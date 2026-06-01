@@ -1,124 +1,149 @@
-# Project artifacts
+# Артефакты продукта
 
-Продуктовый слой проектной инфры — **первичный source of truth** и **вход для skill
-`de-template`**. Уровень ВЫШЕ кодового `docs/{domains,stack}` бэкенда: там «какая бизнес-логика
-одного сервиса», здесь — «из каких сервисов состоит продукт клиента и как этот VPS их хостит».
+Продуктовый слой проекта: 1 singleton + 7 плоских md-файлов в
+`docs/project/`. Vision — корневой документ продукта; остальные 7 — таблицы
+сущностей одного типа. Все связи между сущностями — через `slug`, но
+консистентность по слою — **семантическая**, не структурная (см.
+`/cross-audit`).
 
-Заполняется через `/init-project` (оркестратор) → `/service-deep-dive` + `/stack-deep-dive`,
-валидируется `scripts/tools/validate-project-doc.sh`, разворачивается `/de-template`.
+Чистая продуктовая аналитика. На код / FSD / компонент не мапится — это
+вход для `/interface-deep-dive` (UX-аналитика), `/domain-deep-dive`
+(домены бэкенда) и `/screen-deep-dive` (композиция экранов).
 
-## Структура
+## Файлы
 
-```
-docs/project/
-├── README.md                ← этот файл
-├── _templates/              ← пустые шаблоны для копирования
-│   ├── vision.md
-│   ├── service.md
-│   └── stack.md
-├── vision.md                ← kind: vision (singleton) — продукт + карта сервисов
-├── services/
-│   └── <name>.md            ← kind: service — по одному на hosted-сервис
-└── stack.md                 ← kind: stack (singleton) — cross-cutting инфры VPS
-```
-
-`services/` и `vision.md`/`stack.md` рождаются deep-dive'ами по карте сервисов — в шаблон не
-коммитятся (только `_templates/`).
-
-## Kinds
-
-| kind | файл | что описывает |
+| файл | сущность | поля |
 |---|---|---|
-| `vision` | `vision.md` | продукт: проблема, пользователи, **карта сервисов**, границы, среды |
-| `service` | `services/<name>.md` | один **hosted** сервис: хостинг, идентичность, секреты, роут |
-| `stack` | `stack.md` | cross-cutting инфры VPS: домены, edge, сети, бэкап, телеметрия |
+| [`vision.md`](vision.md) | singleton: проблема, успех, non-goals продукта | три раздела + статус |
+| [`persona.md`](persona.md) | сегмент пользователей / клиентов | slug · name · description · context · jobs · pains · success · status |
+| [`capability.md`](capability.md) | бизнес-возможность продукта верхнего уровня | slug · name · description · value · persona · status |
+| [`boundary.md`](boundary.md) | явный non-goal с обоснованием | slug · name · description · why · status |
+| [`surface.md`](surface.md) | поверхность, куда продукт «торчит наружу» | slug · name · description · type · lives-at · persona · status |
+| [`integration.md`](integration.md) | внешняя система, с которой обмениваемся | slug · name · description · direction · payload · owner · status |
+| [`constraint.md`](constraint.md) | внешнее ограничение (регуляторика, SLA, контракт) | slug · name · description · kind · source · status |
+| [`market.md`](market.md) | рыночный аналог / конкурент | slug · name · description · url · sources · status |
 
-`vision § Service map` — авторитетный перечень всех частей продукта. Сервис с `hosting: here`
-крутится контейнером в ЭТОМ репо и получает свой `services/<name>.md`. Внешние части (frontend-SPA
-на CDN, backend-код в отдельном репо) перечислены в карте как контекст — **без** service-doc;
-`de-template` печатает по ним cross-repo next-steps.
+## Принципы оформления
 
-## Frontmatter
+Зеркалит канон `docs/interface/`. Один файл — одна таблица сущностей
+одного типа (vision исключение — singleton). Структура табличного файла:
 
-```yaml
-# vision.md
-id: project.vision
-kind: vision
-name: vision
-status: draft            # draft → stable (через валидатор)
+```markdown
+# <имя файла>
+
+> Одна-две фразы о сущности (что это в продукте, что чем ссылается).
+
+## Критерии <kind>
+…
+
+## Что <kind> НЕ
+…
+
+## Тест-критерий
+…
+
+| slug | name | description | <relation columns> | status |
+|---|---|---|---|---|
+| `<slug>` | <имя> | <описание> | … | `draft` |
 ```
 
-```yaml
-# services/<name>.md
-id: project.<name>       # == project.<basename без .md>
-kind: service
-subtype: backend         # backend | frontend | datastore | infra
-hosting: here            # here (контейнер в этом репо) | external (свой репо/CDN)
-name: <name>             # == basename файла без .md
-status: draft
-```
+H1 = имя файла = kind. Frontmatter не нужен — kind определяется именем
+файла. Русское слово, являющееся переводом строгого термина, сопровождается
+его `slug` в скобках при каждом вхождении: «персона (persona)»,
+«возможность (capability)», «поверхность (surface)».
 
-```yaml
-# stack.md
-id: project.stack
-kind: stack
-name: stack
-status: draft
-```
+### Форма ячеек (та же что в interface)
 
-## Обязательные H2 по kind
-
-| kind | обязательные H2 |
-|---|---|
-| `vision` | Problem, Users, Service map, Boundaries, Environments |
-| `service` | Hosting, Identity, Secrets, Route, Generates |
-| `stack` | Domains, Edge, Networks, Backup, Observability, Generates |
-
-Пустые/неприменимые секции — явной пометкой `N/A` или `_нет_` (зеркалит domain-дисциплину).
-Пустых таблиц быть не должно.
-
-Каждый `service` и `stack` несёт секцию **Generates** — контракт для `de-template`: что из артефакта
-родится/изменится в инфре (профиль, vault-agent part/template, traefik route, edge-конфиг). Маппинг
-живёт рядом с источником, не отдельным файлом.
-
-## Generates → инфра (что выводит de-template)
-
-`de-template` **выводит `COMPOSE_PROFILES` из карты сервисов**, не из явного списка:
-
-| subtype сервиса | профиль | хостируемое |
+| тип значения | формат | пример |
 |---|---|---|
-| `datastore` (postgres) | `postgres` | `compose/postgres.yml` |
-| `datastore` (minio) | `storage` | `compose/minio.yml` + `backup.yml` |
-| `backend` (`hosting: here`) | `backend` | `compose/backend.yml` |
-| `frontend` (`hosting: here`) | — (always-on `landing`) | `compose/landing.yml` |
-| `frontend`/`backend` (`hosting: external`) | — | cross-repo next-step |
+| одиночный slug-реф | в бэктиках | `` `analyst` `` |
+| массив slug-рефов | питон-стиль с бэктиками внутри | `` [`analyst`, `business-owner`] `` |
+| пустое опциональное поле | em-dash | `—` |
+| enum (`type`, `direction`, `kind`, `status`) | в бэктиках | `` `web` `` |
+| свободный текст | без кавычек, одна строка | «снижение времени до первой ценности» |
 
-Always-on edge/телеметрия (`traefik`/`crowdsec`/`vault-agent`/`otel-agent`/`node-exporter`/
-`cadvisor`) — фиксированный фундамент шаблона, не описывается service-doc'ами. `stack § Generates`
-несёт только cross-cutting: traefik dynamic routes, `DOMAIN`, crowdsec source-IP next-step.
+Первые три колонки везде одни и те же: `slug` · `name` · `description`.
+Последняя колонка — `status` (enum `draft` \| `stable`).
+
+## Статус записи
+
+- `draft` — заведена, но не прошла полный чек-лист зрелости (часть слотов
+  пустая, есть открытые вопросы в `state/`, тест-критерий не подтверждён,
+  ссылается на не существующие сущности).
+- `stable` — прошла все критерии файла-канона (`Критерии <kind>`,
+  `Что <kind> НЕ`, `Тест-критерий`), все обязательные слоты заполнены,
+  все семантические связи внятные, открытых вопросов нет.
+- Дефолт у новой записи — `draft`. Повышение в `stable` — через скилл
+  `/project-deep-dive` (или `/project-deep-dive-for-business`), по
+  подтверждению аналитика.
+- Понижение `stable → draft` — только аналитик руками, когда нашёл
+  несостыковку.
+
+## Связи (семантические, не структурные)
+
+Жёстких slug-валидаций между записями нет — `/project-audit` ловит
+тупики **в пределах project**, `/cross-audit` ловит несостыковки
+**между слоями** через семантический разбор (рой агентов), не через
+ссылочную целостность.
+
+Внутри `docs/project/` ожидаются неформальные связи:
+
+- **persona → surface**: persona работает через одну+ поверхность
+  (`surface.persona` — кого она обслуживает).
+- **persona → capability**: persona получает ценность от одной+
+  возможности (`capability.persona`).
+- **capability → surface**: возможность реализуется на одной+
+  поверхности (выводимо через persona; явная связь — у `/cross-audit` на
+  совести).
+- **integration ↔ capability**: интеграция обычно обслуживает
+  возможность (не фиксируется отдельным полем — `/cross-audit`).
+- **constraint ↔ surface / integration**: ограничение часто привязано к
+  поверхности или интеграции (152-ФЗ → web; SLA партнёра → integration).
+  Не фиксируется полем.
+- **market ↔ capability**: конкурент покрывает наши возможности — это
+  смысл сопоставления, проверяет `/cross-audit`.
+
+Связь с соседними слоями (тоже семантическая):
+
+- `project.persona` ↔ `interface.who` — каждая роль в `interface` должна
+  семантически соответствовать одной из persona проекта.
+- `project.capability` ↔ `interface.situation` / `domain.<область>` —
+  возможность реализуется через ситуации (UX) + домены (бэкенд).
+- `project.surface` ↔ `interface.zone` — зона интерфейса принадлежит
+  поверхности.
+- `project.integration` ↔ `domain.<адаптер>` — внешняя интеграция в
+  коде существует как доменный адаптер.
 
 ## Workflow
 
-1. `/init-project` копирует `_templates/vision.md` → `docs/project/vision.md`, ведёт интервью до
-   заполненной `Service map`.
-2. Per hosted-сервис из карты: `cp _templates/service.md docs/project/services/<name>.md` →
-   `/service-deep-dive <name>` — волны вопросов inside-out до `status: stable`.
-3. `cp _templates/stack.md docs/project/stack.md` → `/stack-deep-dive` до `stable`.
-4. `scripts/tools/validate-project-doc.sh docs/project` зелёный → промоушн `status: draft → stable`.
-5. `/de-template` читает stable-артефакты, выводит профили, прунит неиспользуемое, кастомит
-   `CLAUDE.md`/README под проект, печатает cross-repo next-steps.
+```
+/project-deep-dive            — единая точка входа аналитика.
+/project-deep-dive-for-business — режим «домашнее задание» для клиента
+                                  (бизнес-язык, эскалация в ветку).
+/project-audit                — узкий аудит внутри project-слоя.
+/cross-audit                  — сквозной семантический аудит
+                                project ↔ interface ↔ domain ↔ screen.
+```
 
-## Gate
-
-`/de-template` не запускается, пока все артефакты не `stable` и валидатор не зелён — зеркалит
-domain/stack-gate эталона. `scripts/git-hooks/pre-commit` гонит валидатор на изменённых
-`docs/project/**.md`; `make check` — на весь `docs/project`.
+Скилы заводят новые сущности, углубляют частичные, разбирают сырьё
+(транскрипт интервью клиента, заметки, web-research), ведут переход
+`draft → stable`. Прямой правки артефактов руками избегаем — скилл держит
+state и предлагает переходы через `AskUserQuestion`.
 
 ## Anti-patterns
 
-- ❌ Заводить `services/<name>.md` для внешнего frontend/backend-кода (`hosting: external`) — он
-  только в `vision § Service map`. service-doc — для **hosted** контейнеров этого VPS.
-- ❌ Дублировать `COMPOSE_PROFILES` в `stack.md` — профили выводит `de-template` из карты сервисов.
-- ❌ Оставлять `Generates` пустым — движку `de-template` не из чего разворачивать.
-- ❌ Промоутить `status: stable` руками без зелёного валидатора.
-- ❌ Описывать always-on edge/телеметрию service-doc'ом — это фиксированный фундамент шаблона.
+- ❌ Frontmatter в файлах (kind определяется именем файла — как в
+  `docs/interface/`).
+- ❌ Каталоги под kind (`personas/`, `capabilities/` …) — один файл =
+  один kind, плоско.
+- ❌ Несколько vision в одном репо. Один репо = один продукт = один
+  `vision.md`.
+- ❌ Перенос продукт-аналитики в `docs/interface/` (UX-слой) или в
+  `docs/domains/` (бэкенд) — это разные слои. project = «зачем и для
+  кого», interface = «как взаимодействует», domain = «какой бизнес-код».
+- ❌ Жёсткие slug-валидации между project и соседями. Связи —
+  семантические; ловит `/cross-audit`, а не grep.
+- ❌ Авто-вписывание результатов web-research в артефакты. Рой агентов
+  кладёт кандидатов в `state/research/` — promotion в `market.md` /
+  `constraint.md` только через `AskUserQuestion` аналитика.
+- ❌ Промоушн `stable` руками без чек-листа — это работа скилла.

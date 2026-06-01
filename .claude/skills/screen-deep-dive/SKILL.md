@@ -36,9 +36,12 @@ description: Углублённая проработка аналитическ�
 1. Прочитать `docs/screens/README.md` и README'ы по 4 kind — освежить
    канон композиции, layout-язык, имена `ui:*`/`block:*`/`data:*`,
    anti-patterns.
-2. Если args пустые — сделать сводку (см. ниже) и через
+2. Прочитать `docs/project/README.md` (если каталог существует) +
+   `references/project-context.md` — освежить связи с продуктовым
+   слоем (flow ↔ surface, screen ↔ capability).
+3. Если args пустые — сделать сводку (см. ниже) и через
    `AskUserQuestion` предложить выбор что копать.
-3. Если args указывают на сущность — определить kind и режим (A/B/C),
+4. Если args указывают на сущность — определить kind и режим (A/B/C),
    применить маршрут из `references/workflow-patterns.md`.
 
 ## Сводка состояния (без args)

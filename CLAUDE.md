@@ -3,12 +3,14 @@
 Файл автоматически загружается в каждую сессию `Claude Code`. Здесь —
 невыборочные правила, которые работают всегда.
 
-Этот репозиторий — **проектный шаблон**: аналитика интерфейса
-(`docs/interface/`) и аналитика композиции/облика (`docs/screens/`), по
-которой потом собирается кликабельный hi-fi субстрат на библиотеке
-`@stit-design/ui`. См.:
+Этот репозиторий — **проектный шаблон**: продуктовая аналитика
+(`docs/project/`), аналитика интерфейса (`docs/interface/`) и
+аналитика композиции/облика (`docs/screens/`), по которой потом
+собирается кликабельный hi-fi субстрат на библиотеке `@stit-design/ui`.
+См.:
 
 - `README.md` — карта репозитория и воркфлоу.
+- `docs/project/README.md` — канон 1 singleton + 7 артефактов продукта.
 - `docs/interface/README.md` — канон 7 артефактов интерфейса.
 - `docs/screens/README.md` — канон 4 kind артефактов экранов.
 
@@ -78,16 +80,27 @@ a11y) живёт в библиотеке `@stit-design/ui` и наполняет
 
 ## 6. Зоны правок
 
+- **Артефакты продукта** (`docs/project/`) — через скилл
+  `project-deep-dive` (аналитик) или `project-deep-dive-for-business`
+  (клиент-режим с эскалацией и push в ветку `client/<UTC-ts>`); форма —
+  по `docs/project/README.md`. Узкий аудит — `project-audit`. Сквозная
+  семантическая проверка с interface/domain/screen — `cross-audit`
+  (рой агентов).
 - **Артефакты аналитики** (`docs/interface/`) — через скилл
   `interface-deep-dive`; форма — по `docs/interface/README.md`. Поиск
   тупиков, рассинхрона зеркал, битых ссылок и семантических подозрений —
-  скилл `interface-audit`.
+  скилл `interface-audit`. При заведении ключевых сущностей (who, situation,
+  zone) скилл предлагает связь с project-артефактами как контекст.
 - **Артефакты экранов** (`docs/screens/`) — через скилл
   `screen-deep-dive`; форма — по `docs/screens/README.md` и README'ям 4
   kind (flow/screen/block/shell). Визуальные референсы и ассеты живут в
   `docs/screens/assets/<kind>/<slug>/`. Поиск тупиков, рассинхрона
   зеркал (внутри screens и с interface), битых ссылок, нарушений
   slot-fills/accepts и семантических подозрений — скилл `screen-audit`.
+  При заведении flow/shell скилл предлагает связь с project.surface.
+- **Артефакты доменов** (`docs/domains/`, если присутствуют) — через
+  скилл `domain-deep-dive`; при заведении контекста / use-case
+  предлагается связь с project.capability и project.integration.
 - **Библиотека** — в отдельном репо `ui-lib` как `@stit-design/ui`;
   проект её потребляет, не правит.
 - **Sweep'ы** (терминология, чистка): 1 агент = 1 непересекающаяся зона.

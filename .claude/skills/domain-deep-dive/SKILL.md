@@ -61,9 +61,12 @@ aggregate-файле и kind-ом отдельно не заводится).
 
 1. Прочитать `docs/domains/README.md` — освежить канон (kinds, обязательные H2,
    anti-patterns).
-2. Если args пустые — сделать сводку (см. ниже) и через `AskUserQuestion`
+2. Прочитать `docs/project/README.md` (если каталог существует) +
+   `references/project-context.md` — освежить связи с продуктовым
+   слоем (domain ↔ capability, adapter ↔ integration).
+3. Если args пустые — сделать сводку (см. ниже) и через `AskUserQuestion`
    предложить выбор: что копать / что заводить.
-3. Если args указывают на контекст/сущность — определить kind и режим
+4. Если args указывают на контекст/сущность — определить kind и режим
    (A/B/C), применить маршрут из `references/workflow-patterns.md`.
 
 ## Сводка состояния

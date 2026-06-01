@@ -28,9 +28,12 @@ description: Углублённая проработка аналитическ�
 ## Что делать сразу при запуске
 
 1. Прочитать `docs/interface/README.md` — освежить канон.
-2. Если args пустые — сделать сводку (см. ниже) и через
+2. Прочитать `docs/project/README.md` (если каталог существует) +
+   `references/project-context.md` — освежить связи с продуктовым
+   слоем (who ↔ persona, situation ↔ capability, zone ↔ surface).
+3. Если args пустые — сделать сводку (см. ниже) и через
    `AskUserQuestion` предложить выбор что копать.
-3. Если args указывают на сущность — определить kind и режим (A/B/C),
+4. Если args указывают на сущность — определить kind и режим (A/B/C),
    применить маршрут из `references/workflow-patterns.md`.
 
 ## Сводка состояния (без args)
