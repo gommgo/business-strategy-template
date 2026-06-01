@@ -1,0 +1,25 @@
+# Локальные настройки Claude Code (персональные, не для общего репо)
+**/.claude/settings.local.json
+**/.claude/settings.local.json.*
+
+# Зависимости (substrate @stit/substrate). package-lock.json КОММИТИМ
+# (детерминированная установка), node_modules — нет.
+**/node_modules/
+
+# Build-артефакты генератора (машинно-генерятся; источники — engine/src
+# + tokens/tokens.json + components/*). Не редактировать, не коммитить —
+# воспроизводятся `npm run build:figma` (из substrate/).
+substrate/engine/figma-plugin/spec.generated.js
+substrate/engine/figma-plugin/code.js
+
+# shadcn registry — генерится `shadcn build`, не редактируется агентами.
+substrate/registry.json
+substrate/r/
+
+# OS / редакторы
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
