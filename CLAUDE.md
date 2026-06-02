@@ -3,13 +3,19 @@
 Файл автоматически загружается в каждую сессию `Claude Code`. Здесь —
 невыборочные правила, которые работают всегда.
 
-Этот репозиторий — **проектный шаблон**: продуктовая аналитика
-(`docs/project/`) — корень, аналитика интерфейса (`docs/interface/`)
-— UX над продуктом, опционально бизнес-домены (`docs/domains/`) и
-композиция/облик (`docs/screens/`), по которой потом собирается
-кликабельный hi-fi субстрат на библиотеке `@stit-design/ui`. См.:
+Этот репозиторий — **проектный шаблон**. Поток сверху вниз: бизнес
+заказчика (`docs/business/`) — самый верх, его проблема
+(`docs/business-problem/`) по строгой методологии LinkedSWOT + Карта
+гипотез, под неё продукт (`docs/project/`) — корень решения, аналитика
+интерфейса (`docs/interface/`) — UX над продуктом, опционально
+бизнес-домены (`docs/domains/`) и композиция/облик (`docs/screens/`), по
+которой потом собирается кликабельный hi-fi субстрат на библиотеке
+`@stit-design/ui`. См.:
 
 - `README.md` — карта репозитория и воркфлоу.
+- `docs/business/README.md` — канон 1 singleton + 6 артефактов бизнеса.
+- `docs/business-problem/README.md` — канон 1 singleton + 7 артефактов
+  бизнес-проблемы (SWOT + Карта гипотез).
 - `docs/project/README.md` — канон 1 singleton + 7 артефактов продукта.
 - `docs/interface/README.md` — канон 7 артефактов интерфейса.
 - `docs/domains/README.md` — канон DDD-артефактов бэкенда (если есть).
@@ -35,27 +41,53 @@
 
 ## 2. Слои и терминология
 
-Документация — четырёхслойная, **сверху вниз** идём от «зачем» к «как
+Документация — шестислойная, **сверху вниз** идём от «чей бизнес» к «как
 выглядит»:
 
 | слой | вопрос | вход |
 |---|---|---|
+| `docs/business/` | **кто этот бизнес заказчика** | `/business-deep-dive` (аналитик) или `/business-deep-dive-for-business` (клиент) |
+| `docs/business-problem/` | **какую проблему решаем и под какую метрику целимся** | `/business-problem-deep-dive` или `/business-problem-deep-dive-for-business` |
 | `docs/project/` | **зачем продукт и для кого** | `/project-deep-dive` (аналитик) или `/project-deep-dive-for-business` (клиент) |
 | `docs/interface/` | **как пользователь взаимодействует** | `/interface-deep-dive` |
 | `docs/domains/` | **какой бизнес-код бэкенда** (опц.) | `/domain-deep-dive` |
 | `docs/screens/` | **как это выглядит и компонуется** | `/screen-deep-dive` |
 
-Связи между слоями **семантические**, не slug-валидируемые: persona
-адресата (project) проявляется как роль who (interface), capability
+Связи между слоями **семантические**, не slug-валидируемые: профиль и
+конкуренты бизнеса (business) питают факторы SWOT (business-problem),
+текущая метрика становится baseline целевой; цель/метрика/субъект
+(business-problem) проявляются как vision/persona/capability (project);
+persona адресата проявляется как роль who (interface), capability
 реализуется через situation + domain, surface несёт zones,
 integration — адаптеры в domain. Несостыковки ловит `/cross-audit`
 через рой агентов.
+
+**Юридическая рамка** (слой business-problem): гарантируем **доставку
+проекта на 100% по scope**; метрики — **совместный с бизнесом best-effort
+таргет**, не гарантия исхода (есть внешние факторы). Граница «гарантируем
+/ целимся / вне контроля» — в `docs/business-problem/frame.md`. Метрика
+**никогда** не подаётся как гарантия.
 
 Каноны терминов — в README каждого слоя. Канон терминов компонентов
 и craft — в библиотеке `@stit-design/ui`. Английский в backticks —
 только для устоявшегося канона (`a11y`, DTCG, FSD-слои, `data-*`,
 `aria-busy`). Всё остальное — по-русски, без полу-калек («пропсы»,
 «варианты-проперти»).
+
+Business-слой (нестрогий): 1 singleton `profile.md` + 6 табличных kind
+(`segment`, `offering`, `channel`, `competitor`, `current-metric`,
+`material`). Источник истины — материалы клиента и рой web-research, не
+проекция аналитика. Связи семантические. Питает SWOT-факторы и baseline
+метрик слоя business-problem.
+
+Business-problem-слой (строгий, методология): 1 singleton `frame.md`
+(проблема + граница гарантии) + 7 табличных kind — SWOT-семья (`factor`,
+`bet`) и Карта-гипотез-семья (`goal`, `metric`, `subject`, `hypothesis`,
+`task`). `hypothesis` — исключение: вместо `description` четыре части
+`if`/`then`/`because`/`so`; «тогда» бьёт в метрику цели. Связи
+семантические; методологические инварианты (задача-сирота, «тогда» без
+метрики, метрика без влияния, ставка-висяк, фактор без ставки,
+guardrail) ловит рой `/business-problem-audit`, не grep.
 
 Project-слой: 1 singleton `vision.md` + 7 табличных kind (`persona`,
 `capability`, `boundary`, `surface`, `integration`, `constraint`,
@@ -78,6 +110,13 @@ Interface-слой: 7 плоских md-файлов, каждый — табл�
 Агент **не пишет** доменные / продуктовые / craft-формулировки из
 своей головы.
 
+- **Бизнес-проблемная** (business / business-problem): профиль и текущие
+  числа бизнеса, факторы SWOT, ставки, цель, метрика (формула, источник
+  истины, атрибуция, критерий приёмки), субъект и его мотивация,
+  гипотезы — только от бизнеса / аналитика, через `AskUserQuestion`.
+  Метрика — best-effort таргет, **не гарантия**. Факты о бизнесе — из
+  материалов клиента / подтверждённого research, не из головы.
+  Anti-patterns как опции — да; тексты — нет.
 - **Продуктовая** (project): vision, jobs, pains, value, why, source —
   только от бизнеса / аналитика, через `AskUserQuestion`. Anti-patterns
   как опции — да; тексты — нет.
@@ -119,12 +158,24 @@ Interface-слой: 7 плоских md-файлов, каждый — табл�
 
 ## 6. Зоны правок
 
+- **Артефакты бизнеса** (`docs/business/`) — через скилл
+  `business-deep-dive` (аналитик) или `business-deep-dive-for-business`
+  (клиент-режим); форма — по `docs/business/README.md`. Нестрогий слой:
+  приём материалов клиента + рой web-research конкурентов. Сквозная
+  проверка — `cross-audit`.
+- **Артефакты бизнес-проблемы** (`docs/business-problem/`) — через скилл
+  `business-problem-deep-dive` (аналитик) или
+  `business-problem-deep-dive-for-business` (клиент-режим с эскалацией и
+  push в `client/<UTC-ts>`); форма — по `docs/business-problem/README.md`.
+  Строгая методология LinkedSWOT + Карта гипотез. Семантический аудит
+  инвариантов методологии роем — `business-problem-audit`. Метрика —
+  best-effort таргет, не гарантия.
 - **Артефакты продукта** (`docs/project/`) — через скилл
   `project-deep-dive` (аналитик) или `project-deep-dive-for-business`
   (клиент-режим с эскалацией и push в ветку `client/<UTC-ts>`); форма —
   по `docs/project/README.md`. Узкий аудит — `project-audit`. Сквозная
-  семантическая проверка с interface/domain/screen — `cross-audit`
-  (рой агентов).
+  семантическая проверка с business/interface/domain/screen —
+  `cross-audit` (рой агентов).
 - **Артефакты аналитики интерфейса** (`docs/interface/`) — через скилл
   `interface-deep-dive`; форма — по `docs/interface/README.md`. Поиск
   тупиков, рассинхрона зеркал, битых ссылок и семантических подозрений
@@ -146,19 +197,26 @@ Interface-слой: 7 плоских md-файлов, каждый — табл�
   проект её потребляет, не правит.
 - **Sweep'ы** (терминология, чистка): 1 агент = 1 непересекающаяся зона.
 
-## 7. Клиент-режим (project-deep-dive-for-business)
+## 7. Клиент-режим (`*-for-business`)
 
 Когда сессию ведёт **клиент / основатель / PO**, не аналитик —
-включается `/project-deep-dive-for-business`. Особенности, которые
-влияют на работу:
+включается `*-for-business`-вариант скила слоя:
+`/business-deep-dive-for-business` (профиль бизнеса),
+`/business-problem-deep-dive-for-business` (проблема, SWOT + гипотезы),
+`/project-deep-dive-for-business` (продукт). Все три следуют одним
+правилам клиент-режима. Особенности, которые влияют на работу:
 
 - **Бизнес-язык**: никакого `slug`, `kind`, `draft`, `stable`,
   `artifact` в чате. Видно только «закрыто / в работе».
 - **Anti-patterns из реальных провалов**, не из методичек (см.
-  `project-deep-dive-for-business/references/anti-patterns-real.md`).
+  `<скил>-for-business/references/anti-patterns-real.md`).
+- **Метрика — не гарантия** (business-problem): клиент-скилл никогда не
+  помогает записать метрику как обещание-гарантию, только как цель;
+  строгую измеримость (атрибуция, критерий приёмки) мягко откладывает
+  аналитику.
 - **Эскалация**: state-маркер `**жду аналитика**` + push в ветку
   `client/<UTC-ts>` через `--share` с явного согласия клиента. Уезжают:
-  `docs/project/` (черновики клиента), state клиента, `client-handoff/
+  `docs/<слой>/` (черновики клиента), state клиента, `client-handoff/
   summary.md`, `client-handoff/transcripts/<ts>.md` (полный текст
   сессии).
 - **Изоляция**: клиентский скилл НЕ читает state аналитического

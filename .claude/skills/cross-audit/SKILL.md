@@ -1,12 +1,14 @@
 ---
 name: cross-audit
-description: Сквозной семантический аудит консистентности между слоями документации проекта — project ↔ interface ↔ domain ↔ screen. Запускает рой агентов параллельно, каждый под своим углом (persona ↔ who, capability ↔ situation/domain, surface ↔ zone/screen, integration ↔ domain, constraint ↔ surface/integration, market ↔ capability), читает оба слоя + state, ищет семантические тупики и противоречия — НЕ через slug-валидацию, а через смысловую проверку («персона без UX-покрытия», «capability без бизнес-кода», «зона висит без поверхности»). Не правит, только отчёт. Использовать перед релизом, после крупного апдейта project- или interface-слоя, или когда `/project-deep-dive` / `/interface-deep-dive` предлагают прогон. Сводный отчёт + список findings; deep-dive по каждому — отдельный шаг руками аналитика.
+description: Сквозной семантический аудит консистентности между слоями документации проекта — business ↔ business-problem ↔ project ↔ interface ↔ domain ↔ screen. Запускает рой агентов параллельно, каждый под своим углом (factor ↔ business, current-metric ↔ metric, goal/metric ↔ vision, subject ↔ persona, segment ↔ persona, bet ↔ capability, persona ↔ who, capability ↔ situation/domain, surface ↔ zone/screen, integration ↔ domain, constraint ↔ surface/integration, market ↔ capability), читает оба слоя + state, ищет семантические тупики и противоречия — НЕ через slug-валидацию, а через смысловую проверку («персона без UX-покрытия», «метрика подана как гарантия», «субъект без persona», «зона висит без поверхности»). Не правит, только отчёт. Использовать перед релизом, после крупного апдейта любого слоя, или когда deep-dive-скилы предлагают прогон. Сводный отчёт + список findings; deep-dive по каждому — отдельный шаг руками аналитика.
 ---
 
 # cross-audit
 
 Сквозной семантический аудит **между слоями** документации:
 
+- `docs/business/` (профиль бизнеса — profile/segment/competitor/...)
+- `docs/business-problem/` (проблема — frame/factor/bet/goal/metric/...)
 - `docs/project/` (продукт — vision/persona/capability/...)
 - `docs/interface/` (UX — who/stage/situation/zone/block/...)
 - `docs/domains/` (бизнес-домены бэкенда — если каталог существует)
@@ -27,17 +29,19 @@ description: Сквозной семантический аудит консис
 | `/cross-audit <lens>` | прогон одного угла |
 | `/cross-audit --quick` | быстрый прогон с 3 самыми важными углами (persona↔who, capability↔situation, surface↔zone) |
 
-`lens` ∈ {`persona-who`, `capability-situation`, `capability-domain`,
-`surface-zone`, `surface-screen`, `integration-domain`,
-`constraint-surface`, `market-capability`}.
+`lens` ∈ {`factor-business`, `currentmetric-metric`, `goal-vision`,
+`subject-persona`, `segment-persona`, `bet-capability`, `persona-who`,
+`capability-situation`, `capability-domain`, `surface-zone`,
+`surface-screen`, `integration-domain`, `constraint-surface`,
+`market-capability`}.
 
 См. `references/angles.md`.
 
 ## Что делать при запуске
 
-1. Прочитать `docs/project/README.md`, `docs/interface/README.md`, и
-   (если есть) `docs/domains/README.md` / `docs/screens/README.md` —
-   освежить каноны.
+1. Прочитать `docs/business/README.md`, `docs/business-problem/README.md`,
+   `docs/project/README.md`, `docs/interface/README.md`, и (если есть)
+   `docs/domains/README.md` / `docs/screens/README.md` — освежить каноны.
 2. Прочитать `references/angles.md` — список углов и контекста на
    каждый.
 3. **Проверить наличие слоёв.** `docs/domains/` и `docs/screens/` могут
@@ -121,6 +125,12 @@ Destination layer: <path-2>
 
 | lens | source | destination | основной вопрос |
 |---|---|---|---|
+| `factor-business` | `docs/business-problem/factor.md` | `docs/business/` (profile, competitor) | каждый SWOT-фактор опирается на картину бизнеса? |
+| `currentmetric-metric` | `docs/business/current-metric.md` | `docs/business-problem/metric.md` | baseline целевой метрики (`current`) взят из текущего KPI бизнеса? |
+| `goal-vision` | `docs/business-problem/goal.md`, `metric.md` | `docs/project/vision.md` | цель/метрика проблемы отражены в vision.Success (как таргет, не гарантия)? |
+| `subject-persona` | `docs/business-problem/subject.md` | `docs/project/persona.md` | субъект влияния соответствует persona продукта? |
+| `segment-persona` | `docs/business/segment.md` | `docs/project/persona.md` | сегмент бизнеса соотносится с persona (разные сущности, но связаны)? |
+| `bet-capability` | `docs/business-problem/bet.md`, `goal.md` | `docs/project/capability.md` | ставка/цель реализуется хотя бы одной capability? |
 | `persona-who` | `docs/project/persona.md` | `docs/interface/who.md` | каждая persona имеет хотя бы одно who-покрытие? каждое who сводимо к одной persona? |
 | `capability-situation` | `docs/project/capability.md` | `docs/interface/situation.md` | каждая capability реализуется ≥1 ситуацией? есть ли ситуации без capability-якоря? |
 | `capability-domain` | `docs/project/capability.md` | `docs/domains/` (если есть) | у каждой capability есть бизнес-код в domain? |
@@ -134,9 +144,9 @@ Destination layer: <path-2>
 
 ```
 === /cross-audit ===
-Слои: project, interface, domain, screen
-Углы: 8 запущено, 8 ответили
-Время: <duration> · агентов: 8
+Слои: business, business-problem, project, interface, domain, screen
+Углы: 14 запущено, 14 ответили
+Время: <duration> · агентов: 14
 
 [error] persona-who → persona:doctor не имеет соответствия в
   docs/interface/who.md (нет роли, выполняющей действия персонажа).
@@ -187,7 +197,7 @@ Destination layer: <path-2>
 ---
 ran-on: <UTC-ts>
 lenses-run: 8
-layers: { project: yes, interface: yes, domain: yes, screen: no }
+layers: { business: yes, business-problem: yes, project: yes, interface: yes, domain: yes, screen: no }
 findings: { error: X, warning: Y, hint: Z }
 verdicts: { accepted: A, needs-fix: B, false-positive: C, deferred: D }
 ---

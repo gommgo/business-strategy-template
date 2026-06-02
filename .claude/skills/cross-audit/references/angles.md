@@ -10,6 +10,129 @@
 - **Что искать** — конкретные семантические паттерны.
 - **Промпт для агента** — добавка к каркасу из SKILL.md.
 
+## factor-business
+
+**Source:** `docs/business-problem/factor.md`.
+**Destination:** `docs/business/` (`profile.md`, `competitor.md`,
+`current-metric.md`).
+**Применим если:** оба слоя существуют.
+
+**Что искать:**
+- `warning`: SWOT-фактор, не опирающийся на картину бизнеса (сила/слабость
+  без подтверждения в profile; тренд/угроза без следа в competitor/рынке).
+- `hint`: заметный факт бизнеса (сильный конкурент, проседающий KPI), не
+  отражённый ни в одном факторе.
+
+**Промпт-добавка:**
+```
+factor (SWOT) должен опираться на реальную картину бизнеса. Для каждого
+фактора: подтверждается ли он в business.profile/competitor? Для заметных
+фактов бизнеса: есть ли соответствующий фактор? Сила/слабость — про
+устройство бизнеса; тренд/угроза — про рынок (ищи в competitor).
+```
+
+## currentmetric-metric
+
+**Source:** `docs/business/current-metric.md`.
+**Destination:** `docs/business-problem/metric.md`.
+**Применим если:** оба наполнены.
+
+**Что искать:**
+- `warning`: целевая метрика, чей `current` (baseline) не соответствует ни
+  одному текущему KPI бизнеса (baseline выдуман, а не взят из данных).
+- `hint`: текущий KPI бизнеса, не ставший ни одной целевой метрикой
+  (возможный кандидат в цель).
+
+**Промпт-добавка:**
+```
+baseline целевой метрики (metric.current) должен браться из реального
+текущего KPI бизнеса (business.current-metric), с датой и источником. Для
+каждой целевой метрики: есть ли соответствующий current-metric? Сходятся
+ли число, дата, источник?
+```
+
+## goal-vision
+
+**Source:** `docs/business-problem/goal.md`, `metric.md`.
+**Destination:** `docs/project/vision.md`.
+**Применим если:** оба слоя существуют.
+
+**Что искать:**
+- `error`: vision.Success не отражает ни одной целевой метрики проблемы
+  (продукт не целит в задачу бизнеса).
+- `error`: метрика подана в vision как **гарантия** (нарушение юр-рамки —
+  метрика best-effort таргет).
+- `warning`: цель проблемы (goal) без отражения в vision.Problem/Success.
+
+**Промпт-добавка:**
+```
+vision продукта должен решать сформулированную бизнес-проблему. Отражает
+ли vision.Success целевые метрики (business-problem.metric)? ВАЖНО:
+метрика — best-effort таргет, НЕ гарантия; если в vision она подана как
+обещание результата — error. Каждая цель (goal) должна просматриваться в
+vision.
+```
+
+## subject-persona
+
+**Source:** `docs/business-problem/subject.md`.
+**Destination:** `docs/project/persona.md`.
+**Применим если:** оба слоя существуют.
+
+**Что искать:**
+- `error`: субъект влияния (positive), не ставший ни одной persona
+  продукта (на чьё поведение целимся — но продукт не для него).
+- `warning`: мотивация субъекта (боли/желания) не отражена в
+  persona.jobs/pains.
+
+**Промпт-добавка:**
+```
+subject — тот, чьё поведение двигает метрику; persona — адресат боли
+продукта. Положительный субъект обычно становится persona. Для каждого
+positive-субъекта: есть ли соответствующая persona? Перенесена ли его
+мотивация в jobs/pains? Негативный субъект persona не требует.
+```
+
+## segment-persona
+
+**Source:** `docs/business/segment.md`.
+**Destination:** `docs/project/persona.md`.
+**Применим если:** оба слоя существуют.
+
+**Что искать:**
+- `hint`: сегмент бизнеса без соответствующей persona (продукт не
+  обслуживает часть клиентов бизнеса — намеренно или пропуск?).
+- `hint`: persona, не сводимая ни к сегменту бизнеса, ни к субъекту
+  (откуда она?).
+
+**Промпт-добавка:**
+```
+segment — клиент бизнеса заказчика; persona — пользователь продукта. Это
+РАЗНЫЕ сущности, но связанные: продукт часто делается для части клиентов
+бизнеса. Сегмент без persona и persona без сегмента/субъекта — hint, не
+error (продукт может намеренно сужать).
+```
+
+## bet-capability
+
+**Source:** `docs/business-problem/bet.md`, `goal.md`.
+**Destination:** `docs/project/capability.md`.
+**Применим если:** оба слоя существуют.
+
+**Что искать:**
+- `warning`: ставка/цель (доведённая до карты), не реализуемая ни одной
+  capability продукта (стратегия без продуктового воплощения).
+- `hint`: capability без связи с какой-либо ставкой/целью (продукт умеет
+  то, что не служит проблеме).
+
+**Промпт-добавка:**
+```
+bet/goal — стратегический шаг; capability — что продукт умеет. Каждая
+доведённая ставка/цель должна реализовываться хотя бы одной capability.
+Для каждой capability: какой ставке/цели она служит? Не служит ни одной —
+hint (возможно, лишняя для этой проблемы).
+```
+
 ## persona-who
 
 **Source:** `docs/project/persona.md`.
@@ -253,15 +376,23 @@ Market — рыночные аналоги. Capability — наши умения
 
 ## Порядок lens-ов
 
-При полном прогоне порядок:
+При полном прогоне порядок сверху вниз по слоям:
 
-1. `persona-who` (foundation)
-2. `surface-zone` (foundation)
-3. `capability-situation` (foundation)
-4. `capability-domain` (если есть)
-5. `integration-domain` (если есть)
-6. `surface-screen` (если есть)
-7. `constraint-surface` (cross-внутри-project)
-8. `market-capability` (последний — он часто даёт hints, не error)
+1. `factor-business` (бизнес → проблема)
+2. `currentmetric-metric` (бизнес → проблема)
+3. `goal-vision` (проблема → продукт)
+4. `subject-persona` (проблема → продукт)
+5. `segment-persona` (бизнес → продукт)
+6. `bet-capability` (проблема → продукт)
+7. `persona-who` (foundation, продукт → interface)
+8. `surface-zone` (foundation)
+9. `capability-situation` (foundation)
+10. `capability-domain` (если есть)
+11. `integration-domain` (если есть)
+12. `surface-screen` (если есть)
+13. `constraint-surface` (cross-внутри-project)
+14. `market-capability` (последний — он часто даёт hints, не error)
 
-`--quick` запускает только первые три (foundation).
+`--quick` запускает три foundation-угла продукт↔interface (`persona-who`,
+`capability-situation`, `surface-zone`). Для верхних слоёв —
+`goal-vision`, `subject-persona` как быстрый upstream-чек.

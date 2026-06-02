@@ -15,6 +15,25 @@ description: Углублённая проработка продуктовог�
 `draft → stable`, удаление с каскадом, market/constraint research через
 рой агентов.
 
+## Вышестоящий вход (business-problem)
+
+Продукт — **не корень всего**, а решение под уже формализованную
+бизнес-проблему. Над `docs/project/` лежат `docs/business/` (профиль
+бизнеса) и `docs/business-problem/` (SWOT + Карта гипотез). Якоря для
+discovery приходят оттуда (связь семантическая, не slug):
+
+- `vision.Problem` ← `business-problem/frame.md` (Проблема) + `goal`;
+- `vision.Success` ← `business-problem/metric` (целевые метрики —
+  best-effort таргет, **не** гарантия; не копировать как обещание);
+- `persona` ← `business-problem/subject` (субъект влияния) и
+  `business/segment` (клиентский сегмент бизнеса);
+- `capability` реализует `business-problem/bet`/`goal`.
+
+Если эти слои есть — на фазе `discovery` сначала прочитать
+`business-problem/frame.md` + `goal.md` + `metric.md` и предложить
+аналитику опереть vision на них. Их нет — discovery идёт как обычно.
+Несостыковки ловит `/cross-audit`.
+
 ## Точки входа
 
 | вызов | поведение |
