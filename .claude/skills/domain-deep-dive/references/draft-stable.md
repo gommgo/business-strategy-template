@@ -34,8 +34,10 @@
 
 ### 3. Валидатор зелёный
 
+`<P>` = `docs/projects/<project-slug>` — корень текущего проекта.
+
 ```bash
-scripts/tools/validate-domain-doc.sh docs/domains/<ctx>
+scripts/tools/validate-domain-doc.sh <P>/domains/<ctx>
 ```
 
 Проверяет:
@@ -61,7 +63,7 @@ scripts/tools/validate-domain-doc.sh docs/domains/<ctx>
 
 ### 5. State чист по `**blocker**`-вопросам
 
-`state/<ctx>/<kind>/<slug>.md`:
+`state/<project-slug>/<ctx>/<kind>/<slug>.md`:
 - Не содержит секцию `## Открытые вопросы` ИЛИ
 - Содержит, но в ней нет вопросов с префиксом/суффиксом `**blocker**`.
 
@@ -154,7 +156,7 @@ scripts/tools/validate-domain-doc.sh docs/domains/<ctx>
 После любой правки артефакта:
 
 1. `Read` файл артефакта.
-2. `Read` `state/<ctx>/<kind>/<slug>.md`, если есть.
+2. `Read` `state/<project-slug>/<ctx>/<kind>/<slug>.md`, если есть.
 3. Прогнать пункты 1, 2, 3, 5 (программно проверяемые).
 4. Если все 4 ✅ — раунд `AskUserQuestion` по тест-критерию kind'а
    (пункт 4) с двумя ✅/❌-вариантами + Other.

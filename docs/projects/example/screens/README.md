@@ -1,14 +1,14 @@
 # example — образец оформления артефактов
 
-Полный образцовый набор артефактов `docs/screens/`, покрывающий все
+Полный образцовый набор артефактов слоя screens (`docs/projects/example/screens/`), покрывающий все
 edge-кейсы канона: 4 kind, ссылочную целостность, layout-язык v2,
 состояния, responsive, mobile-decomposition, контракт с
 `@stit-design/ui`.
 
 **Это образец, не реальные данные проекта.** Slug-рефы внутри example
-замкнуты на самой папке и не валидируются по
-`../../interface/`. Зеркало interface-сущностей живёт в
-[`interface-stub.md`](interface-stub.md) и используется только этим
+замкнуты на самой папке и не валидируются по interface-слою проекта.
+Зеркало interface-сущностей живёт в
+[`interface-stub.md`](../interface-stub.md) и используется только этим
 примером.
 
 ## Сюжет
@@ -86,11 +86,11 @@ example/
 | Data binding (`data:study`, `data:study.name`) | [`blocks/studies-list`](blocks/studies-list/index.md) |
 | `used-by-screens` разных viewport | `studies-list` (desktop + mobile master) |
 | `status: stable` (контраст с `draft`) | `studies-list`, `confirm-archive`, login |
-| Все 5 типов ux-substrate | через [`interface-stub`](interface-stub.md) |
+| Все 5 типов ux-substrate | через [`interface-stub`](../interface-stub.md) |
 
 ## Как читать
 
-1. Сначала [`interface-stub.md`](interface-stub.md) — словарь slug-рефов
+1. Сначала [`interface-stub.md`](../interface-stub.md) — словарь slug-рефов
    на бизнес-уровне.
 2. Затем [`flows/studies-browse`](flows/studies-browse/index.md) — карта
    viewport-вариативности всего сценария.
@@ -99,5 +99,5 @@ example/
 5. Наконец [`blocks/`](blocks/) — раскрытие interface-block в дерево
    `ui:*`-компонентов.
 
-Канон формы — в `../README.md` и под-README каждого kind. Этот example
-показывает «как это выглядит на практике».
+Канон формы — в `docs/projects/_canon/screens/README.md` и под-README
+каждого kind. Этот example показывает «как это выглядит на практике».

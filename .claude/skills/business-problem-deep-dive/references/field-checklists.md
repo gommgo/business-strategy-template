@@ -3,68 +3,86 @@
 Что заполнять при заведении/углублении каждого kind, что обязательно для
 stable, и разумный порядок копания. Универсально обязательное в табличных
 kinds: `slug`, `name`, `status` (+ `description`, кроме `hypothesis`).
+Для всех 7 kind кроме `frame` обязателен **непустой `problem`** — массив
+slug-рефов на строки `frame` (M:N): к какой проблеме(ам) относится запись.
 
-## frame (singleton)
+## frame (таблица проблем)
 
-**Обязательно:** разделы `Проблема`, `Гарантируем`, `Целимся`, `Вне
-нашего контроля`, `Scope`.
-**Порядок:** Проблема → Гарантируем/Целимся (граница!) → Вне контроля →
-Scope. Граница «гарантия vs таргет» — главная проверка.
+`frame` — **таблица**, одна строка = одна проблема (не singleton). Колонки:
+`slug` · `name` · `problem` · `guarantee` · `target` · `out-of-control` ·
+`scope` · `status`.
+**Для stable:** `problem` (бизнес-боль в деньгах/времени/риске),
+`guarantee` (что гарантируем — доставка по scope), `target` (на какие
+метрики целимся, best-effort), `out-of-control` (внешние факторы),
+`scope` (in/out).
+**Порядок:** problem → guarantee/target (граница!) → out-of-control →
+scope. Граница «гарантия vs таргет» — главная проверка. Дополнительный
+инвариант: у каждой строки `frame` есть ≥1 `goal` (через `problem`).
 
 ## factor
 
-**Для stable:** `area` (enum), `priority`, формулировка по шаблону
-квадранта.
-**Порядок:** fundamentals → area → формулировка → priority.
+**Для stable:** `problem` (≥1 строка `frame`), `area` (enum), `priority`,
+формулировка по шаблону квадранта.
+**Порядок:** fundamentals → problem → area → формулировка → priority.
 Главная проверка: правильный квадрант (про устройство бизнеса vs про мир;
-действие = это `bet`, не factor).
+действие = это `bet`, не factor). `priority` считается внутри пары
+квадрант × проблема. Один фактор бизнеса часто питает несколько проблем.
 
 ## bet
 
-**Для stable:** `factors` (≥1 внутренний + ≥1 внешний), `promoted-to`
-(`goal:`/`hypothesis:`), формат «⟨действие⟩, чтобы ⟨ценность⟩», `priority`.
-**Порядок:** fundamentals → factors → форма «действие, чтобы ценность» →
-promoted-to → priority.
-Главная проверка: баланс факторов + доведённость до карты.
+**Для stable:** `problem` (≥1 строка `frame`), `factors` (≥1 внутренний +
+≥1 внешний), `promoted-to` (`goal:`/`hypothesis:`), формат «⟨действие⟩,
+чтобы ⟨ценность⟩», `priority`.
+**Порядок:** fundamentals → problem → factors → форма «действие, чтобы
+ценность» → promoted-to → priority.
+Главная проверка: баланс факторов + доведённость до карты. Одна ставка
+может закрывать несколько проблем; её факторы тоже бывают общими.
 
 ## goal
 
-**Для stable:** `from-bet` (или `—` при перепрыгивании), ≥1 метрика
-ссылается на эту цель.
-**Порядок:** fundamentals → from-bet → deadline.
-Главная проверка: критерий успеха без цифр (не задача, не число).
+**Для stable:** `problem` (≥1 строка `frame`), `from-bet` (или `—` при
+перепрыгивании), ≥1 метрика ссылается на эту цель.
+**Порядок:** fundamentals → problem → from-bet → deadline.
+Главная проверка: критерий успеха без цифр (не задача, не число). Цель
+раскрывает проблему в проверяемый критерий — у каждой проблемы должна
+быть ≥1 цель.
 
 ## metric
 
-**Для stable:** `goal`, `current` (baseline+дата+окно), `target`,
-`direction`, `kind`, `source`, `attribution`, `acceptance`. См.
-`metric-spine.md`.
-**Порядок:** goal → current → target → direction → kind → source →
-attribution → acceptance → evidence.
+**Для stable:** `problem` (≥1 строка `frame`, обычно те же, что у её
+цели), `goal`, `current` (baseline+дата+окно), `target`, `direction`,
+`kind`, `source`, `attribution`, `acceptance`. См. `metric-spine.md`.
+**Порядок:** problem → goal → current → target → direction → kind →
+source → attribution → acceptance → evidence.
 Главная проверка: не бинарна; baseline есть; источник назван; атрибуция
-есть; у каждой целевой — guardrail.
+есть; у каждой целевой — guardrail **в пределах её проблемы**.
 
 ## subject
 
-**Для stable:** `kind` (positive/negative), `motivation` (боли/желания).
-**Порядок:** fundamentals → kind → motivation.
+**Для stable:** `problem` (≥1 строка `frame`), `kind` (positive/negative),
+`motivation` (боли/желания).
+**Порядок:** fundamentals → problem → kind → motivation.
 Главная проверка: носитель самодвижения (не исполнитель); мотивация
-наблюдаема (питает «потому что» гипотез).
+наблюдаема (питает «потому что» гипотез). Один субъект бизнеса часто
+фигурирует в нескольких проблемах.
 
 ## hypothesis
 
-**Обязательно:** `slug`, `name`, `status` + четыре части `if`, `then`,
-`because`, `so` (вместо `description`).
+**Обязательно:** `slug`, `name`, `status`, `problem` (≥1 строка `frame`)
++ четыре части `if`, `then`, `because`, `so` (вместо `description`).
 **Для stable:** `subject` (или `—` для бессубъектной), `metric` (на что
 бьёт «тогда»), `priority`.
-**Порядок:** if → then → because → so → subject → metric → priority.
+**Порядок:** problem → if → then → because → so → subject → metric →
+priority.
 Главная проверка: «если» — наш принцип; «то» — поведение субъекта;
-«потому что» — на мотивации; «тогда» — на конкретную метрику.
+«потому что» — на мотивации; «тогда» — на конкретную метрику **той же
+проблемы**. `problem` обычно совпадает с проблемой метрики из `so`.
 
 ## task
 
-**Для stable:** `hypothesis` (привязка обязательна — сирота запрещена).
-**Порядок:** fundamentals → hypothesis.
+**Для stable:** `problem` (≥1 строка `frame`, обычно те же, что у её
+гипотезы), `hypothesis` (привязка обязательна — сирота запрещена).
+**Порядок:** fundamentals → problem → hypothesis.
 Главная проверка: проверяет конкретную гипотезу; не инженерный тикет.
 
 ## Универсальные нюансы
@@ -74,5 +92,8 @@ attribution → acceptance → evidence.
 - `name` — человекочитаемое, русский по умолчанию.
 - `description` — одно предложение, в языке бизнеса, без маркетинга.
 - `priority` — целое, 1 = высший, без дублей.
+- `problem` — массив slug-рефов на строки `frame`, питон-стиль с
+  бэктиками (`` [`paid-outflow`, `slow-onboarding`] ``). Непустой у всех
+  7 kind. M:N — одна сущность бизнеса часто работает на несколько проблем.
 - `status` — дефолт `draft`; повышение только через чек-лист; понижение
   руками аналитика.

@@ -1,7 +1,8 @@
 # block
 
 > Блок (block) — раскрытие interface-block в дерево компонентов.
-> Аналитический блок (block) в `docs/interface/block.md` объявляет
+> Аналитический блок (block) в
+> `docs/projects/<project-slug>/interface/block.md` объявляет
 > навигационный узел и набор ux-substrates; здесь — что и как эти
 > субстраты собираются в облик через компоненты `@stit-design/ui`.
 > Используется на экранах (screen) как содержимое слотов shell.
@@ -52,7 +53,7 @@ ui-lib — а не экран, не каркас и не один компоне
 | `slug` | string | yes | совпадает с `interface-block.slug` |
 | `name` | string | yes | человекочитаемое имя |
 | `description` | string | yes | одна фраза о блоке |
-| `interface-block` | `block-slug` (interface) | yes | источник в `docs/interface/block.md` |
+| `interface-block` | `block-slug` (interface) | yes | источник в `docs/projects/<project-slug>/interface/block.md` |
 | `ux-substrates` | `[ux-substrate-slug]` | yes | зеркало списка из interface |
 | `data` | `{ <param>: data:<slug> }` | optional | контракт входных данных |
 | `slots` | `[slot-name]` | optional | если блок — контейнер (вложение `block:` внутрь) |
@@ -139,8 +140,9 @@ tree:
 
 ## Anti-patterns
 
-- ❌ Расхождение `ux-substrates` с зеркалом в `docs/interface/block.md`
-  (одни и те же блок-slug в обоих слоях — одни и те же субстраты).
+- ❌ Расхождение `ux-substrates` с зеркалом в
+  `docs/projects/<project-slug>/interface/block.md` (одни и те же
+  блок-slug в обоих слоях — одни и те же субстраты).
 - ❌ Дерево без `block-body`.
 - ❌ Облик в дереве (цвет, тень, шрифт).
 - ❌ Тематические props (`density`/`brand`/`scheme`) в узлах.

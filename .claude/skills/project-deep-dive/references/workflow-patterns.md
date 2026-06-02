@@ -4,22 +4,29 @@
 Скилл выбирает режим по виду args при запуске и далее ведёт сеанс,
 комбинируя точечные шаги. Зеркалит interface-deep-dive.
 
+Все пути ниже **скоупятся в выбранный проект**: данные пишутся в
+`docs/projects/<project-slug>/<kind>.md`, форму (критерии / anti-patterns
+/ тест-критерий) читаем из канона `docs/projects/_canon/project/<kind>.md`.
+
 ## A. Новая сущность
 
-**Сигнал**: args = `<kind>` или `<kind>:<новый-slug>` (slug ещё не
-существует в файле).
+**Сигнал**: args = `<project-slug> <kind>` или
+`<project-slug> <kind>:<новый-slug>` (slug ещё не существует в файле
+проекта).
 
 ### Шаги
 
-1. Прочитать `docs/project/<kind>.md` целиком: секции `Критерии`,
-   `Что НЕ`, `Тест-критерий`.
+1. Прочитать форму `docs/projects/_canon/project/<kind>.md` целиком:
+   секции `Критерии`, `Что НЕ`, `Тест-критерий`.
 2. Раунд 1 `AskUserQuestion` — фундамент:
    - `slug` (Other) — если не дан;
    - `name` (Other);
    - `description` (Other).
-3. Записать строку в `docs/project/<kind>.md` с заполненными
-   `slug + name + description + status=draft`, остальные ячейки `—`.
-   Для `vision.md` — записать в раздел Problem.
+3. Записать строку в `docs/projects/<project-slug>/<kind>.md` с
+   заполненными `slug + name + description + status=draft`, остальные
+   ячейки `—`. Для `vision.md` — записать в раздел Problem; на фазе
+   discovery дополнительно добить `addresses-problem` (опции — строки
+   `docs/business-problem/frame.md`).
 4. Раунд 2+ `AskUserQuestion` — батч по доменным слотам kind. См.
    `field-checklists.md`. До 4 вопросов в раунде; перемежать опции
    (anti-patterns / enums / соседи) и Other (значения).
@@ -30,8 +37,8 @@
    варианты ✅/❌ из примеров md как опции. Аналитик подтверждает.
 7. Применить чек-лист `draft-stable.md`. Если все 5 ✅ — предложить
    повышение в stable.
-8. Записать `state/<kind>/<slug>.md`, если есть что (открытые вопросы,
-   неочевидные доменные решения).
+8. Записать `state/<project-slug>/<kind>/<slug>.md`, если есть что
+   (открытые вопросы, неочевидные доменные решения).
 9. Предложить логичный следующий шаг по `phases.md`.
 
 ### Пример раунда (persona, после фундамента)
@@ -47,8 +54,8 @@
 
 ## B. Сырьё
 
-**Сигнал**: args = свободный текст / транскрипт интервью с бизнесом /
-заметки / письмо клиента.
+**Сигнал**: args = `<project-slug>` + свободный текст / транскрипт
+интервью с бизнесом / заметки / письмо клиента.
 
 ### Шаги
 
@@ -96,19 +103,20 @@
 
 ## C. Углубление
 
-**Сигнал**: args = `<kind>:<slug>` существующей записи, либо аналитик
-выбрал из сводки.
+**Сигнал**: args = `<project-slug> <kind>:<slug>` существующей записи,
+либо аналитик выбрал из сводки.
 
 ### Шаги
 
-1. Прочитать строку из `docs/project/<kind>.md` (для vision —
-   `vision.md` целиком).
-2. Прочитать `state/<kind>/<slug>.md`, если есть.
-3. Прочитать соседей семантически: для `capability` — какие persona
-   упомянуты, есть ли они; для `surface` — какие persona, какие
-   capability у них; для `integration` — какие constraint могли бы
-   быть применимы.
-4. Применить `docs/project/<kind>.md` секции к строке. Найти:
+1. Прочитать строку из `docs/projects/<project-slug>/<kind>.md` (для
+   vision — `vision.md` этого проекта целиком).
+2. Прочитать `state/<project-slug>/<kind>/<slug>.md`, если есть.
+3. Прочитать соседей семантически в пределах проекта: для `capability`
+   — какие persona упомянуты, есть ли они; для `surface` — какие
+   persona, какие capability у них; для `integration` — какие constraint
+   могли бы быть применимы.
+4. Применить секции формы `docs/projects/_canon/project/<kind>.md` к
+   строке. Найти:
    - пустые обязательные слоты;
    - подозрения по anti-patterns (capability похожа на фичу, boundary
      похож на backlog, constraint без source);

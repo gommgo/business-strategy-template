@@ -1,6 +1,6 @@
 ---
 name: business-problem-audit
-description: Семантический аудит инвариантов методологии слоя `docs/business-problem/` (LinkedSWOT + Карта гипотез) роем агентов. Связи слоя НЕ валидируются slug-целостностью — они семантические, поэтому аудит запускает агентов параллельно, каждый под своим углом методологии: задача-сирота, гипотеза без метрики в «тогда», «потому что» не на мотивации субъекта, метрика-цель без влияющей гипотезы, целевая без guardrail, ставка не доведённая до карты, фактор без ставки, цель-с-цифрой/задача-вместо-цели, метрика-как-гарантия в frame, исполнитель-вместо-субъекта. Каждый агент читает слой + state и ищет смысловые нарушения, не grep. Не правит, только отчёт. Использовать перед коммитом артефактов business-problem, когда `/business-problem-deep-dive` предлагает прогон в конце сессии, перед `/cross-audit`, или когда аналитик подозревает разрыв методологии.
+description: Семантический аудит инвариантов методологии многопроблемного слоя `docs/business-problem/` (LinkedSWOT + Карта гипотез) роем агентов. `frame` — таблица проблем (одна строка = одна проблема); инварианты считаются ПО КАЖДОЙ проблеме отдельно. Связи слоя НЕ валидируются slug-целостностью — они семантические, поэтому аудит запускает агентов параллельно, каждый под своим углом методологии: задача-сирота, гипотеза без метрики в «тогда», «потому что» не на мотивации субъекта, метрика-цель без влияющей гипотезы, целевая без guardrail, ставка не доведённая до карты, фактор без ставки, цель-с-цифрой/задача-вместо-цели, метрика-как-гарантия в frame, исполнитель-вместо-субъекта, проблема без цели, пустой/невалидный `problem` у записей. Каждый агент читает слой + state и ищет смысловые нарушения в пределах своих проблем, не grep. Не правит, только отчёт. Использовать перед коммитом артефактов business-problem, когда `/business-problem-deep-dive` предлагает прогон в конце сессии, перед `/cross-audit`, или когда аналитик подозревает разрыв методологии.
 ---
 
 # business-problem-audit
@@ -14,53 +14,77 @@ description: Семантический аудит инвариантов мет
 агентов**, каждый читает слой и спрашивает «соблюдён ли этот инвариант
 методологии по смыслу». Это требует LLM, не регулярок.
 
+Слой **многопроблемный**: `frame` — таблица проблем, каждая запись 7 kind
+несёт колонку `problem` (массив строк `frame`, M:N). **Все инварианты
+методологии считаются в пределах одной проблемы**: запись с проблемой P
+замыкается на записи той же P. Поэтому лучи скоупятся **по строке
+`frame`** — луч проверяет инвариант внутри проблемы, не через весь слой
+скопом (метрика без влияния, guardrail, метрика-влияние, фактор-usage и
+т.п. — все per-problem).
+
 `/cross-audit` ловит стыки **между слоями** (business ↔ business-problem
-↔ project). Здесь — только инварианты **внутри** business-problem.
-Аудит **читает и сообщает**, ничего не правит: правки — через
-`/business-problem-deep-dive`.
+↔ проекты `docs/projects/<slug>/`). Здесь — только инварианты **внутри**
+business-problem. Аудит **читает и сообщает**, ничего не правит: правки —
+через `/business-problem-deep-dive`.
 
 ## Точки входа
 
 | вызов | поведение |
 |---|---|
-| `/business-problem-audit` | полный прогон всех применимых лучей |
-| `/business-problem-audit <lens>` | один луч |
-| `/business-problem-audit --quick` | 3 ключевых: `task-orphan`, `hypothesis-shape`, `metric-influence` |
+| `/business-problem-audit` | полный прогон всех применимых лучей по всем проблемам |
+| `/business-problem-audit <lens>` | один луч (по всем проблемам) |
+| `/business-problem-audit <problem-slug>` | все лучи, но только в пределах одной проблемы |
+| `/business-problem-audit --quick` | 4 ключевых: `problem-goal`, `task-orphan`, `hypothesis-shape`, `metric-influence` |
 
-`lens` ∈ {`task-orphan`, `hypothesis-shape`, `metric-influence`,
-`guardrail`, `bet-promotion`, `factor-usage`, `goal-shape`,
-`frame-guarantee`, `subject-selfmotion`}.
+`lens` ∈ {`problem-goal`, `problem-tag`, `task-orphan`,
+`hypothesis-shape`, `metric-influence`, `guardrail`, `bet-promotion`,
+`factor-usage`, `goal-shape`, `frame-guarantee`, `subject-selfmotion`}.
 
 См. `references/rays.md`.
 
 ## Что делать при запуске
 
 1. Прочитать `docs/business-problem/README.md` + `references/rays.md`.
-2. Определить применимые лучи (по args или полный прогон). Луч,
+2. **Прочитать таблицу `frame.md`** — перечислить проблемы (строки). Это
+   контуры, по которым скоупятся лучи. Если задан `<problem-slug>` —
+   ограничиться этой проблемой.
+3. Определить применимые лучи (по args или полный прогон). Луч,
    требующий пустого слоя (нет гипотез → `hypothesis-shape` нечего
-   проверять), пропускается с пометкой.
-3. **Спавнить агентов параллельно** — все вызовы в **одном**
-   message-блоке. `subagent_type: general-purpose` (Read + Grep).
-4. Собрать findings (единый JSON, см. `references/findings-format.md`).
-5. Сгруппировать по лучам, отсортировать по severity.
-6. Через `AskUserQuestion` пройти top-K findings: «принять корректным» /
+   проверять), пропускается с пометкой. Лучи `problem-goal` и
+   `problem-tag` применимы, если в `frame` есть хотя бы одна строка.
+4. **Спавнить агентов параллельно** — все вызовы в **одном**
+   message-блоке. `subagent_type: general-purpose` (Read + Grep). Каждому
+   агенту передать список проблем и инструкцию считать инвариант
+   **per-problem** (запись с проблемой P замыкается на записи той же P).
+5. Собрать findings (единый JSON, см. `references/findings-format.md`).
+   Каждый finding несёт `problem`, в пределах которой найдено нарушение.
+6. Сгруппировать по лучам (внутри — по проблеме), отсортировать по severity.
+7. Через `AskUserQuestion` пройти top-K findings: «принять корректным» /
    «нужна правка» / «false positive».
-7. Перезаписать `audit-state/last-report.md` с reasoning-trace.
+8. Перезаписать `audit-state/last-report.md` с reasoning-trace.
 
 ## Рой агентов
 
 Каждый агент получает: путь к `docs/business-problem/`; свой lens;
-инструкцию из `references/rays.md`; схему findings; relevant suppressions.
+список проблем (строк `frame`); инструкцию из `references/rays.md`; схему
+findings; relevant suppressions.
 
 ### Промпт-каркас
 
 ```
 Lens: <name>
-Слой: docs/business-problem/
+Слой: docs/business-problem/ (многопроблемный)
+Проблемы (строки frame): [<problem-slug>, ...]   # или одна, если задан scope
 
-Цель: проверить инвариант методологии семантически (не slug-валидация).
+Цель: проверить инвариант методологии семантически (не slug-валидация),
+ПО КАЖДОЙ проблеме отдельно. Слой многопроблемный: `frame` — таблица
+проблем, каждая запись 7 kind несёт колонку `problem` (массив строк
+frame, M:N). Инвариант замыкается внутри одной проблемы: запись с
+проблемой P учитывается вместе с записями той же P.
+
 Прочитай нужные файлы слоя + state скилла business-problem-deep-dive
-(если есть). Найди смысловые нарушения по паттернам этого луча.
+(если есть). Для каждой проблемы из списка найди смысловые нарушения по
+паттернам этого луча. В каждом finding укажи поле "problem".
 
 Верни ТОЛЬКО валидный JSON-массив по схеме findings-format.md, без
 preamble. Пусто → []. Не выдумывай findings ради чисел.
@@ -68,17 +92,29 @@ preamble. Пусто → []. Не выдумывай findings ради чисе�
 
 ## Уровни тяжести
 
+Все примеры считаются **в пределах одной проблемы**:
+
 | severity | смысл | пример |
 |---|---|---|
-| `error` | разрыв методологии, ломает карту | задача-сирота; «тогда» не бьёт в метрику; метрика-цель без влияющей гипотезы; метрика подана как гарантия |
-| `warning` | подозрительное нарушение | целевая без guardrail; ставка не доведена до карты; «потому что» слабо связано с мотивацией |
-| `hint` | повод подумать | фактор без ставки; очень короткая мотивация субъекта; цель близка к задаче |
+| `error` | разрыв методологии, ломает карту | проблема без цели; запись 7 kind с пустым/невалидным `problem`; задача-сирота; «тогда» не бьёт в метрику той же проблемы; метрика-цель без влияющей гипотезы; метрика подана как гарантия |
+| `warning` | подозрительное нарушение | целевая без guardrail в её проблеме; ставка не доведена до карты; «потому что» слабо связано с мотивацией |
+| `hint` | повод подумать | фактор без ставки (ни по одной проблеме); очень короткая мотивация субъекта; цель близка к задаче |
 
 ## Формат отчёта
 
+Findings группируются по проблеме (строке `frame`), внутри — по лучу:
+
 ```
 === /business-problem-audit ===
-Слой: business-problem · Лучи: 9 запущено, 9 ответили
+Слой: business-problem · Проблемы: 2 · Лучи: 11 запущено, 11 ответили
+
+── Проблема: paid-outflow ──
+
+[error] problem-goal → у проблемы paid-outflow нет ни одной цели.
+  Доказательство: в goal.md ни одна запись не несёт paid-outflow в
+    problem. Проблема повисла — нечего раскрывать в метрики.
+  Что делать: завести goal с problem=[`paid-outflow`] через
+  /business-problem-deep-dive goal.
 
 [error] task-orphan → task:ab-reminders не привязана ни к одной гипотезе.
   Доказательство: task.hypothesis = «—»; в hypothesis.md нет записи,
@@ -86,7 +122,7 @@ preamble. Пусто → []. Не выдумывай findings ради чисе�
   Что делать: привязать к гипотезе через /business-problem-deep-dive
   task:ab-reminders, либо удалить задачу (ресурсный фильтр методологии).
 
-[error] hypothesis-shape → hypothesis:remind-rebook.«тогда» не ссылается
+[error] hypothesis-shape → hypothesis:remind-rebook «тогда» не ссылается
   на метрику.
   Доказательство: so = «станет лучше»; metric = «—». Нечем оценить
     эффективность.
@@ -94,11 +130,19 @@ preamble. Пусто → []. Не выдумывай findings ради чисе�
 
 [warning] guardrail → metric:paid-churn (целевая) без балансирующей.
   Доказательство: kind=lagging, direction=down; ни одной metric с
-    kind=balancing на ту же goal:retain-paid.
+    kind=balancing на ту же goal:retain-paid в проблеме paid-outflow.
   Что делать: завести guardrail (напр. удержать CAC) через
   /business-problem-deep-dive metric.
 
-Сводка: 2 error / 1 warning / 0 hint.
+── Проблема: slow-onboarding ──
+
+[error] problem-tag → factor:strong-ops не имеет ни одной проблемы.
+  Доказательство: factor.problem = «—». Фактор вне реестра — непонятно,
+    какую проблему он питает.
+  Что делать: проставить problem через /business-problem-deep-dive
+  factor:strong-ops.
+
+Сводка: 4 error / 1 warning / 0 hint (по 2 проблемам).
 ```
 
 После отчёта — `AskUserQuestion` по top-K (до 4 в раунде): «принять
@@ -112,14 +156,15 @@ deep-dive сам) / «false positive» (→ suppressions) / «обсудить �
 ```markdown
 ---
 ran-on: <scope>
-lenses-run: 9
+problems: [<problem-slug>, ...]
+lenses-run: 11
 findings: { error: X, warning: Y, hint: Z }
 verdicts: { accepted: A, needs-fix: B, false-positive: C, deferred: D }
 ---
 
 # Reasoning trace
 ## Lens: task-orphan
-- agent-id / duration / findings / verdicts / details
+- agent-id / duration / problem / findings / verdicts / details
 ...
 ```
 
@@ -135,7 +180,9 @@ Findings «false positive» → `audit-state/suppressions.md` (lens + pattern
   `/business-problem-deep-dive`.
 - **Не понижать `stable → draft`** — error в отчёте, аналитик понизит.
 - **Не выдумывать findings** — пустой массив лучше натянутых.
-- **Не делать кросс-слойную проверку** — это `/cross-audit`.
+- **Не делать кросс-слойную проверку** — стыки с business и проектами
+  `docs/projects/<slug>/` (в т.ч. покрыта ли проблема проектом) — это
+  `/cross-audit`.
 - **Не запускать рой повторно** в одной сессии.
 - **Не вызывать `/business-problem-deep-dive`** автоматически.
 - **Не предлагать клиенту** запустить аудит — это аналитический

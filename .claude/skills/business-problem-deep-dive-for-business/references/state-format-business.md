@@ -7,11 +7,16 @@
 
 ```
 .claude/skills/business-problem-deep-dive-for-business/state/
-├── frame.md
+├── frame/<problem-slug>.md   (заметка по задаче для бизнеса)
 ├── factor/<slug>.md  bet/<slug>.md  goal/<slug>.md  metric/<slug>.md
 ├── subject/<slug>.md  hypothesis/<slug>.md  task/<slug>.md
 └── _session-log/<UTC-ts>.md
 ```
+
+`frame` — реестр задач для бизнеса (по строке на задачу), поэтому его
+заметки лежат per-task: `state/frame/<problem-slug>.md`. Заметки
+factor/goal/… несут внутри привязку к задаче (`problem`); клиенту слово
+не показывается.
 
 `_session-log/` — буфер вопросов-ответов сессии; уезжает в
 `client-handoff/transcripts/<ts>.md` при `--share` и удаляется.
@@ -36,7 +41,9 @@ ref: docs/business-problem/metric.md#paid-churn
 - Спросить в клинике точную цифру оттока за прошлый год.
 ```
 
-Frontmatter: `kind`, `slug` (для frame отсутствует), `ref`.
+Frontmatter: `kind`, `slug` (для `frame` — `<problem-slug>`), `ref`. У
+заметок factor/goal/… полезно держать строку «задача: ⟨task-name⟩» в
+`## Что я имел в виду`, чтобы аналитик увидел привязку.
 
 ## Секции
 

@@ -1,20 +1,23 @@
 # Артефакты продукта
 
 Продуктовый слой проекта: 1 singleton + 7 плоских md-файлов в
-`docs/project/`. Vision — корневой документ продукта; остальные 7 — таблицы
-сущностей одного типа. Все связи между сущностями — через `slug`, но
-консистентность по слою — **семантическая**, не структурная (см.
-`/cross-audit`).
+`docs/projects/<project-slug>/`. Этот файл — **канон формы**
+(`_canon/project/`); данные каждого проекта живут в его папке. Vision —
+корневой документ продукта; остальные 7 — таблицы сущностей одного типа.
+Все связи между сущностями — через `slug`, но консистентность по слою —
+**семантическая**, не структурная (см. `/cross-audit`).
 
 Чистая продуктовая аналитика. На код / FSD / компонент не мапится — это
-вход для `/interface-deep-dive` (UX-аналитика), `/domain-deep-dive`
-(домены бэкенда) и `/screen-deep-dive` (композиция экранов).
+вход для соседних слоёв того же проекта, **вложенных в его папку**:
+`<slug>/interface/` (UX, `/interface-deep-dive`), `<slug>/domains/`
+(домены бэкенда, `/domain-deep-dive`), `<slug>/screens/` (композиция
+экранов, `/screen-deep-dive`).
 
 ## Файлы
 
 | файл | сущность | поля |
 |---|---|---|
-| [`vision.md`](vision.md) | singleton: проблема, успех, non-goals продукта | три раздела + статус |
+| [`vision.md`](vision.md) | singleton: проблема, успех, non-goals продукта | три раздела + addresses-problem + статус |
 | [`persona.md`](persona.md) | сегмент пользователей / клиентов | slug · name · description · context · jobs · pains · success · status |
 | [`capability.md`](capability.md) | бизнес-возможность продукта верхнего уровня | slug · name · description · value · persona · status |
 | [`boundary.md`](boundary.md) | явный non-goal с обоснованием | slug · name · description · why · status |
@@ -25,8 +28,9 @@
 
 ## Принципы оформления
 
-Зеркалит канон `docs/interface/`. Один файл — одна таблица сущностей
-одного типа (vision исключение — singleton). Структура табличного файла:
+Зеркалит канон `docs/projects/_canon/interface/`. Один файл — одна таблица
+сущностей одного типа (vision исключение — singleton). Структура
+табличного файла:
 
 ```markdown
 # <имя файла>
@@ -86,7 +90,7 @@ H1 = имя файла = kind. Frontmatter не нужен — kind опреде
 **между слоями** через семантический разбор (рой агентов), не через
 ссылочную целостность.
 
-Внутри `docs/project/` ожидаются неформальные связи:
+Внутри `docs/projects/<slug>/` ожидаются неформальные связи:
 
 - **persona → surface**: persona работает через одну+ поверхность
   (`surface.persona` — кого она обслуживает).
@@ -103,16 +107,20 @@ H1 = имя файла = kind. Frontmatter не нужен — kind опреде
 - **market ↔ capability**: конкурент покрывает наши возможности — это
   смысл сопоставления, проверяет `/cross-audit`.
 
-Связь с соседними слоями (тоже семантическая):
+Связь с соседними слоями (тоже семантическая; соседи `interface`/
+`domains`/`screens` живут **в той же папке проекта**
+`docs/projects/<slug>/`):
 
-- `project.persona` ↔ `interface.who` — каждая роль в `interface` должна
+- `vision.addresses-problem` ↔ `business-problem.frame` — какие проблемы
+  закрывает продукт (M:N; авторская сторона связи — здесь).
+- `persona` ↔ `<slug>/interface/who` — каждая роль в `interface` должна
   семантически соответствовать одной из persona проекта.
-- `project.capability` ↔ `interface.situation` / `domain.<область>` —
-  возможность реализуется через ситуации (UX) + домены (бэкенд).
-- `project.surface` ↔ `interface.zone` — зона интерфейса принадлежит
+- `capability` ↔ `<slug>/interface/situation` / `<slug>/domains/<область>`
+  — возможность реализуется через ситуации (UX) + домены (бэкенд).
+- `surface` ↔ `<slug>/interface/zone` — зона интерфейса принадлежит
   поверхности.
-- `project.integration` ↔ `domain.<адаптер>` — внешняя интеграция в
-  коде существует как доменный адаптер.
+- `integration` ↔ `<slug>/domains/<адаптер>` — внешняя интеграция в коде
+  существует как доменный адаптер.
 
 ## Workflow
 
@@ -133,13 +141,14 @@ state и предлагает переходы через `AskUserQuestion`.
 ## Anti-patterns
 
 - ❌ Frontmatter в файлах (kind определяется именем файла — как в
-  `docs/interface/`).
+  `interface/`).
 - ❌ Каталоги под kind (`personas/`, `capabilities/` …) — один файл =
   один kind, плоско.
-- ❌ Несколько vision в одном репо. Один репо = один продукт = один
-  `vision.md`.
-- ❌ Перенос продукт-аналитики в `docs/interface/` (UX-слой) или в
-  `docs/domains/` (бэкенд) — это разные слои. project = «зачем и для
+- ❌ Несколько vision в **одном проекте**. Один проект (папка
+  `docs/projects/<slug>/`) = один продукт = один `vision.md`. Разные
+  продукты — разные папки проектов.
+- ❌ Перенос продукт-аналитики в `<slug>/interface/` (UX-слой) или в
+  `<slug>/domains/` (бэкенд) — это разные слои. project = «зачем и для
   кого», interface = «как взаимодействует», domain = «какой бизнес-код».
 - ❌ Жёсткие slug-валидации между project и соседями. Связи —
   семантические; ловит `/cross-audit`, а не grep.

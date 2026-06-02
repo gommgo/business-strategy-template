@@ -10,9 +10,11 @@ description: Углублённая проработка верхнего сло
 клиента** и **рой web-research**, не проекция аналитика.
 
 Слой **нестрогий**: жёсткой методологии нет, цель — полная и честная
-картина бизнеса. Питает следующий слой `docs/business-problem/`: факторы
-SWOT растут из профиля и конкурентов, baseline метрик — из
-`current-metric.md`.
+картина бизнеса. Бизнес — **один** (этот слой общий), но он питает
+**многопроблемный** слой `docs/business-problem/` (где `frame` — таблица
+проблем) и мир из **множества проектов** (`docs/projects/<slug>/`):
+факторы SWOT каждой проблемы растут из профиля и конкурентов, baseline
+целевых метрик — из `current-metric.md`.
 
 ## Точки входа
 
@@ -61,7 +63,7 @@ SWOT растут из профиля и конкурентов, baseline мет
 | `market` | конкуренты и рынок (рой web-research) | `competitor.md` |
 | `structure` | сегменты, оферы, каналы | `segment.md`, `offering.md`, `channel.md` |
 | `metrics` | текущие KPI — baseline-кандидаты | `current-metric.md` |
-| `cohesion` | целостность профиля, передача в business-problem | все |
+| `cohesion` | целостность профиля, передача в многопроблемный business-problem | все |
 
 Полная карта — `references/phases.md`. Порядок — рекомендация.
 
@@ -129,6 +131,7 @@ kind подтверждены · anti-patterns не нарушены · тест
 - Не авто-вписывать research в артефакты — promotion через
   `AskUserQuestion`.
 - Не повышать `draft → stable` без подтверждения; не понижать сам.
-- Не путать `segment` (клиент бизнеса) с `project.persona`.
+- Не путать `segment` (клиент бизнеса) с `persona` продукта
+  (`projects/<slug>/persona`).
 - Не аккумулировать историю в `state/` — forward-only.
 - Не пушить и не коммитить. Не вызывать другие скилы.

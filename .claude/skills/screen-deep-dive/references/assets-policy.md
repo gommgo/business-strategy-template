@@ -1,13 +1,15 @@
 # Политика ассетов
 
 Визуальные референсы — скриншоты, мокапы из Figma, скрины конкурентов,
-картинки-вдохновение — живут в `docs/screens/assets/<kind>/<slug>/` и
+картинки-вдохновение — живут в
+`docs/projects/<project-slug>/screens/assets/<kind>/<slug>/` и
 ссылаются на сущность через поле `assets: [...]` во frontmatter.
+Ассеты скоупятся по проекту: у каждого проекта своя папка `assets/`.
 
 ## Структура папок
 
 ```
-docs/screens/assets/
+docs/projects/<project-slug>/screens/assets/
 ├── flow/
 │   └── <slug>/
 │       └── <file>.{png,jpg,svg,webp}
@@ -46,7 +48,8 @@ assets:
   - competitor-linear-list.png
 ```
 
-- Пути — относительные от `docs/screens/assets/<kind>/<slug>/`. То
+- Пути — относительные от
+  `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/`. То
   есть в frontmatter — только имя файла.
 - Поле опциональное. Если ассетов нет — поля во frontmatter тоже
   нет (не `assets: []` и не `assets: '—'`).
@@ -79,7 +82,7 @@ assets:
 3. **По «сохранить»** — Edit'ом во frontmatter сущности добавить
    путь в `assets: [...]`. Скилл сохраняет файл через `Bash` —
    копирует из временного пути (где Claude получил картинку) в
-   `docs/screens/assets/<kind>/<slug>/<имя>.<ext>`.
+   `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/<имя>.<ext>`.
 4. **По «не сохранять»** — картинка только в контексте сессии,
    используется как сырьё для извлечения кандидатов / углубления.
 
@@ -104,8 +107,9 @@ assets:
    - либо «поищи ещё с другими словами: <уточнение>» (Other).
 3. **По выбранным** — `WebFetch` страницы. Если на странице есть
    подходящая картинка — скачать её в
-   `docs/screens/assets/<kind>/<slug>/<имя>.<ext>`. Имя — kebab-case
-   по содержимому страницы (`linear-issues-list-2024.png`).
+   `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/<имя>.<ext>`.
+   Имя — kebab-case по содержимому страницы
+   (`linear-issues-list-2024.png`).
 4. **Edit** frontmatter сущности — добавить путь в `assets`.
 5. Если страница даёт идеи, но картинку извлечь не вышло, — добавить
    в state-заметку `## Что копать дальше` строку с URL и пометкой
@@ -125,11 +129,13 @@ assets:
 ## Каскад при удалении сущности
 
 При удалении сущности (см. SKILL.md `## Удаление сущности (каскад)`)
-— папка `docs/screens/assets/<kind>/<slug>/` удаляется целиком.
-Ассеты сущности живут ровно столько, сколько живёт сущность.
+— папка `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/`
+удаляется целиком. Ассеты сущности живут ровно столько, сколько живёт
+сущность.
 
 ## Связь с кодом
 
 Прямой связи нет. Ассеты — для аналитической работы и для автора
-макета, который вручную собирает wireframe и hi-fi по `docs/screens/`.
-Сам код `docs/screens/assets/` напрямую не читает.
+макета, который вручную собирает wireframe и hi-fi по
+`docs/projects/<project-slug>/screens/`. Сам код
+`docs/projects/<project-slug>/screens/assets/` напрямую не читает.

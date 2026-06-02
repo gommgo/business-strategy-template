@@ -1,11 +1,15 @@
 # Domain Artifacts
 
-DDD-first документация бизнес-домена. Артефакты — **первичный source of truth** проектирования; код вторичен и генерируется/пишется по ним.
+DDD-first документация бизнес-домена бэкенда — опциональный слой проекта. Артефакты — **первичный source of truth** проектирования; код вторичен и генерируется/пишется по ним.
+
+Этот файл — **канон формы** (`docs/projects/_canon/domains/`); шаблоны (`_templates/`) и форма-образец `_shared/README.md` живут здесь, один раз на все проекты. Данные доменов каждого проекта живут в его папке `docs/projects/<project-slug>/domains/`.
 
 ## Структура
 
+Канон формы живёт один раз в `docs/projects/_canon/domains/`:
+
 ```
-docs/domains/
+docs/projects/_canon/domains/
 ├── README.md                  ← этот файл
 ├── _templates/                ← пустые шаблоны для копирования
 │   ├── aggregate.md
@@ -15,6 +19,14 @@ docs/domains/
 │   ├── use-case.md
 │   ├── policy.md
 │   └── context-readme.md
+└── _shared/
+    └── README.md              ← форма-образец роллапа cross-context VO
+```
+
+Данные доменов живут в папке проекта `docs/projects/<project-slug>/domains/`:
+
+```
+docs/projects/<project-slug>/domains/
 ├── _shared/                   ← cross-context VO и integration events
 │   ├── README.md              ← роллап: какие VO живут здесь и для кого
 │   └── <Name>.md              ← kind: vo, платформенный VO (PhotoRef, MoneyAmount, …)
@@ -29,7 +41,7 @@ docs/domains/
         └── <PolicyName>.md    ← kind: policy
 ```
 
-`_shared/` — заводим только когда VO реально нужен в ≥2 контекстах и не несёт доменной семантики. Внутри-контекстные VO остаются inline в aggregate-файле.
+`_shared/` — заводим только когда VO реально нужен в ≥2 контекстах одного проекта и не несёт доменной семантики. Внутри-контекстные VO остаются inline в aggregate-файле.
 
 ## Kinds
 
@@ -75,23 +87,27 @@ Stateless / aggregate-of-one / пустые consumers — пишутся явн�
 ## Workflow
 
 ```
+0. Шаблоны берём из канона docs/projects/_canon/domains/_templates/,
+   копируем в папку доменов проекта (PROJECT=docs/projects/<project-slug>,
+   TPL=docs/projects/_canon/domains/_templates).
+
 1. Скопировать шаблоны:
-     mkdir -p docs/domains/<ctx>/{events,use-cases,policies}
-     cp _templates/aggregate.md       docs/domains/<ctx>/<Aggregate>.md
-     cp _templates/event.md           docs/domains/<ctx>/events/<Event>.md
-     cp _templates/use-case.md        docs/domains/<ctx>/use-cases/<Op>.md
-     cp _templates/policy.md          docs/domains/<ctx>/policies/<Pol>.md
-     cp _templates/context-readme.md  docs/domains/<ctx>/README.md
+     mkdir -p $PROJECT/domains/<ctx>/{events,use-cases,policies}
+     cp $TPL/aggregate.md       $PROJECT/domains/<ctx>/<Aggregate>.md
+     cp $TPL/event.md           $PROJECT/domains/<ctx>/events/<Event>.md
+     cp $TPL/use-case.md        $PROJECT/domains/<ctx>/use-cases/<Op>.md
+     cp $TPL/policy.md          $PROJECT/domains/<ctx>/policies/<Pol>.md
+     cp $TPL/context-readme.md  $PROJECT/domains/<ctx>/README.md
    # Если обнаружен cross-context платформенный VO:
-     cp _templates/vo-shared.md       docs/domains/_shared/<Name>.md
+     cp $TPL/vo-shared.md       $PROJECT/domains/_shared/<Name>.md
 
 2. Заполнить вручную минимум: frontmatter + properties (имена, типы)
    + methods/operations (имена). Принести Claude.
 
-3. /domain-deep-dive <ctx>
+3. /domain-deep-dive <project-slug> <ctx>
    — пачкой по волнам, AskUserQuestion'ами добиваем секции inside-out.
 
-4. scripts/tools/validate-domain-doc.sh docs/domains/<ctx>
+4. scripts/tools/validate-domain-doc.sh $PROJECT/domains/<ctx>
    — зелёный → промоушн status: draft → stable.
 
 5. /smartdev → /plan <task>
@@ -103,7 +119,7 @@ Stateless / aggregate-of-one / пустые consumers — пишутся явн�
 
 ## Gate
 
-- **Pre-commit hook** (`scripts/git-hooks/pre-commit`) гонит валидатор на изменённых `docs/domains/**.md`.
+- **Pre-commit hook** (`scripts/git-hooks/pre-commit`) гонит валидатор на изменённых `docs/projects/*/domains/**.md`.
 - **Soft-guidance** — Claude-хуков в шаблоне нет; `scaffold`/`domain-deep-dive` по дисциплине идут по stable-артефактам и не стартуют на `status: draft` / красном валидаторе.
 
 ## Anti-patterns

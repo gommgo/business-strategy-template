@@ -10,10 +10,17 @@
 - **R-SEM** — семантические подозрения, anti-patterns канона.
 - **R-COV** — coverage и стиль.
 
-«Папка существует» — это `docs/screens/<kind-folder>/<slug>/index.md`
+Все пути ниже — в папке текущего проекта
+`docs/projects/<project-slug>/`. Сокращённо: `…/screens/` —
+`docs/projects/<project-slug>/screens/`; `…/interface/` —
+`docs/projects/<project-slug>/interface/`.
+
+«Папка существует» — это `…/screens/<kind-folder>/<slug>/index.md`
 читается без ошибок (`flows`, `screens`, `blocks`, `shells`).
 
-`docs/screens/example/` — образец, в аудите не участвует.
+`docs/projects/example/` — образцовый проект, в аудите не участвует.
+`docs/projects/_canon/screens/` — канон формы; из него читаются только
+критерии и инвентарь, не данные.
 
 ---
 
@@ -43,7 +50,7 @@
 - **severity**: `error`.
 - **scope**: все 4 kind.
 - **проверка**: каждый interface-slug в ссылочном поле существует как
-  строка в `docs/interface/<file>.md`:
+  строка в `…/interface/<file>.md`:
   - `flow.who` (массив) → `who.md`
   - `screen.situations` (массив) → `situation.md`
   - `screen.who` (массив) → `who.md`
@@ -72,7 +79,7 @@
 
 - **severity**: `error`.
 - **scope**: все 4 kind.
-- **проверка**: имя папки `docs/screens/<kind-folder>/<X>/` совпадает с
+- **проверка**: имя папки `…/screens/<kind-folder>/<X>/` совпадает с
   `slug: <X>` в её `index.md`.
 - **рекомендация**: «Привести в соответствие через
   `/screen-deep-dive <kind>:<slug>` — скилл переименует папку и
@@ -235,10 +242,10 @@
 ### R-MIRROR-001 «`block.ux-substrates` (screens) ↔ `block.ux-substrates` (interface)»
 
 - **severity**: `error`.
-- **scope**: `blocks/` ↔ `docs/interface/block.md`.
+- **scope**: `blocks/` ↔ `…/interface/block.md`.
 - **проверка**: для каждого блока B в screens — множество
   `B.ux-substrates` равно множеству `ux-substrates` строки с тем же
-  slug в `docs/interface/block.md`. Сравнение как мультимножество (порядок
+  slug в `…/interface/block.md`. Сравнение как мультимножество (порядок
   не важен).
 - **рекомендация**: «Пересинхронизировать через `/screen-deep-dive
   block:<slug>` — скилл переспросит источник правды (screens-вариант,
@@ -401,10 +408,10 @@ warning не превращается в правку.
 ### R-SEM-010 «`screen.situations` не покрывает ситуации экрана»
 
 - **severity**: `warning`.
-- **scope**: `screens/` ↔ `blocks/` ↔ `docs/interface/ux-substrate.md`.
+- **scope**: `screens/` ↔ `blocks/` ↔ `…/interface/ux-substrate.md`.
 - **проверка**: вывод множества «ситуаций, чьи ux-substrates есть на
   экране» — через `screen.blocks → block.ux-substrates →
-  ux-substrate.situation` (поле `situation` в `docs/interface/ux-substrate.md`).
+  ux-substrate.situation` (поле `situation` в `…/interface/ux-substrate.md`).
   Если какая-то такая ситуация отсутствует в `screen.situations` —
   warning.
 - **рекомендация**: «Дополнить `screen.situations` через
@@ -506,9 +513,10 @@ warning не превращается в правку.
 - **severity**: `hint`.
 - **scope**: все 4 kind, узлы дерева.
 - **проверка**: имя `ui:<Foo>` не входит в список «топ-уровень
-  компонентов» в `docs/screens/README.md` (выводимое требование, пока
-  `@stit-design/ui/manifest.json` не опубликован). Прорывной hint, не
-  error — это, скорее всего, ui-lib gap.
+  компонентов» в каноне `docs/projects/_canon/screens/README.md`
+  (выводимое требование, пока `@stit-design/ui/manifest.json` не
+  опубликован). Прорывной hint, не error — это, скорее всего, ui-lib
+  gap.
 - **рекомендация**: «Похоже на gap к ui-lib. Подтвердить через
   `/screen-deep-dive <kind>:<slug>` (скилл предложит зафиксировать
   `ui-lib gap: ui:Foo — для <зачем>` в state-заметке) или заменить на
@@ -519,10 +527,10 @@ warning не превращается в правку.
 - **severity**: `error`.
 - **scope**: все 4 kind.
 - **проверка**: для каждой записи `assets: [f1, f2, ...]` —
-  `docs/screens/assets/<kind>/<slug>/<fN>` существует как файл.
+  `…/screens/assets/<kind>/<slug>/<fN>` существует как файл.
 - **рекомендация**: «Удалить отсутствующий файл из `assets` через
   `/screen-deep-dive <kind>:<slug>`, либо положить файл в
-  `docs/screens/assets/<kind>/<slug>/`».
+  `…/screens/assets/<kind>/<slug>/`».
 
 ### R-COV-008 «`ux-substrate` не представлен узлом в `block.tree`»
 

@@ -1,12 +1,12 @@
 # Артефакты бизнес-проблемы
 
 Слой формализации **проблемы бизнеса**: между «кто этот бизнес»
-(`docs/business/`) и «зачем продукт» (`docs/project/`). Здесь по строгой
+(`docs/business/`) и «зачем продукт» (`docs/projects/`). Здесь по строгой
 методологии превращаем картину бизнеса в проверяемую ставку: на какую
 **метрику** мы целимся и **через какие гипотезы** наше будущее
 IT-решение на неё повлияет.
 
-Две методологии Byndyusoft в одном слое, в порядке потока:
+Две методологии в одном слое, в порядке потока:
 
 1. **LinkedSWOT** (`factor` → `bet`) — из сильных/слабых сторон и
    трендов/угроз бизнеса рождаются стратегические ставки «за счёт чего
@@ -15,7 +15,11 @@ IT-решение на неё повлияет.
    `task`) — ставка дотягивается до измеримой цели и причинной цепи
    «воздействие → поведение субъекта → метрика».
 
-1 singleton `frame.md` + 7 плоских md-файлов.
+`frame.md` — **таблица проблем** (одна строка = одна проблема) + 7 плоских
+md-файлов. Слой **многопроблемный**: каждая запись 7 kind принадлежит
+одной+ проблеме (M:N) через колонку `problem`. Связь с продуктом тоже
+M:N — проблему закрывают несколько проектов, проект закрывает несколько
+проблем (авторски — `projects/<slug>/vision.md` → `addresses-problem`).
 
 ## Юридическая рамка (читать до заполнения)
 
@@ -32,22 +36,25 @@ IT-решение на неё повлияет.
 
 | файл | сущность | поля |
 |---|---|---|
-| [`frame.md`](frame.md) | singleton: проблема + граница гарантии и таргета | пять разделов + статус |
-| [`factor.md`](factor.md) | SWOT-фактор бизнеса | slug · name · description · area · priority · status |
-| [`bet.md`](bet.md) | стратегическая ставка | slug · name · description · factors · promoted-to · priority · status |
-| [`goal.md`](goal.md) | цель карты гипотез (без цифр) | slug · name · description · from-bet · deadline · status |
-| [`metric.md`](metric.md) | измеримый параметр цели (best-effort таргет) | slug · name · goal · current · target · direction · kind · source · attribution · acceptance · evidence · status |
-| [`subject.md`](subject.md) | субъект, чьё поведение меняем | slug · name · description · kind · motivation · status |
-| [`hypothesis.md`](hypothesis.md) | гипотеза (если · то · потому что · тогда) | slug · name · if · then · because · so · subject · metric · priority · status |
-| [`task.md`](task.md) | задача проверки гипотезы | slug · name · description · hypothesis · status |
+| [`frame.md`](frame.md) | таблица проблем + граница гарантии и таргета | slug · name · problem · guarantee · target · out-of-control · scope · status |
+| [`factor.md`](factor.md) | SWOT-фактор бизнеса | slug · name · description · **problem** · area · priority · status |
+| [`bet.md`](bet.md) | стратегическая ставка | slug · name · description · **problem** · factors · promoted-to · priority · status |
+| [`goal.md`](goal.md) | цель карты гипотез (без цифр) | slug · name · description · **problem** · from-bet · deadline · status |
+| [`metric.md`](metric.md) | измеримый параметр цели (best-effort таргет) | slug · name · **problem** · goal · current · target · direction · kind · source · attribution · acceptance · evidence · status |
+| [`subject.md`](subject.md) | субъект, чьё поведение меняем | slug · name · description · **problem** · kind · motivation · status |
+| [`hypothesis.md`](hypothesis.md) | гипотеза (если · то · потому что · тогда) | slug · name · **problem** · if · then · because · so · subject · metric · priority · status |
+| [`task.md`](task.md) | задача проверки гипотезы | slug · name · description · **problem** · hypothesis · status |
+
+`problem` везде — массив slug-рефов на строки `frame` (M:N). `frame` —
+табличный, не singleton: одна строка = одна проблема.
 
 ## Принципы оформления
 
-Зеркалит канон `docs/project/`. Один файл — одна таблица (`frame` —
-singleton). H1 = имя файла = kind, без frontmatter. Русское слово-перевод
-строгого термина сопровождается `slug` в скобках: «фактор (factor)»,
-«ставка (bet)», «цель (goal)», «субъект (subject)», «гипотеза
-(hypothesis)».
+Зеркалит канон `docs/projects/_canon/project/`. Один файл — одна таблица
+(включая `frame` — таблицу проблем). H1 = имя файла = kind, без
+frontmatter. Русское слово-перевод строгого термина сопровождается `slug`
+в скобках: «проблема (problem)», «фактор (factor)», «ставка (bet)», «цель
+(goal)», «субъект (subject)», «гипотеза (hypothesis)».
 
 **Исключение для `hypothesis`:** вместо одиночного `description`
 несёт четыре структурные части `if` · `then` · `because` · `so` —
@@ -78,33 +85,43 @@ singleton). H1 = имя файла = kind, без frontmatter. Русское с
 ## Связи и методологические инварианты (семантические)
 
 Связи между записями **не валидируются slug-целостностью** — они
-семантические, как в `docs/project/`. Методологические инварианты Карты
-гипотез и LinkedSWOT ловит **рой агентов** `/business-problem-audit` —
-смыслом, не grep:
+семантические, как в `docs/projects/_canon/project/`. Все инварианты ниже
+считаются **в пределах одной проблемы** (`problem`): запись, привязанная к
+проблеме P, замыкается на записи той же P. Методологические инварианты
+Карты гипотез и LinkedSWOT ловит **рой агентов** `/business-problem-audit`
+— смыслом, не grep:
 
+- **Каждая проблема раскрыта.** У строки `frame` есть хотя бы одна `goal`
+  (через `problem`). Проблема без цели — повисла.
 - **Задача-сирота запрещена.** Каждая `task` привязана к `hypothesis`.
   Не привязана — не берём в работу (ресурсный фильтр методологии).
 - **«Тогда» бьёт в метрику.** `hypothesis.so` ссылается на конкретную
-  `metric` цели. Нет ссылки — гипотезу нельзя оценить.
+  `metric` цели той же проблемы. Нет ссылки — гипотезу нельзя оценить.
 - **«Потому что» опирается на мотивацию.** `hypothesis.because`
   коррелирует с `subject.motivation`. Нет опоры — гипотеза без шанса.
-- **Метрика без влияния.** Целевая `metric`, в которую не бьёт ни одна
-  гипотеза, — мёртвая.
-- **Целевая без guardrail.** У каждой целевой метрики есть хотя бы одна
-  балансирующая (`kind: balancing`), закрывающая способ «сжульничать».
+- **Метрика без влияния.** Целевая `metric`, в которую (в пределах её
+  проблемы) не бьёт ни одна гипотеза, — мёртвая.
+- **Целевая без guardrail.** У каждой целевой метрики проблемы есть хотя
+  бы одна балансирующая (`kind: balancing`), закрывающая способ
+  «сжульничать».
 - **Ставка доведена до карты.** `bet.promoted-to` ссылается на `goal`
   или `hypothesis`. Висящая ставка — недоделанный мост.
-- **Фактор использован.** `factor`, не вошедший ни в одну `bet`, —
-  повод поднять при cohesion.
+- **Фактор использован.** `factor`, не вошедший ни в одну `bet` (ни по
+  одной из своих проблем), — повод поднять при cohesion.
 
 Связь с соседними слоями (тоже семантическая, ловит `/cross-audit`):
 
 - `business.profile` / `competitor` → `factor` (SWOT растёт из бизнеса).
 - `business.current-metric` → `metric.current` (baseline таргета).
-- `goal` / `metric` → `project.vision.Success` (успех продукта целит в
-  ту же метрику).
-- `subject` → `project.persona` (субъект влияния ↔ персона продукта).
-- `bet` / `goal` → `project.capability` (возможность реализует ставку).
+- `frame` (проблема) ↔ `projects/<slug>/vision.addresses-problem` — M:N:
+  какие проекты её закрывают (авторски на стороне проекта, обратная
+  сторона выводится).
+- `goal` / `metric` → `projects/<slug>/vision.Success` (успех продукта
+  целит в ту же метрику).
+- `subject` → `projects/<slug>/persona` (субъект влияния ↔ персона
+  продукта).
+- `bet` / `goal` → `projects/<slug>/capability` (возможность реализует
+  ставку).
 
 ## Workflow
 
@@ -131,5 +148,9 @@ SWOT — **рекомендуемый, но не обязательный** вх
   субъекта.
 - ❌ Исполнитель вместо субъекта (субъект — носитель самодвижения).
 - ❌ Действие в формулировке фактора (это уже `bet`).
-- ❌ Frontmatter / каталоги под kind / несколько `frame.md`.
+- ❌ Запись 7 kind без `problem` (вне реестра — непонятно, какой проблемы
+  касается). `problem` — массив slug-рефов на строки `frame`, M:N.
+- ❌ Проблема (строка `frame`) без единой `goal` — повисла.
+- ❌ Frontmatter / каталоги под kind / несколько файлов `frame.md`
+  (`frame` — одна таблица проблем, не singleton и не каталог).
 - ❌ Жёсткие slug-валидации. Инварианты ловит рой, не grep.

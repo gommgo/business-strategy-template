@@ -12,8 +12,9 @@
 
 1. Скилл понимает, к какому kind это относится (внутри — surface,
    integration, capability и т.п.). Клиенту не говорит.
-2. Прочитать соответствующий файл `docs/project/<kind>.md` — освежить
-   критерии и anti-patterns.
+2. Прочитать форму `docs/projects/_canon/project/<kind>.md` — освежить
+   критерии и anti-patterns (данные продукта пишутся в его папку
+   `docs/projects/<project-slug>/<kind>.md`).
 3. Раунд `AskUserQuestion` — фундамент в бизнес-языке:
    - «Как это назвать одним словом / коротко?» (Other; внутри —
      это slug + name).

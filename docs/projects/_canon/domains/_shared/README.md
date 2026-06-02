@@ -1,6 +1,8 @@
 # _shared — Cross-context Value Objects
 
-Платформенные VO, разделяемые между bounded contexts. Заводим **только когда реально нужно** (DDD-предпочтение — каждый контекст типизирует своё). Сюда попадает только то, что:
+Форма-образец роллапа cross-context VO. Здесь, в каноне (`docs/projects/_canon/domains/_shared/`), живёт только эта форма; данные `_shared/` каждого проекта (этот README + сами VO-файлы) живут в его папке `docs/projects/<project-slug>/domains/_shared/`.
+
+Платформенные VO, разделяемые между bounded contexts одного проекта. Заводим **только когда реально нужно** (DDD-предпочтение — каждый контекст типизирует своё). Сюда попадает только то, что:
 
 1. структурно идентично между ≥2 доменами,
 2. не несёт доменной семантики (не относится к ubiquitous language конкретного контекста),
@@ -25,4 +27,4 @@ Cross-domain словарь — узкий список терминов, исп
 |---|---|---|
 | _пусто_ | — | — |
 
-> Когда заводишь cross-context VO — `cp docs/domains/_templates/vo-shared.md docs/domains/_shared/<Name>.md`, заполни секции, добавь строку в таблицу выше.
+> Когда заводишь cross-context VO — `cp docs/projects/_canon/domains/_templates/vo-shared.md docs/projects/<project-slug>/domains/_shared/<Name>.md`, заполни секции, добавь строку в таблицу выше.

@@ -7,7 +7,7 @@
 >
 > На `slug` персоны (persona) ссылаются `surface.persona`,
 > `capability.persona` и (семантически, не структурно) роли в
-> `docs/interface/who.md`.
+> `docs/projects/<slug>/interface/who.md`.
 
 ## Критерии persona
 

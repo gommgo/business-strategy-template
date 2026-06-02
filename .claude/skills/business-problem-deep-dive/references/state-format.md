@@ -7,7 +7,7 @@ Forward-only.
 
 ```
 .claude/skills/business-problem-deep-dive/state/
-├── frame.md                  (singleton: frame-заметка)
+├── frame/<problem-slug>.md    (заметка по проблеме)
 ├── factor/<slug>.md
 ├── bet/<slug>.md
 ├── goal/<slug>.md
@@ -16,6 +16,9 @@ Forward-only.
 ├── hypothesis/<slug>.md
 └── task/<slug>.md
 ```
+
+`frame` — табличный (одна строка = одна проблема), поэтому и его заметки
+живут per-problem: `state/frame/<problem-slug>.md`.
 
 Заметки лежат **рядом со скиллом**, не в `docs/business-problem/`.
 Каталоги создаются по требованию.
@@ -41,7 +44,8 @@ ref: docs/business-problem/metric.md#paid-churn
 - После согласования с бизнесом — добавить guardrail на маржу.
 ```
 
-Frontmatter: `kind` (один из 8), `slug` (для frame отсутствует), `ref`.
+Frontmatter: `kind` (один из 8), `slug` (для `frame` — `<problem-slug>`),
+`ref`. У frame-заметки `ref` указывает на строку: `…/frame.md#<problem-slug>`.
 
 ## Секции (все опциональны)
 

@@ -1,15 +1,17 @@
-# Формат заметки `state/<kind>/<slug>.md`
+# Формат заметки `state/<project-slug>/<kind>/<slug>.md`
 
 Память скилла — рабочее состояние знания о сущности. Не журнал.
 
-Заметки лежат **рядом со скиллом**, не в `docs/screens/` и не в
-корне проекта:
+Заметки лежат **рядом со скиллом**, не в
+`docs/projects/<project-slug>/screens/` и не в корне проекта, и
+скоупятся по проекту:
 
 ```
-.claude/skills/screen-deep-dive/state/<kind>/<slug>.md
+.claude/skills/screen-deep-dive/state/<project-slug>/<kind>/<slug>.md
 ```
 
-Дальше по тексту — короткое `state/`, это сокращение того же пути.
+Дальше по тексту — короткое `state/`, это сокращение того же пути
+(с учётом текущего `<project-slug>`).
 
 ## Шаблон
 
@@ -17,7 +19,7 @@
 ---
 kind: screen
 slug: studies-workspace
-ref: docs/screens/screens/studies-workspace/index.md
+ref: docs/projects/<project-slug>/screens/screens/studies-workspace/index.md
 ---
 
 ## Открытые вопросы
@@ -40,8 +42,8 @@ ref: docs/screens/screens/studies-workspace/index.md
 | ключ | значение | назначение |
 |---|---|---|
 | `kind` | один из 4 (`flow`, `screen`, `block`, `shell`) | избыточная подсказка читателю + быстрый фильтр |
-| `slug` | равен `slug` сущности в `docs/screens/<kind>/<slug>/index.md` | связь с артефактом |
-| `ref` | `docs/screens/<kind>/<slug>/index.md` | удобная ссылка в редакторе |
+| `slug` | равен `slug` сущности в `docs/projects/<project-slug>/screens/<kind>/<slug>/index.md` | связь с артефактом |
+| `ref` | `docs/projects/<project-slug>/screens/<kind>/<slug>/index.md` | удобная ссылка в редакторе |
 
 ## Секции
 
@@ -93,8 +95,8 @@ ref: docs/screens/screens/studies-workspace/index.md
 - **Перезаписывается** свободно — это рабочее состояние.
 - **Удаляется**:
   - Все три секции пустые → удалить файл целиком.
-  - Сущность в `docs/screens/<kind>/<slug>/` удалена (каскад) →
-    удалить файл.
+  - Сущность в `docs/projects/<project-slug>/screens/<kind>/<slug>/`
+    удалена (каскад) → удалить файл.
 - **Не аккумулировать** журнал: после правок сущности «было/стало»,
   дат, «решено такого-то», «обсуждено» — не должно быть.
 

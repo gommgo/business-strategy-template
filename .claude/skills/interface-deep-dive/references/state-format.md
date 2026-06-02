@@ -1,15 +1,17 @@
-# Формат заметки `state/<kind>/<slug>.md`
+# Формат заметки `state/<project-slug>/<kind>/<slug>.md`
 
 Память скилла — рабочее состояние знания о сущности. Не журнал.
 
-Заметки лежат **рядом со скиллом**, не в `docs/interface/` и не в
-корне проекта:
+Заметки лежат **рядом со скиллом**, не в
+`docs/projects/<project-slug>/interface/` и не в корне проекта, и
+скоупятся по проекту:
 
 ```
-.claude/skills/interface-deep-dive/state/<kind>/<slug>.md
+.claude/skills/interface-deep-dive/state/<project-slug>/<kind>/<slug>.md
 ```
 
-Дальше по тексту — короткое `state/`, это сокращение того же пути.
+Дальше по тексту — короткое `state/`, это сокращение того же пути
+(с учётом текущего `<project-slug>`).
 
 ## Шаблон
 
@@ -17,7 +19,7 @@
 ---
 kind: situation
 slug: submit-referral
-ref: docs/interface/situation.md#submit-referral
+ref: docs/projects/<project-slug>/interface/situation.md#submit-referral
 ---
 
 ## Открытые вопросы
@@ -38,7 +40,7 @@ ref: docs/interface/situation.md#submit-referral
 |---|---|---|
 | `kind` | один из 7 | избыточная подсказка читателю + быстрый фильтр |
 | `slug` | равен `slug` записи в таблице | связь с артефактом |
-| `ref` | `docs/interface/<kind>.md#<slug>` | удобная ссылка в редакторе |
+| `ref` | `docs/projects/<project-slug>/interface/<kind>.md#<slug>` | удобная ссылка в редакторе |
 
 ## Секции
 

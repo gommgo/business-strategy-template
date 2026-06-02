@@ -11,9 +11,13 @@
 
 ### Шаги
 
-1. Прочитать `docs/domains/README.md` § Kinds и обязательные H2 для
-   указанного `kind`. Прочитать `docs/domains/_templates/<kind>.md`
-   (шаблон) — это входная форма.
+Здесь `<P>` = `docs/projects/<project-slug>`: данные доменов — под
+`<P>/domains/`, форма-канон и шаблоны — в `docs/projects/_canon/domains/`.
+
+1. Прочитать `docs/projects/_canon/domains/README.md` § Kinds и
+   обязательные H2 для указанного `kind`. Прочитать
+   `docs/projects/_canon/domains/_templates/<kind>.md` (шаблон) — это
+   входная форма.
 2. Раунд 1 `AskUserQuestion` — фундамент:
    - `Name` (через Other) — если ещё не дан;
    - `description` (Other) — одна-две фразы что это в бизнесе;
@@ -21,20 +25,20 @@
      visibility in-context|published — три опции в одном раунде если
      влезают, иначе двумя).
 3. Скопировать шаблон по правильному пути:
-   - `aggregate` → `docs/domains/<ctx>/<Name>.md`
-   - `entity` → `docs/domains/<ctx>/<Name>.md`
-   - `event` → `docs/domains/<ctx>/events/<Name>.md`
-   - `use-case` → `docs/domains/<ctx>/use-cases/<Name>.md`
-   - `policy` → `docs/domains/<ctx>/policies/<Name>.md`
-   - `vo` (cross-context) → `docs/domains/_shared/<Name>.md`
+   - `aggregate` → `<P>/domains/<ctx>/<Name>.md`
+   - `entity` → `<P>/domains/<ctx>/<Name>.md`
+   - `event` → `<P>/domains/<ctx>/events/<Name>.md`
+   - `use-case` → `<P>/domains/<ctx>/use-cases/<Name>.md`
+   - `policy` → `<P>/domains/<ctx>/policies/<Name>.md`
+   - `vo` (cross-context) → `<P>/domains/_shared/<Name>.md`
 
    Заполнить frontmatter (`id: <ctx>.<Name>`, `kind`, `context`, `name`,
    `status: draft`, `relations: []`, `emits: []`, `consumes: []`) и
    `description`-параграф; остальные H2-секции оставить как в шаблоне
    (с placeholder'ами).
-4. Если контекст новый (`docs/domains/<ctx>/` создан впервые) — скопировать
-   также `docs/domains/_templates/context-readme.md` →
-   `docs/domains/<ctx>/README.md`, занести в него ссылку на свежезаведённый
+4. Если контекст новый (`<P>/domains/<ctx>/` создан впервые) — скопировать
+   также `docs/projects/_canon/domains/_templates/context-readme.md` →
+   `<P>/domains/<ctx>/README.md`, занести в него ссылку на свежезаведённый
    артефакт.
 5. Раунд 2+ `AskUserQuestion` — батч по доменным слотам kind в порядке
    `references/field-checklists.md`. До 4 вопросов в раунде; перемежать
@@ -48,8 +52,8 @@
    по kind`): два-три ✅/❌-варианта как опции, архитектор соотносит свою запись.
 8. Применить чек-лист `references/draft-stable.md`. Если все 5 ✅ —
    предложить через AskUserQuestion промоушн `draft → stable`.
-9. Записать `state/<ctx>/<kind>/<Name>.md`, если есть что (открытые
-   вопросы, неочевидные доменные решения, next-step'ы).
+9. Записать `state/<project-slug>/<ctx>/<kind>/<Name>.md`, если есть что
+   (открытые вопросы, неочевидные доменные решения, next-step'ы).
 
 ### Пример раунда (use-case, после фундамента)
 
@@ -77,8 +81,8 @@
 1. Прочитать материал внимательно.
 2. Извлечь кандидатов на DDD-сущности — что похоже на агрегат, методы,
    события, use-case'ы, инварианты, value objects. Фильтр —
-   `docs/domains/README.md § Anti-patterns` (отбросить заведомо
-   неподходящее: I/O-операция как метод агрегата → use-case;
+   `docs/projects/_canon/domains/README.md § Anti-patterns` (отбросить
+   заведомо неподходящее: I/O-операция как метод агрегата → use-case;
    внутри-контекстный VO как отдельный файл → inline; spanning invariant
    между двумя aggregate'ами → переразбить).
 3. Через чат показать план:
@@ -99,7 +103,7 @@
    (минимум `frontmatter + description + status: draft`); создать
    state-заметки с открытыми вопросами «извлечено из сырья —
    уточнить <что>», помечая `**blocker**` там, где материал прямо
-   противоречил `docs/domains/README.md § Anti-patterns`.
+   противоречил `docs/projects/_canon/domains/README.md § Anti-patterns`.
 6. Через `AskUserQuestion` — выбрать, какую сущность углубить первой
    (по умолчанию — самые fundamental: aggregate перед events перед
    use-case'ами).
@@ -123,7 +127,7 @@
 ### Шаги
 
 1. Прочитать файл артефакта целиком.
-2. Прочитать `state/<ctx>/<kind>/<Name>.md`, если есть.
+2. Прочитать `state/<project-slug>/<ctx>/<kind>/<Name>.md`, если есть.
 3. Прочитать соседей по cross-ref'ам: для `aggregate` — связанные
    events/, use-cases/, policies/ из своего контекста + чужие
    контексты, на которые ссылается; для `event` — source aggregate и
@@ -169,7 +173,7 @@
 
 | ситуация | формат |
 |---|---|
-| anti-pattern из `docs/domains/README.md § Anti-patterns` | две опции: «это anti-pattern, переразбиваю» / «нет, вот почему» (Other) |
+| anti-pattern из `docs/projects/_canon/domains/README.md § Anti-patterns` | две опции: «это anti-pattern, переразбиваю» / «нет, вот почему» (Other) |
 | enum-поле (`kind`, `Visibility`, `Mutable`, `Source`, `Type of decision`, `Channel`, `Delivery`) | по опции на каждое значение enum |
 | тест-критерий из `references/draft-stable.md` | опции из примеров ✅/❌, архитектор соотносит свой случай |
 | выбор существующего соседа (relations/emits/consumes/called methods) | по опции на каждый существующий `<ctx>.<Name>` + «нужен новый» (Other → A-режим / stub) |

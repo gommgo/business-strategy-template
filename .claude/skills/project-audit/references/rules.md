@@ -14,8 +14,8 @@
 **Обнаружение:** в одном файле два разных ряда с одинаковым `slug`.
 
 **Рекомендация:** «два ряда с slug X в файле Y — переименовать один
-из них через `/project-deep-dive <kind>:<slug>` или объединить
-вручную».
+из них через `/project-deep-dive <project-slug> <kind>:<slug>` или
+объединить вручную».
 
 ### R-STRUCT-002 — Обязательный слот пустой при `status: stable`
 
@@ -32,7 +32,7 @@
 
 | kind | обязательно при stable |
 |---|---|
-| `vision` | секции Problem, Success, Non-goals (Non-goals может быть `_нет_`, но секция должна быть) |
+| `vision` | секции Problem, Success, Non-goals (Non-goals может быть `_нет_`, но секция должна быть) + непустой `addresses-problem` (≥1 slug-реф) |
 | `persona` | `context`, `jobs`, `pains`, `success` |
 | `capability` | `value`, `persona` (≥1 элемент) |
 | `boundary` | `why` |
@@ -42,7 +42,7 @@
 | `market` | `url`, `sources` (≥1 элемент) |
 
 **Рекомендация:** «заполнить слот X или понизить запись в draft через
-`/project-deep-dive <kind>:<slug>`».
+`/project-deep-dive <project-slug> <kind>:<slug>`».
 
 ### R-STRUCT-003 — Невалидное enum-значение
 
@@ -64,7 +64,7 @@
 для опциональных).
 
 **Рекомендация:** «значение X не из enum — выбрать одно из {…}
-через `/project-deep-dive <kind>:<slug>`».
+через `/project-deep-dive <project-slug> <kind>:<slug>`».
 
 ### R-STRUCT-004 — Vision без обязательной секции
 
@@ -75,8 +75,8 @@
 **Обнаружение:** отсутствует H2 раздел Problem, Success или Non-goals.
 
 **Рекомендация:** «vision должен иметь все три раздела (Problem,
-Success, Non-goals). Открыть через `/project-deep-dive vision:fund` или
-`/project-deep-dive --phase discovery`».
+Success, Non-goals). Открыть через
+`/project-deep-dive <project-slug> --phase discovery`».
 
 ### R-STRUCT-005 — Невалидный status
 
@@ -87,7 +87,7 @@ Success, Non-goals). Открыть через `/project-deep-dive vision:fund` 
 **Обнаружение:** `status` не `draft` и не `stable`.
 
 **Рекомендация:** «status должен быть `draft` или `stable`. Исправить
-через `/project-deep-dive <kind>:<slug>`».
+через `/project-deep-dive <project-slug> <kind>:<slug>`».
 
 ### R-STRUCT-006 — Stable со state-blocker
 
@@ -96,8 +96,9 @@ Success, Non-goals). Открыть через `/project-deep-dive vision:fund` 
 **Где:** все 8 файлов + state обоих скиллов.
 
 **Обнаружение:** запись `stable`, но в
-`.claude/skills/project-deep-dive/state/<kind>/<slug>.md` или
-`.claude/skills/project-deep-dive-for-business/state/<kind>/<slug>.md`
+`.claude/skills/project-deep-dive/state/<project-slug>/<kind>/<slug>.md`
+или
+`.claude/skills/project-deep-dive-for-business/state/<project-slug>/<kind>/<slug>.md`
 есть строка с маркером `**blocker**` или `**жду аналитика**`.
 
 **Рекомендация:** «status: stable несовместим с открытым blocker'ом в
@@ -115,7 +116,7 @@ R-STRUCT-002).
 **Обнаружение:** `persona = —` или пустой массив.
 
 **Рекомендация:** «capability без persona — мёртвая. Связать или
-удалить через `/project-deep-dive capability:<slug>`».
+удалить через `/project-deep-dive <project-slug> capability:<slug>`».
 
 ### R-SEM-002 — Surface без persona
 
@@ -141,7 +142,7 @@ R-STRUCT-002).
 
 **Рекомендация:** «формулировка `why` похожа на backlog (anti-pattern
 из boundary.md). Boundary — устойчивое "нет", не "потом".
-Пересмотреть через `/project-deep-dive boundary:<slug>`».
+Пересмотреть через `/project-deep-dive <project-slug> boundary:<slug>`».
 
 ### R-SEM-004 — Constraint без source
 
@@ -204,6 +205,24 @@ R-STRUCT-002).
 **Рекомендация:** «vision звучит как маркетинговая копия. Vision
 — внутренний документ аналитика, не сейлз-материал».
 
+### R-SEM-009 — Vision без addresses-problem
+
+**Severity:** `warning` (если draft) / `error` (если stable, дублирует
+R-STRUCT-002).
+
+**Где:** `vision.md`.
+
+**Обнаружение:** строка `**addresses-problem:**` отсутствует, пустая
+(`—`) или содержит пустой массив.
+
+Проверка только структурная: что привязка **есть**. Совпадает ли slug со
+строкой `docs/business-problem/frame.md` — это уже семантика, её ловит
+`/cross-audit` (не валидируется здесь, чтобы не лезть за пределы проекта).
+
+**Рекомендация:** «vision без `addresses-problem` — продукт не привязан
+ни к одной бизнес-проблеме. Указать строки `frame.md`, которые продукт
+закрывает, через `/project-deep-dive <project-slug> --phase discovery`».
+
 ## Coverage-правила (R-COV-*)
 
 ### R-COV-001 — Persona без жителей
@@ -231,7 +250,7 @@ surface. Либо подключить, либо рассмотреть удал
 **Рекомендация:** «vision закрыт как stable, но ни одной persona
 не заведено. Обычно vision созревает после первой проработки
 persona. Возможно, рано закрыли — пересмотреть через
-`/project-deep-dive`».
+`/project-deep-dive <project-slug>`».
 
 ### R-COV-003 — Stable со ссылкой на draft
 
@@ -242,8 +261,8 @@ persona. Возможно, рано закрыли — пересмотреть 
 **Обнаружение:** stable-запись X ссылается на draft-запись Y.
 
 **Рекомендация:** «stable X ссылается на draft Y. По канону это
-допустимо (см. README), но напомним: цепочка не зрелая, пока Y
-не stable».
+допустимо (см. `docs/projects/_canon/project/README.md`), но напомним:
+цепочка не зрелая, пока Y не stable».
 
 ### R-COV-004 — Запись с пустыми обязательными слотами и пустой
 state-заметкой
@@ -253,12 +272,13 @@ state-заметкой
 **Где:** все 7 табличных файлов + state обоих скиллов.
 
 **Обнаружение:** запись `draft` с пустыми обязательными слотами, но в
-`state/<kind>/<slug>.md` ни одной открытой пометки (или файла нет
-вовсе).
+`state/<project-slug>/<kind>/<slug>.md` ни одной открытой пометки (или
+файла нет вовсе).
 
 **Рекомендация:** «запись X — draft с дырами, но в state нет
 открытых вопросов. Возможно, запись забыта. Углубить через
-`/project-deep-dive <kind>:<slug>` или удалить, если она не нужна».
+`/project-deep-dive <project-slug> <kind>:<slug>` или удалить, если она
+не нужна».
 
 ### R-COV-005 — Очень короткое description
 
@@ -274,7 +294,10 @@ em-dash).
 
 ## Что не делает project-audit
 
-- Не сравнивает project с interface/domain/screen — это `/cross-audit`.
+- Не сравнивает продукт с `<slug>/interface` / `<slug>/domains` /
+  `<slug>/screens` и не проверяет `addresses-problem` против
+  `business-problem/frame` — это `/cross-audit`.
+- Не выходит за пределы одной папки проекта `docs/projects/<project-slug>/`.
 - Не предлагает promotion `draft → stable` — это `/project-deep-dive`.
 - Не вызывает `/project-deep-dive` сам — даёт текст, что запустить
   аналитику.

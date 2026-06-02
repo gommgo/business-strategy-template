@@ -9,6 +9,7 @@ preamble, без пояснений. Первый символ `[`, послед
 [
   {
     "lens": "<lens-name>",
+    "problem": "<problem-slug>",
     "severity": "error" | "warning" | "hint",
     "title": "<одна строка>",
     "evidence": "<2-4 строки: какие slug, какие поля, какой контраст>",
@@ -21,6 +22,7 @@ preamble, без пояснений. Первый символ `[`, послед
 | поле | назначение |
 |---|---|
 | `lens` | имя луча (как в rays.md) — для группировки |
+| `problem` | строка `frame`, в пределах которой найдено нарушение — для группировки по проблеме (для `problem-tag`, когда `problem` пуст/невалиден, — `"—"`) |
 | `severity` | `error` (разрыв методологии) / `warning` (подозрение) / `hint` (повод подумать) |
 | `title` | одна строка, что найдено |
 | `evidence` | конкретика: slug, поля, смысловой контраст |
@@ -33,9 +35,10 @@ preamble, без пояснений. Первый символ `[`, послед
 [
   {
     "lens": "hypothesis-shape",
+    "problem": "paid-outflow",
     "severity": "error",
     "title": "hypothesis:remind-rebook «тогда» не ссылается на метрику",
-    "evidence": "so = «станет лучше с возвратами»; metric = «—». Нет привязки к метрике цели — эффективность нельзя оценить.",
+    "evidence": "so = «станет лучше с возвратами»; metric = «—». Нет привязки к метрике цели проблемы paid-outflow — эффективность нельзя оценить.",
     "suggestion": "Указать метрику в «тогда» (вероятно metric:paid-churn) через /business-problem-deep-dive hypothesis:remind-rebook.",
     "refs": ["hypothesis.md:remind-rebook", "metric.md"]
   }

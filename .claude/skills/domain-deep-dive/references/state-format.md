@@ -1,19 +1,22 @@
-# Формат заметки `state/<ctx>/<kind>/<slug>.md`
+# Формат заметки `state/<project-slug>/<ctx>/<kind>/<slug>.md`
 
 Память скилла — рабочее состояние знания об артефакте. **Не журнал**.
+Разложена по проектам: верхний уровень — `<project-slug>`, дальше —
+`<ctx>/<kind>/<slug>.md`.
 
 Лежит рядом со скиллом (`.claude/skills/domain-deep-dive/state/`) и
 **коммитится** — общая проектная память между сессиями и
-архитекторами. Не часть артефактного канона `docs/domains/` (туда
-уходят зафиксированные решения, не открытые вопросы). Forward-only:
-описывает только текущее открытое — не «было/стало», без дат, без
-журнала прошлых сессий. Это держит `git log` чистым: коммиты в state
-маленькие и тематические (например «закрыл blocker про Lifecycle
+архитекторами. Не часть артефактного канона
+`docs/projects/_canon/domains/` (зафиксированные решения уходят в
+`docs/projects/<project-slug>/domains/`, не открытые вопросы).
+Forward-only: описывает только текущее открытое — не «было/стало», без
+дат, без журнала прошлых сессий. Это держит `git log` чистым: коммиты в
+state маленькие и тематические (например «закрыл blocker про Lifecycle
 User»), а не нарратив «обсуждали такого-то».
 
 `slug` = basename файла артефакта без `.md` (например `User`,
 `UserRegistered`, `RegisterUser`, `CancelWindow`). Для `vo` из
-`_shared/` — каталог `state/_shared/vo/<Name>.md`.
+`_shared/` — каталог `state/<project-slug>/_shared/vo/<Name>.md`.
 
 ## Шаблон
 
@@ -22,7 +25,7 @@ User»), а не нарратив «обсуждали такого-то».
 ctx: user
 kind: aggregate
 slug: User
-ref: docs/domains/user/User.md
+ref: docs/projects/<project-slug>/domains/user/User.md
 ---
 
 ## Открытые вопросы

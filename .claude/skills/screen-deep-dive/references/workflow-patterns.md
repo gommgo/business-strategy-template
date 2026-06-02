@@ -7,19 +7,21 @@
 ## A. Новая сущность
 
 **Сигнал**: args = `<kind>` или `<kind>:<новый-slug>` (когда папка
-`docs/screens/<kind>/<slug>/` ещё не существует).
+`docs/projects/<project-slug>/screens/<kind>/<slug>/` ещё не
+существует).
 
 ### Шаги
 
-1. Прочитать README.md соответствующего kind в
-   `docs/screens/<kind>/README.md`: секции `Критерии`, `Что НЕ`,
-   `Тест-критерий`, `Форма frontmatter`, anti-patterns.
+1. Прочитать канон README.md соответствующего kind в
+   `docs/projects/_canon/screens/<kind>/README.md`: секции `Критерии`,
+   `Что НЕ`, `Тест-критерий`, `Форма frontmatter`, anti-patterns.
 2. Раунд 1 `AskUserQuestion` — фундамент:
    - `slug` (Other) — если ещё не дан;
    - `name` (Other) — человекочитаемое;
    - `description` (Other) — одна-две строки.
-3. Создать папку `docs/screens/<kind>/<slug>/` и записать `index.md`
-   с заполненными `slug + name + description + status=draft`,
+3. Создать папку
+   `docs/projects/<project-slug>/screens/<kind>/<slug>/` и записать
+   `index.md` с заполненными `slug + name + description + status=draft`,
    обязательными полями со значениями где можно проставить, остальное
    через `—` или пустые массивы.
 4. Раунд 2+ `AskUserQuestion` — батч по доменным слотам kind в
@@ -40,8 +42,8 @@
    ✅/❌ варианты как опции. Аналитик подтверждает.
 8. Применить чек-лист `draft-stable.md`. Если все 6 ✅ — предложить
    повышение в stable.
-9. Записать `state/<kind>/<slug>.md`, если есть что (открытые вопросы,
-   доменные решения, ui-lib gap).
+9. Записать `state/<project-slug>/<kind>/<slug>.md`, если есть что
+   (открытые вопросы, доменные решения, ui-lib gap).
 
 ### Пример раунда (screen, после фундамента)
 
@@ -53,14 +55,16 @@
 - **route** — Other (свободная форма): URL вида `/studies` или
   именованный view `modal:archive-confirm`.
 - **who** — мультивыбор из существующих who-slug'ов interface
-  (читается из `docs/interface/who.md`); если нужного нет — Other
-  с предложением запустить `interface-deep-dive who`.
+  (читается из `docs/projects/<project-slug>/interface/who.md`); если
+  нужного нет — Other с предложением запустить
+  `interface-deep-dive <project-slug> who`.
 
 ### Пример раунда (block, после фундамента)
 
 - **interface-block** — выбрать из существующих interface-block-slug'ов
-  (читается из `docs/interface/block.md`); если нет — Other с
-  предложением `interface-deep-dive block:<slug>`. По канону slug
+  (читается из `docs/projects/<project-slug>/interface/block.md`); если
+  нет — Other с предложением
+  `interface-deep-dive <project-slug> block:<slug>`. По канону slug
   блока в screens совпадает с slug interface-блока.
 - **ux-substrates** — мультивыбор; скилл показывает список субстратов
   выбранного interface-блока и предлагает их все по умолчанию (чтобы
@@ -90,9 +94,10 @@ Figma, описание макета словами, либо комбинаци
      filters-panel, preview-pane, …);
    - **flow** — если в материале есть и desktop, и mobile-разрезы
      одного сценария.
-3. Фильтр — anti-patterns из README'ев kind: «один компонент» — не
-   block, «sidebar→drawer» — не flow, «route с контентом» — screen
-   (не shell), и т.п.
+3. Фильтр — anti-patterns из README'ев kind (канон
+   `docs/projects/_canon/screens/<kind>/README.md`): «один компонент»
+   — не block, «sidebar→drawer» — не flow, «route с контентом» —
+   screen (не shell), и т.п.
 4. Через чат показать план:
    ```
    Из материала вижу:
@@ -108,7 +113,8 @@ Figma, описание макета словами, либо комбинаци
 6. По подтверждению:
    - сохранить картинку как `assets/<kind>/<slug>/<имя>.png` (см.
      `assets-policy.md`);
-   - завести **stub-папки** в `docs/screens/<kind>/<slug>/`
+   - завести **stub-папки** в
+     `docs/projects/<project-slug>/screens/<kind>/<slug>/`
      (минимум `slug + name + description + status=draft`,
      `assets: ['<имя>.png']` где применимо);
    - создать state-заметки с открытыми вопросами «извлечено из сырья
@@ -137,10 +143,12 @@ Figma, описание макета словами, либо комбинаци
 
 ### Шаги
 
-1. Прочитать `docs/screens/<kind>/<slug>/index.md` целиком (frontmatter
-   + yaml-дерево в теле).
-2. Прочитать `state/<kind>/<slug>.md`, если есть.
-3. Прочитать соседей:
+1. Прочитать
+   `docs/projects/<project-slug>/screens/<kind>/<slug>/index.md`
+   целиком (frontmatter + yaml-дерево в теле).
+2. Прочитать `state/<project-slug>/<kind>/<slug>.md`, если есть.
+3. Прочитать соседей (interface-файлы — из того же проекта,
+   `docs/projects/<project-slug>/interface/`):
    - для `screen` — соответствующий `shell`, ссылающиеся `block`-и,
      `interface/situation.md` для перечисленных ситуаций,
      `interface/who.md` для участников;
@@ -149,8 +157,9 @@ Figma, описание макета словами, либо комбинаци
      screens, которые ссылаются на этот блок (для `used-by-screens`);
    - для `shell` — все screens, которые на него ссылаются;
    - для `flow` — все его desktop/mobile screens.
-4. Применить README соответствующего kind: секции `Критерии`,
-   `Что НЕ`, `Тест-критерий`. Найти:
+4. Применить канон README соответствующего kind
+   (`docs/projects/_canon/screens/<kind>/README.md`): секции
+   `Критерии`, `Что НЕ`, `Тест-критерий`. Найти:
    - пустые обязательные слоты frontmatter;
    - подозрения по anti-patterns (облик в дереве, breakpoints в
      `slot-fills`, FSD-имена, и т.п.);
@@ -169,8 +178,8 @@ Figma, описание макета словами, либо комбинаци
    - битые ссылки screens — опции «исправить на <варианты>» /
      «удалить» (если поле допускает) / «оставить stub»;
    - битые ссылки interface — опции «запустить
-     `interface-deep-dive <kind>:<slug>`, я подожду» / «удалить
-     ссылку» / «заменить на существующий interface-slug»;
+     `interface-deep-dive <project-slug> <kind>:<slug>`, я подожду» /
+     «удалить ссылку» / «заменить на существующий interface-slug»;
    - рассинхрон зеркала `block.ux-substrates` — опции «брать
      screens-вариант» (предложить запустить interface-deep-dive) /
      «брать interface-вариант» (правка screens) / «расхождение

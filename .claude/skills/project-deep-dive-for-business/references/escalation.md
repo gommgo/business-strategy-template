@@ -90,12 +90,12 @@
 
 ### Что упаковывается
 
-Файлы, которые попадают в commit:
+Файлы, которые попадают в commit (только по **выбранному продукту**):
 
-1. **Изменения в `docs/project/`** — то, что клиент заполнил в этой
-   сессии.
-2. **Изменения в `state/`** — заметки, открытые вопросы, в т.ч. все
-   `**жду аналитика**`.
+1. **Изменения в `docs/projects/<project-slug>/`** — то, что клиент
+   заполнил по продукту в этой сессии.
+2. **Изменения в `state/<project-slug>/`** — заметки, открытые вопросы,
+   в т.ч. все `**жду аналитика**`.
 3. **`client-handoff/summary.md`** — пересказ, что сделал, где
    остановился, на что ждёт ответа. Бизнес-языком, без жаргона.
 4. **`client-handoff/transcripts/<UTC-ts>.md`** — полный текст
@@ -103,9 +103,12 @@
 
 ### Что **не** упаковывается
 
-- ❌ `state/_session-log/` — это служебный буфер, его содержимое уже
-  перенесено в transcripts.
-- ❌ Файлы вне `docs/project/`, `.claude/skills/project-deep-dive-for-business/state/`,
+- ❌ `state/<project-slug>/_session-log/` — это служебный буфер, его
+  содержимое уже перенесено в transcripts.
+- ❌ Папки **других** продуктов — упаковываем только текущий
+  `docs/projects/<project-slug>/`.
+- ❌ Файлы вне `docs/projects/<project-slug>/`,
+  `.claude/skills/project-deep-dive-for-business/state/<project-slug>/`,
   `client-handoff/`.
 - ❌ `.env`, `.runtime/`, ключи. Их в проектном репо быть не должно,
   но на всякий случай — `git add` адресный, не `-A`.
@@ -121,15 +124,18 @@
 4. Сгенерировать `client-handoff/summary.md` (см. формат ниже).
 5. Сгенерировать `client-handoff/transcripts/<UTC-ts>.md` (см.
    формат ниже).
-6. `git add` адресно — перечислить только нужные пути.
+6. `git add` адресно — перечислить только нужные пути выбранного
+   продукта (`docs/projects/<project-slug>/`,
+   `.claude/skills/project-deep-dive-for-business/state/<project-slug>/`,
+   `client-handoff/`).
 7. `git commit -m "client-handoff: <UTC-ts>"` — пройти git-hook
    commit-msg, который проверяет Conventional Commits. Если формат
    ломается — сообщение должно быть `docs(handoff): client session
    <UTC-ts>` или подобное.
 8. `git push -u origin client/<UTC-ts>` — первый push с upstream;
    последующие `git push`.
-9. Удалить локально `state/_session-log/<этой-ts>.md` — он уже
-   уехал в transcripts.
+9. Удалить локально `state/<project-slug>/_session-log/<этой-ts>.md` —
+   он уже уехал в transcripts.
 
 ### Если git-hook падает
 
@@ -154,7 +160,7 @@
 
 1. Обновить state-заметки клиента: к каждой записи с `**жду
    аналитика**` добавить `**отправлено: client/<UTC-ts>**`.
-2. Удалить `state/_session-log/<этой-ts>.md`.
+2. Удалить `state/<project-slug>/_session-log/<этой-ts>.md`.
 3. Сгенерировать текст для клиента — короткий, бизнес-языком:
 
    > «Готово. Аналитику передан черновик в ветке
@@ -172,6 +178,7 @@
 ```markdown
 # Передача аналитику
 
+Продукт: <project-slug>
 Сессия: <UTC-ts>
 Ветка: `client/<UTC-ts>`
 
@@ -182,7 +189,7 @@
 
 ## Что заполнили / уточнили
 
-- <бизнес-формулировка изменений в docs/project/, без slug>
+- <бизнес-формулировка изменений в docs/projects/<project-slug>/, без slug>
 - <…>
 
 ## Где остановились
@@ -197,9 +204,9 @@
 
 ## Где смотреть
 
-- Заполнено в `docs/project/`:
+- Заполнено в `docs/projects/<project-slug>/`:
   - <bullet с указанием файла + бизнес-описание изменения>
-- Заметки клиента: `.claude/skills/project-deep-dive-for-business/state/`
+- Заметки клиента: `.claude/skills/project-deep-dive-for-business/state/<project-slug>/`
 - Полный лог сессии: `client-handoff/transcripts/<UTC-ts>.md`
 ```
 

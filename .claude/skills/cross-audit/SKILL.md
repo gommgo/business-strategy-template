@@ -1,71 +1,136 @@
 ---
 name: cross-audit
-description: Сквозной семантический аудит консистентности между слоями документации проекта — business ↔ business-problem ↔ project ↔ interface ↔ domain ↔ screen. Запускает рой агентов параллельно, каждый под своим углом (factor ↔ business, current-metric ↔ metric, goal/metric ↔ vision, subject ↔ persona, segment ↔ persona, bet ↔ capability, persona ↔ who, capability ↔ situation/domain, surface ↔ zone/screen, integration ↔ domain, constraint ↔ surface/integration, market ↔ capability), читает оба слоя + state, ищет семантические тупики и противоречия — НЕ через slug-валидацию, а через смысловую проверку («персона без UX-покрытия», «метрика подана как гарантия», «субъект без persona», «зона висит без поверхности»). Не правит, только отчёт. Использовать перед релизом, после крупного апдейта любого слоя, или когда deep-dive-скилы предлагают прогон. Сводный отчёт + список findings; deep-dive по каждому — отдельный шаг руками аналитика.
+description: Сквозной семантический аудит консистентности между слоями документации — business ↔ business-problem ↔ (множество проектов docs/projects/<slug>/: project ↔ interface ↔ domain ↔ screen). Запускает рой агентов параллельно: верхнеуровневые углы один раз (factor ↔ business, current-metric ↔ metric, addresses-problem ↔ frame), а углы business-problem ↔ продукт и углы внутри проекта — ПО КАЖДОМУ проекту, с путями, заскоупленными в папку проекта (goal/metric ↔ vision, subject ↔ persona, segment ↔ persona, bet ↔ capability, persona ↔ who, capability ↔ situation/domain, surface ↔ zone/screen, integration ↔ domain, constraint ↔ surface/integration, market ↔ capability). Читает оба слоя + state, ищет семантические тупики и противоречия — НЕ через slug-валидацию, а через смысловую проверку («персона без UX-покрытия», «метрика подана как гарантия», «субъект без persona», «зона висит без поверхности», «проект бьёт в несуществующую проблему», «проблема, которую не закрывает ни один проект»). Не правит, только отчёт. Использовать перед релизом, после крупного апдейта любого слоя, или когда deep-dive-скилы предлагают прогон. Сводный отчёт + список findings; deep-dive по каждому — отдельный шаг руками аналитика.
 ---
 
 # cross-audit
 
-Сквозной семантический аудит **между слоями** документации:
+Сквозной семантический аудит **между слоями** документации. Два верхних
+слоя — **общие для всех проектов**, ниже — **множество проектов**, каждый
+в своей папке `docs/projects/<project-slug>/`:
 
-- `docs/business/` (профиль бизнеса — profile/segment/competitor/...)
-- `docs/business-problem/` (проблема — frame/factor/bet/goal/metric/...)
-- `docs/project/` (продукт — vision/persona/capability/...)
-- `docs/interface/` (UX — who/stage/situation/zone/block/...)
-- `docs/domains/` (бизнес-домены бэкенда — если каталог существует)
-- `docs/screens/` (композиция экранов — если каталог существует)
+- `docs/business/` (профиль бизнеса — profile/segment/competitor/...) —
+  общий, один.
+- `docs/business-problem/` (**многопроблемный** слой —
+  frame/factor/bet/goal/metric/...; `frame` — таблица проблем) — общий,
+  один.
+- `docs/projects/<slug>/` (vision + 7 kind продукта — persona/capability/...)
+  — **по одному на проект**.
+- `docs/projects/<slug>/interface/` (UX — who/stage/situation/zone/block/...)
+  — внутри проекта.
+- `docs/projects/<slug>/domains/` (бизнес-домены бэкенда — если каталог есть)
+  — внутри проекта.
+- `docs/projects/<slug>/screens/` (композиция экранов — если каталог есть)
+  — внутри проекта.
+
+Папка `docs/projects/_canon/` — **канон формы, не данные проекта**; в
+аудит **не входит** (исключается из перечисления проектов).
+
+Бизнес-проблемы — общий слой, питающий **много** проектов: проблему могут
+закрывать несколько проектов, проект — несколько проблем (M:N через
+`vision.addresses-problem`). Углы business-problem ↔ продукт скоупятся к
+конкретному проекту и учитывают, какие проблемы этот проект закрывает.
 
 Аудит **не валидирует slug** между слоями (связи семантические, см.
-`docs/project/README.md`). Аудит читает оба слоя и спрашивает агентов
-«в чём смысл сочетается, а в чём расходится» — это требует LLM, не grep.
+`docs/projects/_canon/project/README.md`). Аудит читает оба слоя и
+спрашивает агентов «в чём смысл сочетается, а в чём расходится» — это
+требует LLM, не grep.
 
-`/project-audit` ловит внутренние тупики **внутри project-слоя**.
-`/interface-audit` — внутри interface. Cross-audit — между.
+`/project-audit` ловит внутренние тупики **внутри одного project-слоя**.
+`/interface-audit` — внутри interface. `/business-problem-audit` ловит
+**методологические инварианты** SWOT / Карты гипотез (внутри
+business-problem, в пределах каждой проблемы). Cross-audit — **между
+слоями**: на содержимое SWOT / гипотез он не лезет, его территория —
+кросс-**слойные** рёбра.
 
 ## Точки входа
 
 | вызов | поведение |
 |---|---|
-| `/cross-audit` | полный прогон всех применимых углов (5-8 в зависимости от наличия domain/screen) |
-| `/cross-audit <lens>` | прогон одного угла |
-| `/cross-audit --quick` | быстрый прогон с 3 самыми важными углами (persona↔who, capability↔situation, surface↔zone) |
+| `/cross-audit` | полный прогон: верхнеуровневые углы один раз + project-скоупленные углы по каждому проекту в `docs/projects/` (кроме `_canon`) |
+| `/cross-audit <slug>` | прогон только по одному проекту (его project-скоупленные углы) + верхнеуровневые углы один раз |
+| `/cross-audit <lens>` | прогон одного угла; для project-скоупленного — по всем проектам (или по `<slug> <lens>`) |
+| `/cross-audit --quick` | быстрый прогон с 3 самыми важными углами (persona↔who, capability↔situation, surface↔zone) по каждому проекту + addresses-problem↔frame один раз |
 
-`lens` ∈ {`factor-business`, `currentmetric-metric`, `goal-vision`,
-`subject-persona`, `segment-persona`, `bet-capability`, `persona-who`,
+`lens` ∈ {`factor-business`, `currentmetric-metric`,
+`addresses-problem-frame`, `goal-vision`, `subject-persona`,
+`segment-persona`, `bet-capability`, `persona-who`,
 `capability-situation`, `capability-domain`, `surface-zone`,
 `surface-screen`, `integration-domain`, `constraint-surface`,
 `market-capability`}.
+
+**Скоуп углов** (подробнее — `references/angles.md`):
+
+- **верхнеуровневые, прогон один раз** (общие слои business ↔
+  business-problem, без проекта): `factor-business`,
+  `currentmetric-metric`.
+- **верхнеуровневый M:N, прогон один раз над всеми проектами**:
+  `addresses-problem-frame` — связывает все `vision.addresses-problem`
+  со строками `frame`, в обе стороны.
+- **по каждому проекту** (business-problem ↔ продукт проекта;
+  скоупится к проблемам, которые проект закрывает): `goal-vision`,
+  `subject-persona`, `segment-persona`, `bet-capability`.
+- **по каждому проекту** (внутри папки проекта): `persona-who`,
+  `capability-situation`, `capability-domain`, `surface-zone`,
+  `surface-screen`, `integration-domain`, `constraint-surface`,
+  `market-capability`.
 
 См. `references/angles.md`.
 
 ## Что делать при запуске
 
 1. Прочитать `docs/business/README.md`, `docs/business-problem/README.md`,
-   `docs/project/README.md`, `docs/interface/README.md`, и (если есть)
-   `docs/domains/README.md` / `docs/screens/README.md` — освежить каноны.
+   `docs/projects/README.md`, `docs/projects/_canon/project/README.md`,
+   `docs/projects/_canon/interface/README.md`, и (если есть)
+   `docs/projects/_canon/domains/README.md` /
+   `docs/projects/_canon/screens/README.md` — освежить каноны формы.
 2. Прочитать `references/angles.md` — список углов и контекста на
    каждый.
-3. **Проверить наличие слоёв.** `docs/domains/` и `docs/screens/` могут
-   отсутствовать (например, продукт без backend, или ещё не дошли).
-   Углы, требующие отсутствующего слоя, пропускаются с пометкой в
-   отчёте.
-4. Определить, какие углы применимы — по args или по полному
-   прогону.
-5. **Спавнить агентов параллельно** (см. ниже).
-6. Собрать ответы. Каждый агент возвращает findings в едином формате.
-7. Сгруппировать findings по углам, отсортировать по severity.
-8. Через `AskUserQuestion` пройти по top-K findings — что делать с
+3. **Перечислить проекты.** Взять подкаталоги `docs/projects/`,
+   **исключив `_canon`** (это канон формы, не данные). Каждый
+   оставшийся каталог `docs/projects/<slug>/` — отдельный проект.
+   Если `<slug>` дан аргументом — список из одного проекта.
+4. **Проверить наличие вложенных слоёв на каждый проект.**
+   `docs/projects/<slug>/domains/` и `docs/projects/<slug>/screens/`
+   могут отсутствовать (продукт без backend, или ещё не дошли) —
+   независимо в каждом проекте. Углы, требующие отсутствующего слоя,
+   пропускаются для этого проекта с пометкой в отчёте.
+5. Определить, какие углы применимы — по args или по полному прогону —
+   и **раскрыть** project-скоупленные углы в пары `(проект × lens)`:
+   один агент на каждую пару. Верхнеуровневые углы (`factor-business`,
+   `currentmetric-metric`, `addresses-problem-frame`) — по одному агенту,
+   без проекта.
+6. **Спавнить агентов параллельно** (см. ниже). При множестве проектов
+   рой широкий: `(число проектов × project-углы) + верхнеуровневые`.
+7. Собрать ответы. Каждый агент возвращает findings в едином формате
+   (с указанием проекта, к которому относится).
+8. Сгруппировать findings по `(проект, угол)`, отсортировать по
+   severity. Верхнеуровневые — в отдельную группу «общие слои».
+9. Через `AskUserQuestion` пройти по top-K findings — что делать с
    каждым: «принять как корректное», «нужна правка», «false positive».
-9. Перезаписать `audit-state/last-report.md` с reasoning-trace и
-   решениями аналитика.
+10. Перезаписать `audit-state/last-report.md` с reasoning-trace и
+    решениями аналитика.
 
 ## Рой агентов
 
+Механизм неизменный: один lens (для project-скоупленного — одна пара
+`проект × lens`) = один агент, все в одном message-блоке параллельно.
+Меняется только то, что **пути параметризованы `<project-slug>`**: перед
+спавном скилл подставляет конкретный slug в шаблоны путей из
+`references/angles.md`.
+
 Каждый агент получает:
 
-- путь к двум каталогам слоёв (`docs/<src>/`, `docs/<dst>/`);
-- свой lens (один из 8);
+- **проект** (`<project-slug>`), к которому относится прогон — для
+  project-скоупленных углов; для верхнеуровневых — пометку «общие слои».
+- путь к двум каталогам слоёв с **уже подставленным** `<project-slug>`
+  (например `docs/projects/<slug>/persona.md`, `docs/business/`);
+- свой lens;
 - промпт-инструкцию из `references/angles.md` для этого lens;
-- стандартный schema для findings (`references/findings-format.md`).
+- стандартный schema для findings (`references/findings-format.md`);
+- для углов business-problem ↔ продукт — **список проблем, которые
+  закрывает этот проект** (из `vision.addresses-problem`), чтобы агент
+  скоупил сопоставление к ним, а не ко всем проблемам реестра.
 
 Спавн — через `Agent` tool, **subagent_type: general-purpose**, чтобы
 агент мог:
@@ -82,17 +147,22 @@ description: Сквозной семантический аудит консис
 
 ```
 Lens: <name>
-Source layer: <path-1>
+Project: <project-slug>   (или «общие слои» для верхнеуровневых углов)
+Source layer: <path-1>     (с уже подставленным <project-slug>)
 Destination layer: <path-2>
+Проблемы этого проекта (для business-problem↔продукт): [<frame-slug>, ...]
 
 Цель: семантически сопоставить записи в source и destination — найти
 тупики, противоречия, потери покрытия. Не slug-валидация: связь
 семантическая, агент сам решает, соответствует ли запись X записи Y.
+Сопоставление держи в границах проекта <project-slug> (для углов
+business-problem↔продукт — в границах перечисленных проблем).
 
 Прочитай:
 - <конкретные файлы из source-layer>
 - <конкретные файлы из destination-layer>
-- state каждого скилла, обслуживающего эти слои (если файлы есть).
+- state скилла, обслуживающего эти слои (для project-скоупленных —
+  state, относящийся к <project-slug>; если файлы есть).
 
 Найди:
 - <конкретные паттерны для этого lens из angles.md>
@@ -101,6 +171,7 @@ Destination layer: <path-2>
 и preamble. Каждый finding:
 {
   "lens": "<lens>",
+  "project": "<project-slug>",   (или null для верхнеуровневых углов)
   "severity": "error" | "warning" | "hint",
   "title": "одна строка-заголовок",
   "evidence": "конкретные slug/файлы/места, где видно",
@@ -115,68 +186,97 @@ Destination layer: <path-2>
 
 | severity | смысл | пример |
 |---|---|---|
-| `error` | Семантический тупик, ломает целостность | persona без покрытия в interface.who; surface без зон; integration без бизнес-домена |
+| `error` | Семантический тупик, ломает целостность | persona без покрытия в interface.who; surface без зон; integration без бизнес-домена; `vision.addresses-problem` ссылается на несуществующую проблему |
 | `warning` | Подозрительная несостыковка | capability упомянута, но в interface ситуаций под неё «впритык»; market покрывает capability, которой у нас нет; constraint не привязан ни к surface, ни к integration |
-| `hint` | Гипотеза / возможная новая capability | market показывает gap, у нас нет capability на эту территорию; в interface есть ситуация, которая не имеет capability-якоря в project |
+| `hint` | Гипотеза / возможная новая capability | market показывает gap, у нас нет capability на эту территорию; в interface есть ситуация, которая не имеет capability-якоря в project; проблема в `frame`, которую не закрывает ни один проект |
 
 ## Углы проверки (lenses)
 
-Полный список — `references/angles.md`. Краткая карта:
+Полный список — `references/angles.md`. `<slug>` = `<project-slug>`,
+подставляется на спавне. Колонка «скоуп» отмечает: `★` — прогон один
+раз; `по проекту` — раскрывается в пары `(проект × lens)`. Краткая карта:
 
-| lens | source | destination | основной вопрос |
-|---|---|---|---|
-| `factor-business` | `docs/business-problem/factor.md` | `docs/business/` (profile, competitor) | каждый SWOT-фактор опирается на картину бизнеса? |
-| `currentmetric-metric` | `docs/business/current-metric.md` | `docs/business-problem/metric.md` | baseline целевой метрики (`current`) взят из текущего KPI бизнеса? |
-| `goal-vision` | `docs/business-problem/goal.md`, `metric.md` | `docs/project/vision.md` | цель/метрика проблемы отражены в vision.Success (как таргет, не гарантия)? |
-| `subject-persona` | `docs/business-problem/subject.md` | `docs/project/persona.md` | субъект влияния соответствует persona продукта? |
-| `segment-persona` | `docs/business/segment.md` | `docs/project/persona.md` | сегмент бизнеса соотносится с persona (разные сущности, но связаны)? |
-| `bet-capability` | `docs/business-problem/bet.md`, `goal.md` | `docs/project/capability.md` | ставка/цель реализуется хотя бы одной capability? |
-| `persona-who` | `docs/project/persona.md` | `docs/interface/who.md` | каждая persona имеет хотя бы одно who-покрытие? каждое who сводимо к одной persona? |
-| `capability-situation` | `docs/project/capability.md` | `docs/interface/situation.md` | каждая capability реализуется ≥1 ситуацией? есть ли ситуации без capability-якоря? |
-| `capability-domain` | `docs/project/capability.md` | `docs/domains/` (если есть) | у каждой capability есть бизнес-код в domain? |
-| `surface-zone` | `docs/project/surface.md` | `docs/interface/zone.md` | каждая surface имеет ≥1 зону? каждая зона принадлежит surface? |
-| `surface-screen` | `docs/project/surface.md` | `docs/screens/` (если есть) | каждая surface имеет ≥1 screen-композицию? |
-| `integration-domain` | `docs/project/integration.md` | `docs/domains/` (если есть) | каждая integration имеет адаптер в domain? |
-| `constraint-surface` | `docs/project/constraint.md` | `docs/project/surface.md`, `docs/project/integration.md` | каждый constraint привязан семантически к surface или integration? |
-| `market-capability` | `docs/project/market.md` | `docs/project/capability.md` | конкуренты покрывают наши capabilities? есть ли gap, где конкурент умеет, а мы нет (signal к новой capability)? |
+| lens | source | destination | скоуп | основной вопрос |
+|---|---|---|---|---|
+| `factor-business` | `docs/business-problem/factor.md` | `docs/business/` (profile, competitor) | ★ | каждый SWOT-фактор опирается на картину бизнеса? |
+| `currentmetric-metric` | `docs/business/current-metric.md` | `docs/business-problem/metric.md` | ★ | baseline целевой метрики (`current`) взят из текущего KPI бизнеса? |
+| `addresses-problem-frame` | `docs/projects/*/vision.md` (`addresses-problem`) | `docs/business-problem/frame.md` | ★ | каждый ref проекта попадает в реальную проблему? есть ли проблема, в которую не бьёт ни один проект? (M:N, обе стороны) |
+| `goal-vision` | `docs/business-problem/goal.md`, `metric.md` (по проблемам проекта) | `docs/projects/<slug>/vision.md` | по проекту | цель/метрика закрываемой проблемы отражены в vision.Success (как таргет, не гарантия)? |
+| `subject-persona` | `docs/business-problem/subject.md` (по проблемам проекта) | `docs/projects/<slug>/persona.md` | по проекту | субъект влияния соответствует persona продукта? |
+| `segment-persona` | `docs/business/segment.md` | `docs/projects/<slug>/persona.md` | по проекту | сегмент бизнеса соотносится с persona (разные сущности, но связаны)? |
+| `bet-capability` | `docs/business-problem/bet.md`, `goal.md` (по проблемам проекта) | `docs/projects/<slug>/capability.md` | по проекту | ставка/цель реализуется хотя бы одной capability проекта? |
+| `persona-who` | `docs/projects/<slug>/persona.md` | `docs/projects/<slug>/interface/who.md` | по проекту | каждая persona имеет хотя бы одно who-покрытие? каждое who сводимо к одной persona? |
+| `capability-situation` | `docs/projects/<slug>/capability.md` | `docs/projects/<slug>/interface/situation.md` | по проекту | каждая capability реализуется ≥1 ситуацией? есть ли ситуации без capability-якоря? |
+| `capability-domain` | `docs/projects/<slug>/capability.md` | `docs/projects/<slug>/domains/` (если есть) | по проекту | у каждой capability есть бизнес-код в domain? |
+| `surface-zone` | `docs/projects/<slug>/surface.md` | `docs/projects/<slug>/interface/zone.md` | по проекту | каждая surface имеет ≥1 зону? каждая зона принадлежит surface? |
+| `surface-screen` | `docs/projects/<slug>/surface.md` | `docs/projects/<slug>/screens/` (если есть) | по проекту | каждая surface имеет ≥1 screen-композицию? |
+| `integration-domain` | `docs/projects/<slug>/integration.md` | `docs/projects/<slug>/domains/` (если есть) | по проекту | каждая integration имеет адаптер в domain? |
+| `constraint-surface` | `docs/projects/<slug>/constraint.md` | `docs/projects/<slug>/surface.md`, `docs/projects/<slug>/integration.md` | по проекту | каждый constraint привязан семантически к surface или integration? |
+| `market-capability` | `docs/projects/<slug>/market.md` | `docs/projects/<slug>/capability.md` | по проекту | конкуренты покрывают наши capabilities? есть ли gap, где конкурент умеет, а мы нет (signal к новой capability)? |
 
 ## Формат отчёта
 
 ```
 === /cross-audit ===
-Слои: business, business-problem, project, interface, domain, screen
-Углы: 14 запущено, 14 ответили
-Время: <duration> · агентов: 14
+Слои: business, business-problem (общие) + проекты: referral-network, partner-portal
+Проектов: 2 · углы: 3 верхнеуровневых + 12 по referral-network + 9 по partner-portal = 24 запущено, 24 ответили
+Время: <duration> · агентов: 24
+
+— Общие слои —
+
+[error] addresses-problem-frame → проект partner-portal бьёт в проблему
+  `legacy-sync`, которой нет в docs/business-problem/frame.md.
+  Доказательство: projects/partner-portal/vision.md addresses-problem =
+    [`paid-churn`, `legacy-sync`]; frame.md → строки [`paid-churn`,
+    `slot-utilization`] — `legacy-sync` отсутствует.
+  Что делать: завести проблему `legacy-sync` через
+  /business-problem-deep-dive, либо убрать ref в /project-deep-dive
+  partner-portal.
+
+[hint] addresses-problem-frame → проблему `slot-utilization` не
+  закрывает ни один проект.
+  Доказательство: frame.md:slot-utilization; ни один
+    projects/*/vision.md не содержит её в addresses-problem.
+  Что делать: решить — нужен ли проект под неё, или проблема пока вне
+  scope (зафиксировать).
+
+— Проект referral-network —
 
 [error] persona-who → persona:doctor не имеет соответствия в
-  docs/interface/who.md (нет роли, выполняющей действия персонажа).
+  projects/referral-network/interface/who.md (нет роли, выполняющей
+  действия персонажа).
   Доказательство: persona:doctor.context = «врач инициирующей клиники»;
     в who.md нет ни одной записи с инициирующей ролью.
-  Что делать: либо завести who:doctor через /interface-deep-dive who,
-  либо пересмотреть persona в /project-deep-dive persona:doctor.
+  Что делать: либо завести who:doctor через /interface-deep-dive
+  referral-network who, либо пересмотреть persona в /project-deep-dive
+  referral-network persona:doctor.
 
 [error] surface-zone → surface:web-partner не имеет ни одной зоны в
-  docs/interface/zone.md (zone.md упоминает только админ-зоны).
-  Доказательство: surface:web-partner.type=web; zone.md → [`admin-overview`,
-    `study-card`] — все принадлежат admin-поверхности по описаниям.
+  projects/referral-network/interface/zone.md (упоминает только
+  админ-зоны).
+  Доказательство: surface:web-partner.type=web; zone.md →
+    [`admin-overview`, `study-card`] — все принадлежат admin-поверхности.
   Что делать: завести зоны для web-partner через /interface-deep-dive
-  zone, или пересмотреть surface.
+  referral-network zone, или пересмотреть surface.
 
-[warning] capability-domain → capability:send-referral не имеет
-  явного домена в docs/domains/.
+[warning] capability-domain → capability:send-referral не имеет явного
+  домена в projects/referral-network/domains/.
   Доказательство: capability:send-referral.value = «один клик»; в
-    docs/domains/ есть только `auth`, `billing`, `inventory`.
+    domains/ есть только `auth`, `billing`, `inventory`.
   Что делать: добавить домен `referrals` через /domain-deep-dive,
   или пересмотреть, действительно ли capability нужна.
+
+— Проект partner-portal —
 
 [hint] market-capability → конкурент klara-app покрывает «mobile-первый
   опыт», у нас нет capability на mobile.
   Доказательство: market:klara-app.description = «mobile-first
-    referrals»; capability.md → нет записи про mobile.
+    referrals»; projects/partner-portal/capability.md → нет записи про
+    mobile.
   Что делать: рассмотреть, нужно ли это вам — открыть
-  /project-deep-dive capability для обсуждения.
+  /project-deep-dive partner-portal capability для обсуждения.
 
-Сводка: 2 error / 1 warning / 1 hint.
+Сводка: 3 error / 1 warning / 2 hint.
 ```
 
 После отчёта — `AskUserQuestion` по каждому top-K finding (до 4 в
@@ -196,15 +296,34 @@ Destination layer: <path-2>
 ```markdown
 ---
 ran-on: <UTC-ts>
-lenses-run: 8
-layers: { business: yes, business-problem: yes, project: yes, interface: yes, domain: yes, screen: no }
+projects: [referral-network, partner-portal]
+top-level-lenses-run: 3
+project-lens-runs: 21   # сумма по всем (проект × lens)
+per-project-layers:
+  referral-network: { project: yes, interface: yes, domain: yes, screen: no }
+  partner-portal:   { project: yes, interface: yes, domain: no,  screen: no }
 findings: { error: X, warning: Y, hint: Z }
 verdicts: { accepted: A, needs-fix: B, false-positive: C, deferred: D }
 ---
 
 # Reasoning trace
 
-## Lens: persona-who
+## Общие слои
+
+### Lens: addresses-problem-frame
+- agent-id: agent-1a
+- duration: 12s
+- findings: 2
+- verdicts: [needs-fix, deferred]
+- details:
+  - finding-1 (error): project partner-portal → проблема `legacy-sync` не
+    в frame → verdict: needs-fix
+  - finding-2 (hint): проблему `slot-utilization` не закрывает ни один
+    проект → verdict: deferred
+
+## Проект: referral-network
+
+### Lens: persona-who
 - agent-id: agent-7c
 - duration: 18s
 - findings: 3
@@ -214,7 +333,12 @@ verdicts: { accepted: A, needs-fix: B, false-positive: C, deferred: D }
   - finding-2 (warning): … → verdict: accepted
   - …
 
-## Lens: capability-situation
+### Lens: capability-situation
+- …
+
+## Проект: partner-portal
+
+### Lens: …
 - …
 
 …
@@ -226,13 +350,17 @@ Findings, помеченные «false positive», сохраняются в
 `audit-state/suppressions.md`:
 
 ```markdown
-- lens: persona-who; pattern: "persona:doctor without who"; reason: <от
-  аналитика, через Other в AskUserQuestion>; suppressed-since: <ts>
+- lens: persona-who; project: referral-network; pattern: "persona:doctor
+  without who"; reason: <от аналитика, через Other в AskUserQuestion>;
+  suppressed-since: <ts>
 ```
 
-При следующем прогоне агент-lens получает suppressions как контекст и
-**не** генерирует те же findings, если они подпадают под паттерн.
-Suppressions можно вручную удалить из файла, чтобы заново всплыли.
+Suppression несёт `project` (для верхнеуровневых углов — `project: —`),
+чтобы подавление в одном проекте не глушило тот же паттерн в другом. При
+следующем прогоне агент-lens получает relevant для его `(проект, lens)`
+suppressions как контекст и **не** генерирует те же findings, если они
+подпадают под паттерн. Suppressions можно вручную удалить из файла, чтобы
+заново всплыли.
 
 ## Что не делать
 
@@ -242,9 +370,17 @@ Suppressions можно вручную удалить из файла, чтоб�
   что запустить.
 - **Не выдумывать findings.** Если агент вернул пустой массив — так
   и пишем «0 findings» по этому lens.
-- **Не игнорировать отсутствующие слои.** `docs/domains/` нет — lens
-  `capability-domain` и `integration-domain` пропускаются с явной
-  пометкой «слой не существует» в отчёте.
+- **Не включать `_canon` в перечисление проектов.** `docs/projects/_canon/`
+  — канон формы, не данные; его записи в аудит не идут.
+- **Не игнорировать отсутствующие слои.** Если у проекта нет
+  `docs/projects/<slug>/domains/` — lens `capability-domain` и
+  `integration-domain` пропускаются **для этого проекта** с явной
+  пометкой «слой не существует» в отчёте. У другого проекта они могут
+  при этом отрабатывать.
+- **Не смешивать территорию с `/business-problem-audit`.** Методологию
+  SWOT / Карты гипотез (задача-сирота, «тогда» без метрики, ставка-висяк,
+  guardrail и т.п. — в пределах проблемы) держит он. Cross-audit — только
+  кросс-**слойные** рёбра.
 - **Не запускать рой повторно** для одной сессии. Если findings много —
   пройти по ним постепенно. Повторный прогон — следующая сессия или
   явный `/cross-audit` запуск.

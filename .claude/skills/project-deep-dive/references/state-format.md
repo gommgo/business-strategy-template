@@ -4,8 +4,11 @@
 
 ## Расположение
 
+State **скоупится по проекту** — у каждого `<project-slug>` своя ветка,
+чтобы разные продукты не сталкивались:
+
 ```
-.claude/skills/project-deep-dive/state/
+.claude/skills/project-deep-dive/state/<project-slug>/
 ├── vision.md                          (singleton: vision-заметка)
 ├── persona/<slug>.md
 ├── capability/<slug>.md
@@ -19,8 +22,8 @@
     └── …
 ```
 
-Заметки лежат **рядом со скиллом**, не в `docs/project/` и не в корне
-проекта. Каталоги создаются по требованию.
+Заметки лежат **рядом со скиллом**, не в `docs/projects/<slug>/` и не в
+корне проекта. Каталоги создаются по требованию.
 
 ## Шаблон для kind-заметки
 
@@ -28,7 +31,7 @@
 ---
 kind: persona
 slug: nurse-partner
-ref: docs/project/persona.md#nurse-partner
+ref: docs/projects/<project-slug>/persona.md#nurse-partner
 ---
 
 ## Открытые вопросы
@@ -50,7 +53,7 @@ ref: docs/project/persona.md#nurse-partner
 ```markdown
 ---
 kind: vision
-ref: docs/project/vision.md
+ref: docs/projects/<project-slug>/vision.md
 ---
 
 ## Открытые вопросы
@@ -71,7 +74,7 @@ ref: docs/project/vision.md
 |---|---|---|
 | `kind` | один из 8 | избыточная подсказка читателю + быстрый фильтр |
 | `slug` | равен `slug` записи в таблице (для vision — отсутствует) | связь с артефактом |
-| `ref` | `docs/project/<kind>.md#<slug>` или `docs/project/vision.md` | удобная ссылка в редакторе |
+| `ref` | `docs/projects/<project-slug>/<kind>.md#<slug>` или `docs/projects/<project-slug>/vision.md` | удобная ссылка в редакторе |
 
 ## Секции
 
@@ -108,8 +111,8 @@ ref: docs/project/vision.md
 
 ## Особый случай: research-отчёт
 
-`state/research/<query>-<ts>.md` — **не** kind-заметка. Это сырьё с
-рою агентов. Структура другая:
+`state/<project-slug>/research/<query>-<ts>.md` — **не** kind-заметка.
+Это сырьё с роя агентов. Структура другая:
 
 ```markdown
 ---
@@ -146,9 +149,10 @@ Research-отчёт **не удаляется** после promotion канди�
 ## Read-only видимость state соседнего скилла
 
 Скилл может прочитать
-`../project-deep-dive-for-business/state/<kind>/<slug>.md`, чтобы
-увидеть, что клиент уже накопал в режиме «домашнее задание». **Писать
-туда запрещено.** Формат тот же — но владелец другой.
+`../project-deep-dive-for-business/state/<project-slug>/<kind>/<slug>.md`,
+чтобы увидеть, что клиент уже накопал по этому проекту в режиме
+«домашнее задание». **Писать туда запрещено.** Формат тот же — но
+владелец другой.
 
 ## Правила жизненного цикла
 

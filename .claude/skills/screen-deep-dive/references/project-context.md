@@ -1,20 +1,27 @@
-# Контекст project-слоя
+# Контекст продуктового слоя проекта
 
-Скилл `screen-deep-dive` живёт **на слой ниже** `docs/project/` и
-**параллельно** с `docs/interface/`. Project описывает **продукт**
-(surface/capability), screens — **визуальную композицию**
-(flow/screen/block/shell). Семантическая связь есть, но
+Скилл `screen-deep-dive` живёт **на слой ниже** продуктового слоя
+**того же проекта** и **параллельно** с его interface-слоем. Продукт
+описывает **продукт** (surface/capability) и живёт в
+`docs/projects/<project-slug>/`; screens — **визуальную композицию**
+(flow/screen/block/shell) в `docs/projects/<project-slug>/screens/`;
+interface — UX-аналитику того же проекта в
+`docs/projects/<project-slug>/interface/`. Семантическая связь есть, но
 **slug-валидаций нет** — её ловит `/cross-audit`.
 
 ## Маппинг
 
-| screens | project | как использовать |
+| screens | продукт (`docs/projects/<project-slug>/`) | как использовать |
 |---|---|---|
-| `flow` (поток экранов) | `surface` (где продукт работает) | каждый flow живёт на одной surface. При заведении flow — предложи опции = существующие surface |
+| `flow` (поток экранов) | `surface` (где продукт работает) | каждый flow живёт на одной surface. При заведении flow — предложи опции = существующие surface проекта |
 | `flow` | `capability` (бизнес-возможность) | flow реализует одну+ capability (например, flow «онбординг» = capability «зарегистрироваться»). При заведении flow — раунд после связи с surface |
 | `screen` | `capability` (точечно, опционально) | screen может быть якорной точкой capability. Чаще capability — на уровне flow |
-| `shell` (каркас навигации) | `surface` (на какой surface висит каркас) | при заведении shell — предложи опции = существующие surface |
-| `block` | — (опционально привязать к persona через interface.who) | блок переиспользуется — обычно не имеет прямой связи с project |
+| `shell` (каркас навигации) | `surface` (на какой surface висит каркас) | при заведении shell — предложи опции = существующие surface проекта |
+| `block` | — (опционально привязать к persona через interface.who) | блок переиспользуется — обычно не имеет прямой связи с продуктом |
+
+Все продуктовые сущности берутся из **того же проекта**
+(`docs/projects/<project-slug>/surface.md`, `…/capability.md`), не из
+глобального слоя.
 
 ## Когда показывать связь
 
@@ -46,7 +53,7 @@
      - Other
    ```
 
-3. Запись — в `state/flow/<slug>.md`:
+3. Запись — в `state/<project-slug>/flow/<slug>.md`:
 
    ```markdown
    ## Доменные решения
@@ -82,18 +89,20 @@ options:
   - Other
 ```
 
-## Что делать, если project-слой пуст
+## Что делать, если продуктовый слой проекта пуст
 
-Если `docs/project/` отсутствует или нет нужных surface/capability —
-раунд связи **не задаётся**. Скилл продолжает обычный flow.
+Если у проекта `docs/projects/<project-slug>/` нет нужных
+surface/capability — раунд связи **не задаётся**. Скилл продолжает
+обычный flow.
 
 При закрытии сессии — `AskUserQuestion`:
 
-> «Не вижу `docs/project/` с surface и capability. Без них screens
-> "плавают в воздухе". Открыть `/project-deep-dive`?»
+> «Не вижу у проекта `<project-slug>` surface и capability. Без них
+> screens "плавают в воздухе". Открыть `/project-deep-dive
+> <project-slug>`?»
 
 ## Cross-audit
 
 После каждой сессии скилл предлагает `/cross-audit` (lenses
 `surface-screen`) — это покажет surface без экранов и экраны без
-surface.
+surface **в этом проекте**.

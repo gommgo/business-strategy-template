@@ -1,9 +1,15 @@
 # Контекст project-слоя
 
-Скилл `domain-deep-dive` живёт **параллельно** с `docs/project/`.
-Project описывает **продукт** (capability/integration/constraint),
-domains — **бизнес-код бэкенда**. Семантическая связь есть, но
-**slug-валидаций нет** — её ловит `/cross-audit`.
+Домены проекта живут **внутри** его папки (`<P>/domains/`, где
+`<P>` = `docs/projects/<project-slug>`), рядом с продуктовым слоем
+(`<P>/vision.md`, `<P>/capability.md`, …). Project описывает **продукт**
+(capability/integration/constraint), domains — **бизнес-код бэкенда**
+того же проекта. Семантическая связь есть, но **slug-валидаций нет** —
+её ловит `/cross-audit`.
+
+Связь всегда **внутрипроектная**: контекст/use-case/адаптер этого проекта
+цепляется к capability/integration **этого же проекта**. Чужие проекты в
+раунды связи не попадают.
 
 ## Маппинг
 
@@ -48,8 +54,8 @@ options:
   - Other
 ```
 
-Запись — в `state/<ctx>/use-case/<Name>.md` секция `## Доменные
-решения`:
+Запись — в `state/<project-slug>/<ctx>/use-case/<Name>.md` секция
+`## Доменные решения`:
 
 ```markdown
 - Реализует capability:<slug>.
@@ -70,24 +76,24 @@ options:
   - Other
 ```
 
-Запись — в `state/<ctx>/<kind>/<Name>.md`.
+Запись — в `state/<project-slug>/<ctx>/<kind>/<Name>.md`.
 
-## Что делать, если project-слой пуст
+## Что делать, если продуктовый слой проекта пуст
 
-Если `docs/project/` отсутствует или нет нужных записей — раунд связи
-**не задаётся**. Скилл продолжает обычный flow.
+Если `<P>/capability.md` отсутствует или нет нужных записей — раунд
+связи **не задаётся**. Скилл продолжает обычный flow.
 
 При закрытии сессии нового контекста — `AskUserQuestion`:
 
-> «В `docs/project/` нет capability, к которой можно прицепить этот
-> контекст. Это ОК, но обычно бэкенд растёт под продуктовые
-> capabilities. Открыть `/project-deep-dive`?»
+> «В продуктовом слое проекта нет capability, к которой можно прицепить
+> этот контекст. Это ОК, но обычно бэкенд растёт под продуктовые
+> capabilities. Открыть `/project-deep-dive <project-slug>`?»
 
 ## Если capability в project меняется
 
 Если в state-заметке зафиксирована связь с `capability:X`, а в
-`docs/project/capability.md` эта запись удалена — это **разрыв
-связи**. Скилл при следующем заходе:
+`<P>/capability.md` эта запись удалена — это **разрыв связи**. Скилл при
+следующем заходе:
 
 1. Не молча удаляет.
 2. `AskUserQuestion`: «Capability X удалена из project. Этот use-case

@@ -5,8 +5,11 @@
 
 ## Расположение
 
+State **скоупится по продукту** — у каждого `<project-slug>` своя ветка,
+чтобы разные продукты не сталкивались:
+
 ```
-.claude/skills/project-deep-dive-for-business/state/
+.claude/skills/project-deep-dive-for-business/state/<project-slug>/
 ├── vision.md
 ├── persona/<slug>.md
 ├── capability/<slug>.md
@@ -20,8 +23,8 @@
 ```
 
 `_session-log/` — служебный буфер для накопления вопросов-ответов
-сессии. Уезжает в `client-handoff/transcripts/<ts>.md` при `--share` и
-удаляется локально.
+сессии по этому продукту. Уезжает в `client-handoff/transcripts/<ts>.md`
+при `--share` и удаляется локально.
 
 ## Шаблон kind-заметки
 
@@ -29,7 +32,7 @@
 ---
 kind: persona
 slug: nurse-partner
-ref: docs/project/persona.md#nurse-partner
+ref: docs/projects/<project-slug>/persona.md#nurse-partner
 ---
 
 ## Открытые вопросы
@@ -126,12 +129,14 @@ ref: docs/project/persona.md#nurse-partner
 ## Read-only видимость аналитического скилла
 
 Клиентский скилл **НЕ** читает
-`../project-deep-dive/state/`. Это намеренная изоляция: клиент не
-должен видеть внутреннюю кухню аналитика (открытые вопросы аналитика,
-доменные решения, что аналитик считает подозрительным).
+`../project-deep-dive/state/<project-slug>/`. Это намеренная изоляция:
+клиент не должен видеть внутреннюю кухню аналитика (открытые вопросы
+аналитика, доменные решения, что аналитик считает подозрительным).
 
 Аналитический скилл, наоборот, может read-only смотреть state клиента
-— чтобы видеть, что клиент наработал в режиме «домашнее задание».
+по этому продукту
+(`../project-deep-dive-for-business/state/<project-slug>/`) — чтобы
+видеть, что клиент наработал в режиме «домашнее задание».
 
 ## Правила жизненного цикла
 
