@@ -96,6 +96,9 @@ docs/projects/    продукты под бизнес (см. docs/projects/READ
     domains/          (опц.) <ctx>/ контексты по DDD-канону
     screens/          flows/ screens/ blocks/ shells/ + assets/
   example/          показная витрина screens-слоя (медисследования; удаляется /de-template)
+client-onboarding/   комплект «как заказчику начать» (отдаём клиенту, см. client-onboarding/README.md):
+  windows.md          поставить Claude Desktop + Git, скачать форк, зайти в *-for-business (Windows)
+  macos.md            то же для Mac
 .claude/
   skills/
     business-deep-dive              — профиль бизнеса: приём материалов + рой web-research

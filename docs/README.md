@@ -67,6 +67,10 @@ golibinfra}` и дизайн-система `@stit-design/ui` (репо `stit-de
 
 - [`getting-started.md`](./getting-started.md) — путь потребителя форка (META,
   удаляется в `/de-template`).
+- [`../client-onboarding/`](../client-onboarding/README.md) — комплект
+  онбординга заказчика (`windows.md` / `macos.md`): поставить Claude Desktop,
+  скачать форк и зайти в `*-for-business`-режим. Один файл под ОС, отдаём
+  заказчику.
 - Устройство `.claude`-системы (rules / skills / state / settings) — корневой
   `CLAUDE.md`.
 
