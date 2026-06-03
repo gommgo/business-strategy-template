@@ -34,6 +34,36 @@
 Превращение `docs/projects/<slug>/screens/` в wireframe и hi-fi — ручная
 работа автора макета, не отдельный артефакт.
 
+Карта документации и handoff-контракт соседям — `docs/README.md`. Путь
+потребителя форка — `docs/getting-started.md`.
+
+## Где это в экосистеме
+
+Это один из **4 форкаемых шаблонов** под `stit-template/`:
+`go-backend-template` (→ `<org>/backend`), `spa-frontend-template`
+(→ `<org>/frontend`), **`project-docs-template`** (этот → `<org>/docs`),
+`project-infra-template-compose` (→ `<org>/infra`). Рядом — корп
+control-plane `stit-infra/{infra, golibinfra}` (registry `git.stit.tech`,
+канон-карта контрактов `stit-infra/infra/docs/ecosystem.md`) и дизайн-система
+`@stit-design/ui` из репо `stit-design/ui-lib`.
+
+**Роль docs-репо — design-time SoT проекта.** Форкается **первым**
+(Gitea → `stit-template/project-docs-template` → **Use this template** →
+`<org>/docs`), наполняется аналитикой, и только потом форкаются код-репо,
+которые **читают** его stable-артефакты как upstream (read-only,
+односторонне):
+
+- `<org>/backend` ← `projects/<slug>/domains/<ctx>/` (scaffold доменов в Go;
+  маппинг DDD → Go живёт у backend в `docs/reference/domain-mapping.md`);
+- `<org>/frontend` ← `projects/<slug>/{interface,screens}/` (fsd-deep-dive);
+- `<org>/infra` ← `projects/<slug>/{vision,surface}` (init-project).
+
+Контракт что docs отдаёт соседям — `docs/README.md § Что docs отдаёт
+соседям`. Онбординг ведёт аналитик руками через рой deep-dive-скиллов —
+оркестратора нет by design (`docs/getting-started.md`). Когда аналитика
+заполнена, `/de-template` вычищает показной `docs/projects/example/` и
+шаблон-нарратив под идентичность проекта.
+
 ## 1. Forward-only (никакой археологии)
 
 Все артефакты — код, документация, комментарии, артефакты аналитики,
@@ -227,6 +257,12 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
   связь с `surface` того же проекта.
 - **Библиотека** — в отдельном репо `ui-lib` как `@stit-design/ui`;
   проект её потребляет, не правит.
+- **Де-темплейтизация форка** — скилл `de-template`: один раз на свежем
+  форке `<org>/docs` вычищает показной `docs/projects/example/` и
+  шаблон-нарратив в `CLAUDE.md`/`README.md` под идентичность проекта. **Не
+  трогает** пустые скелеты-каноны (`docs/projects/_canon/`, `docs/business/`,
+  `docs/business-problem/`). На каноническом шаблоне не запускается (guard по
+  origin).
 - **Sweep'ы** (терминология, чистка): 1 агент = 1 непересекающаяся зона.
 
 ## 7. Клиент-режим (`*-for-business`)

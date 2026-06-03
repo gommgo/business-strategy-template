@@ -61,7 +61,7 @@ id: user.User                 # <context>.<Name>, стабильный крос�
 kind: aggregate               # aggregate|entity|vo|event|use-case|policy
 context: user
 name: User                    # human-readable
-status: draft                 # draft → stable (через валидатор)
+status: draft                 # draft → stable (ручная сверка формы)
 relations: [user.UserId, auth.Session]
 emits: [user.UserRegistered]
 consumes: [verification.EmailVerified]
@@ -69,7 +69,8 @@ consumes: [verification.EmailVerified]
 
 ## Обязательные секции по kind
 
-См. валидатор `scripts/tools/validate-domain-doc.sh`. Кратко:
+Сверяются вручную по этой таблице (committed-скрипта-валидатора в репо нет;
+дисциплину держит `/domain-deep-dive` по чек-листу `draft → stable`):
 
 | kind | обязательные H2 |
 |---|---|
@@ -107,20 +108,23 @@ Stateless / aggregate-of-one / пустые consumers — пишутся явн�
 3. /domain-deep-dive <project-slug> <ctx>
    — пачкой по волнам, AskUserQuestion'ами добиваем секции inside-out.
 
-4. scripts/tools/validate-domain-doc.sh $PROJECT/domains/<ctx>
-   — зелёный → промоушн status: draft → stable.
-
-5. /smartdev → /plan <task>
-   — планировщик читает stable-артефакты, разносит работу по слоям.
-
-6. scaffold (вариант domain/endpoint/event)
-   — скаффолдит код по stable-артефактам.
+4. Ручная сверка формы по чек-листу draft → stable
+   — frontmatter, обязательные H2, ref-целостность; всё держится →
+     промоушн status: draft → stable.
 ```
+
+После `stable` артефакты потребляет соседний backend-репо (`<org>/backend`,
+форк `go-backend-template`) — его `/scaffold` (вариант domain) разворачивает
+Go-код по ним. Это шаг **в том репо**, не в этом design-time SoT.
 
 ## Gate
 
-- **Pre-commit hook** (`scripts/git-hooks/pre-commit`) гонит валидатор на изменённых `docs/projects/*/domains/**.md`.
-- **Soft-guidance** — Claude-хуков в шаблоне нет; `scaffold`/`domain-deep-dive` по дисциплине идут по stable-артефактам и не стартуют на `status: draft` / красном валидаторе.
+Committed-скрипта-валидатора и git-хуков в этом репо нет (markdown-only
+design-SoT). Промоушн `draft → stable` — **ручной review** по дисциплине:
+`/domain-deep-dive` сверяет форму по чек-листу `references/draft-stable.md`
+(frontmatter, обязательные H2, ref-целостность, тест-критерий kind'а) и
+повышает `status` только с явного подтверждения архитектора. Точечные правки
+уже-stable артефакта — прямым `Edit`.
 
 ## Anti-patterns
 
@@ -128,5 +132,5 @@ Stateless / aggregate-of-one / пустые consumers — пишутся явн�
 - ❌ Описывать I/O-операции как методы агрегата. Если нужен репо/порт — это use-case.
 - ❌ Spanning invariant между двумя aggregate'ами. Запрещено DDD.
 - ❌ Cross-context relation типа `composition`. Только `reference` (по ID).
-- ❌ Промоутить `status: stable` руками без зелёного валидатора.
+- ❌ Промоутить `status: stable` в обход чек-листа `draft → stable` (форма не сверена).
 - ❌ Класть в `_shared/` доменный VO (например `Phone`, `Email`). `_shared/` — только для платформенных типов без доменной семантики.

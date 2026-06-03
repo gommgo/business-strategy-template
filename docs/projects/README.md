@@ -23,7 +23,7 @@ docs/projects/
 │   ├── interface/       who/stage/situation/zone/block/ux-substrate/data-items
 │   ├── screens/         flows/ screens/ blocks/ shells/
 │   └── domains/         (опц.) <bounded-context>/
-└── example/             ← образцовый проект (живая демонстрация структуры)
+└── example/             ← показная витрина screens-слоя (удаляется /de-template)
 ```
 
 Канон формы живёт **один раз** в `_canon/`; папки проектов держат только

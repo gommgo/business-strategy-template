@@ -23,15 +23,45 @@ hi-fi субстрат.** Артефакты — чистая аналитика
 `docs/business-problem/` — best-effort таргет (совместно с бизнесом),
 не гарантия исхода.
 
-## Два репозитория
+## Где это в экосистеме
 
-| Репо | Что | Роль |
+Это один из **4 форкаемых шаблонов** под `stit-template/`:
+
+| Шаблон | Форк | Роль |
 |---|---|---|
-| **этот** | артефакты аналитики продуктов, интерфейса и экранов, воркфлоу скилов | проектный шаблон |
-| **`@stit-design/ui`** (репо `ui-lib`) | библиотека компонентов + галерея | потребляется как зависимость из Gitea registry |
+| `go-backend-template` | `<org>/backend` | Go HTTP-бэкенд |
+| `spa-frontend-template` | `<org>/frontend` | React SPA |
+| **`project-docs-template`** (этот) | `<org>/docs` | **design-time SoT** — аналитика проекта |
+| `project-infra-template-compose` | `<org>/infra` | проектная VPS (docker-compose) |
 
-Граница чистая: библиотека строится один раз и версионируется; проект
-её **потребляет**, не правит.
+Рядом — корп control-plane `stit-infra/{infra, golibinfra}` (registry
+`git.stit.tech`, канон-карта контрактов `stit-infra/infra/docs/ecosystem.md`)
+и дизайн-система `@stit-design/ui` из репо `stit-design/ui-lib`.
+
+**Роль docs-репо:** design-time source of truth проекта. Форкается
+**первым** — наполняется аналитикой (бизнес → проблемы → продукты → интерфейс
+/ домены / экраны), и только потом форкаются код-репо, которые **читают**
+его stable-артефакты как upstream:
+
+- `<org>/backend` ← `projects/<slug>/domains/<ctx>/` (scaffold доменов в Go);
+- `<org>/frontend` ← `projects/<slug>/{interface,screens}/` (fsd-deep-dive);
+- `<org>/infra` ← `projects/<slug>/{vision,surface}` (init-project).
+
+Контракт read-only и односторонний (соседи читают, не пишут) —
+`docs/README.md § Что docs отдаёт соседям`.
+
+**Путь форка:** Gitea → `stit-template/project-docs-template` →
+**Use this template** → `<org>/docs`. С чего начать после форка —
+`docs/getting-started.md` (онбординг ведёт аналитик руками через рой
+deep-dive-скиллов; оркестратора нет by design). Когда аналитика заполнена —
+`/de-template` вычищает показной `docs/projects/example/` и шаблон-нарратив.
+
+## Библиотека компонентов
+
+`@stit-design/ui` (репо `stit-design/ui-lib`) — библиотека компонентов +
+галерея, потребляется как зависимость из Gitea registry. Граница чистая:
+библиотека строится один раз и версионируется; проект её **потребляет**, не
+правит.
 
 ## Структура
 
@@ -65,7 +95,7 @@ docs/projects/    продукты под бизнес (см. docs/projects/READ
     interface/        who/stage/situation/zone/block/ux-substrate/data-items
     domains/          (опц.) <ctx>/ контексты по DDD-канону
     screens/          flows/ screens/ blocks/ shells/ + assets/
-  example/          образцовый проект (витрина артефактов)
+  example/          показная витрина screens-слоя (медисследования; удаляется /de-template)
 .claude/
   skills/
     business-deep-dive              — профиль бизнеса: приём материалов + рой web-research
@@ -80,8 +110,12 @@ docs/projects/    продукты под бизнес (см. docs/projects/READ
     domain-deep-dive                — DDD-артефакты бэкенда продукта
     screen-deep-dive · screen-audit         — <project-slug> аргументом или пикер
     cross-audit                     — сквозная семантика business ↔ business-problem ↔ (по каждому проекту: project ↔ interface ↔ domain ↔ screen)
+    de-template                     — вычистить показной example/ + шаблон-нарратив под проект (НЕ на каноне)
   rules/
     forward-only
+docs/
+  README.md           карта документации + handoff-контракт соседям
+  getting-started.md  путь потребителя форка (META, удаляется /de-template)
 ```
 
 ## Воркфлоу
