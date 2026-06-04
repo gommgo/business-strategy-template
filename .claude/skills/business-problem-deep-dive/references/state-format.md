@@ -72,8 +72,11 @@ Frontmatter: `kind` (один из 8), `slug` (для `frame` — `<problem-slug
 `state/goal/_phase-jump.md` — «начали с цели, минуя SWOT, потому что
 бизнес дал ясную цель») как доменное решение. Не блокер.
 
-## Read-only видимость клиентского скилла
+## Единый контекст: read-only видимость соседних state
 
-Скилл может read-only смотреть
-`../business-problem-deep-dive-for-business/state/<kind>/<slug>.md` —
-что наработал клиент. **Писать туда запрещено.**
+Для единой картины скилл read-only смотрит соседние `state/`: клиентский
+режим этого слоя
+(`../business-problem-deep-dive-for-business/state/<kind>/<slug>.md` — что
+наработал клиент) и соседние слои (`../business-deep-dive*/state/`,
+`../project-deep-dive*/state/<slug>/` — проектный по текущему продукту).
+**Писать в чужой state запрещено.**

@@ -101,7 +101,10 @@ description: Углублённая проработка верхнего сло
 `.claude/skills/business-deep-dive/state/<kind>/<slug>.md` (+
 `state/profile.md` singleton, `state/research/`). Формат — см.
 `references/state-format.md`. Три секции, forward-only, пустые удаляются.
-Read-only видимость `../business-deep-dive-for-business/state/`.
+Единый контекст: read-only видимость соседних `state/` — клиентский режим
+(`../business-deep-dive-for-business/state/`) и соседние слои
+(`../business-problem-deep-dive*/state/`, `../project-deep-dive*/state/<slug>/`
+— проектный по текущему продукту). В чужой state не писать.
 
 ## Контракт `draft → stable`
 

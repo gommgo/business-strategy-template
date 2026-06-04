@@ -107,7 +107,7 @@ client-onboarding/   комплект «как заказчику начать»
     business-problem-deep-dive-for-business — клиент-режим проблем (бизнес-язык)
     business-problem-audit          — семантические инварианты методологии по каждой проблеме (рой)
     project-deep-dive               — продукт: <project-slug> аргументом или пикер/новый проект
-    project-deep-dive-for-business  — клиент-режим: дружелюбный пикер продукта, эскалация, push в client/<ts>
+    project-deep-dive-for-business  — клиент-режим: дружелюбный пикер продукта, эскалация, push в ветку client
     project-audit                   — внутрипроектная консистентность одного продукта
     interface-deep-dive · interface-audit   — <project-slug> аргументом или пикер
     domain-deep-dive                — DDD-артефакты бэкенда продукта

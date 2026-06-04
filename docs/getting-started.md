@@ -51,7 +51,7 @@ docs-репо проекта, который ничего не помнит пр
   заполняет `docs/business/{profile,segment,offering,channel,competitor,current-metric,material}.md`.
 - **`/business-deep-dive-for-business`** — режим «домашнее задание» для самого
   заказчика/основателя: мягкий рассказ о своём бизнесе в бизнес-языке (без
-  slug/kind), упаковка результата в ветку `client/<UTC-ts>` для передачи
+  slug/kind), упаковка результата в единую ветку `client` для передачи
   аналитику.
 
 ## 2. Бизнес-проблемы — `docs/business-problem/`
@@ -125,4 +125,4 @@ deep-dive.
   (`/project-audit`, `/interface-audit`, `/screen-audit`, `/business-problem-audit`).
 - **Подозрение на разрыв между слоями** → `/cross-audit`.
 - **Заказчик ведёт сессию сам** → `*-for-business`-вариант скилла (бизнес-язык,
-  эскалация «нужен аналитик», push в `client/<UTC-ts>`).
+  эскалация «нужен аналитик», push в единую ветку `client`).

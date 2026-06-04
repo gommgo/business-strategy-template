@@ -37,8 +37,9 @@
 folder** открывает папку → заказчик пишет `/business-deep-dive-for-business`
 (или другую `*-for-business`-команду, которую мы подскажем) → по
 завершении говорит «передай аналитику», и скилл пушит наработанное в
-ветку `client/<UTC-ts>` (тот же `--share`-механизм, что у
-`*-for-business`-скиллов; см. их `references/escalation.md`).
+единую ветку `client` (тот же `--share`-механизм, что у
+`*-for-business`-скиллов; доступ к репозиторию скилл спрашивает один раз
+и сохраняет; см. их `references/escalation.md`).
 
 Desktop и CLI — один движок и общий конфиг (CLAUDE.md, skills, settings),
 так что `.claude/skills/*-for-business` доступны в Code-вкладке как

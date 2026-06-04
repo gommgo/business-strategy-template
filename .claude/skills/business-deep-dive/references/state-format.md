@@ -56,5 +56,8 @@ Frontmatter: `kind`, `slug` (для profile отсутствует), `ref`.
 
 Создаётся при наличии содержимого; перезаписывается свободно; kind-заметка
 удаляется при пустых секциях или каскадном удалении записи; research —
-не удаляется. Read-only видимость `../business-deep-dive-for-business/state/`.
+не удаляется. Единый контекст: read-only видимость соседних `state/` —
+клиентский режим (`../business-deep-dive-for-business/state/`) и соседние
+слои (`../business-problem-deep-dive*/state/`,
+`../project-deep-dive*/state/<slug>/`); в чужой state не писать.
 Не аккумулировать журнал.
