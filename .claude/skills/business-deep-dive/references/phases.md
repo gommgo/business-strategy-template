@@ -93,6 +93,17 @@ baseline-кандидаты для целевых метрик слоя business
 завести через `/segment-deep-dive`); у каждой строки `business-problem`
 со временем появится ≥1 `goal` (в `docs/hypothesis-map/`).
 
+## Восходящий поток (reconcile-up)
+
+Записи фаз `structure` (`offering`), `metrics` (`current-metric`) и
+`problems` (`business-problem.served`) могут прийти не от клиента, а
+**восходящим потоком** от дозревшего продукта — оркестратор `entrypoint`
+делегирует их сюда с предложенным `from-project = <slug>`. Приёмная часть
+описана в `SKILL.md` (раздел «Приём восходящего потока»): формализуем
+своими режимами A/C, проставляем `from-project`, повышаем
+`business-problem.served` `prospective → served` только при реально
+обслуживаемом рынке. `segment.served` ведёт `/segment-deep-dive`.
+
 ## Сводка фаз для UI
 
 ```

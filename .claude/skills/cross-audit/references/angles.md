@@ -21,7 +21,8 @@
 - **Верхнеуровневые, прогон один раз** (общие слои business ↔ ajtbd ↔
   swot ↔ hypothesis-map, без проекта): `factor-business`,
   `currentmetric-metric`, `segmentproblem-bizproblem`, `segment-subject`,
-  `solution-business`, `business-segment`, `prospective-consistency`.
+  `solution-business`, `business-segment`, `prospective-consistency`,
+  `provenance-upstream`.
 - **Верхнеуровневый M:N, прогон один раз над всеми проектами**:
   `addresses-problem-bizproblem`.
 - **По каждому проекту** (общие слои swot/hypothesis-map ↔ продукт проекта;
@@ -741,6 +742,61 @@ prospective, business/business-problem.served=prospective). Проверь
 hint, не error. НЕ флагай проспективные сущности как «висяк».
 ```
 
+## provenance-upstream
+
+**Source:** `docs/business/offering.md`, `docs/business/current-metric.md`,
+`docs/business/business-problem.md`, `docs/ajtbd/segment.md` (поле
+`from-project` + `served`).
+**Destination:** `docs/projects/*/vision.md` (`lifecycle`,
+`market-maturity`, `addresses-problem`).
+**Скоуп:** один раз, над всеми проектами.
+**Применим если:** есть хотя бы один проект; наверху есть записи с
+непустым `from-project` **или** проект на `lifecycle: stable`.
+
+Обратная сторона восходящего потока (reconcile-up, roadmap §6): `from-project`
+делает контур наблюдаемым — этот угол проверяет провенанс с двух концов
+(ссылка верна, контур замкнут, `market-maturity ↔ served ↔ from-project`
+согласованы). Дополняет `prospective-consistency` (там — `market-maturity ↔
+served`; здесь — измерение провенанса `from-project`).
+
+**Что искать:**
+- `error`: `*.from-project` ссылается на проект, которого нет (нет каталога
+  `docs/projects/<slug>/`) — провенанс бьёт в несуществующий проект.
+- `warning`: рассинхрон `market-maturity ↔ served ↔ from-project`:
+  - запись наверху с `from-project = <slug>`, но `served = prospective`
+    (продукт проявил/подтвердил, а рынок не повышен — контур не доведён);
+  - `served = served` с `from-project = <slug>`, но `vision` проекта
+    `<slug>` не `market-maturity: served` и/или не адресует связанную
+    проблему (провенанс не подтверждается продуктом).
+- `hint`: **обратная сторона** — проект на `lifecycle: stable` (особенно
+  `market-maturity: prospective`), у которого связанные сущности наверху
+  (offering / current-metric / адресуемые business-problem / сегменты) **не
+  несут** `from-project = <slug>` и не повышены до `served` — контур не
+  замкнут, повод прогнать `/entrypoint --upstream <slug>`.
+
+**Промпт-добавка:**
+```
+from-project на offering/current-metric/business-problem/segment — провенанс
+восходящего потока: какой дозревший продукт проявил/подтвердил запись.
+Триггер потока — vision.lifecycle → stable.
+
+Прямая сторона: каждый from-project резолвится в реальный
+docs/projects/<slug>/? Нет — error.
+
+Согласованность market-maturity ↔ served ↔ from-project:
+- from-project проставлен, но served=prospective — warning (контур не
+  доведён до served);
+- served=served + from-project=<slug>, но vision проекта <slug> не
+  market-maturity: served и/или не адресует связанную проблему — warning.
+
+Обратная сторона (замкнут ли контур): для каждого проекта на
+lifecycle: stable — несут ли связанные сущности наверху его from-project и
+повышены ли до served? Нет — hint (повод запустить reconcile-up). Связь
+семантическая (не grep): «связанная сущность» — по vision.addresses-problem
+и адресуемому сегменту. Проспективную сущность без from-project НЕ флагай
+как «висяк». В finding указывай проект-провенанс.
+```
+
 ## capability-hypothesis
 
 **Source:** `docs/projects/<slug>/capability.md` (поле `hypotheses`).
@@ -851,31 +907,33 @@ situation.hypotheses — авторское ребро interface → hypothesis-
 6. `solution-business` (ajtbd → бизнес: нанятое решение ↔ конкурент/офер)
 7. `business-segment` (бизнес → ajtbd: оферы/каналы обслуживают сегменты)
 8. `prospective-consistency` (market-maturity ↔ served сущностей наверху)
+9. `provenance-upstream` (from-project ↔ проект: обратная сторона
+   восходящего потока, согласованность market-maturity ↔ served ↔ from-project)
 
 **По каждому проекту** (для каждого `<slug>` из `docs/projects/`, кроме
 `_canon`; раскрывается в пары `проект × lens`):
 
-9. `goal-vision` (проблема → продукт; скоуп к проблемам проекта)
-10. `subject-user` (проблема → продукт; скоуп к проблемам проекта)
-11. `segment-user` (ajtbd → продукт)
-12. `job-vision` (ajtbd → продукт: Big/Core Job ↔ vision.Success)
-13. `segmentproblem-vision` (ajtbd → продукт: трение ↔ vision.Problem)
-14. `mechanic-capability` (ajtbd → продукт: механика ценности ↔ capability)
-15. `bet-capability` (проблема → продукт; скоуп к проблемам проекта)
-16. `capability-hypothesis` (продукт → hypothesis-map: capability.hypotheses)
-17. `capability-job` (продукт → ajtbd: capability.jobs)
-18. `user-who` (foundation, продукт → interface проекта)
-19. `surface-zone` (foundation)
-20. `capability-situation` (foundation)
-21. `situation-job` (interface → ajtbd: situation.jobs)
-22. `situation-hypothesis` (interface → hypothesis-map: situation.hypotheses)
-23. `capability-domain` (если у проекта есть `domains/`)
-24. `integration-domain` (если у проекта есть `domains/`)
-25. `surface-screen` (если у проекта есть `screens/`)
-26. `constraint-surface` (cross-внутри-project)
-27. `market-capability` (часто даёт hints, не error)
+10. `goal-vision` (проблема → продукт; скоуп к проблемам проекта)
+11. `subject-user` (проблема → продукт; скоуп к проблемам проекта)
+12. `segment-user` (ajtbd → продукт)
+13. `job-vision` (ajtbd → продукт: Big/Core Job ↔ vision.Success)
+14. `segmentproblem-vision` (ajtbd → продукт: трение ↔ vision.Problem)
+15. `mechanic-capability` (ajtbd → продукт: механика ценности ↔ capability)
+16. `bet-capability` (проблема → продукт; скоуп к проблемам проекта)
+17. `capability-hypothesis` (продукт → hypothesis-map: capability.hypotheses)
+18. `capability-job` (продукт → ajtbd: capability.jobs)
+19. `user-who` (foundation, продукт → interface проекта)
+20. `surface-zone` (foundation)
+21. `capability-situation` (foundation)
+22. `situation-job` (interface → ajtbd: situation.jobs)
+23. `situation-hypothesis` (interface → hypothesis-map: situation.hypotheses)
+24. `capability-domain` (если у проекта есть `domains/`)
+25. `integration-domain` (если у проекта есть `domains/`)
+26. `surface-screen` (если у проекта есть `screens/`)
+27. `constraint-surface` (cross-внутри-project)
+28. `market-capability` (часто даёт hints, не error)
 
-Полный рой = `8 верхнеуровневых + Σ по проектам (применимые
+Полный рой = `9 верхнеуровневых + Σ по проектам (применимые
 project-углы)`.
 
 `--quick` запускает по каждому проекту три foundation-угла

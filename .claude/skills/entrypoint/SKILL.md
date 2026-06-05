@@ -65,7 +65,7 @@ description: Единая точка входа аналитика во всю �
 | `/entrypoint <свободный текст / транскрипт / ссылка / путь>` | сырьё → конвейер intake (`references/intake.md`) |
 | `/entrypoint --mode <name>` | принудительно работать в указанном режиме |
 | `/entrypoint --audit [<scope>]` | режим `аудитить`: предложить нужный аудит-рой по `scope` или по всем затронутым слоям |
-| `/entrypoint --upstream [<slug>]` | восходящий поток (заглушка, Фаза 6 — `references/lifecycle-upstream.md`) |
+| `/entrypoint --upstream [<slug>]` | восходящий поток `project → business`: сверить дозревший продукт с верхним слоем (`references/lifecycle-upstream.md`) |
 
 `mode` ∈ {`наполнить`, `актуализировать`, `рефакторить`, `чистить`,
 `аудитить`}.
@@ -190,14 +190,29 @@ state системы: клиентский оркестратор (`../entrypoin
 Ответ уходит в `main` (правка артефактов/своего state); клиент подхватит
 его при следующем rebase своей ветки `client`.
 
-## Восходящий поток (заглушка — Фаза 6)
+## Восходящий поток (reconcile-up)
 
-Триггер — переход `vision.lifecycle → stable` (или ручной `--upstream`):
-дозревший продукт меняет реальность бизнеса (офер, профиль, baseline,
-повышение `prospective → served`). Детали процедуры `reconcile-up` —
-`references/lifecycle-upstream.md` (наполняется в Фазе 6, roadmap §6). В
-этой фазе оркестратор лишь **замечает** триггер и помечает нить
-«сверить продукт с бизнесом» как открытую.
+Триггер — переход `vision.lifecycle → stable` (или ручной `--upstream
+<slug>`): дозревший продукт меняет реальность бизнеса. Оркестратор ведёт
+сверку **сам**, но **пишет через делегирование** — четыре шага, каждый
+через `AskUserQuestion`, без авто-записи:
+
+1. **продукт как офер** → `business/offering` с `from-project` (через
+   `/business-deep-dive`);
+2. **профиль** → правка `profile.md`, если продукт сдвинул «как
+   зарабатывает / кого обслуживает» (через `/business-deep-dive`);
+3. **метрики** → новые baseline в `business/current-metric` с
+   `from-project` (через `/business-deep-dive`);
+4. **проспективное → обслуживаемое** → повысить `served` у связанных
+   `ajtbd/segment` (через `/segment-deep-dive`) и
+   `business/business-problem` (через `/business-deep-dive`), проставив
+   `from-project`.
+
+Провенанс-поля `*.from-project` делают контур наблюдаемым; обратную
+сторону (что породил каждый продукт, замкнут ли контур) сводит
+`/cross-audit` (угол `provenance-upstream`). Контур **процессный** — не
+ломает «downstream read-only» для форков-соседей. Полная процедура —
+`references/lifecycle-upstream.md`.
 
 ## Завершение сессии
 
@@ -223,5 +238,6 @@ state системы: клиентский оркестратор (`../entrypoin
 - Не аккумулировать историю в `state/` — forward-only (закрытое
   удаляется).
 - Не пушить и не коммитить. Коммит/push — гейт аналитика (`CLAUDE.md`).
-- Восходящий поток (`reconcile-up`) в этой фазе не выполнять — заглушка
-  под Фазу 6.
+- В восходящем потоке (`reconcile-up`) не писать в `docs/` напрямую —
+  каждое изменение наверху уезжает через `/business-deep-dive` или
+  `/segment-deep-dive`, всё через `AskUserQuestion`, без авто-записи.
