@@ -183,7 +183,7 @@ Score = важность × частотность × размер × (10 − у
 
 ## Связь графа с соседними слоями (семантическая, ловит /cross-audit)
 
-- `segment` ↔ `projects/<slug>/persona` — рынок ↔ пользователь продукта
+- `segment` ↔ `projects/<slug>/user` — рынок ↔ пользователь продукта
   (разные сущности).
 - `job` (`big`/`core`) → `projects/<slug>/vision.Success` — успех
   продукта целит в Big/Core Job.

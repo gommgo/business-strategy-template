@@ -247,7 +247,7 @@ segment + level + status=draft`, прочее `—`), записать state-з�
   делает `/job-graph-deep-dive`.
 - Не повышать `draft → stable` без подтверждения аналитика; не понижать
   сам.
-- Не путать `ajtbd/segment` (клиент/рынок) с `projects/<slug>/persona`
+- Не путать `ajtbd/segment` (клиент/рынок) с `projects/<slug>/user`
   (пользователь нашего решения) — соседние слои.
 - Не аккумулировать историю в `state/` — forward-only.
 - Не писать в `state/` соседнего (клиентского) скилла — только read-only.

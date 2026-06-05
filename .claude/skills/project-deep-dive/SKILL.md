@@ -1,6 +1,6 @@
 ---
 name: project-deep-dive
-description: Углублённая проработка продуктового слоя одного проекта в `docs/projects/<project-slug>/` (vision · persona · capability · boundary · surface · integration · constraint · market). Принимает `<project-slug>` первым аргументом; без него — предлагает пикер по папкам проектов (или заводит новый проект). Ведёт аналитика через 8 фаз вижн-мейкинга, заполняет артефакты через структурированные вопросы (AskUserQuestion), при необходимости запускает рой агентов для web-research конкурентов и регуляторики, фиксирует контекст в собственной памяти `state/<project-slug>/`, не выдумывает домен и не пишет маркетинговую копию. Использовать всегда, когда речь о продуктовом слое проекта, формировании вижна продукта, разборе интервью с бизнесом, заведении/углублении персоны, возможности, поверхности, интеграции, ограничения, рыночного аналога или границы продукта, заведении нового проекта, проактивном проведении аналитика по фазам проработки, переходе записи `status: draft → stable`, или копании семантических связей между продуктовыми сущностями. Единственная точка входа в `docs/projects/<slug>/` для аналитика — новые строки и правки делаются только через этот скилл.
+description: Углублённая проработка продуктового слоя одного проекта в `docs/projects/<project-slug>/` (vision · user · capability · boundary · surface · integration · constraint · market). Принимает `<project-slug>` первым аргументом; без него — предлагает пикер по папкам проектов (или заводит новый проект). Ведёт аналитика через 8 фаз вижн-мейкинга, заполняет артефакты через структурированные вопросы (AskUserQuestion), при необходимости запускает рой агентов для web-research конкурентов и регуляторики, фиксирует контекст в собственной памяти `state/<project-slug>/`, не выдумывает домен и не пишет маркетинговую копию. Использовать всегда, когда речь о продуктовом слое проекта, формировании вижна продукта, разборе интервью с бизнесом, заведении/углублении пользователя, возможности, поверхности, интеграции, ограничения, рыночного аналога или границы продукта, заведении нового проекта, проактивном проведении аналитика по фазам проработки, переходе записи `status: draft → stable`, или копании семантических связей между продуктовыми сущностями. Единственная точка входа в `docs/projects/<slug>/` для аналитика — новые строки и правки делаются только через этот скилл.
 ---
 
 # project-deep-dive
@@ -36,7 +36,7 @@ description: Углублённая проработка продуктовог�
 
 Внутри сессии выбранный `<project-slug>` фиксируется и подставляется во
 все пути: `docs/projects/<project-slug>/vision.md`,
-`docs/projects/<project-slug>/persona.md`, … и в state
+`docs/projects/<project-slug>/user.md`, … и в state
 (`state/<project-slug>/…`).
 
 ### Заведение нового проекта
@@ -47,7 +47,7 @@ description: Углублённая проработка продуктовог�
 
 1. Спросить `<new-slug>` (kebab-case) через `AskUserQuestion` (Other),
    если не задан.
-2. Скопировать форму: `vision.md` + 7 kind-файлов (`persona.md`,
+2. Скопировать форму: `vision.md` + 7 kind-файлов (`user.md`,
    `capability.md`, `boundary.md`, `surface.md`, `integration.md`,
    `constraint.md`, `market.md`) из `docs/projects/_canon/project/` в
    `docs/projects/<new-slug>/`. Канон-README **не** копируется — форма
@@ -70,7 +70,7 @@ description: Углублённая проработка продуктовог�
   `goal`;
 - `vision.Success` ← `docs/business-problem/metric` (целевые метрики —
   best-effort таргет, **не** гарантия; не копировать как обещание);
-- `persona` ← `docs/business-problem/subject` (субъект влияния) и
+- `user` ← `docs/business-problem/subject` (субъект влияния) и
   `docs/ajtbd/segment` (сегмент по работам Advanced JTBD);
 - `capability` реализует `docs/business-problem/bet`/`goal`.
 
@@ -111,10 +111,10 @@ description: Углублённая проработка продуктовог�
 | `/project-deep-dive <project-slug> --research <kind>:<query>` | запустить рой агентов на тему |
 | `/project-deep-dive --new <new-slug>` | завести новый проект из формы `_canon/project/` |
 
-`kind` ∈ {`vision`, `persona`, `capability`, `boundary`, `surface`,
+`kind` ∈ {`vision`, `user`, `capability`, `boundary`, `surface`,
 `integration`, `constraint`, `market`}.
 
-`phase` ∈ {`discovery`, `persona`, `capability`, `surface`,
+`phase` ∈ {`discovery`, `user`, `capability`, `surface`,
 `integration`, `constraint`, `market`, `cohesion`}.
 
 Если первый аргумент совпал с именем папки в `docs/projects/` (кроме
@@ -157,7 +157,7 @@ description: Углублённая проработка продуктовог�
    открытые вопросы, особенно `**blocker**`.
 4. Определить **текущую фазу** по дереву:
    - vision не существует или status:draft → `discovery`;
-   - persona-таблица пустая → `persona`;
+   - user-таблица пустая → `user`;
    - capability-таблица пустая → `capability`;
    - surface пустая → `surface`;
    - integration пустая → `integration`;
@@ -171,7 +171,7 @@ description: Углублённая проработка продуктовог�
    Текущая фаза: <name> (<n>/<N>)
    docs/projects/<project-slug>/ покрытие:
      vision      [draft]  (addresses-problem: 1)
-     persona     3 stable, 1 draft
+     user     3 stable, 1 draft
      capability  2 draft
      surface     —
      integration —
@@ -196,7 +196,7 @@ description: Углублённая проработка продуктовог�
 | фаза | цель | артефакты на выходе |
 |---|---|---|
 | `discovery` | vision.md draft → stable; первое касание проблемы и успеха | `vision.md` |
-| `persona` | сегменты пользователей/клиентов | `persona.md` |
+| `user` | сегменты пользователей/клиентов | `user.md` |
 | `capability` | бизнес-возможности верхнего уровня | `capability.md` |
 | `surface` | где продукт «торчит наружу» | `surface.md` |
 | `integration` | внешние системы | `integration.md` |
@@ -220,7 +220,7 @@ description: Углублённая проработка продуктовог�
   anti-patterns из `Что <kind> НЕ`; свободная форма через Other для
   значений.
 - **B. Сырьё**. Args = `<project-slug>` + свободный текст или транскрипт
-  интервью с бизнесом. Извлечь кандидатов по слоям (persona /
+  интервью с бизнесом. Извлечь кандидатов по слоям (user /
   capability / surface / integration / constraint / market), показать
   план, по подтверждению завести stub-строки, погрузиться в каждую
   через C.
@@ -240,7 +240,7 @@ description: Углублённая проработка продуктовог�
   - теста-критерия (бинарный выбор ✅/❌ из секции `Тест-критерий`);
   - структурного перечисления (enum типа `surface.type`,
     `integration.direction`, `constraint.kind`);
-  - выбора существующего slug соседа («связать с persona X / Y / нужен
+  - выбора существующего slug соседа («связать с user X / Y / нужен
     новый»).
 - **Свободная форма** (через Other) — для **значения**: `name`,
   `description`, `value`, `jobs`, `pains`, `why`, `payload`, `source`,
@@ -293,17 +293,17 @@ merge / fetch, обычная git-механика.
 В отличие от `<project-slug>/interface/`, продуктовый слой **не
 валидирует** slug-ссылки между записями. Связи семантические:
 
-- `persona.slug` упоминается в `surface.persona` и `capability.persona`
+- `user.slug` упоминается в `surface.user` и `capability.user`
   — но и без явного полей-связи запись может быть валидна;
-- `capability` без persona — не ошибка, но подозрительно (повод
+- `capability` без user — не ошибка, но подозрительно (повод
   поднять при cohesion);
-- `surface` без persona — мёртвая, повод задать вопрос;
+- `surface` без user — мёртвая, повод задать вопрос;
 - `constraint` обычно привязан к surface или integration в `description`,
   не отдельным полем.
 
 `/project-audit <project-slug>` ловит **внутрипроектные** тупики
 (пустые обязательные слоты, draft без якоря). `/cross-audit` ловит
-**между-слойные** несостыковки (persona без покрытия в
+**между-слойные** несостыковки (user без покрытия в
 `<slug>/interface/who` и т.п., продукт против `addresses-problem`). Сам
 project-deep-dive — **не аудитор**; в конце сессии предложит запустить
 один из них.
@@ -347,7 +347,7 @@ project-deep-dive — **не аудитор**; в конце сессии пре
 ## Stub-сущности
 
 Если копаемая сущность ссылается семантически на ещё не существующий
-slug (например, capability упомянула persona, которой ещё нет):
+slug (например, capability упомянула user, которой ещё нет):
 
 1. В соответствующем файле проекта — новая строка: `slug + name +
    description + status=draft`, остальные ячейки `—`.
@@ -366,7 +366,7 @@ slug (например, capability упомянула persona, которой е
 4. По подтверждению — выполнить все правки одним пакетом.
 5. Удалить запись из её файла.
 6. Удалить `state/<project-slug>/<kind>/<slug>.md`.
-7. Если удалена единственная persona — спросить, не пора ли
+7. Если удалена единственная user — спросить, не пора ли
    пересмотреть vision.
 
 ## Завершение сессии

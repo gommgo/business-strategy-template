@@ -19,7 +19,7 @@ docs/projects/
 ├── <project-slug>/      ← ДАННЫЕ одного проекта
 │   ├── README.md        чем продукт, какие проблемы закрывает
 │   ├── vision.md        singleton + addresses-problem (M:N → business-problem)
-│   ├── persona.md … market.md   7 kind продукта
+│   ├── user.md … market.md   7 kind продукта
 │   ├── interface/       who/stage/situation/zone/block/ux-substrate/data-items
 │   ├── screens/         flows/ screens/ blocks/ shells/
 │   └── domains/         (опц.) <bounded-context>/

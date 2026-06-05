@@ -104,7 +104,7 @@ docs-репо проекта, который ничего не помнит пр
 
 - **`/project-deep-dive <slug>`** (аналитик) / **`/project-deep-dive-for-business`**
   — vision (+ `addresses-problem` M:N к проблемам) + 7 kind продукта
-  (persona / capability / boundary / surface / integration / constraint / market).
+  (user / capability / boundary / surface / integration / constraint / market).
   Новый проект заводит сам скилл (копирует форму из `_canon/project/`).
 - **`/project-audit <slug>`** — узкий аудит внутри продуктового слоя.
 - **`/interface-deep-dive <slug>`** → **`/interface-audit <slug>`** — UX-слой
@@ -123,8 +123,8 @@ docs-репо проекта, который ничего не помнит пр
 
 В конце или после крупных изменений. Рой агентов проверяет семантику между
 слоями: business ↔ ajtbd ↔ business-problem ↔ (по каждому проекту: project ↔
-interface ↔ domain ↔ screen). Не slug-валидация — смысловая проверка («персона
-без UX-покрытия», «сегмент без персоны», «проблема бизнеса без единого
+interface ↔ domain ↔ screen). Не slug-валидация — смысловая проверка («пользователь
+без UX-покрытия», «сегмент без пользователя», «проблема бизнеса без единого
 трения-доказательства», «проблема, которую не закрывает ни один проект»,
 «метрика как гарантия»). Только отчёт; деструктивные правки — через
 соответствующий deep-dive.

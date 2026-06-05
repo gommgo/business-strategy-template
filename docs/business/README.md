@@ -1,8 +1,9 @@
 # Артефакты бизнеса
 
 Самый верхний слой документации: **кто этот бизнес заказчика** — до того,
-как мы определили проблему и тем более решение. 1 singleton `profile.md`
-+ 5 плоских md-файлов в `docs/business/`. Источник истины — **материалы
+как мы определили проблему и тем более решение. 1 singleton `profile.md`,
+5 плоских md-файлов картины бизнеса и строгий реестр проблем
+`business-problem.md` в `docs/business/`. Источник истины — **материалы
 клиента** (сайт, PDF, презентации, соцсети, интервью) и **рой
 web-research**; не наша проекция и не будущее IT-решение.
 
@@ -26,6 +27,7 @@ web-research**; не наша проекция и не будущее IT-реш�
 | [`competitor.md`](competitor.md) | игрок на рынке заказчика | slug · name · description · url · position · sources · status |
 | [`current-metric.md`](current-metric.md) | текущий KPI бизнеса — baseline-кандидат | slug · name · description · value · as-of · source · status |
 | [`material.md`](material.md) | источник, из которого сложен профиль | slug · name · kind · uri · status |
+| [`business-problem.md`](business-problem.md) | реестр проблем бизнеса + граница гарантии и таргета | slug · name · problem · guarantee · target · out-of-control · scope · served · from-project · status |
 
 ## Принципы оформления
 

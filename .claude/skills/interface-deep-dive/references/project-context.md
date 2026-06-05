@@ -2,7 +2,7 @@
 
 Скилл `interface-deep-dive` живёт **на слой ниже** продуктового слоя
 **того же проекта**. Продуктовый слой описывает **продукт**
-(vision/persona/capability/surface) и живёт в
+(vision/user/capability/surface) и живёт в
 `docs/projects/<project-slug>/` (vision + 7 файлов); interface —
 **UX-аналитику** того же проекта (who/situation/zone/block) в
 `docs/projects/<project-slug>/interface/`. Семантическая связь между
@@ -16,12 +16,12 @@
 
 | interface | продукт (`docs/projects/<project-slug>/`) | как использовать |
 |---|---|---|
-| `who` (роль) | `persona` (сегмент адресатов продукта) | при заведении нового `who` через `AskUserQuestion` предложи опции = существующие persona проекта; «нужен новый» (Other) — если ни одна не подходит. Записывается не в frontmatter, а опционально в `state/<project-slug>/who/<slug>.md` как «семантически принадлежит persona:X» |
+| `who` (роль) | `user` (сегмент адресатов продукта) | при заведении нового `who` через `AskUserQuestion` предложи опции = существующие user проекта; «нужен новый» (Other) — если ни одна не подходит. Записывается не в frontmatter, а опционально в `state/<project-slug>/who/<slug>.md` как «семантически принадлежит user:X» |
 | `situation` (UX-ситуация) | `capability` (что продукт умеет) | при заведении situation предложи опции = существующие capability проекта; для системных ситуаций — `—` |
 | `zone` (зона интерфейса) | `surface` (где продукт работает) | при заведении zone предложи опции = существующие surface проекта; zone обязан семантически принадлежать какой-то surface |
 
 Все продуктовые сущности берутся из **того же проекта**
-(`docs/projects/<project-slug>/persona.md`, `…/capability.md`,
+(`docs/projects/<project-slug>/user.md`, `…/capability.md`,
 `…/surface.md`), не из глобального слоя.
 
 ## Когда показывать связь
@@ -34,11 +34,11 @@
 
    ```
    AskUserQuestion:
-   header: "Связь с persona"
+   header: "Связь с user"
    options:
-     - "persona:<slug-1>" (description = name)
-     - "persona:<slug-2>" (description = name)
-     - "Системный актор (без persona)"
+     - "user:<slug-1>" (description = name)
+     - "user:<slug-2>" (description = name)
+     - "Системный актор (без user)"
      - Other (через текст: «не одна из перечисленных, опишу»)
    ```
 
@@ -46,10 +46,10 @@
    `## Доменные решения`:
 
    ```markdown
-   - Семантически принадлежит persona:<persona-slug>.
+   - Семантически принадлежит user:<user-slug>.
    ```
 
-3. Если выбран «Системный актор» — записать «Намеренно без persona —
+3. Если выбран «Системный актор» — записать «Намеренно без user —
    системный интерес X (см. README канона who)».
 
 4. Если выбран Other — записать ответ аналитика дословно.
@@ -104,22 +104,22 @@ options:
 
 Опции: «Да, запустим» / «Нет, продолжим без продукта».
 
-## Что делать, если уже есть запись в state с другой persona
+## Что делать, если уже есть запись в state с другой user
 
 Если `who:doctor` в `state/<project-slug>/who/doctor.md` уже привязан
-семантически к `persona:doctor-clinic-owner`, а в новой сессии аналитик
-хочет связать с `persona:doctor-employee` — это **смена контекста**.
+семантически к `user:doctor-clinic-owner`, а в новой сессии аналитик
+хочет связать с `user:doctor-employee` — это **смена контекста**.
 Скилл:
 
 1. Не молча перезаписывает.
-2. `AskUserQuestion`: «Уже было связано с persona:X. Меняем на
-   persona:Y или who относится к обеим?»
+2. `AskUserQuestion`: «Уже было связано с user:X. Меняем на
+   user:Y или who относится к обеим?»
 3. По выбору — обновить state.
 
 ## Cross-audit
 
 После каждой сессии скилл предлагает `/cross-audit --quick` (lens
-`persona-who`) — это поможет аналитику увидеть, не остались ли
-who без persona или persona без who **в этом проекте**.
+`user-who`) — это поможет аналитику увидеть, не остались ли
+who без user или user без who **в этом проекте**.
 
 Скилл **сам** не запускает `/cross-audit` — это работа аналитика.

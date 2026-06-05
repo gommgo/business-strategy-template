@@ -33,10 +33,10 @@
 | kind | обязательно при stable |
 |---|---|
 | `vision` | секции Problem, Success, Non-goals (Non-goals может быть `_нет_`, но секция должна быть) + непустой `addresses-problem` (≥1 slug-реф) |
-| `persona` | `context`, `jobs`, `pains`, `success` |
-| `capability` | `value`, `persona` (≥1 элемент) |
+| `user` | `context`, `jobs`, `pains`, `success` |
+| `capability` | `value`, `user` (≥1 элемент) |
 | `boundary` | `why` |
-| `surface` | `type`, `lives-at`, `persona` (≥1 элемент) |
+| `surface` | `type`, `lives-at`, `user` (≥1 элемент) |
 | `integration` | `direction`, `owner`, `payload` |
 | `constraint` | `kind`, `source` |
 | `market` | `url`, `sources` (≥1 элемент) |
@@ -106,28 +106,28 @@ state. Либо закрыть вопрос, либо понизить запи�
 
 ## Семантические правила (R-SEM-*)
 
-### R-SEM-001 — Capability без persona
+### R-SEM-001 — Capability без user
 
 **Severity:** `warning` (если draft) / `error` (если stable, дублирует
 R-STRUCT-002).
 
 **Где:** `capability.md`.
 
-**Обнаружение:** `persona = —` или пустой массив.
+**Обнаружение:** `user = —` или пустой массив.
 
-**Рекомендация:** «capability без persona — мёртвая. Связать или
+**Рекомендация:** «capability без user — мёртвая. Связать или
 удалить через `/project-deep-dive <project-slug> capability:<slug>`».
 
-### R-SEM-002 — Surface без persona
+### R-SEM-002 — Surface без user
 
 **Severity:** `warning` (если draft) / `error` (если stable, дублирует
 R-STRUCT-002).
 
 **Где:** `surface.md`.
 
-**Обнаружение:** `persona = —` или пустой массив.
+**Обнаружение:** `user = —` или пустой массив.
 
-**Рекомендация:** «surface без persona — кому она нужна? Связать
+**Рекомендация:** «surface без user — кому она нужна? Связать
 или удалить».
 
 ### R-SEM-003 — Boundary с backlog-обоснованием
@@ -225,31 +225,31 @@ R-STRUCT-002).
 
 ## Coverage-правила (R-COV-*)
 
-### R-COV-001 — Persona без жителей
+### R-COV-001 — User без жителей
 
 **Severity:** `hint`.
 
-**Где:** `persona.md`, проверяется через сводку упоминаний в
+**Где:** `user.md`, проверяется через сводку упоминаний в
 `capability.md` и `surface.md`.
 
-**Обнаружение:** persona-slug не появляется ни в одном
-`capability.persona` и ни в одном `surface.persona`.
+**Обнаружение:** user-slug не появляется ни в одном
+`capability.user` и ни в одном `surface.user`.
 
-**Рекомендация:** «persona X не используется ни в capability, ни в
+**Рекомендация:** «user X не используется ни в capability, ни в
 surface. Либо подключить, либо рассмотреть удаление».
 
-### R-COV-002 — Vision stable при пустой persona-таблице
+### R-COV-002 — Vision stable при пустой user-таблице
 
 **Severity:** `hint`.
 
-**Где:** `vision.md` + `persona.md`.
+**Где:** `vision.md` + `user.md`.
 
 **Обнаружение:** `vision.md` имеет `**status:** \`stable\``, но в
-`persona.md` нет ни одной записи.
+`user.md` нет ни одной записи.
 
-**Рекомендация:** «vision закрыт как stable, но ни одной persona
+**Рекомендация:** «vision закрыт как stable, но ни одного user
 не заведено. Обычно vision созревает после первой проработки
-persona. Возможно, рано закрыли — пересмотреть через
+user. Возможно, рано закрыли — пересмотреть через
 `/project-deep-dive <project-slug>`».
 
 ### R-COV-003 — Stable со ссылкой на draft

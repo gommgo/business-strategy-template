@@ -108,14 +108,14 @@ managed (инстанс на `*.sftbmb.ru`) или self-hosted (ваш форк)
 Связи между слоями **семантические**, не slug-валидируемые: профиль и
 конкуренты бизнеса (business) питают факторы SWOT (business-problem),
 текущая метрика становится baseline целевой; сегмент по работам (ajtbd)
-проявляется как `subject` (business-problem) и как `persona` продукта,
+проявляется как `subject` (business-problem) и как `user` продукта,
 трение сегмента (`ajtbd/segment-problem`) доказывает проблему бизнеса
 (`frame`) и `vision.Problem`, Big/Core-работа целит в `vision.Success`,
 механики ценности графа работ — кандидаты в `capability`, нанятое решение
 (`ajtbd/solution`) сопоставляется с `competitor`/`offering`; проблема ↔
 продукт — **M:N** (`projects/<slug>/vision.addresses-problem`);
 цель/метрика/субъект (business-problem) проявляются как
-vision/persona/capability в проекте; persona адресата проявляется как
+vision/user/capability в проекте; user адресата проявляется как
 роль who (interface), capability реализуется через situation + domain,
 surface несёт zones, integration — адаптеры в domain. Несостыковки ловит
 `/cross-audit` через рой агентов (по каждому проекту).
@@ -171,7 +171,7 @@ Business-problem-слой (строгий, методология, **много�
 каждой проблемы**, не grep.
 
 Project-слой (по проекту): у каждого проекта в `docs/projects/<slug>/` —
-1 singleton `vision.md` + 7 табличных kind (`persona`, `capability`,
+1 singleton `vision.md` + 7 табличных kind (`user`, `capability`,
 `boundary`, `surface`, `integration`, `constraint`, `market`). Один
 проект (папка) = один продукт = один `vision.md`; разные продукты —
 разные папки. `vision` несёт `addresses-problem` (массив, M:N к строкам
@@ -237,7 +237,7 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
 Правки артефактов делаются свободно. Уточнять — ТОЛЬКО если правка
 способна:
 
-- сломать накопленную продуктовую модель (vision/persona/capability —
+- сломать накопленную продуктовую модель (vision/user/capability —
   основу остальных слоёв);
 - сломать накопленную craft-экспертизу библиотеки;
 - несовместимо раскатиться вширь (контракт артефактов всех слоёв,

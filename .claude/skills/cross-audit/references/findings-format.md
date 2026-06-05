@@ -45,14 +45,14 @@ preamble, без пояснений. Скилл парсит ответ и об�
 
 ```json
 {
-  "lens": "persona-who",
+  "lens": "user-who",
   "project": "referral-network",
   "problem": null,
   "severity": "error",
-  "title": "persona:doctor не имеет соответствия в interface.who проекта",
-  "evidence": "persona:doctor.context = «врач инициирующей клиники, делает направление». В projects/referral-network/interface/who.md нет ни одной роли, выполняющей эту функцию. Существующие who: nurse, scheduler, any — не покрывают.",
-  "suggestion": "Завести who:doctor через /interface-deep-dive referral-network who, или пересмотреть persona в /project-deep-dive referral-network persona:doctor (возможно, persona = клиника как организация, а действующий — nurse).",
-  "source-refs": ["docs/projects/referral-network/persona.md:doctor"],
+  "title": "user:doctor не имеет соответствия в interface.who проекта",
+  "evidence": "user:doctor.context = «врач инициирующей клиники, делает направление». В projects/referral-network/interface/who.md нет ни одной роли, выполняющей эту функцию. Существующие who: nurse, scheduler, any — не покрывают.",
+  "suggestion": "Завести who:doctor через /interface-deep-dive referral-network who, или пересмотреть user в /project-deep-dive referral-network user:doctor (возможно, user = клиника как организация, а действующий — nurse).",
+  "source-refs": ["docs/projects/referral-network/user.md:doctor"],
   "destination-refs": ["docs/projects/referral-network/interface/who.md"]
 }
 ```

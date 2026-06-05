@@ -24,7 +24,7 @@
 
 Внутри проекта `projects/<slug>/`:
 
-- `vision.md` + 7 kind продукта (persona / capability / boundary / surface /
+- `vision.md` + 7 kind продукта (user / capability / boundary / surface /
   integration / constraint / market) — вход `/project-deep-dive <slug>`.
 - `interface/` — who / stage / situation / zone / block / ux-substrate /
   data-items — вход `/interface-deep-dive <slug>`.

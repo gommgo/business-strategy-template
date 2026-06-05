@@ -1,6 +1,6 @@
 ---
 name: project-audit
-description: Узкий аудит консистентности продуктового слоя одного проекта в `docs/projects/<project-slug>/` (vision + 7 табличных kinds: persona, capability, boundary, surface, integration, constraint, market) — невалидные enum, дубликаты slug, пустые обязательные слоты в stable-записях, невалидные status, рассинхрон stable со state-blocker'ами, vision без addresses-problem, семантические подозрения внутри проекта (capability без persona, surface без persona, boundary с backlog-обоснованием, constraint без source, market без url/sources), coverage-дыры (persona без покрытия, vision stable при пустых соседях). Принимает `<project-slug>` первым аргументом; без него — пикер по папкам проектов. Сквозную проверку с interface/domain/screen-слоями и привязку к проблемам делает `/cross-audit`, не этот скилл. Не правит артефакты, только отчёт; деструктивные правки — через `/project-deep-dive`. Использовать перед коммитом артефактов, когда `/project-deep-dive` предлагает прогон в конце сессии, перед `/cross-audit`, или когда аналитик подозревает рассогласование внутри продуктового слоя проекта.
+description: Узкий аудит консистентности продуктового слоя одного проекта в `docs/projects/<project-slug>/` (vision + 7 табличных kinds: user, capability, boundary, surface, integration, constraint, market) — невалидные enum, дубликаты slug, пустые обязательные слоты в stable-записях, невалидные status, рассинхрон stable со state-blocker'ами, vision без addresses-problem, семантические подозрения внутри проекта (capability без user, surface без user, boundary с backlog-обоснованием, constraint без source, market без url/sources), coverage-дыры (user без покрытия, vision stable при пустых соседях). Принимает `<project-slug>` первым аргументом; без него — пикер по папкам проектов. Сквозную проверку с interface/domain/screen-слоями и привязку к проблемам делает `/cross-audit`, не этот скилл. Не правит артефакты, только отчёт; деструктивные правки — через `/project-deep-dive`. Использовать перед коммитом артефактов, когда `/project-deep-dive` предлагает прогон в конце сессии, перед `/cross-audit`, или когда аналитик подозревает рассогласование внутри продуктового слоя проекта.
 ---
 
 # project-audit
@@ -31,7 +31,7 @@ description: Узкий аудит консистентности продукт
 | `/project-audit <project-slug> <kind>` | прогон одного файла + ссылающихся соседей |
 | `/project-audit <project-slug> <kind>:<slug>` | одна запись + 1-shell соседи |
 
-`kind` ∈ {`vision`, `persona`, `capability`, `boundary`, `surface`,
+`kind` ∈ {`vision`, `user`, `capability`, `boundary`, `surface`,
 `integration`, `constraint`, `market`}.
 
 Если первый аргумент совпал с папкой в `docs/projects/` (кроме
@@ -62,8 +62,8 @@ description: Узкий аудит консистентности продукт
 | severity | смысл | пример |
 |---|---|---|
 | `error` | Структурное нарушение, ломает модель | Дубликат `slug`; невалидное enum-значение; пустой обязательный слот в `stable`; vision без Problem или Success; stable со `**blocker**` в state |
-| `warning` | Семантическое подозрение | capability без persona в массиве; surface без persona; boundary с backlog-обоснованием в `why` («нет ресурсов»); constraint без `source`; market без `url`/`sources`; integration с `direction` но без `owner` |
-| `hint` | Coverage / стиль, не ломает | persona без жителей в capability/surface; vision stable при пустой persona-таблице; stable со ссылкой на draft; очень короткое `description` |
+| `warning` | Семантическое подозрение | capability без user в массиве; surface без user; boundary с backlog-обоснованием в `why` («нет ресурсов»); constraint без `source`; market без `url`/`sources`; integration с `direction` но без `owner` |
+| `hint` | Coverage / стиль, не ломает | user без жителей в capability/surface; vision stable при пустой user-таблице; stable со ссылкой на draft; очень короткое `description` |
 
 Подробный реестр — `references/rules.md`.
 
@@ -80,8 +80,8 @@ description: Узкий аудит консистентности продукт
   Что делать: дописать Success или понизить до draft через
   /project-deep-dive <project-slug>.
 
-[error] capability:send-referral → status: stable, но `persona = —`.
-  Что делать: связать с persona через
+[error] capability:send-referral → status: stable, но `user = —`.
+  Что делать: связать с user через
   /project-deep-dive <project-slug> capability:send-referral.
 
 [warning] boundary:no-mobile → why = «не делаем мобильное приложение, нет ресурсов».
@@ -89,8 +89,8 @@ description: Узкий аудит консистентности продукт
   Что делать: пересмотреть формулировку через
   /project-deep-dive <project-slug> boundary:no-mobile.
 
-[hint] persona:doctor → ни одна capability и ни одна surface не
-  ссылается на эту персону.
+[hint] user:doctor → ни одна capability и ни одна surface не
+  ссылается на этого пользователя.
   Что делать: либо подключить к capability/surface, либо рассмотреть
   удаление через /project-deep-dive <project-slug>.
 

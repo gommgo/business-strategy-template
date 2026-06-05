@@ -62,7 +62,7 @@ description: Углублённая проработка аналитическ�
    канон формы.
 3. Прочитать `docs/projects/<project-slug>/vision.md` и продуктовые
    файлы (если есть) + `references/project-context.md` — освежить связи
-   с продуктовым слоем **того же проекта** (who ↔ persona,
+   с продуктовым слоем **того же проекта** (who ↔ user,
    situation ↔ capability, zone ↔ surface).
 4. Если остаток args пуст — сделать сводку (см. ниже) и через
    `AskUserQuestion` предложить выбор что копать.

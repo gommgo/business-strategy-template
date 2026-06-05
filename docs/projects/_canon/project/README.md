@@ -18,10 +18,10 @@
 | файл | сущность | поля |
 |---|---|---|
 | [`vision.md`](vision.md) | singleton: проблема, успех, non-goals продукта | три раздела + addresses-problem + статус |
-| [`persona.md`](persona.md) | сегмент пользователей / клиентов | slug · name · description · context · jobs · pains · success · status |
-| [`capability.md`](capability.md) | бизнес-возможность продукта верхнего уровня | slug · name · description · value · persona · status |
+| [`user.md`](user.md) | сегмент пользователей / клиентов | slug · name · description · context · jobs · pains · success · status |
+| [`capability.md`](capability.md) | бизнес-возможность продукта верхнего уровня | slug · name · description · value · user · status |
 | [`boundary.md`](boundary.md) | явный non-goal с обоснованием | slug · name · description · why · status |
-| [`surface.md`](surface.md) | поверхность, куда продукт «торчит наружу» | slug · name · description · type · lives-at · persona · status |
+| [`surface.md`](surface.md) | поверхность, куда продукт «торчит наружу» | slug · name · description · type · lives-at · user · status |
 | [`integration.md`](integration.md) | внешняя система, с которой обмениваемся | slug · name · description · direction · payload · owner · status |
 | [`constraint.md`](constraint.md) | внешнее ограничение (регуляторика, SLA, контракт) | slug · name · description · kind · source · status |
 | [`market.md`](market.md) | рыночный аналог / конкурент | slug · name · description · url · sources · status |
@@ -53,7 +53,7 @@
 
 H1 = имя файла = kind. Frontmatter не нужен — kind определяется именем
 файла. Русское слово, являющееся переводом строгого термина, сопровождается
-его `slug` в скобках при каждом вхождении: «персона (persona)»,
+его `slug` в скобках при каждом вхождении: «пользователь (user)»,
 «возможность (capability)», «поверхность (surface)».
 
 ### Форма ячеек (та же что в interface)
@@ -92,12 +92,12 @@ H1 = имя файла = kind. Frontmatter не нужен — kind опреде
 
 Внутри `docs/projects/<slug>/` ожидаются неформальные связи:
 
-- **persona → surface**: persona работает через одну+ поверхность
-  (`surface.persona` — кого она обслуживает).
-- **persona → capability**: persona получает ценность от одной+
-  возможности (`capability.persona`).
+- **user → surface**: user работает через одну+ поверхность
+  (`surface.user` — кого она обслуживает).
+- **user → capability**: user получает ценность от одной+
+  возможности (`capability.user`).
 - **capability → surface**: возможность реализуется на одной+
-  поверхности (выводимо через persona; явная связь — у `/cross-audit` на
+  поверхности (выводимо через user; явная связь — у `/cross-audit` на
   совести).
 - **integration ↔ capability**: интеграция обычно обслуживает
   возможность (не фиксируется отдельным полем — `/cross-audit`).
@@ -113,8 +113,8 @@ H1 = имя файла = kind. Frontmatter не нужен — kind опреде
 
 - `vision.addresses-problem` ↔ `business-problem.frame` — какие проблемы
   закрывает продукт (M:N; авторская сторона связи — здесь).
-- `persona` ↔ `<slug>/interface/who` — каждая роль в `interface` должна
-  семантически соответствовать одной из persona проекта.
+- `user` ↔ `<slug>/interface/who` — каждая роль в `interface` должна
+  семантически соответствовать одной из user проекта.
 - `capability` ↔ `<slug>/interface/situation` / `<slug>/domains/<область>`
   — возможность реализуется через ситуации (UX) + домены (бэкенд).
 - `surface` ↔ `<slug>/interface/zone` — зона интерфейса принадлежит
@@ -142,7 +142,7 @@ state и предлагает переходы через `AskUserQuestion`.
 
 - ❌ Frontmatter в файлах (kind определяется именем файла — как в
   `interface/`).
-- ❌ Каталоги под kind (`personas/`, `capabilities/` …) — один файл =
+- ❌ Каталоги под kind (`users/`, `capabilities/` …) — один файл =
   один kind, плоско.
 - ❌ Несколько vision в **одном проекте**. Один проект (папка
   `docs/projects/<slug>/`) = один продукт = один `vision.md`. Разные

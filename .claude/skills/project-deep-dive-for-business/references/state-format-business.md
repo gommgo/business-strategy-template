@@ -11,7 +11,7 @@ State **скоупится по продукту** — у каждого `<proje
 ```
 .claude/skills/project-deep-dive-for-business/state/<project-slug>/
 ├── vision.md
-├── persona/<slug>.md
+├── user/<slug>.md
 ├── capability/<slug>.md
 ├── boundary/<slug>.md
 ├── surface/<slug>.md
@@ -31,9 +31,9 @@ State **скоупится по продукту** — у каждого `<proje
 
 ```markdown
 ---
-kind: persona
+kind: user
 slug: nurse-partner
-ref: docs/projects/<project-slug>/persona.md#nurse-partner
+ref: docs/projects/<project-slug>/user.md#nurse-partner
 ---
 
 ## Открытые вопросы

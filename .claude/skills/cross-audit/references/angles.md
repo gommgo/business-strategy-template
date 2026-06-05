@@ -26,12 +26,12 @@
   `addresses-problem-frame`.
 - **По каждому проекту** (общий слой business-problem ↔ продукт проекта;
   скоупится к проблемам, которые проект закрывает через
-  `vision.addresses-problem`): `goal-vision`, `subject-persona`,
+  `vision.addresses-problem`): `goal-vision`, `subject-user`,
   `bet-capability`.
 - **По каждому проекту** (общий слой ajtbd ↔ продукт проекта):
-  `segment-persona`, `job-vision`, `segmentproblem-vision`,
+  `segment-user`, `job-vision`, `segmentproblem-vision`,
   `mechanic-capability`.
-- **По каждому проекту** (внутри папки проекта): `persona-who`,
+- **По каждому проекту** (внутри папки проекта): `user-who`,
   `capability-situation`, `capability-domain`, `surface-zone`,
   `surface-screen`, `integration-domain`, `constraint-surface`,
   `market-capability`.
@@ -280,59 +280,59 @@ vision проекта <slug> должен решать проблемы, кот�
 Каждая цель (goal) закрываемой проблемы должна просматриваться в vision.
 ```
 
-## subject-persona
+## subject-user
 
 **Source:** `docs/business-problem/subject.md` (только субъекты проблем,
 которые закрывает проект).
-**Destination:** `docs/projects/<slug>/persona.md`.
+**Destination:** `docs/projects/<slug>/user.md`.
 **Скоуп:** по проекту.
 **Применим если:** оба слоя существуют; у проекта непустой
 `addresses-problem`.
 
 **Что искать:**
 - `error`: субъект влияния (positive) проблемы, которую закрывает проект,
-  не ставший ни одной persona продукта (на чьё поведение целимся — но
+  не ставший ни одним user продукта (на чьё поведение целимся — но
   продукт не для него).
 - `warning`: мотивация субъекта (боли/желания) не отражена в
-  persona.jobs/pains.
+  user.jobs/pains.
 
 **Промпт-добавка:**
 ```
-subject — тот, чьё поведение двигает метрику; persona — адресат боли
+subject — тот, чьё поведение двигает метрику; user — адресат боли
 продукта <slug>. Скоупь субъекты к проблемам этого проекта (колонка
 `problem`).
 
-Положительный субъект обычно становится persona. Для каждого positive-
-субъекта закрываемой проблемы: есть ли соответствующая persona в
-docs/projects/<slug>/persona.md? Перенесена ли его мотивация в
-jobs/pains? Негативный субъект persona не требует.
+Положительный субъект обычно становится user. Для каждого positive-
+субъекта закрываемой проблемы: есть ли соответствующий user в
+docs/projects/<slug>/user.md? Перенесена ли его мотивация в
+jobs/pains? Негативный субъект user не требует.
 ```
 
-## segment-persona
+## segment-user
 
 **Source:** `docs/ajtbd/segment.md`.
-**Destination:** `docs/projects/<slug>/persona.md`.
+**Destination:** `docs/projects/<slug>/user.md`.
 **Скоуп:** по проекту.
 **Применим если:** оба слоя существуют.
 
 **Что искать:**
-- `hint`: сегмент рынка (`ajtbd/segment`) без соответствующей persona в
+- `hint`: сегмент рынка (`ajtbd/segment`) без соответствующего user в
   этом проекте (продукт не обслуживает этот сегмент — намеренно или
-  пропуск? — «сегмент без персоны»).
-- `hint`: persona проекта, не сводимая ни к одному сегменту, ни к
-  субъекту (откуда она? — «персона без сегмента»).
+  пропуск? — «сегмент без пользователя»).
+- `hint`: user проекта, не сводимый ни к одному сегменту, ни к
+  субъекту (откуда он? — «пользователь без сегмента»).
 
 **Промпт-добавка:**
 ```
-segment — группа клиентов рынка по бандлу работ (слой ajtbd); persona —
+segment — группа клиентов рынка по бандлу работ (слой ajtbd); user —
 пользователь продукта <slug>. Это РАЗНЫЕ сущности, но связанные: продукт
 часто делается для части сегментов рынка.
 
 Сопоставляй по смыслу: бандл работ / who-context / критерии успеха
-сегмента ↔ jobs / pains / context персоны.
+сегмента ↔ jobs / pains / context пользователя.
 
-Сегмент без persona в этом проекте («сегмент без персоны») и persona без
-сегмента/субъекта («персона без сегмента») — hint, не error (один проект
+Сегмент без user в этом проекте («сегмент без пользователя») и user без
+сегмента/субъекта («пользователь без сегмента») — hint, не error (один проект
 может намеренно сужать охват сегментов; их закрывает другой проект).
 ```
 
@@ -357,7 +357,7 @@ job уровня big/core — верхняя мотивация и то, за ч
 (слой ajtbd); vision.Success — каким продукт <slug> видит успех. Успех
 продукта должен ЦЕЛИТЬ в Big/Core Job сегмента, который он обслуживает.
 
-Скоупь работы к сегментам, которые продукт обслуживает (через персоны
+Скоупь работы к сегментам, которые продукт обслуживает (через пользователей
 проекта ↔ сегменты). Низкоуровневые работы (`low`) — UX-шаги, не цель;
 их в Success не ждём.
 
@@ -385,7 +385,7 @@ segment-problem — трение КЛИЕНТА с нанятым решение
 vision.Problem — какую проблему решает продукт <slug>. Проблема продукта
 выводится из разведанного трения клиента.
 
-Скоупь трения к сегментам, которые продукт обслуживает (через персоны
+Скоупь трения к сегментам, которые продукт обслуживает (через пользователей
 проекта ↔ сегменты).
 
 Для vision.Problem: опирается ли она на конкретное трение клиента? Не
@@ -416,7 +416,7 @@ value-mechanics — какие из 11 механик создания ценн�
 открывает (кандидаты ценности, слой ajtbd); capability — что продукт
 <slug> умеет. Механика ценности — это КАНДИДАТ в capability.
 
-Скоупь механики к сегментам, которые продукт обслуживает (через персоны
+Скоупь механики к сегментам, которые продукт обслуживает (через пользователей
 проекта ↔ сегменты графа).
 
 Для каждой механики: реализована ли она хотя бы одной capability? Не
@@ -452,43 +452,43 @@ bet/goal — стратегический шаг; capability — что прод
 она служит? Не служит ни одной — hint.
 ```
 
-## persona-who
+## user-who
 
-**Source:** `docs/projects/<slug>/persona.md`.
+**Source:** `docs/projects/<slug>/user.md`.
 **Destination:** `docs/projects/<slug>/interface/who.md`.
 **Скоуп:** по проекту.
 **Применим если:** оба слоя существуют в папке проекта.
 
 **Что искать:**
 
-- `error`: persona, под которую в `who.md` **нет ни одной роли**,
-  семантически соответствующей. Не slug — смысл («persona:nurse-partner»
+- `error`: user, под которую в `who.md` **нет ни одной роли**,
+  семантически соответствующей. Не slug — смысл («user:nurse-partner»
   → ищем who, выполняющую действия медсестры партнёрской клиники).
-- `error`: who, который не соответствует **ни одной** persona проекта
+- `error`: who, который не соответствует **ни одной** user проекта
   (включая системных акторов в who.md — они допустимы как «намеренное
   исключение», но всё равно должны иметь связь с интересами какой-то
-  persona).
-- `warning`: persona, под которую who покрывает только **часть**
-  jobs-to-be-done. Если у persona 3 jobs, а who участвует только в
+  user).
+- `warning`: user, под которую who покрывает только **часть**
+  jobs-to-be-done. Если у user 3 jobs, а who участвует только в
   одном — это намёк, что нужны ещё роли.
 
 **Промпт-добавка:**
 
 ```
-Сопоставь persona и who проекта <slug> семантически — оба слоя живут в
-docs/projects/<slug>/. Persona — это "кто адресат боли продукта". Who —
+Сопоставь user и who проекта <slug> семантически — оба слоя живут в
+docs/projects/<slug>/. User — это "кто адресат боли продукта". Who —
 "роль, выполняющая шаг бизнес-процесса". Связь не структурная: одна
-persona может развернуться в несколько who (например, persona "медсестра
+user может развернуться в несколько who (например, user "медсестра
 партнёрской клиники" → who: nurse-partner, nurse-partner-senior).
 
-Для каждой persona: какие who её "несут" (выполняют её jobs)? Если ни
+Для каждого user: какие who его "несут" (выполняют его jobs)? Если ни
 одного — error.
 
-Для каждого who: какой persona он принадлежит? Системные акторы (scheduler,
-external-svc) — допустимо без persona, но обоснуй почему именно этот
+Для каждого who: какой user он принадлежит? Системные акторы (scheduler,
+external-svc) — допустимо без user, но обоснуй почему именно этот
 системный интерес.
 
-Используй persona.jobs / pains / context и who.description / соседние
+Используй user.jobs / pains / context и who.description / соседние
 situation.action для сопоставления.
 ```
 
@@ -514,7 +514,7 @@ situation.action для сопоставления.
 
 ```
 Оба слоя — внутри docs/projects/<slug>/. Capability — устойчивое умение
-продукта в языке persona. Situation — конкретная UX-точка, где это
+продукта в языке user. Situation — конкретная UX-точка, где это
 умение реализуется (кто/когда/что/ради чего/с какими данными).
 
 Для каждой capability: какие situation её реализуют? Сопоставь по
@@ -654,7 +654,7 @@ integration-якоря — отметь, не error.
   constraint, surface или integration). Например, constraint
   `pdn-consent` (152-ФЗ) должен быть связан с web-поверхностью, где
   есть PII.
-- `hint`: surface с persona, обрабатывающая PII / финансы / здоровье,
+- `hint`: surface с user, обрабатывающая PII / финансы / здоровье,
   но без constraint. Возможно, пропустили.
 
 **Промпт-добавка:**
@@ -729,13 +729,13 @@ PII; PCI-DSS → integration с платежами; HIPAA → surface с
 `_canon`; раскрывается в пары `проект × lens`):
 
 8. `goal-vision` (проблема → продукт; скоуп к проблемам проекта)
-9. `subject-persona` (проблема → продукт; скоуп к проблемам проекта)
-10. `segment-persona` (ajtbd → продукт)
+9. `subject-user` (проблема → продукт; скоуп к проблемам проекта)
+10. `segment-user` (ajtbd → продукт)
 11. `job-vision` (ajtbd → продукт: Big/Core Job ↔ vision.Success)
 12. `segmentproblem-vision` (ajtbd → продукт: трение ↔ vision.Problem)
 13. `mechanic-capability` (ajtbd → продукт: механика ценности ↔ capability)
 14. `bet-capability` (проблема → продукт; скоуп к проблемам проекта)
-15. `persona-who` (foundation, продукт → interface проекта)
+15. `user-who` (foundation, продукт → interface проекта)
 16. `surface-zone` (foundation)
 17. `capability-situation` (foundation)
 18. `capability-domain` (если у проекта есть `domains/`)
@@ -748,6 +748,6 @@ PII; PCI-DSS → integration с платежами; HIPAA → surface с
 project-углы)`.
 
 `--quick` запускает по каждому проекту три foundation-угла
-продукт↔interface (`persona-who`, `capability-situation`, `surface-zone`)
+продукт↔interface (`user-who`, `capability-situation`, `surface-zone`)
 плюс `addresses-problem-frame` один раз. Для верхних слоёв —
-`goal-vision`, `subject-persona` (по проекту) как быстрый upstream-чек.
+`goal-vision`, `subject-user` (по проекту) как быстрый upstream-чек.

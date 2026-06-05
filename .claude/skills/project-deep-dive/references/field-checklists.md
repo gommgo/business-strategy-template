@@ -27,13 +27,13 @@ Non-goals — про вкусовщину. `addresses-problem` закрепля�
 конкретными проблемами бизнеса — без неё vision висит в воздухе, а
 `success` не на что целить.
 
-## persona
+## user
 
 **Обязательно:** `slug`, `name`, `description`, `status`.
 
 **Должно быть заполнено для stable:**
 
-- `context` — где persona живёт, под каким давлением.
+- `context` — где user живёт, под каким давлением.
 - `jobs` — jobs-to-be-done в её языке.
 - `pains` — наблюдаемые боли.
 - `success` — что для неё лично «полегчало».
@@ -50,16 +50,16 @@ jobs и pains. Если context размытый — jobs будут абстр�
 
 **Должно быть для stable:**
 
-- `value` — ценность для persona, в её языке.
-- `persona` — массив slug персон (минимум одна).
+- `value` — ценность для user, в его языке.
+- `user` — массив slug пользователей (минимум один).
 
 **Опционально:** —
 
 **Порядок копания:**
-fundamentals → value → persona.
+fundamentals → value → user.
 
-Если persona в проекте ещё нет — отработать **stub** для них (см.
-SKILL.md), потом вернуться. Capability без persona — мёртвая.
+Если user в проекте ещё нет — отработать **stub** для них (см.
+SKILL.md), потом вернуться. Capability без user — мёртвая.
 
 ## boundary
 
@@ -84,10 +84,10 @@ fundamentals → why.
 - `type` — enum: `web` | `mobile` | `api` | `admin` | `bot` | `desktop`
   | `embed` | `other`.
 - `lives-at` — где живёт (домен / app-id / messenger / host).
-- `persona` — массив slug персон.
+- `user` — массив slug пользователей.
 
 **Порядок копания:**
-fundamentals → type → lives-at → persona.
+fundamentals → type → lives-at → user.
 
 `type` влияет на формат `lives-at` (для `web` это домен; для `mobile`
 — App Store / Google Play app-id; для `bot` — мессенджер). Если type
@@ -154,7 +154,7 @@ fundamentals → kind → source.
 ### `description`
 
 - Одно предложение. Не абзац.
-- В языке бизнеса / persona. Не «JWT-аутентификация», а «вход без
+- В языке бизнеса / user. Не «JWT-аутентификация», а «вход без
   заполнения паролей».
 - Без маркетинговой копии. Не «революционная платформа», а «передача
   направления одним кликом».

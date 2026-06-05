@@ -26,7 +26,7 @@ AI deep-dive-скиллов. Код-репо потом **читают** эти 
 ```
 БИЗНЕС заказчика     →  AJTBD (спрос по работам)  →  ПРОБЛЕМЫ (многопроблемный)   →  ПРОДУКТЫ (несколько под бизнес)
 docs/business/          docs/ajtbd/                   docs/business-problem/           docs/projects/<slug>/
-profile · offering ·    segment · job · job-graph ·   frame (таблица проблем) ·        vision + persona / capability /
+profile · offering ·    segment · job · job-graph ·   frame (таблица проблем) ·        vision + user / capability /
 channel · competitor    solution · segment-problem    SWOT (factor · bet) ·            boundary / surface / ...
 · metric                                              Карта гипотез (goal · metric ·     │
                                                        subject · hypothesis · task)      ├─ interface/  (UX: who/situation/zone)
@@ -59,7 +59,7 @@ channel · competitor    solution · segment-problem    SWOT (factor · bet) · 
 - **business-problem** (строгий, LinkedSWOT + Карта гипотез) — `frame` как таблица
   проблем; по каждой проблеме: SWOT-факторы → ставки → цель → измеримая метрика →
   субъект → гипотеза → задача проверки. Ядро — метрика как best-effort таргет.
-- **projects/`<slug>`** — продукт под проблему(ы): vision + persona / capability /
+- **projects/`<slug>`** — продукт под проблему(ы): vision + user / capability /
   boundary / surface / integration / constraint / market, плюс вложенные
   `interface/`, `domains/`, `screens/`.
 
@@ -106,7 +106,7 @@ channel · competitor    solution · segment-problem    SWOT (factor · bet) · 
 4.  /ajtbd-audit                                инварианты графа работ по сегменту (рой)
 5.  /business-problem-deep-dive[-for-business]  SWOT + Карта гипотез по каждой проблеме
 6.  /business-problem-audit                     инварианты методологии (рой)
-7.  /project-deep-dive <slug>[-for-business]    продукт: vision / persona / capability
+7.  /project-deep-dive <slug>[-for-business]    продукт: vision / user / capability
 8.  /project-audit <slug>                       аудит внутри продукта
 9.  /interface-deep-dive <slug>                 UX: who / situation / zone
 10. /interface-audit <slug>

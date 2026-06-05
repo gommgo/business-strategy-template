@@ -10,7 +10,7 @@ State **скоупится по проекту** — у каждого `<project
 ```
 .claude/skills/project-deep-dive/state/<project-slug>/
 ├── vision.md                          (singleton: vision-заметка)
-├── persona/<slug>.md
+├── user/<slug>.md
 ├── capability/<slug>.md
 ├── boundary/<slug>.md
 ├── surface/<slug>.md
@@ -29,9 +29,9 @@ State **скоупится по проекту** — у каждого `<project
 
 ```markdown
 ---
-kind: persona
+kind: user
 slug: nurse-partner
-ref: docs/projects/<project-slug>/persona.md#nurse-partner
+ref: docs/projects/<project-slug>/user.md#nurse-partner
 ---
 
 ## Открытые вопросы
@@ -58,7 +58,7 @@ ref: docs/projects/<project-slug>/vision.md
 
 ## Открытые вопросы
 - (**blocker**) Бизнес ещё не решил, B2B-only или B2C тоже —
-  это меняет persona.
+  это меняет user.
 
 ## Доменные решения
 - Success измеряется в качественном сдвиге, не в метрике — клиент
