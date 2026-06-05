@@ -4,9 +4,11 @@
 невыборочные правила, которые работают всегда.
 
 Этот репозиторий — **проектный шаблон**. Поток сверху вниз: бизнес
-заказчика (`docs/business/`) — самый верх, его проблемы
-(`docs/business-problem/`) по строгой методологии LinkedSWOT + Карта
-гипотез — слой **многопроблемный** (`frame` — таблица проблем). Под
+заказчика (`docs/business/`) — самый верх; под ним слой **AJTBD**
+(`docs/ajtbd/`) — кто наш сегмент по работам и его граф работ (методология
+Advanced JTBD); его проблемы (`docs/business-problem/`) по строгой
+методологии LinkedSWOT + Карта гипотез — слой **многопроблемный**
+(`frame` — таблица проблем), питаемый трениями сегмента из AJTBD. Под
 проблемы встают **продукты**: несколько проектов под одним бизнесом, у
 каждого своя папка `docs/projects/<slug>/` — корень решения. Внутри
 проекта: продукт (`vision` + 7 kind), аналитика интерфейса (`interface/`)
@@ -16,7 +18,9 @@
 один раз в `docs/projects/_canon/`. См.:
 
 - `README.md` — карта репозитория и воркфлоу.
-- `docs/business/README.md` — канон 1 singleton + 6 артефактов бизнеса.
+- `docs/business/README.md` — канон 1 singleton + 5 артефактов бизнеса.
+- `docs/ajtbd/README.md` — канон 5 kind AJTBD: `segment` · `job` ·
+  `job-graph` · `solution` · `segment-problem`.
 - `docs/business-problem/README.md` — канон: `frame` (таблица проблем) +
   7 артефактов (SWOT + Карта гипотез); `problem` — массив, M:N.
 - `docs/projects/README.md` — как устроены проекты: `_canon`, выбор
@@ -82,11 +86,13 @@ managed (инстанс на `*.sftbmb.ru`) или self-hosted (ваш форк)
 
 ## 2. Слои и терминология
 
-Бизнес и его проблемы — общие (top-level); продуктовые слои — по проекту:
+Бизнес, его сегменты/работы и его проблемы — общие (top-level);
+продуктовые слои — по проекту:
 
 | слой | вопрос | вход |
 |---|---|---|
 | `docs/business/` | **кто этот бизнес заказчика** | `/business-deep-dive` (аналитик) или `/business-deep-dive-for-business` (клиент) |
+| `docs/ajtbd/` | **кто наш сегмент по работам, его граф работ и трения** | `/segment-deep-dive` · `/job-graph-deep-dive` (+ `-for-business`) · `/jtbd-interview` |
 | `docs/business-problem/` | **какие проблемы решаем и под какие метрики целимся** | `/business-problem-deep-dive` или `/business-problem-deep-dive-for-business` |
 | `docs/projects/<slug>/` | **зачем продукт и для кого** | `/project-deep-dive <slug>` (аналитик) или `/project-deep-dive-for-business` (клиент) |
 | `docs/projects/<slug>/interface/` | **как пользователь взаимодействует** | `/interface-deep-dive <slug>` |
@@ -101,13 +107,18 @@ managed (инстанс на `*.sftbmb.ru`) или self-hosted (ваш форк)
 
 Связи между слоями **семантические**, не slug-валидируемые: профиль и
 конкуренты бизнеса (business) питают факторы SWOT (business-problem),
-текущая метрика становится baseline целевой; проблема ↔ продукт — **M:N**
-(`projects/<slug>/vision.addresses-problem`); цель/метрика/субъект
-(business-problem) проявляются как vision/persona/capability в проекте;
-persona адресата проявляется как роль who (interface), capability
-реализуется через situation + domain, surface несёт zones,
-integration — адаптеры в domain. Несостыковки ловит `/cross-audit`
-через рой агентов (по каждому проекту).
+текущая метрика становится baseline целевой; сегмент по работам (ajtbd)
+проявляется как `subject` (business-problem) и как `persona` продукта,
+трение сегмента (`ajtbd/segment-problem`) доказывает проблему бизнеса
+(`frame`) и `vision.Problem`, Big/Core-работа целит в `vision.Success`,
+механики ценности графа работ — кандидаты в `capability`, нанятое решение
+(`ajtbd/solution`) сопоставляется с `competitor`/`offering`; проблема ↔
+продукт — **M:N** (`projects/<slug>/vision.addresses-problem`);
+цель/метрика/субъект (business-problem) проявляются как
+vision/persona/capability в проекте; persona адресата проявляется как
+роль who (interface), capability реализуется через situation + domain,
+surface несёт zones, integration — адаптеры в domain. Несостыковки ловит
+`/cross-audit` через рой агентов (по каждому проекту).
 
 **Юридическая рамка** (слой business-problem): гарантируем **доставку
 проекта на 100% по scope**; метрики — **совместный с бизнесом best-effort
@@ -122,11 +133,30 @@ integration — адаптеры в domain. Несостыковки ловит 
 `aria-busy`). Всё остальное — по-русски, без полу-калек («пропсы»,
 «варианты-проперти»).
 
-Business-слой (нестрогий): 1 singleton `profile.md` + 6 табличных kind
-(`segment`, `offering`, `channel`, `competitor`, `current-metric`,
-`material`). Источник истины — материалы клиента и рой web-research, не
-проекция аналитика. Связи семантические. Питает SWOT-факторы и baseline
-метрик слоя business-problem.
+Business-слой (нестрогий): 1 singleton `profile.md` + 5 табличных kind
+(`offering`, `channel`, `competitor`, `current-metric`, `material`).
+Источник истины — материалы клиента и рой web-research, не проекция
+аналитика. Связи семантические. Питает SWOT-факторы и baseline метрик
+слоя business-problem. Сегменты переехали в слой AJTBD: `offering.for-segment`
+и `channel.serves-segment` ссылаются на `ajtbd/segment`.
+
+AJTBD-слой (строгий, методология, **разведочный**): по Advanced JTBD
+(Иван Замесин) — кто наш сегмент по работам, а не по демографии. 5
+табличных kind: `segment` (бандл Core Jobs + 1 Big Job + критерии + Score),
+`job` (работа когда/хочу/чтобы; `level` big|core|low; 6 типов работ),
+`job-graph` (сборка дерева по сегменту: целевая работа, CPR, 11 механик
+ценности → кандидаты в `capability`), `solution` (что «нанято» на работу:
+satisfaction, цена↔ценность), `segment-problem` (трение сегмента с
+решением: сила 1–10, драйверы, барьеры). Ядро: проблема **никогда** не
+существует сама по себе — она следствие конкретного `solution`, нанятого
+на `job`. Источник истины — многоволновой рой web-research (5–10 агентов
+× 2–5 волн) и опц. JTBD-интервью (`/jtbd-interview`, своё state/transcripts
+→ intake), не проекция аналитика. Связи семантические; инварианты
+(сегмент без Big Job, разрыв «чтобы», трение без решения, Score без
+компонентов, CPR с разрывом, ложная работа) ловит рой `/ajtbd-audit` — **в
+пределах каждого сегмента**, не grep. **`segment-problem` (проблема
+клиента) ≠ `business-problem/frame` (проблема бизнеса)**: первое питает
+второе как доказательство.
 
 Business-problem-слой (строгий, методология, **многопроблемный**):
 `frame.md` — таблица проблем (одна строка = одна проблема + граница
@@ -173,6 +203,12 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
   Метрика — best-effort таргет, **не гарантия**. Факты о бизнесе — из
   материалов клиента / подтверждённого research, не из головы.
   Anti-patterns как опции — да; тексты — нет.
+- **AJTBD** (ajtbd): формулировки сегментов, работ (когда/хочу/чтобы),
+  нанятых решений, трений, драйверов/барьеров и мотиваций — только от
+  аналитика / из подтверждённого research / из транскриптов интервью,
+  через `AskUserQuestion`. Работа доказывается **прошлым поведением**
+  (затраты времени/денег), не гипотетикой. Anti-patterns как опции — да;
+  тексты — нет.
 - **Продуктовая** (project): vision, jobs, pains, value, why, source —
   только от бизнеса / аналитика, через `AskUserQuestion`. Anti-patterns
   как опции — да; тексты — нет.
@@ -219,6 +255,17 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
   (клиент-режим); форма — по `docs/business/README.md`. Нестрогий слой:
   приём материалов клиента + рой web-research конкурентов. Сквозная
   проверка — `cross-audit`.
+- **Артефакты AJTBD** (`docs/ajtbd/`) — сегменты через скилл
+  `segment-deep-dive` (аналитик) или `segment-deep-dive-for-business`
+  (клиент-режим); граф работ, решения и трения через `job-graph-deep-dive`
+  (аналитик) или `job-graph-deep-dive-for-business` (клиент-режим), оба с
+  эскалацией и push в единую ветку `client`. Форма — по
+  `docs/ajtbd/README.md`. Строгая разведочная методология Advanced JTBD;
+  наполняется многоволновым роем web-research и опц. JTBD-интервью
+  (`jtbd-interview` — отдельный тяжёлый процесс по явному запросу, своё
+  state/transcripts, выход разбирается через intake). Семантический аудит
+  инвариантов роем (по каждому сегменту) — `ajtbd-audit`. Трение сегмента
+  (`segment-problem`) питает проблему бизнеса (`frame`), не подменяет её.
 - **Артефакты бизнес-проблемы** (`docs/business-problem/`) — через скилл
   `business-problem-deep-dive` (аналитик) или
   `business-problem-deep-dive-for-business` (клиент-режим с эскалацией и
@@ -263,8 +310,8 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
   форке `<org>/docs` вычищает показной `docs/projects/example/` и
   шаблон-нарратив в `CLAUDE.md`/`README.md` под идентичность проекта. **Не
   трогает** пустые скелеты-каноны (`docs/projects/_canon/`, `docs/business/`,
-  `docs/business-problem/`). На каноническом шаблоне не запускается (guard по
-  origin).
+  `docs/ajtbd/`, `docs/business-problem/`). На каноническом шаблоне не
+  запускается (guard по origin).
 - **Sweep'ы** (терминология, чистка): 1 агент = 1 непересекающаяся зона.
 
 ## 7. Клиент-режим (`*-for-business`)
@@ -272,9 +319,11 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
 Когда сессию ведёт **клиент / основатель / PO**, не аналитик —
 включается `*-for-business`-вариант скила слоя:
 `/business-deep-dive-for-business` (профиль бизнеса),
+`/segment-deep-dive-for-business` (свои клиенты-сегменты),
+`/job-graph-deep-dive-for-business` (работы/решения/трения клиентов),
 `/business-problem-deep-dive-for-business` (проблемы, SWOT + гипотезы),
-`/project-deep-dive-for-business` (продукт). Все три следуют одним
-правилам клиент-режима. Особенности, которые влияют на работу:
+`/project-deep-dive-for-business` (продукт). Все следуют одним правилам
+клиент-режима. Особенности, которые влияют на работу:
 
 - **Бизнес-язык**: никакого `slug`, `kind`, `draft`, `stable`,
   `artifact` в чате. Видно только «закрыто / в работе». Продукт
@@ -290,7 +339,8 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
   `client` через `--share` с явного согласия клиента. Доступ к репозиторию
   (логин/пароль) скилл запрашивает один раз на устройстве и сохраняет —
   дальше push идёт молча. Уезжают: артефакты слоя (`docs/business/`,
-  `docs/business-problem/` или выбранного продукта `docs/projects/<slug>/`),
+  `docs/ajtbd/`, `docs/business-problem/` или выбранного продукта
+  `docs/projects/<slug>/`),
   state клиента, `client-handoff/summary.md` (живой срез, держится
   актуальным и чистится от мусора), `client-handoff/transcripts/<YYYY-MM-DD>--<HH-MM>--<тема>.md`
   (человекочитаемое имя; полный лог сессии с предложенными вариантами).

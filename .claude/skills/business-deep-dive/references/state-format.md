@@ -7,7 +7,6 @@
 ```
 .claude/skills/business-deep-dive/state/
 ├── profile.md                (singleton)
-├── segment/<slug>.md
 ├── offering/<slug>.md
 ├── channel/<slug>.md
 ├── competitor/<slug>.md

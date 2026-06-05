@@ -2,14 +2,16 @@
 
 Самый верхний слой документации: **кто этот бизнес заказчика** — до того,
 как мы определили проблему и тем более решение. 1 singleton `profile.md`
-+ 6 плоских md-файлов в `docs/business/`. Источник истины — **материалы
++ 5 плоских md-файлов в `docs/business/`. Источник истины — **материалы
 клиента** (сайт, PDF, презентации, соцсети, интервью) и **рой
 web-research**; не наша проекция и не будущее IT-решение.
 
 Слой **нестрогий**: жёсткой методологии нет, цель — сложить полную и
-честную картину бизнеса. Эта картина питает следующий слой
-`docs/business-problem/`: факторы SWOT берутся из профиля и конкурентов,
-baseline целевых метрик — из `current-metric.md`.
+честную картину бизнеса. Эта картина питает соседние слои: сегменты по
+работам, граф работ и трения живут в `docs/ajtbd/` (на `ajtbd/segment`
+ссылаются `offering.for-segment` и `channel.serves-segment`); SWOT-факторы
+и baseline метрик питают `docs/business-problem/` (факторы — из профиля и
+конкурентов, baseline целевых метрик — из `current-metric.md`).
 
 Чистая бизнес-аналитика. На продукт / интерфейс / код не мапится — это
 вход для `/business-deep-dive` и далее `/business-problem-deep-dive`.
@@ -19,7 +21,6 @@ baseline целевых метрик — из `current-metric.md`.
 | файл | сущность | поля |
 |---|---|---|
 | [`profile.md`](profile.md) | singleton: чем бизнес занимается, как зарабатывает | четыре раздела + статус |
-| [`segment.md`](segment.md) | клиентский сегмент самого бизнеса | slug · name · description · needs · status |
 | [`offering.md`](offering.md) | продукт / услуга, которую бизнес продаёт | slug · name · description · kind · for-segment · status |
 | [`channel.md`](channel.md) | как бизнес привлекает / продаёт / доставляет | slug · name · description · kind · serves-segment · status |
 | [`competitor.md`](competitor.md) | игрок на рынке заказчика | slug · name · description · url · position · sources · status |
@@ -31,8 +32,8 @@ baseline целевых метрик — из `current-metric.md`.
 Зеркалит канон `docs/projects/_canon/project/`. Один файл — одна таблица
 сущностей одного типа (`profile` исключение — singleton). H1 = имя файла = kind.
 Frontmatter не нужен. Русское слово-перевод строгого термина
-сопровождается его `slug` в скобках при каждом вхождении: «сегмент
-(segment)», «офер (offering)», «канал (channel)».
+сопровождается его `slug` в скобках при каждом вхождении: «офер
+(offering)», «канал (channel)».
 
 ### Форма ячеек
 
@@ -59,19 +60,19 @@ Frontmatter не нужен. Русское слово-перевод строг
 
 ## Связи (семантические)
 
-Внутри слоя связи неформальные: `offering.for-segment` и
-`channel.serves-segment` ссылаются на `segment.slug`; всё остальное —
-свободно. Жёстких slug-валидаций нет.
+Внутри слоя связи неформальные; всё свободно, жёстких slug-валидаций нет.
+Межслойно `offering.for-segment` и `channel.serves-segment` ссылаются на
+`ajtbd/segment.slug` (сегменты по работам живут в слое `docs/ajtbd/`).
 
-Связь со следующим слоем (тоже семантическая, ловит `/cross-audit`):
+Связь с соседними слоями (тоже семантическая, ловит `/cross-audit`):
 
-- `business.profile` / `competitor` / `segment` → `business-problem.factor`
-  — сильные/слабые стороны и тренды/угрозы вырастают из картины бизнеса.
+- `business.profile` / `competitor` → `business-problem.factor` —
+  сильные/слабые стороны и тренды/угрозы вырастают из картины бизнеса.
 - `business.current-metric` → `business-problem.metric.current` — текущий
   KPI становится baseline целевой метрики.
-- `business.segment` ↔ `project.persona` — сегмент бизнеса семантически
-  соответствует персоне продукта (но это **разные** сущности: сегмент —
-  клиент заказчика, персона — пользователь нашего IT-решения).
+- `business.offering` / `competitor` ↔ `ajtbd/solution` — собственный офер
+  и игроки рынка часто и есть решения, нанятые сегментом на работу
+  (`solution.maps-to`).
 
 ## Workflow
 
@@ -98,5 +99,6 @@ Frontmatter не нужен. Русское слово-перевод строг
 - ❌ Профиль «как должно быть» вместо «как есть». Слой описывает текущую
   реальность бизнеса, не желаемое будущее.
 - ❌ Автозалив web-research в артефакты без подтверждения аналитика.
-- ❌ Путать `segment` (клиент бизнеса) с `project.persona` (пользователь
-  продукта) — это соседние слои, не одно и то же.
+- ❌ Заводить сегменты здесь. Сегменты по работам живут в `docs/ajtbd/`
+  (`/segment-deep-dive`); `business` лишь ссылается на них из
+  `offering`/`channel`.

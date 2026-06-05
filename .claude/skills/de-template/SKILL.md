@@ -39,10 +39,13 @@ diff; каждое необратимое действие (удаление `ex
 
 - `docs/projects/_canon/` — пустые скелеты-каноны формы (project / interface
   / screens / domains, включая `_templates/` и `_shared/`). Наследуется форком.
-- `docs/business/*.md` — kind-шаблоны бизнеса (1 singleton + 6 kind) — пустые
+- `docs/business/*.md` — kind-шаблоны бизнеса (1 singleton + 5 kind) — пустые
   скелеты, рабочая основа аналитика.
 - `docs/business-problem/*.md` — kind-шаблоны слоя проблем (`frame` + 7 kind)
   — пустые скелеты.
+- `docs/ajtbd/*.md` — kind-шаблоны разведочного слоя AJTBD (`README` + 5 kind:
+  `segment` / `job` / `job-graph` / `solution` / `segment-problem`) — пустые
+  скелеты, рабочая основа аналитика.
 - `docs/projects/<slug>/` реальных проектов (если уже заведены аналитиком) —
   это **данные проекта**, не витрина.
 - `.claude/` (skills / rules / settings) — система наследуется форком.
@@ -202,8 +205,8 @@ State лежит **рядом со скиллом**:
 - **Не запускать на каноническом шаблоне.** Gate первая защита (origin-подстрока
   `sftbmb-core/project-docs-template`).
 - **Не трогать пустые скелеты-каноны** — `docs/projects/_canon/`,
-  `docs/business/*`, `docs/business-problem/*` — это рабочая основа аналитика,
-  не показуха.
+  `docs/business/*`, `docs/business-problem/*`, `docs/ajtbd/*` — это рабочая
+  основа аналитика, не показуха.
 - **Не трогать `docs/projects/<slug>/` реальных проектов** — это данные, не
   витрина (витрина — только `example/`).
 - **Не удалять без каскада.** Удаление `example/` идёт после показа каскада +

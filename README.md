@@ -24,22 +24,24 @@ AI deep-dive-скиллов. Код-репо потом **читают** эти 
 Шаблон импортируется **под бизнес** и форкается **первым**. Поток сверху вниз:
 
 ```
-БИЗНЕС заказчика            →  ПРОБЛЕМЫ (многопроблемный)  →  ПРОДУКТЫ (несколько под бизнес)
-docs/business/                 docs/business-problem/          docs/projects/<slug>/
-profile · segment ·            frame (таблица проблем) ·       vision + persona / capability /
-offering · channel ·           SWOT (factor · bet) ·           boundary / surface / ...
-competitor · metric            Карта гипотез (goal · metric ·    │
-                               subject · hypothesis · task)      ├─ interface/  (UX: who/situation/zone)
-                                                                 ├─ domains/    (опц. DDD-контексты)
-                                                                 └─ screens/    (flow/screen/block/shell)
-                                                                        │
-                                                                        ▼  ручная работа автора макета
-                                                                   wireframe → hi-fi на @sftbmb/ui
+БИЗНЕС заказчика     →  AJTBD (спрос по работам)  →  ПРОБЛЕМЫ (многопроблемный)   →  ПРОДУКТЫ (несколько под бизнес)
+docs/business/          docs/ajtbd/                   docs/business-problem/           docs/projects/<slug>/
+profile · offering ·    segment · job · job-graph ·   frame (таблица проблем) ·        vision + persona / capability /
+channel · competitor    solution · segment-problem    SWOT (factor · bet) ·            boundary / surface / ...
+· metric                                              Карта гипотез (goal · metric ·     │
+                                                       subject · hypothesis · task)      ├─ interface/  (UX: who/situation/zone)
+                                                                                         ├─ domains/    (опц. DDD-контексты)
+                                                                                         └─ screens/    (flow/screen/block/shell)
+                                                                                                │
+                                                                                                ▼  ручная работа автора макета
+                                                                                           wireframe → hi-fi на @sftbmb/ui
 ```
 
-Артефакты — **чистая аналитика**, на код напрямую не мапятся. Связь «проблема ↔
-продукт» — M:N (`vision.addresses-problem`). Превращение `screens/` в макет —
-ручная работа автора, не отдельный артефакт.
+Артефакты — **чистая аналитика**, на код напрямую не мапятся. Сегменты по работам
+живут в `docs/ajtbd/` (Advanced JTBD): трение сегмента (`segment-problem`)
+доказывает проблему бизнеса (`frame`), а граф работ и механики ценности подсказывают
+возможности продукта. Связь «проблема ↔ продукт» — M:N (`vision.addresses-problem`).
+Превращение `screens/` в макет — ручная работа автора, не отдельный артефакт.
 
 > **Юридическая рамка:** гарантируем доставку проекта по scope; метрики слоя
 > `business-problem` — совместный с бизнесом **best-effort таргет**, не гарантия
@@ -47,8 +49,13 @@ competitor · metric            Карта гипотез (goal · metric ·    
 
 ## Методология в двух словах
 
-- **business** (нестрогий) — кто этот бизнес: профиль + сегменты, оффер, каналы,
-  конкуренты, текущие KPI. Источник — материалы клиента + рой web-research.
+- **business** (нестрогий) — кто этот бизнес: профиль, оффер, каналы, конкуренты,
+  текущие KPI. Источник — материалы клиента + рой web-research.
+- **ajtbd** (строгий, Advanced JTBD) — кто наш сегмент **по работам**, а не по
+  демографии: сегмент (бандл Core Jobs + 1 Big Job + Score), граф работ (CPR + 11
+  механик ценности), нанятые решения и трения. Многоволновой рой web-research +
+  опц. JTBD-интервью. Трение клиента (`segment-problem`) ≠ проблема бизнеса
+  (`frame`); первое доказывает второе.
 - **business-problem** (строгий, LinkedSWOT + Карта гипотез) — `frame` как таблица
   проблем; по каждой проблеме: SWOT-факторы → ставки → цель → измеримая метрика →
   субъект → гипотеза → задача проверки. Ядро — метрика как best-effort таргет.
@@ -93,16 +100,20 @@ competitor · metric            Карта гипотез (goal · metric ·    
 
 ```
 1.  /business-deep-dive[-for-business]          профиль бизнеса + рой web-research
-2.  /business-problem-deep-dive[-for-business]  SWOT + Карта гипотез по каждой проблеме
-3.  /business-problem-audit                     инварианты методологии (рой)
-4.  /project-deep-dive <slug>[-for-business]    продукт: vision / persona / capability
-5.  /project-audit <slug>                       аудит внутри продукта
-6.  /interface-deep-dive <slug>                 UX: who / situation / zone
-7.  /interface-audit <slug>
-8.  /domain-deep-dive <slug> <ctx>              (опц.) бизнес-домены бэкенда
-9.  /screen-deep-dive <slug>                    flows / screens / blocks / shells
-10. /screen-audit <slug>
-11. /cross-audit                                сквозная семантика всех слоёв (рой)
+2.  /segment-deep-dive[-for-business]           AJTBD: сегменты по работам + Score (рой)
+3.  /job-graph-deep-dive <segment>[-for-business] граф работ: решения, трения, CPR, механики
+       /jtbd-interview                          (опц.) живые JTBD-интервью → intake
+4.  /ajtbd-audit                                инварианты графа работ по сегменту (рой)
+5.  /business-problem-deep-dive[-for-business]  SWOT + Карта гипотез по каждой проблеме
+6.  /business-problem-audit                     инварианты методологии (рой)
+7.  /project-deep-dive <slug>[-for-business]    продукт: vision / persona / capability
+8.  /project-audit <slug>                       аудит внутри продукта
+9.  /interface-deep-dive <slug>                 UX: who / situation / zone
+10. /interface-audit <slug>
+11. /domain-deep-dive <slug> <ctx>              (опц.) бизнес-домены бэкенда
+12. /screen-deep-dive <slug>                    flows / screens / blocks / shells
+13. /screen-audit <slug>
+14. /cross-audit                                сквозная семантика всех слоёв (рой)
 ```
 
 Суффикс `-for-business` — клиент-режим: бизнес-язык без жаргона, эскалация «нужен
@@ -115,6 +126,8 @@ competitor · metric            Карта гипотез (goal · metric ·    
 - **Канон формы продуктовых слоёв** — один раз в `docs/projects/_canon/`; данные —
   в папках проектов.
 - **Связи семантические**, не slug-валидируемые; рассинхрон ловит `/cross-audit`.
+- **AJTBD питает соседей**: трение сегмента доказывает проблему бизнеса, механики
+  графа работ — кандидаты в возможности продукта.
 - **Метрика — best-effort таргет, не гарантия.**
 - **Экспертиза священна** — домен/продукт/craft из ответов бизнеса и библиотеки,
   не из головы агента.

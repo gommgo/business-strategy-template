@@ -71,7 +71,7 @@ description: Углублённая проработка продуктовог�
 - `vision.Success` ← `docs/business-problem/metric` (целевые метрики —
   best-effort таргет, **не** гарантия; не копировать как обещание);
 - `persona` ← `docs/business-problem/subject` (субъект влияния) и
-  `docs/business/segment` (клиентский сегмент бизнеса);
+  `docs/ajtbd/segment` (сегмент по работам Advanced JTBD);
 - `capability` реализует `docs/business-problem/bet`/`goal`.
 
 Если эти слои есть — на фазе `discovery` сначала прочитать

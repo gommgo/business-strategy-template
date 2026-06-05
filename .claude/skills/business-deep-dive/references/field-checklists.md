@@ -10,24 +10,20 @@
 **Порядок:** Бизнес → Модель → Позиционирование → Контекст.
 Главная проверка: «как есть» (не про наше решение, не «как должно быть»).
 
-## segment
-
-**Для stable:** `needs`.
-**Порядок:** fundamentals → needs.
-Проверка: клиент бизнеса (≠ persona продукта); исчезновение трогает
-выручку.
-
 ## offering
 
 **Для stable:** `kind` (enum), `for-segment`.
 **Порядок:** fundamentals → kind → for-segment.
-Проверка: источник выручки/ценности; привязан к сегменту.
+Проверка: источник выручки/ценности; `for-segment` указывает на
+существующий `ajtbd/segment` (сегменты — в `docs/ajtbd/`,
+`/segment-deep-dive`).
 
 ## channel
 
 **Для stable:** `kind` (enum), `serves-segment`.
 **Порядок:** fundamentals → kind → serves-segment.
-Проверка: путь между бизнесом и клиентом (≠ наш surface).
+Проверка: путь между бизнесом и клиентом (≠ наш surface);
+`serves-segment` указывает на существующий `ajtbd/segment`.
 
 ## competitor
 

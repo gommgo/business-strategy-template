@@ -1,6 +1,6 @@
 ---
 name: business-deep-dive
-description: Углублённая проработка верхнего слоя — профиля бизнеса заказчика в `docs/business/` (profile · segment · offering · channel · competitor · current-metric · material). Самая первая точка входа: складывает полную картину бизнеса заказчика ДО определения проблемы и решения. Принимает материалы клиента (сайт, PDF, презентации, соцсети, интервью), запускает рой агентов для web-research рынка и конкурентов, ведёт аналитика через фазы intake → profile → market → structure → metrics → cohesion, заполняет артефакты через структурированные вопросы (AskUserQuestion), фиксирует контекст в собственной памяти `state/`, не выдумывает факты о бизнесе. Использовать всегда, когда речь о docs/business/, онбординге нового заказчика, разборе его материалов, исследовании рынка и конкурентов, фиксации текущих бизнес-метрик (baseline), или подготовке почвы для слоя business-problem. Единственная точка входа в docs/business/ для аналитика.
+description: Углублённая проработка верхнего слоя — профиля бизнеса заказчика в `docs/business/` (profile · offering · channel · competitor · current-metric · material). Самая первая точка входа: складывает полную картину бизнеса заказчика ДО определения проблемы и решения. Принимает материалы клиента (сайт, PDF, презентации, соцсети, интервью), запускает рой агентов для web-research рынка и конкурентов, ведёт аналитика через фазы intake → profile → market → structure → metrics → cohesion, заполняет артефакты через структурированные вопросы (AskUserQuestion), фиксирует контекст в собственной памяти `state/`, не выдумывает факты о бизнесе. Сегментацию клиентов передаёт в `/segment-deep-dive` (слой `docs/ajtbd/`). Использовать всегда, когда речь о docs/business/, онбординге нового заказчика, разборе его материалов, исследовании рынка и конкурентов, фиксации текущих бизнес-метрик (baseline), или подготовке почвы для слоя business-problem. Единственная точка входа в docs/business/ для аналитика.
 ---
 
 # business-deep-dive
@@ -16,6 +16,12 @@ description: Углублённая проработка верхнего сло
 факторы SWOT каждой проблемы растут из профиля и конкурентов, baseline
 целевых метрик — из `current-metric.md`.
 
+Сегменты клиента по работам живут в соседнем слое `docs/ajtbd/`
+(скилл `/segment-deep-dive`). Этот скилл их **не заводит** — только
+read-only читает `docs/ajtbd/segment.md`, чтобы привязать
+`offering.for-segment` и `channel.serves-segment` к существующим
+сегментам. Сегментов ещё нет — предложить запустить `/segment-deep-dive`.
+
 ## Точки входа
 
 | вызов | поведение |
@@ -27,7 +33,7 @@ description: Углублённая проработка верхнего сло
 | `/business-deep-dive --research <тема>` | запустить рой web-research |
 | `/business-deep-dive --phase <name>` | работать в указанной фазе |
 
-`kind` ∈ {`profile`, `segment`, `offering`, `channel`, `competitor`,
+`kind` ∈ {`profile`, `offering`, `channel`, `competitor`,
 `current-metric`, `material`}.
 
 `phase` ∈ {`intake`, `profile`, `market`, `structure`, `metrics`,
@@ -49,7 +55,7 @@ description: Углублённая проработка верхнего сло
    - `material`-таблица пустая → `intake`;
    - `profile` нет/draft → `profile`;
    - `competitor` пустая → `market`;
-   - `segment`/`offering`/`channel` пустые → `structure`;
+   - `offering`/`channel` пустые → `structure`;
    - `current-metric` пустая → `metrics`;
    - всё заполнено, есть draft → `cohesion`.
 3. Вывести карту фаз. Через `AskUserQuestion` предложить следующий шаг.
@@ -61,7 +67,7 @@ description: Углублённая проработка верхнего сло
 | `intake` | принять материалы клиента, завести реестр источников | `material.md` |
 | `profile` | чем бизнес занимается, как зарабатывает | `profile.md` |
 | `market` | конкуренты и рынок (рой web-research) | `competitor.md` |
-| `structure` | сегменты, оферы, каналы | `segment.md`, `offering.md`, `channel.md` |
+| `structure` | оферы и каналы (сегменты — в `docs/ajtbd/`, `/segment-deep-dive`) | `offering.md`, `channel.md` |
 | `metrics` | текущие KPI — baseline-кандидаты | `current-metric.md` |
 | `cohesion` | целостность профиля, передача в многопроблемный business-problem | все |
 
@@ -84,7 +90,7 @@ description: Углублённая проработка верхнего сло
 - **Опции** — для enum (`offering.kind`, `channel.kind`,
   `competitor.position`, `material.kind`), выбора существующего slug
   соседа, теста-критерия, promotion кандидата из research.
-- **Other (значения)** — `name`, `description`, `needs`, `value`,
+- **Other (значения)** — `name`, `description`, `value`,
   `position`, числа метрик. Факты о бизнесе **не выдумывать** — брать из
   материалов клиента или подтверждённого research.
 
@@ -114,17 +120,21 @@ kind подтверждены · anti-patterns не нарушены · тест
 
 ## Удаление (каскад)
 
-Найти упоминания slug (`offering.for-segment`, `channel.serves-segment`,
-ссылки в profile), показать каскад, через `AskUserQuestion` решить по
-каждому, применить пакетом, удалить запись и state-заметку.
+Найти упоминания slug (ссылки в profile, в material-провенансе), показать
+каскад, через `AskUserQuestion` решить по каждому, применить пакетом,
+удалить запись и state-заметку. Связи `offering.for-segment` /
+`channel.serves-segment` указывают на сегменты соседнего слоя
+`docs/ajtbd/` — их этот скилл не трогает.
 
 ## Завершение сессии
 
 1. Перечислить затронутые сущности.
 2. Назвать текущую фазу и следующий шаг.
 3. Через `AskUserQuestion` предложить: продолжить фазу /
-   `/cross-audit` (стык с business-problem/project) / передать наработку
-   в `/business-problem-deep-dive` (когда профиль готов) /
+   `/segment-deep-dive` (профиль готов → поиск сегментов клиента по
+   работам в `docs/ajtbd/`) / `/cross-audit` (стык с
+   business-problem/project) / передать наработку в
+   `/business-problem-deep-dive` (когда профиль готов) /
    `/business-problem-audit` (если бизнес-проблемный слой уже наполнен —
    проверить методологию SWOT/гипотез в пределах каждой проблемы).
 
@@ -136,7 +146,7 @@ kind подтверждены · anti-patterns не нарушены · тест
 - Не авто-вписывать research в артефакты — promotion через
   `AskUserQuestion`.
 - Не повышать `draft → stable` без подтверждения; не понижать сам.
-- Не путать `segment` (клиент бизнеса) с `persona` продукта
-  (`projects/<slug>/persona`).
+- Не заводить сегменты здесь — сегменты по работам живут в `docs/ajtbd/`
+  (`/segment-deep-dive`); скилл только read-only на них ссылается.
 - Не аккумулировать историю в `state/` — forward-only.
 - Не пушить и не коммитить. Не вызывать другие скилы.

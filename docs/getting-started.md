@@ -25,21 +25,27 @@ docs-репо проекта, который ничего не помнит пр
 0. Use this template → <org>/docs → клон
 1. Бизнес заказчика → /business-deep-dive (аналитик)
                       ИЛИ /business-deep-dive-for-business («домашнее задание» заказчику)
-2. Бизнес-проблемы  → /business-problem-deep-dive (SWOT + Карта гипотез)
+2. Сегменты и работы → /segment-deep-dive (сегменты по работам + Score, рой)
+                      ИЛИ /segment-deep-dive-for-business
+   ├─ /job-graph-deep-dive <segment> (граф работ, решения, трения)
+   │  ИЛИ /job-graph-deep-dive-for-business
+   ├─ /jtbd-interview (опц.: рекрут → скрипт → интервью → конспект)
+   └─ /ajtbd-audit — инварианты графа работ (рой)
+3. Бизнес-проблемы  → /business-problem-deep-dive (SWOT + Карта гипотез)
                       ИЛИ /business-problem-deep-dive-for-business
    └─ /business-problem-audit — инварианты методологии (рой)
-3. Продукты         → /project-deep-dive <slug> (vision + 7 kind)
+4. Продукты         → /project-deep-dive <slug> (vision + 7 kind)
                       ИЛИ /project-deep-dive-for-business
    ├─ /project-audit <slug>
    ├─ /interface-deep-dive <slug>  → /interface-audit <slug>
    ├─ /domain-deep-dive <slug> <ctx> (опц., DDD)
    └─ /screen-deep-dive <slug>      → /screen-audit <slug>
-4. /cross-audit — сквозная семантика между слоями (рой)
-5. /de-template — вычистить показной example/ и шаблон-нарратив
-6. готовый docs-репо проекта
+5. /cross-audit — сквозная семантика между слоями (рой)
+6. /de-template — вычистить показной example/ и шаблон-нарратив
+7. готовый docs-репо проекта
 ```
 
-Полная лестница 11 шагов с порядком — в корневом `README.md § Воркфлоу`.
+Полная лестница 14 шагов с порядком — в корневом `README.md § Воркфлоу`.
 
 ## 1. Бизнес заказчика — `docs/business/`
 
@@ -48,13 +54,33 @@ docs-репо проекта, который ничего не помнит пр
 - **`/business-deep-dive`** (аналитик) — приём материалов клиента (сайт, PDF,
   презентации, соцсети, интервью) + рой web-research рынка и конкурентов;
   ведёт через фазы intake → profile → market → structure → metrics → cohesion,
-  заполняет `docs/business/{profile,segment,offering,channel,competitor,current-metric,material}.md`.
+  заполняет `docs/business/{profile,offering,channel,competitor,current-metric,material}.md`.
 - **`/business-deep-dive-for-business`** — режим «домашнее задание» для самого
   заказчика/основателя: мягкий рассказ о своём бизнесе в бизнес-языке (без
   slug/kind), упаковка результата в единую ветку `client` для передачи
   аналитику.
 
-## 2. Бизнес-проблемы — `docs/business-problem/`
+## 2. Сегменты и граф работ — `docs/ajtbd/`
+
+Разведка по методологии Advanced JTBD: кто наш сегмент **по работам**, а не по
+демографии, его граф работ и где он трётся с текущими решениями. 5 kind:
+`segment` · `job` · `job-graph` · `solution` · `segment-problem`. Слой питает
+проблемы бизнеса (трения доказывают проблему) и продукты (механики ценности →
+возможности).
+
+- **`/segment-deep-dive`** (аналитик) / **`/segment-deep-dive-for-business`** —
+  поиск, кластеризация и скоринг сегментов (Score = важность × частотность ×
+  размер × (10 − удовлетворённость)) через многоволновой рой web-research.
+- **`/job-graph-deep-dive <segment>`** / **`-for-business`** — граф работ
+  выбранного сегмента: целевая работа вверх/вниз/по последовательности, нанятые
+  решения, трения, CPR и кандидаты-механики ценности.
+- **`/jtbd-interview`** — опц. тяжёлый процесс живых JTBD-интервью (рекрут →
+  скрипт → проведение → конспект), своё state/transcripts; выход разбирается
+  через intake в скилы выше. Запускается по явному запросу.
+- **`/ajtbd-audit`** — рой агентов проверяет инварианты графа работ по каждому
+  сегменту. Только отчёт.
+
+## 3. Бизнес-проблемы — `docs/business-problem/`
 
 Строгая методология LinkedSWOT + Карта гипотез. `frame` — таблица проблем
 (одна строка = одна проблема). Слой **многопроблемный**: каждая запись 7 kind
@@ -70,7 +96,7 @@ docs-репо проекта, который ничего не помнит пр
   по каждой проблеме (задача-сирота, «тогда» без метрики, метрика без влияния,
   ставка-висяк, …). Только отчёт, не правит.
 
-## 3. Продукты — `docs/projects/<slug>/`
+## 4. Продукты — `docs/projects/<slug>/`
 
 Корень решения: несколько продуктов под одним бизнесом, у каждого своя папка.
 Все скиллы слоёв принимают `<project-slug>` первым аргументом (без него —
@@ -93,23 +119,25 @@ docs-репо проекта, который ничего не помнит пр
 `.claude/skills/<имя>/state/`, не выдумывает домен/craft, не повышает
 `draft → stable` без явного подтверждения.
 
-## 4. Сквозной аудит — `/cross-audit`
+## 5. Сквозной аудит — `/cross-audit`
 
 В конце или после крупных изменений. Рой агентов проверяет семантику между
-слоями: business ↔ business-problem ↔ (по каждому проекту: project ↔ interface
-↔ domain ↔ screen). Не slug-валидация — смысловая проверка («персона без
-UX-покрытия», «проблема, которую не закрывает ни один проект», «метрика как
-гарантия»). Только отчёт; деструктивные правки — через соответствующий
-deep-dive.
+слоями: business ↔ ajtbd ↔ business-problem ↔ (по каждому проекту: project ↔
+interface ↔ domain ↔ screen). Не slug-валидация — смысловая проверка («персона
+без UX-покрытия», «сегмент без персоны», «проблема бизнеса без единого
+трения-доказательства», «проблема, которую не закрывает ни один проект»,
+«метрика как гарантия»). Только отчёт; деструктивные правки — через
+соответствующий deep-dive.
 
-## 5. `/de-template` — свой docs-репо
+## 6. `/de-template` — свой docs-репо
 
 Когда аналитика проекта заполнена, `/de-template` превращает форк в docs-репо
 проекта, не помнящий про шаблон: удаляет показной `docs/projects/example/`
 (чужой продукт-витрина), переписывает шаблон-нарратив в `CLAUDE.md`/`README.md`
 под идентичность проекта. **НЕ трогает** пустые скелеты-каноны
-(`docs/projects/_canon/`, `docs/business/`, `docs/business-problem/`) — это
-рабочая основа, не показуха. Движок skill-only, reviewable edits.
+(`docs/projects/_canon/`, `docs/business/`, `docs/ajtbd/`,
+`docs/business-problem/`) — это рабочая основа, не показуха. Движок
+skill-only, reviewable edits.
 
 ## Готово
 

@@ -9,11 +9,13 @@
 
 ## Слои
 
-Поток сверху вниз: бизнес → проблемы → продукты → интерфейс / домены / экраны.
+Поток сверху вниз: бизнес → сегменты и граф работ (AJTBD) → проблемы →
+продукты → интерфейс / домены / экраны.
 
 | каталог | вопрос | вход |
 |---|---|---|
-| [`business/`](./business/README.md) | **кто этот бизнес заказчика** (1 singleton + 6 kind) | `/business-deep-dive` · `/business-deep-dive-for-business` |
+| [`business/`](./business/README.md) | **кто этот бизнес заказчика** (1 singleton + 5 kind) | `/business-deep-dive` · `/business-deep-dive-for-business` |
+| [`ajtbd/`](./ajtbd/README.md) | **кто наш сегмент по работам, его граф работ и трения** (Advanced JTBD, 5 kind) | `/segment-deep-dive` · `/job-graph-deep-dive` (+ `-for-business`) · `/jtbd-interview` |
 | [`business-problem/`](./business-problem/README.md) | **какие проблемы решаем и под какие метрики целимся** (`frame`-таблица + 7 kind, M:N) | `/business-problem-deep-dive` · `/business-problem-deep-dive-for-business` |
 | [`projects/`](./projects/README.md) | **продукты под бизнес** (несколько; см. ниже) | `/project-deep-dive <slug>` · `/project-deep-dive-for-business` |
 | `projects/_canon/` | **канон формы** продуктовых слоёв (образец, не данные) | read-only, наследуется форком |
@@ -34,6 +36,7 @@
 
 - `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>`
   — узкая консистентность внутри слоя проекта.
+- `/ajtbd-audit` — инварианты методологии графа работ по каждому сегменту (рой).
 - `/business-problem-audit` — инварианты методологии по каждой проблеме (рой).
 - `/cross-audit` — сквозная семантика между слоями (рой).
 

@@ -1,6 +1,6 @@
 ---
 name: cross-audit
-description: Сквозной семантический аудит консистентности между слоями документации — business ↔ business-problem ↔ (множество проектов docs/projects/<slug>/: project ↔ interface ↔ domain ↔ screen). Запускает рой агентов параллельно: верхнеуровневые углы один раз (factor ↔ business, current-metric ↔ metric, addresses-problem ↔ frame), а углы business-problem ↔ продукт и углы внутри проекта — ПО КАЖДОМУ проекту, с путями, заскоупленными в папку проекта (goal/metric ↔ vision, subject ↔ persona, segment ↔ persona, bet ↔ capability, persona ↔ who, capability ↔ situation/domain, surface ↔ zone/screen, integration ↔ domain, constraint ↔ surface/integration, market ↔ capability). Читает оба слоя + state, ищет семантические тупики и противоречия — НЕ через slug-валидацию, а через смысловую проверку («персона без UX-покрытия», «метрика подана как гарантия», «субъект без persona», «зона висит без поверхности», «проект бьёт в несуществующую проблему», «проблема, которую не закрывает ни один проект»). Не правит, только отчёт. Использовать перед релизом, после крупного апдейта любого слоя, или когда deep-dive-скилы предлагают прогон. Сводный отчёт + список findings; deep-dive по каждому — отдельный шаг руками аналитика.
+description: Сквозной семантический аудит консистентности между слоями документации — business ↔ ajtbd ↔ business-problem ↔ (множество проектов docs/projects/<slug>/: project ↔ interface ↔ domain ↔ screen). Запускает рой агентов параллельно: верхнеуровневые углы один раз (factor ↔ business, current-metric ↔ metric, addresses-problem ↔ frame, ajtbd segment-problem ↔ frame, ajtbd segment ↔ subject, ajtbd solution ↔ competitor/offering, business offering/channel ↔ ajtbd segment), а углы business-problem ↔ продукт, ajtbd ↔ продукт и углы внутри проекта — ПО КАЖДОМУ проекту, с путями, заскоупленными в папку проекта (goal/metric ↔ vision, subject ↔ persona, ajtbd segment ↔ persona, ajtbd job ↔ vision.Success, ajtbd segment-problem ↔ vision.Problem, ajtbd job-graph value-mechanics ↔ capability, bet ↔ capability, persona ↔ who, capability ↔ situation/domain, surface ↔ zone/screen, integration ↔ domain, constraint ↔ surface/integration, market ↔ capability). Читает оба слоя + state, ищет семантические тупики и противоречия — НЕ через slug-валидацию, а через смысловую проверку («персона без UX-покрытия», «метрика подана как гарантия», «субъект без persona», «сегмент без персоны», «персона без сегмента», «проблема бизнеса без единого трения-доказательства», «субъект без сегмента», «механика ценности без capability», «зона висит без поверхности», «проект бьёт в несуществующую проблему», «проблема, которую не закрывает ни один проект»). Не правит, только отчёт. Использовать перед релизом, после крупного апдейта любого слоя, или когда deep-dive-скилы предлагают прогон. Сводный отчёт + список findings; deep-dive по каждому — отдельный шаг руками аналитика.
 ---
 
 # cross-audit
@@ -9,8 +9,10 @@ description: Сквозной семантический аудит консис
 слоя — **общие для всех проектов**, ниже — **множество проектов**, каждый
 в своей папке `docs/projects/<project-slug>/`:
 
-- `docs/business/` (профиль бизнеса — profile/segment/competitor/...) —
-  общий, один.
+- `docs/business/` (профиль бизнеса — profile/offering/channel/competitor/...)
+  — общий, один.
+- `docs/ajtbd/` (разведка спроса — segment/job/job-graph/solution/segment-problem;
+  сегменты по работам + граф работ Advanced JTBD) — общий, один.
 - `docs/business-problem/` (**многопроблемный** слой —
   frame/factor/bet/goal/metric/...; `frame` — таблица проблем) — общий,
   один.
@@ -39,9 +41,11 @@ description: Сквозной семантический аудит консис
 `/project-audit` ловит внутренние тупики **внутри одного project-слоя**.
 `/interface-audit` — внутри interface. `/business-problem-audit` ловит
 **методологические инварианты** SWOT / Карты гипотез (внутри
-business-problem, в пределах каждой проблемы). Cross-audit — **между
-слоями**: на содержимое SWOT / гипотез он не лезет, его территория —
-кросс-**слойные** рёбра.
+business-problem, в пределах каждой проблемы). `/ajtbd-audit` ловит
+**методологические инварианты** Advanced JTBD (внутри ajtbd, в пределах
+каждого сегмента — бандл работ, непрерывность «чтобы», CPR, трение без
+решения). Cross-audit — **между слоями**: на содержимое SWOT / гипотез /
+графа работ он не лезет, его территория — кросс-**слойные** рёбра.
 
 ## Точки входа
 
@@ -53,23 +57,28 @@ business-problem, в пределах каждой проблемы). Cross-audi
 | `/cross-audit --quick` | быстрый прогон с 3 самыми важными углами (persona↔who, capability↔situation, surface↔zone) по каждому проекту + addresses-problem↔frame один раз |
 
 `lens` ∈ {`factor-business`, `currentmetric-metric`,
-`addresses-problem-frame`, `goal-vision`, `subject-persona`,
-`segment-persona`, `bet-capability`, `persona-who`,
+`addresses-problem-frame`, `segmentproblem-frame`, `segment-subject`,
+`solution-business`, `business-segment`, `goal-vision`, `subject-persona`,
+`segment-persona`, `job-vision`, `segmentproblem-vision`,
+`mechanic-capability`, `bet-capability`, `persona-who`,
 `capability-situation`, `capability-domain`, `surface-zone`,
 `surface-screen`, `integration-domain`, `constraint-surface`,
 `market-capability`}.
 
 **Скоуп углов** (подробнее — `references/angles.md`):
 
-- **верхнеуровневые, прогон один раз** (общие слои business ↔
+- **верхнеуровневые, прогон один раз** (общие слои business ↔ ajtbd ↔
   business-problem, без проекта): `factor-business`,
-  `currentmetric-metric`.
+  `currentmetric-metric`, `segmentproblem-frame`, `segment-subject`,
+  `solution-business`, `business-segment`.
 - **верхнеуровневый M:N, прогон один раз над всеми проектами**:
   `addresses-problem-frame` — связывает все `vision.addresses-problem`
   со строками `frame`, в обе стороны.
 - **по каждому проекту** (business-problem ↔ продукт проекта;
   скоупится к проблемам, которые проект закрывает): `goal-vision`,
-  `subject-persona`, `segment-persona`, `bet-capability`.
+  `subject-persona`, `bet-capability`.
+- **по каждому проекту** (ajtbd ↔ продукт проекта): `segment-persona`,
+  `job-vision`, `segmentproblem-vision`, `mechanic-capability`.
 - **по каждому проекту** (внутри папки проекта): `persona-who`,
   `capability-situation`, `capability-domain`, `surface-zone`,
   `surface-screen`, `integration-domain`, `constraint-surface`,
@@ -79,7 +88,8 @@ business-problem, в пределах каждой проблемы). Cross-audi
 
 ## Что делать при запуске
 
-1. Прочитать `docs/business/README.md`, `docs/business-problem/README.md`,
+1. Прочитать `docs/business/README.md`, `docs/ajtbd/README.md`,
+   `docs/business-problem/README.md`,
    `docs/projects/README.md`, `docs/projects/_canon/project/README.md`,
    `docs/projects/_canon/interface/README.md`, и (если есть)
    `docs/projects/_canon/domains/README.md` /
@@ -98,8 +108,9 @@ business-problem, в пределах каждой проблемы). Cross-audi
 5. Определить, какие углы применимы — по args или по полному прогону —
    и **раскрыть** project-скоупленные углы в пары `(проект × lens)`:
    один агент на каждую пару. Верхнеуровневые углы (`factor-business`,
-   `currentmetric-metric`, `addresses-problem-frame`) — по одному агенту,
-   без проекта.
+   `currentmetric-metric`, `addresses-problem-frame`,
+   `segmentproblem-frame`, `segment-subject`, `solution-business`,
+   `business-segment`) — по одному агенту, без проекта.
 6. **Спавнить агентов параллельно** (см. ниже). При множестве проектов
    рой широкий: `(число проектов × project-углы) + верхнеуровневые`.
 7. Собрать ответы. Каждый агент возвращает findings в едином формате
@@ -204,9 +215,16 @@ business-problem↔продукт — в границах перечисленн
 | `factor-business` | `docs/business-problem/factor.md` | `docs/business/` (profile, competitor) | ★ | каждый SWOT-фактор опирается на картину бизнеса? |
 | `currentmetric-metric` | `docs/business/current-metric.md` | `docs/business-problem/metric.md` | ★ | baseline целевой метрики (`current`) взят из текущего KPI бизнеса? |
 | `addresses-problem-frame` | `docs/projects/*/vision.md` (`addresses-problem`) | `docs/business-problem/frame.md` | ★ | каждый ref проекта попадает в реальную проблему? есть ли проблема, в которую не бьёт ни один проект? (M:N, обе стороны) |
+| `segmentproblem-frame` | `docs/ajtbd/segment-problem.md` | `docs/business-problem/frame.md` | ★ | трение клиента доказывает проблему бизнеса? есть ли проблема бизнеса без единого трения-доказательства? |
+| `segment-subject` | `docs/ajtbd/segment.md` | `docs/business-problem/subject.md` | ★ | субъект влияния вырастает из сегмента? есть ли субъект без сегмента? |
+| `solution-business` | `docs/ajtbd/solution.md` | `docs/business/` (competitor, offering) | ★ | нанятое решение (`maps-to`) сходится с игроком рынка / собственным офером? |
+| `business-segment` | `docs/business/offering.md` (`for-segment`), `channel.md` (`serves-segment`) | `docs/ajtbd/segment.md` | ★ | межслойные ссылки оферов/каналов попадают в реальные сегменты и осмысленны? |
 | `goal-vision` | `docs/business-problem/goal.md`, `metric.md` (по проблемам проекта) | `docs/projects/<slug>/vision.md` | по проекту | цель/метрика закрываемой проблемы отражены в vision.Success (как таргет, не гарантия)? |
 | `subject-persona` | `docs/business-problem/subject.md` (по проблемам проекта) | `docs/projects/<slug>/persona.md` | по проекту | субъект влияния соответствует persona продукта? |
-| `segment-persona` | `docs/business/segment.md` | `docs/projects/<slug>/persona.md` | по проекту | сегмент бизнеса соотносится с persona (разные сущности, но связаны)? |
+| `segment-persona` | `docs/ajtbd/segment.md` | `docs/projects/<slug>/persona.md` | по проекту | сегмент рынка соотносится с persona продукта (разные сущности, но связаны)? сегмент без персоны / персона без сегмента? |
+| `job-vision` | `docs/ajtbd/job.md` (`big`/`core`) | `docs/projects/<slug>/vision.md` (Success) | по проекту | успех продукта целит в Big/Core Job сегмента? |
+| `segmentproblem-vision` | `docs/ajtbd/segment-problem.md` | `docs/projects/<slug>/vision.md` (Problem) | по проекту | трение клиента отражено в vision.Problem продукта? |
+| `mechanic-capability` | `docs/ajtbd/job-graph.md` (`value-mechanics`) | `docs/projects/<slug>/capability.md` | по проекту | механика ценности из графа реализована capability? механика без capability? |
 | `bet-capability` | `docs/business-problem/bet.md`, `goal.md` (по проблемам проекта) | `docs/projects/<slug>/capability.md` | по проекту | ставка/цель реализуется хотя бы одной capability проекта? |
 | `persona-who` | `docs/projects/<slug>/persona.md` | `docs/projects/<slug>/interface/who.md` | по проекту | каждая persona имеет хотя бы одно who-покрытие? каждое who сводимо к одной persona? |
 | `capability-situation` | `docs/projects/<slug>/capability.md` | `docs/projects/<slug>/interface/situation.md` | по проекту | каждая capability реализуется ≥1 ситуацией? есть ли ситуации без capability-якоря? |
@@ -221,9 +239,9 @@ business-problem↔продукт — в границах перечисленн
 
 ```
 === /cross-audit ===
-Слои: business, business-problem (общие) + проекты: referral-network, partner-portal
-Проектов: 2 · углы: 3 верхнеуровневых + 12 по referral-network + 9 по partner-portal = 24 запущено, 24 ответили
-Время: <duration> · агентов: 24
+Слои: business, ajtbd, business-problem (общие) + проекты: referral-network, partner-portal
+Проектов: 2 · углы: 7 верхнеуровневых + 15 по referral-network + 12 по partner-portal = 34 запущено, 34 ответили
+Время: <duration> · агентов: 34
 
 — Общие слои —
 
@@ -242,6 +260,22 @@ business-problem↔продукт — в границах перечисленн
     projects/*/vision.md не содержит её в addresses-problem.
   Что делать: решить — нужен ли проект под неё, или проблема пока вне
   scope (зафиксировать).
+
+[warning] segmentproblem-frame → проблему бизнеса `paid-churn` не
+  доказывает ни одно трение клиента из docs/ajtbd/segment-problem.md.
+  Доказательство: frame.md:paid-churn; в segment-problem.md нет ни одной
+    записи с feeds-problem=`paid-churn` или семантически бьющей в эту
+    проблему.
+  Что делать: разведать трение клиента под эту проблему через
+  /job-graph-deep-dive, либо зафиксировать, что проблема опирается на
+  другой источник доказательства.
+
+[hint] segment-subject → субъект `partner-admin` (business-problem) не
+  выводится ни из одного сегмента docs/ajtbd/segment.md.
+  Доказательство: subject.md:partner-admin; в segment.md нет сегмента,
+    чей бандл работ соответствует этому субъекту.
+  Что делать: проверить через /segment-deep-dive, есть ли сегмент под
+  этого субъекта, или субъект задан вне разведки спроса.
 
 — Проект referral-network —
 
@@ -309,8 +343,8 @@ business-problem↔продукт — в границах перечисленн
 ---
 ran-on: <UTC-ts>
 projects: [referral-network, partner-portal]
-top-level-lenses-run: 3
-project-lens-runs: 21   # сумма по всем (проект × lens)
+top-level-lenses-run: 7
+project-lens-runs: 27   # сумма по всем (проект × lens)
 per-project-layers:
   referral-network: { project: yes, interface: yes, domain: yes, screen: no }
   partner-portal:   { project: yes, interface: yes, domain: no,  screen: no }
@@ -394,10 +428,12 @@ suppressions как контекст и **не** генерирует те же 
   `integration-domain` пропускаются **для этого проекта** с явной
   пометкой «слой не существует» в отчёте. У другого проекта они могут
   при этом отрабатывать.
-- **Не смешивать территорию с `/business-problem-audit`.** Методологию
-  SWOT / Карты гипотез (задача-сирота, «тогда» без метрики, ставка-висяк,
-  guardrail и т.п. — в пределах проблемы) держит он. Cross-audit — только
-  кросс-**слойные** рёбра.
+- **Не смешивать территорию с `/business-problem-audit` и `/ajtbd-audit`.**
+  Методологию SWOT / Карты гипотез (задача-сирота, «тогда» без метрики,
+  ставка-висяк, guardrail и т.п. — в пределах проблемы) держит первый;
+  методологию Advanced JTBD (бандл работ, непрерывность «чтобы», CPR,
+  трение без решения — в пределах сегмента) держит второй. Cross-audit —
+  только кросс-**слойные** рёбра.
 - **Не запускать рой повторно** для одной сессии. Если findings много —
   пройти по ним постепенно. Повторный прогон — следующая сессия или
   явный `/cross-audit` запуск.

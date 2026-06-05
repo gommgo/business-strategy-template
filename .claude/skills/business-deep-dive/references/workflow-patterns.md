@@ -36,7 +36,8 @@
 **Сигнал:** args = `<kind>:<slug>`.
 
 1. Прочитать строку + state-заметку.
-2. Прочитать соседей (для offering/channel — их segment).
+2. Прочитать соседей (для offering/channel — их сегмент в
+   `docs/ajtbd/segment.md`, read-only).
 3. Найти дыры, anti-pattern-подозрения, открытые вопросы.
 4. Раунд `AskUserQuestion` (до 4): дыры → Other; anti-pattern →
    «да/нет почему»; тупик → «связать / оставить почему».
@@ -53,7 +54,7 @@
 | запуск research | «3 / 5 / 10 / 15 агентов» / «не сейчас» |
 | promotion кандидата | «принять как `<kind>:<slug>`» / «отбросить» / «доработать» |
 
-**Только Other (значения):** `name`, `description`, `needs`, `value`,
+**Только Other (значения):** `name`, `description`, `value`,
 `position`-текст, числа метрик. Факты о бизнесе — из материалов/research,
 **не выдумывать**.
 

@@ -8,9 +8,9 @@
 2. **`Критерии <kind>` подтверждены** аналитиком через `AskUserQuestion`.
 3. **`Что <kind> НЕ` не нарушены** — anti-patterns проверены, ❌.
 4. **`Тест-критерий` ✅.**
-5. **Факт прослежен до `material`** — для записей profile/segment/
-   offering/channel/current-metric есть источник (material-ссылка в
-   state или подтверждённый research). Нет `**blocker**` в state.
+5. **Факт прослежен до `material`** — для записей profile/offering/
+   channel/current-metric есть источник (material-ссылка в state или
+   подтверждённый research). Нет `**blocker**` в state.
 
 Все 5 ✅ → `AskUserQuestion`: «Повышаем `<kind>:<slug>` в stable?» По
 «да» — `status: draft → stable`.

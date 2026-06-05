@@ -8,7 +8,7 @@
 ```
 .claude/skills/business-deep-dive-for-business/state/
 ├── profile.md
-├── segment/<slug>.md  offering/<slug>.md  channel/<slug>.md
+├── offering/<slug>.md  channel/<slug>.md
 ├── competitor/<slug>.md  current-metric/<slug>.md  material/<slug>.md
 └── _session-log/<UTC-ts>.md
 ```

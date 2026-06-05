@@ -77,9 +77,11 @@ Frontmatter: `kind` (один из 8), `slug` (для `frame` — `<problem-slug
 Для единой картины скилл read-only смотрит соседние `state/`: клиентский
 режим этого слоя
 (`../business-problem-deep-dive-for-business/state/<kind>/<slug>.md` — что
-наработал клиент) и соседние слои (`../business-deep-dive*/state/`,
-`../project-deep-dive*/state/<slug>/` — проектный по текущему продукту).
-**Писать в чужой state запрещено.**
+наработал клиент), разведку AJTBD (`../segment-deep-dive*/state/`,
+`../job-graph-deep-dive*/state/` — трения и сегменты клиента, питающие
+факторы/строку проблемы/субъекта) и соседние слои
+(`../business-deep-dive*/state/`, `../project-deep-dive*/state/<slug>/` —
+проектный по текущему продукту). **Писать в чужой state запрещено.**
 
 При чтении клиентского state маркер `**жду аналитика**` (которым клиентский
 `*-for-business`-режим помечает эскалацию) трактуй как **blocker-кандидат** —

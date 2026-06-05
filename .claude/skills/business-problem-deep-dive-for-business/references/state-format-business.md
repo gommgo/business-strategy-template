@@ -66,10 +66,14 @@ Frontmatter: `kind`, `slug` (для `frame` — `<problem-slug>`), `ref`. У
 
 Чтобы картина была единой, скилл read-only подтягивает соседние `state/`:
 другие клиентские слои (`../business-deep-dive-for-business/state/`,
-`../project-deep-dive-for-business/state/<slug>/`) и аналитические слои
-(`../business-problem-deep-dive/state/`, `../business-deep-dive/state/`,
-`../project-deep-dive/state/<slug>/`). Проектный слой — только по текущему
-продукту (изоляция продуктов сохраняется). В чужой state **не пишет**.
+`../segment-deep-dive-for-business/state/`,
+`../job-graph-deep-dive-for-business/state/` — что клиент рассказал про
+своих клиентов и где им тяжело, `../project-deep-dive-for-business/state/<slug>/`)
+и аналитические слои (`../business-problem-deep-dive/state/`,
+`../business-deep-dive/state/`, `../segment-deep-dive/state/`,
+`../job-graph-deep-dive/state/`, `../project-deep-dive/state/<slug>/`).
+Проектный слой — только по текущему продукту (изоляция продуктов
+сохраняется). В чужой state **не пишет**.
 
 **Anti-leak (клиент-режим).** Прочитанное из кухни аналитика — тихий
 контекст: сырые открытые вопросы, черновые гипотезы, доменные решения,
