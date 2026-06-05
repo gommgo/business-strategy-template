@@ -180,6 +180,9 @@ business-problem↔продукт — в границах перечисленн
 
 Если ничего не нашёл — пустой массив [].
 Не выдумывай findings ради чисел.
+
+Режим read-only: не вызывай Write/Edit (и любой мутирующий tool),
+ничего не правь в артефактах. Возвращай ТОЛЬКО валидный JSON-массив findings.
 ```
 
 ## Уровни тяжести
@@ -293,6 +296,15 @@ business-problem↔продукт — в границах перечисленн
 
 ## `audit-state/last-report.md`
 
+Отчёт лежит **рядом со скиллом** (cross-audit не скоупится по одному
+проекту — отчёт один на прогон, проекты внутри него):
+
+```
+.claude/skills/cross-audit/audit-state/last-report.md
+```
+
+Дальше по тексту скилла короткое `audit-state/` — сокращение этого пути.
+
 ```markdown
 ---
 ran-on: <UTC-ts>
@@ -346,8 +358,13 @@ verdicts: { accepted: A, needs-fix: B, false-positive: C, deferred: D }
 
 ## Suppressions
 
-Findings, помеченные «false positive», сохраняются в
-`audit-state/suppressions.md`:
+Findings, помеченные «false positive», сохраняются **рядом со скиллом** в
+
+```
+.claude/skills/cross-audit/audit-state/suppressions.md
+```
+
+Формат записи:
 
 ```markdown
 - lens: persona-who; project: referral-network; pattern: "persona:doctor

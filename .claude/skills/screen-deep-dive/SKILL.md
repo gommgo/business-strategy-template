@@ -293,7 +293,7 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
    `<откуда сослались>` — докопать».
 3. Возврат в исходную сущность, копание продолжается.
 
-### В interface (зависимость на не существующий interface-slug)
+### Stub-зависимость на interface-slug
 
 Если `screen.situations` / `block.interface-block` / `data:<slug>` /
 прочая ссылка указывает на не существующий interface-slug **того же

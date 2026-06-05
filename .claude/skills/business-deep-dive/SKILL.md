@@ -124,7 +124,9 @@ kind подтверждены · anti-patterns не нарушены · тест
 2. Назвать текущую фазу и следующий шаг.
 3. Через `AskUserQuestion` предложить: продолжить фазу /
    `/cross-audit` (стык с business-problem/project) / передать наработку
-   в `/business-problem-deep-dive` (когда профиль готов).
+   в `/business-problem-deep-dive` (когда профиль готов) /
+   `/business-problem-audit` (если бизнес-проблемный слой уже наполнен —
+   проверить методологию SWOT/гипотез в пределах каждой проблемы).
 
 ## Запреты
 

@@ -28,6 +28,9 @@
   `/cross-audit` (рой агентов), не grep.
 - **Forward-only.** Все артефакты — «что есть сейчас и куда идём», без changelog'ов в
   prose, дат, «было/стало». История живёт в `git log`.
+- **`.claude/rules/` расширяем.** Каталог правил для агента — открытый: потребитель
+  форка добавляет туда собственные `<topic>.md`-правила (path-scoped инварианты своего
+  проекта), не ограничиваясь поставляемым `forward-only.md`.
 
 ## Форк, issue, PR
 
@@ -50,7 +53,7 @@
 - `/cross-audit` — сквозная семантика business ↔ business-problem ↔ project ↔
   interface ↔ domain ↔ screen (прогнать, если трогал несколько слоёв).
 
-- **Conventional Commits** (хук `commit-msg`): `<type>(<scope>)?: <subject>`,
+- **Conventional Commits** (конвенция формата; git-хук не поставляется): `<type>(<scope>)?: <subject>`,
   subject ≤72. Типы: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `meta`.
   Пример: `docs(canon): clarify hypothesis frame fields`.
 

@@ -151,7 +151,11 @@ deep-dive сам) / «false positive» (→ suppressions) / «обсудить �
 
 ## `audit-state/last-report.md`
 
-Лежит рядом со скиллом, перезаписывается каждый прогон (не журнал, в git):
+Лежит **рядом со скиллом**, перезаписывается каждый прогон (не журнал, в git):
+
+```
+.claude/skills/business-problem-audit/audit-state/last-report.md
+```
 
 ```markdown
 ---

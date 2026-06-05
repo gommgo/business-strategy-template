@@ -110,11 +110,20 @@ project-скила: `**жду аналитика**`, `## Что я имел в �
 
 ## Эскалация и передача
 
-См. `references/escalation.md`. Упаковка `docs/business/` + state +
-summary + transcript в единую ветку `client`, push с явного согласия
-(доступ к репозиторию настраивается один раз — логин/пароль, дальше git
-помнит сам). Рынок/конкуренты — частый повод эскалации (рой делает
-аналитик).
+Упаковка `docs/business/` + state + summary + transcript в единую ветку
+`client`, push с явного согласия (доступ к репозиторию настраивается один
+раз — логин/пароль, дальше git помнит сам). Рынок/конкуренты — частый
+повод эскалации (рой делает аналитик).
+
+Порядок `--share` в сжатом виде (полный протокол — `references/escalation.md`):
+
+1. `git fetch origin` → `git switch client 2>/dev/null || git switch -c client origin/main`.
+2. `git add` **адресно** (`docs/business/`, state, `client-handoff/`) — не `-A`.
+3. `git commit -m "docs(handoff): business client session <UTC-ts>"`.
+4. `git rebase origin/main`, затем push: первый — `git push -u origin client`,
+   последующие — `git push --force-with-lease origin client`.
+
+Никогда `--no-verify`: упал хук — спросить клиента, что делать.
 
 ## Что НЕ делать
 

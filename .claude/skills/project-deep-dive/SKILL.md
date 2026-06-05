@@ -337,7 +337,7 @@ project-deep-dive — **не аудитор**; в конце сессии пре
 3. Спавнит N агентов параллельно через `Agent` tool (subagent_type:
    general-purpose, доступ к WebSearch/WebFetch).
 4. Каждый агент возвращает структурированный отчёт.
-5. Скилл сводит в `state/<project-slug>/research/<query>-<ts>.md` +
+5. Скилл сводит в `state/<project-slug>/research/<query-slug>-<UTC-ts>.md` +
    раскладывает кандидатов по kind (`market`, `constraint`, …).
 6. Аналитик проходит кандидатов через `AskUserQuestion` — какие
    принимаем в артефакты, какие отбрасываем. **Авто-promotion в

@@ -55,13 +55,15 @@
 
 ## Где это в экосистеме
 
-`<org>/docs` — один из **4 форкаемых шаблонов** под `sftbmb-core/`
-(`go-backend-template`, `spa-frontend-template`, `project-docs-template` — этот,
-`project-infra-template-compose`), плюс корп control-plane `sftbmb-infra/infra`,
-общая Go-lib `sftbmb-core/golibinfra` и дизайн-система `@sftbmb/ui` (репо
-`sftbmb-core/ui-lib`). Роль этого репо — **design-time SoT** проекта; форкается
-**первым**, наполняется аналитикой, дальше форкаются код-репо (которые его
-читают). Канон-карта контрактов — `sftbmb-infra/infra/docs/ecosystem.md`.
+`<org>/docs` — один из **5 форкаемых шаблонов** под `sftbmb-core/`
+(`corp-infra-template`, `go-backend-template`, `spa-frontend-template`,
+`project-docs-template` — этот, `project-infra-template-compose`), плюс 2 общие
+библиотеки: Go-lib `sftbmb-core/golibinfra` и дизайн-система `@sftbmb/ui` (репо
+`sftbmb-core/ui-lib`). Корп control-plane — репо `corp-infra-template` (managed =
+инстанс на `*.sftbmb.ru`, self-hosted = ваш форк; вендор-лока нет). Роль этого
+репо — **design-time SoT** проекта; форкается **первым**, наполняется аналитикой,
+дальше форкаются код-репо (которые его читают). Канон-карта контрактов
+(и self-hosted-канон) — `corp-infra-template/docs/ecosystem.md`.
 
 ## Форку
 

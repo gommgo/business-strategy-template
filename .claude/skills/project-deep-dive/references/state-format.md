@@ -18,7 +18,7 @@ State **скоупится по проекту** — у каждого `<project
 ├── constraint/<slug>.md
 ├── market/<slug>.md
 └── research/
-    ├── <query-slug>-<UTC-timestamp>.md
+    ├── <query-slug>-<UTC-ts>.md
     └── …
 ```
 
@@ -111,7 +111,7 @@ ref: docs/projects/<project-slug>/vision.md
 
 ## Особый случай: research-отчёт
 
-`state/<project-slug>/research/<query>-<ts>.md` — **не** kind-заметка.
+`state/<project-slug>/research/<query-slug>-<UTC-ts>.md` — **не** kind-заметка.
 Это сырьё с роя агентов. Структура другая:
 
 ```markdown

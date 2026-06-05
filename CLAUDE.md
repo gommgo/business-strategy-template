@@ -39,13 +39,15 @@
 
 ## Где это в экосистеме
 
-Это один из **4 форкаемых шаблонов** под `sftbmb-core/`:
-`go-backend-template` (→ `<org>/backend`), `spa-frontend-template`
-(→ `<org>/frontend`), **`project-docs-template`** (этот → `<org>/docs`),
-`project-infra-template-compose` (→ `<org>/infra`). Рядом — корп
-control-plane `sftbmb-infra/infra` (registry `git.sftbmb.ru`, канон-карта
-контрактов `sftbmb-infra/infra/docs/ecosystem.md`), общая Go-lib
-`sftbmb-core/golibinfra` и дизайн-система `@sftbmb/ui` из репо `sftbmb-core/ui-lib`.
+Это один из **5 форкаемых шаблонов** под `sftbmb-core/`:
+`corp-infra-template` (корп control-plane), `go-backend-template`
+(→ `<org>/backend`), `spa-frontend-template` (→ `<org>/frontend`),
+**`project-docs-template`** (этот → `<org>/docs`),
+`project-infra-template-compose` (→ `<org>/infra`). Рядом — 2 общие библиотеки:
+Go-lib `sftbmb-core/golibinfra` и дизайн-система `@sftbmb/ui` из репо
+`sftbmb-core/ui-lib`. Корп control-plane `corp-infra-template`: вендор-лока нет —
+managed (инстанс на `*.sftbmb.ru`) или self-hosted (ваш форк). Канон контрактов
+(в т.ч. self-hosted) — `corp-infra-template/docs/ecosystem.md`.
 
 **Роль docs-репо — design-time SoT проекта.** Форкается **первым**
 (Gitea → `sftbmb-core/project-docs-template` → **Use this template** →
@@ -67,8 +69,8 @@ control-plane `sftbmb-infra/infra` (registry `git.sftbmb.ru`, канон-кар�
 ## 1. Forward-only (никакой археологии)
 
 Все артефакты — код, документация, комментарии, артефакты аналитики,
-описания PR и коммитов — пишутся в режиме «что есть и куда идём». **Без
-журналов прошлого**: без changelog'ов внутри prose, без следов миграций,
+описания PR и коммитов — пишутся в режиме «что есть и куда идём».
+**Без журналов прошлого**: без changelog'ов внутри prose, без следов миграций,
 без ссылок на отменённые решения, без дат в комментариях, без «было X —
 стало Y», без имён переходных фаз.
 

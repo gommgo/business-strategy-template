@@ -2,6 +2,13 @@
 **/.claude/settings.local.json
 **/.claude/settings.local.json.*
 
+# Данные заказчика и секреты в репо не хранятся
+.env
+.env.local
+credentials*
+*.pem
+*.key
+
 # OS / редакторы
 .DS_Store
 Thumbs.db
