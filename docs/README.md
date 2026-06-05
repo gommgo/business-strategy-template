@@ -4,19 +4,22 @@
 кода: артефакты — чистая язык-агностичная аналитика, которую читают соседние
 форки (`<org>/{backend,frontend,infra}`) и по которой автор макета вручную
 собирает hi-fi субстрат на `@sftbmb/ui`. Заполняют артефакты deep-dive-
-скиллы (`.claude/skills/`); онбординг ведёт аналитик руками — оркестратора нет
-(by design, см. `getting-started.md`).
+скиллы (`.claude/skills/`); рекомендуемый вход — оркестраторы `/entrypoint`
+(аналитик) и `/entrypoint-for-business` (клиент), которые классифицируют сырьё
+и маршрутизируют к исполнителям (прямой вызов исполнителя тоже допустим, см.
+`getting-started.md`).
 
 ## Слои
 
-Поток сверху вниз: бизнес → сегменты и граф работ (AJTBD) → проблемы →
-продукты → интерфейс / домены / экраны.
+Поток сверху вниз: бизнес (+ реестр проблем) → сегменты и граф работ (AJTBD) →
+SWOT → Карта гипотез → продукты → интерфейс / домены / экраны.
 
 | каталог | вопрос | вход |
 |---|---|---|
-| [`business/`](./business/README.md) | **кто этот бизнес заказчика** (1 singleton + 5 kind) | `/business-deep-dive` · `/business-deep-dive-for-business` |
+| [`business/`](./business/README.md) | **кто этот бизнес заказчика и какие его проблемы решаем** (1 singleton + 5 kind + реестр `business-problem`) | `/business-deep-dive` · `/business-deep-dive-for-business` |
 | [`ajtbd/`](./ajtbd/README.md) | **кто наш сегмент по работам, его граф работ и трения** (Advanced JTBD, 5 kind) | `/segment-deep-dive` · `/job-graph-deep-dive` (+ `-for-business`) · `/jtbd-interview` |
-| [`business-problem/`](./business-problem/README.md) | **какие проблемы решаем и под какие метрики целимся** (`frame`-таблица + 7 kind, M:N) | `/business-problem-deep-dive` · `/business-problem-deep-dive-for-business` |
+| [`swot/`](./swot/README.md) | **за счёт чего возможен следующий шаг** (LinkedSWOT: `factor` · `bet`, M:N) | `/swot-deep-dive` |
+| [`hypothesis-map/`](./hypothesis-map/README.md) | **под какие метрики целимся** (Карта гипотез: `goal` · `metric` · `subject` · `hypothesis` · `task`, M:N) | `/hypothesis-map-deep-dive` |
 | [`projects/`](./projects/README.md) | **продукты под бизнес** (несколько; см. ниже) | `/project-deep-dive <slug>` · `/project-deep-dive-for-business` |
 | `projects/_canon/` | **канон формы** продуктовых слоёв (образец, не данные) | read-only, наследуется форком |
 | `projects/<slug>/` | **данные одного продукта** (vision + 7 kind + `interface/` + `domains/` + `screens/`) | скиллы слоёв `<slug>` |
@@ -37,7 +40,8 @@
 - `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>`
   — узкая консистентность внутри слоя проекта.
 - `/ajtbd-audit` — инварианты методологии графа работ по каждому сегменту (рой).
-- `/business-problem-audit` — инварианты методологии по каждой проблеме (рой).
+- `/swot-audit` — инварианты LinkedSWOT по каждой проблеме (рой).
+- `/hypothesis-map-audit` — инварианты Карты гипотез по каждой проблеме (рой).
 - `/cross-audit` — сквозная семантика между слоями (рой).
 
 ## Что docs отдаёт соседям (handoff-контракт)

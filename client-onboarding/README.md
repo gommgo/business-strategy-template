@@ -51,5 +51,5 @@ Desktop и CLI — один движок и общий конфиг (CLAUDE.md, 
 **аналитика** (форк → deep-dive-скиллы → `/de-template`). Этот комплект —
 про **заказчика**: только как поставить инструмент и попасть в свой
 `*-for-business`-режим. Связь со слоями (что заполняется) — в README
-самих слоёв (`docs/business/`, `docs/business-problem/`,
+самих слоёв (`docs/business/`, `docs/swot/`, `docs/hypothesis-map/`,
 `docs/projects/`).

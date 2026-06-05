@@ -10,13 +10,15 @@
 - Прочитай `README.md` (карта репозитория и воркфлоу) и `CLAUDE.md` (инварианты,
   слои, терминология). Каноны формы — в `docs/projects/_canon/` и README каждого слоя.
 - Сборки здесь нет — артефакты это чистая аналитика в markdown. «Запуск» репозитория —
-  это прохождение слоёв через deep-dive-скиллы (`/business-deep-dive`,
-  `/business-problem-deep-dive`, `/project-deep-dive <slug>`, и т.д.).
+  это прохождение слоёв через оркестратор `/entrypoint` или напрямую deep-dive-скиллы
+  (`/business-deep-dive`, `/swot-deep-dive`, `/hypothesis-map-deep-dive`,
+  `/project-deep-dive <slug>`, и т.д.).
 
 ## Принципы
 
-- **Артефакты — source of truth.** Бизнес — верх; проблемы — многопроблемный слой;
-  продукты — корни решений; всё растёт сверху вниз. На код напрямую не мапятся.
+- **Артефакты — source of truth.** Бизнес — верх (профиль + реестр проблем); под ним
+  AJTBD, SWOT и Карта гипотез; продукты — корни решений; всё растёт сверху вниз. На
+  код напрямую не мапятся.
 - **Канон формы — один раз в `docs/projects/_canon/`**, данные — в папках проектов;
   канон не дублируется в проект.
 - **Экспертиза священна.** Доменные/продуктовые/craft-формулировки приходят от
@@ -49,13 +51,14 @@
 
 - `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>` —
   узкая консистентность внутри слоя продукта.
-- `/business-problem-audit` — инварианты методологии по каждой проблеме.
-- `/cross-audit` — сквозная семантика business ↔ business-problem ↔ project ↔
-  interface ↔ domain ↔ screen (прогнать, если трогал несколько слоёв).
+- `/swot-audit` · `/hypothesis-map-audit` — инварианты методологии по каждой
+  проблеме; `/ajtbd-audit` — по каждому сегменту.
+- `/cross-audit` — сквозная семантика business ↔ ajtbd ↔ swot ↔ hypothesis-map ↔
+  project ↔ interface ↔ domain ↔ screen (прогнать, если трогал несколько слоёв).
 
 - **Conventional Commits** (конвенция формата; git-хук не поставляется): `<type>(<scope>)?: <subject>`,
   subject ≤72. Типы: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `meta`.
-  Пример: `docs(canon): clarify hypothesis frame fields`.
+  Пример: `docs(canon): clarify hypothesis-map metric attribution`.
 
 ## Стиль
 

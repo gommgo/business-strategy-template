@@ -16,7 +16,8 @@ web-research**; не наша проекция и не будущее IT-реш�
 (`business-problem.md`) живёт в этом слое.
 
 Чистая бизнес-аналитика. На продукт / интерфейс / код не мапится — это
-вход для `/business-deep-dive` и далее `/business-problem-deep-dive`.
+вход для `/business-deep-dive` (профиль + реестр проблем) и далее
+`/swot-deep-dive` и `/hypothesis-map-deep-dive`.
 
 ## Файлы
 

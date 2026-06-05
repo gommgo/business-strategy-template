@@ -24,41 +24,44 @@ AI deep-dive-скиллов. Код-репо потом **читают** эти 
 Шаблон импортируется **под бизнес** и форкается **первым**. Поток сверху вниз:
 
 ```
-БИЗНЕС заказчика     →  AJTBD (спрос по работам)  →  ПРОБЛЕМЫ (многопроблемный)   →  ПРОДУКТЫ (несколько под бизнес)
-docs/business/          docs/ajtbd/                   docs/business-problem/           docs/projects/<slug>/
-profile · offering ·    segment · job · job-graph ·   frame (таблица проблем) ·        vision + user / capability /
-channel · competitor    solution · segment-problem    SWOT (factor · bet) ·            boundary / surface / ...
-· metric                                              Карта гипотез (goal · metric ·     │
-                                                       subject · hypothesis · task)      ├─ interface/  (UX: who/situation/zone)
-                                                                                         ├─ domains/    (опц. DDD-контексты)
-                                                                                         └─ screens/    (flow/screen/block/shell)
-                                                                                                │
-                                                                                                ▼  ручная работа автора макета
-                                                                                           wireframe → hi-fi на @sftbmb/ui
+БИЗНЕС (+ реестр проблем) →  AJTBD (спрос по работам) →  SWOT (ставки) →  КАРТА ГИПОТЕЗ        →  ПРОДУКТЫ (несколько под бизнес)
+docs/business/               docs/ajtbd/                 docs/swot/       docs/hypothesis-map/    docs/projects/<slug>/
+profile · offering ·         segment · job ·             factor · bet     goal · metric ·         vision + user / capability /
+channel · competitor ·       job-graph · solution ·                       subject ·               boundary / surface / ...
+current-metric · material ·  segment-problem                              hypothesis · task          │
+business-problem (реестр)                                                                            ├─ interface/  (UX: who/situation/zone)
+                                                                                                     ├─ domains/    (опц. DDD-контексты)
+                                                                                                     └─ screens/    (flow/screen/block/shell)
+                                                                                                            │
+                                                                                                            ▼  ручная работа автора макета
+                                                                                                       wireframe → hi-fi на @sftbmb/ui
 ```
 
 Артефакты — **чистая аналитика**, на код напрямую не мапятся. Сегменты по работам
 живут в `docs/ajtbd/` (Advanced JTBD): трение сегмента (`segment-problem`)
-доказывает проблему бизнеса (`frame`), а граф работ и механики ценности подсказывают
-возможности продукта. Связь «проблема ↔ продукт» — M:N (`vision.addresses-problem`).
-Превращение `screens/` в макет — ручная работа автора, не отдельный артефакт.
+доказывает проблему бизнеса (`business-problem`), а граф работ и механики ценности
+подсказывают возможности продукта. Связь «проблема ↔ продукт» — M:N
+(`vision.addresses-problem`). Превращение `screens/` в макет — ручная работа
+автора, не отдельный артефакт.
 
-> **Юридическая рамка:** гарантируем доставку проекта по scope; метрики слоя
-> `business-problem` — совместный с бизнесом **best-effort таргет**, не гарантия
-> исхода.
+> **Юридическая рамка:** гарантируем доставку проекта по scope; метрики (Карта
+> гипотез) — совместный с бизнесом **best-effort таргет**, не гарантия исхода.
 
 ## Методология в двух словах
 
 - **business** (нестрогий) — кто этот бизнес: профиль, оффер, каналы, конкуренты,
-  текущие KPI. Источник — материалы клиента + рой web-research.
+  текущие KPI **и реестр проблем бизнеса** (`business-problem` — граница гарантии
+  scope и best-effort таргета). Источник — материалы клиента + рой web-research.
 - **ajtbd** (строгий, Advanced JTBD) — кто наш сегмент **по работам**, а не по
   демографии: сегмент (бандл Core Jobs + 1 Big Job + Score), граф работ (CPR + 11
   механик ценности), нанятые решения и трения. Многоволновой рой web-research +
   опц. JTBD-интервью. Трение клиента (`segment-problem`) ≠ проблема бизнеса
-  (`frame`); первое доказывает второе.
-- **business-problem** (строгий, LinkedSWOT + Карта гипотез) — `frame` как таблица
-  проблем; по каждой проблеме: SWOT-факторы → ставки → цель → измеримая метрика →
-  субъект → гипотеза → задача проверки. Ядро — метрика как best-effort таргет.
+  (`business-problem`); первое доказывает второе.
+- **swot** (строгий, LinkedSWOT) — из сильных/слабых сторон и трендов/угроз бизнеса
+  рождаются стратегические ставки (`factor` → `bet`), доводимые до цели/гипотезы.
+- **hypothesis-map** (строгий, Карта гипотез) — по каждой проблеме: цель →
+  измеримая метрика → субъект → гипотеза → задача проверки. Ядро — метрика как
+  best-effort таргет, не гарантия.
 - **projects/`<slug>`** — продукт под проблему(ы): vision + user / capability /
   boundary / surface / integration / constraint / market, плюс вложенные
   `interface/`, `domains/`, `screens/`.
@@ -87,37 +90,50 @@ channel · competitor    solution · segment-problem    SWOT (factor · bet) · 
 ## Путь форка
 
 `Use this template` → `<org>/docs` → откройте `claude` →
-[`docs/getting-started.md`](docs/getting-started.md). Онбординг ведёт аналитик
-руками через рой deep-dive-скиллов (оркестратора нет by design). Когда аналитика
-заполнена — `/de-template` вычищает показной `docs/projects/example/` и
-шаблон-нарратив под идентичность проекта.
+[`docs/getting-started.md`](docs/getting-started.md). Рекомендуемый вход — два
+оркестратора `/entrypoint` (аналитик) и `/entrypoint-for-business` (клиент); под
+ними рой deep-dive/audit-исполнителей, прямой вызов которых тоже допустим. Когда
+аналитика заполнена — `/de-template` вычищает показной `docs/projects/example/`
+и шаблон-нарратив под идентичность проекта.
 
 ## Воркфлоу
 
-Начинаем с бизнеса заказчика — без него проблемы и продукты висят в воздухе.
-Слои `project / interface / domain / screen` — по проекту (скилл принимает
-`<project-slug>`; без него — пикер). Сквозной аудит — в конце.
+Информация приходит **не линейно** — созвон на 3 часа, разрозненные заметки,
+сигнал из жизни. Поэтому рекомендуемый вход — **оркестратор**, который сам
+разложит сырьё по слоям и маршрутизирует к исполнителю:
+
+- **`/entrypoint`** (аналитик) — принимает сырьё любого объёма, классифицирует
+  по слоям/kind, предлагает маршрут и делегирует исполнителю. Пять режимов:
+  наполнить · актуализировать · рефакторить · чистить · аудитить. Даёт срез
+  «где мы во всём воркфлоу».
+- **`/entrypoint-for-business`** (клиент) — то же в бизнес-языке, без жаргона;
+  SWOT и Карту гипотез ведёт сам, эскалация «нужен аналитик», push в ветку
+  `client`.
+
+Семантический поток слоёв (зависимости сверху вниз) — опора маршрутизации:
 
 ```
-1.  /business-deep-dive[-for-business]          профиль бизнеса + рой web-research
-2.  /segment-deep-dive[-for-business]           AJTBD: сегменты по работам + Score (рой)
-3.  /job-graph-deep-dive <segment>[-for-business] граф работ: решения, трения, CPR, механики
-       /jtbd-interview                          (опц.) живые JTBD-интервью → intake
-4.  /ajtbd-audit                                инварианты графа работ по сегменту (рой)
-5.  /business-problem-deep-dive[-for-business]  SWOT + Карта гипотез по каждой проблеме
-6.  /business-problem-audit                     инварианты методологии (рой)
-7.  /project-deep-dive <slug>[-for-business]    продукт: vision / user / capability
-8.  /project-audit <slug>                       аудит внутри продукта
-9.  /interface-deep-dive <slug>                 UX: who / situation / zone
-10. /interface-audit <slug>
-11. /domain-deep-dive <slug> <ctx>              (опц.) бизнес-домены бэкенда
-12. /screen-deep-dive <slug>                    flows / screens / blocks / shells
-13. /screen-audit <slug>
-14. /cross-audit                                сквозная семантика всех слоёв (рой)
+business (профиль + реестр проблем) → ajtbd (спрос по работам) → swot (ставки)
+  → hypothesis-map (цель · метрика) → projects/<slug> (продукт → interface / domains / screens)
 ```
 
-Суффикс `-for-business` — клиент-режим: бизнес-язык без жаргона, эскалация «нужен
-аналитик», push в ветку `client`.
+Под оркестратором — рой исполнителей, прямой вызов которых тоже допустим:
+
+| слой | исполнители | аудит |
+|---|---|---|
+| `business` (+ реестр `business-problem`) | `/business-deep-dive` | — |
+| `ajtbd` | `/segment-deep-dive` · `/job-graph-deep-dive` · `/jtbd-interview` | `/ajtbd-audit` |
+| `swot` | `/swot-deep-dive` | `/swot-audit` |
+| `hypothesis-map` | `/hypothesis-map-deep-dive` | `/hypothesis-map-audit` |
+| `projects/<slug>` | `/project-deep-dive` · `/interface-deep-dive` · `/domain-deep-dive` · `/screen-deep-dive` | `/project-audit` · `/interface-audit` · `/screen-audit` |
+
+Сквозную семантику всех слоёв ловит рой `/cross-audit`. Когда дозревший продукт
+(`vision.lifecycle → stable`) меняет реальность бизнеса, оркестратор ведёт
+восходящую сверку `project → business` (новые оферы/метрики/проблемы с провенансом
+`from-project`).
+
+Суффикс `-for-business` у исполнителей — клиент-режим: бизнес-язык без жаргона,
+эскалация «нужен аналитик», push в ветку `client`.
 
 ## Инварианты
 
@@ -126,8 +142,14 @@ channel · competitor    solution · segment-problem    SWOT (factor · bet) · 
 - **Канон формы продуктовых слоёв** — один раз в `docs/projects/_canon/`; данные —
   в папках проектов.
 - **Связи семантические**, не slug-валидируемые; рассинхрон ловит `/cross-audit`.
+- **Сквозные рёбра — снизу-вверх**: проектная/UX-сущность ссылается на глобальную
+  (`situation.jobs`, `capability.jobs`, `user.segments`, `subject.segments`),
+  обратную сторону сводит `/cross-audit`.
 - **AJTBD питает соседей**: трение сегмента доказывает проблему бизнеса, механики
   графа работ — кандидаты в возможности продукта.
+- **Восходящий поток `project → business`**: дозревший продукт
+  (`vision.lifecycle → stable`) питает business (оферы / метрики / реестр проблем)
+  через провенанс `from-project`.
 - **Метрика — best-effort таргет, не гарантия.**
 - **Экспертиза священна** — домен/продукт/craft из ответов бизнеса и библиотеки,
   не из головы агента.
