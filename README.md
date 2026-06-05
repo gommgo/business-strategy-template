@@ -1,178 +1,136 @@
+<div align="center">
+
 # project-docs-template
 
-Шаблон, который импортируется **под бизнес**. Аналитик начинает с бизнеса
-заказчика в `docs/business/`, формализует его проблемы по методологии
-(SWOT + Карта гипотез) в `docs/business-problem/` — слой
-**многопроблемный**, под проблемы заводит **продукты** в
-`docs/projects/<slug>/` (несколько проектов под одним бизнесом). У каждого
-продукта свои интерфейс (`interface/`), композиция (`screens/`) и
-опционально домены (`domains/`), вложенные в его папку. По `screens/`
-автор макета **вручную** собирает wireframe и hi-fi субстрат на библиотеке
-`@sftbmb/ui`.
+### Сначала понятый бизнес и спроектированный продукт — потом код
 
-Поток: **бизнес (profile/segment/competitor/...) → бизнес-проблемы
-(`frame`-таблица; SWOT factor/bet → goal/metric/subject/hypothesis/task,
-каждая запись несёт `problem`, M:N) → продукты (`projects/<slug>/`:
-vision + addresses-problem / persona / capability /...) → интерфейс
-(who/situation/zone/...) → экраны (flow/screen/block/shell) → wireframe →
-hi-fi субстрат.** Артефакты — чистая аналитика и на код напрямую не
-мапятся; превращение в код — ручная работа автора макета, не отдельный
-артефакт.
+Design-time источник истины проекта. Аналитик (или сам заказчик в клиент-режиме)
+ведёт цепочку **бизнес → проблемы → продукт → интерфейс → экраны** через рой
+AI deep-dive-скиллов. Код-репо потом **читают** эти артефакты — код собирается по
+спроектированному, а не наоборот.
 
-Юр-рамка: гарантируем доставку проекта по scope; метрики
-`docs/business-problem/` — best-effort таргет (совместно с бизнесом),
-не гарантия исхода.
+[![License](https://img.shields.io/badge/license-Apache--2.0-2563eb)](LICENSE)
+[![Часть sftbmb](https://img.shields.io/badge/sftbmb-открытые_шаблоны-6366f1)](https://git.sftbmb.ru/sftbmb-core/sftbmb-public)
+[![Method](https://img.shields.io/badge/method-LinkedSWOT_%2B_Карта_гипотез-0ea5e9)](#методология-в-двух-словах)
+[![Process](https://img.shields.io/badge/process-AI--driven_скиллы-8b5cf6)](#воркфлоу)
+[![SoT](https://img.shields.io/badge/role-design--time_SoT-22c55e)](#место-в-экосистеме)
 
-## Где это в экосистеме
+</div>
 
-Это один из **4 форкаемых шаблонов** под `sftbmb-core/`:
+---
 
-| Шаблон | Форк | Роль |
-|---|---|---|
-| `go-backend-template` | `<org>/backend` | Go HTTP-бэкенд |
-| `spa-frontend-template` | `<org>/frontend` | React SPA |
-| **`project-docs-template`** (этот) | `<org>/docs` | **design-time SoT** — аналитика проекта |
-| `project-infra-template-compose` | `<org>/infra` | проектная VPS (docker-compose) |
+## Что это
 
-Рядом — корп control-plane `sftbmb-infra/infra` (registry `git.sftbmb.ru`,
-канон-карта контрактов `sftbmb-infra/infra/docs/ecosystem.md`), общая Go-lib
-`sftbmb-core/golibinfra` и дизайн-система `@sftbmb/ui` из репо `sftbmb-core/ui-lib`.
-
-**Роль docs-репо:** design-time source of truth проекта. Форкается
-**первым** — наполняется аналитикой (бизнес → проблемы → продукты → интерфейс
-/ домены / экраны), и только потом форкаются код-репо, которые **читают**
-его stable-артефакты как upstream:
-
-- `<org>/backend` ← `projects/<slug>/domains/<ctx>/` (scaffold доменов в Go);
-- `<org>/frontend` ← `projects/<slug>/{interface,screens}/` (fsd-deep-dive);
-- `<org>/infra` ← `projects/<slug>/{vision,surface}` (init-project).
-
-Контракт read-only и односторонний (соседи читают, не пишут) —
-`docs/README.md § Что docs отдаёт соседям`.
-
-**Путь форка:** Gitea → `sftbmb-core/project-docs-template` →
-**Use this template** → `<org>/docs`. С чего начать после форка —
-`docs/getting-started.md` (онбординг ведёт аналитик руками через рой
-deep-dive-скиллов; оркестратора нет by design). Когда аналитика заполнена —
-`/de-template` вычищает показной `docs/projects/example/` и шаблон-нарратив.
-
-## Библиотека компонентов
-
-`@sftbmb/ui` (репо `sftbmb-core/ui-lib`) — библиотека компонентов +
-галерея, потребляется как зависимость из Gitea registry. Граница чистая:
-библиотека строится один раз и версионируется; проект её **потребляет**, не
-правит.
-
-## Структура
+Шаблон импортируется **под бизнес** и форкается **первым**. Поток сверху вниз:
 
 ```
-docs/business/    профиль бизнеса заказчика — верх, один бизнес (см. docs/business/README.md):
-  profile.md        singleton: Бизнес / Модель / Позиционирование / Контекст
-  segment.md        кого обслуживает бизнес
-  offering.md       что продаёт
-  channel.md        каналы привлечения/продажи/доставки
-  competitor.md     рынок (наполняет рой web-research)
-  current-metric.md текущие KPI — baseline-кандидаты
-  material.md       реестр источников (сайт/PDF/презентация/соцсети)
-docs/business-problem/  формализация проблем — многопроблемный (см. docs/business-problem/README.md):
-  frame.md          ТАБЛИЦА проблем (строка = проблема: problem/guarantee/target/out-of-control/scope)
-  factor.md         SWOT-фактор (+ problem[], area: strength|weakness|trend|threat)
-  bet.md            стратегическая ставка (+ problem[])
-  goal.md           цель карты гипотез без цифр (+ problem[])
-  metric.md         метрика-таргет (+ problem[]; current/target/source/attribution/acceptance)
-  subject.md        субъект влияния (+ problem[]; мотивация, негативный)
-  hypothesis.md     гипотеза (+ problem[]; если·то·потому что·тогда→metric)
-  task.md           задача проверки гипотезы (+ problem[])
-docs/projects/    продукты под бизнес (см. docs/projects/README.md):
-  _canon/           КАНОН формы (образец, не данные проекта):
-    project/          канон продукта (vision + 7 kind)
-    interface/        канон UX (who/stage/situation/zone/block/ux-substrate/data-items)
-    screens/          канон экранов (flow/screen/block/shell)
-    domains/          канон DDD (_templates/, _shared/)
-  <slug>/           ДАННЫЕ одного продукта:
-    vision.md         singleton: Problem / Success / Non-goals + addresses-problem (M:N → frame)
-    persona.md … market.md   7 kind продукта (persona/capability/boundary/surface/integration/constraint/market)
-    interface/        who/stage/situation/zone/block/ux-substrate/data-items
-    domains/          (опц.) <ctx>/ контексты по DDD-канону
-    screens/          flows/ screens/ blocks/ shells/ + assets/
-  example/          показная витрина screens-слоя (медисследования; удаляется /de-template)
-client-onboarding/   комплект «как заказчику начать» (отдаём клиенту, см. client-onboarding/README.md):
-  windows.md          поставить Claude Desktop + Git, скачать форк, зайти в *-for-business (Windows)
-  macos.md            то же для Mac
-.claude/
-  skills/
-    business-deep-dive              — профиль бизнеса: приём материалов + рой web-research
-    business-deep-dive-for-business — клиент-режим профиля бизнеса
-    business-problem-deep-dive      — SWOT + Карта гипотез по каждой проблеме, ядро — метрики
-    business-problem-deep-dive-for-business — клиент-режим проблем (бизнес-язык)
-    business-problem-audit          — семантические инварианты методологии по каждой проблеме (рой)
-    project-deep-dive               — продукт: <project-slug> аргументом или пикер/новый проект
-    project-deep-dive-for-business  — клиент-режим: дружелюбный пикер продукта, эскалация, push в ветку client
-    project-audit                   — внутрипроектная консистентность одного продукта
-    interface-deep-dive · interface-audit   — <project-slug> аргументом или пикер
-    domain-deep-dive                — DDD-артефакты бэкенда продукта
-    screen-deep-dive · screen-audit         — <project-slug> аргументом или пикер
-    cross-audit                     — сквозная семантика business ↔ business-problem ↔ (по каждому проекту: project ↔ interface ↔ domain ↔ screen)
-    de-template                     — вычистить показной example/ + шаблон-нарратив под проект (НЕ на каноне)
-  rules/
-    forward-only
-docs/
-  README.md           карта документации + handoff-контракт соседям
-  getting-started.md  путь потребителя форка (META, удаляется /de-template)
+БИЗНЕС заказчика            →  ПРОБЛЕМЫ (многопроблемный)  →  ПРОДУКТЫ (несколько под бизнес)
+docs/business/                 docs/business-problem/          docs/projects/<slug>/
+profile · segment ·            frame (таблица проблем) ·       vision + persona / capability /
+offering · channel ·           SWOT (factor · bet) ·           boundary / surface / ...
+competitor · metric            Карта гипотез (goal · metric ·    │
+                               subject · hypothesis · task)      ├─ interface/  (UX: who/situation/zone)
+                                                                 ├─ domains/    (опц. DDD-контексты)
+                                                                 └─ screens/    (flow/screen/block/shell)
+                                                                        │
+                                                                        ▼  ручная работа автора макета
+                                                                   wireframe → hi-fi на @sftbmb/ui
 ```
+
+Артефакты — **чистая аналитика**, на код напрямую не мапятся. Связь «проблема ↔
+продукт» — M:N (`vision.addresses-problem`). Превращение `screens/` в макет —
+ручная работа автора, не отдельный артефакт.
+
+> **Юридическая рамка:** гарантируем доставку проекта по scope; метрики слоя
+> `business-problem` — совместный с бизнесом **best-effort таргет**, не гарантия
+> исхода.
+
+## Методология в двух словах
+
+- **business** (нестрогий) — кто этот бизнес: профиль + сегменты, оффер, каналы,
+  конкуренты, текущие KPI. Источник — материалы клиента + рой web-research.
+- **business-problem** (строгий, LinkedSWOT + Карта гипотез) — `frame` как таблица
+  проблем; по каждой проблеме: SWOT-факторы → ставки → цель → измеримая метрика →
+  субъект → гипотеза → задача проверки. Ядро — метрика как best-effort таргет.
+- **projects/`<slug>`** — продукт под проблему(ы): vision + persona / capability /
+  boundary / surface / integration / constraint / market, плюс вложенные
+  `interface/`, `domains/`, `screens/`.
+
+Каждый слой ведёт свой deep-dive-скилл через `AskUserQuestion`, держит state в
+`.claude/skills/<имя>/state/`, не выдумывает домен и не повышает `draft → stable`
+без подтверждения. Сквозную консистентность ловит рой `/cross-audit`.
+
+## Место в экосистеме
+
+Это **design-time source of truth** проекта. Форкается первым (`Use this template`
+→ `<org>/docs`), наполняется аналитикой — и только потом форкаются код-репо,
+которые **читают** его stable-артефакты (read-only, односторонне):
+
+| Соседний репо | Читает из этого репо |
+|---|---|
+| [`<org>/backend`](https://git.sftbmb.ru/sftbmb-core/go-backend-template) | `projects/<slug>/domains/<ctx>/` (scaffold доменов в Go) |
+| [`<org>/frontend`](https://git.sftbmb.ru/sftbmb-core/spa-frontend-template) | `projects/<slug>/{interface,screens}/` (fsd-deep-dive) |
+| [`<org>/infra`](https://git.sftbmb.ru/sftbmb-core/project-infra-template-compose) | `projects/<slug>/{vision,surface}` (init-project) |
+
+Облик собирается на дизайн-системе
+[`@sftbmb/ui`](https://git.sftbmb.ru/sftbmb-core/ui-lib) (потребляется, не правится).
+Канон контрактов экосистемы —
+[`corp-infra-template/docs/ecosystem.md`](https://git.sftbmb.ru/sftbmb-core/corp-infra-template/src/branch/main/docs/ecosystem.md).
+
+## Путь форка
+
+`Use this template` → `<org>/docs` → откройте `claude` →
+[`docs/getting-started.md`](docs/getting-started.md). Онбординг ведёт аналитик
+руками через рой deep-dive-скиллов (оркестратора нет by design). Когда аналитика
+заполнена — `/de-template` вычищает показной `docs/projects/example/` и
+шаблон-нарратив под идентичность проекта.
 
 ## Воркфлоу
 
-Начинаем с бизнеса заказчика — без него проблемы и продукты висят в
-воздухе. Слои project / interface / domain / screen — **по проекту**:
-скилл принимает `<project-slug>` (без него — пикер по `docs/projects/`).
-Сквозной аудит — в конце, или после крупных изменений.
+Начинаем с бизнеса заказчика — без него проблемы и продукты висят в воздухе.
+Слои `project / interface / domain / screen` — по проекту (скилл принимает
+`<project-slug>`; без него — пикер). Сквозной аудит — в конце.
 
 ```
-1. /business-deep-dive                — профиль бизнеса (один бизнес): приём
-   ИЛИ /business-deep-dive-for-business  материалов клиента + рой web-research.
-2. /business-problem-deep-dive        — SWOT (factor/bet) → Карта гипотез (goal/
-   ИЛИ /business-problem-deep-dive-for-business  metric/subject/hypothesis/task)
-                                        по каждой проблеме (frame — таблица).
-                                        Ядро — метрики (best-effort таргет).
-3. /business-problem-audit            — инварианты методологии по каждой проблеме (рой).
-4. /project-deep-dive <slug>          — продукт: vision (+ addresses-problem) /
-   ИЛИ /project-deep-dive-for-business   persona / capability из business-problem.
-                                        Без <slug> — пикер / заведение нового проекта.
-5. /project-audit <slug>              — узкий аудит внутри продукта.
-6. /interface-deep-dive <slug>        — UX-сущности (who/situation/zone) из якорей
-                                        persona / capability / surface проекта.
-7. /interface-audit <slug>            — консистентность interface проекта.
-8. /domain-deep-dive <slug> <ctx>     — (опц.) бизнес-домены бэкенда; контекст и
-                                        use-case цепляются к capability проекта,
-                                        адаптеры — к integration проекта.
-9. /screen-deep-dive <slug>           — flows/screens/blocks/shells из interface +
-                                        surface проекта как scope.
-10. /screen-audit <slug>              — консистентность screens проекта.
-11. /cross-audit                      — сквозной семантический аудит business ↔
-                                        business-problem ↔ (по каждому проекту:
-                                        project ↔ interface ↔ domain ↔ screen) (рой).
+1.  /business-deep-dive[-for-business]          профиль бизнеса + рой web-research
+2.  /business-problem-deep-dive[-for-business]  SWOT + Карта гипотез по каждой проблеме
+3.  /business-problem-audit                     инварианты методологии (рой)
+4.  /project-deep-dive <slug>[-for-business]    продукт: vision / persona / capability
+5.  /project-audit <slug>                       аудит внутри продукта
+6.  /interface-deep-dive <slug>                 UX: who / situation / zone
+7.  /interface-audit <slug>
+8.  /domain-deep-dive <slug> <ctx>              (опц.) бизнес-домены бэкенда
+9.  /screen-deep-dive <slug>                    flows / screens / blocks / shells
+10. /screen-audit <slug>
+11. /cross-audit                                сквозная семантика всех слоёв (рой)
 ```
 
-Каждый deep-dive ведёт сессию через `AskUserQuestion`, держит state в
-`.claude/skills/<имя>/state/` (слои продукта — с разбивкой по
-`<project-slug>`), не выдумывает домен, не повышает `draft → stable` без
-явного подтверждения.
+Суффикс `-for-business` — клиент-режим: бизнес-язык без жаргона, эскалация «нужен
+аналитик», push в ветку `client`.
 
 ## Инварианты
 
 - **Forward-only** — только «что есть и куда идём», без журналов прошлого.
 - **Артефакты — source of truth**, всё остальное собирается по ним.
-  Бизнес — верх; проблемы — многопроблемный слой; продукты — корни
-  решений (несколько под одним бизнесом); всё растёт сверху вниз.
-- **Канон формы продуктовых слоёв — один раз в `docs/projects/_canon/`**,
-  данные — в папках проектов; канон не дублируется в проект.
-- **Связи между слоями семантические**, не slug-валидируемые. Проблема ↔
-  продукт — M:N (`vision.addresses-problem`). `/cross-audit` ловит
-  расхождения через рой агентов (по каждому проекту), не grep.
-- **Метрика — best-effort таргет, не гарантия.** Гарантируем доставку
-  проекта по scope; на метрику целимся совместно с бизнесом.
-- **Дизайн-облик — из craft-экспертизы библиотеки**, не из головы агента.
-- **Продуктовая и бизнес-проблемная экспертиза — из ответов бизнеса**,
+- **Канон формы продуктовых слоёв** — один раз в `docs/projects/_canon/`; данные —
+  в папках проектов.
+- **Связи семантические**, не slug-валидируемые; рассинхрон ловит `/cross-audit`.
+- **Метрика — best-effort таргет, не гарантия.**
+- **Экспертиза священна** — домен/продукт/craft из ответов бизнеса и библиотеки,
   не из головы агента.
-- **Коммит / push — гейт человека.** Без явной просьбы агент не коммитит.
+- **Коммит / push — гейт человека.**
+
+Структура каталогов и каноны слоёв — [`docs/README.md`](docs/README.md) и
+README каждого слоя; гайд для агента — [`CLAUDE.md`](CLAUDE.md).
+
+## Часть экосистемы sftbmb
+
+Это один из открытых шаблонов sftbmb (Apache-2.0) — фундамент «-1 уровня»,
+берите бесплатно и владейте. Карта всех шаблонов и точка входа —
+**[витрина sftbmb](https://git.sftbmb.ru/sftbmb-core/sftbmb-public)**. Нужна
+команда аналитиков, методология или поддержка —
+**[наш подход и контакты (vision)](https://git.sftbmb.ru/sftbmb/vision)**.
+
+## Лицензия
+
+**Apache-2.0** — см. [`LICENSE`](LICENSE).
