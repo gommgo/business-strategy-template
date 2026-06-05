@@ -12,9 +12,9 @@ docs-репо проекта, который ничего не помнит пр
 
 ## 0. Форк
 
-1. Gitea (`https://git.stit.tech`) → `stit-template/project-docs-template` →
+1. Gitea (`https://git.sftbmb.ru`) → `sftbmb-core/project-docs-template` →
    **Use this template** → `<org>/docs`.
-2. `git clone git@git.stit.tech:<org>/docs.git && cd docs`.
+2. `git clone git@git.sftbmb.ru:<org>/docs.git && cd docs`.
 3. Форкается **первым** в экосистеме: backend/frontend/infra-форки читают
    `<org>/docs` как upstream-аналитику (`docs/README.md § Что docs отдаёт
    соседям`).
@@ -87,7 +87,7 @@ docs-репо проекта, который ничего не помнит пр
   Завершается на stable-артефакте; Go-код по ним разворачивает соседний
   `<org>/backend`, не этот репо.
 - **`/screen-deep-dive <slug>`** → **`/screen-audit <slug>`** — композиция и
-  облик (flow / screen / block / shell) на инвентаре `@stit-design/ui`.
+  облик (flow / screen / block / shell) на инвентаре `@sftbmb/ui`.
 
 Каждый deep-dive ведёт сессию через `AskUserQuestion`, держит память в
 `.claude/skills/<имя>/state/`, не выдумывает домен/craft, не повышает

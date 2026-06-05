@@ -132,4 +132,4 @@ H1 = имя файла = kind. Под H1 — одна-две поясняющи�
 - ❌ Блок без `ux-substrates` или без `who`.
 - ❌ Код / FSD / компонент / облик в артефактах — это слой кода (ручная
   сборка по `docs/projects/<project-slug>/screens/`) и craft
-  `@stit-design/ui`.
+  `@sftbmb/ui`.

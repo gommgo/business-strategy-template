@@ -85,11 +85,11 @@ diff; каждое необратимое действие (удаление `ex
    ```bash
    git remote get-url origin
    ```
-   Если origin содержит подстроку `stit-template/project-docs-template` И
+   Если origin содержит подстроку `sftbmb-core/project-docs-template` И
    каталог не временная тест-копия → СТОП. Запуск на каноне сносит показную
    витрину из самого шаблона. Через `AskUserQuestion` явно подтвердить: «это
    форк `<org>/docs` или throwaway-копия?». При «нет» / каноне — выйти.
-   Канонический origin: `git@git.stit.tech:stit-template/project-docs-template.git`.
+   Канонический origin: `git@git.sftbmb.ru:sftbmb-core/project-docs-template.git`.
 
 2. **Аналитика проекта заведена (мягкая проверка).** Под клиента обычно уже
    есть хотя бы `docs/business/` с данными и/или реальный
@@ -192,7 +192,7 @@ template-язык — критерий движка.
 ## Запреты
 
 - **Не запускать на каноническом шаблоне.** Gate первая защита (origin-подстрока
-  `stit-template/project-docs-template`).
+  `sftbmb-core/project-docs-template`).
 - **Не трогать пустые скелеты-каноны** — `docs/projects/_canon/`,
   `docs/business/*`, `docs/business-problem/*` — это рабочая основа аналитика,
   не показуха.

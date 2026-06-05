@@ -3,7 +3,7 @@
 Документация — **design-time source of truth** аналитики проекта. Здесь нет
 кода: артефакты — чистая язык-агностичная аналитика, которую читают соседние
 форки (`<org>/{backend,frontend,infra}`) и по которой автор макета вручную
-собирает hi-fi субстрат на `@stit-design/ui`. Заполняют артефакты deep-dive-
+собирает hi-fi субстрат на `@sftbmb/ui`. Заполняют артефакты deep-dive-
 скиллы (`.claude/skills/`); онбординг ведёт аналитик руками — оркестратора нет
 (by design, см. `getting-started.md`).
 
@@ -55,13 +55,13 @@
 
 ## Где это в экосистеме
 
-`<org>/docs` — один из **4 форкаемых шаблонов** под `stit-template/`
+`<org>/docs` — один из **4 форкаемых шаблонов** под `sftbmb-core/`
 (`go-backend-template`, `spa-frontend-template`, `project-docs-template` — этот,
-`project-infra-template-compose`), плюс корп control-plane `stit-infra/{infra,
-golibinfra}` и дизайн-система `@stit-design/ui` (репо `stit-design/ui-lib`).
-Роль этого репо — **design-time SoT** проекта; форкается **первым**, наполняется
-аналитикой, дальше форкаются код-репо (которые его читают). Канон-карта
-контрактов — `stit-infra/infra/docs/ecosystem.md`.
+`project-infra-template-compose`), плюс корп control-plane `sftbmb-infra/infra`,
+общая Go-lib `sftbmb-core/golibinfra` и дизайн-система `@sftbmb/ui` (репо
+`sftbmb-core/ui-lib`). Роль этого репо — **design-time SoT** проекта; форкается
+**первым**, наполняется аналитикой, дальше форкаются код-репо (которые его
+читают). Канон-карта контрактов — `sftbmb-infra/infra/docs/ecosystem.md`.
 
 ## Форку
 

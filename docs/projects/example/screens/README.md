@@ -3,7 +3,7 @@
 Полный образцовый набор артефактов слоя screens (`docs/projects/example/screens/`), покрывающий все
 edge-кейсы канона: 4 kind, ссылочную целостность, layout-язык v2,
 состояния, responsive, mobile-decomposition, контракт с
-`@stit-design/ui`.
+`@sftbmb/ui`.
 
 **Это образец, не реальные данные проекта.** Slug-рефы внутри example
 замкнуты на самой папке и не валидируются по interface-слою проекта.

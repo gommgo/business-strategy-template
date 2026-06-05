@@ -1,4 +1,4 @@
-# ST IT — шаблон проекта дизайна
+# project-docs-template
 
 Шаблон, который импортируется **под бизнес**. Аналитик начинает с бизнеса
 заказчика в `docs/business/`, формализует его проблемы по методологии
@@ -8,7 +8,7 @@
 продукта свои интерфейс (`interface/`), композиция (`screens/`) и
 опционально домены (`domains/`), вложенные в его папку. По `screens/`
 автор макета **вручную** собирает wireframe и hi-fi субстрат на библиотеке
-`@stit-design/ui`.
+`@sftbmb/ui`.
 
 Поток: **бизнес (profile/segment/competitor/...) → бизнес-проблемы
 (`frame`-таблица; SWOT factor/bet → goal/metric/subject/hypothesis/task,
@@ -25,7 +25,7 @@ hi-fi субстрат.** Артефакты — чистая аналитика
 
 ## Где это в экосистеме
 
-Это один из **4 форкаемых шаблонов** под `stit-template/`:
+Это один из **4 форкаемых шаблонов** под `sftbmb-core/`:
 
 | Шаблон | Форк | Роль |
 |---|---|---|
@@ -34,9 +34,9 @@ hi-fi субстрат.** Артефакты — чистая аналитика
 | **`project-docs-template`** (этот) | `<org>/docs` | **design-time SoT** — аналитика проекта |
 | `project-infra-template-compose` | `<org>/infra` | проектная VPS (docker-compose) |
 
-Рядом — корп control-plane `stit-infra/{infra, golibinfra}` (registry
-`git.stit.tech`, канон-карта контрактов `stit-infra/infra/docs/ecosystem.md`)
-и дизайн-система `@stit-design/ui` из репо `stit-design/ui-lib`.
+Рядом — корп control-plane `sftbmb-infra/infra` (registry `git.sftbmb.ru`,
+канон-карта контрактов `sftbmb-infra/infra/docs/ecosystem.md`), общая Go-lib
+`sftbmb-core/golibinfra` и дизайн-система `@sftbmb/ui` из репо `sftbmb-core/ui-lib`.
 
 **Роль docs-репо:** design-time source of truth проекта. Форкается
 **первым** — наполняется аналитикой (бизнес → проблемы → продукты → интерфейс
@@ -50,7 +50,7 @@ hi-fi субстрат.** Артефакты — чистая аналитика
 Контракт read-only и односторонний (соседи читают, не пишут) —
 `docs/README.md § Что docs отдаёт соседям`.
 
-**Путь форка:** Gitea → `stit-template/project-docs-template` →
+**Путь форка:** Gitea → `sftbmb-core/project-docs-template` →
 **Use this template** → `<org>/docs`. С чего начать после форка —
 `docs/getting-started.md` (онбординг ведёт аналитик руками через рой
 deep-dive-скиллов; оркестратора нет by design). Когда аналитика заполнена —
@@ -58,7 +58,7 @@ deep-dive-скиллов; оркестратора нет by design). Когда
 
 ## Библиотека компонентов
 
-`@stit-design/ui` (репо `stit-design/ui-lib`) — библиотека компонентов +
+`@sftbmb/ui` (репо `sftbmb-core/ui-lib`) — библиотека компонентов +
 галерея, потребляется как зависимость из Gitea registry. Граница чистая:
 библиотека строится один раз и версионируется; проект её **потребляет**, не
 правит.
