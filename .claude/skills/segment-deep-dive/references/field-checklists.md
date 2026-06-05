@@ -2,7 +2,7 @@
 
 Поля (канон — `docs/ajtbd/segment.md`): `slug` · `name` · `description` ·
 `kind` · `who-context` · `core-jobs` · `big-job` · `success-criteria` ·
-`score` · `sizing` · `status`.
+`score` · `sizing` · `served` · `from-project` · `status`.
 
 ## Обязательно (для stable)
 
@@ -23,6 +23,9 @@
 - **`score`** — число + обоснование (формула
   важность × частотность × размер × (10 − удовлетворённость)). Все
   компоненты прослежены к research/интервью.
+- **`served`** — enum `served` \| `prospective`. `served` — бизнес уже
+  обслуживает рынок сегмента; `prospective` — известная work-карта рынка,
+  который бизнес ещё **не** обслуживает (разведка под будущую инициативу).
 - **`status`** — дефолт `draft`; повышение через чек-лист
   (`draft-stable.md`); понижение руками.
 
@@ -31,12 +34,23 @@
 - **`sizing`** — TAM/SAM/SOM или иная оценка размера. `—`, если не
   подтверждено количественником / кабинетной аналитикой (тогда компонент
   «размер» Score — `**blocker**` до подтверждения).
+- **`from-project`** — провенанс восходящего потока: какой дозревший
+  продукт проявил/подтвердил сегмент (slug `docs/projects/`); иначе `—`.
+
+## Проспективные сегменты
+
+`served=prospective` — нормальный сегмент-разведка рынка, который бизнес
+ещё не обслуживает (классика: b2b-бизнес целит в b2c). Допускается **без
+обслуживающих оферов/каналов** (`offering.for-segment`/`channel.serves-segment`)
+— это не «висяк». На него адресуется проект с `vision.market-maturity=
+prospective`; при дозревании продукта (`lifecycle → stable`) восходящий
+поток повышает `served` до `served` и проставляет `from-project`.
 
 ## Порядок заполнения
 
 fundamentals (`slug`/`name`/`description`/`kind`) → `who-context` →
 бандл (`core-jobs` + `big-job`, как гипотезы-stub'ы) → `success-criteria`
-→ компоненты `score` → `sizing`.
+→ компоненты `score` → `sizing` → `served` → `from-project`.
 
 ## Главные проверки
 

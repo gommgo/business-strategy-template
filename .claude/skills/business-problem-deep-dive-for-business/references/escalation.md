@@ -61,7 +61,8 @@
 
 ### Что упаковывается
 
-1. Изменения в `docs/business-problem/` (черновики клиента).
+1. Изменения в `docs/business/business-problem.md`, `docs/swot/`,
+   `docs/hypothesis-map/` (черновики клиента).
 2. Изменения в `state/` (заметки, `**жду аналитика**`, `## Что я имел в
    виду`).
 3. `client-handoff/summary.md` (живой срез, держится актуальным).
@@ -140,7 +141,8 @@ summary, state, commit или в обычный текст чата после �
    (живой срез, без мусора) и записать
    `client-handoff/transcripts/<YYYY-MM-DD>--<HH-MM>--<тема>.md` (с предложенными
    вариантами) — форматы ниже.
-4. `git add` адресно (`docs/business-problem/`,
+4. `git add` адресно (`docs/business/business-problem.md`, `docs/swot/`,
+   `docs/hypothesis-map/`,
    `.claude/skills/business-problem-deep-dive-for-business/state/`,
    `client-handoff/`).
 5. `git commit -m "docs(handoff): business-problem client session
@@ -199,7 +201,8 @@ Forward-only — без «было/стало» и следов прошлых �
 - <в бизнес-форме; метрики/атрибуция — сюда чаще всего; только не закрытые>
 
 ## Где смотреть
-- `docs/business-problem/` — черновики
+- `docs/business/business-problem.md`, `docs/swot/`, `docs/hypothesis-map/`
+  — черновики
 - заметки: `.claude/skills/business-problem-deep-dive-for-business/state/`
 - логи сессий: `client-handoff/transcripts/`
 ```

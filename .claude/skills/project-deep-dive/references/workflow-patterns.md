@@ -26,7 +26,8 @@
    заполненными `slug + name + description + status=draft`, остальные
    ячейки `—`. Для `vision.md` — записать в раздел Problem; на фазе
    discovery дополнительно добить `addresses-problem` (опции — строки
-   `docs/business-problem/frame.md`).
+   `docs/business/business-problem.md`), оси `audience`/`intent`/
+   `market-maturity` и `lifecycle` (enum).
 4. Раунд 2+ `AskUserQuestion` — батч по доменным слотам kind. См.
    `field-checklists.md`. До 4 вопросов в раунде; перемежать опции
    (anti-patterns / enums / соседи) и Other (значения).

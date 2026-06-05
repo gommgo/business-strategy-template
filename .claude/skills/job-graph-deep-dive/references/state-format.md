@@ -90,9 +90,9 @@ promotion и засева следующих волн. Кандидаты зав
 - `../job-graph-deep-dive-for-business/state/` — клиентский режим этого
   же слоя (что описал клиент своими словами);
 - `../business-deep-dive*/state/` — профиль бизнеса (оферы/каналы/
-  конкуренты как контекст для `solution.maps-to`);
-- `../business-problem-deep-dive*/state/` — куда трения питают проблему
-  бизнеса (`segment-problem.feeds-problem`);
+  конкуренты как контекст для `solution.maps-to`) и реестр проблем
+  бизнеса (куда трения питают проблему — `segment-problem.feeds-problem`);
+- `../swot-deep-dive/state/` — куда трения питают SWOT-факторы;
 - транскрипты `/jtbd-interview` (его `state/`) — сырьё для intake
   (режим B).
 

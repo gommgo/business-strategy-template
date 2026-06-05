@@ -17,10 +17,14 @@
 
 ## who
 
-**Поля**: `slug`, `name`, `description`, `status`.
-Все обязательные. Опциональных нет.
+**Поля**: `slug`, `name`, `description`, `users`, `status`.
+`slug`/`name`/`description`/`status` обязательны; `users` — опционально.
 
-**Ссылается на**: ничего.
+**Ссылается на**: `users` (опц.) — `projects/<slug>/user` (если роль
+сводится к пользователю(ям) продукта; системные акторы обычно `—`).
+Мягкая связь снизу-вверх (interface → project), ловит `/cross-audit`.
+Опции — существующие `user` того же проекта (см. `project-context.md`),
+не выдумывать.
 **Кто ссылается**: `situation.who`, `block.who`.
 
 **Anti-patterns**: конкретное лицо · уровень прав / ACL · пассивный
@@ -71,15 +75,21 @@
 
 **Поля**: `slug`, `name`, `description`, `stage`, `who`, `when`,
 `action`, `goal`, `entry-data`, `exit-data`, `using-what`,
-`ux-substrate` (зеркало), `block` (зеркало), `status`.
+`ux-substrate` (зеркало), `block` (зеркало), `jobs`, `capabilities`,
+`hypotheses`, `status`.
 
 **Обязательные**: `slug`, `name`, `description`, `stage`, `who`,
 `action`, `goal`, `using-what`, `status`.
 **Опциональные** (могут быть `—`): `when`, `entry-data`, `exit-data`,
-`ux-substrate`, `block`.
+`ux-substrate`, `block`, `jobs`, `capabilities`, `hypotheses`.
 
 **Ссылается на**: `stage`, `who`, `data-items` (entry/exit),
-`ux-substrate` (зеркало), `block` (зеркало).
+`ux-substrate` (зеркало), `block` (зеркало); сквозные рёбра (опц.,
+авторски на ситуации) — `jobs` (`ajtbd/job`), `capabilities`
+(`projects/<slug>/capability`), `hypotheses`
+(`hypothesis-map/hypothesis`). Сквозные рёбра — мягкие связи снизу-вверх,
+ловит `/cross-audit`; опции из существующих сущностей соседних слоёв (см.
+`project-context.md`), не выдумывать.
 **Кто ссылается**: `ux-substrate.situation` (M:1 — этим строится
 зеркало `situation.ux-substrate`).
 
@@ -110,6 +120,10 @@
     A-режим для `ux-substrate` (это раскрытие using-what в атомы).
 11. **`block`** — зеркало; заполняется когда субстраты собраны в
     блок (через `block.ux-substrates`).
+11a. **Сквозные рёбра** (опц.): `jobs` (опции — `ajtbd/job`),
+    `capabilities` (опции — `capability` того же проекта), `hypotheses`
+    (опции — `hypothesis-map/hypothesis`). Предлагать как контекст-связь
+    (см. `project-context.md`); прочерк допустим, не выдумывать.
 12. Anti-patterns.
 13. Тест-критерий: «Одна фраза who+when+action+goal — это один присест,
     одна цель?».

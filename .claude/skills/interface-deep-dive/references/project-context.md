@@ -14,15 +14,18 @@
 
 ## Маппинг
 
-| interface | продукт (`docs/projects/<project-slug>/`) | как использовать |
+| interface | сосед | поле / как использовать |
 |---|---|---|
-| `who` (роль) | `user` (сегмент адресатов продукта) | при заведении нового `who` через `AskUserQuestion` предложи опции = существующие user проекта; «нужен новый» (Other) — если ни одна не подходит. Записывается не в frontmatter, а опционально в `state/<project-slug>/who/<slug>.md` как «семантически принадлежит user:X» |
-| `situation` (UX-ситуация) | `capability` (что продукт умеет) | при заведении situation предложи опции = существующие capability проекта; для системных ситуаций — `—` |
-| `zone` (зона интерфейса) | `surface` (где продукт работает) | при заведении zone предложи опции = существующие surface проекта; zone обязан семантически принадлежать какой-то surface |
+| `who` (роль) | `user` (адресат продукта, тот же проект) | авторское поле `who.users` (опц., массив). При заведении `who` через `AskUserQuestion` предложи опции = существующие user проекта; «системный актор» → `—`. Результат пишется **в колонку `users`** записи who; «почему» — опц. в `state/<project-slug>/who/<slug>.md` |
+| `situation` (UX-ситуация) | `capability` (что продукт умеет, тот же проект) | авторское поле `situation.capabilities` (опц., массив). Опции = существующие capability проекта; системное действие → `—` |
+| `situation` (UX-ситуация) | `job` (`docs/ajtbd/job`, глобальный) | авторское поле `situation.jobs` (опц.). Какие работы сегмента обслуживает шаг |
+| `situation` (UX-ситуация) | `hypothesis` (`docs/hypothesis-map/hypothesis`, глоб.) | авторское поле `situation.hypotheses` (опц.). Какие гипотезы проверяет/обслуживает шаг |
+| `zone` (зона интерфейса) | `surface` (где продукт работает, тот же проект) | при заведении zone предложи опции = существующие surface проекта; zone обязан семантически принадлежать какой-то surface (хранится в `state`, не в колонке) |
 
-Все продуктовые сущности берутся из **того же проекта**
-(`docs/projects/<project-slug>/user.md`, `…/capability.md`,
-`…/surface.md`), не из глобального слоя.
+Продуктовые сущности (`user`, `capability`, `surface`) берутся из **того
+же проекта** (`docs/projects/<project-slug>/`); `job` и `hypothesis` — из
+**глобальных** слоёв `docs/ajtbd/` и `docs/hypothesis-map/`. Все рёбра —
+**семантические** (slug-валидаций нет), ловит `/cross-audit`.
 
 ## Когда показывать связь
 
@@ -35,6 +38,7 @@
    ```
    AskUserQuestion:
    header: "Связь с user"
+   multiSelect: true
    options:
      - "user:<slug-1>" (description = name)
      - "user:<slug-2>" (description = name)
@@ -42,36 +46,34 @@
      - Other (через текст: «не одна из перечисленных, опишу»)
    ```
 
-2. По выбору — записать в `state/<project-slug>/who/<slug>.md` секцию
-   `## Доменные решения`:
+2. По выбору — записать slug(и) **в колонку `users`** записи who
+   (питон-стиль массив, или `—` для системного актора). «Почему» —
+   опционально в `state/<project-slug>/who/<slug>.md` секцию
+   `## Доменные решения`.
 
-   ```markdown
-   - Семантически принадлежит user:<user-slug>.
-   ```
+3. Если выбран «Системный актор» — `users = —`; в state записать
+   «Намеренно без user — системный интерес X».
 
-3. Если выбран «Системный актор» — записать «Намеренно без user —
-   системный интерес X (см. README канона who)».
-
-4. Если выбран Other — записать ответ аналитика дословно.
-
-**НЕ записывать** в frontmatter записи who.md как slug-ссылку — это
-семантика, не структура.
+4. Если выбран Other — записать ответ аналитика дословно в state.
 
 ### Заведение `situation`
 
-В режиме A, после фундамента — раунд связи:
+В режиме A, после фундамента — раунды связи (сквозные рёбра, все опц.,
+multiSelect, прочерк допустим):
 
 ```
-AskUserQuestion:
-header: "Связь с capability"
-options:
-  - "capability:<slug-1>"
-  - "capability:<slug-2>"
-  - "Системное действие (без capability)"
-  - Other
+AskUserQuestion (header: "Связь с capability") → колонка situation.capabilities
+options: capability:<slug-i> того же проекта / «Системное действие (без capability)» / Other
+
+AskUserQuestion (header: "Работа сегмента") → колонка situation.jobs
+options: job:<slug-i> из docs/ajtbd/job.md / «нет» / Other
+
+AskUserQuestion (header: "Гипотеза") → колонка situation.hypotheses
+options: hypothesis:<slug-i> из docs/hypothesis-map/hypothesis.md / «нет» / Other
 ```
 
-Запись — в `state/<project-slug>/situation/<slug>.md`.
+Результат пишется **в соответствующие колонки** записи situation; «почему»
+— опц. в `state/<project-slug>/situation/<slug>.md`.
 
 ### Заведение `zone`
 

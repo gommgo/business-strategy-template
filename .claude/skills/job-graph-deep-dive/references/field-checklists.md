@@ -58,7 +58,7 @@ price-value-fit → maps-to.
 без них нарушение ядра), `segment`, `strength` (1–10 с обоснованием из
 research/интервью), `drivers` (что держит на текущем), `barriers` (что
 мешает уйти — пожиратели ценности). `feeds-problem` опционально (на какую
-`business-problem/frame`).
+`business/business-problem`).
 
 **Порядок:** segment → solution + job (пара!) → strength → drivers →
 barriers → feeds-problem.

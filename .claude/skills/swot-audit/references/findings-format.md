@@ -1,7 +1,7 @@
 # Формат findings из агентов
 
-Каждый агент-луч возвращает **строго** валидный JSON-массив. Без
-preamble, без пояснений. Первый символ `[`, последний `]`.
+Каждый агент-луч возвращает **строго** валидный JSON-массив. Без preamble,
+без пояснений. Первый символ `[`, последний `]`.
 
 ## Schema
 
@@ -22,7 +22,7 @@ preamble, без пояснений. Первый символ `[`, послед
 | поле | назначение |
 |---|---|
 | `lens` | имя луча (как в rays.md) — для группировки |
-| `problem` | строка `frame`, в пределах которой найдено нарушение — для группировки по проблеме (для `problem-tag`, когда `problem` пуст/невалиден, — `"—"`) |
+| `problem` | строка реестра, в пределах которой найдено нарушение — для группировки по проблеме (для `problem-tag`, когда `problem` пуст/невалиден, — `"—"`) |
 | `severity` | `error` (разрыв методологии) / `warning` (подозрение) / `hint` (повод подумать) |
 | `title` | одна строка, что найдено |
 | `evidence` | конкретика: slug, поля, смысловой контраст |
@@ -34,13 +34,13 @@ preamble, без пояснений. Первый символ `[`, послед
 ```json
 [
   {
-    "lens": "hypothesis-shape",
+    "lens": "bet-promotion",
     "problem": "paid-outflow",
-    "severity": "error",
-    "title": "hypothesis:remind-rebook «тогда» не ссылается на метрику",
-    "evidence": "so = «станет лучше с возвратами»; metric = «—». Нет привязки к метрике цели проблемы paid-outflow — эффективность нельзя оценить.",
-    "suggestion": "Указать метрику в «тогда» (вероятно metric:paid-churn) через /business-problem-deep-dive hypothesis:remind-rebook.",
-    "refs": ["hypothesis.md:remind-rebook", "metric.md"]
+    "severity": "warning",
+    "title": "bet:online-booking-push не доведена до карты гипотез",
+    "evidence": "promoted-to = «—». Ни в goal.md, ни в hypothesis.md (docs/hypothesis-map/) нет сущности, в которую эта ставка целит. Мост SWOT→карта оборван.",
+    "suggestion": "Довести до goal/hypothesis через /hypothesis-map-deep-dive, затем проставить promoted-to через /swot-deep-dive bet:online-booking-push.",
+    "refs": ["bet.md:online-booking-push"]
   }
 ]
 ```

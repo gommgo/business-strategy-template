@@ -9,7 +9,9 @@
 «хотим снизить отток»).
 
 1. Скилл понимает kind внутри (factor/goal/metric/…), клиенту не говорит.
-2. Прочитать `docs/business-problem/<kind>.md` — критерии и anti-patterns.
+2. Прочитать канон kind: реестр проблем — `docs/business/business-problem.md`;
+   factor/bet — `docs/swot/README.md`; goal/metric/subject/hypothesis/task
+   — `docs/hypothesis-map/README.md`. Критерии и anti-patterns.
 3. `AskUserQuestion` — фундамент в бизнес-языке: «Как назовём коротко?» /
    «Опишите одним предложением» (Other). Если задач для бизнеса несколько
    — мягко уточнить, **к какой задаче** это относится (внутри — `problem`;

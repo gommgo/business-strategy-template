@@ -6,10 +6,7 @@ Forward-only.
 ## Расположение
 
 ```
-.claude/skills/business-problem-deep-dive/state/
-├── frame/<problem-slug>.md    (заметка по проблеме)
-├── factor/<slug>.md
-├── bet/<slug>.md
+.claude/skills/hypothesis-map-deep-dive/state/
 ├── goal/<slug>.md
 ├── metric/<slug>.md
 ├── subject/<slug>.md
@@ -17,11 +14,8 @@ Forward-only.
 └── task/<slug>.md
 ```
 
-`frame` — табличный (одна строка = одна проблема), поэтому и его заметки
-живут per-problem: `state/frame/<problem-slug>.md`.
-
-Заметки лежат **рядом со скиллом**, не в `docs/business-problem/`.
-Каталоги создаются по требованию.
+Заметки лежат **рядом со скиллом**, не в `docs/hypothesis-map/`. Каталоги
+создаются по требованию.
 
 ## Шаблон kind-заметки
 
@@ -29,7 +23,7 @@ Forward-only.
 ---
 kind: metric
 slug: paid-churn
-ref: docs/business-problem/metric.md#paid-churn
+ref: docs/hypothesis-map/metric.md#paid-churn
 ---
 
 ## Открытые вопросы
@@ -44,15 +38,13 @@ ref: docs/business-problem/metric.md#paid-churn
 - После согласования с бизнесом — добавить guardrail на маржу.
 ```
 
-Frontmatter: `kind` (один из 8), `slug` (для `frame` — `<problem-slug>`),
-`ref`. У frame-заметки `ref` указывает на строку: `…/frame.md#<problem-slug>`.
+Frontmatter: `kind` (один из 5), `slug`, `ref`.
 
 ## Секции (все опциональны)
 
 - **`## Открытые вопросы`** — незакрытые смысловые вопросы, одна строка
   каждый. Префикс/суффикс `**blocker**` блокирует `draft → stable`.
-  Закрытый вопрос **удаляется** (не зачёркивается). Пусто → удалить
-  секцию.
+  Закрытый вопрос **удаляется** (не зачёркивается). Пусто → удалить секцию.
 - **`## Доменные решения`** — неочевидные смысловые решения, не лезущие в
   таблицу. Форма «⟨что выбрано⟩ — ⟨почему⟩». Без «было/стало», без дат.
   Растворилось в записи → удалить.
@@ -69,22 +61,18 @@ Frontmatter: `kind` (один из 8), `slug` (для `frame` — `<problem-slug
 ## Особый случай: `_phase-jump.md`
 
 `state/<phase>/_phase-jump.md` фиксирует решение перепрыгнуть фазу (напр.
-`state/goal/_phase-jump.md` — «начали с цели, минуя SWOT, потому что
-бизнес дал ясную цель») как доменное решение. Не блокер.
+`state/goal/_phase-jump.md` — «начали с метрики-таргета, цель оформили под
+неё») как доменное решение. Не блокер.
 
 ## Единый контекст: read-only видимость соседних state
 
-Для единой картины скилл read-only смотрит соседние `state/`: клиентский
-режим этого слоя
-(`../business-problem-deep-dive-for-business/state/<kind>/<slug>.md` — что
-наработал клиент), разведку AJTBD (`../segment-deep-dive*/state/`,
-`../job-graph-deep-dive*/state/` — трения и сегменты клиента, питающие
-факторы/строку проблемы/субъекта) и соседние слои
-(`../business-deep-dive*/state/`, `../project-deep-dive*/state/<slug>/` —
-проектный по текущему продукту). **Писать в чужой state запрещено.**
+Для единой картины скилл read-only смотрит соседние `state/`: SWOT
+(`../swot-deep-dive/state/` — ставки, доведённые сюда), бизнес-слой
+(`../business-deep-dive*/state/` — реестр проблем, current-metric),
+разведку AJTBD (`../segment-deep-dive*/state/`,
+`../job-graph-deep-dive*/state/` — сегменты и работы, питающие субъект и
+гипотезу) и проект (`../project-deep-dive*/state/<slug>/`). **Писать в
+чужой state запрещено.**
 
-При чтении клиентского state маркер `**жду аналитика**` (которым клиентский
-`*-for-business`-режим помечает эскалацию) трактуй как **blocker-кандидат** —
-семантический эквивалент аналитического `**blocker**`. Клиент не оперирует
-жаргоном `draft/stable/blocker`, поэтому его «жду аналитика» — это и есть
-сигнал «здесь нужен аналитик, пока не stable».
+При чтении клиентского state маркер `**жду аналитика**` трактуй как
+**blocker-кандидат** — семантический эквивалент аналитического `**blocker**`.

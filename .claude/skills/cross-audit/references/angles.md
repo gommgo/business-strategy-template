@@ -19,26 +19,27 @@
 ## Скоуп углов
 
 - **Верхнеуровневые, прогон один раз** (общие слои business ↔ ajtbd ↔
-  business-problem, без проекта): `factor-business`,
-  `currentmetric-metric`, `segmentproblem-frame`, `segment-subject`,
-  `solution-business`, `business-segment`.
+  swot ↔ hypothesis-map, без проекта): `factor-business`,
+  `currentmetric-metric`, `segmentproblem-bizproblem`, `segment-subject`,
+  `solution-business`, `business-segment`, `prospective-consistency`.
 - **Верхнеуровневый M:N, прогон один раз над всеми проектами**:
-  `addresses-problem-frame`.
-- **По каждому проекту** (общий слой business-problem ↔ продукт проекта;
+  `addresses-problem-bizproblem`.
+- **По каждому проекту** (общие слои swot/hypothesis-map ↔ продукт проекта;
   скоупится к проблемам, которые проект закрывает через
   `vision.addresses-problem`): `goal-vision`, `subject-user`,
-  `bet-capability`.
+  `bet-capability`, `capability-hypothesis`.
 - **По каждому проекту** (общий слой ajtbd ↔ продукт проекта):
   `segment-user`, `job-vision`, `segmentproblem-vision`,
-  `mechanic-capability`.
-- **По каждому проекту** (внутри папки проекта): `user-who`,
-  `capability-situation`, `capability-domain`, `surface-zone`,
+  `mechanic-capability`, `capability-job`.
+- **По каждому проекту** (внутри папки проекта + сквозные рёбра interface):
+  `user-who`, `capability-situation`, `situation-job`,
+  `situation-hypothesis`, `capability-domain`, `surface-zone`,
   `surface-screen`, `integration-domain`, `constraint-surface`,
   `market-capability`.
 
 ## factor-business
 
-**Source:** `docs/business-problem/factor.md`.
+**Source:** `docs/swot/factor.md`.
 **Destination:** `docs/business/` (`profile.md`, `competitor.md`,
 `current-metric.md`).
 **Скоуп:** один раз (общие слои, без проекта).
@@ -61,7 +62,7 @@ factor (SWOT) должен опираться на реальную картин
 ## currentmetric-metric
 
 **Source:** `docs/business/current-metric.md`.
-**Destination:** `docs/business-problem/metric.md`.
+**Destination:** `docs/hypothesis-map/metric.md`.
 **Скоуп:** один раз (общие слои, без проекта).
 **Применим если:** оба наполнены.
 
@@ -79,19 +80,19 @@ baseline целевой метрики (metric.current) должен брать�
 ли число, дата, источник?
 ```
 
-## addresses-problem-frame
+## addresses-problem-bizproblem
 
 **Source:** `docs/projects/*/vision.md` (поле `addresses-problem` каждого
 проекта, кроме `_canon`).
-**Destination:** `docs/business-problem/frame.md` (таблица проблем).
+**Destination:** `docs/business/business-problem.md` (таблица проблем).
 **Скоуп:** один раз, **над всеми проектами** (M:N, обе стороны).
-**Применим если:** есть хотя бы один проект и непустой `frame.md`.
+**Применим если:** есть хотя бы один проект и непустой `business/business-problem.md`.
 
 **Что искать:**
 - `error`: проект объявляет `addresses-problem` ref, который **не
-  резолвится** ни в одну строку `frame` (проект бьёт в несуществующую
+  резолвится** ни в одну строку `business-problem` (проект бьёт в несуществующую
   проблему — опечатка slug или проблема не заведена).
-- `hint`: строка `frame` (проблема), которую **не закрывает ни один
+- `hint`: строка `business-problem` (проблема), которую **не закрывает ни один
   проект** (висящая проблема — нужен проект, или она вне scope).
 - `warning`: проект с **пустым** `addresses-problem` при наполненном
   vision (продукт без явной привязки к проблеме бизнеса).
@@ -100,15 +101,15 @@ baseline целевой метрики (metric.current) должен брать�
 ```
 Это единственный M:N-угол через много проектов. Прочитай
 addresses-problem у КАЖДОГО docs/projects/<slug>/vision.md (исключи
-_canon) и строки docs/business-problem/frame.md.
+_canon) и строки docs/business/business-problem.md.
 
 Связь slug-явная по форме, но проверяй СМЫСЛОВО, а не строкой: ref
-проекта должен указывать на реально существующую проблему frame.
+проекта должен указывать на реально существующую проблему business-problem.
 
 Прямая сторона: для каждого ref каждого проекта — есть ли такая строка
-frame? Нет — error (укажи проект и нерезолвящийся ref).
+business-problem? Нет — error (укажи проект и нерезолвящийся ref).
 
-Обратная сторона: для каждой строки frame — закрывает ли её хоть один
+Обратная сторона: для каждой строки business-problem — закрывает ли её хоть один
 проект? Ни один — hint (проблема висит).
 
 Проект с непустым vision, но пустым addresses-problem — warning.
@@ -117,38 +118,38 @@ frame? Нет — error (укажи проект и нерезолвящийся
 hint про висящую проблему — project: null).
 ```
 
-## segmentproblem-frame
+## segmentproblem-bizproblem
 
 **Source:** `docs/ajtbd/segment-problem.md`.
-**Destination:** `docs/business-problem/frame.md` (таблица проблем).
+**Destination:** `docs/business/business-problem.md` (таблица проблем).
 **Скоуп:** один раз (общие слои ajtbd ↔ business-problem, без проекта).
 **Применим если:** оба слоя наполнены.
 
 **Что искать:**
-- `warning`: строка `frame` (проблема бизнеса), которую не доказывает ни
+- `warning`: строка `business-problem` (проблема бизнеса), которую не доказывает ни
   одно трение клиента (`segment-problem`) — проблема бизнеса без единого
   трения-доказательства (по ядру AJTBD проблема бизнеса опирается на
   трение клиента).
 - `hint`: сильное трение клиента (`strength` высок, низкая
   удовлетворённость нанятого решения), не работающее ни на одну проблему
   бизнеса (`feeds-problem: —` и нет семантической пары) — кандидат в
-  новую проблему `frame`.
-- `error`: `segment-problem.feeds-problem` указывает на строку `frame`,
+  новую проблему `business-problem`.
+- `error`: `segment-problem.feeds-problem` указывает на строку `business-problem`,
   которой нет (трение бьёт в несуществующую проблему бизнеса — опечатка
   slug или проблема не заведена).
 
 **Промпт-добавка:**
 ```
-segment-problem — трение КЛИЕНТА с нанятым решением (слой ajtbd); frame —
+segment-problem — трение КЛИЕНТА с нанятым решением (слой ajtbd); business-problem —
 проблема БИЗНЕСА заказчика (business-problem). Это РАЗНЫЕ сущности:
 первое доказывает и питает второе (сильное трение при низкой
 удовлетворённости → проблема бизнеса).
 
 Прямая сторона: `feeds-problem` (если задан) должен указывать на реально
-существующую строку frame — иначе error. Без `feeds-problem` сопоставляй
+существующую строку business-problem — иначе error. Без `feeds-problem` сопоставляй
 СМЫСЛОВО: какая проблема бизнеса опирается на это трение.
 
-Обратная сторона: для каждой строки frame — доказывает ли её хоть одно
+Обратная сторона: для каждой строки business-problem — доказывает ли её хоть одно
 трение клиента? Ни одного — warning (проблема бизнеса без трения-
 доказательства).
 
@@ -160,7 +161,7 @@ segment-problem — трение КЛИЕНТА с нанятым решение
 ## segment-subject
 
 **Source:** `docs/ajtbd/segment.md`.
-**Destination:** `docs/business-problem/subject.md`.
+**Destination:** `docs/hypothesis-map/subject.md`.
 **Скоуп:** один раз (общие слои ajtbd ↔ business-problem, без проекта).
 **Применим если:** оба слоя наполнены.
 
@@ -235,9 +236,11 @@ DIY / субститут / бездействие закономерно иду�
 - `warning`: офер, чей `for-segment` по смыслу не соответствует бандлу
   работ названного сегмента (офер продаётся «не тому» сегменту —
   подозрение на ошибочную привязку).
-- `hint`: сегмент в ajtbd, который не обслуживает ни один офер
-  (`for-segment`) и ни один канал (`serves-segment`) — бизнес знает о
-  сегменте по разведке, но ничего ему не продаёт/не достаёт.
+- `hint`: сегмент в ajtbd с `served=served`, который не обслуживает ни
+  один офер (`for-segment`) и ни один канал (`serves-segment`) — бизнес
+  знает о сегменте по разведке, но ничего ему не продаёт/не достаёт.
+  **Проспективный сегмент** (`served=prospective`) без оферов/каналов —
+  **норма**, не finding (разведка рынка, который бизнес ещё не обслуживает).
 
 **Промпт-добавка:**
 ```
@@ -246,14 +249,15 @@ business в ajtbd/segment. Проверь, что каждая ссылка РЕ
 реальный сегмент (иначе error) и ОСМЫСЛЕННА (офер/канал по смыслу
 подходит бандлу работ и критериям успеха сегмента — иначе warning).
 
-Обратно: сегмент, который не обслуживает ни офер, ни канал — hint
-(бизнес видит сегмент, но не работает с ним). Связь по форме slug-явная,
-но проверяй смыслом, а не строкой.
+Обратно: сегмент с served=served, который не обслуживает ни офер, ни
+канал — hint (бизнес видит сегмент, но не работает с ним). Сегмент с
+served=prospective без оферов/каналов — НЕ finding (разведка рынка).
+Связь по форме slug-явная, но проверяй смыслом, а не строкой.
 ```
 
 ## goal-vision
 
-**Source:** `docs/business-problem/goal.md`, `metric.md` (только строки,
+**Source:** `docs/hypothesis-map/goal.md`, `metric.md` (только строки,
 относящиеся к проблемам, которые закрывает проект).
 **Destination:** `docs/projects/<slug>/vision.md`.
 **Скоуп:** по проекту.
@@ -282,7 +286,7 @@ vision проекта <slug> должен решать проблемы, кот�
 
 ## subject-user
 
-**Source:** `docs/business-problem/subject.md` (только субъекты проблем,
+**Source:** `docs/hypothesis-map/subject.md` (только субъекты проблем,
 которые закрывает проект).
 **Destination:** `docs/projects/<slug>/user.md`.
 **Скоуп:** по проекту.
@@ -390,7 +394,7 @@ vision.Problem — какую проблему решает продукт <slug
 
 Для vision.Problem: опирается ли она на конкретное трение клиента? Не
 опирается — warning. Сильное трение обслуживаемого сегмента без
-отражения в Problem — hint. НЕ путай с проблемой бизнеса (frame) — здесь
+отражения в Problem — hint. НЕ путай с проблемой бизнеса (business-problem) — здесь
 проблема ПРОДУКТА.
 ```
 
@@ -426,7 +430,7 @@ value-mechanics — какие из 11 механик создания ценн�
 
 ## bet-capability
 
-**Source:** `docs/business-problem/bet.md`, `goal.md` (только ставки/цели
+**Source:** `docs/swot/bet.md`, `goal.md` (только ставки/цели
 проблем, которые закрывает проект).
 **Destination:** `docs/projects/<slug>/capability.md`.
 **Скоуп:** по проекту.
@@ -707,6 +711,128 @@ PII; PCI-DSS → integration с платежами; HIPAA → surface с
 не error.
 ```
 
+## prospective-consistency
+
+**Source:** `docs/projects/*/vision.md` (`market-maturity`,
+`addresses-problem`).
+**Destination:** `docs/ajtbd/segment.md` (`served`),
+`docs/business/business-problem.md` (`served`).
+**Скоуп:** один раз, над всеми проектами.
+**Применим если:** есть хотя бы один проект и проспективные сущности
+(`served=prospective`) наверху.
+
+**Что искать:**
+- `warning`: проект с `vision.market-maturity=prospective`, чьи
+  `addresses-problem` указывают только на `served`-проблемы (рассинхрон:
+  продукт-разведка целит в уже обслуживаемый рынок) — или наоборот, проект
+  с `market-maturity=served`, адресующий `prospective`-проблему.
+- `hint`: проспективный сегмент/проблема (`served=prospective`), который
+  не адресует ни один проект (разведка без инициативы — нормально, но
+  стоит знать).
+
+**Промпт-добавка:**
+```
+market-maturity на vision описывает, целит ли продукт в обслуживаемый
+рынок (served) или разведывает новый (prospective). Проспективный продукт
+должен адресовать проспективные сущности наверху (ajtbd/segment.served=
+prospective, business/business-problem.served=prospective). Проверь
+согласованность: market-maturity проекта ↔ served его addresses-problem
+(и связанных сегментов). Проспективная сущность без адресующего проекта —
+hint, не error. НЕ флагай проспективные сущности как «висяк».
+```
+
+## capability-hypothesis
+
+**Source:** `docs/projects/<slug>/capability.md` (поле `hypotheses`).
+**Destination:** `docs/hypothesis-map/hypothesis.md` (по проблемам, которые
+закрывает проект).
+**Скоуп:** по проекту.
+**Применим если:** оба слоя существуют; у проекта непустой
+`addresses-problem`.
+
+**Что искать:**
+- `error`: `capability.hypotheses` ссылается на гипотезу, которой нет в
+  `docs/hypothesis-map/` (ребро бьёт в несуществующую сущность).
+- `hint`: гипотеза проблемы, которую закрывает проект, не реализуемая ни
+  одной capability этого продукта (стратегия без продуктового воплощения —
+  возможно, её несёт соседний проект).
+
+**Промпт-добавка:**
+```
+capability.hypotheses — авторское ребро продукт → hypothesis-map:
+возможность реализует гипотезу. Скоупь гипотезы к проблемам проекта
+(колонка `problem`). Прямая сторона: каждый ref резолвится в реальную
+hypothesis? Нет — error. Обратная: гипотеза проблемы проекта без
+реализующей capability — hint (может нести соседний проект). Связь
+семантическая.
+```
+
+## capability-job
+
+**Source:** `docs/projects/<slug>/capability.md` (поле `jobs`).
+**Destination:** `docs/ajtbd/job.md`.
+**Скоуп:** по проекту.
+**Применим если:** оба слоя существуют.
+
+**Что искать:**
+- `error`: `capability.jobs` ссылается на работу, которой нет в
+  `docs/ajtbd/job.md`.
+- `hint`: Core/Big Job обслуживаемого сегмента без capability, прямо в неё
+  целящей (`capability.jobs`) — дополняет `mechanic-capability` (там через
+  механики ценности, здесь — прямое ребро).
+
+**Промпт-добавка:**
+```
+capability.jobs — прямое авторское ребро продукт → ajtbd: возможность
+целит в работу сегмента (в дополнение к выводимому через
+job-graph.value-mechanics). Прямая сторона: каждый ref резолвится в
+реальный job? Нет — error. Обратная: Big/Core Job обслуживаемого сегмента
+без прямо целящей capability — hint. Связь семантическая.
+```
+
+## situation-job
+
+**Source:** `docs/projects/<slug>/interface/situation.md` (поле `jobs`).
+**Destination:** `docs/ajtbd/job.md`.
+**Скоуп:** по проекту.
+**Применим если:** оба слоя существуют.
+
+**Что искать:**
+- `error`: `situation.jobs` ссылается на работу, которой нет в
+  `docs/ajtbd/job.md`.
+- `hint`: UX-ситуация, обслуживающая работу сегмента, без проставленного
+  `jobs` (связь полезна, но не обязательна).
+
+**Промпт-добавка:**
+```
+situation.jobs — авторское ребро interface → ajtbd: UX-шаг обслуживает
+работу сегмента. Прямая сторона: каждый ref резолвится в реальный job?
+Нет — error. Это мягкое ребро (опц.), прочерк — норма; не требуй его.
+В finding укажи project.
+```
+
+## situation-hypothesis
+
+**Source:** `docs/projects/<slug>/interface/situation.md` (поле
+`hypotheses`).
+**Destination:** `docs/hypothesis-map/hypothesis.md`.
+**Скоуп:** по проекту.
+**Применим если:** оба слоя существуют.
+
+**Что искать:**
+- `error`: `situation.hypotheses` ссылается на гипотезу, которой нет в
+  `docs/hypothesis-map/`.
+- `hint`: UX-ситуация, которая по смыслу проверяет/обслуживает гипотезу,
+  без проставленного `hypotheses`.
+
+**Промпт-добавка:**
+```
+situation.hypotheses — авторское ребро interface → hypothesis-map: UX-шаг
+проверяет/обслуживает гипотезу. Прямая сторона: каждый ref резолвится в
+реальную hypothesis? Нет — error. Мягкое ребро (опц.), прочерк — норма.
+В finding укажи project.
+```
+
 ## Порядок lens-ов
 
 Все агенты спавнятся в одном message-блоке параллельно — порядок ниже
@@ -717,37 +843,42 @@ PII; PCI-DSS → integration с платежами; HIPAA → surface с
 
 1. `factor-business` (бизнес → проблема)
 2. `currentmetric-metric` (бизнес → проблема)
-3. `addresses-problem-frame` (продукты ↔ проблемы, M:N над всеми
+3. `addresses-problem-bizproblem` (продукты ↔ проблемы, M:N над всеми
    проектами)
-4. `segmentproblem-frame` (ajtbd → проблема: трение клиента доказывает
+4. `segmentproblem-bizproblem` (ajtbd → проблема: трение клиента доказывает
    проблему бизнеса)
 5. `segment-subject` (ajtbd → проблема: субъект вырастает из сегмента)
 6. `solution-business` (ajtbd → бизнес: нанятое решение ↔ конкурент/офер)
 7. `business-segment` (бизнес → ajtbd: оферы/каналы обслуживают сегменты)
+8. `prospective-consistency` (market-maturity ↔ served сущностей наверху)
 
 **По каждому проекту** (для каждого `<slug>` из `docs/projects/`, кроме
 `_canon`; раскрывается в пары `проект × lens`):
 
-8. `goal-vision` (проблема → продукт; скоуп к проблемам проекта)
-9. `subject-user` (проблема → продукт; скоуп к проблемам проекта)
-10. `segment-user` (ajtbd → продукт)
-11. `job-vision` (ajtbd → продукт: Big/Core Job ↔ vision.Success)
-12. `segmentproblem-vision` (ajtbd → продукт: трение ↔ vision.Problem)
-13. `mechanic-capability` (ajtbd → продукт: механика ценности ↔ capability)
-14. `bet-capability` (проблема → продукт; скоуп к проблемам проекта)
-15. `user-who` (foundation, продукт → interface проекта)
-16. `surface-zone` (foundation)
-17. `capability-situation` (foundation)
-18. `capability-domain` (если у проекта есть `domains/`)
-19. `integration-domain` (если у проекта есть `domains/`)
-20. `surface-screen` (если у проекта есть `screens/`)
-21. `constraint-surface` (cross-внутри-project)
-22. `market-capability` (часто даёт hints, не error)
+9. `goal-vision` (проблема → продукт; скоуп к проблемам проекта)
+10. `subject-user` (проблема → продукт; скоуп к проблемам проекта)
+11. `segment-user` (ajtbd → продукт)
+12. `job-vision` (ajtbd → продукт: Big/Core Job ↔ vision.Success)
+13. `segmentproblem-vision` (ajtbd → продукт: трение ↔ vision.Problem)
+14. `mechanic-capability` (ajtbd → продукт: механика ценности ↔ capability)
+15. `bet-capability` (проблема → продукт; скоуп к проблемам проекта)
+16. `capability-hypothesis` (продукт → hypothesis-map: capability.hypotheses)
+17. `capability-job` (продукт → ajtbd: capability.jobs)
+18. `user-who` (foundation, продукт → interface проекта)
+19. `surface-zone` (foundation)
+20. `capability-situation` (foundation)
+21. `situation-job` (interface → ajtbd: situation.jobs)
+22. `situation-hypothesis` (interface → hypothesis-map: situation.hypotheses)
+23. `capability-domain` (если у проекта есть `domains/`)
+24. `integration-domain` (если у проекта есть `domains/`)
+25. `surface-screen` (если у проекта есть `screens/`)
+26. `constraint-surface` (cross-внутри-project)
+27. `market-capability` (часто даёт hints, не error)
 
-Полный рой = `7 верхнеуровневых + Σ по проектам (применимые
+Полный рой = `8 верхнеуровневых + Σ по проектам (применимые
 project-углы)`.
 
 `--quick` запускает по каждому проекту три foundation-угла
 продукт↔interface (`user-who`, `capability-situation`, `surface-zone`)
-плюс `addresses-problem-frame` один раз. Для верхних слоёв —
+плюс `addresses-problem-bizproblem` один раз. Для верхних слоёв —
 `goal-vision`, `subject-user` (по проекту) как быстрый upstream-чек.

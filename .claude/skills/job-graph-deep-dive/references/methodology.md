@@ -187,7 +187,7 @@ Score = важность × частотность × размер × (10 − у
   (разные сущности).
 - `job` (`big`/`core`) → `projects/<slug>/vision.Success` — успех
   продукта целит в Big/Core Job.
-- `segment-problem` → `business-problem/frame` (доказательство проблемы
+- `segment-problem` → `business/business-problem` (доказательство проблемы
   бизнеса; опц. `feeds-problem`) и → `projects/<slug>/vision.Problem`.
 - `solution` ↔ `business/competitor` / `business/offering` (`maps-to`).
 - `job-graph.value-mechanics` → `projects/<slug>/capability`.

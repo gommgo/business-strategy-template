@@ -11,21 +11,36 @@
 2. **Success** — что считаем успехом (метрика или наблюдаемый сдвиг).
 3. **Non-goals** — список «не делаем X, потому что Y».
 4. **addresses-problem** — массив slug-рефов на строки
-   `docs/business-problem/frame.md` (общий слой проблем), которые
-   продукт закрывает (M:N). Привязку даёт аналитик через
-   `AskUserQuestion` (опции — существующие строки `frame.md`); скилл не
-   выдумывает проблемы и не заводит их здесь.
+   `docs/business/business-problem.md` (общий реестр проблем), которые
+   продукт закрывает (M:N). Привязку даёт аналитик через `AskUserQuestion`
+   (опции — существующие строки реестра); скилл не выдумывает проблемы и
+   не заводит их здесь.
+5. **Оси инициативы** (enum, опция на каждое значение):
+   - **audience** — `b2b` \| `b2c` \| `b2b2c` \| `internal` \| `gov`.
+   - **intent** — `new-service` \| `improve-service` \| `internal-problem`
+     \| `client-problem`.
+   - **market-maturity** — `prospective` (разведка нового рынка) \|
+     `served` (обслуживаемый рынок). `prospective` адресует проспективные
+     `ajtbd/segment` и `business/business-problem` (`served=prospective`).
+6. **lifecycle** — жизненный цикл продукта `draft` → `accepted` → `build`
+   → `mvp` → `beta-testing` → `stable` → `updating`. **Отдельно** от
+   `status` (зрелость записи). Переход в `stable` запускает восходящий
+   поток `project → business` (провенанс `from-project` у offering/
+   current-metric/business-problem) — ловит `/cross-audit`.
 
 **Статус:** один маркер `**status:** \`draft\`` или `\`stable\`` в
-конце файла; рядом строка `**addresses-problem:**`.
+конце файла; рядом строки `**audience:**`, `**intent:**`,
+`**market-maturity:**`, `**lifecycle:**`, `**addresses-problem:**`.
 
 **Порядок копания:**
-Problem → Success → Non-goals → addresses-problem.
+Problem → Success → Non-goals → audience/intent/market-maturity →
+lifecycle → addresses-problem.
 
 Problem задаёт всё остальное; без него Success — про абстракцию,
 Non-goals — про вкусовщину. `addresses-problem` закрепляет продукт за
 конкретными проблемами бизнеса — без неё vision висит в воздухе, а
-`success` не на что целить.
+`success` не на что целить. Оси и lifecycle — enum **от аналитика** через
+`AskUserQuestion`, не угадывать.
 
 ## user
 
@@ -38,8 +53,14 @@ Non-goals — про вкусовщину. `addresses-problem` закрепля�
 - `pains` — наблюдаемые боли.
 - `success` — что для неё лично «полегчало».
 
+**Опционально:** `segments` — массив slug-рефов на `ajtbd/segment`
+(сегменты по работам, к которым принадлежит пользователь). Мягкая связь
+снизу-вверх (project → ajtbd), прочерк допустим; обратную сторону сводит
+`/cross-audit`. Опции — существующие `docs/ajtbd/segment.md`, не выдумывать.
+
 **Порядок копания:**
-fundamentals (slug/name/description) → context → jobs → pains → success.
+fundamentals (slug/name/description) → context → jobs → pains → success →
+segments.
 
 `context` идёт первым, потому что от него зависит, как формулировать
 jobs и pains. Если context размытый — jobs будут абстракцией.
@@ -53,13 +74,20 @@ jobs и pains. Если context размытый — jobs будут абстр�
 - `value` — ценность для user, в его языке.
 - `user` — массив slug пользователей (минимум один).
 
-**Опционально:** —
+**Опционально:**
+- `hypotheses` — массив slug-рефов на `hypothesis-map/hypothesis`
+  (capability реализует гипотезу). Снизу-вверх (project → hypothesis-map).
+- `jobs` — массив slug-рефов на `ajtbd/job` (capability прямо целит в
+  работу сегмента). Снизу-вверх (project → ajtbd). Прямое ребро —
+  **в дополнение** к выводимому через `job-graph.value-mechanics`.
+  Оба — прочерк допустим; обратную сторону сводит `/cross-audit`.
 
 **Порядок копания:**
-fundamentals → value → user.
+fundamentals → value → user → hypotheses → jobs.
 
 Если user в проекте ещё нет — отработать **stub** для них (см.
-SKILL.md), потом вернуться. Capability без user — мёртвая.
+SKILL.md), потом вернуться. Capability без user — мёртвая. `hypotheses` и
+`jobs` — опции из существующих сущностей соседних слоёв, не выдумывать.
 
 ## boundary
 

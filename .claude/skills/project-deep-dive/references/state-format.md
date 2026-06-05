@@ -152,7 +152,8 @@ Research-отчёт **не удаляется** после promotion канди�
 режим того же продукта
 (`../project-deep-dive-for-business/state/<project-slug>/<kind>/<slug>.md`
 — что клиент накопал в режиме «домашнее задание») и верхнеуровневые слои
-(`../business-deep-dive*/state/`, `../business-problem-deep-dive*/state/`).
+(`../business-deep-dive*/state/`, `../swot-deep-dive/state/`,
+`../hypothesis-map-deep-dive/state/`).
 Проектный слой — только по текущему `<project-slug>` (изоляция продуктов).
 **Писать в чужой state запрещено.** Формат тот же — но владелец другой.
 

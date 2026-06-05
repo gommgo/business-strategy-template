@@ -28,7 +28,7 @@ factor/goal/… несут внутри привязку к задаче (`probl
 ---
 kind: metric
 slug: paid-churn
-ref: docs/business-problem/metric.md#paid-churn
+ref: docs/hypothesis-map/metric.md#paid-churn
 ---
 
 ## Открытые вопросы
@@ -69,7 +69,8 @@ Frontmatter: `kind`, `slug` (для `frame` — `<problem-slug>`), `ref`. У
 `../segment-deep-dive-for-business/state/`,
 `../job-graph-deep-dive-for-business/state/` — что клиент рассказал про
 своих клиентов и где им тяжело, `../project-deep-dive-for-business/state/<slug>/`)
-и аналитические слои (`../business-problem-deep-dive/state/`,
+и аналитические слои (`../swot-deep-dive/state/`,
+`../hypothesis-map-deep-dive/state/`,
 `../business-deep-dive/state/`, `../segment-deep-dive/state/`,
 `../job-graph-deep-dive/state/`, `../project-deep-dive/state/<slug>/`).
 Проектный слой — только по текущему продукту (изоляция продуктов

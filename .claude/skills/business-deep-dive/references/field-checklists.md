@@ -13,10 +13,11 @@
 ## offering
 
 **Для stable:** `kind` (enum), `for-segment`.
-**Порядок:** fundamentals → kind → for-segment.
+**Порядок:** fundamentals → kind → for-segment → from-project.
 Проверка: источник выручки/ценности; `for-segment` указывает на
 существующий `ajtbd/segment` (сегменты — в `docs/ajtbd/`,
-`/segment-deep-dive`).
+`/segment-deep-dive`). `from-project` — провенанс восходящего потока: если
+офер родился из дозревшего продукта, его slug; иначе `—`.
 
 ## channel
 
@@ -36,14 +37,41 @@
 ## current-metric
 
 **Для stable:** `value`, `as-of` (дата), `source`.
-**Порядок:** fundamentals → value → as-of → source.
+**Порядок:** fundamentals → value → as-of → source → from-project.
 Проверка: число + дата + источник; бизнес-метрика; не бинарна; годится
-как baseline.
+как baseline. `from-project` — провенанс восходящего потока: новый
+baseline, привнесённый дозревшим продуктом (slug); иначе `—`.
 
 ## material
 
 **Обязательно:** `slug`, `name`, `kind` (enum), `uri`, `status`.
 Проверка: по записи можно вернуться к первоисточнику факта.
+
+## business-problem (строгий реестр проблем)
+
+`business-problem.md` — **таблица проблем бизнеса** (одна строка = одна
+проблема). Колонки: `slug · name · problem · guarantee · target ·
+out-of-control · scope · served · from-project · status`.
+**Для stable:** `problem` (бизнес-боль в деньгах/времени/риске, не в
+терминах фич), `guarantee` (что гарантируем — доставка по scope), `target`
+(на какие метрики целимся, best-effort, **не гарантия**), `out-of-control`
+(внешние факторы вне контроля), `scope` (in/out), `served` (enum).
+**Порядок:** problem → guarantee/target (**граница** — главная проверка) →
+out-of-control → scope → served → from-project.
+**Главная проверка:** граница «гарантия (доставка по scope) vs таргет
+(метрики best-effort)»; метрика **никогда** не подана как гарантия.
+**`served`:** `served` — бизнес уже обслуживает рынок проблемы;
+`prospective` — разведка под будущую инициативу (рынок ещё не обслуживается;
+допускается без обслуживающих оферов/каналов — не «висяк»).
+**`from-project`:** какой дозревший продукт проявил/подтвердил проблему
+(slug | `—`) — провенанс восходящего потока.
+**Опора на доказательства:** строка — проблема **бизнеса**, не трение
+клиента; агрегированные трения клиента из `ajtbd/segment-problem` (read-only)
+служат ей доказательством. Перенос смысла трения в формулировку — через
+`AskUserQuestion`, не выдумывать.
+**Дополнительный инвариант (ловит `/hypothesis-map-audit`):** у каждой
+строки `business-problem` есть ≥1 `goal` в `docs/hypothesis-map/` —
+иначе проблема повисла.
 
 ## Универсальные нюансы
 

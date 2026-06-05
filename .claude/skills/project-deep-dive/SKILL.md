@@ -58,41 +58,45 @@ description: Углублённая проработка продуктовог�
 `<new-slug>/domains/`) заводят свои скилы по мере надобности — этот
 скилл их не создаёт.
 
-## Вышестоящий вход (business-problem)
+## Вышестоящий вход (реестр проблем, SWOT, Карта гипотез)
 
 Продукт — **не корень всего**, а решение под уже формализованную
 бизнес-проблему. Над папками проектов лежат `docs/business/` (профиль
-бизнеса) и `docs/business-problem/` (SWOT + Карта гипотез) — **общие для
-всех проектов** верхние слои. Якоря для discovery приходят оттуда (связь
-семантическая, не slug):
+бизнеса + реестр проблем `business-problem.md`), `docs/swot/` (LinkedSWOT)
+и `docs/hypothesis-map/` (Карта гипотез) — **общие для всех проектов**
+верхние слои. Якоря для discovery приходят оттуда (связь семантическая,
+не slug):
 
-- `vision.Problem` ← `docs/business-problem/frame.md` (строки-проблемы) +
-  `goal`;
-- `vision.Success` ← `docs/business-problem/metric` (целевые метрики —
+- `vision.Problem` ← `docs/business/business-problem.md` (строки-проблемы)
+  + `hypothesis-map/goal`;
+- `vision.Success` ← `docs/hypothesis-map/metric` (целевые метрики —
   best-effort таргет, **не** гарантия; не копировать как обещание);
-- `user` ← `docs/business-problem/subject` (субъект влияния) и
+- `user` ← `docs/hypothesis-map/subject` (субъект влияния) и
   `docs/ajtbd/segment` (сегмент по работам Advanced JTBD);
-- `capability` реализует `docs/business-problem/bet`/`goal`.
+- `capability` реализует `docs/swot/bet` / `hypothesis-map/goal`;
+  авторски `capability.hypotheses` (→ `hypothesis-map`) и `capability.jobs`
+  (→ `ajtbd`) ведутся здесь, на стороне продукта.
 
 Если эти слои есть — на фазе `discovery` сначала прочитать
-`docs/business-problem/frame.md` + `goal.md` + `metric.md` и предложить
-аналитику опереть vision на них. Их нет — discovery идёт как обычно.
-Несостыковки ловит `/cross-audit`.
+`docs/business/business-problem.md` + `hypothesis-map/goal.md` +
+`hypothesis-map/metric.md` и предложить аналитику опереть vision на них.
+Их нет — discovery идёт как обычно. Несостыковки ловит `/cross-audit`.
 
 ### `addresses-problem` — какие проблемы закрывает продукт
 
-`frame.md` — таблица проблем (одна строка = одна проблема), **общая** для
-всех проектов. Каждый проект объявляет, какие из них закрывает, полем
-`addresses-problem` в своём `vision.md` (массив slug-рефов на строки
-`frame`; связь M:N — проблему могут бить несколько проектов, проект —
-несколько проблем). Авторская сторона связи — здесь; обратную сводит
-`/cross-audit`.
+`docs/business/business-problem.md` — реестр проблем (одна строка = одна
+проблема), **общий** для всех проектов. Каждый проект объявляет, какие из
+них закрывает, полем `addresses-problem` в своём `vision.md` (массив
+slug-рефов на строки реестра; связь M:N — проблему могут бить несколько
+проектов, проект — несколько проблем). Авторская сторона связи — здесь;
+обратную сводит `/cross-audit`.
 
 На фазе `discovery` скилл **обязательно** добивает `addresses-problem`
 (см. `references/phases.md`, фаза 1, и `references/field-checklists.md`).
 Привязка приходит **от аналитика** через `AskUserQuestion` — скилл
-показывает существующие строки `frame.md` как опции, не выдумывает. Без
-привязки продукт висит в воздухе, `success` целит в метрики этих проблем.
+показывает существующие строки реестра `business-problem.md` как опции, не
+выдумывает. Без привязки продукт висит в воздухе, `success` целит в
+метрики этих проблем.
 
 ## Точки входа
 
@@ -282,7 +286,8 @@ description: Углублённая проработка продуктовог�
 клиентский режим того же продукта
 (`../project-deep-dive-for-business/state/<project-slug>/` — что клиент
 наработал в режиме «домашнее задание») и верхнеуровневые слои
-(`../business-deep-dive*/state/`, `../business-problem-deep-dive*/state/`).
+(`../business-deep-dive*/state/`, `../swot-deep-dive/state/`,
+`../hypothesis-map-deep-dive/state/`).
 Проектный слой — только по текущему `<project-slug>` (изоляция продуктов).
 Пишет **только в свой** state. Если клиент прислал черновик через push в
 единую ветку `client` — этот state появляется в файловой системе после

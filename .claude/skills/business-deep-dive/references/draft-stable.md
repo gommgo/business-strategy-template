@@ -20,6 +20,10 @@
 - `current-metric` не stable без `as-of` и `source` (baseline без даты и
   источника бесполезен).
 - `competitor` не stable без `url` и `sources`.
+- `business-problem` не stable без явной **границы** `guarantee` (доставка
+  по scope) vs `target` (метрики best-effort), без `out-of-control` и без
+  `served`. Не становится stable, если метрика где-то подана как гарантия
+  (нарушение юр-рамки) или `target` смешан с `guarantee`.
 - Запись на основе **неподтверждённого** web-research остаётся `draft`,
   пока аналитик не подтвердил факт.
 

@@ -10,7 +10,7 @@ preamble, без пояснений. Скилл парсит ответ и об�
   {
     "lens": "<lens-name>",
     "project": "<project-slug>" | null,
-    "problem": "<frame-slug>" | null,
+    "problem": "<problem-slug>" | null,
     "severity": "error" | "warning" | "hint",
     "title": "<одна строка>",
     "evidence": "<2-4 строки>",
@@ -27,7 +27,7 @@ preamble, без пояснений. Скилл парсит ответ и об�
 |---|---|---|
 | `lens` | string | имя угла (как в angles.md) — для группировки в отчёте |
 | `project` | string \| null | slug проекта, к которому относится finding (для project-скоупленных углов); `null` для верхнеуровневых (общие слои business ↔ business-problem) |
-| `problem` | string \| null | slug проблемы (`frame`), если finding касается конкретной проблемы (углы business-problem ↔ продукт, `addresses-problem-frame`); иначе `null` |
+| `problem` | string \| null | slug проблемы (`business-problem`), если finding касается конкретной проблемы (углы business-problem ↔ продукт, `addresses-problem-bizproblem`); иначе `null` |
 | `severity` | enum | `error` / `warning` / `hint` — уровень тяжести |
 | `title` | string | одна строка, что найдено |
 | `evidence` | string | конкретные доказательства: какие slug, какие поля, какой контраст |
@@ -57,19 +57,19 @@ preamble, без пояснений. Скилл парсит ответ и об�
 }
 ```
 
-### Error (верхнеуровневый M:N — addresses-problem ↔ frame)
+### Error (верхнеуровневый M:N — addresses-problem ↔ business-problem)
 
 ```json
 {
-  "lens": "addresses-problem-frame",
+  "lens": "addresses-problem-bizproblem",
   "project": "partner-portal",
   "problem": "legacy-sync",
   "severity": "error",
   "title": "проект partner-portal бьёт в несуществующую проблему legacy-sync",
-  "evidence": "projects/partner-portal/vision.md addresses-problem = [`paid-churn`, `legacy-sync`]. В docs/business-problem/frame.md строки: `paid-churn`, `slot-utilization`. Проблемы `legacy-sync` нет.",
-  "suggestion": "Завести проблему `legacy-sync` через /business-problem-deep-dive, либо убрать ref в /project-deep-dive partner-portal (опечатка slug?).",
+  "evidence": "projects/partner-portal/vision.md addresses-problem = [`paid-churn`, `legacy-sync`]. В docs/business/business-problem.md строки: `paid-churn`, `slot-utilization`. Проблемы `legacy-sync` нет.",
+  "suggestion": "Завести проблему `legacy-sync` через /business-deep-dive business-problem, либо убрать ref в /project-deep-dive partner-portal (опечатка slug?).",
   "source-refs": ["docs/projects/partner-portal/vision.md"],
-  "destination-refs": ["docs/business-problem/frame.md"]
+  "destination-refs": ["docs/business/business-problem.md"]
 }
 ```
 
@@ -98,10 +98,10 @@ preamble, без пояснений. Скилл парсит ответ и об�
   "problem": "paid-churn",
   "severity": "hint",
   "title": "текущий KPI no-show-rate не стал ни одной целевой метрикой",
-  "evidence": "business/current-metric.md:no-show-rate = 18% (as-of 2026-Q1). В business-problem/metric.md нет целевой метрики, чей baseline опирался бы на этот KPI.",
-  "suggestion": "Решить через /business-problem-deep-dive: возможно, no-show-rate — кандидат в целевую метрику для проблемы paid-churn.",
+  "evidence": "business/current-metric.md:no-show-rate = 18% (as-of 2026-Q1). В hypothesis-map/metric.md нет целевой метрики, чей baseline опирался бы на этот KPI.",
+  "suggestion": "Решить через /hypothesis-map-deep-dive: возможно, no-show-rate — кандидат в целевую метрику для проблемы paid-churn.",
   "source-refs": ["docs/business/current-metric.md:no-show-rate"],
-  "destination-refs": ["docs/business-problem/metric.md"]
+  "destination-refs": ["docs/hypothesis-map/metric.md"]
 }
 ```
 

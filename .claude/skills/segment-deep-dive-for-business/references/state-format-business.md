@@ -66,7 +66,7 @@ Frontmatter: `kind` (всегда `segment`), `slug`, `ref`.
 `../project-deep-dive-for-business/state/<slug>/`) и аналитические слои
 (аналитический брат `../segment-deep-dive/state/`,
 `../job-graph-deep-dive/state/`, `../business-deep-dive/state/`,
-`../business-problem-deep-dive/state/`,
+`../swot-deep-dive/state/`, `../hypothesis-map-deep-dive/state/`,
 `../project-deep-dive/state/<slug>/`). Проектный слой — только по текущему
 продукту (изоляция продуктов сохраняется). В чужой state **не пишет**.
 

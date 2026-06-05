@@ -32,7 +32,7 @@
 
 | kind | обязательно при stable |
 |---|---|
-| `vision` | секции Problem, Success, Non-goals (Non-goals может быть `_нет_`, но секция должна быть) + непустой `addresses-problem` (≥1 slug-реф) |
+| `vision` | секции Problem, Success, Non-goals (Non-goals может быть `_нет_`, но секция должна быть) + непустой `addresses-problem` (≥1 slug-реф) + оси `audience`/`intent`/`market-maturity`/`lifecycle` (валидные enum) |
 | `user` | `context`, `jobs`, `pains`, `success` |
 | `capability` | `value`, `user` (≥1 элемент) |
 | `boundary` | `why` |
@@ -54,6 +54,10 @@
 
 | поле | допустимо |
 |---|---|
+| `vision.audience` | `b2b`, `b2c`, `b2b2c`, `internal`, `gov` |
+| `vision.intent` | `new-service`, `improve-service`, `internal-problem`, `client-problem` |
+| `vision.market-maturity` | `prospective`, `served` |
+| `vision.lifecycle` | `draft`, `accepted`, `build`, `mvp`, `beta-testing`, `stable`, `updating` |
 | `surface.type` | `web`, `mobile`, `api`, `admin`, `bot`, `desktop`, `embed`, `other` |
 | `integration.direction` | `in`, `out`, `duplex` |
 | `integration.owner` | `we`, `partner`, `both` |
@@ -216,12 +220,13 @@ R-STRUCT-002).
 (`—`) или содержит пустой массив.
 
 Проверка только структурная: что привязка **есть**. Совпадает ли slug со
-строкой `docs/business-problem/frame.md` — это уже семантика, её ловит
+строкой `docs/business/business-problem.md` — это уже семантика, её ловит
 `/cross-audit` (не валидируется здесь, чтобы не лезть за пределы проекта).
 
 **Рекомендация:** «vision без `addresses-problem` — продукт не привязан
-ни к одной бизнес-проблеме. Указать строки `frame.md`, которые продукт
-закрывает, через `/project-deep-dive <project-slug> --phase discovery`».
+ни к одной бизнес-проблеме. Указать строки реестра `business-problem.md`,
+которые продукт закрывает, через `/project-deep-dive <project-slug>
+--phase discovery`».
 
 ## Coverage-правила (R-COV-*)
 
@@ -295,8 +300,8 @@ em-dash).
 ## Что не делает project-audit
 
 - Не сравнивает продукт с `<slug>/interface` / `<slug>/domains` /
-  `<slug>/screens` и не проверяет `addresses-problem` против
-  `business-problem/frame` — это `/cross-audit`.
+  `<slug>/screens` и не проверяет `addresses-problem` против реестра
+  `business/business-problem` — это `/cross-audit`.
 - Не выходит за пределы одной папки проекта `docs/projects/<project-slug>/`.
 - Не предлагает promotion `draft → stable` — это `/project-deep-dive`.
 - Не вызывает `/project-deep-dive` сам — даёт текст, что запустить

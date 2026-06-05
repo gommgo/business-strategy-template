@@ -135,7 +135,8 @@ ref: docs/projects/<project-slug>/user.md#nurse-partner
 и верхнеуровневые слои — клиентский и аналитический режим
 (`../business-deep-dive-for-business/state/`, `../business-deep-dive/state/`,
 `../business-problem-deep-dive-for-business/state/`,
-`../business-problem-deep-dive/state/`). Проектный слой — только по
+`../swot-deep-dive/state/`, `../hypothesis-map-deep-dive/state/`).
+Проектный слой — только по
 текущему продукту (`<project-slug>`); чужие продукты не читаются (изоляция
 продуктов). В чужой state **не пишет**. Аналитический скилл симметрично
 read-only видит state клиента по этому продукту.

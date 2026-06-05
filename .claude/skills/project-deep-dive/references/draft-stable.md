@@ -17,8 +17,9 @@
 Vision — обязательны три раздела (Problem, Success, Non-goals — даже
 если Non-goals пуст, секция должна явно сказать «нет ограничений» или
 «определим позже») плюс непустой `addresses-problem` (≥1 slug-реф на
-строку `docs/business-problem/frame.md`). Vision без привязки к проблеме
-в stable не повышается — продукт без проблемы висит в воздухе.
+строку `docs/business/business-problem.md`) и оси `audience`/`intent`/
+`market-maturity`/`lifecycle`. Vision без привязки к проблеме в stable не
+повышается — продукт без проблемы висит в воздухе.
 
 ### 2. `Критерии <kind>` пройдены
 

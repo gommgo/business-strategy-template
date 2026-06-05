@@ -29,12 +29,15 @@
 - Success — проверяемый исход (метрика или наблюдаемый сдвиг
   поведения).
 - Non-goals — что **не делаем**, с короткими «потому что».
-- `addresses-problem` — какие строки `docs/business-problem/frame.md`
-  (общий слой проблем) продукт закрывает (массив slug-рефов, M:N).
-  Скилл читает `frame.md`, показывает строки-проблемы как опции
-  `AskUserQuestion`, аналитик выбирает; новые проблемы не выдумываются
-  здесь (заводятся в `/business-problem-deep-dive`). Без привязки vision
-  висит в воздухе — `success` целит в метрики выбранных проблем.
+- Оси `audience`/`intent`/`market-maturity` и `lifecycle` — тип и зрелость
+  инициативы (enum от аналитика, см. `field-checklists.md`).
+- `addresses-problem` — какие строки
+  `docs/business/business-problem.md` (общий реестр проблем) продукт
+  закрывает (массив slug-рефов, M:N). Скилл читает реестр, показывает
+  строки-проблемы как опции `AskUserQuestion`, аналитик выбирает; новые
+  проблемы не выдумываются здесь (заводятся в
+  `/business-deep-dive business-problem`). Без привязки vision висит в
+  воздухе — `success` целит в метрики выбранных проблем.
 
 **Анти-паттерны:**
 
@@ -42,6 +45,8 @@
 - Vision как список фич.
 - Vision как маркетинговый слоган.
 - `addresses-problem` пустой при stable — продукт без проблемы.
+- `market-maturity: prospective` без проспективных сущностей наверху
+  (`ajtbd/segment` / `business/business-problem` с `served=prospective`).
 
 **Логичные переходы после:**
 

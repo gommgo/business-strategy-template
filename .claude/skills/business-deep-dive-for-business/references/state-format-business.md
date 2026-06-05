@@ -57,7 +57,8 @@ Frontmatter: `kind`, `slug` (для profile отсутствует), `ref`.
 Чтобы картина была единой, скилл read-only подтягивает соседние `state/`:
 другие клиентские слои (`../business-problem-deep-dive-for-business/state/`,
 `../project-deep-dive-for-business/state/<slug>/`) и аналитические слои
-(`../business-deep-dive/state/`, `../business-problem-deep-dive/state/`,
+(`../business-deep-dive/state/`, `../swot-deep-dive/state/`,
+`../hypothesis-map-deep-dive/state/`,
 `../project-deep-dive/state/<slug>/`). Проектный слой — только по текущему
 продукту (изоляция продуктов сохраняется). В чужой state **не пишет**.
 

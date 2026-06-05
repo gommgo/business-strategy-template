@@ -153,7 +153,7 @@ Big Job = `segment.big-job`.
 результат?»; `strength` (1–10 — сила негативной эмоции / недостижимость);
 `drivers` (что тянет продолжать несмотря на трение); `barriers`
 (страхи/тревоги перехода на лучшее — пожиратели ценности); `feeds-problem`
-(на какую `business-problem/frame` это работает доказательством, если
+(на какую `business/business-problem` это работает доказательством, если
 очевидно).
 
 **Анти-паттерны:** трение без пары `solution`+`job`; слово «pain»/«боль»;
@@ -200,7 +200,8 @@ Big Job = `segment.big-job`.
 работа), предложить `/ajtbd-audit` и `/cross-audit`, передать наверх и
 вниз:
 - **наверх** — трения сегмента (`segment-problem`) питают проблему
-  бизнеса (`business-problem/frame`) → `/business-problem-deep-dive`;
+  бизнеса (`business/business-problem`) → `/business-deep-dive
+  business-problem` и SWOT-факторы → `/swot-deep-dive`;
 - **вниз** — механики ценности (`job-graph.value-mechanics`) становятся
   возможностями продукта (`projects/<slug>/capability`) →
   `/project-deep-dive`.

@@ -11,7 +11,9 @@ JTBD** (Иван Замесин): что за работы выполняет с
 **нанимает** на эти работы, где **трётся** с решениями и какие **механики
 ценности** из графа вырастают в возможности продукта. Канон —
 `docs/ajtbd/README.md`. Слой **discovery** между «кто этот бизнес»
-(`docs/business/`) и «какую проблему решаем» (`docs/business-problem/`).
+(`docs/business/`) и «какую проблему решаем» (реестр проблем
+`docs/business/business-problem.md`, SWOT `docs/swot/`, Карта гипотез
+`docs/hypothesis-map/`).
 
 Скилл владеет файлами `docs/ajtbd/{job.md, job-graph.md, solution.md,
 segment-problem.md}`. **Сегментами он не владеет** — их заводит и скорит
@@ -130,7 +132,7 @@ segment-problem.md}`. **Сегментами он не владеет** — их
 
 ## Три режима
 
-См. `references/workflow-patterns.md`. Зеркалит business-problem-deep-dive:
+См. `references/workflow-patterns.md`. Зеркалит project-deep-dive:
 
 - **A. Новая сущность.** Args = `<segment> <kind>` или
   `<segment> <kind>:<новый-slug>`. Батч `AskUserQuestion` по
@@ -267,11 +269,12 @@ state · факт прослежен до research или транскрипта
 3. Назвать текущую фазу и логичный следующий шаг.
 4. Через `AskUserQuestion` предложить:
    - `/ajtbd-audit` (инварианты методологии слоя роем);
-   - `/cross-audit` (стыки с business / business-problem / projects);
+   - `/cross-audit` (стыки с business / swot / hypothesis-map / projects);
    - `/jtbd-interview` (если работ/решений не хватает — добыть живым
      интервью; кладёт транскрипты + кандидатов в state → разбираем через
      intake, режим B);
-   - `/business-problem-deep-dive` (трения → проблема бизнеса `frame`);
+   - `/business-deep-dive business-problem` (трения → проблема бизнеса в
+     реестре) и `/swot-deep-dive` (трения → SWOT-факторы);
    - `/project-deep-dive` (механики ценности → `capability` продукта).
 
 Скилл **сам не вызывает** другие скилы — аналитик запускает.
@@ -287,7 +290,7 @@ state · факт прослежен до research или транскрипта
 - Не выдавать **гипотетику** за работу — работа доказывается прошлым
   поведением (затраты времени/денег/энергии).
 - Не путать `job` с фичей/решением, `segment-problem` (трение клиента) с
-  `business-problem/frame` (проблема бизнеса), `segment` (рынок) с
+  `business/business-problem` (проблема бизнеса), `segment` (рынок) с
   `user` (пользователь продукта).
 - Не оставлять `segment-problem` без пары `solution` + `job`.
 - Не повышать `draft → stable` без явного подтверждения аналитика; не

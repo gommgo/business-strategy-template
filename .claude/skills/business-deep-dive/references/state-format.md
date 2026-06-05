@@ -12,6 +12,7 @@
 ├── competitor/<slug>.md
 ├── current-metric/<slug>.md
 ├── material/<slug>.md
+├── business-problem/<slug>.md
 └── research/
     └── <тема>-<UTC-ts>.md
 ```
@@ -56,7 +57,8 @@ Frontmatter: `kind`, `slug` (для profile отсутствует), `ref`.
 Создаётся при наличии содержимого; перезаписывается свободно; kind-заметка
 удаляется при пустых секциях или каскадном удалении записи; research —
 не удаляется. Единый контекст: read-only видимость соседних `state/` —
-клиентский режим (`../business-deep-dive-for-business/state/`) и соседние
-слои (`../business-problem-deep-dive*/state/`,
+клиентский режим (`../business-deep-dive-for-business/state/`) и
+нижележащие слои (`../swot-deep-dive/state/`,
+`../hypothesis-map-deep-dive/state/`,
 `../project-deep-dive*/state/<slug>/`); в чужой state не писать.
 Не аккумулировать журнал.

@@ -1,20 +1,39 @@
 ---
 name: business-deep-dive
-description: Углублённая проработка верхнего слоя — профиля бизнеса заказчика в `docs/business/` (profile · offering · channel · competitor · current-metric · material). Самая первая точка входа: складывает полную картину бизнеса заказчика ДО определения проблемы и решения. Принимает материалы клиента (сайт, PDF, презентации, соцсети, интервью), запускает рой агентов для web-research рынка и конкурентов, ведёт аналитика через фазы intake → profile → market → structure → metrics → cohesion, заполняет артефакты через структурированные вопросы (AskUserQuestion), фиксирует контекст в собственной памяти `state/`, не выдумывает факты о бизнесе. Сегментацию клиентов передаёт в `/segment-deep-dive` (слой `docs/ajtbd/`). Использовать всегда, когда речь о docs/business/, онбординге нового заказчика, разборе его материалов, исследовании рынка и конкурентов, фиксации текущих бизнес-метрик (baseline), или подготовке почвы для слоя business-problem. Единственная точка входа в docs/business/ для аналитика.
+description: Углублённая проработка верхнего слоя — профиля бизнеса заказчика и реестра его проблем в `docs/business/` (profile · offering · channel · competitor · current-metric · material · business-problem). Самая первая точка входа: складывает полную картину бизнеса заказчика и формализует, какие проблемы бизнеса решаем (реестр `business-problem` — граница между гарантией доставки по scope и best-effort таргетом метрик). Принимает материалы клиента (сайт, PDF, презентации, соцсети, интервью), запускает рой агентов для web-research рынка и конкурентов, ведёт аналитика через фазы intake → profile → market → structure → metrics → problems → cohesion, заполняет артефакты через структурированные вопросы (AskUserQuestion), фиксирует контекст в собственной памяти `state/`, не выдумывает факты о бизнесе. Сегментацию клиентов передаёт в `/segment-deep-dive` (слой `docs/ajtbd/`); SWOT-факторы и Карту гипотез под реестр проблем — в `/swot-deep-dive` и `/hypothesis-map-deep-dive`. Несёт провенанс восходящего потока (`from-project` у offering/current-metric/business-problem — что проявил дозревший продукт). Использовать всегда, когда речь о docs/business/, онбординге нового заказчика, разборе его материалов, исследовании рынка и конкурентов, фиксации текущих бизнес-метрик (baseline), заведении или границе проблемы бизнеса, или подготовке почвы для SWOT и Карты гипотез. Единственная точка входа в docs/business/ для аналитика.
 ---
 
 # business-deep-dive
 
-Профиль **бизнеса заказчика** — самый верхний слой, до проблемы и
-решения. Канон — `docs/business/README.md`. Источник истины — **материалы
-клиента** и **рой web-research**, не проекция аналитика.
+Профиль **бизнеса заказчика** и реестр его **проблем** — самый верхний
+слой, до решения. Канон — `docs/business/README.md`. Источник истины —
+**материалы клиента** и **рой web-research**, не проекция аналитика.
 
-Слой **нестрогий**: жёсткой методологии нет, цель — полная и честная
-картина бизнеса. Бизнес — **один** (этот слой общий), но он питает
-**многопроблемный** слой `docs/business-problem/` (где `frame` — таблица
-проблем) и мир из **множества проектов** (`docs/projects/<slug>/`):
-факторы SWOT каждой проблемы растут из профиля и конкурентов, baseline
-целевых метрик — из `current-metric.md`.
+Слой **нестрогий по картине бизнесa** (profile · offering · channel ·
+competitor · current-metric · material), но несёт **строгий реестр
+проблем** `business-problem.md` — таблицу проблем бизнеса (одна строка =
+одна проблема + граница «гарантируем доставку по scope / целимся в
+метрики best-effort»). Бизнес — **один** (этот слой общий), он питает
+слои **SWOT** (`docs/swot/`) и **Карты гипотез** (`docs/hypothesis-map/`)
+и мир из **множества проектов** (`docs/projects/<slug>/`): факторы SWOT
+каждой проблемы растут из профиля и конкурентов, baseline целевых метрик —
+из `current-metric.md`, а каждая запись SWOT / Карты гипотез тегируется
+проблемой(ами) реестра через колонку `problem` (M:N).
+
+## Реестр проблем `business-problem` (строгий kind)
+
+`business-problem.md` — **таблица проблем бизнеса**: какую бизнес-боль (в
+деньгах/времени/риске) решаем и — критично — **границу** между тем, что
+гарантируем (доставка проекта по scope), и тем, на что целимся (метрики,
+best-effort, **не гарантия**). Колонки: `slug · name · problem ·
+guarantee · target · out-of-control · scope · served · from-project ·
+status`. `served` — `served` (бизнес уже обслуживает рынок проблемы) либо
+`prospective` (разведка под будущую инициативу). `from-project` —
+провенанс восходящего потока (какой дозревший продукт проявил/подтвердил
+проблему; иначе `—`). На строки реестра ссылаются `swot.*.problem`,
+`hypothesis-map.*.problem` и `projects/<slug>/vision.addresses-problem`
+(M:N). **Метрику никогда не подавать как гарантию** — это нарушение
+юр-рамки.
 
 Сегменты клиента по работам живут в соседнем слое `docs/ajtbd/`
 (скилл `/segment-deep-dive`). Этот скилл их **не заводит** — только
@@ -34,10 +53,10 @@ read-only читает `docs/ajtbd/segment.md`, чтобы привязать
 | `/business-deep-dive --phase <name>` | работать в указанной фазе |
 
 `kind` ∈ {`profile`, `offering`, `channel`, `competitor`,
-`current-metric`, `material`}.
+`current-metric`, `material`, `business-problem`}.
 
 `phase` ∈ {`intake`, `profile`, `market`, `structure`, `metrics`,
-`cohesion`}.
+`problems`, `cohesion`}.
 
 ## Что делать сразу при запуске
 
@@ -50,13 +69,15 @@ read-only читает `docs/ajtbd/segment.md`, чтобы привязать
 
 ## Сводка состояния (без args)
 
-1. Прочитать `profile.md` + 6 табличных файлов + `state/`.
+1. Прочитать `profile.md` + 6 табличных файлов + `business-problem.md` +
+   `state/`.
 2. Определить **текущую фазу**:
    - `material`-таблица пустая → `intake`;
    - `profile` нет/draft → `profile`;
    - `competitor` пустая → `market`;
    - `offering`/`channel` пустые → `structure`;
    - `current-metric` пустая → `metrics`;
+   - `business-problem` пустая → `problems`;
    - всё заполнено, есть draft → `cohesion`.
 3. Вывести карту фаз. Через `AskUserQuestion` предложить следующий шаг.
 
@@ -69,7 +90,8 @@ read-only читает `docs/ajtbd/segment.md`, чтобы привязать
 | `market` | конкуренты и рынок (рой web-research) | `competitor.md` |
 | `structure` | оферы и каналы (сегменты — в `docs/ajtbd/`, `/segment-deep-dive`) | `offering.md`, `channel.md` |
 | `metrics` | текущие KPI — baseline-кандидаты | `current-metric.md` |
-| `cohesion` | целостность профиля, передача в многопроблемный business-problem | все |
+| `problems` | реестр проблем бизнеса + граница гарантии/таргета | `business-problem.md` |
+| `cohesion` | целостность картины, передача в SWOT (`/swot-deep-dive`) и Карту гипотез (`/hypothesis-map-deep-dive`) | все |
 
 Полная карта — `references/phases.md`. Порядок — рекомендация.
 
@@ -88,11 +110,15 @@ read-only читает `docs/ajtbd/segment.md`, чтобы привязать
 
 - **Всегда `AskUserQuestion`**, до 4 вопросов в раунде.
 - **Опции** — для enum (`offering.kind`, `channel.kind`,
-  `competitor.position`, `material.kind`), выбора существующего slug
-  соседа, теста-критерия, promotion кандидата из research.
-- **Other (значения)** — `name`, `description`, `value`,
-  `position`, числа метрик. Факты о бизнесе **не выдумывать** — брать из
-  материалов клиента или подтверждённого research.
+  `competitor.position`, `material.kind`, `business-problem.served`),
+  выбора существующего slug соседа (в т.ч. `from-project` — какой проект
+  проявил запись), теста-критерия, promotion кандидата из research.
+- **Other (значения)** — `name`, `description`, `value`, `position`,
+  числа метрик, текст проблемы/границы (`problem`/`guarantee`/`target`/
+  `out-of-control`/`scope`). Факты о бизнесе **не выдумывать** — брать из
+  материалов клиента или подтверждённого research. **Метрику в `target`
+  никогда не формулировать как гарантию** — только best-effort таргет
+  (детали измеримости — слой `docs/hypothesis-map/`).
 
 ## Web-research через рой агентов
 
@@ -105,12 +131,14 @@ read-only читает `docs/ajtbd/segment.md`, чтобы привязать
 ## Память `state/`
 
 `.claude/skills/business-deep-dive/state/<kind>/<slug>.md` (+
-`state/profile.md` singleton, `state/research/`). Формат — см.
-`references/state-format.md`. Три секции, forward-only, пустые удаляются.
-Единый контекст: read-only видимость соседних `state/` — клиентский режим
-(`../business-deep-dive-for-business/state/`) и соседние слои
-(`../business-problem-deep-dive*/state/`, `../project-deep-dive*/state/<slug>/`
-— проектный по текущему продукту). В чужой state не писать.
+`state/profile.md` singleton, `state/business-problem/<slug>.md`,
+`state/research/`). Формат — см. `references/state-format.md`. Три секции,
+forward-only, пустые удаляются. Единый контекст: read-only видимость
+соседних `state/` — клиентский режим
+(`../business-deep-dive-for-business/state/`) и нижележащие слои
+(`../swot-deep-dive/state/`, `../hypothesis-map-deep-dive/state/`,
+`../project-deep-dive*/state/<slug>/` — проектный по текущему продукту).
+В чужой state не писать.
 
 ## Контракт `draft → stable`
 
@@ -124,7 +152,12 @@ kind подтверждены · anti-patterns не нарушены · тест
 каскад, через `AskUserQuestion` решить по каждому, применить пакетом,
 удалить запись и state-заметку. Связи `offering.for-segment` /
 `channel.serves-segment` указывают на сегменты соседнего слоя
-`docs/ajtbd/` — их этот скилл не трогает.
+`docs/ajtbd/` — их этот скилл не трогает. Удаление **строки
+`business-problem`** затрагивает нижележащие слои: на неё через колонку
+`problem` ссылаются записи `docs/swot/` и `docs/hypothesis-map/`, а через
+`addresses-problem` — `vision` проектов. Семантические висяки после
+удаления ловит `/cross-audit`; предупредить аналитика и предложить
+пройтись по зависимым слоям.
 
 ## Завершение сессии
 
@@ -132,11 +165,10 @@ kind подтверждены · anti-patterns не нарушены · тест
 2. Назвать текущую фазу и следующий шаг.
 3. Через `AskUserQuestion` предложить: продолжить фазу /
    `/segment-deep-dive` (профиль готов → поиск сегментов клиента по
-   работам в `docs/ajtbd/`) / `/cross-audit` (стык с
-   business-problem/project) / передать наработку в
-   `/business-problem-deep-dive` (когда профиль готов) /
-   `/business-problem-audit` (если бизнес-проблемный слой уже наполнен —
-   проверить методологию SWOT/гипотез в пределах каждой проблемы).
+   работам в `docs/ajtbd/`) / `/swot-deep-dive` (реестр проблем готов →
+   SWOT-факторы и ставки под проблемы) / `/hypothesis-map-deep-dive`
+   (цели, метрики, субъекты, гипотезы под проблемы) / `/cross-audit`
+   (стык с ajtbd / swot / hypothesis-map / проектами).
 
 ## Запреты
 
