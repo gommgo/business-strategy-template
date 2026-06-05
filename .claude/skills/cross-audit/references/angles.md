@@ -753,7 +753,7 @@ hint, не error. НЕ флагай проспективные сущности 
 **Применим если:** есть хотя бы один проект; наверху есть записи с
 непустым `from-project` **или** проект на `lifecycle: stable`.
 
-Обратная сторона восходящего потока (reconcile-up, roadmap §6): `from-project`
+Обратная сторона восходящего потока (reconcile-up): `from-project`
 делает контур наблюдаемым — этот угол проверяет провенанс с двух концов
 (ссылка верна, контур замкнут, `market-maturity ↔ served ↔ from-project`
 согласованы). Дополняет `prospective-consistency` (там — `market-maturity ↔
