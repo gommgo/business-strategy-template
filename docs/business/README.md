@@ -11,8 +11,9 @@ web-research**; не наша проекция и не будущее IT-реш�
 честную картину бизнеса. Эта картина питает соседние слои: сегменты по
 работам, граф работ и трения живут в `docs/ajtbd/` (на `ajtbd/segment`
 ссылаются `offering.for-segment` и `channel.serves-segment`); SWOT-факторы
-и baseline метрик питают `docs/business-problem/` (факторы — из профиля и
-конкурентов, baseline целевых метрик — из `current-metric.md`).
+(`docs/swot/`) растут из профиля и конкурентов, baseline целевых метрик
+(`docs/hypothesis-map/`) — из `current-metric.md`. Реестр проблем бизнеса
+(`business-problem.md`) живёт в этом слое.
 
 Чистая бизнес-аналитика. На продукт / интерфейс / код не мапится — это
 вход для `/business-deep-dive` и далее `/business-problem-deep-dive`.
@@ -22,10 +23,10 @@ web-research**; не наша проекция и не будущее IT-реш�
 | файл | сущность | поля |
 |---|---|---|
 | [`profile.md`](profile.md) | singleton: чем бизнес занимается, как зарабатывает | четыре раздела + статус |
-| [`offering.md`](offering.md) | продукт / услуга, которую бизнес продаёт | slug · name · description · kind · for-segment · status |
+| [`offering.md`](offering.md) | продукт / услуга, которую бизнес продаёт | slug · name · description · kind · for-segment · from-project · status |
 | [`channel.md`](channel.md) | как бизнес привлекает / продаёт / доставляет | slug · name · description · kind · serves-segment · status |
 | [`competitor.md`](competitor.md) | игрок на рынке заказчика | slug · name · description · url · position · sources · status |
-| [`current-metric.md`](current-metric.md) | текущий KPI бизнеса — baseline-кандидат | slug · name · description · value · as-of · source · status |
+| [`current-metric.md`](current-metric.md) | текущий KPI бизнеса — baseline-кандидат | slug · name · description · value · as-of · source · from-project · status |
 | [`material.md`](material.md) | источник, из которого сложен профиль | slug · name · kind · uri · status |
 | [`business-problem.md`](business-problem.md) | реестр проблем бизнеса + граница гарантии и таргета | slug · name · problem · guarantee · target · out-of-control · scope · served · from-project · status |
 
@@ -68,10 +69,15 @@ Frontmatter не нужен. Русское слово-перевод строг
 
 Связь с соседними слоями (тоже семантическая, ловит `/cross-audit`):
 
-- `business.profile` / `competitor` → `business-problem.factor` —
+- `business.profile` / `competitor` → `swot.factor` —
   сильные/слабые стороны и тренды/угрозы вырастают из картины бизнеса.
-- `business.current-metric` → `business-problem.metric.current` — текущий
+- `business.current-metric` → `hypothesis-map.metric.current` — текущий
   KPI становится baseline целевой метрики.
+- `business-problem` ← `swot` / `hypothesis-map` /
+  `projects/<slug>/vision.addresses-problem` — реестр проблем, на который
+  ссылаются SWOT, Карта гипотез и продукты (M:N через колонку `problem`).
+- `business.offering` / `current-metric` / `business-problem` ← дозревший
+  продукт (`*.from-project`) — провенанс восходящего потока.
 - `business.offering` / `competitor` ↔ `ajtbd/solution` — собственный офер
   и игроки рынка часто и есть решения, нанятые сегментом на работу
   (`solution.maps-to`).
@@ -81,7 +87,7 @@ Frontmatter не нужен. Русское слово-перевод строг
 ```
 /business-deep-dive             — единая точка входа аналитика.
 /business-deep-dive-for-business — режим «домашнее задание» для клиента.
-/cross-audit                    — сквозная проверка с business-problem / project.
+/cross-audit                    — сквозная проверка с ajtbd / swot / hypothesis-map / project.
 ```
 
 Слой наполняется приёмом материалов клиента и роем web-research. Рой

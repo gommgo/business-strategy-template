@@ -4,7 +4,9 @@
 > бизнес сдвигает рамки. Один проект (папка `docs/projects/<slug>/`) =
 > один продукт = один `vision.md`. Остальные kinds (`user`,
 > `capability`, …) растут из этих трёх вопросов. `addresses-problem`
-> связывает продукт с проблемами слоя `business-problem` (M:N).
+> связывает продукт с проблемами (`business/business-problem`, M:N). Оси
+> `audience` · `intent` · `market-maturity` и жизненный цикл `lifecycle`
+> описывают тип и зрелость инициативы.
 
 ## Критерии vision
 
@@ -22,9 +24,17 @@
 4. **Без жаргона.** Сторонний человек прочитал и понял за минуту, чем
    продукт занимается и для кого.
 5. **Адресует проблему(ы).** `addresses-problem` — массив slug-рефов на
-   строки `frame` слоя `business-problem`, которые продукт закрывает
-   (M:N). Без привязки продукт висит в воздухе; `success` целит в метрики
-   этих проблем.
+   строки `business/business-problem`, которые продукт закрывает (M:N).
+   Без привязки продукт висит в воздухе; `success` целит в метрики этих
+   проблем.
+6. **Оси инициативы.** `audience` (`b2b` \| `b2c` \| `b2b2c` \| `internal`
+   \| `gov`), `intent` (`new-service` \| `improve-service` \|
+   `internal-problem` \| `client-problem`) и `market-maturity`
+   (`prospective` — разведка нового рынка \| `served` — обслуживаемый
+   рынок) описывают тип инициативы. `lifecycle` (`draft` → `accepted` →
+   `build` → `mvp` → `beta-testing` → `stable` → `updating`) — жизненный
+   цикл продукта, **отдельно** от `status` (зрелость записи). Переход в
+   `stable` запускает восходящий поток `project → business`.
 
 ## Что vision НЕ
 
@@ -71,6 +81,9 @@ slug + краткое why.>
 
 ---
 
-**addresses-problem:** `` [`<problem-slug>`] `` — строки `frame` слоя
-`business-problem`, которые закрывает продукт (M:N).
+**audience:** `b2b` \| `b2c` \| `b2b2c` \| `internal` \| `gov`
+**intent:** `new-service` \| `improve-service` \| `internal-problem` \| `client-problem`
+**market-maturity:** `prospective` \| `served`
+**lifecycle:** `draft` \| `accepted` \| `build` \| `mvp` \| `beta-testing` \| `stable` \| `updating`
+**addresses-problem:** `` [`<problem-slug>`] `` — строки `business/business-problem`, которые закрывает продукт (M:N).
 **status:** `draft`

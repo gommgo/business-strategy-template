@@ -17,9 +17,9 @@
 
 | файл | сущность | поля |
 |---|---|---|
-| [`vision.md`](vision.md) | singleton: проблема, успех, non-goals продукта | три раздела + addresses-problem + статус |
-| [`user.md`](user.md) | сегмент пользователей / клиентов | slug · name · description · context · jobs · pains · success · status |
-| [`capability.md`](capability.md) | бизнес-возможность продукта верхнего уровня | slug · name · description · value · user · status |
+| [`vision.md`](vision.md) | singleton: проблема, успех, non-goals продукта | три раздела + оси (audience · intent · market-maturity · lifecycle) + addresses-problem + статус |
+| [`user.md`](user.md) | сегмент пользователей / клиентов | slug · name · description · context · jobs · pains · success · segments · status |
+| [`capability.md`](capability.md) | бизнес-возможность продукта верхнего уровня | slug · name · description · value · user · hypotheses · jobs · status |
 | [`boundary.md`](boundary.md) | явный non-goal с обоснованием | slug · name · description · why · status |
 | [`surface.md`](surface.md) | поверхность, куда продукт «торчит наружу» | slug · name · description · type · lives-at · user · status |
 | [`integration.md`](integration.md) | внешняя система, с которой обмениваемся | slug · name · description · direction · payload · owner · status |
@@ -111,10 +111,15 @@ H1 = имя файла = kind. Frontmatter не нужен — kind опреде
 `domains`/`screens` живут **в той же папке проекта**
 `docs/projects/<slug>/`):
 
-- `vision.addresses-problem` ↔ `business-problem.frame` — какие проблемы
+- `vision.addresses-problem` ↔ `business/business-problem` — какие проблемы
   закрывает продукт (M:N; авторская сторона связи — здесь).
+- `user.segments` → `ajtbd/segment` — пользователь сводится к сегменту(ам)
+  рынка (опц.; авторски здесь).
+- `capability.hypotheses` → `hypothesis-map/hypothesis`, `capability.jobs`
+  → `ajtbd/job` — возможность реализует гипотезу и целит в работу сегмента
+  (опц.; авторски здесь).
 - `user` ↔ `<slug>/interface/who` — каждая роль в `interface` должна
-  семантически соответствовать одной из user проекта.
+  семантически соответствовать одной из user проекта (авторски `who.users`).
 - `capability` ↔ `<slug>/interface/situation` / `<slug>/domains/<область>`
   — возможность реализуется через ситуации (UX) + домены (бэкенд).
 - `surface` ↔ `<slug>/interface/zone` — зона интерфейса принадлежит

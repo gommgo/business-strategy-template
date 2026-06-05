@@ -13,9 +13,9 @@ UX-слой проекта: 7 плоских md-файлов, каждый — �
 
 | файл | сущность | поля |
 |---|---|---|
-| [`who.md`](who.md) | участник системы | slug · name · description · status |
+| [`who.md`](who.md) | участник системы | slug · name · description · users · status |
 | [`stage.md`](stage.md) | этап бизнес-процесса (порядок строк = порядок этапов) | slug · name · description · status |
-| [`situation.md`](situation.md) | ситуация: кто/когда/что/ради чего/с какими данными | slug · name · description · stage · who · when · action · goal · entry-data · exit-data · using-what · ux-substrate · block · status |
+| [`situation.md`](situation.md) | ситуация: кто/когда/что/ради чего/с какими данными | slug · name · description · stage · who · when · action · goal · entry-data · exit-data · using-what · ux-substrate · block · jobs · capabilities · hypotheses · status |
 | [`zone.md`](zone.md) | зона интерфейса | slug · name · description · parent-zone · status |
 | [`block.md`](block.md) | блок (узел навигации + контейнер субстратов) | slug · name · description · zone · who · ux-substrates · entrypoint · transition-to-block · transition-from-zone · status |
 | [`ux-substrate.md`](ux-substrate.md) | UX-субстрат: `type` + `name`, принадлежит ситуации | slug · name · description · type · situation · status |
@@ -105,6 +105,18 @@ H1 = имя файла = kind. Под H1 — одна-две поясняющи�
   взаимно неявно: пишутся только нестандартные/межзонные переходы.
 - **глобальный entrypoint**: `block.entrypoint = true` — стартовый блок
   системы (их может быть несколько, например по разным `who`).
+
+Межслойные сквозные рёбра (семантические, опц., авторски на стороне
+interface; ловит `/cross-audit`):
+
+- **ситуация → работа** (M:N): `situation.jobs` → `ajtbd/job` — какие
+  работы сегмента обслуживает шаг.
+- **ситуация → возможность** (M:N): `situation.capabilities` →
+  `projects/<slug>/capability` — какие возможности продукта шаг реализует.
+- **ситуация → гипотеза** (M:N): `situation.hypotheses` →
+  `hypothesis-map/hypothesis` — какие гипотезы шаг проверяет.
+- **участник → пользователь** (M:N): `who.users` → `projects/<slug>/user`
+  — какому пользователю продукта соответствует роль.
 
 ## Workflow
 

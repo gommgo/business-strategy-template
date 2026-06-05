@@ -40,8 +40,8 @@
 |---|---|---|
 | [`goal.md`](goal.md) | цель карты гипотез (без цифр) | slug · name · description · **problem** · from-bet · deadline · status |
 | [`metric.md`](metric.md) | измеримый параметр цели (best-effort таргет) | slug · name · **problem** · goal · current · target · direction · kind · source · attribution · acceptance · evidence · status |
-| [`subject.md`](subject.md) | субъект, чьё поведение меняем | slug · name · description · **problem** · kind · motivation · status |
-| [`hypothesis.md`](hypothesis.md) | гипотеза (если · то · потому что · тогда) | slug · name · **problem** · if · then · because · so · subject · metric · priority · status |
+| [`subject.md`](subject.md) | субъект, чьё поведение меняем | slug · name · description · **problem** · kind · motivation · segments · users · status |
+| [`hypothesis.md`](hypothesis.md) | гипотеза (если · то · потому что · тогда) | slug · name · **problem** · if · then · because · so · subject · metric · jobs · priority · status |
 | [`task.md`](task.md) | задача проверки гипотезы | slug · name · description · **problem** · hypothesis · status |
 
 `problem` везде — массив slug-рефов на строки `business/business-problem.md`
@@ -110,8 +110,11 @@ H1 = имя файла = kind, без frontmatter. Русское слово-п�
   baseline целевой метрики.
 - `goal` / `metric` → `projects/<slug>/vision.Success` — успех продукта
   целит в ту же метрику.
-- `subject` → `projects/<slug>/user` — субъект влияния ↔ пользователь
-  продукта.
+- `subject.segments` → `ajtbd/segment` — субъект влияния вырастает из
+  сегмента рынка (обяз.).
+- `subject.users` → `projects/<slug>/user` — субъект влияния ↔ пользователь
+  продукта (опц.).
+- `hypothesis.jobs` → `ajtbd/job` — гипотеза целит в работу(ы) сегмента (опц.).
 - `problem` → `business/business-problem.md` — каждая запись питает одну+
   строку реестра проблем; строка без единой `goal` — повисла.
 

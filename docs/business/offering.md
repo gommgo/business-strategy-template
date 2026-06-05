@@ -7,6 +7,9 @@
 > `for-segment` ссылается на `slug` сегмента в слое `docs/ajtbd/segment.md`
 > (межслойная семантическая связь). Не путать с возможностью продукта
 > (`project.capability`) — та про то, что умеет наше будущее IT-решение.
+>
+> `from-project` — провенанс восходящего потока: офер, родившийся из
+> дозревшего продукта (slug | `—`).
 
 ## Критерии offering
 
@@ -18,6 +21,8 @@
    не «всё, что мы делаем» в одной.
 4. **`kind` один.** Тип офера: `product` \| `service` \| `subscription`
    \| `marketplace` \| `other`.
+5. **Провенанс (`from-project`).** Если офер родился из дозревшего
+   продукта — `from-project` несёт его slug; иначе `—`.
 
 ## Что offering НЕ
 
@@ -34,10 +39,10 @@
 - «Годовая программа чек-апов» → ✅ (`subscription`)
 - «Удобная регистратура» → ❌ (это процесс/канал, не офер)
 
-| slug | name | description | kind | for-segment | status |
-|---|---|---|---|---|---|
-| `<slug>` | <короткое имя> | <одно предложение, что это> | `product` \| `service` \| `subscription` \| `marketplace` \| `other` | `` [`segment-1`, …] `` | `draft` |
+| slug | name | description | kind | for-segment | from-project | status |
+|---|---|---|---|---|---|---|
+| `<slug>` | <короткое имя> | <одно предложение, что это> | `product` \| `service` \| `subscription` \| `marketplace` \| `other` | `` [`segment-1`, …] `` | `<project-slug>` \| `—` | `draft` |
 
 > Заполняется под заказчика. Пример: `paid-visit` · «Платный приём» ·
 > «Очный приём профильного специалиста за деньги» · `service` ·
-> `` [`paid-patient`] `` · `draft`.
+> `` [`paid-patient`] `` · `—` · `draft`.

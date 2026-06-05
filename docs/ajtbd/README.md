@@ -49,7 +49,7 @@ per-project. Питает обоих соседей: вверх — `business-pr
 
 | файл | сущность | поля |
 |---|---|---|
-| [`segment.md`](segment.md) | сегмент по работам | slug · name · description · kind · who-context · core-jobs · big-job · success-criteria · score · sizing · status |
+| [`segment.md`](segment.md) | сегмент по работам | slug · name · description · kind · who-context · core-jobs · big-job · success-criteria · score · sizing · served · from-project · status |
 | [`job.md`](job.md) | работа (узел графа) | slug · name · when · want · success-criteria · so-that · level · type · segment · parent-job · prev-jobs · frequency · importance · status |
 | [`job-graph.md`](job-graph.md) | сборка дерева по сегменту (мост к продукту) | slug · name · segment · target-job · cpr · job-types · value-mechanics · status |
 | [`solution.md`](solution.md) | что «нанято» на работу | slug · name · description · hired-for · by-segment · kind · satisfaction · price · price-value-fit · maps-to · status |
@@ -57,7 +57,7 @@ per-project. Питает обоих соседей: вверх — `business-pr
 
 ## Принципы оформления
 
-Зеркалит канон `docs/business/` и `docs/business-problem/`. Один файл —
+Зеркалит канон `docs/business/`. Один файл —
 одна таблица сущностей одного типа. H1 = имя файла = kind, без
 frontmatter. Русское слово-перевод строгого термина сопровождается `slug`
 в скобках при каждом вхождении: «сегмент (segment)», «работа (job)»,
@@ -93,7 +93,7 @@ frontmatter. Русское слово-перевод строгого терм�
 ## Связи и методологические инварианты (семантические)
 
 Связи **не валидируются slug-целостностью** — они семантические, как в
-`business-problem` и `project`. Методологические инварианты ловит **рой
+`swot`/`hypothesis-map` и `project`. Методологические инварианты ловит **рой
 агентов** `/ajtbd-audit` — смыслом, не grep:
 
 - **Сегмент держится на бандле.** У `segment` ровно одна `big-job` и ≥1
@@ -116,15 +116,18 @@ frontmatter. Русское слово-перевод строгого терм�
 
 - `segment` ↔ `projects/<slug>/user` — сегмент рынка ↔ пользователь
   продукта (разные сущности: сегмент — клиент/рынок, пользователь —
-  адресат нашего решения).
+  адресат нашего решения; авторски `user.segments`).
 - `job` (`big`/`core`) → `projects/<slug>/vision.Success` — успех
   продукта целит в Big/Core Job сегмента.
-- `segment-problem` → `business-problem/frame` (доказательство проблемы
+- `segment-problem` → `business/business-problem` (доказательство проблемы
   бизнеса; опц. явная ссылка `feeds-problem`) и → `projects/<slug>/vision.Problem`.
-- `segment` → `business-problem/subject` — субъект влияния вырастает из
-  сегмента.
-- `segment.score` / `segment-problem` → `business-problem/factor` —
+- `segment` ↔ `hypothesis-map/subject` — субъект влияния вырастает из
+  сегмента (авторски `subject.segments`).
+- `segment.score` / `segment-problem` → `swot/factor` —
   сильное трение при низкой удовлетворённости питает SWOT-фактор.
+- `job` ← `hypothesis-map/hypothesis.jobs`, `projects/<slug>/capability.jobs`,
+  `interface/situation.jobs` — работа сегмента, в которую целят гипотеза,
+  возможность и ситуация (авторски снизу-вверх).
 - `solution` ↔ `business/competitor` / `business/offering` — нанятое
   решение часто и есть конкурент или собственный офер бизнеса (`maps-to`).
 - `job-graph.value-mechanics` → `projects/<slug>/capability` — механика
@@ -164,7 +167,7 @@ capability). `jtbd-interview` запускается из любой фазы п
 - ❌ **Сегмент без Big Job или с несколькими.** Ровно одна Big Job на
   сегмент.
 - ❌ Путать `segment-problem` (трение **клиента** с решением) с
-  `business-problem/frame` (проблема **бизнеса**). Первое питает второе.
+  `business/business-problem` (проблема **бизнеса**). Первое питает второе.
 - ❌ Путать `ajtbd/segment` (клиент/рынок) с `projects/<slug>/user`
   (пользователь нашего решения) — соседние слои.
 - ❌ Граф работ без разметки типов и без CPR.

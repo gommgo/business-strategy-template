@@ -31,6 +31,12 @@
 > субстраты (ux-substrate), у которых `situation` = её `slug`, и ровно те
 > блоки (block), в `ux-substrates` которых есть хотя бы один из этих
 > субстратов (ux-substrate).
+>
+> **Сквозные рёбра (опц., авторски на ситуации):** `jobs` — работы сегмента
+> (`ajtbd/job`), которые шаг обслуживает; `capabilities` — возможности
+> продукта (`projects/<slug>/capability`), которые шаг реализует;
+> `hypotheses` — гипотезы (`hypothesis-map/hypothesis`), которые шаг
+> проверяет. Прочерк допустим.
 
 ## Критерии situation
 
@@ -54,6 +60,10 @@
    (action) — контекст сужает выбор; способ (action) ↔ данные (data-items)
    — верно ли выделены объекты; цель (goal) предопределяет набор условий
    старта (when).
+6. **Сквозные рёбра (опц.).** `jobs` (`ajtbd/job`), `capabilities`
+   (`projects/<slug>/capability`), `hypotheses` (`hypothesis-map/hypothesis`)
+   — во что шаг вплетён по потоку ценности; авторски на ситуации, прочерк
+   допустим.
 
 ## Что situation НЕ
 
@@ -88,9 +98,9 @@
 - «Авторизуется, **чтобы продолжить работу**» — цель (goal) подменена
   предусловием ❌
 
-| slug | name | description | stage | who | when | action | goal | entry-data | exit-data | using-what | ux-substrate | block | status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `<slug>` | <имя> | <что за ситуация> | `<stage>` | `<who>` | <когда роль входит> | <что делает> | <ради чего> | [`<data-items>`, `<data-items>`] \| — | [`<data-items>`] \| — | <бизнес-средство> | [`<ux-substrate>`, `<ux-substrate>`] | [`<block>`] \| — | `draft` \| `stable` |
+| slug | name | description | stage | who | when | action | goal | entry-data | exit-data | using-what | ux-substrate | block | jobs | capabilities | hypotheses | status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `<slug>` | <имя> | <что за ситуация> | `<stage>` | `<who>` | <когда роль входит> | <что делает> | <ради чего> | [`<data-items>`, `<data-items>`] \| — | [`<data-items>`] \| — | <бизнес-средство> | [`<ux-substrate>`, `<ux-substrate>`] | [`<block>`] \| — | [`<job>`] \| — | [`<capability>`] \| — | [`<hypothesis>`] \| — | `draft` \| `stable` |
 
 > Заполняется под проект. Пример: `submit-referral` · «Подача
 > направления» · «Врач отправляет направление в партнёрскую клинику» ·
@@ -98,4 +108,4 @@
 > направление» · «передать пациента на исследование» ·
 > `[\`policy-number\`, \`birth-date\`]` · `[\`referral\`]` · «бланк
 > направления» · `[\`referral-form\`, \`referral-submit\`]` ·
-> `[\`referral-editor\`]` · `draft`.
+> `[\`referral-editor\`]` · `—` · `[\`send-referral\`]` · `—` · `draft`.
