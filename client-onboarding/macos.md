@@ -81,7 +81,7 @@ git clone <ВАШ-АДРЕС-РЕПОЗИТОРИЯ> docs
 > | Команда | О чём поговорим |
 > |---|---|
 > | `/business-deep-dive-for-business` | про ваш бизнес в целом |
-> | `/business-problem-deep-dive-for-business` | какие задачи решаем, по какому числу поймём успех |
+> | `/entrypoint-for-business` | какие задачи решаем, по какому числу поймём успех |
 > | `/project-deep-dive-for-business` | про конкретный продукт |
 
 ---

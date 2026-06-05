@@ -55,7 +55,7 @@ Frontmatter: `kind`, `slug` (для profile отсутствует), `ref`.
 ## Единый контекст (read-only)
 
 Чтобы картина была единой, скилл read-only подтягивает соседние `state/`:
-другие клиентские слои (`../business-problem-deep-dive-for-business/state/`,
+другие клиентские слои (`../entrypoint-for-business/state/`,
 `../project-deep-dive-for-business/state/<slug>/`) и аналитические слои
 (`../business-deep-dive/state/`, `../swot-deep-dive/state/`,
 `../hypothesis-map-deep-dive/state/`,

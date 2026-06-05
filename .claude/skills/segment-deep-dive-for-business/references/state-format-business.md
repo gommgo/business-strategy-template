@@ -61,7 +61,7 @@ Frontmatter: `kind` (всегда `segment`), `slug`, `ref`.
 
 Чтобы картина была единой, скилл read-only подтягивает соседние `state/`:
 другие клиентские слои (`../business-deep-dive-for-business/state/`,
-`../business-problem-deep-dive-for-business/state/`,
+`../entrypoint-for-business/state/`,
 `../job-graph-deep-dive-for-business/state/`,
 `../project-deep-dive-for-business/state/<slug>/`) и аналитические слои
 (аналитический брат `../segment-deep-dive/state/`,

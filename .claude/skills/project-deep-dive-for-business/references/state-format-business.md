@@ -134,7 +134,7 @@ ref: docs/projects/<project-slug>/user.md#nurse-partner
 аналитика того же продукта (`../project-deep-dive/state/<project-slug>/`)
 и верхнеуровневые слои — клиентский и аналитический режим
 (`../business-deep-dive-for-business/state/`, `../business-deep-dive/state/`,
-`../business-problem-deep-dive-for-business/state/`,
+`../entrypoint-for-business/state/`,
 `../swot-deep-dive/state/`, `../hypothesis-map-deep-dive/state/`).
 Проектный слой — только по
 текущему продукту (`<project-slug>`); чужие продукты не читаются (изоляция

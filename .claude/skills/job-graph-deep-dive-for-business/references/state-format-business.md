@@ -73,7 +73,7 @@ Frontmatter: `kind`, `slug`, `segment` (к какой группе относи�
 - соседний клиентский слой групп клиентов
   (`../segment-deep-dive-for-business/state/`);
 - другие клиентские слои (`../business-deep-dive-for-business/state/`,
-  `../business-problem-deep-dive-for-business/state/`,
+  `../entrypoint-for-business/state/`,
   `../project-deep-dive-for-business/state/<slug>/`);
 - аналитические слои той же группы и соседей
   (`../job-graph-deep-dive/state/`, `../segment-deep-dive/state/`,
