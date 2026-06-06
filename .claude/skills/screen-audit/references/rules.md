@@ -18,8 +18,7 @@
 «Папка существует» — это `…/screens/<kind-folder>/<slug>/index.md`
 читается без ошибок (`flows`, `screens`, `blocks`, `shells`).
 
-`docs/projects/example/` — образцовый проект, в аудите не участвует.
-`docs/projects/_canon/screens/` — канон формы; из него читаются только
+`docs/projects/_template/screens/` — канон формы; из него читаются только
 критерии и инвентарь, не данные.
 
 ---
@@ -513,7 +512,7 @@ warning не превращается в правку.
 - **severity**: `hint`.
 - **scope**: все 4 kind, узлы дерева.
 - **проверка**: имя `ui:<Foo>` не входит в список «топ-уровень
-  компонентов» в каноне `docs/projects/_canon/screens/README.md`
+  компонентов» в каноне `docs/projects/_template/screens/README.md`
   (выводимое требование, пока `@sftbmb/ui/manifest.json` не
   опубликован). Прорывной hint, не error — это, скорее всего, ui-lib
   gap.

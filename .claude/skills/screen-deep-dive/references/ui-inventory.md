@@ -12,7 +12,7 @@
 1. **Соседний репо** `ui-lib/` (рядом с этим проектом):
    `../ui-lib/manifest.json`. Если есть — читать его.
 2. **Fallback** — раздел «Топ-уровень компонентов» в каноне
-   `docs/projects/_canon/screens/README.md`. Это «выводимые
+   `docs/projects/_template/screens/README.md`. Это «выводимые
    требования», не окончательный реестр; покрывает основные категории,
    но без детального списка props.
 
@@ -51,7 +51,7 @@
 
 ## Категории (для группировки в опциях AskUserQuestion)
 
-Из канона `docs/projects/_canon/screens/README.md`:
+Из канона `docs/projects/_template/screens/README.md`:
 
 | категория | компоненты (выводимый минимум) |
 |---|---|

@@ -7,7 +7,7 @@ description: "Углублённая проработка аналитическ
 
 Углублённая проработка артефактов экранов **одного проекта** в
 `docs/projects/<project-slug>/screens/`. Канон формы —
-`docs/projects/_canon/screens/README.md` и README'ы по kind в его
+`docs/projects/_template/screens/README.md` и README'ы по kind в его
 подпапках. Скилл ведёт сеанс через структурированные вопросы, фиксирует
 контекст в своей ветке единого дерева state оркестратора
 (`../entrypoint/state/projects/<project-slug>/screens/`), не выдумывает
@@ -30,7 +30,7 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 | вызов | проект |
 |---|---|
 | `/screen-deep-dive <project-slug> …` | взять `<project-slug>` |
-| `/screen-deep-dive …` (без slug) | `AskUserQuestion`-пикер по папкам `docs/projects/` (исключая `_canon`) |
+| `/screen-deep-dive …` (без slug) | `AskUserQuestion`-пикер по папкам `docs/projects/` (исключая `_template`) |
 
 Поскольку точки входа допускают `<kind>:<slug>` (например,
 `screen-deep-dive my-app:login`), `<project-slug>` отделяется от
@@ -38,8 +38,8 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 `docs/projects/`:
 
 1. Если первый аргумент совпадает с именем подпапки `docs/projects/`
-   (кроме `_canon`) — это `<project-slug>`; остаток args — точка входа.
-2. Иначе — пикер по подпапкам `docs/projects/` (исключить `_canon`).
+   (кроме `_template`) — это `<project-slug>`; остаток args — точка входа.
+2. Иначе — пикер по подпапкам `docs/projects/` (исключить `_template`).
    Если проектов нет — сказать «сначала заведи проект через
    `/project-deep-dive`», выйти.
 3. Все чтения/записи скоупятся в выбранный проект:
@@ -70,7 +70,7 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 ## Что делать сразу при запуске
 
 1. Определить `<project-slug>` (см. «Выбор проекта»).
-2. Прочитать `docs/projects/_canon/screens/README.md` и README'ы по
+2. Прочитать `docs/projects/_template/screens/README.md` и README'ы по
    4 kind в его подпапках — освежить канон композиции, layout-язык,
    имена `ui:*`/`block:*`/`data:*`, anti-patterns.
 3. Прочитать `docs/projects/<project-slug>/vision.md` и продуктовые
@@ -211,7 +211,7 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
   опубликован). Скилл ищет его по локальному пути установки пакета или
   в соседнем репо `ui-lib` (если доступен).
 - Пока manifest'а нет — fallback на раздел «Топ-уровень компонентов»
-  в `docs/projects/_canon/screens/README.md`. Это «выводимые
+  в `docs/projects/_template/screens/README.md`. Это «выводимые
   требования», не окончательный реестр.
 - В режиме углубления дерева скилл предлагает `ui:Component` как
   опции из инвентаря (по релевантной категории: layout-примитивы для
@@ -239,7 +239,7 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
    - `block.used-by-screens` ↔ ссылки `block:<slug>` в screens;
    - `screen.blocks` ↔ блоки в `slot-fills`/`states`.
 4. Тест-критерий из README соответствующего kind (канон
-   `docs/projects/_canon/screens/<kind>/README.md`) явно подтверждён
+   `docs/projects/_template/screens/<kind>/README.md`) явно подтверждён
    аналитиком в этой сессии.
 5. В `../entrypoint/state/projects/<project-slug>/screens/<kind>/<slug>.md`
    нет `**blocker**`-вопросов.

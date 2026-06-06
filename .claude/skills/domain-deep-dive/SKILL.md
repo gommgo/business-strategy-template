@@ -11,14 +11,14 @@ description: "Углублённая интерактивная проработ
 
 Домены живут **внутри проекта**: данные — в
 `docs/projects/<project-slug>/domains/<context>/`, форма-канон и шаблоны —
-один раз в `docs/projects/_canon/domains/`. Сессия всегда идёт в контексте
+один раз в `docs/projects/_template/domains/`. Сессия всегда идёт в контексте
 **одного проекта**: скилл принимает `<project-slug>` первым аргументом, без
-него — предлагает пикер по папкам `docs/projects/` (кроме `_canon`). Все
+него — предлагает пикер по папкам `docs/projects/` (кроме `_template`). Все
 чтения и записи скоупятся в `domains/` выбранного проекта.
 
 Это **source of truth** проектирования (design-time): артефакты — чистая
 язык-агностичная аналитика домена. Канон артефактов и обязательных секций —
-`docs/projects/_canon/domains/README.md`; скилл его не дублирует, а исполняет.
+`docs/projects/_template/domains/README.md`; скилл его не дублирует, а исполняет.
 Маппинг DDD → конкретный код (Go-раскладка `internal/domain/<ctx>/`) живёт
 не здесь, а в соседнем backend-репо (`<org>/backend`, форк
 `go-backend-template`), его `docs/reference/domain-mapping.md` — он
@@ -62,12 +62,12 @@ description: "Углублённая интерактивная проработ
 - `<project-slug>` передан первым аргументом
   (`/domain-deep-dive <slug> …`) — берём его.
 - Аргумент отсутствует — `AskUserQuestion`-пикер по подкаталогам
-  `docs/projects/` **кроме `_canon`** (это образец формы, не проект). Одна
+  `docs/projects/` **кроме `_template`** (это образец формы, не проект). Одна
   опция на проект + Other. Без выбора проекта сессия не идёт.
 
 Дальше в этом файле `<P>` = `docs/projects/<project-slug>` для краткости:
 данные доменов — `<P>/domains/<ctx>/`, форма-канон и шаблоны — один раз в
-`docs/projects/_canon/domains/`.
+`docs/projects/_template/domains/`.
 
 ## Точки входа
 
@@ -88,9 +88,9 @@ aggregate-файле и kind-ом отдельно не заводится).
 ## Что делать сразу при запуске
 
 1. Определить `<project-slug>` (см. § Выбор проекта).
-2. Прочитать `docs/projects/_canon/domains/README.md` — освежить канон
+2. Прочитать `docs/projects/_template/domains/README.md` — освежить канон
    (kinds, обязательные H2, anti-patterns).
-3. Прочитать `docs/projects/_canon/project/README.md` +
+3. Прочитать `docs/projects/_template/project/README.md` +
    `references/project-context.md` — освежить связи с продуктовым слоем
    **того же проекта** (domain ↔ capability, adapter ↔ integration).
 4. Если args (после slug) пустые — сделать сводку (см. ниже) и через
@@ -105,7 +105,7 @@ aggregate-файле и kind-ом отдельно не заводится).
    `<ctx>/use-cases/*.md`, `<ctx>/policies/*.md`; для каждого артефакта
    считать `status`, `kind` и **сколько обязательных H2-секций заполнено**
    (см. `references/field-checklists.md`).
-3. Сверить артефакты с канон-формой (`docs/projects/_canon/domains/README.md`
+3. Сверить артефакты с канон-формой (`docs/projects/_template/domains/README.md`
    + `references/field-checklists.md`) вручную: frontmatter, обязательные H2,
    ref-целостность. Если всё `stable` и без дыр — выйти: «спроектировано,
    делать нечего». Committed-валидатора в этом репо нет — проверка ручная,
@@ -136,7 +136,7 @@ aggregate-файле и kind-ом отдельно не заводится).
 Детали — `references/workflow-patterns.md`. Краткая семантика:
 
 - **A. Новая сущность.** Args = `<ctx>:<kind>` или `<ctx>:<kind>:<новый-Name>`.
-  Скилл копирует шаблон из `docs/projects/_canon/domains/_templates/<kind>.md`
+  Скилл копирует шаблон из `docs/projects/_template/domains/_templates/<kind>.md`
   в нужный путь под `<P>/domains/`, заполняет frontmatter, заводит минимум
   (имя + одна фраза описания) и погружается в режим C.
 - **B. Сырьё.** Args = свободный текст / приложение (транскрипт интервью,
@@ -176,7 +176,7 @@ aggregate-файле и kind-ом отдельно не заводится).
   (лимит инструмента).
 - **Опции** только для:
   - anti-patterns из секции **Anti-patterns** в
-    `docs/projects/_canon/domains/README.md` и из шаблонов («Это I/O-метод
+    `docs/projects/_template/domains/README.md` и из шаблонов («Это I/O-метод
     агрегата вместо use-case?» / «Spanning invariant между двумя
     aggregate'ами?»);
   - enum-поля (`kind`, `Visibility`, `Mutable`, `Channel`, `Source`,
@@ -223,7 +223,7 @@ aggregate-файле и kind-ом отдельно не заводится).
 Ветка **коммитится** вместе с деревом оркестратора — это общая проектная
 память между сессиями и архитекторами. Forward-only (никакого
 «было/стало») держит `git log` чистым. Это **не** часть канона
-`docs/projects/_canon/domains/` (зафиксированные решения уходят в
+`docs/projects/_template/domains/` (зафиксированные решения уходят в
 `<P>/domains/`, не открытые вопросы), но это часть проектного знания о
 домене — клон репо несёт с собой все висящие `**blocker**`-вопросы, на
 которые тимейт может ответить.
@@ -278,7 +278,7 @@ AskUserQuestion со смыслом «эту запись надо пересм�
 методы) на ещё не существующий `<ctx>.<Name>`:
 
 1. В соответствующем пути (по kind, под `<P>/domains/`) — новая запись
-   через шаблон из `docs/projects/_canon/domains/_templates/<kind>.md`:
+   через шаблон из `docs/projects/_template/domains/_templates/<kind>.md`:
    `id`, `kind`, `context`, `name` заполнены; `status: draft`; обязательные
    H2-заголовки оставлены пустыми или с заглушкой `_TBD_`.
 2. В `../entrypoint/state/projects/<project-slug>/domains/<ctx>/<kind>/<Name>.md`
@@ -347,6 +347,6 @@ AskUserQuestion со смыслом «эту запись надо пересм�
   теряется при `/clear`.
 - Не смешивать проекты: чтения, записи, сверка формы и state — строго в
   скоупе выбранного `<project-slug>`.
-- Не дублировать здесь правила `docs/projects/_canon/domains/README.md` и
+- Не дублировать здесь правила `docs/projects/_template/domains/README.md` и
   шаблонов — они source of truth канона, скилл их **исполняет**, не
   пересказывает.

@@ -7,7 +7,7 @@ description: "Аудит консистентности аналитически
 
 Аудит консистентности 4 артефактных kind экранов **одного проекта** в
 `docs/projects/<project-slug>/screens/` (flow · screen · block ·
-shell). Канон формы — `docs/projects/_canon/screens/README.md` и
+shell). Канон формы — `docs/projects/_template/screens/README.md` и
 README'ы по 4 kind в его подпапках. Аудит **читает и сообщает**,
 ничего не правит: каскадные правки идут через `screen-deep-dive`.
 
@@ -19,11 +19,11 @@ README'ы по 4 kind в его подпапках. Аудит **читает и
 | вызов | проект |
 |---|---|
 | `/screen-audit <project-slug> …` | взять `<project-slug>` |
-| `/screen-audit …` (без slug) | `AskUserQuestion`-пикер по папкам `docs/projects/` (исключая `_canon`) |
+| `/screen-audit …` (без slug) | `AskUserQuestion`-пикер по папкам `docs/projects/` (исключая `_template`) |
 
 1. Если первый аргумент совпадает с именем подпапки `docs/projects/`
-   (кроме `_canon`) — это `<project-slug>`; остаток args — scope.
-2. Иначе — пикер по подпапкам `docs/projects/` (исключить `_canon`).
+   (кроме `_template`) — это `<project-slug>`; остаток args — scope.
+2. Иначе — пикер по подпапкам `docs/projects/` (исключить `_template`).
    Если проектов нет — сказать «нечего аудитить», выйти.
 3. Все чтения скоупятся в `docs/projects/<project-slug>/screens/`,
    `docs/projects/<project-slug>/interface/` (зеркала) и
@@ -50,17 +50,15 @@ README'ы по 4 kind в его подпапках. Аудит **читает и
 - Зеркала interface того же проекта:
   `docs/projects/<project-slug>/interface/{who,situation,block,ux-substrate,data-items}.md`.
 - Контракт ui-lib: «топ-уровень компонентов» в каноне
-  `docs/projects/_canon/screens/README.md` (пока
+  `docs/projects/_template/screens/README.md` (пока
   `@sftbmb/ui/manifest.json` не опубликован).
 
 **Чего аудит не читает**:
 
 - Другие проекты `docs/projects/<other-slug>/` — аудит скоупится в
   один проект; межпроектные несостыковки ловит `/cross-audit`.
-- `docs/projects/_canon/screens/` — это канон формы, не рабочая зона.
+- `docs/projects/_template/screens/` — это канон формы, не рабочая зона.
   Из него читаются только критерии/anti-patterns/инвентарь, не данные.
-- `docs/projects/example/` — образцовый проект, не рабочая зона.
-  Игнорировать.
 - Исходники библиотеки — это слой кода, не предмет screens.
 - `state/<project-slug>/<kind>/<slug>.md` скилла `screen-deep-dive` —
   рабочая память другого скилла; аудит её не трогает.
@@ -68,7 +66,7 @@ README'ы по 4 kind в его подпапках. Аудит **читает и
 ## Что делать при запуске
 
 1. Определить `<project-slug>` (см. «Выбор проекта»).
-2. Прочитать канон `docs/projects/_canon/screens/README.md` и 4
+2. Прочитать канон `docs/projects/_template/screens/README.md` и 4
    kind-README'я в его подпапках — освежить канон композиции,
    layout-язык, anti-patterns, форму frontmatter.
 3. Прочитать `references/rules.md` — реестр проверок с тяжестью.
@@ -207,9 +205,7 @@ totals: { error: X, warning: Y, hint: Z }
   slot/fill валиден или нет. Ложных срабатываний не бывает, подавлять нечего.
 - **Не запускать `screen-deep-dive`** автоматически из аудита. Это
   делает аналитик руками по выводу аудита.
-- **Не аудитить `docs/projects/example/`** — это образцовый проект, не
-  рабочая зона.
-- **Не аудитить `docs/projects/_canon/screens/`** — это канон формы;
+- **Не аудитить `docs/projects/_template/screens/`** — это канон формы;
   из него читаются только критерии и инвентарь, не данные.
 - **Не аудитить `state/<project-slug>/<kind>/<slug>.md`** — рабочая
   память `screen-deep-dive`, не предмет screens-канона.

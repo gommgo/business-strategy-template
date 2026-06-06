@@ -84,7 +84,7 @@ baseline целевой метрики (metric.current) должен брать�
 ## addresses-problem-bizproblem
 
 **Source:** `docs/projects/*/vision.md` (поле `addresses-problem` каждого
-проекта, кроме `_canon`).
+проекта, кроме `_template`).
 **Destination:** `docs/business/business-problem.md` (таблица проблем).
 **Скоуп:** один раз, **над всеми проектами** (M:N, обе стороны).
 **Применим если:** есть хотя бы один проект и непустой `business/business-problem.md`.
@@ -102,7 +102,7 @@ baseline целевой метрики (metric.current) должен брать�
 ```
 Это единственный M:N-угол через много проектов. Прочитай
 addresses-problem у КАЖДОГО docs/projects/<slug>/vision.md (исключи
-_canon) и строки docs/business/business-problem.md.
+_template) и строки docs/business/business-problem.md.
 
 Связь slug-явная по форме, но проверяй СМЫСЛОВО, а не строкой: ref
 проекта должен указывать на реально существующую проблему business-problem.
@@ -911,7 +911,7 @@ situation.hypotheses — авторское ребро interface → hypothesis-
    восходящего потока, согласованность market-maturity ↔ served ↔ from-project)
 
 **По каждому проекту** (для каждого `<slug>` из `docs/projects/`, кроме
-`_canon`; раскрывается в пары `проект × lens`):
+`_template`; раскрывается в пары `проект × lens`):
 
 10. `goal-vision` (проблема → продукт; скоуп к проблемам проекта)
 11. `subject-user` (проблема → продукт; скоуп к проблемам проекта)

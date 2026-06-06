@@ -7,7 +7,7 @@ description: "Углублённая проработка аналитическ
 
 Углублённая проработка артефактов интерфейса **одного проекта** в
 `docs/projects/<project-slug>/interface/`. Канон формы —
-`docs/projects/_canon/interface/README.md`. Скилл ведёт сеанс через
+`docs/projects/_template/interface/README.md`. Скилл ведёт сеанс через
 структурированные вопросы, фиксирует контекст в своей ветке единого
 дерева state оркестратора
 (`../entrypoint/state/projects/<project-slug>/interface/`), не выдумывает
@@ -29,14 +29,14 @@ description: "Углублённая проработка аналитическ
 | вызов | проект |
 |---|---|
 | `/interface-deep-dive <project-slug> …` | взять `<project-slug>` |
-| `/interface-deep-dive …` (без slug) | `AskUserQuestion`-пикер по папкам `docs/projects/` (исключая `_canon`) |
+| `/interface-deep-dive …` (без slug) | `AskUserQuestion`-пикер по папкам `docs/projects/` (исключая `_template`) |
 
 Алгоритм определения проекта при запуске:
 
 1. Если первый аргумент совпадает с именем подпапки `docs/projects/`
-   (кроме `_canon`) — это `<project-slug>`; остаток args — точка входа.
+   (кроме `_template`) — это `<project-slug>`; остаток args — точка входа.
 2. Иначе — собрать список подпапок `docs/projects/` (исключить
-   `_canon`) и через `AskUserQuestion` спросить «Какой проект?». Если
+   `_template`) и через `AskUserQuestion` спросить «Какой проект?». Если
    проектов нет — сказать «сначала заведи проект через
    `/project-deep-dive`», выйти.
 3. Все дальнейшие чтения/записи скоупятся в выбранный проект:
@@ -60,7 +60,7 @@ description: "Углублённая проработка аналитическ
 ## Что делать сразу при запуске
 
 1. Определить `<project-slug>` (см. «Выбор проекта»).
-2. Прочитать `docs/projects/_canon/interface/README.md` — освежить
+2. Прочитать `docs/projects/_template/interface/README.md` — освежить
    канон формы.
 3. Прочитать `docs/projects/<project-slug>/vision.md` и продуктовые
    файлы (если есть) + `references/project-context.md` — освежить связи

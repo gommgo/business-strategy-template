@@ -2,14 +2,14 @@
 
 DDD-first документация бизнес-домена бэкенда — опциональный слой проекта. Артефакты — **первичный source of truth** проектирования; код вторичен и генерируется/пишется по ним.
 
-Этот файл — **канон формы** (`docs/projects/_canon/domains/`); шаблоны (`_templates/`) и форма-образец `_shared/README.md` живут здесь, один раз на все проекты. Данные доменов каждого проекта живут в его папке `docs/projects/<project-slug>/domains/`.
+Этот файл — **канон формы** (`docs/projects/_template/domains/`); шаблоны (`_templates/`) и форма-образец `_shared/README.md` живут здесь, один раз на все проекты. Данные доменов каждого проекта живут в его папке `docs/projects/<project-slug>/domains/`.
 
 ## Структура
 
-Канон формы живёт один раз в `docs/projects/_canon/domains/`:
+Канон формы живёт один раз в `docs/projects/_template/domains/`:
 
 ```
-docs/projects/_canon/domains/
+docs/projects/_template/domains/
 ├── README.md                  ← этот файл
 ├── _templates/                ← пустые шаблоны для копирования
 │   ├── aggregate.md
@@ -91,9 +91,9 @@ Stateless / aggregate-of-one / пустые consumers — пишутся явн�
 ## Workflow
 
 ```
-0. Шаблоны берём из канона docs/projects/_canon/domains/_templates/,
+0. Шаблоны берём из канона docs/projects/_template/domains/_templates/,
    копируем в папку доменов проекта (PROJECT=docs/projects/<project-slug>,
-   TPL=docs/projects/_canon/domains/_templates).
+   TPL=docs/projects/_template/domains/_templates).
 
 1. Скопировать шаблоны:
      mkdir -p $PROJECT/domains/<ctx>/{events,use-cases,policies}

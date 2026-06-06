@@ -48,7 +48,7 @@ Desktop и CLI — один движок и общий конфиг (CLAUDE.md, 
 ## Граница с getting-started
 
 [`../docs/getting-started.md`](../docs/getting-started.md) — путь
-**аналитика** (форк → deep-dive-скиллы → `/de-template`). Этот комплект —
+**аналитика** (форк → deep-dive-скиллы → `/cross-audit`). Этот комплект —
 про **заказчика**: только как поставить инструмент и попасть в
 `/entrypoint-for-business`. Связь со слоями (что заполняется) — в README
 самих слоёв (`docs/business/`, `docs/swot/`, `docs/hypothesis-map/`,

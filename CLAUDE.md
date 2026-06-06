@@ -18,7 +18,7 @@
 — UX над продуктом, опционально бизнес-домены (`domains/`) и
 композиция/облик (`screens/`), по которой собирается кликабельный hi-fi
 субстрат на библиотеке `@sftbmb/ui`. Канон формы продуктовых слоёв —
-один раз в `docs/projects/_canon/`. См.:
+один раз в `docs/projects/_template/`. См.:
 
 - `README.md` — карта репозитория и воркфлоу.
 - `docs/business/README.md` — канон 1 singleton + 5 kind бизнеса +
@@ -29,15 +29,15 @@
   `business-problem` — массив, M:N к реестру проблем бизнеса.
 - `docs/hypothesis-map/README.md` — канон Карты гипотез: `goal` ·
   `metric` · `subject` · `hypothesis` · `task`; `business-problem` — массив, M:N.
-- `docs/projects/README.md` — как устроены проекты: `_canon`, выбор
+- `docs/projects/README.md` — как устроены проекты: `_template`, выбор
   проекта, связь `addresses-problem` (M:N) с проблемами.
-- `docs/projects/_canon/project/README.md` — канон 1 vision + 7
+- `docs/projects/_template/project/README.md` — канон 1 vision + 7
   артефактов продукта.
-- `docs/projects/_canon/interface/README.md` — канон 7 артефактов
+- `docs/projects/_template/interface/README.md` — канон 7 артефактов
   интерфейса.
-- `docs/projects/_canon/domains/README.md` — канон DDD-артефактов бэкенда
+- `docs/projects/_template/domains/README.md` — канон DDD-артефактов бэкенда
   (если есть).
-- `docs/projects/_canon/screens/README.md` — канон 4 kind артефактов
+- `docs/projects/_template/screens/README.md` — канон 4 kind артефактов
   экранов.
 
 Артефакты — чистая аналитика; на FSD/компоненты напрямую не мапятся.
@@ -74,9 +74,7 @@ managed (инстанс на `*.sftbmb.ru`) или self-hosted (ваш форк)
 соседям`. Рекомендуемый вход — два оркестратора `/entrypoint` (аналитик)
 и `/entrypoint-for-business` (клиент): принимают сырьё, классифицируют по
 слоям и маршрутизируют к рою deep-dive/audit-исполнителей (прямой вызов
-исполнителя тоже допустим — `docs/getting-started.md`). Когда аналитика
-заполнена, `/de-template` вычищает показной `docs/projects/example/` и
-шаблон-нарратив под идентичность проекта.
+исполнителя тоже допустим — `docs/getting-started.md`).
 
 ## 1. Forward-only (никакой археологии)
 
@@ -112,9 +110,9 @@ managed (инстанс на `*.sftbmb.ru`) или self-hosted (ваш форк)
 | `docs/projects/<slug>/screens/` | **как это выглядит и компонуется** | `/screen-deep-dive <slug>` |
 
 Канон формы продуктовых слоёв (project/interface/screens/domains) живёт
-один раз в `docs/projects/_canon/`; данные — в папках проектов. Скилы этих
+один раз в `docs/projects/_template/`; данные — в папках проектов. Скилы этих
 слоёв принимают `<project-slug>` первым аргументом (без него — пикер по
-`docs/projects/`, исключая `_canon`); клиент-режим — дружелюбный пикер
+`docs/projects/`, исключая `_template`); клиент-режим — дружелюбный пикер
 «какой продукт обсуждаем».
 
 Связи между слоями **семантические**, не slug-валидируемые: профиль и
@@ -215,7 +213,7 @@ Project-слой (по проекту): у каждого проекта в `doc
 `market-maturity` (тип инициативы и зрелость рынка) и `lifecycle` проекта
 — отдельно от `status` зрелости записи; переход `lifecycle → stable`
 запускает восходящий поток к business. Канон формы —
-`docs/projects/_canon/project/`. Связи внутри слоя семантические,
+`docs/projects/_template/project/`. Связи внутри слоя семантические,
 валидируется `/project-audit <slug>`. Vision —
 singleton с разделами `Problem`, `Success`, `Non-goals`; остальные —
 таблицы. Без frontmatter (kind = имя файла); `status` — отдельная строка
@@ -333,14 +331,14 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
   `project-deep-dive <slug>` (аналитик); клиент-режим — оркестратор
   `entrypoint-for-business` ведёт сам (призма `product.md`), с эскалацией и
   push в единую ветку `client`; форма — по
-  `docs/projects/_canon/project/README.md`. `vision.addresses-problem`
+  `docs/projects/_template/project/README.md`. `vision.addresses-problem`
   связывает продукт с проблемами (M:N). Узкий аудит — `project-audit
   <slug>`. Сквозная семантическая проверка со всеми слоями
   (business/ajtbd/swot/hypothesis-map/interface/domain/screen) —
   `cross-audit` (рой агентов, по каждому проекту).
 - **Артефакты аналитики интерфейса** (`docs/projects/<slug>/interface/`)
   — через скилл `interface-deep-dive <slug>`; форма — по
-  `docs/projects/_canon/interface/README.md`. Поиск тупиков, рассинхрона
+  `docs/projects/_template/interface/README.md`. Поиск тупиков, рассинхрона
   зеркал, битых ссылок и семантических подозрений — скилл
   `interface-audit <slug>`. При заведении ключевых сущностей (who,
   situation, zone) скилл предлагает связь с продуктовыми артефактами того
@@ -352,7 +350,7 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
   для адаптеров — с `integration`.
 - **Артефакты экранов** (`docs/projects/<slug>/screens/`) — через скилл
   `screen-deep-dive <slug>`; форма — по
-  `docs/projects/_canon/screens/README.md` и README'ям 4 kind
+  `docs/projects/_template/screens/README.md` и README'ям 4 kind
   (flow/screen/block/shell). Визуальные референсы и ассеты живут в
   `docs/projects/<slug>/screens/assets/<kind>/<slug>/`. Поиск тупиков,
   рассинхрона зеркал (внутри screens и с interface того же проекта),
@@ -361,12 +359,6 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
   связь с `surface` того же проекта.
 - **Библиотека** — в отдельном репо `ui-lib` как `@sftbmb/ui`;
   проект её потребляет, не правит.
-- **Де-темплейтизация форка** — скилл `de-template`: один раз на свежем
-  форке `<org>/docs` вычищает показной `docs/projects/example/` и
-  шаблон-нарратив в `CLAUDE.md`/`README.md` под идентичность проекта. **Не
-  трогает** пустые скелеты-каноны (`docs/projects/_canon/`, `docs/business/`,
-  `docs/ajtbd/`, `docs/swot/`, `docs/hypothesis-map/`). На каноническом
-  шаблоне не запускается (guard по origin).
 - **Sweep'ы** (терминология, чистка): 1 агент = 1 непересекающаяся зона.
 
 ## 7. Клиент-режим (`entrypoint-for-business`)

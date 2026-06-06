@@ -7,7 +7,7 @@ description: "Аудит консистентности аналитически
 
 Аудит консистентности 7 артефактных файлов интерфейса **одного
 проекта** в `docs/projects/<project-slug>/interface/`. Канон формы —
-`docs/projects/_canon/interface/README.md`. Аудит **читает и
+`docs/projects/_template/interface/README.md`. Аудит **читает и
 сообщает**, ничего не правит: каскадные правки идут через
 `interface-deep-dive`.
 
@@ -19,11 +19,11 @@ description: "Аудит консистентности аналитически
 | вызов | проект |
 |---|---|
 | `/interface-audit <project-slug> …` | взять `<project-slug>` |
-| `/interface-audit …` (без slug) | `AskUserQuestion`-пикер по папкам `docs/projects/` (исключая `_canon`) |
+| `/interface-audit …` (без slug) | `AskUserQuestion`-пикер по папкам `docs/projects/` (исключая `_template`) |
 
 1. Если первый аргумент совпадает с именем подпапки `docs/projects/`
-   (кроме `_canon`) — это `<project-slug>`; остаток args — scope.
-2. Иначе — пикер по подпапкам `docs/projects/` (исключить `_canon`).
+   (кроме `_template`) — это `<project-slug>`; остаток args — scope.
+2. Иначе — пикер по подпапкам `docs/projects/` (исключить `_template`).
    Если проектов нет — сказать «нечего аудитить», выйти.
 3. Все чтения скоупятся в `docs/projects/<project-slug>/interface/`
    и `audit-state/<project-slug>/`.
@@ -43,7 +43,7 @@ description: "Аудит консистентности аналитически
 ## Что делать при запуске
 
 1. Определить `<project-slug>` (см. «Выбор проекта»).
-2. Прочитать `docs/projects/_canon/interface/README.md` — освежить
+2. Прочитать `docs/projects/_template/interface/README.md` — освежить
    канон формы.
 3. Прочитать `references/rules.md` — реестр проверок с тяжестью.
 4. Прочитать все 7 файлов

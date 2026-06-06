@@ -12,11 +12,11 @@
 ### Шаги
 
 Здесь `<P>` = `docs/projects/<project-slug>`: данные доменов — под
-`<P>/domains/`, форма-канон и шаблоны — в `docs/projects/_canon/domains/`.
+`<P>/domains/`, форма-канон и шаблоны — в `docs/projects/_template/domains/`.
 
-1. Прочитать `docs/projects/_canon/domains/README.md` § Kinds и
+1. Прочитать `docs/projects/_template/domains/README.md` § Kinds и
    обязательные H2 для указанного `kind`. Прочитать
-   `docs/projects/_canon/domains/_templates/<kind>.md` (шаблон) — это
+   `docs/projects/_template/domains/_templates/<kind>.md` (шаблон) — это
    входная форма.
 2. Раунд 1 `AskUserQuestion` — фундамент:
    - `Name` (через Other) — если ещё не дан;
@@ -37,7 +37,7 @@
    `description`-параграф; остальные H2-секции оставить как в шаблоне
    (с placeholder'ами).
 4. Если контекст новый (`<P>/domains/<ctx>/` создан впервые) — скопировать
-   также `docs/projects/_canon/domains/_templates/context-readme.md` →
+   также `docs/projects/_template/domains/_templates/context-readme.md` →
    `<P>/domains/<ctx>/README.md`, занести в него ссылку на свежезаведённый
    артефакт.
 5. Раунд 2+ `AskUserQuestion` — батч по доменным слотам kind в порядке
@@ -81,7 +81,7 @@
 1. Прочитать материал внимательно.
 2. Извлечь кандидатов на DDD-сущности — что похоже на агрегат, методы,
    события, use-case'ы, инварианты, value objects. Фильтр —
-   `docs/projects/_canon/domains/README.md § Anti-patterns` (отбросить
+   `docs/projects/_template/domains/README.md § Anti-patterns` (отбросить
    заведомо неподходящее: I/O-операция как метод агрегата → use-case;
    внутри-контекстный VO как отдельный файл → inline; spanning invariant
    между двумя aggregate'ами → переразбить).
@@ -103,7 +103,7 @@
    (минимум `frontmatter + description + status: draft`); создать
    state-заметки с открытыми вопросами «извлечено из сырья —
    уточнить <что>», помечая `**blocker**` там, где материал прямо
-   противоречил `docs/projects/_canon/domains/README.md § Anti-patterns`.
+   противоречил `docs/projects/_template/domains/README.md § Anti-patterns`.
 6. Через `AskUserQuestion` — выбрать, какую сущность углубить первой
    (по умолчанию — самые fundamental: aggregate перед events перед
    use-case'ами).
@@ -173,7 +173,7 @@
 
 | ситуация | формат |
 |---|---|
-| anti-pattern из `docs/projects/_canon/domains/README.md § Anti-patterns` | две опции: «это anti-pattern, переразбиваю» / «нет, вот почему» (Other) |
+| anti-pattern из `docs/projects/_template/domains/README.md § Anti-patterns` | две опции: «это anti-pattern, переразбиваю» / «нет, вот почему» (Other) |
 | enum-поле (`kind`, `Visibility`, `Mutable`, `Source`, `Type of decision`, `Channel`, `Delivery`) | по опции на каждое значение enum |
 | тест-критерий из `references/draft-stable.md` | опции из примеров ✅/❌, архитектор соотносит свой случай |
 | выбор существующего соседа (relations/emits/consumes/called methods) | по опции на каждый существующий `<ctx>.<Name>` + «нужен новый» (Other → A-режим / stub) |

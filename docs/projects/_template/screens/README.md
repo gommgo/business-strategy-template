@@ -3,7 +3,7 @@
 Слой композиции и облика проекта: из аналитических артефактов
 `docs/projects/<project-slug>/interface/` синтезируется детерминированная
 карта экранов, по которой собираются вайрфреймы и hi-fi. Этот файл —
-**канон формы** (`docs/projects/_canon/screens/`); данные каждого проекта
+**канон формы** (`docs/projects/_template/screens/`); данные каждого проекта
 живут в `docs/projects/<project-slug>/screens/`. Артефакты — **аналитика
 композиции и облика** в терминах семантического дерева и компонентов
 `@sftbmb/ui`. **Маппинг на FSD здесь не делается** — превращение
@@ -41,10 +41,10 @@ interface/ → синтез → screens/ → wireframe → hi-fi
 ## Структура папок
 
 Канон формы (этот README + 4 kind-README) живёт один раз в
-`docs/projects/_canon/screens/`:
+`docs/projects/_template/screens/`:
 
 ```
-docs/projects/_canon/screens/
+docs/projects/_template/screens/
 ├── README.md                       (этот файл)
 ├── flows/README.md                 (канон flow)
 ├── screens/README.md               (канон screen)
@@ -92,7 +92,7 @@ status: draft | stable
 ```
 
 Маркеры `<>` — заполняемые места. `status` — зрелость записи относительно
-критериев своего kind (как в каноне `docs/projects/_canon/interface/`).
+критериев своего kind (как в каноне `docs/projects/_template/interface/`).
 Связи — слаг-рефами в бэктиках (форма ячеек — как в interface).
 Frontmatter — YAML, древо — fenced ```yaml```-блок в теле.
 

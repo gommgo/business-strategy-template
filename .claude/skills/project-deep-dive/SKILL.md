@@ -7,8 +7,8 @@ description: "Углублённая проработка продуктовог
 
 Углублённая проработка продуктовых артефактов **одного проекта** в
 `docs/projects/<project-slug>/`. Канон формы —
-`docs/projects/_canon/project/README.md` (форма живёт один раз в
-`_canon/`; данные каждого проекта — в его папке). Скилл ведёт сеанс
+`docs/projects/_template/project/README.md` (форма живёт один раз в
+`_template/`; данные каждого проекта — в его папке). Скилл ведёт сеанс
 через 8 фаз вижн-мейкинга, структурированные вопросы
 (`AskUserQuestion`), фиксирует контекст в своей ветке единого дерева
 state оркестратора (`../entrypoint/state/projects/<project-slug>/project/`),
@@ -28,7 +28,7 @@ state оркестратора (`../entrypoint/state/projects/<project-slug>/pro
 - `/project-deep-dive <project-slug> …` — первый аргумент задаёт
   проект; остальные args — kind / slug / сырьё / флаги.
 - Без `<project-slug>` — скилл строит пикер через `AskUserQuestion` по
-  подкаталогам `docs/projects/`, **исключая `_canon`** (это образец
+  подкаталогам `docs/projects/`, **исключая `_template`** (это образец
   формы, не проект). Опции: каждый существующий проект + «Завести новый
   проект» (Other → новый slug).
 - Если переданный slug не существует среди папок — переспросить через
@@ -42,7 +42,7 @@ state оркестратора (`../entrypoint/state/projects/<project-slug>/pro
 
 ### Заведение нового проекта
 
-Новый проект = **копия формы** из `docs/projects/_canon/project/` в
+Новый проект = **копия формы** из `docs/projects/_template/project/` в
 новую папку `docs/projects/<new-slug>/`. Каталоги руками не плодим —
 скаффолдит скилл:
 
@@ -50,9 +50,9 @@ state оркестратора (`../entrypoint/state/projects/<project-slug>/pro
    если не задан.
 2. Скопировать форму: `vision.md` + 7 kind-файлов (`user.md`,
    `capability.md`, `boundary.md`, `surface.md`, `integration.md`,
-   `constraint.md`, `market.md`) из `docs/projects/_canon/project/` в
+   `constraint.md`, `market.md`) из `docs/projects/_template/project/` в
    `docs/projects/<new-slug>/`. Канон-README **не** копируется — форма
-   живёт один раз в `_canon/`.
+   живёт один раз в `_template/`.
 3. Зайти в фазу `discovery` на свежем `vision.md` нового проекта.
 
 Соседние слои (`<new-slug>/interface/`, `<new-slug>/screens/`,
@@ -114,7 +114,7 @@ slug-рефов на строки реестра; связь M:N — пробл�
 | `/project-deep-dive <project-slug> <свободный текст / транскрипт>` | сырьё → разбор (режим B) |
 | `/project-deep-dive <project-slug> --phase <name>` | принудительно работать в указанной фазе |
 | `/project-deep-dive <project-slug> --research <kind>:<query>` | запустить рой агентов на тему |
-| `/project-deep-dive --new <new-slug>` | завести новый проект из формы `_canon/project/` |
+| `/project-deep-dive --new <new-slug>` | завести новый проект из формы `_template/project/` |
 
 `kind` ∈ {`vision`, `user`, `capability`, `boundary`, `surface`,
 `integration`, `constraint`, `market`}.
@@ -123,7 +123,7 @@ slug-рефов на строки реестра; связь M:N — пробл�
 `integration`, `constraint`, `market`, `cohesion`}.
 
 Если первый аргумент совпал с именем папки в `docs/projects/` (кроме
-`_canon`) — это `<project-slug>`. Если нет — скилл показывает пикер
+`_template`) — это `<project-slug>`. Если нет — скилл показывает пикер
 проекта (см. «Мультипроект»), а уже выбранный проект применяет к
 остальным args.
 
@@ -131,9 +131,9 @@ slug-рефов на строки реестра; связь M:N — пробл�
 
 1. **Определить проект.** Разобрать первый аргумент как `<project-slug>`;
    если не задан или не совпал с папкой — пикер по `docs/projects/`
-   (исключая `_canon`) + опция «Завести новый». Зафиксировать выбранный
+   (исключая `_template`) + опция «Завести новый». Зафиксировать выбранный
    `<project-slug>` на всю сессию.
-2. Прочитать `docs/projects/_canon/project/README.md` — освежить канон
+2. Прочитать `docs/projects/_template/project/README.md` — освежить канон
    8 kinds и связи (форма-образец).
 3. Прочитать `references/phases.md` — карту 8 фаз.
 4. Если за `<project-slug>` нет других args — сделать **сводку по
@@ -423,8 +423,8 @@ slug (например, capability упомянула user, которой ещ�
   выбранный `<project-slug>` фиксируется, пути и ветка state скоупятся в
   него (изоляция продуктов сохраняется).
 - Не создавать папку проекта вручную в обход скаффолда — новый проект
-  только через копию формы из `docs/projects/_canon/project/`. Канон в
-  `_canon/` не править под конкретный проект.
+  только через копию формы из `docs/projects/_template/project/`. Канон в
+  `_template/` не править под конкретный проект.
 - Не повышать `draft → stable` без явного подтверждения аналитика.
 - Не понижать `stable → draft` сам — только подсветить и предложить.
 - Не аккумулировать историю в своей ветке state — forward-only.

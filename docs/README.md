@@ -21,9 +21,8 @@ SWOT → Карта гипотез → продукты → интерфейс /
 | [`swot/`](./swot/README.md) | **за счёт чего возможен следующий шаг** (LinkedSWOT: `factor` · `bet`, M:N) | `/swot-deep-dive` |
 | [`hypothesis-map/`](./hypothesis-map/README.md) | **под какие метрики целимся** (Карта гипотез: `goal` · `metric` · `subject` · `hypothesis` · `task`, M:N) | `/hypothesis-map-deep-dive` |
 | [`projects/`](./projects/README.md) | **продукты под бизнес** (несколько; см. ниже) | `/project-deep-dive <slug>` (аналитик); клиент — `/entrypoint-for-business` |
-| `projects/_canon/` | **канон формы** продуктовых слоёв (образец, не данные) | read-only, наследуется форком |
+| `projects/_template/` | **канон формы** продуктовых слоёв (образец, не данные) | read-only, наследуется форком |
 | `projects/<slug>/` | **данные одного продукта** (vision + 7 kind + `interface/` + `domains/` + `screens/`) | скиллы слоёв `<slug>` |
-| `projects/example/` | **показная витрина** screens-слоя (медисследования) | удаляется `/de-template` |
 
 Внутри проекта `projects/<slug>/`:
 
@@ -74,8 +73,7 @@ SWOT → Карта гипотез → продукты → интерфейс /
 
 ## Форку
 
-- [`getting-started.md`](./getting-started.md) — путь потребителя форка (META,
-  удаляется в `/de-template`).
+- [`getting-started.md`](./getting-started.md) — путь потребителя форка (META).
 - [`../client-onboarding/`](../client-onboarding/README.md) — комплект
   онбординга заказчика (`windows.md` / `macos.md`): поставить Claude Desktop,
   скачать форк и зайти в `/entrypoint-for-business`. Один файл под ОС, отдаём

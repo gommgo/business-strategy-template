@@ -8,7 +8,7 @@
 - **Главные anti-patterns** — короткий список из `Что <kind> НЕ`.
 - **Порядок копания** — последовательность вопросов в режиме A/C.
 
-Полные критерии — в каноне `docs/projects/_canon/interface/<kind>.md`
+Полные критерии — в каноне `docs/projects/_template/interface/<kind>.md`
 (форма-образец, общая для всех проектов). Данные проекта живут в
 `docs/projects/<project-slug>/interface/<kind>.md`. Здесь — выжимка для
 скилла.

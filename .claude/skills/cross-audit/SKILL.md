@@ -27,7 +27,7 @@ description: "Сквозной семантический аудит конси�
 - `docs/projects/<slug>/screens/` (композиция экранов — если каталог есть)
   — внутри проекта.
 
-Папка `docs/projects/_canon/` — **канон формы, не данные проекта**; в
+Папка `docs/projects/_template/` — **канон формы, не данные проекта**; в
 аудит **не входит** (исключается из перечисления проектов).
 
 Бизнес-проблемы — общий слой, питающий **много** проектов: проблему могут
@@ -36,7 +36,7 @@ description: "Сквозной семантический аудит конси�
 конкретному проекту и учитывают, какие проблемы этот проект закрывает.
 
 Аудит **не валидирует slug** между слоями (связи семантические, см.
-`docs/projects/_canon/project/README.md`). Аудит читает оба слоя и
+`docs/projects/_template/project/README.md`). Аудит читает оба слоя и
 спрашивает агентов «в чём смысл сочетается, а в чём расходится» — это
 требует LLM, не grep.
 
@@ -55,7 +55,7 @@ description: "Сквозной семантический аудит конси�
 
 | вызов | поведение |
 |---|---|
-| `/cross-audit` | полный прогон: верхнеуровневые углы один раз + project-скоупленные углы по каждому проекту в `docs/projects/` (кроме `_canon`) |
+| `/cross-audit` | полный прогон: верхнеуровневые углы один раз + project-скоупленные углы по каждому проекту в `docs/projects/` (кроме `_template`) |
 | `/cross-audit <slug>` | прогон только по одному проекту (его project-скоупленные углы) + верхнеуровневые углы один раз |
 | `/cross-audit <lens>` | прогон одного угла; для project-скоупленного — по всем проектам (или по `<slug> <lens>`) |
 | `/cross-audit --quick` | быстрый прогон с 3 самыми важными углами (user↔who, capability↔situation, surface↔zone) по каждому проекту + addresses-problem↔business-problem один раз |
@@ -99,14 +99,14 @@ description: "Сквозной семантический аудит конси�
 
 1. Прочитать `docs/business/README.md`, `docs/ajtbd/README.md`,
    `docs/swot/README.md`, `docs/hypothesis-map/README.md`,
-   `docs/projects/README.md`, `docs/projects/_canon/project/README.md`,
-   `docs/projects/_canon/interface/README.md`, и (если есть)
-   `docs/projects/_canon/domains/README.md` /
-   `docs/projects/_canon/screens/README.md` — освежить каноны формы.
+   `docs/projects/README.md`, `docs/projects/_template/project/README.md`,
+   `docs/projects/_template/interface/README.md`, и (если есть)
+   `docs/projects/_template/domains/README.md` /
+   `docs/projects/_template/screens/README.md` — освежить каноны формы.
 2. Прочитать `references/angles.md` — список углов и контекста на
    каждый.
 3. **Перечислить проекты.** Взять подкаталоги `docs/projects/`,
-   **исключив `_canon`** (это канон формы, не данные). Каждый
+   **исключив `_template`** (это канон формы, не данные). Каждый
    оставшийся каталог `docs/projects/<slug>/` — отдельный проект.
    Если `<slug>` дан аргументом — список из одного проекта.
 4. **Проверить наличие вложенных слоёв на каждый проект.**
@@ -432,7 +432,7 @@ suppressions как контекст и **не** генерирует те же 
   что запустить.
 - **Не выдумывать findings.** Если агент вернул пустой массив — так
   и пишем «0 findings» по этому lens.
-- **Не включать `_canon` в перечисление проектов.** `docs/projects/_canon/`
+- **Не включать `_template` в перечисление проектов.** `docs/projects/_template/`
   — канон формы, не данные; его записи в аудит не идут.
 - **Не игнорировать отсутствующие слои.** Если у проекта нет
   `docs/projects/<slug>/domains/` — lens `capability-domain` и

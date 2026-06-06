@@ -7,11 +7,11 @@
 - **Ссылается на** — какие соседи во frontmatter / теле.
 - **Кто ссылается на это** — обратные связи.
 - **Главные anti-patterns** — короткий список (из
-  `docs/projects/_canon/domains/README.md` и подсказок шаблонов).
+  `docs/projects/_template/domains/README.md` и подсказок шаблонов).
 - **Порядок копания** — последовательность вопросов в режиме A/C.
 
-Полный канон — `docs/projects/_canon/domains/README.md` +
-`docs/projects/_canon/domains/_templates/<kind>.md`. Здесь — выжимка для
+Полный канон — `docs/projects/_template/domains/README.md` +
+`docs/projects/_template/domains/_templates/<kind>.md`. Здесь — выжимка для
 скилла.
 
 ---

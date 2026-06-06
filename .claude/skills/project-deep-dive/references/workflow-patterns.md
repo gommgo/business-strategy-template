@@ -6,7 +6,7 @@
 
 Все пути ниже **скоупятся в выбранный проект**: данные пишутся в
 `docs/projects/<project-slug>/<kind>.md`, форму (критерии / anti-patterns
-/ тест-критерий) читаем из канона `docs/projects/_canon/project/<kind>.md`.
+/ тест-критерий) читаем из канона `docs/projects/_template/project/<kind>.md`.
 
 ## A. Новая сущность
 
@@ -16,7 +16,7 @@
 
 ### Шаги
 
-1. Прочитать форму `docs/projects/_canon/project/<kind>.md` целиком:
+1. Прочитать форму `docs/projects/_template/project/<kind>.md` целиком:
    секции `Критерии`, `Что НЕ`, `Тест-критерий`.
 2. Раунд 1 `AskUserQuestion` — фундамент:
    - `slug` (Other) — если не дан;
@@ -116,7 +116,7 @@
    — какие user упомянуты, есть ли они; для `surface` — какие
    user, какие capability у них; для `integration` — какие constraint
    могли бы быть применимы.
-4. Применить секции формы `docs/projects/_canon/project/<kind>.md` к
+4. Применить секции формы `docs/projects/_template/project/<kind>.md` к
    строке. Найти:
    - пустые обязательные слоты;
    - подозрения по anti-patterns (capability похожа на фичу, boundary

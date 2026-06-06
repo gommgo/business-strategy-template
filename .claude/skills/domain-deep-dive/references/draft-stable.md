@@ -36,7 +36,7 @@
 
 `<P>` = `docs/projects/<project-slug>` — корень текущего проекта.
 Committed-скрипта-валидатора в репо нет: сверяешь форму руками по
-канону (`docs/projects/_canon/domains/README.md`) и этому чек-листу.
+канону (`docs/projects/_template/domains/README.md`) и этому чек-листу.
 Что проверить:
 
 - frontmatter (`id`, `kind`, `context`, `name`, `status` обязательны;
