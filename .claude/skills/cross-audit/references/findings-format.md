@@ -10,7 +10,7 @@ preamble, без пояснений. Скилл парсит ответ и об�
   {
     "lens": "<lens-name>",
     "project": "<project-slug>" | null,
-    "problem": "<problem-slug>" | null,
+    "business-problem": "<business-problem-slug>" | null,
     "severity": "error" | "warning" | "hint",
     "title": "<одна строка>",
     "evidence": "<2-4 строки>",
@@ -27,7 +27,7 @@ preamble, без пояснений. Скилл парсит ответ и об�
 |---|---|---|
 | `lens` | string | имя угла (как в angles.md) — для группировки в отчёте |
 | `project` | string \| null | slug проекта, к которому относится finding (для project-скоупленных углов); `null` для верхнеуровневых (общие слои business ↔ business-problem) |
-| `problem` | string \| null | slug проблемы (`business-problem`), если finding касается конкретной проблемы (углы business-problem ↔ продукт, `addresses-problem-bizproblem`); иначе `null` |
+| `business-problem` | string \| null | slug проблемы из реестра `business-problem`, если finding касается конкретной проблемы (углы business-problem ↔ продукт, `addresses-problem-bizproblem`); иначе `null` |
 | `severity` | enum | `error` / `warning` / `hint` — уровень тяжести |
 | `title` | string | одна строка, что найдено |
 | `evidence` | string | конкретные доказательства: какие slug, какие поля, какой контраст |
@@ -36,7 +36,7 @@ preamble, без пояснений. Скилл парсит ответ и об�
 | `destination-refs` | array | ссылки на destination-слой |
 
 `project` обязателен (не `null`) у всех project-скоупленных углов; агент
-получает свой `<project-slug>` в промпте и проставляет его. `problem`
+получает свой `<project-slug>` в промпте и проставляет его. `business-problem`
 заполняется, когда finding можно отнести к конкретной проблеме реестра.
 
 ## Примеры
@@ -47,7 +47,7 @@ preamble, без пояснений. Скилл парсит ответ и об�
 {
   "lens": "user-who",
   "project": "referral-network",
-  "problem": null,
+  "business-problem": null,
   "severity": "error",
   "title": "user:doctor не имеет соответствия в interface.who проекта",
   "evidence": "user:doctor.context = «врач инициирующей клиники, делает направление». В projects/referral-network/interface/who.md нет ни одной роли, выполняющей эту функцию. Существующие who: nurse, scheduler, any — не покрывают.",
@@ -63,7 +63,7 @@ preamble, без пояснений. Скилл парсит ответ и об�
 {
   "lens": "addresses-problem-bizproblem",
   "project": "partner-portal",
-  "problem": "legacy-sync",
+  "business-problem": "legacy-sync",
   "severity": "error",
   "title": "проект partner-portal бьёт в несуществующую проблему legacy-sync",
   "evidence": "projects/partner-portal/vision.md addresses-problem = [`paid-churn`, `legacy-sync`]. В docs/business/business-problem.md строки: `paid-churn`, `slot-utilization`. Проблемы `legacy-sync` нет.",
@@ -79,7 +79,7 @@ preamble, без пояснений. Скилл парсит ответ и об�
 {
   "lens": "capability-domain",
   "project": "referral-network",
-  "problem": null,
+  "business-problem": null,
   "severity": "warning",
   "title": "capability:send-referral не имеет домена в domains/ проекта",
   "evidence": "capability:send-referral.value = «один клик вместо звонка». В projects/referral-network/domains/ существуют: auth, billing, inventory. Ни один не покрывает доменную область направлений.",
@@ -95,7 +95,7 @@ preamble, без пояснений. Скилл парсит ответ и об�
 {
   "lens": "currentmetric-metric",
   "project": null,
-  "problem": "paid-churn",
+  "business-problem": "paid-churn",
   "severity": "hint",
   "title": "текущий KPI no-show-rate не стал ни одной целевой метрикой",
   "evidence": "business/current-metric.md:no-show-rate = 18% (as-of 2026-Q1). В hypothesis-map/metric.md нет целевой метрики, чей baseline опирался бы на этот KPI.",
@@ -111,7 +111,7 @@ preamble, без пояснений. Скилл парсит ответ и об�
 {
   "lens": "market-capability",
   "project": "partner-portal",
-  "problem": null,
+  "business-problem": null,
   "severity": "hint",
   "title": "Конкурент klara-app покрывает mobile-experience, у нас этой capability нет",
   "evidence": "market:klara-app.description = «mobile-first referrals app». В projects/partner-portal/capability.md → 0 записей с упоминанием mobile-контекста.",

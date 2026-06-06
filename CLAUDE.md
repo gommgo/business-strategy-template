@@ -25,10 +25,10 @@
   реестр проблем `business-problem`.
 - `docs/ajtbd/README.md` — канон 5 kind AJTBD: `segment` · `job` ·
   `job-graph` · `solution` · `segment-problem`.
-- `docs/swot/README.md` — канон LinkedSWOT: `factor` · `bet`; `problem` —
-  массив, M:N к реестру `business-problem`.
+- `docs/swot/README.md` — канон LinkedSWOT: `factor` · `bet`; колонка-ссылка
+  `business-problem` — массив, M:N к реестру проблем бизнеса.
 - `docs/hypothesis-map/README.md` — канон Карты гипотез: `goal` ·
-  `metric` · `subject` · `hypothesis` · `task`; `problem` — массив, M:N.
+  `metric` · `subject` · `hypothesis` · `task`; `business-problem` — массив, M:N.
 - `docs/projects/README.md` — как устроены проекты: `_canon`, выбор
   проекта, связь `addresses-problem` (M:N) с проблемами.
 - `docs/projects/_canon/project/README.md` — канон 1 vision + 7
@@ -102,11 +102,11 @@ managed (инстанс на `*.sftbmb.ru`) или self-hosted (ваш форк)
 
 | слой | вопрос | вход |
 |---|---|---|
-| `docs/business/` | **кто этот бизнес заказчика и какие его проблемы решаем** | `/business-deep-dive` (аналитик) или `/business-deep-dive-for-business` (клиент) |
-| `docs/ajtbd/` | **кто наш сегмент по работам, его граф работ и трения** | `/segment-deep-dive` · `/job-graph-deep-dive` (+ `-for-business`) · `/jtbd-interview` |
+| `docs/business/` | **кто этот бизнес заказчика и какие его проблемы решаем** | `/business-deep-dive` (аналитик); клиент — `/entrypoint-for-business` |
+| `docs/ajtbd/` | **кто наш сегмент по работам, его граф работ и трения** | `/segment-deep-dive` · `/job-graph-deep-dive` · `/jtbd-interview` (аналитик); клиент — `/entrypoint-for-business` |
 | `docs/swot/` | **за счёт чего возможен следующий шаг** (факторы → ставки) | `/swot-deep-dive` |
 | `docs/hypothesis-map/` | **под какие метрики целимся** (цель → метрика → субъект → гипотеза) | `/hypothesis-map-deep-dive` |
-| `docs/projects/<slug>/` | **зачем продукт и для кого** | `/project-deep-dive <slug>` (аналитик) или `/project-deep-dive-for-business` (клиент) |
+| `docs/projects/<slug>/` | **зачем продукт и для кого** | `/project-deep-dive <slug>` (аналитик); клиент — `/entrypoint-for-business` |
 | `docs/projects/<slug>/interface/` | **как пользователь взаимодействует** | `/interface-deep-dive <slug>` |
 | `docs/projects/<slug>/domains/` | **какой бизнес-код бэкенда** (опц.) | `/domain-deep-dive <slug>` |
 | `docs/projects/<slug>/screens/` | **как это выглядит и компонуется** | `/screen-deep-dive <slug>` |
@@ -172,8 +172,8 @@ satisfaction, цена↔ценность), `segment-problem` (трение се
 решением: сила 1–10, драйверы, барьеры). Ядро: проблема **никогда** не
 существует сама по себе — она следствие конкретного `solution`, нанятого
 на `job`. Источник истины — многоволновой рой web-research (5–10 агентов
-× 2–5 волн) и опц. JTBD-интервью (`/jtbd-interview`, своё state/transcripts
-→ intake), не проекция аналитика. Связи семантические; инварианты
+× 2–5 волн) и опц. JTBD-интервью (`/jtbd-interview`, собирает сырьё в ветку
+`entrypoint/state/ajtbd/_interview/` → intake), не проекция аналитика. Связи семантические; инварианты
 (сегмент без Big Job, разрыв «чтобы», трение без решения, Score без
 компонентов, CPR с разрывом, ложная работа) ловит рой `/ajtbd-audit` — **в
 пределах каждого сегмента**, не grep. Сегмент несёт `served` (`served` |
@@ -186,7 +186,7 @@ SWOT-слой (строгий, LinkedSWOT, **многопроблемный**): 
 табличных kind `factor` (сильная/слабая сторона · тренд/угроза — само по
 себе не действие) и `bet` (стратегическая ставка «`действие`, чтобы
 `ценность`»; держится на ≥1 внутреннем + ≥1 внешнем факторе; `promoted-to`
-доводит до `goal`/`hypothesis`). Каждая запись несёт массив `problem` (M:N
+доводит до `goal`/`hypothesis`). Каждая запись несёт массив `business-problem` (M:N
 к строкам реестра `business/business-problem`). Связи семантические;
 методологические инварианты (баланс факторов, ставка-висяк `promoted-to`,
 фактор без ставки, приоритет без дублей) ловит рой `/swot-audit` — **в
@@ -199,7 +199,7 @@ SWOT-слой (строгий, LinkedSWOT, **многопроблемный**): 
 baseline, источником, атрибуцией, приёмкой) → субъект (носитель
 самодвижения) → гипотеза → задача проверки. `hypothesis` — исключение:
 вместо `description` четыре части `if`/`then`/`because`/`so`; «тогда» (so)
-бьёт в метрику цели. Каждая запись несёт массив `problem` (M:N к строкам
+бьёт в метрику цели. Каждая запись несёт массив `business-problem` (M:N к строкам
 реестра `business/business-problem`). Связи семантические;
 методологические инварианты (задача-сирота, «тогда» без метрики, метрика
 без влияния, целевая без guardrail, цель без метрики, исполнитель вместо
@@ -269,8 +269,11 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
 памяти, если попал в контекст, — read-only артефакт.
 
 Постоянное «помни между сессиями» — в репо: `CLAUDE.md`,
-`.claude/rules/<topic>.md`, `state/` каждого скила (коммитятся —
-это shared проектная память).
+`.claude/rules/<topic>.md`, единый state оркестраторов
+(`.claude/skills/entrypoint/state/` для аналитика,
+`.claude/skills/entrypoint-for-business/state/` для клиента; исполнители
+пишут в свои ветки этого дерева) — коммитятся, это shared проектная
+память.
 
 ## 5. Авторизация правок
 
@@ -292,25 +295,27 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
 ## 6. Зоны правок
 
 - **Артефакты бизнеса** (`docs/business/`) — через скилл
-  `business-deep-dive` (аналитик) или `business-deep-dive-for-business`
-  (клиент-режим); форма — по `docs/business/README.md`. Нестрогий слой:
-  приём материалов клиента + рой web-research конкурентов. Сквозная
+  `business-deep-dive` (аналитик); клиент-режим — оркестратор
+  `entrypoint-for-business` ведёт сам через призму `business-profile.md`.
+  Форма — по `docs/business/README.md`. Нестрогий слой: приём материалов
+  клиента + рой web-research конкурентов (доступен и клиенту). Сквозная
   проверка — `cross-audit`.
 - **Артефакты AJTBD** (`docs/ajtbd/`) — сегменты через скилл
-  `segment-deep-dive` (аналитик) или `segment-deep-dive-for-business`
-  (клиент-режим); граф работ, решения и трения через `job-graph-deep-dive`
-  (аналитик) или `job-graph-deep-dive-for-business` (клиент-режим), оба с
-  эскалацией и push в единую ветку `client`. Форма — по
-  `docs/ajtbd/README.md`. Строгая разведочная методология Advanced JTBD;
+  `segment-deep-dive`, граф работ, решения и трения через
+  `job-graph-deep-dive` (аналитик); клиент-режим — оркестратор
+  `entrypoint-for-business` ведёт сам (призмы `clients-segments.md` /
+  `clients-jobs.md`), с эскалацией и push в единую ветку `client`. Форма —
+  по `docs/ajtbd/README.md`. Строгая разведочная методология Advanced JTBD;
   наполняется многоволновым роем web-research и опц. JTBD-интервью
-  (`jtbd-interview` — отдельный тяжёлый процесс по явному запросу, своё
-  state/transcripts, выход разбирается через intake). Семантический аудит
+  (`jtbd-interview` — отдельный тяжёлый процесс по явному запросу, собирает
+  сырьё в ветку `entrypoint/state/ajtbd/_interview/`, выход разбирается
+  через intake). Семантический аудит
   инвариантов роем (по каждому сегменту) — `ajtbd-audit`. Трение сегмента
   (`segment-problem`) питает проблему бизнеса (`business/business-problem`),
   не подменяет её.
 - **Реестр проблем бизнеса** (`business-problem` в `docs/business/`) —
   через скилл `business-deep-dive` (часть бизнес-слоя); таблица проблем +
-  граница гарантии/таргета (`problem` — массив M:N, на который ссылаются
+  граница гарантии/таргета (`business-problem` — массив M:N, на который ссылаются
   swot / hypothesis-map / `vision.addresses-problem`).
 - **Артефакты SWOT** (`docs/swot/`) — через скилл `swot-deep-dive`; форма
   — по `docs/swot/README.md`. Строгая многопроблемная методология
@@ -321,13 +326,13 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
   Строгая многопроблемная методология Карты гипотез (`goal` · `metric` ·
   `subject` · `hypothesis` · `task`). Семантический аудит инвариантов роем
   (по каждой проблеме) — `hypothesis-map-audit`. Метрика — best-effort
-  таргет, не гарантия. В клиент-режиме SWOT и Карту гипотез ведёт сам
-  оркестратор `entrypoint-for-business` (отдельных `*-for-business`-скиллов
-  для них нет).
+  таргет, не гарантия. В клиент-режиме SWOT и Карту гипотез — как и все
+  темы — ведёт сам оркестратор `entrypoint-for-business` через свою призму
+  (`swot-hypothesis-map.md`); отдельных клиентских под-скилов нет.
 - **Артефакты продукта** (`docs/projects/<slug>/`) — через скилл
-  `project-deep-dive <slug>` (аналитик) или
-  `project-deep-dive-for-business` (клиент-режим с эскалацией и push в
-  единую ветку `client`); форма — по
+  `project-deep-dive <slug>` (аналитик); клиент-режим — оркестратор
+  `entrypoint-for-business` ведёт сам (призма `product.md`), с эскалацией и
+  push в единую ветку `client`; форма — по
   `docs/projects/_canon/project/README.md`. `vision.addresses-problem`
   связывает продукт с проблемами (M:N). Узкий аудит — `project-audit
   <slug>`. Сквозная семантическая проверка со всеми слоями
@@ -364,27 +369,26 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
   шаблоне не запускается (guard по origin).
 - **Sweep'ы** (терминология, чистка): 1 агент = 1 непересекающаяся зона.
 
-## 7. Клиент-режим (`*-for-business`)
+## 7. Клиент-режим (`entrypoint-for-business`)
 
-Когда сессию ведёт **клиент / основатель / PO**, не аналитик —
-рекомендуемый вход — клиентский оркестратор `/entrypoint-for-business`
-(зеркало `/entrypoint` в бизнес-языке): принимает рассказ и материалы,
-раскладывает по темам и маршрутизирует к клиентским исполнителям —
-`/business-deep-dive-for-business` (профиль бизнеса),
-`/segment-deep-dive-for-business` (свои клиенты-сегменты),
-`/job-graph-deep-dive-for-business` (работы/решения/трения клиентов),
-`/project-deep-dive-for-business` (продукт). SWOT и Карту гипотез
-(сильные/слабые стороны → ставки → цель → метрика) оркестратор в
-клиент-режиме ведёт **сам** — отдельных `*-for-business`-скиллов для них
-нет. Все следуют одним правилам клиент-режима. Особенности, которые влияют
-на работу:
+Когда сессию ведёт **клиент / основатель / PO**, не аналитик — вход один:
+клиентский оркестратор `/entrypoint-for-business` (зеркало `/entrypoint` в
+бизнес-языке). Он принимает рассказ и материалы, раскладывает по темам и
+**ведёт все темы сам через свою призму** — отдельных клиентских
+под-скилов нет. Для каждой темы берёт призму-методичку в бизнес-языке
+(`references/business-profile.md` · `clients-segments.md` ·
+`clients-jobs.md` · `swot-hypothesis-map.md` · `product.md`) и read-only
+сверяется со строгой подложкой обычного аналитического скила того же слоя
+(обычные скилы в клиент-режиме **не активируются**). Клиенту доступен и рой
+web-research (`references/research-business.md`). Особенности, которые
+влияют на работу:
 
 - **Бизнес-язык**: никакого `slug`, `kind`, `draft`, `stable`,
   `artifact` в чате. Видно только «закрыто / в работе». Продукт
   выбирается дружелюбным пикером «какой продукт обсуждаем», без папок и
   slug.
 - **Anti-patterns из реальных провалов**, не из методичек (см.
-  `<скил>-for-business/references/anti-patterns-real.md`).
+  `entrypoint-for-business/references/anti-patterns-real.md`).
 - **Метрика — не гарантия** (Карта гипотез): клиент-скилл никогда не
   помогает записать метрику как обещание-гарантию, только как цель;
   строгую измеримость (атрибуция, критерий приёмки) мягко откладывает
@@ -399,10 +403,10 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
   актуальным и чистится от мусора), `client-handoff/transcripts/<YYYY-MM-DD>--<HH-MM>--<тема>.md`
   (человекочитаемое имя; полный лог сессии с предложенными вариантами).
 - **Единый контекст (read-only)**: чтобы картина была общей и понятной,
-  любой скилл (клиентский и аналитический) read-only подтягивает соседние
-  `state/` — клиентские и аналитические слои; проектный слой — только по
-  текущему продукту (изоляция продуктов сохраняется). В чужой state
-  **никто не пишет**. **Anti-leak (клиент-режим)**: прочитанное из кухни
+  любой скилл read-only видит **оба дома** state — аналитический
+  `entrypoint/state/` и клиентский `entrypoint-for-business/state/`;
+  проектные ветки — только по текущему продукту (изоляция продуктов
+  сохраняется). В чужой дом / чужую ветку **никто не пишет**. **Anti-leak (клиент-режим)**: прочитанное из кухни
   аналитика — тихий контекст; сырые открытые вопросы, черновые гипотезы,
   доменные решения и термины (`slug/draft/stable`) клиенту не зачитываются,
   только переводятся в бизнес-язык (видно по-прежнему «закрыто / в работе»).

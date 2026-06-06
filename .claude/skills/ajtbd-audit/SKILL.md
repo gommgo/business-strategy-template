@@ -90,8 +90,8 @@ Lens: <name>
 строковому совпадению.
 
 Прочитай нужные файлы слоя (segment.md, job.md, job-graph.md, solution.md,
-segment-problem.md) + state скиллов segment-deep-dive / job-graph-deep-dive
-(если есть). Для каждого сегмента из списка найди смысловые нарушения по
+segment-problem.md) + ветку state слоя ajtbd
+(`../entrypoint/state/ajtbd/`, если есть). Для каждого сегмента из списка найди смысловые нарушения по
 паттернам этого луча. В каждом finding укажи поле "segment".
 
 Верни ТОЛЬКО валидный JSON-массив по схеме findings-format.md, без
@@ -206,7 +206,7 @@ Findings «false positive» → `audit-state/suppressions.md` (lens + segment
 - **Не вызывать `/segment-deep-dive` / `/job-graph-deep-dive` / `/cross-audit`**
   автоматически — в next-actions только текст, что запустить.
 - **Не предлагать клиенту** запустить аудит — это аналитический
-  инструмент; в `*-for-business`-скиллах не упоминается.
+  инструмент; в клиент-режиме (`entrypoint-for-business`) не упоминается.
 
 ## Что дальше (next-actions)
 

@@ -39,6 +39,16 @@
 - «Годовая программа чек-апов» → ✅ (`subscription`)
 - «Удобная регистратура» → ❌ (это процесс/канал, не офер)
 
+## Колонки
+
+- `slug` — уникальный идентификатор офера · `kebab-case` · обяз.
+- `name` — короткое имя офера · текст · обяз.
+- `description` — одно предложение, что это · текст · обяз.
+- `kind` — тип офера · `product` \| `service` \| `subscription` \| `marketplace` \| `other` · обяз.
+- `for-segment` — кому офер продаётся; ссылка на `slug` сегмента в `ajtbd/segment` · массив `slug` · обяз.
+- `from-project` — провенанс-ссылка на slug проекта (`docs/projects/<slug>`), родившего офер; след восходящего потока · `slug` \| `—` · опц.
+- `status` — зрелость записи · `draft` \| `stable` · обяз.
+
 | slug | name | description | kind | for-segment | from-project | status |
 |---|---|---|---|---|---|---|
 | `<slug>` | <короткое имя> | <одно предложение, что это> | `product` \| `service` \| `subscription` \| `marketplace` \| `other` | `` [`segment-1`, …] `` | `<project-slug>` \| `—` | `draft` |

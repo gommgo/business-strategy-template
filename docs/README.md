@@ -16,11 +16,11 @@ SWOT → Карта гипотез → продукты → интерфейс /
 
 | каталог | вопрос | вход |
 |---|---|---|
-| [`business/`](./business/README.md) | **кто этот бизнес заказчика и какие его проблемы решаем** (1 singleton + 5 kind + реестр `business-problem`) | `/business-deep-dive` · `/business-deep-dive-for-business` |
-| [`ajtbd/`](./ajtbd/README.md) | **кто наш сегмент по работам, его граф работ и трения** (Advanced JTBD, 5 kind) | `/segment-deep-dive` · `/job-graph-deep-dive` (+ `-for-business`) · `/jtbd-interview` |
+| [`business/`](./business/README.md) | **кто этот бизнес заказчика и какие его проблемы решаем** (1 singleton + 5 kind + реестр `business-problem`) | `/business-deep-dive` (аналитик); клиент — `/entrypoint-for-business` |
+| [`ajtbd/`](./ajtbd/README.md) | **кто наш сегмент по работам, его граф работ и трения** (Advanced JTBD, 5 kind) | `/segment-deep-dive` · `/job-graph-deep-dive` · `/jtbd-interview` (аналитик); клиент — `/entrypoint-for-business` |
 | [`swot/`](./swot/README.md) | **за счёт чего возможен следующий шаг** (LinkedSWOT: `factor` · `bet`, M:N) | `/swot-deep-dive` |
 | [`hypothesis-map/`](./hypothesis-map/README.md) | **под какие метрики целимся** (Карта гипотез: `goal` · `metric` · `subject` · `hypothesis` · `task`, M:N) | `/hypothesis-map-deep-dive` |
-| [`projects/`](./projects/README.md) | **продукты под бизнес** (несколько; см. ниже) | `/project-deep-dive <slug>` · `/project-deep-dive-for-business` |
+| [`projects/`](./projects/README.md) | **продукты под бизнес** (несколько; см. ниже) | `/project-deep-dive <slug>` (аналитик); клиент — `/entrypoint-for-business` |
 | `projects/_canon/` | **канон формы** продуктовых слоёв (образец, не данные) | read-only, наследуется форком |
 | `projects/<slug>/` | **данные одного продукта** (vision + 7 kind + `interface/` + `domains/` + `screens/`) | скиллы слоёв `<slug>` |
 | `projects/example/` | **показная витрина** screens-слоя (медисследования) | удаляется `/de-template` |
@@ -78,7 +78,7 @@ SWOT → Карта гипотез → продукты → интерфейс /
   удаляется в `/de-template`).
 - [`../client-onboarding/`](../client-onboarding/README.md) — комплект
   онбординга заказчика (`windows.md` / `macos.md`): поставить Claude Desktop,
-  скачать форк и зайти в `*-for-business`-режим. Один файл под ОС, отдаём
+  скачать форк и зайти в `/entrypoint-for-business`. Один файл под ОС, отдаём
   заказчику.
 - Устройство `.claude`-системы (rules / skills / state / settings) — корневой
   `CLAUDE.md`.

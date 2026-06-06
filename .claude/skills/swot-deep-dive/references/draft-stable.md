@@ -6,9 +6,9 @@
 ## Пункты
 
 1. **Обязательные слоты заполнены** (см. `field-checklists.md`).
-   Опциональные могут быть `—`. `factor` — `problem`/`area`/формулировка;
-   `bet` — `problem`/`factors`/`promoted-to`/форма «действие, чтобы
-   ценность». Для обоих kind — **непустой `problem`** (массив строк
+   Опциональные могут быть `—`. `factor` — `business-problem`/`area`/формулировка;
+   `bet` — `business-problem`/`factors`/`promoted-to`/форма «действие, чтобы
+   ценность». Для обоих kind — **непустой `business-problem`** (массив строк
    реестра проблем).
 2. **`Критерии <kind>` пройдены** — каждый критерий из README слоя
    (`docs/swot/README.md`) явно подтверждён аналитиком через
@@ -16,7 +16,7 @@
 3. **`Anti-patterns` не нарушены** — по каждому скилл спросил «не похоже
    ли?» и получил ❌. Один подтверждённый anti-pattern блокирует stable до
    переформулировки.
-4. **Нет `**blocker**`-вопросов** в `state/<kind>/<slug>.md`.
+4. **Нет `**blocker**`-вопросов** в `../entrypoint/state/swot/<kind>/<slug>.md`.
 
 Все ✅ → `AskUserQuestion`: «Запись `<kind>:<slug>` прошла чек-лист.
 Повышаем `draft → stable`?» (Да / Нет, ещё подумаю / Да, но сначала закрою:
@@ -24,7 +24,7 @@ Other). По «да» — `status: draft → stable`.
 
 ## Особое для этого слоя
 
-- Любая запись не становится stable без непустого `problem` (массив
+- Любая запись не становится stable без непустого `business-problem` (массив
   существующих строк реестра `docs/business/business-problem.md`).
 - **Ставка** не становится stable, если `factors` не балансирует ≥1
   внутренний (`strength`/`weakness`) + ≥1 внешний (`trend`/`threat`), или

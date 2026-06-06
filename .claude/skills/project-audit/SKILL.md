@@ -47,9 +47,8 @@ description: Узкий аудит консистентности продукт
 3. Прочитать `references/rules.md` — реестр проверок с severity.
 4. Прочитать все 8 файлов проекта `docs/projects/<project-slug>/` (или
    подмножество по args).
-5. Прочитать `state/<project-slug>/` обоих скиллов
-   (`project-deep-dive/state/<project-slug>/` и
-   `project-deep-dive-for-business/state/<project-slug>/`) — для
+5. Прочитать ветку state проекта в едином дереве оркестратора
+   (`../entrypoint/state/projects/<project-slug>/project/`) — для
    проверок типа «stable с blocker-вопросами».
 6. Прогнать правила по очереди. Собрать findings.
 7. Сгруппировать по сущности, отсортировать по severity внутри.
@@ -161,4 +160,4 @@ totals: { error: X, warning: Y, hint: Z }
 - **Не запускать `/project-deep-dive`** автоматически из аудита. Это
   делает аналитик руками по выводу аудита.
 - **Не предлагать клиенту запустить** `/project-audit`. Это аналитический
-  инструмент; в `project-deep-dive-for-business` он не упоминается.
+  инструмент; в клиент-режиме (`entrypoint-for-business`) он не упоминается.

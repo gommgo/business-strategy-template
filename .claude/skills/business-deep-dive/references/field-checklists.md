@@ -50,13 +50,13 @@ baseline, привнесённый дозревшим продуктом (slug);
 ## business-problem (строгий реестр проблем)
 
 `business-problem.md` — **таблица проблем бизнеса** (одна строка = одна
-проблема). Колонки: `slug · name · problem · guarantee · target ·
+проблема). Колонки: `slug · name · statement · guarantee · target ·
 out-of-control · scope · served · from-project · status`.
-**Для stable:** `problem` (бизнес-боль в деньгах/времени/риске, не в
+**Для stable:** `statement` (бизнес-боль в деньгах/времени/риске, не в
 терминах фич), `guarantee` (что гарантируем — доставка по scope), `target`
 (на какие метрики целимся, best-effort, **не гарантия**), `out-of-control`
 (внешние факторы вне контроля), `scope` (in/out), `served` (enum).
-**Порядок:** problem → guarantee/target (**граница** — главная проверка) →
+**Порядок:** statement → guarantee/target (**граница** — главная проверка) →
 out-of-control → scope → served → from-project.
 **Главная проверка:** граница «гарантия (доставка по scope) vs таргет
 (метрики best-effort)»; метрика **никогда** не подана как гарантия.

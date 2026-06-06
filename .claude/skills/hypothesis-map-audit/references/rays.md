@@ -5,10 +5,10 @@
 **Файлы** · **Применим если** · **Что искать** · **Промпт-добавка**.
 
 Слой **многопроблемный**: реестр проблем — `docs/business/business-problem.md`
-(одна строка = одна проблема), каждая запись 5 kind несёт колонку `problem`
+(одна строка = одна проблема), каждая запись 5 kind несёт колонку `business-problem`
 (массив строк реестра, M:N). **Все лучи считают инвариант в пределах одной
 проблемы**: запись с проблемой P учитывается вместе с записями той же P, а
-нарушение помечается полем `problem`. Луч проходит по каждой строке реестра
+нарушение помечается полем `business-problem`. Луч проходит по каждой строке реестра
 отдельно (или по одной, если задан scope).
 
 ## problem-tag
@@ -18,16 +18,16 @@
 **Применим если:** есть хотя бы одна запись 5 kind.
 
 **Что искать:**
-- `error`: запись 5 kind с пустым `problem` (`—`) — вне реестра, непонятно,
+- `error`: запись 5 kind с пустым `business-problem` (`—`) — вне реестра, непонятно,
   какой проблемы касается.
-- `error`: запись, чей `problem` ссылается на slug, которого нет в реестре
+- `error`: запись, чей `business-problem` ссылается на slug, которого нет в реестре
   (несуществующая проблема).
 
 **Промпт-добавка:**
 ```
-У каждой записи goal/metric/subject/hypothesis/task колонка problem —
+У каждой записи goal/metric/subject/hypothesis/task колонка business-problem —
 непустой массив slug-рефов на существующие строки реестра
-docs/business/business-problem.md. Найди записи с пустым problem (error)
+docs/business/business-problem.md. Найди записи с пустым business-problem (error)
 или ссылкой на отсутствующую в реестре проблему (error). В finding укажи
 refs на запись.
 ```
@@ -39,14 +39,14 @@ refs на запись.
 
 **Что искать:**
 - `error`: строка реестра (проблема), на которую не ссылается ни одна
-  `goal` через `problem`. Проблема без цели — повисла, её нечего
+  `goal` через `business-problem`. Проблема без цели — повисла, её нечего
   раскрывать в метрики.
 
 **Промпт-добавка:**
 ```
 docs/business/business-problem.md — реестр проблем. Для КАЖДОЙ строки
-проверь: есть ли хотя бы одна goal, чей массив problem содержит этот
-problem-slug? Нет → error «проблема без цели», в finding укажи problem =
+проверь: есть ли хотя бы одна goal, чей массив business-problem содержит этот
+problem-slug? Нет → error «проблема без цели», в finding укажи business-problem =
 этот slug.
 ```
 
@@ -65,12 +65,12 @@ problem-slug? Нет → error «проблема без цели», в finding 
 **Промпт-добавка:**
 ```
 docs/business/business-problem.md — реестр проблем, колонки slug·name·
-problem·guarantee·target·out-of-control·scope·served·from-project·status.
+business-problem·guarantee·target·out-of-control·scope·served·from-project·status.
 Юр-рамка: гарантируем доставку проекта по scope (guarantee); метрики
 (target) — best-effort, НЕ гарантия. Для КАЖДОЙ строки: найди, где метрика
 обещана как гарантия результата; проверь, что guarantee и target не
 смешаны и out-of-control заполнен. Метрики цели читай в metric.md (docs/
-hypothesis-map/). В finding укажи problem = slug строки.
+hypothesis-map/). В finding укажи business-problem = slug строки.
 ```
 
 ## goal-shape
@@ -87,7 +87,7 @@ hypothesis-map/). В finding укажи problem = slug строки.
 ```
 Цель — критерий успеха без цифр, состояние мира (не активность). Проверь:
 нет ли цифр в формулировке (должны быть в metric); не активность ли это
-(тогда задача); есть ли ≥1 метрика на цель. В finding укажи problem(ы)
+(тогда задача); есть ли ≥1 метрика на цель. В finding укажи business-problem(ы)
 цели.
 ```
 
@@ -110,7 +110,7 @@ hypothesis-map/). В finding укажи problem = slug строки.
 (через «тогда»)? Ни одной → error «метрика без влияния». Проверь baseline
 (current), источник истины (source), небинарность. Балансирующие
 (kind=balancing) влияния не требуют — их удерживают. В finding укажи
-problem метрики.
+business-problem метрики.
 ```
 
 ## guardrail
@@ -128,7 +128,7 @@ problem метрики.
 У каждой целевой метрики (kind=leading/lagging, direction=up/down) должна
 быть ≥1 балансирующая (kind=balancing, direction=hold) В ТОЙ ЖЕ проблеме,
 закрывающая очевидный способ «сжульничать». Нет → warning, назови, какой
-способ обхода открыт, и укажи problem.
+способ обхода открыт, и укажи business-problem.
 ```
 
 ## subject-selfmotion
@@ -149,7 +149,7 @@ problem метрики.
 Субъект — носитель собственной воли, чьё поведение меняем; не исполнитель
 задачи. Проверь каждого: это тот, чьё поведение двигает метрику, или
 исполнитель? Есть ли мотивация (боли/желания)? Есть ли связь с сегментом
-(segments)? В finding укажи problem(ы) субъекта.
+(segments)? В finding укажи business-problem(ы) субъекта.
 ```
 
 ## hypothesis-shape
@@ -174,7 +174,7 @@ problem метрики.
 ПОТОМУ ЧТО <на мотивации субъекта> ТОГДА <метрика цели>. Проверь каждую
 часть семантически против subject.motivation и metric. «Тогда» должно
 бить в метрику ТОЙ ЖЕ проблемы, что у гипотезы. Перечисли конкретные
-нарушения, в каждом finding укажи problem гипотезы.
+нарушения, в каждом finding укажи business-problem гипотезы.
 ```
 
 ## task-orphan
@@ -192,7 +192,7 @@ problem метрики.
 Каждая задача (task) обязана проверять конкретную гипотезу. Для каждой
 task: есть ли гипотеза, которую она по смыслу проверяет? Нет → error.
 Также: задача, похожая на инженерный тикет реализации (а не на проверку
-гипотезы), → warning. В finding укажи problem(ы) задачи.
+гипотезы), → warning. В finding укажи business-problem(ы) задачи.
 ```
 
 ## Порядок лучей

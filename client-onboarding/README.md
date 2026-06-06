@@ -2,8 +2,8 @@
 
 **[META / handoff]** Это не аналитический артефакт, а готовый комплект,
 который мы (sftbmb) отдаём заказчику, чтобы он за ~10 минут поставил
-**Claude Desktop**, скачал свой форк `<org>/docs` и сам поработал в
-`*-for-business`-режиме (homework: профиль бизнеса, проблемы, продукт).
+**Claude Desktop**, скачал свой форк `<org>/docs` и сам поработал через
+`/entrypoint-for-business` (homework: профиль бизнеса, проблемы, продукт).
 
 Заказчик получает **один** файл под свою ОС:
 
@@ -34,22 +34,22 @@
 
 `winget`/`brew`/`.dmg` ставят **Claude Desktop** + **Git** → `git clone`
 по нашим кредам тянет форк → **Code → New session → Local → Select
-folder** открывает папку → заказчик пишет `/business-deep-dive-for-business`
-(или другую `*-for-business`-команду, которую мы подскажем) → по
+folder** открывает папку → заказчик пишет `/entrypoint-for-business`
+(единый вход — оркестратор сам разложит разговор по темам) → по
 завершении говорит «передай аналитику», и скилл пушит наработанное в
-единую ветку `client` (тот же `--share`-механизм, что у
-`*-for-business`-скиллов; доступ к репозиторию скилл спрашивает один раз
-и сохраняет; см. их `references/escalation.md`).
+единую ветку `client` (`--share`-механизм клиентского оркестратора;
+доступ к репозиторию скилл спрашивает один раз и сохраняет; см.
+`references/escalation.md`).
 
 Desktop и CLI — один движок и общий конфиг (CLAUDE.md, skills, settings),
-так что `.claude/skills/*-for-business` доступны в Code-вкладке как
-слэш-команды.
+так что `.claude/skills/entrypoint-for-business` доступен в Code-вкладке как
+слэш-команда.
 
 ## Граница с getting-started
 
 [`../docs/getting-started.md`](../docs/getting-started.md) — путь
 **аналитика** (форк → deep-dive-скиллы → `/de-template`). Этот комплект —
-про **заказчика**: только как поставить инструмент и попасть в свой
-`*-for-business`-режим. Связь со слоями (что заполняется) — в README
+про **заказчика**: только как поставить инструмент и попасть в
+`/entrypoint-for-business`. Связь со слоями (что заполняется) — в README
 самих слоёв (`docs/business/`, `docs/swot/`, `docs/hypothesis-map/`,
 `docs/projects/`).

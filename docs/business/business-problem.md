@@ -7,11 +7,11 @@
 > части интервью; питает слои SWOT (`docs/swot/`) и Карты гипотез
 > (`docs/hypothesis-map/`) — каждая запись `factor` · `bet` · `goal` ·
 > `metric` · `subject` · `hypothesis` · `task` принадлежит одной+ проблеме
-> (M:N) через колонку `problem`.
+> (M:N) через колонку `business-problem`.
 >
 > Проблему могут закрывать **несколько проектов**, и проект может закрывать
 > **несколько проблем** (M:N). Связь авторски ведётся на стороне продукта:
-> `projects/<slug>/vision.md` несёт `addresses-problem: [<problem-slug>]`;
+> `projects/<slug>/vision.md` несёт `addresses-problem: [<business-problem-slug>]`;
 > обратную сторону (какие проекты бьют в проблему) сводит `/cross-audit`.
 
 ## Критерии problem (строки business-problem)
@@ -35,9 +35,9 @@
 6. **Провенанс (`from-project`).** Если проблему **проявил или подтвердил**
    дозревший продукт — `from-project` несёт его slug; иначе `—`. Делает
    восходящий поток `project → business` наблюдаемым.
-7. **Slug уникален.** На него ссылается колонка `problem` всех записей
-   SWOT (`docs/swot/`) и Карты гипотез (`docs/hypothesis-map/`), а также
-   `project.vision.addresses-problem`.
+7. **Slug уникален.** На него ссылается колонка `business-problem` всех
+   записей SWOT (`docs/swot/`) и Карты гипотез (`docs/hypothesis-map/`), а
+   также `project.vision.addresses-problem`.
 
 ## Что строка business-problem НЕ
 
@@ -58,7 +58,24 @@
   цены конкурентов» → ✅
 - «гарантируем рост выручки на 20%» → ❌ (метрика подана как гарантия)
 
-| slug | name | problem | guarantee | target | out-of-control | scope | served | from-project | status |
+## Колонки
+
+Этот файл — реестр проблем **БИЗНЕСА** (`business/business-problem`). Не
+путать с `ajtbd/segment-problem` (трение клиента) — то питает этот реестр
+как доказательство, но не подменяет его.
+
+- `slug` — уникальный идентификатор проблемы; на него ссылаются записи SWOT / Карты гипотез и `vision.addresses-problem` · `kebab-case` · обяз.
+- `name` — короткое имя проблемы · текст · обяз.
+- `statement` — текст-формулировка бизнес-боли в деньгах / времени / риске (не ссылка) · текст · обяз.
+- `guarantee` — что гарантируем твёрдо: доставка проекта на 100% по scope · текст · обяз.
+- `target` — на какие метрики целимся, best-effort, без гарантии исхода · текст · обяз.
+- `out-of-control` — внешние факторы вне контроля (сезонность, рынок, действия заказчика) · текст · обяз.
+- `scope` — что входит в проблему и что явно нет · `in: …; out: …` · обяз.
+- `served` — обслуживает ли бизнес рынок этой проблемы · `served` \| `prospective` · обяз.
+- `from-project` — провенанс-ссылка на slug проекта (`docs/projects/<slug>`), проявившего или подтвердившего проблему; след восходящего потока · `slug` \| `—` · опц.
+- `status` — зрелость записи · `draft` \| `stable` · обяз.
+
+| slug | name | statement | guarantee | target | out-of-control | scope | served | from-project | status |
 |---|---|---|---|---|---|---|---|---|---|
 | `<slug>` | <короткое имя> | <бизнес-боль в деньгах / времени / риске> | <что гарантируем: доставка по scope> | <на какие метрики целимся, best-effort> | <внешние факторы вне контроля> | in: <что входит>; out: <что нет> | `served` \| `prospective` | `<project-slug>` \| `—` | `draft` |
 

@@ -9,7 +9,7 @@
 [
   {
     "lens": "<lens-name>",
-    "problem": "<problem-slug>",
+    "business-problem": "<business-problem-slug>",
     "severity": "error" | "warning" | "hint",
     "title": "<одна строка>",
     "evidence": "<2-4 строки: какие slug, какие поля, какой контраст>",
@@ -22,7 +22,7 @@
 | поле | назначение |
 |---|---|
 | `lens` | имя луча (как в rays.md) — для группировки |
-| `problem` | строка реестра, в пределах которой найдено нарушение — для группировки по проблеме (для `problem-tag`, когда `problem` пуст/невалиден, — `"—"`) |
+| `business-problem` | строка реестра, в пределах которой найдено нарушение — для группировки по проблеме (для `problem-tag`, когда `business-problem` пуст/невалиден, — `"—"`) |
 | `severity` | `error` (разрыв методологии) / `warning` (подозрение) / `hint` (повод подумать) |
 | `title` | одна строка, что найдено |
 | `evidence` | конкретика: slug, поля, смысловой контраст |
@@ -35,7 +35,7 @@
 [
   {
     "lens": "hypothesis-shape",
-    "problem": "paid-outflow",
+    "business-problem": "paid-outflow",
     "severity": "error",
     "title": "hypothesis:remind-rebook «тогда» не ссылается на метрику",
     "evidence": "so = «станет лучше с возвратами»; metric = «—». Нет привязки к метрике цели проблемы paid-outflow — эффективность нельзя оценить.",

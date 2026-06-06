@@ -9,7 +9,7 @@
 > это замыкание ветки на измеримый хребет.
 >
 > На `slug` метрики ссылаются `hypothesis.metric`; `goal` — на цель;
-> `problem` — строки `business-problem` (массив; обычно те же, что у её
+> `business-problem` — строки `business-problem` (массив; обычно те же, что у её
 > цели). `current` берётся из `business/current-metric.md`.
 
 ## Критерии metric
@@ -31,7 +31,7 @@
    двигаем). У каждой целевой метрики есть ≥1 `balancing`.
 7. **Направление (`direction`).** `up` / `down` / `hold` (`hold` =
    `balancing`).
-8. **Привязана к проблеме(ам).** `problem` — строки `business-problem`
+8. **Привязана к проблеме(ам).** `business-problem` — строки `business-problem`
    (массив; обычно совпадают с проблемами её цели). Guardrail и «метрика без
    влияния» считаются **в пределах проблемы**.
 
@@ -57,9 +57,25 @@
   acceptance «≥3 п.п. за 30д, p<0.05» → ✅
 - «Улучшить удержание» → ❌ (нет числа, источника, правила приёмки)
 
-| slug | name | problem | goal | current | target | direction | kind | source | attribution | acceptance | evidence | status |
+## Колонки
+
+- `slug` — уникальный идентификатор метрики · слаг · обяз.
+- `name` — короткое человекочитаемое имя метрики · свободный текст · обяз.
+- `business-problem` — ссылка(и) на строки реестра `business/business-problem` (проблема **БИЗНЕСА**; не путать с `ajtbd/segment-problem`) · массив slug-рефов · обяз.
+- `goal` — цель, измеримым параметром которой служит метрика · одиночный slug-реф · обяз.
+- `current` — baseline: текущее значение + дата + окно (из `business/current-metric`) · свободный текст · обяз.
+- `target` — желаемое значение; **best-effort таргет, не гарантия** · свободный текст · обяз.
+- `direction` — направление сдвига · `up` \| `down` \| `hold` (`hold` = `balancing`) · обяз.
+- `kind` — вид метрики · `leading` \| `lagging` \| `balancing` · обяз.
+- `source` — система-источник истины, откуда берётся число · свободный текст · обяз.
+- `attribution` — способ наблюдения **нашего** вклада (A/B, контроль, diff-in-diff) · свободный текст · обяз.
+- `acceptance` — однозначный предикат приёмки: сравнение + окно + порог · свободный текст · обяз.
+- `evidence` — протокол замера (как и кем снимается число) · свободный текст · обяз.
+- `status` — зрелость записи · `draft` \| `stable`.
+
+| slug | name | business-problem | goal | current | target | direction | kind | source | attribution | acceptance | evidence | status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `<slug>` | <имя> | `` [`<problem-slug>`] `` | `` `goal-slug` `` | <число + дата + окно> | <желаемое> | `up` \| `down` \| `hold` | `leading` \| `lagging` \| `balancing` | <система-источник> | <способ атрибуции> | <предикат приёмки> | <протокол замера> | `draft` |
+| `<slug>` | <имя> | `` [`<business-problem-slug>`] `` | `` `goal-slug` `` | <число + дата + окно> | <желаемое> | `up` \| `down` \| `hold` | `leading` \| `lagging` \| `balancing` | <система-источник> | <способ атрибуции> | <предикат приёмки> | <протокол замера> | `draft` |
 
 > Заполняется аналитиком. Пример: `paid-churn` · «Отток платных» ·
 > `` [`paid-outflow`] `` · `` `retain-paid` `` · «8.2%/мес @2026-05-01, окно 30д» · «≤5%/мес» ·

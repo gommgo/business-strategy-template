@@ -16,17 +16,17 @@
    доводится до `goal`/`hypothesis`.
 
 Слой **строгий** (методология LinkedSWOT) и **многопроблемный**: каждая
-запись принадлежит одной+ проблеме (M:N) через колонку `problem` — ссылку
-на строки `business/business-problem.md`.
+запись принадлежит одной+ проблеме (M:N) через колонку `business-problem` —
+ссылку на строки `business/business-problem.md`.
 
 ## Файлы
 
 | файл | сущность | поля |
 |---|---|---|
-| [`factor.md`](factor.md) | SWOT-фактор бизнеса | slug · name · description · **problem** · area · priority · status |
-| [`bet.md`](bet.md) | стратегическая ставка | slug · name · description · **problem** · factors · promoted-to · priority · status |
+| [`factor.md`](factor.md) | SWOT-фактор бизнеса | slug · name · description · **business-problem** · area · priority · status |
+| [`bet.md`](bet.md) | стратегическая ставка | slug · name · description · **business-problem** · factors · promoted-to · priority · status |
 
-`problem` — массив slug-рефов на строки `business/business-problem.md`
+`business-problem` — массив slug-рефов на строки `business/business-problem.md`
 (M:N). `factor.area` — `strength` \| `weakness` \| `trend` \| `threat`.
 
 ## Принципы оформления
@@ -60,7 +60,7 @@
 ## Связи и методологические инварианты (семантические)
 
 Связи **не валидируются slug-целостностью** — они семантические. Все
-инварианты считаются **в пределах одной проблемы** (`problem`).
+инварианты считаются **в пределах одной проблемы** (`business-problem`).
 Методологические инварианты LinkedSWOT ловит **рой агентов** `/swot-audit`
 — смыслом, не grep:
 
@@ -80,8 +80,8 @@
   стороны и тренды/угрозы вырастают из картины бизнеса.
 - `bet.promoted-to` → `hypothesis-map.goal` / `hypothesis-map.hypothesis`
   — ставка дотягивается до измеримой цели или проверяемой гипотезы.
-- `problem` → `business/business-problem.md` — какие строки реестра
-  проблем питает запись.
+- `business-problem` → `business/business-problem.md` — какие строки
+  реестра проблем питает запись.
 
 ## Workflow
 
@@ -99,6 +99,6 @@
 - ❌ Ставка только с внутренними или только с внешними факторами.
 - ❌ Ставка-фича без «чтобы» (есть действие, нет ценности).
 - ❌ Ставка, не доведённая до `goal`/`hypothesis` (мёртвый мост).
-- ❌ Запись без `problem` (непонятно, какой проблемы касается).
+- ❌ Запись без `business-problem` (непонятно, какой проблемы касается).
 - ❌ Frontmatter / каталоги под kind.
 - ❌ Жёсткие slug-валидации. Инварианты ловит рой, не grep.

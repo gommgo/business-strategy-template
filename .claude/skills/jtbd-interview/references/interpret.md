@@ -1,7 +1,8 @@
 # Интерпретация конспекта в кандидатов (фаза interpret)
 
 Превратить транскрипт интервью в **кандидатов** под формы `docs/ajtbd/`.
-Кандидаты падают в `state/candidates/<тема>-<ts>.md`, **не** в
+Кандидаты падают в
+`../entrypoint/state/ajtbd/_interview/candidates/<тема>-<ts>.md`, **не** в
 `docs/ajtbd/`. Промотируют их `/segment-deep-dive` и `/job-graph-deep-dive`
 через intake (режим B).
 
@@ -89,7 +90,9 @@ solution + job** (проблема — следствие конкретного
 
 1. Прочитать транскрипт.
 2. Выделить кандидатов по трём формам — только названное действиями.
-3. Записать `state/candidates/<тема>-<ts>.md` (см. `state-format.md`):
+3. Записать
+   `../entrypoint/state/ajtbd/_interview/candidates/<тема>-<ts>.md` (см.
+   `../entrypoint/references/state-model.md`):
    секции `## Кандидаты-работы`, `## Кандидаты-решения`,
    `## Кандидаты-трения` + ссылка на транскрипт-источник + пометки
    «уточнить ⟨что⟩».

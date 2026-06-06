@@ -171,7 +171,7 @@ Lens: <name>
 Project: <project-slug>   (или «общие слои» для верхнеуровневых углов)
 Source layer: <path-1>     (с уже подставленным <project-slug>)
 Destination layer: <path-2>
-Проблемы этого проекта (для swot/hypothesis-map↔продукт): [<problem-slug>, ...]
+Проблемы этого проекта (для swot/hypothesis-map↔продукт): [<business-problem-slug>, ...]
 
 Цель: семантически сопоставить записи в source и destination — найти
 тупики, противоречия, потери покрытия. Не slug-валидация: связь
@@ -182,8 +182,9 @@ business-problem↔продукт — в границах перечисленн
 Прочитай:
 - <конкретные файлы из source-layer>
 - <конкретные файлы из destination-layer>
-- state скилла, обслуживающего эти слои (для project-скоупленных —
-  state, относящийся к <project-slug>; если файлы есть).
+- ветку state этих слоёв в едином дереве оркестратора
+  `../entrypoint/state/` (по слою; для project-скоупленных —
+  `../entrypoint/state/projects/<project-slug>/`; если файлы есть).
 
 Найди:
 - <конкретные паттерны для этого lens из angles.md>
@@ -450,4 +451,4 @@ suppressions как контекст и **не** генерирует те же 
   пройти по ним постепенно. Повторный прогон — следующая сессия или
   явный `/cross-audit` запуск.
 - **Не предлагать клиенту запустить** `/cross-audit`. Это аналитический
-  инструмент; в `project-deep-dive-for-business` он не упоминается.
+  инструмент; в клиент-режиме (`entrypoint-for-business`) он не упоминается.

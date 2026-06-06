@@ -20,7 +20,7 @@
    запрещена).
 
 Слой **строгий** (методология Карты гипотез) и **многопроблемный**:
-каждая запись принадлежит одной+ проблеме (M:N) через колонку `problem` —
+каждая запись принадлежит одной+ проблеме (M:N) через колонку `business-problem` —
 ссылку на строки `business/business-problem.md`.
 
 ## Юридическая рамка (читать до заполнения)
@@ -38,13 +38,13 @@
 
 | файл | сущность | поля |
 |---|---|---|
-| [`goal.md`](goal.md) | цель карты гипотез (без цифр) | slug · name · description · **problem** · from-bet · deadline · status |
-| [`metric.md`](metric.md) | измеримый параметр цели (best-effort таргет) | slug · name · **problem** · goal · current · target · direction · kind · source · attribution · acceptance · evidence · status |
-| [`subject.md`](subject.md) | субъект, чьё поведение меняем | slug · name · description · **problem** · kind · motivation · segments · users · status |
-| [`hypothesis.md`](hypothesis.md) | гипотеза (если · то · потому что · тогда) | slug · name · **problem** · if · then · because · so · subject · metric · jobs · priority · status |
-| [`task.md`](task.md) | задача проверки гипотезы | slug · name · description · **problem** · hypothesis · status |
+| [`goal.md`](goal.md) | цель карты гипотез (без цифр) | slug · name · description · **business-problem** · from-bet · deadline · status |
+| [`metric.md`](metric.md) | измеримый параметр цели (best-effort таргет) | slug · name · **business-problem** · goal · current · target · direction · kind · source · attribution · acceptance · evidence · status |
+| [`subject.md`](subject.md) | субъект, чьё поведение меняем | slug · name · description · **business-problem** · kind · motivation · segments · users · status |
+| [`hypothesis.md`](hypothesis.md) | гипотеза (если · то · потому что · тогда) | slug · name · **business-problem** · if · then · because · so · subject · metric · jobs · priority · status |
+| [`task.md`](task.md) | задача проверки гипотезы | slug · name · description · **business-problem** · hypothesis · status |
 
-`problem` везде — массив slug-рефов на строки `business/business-problem.md`
+`business-problem` везде — массив slug-рефов на строки `business/business-problem.md`
 (M:N).
 
 ## Принципы оформления
@@ -82,7 +82,7 @@ H1 = имя файла = kind, без frontmatter. Русское слово-п�
 ## Связи и методологические инварианты (семантические)
 
 Связи **не валидируются slug-целостностью** — они семантические. Все
-инварианты считаются **в пределах одной проблемы** (`problem`).
+инварианты считаются **в пределах одной проблемы** (`business-problem`).
 Методологические инварианты Карты гипотез ловит **рой агентов**
 `/hypothesis-map-audit` — смыслом, не grep:
 
@@ -115,7 +115,7 @@ H1 = имя файла = kind, без frontmatter. Русское слово-п�
 - `subject.users` → `projects/<slug>/user` — субъект влияния ↔ пользователь
   продукта (опц.).
 - `hypothesis.jobs` → `ajtbd/job` — гипотеза целит в работу(ы) сегмента (опц.).
-- `problem` → `business/business-problem.md` — каждая запись питает одну+
+- `business-problem` → `business/business-problem.md` — каждая запись питает одну+
   строку реестра проблем; строка без единой `goal` — повисла.
 
 ## Workflow
@@ -137,6 +137,6 @@ H1 = имя файла = kind, без frontmatter. Русское слово-п�
   конкретизация); «тогда» не о метрике цели; «потому что» не о мотивации
   субъекта.
 - ❌ Исполнитель вместо субъекта (субъект — носитель самодвижения).
-- ❌ Запись без `problem` (непонятно, какой проблемы касается).
+- ❌ Запись без `business-problem` (непонятно, какой проблемы касается).
 - ❌ Frontmatter / каталоги под kind.
 - ❌ Жёсткие slug-валидации. Инварианты ловит рой, не grep.

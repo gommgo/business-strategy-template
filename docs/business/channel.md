@@ -35,6 +35,15 @@
 - «Контекстная реклама» → ✅ (`acquisition`)
 - «1С-бухгалтерия» → ❌ (внутренний инструмент, не канал к клиенту)
 
+## Колонки
+
+- `slug` — уникальный идентификатор канала · `kebab-case` · обяз.
+- `name` — короткое имя канала · текст · обяз.
+- `description` — одно предложение, что это за путь · текст · обяз.
+- `kind` — тип канала · `acquisition` \| `sales` \| `delivery` \| `support` \| `other` · обяз.
+- `serves-segment` — кого канал достаёт; ссылка на `slug` сегмента в `ajtbd/segment` · массив `slug` · обяз.
+- `status` — зрелость записи · `draft` \| `stable` · обяз.
+
 | slug | name | description | kind | serves-segment | status |
 |---|---|---|---|---|---|
 | `<slug>` | <короткое имя> | <одно предложение, что это за путь> | `acquisition` \| `sales` \| `delivery` \| `support` \| `other` | `` [`segment-1`, …] `` | `draft` |

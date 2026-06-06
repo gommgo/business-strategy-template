@@ -97,12 +97,10 @@ Success, Non-goals). Открыть через
 
 **Severity:** `error`.
 
-**Где:** все 8 файлов + state обоих скиллов.
+**Где:** все 8 файлов + ветка state проекта в едином дереве оркестратора.
 
 **Обнаружение:** запись `stable`, но в
-`.claude/skills/project-deep-dive/state/<project-slug>/<kind>/<slug>.md`
-или
-`.claude/skills/project-deep-dive-for-business/state/<project-slug>/<kind>/<slug>.md`
+`../entrypoint/state/projects/<project-slug>/project/<kind>/<slug>.md`
 есть строка с маркером `**blocker**` или `**жду аналитика**`.
 
 **Рекомендация:** «status: stable несовместим с открытым blocker'ом в
@@ -274,10 +272,10 @@ state-заметкой
 
 **Severity:** `hint`.
 
-**Где:** все 7 табличных файлов + state обоих скиллов.
+**Где:** все 7 табличных файлов + ветка state проекта в едином дереве оркестратора.
 
 **Обнаружение:** запись `draft` с пустыми обязательными слотами, но в
-`state/<project-slug>/<kind>/<slug>.md` ни одной открытой пометки (или
+`../entrypoint/state/projects/<project-slug>/project/<kind>/<slug>.md` ни одной открытой пометки (или
 файла нет вовсе).
 
 **Рекомендация:** «запись X — draft с дырами, но в state нет

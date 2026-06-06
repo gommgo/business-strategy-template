@@ -7,7 +7,7 @@
 ## Именование файла
 
 ```
-state/transcripts/<YYYY-MM-DD>--<HH-MM>--<тема>.md
+../entrypoint/state/ajtbd/_interview/transcripts/<YYYY-MM-DD>--<HH-MM>--<тема>.md
 ```
 
 - `<YYYY-MM-DD>` — дата интервью (напр. `2026-06-05`).

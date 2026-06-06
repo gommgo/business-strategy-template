@@ -45,7 +45,7 @@ docs/projects/
 Скилы слоёв project / interface / domain / screen работают **в контексте
 одного проекта**. Аналитический скилл принимает `<project-slug>` первым
 аргументом (`/interface-deep-dive <slug> …`); без него — предлагает пикер
-по папкам `docs/projects/`. Клиент-режим (`*-for-business`) всегда
+по папкам `docs/projects/`. Клиент-режим (`/entrypoint-for-business`) всегда
 показывает дружелюбный пикер «какой продукт обсуждаем», без slug.
 
 Новый проект заводит `/project-deep-dive` (копирует форму из

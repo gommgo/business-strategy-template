@@ -1,6 +1,6 @@
 ---
 name: screen-deep-dive
-description: Углублённая проработка аналитических артефактов экранов проекта в `docs/projects/<project-slug>/screens/` (flow · screen · block · shell). Ведёт сессию заполнения через структурированные вопросы (AskUserQuestion), фиксирует контекст в собственной памяти `state/<project-slug>/`, аккумулирует визуальные референсы в `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/`, ходит в web за UI-референсами по явной просьбе, опирается на инвентарь компонентов `@sftbmb/ui` и не выдумывает craft. Использовать всегда, когда речь о screens-слое проекта, заполнении одного из 4 артефактных kind (flow/screen/block/shell), заведении или углублении потока/экрана/блока/каркаса, разборе сырья (скриншот UI, описание макета, транскрипт интервью, ссылка на конкурента), переходе записи `status: draft → stable`, удалении с каскадом, прокладке композиции через семантическое дерево, или копании связей между сущностями screens и сущностями interface. Также — единственная точка входа в screens-слой проекта: новые файлы и правки артефактов делаются через этот скилл.
+description: Углублённая проработка аналитических артефактов экранов проекта в `docs/projects/<project-slug>/screens/` (flow · screen · block · shell). Ведёт сессию заполнения через структурированные вопросы (AskUserQuestion), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/projects/<project-slug>/screens/`), аккумулирует визуальные референсы в `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/`, ходит в web за UI-референсами по явной просьбе, опирается на инвентарь компонентов `@sftbmb/ui` и не выдумывает craft. Использовать всегда, когда речь о screens-слое проекта, заполнении одного из 4 артефактных kind (flow/screen/block/shell), заведении или углублении потока/экрана/блока/каркаса, разборе сырья (скриншот UI, описание макета, транскрипт интервью, ссылка на конкурента), переходе записи `status: draft → stable`, удалении с каскадом, прокладке композиции через семантическое дерево, или копании связей между сущностями screens и сущностями interface. Также — единственная точка входа в screens-слой проекта: новые файлы и правки артефактов делаются через этот скилл.
 ---
 
 # screen-deep-dive
@@ -9,8 +9,9 @@ description: Углублённая проработка аналитическ�
 `docs/projects/<project-slug>/screens/`. Канон формы —
 `docs/projects/_canon/screens/README.md` и README'ы по kind в его
 подпапках. Скилл ведёт сеанс через структурированные вопросы, фиксирует
-контекст в `state/<project-slug>/`, не выдумывает craft и не лезет в
-interface-слой того же проекта своими руками.
+контекст в своей ветке единого дерева state оркестратора
+(`../entrypoint/state/projects/<project-slug>/screens/`), не выдумывает
+craft и не лезет в interface-слой того же проекта своими руками.
 
 Использовать как **единственную точку входа** в screens-слой проекта:
 заведение, углубление, разбор сырья, переход `draft → stable`,
@@ -45,7 +46,7 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
    `docs/projects/<project-slug>/screens/`,
    `docs/projects/<project-slug>/interface/`,
    `docs/projects/<project-slug>/screens/assets/`,
-   `state/<project-slug>/`.
+   ветка state `../entrypoint/state/projects/<project-slug>/screens/`.
 
 ## Точки входа
 
@@ -86,8 +87,10 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 1. Пройтись по
    `docs/projects/<project-slug>/screens/{flows,screens,blocks,shells}/*/index.md`.
 2. Подсчитать: сколько `draft` / `stable` по каждому kind.
-3. Прочитать `state/` (если есть) и собрать открытые вопросы — секции
-   `## Открытые вопросы`; пометки `**blocker**` приоритетны.
+3. Прочитать свою ветку
+   `../entrypoint/state/projects/<project-slug>/screens/` (если есть) и
+   собрать открытые вопросы — секции `## Открытые вопросы`; пометки
+   `**blocker**` приоритетны.
 4. Выявить топ-3 «горячих» кандидата по приоритету:
    - draft-записи с `**blocker**`-вопросами;
    - draft-записи с большим числом пустых обязательных слотов или
@@ -140,32 +143,43 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
   (label кнопки, route, описание блока) от себя. Anti-patterns — да.
   Сама формулировка — нет.
 
-## Память `state/<project-slug>/<kind>/<slug>.md`
+## Память: своя ветка единого дерева state
 
-Заметки лежат **рядом со скиллом**, не в
-`docs/projects/<project-slug>/screens/` и не в корне проекта, и
-скоупятся по проекту:
+Скилл не держит своего `state/`. Per-kind заметки пишутся в **свою ветку**
+единого дерева state оркестратора, не в
+`docs/projects/<project-slug>/screens/` и не в корне проекта; ветка
+скоупится по проекту:
 
 ```
-.claude/skills/screen-deep-dive/state/<project-slug>/<kind>/<slug>.md
+../entrypoint/state/projects/<project-slug>/screens/<kind>/<slug>.md
 ```
 
-Дальше по тексту скилла — короткое `state/`, это сокращение того же
-пути (с учётом текущего `<project-slug>`).
-
-См. `references/state-format.md`. Кратко:
+Формат заметки — канон `../entrypoint/references/state-model.md`. Кратко:
 
 - Файл существует, пока в нём есть хоть одна секция с содержимым.
+- Frontmatter: `kind` · `slug` · `ref` (путь к артефакту).
 - Три возможные секции (любая может отсутствовать):
-  - `## Открытые вопросы` (опц. префикс `**blocker**` у вопроса,
+  - `## Открытые вопросы` (опц. префикс/суффикс `**blocker**` у вопроса,
     блокирующего stable),
   - `## Доменные решения` (неочевидные смысловые решения, не лезущие
     в `description`),
   - `## Что копать дальше` (включая «ui-lib gap: нужен ui:Foo» —
     обратная связь в библиотеку).
-- Если все три пусты — заметку удалить.
+- Если все секции пусты — заметку удалить.
 - Заметка не журнал: не аккумулировать «было/стало», только текущее
   состояние знания. Forward-only.
+
+### Единый контекст: read-only видимость дерева
+
+Для единой картины скилл **read-only** подтягивает всё дерево state
+оркестратора `../entrypoint/state/` (срез `index.md`, открытые нити
+`threads/`, верхнеуровневые слои `business/`, `ajtbd/`, `swot/`,
+`hypothesis-map/`) и клиентский дом `../entrypoint-for-business/state/`.
+Проектные ветки `projects/<…>/` читаются **только по текущему
+`<project-slug>`** (изоляция продуктов сохраняется). Своя ветка
+`projects/<project-slug>/screens/` — **rw**, всё остальное дерево и
+клиентский дом — **read-only**: в чужое не писать. При чтении клиентского
+дома маркер `**жду аналитика**` трактуется как blocker-кандидат.
 
 ## Ассеты
 
@@ -205,8 +219,8 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 - Если в инвентаре нет подходящего — `AskUserQuestion`:
   «предложить новый `ui:Foo` как требование к ui-lib?». По «да» —
   компонент попадает в дерево, и в
-  `state/<project-slug>/<kind>/<slug>.md` в секции
-  `## Что копать дальше` появляется строка
+  `../entrypoint/state/projects/<project-slug>/screens/<kind>/<slug>.md` в
+  секции `## Что копать дальше` появляется строка
   `ui-lib gap: нужен ui:Foo — для <зачем>`.
 
 ## Контракт `draft → stable`
@@ -227,7 +241,8 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 4. Тест-критерий из README соответствующего kind (канон
    `docs/projects/_canon/screens/<kind>/README.md`) явно подтверждён
    аналитиком в этой сессии.
-5. В `state/<project-slug>/<kind>/<slug>.md` нет `**blocker**`-вопросов.
+5. В `../entrypoint/state/projects/<project-slug>/screens/<kind>/<slug>.md`
+   нет `**blocker**`-вопросов.
 6. Дерево в теле артефакта полное:
    - `screen.slot-fills` — все обязательные слоты shell заполнены;
      `states` покрывает минимум `loading`, `empty`, `error`,
@@ -288,8 +303,8 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
    `docs/projects/<project-slug>/screens/<kind>/<slug>/index.md` с
    минимальным frontmatter (`slug + name + description + status=draft`
    + обязательные опции с `—` где допустимо).
-2. В `state/<project-slug>/<kind>/<slug>.md` — секция
-   `## Открытые вопросы` с записью «Заведён как stub в контексте
+2. В `../entrypoint/state/projects/<project-slug>/screens/<kind>/<slug>.md`
+   — секция `## Открытые вопросы` с записью «Заведён как stub в контексте
    `<откуда сослались>` — докопать».
 3. Возврат в исходную сущность, копание продолжается.
 
@@ -315,7 +330,8 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 ## Удаление сущности (каскад)
 
 1. Прочитать все 4 kind-папки
-   `docs/projects/<project-slug>/screens/` + `state/` — найти все
+   `docs/projects/<project-slug>/screens/` + свою ветку
+   `../entrypoint/state/projects/<project-slug>/screens/` — найти все
    ссылки на удаляемый slug. Также проверить
    `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/`.
 2. Показать каскад: «ссылаются X, Y, Z — вот что сломается».
@@ -328,7 +344,9 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 6. Удалить папку
    `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/` целиком,
    если существует.
-7. Удалить `state/<project-slug>/<kind>/<slug>.md`, если существует.
+7. Удалить
+   `../entrypoint/state/projects/<project-slug>/screens/<kind>/<slug>.md`,
+   если существует.
 8. Пересчитать зеркала затронутых блоков (`used-by-screens`,
    `screen.blocks`).
 
@@ -364,7 +382,7 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
   (`docs/projects/<project-slug>/interface/`) своими руками — только
   через предложение аналитику запустить `interface-deep-dive`.
 - Не работать сразу с несколькими проектами в одной сессии — скилл
-  скоупится в один `<project-slug>`.
+  скоупится в один `<project-slug>` (изоляция продуктов сохраняется).
 - Не повышать `draft → stable` без явного подтверждения аналитика.
 - Не понижать `stable → draft` сам — только подсветить и предложить.
 - Не править `block.ux-substrates` молча при рассинхроне с interface —
@@ -372,7 +390,11 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 - Не лазить в web без явной просьбы аналитика.
 - Не сохранять входящие картинки в `assets/` без согласия аналитика.
 - Не вызывать `screen-audit` самостоятельно — только предложить.
-- Не аккумулировать историю в `state/` — forward-only.
-- Не создавать `state/<project-slug>/<kind>/<slug>.md`, если все
-  секции были бы пустыми — заметка появляется только когда есть что
-  записать.
+- Не аккумулировать историю в своей ветке state — forward-only.
+- Не создавать
+  `../entrypoint/state/projects/<project-slug>/screens/<kind>/<slug>.md`,
+  если все секции были бы пустыми — заметка появляется только когда есть
+  что записать.
+- Не писать в чужие ветки дерева `../entrypoint/state/` и в клиентский дом
+  `../entrypoint-for-business/state/` — только read-only; rw только своя
+  ветка `projects/<project-slug>/screens/`.

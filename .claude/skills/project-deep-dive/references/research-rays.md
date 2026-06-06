@@ -140,7 +140,7 @@ docs teams») 5 углов = 5 разных запросов:
 ## Storage
 
 ```
-.claude/skills/project-deep-dive/state/<project-slug>/research/
+../entrypoint/state/projects/<project-slug>/project/research/
   ├── competitors-medreferral-20250603T143000.md
   ├── pdn-constraints-20250603T144500.md
   └── …

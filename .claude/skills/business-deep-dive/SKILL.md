@@ -1,6 +1,6 @@
 ---
 name: business-deep-dive
-description: Углублённая проработка верхнего слоя — профиля бизнеса заказчика и реестра его проблем в `docs/business/` (profile · offering · channel · competitor · current-metric · material · business-problem). Самая первая точка входа: складывает полную картину бизнеса заказчика и формализует, какие проблемы бизнеса решаем (реестр `business-problem` — граница между гарантией доставки по scope и best-effort таргетом метрик). Принимает материалы клиента (сайт, PDF, презентации, соцсети, интервью), запускает рой агентов для web-research рынка и конкурентов, ведёт аналитика через фазы intake → profile → market → structure → metrics → problems → cohesion, заполняет артефакты через структурированные вопросы (AskUserQuestion), фиксирует контекст в собственной памяти `state/`, не выдумывает факты о бизнесе. Сегментацию клиентов передаёт в `/segment-deep-dive` (слой `docs/ajtbd/`); SWOT-факторы и Карту гипотез под реестр проблем — в `/swot-deep-dive` и `/hypothesis-map-deep-dive`. Несёт провенанс восходящего потока (`from-project` у offering/current-metric/business-problem — что проявил дозревший продукт). Использовать всегда, когда речь о docs/business/, онбординге нового заказчика, разборе его материалов, исследовании рынка и конкурентов, фиксации текущих бизнес-метрик (baseline), заведении или границе проблемы бизнеса, или подготовке почвы для SWOT и Карты гипотез. Единственная точка входа в docs/business/ для аналитика.
+description: Углублённая проработка верхнего слоя — профиля бизнеса заказчика и реестра его проблем в `docs/business/` (profile · offering · channel · competitor · current-metric · material · business-problem). Самая первая точка входа: складывает полную картину бизнеса заказчика и формализует, какие проблемы бизнеса решаем (реестр `business-problem` — граница между гарантией доставки по scope и best-effort таргетом метрик). Принимает материалы клиента (сайт, PDF, презентации, соцсети, интервью), запускает рой агентов для web-research рынка и конкурентов, ведёт аналитика через фазы intake → profile → market → structure → metrics → problems → cohesion, заполняет артефакты через структурированные вопросы (AskUserQuestion), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/business/`), не выдумывает факты о бизнесе. Сегментацию клиентов передаёт в `/segment-deep-dive` (слой `docs/ajtbd/`); SWOT-факторы и Карту гипотез под реестр проблем — в `/swot-deep-dive` и `/hypothesis-map-deep-dive`. Несёт провенанс восходящего потока (`from-project` у offering/current-metric/business-problem — что проявил дозревший продукт). Использовать всегда, когда речь о docs/business/, онбординге нового заказчика, разборе его материалов, исследовании рынка и конкурентов, фиксации текущих бизнес-метрик (baseline), заведении или границе проблемы бизнеса, или подготовке почвы для SWOT и Карты гипотез. Единственная точка входа в docs/business/ для аналитика.
 ---
 
 # business-deep-dive
@@ -18,20 +18,20 @@ competitor · current-metric · material), но несёт **строгий ре
 и мир из **множества проектов** (`docs/projects/<slug>/`): факторы SWOT
 каждой проблемы растут из профиля и конкурентов, baseline целевых метрик —
 из `current-metric.md`, а каждая запись SWOT / Карты гипотез тегируется
-проблемой(ами) реестра через колонку `problem` (M:N).
+проблемой(ами) реестра через колонку `business-problem` (M:N).
 
 ## Реестр проблем `business-problem` (строгий kind)
 
 `business-problem.md` — **таблица проблем бизнеса**: какую бизнес-боль (в
 деньгах/времени/риске) решаем и — критично — **границу** между тем, что
 гарантируем (доставка проекта по scope), и тем, на что целимся (метрики,
-best-effort, **не гарантия**). Колонки: `slug · name · problem ·
+best-effort, **не гарантия**). Колонки: `slug · name · statement ·
 guarantee · target · out-of-control · scope · served · from-project ·
-status`. `served` — `served` (бизнес уже обслуживает рынок проблемы) либо
+status` (`statement` — текст-формулировка боли, не ссылка). `served` — `served` (бизнес уже обслуживает рынок проблемы) либо
 `prospective` (разведка под будущую инициативу). `from-project` —
 провенанс восходящего потока (какой дозревший продукт проявил/подтвердил
-проблему; иначе `—`). На строки реестра ссылаются `swot.*.problem`,
-`hypothesis-map.*.problem` и `projects/<slug>/vision.addresses-problem`
+проблему; иначе `—`). На строки реестра ссылаются `swot.*.business-problem`,
+`hypothesis-map.*.business-problem` и `projects/<slug>/vision.addresses-problem`
 (M:N). **Метрику никогда не подавать как гарантию** — это нарушение
 юр-рамки.
 
@@ -70,7 +70,7 @@ read-only читает `docs/ajtbd/segment.md`, чтобы привязать
 ## Сводка состояния (без args)
 
 1. Прочитать `profile.md` + 6 табличных файлов + `business-problem.md` +
-   `state/`.
+   свою ветку `../entrypoint/state/business/`.
 2. Определить **текущую фазу**:
    - `material`-таблица пустая → `intake`;
    - `profile` нет/draft → `profile`;
@@ -146,7 +146,7 @@ business`: когда продукт дозревает (`vision.lifecycle → s
   выбора существующего slug соседа (в т.ч. `from-project` — какой проект
   проявил запись), теста-критерия, promotion кандидата из research.
 - **Other (значения)** — `name`, `description`, `value`, `position`,
-  числа метрик, текст проблемы/границы (`problem`/`guarantee`/`target`/
+  числа метрик, текст проблемы/границы (`statement`/`guarantee`/`target`/
   `out-of-control`/`scope`). Факты о бизнесе **не выдумывать** — брать из
   материалов клиента или подтверждённого research. **Метрику в `target`
   никогда не формулировать как гарантию** — только best-effort таргет
@@ -157,20 +157,26 @@ business`: когда продукт дозревает (`vision.lifecycle → s
 См. `references/research-rays.md`. Основной для `competitor`, полезен для
 `profile`-контекста и `current-metric` (отраслевые бенчмарки). Запуск —
 только по решению аналитика через `AskUserQuestion` (дефолт 5 агентов).
-Кандидаты падают в `state/research/<тема>-<ts>.md`; **авто-вписывание в
-артефакты запрещено** — promotion через `AskUserQuestion`.
+Кандидаты падают в `../entrypoint/state/business/research/<тема>-<ts>.md`;
+**авто-вписывание в артефакты запрещено** — promotion через
+`AskUserQuestion`.
 
-## Память `state/`
+## Память (state)
 
-`.claude/skills/business-deep-dive/state/<kind>/<slug>.md` (+
-`state/profile.md` singleton, `state/business-problem/<slug>.md`,
-`state/research/`). Формат — см. `references/state-format.md`. Три секции,
-forward-only, пустые удаляются. Единый контекст: read-only видимость
-соседних `state/` — клиентский режим
-(`../business-deep-dive-for-business/state/`) и нижележащие слои
-(`../swot-deep-dive/state/`, `../hypothesis-map-deep-dive/state/`,
-`../project-deep-dive*/state/<slug>/` — проектный по текущему продукту).
-В чужой state не писать.
+Своя ветка единого дерева — `../entrypoint/state/business/`: per-kind
+заметки `<kind>/<slug>.md` (+ `profile.md` singleton,
+`business-problem/<slug>.md`, `research/<тема>-<ts>.md`). Формат и
+жизненный цикл заметки (три секции, `**blocker**` блокирует stable,
+forward-only, пустые удаляются) — единый канон
+`../entrypoint/references/state-model.md`.
+
+**Единый контекст (read-only):** для общей картины скилл подтягивает всё
+дерево `../entrypoint/state/` (соседние слои business/ajtbd/swot/
+hypothesis-map и проектные ветки) плюс клиентский дом
+`../entrypoint-for-business/state/`. **Своя ветка `business/` — rw; чужие
+ветки и клиентский дом — read-only**, туда не писать. При чтении
+клиентского дома маркер `**жду аналитика**` — blocker-кандидат
+(эквивалент `**blocker**`).
 
 ## Контракт `draft → stable`
 
@@ -186,7 +192,7 @@ kind подтверждены · anti-patterns не нарушены · тест
 `channel.serves-segment` указывают на сегменты соседнего слоя
 `docs/ajtbd/` — их этот скилл не трогает. Удаление **строки
 `business-problem`** затрагивает нижележащие слои: на неё через колонку
-`problem` ссылаются записи `docs/swot/` и `docs/hypothesis-map/`, а через
+`business-problem` ссылаются записи `docs/swot/` и `docs/hypothesis-map/`, а через
 `addresses-problem` — `vision` проектов. Семантические висяки после
 удаления ловит `/cross-audit`; предупредить аналитика и предложить
 пройтись по зависимым слоям.

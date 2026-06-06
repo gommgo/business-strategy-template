@@ -57,6 +57,18 @@
 - «Сделать платформу управления медицинскими данными» → ❌ (нет
   адресата, нет проверяемого исхода, нет границ)
 
+## Поля
+
+- `Problem` — чьей боли касается продукт, в терминах бизнеса/жизни, не решения · текстовый раздел · обяз.
+- `Success` — что считается успехом: метрика или наблюдаемый сдвиг, проверяемо и адресовано поведению · текстовый раздел · обяз.
+- `Non-goals` — что продукт явно не делает, пункты «не делаем X, потому что Y» · список · обяз.
+- `audience` — тип адресата инициативы · `b2b` \| `b2c` \| `b2b2c` \| `internal` \| `gov` · обяз.
+- `intent` — тип инициативы · `new-service` \| `improve-service` \| `internal-problem` \| `client-problem` · обяз.
+- `market-maturity` — зрелость рынка: разведка нового vs обслуживаемый · `prospective` \| `served` · обяз.
+- `lifecycle` — жизненный цикл продукта, отдельно от `status` записи; переход в `stable` запускает восходящий поток `project → business` · `draft` \| `accepted` \| `build` \| `mvp` \| `beta-testing` \| `stable` \| `updating` · обяз.
+- `addresses-problem` — ссылки на строки реестра `business/business-problem` (проблема **бизнеса**), которые продукт закрывает; авторская сторона связи продукт↔проблема; не путать с `ajtbd/segment-problem` (трение клиента) · `` [`<business-problem-slug>`] `` (M:N) · обяз.
+- `status` — зрелость записи · `draft` \| `stable` · обяз.
+
 ---
 
 ## Problem
@@ -85,5 +97,5 @@ slug + краткое why.>
 **intent:** `new-service` \| `improve-service` \| `internal-problem` \| `client-problem`
 **market-maturity:** `prospective` \| `served`
 **lifecycle:** `draft` \| `accepted` \| `build` \| `mvp` \| `beta-testing` \| `stable` \| `updating`
-**addresses-problem:** `` [`<problem-slug>`] `` — строки `business/business-problem`, которые закрывает продукт (M:N).
+**addresses-problem:** `` [`<business-problem-slug>`] `` — строки `business/business-problem`, которые закрывает продукт (M:N).
 **status:** `draft`

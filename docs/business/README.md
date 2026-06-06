@@ -76,7 +76,7 @@ Frontmatter не нужен. Русское слово-перевод строг
   KPI становится baseline целевой метрики.
 - `business-problem` ← `swot` / `hypothesis-map` /
   `projects/<slug>/vision.addresses-problem` — реестр проблем, на который
-  ссылаются SWOT, Карта гипотез и продукты (M:N через колонку `problem`).
+  ссылаются SWOT, Карта гипотез и продукты (M:N через колонку `business-problem`).
 - `business.offering` / `current-metric` / `business-problem` ← дозревший
   продукт (`*.from-project`) — провенанс восходящего потока.
 - `business.offering` / `competitor` ↔ `ajtbd/solution` — собственный офер
@@ -87,7 +87,7 @@ Frontmatter не нужен. Русское слово-перевод строг
 
 ```
 /business-deep-dive             — единая точка входа аналитика.
-/business-deep-dive-for-business — режим «домашнее задание» для клиента.
+/entrypoint-for-business        — режим «домашнее задание» для клиента (единый вход на все темы).
 /cross-audit                    — сквозная проверка с ajtbd / swot / hypothesis-map / project.
 ```
 

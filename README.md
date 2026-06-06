@@ -66,9 +66,11 @@ business-problem (реестр)                                                 
   boundary / surface / integration / constraint / market, плюс вложенные
   `interface/`, `domains/`, `screens/`.
 
-Каждый слой ведёт свой deep-dive-скилл через `AskUserQuestion`, держит state в
-`.claude/skills/<имя>/state/`, не выдумывает домен и не повышает `draft → stable`
-без подтверждения. Сквозную консистентность ловит рой `/cross-audit`.
+Каждый слой ведёт свой deep-dive-скилл через `AskUserQuestion`, пишет state в
+свою ветку единого дерева оркестратора (`.claude/skills/entrypoint/state/`;
+клиент-режим — `.claude/skills/entrypoint-for-business/state/`), не выдумывает
+домен и не повышает `draft → stable` без подтверждения. Сквозную
+консистентность ловит рой `/cross-audit`.
 
 ## Место в экосистеме
 
@@ -132,8 +134,8 @@ business (профиль + реестр проблем) → ajtbd (спрос п
 восходящую сверку `project → business` (новые оферы/метрики/проблемы с провенансом
 `from-project`).
 
-Суффикс `-for-business` у исполнителей — клиент-режим: бизнес-язык без жаргона,
-эскалация «нужен аналитик», push в ветку `client`.
+Клиент ведёт сессию сам через единый вход `/entrypoint-for-business` —
+бизнес-язык без жаргона, эскалация «нужен аналитик», push в ветку `client`.
 
 ## Инварианты
 

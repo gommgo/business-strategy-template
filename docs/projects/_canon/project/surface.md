@@ -50,6 +50,16 @@ job-to-be-done?»
 - `internal-grafana` → ❌ (внутренний tool, не продуктовая
   поверхность).
 
+## Колонки
+
+- `slug` — устойчивый идентификатор записи · `kebab-case` · обяз.
+- `name` — короткое имя поверхности · текст · обяз.
+- `description` — одно предложение, что это за точка встречи · текст · обяз.
+- `type` — тип поверхности (один) · `web` \| `mobile` \| `api` \| `admin` \| `bot` \| `desktop` \| `embed` \| `other` · обяз.
+- `lives-at` — конкретное «где»: домен / app-id / мессенджер / embedding-host · текст · обяз.
+- `user` — ссылки на пользователей (`user`), которых поверхность обслуживает · `` [`user-slug`, …] `` · обяз.
+- `status` — зрелость записи · `draft` \| `stable` · обяз.
+
 | slug | name | description | type | lives-at | user | status |
 |---|---|---|---|---|---|---|
 | `<slug>` | <короткое имя> | <одно предложение> | `web` \| `mobile` \| `api` \| `admin` \| `bot` \| `desktop` \| `embed` \| `other` | <домен / app-id / messenger / host> | `` [`user-1`, …] `` | `draft` |
