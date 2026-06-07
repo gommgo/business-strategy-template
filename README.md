@@ -30,7 +30,7 @@ profile · offering ·         segment · job ·             factor · bet     g
 channel · competitor ·       job-graph · solution ·                       subject ·               boundary / surface / ...
 current-metric · material ·  segment-problem                              hypothesis · task          │
 business-problem (реестр)                                                                            ├─ interface/  (UX: who/situation/zone)
-                                                                                                     ├─ domains/    (опц. DDD-контексты)
+stakeholder · stakeholder-map                                                                        ├─ domains/    (опц. DDD-контексты)
                                                                                                      └─ screens/    (flow/screen/block/shell)
                                                                                                             │
                                                                                                             ▼  ручная работа автора макета
@@ -49,9 +49,14 @@ business-problem (реестр)                                                 
 
 ## Методология в двух словах
 
-- **business** (нестрогий) — кто этот бизнес: профиль, оффер, каналы, конкуренты,
-  текущие KPI **и реестр проблем бизнеса** (`business-problem` — граница гарантии
-  scope и best-effort таргета). Источник — материалы клиента + рой web-research.
+- **business** (нестрогая картина + строгие реестры) — кто этот бизнес: профиль,
+  оффер, каналы, конкуренты, текущие KPI, **реестр проблем бизнеса**
+  (`business-problem` — граница гарантии scope и best-effort таргета) **и реестр
+  стейкхолдеров** (`stakeholder` · `stakeholder-map` — конкретные люди-решатели,
+  их роли/власть/стойка/драйверы и карты связей и вовлечения; единственное место
+  с конкретными лицами, вне handoff; сверка стойки со swot/hypothesis-map —
+  `/cross-audit` углы `stakeholder-*`). Источник — материалы клиента + рой
+  web-research.
 - **ajtbd** (строгий, Advanced JTBD) — кто наш сегмент **по работам**, а не по
   демографии: сегмент (бандл Core Jobs + 1 Big Job + Score), граф работ (CPR + 11
   механик ценности), нанятые решения и трения. Многоволновой рой web-research +
@@ -113,7 +118,7 @@ business-problem (реестр)                                                 
 Семантический поток слоёв (зависимости сверху вниз) — опора маршрутизации:
 
 ```
-business (профиль + реестр проблем) → ajtbd (спрос по работам) → swot (ставки)
+business (профиль + реестр проблем + стейкхолдеры) → ajtbd (спрос по работам) → swot (ставки)
   → hypothesis-map (цель · метрика) → projects/<slug> (продукт → interface / domains / screens)
 ```
 
@@ -121,7 +126,7 @@ business (профиль + реестр проблем) → ajtbd (спрос п
 
 | слой | исполнители | аудит |
 |---|---|---|
-| `business` (+ реестр `business-problem`) | `/business-deep-dive` | — |
+| `business` (+ реестр `business-problem` + стейкхолдеры `stakeholder` · `stakeholder-map`) | `/business-deep-dive` | `/cross-audit` (своего узкого нет) |
 | `ajtbd` | `/segment-deep-dive` · `/job-graph-deep-dive` · `/jtbd-interview` | `/ajtbd-audit` |
 | `swot` | `/swot-deep-dive` | `/swot-audit` |
 | `hypothesis-map` | `/hypothesis-map-deep-dive` | `/hypothesis-map-audit` |
