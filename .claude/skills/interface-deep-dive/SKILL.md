@@ -29,15 +29,16 @@ description: "Углублённая проработка аналитическ
 | вызов | проект |
 |---|---|
 | `/interface-deep-dive <project-slug> …` | взять `<project-slug>` |
-| `/interface-deep-dive …` (без slug) | `AskUserQuestion`-пикер по папкам `docs/projects/` (исключая `_template`) |
+| `/interface-deep-dive …` (без slug) | `AskUserQuestion`-пикер **по именам** проектов (исключая `_template`) |
 
 Алгоритм определения проекта при запуске:
 
 1. Если первый аргумент совпадает с именем подпапки `docs/projects/`
    (кроме `_template`) — это `<project-slug>`; остаток args — точка входа.
-2. Иначе — собрать список подпапок `docs/projects/` (исключить
-   `_template`) и через `AskUserQuestion` спросить «Какой проект?». Если
-   проектов нет — сказать «сначала заведи проект через
+2. Иначе — собрать проекты (подпапки `docs/projects/`, исключить
+   `_template`) и через `AskUserQuestion` спросить «Какой проект?»,
+   **показывая имена** (заголовок из `vision`; slug — деталь в описании).
+   Если проектов нет — сказать «сначала заведи проект через
    `/project-deep-dive`», выйти.
 3. Все дальнейшие чтения/записи скоупятся в выбранный проект:
    `docs/projects/<project-slug>/interface/` и ветку state

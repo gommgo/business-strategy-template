@@ -28,9 +28,10 @@ state оркестратора (`../entrypoint/state/projects/<project-slug>/pro
 - `/project-deep-dive <project-slug> …` — первый аргумент задаёт
   проект; остальные args — kind / slug / сырьё / флаги.
 - Без `<project-slug>` — скилл строит пикер через `AskUserQuestion` по
-  подкаталогам `docs/projects/`, **исключая `_template`** (это образец
-  формы, не проект). Опции: каждый существующий проект + «Завести новый
-  проект» (Other → новый slug).
+  существующим проектам, **исключая `_template`** (это образец формы, не
+  проект). Опции — **человекочитаемые имена** проектов (заголовок из
+  `vision`; slug — мелкой деталью в описании) + «Завести новый проект».
+  slug аналитик не вводит (см. `.claude/rules/naming.md`).
 - Если переданный slug не существует среди папок — переспросить через
   `AskUserQuestion`: «Проекта `<slug>` нет. Завести новый / выбрать из
   существующих?».
@@ -46,8 +47,10 @@ state оркестратора (`../entrypoint/state/projects/<project-slug>/pro
 новую папку `docs/projects/<new-slug>/`. Каталоги руками не плодим —
 скаффолдит скилл:
 
-1. Спросить `<new-slug>` (kebab-case) через `AskUserQuestion` (Other),
-   если не задан.
+1. Спросить **человекочитаемое имя** продукта (свободный текст). `slug`
+   вывести самому из имени (транслит в kebab-case, при коллизии — суффикс)
+   и показать одной строкой для контроля — аналитик kebab-case не
+   придумывает (см. `.claude/rules/naming.md`).
 2. Скопировать форму: `vision.md` + 7 kind-файлов (`user.md`,
    `capability.md`, `boundary.md`, `surface.md`, `integration.md`,
    `constraint.md`, `market.md`) из `docs/projects/_template/project/` в
@@ -114,7 +117,7 @@ slug-рефов на строки реестра; связь M:N — пробл�
 | `/project-deep-dive <project-slug> <свободный текст / транскрипт>` | сырьё → разбор (режим B) |
 | `/project-deep-dive <project-slug> --phase <name>` | принудительно работать в указанной фазе |
 | `/project-deep-dive <project-slug> --research <kind>:<query>` | запустить рой агентов на тему |
-| `/project-deep-dive --new <new-slug>` | завести новый проект из формы `_template/project/` |
+| `/project-deep-dive --new` | завести новый проект из формы `_template/project/` (спросит имя, slug выведет сам) |
 
 `kind` ∈ {`vision`, `user`, `capability`, `boundary`, `surface`,
 `integration`, `constraint`, `market`}.
@@ -130,7 +133,7 @@ slug-рефов на строки реестра; связь M:N — пробл�
 ## Что делать сразу при запуске
 
 1. **Определить проект.** Разобрать первый аргумент как `<project-slug>`;
-   если не задан или не совпал с папкой — пикер по `docs/projects/`
+   если не задан или не совпал с папкой — пикер **по именам** проектов
    (исключая `_template`) + опция «Завести новый». Зафиксировать выбранный
    `<project-slug>` на всю сессию.
 2. Прочитать `docs/projects/_template/project/README.md` — освежить канон

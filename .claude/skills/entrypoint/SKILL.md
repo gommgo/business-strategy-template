@@ -107,13 +107,18 @@ state (`references/state-model.md`) + быстрый проход по `docs/`.
    ajtbd             3 сегмента stable · граф работ: 2/3 собраны
    swot              факторы по 4 проблемам · 1 проблема без ставок
    hypothesis-map    метрики по 3 проблемам · 1 цель без метрики
-   projects/clinic   фаза surface · vision stable, lifecycle: mvp
-   projects/intake   фаза discovery · vision draft
-     interface       who/situation заполнены · zone — пусто
-     screens         —
+   Клиника удержания (clinic)   фаза surface · vision stable, lifecycle: mvp
+   Интейк-форма (intake)        фаза discovery · vision draft
+     interface                  who/situation заполнены · zone — пусто
+     screens                    —
    Открытые нити: 1 (разбор транскрипта 2026-06-06)
    От клиента ждёт аналитика: 2 вопроса (метрики)
    ```
+
+   Проекты в сводке и пикерах называются **по-человечески** (имя из
+   `vision`); slug — деталь в скобках, аналитик его не вводит (см.
+   `.claude/rules/naming.md`). Жаргон (`draft`/`stable`, `kind`) аналитику
+   виден, но можно дублировать человеческим «в работе/закрыто».
 
 5. Через `AskUserQuestion` (до 4 опций) предложить:
    - продолжить открытую нить;

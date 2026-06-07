@@ -30,7 +30,7 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 | вызов | проект |
 |---|---|
 | `/screen-deep-dive <project-slug> …` | взять `<project-slug>` |
-| `/screen-deep-dive …` (без slug) | `AskUserQuestion`-пикер по папкам `docs/projects/` (исключая `_template`) |
+| `/screen-deep-dive …` (без slug) | `AskUserQuestion`-пикер **по именам** проектов (исключая `_template`) |
 
 Поскольку точки входа допускают `<kind>:<slug>` (например,
 `screen-deep-dive my-app:login`), `<project-slug>` отделяется от
@@ -39,7 +39,8 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 
 1. Если первый аргумент совпадает с именем подпапки `docs/projects/`
    (кроме `_template`) — это `<project-slug>`; остаток args — точка входа.
-2. Иначе — пикер по подпапкам `docs/projects/` (исключить `_template`).
+2. Иначе — пикер **по именам** проектов (подпапки `docs/projects/`,
+   исключить `_template`; опции — имена из `vision`, slug — деталь).
    Если проектов нет — сказать «сначала заведи проект через
    `/project-deep-dive`», выйти.
 3. Все чтения/записи скоупятся в выбранный проект:

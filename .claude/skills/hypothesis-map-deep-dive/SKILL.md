@@ -43,10 +43,11 @@ state оркестратора (`../entrypoint/state/hypothesis-map/`), **не �
 - **Baseline из бизнеса.** `metric.current` берётся из
   `business/current-metric.md` (read-only) — текущий KPI становится
   baseline целевой.
-- **Субъект из сегмента AJTBD.** `subject.segments` (обяз.) связывает
-  субъект влияния с `ajtbd/segment`; мотивация субъекта опирается на
-  success-criteria сегмента и его трения (`segment-problem`), не
-  выдумывается. Опц. `subject.users` — связь с пользователем продукта.
+- **Субъект из сегмента AJTBD.** `subject.segments` связывает субъект
+  влияния с `ajtbd/segment` — обяз. для `positive` (мотивация субъекта
+  опирается на success-criteria сегмента и его трения `segment-problem`,
+  не выдумывается); для `negative` (конкурент, регулятор, внешняя сила)
+  сегмент опц. Опц. `subject.users` — связь с пользователем продукта.
 - **Гипотеза в работу.** `hypothesis.jobs` (опц.) — на какую работу
   сегмента (`ajtbd/job`) целит гипотеза.
 

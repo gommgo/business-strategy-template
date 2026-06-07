@@ -19,12 +19,12 @@ README'ы по 4 kind в его подпапках. Аудит **читает и
 | вызов | проект |
 |---|---|
 | `/screen-audit <project-slug> …` | взять `<project-slug>` |
-| `/screen-audit …` (без slug) | `AskUserQuestion`-пикер по папкам `docs/projects/` (исключая `_template`) |
+| `/screen-audit …` (без slug) | `AskUserQuestion`-пикер **по именам** проектов (исключая `_template`) |
 
 1. Если первый аргумент совпадает с именем подпапки `docs/projects/`
    (кроме `_template`) — это `<project-slug>`; остаток args — scope.
-2. Иначе — пикер по подпапкам `docs/projects/` (исключить `_template`).
-   Если проектов нет — сказать «нечего аудитить», выйти.
+2. Иначе — пикер **по именам** проектов (подпапки `docs/projects/`,
+   исключить `_template`). Если проектов нет — сказать «нечего аудитить», выйти.
 3. Все чтения скоупятся в `docs/projects/<project-slug>/screens/`,
    `docs/projects/<project-slug>/interface/` (зеркала) и
    `audit-state/<project-slug>/`.
