@@ -9,8 +9,8 @@
 3. **`Что <kind> НЕ` не нарушены** — anti-patterns проверены, ❌.
 4. **`Тест-критерий` ✅.**
 5. **Факт прослежен до `material`** — для записей profile/offering/
-   channel/current-metric есть источник (material-ссылка в state или
-   подтверждённый research). Нет `**blocker**` в state.
+   channel/current-metric/stakeholder есть источник (material-ссылка в
+   state, транскрипт или подтверждённый research). Нет `**blocker**` в state.
 
 Все 5 ✅ → `AskUserQuestion`: «Повышаем `<kind>:<slug>` в stable?» По
 «да» — `status: draft → stable`.
@@ -24,6 +24,12 @@
   по scope) vs `target` (метрики best-effort), без `out-of-control` и без
   `served`. Не становится stable, если метрика где-то подана как гарантия
   (нарушение юр-рамки) или `target` смешан с `guarantee`.
+- `stakeholder` не stable без `deal-role`, `power`/`interest`, `attitude`
+  и `motivation`/`win`; имена и психографика — только от клиента/интервью,
+  не выдуманы (минимизация: берётся ровно нужное, без биографии).
+  `stakeholder-map` не stable без ЛПР и держателя бюджета среди `members`,
+  без графа связей (`influence-edges`) и пути вовлечения (`engagement-path`
+  без разрыва к ЛПР; властный блокер с митигацией в `risks`).
 - Запись на основе **неподтверждённого** web-research остаётся `draft`,
   пока аналитик не подтвердил факт.
 

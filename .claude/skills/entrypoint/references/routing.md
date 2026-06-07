@@ -10,6 +10,7 @@
 | слой | kinds | исполнитель | аудит |
 |---|---|---|---|
 | `docs/business/` | `profile` · `offering` · `channel` · `competitor` · `current-metric` · `material` · `business-problem` | `/business-deep-dive` | `/cross-audit` (своего узкого нет) |
+| `docs/business/` (стейкхолдеры) | `stakeholder` · `stakeholder-map` | `/business-deep-dive` (фаза `stakeholders`) | `/cross-audit` (углы `stakeholder-*`; своего узкого нет) |
 | `docs/ajtbd/` (сегменты) | `segment` | `/segment-deep-dive` | `/ajtbd-audit` |
 | `docs/ajtbd/` (граф работ) | `job` · `job-graph` · `solution` · `segment-problem` | `/job-graph-deep-dive` | `/ajtbd-audit` |
 | `docs/ajtbd/` (живые интервью) | сырьё-кандидаты | `/jtbd-interview` (опц., тяжёлый, по явному запросу) | — |
@@ -35,6 +36,7 @@
 | «текущие KPI, числа бизнеса сейчас» (с датой/источником) | `business` / `current-metric` |
 | «вот документ / сайт / выгрузка» (источник) | `business` / `material` (провенанс) |
 | «какую боль бизнеса решаем, граница гарантии/таргета» | `business` / `business-problem` (реестр проблем) |
+| «кто в бизнесе принимает решение / спонсор / держит бюджет / блокирует / на кого влияет» | `business` / `stakeholder` · `stakeholder-map` |
 | «кто наши клиенты — группа по общим работам, не демография» | `ajtbd` / `segment` |
 | «что клиент пытается сделать / зачем / чем пользуется сейчас / где тяжело» | `ajtbd` / граф работ (`job` · `solution` · `segment-problem` · `job-graph`) |
 | «нужны живые интервью с клиентами» | `ajtbd` / `/jtbd-interview` |
@@ -61,8 +63,11 @@
   business-problem.
 - **четвёрка адресатов**: `who` (участник системы, interface) ≠ `user`
   (пользователь продукта, project) ≠ `segment` (рынок по работам, ajtbd) ≠
-  `subject` (носитель самодвижения, hypothesis-map). Сигнал решает, в
-  какой слой.
+  `subject` (носитель самодвижения, hypothesis-map) — все смотрят **наружу**
+  (рынок / адресат решения). `stakeholder` (business) — пятый, смотрит
+  **внутрь** заказчика: человек-решатель в политике проекта, не рыночное
+  лицо. Сигнал «человек, влияющий на судьбу проекта внутри заказчика» →
+  `stakeholder`; один человек обеими линзами — `manifests-as`.
 
 ## Режим → как маршрутизировать
 
@@ -81,6 +86,7 @@
 | инварианты LinkedSWOT (по каждой проблеме) | `/swot-audit` |
 | инварианты Карты гипотез (по каждой проблеме) | `/hypothesis-map-audit` |
 | инварианты AJTBD (по каждому сегменту) | `/ajtbd-audit` |
+| стыки стейкхолдеров со swot / hypothesis-map | `/cross-audit` (углы `stakeholder-subject` · `stakeholder-factor` · `stakeholder-strategy`) |
 | внутрипроектная консистентность продукта | `/project-audit <slug>` |
 | консистентность interface проекта | `/interface-audit <slug>` |
 | консистентность screens проекта | `/screen-audit <slug>` |

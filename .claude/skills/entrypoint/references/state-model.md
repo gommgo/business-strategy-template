@@ -20,7 +20,7 @@ Forward-only: закрытое **удаляется**, история живёт
 ├── threads/<slug>.md        ← оркестратор: открытая нить (маршрут разбора)
 ├── business/                ← business-deep-dive
 │   ├── profile.md
-│   └── <kind>/<slug>.md         (offering · channel · competitor · current-metric · material · business-problem)
+│   └── <kind>/<slug>.md         (offering · channel · competitor · current-metric · material · business-problem · stakeholder · stakeholder-map)
 ├── ajtbd/                   ← segment-deep-dive + job-graph-deep-dive
 │   ├── <kind>/<slug>.md         (segment · job · job-graph · solution · segment-problem)
 │   ├── hypotheses.md            (гипотезы работ до подтверждения)

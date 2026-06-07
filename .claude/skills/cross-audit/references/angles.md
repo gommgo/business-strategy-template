@@ -22,7 +22,8 @@
   swot ↔ hypothesis-map, без проекта): `factor-business`,
   `currentmetric-metric`, `segmentproblem-bizproblem`, `segment-subject`,
   `solution-business`, `business-segment`, `prospective-consistency`,
-  `provenance-upstream`.
+  `provenance-upstream`, `stakeholder-subject`, `stakeholder-factor`,
+  `stakeholder-strategy`.
 - **Верхнеуровневый M:N, прогон один раз над всеми проектами**:
   `addresses-problem-bizproblem`.
 - **По каждому проекту** (общие слои swot/hypothesis-map ↔ продукт проекта;
@@ -799,6 +800,92 @@ lifecycle: stable — несут ли связанные сущности нав
 как «висяк». В finding указывай проект-провенанс.
 ```
 
+## stakeholder-subject
+
+**Source:** `docs/business/stakeholder.md` (`manifests-as`, `attitude`,
+`motivation`).
+**Destination:** `docs/hypothesis-map/subject.md`.
+**Скоуп:** один раз (business ↔ hypothesis-map).
+**Применим если:** оба наполнены.
+
+**Что искать:**
+- `error`: `stakeholder.manifests-as` с префиксом `subject:` указывает на
+  субъекта, которого нет в `subject.md`.
+- `warning`: лицо и его субъект (через `manifests-as`) несут **рассинхрон
+  мотиваций** — один человек, два разных портрета.
+- `hint`: властный внутренний `blocker`/`skeptic` стейкхолдер, по смыслу
+  противодействующий, не отражённый как `negative`-субъект там, где его
+  поведение двигает метрику (кандидат в `subject.kind: negative`).
+
+**Промпт-добавка:**
+```
+stakeholder — человек-решатель ВНУТРИ заказчика; subject — носитель
+поведения, двигающего метрику. Один человек может быть обоими (через
+stakeholder.manifests-as = subject:<slug>); властный внутренний блокер ≈
+negative-субъект.
+
+Прямая сторона: каждый manifests-as subject:<slug> резолвится в реальный
+subject? Нет — error. Согласованность мотиваций лица и субъекта — рассинхрон
+warning. Властный blocker/skeptic стейкхолдер без negative-субъекта там,
+где он двигает метрику, — hint. НЕ путай: это РАЗНЫЕ сущности, связь
+семантическая.
+```
+
+## stakeholder-factor
+
+**Source:** `docs/business/stakeholder.md` (`attitude`, `power`).
+**Destination:** `docs/swot/factor.md`.
+**Скоуп:** один раз (business ↔ swot).
+**Применим если:** оба наполнены.
+
+**Что искать:**
+- `hint`: властный `champion` (`power: high`, `attitude: champion`), не
+  отражённый ни одним SWOT-фактором — сильный внутренний союзник как
+  сила-фактор.
+- `hint`: властный `blocker`/`skeptic` (`power: high`), не отражённый ни
+  одним фактором — внутреннее сопротивление как слабость/угроза-фактор.
+
+**Промпт-добавка:**
+```
+Люди-решатели часто И ЕСТЬ внутренние факторы SWOT: властный champion —
+сила, властный blocker/skeptic — слабость/угроза. Для властных
+стейкхолдеров (power=high) с выраженной стойкой: отражён ли каждый
+соответствующим factor? Не отражён — hint (кандидат в фактор). Связь
+семантическая, не slug; это материал для аналитика, не error.
+```
+
+## stakeholder-strategy
+
+**Source:** `docs/business/stakeholder.md` (`strategic-stance`, `power`).
+**Destination:** `docs/swot/bet.md`, `docs/hypothesis-map/goal.md`.
+**Скоуп:** один раз (business ↔ swot/hypothesis-map).
+**Применим если:** есть стейкхолдеры со `strategic-stance` и есть ставки/цели.
+
+**Что искать:**
+- `warning`: `bet`/`goal`, **противоречащий** стратегической стойке
+  властного стейкхолдера (`power: high`) — стратегия идёт против ключевого
+  лица, которое будет её санкционировать/финансировать (стратегический риск:
+  стратегия в вакууме от людей).
+- `hint`: властный стейкхолдер, чью стойку **не несёт ни одна** ставка/цель
+  — незадействованная опора (мог бы стать чемпионом, но стратегия мимо его
+  взглядов).
+
+**Промпт-добавка:**
+```
+strategic-stance — куда властное лицо хочет/не хочет движения бизнеса; bet
+(SWOT) и goal (Карта гипотез) — стратегические шаги. Стратегия не должна
+противоречить стойке тех, кто её санкционирует/финансирует, иначе она
+мертва на старте.
+
+Для каждой ставки/цели: не бьёт ли она в стойку какого-либо властного
+(power: high) стейкхолдера (по смыслу — противоречит тому, что он
+поддержал бы)? Бьёт — warning (стратегия против ключевого лица).
+
+Обратно: властный стейкхолдер со strategic-stance, чью линию не несёт ни
+одна ставка/цель — hint (незадействованная опора). Скоупь к властным лицам;
+противоречие со слабым лицом — НЕ finding. Связь семантическая, не slug.
+```
+
 ## capability-hypothesis
 
 **Source:** `docs/projects/<slug>/capability.md` (поле `hypotheses`).
@@ -911,31 +998,37 @@ situation.hypotheses — авторское ребро interface → hypothesis-
 8. `prospective-consistency` (market-maturity ↔ served сущностей наверху)
 9. `provenance-upstream` (from-project ↔ проект: обратная сторона
    восходящего потока, согласованность market-maturity ↔ served ↔ from-project)
+10. `stakeholder-subject` (business → hypothesis-map: лицо ↔ субъект через
+    manifests-as; властный блокер ≈ negative-субъект)
+11. `stakeholder-factor` (business → swot: властный champion/blocker как
+    фактор)
+12. `stakeholder-strategy` (business → swot/hypothesis-map: стойка властного
+    лица ↔ bet/goal — стратегия не против ключевого человека)
 
 **По каждому проекту** (для каждого `<slug>` из `docs/projects/`, кроме
 `_template`; раскрывается в пары `проект × lens`):
 
-10. `goal-vision` (проблема → продукт; скоуп к проблемам проекта)
-11. `subject-user` (проблема → продукт; скоуп к проблемам проекта)
-12. `segment-user` (ajtbd → продукт)
-13. `job-vision` (ajtbd → продукт: Big/Core Job ↔ vision.Success)
-14. `segmentproblem-vision` (ajtbd → продукт: трение ↔ vision.Problem)
-15. `mechanic-capability` (ajtbd → продукт: механика ценности ↔ capability)
-16. `bet-capability` (проблема → продукт; скоуп к проблемам проекта)
-17. `capability-hypothesis` (продукт → hypothesis-map: capability.hypotheses)
-18. `capability-job` (продукт → ajtbd: capability.jobs)
-19. `user-who` (foundation, продукт → interface проекта)
-20. `surface-zone` (foundation)
-21. `capability-situation` (foundation)
-22. `situation-job` (interface → ajtbd: situation.jobs)
-23. `situation-hypothesis` (interface → hypothesis-map: situation.hypotheses)
-24. `capability-domain` (если у проекта есть `domains/`)
-25. `integration-domain` (если у проекта есть `domains/`)
-26. `surface-screen` (если у проекта есть `screens/`)
-27. `constraint-surface` (cross-внутри-project)
-28. `market-capability` (часто даёт hints, не error)
+13. `goal-vision` (проблема → продукт; скоуп к проблемам проекта)
+14. `subject-user` (проблема → продукт; скоуп к проблемам проекта)
+15. `segment-user` (ajtbd → продукт)
+16. `job-vision` (ajtbd → продукт: Big/Core Job ↔ vision.Success)
+17. `segmentproblem-vision` (ajtbd → продукт: трение ↔ vision.Problem)
+18. `mechanic-capability` (ajtbd → продукт: механика ценности ↔ capability)
+19. `bet-capability` (проблема → продукт; скоуп к проблемам проекта)
+20. `capability-hypothesis` (продукт → hypothesis-map: capability.hypotheses)
+21. `capability-job` (продукт → ajtbd: capability.jobs)
+22. `user-who` (foundation, продукт → interface проекта)
+23. `surface-zone` (foundation)
+24. `capability-situation` (foundation)
+25. `situation-job` (interface → ajtbd: situation.jobs)
+26. `situation-hypothesis` (interface → hypothesis-map: situation.hypotheses)
+27. `capability-domain` (если у проекта есть `domains/`)
+28. `integration-domain` (если у проекта есть `domains/`)
+29. `surface-screen` (если у проекта есть `screens/`)
+30. `constraint-surface` (cross-внутри-project)
+31. `market-capability` (часто даёт hints, не error)
 
-Полный рой = `9 верхнеуровневых + Σ по проектам (применимые
+Полный рой = `12 верхнеуровневых + Σ по проектам (применимые
 project-углы)`.
 
 `--quick` запускает по каждому проекту три foundation-угла

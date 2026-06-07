@@ -73,6 +73,58 @@ out-of-control → scope → served → from-project.
 строки `business-problem` есть ≥1 `goal` в `docs/hypothesis-map/` —
 иначе проблема повисла.
 
+## stakeholder (строгий kind, конкретные лица)
+
+Колонки: `slug · name · description · unit · deal-role · power · interest ·
+attitude · motivation · win · strategic-stance · objections · reports-to ·
+manifests-as · status`.
+**Для stable:** `unit`, `deal-role` (enum), `power`/`interest` (enum),
+`attitude` (enum), `motivation` (личные драйверы/страхи), `win` (личная
+победа).
+**`strategic-stance` (опц., минимизация):** куда лицо хочет/не хочет
+движения **бизнеса** — что поддержит/чему воспротивится на уровне
+стратегии. Отлично от `motivation` (психология) и `win` (личный успех).
+Ровно необходимое про взгляды (не биография, не вкусы) — чтобы сверить
+стратегию с людьми. Заполняется для **властных** лиц (`power: high`);
+сверяется с `swot/bet` / `hypothesis-map/goal` (`/cross-audit`
+`stakeholder-strategy`).
+**Порядок:** идентичность (name/кресло/unit) → роль (deal-role) → позиция
+(power/interest/attitude) → драйверы (motivation/win/objections) → связи
+(reports-to/manifests-as).
+**Главная проверка:** конкретное лицо (не абстрактная роль там, где лицо
+известно); `deal-role` (формальная позиция) ≠ `attitude` (стойка) — «ЛПР со
+skeptic» валиден; влияние на судьбу проекта наблюдаемо.
+**Экспертиза священна:** имена и психографику — только из материалов
+клиента / интервью, **не выдумывать**. Anti-patterns как опции — да;
+тексты — нет.
+**`deal-role`:** `lpr` · `budget-holder` · `lvr` · `recommender` ·
+`gatekeeper` · `end-user` · `sponsor`. **`attitude`:** `champion` ·
+`supporter` · `neutral` · `skeptic` · `blocker`.
+**`manifests-as`:** тот же человек в соседних слоях с префиксом kind
+(`subject:`/`user:`/`who:`) — связь авторская (business → соседний слой),
+не дублировать портрет.
+**Forward-only:** только текущее состояние стойки; «был против — стал за»
+— перезапись, не журнал.
+
+## stakeholder-map (строгий kind, сборка)
+
+Колонки: `slug · name · scope · business-problem · members · grid ·
+influence-edges · engagement-path · strategy · risks · status`.
+**Для stable:** `scope`, `business-problem` (≥1), `members` (≥2), `grid`
+(раскладка по 4 квадрантам), `influence-edges` (граф связей),
+`engagement-path` (упорядочен, к ЛПР), `strategy`, `risks` (митигация
+властных блокеров).
+**Порядок:** scope/business-problem → members → grid → influence-edges →
+engagement-path → strategy/risks.
+**Главная проверка:** среди `members` есть `lpr` И `budget-holder` (некому
+санкционировать/финансировать иначе); `influence-edges` ссылается только на
+`members`; `engagement-path` без разрыва ведёт к ЛПР; властный
+`blocker`/`skeptic` имеет митигацию в `risks`.
+**`influence-edges`-тип:** `influences` · `allies` · `conflicts` ·
+`sponsors` · `blocks` · `delegates` (направленное `from → to : kind`).
+**Не дубль `stakeholder.md`:** здесь синтез по инициативе, не повтор
+атрибутов; формальная иерархия — `stakeholder.reports-to`, не `edges`.
+
 ## Универсальные нюансы
 
 - `slug` — kebab-case, английский, уникальный в файле, не меняется;

@@ -39,6 +39,7 @@ description: "Единая точка входа заказчика/основа
 | тема (бизнес-язык) | призма | строгая подложка |
 |---|---|---|
 | «расскажу про свой бизнес — чем заняты, как зарабатываем» | `references/business-profile.md` | `../business-deep-dive/references/` |
+| «кто принимает решение по проекту — кто за/против, бюджет, влияние» | `references/stakeholders.md` | `../business-deep-dive/references/` |
 | «кто мои клиенты — на кого делятся, за что платят» | `references/clients-segments.md` | `../segment-deep-dive/references/` |
 | «что клиенты делают, чем пользуются, где им тяжело» | `references/clients-jobs.md` | `../job-graph-deep-dive/references/` |
 | «стороны/идеи/цель/число/на кого влияем/ставки/проверка» | `references/swot-hypothesis-map.md` | методичка внутри призмы |
@@ -112,9 +113,9 @@ description: "Единая точка входа заказчика/основа
 
 Внутри каждой темы — три режима ведения (новая запись / разбор рассказа /
 углубление) в бизнес-языке; они описаны в призме темы
-(`references/business-profile.md`, `clients-segments.md`, `clients-jobs.md`,
-`swot-hypothesis-map.md`, `product.md`). Оркестратор ведёт тему сам по её
-призме, не активируя обычные скилы.
+(`references/business-profile.md`, `stakeholders.md`, `clients-segments.md`,
+`clients-jobs.md`, `swot-hypothesis-map.md`, `product.md`). Оркестратор
+ведёт тему сам по её призме, не активируя обычные скилы.
 
 ## Дружелюбие для новичка
 

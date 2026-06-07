@@ -1,6 +1,6 @@
 ---
 name: cross-audit
-description: "Сквозной семантический аудит консистентности между слоями документации — business (профиль + реестр проблем business-problem) ↔ ajtbd ↔ swot ↔ hypothesis-map ↔ (множество проектов docs/projects/<slug>/: project ↔ interface ↔ domain ↔ screen). Запускает рой агентов параллельно: верхнеуровневые углы один раз (factor ↔ business, current-metric ↔ metric, addresses-problem ↔ business-problem, ajtbd segment-problem ↔ business-problem, ajtbd segment ↔ subject, ajtbd solution ↔ competitor/offering, business offering/channel ↔ ajtbd segment, проспективная согласованность market-maturity ↔ served, провенанс восходящего потока from-project ↔ проект), а углы swot/hypothesis-map ↔ продукт, ajtbd ↔ продукт и углы внутри проекта — ПО КАЖДОМУ проекту, с путями, заскоупленными в папку проекта (goal/metric ↔ vision, subject ↔ user, ajtbd segment ↔ user, ajtbd job ↔ vision.Success, ajtbd segment-problem ↔ vision.Problem, ajtbd job-graph value-mechanics ↔ capability, bet ↔ capability, capability ↔ hypothesis/job, user ↔ who, capability ↔ situation/domain, situation ↔ job/hypothesis, surface ↔ zone/screen, integration ↔ domain, constraint ↔ surface/integration, market ↔ capability). Читает оба слоя + state, ищет семантические тупики и противоречия — НЕ через slug-валидацию, а через смысловую проверку («пользователь без UX-покрытия», «метрика подана как гарантия», «субъект без пользователя», «сегмент без пользователя», «пользователь без сегмента», «проблема бизнеса без единого трения-доказательства», «позитивный субъект без сегмента», «механика ценности без capability», «зона висит без поверхности», «проект бьёт в несуществующую проблему», «проблема, которую не закрывает ни один проект»). Не правит, только отчёт. Использовать перед релизом, после крупного апдейта любого слоя, или когда deep-dive-скилы предлагают прогон. Сводный отчёт + список findings; deep-dive по каждому — отдельный шаг руками аналитика."
+description: "Сквозной семантический аудит консистентности между слоями документации — business (профиль + реестр проблем business-problem) ↔ ajtbd ↔ swot ↔ hypothesis-map ↔ (множество проектов docs/projects/<slug>/: project ↔ interface ↔ domain ↔ screen). Запускает рой агентов параллельно: верхнеуровневые углы один раз (factor ↔ business, current-metric ↔ metric, addresses-problem ↔ business-problem, ajtbd segment-problem ↔ business-problem, ajtbd segment ↔ subject, ajtbd solution ↔ competitor/offering, business offering/channel ↔ ajtbd segment, проспективная согласованность market-maturity ↔ served, провенанс восходящего потока from-project ↔ проект, стейкхолдер ↔ субъект/фактор/стратегическая стойка (business stakeholder ↔ hypothesis-map subject, swot factor/bet, hypothesis-map goal)), а углы swot/hypothesis-map ↔ продукт, ajtbd ↔ продукт и углы внутри проекта — ПО КАЖДОМУ проекту, с путями, заскоупленными в папку проекта (goal/metric ↔ vision, subject ↔ user, ajtbd segment ↔ user, ajtbd job ↔ vision.Success, ajtbd segment-problem ↔ vision.Problem, ajtbd job-graph value-mechanics ↔ capability, bet ↔ capability, capability ↔ hypothesis/job, user ↔ who, capability ↔ situation/domain, situation ↔ job/hypothesis, surface ↔ zone/screen, integration ↔ domain, constraint ↔ surface/integration, market ↔ capability). Читает оба слоя + state, ищет семантические тупики и противоречия — НЕ через slug-валидацию, а через смысловую проверку («пользователь без UX-покрытия», «метрика подана как гарантия», «субъект без пользователя», «сегмент без пользователя», «пользователь без сегмента», «проблема бизнеса без единого трения-доказательства», «позитивный субъект без сегмента», «механика ценности без capability», «зона висит без поверхности», «проект бьёт в несуществующую проблему», «проблема, которую не закрывает ни один проект»). Не правит, только отчёт. Использовать перед релизом, после крупного апдейта любого слоя, или когда deep-dive-скилы предлагают прогон. Сводный отчёт + список findings; deep-dive по каждому — отдельный шаг руками аналитика."
 ---
 
 # cross-audit
@@ -63,7 +63,8 @@ description: "Сквозной семантический аудит конси�
 `lens` ∈ {`factor-business`, `currentmetric-metric`,
 `addresses-problem-bizproblem`, `segmentproblem-bizproblem`, `segment-subject`,
 `solution-business`, `business-segment`, `prospective-consistency`,
-`provenance-upstream`,
+`provenance-upstream`, `stakeholder-subject`, `stakeholder-factor`,
+`stakeholder-strategy`,
 `goal-vision`, `subject-user`, `segment-user`, `job-vision`,
 `segmentproblem-vision`, `mechanic-capability`, `bet-capability`,
 `capability-hypothesis`, `capability-job`, `user-who`,
@@ -77,7 +78,9 @@ description: "Сквозной семантический аудит конси�
   swot ↔ hypothesis-map, без проекта): `factor-business`,
   `currentmetric-metric`, `segmentproblem-bizproblem`, `segment-subject`,
   `solution-business`, `business-segment`, `prospective-consistency`,
-  `provenance-upstream`.
+  `provenance-upstream`, `stakeholder-subject` (лицо ↔ субъект через
+  `manifests-as`), `stakeholder-factor` (властный champion/blocker как
+  фактор), `stakeholder-strategy` (стойка властного лица ↔ bet/goal).
 - **верхнеуровневый M:N, прогон один раз над всеми проектами**:
   `addresses-problem-bizproblem` — связывает все `vision.addresses-problem`
   со строками реестра `business-problem`, в обе стороны.
@@ -119,7 +122,8 @@ description: "Сквозной семантический аудит конси�
    один агент на каждую пару. Верхнеуровневые углы (`factor-business`,
    `currentmetric-metric`, `addresses-problem-bizproblem`,
    `segmentproblem-bizproblem`, `segment-subject`, `solution-business`,
-   `business-segment`, `prospective-consistency`, `provenance-upstream`) —
+   `business-segment`, `prospective-consistency`, `provenance-upstream`,
+   `stakeholder-subject`, `stakeholder-factor`, `stakeholder-strategy`) —
    по одному агенту, без проекта.
 6. **Спавнить агентов параллельно** (см. ниже). При множестве проектов
    рой широкий: `(число проектов × project-углы) + верхнеуровневые`.
@@ -230,6 +234,9 @@ business-problem↔продукт — в границах перечисленн
 | `segment-subject` | `docs/ajtbd/segment.md` | `docs/hypothesis-map/subject.md` | ★ | субъект влияния вырастает из сегмента? есть ли позитивный субъект без сегмента (негативному не нужен)? |
 | `solution-business` | `docs/ajtbd/solution.md` | `docs/business/` (competitor, offering) | ★ | нанятое решение (`maps-to`) сходится с игроком рынка / собственным офером? |
 | `business-segment` | `docs/business/offering.md` (`for-segment`), `channel.md` (`serves-segment`) | `docs/ajtbd/segment.md` | ★ | межслойные ссылки оферов/каналов попадают в реальные сегменты и осмысленны? |
+| `stakeholder-subject` | `docs/business/stakeholder.md` (`manifests-as`) | `docs/hypothesis-map/subject.md` | ★ | лицо-решатель и субъект — один человек (`manifests-as`)? властный блокер ≈ negative-субъект? |
+| `stakeholder-factor` | `docs/business/stakeholder.md` (`attitude`, `power`) | `docs/swot/factor.md` | ★ | властный champion/blocker отражён SWOT-фактором (человек-как-фактор)? |
+| `stakeholder-strategy` | `docs/business/stakeholder.md` (`strategic-stance`) | `docs/swot/bet.md`, `docs/hypothesis-map/goal.md` | ★ | ставка/цель не противоречит стойке властного лица? |
 | `goal-vision` | `docs/hypothesis-map/goal.md`, `metric.md` (по проблемам проекта) | `docs/projects/<slug>/vision.md` | по проекту | цель/метрика закрываемой проблемы отражены в vision.Success (как таргет, не гарантия)? |
 | `subject-user` | `docs/hypothesis-map/subject.md` (по проблемам проекта) | `docs/projects/<slug>/user.md` | по проекту | субъект влияния соответствует user продукта? |
 | `segment-user` | `docs/ajtbd/segment.md` | `docs/projects/<slug>/user.md` | по проекту | сегмент рынка соотносится с user продукта (разные сущности, но связаны)? сегмент без пользователя / пользователь без сегмента? |
@@ -250,9 +257,9 @@ business-problem↔продукт — в границах перечисленн
 
 ```
 === /cross-audit ===
-Слои: business, ajtbd, business-problem (общие) + проекты: referral-network, partner-portal
-Проектов: 2 · углы: 7 верхнеуровневых + 15 по referral-network + 12 по partner-portal = 34 запущено, 34 ответили
-Время: <duration> · агентов: 34
+Слои: business (+ стейкхолдеры), ajtbd, business-problem (общие) + проекты: referral-network, partner-portal
+Проектов: 2 · углы: 10 верхнеуровневых + 15 по referral-network + 12 по partner-portal = 37 запущено, 37 ответили
+Время: <duration> · агентов: 37
 
 — Общие слои —
 

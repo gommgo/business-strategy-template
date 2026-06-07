@@ -1,6 +1,6 @@
 ---
 name: business-deep-dive
-description: "Углублённая проработка верхнего слоя — профиля бизнеса заказчика и реестра его проблем в `docs/business/` (profile · offering · channel · competitor · current-metric · material · business-problem). Самая первая точка входа: складывает полную картину бизнеса заказчика и формализует, какие проблемы бизнеса решаем (реестр `business-problem` — граница между гарантией доставки по scope и best-effort таргетом метрик). Принимает материалы клиента (сайт, PDF, презентации, соцсети, интервью), запускает рой агентов для web-research рынка и конкурентов, ведёт аналитика через фазы intake → profile → market → structure → metrics → problems → cohesion, заполняет артефакты через структурированные вопросы (AskUserQuestion), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/business/`), не выдумывает факты о бизнесе. Сегментацию клиентов передаёт в `/segment-deep-dive` (слой `docs/ajtbd/`); SWOT-факторы и Карту гипотез под реестр проблем — в `/swot-deep-dive` и `/hypothesis-map-deep-dive`. Несёт провенанс восходящего потока (`from-project` у offering/current-metric/business-problem — что проявил дозревший продукт). Использовать всегда, когда речь о docs/business/, онбординге нового заказчика, разборе его материалов, исследовании рынка и конкурентов, фиксации текущих бизнес-метрик (baseline), заведении или границе проблемы бизнеса, или подготовке почвы для SWOT и Карты гипотез. Единственная точка входа в docs/business/ для аналитика."
+description: "Углублённая проработка верхнего слоя — профиля бизнеса заказчика, реестра его проблем и реестра стейкхолдеров в `docs/business/` (profile · offering · channel · competitor · current-metric · material · business-problem · stakeholder · stakeholder-map). Самая первая точка входа: складывает полную картину бизнеса заказчика, формализует, какие проблемы бизнеса решаем (реестр `business-problem` — граница между гарантией доставки по scope и best-effort таргетом метрик), и кто в бизнесе принимает решения (стейкхолдеры — конкретные лица, их роли в сделке, власть/интерес, стойка, личные драйверы и стратегическая стойка; карты связей и вовлечения). Принимает материалы клиента (сайт, PDF, презентации, соцсети, интервью), запускает рой агентов для web-research рынка и конкурентов, ведёт аналитика через фазы intake → profile → market → structure → metrics → problems → stakeholders → cohesion, заполняет артефакты через структурированные вопросы (AskUserQuestion), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/business/`), не выдумывает факты о бизнесе. Сегментацию клиентов передаёт в `/segment-deep-dive` (слой `docs/ajtbd/`); SWOT-факторы и Карту гипотез под реестр проблем — в `/swot-deep-dive` и `/hypothesis-map-deep-dive`. Несёт провенанс восходящего потока (`from-project` у offering/current-metric/business-problem — что проявил дозревший продукт). Использовать всегда, когда речь о docs/business/, онбординге нового заказчика, разборе его материалов, исследовании рынка и конкурентов, фиксации текущих бизнес-метрик (baseline), заведении или границе проблемы бизнеса, или подготовке почвы для SWOT и Карты гипотез. Единственная точка входа в docs/business/ для аналитика."
 ---
 
 # business-deep-dive
@@ -13,7 +13,10 @@ description: "Углублённая проработка верхнего сл�
 competitor · current-metric · material), но несёт **строгий реестр
 проблем** `business-problem.md` — таблицу проблем бизнеса (одна строка =
 одна проблема + граница «гарантируем доставку по scope / целимся в
-метрики best-effort»). Бизнес — **один** (этот слой общий), он питает
+метрики best-effort») — и **строгий реестр стейкхолдеров** (`stakeholder` ·
+`stakeholder-map`) — конкретных людей, принимающих решения в бизнесе, и
+карты их связей и вовлечения (фаза `stakeholders`). Бизнес — **один**
+(этот слой общий), он питает
 слои **SWOT** (`docs/swot/`) и **Карты гипотез** (`docs/hypothesis-map/`)
 и мир из **множества проектов** (`docs/projects/<slug>/`): факторы SWOT
 каждой проблемы растут из профиля и конкурентов, baseline целевых метрик —
@@ -53,7 +56,8 @@ read-only читает `docs/ajtbd/segment.md`, чтобы привязать
 | `/business-deep-dive --phase <name>` | работать в указанной фазе |
 
 `kind` ∈ {`profile`, `offering`, `channel`, `competitor`,
-`current-metric`, `material`, `business-problem`}.
+`current-metric`, `material`, `business-problem`, `stakeholder`,
+`stakeholder-map`}.
 
 `phase` ∈ {`intake`, `profile`, `market`, `structure`, `metrics`,
 `problems`, `cohesion`}.
@@ -69,8 +73,10 @@ read-only читает `docs/ajtbd/segment.md`, чтобы привязать
 
 ## Сводка состояния (без args)
 
-1. Прочитать `profile.md` + 6 табличных файлов + `business-problem.md` +
-   свою ветку `../entrypoint/state/business/`.
+1. Прочитать `profile.md` + табличные файлы картины (`offering` · `channel`
+   · `competitor` · `current-metric` · `material`) + `business-problem.md` +
+   стейкхолдеры (`stakeholder.md` · `stakeholder-map.md`) + свою ветку
+   `../entrypoint/state/business/`.
 2. Определить **текущую фазу**:
    - `material`-таблица пустая → `intake`;
    - `profile` нет/draft → `profile`;
@@ -78,6 +84,7 @@ read-only читает `docs/ajtbd/segment.md`, чтобы привязать
    - `offering`/`channel` пустые → `structure`;
    - `current-metric` пустая → `metrics`;
    - `business-problem` пустая → `problems`;
+   - `stakeholder`/`stakeholder-map` пустые → `stakeholders`;
    - всё заполнено, есть draft → `cohesion`.
 3. Вывести карту фаз. Через `AskUserQuestion` предложить следующий шаг.
 
@@ -91,6 +98,7 @@ read-only читает `docs/ajtbd/segment.md`, чтобы привязать
 | `structure` | оферы и каналы (сегменты — в `docs/ajtbd/`, `/segment-deep-dive`) | `offering.md`, `channel.md` |
 | `metrics` | текущие KPI — baseline-кандидаты | `current-metric.md` |
 | `problems` | реестр проблем бизнеса + граница гарантии/таргета | `business-problem.md` |
+| `stakeholders` | конкретные лица-решатели + карты их связей и вовлечения | `stakeholder.md`, `stakeholder-map.md` |
 | `cohesion` | целостность картины, передача в SWOT (`/swot-deep-dive`) и Карту гипотез (`/hypothesis-map-deep-dive`) | все |
 
 Полная карта — `references/phases.md`. Порядок — рекомендация.

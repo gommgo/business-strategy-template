@@ -2,10 +2,12 @@
 
 Самый верхний слой документации: **кто этот бизнес заказчика** — до того,
 как мы определили проблему и тем более решение. 1 singleton `profile.md`,
-5 плоских md-файлов картины бизнеса и строгий реестр проблем
-`business-problem.md` в `docs/business/`. Источник истины — **материалы
-клиента** (сайт, PDF, презентации, соцсети, интервью) и **рой
-web-research**; не наша проекция и не будущее IT-решение.
+5 плоских md-файлов картины бизнеса, строгий реестр проблем
+`business-problem.md` и 2 строгих файла стейкхолдеров (`stakeholder` ·
+`stakeholder-map`) — людей, которые в этом бизнесе принимают решения, — в
+`docs/business/`. Источник истины — **материалы клиента** (сайт, PDF,
+презентации, соцсети, интервью) и **рой web-research**; не наша проекция и
+не будущее IT-решение.
 
 Слой **нестрогий**: жёсткой методологии нет, цель — сложить полную и
 честную картину бизнеса. Эта картина питает соседние слои: сегменты по
@@ -16,8 +18,8 @@ web-research**; не наша проекция и не будущее IT-реш�
 (`business-problem.md`) живёт в этом слое.
 
 Чистая бизнес-аналитика. На продукт / интерфейс / код не мапится — это
-вход для `/business-deep-dive` (профиль + реестр проблем) и далее
-`/swot-deep-dive` и `/hypothesis-map-deep-dive`.
+вход для `/business-deep-dive` (профиль + реестр проблем + стейкхолдеры) и
+далее `/swot-deep-dive` и `/hypothesis-map-deep-dive`.
 
 ## Файлы
 
@@ -30,6 +32,8 @@ web-research**; не наша проекция и не будущее IT-реш�
 | [`current-metric.md`](current-metric.md) | текущий KPI бизнеса — baseline-кандидат | slug · name · description · value · as-of · source · from-project · status |
 | [`material.md`](material.md) | источник, из которого сложен профиль | slug · name · kind · uri · status |
 | [`business-problem.md`](business-problem.md) | реестр проблем бизнеса + граница гарантии и таргета | slug · name · problem · guarantee · target · out-of-control · scope · served · from-project · status |
+| [`stakeholder.md`](stakeholder.md) | человек, принимающий решение в бизнесе заказчика (конкретное лицо) | slug · name · description · unit · deal-role · power · interest · attitude · motivation · win · strategic-stance · objections · reports-to · manifests-as · status |
+| [`stakeholder-map.md`](stakeholder-map.md) | сборка по инициативе: сетка власть/интерес, граф связей, путь вовлечения | slug · name · scope · business-problem · members · grid · influence-edges · engagement-path · strategy · risks · status |
 
 ## Принципы оформления
 
@@ -82,13 +86,38 @@ Frontmatter не нужен. Русское слово-перевод строг
 - `business.offering` / `competitor` ↔ `ajtbd/solution` — собственный офер
   и игроки рынка часто и есть решения, нанятые сегментом на работу
   (`solution.maps-to`).
+- `stakeholder` → `business-problem` — кто проблему **чувствует /
+  приоритизирует** и кто согласовал границу гарантия/таргет
+  (`stakeholder-map.business-problem` тегирует карту проблемой).
+- `stakeholder` ↔ `hypothesis-map/subject` — внутр. субъект; властный
+  `blocker` ≈ `negative`-субъект; мотивации согласованы (через
+  `manifests-as`).
+- `stakeholder` ↔ `projects/<slug>/user` · `interface/who` — стейкхолдер,
+  ставший пользователем/актором продукта (через `manifests-as`).
+- `stakeholder` → `swot/factor` — властный `champion` = сила, властный
+  `skeptic`/`blocker` = слабость/угроза (человек-как-фактор).
+- `stakeholder.strategic-stance` ↔ `swot/bet` · `hypothesis-map/goal` —
+  стратегия не должна противоречить стойке властного лица; ставка/цель,
+  бьющая в стойку, — стратегический риск (ловит `/cross-audit`
+  `stakeholder-strategy`).
+- `stakeholder` → `projects/<slug>/constraint` — вето `gatekeeper`/lvr
+  (безопасник, юрист) рождает ограничение продукта.
+
+Стейкхолдеры (`stakeholder` · `stakeholder-map`) — **строгие** kind (свои
+методологические инварианты держит draft→stable-гейт `/business-deep-dive`,
+а сквозную сверку со swot/hypothesis-map — `/cross-audit`, углы
+`stakeholder-*`) и **намеренно вне handoff-контракта**: `business/` не
+читает ни один код-репо, поэтому персональные данные людей-решателей не
+уезжают в backend/frontend/infra. Это **единственное место**, где
+репозиторий пишет конкретных лиц, а не роли (см. `stakeholder.md` §
+«Намеренное исключение»).
 
 ## Workflow
 
 ```
-/business-deep-dive             — единая точка входа аналитика.
+/business-deep-dive             — единая точка входа аналитика (в т.ч. фаза stakeholders).
 /entrypoint-for-business        — режим «домашнее задание» для клиента (единый вход на все темы).
-/cross-audit                    — сквозная проверка с ajtbd / swot / hypothesis-map / project.
+/cross-audit                    — сквозная проверка с ajtbd / swot / hypothesis-map / project (углы stakeholder-*).
 ```
 
 Слой наполняется приёмом материалов клиента и роем web-research. Рой
@@ -111,3 +140,12 @@ Frontmatter не нужен. Русское слово-перевод строг
 - ❌ Заводить сегменты здесь. Сегменты по работам живут в `docs/ajtbd/`
   (`/segment-deep-dive`); `business` лишь ссылается на них из
   `offering`/`channel`.
+- ❌ Путать `stakeholder` (человек-решатель **внутри** заказчика) с
+  `segment`/`user`/`who`/`subject` (люди **снаружи** — рынок, адресат,
+  актор, носитель поведения). Один человек обеими линзами — `manifests-as`.
+- ❌ Стейкхолдер как абстрактная роль («руководство») там, где лицо
+  известно. Это единственное место для конкретных лиц.
+- ❌ Журнал отношения стейкхолдера («был против, стал за»). Только текущее
+  состояние, перезапись при сдвиге (forward-only).
+- ❌ Выдуманные мотивации/страхи стейкхолдера. Только из материалов
+  клиента / интервью — экспертиза священна.

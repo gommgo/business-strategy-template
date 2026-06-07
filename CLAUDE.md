@@ -5,7 +5,9 @@
 
 Этот репозиторий — **проектный шаблон**. Поток сверху вниз: бизнес
 заказчика (`docs/business/`) — самый верх; он же держит **реестр проблем
-бизнеса** (`business-problem` — таблица проблем, по строке на проблему).
+бизнеса** (`business-problem` — таблица проблем, по строке на проблему) и
+**реестр стейкхолдеров** (`stakeholder` · `stakeholder-map` — конкретные
+люди, принимающие решения в бизнесе, и карты их связей и вовлечения).
 Под ним слой **AJTBD** (`docs/ajtbd/`) — кто наш сегмент по работам и его
 граф работ (методология Advanced JTBD), питающий проблемы трениями
 сегмента. По строгой методологии **LinkedSWOT** реестр проблем
@@ -22,7 +24,8 @@
 
 - `README.md` — карта репозитория и воркфлоу.
 - `docs/business/README.md` — канон 1 singleton + 5 kind бизнеса +
-  реестр проблем `business-problem`.
+  реестр проблем `business-problem` + 2 строгих kind стейкхолдеров
+  (`stakeholder` · `stakeholder-map`).
 - `docs/ajtbd/README.md` — канон 5 kind AJTBD: `segment` · `job` ·
   `job-graph` · `solution` · `segment-problem`.
 - `docs/swot/README.md` — канон LinkedSWOT: `factor` · `bet`; колонка-ссылка
@@ -100,7 +103,7 @@ managed (инстанс на `*.sftbmb.ru`) или self-hosted (ваш форк)
 
 | слой | вопрос | вход |
 |---|---|---|
-| `docs/business/` | **кто этот бизнес заказчика и какие его проблемы решаем** | `/business-deep-dive` (аналитик); клиент — `/entrypoint-for-business` |
+| `docs/business/` | **кто этот бизнес заказчика, какие его проблемы решаем и кто в нём принимает решения** | `/business-deep-dive` (аналитик); клиент — `/entrypoint-for-business` |
 | `docs/ajtbd/` | **кто наш сегмент по работам, его граф работ и трения** | `/segment-deep-dive` · `/job-graph-deep-dive` · `/jtbd-interview` (аналитик); клиент — `/entrypoint-for-business` |
 | `docs/swot/` | **за счёт чего возможен следующий шаг** (факторы → ставки) | `/swot-deep-dive` |
 | `docs/hypothesis-map/` | **под какие метрики целимся** (цель → метрика → субъект → гипотеза) | `/hypothesis-map-deep-dive` |
@@ -156,16 +159,42 @@ domain. Сквозные рёбра авторятся **снизу-вверх**
 `aria-busy`). Всё остальное — по-русски, без полу-калек («пропсы»,
 «варианты-проперти»).
 
-Business-слой (нестрогий): 1 singleton `profile.md` + 5 табличных kind
-(`offering`, `channel`, `competitor`, `current-metric`, `material`) +
-строгий реестр проблем `business-problem` (таблица проблем + граница
-гарантии). Источник истины — материалы клиента и рой web-research, не
-проекция аналитика. Связи семантические. Питает факторы `swot/factor` и
-baseline метрик `hypothesis-map/metric`. Сегменты живут в слое AJTBD:
-`offering.for-segment` и `channel.serves-segment` ссылаются на
-`ajtbd/segment`. Провенанс-поля `*.from-project` (у `offering`,
-`current-metric`, `business-problem`) несут восходящий поток — что проявил
-дозревший продукт.
+Business-слой (нестрогая картина + строгие реестры): 1 singleton
+`profile.md` + 5 табличных kind (`offering`, `channel`, `competitor`,
+`current-metric`, `material`) + строгий реестр проблем `business-problem`
+(таблица проблем + граница гарантии) + 2 строгих kind стейкхолдеров
+(`stakeholder` · `stakeholder-map`). Источник истины — материалы клиента и
+рой web-research, не проекция аналитика. Связи семантические. Питает
+факторы `swot/factor` и baseline метрик `hypothesis-map/metric`. Сегменты
+живут в слое AJTBD: `offering.for-segment` и `channel.serves-segment`
+ссылаются на `ajtbd/segment`. Провенанс-поля `*.from-project` (у
+`offering`, `current-metric`, `business-problem`) несут восходящий поток —
+что проявил дозревший продукт.
+
+Стейкхолдеры (строгие, **многоинициативные**): бизнес — это **люди,
+принимающие решения**, а не абстракция. `stakeholder` — **конкретное лицо**
+(или именованное «кресло») внутри заказчика или ближнего контура
+(партнёр/регулятор/инвестор), с ролью в сделке (`lpr` · `budget-holder` ·
+`lvr` · `recommender` · `gatekeeper` · `end-user` · `sponsor`), осями
+власть/интерес (Mendelow), стойкой (`champion`…`blocker`), личными
+драйверами/страхами, личным `win` (тот же B2B-инсайт «90% мотивации —
+личное») и **стратегической стойкой** (`strategic-stance` — куда властное
+лицо хочет/не хочет движения бизнеса; минимизация: ровно столько про
+взгляды, чтобы сверить стратегию с людьми, не биография). `stakeholder-map`
+— сборка по инициативе: сетка власть/интерес, **граф связей**
+(`influence-edges`: влияние/союзы/конфликты/блок), **путь вовлечения** (кого
+в каком порядке провести к «да»), стратегия и риски; несёт массив
+`business-problem` (M:N). Это **единственное место**, где репозиторий пишет
+конкретных лиц (намеренное исключение из «роль, не лицо»), и оно **вне
+handoff-контракта** (`business/` не читает ни один код-репо — PII не
+уезжает в backend/frontend/infra). `stakeholder` смотрит **внутрь**
+заказчика (политика проекта) — в отличие от `segment`/`user`/`who`/`subject`,
+смотрящих наружу; один человек обеими линзами — через `manifests-as`.
+Методологические инварианты карты (без ЛПР/держателя бюджета, властный
+блокер без митигации, разрыв пути вовлечения, цикл `reports-to`) держит
+draft→stable-гейт `/business-deep-dive`; сверку `strategic-stance` со
+ставками (`swot/bet`) и целями (`hypothesis-map/goal`), чтобы стратегия не
+шла против ключевых лиц, ведёт рой `/cross-audit` (углы `stakeholder-*`).
 
 AJTBD-слой (строгий, методология, **разведочный**): по Advanced JTBD
 (Иван Замесин) — кто наш сегмент по работам, а не по демографии. 5
@@ -248,6 +277,12 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
   Метрика — best-effort таргет, **не гарантия**. Факты о бизнесе — из
   материалов клиента / подтверждённого research, не из головы.
   Anti-patterns как опции — да; тексты — нет.
+- **Стейкхолдерская** (business / stakeholder): имена и кресла, роль в
+  сделке, власть/интерес, стойка, **личные драйверы/страхи и личный win**,
+  связи между людьми (влияние/союзы/конфликты), путь вовлечения — только из
+  материалов клиента / интервью, через `AskUserQuestion`. Психографику
+  лица **не выдумывать**: «не отбить ROI» как страх CFO пишется, только
+  если так сказал клиент. Anti-patterns как опции — да; тексты — нет.
 - **AJTBD** (ajtbd): формулировки сегментов, работ (когда/хочу/чтобы),
   нанятых решений, трений, драйверов/барьеров и мотиваций — только от
   аналитика / из подтверждённого research / из транскриптов интервью,
@@ -322,6 +357,16 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
   через скилл `business-deep-dive` (часть бизнес-слоя); таблица проблем +
   граница гарантии/таргета (`business-problem` — массив M:N, на который ссылаются
   swot / hypothesis-map / `vision.addresses-problem`).
+- **Стейкхолдеры** (`stakeholder` · `stakeholder-map` в `docs/business/`)
+  — через скилл `business-deep-dive` (фаза `stakeholders`, часть
+  бизнес-слоя); клиент-режим — оркестратор `entrypoint-for-business` ведёт
+  сам (призма `stakeholders.md`). Форма — по `docs/business/README.md`.
+  Конкретные лица (намеренное исключение из «роль, не лицо»), вне
+  handoff-контракта. Инварианты карт держит draft→stable-гейт
+  `business-deep-dive`; сверку стратегической стойки со swot/hypothesis-map
+  роем — `/cross-audit` (углы `stakeholder-*`). `stakeholder` (человек
+  внутри заказчика) ≠ `segment`/`user`/`who`/`subject` (люди снаружи);
+  связь — `manifests-as`.
 - **Артефакты SWOT** (`docs/swot/`) — через скилл `swot-deep-dive`; форма
   — по `docs/swot/README.md`. Строгая многопроблемная методология
   LinkedSWOT (`factor` · `bet`). Семантический аудит инвариантов роем (по
@@ -375,7 +420,7 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
 бизнес-языке). Он принимает рассказ и материалы, раскладывает по темам и
 **ведёт все темы сам через свою призму** — отдельных клиентских
 под-скилов нет. Для каждой темы берёт призму-методичку в бизнес-языке
-(`references/business-profile.md` · `clients-segments.md` ·
+(`references/business-profile.md` · `stakeholders.md` · `clients-segments.md` ·
 `clients-jobs.md` · `swot-hypothesis-map.md` · `product.md`) и read-only
 сверяется со строгой подложкой обычного аналитического скила того же слоя
 (обычные скилы в клиент-режиме **не активируются**). Клиенту доступен и рой
