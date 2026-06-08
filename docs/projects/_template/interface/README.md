@@ -144,4 +144,4 @@ interface; ловит `/cross-audit`):
 - ❌ Блок без `ux-substrates` или без `who`.
 - ❌ Код / FSD / компонент / облик в артефактах — это слой кода (ручная
   сборка по `docs/projects/<project-slug>/screens/`) и craft
-  `@stit-design/ui`.
+  `@stit/ui`.

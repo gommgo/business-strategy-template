@@ -315,7 +315,7 @@ warning не превращается в правку.
   - типографика: `font`, `font-size`, `font-weight`, `line-height`,
     `letter-spacing`;
   - сырой стиль: `style=`.
-- **рекомендация**: «Облик — craft в `@stit-design/ui`. Убрать из
+- **рекомендация**: «Облик — craft в `@stit/ui`. Убрать из
   артефакта через `/screen-deep-dive <kind>:<slug>`; токены — на
   стороне ui-lib».
 
@@ -513,7 +513,7 @@ warning не превращается в правку.
 - **scope**: все 4 kind, узлы дерева.
 - **проверка**: имя `ui:<Foo>` не входит в список «топ-уровень
   компонентов» в каноне `docs/projects/_template/screens/README.md`
-  (выводимое требование, пока `@stit-design/ui/manifest.json` не
+  (выводимое требование, пока `@stit/ui/manifest.json` не
   опубликован). Прорывной hint, не error — это, скорее всего, ui-lib
   gap.
 - **рекомендация**: «Похоже на gap к ui-lib. Подтвердить через

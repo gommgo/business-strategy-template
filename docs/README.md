@@ -3,7 +3,7 @@
 Документация — **design-time source of truth** аналитики проекта. Здесь нет
 кода: артефакты — чистая язык-агностичная аналитика, которую читают соседние
 форки (`<org>/{backend,frontend,infra}`) и по которой автор макета вручную
-собирает hi-fi субстрат на `@stit-design/ui`. Заполняют артефакты deep-dive-
+собирает hi-fi субстрат на `@stit/ui`. Заполняют артефакты deep-dive-
 скиллы (`.claude/skills/`); рекомендуемый вход — оркестраторы `/entrypoint`
 (аналитик) и `/entrypoint-for-business` (клиент), которые классифицируют сырьё
 и маршрутизируют к исполнителям (прямой вызов исполнителя тоже допустим, см.
@@ -64,7 +64,7 @@ SWOT → Карта гипотез → продукты → интерфейс /
 `<org>/docs` — один из **5 форкаемых шаблонов** под `stit-core/`
 (`corp-infra-template`, `go-backend-template`, `spa-frontend-template`,
 `project-docs-template` — этот, `project-infra-template-compose`), плюс 2 общие
-библиотеки: Go-lib `stit-core/golibinfra` и дизайн-система `@stit-design/ui` (репо
+библиотеки: Go-lib `stit-core/golibinfra` и дизайн-система `@stit/ui` (репо
 `stit-core/ui-lib`). Корп control-plane — репо `corp-infra-template` (managed =
 инстанс на `*.stit.tech`, self-hosted = ваш форк; вендор-лока нет). Роль этого
 репо — **design-time SoT** проекта; форкается **первым**, наполняется аналитикой,

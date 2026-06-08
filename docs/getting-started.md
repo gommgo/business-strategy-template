@@ -127,7 +127,7 @@ truth для соседних форков (`<org>/{backend,frontend,infra}`).
   Завершается на stable-артефакте; Go-код по ним разворачивает соседний
   `<org>/backend`, не этот репо.
 - **`/screen-deep-dive <slug>`** → **`/screen-audit <slug>`** — композиция и
-  облик (flow / screen / block / shell) на инвентаре `@stit-design/ui`.
+  облик (flow / screen / block / shell) на инвентаре `@stit/ui`.
 
 Каждый deep-dive ведёт сессию через `AskUserQuestion`, пишет память в свою
 ветку единого дерева оркестратора (`.claude/skills/entrypoint/state/`;

@@ -34,7 +34,7 @@ stakeholder · stakeholder-map                                                  
                                                                                                      └─ screens/    (flow/screen/block/shell)
                                                                                                             │
                                                                                                             ▼  ручная работа автора макета
-                                                                                                       wireframe → hi-fi на @stit-design/ui
+                                                                                                       wireframe → hi-fi на @stit/ui
 ```
 
 Артефакты — **чистая аналитика**, на код напрямую не мапятся. Сегменты по работам
@@ -90,7 +90,7 @@ stakeholder · stakeholder-map                                                  
 | [`<org>/infra`](https://git.stit.tech/stit-core/project-infra-template-compose) | `projects/<slug>/{vision,surface}` (init-project) |
 
 Облик собирается на дизайн-системе
-[`@stit-design/ui`](https://git.stit.tech/stit-core/ui-lib) (потребляется, не правится).
+[`@stit/ui`](https://git.stit.tech/stit-core/ui-lib) (потребляется, не правится).
 Канон контрактов экосистемы —
 [`corp-infra-template/docs/ecosystem.md`](https://git.stit.tech/stit-core/corp-infra-template/src/branch/main/docs/ecosystem.md).
 
