@@ -10,7 +10,7 @@ AI deep-dive-скиллов. Код-репо потом **читают** эти 
 спроектированному, а не наоборот.
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-2563eb)](LICENSE)
-[![Часть sftbmb](https://img.shields.io/badge/sftbmb-открытые_шаблоны-6366f1)](https://git.stit.tech/stit-core/sftbmb-public)
+[![Часть stit](https://img.shields.io/badge/stit-открытые_шаблоны-6366f1)](https://git.stit.tech/stit-core/sftbmb-public)
 [![Method](https://img.shields.io/badge/method-LinkedSWOT_%2B_Карта_гипотез-0ea5e9)](#методология-в-двух-словах)
 [![Process](https://img.shields.io/badge/process-AI--driven_скиллы-8b5cf6)](#воркфлоу)
 [![SoT](https://img.shields.io/badge/role-design--time_SoT-22c55e)](#место-в-экосистеме)
@@ -163,13 +163,13 @@ business (профиль + реестр проблем + стейкхолдер�
 Структура каталогов и каноны слоёв — [`docs/README.md`](docs/README.md) и
 README каждого слоя; гайд для агента — [`CLAUDE.md`](CLAUDE.md).
 
-## Часть экосистемы sftbmb
+## Часть экосистемы stit
 
-Это один из открытых шаблонов sftbmb (Apache-2.0) — фундамент «-1 уровня»,
+Это один из открытых шаблонов stit (Apache-2.0) — фундамент «-1 уровня»,
 берите бесплатно и владейте. Карта всех шаблонов и точка входа —
-**[витрина sftbmb](https://git.stit.tech/stit-core/sftbmb-public)**. Нужна
+**[витрина stit](https://git.stit.tech/stit-core/sftbmb-public)**. Нужна
 команда аналитиков, методология или поддержка —
-**[наш подход и контакты (vision)](https://git.stit.tech/sftbmb/vision)**.
+**[наш подход и контакты (vision)](https://git.stit.tech/stit/vision)**.
 
 ## Лицензия
 
