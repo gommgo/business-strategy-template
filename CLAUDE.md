@@ -3,7 +3,7 @@
 Файл автоматически загружается в каждую сессию `Claude Code`. Здесь —
 невыборочные правила, которые работают всегда.
 
-Этот репозиторий — **проектный шаблон**. Поток сверху вниз: бизнес
+Этот репозиторий — **шаблон бизнес-стратегии**. Поток сверху вниз: бизнес
 заказчика (`docs/business/`) — самый верх; он же держит **реестр проблем
 бизнеса** (`business-problem` — таблица проблем, по строке на проблему) и
 **реестр стейкхолдеров** (`stakeholder` · `stakeholder-map` — конкретные
@@ -13,9 +13,12 @@
 сегмента. По строгой методологии **LinkedSWOT** реестр проблем
 разворачивается в слой `docs/swot/` (`factor` · `bet`), а по **Карте
 гипотез** — в слой `docs/hypothesis-map/` (`goal` · `metric` · `subject` ·
-`hypothesis` · `task`); оба — **многопроблемные**. Под проблемы встают
-**продукты**: несколько проектов под одним бизнесом, у каждого своя папка
-`docs/projects/<slug>/` — корень решения. Внутри
+`hypothesis` · `task`); оба — **многопроблемные**. Терминал стратегии —
+**задача** (`task` Карты гипотез): исход проблемы бизнеса не обязан быть
+IT-продуктом — её может закрыть отдельная задача (процесс, партнёрство, цена,
+операционное действие). Когда стратегия требует продукта, под проблемы встают
+**продукты** (опциональный downstream): несколько проектов под одним бизнесом, у
+каждого своя папка `docs/projects/<slug>/`. Внутри
 проекта: продукт (`vision` + 7 kind), аналитика интерфейса (`interface/`)
 — UX над продуктом, опционально бизнес-домены (`domains/`) и
 композиция/облик (`screens/`), по которой собирается кликабельный hi-fi
@@ -55,18 +58,18 @@
 Это один из **5 форкаемых шаблонов** под `stit-core/`:
 `corp-infra-template` (корп control-plane), `go-backend-template`
 (→ `<org>/backend`), `spa-frontend-template` (→ `<org>/frontend`),
-**`project-docs-template`** (этот → `<org>/docs`),
+**`business-strategy-template`** (этот → `<org>/strategy`),
 `project-infra-template-compose` (→ `<org>/infra`). Рядом — 2 общие библиотеки:
 Go-lib `stit-core/golibinfra` и дизайн-система `@stit/ui` из репо
 `stit-core/ui-lib`. Корп control-plane `corp-infra-template`: вендор-лока нет —
 managed (инстанс на `*.stit.tech`) или self-hosted (ваш форк). Канон контрактов
 (в т.ч. self-hosted) — `corp-infra-template/docs/ecosystem.md`.
 
-**Роль docs-репо — design-time SoT проекта.** Форкается **первым**
-(Gitea → `stit-core/project-docs-template` → **Use this template** →
-`<org>/docs`), наполняется аналитикой, и только потом форкаются код-репо,
-которые **читают** его stable-артефакты как upstream (read-only,
-односторонне):
+**Роль репо — design-time SoT стратегии** (и проектирования продукта, когда он
+нужен). Форкается **первым** (Gitea → `stit-core/business-strategy-template` →
+**Use this template** → `<org>/strategy`), наполняется аналитикой, и — **когда
+стратегия рождает продукт** — его stable-артефакты **читают** код-репо как
+upstream (read-only, односторонне):
 
 - `<org>/backend` ← `projects/<slug>/domains/<ctx>/` (scaffold доменов в Go;
   маппинг DDD → Go живёт у backend в `docs/reference/domain-mapping.md`);

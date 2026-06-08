@@ -1,13 +1,16 @@
 <div align="center">
 
-# project-docs-template
+# business-strategy-template
 
-### Сначала понятый бизнес и спроектированный продукт — потом код
+### Понятый бизнес, рынок и стейкхолдеры → стратегия. Продукт — один из возможных исходов
 
-Design-time источник истины проекта. Аналитик (или сам заказчик в клиент-режиме)
-ведёт цепочку **бизнес → проблемы → продукт → интерфейс → экраны** через рой
-AI deep-dive-скиллов. Код-репо потом **читают** эти артефакты — код собирается по
-спроектированному, а не наоборот.
+Design-time источник истины **стратегии бизнеса**. Аналитик (или сам заказчик в
+клиент-режиме) разбирает бизнес, его проблемы, рынок, спрос по работам и
+стейкхолдеров — и строит стратегию: от факторов **SWOT** через **Карту гипотез**
+до **задач проверки**. Исход не обязан быть IT-продуктом — проблему бизнеса может
+закрыть и отдельная **задача** (`task`). Когда стратегия требует продукта,
+открывается опциональная ветка проектирования (`docs/projects/<slug>/`), чьи
+stable-артефакты потом **читают** код-репо.
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-2563eb)](LICENSE)
 [![Часть stit](https://img.shields.io/badge/stit-открытые_шаблоны-6366f1)](https://git.stit.tech/stit-core/stit-public)
@@ -21,31 +24,40 @@ AI deep-dive-скиллов. Код-репо потом **читают** эти 
 
 ## Что это
 
-Шаблон импортируется **под бизнес** и форкается **первым**. Поток сверху вниз:
+Шаблон импортируется **под бизнес** и форкается **первым**. Стратегия — всегда;
+продукт — опциональный downstream, который заводится, только когда исход требует
+его:
 
 ```
-БИЗНЕС (+ реестр проблем) →  AJTBD (спрос по работам) →  SWOT (ставки) →  КАРТА ГИПОТЕЗ        →  ПРОДУКТЫ (несколько под бизнес)
-docs/business/               docs/ajtbd/                 docs/swot/       docs/hypothesis-map/    docs/projects/<slug>/
-profile · offering ·         segment · job ·             factor · bet     goal · metric ·         vision + user / capability /
-channel · competitor ·       job-graph · solution ·                       subject ·               boundary / surface / ...
-current-metric · material ·  segment-problem                              hypothesis · task          │
-business-problem (реестр)                                                                            ├─ interface/  (UX: who/situation/zone)
-stakeholder · stakeholder-map                                                                        ├─ domains/    (опц. DDD-контексты)
-                                                                                                     └─ screens/    (flow/screen/block/shell)
-                                                                                                            │
-                                                                                                            ▼  ручная работа автора макета
-                                                                                                       wireframe → hi-fi на @stit/ui
+СТРАТЕГИЯ (всегда) — сверху вниз:
+
+БИЗНЕС (+ реестр проблем + стейкхолдеры) →  AJTBD (спрос по работам) →  SWOT (ставки) →  КАРТА ГИПОТЕЗ
+docs/business/                              docs/ajtbd/                 docs/swot/       docs/hypothesis-map/
+profile · offering · channel ·              segment · job · job-graph · factor · bet     goal · metric · subject ·
+competitor · current-metric ·               solution · segment-problem                  hypothesis · task
+material · business-problem (реестр) ·
+stakeholder · stakeholder-map
+
+ИСХОД проблемы (по результату стратегии):
+  • task — закрывает проблему без продукта (процесс, партнёрство, цена, операционное действие)
+  • ПРОДУКТ (опционально, под ставку/гипотезу) — docs/projects/<slug>/
+        vision + user / capability / boundary / surface / integration / constraint / market
+        ├─ interface/  (UX: who / situation / zone)
+        ├─ domains/    (опц. DDD-контексты)
+        └─ screens/    (flow / screen / block / shell)  →  wireframe → hi-fi на @stit/ui  →  код-репо читают
 ```
 
 Артефакты — **чистая аналитика**, на код напрямую не мапятся. Сегменты по работам
 живут в `docs/ajtbd/` (Advanced JTBD): трение сегмента (`segment-problem`)
 доказывает проблему бизнеса (`business-problem`), а граф работ и механики ценности
-подсказывают возможности продукта. Связь «проблема ↔ продукт» — M:N
-(`vision.addresses-problem`). Превращение `screens/` в макет — ручная работа
+питают и стратегию, и — если дело дошло до продукта — его возможности. Исход
+проблемы может остаться **задачей** (`task` в Карте гипотез); продуктовый слой
+заводится, только когда ставка/гипотеза требуют его. Связь «проблема ↔ продукт» —
+M:N (`vision.addresses-problem`). Превращение `screens/` в макет — ручная работа
 автора, не отдельный артефакт.
 
-> **Юридическая рамка:** гарантируем доставку проекта по scope; метрики (Карта
-> гипотез) — совместный с бизнесом **best-effort таргет**, не гарантия исхода.
+> **Юридическая рамка:** гарантируем доставку по scope (продукт или задача); метрики
+> (Карта гипотез) — совместный с бизнесом **best-effort таргет**, не гарантия исхода.
 
 ## Методология в двух словах
 
@@ -66,10 +78,12 @@ stakeholder · stakeholder-map                                                  
   рождаются стратегические ставки (`factor` → `bet`), доводимые до цели/гипотезы.
 - **hypothesis-map** (строгий, Карта гипотез) — по каждой проблеме: цель →
   измеримая метрика → субъект → гипотеза → задача проверки. Ядро — метрика как
-  best-effort таргет, не гарантия.
-- **projects/`<slug>`** — продукт под проблему(ы): vision + user / capability /
-  boundary / surface / integration / constraint / market, плюс вложенные
-  `interface/`, `domains/`, `screens/`.
+  best-effort таргет, не гарантия. Терминал стратегии — **задача** (`task`):
+  она может закрыть проблему сама либо развернуться в продукт.
+- **projects/`<slug>`** (опционально) — когда исход стратегии — продукт под
+  проблему(ы): vision + user / capability / boundary / surface / integration /
+  constraint / market, плюс вложенные `interface/`, `domains/`, `screens/`. Если
+  проблему закрывает задача (`task`), продуктовый слой не заводится.
 
 Каждый слой ведёт свой deep-dive-скилл через `AskUserQuestion`, пишет state в
 свою ветку единого дерева оркестратора (`.claude/skills/entrypoint/state/`;
@@ -79,9 +93,10 @@ stakeholder · stakeholder-map                                                  
 
 ## Место в экосистеме
 
-Это **design-time source of truth** проекта. Форкается первым (`Use this template`
-→ `<org>/docs`), наполняется аналитикой — и только потом форкаются код-репо,
-которые **читают** его stable-артефакты (read-only, односторонне):
+Это **design-time source of truth** стратегии (и проектирования продукта, когда он
+нужен). Форкается первым (`Use this template` → `<org>/strategy`), наполняется
+аналитикой — и, **когда стратегия рождает продукт**, его stable-артефакты
+**читают** код-репо (read-only, односторонне):
 
 | Соседний репо | Читает из этого репо |
 |---|---|
@@ -96,7 +111,7 @@ stakeholder · stakeholder-map                                                  
 
 ## Путь форка
 
-`Use this template` → `<org>/docs` → откройте `claude` →
+`Use this template` → `<org>/strategy` → откройте `claude` →
 [`docs/getting-started.md`](docs/getting-started.md). Рекомендуемый вход — два
 оркестратора `/entrypoint` (аналитик) и `/entrypoint-for-business` (клиент); под
 ними рой deep-dive/audit-исполнителей, прямой вызов которых тоже допустим.
@@ -119,7 +134,7 @@ stakeholder · stakeholder-map                                                  
 
 ```
 business (профиль + реестр проблем + стейкхолдеры) → ajtbd (спрос по работам) → swot (ставки)
-  → hypothesis-map (цель · метрика) → projects/<slug> (продукт → interface / domains / screens)
+  → hypothesis-map (цель · метрика · task) → [опц.] projects/<slug> (продукт → interface / domains / screens)
 ```
 
 Под оркестратором — рой исполнителей, прямой вызов которых тоже допустим:
@@ -130,7 +145,7 @@ business (профиль + реестр проблем + стейкхолдер�
 | `ajtbd` | `/segment-deep-dive` · `/job-graph-deep-dive` · `/jtbd-interview` | `/ajtbd-audit` |
 | `swot` | `/swot-deep-dive` | `/swot-audit` |
 | `hypothesis-map` | `/hypothesis-map-deep-dive` | `/hypothesis-map-audit` |
-| `projects/<slug>` | `/project-deep-dive` · `/interface-deep-dive` · `/domain-deep-dive` · `/screen-deep-dive` | `/project-audit` · `/interface-audit` · `/screen-audit` |
+| `projects/<slug>` (опц.) | `/project-deep-dive` · `/interface-deep-dive` · `/domain-deep-dive` · `/screen-deep-dive` | `/project-audit` · `/interface-audit` · `/screen-audit` |
 
 Сквозную семантику всех слоёв ловит рой `/cross-audit`. Когда дозревший продукт
 (`vision.lifecycle → stable`) меняет реальность бизнеса, оркестратор ведёт
@@ -152,6 +167,8 @@ business (профиль + реестр проблем + стейкхолдер�
   обратную сторону сводит `/cross-audit`.
 - **AJTBD питает соседей**: трение сегмента доказывает проблему бизнеса, механики
   графа работ — кандидаты в возможности продукта.
+- **Продукт — опциональный исход**: проблему может закрыть задача (`task`); слой
+  `docs/projects/` заводится, только когда стратегия требует продукта.
 - **Восходящий поток `project → business`**: дозревший продукт
   (`vision.lifecycle → stable`) питает business (оферы / метрики / реестр проблем)
   через провенанс `from-project`.

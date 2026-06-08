@@ -1,9 +1,10 @@
 # docs/ — карта документации
 
-Документация — **design-time source of truth** аналитики проекта. Здесь нет
-кода: артефакты — чистая язык-агностичная аналитика, которую читают соседние
-форки (`<org>/{backend,frontend,infra}`) и по которой автор макета вручную
-собирает hi-fi субстрат на `@stit/ui`. Заполняют артефакты deep-dive-
+Документация — **design-time source of truth** стратегии бизнеса (и проектирования
+продукта, когда он нужен). Здесь нет кода: артефакты — чистая язык-агностичная
+аналитика. Когда стратегия рождает продукт, его артефакты читают соседние форки
+(`<org>/{backend,frontend,infra}`) и по ним автор макета вручную собирает hi-fi
+субстрат на `@stit/ui`. Заполняют артефакты deep-dive-
 скиллы (`.claude/skills/`); рекомендуемый вход — оркестраторы `/entrypoint`
 (аналитик) и `/entrypoint-for-business` (клиент), которые классифицируют сырьё
 и маршрутизируют к исполнителям (прямой вызов исполнителя тоже допустим, см.
@@ -12,7 +13,8 @@
 ## Слои
 
 Поток сверху вниз: бизнес (+ реестр проблем) → сегменты и граф работ (AJTBD) →
-SWOT → Карта гипотез → продукты → интерфейс / домены / экраны.
+SWOT → Карта гипотез (терминал — `task`). Исход — задача, закрывающая проблему,
+либо **опционально** продукт → интерфейс / домены / экраны.
 
 | каталог | вопрос | вход |
 |---|---|---|
@@ -20,7 +22,7 @@ SWOT → Карта гипотез → продукты → интерфейс /
 | [`ajtbd/`](./ajtbd/README.md) | **кто наш сегмент по работам, его граф работ и трения** (Advanced JTBD, 5 kind) | `/segment-deep-dive` · `/job-graph-deep-dive` · `/jtbd-interview` (аналитик); клиент — `/entrypoint-for-business` |
 | [`swot/`](./swot/README.md) | **за счёт чего возможен следующий шаг** (LinkedSWOT: `factor` · `bet`, M:N) | `/swot-deep-dive` |
 | [`hypothesis-map/`](./hypothesis-map/README.md) | **под какие метрики целимся** (Карта гипотез: `goal` · `metric` · `subject` · `hypothesis` · `task`, M:N) | `/hypothesis-map-deep-dive` |
-| [`projects/`](./projects/README.md) | **продукты под бизнес** (несколько; см. ниже) | `/project-deep-dive <slug>` (аналитик); клиент — `/entrypoint-for-business` |
+| [`projects/`](./projects/README.md) | **продукты под бизнес** (опционально, когда исход — продукт; несколько, см. ниже) | `/project-deep-dive <slug>` (аналитик); клиент — `/entrypoint-for-business` |
 | `projects/_template/` | **канон формы** продуктовых слоёв (образец, не данные) | read-only, наследуется форком |
 | `projects/<slug>/` | **данные одного продукта** (vision + 7 kind + `interface/` + `domains/` + `screens/`) | скиллы слоёв `<slug>` |
 
@@ -45,9 +47,9 @@ SWOT → Карта гипотез → продукты → интерфейс /
 
 ## Что docs отдаёт соседям (handoff-контракт)
 
-`<org>/docs` — **жёсткий upstream** для остальных форков экосистемы. Контракт
-**read-only и односторонний**: соседи **читают** stable-артефакты этого репо,
-сами в него не пишут.
+`<org>/strategy` — **жёсткий upstream** для остальных форков экосистемы (актуален,
+когда стратегия дошла до продукта). Контракт **read-only и односторонний**: соседи
+**читают** stable-артефакты этого репо, сами в него не пишут.
 
 | потребитель (форк) | что читает | для чего |
 |---|---|---|
@@ -55,21 +57,21 @@ SWOT → Карта гипотез → продукты → интерфейс /
 | **`<org>/frontend`** (`spa-frontend-template`) | `projects/<slug>/{interface,screens}/` + product-файлы | `/fsd-deep-dive` мапит ситуации/блоки/сущности на FSD-слои |
 | **`<org>/infra`** (`project-infra-template-compose`) | `projects/<slug>/{vision, surface}` | `/init-project` читает продуктовый контекст (vision / surfaces) |
 
-Соседи держат `<org>/docs` sibling-checkout'ом рядом и резолвят путь через
+Соседи держат `<org>/strategy` sibling-checkout'ом рядом и резолвят путь через
 свой `docs/reference/ecosystem.md`. Эти артефакты — единственное, что docs
 производит для экосистемы; ничего обратно из них не импортируется.
 
 ## Где это в экосистеме
 
-`<org>/docs` — один из **5 форкаемых шаблонов** под `stit-core/`
+`<org>/strategy` — один из **5 форкаемых шаблонов** под `stit-core/`
 (`corp-infra-template`, `go-backend-template`, `spa-frontend-template`,
-`project-docs-template` — этот, `project-infra-template-compose`), плюс 2 общие
+`business-strategy-template` — этот, `project-infra-template-compose`), плюс 2 общие
 библиотеки: Go-lib `stit-core/golibinfra` и дизайн-система `@stit/ui` (репо
 `stit-core/ui-lib`). Корп control-plane — репо `corp-infra-template` (managed =
 инстанс на `*.stit.tech`, self-hosted = ваш форк; вендор-лока нет). Роль этого
-репо — **design-time SoT** проекта; форкается **первым**, наполняется аналитикой,
-дальше форкаются код-репо (которые его читают). Канон-карта контрактов
-(и self-hosted-канон) — `corp-infra-template/docs/ecosystem.md`.
+репо — **design-time SoT** стратегии; форкается **первым**, наполняется аналитикой,
+дальше — когда стратегия рождает продукт — форкаются код-репо (которые его читают).
+Канон-карта контрактов (и self-hosted-канон) — `corp-infra-template/docs/ecosystem.md`.
 
 ## Форку
 

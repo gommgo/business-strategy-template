@@ -1,29 +1,31 @@
-# Getting started — от шаблона к docs-репо проекта
+# Getting started — от шаблона к репо стратегии
 
 **[META]** Этот файл — для потребителя шаблона. Описывает путь от форка до
-наполненного аналитикой docs-репо проекта.
+наполненного аналитикой репо стратегии проекта.
 
 Принцип: **аналитика первична.** Рекомендуемый вход — оркестратор `/entrypoint`
 (аналитик) или `/entrypoint-for-business` (клиент): принимает сырьё любого объёма,
 классифицирует по слоям и маршрутизирует к рою deep-dive-исполнителей (прямой
 вызов исполнителя тоже допустим). Семантический поток сверху вниз: бизнес
-заказчика (+ реестр проблем) → сегменты и граф работ → SWOT → Карта гипотез →
-продукты → интерфейс / домены / экраны. Артефакты `docs/` — design-time source of
-truth для соседних форков (`<org>/{backend,frontend,infra}`).
+заказчика (+ реестр проблем) → сегменты и граф работ → SWOT → Карта гипотез
+(терминал — `task`). Исход — задача, закрывающая проблему, либо **опционально**
+продукт → интерфейс / домены / экраны. Артефакты `docs/` — design-time source of
+truth; когда дело дошло до продукта, их читают соседние форки
+(`<org>/{backend,frontend,infra}`).
 
 ## 0. Форк
 
-1. Gitea (`https://git.stit.tech`) → `stit-core/project-docs-template` →
-   **Use this template** → `<org>/docs`.
-2. `git clone git@git.stit.tech:<org>/docs.git && cd docs`.
-3. Форкается **первым** в экосистеме: backend/frontend/infra-форки читают
-   `<org>/docs` как upstream-аналитику (`docs/README.md § Что docs отдаёт
-   соседям`).
+1. Gitea (`https://git.stit.tech`) → `stit-core/business-strategy-template` →
+   **Use this template** → `<org>/strategy`.
+2. `git clone git@git.stit.tech:<org>/strategy.git && cd strategy`.
+3. Форкается **первым** в экосистеме: когда стратегия рождает продукт,
+   backend/frontend/infra-форки читают `<org>/strategy` как upstream-аналитику
+   (`docs/README.md § Что docs отдаёт соседям`).
 
 ## Путь
 
 ```
-0. Use this template → <org>/docs → клон
+0. Use this template → <org>/strategy → клон
    Вход аналитика: /entrypoint — приносишь сырьё, оркестратор маршрутизирует.
                    Прямой вызов исполнителей ниже тоже допустим.
    Вход клиента:   /entrypoint-for-business — одной командой про всё (бизнес,
@@ -36,13 +38,13 @@ truth для соседних форков (`<org>/{backend,frontend,infra}`).
 3. SWOT и Карта гипотез
    ├─ /swot-deep-dive (факторы → ставки)            → /swot-audit
    └─ /hypothesis-map-deep-dive (цель → метрика → субъект → гипотеза) → /hypothesis-map-audit
-4. Продукты         → /project-deep-dive <slug> (vision + 7 kind)
+4. Продукты (опц.)  → /project-deep-dive <slug> (vision + 7 kind)
    ├─ /project-audit <slug>
    ├─ /interface-deep-dive <slug>  → /interface-audit <slug>
    ├─ /domain-deep-dive <slug> <ctx> (опц., DDD)
    └─ /screen-deep-dive <slug>      → /screen-audit <slug>
 5. /cross-audit — сквозная семантика между слоями (рой)
-6. готовый docs-репо проекта
+6. готовый репо стратегии (с продуктами, если до них дошло)
 ```
 
 Это не жёсткая лестница: информация приходит не линейно, оркестратор ведёт по
@@ -109,11 +111,12 @@ truth для соседних форков (`<org>/{backend,frontend,infra}`).
 В клиент-режиме SWOT и Карту гипотез, как и все остальные темы, ведёт сам
 `/entrypoint-for-business` — единый клиентский вход.
 
-## 4. Продукты — `docs/projects/<slug>/`
+## 4. Продукты — `docs/projects/<slug>/` (опционально)
 
-Корень решения: несколько продуктов под одним бизнесом, у каждого своя папка.
-Все скиллы слоёв принимают `<project-slug>` первым аргументом (без него —
-пикер по `docs/projects/`, исключая `_template`).
+Опциональный downstream — когда исход стратегии требует продукта (иначе проблему
+закрывает задача `task` Карты гипотез). Несколько продуктов под одним бизнесом, у
+каждого своя папка. Все скиллы слоёв принимают `<project-slug>` первым аргументом
+(без него — пикер по `docs/projects/`, исключая `_template`).
 
 - **`/project-deep-dive <slug>`** (аналитик) — vision (+ `addresses-problem`
   M:N к проблемам) + 7 kind продукта (user / capability / boundary / surface /
@@ -147,10 +150,11 @@ interface ↔ domain ↔ screen). Не slug-валидация — смысло�
 
 ## Готово
 
-Репо наполнено аналитикой проекта: свой бизнес, свои проблемы, свои
-продукты. Дальше — обычный аналитический флоу по воркфлоу
-(`README.md`), под git-ревью. Соседние форки `<org>/{backend,frontend,infra}`
-читают stable-артефакты этого репо как upstream (`docs/README.md`).
+Репо наполнено стратегией бизнеса: свой бизнес, свои проблемы, ставки и гипотезы —
+и продукты, если до них дошло. Дальше — обычный аналитический флоу по воркфлоу
+(`README.md`), под git-ревью. Когда стратегия рождает продукт, соседние форки
+`<org>/{backend,frontend,infra}` читают его stable-артефакты как upstream
+(`docs/README.md`).
 
 ## Когда что-то идёт не так
 
