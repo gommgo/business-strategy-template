@@ -19,7 +19,7 @@
 проекта: продукт (`vision` + 7 kind), аналитика интерфейса (`interface/`)
 — UX над продуктом, опционально бизнес-домены (`domains/`) и
 композиция/облик (`screens/`), по которой собирается кликабельный hi-fi
-субстрат на библиотеке `@sftbmb/ui`. Канон формы продуктовых слоёв —
+субстрат на библиотеке `@stit-design/ui`. Канон формы продуктовых слоёв —
 один раз в `docs/projects/_template/`. См.:
 
 - `README.md` — карта репозитория и воркфлоу.
@@ -52,18 +52,18 @@
 
 ## Где это в экосистеме
 
-Это один из **5 форкаемых шаблонов** под `sftbmb-core/`:
+Это один из **5 форкаемых шаблонов** под `stit-core/`:
 `corp-infra-template` (корп control-plane), `go-backend-template`
 (→ `<org>/backend`), `spa-frontend-template` (→ `<org>/frontend`),
 **`project-docs-template`** (этот → `<org>/docs`),
 `project-infra-template-compose` (→ `<org>/infra`). Рядом — 2 общие библиотеки:
-Go-lib `sftbmb-core/golibinfra` и дизайн-система `@sftbmb/ui` из репо
-`sftbmb-core/ui-lib`. Корп control-plane `corp-infra-template`: вендор-лока нет —
-managed (инстанс на `*.sftbmb.ru`) или self-hosted (ваш форк). Канон контрактов
+Go-lib `stit-core/golibinfra` и дизайн-система `@stit-design/ui` из репо
+`stit-core/ui-lib`. Корп control-plane `corp-infra-template`: вендор-лока нет —
+managed (инстанс на `*.stit.tech`) или self-hosted (ваш форк). Канон контрактов
 (в т.ч. self-hosted) — `corp-infra-template/docs/ecosystem.md`.
 
 **Роль docs-репо — design-time SoT проекта.** Форкается **первым**
-(Gitea → `sftbmb-core/project-docs-template` → **Use this template** →
+(Gitea → `stit-core/project-docs-template` → **Use this template** →
 `<org>/docs`), наполняется аналитикой, и только потом форкаются код-репо,
 которые **читают** его stable-артефакты как upstream (read-only,
 односторонне):
@@ -154,7 +154,7 @@ domain. Сквозные рёбра авторятся **снизу-вверх**
 проблему). Метрика **никогда** не подаётся как гарантия.
 
 Каноны терминов — в README каждого слоя. Канон терминов компонентов
-и craft — в библиотеке `@sftbmb/ui`. Английский в backticks —
+и craft — в библиотеке `@stit-design/ui`. Английский в backticks —
 только для устоявшегося канона (`a11y`, DTCG, FSD-слои, `data-*`,
 `aria-busy`). Всё остальное — по-русски, без полу-калек («пропсы»,
 «варианты-проперти»).
@@ -297,7 +297,7 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
 - **Бизнес-домен** (domains): инварианты, preconditions, business
   rules — только от архитектора.
 - **Craft** (компоненты, цвет, пространство, типографика, движение,
-  a11y): живёт в библиотеке `@sftbmb/ui`, наполняется ответами
+  a11y): живёт в библиотеке `@stit-design/ui`, наполняется ответами
   owner. Облик в макете — из craft-экспертизы, не «на глаз».
 
 Неоднозначность вне покрытия → вопрос человеку, не угадывание.
@@ -409,7 +409,7 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
   битых ссылок, нарушений slot-fills/accepts и семантических подозрений —
   скилл `screen-audit <slug>`. При заведении flow/shell скилл предлагает
   связь с `surface` того же проекта.
-- **Библиотека** — в отдельном репо `ui-lib` как `@sftbmb/ui`;
+- **Библиотека** — в отдельном репо `ui-lib` как `@stit-design/ui`;
   проект её потребляет, не правит.
 - **Sweep'ы** (терминология, чистка): 1 агент = 1 непересекающаяся зона.
 

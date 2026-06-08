@@ -6,7 +6,7 @@
 **канон формы** (`docs/projects/_template/screens/`); данные каждого проекта
 живут в `docs/projects/<project-slug>/screens/`. Артефакты — **аналитика
 композиции и облика** в терминах семантического дерева и компонентов
-`@sftbmb/ui`. **Маппинг на FSD здесь не делается** — превращение
+`@stit-design/ui`. **Маппинг на FSD здесь не делается** — превращение
 `docs/projects/<project-slug>/screens/` в код делает автор макета вручную,
 не отдельный артефакт.
 
@@ -14,7 +14,7 @@
 
 ```
 interface/ → синтез → screens/ → wireframe → hi-fi
- (бизнес)              (композиция,   (код на @sftbmb/ui,
+ (бизнес)              (композиция,   (код на @stit-design/ui,
                         облик)         вручную)
 ```
 
@@ -26,7 +26,7 @@ interface/ → синтез → screens/ → wireframe → hi-fi
    `docs/projects/<project-slug>/screens/` — каждый ссылается на свой
    источник в interface через `slug`.
 3. По `docs/projects/<project-slug>/screens/` автор макета вручную
-   собирает wireframe и hi-fi субстрат на `@sftbmb/ui`. Отдельного
+   собирает wireframe и hi-fi субстрат на `@stit-design/ui`. Отдельного
    артефакта-моста между screens и кодом нет.
 
 ## 4 kind
@@ -100,13 +100,13 @@ Frontmatter — YAML, древо — fenced ```yaml```-блок в теле.
 
 Дерево живёт в ```yaml```-блоке тела артефакта. Узлы — **семантические**:
 описывают намерение композиции, не CSS-детали. Конкретный облик
-(пиксели, цвета, шрифты) — в craft библиотеки `@sftbmb/ui`.
+(пиксели, цвета, шрифты) — в craft библиотеки `@stit-design/ui`.
 
 ### Naming компонентов
 
 | префикс | источник | пример |
 |---|---|---|
-| `ui:` | `@sftbmb/ui` (компонент библиотеки) | `ui:Stack`, `ui:Button`, `ui:DataList` |
+| `ui:` | `@stit-design/ui` (компонент библиотеки) | `ui:Stack`, `ui:Button`, `ui:DataList` |
 | `block:` | `docs/projects/<project-slug>/screens/blocks/<slug>` (проектный блок) | `block:filters-panel` |
 | `data:` | `docs/projects/<project-slug>/interface/data-items.md` (датум) | `data:study`, `data:study.name` |
 | `block-*:` | зарезервированная internal-zone блока (внутри tree блока) | `block-header:`, `block-body:`, `block-footer:`, `block-aside:` |
@@ -184,9 +184,9 @@ tree:
 Lint проверяет существование slug-а в `data-items.md`. Реальный источник
 данных — слой кода (FSD); артефакт фиксирует только контракт.
 
-## Контракт с `@sftbmb/ui`
+## Контракт с `@stit-design/ui`
 
-`@sftbmb/ui` публикует JSON-каталог компонентов
+`@stit-design/ui` публикует JSON-каталог компонентов
 (`manifest.json` в дистрибутиве): имя + props + варианты. Lint в
 `docs/projects/<project-slug>/screens/` читает manifest и ругает
 неизвестные `ui:*` имена и невалидные props.
@@ -224,7 +224,7 @@ Forms и input:
   `ui:InputOtp`.
 
 Список — выводимое требование, не финальный реестр. Источник правды —
-`@sftbmb/ui/manifest.json`, когда тот появится.
+`@stit-design/ui/manifest.json`, когда тот появится.
 
 ## Anti-patterns
 
@@ -270,6 +270,6 @@ screens (правило forward-only).
 ## Связь с кодом
 
 Прямой автоматической связи нет. Wireframe и hi-fi субстрат на
-`@sftbmb/ui` собирает автор макета **вручную** по
+`@stit-design/ui` собирает автор макета **вручную** по
 `docs/projects/<project-slug>/screens/`. Отдельного артефакта-моста между
 screens и кодом нет и не планируется.

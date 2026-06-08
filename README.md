@@ -10,7 +10,7 @@ AI deep-dive-скиллов. Код-репо потом **читают** эти 
 спроектированному, а не наоборот.
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-2563eb)](LICENSE)
-[![Часть sftbmb](https://img.shields.io/badge/sftbmb-открытые_шаблоны-6366f1)](https://git.sftbmb.ru/sftbmb-core/sftbmb-public)
+[![Часть sftbmb](https://img.shields.io/badge/sftbmb-открытые_шаблоны-6366f1)](https://git.stit.tech/stit-core/sftbmb-public)
 [![Method](https://img.shields.io/badge/method-LinkedSWOT_%2B_Карта_гипотез-0ea5e9)](#методология-в-двух-словах)
 [![Process](https://img.shields.io/badge/process-AI--driven_скиллы-8b5cf6)](#воркфлоу)
 [![SoT](https://img.shields.io/badge/role-design--time_SoT-22c55e)](#место-в-экосистеме)
@@ -34,7 +34,7 @@ stakeholder · stakeholder-map                                                  
                                                                                                      └─ screens/    (flow/screen/block/shell)
                                                                                                             │
                                                                                                             ▼  ручная работа автора макета
-                                                                                                       wireframe → hi-fi на @sftbmb/ui
+                                                                                                       wireframe → hi-fi на @stit-design/ui
 ```
 
 Артефакты — **чистая аналитика**, на код напрямую не мапятся. Сегменты по работам
@@ -85,14 +85,14 @@ stakeholder · stakeholder-map                                                  
 
 | Соседний репо | Читает из этого репо |
 |---|---|
-| [`<org>/backend`](https://git.sftbmb.ru/sftbmb-core/go-backend-template) | `projects/<slug>/domains/<ctx>/` (scaffold доменов в Go) |
-| [`<org>/frontend`](https://git.sftbmb.ru/sftbmb-core/spa-frontend-template) | `projects/<slug>/{interface,screens}/` (fsd-deep-dive) |
-| [`<org>/infra`](https://git.sftbmb.ru/sftbmb-core/project-infra-template-compose) | `projects/<slug>/{vision,surface}` (init-project) |
+| [`<org>/backend`](https://git.stit.tech/stit-core/go-backend-template) | `projects/<slug>/domains/<ctx>/` (scaffold доменов в Go) |
+| [`<org>/frontend`](https://git.stit.tech/stit-core/spa-frontend-template) | `projects/<slug>/{interface,screens}/` (fsd-deep-dive) |
+| [`<org>/infra`](https://git.stit.tech/stit-core/project-infra-template-compose) | `projects/<slug>/{vision,surface}` (init-project) |
 
 Облик собирается на дизайн-системе
-[`@sftbmb/ui`](https://git.sftbmb.ru/sftbmb-core/ui-lib) (потребляется, не правится).
+[`@stit-design/ui`](https://git.stit.tech/stit-core/ui-lib) (потребляется, не правится).
 Канон контрактов экосистемы —
-[`corp-infra-template/docs/ecosystem.md`](https://git.sftbmb.ru/sftbmb-core/corp-infra-template/src/branch/main/docs/ecosystem.md).
+[`corp-infra-template/docs/ecosystem.md`](https://git.stit.tech/stit-core/corp-infra-template/src/branch/main/docs/ecosystem.md).
 
 ## Путь форка
 
@@ -167,9 +167,9 @@ README каждого слоя; гайд для агента — [`CLAUDE.md`](C
 
 Это один из открытых шаблонов sftbmb (Apache-2.0) — фундамент «-1 уровня»,
 берите бесплатно и владейте. Карта всех шаблонов и точка входа —
-**[витрина sftbmb](https://git.sftbmb.ru/sftbmb-core/sftbmb-public)**. Нужна
+**[витрина sftbmb](https://git.stit.tech/stit-core/sftbmb-public)**. Нужна
 команда аналитиков, методология или поддержка —
-**[наш подход и контакты (vision)](https://git.sftbmb.ru/sftbmb/vision)**.
+**[наш подход и контакты (vision)](https://git.stit.tech/sftbmb/vision)**.
 
 ## Лицензия
 

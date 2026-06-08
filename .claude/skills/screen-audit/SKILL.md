@@ -51,7 +51,7 @@ README'ы по 4 kind в его подпапках. Аудит **читает и
   `docs/projects/<project-slug>/interface/{who,situation,block,ux-substrate,data-items}.md`.
 - Контракт ui-lib: «топ-уровень компонентов» в каноне
   `docs/projects/_template/screens/README.md` (пока
-  `@sftbmb/ui/manifest.json` не опубликован).
+  `@stit-design/ui/manifest.json` не опубликован).
 
 **Чего аудит не читает**:
 

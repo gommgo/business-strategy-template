@@ -3,7 +3,7 @@
 Документация — **design-time source of truth** аналитики проекта. Здесь нет
 кода: артефакты — чистая язык-агностичная аналитика, которую читают соседние
 форки (`<org>/{backend,frontend,infra}`) и по которой автор макета вручную
-собирает hi-fi субстрат на `@sftbmb/ui`. Заполняют артефакты deep-dive-
+собирает hi-fi субстрат на `@stit-design/ui`. Заполняют артефакты deep-dive-
 скиллы (`.claude/skills/`); рекомендуемый вход — оркестраторы `/entrypoint`
 (аналитик) и `/entrypoint-for-business` (клиент), которые классифицируют сырьё
 и маршрутизируют к исполнителям (прямой вызов исполнителя тоже допустим, см.
@@ -61,12 +61,12 @@ SWOT → Карта гипотез → продукты → интерфейс /
 
 ## Где это в экосистеме
 
-`<org>/docs` — один из **5 форкаемых шаблонов** под `sftbmb-core/`
+`<org>/docs` — один из **5 форкаемых шаблонов** под `stit-core/`
 (`corp-infra-template`, `go-backend-template`, `spa-frontend-template`,
 `project-docs-template` — этот, `project-infra-template-compose`), плюс 2 общие
-библиотеки: Go-lib `sftbmb-core/golibinfra` и дизайн-система `@sftbmb/ui` (репо
-`sftbmb-core/ui-lib`). Корп control-plane — репо `corp-infra-template` (managed =
-инстанс на `*.sftbmb.ru`, self-hosted = ваш форк; вендор-лока нет). Роль этого
+библиотеки: Go-lib `stit-core/golibinfra` и дизайн-система `@stit-design/ui` (репо
+`stit-core/ui-lib`). Корп control-plane — репо `corp-infra-template` (managed =
+инстанс на `*.stit.tech`, self-hosted = ваш форк; вендор-лока нет). Роль этого
 репо — **design-time SoT** проекта; форкается **первым**, наполняется аналитикой,
 дальше форкаются код-репо (которые его читают). Канон-карта контрактов
 (и self-hosted-канон) — `corp-infra-template/docs/ecosystem.md`.
