@@ -1,72 +1,95 @@
 ---
 name: interface-deep-dive
-description: "Углублённая проработка аналитических артефактов интерфейса проекта в `docs/projects/<project-slug>/interface/` (who · stage · situation · zone · block · ux-substrate · data-items). Ведёт сессию заполнения через структурированные вопросы (AskUserQuestion), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/projects/<project-slug>/interface/`), не выдумывает домен и craft. Использовать всегда, когда речь об interface-слое проекта, заполнении 7 артефактных таблиц, заведении или углублении ситуации/блока/зоны/субстрата/участника/этапа/данных, разборе сырья (транскрипт интервью, заметки, скрин UI) под эти артефакты, переходе записи `status: draft → stable`, удалении с каскадом, или копании связей между сущностями. Также — единственная точка входа в interface-слой проекта: новые строки и правки делаются через этот скилл."
+description: "Углублённая проработка аналитических артефактов интерфейса проекта в `docs/projects/<project-slug>/interface/<surface>/` (who · stage · situation · zone · block · ux-substrate · data-items) — по папке на поверхность из реестра `surface.md`. Ведёт сессию заполнения через структурированные вопросы (AskUserQuestion), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/projects/<project-slug>/interface/<surface>/`), не выдумывает домен и craft. Использовать всегда, когда речь об interface-слое проекта, заполнении 7 артефактных таблиц одной поверхности, заведении или углублении ситуации/блока/зоны/субстрата/участника/этапа/данных, разборе сырья (транскрипт интервью, заметки, скрин UI) под эти артефакты, переходе записи `status: draft → stable`, удалении с каскадом, или копании связей между сущностями. Также — единственная точка входа в interface-слой проекта: новые строки и правки делаются через этот скилл."
 ---
 
 # interface-deep-dive
 
-Углублённая проработка артефактов интерфейса **одного проекта** в
-`docs/projects/<project-slug>/interface/`. Канон формы —
+Углублённая проработка артефактов интерфейса **одной поверхности** проекта
+в `docs/projects/<project-slug>/interface/<surface>/`. Канон формы —
 `docs/projects/_template/interface/README.md`. Скилл ведёт сеанс через
 структурированные вопросы, фиксирует контекст в своей ветке единого
 дерева state оркестратора
-(`../entrypoint/state/projects/<project-slug>/interface/`), не выдумывает
-домен и craft.
+(`../entrypoint/state/projects/<project-slug>/interface/<surface>/`), не
+выдумывает домен и craft.
 
 Использовать как **единственную точку входа** в interface-слой проекта:
 заведение, углубление, разбор сырья, переход `draft → stable`,
 удаление с каскадом.
 
-Скилл всегда работает **в контексте одного проекта** (см. ниже «Выбор
-проекта»). Дальше по тексту `<project-slug>` — выбранный проект, а
-`docs/projects/<project-slug>/interface/` — его interface-слой.
+UX-слой **партиционируется по поверхности (surface)**: на каждую
+поверхность из реестра `docs/projects/<project-slug>/surface.md` — своя
+папка `interface/<surface>/` с 7 файлами. Скилл всегда работает **в
+контексте одного проекта и одной его поверхности** (см. ниже «Выбор
+проекта и поверхности»). Дальше по тексту `<project-slug>` — выбранный
+проект, `<surface>` — выбранная поверхность, а
+`docs/projects/<project-slug>/interface/<surface>/` — её interface-слой.
 
-## Выбор проекта
+## Выбор проекта и поверхности
 
-Скилл работает в контексте **одного** проекта. `<project-slug>` —
-первый позиционный аргумент:
+Скилл работает в контексте **одного** проекта и **одной** его поверхности.
+Аргументы позиционны — `<project-slug>` первый, `<surface>` второй:
 
-| вызов | проект |
+| вызов | проект · поверхность |
 |---|---|
-| `/interface-deep-dive <project-slug> …` | взять `<project-slug>` |
-| `/interface-deep-dive …` (без slug) | `AskUserQuestion`-пикер **по именам** проектов (исключая `_template`) |
+| `/interface-deep-dive <project-slug> <surface> …` | взять `<project-slug>` и `<surface>` |
+| `/interface-deep-dive <project-slug> …` (без surface) | проект задан; поверхность — `AskUserQuestion`-пикер **по именам** из `surface.md` |
+| `/interface-deep-dive …` (без slug) | пикеры **по именам**: сначала проект, затем поверхность |
 
-Алгоритм определения проекта при запуске:
+Алгоритм определения при запуске:
 
-1. Если первый аргумент совпадает с именем подпапки `docs/projects/`
-   (кроме `_template`) — это `<project-slug>`; остаток args — точка входа.
-2. Иначе — собрать проекты (подпапки `docs/projects/`, исключить
-   `_template`) и через `AskUserQuestion` спросить «Какой проект?»,
-   **показывая имена** (заголовок из `vision`; slug — деталь в описании).
-   Если проектов нет — сказать «сначала заведи проект через
-   `/project-deep-dive`», выйти.
-3. Все дальнейшие чтения/записи скоупятся в выбранный проект:
-   `docs/projects/<project-slug>/interface/` и ветку state
-   `../entrypoint/state/projects/<project-slug>/interface/`.
+1. **Проект.** Если первый аргумент совпадает с именем подпапки
+   `docs/projects/` (кроме `_template`) — это `<project-slug>`. Иначе —
+   собрать проекты (подпапки `docs/projects/`, исключить `_template`) и
+   через `AskUserQuestion` спросить «Какой проект?», **показывая имена**
+   (заголовок из `vision`; slug — деталь в описании). Если проектов нет —
+   сказать «сначала заведи проект через `/project-deep-dive`», выйти.
+2. **Поверхность.** Прочитать реестр
+   `docs/projects/<project-slug>/surface.md`. Если следующий аргумент
+   совпадает со `slug` строки реестра — это `<surface>`. Иначе — через
+   `AskUserQuestion` спросить «Какая поверхность?», **показывая имена**
+   (`surface.name`; slug и `type` — деталь в описании опции). Если реестр
+   поверхностей пуст или его нет — сказать «сначала заведи поверхность в
+   `surface.md` через `/project-deep-dive <project-slug>`», выйти.
+   Поверхность вне реестра не принимается — хребет ведёт реестр.
+3. **Scaffold.** Если папки `docs/projects/<project-slug>/interface/<surface>/`
+   ещё нет — это **первый заход на поверхность**: создать её, скопировав
+   форму из `docs/projects/_template/interface/` (7 файлов: `who`, `stage`,
+   `situation`, `zone`, `block`, `ux-substrate`, `data-items`), очистив
+   таблицы от строк-образцов (остаётся канон-проза + пустой заголовок
+   таблицы). Каталог руками не создавать в обход скила.
+4. Все дальнейшие чтения/записи скоупятся в выбранную поверхность:
+   `docs/projects/<project-slug>/interface/<surface>/` и ветку state
+   `../entrypoint/state/projects/<project-slug>/interface/<surface>/`.
 
 ## Точки входа
 
-После того как `<project-slug>` определён, остаток args задаёт режим:
+После того как `<project-slug>` и `<surface>` определены, остаток args
+задаёт режим:
 
 | вызов | поведение |
 |---|---|
-| `/interface-deep-dive <project-slug>` | сводка состояния + топ-3 кандидата на углубление |
-| `/interface-deep-dive <project-slug> <kind>` | завести новую сущность типа kind (режим A) |
-| `/interface-deep-dive <project-slug> <kind>:<slug>` | углубить существующую запись (режим C) |
-| `/interface-deep-dive <project-slug> <slug>` | найти slug; одиночный → C; конфликт kind → переспросить |
-| `/interface-deep-dive <project-slug> <свободный текст / приложение>` | сырьё → разбор (режим B) |
+| `/interface-deep-dive <project-slug> <surface>` | сводка состояния поверхности + топ-3 кандидата на углубление |
+| `/interface-deep-dive <project-slug> <surface> <kind>` | завести новую сущность типа kind (режим A) |
+| `/interface-deep-dive <project-slug> <surface> <kind>:<slug>` | углубить существующую запись (режим C) |
+| `/interface-deep-dive <project-slug> <surface> <slug>` | найти slug; одиночный → C; конфликт kind → переспросить |
+| `/interface-deep-dive <project-slug> <surface> <свободный текст / приложение>` | сырьё → разбор (режим B) |
 
 `kind` ∈ {`who`, `stage`, `situation`, `zone`, `block`, `ux-substrate`, `data-items`}.
 
 ## Что делать сразу при запуске
 
-1. Определить `<project-slug>` (см. «Выбор проекта»).
+1. Определить `<project-slug>` и `<surface>`, при первом заходе —
+   scaffold папки (см. «Выбор проекта и поверхности»).
 2. Прочитать `docs/projects/_template/interface/README.md` — освежить
    канон формы.
-3. Прочитать `docs/projects/<project-slug>/vision.md` и продуктовые
-   файлы (если есть) + `references/project-context.md` — освежить связи
-   с продуктовым слоем **того же проекта** (who ↔ user,
-   situation ↔ capability, zone ↔ surface).
+3. Прочитать `docs/projects/<project-slug>/vision.md`, реестр
+   `surface.md`, файл возможностей поверхности
+   `capability/<surface>.md` и корневой `user.md` (если есть) +
+   `references/project-context.md` — освежить связи с продуктовым слоем
+   **того же проекта** (who ↔ корневой `user`, situation ↔ `capability`
+   той же поверхности; zone живёт в папке своей поверхности — связь
+   структурная).
 4. Если остаток args пуст — сделать сводку (см. ниже) и через
    `AskUserQuestion` предложить выбор что копать.
 5. Если остаток args указывает на сущность — определить kind и режим
@@ -74,11 +97,11 @@ description: "Углублённая проработка аналитическ
 
 ## Сводка состояния (без args)
 
-1. Прочитать все 7 файлов в `docs/projects/<project-slug>/interface/`.
+1. Прочитать все 7 файлов в `docs/projects/<project-slug>/interface/<surface>/`.
 2. Подсчитать: сколько `draft` / `stable` по каждому kind.
 3. Прочитать свою ветку
-   `../entrypoint/state/projects/<project-slug>/interface/` (если есть) и
-   собрать открытые вопросы — секции `## Открытые вопросы`; пометки
+   `../entrypoint/state/projects/<project-slug>/interface/<surface>/` (если
+   есть) и собрать открытые вопросы — секции `## Открытые вопросы`; пометки
    `**blocker**` приоритетны.
 4. Выявить топ-3 «горячих» кандидата по приоритету:
    - draft-записи с `**blocker**`-вопросами;
@@ -122,11 +145,11 @@ description: "Углублённая проработка аналитическ
 
 Скилл не держит своего `state/`. Per-kind заметки пишутся в **свою ветку**
 единого дерева state оркестратора, не в
-`docs/projects/<project-slug>/interface/` и не в корне проекта; ветка
-скоупится по проекту:
+`docs/projects/<project-slug>/interface/<surface>/` и не в корне проекта;
+ветка скоупится по проекту **и поверхности**:
 
 ```
-../entrypoint/state/projects/<project-slug>/interface/<kind>/<slug>.md
+../entrypoint/state/projects/<project-slug>/interface/<surface>/<kind>/<slug>.md
 ```
 
 Формат заметки — канон `../entrypoint/references/state-model.md`. Кратко:
@@ -151,9 +174,10 @@ description: "Углублённая проработка аналитическ
 `hypothesis-map/`) и клиентский дом `../entrypoint-for-business/state/`.
 Проектные ветки `projects/<…>/` читаются **только по текущему
 `<project-slug>`** (изоляция продуктов сохраняется). Своя ветка —
-**rw**, всё остальное дерево и клиентский дом — **read-only**: в чужое не
-писать. При чтении клиентского дома маркер `**жду аналитика**` трактуется
-как blocker-кандидат.
+`projects/<project-slug>/interface/<surface>/` (одна поверхность) — **rw**,
+всё остальное дерево и клиентский дом — **read-only**: в чужое не писать.
+При чтении клиентского дома маркер `**жду аналитика**` трактуется как
+blocker-кандидат.
 
 ## Зеркала
 
@@ -171,10 +195,11 @@ description: "Углублённая проработка аналитическ
 См. `references/draft-stable.md`. Чек-лист после каждой правки:
 
 1. Обязательные слоты заполнены (опциональные могут быть `—`).
-2. Все `slug`-ссылки валидны (записи существуют в соседних файлах).
+2. Все `slug`-ссылки валидны (записи существуют в соседних файлах **той
+   же поверхности**).
 3. Зеркала консистентны (для `situation`).
 4. Тест-критерий из md явно подтверждён аналитиком в этой сессии.
-5. В `../entrypoint/state/projects/<project-slug>/interface/<kind>/<slug>.md`
+5. В `../entrypoint/state/projects/<project-slug>/interface/<surface>/<kind>/<slug>.md`
    нет `**blocker**`-вопросов (другие открытые вопросы — закрыты или явно
    отмечены как «не блокирует»).
 
@@ -187,11 +212,12 @@ description: "Углублённая проработка аналитическ
 
 ## Stub-сущности
 
-Если копаемая сущность ссылается на не существующий slug:
+Если копаемая сущность ссылается на не существующий slug **в той же
+поверхности**:
 
-1. В соответствующем файле — новая строка: `slug + name + description
-   + status=draft`, остальные ячейки `—`.
-2. В `../entrypoint/state/projects/<project-slug>/interface/<kind>/<stub-slug>.md`
+1. В соответствующем файле поверхности — новая строка: `slug + name +
+   description + status=draft`, остальные ячейки `—`.
+2. В `../entrypoint/state/projects/<project-slug>/interface/<surface>/<kind>/<stub-slug>.md`
    — секция `## Открытые вопросы` с записью «Заведён как stub в контексте
    `<откуда сослались>` — докопать».
 3. Возврат в исходную сущность, копание продолжается.
@@ -199,9 +225,9 @@ description: "Углублённая проработка аналитическ
 ## Удаление сущности (каскад)
 
 1. Прочитать все 7 файлов
-   `docs/projects/<project-slug>/interface/` + свою ветку
-   `../entrypoint/state/projects/<project-slug>/interface/` — найти все
-   ссылки на удаляемый slug.
+   `docs/projects/<project-slug>/interface/<surface>/` + свою ветку
+   `../entrypoint/state/projects/<project-slug>/interface/<surface>/` —
+   найти все ссылки на удаляемый slug **в этой поверхности**.
 2. Показать каскад: «ссылаются X, Y, Z — вот что сломается».
 3. Через `AskUserQuestion` по каждому месту — опции: «заменить на
    другой slug» / «поставить `—` (если поле допускает)» / «удалить
@@ -209,7 +235,7 @@ description: "Углублённая проработка аналитическ
 4. По подтверждению — выполнить все правки одним пакетом.
 5. Удалить запись из её файла.
 6. Удалить
-   `../entrypoint/state/projects/<project-slug>/interface/<kind>/<slug>.md`.
+   `../entrypoint/state/projects/<project-slug>/interface/<surface>/<kind>/<slug>.md`.
 7. Пересчитать зеркала затронутых ситуаций.
 
 ## Завершение сессии
@@ -234,11 +260,16 @@ description: "Углублённая проработка аналитическ
 - Не оставлять зеркала рассинхронными.
 - Не аккумулировать историю в своей ветке state — forward-only.
 - Не создавать
-  `../entrypoint/state/projects/<project-slug>/interface/<kind>/<slug>.md`,
+  `../entrypoint/state/projects/<project-slug>/interface/<surface>/<kind>/<slug>.md`,
   если все секции были бы пустыми — заметка появляется только когда есть
   что записать.
 - Не писать в чужие ветки дерева `../entrypoint/state/` и в клиентский дом
   `../entrypoint-for-business/state/` — только read-only; rw только своя
-  ветка `projects/<project-slug>/interface/`.
-- Не работать сразу с несколькими проектами в одной сессии — скилл
-  скоупится в один `<project-slug>` (изоляция продуктов сохраняется).
+  ветка `projects/<project-slug>/interface/<surface>/`.
+- Не работать сразу с несколькими проектами или поверхностями в одной
+  сессии — скилл скоупится в один `<project-slug>` и одну `<surface>`
+  (изоляция продуктов и поверхностей сохраняется).
+- Не ссылаться из одной поверхности в сущность другой — поверхности
+  изолированы; общее (один user на разных поверхностях, один датум) сводит
+  `/cross-audit`. Создавать папку поверхности вне реестра `surface.md`
+  тоже нельзя — хребет ведёт реестр.

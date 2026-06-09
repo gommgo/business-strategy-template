@@ -24,17 +24,24 @@ SWOT → Карта гипотез (терминал — `task`). Исход —
 | [`hypothesis-map/`](./hypothesis-map/README.md) | **под какие метрики целимся** (Карта гипотез: `goal` · `metric` · `subject` · `hypothesis` · `task`, M:N) | `/hypothesis-map-deep-dive` |
 | [`projects/`](./projects/README.md) | **продукты под бизнес** (опционально, когда исход — продукт; несколько, см. ниже) | `/project-deep-dive <slug>` (аналитик); клиент — `/entrypoint-for-business` |
 | `projects/_template/` | **канон формы** продуктовых слоёв (образец, не данные) | read-only, наследуется форком |
-| `projects/<slug>/` | **данные одного продукта** (vision + 7 kind + `interface/` + `domains/` + `screens/`) | скиллы слоёв `<slug>` |
+| `projects/<slug>/` | **данные одного продукта** (vision + surface-реестр + kind + `capability/<surface>` + `interface/<surface>/` + `screens/<surface>/` + `domains/`) | скиллы слоёв `<slug>` |
+| `projects/project-map.md` | **карта стыков между продуктами бизнеса** (межпроектный граф) | сводится из `integration`, сверяет `/cross-audit` |
 
+Поверхность (`surface`) — ось продукта: реестр `surface.md` объявляет
+поверхности, а их slug'и партиционируют возможности, интерфейс и экраны.
 Внутри проекта `projects/<slug>/`:
 
-- `vision.md` + 7 kind продукта (user / capability / boundary / surface /
-  integration / constraint / market) — вход `/project-deep-dive <slug>`.
-- `interface/` — who / stage / situation / zone / block / ux-substrate /
-  data-items — вход `/interface-deep-dive <slug>`.
-- `domains/` — (опц.) DDD-артефакты бэкенда по контекстам — вход
-  `/domain-deep-dive <slug> <ctx>`.
-- `screens/` — flow / screen / block / shell — вход `/screen-deep-dive <slug>`.
+- `vision.md` + реестр-хребет `surface.md` + кросс-поверхностные kind
+  (user / integration / boundary / constraint / market) — вход
+  `/project-deep-dive <slug>`.
+- `capability/<surface>.md` — возможности по поверхности — вход
+  `/project-deep-dive <slug>`.
+- `interface/<surface>/` — who / stage / situation / zone / block /
+  ux-substrate / data-items — вход `/interface-deep-dive <slug> [<surface>]`.
+- `screens/<surface>/` — flow / screen / block / shell — вход
+  `/screen-deep-dive <slug> [<surface>]`.
+- `domains/` — (опц.) DDD-артефакты бэкенда по bounded-context
+  (surface-агностичны) — вход `/domain-deep-dive <slug> <ctx>`.
 
 ## Аудиты (только отчёт)
 
@@ -54,8 +61,8 @@ SWOT → Карта гипотез (терминал — `task`). Исход —
 | потребитель (форк) | что читает | для чего |
 |---|---|---|
 | **`<org>/backend`** (`go-backend-template`) | `projects/<slug>/domains/<ctx>/` (stable) | `/scaffold` domain → Go-код; маппинг DDD → Go живёт у него (`docs/reference/domain-mapping.md`) |
-| **`<org>/frontend`** (`spa-frontend-template`) | `projects/<slug>/{interface,screens}/` + product-файлы | `/fsd-deep-dive` мапит ситуации/блоки/сущности на FSD-слои |
-| **`<org>/infra`** (`project-infra-template-compose`) | `projects/<slug>/{vision, surface}` | `/init-project` читает продуктовый контекст (vision / surfaces) |
+| **`<org>/frontend`** (`spa-frontend-template`) | `projects/<slug>/{interface,screens}/<surface>/` + product-файлы | `/fsd-deep-dive` мапит ситуации/блоки/сущности на FSD-слои (по поверхности) |
+| **`<org>/infra`** (`project-infra-template-compose`) | `projects/<slug>/{vision, surface}` | `/init-project` читает продуктовый контекст (vision / реестр поверхностей) |
 
 Соседи держат `<org>/strategy` sibling-checkout'ом рядом и резолвят путь через
 свой `docs/reference/ecosystem.md`. Эти артефакты — единственное, что docs

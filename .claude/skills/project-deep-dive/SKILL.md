@@ -1,6 +1,6 @@
 ---
 name: project-deep-dive
-description: "Углублённая проработка продуктового слоя одного проекта в `docs/projects/<project-slug>/` (vision · user · capability · boundary · surface · integration · constraint · market). Принимает `<project-slug>` первым аргументом; без него — предлагает пикер по папкам проектов (или заводит новый проект). Ведёт аналитика через 8 фаз вижн-мейкинга, заполняет артефакты через структурированные вопросы (AskUserQuestion), при необходимости запускает рой агентов для web-research конкурентов и регуляторики, фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/projects/<project-slug>/project/`), не выдумывает домен и не пишет маркетинговую копию. Использовать всегда, когда речь о продуктовом слое проекта, формировании вижна продукта, разборе интервью с бизнесом, заведении/углублении пользователя, возможности, поверхности, интеграции, ограничения, рыночного аналога или границы продукта, заведении нового проекта, проактивном проведении аналитика по фазам проработки, переходе записи `status: draft → stable`, или копании семантических связей между продуктовыми сущностями. Единственная точка входа в `docs/projects/<slug>/` для аналитика — новые строки и правки делаются только через этот скилл."
+description: "Углублённая проработка продуктового слоя одного проекта в `docs/projects/<project-slug>/` (vision · surface-реестр · user · capability по поверхности · boundary · integration · constraint · market). Поверхность (surface) — ось: реестр-хребет `surface.md` партиционирует возможности (capability) по файлам `capability/<surface>.md`. Принимает `<project-slug>` первым аргументом; без него — предлагает пикер по папкам проектов (или заводит новый проект). Ведёт аналитика через 8 фаз вижн-мейкинга, заполняет артефакты через структурированные вопросы (AskUserQuestion), при необходимости запускает рой агентов для web-research конкурентов и регуляторики, фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/projects/<project-slug>/project/`), не выдумывает домен и не пишет маркетинговую копию. Использовать всегда, когда речь о продуктовом слое проекта, формировании вижна продукта, разборе интервью с бизнесом, заведении/углублении пользователя, поверхности, возможности, интеграции, ограничения, рыночного аналога или границы продукта, заведении нового проекта, проактивном проведении аналитика по фазам проработки, переходе записи `status: draft → stable`, или копании семантических связей между продуктовыми сущностями. Единственная точка входа в `docs/projects/<slug>/` для аналитика — новые строки и правки делаются только через этот скилл."
 ---
 
 # project-deep-dive
@@ -13,6 +13,14 @@ description: "Углублённая проработка продуктовог
 (`AskUserQuestion`), фиксирует контекст в своей ветке единого дерева
 state оркестратора (`../entrypoint/state/projects/<project-slug>/project/`),
 не выдумывает домен и не пишет маркетинговую копию.
+
+**Поверхность (surface) — ось продукта.** Реестр-хребет `surface.md`
+объявляет поверхности (web, mobile, бот, API, админка …), и их slug'и —
+ключи партиционирования: каждая поверхность получает свой файл
+возможностей `capability/<surface>.md`. Возможность (capability) живёт
+**не плоским файлом**, а в папке `capability/`, по файлу на поверхность;
+связь capability → surface **структурная** (файл = поверхность).
+Остальные kind — плоские кросс-поверхностные таблицы в корне проекта.
 
 Использовать как **единственную точку входа** в продуктовый слой
 проекта для аналитика: выбор/заведение проекта, заведение, углубление,
@@ -38,7 +46,9 @@ state оркестратора (`../entrypoint/state/projects/<project-slug>/pro
 
 Внутри сессии выбранный `<project-slug>` фиксируется и подставляется во
 все пути: `docs/projects/<project-slug>/vision.md`,
-`docs/projects/<project-slug>/user.md`, … и в ветку state
+`docs/projects/<project-slug>/surface.md`,
+`docs/projects/<project-slug>/user.md`,
+`docs/projects/<project-slug>/capability/<surface>.md`, … и в ветку state
 (`../entrypoint/state/projects/<project-slug>/project/…`).
 
 ### Заведение нового проекта
@@ -51,11 +61,17 @@ state оркестратора (`../entrypoint/state/projects/<project-slug>/pro
    вывести самому из имени (транслит в kebab-case, при коллизии — суффикс)
    и показать одной строкой для контроля — аналитик kebab-case не
    придумывает (см. `.claude/rules/naming.md`).
-2. Скопировать форму: `vision.md` + 7 kind-файлов (`user.md`,
-   `capability.md`, `boundary.md`, `surface.md`, `integration.md`,
-   `constraint.md`, `market.md`) из `docs/projects/_template/project/` в
-   `docs/projects/<new-slug>/`. Канон-README **не** копируется — форма
-   живёт один раз в `_template/`.
+2. Скопировать форму из `docs/projects/_template/project/` в
+   `docs/projects/<new-slug>/`:
+   - `vision.md` (singleton);
+   - 6 плоских кросс-поверхностных kind-файлов: `surface.md`, `user.md`,
+     `integration.md`, `boundary.md`, `constraint.md`, `market.md`.
+   - `capability` **не плоский файл**: создаётся **папка** `capability/`.
+     Сам файл `capability/<surface>.md` заводится **под каждую
+     поверхность** из формы `_template/project/capability.md` позже — в
+     фазах `surface`/`capability`, когда реестр `surface.md` уже знает
+     поверхность. На скаффолде capability-файлов ещё нет (нет поверхностей).
+   - Канон-README **не** копируется — форма живёт один раз в `_template/`.
 3. Зайти в фазу `discovery` на свежем `vision.md` нового проекта.
 
 Соседние слои (`<new-slug>/interface/`, `<new-slug>/screens/`,
@@ -113,17 +129,25 @@ slug-рефов на строки реестра; связь M:N — пробл�
 | `/project-deep-dive <slug>` | если `<slug>` — папка проекта: сводка по фазам; иначе — пикер с предложением завести новый |
 | `/project-deep-dive <project-slug> <kind>` | завести новую сущность типа kind (режим A) |
 | `/project-deep-dive <project-slug> <kind>:<entity-slug>` | углубить существующую запись (режим C) |
+| `/project-deep-dive <project-slug> capability:<surface>:<entity-slug>` | возможность в файле поверхности `<surface>` (режим A/C) |
 | `/project-deep-dive <project-slug> <entity-slug>` | найти entity-slug; одиночный → C; конфликт kind → переспросить |
 | `/project-deep-dive <project-slug> <свободный текст / транскрипт>` | сырьё → разбор (режим B) |
 | `/project-deep-dive <project-slug> --phase <name>` | принудительно работать в указанной фазе |
 | `/project-deep-dive <project-slug> --research <kind>:<query>` | запустить рой агентов на тему |
 | `/project-deep-dive --new` | завести новый проект из формы `_template/project/` (спросит имя, slug выведет сам) |
 
-`kind` ∈ {`vision`, `user`, `capability`, `boundary`, `surface`,
-`integration`, `constraint`, `market`}.
+`kind` ∈ {`vision`, `surface`, `user`, `capability`, `integration`,
+`boundary`, `constraint`, `market`}. `vision` — singleton; `surface`,
+`user`, `integration`, `boundary`, `constraint`, `market` — 6 плоских
+кросс-поверхностных таблиц в корне проекта; `capability` — **папка**
+`capability/`, файл на поверхность (`capability/<surface>.md`). Для
+capability нужна поверхность: без явного `<surface>` скилл показывает
+пикер по реестру `surface.md`.
 
-`phase` ∈ {`discovery`, `user`, `capability`, `surface`,
-`integration`, `constraint`, `market`, `cohesion`}.
+`phase` ∈ {`discovery`, `user`, `surface`, `capability`,
+`integration`, `constraint`, `market`, `cohesion`}. Порядок неслучаен:
+`surface` идёт **перед** `capability` — хребет вперёд, возможности
+партиционируются по поверхностям.
 
 Если первый аргумент совпал с именем папки в `docs/projects/` (кроме
 `_template`) — это `<project-slug>`. Если нет — скилл показывает пикер
@@ -137,7 +161,8 @@ slug-рефов на строки реестра; связь M:N — пробл�
    (исключая `_template`) + опция «Завести новый». Зафиксировать выбранный
    `<project-slug>` на всю сессию.
 2. Прочитать `docs/projects/_template/project/README.md` — освежить канон
-   8 kinds и связи (форма-образец).
+   (vision + реестр-хребет `surface.md` + 5 плоских kind +
+   папка `capability/<surface>.md`) и связи (форма-образец).
 3. Прочитать `references/phases.md` — карту 8 фаз.
 4. Если за `<project-slug>` нет других args — сделать **сводку по
    фазам** для этого проекта (см. ниже) и через `AskUserQuestion`
@@ -155,10 +180,14 @@ slug-рефов на строки реестра; связь M:N — пробл�
 Скилл всегда даёт аналитику **карту, где он находится в воркфлоу**, а не
 просто список draft-записей. Это ключевое отличие от interface-канона.
 
-1. Прочитать `docs/projects/<project-slug>/vision.md` + все 7 табличных
-   файлов этого проекта.
+1. Прочитать `docs/projects/<project-slug>/vision.md` + плоские
+   kind-файлы (`surface.md`, `user.md`, `integration.md`, `boundary.md`,
+   `constraint.md`, `market.md`) + все файлы папки `capability/` (по
+   файлу на поверхность).
 2. Подсчитать: `draft` / `stable` по каждому kind, плюс существует ли
-   vision (если нет — текущая фаза = `discovery`).
+   vision (если нет — текущая фаза = `discovery`). Для capability считать
+   **по поверхностям**: какие поверхности реестра уже имеют файл
+   `capability/<surface>.md` и сколько в нём записей, у каких файла ещё нет.
 3. Прочитать свою ветку
    `../entrypoint/state/projects/<project-slug>/project/` (rw) + read-only
    всё дерево `../entrypoint/state/` (проектные ветки — только по текущему
@@ -168,26 +197,33 @@ slug-рефов на строки реестра; связь M:N — пробл�
 4. Определить **текущую фазу** по дереву:
    - vision не существует или status:draft → `discovery`;
    - user-таблица пустая → `user`;
-   - capability-таблица пустая → `capability`;
-   - surface пустая → `surface`;
+   - surface-реестр пустой → `surface`;
+   - реестр surface непустой, но есть поверхность без файла
+     `capability/<surface>.md` или этот файл пуст → `capability`;
    - integration пустая → `integration`;
    - constraint пустая → `constraint`;
    - market пустая → `market`;
    - все заполнены, но есть draft-записи или blocker-вопросы → `cohesion`.
-5. Вывести сводку в чат:
+
+   Фаза `capability` **не стартует без `surface`**: если реестр пуст,
+   текущая фаза — `surface`, а не `capability` (нет поверхностей —
+   некуда партиционировать возможности).
+5. Вывести сводку в чат (capability — построчно по поверхностям реестра):
 
    ```
    Проект: <project-slug>
    Текущая фаза: <name> (<n>/<N>)
    docs/projects/<project-slug>/ покрытие:
-     vision      [draft]  (addresses-problem: 1)
-     user     3 stable, 1 draft
-     capability  2 draft
-     surface     —
-     integration —
-     constraint  —
-     market      —
-     boundary    1 stable
+     vision         [draft]  (addresses-problem: 1)
+     user        3 stable, 1 draft
+     surface        2 (web-partner, tg-bot)
+     capability/
+       web-partner  2 draft
+       tg-bot       — (файла ещё нет)
+     integration    —
+     constraint     —
+     market         —
+     boundary       1 stable
    Открытых blocker-вопросов: 2
    Готов клиент-черновик в ветке: client  (если есть)
    ```
@@ -207,12 +243,17 @@ slug-рефов на строки реестра; связь M:N — пробл�
 |---|---|---|
 | `discovery` | vision.md draft → stable; первое касание проблемы и успеха | `vision.md` |
 | `user` | сегменты пользователей/клиентов | `user.md` |
-| `capability` | бизнес-возможности верхнего уровня | `capability.md` |
-| `surface` | где продукт «торчит наружу» | `surface.md` |
-| `integration` | внешние системы | `integration.md` |
+| `surface` | где продукт «торчит наружу» — реестр-хребет | `surface.md` |
+| `capability` | бизнес-возможности верхнего уровня, **по каждой поверхности** | `capability/<surface>.md` (по файлу на поверхность реестра) |
+| `integration` | внешние системы и стыки с соседними проектами | `integration.md` |
 | `constraint` | регуляторика / SLA / контракты | `constraint.md` |
 | `market` | конкуренты и аналоги (с роем агентов) | `market.md` |
 | `cohesion` | boundary + сквозная проверка, что слой целостен | `boundary.md`, повышение `draft → stable` |
+
+`surface` идёт **перед** `capability`: реестр-хребет — ось, а
+возможности партиционируются по поверхностям (`capability/<surface>.md` —
+по файлу на каждую поверхность реестра). Без поверхностей capability-фаза
+не стартует.
 
 Порядок — рекомендация, не закон. Аналитик может перепрыгнуть. Скилл
 **в начале каждой сессии напоминает**, какая фаза сейчас и почему, и
@@ -230,10 +271,10 @@ slug-рефов на строки реестра; связь M:N — пробл�
   anti-patterns из `Что <kind> НЕ`; свободная форма через Other для
   значений.
 - **B. Сырьё**. Args = `<project-slug>` + свободный текст или транскрипт
-  интервью с бизнесом. Извлечь кандидатов по слоям (user /
-  capability / surface / integration / constraint / market), показать
-  план, по подтверждению завести stub-строки, погрузиться в каждую
-  через C.
+  интервью с бизнесом. Извлечь кандидатов по слоям (user / surface /
+  capability с привязкой к поверхности / integration / constraint /
+  market), показать план, по подтверждению завести stub-строки (capability
+  — в файл своей поверхности), погрузиться в каждую через C.
 - **C. Углубление**. Args = `<project-slug> <kind>:<slug>` или выбран из
   сводки. Точечные вопросы по дырам и подозрениям; чек-лист
   `draft → stable` после каждой правки.
@@ -269,6 +310,10 @@ slug-рефов на строки реестра; связь M:N — пробл�
 
 Для `vision` — singleton:
 `../entrypoint/state/projects/<project-slug>/project/vision.md`.
+
+Для `capability` заметки скоупятся **по поверхности** (capability —
+папка по surface), чтобы возможности разных поверхностей не сталкивались:
+`../entrypoint/state/projects/<project-slug>/project/capability/<surface>/<slug>.md`.
 
 Дополнительный каталог
 `../entrypoint/state/projects/<project-slug>/project/research/` — для
@@ -309,23 +354,32 @@ merge / fetch, обычная git-механика.
 
 ## Семантические связи (без жёстких slug-валидаций)
 
-В отличие от `<project-slug>/interface/`, продуктовый слой **не
-валидирует** slug-ссылки между записями. Связи семантические:
+В отличие от `<project-slug>/interface/<surface>/`, продуктовый слой
+**не валидирует** slug-ссылки между записями — кроме **одной структурной
+оси**: поверхность. Файл `capability/<surface>.md` обязан соответствовать
+строке реестра `surface.md` (имя файла = slug поверхности), а
+`integration.surface` ссылается на поверхности реестра. Остальные связи
+семантические:
 
-- `user.slug` упоминается в `surface.user` и `capability.user`
-  — но и без явного полей-связи запись может быть валидна;
+- `user.slug` упоминается в `surface.user` и в `capability/<surface>.md`
+  → колонка `user` — но и без явного поля-связи запись может быть валидна;
 - `capability` без user — не ошибка, но подозрительно (повод
   поднять при cohesion);
 - `surface` без user — мёртвая, повод задать вопрос;
+- `integration → surface`: интеграция обслуживает поверхности (массив
+  slug-рефов в реестр); `integration → соседний проект` при
+  `target: sibling-project` (поле `sibling-project`);
 - `constraint` обычно привязан к surface или integration в `description`,
   не отдельным полем.
 
 `/project-audit <project-slug>` ловит **внутрипроектные** тупики
-(пустые обязательные слоты, draft без якоря). `/cross-audit` ловит
-**между-слойные** несостыковки (user без покрытия в
-`<slug>/interface/who` и т.п., продукт против `addresses-problem`). Сам
-project-deep-dive — **не аудитор**; в конце сессии предложит запустить
-один из них.
+(пустые обязательные слоты, draft без якоря, структурный разрыв хребта:
+`capability/<surface>.md` для поверхности вне реестра, поверхность
+реестра без файла возможностей). `/cross-audit` ловит **между-слойные**
+несостыковки (user без покрытия в `<slug>/interface/<surface>/who` и т.п.,
+продукт против `addresses-problem`, межпроектные стыки против
+`project-map.md`). Сам project-deep-dive — **не аудитор**; в конце сессии
+предложит запустить один из них.
 
 ## Контракт `draft → stable`
 
@@ -336,8 +390,9 @@ project-deep-dive — **не аудитор**; в конце сессии пре
    `AskUserQuestion`.
 3. `Что <kind> НЕ` — не нарушены (anti-patterns исключены).
 4. `Тест-критерий` ✅ — аналитик явно подтвердил пример своего случая.
-5. В `../entrypoint/state/projects/<project-slug>/project/<kind>/<slug>.md`
-   нет `**blocker**`-вопросов.
+5. В соответствующей state-заметке нет `**blocker**`-вопросов
+   (`../entrypoint/state/projects/<project-slug>/project/<kind>/<slug>.md`;
+   для capability — `…/project/capability/<surface>/<slug>.md`).
 
 Если все 5 ✅ — предложить через `AskUserQuestion`: «Готов к stable,
 повышаем?». По подтверждению — изменить `status: draft → stable`. Скилл
@@ -371,24 +426,36 @@ project-deep-dive — **не аудитор**; в конце сессии пре
 slug (например, capability упомянула user, которой ещё нет):
 
 1. В соответствующем файле проекта — новая строка: `slug + name +
-   description + status=draft`, остальные ячейки `—`.
-2. В `../entrypoint/state/projects/<project-slug>/project/<kind>/<stub-slug>.md`
-   — секция `## Открытые вопросы` с записью «Заведён как stub в контексте
-   `<откуда сослались>` — докопать в фазе `<phase>`».
+   description + status=draft`, остальные ячейки `—`. Stub-capability
+   заводится **в файле своей поверхности** `capability/<surface>.md`;
+   если поверхности ещё нет в реестре — сначала stub-`surface`, потом
+   `capability/<surface>.md` (хребет ведёт реестр).
+2. В state-заметке — секция `## Открытые вопросы` с записью «Заведён как
+   stub в контексте `<откуда сослались>` — докопать в фазе `<phase>`»
+   (`…/project/<kind>/<stub-slug>.md`; для capability —
+   `…/project/capability/<surface>/<stub-slug>.md`).
 3. Возврат в исходную сущность, копание продолжается.
 
 ## Удаление сущности (каскад)
 
-1. Прочитать все 8 файлов проекта +
+1. Прочитать продуктовый слой проекта — vision + плоские kind-файлы
+   (`surface.md`, `user.md`, `integration.md`, `boundary.md`,
+   `constraint.md`, `market.md`) + все файлы папки `capability/` +
    `../entrypoint/state/projects/<project-slug>/project/` — найти все
    семантические упоминания удаляемого slug.
 2. Показать каскад: «упоминается в `<files>` — вот что нужно поправить».
 3. Через `AskUserQuestion` по каждому месту — опции: «заменить на
    другой slug» / «удалить упоминание» / «оставить как есть».
 4. По подтверждению — выполнить все правки одним пакетом.
-5. Удалить запись из её файла.
-6. Удалить
-   `../entrypoint/state/projects/<project-slug>/project/<kind>/<slug>.md`.
+5. Удалить запись из её файла. Если удаляется **поверхность**
+   (`surface`) — её файл возможностей `capability/<surface>.md` и
+   ссылки `integration.surface` на неё повисают: показать каскад и решить
+   судьбу capability-файла (перенести записи на другую поверхность /
+   удалить). Папки `interface/<surface>/`, `screens/<surface>/` ведут свои
+   скилы — здесь только предупредить, что они осиротеют.
+6. Удалить state-заметку
+   (`…/project/<kind>/<slug>.md`; для capability —
+   `…/project/capability/<surface>/<slug>.md`).
 7. Если удалена единственная user — спросить, не пора ли
    пересмотреть vision.
 
@@ -404,8 +471,8 @@ slug (например, capability упомянула user, которой ещ�
    - «Прогнать `/project-audit <project-slug>`?» (внутрипроектная
      консистентность);
    - «Прогнать `/cross-audit`?» (сквозная проверка продукта с
-     `<slug>/interface`/`<slug>/domains`/`<slug>/screens` и привязкой
-     `addresses-problem`);
+     `<slug>/interface/<surface>`/`<slug>/domains`/`<slug>/screens/<surface>`,
+     привязкой `addresses-problem` и межпроектными стыками `project-map.md`);
    - «Передать клиенту через `/entrypoint-for-business` блок
      <X>?» (если фаза подходит под бизнес-домашку).
 
@@ -428,6 +495,12 @@ slug (например, capability упомянула user, которой ещ�
 - Не создавать папку проекта вручную в обход скаффолда — новый проект
   только через копию формы из `docs/projects/_template/project/`. Канон в
   `_template/` не править под конкретный проект.
+- Не заводить **плоский** `capability.md` в данных проекта. Возможности
+  живут в папке `capability/`, по файлу на поверхность
+  (`capability/<surface>.md`), форма — из `_template/project/capability.md`.
+- Не заводить файл `capability/<surface>.md` (и не заполнять
+  `integration.surface`) для поверхности, которой нет в реестре
+  `surface.md` — хребет ведёт реестр.
 - Не повышать `draft → stable` без явного подтверждения аналитика.
 - Не понижать `stable → draft` сам — только подсветить и предложить.
 - Не аккумулировать историю в своей ветке state — forward-only.

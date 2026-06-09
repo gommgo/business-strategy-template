@@ -32,11 +32,24 @@ Forward-only: закрытое **удаляется**, история живёт
 ├── swot/<kind>/<slug>.md    ← swot-deep-dive            (factor · bet)
 ├── hypothesis-map/<kind>/<slug>.md  ← hypothesis-map-deep-dive  (goal · metric · subject · hypothesis · task)
 └── projects/<project-slug>/ ← проектные исполнители (изоляция по продукту)
-    ├── project/             ← project-deep-dive    (vision.md, <kind>/<slug>.md)
-    ├── interface/<kind>/<slug>.md   ← interface-deep-dive
-    ├── domains/<context>/...        ← domain-deep-dive
-    └── screens/<kind>/<slug>.md     ← screen-deep-dive
+    ├── project/             ← project-deep-dive    (vision.md, <kind>/<slug>.md для surface · user · integration · boundary · constraint · market)
+    │   └── capability/<surface>/<slug>.md          возможности по поверхности
+    ├── interface/<surface>/<kind>/<slug>.md   ← interface-deep-dive
+    ├── domains/<context>/...                  ← domain-deep-dive (по bounded-context, surface-агностичны)
+    └── screens/<surface>/<kind>/<slug>.md     ← screen-deep-dive
 ```
+
+Поверхность (`surface`) — ось продукта. Реестр-хребет `surface.md`
+объявляет поверхности, а их slug'и партиционируют ветки `state/`:
+возможности (`project/capability/<surface>/`), интерфейс
+(`interface/<surface>/`) и экраны (`screens/<surface>/`) разнесены по
+поверхности. `vision` и кросс-поверхностные kind (`surface`-реестр · `user`
+· `integration` · `boundary` · `constraint` · `market`) лежат плоско в
+`project/`. Домены (`domains/<context>/`) surface-агностичны — делятся по
+bounded-context. Межпроектные стыки (`projects/project-map.md`) — авторская
+сторона у `integration` инициатора (`target: sibling-project`); отдельной
+state-ветки `project-map` не держим — заметки идут в ветку `project/`
+инициатора.
 
 Оркестратор владеет **только** `index.md` + `threads/` — это срез и
 маршрут. Детальную per-kind проработку держат **исполнители** в своих
@@ -71,10 +84,20 @@ Singleton-карта «где мы». По каждому слою (и кажд�
 
 ## projects/clinic
 - фаза: `surface` · vision stable · lifecycle: `mvp`
-- interface: who/situation заполнены, zone пусто
+- поверхности: `web`, `bot` (реестр surface.md)
+- capability: `web` 3 stable · `bot` 1 draft
+- interface[`web`]: who/situation заполнены, zone пусто
+- interface[`bot`]: —
 - screens: —
+- межпроектные стыки: `loyalty-sync` → `web-store` (project-map)
 - детально: `projects/clinic/`
 ```
+
+Срез проекта несёт **поверхностное измерение**: счётчики возможностей,
+интерфейса и экранов даются **по поверхности** (`capability`/`interface`/
+`screens` партиционированы по slug'ам реестра `surface.md`). Межпроектные
+стыки (что течёт в соседний продукт) — отдельной строкой со ссылкой на
+`projects/project-map.md`.
 
 `index.md` — **рабочий срез, не журнал**: устаревшая строка
 перезаписывается под актуальное состояние, а не дополняется «было/стало».
@@ -101,7 +124,7 @@ opened-from: транскрипт созвона с клиникой, 2026-06-06
 ## Маршрут (ждут разбора)
 - чанк «платные не возвращаются» → business / business-problem — ждёт
 - чанк «отток 8% за Q1» → hypothesis-map / metric (baseline ← current-metric) — ждёт
-- чанк «приложение с напоминаниями» → projects/? / capability — ждёт уточнения проекта
+- чанк «напоминания в боте» → projects/? / capability[поверхность `bot`?] — ждёт уточнения проекта и поверхности
 
 ## Открытые нити (смежные слои не потерять)
 - субъект влияния (на кого целим возврат) — после metric завести в hypothesis-map/subject

@@ -71,6 +71,30 @@
 `Inputs`, `Outputs`, `Steps`, `Errors` — следующие раунды; их значения
 **только** через Other, не предлагать тексты как опции.
 
+#### Раунд по `## Dependencies` (порты)
+
+На каждый порт use-case'а — раунд связи с продуктовым слоем (см.
+`references/project-context.md § Заведение адаптера / клиента / порта`).
+Колонка `integration` в таблице `## Dependencies`:
+
+- **внутренняя инфра** (`<Aggregate>Repository`, `Clock`,
+  `<OtherCtx>Reader` — reader другого контекста **этого** проекта) →
+  `integration` = `—`. Опции `AskUserQuestion` включают «Внутренняя инфра —
+  без integration».
+- **внешняя система** (платёж, email, SMS, IDP, webhook) → опция = одна из
+  записей `<P>/integration.md` с `target: external`; выбранный slug в
+  бэктиках идёт в колонку `integration`.
+- **соседний проект** бизнеса (HTTP-клиент к API соседа синхронно, либо
+  `consumes` его события асинхронно) → опция = запись `<P>/integration.md`
+  с `target: sibling-project`; её ребро живёт в
+  `docs/projects/project-map.md`.
+
+Имена портов (`<X>Repository`, `<Y>Client`) и `purpose` — **только** через
+Other (это формулировка архитектора). Опциями подаётся лишь **выбор записи
+`integration`** (существующие + «внутренняя инфра» + «нужна новая» через
+Other). Скилл доменов **не** заводит запись в `<P>/integration.md` сам — если
+её нет, фиксирует `**blocker**`-вопрос и отсылает к `/project-deep-dive`.
+
 ## B. Сырьё
 
 **Сигнал**: args = свободный текст, либо архитектор приложил транскрипт
@@ -138,7 +162,9 @@
    - подозрения по anti-patterns (метод агрегата с I/O → use-case;
      `goal` use-case = «чтобы продолжить работу» → подмена предусловием;
      event payload содержит UI-state; spanning invariant между
-     aggregate'ами; cross-context relation типа `composition`);
+     aggregate'ами; cross-context relation типа `composition`;
+     порт `## Dependencies` к внешней системе / соседнему проекту с
+     пустой колонкой `integration` — пробел продуктового слоя);
    - битые cross-ref'ы (`relations`, `emits`, `consumes` указывают на
      несуществующее);
    - frontmatter-дрифт (basename не совпадает с `name`, `id` не равен
@@ -177,6 +203,7 @@
 | enum-поле (`kind`, `Visibility`, `Mutable`, `Source`, `Type of decision`, `Channel`, `Delivery`) | по опции на каждое значение enum |
 | тест-критерий из `references/draft-stable.md` | опции из примеров ✅/❌, архитектор соотносит свой случай |
 | выбор существующего соседа (relations/emits/consumes/called methods) | по опции на каждый существующий `<ctx>.<Name>` + «нужен новый» (Other → A-режим / stub) |
+| колонка `integration` порта в use-case `## Dependencies` | по опции на каждую запись `<P>/integration.md` (внешнюю и `sibling-project`) + «внутренняя инфра — `—`» + «нужна новая integration» (Other → `**blocker**` + `/project-deep-dive`) |
 | структурный bool (`entrypoint`, `mutable`, `pure`) | две опции `yes` / `no` |
 | «promote draft → stable?» | две опции `Да, повысить` / `Нет, ещё не уверен` (Other) |
 
@@ -191,6 +218,7 @@
 | текст `Rule` в policy | бизнес-правило — формулировка архитектора |
 | текст `Step` в use-case | observable действие — формулировка архитектора |
 | текст `Errors` в use-case | sentinel-имя + when — выбор архитектора |
+| имя порта (`<X>Repository`, `<Y>Client`) и `purpose` в `## Dependencies` | архитектор называет порт; опциями подаётся только выбор записи `integration` |
 | имена `Field` / `Method` / `Event` | архитектор называет, не скилл |
 | любой `Name`, который ещё не существует | архитектор называет, не скилл |
 

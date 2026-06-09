@@ -16,6 +16,13 @@ description: "Углублённая интерактивная проработ
 него — предлагает пикер по именам проектов (кроме `_template`). Все
 чтения и записи скоупятся в `domains/` выбранного проекта.
 
+Домены партиционируются **по bounded-context и surface-агностичны**: бэкенд
+не делится по поверхности (surface) — одна доменная модель обслуживает все
+поверхности продукта. (Поверхность — ось продуктового, UX- и screens-слоёв,
+не доменного.) Возможности (capability), наоборот, лежат **по поверхности**
+— `docs/projects/<project-slug>/capability/<surface>.md`, файл на
+поверхность; use-case реализует возможность той или иной поверхности.
+
 Это **source of truth** проектирования (design-time): артефакты — чистая
 язык-агностичная аналитика домена. Канон артефактов и обязательных секций —
 `docs/projects/_template/domains/README.md`; скилл его не дублирует, а исполняет.
@@ -93,7 +100,10 @@ aggregate-файле и kind-ом отдельно не заводится).
    (kinds, обязательные H2, anti-patterns).
 3. Прочитать `docs/projects/_template/project/README.md` +
    `references/project-context.md` — освежить связи с продуктовым слоем
-   **того же проекта** (domain ↔ capability, adapter ↔ integration).
+   **того же проекта**: domain ↔ возможность поверхности
+   (`capability/<surface>.md`), адаптер/порт ↔ `integration` (колонка
+   `integration` в use-case `## Dependencies`), межпроектный порт ↔
+   `integration` с `target: sibling-project` + ребро `project-map.md`.
 4. Если args (после slug) пустые — сделать сводку (см. ниже) и через
    `AskUserQuestion` предложить выбор: что копать / что заводить.
 5. Если args указывают на контекст/сущность — определить kind и режим
@@ -159,7 +169,10 @@ aggregate-файле и kind-ом отдельно не заводится).
 5. **Identity** — ID type, mutability, visibility.
 6. **Boundary / VOs / Contained Entities / Spanning Invariants** — границы агрегата.
 7. **Events** — `events/*.md`: Trigger, Payload, Consumers, Delivery.
-8. **Use Cases** — Actor, Inputs, Outputs, Dependencies, Steps, Called methods, Events, Errors.
+8. **Use Cases** — Actor, Inputs, Outputs, Dependencies (с колонкой
+   `integration`: для внешних/межпроектных портов — slug записи
+   `integration.md`, для внутренней инфры — `—`), Steps, Called methods,
+   Events, Errors.
 9. **Policies** — Kind, Inputs, Rules, Outcomes.
 10. **Relations** — связи между артефактами + cross-context (по ID, не composition).
 11. **Context README / Ubiquitous Language** — финальный роллап.
@@ -247,10 +260,17 @@ aggregate-файле и kind-ом отдельно не заводится).
 (все 5 одновременно ✅ → предложить промоушн через AskUserQuestion):
 
 1. **Обязательные H2 заполнены** (см. `references/field-checklists.md`
-   по kind). Опциональные могут быть `_N/A_` / `_нет_`.
+   по kind). Опциональные могут быть `_N/A_` / `_нет_`. Для `use-case`
+   дополнительно: в `## Dependencies` каждый порт к **внешней системе**
+   или **соседнему проекту** несёт непустую колонку `integration` (slug
+   существующей записи `integration.md`); внутренняя инфра (репозиторий,
+   `Clock`, reader другого контекста этого проекта) — `—`.
 2. **Все cross-ref'ы валидны** — `relations`, `emits`, `consumes` указывают
    на существующие `<ctx>.<Name>`; `stable` может ссылаться на `draft`
-   (это допустимо, не блокирует).
+   (это допустимо, не блокирует). Для `use-case` — каждый непустой slug в
+   колонке `integration` указывает на существующую запись `integration.md`
+   продукта (для `target: sibling-project` — её ребро есть в
+   `docs/projects/project-map.md`).
 3. **Форма консистентна (ручная сверка)** — frontmatter полон
    (`id`/`kind`/`context`/`name`/`status`), `id` = `<context>.<Name>`,
    basename файла = `name`, все обязательные H2 для kind присутствуют и
@@ -319,7 +339,10 @@ AskUserQuestion со смыслом «эту запись надо пересм�
    - **Внутри docs**: добить остальные контексты/use-case'ы этого проекта
      (`/domain-deep-dive <slug> <ctx>`), либо прогнать `/cross-audit`
      (lenses `capability-domain`, `integration-domain`) — не повисла ли
-     capability без бизнес-кода или integration без адаптера.
+     возможность поверхности без бизнес-кода, интеграция без адаптера, и
+     сходятся ли три стороны межпроектного порта (use-case `## Dependencies`
+     `integration` ↔ запись `integration.md` `target: sibling-project` ↔
+     ребро `docs/projects/project-map.md`).
    - **Cross-repo (текстовая ссылка, не локальный chain)**: когда домены
      `stable`, их потребляет соседний `<org>/backend` (форк
      `go-backend-template`) — там `/scaffold` (вариант domain) разворачивает

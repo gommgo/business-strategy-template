@@ -34,7 +34,7 @@
 >
 > **Сквозные рёбра (опц., авторски на ситуации):** `jobs` — работы сегмента
 > (`ajtbd/job`), которые шаг обслуживает; `capabilities` — возможности
-> продукта (`projects/<slug>/capability`), которые шаг реализует;
+> продукта (`projects/<slug>/capability/<surface>`), которые шаг реализует;
 > `hypotheses` — гипотезы (`hypothesis-map/hypothesis`), которые шаг
 > проверяет. Прочерк допустим.
 
@@ -61,7 +61,7 @@
    — верно ли выделены объекты; цель (goal) предопределяет набор условий
    старта (when).
 6. **Сквозные рёбра (опц.).** `jobs` (`ajtbd/job`), `capabilities`
-   (`projects/<slug>/capability`), `hypotheses` (`hypothesis-map/hypothesis`)
+   (`projects/<slug>/capability/<surface>`), `hypotheses` (`hypothesis-map/hypothesis`)
    — во что шаг вплетён по потоку ценности; авторски на ситуации, прочерк
    допустим.
 
@@ -114,7 +114,7 @@
 - `ux-substrate` — зеркало субстратов шага (канон — `ux-substrate.situation`) · массив ссылок → `ux-substrate` · обяз.
 - `block` — зеркало блоков шага (канон — `block.ux-substrates`) · массив ссылок → `block` (или `—`) · опц.
 - `jobs` — работы сегмента, которые шаг обслуживает (сквозное ребро, авторски) · массив ссылок → `ajtbd/job` (или `—`) · опц.
-- `capabilities` — возможности продукта, которые шаг реализует (сквозное ребро, авторски) · массив ссылок → `projects/<slug>/capability` (или `—`) · опц.
+- `capabilities` — возможности продукта, которые шаг реализует (сквозное ребро, авторски) · массив ссылок → `projects/<slug>/capability/<surface>` (или `—`) · опц.
 - `hypotheses` — гипотезы, которые шаг проверяет (сквозное ребро, авторски) · массив ссылок → `hypothesis-map/hypothesis` (или `—`) · опц.
 - `status` — зрелость записи · `draft | stable` · обяз.
 

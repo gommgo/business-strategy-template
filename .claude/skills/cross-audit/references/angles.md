@@ -1,20 +1,44 @@
 # Углы проверки cross-audit
 
 Каждый lens — отдельный угол семантической проверки. Один lens = один
-агент (для project-скоупленного — один агент на пару `проект × lens`).
-Запускаются параллельно.
+агент (для project-скоупленного — один агент на пару `проект × lens`; для
+project×surface-скоупленного — один агент на тройку `проект × поверхность ×
+lens`). Запускаются параллельно.
 
-`<slug>` = `<project-slug>` — подставляется на спавне. Пути с `<slug>`
-указывают на папку конкретного проекта `docs/projects/<slug>/`.
+`<slug>` = `<project-slug>` — подставляется на спавне. `<surface>` = slug
+поверхности из реестра `docs/projects/<slug>/surface.md` — подставляется на
+спавне для project×surface-углов. Пути с `<slug>` указывают на папку
+конкретного проекта `docs/projects/<slug>/`; пути с `<surface>` — на
+per-surface артефакт (`capability/<surface>.md`, `interface/<surface>/...`,
+`screens/<surface>/...`).
 
 Структура каждого пункта:
 
-- **Source / Destination** — какие слои читать (с `<slug>` где project-скоуп).
-- **Скоуп** — `один раз` (верхнеуровневый, без проекта) или
-  `по проекту` (раскрывается в пары `проект × lens`).
+- **Source / Destination** — какие слои читать (с `<slug>`/`<surface>` где
+  project/surface-скоуп).
+- **Скоуп** — `один раз` (верхнеуровневый, без проекта), `по проекту`
+  (раскрывается в пары `проект × lens`) или `по проекту × поверхность`
+  (раскрывается в тройки `проект × поверхность × lens`).
 - **Применим если** — какие слои/каталоги должны существовать.
 - **Что искать** — конкретные семантические паттерны.
 - **Промпт для агента** — добавка к каркасу из SKILL.md.
+
+## Поверхность (surface) — ось партиционирования
+
+Продуктовый слой партиционирован по поверхности: реестр-хребет
+`docs/projects/<slug>/surface.md` объявляет поверхности, и их slug'и —
+ключи трёх per-surface слоёв: возможности (`capability/<surface>.md`),
+интерфейс (`interface/<surface>/...`) и экраны (`screens/<surface>/...`).
+Кросс-поверхностные kind продукта (`vision`, `user`, `integration`,
+`boundary`, `constraint`, `market`) лежат в корне папки проекта. Домены
+(`domains/<ctx>/`) **surface-агностичны** — партиционируются по
+bounded-context, не по поверхности.
+
+Поэтому lens, чей source ИЛИ destination — per-surface артефакт,
+раскрывается в **тройки** `проект × поверхность × lens`: на каждую
+поверхность реестра — свой агент. Lens с проектными (корневыми, не
+per-surface) целями раскрывается в **пары** `проект × lens`. Верхнеуровневые —
+один агент.
 
 ## Скоуп углов
 
@@ -23,21 +47,33 @@
   `currentmetric-metric`, `segmentproblem-bizproblem`, `segment-subject`,
   `solution-business`, `business-segment`, `prospective-consistency`,
   `provenance-upstream`, `stakeholder-subject`, `stakeholder-factor`,
-  `stakeholder-strategy`.
+  `stakeholder-strategy`, `projectmap-reciprocity`.
 - **Верхнеуровневый M:N, прогон один раз над всеми проектами**:
   `addresses-problem-bizproblem`.
-- **По каждому проекту** (общие слои swot/hypothesis-map ↔ продукт проекта;
-  скоупится к проблемам, которые проект закрывает через
-  `vision.addresses-problem`): `goal-vision`, `subject-user`,
-  `bet-capability`, `capability-hypothesis`.
-- **По каждому проекту** (общий слой ajtbd ↔ продукт проекта):
-  `segment-user`, `job-vision`, `segmentproblem-vision`,
-  `mechanic-capability`, `capability-job`.
-- **По каждому проекту** (внутри папки проекта + сквозные рёбра interface):
-  `user-who`, `capability-situation`, `situation-job`,
-  `situation-hypothesis`, `capability-domain`, `surface-zone`,
-  `surface-screen`, `integration-domain`, `constraint-surface`,
-  `market-capability`.
+- **По каждому проекту** (пары `проект × lens`; цели — корневые kind
+  продукта `vision`/`user`/`integration`, не per-surface):
+  - swot/hypothesis-map ↔ продукт (скоупится к проблемам, которые проект
+    закрывает через `vision.addresses-problem`): `goal-vision`,
+    `subject-user`.
+  - ajtbd ↔ продукт: `segment-user`, `job-vision`, `segmentproblem-vision`.
+  - продукт ↔ соседние проекты (межпроектный): `integration-crossproject`.
+- **По каждому проекту × поверхность** (тройки `проект × поверхность × lens`;
+  source ИЛИ destination — per-surface артефакт `capability/<surface>.md`,
+  `interface/<surface>/*`, `screens/<surface>/*`):
+  - swot/hypothesis-map ↔ возможности поверхности (скоупится к проблемам
+    проекта): `bet-capability`, `capability-hypothesis`.
+  - ajtbd ↔ возможности поверхности: `mechanic-capability`, `capability-job`.
+  - продукт ↔ интерфейс/экраны поверхности: `user-who`,
+    `capability-situation`, `surface-zone`, `surface-screen`,
+    `surface-capability`.
+  - возможности поверхности ↔ домены проекта: `capability-domain`.
+  - сквозные рёбра интерфейса поверхности: `situation-job`,
+    `situation-hypothesis`.
+  - интеграция ↔ домены (по поверхностям интеграции): `integration-domain`.
+  - ограничение ↔ поверхность/интеграция (по поверхностям): `constraint-surface`.
+  - рынок ↔ возможности поверхности: `market-capability`.
+- **По проекту, сразу по всем поверхностям** (один агент на проект,
+  читает `data-items.md` всех папок поверхностей): `dataitems-crosssurface`.
 
 ## factor-business
 
@@ -405,314 +441,373 @@ vision.Problem — какую проблему решает продукт <slug
 ## mechanic-capability
 
 **Source:** `docs/ajtbd/job-graph.md` (поле `value-mechanics`).
-**Destination:** `docs/projects/<slug>/capability.md`.
-**Скоуп:** по проекту.
-**Применим если:** оба слоя существуют.
+**Destination:** `docs/projects/<slug>/capability/<surface>.md`.
+**Скоуп:** по проекту × поверхность.
+**Применим если:** оба слоя существуют; у проекта есть поверхность
+`<surface>` в реестре с файлом возможностей.
 
 **Что искать:**
 - `warning`: механика ценности (`value-mechanics`) графа сегмента,
   обслуживаемого продуктом, не реализованная ни одной capability
-  продукта («механика без capability» — выведенный из графа кандидат
-  ценности не дошёл до продукта).
-- `hint`: capability продукта, не выводимая ни из одной механики ценности
-  (продукт умеет то, что не подсказано разведкой — проверить
+  этой поверхности («механика без capability» — выведенный из графа
+  кандидат ценности не дошёл до поверхности).
+- `hint`: capability поверхности, не выводимая ни из одной механики
+  ценности (продукт умеет то, что не подсказано разведкой — проверить
   обоснованность).
 
 **Промпт-добавка:**
 ```
 value-mechanics — какие из 11 механик создания ценности граф работ
-открывает (кандидаты ценности, слой ajtbd); capability — что продукт
-<slug> умеет. Механика ценности — это КАНДИДАТ в capability.
+открывает (кандидаты ценности, слой ajtbd); capability/<surface>.md — что
+поверхность <surface> продукта <slug> умеет. Механика ценности — это
+КАНДИДАТ в capability.
 
 Скоупь механики к сегментам, которые продукт обслуживает (через пользователей
-проекта ↔ сегменты графа).
+проекта ↔ сегменты графа). Сопоставляй только с возможностями ЭТОЙ
+поверхности; та же механика может быть реализована на другой поверхности —
+её ловит агент той поверхности.
 
-Для каждой механики: реализована ли она хотя бы одной capability? Не
-реализована — warning («механика без capability»). Capability без
-механики-якоря — hint (возможно, обоснована иначе; не error).
+Для каждой механики: реализована ли она хотя бы одной capability этой
+поверхности? Не реализована ни на одной поверхности — warning («механика
+без capability»; не флагай, если механика очевидно относится к другой
+поверхности). Capability без механики-якоря — hint (возможно, обоснована
+иначе; не error).
 ```
 
 ## bet-capability
 
 **Source:** `docs/swot/bet.md`, `goal.md` (только ставки/цели
 проблем, которые закрывает проект).
-**Destination:** `docs/projects/<slug>/capability.md`.
-**Скоуп:** по проекту.
+**Destination:** `docs/projects/<slug>/capability/<surface>.md`.
+**Скоуп:** по проекту × поверхность.
 **Применим если:** оба слоя существуют; у проекта непустой
-`addresses-problem`.
+`addresses-problem` и есть поверхность `<surface>` с файлом возможностей.
 
 **Что искать:**
 - `warning`: ставка/цель (доведённая до карты) проблемы, которую
-  закрывает проект, не реализуемая ни одной capability этого продукта
-  (стратегия без продуктового воплощения).
-- `hint`: capability проекта без связи с какой-либо ставкой/целью его
-  проблем (продукт умеет то, что не служит закрываемой проблеме).
+  закрывает проект, не реализуемая ни одной capability ни на одной
+  поверхности этого продукта (стратегия без продуктового воплощения).
+- `hint`: capability поверхности без связи с какой-либо ставкой/целью
+  проблем проекта (продукт умеет то, что не служит закрываемой проблеме).
 
 **Промпт-добавка:**
 ```
-bet/goal — стратегический шаг; capability — что продукт <slug> умеет.
-Скоупь ставки/цели к проблемам этого проекта (колонка `business-problem`).
+bet/goal — стратегический шаг; capability/<surface>.md — что поверхность
+<surface> продукта <slug> умеет. Скоупь ставки/цели к проблемам этого
+проекта (колонка `business-problem`).
 
-ВАЖНО: ставку/цель проблемы могут реализовывать РАЗНЫЕ проекты — её
-воплощение в capability ищи в ЭТОМ проекте; отсутствие здесь не error,
-а warning (возможно, её несёт соседний проект, закрывающий ту же
-проблему). Для каждой capability проекта: какой ставке/цели его проблем
-она служит? Не служит ни одной — hint.
+ВАЖНО: ставку/цель проблемы могут реализовывать РАЗНЫЕ проекты И разные
+поверхности одного проекта — воплощение в capability ищи на ЭТОЙ
+поверхности; отсутствие здесь не error, а warning (возможно, её несёт
+другая поверхность того же проекта или соседний проект, закрывающий ту же
+проблему — не флагай, если очевидно покрыто другой поверхностью). Для
+каждой capability этой поверхности: какой ставке/цели его проблем она
+служит? Не служит ни одной — hint.
 ```
 
 ## user-who
 
-**Source:** `docs/projects/<slug>/user.md`.
-**Destination:** `docs/projects/<slug>/interface/who.md`.
-**Скоуп:** по проекту.
-**Применим если:** оба слоя существуют в папке проекта.
+**Source:** `docs/projects/<slug>/user.md` (корневой, кросс-поверхностный).
+**Destination:** `docs/projects/<slug>/interface/<surface>/who.md`.
+**Скоуп:** по проекту × поверхность.
+**Применим если:** оба слоя существуют; у проекта есть поверхность
+`<surface>` с папкой интерфейса.
 
 **Что искать:**
 
-- `error`: user, под которую в `who.md` **нет ни одной роли**,
-  семантически соответствующей. Не slug — смысл («user:nurse-partner»
-  → ищем who, выполняющую действия медсестры партнёрской клиники).
-- `error`: who, который не соответствует **ни одной** user проекта
-  (включая системных акторов в who.md — они допустимы как «намеренное
-  исключение», но всё равно должны иметь связь с интересами какой-то
-  user).
-- `warning`: user, под которую who покрывает только **часть**
-  jobs-to-be-done. Если у user 3 jobs, а who участвует только в
-  одном — это намёк, что нужны ещё роли.
+- `error`: who **этой поверхности**, который не соответствует **ни одной**
+  user проекта (включая системных акторов в who.md — они допустимы как
+  «намеренное исключение», но всё равно должны иметь связь с интересами
+  какой-то user).
+- `warning`: user, которую `interface/<surface>/who.md` не несёт ни одной
+  ролью, хотя по jobs/context она явно работает через эту поверхность
+  (поверхность обслуживает user, а роли под него нет). Если user работает
+  через другую поверхность — это норма, не флагать.
+- `warning`: user, под которую who этой поверхности покрывает только
+  **часть** jobs-to-be-done. Если у user на этой поверхности 3 jobs, а who
+  участвует только в одном — намёк, что нужны ещё роли.
 
 **Промпт-добавка:**
 
 ```
-Сопоставь user и who проекта <slug> семантически — оба слоя живут в
-docs/projects/<slug>/. User — это "кто адресат боли продукта". Who —
-"роль, выполняющая шаг бизнес-процесса". Связь не структурная: одна
-user может развернуться в несколько who (например, user "медсестра
-партнёрской клиники" → who: nurse-partner, nurse-partner-senior).
+Сопоставь user (корневой файл проекта <slug>, кросс-поверхностный) и who
+ПОВЕРХНОСТИ <surface> (docs/projects/<slug>/interface/<surface>/who.md)
+семантически. User — это "кто адресат боли продукта" (один на весь
+проект). Who — "роль, выполняющая шаг бизнес-процесса НА ЭТОЙ
+поверхности". Связь не структурная: одна user может развернуться в
+несколько who (например, user "медсестра партнёрской клиники" → who:
+nurse-partner, nurse-partner-senior), и в несколько поверхностей.
 
-Для каждого user: какие who его "несут" (выполняют его jobs)? Если ни
-одного — error.
+User обслуживается этой поверхностью, если она названа в surface.user
+поверхности <surface> ИЛИ по jobs/context работает через неё. Для такой
+user: несёт ли её хоть одно who этой поверхности? Если нет — warning
+(поверхность для user без роли). User, работающая только через ДРУГУЮ
+поверхность, — не флаг: её несёт who той поверхности (свой агент).
 
-Для каждого who: какой user он принадлежит? Системные акторы (scheduler,
-external-svc) — допустимо без user, но обоснуй почему именно этот
-системный интерес.
+Для каждого who этой поверхности: какой user он принадлежит? Нет ни одной
+— error. Системные акторы (scheduler, external-svc) — допустимо без user,
+но обоснуй системный интерес.
 
 Используй user.jobs / pains / context и who.description / соседние
-situation.action для сопоставления.
+situation.action для сопоставления. В finding указывай project и surface.
 ```
 
 ## capability-situation
 
-**Source:** `docs/projects/<slug>/capability.md`.
-**Destination:** `docs/projects/<slug>/interface/situation.md`.
-**Скоуп:** по проекту.
-**Применим если:** оба слоя существуют в папке проекта.
+**Source:** `docs/projects/<slug>/capability/<surface>.md`.
+**Destination:** `docs/projects/<slug>/interface/<surface>/situation.md`.
+**Скоуп:** по проекту × поверхность.
+**Применим если:** у проекта есть поверхность `<surface>` с файлом
+возможностей и папкой интерфейса.
 
 **Что искать:**
 
-- `error`: capability `stable`, под которую в interface проекта **нет ни
-  одной ситуации**, реализующей действие. Capability — это «что продукт
-  умеет», situation — конкретное UX-проявление этого умения.
-- `warning`: capability имеет один-два, в то время как ожидается
+- `error`: capability `stable` этой поверхности, под которую в
+  `interface/<surface>/` **нет ни одной ситуации**, реализующей действие.
+  Capability — это «что продукт умеет», situation — конкретное UX-проявление
+  этого умения **на той же поверхности**.
+- `warning`: capability имеет одну-две ситуации, в то время как ожидается
   больше (capability сложная, например «согласовать слот» — обычно
-  это 3-5 ситуаций).
-- `hint`: ситуация в interface, у которой нет ясной capability-якоря
-  в project проекта. Возможно, нужна capability, либо ситуация не нужна.
+  3-5 ситуаций).
+- `hint`: ситуация в `interface/<surface>/`, у которой нет ясной
+  capability-якоря в `capability/<surface>.md`. Возможно, нужна
+  capability, либо ситуация не нужна.
 
 **Промпт-добавка:**
 
 ```
-Оба слоя — внутри docs/projects/<slug>/. Capability — устойчивое умение
-продукта в языке user. Situation — конкретная UX-точка, где это
-умение реализуется (кто/когда/что/ради чего/с какими данными).
+Оба слоя — ПОВЕРХНОСТИ <surface> проекта <slug>:
+capability/<surface>.md и interface/<surface>/situation.md. Capability —
+устойчивое умение продукта на этой поверхности в языке user. Situation —
+конкретная UX-точка той же поверхности, где умение реализуется
+(кто/когда/что/ради чего/с какими данными). Поверхности изолированы:
+сопоставляй только в пределах <surface>.
 
-Для каждой capability: какие situation её реализуют? Сопоставь по
-смыслу действий и goal.
+Для каждой capability этой поверхности: какие situation её реализуют?
+Сопоставь по смыслу действий и goal.
 
-Для каждой situation: к какой capability она относится? Если ни к
-одной — hint (либо новая capability, либо ситуация не нужна).
+Для каждой situation: к какой capability той же поверхности она
+относится? Если ни к одной — hint (либо новая capability, либо ситуация
+не нужна). В finding указывай project и surface.
 ```
 
 ## capability-domain
 
-**Source:** `docs/projects/<slug>/capability.md`.
-**Destination:** `docs/projects/<slug>/domains/` (если есть).
-**Скоуп:** по проекту.
-**Применим если:** `docs/projects/<slug>/domains/` существует.
+**Source:** `docs/projects/<slug>/capability/<surface>.md`.
+**Destination:** `docs/projects/<slug>/domains/` (если есть;
+surface-агностичны).
+**Скоуп:** по проекту × поверхность.
+**Применим если:** `docs/projects/<slug>/domains/` существует; у проекта
+есть поверхность `<surface>` с файлом возможностей.
 
 **Что искать:**
 
-- `error`: capability `stable`, под которую в `domains/` проекта нет
-  бизнес-домена / агрегата. Capability не существует в коде.
-- `warning`: domain в `domains/` проекта, у которого не находится
-  capability-якорь в project. Возможно, технический домен (auth,
-  logging) — это норма; но если бизнес-домен (referrals, billing) —
-  это пробел.
+- `error`: capability `stable` этой поверхности, под которую в `domains/`
+  проекта нет бизнес-домена / агрегата. Capability не существует в коде.
+- `warning`: бизнес-домен в `domains/` проекта, у которого не находится
+  capability-якорь ни на одной поверхности. Технический домен (auth,
+  logging) — норма; бизнес-домен (referrals, billing) без якоря — пробел.
+  (Поскольку домены surface-агностичны, обратную сторону — домен без
+  capability — точнее видит агент любой поверхности; не дублируй её
+  агрессивно, флагай только домен, который явно не покрыт capability этой
+  поверхности и по смыслу должен бы.)
 
 **Промпт-добавка:**
 
 ```
-Оба слоя — внутри docs/projects/<slug>/. Capability — продуктовое умение.
-Domain в docs/projects/<slug>/domains/ — бизнес-код, несущий это умение.
+Source — capability/<surface>.md (умения поверхности <surface> проекта
+<slug>); destination — docs/projects/<slug>/domains/ (бизнес-код,
+ОБЩИЙ для всех поверхностей: домены партиционируются по bounded-context,
+не по surface).
 
-Для каждой capability: есть ли в domains/ проекта агрегат или сервис,
-реализующий бизнес-логику? Сопоставь по семантике, не имени файла.
+Для каждой capability этой поверхности: есть ли в domains/ проекта
+агрегат или use-case, реализующий бизнес-логику? Сопоставь по семантике,
+не имени файла. Одна доменная модель обслуживает все поверхности — домен
+может нести capability и этой поверхности, и других.
 
-Технические домены (auth, audit, logging) могут не иметь
-capability-якоря — отметь, но не помечай ошибкой.
+Технические домены (auth, audit, logging) могут не иметь capability-якоря
+— отметь, не помечай ошибкой. В finding указывай project и surface.
 ```
 
 ## surface-zone
 
-**Source:** `docs/projects/<slug>/surface.md`.
-**Destination:** `docs/projects/<slug>/interface/zone.md`.
-**Скоуп:** по проекту.
-**Применим если:** оба слоя существуют в папке проекта.
+**Source:** `docs/projects/<slug>/surface.md` (реестр, строка `<surface>`).
+**Destination:** `docs/projects/<slug>/interface/<surface>/zone.md`.
+**Скоуп:** по проекту × поверхность.
+**Применим если:** у проекта есть поверхность `<surface>` с папкой
+интерфейса (`interface/<surface>/`).
 
 **Что искать:**
 
-- `error`: surface `stable`, у которой нет **ни одной** зоны в
-  interface проекта, принадлежащей этой поверхности (по смыслу).
-- `error`: zone в interface проекта, не привязанная ни к одной surface
-  (zone «висит в воздухе»).
-- `warning`: zone, которая по смыслу принадлежит сразу нескольким
-  surface (например, общая навигация для web и mobile). Это норма, но
-  важно явно зафиксировать.
+- `error`: surface `stable`, у которой папка `interface/<surface>/`
+  существует, но `zone.md` **пуст** — поверхность без единой зоны (мёртвый
+  интерфейс).
+- `warning`: зоны поверхности по смыслу не покрывают её user или
+  основной job-to-be-done (поверхность объявлена, но зоны не образуют
+  целостного UX для того, кого она обслуживает).
+- `hint`: зона, чьё `description` по смыслу относится к другой поверхности
+  (зона заведена «не в той» папке поверхности).
 
 **Промпт-добавка:**
 
 ```
-Оба слоя — внутри docs/projects/<slug>/. Surface — поверхность продукта
-(web/mobile/api/admin/bot/...). Zone — зона интерфейса (логический
-контейнер блоков).
+Source — строка <surface> реестра surface.md проекта <slug>;
+destination — docs/projects/<slug>/interface/<surface>/zone.md. Структурная
+привязка зон к поверхности уже даёт папка (за неё отвечает
+/interface-audit и /project-audit). Здесь — СЕМАНТИКА: образуют ли зоны
+этой поверхности целостный UX для user, которого surface.user обслуживает.
 
-Для каждой surface: какие zone в неё попадают? Связь семантическая —
-смотри на surface.type, surface.lives-at, и zone.description /
-parent-zone.
-
-Для каждой zone: какой surface она принадлежит? Если ни одной —
-error.
+Surface существует и stable, но zone.md этой поверхности пуст — error.
+Зоны не покрывают user/основной job поверхности — warning. Зона, по
+description явно относящаяся к другой поверхности (заведена не в той
+папке), — hint. В finding указывай project и surface.
 ```
 
 ## surface-screen
 
-**Source:** `docs/projects/<slug>/surface.md`.
-**Destination:** `docs/projects/<slug>/screens/` (если есть).
-**Скоуп:** по проекту.
-**Применим если:** `docs/projects/<slug>/screens/` существует.
+**Source:** `docs/projects/<slug>/surface.md` (реестр, строка `<surface>`)
++ `docs/projects/<slug>/interface/<surface>/`.
+**Destination:** `docs/projects/<slug>/screens/<surface>/` (если есть).
+**Скоуп:** по проекту × поверхность.
+**Применим если:** у проекта есть поверхность `<surface>` и папка
+`screens/<surface>/`.
 
 **Что искать:**
 
-- `error`: surface `stable`, у которой нет ни одного screen или flow
-  в `screens/` проекта.
-- `warning`: screen / flow в `screens/` проекта, не привязанный к
-  surface этого проекта (по смыслу).
+- `error`: surface `stable` с наполненным `interface/<surface>/`, у которой
+  папка `screens/<surface>/` существует, но пуста (нет ни одного flow /
+  screen) — поверхность с UX, но без композиции экранов.
+- `warning`: ситуации/блоки `interface/<surface>/` без отражения в
+  `screens/<surface>/` (UX-точки поверхности не дошли до композиции экранов).
+- `hint`: screen / flow в `screens/<surface>/`, не привязанный по смыслу к
+  поверхности (заведён не в той папке).
 
 **Промпт-добавка:**
 
 ```
-Оба слоя — внутри docs/projects/<slug>/. Surface — где продукт работает.
-Screen / flow в docs/projects/<slug>/screens/ — композиция UX, ассеты,
-hi-fi-материал.
+Source — строка <surface> реестра surface.md + UX той же поверхности
+docs/projects/<slug>/interface/<surface>/; destination —
+docs/projects/<slug>/screens/<surface>/ (композиция UX, ассеты,
+hi-fi-материал ТОЙ ЖЕ поверхности). Поверхности изолированы — сопоставляй
+в пределах <surface>.
 
-Для каждой surface: есть ли в screens/ проекта хотя бы один артефакт
-этой поверхности? По смыслу — посмотри shell/flow/screen-описания.
+Папка screens/<surface>/ существует, но пуста при наполненном
+interface/<surface>/ — error. Ключевые ситуации/блоки интерфейса
+поверхности без композиции в screens этой поверхности — warning. По
+смыслу — посмотри shell/flow/screen-описания. В finding указывай project и
+surface.
 ```
 
 ## integration-domain
 
-**Source:** `docs/projects/<slug>/integration.md`.
-**Destination:** `docs/projects/<slug>/domains/` (если есть).
-**Скоуп:** по проекту.
-**Применим если:** `docs/projects/<slug>/domains/` существует.
+**Source:** `docs/projects/<slug>/integration.md` (записи, чья колонка
+`surface` содержит `<surface>`).
+**Destination:** `docs/projects/<slug>/domains/` (если есть;
+surface-агностичны; колонка `integration` в `use-cases/*` `## Dependencies`).
+**Скоуп:** по проекту × поверхность.
+**Применим если:** `docs/projects/<slug>/domains/` существует; у проекта
+есть поверхность `<surface>`.
 
 **Что искать:**
 
-- `error`: integration `stable`, под которую в `domains/` проекта нет
-  адаптера / клиента.
-- `warning`: адаптер в `domains/` проекта, у которого нет integration в
-  project (возможно, технический адаптер — http-клиент, redis-клиент
-  — это норма; бизнес-адаптер без integration — пробел).
+- `error`: integration `stable`, обслуживающая `<surface>` (её колонка
+  `surface` содержит `<surface>`), под которую в `domains/` проекта нет
+  адаптера / порта (нет use-case с `integration` = slug этой записи в
+  `## Dependencies`). Интеграция объявлена, но в коде её нет.
+- `warning`: порт в `domains/` use-case (`## Dependencies` колонка
+  `integration` непуста), указывающий на запись `integration.md`, чей
+  `surface` не содержит ни одну поверхность (рассинхрон: код знает порт,
+  продуктовый слой не привязал интеграцию к поверхности).
 
 **Промпт-добавка:**
 
 ```
-Оба слоя — внутри docs/projects/<slug>/. Integration — внешняя система,
-с которой обмениваемся. Domain в docs/projects/<slug>/domains/ может
-содержать адаптер для интеграции.
+Source — integration.md проекта <slug>, но СКОУПЬ к интеграциям, чья
+колонка `surface` содержит <surface>. Destination — domains/ проекта
+(surface-агностичны): порт виден в use-case `## Dependencies`, колонка
+`integration` = slug записи integration.md (внутренняя инфра — `—`).
 
-Для каждой integration: есть ли адаптер / клиент в domains/ проекта?
-Сопоставь по семантике.
+Для каждой интеграции, обслуживающей <surface>: есть ли use-case с этим
+integration-slug в Dependencies (адаптер/порт)? Нет — error.
 
-Технические адаптеры (http-client, db-client) могут не иметь
-integration-якоря — отметь, не error.
+Обратно: порт use-case с непустым integration, чья запись в integration.md
+не несёт ни одной поверхности в `surface` — warning. Технические адаптеры
+(внутренняя инфра, integration = `—`) — норма, не флаг. В finding указывай
+project и surface.
 ```
 
 ## constraint-surface
 
-**Source:** `docs/projects/<slug>/constraint.md`.
-**Destination:** `docs/projects/<slug>/surface.md`,
-`docs/projects/<slug>/integration.md`.
-**Скоуп:** по проекту (cross-внутри-project).
-**Применим если:** product-слой проекта существует.
+**Source:** `docs/projects/<slug>/constraint.md` (корневой).
+**Destination:** `docs/projects/<slug>/surface.md` (строка `<surface>`),
+`docs/projects/<slug>/integration.md` (интеграции, чей `surface` содержит
+`<surface>`).
+**Скоуп:** по проекту × поверхность.
+**Применим если:** product-слой проекта существует; у проекта есть
+поверхность `<surface>`.
 
 **Что искать:**
 
-- `warning`: constraint, который семантически касается surface или
-  integration, но эта связь нигде не упомянута (в `description`
-  constraint, surface или integration). Например, constraint
-  `pdn-consent` (152-ФЗ) должен быть связан с web-поверхностью, где
-  есть PII.
-- `hint`: surface с user, обрабатывающая PII / финансы / здоровье,
-  но без constraint. Возможно, пропустили.
+- `warning`: constraint, который семантически касается поверхности
+  `<surface>` (или интеграции, обслуживающей её), но эта связь нигде не
+  упомянута. Например, `pdn-consent` (152-ФЗ) должен быть связан с
+  web-поверхностью, где есть PII.
+- `hint`: поверхность `<surface>` с user, обрабатывающая PII / финансы /
+  здоровье, но без относящегося constraint. Возможно, пропустили.
 
 **Промпт-добавка:**
 
 ```
-Все три файла — внутри одного docs/projects/<slug>/. Constraint —
-обязательное правило (закон / SLA / контракт). Обычно constraint
-касается surface (где это применимо) или integration (с чем
-обмениваемся под этим правилом).
+Constraint (корневой constraint.md проекта <slug>) — обязательное правило
+(закон / SLA / контракт). Скоупь к ПОВЕРХНОСТИ <surface>: строка <surface>
+реестра surface.md + интеграции, чья колонка `surface` содержит <surface>.
 
-Для каждого constraint: какая surface или integration его несёт? Найди
-в description упоминания или сопоставь по смыслу (152-ФЗ → surface с
-PII; PCI-DSS → integration с платежами; HIPAA → surface с
+Для каждого constraint, по смыслу касающегося этой поверхности или её
+интеграций: видна ли связь (в description constraint / surface /
+integration)? Не видна — warning (152-ФЗ → web с PII; PCI-DSS →
+integration с платежами на этой поверхности; HIPAA → surface с
 медданными).
 
-Если связь не видна нигде — warning.
-
-Дополнительно: surface, обрабатывающая PII / финансы / здоровье, без
-относящегося constraint — hint.
+Поверхность <surface> с user, обрабатывающая PII / финансы / здоровье,
+без относящегося constraint — hint. Не флагай constraint, относящийся к
+другой поверхности (его ловит её агент). В finding указывай project и
+surface.
 ```
 
 ## market-capability
 
-**Source:** `docs/projects/<slug>/market.md`.
-**Destination:** `docs/projects/<slug>/capability.md`.
-**Скоуп:** по проекту.
-**Применим если:** оба наполнены в папке проекта.
+**Source:** `docs/projects/<slug>/market.md` (корневой,
+кросс-поверхностный).
+**Destination:** `docs/projects/<slug>/capability/<surface>.md`.
+**Скоуп:** по проекту × поверхность.
+**Применим если:** оба наполнены; у проекта есть поверхность `<surface>`
+с файлом возможностей.
 
 **Что искать:**
 
-- `hint`: market-аналог покрывает capability, которой у нас **нет**.
-  Это сигнал: либо нам нужна эта capability, либо явно decide, что
-  это вне scope.
-- `hint`: market-аналог не покрывает наши capabilities (мы делаем то,
-  чего конкурент не умеет). Полезно для позиционирования.
+- `hint`: market-аналог покрывает возможность, которой у нас **нет** на
+  этой поверхности. Сигнал: либо нужна эта capability, либо явно decide,
+  что вне scope.
+- `hint`: возможности этой поверхности, которых market-аналог не покрывает
+  (мы делаем то, чего конкурент не умеет). Полезно для позиционирования.
 - `warning`: market.description упоминает «direct competitor», но
-  пересечение capabilities — почти полное. Возможно, недо-дифференциация.
+  пересечение с capabilities этой поверхности — почти полное. Возможно,
+  недо-дифференциация.
 
 **Промпт-добавка:**
 
 ```
-Оба слоя — внутри docs/projects/<slug>/. Market — рыночные аналоги
-этого продукта. Capability — умения этого продукта.
+Market (корневой market.md проекта <slug>) — рыночные аналоги продукта.
+Capability/<surface>.md — умения ПОВЕРХНОСТИ <surface>. Сопоставляй
+рыночные аналоги с возможностями именно этой поверхности (mobile-аналог —
+с capability mobile-поверхности, и т.д.).
 
-Для каждого market-аналога: что он покрывает из наших capabilities?
-Что у него есть, чего у нас нет (гэп для нас)? Что у нас есть, чего у
-него нет (наша дифференциация)?
+Для каждого market-аналога: что он покрывает из возможностей этой
+поверхности? Что у него есть, чего у нас на этой поверхности нет (гэп)?
+Что у нас на этой поверхности есть, чего у него нет (дифференциация)?
 
-Возвращай как findings hints / warnings — это материал для аналитика,
-не error.
+Возвращай hints / warnings — материал для аналитика, не error. В finding
+указывай project и surface.
 ```
 
 ## prospective-consistency
@@ -888,94 +983,295 @@ strategic-stance — куда властное лицо хочет/не хоче
 
 ## capability-hypothesis
 
-**Source:** `docs/projects/<slug>/capability.md` (поле `hypotheses`).
+**Source:** `docs/projects/<slug>/capability/<surface>.md` (поле
+`hypotheses`).
 **Destination:** `docs/hypothesis-map/hypothesis.md` (по проблемам, которые
 закрывает проект).
-**Скоуп:** по проекту.
+**Скоуп:** по проекту × поверхность.
 **Применим если:** оба слоя существуют; у проекта непустой
-`addresses-problem`.
+`addresses-problem` и есть поверхность `<surface>` с файлом возможностей.
 
 **Что искать:**
-- `error`: `capability.hypotheses` ссылается на гипотезу, которой нет в
-  `docs/hypothesis-map/` (ребро бьёт в несуществующую сущность).
+- `error`: `capability.hypotheses` (в `capability/<surface>.md`) ссылается
+  на гипотезу, которой нет в `docs/hypothesis-map/` (ребро бьёт в
+  несуществующую сущность).
 - `hint`: гипотеза проблемы, которую закрывает проект, не реализуемая ни
-  одной capability этого продукта (стратегия без продуктового воплощения —
-  возможно, её несёт соседний проект).
+  одной capability ни на одной поверхности продукта (стратегия без
+  продуктового воплощения — возможно, её несёт соседний проект).
 
 **Промпт-добавка:**
 ```
-capability.hypotheses — авторское ребро продукт → hypothesis-map:
-возможность реализует гипотезу. Скоупь гипотезы к проблемам проекта
-(колонка `business-problem`). Прямая сторона: каждый ref резолвится в реальную
-hypothesis? Нет — error. Обратная: гипотеза проблемы проекта без
-реализующей capability — hint (может нести соседний проект). Связь
-семантическая.
+capability.hypotheses (поле в capability/<surface>.md — возможностях
+поверхности <surface> проекта <slug>) — авторское ребро продукт →
+hypothesis-map: возможность реализует гипотезу. Скоупь гипотезы к проблемам
+проекта (колонка `business-problem`).
+
+Прямая сторона: каждый ref hypotheses этой поверхности резолвится в
+реальную hypothesis? Нет — error. Обратная: гипотеза проблемы проекта без
+реализующей capability на ЭТОЙ поверхности — hint (может нести другая
+поверхность того же проекта или соседний проект; не флагай агрессивно).
+Связь семантическая. В finding указывай project и surface.
 ```
 
 ## capability-job
 
-**Source:** `docs/projects/<slug>/capability.md` (поле `jobs`).
+**Source:** `docs/projects/<slug>/capability/<surface>.md` (поле `jobs`).
 **Destination:** `docs/ajtbd/job.md`.
-**Скоуп:** по проекту.
-**Применим если:** оба слоя существуют.
+**Скоуп:** по проекту × поверхность.
+**Применим если:** оба слоя существуют; у проекта есть поверхность
+`<surface>` с файлом возможностей.
 
 **Что искать:**
-- `error`: `capability.jobs` ссылается на работу, которой нет в
-  `docs/ajtbd/job.md`.
-- `hint`: Core/Big Job обслуживаемого сегмента без capability, прямо в неё
-  целящей (`capability.jobs`) — дополняет `mechanic-capability` (там через
-  механики ценности, здесь — прямое ребро).
+- `error`: `capability.jobs` (в `capability/<surface>.md`) ссылается на
+  работу, которой нет в `docs/ajtbd/job.md`.
+- `hint`: Core/Big Job обслуживаемого сегмента без capability ни на одной
+  поверхности, прямо в неё целящей (`capability.jobs`) — дополняет
+  `mechanic-capability` (там через механики ценности, здесь — прямое ребро).
 
 **Промпт-добавка:**
 ```
-capability.jobs — прямое авторское ребро продукт → ajtbd: возможность
-целит в работу сегмента (в дополнение к выводимому через
-job-graph.value-mechanics). Прямая сторона: каждый ref резолвится в
-реальный job? Нет — error. Обратная: Big/Core Job обслуживаемого сегмента
-без прямо целящей capability — hint. Связь семантическая.
+capability.jobs (поле в capability/<surface>.md — возможностях поверхности
+<surface> проекта <slug>) — прямое авторское ребро продукт → ajtbd:
+возможность целит в работу сегмента (в дополнение к выводимому через
+job-graph.value-mechanics).
+
+Прямая сторона: каждый ref jobs этой поверхности резолвится в реальный
+job? Нет — error. Обратная: Big/Core Job обслуживаемого сегмента без
+прямо целящей capability на ЭТОЙ поверхности — hint (может нести другая
+поверхность; не флагай агрессивно). Связь семантическая. В finding указывай
+project и surface.
 ```
 
 ## situation-job
 
-**Source:** `docs/projects/<slug>/interface/situation.md` (поле `jobs`).
+**Source:** `docs/projects/<slug>/interface/<surface>/situation.md` (поле
+`jobs`).
 **Destination:** `docs/ajtbd/job.md`.
-**Скоуп:** по проекту.
-**Применим если:** оба слоя существуют.
+**Скоуп:** по проекту × поверхность.
+**Применим если:** оба слоя существуют; у проекта есть поверхность
+`<surface>` с папкой интерфейса.
 
 **Что искать:**
-- `error`: `situation.jobs` ссылается на работу, которой нет в
-  `docs/ajtbd/job.md`.
-- `hint`: UX-ситуация, обслуживающая работу сегмента, без проставленного
-  `jobs` (связь полезна, но не обязательна).
+- `error`: `situation.jobs` (в `interface/<surface>/situation.md`)
+  ссылается на работу, которой нет в `docs/ajtbd/job.md`.
+- `hint`: UX-ситуация поверхности, обслуживающая работу сегмента, без
+  проставленного `jobs` (связь полезна, но не обязательна).
 
 **Промпт-добавка:**
 ```
-situation.jobs — авторское ребро interface → ajtbd: UX-шаг обслуживает
-работу сегмента. Прямая сторона: каждый ref резолвится в реальный job?
-Нет — error. Это мягкое ребро (опц.), прочерк — норма; не требуй его.
-В finding укажи project.
+situation.jobs (поле в interface/<surface>/situation.md поверхности
+<surface> проекта <slug>) — авторское ребро interface → ajtbd: UX-шаг
+обслуживает работу сегмента. Прямая сторона: каждый ref резолвится в
+реальный job? Нет — error. Мягкое ребро (опц.), прочерк — норма; не требуй
+его. В finding укажи project и surface.
 ```
 
 ## situation-hypothesis
 
-**Source:** `docs/projects/<slug>/interface/situation.md` (поле
+**Source:** `docs/projects/<slug>/interface/<surface>/situation.md` (поле
 `hypotheses`).
 **Destination:** `docs/hypothesis-map/hypothesis.md`.
-**Скоуп:** по проекту.
-**Применим если:** оба слоя существуют.
+**Скоуп:** по проекту × поверхность.
+**Применим если:** оба слоя существуют; у проекта есть поверхность
+`<surface>` с папкой интерфейса.
 
 **Что искать:**
-- `error`: `situation.hypotheses` ссылается на гипотезу, которой нет в
-  `docs/hypothesis-map/`.
-- `hint`: UX-ситуация, которая по смыслу проверяет/обслуживает гипотезу,
-  без проставленного `hypotheses`.
+- `error`: `situation.hypotheses` (в `interface/<surface>/situation.md`)
+  ссылается на гипотезу, которой нет в `docs/hypothesis-map/`.
+- `hint`: UX-ситуация поверхности, которая по смыслу проверяет/обслуживает
+  гипотезу, без проставленного `hypotheses`.
 
 **Промпт-добавка:**
 ```
-situation.hypotheses — авторское ребро interface → hypothesis-map: UX-шаг
-проверяет/обслуживает гипотезу. Прямая сторона: каждый ref резолвится в
-реальную hypothesis? Нет — error. Мягкое ребро (опц.), прочерк — норма.
-В finding укажи project.
+situation.hypotheses (поле в interface/<surface>/situation.md поверхности
+<surface> проекта <slug>) — авторское ребро interface → hypothesis-map:
+UX-шаг проверяет/обслуживает гипотезу. Прямая сторона: каждый ref
+резолвится в реальную hypothesis? Нет — error. Мягкое ребро (опц.),
+прочерк — норма. В finding укажи project и surface.
+```
+
+## surface-capability
+
+**Source:** `docs/projects/<slug>/surface.md` (реестр, строка `<surface>`).
+**Destination:** `docs/projects/<slug>/capability/<surface>.md`.
+**Скоуп:** по проекту × поверхность.
+**Применим если:** у проекта есть поверхность `<surface>` в реестре.
+
+Структурную часть хребта (файл `capability/<surface>.md` без поверхности в
+реестре; поверхность реестра без файла возможностей) уже ловит
+`/project-audit`. Здесь — **семантика**: для кого поверхность объявлена и
+кому её возможности на деле ценны.
+
+**Что искать:**
+- `error`: поверхность реестра `stable`, чей файл `capability/<surface>.md`
+  существует, но **пуст** (нет ни одной возможности) — поверхность без
+  единого умения для своего user.
+- `warning`: возможность в `capability/<surface>.md`, чьи `user` **не
+  входят** в `surface.user` этой поверхности (возможность даётся не тем,
+  кого поверхность обслуживает).
+- `hint`: user из `surface.user`, которому на этой поверхности не ценна ни
+  одна возможность (поверхность объявлена для user, но умений под него
+  нет).
+
+**Промпт-добавка:**
+```
+Source — строка <surface> реестра surface.md проекта <slug> (с колонкой
+`user` — кого поверхность обслуживает); destination —
+capability/<surface>.md (возможности этой поверхности, у каждой колонка
+`user`). Связь capability → поверхность СТРУКТУРНАЯ (файл лежит в своей
+поверхности — это держит /project-audit); ты проверяешь СМЫСЛ: совпадают
+ли адресаты.
+
+Файл capability/<surface>.md пуст при stable-поверхности — error
+(поверхность без умений). Возможность, чьи user не пересекаются с
+surface.user поверхности — warning (умение «не тем», кого поверхность
+обслуживает). User из surface.user без единой ценной ему возможности —
+hint. Связь семантическая (user сопоставляй по смыслу, не только по slug).
+В finding указывай project и surface.
+```
+
+## integration-crossproject
+
+**Source:** `docs/projects/<slug>/integration.md` (записи с
+`target: sibling-project`).
+**Destination:** `docs/projects/project-map.md` (рёбра) +
+`docs/projects/<sibling>/integration.md` (обратная сторона у соседа) +
+`docs/projects/<slug>/domains/<ctx>/use-cases/*` (`## Dependencies`,
+колонка `integration` — порт стыка).
+**Скоуп:** по проекту (пара `проект × lens`; межпроектный).
+**Применим если:** у проекта есть хотя бы одна `integration` с
+`target: sibling-project`, **или** в `project-map.md` есть ребро с
+`from-project = <slug>`.
+
+Сверяет **три стороны** межпроектного стыка: продуктовая интеграция
+(`integration.md`, авторская сторона ребра) ↔ граф стыков
+(`project-map.md`) ↔ техническое воплощение (порт в `domains/`). Дополняет
+`projectmap-reciprocity` (тот — над всей картой, осмысленность пар рёбер).
+
+**Что искать:**
+- `error`: `integration` с `target: sibling-project` и `sibling-project =
+  <X>`, для которой в `project-map.md` **нет ребра** (`via:
+  integration:<этот-slug>` или семантически соответствующего) — стык
+  объявлен в продукте, но не сведён в карту.
+- `error`: `integration.sibling-project` указывает на проект, у которого
+  **нет каталога** `docs/projects/<X>/` (стык в несуществующий проект).
+- `warning`: ребро `project-map.md` с `from-project = <slug>`, у которого
+  **нет опорной** `integration` с `target: sibling-project` в этом проекте
+  (`via` указывает на отсутствующую интеграцию — карта без авторской
+  стороны).
+- `warning`: у соседа `<sibling>` **нет обратной** интеграции / порта на
+  этот проект, хотя `direction` ребра предполагает обмен в обе стороны
+  (`duplex`) или входящий поток к соседу (асимметрия стыка).
+- `warning`: `integration` с `target: sibling-project`, у которой нет
+  порта в `domains/<ctx>/use-cases/*` (нет use-case с `integration` =
+  slug этой записи в `## Dependencies`) — стык без технического
+  воплощения (если у проекта есть `domains/`).
+
+**Промпт-добавка:**
+```
+Межпроектный стык фиксируется ТРЕМЯ согласованными сторонами: (1)
+авторская — integration.md проекта <slug> с target: sibling-project +
+sibling-project → slug соседа; (2) граф — ребро в
+docs/projects/project-map.md (колонка via → integration:<slug>); (3)
+техническая — порт в domains/<ctx>/use-cases/* (## Dependencies, колонка
+integration = slug записи).
+
+Прочитай integration.md проекта <slug> (фильтр target: sibling-project),
+docs/projects/project-map.md, перечень каталогов docs/projects/ (какие
+проекты существуют), integration.md соседа <sibling> и domains/ проекта
+<slug> (если есть).
+
+Найди рассинхрон трёх сторон:
+- integration с target: sibling-project без ребра в project-map — error;
+- sibling-project на несуществующий проект (нет каталога) — error;
+- ребро project-map (from-project=<slug>) без опорной integration — warning;
+- у соседа нет обратной интеграции/порта при duplex/входящем направлении —
+  warning;
+- integration sibling-project без порта в domains/ (если domains есть) —
+  warning.
+
+Связь семантическая, не только slug-матч via. В finding ставь project =
+<slug> (проект-инициатор), business-problem = null.
+```
+
+## projectmap-reciprocity
+
+**Source:** `docs/projects/project-map.md` (все рёбра).
+**Destination:** перечень каталогов `docs/projects/` (какие проекты
+существуют) + `integration.md` каждого упомянутого проекта.
+**Скоуп:** один раз (верхнеуровневый, над всей картой стыков).
+**Применим если:** `docs/projects/project-map.md` непуст.
+
+Проверяет **осмысленность графа стыков как целого** — в отличие от
+`integration-crossproject`, который скоупится к одному проекту-инициатору.
+
+**Что искать:**
+- `error`: ребро, чей `from-project` или `to-project` — slug
+  несуществующего проекта (нет каталога `docs/projects/<slug>/`, либо это
+  `_template`).
+- `error`: ребро-самоссылка (`from-project == to-project`).
+- `warning`: **встречная пара рёбер** вместо `duplex` — два ребра
+  `A→B` (`out`) и `B→A` (`out`/`in`) по одному и тому же payload, которые
+  должны быть одним ребром `direction: duplex` (дубль-встречное ребро).
+- `hint`: ребро с `via`, не резолвящимся ни в одну реальную
+  `integration`/`event`/`domain-port` проекта-инициатора (карта ссылается
+  «в пустоту»).
+
+**Промпт-добавка:**
+```
+project-map.md — граф стыков между продуктами одного бизнеса. Проверь
+осмысленность КАЖДОГО ребра и пар рёбер:
+
+- from-project / to-project — реальные каталоги docs/projects/<slug>/ (не
+  _template)? Нет — error.
+- from-project == to-project (самоссылка)? error.
+- есть ли встречная пара A→B и B→A по одному payload, которая должна быть
+  одним duplex-ребром? warning (дубль вместо duplex).
+- via резолвится в реальную integration / event / domain-port
+  проекта-инициатора? Нет — hint.
+
+Это верхнеуровневый угол: project = null в findings, business-problem =
+null. Согласованность ребра с конкретной integration проекта-инициатора
+глубже проверяет integration-crossproject (по проекту) — здесь не дублируй
+её, держись уровня графа.
+```
+
+## dataitems-crosssurface
+
+**Source / Destination:** `docs/projects/<slug>/interface/<surface>/data-items.md`
+**всех** поверхностей проекта (один агент читает их все сразу).
+**Скоуп:** по проекту (один агент на проект, сразу по всем поверхностям).
+**Применим если:** у проекта ≥2 папки поверхностей с `data-items.md`.
+
+Реестр `data-items` **surface-локален** (правило «один датум — один slug»
+действует в пределах поверхности): один и тот же бизнес-датум на web и в
+боте — **намеренно** две записи в разных папках. Этот угол ищет не сам
+факт дубля (он ожидаем), а **смысловые расхождения** словаря данных между
+поверхностями.
+
+**Что искать:**
+- `hint`: один и тот же бизнес-датум в `data-items.md` разных поверхностей
+  под **разными slug** (словарь данных расходится между поверхностями —
+  стоит согласовать имена).
+- `hint`: один и тот же датум под одним slug, но с **рассогласованными
+  описаниями** на разных поверхностях (один датум — два разных смысла).
+
+**Промпт-добавка:**
+```
+Прочитай data-items.md ВСЕХ папок поверхностей проекта <slug>
+(docs/projects/<slug>/interface/*/data-items.md). Реестр data-items
+surface-локален: один датум на разных поверхностях — это НАМЕРЕННО разные
+записи (web и бот воплощают его по-разному). НЕ флагай сам факт раздельных
+записей.
+
+Ищи только СМЫСЛОВЫЕ расхождения словаря данных между поверхностями:
+- один бизнес-датум под разными slug на разных поверхностях — hint
+  (согласовать имена);
+- один slug с противоречивыми description на разных поверхностях — hint
+  (один датум — два смысла).
+
+Всё — hint (консистентность словаря, не ошибка). В finding ставь project =
+<slug>, surface не указывай (угол охватывает все поверхности сразу).
 ```
 
 ## Порядок lens-ов
@@ -1004,34 +1300,56 @@ situation.hypotheses — авторское ребро interface → hypothesis-
     фактор)
 12. `stakeholder-strategy` (business → swot/hypothesis-map: стойка властного
     лица ↔ bet/goal — стратегия не против ключевого человека)
+13. `projectmap-reciprocity` (граф стыков: осмысленность рёбер project-map)
 
-**По каждому проекту** (для каждого `<slug>` из `docs/projects/`, кроме
-`_template`; раскрывается в пары `проект × lens`):
+**По каждому проекту, пары `проект × lens`** (для каждого `<slug>` из
+`docs/projects/`, кроме `_template`; цели — корневые kind продукта
+`vision`/`user`/`integration`):
 
-13. `goal-vision` (проблема → продукт; скоуп к проблемам проекта)
-14. `subject-user` (проблема → продукт; скоуп к проблемам проекта)
-15. `segment-user` (ajtbd → продукт)
-16. `job-vision` (ajtbd → продукт: Big/Core Job ↔ vision.Success)
-17. `segmentproblem-vision` (ajtbd → продукт: трение ↔ vision.Problem)
-18. `mechanic-capability` (ajtbd → продукт: механика ценности ↔ capability)
-19. `bet-capability` (проблема → продукт; скоуп к проблемам проекта)
-20. `capability-hypothesis` (продукт → hypothesis-map: capability.hypotheses)
-21. `capability-job` (продукт → ajtbd: capability.jobs)
-22. `user-who` (foundation, продукт → interface проекта)
-23. `surface-zone` (foundation)
-24. `capability-situation` (foundation)
-25. `situation-job` (interface → ajtbd: situation.jobs)
-26. `situation-hypothesis` (interface → hypothesis-map: situation.hypotheses)
-27. `capability-domain` (если у проекта есть `domains/`)
-28. `integration-domain` (если у проекта есть `domains/`)
-29. `surface-screen` (если у проекта есть `screens/`)
-30. `constraint-surface` (cross-внутри-project)
-31. `market-capability` (часто даёт hints, не error)
+14. `goal-vision` (проблема → продукт; скоуп к проблемам проекта)
+15. `subject-user` (проблема → продукт; скоуп к проблемам проекта)
+16. `segment-user` (ajtbd → продукт)
+17. `job-vision` (ajtbd → продукт: Big/Core Job ↔ vision.Success)
+18. `segmentproblem-vision` (ajtbd → продукт: трение ↔ vision.Problem)
+19. `integration-crossproject` (межпроектный: integration ↔ project-map ↔
+    domains-порт ↔ обратная сторона соседа; если у проекта есть стыки
+    `target: sibling-project` или ребро в project-map)
 
-Полный рой = `12 верхнеуровневых + Σ по проектам (применимые
-project-углы)`.
+**По каждому проекту, тройки `проект × поверхность × lens`** (для каждого
+`<slug>` и каждой поверхности `<surface>` из его `surface.md`; source ИЛИ
+destination — per-surface артефакт):
 
-`--quick` запускает по каждому проекту три foundation-угла
-продукт↔interface (`user-who`, `capability-situation`, `surface-zone`)
-плюс `addresses-problem-bizproblem` один раз. Для верхних слоёв —
-`goal-vision`, `subject-user` (по проекту) как быстрый upstream-чек.
+20. `surface-capability` (foundation: реестр поверхности ↔ её возможности)
+21. `mechanic-capability` (ajtbd → продукт: механика ценности ↔ capability
+    поверхности)
+22. `bet-capability` (проблема → продукт; скоуп к проблемам проекта)
+23. `capability-hypothesis` (продукт → hypothesis-map: capability.hypotheses)
+24. `capability-job` (продукт → ajtbd: capability.jobs)
+25. `user-who` (foundation, продукт → interface поверхности)
+26. `surface-zone` (foundation: реестр поверхности ↔ её зоны)
+27. `capability-situation` (foundation: возможности ↔ ситуации поверхности)
+28. `situation-job` (interface поверхности → ajtbd: situation.jobs)
+29. `situation-hypothesis` (interface поверхности → hypothesis-map:
+    situation.hypotheses)
+30. `market-capability` (рынок ↔ возможности поверхности; часто hints)
+31. `constraint-surface` (ограничение ↔ поверхность/её интеграции)
+32. `capability-domain` (если у проекта есть `domains/`; возможности
+    поверхности ↔ домены)
+33. `integration-domain` (если у проекта есть `domains/`; интеграции
+    поверхности ↔ домены-порты)
+34. `surface-screen` (если у проекта есть `screens/<surface>/`)
+
+**По каждому проекту, один агент на проект сразу по всем поверхностям:**
+
+35. `dataitems-crosssurface` (консистентность словаря данных между
+    поверхностями; только если у проекта ≥2 поверхностей)
+
+Полный рой = `13 верхнеуровневых + Σ по проектам (пары проект×lens +
+тройки проект×поверхность×lens применимых углов + dataitems-crosssurface
+для мультиповерхностных проектов)`.
+
+`--quick` запускает по каждому проекту **× каждой поверхности** три
+foundation-угла продукт↔interface (`user-who`, `capability-situation`,
+`surface-zone` — все per-surface, раскрываются в тройки), плюс
+`addresses-problem-bizproblem` один раз. Для верхних слоёв — `goal-vision`,
+`subject-user` (пары по проекту) как быстрый upstream-чек.

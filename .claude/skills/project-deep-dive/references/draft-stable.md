@@ -11,8 +11,10 @@
 Для каждого kind — свой список обязательного (см.
 `field-checklists.md`). Опциональные слоты могут быть `—`.
 
-Универсально обязательное во всех 7 табличных kinds: `slug`, `name`,
-`description`, `status`.
+Универсально обязательное во всех табличных kinds (6 плоских:
+`surface`, `user`, `integration`, `boundary`, `constraint`, `market` +
+capability по файлу на поверхность): `slug`, `name`, `description`,
+`status`.
 
 Vision — обязательны три раздела (Problem, Success, Non-goals — даже
 если Non-goals пуст, секция должна явно сказать «нет ограничений» или
@@ -20,6 +22,17 @@ Vision — обязательны три раздела (Problem, Success, Non-g
 строку `docs/business/business-problem.md`) и оси `audience`/`intent`/
 `market-maturity`/`lifecycle`. Vision без привязки к проблеме в stable не
 повышается — продукт без проблемы висит в воздухе.
+
+`integration` — для stable обязательны `surface` (≥1 slug-реф в реестр),
+`target` и условно `sibling-project`: оно обязательно **тогда и только
+тогда**, когда `target: sibling-project` (при `target: external` —
+прочерк). Ребро межпроектного стыка сводится в
+`docs/projects/project-map.md`.
+
+`capability` — лежит в файле своей поверхности
+(`capability/<surface>.md`); зрелость считается по записи, а целостность
+(запись относится к существующей поверхности реестра) ловит
+`/project-audit`.
 
 ### 2. `Критерии <kind>` пройдены
 
@@ -46,7 +59,10 @@ Vision — обязательны три раздела (Problem, Success, Non-g
 списка ✅). Если случай попадает в ❌-категорию — повышение
 блокируется.
 
-### 5. В `state/<project-slug>/<kind>/<slug>.md` нет `**blocker**`-вопросов
+### 5. В state-заметке нет `**blocker**`-вопросов
+
+Путь заметки: `state/<project-slug>/project/<kind>/<slug>.md`; для
+capability — `state/<project-slug>/project/capability/<surface>/<slug>.md`.
 
 Открытые вопросы без префикса `**blocker**` — не мешают (это
 обычные «копать дальше»). Блокирует только то, что явно помечено как

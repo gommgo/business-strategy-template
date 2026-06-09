@@ -4,9 +4,18 @@
 Скилл выбирает режим по виду args при запуске и далее ведёт сеанс,
 комбинируя точечные шаги. Зеркалит interface-deep-dive.
 
-Все пути ниже **скоупятся в выбранный проект**: данные пишутся в
-`docs/projects/<project-slug>/<kind>.md`, форму (критерии / anti-patterns
-/ тест-критерий) читаем из канона `docs/projects/_template/project/<kind>.md`.
+Все пути ниже **скоупятся в выбранный проект**. Данные пишутся в:
+
+- vision — `docs/projects/<project-slug>/vision.md`;
+- 6 плоских kind — `docs/projects/<project-slug>/<kind>.md`
+  (`surface`, `user`, `integration`, `boundary`, `constraint`, `market`);
+- capability — **файл на поверхность**:
+  `docs/projects/<project-slug>/capability/<surface>.md`.
+
+Форму (критерии / anti-patterns / тест-критерий) читаем из канона
+`docs/projects/_template/project/<kind>.md`; для capability —
+`docs/projects/_template/project/capability.md` (одна форма на все
+поверхности).
 
 ## A. Новая сущность
 
@@ -17,30 +26,48 @@
 ### Шаги
 
 1. Прочитать форму `docs/projects/_template/project/<kind>.md` целиком:
-   секции `Критерии`, `Что НЕ`, `Тест-критерий`.
-2. Раунд 1 `AskUserQuestion` — фундамент:
+   секции `Критерии`, `Что НЕ`, `Тест-критерий`. Для capability форма —
+   `_template/project/capability.md`.
+2. Если kind = `capability` — **сначала определить поверхность**: из
+   аргумента `capability:<surface>:<slug>` или пикером по реестру
+   `surface.md` (по именам поверхностей). Без поверхности в реестре
+   capability не заводится — предложить сперва завести `surface`.
+3. Раунд 1 `AskUserQuestion` — фундамент:
    - `slug` (Other) — если не дан;
    - `name` (Other);
    - `description` (Other).
-3. Записать строку в `docs/projects/<project-slug>/<kind>.md` с
-   заполненными `slug + name + description + status=draft`, остальные
-   ячейки `—`. Для `vision.md` — записать в раздел Problem; на фазе
-   discovery дополнительно добить `addresses-problem` (опции — строки
-   `docs/business/business-problem.md`), оси `audience`/`intent`/
-   `market-maturity` и `lifecycle` (enum).
-4. Раунд 2+ `AskUserQuestion` — батч по доменным слотам kind. См.
+4. Записать строку в файл данных:
+   - 6 плоских kind → `docs/projects/<project-slug>/<kind>.md`;
+   - capability → `docs/projects/<project-slug>/capability/<surface>.md`
+     (если файла ещё нет — завести из формы
+     `_template/project/capability.md`);
+   - vision → `vision.md`, раздел Problem; на фазе discovery
+     дополнительно добить `addresses-problem` (опции — строки
+     `docs/business/business-problem.md`), оси `audience`/`intent`/
+     `market-maturity` и `lifecycle` (enum).
+
+   Новая строка — `slug + name + description + status=draft`, остальные
+   ячейки `—`.
+5. Раунд 2+ `AskUserQuestion` — батч по доменным слотам kind. См.
    `field-checklists.md`. До 4 вопросов в раунде; перемежать опции
-   (anti-patterns / enums / соседи) и Other (значения).
-5. Если в поле нужна ссылка на ещё не существующую сущность — отработать
+   (anti-patterns / enums / соседи) и Other (значения). Для integration —
+   среди слотов `surface` (массив slug-рефов в реестр), `target`
+   (`external` / `sibling-project`) и `sibling-project` (slug соседа,
+   обязателен iff `target: sibling-project`).
+6. Если в поле нужна ссылка на ещё не существующую сущность — отработать
    **stub** (см. SKILL.md): создать stub-запись, записать state-заметку
    с открытым вопросом, продолжить текущую запись.
-6. После всех слотов — раунд `AskUserQuestion` по `Тест-критерий`:
+7. После всех слотов — раунд `AskUserQuestion` по `Тест-критерий`:
    варианты ✅/❌ из примеров md как опции. Аналитик подтверждает.
-7. Применить чек-лист `draft-stable.md`. Если все 5 ✅ — предложить
+8. Применить чек-лист `draft-stable.md`. Если все 5 ✅ — предложить
    повышение в stable.
-8. Записать `state/<project-slug>/<kind>/<slug>.md`, если есть что
-   (открытые вопросы, неочевидные доменные решения).
-9. Предложить логичный следующий шаг по `phases.md`.
+9. Записать state-заметку, если есть что (открытые вопросы, неочевидные
+   доменные решения): `state/<project-slug>/project/<kind>/<slug>.md`;
+   для capability — `…/project/capability/<surface>/<slug>.md`.
+10. Если завели запись в `integration` с `target: sibling-project` —
+    напомнить, что ребро межпроектного стыка сводится в
+    `docs/projects/project-map.md`.
+11. Предложить логичный следующий шаг по `phases.md`.
 
 ### Пример раунда (user, после фундамента)
 
@@ -64,20 +91,29 @@
 2. Извлечь кандидатов по слоям. **Не** угадывать значения доменных
    полей — только то, что **прямо названо** в материале:
    - user — кто упомянут как «пользователь / клиент / адресат»;
-   - capability — что «продукт / сервис / решение умеет/будет уметь»;
-   - surface — где «работаем / пользуемся / на телефоне / в админке»;
-   - integration — какие внешние «системы / провайдеры / партнёры»;
+   - surface — где «работаем / пользуемся / на телефоне / в админке»
+     (поверхность — ось; capability привязывается к ней);
+   - capability — что «продукт / сервис / решение умеет/будет уметь»,
+     **с привязкой к поверхности**: каждый кандидат идёт в файл своей
+     поверхности `capability/<surface>.md`. Если поверхность из материала
+     неясна — пометить кандидата «поверхность уточнить»;
+   - integration — какие внешние «системы / провайдеры / партнёры»; если
+     упомянут **другой продукт того же бизнеса** — это `target:
+     sibling-project` (ребро в `project-map.md`);
    - constraint — какие «законы / договоры / обязательства»;
    - boundary — что «не делаем / не наш скоуп / отдаём наружу»;
    - market — кто упомянут как «конкурент / аналог / альтернатива».
-3. Через чат показать план:
+3. Через чат показать план (capability — под поверхностями):
 
    ```
    Из материала вижу:
      user: nurse-partner, doctor (кандидаты)
-     capability: send-referral, check-status
-     surface: web-partner
-     integration: clinic-mis (упомянули МИС партнёра)
+     surface: web-partner, tg-bot
+     capability:
+       web-partner: send-referral, check-status
+       tg-bot:      check-status (отдельное воплощение в боте)
+     integration: clinic-mis (МИС партнёра, external);
+                  loyalty-app (соседний продукт → sibling-project)
      boundary: no-insurance (явно сказано «страховку не считаем»)
    Так?
    ```
@@ -109,19 +145,28 @@
 
 ### Шаги
 
-1. Прочитать строку из `docs/projects/<project-slug>/<kind>.md` (для
-   vision — `vision.md` этого проекта целиком).
-2. Прочитать `state/<project-slug>/<kind>/<slug>.md`, если есть.
+1. Прочитать строку из файла данных (для vision — `vision.md` целиком):
+   - 6 плоских kind → `docs/projects/<project-slug>/<kind>.md`;
+   - capability → `docs/projects/<project-slug>/capability/<surface>.md`
+     (поверхность из аргумента `capability:<surface>:<slug>` или пикером).
+2. Прочитать state-заметку, если есть:
+   `state/<project-slug>/project/<kind>/<slug>.md`; для capability —
+   `…/project/capability/<surface>/<slug>.md`.
 3. Прочитать соседей семантически в пределах проекта: для `capability`
-   — какие user упомянуты, есть ли они; для `surface` — какие
-   user, какие capability у них; для `integration` — какие constraint
-   могли бы быть применимы.
-4. Применить секции формы `docs/projects/_template/project/<kind>.md` к
-   строке. Найти:
-   - пустые обязательные слоты;
+   — какие user упомянуты в её файле поверхности, есть ли они; для
+   `surface` — какие user её обслуживают, есть ли у неё файл
+   `capability/<surface>.md`; для `integration` — на какие поверхности
+   реестра она ссылается (`surface`), не повис ли `sibling-project`,
+   какие constraint могли бы быть применимы.
+4. Применить секции формы `docs/projects/_template/project/<kind>.md`
+   (для capability — `capability.md`) к строке. Найти:
+   - пустые обязательные слоты (для integration — `surface`, `target`,
+     и `sibling-project` при `target: sibling-project`);
    - подозрения по anti-patterns (capability похожа на фичу, boundary
-     похож на backlog, constraint без source);
-   - семантические тупики (surface без user, market без sources).
+     похож на backlog, constraint без source, соседний продукт как
+     `target: external` вместо `sibling-project`);
+   - семантические тупики (surface без user, market без sources,
+     capability в файле поверхности вне реестра).
 5. Раунд `AskUserQuestion` (до 4 вопросов) — точечно по найденному:
    - дыры — заполняем через Other;
    - anti-pattern-подозрения — опции «да, anti-pattern» / «нет, вот
@@ -148,9 +193,11 @@
 | ситуация | формат |
 |---|---|
 | anti-pattern из `Что <kind> НЕ` | две опции: «соответствует anti-pattern» / «не соответствует» (объяснить почему через Other) |
-| enum поле (`surface.type`, `integration.direction`, `integration.owner`, `constraint.kind`) | по одной опции на каждое значение enum |
+| enum поле (`surface.type`, `integration.direction`, `integration.owner`, `integration.target`, `constraint.kind`) | по одной опции на каждое значение enum |
 | тест-критерий из `Тест-критерий` | опции из примеров ✅/❌, аналитик соотносит свой случай |
 | выбор существующего slug соседа | по опции на каждый существующий + «нужен новый» (Other) |
+| поверхность для capability / `integration.surface` | по опции на каждую поверхность реестра `surface.md` (по именам) + «нужна новая поверхность» |
+| `integration.sibling-project` (при `target: sibling-project`) | по опции на каждый существующий проект `docs/projects/<slug>/` (кроме текущего и `_template`) + «нужен новый проект» |
 | перепрыгивание фазы | две-три опции «потому что X / Y / Other» |
 | запуск research | «5 агентов» / «10 агентов» / «15 агентов» / «не запускать сейчас» |
 | promotion кандидата из research в артефакт | «принять как `<kind>:<slug>`» / «отбросить» / «доработать через Other» |

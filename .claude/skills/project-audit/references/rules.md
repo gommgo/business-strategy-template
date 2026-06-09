@@ -3,15 +3,35 @@
 Каждое правило: id, severity, описание, как обнаружить, что
 рекомендовать.
 
+## Состав слоя
+
+Продуктовый слой проекта `docs/projects/<project-slug>/`:
+
+- **1 singleton** `vision.md`;
+- **реестр-хребет** `surface.md` (поверхности; их slug'и — ключи
+  партиционирования);
+- **папка возможностей** `capability/` — по файлу на поверхность
+  (`capability/<surface>.md`, имя файла = slug поверхности из `surface.md`);
+- **5 плоских кросс-поверхностных таблиц** `user.md`, `integration.md`,
+  `boundary.md`, `constraint.md`, `market.md`.
+
+«Все табличные файлы» в правилах ниже = `surface.md` + `user.md` +
+`integration.md` + `boundary.md` + `constraint.md` + `market.md` + каждый
+файл `capability/*.md`. `vision.md` — singleton, не таблица.
+
 ## Структурные правила (R-STRUCT-*)
 
 ### R-STRUCT-001 — Дубликаты slug в одном файле
 
 **Severity:** `error`.
 
-**Где:** все 7 табличных файлов.
+**Где:** все табличные файлы (включая каждый `capability/*.md`).
 
 **Обнаружение:** в одном файле два разных ряда с одинаковым `slug`.
+Для `capability` область уникальности — **один файл поверхности**
+(`capability/<surface>.md`): один slug возможности может повторяться в
+разных файлах-поверхностях (это разные воплощения одной ценности),
+дубликатом считается только повтор **внутри одного файла**.
 
 **Рекомендация:** «два ряда с slug X в файле Y — переименовать один
 из них через `/project-deep-dive <project-slug> <kind>:<slug>` или
@@ -21,7 +41,7 @@
 
 **Severity:** `error`.
 
-**Где:** все 8 файлов.
+**Где:** все файлы (singleton + табличные, включая каждый `capability/*.md`).
 
 **Обнаружение:** запись `stable`, но один из обязательных слотов
 (по `field-checklists.md` аналитического скилла) `—` или пустой.
@@ -33,13 +53,18 @@
 | kind | обязательно при stable |
 |---|---|
 | `vision` | секции Problem, Success, Non-goals (Non-goals может быть `_нет_`, но секция должна быть) + непустой `addresses-problem` (≥1 slug-реф) + оси `audience`/`intent`/`market-maturity`/`lifecycle` (валидные enum) |
-| `user` | `context`, `jobs`, `pains`, `success` |
-| `capability` | `value`, `user` (≥1 элемент) |
-| `boundary` | `why` |
 | `surface` | `type`, `lives-at`, `user` (≥1 элемент) |
-| `integration` | `direction`, `owner`, `payload` |
+| `capability` | `value`, `user` (≥1 элемент) |
+| `user` | `context`, `jobs`, `pains`, `success` |
+| `integration` | `direction`, `owner`, `payload`, `surface` (≥1 элемент), `target` (валидный enum); `sibling-project` — обязателен **iff** `target: sibling-project` (тогда непустой slug), иначе обязан быть `—` |
+| `boundary` | `why` |
 | `constraint` | `kind`, `source` |
 | `market` | `url`, `sources` (≥1 элемент) |
+
+`integration.sibling-project` без `target: sibling-project` (заполнен при
+`target: external`) — тоже нарушение слота: при `external` поле обязано
+быть `—`. Проверку структурную (поле есть/пусто) делает это правило;
+существование самой поверхности/проекта по ссылке — R-SEM-010/R-SEM-011.
 
 **Рекомендация:** «заполнить слот X или понизить запись в draft через
 `/project-deep-dive <project-slug> <kind>:<slug>`».
@@ -48,7 +73,8 @@
 
 **Severity:** `error`.
 
-**Где:** все 7 табличных файлов с enum-полями.
+**Где:** все файлы с enum-полями (singleton `vision.md` + табличные,
+включая каждый `capability/*.md`).
 
 **Enum-поля:**
 
@@ -61,6 +87,7 @@
 | `surface.type` | `web`, `mobile`, `api`, `admin`, `bot`, `desktop`, `embed`, `other` |
 | `integration.direction` | `in`, `out`, `duplex` |
 | `integration.owner` | `we`, `partner`, `both` |
+| `integration.target` | `external`, `sibling-project` |
 | `constraint.kind` | `regulation`, `sla`, `contract`, `technical`, `other` |
 | `<любой>.status` | `draft`, `stable` |
 
@@ -86,7 +113,7 @@ Success, Non-goals). Открыть через
 
 **Severity:** `error`.
 
-**Где:** все 8 файлов.
+**Где:** все файлы (singleton + табличные, включая каждый `capability/*.md`).
 
 **Обнаружение:** `status` не `draft` и не `stable`.
 
@@ -97,14 +124,46 @@ Success, Non-goals). Открыть через
 
 **Severity:** `error`.
 
-**Где:** все 8 файлов + ветка state проекта в едином дереве оркестратора.
+**Где:** все файлы + ветка state проекта в едином дереве оркестратора.
 
-**Обнаружение:** запись `stable`, но в
-`../entrypoint/state/projects/<project-slug>/project/<kind>/<slug>.md`
-есть строка с маркером `**blocker**` или `**жду аналитика**`.
+**Обнаружение:** запись `stable`, но в state-заметке записи есть строка с
+маркером `**blocker**` или `**жду аналитика**`. Заметка лежит в
+`../entrypoint/state/projects/<project-slug>/project/<kind>/<slug>.md`; для
+возможности поверхности путь несёт поверхность —
+`../entrypoint/state/projects/<project-slug>/project/capability/<surface>/<slug>.md`.
 
 **Рекомендация:** «status: stable несовместим с открытым blocker'ом в
 state. Либо закрыть вопрос, либо понизить запись в draft».
+
+### R-STRUCT-007 — Файл `capability/<surface>.md` для поверхности вне реестра
+
+**Severity:** `error`.
+
+**Где:** папка `capability/` + реестр `surface.md`.
+
+**Обнаружение:** в каталоге `capability/` лежит файл `<surface>.md`, имя
+которого (без `.md`) не совпадает ни с одним `slug` из `surface.md`. Связь
+capability → surface **структурная**: имя файла обязано быть slug'ом
+поверхности из хребта.
+
+**Рекомендация:** «файл возможностей `capability/<surface>.md` висит без
+поверхности в реестре. Завести поверхность в `surface.md` или
+переименовать/удалить файл через `/project-deep-dive <project-slug>`».
+
+### R-STRUCT-008 — Поверхность реестра без файла возможностей
+
+**Severity:** `hint` (coverage).
+
+**Где:** реестр `surface.md` + папка `capability/`.
+
+**Обнаружение:** в `surface.md` есть поверхность `<surface>`, но файла
+`capability/<surface>.md` нет. Хребет объявил поверхность, а слой
+возможностей под неё не открыт.
+
+**Рекомендация:** «поверхность `<surface>` из реестра не имеет файла
+`capability/<surface>.md`. Если поверхность живая — завести возможности
+через `/project-deep-dive <project-slug> capability:<surface>`; иначе
+проверить, нужна ли поверхность».
 
 ## Семантические правила (R-SEM-*)
 
@@ -113,7 +172,7 @@ state. Либо закрыть вопрос, либо понизить запи�
 **Severity:** `warning` (если draft) / `error` (если stable, дублирует
 R-STRUCT-002).
 
-**Где:** `capability.md`.
+**Где:** каждый файл `capability/*.md`.
 
 **Обнаружение:** `user = —` или пустой массив.
 
@@ -187,7 +246,7 @@ R-STRUCT-002).
 
 **Severity:** `warning`.
 
-**Где:** все 7 табличных файлов.
+**Где:** все табличные файлы (включая каждый `capability/*.md`).
 
 **Обнаружение:** `description` и `name` идентичны (по содержимому).
 
@@ -226,17 +285,52 @@ R-STRUCT-002).
 которые продукт закрывает, через `/project-deep-dive <project-slug>
 --phase discovery`».
 
+### R-SEM-010 — `integration.surface` на несуществующую поверхность
+
+**Severity:** `error`.
+
+**Где:** `integration.md` + реестр `surface.md`.
+
+**Обнаружение:** в массиве `integration.surface` есть slug, которого нет
+ни в одной строке `surface.md`. Поверхность — структурная ось внутри
+проекта, ссылка валидируется на целостность (в отличие от семантических
+рёбер вверх по слоям).
+
+**Рекомендация:** «`integration:<slug>` обслуживает поверхность `<surface>`,
+которой нет в реестре `surface.md`. Завести поверхность или поправить
+ссылку через `/project-deep-dive <project-slug> integration:<slug>`».
+
+### R-SEM-011 — `integration.sibling-project` на несуществующий или текущий проект
+
+**Severity:** `error` (проект не существует) / `warning` (ссылка на сам
+текущий проект).
+
+**Где:** `integration.md` + каталог `docs/projects/`.
+
+**Обнаружение:** при `target: sibling-project` значение `sibling-project`:
+
+- не совпадает ни с одной папкой `docs/projects/<slug>/` (исключая
+  `_template`) → `error` — стык ведёт в пустоту;
+- совпадает с **текущим** `<project-slug>` → `warning` — соседний проект
+  не может быть самим собой (это внутренний обмен, не межпроектный стык).
+
+**Рекомендация:** «`integration:<slug>` стыкуется с соседним проектом
+`<sibling-project>`, которого нет / который равен текущему. Поправить slug
+соседнего проекта или сменить `target` на `external` через
+`/project-deep-dive <project-slug> integration:<slug>`. Сам стык сводится в
+`docs/projects/project-map.md`».
+
 ## Coverage-правила (R-COV-*)
 
 ### R-COV-001 — User без жителей
 
 **Severity:** `hint`.
 
-**Где:** `user.md`, проверяется через сводку упоминаний в
-`capability.md` и `surface.md`.
+**Где:** `user.md`, проверяется через сводку упоминаний во **всех** файлах
+`capability/*.md` и в `surface.md`.
 
-**Обнаружение:** user-slug не появляется ни в одном
-`capability.user` и ни в одном `surface.user`.
+**Обнаружение:** user-slug не появляется ни в одном `capability.user`
+(по всем файлам поверхностей) и ни в одном `surface.user`.
 
 **Рекомендация:** «user X не используется ни в capability, ни в
 surface. Либо подключить, либо рассмотреть удаление».
@@ -272,11 +366,14 @@ state-заметкой
 
 **Severity:** `hint`.
 
-**Где:** все 7 табличных файлов + ветка state проекта в едином дереве оркестратора.
+**Где:** все табличные файлы (включая каждый `capability/*.md`) + ветка
+state проекта в едином дереве оркестратора.
 
 **Обнаружение:** запись `draft` с пустыми обязательными слотами, но в
-`../entrypoint/state/projects/<project-slug>/project/<kind>/<slug>.md` ни одной открытой пометки (или
-файла нет вовсе).
+state-заметке записи ни одной открытой пометки (или файла нет вовсе).
+Заметка — `../entrypoint/state/projects/<project-slug>/project/<kind>/<slug>.md`;
+для возможности поверхности —
+`../entrypoint/state/projects/<project-slug>/project/capability/<surface>/<slug>.md`.
 
 **Рекомендация:** «запись X — draft с дырами, но в state нет
 открытых вопросов. Возможно, запись забыта. Углубить через
@@ -287,7 +384,7 @@ state-заметкой
 
 **Severity:** `hint`.
 
-**Где:** все 7 табличных файлов.
+**Где:** все табличные файлы (включая каждый `capability/*.md`).
 
 **Обнаружение:** `description` короче 10 символов (без бэктиков и
 em-dash).
@@ -300,7 +397,12 @@ em-dash).
 - Не сравнивает продукт с `<slug>/interface` / `<slug>/domains` /
   `<slug>/screens` и не проверяет `addresses-problem` против реестра
   `business/business-problem` — это `/cross-audit`.
-- Не выходит за пределы одной папки проекта `docs/projects/<project-slug>/`.
+- Не выходит за пределы одной папки проекта `docs/projects/<project-slug>/`
+  — кроме одного структурного исключения: проверки **существования** папки
+  соседнего проекта по `integration.sibling-project` (R-SEM-011) только
+  листингом `docs/projects/`, без чтения его артефактов. Согласованность
+  трёх сторон стыка (integration ↔ project-map ↔ domains-порт) — у
+  `/cross-audit`.
 - Не предлагает promotion `draft → stable` — это `/project-deep-dive`.
 - Не вызывает `/project-deep-dive` сам — даёт текст, что запустить
   аналитику.

@@ -31,11 +31,28 @@ consumes: []
 
 ## Dependencies
 
-| port | purpose | adapter |
-|---|---|---|
-| `<Aggregate>Repository` | persistence корневого агрегата | postgres (pgx + sqlc) |
-| `Clock` | детерминированное время | `golibinfra/clock` |
-| `<OtherDomain>Reader` | cross-domain port (если нужны данные из другого контекста) | adapter в `module/adapters.go` чужого домена |
+Колонка `integration` связывает порт с записью продуктового слоя
+`docs/projects/<project-slug>/integration.md`: для **внешних** интеграций
+(платёж, email, SMS, IDP) и **межпроектных** портов (обмен с соседним
+проектом бизнеса) — slug интеграции; для внутренней инфры
+(репозиторий, `Clock`, reader другого контекста **этого же** проекта) —
+`—`. Так каждый выход наружу из кода поднимается до явной интеграции в
+продукте; согласованность ловит `/cross-audit`.
+
+| port | purpose | adapter | integration |
+|---|---|---|---|
+| `<Aggregate>Repository` | persistence корневого агрегата | postgres (pgx + sqlc) | `—` |
+| `Clock` | детерминированное время | `golibinfra/clock` | `—` |
+| `<OtherDomain>Reader` | cross-domain port — данные из другого контекста **этого** проекта | adapter в `module/adapters.go` чужого домена | `—` |
+| `<ExternalService>` | внешняя система (платёж / email / SMS / webhook) | SDK / HTTP-клиент провайдера | `` `<integration-slug>` `` |
+| `<SiblingProject>Client` | обмен с **соседним проектом** бизнеса (синхронный вызов API) | HTTP-клиент к API соседа | `` `<integration-slug>` `` (`target: sibling-project`) |
+
+> **Внешние и межпроектные интеграции** держим явно: каждый порт с
+> непустой колонкой `integration` обязан иметь запись в `integration.md`
+> продукта. Межпроектный порт ссылается на интеграцию с
+> `target: sibling-project`; её ребро попадает в `../project-map.md`.
+> Синхронные вызовы наружу видны в `## Steps` отдельным шагом; асинхронный
+> обмен — через события (`## Events emitted` / `consumes`).
 
 > **Авторизация** — на уровне HTTP-middleware (`platform/authgate`), не в use-case'е. Use-case не имеет `Authorizer`-порта и не возвращает `ErrForbidden`, если репо-конвенция «есть валидная сессия → can do everything». Если в конкретном домене нужны fine-grained роли — заводи policy в `<ctx>/policies/` и **явно** добавь её здесь.
 
@@ -64,6 +81,11 @@ consumes: []
 
 <!-- Или: -->
 <!-- - _нет_ -->
+
+> Если событие потребляет **соседний проект** бизнеса (межпроектный
+> асинхронный обмен) — это тоже интеграция с `target: sibling-project`:
+> заведи запись в `integration.md` и ребро в `../project-map.md`.
+> Симметрично — `consumes` события, пришедшего от соседнего проекта.
 
 ## Errors
 

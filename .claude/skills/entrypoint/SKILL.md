@@ -19,11 +19,18 @@ description: "Единая точка входа аналитика во всю 
 | `docs/ajtbd/` (сегменты + граф работ) | `/segment-deep-dive` · `/job-graph-deep-dive` · `/jtbd-interview` |
 | `docs/swot/` (LinkedSWOT) | `/swot-deep-dive` |
 | `docs/hypothesis-map/` (Карта гипотез) | `/hypothesis-map-deep-dive` |
-| `docs/projects/<slug>/` (продукт) | `/project-deep-dive <slug>` |
-| `docs/projects/<slug>/interface/` | `/interface-deep-dive <slug>` |
-| `docs/projects/<slug>/domains/` | `/domain-deep-dive <slug>` |
-| `docs/projects/<slug>/screens/` | `/screen-deep-dive <slug>` |
+| `docs/projects/<slug>/` (продукт: vision + хребет `surface` + `capability/<surface>`) | `/project-deep-dive <slug>` |
+| `docs/projects/<slug>/interface/<surface>/` | `/interface-deep-dive <slug> [<surface>]` |
+| `docs/projects/<slug>/domains/<ctx>/` (по bounded-context) | `/domain-deep-dive <slug> <ctx>` |
+| `docs/projects/<slug>/screens/<surface>/` | `/screen-deep-dive <slug> [<surface>]` |
+| `docs/projects/project-map.md` (межпроектные стыки) | `/project-deep-dive <slug>` (авторская сторона — `integration` инициатора) |
 | аудиты | `/swot-audit` · `/hypothesis-map-audit` · `/ajtbd-audit` · `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>` · `/cross-audit` |
+
+Поверхность (`surface`) — ось продукта: реестр-хребет `surface.md`
+партиционирует возможности (`capability/<surface>`), интерфейс
+(`interface/<surface>/`) и экраны (`screens/<surface>/`) по своим slug'ам.
+Скилы `interface`/`screen` берут поверхность **вторым аргументом**
+`[<surface>]` — без него предлагают пикер поверхностей по `surface.name`.
 
 Полная таблица «сигнал → слой → kind → исполнитель → режим» —
 `references/routing.md`.
@@ -108,12 +115,21 @@ state (`references/state-model.md`) + быстрый проход по `docs/`.
    swot              факторы по 4 проблемам · 1 проблема без ставок
    hypothesis-map    метрики по 3 проблемам · 1 цель без метрики
    Клиника удержания (clinic)   фаза surface · vision stable, lifecycle: mvp
-   Интейк-форма (intake)        фаза discovery · vision draft
-     interface                  who/situation заполнены · zone — пусто
+     поверхности                web, bot (реестр surface)
+     capability                 web: 3 stable · bot: 1 draft
+     interface[web]             who/situation заполнены · zone — пусто
+     interface[bot]             —
      screens                    —
+     межпроектные стыки         loyalty-sync → web-store (project-map)
+   Интейк-форма (intake)        фаза discovery · vision draft
    Открытые нити: 1 (разбор транскрипта 2026-06-06)
    От клиента ждёт аналитика: 2 вопроса (метрики)
    ```
+
+   Поверхность (`surface`) идёт **перед** возможностями: реестр-хребет
+   называет поверхности, а `capability`/`interface`/`screens` даются по
+   поверхности. Межпроектные стыки — отдельной строкой (сводятся в
+   `project-map`).
 
    Проекты в сводке и пикерах называются **по-человечески** (имя из
    `vision`); slug — деталь в скобках, аналитик его не вводит (см.
@@ -153,7 +169,10 @@ state (`references/state-model.md`) + быстрый проход по `docs/`.
 1. Записывает строку маршрута в открытую нить `state/threads/<slug>.md`
    (чанк → слой/kind/исполнитель → ждёт).
 2. **Активирует исполнителя** с нужными аргументами (для проектных
-   слоёв — первым аргументом `<project-slug>`; сырьё передаёт чанком).
+   слоёв — первым аргументом `<project-slug>`; для `interface`/`screens` —
+   вторым аргументом `[<surface>]`, без него исполнитель сам предложит
+   пикер поверхностей по `surface.name`; для `domains` — `<ctx>`; сырьё
+   передаёт чанком).
 3. Исполнитель ведёт свой слой по своим фазам и пишет per-kind заметку в
    **свою ветку** общего дерева (`state/<слой>/...`) — оркестратор её не
    дублирует.
@@ -176,7 +195,10 @@ anti-patterns, draft→stable, каскады внутри слоя) — у ис
 ├── index.md                 ← оркестратор: срез по слоям/проектам
 ├── threads/<slug>.md        ← оркестратор: открытая нить (маршрут)
 ├── business/ · ajtbd/ · swot/ · hypothesis-map/   ← исполнители верхних слоёв
-└── projects/<slug>/{project,interface,domains,screens}/  ← проектные исполнители
+└── projects/<slug>/                                ← проектные исполнители
+    ├── project/ (vision + плоские kind + capability/<surface>/)
+    ├── interface/<surface>/ · screens/<surface>/   ← по поверхности
+    └── domains/<ctx>/                              ← по bounded-context
 ```
 
 - Оркестратор владеет `index.md` (карта «где мы») + `threads/` и **не

@@ -17,21 +17,23 @@
    - `slug` (через Other) — если ещё не дан;
    - `name` (Other) — человекочитаемое;
    - `description` (Other) — одна-две строки.
-3. Записать строку в данные проекта
-   `docs/projects/<project-slug>/interface/<kind>.md` с заполненными
-   `slug + name + description + status=draft`, остальные ячейки `—`.
+3. Записать строку в данные поверхности
+   `docs/projects/<project-slug>/interface/<surface>/<kind>.md` с
+   заполненными `slug + name + description + status=draft`, остальные
+   ячейки `—`.
 4. Раунд 2+ `AskUserQuestion` — батч по доменным слотам kind в порядке
    `field-checklists.md`. До 4 вопросов в раунде; перемежать опции
    (anti-patterns) и Other (значения).
 5. По мере заполнения — если в поле нужна ссылка на ещё не
-   существующую сущность, отработать **stub** (см. SKILL.md): создать
-   stub-запись, записать state-заметку с открытым вопросом, продолжить.
+   существующую сущность **той же поверхности**, отработать **stub**
+   (см. SKILL.md): создать stub-запись, записать state-заметку с открытым
+   вопросом, продолжить.
 6. После всех слотов — раунд `AskUserQuestion` по `Тест-критерий` из
    md: ✅/❌ варианты как опции. Аналитик подтверждает.
 7. Применить чек-лист `draft-stable.md`. Если все 5 ✅ — предложить
    повышение в stable.
-8. Записать `state/<project-slug>/<kind>/<slug>.md`, если есть что
-   (открытые вопросы, неочевидные доменные решения).
+8. Записать `state/<project-slug>/interface/<surface>/<kind>/<slug>.md`,
+   если есть что (открытые вопросы, неочевидные доменные решения).
 
 ### Пример раунда (situation, после фундамента)
 
@@ -69,6 +71,7 @@
 4. Раунд `AskUserQuestion` — подтвердить план / попросить корректировку
    через Other.
 5. По подтверждению — завести **stub'ы** в соответствующих файлах
+   поверхности `docs/projects/<project-slug>/interface/<surface>/`
    (минимум `slug + name + description + status=draft`); создать
    state-заметки с открытыми вопросами «извлечено из сырья — уточнить
    <что>».
@@ -91,11 +94,13 @@
 
 ### Шаги
 
-1. Прочитать строку из данных проекта
-   `docs/projects/<project-slug>/interface/<kind>.md`.
-2. Прочитать `state/<project-slug>/<kind>/<slug>.md`, если есть.
-3. Прочитать соседей: для situation — `who`, `stage`, ссылки на
-   data-items, ux-substrate (по фильтру), block (по join'у).
+1. Прочитать строку из данных поверхности
+   `docs/projects/<project-slug>/interface/<surface>/<kind>.md`.
+2. Прочитать `state/<project-slug>/interface/<surface>/<kind>/<slug>.md`,
+   если есть.
+3. Прочитать соседей **той же поверхности**: для situation — `who`,
+   `stage`, ссылки на data-items, ux-substrate (по фильтру), block (по
+   join'у).
 4. Применить канон `docs/projects/_template/interface/<kind>.md` секции
    `Критерии`, `Что НЕ`, `Тест-критерий` к строке. Найти:
    - пустые обязательные слоты;

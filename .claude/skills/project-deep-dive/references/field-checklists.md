@@ -65,45 +65,7 @@ segments.
 `context` идёт первым, потому что от него зависит, как формулировать
 jobs и pains. Если context размытый — jobs будут абстракцией.
 
-## capability
-
-**Обязательно:** `slug`, `name`, `description`, `status`.
-
-**Должно быть для stable:**
-
-- `value` — ценность для user, в его языке.
-- `user` — массив slug пользователей (минимум один).
-
-**Опционально:**
-- `hypotheses` — массив slug-рефов на `hypothesis-map/hypothesis`
-  (capability реализует гипотезу). Снизу-вверх (project → hypothesis-map).
-- `jobs` — массив slug-рефов на `ajtbd/job` (capability прямо целит в
-  работу сегмента). Снизу-вверх (project → ajtbd). Прямое ребро —
-  **в дополнение** к выводимому через `job-graph.value-mechanics`.
-  Оба — прочерк допустим; обратную сторону сводит `/cross-audit`.
-
-**Порядок копания:**
-fundamentals → value → user → hypotheses → jobs.
-
-Если user в проекте ещё нет — отработать **stub** для них (см.
-SKILL.md), потом вернуться. Capability без user — мёртвая. `hypotheses` и
-`jobs` — опции из существующих сущностей соседних слоёв, не выдумывать.
-
-## boundary
-
-**Обязательно:** `slug`, `name`, `description`, `status`.
-
-**Должно быть для stable:**
-
-- `why` — почему отказ продуктово правильный.
-
-**Порядок копания:**
-fundamentals → why.
-
-`why` — основная проверка: если в нём нет продуктового аргумента
-(только «нет ресурсов», «потом»), запись не boundary, а backlog.
-
-## surface
+## surface (реестр-хребет)
 
 **Обязательно:** `slug`, `name`, `description`, `status`.
 
@@ -121,6 +83,60 @@ fundamentals → type → lives-at → user.
 — App Store / Google Play app-id; для `bot` — мессенджер). Если type
 сменился — `lives-at` чаще всего нужно переформулировать.
 
+`surface` — **ось**: каждая строка реестра открывает поверхности место
+в остальных слоях. Завести строку здесь = под эту поверхность можно
+завести файл `capability/<surface>.md` (и, отдельными скилами, папки
+`interface/<surface>/`, `screens/<surface>/`).
+
+## capability (файл на поверхность, `capability/<surface>.md`)
+
+Возможность живёт **не плоским файлом**, а в папке `capability/`, по
+файлу на поверхность. Связь capability → surface **структурная**: имя
+файла = slug поверхности из реестра `surface.md`. Чек-лист зрелости
+считается **по каждой записи внутри файла поверхности**; целостность
+файла — что все его записи относятся к существующей поверхности реестра
+(ловит `/project-audit`).
+
+**Обязательно:** `slug`, `name`, `description`, `status`.
+
+**Должно быть для stable:**
+
+- `value` — ценность для user, в его языке.
+- `user` — массив slug пользователей (минимум один).
+
+**Опционально:**
+- `hypotheses` — массив slug-рефов на `hypothesis-map/hypothesis`
+  (capability реализует гипотезу). Снизу-вверх (project → hypothesis-map).
+- `jobs` — массив slug-рефов на `ajtbd/job` (capability прямо целит в
+  работу сегмента). Снизу-вверх (project → ajtbd). Прямое ребро —
+  **в дополнение** к выводимому через `job-graph.value-mechanics`.
+  Оба — прочерк допустим; обратную сторону сводит `/cross-audit`.
+
+**Порядок копания:**
+выбрать поверхность (файл `capability/<surface>.md`) → fundamentals →
+value → user → hypotheses → jobs.
+
+Capability нельзя заводить без поверхности: сначала строка в реестре
+`surface.md`, затем файл `capability/<surface>.md`. Если user в проекте
+ещё нет — отработать **stub** для них (см. SKILL.md), потом вернуться.
+Capability без user — мёртвая. Одна ценность на двух поверхностях = две
+записи в **разных** файлах, у каждой своё воплощение. `hypotheses` и
+`jobs` — опции из существующих сущностей соседних слоёв, не выдумывать.
+
+## boundary
+
+**Обязательно:** `slug`, `name`, `description`, `status`.
+
+**Должно быть для stable:**
+
+- `why` — почему отказ продуктово правильный.
+
+**Порядок копания:**
+fundamentals → why.
+
+`why` — основная проверка: если в нём нет продуктового аргумента
+(только «нет ресурсов», «потом»), запись не boundary, а backlog.
+
 ## integration
 
 **Обязательно:** `slug`, `name`, `description`, `status`.
@@ -130,13 +146,24 @@ fundamentals → type → lives-at → user.
 - `direction` — enum: `in` | `out` | `duplex`.
 - `payload` — что передаём/получаем, в языке бизнеса.
 - `owner` — enum: `we` | `partner` | `both`.
+- `surface` — массив slug-рефов на поверхности реестра `surface.md`,
+  которые интеграция обслуживает (минимум одна).
+- `target` — enum: `external` | `sibling-project`.
+- `sibling-project` — **обязателен тогда и только тогда**, когда
+  `target: sibling-project`: slug соседнего проекта бизнеса; при
+  `target: external` — `—`.
 
 **Порядок копания:**
-fundamentals → direction → owner → payload.
+fundamentals → direction → owner → payload → surface → target →
+sibling-project.
 
 `direction` + `owner` дают четверть, через которую полезно посмотреть
 на payload (out+we = «мы вызываем их API»; in+partner = «они шлют нам
-webhook»; duplex+both — нужна явная синхронизация).
+webhook»; duplex+both — нужна явная синхронизация). `surface` привязывает
+интеграцию к точкам входа реестра (slug вне реестра — ошибка, ловит
+`/project-audit`). `target: sibling-project` означает обмен с **другим
+продуктом того же бизнеса**: тогда `sibling-project` ссылается на его
+slug, а ребро сводится в `docs/projects/project-map.md`.
 
 ## constraint
 

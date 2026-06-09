@@ -125,7 +125,8 @@ docs teams») 5 углов = 5 разных запросов:
 
 ## Что НЕ делать с результатами
 
-- ❌ Авто-вписывать в `docs/projects/<project-slug>/<kind>.md`.
+- ❌ Авто-вписывать в `docs/projects/<project-slug>/<kind>.md` (а для
+  capability — в `docs/projects/<project-slug>/capability/<surface>.md`).
   Promotion **только** через `AskUserQuestion` аналитика.
 - ❌ Терять отчёты — `state/<project-slug>/research/<query>-<ts>.md`
   остаётся даже после promotion. Forward-only не означает «удаляй

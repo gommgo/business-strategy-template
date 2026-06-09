@@ -1,32 +1,35 @@
 # Артефакты экранов
 
-Слой композиции и облика проекта: из аналитических артефактов
-`docs/projects/<project-slug>/interface/` синтезируется детерминированная
-карта экранов, по которой собираются вайрфреймы и hi-fi. Этот файл —
-**канон формы** (`docs/projects/_template/screens/`); данные каждого проекта
-живут в `docs/projects/<project-slug>/screens/`. Артефакты — **аналитика
-композиции и облика** в терминах семантического дерева и компонентов
-`@stit/ui`. **Маппинг на FSD здесь не делается** — превращение
-`docs/projects/<project-slug>/screens/` в код делает автор макета вручную,
-не отдельный артефакт.
+Слой композиции и облика проекта, **партиционированный по поверхности
+(surface)**: из аналитических артефактов
+`docs/projects/<project-slug>/interface/<surface>/` синтезируется
+детерминированная карта экранов той же поверхности, по которой собираются
+вайрфреймы и hi-fi. Этот файл — **канон формы одной папки поверхности**
+(`docs/projects/_template/screens/`); данные каждого проекта живут в
+`docs/projects/<project-slug>/screens/<surface>/` (по папке на поверхность
+из реестра `surface.md`). Артефакты — **аналитика композиции и облика** в
+терминах семантического дерева и компонентов `@stit/ui`. **Маппинг на FSD
+здесь не делается** — превращение `docs/projects/<project-slug>/screens/<surface>/`
+в код делает автор макета вручную, не отдельный артефакт.
 
 ## Воркфлоу
 
 ```
-interface/ → синтез → screens/ → wireframe → hi-fi
- (бизнес)              (композиция,   (код на @stit/ui,
-                        облик)         вручную)
+interface/<surface>/ → синтез → screens/<surface>/ → wireframe → hi-fi
+ (бизнес)                        (композиция,          (код на @stit/ui,
+                                  облик)                вручную)
 ```
 
-(оба слоя — в папке проекта `docs/projects/<project-slug>/`)
+(оба слоя — в папке поверхности проекта
+`docs/projects/<project-slug>/{interface,screens}/<surface>/`)
 
-1. В `docs/projects/<project-slug>/interface/` заведены и углублены
-   сущности (через `interface-deep-dive`).
+1. В `docs/projects/<project-slug>/interface/<surface>/` заведены и
+   углублены сущности (через `interface-deep-dive`).
 2. На их базе вручную создаются артефакты в
-   `docs/projects/<project-slug>/screens/` — каждый ссылается на свой
-   источник в interface через `slug`.
-3. По `docs/projects/<project-slug>/screens/` автор макета вручную
-   собирает wireframe и hi-fi субстрат на `@stit/ui`. Отдельного
+   `docs/projects/<project-slug>/screens/<surface>/` — каждый ссылается на
+   свой источник в interface той же поверхности через `slug`.
+3. По `docs/projects/<project-slug>/screens/<surface>/` автор макета
+   вручную собирает wireframe и hi-fi субстрат на `@stit/ui`. Отдельного
    артефакта-моста между screens и кодом нет.
 
 ## 4 kind
@@ -41,7 +44,7 @@ interface/ → синтез → screens/ → wireframe → hi-fi
 ## Структура папок
 
 Канон формы (этот README + 4 kind-README) живёт один раз в
-`docs/projects/_template/screens/`:
+`docs/projects/_template/screens/` и описывает **одну папку поверхности**:
 
 ```
 docs/projects/_template/screens/
@@ -52,24 +55,30 @@ docs/projects/_template/screens/
 └── shells/README.md                (канон shell)
 ```
 
-Данные экранов живут в папке проекта
-`docs/projects/<project-slug>/screens/`:
+Данные экранов живут в папке поверхности проекта
+`docs/projects/<project-slug>/screens/<surface>/` (одна папка на поверхность
+из реестра `surface.md`):
 
 ```
 docs/projects/<project-slug>/screens/
-├── flows/
-│   └── <slug>/index.md
-├── screens/
-│   └── <slug>/index.md
-├── blocks/
-│   └── <slug>/index.md
-└── shells/
-    └── <slug>/index.md
+└── <surface>/
+    ├── flows/
+    │   └── <slug>/index.md
+    ├── screens/
+    │   └── <slug>/index.md
+    ├── blocks/
+    │   └── <slug>/index.md
+    ├── shells/
+    │   └── <slug>/index.md
+    └── assets/
+        └── <kind>/<slug>/          (визуальные референсы и ассеты сущности)
 ```
 
 Каждая сущность — папка с `index.md`. Папка оставляет место для будущих
 add-on (заметки, скриншоты, отдельные macro-вью), не плодя файлов сейчас.
-Если у сущности кроме `index.md` ничего нет — это нормально.
+Если у сущности кроме `index.md` ничего нет — это нормально. Поверхности
+изолированы: ссылки внутри `screens/<surface>/` и зеркала с
+`interface/<surface>/` — в пределах одной поверхности.
 
 ## Форма артефакта
 
@@ -107,8 +116,8 @@ Frontmatter — YAML, древо — fenced ```yaml```-блок в теле.
 | префикс | источник | пример |
 |---|---|---|
 | `ui:` | `@stit/ui` (компонент библиотеки) | `ui:Stack`, `ui:Button`, `ui:DataList` |
-| `block:` | `docs/projects/<project-slug>/screens/blocks/<slug>` (проектный блок) | `block:filters-panel` |
-| `data:` | `docs/projects/<project-slug>/interface/data-items.md` (датум) | `data:study`, `data:study.name` |
+| `block:` | `docs/projects/<project-slug>/screens/<surface>/blocks/<slug>` (проектный блок) | `block:filters-panel` |
+| `data:` | `docs/projects/<project-slug>/interface/<surface>/data-items.md` (датум) | `data:study`, `data:study.name` |
 | `block-*:` | зарезервированная internal-zone блока (внутри tree блока) | `block-header:`, `block-body:`, `block-footer:`, `block-aside:` |
 
 ### Layout-примитивы
@@ -169,8 +178,8 @@ tree:
 ## Data binding
 
 Ссылка на датум — `data:<slug>` (slug из
-`docs/projects/<project-slug>/interface/data-items.md`). Доступ к полю —
-`data:<slug>.<field>`.
+`docs/projects/<project-slug>/interface/<surface>/data-items.md`). Доступ к
+полю — `data:<slug>.<field>`.
 
 ```yaml
 - ui:DataList
@@ -181,14 +190,15 @@ tree:
       - { field: data:study.status, label: 'Статус' }
 ```
 
-Lint проверяет существование slug-а в `data-items.md`. Реальный источник
-данных — слой кода (FSD); артефакт фиксирует только контракт.
+Lint проверяет существование slug-а в `data-items.md` той же поверхности.
+Реальный источник данных — слой кода (FSD); артефакт фиксирует только
+контракт.
 
 ## Контракт с `@stit/ui`
 
 `@stit/ui` публикует JSON-каталог компонентов
 (`manifest.json` в дистрибутиве): имя + props + варианты. Lint в
-`docs/projects/<project-slug>/screens/` читает manifest и ругает
+`docs/projects/<project-slug>/screens/<surface>/` читает manifest и ругает
 неизвестные `ui:*` имена и невалидные props.
 
 Пока manifest не опубликован — имена `ui:*` в артефактах служат
@@ -239,10 +249,12 @@ Forms и input:
 - ❌ Inline-логика: `if`/`then`, тернарники, вычислимые выражения.
   Артефакт — декларативный.
 - ❌ Битый slug-реф (на несуществующий screen/block/shell/data-item).
+- ❌ Ссылка из папки одной поверхности в сущность другой поверхности —
+  поверхности изолированы.
 - ❌ Расхождение зеркал interface ↔ screens: если у `interface-block` в
-  `docs/projects/<project-slug>/interface/block.md` объявлены
+  `docs/projects/<project-slug>/interface/<surface>/block.md` объявлены
   `ux-substrates`, тот же набор должен быть в frontmatter
-  соответствующего `block`-артефакта.
+  соответствующего `block`-артефакта той же поверхности.
 - ❌ Breakpoints в `shell.tree` или в `screen.slot-fills`: облицовочный
   адаптив (sidebar→drawer) — только в `shell.responsive`. Структурный
   адаптив (1 desktop ↔ N mobile) — через `flow`, не через `screen`.
@@ -250,10 +262,10 @@ Forms и input:
   `interface-block`, `flow` без `desktop` или без `mobile`.
 - ❌ `block` 1:1 экрану: блок — содержимое слота, не route.
 
-## Связь с `interface/` проекта
+## Связь с `interface/<surface>/` проекта
 
-Источник синтеза — UX-слой того же проекта,
-`docs/projects/<project-slug>/interface/`:
+Источник синтеза — UX-слой **той же поверхности** того же проекта,
+`docs/projects/<project-slug>/interface/<surface>/`:
 
 | screens | → ссылается на → | interface |
 |---|---|---|
@@ -271,5 +283,5 @@ screens (правило forward-only).
 
 Прямой автоматической связи нет. Wireframe и hi-fi субстрат на
 `@stit/ui` собирает автор макета **вручную** по
-`docs/projects/<project-slug>/screens/`. Отдельного артефакта-моста между
-screens и кодом нет и не планируется.
+`docs/projects/<project-slug>/screens/<surface>/`. Отдельного
+артефакта-моста между screens и кодом нет и не планируется.

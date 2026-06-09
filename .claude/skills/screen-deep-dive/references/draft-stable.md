@@ -16,32 +16,35 @@
 
 ### 2. Все ссылки валидны
 
-Каждый `slug` существует:
+Каждый `slug` существует **в пределах текущей поверхности**:
 
-**Внутри screens** (все пути — в папке текущего проекта
-`docs/projects/<project-slug>/screens/`):
+**Внутри screens** (все пути — в папке текущей поверхности текущего
+проекта `docs/projects/<project-slug>/screens/<surface>/`):
 - `flow.desktop` / `flow.mobile` / `flow.transitions[].{from,to}` →
-  существуют как папки `…/screens/screens/<slug>/`;
-- `screen.shell` → `…/screens/shells/<slug>/`;
+  существуют как папки `…/screens/<surface>/screens/<slug>/`;
+- `screen.shell` → `…/screens/<surface>/shells/<slug>/`;
 - `screen.blocks` / `block:<slug>` в `slot-fills`/`states` →
-  `…/screens/blocks/<slug>/`;
-- `screen.transitions-to-screen` → `…/screens/screens/<slug>/`;
-- `screen.mobile-of` → `…/screens/flows/<slug>/`;
-- `block.used-by-screens` → `…/screens/screens/<slug>/`.
+  `…/screens/<surface>/blocks/<slug>/`;
+- `screen.transitions-to-screen` → `…/screens/<surface>/screens/<slug>/`;
+- `screen.mobile-of` → `…/screens/<surface>/flows/<slug>/`;
+- `block.used-by-screens` → `…/screens/<surface>/screens/<slug>/`.
 
-**В interface** (interface-слой того же проекта,
-`docs/projects/<project-slug>/interface/`):
-- `screen.situations` → строка `<slug>` в `…/interface/situation.md`;
-- `screen.who` / `flow.who` → строка `<slug>` в `…/interface/who.md`;
-- `block.interface-block` → строка `<slug>` в `…/interface/block.md`;
+**В interface** (interface-слой **той же поверхности** того же проекта,
+`docs/projects/<project-slug>/interface/<surface>/`):
+- `screen.situations` → строка `<slug>` в
+  `…/interface/<surface>/situation.md`;
+- `screen.who` / `flow.who` → строка `<slug>` в
+  `…/interface/<surface>/who.md`;
+- `block.interface-block` → строка `<slug>` в
+  `…/interface/<surface>/block.md`;
 - `block.ux-substrates[*]` → строка `<slug>` в
-  `…/interface/ux-substrate.md`;
+  `…/interface/<surface>/ux-substrate.md`;
 - `data:<slug>` внутри `tree`/`slot-fills` → строка `<slug>` в
-  `…/interface/data-items.md`.
+  `…/interface/<surface>/data-items.md`.
 
 **Assets**: каждый путь в `assets: [...]` ссылается на
 существующий файл в
-`docs/projects/<project-slug>/screens/assets/<kind>/<slug>/`.
+`docs/projects/<project-slug>/screens/<surface>/assets/<kind>/<slug>/`.
 
 **Inventory**: каждое имя `ui:<Component>` есть в инвентаре (см.
 `ui-inventory.md`); либо имя — «ui-lib gap», зарегистрированный в
@@ -54,8 +57,8 @@ hint, но не блокирует stable.
 
 - `block.ux-substrates` (screens, frontmatter) **равен**
   `block.ux-substrates` (interface,
-  `docs/projects/<project-slug>/interface/block.md`, строка с тем же
-  slug). При расхождении — `**blocker**` в state, не stable.
+  `docs/projects/<project-slug>/interface/<surface>/block.md`, строка с
+  тем же slug). При расхождении — `**blocker**` в state, не stable.
 - `block.used-by-screens` **равен** множеству screen-slug'ов, в
   чьих `slot-fills`/`states` встречается `block:<slug>`. Скилл
   пересчитывает автоматически.
@@ -76,7 +79,7 @@ hint, но не блокирует stable.
 
 ### 5. State-заметка чиста по `**blocker**`-вопросам
 
-`state/<project-slug>/<kind>/<slug>.md`:
+`state/<project-slug>/screens/<surface>/<kind>/<slug>.md`:
 
 - Не содержит секцию `## Открытые вопросы` ИЛИ
 - Содержит, но в ней нет вопросов с префиксом/суффиксом `**blocker**`.
@@ -118,8 +121,10 @@ flow всегда ✅, если frontmatter полный.
 
 После любой правки сущности:
 
-1. Прочитать `docs/projects/<project-slug>/screens/<kind>/<slug>/index.md`.
-2. Прочитать `state/<project-slug>/<kind>/<slug>.md`, если есть.
+1. Прочитать
+   `docs/projects/<project-slug>/screens/<surface>/<kind>/<slug>/index.md`.
+2. Прочитать `state/<project-slug>/screens/<surface>/<kind>/<slug>.md`,
+   если есть.
 3. Прочитать соседей (см. `field-checklists.md`).
 4. Прогнать пункты 1, 2, 3, 5, 6 (программно проверяемые).
 5. Если все 5 ✅ — раунд `AskUserQuestion` по тест-критерию

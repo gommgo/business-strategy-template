@@ -16,15 +16,25 @@
 | `docs/ajtbd/` (живые интервью) | сырьё-кандидаты | `/jtbd-interview` (опц., тяжёлый, по явному запросу) | — |
 | `docs/swot/` | `factor` · `bet` | `/swot-deep-dive` | `/swot-audit` |
 | `docs/hypothesis-map/` | `goal` · `metric` · `subject` · `hypothesis` · `task` | `/hypothesis-map-deep-dive` | `/hypothesis-map-audit` |
-| `docs/projects/<slug>/` | `vision` · `user` · `capability` · `boundary` · `surface` · `integration` · `constraint` · `market` | `/project-deep-dive <slug>` | `/project-audit <slug>` |
-| `docs/projects/<slug>/interface/` | `who` · `stage` · `situation` · `zone` · `block` · `ux-substrate` · `data-items` | `/interface-deep-dive <slug>` | `/interface-audit <slug>` |
-| `docs/projects/<slug>/domains/` | агрегаты/события/use-case/… | `/domain-deep-dive <slug>` | `/cross-audit` |
-| `docs/projects/<slug>/screens/` | `flow` · `screen` · `block` · `shell` | `/screen-deep-dive <slug>` | `/screen-audit <slug>` |
+| `docs/projects/<slug>/` (vision + хребет + кросс-поверхностные kind) | `vision` · `surface` · `user` · `integration` · `boundary` · `constraint` · `market` | `/project-deep-dive <slug>` | `/project-audit <slug>` |
+| `docs/projects/<slug>/capability/<surface>.md` (возможности по поверхности) | `capability` (по файлу на поверхность) | `/project-deep-dive <slug>` | `/project-audit <slug>` |
+| `docs/projects/<slug>/interface/<surface>/` | `who` · `stage` · `situation` · `zone` · `block` · `ux-substrate` · `data-items` | `/interface-deep-dive <slug> [<surface>]` | `/interface-audit <slug>` |
+| `docs/projects/<slug>/domains/<ctx>/` (по bounded-context, surface-агностичны) | агрегаты/события/use-case/… | `/domain-deep-dive <slug> <ctx>` | `/cross-audit` |
+| `docs/projects/<slug>/screens/<surface>/` | `flow` · `screen` · `block` · `shell` | `/screen-deep-dive <slug> [<surface>]` | `/screen-audit <slug>` |
+| `docs/projects/project-map.md` (межпроектные стыки) | `project-map` (singleton-граф рёбер) | `/project-deep-dive <slug>` (авторская сторона ребра — `integration` инициатора) | `/cross-audit` |
 | сквозная консистентность | — | — | `/cross-audit` |
 
 Проектные исполнители берут `<project-slug>` **первым аргументом**;
 оркестратор обязан определить проект до делегирования (из сырья или
-вопросом).
+вопросом). Поверхность (`surface`) — ось продукта: реестр-хребет
+`surface.md` объявляет поверхности, а их slug'и партиционируют возможности
+(`capability/<surface>.md`), интерфейс (`interface/<surface>/`) и экраны
+(`screens/<surface>/`). Скилы `interface`/`screen` берут поверхность
+**вторым аргументом** `[<surface>]`; без него — пикер поверхностей по
+`surface.name` (после пикера проекта). Домены (`domains/<ctx>/`) —
+surface-агностичны, делятся по bounded-context. Межпроектные стыки сводит
+`docs/projects/project-map.md` — авторская сторона каждого ребра живёт в
+`integration` проекта-инициатора (`target: sibling-project`).
 
 ## Сигнал → слой (классификация чанка)
 
@@ -48,12 +58,14 @@
 | «если сделаем X — то Y, потому что Z, и тогда метрика» | `hypothesis-map` / `hypothesis` |
 | «как проверим ставку — эксперимент/замер» | `hypothesis-map` / `task` |
 | «зачем продукт и для кого, что НЕ делаем» | `projects/<slug>` / `vision` (`addresses-problem`) |
+| «через какие поверхности продукт встречает пользователя (web, бот, API …)» | `projects/<slug>` / `surface` (реестр-хребет) |
 | «кто пользователь продукта» | `projects/<slug>` / `user` |
-| «что продукт умеет (бизнес-возможность)» | `projects/<slug>` / `capability` |
-| «где торчит наружу / с чем интегрируется / какие правила-SLA / аналоги» | `projects/<slug>` / `surface` · `integration` · `constraint` · `market` |
-| «как пользователь взаимодействует, ситуации, зоны, блоки» | `projects/<slug>/interface` / `who` · `situation` · `zone` · `block` · … |
-| «как это выглядит, экраны, композиция» | `projects/<slug>/screens` / `flow` · `screen` · `block` · `shell` |
-| «бизнес-код бэкенда, агрегаты, инварианты» | `projects/<slug>/domains` |
+| «что продукт умеет на этой поверхности (бизнес-возможность)» | `projects/<slug>` / `capability` (файл `capability/<surface>.md` — на какой поверхности?) |
+| «где торчит наружу / с чем интегрируется внешняя система / какие правила-SLA / аналоги» | `projects/<slug>` / `surface` · `integration` · `constraint` · `market` |
+| «продукт обменивается с **соседним продуктом** того же бизнеса» | `projects/<slug>` / `integration` (`target: sibling-project`, `sibling-project: <slug-соседа>`) → ребро в `projects/project-map` |
+| «как пользователь взаимодействует, ситуации, зоны, блоки» (на какой поверхности?) | `projects/<slug>/interface/<surface>` / `who` · `situation` · `zone` · `block` · … |
+| «как это выглядит, экраны, композиция» (на какой поверхности?) | `projects/<slug>/screens/<surface>` / `flow` · `screen` · `block` · `shell` |
+| «бизнес-код бэкенда, агрегаты, инварианты» (какой bounded-context?) | `projects/<slug>/domains/<ctx>` |
 
 Граничные пары (снимает именование, не путать):
 
@@ -104,6 +116,24 @@
 (`subject.segments`, `hypothesis.jobs`, `capability.jobs` и т.п.) исполнитель
 заводит **авторски снизу-вверх** на своей стороне. Оркестратор лишь следит,
 чтобы смежный слой не потерялся — фиксирует его открытой нитью.
+
+## Выбор поверхности (interface / screens / capability)
+
+Слои `interface` и `screens` партиционированы по поверхности — путь
+делегирования несёт **и проект, и поверхность**:
+`/interface-deep-dive <slug> [<surface>]`,
+`/screen-deep-dive <slug> [<surface>]`. Возможности (`capability`) тоже
+живут по поверхности (`capability/<surface>.md`), но входом остаётся
+`/project-deep-dive <slug>` — там поверхность выбирается внутри.
+
+Оркестратор определяет поверхность так же, как проект: из сырья (явно
+названа web / бот / API) или вопросом. Если поверхность неясна —
+передать без второго аргумента, исполнитель сам предложит пикер
+поверхностей по `surface.name` (после пикера проекта). Поверхность, которой
+нет в реестре `surface.md`, сперва заводится через `/project-deep-dive
+<slug>` (kind `surface`) — каталоги `interface/<surface>/`,
+`screens/<surface>/`, `capability/<surface>.md` руками не создаём, их
+заводят их скилы при первом заходе.
 
 ## Чего оркестратор не делает в маршрутизации
 

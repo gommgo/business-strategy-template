@@ -2,14 +2,15 @@
 
 Визуальные референсы — скриншоты, мокапы из Figma, скрины конкурентов,
 картинки-вдохновение — живут в
-`docs/projects/<project-slug>/screens/assets/<kind>/<slug>/` и
+`docs/projects/<project-slug>/screens/<surface>/assets/<kind>/<slug>/` и
 ссылаются на сущность через поле `assets: [...]` во frontmatter.
-Ассеты скоупятся по проекту: у каждого проекта своя папка `assets/`.
+Ассеты скоупятся по проекту **и поверхности**: у каждой поверхности
+проекта своя папка `<surface>/assets/`.
 
 ## Структура папок
 
 ```
-docs/projects/<project-slug>/screens/assets/
+docs/projects/<project-slug>/screens/<surface>/assets/
 ├── flow/
 │   └── <slug>/
 │       └── <file>.{png,jpg,svg,webp}
@@ -24,8 +25,8 @@ docs/projects/<project-slug>/screens/assets/
         └── ...
 ```
 
-Папка `assets/<kind>/<slug>/` создаётся, только когда у сущности
-появляется первый ассет. Папка живёт под git, ассеты — тоже.
+Папка `<surface>/assets/<kind>/<slug>/` создаётся, только когда у
+сущности появляется первый ассет. Папка живёт под git, ассеты — тоже.
 
 ## Имена файлов
 
@@ -49,8 +50,8 @@ assets:
 ```
 
 - Пути — относительные от
-  `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/`. То
-  есть в frontmatter — только имя файла.
+  `docs/projects/<project-slug>/screens/<surface>/assets/<kind>/<slug>/`.
+  То есть в frontmatter — только имя файла.
 - Поле опциональное. Если ассетов нет — поля во frontmatter тоже
   нет (не `assets: []` и не `assets: '—'`).
 - Lint проверяет существование каждого файла. Несуществующий путь —
@@ -82,7 +83,7 @@ assets:
 3. **По «сохранить»** — Edit'ом во frontmatter сущности добавить
    путь в `assets: [...]`. Скилл сохраняет файл через `Bash` —
    копирует из временного пути (где Claude получил картинку) в
-   `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/<имя>.<ext>`.
+   `docs/projects/<project-slug>/screens/<surface>/assets/<kind>/<slug>/<имя>.<ext>`.
 4. **По «не сохранять»** — картинка только в контексте сессии,
    используется как сырьё для извлечения кандидатов / углубления.
 
@@ -107,7 +108,7 @@ assets:
    - либо «поищи ещё с другими словами: <уточнение>» (Other).
 3. **По выбранным** — `WebFetch` страницы. Если на странице есть
    подходящая картинка — скачать её в
-   `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/<имя>.<ext>`.
+   `docs/projects/<project-slug>/screens/<surface>/assets/<kind>/<slug>/<имя>.<ext>`.
    Имя — kebab-case по содержимому страницы
    (`linear-issues-list-2024.png`).
 4. **Edit** frontmatter сущности — добавить путь в `assets`.
@@ -129,7 +130,8 @@ assets:
 ## Каскад при удалении сущности
 
 При удалении сущности (см. SKILL.md `## Удаление сущности (каскад)`)
-— папка `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/`
+— папка
+`docs/projects/<project-slug>/screens/<surface>/assets/<kind>/<slug>/`
 удаляется целиком. Ассеты сущности живут ровно столько, сколько живёт
 сущность.
 
@@ -137,5 +139,6 @@ assets:
 
 Прямой связи нет. Ассеты — для аналитической работы и для автора
 макета, который вручную собирает wireframe и hi-fi по
-`docs/projects/<project-slug>/screens/`. Сам код
-`docs/projects/<project-slug>/screens/assets/` напрямую не читает.
+`docs/projects/<project-slug>/screens/<surface>/`. Сам код
+`docs/projects/<project-slug>/screens/<surface>/assets/` напрямую не
+читает.

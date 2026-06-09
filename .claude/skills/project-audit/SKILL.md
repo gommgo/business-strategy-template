@@ -1,15 +1,25 @@
 ---
 name: project-audit
-description: "Узкий аудит консистентности продуктового слоя одного проекта в `docs/projects/<project-slug>/` (vision + 7 табличных kinds: user, capability, boundary, surface, integration, constraint, market) — невалидные enum, дубликаты slug, пустые обязательные слоты в stable-записях, невалидные status, рассинхрон stable со state-blocker'ами, vision без addresses-problem, семантические подозрения внутри проекта (capability без user, surface без user, boundary с backlog-обоснованием, constraint без source, market без url/sources), coverage-дыры (user без покрытия, vision stable при пустых соседях). Принимает `<project-slug>` первым аргументом; без него — пикер по папкам проектов. Сквозную проверку с interface/domain/screen-слоями и привязку к проблемам делает `/cross-audit`, не этот скилл. Не правит артефакты, только отчёт; деструктивные правки — через `/project-deep-dive`. Использовать перед коммитом артефактов, когда `/project-deep-dive` предлагает прогон в конце сессии, перед `/cross-audit`, или когда аналитик подозревает рассогласование внутри продуктового слоя проекта."
+description: "Узкий аудит консистентности продуктового слоя одного проекта в `docs/projects/<project-slug>/` (vision + реестр-хребет surface + плоские kind user/integration/boundary/constraint/market + папка capability/<surface>.md по файлу на поверхность) — невалидные enum, дубликаты slug, пустые обязательные слоты в stable-записях, невалидные status, рассинхрон stable со state-blocker'ами, vision без addresses-problem, структурный разрыв хребта (файл capability/<surface>.md без поверхности в реестре, поверхность реестра без файла возможностей, integration.surface на несуществующую поверхность, integration.sibling-project на несуществующий проект), семантические подозрения внутри проекта (capability без user, surface без user, boundary с backlog-обоснованием, constraint без source, market без url/sources). Принимает `<project-slug>` первым аргументом; без него — пикер по папкам проектов. Сквозную проверку с interface/domain/screen-слоями и привязку к проблемам делает `/cross-audit`, не этот скилл. Не правит артефакты, только отчёт; деструктивные правки — через `/project-deep-dive`. Использовать перед коммитом артефактов, когда `/project-deep-dive` предлагает прогон в конце сессии, перед `/cross-audit`, или когда аналитик подозревает рассогласование внутри продуктового слоя проекта."
 ---
 
 # project-audit
 
-Аудит консистентности продуктового слоя **одного проекта**: 1 singleton
-+ 7 табличных файлов в `docs/projects/<project-slug>/`. Канон формы —
-`docs/projects/_template/project/README.md`. Аудит **читает и сообщает**,
-ничего не правит: каскадные правки идут через
-`/project-deep-dive <project-slug>`.
+Аудит консистентности продуктового слоя **одного проекта** в
+`docs/projects/<project-slug>/`:
+
+- **1 singleton** `vision.md`.
+- **реестр-хребет** `surface.md` — поверхности продукта; его slug'и —
+  ключи партиционирования.
+- **папка возможностей** `capability/` — по файлу на поверхность
+  (`capability/<surface>.md`).
+- **5 плоских кросс-поверхностных таблиц** `user.md`, `integration.md`,
+  `boundary.md`, `constraint.md`, `market.md`.
+
+Канон формы — `docs/projects/_template/project/README.md`. Поверхность
+(`surface`) — единственная **структурная** ось: её slug = имя файла
+`capability/<surface>.md`. Аудит **читает и сообщает**, ничего не правит:
+каскадные правки идут через `/project-deep-dive <project-slug>`.
 
 **Сквозную проверку** (продукт ↔ `<slug>/interface` ↔ `<slug>/domains` ↔
 `<slug>/screens`, продукт ↔ `addresses-problem`) делает `/cross-audit`.
@@ -27,13 +37,22 @@ description: "Узкий аудит консистентности продук�
 
 | вызов | поведение |
 |---|---|
-| `/project-audit` | пикер проекта → полный прогон 8 файлов выбранного |
-| `/project-audit <project-slug>` | полный прогон 8 файлов проекта |
-| `/project-audit <project-slug> <kind>` | прогон одного файла + ссылающихся соседей |
+| `/project-audit` | пикер проекта → полный прогон всех файлов выбранного |
+| `/project-audit <project-slug>` | полный прогон всех файлов проекта |
+| `/project-audit <project-slug> <kind>` | прогон одного kind + ссылающихся соседей |
+| `/project-audit <project-slug> capability` | прогон **всех** файлов `capability/*.md` + соседей |
+| `/project-audit <project-slug> capability:<surface>` | один файл `capability/<surface>.md` |
 | `/project-audit <project-slug> <kind>:<slug>` | одна запись + 1-shell соседи |
 
-`kind` ∈ {`vision`, `user`, `capability`, `boundary`, `surface`,
-`integration`, `constraint`, `market`}.
+`kind` ∈ {`vision`, `surface`, `capability`, `user`, `integration`,
+`boundary`, `constraint`, `market`}.
+
+`capability` — **папка**: один файл на поверхность (`capability/<surface>.md`).
+Без уточнения `capability` берёт все файлы `capability/*.md`;
+`capability:<surface>` сужает до файла одной поверхности (`<surface>` —
+slug поверхности из реестра `surface.md`). `capability:<slug>` (где `<slug>`
+— это slug записи внутри файла) тоже допустим — скилл находит файл, в
+котором лежит запись.
 
 Если первый аргумент совпал с папкой в `docs/projects/` (кроме
 `_template`) — это `<project-slug>`. Иначе — пикер.
@@ -46,8 +65,14 @@ description: "Узкий аудит консистентности продук�
 2. Прочитать `docs/projects/_template/project/README.md` — освежить канон
    формы.
 3. Прочитать `references/rules.md` — реестр проверок с severity.
-4. Прочитать все 8 файлов проекта `docs/projects/<project-slug>/` (или
-   подмножество по args).
+4. Прочитать все файлы проекта `docs/projects/<project-slug>/` (или
+   подмножество по args):
+   - корневые: `vision.md`, `surface.md`, `user.md`, `integration.md`,
+     `boundary.md`, `constraint.md`, `market.md`;
+   - папка возможностей: **все** файлы `capability/*.md` (по одному на
+     поверхность). Перечисляй их листингом каталога `capability/`, не
+     угадывай имена — имя каждого файла должно быть slug'ом поверхности из
+     реестра `surface.md` (это проверяет R-STRUCT-007).
 5. Прочитать ветку state проекта в едином дереве оркестратора
    (`../entrypoint/state/projects/<project-slug>/project/`) — для
    проверок типа «stable с blocker-вопросами».
@@ -61,9 +86,9 @@ description: "Узкий аудит консистентности продук�
 
 | severity | смысл | пример |
 |---|---|---|
-| `error` | Структурное нарушение, ломает модель | Дубликат `slug`; невалидное enum-значение; пустой обязательный слот в `stable`; vision без Problem или Success; stable со `**blocker**` в state |
-| `warning` | Семантическое подозрение | capability без user в массиве; surface без user; boundary с backlog-обоснованием в `why` («нет ресурсов»); constraint без `source`; market без `url`/`sources`; integration с `direction` но без `owner` |
-| `hint` | Coverage / стиль, не ломает | user без жителей в capability/surface; vision stable при пустой user-таблице; stable со ссылкой на draft; очень короткое `description` |
+| `error` | Структурное нарушение, ломает модель | Дубликат `slug`; невалидное enum-значение; пустой обязательный слот в `stable`; vision без Problem или Success; stable со `**blocker**` в state; файл `capability/<surface>.md` для поверхности вне реестра `surface.md`; `integration.surface` на несуществующую поверхность; `integration.sibling-project` на несуществующий проект |
+| `warning` | Семантическое подозрение | capability без user в массиве; surface без user; boundary с backlog-обоснованием в `why` («нет ресурсов»); constraint без `source`; market без `url`/`sources`; integration с `direction` но без `owner`; `integration.sibling-project` указан на сам текущий проект |
+| `hint` | Coverage / стиль, не ломает | user без жителей в capability/surface; поверхность реестра без файла `capability/<surface>.md`; vision stable при пустой user-таблице; stable со ссылкой на draft; очень короткое `description` |
 
 Подробный реестр — `references/rules.md`.
 
@@ -74,15 +99,20 @@ description: "Узкий аудит консистентности продук�
 ```
 === /project-audit <project-slug> ===
 Проект: <project-slug>
-Прочитано: 8 файлов, N записей.
+Прочитано: 7 корневых + M файлов capability/ (поверхностей), N записей.
 
 [error] vision → раздел Success пустой. status: stable.
   Что делать: дописать Success или понизить до draft через
   /project-deep-dive <project-slug>.
 
-[error] capability:send-referral → status: stable, но `user = —`.
+[error] capability/web-partner.md:send-referral → status: stable, но `user = —`.
   Что делать: связать с user через
   /project-deep-dive <project-slug> capability:send-referral.
+
+[error] capability/tg-bot.md — поверхность `tg-bot` отсутствует в реестре
+  surface.md. Файл возможностей висит без хребта.
+  Что делать: завести поверхность в surface.md или удалить файл через
+  /project-deep-dive <project-slug>.
 
 [warning] boundary:no-mobile → why = «не делаем мобильное приложение, нет ресурсов».
   Похоже на backlog в маскировке (anti-pattern из boundary.md).
@@ -117,8 +147,8 @@ description: "Узкий аудит консистентности продук�
 ```markdown
 ---
 project: <project-slug>
-ran-on: <scope: all | kind | kind:slug>
-files-read: 8
+ran-on: <scope: all | kind | kind:slug | capability:<surface>>
+files-read: <7 корневых + M файлов capability/>
 records-checked: N
 totals: { error: X, warning: Y, hint: Z }
 ---

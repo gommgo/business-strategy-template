@@ -11,13 +11,15 @@
 
 Полные критерии — в каноне
 `docs/projects/_template/screens/<kind>/README.md` (форма-образец, общая
-для всех проектов). Данные проекта живут в
-`docs/projects/<project-slug>/screens/<kind>/<slug>/index.md`. Здесь —
-выжимка для скилла.
+для всех проектов и поверхностей). Данные поверхности проекта живут в
+`docs/projects/<project-slug>/screens/<surface>/<kind>/<slug>/index.md`.
+Здесь — выжимка для скилла.
 
-Дальше `…/screens/` и `…/interface/` — это слои **текущего проекта**:
-`docs/projects/<project-slug>/screens/` и
-`docs/projects/<project-slug>/interface/` соответственно.
+Дальше `…/screens/` и `…/interface/` — это слои **текущей поверхности
+текущего проекта**:
+`docs/projects/<project-slug>/screens/<surface>/` и
+`docs/projects/<project-slug>/interface/<surface>/` соответственно. Все
+ссылки — в пределах одной поверхности.
 
 ---
 
@@ -34,9 +36,9 @@
 именно объединяет flow.
 
 **Ссылается на**:
-- `desktop` / `mobile` → `…/screens/screens/<slug>/` (screens);
+- `desktop` / `mobile` → `…/screens/<surface>/screens/<slug>/` (screens);
 - `transitions[].{from,to}` → screens той же mobile-серии;
-- `who` → `…/interface/who.md` (interface).
+- `who` → `…/interface/<surface>/who.md` (interface).
 **Кто ссылается**: `screen.mobile-of` (для screen, входящих в
 mobile-серию потока).
 
@@ -60,8 +62,9 @@ mobile-серию потока).
 4. `transitions` (опц): для каждой пары `from→to` в mobile-серии
    собрать `{from, to, trigger}`. Триггер — Other (`tap row`,
    `apply / close`, `back`).
-5. `who` (опц): мультивыбор из `…/interface/who.md` + «нужен
-   новый» (Other → запустить `interface-deep-dive who`).
+5. `who` (опц): мультивыбор из `…/interface/<surface>/who.md` + «нужен
+   новый» (Other → запустить
+   `interface-deep-dive <project-slug> <surface> who`).
 6. `assets` (опц): см. `assets-policy.md`.
 7. Anti-patterns раундом: «Это просто screen?» / «Это
    sidebar→drawer?» (бинарные опции + Other).
@@ -90,14 +93,15 @@ mobile-серию потока).
   явное «здесь не применимо»).
 
 **Ссылается на**:
-- `shell` → `…/screens/shells/<slug>/`;
-- `blocks` → `…/screens/blocks/<slug>/`;
-- `situations` → `…/interface/situation.md`;
-- `who` → `…/interface/who.md`;
+- `shell` → `…/screens/<surface>/shells/<slug>/`;
+- `blocks` → `…/screens/<surface>/blocks/<slug>/`;
+- `situations` → `…/interface/<surface>/situation.md`;
+- `who` → `…/interface/<surface>/who.md`;
 - `transitions-to-screen` → screens;
 - `mobile-of` → flow;
 - `block:<slug>` внутри `slot-fills`/`states` → screens-blocks;
-- `data:<slug>` внутри inline-деревьев → `…/interface/data-items.md`.
+- `data:<slug>` внутри inline-деревьев →
+  `…/interface/<surface>/data-items.md`.
 **Кто ссылается**: `flow.desktop`, `flow.mobile`,
 `block.used-by-screens` (зеркало), `screen.transitions-to-screen`
 (другие screens).
@@ -123,11 +127,12 @@ mobile-серию потока).
 3. `viewport`: три опции enum `desktop` / `mobile` / `any`.
 4. `route`: Other (URL `/foo` или именованный view
    `modal:archive-confirm`).
-5. `who`: мультивыбор из `…/interface/who.md` + «нужен новый»
-   (Other → запустить `interface-deep-dive who`).
-6. `situations`: мультивыбор из `…/interface/situation.md` +
+5. `who`: мультивыбор из `…/interface/<surface>/who.md` + «нужен новый»
+   (Other → запустить
+   `interface-deep-dive <project-slug> <surface> who`).
+6. `situations`: мультивыбор из `…/interface/<surface>/situation.md` +
    «нужна новая» (Other → запустить
-   `interface-deep-dive situation`).
+   `interface-deep-dive <project-slug> <surface> situation`).
 7. `blocks`: мультивыбор из существующих screens-blocks + «новый»
    (Other → A в block). Должен включать всё, что появится в
    `slot-fills`/`states`.
@@ -174,22 +179,23 @@ mobile-серию потока).
 `block-footer`, `block-aside`). Минимум — `block-body`.
 
 **Ссылается на**:
-- `interface-block` → `…/interface/block.md` (тот же slug,
+- `interface-block` → `…/interface/<surface>/block.md` (тот же slug,
   ровно один);
-- `ux-substrates` → `…/interface/ux-substrate.md` (зеркало
-  `interface/block.md.ux-substrates`);
-- `data: { <param>: data:<slug> }` → `…/interface/data-items.md`;
+- `ux-substrates` → `…/interface/<surface>/ux-substrate.md` (зеркало
+  `interface/<surface>/block.md.ux-substrates`);
+- `data: { <param>: data:<slug> }` →
+  `…/interface/<surface>/data-items.md`;
 - `used-by-screens` → screens (зеркало; источник — реальные ссылки
   `block:<slug>` в screens);
 - `block:<slug>` внутри `tree` через `slots` → другие screens-
   blocks (если блок-контейнер);
-- `data:<slug>` внутри `tree` → `…/interface/data-items.md`.
+- `data:<slug>` внутри `tree` → `…/interface/<surface>/data-items.md`.
 **Кто ссылается**: `screen.blocks`, `screen.slot-fills`,
 `screen.states`.
 
 **Anti-patterns**:
 - screen / shell / один компонент / data-слой / FSD-узел — не путать;
-- расхождение `ux-substrates` с зеркалом в `interface/block.md`;
+- расхождение `ux-substrates` с зеркалом в `interface/<surface>/block.md`;
 - дерево без `block-body`;
 - облик в дереве (цвет, тень, шрифт, пиксели);
 - тематические props (`density`/`brand`/`scheme`) в узлах;
@@ -201,8 +207,9 @@ mobile-серию потока).
 
 1. `slug`, `name`, `description` (Other).
 2. `interface-block`: опции = существующие interface-block-slug'и
-   (читать из `…/interface/block.md`) + «нужен новый» (Other →
-   предложить запустить `interface-deep-dive block:<slug>`).
+   (читать из `…/interface/<surface>/block.md`) + «нужен новый» (Other →
+   предложить запустить
+   `interface-deep-dive <project-slug> <surface> block:<slug>`).
    **По канону slug в screens совпадает с slug в interface.**
 3. `ux-substrates`: автоматически предложить весь список
    `ux-substrates` выбранного interface-block по умолчанию (для
@@ -236,7 +243,7 @@ mobile-серию потока).
     варианты ✅/❌ из README.
 
 **После правки `ux-substrates`** — сравнить с
-`…/interface/block.md`; при расхождении — политика зеркал (см.
+`…/interface/<surface>/block.md`; при расхождении — политика зеркал (см.
 SKILL.md).
 
 ---

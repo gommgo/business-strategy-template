@@ -14,16 +14,16 @@
 Скилл переходит в режим B, когда:
 
 - args содержат свободный текст без kind/slug-сигналов;
-- в сообщении пользователя есть приложение (image/file content
-  block);
+- в сообщении пользователя есть приложение (картинка или файл
+  отдельным content-блоком);
 - args начинаются с URL.
 
 ## Алгоритм разбора
 
 ### Шаг 1. Изучить материал
 
-**Картинка**: посмотреть содержательно. Что за макет — single
-page, master/detail, dashboard, форма, модалка? Какие зоны видны
+**Картинка**: посмотреть содержательно. Что за макет — одностраничный,
+master/detail, дашборд, форма, модалка? Какие зоны видны
 (header, sidebar, main, detail, footer, overlay)? Сколько блоков
 внутри (toolbar, list, preview, filters)? Mobile или desktop?
 
@@ -74,8 +74,8 @@ flow-кандидаты:
   - studies-browse — объединяет studies-workspace (desktop) и
     studies-list-m (mobile)
 
-Картинка → сохранить как assets/screen/studies-workspace/master-
-detail-figma.png? (y/n)
+Картинка → сохранить как <surface>/assets/screen/studies-workspace/
+master-detail-figma.png? (y/n)
 
 Так?
 ```
@@ -99,7 +99,7 @@ detail-figma.png? (y/n)
 Для каждого подтверждённого кандидата:
 
 1. Создать папку
-   `docs/projects/<project-slug>/screens/<kind>/<slug>/`.
+   `docs/projects/<project-slug>/screens/<surface>/<kind>/<slug>/`.
 2. Записать `index.md` с минимальным frontmatter:
    - `slug`, `name` (из описания / содержимого материала), `description`
      (краткая фраза о сущности), `status: draft`;
@@ -108,8 +108,8 @@ detail-figma.png? (y/n)
    - `assets: [<имя-сохранённого-файла>]` если сохранили.
 3. Тело — пустое (или минимальный yaml-`tree`/`slot-fills` со
    значимыми узлами из материала).
-4. Создать `state/<project-slug>/<kind>/<slug>.md` с секцией
-   `## Открытые вопросы`:
+4. Создать `state/<project-slug>/screens/<surface>/<kind>/<slug>.md` с
+   секцией `## Открытые вопросы`:
    - «извлечено из сырья — уточнить <конкретно что>»;
    - **blocker**'ы по ключевым неопределённостям (например, если из
      материала непонятно, какой shell соответствует — `**blocker**:

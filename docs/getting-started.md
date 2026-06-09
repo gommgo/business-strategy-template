@@ -38,11 +38,11 @@ truth; когда дело дошло до продукта, их читают �
 3. SWOT и Карта гипотез
    ├─ /swot-deep-dive (факторы → ставки)            → /swot-audit
    └─ /hypothesis-map-deep-dive (цель → метрика → субъект → гипотеза) → /hypothesis-map-audit
-4. Продукты (опц.)  → /project-deep-dive <slug> (vision + 7 kind)
+4. Продукты (опц.)  → /project-deep-dive <slug> (vision + surface-реестр + kind + capability/<surface>)
    ├─ /project-audit <slug>
-   ├─ /interface-deep-dive <slug>  → /interface-audit <slug>
+   ├─ /interface-deep-dive <slug> [<surface>]  → /interface-audit <slug>
    ├─ /domain-deep-dive <slug> <ctx> (опц., DDD)
-   └─ /screen-deep-dive <slug>      → /screen-audit <slug>
+   └─ /screen-deep-dive <slug> [<surface>]     → /screen-audit <slug>
 5. /cross-audit — сквозная семантика между слоями (рой)
 6. готовый репо стратегии (с продуктами, если до них дошло)
 ```
@@ -116,21 +116,31 @@ truth; когда дело дошло до продукта, их читают �
 Опциональный downstream — когда исход стратегии требует продукта (иначе проблему
 закрывает задача `task` Карты гипотез). Несколько продуктов под одним бизнесом, у
 каждого своя папка. Все скиллы слоёв принимают `<project-slug>` первым аргументом
-(без него — пикер по `docs/projects/`, исключая `_template`).
+(без него — пикер по `docs/projects/`, исключая `_template`); interface и screen
+берут вторым аргументом поверхность (без неё — пикер по именам из `surface.md`).
 
 - **`/project-deep-dive <slug>`** (аналитик) — vision (+ `addresses-problem`
-  M:N к проблемам) + 7 kind продукта (user / capability / boundary / surface /
-  integration / constraint / market). Новый проект заводит сам скилл (копирует
-  форму из `_template/project/`). В клиент-режиме продукт заказчик описывает сам
-  через единый вход **`/entrypoint-for-business`**.
+  M:N к проблемам) + реестр-хребет `surface.md` + кросс-поверхностные kind
+  (user / integration / boundary / constraint / market) + возможности по
+  поверхности `capability/<surface>.md`. Поверхность — ось: её slug'и
+  партиционируют capability / interface / screens. Новый проект заводит сам
+  скилл (копирует форму из `_template/project/`). В клиент-режиме продукт
+  заказчик описывает сам через единый вход **`/entrypoint-for-business`**.
 - **`/project-audit <slug>`** — узкий аудит внутри продуктового слоя.
-- **`/interface-deep-dive <slug>`** → **`/interface-audit <slug>`** — UX-слой
-  (who / stage / situation / zone / block / ux-substrate / data-items).
-- **`/domain-deep-dive <slug> <ctx>`** — (опц.) DDD-артефакты бэкенда продукта.
-  Завершается на stable-артефакте; Go-код по ним разворачивает соседний
-  `<org>/backend`, не этот репо.
-- **`/screen-deep-dive <slug>`** → **`/screen-audit <slug>`** — композиция и
-  облик (flow / screen / block / shell) на инвентаре `@stit/ui`.
+- **`/interface-deep-dive <slug> [<surface>]`** → **`/interface-audit <slug>`**
+  — UX-слой по поверхности (who / stage / situation / zone / block /
+  ux-substrate / data-items в `interface/<surface>/`).
+- **`/domain-deep-dive <slug> <ctx>`** — (опц.) DDD-артефакты бэкенда продукта
+  по bounded-context (surface-агностичны; внешние и межпроектные интеграции
+  — через `integration`). Завершается на stable-артефакте; Go-код по ним
+  разворачивает соседний `<org>/backend`, не этот репо.
+- **`/screen-deep-dive <slug> [<surface>]`** → **`/screen-audit <slug>`** —
+  композиция и облик по поверхности (flow / screen / block / shell в
+  `screens/<surface>/`) на инвентаре `@stit/ui`.
+
+Точки стыка **между продуктами** бизнеса фиксируются в
+`docs/projects/project-map.md` (авторская сторона — `integration` с
+`target: sibling-project`); сверяет `/cross-audit`.
 
 Каждый deep-dive ведёт сессию через `AskUserQuestion`, пишет память в свою
 ветку единого дерева оркестратора (`.claude/skills/entrypoint/state/`;
@@ -142,10 +152,12 @@ truth; когда дело дошло до продукта, их читают �
 
 В конце или после крупных изменений. Рой агентов проверяет семантику между
 слоями: business ↔ ajtbd ↔ swot ↔ hypothesis-map ↔ (по каждому проекту: project ↔
-interface ↔ domain ↔ screen). Не slug-валидация — смысловая проверка («пользователь
+interface ↔ domain ↔ screen, по каждой поверхности) ↔ межпроектные стыки
+(`project-map`). Не slug-валидация — смысловая проверка («пользователь
 без UX-покрытия», «сегмент без пользователя», «проблема бизнеса без единого
 трения-доказательства», «проблема, которую не закрывает ни один проект»,
-«метрика как гарантия»). Только отчёт; деструктивные правки — через
+«поверхность без возможностей», «интеграция к соседнему проекту без ребра в
+карте», «метрика как гарантия»). Только отчёт; деструктивные правки — через
 соответствующий deep-dive.
 
 ## Готово

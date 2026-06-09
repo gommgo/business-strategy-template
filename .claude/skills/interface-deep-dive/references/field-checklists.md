@@ -9,8 +9,10 @@
 - **Порядок копания** — последовательность вопросов в режиме A/C.
 
 Полные критерии — в каноне `docs/projects/_template/interface/<kind>.md`
-(форма-образец, общая для всех проектов). Данные проекта живут в
-`docs/projects/<project-slug>/interface/<kind>.md`. Здесь — выжимка для
+(форма-образец, общая для всех проектов и поверхностей). Данные живут в
+папке поверхности `docs/projects/<project-slug>/interface/<surface>/<kind>.md`
+— по папке на поверхность из реестра `surface.md`. Все ссылки между
+сущностями — **в пределах одной поверхности**. Здесь — выжимка для
 скилла.
 
 ---
@@ -20,11 +22,11 @@
 **Поля**: `slug`, `name`, `description`, `users`, `status`.
 `slug`/`name`/`description`/`status` обязательны; `users` — опционально.
 
-**Ссылается на**: `users` (опц.) — `projects/<slug>/user` (если роль
-сводится к пользователю(ям) продукта; системные акторы обычно `—`).
-Мягкая связь снизу-вверх (interface → project), ловит `/cross-audit`.
-Опции — существующие `user` того же проекта (см. `project-context.md`),
-не выдумывать.
+**Ссылается на**: `users` (опц.) — корневой `projects/<slug>/user.md`
+(кросс-поверхностный; если роль сводится к пользователю(ям) продукта;
+системные акторы обычно `—`). Мягкая связь снизу-вверх (interface →
+project), ловит `/cross-audit`. Опции — существующие `user` из корневого
+`user.md` проекта (см. `project-context.md`), не выдумывать.
 **Кто ссылается**: `situation.who`, `block.who`.
 
 **Anti-patterns**: конкретное лицо · уровень прав / ACL · пассивный
@@ -83,13 +85,13 @@
 **Опциональные** (могут быть `—`): `when`, `entry-data`, `exit-data`,
 `ux-substrate`, `block`, `jobs`, `capabilities`, `hypotheses`.
 
-**Ссылается на**: `stage`, `who`, `data-items` (entry/exit),
-`ux-substrate` (зеркало), `block` (зеркало); сквозные рёбра (опц.,
-авторски на ситуации) — `jobs` (`ajtbd/job`), `capabilities`
-(`projects/<slug>/capability`), `hypotheses`
-(`hypothesis-map/hypothesis`). Сквозные рёбра — мягкие связи снизу-вверх,
-ловит `/cross-audit`; опции из существующих сущностей соседних слоёв (см.
-`project-context.md`), не выдумывать.
+**Ссылается на** (внутри поверхности): `stage`, `who`, `data-items`
+(entry/exit), `ux-substrate` (зеркало), `block` (зеркало); сквозные рёбра
+(опц., авторски на ситуации) — `jobs` (`ajtbd/job`), `capabilities`
+(`projects/<slug>/capability/<surface>` — **той же поверхности**),
+`hypotheses` (`hypothesis-map/hypothesis`). Сквозные рёбра — мягкие связи
+снизу-вверх, ловит `/cross-audit`; опции из существующих сущностей
+соседних слоёв (см. `project-context.md`), не выдумывать.
 **Кто ссылается**: `ux-substrate.situation` (M:1 — этим строится
 зеркало `situation.ux-substrate`).
 
@@ -121,8 +123,9 @@
 11. **`block`** — зеркало; заполняется когда субстраты собраны в
     блок (через `block.ux-substrates`).
 11a. **Сквозные рёбра** (опц.): `jobs` (опции — `ajtbd/job`),
-    `capabilities` (опции — `capability` того же проекта), `hypotheses`
-    (опции — `hypothesis-map/hypothesis`). Предлагать как контекст-связь
+    `capabilities` (опции — `capability` **той же поверхности** из
+    `capability/<surface>.md`), `hypotheses` (опции —
+    `hypothesis-map/hypothesis`). Предлагать как контекст-связь
     (см. `project-context.md`); прочерк допустим, не выдумывать.
 12. Anti-patterns.
 13. Тест-критерий: «Одна фраза who+when+action+goal — это один присест,
@@ -140,9 +143,13 @@
 **Обязательные**: `slug`, `name`, `description`, `status`.
 **Опциональные**: `parent-zone` (может быть `—` для корневой).
 
-**Ссылается на**: `parent-zone` → другая `zone` (родитель). Цикл
-запрещён.
+**Ссылается на**: `parent-zone` → другая `zone` **той же поверхности**
+(родитель). Цикл запрещён.
 **Кто ссылается**: `block.zone`, `block.transition-from-zone`.
+
+**Поверхность — структурно**: зона принадлежит поверхности тем, что лежит
+в папке `interface/<surface>/`. Отдельной колонки/вопроса про surface нет
+— поверхность задана на старте сессии (см. `project-context.md`).
 
 **Anti-patterns**: отдельный блок (даже если в зоне один блок) · экран /
 маршрут приложения · этап процесса · группа по who или stage ·

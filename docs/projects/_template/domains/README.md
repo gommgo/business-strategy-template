@@ -1,6 +1,8 @@
-# Domain Artifacts
+# Артефакты доменов
 
 DDD-first документация бизнес-домена бэкенда — опциональный слой проекта. Артефакты — **первичный source of truth** проектирования; код вторичен и генерируется/пишется по ним.
+
+В отличие от `interface/` и `screens/`, домены партиционируются **по bounded-context, не по поверхности (surface)**: бэкенд surface-агностичен — одна доменная модель обслуживает все поверхности продукта. Поверхность входит в домен только через `Channel` use-case'а (`HTTP API …`) и через внешние/межпроектные интеграции (см. ниже).
 
 Этот файл — **канон формы** (`docs/projects/_template/domains/`); шаблоны (`_templates/`) и форма-образец `_shared/README.md` живут здесь, один раз на все проекты. Данные доменов каждого проекта живут в его папке `docs/projects/<project-slug>/domains/`.
 
@@ -87,6 +89,27 @@ consumes: [verification.EmailVerified]
 Контекст-`README.md`: Purpose, Aggregates, Use cases, Events, Cross-context dependencies, Ubiquitous Language.
 
 Stateless / aggregate-of-one / пустые consumers — пишутся явной пометкой `N/A` или `_нет_`. Пустых таблиц быть не должно.
+
+## Внешние и межпроектные интеграции
+
+Каждый выход кода наружу поднимается до явной записи в продуктовом слое
+`docs/projects/<project-slug>/integration.md`. В use-case это видно в
+таблице `## Dependencies` — колонка `integration`:
+
+- **внутренняя инфра** (репозиторий, `Clock`, reader другого контекста
+  **этого** проекта) — `integration` = `—`;
+- **внешняя система** (платёж, email, SMS, IDP, webhook) — `integration` =
+  slug записи `integration.md` с `target: external`; адаптер реализует порт;
+- **соседний проект бизнеса** — `integration` = slug записи с
+  `target: sibling-project` (+ `sibling-project` → slug проекта). Порт —
+  HTTP-клиент к API соседа (синхронно) или подписка на его событие
+  (асинхронно через `consumes`). Ребро стыка сводится в
+  [`../../project-map.md`](../../project-map.md).
+
+`/cross-audit` сверяет три стороны: порт в use-case ↔ запись в
+`integration.md` ↔ ребро в `project-map.md`. Внутри-проектные связи
+(между контекстами) остаются `relations` / `emits` / `consumes` —
+они **не** интеграции и в `integration.md` не попадают.
 
 ## Workflow
 

@@ -160,7 +160,11 @@ ID-ссылки на child entity (только через parent).
 [<ctx>.<Aggregate>]`, `emits`, `consumes`.
 
 **Ссылается на**: `<ctx>.<Aggregate>` (called methods), `<ctx>.<Event>`
-(emitted), `<other-ctx>.<X>Reader` (cross-domain ports).
+(emitted), `<other-ctx>.<X>Reader` (cross-domain ports — reader другого
+контекста **этого** проекта), запись `<P>/integration.md` (колонка
+`integration` в `## Dependencies` — для портов к внешней системе или к
+соседнему проекту бизнеса; `target: sibling-project` → ребро в
+`docs/projects/project-map.md`).
 **Кто ссылается**: `<ctx>/README.md § Use cases`,
 `<ctx>.<Aggregate>.Use Cases`, `<ctx>.<Policy>.Used by`.
 
@@ -173,6 +177,9 @@ ID-ссылки на child entity (только через parent).
   причина того, что use-case «голый» — переразбить.
 - `Authorizer`-порт внутри use-case (авторизация — middleware
   `authgate`, если не нужны fine-grained policy).
+- Порт `## Dependencies` к внешней системе / соседнему проекту с пустой
+  колонкой `integration` — внешний выход кода не поднят до записи
+  `integration.md` продукта.
 
 **Порядок копания**:
 
@@ -182,9 +189,22 @@ ID-ссылки на child entity (только через parent).
      `scheduled job` / `internal` (Other для конкретного path).
 2. `Inputs` (таблица) — Other per field.
 3. `Outputs` — `On success` (Other), `On failure` ссылается на Errors.
-4. `Dependencies` (таблица `port | purpose | adapter`) — выбор из
-   известных портов проекта (репо агрегата, `Clock`, cross-domain
-   readers) + Other для нового. Anti-pattern alert: `Authorizer`.
+4. `Dependencies` (таблица `port | purpose | adapter | integration`) —
+   имя порта и `purpose` через Other (формулировка архитектора); колонка
+   `integration` — раунд связи с продуктовым слоем:
+   - внутренняя инфра (репозиторий агрегата, `Clock`, reader другого
+     контекста **этого** проекта) → `—`;
+   - порт к **внешней системе** (платёж, email, SMS, IDP, webhook) →
+     slug записи `<P>/integration.md` (`target: external`);
+   - порт к **соседнему проекту** бизнеса (HTTP-клиент к его API
+     синхронно, либо `consumes` его события) → slug записи
+     `<P>/integration.md` (`target: sibling-project`); ребро — в
+     `docs/projects/project-map.md`.
+   Опциями подаётся выбор записи `integration` (см.
+   `references/project-context.md`); запись `integration.md` скилл доменов
+   не заводит — нет нужной → `**blocker**` + `/project-deep-dive`.
+   Anti-pattern alert: `Authorizer`; пустая колонка `integration` у
+   внешнего/межпроектного порта.
 5. `Steps` — нумерованный observable список. Other на каждый шаг.
 6. `Called aggregate methods` — выбор из методов соответствующего
    `<Aggregate>.md` + «нужен новый метод» (Other → правка aggregate'а).

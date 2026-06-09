@@ -5,21 +5,82 @@
 
 Категории:
 
+- **R-SURF** — целостность хребта поверхностей (папка ↔ реестр `surface.md`).
+- **R-XSURF** — изоляция поверхностей (ссылка не уходит наружу).
 - **R-STRUCT** — структурная целостность (ошибки модели).
 - **R-MIRROR** — синхронность зеркал (внутри screens и с interface).
 - **R-SEM** — семантические подозрения, anti-patterns канона.
 - **R-COV** — coverage и стиль.
 
-Все пути ниже — в папке текущего проекта
-`docs/projects/<project-slug>/`. Сокращённо: `…/screens/` —
-`docs/projects/<project-slug>/screens/`; `…/interface/` —
-`docs/projects/<project-slug>/interface/`.
+Слой экранов партиционирован по поверхности (surface): на каждую
+поверхность из реестра `docs/projects/<project-slug>/surface.md` — папка
+`docs/projects/<project-slug>/screens/<surface>/` с подпапками
+`{flows,screens,blocks,shells}` и `assets/`. Сокращённо: `…/screens/` —
+`docs/projects/<project-slug>/screens/<surface>/`; `…/interface/` —
+`docs/projects/<project-slug>/interface/<surface>/` (зеркала **той же
+поверхности**).
+
+Правила R-STRUCT/R-MIRROR/R-SEM/R-COV применяются **в пределах одной
+поверхности**: ссылочные поля разрешаются среди записей той же папки
+`…/screens/`, зеркала сверяются с `…/interface/` той же поверхности.
+Аудит итерирует по каждой папке поверхности из scope отдельно.
+R-SURF/R-XSURF — про границу между поверхностями.
 
 «Папка существует» — это `…/screens/<kind-folder>/<slug>/index.md`
 читается без ошибок (`flows`, `screens`, `blocks`, `shells`).
 
 `docs/projects/_template/screens/` — канон формы; из него читаются только
 критерии и инвентарь, не данные.
+
+---
+
+## R-SURF (хребет поверхностей)
+
+### R-SURF-001 «папка поверхности вне реестра»
+
+- **severity**: `error`.
+- **scope**: подпапки `docs/projects/<project-slug>/screens/` ↔
+  `surface.md`.
+- **проверка**: каждая подпапка `screens/<X>/` имеет строку `slug: X` в
+  реестре `docs/projects/<project-slug>/surface.md`. Хребет ведёт реестр
+  — папки экранов для поверхности вне реестра быть не должно.
+- **рекомендация**: «Завести строку `<X>` в `surface.md` через
+  `/project-deep-dive <project-slug>`, либо удалить папку `screens/<X>/`
+  (она осиротела относительно хребта)».
+
+### R-SURF-002 «поверхность реестра без папки screens»
+
+- **severity**: `hint` (coverage).
+- **scope**: `surface.md` ↔ подпапки `screens/`.
+- **проверка**: для каждой строки реестра `surface.md` существует папка
+  `screens/<slug>/`. Отсутствие — не ошибка модели, а непокрытая
+  поверхность (экраны ещё не синтезировали).
+- **рекомендация**: «Поверхность объявлена в `surface.md`, но её экраны
+  ещё не начаты — завести через `/screen-deep-dive <project-slug>
+  <slug>`, либо это сознательно отложено».
+
+---
+
+## R-XSURF (изоляция поверхностей)
+
+### R-XSURF-001 «ссылка из одной поверхности в другую»
+
+- **severity**: `error`.
+- **scope**: все 4 kind любой папки `…/screens/`; зеркала с
+  `…/interface/`.
+- **проверка**: каждое slug-значение в ссылочном поле (внутрь screens
+  или в interface) разрешается среди записей **той же** поверхности.
+  Если slug не найден в своей поверхности, но найден в другой — это
+  пересечение границы (а не просто битая ссылка R-STRUCT-001/002):
+  поверхности изолированы. Зеркала `block.ux-substrates`,
+  `screen.situations`/`who`/`blocks` сверяются с `interface/<surface>/`
+  **той же** поверхности.
+- **рекомендация**: «Поверхности изолированы — ссылка не должна уходить в
+  чужую папку. Завести сущность в своей поверхности через
+  `/screen-deep-dive <project-slug> <surface> <kind>`
+  (или `/interface-deep-dive` для interface-источника той же
+  поверхности), либо убрать ссылку. Общее между поверхностями сводит
+  `/cross-audit`».
 
 ---
 
@@ -42,14 +103,17 @@
   - `block:<slug>` внутри `slot-fills`/`states` (screens) → `blocks/<slug>/`
   - `block:<slug>` внутри `tree` через `slots` (block-контейнер) → `blocks/<slug>/`
 - **рекомендация**: «Завести stub через `/screen-deep-dive
-  <kind>:<missing-slug>` или заменить ссылку на существующий slug».
+  <project-slug> <surface> <kind>:<missing-slug>` или заменить ссылку на
+  существующий slug этой поверхности».
+- **примечание**: если slug отсутствует в своей поверхности, но есть в
+  другой — это R-XSURF-001 (пересечение границы), а не битая ссылка.
 
-### R-STRUCT-002 «валидность ссылок в interface»
+### R-STRUCT-002 «валидность ссылок в interface той же поверхности»
 
 - **severity**: `error`.
-- **scope**: все 4 kind.
+- **scope**: все 4 kind; зеркала — `…/interface/` той же поверхности.
 - **проверка**: каждый interface-slug в ссылочном поле существует как
-  строка в `…/interface/<file>.md`:
+  строка в `…/interface/<file>.md` **той же поверхности**:
   - `flow.who` (массив) → `who.md`
   - `screen.situations` (массив) → `situation.md`
   - `screen.who` (массив) → `who.md`
@@ -58,21 +122,27 @@
   - `data:<slug>` (одиночный) или `data:<slug>.<field>` внутри
     `slot-fills`/`states` (screen), `tree` (block), `block.data`-карты →
     `data-items.md`
-- **рекомендация**: «Завести запись в interface через
-  `/interface-deep-dive <kind>:<missing-slug>` (это другой скилл) или
-  заменить ссылку на существующий interface-slug через
-  `/screen-deep-dive <kind>:<slug>`».
+- **рекомендация**: «Завести запись в interface той же поверхности через
+  `/interface-deep-dive <project-slug> <surface> <kind>:<missing-slug>`
+  (это другой скилл) или заменить ссылку на существующий interface-slug
+  этой поверхности через `/screen-deep-dive <project-slug> <surface>
+  <kind>:<slug>`».
+- **примечание**: interface-slug, найденный только в другой поверхности —
+  R-XSURF-001, не R-STRUCT-002.
 
 ### R-STRUCT-003 «дубликат slug»
 
 - **severity**: `error`.
-- **scope**: каждый kind независимо.
-- **проверка**: внутри одного kind все `slug` уникальны (фактический
-  дубль — два `slug:` с одним значением в разных папках одного kind).
-  Файловая система не даст двух папок с одним именем, но `slug` во
-  frontmatter может разойтись с именем папки — см. R-STRUCT-004.
+- **scope**: каждый kind в пределах поверхности независимо.
+- **проверка**: внутри одного kind одной поверхности все `slug`
+  уникальны (фактический дубль — два `slug:` с одним значением в разных
+  папках одного kind). Файловая система не даст двух папок с одним
+  именем, но `slug` во frontmatter может разойтись с именем папки — см.
+  R-STRUCT-004. Совпадение slug между поверхностями — не дубль (записи
+  изолированы), это норма.
 - **рекомендация**: «Переименовать дубликат через
-  `/screen-deep-dive` (каскадно правит ссылки)».
+  `/screen-deep-dive <project-slug> <surface>` (каскадно правит
+  ссылки)».
 
 ### R-STRUCT-004 «slug папки ≠ frontmatter.slug»
 
@@ -81,7 +151,7 @@
 - **проверка**: имя папки `…/screens/<kind-folder>/<X>/` совпадает с
   `slug: <X>` в её `index.md`.
 - **рекомендация**: «Привести в соответствие через
-  `/screen-deep-dive <kind>:<slug>` — скилл переименует папку и
+  `/screen-deep-dive <project-slug> <surface> <kind>:<slug>` — скилл переименует папку и
   пересчитает ссылки».
 
 ### R-STRUCT-005 «status вне enum»
@@ -89,7 +159,7 @@
 - **severity**: `error`.
 - **scope**: все 4 kind.
 - **проверка**: `status` ∈ {`draft`, `stable`}.
-- **рекомендация**: «Поправить status через `/screen-deep-dive
+- **рекомендация**: «Поправить status через `/screen-deep-dive <project-slug> <surface>
   <kind>:<slug>`».
 
 ### R-STRUCT-006 «`screen.viewport` вне enum»
@@ -97,7 +167,7 @@
 - **severity**: `error`.
 - **scope**: `screens/`.
 - **проверка**: `viewport` ∈ {`desktop`, `mobile`, `any`}.
-- **рекомендация**: «Поправить viewport через `/screen-deep-dive
+- **рекомендация**: «Поправить viewport через `/screen-deep-dive <project-slug> <surface>
   screen:<slug>`».
 
 ### R-STRUCT-007 «`shell.slots[*].accepts` вне enum»
@@ -106,7 +176,7 @@
 - **scope**: `shells/`.
 - **проверка**: для каждого слота `accepts` ∈
   {`block`, `tree`, `block | tree`, `block (modal/drawer)`}.
-- **рекомендация**: «Поправить `accepts` через `/screen-deep-dive
+- **рекомендация**: «Поправить `accepts` через `/screen-deep-dive <project-slug> <surface>
   shell:<slug>`».
 
 ### R-STRUCT-008 «`shell.responsive` вне enum»
@@ -117,7 +187,7 @@
   `bp` ∈ {`xs`, `sm`, `md`, `lg`, `xl`}, значение ∈
   {`visible`, `drawer-via-burger`, `overlay`, `stacked`, `hidden`}.
   Каждый `<slot>` в responsive есть в `shell.slots`.
-- **рекомендация**: «Поправить `responsive` через `/screen-deep-dive
+- **рекомендация**: «Поправить `responsive` через `/screen-deep-dive <project-slug> <surface>
   shell:<slug>`».
 
 ### R-STRUCT-009 «shell без `slots`»
@@ -126,7 +196,7 @@
 - **scope**: `shells/`.
 - **проверка**: `shell.slots` непуст и не `—`. Для каждого слота указаны
   и `required`, и `accepts`.
-- **рекомендация**: «Завести слоты через `/screen-deep-dive
+- **рекомендация**: «Завести слоты через `/screen-deep-dive <project-slug> <surface>
   shell:<slug>`, либо удалить shell, если он бессодержателен».
 
 ### R-STRUCT-010 «block без `block-body`»
@@ -135,7 +205,7 @@
 - **scope**: `blocks/`.
 - **проверка**: `block.tree` содержит зону `block-body` хотя бы с одним
   узлом.
-- **рекомендация**: «Добавить `block-body` через `/screen-deep-dive
+- **рекомендация**: «Добавить `block-body` через `/screen-deep-dive <project-slug> <surface>
   block:<slug>` — это обязательная зона блока».
 
 ### R-STRUCT-011 «`screen.slot-fills` вводит слот, не объявленный в shell»
@@ -146,7 +216,7 @@
   у соответствующего `screen.shell`. То же для каждого слота, упомянутого
   в `screen.states[<state>]` (override).
 - **рекомендация**: «Убрать неизвестный слот из `slot-fills`/`states`
-  или объявить его в shell через `/screen-deep-dive shell:<shell-slug>`».
+  или объявить его в shell через `/screen-deep-dive <project-slug> <surface> shell:<shell-slug>`».
 
 ### R-STRUCT-012 «нарушение `accepts` в `slot-fills`»
 
@@ -160,8 +230,8 @@
   - `accepts: block (modal/drawer)` → только `block:<slug>` или `—`.
   То же для override в `states`.
 - **рекомендация**: «Привести содержимое в соответствие с `accepts`
-  через `/screen-deep-dive screen:<slug>` либо пересмотреть `accepts`
-  через `/screen-deep-dive shell:<shell-slug>`».
+  через `/screen-deep-dive <project-slug> <surface> screen:<slug>` либо пересмотреть `accepts`
+  через `/screen-deep-dive <project-slug> <surface> shell:<shell-slug>`».
 
 ### R-STRUCT-013 «незаполненный `required`-слот в screen»
 
@@ -170,9 +240,9 @@
 - **scope**: `screens/` ↔ `shells/`.
 - **проверка**: для каждого слота shell c `required: true` —
   `screen.slot-fills[<slot>]` непуст и не `—`.
-- **рекомендация**: «Заполнить слот через `/screen-deep-dive
+- **рекомендация**: «Заполнить слот через `/screen-deep-dive <project-slug> <surface>
   screen:<slug>`; либо сделать слот опциональным в shell, если
-  это сознательное решение, через `/screen-deep-dive shell:<shell-slug>`».
+  это сознательное решение, через `/screen-deep-dive <project-slug> <surface> shell:<shell-slug>`».
 
 ### R-STRUCT-014 «slug блока (screens) ≠ slug interface-block»
 
@@ -181,14 +251,14 @@
 - **проверка**: `block.slug` совпадает с `block.interface-block` (одно
   имя на двух слоях — канон).
 - **рекомендация**: «Привести slug к одному значению через
-  `/screen-deep-dive block:<slug>` (каскадно переименует ссылки)».
+  `/screen-deep-dive <project-slug> <surface> block:<slug>` (каскадно переименует ссылки)».
 
 ### R-STRUCT-015 «flow с пустым `desktop` или пустым `mobile`»
 
 - **severity**: `error`.
 - **scope**: `flows/`.
 - **проверка**: оба массива непусты.
-- **рекомендация**: «Заполнить через `/screen-deep-dive flow:<slug>`,
+- **рекомендация**: «Заполнить через `/screen-deep-dive <project-slug> <surface> flow:<slug>`,
   либо это не flow — удалить или переосмыслить как одиночный screen с
   `viewport: any`».
 
@@ -199,7 +269,7 @@
 - **проверка**: множества `desktop` и `mobile` не пересекаются. На
   разных viewport — разные screen.
 - **рекомендация**: «Развести в два screen-slug через
-  `/screen-deep-dive flow:<slug>` (один — desktop, другой — mobile),
+  `/screen-deep-dive <project-slug> <surface> flow:<slug>` (один — desktop, другой — mobile),
   либо это просто screen с `viewport: any` — удалить flow».
 
 ### R-STRUCT-017 «`flow.transitions` пересекает desktop ↔ mobile»
@@ -209,7 +279,7 @@
 - **проверка**: для каждого `transitions[i]` — оба `from` и `to`
   принадлежат `flow.mobile` (transitions описывают только mobile-серию).
 - **рекомендация**: «Удалить cross-viewport transition через
-  `/screen-deep-dive flow:<slug>` — переходы desktop↔mobile не пишутся,
+  `/screen-deep-dive <project-slug> <surface> flow:<slug>` — переходы desktop↔mobile не пишутся,
   это разные viewport одного flow».
 
 ### R-STRUCT-018 «`screen.transitions-to-screen` внутри одного flow»
@@ -220,7 +290,7 @@
   явный `transitions-to-screen` дублирует `flow.transitions`. Явный
   `transitions-to-screen` нужен для переходов наружу из flow.
 - **рекомендация**: «Перенести переход в `flow.transitions` через
-  `/screen-deep-dive flow:<flow-slug>`, либо подтвердить, что это
+  `/screen-deep-dive <project-slug> <surface> flow:<flow-slug>`, либо подтвердить, что это
   выход наружу — тогда target screen не должен быть в той же mobile-
   серии».
 
@@ -231,7 +301,7 @@
 - **проверка**: опциональное ссылочное поле либо отсутствует, либо
   непустой массив/slug, либо `—`. Пустой массив `[]` без явного `—`,
   или ссылка на несуществующий slug — нарушают канон.
-- **рекомендация**: «Поправить через `/screen-deep-dive <kind>:<slug>`:
+- **рекомендация**: «Поправить через `/screen-deep-dive <project-slug> <surface> <kind>:<slug>`:
   убрать поле, поставить `—`, или указать существующий slug».
 
 ---
@@ -241,12 +311,12 @@
 ### R-MIRROR-001 «`block.ux-substrates` (screens) ↔ `block.ux-substrates` (interface)»
 
 - **severity**: `error`.
-- **scope**: `blocks/` ↔ `…/interface/block.md`.
+- **scope**: `blocks/` ↔ `…/interface/<surface>/block.md` **той же поверхности**.
 - **проверка**: для каждого блока B в screens — множество
   `B.ux-substrates` равно множеству `ux-substrates` строки с тем же
-  slug в `…/interface/block.md`. Сравнение как мультимножество (порядок
-  не важен).
-- **рекомендация**: «Пересинхронизировать через `/screen-deep-dive
+  slug в `…/interface/<surface>/block.md` **той же поверхности**. Сравнение как
+  мультимножество (порядок не важен).
+- **рекомендация**: «Пересинхронизировать через `/screen-deep-dive <project-slug> <surface>
   block:<slug>` — скилл переспросит источник правды (screens-вариант,
   interface-вариант, или смысловое расхождение → blocker)».
 
@@ -257,7 +327,7 @@
 - **проверка**: для каждого блока B — `B.used-by-screens` равно
   множеству screen-slug, в чьих `slot-fills` или `states` встречается
   `block:<B.slug>` (любое поле, любой state).
-- **рекомендация**: «Пересчитать через `/screen-deep-dive block:<slug>`
+- **рекомендация**: «Пересчитать через `/screen-deep-dive <project-slug> <surface> block:<slug>`
   — `used-by-screens` выводимо из screens, скилл синхронизирует
   автоматически».
 
@@ -268,7 +338,7 @@
 - **проверка**: для каждого screen S — `S.blocks` равно множеству
   block-slug, на которые ссылается `block:<slug>` в теле (slot-fills и
   states-override).
-- **рекомендация**: «Пересчитать через `/screen-deep-dive screen:<slug>`
+- **рекомендация**: «Пересчитать через `/screen-deep-dive <project-slug> <surface> screen:<slug>`
   — `blocks` выводимо из тела, скилл синхронизирует автоматически».
 
 ### R-MIRROR-004 «`screen.viewport` несовместим с участием в flow»
@@ -278,9 +348,9 @@
 - **проверка**:
   - если screen упомянут в `flow.desktop` — `viewport` ∈ {`desktop`, `any`};
   - если в `flow.mobile` — `viewport` ∈ {`mobile`, `any`}.
-- **рекомендация**: «Поправить через `/screen-deep-dive screen:<slug>`
+- **рекомендация**: «Поправить через `/screen-deep-dive <project-slug> <surface> screen:<slug>`
   (привести viewport к согласованному значению) или через
-  `/screen-deep-dive flow:<flow-slug>` (исключить screen из не своей
+  `/screen-deep-dive <project-slug> <surface> flow:<flow-slug>` (исключить screen из не своей
   серии)».
 
 ### R-MIRROR-005 «`screen.mobile-of` ↔ `flow.mobile`»
@@ -289,9 +359,9 @@
 - **scope**: `screens/` ↔ `flows/`.
 - **проверка**: если `screen.mobile-of = <flow-slug>` — `screen.slug` ∈
   `flow.mobile` указанного flow.
-- **рекомендация**: «Привести через `/screen-deep-dive screen:<slug>`
+- **рекомендация**: «Привести через `/screen-deep-dive <project-slug> <surface> screen:<slug>`
   (убрать `mobile-of` или сменить на правильный flow) или через
-  `/screen-deep-dive flow:<flow-slug>` (добавить screen в `mobile`)».
+  `/screen-deep-dive <project-slug> <surface> flow:<flow-slug>` (добавить screen в `mobile`)».
 
 ---
 
@@ -316,7 +386,7 @@ warning не превращается в правку.
     `letter-spacing`;
   - сырой стиль: `style=`.
 - **рекомендация**: «Облик — craft в `@stit/ui`. Убрать из
-  артефакта через `/screen-deep-dive <kind>:<slug>`; токены — на
+  артефакта через `/screen-deep-dive <project-slug> <surface> <kind>:<slug>`; токены — на
   стороне ui-lib».
 
 ### R-SEM-002 «тематические оси (`density`/`brand`/`scheme`) в дереве»
@@ -328,7 +398,7 @@ warning не превращается в правку.
   Тематические оси живут на корне через `data-*`, не как props
   компонентов и не как поля артефактов.
 - **рекомендация**: «Убрать тематическую ось из узла через
-  `/screen-deep-dive <kind>:<slug>` — это `data-theme`/`data-density`
+  `/screen-deep-dive <project-slug> <surface> <kind>:<slug>` — это `data-theme`/`data-density`
   на корне приложения, а не контракт компонента».
 
 ### R-SEM-003 «FSD-имена в дереве или frontmatter»
@@ -340,7 +410,7 @@ warning не превращается в правку.
   `Widget`, `Feature`, `Page` в значениях полей или в узлах дерева.
 - **рекомендация**: «FSD-структура живёт в коде, который пишется по
   screens вручную, не в самих артефактах. Убрать FSD-имена через
-  `/screen-deep-dive <kind>:<slug>`».
+  `/screen-deep-dive <project-slug> <surface> <kind>:<slug>`».
 
 ### R-SEM-004 «breakpoints в `slot-fills` или `block.tree`»
 
@@ -351,8 +421,8 @@ warning не превращается в правку.
   жить не должны — облицовочный адаптив только в `shell.responsive`,
   структурный — через `flow`.
 - **рекомендация**: «Перенести в `shell.responsive` через
-  `/screen-deep-dive shell:<shell-slug>` (облицовочный адаптив) либо
-  оформить как `flow` через `/screen-deep-dive flow:<slug>`
+  `/screen-deep-dive <project-slug> <surface> shell:<shell-slug>` (облицовочный адаптив) либо
+  оформить как `flow` через `/screen-deep-dive <project-slug> <surface> flow:<slug>`
   (структурный — разные viewport → разные screen)».
 
 ### R-SEM-005 «inline-cтейты в `block.tree`»
@@ -363,7 +433,7 @@ warning не превращается в правку.
   `ui:EmptyState`, `ui:ErrorState`, `ui:AccessDeniedState`,
   `ui:OfflineState`, `ui:NotFoundState`.
 - **рекомендация**: «Состояния — слой screen, не block. Перенести в
-  `screen.states` через `/screen-deep-dive screen:<потребитель>`».
+  `screen.states` через `/screen-deep-dive <project-slug> <surface> screen:<потребитель>`».
 
 ### R-SEM-006 «один `data:<slug>` под разными именованными слотами `block.data`»
 
@@ -372,7 +442,7 @@ warning не превращается в правку.
 - **проверка**: в `block.data: { <param>: data:<slug> }` один и тот же
   `data:<slug>` фигурирует в двух разных `<param>`.
 - **рекомендация**: «Переиспользовать data-items напрямую через одно
-  имя; перепроектировать через `/screen-deep-dive block:<slug>`».
+  имя; перепроектировать через `/screen-deep-dive <project-slug> <surface> block:<slug>`».
 
 ### R-SEM-007 «слотовый узел shell непуст»
 
@@ -380,7 +450,7 @@ warning не превращается в правку.
 - **scope**: `shells/`.
 - **проверка**: узел дерева shell с пометкой `(fills: $<slot>)` не
   имеет вложенных детей. Содержимое слота — задача screen, не shell.
-- **рекомендация**: «Очистить слотовый узел через `/screen-deep-dive
+- **рекомендация**: «Очистить слотовый узел через `/screen-deep-dive <project-slug> <surface>
   shell:<slug>` — содержимое идёт через `screen.slot-fills`».
 
 ### R-SEM-008 «пустой обязательный слот frontmatter»
@@ -392,7 +462,7 @@ warning не превращается в правку.
   frontmatter` каждого kind-README.
 - **проверка**: для каждой записи — каждый обязательный слот непуст
   и не `—`.
-- **рекомендация**: «Заполнить через `/screen-deep-dive <kind>:<slug>`;
+- **рекомендация**: «Заполнить через `/screen-deep-dive <project-slug> <surface> <kind>:<slug>`;
   для stable обязательные слоты не могут быть пусты».
 
 ### R-SEM-009 «`description` совпадает с `name`»
@@ -402,19 +472,19 @@ warning не превращается в правку.
 - **проверка**: `description` после трима/lowercase = `name` или
   содержится в `name` целиком, не добавляя смысла.
 - **рекомендация**: «`description` должен пояснять что/зачем, а не
-  повторять `name` — уточнить через `/screen-deep-dive <kind>:<slug>`».
+  повторять `name` — уточнить через `/screen-deep-dive <project-slug> <surface> <kind>:<slug>`».
 
 ### R-SEM-010 «`screen.situations` не покрывает ситуации экрана»
 
 - **severity**: `warning`.
-- **scope**: `screens/` ↔ `blocks/` ↔ `…/interface/ux-substrate.md`.
+- **scope**: `screens/` ↔ `blocks/` ↔ `…/interface/<surface>/ux-substrate.md`.
 - **проверка**: вывод множества «ситуаций, чьи ux-substrates есть на
   экране» — через `screen.blocks → block.ux-substrates →
-  ux-substrate.situation` (поле `situation` в `…/interface/ux-substrate.md`).
+  ux-substrate.situation` (поле `situation` в `…/interface/<surface>/ux-substrate.md`).
   Если какая-то такая ситуация отсутствует в `screen.situations` —
   warning.
 - **рекомендация**: «Дополнить `screen.situations` через
-  `/screen-deep-dive screen:<slug>` (скилл предложит точечный батч)».
+  `/screen-deep-dive <project-slug> <surface> screen:<slug>` (скилл предложит точечный батч)».
 
 ### R-SEM-011 «`screen.states` не покрывает 6 канон-состояний»
 
@@ -425,7 +495,7 @@ warning не превращается в правку.
   `empty`, `error`, `permission-denied`, `offline`, `not-found`. Для
   каждого — либо непустой override (минимум один слот переопределён),
   либо явный комментарий «здесь не применимо» в теле.
-- **рекомендация**: «Дополнить через `/screen-deep-dive screen:<slug>`;
+- **рекомендация**: «Дополнить через `/screen-deep-dive <project-slug> <surface> screen:<slug>`;
   для stable канон-состояния обязательны».
 
 ### R-SEM-012 «flow с одним screen и в `desktop`, и в `mobile`»
@@ -437,7 +507,7 @@ warning не превращается в правку.
   один экран. Если на mobile один экран и на desktop один — это не
   flow (нечего разводить).
 - **рекомендация**: «Это не flow — переосмыслить через
-  `/screen-deep-dive flow:<slug>` (удалить, заменить на один screen с
+  `/screen-deep-dive <project-slug> <surface> flow:<slug>` (удалить, заменить на один screen с
   `viewport: any`)».
 
 ### R-SEM-013 «структурный адаптив через `shell.responsive`»
@@ -451,7 +521,7 @@ warning не превращается в правку.
   «спрятать», на самом деле — структурный разрез (flow), а не
   облицовка.
 - **рекомендация**: «Проверить, не лучше ли описать как `flow` через
-  `/screen-deep-dive flow:<slug>`. Если облицовка осознанная — ответ
+  `/screen-deep-dive <project-slug> <surface> flow:<slug>`. Если облицовка осознанная — ответ
   аналитика снимает подозрение».
 
 ---
@@ -465,8 +535,8 @@ warning не превращается в правку.
 - **проверка**: для каждого `shell.slug` есть хотя бы один screen с
   `screen.shell == slug`.
 - **рекомендация**: «Завести screen с этим shell через
-  `/screen-deep-dive screen` либо удалить shell через
-  `/screen-deep-dive` (каскадно)».
+  `/screen-deep-dive <project-slug> <surface> screen` либо удалить shell через
+  `/screen-deep-dive <project-slug> <surface>` (каскадно)».
 
 ### R-COV-002 «block без потребителей»
 
@@ -475,8 +545,8 @@ warning не превращается в правку.
 - **проверка**: блок не упомянут ни в одном `screen.blocks` и ни в
   одном `block:<slug>` в slot-fills/states/tree.
 - **рекомендация**: «Завести screen с этим блоком через
-  `/screen-deep-dive screen`, либо удалить блок через
-  `/screen-deep-dive block:<slug>` (каскадно)».
+  `/screen-deep-dive <project-slug> <surface> screen`, либо удалить блок через
+  `/screen-deep-dive <project-slug> <surface> block:<slug>` (каскадно)».
 
 ### R-COV-003 «screen недостижим»
 
@@ -486,7 +556,7 @@ warning не превращается в правку.
   `flow.mobile`, не имеет `entrypoint: true`, не является целью ни
   одного `transitions-to-screen` другого screen.
 - **рекомендация**: «Сделать `entrypoint=true`, добавить в flow или
-  сделать целью перехода через `/screen-deep-dive screen:<slug>`,
+  сделать целью перехода через `/screen-deep-dive <project-slug> <surface> screen:<slug>`,
   либо удалить (каскадно)».
 
 ### R-COV-004 «stable ссылается на draft»
@@ -497,7 +567,7 @@ warning не превращается в правку.
   `status: draft` (внутри screens; ссылки в interface проверяет
   `interface-audit`).
 - **рекомендация**: «Не блокирует stable, но стоит докопать draft-
-  соседа: `/screen-deep-dive <kind>:<slug-соседа>`».
+  соседа: `/screen-deep-dive <project-slug> <surface> <kind>:<slug-соседа>`».
 
 ### R-COV-005 «короткое `description`»
 
@@ -505,7 +575,7 @@ warning не превращается в правку.
 - **scope**: все 4 kind.
 - **проверка**: длина `description` меньше 10 символов.
 - **рекомендация**: «`description` слишком короткое для смысловой
-  ясности; уточнить через `/screen-deep-dive <kind>:<slug>`».
+  ясности; уточнить через `/screen-deep-dive <project-slug> <surface> <kind>:<slug>`».
 
 ### R-COV-006 «`ui:Component` отсутствует в выводимом инвентаре»
 
@@ -517,7 +587,7 @@ warning не превращается в правку.
   опубликован). Прорывной hint, не error — это, скорее всего, ui-lib
   gap.
 - **рекомендация**: «Похоже на gap к ui-lib. Подтвердить через
-  `/screen-deep-dive <kind>:<slug>` (скилл предложит зафиксировать
+  `/screen-deep-dive <project-slug> <surface> <kind>:<slug>` (скилл предложит зафиксировать
   `ui-lib gap: ui:Foo — для <зачем>` в state-заметке) или заменить на
   существующий компонент из инвентаря».
 
@@ -528,7 +598,7 @@ warning не превращается в правку.
 - **проверка**: для каждой записи `assets: [f1, f2, ...]` —
   `…/screens/assets/<kind>/<slug>/<fN>` существует как файл.
 - **рекомендация**: «Удалить отсутствующий файл из `assets` через
-  `/screen-deep-dive <kind>:<slug>`, либо положить файл в
+  `/screen-deep-dive <project-slug> <surface> <kind>:<slug>`, либо положить файл в
   `…/screens/assets/<kind>/<slug>/`».
 
 ### R-COV-008 «`ux-substrate` не представлен узлом в `block.tree`»
@@ -541,7 +611,7 @@ warning не превращается в правку.
   не сделает — эвристика на соответствие slug/имени; спорные —
   оставлять для аналитика.
 - **рекомендация**: «Раскрыть субстрат узлом дерева через
-  `/screen-deep-dive block:<slug>` или убрать его из `ux-substrates`
+  `/screen-deep-dive <project-slug> <surface> block:<slug>` или убрать его из `ux-substrates`
   (если перестал быть частью блока — это смысловое решение)».
 
 ### R-COV-009 «slug папки не kebab-case»
@@ -549,5 +619,5 @@ warning не превращается в правку.
 - **severity**: `hint`.
 - **scope**: все 4 kind.
 - **проверка**: имя папки `[a-z0-9]+(-[a-z0-9]+)*`.
-- **рекомендация**: «Переименовать через `/screen-deep-dive
+- **рекомендация**: «Переименовать через `/screen-deep-dive <project-slug> <surface>
   <kind>:<slug>` — скилл переименует папку и пересчитает ссылки».

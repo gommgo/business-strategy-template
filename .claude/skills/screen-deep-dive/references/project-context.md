@@ -1,108 +1,128 @@
 # Контекст продуктового слоя проекта
 
 Скилл `screen-deep-dive` живёт **на слой ниже** продуктового слоя
-**того же проекта** и **параллельно** с его interface-слоем. Продукт
-описывает **продукт** (surface/capability) и живёт в
-`docs/projects/<project-slug>/`; screens — **визуальную композицию**
-(flow/screen/block/shell) в `docs/projects/<project-slug>/screens/`;
-interface — UX-аналитику того же проекта в
-`docs/projects/<project-slug>/interface/`. Семантическая связь есть, но
-**slug-валидаций нет** — её ловит `/cross-audit`.
+**того же проекта** и **параллельно** с его interface-слоем, причём всё
+— **в пределах одной поверхности (surface)**. Продукт описывает
+**продукт** (реестр-хребет `surface.md` + возможности по поверхности
+`capability/<surface>.md`) и живёт в `docs/projects/<project-slug>/`;
+screens — **визуальную композицию** (flow/screen/block/shell) в
+`docs/projects/<project-slug>/screens/<surface>/`; interface — UX-аналитику
+той же поверхности в `docs/projects/<project-slug>/interface/<surface>/`.
+Семантическая связь есть, но **slug-валидаций нет** — её ловит
+`/cross-audit`.
+
+## Поверхность — структурная ось
+
+Поверхность не хранится отдельным полем артефакта — она **задана папкой**.
+Все 4 kind screens текущего сеанса лежат в
+`docs/projects/<project-slug>/screens/<surface>/`, и тем самым **уже
+принадлежат** этой поверхности. Поэтому:
+
+- **flow → surface** и **shell → surface** — **структурная** связь (=
+  папка), а не state-заметка. Скилл **не задаёт** `AskUserQuestion` «на
+  какой surface живёт flow/shell»: ответ — `<surface>`, выбранная при
+  запуске.
+- screen наследует поверхность той же папки; flow/screen/block/shell не
+  ссылаются на сущности другой поверхности.
+
+`<surface>` берётся из реестра-хребта
+`docs/projects/<project-slug>/surface.md` на старте сеанса (см. SKILL.md
+«Выбор поверхности»).
 
 ## Маппинг
 
+Продуктовые сущности берутся из **того же проекта и той же поверхности**:
+реестр `docs/projects/<project-slug>/surface.md` и файл возможностей
+`docs/projects/<project-slug>/capability/<surface>.md`.
+
 | screens | продукт (`docs/projects/<project-slug>/`) | как использовать |
 |---|---|---|
-| `flow` (поток экранов) | `surface` (где продукт работает) | каждый flow живёт на одной surface. При заведении flow — предложи опции = существующие surface проекта |
-| `flow` | `capability` (бизнес-возможность) | flow реализует одну+ capability (например, flow «онбординг» = capability «зарегистрироваться»). При заведении flow — раунд после связи с surface |
-| `screen` | `capability` (точечно, опционально) | screen может быть якорной точкой capability. Чаще capability — на уровне flow |
-| `shell` (каркас навигации) | `surface` (на какой surface висит каркас) | при заведении shell — предложи опции = существующие surface проекта |
-| `block` | — (опционально привязать к user через interface.who) | блок переиспользуется — обычно не имеет прямой связи с продуктом |
+| `flow` (поток экранов) | `surface` (где продукт работает) | поверхность задана папкой `screens/<surface>/` — **не спрашивать**. flow живёт на текущей `<surface>` |
+| `flow` | `capability/<surface>` (бизнес-возможность) | flow реализует одну+ возможность поверхности (например, flow «онбординг» = возможность «зарегистрироваться»). При заведении flow — раунд связи с `capability/<surface>` |
+| `screen` | `capability/<surface>` (точечно, опционально) | screen может быть якорной точкой возможности. Чаще возможность — на уровне flow |
+| `shell` (каркас навигации) | `surface` (на какой surface висит каркас) | поверхность задана папкой `screens/<surface>/` — **не спрашивать**. shell принадлежит текущей `<surface>` |
+| `block` | — (опционально привязать к user через `interface/<surface>/who`) | блок переиспользуется внутри поверхности — обычно не имеет прямой связи с продуктом |
 
-Все продуктовые сущности берутся из **того же проекта**
-(`docs/projects/<project-slug>/surface.md`, `…/capability.md`), не из
-глобального слоя.
+Возможности берутся из файла поверхности
+`docs/projects/<project-slug>/capability/<surface>.md`, не из общего
+капабилити-файла (его нет — capability партиционирован по поверхности) и
+не из глобального слоя.
 
 ## Когда показывать связь
 
 ### Заведение `flow`
 
-В режиме A (новая сущность):
+В режиме A (новая сущность) поверхность уже зафиксирована папкой —
+раунд про surface **не задаётся**. Задаётся только раунд связи с
+возможностью поверхности:
 
 1. После раунда фундамента (slug/name/description) — раунд связи с
-   surface:
+   `capability/<surface>`:
 
    ```
    AskUserQuestion:
-   header: "На какой surface живёт flow"
-   options:
-     - "surface:<slug-1>" (type)
-     - "surface:<slug-2>" (type)
-     - Other
-   ```
-
-2. После — раунд связи с capability:
-
-   ```
-   AskUserQuestion:
-   header: "Какую capability реализует flow"
+   header: "Какую возможность поверхности реализует flow"
    options:
      - "capability:<slug-1>"
      - "capability:<slug-2>"
-     - "Несколько capability (выберу позже)"
+     - "Несколько возможностей (выберу позже)"
      - Other
    ```
 
-3. Запись — в `state/<project-slug>/flow/<slug>.md`:
+   Опции читаются из
+   `docs/projects/<project-slug>/capability/<surface>.md`.
+
+2. Запись — в
+   `state/<project-slug>/screens/<surface>/flow/<slug>.md`:
 
    ```markdown
    ## Доменные решения
-   - Surface: surface:web-partner
-   - Реализует capability: send-referral
+   - Реализует capability (поверхность <surface>): send-referral
    ```
+
+   Surface отдельной строкой не пишется — она и так в пути
+   (`screens/<surface>/`).
 
 ### Заведение `screen`
 
-В режиме A — опциональный раунд связи (screen наследует surface от
-flow):
+В режиме A — опциональный раунд связи (screen наследует поверхность той
+же папки):
 
 ```
 AskUserQuestion:
-header: "Этот screen — якорь одной capability"
+header: "Этот screen — якорь одной возможности поверхности"
 options:
   - "Да, основной screen для capability:<slug>"
-  - "Нет, вспомогательный (без явной capability)"
+  - "Нет, вспомогательный (без явной возможности)"
   - Other
 ```
+
+Опции — из `docs/projects/<project-slug>/capability/<surface>.md`.
 
 ### Заведение `shell`
 
-В режиме A — раунд связи:
+В режиме A раунд про surface **не задаётся** — поверхность задана папкой
+`screens/<surface>/`. shell принадлежит текущей `<surface>`; «общий для
+всех поверхностей» каркас в этой модели не существует — у каждой
+поверхности своя папка `screens/<surface>/shells/`, и если две
+поверхности нуждаются в похожем каркасе, это **две записи** (по одной в
+папке каждой поверхности).
 
-```
-AskUserQuestion:
-header: "На какой surface висит shell"
-options:
-  - "surface:<slug-1>"
-  - "surface:<slug-2>"
-  - "Общий shell (для всех web-поверхностей)"
-  - Other
-```
+## Что делать, если продуктовый слой поверхности пуст
 
-## Что делать, если продуктовый слой проекта пуст
-
-Если у проекта `docs/projects/<project-slug>/` нет нужных
-surface/capability — раунд связи **не задаётся**. Скилл продолжает
-обычный flow.
+Если у поверхности нет файла возможностей
+`docs/projects/<project-slug>/capability/<surface>.md` или он пуст —
+раунд связи **не задаётся**. Скилл продолжает обычный flow.
 
 При закрытии сессии — `AskUserQuestion`:
 
-> «Не вижу у проекта `<project-slug>` surface и capability. Без них
-> screens "плавают в воздухе". Открыть `/project-deep-dive
-> <project-slug>`?»
+> «Не вижу у поверхности `<surface>` возможностей
+> (`capability/<surface>.md`). Без них screens "плавают в воздухе".
+> Открыть `/project-deep-dive <project-slug>` и наполнить возможности
+> поверхности?»
 
 ## Cross-audit
 
-После каждой сессии скилл предлагает `/cross-audit` (lenses
-`surface-screen`) — это покажет surface без экранов и экраны без
-surface **в этом проекте**.
+После каждой сессии скилл предлагает `/cross-audit` (углы
+`surface-screen`) — это покажет поверхность без экранов и экраны без
+привязки к возможностям поверхности **в этом проекте**.

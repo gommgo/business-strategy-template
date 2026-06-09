@@ -19,6 +19,12 @@
 - в ней есть непустой текст / таблица с непустыми ячейками;
 - placeholder'ы вида `<...>` и `_TBD_` не остались.
 
+Для `use-case` дополнительно — таблица `## Dependencies` с колонкой
+`integration`: каждый порт к **внешней системе** или **соседнему проекту**
+бизнеса несёт непустой slug записи `<P>/integration.md`; внутренняя инфра
+(репозиторий, `Clock`, reader другого контекста **этого** проекта) — `—`.
+Колонка пустой быть не должна — либо slug, либо `—`.
+
 ### 2. Все cross-ref'ы валидны
 
 Каждая ссылка во frontmatter (`relations`, `emits`, `consumes`) и в
@@ -28,6 +34,12 @@
 - `relations`/`emits`/`consumes` парсятся как `<ctx>.<Name>`;
   соответствующий файл существует.
 - Markdown-ссылки на локальные `.md` резолвятся (путь существует).
+- Для `use-case`: каждый непустой slug в колонке `integration`
+  (`## Dependencies`) указывает на существующую запись `<P>/integration.md`.
+  Если интеграция с `target: sibling-project` — её ребро есть в
+  `docs/projects/project-map.md` (стык доказан). Записи `integration.md` и
+  `project-map.md` ведёт `/project-deep-dive`; если ссылки нет — это
+  `**blocker**`-вопрос в state, а не повод заводить запись из этого скилла.
 
 `stable` может ссылаться на `draft` — это допустимо. Валидатор
 подсветит hint, но не блокирует переход.
@@ -112,12 +124,19 @@ Committed-скрипта-валидатора в репо нет: сверяеш
 
 > Один use-case = одна бизнес-операция актора с одной целью; авторизация
 > — middleware (`authgate`) или явная policy в `Steps`, не молчаливо
-> размазана; шаги observable; ошибки — sentinel'ы с HTTP-статусом?
+> размазана; шаги observable; ошибки — sentinel'ы с HTTP-статусом; каждый
+> порт `## Dependencies` к внешней системе / соседнему проекту несёт
+> `integration`-slug, внутренняя инфра — `—`?
 
 - ✅ `RegisterUser`: actor=anonymous HTTP, Inputs/Outputs описаны, Steps
-  = Validate→Construct→Persist→Emit→Return, Errors c HTTP-статусами.
+  = Validate→Construct→Persist→Emit→Return, Errors c HTTP-статусами,
+  `## Dependencies`: `UserRepository`+`Clock` → `—`, `EmailProvider` →
+  `` `email-sendgrid` `` (внешняя), `LoyaltyClient` → `` `loyalty-sync` ``
+  (`target: sibling-project`).
 - ❌ `HandleUserStuff`: actor неясен, Steps = «обрабатывает запрос»,
   Errors отсутствуют → размазанный CRUD-эндпоинт.
+- ❌ `ChargeOrder`: порт `StripeClient` ходит наружу, а колонка
+  `integration` пустая → внешний выход не поднят до записи `integration.md`.
 
 ### policy
 

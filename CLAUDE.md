@@ -19,10 +19,15 @@ IT-продуктом — её может закрыть отдельная за
 операционное действие). Когда стратегия требует продукта, под проблемы встают
 **продукты** (опциональный downstream): несколько проектов под одним бизнесом, у
 каждого своя папка `docs/projects/<slug>/`. Внутри
-проекта: продукт (`vision` + 7 kind), аналитика интерфейса (`interface/`)
-— UX над продуктом, опционально бизнес-домены (`domains/`) и
-композиция/облик (`screens/`), по которой собирается кликабельный hi-fi
-субстрат на библиотеке `@stit/ui`. Канон формы продуктовых слоёв —
+проекта **поверхность (surface) — ось**: реестр `surface.md` объявляет
+поверхности, а их slug'и партиционируют возможности (`capability/<surface>.md`),
+интерфейс (`interface/<surface>/` — UX над продуктом) и экраны
+(`screens/<surface>/` — композиция/облик, по которой собирается кликабельный
+hi-fi субстрат на библиотеке `@stit/ui`). Кросс-поверхностные kind продукта
+(`user` · `integration` · `boundary` · `constraint` · `market`) и `vision` —
+плоско в корне проекта. Опционально бизнес-домены (`domains/`) —
+**по bounded-context, surface-агностичны**. Точки стыка между продуктами
+бизнеса — в `docs/projects/project-map.md`. Канон формы продуктовых слоёв —
 один раз в `docs/projects/_template/`. См.:
 
 - `README.md` — карта репозитория и воркфлоу.
@@ -36,15 +41,18 @@ IT-продуктом — её может закрыть отдельная за
 - `docs/hypothesis-map/README.md` — канон Карты гипотез: `goal` ·
   `metric` · `subject` · `hypothesis` · `task`; `business-problem` — массив, M:N.
 - `docs/projects/README.md` — как устроены проекты: `_template`, выбор
-  проекта, связь `addresses-problem` (M:N) с проблемами.
-- `docs/projects/_template/project/README.md` — канон 1 vision + 7
-  артефактов продукта.
+  проекта и поверхности, связь `addresses-problem` (M:N) с проблемами,
+  межпроектная карта.
+- `docs/projects/_template/project/README.md` — канон 1 vision +
+  реестр-хребет `surface` + кросс-поверхностные kind + `capability/<surface>`.
 - `docs/projects/_template/interface/README.md` — канон 7 артефактов
-  интерфейса.
+  интерфейса **одной поверхности** (`interface/<surface>/`).
 - `docs/projects/_template/domains/README.md` — канон DDD-артефактов бэкенда
-  (если есть).
+  (если есть; по bounded-context).
 - `docs/projects/_template/screens/README.md` — канон 4 kind артефактов
-  экранов.
+  экранов **одной поверхности** (`screens/<surface>/`).
+- `docs/projects/_template/project-map.md` — канон карты стыков между
+  продуктами бизнеса.
 
 Артефакты — чистая аналитика; на FSD/компоненты напрямую не мапятся.
 Превращение `docs/projects/<slug>/screens/` в wireframe и hi-fi — ручная
@@ -73,7 +81,7 @@ upstream (read-only, односторонне):
 
 - `<org>/backend` ← `projects/<slug>/domains/<ctx>/` (scaffold доменов в Go;
   маппинг DDD → Go живёт у backend в `docs/reference/domain-mapping.md`);
-- `<org>/frontend` ← `projects/<slug>/{interface,screens}/` (fsd-deep-dive);
+- `<org>/frontend` ← `projects/<slug>/{interface,screens}/<surface>/` (fsd-deep-dive, по поверхности);
 - `<org>/infra` ← `projects/<slug>/{vision,surface}` (init-project).
 
 Контракт что docs отдаёт соседям — `docs/README.md § Что docs отдаёт
@@ -110,16 +118,18 @@ upstream (read-only, односторонне):
 | `docs/ajtbd/` | **кто наш сегмент по работам, его граф работ и трения** | `/segment-deep-dive` · `/job-graph-deep-dive` · `/jtbd-interview` (аналитик); клиент — `/entrypoint-for-business` |
 | `docs/swot/` | **за счёт чего возможен следующий шаг** (факторы → ставки) | `/swot-deep-dive` |
 | `docs/hypothesis-map/` | **под какие метрики целимся** (цель → метрика → субъект → гипотеза) | `/hypothesis-map-deep-dive` |
-| `docs/projects/<slug>/` | **зачем продукт и для кого** | `/project-deep-dive <slug>` (аналитик); клиент — `/entrypoint-for-business` |
-| `docs/projects/<slug>/interface/` | **как пользователь взаимодействует** | `/interface-deep-dive <slug>` |
-| `docs/projects/<slug>/domains/` | **какой бизнес-код бэкенда** (опц.) | `/domain-deep-dive <slug>` |
-| `docs/projects/<slug>/screens/` | **как это выглядит и компонуется** | `/screen-deep-dive <slug>` |
+| `docs/projects/<slug>/` | **зачем продукт и для кого** (vision + реестр-хребет `surface` + kind + `capability/<surface>`) | `/project-deep-dive <slug>` (аналитик); клиент — `/entrypoint-for-business` |
+| `docs/projects/<slug>/interface/<surface>/` | **как пользователь взаимодействует** (по поверхности) | `/interface-deep-dive <slug> [<surface>]` |
+| `docs/projects/<slug>/domains/` | **какой бизнес-код бэкенда** (опц.; по bounded-context) | `/domain-deep-dive <slug> <ctx>` |
+| `docs/projects/<slug>/screens/<surface>/` | **как это выглядит и компонуется** (по поверхности) | `/screen-deep-dive <slug> [<surface>]` |
+| `docs/projects/project-map.md` | **как продукты бизнеса стыкуются** | сводится из `integration`, сверяет `/cross-audit` |
 
-Канон формы продуктовых слоёв (project/interface/screens/domains) живёт
-один раз в `docs/projects/_template/`; данные — в папках проектов. Скилы этих
-слоёв принимают `<project-slug>` первым аргументом (без него — пикер **по
-человекочитаемым именам** проектов, исключая `_template`); клиент-режим —
-дружелюбный пикер «какой продукт обсуждаем».
+Канон формы продуктовых слоёв (project/interface/screens/domains/project-map)
+живёт один раз в `docs/projects/_template/`; данные — в папках проектов. Скилы
+этих слоёв принимают `<project-slug>` первым аргументом (без него — пикер **по
+человекочитаемым именам** проектов, исключая `_template`); interface и screen
+берут вторым аргументом поверхность (без неё — пикер по именам из `surface.md`).
+Клиент-режим — дружелюбные пикеры «какой продукт обсуждаем» и «где он работает».
 
 **Дружелюбие к аналитику (нейминг).** Жаргон (`slug`/`kind`/`draft`/`stable`)
 аналитику виден, но он не обязан в нём *думать* или его *придумывать*: скилл
@@ -141,9 +151,11 @@ upstream (read-only, односторонне):
 дотягивается до цели/гипотезы Карты гипотез; проблема ↔ продукт — **M:N**
 (`projects/<slug>/vision.addresses-problem`); цель/метрика/субъект
 (hypothesis-map) проявляются как vision/user/capability в проекте; user
-адресата проявляется как роль who (interface), capability реализуется
-через situation + domain, surface несёт zones, integration — адаптеры в
-domain. Сквозные рёбра авторятся **снизу-вверх** (проектная/UX-сущность
+адресата проявляется как роль who (interface), `capability/<surface>`
+реализуется через situation той же поверхности + domain; surface —
+ось партиционирования interface/screens/capability; integration — адаптеры в
+domain (внешние и межпроектные; стык продуктов бизнеса ведёт `project-map`).
+Сквозные рёбра авторятся **снизу-вверх** (проектная/UX-сущность
 ссылается на глобальную: `situation.jobs`/`capabilities`/`hypotheses`,
 `capability.jobs`/`hypotheses`, `user.segments`, `subject.segments`);
 обратную сторону и несостыковки сводит `/cross-audit` через рой агентов
@@ -159,8 +171,12 @@ domain. Сквозные рёбра авторятся **снизу-вверх**
 Каноны терминов — в README каждого слоя. Канон терминов компонентов
 и craft — в библиотеке `@stit/ui`. Английский в backticks —
 только для устоявшегося канона (`a11y`, DTCG, FSD-слои, `data-*`,
-`aria-busy`). Всё остальное — по-русски, без полу-калек («пропсы»,
-«варианты-проперти»).
+`aria-busy`, DDD-термины — `aggregate` · `value object` · `use-case` ·
+`event` · `policy` · `bounded-context`, а также имена обязательных H2-секций
+domains-шаблонов, которые парсит `<org>/backend`). Эти структурные
+идентификаторы **не переименовываем** — они часть handoff-контракта. Всё
+остальное — prose, пояснения, человекочитаемые поля — по-русски, без
+полу-калек («пропсы», «варианты-проперти»).
 
 Business-слой (нестрогая картина + строгие реестры): 1 singleton
 `profile.md` + 5 табличных kind (`offering`, `channel`, `competitor`,
@@ -243,30 +259,37 @@ baseline, источником, атрибуцией, приёмкой) → су
 субъекта, проблема без цели) ловит рой `/hypothesis-map-audit` — **в
 пределах каждой проблемы**, не grep.
 
-Project-слой (по проекту): у каждого проекта в `docs/projects/<slug>/` —
-1 singleton `vision.md` + 7 табличных kind (`user`, `capability`,
-`boundary`, `surface`, `integration`, `constraint`, `market`). Один
-проект (папка) = один продукт = один `vision.md`; разные продукты —
-разные папки. `vision` несёт `addresses-problem` (массив, M:N к строкам
-реестра `business/business-problem`), оси `audience` / `intent` /
-`market-maturity` (тип инициативы и зрелость рынка) и `lifecycle` проекта
-— отдельно от `status` зрелости записи; переход `lifecycle → stable`
-запускает восходящий поток к business. Канон формы —
-`docs/projects/_template/project/`. Связи внутри слоя семантические,
-валидируется `/project-audit <slug>`. Vision —
-singleton с разделами `Problem`, `Success`, `Non-goals`; остальные —
-таблицы. Без frontmatter (kind = имя файла); `status` — отдельная строка
+Project-слой (по проекту), **ось — поверхность (surface)**: у каждого
+проекта в `docs/projects/<slug>/` — 1 singleton `vision.md`, реестр-хребет
+`surface.md` (объявляет поверхности; его slug'и партиционируют
+capability/interface/screens), кросс-поверхностные табличные kind (`user`,
+`integration`, `boundary`, `constraint`, `market`) и папка возможностей
+`capability/<surface>.md` (по файлу на поверхность; связь capability →
+surface структурная). Один проект (папка) = один продукт = один `vision.md`;
+разные продукты — разные папки. `vision` несёт `addresses-problem` (массив,
+M:N к строкам реестра `business/business-problem`), оси `audience` /
+`intent` / `market-maturity` и `lifecycle` проекта — отдельно от `status`
+зрелости записи; переход `lifecycle → stable` запускает восходящий поток к
+business. `integration` несёт `surface` (какие поверхности обслуживает) и
+`target` (`external` | `sibling-project`): межпроектный стык авторится здесь
+и сводится в `docs/projects/project-map.md`. Канон формы —
+`docs/projects/_template/project/`. Связи внутри слоя семантические (кроме
+структурной capability↔surface), валидируется `/project-audit <slug>`.
+Vision — singleton с разделами `Problem`, `Success`, `Non-goals`; остальные
+— таблицы. Без frontmatter (kind = имя файла); `status` — отдельная строка
 в vision или последняя колонка в таблицах.
 
-Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 7
-плоских md-файлов, каждый — таблица сущностей одного типа (`who`,
-`stage`, `situation`, `zone`, `block`, `ux-substrate`, `data-items`).
-Все ссылки **внутри слоя** — через `slug` (валидируемо). Связь ситуаций
-и блоков — через `ux-substrate.situation` + `block.ux-substrates` (M:N
-выводимо). Навигация: внутри зоны блоки достижимы взаимно неявно;
-межзонные/нестандартные переходы — через `block.transition-to-block`
-(исходящие) и `block.transition-from-zone` (входящие). Вложенность зон —
-через `zone.parent-zone`.
+Interface-слой (по проекту, **по поверхности**):
+`docs/projects/<slug>/interface/<surface>/` — папка на каждую поверхность из
+реестра, внутри 7 плоских md-файлов, каждый — таблица сущностей одного типа
+(`who`, `stage`, `situation`, `zone`, `block`, `ux-substrate`, `data-items`).
+Все ссылки **внутри слоя** — через `slug` (валидируемо), **в пределах одной
+поверхности**; `data-items` surface-локален (кросс-поверхностную сверку
+датумов ведёт `/cross-audit`). Связь ситуаций и блоков — через
+`ux-substrate.situation` + `block.ux-substrates` (M:N выводимо). Навигация:
+внутри зоны блоки достижимы взаимно неявно; межзонные/нестандартные переходы
+— через `block.transition-to-block` (исходящие) и `block.transition-from-zone`
+(входящие). Вложенность зон — через `zone.parent-zone`.
 
 ## 3. Экспертиза — священна на всех слоях
 
@@ -386,32 +409,42 @@ Interface-слой (по проекту): `docs/projects/<slug>/interface/` — 
   `project-deep-dive <slug>` (аналитик); клиент-режим — оркестратор
   `entrypoint-for-business` ведёт сам (призма `product.md`), с эскалацией и
   push в единую ветку `client`; форма — по
-  `docs/projects/_template/project/README.md`. `vision.addresses-problem`
-  связывает продукт с проблемами (M:N). Узкий аудит — `project-audit
-  <slug>`. Сквозная семантическая проверка со всеми слоями
-  (business/ajtbd/swot/hypothesis-map/interface/domain/screen) —
-  `cross-audit` (рой агентов, по каждому проекту).
-- **Артефакты аналитики интерфейса** (`docs/projects/<slug>/interface/`)
-  — через скилл `interface-deep-dive <slug>`; форма — по
-  `docs/projects/_template/interface/README.md`. Поиск тупиков, рассинхрона
-  зеркал, битых ссылок и семантических подозрений — скилл
-  `interface-audit <slug>`. При заведении ключевых сущностей (who,
-  situation, zone) скилл предлагает связь с продуктовыми артефактами того
-  же проекта как контекст (см.
+  `docs/projects/_template/project/README.md`. Ось — поверхность
+  (`surface.md` реестр; `capability/<surface>.md` по файлу на поверхность).
+  `vision.addresses-problem` связывает продукт с проблемами (M:N);
+  `integration` несёт `surface` + `target` (`external`|`sibling-project`).
+  Узкий аудит — `project-audit <slug>`. Сквозная семантическая проверка со
+  всеми слоями (business/ajtbd/swot/hypothesis-map/interface/domain/screen,
+  по поверхности) + межпроектные стыки (`project-map`) — `cross-audit`
+  (рой агентов, по каждому проекту).
+- **Карта проектов** (`docs/projects/project-map.md`) — граф стыков между
+  продуктами бизнеса; авторская сторона рёбер — `integration` с
+  `target: sibling-project`; форма — `docs/projects/_template/project-map.md`;
+  сверяет `cross-audit`.
+- **Артефакты аналитики интерфейса** (`docs/projects/<slug>/interface/<surface>/`)
+  — через скилл `interface-deep-dive <slug> [<surface>]`; форма — по
+  `docs/projects/_template/interface/README.md` (канон одной папки
+  поверхности). Поиск тупиков, рассинхрона зеркал, битых ссылок и
+  семантических подозрений — скилл `interface-audit <slug>`. Связь
+  zone/situation с поверхностью теперь структурная (папка). При заведении
+  ключевых сущностей (who, situation) скилл предлагает связь с продуктовыми
+  артефактами того же проекта как контекст (см.
   `interface-deep-dive/references/project-context.md`).
 - **Артефакты доменов** (`docs/projects/<slug>/domains/`, если
-  присутствуют) — через скилл `domain-deep-dive <slug>`; при заведении
-  контекста / use-case предлагается связь с `capability` того же проекта,
-  для адаптеров — с `integration`.
-- **Артефакты экранов** (`docs/projects/<slug>/screens/`) — через скилл
-  `screen-deep-dive <slug>`; форма — по
-  `docs/projects/_template/screens/README.md` и README'ям 4 kind
-  (flow/screen/block/shell). Визуальные референсы и ассеты живут в
-  `docs/projects/<slug>/screens/assets/<kind>/<slug>/`. Поиск тупиков,
-  рассинхрона зеркал (внутри screens и с interface того же проекта),
-  битых ссылок, нарушений slot-fills/accepts и семантических подозрений —
-  скилл `screen-audit <slug>`. При заведении flow/shell скилл предлагает
-  связь с `surface` того же проекта.
+  присутствуют) — через скилл `domain-deep-dive <slug> <ctx>`; по
+  bounded-context, surface-агностичны. При заведении контекста / use-case
+  предлагается связь с `capability/<surface>` того же проекта; внешние и
+  межпроектные интеграции (порт к соседнему проекту, события) — через
+  `integration` (колонка `integration` в `Dependencies` use-case).
+- **Артефакты экранов** (`docs/projects/<slug>/screens/<surface>/`) — через
+  скилл `screen-deep-dive <slug> [<surface>]`; форма — по
+  `docs/projects/_template/screens/README.md` (канон одной папки поверхности)
+  и README'ям 4 kind (flow/screen/block/shell). Визуальные референсы и ассеты
+  живут в `docs/projects/<slug>/screens/<surface>/assets/<kind>/<slug>/`.
+  Поиск тупиков, рассинхрона зеркал (внутри screens и с `interface/<surface>/`
+  того же проекта), битых ссылок, нарушений slot-fills/accepts и
+  семантических подозрений — скилл `screen-audit <slug>`. Связь flow/shell с
+  поверхностью теперь структурная (папка).
 - **Библиотека** — в отдельном репо `ui-lib` как `@stit/ui`;
   проект её потребляет, не правит.
 - **Sweep'ы** (терминология, чистка): 1 агент = 1 непересекающаяся зона.

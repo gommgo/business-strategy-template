@@ -1,83 +1,132 @@
 ---
 name: screen-deep-dive
-description: "Углублённая проработка аналитических артефактов экранов проекта в `docs/projects/<project-slug>/screens/` (flow · screen · block · shell). Ведёт сессию заполнения через структурированные вопросы (AskUserQuestion), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/projects/<project-slug>/screens/`), аккумулирует визуальные референсы в `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/`, ходит в web за UI-референсами по явной просьбе, опирается на инвентарь компонентов `@stit/ui` и не выдумывает craft. Использовать всегда, когда речь о screens-слое проекта, заполнении одного из 4 артефактных kind (flow/screen/block/shell), заведении или углублении потока/экрана/блока/каркаса, разборе сырья (скриншот UI, описание макета, транскрипт интервью, ссылка на конкурента), переходе записи `status: draft → stable`, удалении с каскадом, прокладке композиции через семантическое дерево, или копании связей между сущностями screens и сущностями interface. Также — единственная точка входа в screens-слой проекта: новые файлы и правки артефактов делаются через этот скилл."
+description: "Углублённая проработка аналитических артефактов экранов проекта в `docs/projects/<project-slug>/screens/<surface>/` (flow · screen · block · shell) — по папке на поверхность (surface) из реестра `surface.md`. Ведёт сессию заполнения через структурированные вопросы (AskUserQuestion), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/projects/<project-slug>/screens/<surface>/`), аккумулирует визуальные референсы в `docs/projects/<project-slug>/screens/<surface>/assets/<kind>/<slug>/`, ходит в web за UI-референсами по явной просьбе, опирается на инвентарь компонентов `@stit/ui` и не выдумывает craft. Использовать всегда, когда речь о screens-слое проекта, заполнении одного из 4 артефактных kind (flow/screen/block/shell) одной поверхности, заведении или углублении потока/экрана/блока/каркаса, разборе сырья (скриншот UI, описание макета, транскрипт интервью, ссылка на конкурента), переходе записи `status: draft → stable`, удалении с каскадом, прокладке композиции через семантическое дерево, или копании связей между сущностями screens и сущностями interface той же поверхности. Также — единственная точка входа в screens-слой проекта: новые файлы и правки артефактов делаются через этот скилл."
 ---
 
 # screen-deep-dive
 
-Углублённая проработка артефактов экранов **одного проекта** в
-`docs/projects/<project-slug>/screens/`. Канон формы —
+Углублённая проработка артефактов экранов **одного проекта**, в контексте
+**одной поверхности (surface)** —
+`docs/projects/<project-slug>/screens/<surface>/`. Канон формы —
 `docs/projects/_template/screens/README.md` и README'ы по kind в его
 подпапках. Скилл ведёт сеанс через структурированные вопросы, фиксирует
 контекст в своей ветке единого дерева state оркестратора
-(`../entrypoint/state/projects/<project-slug>/screens/`), не выдумывает
-craft и не лезет в interface-слой того же проекта своими руками.
+(`../entrypoint/state/projects/<project-slug>/screens/<surface>/`), не
+выдумывает craft и не лезет в interface-слой того же проекта своими
+руками.
 
 Использовать как **единственную точку входа** в screens-слой проекта:
 заведение, углубление, разбор сырья, переход `draft → stable`,
 удаление с каскадом.
 
-Скилл всегда работает **в контексте одного проекта** (см. «Выбор
-проекта»). Дальше по тексту `<project-slug>` — выбранный проект;
-screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
-того же проекта — `docs/projects/<project-slug>/interface/`.
+Screens-слой **партиционирован по поверхности**: каждая поверхность из
+реестра-хребта `docs/projects/<project-slug>/surface.md` получает свою
+папку `screens/<surface>/`. Скилл всегда работает **в контексте одного
+проекта и одной поверхности** (см. «Выбор проекта» и «Выбор поверхности»).
+Дальше по тексту `<project-slug>` — выбранный проект, `<surface>` —
+выбранная поверхность; screens-слой —
+`docs/projects/<project-slug>/screens/<surface>/`, interface-слой той же
+поверхности того же проекта —
+`docs/projects/<project-slug>/interface/<surface>/`. Поверхности
+изолированы: ссылки внутри `screens/<surface>/` и зеркала с
+`interface/<surface>/` — в пределах одной поверхности.
 
 ## Выбор проекта
 
 Скилл работает в контексте **одного** проекта. `<project-slug>` —
-первый позиционный аргумент:
+первый позиционный аргумент, `<surface>` — второй (см. «Выбор
+поверхности»):
 
 | вызов | проект |
 |---|---|
-| `/screen-deep-dive <project-slug> …` | взять `<project-slug>` |
+| `/screen-deep-dive <project-slug> [<surface>] …` | взять `<project-slug>` |
 | `/screen-deep-dive …` (без slug) | `AskUserQuestion`-пикер **по именам** проектов (исключая `_template`) |
 
 Поскольку точки входа допускают `<kind>:<slug>` (например,
-`screen-deep-dive my-app:login`), `<project-slug>` отделяется от
+`screen-deep-dive my-app web login`), `<project-slug>` отделяется от
 остатка как первый токен и/или по совпадению с именем подпапки
 `docs/projects/`:
 
 1. Если первый аргумент совпадает с именем подпапки `docs/projects/`
-   (кроме `_template`) — это `<project-slug>`; остаток args — точка входа.
+   (кроме `_template`) — это `<project-slug>`; остаток args идёт на
+   выбор поверхности и точку входа.
 2. Иначе — пикер **по именам** проектов (подпапки `docs/projects/`,
    исключить `_template`; опции — имена из `vision`, slug — деталь).
    Если проектов нет — сказать «сначала заведи проект через
    `/project-deep-dive`», выйти.
-3. Все чтения/записи скоупятся в выбранный проект:
-   `docs/projects/<project-slug>/screens/`,
-   `docs/projects/<project-slug>/interface/`,
-   `docs/projects/<project-slug>/screens/assets/`,
-   ветка state `../entrypoint/state/projects/<project-slug>/screens/`.
+3. После того как проект определён — определить поверхность (см.
+   «Выбор поверхности»).
+4. Все чтения/записи скоупятся в выбранный проект **и поверхность**:
+   `docs/projects/<project-slug>/screens/<surface>/`,
+   `docs/projects/<project-slug>/interface/<surface>/`,
+   `docs/projects/<project-slug>/screens/<surface>/assets/`,
+   ветка state
+   `../entrypoint/state/projects/<project-slug>/screens/<surface>/`.
+
+## Выбор поверхности
+
+Screens-слой партиционирован по поверхности. После проекта скилл
+определяет `<surface>` — второй позиционный аргумент:
+
+| вызов | поверхность |
+|---|---|
+| `/screen-deep-dive <project-slug> <surface> …` | взять `<surface>` |
+| `/screen-deep-dive <project-slug> …` (без surface) | `AskUserQuestion`-пикер **по именам** поверхностей из реестра `surface.md` |
+
+Алгоритм:
+
+1. Прочитать реестр-хребет
+   `docs/projects/<project-slug>/surface.md` — список поверхностей.
+2. Если следующий после `<project-slug>` токен совпадает со `slug`
+   поверхности из реестра — это `<surface>`; остаток args — точка входа.
+3. Иначе — пикер **по именам** поверхностей (опции — `name` из
+   `surface.md`; `type` и `slug` — деталь в описании опции). Аналитик
+   slug не вводит — выбирает имя.
+   - Если в реестре одна поверхность — взять её без вопроса.
+   - Если реестр пуст (нет `surface.md` или нет строк) — сказать
+     «сначала заведи поверхность через `/project-deep-dive
+     <project-slug>` (реестр-хребет `surface.md`)», выйти.
+4. Если папки `docs/projects/<project-slug>/screens/<surface>/` ещё
+   нет — она появится при заведении первой сущности (режим A/B); это
+   нормально для свежей поверхности.
+
+Дальше весь сеанс идёт **в пределах одной поверхности**. Сменить
+поверхность — это новый запуск скилла с другим `<surface>`.
 
 ## Точки входа
 
-После того как `<project-slug>` определён, остаток args задаёт режим:
+После того как `<project-slug>` и `<surface>` определены, остаток args
+задаёт режим:
 
 | вызов | поведение |
 |---|---|
-| `/screen-deep-dive <project-slug>` | сводка состояния + топ-3 кандидата на углубление |
-| `/screen-deep-dive <project-slug> <kind>` | завести новую сущность типа kind (режим A) |
-| `/screen-deep-dive <project-slug> <kind>:<slug>` | завести (если slug ещё не существует) либо углубить (если существует) |
-| `/screen-deep-dive <project-slug> <slug>` | найти slug; одиночный → C; конфликт kind → переспросить |
-| `/screen-deep-dive <project-slug> <свободный текст / приложение>` | сырьё → разбор (режим B) |
+| `/screen-deep-dive <project-slug> <surface>` | сводка состояния поверхности + топ-3 кандидата на углубление |
+| `/screen-deep-dive <project-slug> <surface> <kind>` | завести новую сущность типа kind (режим A) |
+| `/screen-deep-dive <project-slug> <surface> <kind>:<slug>` | завести (если slug ещё не существует) либо углубить (если существует) |
+| `/screen-deep-dive <project-slug> <surface> <slug>` | найти slug; одиночный → C; конфликт kind → переспросить |
+| `/screen-deep-dive <project-slug> <surface> <свободный текст / приложение>` | сырьё → разбор (режим B) |
 
 `kind` ∈ {`flow`, `screen`, `block`, `shell`}.
 
 Сырьё (режим B) — это: текстовое описание макета, скриншот UI,
 ссылка на чужой продукт, выгрузка из Figma, транскрипт интервью с
-дизайнером, либо любой комбинированный inputs. Картинки и URL —
-обычные content-блоки в сообщении пользователя.
+дизайнером, либо любая их комбинация. Картинки и URL — обычные
+content-блоки в сообщении пользователя.
 
 ## Что делать сразу при запуске
 
-1. Определить `<project-slug>` (см. «Выбор проекта»).
+1. Определить `<project-slug>` (см. «Выбор проекта») и `<surface>` (см.
+   «Выбор поверхности»).
 2. Прочитать `docs/projects/_template/screens/README.md` и README'ы по
    4 kind в его подпапках — освежить канон композиции, layout-язык,
    имена `ui:*`/`block:*`/`data:*`, anti-patterns.
-3. Прочитать `docs/projects/<project-slug>/vision.md` и продуктовые
-   файлы (если есть) + `references/project-context.md` — освежить связи
-   с продуктовым слоем **того же проекта** (flow ↔ surface,
-   screen ↔ capability).
+3. Прочитать `docs/projects/<project-slug>/vision.md`,
+   реестр-хребет `docs/projects/<project-slug>/surface.md`, файл
+   возможностей выбранной поверхности
+   `docs/projects/<project-slug>/capability/<surface>.md` (если есть) +
+   `references/project-context.md` — освежить связи с продуктовым слоем
+   **того же проекта** (flow/shell живут на `<surface>` структурно,
+   screen ↔ `capability/<surface>`).
 4. Если остаток args пуст — сделать сводку (см. ниже) и через
    `AskUserQuestion` предложить выбор что копать.
 5. Если остаток args указывает на сущность — определить kind и режим
@@ -86,19 +135,20 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 ## Сводка состояния (без args)
 
 1. Пройтись по
-   `docs/projects/<project-slug>/screens/{flows,screens,blocks,shells}/*/index.md`.
+   `docs/projects/<project-slug>/screens/<surface>/{flows,screens,blocks,shells}/*/index.md`.
 2. Подсчитать: сколько `draft` / `stable` по каждому kind.
 3. Прочитать свою ветку
-   `../entrypoint/state/projects/<project-slug>/screens/` (если есть) и
-   собрать открытые вопросы — секции `## Открытые вопросы`; пометки
-   `**blocker**` приоритетны.
+   `../entrypoint/state/projects/<project-slug>/screens/<surface>/`
+   (если есть) и собрать открытые вопросы — секции `## Открытые
+   вопросы`; пометки `**blocker**` приоритетны.
 4. Выявить топ-3 «горячих» кандидата по приоритету:
    - draft-записи с `**blocker**`-вопросами;
    - draft-записи с большим числом пустых обязательных слотов или
      дырами в дереве (`tree`/`slot-fills`);
    - draft-записи, на которые ссылаются stable-соседи (блокируют их
      корректность) — например, `screen.shell` ссылается на draft-shell.
-5. Вывести сводку в чат, предложить через `AskUserQuestion` выбрать.
+5. Вывести сводку в чат (с указанием поверхности), предложить через
+   `AskUserQuestion` выбрать.
 
 ## Три режима
 
@@ -148,11 +198,11 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 
 Скилл не держит своего `state/`. Per-kind заметки пишутся в **свою ветку**
 единого дерева state оркестратора, не в
-`docs/projects/<project-slug>/screens/` и не в корне проекта; ветка
-скоупится по проекту:
+`docs/projects/<project-slug>/screens/<surface>/` и не в корне проекта;
+ветка скоупится по проекту **и поверхности**:
 
 ```
-../entrypoint/state/projects/<project-slug>/screens/<kind>/<slug>.md
+../entrypoint/state/projects/<project-slug>/screens/<surface>/<kind>/<slug>.md
 ```
 
 Формат заметки — канон `../entrypoint/references/state-model.md`. Кратко:
@@ -178,7 +228,8 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 `hypothesis-map/`) и клиентский дом `../entrypoint-for-business/state/`.
 Проектные ветки `projects/<…>/` читаются **только по текущему
 `<project-slug>`** (изоляция продуктов сохраняется). Своя ветка
-`projects/<project-slug>/screens/` — **rw**, всё остальное дерево и
+`projects/<project-slug>/screens/<surface>/` — **rw**, всё остальное
+дерево (включая ветки других поверхностей `screens/<other-surface>/`) и
 клиентский дом — **read-only**: в чужое не писать. При чтении клиентского
 дома маркер `**жду аналитика**` трактуется как blocker-кандидат.
 
@@ -186,12 +237,13 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 
 См. `references/assets-policy.md`. Кратко:
 
-- Каталог: `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/`.
+- Каталог:
+  `docs/projects/<project-slug>/screens/<surface>/assets/<kind>/<slug>/`.
   Имена файлов — человекочитаемые kebab-case
   (`master-detail-figma.png`, `competitor-linear-list.png`).
 - Поле во frontmatter каждого kind: `assets: ['file1.png', 'file2.png']`
-  (пути от `assets/<kind>/<slug>/`). Lint проверяет существование
-  файла.
+  (пути от `<surface>/assets/<kind>/<slug>/`). Lint проверяет
+  существование файла.
 - Входящая картинка от аналитика → скилл анализирует, через
   `AskUserQuestion` решают вместе: (a) сохранить как референс с slug-ом,
   (b) использовать как сырьё (режим B) и не сохранять, (c) поискать
@@ -200,9 +252,9 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
   Скилл вызывает `WebSearch`, показывает кандидатов через
   `AskUserQuestion`, аналитик выбирает один (или ни одного). Выбранный
   — `WebFetch`/скачивание в
-  `assets/<kind>/<slug>/<имя>.<ext>` (от корня
-  `docs/projects/<project-slug>/screens/assets/`). Без просьбы скилл не
-  лазит в web.
+  `<surface>/assets/<kind>/<slug>/<имя>.<ext>` (от корня
+  `docs/projects/<project-slug>/screens/<surface>/assets/`). Без просьбы
+  скилл не лазит в web.
 
 ## Инвентарь `ui:Component`
 
@@ -220,8 +272,8 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 - Если в инвентаре нет подходящего — `AskUserQuestion`:
   «предложить новый `ui:Foo` как требование к ui-lib?». По «да» —
   компонент попадает в дерево, и в
-  `../entrypoint/state/projects/<project-slug>/screens/<kind>/<slug>.md` в
-  секции `## Что копать дальше` появляется строка
+  `../entrypoint/state/projects/<project-slug>/screens/<surface>/<kind>/<slug>.md`
+  в секции `## Что копать дальше` появляется строка
   `ui-lib gap: нужен ui:Foo — для <зачем>`.
 
 ## Контракт `draft → stable`
@@ -232,17 +284,20 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 1. Обязательные слоты frontmatter заполнены (опциональные могут быть
    `—`).
 2. Все `slug`-ссылки валидны (записи существуют — внутри
-   `docs/projects/<project-slug>/screens/` и в interface-слое того же
-   проекта `docs/projects/<project-slug>/interface/`).
+   `docs/projects/<project-slug>/screens/<surface>/` и в interface-слое
+   **той же поверхности** того же проекта
+   `docs/projects/<project-slug>/interface/<surface>/`).
 3. Зеркала консистентны:
    - `block.ux-substrates` (screens) ↔ `block.ux-substrates`
-     (interface, `docs/projects/<project-slug>/interface/block.md`);
+     (interface,
+     `docs/projects/<project-slug>/interface/<surface>/block.md`);
    - `block.used-by-screens` ↔ ссылки `block:<slug>` в screens;
    - `screen.blocks` ↔ блоки в `slot-fills`/`states`.
 4. Тест-критерий из README соответствующего kind (канон
    `docs/projects/_template/screens/<kind>/README.md`) явно подтверждён
    аналитиком в этой сессии.
-5. В `../entrypoint/state/projects/<project-slug>/screens/<kind>/<slug>.md`
+5. В
+   `../entrypoint/state/projects/<project-slug>/screens/<surface>/<kind>/<slug>.md`
    нет `**blocker**`-вопросов.
 6. Дерево в теле артефакта полное:
    - `screen.slot-fills` — все обязательные слоты shell заполнены;
@@ -265,12 +320,12 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 
 ## Зеркала interface ↔ screens
 
-Зеркало `block.ux-substrates` (M:N) живёт в **двух** слоях **одного и
-того же проекта**:
+Зеркало `block.ux-substrates` (M:N) живёт в **двух** слоях **одной и той
+же поверхности одного и того же проекта**:
 
-- `docs/projects/<project-slug>/interface/block.md` — взгляд бизнеса
-  (блок собирает определённые субстраты ситуаций);
-- `docs/projects/<project-slug>/screens/blocks/<slug>/index.md`
+- `docs/projects/<project-slug>/interface/<surface>/block.md` — взгляд
+  бизнеса (блок собирает определённые субстраты ситуаций);
+- `docs/projects/<project-slug>/screens/<surface>/blocks/<slug>/index.md`
   (frontmatter `ux-substrates: [...]`) — взгляд композиции (блок
   реализует те же субстраты как узлы дерева).
 
@@ -279,13 +334,13 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 
 1. После любой правки `ux-substrates` в screens-блоке или после
    запуска C-режима на блоке — сравнить с
-   `docs/projects/<project-slug>/interface/block.md`.
+   `docs/projects/<project-slug>/interface/<surface>/block.md`.
 2. Если совпадает — ок.
 3. Если различаются — через `AskUserQuestion` показать diff и
    спросить: «какой слой брать за источник правды для этого блока?»
    - «screens-вариант» → предложить аналитику запустить
-     `interface-deep-dive <project-slug> block:<slug>` и подровнять
-     interface;
+     `interface-deep-dive <project-slug> <surface> block:<slug>` и
+     подровнять interface;
    - «interface-вариант» → подровнять screens-блок (правка
      `ux-substrates` в frontmatter здесь);
    - «оба нужны» → значит расхождение смысловое, оставить state-заметку
@@ -298,13 +353,15 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 
 ### Внутри screens
 
-Если копаемая сущность ссылается на не существующий screens-slug:
+Если копаемая сущность ссылается на не существующий screens-slug **той
+же поверхности**:
 
 1. Завести stub-папку
-   `docs/projects/<project-slug>/screens/<kind>/<slug>/index.md` с
-   минимальным frontmatter (`slug + name + description + status=draft`
+   `docs/projects/<project-slug>/screens/<surface>/<kind>/<slug>/index.md`
+   с минимальным frontmatter (`slug + name + description + status=draft`
    + обязательные опции с `—` где допустимо).
-2. В `../entrypoint/state/projects/<project-slug>/screens/<kind>/<slug>.md`
+2. В
+   `../entrypoint/state/projects/<project-slug>/screens/<surface>/<kind>/<slug>.md`
    — секция `## Открытые вопросы` с записью «Заведён как stub в контексте
    `<откуда сослались>` — докопать».
 3. Возврат в исходную сущность, копание продолжается.
@@ -312,18 +369,18 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 ### Stub-зависимость на interface-slug
 
 Если `screen.situations` / `block.interface-block` / `data:<slug>` /
-прочая ссылка указывает на не существующий interface-slug **того же
-проекта**:
+прочая ссылка указывает на не существующий interface-slug **той же
+поверхности того же проекта**:
 
 1. **Скилл не заводит ничего в
-   `docs/projects/<project-slug>/interface/`** — это нарушение единой
-   точки входа interface.
+   `docs/projects/<project-slug>/interface/<surface>/`** — это нарушение
+   единой точки входа interface.
 2. Через `AskUserQuestion` показать аналитику: «Ссылка на
    `<kind>:<slug>` в interface не валидна. Что делаем?»
-   - «запустить `interface-deep-dive <project-slug> <kind>:<slug>`
-     сейчас, я подожду» → скилл говорит «запусти
-     `/interface-deep-dive <project-slug> <kind>:<slug>`», выходит из
-     текущей сущности (state-заметка с `**blocker**`), ждёт
+   - «запустить `interface-deep-dive <project-slug> <surface>
+     <kind>:<slug>` сейчас, я подожду» → скилл говорит «запусти
+     `/interface-deep-dive <project-slug> <surface> <kind>:<slug>`»,
+     выходит из текущей сущности (state-заметка с `**blocker**`), ждёт
      возвращения аналитика;
    - «удалить эту ссылку» (если поле допускает) → правка screens;
    - «заменить на существующий slug» (показать варианты) → правка.
@@ -331,22 +388,24 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 ## Удаление сущности (каскад)
 
 1. Прочитать все 4 kind-папки
-   `docs/projects/<project-slug>/screens/` + свою ветку
-   `../entrypoint/state/projects/<project-slug>/screens/` — найти все
-   ссылки на удаляемый slug. Также проверить
-   `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/`.
+   `docs/projects/<project-slug>/screens/<surface>/` + свою ветку
+   `../entrypoint/state/projects/<project-slug>/screens/<surface>/` —
+   найти все ссылки на удаляемый slug (в пределах поверхности). Также
+   проверить
+   `docs/projects/<project-slug>/screens/<surface>/assets/<kind>/<slug>/`.
 2. Показать каскад: «ссылаются X, Y, Z — вот что сломается».
 3. Через `AskUserQuestion` по каждому месту — опции: «заменить на
    другой slug» / «поставить `—` (если поле допускает)» / «удалить
    ссылающуюся запись».
 4. По подтверждению — выполнить все правки одним пакетом.
-5. Удалить папку `docs/projects/<project-slug>/screens/<kind>/<slug>/`
+5. Удалить папку
+   `docs/projects/<project-slug>/screens/<surface>/<kind>/<slug>/`
    целиком (включая `index.md` и любые add-on файлы).
 6. Удалить папку
-   `docs/projects/<project-slug>/screens/assets/<kind>/<slug>/` целиком,
-   если существует.
+   `docs/projects/<project-slug>/screens/<surface>/assets/<kind>/<slug>/`
+   целиком, если существует.
 7. Удалить
-   `../entrypoint/state/projects/<project-slug>/screens/<kind>/<slug>.md`,
+   `../entrypoint/state/projects/<project-slug>/screens/<surface>/<kind>/<slug>.md`,
    если существует.
 8. Пересчитать зеркала затронутых блоков (`used-by-screens`,
    `screen.blocks`).
@@ -359,10 +418,10 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 2. Перечислить нерешённые открытые вопросы по сущностям (с указанием
    `**blocker**`-меток).
 3. Предложить через `AskUserQuestion`: «Прогнать
-   `/screen-audit <project-slug>`?» — это полный аудит консистентности
-   screens-слоя проекта и зеркал с его interface. По «да» сказать
-   пользователю «Запусти `/screen-audit <project-slug>`» — сам не
-   вызываю, это другой скилл.
+   `/screen-audit <project-slug> <surface>`?» — это аудит консистентности
+   screens-слоя поверхности и зеркал с её interface. По «да» сказать
+   пользователю «Запусти `/screen-audit <project-slug> <surface>`» — сам
+   не вызываю, это другой скилл.
 
 ## Запреты
 
@@ -380,10 +439,14 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
   облицовочный адаптив только в `shell.responsive`, структурный — в
   `flow`.
 - Не лезть в interface-слой проекта
-  (`docs/projects/<project-slug>/interface/`) своими руками — только
-  через предложение аналитику запустить `interface-deep-dive`.
+  (`docs/projects/<project-slug>/interface/<surface>/`) своими руками —
+  только через предложение аналитику запустить `interface-deep-dive`.
 - Не работать сразу с несколькими проектами в одной сессии — скилл
   скоупится в один `<project-slug>` (изоляция продуктов сохраняется).
+- Не работать сразу с несколькими поверхностями в одной сессии — скилл
+  скоупится в одну `<surface>`; ссылка из одной поверхности в сущность
+  другой запрещена (поверхности изолированы). Смена поверхности — новый
+  запуск.
 - Не повышать `draft → stable` без явного подтверждения аналитика.
 - Не понижать `stable → draft` сам — только подсветить и предложить.
 - Не править `block.ux-substrates` молча при рассинхроне с interface —
@@ -393,9 +456,11 @@ screens-слой — `docs/projects/<project-slug>/screens/`, interface-слой
 - Не вызывать `screen-audit` самостоятельно — только предложить.
 - Не аккумулировать историю в своей ветке state — forward-only.
 - Не создавать
-  `../entrypoint/state/projects/<project-slug>/screens/<kind>/<slug>.md`,
+  `../entrypoint/state/projects/<project-slug>/screens/<surface>/<kind>/<slug>.md`,
   если все секции были бы пустыми — заметка появляется только когда есть
   что записать.
-- Не писать в чужие ветки дерева `../entrypoint/state/` и в клиентский дом
-  `../entrypoint-for-business/state/` — только read-only; rw только своя
-  ветка `projects/<project-slug>/screens/`.
+- Не писать в чужие ветки дерева `../entrypoint/state/` (включая ветки
+  других поверхностей `projects/<project-slug>/screens/<other-surface>/`)
+  и в клиентский дом `../entrypoint-for-business/state/` — только
+  read-only; rw только своя ветка
+  `projects/<project-slug>/screens/<surface>/`.
