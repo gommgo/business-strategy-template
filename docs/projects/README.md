@@ -17,13 +17,12 @@ kind), UX-интерфейс (`interface/<surface>/`), композиция эк
 ```
 docs/projects/
 ├── README.md            (этот файл)
-├── project-map.md       ← карта стыков между продуктами бизнеса (singleton)
+├── project-map.md       ← карта стыков между продуктами бизнеса (singleton: канон формы + данные)
 ├── _template/           ← КАНОН формы (образец, не данные проекта)
 │   ├── project/         канон продуктового слоя (vision + surface-реестр + kind)
 │   ├── interface/       канон UX-слоя одной поверхности (who/stage/situation/…)
 │   ├── screens/         канон слоя экранов одной поверхности (flow/screen/block/shell)
-│   ├── domains/         канон DDD-слоя (_templates/, _shared/)
-│   └── project-map.md   канон карты проектов
+│   └── domains/         канон DDD-слоя (_templates/, _shared/)
 └── <project-slug>/      ← ДАННЫЕ одного проекта
     ├── README.md        чем продукт, какие проблемы закрывает
     ├── vision.md        singleton + addresses-problem (M:N → business-problem)
@@ -82,7 +81,7 @@ docs/projects/
 - [`_template/interface/README.md`](_template/interface/README.md) — интерфейс одной поверхности.
 - [`_template/screens/README.md`](_template/screens/README.md) — экраны одной поверхности.
 - [`_template/domains/README.md`](_template/domains/README.md) — бизнес-домены бэкенда.
-- [`_template/project-map.md`](_template/project-map.md) — карта стыков между проектами.
+- [`project-map.md`](project-map.md) — карта стыков между проектами (singleton, бизнес-язык).
 
 ## Anti-patterns
 

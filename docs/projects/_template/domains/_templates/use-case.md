@@ -31,28 +31,34 @@ consumes: []
 
 ## Dependencies
 
-Колонка `integration` связывает порт с записью продуктового слоя
+Колонка `integration` связывает порт с провайдером продуктового слоя
 `docs/projects/<project-slug>/integration.md`: для **внешних** интеграций
 (платёж, email, SMS, IDP) и **межпроектных** портов (обмен с соседним
-проектом бизнеса) — slug интеграции; для внутренней инфры
-(репозиторий, `Clock`, reader другого контекста **этого же** проекта) —
-`—`. Так каждый выход наружу из кода поднимается до явной интеграции в
-продукте; согласованность ловит `/cross-audit`.
+проектом бизнеса) — slug провайдера; для внутренней инфры (репозиторий,
+`Clock`, reader другого контекста **этого же** проекта) — `—`. Колонка
+`functions` — **какие функции** интеграции этот use-case дёргает (`slug`'и из
+`## Функции` `integration.md` / клиента `_shared/`); для внутренней инфры —
+`—`. Домен **transport-agnostic**: он зовёт функцию по `slug`, а как именно
+(HTTP / gRPC / очередь) — знает только клиент `_shared/integrations/<slug>/`.
 
-| port | purpose | adapter | integration |
-|---|---|---|---|
-| `<Aggregate>Repository` | хранение корневого агрегата | postgres (pgx + sqlc) | `—` |
-| `Clock` | детерминированное время | `golibinfra/clock` | `—` |
-| `<OtherDomain>Reader` | кросс-контекстный порт — данные из другого контекста **этого** проекта | адаптер в `module/adapters.go` чужого домена | `—` |
-| `<ExternalService>` | внешняя система (платёж / email / SMS / webhook) | SDK / HTTP-клиент провайдера | `` `<integration-slug>` `` |
-| `<SiblingProject>Client` | обмен с **соседним проектом** бизнеса (синхронный вызов API) | HTTP-клиент к API соседа | `` `<integration-slug>` `` (`target: sibling-project`) |
+| port | purpose | adapter | integration | functions |
+|---|---|---|---|---|
+| `<Aggregate>Repository` | хранение корневого агрегата | postgres (pgx + sqlc) | `—` | `—` |
+| `Clock` | детерминированное время | `golibinfra/clock` | `—` | `—` |
+| `<OtherDomain>Reader` | кросс-контекстный порт — данные из другого контекста **этого** проекта | адаптер в `module/adapters.go` чужого домена | `—` | `—` |
+| `<ExternalService>` | внешняя система — зовём по функциям, транспорт не знаем | клиент `_shared/integrations/<integration-slug>/` | `` `<integration-slug>` `` | `` [`<fn-slug>`, …] `` |
+| `<SiblingProject>Client` | обмен с **соседним проектом** бизнеса | клиент `_shared/integrations/<integration-slug>/` | `` `<integration-slug>` `` (`target: sibling-project`) | `` [`<fn-slug>`, …] `` |
 
 > **Внешние и межпроектные интеграции** держим явно: каждый порт с
-> непустой колонкой `integration` обязан иметь запись в `integration.md`
-> продукта. Межпроектный порт ссылается на интеграцию с
-> `target: sibling-project`; её ребро попадает в `../project-map.md`.
-> Синхронные вызовы наружу видны в `## Steps` отдельным шагом; асинхронный
-> обмен — через события (`## Events emitted` / `consumes`).
+> непустой колонкой `integration` ссылается на провайдера в `integration.md`,
+> а его `functions` — на строки `## Функции` того провайдера и на функции
+> клиента `_shared/integrations/<slug>/`. Межпроектный порт — провайдер с
+> `target: sibling-project`; ребро попадает в `docs/projects/project-map.md`
+> (на бизнес-языке). `/cross-audit` сверяет цепочку: `functions` здесь ↔ функция
+> клиента `_shared/` ↔ строка `## Функции` `integration.md` ↔ (для соседа)
+> ребро `project-map.md` и обслуживающий use-case у соседа. Синхронные вызовы
+> видны в `## Steps` отдельным шагом; асинхронный обмен — через события
+> (`## Events emitted` / `consumes`).
 
 > **Авторизация** — на уровне HTTP-middleware (`platform/authgate`), не в use-case'е. Use-case не имеет `Authorizer`-порта и не возвращает `ErrForbidden`, если репо-конвенция «есть валидная сессия → can do everything». Если в конкретном домене нужны fine-grained роли — заводи policy в `<ctx>/policies/` и **явно** добавь её здесь.
 
@@ -84,7 +90,7 @@ consumes: []
 
 > Если событие потребляет **соседний проект** бизнеса (межпроектный
 > асинхронный обмен) — это тоже интеграция с `target: sibling-project`:
-> заведи запись в `integration.md` и ребро в `../project-map.md`.
+> заведи запись в `integration.md` и ребро в `docs/projects/project-map.md`.
 > Симметрично — `consumes` события, пришедшего от соседнего проекта.
 
 ## Errors

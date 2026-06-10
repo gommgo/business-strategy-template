@@ -51,8 +51,8 @@ hi-fi субстрат на библиотеке `@stit/ui`). Кросс-пов�
   (если есть; по bounded-context).
 - `docs/projects/_template/screens/README.md` — канон 4 kind артефактов
   экранов **одной поверхности** (`screens/<surface>/`).
-- `docs/projects/_template/project-map.md` — канон карты стыков между
-  продуктами бизнеса.
+- `docs/projects/project-map.md` — карта стыков между продуктами бизнеса
+  (singleton: канон формы + данные в одном файле; бизнес-язык, без техники).
 
 Артефакты — чистая аналитика; на FSD/компоненты напрямую не мапятся.
 Превращение `docs/projects/<slug>/screens/` в wireframe и hi-fi — ручная
@@ -418,9 +418,9 @@ Interface-слой (по проекту, **по поверхности**):
   по поверхности) + межпроектные стыки (`project-map`) — `cross-audit`
   (рой агентов, по каждому проекту).
 - **Карта проектов** (`docs/projects/project-map.md`) — граф стыков между
-  продуктами бизнеса; авторская сторона рёбер — `integration` с
-  `target: sibling-project`; форма — `docs/projects/_template/project-map.md`;
-  сверяет `cross-audit`.
+  продуктами бизнеса на бизнес-языке; авторская сторона рёбер — `integration`
+  с `target: sibling-project`; singleton (канон формы + данные в одном файле,
+  без технических подробностей стыка); сверяет `cross-audit`.
 - **Артефакты аналитики интерфейса** (`docs/projects/<slug>/interface/<surface>/`)
   — через скилл `interface-deep-dive <slug> [<surface>]`; форма — по
   `docs/projects/_template/interface/README.md` (канон слоя; форма одной

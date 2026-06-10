@@ -127,7 +127,7 @@ description: "Сквозной семантический аудит конси�
    `docs/swot/README.md`, `docs/hypothesis-map/README.md`,
    `docs/projects/README.md`, `docs/projects/_template/project/README.md`,
    `docs/projects/_template/project/{surface,capability,integration}.md`,
-   `docs/projects/_template/project-map.md`,
+   `docs/projects/project-map.md`,
    `docs/projects/_template/interface/README.md`, и (если есть)
    `docs/projects/_template/domains/README.md` /
    `docs/projects/_template/screens/README.md` — освежить каноны формы и

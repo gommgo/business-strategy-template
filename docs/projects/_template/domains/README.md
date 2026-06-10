@@ -20,18 +20,22 @@ docs/projects/_template/domains/
 │   ├── event.md
 │   ├── use-case.md
 │   ├── policy.md
+│   ├── integration-client.md  (kind: integration-client — клиент внешней системы в _shared/)
 │   └── context-readme.md
 └── _shared/
-    └── README.md              ← форма-образец роллапа cross-context VO
+    └── README.md              ← форма-образец роллапа cross-context VO и клиентов интеграций
 ```
 
 Данные доменов живут в папке проекта `docs/projects/<project-slug>/domains/`:
 
 ```
 docs/projects/<project-slug>/domains/
-├── _shared/                   ← cross-context VO и integration events
-│   ├── README.md              ← роллап: какие VO живут здесь и для кого
-│   └── <Name>.md              ← kind: vo, платформенный VO (PhotoRef, MoneyAmount, …)
+├── _shared/                   ← cross-context VO + конкретные клиенты интеграций
+│   ├── README.md              ← роллап: какие VO и клиенты живут здесь и для кого
+│   ├── <Name>.md              ← kind: vo, платформенный VO (PhotoRef, MoneyAmount, …)
+│   └── integrations/
+│       └── <integration-slug>/
+│           └── README.md      ← kind: integration-client, клиент внешней системы / соседа
 └── <bounded-context>/
     ├── README.md              ← purpose, ubiquitous language (роллап на контекст)
     ├── <Aggregate>.md         ← kind: aggregate, root entity + inline-VO внутри
@@ -43,7 +47,13 @@ docs/projects/<project-slug>/domains/
         └── <PolicyName>.md    ← kind: policy
 ```
 
-`_shared/` — заводим только когда VO реально нужен в ≥2 контекстах одного проекта и не несёт доменной семантики. Внутри-контекстные VO остаются inline в aggregate-файле.
+`_shared/` держит два рода платформенных артефактов: **cross-context VO**
+(заводим только когда VO реально нужен в ≥2 контекстах одного проекта и не
+несёт доменной семантики; внутри-контекстные VO остаются inline в
+aggregate-файле) и **клиенты интеграций** (`integrations/<integration-slug>/`)
+— конкретное воплощение интеграции, к которой обращаются домены: транспорт,
+функции с `slug`, ошибки. Домен зовёт функцию клиента по `slug`, оставаясь
+transport-agnostic; что это HTTP/gRPC/очередь — знает только клиент.
 
 ## Kinds
 
@@ -55,6 +65,7 @@ docs/projects/<project-slug>/domains/
 | `use-case` | бизнес-операция (orchestration) | `<ctx>/use-cases/<Name>.md` |
 | `policy` | pure правило / authz / rate-limit | `<ctx>/policies/<Name>.md` |
 | `vo` | cross-context платформенный VO (только для `_shared/`) | `_shared/<Name>.md` |
+| `integration-client` | конкретный клиент внешней системы / соседа: транспорт + функции с `slug` | `_shared/integrations/<integration-slug>/README.md` |
 
 ## Frontmatter (общий контракт)
 
@@ -85,6 +96,7 @@ consumes: [verification.EmailVerified]
 | `use-case` | Actor, Inputs, Outputs, Dependencies, Steps, Called aggregate methods, Events emitted, Errors |
 | `policy` | Kind of decision, Inputs, Rules, Outcomes, Used by |
 | `vo` | Properties, Invariants, Constructor, Consumed by |
+| `integration-client` | Transport, Functions, Errors |
 
 Контекст-`README.md`: Purpose, Aggregates, Use cases, Events, Cross-context dependencies, Ubiquitous Language.
 
@@ -100,22 +112,30 @@ Stateless / aggregate-of-one / пустые consumers — пишутся явн�
 ## Внешние и межпроектные интеграции
 
 Каждый выход кода наружу поднимается до явной записи в продуктовом слое
-`docs/projects/<project-slug>/integration.md`. В use-case это видно в
-таблице `## Dependencies` — колонка `integration`:
+`docs/projects/<project-slug>/integration.md` (провайдер + его функции) и
+получает **конкретный клиент** в `_shared/integrations/<integration-slug>/`.
+Домен остаётся **transport-agnostic**: в `## Dependencies` use-case объявляет,
+**какие функции** интеграции дёргает (по `slug`), а как именно (HTTP / gRPC /
+очередь / SDK) — дело клиента.
+
+В `## Dependencies` use-case колонка `integration`:
 
 - **внутренняя инфра** (репозиторий, `Clock`, reader другого контекста
-  **этого** проекта) — `integration` = `—`;
+  **этого** проекта) — `integration` = `—`, функции не нужны;
 - **внешняя система** (платёж, email, SMS, IDP, webhook) — `integration` =
-  slug записи `integration.md` с `target: external`; адаптер реализует порт;
-- **соседний проект бизнеса** — `integration` = slug записи с
-  `target: sibling-project` (+ `sibling-project` → slug проекта). Порт —
-  HTTP-клиент к API соседа (синхронно) или подписка на его событие
-  (асинхронно через `consumes`). Ребро стыка сводится в
-  [`../../project-map.md`](../../project-map.md).
+  slug провайдера в `integration.md` с `target: external`; use-case
+  перечисляет потребляемые функции `` [`<integration>.<fn-slug>`] ``, их
+  конкретика — в клиенте `_shared/integrations/<integration>/`;
+- **соседний проект бизнеса** — `integration` = slug провайдера с
+  `target: sibling-project` (+ `sibling-project` → slug проекта). Outbound —
+  функции клиента к соседу; inbound (сосед зовёт нас) — use-case с
+  соответствующим `Actor`. Ребро стыка сводится в
+  [`../../project-map.md`](../../project-map.md) на бизнес-языке.
 
-`/cross-audit` сверяет три стороны: порт в use-case ↔ запись в
-`integration.md` ↔ ребро в `project-map.md`. Внутри-проектные связи
-(между контекстами) остаются `relations` / `emits` / `consumes` —
+`/cross-audit` сверяет цепочку: потребляемая функция в use-case ↔ функция
+клиента `_shared/` ↔ строка `## Функции` в `integration.md` ↔ (для соседа)
+ребро `project-map.md` и обслуживающий use-case у соседа. Внутри-проектные
+связи (между контекстами) остаются `relations` / `emits` / `consumes` —
 они **не** интеграции и в `integration.md` не попадают.
 
 ## Workflow
@@ -134,6 +154,10 @@ Stateless / aggregate-of-one / пустые consumers — пишутся явн�
      cp $TPL/context-readme.md  $PROJECT/domains/<ctx>/README.md
    # Если обнаружен cross-context платформенный VO:
      cp $TPL/vo-shared.md       $PROJECT/domains/_shared/<Name>.md
+   # Если домен обращается к внешней системе / соседу — клиент интеграции:
+     mkdir -p $PROJECT/domains/_shared/integrations/<integration-slug>
+     cp $TPL/integration-client.md \
+        $PROJECT/domains/_shared/integrations/<integration-slug>/README.md
 
 2. Заполнить вручную минимум: frontmatter + properties (имена, типы)
    + methods/operations (имена). Принести Claude.
@@ -167,3 +191,6 @@ design-SoT). Промоушн `draft → stable` — **ручной review** п�
 - ❌ Cross-context relation типа `composition`. Только `reference` (по ID).
 - ❌ Промоутить `status: stable` в обход чек-листа `draft → stable` (форма не сверена).
 - ❌ Класть в `_shared/` доменный VO (например `Phone`, `Email`). `_shared/` — только для платформенных типов без доменной семантики.
+- ❌ Транспорт интеграции (HTTP-метод, endpoint, gRPC, очередь) в use-case или aggregate. Домен дёргает функцию по `slug`; транспорт живёт в клиенте `_shared/integrations/<slug>/`.
+- ❌ Клиент интеграции в `<ctx>/` вместо `_shared/integrations/`. Клиент платформенный и общий между контекстами; в доменном контексте — только потребление функций.
+- ❌ Сигнатура/endpoint функции в продуктовом `integration.md`. Там бизнес-описание функции; конкретика — в клиенте `_shared/`.
