@@ -40,7 +40,8 @@ SWOT → Карта гипотез (терминал — `task`). Исход —
   ux-substrate / data-items — вход `/interface-deep-dive <slug> [<surface>]`.
 - `screens/<surface>/` — flow / screen / block / shell — вход
   `/screen-deep-dive <slug> [<surface>]`.
-- `telegram-bot-flow/<surface>/` — dialog / window / command / notification
+- `telegram-bot-flow/<surface>/` — фичи `features/<feature>/` (dialog /
+  window / use-case бота) + сквозные `command` / `notification` на корне
   (для поверхностей с `type: bot` — вместо `screens/`) — вход
   `/telegram-bot-flow-deep-dive <slug> [<surface>]`.
 - `domains/` — (опц.) DDD-артефакты бэкенда по bounded-context
@@ -66,7 +67,7 @@ SWOT → Карта гипотез (терминал — `task`). Исход —
 |---|---|---|
 | **`<org>/backend`** (`go-backend-template`) | `projects/<slug>/domains/<ctx>/` + `domains/_shared/` (VO + клиенты интеграций; stable) | `/scaffold` domain → Go-код; маппинг DDD → Go (включая `integration-client` → порт/адаптер) живёт у него (`docs/reference/domain-mapping.md`) |
 | **`<org>/frontend`** (`spa-frontend-template`) | `projects/<slug>/{interface,screens}/<surface>/` + product-файлы | `/fsd-deep-dive` мапит ситуации/блоки/сущности на FSD-слои (по поверхности) |
-| **`<org>/<bot>`** (`telegram-bot-template`) | `projects/<slug>/telegram-bot-flow/<surface>/` + `interface/<surface>/` + `domains/` (use-case'ы и события под действия/триггеры) | проектирование и scaffold диалогов бота: StatesGroup, окна, виджеты, getter'ы, обработчики |
+| **`<org>/<bot>`** (`telegram-bot-template`) | `projects/<slug>/telegram-bot-flow/<surface>/` (фичи: диалоги, окна, use-case'ы бота-оркестратора) + `interface/<surface>/` + `domains/` (доменные use-case'ы и события под оркестратор) | проектирование и scaffold диалогов бота: StatesGroup, окна, виджеты, getter'ы, сервисы-оркестраторы, обработчики |
 | **`<org>/infra`** (`project-infra-template-compose`) | `projects/<slug>/{vision, surface}` | `/init-project` читает продуктовый контекст (vision / реестр поверхностей) |
 
 Соседи держат `<org>/strategy` sibling-checkout'ом рядом и резолвят путь через

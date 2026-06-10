@@ -1,6 +1,6 @@
 ---
 name: telegram-bot-flow-deep-dive
-description: "Углублённая проработка артефактов композиции телеграм-бота в `docs/projects/<project-slug>/telegram-bot-flow/<surface>/` (dialog · window · command · notification) — по папке на bot-поверхность (`type: bot`) из реестра `surface.md`. Ведёт сессию заполнения через структурированные вопросы (AskUserQuestion), синтезирует кандидатов из interface-слоя той же поверхности (зона → диалог, блок → окно, атомы → виджеты), держит мост к доменам (`use-case` для действий и данных, `event` для уведомлений), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/projects/<project-slug>/telegram-bot-flow/<surface>/`), аккумулирует референсы в `docs/projects/<project-slug>/telegram-bot-flow/<surface>/assets/<kind>/<slug>/` и не выдумывает тексты сообщений. Использовать всегда, когда речь о слое телеграм-бота проекта, заполнении одного из 4 артефактных kind (dialog/window/command/notification) одной bot-поверхности, заведении или углублении диалога/окна/команды/уведомления, разборе сырья (скриншот чужого бота, описание сценария словами, транскрипт интервью), прокладке переходов между окнами и диалогами, контракте данных окна (getter), переходе записи `status: draft → stable`, удалении с каскадом, или копании связей между сущностями telegram-bot-flow, interface той же поверхности и доменами проекта. Также — единственная точка входа в telegram-bot-flow-слой проекта: новые файлы и правки артефактов делаются через этот скилл."
+description: "Углублённая проработка артефактов композиции телеграм-бота в `docs/projects/<project-slug>/telegram-bot-flow/<surface>/` (dialog · window · use-case · command · notification) — по папке на bot-поверхность (`type: bot`) из реестра `surface.md`. Организующая ось внутри поверхности — фича (feature): один диалог + его окна + его use-case'ы бота в папке `features/<feature>/`; команды и уведомления — сквозными реестрами на корне. Ведёт сессию заполнения через структурированные вопросы (AskUserQuestion), синтезирует кандидатов из interface-слоя той же поверхности (зона → диалог/фича, блок → окно, атомы → виджеты), держит двухуровневый мост к доменам (виджет и getter окна ссылаются на use-case бота, а тот в зависимостях — на `use-case` домена; `event` — для уведомлений), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/projects/<project-slug>/telegram-bot-flow/<surface>/`), аккумулирует референсы в `docs/projects/<project-slug>/telegram-bot-flow/<surface>/features/<feature>/assets/<slug>/` и не выдумывает тексты сообщений. Использовать всегда, когда речь о слое телеграм-бота проекта, заполнении одного из 5 артефактных kind (dialog/window/use-case/command/notification) одной bot-поверхности, заведении или углублении фичи/диалога/окна/use-case'а бота/команды/уведомления, разборе сырья (скриншот чужого бота, описание сценария словами, транскрипт интервью), прокладке переходов между окнами и фичами, контракте данных окна (getter), оркестрации действия окна через use-case бота, переходе записи `status: draft → stable`, удалении с каскадом, или копании связей между сущностями telegram-bot-flow, interface той же поверхности и доменами проекта. Также — единственная точка входа в telegram-bot-flow-слой проекта: новые файлы и правки артефактов делаются через этот скилл."
 ---
 
 # telegram-bot-flow-deep-dive
@@ -8,11 +8,11 @@ description: "Углублённая проработка артефактов �
 Углублённая проработка артефактов телеграм-бота **одного проекта**, в
 контексте **одной bot-поверхности (surface)** —
 `docs/projects/<project-slug>/telegram-bot-flow/<surface>/`. Канон формы —
-`docs/projects/_template/telegram-bot-flow/README.md` и kind-каноны в
-подпапке `_template/` (`dialogs/README.md`, `windows/README.md`,
-`command.md`, `notification.md`). Скилл ведёт сеанс через
-структурированные вопросы, фиксирует контекст в своей ветке единого
-дерева state оркестратора
+`docs/projects/_template/telegram-bot-flow/README.md` и каноны в подпапке
+`_template/` (`features/README.md` — формы `dialog.md`, `window.md`,
+`use-case.md`; `command.md`, `notification.md` — root-реестры). Скилл
+ведёт сеанс через структурированные вопросы, фиксирует контекст в своей
+ветке единого дерева state оркестратора
 (`../entrypoint/state/projects/<project-slug>/telegram-bot-flow/<surface>/`),
 не выдумывает тексты сообщений и не лезет в interface-слой того же
 проекта своими руками.
@@ -25,15 +25,22 @@ description: "Углублённая проработка артефактов �
 `type: bot` из реестра-хребта `docs/projects/<project-slug>/surface.md`
 получает свою папку `telegram-bot-flow/<surface>/` — она встаёт на место
 `screens/<surface>/` (web-поверхность получает экраны, бот — диалоги).
-Скилл всегда работает **в контексте одного проекта и одной
-bot-поверхности** (см. «Выбор проекта» и «Выбор поверхности»). Дальше по
-тексту `<project-slug>` — выбранный проект, `<surface>` — выбранная
-поверхность; слой бота —
+Внутри поверхности организующая ось — **фича (feature)**: один диалог +
+его окна + его use-case'ы бота собраны в папку `features/<feature>/`
+(`dialog.md` · `window.md` · `use-case.md`); slug фичи = slug её диалога.
+Команды (command) и уведомления (notification) — сквозные реестры **на
+корне поверхности**, вне фич. Скилл всегда работает **в контексте одного
+проекта и одной bot-поверхности** (см. «Выбор проекта» и «Выбор
+поверхности»). Дальше по тексту `<project-slug>` — выбранный проект,
+`<surface>` — выбранная поверхность; слой бота —
 `docs/projects/<project-slug>/telegram-bot-flow/<surface>/`, interface-слой
 той же поверхности —
-`docs/projects/<project-slug>/interface/<surface>/`. Поверхности
-изолированы: ссылки внутри `telegram-bot-flow/<surface>/` и зеркала с
-`interface/<surface>/` — в пределах одной поверхности.
+`docs/projects/<project-slug>/interface/<surface>/`. **Изоляция
+двухуровневая**: поверхности изолированы между собой, а внутри поверхности
+изолированы и **фичи** — ссылки внутри `features/<feature>/` (окно ↔ диалог
+↔ use-case) резолвятся в пределах своей фичи; между фичами — только
+`start:<feature>` и сквозные реестры корня. Зеркала с `interface/<surface>/`
+— в пределах одной поверхности.
 
 ## Выбор проекта
 
@@ -47,7 +54,7 @@ bot-поверхности** (см. «Выбор проекта» и «Выбо�
 | `/telegram-bot-flow-deep-dive …` (без slug) | `AskUserQuestion`-пикер **по именам** проектов (исключая `_template`) |
 
 Поскольку точки входа допускают `<kind>:<slug>` (например,
-`telegram-bot-flow-deep-dive my-app client-bot dialog:booking`),
+`telegram-bot-flow-deep-dive my-app client-bot feature:booking`),
 `<project-slug>` отделяется от остатка как первый токен и/или по
 совпадению с именем подпапки `docs/projects/`:
 
@@ -106,12 +113,12 @@ bot-поверхности** (см. «Выбор проекта» и «Выбо�
 
 Каталоги руками не создаются в обход скила. При первом заходе на
 bot-поверхность скилл создаёт форму папки из канона
-`docs/projects/_template/telegram-bot-flow/_template/`: реестры
+`docs/projects/_template/telegram-bot-flow/_template/`: реестры корня
 `command.md` и `notification.md` (копии канон-таблиц, очищенные от
 строк-образцов — остаётся канон-проза + пустой заголовок таблицы) и
-пустые папки `dialogs/`, `windows/`, `assets/` (папки
-`dialogs/<slug>/` и `windows/<slug>/` наполняются при заведении первой
-сущности).
+пустую папку `features/`. Папка фичи `features/<feature>/` с файлами
+`dialog.md`, `window.md`, `use-case.md` (и `assets/`) создаётся при
+заведении первой фичи (= её диалога), не на scaffold'е.
 
 ## Точки входа
 
@@ -126,7 +133,17 @@ bot-поверхность скилл создаёт форму папки из 
 | `/telegram-bot-flow-deep-dive <project-slug> <surface> <slug>` | найти slug; одиночный → C; конфликт kind → переспросить |
 | `/telegram-bot-flow-deep-dive <project-slug> <surface> <свободный текст / приложение>` | сырьё → разбор (режим B) |
 
-`kind` ∈ {`dialog`, `window`, `command`, `notification`}.
+`kind` ∈ {`dialog`, `window`, `use-case`, `command`, `notification`}.
+
+`dialog`, `window` и `use-case` живут **внутри фичи**
+(`features/<feature>/`): диалог — файл `dialog.md`, окно — H2-секция
+`## <window-slug>` в `window.md`, use-case бота — H2-секция
+`## <uc-slug>` в `use-case.md`. Поскольку фича = один диалог, slug фичи =
+slug её диалога. Резолв `window`/`use-case`-точки входа требует **контекста
+фичи**: выбор диалога = выбор фичи. Если фича из `<kind>:<slug>` не
+определена однозначно — скилл переспрашивает фичу `AskUserQuestion`-пикером
+по именам диалогов; `command` и `notification` живут на **корне
+поверхности**, вне фич, и контекста фичи не требуют.
 
 Сырьё (режим B) — описание сценария бота словами, скриншот чужого
 бота-референса, транскрипт интервью, либо любая их комбинация. Картинки
@@ -137,8 +154,10 @@ bot-поверхность скилл создаёт форму папки из 
 1. Определить `<project-slug>` (см. «Выбор проекта») и `<surface>` (см.
    «Выбор поверхности»), при первом заходе — scaffold.
 2. Прочитать `docs/projects/_template/telegram-bot-flow/README.md` и
-   kind-каноны в подпапке `_template/` — освежить виджет-язык, контракт
-   getter, инварианты модели Telegram, anti-patterns.
+   каноны в подпапке `_template/` (`features/README.md` — формы
+   `dialog.md`/`window.md`/`use-case.md`; `command.md`, `notification.md`)
+   — освежить виджет-язык, контракт getter, форму use-case бота,
+   инварианты модели Telegram, anti-patterns.
 3. Прочитать `docs/projects/<project-slug>/vision.md`, реестр-хребет
    `surface.md`, файл возможностей поверхности
    `capability/<surface>.md` (если есть) и interface-слой поверхности
@@ -146,7 +165,8 @@ bot-поверхность скилл создаёт форму папки из 
    `references/interface-context.md` — освежить источник синтеза.
 4. Пробежать `docs/projects/<project-slug>/domains/` (если есть):
    контексты, `use-cases/`, `events/` + `references/domain-bridge.md`
-   — освежить мост к доменам.
+   — освежить двухуровневый мост к доменам (use-case бота → доменный
+   use-case).
 5. Если остаток args пуст — сделать сводку (см. ниже) и через
    `AskUserQuestion` предложить выбор что копать.
 6. Если остаток args указывает на сущность — определить kind и режим
@@ -155,9 +175,10 @@ bot-поверхность скилл создаёт форму папки из 
 
 ## Сводка состояния (без args)
 
-1. Пройтись по
-   `docs/projects/<project-slug>/telegram-bot-flow/<surface>/{dialogs,windows}/*/index.md`
-   и реестрам `command.md`, `notification.md`.
+1. Пройтись по фичам
+   `docs/projects/<project-slug>/telegram-bot-flow/<surface>/features/*/`
+   (`dialog.md` каждой фичи, секции `## <slug>` в `window.md` и
+   `use-case.md`) и реестрам корня `command.md`, `notification.md`.
 2. Подсчитать: сколько `draft` / `stable` по каждому kind.
 3. Прочитать свою ветку
    `../entrypoint/state/projects/<project-slug>/telegram-bot-flow/<surface>/`
@@ -166,11 +187,12 @@ bot-поверхность скилл создаёт форму папки из 
 4. Выявить топ-3 «горячих» кандидата по приоритету:
    - draft-записи с `**blocker**`-вопросами;
    - диалоги без `started-by`, окна-тупики, плейсхолдеры без ключа в
-     `getter` / ключи без `fallback`;
+     `getter` / ключи без `fallback`, виджеты с `action` на
+     несуществующий use-case бота фичи, use-case'ы без `Outputs`;
    - draft-записи, на которые ссылаются stable-соседи (например,
      `dialog.windows` указывает на draft-окно);
    - дыры синтеза: зоны/блоки interface поверхности, ещё не
-     воплощённые диалогами/окнами (см.
+     воплощённые фичами/окнами (см.
      `references/interface-context.md`).
 5. Вывести сводку в чат (с указанием поверхности), предложить через
    `AskUserQuestion` выбрать.
@@ -185,8 +207,12 @@ bot-поверхность скилл создаёт форму папки из 
   батч `AskUserQuestion` по чек-листам полей; опции — anti-patterns из
   секций `Что <kind> НЕ` соответствующих канонов; свободная форма через
   Other для значений (`name`, `description`, тексты сообщений, подписи
-  кнопок). dialog и window — папка с `index.md`; command и
-  notification — новая строка таблицы реестра.
+  кнопок). dialog — файл `features/<feature>/dialog.md` (заведение
+  диалога заводит и папку фичи); window — H2-секция `## <slug>` в
+  `features/<feature>/window.md`; use-case бота — H2-секция `## <slug>`
+  в `features/<feature>/use-case.md` (заводится, когда виджету окна нужен
+  `action`, см. «Мост к domains»); command и notification — новая строка
+  таблицы реестра корня.
 - **B. Сырьё**. Args = свободный текст, картинка, URL. Скилл
   анализирует, извлекает кандидатов, через чат показывает план,
   по подтверждению заводит stub'ы и погружается в каждый через
@@ -204,14 +230,17 @@ bot-поверхность скилл создаёт форму папки из 
     anti-pattern X — согласен?»);
   - теста-критерия (бинарный выбор ✅/❌ из секций `Тест-критерий`);
   - перечисления enum'ов из канона (`launch-mode`, `stack`, тип
-    виджета, `transition: <window>|back|done|start:<dialog>`,
+    виджета, `transition: <window>|back|done|start:<feature>`,
     `getter.source: use-case|dialog-data|start-data|const`);
   - выбора существующего slug-соседа (по опции на каждый существующий
     + «нужен новый» через Other);
   - выбора блока/зоны/субстрата/ситуации/роли interface для синтеза и
     рёбер (`interface-block`, `ux-substrates`, `situations`, `who`);
-  - выбора `use-case:<ctx>.<Operation>` / `event:<ctx>.<Event>` из
-    доменов проекта (см. `references/domain-bridge.md`).
+  - выбора use-case бота фичи для `widget.action` / `getter.*.source`
+    (`use-case:<uc-slug>`, опция на каждый существующий + «нужен новый
+    bot UC») и выбора доменного `use-case:<ctx>.<Operation>` /
+    `event:<ctx>.<Event>` из доменов проекта (см.
+    `references/domain-bridge.md`).
 - **Свободная форма** (через Other) — для **значения**: `name`,
   `description`, текст сообщения (`message.text`), подписи кнопок
   (`label`), тексты `content` и `errors`, условия переходов (`when` —
@@ -227,18 +256,22 @@ bot-поверхность скилл создаёт форму папки из 
 (`.claude/rules/naming.md`):
 
 - `slug` — из человекочитаемого `name` (транслит в kebab-case); при
-  коллизии — числовой суффикс;
+  коллизии — числовой суффикс (slug фичи = slug её диалога; slug окна /
+  use-case бота уникален **в пределах фичи**);
 - `states-group` диалога (PascalCase, англ., уникален в поверхности) и
   `state` окна (UPPER_SNAKE, англ., уникален в группе) — скилл сам
   предлагает из `name` (смысловой английский корень);
+- `operation` use-case бота (PascalCase, англ., из него код строит
+  сервис/handler оркестрации) — скилл предлагает из `name`;
 - `id` виджета (snake_case, уникален в окне) — из роли виджета.
 
 Каждый идентификатор показывается **одной строкой для контроля**
-(«завожу как `booking`, группа состояний — `Booking`, ок?»), не как
+(«завожу как `booking`, группа состояний — `Booking`, ок?»; для use-case
+бота — «завожу `submit-booking`, операция — `SubmitBooking`, ок?»), не как
 поле ввода; поправить можно через Other, но аналитик никогда не обязан
-придумывать его сам. `slug`, `states-group` и `state` неизменяемы после
-заведения — их читает код-репо бота; переименование — отдельный каскад
-через рефактор-режим оркестратора, не правка руками.
+придумывать его сам. `slug`, `states-group`, `state` и `operation`
+неизменяемы после заведения — их читает код-репо бота; переименование —
+отдельный каскад через рефактор-режим оркестратора, не правка руками.
 
 ## Память: своя ветка единого дерева state
 
@@ -251,6 +284,10 @@ bot-поверхность скилл создаёт форму папки из 
 ../entrypoint/state/projects/<project-slug>/telegram-bot-flow/<surface>/<kind>/<slug>.md
 ```
 
+Заметки фичевых kind (`dialog`/`window`/`use-case`) ведутся в подпапке
+фичи: `…/<surface>/<feature>/<kind>/<slug>.md`; `command`/`notification`
+— на корне ветки поверхности.
+
 Формат заметки — канон `../entrypoint/references/state-model.md`. Кратко:
 
 - Файл существует, пока в нём есть хоть одна секция с содержимым.
@@ -260,7 +297,8 @@ bot-поверхность скилл создаёт форму папки из 
     блокирующего stable),
   - `## Доменные решения` (неочевидные смысловые решения, не лезущие
     в `description`; сюда же — доменные требования вида «нужен
-    `use-case:<ctx>.<Operation>`», когда домена ещё нет),
+    `use-case:<ctx>.<Operation>` в `Dependencies` bot UC», когда домена
+    ещё нет),
   - `## Что копать дальше`.
 - Если все секции пусты — заметку удалить.
 - Заметка не журнал: не аккумулировать «было/стало», только текущее
@@ -281,11 +319,13 @@ bot-поверхность скилл создаёт форму папки из 
 
 ## Ассеты
 
-Референсы (скриншоты ботов-аналогов, мокапы сообщений) живут в
-`docs/projects/<project-slug>/telegram-bot-flow/<surface>/assets/<kind>/<slug>/`;
-имена файлов — человекочитаемые kebab-case
-(`competitor-bot-menu.png`, `booking-confirm-mockup.png`). Папка
-сущности создаётся при первом ассете и удаляется вместе с сущностью.
+Референсы (скриншоты ботов-аналогов, мокапы сообщений) живут в папке
+ассетов фичи
+`docs/projects/<project-slug>/telegram-bot-flow/<surface>/features/<feature>/assets/<slug>/`
+(где `<slug>` — окно или use-case бота фичи); имена файлов —
+человекочитаемые kebab-case (`competitor-bot-menu.png`,
+`booking-confirm-mockup.png`). Папка сущности создаётся при первом ассете
+и удаляется вместе с сущностью.
 
 - Входящая картинка от аналитика → скилл анализирует, через
   `AskUserQuestion` решают вместе: (a) сохранить как референс к
@@ -302,28 +342,40 @@ bot-поверхность скилл создаёт форму папки из 
 
 1. Обязательные слоты frontmatter / колонки таблицы заполнены
    (опциональные могут быть `—`).
-2. Все `slug`-ссылки валидны — внутри
-   `docs/projects/<project-slug>/telegram-bot-flow/<surface>/` и в
-   interface-слое **той же поверхности**
+2. Все `slug`-ссылки валидны: внутрифичевые рёбра
+   (`dialog.windows`, `widget.transition`, `widget.action`,
+   `getter.*.source`) — в пределах **своей фичи**
+   `…/telegram-bot-flow/<surface>/features/<feature>/`; межфичевые/root
+   (`start:<feature>`, `dialog.started-by`, `command.starts`,
+   `notification.action`) — по реестрам корня и фичам поверхности;
+   interface-рефы — в interface-слое **той же поверхности**
    `docs/projects/<project-slug>/interface/<surface>/`. Доменные рефы
-   (`use-case:…`, `event:…`) — семантические: при отсутствующем домене
-   фиксируются как требование в state, stable не блокируют.
+   bot UC (`use-case.Dependencies` → `use-case:<ctx>.<Operation>`) и
+   `notification.trigger` (`event:…`) — семантические: при отсутствующем
+   домене фиксируются как требование в state, stable не блокируют.
 3. Зеркала консистентны:
-   - `window.ux-substrates` ↔ `block.ux-substrates` interface-блока
-     `window.interface-block`;
-   - `dialog.windows` ↔ `window.dialog` каждого окна;
+   - `window.ux-substrates` (мета-блок секции окна) ↔
+     `block.ux-substrates` interface-блока `window.interface-block`;
+   - `dialog.windows` ↔ множество секций `## <slug>` в `window.md` фичи;
    - `dialog.transitions` (сводка) ↔ поля `transition` на виджетах
-     окон диалога.
+     окон фичи;
+   - `widget.action` / `getter.*.source` (`use-case:<uc-slug>`) ↔
+     секция `## <uc-slug>` в `use-case.md` той же фичи.
 4. Тест-критерий из канона соответствующего kind явно подтверждён
    аналитиком в этой сессии.
-5. В
-   `../entrypoint/state/projects/<project-slug>/telegram-bot-flow/<surface>/<kind>/<slug>.md`
+5. В state-заметке сущности
+   (`…/telegram-bot-flow/<surface>/<feature>/<kind>/<slug>.md` для
+   фичевых kind, `…/<surface>/<kind>/<slug>.md` для command/notification)
    нет `**blocker**`-вопросов.
 6. Тело / строка полные и держат инварианты Telegram (см. ниже):
    `window` — каждый плейсхолдер `{…}` и `items` обеспечен ключом
-   `getter` с `fallback`, `errors` несёт канон-ключи, окно не тупик;
-   `dialog` — `dialog-data` описан, `transitions`-сводка сходится, из
-   каждого окна есть путь к `done`; `command` — `/start` со
+   `getter` с `fallback`, `action` ссылается на use-case бота фичи или
+   отсутствует, `errors` несёт канон-ключи, окно не тупик;
+   `use-case` — мета-поля (`name`, `operation`, `who`, `status`) и
+   H3-секции (`Actor`/`Inputs`/`Outputs`/`Dependencies`/`Steps`/`Errors`)
+   полны, `Outputs` называет исходы для `when` окон, `Steps` без
+   бизнес-правил; `dialog` — `dialog-data` описан, `transitions`-сводка
+   сходится, из каждого окна есть путь к `done`; `command` — `/start` со
    `stack: reset`, deep-link несёт `payload`; `notification` —
    `trigger` объявлен, `idempotency` непуст, плейсхолдеры `content`
    обеспечены payload'ом триггера.
@@ -348,9 +400,9 @@ bot-поверхность скилл создаёт форму папки из 
   записывается.
 - **`dialog-data` — только JSON-примитивы** — сущности домена и
   даты-объекты в контракт накопления не пишутся.
-- **Между диалогами — только `start:` / `done`** — `transition` на окно
-  чужого диалога не записывается; предлагается `start:<dialog-slug>` или
-  пересборка состава окон.
+- **Между фичами — только `start:` / `done`** — `transition` на окно
+  чужой фичи не записывается; предлагается `start:<feature>` (войти в
+  диалог другой фичи) или пересборка состава окон этой фичи.
 - **Уведомление — только с идемпотентностью** — строка без `idempotency`
   или с триггером «когда захотим» не заводится.
 
@@ -361,9 +413,10 @@ bot-поверхность скилл создаёт форму папки из 
 
 - `docs/projects/<project-slug>/interface/<surface>/block.md` — взгляд
   бизнеса (блок собирает определённые субстраты ситуаций);
-- `docs/projects/<project-slug>/telegram-bot-flow/<surface>/windows/<slug>/index.md`
-  (frontmatter `ux-substrates: [...]`) — взгляд композиции (окно
-  реализует те же субстраты как текст и виджеты).
+- мета-блок секции окна `## <window-slug>` в
+  `docs/projects/<project-slug>/telegram-bot-flow/<surface>/features/<feature>/window.md`
+  (`ux-substrates: [...]`) — взгляд композиции (окно реализует те же
+  субстраты как текст и виджеты).
 
 Канонического источника нет: оба слоя ведут разную работу. При
 расхождении скилл **не правит молча**. Алгоритм:
@@ -377,8 +430,8 @@ bot-поверхность скилл создаёт форму папки из 
    - «вариант бота» → предложить аналитику запустить
      `interface-deep-dive <project-slug> <surface> block:<slug>` и
      подровнять interface;
-   - «interface-вариант» → подровнять окно (правка `ux-substrates` во
-     frontmatter здесь) и сверить покрытие виджетами;
+   - «interface-вариант» → подровнять окно (правка `ux-substrates` в
+     мета-блоке его секции здесь) и сверить покрытие виджетами;
    - «оба нужны» → расхождение смысловое, state-заметка
      `**blocker**: ux-substrates расходятся, прояснить смысл окна`.
 
@@ -390,28 +443,42 @@ bot-поверхность скилл создаёт форму папки из 
 
 ### Зеркало transitions внутри слоя
 
-Источник правды графа переходов — поля `transition` на виджетах окон;
-`dialog.transitions` — выводимая сводка. После правки переходов любого
-окна скилл пересчитывает сводку диалога и предлагает обновление (это
-механический пересчёт, не смысловое решение — но запись делается явно,
-не молча).
+Источник правды графа переходов — поля `transition` на виджетах окон
+фичи; `dialog.transitions` — выводимая сводка. После правки переходов
+любого окна фичи скилл пересчитывает сводку её диалога и предлагает
+обновление (это механический пересчёт, не смысловое решение — но запись
+делается явно, не молча).
 
 ## Мост к domains
 
-См. `references/domain-bridge.md`. Кратко:
+См. `references/domain-bridge.md`. Мост **двухуровневый**: окно касается
+домена не напрямую, а через **use-case бота** фичи.
 
-- `widget.action` и `getter.*.source` — реф `use-case:<ctx>.<Operation>`
-  на `docs/projects/<project-slug>/domains/<ctx>/use-cases/`; при
-  заведении — опции из существующих use-case проекта + «нужен новый».
-- условие перехода `when` — **исход use-case** (его `Outputs`/`Errors`),
-  не правило, придуманное окном; скилл показывает исходы как контекст,
-  формулировку даёт аналитик.
+- **Уровень 1 — окно → use-case бота (внутри фичи, slug-валидируемо)**:
+  `widget.action` и `getter.*.source` — реф `use-case:<uc-slug>` (без
+  точки) на секцию `## <uc-slug>` в `use-case.md` **той же фичи**, либо
+  `—` (чистая навигация). Когда виджету окна нужен `action`, а
+  подходящего use-case бота в фиче ещё нет — скилл предлагает завести
+  его (`slug` + `operation`): опции из существующих bot UC фичи + «нужен
+  новый bot UC». Bot UC и есть точка, где композиция мостится к домену.
+- **Уровень 2 — use-case бота → доменный use-case (семантически)**: в
+  своих `### Dependencies` bot UC ссылается на доменный
+  `use-case:<ctx>.<Operation>` (**с точкой**) на
+  `docs/projects/<project-slug>/domains/<ctx>/use-cases/`; при заведении
+  bot UC — опции из существующих доменных use-case проекта + «нужна
+  новая операция». Точка различает уровни: реф без точки — bot UC, с
+  точкой — доменный.
+- условие перехода `when` на виджете — **исход use-case бота** (его
+  `### Outputs`/`### Errors`), не правило, придуманное окном; скилл
+  показывает исходы как контекст, формулировку даёт аналитик.
 - `notification.trigger` — `event:<ctx>.<Event>` из
   `domains/<ctx>/events/` (опции из существующих), `schedule: <по-русски>`
-  или `integration:<slug>` из `integration.md` проекта.
+  или `integration:<slug>` из `integration.md` проекта (без изменений —
+  уведомление триггерится доменным событием напрямую).
 - Если доменного слоя нет (или нужного контекста/операции/события ещё
-  нет) — связь **семантическая**: имя фиксируется в артефакте как есть,
-  а в state-заметке (`## Доменные решения`) — строка-требование «нужен
+  нет) — доменная связь **семантическая** и фиксируется на уровне bot UC:
+  имя пишется в `### Dependencies` как есть, а в state-заметке bot UC
+  (`## Доменные решения`) — строка-требование «нужен
   `use-case:<ctx>.<Operation>` — для <зачем>» + предложение
   `/domain-deep-dive <project-slug> <ctx>`. Stable это не блокирует;
   несостыковки сводит `/cross-audit`.
@@ -422,15 +489,26 @@ bot-поверхность скилл создаёт форму папки из 
 
 ### Внутри telegram-bot-flow
 
-Если копаемая сущность ссылается на не существующий slug слоя **той же
-поверхности** (окно в `dialog.windows`, диалог в `command.starts` или
-`transition: start:<slug>`, команда в `notification.action`):
+Внутрифичевые рефы (окно в `dialog.windows`, use-case бота в
+`widget.action` / `getter.*.source`) резолвятся **в пределах своей
+фичи**; межфичевые/root (фича в `command.starts` или
+`transition: start:<feature>`, команда в `notification.action`) — по
+реестрам корня и фичам поверхности. Если копаемая сущность ссылается на
+не существующий slug:
 
-1. Завести stub: для dialog/window — папка
-   `…/telegram-bot-flow/<surface>/<kind>s/<slug>/index.md` с минимальным
-   frontmatter (`slug + name + description + status=draft` +
-   обязательные поля с `—` где допустимо); для command/notification —
-   строка таблицы с `—` в незаполненных колонках.
+1. Завести stub:
+   - окно — H2-секция `## <slug>` в `window.md` **той же фичи** с
+     минимальным мета-блоком (`name` + `state` + `status: draft` +
+     обязательные поля с `—` где допустимо);
+   - use-case бота — H2-секция `## <slug>` в `use-case.md` **той же
+     фичи** с минимальным мета-блоком (`name` + `operation` +
+     `status: draft`) и пустыми/`—` H3-секциями;
+   - фича/диалог (новый `start:<feature>`) — папка `features/<feature>/`
+     с `dialog.md` (минимальный frontmatter `slug + name + description +
+     status=draft` + обязательные поля с `—`) и пустыми `window.md` /
+     `use-case.md`;
+   - command/notification — строка таблицы реестра корня с `—` в
+     незаполненных колонках.
 2. В state-заметке stub'а — секция `## Открытые вопросы` с записью
    «Заведён как stub в контексте `<откуда сослались>` — докопать».
 3. Возврат в исходную сущность, копание продолжается.
@@ -456,21 +534,28 @@ interface-slug **той же поверхности**:
 
 ## Удаление сущности (каскад)
 
-1. Прочитать все 4 kind поверхности
-   (`dialogs/`, `windows/`, `command.md`, `notification.md`) + свою
-   ветку state — найти все ссылки на удаляемый slug (в пределах
-   поверхности): `dialog.windows`, `started-by`, `transition` виджетов
-   (включая `start:`), `command.starts`, `notification.action`. Также
-   проверить `…/<surface>/assets/<kind>/<slug>/`.
+1. Прочитать все 5 kind поверхности (фичи
+   `features/*/{dialog.md, window.md, use-case.md}` + реестры корня
+   `command.md`, `notification.md`) + свою ветку state — найти все
+   ссылки на удаляемый slug: `dialog.windows`, `started-by`,
+   `widget.transition` (включая `start:<feature>`), `widget.action`,
+   `getter.*.source`, `command.starts`, `notification.action`. Также
+   проверить папку ассетов фичи
+   `…/features/<feature>/assets/<slug>/`.
 2. Показать каскад: «ссылаются X, Y, Z — вот что сломается». Удаление
-   диалога тянет его окна (`window.dialog` — ровно один) — показать их
-   списком отдельно.
+   фичи/диалога тянет все её окна и use-case'ы (вся папка
+   `features/<feature>/`) — показать их списком отдельно. Удаление
+   use-case бота тянет `widget.action` / `getter.*.source`, которые на
+   него ссылались.
 3. Через `AskUserQuestion` по каждому месту — опции: «заменить на
    другой slug» / «поставить `—` (если поле допускает)» / «удалить
    ссылающуюся запись».
 4. По подтверждению — выполнить все правки одним пакетом: удалить
-   артефакт (папку `…/<kind>s/<slug>/` целиком либо строку таблицы
-   реестра), его папку ассетов и state-заметку, если существуют.
+   артефакт (папку `features/<feature>/` целиком — при удалении фичи;
+   H2-секцию `## <slug>` в `window.md` / `use-case.md` — при удалении
+   окна / use-case; строку таблицы реестра — при удалении
+   command/notification), его папку ассетов и state-заметку, если
+   существуют.
 5. Пересчитать сводки `transitions` затронутых диалогов и зеркала
    `dialog.windows`.
 
@@ -481,7 +566,8 @@ interface-slug **той же поверхности**:
 1. Перечислить затронутые сущности (заведены / углублены / удалены).
 2. Перечислить нерешённые открытые вопросы по сущностям (с указанием
    `**blocker**`-меток) и накопленные доменные требования (нужные
-   use-case / event без домена).
+   доменные use-case в `Dependencies` bot UC / event уведомлений без
+   домена).
 3. Предложить через `AskUserQuestion`: «Прогнать
    `/telegram-bot-flow-audit <project-slug> <surface>`?» — это аудит
    консистентности слоя поверхности и зеркал с её interface. По «да»
@@ -499,10 +585,17 @@ interface-slug **той же поверхности**:
   `.ftl`-ключи, callback-строки — забота код-репо.
 - Не описывать облик: эмодзи-оформление, HTML/Markdown-разметка,
   «жирная кнопка» — забота кода и контента.
-- Не класть бизнес-правила в `when` — условие перехода формулируется
-  как исход use-case; ветвление решает домен.
+- Не класть бизнес-правила в `when` или в `Steps` use-case бота —
+  условие перехода формулируется как исход use-case бота, а тот лишь
+  оркеструет; ветвление по бизнес-правилу решает домен.
+- Не давать `widget.action` работать мимо use-case бота («кнопка сама
+  сохраняет в базу») — действие ссылается на `use-case:<uc-slug>` фичи
+  или отсутствует; в домен ходит bot UC через свои `Dependencies`.
+- Не путать уровни рефа: `use-case:<uc-slug>` без точки — use-case бота
+  (внутри фичи), `use-case:<ctx>.<Operation>` с точкой — доменный (в
+  `Dependencies` bot UC).
 - Не нарушать инварианты модели Telegram (см. выше) — ни в заведении,
-  ни в правке; исходящее сообщение — только через реестр
+  ни в правке; исходящее сообщение — только через реестр корня
   `notification.md`.
 - Не лезть в interface-слой проекта
   (`docs/projects/<project-slug>/interface/<surface>/`) и в `domains/`
@@ -514,9 +607,15 @@ interface-slug **той же поверхности**:
   сессии — скилл скоупится в один `<project-slug>` и одну `<surface>`;
   ссылка из одной поверхности в сущность другой запрещена (поверхности
   изолированы). Смена поверхности — новый запуск.
+- Не ссылаться из одной фичи в окно/use-case другой минуя
+  `start:<feature>` / `command` — фичи изолированы так же, как
+  поверхности; внутрифичевые рефы (окно ↔ диалог ↔ use-case) резолвятся
+  только в пределах своей фичи.
+- Не заводить несколько диалогов в одной фиче — вложенный сценарий
+  выносится в отдельную фичу, вход через `start:<feature>`.
 - Не просить аналитика придумывать `slug` / `states-group` / `state` /
-  `id` — идентификаторы выводит скилл, аналитик контролирует одной
-  строкой.
+  `operation` / `id` — идентификаторы выводит скилл, аналитик
+  контролирует одной строкой.
 - Не повышать `draft → stable` без явного подтверждения аналитика.
 - Не понижать `stable → draft` сам — только подсветить и предложить.
 - Не править `window.ux-substrates` молча при рассинхроне с interface —

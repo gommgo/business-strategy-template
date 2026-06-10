@@ -51,7 +51,7 @@ docs/projects/<slug>/
 │   ├── <surface-1>/          flows · screens · blocks · shells · assets
 │   └── <surface-2>/
 ├── telegram-bot-flow/
-│   └── <bot-surface>/        dialogs · windows · command · notification · assets  (для type: bot — вместо screens)
+│   └── <bot-surface>/        command.md · notification.md · features/<feature>/{dialog.md,window.md,use-case.md}  (для type: bot — вместо screens)
 └── domains/                  _shared + <bounded-context>/  (по контексту, не по surface)
 ```
 

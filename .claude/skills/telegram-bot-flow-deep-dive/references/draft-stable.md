@@ -7,47 +7,55 @@
 
 ### 1. Обязательные слоты заполнены
 
-Frontmatter (dialog, window) или колонки таблицы (command,
-notification) — обязательные с непустым значением; опциональные могут
-быть `—` (`dialog.start-data`, `command.starts`/`payload`,
-`notification.action`, `message.media`).
+Frontmatter диалога (`dialog.md`), мета-блок секции окна / use-case бота
+(`## <slug>` в `window.md` / `use-case.md`) или колонки таблицы реестра
+корня (command, notification) — обязательные с непустым значением;
+опциональные могут быть `—` (`dialog.start-data`,
+`command.starts`/`payload`, `notification.action`, `message.media`).
 
-См. `field-checklists.md` — там по каждому из 4 kind: какие поля
+См. `field-checklists.md` — там по каждому из 5 kind: какие поля
 обязательны и какие допускают `—`.
 
 ### 2. Все ссылки валидны
 
-Каждый `slug` существует **в пределах текущей поверхности**:
+Каждый `slug` существует **в пределах своей области** (поверхность,
+внутри неё — фича):
 
-**Внутри telegram-bot-flow** (все пути — в папке текущей поверхности
-текущего проекта
-`docs/projects/<project-slug>/telegram-bot-flow/<surface>/`):
-- `dialog.windows[*]` и `window.dialog` →
-  `…/windows/<slug>/` и `…/dialogs/<slug>/` соответственно;
-- `dialog.started-by[*]` → строка `command.md` / окно в `windows/` /
-  строка `notification.md` (по префиксу рефа);
-- `widget.transition` → окно **того же диалога**, `back`, `done` или
-  `start:<dialog-slug>` на существующий диалог;
-- `command.starts` → `…/dialogs/<slug>/` (или `—`);
-- `notification.action` → строка `command.md` / `…/dialogs/<slug>/`
-  (или `—`).
+**Внутри фичи** (`docs/projects/<project-slug>/telegram-bot-flow/<surface>/features/<feature>/`,
+рёбра резолвятся в пределах своей фичи):
+- `dialog.windows[*]` → секции `## <slug>` в `window.md` фичи;
+- `widget.transition` → окно **этой фичи** (секция `window.md`), `back`,
+  `done` или `start:<feature>` на существующую фичу;
+- `widget.action` (`use-case:<uc-slug>`) → секция `## <uc-slug>` в
+  `use-case.md` фичи (или `—` — чистая навигация);
+- `getter.*.source` (`use-case:<uc-slug>`) → секция `## <uc-slug>` в
+  `use-case.md` фичи.
+
+**Межфичевое / root** (реестры корня + фичи поверхности):
+- `dialog.started-by[*]` → строка `command.md` / строка
+  `notification.md` корня / `feature:<slug>` другой фичи (по префиксу
+  рефа);
+- `command.starts` → `feature:<slug>` (существующая фича) или `—`;
+- `notification.action` → строка `command.md` / `feature:<slug>` (или
+  `—`).
 
 **В interface** (interface-слой **той же поверхности** того же проекта,
 `docs/projects/<project-slug>/interface/<surface>/`):
-- `dialog.who` / `window.who` / `command.who` / `notification.to` →
-  строки `who.md`;
+- `dialog.who` / `window.who` / `use-case.who` / `command.who` /
+  `notification.to` → строки `who.md`;
 - `window.interface-block` → строка `block.md`;
 - `window.ux-substrates[*]` → строки `ux-substrate.md`;
 - `window.situations[*]` → строки `situation.md`;
 - `getter.*.data` (`data:<slug>`) → строка `data-items.md`.
 
-**В domains — семантически, не slug-валидация**: `widget.action`,
-`getter.*.source` (`use-case:<ctx>.<Operation>`) и
-`notification.trigger` (`event:<ctx>.<Event>`) сверяются с
+**В domains — семантически, не slug-валидация**: доменные рефы живут на
+уровне use-case бота и реестра уведомлений. `use-case.Dependencies`
+(`use-case:<ctx>.<Operation>` bot UC) и `notification.trigger`
+(`event:<ctx>.<Event>`) сверяются с
 `docs/projects/<project-slug>/domains/`, **если домен есть**. Если
-домена / операции / события нет — реф остаётся, а в state-заметке
-живёт строка-требование (см. `domain-bridge.md`); stable это **не
-блокирует** (несостыковки сводит `/cross-audit`).
+домена / операции / события нет — реф остаётся, а в state-заметке (bot
+UC / уведомления) живёт строка-требование (см. `domain-bridge.md`);
+stable это **не блокирует** (несостыковки сводит `/cross-audit`).
 `notification.trigger` вида `integration:<slug>` сверяется с
 `integration.md` проекта.
 
@@ -56,18 +64,23 @@ hint, но не блокирует stable.
 
 ### 3. Зеркала консистентны
 
-- `window.ux-substrates` (frontmatter окна) **равен**
+- `window.ux-substrates` (мета-блок секции окна) **равен**
   `block.ux-substrates` interface-блока `window.interface-block`
   (строка с тем же slug в
   `docs/projects/<project-slug>/interface/<surface>/block.md`). При
   расхождении — политика зеркал из SKILL.md; нерешённое расхождение —
   `**blocker**` в state, не stable.
-- `dialog.windows` **равно** множеству окон с `window.dialog =
-  <этот диалог>`; порядок списка — порядок состояний. Скилл
-  пересчитывает и показывает.
+- `dialog.windows` **равно** множеству секций `## <slug>` в `window.md`
+  фичи; порядок списка — порядок состояний. Скилл пересчитывает и
+  показывает.
 - `dialog.transitions` (сводка в теле) **сходится** с полями
-  `transition` виджетов окон диалога (включая условные `{ to, when }`).
+  `transition` виджетов окон фичи (включая условные `{ to, when }`).
   Скилл пересчитывает сводку автоматически после правки переходов.
+- `widget.action` / `getter.*.source` (`use-case:<uc-slug>`) **указывает
+  на существующую секцию** `## <uc-slug>` в `use-case.md` той же фичи;
+  отсутствие секции — невалидный реф, блокирует stable окна.
+- `when` условных переходов окна **соответствует исходам** (`### Outputs`
+  / `### Errors`) use-case бота, на который ссылается виджет.
 
 ### 4. Тест-критерий явно подтверждён
 
@@ -82,15 +95,17 @@ hint, но не блокирует stable.
 
 ### 5. State-заметка чиста по `**blocker**`-вопросам
 
-`../entrypoint/state/projects/<project-slug>/telegram-bot-flow/<surface>/<kind>/<slug>.md`:
+State-заметка сущности (для фичевых kind — в подпапке фичи
+`…/telegram-bot-flow/<surface>/<feature>/<kind>/<slug>.md`; для
+command/notification — `…/<surface>/<kind>/<slug>.md`):
 
 - Не содержит секцию `## Открытые вопросы` ИЛИ
 - Содержит, но в ней нет вопросов с префиксом/суффиксом `**blocker**`.
 
 Не-blocker открытые вопросы при stable допустимы (они описывают
 «хорошо бы узнать», не «здесь смысл сломан»). Доменные требования в
-`## Доменные решения` («нужен `use-case:…`») к stable не относятся —
-они могут быть.
+`## Доменные решения` («нужен доменный `use-case:<ctx>.<Operation>` в
+`Dependencies` bot UC») к stable не относятся — они могут быть.
 
 ### 6. Тело / строка полные, инварианты Telegram держатся
 
@@ -109,15 +124,33 @@ hint, но не блокирует stable.
   (окно не падает никогда).
 - `errors` несёт канон-ключи `backend-unavailable` и `invalid-input`
   (текст или `—`, но не пустота).
+- `widget.action` ссылается на use-case бота фичи (`use-case:<uc-slug>`,
+  существующая секция) или `—`; не на доменный use-case напрямую.
 - `id` виджетов уникальны в окне; условные `transition` маршрутизируют
-  исходы use-case, не собственные правила окна.
+  исходы use-case бота, не собственные правила окна.
 - Окно не тупик: есть `transition` / `done`, либо оно последний шаг
   перед `done`.
 
+**use-case**:
+- Мета-поля `name`, `operation` (PascalCase), `who`, `status` непусты.
+- H3-секции `### Actor` / `### Inputs` / `### Outputs` /
+  `### Dependencies` / `### Steps` / `### Errors` присутствуют;
+  `### Outputs` называет исходы для `when` окон.
+- `### Dependencies` — доменные `use-case:<ctx>.<Operation>`
+  (семантически; отсутствие домена **не блокирует** stable — требование
+  в state) + строки стейта `dialog-data:<key>` (read/write,
+  JSON-примитивы).
+- `### Steps` — оркестрация без бизнес-правил (валидация формата → вызов
+  домена → маппинг исхода → апдейт `dialog-data` → возврат исхода);
+  бизнес-решение принимает домен.
+- На UC ссылается хотя бы один `widget.action` / `getter.*.source` фичи
+  (UC без потребителя — hint, не блок).
+
 **command**:
 - `/start` — со `stack: reset`.
+- `starts` — `feature:<slug>` (существующая фича) или `—`.
 - Deep-link (`/start <param>`) несёт `payload` с описанием, что
-  уезжает в `start-data` целевого диалога (и диалог его ждёт).
+  уезжает в `start-data` диалога целевой фичи (и диалог его ждёт).
 - Команда — вход, не шаг (нет `/next`-подобных).
 
 **notification**:
@@ -132,11 +165,14 @@ hint, но не блокирует stable.
 
 После любой правки сущности:
 
-1. Прочитать артефакт целиком (`…/dialogs|windows/<slug>/index.md`
-   либо строку реестра `command.md` / `notification.md`).
+1. Прочитать артефакт целиком (`features/<feature>/dialog.md`, либо
+   секцию `## <slug>` в `features/<feature>/window.md` /
+   `features/<feature>/use-case.md`, либо строку реестра корня
+   `command.md` / `notification.md`).
 2. Прочитать state-заметку сущности, если есть.
-3. Прочитать соседей (см. `field-checklists.md` «Ссылается на»):
-   окна/диалог, interface-файлы поверхности, домены (если есть).
+3. Прочитать соседей (см. `field-checklists.md` «Ссылается на»): диалог
+   и use-case'ы бота той же фичи, interface-файлы поверхности, домены
+   (если есть).
 4. Прогнать пункты 1, 2, 3, 5, 6 (программно проверяемые).
 5. Если все 5 ✅ — раунд `AskUserQuestion` по тест-критерию
    (пункт 4).
@@ -144,7 +180,8 @@ hint, но не блокирует stable.
    повышаем?» с опциями «Да, повысить» / «Нет, ещё не уверен»
    (через Other — что именно смущает).
 7. При «Да» — `Edit`'ом поменять `status: draft → stable` во
-   frontmatter / в строке таблицы.
+   frontmatter диалога / в мета-блоке секции окна-use-case / в строке
+   таблицы.
 
 ## Что НЕ делать
 

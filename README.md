@@ -45,7 +45,7 @@ stakeholder · stakeholder-map
         ├─ interface/          (UX: who / situation / zone)
         ├─ domains/            (опц. DDD-контексты)
         ├─ screens/            (flow / screen / block / shell)  →  wireframe → hi-fi на @stit/ui
-        └─ telegram-bot-flow/  (dialog / window / command / notification — для bot-поверхностей)  →  код-репо читают
+        └─ telegram-bot-flow/  (фичи: dialog / window / use-case + сквозные command / notification — bot-поверхности)  →  код-репо читают
 ```
 
 Артефакты — **чистая аналитика**, на код напрямую не мапятся. Сегменты по работам

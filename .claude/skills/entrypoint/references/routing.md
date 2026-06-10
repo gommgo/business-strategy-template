@@ -21,7 +21,7 @@
 | `docs/projects/<slug>/interface/<surface>/` | `who` · `stage` · `situation` · `zone` · `block` · `ux-substrate` · `data-items` | `/interface-deep-dive <slug> [<surface>]` | `/interface-audit <slug>` |
 | `docs/projects/<slug>/domains/<ctx>/` (по bounded-context, surface-агностичны) | агрегаты/события/use-case/… | `/domain-deep-dive <slug> <ctx>` | `/cross-audit` |
 | `docs/projects/<slug>/screens/<surface>/` | `flow` · `screen` · `block` · `shell` | `/screen-deep-dive <slug> [<surface>]` | `/screen-audit <slug>` |
-| `docs/projects/<slug>/telegram-bot-flow/<surface>/` (bot-поверхности) | `dialog` · `window` · `command` · `notification` | `/telegram-bot-flow-deep-dive <slug> [<surface>]` | `/telegram-bot-flow-audit <slug>` |
+| `docs/projects/<slug>/telegram-bot-flow/<surface>/` (bot-поверхности) | фичи `features/<feature>/` (`dialog` · `window` · `use-case` бота) + сквозные `command` · `notification` | `/telegram-bot-flow-deep-dive <slug> [<surface>]` | `/telegram-bot-flow-audit <slug>` |
 | `docs/projects/project-map.md` (межпроектные стыки) | `project-map` (singleton-граф рёбер) | `/project-deep-dive <slug>` (авторская сторона ребра — `integration` инициатора) | `/cross-audit` |
 | сквозная консистентность | — | — | `/cross-audit` |
 
@@ -68,7 +68,7 @@ surface-агностичны, делятся по bounded-context. Межпро�
 | «продукт обменивается с **соседним продуктом** того же бизнеса» | `projects/<slug>` / `integration` (`target: sibling-project`, `sibling-project: <slug-соседа>`) → ребро в `projects/project-map` |
 | «как пользователь взаимодействует, ситуации, зоны, блоки» (на какой поверхности?) | `projects/<slug>/interface/<surface>` / `who` · `situation` · `zone` · `block` · … |
 | «как это выглядит, экраны, композиция» (на какой поверхности?) | `projects/<slug>/screens/<surface>` / `flow` · `screen` · `block` · `shell` |
-| «как бот ведёт диалог: окна, кнопки, команды, уведомления» (какая bot-поверхность?) | `projects/<slug>/telegram-bot-flow/<surface>` / `dialog` · `window` · `command` · `notification` |
+| «как бот ведёт диалог: окна, кнопки, команды, уведомления, оркестрация действий» (какая bot-поверхность?) | `projects/<slug>/telegram-bot-flow/<surface>` / фичи `features/<feature>/` (`dialog` · `window` · `use-case` бота) + `command` · `notification` |
 | «бизнес-код бэкенда, агрегаты, инварианты» (какой bounded-context?) | `projects/<slug>/domains/<ctx>` |
 
 Граничные пары (снимает именование, не путать):

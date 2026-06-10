@@ -25,7 +25,7 @@ docs/projects/
 │   ├── project/         канон продуктового слоя (vision + surface-реестр + kind)
 │   ├── interface/       канон UX-слоя одной поверхности (who/stage/situation/…)
 │   ├── screens/         канон слоя экранов одной поверхности (flow/screen/block/shell)
-│   ├── telegram-bot-flow/  канон слоя диалогов одной bot-поверхности (dialog/window/command/notification)
+│   ├── telegram-bot-flow/  канон слоя диалогов одной bot-поверхности (фичи: dialog/window/use-case + сквозные command/notification)
 │   └── domains/         канон DDD-слоя (_templates/, _shared/)
 └── <project-slug>/      ← ДАННЫЕ одного проекта
     ├── README.md        чем продукт, какие проблемы закрывает
@@ -35,7 +35,7 @@ docs/projects/
     ├── capability/<surface>.md   возможности по поверхности
     ├── interface/<surface>/      who/stage/situation/zone/block/ux-substrate/data-items
     ├── screens/<surface>/        flows/ screens/ blocks/ shells/ assets/
-    ├── telegram-bot-flow/<surface>/   dialogs/ windows/ command.md notification.md assets/  (для type: bot — вместо screens)
+    ├── telegram-bot-flow/<surface>/   command.md notification.md features/<feature>/{dialog.md,window.md,use-case.md}  (для type: bot — вместо screens)
     └── domains/         (опц.) <bounded-context>/  (по контексту, не по surface)
 ```
 

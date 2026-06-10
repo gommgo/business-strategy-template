@@ -707,7 +707,8 @@ surface.
 **Source:** `docs/projects/<slug>/surface.md` (строка `<surface>` с
 `type: bot`) + `docs/projects/<slug>/interface/<surface>/`.
 **Destination:** `docs/projects/<slug>/telegram-bot-flow/<surface>/`
-(если есть).
+(если есть): `features/<feature>/{dialog.md, window.md, use-case.md}` +
+`command.md`, `notification.md` корня.
 **Скоуп:** по проекту × поверхность.
 **Применим если:** у проекта есть поверхность `<surface>` с `type: bot` и
 папка `telegram-bot-flow/<surface>/`.
@@ -715,17 +716,20 @@ surface.
 **Что искать:**
 
 - `error`: bot-поверхность `stable` с наполненным `interface/<surface>/`,
-  у которой папка `telegram-bot-flow/<surface>/` существует, но пуста (нет
-  ни одного диалога/окна) — UX бота без композиции диалогов.
+  у которой папка `telegram-bot-flow/<surface>/` существует, но `features/`
+  пуста (нет ни одной фичи — ни диалога, ни окна, ни use-case'а бота) —
+  UX бота без композиции диалогов.
 - `error`: папка `telegram-bot-flow/<surface>/` у поверхности, чей `type`
   в реестре не `bot` (слой только для ботов; для web — `screens/`).
 - `warning`: блок (block) или ситуация interface bot-поверхности без
-  отражения ни в одном окне (window) — UX-точка не дошла до диалогов.
+  отражения ни в одном окне (window) какой-либо фичи — UX-точка не дошла
+  до диалогов.
 - `warning`: реестр `command.md` без команды `/start` при наполненных
-  диалогах — у бота нет объявленного входа.
-- `warning`: зеркало разошлось — `window.ux-substrates` не совпадает с
-  `ux-substrates` его `interface-block` в interface той же поверхности.
-- `hint`: диалог/окно, не соотносимое по смыслу ни с одной зоной/блоком
+  фичах — у бота нет объявленного входа.
+- `warning`: зеркало разошлось — `window.ux-substrates` (мета-блок секции
+  окна в `features/<feature>/window.md`) не совпадает с `ux-substrates` его
+  `interface-block` в interface той же поверхности.
+- `hint`: фича/диалог/окно, не соотносимое по смыслу ни с одной зоной/блоком
   interface поверхности (заведено не в той папке или UX-анализ отстал).
 
 **Промпт-добавка:**
@@ -733,48 +737,54 @@ surface.
 ```
 Source — строка <surface> (type: bot) реестра surface.md + UX той же
 поверхности docs/projects/<slug>/interface/<surface>/; destination —
-docs/projects/<slug>/telegram-bot-flow/<surface>/ (диалоги/окна/команды/
-уведомления ТОЙ ЖЕ поверхности). Поверхности изолированы — сопоставляй в
-пределах <surface>.
+docs/projects/<slug>/telegram-bot-flow/<surface>/ (фичи в features/<feature>/:
+диалоги, окна, use-case'ы бота; плюс команды и уведомления реестрами корня
+ТОЙ ЖЕ поверхности). Поверхности изолированы — сопоставляй в пределах
+<surface>.
 
-Папка слоя пуста при наполненном interface — error; папка у поверхности с
-type ≠ bot — error. Блок/ситуация interface без окна — warning; command.md
-без /start — warning; рассинхрон window.ux-substrates ↔ interface-block —
-warning. Смысловая рифма: зона (zone) ≈ диалог (dialog), блок (block) ≈
-окно (window) — её разрывы флагай hint. В finding указывай project и
-surface.
+features/ пуста (ни одной фичи) при наполненном interface — error; папка у
+поверхности с type ≠ bot — error. Блок/ситуация interface без окна —
+warning; command.md без /start — warning; рассинхрон window.ux-substrates
+(секция окна в window.md) ↔ interface-block — warning. Смысловая рифма:
+зона (zone) ≈ фича/диалог (feature/dialog), блок (block) ≈ окно (window) —
+её разрывы флагай hint. В finding указывай project и surface.
 ```
 
 ## botflow-domain
 
-**Source:** `docs/projects/<slug>/telegram-bot-flow/<surface>/` (окна:
-`widget.action` + `getter.*.source` вида `use-case:<ctx>.<Operation>`;
-реестр `notification.md`: `trigger` вида `event:<ctx>.<Event>`, плейсхолдеры
-`content`).
+**Source:** `docs/projects/<slug>/telegram-bot-flow/<surface>/`: use-case'ы
+бота фич (`features/<feature>/use-case.md`, секция `### Dependencies` с
+рефами `use-case:<ctx>.<Operation>` — с точкой); реестр `notification.md`
+(`trigger` вида `event:<ctx>.<Event>`, плейсхолдеры `content`).
 **Destination:** `docs/projects/<slug>/domains/` (если есть):
 `<ctx>/use-cases/`, `<ctx>/events/` (секция `Payload`).
 **Скоуп:** по проекту × поверхность.
 **Применим если:** у проекта есть `domains/` и папка
 `telegram-bot-flow/<surface>/`.
 
-Бот — фронтенд: каждое действие и каждый триггер обязаны опираться на
-домен, а домен, рождающий события для людей, — доходить до уведомлений.
+Бот — фронтенд: мост к домену поднят на уровень **use-case бота**
+(оркестратора). Каждая зависимость bot UC и каждый триггер уведомления
+обязаны опираться на домен, а домен, рождающий события для людей, —
+доходить до уведомлений. Связь `widget.action` → bot UC и
+`getter.*.source` → bot UC — **внутри слоя** (slug-валидируема в пределах
+фичи), её сверяет `telegram-bot-flow-audit`; здесь она **не** проверяется.
 
 **Что искать:**
 
-- `error`: `widget.action` или `getter.*.source` со ссылкой
-  `use-case:<ctx>.<Operation>` на use-case, которого нет в
-  `domains/<ctx>/use-cases/` — действие бота висит в воздухе.
+- `error`: реф `use-case:<ctx>.<Operation>` в секции `### Dependencies`
+  use-case'а бота (`features/<feature>/use-case.md`) на доменный use-case,
+  которого нет в `domains/<ctx>/use-cases/` — оркестратор бота опирается на
+  несуществующий домен.
 - `error`: `notification.trigger` со ссылкой `event:<ctx>.<Event>` на
   событие, которого нет в `domains/<ctx>/events/`.
 - `warning`: плейсхолдер `{…}` в `notification.content`, отсутствующий в
   `Payload` события-триггера — текст просит данных, которых событие не несёт.
-- `warning`: условие перехода `when`, сформулированное как бизнес-правило
-  («если сумма > 1000»), а не как исход use-case — доменное решение утекло
-  в окно.
-- `warning`: окно stable с `action` у всех содержательных кнопок `—` —
-  сценарий «смотрит», но ничего не делает с доменом (возможно, чтение тоже
-  должно идти через use-case в getter).
+- `warning`: бизнес-правило («если сумма > 1000») в условии перехода `when`
+  окна **или** в секции `### Steps` use-case'а бота, а не как исход
+  доменного use-case — доменное решение утекло в бот.
+- `warning`: use-case бота `stable` без секции `### Dependencies` на
+  доменный use-case (ничего не оркеструет) — кандидат на чистую навигацию
+  без use-case либо на пропущенный поход в домен.
 - `hint`: доменное событие, по смыслу адресованное человеку (подтверждение,
   напоминание, смена статуса), без уведомления в `notification.md` —
   кандидат на исходящее.
@@ -782,13 +792,18 @@ surface.
 **Промпт-добавка:**
 
 ```
-Source — окна и notification.md слоя telegram-bot-flow/<surface>/ проекта
-<slug>: собери все рефы use-case:<ctx>.<Operation> (widget.action,
-getter.*.source) и event:<ctx>.<Event> (notification.trigger). Destination
-— domains/ проекта: use-cases и events соответствующих контекстов.
+Source — use-case'ы бота фич (features/<feature>/use-case.md) и
+notification.md слоя telegram-bot-flow/<surface>/ проекта <slug>: собери
+рефы use-case:<ctx>.<Operation> (с точкой — доменные) из секций
+### Dependencies всех use-case.md фич + рефы event:<ctx>.<Event>
+(notification.trigger). Destination — domains/ проекта: use-cases и events
+соответствующих контекстов. widget.action → bot UC и getter.source → bot UC
+— within-layer (их сверяет telegram-bot-flow-audit), ЗДЕСЬ не проверяй.
 
-Реф на несуществующий use-case/event — error. Плейсхолдер content вне
-Payload события — warning. Бизнес-правило в when вместо исхода use-case —
+Реф зависимости bot UC на несуществующий доменный use-case — error; триггер
+на несуществующее событие — error. Плейсхолдер content вне Payload события —
+warning. Бизнес-правило в when окна ИЛИ в Steps bot UC вместо исхода
+доменного use-case — warning. Bot UC stable без Dependencies на домен —
 warning. Обратная сторона: события домена, по смыслу адресованные человеку,
 без уведомления — hint. Связь семантическая: совпадение по смыслу имени
 операции достаточно, точная орфография — вопрос к deep-dive, не error,
@@ -1460,9 +1475,10 @@ destination — per-surface артефакт):
     поверхности ↔ домены-порты)
 34. `surface-screen` (если у проекта есть `screens/<surface>/`)
 35. `surface-botflow` (если поверхность `type: bot` и есть
-    `telegram-bot-flow/<surface>/`)
+    `telegram-bot-flow/<surface>/` с фичами `features/<feature>/`)
 36. `botflow-domain` (если у проекта есть `domains/` и
-    `telegram-bot-flow/<surface>/`)
+    `telegram-bot-flow/<surface>/`; зависимости use-case'ов бота фич +
+    триггеры уведомлений ↔ домены)
 
 **По каждому проекту, один агент на проект сразу по всем поверхностям:**
 
