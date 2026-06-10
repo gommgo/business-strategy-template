@@ -1,4 +1,4 @@
-# _shared — Cross-context Value Objects
+# _shared — кросс-контекстные VO
 
 Форма-образец роллапа cross-context VO. Здесь, в каноне (`docs/projects/_template/domains/_shared/`), живёт только эта форма; данные `_shared/` каждого проекта (этот README + сами VO-файлы) живут в его папке `docs/projects/<project-slug>/domains/_shared/`.
 
@@ -10,8 +10,8 @@
 
 ## Purpose
 
-- _что делаем_: даём bounded contexts общий VO-словарь для платформенных значений (storage refs, media-метаданные, и т.п.).
-- _чего не делаем_: не помещаем сюда доменные VO (например, `Phone` живёт внутри `iam.User` или `directory.Mosque` — это бизнес-семантика контекста). Не моделируем здесь cross-context **агрегаты** или **events**.
+- _что делаем_: даём bounded contexts общий VO-словарь для платформенных значений (ссылки на хранилище, медиа-метаданные и т. п.).
+- _чего не делаем_: не помещаем сюда доменные VO (например, `Phone` живёт внутри `iam.User`, а `OrderTotal` — внутри `billing.Order`: это бизнес-семантика контекста). Не моделируем здесь кросс-контекстные **агрегаты** или **события**.
 
 ## Ubiquitous Language
 
@@ -19,12 +19,12 @@ Cross-domain словарь — узкий список терминов, исп
 
 | Бизнес-термин | В коде | Не путать с |
 |---|---|---|
-| _пусто_ | — | — |
+| _нет_ | — | — |
 
 ## Value Objects
 
 | VO | Файл | Используется в |
 |---|---|---|
-| _пусто_ | — | — |
+| _нет_ | — | — |
 
 > Когда заводишь cross-context VO — `cp docs/projects/_template/domains/_templates/vo-shared.md docs/projects/<project-slug>/domains/_shared/<Name>.md`, заполни секции, добавь строку в таблицу выше.

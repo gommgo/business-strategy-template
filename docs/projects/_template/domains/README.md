@@ -62,7 +62,7 @@ docs/projects/<project-slug>/domains/
 id: user.User                 # <context>.<Name>, стабильный кросс-реф
 kind: aggregate               # aggregate|entity|vo|event|use-case|policy
 context: user
-name: User                    # human-readable
+name: User                    # человекочитаемое имя
 status: draft                 # draft → stable (ручная сверка формы)
 relations: [user.UserId, auth.Session]
 emits: [user.UserRegistered]
@@ -87,6 +87,13 @@ consumes: [verification.EmailVerified]
 | `vo` | Properties, Invariants, Constructor, Consumed by |
 
 Контекст-`README.md`: Purpose, Aggregates, Use cases, Events, Cross-context dependencies, Ubiquitous Language.
+
+**Язык артефактов.** Имена H2-секций, заголовки колонок таблиц и поле-метки
+(`Source`, `Constraints`, `preconditions`, `guard`, `Equality`, …) — на
+английском: это структурные идентификаторы handoff-контракта, по ним
+`<org>/backend` разворачивает Go-код (маппинг — его
+`docs/reference/domain-mapping.md`). Вся проза — описания, бизнес-значения,
+пояснения, примеры — по-русски.
 
 Stateless / aggregate-of-one / пустые consumers — пишутся явной пометкой `N/A` или `_нет_`. Пустых таблиц быть не должно.
 

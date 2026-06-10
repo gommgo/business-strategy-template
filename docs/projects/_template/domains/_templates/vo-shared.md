@@ -37,8 +37,8 @@ New<Name>(...) (<Name>, error)
 
 - **params:** <список полей>
 - **returns:** `<Name>` или sentinel-ошибка
-- **preconditions:** см. invariants
-- **postconditions:** zero-value становится валидным; equality — by value
+- **preconditions:** см. Invariants
+- **postconditions:** сконструированное значение валидно; equality — by value
 
 ## Consumed by
 
@@ -54,4 +54,4 @@ Sentinel-ошибка живёт в `internal/platform/shared/errors.go`.
 
 ## Notes
 
-- <Опциональные пояснения: equality semantics, где загружается источник данных, и т.п.>
+- <Опциональные пояснения: семантика equality, откуда загружается источник данных и т. п.>

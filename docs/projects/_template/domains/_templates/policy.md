@@ -43,9 +43,9 @@ consumes: []
 
 ## Composition
 
-> Как эта policy сочетается с другими (если есть). Например: PasswordPolicy + LoginPolicy перед `auth.Login`.
+> Как эта policy сочетается с другими (если есть). Например: `PasswordPolicy` + `LoginPolicy` перед `auth.Login`.
 
-- — самостоятельна
+- _самостоятельна_
 
 ## Used by
 

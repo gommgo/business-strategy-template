@@ -79,8 +79,8 @@ consumes: []
 
 | from | event/method | to | guard | side effects |
 |---|---|---|---|---|
-| ∅ | `New<Name>` | exists | — | record created (+ event если есть) |
-| exists | `<Mutator>` | exists | <условие> | bumped UpdatedAt (+ event если есть) |
+| ∅ | `New<Name>` | exists | — | создана запись (+ событие, если есть) |
+| exists | `<Mutator>` | exists | <условие> | обновлён `UpdatedAt` (+ событие, если есть) |
 | exists | `Delete<Name>` (use-case) | ∅ | — | — |
 
 ## Boundary
@@ -106,7 +106,7 @@ consumes: []
 
 ## Value Objects
 
-> Внутри-контекстные VO живут здесь inline. Cross-context платформенные VO (`PhotoRef`, etc) — в `_shared/<Name>.md`, ссылка тут одной строкой.
+> Внутри-контекстные VO живут здесь inline. Кросс-контекстные платформенные VO (`PhotoRef` и т. п.) — в `_shared/<Name>.md`, ссылка тут одной строкой.
 
 ### `<Name>ID`
 

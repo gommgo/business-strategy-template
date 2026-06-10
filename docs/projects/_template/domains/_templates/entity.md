@@ -11,7 +11,7 @@ consumes: []
 
 # <Name>
 
-> Child entity внутри aggregate <ParentAggregate>. Снаружи агрегата напрямую недоступна.
+> Одна-две фразы: что это в бизнесе. Child entity внутри агрегата `<ParentAggregate>`; снаружи агрегата напрямую недоступна.
 
 > **Используй этот kind только когда child entity действительно сложна и заслуживает отдельного файла.** В большинстве случаев документируй child entities как подсекцию в файле aggregate'а.
 
@@ -25,37 +25,38 @@ consumes: []
 
 | name | type | required | brief |
 |---|---|---|---|
-| | | | |
+| `<Field>` | <Type> | yes | <бизнес-значение> |
 
-### `<field>`
+### `<Field>`
 
-- **Constraints:**
-- **Default:**
+- **Constraints:** <правила валидации, длины, форматы>
+- **Default:** —
 - **Source:** input | derived | computed | system
-- **Description:**
+- **Description:** <чем является в бизнесе>
 
 ## Methods
 
 | name | brief |
 |---|---|
-| | |
+| `<Method>` | <что делает> |
 
 ### `<Method>(...)`
 
-- **params:**
-- **returns:**
-- **preconditions:**
-- **postconditions:**
-- **events emitted:**
+- **params:** <что приходит>
+- **returns:** <результат или sentinel-ошибка>
+- **preconditions:** <бизнес-условия>
+- **postconditions:** <что становится истинным>
+- **events emitted:** <event или _нет_>
 
 ## Invariants
 
-1.
+1. **<Инвариант 1>.** Гарантируется <конструктором / методом / БД-constraint>.
 
 ## Lifecycle
 
 | from | event/method | to | guard | side effects |
 |---|---|---|---|---|
+| ∅ | `<конструктор>` | exists | — | <что происходит> |
 
 <!-- если stateless: -->
 <!-- _Lifecycle: N/A (stateless)._ -->

@@ -11,7 +11,7 @@ consumes: []
 
 # <Operation>
 
-> Одна фраза описывающая бизнес-операцию. Что хочет сделать актор.
+> Одна фраза, описывающая бизнес-операцию. Что хочет сделать актор.
 
 ## Actor
 
@@ -41,9 +41,9 @@ consumes: []
 
 | port | purpose | adapter | integration |
 |---|---|---|---|
-| `<Aggregate>Repository` | persistence корневого агрегата | postgres (pgx + sqlc) | `—` |
+| `<Aggregate>Repository` | хранение корневого агрегата | postgres (pgx + sqlc) | `—` |
 | `Clock` | детерминированное время | `golibinfra/clock` | `—` |
-| `<OtherDomain>Reader` | cross-domain port — данные из другого контекста **этого** проекта | adapter в `module/adapters.go` чужого домена | `—` |
+| `<OtherDomain>Reader` | кросс-контекстный порт — данные из другого контекста **этого** проекта | адаптер в `module/adapters.go` чужого домена | `—` |
 | `<ExternalService>` | внешняя система (платёж / email / SMS / webhook) | SDK / HTTP-клиент провайдера | `` `<integration-slug>` `` |
 | `<SiblingProject>Client` | обмен с **соседним проектом** бизнеса (синхронный вызов API) | HTTP-клиент к API соседа | `` `<integration-slug>` `` (`target: sibling-project`) |
 

@@ -11,7 +11,7 @@ consumes: []
 
 # <Name>
 
-> Одно предложение: что произошло в бизнесе. В прошедшем времени (`UserRegistered`, `EmailVerified`, `MosqueDeleted`). Суффикс `Event` **не** используется — имя самодостаточно.
+> Одно предложение: что произошло в бизнесе. В прошедшем времени (`UserRegistered`, `EmailVerified`, `OrderCancelled`). Суффикс `Event` **не** используется — имя самодостаточно.
 
 ## Trigger
 
@@ -23,9 +23,9 @@ consumes: []
 
 | field | type | description |
 |---|---|---|
-| `EventID` | UUID v7 | идемпотентность; unique per event instance |
+| `EventID` | UUID v7 | ключ идемпотентности; уникален для каждого экземпляра события |
 | `OccurredAt` | timestamp | момент произошедшего изменения |
-| `<Aggregate>ID` | UUID v7 | identity агрегата-источника |
+| `<Aggregate>ID` | UUID v7 | идентификатор агрегата-источника |
 | `<custom field>` | <type> | <зачем нужно консьюмерам> |
 
 ## Consumers
@@ -46,6 +46,6 @@ consumes: []
 
 ## Notes
 
-> Дополнительные ограничения, миграционные хвосты, breaking-change policy если уже эволюционировало.
+> Дополнительные ограничения и договорённости о совместимости payload — что консьюмерам нельзя ломать.
 
 - _нет_

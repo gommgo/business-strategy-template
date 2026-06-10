@@ -23,7 +23,7 @@ Read use-case'ы (`Get<Name>`, `List<Name>s`) — добавим при скаф
 
 ## Events
 
-### Published (outgoing)
+### Published (исходящие)
 
 | event | trigger | consumers |
 |---|---|---|
@@ -32,7 +32,7 @@ Read use-case'ы (`Get<Name>`, `List<Name>s`) — добавим при скаф
 <!-- Если событий нет: -->
 <!-- | _нет на старте_ | — | — | -->
 
-### Subscribed (incoming)
+### Subscribed (входящие)
 
 | event | source | reaction |
 |---|---|---|
@@ -45,7 +45,7 @@ Read use-case'ы (`Get<Name>`, `List<Name>s`) — добавим при скаф
 
 | direction | other context | nature |
 |---|---|---|
-| outbound | `<other-context>` | port `<OtherDomain>Reader` для чтения данных кросс-контекстно |
+| outbound | `<other-context>` | порт `<OtherDomain>Reader` — чтение данных другого контекста |
 | inbound | `iam` / `platform/authgate` | проверка валидной admin-сессии через HTTP-middleware |
 
 ## Ubiquitous Language
@@ -59,12 +59,12 @@ Read use-case'ы (`Get<Name>`, `List<Name>s`) — добавим при скаф
 
 ## Glossary notes
 
-> Дополнения, неоднозначности, исторические причины именований. Все вопросы «почему так названо» — сюда.
+> Дополнения, неоднозначности именований. Все вопросы «почему так названо» — сюда.
 
-- _пусто_
+- _нет_
 
 ## Architecture notes
 
-> Архитектурные решения, специфичные для этого контекста. Что нестандартно? Что отличается от других доменов? Где живут cross-aggregate чтения? Семантика PUT/PATCH? Hard- vs soft-delete? Auth — middleware или policy?
+> Архитектурные решения, специфичные для этого контекста. Что нестандартно? Что отличается от других доменов? Где живут cross-aggregate чтения? Семантика PUT/PATCH? Hard- или soft-delete? Авторизация — middleware или policy?
 
-- _пусто_
+- _нет_
