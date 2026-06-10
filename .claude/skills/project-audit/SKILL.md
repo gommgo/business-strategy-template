@@ -86,7 +86,7 @@ slug поверхности из реестра `surface.md`). `capability:<slug
 
 | severity | смысл | пример |
 |---|---|---|
-| `error` | Структурное нарушение, ломает модель | Дубликат `slug`; невалидное enum-значение; пустой обязательный слот в `stable`; vision без Problem или Success; stable со `**blocker**` в state; файл `capability/<surface>.md` для поверхности вне реестра `surface.md`; `integration.surface` на несуществующую поверхность; `integration.sibling-project` на несуществующий проект |
+| `error` | Структурное нарушение, ломает модель | Дубликат `slug`; невалидное enum-значение; пустой обязательный слот в `stable`; vision без Problem или Success; stable со `**blocker**` в state; файл `capability/<surface>.md` для поверхности вне реестра `surface.md`; `integration.surface` на несуществующую поверхность; `integration.sibling-project` на несуществующий проект; функция `## Функции` на несуществующего провайдера |
 | `warning` | Семантическое подозрение | capability без user в массиве; surface без user; boundary с backlog-обоснованием в `why` («нет ресурсов»); constraint без `source`; market без `url`/`sources`; integration с `direction` но без `owner`; `integration.sibling-project` указан на сам текущий проект |
 | `hint` | Coverage / стиль, не ломает | user без жителей в capability/surface; поверхность реестра без файла `capability/<surface>.md`; vision stable при пустой user-таблице; stable со ссылкой на draft; очень короткое `description` |
 

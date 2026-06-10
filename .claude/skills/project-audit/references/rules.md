@@ -56,7 +56,8 @@
 | `surface` | `type`, `lives-at`, `user` (≥1 элемент) |
 | `capability` | `value`, `user` (≥1 элемент) |
 | `user` | `context`, `jobs`, `pains`, `success` |
-| `integration` | `direction`, `owner`, `payload`, `surface` (≥1 элемент), `target` (валидный enum); `sibling-project` — обязателен **iff** `target: sibling-project` (тогда непустой slug), иначе обязан быть `—` |
+| `integration` (провайдер) | `direction`, `owner`, `payload`, `surface` (≥1 элемент), `target` (валидный enum); `sibling-project` — обязателен **iff** `target: sibling-project` (тогда непустой slug), иначе обязан быть `—` |
+| `integration` (функция, `## Функции`) | `integration` (slug провайдера), `name`, `description`, `direction` (валидный enum `out`/`in`) |
 | `boundary` | `why` |
 | `constraint` | `kind`, `source` |
 | `market` | `url`, `sources` (≥1 элемент) |
@@ -85,9 +86,10 @@
 | `vision.market-maturity` | `prospective`, `served` |
 | `vision.lifecycle` | `draft`, `accepted`, `build`, `mvp`, `beta-testing`, `stable`, `updating` |
 | `surface.type` | `web`, `mobile`, `api`, `admin`, `bot`, `desktop`, `embed`, `other` |
-| `integration.direction` | `in`, `out`, `duplex` |
+| `integration.direction` (провайдер) | `in`, `out`, `duplex` |
 | `integration.owner` | `we`, `partner`, `both` |
 | `integration.target` | `external`, `sibling-project` |
+| `integration` функция `.direction` (`## Функции`) | `out`, `in` |
 | `constraint.kind` | `regulation`, `sla`, `contract`, `technical`, `other` |
 | `<любой>.status` | `draft`, `stable` |
 
@@ -319,6 +321,24 @@ R-STRUCT-002).
 соседнего проекта или сменить `target` на `external` через
 `/project-deep-dive <project-slug> integration:<slug>`. Сам стык сводится в
 `docs/projects/project-map.md`».
+
+### R-SEM-012 — функция `## Функции` на несуществующего провайдера
+
+**Severity:** `error`.
+
+**Где:** `integration.md` (таблицы `## Провайдеры` + `## Функции`).
+
+**Обнаружение:** в строке `## Функции` колонка `integration` ссылается на
+slug, которого нет ни в одной строке `## Провайдеры`. Функция без провайдера
+— сирота (связь функция → провайдер структурная, в пределах файла).
+
+**Рекомендация:** «функция `<fn-slug>` ссылается на провайдера
+`<integration>`, которого нет в `## Провайдеры`. Завести провайдера или
+поправить ссылку через `/project-deep-dive <project-slug> integration`».
+
+> Соответствие функции её клиенту `domains/_shared/integrations/<integration>/`
+> и потреблению в use-case (`functions`) — **семантическое**, в пределах
+> проекта его не валидируем: это зона `/cross-audit` (угол `integration-domain`).
 
 ## Coverage-правила (R-COV-*)
 

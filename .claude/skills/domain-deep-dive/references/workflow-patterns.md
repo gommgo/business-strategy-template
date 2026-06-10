@@ -74,26 +74,28 @@
 #### Раунд по `## Dependencies` (порты)
 
 На каждый порт use-case'а — раунд связи с продуктовым слоем (см.
-`references/project-context.md § Заведение адаптера / клиента / порта`).
-Колонка `integration` в таблице `## Dependencies`:
+`references/project-context.md § Заведение клиента интеграции и потребления
+функций`). Колонки `integration` + `functions` в таблице `## Dependencies`:
 
 - **внутренняя инфра** (`<Aggregate>Repository`, `Clock`,
   `<OtherCtx>Reader` — reader другого контекста **этого** проекта) →
-  `integration` = `—`. Опции `AskUserQuestion` включают «Внутренняя инфра —
-  без integration».
-- **внешняя система** (платёж, email, SMS, IDP, webhook) → опция = одна из
-  записей `<P>/integration.md` с `target: external`; выбранный slug в
-  бэктиках идёт в колонку `integration`.
-- **соседний проект** бизнеса (HTTP-клиент к API соседа синхронно, либо
-  `consumes` его события асинхронно) → опция = запись `<P>/integration.md`
-  с `target: sibling-project`; её ребро живёт в
-  `docs/projects/project-map.md`.
+  `integration` = `—`, `functions` = `—`. Опции `AskUserQuestion` включают
+  «Внутренняя инфра — без integration».
+- **внешняя система** (платёж, email, SMS, IDP, webhook) → опция = провайдер
+  `<P>/integration.md` с `target: external`; затем **второй раунд** — какие
+  функции дёргаем (опции = `## Функции` этого провайдера) → `functions` =
+  `` [`<integration>.<fn-slug>`] ``. Конкретный клиент авторится в
+  `_shared/integrations/<slug>/` (kind `integration-client`).
+- **соседний проект** бизнеса → опция = провайдер `<P>/integration.md` с
+  `target: sibling-project` + его функции; ребро живёт в
+  `docs/projects/project-map.md` (бизнес-язык).
 
 Имена портов (`<X>Repository`, `<Y>Client`) и `purpose` — **только** через
-Other (это формулировка архитектора). Опциями подаётся лишь **выбор записи
-`integration`** (существующие + «внутренняя инфра» + «нужна новая» через
-Other). Скилл доменов **не** заводит запись в `<P>/integration.md` сам — если
-её нет, фиксирует `**blocker**`-вопрос и отсылает к `/project-deep-dive`.
+Other (формулировка архитектора). Опциями подаётся выбор **провайдера** и его
+**функций** (существующие + «внутренняя инфра» + «нужна новая» через Other).
+Скилл доменов авторит use-case (`integration` + `functions`) и клиент
+`_shared/`, но **не** заводит провайдера/функцию в `<P>/integration.md` — если
+их нет, фиксирует `**blocker**`-вопрос и отсылает к `/project-deep-dive`.
 
 ## B. Сырьё
 

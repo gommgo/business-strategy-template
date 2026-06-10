@@ -23,11 +23,14 @@ Vision — обязательны три раздела (Problem, Success, Non-g
 `market-maturity`/`lifecycle`. Vision без привязки к проблеме в stable не
 повышается — продукт без проблемы висит в воздухе.
 
-`integration` — для stable обязательны `surface` (≥1 slug-реф в реестр),
-`target` и условно `sibling-project`: оно обязательно **тогда и только
-тогда**, когда `target: sibling-project` (при `target: external` —
+`integration` — для stable провайдера обязательны `surface` (≥1 slug-реф в
+реестр), `target` и условно `sibling-project`: оно обязательно **тогда и
+только тогда**, когда `target: sibling-project` (при `target: external` —
 прочерк). Ребро межпроектного стыка сводится в
-`docs/projects/project-map.md`.
+`docs/projects/project-map.md`. Каждая строка `## Функции` для stable несёт
+`integration` (slug существующего провайдера), `description` в бизнес-языке
+и `direction` (`out`/`in`); сигнатуры/endpoint'ы сюда не пишутся (они в
+клиенте `domains/_shared/`).
 
 `capability` — лежит в файле своей поверхности
 (`capability/<surface>.md`); зрелость считается по записи, а целостность

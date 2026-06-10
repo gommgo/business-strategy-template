@@ -19,11 +19,18 @@
 - в ней есть непустой текст / таблица с непустыми ячейками;
 - placeholder'ы вида `<...>` и `_TBD_` не остались.
 
-Для `use-case` дополнительно — таблица `## Dependencies` с колонкой
-`integration`: каждый порт к **внешней системе** или **соседнему проекту**
-бизнеса несёт непустой slug записи `<P>/integration.md`; внутренняя инфра
-(репозиторий, `Clock`, reader другого контекста **этого** проекта) — `—`.
-Колонка пустой быть не должна — либо slug, либо `—`.
+Для `use-case` дополнительно — таблица `## Dependencies` с колонками
+`integration` и `functions`: каждый порт к **внешней системе** или
+**соседнему проекту** бизнеса несёт непустой slug провайдера
+`<P>/integration.md` и непустой массив `functions`
+(`` [`<integration>.<fn-slug>`] ``); внутренняя инфра (репозиторий, `Clock`,
+reader другого контекста **этого** проекта) — `—` в обеих. Колонки пустыми
+быть не должны — либо значение, либо `—`.
+
+Для `integration-client` (`_shared/integrations/<slug>/`) — таблица
+`## Functions` непустая: у каждой функции `slug`, `direction`, `payload`;
+`signature` либо конкретна, либо `—` (транспорт её не имеет). `## Transport`
+и `## Errors` заполнены осмысленно.
 
 ### 2. Все cross-ref'ы валидны
 
@@ -35,11 +42,17 @@
   соответствующий файл существует.
 - Markdown-ссылки на локальные `.md` резолвятся (путь существует).
 - Для `use-case`: каждый непустой slug в колонке `integration`
-  (`## Dependencies`) указывает на существующую запись `<P>/integration.md`.
-  Если интеграция с `target: sibling-project` — её ребро есть в
-  `docs/projects/project-map.md` (стык доказан). Записи `integration.md` и
-  `project-map.md` ведёт `/project-deep-dive`; если ссылки нет — это
-  `**blocker**`-вопрос в state, а не повод заводить запись из этого скилла.
+  (`## Dependencies`) указывает на существующего провайдера
+  `<P>/integration.md`, а каждая `functions`-запись `<integration>.<fn-slug>`
+  — на строку `## Функции` того провайдера **и** на функцию клиента
+  `_shared/integrations/<integration>/`. Если интеграция с
+  `target: sibling-project` — её ребро есть в `docs/projects/project-map.md`
+  (стык доказан). Бизнес-каталог `integration.md` и `project-map.md` ведёт
+  `/project-deep-dive`; если ссылки нет — `**blocker**`-вопрос в state, а не
+  повод заводить запись из этого скилла.
+- Для `integration-client`: `integration` во frontmatter указывает на
+  существующего провайдера `<P>/integration.md`; каждая функция клиента
+  совпадает по `slug` со строкой `## Функции` того провайдера.
 
 `stable` может ссылаться на `draft` — это допустимо. Валидатор
 подсветит hint, но не блокирует переход.
@@ -126,17 +139,20 @@ Committed-скрипта-валидатора в репо нет: сверяеш
 > — middleware (`authgate`) или явная policy в `Steps`, не молчаливо
 > размазана; шаги observable; ошибки — sentinel'ы с HTTP-статусом; каждый
 > порт `## Dependencies` к внешней системе / соседнему проекту несёт
-> `integration`-slug, внутренняя инфра — `—`?
+> `integration`-slug провайдера и `functions` (дёрнутые функции), внутренняя
+> инфра — `—`; транспорт держит клиент `_shared/`, не use-case?
 
 - ✅ `RegisterUser`: actor=anonymous HTTP, Inputs/Outputs описаны, Steps
   = Validate→Construct→Persist→Emit→Return, Errors c HTTP-статусами,
-  `## Dependencies`: `UserRepository`+`Clock` → `—`, `EmailProvider` →
-  `` `email-sendgrid` `` (внешняя), `LoyaltyClient` → `` `loyalty-sync` ``
+  `## Dependencies`: `UserRepository`+`Clock` → `—` / `—`, `EmailProvider` →
+  `` `email-sendgrid` `` / `` [`email-sendgrid.send`] `` (внешняя),
+  `LoyaltyClient` → `` `loyalty-sync` `` / `` [`loyalty-sync.accrue-points`] ``
   (`target: sibling-project`).
 - ❌ `HandleUserStuff`: actor неясен, Steps = «обрабатывает запрос»,
   Errors отсутствуют → размазанный CRUD-эндпоинт.
-- ❌ `ChargeOrder`: порт `StripeClient` ходит наружу, а колонка
-  `integration` пустая → внешний выход не поднят до записи `integration.md`.
+- ❌ `ChargeOrder`: порт `StripeClient` ходит наружу, а колонки
+  `integration`/`functions` пустые → внешний выход не поднят до функции
+  `integration.md` + клиента `_shared/`.
 
 ### policy
 
@@ -157,6 +173,19 @@ Committed-скрипта-валидатора в репо нет: сверяеш
 - ✅ `PhotoRef { Bucket, Key }` — storage-ссылка, нейтральна.
 - ❌ `Phone` / `Email` — доменная семантика; должно быть inline-VO
   в соответствующем aggregate-файле, не в `_shared/`.
+
+### integration-client
+
+> Конкретное воплощение интеграции: транспорт описан, функции совпадают по
+> `slug` с `## Функции` провайдера, домен зовёт по `slug` (транспорт не
+> протёк в use-case/aggregate), ошибки отданы домену абстрактно?
+
+- ✅ `_shared/integrations/stripe-payments/`: Transport=HTTP+API-key,
+  Functions=[`charge-create` out `POST /v1/charges`, `payment-succeeded` in
+  webhook], Errors=[`ErrStripeUnavailable`, `ErrStripeRejected`].
+- ❌ Клиент перечисляет функцию `charge-create`, которой нет в `## Функции`
+  провайдера `integration.md` → бизнес-каталог о ней не знает.
+- ❌ `use-case.Steps` содержит `POST /v1/charges` → транспорт протёк в домен.
 
 ### context-README
 

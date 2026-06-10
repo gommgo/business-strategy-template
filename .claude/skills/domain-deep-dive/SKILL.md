@@ -101,9 +101,10 @@ aggregate-файле и kind-ом отдельно не заводится).
 3. Прочитать `docs/projects/_template/project/README.md` +
    `references/project-context.md` — освежить связи с продуктовым слоем
    **того же проекта**: domain ↔ возможность поверхности
-   (`capability/<surface>.md`), адаптер/порт ↔ `integration` (колонка
-   `integration` в use-case `## Dependencies`), межпроектный порт ↔
-   `integration` с `target: sibling-project` + ребро `project-map.md`.
+   (`capability/<surface>.md`), клиент интеграции
+   (`_shared/integrations/<slug>/`) + потребление функций (колонки
+   `integration` + `functions` в use-case `## Dependencies`), межпроектный
+   порт ↔ `integration` с `target: sibling-project` + ребро `project-map.md`.
 4. Если args (после slug) пустые — сделать сводку (см. ниже) и через
    `AskUserQuestion` предложить выбор: что копать / что заводить.
 5. Если args указывают на контекст/сущность — определить kind и режим
@@ -169,13 +170,17 @@ aggregate-файле и kind-ом отдельно не заводится).
 5. **Identity** — ID type, mutability, visibility.
 6. **Boundary / VOs / Contained Entities / Spanning Invariants** — границы агрегата.
 7. **Events** — `events/*.md`: Trigger, Payload, Consumers, Delivery.
-8. **Use Cases** — Actor, Inputs, Outputs, Dependencies (с колонкой
-   `integration`: для внешних/межпроектных портов — slug записи
-   `integration.md`, для внутренней инфры — `—`), Steps, Called methods,
-   Events, Errors.
-9. **Policies** — Kind, Inputs, Rules, Outcomes.
-10. **Relations** — связи между артефактами + cross-context (по ID, не composition).
-11. **Context README / Ubiquitous Language** — финальный роллап.
+8. **Use Cases** — Actor, Inputs, Outputs, Dependencies (колонки
+   `integration` = slug провайдера `integration.md` и `functions` =
+   дёрнутые функции `` [`<integration>.<fn-slug>`] ``; внутренняя инфра — `—`),
+   Steps, Called methods, Events, Errors.
+9. **Integration clients** — `_shared/integrations/<slug>/` (`integration-client`):
+   Transport, Functions (slug · signature · payload · consumed-by), Errors.
+   Конкретное воплощение интеграции; домен зовёт функцию по `slug`, транспорт
+   держит клиент.
+10. **Policies** — Kind, Inputs, Rules, Outcomes.
+11. **Relations** — связи между артефактами + cross-context (по ID, не composition).
+12. **Context README / Ubiquitous Language** — финальный роллап.
 
 Юзеру при старте волн в новом контексте — короткое: «иду inside-out, начну
 с Properties во всех aggregate'ах этого контекста; скажи если хочешь

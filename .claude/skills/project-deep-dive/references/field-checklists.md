@@ -139,12 +139,17 @@ fundamentals → why.
 
 ## integration
 
+Файл несёт **две таблицы**: `## Провайдеры` (строка на систему) и
+`## Функции` (строка на функцию интеграции).
+
+### Провайдеры
+
 **Обязательно:** `slug`, `name`, `description`, `status`.
 
 **Должно быть для stable:**
 
 - `direction` — enum: `in` | `out` | `duplex`.
-- `payload` — что передаём/получаем, в языке бизнеса.
+- `payload` — что передаём/получаем в целом, в языке бизнеса.
 - `owner` — enum: `we` | `partner` | `both`.
 - `surface` — массив slug-рефов на поверхности реестра `surface.md`,
   которые интеграция обслуживает (минимум одна).
@@ -164,6 +169,23 @@ webhook»; duplex+both — нужна явная синхронизация). `s
 `/project-audit`). `target: sibling-project` означает обмен с **другим
 продуктом того же бизнеса**: тогда `sibling-project` ссылается на его
 slug, а ребро сводится в `docs/projects/project-map.md`.
+
+### Функции
+
+**Обязательно:** `slug`, `integration`, `name`, `description`, `direction`,
+`status`.
+
+- `integration` — slug провайдера из таблицы выше (M:1); функция без
+  провайдера — сирота.
+- `description` — что функция делает, в **языке бизнеса**, без техники
+  (endpoint/сигнатура — конкретика клиента `domains/_shared/`, не сюда).
+- `direction` — enum: `out` (мы зовём их функцию) | `in` (они зовут нашу,
+  мы обслуживаем). Событие — тоже функция (`out` публикуем / `in` подписка).
+
+`slug` функции — её общая личность на трёх высотах: здесь (бизнес), в
+клиенте `domains/_shared/integrations/<integration>/` (конкретика) и в
+`functions` use-case'а, который её дёргает. Согласованность ловит
+`/cross-audit`.
 
 ## constraint
 

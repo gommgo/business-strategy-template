@@ -245,7 +245,7 @@ capability нужна поверхность: без явного `<surface>` с
 | `user` | сегменты пользователей/клиентов | `user.md` |
 | `surface` | где продукт «торчит наружу» — реестр-хребет | `surface.md` |
 | `capability` | бизнес-возможности верхнего уровня, **по каждой поверхности** | `capability/<surface>.md` (по файлу на поверхность реестра) |
-| `integration` | внешние системы и стыки с соседними проектами | `integration.md` |
+| `integration` | внешние системы и стыки с соседями: провайдеры + их функции (бизнес-каталог) | `integration.md` (`## Провайдеры` + `## Функции`) |
 | `constraint` | регуляторика / SLA / контракты | `constraint.md` |
 | `market` | конкуренты и аналоги (с роем агентов) | `market.md` |
 | `cohesion` | boundary + сквозная проверка, что слой целостен | `boundary.md`, повышение `draft → stable` |
@@ -368,7 +368,11 @@ merge / fetch, обычная git-механика.
 - `surface` без user — мёртвая, повод задать вопрос;
 - `integration → surface`: интеграция обслуживает поверхности (массив
   slug-рефов в реестр); `integration → соседний проект` при
-  `target: sibling-project` (поле `sibling-project`);
+  `target: sibling-project` (поле `sibling-project`); `функция → провайдер`:
+  каждая строка `## Функции` несёт `integration` существующего провайдера;
+- `функция → клиент/потребление`: `slug` функции встречается в клиенте
+  `domains/_shared/integrations/<integration>/` и в `functions` use-case'а
+  (семантически, ловит `/cross-audit`);
 - `constraint` обычно привязан к surface или integration в `description`,
   не отдельным полем.
 

@@ -131,9 +131,11 @@ truth; когда дело дошло до продукта, их читают �
   — UX-слой по поверхности (who / stage / situation / zone / block /
   ux-substrate / data-items в `interface/<surface>/`).
 - **`/domain-deep-dive <slug> <ctx>`** — (опц.) DDD-артефакты бэкенда продукта
-  по bounded-context (surface-агностичны; внешние и межпроектные интеграции
-  — через `integration`). Завершается на stable-артефакте; Go-код по ним
-  разворачивает соседний `<org>/backend`, не этот репо.
+  по bounded-context (surface-агностичны; внешние и межпроектные интеграции —
+  через конкретный клиент `domains/_shared/integrations/<slug>/` и потребление
+  функций в use-case, домен transport-agnostic). Завершается на
+  stable-артефакте; Go-код по ним разворачивает соседний `<org>/backend`, не
+  этот репо.
 - **`/screen-deep-dive <slug> [<surface>]`** → **`/screen-audit <slug>`** —
   композиция и облик по поверхности (flow / screen / block / shell в
   `screens/<surface>/`) на инвентаре `@stit/ui`.

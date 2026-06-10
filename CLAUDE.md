@@ -153,8 +153,10 @@ upstream (read-only, односторонне):
 (hypothesis-map) проявляются как vision/user/capability в проекте; user
 адресата проявляется как роль who (interface), `capability/<surface>`
 реализуется через situation той же поверхности + domain; surface —
-ось партиционирования interface/screens/capability; integration — адаптеры в
-domain (внешние и межпроектные; стык продуктов бизнеса ведёт `project-map`).
+ось партиционирования interface/screens/capability; integration раскрывается
+в функции (бизнес-каталог в `integration.md`), их конкретный клиент живёт в
+`domains/_shared/integrations/<slug>/`, а use-case дёргает функции по `slug`
+(transport-agnostic; стык продуктов бизнеса ведёт `project-map`).
 Сквозные рёбра авторятся **снизу-вверх** (проектная/UX-сущность
 ссылается на глобальную: `situation.jobs`/`capabilities`/`hypotheses`,
 `capability.jobs`/`hypotheses`, `user.segments`, `subject.segments`);
@@ -270,9 +272,11 @@ surface структурная). Один проект (папка) = один �
 M:N к строкам реестра `business/business-problem`), оси `audience` /
 `intent` / `market-maturity` и `lifecycle` проекта — отдельно от `status`
 зрелости записи; переход `lifecycle → stable` запускает восходящий поток к
-business. `integration` несёт `surface` (какие поверхности обслуживает) и
-`target` (`external` | `sibling-project`): межпроектный стык авторится здесь
-и сводится в `docs/projects/project-map.md`. Канон формы —
+business. `integration` несёт две таблицы — провайдеры (`surface`, `target`
+`external` | `sibling-project`) и их функции (бизнес-каталог «что умеет»);
+межпроектный стык авторится здесь и сводится в `docs/projects/project-map.md`
+(бизнес-язык). Конкретный клиент функций — в `domains/_shared/integrations/`,
+потребление — в use-case (колонка `functions`). Канон формы —
 `docs/projects/_template/project/`. Связи внутри слоя семантические (кроме
 структурной capability↔surface), валидируется `/project-audit <slug>`.
 Vision — singleton с разделами `Problem`, `Success`, `Non-goals`; остальные
@@ -434,8 +438,10 @@ Interface-слой (по проекту, **по поверхности**):
   присутствуют) — через скилл `domain-deep-dive <slug> <ctx>`; по
   bounded-context, surface-агностичны. При заведении контекста / use-case
   предлагается связь с `capability/<surface>` того же проекта; внешние и
-  межпроектные интеграции (порт к соседнему проекту, события) — через
-  `integration` (колонка `integration` в `Dependencies` use-case).
+  межпроектные интеграции — через конкретный клиент
+  `domains/_shared/integrations/<slug>/` (kind `integration-client`:
+  транспорт + функции) и потребление функций в use-case (колонки
+  `integration` + `functions` в `Dependencies`); домен transport-agnostic.
 - **Артефакты экранов** (`docs/projects/<slug>/screens/<surface>/`) — через
   скилл `screen-deep-dive <slug> [<surface>]`; форма — по
   `docs/projects/_template/screens/README.md` (канон слоя; форма одной папки

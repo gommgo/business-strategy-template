@@ -34,7 +34,7 @@ use-case'а (`HTTP API …`) и через внешние/межпроектны
 |---|---|---|
 | контекст (`<ctx>/`) | возможность (`capability/<surface>.md`) | контекст бэкенда (surface-агностичный) обычно несёт одну+ возможность одной или нескольких поверхностей. При заведении нового контекста — предложи опции = существующие capability из всех `<P>/capability/*.md` + «технический контекст без capability» |
 | aggregate / event / use-case | возможность (`capability/<surface>.md`, более точный якорь) | use-case — реализация одной возможности поверхности. При заведении use-case — предложи опции = существующие capability из всех `<P>/capability/*.md` |
-| адаптер / клиент в контексте | `integration` (внешняя система или соседний проект) | если контекст содержит код, ходящий во внешнюю систему **или** к соседнему проекту бизнеса — это адаптер/порт интеграции. При заведении такого артефакта — предложи опции = существующие записи `<P>/integration.md`. Выбранная интеграция заполняет колонку `integration` в use-case `## Dependencies` |
+| клиент интеграции (`_shared/integrations/<slug>/`) | `integration` (провайдер) + его функции | если код ходит во внешнюю систему **или** к соседнему проекту — это **клиент интеграции** в `_shared/integrations/<integration-slug>/` (kind `integration-client`): транспорт + функции с `slug` + ошибки. Use-case дёргает функции по `slug` (колонки `integration` + `functions` в `## Dependencies`), **не зная транспорта**. При заведении — предложи опции = провайдеры из `<P>/integration.md` |
 | технические контексты (auth, logging, audit) | — | допустимы без capability/integration — это инфра-домены. Не показывать связь |
 
 ## Когда показывать связь
@@ -80,7 +80,7 @@ options:
 - Реализует capability:<slug> (поверхность <surface>).
 ```
 
-### Заведение адаптера / клиента / порта
+### Заведение клиента интеграции и потребления функций
 
 Когда заводится артефакт или порт в `## Dependencies`, описывающий
 взаимодействие с **внешней системой** или с **соседним проектом** бизнеса
@@ -97,19 +97,32 @@ options:
   - Other  ← нужна новая запись integration
 ```
 
-Опции собираются из `<P>/integration.md`. Выбранная интеграция:
+Опции — провайдеры из `<P>/integration.md`. Выбранная интеграция тянет
+**второй раунд** — какие функции use-case дёргает (опции = функции этого
+провайдера из `## Функции` `integration.md`; Other — нужна новая функция).
 
-1. **заполняет колонку `integration`** в use-case `## Dependencies` (slug
-   записи в бэктиках); для внутренней инфры колонка остаётся `—`;
-2. фиксируется в `state/<project-slug>/<ctx>/<kind>/<Name>.md`.
+Выбор фиксируется на двух уровнях:
 
-Если нужной записи в `<P>/integration.md` ещё нет (выбрано Other) — это
-**аналитический пробел продуктового слоя**: домен ссылается на интеграцию,
-которой нет. Зафиксируй `**blocker**`-вопрос в state-заметке use-case
-(«порт `<port>` ходит наружу, а записи integration нет — завести через
-`/project-deep-dive <project-slug>`») и оставь колонку с предложенным
-slug'ом до заведения. Скилл доменов **не** пишет в `<P>/integration.md` —
-это зона `/project-deep-dive`.
+1. **use-case `## Dependencies`** — колонка `integration` = slug провайдера
+   (в бэктиках; внутренняя инфра — `—`), колонка `functions` =
+   `` [`<integration>.<fn-slug>`, …] `` (дёрнутые функции; для инфры — `—`);
+2. **клиент `_shared/integrations/<integration-slug>/README.md`**
+   (`kind: integration-client`) — конкретное воплощение: транспорт, та же
+   функция со `slug`, сигнатура, ошибки. Если клиента ещё нет — завести из
+   шаблона `_templates/integration-client.md`. Домен зовёт функцию по `slug`,
+   **транспорт держит только клиент** (HTTP/gRPC/очередь — домен не знает);
+3. фиксируется в `state/<project-slug>/<ctx>/<kind>/<Name>.md`.
+
+Скилл доменов авторит use-case (`integration` + `functions`) и клиент
+`_shared/`. Бизнес-каталог `integration.md` (провайдеры + `## Функции` с
+бизнес-описанием) ведёт `/project-deep-dive` — **не** этот скилл.
+
+Если нужного **провайдера** или **функции** в `<P>/integration.md` ещё нет
+(выбрано Other) — это **аналитический пробел продуктового слоя**: домен
+ссылается на то, чего нет. Зафиксируй `**blocker**`-вопрос в state-заметке
+use-case («порт `<port>` дёргает функцию `<fn>`, а её/провайдера нет в
+`integration.md` — завести через `/project-deep-dive <project-slug>`») и
+оставь колонки с предложенными slug'ами до заведения.
 
 ### Межпроектный порт / событие (`target: sibling-project`)
 
@@ -119,15 +132,20 @@ slug'ом до заведения. Скилл доменов **не** пишет
 
 - запись integration имеет `target: sibling-project` и `sibling-project` →
   slug соседнего проекта;
-- колонка `integration` в `## Dependencies` ссылается на эту запись;
-- **ребро стыка** сводится в `docs/projects/project-map.md` (с `via:`
-  `` `integration:<slug>` ``, `` `event:<name>` `` или `` `domain-port:<ctx>.<Op>` ``).
+- колонки `integration` + `functions` в `## Dependencies` ссылаются на эту
+  запись и её функции (outbound — мы зовём функцию соседа; inbound — сосед
+  зовёт нашу, тогда это наш use-case с соответствующим `Actor`);
+- **ребро стыка** сводится в `docs/projects/project-map.md` на бизнес-языке
+  (с `via:` `` `integration:<slug>` ``, `` `event:<name>` `` или
+  `` `domain-port:<ctx>.<Op>` ``; функции/сигнатуры в карту **не** уезжают).
 
-Скилл доменов авторит **только** колонку `integration` в use-case'е и
-state-заметку. Запись `integration.md` и ребро `project-map.md` ведёт
-`/project-deep-dive`; согласованность трёх сторон (порт ↔ integration ↔
-project-map) сверяет `/cross-audit`. Если соседнего проекта или ребра
-нет — `**blocker**`-вопрос в state-заметке.
+Скилл доменов авторит use-case (`integration` + `functions`), клиент
+`_shared/` и state-заметку. Бизнес-каталог `integration.md` и ребро
+`project-map.md` ведёт `/project-deep-dive`; согласованность сторон
+(функция в use-case ↔ функция клиента `_shared/` ↔ `## Функции`
+`integration.md` ↔ ребро `project-map` ↔ обслуживающий use-case соседа)
+сверяет `/cross-audit`. Если соседнего проекта или ребра нет —
+`**blocker**`-вопрос в state-заметке.
 
 ## Что делать, если продуктовый слой проекта пуст
 
@@ -158,7 +176,9 @@ project-map) сверяет `/cross-audit`. Если соседнего прое
 После каждой сессии скилл предлагает `/cross-audit` (lenses
 `capability-domain`, `integration-domain`) — это поможет аналитику
 увидеть, не осталась ли возможность (capability) поверхности без
-бизнес-кода или интеграция (integration) без адаптера. Для межпроектных
-портов `/cross-audit` сверяет три стороны: колонка `integration` в
-use-case `## Dependencies` ↔ запись `<P>/integration.md`
-(`target: sibling-project`) ↔ ребро `docs/projects/project-map.md`.
+бизнес-кода, функция интеграции без клиента/потребителя или интеграция
+без клиента. Для межпроектных портов `/cross-audit` сверяет цепочку:
+`functions` в use-case `## Dependencies` ↔ функция клиента
+`_shared/integrations/<slug>/` ↔ `## Функции` `<P>/integration.md`
+(`target: sibling-project`) ↔ ребро `docs/projects/project-map.md` ↔
+обслуживающий use-case у соседа.

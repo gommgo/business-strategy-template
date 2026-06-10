@@ -700,39 +700,59 @@ surface.
 
 ## integration-domain
 
-**Source:** `docs/projects/<slug>/integration.md` (записи, чья колонка
-`surface` содержит `<surface>`).
+**Source:** `docs/projects/<slug>/integration.md` (`## Провайдеры`, чья
+колонка `surface` содержит `<surface>`; их `## Функции`).
 **Destination:** `docs/projects/<slug>/domains/` (если есть;
-surface-агностичны; колонка `integration` в `use-cases/*` `## Dependencies`).
+surface-агностичны): use-case `## Dependencies` колонки `integration` +
+`functions`; клиенты `_shared/integrations/<integration>/` (`## Functions`).
 **Скоуп:** по проекту × поверхность.
 **Применим если:** `docs/projects/<slug>/domains/` существует; у проекта
 есть поверхность `<surface>`.
 
+Сверяет **цепочку функции**: бизнес-каталог (`## Функции` integration.md) ↔
+конкретный клиент (`_shared/integrations/<integration>/`) ↔ потребление
+(use-case `functions`).
+
 **Что искать:**
 
-- `error`: integration `stable`, обслуживающая `<surface>` (её колонка
-  `surface` содержит `<surface>`), под которую в `domains/` проекта нет
-  адаптера / порта (нет use-case с `integration` = slug этой записи в
-  `## Dependencies`). Интеграция объявлена, но в коде её нет.
-- `warning`: порт в `domains/` use-case (`## Dependencies` колонка
-  `integration` непуста), указывающий на запись `integration.md`, чей
-  `surface` не содержит ни одну поверхность (рассинхрон: код знает порт,
-  продуктовый слой не привязал интеграцию к поверхности).
+- `error`: integration `stable`, обслуживающая `<surface>`, под которую в
+  `domains/` нет клиента `_shared/integrations/<integration>/` и ни одного
+  use-case с этим `integration` в `## Dependencies`. Интеграция объявлена, но
+  в коде её нет.
+- `error`: функция `## Функции` с `direction: out`, у которой **нет пары** в
+  `## Functions` клиента `_shared/integrations/<integration>/` (тот же
+  `slug`). Бизнес объявил функцию, но клиент её не реализует.
+- `error`: `functions`-запись в use-case (`<integration>.<fn-slug>`), которой
+  **нет** ни в `## Функции` провайдера, ни в `## Functions` клиента —
+  висячее потребление.
+- `warning`: функция клиента (`out`) без потребителя — ни один use-case не
+  держит её в `functions` (мёртвая функция клиента).
+- `warning`: функция `## Функции` с `direction: in` без **обслуживающего**
+  use-case (нет use-case с подходящим `Actor`, принимающего этот вызов).
+- `warning`: порт use-case с непустым `integration`, чья запись в
+  integration.md не несёт ни одну поверхность в `surface` (рассинхрон).
 
 **Промпт-добавка:**
 
 ```
-Source — integration.md проекта <slug>, но СКОУПЬ к интеграциям, чья
-колонка `surface` содержит <surface>. Destination — domains/ проекта
-(surface-агностичны): порт виден в use-case `## Dependencies`, колонка
-`integration` = slug записи integration.md (внутренняя инфра — `—`).
+Source — integration.md проекта <slug> (## Провайдеры + ## Функции), СКОУПЬ
+к провайдерам, чья `surface` содержит <surface>. Destination — domains/:
+клиенты _shared/integrations/<integration>/ (## Functions) и use-case
+`## Dependencies` (колонки `integration` + `functions`).
 
-Для каждой интеграции, обслуживающей <surface>: есть ли use-case с этим
-integration-slug в Dependencies (адаптер/порт)? Нет — error.
+Сверяй цепочку каждой функции (общий slug на трёх высотах):
+- функция ## Функции (out) без пары в ## Functions клиента — error;
+- функция-потребление в use-case (functions = <integration>.<fn-slug>) без
+  строки в ## Функции провайдера или в клиенте — error;
+- функция клиента (out) без потребителя (ни один use-case не держит её в
+  functions) — warning;
+- функция ## Функции (in) без обслуживающего use-case (Actor принимает) —
+  warning;
+- провайдер, обслуживающий <surface>, без клиента и без use-case — error.
 
-Обратно: порт use-case с непустым integration, чья запись в integration.md
-не несёт ни одной поверхности в `surface` — warning. Технические адаптеры
-(внутренняя инфра, integration = `—`) — норма, не флаг. В finding указывай
+Внутренняя инфра (integration = `—`, functions = `—`) — норма, не флаг.
+Транспорт (HTTP/endpoint) держит клиент _shared/, не use-case — если
+сигнатура протекла в use-case.Steps, это warning. В finding указывай
 project и surface.
 ```
 
@@ -1132,66 +1152,70 @@ hint. Связь семантическая (user сопоставляй по с
 
 ## integration-crossproject
 
-**Source:** `docs/projects/<slug>/integration.md` (записи с
-`target: sibling-project`).
+**Source:** `docs/projects/<slug>/integration.md` (`## Провайдеры` с
+`target: sibling-project` + их `## Функции`).
 **Destination:** `docs/projects/project-map.md` (рёбра) +
-`docs/projects/<sibling>/integration.md` (обратная сторона у соседа) +
-`docs/projects/<slug>/domains/<ctx>/use-cases/*` (`## Dependencies`,
-колонка `integration` — порт стыка).
+`docs/projects/<sibling>/` (обратная сторона: его `integration.md` +
+обслуживающие `domains/<ctx>/use-cases/*`) +
+`docs/projects/<slug>/domains/` (наш клиент `_shared/integrations/<slug>/` +
+use-case `functions`).
 **Скоуп:** по проекту (пара `проект × lens`; межпроектный).
 **Применим если:** у проекта есть хотя бы одна `integration` с
 `target: sibling-project`, **или** в `project-map.md` есть ребро с
 `from-project = <slug>`.
 
-Сверяет **три стороны** межпроектного стыка: продуктовая интеграция
-(`integration.md`, авторская сторона ребра) ↔ граф стыков
-(`project-map.md`) ↔ техническое воплощение (порт в `domains/`). Дополняет
-`projectmap-reciprocity` (тот — над всей картой, осмысленность пар рёбер).
+Сверяет межпроектный стык **в обе стороны**: продуктовая интеграция
+(`integration.md`, авторская сторона) ↔ граф стыков (`project-map.md`,
+бизнес-язык) ↔ наше техническое воплощение (клиент `_shared/` + функции в
+use-case) ↔ **обслуживающая сторона у соседа** (его use-case, принимающий
+наш вызов, или его исходящая функция). Дополняет `projectmap-reciprocity`.
 
 **Что искать:**
-- `error`: `integration` с `target: sibling-project` и `sibling-project =
-  <X>`, для которой в `project-map.md` **нет ребра** (`via:
-  integration:<этот-slug>` или семантически соответствующего) — стык
-  объявлен в продукте, но не сведён в карту.
+- `error`: `integration` с `target: sibling-project = <X>`, для которой в
+  `project-map.md` **нет ребра** — стык объявлен, но не сведён в карту.
 - `error`: `integration.sibling-project` указывает на проект, у которого
-  **нет каталога** `docs/projects/<X>/` (стык в несуществующий проект).
-- `warning`: ребро `project-map.md` с `from-project = <slug>`, у которого
-  **нет опорной** `integration` с `target: sibling-project` в этом проекте
-  (`via` указывает на отсутствующую интеграцию — карта без авторской
-  стороны).
-- `warning`: у соседа `<sibling>` **нет обратной** интеграции / порта на
-  этот проект, хотя `direction` ребра предполагает обмен в обе стороны
-  (`duplex`) или входящий поток к соседу (асимметрия стыка).
-- `warning`: `integration` с `target: sibling-project`, у которой нет
-  порта в `domains/<ctx>/use-cases/*` (нет use-case с `integration` =
-  slug этой записи в `## Dependencies`) — стык без технического
-  воплощения (если у проекта есть `domains/`).
+  **нет каталога** `docs/projects/<X>/`.
+- `error`: наша `out`-функция к соседу (`## Функции` `direction: out`,
+  провайдер `target: sibling-project`) без **обслуживающего use-case у
+  соседа** `<X>` — мы зовём функцию, которую сосед не обслуживает
+  (caller есть, callee нет).
+- `warning`: ребро `project-map.md` (`from-project = <slug>`) **без опорной**
+  `integration` с `target: sibling-project` — карта без авторской стороны.
+- `warning`: у соседа `<X>` **нет обратной** интеграции/функции на этот
+  проект при `duplex`/входящем направлении ребра (асимметрия стыка).
+- `warning`: `integration` с `target: sibling-project` без клиента
+  `_shared/` и без use-case с её функциями (стык без воплощения, если есть
+  `domains/`).
+- `warning`: техническая деталь (сигнатура функции, endpoint, имя use-case)
+  просочилась в `project-map.md` — карта должна быть на бизнес-языке.
 
 **Промпт-добавка:**
 ```
-Межпроектный стык фиксируется ТРЕМЯ согласованными сторонами: (1)
-авторская — integration.md проекта <slug> с target: sibling-project +
-sibling-project → slug соседа; (2) граф — ребро в
-docs/projects/project-map.md (колонка via → integration:<slug>); (3)
-техническая — порт в domains/<ctx>/use-cases/* (## Dependencies, колонка
-integration = slug записи).
+Межпроектный стык согласован В ОБЕ СТОРОНЫ: (1) авторская — integration.md
+проекта <slug> (target: sibling-project + ## Функции); (2) граф — ребро в
+docs/projects/project-map.md (бизнес-язык, via → integration:<slug>); (3)
+наша техника — клиент _shared/integrations/<slug>/ + use-case functions; (4)
+сторона соседа <X> — обслуживающий use-case (наш out ↔ его принимающий
+Actor) или его исходящая функция.
 
-Прочитай integration.md проекта <slug> (фильтр target: sibling-project),
-docs/projects/project-map.md, перечень каталогов docs/projects/ (какие
-проекты существуют), integration.md соседа <sibling> и domains/ проекта
-<slug> (если есть).
+Прочитай integration.md проекта <slug> (фильтр target: sibling-project +
+функции), docs/projects/project-map.md, перечень каталогов docs/projects/,
+integration.md соседа <X> и его domains/use-cases (если есть), domains/
+проекта <slug> (клиент _shared/ + functions в use-case).
 
-Найди рассинхрон трёх сторон:
-- integration с target: sibling-project без ребра в project-map — error;
-- sibling-project на несуществующий проект (нет каталога) — error;
-- ребро project-map (from-project=<slug>) без опорной integration — warning;
-- у соседа нет обратной интеграции/порта при duplex/входящем направлении —
-  warning;
-- integration sibling-project без порта в domains/ (если domains есть) —
-  warning.
+Найди рассинхрон сторон:
+- integration target: sibling-project без ребра в project-map — error;
+- sibling-project на несуществующий проект — error;
+- наша out-функция к соседу без обслуживающего use-case у соседа — error
+  (caller без callee);
+- ребро project-map (from=<slug>) без опорной integration — warning;
+- у соседа нет обратной интеграции/функции при duplex/входящем — warning;
+- integration sibling-project без клиента _shared/ и потребления — warning;
+- техническая деталь (сигнатура/endpoint/use-case) в project-map — warning
+  (карта на бизнес-языке).
 
-Связь семантическая, не только slug-матч via. В finding ставь project =
-<slug> (проект-инициатор), business-problem = null.
+Связь семантическая, не только slug-матч. В finding ставь project = <slug>
+(проект-инициатор), business-problem = null.
 ```
 
 ## projectmap-reciprocity

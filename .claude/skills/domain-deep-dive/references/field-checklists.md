@@ -161,10 +161,11 @@ ID-ссылки на child entity (только через parent).
 
 **Ссылается на**: `<ctx>.<Aggregate>` (called methods), `<ctx>.<Event>`
 (emitted), `<other-ctx>.<X>Reader` (cross-domain ports — reader другого
-контекста **этого** проекта), запись `<P>/integration.md` (колонка
-`integration` в `## Dependencies` — для портов к внешней системе или к
-соседнему проекту бизнеса; `target: sibling-project` → ребро в
-`docs/projects/project-map.md`).
+контекста **этого** проекта), провайдера `<P>/integration.md` (колонка
+`integration`) и его функции (колонка `functions` =
+`` [`<integration>.<fn-slug>`] ``) в `## Dependencies` — для портов к внешней
+системе или к соседнему проекту; их клиент — `_shared/integrations/<slug>/`;
+`target: sibling-project` → ребро в `docs/projects/project-map.md`.
 **Кто ссылается**: `<ctx>/README.md § Use cases`,
 `<ctx>.<Aggregate>.Use Cases`, `<ctx>.<Policy>.Used by`.
 
@@ -178,8 +179,10 @@ ID-ссылки на child entity (только через parent).
 - `Authorizer`-порт внутри use-case (авторизация — middleware
   `authgate`, если не нужны fine-grained policy).
 - Порт `## Dependencies` к внешней системе / соседнему проекту с пустой
-  колонкой `integration` — внешний выход кода не поднят до записи
-  `integration.md` продукта.
+  колонкой `integration` или `functions` — внешний выход кода не поднят до
+  функции `integration.md` + клиента `_shared/`.
+- Транспорт (HTTP-метод, endpoint, очередь) в `Steps`/`purpose` use-case —
+  домен transport-agnostic; транспорт живёт в клиенте `_shared/`.
 
 **Порядок копания**:
 
@@ -189,22 +192,24 @@ ID-ссылки на child entity (только через parent).
      `scheduled job` / `internal` (Other для конкретного path).
 2. `Inputs` (таблица) — Other per field.
 3. `Outputs` — `On success` (Other), `On failure` ссылается на Errors.
-4. `Dependencies` (таблица `port | purpose | adapter | integration`) —
-   имя порта и `purpose` через Other (формулировка архитектора); колонка
-   `integration` — раунд связи с продуктовым слоем:
+4. `Dependencies` (таблица `port | purpose | adapter | integration | functions`)
+   — имя порта и `purpose` через Other (формулировка архитектора); колонки
+   `integration` + `functions` — раунд связи с продуктовым слоем:
    - внутренняя инфра (репозиторий агрегата, `Clock`, reader другого
-     контекста **этого** проекта) → `—`;
-   - порт к **внешней системе** (платёж, email, SMS, IDP, webhook) →
-     slug записи `<P>/integration.md` (`target: external`);
-   - порт к **соседнему проекту** бизнеса (HTTP-клиент к его API
-     синхронно, либо `consumes` его события) → slug записи
-     `<P>/integration.md` (`target: sibling-project`); ребро — в
-     `docs/projects/project-map.md`.
-   Опциями подаётся выбор записи `integration` (см.
-   `references/project-context.md`); запись `integration.md` скилл доменов
-   не заводит — нет нужной → `**blocker**` + `/project-deep-dive`.
-   Anti-pattern alert: `Authorizer`; пустая колонка `integration` у
-   внешнего/межпроектного порта.
+     контекста **этого** проекта) → `—` / `—`;
+   - порт к **внешней системе** (платёж, email, SMS, IDP, webhook) → slug
+     провайдера `<P>/integration.md` (`target: external`) + `functions` =
+     дёрнутые функции этого провайдера `` [`<integration>.<fn-slug>`] ``;
+   - порт к **соседнему проекту** бизнеса → slug провайдера
+     `<P>/integration.md` (`target: sibling-project`) + `functions`; ребро —
+     в `docs/projects/project-map.md`.
+   Раунд: сперва выбор провайдера, затем — какие функции дёргаем (опции —
+   `## Функции` этого провайдера; см. `references/project-context.md`).
+   Конкретный клиент авторь в `_shared/integrations/<slug>/` (kind
+   `integration-client`). Провайдера/функцию в `integration.md` скилл
+   доменов не заводит — нет нужной → `**blocker**` + `/project-deep-dive`.
+   Anti-pattern alert: `Authorizer`; пустые `integration`/`functions` у
+   внешнего/межпроектного порта; транспорт в use-case вместо клиента.
 5. `Steps` — нумерованный observable список. Other на каждый шаг.
 6. `Called aggregate methods` — выбор из методов соответствующего
    `<Aggregate>.md` + «нужен новый метод» (Other → правка aggregate'а).
@@ -284,6 +289,43 @@ ID-ссылки на child entity (только через parent).
 6. `Notes` — equality semantics, источник данных и т.п.
 
 **Тест-критерий**: см. `draft-stable.md § vo`.
+
+---
+
+## integration-client (`_shared/integrations/<slug>/`)
+
+**Обязательные H2**: `Transport`, `Functions`, `Errors`.
+
+**Опциональные**: `Notes`.
+
+**Frontmatter**: `id: _shared.integrations.<integration-slug>`,
+`kind: integration-client`, `integration: <integration-slug>` (→ провайдер
+`<P>/integration.md`), `status`.
+
+**Ссылается на**: провайдера `<P>/integration.md` (frontmatter `integration`);
+функции совпадают по `slug` с его `## Функции`.
+**Кто ссылается**: use-case `## Dependencies` колонка `functions`
+(`<integration>.<fn-slug>`); зеркало — колонка `consumed-by` в `## Functions`.
+
+**Anti-patterns**:
+- Транспорт «протёк» в домен (use-case/aggregate знает про HTTP) — он живёт
+  только здесь.
+- Функция клиента без пары в `## Функции` провайдера `integration.md`
+  (бизнес-каталог не знает о ней).
+- Доменная логика/инварианты в клиенте — клиент только адаптирует транспорт.
+
+**Порядок копания**:
+
+1. `Transport` — протокол (HTTP/gRPC/очередь/SDK/webhook), база, авторизация,
+   надёжность (ретраи/таймауты/идемпотентность). Other на каждое.
+2. `Functions` (таблица `slug | name | direction | signature | payload | consumed-by`)
+   — `slug` совпадает с `## Функции` провайдера; `direction` `out`/`in`;
+   `signature` конкретна или `—`; `consumed-by` — use-case'ы (зеркало).
+3. `Errors` — как клиент отдаёт ошибки домену **абстрактно** (доменные
+   sentinel'ы, не HTTP-коды).
+4. `Notes` — маппинг кодов провайдера, версии, идемпотентность.
+
+**Тест-критерий**: см. `draft-stable.md § integration-client`.
 
 ---
 

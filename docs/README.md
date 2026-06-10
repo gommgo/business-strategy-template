@@ -60,7 +60,7 @@ SWOT → Карта гипотез (терминал — `task`). Исход —
 
 | потребитель (форк) | что читает | для чего |
 |---|---|---|
-| **`<org>/backend`** (`go-backend-template`) | `projects/<slug>/domains/<ctx>/` (stable) | `/scaffold` domain → Go-код; маппинг DDD → Go живёт у него (`docs/reference/domain-mapping.md`) |
+| **`<org>/backend`** (`go-backend-template`) | `projects/<slug>/domains/<ctx>/` + `domains/_shared/` (VO + клиенты интеграций; stable) | `/scaffold` domain → Go-код; маппинг DDD → Go (включая `integration-client` → порт/адаптер) живёт у него (`docs/reference/domain-mapping.md`) |
 | **`<org>/frontend`** (`spa-frontend-template`) | `projects/<slug>/{interface,screens}/<surface>/` + product-файлы | `/fsd-deep-dive` мапит ситуации/блоки/сущности на FSD-слои (по поверхности) |
 | **`<org>/infra`** (`project-infra-template-compose`) | `projects/<slug>/{vision, surface}` | `/init-project` читает продуктовый контекст (vision / реестр поверхностей) |
 
