@@ -255,31 +255,47 @@ mermaid-диаграмма). Обязательные слоты и легаль
 ### R-STRUCT-015 — Worker с topic-триггером без consumes
 
 - **severity**: `error`
-- **что ищем**: строка `## Workers` паспорта с `trigger: topic:<t>`, для
-  которой в `## Messaging` того же паспорта нет строки `consumes` с тем же
-  `topic` — воркер слушает топик, на который сервис не подписан.
-- **как проверяем**: для каждого паспорта собрать пары
-  (`Workers.trigger=topic:<t>` ↔ `Messaging.direction=consumes, topic=<t>`);
+- **что ищем**: воркер (реестр `## Workers` / `Trigger` файла
+  `workers/<slug>.md`) с `topic:<t>`, для которого в `## Messaging` того же
+  паспорта нет строки `consumes` с тем же `topic` — воркер слушает топик,
+  на который сервис не подписан.
+- **как проверяем**: для каждого сервиса собрать пары
+  (`trigger=topic:<t>` ↔ `Messaging.direction=consumes, topic=<t>`);
   непарный trigger — finding.
 - **пример**: `notifier` с `trigger: topic:orders.paid`, а в Messaging
   только `produces`.
 
-### R-STRUCT-016 — Workers.backed-by в пустоту
+### R-STRUCT-016 — Handles воркера в пустоту
 
 - **severity**: `error`
-- **что ищем**: `backed-by: use-case:<ctx>.<Operation>` строки `## Workers`,
-  для которого нет файла `services/*/domains/<ctx>/use-cases/<Operation>.md`.
-- **как проверяем**: реф → скан доменов всех сервисов проекта. Дополнительно
-  (`warning`, не отдельное правило): use-case найден в **чужом** сервисе —
-  воркер исполняет чужой домен, обмен должен идти через события/Exposes.
+- **что ищем**: реф `use-case:<ctx>.<Operation>` из `## Handles` файла
+  `workers/<slug>.md`, для которого нет файла
+  `services/*/domains/<ctx>/use-cases/<Operation>.md`.
+- **как проверяем**: каждый реф колонки `use-case` → скан доменов всех
+  сервисов проекта. Дополнительно (`warning`, не отдельное правило):
+  use-case найден в **чужом** сервисе — воркер исполняет чужой домен,
+  обмен должен идти через события/Exposes.
 
-### R-SEM-006 — Cron-выражение в Workers.trigger
+### R-STRUCT-017 — Воркер: рассинхрон реестра и файлов
+
+- **severity**: `error`
+- **что ищем**: строка реестра `## Workers` без файла
+  `workers/<slug>.md`; файл в `workers/` без строки реестра; рассинхрон
+  `trigger` между строкой реестра и `Trigger` файла; отсутствие
+  обязательных секций файла (`Trigger`, `Handles`, `Semantics`,
+  `On failure`, `Notes`) или `kind: worker` во frontmatter.
+- **как проверяем**: slug'и реестра ↔ листинг `workers/*.md`; по каждому
+  файлу — frontmatter и набор H2.
+
+### R-SEM-006 — Cron-выражение или числа в воркере
 
 - **severity**: `warning`
-- **что ищем**: `trigger` строки `## Workers` с cron-синтаксисом
-  (`*/5 * * * *` и подобное) вместо смысла словами («каждые 5 минут») —
-  runtime-механика в design-time артефакте.
-- **как проверяем**: regex на cron-подобные значения в колонке `trigger`.
+- **что ищем**: `Trigger`/`trigger` воркера с cron-синтаксисом
+  (`*/5 * * * *` и подобное) вместо смысла словами («каждые 5 минут»);
+  числа ретраев/тайминги/размеры батчей в `Semantics` — runtime-механика
+  в design-time артефакте.
+- **как проверяем**: regex на cron-подобные значения; числа с единицами
+  времени/штук в `Semantics`.
 
 ### R-SEM-001 — Платформенный ресурс-сирота
 

@@ -121,12 +121,17 @@ cp $TPL/_templates/service-readme.md <P>/services/<svc>/README.md
      `produces` соседей (та же пара `broker`+`topic`); `purpose` (Other);
    - не ходит в брокер — `_N/A_`.
 7. **Workers** — фоновые воркеры внутри сервиса (процессы того же
-   деплой-юнита): по каждому — `trigger` (`topic:<t>` — обязана быть парная
-   строка `consumes` в `Messaging`; schedule — смысл словами, не cron) и
-   `backed-by` (доменный use-case — опции из `domains/*/use-cases/`).
-   Развилка через AskUserQuestion: «это воркер внутри сервиса или отдельный
-   деплой-юнит?» — отдельный целиком на событиях/расписании → сервис
-   `type: worker` в реестре, не строка Workers.
+   деплой-юнита). На каждый: строка реестра `## Workers` + файл
+   `workers/<slug>.md` из шаблона `_templates/worker.md`; раунды по
+   секциям файла — `Trigger` (`topic:<t>` — обязана быть парная строка
+   `consumes` в `Messaging`; schedule — смысл словами, не cron), `Handles`
+   (какие доменные use-case'ы дёргает — опции из `domains/*/use-cases/`;
+   `when` — маршрутизация исходов, не бизнес-правило), `Semantics`
+   (идемпотентность · retry → DLQ · ordering · батчинг — стратегии от
+   архитектора, без чисел), `On failure` (поток + сигнал). Развилка через
+   AskUserQuestion: «это воркер внутри сервиса или отдельный деплой-юнит?»
+   — отдельный целиком на событиях/расписании → сервис `type: worker` в
+   реестре, не воркер.
 8. **Fronts** — только для `type: gateway`: `Integration` — выбор из
    `integration.md`; `Client` — ссылка на
    `_shared/integrations/<slug>/` (клиента авторит `/domain-deep-dive`;

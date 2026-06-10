@@ -192,7 +192,8 @@ falsifiable-вопрос и пишет ответ архитектора дос�
    (`service:` | `platform:` | `integration:`) → `Resources` («потребность +
    технология», без операционки) → `Messaging`
    (produces/consumes · broker · topic · event) → `Workers` (фоновые
-   воркеры внутри сервиса: trigger topic/schedule, парность с Messaging) →
+   воркеры: реестр в паспорте + файл `workers/<slug>.md` — Trigger ·
+   Handles · Semantics · On failure) →
    `Fronts` (только
    `type: gateway`).
 4. **platform** — реестр `platform.md`: **только то, что требуют паспорта**

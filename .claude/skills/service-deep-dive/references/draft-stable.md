@@ -17,12 +17,16 @@ Committed-скрипта-валидатора в репо нет — прове�
 - `Owned Contexts` = `_N/A (no domains)_` обязательно для
   `gateway`/`edge`/`bot`, подозрительно для `api`/`worker`;
 - `Fronts` ≠ `_N/A_` только у `type: gateway`;
-- каждый `Workers.trigger` вида `topic:<t>` имеет парную строку `consumes`
-  с тем же `topic` в `Messaging`; `backed-by` резолвится в
-  `domains/<ctx>/use-cases/` (этого или другого сервиса — тогда это
-  подозрение: воркер исполняет чужой домен);
-- `Workers.trigger` со schedule — смысл словами, не cron-выражение
+- каждая строка реестра `## Workers` имеет файл `workers/<slug>.md` и
+  наоборот; обязательные секции файла заполнены (см.
+  `field-checklists.md § worker`);
+- `Trigger` вида `topic:<t>` имеет парную строку `consumes` с тем же
+  `topic` в `Messaging`; schedule — смысл словами, не cron-выражение
   (cron — runtime, `<org>/infra`);
+- каждый `use-case:<ctx>.<Operation>` из `Handles` резолвится в домены
+  проекта (чужой сервис — подозрение: воркер исполняет чужой домен);
+- `Semantics` — стратегиями без чисел; `On failure` называет поток и
+  сигнал;
 - placeholder'ы формы (`<slug>`, `<одно предложение>`, шаблонная
   mermaid-диаграмма) не остались.
 

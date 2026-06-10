@@ -34,7 +34,8 @@ aiogram_dialog + сквозные реестры command · notification на к
 реестр-хребет `service.md` объявляет сервисы (типы `api` · `worker` ·
 `gateway` · `edge` · `bot`), каждый несёт паспорт
 (`services/<svc>/README.md` — Exposes · Dependencies · Resources ·
-Messaging) и владеет доменами (`services/<svc>/domains/<ctx>/` — **по
+Messaging · Workers; фоновые воркеры — файлами `workers/<slug>.md`:
+триггер, оркестрация доменных use-case'ов, семантика потребления) и владеет доменами (`services/<svc>/domains/<ctx>/` — **по
 bounded-context, surface-агностичны**, контекст уникален в проекте);
 платформенные ресурсы проекта — `services/platform.md`, свод топологии и
 решения разбиения — `services/architecture.md`. Точки стыка между продуктами
@@ -42,7 +43,8 @@ bounded-context, surface-агностичны**, контекст уникале
 `docs/projects/infrastructure/` (межпроектный: учёт серверов `server.md`,
 рантаймы `runtime.md` — kubernetes/compose по окружениям, общие
 платформенные ресурсы `shared-platform.md` — один брокер/traefik на все
-проекты, обслуживающие джобы периметра `job.md` — бэкапы/ротация/сертификаты,
+проекты, джобы периметра — реестр `job.md` + файлы `jobs/<slug>.md`
+(бэкапы/ротация/сертификаты: шаги, retention, проверка успеха),
 и размещение `placement.md` — единственное место «какой юнит где
 живёт»). Канон формы продуктовых слоёв —
 один раз в `docs/projects/_template/`. См.:
@@ -502,7 +504,8 @@ Interface-слой (по проекту, **по поверхности**):
   партиционирования бэкенда (типы `api` · `worker` · `gateway` · `edge` ·
   `bot`); паспорт несёт Exposes / Dependencies / Resources («потребность +
   технология») / Messaging (produces/consumes ↔ topic ↔
-  `event:<ctx>.<Event>`); перенос контекста между сервисами — миграция
+  `event:<ctx>.<Event>`) / Workers (реестр; полное описание воркера —
+  файл `workers/<slug>.md`: Trigger · Handles · Semantics · On failure); перенос контекста между сервисами — миграция
   через этот же скилл. Узкий аудит — `service-audit <slug>`.
 - **Артефакты доменов** (`docs/projects/<slug>/services/<svc>/domains/`) —
   через скилл `domain-deep-dive <slug> <ctx>`; по bounded-context, внутри
@@ -516,7 +519,8 @@ Interface-слой (по проекту, **по поверхности**):
   `Dependencies`; другой сервис проекта — порт `service:<svc>`); домен
   transport-agnostic.
 - **ИТ-периметр бизнеса** (`docs/projects/infrastructure/`: `server.md` ·
-  `runtime.md` · `shared-platform.md` · `job.md` · `placement.md`) — через скилл
+  `runtime.md` · `shared-platform.md` · `job.md` + файлы `jobs/<slug>.md` ·
+  `placement.md`) — через скилл
   `infrastructure-deep-dive`; один слой на бизнес (канон формы + данные
   вместе), межпроектный. Размещение юнитов — только здесь (`placement.md`);
   проектные слои deployment-agnostic. Без IP/hostname/секретов и

@@ -148,6 +148,25 @@ Read-only контекст резолва (исключая `_template`):
 - **пример**: `pg-backup` с `target: [service:crm/orders]`, а проекта `crm`
   нет.
 
+### R-STRUCT-011 — Джоба: рассинхрон реестра и файлов
+
+- **severity**: `error`
+- **что ищем**: строка реестра `job.md` без файла `jobs/<slug>.md`; файл в
+  `jobs/` без строки реестра; отсутствие обязательных секций файла
+  (`Trigger`, `Does`, `Target`, `Retention`, `Verify`, `On failure`,
+  `Notes`) или `kind: job` во frontmatter; рассинхрон `trigger`/`target`
+  между реестром и файлом.
+- **как проверяем**: slug'и реестра ↔ листинг `jobs/*.md`; по каждому
+  файлу — frontmatter, набор H2, сверка trigger/target с реестром.
+
+### R-SEM-004 — Stable-джоба с пустым Verify
+
+- **severity**: `warning`
+- **что ищем**: файл джобы со `status: stable`, у которого `Verify` —
+  `_N/A_`/`—`/пустой: никак не проверяется, что джоба реально работает
+  (бэкап без restore-теста — вера, не гарантия).
+- **как проверяем**: для stable-джоб секция `Verify` непуста содержательно.
+
 ### R-STRUCT-008 — Потребность `shared:<slug>` без записи в `shared-platform.md`
 
 **Severity:** `error`.

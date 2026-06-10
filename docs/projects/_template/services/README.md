@@ -42,6 +42,7 @@ docs/projects/_template/services/
 ├── architecture.md            ← форма singleton'а топологии
 ├── _templates/                ← пустые шаблоны для копирования
 │   ├── service-readme.md      (паспорт сервиса)
+│   ├── worker.md              (kind: worker — фоновый воркер сервиса)
 │   ├── aggregate.md
 │   ├── entity.md              (опционально, для сложных child entities)
 │   ├── vo-shared.md           (kind: vo — для _shared/, не для inline-VO внутри aggregate)
@@ -69,6 +70,8 @@ docs/projects/<project-slug>/services/
 │           └── README.md      ← kind: integration-client, клиент внешней системы / соседа
 └── <service-slug>/            ← по папке на сервис из реестра
     ├── README.md              ← паспорт сервиса (kind: service-passport)
+    ├── workers/               ← фоновые воркеры сервиса (если есть)
+    │   └── <worker-slug>.md   ← kind: worker (Trigger · Handles · Semantics · On failure)
     └── domains/               ← только у доменных сервисов (type: api | worker)
         └── <bounded-context>/
             ├── README.md      ← purpose, ubiquitous language (роллап на контекст)
@@ -106,6 +109,7 @@ docs/projects/<project-slug>/services/
 |---|---|---|
 | строка реестра сервисов | объявление сервиса: тип, поверхности | `service.md` |
 | `service-passport` | паспорт одного сервиса: Exposes · Owned Contexts · Dependencies · Resources · Messaging · Workers | `<svc>/README.md` |
+| `worker` | фоновый воркер сервиса: триггер, оркестрация доменных use-case'ов, семантика потребления | `<svc>/workers/<slug>.md` |
 | строка реестра платформы | платформенный ресурс проекта: брокер, api-gateway, CDN, object storage | `platform.md` |
 | `architecture` (singleton) | свод топологии + авторские решения разбиения | `architecture.md` |
 | `aggregate` | бизнес-сущность с консистентной границей: root entity + inline-VO внутри | `<svc>/domains/<ctx>/<Name>.md` |
@@ -148,6 +152,7 @@ consumes: [verification.EmailVerified]
 | kind | обязательные H2 |
 |---|---|
 | `service-passport` | Purpose, Exposes, Owned Contexts, Dependencies, Resources, Messaging, Workers, Fronts, Notes |
+| `worker` | Trigger, Handles, Semantics, On failure, Notes |
 | `aggregate` | Identity, Properties, Methods, Invariants, Lifecycle, Boundary, Contained Entities, Spanning Invariants, Value Objects, Events, Relations, Use Cases |
 | `entity` | Identity, Properties, Methods, Invariants, Lifecycle, Relations |
 | `event` | Trigger, Payload, Consumers, Delivery semantics |
@@ -189,13 +194,18 @@ Stateless / aggregate-of-one / пустые consumers — пишутся явн�
 систем и соседних проектов).
 
 **Воркеры внутри сервиса**: фоновые процессы того же деплой-юнита
-(консьюмер топика, периодическая задача) — таблица `## Workers` паспорта,
-не отдельный сервис. Критерий: общий код/данные и деплой вместе — строка
-`Workers`; отдельный деплой-юнит, живущий только на событиях/расписании, —
-сервис `type: worker`. Воркер с `trigger: topic:<t>` обязан иметь парную
-строку `consumes` в `Messaging`; расписание пишется смыслом («ежечасно»),
-cron-выражение — runtime (`<org>/infra`). Воркеры размещаются вместе со
-своим сервисом — отдельной строки `placement` им не нужно.
+(консьюмер топика, периодическая задача). Критерий: общий код/данные и
+деплой вместе — воркер сервиса; отдельный деплой-юнит, живущий только на
+событиях/расписании, — сервис `type: worker`. Реестр — таблица `## Workers`
+паспорта, полное описание — файл `workers/<slug>.md` (kind `worker`):
+`Trigger` (topic — с парной строкой `consumes` в `Messaging`; расписание —
+смыслом, cron — runtime), `Handles` (какие **доменные use-case'ы** дёргает,
+M:N — воркер оркестрирует, бизнес-правил не держит, как use-case бота),
+`Semantics` (идемпотентность · retry → DLQ · ordering · батчинг —
+стратегиями, без чисел: транспортная механика живёт здесь, не в
+transport-agnostic домене), `On failure` (судьба сообщения + сигнал людям).
+Воркеры размещаются вместе со своим сервисом — отдельной строки
+`placement` им не нужно.
 
 **Async через брокер**: событие остаётся доменным артефактом
 (transport-agnostic, outbox; домен топиков не знает). Привязка
@@ -278,7 +288,11 @@ anti-pattern-правила.
      mkdir -p $PROJECT/services/<svc>
      cp $TPL/_templates/service-readme.md $PROJECT/services/<svc>/README.md
 
-3. Завести контекст внутри сервиса:
+3. Завести воркер сервиса: строка в `## Workers` паспорта →
+     mkdir -p $PROJECT/services/<svc>/workers
+     cp $TPL/_templates/worker.md $PROJECT/services/<svc>/workers/<slug>.md
+
+4. Завести контекст внутри сервиса:
      mkdir -p $PROJECT/services/<svc>/domains/<ctx>/{events,use-cases,policies}
      cp $TPL/_templates/aggregate.md       $PROJECT/services/<svc>/domains/<ctx>/<Aggregate>.md
      cp $TPL/_templates/event.md           $PROJECT/services/<svc>/domains/<ctx>/events/<Event>.md
@@ -292,13 +306,14 @@ anti-pattern-правила.
      cp $TPL/_templates/integration-client.md \
         $PROJECT/services/_shared/integrations/<integration-slug>/README.md
 
-4. /service-deep-dive <project-slug>
-   — сервисный уровень: реестр, паспорта, платформа, разбиение, топология.
+5. /service-deep-dive <project-slug>
+   — сервисный уровень: реестр, паспорта, воркеры, платформа, разбиение,
+     топология.
 
-5. /domain-deep-dive <project-slug> <ctx>
+6. /domain-deep-dive <project-slug> <ctx>
    — доменный уровень: пачкой по волнам, AskUserQuestion'ами добиваем секции.
 
-6. Ручная сверка формы по чек-листам draft → stable
+7. Ручная сверка формы по чек-листам draft → stable
    — frontmatter, обязательные H2, ref-целостность, инварианты слоя →
      промоушн status: draft → stable.
 ```
