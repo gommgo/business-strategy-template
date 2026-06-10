@@ -23,14 +23,17 @@ description: "Единая точка входа аналитика во всю 
 | `docs/projects/<slug>/interface/<surface>/` | `/interface-deep-dive <slug> [<surface>]` |
 | `docs/projects/<slug>/domains/<ctx>/` (по bounded-context) | `/domain-deep-dive <slug> <ctx>` |
 | `docs/projects/<slug>/screens/<surface>/` | `/screen-deep-dive <slug> [<surface>]` |
+| `docs/projects/<slug>/telegram-bot-flow/<surface>/` (bot-поверхности) | `/telegram-bot-flow-deep-dive <slug> [<surface>]` |
 | `docs/projects/project-map.md` (межпроектные стыки) | `/project-deep-dive <slug>` (авторская сторона — `integration` инициатора) |
-| аудиты | `/swot-audit` · `/hypothesis-map-audit` · `/ajtbd-audit` · `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>` · `/cross-audit` |
+| аудиты | `/swot-audit` · `/hypothesis-map-audit` · `/ajtbd-audit` · `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>` · `/telegram-bot-flow-audit <slug>` · `/cross-audit` |
 
 Поверхность (`surface`) — ось продукта: реестр-хребет `surface.md`
 партиционирует возможности (`capability/<surface>`), интерфейс
-(`interface/<surface>/`) и экраны (`screens/<surface>/`) по своим slug'ам.
-Скилы `interface`/`screen` берут поверхность **вторым аргументом**
-`[<surface>]` — без него предлагают пикер поверхностей по `surface.name`.
+(`interface/<surface>/`) и композицию — экраны (`screens/<surface>/`) либо
+диалоги бота (`telegram-bot-flow/<surface>/` при `type: bot`) — по своим
+slug'ам. Скилы `interface`/`screen`/`telegram-bot-flow` берут поверхность
+**вторым аргументом** `[<surface>]` — без него предлагают пикер
+поверхностей по `surface.name`.
 
 Полная таблица «сигнал → слой → kind → исполнитель → режим» —
 `references/routing.md`.
@@ -253,7 +256,8 @@ anti-patterns, draft→stable, каскады внутри слоя) — у ис
 4. Через `AskUserQuestion` предложить: продолжить нить / войти в
    следующий слой / прогнать нужный аудит (`/swot-audit`,
    `/hypothesis-map-audit`, `/ajtbd-audit`, `/project-audit <slug>`,
-   `/interface-audit <slug>`, `/screen-audit <slug>`, `/cross-audit`).
+   `/interface-audit <slug>`, `/screen-audit <slug>`,
+   `/telegram-bot-flow-audit <slug>`, `/cross-audit`).
 
 ## Запреты
 

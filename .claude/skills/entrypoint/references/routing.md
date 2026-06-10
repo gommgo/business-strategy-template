@@ -21,6 +21,7 @@
 | `docs/projects/<slug>/interface/<surface>/` | `who` · `stage` · `situation` · `zone` · `block` · `ux-substrate` · `data-items` | `/interface-deep-dive <slug> [<surface>]` | `/interface-audit <slug>` |
 | `docs/projects/<slug>/domains/<ctx>/` (по bounded-context, surface-агностичны) | агрегаты/события/use-case/… | `/domain-deep-dive <slug> <ctx>` | `/cross-audit` |
 | `docs/projects/<slug>/screens/<surface>/` | `flow` · `screen` · `block` · `shell` | `/screen-deep-dive <slug> [<surface>]` | `/screen-audit <slug>` |
+| `docs/projects/<slug>/telegram-bot-flow/<surface>/` (bot-поверхности) | `dialog` · `window` · `command` · `notification` | `/telegram-bot-flow-deep-dive <slug> [<surface>]` | `/telegram-bot-flow-audit <slug>` |
 | `docs/projects/project-map.md` (межпроектные стыки) | `project-map` (singleton-граф рёбер) | `/project-deep-dive <slug>` (авторская сторона ребра — `integration` инициатора) | `/cross-audit` |
 | сквозная консистентность | — | — | `/cross-audit` |
 
@@ -28,8 +29,10 @@
 оркестратор обязан определить проект до делегирования (из сырья или
 вопросом). Поверхность (`surface`) — ось продукта: реестр-хребет
 `surface.md` объявляет поверхности, а их slug'и партиционируют возможности
-(`capability/<surface>.md`), интерфейс (`interface/<surface>/`) и экраны
-(`screens/<surface>/`). Скилы `interface`/`screen` берут поверхность
+(`capability/<surface>.md`), интерфейс (`interface/<surface>/`) и
+композицию — экраны (`screens/<surface>/`) либо диалоги бота
+(`telegram-bot-flow/<surface>/` при `type: bot`). Скилы
+`interface`/`screen`/`telegram-bot-flow` берут поверхность
 **вторым аргументом** `[<surface>]`; без него — пикер поверхностей по
 `surface.name` (после пикера проекта). Домены (`domains/<ctx>/`) —
 surface-агностичны, делятся по bounded-context. Межпроектные стыки сводит
@@ -65,6 +68,7 @@ surface-агностичны, делятся по bounded-context. Межпро�
 | «продукт обменивается с **соседним продуктом** того же бизнеса» | `projects/<slug>` / `integration` (`target: sibling-project`, `sibling-project: <slug-соседа>`) → ребро в `projects/project-map` |
 | «как пользователь взаимодействует, ситуации, зоны, блоки» (на какой поверхности?) | `projects/<slug>/interface/<surface>` / `who` · `situation` · `zone` · `block` · … |
 | «как это выглядит, экраны, композиция» (на какой поверхности?) | `projects/<slug>/screens/<surface>` / `flow` · `screen` · `block` · `shell` |
+| «как бот ведёт диалог: окна, кнопки, команды, уведомления» (какая bot-поверхность?) | `projects/<slug>/telegram-bot-flow/<surface>` / `dialog` · `window` · `command` · `notification` |
 | «бизнес-код бэкенда, агрегаты, инварианты» (какой bounded-context?) | `projects/<slug>/domains/<ctx>` |
 
 Граничные пары (снимает именование, не путать):
@@ -117,13 +121,15 @@ surface-агностичны, делятся по bounded-context. Межпро�
 заводит **авторски снизу-вверх** на своей стороне. Оркестратор лишь следит,
 чтобы смежный слой не потерялся — фиксирует его открытой нитью.
 
-## Выбор поверхности (interface / screens / capability)
+## Выбор поверхности (interface / screens / telegram-bot-flow / capability)
 
-Слои `interface` и `screens` партиционированы по поверхности — путь
-делегирования несёт **и проект, и поверхность**:
+Слои `interface`, `screens` и `telegram-bot-flow` партиционированы по
+поверхности — путь делегирования несёт **и проект, и поверхность**:
 `/interface-deep-dive <slug> [<surface>]`,
-`/screen-deep-dive <slug> [<surface>]`. Возможности (`capability`) тоже
-живут по поверхности (`capability/<surface>.md`), но входом остаётся
+`/screen-deep-dive <slug> [<surface>]`,
+`/telegram-bot-flow-deep-dive <slug> [<surface>]` (только поверхности с
+`type: bot` — композиция бота вместо экранов). Возможности (`capability`)
+тоже живут по поверхности (`capability/<surface>.md`), но входом остаётся
 `/project-deep-dive <slug>` — там поверхность выбирается внутри.
 
 Оркестратор определяет поверхность так же, как проект: из сырья (явно
@@ -132,7 +138,8 @@ surface-агностичны, делятся по bounded-context. Межпро�
 поверхностей по `surface.name` (после пикера проекта). Поверхность, которой
 нет в реестре `surface.md`, сперва заводится через `/project-deep-dive
 <slug>` (kind `surface`) — каталоги `interface/<surface>/`,
-`screens/<surface>/`, `capability/<surface>.md` руками не создаём, их
+`screens/<surface>/`, `telegram-bot-flow/<surface>/`,
+`capability/<surface>.md` руками не создаём, их
 заводят их скилы при первом заходе.
 
 ## Чего оркестратор не делает в маршрутизации

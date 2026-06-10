@@ -1,6 +1,6 @@
 ---
 name: cross-audit
-description: "Сквозной семантический аудит консистентности между слоями документации — business (профиль + реестр проблем business-problem) ↔ ajtbd ↔ swot ↔ hypothesis-map ↔ (множество проектов docs/projects/<slug>/: project ↔ interface ↔ domain ↔ screen, партиционированных по поверхности surface) + межпроектные стыки (project-map). Запускает рой агентов параллельно: верхнеуровневые углы один раз (factor ↔ business, current-metric ↔ metric, addresses-problem ↔ business-problem, ajtbd segment-problem ↔ business-problem, ajtbd segment ↔ subject, ajtbd solution ↔ competitor/offering, business offering/channel ↔ ajtbd segment, проспективная согласованность market-maturity ↔ served, провенанс from-project ↔ проект, стейкхолдер ↔ субъект/фактор/стратегическая стойка, осмысленность графа project-map projectmap-reciprocity); углы с корневыми целями (vision/user/integration) — ПАРАМИ по проекту (goal/metric ↔ vision, subject ↔ user, ajtbd segment ↔ user, job ↔ vision.Success, segment-problem ↔ vision.Problem, integration ↔ соседний проект через project-map); углы с per-surface источником/целью — ТРОЙКАМИ проект×поверхность×lens (surface ↔ capability, value-mechanics ↔ capability/<surface>, bet ↔ capability/<surface>, capability ↔ hypothesis/job, user ↔ who/<surface>, capability ↔ situation/<surface>, surface ↔ zone/<surface>, surface ↔ screen/<surface>, situation ↔ job/hypothesis, capability ↔ domain, integration ↔ domain-порт, constraint ↔ surface/integration, market ↔ capability/<surface>); консистентность словаря данных между поверхностями (dataitems-crosssurface) — один агент на проект. Читает слои + state, ищет семантические тупики — НЕ через slug-валидацию, а смыслом («пользователь без UX-покрытия поверхности», «метрика подана как гарантия», «субъект без пользователя», «механика ценности без capability», «поверхность без возможностей», «зона висит без поверхности», «интеграция к соседнему проекту без ребра в project-map», «проект бьёт в несуществующую проблему»). Не правит, только отчёт. Использовать перед релизом, после крупного апдейта любого слоя, или когда deep-dive-скилы предлагают прогон. Сводный отчёт + список findings; deep-dive по каждому — отдельный шаг руками аналитика."
+description: "Сквозной семантический аудит консистентности между слоями документации — business (профиль + реестр проблем business-problem) ↔ ajtbd ↔ swot ↔ hypothesis-map ↔ (множество проектов docs/projects/<slug>/: project ↔ interface ↔ domain ↔ screen, партиционированных по поверхности surface) + межпроектные стыки (project-map). Запускает рой агентов параллельно: верхнеуровневые углы один раз (factor ↔ business, current-metric ↔ metric, addresses-problem ↔ business-problem, ajtbd segment-problem ↔ business-problem, ajtbd segment ↔ subject, ajtbd solution ↔ competitor/offering, business offering/channel ↔ ajtbd segment, проспективная согласованность market-maturity ↔ served, провенанс from-project ↔ проект, стейкхолдер ↔ субъект/фактор/стратегическая стойка, осмысленность графа project-map projectmap-reciprocity); углы с корневыми целями (vision/user/integration) — ПАРАМИ по проекту (goal/metric ↔ vision, subject ↔ user, ajtbd segment ↔ user, job ↔ vision.Success, segment-problem ↔ vision.Problem, integration ↔ соседний проект через project-map); углы с per-surface источником/целью — ТРОЙКАМИ проект×поверхность×lens (surface ↔ capability, value-mechanics ↔ capability/<surface>, bet ↔ capability/<surface>, capability ↔ hypothesis/job, user ↔ who/<surface>, capability ↔ situation/<surface>, surface ↔ zone/<surface>, surface ↔ screen/<surface>, surface ↔ telegram-bot-flow/<surface> (UX bot-поверхности доведён до диалогов, surface-botflow), диалоги бота ↔ домены (действия/триггеры окон и уведомлений опираются на use-case/события, botflow-domain), situation ↔ job/hypothesis, capability ↔ domain, integration ↔ domain-порт, constraint ↔ surface/integration, market ↔ capability/<surface>); консистентность словаря данных между поверхностями (dataitems-crosssurface) — один агент на проект. Читает слои + state, ищет семантические тупики — НЕ через slug-валидацию, а смыслом («пользователь без UX-покрытия поверхности», «метрика подана как гарантия», «субъект без пользователя», «механика ценности без capability», «поверхность без возможностей», «зона висит без поверхности», «интеграция к соседнему проекту без ребра в project-map», «проект бьёт в несуществующую проблему»). Не правит, только отчёт. Использовать перед релизом, после крупного апдейта любого слоя, или когда deep-dive-скилы предлагают прогон. Сводный отчёт + список findings; deep-dive по каждому — отдельный шаг руками аналитика."
 ---
 
 # cross-audit
@@ -32,11 +32,15 @@ description: "Сквозной семантический аудит конси�
   — внутри проекта.
 - `docs/projects/<slug>/screens/<surface>/` (композиция экранов — если
   каталог есть; **папка на поверхность**) — внутри проекта.
+- `docs/projects/<slug>/telegram-bot-flow/<surface>/` (композиция диалогов
+  бота — если каталог есть; **папка на bot-поверхность**) — внутри проекта.
 
 **Поверхность (surface) — ось продукта.** Реестр-хребет
 `docs/projects/<slug>/surface.md` объявляет поверхности, и их slug'и —
 ключи партиционирования трёх слоёв: возможностей (`capability/<surface>.md`),
-интерфейса (`interface/<surface>/`) и экранов (`screens/<surface>/`).
+интерфейса (`interface/<surface>/`) и композиции — экранов
+(`screens/<surface>/`) либо диалогов бота (`telegram-bot-flow/<surface>/`
+при `type: bot`).
 Корневые kind продукта (`vision`, `user`, `integration`, `boundary`,
 `constraint`, `market`) — кросс-поверхностные, лежат в корне папки проекта;
 домены surface-агностичны. Поэтому углы делятся на **пары** (проект × lens,
@@ -86,7 +90,8 @@ description: "Сквозной семантический аудит конси�
 `surface-capability`, `mechanic-capability`, `bet-capability`,
 `capability-hypothesis`, `capability-job`, `user-who`,
 `capability-situation`, `situation-job`, `situation-hypothesis`,
-`capability-domain`, `surface-zone`, `surface-screen`, `integration-domain`,
+`capability-domain`, `surface-zone`, `surface-screen`, `surface-botflow`,
+`botflow-domain`, `integration-domain`,
 `constraint-surface`, `market-capability`, `dataitems-crosssurface`}.
 
 **Скоуп углов** (подробнее — `references/angles.md`):
@@ -110,10 +115,13 @@ description: "Сквозной семантический аудит конси�
   - продукт ↔ соседние проекты (межпроектный): `integration-crossproject`.
 - **тройки `проект × поверхность × lens`** (source ИЛИ destination —
   per-surface артефакт `capability/<surface>.md`, `interface/<surface>/*`,
-  `screens/<surface>/*`): `surface-capability`, `mechanic-capability`,
+  `screens/<surface>/*`, `telegram-bot-flow/<surface>/*`):
+  `surface-capability`, `mechanic-capability`,
   `bet-capability`, `capability-hypothesis`, `capability-job`, `user-who`,
   `capability-situation`, `situation-job`, `situation-hypothesis`,
-  `surface-zone`, `surface-screen`, `capability-domain`, `integration-domain`,
+  `surface-zone`, `surface-screen`, `surface-botflow` (UX bot-поверхности
+  доведён до диалогов), `botflow-domain` (действия/триггеры бота опираются
+  на use-case/события доменов), `capability-domain`, `integration-domain`,
   `constraint-surface`, `market-capability`.
 - **один агент на проект, сразу по всем поверхностям**:
   `dataitems-crosssurface` (консистентность словаря данных между
@@ -130,8 +138,9 @@ description: "Сквозной семантический аудит конси�
    `docs/projects/project-map.md`,
    `docs/projects/_template/interface/README.md`, и (если есть)
    `docs/projects/_template/domains/README.md` /
-   `docs/projects/_template/screens/README.md` — освежить каноны формы и
-   ось поверхности.
+   `docs/projects/_template/screens/README.md` /
+   `docs/projects/_template/telegram-bot-flow/README.md` — освежить каноны
+   формы и ось поверхности.
 2. Прочитать `references/angles.md` — список углов и контекста на
    каждый.
 3. **Перечислить проекты.** Взять подкаталоги `docs/projects/`,
@@ -142,13 +151,15 @@ description: "Сквозной семантический аудит конси�
 4. **Перечислить поверхности каждого проекта.** Прочитать реестр-хребет
    `docs/projects/<slug>/surface.md` — каждая строка `surface` даёт slug
    поверхности `<surface>`. Это ключи партиционирования: per-surface слои
-   (`capability/<surface>.md`, `interface/<surface>/`, `screens/<surface>/`)
+   (`capability/<surface>.md`, `interface/<surface>/`, `screens/<surface>/`,
+   `telegram-bot-flow/<surface>/` для `type: bot`)
    живут под этими slug'ами. Тройки `(проект × поверхность × lens)`
    раскрываются по этому списку. Поверхность без папки нужного слоя —
    тройка для неё по этому lens пропускается (пометка в отчёте).
-5. **Проверить наличие вложенных слоёв.** `docs/projects/<slug>/domains/`
-   и `docs/projects/<slug>/screens/<surface>/` могут отсутствовать
-   (продукт без backend, или поверхность ещё не дошла до экранов) —
+5. **Проверить наличие вложенных слоёв.** `docs/projects/<slug>/domains/`,
+   `docs/projects/<slug>/screens/<surface>/` и
+   `docs/projects/<slug>/telegram-bot-flow/<surface>/` могут отсутствовать
+   (продукт без backend, или поверхность ещё не дошла до композиции) —
    независимо. Углы, требующие отсутствующего слоя, пропускаются для этого
    проекта/поверхности с пометкой в отчёте.
 6. Определить, какие углы применимы — по args или по полному прогону — и
@@ -191,10 +202,12 @@ lens)`. Перед спавном скилл подставляет конкре
 поверхностей (по строке `surface` = одна поверхность). Затем на каждую
 поверхность `<surface>` и каждый применимый тройка-lens спавнится отдельный
 агент с подставленными путями (`capability/<surface>.md`,
-`interface/<surface>/situation.md`, `screens/<surface>/`, …). Если папка
+`interface/<surface>/situation.md`, `screens/<surface>/`,
+`telegram-bot-flow/<surface>/`, …). Если папка
 нужного слоя для поверхности отсутствует (например, `screens/<surface>/`
-ещё не заведена), тройка по этому lens для этой поверхности пропускается с
-пометкой в отчёте. Пара-lens'ы (`goal-vision`, `subject-user`,
+ещё не заведена) или lens неприменим к типу поверхности (`surface-botflow`
+и `botflow-domain` — только `type: bot`), тройка по этому lens для этой
+поверхности пропускается с пометкой в отчёте. Пара-lens'ы (`goal-vision`, `subject-user`,
 `segment-user`, `job-vision`, `segmentproblem-vision`,
 `integration-crossproject`) спавнятся **один раз на проект** — их цели
 кросс-поверхностны (`vision.md`, `user.md`, `integration.md`).
@@ -320,6 +333,8 @@ Destination layer: <path-2>
 | `situation-hypothesis` | `docs/projects/<slug>/interface/<surface>/situation.md` (`hypotheses`) | `docs/hypothesis-map/hypothesis.md` | проект×поверхность | ребро situation→гипотеза резолвится? |
 | `surface-zone` | `docs/projects/<slug>/surface.md` (строка `<surface>`) | `docs/projects/<slug>/interface/<surface>/zone.md` | проект×поверхность | зоны поверхности образуют целостный UX для её user? |
 | `surface-screen` | `docs/projects/<slug>/surface.md` + `interface/<surface>/` | `docs/projects/<slug>/screens/<surface>/` (если есть) | проект×поверхность | UX поверхности доведён до композиции экранов той же поверхности? |
+| `surface-botflow` | `docs/projects/<slug>/surface.md` (строка `<surface>`, `type: bot`) + `interface/<surface>/` | `docs/projects/<slug>/telegram-bot-flow/<surface>/` (если есть) | проект×поверхность | UX bot-поверхности доведён до диалогов? зеркала окно↔блок сходятся? есть `/start`? |
+| `botflow-domain` | `docs/projects/<slug>/telegram-bot-flow/<surface>/` (`widget.action`, `getter.*.source`, `notification.trigger`/`content`) | `docs/projects/<slug>/domains/` (use-cases, events + Payload; если есть) | проект×поверхность | действия и данные окон опираются на use-case? триггеры уведомлений — на события, payload покрывает плейсхолдеры? доменное решение не утекло в `when`? |
 | `capability-domain` | `docs/projects/<slug>/capability/<surface>.md` | `docs/projects/<slug>/domains/` (если есть) | проект×поверхность | у каждой capability поверхности есть бизнес-код в domain? |
 | `integration-domain` | `docs/projects/<slug>/integration.md` (`## Провайдеры` ∋ `<surface>` + `## Функции`) | `docs/projects/<slug>/domains/` (клиент `_shared/integrations/` + use-case `functions`) | проект×поверхность | цепочка функции цела: бизнес-каталог ↔ клиент `_shared/` ↔ потребление в use-case? |
 | `constraint-surface` | `docs/projects/<slug>/constraint.md` | `docs/projects/<slug>/surface.md` (строка `<surface>`), `integration.md` (поверхности) | проект×поверхность | constraint поверхности привязан к ней или её интеграции? |

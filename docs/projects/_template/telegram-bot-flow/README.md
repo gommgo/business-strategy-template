@@ -27,9 +27,13 @@ interface/<surface>/ → синтез → telegram-bot-flow/<surface>/ → ко�
 1. В `docs/projects/<project-slug>/interface/<surface>/` заведены и
    углублены сущности bot-поверхности (через `interface-deep-dive`;
    канон interface един для всех типов поверхностей).
-2. На их базе создаются артефакты в
+2. На их базе через скилл `telegram-bot-flow-deep-dive <slug> [<surface>]`
+   создаются артефакты в
    `docs/projects/<project-slug>/telegram-bot-flow/<surface>/` — каждый
    ссылается на свой источник в interface той же поверхности через `slug`.
+   Консистентность слоя (зеркала, граф, контракты данных) сверяет
+   `telegram-bot-flow-audit <slug>`; сквозные рёбра с interface и domains —
+   `/cross-audit` (углы `surface-botflow` · `botflow-domain`).
 3. Stable-артефакты слоя читает код-репо бота (форк
    `telegram-bot-template`): по диалогам и окнам он разворачивает
    `StatesGroup`, окна, виджеты, getter'ы и обработчики. Имена файлов,

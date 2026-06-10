@@ -131,7 +131,7 @@ upstream (read-only, односторонне):
 | `docs/projects/<slug>/interface/<surface>/` | **как пользователь взаимодействует** (по поверхности) | `/interface-deep-dive <slug> [<surface>]` |
 | `docs/projects/<slug>/domains/` | **какой бизнес-код бэкенда** (опц.; по bounded-context) | `/domain-deep-dive <slug> <ctx>` |
 | `docs/projects/<slug>/screens/<surface>/` | **как это выглядит и компонуется** (по поверхности) | `/screen-deep-dive <slug> [<surface>]` |
-| `docs/projects/<slug>/telegram-bot-flow/<surface>/` | **как бот ведёт диалог** (по bot-поверхности: диалоги · окна · команды · уведомления) | по канону `_template/telegram-bot-flow/`; сверяет `/cross-audit` |
+| `docs/projects/<slug>/telegram-bot-flow/<surface>/` | **как бот ведёт диалог** (по bot-поверхности: диалоги · окна · команды · уведомления) | `/telegram-bot-flow-deep-dive <slug> [<surface>]` |
 | `docs/projects/project-map.md` | **как продукты бизнеса стыкуются** | сводится из `integration`, сверяет `/cross-audit` |
 
 Канон формы продуктовых слоёв
@@ -376,7 +376,8 @@ Interface-слой (по проекту, **по поверхности**):
 
 Гейты прогонять всегда (`/swot-audit`, `/hypothesis-map-audit`,
 `/ajtbd-audit`, `/project-audit <slug>`, `/interface-audit <slug>`,
-`/screen-audit <slug>`, и/или `/cross-audit` перед коммитом, если трогали
+`/screen-audit <slug>`, `/telegram-bot-flow-audit <slug>`, и/или
+`/cross-audit` перед коммитом, если трогали
 несколько слоёв). **Коммит / push — гейт человека.** Без явной просьбы
 агент не коммитит.
 
@@ -461,7 +462,8 @@ Interface-слой (по проекту, **по поверхности**):
   транспорт + функции) и потребление функций в use-case (колонки
   `integration` + `functions` в `Dependencies`); домен transport-agnostic.
 - **Артефакты диалогов бота** (`docs/projects/<slug>/telegram-bot-flow/<surface>/`,
-  для поверхностей с `type: bot` — вместо screens) — форма по канону
+  для поверхностей с `type: bot` — вместо screens) — через скилл
+  `telegram-bot-flow-deep-dive <slug> [<surface>]`; форма — по канону
   `docs/projects/_template/telegram-bot-flow/README.md` и README'ям kind
   (dialog/window — папки с `index.md`; command/notification — плоские
   реестры-таблицы). Окно зеркалит блок interface той же поверхности
@@ -469,8 +471,11 @@ Interface-слой (по проекту, **по поверхности**):
   use-case домена, уведомления — на доменные события; структурные
   идентификаторы контракта (`states-group`, `state`, `id` виджетов,
   ключи getter'а) — английские, тексты сообщений — русские. Stable-артефакты
-  читает форк `telegram-bot-template` (`<org>/<bot>`). Сквозную сверку
-  (interface ↔ диалоги ↔ domains) ведёт `/cross-audit`.
+  читает форк `telegram-bot-template` (`<org>/<bot>`). Узкий аудит слоя
+  (зеркала, граф, контракты данных, инварианты Telegram) —
+  `telegram-bot-flow-audit <slug>`; сквозную сверку
+  (interface ↔ диалоги ↔ domains) ведёт `/cross-audit` (углы
+  `surface-botflow` · `botflow-domain`).
 - **Артефакты экранов** (`docs/projects/<slug>/screens/<surface>/`) — через
   скилл `screen-deep-dive <slug> [<surface>]`; форма — по
   `docs/projects/_template/screens/README.md` (канон слоя; форма одной папки

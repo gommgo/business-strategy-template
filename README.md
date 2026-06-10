@@ -148,7 +148,7 @@ business (профиль + реестр проблем + стейкхолдер�
 | `ajtbd` | `/segment-deep-dive` · `/job-graph-deep-dive` · `/jtbd-interview` | `/ajtbd-audit` |
 | `swot` | `/swot-deep-dive` | `/swot-audit` |
 | `hypothesis-map` | `/hypothesis-map-deep-dive` | `/hypothesis-map-audit` |
-| `projects/<slug>` (опц.) | `/project-deep-dive` · `/interface-deep-dive` · `/domain-deep-dive` · `/screen-deep-dive` | `/project-audit` · `/interface-audit` · `/screen-audit` |
+| `projects/<slug>` (опц.) | `/project-deep-dive` · `/interface-deep-dive` · `/domain-deep-dive` · `/screen-deep-dive` · `/telegram-bot-flow-deep-dive` | `/project-audit` · `/interface-audit` · `/screen-audit` · `/telegram-bot-flow-audit` |
 
 Сквозную семантику всех слоёв ловит рой `/cross-audit`. Когда дозревший продукт
 (`vision.lifecycle → stable`) меняет реальность бизнеса, оркестратор ведёт

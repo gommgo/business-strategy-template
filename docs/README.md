@@ -41,15 +41,16 @@ SWOT → Карта гипотез (терминал — `task`). Исход —
 - `screens/<surface>/` — flow / screen / block / shell — вход
   `/screen-deep-dive <slug> [<surface>]`.
 - `telegram-bot-flow/<surface>/` — dialog / window / command / notification
-  (для поверхностей с `type: bot` — вместо `screens/`) — форма по канону
-  `projects/_template/telegram-bot-flow/`.
+  (для поверхностей с `type: bot` — вместо `screens/`) — вход
+  `/telegram-bot-flow-deep-dive <slug> [<surface>]`.
 - `domains/` — (опц.) DDD-артефакты бэкенда по bounded-context
   (surface-агностичны) — вход `/domain-deep-dive <slug> <ctx>`.
 
 ## Аудиты (только отчёт)
 
 - `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>`
-  — узкая консистентность внутри слоя проекта.
+  · `/telegram-bot-flow-audit <slug>` — узкая консистентность внутри слоя
+  проекта.
 - `/ajtbd-audit` — инварианты методологии графа работ по каждому сегменту (рой).
 - `/swot-audit` — инварианты LinkedSWOT по каждой проблеме (рой).
 - `/hypothesis-map-audit` — инварианты Карты гипотез по каждой проблеме (рой).

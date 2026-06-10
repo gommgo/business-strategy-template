@@ -28,7 +28,9 @@ per-surface артефакт (`capability/<surface>.md`, `interface/<surface>/..
 Продуктовый слой партиционирован по поверхности: реестр-хребет
 `docs/projects/<slug>/surface.md` объявляет поверхности, и их slug'и —
 ключи трёх per-surface слоёв: возможности (`capability/<surface>.md`),
-интерфейс (`interface/<surface>/...`) и экраны (`screens/<surface>/...`).
+интерфейс (`interface/<surface>/...`) и композиция — экраны
+(`screens/<surface>/...`) либо, для поверхностей с `type: bot`, диалоги
+бота (`telegram-bot-flow/<surface>/...`).
 Кросс-поверхностные kind продукта (`vision`, `user`, `integration`,
 `boundary`, `constraint`, `market`) лежат в корне папки проекта. Домены
 (`domains/<ctx>/`) **surface-агностичны** — партиционируются по
@@ -66,6 +68,8 @@ per-surface) целями раскрывается в **пары** `проект
   - продукт ↔ интерфейс/экраны поверхности: `user-who`,
     `capability-situation`, `surface-zone`, `surface-screen`,
     `surface-capability`.
+  - продукт/интерфейс ↔ диалоги bot-поверхности: `surface-botflow`.
+  - диалоги bot-поверхности ↔ домены проекта: `botflow-domain`.
   - возможности поверхности ↔ домены проекта: `capability-domain`.
   - сквозные рёбра интерфейса поверхности: `situation-job`,
     `situation-hypothesis`.
@@ -696,6 +700,99 @@ interface/<surface>/ — error. Ключевые ситуации/блоки и�
 поверхности без композиции в screens этой поверхности — warning. По
 смыслу — посмотри shell/flow/screen-описания. В finding указывай project и
 surface.
+```
+
+## surface-botflow
+
+**Source:** `docs/projects/<slug>/surface.md` (строка `<surface>` с
+`type: bot`) + `docs/projects/<slug>/interface/<surface>/`.
+**Destination:** `docs/projects/<slug>/telegram-bot-flow/<surface>/`
+(если есть).
+**Скоуп:** по проекту × поверхность.
+**Применим если:** у проекта есть поверхность `<surface>` с `type: bot` и
+папка `telegram-bot-flow/<surface>/`.
+
+**Что искать:**
+
+- `error`: bot-поверхность `stable` с наполненным `interface/<surface>/`,
+  у которой папка `telegram-bot-flow/<surface>/` существует, но пуста (нет
+  ни одного диалога/окна) — UX бота без композиции диалогов.
+- `error`: папка `telegram-bot-flow/<surface>/` у поверхности, чей `type`
+  в реестре не `bot` (слой только для ботов; для web — `screens/`).
+- `warning`: блок (block) или ситуация interface bot-поверхности без
+  отражения ни в одном окне (window) — UX-точка не дошла до диалогов.
+- `warning`: реестр `command.md` без команды `/start` при наполненных
+  диалогах — у бота нет объявленного входа.
+- `warning`: зеркало разошлось — `window.ux-substrates` не совпадает с
+  `ux-substrates` его `interface-block` в interface той же поверхности.
+- `hint`: диалог/окно, не соотносимое по смыслу ни с одной зоной/блоком
+  interface поверхности (заведено не в той папке или UX-анализ отстал).
+
+**Промпт-добавка:**
+
+```
+Source — строка <surface> (type: bot) реестра surface.md + UX той же
+поверхности docs/projects/<slug>/interface/<surface>/; destination —
+docs/projects/<slug>/telegram-bot-flow/<surface>/ (диалоги/окна/команды/
+уведомления ТОЙ ЖЕ поверхности). Поверхности изолированы — сопоставляй в
+пределах <surface>.
+
+Папка слоя пуста при наполненном interface — error; папка у поверхности с
+type ≠ bot — error. Блок/ситуация interface без окна — warning; command.md
+без /start — warning; рассинхрон window.ux-substrates ↔ interface-block —
+warning. Смысловая рифма: зона (zone) ≈ диалог (dialog), блок (block) ≈
+окно (window) — её разрывы флагай hint. В finding указывай project и
+surface.
+```
+
+## botflow-domain
+
+**Source:** `docs/projects/<slug>/telegram-bot-flow/<surface>/` (окна:
+`widget.action` + `getter.*.source` вида `use-case:<ctx>.<Operation>`;
+реестр `notification.md`: `trigger` вида `event:<ctx>.<Event>`, плейсхолдеры
+`content`).
+**Destination:** `docs/projects/<slug>/domains/` (если есть):
+`<ctx>/use-cases/`, `<ctx>/events/` (секция `Payload`).
+**Скоуп:** по проекту × поверхность.
+**Применим если:** у проекта есть `domains/` и папка
+`telegram-bot-flow/<surface>/`.
+
+Бот — фронтенд: каждое действие и каждый триггер обязаны опираться на
+домен, а домен, рождающий события для людей, — доходить до уведомлений.
+
+**Что искать:**
+
+- `error`: `widget.action` или `getter.*.source` со ссылкой
+  `use-case:<ctx>.<Operation>` на use-case, которого нет в
+  `domains/<ctx>/use-cases/` — действие бота висит в воздухе.
+- `error`: `notification.trigger` со ссылкой `event:<ctx>.<Event>` на
+  событие, которого нет в `domains/<ctx>/events/`.
+- `warning`: плейсхолдер `{…}` в `notification.content`, отсутствующий в
+  `Payload` события-триггера — текст просит данных, которых событие не несёт.
+- `warning`: условие перехода `when`, сформулированное как бизнес-правило
+  («если сумма > 1000»), а не как исход use-case — доменное решение утекло
+  в окно.
+- `warning`: окно stable с `action` у всех содержательных кнопок `—` —
+  сценарий «смотрит», но ничего не делает с доменом (возможно, чтение тоже
+  должно идти через use-case в getter).
+- `hint`: доменное событие, по смыслу адресованное человеку (подтверждение,
+  напоминание, смена статуса), без уведомления в `notification.md` —
+  кандидат на исходящее.
+
+**Промпт-добавка:**
+
+```
+Source — окна и notification.md слоя telegram-bot-flow/<surface>/ проекта
+<slug>: собери все рефы use-case:<ctx>.<Operation> (widget.action,
+getter.*.source) и event:<ctx>.<Event> (notification.trigger). Destination
+— domains/ проекта: use-cases и events соответствующих контекстов.
+
+Реф на несуществующий use-case/event — error. Плейсхолдер content вне
+Payload события — warning. Бизнес-правило в when вместо исхода use-case —
+warning. Обратная сторона: события домена, по смыслу адресованные человеку,
+без уведомления — hint. Связь семантическая: совпадение по смыслу имени
+операции достаточно, точная орфография — вопрос к deep-dive, не error,
+если сущность узнаваема. В finding указывай project и surface.
 ```
 
 ## integration-domain
@@ -1362,10 +1459,14 @@ destination — per-surface артефакт):
 33. `integration-domain` (если у проекта есть `domains/`; интеграции
     поверхности ↔ домены-порты)
 34. `surface-screen` (если у проекта есть `screens/<surface>/`)
+35. `surface-botflow` (если поверхность `type: bot` и есть
+    `telegram-bot-flow/<surface>/`)
+36. `botflow-domain` (если у проекта есть `domains/` и
+    `telegram-bot-flow/<surface>/`)
 
 **По каждому проекту, один агент на проект сразу по всем поверхностям:**
 
-35. `dataitems-crosssurface` (консистентность словаря данных между
+37. `dataitems-crosssurface` (консистентность словаря данных между
     поверхностями; только если у проекта ≥2 поверхностей)
 
 Полный рой = `13 верхнеуровневых + Σ по проектам (пары проект×lens +
