@@ -1,9 +1,9 @@
 # Контекст project-слоя
 
-Домены проекта живут **внутри** его папки (`<P>/domains/`, где
+Домены проекта живут **внутри сервисов** его папки (`<P>/services/<svc>/domains/`, где
 `<P>` = `docs/projects/<project-slug>`), рядом с продуктовым слоем
 (`<P>/vision.md`, `<P>/capability/<surface>.md`, `<P>/integration.md`, …).
-Project описывает **продукт** (capability/integration/constraint), domains
+Project описывает **продукт** (capability/integration/constraint), services/domains
 — **бизнес-код бэкенда** того же проекта. Семантическая связь есть, но
 **slug-валидаций нет** — её ловит `/cross-audit`.
 

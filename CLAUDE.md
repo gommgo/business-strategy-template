@@ -29,9 +29,21 @@ hi-fi субстрат на библиотеке `@stit/ui`) либо — для
 aiogram_dialog + сквозные реестры command · notification на корне; читает
 форк `telegram-bot-template`). Кросс-поверхностные kind продукта
 (`user` · `integration` · `boundary` · `constraint` · `market`) и `vision` —
-плоско в корне проекта. Опционально бизнес-домены (`domains/`) —
-**по bounded-context, surface-агностичны**. Точки стыка между продуктами
-бизнеса — в `docs/projects/project-map.md`. Канон формы продуктовых слоёв —
+плоско в корне проекта. Бэкенд продукта — **сервисная топология**
+(`services/`, обязательна при наличии бэкенда; монолит = один сервис):
+реестр-хребет `service.md` объявляет сервисы (типы `api` · `worker` ·
+`gateway` · `edge` · `bot`), каждый несёт паспорт
+(`services/<svc>/README.md` — Exposes · Dependencies · Resources ·
+Messaging) и владеет доменами (`services/<svc>/domains/<ctx>/` — **по
+bounded-context, surface-агностичны**, контекст уникален в проекте);
+платформенные ресурсы проекта — `services/platform.md`, свод топологии и
+решения разбиения — `services/architecture.md`. Точки стыка между продуктами
+бизнеса — в `docs/projects/project-map.md`; **ИТ-периметр бизнеса** — в
+`docs/projects/infrastructure/` (межпроектный: учёт серверов `server.md`,
+рантаймы `runtime.md` — kubernetes/compose по окружениям, общие
+платформенные ресурсы `shared-platform.md` — один брокер/traefik на все
+проекты, и размещение `placement.md` — единственное место «какой юнит где
+живёт»). Канон формы продуктовых слоёв —
 один раз в `docs/projects/_template/`. См.:
 
 - `README.md` — карта репозитория и воркфлоу.
@@ -51,8 +63,12 @@ aiogram_dialog + сквозные реестры command · notification на к
   реестр-хребет `surface` + кросс-поверхностные kind + `capability/<surface>`.
 - `docs/projects/_template/interface/README.md` — канон 7 артефактов
   интерфейса **одной поверхности** (`interface/<surface>/`).
-- `docs/projects/_template/domains/README.md` — канон DDD-артефактов бэкенда
-  (если есть; по bounded-context).
+- `docs/projects/_template/services/README.md` — канон сервисного слоя:
+  реестры (`service` · `platform`) + singleton `architecture` + паспорт
+  сервиса + DDD-артефакты доменов внутри сервисов (по bounded-context).
+- `docs/projects/infrastructure/README.md` — канон ИТ-периметра бизнеса
+  (`server` · `runtime` · `shared-platform` · `placement`; канон формы +
+  данные в одном слое, один на бизнес).
 - `docs/projects/_template/screens/README.md` — канон 4 kind артефактов
   экранов **одной поверхности** (`screens/<surface>/`).
 - `docs/projects/_template/telegram-bot-flow/README.md` — канон слоя
@@ -88,13 +104,20 @@ managed (инстанс на `*.stit.tech`) или self-hosted (ваш форк)
 стратегия рождает продукт** — его stable-артефакты **читают** код-репо как
 upstream (read-only, односторонне):
 
-- `<org>/backend` ← `projects/<slug>/domains/<ctx>/` (scaffold доменов в Go;
-  маппинг DDD → Go живёт у backend в `docs/reference/domain-mapping.md`);
+- `<org>/backend` ← `projects/<slug>/services/<svc>/domains/<ctx>/` +
+  `services/_shared/` + паспорт `services/<svc>/README.md` (паспорт задаёт
+  границы деплой-юнита, домены — начинку; маппинг DDD → Go живёт у backend
+  в `docs/reference/domain-mapping.md`);
 - `<org>/frontend` ← `projects/<slug>/{interface,screens}/<surface>/` (fsd-deep-dive, по поверхности);
 - `<org>/<bot>` ← `projects/<slug>/telegram-bot-flow/<surface>/` (фичи: диалоги,
-  окна, use-case'ы бота-оркестратора) (+ `interface/<surface>/`, `domains/` —
-  доменные use-case'ы и события, на которые опирается оркестратор бота);
-- `<org>/infra` ← `projects/<slug>/{vision,surface}` (init-project).
+  окна, use-case'ы бота-оркестратора) (+ `interface/<surface>/`,
+  `services/*/domains/` — доменные use-case'ы и события, на которые
+  опирается оркестратор бота);
+- `<org>/infra` ← `projects/<slug>/{vision,surface}` +
+  `projects/<slug>/services/{service,platform}.md` + секции
+  `Resources`/`Messaging` паспортов + весь `projects/infrastructure/`
+  (e2e: что билдить, где располагать, что провижинить; runtime-механика —
+  решение infra).
 
 Контракт что docs отдаёт соседям — `docs/README.md § Что docs отдаёт
 соседям`. Рекомендуемый вход — два оркестратора `/entrypoint` (аналитик)
@@ -132,13 +155,15 @@ upstream (read-only, односторонне):
 | `docs/hypothesis-map/` | **под какие метрики целимся** (цель → метрика → субъект → гипотеза) | `/hypothesis-map-deep-dive` |
 | `docs/projects/<slug>/` | **зачем продукт и для кого** (vision + реестр-хребет `surface` + kind + `capability/<surface>`) | `/project-deep-dive <slug>` (аналитик); клиент — `/entrypoint-for-business` |
 | `docs/projects/<slug>/interface/<surface>/` | **как пользователь взаимодействует** (по поверхности) | `/interface-deep-dive <slug> [<surface>]` |
-| `docs/projects/<slug>/domains/` | **какой бизнес-код бэкенда** (опц.; по bounded-context) | `/domain-deep-dive <slug> <ctx>` |
+| `docs/projects/<slug>/services/` | **из каких сервисов состоит приложение** (топология: реестр + паспорта + платформа; монолит = 1 сервис) | `/service-deep-dive <slug>` |
+| `docs/projects/<slug>/services/<svc>/domains/` | **какой бизнес-код бэкенда** (по bounded-context, внутри сервиса-владельца) | `/domain-deep-dive <slug> <ctx>` |
+| `docs/projects/infrastructure/` | **где всё это физически живёт** (сервера · рантаймы · общие ресурсы · размещение; один слой на бизнес) | `/infrastructure-deep-dive` |
 | `docs/projects/<slug>/screens/<surface>/` | **как это выглядит и компонуется** (по поверхности) | `/screen-deep-dive <slug> [<surface>]` |
 | `docs/projects/<slug>/telegram-bot-flow/<surface>/` | **как бот ведёт диалог** (по bot-поверхности: фичи — диалоги · окна · use-case'ы бота; сквозные команды · уведомления) | `/telegram-bot-flow-deep-dive <slug> [<surface>]` |
 | `docs/projects/project-map.md` | **как продукты бизнеса стыкуются** | сводится из `integration`, сверяет `/cross-audit` |
 
 Канон формы продуктовых слоёв
-(project/interface/screens/telegram-bot-flow/domains/project-map)
+(project/interface/screens/telegram-bot-flow/services/project-map)
 живёт один раз в `docs/projects/_template/`; данные — в папках проектов. Скилы
 этих слоёв принимают `<project-slug>` первым аргументом (без него — пикер **по
 человекочитаемым именам** проектов, исключая `_template`); interface и screen
@@ -166,10 +191,11 @@ upstream (read-only, односторонне):
 (`projects/<slug>/vision.addresses-problem`); цель/метрика/субъект
 (hypothesis-map) проявляются как vision/user/capability в проекте; user
 адресата проявляется как роль who (interface), `capability/<surface>`
-реализуется через situation той же поверхности + domain; surface —
+реализуется через situation той же поверхности + domain (внутри
+сервиса-владельца); surface —
 ось партиционирования interface/screens/capability; integration раскрывается
 в функции (бизнес-каталог в `integration.md`), их конкретный клиент живёт в
-`domains/_shared/integrations/<slug>/`, а use-case дёргает функции по `slug`
+`services/_shared/integrations/<slug>/`, а use-case дёргает функции по `slug`
 (transport-agnostic; стык продуктов бизнеса ведёт `project-map`); в
 bot-поверхности окно (window) реализует блок interface, действие виджета и
 источник данных окна ссылаются на **use-case бота** той же фичи
@@ -299,7 +325,7 @@ M:N к строкам реестра `business/business-problem`), оси `audie
 business. `integration` несёт две таблицы — провайдеры (`surface`, `target`
 `external` | `sibling-project`) и их функции (бизнес-каталог «что умеет»);
 межпроектный стык авторится здесь и сводится в `docs/projects/project-map.md`
-(бизнес-язык). Конкретный клиент функций — в `domains/_shared/integrations/`,
+(бизнес-язык). Конкретный клиент функций — в `services/_shared/integrations/`,
 потребление — в use-case (колонка `functions`). Канон формы —
 `docs/projects/_template/project/`. Связи внутри слоя семантические (кроме
 структурной capability↔surface), валидируется `/project-audit <slug>`.
@@ -348,8 +374,16 @@ Interface-слой (по проекту, **по поверхности**):
   как опции — да; тексты — нет.
 - **UX-доменная** (interface): goal, action, when, using-what — только
   от аналитика, не от модели.
-- **Бизнес-домен** (domains): инварианты, preconditions, business
+- **Бизнес-домен** (домены сервисов): инварианты, preconditions, business
   rules — только от архитектора.
+- **Архитектурная** (services): разбиение на сервисы, владелец данных,
+  sync vs брокер, выбор технологии ресурса (postgres/redis/nats), нужен ли
+  gateway — только от архитектора, через `AskUserQuestion`. Anti-patterns
+  как опции — да; тексты — нет.
+- **Инфраструктурная** (infrastructure): провайдеры и ёмкости серверов,
+  выбор kubernetes vs compose, раскладка юнитов по рантаймам, общие
+  ресурсы бизнеса — только от архитектора / бизнеса, через
+  `AskUserQuestion`.
 - **Craft** (компоненты, цвет, пространство, типографика, движение,
   a11y): живёт в библиотеке `@stit/ui`, наполняется ответами
   owner. Облик в макете — из craft-экспертизы, не «на глаз».
@@ -382,7 +416,8 @@ Interface-слой (по проекту, **по поверхности**):
 
 Гейты прогонять всегда (`/swot-audit`, `/hypothesis-map-audit`,
 `/ajtbd-audit`, `/project-audit <slug>`, `/interface-audit <slug>`,
-`/screen-audit <slug>`, `/telegram-bot-flow-audit <slug>`, и/или
+`/screen-audit <slug>`, `/telegram-bot-flow-audit <slug>`,
+`/service-audit <slug>`, `/infrastructure-audit`, и/или
 `/cross-audit` перед коммитом, если трогали
 несколько слоёв). **Коммит / push — гейт человека.** Без явной просьбы
 агент не коммитит.
@@ -443,9 +478,9 @@ Interface-слой (по проекту, **по поверхности**):
   `vision.addresses-problem` связывает продукт с проблемами (M:N);
   `integration` несёт `surface` + `target` (`external`|`sibling-project`).
   Узкий аудит — `project-audit <slug>`. Сквозная семантическая проверка со
-  всеми слоями (business/ajtbd/swot/hypothesis-map/interface/domain/screen,
-  по поверхности) + межпроектные стыки (`project-map`) — `cross-audit`
-  (рой агентов, по каждому проекту).
+  всеми слоями (business/ajtbd/swot/hypothesis-map/interface/services/
+  domain/screen, по поверхности) + межпроектные стыки (`project-map`) —
+  `cross-audit` (рой агентов, по каждому проекту).
 - **Карта проектов** (`docs/projects/project-map.md`) — граф стыков между
   продуктами бизнеса на бизнес-языке; авторская сторона рёбер — `integration`
   с `target: sibling-project`; singleton (канон формы + данные в одном файле,
@@ -455,18 +490,38 @@ Interface-слой (по проекту, **по поверхности**):
   `docs/projects/_template/interface/README.md` (канон слоя; форма одной
   папки поверхности — в подпапке `_template/`). Поиск тупиков, рассинхрона зеркал, битых ссылок и
   семантических подозрений — скилл `interface-audit <slug>`. Связь
-  zone/situation с поверхностью теперь структурная (папка). При заведении
+  zone/situation с поверхностью структурная (папка). При заведении
   ключевых сущностей (who, situation) скилл предлагает связь с продуктовыми
   артефактами того же проекта как контекст (см.
   `interface-deep-dive/references/project-context.md`).
-- **Артефакты доменов** (`docs/projects/<slug>/domains/`, если
-  присутствуют) — через скилл `domain-deep-dive <slug> <ctx>`; по
-  bounded-context, surface-агностичны. При заведении контекста / use-case
+- **Сервисная топология** (`docs/projects/<slug>/services/`: реестры
+  `service.md` · `platform.md`, singleton `architecture.md`, паспорта
+  `services/<svc>/README.md`) — через скилл `service-deep-dive <slug>`;
+  форма — по `docs/projects/_template/services/README.md`. Сервис — ось
+  партиционирования бэкенда (типы `api` · `worker` · `gateway` · `edge` ·
+  `bot`); паспорт несёт Exposes / Dependencies / Resources («потребность +
+  технология») / Messaging (produces/consumes ↔ topic ↔
+  `event:<ctx>.<Event>`); перенос контекста между сервисами — миграция
+  через этот же скилл. Узкий аудит — `service-audit <slug>`.
+- **Артефакты доменов** (`docs/projects/<slug>/services/<svc>/domains/`) —
+  через скилл `domain-deep-dive <slug> <ctx>`; по bounded-context, внутри
+  сервиса-владельца (контекст уникален в проекте, сервис выводится из
+  пути), surface-агностичны. При заведении контекста / use-case
   предлагается связь с `capability/<surface>` того же проекта; внешние и
   межпроектные интеграции — через конкретный клиент
-  `domains/_shared/integrations/<slug>/` (kind `integration-client`:
-  транспорт + функции) и потребление функций в use-case (колонки
-  `integration` + `functions` в `Dependencies`); домен transport-agnostic.
+  `services/_shared/integrations/<slug>/` (kind `integration-client`:
+  транспорт + функции, опц. `fronted-by` gateway-сервис) и потребление
+  функций в use-case (колонки `integration` + `functions` в
+  `Dependencies`; другой сервис проекта — порт `service:<svc>`); домен
+  transport-agnostic.
+- **ИТ-периметр бизнеса** (`docs/projects/infrastructure/`: `server.md` ·
+  `runtime.md` · `shared-platform.md` · `placement.md`) — через скилл
+  `infrastructure-deep-dive`; один слой на бизнес (канон формы + данные
+  вместе), межпроектный. Размещение юнитов — только здесь (`placement.md`);
+  проектные слои deployment-agnostic. Без IP/hostname/секретов и
+  runtime-механики — это `<org>/infra`. Узкий аудит —
+  `infrastructure-audit`; сквозные углы — `/cross-audit`
+  (`service-placement` · `platform-shared`).
 - **Артефакты диалогов бота** (`docs/projects/<slug>/telegram-bot-flow/<surface>/`,
   для поверхностей с `type: bot` — вместо screens) — через скилл
   `telegram-bot-flow-deep-dive <slug> [<surface>]`; форма — по канону
@@ -486,8 +541,9 @@ Interface-слой (по проекту, **по поверхности**):
   русские. Stable-артефакты читает форк `telegram-bot-template`
   (`<org>/<bot>`). Узкий аудит слоя (зеркала, граф, контракты данных,
   фиче-изоляция, инварианты Telegram) — `telegram-bot-flow-audit <slug>`;
-  сквозную сверку (interface ↔ фичи ↔ domains) ведёт `/cross-audit` (углы
-  `surface-botflow` · `botflow-domain`).
+  сквозную сверку (interface ↔ фичи ↔ домены сервисов) ведёт
+  `/cross-audit` (углы `surface-botflow` · `botflow-domain` ·
+  `botflow-service`).
 - **Артефакты экранов** (`docs/projects/<slug>/screens/<surface>/`) — через
   скилл `screen-deep-dive <slug> [<surface>]`; форма — по
   `docs/projects/_template/screens/README.md` (канон слоя; форма одной папки
@@ -497,7 +553,7 @@ Interface-слой (по проекту, **по поверхности**):
   Поиск тупиков, рассинхрона зеркал (внутри screens и с `interface/<surface>/`
   того же проекта), битых ссылок, нарушений slot-fills/accepts и
   семантических подозрений — скилл `screen-audit <slug>`. Связь flow/shell с
-  поверхностью теперь структурная (папка).
+  поверхностью структурная (папка).
 - **Библиотека** — в отдельном репо `ui-lib` как `@stit/ui`;
   проект её потребляет, не правит.
 - **Sweep'ы** (терминология, чистка): 1 агент = 1 непересекающаяся зона.

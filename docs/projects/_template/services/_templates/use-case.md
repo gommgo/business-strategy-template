@@ -31,21 +31,26 @@ consumes: []
 
 ## Dependencies
 
-Колонка `integration` связывает порт с провайдером продуктового слоя
-`docs/projects/<project-slug>/integration.md`: для **внешних** интеграций
-(платёж, email, SMS, IDP) и **межпроектных** портов (обмен с соседним
-проектом бизнеса) — slug провайдера; для внутренней инфры (репозиторий,
-`Clock`, reader другого контекста **этого же** проекта) — `—`. Колонка
-`functions` — **какие функции** интеграции этот use-case дёргает (`slug`'и из
+Колонка `integration` говорит, чей это порт: для внутренней инфры
+(репозиторий, `Clock`, in-process reader другого контекста **этого же
+сервиса**) — `—`; для **другого сервиса этого проекта** —
+`` `service:<svc-slug>` `` (его функции — из `## Exposes` паспорта
+провайдера); для **внешних** интеграций (платёж, email, SMS, IDP) и
+**межпроектных** портов (обмен с соседним проектом бизнеса) — slug
+провайдера из продуктового `integration.md`. Колонка `functions` — **какие
+функции** этот use-case дёргает (`slug`'и из `Exposes` сервиса /
 `## Функции` `integration.md` / клиента `_shared/`); для внутренней инфры —
 `—`. Домен **transport-agnostic**: он зовёт функцию по `slug`, а как именно
-(HTTP / gRPC / очередь) — знает только клиент `_shared/integrations/<slug>/`.
+(HTTP / gRPC / очередь) — знает только клиент `_shared/integrations/<slug>/`
+или код сервиса-провайдера. Контекст **другого сервиса** in-process
+недостижим — только `service:`-порт или событие.
 
 | port | purpose | adapter | integration | functions |
 |---|---|---|---|---|
 | `<Aggregate>Repository` | хранение корневого агрегата | postgres (pgx + sqlc) | `—` | `—` |
 | `Clock` | детерминированное время | `golibinfra/clock` | `—` | `—` |
-| `<OtherDomain>Reader` | кросс-контекстный порт — данные из другого контекста **этого** проекта | адаптер в `module/adapters.go` чужого домена | `—` | `—` |
+| `<OtherDomain>Reader` | кросс-контекстный порт — данные из другого контекста **этого же сервиса** | адаптер в `module/adapters.go` чужого домена | `—` | `—` |
+| `<OtherService>Client` | другой сервис этого проекта — зовём его функции из `Exposes` | код сервиса-провайдера | `` `service:<svc-slug>` `` | `` [`<fn-slug>`, …] `` |
 | `<ExternalService>` | внешняя система — зовём по функциям, транспорт не знаем | клиент `_shared/integrations/<integration-slug>/` | `` `<integration-slug>` `` | `` [`<fn-slug>`, …] `` |
 | `<SiblingProject>Client` | обмен с **соседним проектом** бизнеса | клиент `_shared/integrations/<integration-slug>/` | `` `<integration-slug>` `` (`target: sibling-project`) | `` [`<fn-slug>`, …] `` |
 
@@ -56,9 +61,11 @@ consumes: []
 > `target: sibling-project`; ребро попадает в `docs/projects/project-map.md`
 > (на бизнес-языке). `/cross-audit` сверяет цепочку: `functions` здесь ↔ функция
 > клиента `_shared/` ↔ строка `## Функции` `integration.md` ↔ (для соседа)
-> ребро `project-map.md` и обслуживающий use-case у соседа. Синхронные вызовы
+> ребро `project-map.md` и обслуживающий use-case у соседа. Порт
+> `service:<svc-slug>` сверяется со строкой `Dependencies` паспорта
+> **этого** сервиса и функцией `Exposes` провайдера. Синхронные вызовы
 > видны в `## Steps` отдельным шагом; асинхронный обмен — через события
-> (`## Events emitted` / `consumes`).
+> (`## Events emitted` / `consumes`) и `## Messaging` паспортов.
 
 > **Авторизация** — на уровне HTTP-middleware (`platform/authgate`), не в use-case'е. Use-case не имеет `Authorizer`-порта и не возвращает `ErrForbidden`, если репо-конвенция «есть валидная сессия → can do everything». Если в конкретном домене нужны fine-grained роли — заводи policy в `<ctx>/policies/` и **явно** добавь её здесь.
 

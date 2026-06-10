@@ -1,6 +1,6 @@
 ---
 name: telegram-bot-flow-deep-dive
-description: "Углублённая проработка артефактов композиции телеграм-бота в `docs/projects/<project-slug>/telegram-bot-flow/<surface>/` (dialog · window · use-case · command · notification) — по папке на bot-поверхность (`type: bot`) из реестра `surface.md`. Организующая ось внутри поверхности — фича (feature): один диалог + его окна + его use-case'ы бота в папке `features/<feature>/`; команды и уведомления — сквозными реестрами на корне. Ведёт сессию заполнения через структурированные вопросы (AskUserQuestion), синтезирует кандидатов из interface-слоя той же поверхности (зона → диалог/фича, блок → окно, атомы → виджеты), держит двухуровневый мост к доменам (виджет и getter окна ссылаются на use-case бота, а тот в зависимостях — на `use-case` домена; `event` — для уведомлений), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/projects/<project-slug>/telegram-bot-flow/<surface>/`), аккумулирует референсы в `docs/projects/<project-slug>/telegram-bot-flow/<surface>/features/<feature>/assets/<slug>/` и не выдумывает тексты сообщений. Использовать всегда, когда речь о слое телеграм-бота проекта, заполнении одного из 5 артефактных kind (dialog/window/use-case/command/notification) одной bot-поверхности, заведении или углублении фичи/диалога/окна/use-case'а бота/команды/уведомления, разборе сырья (скриншот чужого бота, описание сценария словами, транскрипт интервью), прокладке переходов между окнами и фичами, контракте данных окна (getter), оркестрации действия окна через use-case бота, переходе записи `status: draft → stable`, удалении с каскадом, или копании связей между сущностями telegram-bot-flow, interface той же поверхности и доменами проекта. Также — единственная точка входа в telegram-bot-flow-слой проекта: новые файлы и правки артефактов делаются через этот скилл."
+description: "Углублённая проработка артефактов композиции телеграм-бота в `docs/projects/<project-slug>/telegram-bot-flow/<surface>/` (dialog · window · use-case · command · notification) — по папке на bot-поверхность (`type: bot`) из реестра `surface.md`. Организующая ось внутри поверхности — фича (feature): один диалог + его окна + его use-case'ы бота в папке `features/<feature>/`; команды и уведомления — сквозными реестрами на корне. Ведёт сессию заполнения через структурированные вопросы (AskUserQuestion), синтезирует кандидатов из interface-слоя той же поверхности (зона → диалог/фича, блок → окно, атомы → виджеты), держит двухуровневый мост к доменам (виджет и getter окна ссылаются на use-case бота, а тот в зависимостях — на `use-case` домена; `event` — для уведомлений), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/projects/<project-slug>/telegram-bot-flow/<surface>/`), аккумулирует референсы в `docs/projects/<project-slug>/telegram-bot-flow/<surface>/features/<feature>/assets/<slug>/` и не выдумывает тексты сообщений. Использовать всегда, когда речь о слое телеграм-бота проекта, заполнении одного из 5 артефактных kind (dialog/window/use-case/command/notification) одной bot-поверхности, заведении или углублении фичи/диалога/окна/use-case'а бота/команды/уведомления, разборе сырья (скриншот чужого бота, описание сценария словами, транскрипт интервью), прокладке переходов между окнами и фичами, контракте данных окна (getter), оркестрации действия окна через use-case бота, переходе записи `status: draft → stable`, удалении с каскадом, или копании связей между сущностями telegram-bot-flow, interface той же поверхности и доменами сервисов проекта (`services/*/domains/`). Также — единственная точка входа в telegram-bot-flow-слой проекта: новые файлы и правки артефактов делаются через этот скилл."
 ---
 
 # telegram-bot-flow-deep-dive
@@ -70,7 +70,7 @@ description: "Углублённая проработка артефактов �
 4. Все чтения/записи скоупятся в выбранный проект **и поверхность**:
    `docs/projects/<project-slug>/telegram-bot-flow/<surface>/`,
    `docs/projects/<project-slug>/interface/<surface>/` (read-only),
-   `docs/projects/<project-slug>/domains/` (read-only), ветка state
+   `docs/projects/<project-slug>/services/*/domains/` (read-only), ветка state
    `../entrypoint/state/projects/<project-slug>/telegram-bot-flow/<surface>/`.
 
 ## Выбор поверхности
@@ -163,7 +163,8 @@ slug её диалога. Резолв `window`/`use-case`-точки входа
    `capability/<surface>.md` (если есть) и interface-слой поверхности
    `docs/projects/<project-slug>/interface/<surface>/` +
    `references/interface-context.md` — освежить источник синтеза.
-4. Пробежать `docs/projects/<project-slug>/domains/` (если есть):
+4. Пробежать домены сервисов
+   `docs/projects/<project-slug>/services/*/domains/` (если есть):
    контексты, `use-cases/`, `events/` + `references/domain-bridge.md`
    — освежить двухуровневый мост к доменам (use-case бота → доменный
    use-case).
@@ -211,7 +212,7 @@ slug её диалога. Резолв `window`/`use-case`-точки входа
   диалога заводит и папку фичи); window — H2-секция `## <slug>` в
   `features/<feature>/window.md`; use-case бота — H2-секция `## <slug>`
   в `features/<feature>/use-case.md` (заводится, когда виджету окна нужен
-  `action`, см. «Мост к domains»); command и notification — новая строка
+  `action`, см. «Мост к доменам сервисов»); command и notification — новая строка
   таблицы реестра корня.
 - **B. Сырьё**. Args = свободный текст, картинка, URL. Скилл
   анализирует, извлекает кандидатов, через чат показывает план,
@@ -239,7 +240,7 @@ slug её диалога. Резолв `window`/`use-case`-точки входа
   - выбора use-case бота фичи для `widget.action` / `getter.*.source`
     (`use-case:<uc-slug>`, опция на каждый существующий + «нужен новый
     bot UC») и выбора доменного `use-case:<ctx>.<Operation>` /
-    `event:<ctx>.<Event>` из доменов проекта (см.
+    `event:<ctx>.<Event>` из доменов сервисов проекта (см.
     `references/domain-bridge.md`).
 - **Свободная форма** (через Other) — для **значения**: `name`,
   `description`, текст сообщения (`message.text`), подписи кнопок
@@ -449,7 +450,7 @@ slug её диалога. Резолв `window`/`use-case`-точки входа
 обновление (это механический пересчёт, не смысловое решение — но запись
 делается явно, не молча).
 
-## Мост к domains
+## Мост к доменам сервисов
 
 См. `references/domain-bridge.md`. Мост **двухуровневый**: окно касается
 домена не напрямую, а через **use-case бота** фичи.
@@ -464,7 +465,9 @@ slug её диалога. Резолв `window`/`use-case`-точки входа
 - **Уровень 2 — use-case бота → доменный use-case (семантически)**: в
   своих `### Dependencies` bot UC ссылается на доменный
   `use-case:<ctx>.<Operation>` (**с точкой**) на
-  `docs/projects/<project-slug>/domains/<ctx>/use-cases/`; при заведении
+  `docs/projects/<project-slug>/services/*/domains/<ctx>/use-cases/`
+  (реф сервисо-агностичен: контекст уникален в проекте, сервис-владелец
+  выводится из пути); при заведении
   bot UC — опции из существующих доменных use-case проекта + «нужна
   новая операция». Точка различает уровни: реф без точки — bot UC, с
   точкой — доменный.
@@ -472,10 +475,12 @@ slug её диалога. Резолв `window`/`use-case`-точки входа
   `### Outputs`/`### Errors`), не правило, придуманное окном; скилл
   показывает исходы как контекст, формулировку даёт аналитик.
 - `notification.trigger` — `event:<ctx>.<Event>` из
-  `domains/<ctx>/events/` (опции из существующих), `schedule: <по-русски>`
+  `services/*/domains/<ctx>/events/` (опции из существующих),
+  `schedule: <по-русски>`
   или `integration:<slug>` из `integration.md` проекта (без изменений —
   уведомление триггерится доменным событием напрямую).
-- Если доменного слоя нет (или нужного контекста/операции/события ещё
+- Если слоя services у проекта ещё нет (или нужного
+  контекста/операции/события ещё
   нет) — доменная связь **семантическая** и фиксируется на уровне bot UC:
   имя пишется в `### Dependencies` как есть, а в state-заметке bot UC
   (`## Доменные решения`) — строка-требование «нужен
@@ -483,7 +488,8 @@ slug её диалога. Резолв `window`/`use-case`-точки входа
   `/domain-deep-dive <project-slug> <ctx>`. Stable это не блокирует;
   несостыковки сводит `/cross-audit`.
 
-Скилл **не пишет** в `domains/` — это домен `domain-deep-dive`.
+Скилл **не пишет** в `services/` — домены проектирует `domain-deep-dive`,
+сервисный уровень — `service-deep-dive`.
 
 ## Stub-сущности
 
@@ -598,8 +604,9 @@ interface-slug **той же поверхности**:
   ни в правке; исходящее сообщение — только через реестр корня
   `notification.md`.
 - Не лезть в interface-слой проекта
-  (`docs/projects/<project-slug>/interface/<surface>/`) и в `domains/`
-  своими руками — только через предложение аналитику запустить
+  (`docs/projects/<project-slug>/interface/<surface>/`) и в `services/`
+  (включая домены `services/*/domains/`) своими руками — только через
+  предложение аналитику запустить
   `interface-deep-dive` / `domain-deep-dive`.
 - Не создавать папку `telegram-bot-flow/<surface>/` для поверхности вне
   реестра `surface.md` или с `type` ≠ `bot` — хребет ведёт реестр.

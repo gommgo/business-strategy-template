@@ -178,12 +178,12 @@ slug, а ребро сводится в `docs/projects/project-map.md`.
 - `integration` — slug провайдера из таблицы выше (M:1); функция без
   провайдера — сирота.
 - `description` — что функция делает, в **языке бизнеса**, без техники
-  (endpoint/сигнатура — конкретика клиента `domains/_shared/`, не сюда).
+  (endpoint/сигнатура — конкретика клиента `services/_shared/`, не сюда).
 - `direction` — enum: `out` (мы зовём их функцию) | `in` (они зовут нашу,
   мы обслуживаем). Событие — тоже функция (`out` публикуем / `in` подписка).
 
 `slug` функции — её общая личность на трёх высотах: здесь (бизнес), в
-клиенте `domains/_shared/integrations/<integration>/` (конкретика) и в
+клиенте `services/_shared/integrations/<integration>/` (конкретика) и в
 `functions` use-case'а, который её дёргает. Согласованность ловит
 `/cross-audit`.
 

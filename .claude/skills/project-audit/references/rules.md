@@ -336,7 +336,7 @@ slug, которого нет ни в одной строке `## Провайд
 `<integration>`, которого нет в `## Провайдеры`. Завести провайдера или
 поправить ссылку через `/project-deep-dive <project-slug> integration`».
 
-> Соответствие функции её клиенту `domains/_shared/integrations/<integration>/`
+> Соответствие функции её клиенту `services/_shared/integrations/<integration>/`
 > и потреблению в use-case (`functions`) — **семантическое**, в пределах
 > проекта его не валидируем: это зона `/cross-audit` (угол `integration-domain`).
 
@@ -414,15 +414,15 @@ em-dash).
 
 ## Что не делает project-audit
 
-- Не сравнивает продукт с `<slug>/interface` / `<slug>/domains` /
+- Не сравнивает продукт с `<slug>/interface` / `<slug>/services` /
   `<slug>/screens` и не проверяет `addresses-problem` против реестра
   `business/business-problem` — это `/cross-audit`.
 - Не выходит за пределы одной папки проекта `docs/projects/<project-slug>/`
   — кроме одного структурного исключения: проверки **существования** папки
   соседнего проекта по `integration.sibling-project` (R-SEM-011) только
   листингом `docs/projects/`, без чтения его артефактов. Согласованность
-  трёх сторон стыка (integration ↔ project-map ↔ domains-порт) — у
-  `/cross-audit`.
+  трёх сторон стыка (integration ↔ project-map ↔ порт в доменах
+  сервисов) — у `/cross-audit` (угол `integration-domain`).
 - Не предлагает promotion `draft → stable` — это `/project-deep-dive`.
 - Не вызывает `/project-deep-dive` сам — даёт текст, что запустить
   аналитику.

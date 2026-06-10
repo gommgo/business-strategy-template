@@ -122,11 +122,11 @@ preamble, без пояснений. Скилл парсит ответ и об�
   "surface": "web-partner",
   "business-problem": null,
   "severity": "warning",
-  "title": "capability:send-referral (web-partner) не имеет домена в domains/ проекта",
-  "evidence": "capability/web-partner.md:send-referral.value = «один клик вместо звонка». В projects/referral-network/domains/ существуют контексты: auth, billing, inventory. Ни один не покрывает доменную область направлений.",
+  "title": "capability:send-referral (web-partner) не имеет домена в services/*/domains/ проекта",
+  "evidence": "capability/web-partner.md:send-referral.value = «один клик вместо звонка». В projects/referral-network/services/*/domains/ существуют контексты: auth, billing, inventory. Ни один не покрывает доменную область направлений.",
   "suggestion": "Добавить домен `referrals` через /domain-deep-dive, или подтвердить, что capability реализуется на уровне адаптеров (тогда уточнить в state).",
   "source-refs": ["docs/projects/referral-network/capability/web-partner.md:send-referral"],
-  "destination-refs": ["docs/projects/referral-network/domains/"]
+  "destination-refs": ["docs/projects/referral-network/services/"]
 }
 ```
 

@@ -1,6 +1,6 @@
 ---
 name: domain-deep-dive
-description: "Углублённая интерактивная проработка DDD-артефактов в `docs/projects/<project-slug>/domains/<context>/` (aggregate · entity · vo · event · use-case · policy · context-README) — единственная точка входа для **проектирования** домена. Ведёт сессию через серию структурированных раундов `AskUserQuestion` (каждый шаг — раунд вопросов; без монологов и догадок), фиксирует рабочее состояние в своей ветке единого дерева state оркестратора (`../entrypoint/state/projects/<project-slug>/domains/<context>/`), не выдумывает бизнес-логику. Активируй когда архитектор проектирует или углубляет домен, приносит сырьё (транскрипт интервью, заметки, набросок кода) под DDD-разбор, заводит новый агрегат/событие/use-case, добивает `status: draft → stable`, удаляет домен/событие с каскадом ссылок. Также — точечные правки **уже стабильного** артефакта идут через прямой Edit, не сюда."
+description: "Углублённая интерактивная проработка DDD-артефактов в `docs/projects/<project-slug>/services/<svc>/domains/<context>/` (домены живут внутри сервиса-владельца; контекст уникален в проекте, сервис выводится по контексту, для нового контекста — пикер сервиса из реестра `services/service.md`) (aggregate · entity · vo · event · use-case · policy · context-README) — единственная точка входа для **проектирования** домена. Ведёт сессию через серию структурированных раундов `AskUserQuestion` (каждый шаг — раунд вопросов; без монологов и догадок), фиксирует рабочее состояние в своей ветке единого дерева state оркестратора (`../entrypoint/state/projects/<project-slug>/domains/<context>/` — ключ ветки контекст, не сервис), не выдумывает бизнес-логику. Активируй когда архитектор проектирует или углубляет домен, приносит сырьё (транскрипт интервью, заметки, набросок кода) под DDD-разбор, заводит новый агрегат/событие/use-case, добивает `status: draft → stable`, удаляет домен/событие с каскадом ссылок. Также — точечные правки **уже стабильного** артефакта идут через прямой Edit, не сюда."
 ---
 
 # Skill: domain-deep-dive
@@ -9,31 +9,34 @@ description: "Углублённая интерактивная проработ
 (frontmatter + properties + методы по имени) в полные `status: stable`
 артефакты, сверенные с канон-формой и явно подтверждённые архитектором.
 
-Домены живут **внутри проекта**: данные — в
-`docs/projects/<project-slug>/domains/<context>/`, форма-канон и шаблоны —
-один раз в `docs/projects/_template/domains/`. Сессия всегда идёт в контексте
-**одного проекта**: скилл принимает `<project-slug>` первым аргументом, без
-него — предлагает пикер по именам проектов (кроме `_template`). Все
-чтения и записи скоупятся в `domains/` выбранного проекта.
+Домены живут **внутри сервиса-владельца**: данные — в
+`docs/projects/<project-slug>/services/<svc>/domains/<context>/`, форма-канон
+и шаблоны — один раз в `docs/projects/_template/services/`. Сессия всегда
+идёт в контексте **одного проекта**: скилл принимает `<project-slug>` первым
+аргументом, без него — предлагает пикер по именам проектов (кроме
+`_template`). Все чтения и записи скоупятся в `services/*/domains/`
+выбранного проекта.
 
-Домены партиционируются **по bounded-context и surface-агностичны**: бэкенд
-не делится по поверхности (surface) — одна доменная модель обслуживает все
-поверхности продукта. (Поверхность — ось продуктового, UX- и screens-слоёв,
+Домены партиционируются **по сервису, внутри сервиса — по bounded-context**,
+и **surface-агностичны**: бэкенд не делится по поверхности (surface) — одна
+доменная модель обслуживает все поверхности продукта. Слаги контекстов
+уникальны в пределах проекта (не сервиса), поэтому `id: <context>.<Name>` и
+рефы `use-case:<ctx>.<Operation>` / `event:<ctx>.<Event>` сервиса не несут —
+сервис-владелец выводится из пути. (Поверхность — ось продуктового, UX- и screens-слоёв,
 не доменного.) Возможности (capability), наоборот, лежат **по поверхности**
 — `docs/projects/<project-slug>/capability/<surface>.md`, файл на
 поверхность; use-case реализует возможность той или иной поверхности.
 
 Это **source of truth** проектирования (design-time): артефакты — чистая
 язык-агностичная аналитика домена. Канон артефактов и обязательных секций —
-`docs/projects/_template/domains/README.md`; скилл его не дублирует, а исполняет.
+`docs/projects/_template/services/README.md`; скилл его не дублирует, а исполняет.
 Маппинг DDD → конкретный код (Go-раскладка `internal/domain/<ctx>/`) живёт
 не здесь, а в соседнем backend-репо (`<org>/backend`, форк
 `go-backend-template`), его `docs/reference/domain-mapping.md` — он
 потребитель этих stable-артефактов.
 
-Этот слой — опциональный и **завершается на stable-артефакте**. Что с ним
-делают соседние форки (scaffold доменов в код) — забота тех репо, не этого
-скилла.
+Слой **завершается на stable-артефакте**. Что с ним делают соседние форки
+(scaffold доменов в код) — забота тех репо, не этого скилла.
 
 ## Главный ритм: AskUserQuestion
 
@@ -74,8 +77,29 @@ description: "Углублённая интерактивная проработ
   Без выбора проекта сессия не идёт.
 
 Дальше в этом файле `<P>` = `docs/projects/<project-slug>` для краткости:
-данные доменов — `<P>/domains/<ctx>/`, форма-канон и шаблоны — один раз в
-`docs/projects/_template/domains/`.
+данные доменов — `<P>/services/<svc>/domains/<ctx>/`, форма-канон и шаблоны —
+один раз в `docs/projects/_template/services/`.
+
+## Выбор сервиса (резолв владельца контекста)
+
+Сигнатура скилла сервиса не несёт — он выводится:
+
+- **Существующий контекст**: скан `<P>/services/*/domains/<ctx>/` — где
+  найден, тот сервис и владелец (контекст уникален в проекте; дубль в двух
+  сервисах — находка `/service-audit`, работа останавливается до разруливания).
+- **Новый контекст**: обязательный `AskUserQuestion`-пикер «в каком сервисе
+  живёт контекст» — опции из реестра `<P>/services/service.md` (по именам;
+  только типы с доменами: `api` · `worker`) + «нужен новый сервис». Новый
+  сервис этот скилл **не заводит** — blocker-вопрос в state и отсылка в
+  `/service-deep-dive <slug>`.
+- Слоя `services/` в проекте ещё нет → сначала `/service-deep-dive <slug>`
+  (bootstrap топологии); без сервиса домен заводить некуда.
+
+Паспорт сервиса-владельца (`<P>/services/<svc>/README.md`) читается как
+**read-only контекст**: Exposes (какие функции сервис отдаёт), Dependencies
+(какие `service:`-порты уже объявлены), Messaging (какие события ходят через
+брокер). Паспорта, реестры и `architecture.md` этот скилл **не правит** —
+территория `/service-deep-dive`; рассинхрон фиксируется blocker-вопросом.
 
 ## Точки входа
 
@@ -96,15 +120,18 @@ aggregate-файле и kind-ом отдельно не заводится).
 ## Что делать сразу при запуске
 
 1. Определить `<project-slug>` (см. § Выбор проекта).
-2. Прочитать `docs/projects/_template/domains/README.md` — освежить канон
-   (kinds, обязательные H2, anti-patterns).
+2. Прочитать `docs/projects/_template/services/README.md` — освежить канон
+   (kinds, обязательные H2, инварианты слоя, anti-patterns).
 3. Прочитать `docs/projects/_template/project/README.md` +
    `references/project-context.md` — освежить связи с продуктовым слоем
    **того же проекта**: domain ↔ возможность поверхности
    (`capability/<surface>.md`), клиент интеграции
-   (`_shared/integrations/<slug>/`) + потребление функций (колонки
-   `integration` + `functions` в use-case `## Dependencies`), межпроектный
+   (`services/_shared/integrations/<slug>/`) + потребление функций (колонки
+   `integration` + `functions` в use-case `## Dependencies`; другой сервис
+   проекта — порт `service:<svc>` + функции из его `Exposes`), межпроектный
    порт ↔ `integration` с `target: sibling-project` + ребро `project-map.md`.
+   Плюс реестр `<P>/services/service.md` и паспорт сервиса-владельца —
+   read-only контекст (см. § Выбор сервиса).
 4. Если args (после slug) пустые — сделать сводку (см. ниже) и через
    `AskUserQuestion` предложить выбор: что копать / что заводить.
 5. Если args указывают на контекст/сущность — определить kind и режим
@@ -112,12 +139,12 @@ aggregate-файле и kind-ом отдельно не заводится).
 
 ## Сводка состояния
 
-1. `ls <P>/domains/` — список контекстов проекта.
+1. `ls <P>/services/*/domains/` — список контекстов проекта, по сервисам.
 2. На каждый контекст: пройтись по `<ctx>/*.md`, `<ctx>/events/*.md`,
    `<ctx>/use-cases/*.md`, `<ctx>/policies/*.md`; для каждого артефакта
    считать `status`, `kind` и **сколько обязательных H2-секций заполнено**
    (см. `references/field-checklists.md`).
-3. Сверить артефакты с канон-формой (`docs/projects/_template/domains/README.md`
+3. Сверить артефакты с канон-формой (`docs/projects/_template/services/README.md`
    + `references/field-checklists.md`) вручную: frontmatter, обязательные H2,
    ref-целостность. Если всё `stable` и без дыр — выйти: «спроектировано,
    делать нечего». Committed-валидатора в этом репо нет — проверка ручная,
@@ -133,7 +160,7 @@ aggregate-файле и kind-ом отдельно не заводится).
 6. Сжатая карта в чат:
 
    ```
-   ## Состояние <P>/domains/<ctx>
+   ## Состояние <P>/services/<svc>/domains/<ctx>
 
    | артефакт | kind | status | H2 заполнено | дыры |
    |---|---|---|---|---|
@@ -148,9 +175,10 @@ aggregate-файле и kind-ом отдельно не заводится).
 Детали — `references/workflow-patterns.md`. Краткая семантика:
 
 - **A. Новая сущность.** Args = `<ctx>:<kind>` или `<ctx>:<kind>:<новый-Name>`.
-  Скилл копирует шаблон из `docs/projects/_template/domains/_templates/<kind>.md`
-  в нужный путь под `<P>/domains/`, заполняет frontmatter, заводит минимум
-  (имя + одна фраза описания) и погружается в режим C.
+  Скилл резолвит сервис-владелец контекста (см. § Выбор сервиса), копирует
+  шаблон из `docs/projects/_template/services/_templates/<kind>.md`
+  в нужный путь под `<P>/services/<svc>/domains/`, заполняет frontmatter,
+  заводит минимум (имя + одна фраза описания) и погружается в режим C.
 - **B. Сырьё.** Args = свободный текст / приложение (транскрипт интервью,
   ER-диаграмма, набросок кода, заметки). Извлекает кандидатов на агрегаты /
   методы / события / use-case'ы, показывает план, по подтверждению — заводит
@@ -170,11 +198,15 @@ aggregate-файле и kind-ом отдельно не заводится).
 5. **Identity** — ID type, mutability, visibility.
 6. **Boundary / VOs / Contained Entities / Spanning Invariants** — границы агрегата.
 7. **Events** — `events/*.md`: Trigger, Payload, Consumers, Delivery.
-8. **Use Cases** — Actor, Inputs, Outputs, Dependencies (колонки
-   `integration` = slug провайдера `integration.md` и `functions` =
-   дёрнутые функции `` [`<integration>.<fn-slug>`] ``; внутренняя инфра — `—`),
-   Steps, Called methods, Events, Errors.
-9. **Integration clients** — `_shared/integrations/<slug>/` (`integration-client`):
+8. **Use Cases** — Actor, Inputs, Outputs, Dependencies (колонка
+   `integration`: `—` — внутренняя инфра этого сервиса,
+   `` `service:<svc>` `` — другой сервис проекта (functions из его
+   `Exposes`), slug провайдера `integration.md` — внешнее/сосед; `functions`
+   = дёрнутые функции `` [`<fn-slug>`, …] ``), Steps, Called methods,
+   Events, Errors. Порт `service:`/события через брокер → сверить с
+   `Dependencies`/`Messaging` паспорта сервиса; рассинхрон — blocker-вопрос
+   «обновить паспорт через /service-deep-dive», не молчаливая правка.
+9. **Integration clients** — `services/_shared/integrations/<slug>/` (`integration-client`):
    Transport, Functions (slug · signature · payload · consumed-by), Errors.
    Конкретное воплощение интеграции; домен зовёт функцию по `slug`, транспорт
    держит клиент.
@@ -195,7 +227,7 @@ aggregate-файле и kind-ом отдельно не заводится).
   (лимит инструмента).
 - **Опции** только для:
   - anti-patterns из секции **Anti-patterns** в
-    `docs/projects/_template/domains/README.md` и из шаблонов («Это I/O-метод
+    `docs/projects/_template/services/README.md` и из шаблонов («Это I/O-метод
     агрегата вместо use-case?» / «Spanning invariant между двумя
     aggregate'ами?»);
   - enum-поля (`kind`, `Visibility`, `Mutable`, `Channel`, `Source`,
@@ -222,6 +254,9 @@ aggregate-файле и kind-ом отдельно не заводится).
 ../entrypoint/state/projects/<project-slug>/domains/<ctx>/<kind>/<slug>.md
 ```
 
+Ключ ветки — **контекст, не сервис**: перенос контекста между сервисами
+(миграция через `/service-deep-dive`) не теряет заметки.
+
 Формат заметки — канон `../entrypoint/references/state-model.md`. Кратко:
 
 - `slug` = basename файла артефакта без `.md` (например `User`,
@@ -242,8 +277,8 @@ aggregate-файле и kind-ом отдельно не заводится).
 Ветка **коммитится** вместе с деревом оркестратора — это общая проектная
 память между сессиями и архитекторами. Forward-only (никакого
 «было/стало») держит `git log` чистым. Это **не** часть канона
-`docs/projects/_template/domains/` (зафиксированные решения уходят в
-`<P>/domains/`, не открытые вопросы), но это часть проектного знания о
+`docs/projects/_template/services/` (зафиксированные решения уходят в
+`<P>/services/<svc>/domains/`, не открытые вопросы), но это часть проектного знания о
 домене — клон репо несёт с собой все висящие `**blocker**`-вопросы, на
 которые тимейт может ответить.
 
@@ -303,8 +338,9 @@ AskUserQuestion со смыслом «эту запись надо пересм�
 Если копаемый артефакт ссылается (`relations` / `emits` / `consumes` /
 методы) на ещё не существующий `<ctx>.<Name>`:
 
-1. В соответствующем пути (по kind, под `<P>/domains/`) — новая запись
-   через шаблон из `docs/projects/_template/domains/_templates/<kind>.md`:
+1. В соответствующем пути (по kind, под `<P>/services/<svc>/domains/` —
+   сервис-владелец резолвится как в § Выбор сервиса) — новая запись
+   через шаблон из `docs/projects/_template/services/_templates/<kind>.md`:
    `id`, `kind`, `context`, `name` заполнены; `status: draft`; обязательные
    H2-заголовки оставлены пустыми или с заглушкой `_TBD_`.
 2. В `../entrypoint/state/projects/<project-slug>/domains/<ctx>/<kind>/<Name>.md`
@@ -316,7 +352,7 @@ AskUserQuestion со смыслом «эту запись надо пересм�
 
 ## Удаление артефакта (каскад)
 
-1. Прочитать все `<P>/domains/**/*.md` +
+1. Прочитать все `<P>/services/**/*.md` (домены всех сервисов + паспорта) +
    `../entrypoint/state/projects/<project-slug>/domains/` — найти все
    ссылки на удаляемый `<ctx>.<Name>` (frontmatter
    `relations|emits|consumes`, markdown-ссылки `[...](...)`).
@@ -342,7 +378,9 @@ AskUserQuestion со смыслом «эту запись надо пересм�
    подтвердить, что форма консистентна и stable-инварианты держатся.
 4. Предложить следующий шаг:
    - **Внутри docs**: добить остальные контексты/use-case'ы этого проекта
-     (`/domain-deep-dive <slug> <ctx>`), либо прогнать `/cross-audit`
+     (`/domain-deep-dive <slug> <ctx>`); если менялись события через брокер
+     или `service:`-порты — предложить `/service-audit <slug>` (парность
+     produces/consumes, цепочка порт ↔ Exposes); либо прогнать `/cross-audit`
      (lenses `capability-domain`, `integration-domain`) — не повисла ли
      возможность поверхности без бизнес-кода, интеграция без адаптера, и
      сходятся ли три стороны межпроектного порта (use-case `## Dependencies`
@@ -351,7 +389,7 @@ AskUserQuestion со смыслом «эту запись надо пересм�
    - **Cross-repo (текстовая ссылка, не локальный chain)**: когда домены
      `stable`, их потребляет соседний `<org>/backend` (форк
      `go-backend-template`) — там `/scaffold` (вариант domain) разворачивает
-     Go-код по этим артефактам. Это шаг **в другом репо**, не запускается
+     Go-код по паспорту сервиса и этим артефактам. Это шаг **в другом репо**, не запускается
      отсюда.
 
 ## Запреты
@@ -376,6 +414,11 @@ AskUserQuestion со смыслом «эту запись надо пересм�
   теряется при `/clear`.
 - Не смешивать проекты: чтения, записи, сверка формы и state — строго в
   скоупе выбранного `<project-slug>`.
-- Не дублировать здесь правила `docs/projects/_template/domains/README.md` и
+- Не заводить сервис и не править `service.md` / `platform.md` /
+  `architecture.md` / паспорта `services/<svc>/README.md` — территория
+  `/service-deep-dive`; максимум blocker-вопрос в state.
+- Не переносить контекст между сервисами — это миграция с каскадом, её
+  ведёт `/service-deep-dive`.
+- Не дублировать здесь правила `docs/projects/_template/services/README.md` и
   шаблонов — они source of truth канона, скилл их **исполняет**, не
   пересказывает.

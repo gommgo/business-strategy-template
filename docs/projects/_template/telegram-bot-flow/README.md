@@ -16,7 +16,8 @@
 `docs/projects/<project-slug>/telegram-bot-flow/<surface>/`.
 
 Бот — **фронтенд в Telegram**: его окна показывают данные и принимают
-действия, а вся бизнес-логика живёт в `domains/` того же проекта. Между
+действия, а вся бизнес-логика живёт в доменах сервисов того же проекта
+(`services/*/domains/`). Между
 окнами и доменом стоит **оркестратор бота** — `use-case` слоя: он собирает
 ввод, дёргает доменные `use-case` через backend и работает со стейтом
 диалога, **не держа бизнес-правил**. Слой фиксирует мост явно: действие
@@ -40,7 +41,7 @@ interface/<surface>/ → синтез → telegram-bot-flow/<surface>/ → ко�
    `docs/projects/<project-slug>/telegram-bot-flow/<surface>/` — каждый
    ссылается на свой источник в interface той же поверхности через `slug`.
    Консистентность слоя (зеркала, граф, контракты данных) сверяет
-   `telegram-bot-flow-audit <slug>`; сквозные рёбра с interface и domains —
+   `telegram-bot-flow-audit <slug>`; сквозные рёбра с interface и services —
    `/cross-audit` (углы `surface-botflow` · `botflow-domain`).
 3. Stable-артефакты слоя читает код-репо бота (форк
    `telegram-bot-template`): по диалогам и окнам он разворачивает
@@ -126,7 +127,7 @@ docs/projects/<project-slug>/telegram-bot-flow/
   каждая — мета-блок ```yaml``` (`name` · `operation` · `who` · `status`) +
   **H3-секции** `### Actor` · `### Inputs` · `### Outputs` ·
   `### Dependencies` · `### Steps` · `### Errors`, зеркалящие доменный
-  use-case (`domains/_templates/use-case.md`) без доменных-only секций.
+  use-case (`services/_templates/use-case.md`) без доменных-only секций.
 
 `status` — зрелость **каждой** секции/файла относительно критериев своего
 kind. Связи — слаг-рефами в бэктиках (форма ячеек — как в interface).
@@ -244,20 +245,27 @@ interface обычно проявляется как диалог (dialog), бл
 | `getter.*.source` (`use-case:<slug>`) | M:1 | секция `## <slug>` в `use-case.md` **той же фичи** |
 | условие перехода `when` | — | исход bot UC (его `Outputs`/`Errors`) |
 
-## Связь с `domains/` проекта
+## Связь с доменами сервисов проекта
 
 Бизнес-логики в слое нет; домена касается только **use-case бота** (через
 свои `Dependencies`) и реестр уведомлений. Рёбра семантические (домен
 опционален), сверяет `/cross-audit`:
 
-| telegram-bot-flow | → ссылается на → | domains |
+| telegram-bot-flow | → ссылается на → | services (домены) |
 |---|---|---|
-| `use-case.Dependencies` (`use-case:<ctx>.<Operation>`) | M:N | `domains/<ctx>/use-cases/` |
-| `notification.trigger` (`event:<ctx>.<Event>`) | M:1 | `domains/<ctx>/events/` |
+| `use-case.Dependencies` (`use-case:<ctx>.<Operation>`) | M:N | `services/*/domains/<ctx>/use-cases/` |
+| `notification.trigger` (`event:<ctx>.<Event>`) | M:1 | `services/*/domains/<ctx>/events/` |
 
 Ветвление сценария — следствие исхода доменного use-case, который bot UC
 возвращает окну («адрес нужен, если выбрана доставка» — решает домен);
 окно лишь маршрутизирует исход bot UC.
+
+В сервисной топологии бот — сервис `type: bot` реестра `service.md`
+(оркестратор без бизнес-правил). Сервис-владелец контекста выводится из
+пути `services/*/domains/<ctx>/`; чтобы уведомление дошло, его
+событие-триггер должно публиковаться в брокер — строка `produces` в
+`## Messaging` паспорта сервиса-владельца (сверяет `/cross-audit`, угол
+`botflow-service`).
 
 ## Связь с кодом
 

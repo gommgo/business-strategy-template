@@ -41,9 +41,12 @@ truth; когда дело дошло до продукта, их читают �
 4. Продукты (опц.)  → /project-deep-dive <slug> (vision + surface-реестр + kind + capability/<surface>)
    ├─ /project-audit <slug>
    ├─ /interface-deep-dive <slug> [<surface>]  → /interface-audit <slug>
-   ├─ /domain-deep-dive <slug> <ctx> (опц., DDD)
+   ├─ /service-deep-dive <slug> (сервисная топология) → /service-audit <slug>
+   ├─ /domain-deep-dive <slug> <ctx> (DDD внутри сервиса)
    └─ /screen-deep-dive <slug> [<surface>]     → /screen-audit <slug>
-5. /cross-audit — сквозная семантика между слоями (рой)
+5. ИТ-периметр бизнеса → /infrastructure-deep-dive (сервера · рантаймы ·
+   общие ресурсы · размещение) → /infrastructure-audit
+6. /cross-audit — сквозная семантика между слоями (рой)
 6. готовый репо стратегии (с продуктами, если до них дошло)
 ```
 
@@ -130,12 +133,22 @@ truth; когда дело дошло до продукта, их читают �
 - **`/interface-deep-dive <slug> [<surface>]`** → **`/interface-audit <slug>`**
   — UX-слой по поверхности (who / stage / situation / zone / block /
   ux-substrate / data-items в `interface/<surface>/`).
-- **`/domain-deep-dive <slug> <ctx>`** — (опц.) DDD-артефакты бэкенда продукта
-  по bounded-context (surface-агностичны; внешние и межпроектные интеграции —
-  через конкретный клиент `domains/_shared/integrations/<slug>/` и потребление
-  функций в use-case, домен transport-agnostic). Завершается на
-  stable-артефакте; Go-код по ним разворачивает соседний `<org>/backend`, не
-  этот репо.
+- **`/service-deep-dive <slug>`** → **`/service-audit <slug>`** — сервисная
+  топология бэкенда: реестр сервисов (`service.md`), паспорта (Exposes /
+  Dependencies / Resources / Messaging), платформенные ресурсы
+  (`platform.md`), свод и решения разбиения (`architecture.md`); монолит =
+  один сервис.
+- **`/domain-deep-dive <slug> <ctx>`** — DDD-артефакты бэкенда продукта по
+  bounded-context, внутри сервиса-владельца (surface-агностичны; внешние и
+  межпроектные интеграции — через конкретный клиент
+  `services/_shared/integrations/<slug>/` и потребление функций в use-case,
+  домен transport-agnostic). Завершается на stable-артефакте; Go-код по ним
+  разворачивает соседний `<org>/backend`, не этот репо.
+- **`/infrastructure-deep-dive`** → **`/infrastructure-audit`** —
+  ИТ-периметр бизнеса (`docs/projects/infrastructure/`, один на все
+  проекты): учёт серверов, рантаймы (kubernetes/compose по окружениям),
+  общие платформенные ресурсы, размещение юнитов (`placement.md`). По нему
+  `<org>/infra` понимает, что билдить и где располагать.
 - **`/screen-deep-dive <slug> [<surface>]`** → **`/screen-audit <slug>`** —
   композиция и облик по поверхности (flow / screen / block / shell в
   `screens/<surface>/`) на инвентаре `@stit/ui`.
@@ -154,7 +167,7 @@ truth; когда дело дошло до продукта, их читают �
 
 В конце или после крупных изменений. Рой агентов проверяет семантику между
 слоями: business ↔ ajtbd ↔ swot ↔ hypothesis-map ↔ (по каждому проекту: project ↔
-interface ↔ domain ↔ screen, по каждой поверхности) ↔ межпроектные стыки
+interface ↔ services/domain ↔ screen, по каждой поверхности) ↔ межпроектные стыки
 (`project-map`). Не slug-валидация — смысловая проверка («пользователь
 без UX-покрытия», «сегмент без пользователя», «проблема бизнеса без единого
 трения-доказательства», «проблема, которую не закрывает ни один проект»,
@@ -174,8 +187,9 @@ interface ↔ domain ↔ screen, по каждой поверхности) ↔ �
 
 - **Артефакт не `stable`** → доведи через соответствующий deep-dive того же слоя.
 - **Подозрение на рассинхрон внутри слоя** → узкий аудит
-  (`/project-audit`, `/interface-audit`, `/screen-audit`, `/swot-audit`,
-  `/hypothesis-map-audit`, `/ajtbd-audit`).
+  (`/project-audit`, `/interface-audit`, `/screen-audit`, `/service-audit`,
+  `/infrastructure-audit`, `/swot-audit`, `/hypothesis-map-audit`,
+  `/ajtbd-audit`).
 - **Подозрение на разрыв между слоями** → `/cross-audit`.
 - **Заказчик ведёт сессию сам** → единый вход `/entrypoint-for-business`
   (бизнес-язык, эскалация «нужен аналитик», push в единую ветку `client`).

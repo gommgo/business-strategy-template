@@ -33,7 +33,7 @@ per-surface артефакт (`capability/<surface>.md`, `interface/<surface>/..
 бота (`telegram-bot-flow/<surface>/...`).
 Кросс-поверхностные kind продукта (`vision`, `user`, `integration`,
 `boundary`, `constraint`, `market`) лежат в корне папки проекта. Домены
-(`domains/<ctx>/`) **surface-агностичны** — партиционируются по
+(`services/<svc>/domains/<ctx>/`) **surface-агностичны** — живут внутри сервиса-владельца (реестр `services/service.md`) и партиционируются по
 bounded-context, не по поверхности.
 
 Поэтому lens, чей source ИЛИ destination — per-surface артефакт,
@@ -49,7 +49,9 @@ per-surface) целями раскрывается в **пары** `проект
   `currentmetric-metric`, `segmentproblem-bizproblem`, `segment-subject`,
   `solution-business`, `business-segment`, `prospective-consistency`,
   `provenance-upstream`, `stakeholder-subject`, `stakeholder-factor`,
-  `stakeholder-strategy`, `projectmap-reciprocity`.
+  `stakeholder-strategy`, `projectmap-reciprocity`, `service-placement`
+  (сервисы всех проектов ↔ ИТ-периметр), `platform-shared` (shared-нужды
+  проектов ↔ общие ресурсы бизнеса).
 - **Верхнеуровневый M:N, прогон один раз над всеми проектами**:
   `addresses-problem-bizproblem`.
 - **По каждому проекту** (пары `проект × lens`; цели — корневые kind
@@ -59,6 +61,7 @@ per-surface) целями раскрывается в **пары** `проект
     `subject-user`.
   - ajtbd ↔ продукт: `segment-user`, `job-vision`, `segmentproblem-vision`.
   - продукт ↔ соседние проекты (межпроектный): `integration-crossproject`.
+  - сервисы ↔ продукт (сервисы кросс-поверхностны): `service-capability`.
 - **По каждому проекту × поверхность** (тройки `проект × поверхность × lens`;
   source ИЛИ destination — per-surface артефакт `capability/<surface>.md`,
   `interface/<surface>/*`, `screens/<surface>/*`):
@@ -70,6 +73,8 @@ per-surface) целями раскрывается в **пары** `проект
     `surface-capability`.
   - продукт/интерфейс ↔ диалоги bot-поверхности: `surface-botflow`.
   - диалоги bot-поверхности ↔ домены проекта: `botflow-domain`.
+  - диалоги bot-поверхности ↔ сервисы проекта: `botflow-service`.
+  - поверхность ↔ сервисы проекта: `surface-service`.
   - возможности поверхности ↔ домены проекта: `capability-domain`.
   - сквозные рёбра интерфейса поверхности: `situation-job`,
     `situation-hypothesis`.
@@ -598,17 +603,17 @@ capability/<surface>.md и interface/<surface>/situation.md. Capability —
 ## capability-domain
 
 **Source:** `docs/projects/<slug>/capability/<surface>.md`.
-**Destination:** `docs/projects/<slug>/domains/` (если есть;
+**Destination:** `docs/projects/<slug>/services/*/domains/` (если есть;
 surface-агностичны).
 **Скоуп:** по проекту × поверхность.
-**Применим если:** `docs/projects/<slug>/domains/` существует; у проекта
+**Применим если:** у проекта есть `services/` с доменами; у проекта
 есть поверхность `<surface>` с файлом возможностей.
 
 **Что искать:**
 
-- `error`: capability `stable` этой поверхности, под которую в `domains/`
+- `error`: capability `stable` этой поверхности, под которую в доменах сервисов
   проекта нет бизнес-домена / агрегата. Capability не существует в коде.
-- `warning`: бизнес-домен в `domains/` проекта, у которого не находится
+- `warning`: бизнес-домен в `services/*/domains/` проекта, у которого не находится
   capability-якорь ни на одной поверхности. Технический домен (auth,
   logging) — норма; бизнес-домен (referrals, billing) без якоря — пробел.
   (Поскольку домены surface-агностичны, обратную сторону — домен без
@@ -620,11 +625,11 @@ surface-агностичны).
 
 ```
 Source — capability/<surface>.md (умения поверхности <surface> проекта
-<slug>); destination — docs/projects/<slug>/domains/ (бизнес-код,
+<slug>); destination — docs/projects/<slug>/services/*/domains/ (бизнес-код,
 ОБЩИЙ для всех поверхностей: домены партиционируются по bounded-context,
 не по surface).
 
-Для каждой capability этой поверхности: есть ли в domains/ проекта
+Для каждой capability этой поверхности: есть ли в доменах сервисов проекта (services/*/domains/)
 агрегат или use-case, реализующий бизнес-логику? Сопоставь по семантике,
 не имени файла. Одна доменная модель обслуживает все поверхности — домен
 может нести capability и этой поверхности, и других.
@@ -756,10 +761,10 @@ warning; command.md без /start — warning; рассинхрон window.ux-su
 бота фич (`features/<feature>/use-case.md`, секция `### Dependencies` с
 рефами `use-case:<ctx>.<Operation>` — с точкой); реестр `notification.md`
 (`trigger` вида `event:<ctx>.<Event>`, плейсхолдеры `content`).
-**Destination:** `docs/projects/<slug>/domains/` (если есть):
+**Destination:** `docs/projects/<slug>/services/*/domains/` (если есть):
 `<ctx>/use-cases/`, `<ctx>/events/` (секция `Payload`).
 **Скоуп:** по проекту × поверхность.
-**Применим если:** у проекта есть `domains/` и папка
+**Применим если:** у проекта есть `services/` (с доменами) и папка
 `telegram-bot-flow/<surface>/`.
 
 Бот — фронтенд: мост к домену поднят на уровень **use-case бота**
@@ -773,10 +778,10 @@ warning; command.md без /start — warning; рассинхрон window.ux-su
 
 - `error`: реф `use-case:<ctx>.<Operation>` в секции `### Dependencies`
   use-case'а бота (`features/<feature>/use-case.md`) на доменный use-case,
-  которого нет в `domains/<ctx>/use-cases/` — оркестратор бота опирается на
+  которого нет в `services/*/domains/<ctx>/use-cases/` — оркестратор бота опирается на
   несуществующий домен.
 - `error`: `notification.trigger` со ссылкой `event:<ctx>.<Event>` на
-  событие, которого нет в `domains/<ctx>/events/`.
+  событие, которого нет в `services/*/domains/<ctx>/events/`.
 - `warning`: плейсхолдер `{…}` в `notification.content`, отсутствующий в
   `Payload` события-триггера — текст просит данных, которых событие не несёт.
 - `warning`: бизнес-правило («если сумма > 1000») в условии перехода `when`
@@ -796,7 +801,7 @@ Source — use-case'ы бота фич (features/<feature>/use-case.md) и
 notification.md слоя telegram-bot-flow/<surface>/ проекта <slug>: собери
 рефы use-case:<ctx>.<Operation> (с точкой — доменные) из секций
 ### Dependencies всех use-case.md фич + рефы event:<ctx>.<Event>
-(notification.trigger). Destination — domains/ проекта: use-cases и events
+(notification.trigger). Destination — services/*/domains/ проекта: use-cases и events
 соответствующих контекстов. widget.action → bot UC и getter.source → bot UC
 — within-layer (их сверяет telegram-bot-flow-audit), ЗДЕСЬ не проверяй.
 
@@ -814,11 +819,11 @@ warning. Обратная сторона: события домена, по см
 
 **Source:** `docs/projects/<slug>/integration.md` (`## Провайдеры`, чья
 колонка `surface` содержит `<surface>`; их `## Функции`).
-**Destination:** `docs/projects/<slug>/domains/` (если есть;
+**Destination:** `docs/projects/<slug>/services/*/domains/` (если есть;
 surface-агностичны): use-case `## Dependencies` колонки `integration` +
 `functions`; клиенты `_shared/integrations/<integration>/` (`## Functions`).
 **Скоуп:** по проекту × поверхность.
-**Применим если:** `docs/projects/<slug>/domains/` существует; у проекта
+**Применим если:** у проекта есть `services/` с доменами; у проекта
 есть поверхность `<surface>`.
 
 Сверяет **цепочку функции**: бизнес-каталог (`## Функции` integration.md) ↔
@@ -828,7 +833,7 @@ surface-агностичны): use-case `## Dependencies` колонки `integr
 **Что искать:**
 
 - `error`: integration `stable`, обслуживающая `<surface>`, под которую в
-  `domains/` нет клиента `_shared/integrations/<integration>/` и ни одного
+  `services/` нет клиента `_shared/integrations/<integration>/` и ни одного
   use-case с этим `integration` в `## Dependencies`. Интеграция объявлена, но
   в коде её нет.
 - `error`: функция `## Функции` с `direction: out`, у которой **нет пары** в
@@ -848,7 +853,7 @@ surface-агностичны): use-case `## Dependencies` колонки `integr
 
 ```
 Source — integration.md проекта <slug> (## Провайдеры + ## Функции), СКОУПЬ
-к провайдерам, чья `surface` содержит <surface>. Destination — domains/:
+к провайдерам, чья `surface` содержит <surface>. Destination — services/ (клиент _shared/ + домены):
 клиенты _shared/integrations/<integration>/ (## Functions) и use-case
 `## Dependencies` (колонки `integration` + `functions`).
 
@@ -1268,8 +1273,8 @@ hint. Связь семантическая (user сопоставляй по с
 `target: sibling-project` + их `## Функции`).
 **Destination:** `docs/projects/project-map.md` (рёбра) +
 `docs/projects/<sibling>/` (обратная сторона: его `integration.md` +
-обслуживающие `domains/<ctx>/use-cases/*`) +
-`docs/projects/<slug>/domains/` (наш клиент `_shared/integrations/<slug>/` +
+обслуживающие `services/*/domains/<ctx>/use-cases/*`) +
+`docs/projects/<slug>/services/*/domains/` (наш клиент `_shared/integrations/<slug>/` +
 use-case `functions`).
 **Скоуп:** по проекту (пара `проект × lens`; межпроектный).
 **Применим если:** у проекта есть хотя бы одна `integration` с
@@ -1297,7 +1302,7 @@ use-case) ↔ **обслуживающая сторона у соседа** (е�
   проект при `duplex`/входящем направлении ребра (асимметрия стыка).
 - `warning`: `integration` с `target: sibling-project` без клиента
   `_shared/` и без use-case с её функциями (стык без воплощения, если есть
-  `domains/`).
+  `services/`).
 - `warning`: техническая деталь (сигнатура функции, endpoint, имя use-case)
   просочилась в `project-map.md` — карта должна быть на бизнес-языке.
 
@@ -1312,7 +1317,7 @@ Actor) или его исходящая функция.
 
 Прочитай integration.md проекта <slug> (фильтр target: sibling-project +
 функции), docs/projects/project-map.md, перечень каталогов docs/projects/,
-integration.md соседа <X> и его domains/use-cases (если есть), domains/
+integration.md соседа <X> и его services/*/domains/use-cases (если есть), services/
 проекта <slug> (клиент _shared/ + functions в use-case).
 
 Найди рассинхрон сторон:
@@ -1410,6 +1415,165 @@ surface-локален: один датум на разных поверхнос
 <slug>, surface не указывай (угол охватывает все поверхности сразу).
 ```
 
+## surface-service
+
+**Source:** `docs/projects/<slug>/surface.md` (строка `<surface>`).
+**Destination:** `docs/projects/<slug>/services/service.md` (колонка
+`surfaces`) + паспорта `services/<svc>/README.md` (`Exposes`).
+**Скоуп:** по проекту × поверхность.
+**Применим если:** у проекта есть `services/service.md`.
+
+**Что искать:**
+
+- `error`: поверхность реестра, которую не обслуживает ни один сервис
+  (нет ни в одной колонке `surfaces`, и никакой `Exposes` не несёт
+  `surface:<slug>`) — фронт без бэкенда.
+- `error`: bot-поверхность (`type: bot`), у которой нет ровно одного
+  сервиса `type: bot` (ноль или два).
+- `warning`: сервис экспонирует поверхность, которой нет в реестре, или
+  обслуживает поверхность, по смыслу не свою (admin-сервис в колонке
+  `surfaces` клиентского web).
+
+**Промпт-добавка:**
+
+```
+Source — строка поверхности <surface> реестра surface.md проекта <slug>;
+destination — services/service.md (колонка surfaces) и Exposes паспортов.
+Поверхность реальна, только если её кто-то обслуживает: найди сервисы с
+<surface> в surfaces и функции Exposes с audience surface:<surface>.
+Сопоставь смыслом: тот ли это сервис, который должен нести эту поверхность?
+В finding указывай project и surface.
+```
+
+## service-capability
+
+**Source:** `docs/projects/<slug>/services/service.md` + паспорта
+(`Owned Contexts`, `Exposes`).
+**Destination:** `docs/projects/<slug>/capability/*.md` (все поверхности).
+**Скоуп:** по проекту (один агент — сервисы кросс-поверхностны).
+**Применим если:** у проекта есть `services/`.
+
+**Что искать:**
+
+- `warning`: бизнес-сервис (`type: api`/`worker`), чьи контексты не несут
+  ни одной capability ни на одной поверхности — сервис без продуктового
+  якоря («сервис ради сервиса»). Технические `gateway`/`edge`/`bot` —
+  норма, пометить без finding.
+- `hint`: capability `stable`, чьи домены живут в сервисе, который не
+  обслуживает поверхность этой capability ни напрямую (`surfaces`), ни
+  транзитом (через `Exposes` к edge/bot) — путь ценности до пользователя
+  неочевиден.
+
+**Промпт-добавка:**
+
+```
+Source — реестр сервисов и паспорта services/ проекта <slug>; destination —
+capability/*.md всех поверхностей. Для каждого api/worker-сервиса: какие
+capability реализуют его контексты (семантикой, не grep)? Сервис, чьи
+домены не держат ни одну capability, — кандидат на лишнего. В finding
+указывай project и сервис.
+```
+
+## botflow-service
+
+**Source:** `docs/projects/<slug>/telegram-bot-flow/<surface>/features/*/use-case.md`
+(рефы `use-case:<ctx>.<Operation>`) + `notification.md`
+(`trigger: event:<ctx>.<Event>`).
+**Destination:** `docs/projects/<slug>/services/service.md` + паспорта
+сервисов-владельцев контекстов (`Exposes`, `Messaging`).
+**Скоуп:** по проекту × поверхность (`type: bot`).
+**Применим если:** у проекта есть `services/` и папка
+`telegram-bot-flow/<surface>/`.
+
+**Что искать:**
+
+- `error`: контекст `<ctx>` из зависимостей бота не имеет сервиса-владельца
+  (нет папки `services/*/domains/<ctx>/`).
+- `error`: уведомление с `trigger: event:<ctx>.<Event>`, событие которого
+  сервис-владелец не публикует в брокер (нет строки `produces` с этим
+  `event` в его `Messaging`) — бот сигнал не получит.
+- `warning`: в реестре сервисов нет сервиса `type: bot` при наличии
+  bot-поверхности с диалогами (оркестратору бота негде жить).
+- `hint`: операции, которые бот дёргает (`use-case:<ctx>.<Op>`), у
+  сервиса-владельца не видны ни в `Exposes`, ни смыслом в `Owned
+  Contexts` — стоит проверить достижимость.
+
+**Промпт-добавка:**
+
+```
+Source — рефы use-case:<ctx>.<Operation> и event:<ctx>.<Event> слоя
+telegram-bot-flow/<surface>/ проекта <slug>; destination — реестр
+service.md и паспорта сервисов-владельцев этих контекстов (владелец =
+сервис с папкой services/<svc>/domains/<ctx>/). Сверь: владелец существует;
+событие-триггер каждого уведомления публикуется владельцем в Messaging
+(produces, тот же event); бот заведён сервисом type: bot. Содержание
+диалогов и зеркала окон НЕ проверяй (это telegram-bot-flow-audit и
+botflow-domain). В finding указывай project и surface.
+```
+
+## service-placement
+
+**Source:** реестры `docs/projects/*/services/service.md` + проектные
+`platform.md` (строки `provided-by: own`).
+**Destination:** `docs/projects/infrastructure/placement.md` +
+`runtime.md` + `server.md`.
+**Скоуп:** верхнеуровневый, прогон один раз (по всем проектам).
+**Применим если:** существует `docs/projects/infrastructure/` и хотя бы у
+одного проекта есть `services/`.
+
+**Что искать:**
+
+- `error`: сервис проекта без строки `placement` хотя бы в одном
+  prod-рантайме (`runtime.environment: prod`).
+- `error`: проектный платформенный ресурс `provided-by: own` без
+  размещения.
+- `warning`: размещение, противоречащее смыслу: prod-сервис на рантайме
+  `environment: dev`; юнит на сервере, чьё `purpose` явно про другое;
+  ёмкость сервера очевидно не бьётся с ролью юнита.
+- `hint`: рантайм, в который ничего не размещено; сервер без рантаймов.
+
+**Промпт-добавка:**
+
+```
+Source — реестры service.md и platform.md (own) всех проектов; destination
+— infrastructure/{placement,runtime,server}.md. Это сверка ПОЛНОТЫ и
+ОСМЫСЛЕННОСТИ размещения: каждый сервис и own-ресурс живёт где-то в prod?
+размещение не противоречит назначению/ёмкости сервера? Битые рефы
+placement (unit/runtime/servers) НЕ ищи — это /infrastructure-audit;
+здесь — семантика.
+```
+
+## platform-shared
+
+**Source:** `docs/projects/*/services/platform.md` (строки
+`provided-by: shared:<slug>`).
+**Destination:** `docs/projects/infrastructure/shared-platform.md` +
+`placement.md`.
+**Скоуп:** верхнеуровневый, прогон один раз (по всем проектам).
+**Применим если:** существует `docs/projects/infrastructure/`.
+
+**Что искать:**
+
+- `error`: потребность проекта `shared:<slug>` без записи в
+  `shared-platform.md` (проект ждёт общий ресурс, которого у бизнеса нет).
+- `error`: технологическое противоречие: проектная строка ждёт одну
+  технологию (например `kafka`), а общий ресурс несёт другую (`nats`).
+- `warning`: общий ресурс, который не потребляет ни один проект (сирота),
+  или не размещён в `placement.md`.
+- `hint`: два проекта держат `own`-ресурсы одной технологии и типа —
+  напрашивается общий ресурс (осознанная изоляция допустима — отметить,
+  не настаивать).
+
+**Промпт-добавка:**
+
+```
+Source — строки provided-by: shared:<slug> в platform.md всех проектов;
+destination — infrastructure/shared-platform.md и placement.md. Сверь
+цепочку «потребность проекта → общий ресурс бизнеса → размещение» в обе
+стороны: каждая потребность закрыта, каждый общий ресурс кому-то нужен и
+где-то живёт, технологии совпадают.
+```
+
 ## Порядок lens-ов
 
 Все агенты спавнятся в одном message-блоке параллельно — порядок ниже
@@ -1442,6 +1606,12 @@ surface-локален: один датум на разных поверхнос
 `docs/projects/`, кроме `_template`; цели — корневые kind продукта
 `vision`/`user`/`integration`):
 
+13a. `service-placement` (сервисы и own-ресурсы всех проектов ↔
+    `infrastructure/{placement,runtime,server}.md`; если есть и services, и
+    периметр)
+13b. `platform-shared` (`provided-by: shared:` проектов ↔
+    `infrastructure/shared-platform.md`; если есть периметр)
+
 14. `goal-vision` (проблема → продукт; скоуп к проблемам проекта)
 15. `subject-user` (проблема → продукт; скоуп к проблемам проекта)
 16. `segment-user` (ajtbd → продукт)
@@ -1450,6 +1620,8 @@ surface-локален: один датум на разных поверхнос
 19. `integration-crossproject` (межпроектный: integration ↔ project-map ↔
     domains-порт ↔ обратная сторона соседа; если у проекта есть стыки
     `target: sibling-project` или ребро в project-map)
+20. `service-capability` (сервисы проекта ↔ его capability; если у проекта
+    есть `services/`)
 
 **По каждому проекту, тройки `проект × поверхность × lens`** (для каждого
 `<slug>` и каждой поверхности `<surface>` из его `surface.md`; source ИЛИ
@@ -1469,14 +1641,14 @@ destination — per-surface артефакт):
     situation.hypotheses)
 30. `market-capability` (рынок ↔ возможности поверхности; часто hints)
 31. `constraint-surface` (ограничение ↔ поверхность/её интеграции)
-32. `capability-domain` (если у проекта есть `domains/`; возможности
+32. `capability-domain` (если у проекта есть `services/` с доменами; возможности
     поверхности ↔ домены)
-33. `integration-domain` (если у проекта есть `domains/`; интеграции
+33. `integration-domain` (если у проекта есть `services/`; интеграции
     поверхности ↔ домены-порты)
 34. `surface-screen` (если у проекта есть `screens/<surface>/`)
 35. `surface-botflow` (если поверхность `type: bot` и есть
     `telegram-bot-flow/<surface>/` с фичами `features/<feature>/`)
-36. `botflow-domain` (если у проекта есть `domains/` и
+36. `botflow-domain` (если у проекта есть `services/` с доменами и
     `telegram-bot-flow/<surface>/`; зависимости use-case'ов бота фич +
     триггеры уведомлений ↔ домены)
 

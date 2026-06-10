@@ -75,7 +75,9 @@ state оркестратора (`../entrypoint/state/projects/<project-slug>/pro
 3. Зайти в фазу `discovery` на свежем `vision.md` нового проекта.
 
 Соседние слои (`<new-slug>/interface/`, `<new-slug>/screens/`,
-`<new-slug>/domains/`) заводят свои скилы по мере надобности — этот
+`<new-slug>/services/` — топология сервисов через `/service-deep-dive`,
+домены внутри сервисов через `/domain-deep-dive <slug> <ctx>`) заводят
+свои скилы по мере надобности — этот
 скилл их не создаёт.
 
 ## Вышестоящий вход (реестр проблем, SWOT, Карта гипотез)
@@ -371,7 +373,7 @@ merge / fetch, обычная git-механика.
   `target: sibling-project` (поле `sibling-project`); `функция → провайдер`:
   каждая строка `## Функции` несёт `integration` существующего провайдера;
 - `функция → клиент/потребление`: `slug` функции встречается в клиенте
-  `domains/_shared/integrations/<integration>/` и в `functions` use-case'а
+  `services/_shared/integrations/<integration>/` и в `functions` use-case'а
   (семантически, ловит `/cross-audit`);
 - `constraint` обычно привязан к surface или integration в `description`,
   не отдельным полем.
@@ -475,7 +477,7 @@ slug (например, capability упомянула user, которой ещ�
    - «Прогнать `/project-audit <project-slug>`?» (внутрипроектная
      консистентность);
    - «Прогнать `/cross-audit`?» (сквозная проверка продукта с
-     `<slug>/interface/<surface>`/`<slug>/domains`/`<slug>/screens/<surface>`,
+     `<slug>/interface/<surface>`/`<slug>/services`/`<slug>/screens/<surface>`,
      привязкой `addresses-problem` и межпроектными стыками `project-map.md`);
    - «Передать клиенту через `/entrypoint-for-business` блок
      <X>?» (если фаза подходит под бизнес-домашку).

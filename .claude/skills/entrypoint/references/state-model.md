@@ -35,7 +35,8 @@ Forward-only: закрытое **удаляется**, история живёт
     ├── project/             ← project-deep-dive    (vision.md, <kind>/<slug>.md для surface · user · integration · boundary · constraint · market)
     │   └── capability/<surface>/<slug>.md          возможности по поверхности
     ├── interface/<surface>/<kind>/<slug>.md   ← interface-deep-dive
-    ├── domains/<context>/...                  ← domain-deep-dive (по bounded-context, surface-агностичны)
+    ├── services/<kind>/<slug>.md              ← service-deep-dive (kind: service · platform · architecture)
+    ├── domains/<context>/...                  ← domain-deep-dive (по bounded-context; ключ — контекст, не сервис)
     └── screens/<surface>/<kind>/<slug>.md     ← screen-deep-dive
 ```
 
@@ -45,7 +46,7 @@ Forward-only: закрытое **удаляется**, история живёт
 (`interface/<surface>/`) и экраны (`screens/<surface>/`) разнесены по
 поверхности. `vision` и кросс-поверхностные kind (`surface`-реестр · `user`
 · `integration` · `boundary` · `constraint` · `market`) лежат плоско в
-`project/`. Домены (`domains/<context>/`) surface-агностичны — делятся по
+`project/`. Домены (ветка `domains/<context>/`) surface-агностичны — делятся по
 bounded-context. Межпроектные стыки (`projects/project-map.md`) — авторская
 сторона у `integration` инициатора (`target: sibling-project`); отдельной
 state-ветки `project-map` не держим — заметки идут в ветку `project/`

@@ -1,6 +1,6 @@
 ---
 name: entrypoint
-description: "Единая точка входа аналитика во всю систему проектирования — оркестратор над всеми слоями (`docs/business/` профиль + реестр проблем + стейкхолдеры, `docs/ajtbd/` сегменты и граф работ, `docs/swot/`, `docs/hypothesis-map/`, `docs/projects/<slug>/` продукт · интерфейс · домены · экраны) и над всеми аудитами. Принимает сырьё любого объёма (3-часовой транскрипт, разрозненные заметки, ссылки, файлы, сигнал из жизни), сам сегментирует его по темам, классифицирует каждый чанк к слою/kind, предлагает маршрут и по подтверждению (AskUserQuestion) делегирует скиллу-исполнителю — единственный скилл, которому разрешено активировать другие. Ведёт единый state (срез по слоям/проектам + открытые нити-маршруты), read-only видит клиентский оркестратор. Пять режимов-намерений: наполнить · актуализировать · рефакторить · чистить · аудитить. Использовать всегда, когда аналитик хочет войти «не думая, в какой слой»: разобрать большое сырьё, обновить картину под новые данные, провести переименование/перенос/слияние с каскадом, удалить сущность, прогнать нужный аудит-рой, или просто понять «где мы во всём воркфлоу». Существующие `*-deep-dive`/`*-audit` остаются исполнителями (прямой вызов из чата допустим) — этот скилл их единый фасад."
+description: "Единая точка входа аналитика во всю систему проектирования — оркестратор над всеми слоями (`docs/business/` профиль + реестр проблем + стейкхолдеры, `docs/ajtbd/` сегменты и граф работ, `docs/swot/`, `docs/hypothesis-map/`, `docs/projects/<slug>/` продукт · интерфейс · сервисы и домены · экраны, `docs/projects/infrastructure/` ИТ-периметр бизнеса) и над всеми аудитами. Принимает сырьё любого объёма (3-часовой транскрипт, разрозненные заметки, ссылки, файлы, сигнал из жизни), сам сегментирует его по темам, классифицирует каждый чанк к слою/kind, предлагает маршрут и по подтверждению (AskUserQuestion) делегирует скиллу-исполнителю — единственный скилл, которому разрешено активировать другие. Ведёт единый state (срез по слоям/проектам + открытые нити-маршруты), read-only видит клиентский оркестратор. Пять режимов-намерений: наполнить · актуализировать · рефакторить · чистить · аудитить. Использовать всегда, когда аналитик хочет войти «не думая, в какой слой»: разобрать большое сырьё, обновить картину под новые данные, провести переименование/перенос/слияние с каскадом, удалить сущность, прогнать нужный аудит-рой, или просто понять «где мы во всём воркфлоу». Существующие `*-deep-dive`/`*-audit` остаются исполнителями (прямой вызов из чата допустим) — этот скилл их единый фасад."
 ---
 
 # entrypoint
@@ -21,11 +21,13 @@ description: "Единая точка входа аналитика во всю 
 | `docs/hypothesis-map/` (Карта гипотез) | `/hypothesis-map-deep-dive` |
 | `docs/projects/<slug>/` (продукт: vision + хребет `surface` + `capability/<surface>`) | `/project-deep-dive <slug>` |
 | `docs/projects/<slug>/interface/<surface>/` | `/interface-deep-dive <slug> [<surface>]` |
-| `docs/projects/<slug>/domains/<ctx>/` (по bounded-context) | `/domain-deep-dive <slug> <ctx>` |
+| `docs/projects/<slug>/services/` (сервисная топология) | `/service-deep-dive <slug>` |
+| `docs/projects/<slug>/services/<svc>/domains/<ctx>/` (по bounded-context) | `/domain-deep-dive <slug> <ctx>` |
+| `docs/projects/infrastructure/` (ИТ-периметр бизнеса) | `/infrastructure-deep-dive` |
 | `docs/projects/<slug>/screens/<surface>/` | `/screen-deep-dive <slug> [<surface>]` |
 | `docs/projects/<slug>/telegram-bot-flow/<surface>/` (bot-поверхности) | `/telegram-bot-flow-deep-dive <slug> [<surface>]` |
 | `docs/projects/project-map.md` (межпроектные стыки) | `/project-deep-dive <slug>` (авторская сторона — `integration` инициатора) |
-| аудиты | `/swot-audit` · `/hypothesis-map-audit` · `/ajtbd-audit` · `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>` · `/telegram-bot-flow-audit <slug>` · `/cross-audit` |
+| аудиты | `/swot-audit` · `/hypothesis-map-audit` · `/ajtbd-audit` · `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>` · `/telegram-bot-flow-audit <slug>` · `/service-audit <slug>` · `/infrastructure-audit` · `/cross-audit` |
 
 Поверхность (`surface`) — ось продукта: реестр-хребет `surface.md`
 партиционирует возможности (`capability/<surface>`), интерфейс
@@ -174,7 +176,9 @@ state (`references/state-model.md`) + быстрый проход по `docs/`.
 2. **Активирует исполнителя** с нужными аргументами (для проектных
    слоёв — первым аргументом `<project-slug>`; для `interface`/`screens` —
    вторым аргументом `[<surface>]`, без него исполнитель сам предложит
-   пикер поверхностей по `surface.name`; для `domains` — `<ctx>`; сырьё
+   пикер поверхностей по `surface.name`; для `services` — без доп.
+   аргументов или `<service-slug>`; для `domains` — `<ctx>` (сервис
+   выводится); для `infrastructure` — без аргументов; сырьё
    передаёт чанком).
 3. Исполнитель ведёт свой слой по своим фазам и пишет per-kind заметку в
    **свою ветку** общего дерева (`state/<слой>/...`) — оркестратор её не
@@ -201,7 +205,7 @@ anti-patterns, draft→stable, каскады внутри слоя) — у ис
 └── projects/<slug>/                                ← проектные исполнители
     ├── project/ (vision + плоские kind + capability/<surface>/)
     ├── interface/<surface>/ · screens/<surface>/   ← по поверхности
-    └── domains/<ctx>/                              ← по bounded-context
+    └── services/<svc>/domains/<ctx>/               ← по bounded-context, внутри сервиса
 ```
 
 - Оркестратор владеет `index.md` (карта «где мы») + `threads/` и **не
@@ -257,7 +261,8 @@ anti-patterns, draft→stable, каскады внутри слоя) — у ис
    следующий слой / прогнать нужный аудит (`/swot-audit`,
    `/hypothesis-map-audit`, `/ajtbd-audit`, `/project-audit <slug>`,
    `/interface-audit <slug>`, `/screen-audit <slug>`,
-   `/telegram-bot-flow-audit <slug>`, `/cross-audit`).
+   `/telegram-bot-flow-audit <slug>`, `/service-audit <slug>`,
+   `/infrastructure-audit`, `/cross-audit`).
 
 ## Запреты
 

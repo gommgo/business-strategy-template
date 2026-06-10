@@ -19,7 +19,9 @@
 | `docs/projects/<slug>/` (vision + хребет + кросс-поверхностные kind) | `vision` · `surface` · `user` · `integration` · `boundary` · `constraint` · `market` | `/project-deep-dive <slug>` | `/project-audit <slug>` |
 | `docs/projects/<slug>/capability/<surface>.md` (возможности по поверхности) | `capability` (по файлу на поверхность) | `/project-deep-dive <slug>` | `/project-audit <slug>` |
 | `docs/projects/<slug>/interface/<surface>/` | `who` · `stage` · `situation` · `zone` · `block` · `ux-substrate` · `data-items` | `/interface-deep-dive <slug> [<surface>]` | `/interface-audit <slug>` |
-| `docs/projects/<slug>/domains/<ctx>/` (по bounded-context, surface-агностичны) | агрегаты/события/use-case/… | `/domain-deep-dive <slug> <ctx>` | `/cross-audit` |
+| `docs/projects/<slug>/services/` (топология: реестр сервисов + паспорта + платформа + architecture) | сервисы/паспорта/брокер/ресурсы | `/service-deep-dive <slug>` | `/service-audit <slug>` + `/cross-audit` |
+| `docs/projects/<slug>/services/<svc>/domains/<ctx>/` (по bounded-context, внутри сервиса-владельца, surface-агностичны) | агрегаты/события/use-case/… | `/domain-deep-dive <slug> <ctx>` | `/service-audit <slug>` + `/cross-audit` |
+| `docs/projects/infrastructure/` (ИТ-периметр бизнеса: сервера · рантаймы · общие ресурсы · размещение) | server/runtime/shared-platform/placement | `/infrastructure-deep-dive` | `/infrastructure-audit` + `/cross-audit` |
 | `docs/projects/<slug>/screens/<surface>/` | `flow` · `screen` · `block` · `shell` | `/screen-deep-dive <slug> [<surface>]` | `/screen-audit <slug>` |
 | `docs/projects/<slug>/telegram-bot-flow/<surface>/` (bot-поверхности) | фичи `features/<feature>/` (`dialog` · `window` · `use-case` бота) + сквозные `command` · `notification` | `/telegram-bot-flow-deep-dive <slug> [<surface>]` | `/telegram-bot-flow-audit <slug>` |
 | `docs/projects/project-map.md` (межпроектные стыки) | `project-map` (singleton-граф рёбер) | `/project-deep-dive <slug>` (авторская сторона ребра — `integration` инициатора) | `/cross-audit` |
@@ -34,7 +36,7 @@
 (`telegram-bot-flow/<surface>/` при `type: bot`). Скилы
 `interface`/`screen`/`telegram-bot-flow` берут поверхность
 **вторым аргументом** `[<surface>]`; без него — пикер поверхностей по
-`surface.name` (после пикера проекта). Домены (`domains/<ctx>/`) —
+`surface.name` (после пикера проекта). Домены (`services/<svc>/domains/<ctx>/`) —
 surface-агностичны, делятся по bounded-context. Межпроектные стыки сводит
 `docs/projects/project-map.md` — авторская сторона каждого ребра живёт в
 `integration` проекта-инициатора (`target: sibling-project`).
@@ -69,7 +71,9 @@ surface-агностичны, делятся по bounded-context. Межпро�
 | «как пользователь взаимодействует, ситуации, зоны, блоки» (на какой поверхности?) | `projects/<slug>/interface/<surface>` / `who` · `situation` · `zone` · `block` · … |
 | «как это выглядит, экраны, композиция» (на какой поверхности?) | `projects/<slug>/screens/<surface>` / `flow` · `screen` · `block` · `shell` |
 | «как бот ведёт диалог: окна, кнопки, команды, уведомления, оркестрация действий» (какая bot-поверхность?) | `projects/<slug>/telegram-bot-flow/<surface>` / фичи `features/<feature>/` (`dialog` · `window` · `use-case` бота) + `command` · `notification` |
-| «бизнес-код бэкенда, агрегаты, инварианты» (какой bounded-context?) | `projects/<slug>/domains/<ctx>` |
+| «бизнес-код бэкенда, агрегаты, инварианты» (какой bounded-context?) | `projects/<slug>/services/<svc>/domains/<ctx>` |
+| «архитектура приложения: из каких сервисов состоит, монолит/микросервисы, брокер/очередь, gateway, где какая БД, кто продюсер/консьюмер событий» | `projects/<slug>/services` |
+| «сервера, хостинг, кубер vs compose, где будет жить сервис, общий брокер/traefik на все проекты, учёт VPS» | `projects/infrastructure` |
 
 Граничные пары (снимает именование, не путать):
 

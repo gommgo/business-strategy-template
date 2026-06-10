@@ -1,6 +1,6 @@
 ---
 name: project-audit
-description: "Узкий аудит консистентности продуктового слоя одного проекта в `docs/projects/<project-slug>/` (vision + реестр-хребет surface + плоские kind user/integration/boundary/constraint/market + папка capability/<surface>.md по файлу на поверхность) — невалидные enum, дубликаты slug, пустые обязательные слоты в stable-записях, невалидные status, рассинхрон stable со state-blocker'ами, vision без addresses-problem, структурный разрыв хребта (файл capability/<surface>.md без поверхности в реестре, поверхность реестра без файла возможностей, integration.surface на несуществующую поверхность, integration.sibling-project на несуществующий проект), семантические подозрения внутри проекта (capability без user, surface без user, boundary с backlog-обоснованием, constraint без source, market без url/sources). Принимает `<project-slug>` первым аргументом; без него — пикер по папкам проектов. Сквозную проверку с interface/domain/screen-слоями и привязку к проблемам делает `/cross-audit`, не этот скилл. Не правит артефакты, только отчёт; деструктивные правки — через `/project-deep-dive`. Использовать перед коммитом артефактов, когда `/project-deep-dive` предлагает прогон в конце сессии, перед `/cross-audit`, или когда аналитик подозревает рассогласование внутри продуктового слоя проекта."
+description: "Узкий аудит консистентности продуктового слоя одного проекта в `docs/projects/<project-slug>/` (vision + реестр-хребет surface + плоские kind user/integration/boundary/constraint/market + папка capability/<surface>.md по файлу на поверхность) — невалидные enum, дубликаты slug, пустые обязательные слоты в stable-записях, невалидные status, рассинхрон stable со state-blocker'ами, vision без addresses-problem, структурный разрыв хребта (файл capability/<surface>.md без поверхности в реестре, поверхность реестра без файла возможностей, integration.surface на несуществующую поверхность, integration.sibling-project на несуществующий проект), семантические подозрения внутри проекта (capability без user, surface без user, boundary с backlog-обоснованием, constraint без source, market без url/sources). Принимает `<project-slug>` первым аргументом; без него — пикер по папкам проектов. Сквозную проверку с interface/services/screen-слоями и привязку к проблемам делает `/cross-audit`, не этот скилл. Не правит артефакты, только отчёт; деструктивные правки — через `/project-deep-dive`. Использовать перед коммитом артефактов, когда `/project-deep-dive` предлагает прогон в конце сессии, перед `/cross-audit`, или когда аналитик подозревает рассогласование внутри продуктового слоя проекта."
 ---
 
 # project-audit
@@ -21,7 +21,7 @@ description: "Узкий аудит консистентности продук�
 `capability/<surface>.md`. Аудит **читает и сообщает**, ничего не правит:
 каскадные правки идут через `/project-deep-dive <project-slug>`.
 
-**Сквозную проверку** (продукт ↔ `<slug>/interface` ↔ `<slug>/domains` ↔
+**Сквозную проверку** (продукт ↔ `<slug>/interface` ↔ `<slug>/services` ↔
 `<slug>/screens`, продукт ↔ `addresses-problem`) делает `/cross-audit`.
 Здесь — только внутрипроектная, в пределах одной папки проекта.
 
@@ -179,7 +179,7 @@ totals: { error: X, warning: Y, hint: Z }
 - **Не выдумывать findings.** Если правило не сработало — не писать
   «возможно, тут что-то не так на всякий случай».
 - **Не делать кросс-слойную проверку** (продукт ↔ `<slug>/interface` /
-  `<slug>/domains` / `<slug>/screens`, продукт ↔ `addresses-problem`).
+  `<slug>/services` / `<slug>/screens`, продукт ↔ `addresses-problem`).
   Это `/cross-audit`.
 - **Не аккумулировать историю** в `audit-state/`. Перезаписывать
   `<project-slug>/last-report.md` каждый прогон.

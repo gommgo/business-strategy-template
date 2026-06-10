@@ -30,7 +30,7 @@ Vision — обязательны три раздела (Problem, Success, Non-g
 `docs/projects/project-map.md`. Каждая строка `## Функции` для stable несёт
 `integration` (slug существующего провайдера), `description` в бизнес-языке
 и `direction` (`out`/`in`); сигнатуры/endpoint'ы сюда не пишутся (они в
-клиенте `domains/_shared/`).
+клиенте `services/_shared/`).
 
 `capability` — лежит в файле своей поверхности
 (`capability/<surface>.md`); зрелость считается по записи, а целостность

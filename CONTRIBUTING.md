@@ -56,7 +56,7 @@ deep-dive-скиллы чище и понятнее — не когда он з�
 - `/swot-audit` · `/hypothesis-map-audit` — инварианты методологии по каждой
   проблеме; `/ajtbd-audit` — по каждому сегменту.
 - `/cross-audit` — сквозная семантика business ↔ ajtbd ↔ swot ↔ hypothesis-map ↔
-  project ↔ interface ↔ domain ↔ screen (прогнать, если трогал несколько слоёв).
+  project ↔ interface ↔ services/domain ↔ screen (прогнать, если трогал несколько слоёв).
 
 - **Conventional Commits** (конвенция формата; git-хук не поставляется): `<type>(<scope>)?: <subject>`,
   subject ≤72. Типы: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `meta`.

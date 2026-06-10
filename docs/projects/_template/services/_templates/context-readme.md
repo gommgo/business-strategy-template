@@ -43,6 +43,11 @@ Read use-case'ы (`Get<Name>`, `List<Name>s`) — добавим при скаф
 
 ## Cross-context dependencies
 
+> Если другой контекст живёт в **другом сервисе**, `nature` обязан называть
+> способ: `service:`-порт (sync, через `Exposes` сервиса-владельца) или
+> событие через брокер. In-process reader возможен только внутри одного
+> сервиса.
+
 | direction | other context | nature |
 |---|---|---|
 | outbound | `<other-context>` | порт `<OtherDomain>Reader` — чтение данных другого контекста |

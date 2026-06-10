@@ -27,7 +27,9 @@
 `…/feat/` — её папка фичи `features/<feature>/`;
 `…/interface/` — `docs/projects/<project-slug>/interface/<surface>/`
 (зеркала **той же поверхности**); `…/domains/` —
-`docs/projects/<project-slug>/domains/` (read-only контекст).
+`docs/projects/<project-slug>/services/*/domains/` (домены сервисов, по
+всем сервисам; read-only контекст — контекст уникален в проекте,
+сервис-владелец выводится из пути).
 
 **Изоляция двухуровневая.** R-STRUCT/R-MIRROR/R-GRAPH/R-DATA/R-TG/R-SEM/R-COV
 применяются **в пределах одной поверхности**: зеркала сверяются с
@@ -793,13 +795,14 @@ H2-секция `## <slug>` (заголовок секции = slug; мета-б
   `/telegram-bot-flow-deep-dive <project-slug> <surface> window:<slug>`;
   само правило живёт в домене (`/domain-deep-dive`)».
 
-### R-SEM-003 «`trigger: event:…` на событие, которого нет в domains»
+### R-SEM-003 «`trigger: event:…` на событие, которого нет в доменах сервисов»
 
 - **severity**: `warning`.
 - **scope**: `notification.md` корня ↔ `…/domains/<ctx>/events/`
-  (read-only).
+  (read-only, поиск по всем сервисам).
 - **проверка**: для `trigger: event:<ctx>.<Event>` — контекст `<ctx>`
-  существует в `domains/`, событие `<Event>` находится среди его событий
+  существует в `…/domains/` (у какого-то сервиса), событие `<Event>`
+  находится среди его событий
   (по имени, смысловое сопоставление). Отсутствие домена/события —
   подозрение: либо опечатка, либо событие ещё не спроектировано. Сверку
   payload ↔ плейсхолдеры `content` ведёт `/cross-audit`.
@@ -920,18 +923,20 @@ H2-секция `## <slug>` (заголовок секции = slug; мета-б
   маршрутизацию исхода через `/telegram-bot-flow-deep-dive <project-slug>
   <surface> use-case:<uc-slug>`».
 
-### R-SEM-011 «`Dependencies` use-case бота на доменный use-case, которого нет в domains»
+### R-SEM-011 «`Dependencies` use-case бота на доменный use-case, которого нет в доменах сервисов»
 
 - **severity**: `warning`.
 - **scope**: `…/feat/use-case.md` (секция `### Dependencies`) ↔
-  `…/domains/<ctx>/use-cases/` (read-only).
+  `…/domains/<ctx>/use-cases/` (read-only, поиск по всем сервисам).
 - **проверка**: для каждого рефа `use-case:<ctx>.<Operation>` **с точкой**
-  в `Dependencies` — контекст `<ctx>` существует в `domains/`, операция
+  в `Dependencies` — контекст `<ctx>` существует в `…/domains/` (у
+  какого-то сервиса), операция
   `<Operation>` находится среди его use-case (по имени, смысловое
-  сопоставление). Домен опционален: отсутствие домена/use-case —
+  сопоставление). Домен может ещё не существовать: отсутствие
+  домена/use-case —
   подозрение (опечатка либо домен ещё не спроектирован), не приговор.
 - **пример**: подозрение — `Dependencies: use-case:booking.CreateOrder`,
-  а в `domains/booking/use-cases/` такого нет; норма — реф на
+  а в `services/*/domains/booking/use-cases/` такого нет; норма — реф на
   существующий доменный use-case.
 - **рекомендация**: «Поправить реф через `/telegram-bot-flow-deep-dive
   <project-slug> <surface> use-case:<uc-slug>`, либо спроектировать

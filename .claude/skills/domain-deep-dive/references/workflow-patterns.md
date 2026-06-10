@@ -12,11 +12,12 @@
 ### Шаги
 
 Здесь `<P>` = `docs/projects/<project-slug>`: данные доменов — под
-`<P>/domains/`, форма-канон и шаблоны — в `docs/projects/_template/domains/`.
+`<P>/services/<svc>/domains/` (сервис-владелец — § Выбор сервиса SKILL.md),
+форма-канон и шаблоны — в `docs/projects/_template/services/`.
 
-1. Прочитать `docs/projects/_template/domains/README.md` § Kinds и
+1. Прочитать `docs/projects/_template/services/README.md` § Kinds и
    обязательные H2 для указанного `kind`. Прочитать
-   `docs/projects/_template/domains/_templates/<kind>.md` (шаблон) — это
+   `docs/projects/_template/services/_templates/<kind>.md` (шаблон) — это
    входная форма.
 2. Раунд 1 `AskUserQuestion` — фундамент:
    - `Name` (через Other) — если ещё не дан;
@@ -25,20 +26,21 @@
      visibility in-context|published — три опции в одном раунде если
      влезают, иначе двумя).
 3. Скопировать шаблон по правильному пути:
-   - `aggregate` → `<P>/domains/<ctx>/<Name>.md`
-   - `entity` → `<P>/domains/<ctx>/<Name>.md`
-   - `event` → `<P>/domains/<ctx>/events/<Name>.md`
-   - `use-case` → `<P>/domains/<ctx>/use-cases/<Name>.md`
-   - `policy` → `<P>/domains/<ctx>/policies/<Name>.md`
-   - `vo` (cross-context) → `<P>/domains/_shared/<Name>.md`
+   - `aggregate` → `<P>/services/<svc>/domains/<ctx>/<Name>.md`
+   - `entity` → `<P>/services/<svc>/domains/<ctx>/<Name>.md`
+   - `event` → `<P>/services/<svc>/domains/<ctx>/events/<Name>.md`
+   - `use-case` → `<P>/services/<svc>/domains/<ctx>/use-cases/<Name>.md`
+   - `policy` → `<P>/services/<svc>/domains/<ctx>/policies/<Name>.md`
+   - `vo` (cross-context) → `<P>/services/_shared/<Name>.md`
 
    Заполнить frontmatter (`id: <ctx>.<Name>`, `kind`, `context`, `name`,
    `status: draft`, `relations: []`, `emits: []`, `consumes: []`) и
    `description`-параграф; остальные H2-секции оставить как в шаблоне
    (с placeholder'ами).
-4. Если контекст новый (`<P>/domains/<ctx>/` создан впервые) — скопировать
-   также `docs/projects/_template/domains/_templates/context-readme.md` →
-   `<P>/domains/<ctx>/README.md`, занести в него ссылку на свежезаведённый
+4. Если контекст новый (`<P>/services/<svc>/domains/<ctx>/` создан впервые —
+   сервис выбран пикером по § Выбор сервиса SKILL.md) — скопировать
+   также `docs/projects/_template/services/_templates/context-readme.md` →
+   `<P>/services/<svc>/domains/<ctx>/README.md`, занести в него ссылку на свежезаведённый
    артефакт.
 5. Раунд 2+ `AskUserQuestion` — батч по доменным слотам kind в порядке
    `references/field-checklists.md`. До 4 вопросов в раунде; перемежать
@@ -107,7 +109,7 @@ Other (формулировка архитектора). Опциями пода
 1. Прочитать материал внимательно.
 2. Извлечь кандидатов на DDD-сущности — что похоже на агрегат, методы,
    события, use-case'ы, инварианты, value objects. Фильтр —
-   `docs/projects/_template/domains/README.md § Anti-patterns` (отбросить
+   `docs/projects/_template/services/README.md § Anti-patterns` (отбросить
    заведомо неподходящее: I/O-операция как метод агрегата → use-case;
    внутри-контекстный VO как отдельный файл → inline; spanning invariant
    между двумя aggregate'ами → переразбить).
@@ -129,7 +131,7 @@ Other (формулировка архитектора). Опциями пода
    (минимум `frontmatter + description + status: draft`); создать
    state-заметки с открытыми вопросами «извлечено из сырья —
    уточнить <что>», помечая `**blocker**` там, где материал прямо
-   противоречил `docs/projects/_template/domains/README.md § Anti-patterns`.
+   противоречил `docs/projects/_template/services/README.md § Anti-patterns`.
 6. Через `AskUserQuestion` — выбрать, какую сущность углубить первой
    (по умолчанию — самые fundamental: aggregate перед events перед
    use-case'ами).
@@ -201,7 +203,7 @@ Other (формулировка архитектора). Опциями пода
 
 | ситуация | формат |
 |---|---|
-| anti-pattern из `docs/projects/_template/domains/README.md § Anti-patterns` | две опции: «это anti-pattern, переразбиваю» / «нет, вот почему» (Other) |
+| anti-pattern из `docs/projects/_template/services/README.md § Anti-patterns` | две опции: «это anti-pattern, переразбиваю» / «нет, вот почему» (Other) |
 | enum-поле (`kind`, `Visibility`, `Mutable`, `Source`, `Type of decision`, `Channel`, `Delivery`) | по опции на каждое значение enum |
 | тест-критерий из `references/draft-stable.md` | опции из примеров ✅/❌, архитектор соотносит свой случай |
 | выбор существующего соседа (relations/emits/consumes/called methods) | по опции на каждый существующий `<ctx>.<Name>` + «нужен новый» (Other → A-режим / stub) |

@@ -48,11 +48,12 @@ Frontmatter диалога (`dialog.md`), мета-блок секции окн�
 - `window.situations[*]` → строки `situation.md`;
 - `getter.*.data` (`data:<slug>`) → строка `data-items.md`.
 
-**В domains — семантически, не slug-валидация**: доменные рефы живут на
-уровне use-case бота и реестра уведомлений. `use-case.Dependencies`
-(`use-case:<ctx>.<Operation>` bot UC) и `notification.trigger`
-(`event:<ctx>.<Event>`) сверяются с
-`docs/projects/<project-slug>/domains/`, **если домен есть**. Если
+**В доменах сервисов — семантически, не slug-валидация**: доменные рефы
+живут на уровне use-case бота и реестра уведомлений.
+`use-case.Dependencies` (`use-case:<ctx>.<Operation>` bot UC) и
+`notification.trigger` (`event:<ctx>.<Event>`) сверяются с
+`docs/projects/<project-slug>/services/*/domains/<ctx>/` (по всем
+сервисам; рефы сервисо-агностичны), **если домен есть**. Если
 домена / операции / события нет — реф остаётся, а в state-заметке (bot
 UC / уведомления) живёт строка-требование (см. `domain-bridge.md`);
 stable это **не блокирует** (несостыковки сводит `/cross-audit`).

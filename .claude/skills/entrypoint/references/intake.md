@@ -66,7 +66,10 @@
 - «как пользователь взаимодействует / экраны / композиция» →
   `projects/<slug>` (interface / screens — на какой поверхности?);
 - «бизнес-код бэкенда / агрегаты / инварианты» →
-  `projects/<slug>/domains/<ctx>` (по bounded-context).
+  `projects/<slug>/services/<svc>/domains/<ctx>` (по bounded-context, внутри
+  сервиса-владельца); сервисная топология и инфраструктура — классы
+  «архитектура приложения» (`projects/<slug>/services`) и «ИТ-периметр»
+  (`projects/infrastructure`).
 
 Неоднозначный чанк → опция в `AskUserQuestion` на следующем шаге, не
 самовольный выбор слоя. Для `interface`/`screens`/`capability` неясная

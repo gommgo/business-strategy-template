@@ -1,4 +1,4 @@
-# Мост к domains
+# Мост к доменам сервисов
 
 Бот — **фронтенд в Telegram**: доменных решений в слое нет, есть рёбра
 к ним. Но окно касается домена **не напрямую**, а через **use-case
@@ -17,16 +17,19 @@
 доменный. Бизнес-логики (валидация по правилу, инвариант, policy) в слое
 нет: bot UC её **вызывает** у домена, не повторяет — он лишь оркеструет
 (собрать ввод → дёрнуть доменный use-case → разобрать исход → апдейт
-`dialog-data` → вернуть исход окну). Скилл читает домены read-only:
+`dialog-data` → вернуть исход окну). Домены живут внутри сервисов проекта
+(`services/*/domains/<ctx>/`); рефы `use-case:<ctx>.<Operation>` и
+`event:<ctx>.<Event>` сервисо-агностичны — контекст уникален в проекте,
+сервис-владелец выводится из пути. Скилл читает домены read-only:
 предлагает существующие операции и события как опции, но **не пишет** в
-`domains/` — это домен `domain-deep-dive`.
+`services/` — это домен `domain-deep-dive`.
 
 | ребро | уровень | → ссылается на → | как валидируется |
 |---|---|---|---|
 | `widget.action` (`use-case:<uc-slug>`) | окно → bot UC | секция `## <uc-slug>` в `use-case.md` **той же фичи** | slug, в пределах фичи |
 | `getter.*.source` (`use-case:<uc-slug>`) | окно → bot UC | секция `## <uc-slug>` в `use-case.md` **той же фичи** | slug, в пределах фичи |
-| `use-case.Dependencies` (`use-case:<ctx>.<Operation>`) | bot UC → домен | `domains/<ctx>/use-cases/<Operation>.md` | семантически |
-| `notification.trigger` (`event:<ctx>.<Event>`) | реестр корня → домен | `domains/<ctx>/events/<Event>.md` | семантически |
+| `use-case.Dependencies` (`use-case:<ctx>.<Operation>`) | bot UC → домен | `services/*/domains/<ctx>/use-cases/<Operation>.md` | семантически |
+| `notification.trigger` (`event:<ctx>.<Event>`) | реестр корня → домен | `services/*/domains/<ctx>/events/<Event>.md` | семантически |
 | условие перехода `when` | — | исход bot UC (его `### Outputs` / `### Errors`) | смысловое |
 
 ## Заведение action / getter.source (окно → bot UC)
@@ -59,8 +62,8 @@ anti-pattern: действие либо ссылается на use-case бот�
 
 Внутри секции use-case бота, при заполнении `### Dependencies`:
 
-1. Просканировать `docs/projects/<project-slug>/domains/*/use-cases/`
-   (исключая `_shared` и `_templates`).
+1. Просканировать `docs/projects/<project-slug>/services/*/domains/*/use-cases/`
+   (по всем сервисам; `services/_shared/` не содержит use-case'ов).
 2. Раунд `AskUserQuestion`: опции — существующие доменные операции в форме
    `use-case:<ctx>.<Operation>` (короткое «что делает» из файла — деталь
    опции; релевантные по смыслу bot UC — первыми), плюс «нужна новая
@@ -92,7 +95,8 @@ anti-pattern: действие либо ссылается на use-case бот�
 
 ## Заведение notification.trigger
 
-1. Просканировать `docs/projects/<project-slug>/domains/*/events/`.
+1. Просканировать `docs/projects/<project-slug>/services/*/domains/*/events/`
+   (по всем сервисам).
 2. Раунд `AskUserQuestion`: опции — существующие события
    `event:<ctx>.<Event>` (короткий смысл — деталь) + `schedule:`
    (Other — расписание по-русски: «за час до брони») +
@@ -108,9 +112,9 @@ anti-pattern: действие либо ссылается на use-case бот�
 
 ## Когда домена нет (или нет нужной части)
 
-Слой `domains/` опционален — его отсутствие **не блокирует** работу и
-stable. Доменная связь семантическая: имя фиксируется как **требование**
-на уровне bot UC (или реестра уведомлений).
+Отсутствие слоя `services/` или нужного контекста/операции/события **не
+блокирует** работу и stable. Доменная связь семантическая: имя фиксируется
+как **требование** на уровне bot UC (или реестра уведомлений).
 
 1. В артефакте реф пишется как есть:
    - в `### Dependencies` bot UC: `use-case:booking.SetGuests`;
@@ -134,7 +138,7 @@ stable. Доменная связь семантическая: имя фикс�
 - Не давать `widget.action` ссылаться на доменный use-case напрямую (с
   точкой) — окно ходит в домен **только через use-case бота фичи** (без
   точки); доменный use-case живёт в `Dependencies` bot UC.
-- Не писать в `docs/projects/<project-slug>/domains/` — ни файлов, ни
+- Не писать в `docs/projects/<project-slug>/services/` — ни файлов, ни
   правок. Только read-only чтение и предложение `domain-deep-dive`.
 - Не выдумывать исходы, inputs и payload'ы операций/событий — читать
   из файлов домена; чего нет — спросить аналитика и зафиксировать как

@@ -43,7 +43,7 @@ stakeholder · stakeholder-map
   • ПРОДУКТ (опционально, под ставку/гипотезу) — docs/projects/<slug>/
         vision + user / capability / boundary / surface / integration / constraint / market
         ├─ interface/          (UX: who / situation / zone)
-        ├─ domains/            (опц. DDD-контексты)
+        ├─ services/           (сервисы: реестр + паспорта + домены внутри)
         ├─ screens/            (flow / screen / block / shell)  →  wireframe → hi-fi на @stit/ui
         └─ telegram-bot-flow/  (фичи: dialog / window / use-case + сквозные command / notification — bot-поверхности)  →  код-репо читают
 ```
@@ -83,7 +83,7 @@ M:N (`vision.addresses-problem`). Превращение `screens/` в маке�
   она может закрыть проблему сама либо развернуться в продукт.
 - **projects/`<slug>`** (опционально) — когда исход стратегии — продукт под
   проблему(ы): vision + user / capability / boundary / surface / integration /
-  constraint / market, плюс вложенные `interface/`, `domains/`, `screens/`
+  constraint / market, плюс вложенные `interface/`, `services/`, `screens/`
   (web-поверхности) или `telegram-bot-flow/` (bot-поверхности). Если
   проблему закрывает задача (`task`), продуктовый слой не заводится.
 
@@ -102,10 +102,10 @@ M:N (`vision.addresses-problem`). Превращение `screens/` в маке�
 
 | Соседний репо | Читает из этого репо |
 |---|---|
-| [`<org>/backend`](https://git.stit.tech/stit-core/go-backend-template) | `projects/<slug>/domains/<ctx>/` (scaffold доменов в Go) |
+| [`<org>/backend`](https://git.stit.tech/stit-core/go-backend-template) | `projects/<slug>/services/<svc>/domains/<ctx>/` + паспорт сервиса (scaffold доменов в Go по сервису) |
 | [`<org>/frontend`](https://git.stit.tech/stit-core/spa-frontend-template) | `projects/<slug>/{interface,screens}/` (fsd-deep-dive) |
 | [`<org>/<bot>`](https://git.stit.tech/stit-core/telegram-bot-template) | `projects/<slug>/telegram-bot-flow/<surface>/` (диалоги бота → код) |
-| [`<org>/infra`](https://git.stit.tech/stit-core/project-infra-template-compose) | `projects/<slug>/{vision,surface}` (init-project) |
+| [`<org>/infra`](https://git.stit.tech/stit-core/project-infra-template-compose) | `projects/<slug>/{vision,surface}` + `services/{service,platform}.md` + `projects/infrastructure/` (init-project + материализация топологии) |
 
 Облик собирается на дизайн-системе
 [`@stit/ui`](https://git.stit.tech/stit-core/ui-lib) (потребляется, не правится).
@@ -137,7 +137,7 @@ M:N (`vision.addresses-problem`). Превращение `screens/` в маке�
 
 ```
 business (профиль + реестр проблем + стейкхолдеры) → ajtbd (спрос по работам) → swot (ставки)
-  → hypothesis-map (цель · метрика · task) → [опц.] projects/<slug> (продукт → interface / domains / screens / telegram-bot-flow)
+  → hypothesis-map (цель · метрика · task) → [опц.] projects/<slug> (продукт → interface / services / screens / telegram-bot-flow) + infrastructure (ИТ-периметр бизнеса)
 ```
 
 Под оркестратором — рой исполнителей, прямой вызов которых тоже допустим:
@@ -148,7 +148,8 @@ business (профиль + реестр проблем + стейкхолдер�
 | `ajtbd` | `/segment-deep-dive` · `/job-graph-deep-dive` · `/jtbd-interview` | `/ajtbd-audit` |
 | `swot` | `/swot-deep-dive` | `/swot-audit` |
 | `hypothesis-map` | `/hypothesis-map-deep-dive` | `/hypothesis-map-audit` |
-| `projects/<slug>` (опц.) | `/project-deep-dive` · `/interface-deep-dive` · `/domain-deep-dive` · `/screen-deep-dive` · `/telegram-bot-flow-deep-dive` | `/project-audit` · `/interface-audit` · `/screen-audit` · `/telegram-bot-flow-audit` |
+| `projects/<slug>` (опц.) | `/project-deep-dive` · `/interface-deep-dive` · `/service-deep-dive` · `/domain-deep-dive` · `/screen-deep-dive` · `/telegram-bot-flow-deep-dive` | `/project-audit` · `/interface-audit` · `/service-audit` · `/screen-audit` · `/telegram-bot-flow-audit` |
+| `projects/infrastructure` | `/infrastructure-deep-dive` | `/infrastructure-audit` |
 
 Сквозную семантику всех слоёв ловит рой `/cross-audit`. Когда дозревший продукт
 (`vision.lifecycle → stable`) меняет реальность бизнеса, оркестратор ведёт

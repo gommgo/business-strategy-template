@@ -56,7 +56,7 @@ slug окна/use-case уникален **в пределах фичи** (оди
 Бизнес-логики в фиче нет. Действие виджета и источник данных getter'а
 ссылаются на **use-case бота** (`use-case:<uc-slug>`, внутри фичи); сам
 use-case бота в секции `Dependencies` ссылается на **доменный** use-case
-(`use-case:<ctx>.<Operation>`, `domains/<ctx>/use-cases/`). Точка различает
+(`use-case:<ctx>.<Operation>`, `services/*/domains/<ctx>/use-cases/`). Точка различает
 уровни: реф **без точки** — use-case бота, **с точкой** — доменный.
 Доменные рёбра семантические (домен опционален), их сверяет `/cross-audit`
 (угол `botflow-domain`). Уведомления (`notification.trigger`) триггерятся
@@ -270,9 +270,9 @@ errors:
 
 > Use-case бота — **оркестратор** одного действия: собрать ввод, дёрнуть
 > доменный use-case через backend, поработать со стейтом и вернуть исход.
-> **Бизнес-правил не держит** (они в `domains/`). Все use-case'ы фичи лежат
+> **Бизнес-правил не держит** (они в доменах сервисов). Все use-case'ы фичи лежат
 > в `use-case.md` — **по H2-секции на use-case**, форма секции зеркалит
-> доменный use-case (`domains/_templates/use-case.md`) на уровне H3, без
+> доменный use-case (`services/_templates/use-case.md`) на уровне H3, без
 > доменных-only секций (`Called aggregate methods`, `Events emitted`,
 > `Side effects`).
 
@@ -339,7 +339,7 @@ status: draft | stable
 ### Что use-case НЕ
 
 - ❌ Не носитель бизнес-правил: инвариант, бизнес-валидация, policy — в
-  `domains/`. Bot UC их **вызывает**, не повторяет.
+  доменов сервисов (`services/*/domains/`). Bot UC их **вызывает**, не повторяет.
 - ❌ Не доменный use-case: реф на доменный — с точкой
   (`use-case:<ctx>.<Operation>`), на bot UC — без точки.
 - ❌ Не окно: UC обрабатывает действие и возвращает исход, показ — окно.

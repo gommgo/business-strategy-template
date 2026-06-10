@@ -2,6 +2,7 @@
 id: _shared.integrations.<integration-slug>
 kind: integration-client
 integration: <integration-slug>   # → провайдер в продуктовом integration.md
+fronted-by: —                     # service:<svc-slug>, если интеграцию фронтит gateway-сервис; иначе —
 status: draft
 ---
 
@@ -9,7 +10,9 @@ status: draft
 
 > Одна-две фразы: к какой внешней системе (или соседнему проекту) это клиент
 > и что он берёт на себя. Это **конкретное** воплощение интеграции; домен его
-> деталей не знает — он просто дёргает функции по `slug`.
+> деталей не знает — он просто дёргает функции по `slug`. `fronted-by` во
+> frontmatter — gateway-сервис, хостящий клиента в коде: при его наличии
+> остальные сервисы ходят через `Exposes` gateway'я, не напрямую.
 
 ## Transport
 

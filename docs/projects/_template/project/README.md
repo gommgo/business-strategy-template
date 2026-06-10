@@ -25,8 +25,9 @@
 `<slug>/interface/<surface>/` (UX по поверхности, `/interface-deep-dive`),
 `<slug>/screens/<surface>/` (композиция экранов по поверхности,
 `/screen-deep-dive`), `<slug>/telegram-bot-flow/<surface>/` (композиция
-диалогов bot-поверхности), `<slug>/domains/` (домены бэкенда по
-bounded-context — surface-агностичны, `/domain-deep-dive`).
+диалогов bot-поверхности), `<slug>/services/` (сервисная топология бэкенда,
+`/service-deep-dive`; домены по bounded-context внутри сервисов —
+surface-агностичны, `/domain-deep-dive`).
 
 ## Поверхность — хребет продукта
 
@@ -52,7 +53,8 @@ docs/projects/<slug>/
 │   └── <surface-2>/
 ├── telegram-bot-flow/
 │   └── <bot-surface>/        command.md · notification.md · features/<feature>/{dialog.md,window.md,use-case.md}  (для type: bot — вместо screens)
-└── domains/                  _shared + <bounded-context>/  (по контексту, не по surface)
+└── services/                 service.md + platform.md + architecture.md + _shared/
+                              + <service-slug>/ (паспорт + domains/<ctx>/)
 ```
 
 Одна ценность, доступная на двух поверхностях («смотреть статус» на web и
@@ -168,7 +170,7 @@ H1 внутри — `capability`. Русское слово, являющеес�
   смысл сопоставления, проверяет `/cross-audit`.
 
 Связь с соседними слоями (тоже семантическая; соседи `interface`/
-`screens`/`domains` живут **в той же папке проекта**
+`screens`/`services` живут **в той же папке проекта**
 `docs/projects/<slug>/`):
 
 - `vision.addresses-problem` ↔ `business/business-problem` — какие проблемы
@@ -182,13 +184,15 @@ H1 внутри — `capability`. Русское слово, являющеес�
   должна семантически соответствовать одной из user проекта (авторски
   `who.users`).
 - `capability/<surface>` ↔ `<slug>/interface/<surface>/situation` /
-  `<slug>/domains/<область>` — возможность поверхности реализуется через
+  `<slug>/services/<svc>/domains/<область>` — возможность поверхности реализуется через
   ситуации той же поверхности (UX) + домены (бэкенд).
 - `surface` ↔ `<slug>/interface/<surface>/zone` — зоны интерфейса живут в
   папке своей поверхности.
-- `integration` ↔ `<slug>/domains/<адаптер>` — внешняя интеграция в коде
+- `integration` ↔ `<slug>/services/` — внешняя интеграция в коде
   существует как доменный адаптер; межпроектная интеграция — как порт/клиент
-  к соседнему проекту (см. `domains/_templates/use-case.md`).
+  к соседнему проекту (клиент в `services/_shared/integrations/`,
+  потребление — `services/_templates/use-case.md`); какой сервис ходит
+  наружу — видно по паспорту (`Dependencies`/`Fronts`).
 
 ## Workflow
 
@@ -198,7 +202,7 @@ H1 внутри — `capability`. Русское слово, являющеес�
                                 (бизнес-язык, единый вход, эскалация в ветку).
 /project-audit                — узкий аудит внутри project-слоя.
 /cross-audit                  — сквозной семантический аудит
-                                project ↔ interface ↔ domain ↔ screen
+                                project ↔ interface ↔ services/domain ↔ screen
                                 + межпроектные стыки (project-map).
 ```
 
@@ -220,7 +224,7 @@ state и предлагает переходы через `AskUserQuestion`.
   `docs/projects/<slug>/`) = один продукт = один `vision.md`. Разные
   продукты — разные папки проектов.
 - ❌ Перенос продукт-аналитики в `<slug>/interface/` (UX-слой) или в
-  `<slug>/domains/` (бэкенд) — это разные слои. project = «зачем и для
+  `<slug>/services/` (топология и бэкенд) — это разные слои. project = «зачем и для
   кого», interface = «как взаимодействует», domain = «какой бизнес-код».
 - ❌ Жёсткие slug-валидации между project и соседями. Связи —
   семантические; ловит `/cross-audit`, а не grep.

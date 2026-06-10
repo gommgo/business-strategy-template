@@ -57,7 +57,7 @@ H2-секциями `## <uc-slug>`) и `assets/`. **Изоляция двуху�
 3. Все чтения скоупятся в
    `docs/projects/<project-slug>/telegram-bot-flow/<surface>/` (одну или
    каждую), зеркала `docs/projects/<project-slug>/interface/<surface>/`,
-   read-only контекст `docs/projects/<project-slug>/domains/` и
+   read-only контекст `docs/projects/<project-slug>/services/*/domains/` и
    `audit-state/<project-slug>/`.
 
 ## Точки входа
@@ -93,12 +93,14 @@ args задаёт scope:
 - Реестр-хребет `docs/projects/<project-slug>/surface.md` — перечень
   поверхностей и их `type` (для R-SURF).
 - Read-only контекст для семантических углов:
-  `docs/projects/<project-slug>/domains/<ctx>/{use-cases,events}/` —
-  существует ли доменный use-case из `Dependencies` use-case'а бота и
-  событие из `notification.trigger`;
+  `docs/projects/<project-slug>/services/*/domains/<ctx>/{use-cases,events}/`
+  (по всем сервисам — контекст уникален в проекте, сервис-владелец
+  выводится из пути) — существует ли доменный use-case из `Dependencies`
+  use-case'а бота и событие из `notification.trigger`;
   `docs/projects/<project-slug>/integration.md` — для
-  `trigger: integration:<slug>`. Домен опционален: bot UC опираются на его
-  use-case'ы, но отсутствие домена — подозрение, не ошибка модели.
+  `trigger: integration:<slug>`. Домен может ещё не существовать: bot UC
+  опираются на его use-case'ы, но отсутствие домена — подозрение, не
+  ошибка модели.
 
 **Чего аудит не читает**:
 
@@ -116,9 +118,11 @@ args задаёт scope:
 - `docs/projects/_template/telegram-bot-flow/` — это канон формы, не
   рабочая зона. Из него читаются только критерии, enum'ы и anti-patterns,
   не данные.
-- `domains/` — правками: домен читается только как контекст «существует ли
-  адресат рефа»; глубину сверки payload событий с плейсхолдерами `content`
-  ведёт `/cross-audit`, проектирование домена — `/domain-deep-dive`.
+- `services/` — правками: домены сервисов (`services/*/domains/`)
+  читаются только как контекст «существует ли адресат рефа»; глубину
+  сверки payload событий с плейсхолдерами `content` ведёт `/cross-audit`
+  (углы `botflow-domain` · `botflow-service`), проектирование домена —
+  `/domain-deep-dive`.
 - Код-репо бота (форк `telegram-bot-template`) — слой кода, не предмет
   этого аудита.
 - `state/…` скилла `telegram-bot-flow-deep-dive` — рабочая память другого
@@ -161,7 +165,7 @@ args задаёт scope:
 | severity | смысл | пример |
 |---|---|---|
 | `error` | Структурное нарушение, ломает модель | Битый slug-реф; `transition` на окно чужой фичи; `widget.action`/`getter.source` на несуществующий use-case бота фичи; дубль `slug`/`states-group`/`state`/`operation`/`id`; `launch-mode`/`stack`/`widget`/`source`/`status` вне enum; рассинхрон зеркал (`dialog.transitions` ↔ виджеты, `ux-substrates` ↔ interface, `windows` ↔ окна фичи); плейсхолдер без ключа getter; ключ getter без `fallback`; `/start` без `stack: reset`; уведомление без `idempotency`; тупиковое окно; диалог без `started-by`; папка поверхности вне реестра или для `type ≠ bot`; ссылка из одной поверхности в другую; ссылка из одной фичи в чужую минуя `start:`/`command`/`feature:` |
-| `warning` | Семантическое подозрение, рискует смыслом | Бизнес-правило в `when` или в `Steps` use-case бота; bot UC `Dependencies` на доменный use-case, которого нет в `domains/`; bot UC без `Dependencies` и без работы со стейтом (чистая навигация — это transition); `trigger: event:…` на событие, которого нет в `domains/`; команда-шаг (`/next`); клавиатура-сценарий в уведомлении; несериализуемое в `dialog-data`; облик (HTML, эмодзи-оформление как требование) или код (`.ftl`-ключи, python-имена) в артефакте; окно без соотносимой ситуации; окно-сирота; матрёшка `start:` без `done`; пустой обязательный слот draft-записи; deep-link только в тексте уведомления |
+| `warning` | Семантическое подозрение, рискует смыслом | Бизнес-правило в `when` или в `Steps` use-case бота; bot UC `Dependencies` на доменный use-case, которого нет в `services/*/domains/`; bot UC без `Dependencies` и без работы со стейтом (чистая навигация — это transition); `trigger: event:…` на событие, которого нет в `services/*/domains/`; команда-шаг (`/next`); клавиатура-сценарий в уведомлении; несериализуемое в `dialog-data`; облик (HTML, эмодзи-оформление как требование) или код (`.ftl`-ключи, python-имена) в артефакте; окно без соотносимой ситуации; окно-сирота; матрёшка `start:` без `done`; пустой обязательный слот draft-записи; deep-link только в тексте уведомления |
 | `hint` | Coverage / стиль, не ломает | Блок interface bot-поверхности без окна (дыра синтеза); use-case бота, на который не ссылается ни один `widget.action`/`getter.source` фичи (осиротевшая оркестрация); bot-поверхность реестра без папки слоя; stable ссылается на draft; реестр команд без `/start` при живых фичах |
 
 Подробный реестр — `references/rules.md`.
@@ -189,7 +193,8 @@ draft те же дыры — ожидаемое незаконченное со�
 - `widget.action`/`getter.source` указывают на use-case бота фичи
   (`use-case:<uc-slug>` **без точки**) — это slug-валидируемое ребро
   внутри фичи (R-STRUCT-020). А вот `Dependencies` use-case'а бота
-  сверяются с `domains/<ctx>/use-cases/` **по смыслу адресации**
+  сверяются с `services/*/domains/<ctx>/use-cases/` **по смыслу
+  адресации**
   (контекст и операция существуют — `use-case:<ctx>.<Operation>` **с
   точкой**), и `when` — на «исход use-case бота, не правило окна»:
   «use-case вернул „нужен адрес“» — норма, «если сумма > 1000» —
@@ -247,7 +252,7 @@ Bot-поверхностей в scope: K (tg-client-bot), фич: F. Прочи�
   /telegram-bot-flow-deep-dive <project-slug> tg-client-bot use-case:submit-booking.
 
 [warning] tg-client-bot / booking / use-case:submit-booking → Dependencies ссылается на
-  use-case:booking.CreateOrder, которого нет в domains/booking/use-cases/.
+  use-case:booking.CreateOrder, которого нет в services/*/domains/booking/use-cases/.
   Что делать: спроектировать use-case через /domain-deep-dive <project-slug> booking,
   либо поправить реф (домен опционален — если осознанно, объяснить).
 
@@ -348,8 +353,9 @@ totals: { error: X, warning: Y, hint: Z }
   `ux-substrates` расходится — отчёт указывает оба слоя той же
   поверхности, но решение источника правды делает аналитик через
   `telegram-bot-flow-deep-dive`.
-- **Не лезть в `domains/`.** Домен читается read-only как контекст
-  адресации доменного `Dependencies` use-case'а бота (`use-case:<ctx>.<Operation>`)
+- **Не лезть в `services/`.** Домены сервисов (`services/*/domains/`)
+  читаются read-only как контекст адресации доменного `Dependencies`
+  use-case'а бота (`use-case:<ctx>.<Operation>`)
   и `event:…`; отсутствие адресата — warning в отчёте, заведение
   use-case/события — `/domain-deep-dive`, не этот скилл.
 - **Не смешивать проекты.** Аудит скоупится в один `<project-slug>`;
