@@ -42,9 +42,10 @@ stakeholder · stakeholder-map
   • task — закрывает проблему без продукта (процесс, партнёрство, цена, операционное действие)
   • ПРОДУКТ (опционально, под ставку/гипотезу) — docs/projects/<slug>/
         vision + user / capability / boundary / surface / integration / constraint / market
-        ├─ interface/  (UX: who / situation / zone)
-        ├─ domains/    (опц. DDD-контексты)
-        └─ screens/    (flow / screen / block / shell)  →  wireframe → hi-fi на @stit/ui  →  код-репо читают
+        ├─ interface/          (UX: who / situation / zone)
+        ├─ domains/            (опц. DDD-контексты)
+        ├─ screens/            (flow / screen / block / shell)  →  wireframe → hi-fi на @stit/ui
+        └─ telegram-bot-flow/  (dialog / window / command / notification — для bot-поверхностей)  →  код-репо читают
 ```
 
 Артефакты — **чистая аналитика**, на код напрямую не мапятся. Сегменты по работам
@@ -82,7 +83,8 @@ M:N (`vision.addresses-problem`). Превращение `screens/` в маке�
   она может закрыть проблему сама либо развернуться в продукт.
 - **projects/`<slug>`** (опционально) — когда исход стратегии — продукт под
   проблему(ы): vision + user / capability / boundary / surface / integration /
-  constraint / market, плюс вложенные `interface/`, `domains/`, `screens/`. Если
+  constraint / market, плюс вложенные `interface/`, `domains/`, `screens/`
+  (web-поверхности) или `telegram-bot-flow/` (bot-поверхности). Если
   проблему закрывает задача (`task`), продуктовый слой не заводится.
 
 Каждый слой ведёт свой deep-dive-скилл через `AskUserQuestion`, пишет state в
@@ -102,6 +104,7 @@ M:N (`vision.addresses-problem`). Превращение `screens/` в маке�
 |---|---|
 | [`<org>/backend`](https://git.stit.tech/stit-core/go-backend-template) | `projects/<slug>/domains/<ctx>/` (scaffold доменов в Go) |
 | [`<org>/frontend`](https://git.stit.tech/stit-core/spa-frontend-template) | `projects/<slug>/{interface,screens}/` (fsd-deep-dive) |
+| [`<org>/<bot>`](https://git.stit.tech/stit-core/telegram-bot-template) | `projects/<slug>/telegram-bot-flow/<surface>/` (диалоги бота → код) |
 | [`<org>/infra`](https://git.stit.tech/stit-core/project-infra-template-compose) | `projects/<slug>/{vision,surface}` (init-project) |
 
 Облик собирается на дизайн-системе
@@ -134,7 +137,7 @@ M:N (`vision.addresses-problem`). Превращение `screens/` в маке�
 
 ```
 business (профиль + реестр проблем + стейкхолдеры) → ajtbd (спрос по работам) → swot (ставки)
-  → hypothesis-map (цель · метрика · task) → [опц.] projects/<slug> (продукт → interface / domains / screens)
+  → hypothesis-map (цель · метрика · task) → [опц.] projects/<slug> (продукт → interface / domains / screens / telegram-bot-flow)
 ```
 
 Под оркестратором — рой исполнителей, прямой вызов которых тоже допустим:

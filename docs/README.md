@@ -24,7 +24,7 @@ SWOT → Карта гипотез (терминал — `task`). Исход —
 | [`hypothesis-map/`](./hypothesis-map/README.md) | **под какие метрики целимся** (Карта гипотез: `goal` · `metric` · `subject` · `hypothesis` · `task`, M:N) | `/hypothesis-map-deep-dive` |
 | [`projects/`](./projects/README.md) | **продукты под бизнес** (опционально, когда исход — продукт; несколько, см. ниже) | `/project-deep-dive <slug>` (аналитик); клиент — `/entrypoint-for-business` |
 | `projects/_template/` | **канон формы** продуктовых слоёв (образец, не данные) | read-only, наследуется форком |
-| `projects/<slug>/` | **данные одного продукта** (vision + surface-реестр + kind + `capability/<surface>` + `interface/<surface>/` + `screens/<surface>/` + `domains/`) | скиллы слоёв `<slug>` |
+| `projects/<slug>/` | **данные одного продукта** (vision + surface-реестр + kind + `capability/<surface>` + `interface/<surface>/` + `screens/<surface>/` или `telegram-bot-flow/<surface>/` + `domains/`) | скиллы слоёв `<slug>` |
 | `projects/project-map.md` | **карта стыков между продуктами бизнеса** (межпроектный граф) | сводится из `integration`, сверяет `/cross-audit` |
 
 Поверхность (`surface`) — ось продукта: реестр `surface.md` объявляет
@@ -40,6 +40,9 @@ SWOT → Карта гипотез (терминал — `task`). Исход —
   ux-substrate / data-items — вход `/interface-deep-dive <slug> [<surface>]`.
 - `screens/<surface>/` — flow / screen / block / shell — вход
   `/screen-deep-dive <slug> [<surface>]`.
+- `telegram-bot-flow/<surface>/` — dialog / window / command / notification
+  (для поверхностей с `type: bot` — вместо `screens/`) — форма по канону
+  `projects/_template/telegram-bot-flow/`.
 - `domains/` — (опц.) DDD-артефакты бэкенда по bounded-context
   (surface-агностичны) — вход `/domain-deep-dive <slug> <ctx>`.
 
@@ -62,6 +65,7 @@ SWOT → Карта гипотез (терминал — `task`). Исход —
 |---|---|---|
 | **`<org>/backend`** (`go-backend-template`) | `projects/<slug>/domains/<ctx>/` + `domains/_shared/` (VO + клиенты интеграций; stable) | `/scaffold` domain → Go-код; маппинг DDD → Go (включая `integration-client` → порт/адаптер) живёт у него (`docs/reference/domain-mapping.md`) |
 | **`<org>/frontend`** (`spa-frontend-template`) | `projects/<slug>/{interface,screens}/<surface>/` + product-файлы | `/fsd-deep-dive` мапит ситуации/блоки/сущности на FSD-слои (по поверхности) |
+| **`<org>/<bot>`** (`telegram-bot-template`) | `projects/<slug>/telegram-bot-flow/<surface>/` + `interface/<surface>/` + `domains/` (use-case'ы и события под действия/триггеры) | проектирование и scaffold диалогов бота: StatesGroup, окна, виджеты, getter'ы, обработчики |
 | **`<org>/infra`** (`project-infra-template-compose`) | `projects/<slug>/{vision, surface}` | `/init-project` читает продуктовый контекст (vision / реестр поверхностей) |
 
 Соседи держат `<org>/strategy` sibling-checkout'ом рядом и резолвят путь через
@@ -70,9 +74,10 @@ SWOT → Карта гипотез (терминал — `task`). Исход —
 
 ## Где это в экосистеме
 
-`<org>/strategy` — один из **5 форкаемых шаблонов** под `stit-core/`
+`<org>/strategy` — один из **6 форкаемых шаблонов** под `stit-core/`
 (`corp-infra-template`, `go-backend-template`, `spa-frontend-template`,
-`business-strategy-template` — этот, `project-infra-template-compose`), плюс 2 общие
+`telegram-bot-template`, `business-strategy-template` — этот,
+`project-infra-template-compose`), плюс 2 общие
 библиотеки: Go-lib `stit-core/golibinfra` и дизайн-система `@stit/ui` (репо
 `stit-core/ui-lib`). Корп control-plane — репо `corp-infra-template` (managed =
 инстанс на `*.stit.tech`, self-hosted = ваш форк; вендор-лока нет). Роль этого

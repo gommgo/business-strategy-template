@@ -4,11 +4,14 @@
 папка `docs/projects/<project-slug>/`, внутри которой живёт вся аналитика
 этого продукта: продуктовый слой (vision + реестр-хребет поверхностей +
 kind), UX-интерфейс (`interface/<surface>/`), композиция экранов
-(`screens/<surface>/`) и бизнес-домены бэкенда (`domains/`, опц.).
+(`screens/<surface>/`) или диалогов телеграм-бота
+(`telegram-bot-flow/<surface>/` — для bot-поверхностей) и бизнес-домены
+бэкенда (`domains/`, опц.).
 
 **Поверхность (surface) — ось продукта.** Реестр `surface.md` объявляет
 поверхности (web, mobile, бот, API …), а их slug'и партиционируют
-возможности, интерфейс и экраны: каждая поверхность описывается сверху вниз
+возможности, интерфейс и композицию (экраны — либо диалоги бота, по
+`type` поверхности): каждая поверхность описывается сверху вниз
 в своей папке. Точки стыка **между проектами** одного бизнеса — в
 [`project-map.md`](project-map.md).
 
@@ -22,6 +25,7 @@ docs/projects/
 │   ├── project/         канон продуктового слоя (vision + surface-реестр + kind)
 │   ├── interface/       канон UX-слоя одной поверхности (who/stage/situation/…)
 │   ├── screens/         канон слоя экранов одной поверхности (flow/screen/block/shell)
+│   ├── telegram-bot-flow/  канон слоя диалогов одной bot-поверхности (dialog/window/command/notification)
 │   └── domains/         канон DDD-слоя (_templates/, _shared/)
 └── <project-slug>/      ← ДАННЫЕ одного проекта
     ├── README.md        чем продукт, какие проблемы закрывает
@@ -31,15 +35,17 @@ docs/projects/
     ├── capability/<surface>.md   возможности по поверхности
     ├── interface/<surface>/      who/stage/situation/zone/block/ux-substrate/data-items
     ├── screens/<surface>/        flows/ screens/ blocks/ shells/ assets/
+    ├── telegram-bot-flow/<surface>/   dialogs/ windows/ command.md notification.md assets/  (для type: bot — вместо screens)
     └── domains/         (опц.) <bounded-context>/  (по контексту, не по surface)
 ```
 
 Канон формы живёт **один раз** в `_template/`; папки проектов держат только
 данные. Скилы читают форму из `_template/<слой>/`, пишут данные в
 `<project-slug>/...`. `_template/` — read-only образец: его не правят под
-конкретный проект. Форма `_template/interface/` и `_template/screens/` —
-канон **одной папки поверхности**; в данных она повторяется под каждый slug
-из реестра `surface.md`.
+конкретный проект. Форма `_template/interface/`, `_template/screens/` и
+`_template/telegram-bot-flow/` — канон **одной папки поверхности**; в
+данных она повторяется под каждый slug из реестра `surface.md`
+(композиция — по `type` поверхности: экраны либо диалоги бота).
 
 ## Связь с проблемой (M:N)
 
@@ -80,6 +86,7 @@ docs/projects/
 - [`_template/project/README.md`](_template/project/README.md) — продукт (vision + surface-реестр + kind).
 - [`_template/interface/README.md`](_template/interface/README.md) — интерфейс одной поверхности.
 - [`_template/screens/README.md`](_template/screens/README.md) — экраны одной поверхности.
+- [`_template/telegram-bot-flow/README.md`](_template/telegram-bot-flow/README.md) — диалоги одной bot-поверхности.
 - [`_template/domains/README.md`](_template/domains/README.md) — бизнес-домены бэкенда.
 - [`project-map.md`](project-map.md) — карта стыков между проектами (singleton, бизнес-язык).
 
@@ -89,7 +96,8 @@ docs/projects/
 - ❌ Дублирование канона в папку проекта (`<slug>/interface/README.md`
   и т.п.) — форма живёт один раз в `_template/`.
 - ❌ Папка поверхности (`capability/<surface>.md`, `interface/<surface>/`,
-  `screens/<surface>/`) для поверхности, которой нет в реестре `surface.md`.
+  `screens/<surface>/`, `telegram-bot-flow/<surface>/`) для поверхности,
+  которой нет в реестре `surface.md`.
 - ❌ Создание каталога проекта или папки поверхности руками вместо скила.
 - ❌ Жёсткие slug-валидации между проектом и `business-problem`. Связь
   семантическая (`addresses-problem`), ловит `/cross-audit`.

@@ -21,9 +21,12 @@ IT-продуктом — её может закрыть отдельная за
 каждого своя папка `docs/projects/<slug>/`. Внутри
 проекта **поверхность (surface) — ось**: реестр `surface.md` объявляет
 поверхности, а их slug'и партиционируют возможности (`capability/<surface>.md`),
-интерфейс (`interface/<surface>/` — UX над продуктом) и экраны
+интерфейс (`interface/<surface>/` — UX над продуктом) и композицию: экраны
 (`screens/<surface>/` — композиция/облик, по которой собирается кликабельный
-hi-fi субстрат на библиотеке `@stit/ui`). Кросс-поверхностные kind продукта
+hi-fi субстрат на библиотеке `@stit/ui`) либо — для поверхностей с
+`type: bot` — диалоги телеграм-бота (`telegram-bot-flow/<surface>/` —
+dialog · window · command · notification в понятиях aiogram_dialog;
+читает форк `telegram-bot-template`). Кросс-поверхностные kind продукта
 (`user` · `integration` · `boundary` · `constraint` · `market`) и `vision` —
 плоско в корне проекта. Опционально бизнес-домены (`domains/`) —
 **по bounded-context, surface-агностичны**. Точки стыка между продуктами
@@ -51,6 +54,9 @@ hi-fi субстрат на библиотеке `@stit/ui`). Кросс-пов�
   (если есть; по bounded-context).
 - `docs/projects/_template/screens/README.md` — канон 4 kind артефактов
   экранов **одной поверхности** (`screens/<surface>/`).
+- `docs/projects/_template/telegram-bot-flow/README.md` — канон 4 kind
+  диалогов **одной bot-поверхности** (`telegram-bot-flow/<surface>/`):
+  dialog · window · command · notification.
 - `docs/projects/project-map.md` — карта стыков между продуктами бизнеса
   (singleton: канон формы + данные в одном файле; бизнес-язык, без техники).
 
@@ -63,9 +69,10 @@ hi-fi субстрат на библиотеке `@stit/ui`). Кросс-пов�
 
 ## Где это в экосистеме
 
-Это один из **5 форкаемых шаблонов** под `stit-core/`:
+Это один из **6 форкаемых шаблонов** под `stit-core/`:
 `corp-infra-template` (корп control-plane), `go-backend-template`
 (→ `<org>/backend`), `spa-frontend-template` (→ `<org>/frontend`),
+`telegram-bot-template` (→ `<org>/<bot>`),
 **`business-strategy-template`** (этот → `<org>/strategy`),
 `project-infra-template-compose` (→ `<org>/infra`). Рядом — 2 общие библиотеки:
 Go-lib `stit-core/golibinfra` и дизайн-система `@stit/ui` из репо
@@ -82,6 +89,8 @@ upstream (read-only, односторонне):
 - `<org>/backend` ← `projects/<slug>/domains/<ctx>/` (scaffold доменов в Go;
   маппинг DDD → Go живёт у backend в `docs/reference/domain-mapping.md`);
 - `<org>/frontend` ← `projects/<slug>/{interface,screens}/<surface>/` (fsd-deep-dive, по поверхности);
+- `<org>/<bot>` ← `projects/<slug>/telegram-bot-flow/<surface>/` (+ `interface/<surface>/`,
+  `domains/` — use-case'ы и события под действия и триггеры бота);
 - `<org>/infra` ← `projects/<slug>/{vision,surface}` (init-project).
 
 Контракт что docs отдаёт соседям — `docs/README.md § Что docs отдаёт
@@ -122,9 +131,11 @@ upstream (read-only, односторонне):
 | `docs/projects/<slug>/interface/<surface>/` | **как пользователь взаимодействует** (по поверхности) | `/interface-deep-dive <slug> [<surface>]` |
 | `docs/projects/<slug>/domains/` | **какой бизнес-код бэкенда** (опц.; по bounded-context) | `/domain-deep-dive <slug> <ctx>` |
 | `docs/projects/<slug>/screens/<surface>/` | **как это выглядит и компонуется** (по поверхности) | `/screen-deep-dive <slug> [<surface>]` |
+| `docs/projects/<slug>/telegram-bot-flow/<surface>/` | **как бот ведёт диалог** (по bot-поверхности: диалоги · окна · команды · уведомления) | по канону `_template/telegram-bot-flow/`; сверяет `/cross-audit` |
 | `docs/projects/project-map.md` | **как продукты бизнеса стыкуются** | сводится из `integration`, сверяет `/cross-audit` |
 
-Канон формы продуктовых слоёв (project/interface/screens/domains/project-map)
+Канон формы продуктовых слоёв
+(project/interface/screens/telegram-bot-flow/domains/project-map)
 живёт один раз в `docs/projects/_template/`; данные — в папках проектов. Скилы
 этих слоёв принимают `<project-slug>` первым аргументом (без него — пикер **по
 человекочитаемым именам** проектов, исключая `_template`); interface и screen
@@ -156,7 +167,12 @@ upstream (read-only, односторонне):
 ось партиционирования interface/screens/capability; integration раскрывается
 в функции (бизнес-каталог в `integration.md`), их конкретный клиент живёт в
 `domains/_shared/integrations/<slug>/`, а use-case дёргает функции по `slug`
-(transport-agnostic; стык продуктов бизнеса ведёт `project-map`).
+(transport-agnostic; стык продуктов бизнеса ведёт `project-map`); в
+bot-поверхности окно (window) реализует блок interface, действие виджета и
+источник данных окна ссылаются на use-case домена
+(`use-case:<ctx>.<Operation>`), а уведомление (notification) триггерится
+доменным событием (`event:<ctx>.<Event>`) — бот остаётся фронтендом без
+собственных бизнес-правил.
 Сквозные рёбра авторятся **снизу-вверх** (проектная/UX-сущность
 ссылается на глобальную: `situation.jobs`/`capabilities`/`hypotheses`,
 `capability.jobs`/`hypotheses`, `user.segments`, `subject.segments`);
@@ -174,8 +190,10 @@ upstream (read-only, односторонне):
 и craft — в библиотеке `@stit/ui`. Английский в backticks —
 только для устоявшегося канона (`a11y`, DTCG, FSD-слои, `data-*`,
 `aria-busy`, DDD-термины — `aggregate` · `value object` · `use-case` ·
-`event` · `policy` · `bounded-context`, а также имена обязательных H2-секций
-domains-шаблонов, которые парсит `<org>/backend`). Эти структурные
+`event` · `policy` · `bounded-context`, имена обязательных H2-секций
+domains-шаблонов, которые парсит `<org>/backend`, а также структурные
+идентификаторы telegram-bot-flow, которые читает `<org>/<bot>`:
+`states-group` · `state` · `id` виджетов · ключи getter'а). Эти структурные
 идентификаторы **не переименовываем** — они часть handoff-контракта. Всё
 остальное — prose, пояснения, человекочитаемые поля — по-русски, без
 полу-калек («пропсы», «варианты-проперти»).
@@ -442,6 +460,17 @@ Interface-слой (по проекту, **по поверхности**):
   `domains/_shared/integrations/<slug>/` (kind `integration-client`:
   транспорт + функции) и потребление функций в use-case (колонки
   `integration` + `functions` в `Dependencies`); домен transport-agnostic.
+- **Артефакты диалогов бота** (`docs/projects/<slug>/telegram-bot-flow/<surface>/`,
+  для поверхностей с `type: bot` — вместо screens) — форма по канону
+  `docs/projects/_template/telegram-bot-flow/README.md` и README'ям kind
+  (dialog/window — папки с `index.md`; command/notification — плоские
+  реестры-таблицы). Окно зеркалит блок interface той же поверхности
+  (`interface-block`, `ux-substrates`); действия и данные ссылаются на
+  use-case домена, уведомления — на доменные события; структурные
+  идентификаторы контракта (`states-group`, `state`, `id` виджетов,
+  ключи getter'а) — английские, тексты сообщений — русские. Stable-артефакты
+  читает форк `telegram-bot-template` (`<org>/<bot>`). Сквозную сверку
+  (interface ↔ диалоги ↔ domains) ведёт `/cross-audit`.
 - **Артефакты экранов** (`docs/projects/<slug>/screens/<surface>/`) — через
   скилл `screen-deep-dive <slug> [<surface>]`; форма — по
   `docs/projects/_template/screens/README.md` (канон слоя; форма одной папки

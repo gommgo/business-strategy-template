@@ -8,7 +8,9 @@
 - **реестр-хребет** `surface.md` — поверхности продукта. Его slug'и —
   **ключи партиционирования**: каждая поверхность получает свой файл
   возможностей `capability/<surface>.md`, свою папку интерфейса
-  `interface/<surface>/` и свою папку экранов `screens/<surface>/`.
+  `interface/<surface>/` и свою папку композиции — экранов
+  `screens/<surface>/` либо, при `type: bot`, диалогов
+  `telegram-bot-flow/<surface>/`.
 - **папка возможностей** `capability/<surface>.md` — таблица возможностей
   одной поверхности (по файлу на поверхность).
 - **5 плоских кросс-поверхностных таблиц** `user.md`, `integration.md`,
@@ -22,7 +24,8 @@
 вход для соседних слоёв того же проекта, **вложенных в его папку**:
 `<slug>/interface/<surface>/` (UX по поверхности, `/interface-deep-dive`),
 `<slug>/screens/<surface>/` (композиция экранов по поверхности,
-`/screen-deep-dive`), `<slug>/domains/` (домены бэкенда по
+`/screen-deep-dive`), `<slug>/telegram-bot-flow/<surface>/` (композиция
+диалогов bot-поверхности), `<slug>/domains/` (домены бэкенда по
 bounded-context — surface-агностичны, `/domain-deep-dive`).
 
 ## Поверхность — хребет продукта
@@ -47,6 +50,8 @@ docs/projects/<slug>/
 ├── screens/
 │   ├── <surface-1>/          flows · screens · blocks · shells · assets
 │   └── <surface-2>/
+├── telegram-bot-flow/
+│   └── <bot-surface>/        dialogs · windows · command · notification · assets  (для type: bot — вместо screens)
 └── domains/                  _shared + <bounded-context>/  (по контексту, не по surface)
 ```
 
@@ -136,8 +141,9 @@ H1 внутри — `capability`. Русское слово, являющеес�
 **между слоями** через семантический разбор (рой агентов), не через
 ссылочную целостность. Единственное структурное правило — поверхность:
 файл `capability/<surface>.md` и папки `interface/<surface>/`,
-`screens/<surface>/` обязаны соответствовать поверхности из реестра
-`surface.md`.
+`screens/<surface>/`, `telegram-bot-flow/<surface>/` обязаны
+соответствовать поверхности из реестра `surface.md` (последняя — только
+поверхности с `type: bot`).
 
 Внутри `docs/projects/<slug>/` ожидаются неформальные связи:
 
@@ -208,8 +214,8 @@ state и предлагает переходы через `AskUserQuestion`.
 - ❌ Каталоги-по-сущностям (`users/` с файлом на запись). Один табличный
   файл = один kind. Поверхность — единственная ось партиционирования:
   `capability/<surface>.md` — это таблица, не каталог записей.
-- ❌ Файл возможностей или папка интерфейса/экранов для поверхности, которой
-  нет в реестре `surface.md`. Хребет ведёт реестр.
+- ❌ Файл возможностей или папка интерфейса/экранов/диалогов для
+  поверхности, которой нет в реестре `surface.md`. Хребет ведёт реестр.
 - ❌ Несколько vision в **одном проекте**. Один проект (папка
   `docs/projects/<slug>/`) = один продукт = один `vision.md`. Разные
   продукты — разные папки проектов.
