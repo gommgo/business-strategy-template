@@ -8,8 +8,8 @@ description: "Углублённая проработка аналитическ
 Углублённая проработка артефактов экранов **одного проекта**, в контексте
 **одной поверхности (surface)** —
 `docs/projects/<project-slug>/screens/<surface>/`. Канон формы —
-`docs/projects/_template/screens/README.md` и README'ы по kind в его
-подпапках. Скилл ведёт сеанс через структурированные вопросы, фиксирует
+`docs/projects/_template/screens/README.md` и kind-README'я в подпапке
+`_template/`. Скилл ведёт сеанс через структурированные вопросы, фиксирует
 контекст в своей ветке единого дерева state оркестратора
 (`../entrypoint/state/projects/<project-slug>/screens/<surface>/`), не
 выдумывает craft и не лезет в interface-слой того же проекта своими
@@ -118,7 +118,7 @@ content-блоки в сообщении пользователя.
 1. Определить `<project-slug>` (см. «Выбор проекта») и `<surface>` (см.
    «Выбор поверхности»).
 2. Прочитать `docs/projects/_template/screens/README.md` и README'ы по
-   4 kind в его подпапках — освежить канон композиции, layout-язык,
+   4 kind в подпапке `_template/` — освежить канон композиции, layout-язык,
    имена `ui:*`/`block:*`/`data:*`, anti-patterns.
 3. Прочитать `docs/projects/<project-slug>/vision.md`,
    реестр-хребет `docs/projects/<project-slug>/surface.md`, файл
@@ -294,7 +294,7 @@ content-блоки в сообщении пользователя.
    - `block.used-by-screens` ↔ ссылки `block:<slug>` в screens;
    - `screen.blocks` ↔ блоки в `slot-fills`/`states`.
 4. Тест-критерий из README соответствующего kind (канон
-   `docs/projects/_template/screens/<kind>/README.md`) явно подтверждён
+   `docs/projects/_template/screens/_template/<kind>/README.md`) явно подтверждён
    аналитиком в этой сессии.
 5. В
    `../entrypoint/state/projects/<project-slug>/screens/<surface>/<kind>/<slug>.md`

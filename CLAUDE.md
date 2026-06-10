@@ -423,8 +423,8 @@ Interface-слой (по проекту, **по поверхности**):
   сверяет `cross-audit`.
 - **Артефакты аналитики интерфейса** (`docs/projects/<slug>/interface/<surface>/`)
   — через скилл `interface-deep-dive <slug> [<surface>]`; форма — по
-  `docs/projects/_template/interface/README.md` (канон одной папки
-  поверхности). Поиск тупиков, рассинхрона зеркал, битых ссылок и
+  `docs/projects/_template/interface/README.md` (канон слоя; форма одной
+  папки поверхности — в подпапке `_template/`). Поиск тупиков, рассинхрона зеркал, битых ссылок и
   семантических подозрений — скилл `interface-audit <slug>`. Связь
   zone/situation с поверхностью теперь структурная (папка). При заведении
   ключевых сущностей (who, situation) скилл предлагает связь с продуктовыми
@@ -438,8 +438,9 @@ Interface-слой (по проекту, **по поверхности**):
   `integration` (колонка `integration` в `Dependencies` use-case).
 - **Артефакты экранов** (`docs/projects/<slug>/screens/<surface>/`) — через
   скилл `screen-deep-dive <slug> [<surface>]`; форма — по
-  `docs/projects/_template/screens/README.md` (канон одной папки поверхности)
-  и README'ям 4 kind (flow/screen/block/shell). Визуальные референсы и ассеты
+  `docs/projects/_template/screens/README.md` (канон слоя; форма одной папки
+  поверхности — в подпапке `_template/`) и README'ям 4 kind
+  (flow/screen/block/shell). Визуальные референсы и ассеты
   живут в `docs/projects/<slug>/screens/<surface>/assets/<kind>/<slug>/`.
   Поиск тупиков, рассинхрона зеркал (внутри screens и с `interface/<surface>/`
   того же проекта), битых ссылок, нарушений slot-fills/accepts и

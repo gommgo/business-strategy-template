@@ -13,7 +13,7 @@
 ### Шаги
 
 1. Прочитать канон README.md соответствующего kind в
-   `docs/projects/_template/screens/<kind>/README.md`: секции `Критерии`,
+   `docs/projects/_template/screens/_template/<kind>/README.md`: секции `Критерии`,
    `Что НЕ`, `Тест-критерий`, `Форма frontmatter`, anti-patterns.
 2. Раунд 1 `AskUserQuestion` — фундамент:
    - `slug` (Other) — если ещё не дан;
@@ -98,7 +98,7 @@ Figma, описание макета словами, либо комбинаци
    - **flow** — если в материале есть и desktop, и mobile-разрезы
      одного сценария.
 3. Фильтр — anti-patterns из README'ев kind (канон
-   `docs/projects/_template/screens/<kind>/README.md`): «один компонент»
+   `docs/projects/_template/screens/_template/<kind>/README.md`): «один компонент»
    — не block, «sidebar→drawer» — не flow, «route с контентом» —
    screen (не shell), и т.п.
 4. Через чат показать план:
@@ -163,7 +163,7 @@ Figma, описание макета словами, либо комбинаци
    - для `shell` — все screens, которые на него ссылаются;
    - для `flow` — все его desktop/mobile screens.
 4. Применить канон README соответствующего kind
-   (`docs/projects/_template/screens/<kind>/README.md`): секции
+   (`docs/projects/_template/screens/_template/<kind>/README.md`): секции
    `Критерии`, `Что НЕ`, `Тест-критерий`. Найти:
    - пустые обязательные слоты frontmatter;
    - подозрения по anti-patterns (облик в дереве, breakpoints в

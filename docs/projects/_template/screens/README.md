@@ -4,10 +4,10 @@
 (surface)**: из аналитических артефактов
 `docs/projects/<project-slug>/interface/<surface>/` синтезируется
 детерминированная карта экранов той же поверхности, по которой собираются
-вайрфреймы и hi-fi. Этот файл — **канон формы одной папки поверхности**
-(`docs/projects/_template/screens/`); данные каждого проекта живут в
-`docs/projects/<project-slug>/screens/<surface>/` (по папке на поверхность
-из реестра `surface.md`). Артефакты — **аналитика композиции и облика** в
+вайрфреймы и hi-fi. Этот файл — **канон слоя**; форма одной папки
+поверхности (4 kind-README) лежит рядом в `_template/`. Данные каждого
+проекта живут в `docs/projects/<project-slug>/screens/<surface>/` (по папке
+на поверхность из реестра `surface.md`). Артефакты — **аналитика композиции и облика** в
 терминах семантического дерева и компонентов `@stit/ui`. **Маппинг на FSD
 здесь не делается** — превращение `docs/projects/<project-slug>/screens/<surface>/`
 в код делает автор макета вручную, не отдельный артефакт.
@@ -36,23 +36,25 @@ interface/<surface>/ → синтез → screens/<surface>/ → wireframe → h
 
 | kind | сущность | один-в-одно про |
 |---|---|---|
-| [`flow`](flows/README.md) | пользовательский сценарий, объединяющий desktop-screen и mobile-decomposition | viewport-вариативность |
-| [`screen`](screens/README.md) | route/view с типизированными слотами | что в каких слотах + состояния |
-| [`block`](blocks/README.md) | раскрытие interface-block в дерево компонентов | как реализуется аналитический блок |
-| [`shell`](shells/README.md) | каркас, объявляющий слоты | layout-капсула + responsive поведение |
+| [`flow`](_template/flows/README.md) | пользовательский сценарий, объединяющий desktop-screen и mobile-decomposition | viewport-вариативность |
+| [`screen`](_template/screens/README.md) | route/view с типизированными слотами | что в каких слотах + состояния |
+| [`block`](_template/blocks/README.md) | раскрытие interface-block в дерево компонентов | как реализуется аналитический блок |
+| [`shell`](_template/shells/README.md) | каркас, объявляющий слоты | layout-капсула + responsive поведение |
 
 ## Структура папок
 
 Канон формы (этот README + 4 kind-README) живёт один раз в
-`docs/projects/_template/screens/` и описывает **одну папку поверхности**:
+`docs/projects/_template/screens/`; подпапка `_template/` описывает **одну
+папку поверхности**:
 
 ```
 docs/projects/_template/screens/
-├── README.md                       (этот файл)
-├── flows/README.md                 (канон flow)
-├── screens/README.md               (канон screen)
-├── blocks/README.md                (канон block)
-└── shells/README.md                (канон shell)
+├── README.md                       (этот файл — канон слоя)
+└── _template/                      (форма одной папки поверхности)
+    ├── flows/README.md             (канон flow)
+    ├── screens/README.md           (канон screen)
+    ├── blocks/README.md            (канон block)
+    └── shells/README.md            (канон shell)
 ```
 
 Данные экранов живут в папке поверхности проекта

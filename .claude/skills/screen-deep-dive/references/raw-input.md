@@ -37,7 +37,7 @@ URL — картинка, посмотреть её.
 ### Шаг 2. Извлечь кандидатов
 
 Применить фильтр по `Что НЕ` из README каждого kind (канон
-`docs/projects/_template/screens/<kind>/README.md`). Кандидаты —
+`docs/projects/_template/screens/_template/<kind>/README.md`). Кандидаты —
 только то, что прошло фильтр.
 
 | вижу в материале | kind-кандидат |

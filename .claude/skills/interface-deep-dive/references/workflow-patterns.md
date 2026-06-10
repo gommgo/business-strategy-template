@@ -11,7 +11,7 @@
 
 ### Шаги
 
-1. Прочитать канон `docs/projects/_template/interface/<kind>.md` целиком:
+1. Прочитать канон `docs/projects/_template/interface/_template/<kind>.md` целиком:
    секции `Критерии`, `Что НЕ`, `Тест-критерий`.
 2. Раунд 1 `AskUserQuestion` — фундамент:
    - `slug` (через Other) — если ещё не дан;
@@ -59,7 +59,7 @@
 1. Прочитать материал внимательно.
 2. Извлечь кандидатов на сущности — что похоже на ситуацию, кто
    действующий, какие данные, какие зоны. Фильтр — секции `Что НЕ`
-   из канона `docs/projects/_template/interface/<kind>.md` (отбросить,
+   из канона `docs/projects/_template/interface/_template/<kind>.md` (отбросить,
    что заведомо не подходит: «снимок» не who, «нажать кнопку» не
    situation, и т.п.).
 3. Через чат показать план: «Из материала вижу:
@@ -101,7 +101,7 @@
 3. Прочитать соседей **той же поверхности**: для situation — `who`,
    `stage`, ссылки на data-items, ux-substrate (по фильтру), block (по
    join'у).
-4. Применить канон `docs/projects/_template/interface/<kind>.md` секции
+4. Применить канон `docs/projects/_template/interface/_template/<kind>.md` секции
    `Критерии`, `Что НЕ`, `Тест-критерий` к строке. Найти:
    - пустые обязательные слоты;
    - подозрения по anti-patterns (`goal` похож на предусловие,

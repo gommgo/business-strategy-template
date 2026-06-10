@@ -54,7 +54,7 @@ UX-слой **партиционируется по поверхности (surf
    Поверхность вне реестра не принимается — хребет ведёт реестр.
 3. **Scaffold.** Если папки `docs/projects/<project-slug>/interface/<surface>/`
    ещё нет — это **первый заход на поверхность**: создать её, скопировав
-   форму из `docs/projects/_template/interface/` (7 файлов: `who`, `stage`,
+   форму из `docs/projects/_template/interface/_template/` (7 файлов: `who`, `stage`,
    `situation`, `zone`, `block`, `ux-substrate`, `data-items`), очистив
    таблицы от строк-образцов (остаётся канон-проза + пустой заголовок
    таблицы). Каталог руками не создавать в обход скила.

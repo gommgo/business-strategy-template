@@ -3,9 +3,43 @@
 UX-слой проекта **партиционируется по поверхности (surface)**: на каждую
 поверхность из реестра `surface.md` — своя папка
 `docs/projects/<project-slug>/interface/<surface>/` с 7 плоскими md-файлами
-(каждый — таблица сущностей одного типа). Этот файл — **канон формы одной
-папки поверхности** (`docs/projects/_template/interface/`); в данных она
-повторяется под каждый slug поверхности.
+(каждый — таблица сущностей одного типа). Этот файл — **канон слоя**; форма
+одной папки поверхности (те самые 7 файлов) лежит рядом в
+[`_template/`](_template/) — её копируют под каждый slug поверхности.
+
+## Структура
+
+Канон формы живёт один раз в `docs/projects/_template/interface/` и
+описывает **одну папку поверхности**:
+
+```
+docs/projects/_template/interface/
+├── README.md          ← этот файл (канон слоя)
+└── _template/         ← форма одной папки поверхности (копируется под surface)
+    ├── who.md
+    ├── stage.md
+    ├── situation.md
+    ├── zone.md
+    ├── block.md
+    ├── ux-substrate.md
+    └── data-items.md
+```
+
+Данные интерфейса живут в папке поверхности проекта
+`docs/projects/<project-slug>/interface/<surface>/` (одна папка на
+поверхность из реестра `surface.md`):
+
+```
+docs/projects/<project-slug>/interface/
+└── <surface>/
+    ├── who.md
+    ├── stage.md
+    ├── situation.md
+    ├── zone.md
+    ├── block.md
+    ├── ux-substrate.md
+    └── data-items.md
+```
 
 Все ссылки между сущностями — через `slug`, **в пределах одной
 поверхности**: who/stage/situation/zone/block/ux-substrate/data-items
@@ -23,13 +57,13 @@ surface-локален — правило «один датум, один slug»
 
 | файл | сущность | поля |
 |---|---|---|
-| [`who.md`](who.md) | участник системы | slug · name · description · users · status |
-| [`stage.md`](stage.md) | этап бизнес-процесса (порядок строк = порядок этапов) | slug · name · description · status |
-| [`situation.md`](situation.md) | ситуация: кто/когда/что/ради чего/с какими данными | slug · name · description · stage · who · when · action · goal · entry-data · exit-data · using-what · ux-substrate · block · jobs · capabilities · hypotheses · status |
-| [`zone.md`](zone.md) | зона интерфейса | slug · name · description · parent-zone · status |
-| [`block.md`](block.md) | блок (узел навигации + контейнер субстратов) | slug · name · description · zone · who · ux-substrates · entrypoint · transition-to-block · transition-from-zone · status |
-| [`ux-substrate.md`](ux-substrate.md) | UX-субстрат: `type` + `name`, принадлежит ситуации | slug · name · description · type · situation · status |
-| [`data-items.md`](data-items.md) | элемент данных в языке участника (entry/exit ситуации, опц.) | slug · name · description · status |
+| [`who.md`](_template/who.md) | участник системы | slug · name · description · users · status |
+| [`stage.md`](_template/stage.md) | этап бизнес-процесса (порядок строк = порядок этапов) | slug · name · description · status |
+| [`situation.md`](_template/situation.md) | ситуация: кто/когда/что/ради чего/с какими данными | slug · name · description · stage · who · when · action · goal · entry-data · exit-data · using-what · ux-substrate · block · jobs · capabilities · hypotheses · status |
+| [`zone.md`](_template/zone.md) | зона интерфейса | slug · name · description · parent-zone · status |
+| [`block.md`](_template/block.md) | блок (узел навигации + контейнер субстратов) | slug · name · description · zone · who · ux-substrates · entrypoint · transition-to-block · transition-from-zone · status |
+| [`ux-substrate.md`](_template/ux-substrate.md) | UX-субстрат: `type` + `name`, принадлежит ситуации | slug · name · description · type · situation · status |
+| [`data-items.md`](_template/data-items.md) | элемент данных в языке участника (entry/exit ситуации, опц.) | slug · name · description · status |
 
 ## Принципы оформления
 
@@ -96,7 +130,7 @@ H1 = имя файла = kind. Под H1 — одна-две поясняющи�
   `situation.exit-data` → `data-items`. Оба поля могут быть `—`
   (например, ситуация открытия экрана без явных входных данных).
   data-items — в **языке участника** (`who`), не в понятиях реализации;
-  определение и критерии — в [`data-items.md`](data-items.md).
+  определение и критерии — в [`data-items.md`](_template/data-items.md).
 - **субстрат → ситуация** (M:1): `ux-substrate.situation` —
   канонический источник.
 - **ситуация → субстраты** (1:N): `situation.ux-substrate` — **зеркало

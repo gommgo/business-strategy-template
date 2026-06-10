@@ -8,7 +8,7 @@
 - **Главные anti-patterns** — короткий список из `Что <kind> НЕ`.
 - **Порядок копания** — последовательность вопросов в режиме A/C.
 
-Полные критерии — в каноне `docs/projects/_template/interface/<kind>.md`
+Полные критерии — в каноне `docs/projects/_template/interface/_template/<kind>.md`
 (форма-образец, общая для всех проектов и поверхностей). Данные живут в
 папке поверхности `docs/projects/<project-slug>/interface/<surface>/<kind>.md`
 — по папке на поверхность из реестра `surface.md`. Все ссылки между
