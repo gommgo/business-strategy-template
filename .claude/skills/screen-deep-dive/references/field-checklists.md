@@ -10,7 +10,7 @@
 - **Порядок копания** — последовательность вопросов в режиме A/C.
 
 Полные критерии — в каноне
-`docs/projects/_template/screens/_template/<kind>/README.md` (форма-образец, общая
+`docs/projects/_template/screens/_template/<kind>.md` (форма-образец, общая
 для всех проектов и поверхностей). Данные поверхности проекта живут в
 `docs/projects/<project-slug>/screens/<surface>/<kind>/<slug>/index.md`.
 Здесь — выжимка для скилла.

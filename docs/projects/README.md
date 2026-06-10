@@ -24,7 +24,7 @@ kind), UX-интерфейс (`interface/<surface>/`), композиция эк
 docs/projects/
 ├── README.md            (этот файл)
 ├── project-map.md       ← карта стыков между продуктами бизнеса (singleton: канон формы + данные)
-├── infrastructure/      ← ИТ-периметр бизнеса (один на все проекты: server.md, runtime.md, shared-platform.md, placement.md)
+├── infrastructure/      ← ИТ-периметр бизнеса (один на все проекты: server.md, runtime.md, shared-platform.md, job.md, placement.md)
 ├── _template/           ← КАНОН формы (образец, не данные проекта)
 │   ├── project/         канон продуктового слоя (vision + surface-реестр + kind)
 │   ├── interface/       канон UX-слоя одной поверхности (who/stage/situation/…)
@@ -93,7 +93,7 @@ docs/projects/
 - [`_template/screens/README.md`](_template/screens/README.md) — экраны одной поверхности.
 - [`_template/telegram-bot-flow/README.md`](_template/telegram-bot-flow/README.md) — диалоги одной bot-поверхности.
 - [`_template/services/README.md`](_template/services/README.md) — сервисная топология и домены бэкенда.
-- [`infrastructure/README.md`](infrastructure/README.md) — ИТ-периметр бизнеса (сервера · рантаймы · общие ресурсы · размещение).
+- [`infrastructure/README.md`](infrastructure/README.md) — ИТ-периметр бизнеса (сервера · рантаймы · общие ресурсы · джобы · размещение).
 - [`project-map.md`](project-map.md) — карта стыков между проектами (singleton, бизнес-язык).
 
 ## Anti-patterns

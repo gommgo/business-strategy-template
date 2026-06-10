@@ -213,7 +213,7 @@ H2-секция `## <slug>` (заголовок секции = slug; мета-б
 
 - **severity**: `error`.
 - **scope**: все 5 kind; перечни обязательных полей — в каноне фичи
-  `_template/features/README.md` (frontmatter `dialog`, мета-блоки
+  `_template/features/{dialog,window,use-case}.md` (frontmatter `dialog`, мета-блоки
   `window`/`use-case`, H3-секции `use-case`) и «Колонки» в
   `_template/command.md`, `_template/notification.md`.
 - **проверка**: каждое обязательное поле/колонка/секция **присутствует** в

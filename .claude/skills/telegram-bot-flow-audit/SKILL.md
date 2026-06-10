@@ -10,7 +10,7 @@ bot-поверхности** проекта в
 `docs/projects/<project-slug>/telegram-bot-flow/<surface>/` (dialog ·
 window · use-case бота — в фичах; command · notification — на корне). Канон
 формы — `docs/projects/_template/telegram-bot-flow/README.md`, канон фичи в
-подпапке `_template/features/README.md` (dialog · window · use-case) и
+подпапке `_template/features/` (README общей части + формы `dialog.md` · `window.md` · `use-case.md`) и
 табличные каноны `_template/command.md`, `_template/notification.md`. Аудит
 **читает и сообщает**, ничего не правит: каскадные правки идут через
 `telegram-bot-flow-deep-dive`.
@@ -133,7 +133,7 @@ args задаёт scope:
 1. Определить `<project-slug>` и (опц.) `<surface>` (см. «Выбор проекта и
    поверхности»).
 2. Прочитать канон `docs/projects/_template/telegram-bot-flow/README.md`,
-   канон фичи `_template/features/README.md` (dialog · window · use-case)
+   канон фичи `_template/features/` (README + формы `dialog.md` · `window.md` · `use-case.md`)
    и табличные каноны `_template/command.md`, `_template/notification.md` —
    освежить виджет-язык, форму getter'а, форму секции use-case бота,
    инварианты модели Telegram, anti-patterns.

@@ -459,7 +459,7 @@ warning не превращается в правку.
   `status: stable`).
 - **scope**: все 4 kind; список обязательных слотов по kind — в
   `screen-deep-dive/references/field-checklists.md` и в `Форма
-  frontmatter` каждого kind-README.
+  frontmatter` каждого файла-формы (`_template/<kind>.md`).
 - **проверка**: для каждой записи — каждый обязательный слот непуст
   и не `—`.
 - **рекомендация**: «Заполнить через `/screen-deep-dive <project-slug> <surface> <kind>:<slug>`;

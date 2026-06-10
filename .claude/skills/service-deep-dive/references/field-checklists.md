@@ -53,6 +53,7 @@
 | `Dependencies` | таблица: `ref` (`` `service:` ``/`` `platform:` ``/`` `integration:` ``) · `nature` (бизнес-смыслом) · `status` | `- _нет_` |
 | `Resources` | таблица: `resource` · `type` (`database` \| `cache` \| `search-index` \| `vector-store` \| `object-storage` \| `other`) · `technology` · `purpose` · `status` — потребность + технология, без операционки | `_нет (stateless service)_` |
 | `Messaging` | таблица: `direction` (`produces` \| `consumes`) · `broker` (`` `platform:<slug>` ``) · `topic` · `event` (`` `event:<ctx>.<Event>` ``) · `purpose` · `status` | `_N/A_` (не ходит в брокер) |
+| `Workers` | таблица: `worker` (slug) · `trigger` (`` `topic:<topic>` `` \| schedule: смысл словами) · `purpose` · `backed-by` (`` `use-case:<ctx>.<Operation>` `` \| `—`) · `status` | `_нет_` (фоновых воркеров нет) |
 | `Fronts` | только `type: gateway`: `Integration` + `Client` + `Normalizes` | `_N/A_` — обязательное значение для всех остальных типов |
 | `Notes` | список особенностей | `- _нет_` |
 
@@ -71,7 +72,7 @@
 
 | секция | обязательна | заполнено, если |
 |---|---|---|
-| `Topology` | да | одна mermaid-диаграмма `flowchart LR`; узлы — только slug'и из `service.md` / `platform.md` / `surface.md` / `integration.md`; сплошные стрелки = sync (есть в `Dependencies`), пунктирные = async (есть в `Messaging`); шаблонная диаграмма формы заменена на реальную |
+| `Topology` | да | одна **полная** mermaid-диаграмма `flowchart LR`: каждый сервис — subgraph (внутри воркеры и ресурсы), поверхности — subgraph, платформа и интеграции — узлы; присутствуют ВСЕ сервисы/платформенные ресурсы/интеграции проекта; узлы — только slug'и из `service.md` / `platform.md` / `surface.md` / `integration.md` / паспортов; сплошные стрелки = sync (есть в `Dependencies`), пунктирные = async (есть в `Messaging`, подпись — topic); шаблонная диаграмма формы заменена на реальную |
 | `Decisions` | да | нумерованный список falsifiable-решений разбиения (≥1), формулировки архитектора |
 | `Flows` | нет | 3–7 однострочных потоков либо `_нет_` |
 

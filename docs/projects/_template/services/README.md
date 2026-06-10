@@ -105,7 +105,7 @@ docs/projects/<project-slug>/services/
 | kind | назначение | где живёт |
 |---|---|---|
 | строка реестра сервисов | объявление сервиса: тип, поверхности | `service.md` |
-| `service-passport` | паспорт одного сервиса: Exposes · Owned Contexts · Dependencies · Resources · Messaging | `<svc>/README.md` |
+| `service-passport` | паспорт одного сервиса: Exposes · Owned Contexts · Dependencies · Resources · Messaging · Workers | `<svc>/README.md` |
 | строка реестра платформы | платформенный ресурс проекта: брокер, api-gateway, CDN, object storage | `platform.md` |
 | `architecture` (singleton) | свод топологии + авторские решения разбиения | `architecture.md` |
 | `aggregate` | бизнес-сущность с консистентной границей: root entity + inline-VO внутри | `<svc>/domains/<ctx>/<Name>.md` |
@@ -147,7 +147,7 @@ consumes: [verification.EmailVerified]
 
 | kind | обязательные H2 |
 |---|---|
-| `service-passport` | Purpose, Exposes, Owned Contexts, Dependencies, Resources, Messaging, Fronts, Notes |
+| `service-passport` | Purpose, Exposes, Owned Contexts, Dependencies, Resources, Messaging, Workers, Fronts, Notes |
 | `aggregate` | Identity, Properties, Methods, Invariants, Lifecycle, Boundary, Contained Entities, Spanning Invariants, Value Objects, Events, Relations, Use Cases |
 | `entity` | Identity, Properties, Methods, Invariants, Lifecycle, Relations |
 | `event` | Trigger, Payload, Consumers, Delivery semantics |
@@ -187,6 +187,15 @@ Stateless / aggregate-of-one / пустые consumers — пишутся явн�
 (sync) или через события (async). Сервисы этого проекта друг для друга —
 **не интеграции**: в `integration.md` они не попадают (он — для внешних
 систем и соседних проектов).
+
+**Воркеры внутри сервиса**: фоновые процессы того же деплой-юнита
+(консьюмер топика, периодическая задача) — таблица `## Workers` паспорта,
+не отдельный сервис. Критерий: общий код/данные и деплой вместе — строка
+`Workers`; отдельный деплой-юнит, живущий только на событиях/расписании, —
+сервис `type: worker`. Воркер с `trigger: topic:<t>` обязан иметь парную
+строку `consumes` в `Messaging`; расписание пишется смыслом («ежечасно»),
+cron-выражение — runtime (`<org>/infra`). Воркеры размещаются вместе со
+своим сервисом — отдельной строки `placement` им не нужно.
 
 **Async через брокер**: событие остаётся доменным артефактом
 (transport-agnostic, outbox; домен топиков не знает). Привязка

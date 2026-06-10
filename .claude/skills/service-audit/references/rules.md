@@ -11,7 +11,7 @@
 - **реестр** `platform.md` — платформенные ресурсы проекта;
 - **1 singleton** `architecture.md` — свод топологии + Decisions;
 - **паспорта** `services/<svc>/README.md` (H2: Purpose, Exposes, Owned
-  Contexts, Dependencies, Resources, Messaging, Fronts, Notes);
+  Contexts, Dependencies, Resources, Messaging, Workers, Fronts, Notes);
 - **папки доменов** `services/<svc>/domains/<ctx>/` — содержимое контекстов
   здесь не аудитится (только владение и существование событий);
 - `_shared/` — территория `/domain-deep-dive`, в прогон не входит.
@@ -189,7 +189,9 @@ shared database (anti-pattern). Оставить одного владельца
 `platform.md`, ни в `surface.md`, ни в `integration.md`. Сюда же — ребро
 диаграммы, которого нет ни в одном паспорте (`Dependencies` для sync,
 `Messaging` для async) и ни в одной колонке `surfaces`: диаграмма — свод,
-рёбра в ней не авторятся.
+рёбра в ней не авторятся. Обратная сторона (полнота свода) — `warning`:
+сервис реестра / платформенный ресурс / интеграция проекта, **отсутствующие**
+на диаграмме.
 
 **Рекомендация:** «узел/ребро `<X>` в Topology не подтверждено
 паспортами/реестрами. Канон — паспорта: дописать авторскую сторону или
@@ -249,6 +251,35 @@ mermaid-диаграмма). Обязательные слоты и легаль
 `/service-deep-dive <project-slug> <svc>`».
 
 ## Семантические правила (R-SEM-*)
+
+### R-STRUCT-015 — Worker с topic-триггером без consumes
+
+- **severity**: `error`
+- **что ищем**: строка `## Workers` паспорта с `trigger: topic:<t>`, для
+  которой в `## Messaging` того же паспорта нет строки `consumes` с тем же
+  `topic` — воркер слушает топик, на который сервис не подписан.
+- **как проверяем**: для каждого паспорта собрать пары
+  (`Workers.trigger=topic:<t>` ↔ `Messaging.direction=consumes, topic=<t>`);
+  непарный trigger — finding.
+- **пример**: `notifier` с `trigger: topic:orders.paid`, а в Messaging
+  только `produces`.
+
+### R-STRUCT-016 — Workers.backed-by в пустоту
+
+- **severity**: `error`
+- **что ищем**: `backed-by: use-case:<ctx>.<Operation>` строки `## Workers`,
+  для которого нет файла `services/*/domains/<ctx>/use-cases/<Operation>.md`.
+- **как проверяем**: реф → скан доменов всех сервисов проекта. Дополнительно
+  (`warning`, не отдельное правило): use-case найден в **чужом** сервисе —
+  воркер исполняет чужой домен, обмен должен идти через события/Exposes.
+
+### R-SEM-006 — Cron-выражение в Workers.trigger
+
+- **severity**: `warning`
+- **что ищем**: `trigger` строки `## Workers` с cron-синтаксисом
+  (`*/5 * * * *` и подобное) вместо смысла словами («каждые 5 минут») —
+  runtime-механика в design-time артефакте.
+- **как проверяем**: regex на cron-подобные значения в колонке `trigger`.
 
 ### R-SEM-001 — Платформенный ресурс-сирота
 

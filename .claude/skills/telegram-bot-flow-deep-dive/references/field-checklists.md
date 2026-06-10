@@ -13,7 +13,7 @@
 
 Полные критерии — в каноне
 `docs/projects/_template/telegram-bot-flow/_template/`
-(`features/README.md` — формы `dialog.md` / `window.md` / `use-case.md`;
+(`features/{dialog,window,use-case}.md` — формы по kind, README — общая часть;
 `command.md`, `notification.md` — root-реестры). Данные поверхности
 проекта живут в
 `docs/projects/<project-slug>/telegram-bot-flow/<surface>/`: фичи —

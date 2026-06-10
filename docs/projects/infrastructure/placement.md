@@ -14,14 +14,14 @@
    строка реестра `projects/<project>/services/service.md`;
    `` `platform:<project>/<slug>` `` — строка `services/platform.md` проекта
    с `provided-by: own`; `` `shared-platform:<slug>` `` — строка
-   `shared-platform.md`.
+   `shared-platform.md`; `` `job:<slug>` `` — строка `job.md`.
 2. **Рантайм существует.** `runtime` — строка `runtime.md`.
 3. **Несколько строк на юнит = несколько окружений.** Prod на k8s + dev на
    compose — две строки; окружение читается из рантайма, здесь не
    дублируется.
 4. **Полнота.** Каждый сервис каждого проекта размещён хотя бы в один
-   prod-рантайм; каждый `own`-ресурс и каждый используемый общий ресурс —
-   размещены. Дыры ловят `/infrastructure-audit` и `/cross-audit`
+   prod-рантайм; каждый `own`-ресурс, каждый используемый общий ресурс и каждая
+   джоба периметра — размещены. Дыры ловят `/infrastructure-audit` и `/cross-audit`
    (`service-placement`).
 
 ## Что placement НЕ
@@ -42,7 +42,7 @@
 
 ## Колонки
 
-- `unit` — что размещаем · `` `service:<project>/<svc>` `` \| `` `platform:<project>/<slug>` `` \| `` `shared-platform:<slug>` `` · обяз.
+- `unit` — что размещаем · `` `service:<project>/<svc>` `` \| `` `platform:<project>/<slug>` `` \| `` `shared-platform:<slug>` `` \| `` `job:<slug>` `` · обяз.
 - `runtime` — куда · `` `runtime-slug` `` (строка `runtime.md`) · обяз.
 - `status` — зрелость записи · `draft` \| `stable` · обяз.
 

@@ -27,7 +27,7 @@ SWOT → Карта гипотез (терминал — `task`). Исход —
 | `projects/_template/` | **канон формы** продуктовых слоёв (образец, не данные) | read-only, наследуется форком |
 | `projects/<slug>/` | **данные одного продукта** (vision + surface-реестр + kind + `capability/<surface>` + `interface/<surface>/` + `screens/<surface>/` или `telegram-bot-flow/<surface>/` + `services/`) | скиллы слоёв `<slug>` |
 | `projects/project-map.md` | **карта стыков между продуктами бизнеса** (межпроектный граф) | сводится из `integration`, сверяет `/cross-audit` |
-| [`projects/infrastructure/`](./projects/infrastructure/README.md) | **ИТ-периметр бизнеса** (сервера · рантаймы · общие платформенные ресурсы · размещение; один на все проекты) | `/infrastructure-deep-dive` |
+| [`projects/infrastructure/`](./projects/infrastructure/README.md) | **ИТ-периметр бизнеса** (сервера · рантаймы · общие платформенные ресурсы · джобы · размещение; один на все проекты) | `/infrastructure-deep-dive` |
 
 Поверхность (`surface`) — ось продукта: реестр `surface.md` объявляет
 поверхности, а их slug'и партиционируют возможности, интерфейс и экраны.

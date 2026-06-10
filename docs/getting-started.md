@@ -45,7 +45,7 @@ truth; когда дело дошло до продукта, их читают �
    ├─ /domain-deep-dive <slug> <ctx> (DDD внутри сервиса)
    └─ /screen-deep-dive <slug> [<surface>]     → /screen-audit <slug>
 5. ИТ-периметр бизнеса → /infrastructure-deep-dive (сервера · рантаймы ·
-   общие ресурсы · размещение) → /infrastructure-audit
+   общие ресурсы · джобы · размещение) → /infrastructure-audit
 6. /cross-audit — сквозная семантика между слоями (рой)
 6. готовый репо стратегии (с продуктами, если до них дошло)
 ```
@@ -147,7 +147,8 @@ truth; когда дело дошло до продукта, их читают �
 - **`/infrastructure-deep-dive`** → **`/infrastructure-audit`** —
   ИТ-периметр бизнеса (`docs/projects/infrastructure/`, один на все
   проекты): учёт серверов, рантаймы (kubernetes/compose по окружениям),
-  общие платформенные ресурсы, размещение юнитов (`placement.md`). По нему
+  общие платформенные ресурсы, обслуживающие джобы (бэкапы, ротация,
+  сертификаты), размещение юнитов (`placement.md`). По нему
   `<org>/infra` понимает, что билдить и где располагать.
 - **`/screen-deep-dive <slug> [<surface>]`** → **`/screen-audit <slug>`** —
   композиция и облик по поверхности (flow / screen / block / shell в

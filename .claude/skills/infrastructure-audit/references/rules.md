@@ -5,7 +5,7 @@
 
 ## Состав слоя
 
-ИТ-периметр бизнеса `docs/projects/infrastructure/` — 4 реестра (канон
+ИТ-периметр бизнеса `docs/projects/infrastructure/` — 5 реестров (канон
 формы + данные в одних файлах):
 
 - `server.md` — учёт серверов (железо/VPS);
@@ -30,10 +30,10 @@ Read-only контекст резолва (исключая `_template`):
 
 **Severity:** `error`.
 
-**Где:** все 4 реестра слоя.
+**Где:** все 5 реестров слоя.
 
 **Обнаружение:** в одном реестре два ряда с одинаковым `slug`
-(`server.md`, `runtime.md`, `shared-platform.md`); в `placement.md` —
+(`server.md`, `runtime.md`, `shared-platform.md`, `job.md`); в `placement.md` —
 два ряда с одинаковой парой `unit` + `runtime` (один юнит в один рантайм
 дважды).
 
@@ -135,6 +135,18 @@ Read-only контекст резолва (исключая `_template`):
 **Рекомендация:** «размещение указывает на общий ресурс `<slug>`,
 которого нет в `shared-platform.md`. Завести ресурс или поправить unit
 через `/infrastructure-deep-dive`».
+
+### R-STRUCT-010 — `placement.unit` `job:` или `job.target` в пустоту
+
+- **severity**: `error`
+- **что ищем**: (а) строка `placement.md` с `unit: job:<slug>`, которого
+  нет в `job.md`; (б) реф `job.target` (`server:` / `runtime:` /
+  `shared-platform:` / `service:<project>/<svc>`), который не резолвится в
+  соответствующий реестр.
+- **как проверяем**: собрать slug'и `job.md`; каждый `job:`-unit placement
+  и каждый реф колонки `target` сверить с реестрами периметра и проектов.
+- **пример**: `pg-backup` с `target: [service:crm/orders]`, а проекта `crm`
+  нет.
 
 ### R-STRUCT-008 — Потребность `shared:<slug>` без записи в `shared-platform.md`
 
@@ -241,6 +253,13 @@ state».
 
 **Рекомендация:** «сервис `<project>/<svc>` не размещён в prod — он
 „живёт нигде“. Разместить через `/infrastructure-deep-dive placement`».
+
+### R-COV-005 — Джоба периметра без placement
+
+- **severity**: `hint`
+- **что ищем**: строка `job.md`, для которой нет строки `placement.md` с
+  `unit: job:<slug>` — джоба заведена, но негде не исполняется.
+- **как проверяем**: каждый slug `job.md` ↔ юниты placement.
 
 ### R-COV-002 — Размещаемый ресурс без placement
 

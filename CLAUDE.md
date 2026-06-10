@@ -42,7 +42,8 @@ bounded-context, surface-агностичны**, контекст уникале
 `docs/projects/infrastructure/` (межпроектный: учёт серверов `server.md`,
 рантаймы `runtime.md` — kubernetes/compose по окружениям, общие
 платформенные ресурсы `shared-platform.md` — один брокер/traefik на все
-проекты, и размещение `placement.md` — единственное место «какой юнит где
+проекты, обслуживающие джобы периметра `job.md` — бэкапы/ротация/сертификаты,
+и размещение `placement.md` — единственное место «какой юнит где
 живёт»). Канон формы продуктовых слоёв —
 один раз в `docs/projects/_template/`. См.:
 
@@ -67,8 +68,8 @@ bounded-context, surface-агностичны**, контекст уникале
   реестры (`service` · `platform`) + singleton `architecture` + паспорт
   сервиса + DDD-артефакты доменов внутри сервисов (по bounded-context).
 - `docs/projects/infrastructure/README.md` — канон ИТ-периметра бизнеса
-  (`server` · `runtime` · `shared-platform` · `placement`; канон формы +
-  данные в одном слое, один на бизнес).
+  (`server` · `runtime` · `shared-platform` · `job` · `placement`; канон
+  формы + данные в одном слое, один на бизнес).
 - `docs/projects/_template/screens/README.md` — канон 4 kind артефактов
   экранов **одной поверхности** (`screens/<surface>/`).
 - `docs/projects/_template/telegram-bot-flow/README.md` — канон слоя
@@ -515,7 +516,7 @@ Interface-слой (по проекту, **по поверхности**):
   `Dependencies`; другой сервис проекта — порт `service:<svc>`); домен
   transport-agnostic.
 - **ИТ-периметр бизнеса** (`docs/projects/infrastructure/`: `server.md` ·
-  `runtime.md` · `shared-platform.md` · `placement.md`) — через скилл
+  `runtime.md` · `shared-platform.md` · `job.md` · `placement.md`) — через скилл
   `infrastructure-deep-dive`; один слой на бизнес (канон формы + данные
   вместе), межпроектный. Размещение юнитов — только здесь (`placement.md`);
   проектные слои deployment-agnostic. Без IP/hostname/секретов и
@@ -526,7 +527,8 @@ Interface-слой (по проекту, **по поверхности**):
   для поверхностей с `type: bot` — вместо screens) — через скилл
   `telegram-bot-flow-deep-dive <slug> [<surface>]`; форма — по канону
   `docs/projects/_template/telegram-bot-flow/README.md` и канону фичи
-  `_template/features/README.md`. Ось — **feature** (`features/<feature>/`:
+  (`_template/features/` — README общей части + формы `dialog.md` ·
+  `window.md` · `use-case.md`). Ось — **feature** (`features/<feature>/`:
   один диалог + его окна `window.md` + его use-case'ы бота `use-case.md`);
   команды и уведомления — сквозные реестры корня. Фичи изолированы как
   поверхности (рефы внутри — голые, межфичевые — `start:<feature>`/`feature:`).

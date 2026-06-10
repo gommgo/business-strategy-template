@@ -69,7 +69,7 @@ hint, но не блокирует stable.
 ### 4. Тест-критерий явно подтверждён
 
 В README соответствующего kind (канон
-`docs/projects/_template/screens/_template/<kind>/README.md`) есть секция
+`docs/projects/_template/screens/_template/<kind>.md`) есть секция
 `Тест-критерий` с примерами ✅/❌. Через `AskUserQuestion` скилл
 предъявляет аналитику примеры и спрашивает: «какой из этих образцов
 ближе всего к вашей записи?».

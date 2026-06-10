@@ -120,11 +120,18 @@ cp $TPL/_templates/service-readme.md <P>/services/<svc>/README.md
      владелец контекста события), для `consumes` — выбор из существующих
      `produces` соседей (та же пара `broker`+`topic`); `purpose` (Other);
    - не ходит в брокер — `_N/A_`.
-7. **Fronts** — только для `type: gateway`: `Integration` — выбор из
+7. **Workers** — фоновые воркеры внутри сервиса (процессы того же
+   деплой-юнита): по каждому — `trigger` (`topic:<t>` — обязана быть парная
+   строка `consumes` в `Messaging`; schedule — смысл словами, не cron) и
+   `backed-by` (доменный use-case — опции из `domains/*/use-cases/`).
+   Развилка через AskUserQuestion: «это воркер внутри сервиса или отдельный
+   деплой-юнит?» — отдельный целиком на событиях/расписании → сервис
+   `type: worker` в реестре, не строка Workers.
+8. **Fronts** — только для `type: gateway`: `Integration` — выбор из
    `integration.md`; `Client` — ссылка на
    `_shared/integrations/<slug>/` (клиента авторит `/domain-deep-dive`;
    нет — `**blocker**`); `Normalizes` (Other). У остальных типов — `_N/A_`.
-8. **Notes** — особенности, не влезшие в таблицы (Other), или `_нет_`.
+9. **Notes** — особенности, не влезшие в таблицы (Other), или `_нет_`.
 
 После каждой секции — чек-лист `references/draft-stable.md`; все ✅ —
 предложить промоушн паспорта.

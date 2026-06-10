@@ -9,7 +9,7 @@ description: "Углублённая проработка артефактов �
 контексте **одной bot-поверхности (surface)** —
 `docs/projects/<project-slug>/telegram-bot-flow/<surface>/`. Канон формы —
 `docs/projects/_template/telegram-bot-flow/README.md` и каноны в подпапке
-`_template/` (`features/README.md` — формы `dialog.md`, `window.md`,
+`_template/` (`features/` — README общей части и формы `dialog.md`, `window.md`,
 `use-case.md`; `command.md`, `notification.md` — root-реестры). Скилл
 ведёт сеанс через структурированные вопросы, фиксирует контекст в своей
 ветке единого дерева state оркестратора
@@ -154,7 +154,7 @@ slug её диалога. Резолв `window`/`use-case`-точки входа
 1. Определить `<project-slug>` (см. «Выбор проекта») и `<surface>` (см.
    «Выбор поверхности»), при первом заходе — scaffold.
 2. Прочитать `docs/projects/_template/telegram-bot-flow/README.md` и
-   каноны в подпапке `_template/` (`features/README.md` — формы
+   каноны в подпапке `_template/` (`features/README.md` — общая часть фичи; формы
    `dialog.md`/`window.md`/`use-case.md`; `command.md`, `notification.md`)
    — освежить виджет-язык, контракт getter, форму use-case бота,
    инварианты модели Telegram, anti-patterns.

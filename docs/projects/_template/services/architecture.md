@@ -13,29 +13,70 @@
 
 ## Topology
 
-> Одна mermaid-диаграмма `flowchart LR`: subgraph поверхностей → входной
-> api-gateway (`platform.md`) → сервисы; сервисы ↔ брокер (пунктир, подписи —
-> topic'и); gateway-сервисы → внешние интеграции. Узлы — только slug'и из
-> `service.md` / `platform.md` / `surface.md` / `integration.md`, ничего
-> нового. Сплошная стрелка = sync (`Dependencies`), пунктирная = async
-> (`Messaging`).
+> Одна **полная** mermaid-диаграмма `flowchart LR` — вся топология проекта на
+> одной картинке. Каждый сервис — свой subgraph: внутри его воркеры
+> (`Workers`) и собственные ресурсы (`Resources` — БД, кэши); поверхности —
+> subgraph слева; платформа (входной api-gateway, брокер с подписями-topic'ами,
+> CDN) — между ними; внешние интеграции — справа у gateway-сервисов. Узлы —
+> только slug'и из `service.md` / `platform.md` / `surface.md` /
+> `integration.md` / паспортов, ничего нового. Сплошная стрелка = sync
+> (`Dependencies`/`Exposes`), пунктирная = async (`Messaging`). Диаграмма —
+> свод полного состава: каждый сервис, каждый платформенный ресурс и каждая
+> интеграция проекта присутствуют (выпавший узел — находка `/service-audit`).
 
 ```mermaid
 flowchart LR
-  subgraph surfaces
-    web[surface: web]
+  subgraph surfaces["Поверхности"]
+    web["surface: web"]
+    tgbot["surface: tg-bot"]
   end
-  gw{{platform: api-gateway}}
-  svc1[service: <slug>]
-  broker{{platform: events-broker}}
-  ext[(integration: <slug>)]
 
-  web --> gw --> svc1
-  svc1 -. "<topic>" .-> broker
-  svc1 --> ext
+  gw{{"platform: api-gateway"}}
+  cdn{{"platform: cdn"}}
+  broker{{"platform: events-broker"}}
+
+  subgraph svc_orders["service: orders (api)"]
+    orders_api["API: Exposes"]
+    orders_db[("orders-db: postgres")]
+    orders_cache[("cache: redis")]
+  end
+
+  subgraph svc_billing["service: billing-worker (worker)"]
+    billing_w["worker: charge-processor"]
+  end
+
+  subgraph svc_aigw["service: ai-gateway (gateway)"]
+    aigw["Fronts: integration"]
+  end
+
+  subgraph svc_bot["service: tg-bot (bot)"]
+    bot["оркестратор диалогов"]
+  end
+
+  ext_llm[("integration: llm-provider")]
+  ext_pay[("integration: stripe-payments")]
+
+  web --> gw
+  web -.-> cdn
+  tgbot --> bot
+  gw --> orders_api
+  bot --> orders_api
+  orders_api --> orders_db
+  orders_api --> orders_cache
+  orders_api --> aigw
+  aigw --> ext_llm
+  orders_api -. "orders.paid" .-> broker
+  broker -. "orders.paid" .-> billing_w
+  billing_w --> ext_pay
+  billing_w -. "billing.charged" .-> broker
+  broker -. "billing.charged" .-> bot
 ```
 
-> Шаблонная диаграмма выше — заменить на реальную при заведении слоя.
+> Шаблонная диаграмма выше — пример полноты и нотации; при заведении слоя
+> заменяется на реальную и **растёт вместе с паспортами**: новый сервис /
+> ресурс / topic — новое место на картинке. Размещение (какой сервис на
+> каком сервере) сюда не рисуется — это свод периметра
+> (`docs/projects/infrastructure/README.md § Topology`).
 
 ## Decisions
 

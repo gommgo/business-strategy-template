@@ -1,13 +1,14 @@
 ---
 name: infrastructure-deep-dive
-description: "Углублённая проработка ИТ-периметра бизнеса в `docs/projects/infrastructure/` (учёт серверов `server.md` · рантаймы `runtime.md` — kubernetes/compose по окружениям · общие платформенные ресурсы `shared-platform.md` · размещение `placement.md`) — единственная точка входа в слой. Слой один на бизнес, межпроектный (канон формы + данные в одних файлах, `_template/` не шаблонируется): проектные слои описывают, ЧТО мы строим (deployment-agnostic), периметр — ГДЕ это живёт; runtime-механику (реплики, версии, манифесты) и доступы (IP, hostname, секреты) читает и решает `<org>/infra`, не этот слой. Ведёт архитектора через 5 фаз: servers (учёт железа/VPS: провайдер, локация, ёмкость, назначение) → runtimes (k8s-кластер на нескольких серверах / compose-хост на одном; environment prod|staging|dev) → shared-platform (общие ресурсы бизнеса; intake потребностей `provided-by: shared:<slug>` из `services/platform.md` проектов) → placement (раскладка: каждый сервис из реестров `docs/projects/*/services/service.md` и каждый размещаемый ресурс получает рантайм; coverage-сводка «кто ещё не размещён») → cohesion (инварианты слоя, draft → stable, гейт `/infrastructure-audit`). Заполняет реестры через структурированные вопросы (AskUserQuestion), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/infrastructure/`), не выдумывает провайдеров, ёмкости и раскладку. Активируй когда заводится сервер/VPS, выбирается кубер vs compose, обсуждается общий брокер/traefik на все проекты, звучит «где будет жить сервис», делается раскладка юнитов по серверам, или запись периметра добивается до `status: draft → stable`."
+description: "Углублённая проработка ИТ-периметра бизнеса в `docs/projects/infrastructure/` (учёт серверов `server.md` · рантаймы `runtime.md` — kubernetes/compose по окружениям · общие платформенные ресурсы `shared-platform.md` · обслуживающие джобы периметра `job.md` — бэкапы, ротация, сертификаты · размещение `placement.md`) — единственная точка входа в слой. Слой один на бизнес, межпроектный (канон формы + данные в одних файлах, `_template/` не шаблонируется): проектные слои описывают, ЧТО мы строим (deployment-agnostic), периметр — ГДЕ это живёт; runtime-механику (реплики, версии, манифесты) и доступы (IP, hostname, секреты) читает и решает `<org>/infra`, не этот слой. Ведёт архитектора через 6 фаз: servers (учёт железа/VPS: провайдер, локация, ёмкость, назначение) → runtimes (k8s-кластер на нескольких серверах / compose-хост на одном; environment prod|staging|dev) → shared-platform (общие ресурсы бизнеса; intake потребностей `provided-by: shared:<slug>` из `services/platform.md` проектов) → jobs (обслуживающие джобы периметра: триггер смыслом — не cron, target — что обслуживают) → placement (раскладка: каждый сервис из реестров `docs/projects/*/services/service.md`, каждый размещаемый ресурс и каждая джоба получают рантайм; coverage-сводка «кто ещё не размещён») → cohesion (инварианты слоя, draft → stable, гейт `/infrastructure-audit`). Заполняет реестры через структурированные вопросы (AskUserQuestion), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/infrastructure/`), не выдумывает провайдеров, ёмкости и раскладку. Активируй когда заводится сервер/VPS, выбирается кубер vs compose, обсуждается общий брокер/traefik на все проекты, звучит «где будет жить сервис», делается раскладка юнитов по серверам, или запись периметра добивается до `status: draft → stable`."
 ---
 
 # infrastructure-deep-dive
 
 Проработка **ИТ-периметра бизнеса** — физической стороны всех продуктов:
 сервера (`server.md`) → рантаймы на них (`runtime.md`) → общие
-платформенные ресурсы (`shared-platform.md`) → размещение юнитов
+платформенные ресурсы (`shared-platform.md`) → джобы периметра (`job.md`)
+→ размещение юнитов
 (`placement.md`). Канон слоя — `docs/projects/infrastructure/README.md`;
 скилл его не дублирует, а исполняет.
 
@@ -67,7 +68,7 @@ helm, compose-файлы) — забота того репо, не этого с
 | `/infrastructure-deep-dive <свободный текст / приложение>` | сырьё → разбор (режим **B**): список VPS, набросок раскладки, выгрузка биллинга провайдера |
 | `/infrastructure-deep-dive --phase <name>` | принудительно работать в фазе |
 
-`kind` ∈ {`server`, `runtime`, `shared-platform`, `placement`}.
+`kind` ∈ {`server`, `runtime`, `shared-platform`, `job`, `placement`}.
 
 `phase` ∈ {`servers`, `runtimes`, `shared-platform`, `placement`,
 `cohesion`}.
@@ -81,7 +82,7 @@ helm, compose-файлы) — забота того репо, не этого с
 1. Прочитать `docs/projects/infrastructure/README.md` — освежить канон
    слоя и его инварианты.
 2. Прочитать `references/phases.md` — карту 5 фаз.
-3. Прочитать 4 реестра слоя: `server.md`, `runtime.md`,
+3. Прочитать 5 реестров слоя: `server.md`, `runtime.md`, `job.md`,
    `shared-platform.md`, `placement.md`.
 4. Собрать **межпроектный контекст** (read-only):
    - реестры сервисов всех проектов — `docs/projects/*/services/service.md`
@@ -193,7 +194,7 @@ helm, compose-файлы) — забота того репо, не этого с
 ../entrypoint/state/infrastructure/<kind>/<slug>.md
 ```
 
-`kind` ∈ {`server`, `runtime`, `shared-platform`, `placement`}; для
+`kind` ∈ {`server`, `runtime`, `shared-platform`, `job`, `placement`}; для
 `placement` ключ заметки — нормализованный `unit`
 (`:` и `/` → `--`, например `service--crm--orders.md`). Формат — канон
 `../entrypoint/references/state-model.md`: frontmatter (`kind` · `slug` ·
@@ -232,7 +233,7 @@ helm, compose-файлы) — забота того репо, не этого с
 
 ## Удаление записи (каскад)
 
-1. Прочитать 4 реестра слоя + `services/platform.md` проектов + свою
+1. Прочитать 5 реестров слоя + `services/platform.md` проектов + свою
    ветку state — найти все ссылки на удаляемый slug (`runtime.servers`,
    `placement.runtime`, `placement.unit`, `provided-by: shared:<slug>`).
 2. Показать каскад: «ссылаются X, Y — вот что повиснет» (удаление сервера

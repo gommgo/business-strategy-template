@@ -8,7 +8,7 @@ description: "Аудит консистентности аналитически
 Аудит консистентности 4 артефактных kind экранов **одной поверхности**
 проекта в `docs/projects/<project-slug>/screens/<surface>/` (flow ·
 screen · block · shell). Канон формы —
-`docs/projects/_template/screens/README.md` и 4 kind-README'я в подпапке
+`docs/projects/_template/screens/README.md` и 4 файла-формы по kind в подпапке
 `_template/`. Аудит **читает и сообщает**, ничего не правит: каскадные
 правки идут через `screen-deep-dive`.
 
@@ -97,7 +97,7 @@ args задаёт scope:
 1. Определить `<project-slug>` и (опц.) `<surface>` (см. «Выбор проекта
    и поверхности»).
 2. Прочитать канон `docs/projects/_template/screens/README.md` и 4
-   kind-README'я в подпапке `_template/` — освежить канон композиции,
+   файла-формы `_template/{flow,screen,block,shell}.md` — освежить канон композиции,
    layout-язык, anti-patterns, форму frontmatter.
 3. Прочитать `references/rules.md` — реестр проверок с тяжестью.
 4. Прочитать реестр `docs/projects/<project-slug>/surface.md`. Сверить

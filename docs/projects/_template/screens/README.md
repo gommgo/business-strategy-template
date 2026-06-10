@@ -5,7 +5,7 @@
 `docs/projects/<project-slug>/interface/<surface>/` синтезируется
 детерминированная карта экранов той же поверхности, по которой собираются
 вайрфреймы и hi-fi. Этот файл — **канон слоя**; форма одной папки
-поверхности (4 kind-README) лежит рядом в `_template/`. Данные каждого
+поверхности (4 файла-формы по kind) лежит рядом в `_template/`. Данные каждого
 проекта живут в `docs/projects/<project-slug>/screens/<surface>/` (по папке
 на поверхность из реестра `surface.md`; поверхность с `type: bot` вместо
 экранов получает слой диалогов `telegram-bot-flow/<surface>/` — см.
@@ -38,25 +38,25 @@ interface/<surface>/ → синтез → screens/<surface>/ → wireframe → h
 
 | kind | сущность | один-в-одно про |
 |---|---|---|
-| [`flow`](_template/flows/README.md) | пользовательский сценарий, объединяющий desktop-screen и mobile-decomposition | viewport-вариативность |
-| [`screen`](_template/screens/README.md) | route/view с типизированными слотами | что в каких слотах + состояния |
-| [`block`](_template/blocks/README.md) | раскрытие interface-block в дерево компонентов | как реализуется аналитический блок |
-| [`shell`](_template/shells/README.md) | каркас, объявляющий слоты | layout-капсула + responsive поведение |
+| [`flow`](_template/flow.md) | пользовательский сценарий, объединяющий desktop-screen и mobile-decomposition | viewport-вариативность |
+| [`screen`](_template/screen.md) | route/view с типизированными слотами | что в каких слотах + состояния |
+| [`block`](_template/block.md) | раскрытие interface-block в дерево компонентов | как реализуется аналитический блок |
+| [`shell`](_template/shell.md) | каркас, объявляющий слоты | layout-капсула + responsive поведение |
 
 ## Структура папок
 
-Канон формы (этот README + 4 kind-README) живёт один раз в
-`docs/projects/_template/screens/`; подпапка `_template/` описывает **одну
-папку поверхности**:
+Канон формы (этот README + 4 файла-формы по kind, как в
+`_template/interface/`) живёт один раз в `docs/projects/_template/screens/`;
+подпапка `_template/` описывает **одну папку поверхности**:
 
 ```
 docs/projects/_template/screens/
 ├── README.md                       (этот файл — канон слоя)
 └── _template/                      (форма одной папки поверхности)
-    ├── flows/README.md             (канон flow)
-    ├── screens/README.md           (канон screen)
-    ├── blocks/README.md            (канон block)
-    └── shells/README.md            (канон shell)
+    ├── flow.md                     (форма flow)
+    ├── screen.md                   (форма screen)
+    ├── block.md                    (форма block)
+    └── shell.md                    (форма shell)
 ```
 
 Данные экранов живут в папке поверхности проекта

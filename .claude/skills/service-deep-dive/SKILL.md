@@ -28,7 +28,7 @@ description: "Углублённая проработка сервисного �
 Разделение труда с соседним скиллом — по высоте:
 
 - **этот скилл** — сервисный уровень: реестр, паспорта (Exposes · Owned
-  Contexts · Dependencies · Resources · Messaging · Fronts), платформенные
+  Contexts · Dependencies · Resources · Messaging · Workers · Fronts), платформенные
   ресурсы (platform), разбиение контекстов по сервисам, свод топологии;
 - **`/domain-deep-dive <slug> <ctx>`** — доменный уровень: агрегаты,
   события, use-case'ы, политики **внутри** контекста, плюс `_shared/`
@@ -147,7 +147,7 @@ falsifiable-вопрос и пишет ответ архитектора дос�
    | юнит | type | status | H2 заполнено | дыры |
    |---|---|---|---|---|
    | orders (паспорт) | api | draft | 5/8 | Resources, Messaging, Notes |
-   | tg-bot (паспорт) | bot | draft | 3/8 | Exposes, Dependencies, Resources, Fronts, Notes |
+   | tg-bot (паспорт) | bot | draft | 3/9 | Exposes, Dependencies, Resources, Workers, Fronts, Notes |
    | platform.md | — | 1 запись draft | — | events-broker без provided-by |
    | architecture.md | — | draft | 1/2 | Decisions пуст |
    ```
@@ -191,7 +191,9 @@ falsifiable-вопрос и пишет ответ архитектора дос�
    (бизнес-каталог функций, audience) → `Owned Contexts` → `Dependencies`
    (`service:` | `platform:` | `integration:`) → `Resources` («потребность +
    технология», без операционки) → `Messaging`
-   (produces/consumes · broker · topic · event) → `Fronts` (только
+   (produces/consumes · broker · topic · event) → `Workers` (фоновые
+   воркеры внутри сервиса: trigger topic/schedule, парность с Messaging) →
+   `Fronts` (только
    `type: gateway`).
 4. **platform** — реестр `platform.md`: **только то, что требуют паспорта**
    (брокер из `Messaging`, gateway/CDN/storage из `Dependencies`); по

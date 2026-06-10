@@ -56,9 +56,9 @@ interface/<surface>/ → синтез → telegram-bot-flow/<surface>/ → ко�
 
 | kind | где живёт | один-в-одно про |
 |---|---|---|
-| [`dialog`](_template/features/README.md) | `features/<feature>/dialog.md` (один на фичу) | состав окон + входы + накопление данных |
-| [`window`](_template/features/README.md) | `features/<feature>/window.md` (секция на окно) | что показано, что нажимается, куда ведёт |
-| [`use-case`](_template/features/README.md) | `features/<feature>/use-case.md` (секция на UC) | что делает кнопка/getter, чем оркеструет, какие исходы |
+| [`dialog`](_template/features/dialog.md) | `features/<feature>/dialog.md` (один на фичу) | состав окон + входы + накопление данных |
+| [`window`](_template/features/window.md) | `features/<feature>/window.md` (секция на окно) | что показано, что нажимается, куда ведёт |
+| [`use-case`](_template/features/use-case.md) | `features/<feature>/use-case.md` (секция на UC) | что делает кнопка/getter, чем оркеструет, какие исходы |
 | [`command`](_template/command.md) | `command.md` (корень поверхности) | что запускает какую фичу |
 | [`notification`](_template/notification.md) | `notification.md` (корень поверхности) | бот пишет первым по событию домена |
 
@@ -81,7 +81,11 @@ interface/<surface>/ → синтез → telegram-bot-flow/<surface>/ → ко�
 docs/projects/_template/telegram-bot-flow/
 ├── README.md                       (этот файл — канон слоя)
 └── _template/                      (форма одной папки поверхности)
-    ├── features/README.md          (канон фичи: dialog.md · window.md · use-case.md)
+    ├── features/                    (канон фичи)
+    │   ├── README.md                (общая часть: изоляция · мост к домену · виджет-язык · инварианты)
+    │   ├── dialog.md                (форма диалога)
+    │   ├── window.md                (форма окна)
+    │   └── use-case.md              (форма use-case бота)
     ├── command.md                  (канон-таблица command, корень)
     └── notification.md             (канон-таблица notification, корень)
 ```
@@ -113,7 +117,7 @@ docs/projects/<project-slug>/telegram-bot-flow/
 
 ## Форма трёх файлов фичи
 
-Полные формы — в каноне фичи `_template/features/README.md`. Кратко:
+Полные формы — в файлах-формах канона фичи (`_template/features/{dialog,window,use-case}.md`). Кратко:
 
 - **`dialog.md`** — один диалог: frontmatter YAML (`slug` · `name` ·
   `description` · `states-group` · `windows` · `started-by` · `launch-mode`

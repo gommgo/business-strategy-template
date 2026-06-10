@@ -21,7 +21,7 @@
 | `docs/projects/<slug>/interface/<surface>/` | `who` · `stage` · `situation` · `zone` · `block` · `ux-substrate` · `data-items` | `/interface-deep-dive <slug> [<surface>]` | `/interface-audit <slug>` |
 | `docs/projects/<slug>/services/` (топология: реестр сервисов + паспорта + платформа + architecture) | сервисы/паспорта/брокер/ресурсы | `/service-deep-dive <slug>` | `/service-audit <slug>` + `/cross-audit` |
 | `docs/projects/<slug>/services/<svc>/domains/<ctx>/` (по bounded-context, внутри сервиса-владельца, surface-агностичны) | агрегаты/события/use-case/… | `/domain-deep-dive <slug> <ctx>` | `/service-audit <slug>` + `/cross-audit` |
-| `docs/projects/infrastructure/` (ИТ-периметр бизнеса: сервера · рантаймы · общие ресурсы · размещение) | server/runtime/shared-platform/placement | `/infrastructure-deep-dive` | `/infrastructure-audit` + `/cross-audit` |
+| `docs/projects/infrastructure/` (ИТ-периметр бизнеса: сервера · рантаймы · общие ресурсы · джобы · размещение) | server/runtime/shared-platform/job/placement | `/infrastructure-deep-dive` | `/infrastructure-audit` + `/cross-audit` |
 | `docs/projects/<slug>/screens/<surface>/` | `flow` · `screen` · `block` · `shell` | `/screen-deep-dive <slug> [<surface>]` | `/screen-audit <slug>` |
 | `docs/projects/<slug>/telegram-bot-flow/<surface>/` (bot-поверхности) | фичи `features/<feature>/` (`dialog` · `window` · `use-case` бота) + сквозные `command` · `notification` | `/telegram-bot-flow-deep-dive <slug> [<surface>]` | `/telegram-bot-flow-audit <slug>` |
 | `docs/projects/project-map.md` (межпроектные стыки) | `project-map` (singleton-граф рёбер) | `/project-deep-dive <slug>` (авторская сторона ребра — `integration` инициатора) | `/cross-audit` |
