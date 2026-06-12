@@ -109,8 +109,8 @@ mobile-серию потока).
 **Anti-patterns**:
 - block / shell / flow / route / data-слой — не путать;
 - облик в `slot-fills` (цвета, пиксели, шрифты);
-- тематические оси (`density`, `brand`, `scheme`) как props
-  компонентов;
+- оси контекста (`brand`, `scheme`, `density`, `mode`, `dir`) как
+  props компонентов;
 - breakpoints в `slot-fills`;
 - FSD-имена (`widget`, `feature`) в дереве или frontmatter;
 - `state` без явного override (пустая секция);
@@ -147,13 +147,14 @@ mobile-серию потока).
     - для каждого слота shell из соседнего файла:
       - опции: «`block:<slug>` из существующих» / «inline-дерево»
         (Other) / «оставить `—`» (если слот опционален в shell);
-      - если inline-дерево — углубление по узлам через ui-инвентарь.
+      - если inline-дерево — углубление по узлам через манифест
+        (см. `ui-inventory.md`) и `layout:`-узлы.
 13. **Тело — `states`** (раунд за раундом по каждому из 6 канон-
     состояний):
-    - опции: «использовать ui-feedback (`ui:Skeleton` для loading,
-      `ui:EmptyState`/`ui:ErrorState`/… для остальных)» / «inline-
-      дерево» (Other) / «здесь не применимо» (с пометкой в state-
-      заметке).
+    - опции: «реф из манифеста (`ui:Spinner` для loading;
+      `ui:Skeleton (planned)` — forward-реф)» / «композиция
+      `layout:`-узлов + текст-children (+ `ui:Button` для действия)»
+      (Other) / «здесь не применимо» (с пометкой в state-заметке).
 14. `assets` (опц): см. `assets-policy.md`.
 15. Anti-patterns раундом.
 16. Тест-критерий: «Одна точка маршрута / view с заполненными слотами
@@ -198,7 +199,8 @@ mobile-серию потока).
 - расхождение `ux-substrates` с зеркалом в `interface/<surface>/block.md`;
 - дерево без `block-body`;
 - облик в дереве (цвет, тень, шрифт, пиксели);
-- тематические props (`density`/`brand`/`scheme`) в узлах;
+- оси контекста (`brand`/`scheme`/`density`/`mode`/`dir`) как props
+  узлов;
 - breakpoints в дереве;
 - один и тот же `data:<slug>` под разными именованными слотами;
 - inline-состояния (loading/empty) в дереве блока — это слой screen.
@@ -225,13 +227,14 @@ mobile-серию потока).
    текущий список (выводимо из screens), аналитик подтверждает.
 7. **Тело — `tree`** (раунд за раундом, по зонам):
    - Начать с `block-body` (обязательная) — пройтись по узлам:
-     выбор `ui:Component` из релевантной категории инвентаря
-     (data-display, layout-примитивы, forms) + props enum + Other
-     для свободных значений.
-   - Затем `block-header` (опц): обычно `ui:Row` / `ui:Sticky` с
-     поиском/кнопками.
-   - Затем `block-footer` (опц): обычно `ui:Pagination` /
-     `ui:Row` с действиями.
+     выбор `ui:Component` из релевантной family манифеста
+     (data-display, forms, actions; подсказки — `taskMap`) или
+     forward-реф `(planned)`, раскладка — `layout:`-узлы + props
+     enum (из `values`) + Other для свободных значений.
+   - Затем `block-header` (опц): обычно `layout:row` с поиском
+     (`ui:Search`) и кнопками.
+   - Затем `block-footer` (опц): обычно `ui:Pagination (planned)` /
+     `layout:row` с действиями.
    - Затем `block-aside` (опц): для боковых дорожек блока.
    - Проверка покрытия: каждый объявленный `ux-substrate` должен
      быть представлен узлом дерева (через имя `ui:Component` +
@@ -265,10 +268,11 @@ overlay / footer и т.п.) с пометками `(fills: $<slot>)` для ка
 **Кто ссылается**: `screen.shell`.
 
 **Anti-patterns**:
-- screen / block / layout-примитив / sitemap — не путать;
+- screen / block / узел раскладки / sitemap — не путать;
 - содержимое в shell-tree (конкретный блок, конкретный текст
   кнопки);
-- тематические props (`density`/`brand`/`scheme`) на узлах shell;
+- оси контекста (`brand`/`scheme`/`density`/`mode`/`dir`) как props
+  узлов shell;
 - пиксели / raw-CSS в `tree` или `responsive`;
 - слот без `accepts` или без `required`;
 - `responsive`-behaviour, не покрытое допустимыми значениями;
@@ -289,12 +293,13 @@ overlay / footer и т.п.) с пометками `(fills: $<slot>)` для ка
    `lg` / `xl`) — поведения слотов из enum (`visible` /
    `drawer-via-burger` / `overlay` / `stacked` / `hidden`). Спросить:
    «Меняется ли что-то на этом breakpoint?»
-4. **Тело — `tree`**: ui:AppShell / ui:Header / ui:Sidebar /
-   ui:Main / ui:Detail / ui:OverlayLayer / ui:Footer (из инвентаря
-   shell-каркасов). Каждый узел, обёртывающий слот, получает
+4. **Тело — `tree`**: каркас из `layout:`-узлов (`layout:stack` /
+   `layout:row` / `layout:layer`) и компонентов манифеста;
+   запланированные — forward-рефами (`ui:Navbar (planned)`,
+   `ui:Sidebar (planned)`). Каждый узел, обёртывающий слот, получает
    `(fills: $<slot>)`. **Слотовые узлы — пустые** (без содержимого).
 5. `assets` (опц): см. `assets-policy.md`.
 6. Anti-patterns раундом.
 7. Тест-критерий: «Объявление набора слотов + responsive-поведение
-   — не сам route с контентом, не блок и не layout-примитив?» —
+   — не сам route с контентом, не блок и не узел раскладки?» —
    варианты ✅/❌ из README.

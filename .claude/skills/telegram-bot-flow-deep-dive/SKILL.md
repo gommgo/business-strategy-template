@@ -133,7 +133,9 @@ bot-поверхность скилл создаёт форму папки из 
 | `/telegram-bot-flow-deep-dive <project-slug> <surface> <slug>` | найти slug; одиночный → C; конфликт kind → переспросить |
 | `/telegram-bot-flow-deep-dive <project-slug> <surface> <свободный текст / приложение>` | сырьё → разбор (режим B) |
 
-`kind` ∈ {`dialog`, `window`, `use-case`, `command`, `notification`}.
+`kind` ∈ {`dialog`, `window`, `use-case`, `command`, `notification`};
+дополнительно работает `feature:<slug>` — вход в фичу целиком, синоним
+`dialog:<slug>` (фича = один диалог, slug фичи = slug её диалога).
 
 `dialog`, `window` и `use-case` живут **внутри фичи**
 (`features/<feature>/`): диалог — файл `dialog.md`, окно — H2-секция
@@ -231,7 +233,8 @@ slug её диалога. Резолв `window`/`use-case`-точки входа
     anti-pattern X — согласен?»);
   - теста-критерия (бинарный выбор ✅/❌ из секций `Тест-критерий`);
   - перечисления enum'ов из канона (`launch-mode`, `stack`, тип
-    виджета, `transition: <window>|back|done|start:<feature>`,
+    виджета, `value-type` text-input'а, `media.type`,
+    `transition: <window>|back|done|start:<feature>`,
     `getter.source: use-case|dialog-data|start-data|const`);
   - выбора существующего slug-соседа (по опции на каждый существующий
     + «нужен новый» через Other);
@@ -503,9 +506,12 @@ slug её диалога. Резолв `window`/`use-case`-точки входа
 не существующий slug:
 
 1. Завести stub:
-   - окно — H2-секция `## <slug>` в `window.md` **той же фичи** с
-     минимальным мета-блоком (`name` + `state` + `status: draft` +
-     обязательные поля с `—` где допустимо);
+   - окно — H2-секция `## <slug>` в `window.md` **той же фичи** со
+     `status: draft`; у окна **все** мета-поля обязательны и `—` ни в
+     одном не допускается, поэтому stub заводится сразу с минимально
+     осмысленными значениями (`name`, `state`, `interface-block`,
+     `ux-substrates`, `situations`, `who` — из контекста ссылки и
+     блока-источника), а дыры — вопросами в state;
    - use-case бота — H2-секция `## <slug>` в `use-case.md` **той же
      фичи** с минимальным мета-блоком (`name` + `operation` +
      `status: draft`) и пустыми/`—` H3-секциями;

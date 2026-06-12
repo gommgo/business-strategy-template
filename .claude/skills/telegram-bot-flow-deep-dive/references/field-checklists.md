@@ -128,8 +128,9 @@ JSON-примитивы) + `transitions` (сводное зеркало граф
   (`use-case:<uc-slug>`, секция в `use-case.md` фичи, slug-валидируемо;
   `action` может быть `—` — чистая навигация);
 - `getter.*.data` → `data:<slug>` в `…/interface/<surface>/data-items.md`;
-- `message.media` → `assets/<window-slug>/…` (папка ассетов фичи) или
-  `data:<slug>.<поле>`.
+- `message.media.source` → `assets/<window-slug>/…` (папка ассетов фичи)
+  или `data:<slug>.<поле>` (`media.type` — `photo | video | document |
+  animation`).
 **Кто ссылается**: `dialog.windows`, `transition` виджетов соседних
 окон **этой же фичи**.
 
@@ -161,8 +162,8 @@ JSON-примитивы) + `transitions` (сводное зеркало граф
    диалога) + «нужен новый» (Other → предложить запустить
    `interface-deep-dive <project-slug> <surface> block:<slug>`).
 3. `name` (Other) → скилл выводит `slug` и предлагает `state`
-   (UPPER_SNAKE, англ.) одной строкой для контроля; `description`
-   (Other).
+   (UPPER_SNAKE, англ.) одной строкой для контроля; одна фраза об окне
+   (Other) — это blockquote под заголовком секции, не мета-поле.
 4. `ux-substrates`: автоматически предложить весь список
    `ux-substrates` выбранного interface-блока по умолчанию (для
    зеркала). Аналитик может скорректировать; при несовпадении —
@@ -173,8 +174,9 @@ JSON-примитивы) + `transitions` (сводное зеркало граф
 6. `who`: мультивыбор из `…/interface/<surface>/who.md`.
 7. **Тело — `message`**: текст сообщения — Other (формулировка
    аналитика; скилл лишь подсказывает, какие плейсхолдеры `{…}`
-   понадобятся под `инфо`/`список`-субстраты). `media` (опц) — референс
-   из `assets/` или `data:<slug>.<поле>`, или `—`.
+   понадобятся под `инфо`/`список`-субстраты). `media` (опц) — `type`
+   (опции enum `photo`/`video`/`document`/`animation`) + `source`
+   (референс из `assets/` или `data:<slug>.<поле>`), или `—`.
 8. **Тело — `widgets`** (раунд за раундом, по виджету): скилл
    предлагает состав из соответствия атомам (`команда` → `button`,
    `ввод` → `text-input`, `выбор` → `select`/`multiselect`/`calendar` —

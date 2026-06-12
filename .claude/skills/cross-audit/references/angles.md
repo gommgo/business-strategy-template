@@ -1601,63 +1601,68 @@ destination — infrastructure/shared-platform.md и placement.md. Сверь
 12. `stakeholder-strategy` (business → swot/hypothesis-map: стойка властного
     лица ↔ bet/goal — стратегия не против ключевого человека)
 13. `projectmap-reciprocity` (граф стыков: осмысленность рёбер project-map)
+14. `service-placement` (сервисы и own-ресурсы всех проектов ↔
+    `infrastructure/{placement,runtime,server}.md`; если есть и services, и
+    периметр)
+15. `platform-shared` (`provided-by: shared:` проектов ↔
+    `infrastructure/shared-platform.md`; если есть периметр)
 
 **По каждому проекту, пары `проект × lens`** (для каждого `<slug>` из
 `docs/projects/`, кроме `_template`; цели — корневые kind продукта
 `vision`/`user`/`integration`):
 
-13a. `service-placement` (сервисы и own-ресурсы всех проектов ↔
-    `infrastructure/{placement,runtime,server}.md`; если есть и services, и
-    периметр)
-13b. `platform-shared` (`provided-by: shared:` проектов ↔
-    `infrastructure/shared-platform.md`; если есть периметр)
-
-14. `goal-vision` (проблема → продукт; скоуп к проблемам проекта)
-15. `subject-user` (проблема → продукт; скоуп к проблемам проекта)
-16. `segment-user` (ajtbd → продукт)
-17. `job-vision` (ajtbd → продукт: Big/Core Job ↔ vision.Success)
-18. `segmentproblem-vision` (ajtbd → продукт: трение ↔ vision.Problem)
-19. `integration-crossproject` (межпроектный: integration ↔ project-map ↔
+16. `goal-vision` (проблема → продукт; скоуп к проблемам проекта)
+17. `subject-user` (проблема → продукт; скоуп к проблемам проекта)
+18. `segment-user` (ajtbd → продукт)
+19. `job-vision` (ajtbd → продукт: Big/Core Job ↔ vision.Success)
+20. `segmentproblem-vision` (ajtbd → продукт: трение ↔ vision.Problem)
+21. `integration-crossproject` (межпроектный: integration ↔ project-map ↔
     domains-порт ↔ обратная сторона соседа; если у проекта есть стыки
     `target: sibling-project` или ребро в project-map)
-20. `service-capability` (сервисы проекта ↔ его capability; если у проекта
+22. `service-capability` (сервисы проекта ↔ его capability; если у проекта
     есть `services/`)
 
 **По каждому проекту, тройки `проект × поверхность × lens`** (для каждого
 `<slug>` и каждой поверхности `<surface>` из его `surface.md`; source ИЛИ
 destination — per-surface артефакт):
 
-20. `surface-capability` (foundation: реестр поверхности ↔ её возможности)
-21. `mechanic-capability` (ajtbd → продукт: механика ценности ↔ capability
+23. `surface-capability` (foundation: реестр поверхности ↔ её возможности)
+24. `mechanic-capability` (ajtbd → продукт: механика ценности ↔ capability
     поверхности)
-22. `bet-capability` (проблема → продукт; скоуп к проблемам проекта)
-23. `capability-hypothesis` (продукт → hypothesis-map: capability.hypotheses)
-24. `capability-job` (продукт → ajtbd: capability.jobs)
-25. `user-who` (foundation, продукт → interface поверхности)
-26. `surface-zone` (foundation: реестр поверхности ↔ её зоны)
-27. `capability-situation` (foundation: возможности ↔ ситуации поверхности)
-28. `situation-job` (interface поверхности → ajtbd: situation.jobs)
-29. `situation-hypothesis` (interface поверхности → hypothesis-map:
+25. `bet-capability` (проблема → продукт; скоуп к проблемам проекта)
+26. `capability-hypothesis` (продукт → hypothesis-map: capability.hypotheses)
+27. `capability-job` (продукт → ajtbd: capability.jobs)
+28. `user-who` (foundation, продукт → interface поверхности)
+29. `surface-zone` (foundation: реестр поверхности ↔ её зоны)
+30. `capability-situation` (foundation: возможности ↔ ситуации поверхности)
+31. `situation-job` (interface поверхности → ajtbd: situation.jobs)
+32. `situation-hypothesis` (interface поверхности → hypothesis-map:
     situation.hypotheses)
-30. `market-capability` (рынок ↔ возможности поверхности; часто hints)
-31. `constraint-surface` (ограничение ↔ поверхность/её интеграции)
-32. `capability-domain` (если у проекта есть `services/` с доменами; возможности
+33. `market-capability` (рынок ↔ возможности поверхности; часто hints)
+34. `constraint-surface` (ограничение ↔ поверхность/её интеграции)
+35. `surface-service` (если у проекта есть `services/service.md`;
+    поверхность обслуживается ≥1 сервисом, bot-поверхность — ровно одним
+    `type: bot`)
+36. `capability-domain` (если у проекта есть `services/` с доменами; возможности
     поверхности ↔ домены)
-33. `integration-domain` (если у проекта есть `services/`; интеграции
+37. `integration-domain` (если у проекта есть `services/`; интеграции
     поверхности ↔ домены-порты)
-34. `surface-screen` (если у проекта есть `screens/<surface>/`)
-35. `surface-botflow` (если поверхность `type: bot` и есть
+38. `surface-screen` (если у проекта есть `screens/<surface>/`)
+39. `surface-botflow` (если поверхность `type: bot` и есть
     `telegram-bot-flow/<surface>/` с фичами `features/<feature>/`)
-36. `botflow-domain` (если у проекта есть `services/` с доменами и
+40. `botflow-domain` (если у проекта есть `services/` с доменами и
     `telegram-bot-flow/<surface>/`; зависимости use-case'ов бота фич +
     триггеры уведомлений ↔ домены)
+41. `botflow-service` (если у проекта есть `services/` и
+    `telegram-bot-flow/<surface>/`; контексты-зависимости бота ↔
+    сервисы-владельцы, событие-триггер ↔ их `Messaging`)
 
 **По каждому проекту, один агент на проект сразу по всем поверхностям:**
 
-37. `dataitems-crosssurface` (консистентность словаря данных между
+42. `dataitems-crosssurface` (консистентность словаря данных между
     поверхностями; только если у проекта ≥2 поверхностей)
 
-Полный рой = `13 верхнеуровневых + Σ по проектам (пары проект×lens +
+Полный рой = `15 верхнеуровневых + Σ по проектам (пары проект×lens +
 тройки проект×поверхность×lens применимых углов + dataitems-crosssurface
 для мультиповерхностных проектов)`.
 

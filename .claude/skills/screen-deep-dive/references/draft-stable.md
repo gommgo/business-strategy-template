@@ -46,9 +46,11 @@
 существующий файл в
 `docs/projects/<project-slug>/screens/<surface>/assets/<kind>/<slug>/`.
 
-**Inventory**: каждое имя `ui:<Component>` есть в инвентаре (см.
-`ui-inventory.md`); либо имя — «ui-lib gap», зарегистрированный в
-state-заметке.
+**Inventory**: каждое имя `ui:<Name>` есть в словаре `components`
+манифеста `@stit/ui` (см. `ui-inventory.md`), props — из `props[]`;
+либо это forward-реф на компонент из `notAvailable` с пометкой
+`(planned)`. Потребность вне манифеста — «ui-lib gap» в state-заметке;
+само выдуманное имя в дереве не живёт.
 
 `stable` может ссылаться на `draft` — это допустимо. Аудит подсветит
 hint, но не блокирует stable.
@@ -79,7 +81,7 @@ hint, но не блокирует stable.
 
 ### 5. State-заметка чиста по `**blocker**`-вопросам
 
-`state/<project-slug>/screens/<surface>/<kind>/<slug>.md`:
+`../entrypoint/state/projects/<project-slug>/screens/<surface>/<kind>/<slug>.md`:
 
 - Не содержит секцию `## Открытые вопросы` ИЛИ
 - Содержит, но в ней нет вопросов с префиксом/суффиксом `**blocker**`.
@@ -113,8 +115,9 @@ flow всегда ✅, если frontmatter полный.
 
 **shell**:
 - `slots` объявлены и для каждого указаны `required` + `accepts`.
-- `tree` содержит каркасный узел (`ui:AppShell` / `ui:Header` / …)
-  с `(fills: $<slot>)` для каждого объявленного слота.
+- `tree` содержит каркас (`layout:`-узлы и/или компоненты манифеста,
+  запланированные — forward-рефами `(planned)`) с `(fills: $<slot>)`
+  для каждого объявленного слота.
 - Слотовые узлы пустые (без содержимого).
 
 ## Алгоритм проверки скиллом
@@ -123,7 +126,8 @@ flow всегда ✅, если frontmatter полный.
 
 1. Прочитать
    `docs/projects/<project-slug>/screens/<surface>/<kind>/<slug>/index.md`.
-2. Прочитать `state/<project-slug>/screens/<surface>/<kind>/<slug>.md`,
+2. Прочитать
+   `../entrypoint/state/projects/<project-slug>/screens/<surface>/<kind>/<slug>.md`,
    если есть.
 3. Прочитать соседей (см. `field-checklists.md`).
 4. Прогнать пункты 1, 2, 3, 5, 6 (программно проверяемые).

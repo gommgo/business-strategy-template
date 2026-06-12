@@ -146,7 +146,7 @@ falsifiable-вопрос и пишет ответ архитектора дос�
 
    | юнит | type | status | H2 заполнено | дыры |
    |---|---|---|---|---|
-   | orders (паспорт) | api | draft | 5/8 | Resources, Messaging, Notes |
+   | orders (паспорт) | api | draft | 6/9 | Resources, Messaging, Notes |
    | tg-bot (паспорт) | bot | draft | 3/9 | Exposes, Dependencies, Resources, Workers, Fronts, Notes |
    | platform.md | — | 1 запись draft | — | events-broker без provided-by |
    | architecture.md | — | draft | 1/2 | Decisions пуст |

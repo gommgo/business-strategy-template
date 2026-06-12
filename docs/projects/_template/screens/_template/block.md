@@ -30,7 +30,7 @@
 
 - ❌ Не screen: «весь экран» — это screen.
 - ❌ Не shell: каркас — shell.
-- ❌ Не один компонент: «primary-кнопка размером md» — это props
+- ❌ Не один компонент: «accent-кнопка размером md» — это props
   `ui:Button`, не блок.
 - ❌ Не data-слой: блок объявляет контракт `data:` ссылками; реальная
   загрузка — в коде.
@@ -43,7 +43,7 @@ ui-lib — а не экран, не каркас и не один компоне
 
 - «**Список исследований**» (toolbar + таблица + пагинация) →
   `studies-list` ✅
-- «**Кнопка "Создать"**» — это `ui:Button` с props ❌
+- «**Кнопка "Создать"**» — это `ui:Button` с children-текстом ❌
 - «**Рабочее место исследований**» — это screen ❌
 
 ## Форма frontmatter
@@ -58,6 +58,7 @@ ui-lib — а не экран, не каркас и не один компоне
 | `data` | `{ <param>: data:<slug> }` | optional | контракт входных данных |
 | `slots` | `[slot-name]` | optional | если блок — контейнер (вложение `block:` внутрь) |
 | `used-by-screens` | `[screen-slug]` | optional | где встречается (выводимое поле для удобства) |
+| `assets` | `[имя-файла]` | optional | визуальные референсы в `assets/block/<slug>/` (только имена файлов; без ассетов поле отсутствует) |
 | `status` | `draft \| stable` | yes | зрелость записи |
 
 `data` — карта именованных входов в slug-и `data-items` из interface.
@@ -69,14 +70,17 @@ ui-lib — а не экран, не каркас и не один компоне
 ```yaml
 tree:
   block-header:
-    - ui:Row justify=between align=center gap=md
-      - ui:Search placeholder='Поиск исследований'
-      - ui:Row gap=sm
-        - ui:Button variant=ghost icon=filter label='Фильтры'
-        - ui:Button variant=primary icon=plus label='Новое'
+    - layout:row justify=between align=center gap=md
+      - ui:Search size=md
+      - layout:row gap=sm
+        - ui:Button variant=ghost
+          - 'Фильтры'
+        - ui:Button variant=accent
+          - icon:plus
+          - 'Новое'
   block-body:
-    - ui:Scroll axis=y
-      - ui:DataList
+    - ui:ScrollArea scrollbars=vertical
+      - ui:Table (planned)
           items: data:study
           columns:
             - { field: data:study.name,   label: 'Имя' }
@@ -84,10 +88,16 @@ tree:
             - { field: data:study.status, label: 'Статус' }
             - { field: data:study.owner,  label: 'Владелец' }
   block-footer:
-    - ui:Row justify=between
-      - ui:Pagination
-      - ui:Button variant=ghost label='Экспорт'
+    - layout:row justify=between
+      - ui:Pagination (planned)
+      - ui:Button variant=ghost
+        - 'Экспорт'
 ```
+
+Текст и иконка — children-узлы (`- 'Новое'`, `- icon:plus`), не props.
+`ui:Table (planned)` / `ui:Pagination (planned)` — forward-рефы на
+запланированные компоненты из `notAvailable` манифеста (см. канон слоя,
+«Контракт с `@stit/ui`»).
 
 ## Пример
 
@@ -118,23 +128,27 @@ screen, который этот блок размещает.
 ​```yaml
 tree:
   block-header:
-    - ui:Row justify=between align=center gap=md
-      - ui:Search placeholder='Поиск исследований'
-      - ui:Row gap=sm
-        - ui:Button variant=ghost icon=filter label='Фильтры'
-        - ui:Button variant=primary icon=plus label='Новое'
+    - layout:row justify=between align=center gap=md
+      - ui:Search size=md
+      - layout:row gap=sm
+        - ui:Button variant=ghost
+          - 'Фильтры'
+        - ui:Button variant=accent
+          - icon:plus
+          - 'Новое'
   block-body:
-    - ui:Scroll axis=y
-      - ui:DataList
+    - ui:ScrollArea scrollbars=vertical
+      - ui:Table (planned)
           items: data:study
           columns:
             - { field: data:study.name,   label: 'Имя' }
             - { field: data:study.date,   label: 'Дата' }
             - { field: data:study.status, label: 'Статус' }
   block-footer:
-    - ui:Row justify=between
-      - ui:Pagination
-      - ui:Button variant=ghost label='Экспорт'
+    - layout:row justify=between
+      - ui:Pagination (planned)
+      - ui:Button variant=ghost
+        - 'Экспорт'
 ​```
 ```
 
@@ -145,7 +159,8 @@ tree:
   блок-slug в обоих слоях — одни и те же субстраты).
 - ❌ Дерево без `block-body`.
 - ❌ Облик в дереве (цвет, тень, шрифт).
-- ❌ Тематические props (`density`/`brand`/`scheme`) в узлах.
+- ❌ Оси контекста (`brand`/`scheme`/`density`/`mode`/`dir`) как props
+  узлов — они живут на корне приложения (`data-*` / `StitProvider`).
 - ❌ Breakpoints в дереве (адаптив блока — props ui-lib + shell).
 - ❌ Один и тот же `data:<slug>` под разными именованными слотами —
   переиспользовать data-items напрямую.

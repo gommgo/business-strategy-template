@@ -119,25 +119,36 @@ Frontmatter — YAML, древо — fenced ```yaml```-блок в теле.
 
 | префикс | источник | пример |
 |---|---|---|
-| `ui:` | `@stit/ui` (компонент библиотеки) | `ui:Stack`, `ui:Button`, `ui:DataList` |
+| `ui:` | словарь `components` манифеста `@stit/ui` (см. «Контракт с `@stit/ui`») | `ui:Button`, `ui:Search`, `ui:Popover.Content` |
+| `layout:` | нейтральный узел раскладки — не компонент (см. «Узлы раскладки») | `layout:stack`, `layout:row`, `layout:grid` |
+| `icon:` | реестр иконок манифеста `@stit/ui` | `icon:plus`, `icon:brands/visa` |
 | `block:` | `docs/projects/<project-slug>/screens/<surface>/blocks/<slug>` (проектный блок) | `block:filters-panel` |
 | `data:` | `docs/projects/<project-slug>/interface/<surface>/data-items.md` (датум) | `data:study`, `data:study.name` |
 | `block-*:` | зарезервированная internal-zone блока (внутри tree блока) | `block-header:`, `block-body:`, `block-footer:`, `block-aside:` |
 
-### Layout-примитивы
+Текст — **children-узел** дерева (строка в кавычках), не props: у
+компонентов библиотеки нет `label=` / `title=` / `icon=` — подпись
+кнопки и её иконка передаются детьми (`- 'Новое'`, `- icon:plus`).
 
-| узел | роль | ключевые props |
+### Узлы раскладки
+
+Layout-примитивов в `@stit/ui` нет и не планируется: стеки, сетки и
+отступы — не компоненты, а **композиция дерева** (internal-zones и
+порядок узлов), которую автор макета материализует Tailwind-утилитами
+при сборке. Намерение раскладки дерево несёт нейтральными
+`layout:`-узлами:
+
+| узел | намерение | ключевые props |
 |---|---|---|
-| `ui:Stack` | вертикальная композиция | `gap=sm\|md\|lg`, `justify`, `align` |
-| `ui:Row` | горизонтальная композиция | `gap`, `justify=start\|center\|end\|between\|around`, `align=start\|center\|stretch`, `wrap=true\|false` |
-| `ui:Cluster` | группа без направления (плотный кластер) | `gap` |
-| `ui:Grid` | сетка | `columns=N`, `gap`, либо `areas: [[…]]` |
-| `ui:Pad` | внутренний отступ-обёртка | `gap` |
-| `ui:Sticky` | прилипающая обёртка | `offset=top\|bottom` |
-| `ui:Scroll` | скроллируемая обёртка | `axis=y\|x` |
+| `layout:stack` | вертикальная композиция | `gap=xs\|sm\|md\|lg`, `justify`, `align` |
+| `layout:row` | горизонтальная композиция | `gap`, `justify=start\|center\|end\|between`, `align=start\|center\|stretch`, `wrap=true\|false` |
+| `layout:grid` | сетка | `columns=N`, `gap`, либо `areas: [[…]]` |
+| `layout:layer` | слой поверх потока (якорь overlay) | — |
 
-`span=N` ставится на дочернем узле `ui:Grid` (как в CSS grid-column-span).
-Размеры — токенами (`sm`, `md`, `lg`), не пикселями.
+`span=N` ставится на дочернем узле `layout:grid`. Размеры — токенами
+намерения (`xs`, `sm`, `md`, `lg`), не пикселями. `layout:`-узел — не
+требование к библиотеке: он живёт только в артефакте и превращается в
+Tailwind-утилиты при ручной сборке.
 
 ### Internal-zones блока
 
@@ -147,16 +158,22 @@ Frontmatter — YAML, древо — fenced ```yaml```-блок в теле.
 ```yaml
 tree:
   block-header:                # toolbar / title
-    - ui:Row justify=between
+    - layout:row justify=between
       - ui:Search
-      - ui:Button label='Новое'
+      - ui:Button variant=accent
+        - icon:plus
+        - 'Новое'
   block-body:                  # основной контент
-    - ui:DataList items=data:study
+    - ui:Table (planned)
+        items: data:study
   block-footer:                # пагинация / действия
-    - ui:Pagination
+    - ui:Pagination (planned)
   block-aside:                 # боковая дорожка (если есть)
-    - ui:Stack
-      - ui:Field label='Сортировка'
+    - layout:stack gap=md
+      - ui:Field
+        - ui:Field.Label
+          - 'Сортировка'
+        - ui:Select
 ```
 
 Зоны опциональны; блок может содержать только `block-body`.
@@ -166,14 +183,16 @@ tree:
 Для нетривиальных сеток (дашборды, многопанельные backoffice):
 
 ```yaml
-- ui:Grid
+- layout:grid
     areas:
       - [search,  search,  action]
       - [filters, list,    detail]
       - [filters, list,    detail]
     fill:
       search:  ui:Search
-      action:  ui:Button label='Новое'
+      action:
+        - ui:Button variant=accent
+          - 'Новое'
       filters: block:filters-panel
       list:    block:studies-list
       detail:  block:study-preview
@@ -186,7 +205,7 @@ tree:
 полю — `data:<slug>.<field>`.
 
 ```yaml
-- ui:DataList
+- ui:Table (planned)
     items: data:study
     columns:
       - { field: data:study.name,   label: 'Имя' }
@@ -194,59 +213,64 @@ tree:
       - { field: data:study.status, label: 'Статус' }
 ```
 
-Lint проверяет существование slug-а в `data-items.md` той же поверхности.
-Реальный источник данных — слой кода (FSD); артефакт фиксирует только
-контракт.
+Существование slug-а в `data-items.md` той же поверхности проверяет
+`/screen-audit`. Реальный источник данных — слой кода (FSD); артефакт
+фиксирует только контракт.
 
 ## Контракт с `@stit/ui`
 
-`@stit/ui` публикует JSON-каталог компонентов
-(`manifest.json` в дистрибутиве): имя + props + варианты. Lint в
-`docs/projects/<project-slug>/screens/<surface>/` читает manifest и ругает
-неизвестные `ui:*` имена и невалидные props.
+Источник правды словаря компонентов — манифест пакета
+`@stit/ui/manifest.json`: в экосистеме рядом — `../ui-lib/dist/manifest.json`,
+у потребителя с установленным пакетом — `node_modules/@stit/ui/manifest.json`.
+Канон screens собственного списка компонентов **не ведёт** — экраны
+собираются на словаре манифеста:
 
-Пока manifest не опубликован — имена `ui:*` в артефактах служат
-**требованиями к ui-lib**. Накопленный «список требуемого» — раздел
-ниже.
+- имя `ui:<Name>` валидно ⇔ `<Name>` есть в словаре `components`
+  манифеста;
+- props и их значения — из массива `props[]` компонента (объекты
+  `{name, tsType, required, values?, default}`); если у пропа задан
+  `values` — значение только из списка. Например, у `ui:Button`
+  `variant ∈ accent | secondary | outline | ghost | destructive`, тон —
+  отдельный проп `tone` (действует при `variant=accent`);
+- части compound-компонентов — `ui:<Name>.<Part>` по массиву `parts`
+  компонента (`ui:Popover.Trigger`, `ui:Field.Label`); props части — из
+  её `props[]`;
+- реф `icon:<slug>` валиден ⇔ иконка есть в реестре иконок: ключ
+  `icons` манифеста указывает на под-манифест (`icons.manifest`, в
+  дистрибутиве — `dist/icons/manifest.json`), где `icons[]` несёт
+  `subpath` вида `@stit/ui/icons/<slug>`; `<slug>` — хвост subpath
+  (`plus`, `chevron-down`, `brands/visa`);
+- компонент из `notAvailable` манифеста (запланированный) — осознанный
+  **forward-реф**: в дереве помечается суффиксом `(planned)`
+  (`ui:Table (planned)`); props у него не описываются — контракта ещё
+  нет, намерение несут children и текст. `/screen-audit` репортит такой
+  реф как gap;
+- имени нет ни в `components`, ни в `notAvailable` — в дерево оно не
+  попадает: узел собирается из существующих компонентов и
+  `layout:`-узлов, а потребность фиксируется как «ui-lib gap» в
+  state-заметке скилла (обратная связь библиотеке).
 
-### Топ-уровень компонентов (выводимые требования)
+Проверки ведёт `/screen-audit`, читающий манифест. Живой
+референс-потребитель манифеста — соседняя галерея `ui-gallery`: каталог
+и плейграунд компонентов она выводит из `manifest.json` автоматически —
+доказательство, что по словарю манифеста UI действительно собирается.
 
-Layout-примитивы:
-- `ui:Stack`, `ui:Row`, `ui:Cluster`, `ui:Grid`, `ui:Pad`,
-  `ui:Sticky`, `ui:Scroll`.
+### Состояния экрана
 
-Shell-каркасы:
-- `ui:AppShell` (слоты header/side/main/detail/overlay/footer),
-  `ui:Header`, `ui:Sidebar`, `ui:Main`, `ui:Detail`, `ui:OverlayLayer`,
-  `ui:Footer`.
-
-Data display:
-- `ui:DataList`, `ui:DataTable`, `ui:Pagination`, `ui:Avatar`,
-  `ui:Menu`, `ui:IconButton`, `ui:Toolbar`.
-
-Feedback (loading/empty/error/permission):
-- `ui:Skeleton`, `ui:EmptyState`, `ui:ErrorState`,
-  `ui:AccessDeniedState`, `ui:OfflineState`, `ui:NotFoundState`,
-  `ui:Toast`.
-
-Overlay:
-- `ui:Modal`, `ui:Drawer`, `ui:Popover`.
-
-Forms и input:
-- `ui:Form`, `ui:Field`, `ui:Input`, `ui:Checkbox`, `ui:Radio`,
-  `ui:DateInput`, `ui:Search`, `ui:Button`, `ui:Calendar`,
-  `ui:InputOtp`.
-
-Список — выводимое требование, не финальный реестр. Источник правды —
-`@stit/ui/manifest.json`, когда тот появится.
+Канон-состояния (`loading`, `empty`, `error`, `permission-denied`,
+`offline`, `not-found`) — канон слоя screens, от словаря библиотеки они
+не зависят. Их облик описывается композицией и текстом (`layout:`-узлы
++ children-строки); когда в манифесте есть подходящий компонент — рефом
+(`ui:Spinner`; `ui:Skeleton (planned)` — forward-реф).
 
 ## Anti-patterns
 
 - ❌ Облик в артефакте: цвета, типографика, пиксели, `style=`. Это craft
   библиотеки.
 - ❌ Оси контекста как props компонентов или поля артефактов:
-  `density`/`brand`/`scheme` живут на корне через `data-*`, не в YAML
-  дерева.
+  `data-brand` / `data-scheme` / `data-density` / `data-mode` живут на
+  корне приложения, `dir` — на узле-носителе (`StitProvider`), не в
+  YAML дерева.
 - ❌ FSD-маппинг в screens (widget/feature/entity-имена в дереве,
   ссылки на `pages/`/`widgets/`). FSD-структура появляется в коде
   вручную при сборке wireframe/hi-fi, не в артефактах screens.

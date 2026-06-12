@@ -1,6 +1,6 @@
 ---
 name: screen-audit
-description: "Аудит консистентности аналитических артефактов экранов проекта в `docs/projects/<project-slug>/screens/<surface>/` — по папке на поверхность (surface) из реестра `surface.md`. Невалидные ссылки на slug (внутри screens той же поверхности и в interface-слое той же поверхности), рассинхрон зеркал (`block.ux-substrates` ↔ interface, `screen.blocks` ↔ реально использованные `block:` в дереве, `block.used-by-screens`), нарушения slot-fills (необъявленный слот, нарушение `accepts`, незаполненный `required`-слот в stable-screen), `viewport` против участия в flow, отсутствие канон-состояний, anti-patterns (облик/breakpoints/FSD-имена в дереве, inline-cтейты в block.tree), coverage-дыры (shell/block без потребителей, недостижимый screen), папка поверхности вне реестра, ссылка из одной поверхности в другую. Не правит артефакты, только указывает; деструктивные правки — через `screen-deep-dive`. Использовать перед коммитом артефактов, когда `screen-deep-dive` предлагает прогон в конце сессии, или когда аналитик подозревает рассогласование между файлами и зеркалами с interface. Принимает `<project-slug>` первым аргументом; без него — пикер по проектам. Без `<surface>` — прогон по всем папкам поверхностей; с `<surface>` — одна поверхность. Полный прогон по 4 kind — без kind-аргумента; узкий — `<kind>` или `<kind>:<slug>`."
+description: "Аудит консистентности аналитических артефактов экранов проекта в `docs/projects/<project-slug>/screens/<surface>/` — по папке на поверхность (surface) из реестра `surface.md`. Невалидные ссылки на slug (внутри screens той же поверхности и в interface-слое той же поверхности), рассинхрон зеркал (`block.ux-substrates` ↔ interface, `screen.blocks` ↔ реально использованные `block:` в дереве, `block.used-by-screens`), нарушения slot-fills (необъявленный слот, нарушение `accepts`, незаполненный `required`-слот в stable-screen), `viewport` против участия в flow, отсутствие канон-состояний, anti-patterns (облик/breakpoints/FSD-имена в дереве, inline-cтейты в block.tree), имена/props `ui:*` против манифеста `@stit/ui` (словарь `components`+`notAvailable`, forward-рефы `(planned)`), coverage-дыры (shell/block без потребителей, недостижимый screen), папка поверхности вне реестра, ссылка из одной поверхности в другую. Не правит артефакты, только указывает; деструктивные правки — через `screen-deep-dive`. Использовать перед коммитом артефактов, когда `screen-deep-dive` предлагает прогон в конце сессии, или когда аналитик подозревает рассогласование между файлами и зеркалами с interface. Принимает `<project-slug>` первым аргументом; без него — пикер по проектам. Без `<surface>` — прогон по всем папкам поверхностей; с `<surface>` — одна поверхность. Полный прогон по 4 kind — без kind-аргумента; узкий — `<kind>` или `<kind>:<slug>`."
 ---
 
 # screen-audit
@@ -73,9 +73,11 @@ args задаёт scope:
   `docs/projects/<project-slug>/interface/<surface>/{who,situation,block,ux-substrate,data-items}.md`.
 - Реестр-хребет `docs/projects/<project-slug>/surface.md` — перечень
   поверхностей (для R-SURF).
-- Контракт ui-lib: «топ-уровень компонентов» в каноне
-  `docs/projects/_template/screens/README.md` (пока
-  `@stit/ui/manifest.json` не опубликован).
+- Контракт ui-lib: манифест `@stit/ui/manifest.json` — в экосистеме
+  соседний репо `../ui-lib/dist/manifest.json`, у потребителя
+  `node_modules/@stit/ui/manifest.json` (словарь `components` + `parts`
+  + `props[]`, `notAvailable`, реестр иконок по указателю `icons`) —
+  для R-COV-006.
 
 **Чего аудит не читает**:
 
@@ -86,11 +88,12 @@ args задаёт scope:
   поверхность — error (R-XSURF-001), а кросс-поверхностную сверку делает
   `/cross-audit`.
 - `docs/projects/_template/screens/` — это канон формы, не рабочая зона.
-  Из него читаются только критерии/anti-patterns/инвентарь, не данные.
+  Из него читаются только критерии и anti-patterns, не данные; словарь
+  `ui:*` — манифест `@stit/ui`, не канон.
 - Исходники библиотеки — это слой кода, не предмет screens.
-- `state/<project-slug>/<surface>/<kind>/<slug>.md` скилла
-  `screen-deep-dive` — рабочая память другого скилла; аудит её не
-  трогает.
+- `../entrypoint/state/projects/<project-slug>/screens/<surface>/<kind>/<slug>.md`
+  — рабочая память скилла `screen-deep-dive` в едином дереве state
+  оркестратора; аудит её не трогает.
 
 ## Что делать при запуске
 
@@ -120,8 +123,8 @@ args задаёт scope:
 | severity | смысл | пример |
 |---|---|---|
 | `error` | Структурное нарушение, ломает модель | Невалидная ссылка; дубликат `slug`; `slug` папки ≠ `slug` во frontmatter; `screen` ссылается на слот, не объявленный в shell; нарушение `accepts` (`tree` там, где `accepts: block`); рассинхрон зеркал; `block.interface-block.slug ≠ block.slug`; transition между desktop- и mobile-screen; `status` или `viewport` вне enum; папка поверхности вне реестра `surface.md`; ссылка из папки одной поверхности в сущность другой |
-| `warning` | Семантическое подозрение, рискует смыслом | Облик/breakpoints/FSD-имена в дереве; inline-cтейты в `block.tree`; `screen.situations` не покрывает ситуации, чьи ux-substrates есть на экране; пустой обязательный слот frontmatter; `description` совпадает с `name`; flow с одним screen и в `desktop`, и в `mobile`; `screen.viewport` несовместим с участием в `flow.desktop`/`mobile` |
-| `hint` | Coverage / стиль, не ломает | shell без screens; block без потребителей; screen недостижим (не в flow, не entrypoint, не таргет переходов); stable ссылается на draft; `ui:Component` отсутствует в выводимом инвентаре; короткое `description`; поверхность реестра без папки screens |
+| `warning` | Семантическое подозрение, рискует смыслом | Облик/breakpoints/FSD-имена в дереве; inline-cтейты в `block.tree`; имя `ui:*`, проп или значение enum вне манифеста `@stit/ui`; forward-реф из `notAvailable` без пометки `(planned)`; `screen.situations` не покрывает ситуации, чьи ux-substrates есть на экране; пустой обязательный слот frontmatter; `description` совпадает с `name`; flow с одним screen и в `desktop`, и в `mobile`; `screen.viewport` несовместим с участием в `flow.desktop`/`mobile` |
+| `hint` | Coverage / стиль, не ломает | shell без screens; block без потребителей; screen недостижим (не в flow, не entrypoint, не таргет переходов); stable ссылается на draft; forward-реф `ui:* (planned)` (gap к ui-lib); короткое `description`; поверхность реестра без папки screens |
 
 Подробный реестр — `references/rules.md`.
 
@@ -164,7 +167,7 @@ args задаёт scope:
   Что делать: пересинхронизировать через /screen-deep-dive <project-slug> web-clinic block:studies-list
   (скилл переспросит источник правды).
 
-[warning] web-clinic / block:studies-list → tree содержит `ui:Skeleton` (inline-state в block).
+[warning] web-clinic / block:studies-list → tree содержит `ui:Skeleton (planned)` (inline-state в block).
   Что делать: перенести в screen.states через /screen-deep-dive <project-slug> web-clinic screen:<потребитель>.
 
 [hint] tg-bot / shell:auth-shell → ни один screen не ссылается на этот shell.
@@ -265,6 +268,7 @@ totals: { error: X, warning: Y, hint: Z }
 - **Не запускать `screen-deep-dive`** автоматически из аудита. Это
   делает аналитик руками по выводу аудита.
 - **Не аудитить `docs/projects/_template/screens/`** — это канон формы;
-  из него читаются только критерии и инвентарь, не данные.
-- **Не аудитить `state/<project-slug>/<surface>/<kind>/<slug>.md`** —
-  рабочая память `screen-deep-dive`, не предмет screens-канона.
+  из него читаются только критерии и anti-patterns, не данные.
+- **Не аудитить
+  `../entrypoint/state/projects/<project-slug>/screens/<surface>/<kind>/<slug>.md`**
+  — рабочая память `screen-deep-dive`, не предмет screens-канона.

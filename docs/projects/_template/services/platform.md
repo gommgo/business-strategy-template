@@ -52,7 +52,7 @@ object storage, IDP. Тест: «есть ли у этой штуки бизне
 - `slug` — устойчивый идентификатор · `kebab-case` · обяз.
 - `name` — короткое имя · текст · обяз.
 - `description` — зачем нужен проекту, бизнес-смыслом · текст · обяз.
-- `type` — вид ресурса · `message-broker` \| `api-gateway` \| `cdn` \| `object-storage` \| `idp` \| `other` · обяз.
+- `type` — вид ресурса · `message-broker` \| `api-gateway` \| `cdn` \| `object-storage` \| `idp` \| `registry` \| `monitoring` \| `secret-store` \| `other` · обяз.
 - `technology` — осознанный выбор технологии · `nats` \| `kafka` \| `traefik` \| `minio` \| `keycloak` \| … (свободный slug) · обяз.
 - `provided-by` — свой ресурс проекта или общий ресурс бизнеса · `own` \| `` `shared:<slug>` `` (реф в `docs/projects/infrastructure/shared-platform.md`) · обяз.
 - `status` — зрелость записи · `draft` \| `stable` · обяз.
@@ -65,7 +65,7 @@ object storage, IDP. Тест: «есть ли у этой штуки бизне
 
 | slug | name | description | type | technology | provided-by | status |
 |---|---|---|---|---|---|---|
-| `<slug>` | <короткое имя> | <зачем проекту> | `message-broker` \| `api-gateway` \| `cdn` \| `object-storage` \| `idp` \| `other` | `<technology>` | `own` \| `` `shared:<slug>` `` | `draft` |
+| `<slug>` | <короткое имя> | <зачем проекту> | `message-broker` \| `api-gateway` \| `cdn` \| `object-storage` \| `idp` \| `registry` \| `monitoring` \| `secret-store` \| `other` | `<technology>` | `own` \| `` `shared:<slug>` `` | `draft` |
 
 > Заполняется под проект. Пример: `events-broker` · «Брокер событий» ·
 > «Асинхронный обмен между сервисами проекта» · `message-broker` · `nats` ·

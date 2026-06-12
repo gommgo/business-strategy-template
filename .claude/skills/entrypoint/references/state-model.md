@@ -31,19 +31,22 @@ Forward-only: закрытое **удаляется**, история живёт
 │       └── candidates/<тема>-<ts>.md
 ├── swot/<kind>/<slug>.md    ← swot-deep-dive            (factor · bet)
 ├── hypothesis-map/<kind>/<slug>.md  ← hypothesis-map-deep-dive  (goal · metric · subject · hypothesis · task)
+├── infrastructure/          ← infrastructure-deep-dive (ИТ-периметр бизнеса: server · runtime · shared-platform · job · placement)
 └── projects/<project-slug>/ ← проектные исполнители (изоляция по продукту)
     ├── project/             ← project-deep-dive    (vision.md, <kind>/<slug>.md для surface · user · integration · boundary · constraint · market)
     │   └── capability/<surface>/<slug>.md          возможности по поверхности
     ├── interface/<surface>/<kind>/<slug>.md   ← interface-deep-dive
     ├── services/<kind>/<slug>.md              ← service-deep-dive (kind: service · platform · architecture)
     ├── domains/<context>/...                  ← domain-deep-dive (по bounded-context; ключ — контекст, не сервис)
-    └── screens/<surface>/<kind>/<slug>.md     ← screen-deep-dive
+    ├── screens/<surface>/<kind>/<slug>.md     ← screen-deep-dive
+    └── telegram-bot-flow/<surface>/...        ← telegram-bot-flow-deep-dive (по bot-поверхности)
 ```
 
 Поверхность (`surface`) — ось продукта. Реестр-хребет `surface.md`
 объявляет поверхности, а их slug'и партиционируют ветки `state/`:
 возможности (`project/capability/<surface>/`), интерфейс
-(`interface/<surface>/`) и экраны (`screens/<surface>/`) разнесены по
+(`interface/<surface>/`) и композиция — экраны (`screens/<surface>/`) либо
+диалоги бота (`telegram-bot-flow/<surface>/`) — разнесены по
 поверхности. `vision` и кросс-поверхностные kind (`surface`-реестр · `user`
 · `integration` · `boundary` · `constraint` · `market`) лежат плоско в
 `project/`. Домены (ветка `domains/<context>/`) surface-агностичны — делятся по

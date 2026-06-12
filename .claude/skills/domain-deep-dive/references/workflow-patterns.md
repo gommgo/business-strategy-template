@@ -54,7 +54,9 @@
    по kind`): два-три ✅/❌-варианта как опции, архитектор соотносит свою запись.
 8. Применить чек-лист `references/draft-stable.md`. Если все 5 ✅ —
    предложить через AskUserQuestion промоушн `draft → stable`.
-9. Записать `state/<project-slug>/<ctx>/<kind>/<Name>.md`, если есть что
+9. Записать
+   `../entrypoint/state/projects/<project-slug>/domains/<ctx>/<kind>/<Name>.md`,
+   если есть что
    (открытые вопросы, неочевидные доменные решения, next-step'ы).
 
 ### Пример раунда (use-case, после фундамента)
@@ -155,7 +157,9 @@ Other (формулировка архитектора). Опциями пода
 ### Шаги
 
 1. Прочитать файл артефакта целиком.
-2. Прочитать `state/<project-slug>/<ctx>/<kind>/<Name>.md`, если есть.
+2. Прочитать
+   `../entrypoint/state/projects/<project-slug>/domains/<ctx>/<kind>/<Name>.md`,
+   если есть.
 3. Прочитать соседей по cross-ref'ам: для `aggregate` — связанные
    events/, use-cases/, policies/ из своего контекста + чужие
    контексты, на которые ссылается; для `event` — source aggregate и

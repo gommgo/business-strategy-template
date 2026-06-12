@@ -332,8 +332,9 @@ ID-ссылки на child entity (только через parent).
 ## context-README (`<ctx>/README.md`)
 
 **Обязательные H2**: `Purpose`, `Aggregates`, `Use cases`, `Events`
-(вложенно `Published (outgoing)` + `Subscribed (incoming)`),
-`Cross-context dependencies`, `Ubiquitous Language`.
+(вложенные H3 — `Published (исходящие)` + `Subscribed (входящие)`, как в
+`_templates/context-readme.md`), `Cross-context dependencies`,
+`Ubiquitous Language`.
 
 **Опциональные**: `Glossary notes`, `Architecture notes`.
 

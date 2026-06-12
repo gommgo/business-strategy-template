@@ -50,8 +50,9 @@ surface-локален — правило «один датум, один slug»
 
 **Чистая аналитика**: на код (FSD-слои, компоненты) артефакты напрямую не
 мапятся — переход к коду идёт через
-`docs/projects/<project-slug>/screens/<surface>/` и далее вручную, без
-отдельного артефакта-моста.
+`docs/projects/<project-slug>/screens/<surface>/` (для поверхности с
+`type: bot` композиция живёт в `telegram-bot-flow/<surface>/`) и далее
+вручную, без отдельного артефакта-моста.
 
 ## Файлы
 
@@ -189,7 +190,8 @@ interface; ловит `/cross-audit`):
   связность — по умолчанию).
 - ❌ Блок без `ux-substrates` или без `who`.
 - ❌ Код / FSD / компонент / облик в артефактах — это слой кода (ручная
-  сборка по `docs/projects/<project-slug>/screens/<surface>/`) и craft
+  сборка по `docs/projects/<project-slug>/screens/<surface>/`; для
+  bot-поверхности композиция — `telegram-bot-flow/<surface>/`) и craft
   `@stit/ui`.
 - ❌ Ссылка из папки одной поверхности в сущность другой поверхности.
   Поверхности изолированы; общее (один user, один датум на разных

@@ -202,7 +202,8 @@ aggregate-файле и kind-ом отдельно не заводится).
    `integration`: `—` — внутренняя инфра этого сервиса,
    `` `service:<svc>` `` — другой сервис проекта (functions из его
    `Exposes`), slug провайдера `integration.md` — внешнее/сосед; `functions`
-   = дёрнутые функции `` [`<fn-slug>`, …] ``), Steps, Called methods,
+   = дёрнутые функции с префиксом провайдера
+   `` [`<integration>.<fn-slug>`, …] ``), Steps, Called methods,
    Events, Errors. Порт `service:`/события через брокер → сверить с
    `Dependencies`/`Messaging` паспорта сервиса; рассинхрон — blocker-вопрос
    «обновить паспорт через /service-deep-dive», не молчаливая правка.

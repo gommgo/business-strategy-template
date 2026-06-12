@@ -99,3 +99,10 @@ flowchart LR
 
 <!-- Или: -->
 <!-- - _нет_ -->
+
+---
+
+**status:** `draft`
+
+> Зрелость singleton'а — отдельная строка, без frontmatter (как `status` у
+> `vision` продуктового слоя): `draft` \| `stable`.

@@ -202,10 +202,12 @@ anti-patterns, draft→stable, каскады внутри слоя) — у ис
 ├── index.md                 ← оркестратор: срез по слоям/проектам
 ├── threads/<slug>.md        ← оркестратор: открытая нить (маршрут)
 ├── business/ · ajtbd/ · swot/ · hypothesis-map/   ← исполнители верхних слоёв
+├── infrastructure/                                 ← infrastructure-deep-dive
 └── projects/<slug>/                                ← проектные исполнители
     ├── project/ (vision + плоские kind + capability/<surface>/)
-    ├── interface/<surface>/ · screens/<surface>/   ← по поверхности
-    └── services/<svc>/domains/<ctx>/               ← по bounded-context, внутри сервиса
+    ├── interface/<surface>/ · screens/<surface>/ · telegram-bot-flow/<surface>/ ← по поверхности
+    ├── services/                                   ← service-deep-dive (топология)
+    └── domains/<context>/                          ← по bounded-context (ключ — контекст, не сервис)
 ```
 
 - Оркестратор владеет `index.md` (карта «где мы») + `threads/` и **не

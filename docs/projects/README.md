@@ -72,8 +72,9 @@ docs/projects/
 
 ## Выбор проекта и поверхности в скилах
 
-Скилы слоёв project / interface / services / domain / screen работают **в контексте
-одного проекта**; interface и screen — ещё и **в контексте одной
+Скилы слоёв project / interface / services / domain / screen /
+telegram-bot-flow работают **в контексте одного проекта**; interface, screen
+и telegram-bot-flow — ещё и **в контексте одной
 поверхности**. Аналитический скилл принимает `<project-slug>` первым
 аргументом (`/interface-deep-dive <slug> [<surface>] …`); без аргументов —
 пикеры по **человекочитаемым именам**: сначала проект (заголовок из
@@ -83,8 +84,9 @@ docs/projects/
 
 Новый проект заводит `/project-deep-dive` (копирует форму из
 `_template/project/` в новую папку проекта); папки поверхностей под
-`interface/`/`screens/` заводят их скилы при первом заходе на поверхность —
-каталоги руками не создаём.
+`interface/`/`screens/`/`telegram-bot-flow/` заводят их скилы
+(`/interface-deep-dive`, `/screen-deep-dive`, `/telegram-bot-flow-deep-dive`)
+при первом заходе на поверхность — каталоги руками не создаём.
 
 ## Каноны слоёв
 

@@ -149,7 +149,8 @@ cp $TPL/_templates/service-readme.md <P>/services/<svc>/README.md
 - **name** (Other; `slug` выводит скилл), **description** (Other — зачем
   проекту, бизнес-смыслом);
 - **type** — опции enum: `message-broker` / `api-gateway` / `cdn` /
-  `object-storage` / `idp` / `other`;
+  `object-storage` / `idp` / `registry` / `monitoring` / `secret-store` /
+  `other`;
 - **technology** — Other (осознанный выбор архитектора: `nats` / `kafka` /
   `traefik` / `minio` / …);
 - **provided-by** — опции: `own` (свой ресурс проекта; размещение потом —

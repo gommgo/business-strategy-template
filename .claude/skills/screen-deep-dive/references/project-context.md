@@ -73,7 +73,7 @@ screens — **визуальную композицию** (flow/screen/block/she
    `docs/projects/<project-slug>/capability/<surface>.md`.
 
 2. Запись — в
-   `state/<project-slug>/screens/<surface>/flow/<slug>.md`:
+   `../entrypoint/state/projects/<project-slug>/screens/<surface>/flow/<slug>.md`:
 
    ```markdown
    ## Доменные решения

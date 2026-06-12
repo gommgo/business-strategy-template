@@ -87,7 +87,7 @@ Committed-скрипта-валидатора в репо нет: сверяеш
 
 ### 5. State чист по `**blocker**`-вопросам
 
-`state/<project-slug>/<ctx>/<kind>/<slug>.md`:
+`../entrypoint/state/projects/<project-slug>/domains/<ctx>/<kind>/<slug>.md`:
 - Не содержит секцию `## Открытые вопросы` ИЛИ
 - Содержит, но в ней нет вопросов с префиксом/суффиксом `**blocker**`.
 
@@ -203,7 +203,8 @@ Committed-скрипта-валидатора в репо нет: сверяеш
 После любой правки артефакта:
 
 1. `Read` файл артефакта.
-2. `Read` `state/<project-slug>/<ctx>/<kind>/<slug>.md`, если есть.
+2. `Read` `../entrypoint/state/projects/<project-slug>/domains/<ctx>/<kind>/<slug>.md`,
+   если есть.
 3. Сверить пункты 1, 2, 3, 5 вручную по форме (см. выше).
 4. Если все 4 ✅ — раунд `AskUserQuestion` по тест-критерию kind'а
    (пункт 4) с двумя ✅/❌-вариантами + Other.

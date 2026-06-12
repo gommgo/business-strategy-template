@@ -14,7 +14,9 @@
   Contexts, Dependencies, Resources, Messaging, Workers, Fronts, Notes);
 - **папки доменов** `services/<svc>/domains/<ctx>/` — содержимое контекстов
   здесь не аудитится (только владение и существование событий);
-- `_shared/` — территория `/domain-deep-dive`, в прогон не входит.
+- `_shared/` — территория `/domain-deep-dive`, в прогон не входит (кроме
+  frontmatter `fronted-by` клиентов `_shared/integrations/<slug>/README.md`
+  — зеркала `Fronts` gateway-паспортов, см. R-SEM-007).
 
 «Оба реестра» в правилах ниже = `service.md` + `platform.md`. Точечные
 структурные опоры вне слоя: `surface.md` и `integration.md` того же
@@ -208,7 +210,7 @@ shared database (anti-pattern). Оставить одного владельца
 | поле | допустимо |
 |---|---|
 | `service.type` | `api`, `worker`, `gateway`, `edge`, `bot` |
-| `platform.type` | `message-broker`, `api-gateway`, `cdn`, `object-storage`, `idp`, `other` |
+| `platform.type` | `message-broker`, `api-gateway`, `cdn`, `object-storage`, `idp`, `registry`, `monitoring`, `secret-store`, `other` |
 | `platform.provided-by` | `own`, `` `shared:<slug>` `` |
 | `Messaging.direction` | `produces`, `consumes` |
 | `Resources.type` | `database`, `cache`, `search-index`, `vector-store`, `object-storage`, `other` |
@@ -250,8 +252,6 @@ mermaid-диаграмма). Обязательные слоты и легаль
 **Рекомендация:** «заполнить слот X или понизить запись в draft через
 `/service-deep-dive <project-slug> <svc>`».
 
-## Семантические правила (R-SEM-*)
-
 ### R-STRUCT-015 — Worker с topic-триггером без consumes
 
 - **severity**: `error`
@@ -287,15 +287,25 @@ mermaid-диаграмма). Обязательные слоты и легаль
 - **как проверяем**: slug'и реестра ↔ листинг `workers/*.md`; по каждому
   файлу — frontmatter и набор H2.
 
-### R-SEM-006 — Cron-выражение или числа в воркере
+### R-STRUCT-018 — `Exposes.backed-by` в пустоту
 
-- **severity**: `warning`
-- **что ищем**: `Trigger`/`trigger` воркера с cron-синтаксисом
-  (`*/5 * * * *` и подобное) вместо смысла словами («каждые 5 минут»);
-  числа ретраев/тайминги/размеры батчей в `Semantics` — runtime-механика
-  в design-time артефакте.
-- **как проверяем**: regex на cron-подобные значения; числа с единицами
-  времени/штук в `Semantics`.
+**Severity:** `error` для строки `Exposes` со `status: stable`; для
+`draft`-строки — `warning` (use-case мог ещё не появиться).
+
+**Где:** паспорта, таблица `Exposes` + папки `services/<svc>/domains/`.
+
+**Обнаружение:** `backed-by` = `` `use-case:<ctx>.<Operation>` ``, но файла
+`domains/<ctx>/use-cases/<Operation>.md` в **этом же** сервисе нет: либо
+use-case не существует, либо контекст `<ctx>` живёт в другом сервисе —
+функция обслуживается чужим доменом. `backed-by: —` (сервис без доменов)
+этим правилом не проверяется.
+
+**Рекомендация:** «функция `<fn-slug>` обещает use-case `<ctx>.<Operation>`,
+которого нет в доменах сервиса `<svc>`. Завести use-case через
+`/domain-deep-dive <project-slug> <ctx>` или поправить `backed-by` через
+`/service-deep-dive <project-slug> <svc>`».
+
+## Семантические правила (R-SEM-*)
 
 ### R-SEM-001 — Платформенный ресурс-сирота
 
@@ -374,6 +384,37 @@ CPU/RAM/Gb, retention, helm-values, hostname/IP. Слой deployment-agnostic:
 `/service-deep-dive <project-slug> <svc>`: либо это gateway с явной
 интеграцией, либо `Fronts: _N/A_`».
 
+### R-SEM-006 — Cron-выражение или числа в воркере
+
+- **severity**: `warning`
+- **что ищем**: `Trigger`/`trigger` воркера с cron-синтаксисом
+  (`*/5 * * * *` и подобное) вместо смысла словами («каждые 5 минут»);
+  числа ретраев/тайминги/размеры батчей в `Semantics` — runtime-механика
+  в design-time артефакте.
+- **как проверяем**: regex на cron-подобные значения; числа с единицами
+  времени/штук в `Semantics`.
+
+### R-SEM-007 — Рассинхрон `Fronts.Client` ↔ `fronted-by` клиента
+
+**Severity:** `warning`.
+
+**Где:** паспорта (`Fronts` у `type: gateway`) + frontmatter клиентов
+`_shared/integrations/<slug>/README.md` (поле `fronted-by`).
+
+**Обнаружение:** зеркало не сходится:
+
+- `Fronts.Client` gateway-паспорта указывает на
+  `_shared/integrations/<slug>/`, но `fronted-by` этого клиента ≠
+  `service:<этот-svc>` (либо клиента/файла нет);
+- клиент с `fronted-by: service:<svc>`, но паспорт `<svc>` не называет его
+  в `Fronts.Client` (либо `<svc>` не `type: gateway` — тогда сюда же
+  R-SEM-005).
+
+**Рекомендация:** «gateway `<svc>` и клиент `_shared/integrations/<slug>/`
+расходятся в зеркале `Fronts.Client` ↔ `fronted-by`. Согласовать стороны:
+паспорт — `/service-deep-dive <project-slug> <svc>`, frontmatter клиента —
+`/domain-deep-dive <project-slug>`».
+
 ## Coverage-правила (R-COV-*)
 
 ### R-COV-001 — Пустой сервис
@@ -427,7 +468,8 @@ Messaging. Наполнить через `/service-deep-dive <project-slug> <svc
 
 - Не читает содержимое доменных артефактов (секции агрегатов,
   use-case'ов, политик) — только структуру владения и существование
-  файлов событий. Домены — чек-листы `/domain-deep-dive`.
+  файлов событий и use-case'ов (резолв `Messaging.event` и
+  `Exposes.backed-by`). Домены — чек-листы `/domain-deep-dive`.
 - Не сверяет services с `interface/` / `screens/` / `telegram-bot-flow/`
   и с размещением `infrastructure/placement.md` — это `/cross-audit`
   (углы `service-placement` · `platform-shared`) и

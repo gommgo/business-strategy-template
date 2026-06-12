@@ -42,7 +42,7 @@
 - `slug` — устойчивый идентификатор · `kebab-case` · обяз.
 - `name` — короткое имя · текст · обяз.
 - `description` — зачем бизнесу, бизнес-смыслом · текст · обяз.
-- `type` — вид ресурса · `message-broker` \| `api-gateway` \| `cdn` \| `object-storage` \| `idp` \| `registry` \| `monitoring` \| `other` · обяз.
+- `type` — вид ресурса · `message-broker` \| `api-gateway` \| `cdn` \| `object-storage` \| `idp` \| `registry` \| `monitoring` \| `secret-store` \| `other` · обяз.
 - `technology` — осознанный выбор технологии · `nats` \| `traefik` \| `minio` \| `keycloak` \| … (свободный slug) · обяз.
 - `status` — зрелость записи · `draft` \| `stable` · обяз.
 

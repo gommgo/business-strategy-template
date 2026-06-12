@@ -16,8 +16,8 @@
    слот меняет облик на разных viewport (visible / drawer-via-burger /
    overlay / stacked / hidden). Структурный адаптив (разные screen) —
    через `flow`, не здесь.
-4. **Не содержимое.** Дерево shell описывает каркас (Header, Sidebar,
-   Main, …) с пустыми слотами; что в слотах — задача screen.
+4. **Не содержимое.** Дерево shell описывает каркас (шапка, сайдбар,
+   main, …) с пустыми слотами; что в слотах — задача screen.
 5. **Может быть несколько shell.** `app-shell` (основной),
    `auth-shell` (логин/регистрация), `fullscreen-shell`
    (модалки/мастера) — разные капсулы под разный смысл.
@@ -27,17 +27,17 @@
 - ❌ Не screen: каркас без контента — это shell; route с контентом —
   screen.
 - ❌ Не block: содержимое слота — это блок.
-- ❌ Не layout-примитив: `ui:Stack` — это узел дерева, не shell.
+- ❌ Не узел раскладки: `layout:stack` — это узел дерева, не shell.
 - ❌ Не контракт навигации (sitemap): shell ничего не знает о других
   экранах.
 
 ## Тест-критерий
 
 «Это объявление набора слотов + responsive-поведение, а не сам route с
-контентом, не блок и не layout-примитив?»
+контентом, не блок и не узел раскладки?»
 
-- «**Основной каркас приложения**» (header / side / main / detail /
-  overlay / footer) → `app-shell` ✅
+- «**Основной каркас приложения**» (шапка / side / main / detail /
+  overlay) → `app-shell` ✅
 - «**Каркас экрана аутентификации**» (только centered main, без
   sidebar) → `auth-shell` ✅
 - «**Список исследований**» — это block ❌
@@ -52,6 +52,7 @@
 | `description` | string | yes | одна фраза о капсуле |
 | `slots` | `{ <name>: { required, accepts } }` | yes | объявление слотов |
 | `responsive` | `{ <breakpoint>: { <slot>: <behaviour> } }` | optional | облицовочный адаптив |
+| `assets` | `[имя-файла]` | optional | визуальные референсы в `assets/shell/<slug>/` (только имена файлов; без ассетов поле отсутствует) |
 | `status` | `draft \| stable` | yes | зрелость записи |
 
 Допустимые `accepts`:
@@ -60,7 +61,7 @@
 - `block | tree` — любое из двух.
 - `block (modal/drawer)` — блок-overlay (модалка/шторка).
 
-Допустимые `breakpoint`: `xs`, `sm`, `md`, `lg`, `xl` (токены из ui-lib).
+Допустимые `breakpoint`: `xs`, `sm`, `md`, `lg`, `xl` (канон слоя).
 
 Допустимые `behaviour` слота на breakpoint:
 - `visible` — слот рендерится как объявлено в `tree`.
@@ -73,22 +74,20 @@
 
 ```yaml
 tree:
-  - ui:AppShell
-    - ui:Header
-      - ui:Row justify=between
-        - ui:Logo
-        - ui:Nav
-        - ui:UserMenu
-    - ui:Sidebar     (fills: $side)
-    - ui:Main        (fills: $main)
-    - ui:Detail      (fills: $detail)
-    - ui:OverlayLayer (fills: $overlay)
-    - ui:Footer
-      - ui:StatusBar
+  - layout:stack
+    - ui:Navbar (planned)         # шапка: лого, навигация, меню пользователя
+    - layout:row
+      - ui:Sidebar (planned)   (fills: $side)
+      - layout:stack           (fills: $main)
+      - layout:stack           (fills: $detail)
+    - layout:layer             (fills: $overlay)
 ```
 
 `(fills: $<slot>)` помечает узел shell, в который screen вставит
-содержимое слота с таким именем.
+содержимое слота с таким именем. Каркас собирается из `layout:`-узлов
+(раскладка — не компоненты, материализуется Tailwind-утилитами при
+сборке) и компонентов манифеста `@stit/ui`; запланированные
+(`notAvailable`) — forward-рефами с пометкой `(planned)`.
 
 ## Пример
 
@@ -96,7 +95,7 @@ tree:
 ---
 slug: app-shell
 name: 'Основной каркас приложения'
-description: 'Header + Sidebar + Main + Detail + Overlay + Footer'
+description: 'Шапка + сайдбар + main + detail + overlay'
 slots:
   side:    { required: false, accepts: 'block | tree' }
   main:    { required: true,  accepts: 'block | tree' }
@@ -123,25 +122,21 @@ screen в рамках flow).
 
 ​```yaml
 tree:
-  - ui:AppShell
-    - ui:Header
-      - ui:Row justify=between align=center
-        - ui:Logo
-        - ui:Nav
-        - ui:UserMenu
-    - ui:Sidebar     (fills: $side)
-    - ui:Main        (fills: $main)
-    - ui:Detail      (fills: $detail)
-    - ui:OverlayLayer (fills: $overlay)
-    - ui:Footer
-      - ui:StatusBar
+  - layout:stack
+    - ui:Navbar (planned)         # шапка: лого, навигация, меню пользователя
+    - layout:row
+      - ui:Sidebar (planned)   (fills: $side)
+      - layout:stack           (fills: $main)
+      - layout:stack           (fills: $detail)
+    - layout:layer             (fills: $overlay)
 ​```
 ```
 
 ## Anti-patterns
 
 - ❌ Содержимое в shell-tree (конкретный блок, конкретный текст).
-- ❌ Тематические props (`density`/`brand`/`scheme`) на узлах shell.
+- ❌ Оси контекста (`brand`/`scheme`/`density`/`mode`/`dir`) как props
+  узлов shell — они живут на корне приложения (`data-*` / `StitProvider`).
 - ❌ Пиксели/raw-CSS в `tree` или `responsive`.
 - ❌ Слот без `accepts` или без `required`.
 - ❌ `responsive`-поведение, не покрытое доступными `behaviour`.

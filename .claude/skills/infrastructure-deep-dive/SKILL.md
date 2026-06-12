@@ -70,18 +70,18 @@ helm, compose-файлы) — забота того репо, не этого с
 
 `kind` ∈ {`server`, `runtime`, `shared-platform`, `job`, `placement`}.
 
-`phase` ∈ {`servers`, `runtimes`, `shared-platform`, `placement`,
-`cohesion`}.
+`phase` ∈ {`servers`, `runtimes`, `shared-platform`, `jobs`,
+`placement`, `cohesion`}.
 
 Для `placement` записи идентифицируются по `unit`
 (`service:<project>/<svc>` | `platform:<project>/<slug>` |
-`shared-platform:<slug>`), не по slug.
+`shared-platform:<slug>` | `job:<slug>`), не по slug.
 
 ## Что делать сразу при запуске
 
 1. Прочитать `docs/projects/infrastructure/README.md` — освежить канон
    слоя и его инварианты.
-2. Прочитать `references/phases.md` — карту 5 фаз.
+2. Прочитать `references/phases.md` — карту 6 фаз.
 3. Прочитать 5 реестров слоя: `server.md`, `runtime.md`, `job.md`,
    `shared-platform.md`, `placement.md`.
 4. Собрать **межпроектный контекст** (read-only):
@@ -100,7 +100,7 @@ helm, compose-файлы) — забота того репо, не этого с
 
 ## Сводка состояния (без args)
 
-1. Подсчитать `draft`/`stable` по каждому из 4 реестров.
+1. Подсчитать `draft`/`stable` по каждому из 5 реестров.
 2. Построить **coverage-сводку** (таблицей в чат, не prose):
 
    ```
@@ -130,7 +130,7 @@ helm, compose-файлы) — забота того репо, не этого с
 
 ## Фазы проработки
 
-Скилл **проактивно** ведёт через 5 фаз. Полная карта (триггеры, что
+Скилл **проактивно** ведёт через 6 фаз. Полная карта (триггеры, что
 копать, анти-паттерны, переходы) — `references/phases.md`:
 
 | фаза | цель | артефакт |
@@ -138,7 +138,8 @@ helm, compose-файлы) — забота того репо, не этого с
 | `servers` | учёт железа/VPS: провайдер, локация, ёмкость одной колонкой, назначение | `server.md` |
 | `runtimes` | среды исполнения: k8s-кластер на нескольких серверах / compose-хост на одном; `environment` prod\|staging\|dev | `runtime.md` |
 | `shared-platform` | общие ресурсы бизнеса из intake потребностей проектов (`provided-by: shared:<slug>`) | `shared-platform.md` |
-| `placement` | каждый сервис и каждый размещаемый ресурс получает рантайм; coverage-сводка | `placement.md` |
+| `jobs` | обслуживающие джобы периметра: триггер смыслом (не cron), `target` — что обслуживают, проверка успеха | `job.md` + `jobs/<slug>.md` |
+| `placement` | каждый сервис, каждый размещаемый ресурс и каждая джоба получают рантайм; coverage-сводка | `placement.md` |
 | `cohesion` | инварианты слоя из README + повышение draft → stable + гейт аудита | все |
 
 Порядок — рекомендация, не закон: строим набегающей волной (неточно →
@@ -221,8 +222,9 @@ helm, compose-файлы) — забота того репо, не этого с
    placeholder'ов.
 2. **Рефы резолвятся**: `runtime.servers` → строки `server.md`;
    `placement.unit` → реестры `service.md`/`platform.md` проектов
-   (для `platform:` — строка с `provided-by: own`) или
-   `shared-platform.md`; `placement.runtime` → строка `runtime.md`.
+   (для `platform:` — строка с `provided-by: own`),
+   `shared-platform.md` или `job.md`; `placement.runtime` → строка
+   `runtime.md`.
 3. **У юнита есть prod-размещение** — для записей, отвечающих за юнит
    (placement сервиса; shared-ресурс, который потребляют).
 4. **Нет IP / hostname / секретов / runtime-механики** в тексте записи.

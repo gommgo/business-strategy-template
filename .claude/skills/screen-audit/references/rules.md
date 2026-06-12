@@ -30,7 +30,9 @@ R-SURF/R-XSURF — про границу между поверхностями.
 читается без ошибок (`flows`, `screens`, `blocks`, `shells`).
 
 `docs/projects/_template/screens/` — канон формы; из него читаются только
-критерии и инвентарь, не данные.
+критерии и anti-patterns, не данные. Словарь `ui:*` — манифест
+`@stit/ui/manifest.json`: в экосистеме — `../ui-lib/dist/manifest.json`,
+у потребителя — `node_modules/@stit/ui/manifest.json` (см. R-COV-006).
 
 ---
 
@@ -389,17 +391,21 @@ warning не превращается в правку.
   артефакта через `/screen-deep-dive <project-slug> <surface> <kind>:<slug>`; токены — на
   стороне ui-lib».
 
-### R-SEM-002 «тематические оси (`density`/`brand`/`scheme`) в дереве»
+### R-SEM-002 «оси контекста в дереве»
 
 - **severity**: `warning`.
 - **scope**: `screens/`, `blocks/`, `shells/`.
-- **проверка**: в любом узле или в любом props присутствует
-  `density=` / `brand=` / `scheme=` / `density:` / `brand:` / `scheme:`.
-  Тематические оси живут на корне через `data-*`, не как props
-  компонентов и не как поля артефактов.
-- **рекомендация**: «Убрать тематическую ось из узла через
-  `/screen-deep-dive <project-slug> <surface> <kind>:<slug>` — это `data-theme`/`data-density`
-  на корне приложения, а не контракт компонента».
+- **проверка**: в любом узле или в любом props присутствует маркер оси:
+  `brand=` / `scheme=` / `density=` / `mode=` / `dir=` (и варианты с
+  `:`). Оси манифеста `@stit/ui` (`axes`) — `data-brand`, `data-scheme`,
+  `data-density`, `data-mode` и `dir` — живут на корне приложения
+  (`data-*`-атрибуты и `dir` на узле-носителе `StitProvider`), не как
+  props компонентов и не как поля артефактов. Отдельные компоненты
+  технически принимают `dir` — в артефактах это всё равно подозрение
+  (ось ставится на корне); аналитик может объяснить и снять.
+- **рекомендация**: «Убрать ось контекста из узла через
+  `/screen-deep-dive <project-slug> <surface> <kind>:<slug>` — это
+  `data-*`-оси / `dir` на корне приложения, а не контракт компонента».
 
 ### R-SEM-003 «FSD-имена в дереве или frontmatter»
 
@@ -429,9 +435,11 @@ warning не превращается в правку.
 
 - **severity**: `warning`.
 - **scope**: `blocks/`.
-- **проверка**: в `block.tree` присутствуют узлы `ui:Skeleton`,
-  `ui:EmptyState`, `ui:ErrorState`, `ui:AccessDeniedState`,
-  `ui:OfflineState`, `ui:NotFoundState`.
+- **проверка**: в `block.tree` присутствуют feedback-узлы состояний:
+  `ui:Spinner` (манифест, family `feedback`), forward-рефы
+  `ui:Skeleton` / `ui:Progress` / `ui:Alert` / `ui:Toast`, либо
+  композиция, явно изображающая loading/empty/error (текст вида «не
+  удалось…», «пока нет…» как состояние, а не контент).
 - **рекомендация**: «Состояния — слой screen, не block. Перенести в
   `screen.states` через `/screen-deep-dive <project-slug> <surface> screen:<потребитель>`».
 
@@ -577,19 +585,47 @@ warning не превращается в правку.
 - **рекомендация**: «`description` слишком короткое для смысловой
   ясности; уточнить через `/screen-deep-dive <project-slug> <surface> <kind>:<slug>`».
 
-### R-COV-006 «`ui:Component` отсутствует в выводимом инвентаре»
+### R-COV-006 «`ui:*` против манифеста `@stit/ui`»
 
-- **severity**: `hint`.
-- **scope**: все 4 kind, узлы дерева.
-- **проверка**: имя `ui:<Foo>` не входит в список «топ-уровень
-  компонентов» в каноне `docs/projects/_template/screens/README.md`
-  (выводимое требование, пока `@stit/ui/manifest.json` не
-  опубликован). Прорывной hint, не error — это, скорее всего, ui-lib
-  gap.
-- **рекомендация**: «Похоже на gap к ui-lib. Подтвердить через
-  `/screen-deep-dive <project-slug> <surface> <kind>:<slug>` (скилл предложит зафиксировать
-  `ui-lib gap: ui:Foo — для <зачем>` в state-заметке) или заменить на
-  существующий компонент из инвентаря».
+- **severity**: смешанная — по под-проверкам ниже.
+- **scope**: все 4 kind, узлы дерева (`slot-fills`, `states`, `tree`).
+- **источник**: манифест `@stit/ui/manifest.json` (в экосистеме —
+  `../ui-lib/dist/manifest.json`, у потребителя —
+  `node_modules/@stit/ui/manifest.json`): словарь `components` (у
+  компонента — `props[]` как массив объектов
+  `{name, tsType, required, values?, default}` и `parts[]` у compound),
+  массив `notAvailable` (`{name, plannedAt, task, aka?}`), реестр
+  иконок по указателю `icons.manifest` (в дистрибутиве —
+  `dist/icons/manifest.json`, массив `icons[]` с `subpath`).
+- **проверки**:
+  1. имя `ui:<Name>` есть в `components` → валидно. Props узла: каждое
+     имя пропа есть в `props[]` компонента; если у пропа задан
+     `values` — значение из списка. Неизвестный проп или значение вне
+     `values` — `warning`.
+  2. `ui:<Name>.<Part>` — `<Name>` есть в `components` и `<Part>` в его
+     `parts[].name`; props части — по её `props[]`. Нарушение —
+     `warning`.
+  3. имя есть в `notAvailable` (включая `aka`) и узел помечен
+     `(planned)` → `hint`: осознанный forward-реф, gap к ui-lib (props
+     у forward-рефа не валидируются — контракта ещё нет).
+  4. имя есть в `notAvailable`, но пометки `(planned)` нет → `warning`:
+     помечать forward-реф обязательно.
+  5. имени нет ни в `components`, ни в `notAvailable` → `warning`:
+     выдуманный компонент — заменить на компонент манифеста /
+     композицию `layout:`-узлов, потребность зафиксировать как
+     «ui-lib gap» в state-заметке `screen-deep-dive`.
+  6. `icon:<slug>` — `<slug>` есть в реестре иконок (хвост `subpath`
+     после `@stit/ui/icons/`). Нарушение — `warning`.
+  `layout:`-узлы (`layout:stack|row|grid|layer`) — не компоненты, по
+  манифесту не проверяются (их enum держит канон слоя).
+- **если манифест недоступен** ни по одному пути — под-проверки
+  пропускаются, в отчёт — один `hint` «манифест @stit/ui не найден,
+  словарь ui:* не проверен».
+- **рекомендация**: «Сверить узел с манифестом через
+  `/screen-deep-dive <project-slug> <surface> <kind>:<slug>`: имя/проп —
+  из `components`, forward-реф — пометить `(planned)`, потребность вне
+  манифеста — зафиксировать `ui-lib gap: ui:Foo — для <зачем>` в
+  state-заметке и собрать узел из существующего».
 
 ### R-COV-007 «asset-файл из `assets: [...]` не существует»
 

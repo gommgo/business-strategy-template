@@ -98,8 +98,8 @@ use-case бота в секции `Dependencies` ссылается на **до�
 |---|---|---|
 | `button` | команда участника (нажал — действие и/или переход) | `id`, `label`, `action`, `transition` |
 | `url` | кнопка-ссылка наружу (без обработчика) | `id`, `label`, `url` |
-| `select` | одиночный выбор из вариантов | `id`, `items`, `label`, `action`, `transition` |
-| `multiselect` | множественный выбор (копится в окне) | `id`, `items`, `label`, `selected-label` |
+| `select` | одиночный выбор из вариантов | `id`, `items`, `label`, `action`, `transition`, опц. `paginated` |
+| `multiselect` | множественный выбор (копится в окне) | `id`, `items`, `label`, `selected-label`, опц. `paginated` |
 | `text-input` | свободный ввод сообщением | `id`, `value-type`, `validation`, `action`, `transition` |
 | `calendar` | выбор даты | `id`, `action`, `transition` |
 
@@ -107,11 +107,15 @@ use-case бота в секции `Dependencies` ссылается на **до�
 `ввод` → `text-input`, `выбор` → `select`/`multiselect`/`calendar`, `инфо`/
 `список` — текст сообщения и `items`. Группировка кнопок в ряд — узлом
 `row:`. Облик (эмодзи-стиль, форматирование) — забота кода, не артефакта.
+`value-type` у `text-input` — `str | int | float | date | phone | email`
+(`str` — по умолчанию); `paginated: true` (опц.) у виджета с `items` —
+большая коллекция листается внутри окна.
 
 ## Инварианты модели Telegram
 
 - **Одно окно = одно сообщение.** Бот редактирует одно сообщение стека:
-  большие коллекции — пагинация внутри окна, не серия сообщений.
+  большие коллекции — пагинация внутри окна (атрибут `paginated` у
+  виджета с `items`), не серия сообщений.
 - **Стек диалогов.** `start:<feature>` растит стек (вложенный диалог),
   `done` сворачивает к родителю. Команда со `stack: reset` (обязательна для
   `/start`) очищает стек целиком.

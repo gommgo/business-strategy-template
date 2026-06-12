@@ -35,14 +35,14 @@
 | `slug` | да | kebab-case, уникален в файле |
 | `name` | да | человекочитаемое имя |
 | `description` | да | зачем нужен проекту, бизнес-смыслом |
-| `type` | да | одно из `message-broker` \| `api-gateway` \| `cdn` \| `object-storage` \| `idp` \| `other` |
+| `type` | да | одно из `message-broker` \| `api-gateway` \| `cdn` \| `object-storage` \| `idp` \| `registry` \| `monitoring` \| `secret-store` \| `other` |
 | `technology` | да | осознанный выбор архитектора (свободный slug: `nats`, `traefik`, …) |
 | `provided-by` | да | `own` либо `` `shared:<slug>` `` (реф в `docs/projects/infrastructure/shared-platform.md`) |
 | `status` | да | `draft` \| `stable` |
 
 ## Паспорт сервиса (`<svc>/README.md`, kind `service-passport`)
 
-Обязательные H2 (все 8 присутствуют всегда; «пусто» допустимо только явной
+Обязательные H2 (все 9 присутствуют всегда; «пусто» допустимо только явной
 пометкой, уместной типу сервиса):
 
 | H2 | заполнено, если | легальная пустота |
@@ -75,6 +75,7 @@
 | `Topology` | да | одна **полная** mermaid-диаграмма `flowchart LR`: каждый сервис — subgraph (внутри воркеры и ресурсы), поверхности — subgraph, платформа и интеграции — узлы; присутствуют ВСЕ сервисы/платформенные ресурсы/интеграции проекта; узлы — только slug'и из `service.md` / `platform.md` / `surface.md` / `integration.md` / паспортов; сплошные стрелки = sync (есть в `Dependencies`), пунктирные = async (есть в `Messaging`, подпись — topic); шаблонная диаграмма формы заменена на реальную |
 | `Decisions` | да | нумерованный список falsifiable-решений разбиения (≥1), формулировки архитектора |
 | `Flows` | нет | 3–7 однострочных потоков либо `_нет_` |
+| `status` | да | отдельная строка `**status:**` в конце файла (без frontmatter): `draft` \| `stable` |
 
 Здесь авторятся **только** `Decisions`; всё остальное — свод. Ребро на
 диаграмме без авторской записи в паспорте/реестре — дыра свода, чинится в

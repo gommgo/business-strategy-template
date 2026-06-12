@@ -56,6 +56,7 @@
 | `mobile` | `[screen-slug]` | yes | список mobile-screen (обычно ≥2) |
 | `transitions` | `[ {from, to, trigger} ]` | optional | переходы внутри mobile-серии |
 | `who` | `[who-slug]` | optional | роли interface, к которым относится flow |
+| `assets` | `[имя-файла]` | optional | визуальные референсы в `assets/flow/<slug>/` (только имена файлов; без ассетов поле отсутствует) |
 | `status` | `draft \| stable` | yes | зрелость записи |
 
 ## Пример

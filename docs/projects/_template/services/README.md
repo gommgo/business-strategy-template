@@ -93,7 +93,8 @@ docs/projects/<project-slug>/services/
    (`<context>.<Name>`) и рефы `use-case:<ctx>.<Operation>` /
    `event:<ctx>.<Event>` (telegram-bot-flow, межслойные связи)
    **сервисо-агностичны** — сервис-владелец однозначно выводится из пути
-   `services/*/domains/<ctx>/`.
+   `services/*/domains/<ctx>/`. Слаг контекста — kebab-case, как все слаги
+   репозитория; маппинг в имена пакетов кода — забота код-репо.
 3. **Ресурс принадлежит ровно одному сервису** (его таблица `Resources`).
    Shared database между сервисами запрещён; данные соседа — только через его
    `Exposes`-функции (sync) или события (async).
@@ -171,6 +172,11 @@ dependencies, Ubiquitous Language.
 `docs/reference/domain-mapping.md`), а `<org>/infra` читает топологию. Вся
 проза — описания, бизнес-значения, пояснения, примеры — по-русски.
 
+Примеры адаптеров и пакетов в шаблонах `_templates/` (pgx/sqlc,
+`golibinfra`, `outboxkit`, `authgate` и т.п.) — иллюстрации целевого стека
+по умолчанию, не часть контракта: слой остаётся язык-агностичным, выбор
+технологий — за `platform.md` и архитектором.
+
 Stateless / aggregate-of-one / пустые consumers — пишутся явной пометкой
 `N/A` или `_нет_`. Пустых таблиц быть не должно.
 
@@ -184,8 +190,8 @@ Stateless / aggregate-of-one / пустые consumers — пишутся явн�
 2. **каталог**: функция в `## Exposes` паспорта провайдера
    (`backed-by: use-case:<ctx>.<Operation>`);
 3. **доменный уровень** (потребление): в `## Dependencies` use-case'а колонка
-   `integration` принимает `` `service:<svc-slug>` ``, а `functions` — слаги
-   из `Exposes` провайдера.
+   `integration` принимает `` `service:<svc-slug>` ``, а `functions` — функции
+   из `Exposes` провайдера записями `<svc-slug>.<fn-slug>`.
 
 **In-process reader чужого контекста возможен только в пределах одного
 сервиса.** Контекст другого сервиса достижим только как `service:`-порт
@@ -228,7 +234,10 @@ transport-agnostic домене), `On failure` (судьба сообщения 
 получает **конкретный клиент** в `_shared/integrations/<integration-slug>/`.
 Домен остаётся **transport-agnostic**: в `## Dependencies` use-case объявляет,
 **какие функции** интеграции дёргает (по `slug`), а как именно (HTTP / gRPC /
-очередь / SDK) — дело клиента.
+очередь / SDK) — дело клиента. Формат записи в колонке `functions` —
+`<integration>.<fn-slug>` (слаг провайдера точкой перед слагом функции; для
+порта к сервису проекта — `<svc-slug>.<fn-slug>`): однозначен при нескольких
+интеграциях у одного use-case'а.
 
 В `## Dependencies` use-case колонка `integration`:
 

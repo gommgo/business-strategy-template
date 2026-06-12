@@ -11,6 +11,8 @@ description: "Узкий аудит консистентности ИТ-пери
 - **учёт серверов** `server.md` — железо/VPS;
 - **рантаймы** `runtime.md` — k8s-кластеры и compose-хосты по окружениям;
 - **общие платформенные ресурсы** `shared-platform.md`;
+- **джобы периметра** `job.md` + файлы `jobs/<slug>.md` — бэкапы,
+  ротация, сертификаты;
 - **размещение** `placement.md` — единственное место «кто где живёт».
 
 Канон формы — `docs/projects/infrastructure/README.md` (канон и данные —
@@ -32,15 +34,16 @@ coverage. Семантическую сверку проектных слоёв 
 
 | вызов | поведение |
 |---|---|
-| `/infrastructure-audit` | полный прогон всех 4 реестров периметра |
+| `/infrastructure-audit` | полный прогон всех 5 реестров периметра |
 
 ## Что делать при запуске
 
 1. Прочитать `docs/projects/infrastructure/README.md` — освежить канон и
    инварианты слоя.
 2. Прочитать `references/rules.md` — реестр проверок с severity.
-3. Прочитать 4 реестра слоя: `server.md`, `runtime.md`,
-   `shared-platform.md`, `placement.md`.
+3. Прочитать 5 реестров слоя: `server.md`, `runtime.md`,
+   `shared-platform.md`, `job.md`, `placement.md` — плюс файлы джоб
+   `jobs/*.md` (листингом каталога).
 4. Прочитать read-only межпроектный контекст: все
    `docs/projects/*/services/service.md` и
    `docs/projects/*/services/platform.md` (листингом каталогов, исключая
@@ -69,7 +72,8 @@ coverage. Семантическую сверку проектных слоёв 
 
 ```
 === /infrastructure-audit ===
-Прочитано: 4 реестра периметра + N реестров services/ по M проектам.
+Прочитано: 5 реестров периметра (+ файлы jobs/) + N реестров services/
+по M проектам.
 
 [error] placement:service:crm/orders → runtime `main-cluster` отсутствует
   в runtime.md.
@@ -113,7 +117,7 @@ coverage. Семантическую сверку проектных слоёв 
 ```markdown
 ---
 ran-on: all
-files-read: <4 реестра периметра + N services-реестров (M проектов)>
+files-read: <5 реестров периметра + файлы jobs/ + N services-реестров (M проектов)>
 records-checked: N
 totals: { error: X, warning: Y, hint: Z }
 ---

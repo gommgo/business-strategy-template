@@ -16,6 +16,7 @@
 | `server` | `slug`, `name`, `provider`, `location`, `capacity`, `purpose` |
 | `runtime` | `slug`, `name`, `type` (`kubernetes` \| `compose`), `environment` (`prod` \| `staging` \| `dev`), `servers` (≥1 slug) |
 | `shared-platform` | `slug`, `name`, `description`, `type` (enum реестра), `technology` |
+| `job` | `slug`, `name`, `trigger`, `target` (≥1 реф) — плюс чек-лист `§ job` ниже |
 | `placement` | `unit`, `runtime` |
 
 Для `runtime` дополнительно: `type: compose` несёт ровно один сервер в
@@ -32,7 +33,8 @@
     `docs/projects/<project>/services/platform.md` **с
     `provided-by: own`** (ресурс с `shared:` размещается как
     `shared-platform:<slug>`, не от имени проекта);
-  - `shared-platform:<slug>` → строка `shared-platform.md`.
+  - `shared-platform:<slug>` → строка `shared-platform.md`;
+  - `job:<slug>` → строка реестра `job.md`.
 - Для `shared-platform` — ресурс потребляет ≥1 проект
   (`provided-by: shared:<slug>` в чьём-то `services/platform.md`); сирота
   stable не становится без явного решения архитектора в state («заведён

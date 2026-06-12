@@ -124,8 +124,10 @@ notification-кандидаты (корень):
    минимальным frontmatter (`slug`, `name`, `description`,
    `status: draft`; `states-group` скилл предлагает сразу, с контролем
    одной строкой; обязательные поля без значения — `—` или пустые
-   массивы). window — секция `## <slug>` в `window.md` фичи
-   (`name`/`state` + `status: draft` + обязательные поля `—`); use-case
+   массивы). window — секция `## <slug>` в `window.md` фичи со
+   `status: draft` и минимально осмысленными значениями всех мета-полей
+   (у окна `—` в мета-полях не допускается; дыры — вопросами в
+   state-заметке); use-case
    бота — секция `## <slug>` в `use-case.md` фичи (`name`/`operation` +
    `status: draft` + пустые/`—` H3-секции). command/notification —
    строка таблицы реестра корня с `—` в незаполненных колонках

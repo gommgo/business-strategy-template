@@ -38,9 +38,11 @@ consumes: []
 провайдера); для **внешних** интеграций (платёж, email, SMS, IDP) и
 **межпроектных** портов (обмен с соседним проектом бизнеса) — slug
 провайдера из продуктового `integration.md`. Колонка `functions` — **какие
-функции** этот use-case дёргает (`slug`'и из `Exposes` сервиса /
-`## Функции` `integration.md` / клиента `_shared/`); для внутренней инфры —
-`—`. Домен **transport-agnostic**: он зовёт функцию по `slug`, а как именно
+функции** этот use-case дёргает, записями `<integration>.<fn-slug>` (слаг
+провайдера — сервиса или интеграции — точкой перед слагом функции из
+`Exposes` сервиса / `## Функции` `integration.md` / клиента `_shared/`;
+формат однозначен при нескольких провайдерах в одной таблице); для
+внутренней инфры — `—`. Домен **transport-agnostic**: он зовёт функцию по `slug`, а как именно
 (HTTP / gRPC / очередь) — знает только клиент `_shared/integrations/<slug>/`
 или код сервиса-провайдера. Контекст **другого сервиса** in-process
 недостижим — только `service:`-порт или событие.
@@ -50,9 +52,9 @@ consumes: []
 | `<Aggregate>Repository` | хранение корневого агрегата | postgres (pgx + sqlc) | `—` | `—` |
 | `Clock` | детерминированное время | `golibinfra/clock` | `—` | `—` |
 | `<OtherDomain>Reader` | кросс-контекстный порт — данные из другого контекста **этого же сервиса** | адаптер в `module/adapters.go` чужого домена | `—` | `—` |
-| `<OtherService>Client` | другой сервис этого проекта — зовём его функции из `Exposes` | код сервиса-провайдера | `` `service:<svc-slug>` `` | `` [`<fn-slug>`, …] `` |
-| `<ExternalService>` | внешняя система — зовём по функциям, транспорт не знаем | клиент `_shared/integrations/<integration-slug>/` | `` `<integration-slug>` `` | `` [`<fn-slug>`, …] `` |
-| `<SiblingProject>Client` | обмен с **соседним проектом** бизнеса | клиент `_shared/integrations/<integration-slug>/` | `` `<integration-slug>` `` (`target: sibling-project`) | `` [`<fn-slug>`, …] `` |
+| `<OtherService>Client` | другой сервис этого проекта — зовём его функции из `Exposes` | код сервиса-провайдера | `` `service:<svc-slug>` `` | `` [`<svc-slug>.<fn-slug>`, …] `` |
+| `<ExternalService>` | внешняя система — зовём по функциям, транспорт не знаем | клиент `_shared/integrations/<integration-slug>/` | `` `<integration-slug>` `` | `` [`<integration-slug>.<fn-slug>`, …] `` |
+| `<SiblingProject>Client` | обмен с **соседним проектом** бизнеса | клиент `_shared/integrations/<integration-slug>/` | `` `<integration-slug>` `` (`target: sibling-project`) | `` [`<integration-slug>.<fn-slug>`, …] `` |
 
 > **Внешние и межпроектные интеграции** держим явно: каждый порт с
 > непустой колонкой `integration` ссылается на провайдера в `integration.md`,

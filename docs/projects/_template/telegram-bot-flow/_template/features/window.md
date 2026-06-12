@@ -39,7 +39,7 @@ status: draft | stable
 message:
   text: |
     <текст с плейсхолдерами {…}>
-  media: —                       # или assets/<window-slug>/…, или data:<slug>.<поле>
+  media: —                       # или { type: photo|video|document|animation, source: assets/<window-slug>/… | data:<slug>.<поле> }
 
 widgets:
   - widget: <button|url|select|multiselect|text-input|calendar>
@@ -64,6 +64,16 @@ errors:
   `ux-substrates`, `situations`, `who`, `status` (`slug` — заголовок H2).
 - Условный переход — списком исходов use-case бота:
   `transition: [{ to: address, when: 'use-case бота вернул «нужен адрес»' }, { to: confirm, when: 'иначе' }]`.
+- Виджет с `items` берёт коллекцию из ключа `getter` (значение `items` —
+  имя ключа). Контракт элемента: каждый item несёт `id` (callback-данные
+  выбора) и поля, которые `label`/`selected-label` подставляют через
+  `{item.<поле>}`; `fallback` ключа-коллекции — пустое состояние. Большая
+  коллекция листается внутри окна — опц. `paginated: true` у виджета.
+- `value-type` у `text-input` — `str | int | float | date | phone | email`
+  (`str` — по умолчанию, поле можно опустить).
+- `media` — `—` либо `type` ∈ `photo | video | document | animation` +
+  `source` (путь ассета `assets/<window-slug>/…` или реф
+  `data:<slug>.<поле>`).
 - `errors` — канон-ключи `backend-unavailable`, `invalid-input` (текст или
   `—`); технический recovery — в код-репо.
 

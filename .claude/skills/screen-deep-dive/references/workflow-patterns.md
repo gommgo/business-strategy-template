@@ -37,13 +37,15 @@
    `**blocker**` в state.
 6. После frontmatter — переход к дереву (только для screen / block /
    shell; flow не имеет yaml-тела). Раунд за раундом по слотам/зонам
-   с опциями ui:Component из инвентаря (см. `ui-inventory.md`) и
-   Other для свободных значений (тексты label, placeholder).
+   с опциями ui:Component из манифеста (см. `ui-inventory.md`),
+   `layout:`-узлами для раскладки и Other для свободных значений
+   (тексты-children, свободные props).
 7. После всех слотов — раунд `AskUserQuestion` по `Тест-критерий`:
    ✅/❌ варианты как опции. Аналитик подтверждает.
 8. Применить чек-лист `draft-stable.md`. Если все 6 ✅ — предложить
    повышение в stable.
-9. Записать `state/<project-slug>/screens/<surface>/<kind>/<slug>.md`,
+9. Записать
+   `../entrypoint/state/projects/<project-slug>/screens/<surface>/<kind>/<slug>.md`,
    если есть что (открытые вопросы, доменные решения, ui-lib gap).
 
 ### Пример раунда (screen, после фундамента)
@@ -149,7 +151,8 @@ Figma, описание макета словами, либо комбинаци
 1. Прочитать
    `docs/projects/<project-slug>/screens/<surface>/<kind>/<slug>/index.md`
    целиком (frontmatter + yaml-дерево в теле).
-2. Прочитать `state/<project-slug>/screens/<surface>/<kind>/<slug>.md`,
+2. Прочитать
+   `../entrypoint/state/projects/<project-slug>/screens/<surface>/<kind>/<slug>.md`,
    если есть.
 3. Прочитать соседей (interface-файлы — из той же поверхности того же
    проекта, `docs/projects/<project-slug>/interface/<surface>/`):
@@ -176,8 +179,8 @@ Figma, описание макета словами, либо комбинаци
      неизвестные `ui:*`).
 5. Раунд `AskUserQuestion` (до 4 вопросов) — точечно по найденному:
    - дыры frontmatter — заполняем через Other / выбор существующих;
-   - дыры дерева — выбор `ui:Component` из инвентаря (см.
-     `ui-inventory.md`) + Other для свободных props;
+   - дыры дерева — выбор `ui:Component` из манифеста (см.
+     `ui-inventory.md`) / `layout:`-узла + Other для свободных props;
    - anti-pattern-подозрения — опции «да, anti-pattern» / «нет,
      вот почему» (через Other);
    - битые ссылки screens — опции «исправить на <варианты>» /
@@ -215,7 +218,7 @@ Figma, описание макета словами, либо комбинаци
 | enum поле (`viewport`, `accepts`, `behaviour`, `entrypoint`) | по одной опции на каждое значение enum |
 | тест-критерий из `Тест-критерий` | опции из примеров ✅/❌, аналитик соотносит свой случай |
 | выбор существующего slug соседа | по опции на каждый существующий + «нужен новый» (Other) |
-| выбор `ui:Component` для узла дерева | опции из релевантной категории инвентаря + «нужен новый ui:Foo» (Other → state-заметка) |
+| выбор `ui:Component` для узла дерева | опции из релевантной family манифеста + подсказки `taskMap` + «нет подходящего» (Other → forward-реф `(planned)` из `notAvailable` либо ui-lib gap в state-заметке) |
 | выбор `block:<slug>` для слота screen | опции — существующие блоки + «новый» (Other → A в block) |
 | зеркало `block.ux-substrates` расходится с interface | три опции: «брать screens» / «брать interface» / «расхождение смысловое — blocker» |
 
@@ -226,7 +229,7 @@ Figma, описание макета словами, либо комбинаци
 | `name` | человекочитаемое имя — формулировка аналитика |
 | `description` | смысл записи — слова аналитика |
 | `route` | URL/именованный view — доменная семантика, не угадывать |
-| текст `label`, `placeholder`, `title` в дереве | копирайтинг — выбор аналитика |
+| тексты в дереве (children-строки, `placeholder`) | копирайтинг — выбор аналитика |
 | props со свободным значением (`columns: [...]`, `gap='custom-X'`) | конкретика — выбор аналитика |
 | любой slug, который ещё не существует | аналитик называет, не скилл |
 | `assets` (имя файла-референса) | имя выбирает аналитик; скилл предлагает kebab-case по умолчанию |

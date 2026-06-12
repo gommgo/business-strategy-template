@@ -61,6 +61,7 @@ desktop↔mobile?»
 | `transitions-to-screen` | `[screen-slug]` | optional | явные переходы наружу (между viewport одного flow не пишутся) |
 | `mobile-of` | `flow-slug` | optional | для mobile-screen-членов flow — поток-родитель |
 | `role` | string | optional | роль внутри flow (`master`, `detail`, `filters`, …) |
+| `assets` | `[имя-файла]` | optional | визуальные референсы в `assets/screen/<slug>/` (только имена файлов; без ассетов поле отсутствует) |
 | `status` | `draft \| stable` | yes | зрелость записи |
 
 ## Тело: slot-fills и states
@@ -74,27 +75,34 @@ slot-fills:
 
 states:
   loading:
-    main:    [ui:Skeleton variant=list rows=8]
-    detail:  [ui:Skeleton variant=card]
+    main:    [ui:Skeleton (planned)]
+    detail:  [ui:Spinner size=lg]
   empty:
     main:
-      - ui:EmptyState
-          illustration: no-studies
-          title: 'Исследований пока нет'
-          action: ui:Button variant=primary label='Создать'
+      - layout:stack align=center gap=md
+        - 'Исследований пока нет'
+        - ui:Button variant=accent
+          - 'Создать'
   error:
-    main: [ui:ErrorState retry=true]
+    main:
+      - layout:stack align=center gap=md
+        - 'Не удалось загрузить список'
+        - ui:Button variant=outline
+          - 'Повторить'
   permission-denied:
-    main: [ui:AccessDeniedState]
+    main: ['Нет доступа к исследованиям — запросите права у администратора']
   offline:
-    main: [ui:OfflineState]
+    main: ['Нет соединения — список появится при восстановлении сети']
   not-found:
-    main: [ui:NotFoundState]
+    main: ['Исследование не найдено']
 ```
 
 `slot-fills` — основная композиция: для каждого слота shell либо
 `block:<slug>`, либо inline-дерево, либо `—` (если опционален). `states`
 — delta-overrides на слот (другие слоты унаследованы из `slot-fills`).
+Облик состояния — композиция и текст; компонент из манифеста
+(`ui:Spinner`) или forward-реф (`ui:Skeleton (planned)`) — когда он
+действительно есть/запланирован в `@stit/ui`.
 
 ## Пример
 
@@ -127,26 +135,31 @@ slot-fills:
 
 states:
   loading:
-    main:   [ui:Skeleton variant=list rows=8]
-    detail: [ui:Skeleton variant=card]
+    main:   [ui:Skeleton (planned)]
+    detail: [ui:Spinner size=lg]
   empty:
     main:
-      - ui:EmptyState
-          illustration: no-studies
-          title: 'Исследований пока нет'
-          action: ui:Button variant=primary label='Создать'
+      - layout:stack align=center gap=md
+        - 'Исследований пока нет'
+        - ui:Button variant=accent
+          - 'Создать'
   error:
-    main: [ui:ErrorState retry=true]
+    main:
+      - layout:stack align=center gap=md
+        - 'Не удалось загрузить список'
+        - ui:Button variant=outline
+          - 'Повторить'
   permission-denied:
-    main: [ui:AccessDeniedState]
+    main: ['Нет доступа к исследованиям — запросите права у администратора']
 ​```
 ```
 
 ## Anti-patterns
 
 - ❌ Облик в `slot-fills` (цвета, пиксели, шрифты).
-- ❌ Тематические оси (`density`, `brand`, `scheme`) как props
-  компонентов в дереве.
+- ❌ Оси контекста (`brand`, `scheme`, `density`, `mode`, `dir`) как
+  props компонентов в дереве — они живут на корне приложения
+  (`data-*` / `StitProvider`).
 - ❌ Breakpoints в `slot-fills`. Облицовочный адаптив — в `shell`,
   структурный — через `flow`.
 - ❌ FSD-имена (`widget`, `feature`) в дереве или в frontmatter.

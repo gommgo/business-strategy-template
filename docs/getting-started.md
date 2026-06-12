@@ -11,7 +11,7 @@
 (терминал — `task`). Исход — задача, закрывающая проблему, либо **опционально**
 продукт → интерфейс / домены / экраны. Артефакты `docs/` — design-time source of
 truth; когда дело дошло до продукта, их читают соседние форки
-(`<org>/{backend,frontend,infra}`).
+(`<org>/{backend,frontend,infra}` и `<org>/<bot>`).
 
 ## 0. Форк
 
@@ -43,11 +43,13 @@ truth; когда дело дошло до продукта, их читают �
    ├─ /interface-deep-dive <slug> [<surface>]  → /interface-audit <slug>
    ├─ /service-deep-dive <slug> (сервисная топология) → /service-audit <slug>
    ├─ /domain-deep-dive <slug> <ctx> (DDD внутри сервиса)
-   └─ /screen-deep-dive <slug> [<surface>]     → /screen-audit <slug>
+   ├─ /screen-deep-dive <slug> [<surface>]     → /screen-audit <slug>
+   └─ /telegram-bot-flow-deep-dive <slug> [<surface>] (bot-поверхности — вместо
+      screen) → /telegram-bot-flow-audit <slug>
 5. ИТ-периметр бизнеса → /infrastructure-deep-dive (сервера · рантаймы ·
    общие ресурсы · джобы · размещение) → /infrastructure-audit
 6. /cross-audit — сквозная семантика между слоями (рой)
-6. готовый репо стратегии (с продуктами, если до них дошло)
+7. готовый репо стратегии (с продуктами, если до них дошло)
 ```
 
 Это не жёсткая лестница: информация приходит не линейно, оркестратор ведёт по
@@ -119,8 +121,9 @@ truth; когда дело дошло до продукта, их читают �
 Опциональный downstream — когда исход стратегии требует продукта (иначе проблему
 закрывает задача `task` Карты гипотез). Несколько продуктов под одним бизнесом, у
 каждого своя папка. Все скиллы слоёв принимают `<project-slug>` первым аргументом
-(без него — пикер по `docs/projects/`, исключая `_template`); interface и screen
-берут вторым аргументом поверхность (без неё — пикер по именам из `surface.md`).
+(без него — пикер по `docs/projects/`, исключая `_template`); interface, screen
+и telegram-bot-flow берут вторым аргументом поверхность (без неё — пикер по
+именам из `surface.md`).
 
 - **`/project-deep-dive <slug>`** (аналитик) — vision (+ `addresses-problem`
   M:N к проблемам) + реестр-хребет `surface.md` + кросс-поверхностные kind
@@ -153,6 +156,12 @@ truth; когда дело дошло до продукта, их читают �
 - **`/screen-deep-dive <slug> [<surface>]`** → **`/screen-audit <slug>`** —
   композиция и облик по поверхности (flow / screen / block / shell в
   `screens/<surface>/`) на инвентаре `@stit/ui`.
+- **`/telegram-bot-flow-deep-dive <slug> [<surface>]`** →
+  **`/telegram-bot-flow-audit <slug>`** — диалоги телеграм-бота по
+  bot-поверхности (вместо screens): фичи `features/<feature>/` (dialog /
+  window / use-case бота) + сквозные command / notification в
+  `telegram-bot-flow/<surface>/`. Stable-артефакты читает форк
+  `<org>/<bot>`.
 
 Точки стыка **между продуктами** бизнеса фиксируются в
 `docs/projects/project-map.md` (авторская сторона — `integration` с
@@ -181,16 +190,16 @@ interface ↔ services/domain ↔ screen, по каждой поверхност
 Репо наполнено стратегией бизнеса: свой бизнес, свои проблемы, ставки и гипотезы —
 и продукты, если до них дошло. Дальше — обычный аналитический флоу по воркфлоу
 (`README.md`), под git-ревью. Когда стратегия рождает продукт, соседние форки
-`<org>/{backend,frontend,infra}` читают его stable-артефакты как upstream
-(`docs/README.md`).
+`<org>/{backend,frontend,infra}` и `<org>/<bot>` читают его stable-артефакты
+как upstream (`docs/README.md`).
 
 ## Когда что-то идёт не так
 
 - **Артефакт не `stable`** → доведи через соответствующий deep-dive того же слоя.
 - **Подозрение на рассинхрон внутри слоя** → узкий аудит
-  (`/project-audit`, `/interface-audit`, `/screen-audit`, `/service-audit`,
-  `/infrastructure-audit`, `/swot-audit`, `/hypothesis-map-audit`,
-  `/ajtbd-audit`).
+  (`/project-audit`, `/interface-audit`, `/screen-audit`,
+  `/telegram-bot-flow-audit`, `/service-audit`, `/infrastructure-audit`,
+  `/swot-audit`, `/hypothesis-map-audit`, `/ajtbd-audit`).
 - **Подозрение на разрыв между слоями** → `/cross-audit`.
 - **Заказчик ведёт сессию сам** → единый вход `/entrypoint-for-business`
   (бизнес-язык, эскалация «нужен аналитик», push в единую ветку `client`).

@@ -12,6 +12,8 @@
 - `runtime.md` — среды исполнения (`kubernetes` | `compose`, по
   окружениям);
 - `shared-platform.md` — общие платформенные ресурсы бизнеса;
+- `job.md` — реестр-хребет джоб периметра; полные описания — файлы
+  `jobs/<slug>.md`;
 - `placement.md` — размещение юнитов (`unit → runtime`).
 
 Read-only контекст резолва (исключая `_template`):
@@ -22,7 +24,8 @@ Read-only контекст резолва (исключая `_template`):
   потребности общих ресурсов).
 
 Синтаксис `placement.unit`: `` `service:<project>/<svc>` `` |
-`` `platform:<project>/<slug>` `` | `` `shared-platform:<slug>` ``.
+`` `platform:<project>/<slug>` `` | `` `shared-platform:<slug>` `` |
+`` `job:<slug>` ``.
 
 ## Структурные правила (R-STRUCT-*)
 
@@ -50,8 +53,8 @@ Read-only контекст резолва (исключая `_template`):
 |---|---|
 | `runtime.type` | `kubernetes`, `compose` |
 | `runtime.environment` | `prod`, `staging`, `dev` |
-| `shared-platform.type` | `message-broker`, `api-gateway`, `cdn`, `object-storage`, `idp`, `registry`, `monitoring`, `other` |
-| `placement.unit` (префикс) | `service:`, `platform:`, `shared-platform:` |
+| `shared-platform.type` | `message-broker`, `api-gateway`, `cdn`, `object-storage`, `idp`, `registry`, `monitoring`, `secret-store`, `other` |
+| `placement.unit` (префикс) | `service:`, `platform:`, `shared-platform:`, `job:` |
 | `<любой>.status` | `draft`, `stable` |
 
 **Обнаружение:** значение не из списка (с учётом бэктиков); `unit` без
@@ -136,37 +139,6 @@ Read-only контекст резолва (исключая `_template`):
 которого нет в `shared-platform.md`. Завести ресурс или поправить unit
 через `/infrastructure-deep-dive`».
 
-### R-STRUCT-010 — `placement.unit` `job:` или `job.target` в пустоту
-
-- **severity**: `error`
-- **что ищем**: (а) строка `placement.md` с `unit: job:<slug>`, которого
-  нет в `job.md`; (б) реф `job.target` (`server:` / `runtime:` /
-  `shared-platform:` / `service:<project>/<svc>`), который не резолвится в
-  соответствующий реестр.
-- **как проверяем**: собрать slug'и `job.md`; каждый `job:`-unit placement
-  и каждый реф колонки `target` сверить с реестрами периметра и проектов.
-- **пример**: `pg-backup` с `target: [service:crm/orders]`, а проекта `crm`
-  нет.
-
-### R-STRUCT-011 — Джоба: рассинхрон реестра и файлов
-
-- **severity**: `error`
-- **что ищем**: строка реестра `job.md` без файла `jobs/<slug>.md`; файл в
-  `jobs/` без строки реестра; отсутствие обязательных секций файла
-  (`Trigger`, `Does`, `Target`, `Retention`, `Verify`, `On failure`,
-  `Notes`) или `kind: job` во frontmatter; рассинхрон `trigger`/`target`
-  между реестром и файлом.
-- **как проверяем**: slug'и реестра ↔ листинг `jobs/*.md`; по каждому
-  файлу — frontmatter, набор H2, сверка trigger/target с реестром.
-
-### R-SEM-004 — Stable-джоба с пустым Verify
-
-- **severity**: `warning`
-- **что ищем**: файл джобы со `status: stable`, у которого `Verify` —
-  `_N/A_`/`—`/пустой: никак не проверяется, что джоба реально работает
-  (бэкап без restore-теста — вера, не гарантия).
-- **как проверяем**: для stable-джоб секция `Verify` непуста содержательно.
-
 ### R-STRUCT-008 — Потребность `shared:<slug>` без записи в `shared-platform.md`
 
 **Severity:** `error`.
@@ -196,13 +168,47 @@ Read-only контекст резолва (исключая `_template`):
 **Рекомендация:** «stable несовместим с открытым blocker'ом. Закрыть
 вопрос или понизить запись в draft через `/infrastructure-deep-dive`».
 
+### R-STRUCT-010 — `placement.unit` `job:` или `job.target` в пустоту
+
+**Severity:** `error`.
+
+**Где:** `placement.md` + `job.md` + реестры периметра и проектов.
+
+**Обнаружение:** (а) строка `placement.md` с `unit: job:<slug>`, которого
+нет в `job.md`; (б) реф `job.target` (`server:` / `runtime:` /
+`shared-platform:` / `service:<project>/<svc>`), который не резолвится в
+соответствующий реестр. Проверка: собрать slug'и `job.md`; каждый
+`job:`-unit placement и каждый реф колонки `target` сверить с реестрами
+периметра и проектов. Пример: `pg-backup` с
+`target: [service:crm/orders]`, а проекта `crm` нет.
+
+**Рекомендация:** «реф X не резолвится. Завести джобу/сущность или
+поправить строку через `/infrastructure-deep-dive`».
+
+### R-STRUCT-011 — Джоба: рассинхрон реестра и файлов
+
+**Severity:** `error`.
+
+**Где:** `job.md` + файлы `jobs/<slug>.md`.
+
+**Обнаружение:** строка реестра `job.md` без файла `jobs/<slug>.md`; файл
+в `jobs/` без строки реестра; отсутствие обязательных секций файла
+(`Trigger`, `Does`, `Target`, `Retention`, `Verify`, `On failure`,
+`Notes`) или `kind: job` во frontmatter; рассинхрон `trigger`/`target`
+между реестром и файлом. Проверка: slug'и реестра ↔ листинг `jobs/*.md`;
+по каждому файлу — frontmatter, набор H2, сверка trigger/target с
+реестром.
+
+**Рекомендация:** «реестр `job.md` и файлы `jobs/` разошлись на X —
+выровнять через `/infrastructure-deep-dive job:<slug>`».
+
 ## Семантические правила (R-SEM-*)
 
 ### R-SEM-001 — IP / hostname / ОС / секреты / runtime-механика в файлах слоя
 
 **Severity:** `warning`.
 
-**Где:** все 4 реестра слоя (любые колонки и prose).
+**Где:** все 5 реестров слоя + файлы `jobs/*.md` (любые колонки и prose).
 
 **Обнаружение:** в тексте встречается:
 
@@ -257,6 +263,21 @@ Read-only контекст резолва (исключая `_template`):
 через `/service-deep-dive`); если осознанна — зафиксировать „почему“ в
 state».
 
+### R-SEM-004 — Stable-джоба с пустым Verify
+
+**Severity:** `warning`.
+
+**Где:** файлы `jobs/<slug>.md`.
+
+**Обнаружение:** файл джобы со `status: stable`, у которого `Verify` —
+`_N/A_`/`—`/пустой: никак не проверяется, что джоба реально работает
+(бэкап без restore-теста — вера, не гарантия). Проверка: для stable-джоб
+секция `Verify` непуста содержательно.
+
+**Рекомендация:** «stable-джоба X не несёт проверки успеха. Заполнить
+`Verify` или понизить запись в draft через
+`/infrastructure-deep-dive job:<slug>`».
+
 ## Coverage-правила (R-COV-*)
 
 ### R-COV-001 — Сервис проекта без prod-размещения
@@ -272,13 +293,6 @@ state».
 
 **Рекомендация:** «сервис `<project>/<svc>` не размещён в prod — он
 „живёт нигде“. Разместить через `/infrastructure-deep-dive placement`».
-
-### R-COV-005 — Джоба периметра без placement
-
-- **severity**: `hint`
-- **что ищем**: строка `job.md`, для которой нет строки `placement.md` с
-  `unit: job:<slug>` — джоба заведена, но негде не исполняется.
-- **как проверяем**: каждый slug `job.md` ↔ юниты placement.
 
 ### R-COV-002 — Размещаемый ресурс без placement
 
@@ -322,6 +336,19 @@ state».
 **Рекомендация:** «в рантайм X ничего не размещено. Либо разместить
 юниты через `/infrastructure-deep-dive placement`, либо проверить, нужен
 ли рантайм».
+
+### R-COV-005 — Джоба периметра без placement
+
+**Severity:** `hint`.
+
+**Где:** `job.md` + `placement.md`.
+
+**Обнаружение:** строка `job.md`, для которой нет строки `placement.md` с
+`unit: job:<slug>` — джоба заведена, но нигде не исполняется. Проверка:
+каждый slug `job.md` ↔ юниты placement.
+
+**Рекомендация:** «джоба X не размещена. Разместить через
+`/infrastructure-deep-dive placement`».
 
 ## Что не делает infrastructure-audit
 

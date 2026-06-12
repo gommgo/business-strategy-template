@@ -1,6 +1,6 @@
 ---
 name: screen-deep-dive
-description: "Углублённая проработка аналитических артефактов экранов проекта в `docs/projects/<project-slug>/screens/<surface>/` (flow · screen · block · shell) — по папке на поверхность (surface) из реестра `surface.md`. Ведёт сессию заполнения через структурированные вопросы (AskUserQuestion), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/projects/<project-slug>/screens/<surface>/`), аккумулирует визуальные референсы в `docs/projects/<project-slug>/screens/<surface>/assets/<kind>/<slug>/`, ходит в web за UI-референсами по явной просьбе, опирается на инвентарь компонентов `@stit/ui` и не выдумывает craft. Использовать всегда, когда речь о screens-слое проекта, заполнении одного из 4 артефактных kind (flow/screen/block/shell) одной поверхности, заведении или углублении потока/экрана/блока/каркаса, разборе сырья (скриншот UI, описание макета, транскрипт интервью, ссылка на конкурента), переходе записи `status: draft → stable`, удалении с каскадом, прокладке композиции через семантическое дерево, или копании связей между сущностями screens и сущностями interface той же поверхности. Также — единственная точка входа в screens-слой проекта: новые файлы и правки артефактов делаются через этот скилл."
+description: "Углублённая проработка аналитических артефактов экранов проекта в `docs/projects/<project-slug>/screens/<surface>/` (flow · screen · block · shell) — по папке на поверхность (surface) из реестра `surface.md`. Ведёт сессию заполнения через структурированные вопросы (AskUserQuestion), фиксирует контекст в своей ветке единого дерева state оркестратора (`../entrypoint/state/projects/<project-slug>/screens/<surface>/`), аккумулирует визуальные референсы в `docs/projects/<project-slug>/screens/<surface>/assets/<kind>/<slug>/`, ходит в web за UI-референсами по явной просьбе, опирается на манифест компонентов `@stit/ui` (`manifest.json` пакета — единственный словарь имён `ui:*`) и не выдумывает craft. Использовать всегда, когда речь о screens-слое проекта, заполнении одного из 4 артефактных kind (flow/screen/block/shell) одной поверхности, заведении или углублении потока/экрана/блока/каркаса, разборе сырья (скриншот UI, описание макета, транскрипт интервью, ссылка на конкурента), переходе записи `status: draft → stable`, удалении с каскадом, прокладке композиции через семантическое дерево, или копании связей между сущностями screens и сущностями interface той же поверхности. Также — единственная точка входа в screens-слой проекта: новые файлы и правки артефактов делаются через этот скилл."
 ---
 
 # screen-deep-dive
@@ -119,7 +119,7 @@ content-блоки в сообщении пользователя.
    «Выбор поверхности»).
 2. Прочитать `docs/projects/_template/screens/README.md` и файлы-формы по
    4 kind в подпапке `_template/` — освежить канон композиции, layout-язык,
-   имена `ui:*`/`block:*`/`data:*`, anti-patterns.
+   имена `ui:*`/`layout:*`/`icon:*`/`block:*`/`data:*`, anti-patterns.
 3. Прочитать `docs/projects/<project-slug>/vision.md`,
    реестр-хребет `docs/projects/<project-slug>/surface.md`, файл
    возможностей выбранной поверхности
@@ -185,7 +185,7 @@ content-блоки в сообщении пользователя.
     `entrypoint: true|false`);
   - выбора существующего slug-соседа (по опции на каждый существующий
     + «нужен новый» через Other);
-  - выбора `ui:Component` из инвентаря (см. ниже);
+  - выбора `ui:Component` из манифеста (см. ниже);
   - выбора `block:<slug>` для слота из существующих + «новый» (Other).
 - **Свободная форма** (через Other) — для **значения**: `name`,
   `description`, `route`, тексты label/placeholder/title, slug новых
@@ -242,8 +242,8 @@ content-блоки в сообщении пользователя.
   Имена файлов — человекочитаемые kebab-case
   (`master-detail-figma.png`, `competitor-linear-list.png`).
 - Поле во frontmatter каждого kind: `assets: ['file1.png', 'file2.png']`
-  (пути от `<surface>/assets/<kind>/<slug>/`). Lint проверяет
-  существование файла.
+  (пути от `<surface>/assets/<kind>/<slug>/`). Существование файлов
+  проверяет `/screen-audit` (R-COV-007).
 - Входящая картинка от аналитика → скилл анализирует, через
   `AskUserQuestion` решают вместе: (a) сохранить как референс с slug-ом,
   (b) использовать как сырьё (режим B) и не сохранять, (c) поискать
@@ -260,21 +260,26 @@ content-блоки в сообщении пользователя.
 
 См. `references/ui-inventory.md`. Кратко:
 
-- Источник правды — `manifest.json` пакета `@stit/ui` (когда
-  опубликован). Скилл ищет его по локальному пути установки пакета или
-  в соседнем репо `ui-lib` (если доступен).
-- Пока manifest'а нет — fallback на раздел «Топ-уровень компонентов»
-  в `docs/projects/_template/screens/README.md`. Это «выводимые
-  требования», не окончательный реестр.
+- Источник правды словаря — манифест `@stit/ui/manifest.json`: в
+  экосистеме — соседний репо `../ui-lib/dist/manifest.json`, у
+  потребителя — `node_modules/@stit/ui/manifest.json`. Имя `ui:<Name>`
+  валидно ⇔ `<Name>` есть в словаре `components`; props — из `props[]`
+  компонента; части compound — `ui:<Name>.<Part>` по `parts`.
 - В режиме углубления дерева скилл предлагает `ui:Component` как
-  опции из инвентаря (по релевантной категории: layout-примитивы для
-  обёрток, data-display для тел, feedback для states, и т.д.).
-- Если в инвентаре нет подходящего — `AskUserQuestion`:
-  «предложить новый `ui:Foo` как требование к ui-lib?». По «да» —
-  компонент попадает в дерево, и в
+  опции из манифеста (по `taxonomy.family` и `taskMap`). Раскладка —
+  не компоненты, а `layout:`-узлы дерева (`layout:stack` · `layout:row`
+  · `layout:grid` · `layout:layer`); текст и иконки — children-узлы
+  (`- 'Новое'`, `- icon:plus`), не props.
+- Компонент из `notAvailable` манифеста — осознанный forward-реф: в
+  дерево попадает с пометкой `(planned)` (`ui:Table (planned)`), без
+  props; аудит репортит его как gap.
+- Если подходящего нет ни в `components`, ни в `notAvailable` —
+  `AskUserQuestion`: собрать узел из существующих компонентов и
+  `layout:`-узлов, а потребность зафиксировать в
   `../entrypoint/state/projects/<project-slug>/screens/<surface>/<kind>/<slug>.md`
-  в секции `## Что копать дальше` появляется строка
-  `ui-lib gap: нужен ui:Foo — для <зачем>`.
+  в секции `## Что копать дальше` строкой
+  `ui-lib gap: нужен ui:Foo — для <зачем>`. Выдуманное имя в дерево не
+  попадает.
 
 ## Контракт `draft → stable`
 
@@ -433,8 +438,9 @@ content-блоки в сообщении пользователя.
 - Не упоминать FSD-имена (`widget`, `feature`, `pages/`) в дереве или
   в frontmatter — FSD-структура живёт в коде, который пишется по
   screens вручную, не в самих артефактах.
-- Не помещать тематические оси (`density`/`brand`/`scheme`) ни в
-  frontmatter, ни в узлы дерева — это data-* на корне приложения.
+- Не помещать оси контекста (`brand`/`scheme`/`density`/`mode`/`dir`)
+  ни в frontmatter, ни в узлы дерева — это `data-*`-оси и `dir` на
+  корне приложения (`StitProvider`).
 - Не помещать breakpoints в `slot-fills` или `block.tree` —
   облицовочный адаптив только в `shell.responsive`, структурный — в
   `flow`.

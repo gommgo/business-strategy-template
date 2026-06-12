@@ -73,7 +73,9 @@ options:
   - Other
 ```
 
-Запись — в `state/<project-slug>/<ctx>/use-case/<Name>.md` секция
+Запись — в
+`../entrypoint/state/projects/<project-slug>/domains/<ctx>/use-case/<Name>.md`
+секция
 `## Доменные решения`:
 
 ```markdown
@@ -111,7 +113,8 @@ options:
    функция со `slug`, сигнатура, ошибки. Если клиента ещё нет — завести из
    шаблона `_templates/integration-client.md`. Домен зовёт функцию по `slug`,
    **транспорт держит только клиент** (HTTP/gRPC/очередь — домен не знает);
-3. фиксируется в `state/<project-slug>/<ctx>/<kind>/<Name>.md`.
+3. фиксируется в
+   `../entrypoint/state/projects/<project-slug>/domains/<ctx>/<kind>/<Name>.md`.
 
 Скилл доменов авторит use-case (`integration` + `functions`) и клиент
 `_shared/`. Бизнес-каталог `integration.md` (провайдеры + `## Функции` с

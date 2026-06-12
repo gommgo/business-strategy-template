@@ -33,7 +33,8 @@ description: "Сквозной семантический аудит конси�
   `services/<svc>/domains/<ctx>/` — по bounded-context,
   **surface-агностичны**) — внутри проекта.
 - `docs/projects/infrastructure/` (ИТ-периметр бизнеса: `server.md` ·
-  `runtime.md` · `shared-platform.md` · `placement.md`) — один на бизнес.
+  `runtime.md` · `shared-platform.md` · `job.md` + файлы `jobs/<slug>.md` ·
+  `placement.md`) — один на бизнес.
 - `docs/projects/<slug>/screens/<surface>/` (композиция экранов — если
   каталог есть; **папка на поверхность**) — внутри проекта.
 - `docs/projects/<slug>/telegram-bot-flow/<surface>/` (композиция диалогов
@@ -286,7 +287,7 @@ Destination layer: <path-2>
   `../entrypoint/state/` (по слою; для пар проекта —
   `../entrypoint/state/projects/<project-slug>/project/`; для троек
   per-surface слоёв — `../entrypoint/state/projects/<project-slug>/`
-  `{interface,screens}/<surface>/`; если файлы есть).
+  `{interface,screens,telegram-bot-flow}/<surface>/`; если файлы есть).
 
 Найди:
 - <конкретные паттерны для этого lens из angles.md>
@@ -374,7 +375,7 @@ Destination layer: <path-2>
 ```
 === /cross-audit ===
 Слои: business (+ стейкхолдеры), ajtbd, business-problem, project-map (общие) + проекты: referral-network (поверхности: web-partner, tg-bot), loyalty-app (поверхности: mobile)
-Проектов: 2 · агентов: 13 верхнеуровневых + (6 пар + 2 поверхности × 12 троек + 1 dataitems) по referral-network + (6 пар + 1 поверхность × 12 троек) по loyalty-app = …
+Проектов: 2 · агентов: 15 верхнеуровневых + (6 пар + 2 поверхности × 12 троек + 1 dataitems) по referral-network + (6 пар + 1 поверхность × 12 троек) по loyalty-app = …
 Время: <duration>
 
 — Общие слои —
@@ -488,13 +489,13 @@ projects: [referral-network, loyalty-app]
 surfaces:
   referral-network: [web-partner, tg-bot]
   loyalty-app: [mobile]
-top-level-lenses-run: 13
+top-level-lenses-run: 15
 pair-lens-runs: 12        # сумма по всем (проект × пара-lens)
 triple-lens-runs: 36      # сумма по всем (проект × поверхность × тройка-lens)
 dataitems-runs: 1         # один на мультиповерхностный проект
 per-project-layers:
-  referral-network: { project: yes, interface: yes, domain: yes, screen: no }
-  loyalty-app:      { project: yes, interface: yes, domain: no,  screen: no }
+  referral-network: { project: yes, interface: yes, domain: yes, screen: no, botflow: yes }
+  loyalty-app:      { project: yes, interface: yes, domain: no,  screen: no, botflow: no }
 findings: { error: X, warning: Y, hint: Z }
 verdicts: { accepted: A, needs-fix: B, false-positive: C, deferred: D }
 ---
