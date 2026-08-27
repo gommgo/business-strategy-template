@@ -39,6 +39,7 @@ Forward-only: закрытое **удаляется**, история живёт
     ├── services/<kind>/<slug>.md              ← service-deep-dive (kind: service · platform · architecture)
     ├── domains/<context>/...                  ← domain-deep-dive (по bounded-context; ключ — контекст, не сервис)
     ├── screens/<surface>/<kind>/<slug>.md     ← screen-deep-dive
+    ├── fsd/<surface>/<kind>/<slug>.md         ← fsd-deep-dive (по SPA-поверхности)
     └── telegram-bot-flow/<surface>/...        ← telegram-bot-flow-deep-dive (по bot-поверхности)
 ```
 

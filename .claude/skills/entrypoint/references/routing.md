@@ -23,6 +23,7 @@
 | `docs/projects/<slug>/services/<svc>/domains/<ctx>/` (по bounded-context, внутри сервиса-владельца, surface-агностичны) | агрегаты/события/use-case/… | `/domain-deep-dive <slug> <ctx>` | `/service-audit <slug>` + `/cross-audit` |
 | `docs/projects/infrastructure/` (ИТ-периметр бизнеса: сервера · рантаймы · общие ресурсы · джобы · размещение) | server/runtime/shared-platform/job/placement | `/infrastructure-deep-dive` | `/infrastructure-audit` + `/cross-audit` |
 | `docs/projects/<slug>/screens/<surface>/` | `flow` · `screen` · `block` · `shell` | `/screen-deep-dive <slug> [<surface>]` | `/screen-audit <slug>` |
+| `docs/projects/<slug>/fsd/<surface>/` (SPA-поверхности) | `entities` · `features` · `pages` · `widgets` · `app` · `shared-ui` · `shared-api` · `shared-lib` | `/fsd-deep-dive <slug> [<surface>]` | `/fsd-audit <slug>` |
 | `docs/projects/<slug>/telegram-bot-flow/<surface>/` (bot-поверхности) | фичи `features/<feature>/` (`dialog` · `window` · `use-case` бота) + сквозные `command` · `notification` | `/telegram-bot-flow-deep-dive <slug> [<surface>]` | `/telegram-bot-flow-audit <slug>` |
 | `docs/projects/project-map.md` (межпроектные стыки) | `project-map` (singleton-граф рёбер) | `/project-deep-dive <slug>` (авторская сторона ребра — `integration` инициатора) | `/cross-audit` |
 | сквозная консистентность | — | — | `/cross-audit` |
@@ -110,6 +111,7 @@ surface-агностичны, делятся по bounded-context. Межпро�
 | внутрипроектная консистентность продукта | `/project-audit <slug>` |
 | консистентность interface проекта | `/interface-audit <slug>` |
 | консистентность screens проекта | `/screen-audit <slug>` |
+| консистентность FSD-карты проекта (SPA-поверхности) | `/fsd-audit <slug>` |
 | консистентность telegram-bot-flow проекта (bot-поверхности) | `/telegram-bot-flow-audit <slug>` |
 | консистентность сервисной топологии проекта (реестры, паспорта, домены-владельцы) | `/service-audit <slug>` |
 | структура ИТ-периметра бизнеса (размещение, рефы, сироты) | `/infrastructure-audit` |
@@ -128,12 +130,14 @@ surface-агностичны, делятся по bounded-context. Межпро�
 заводит **авторски снизу-вверх** на своей стороне. Оркестратор лишь следит,
 чтобы смежный слой не потерялся — фиксирует его открытой нитью.
 
-## Выбор поверхности (interface / screens / telegram-bot-flow / capability)
+## Выбор поверхности (interface / screens / fsd / telegram-bot-flow / capability)
 
-Слои `interface`, `screens` и `telegram-bot-flow` партиционированы по
+Слои `interface`, `screens`, `fsd` и `telegram-bot-flow` партиционированы по
 поверхности — путь делегирования несёт **и проект, и поверхность**:
 `/interface-deep-dive <slug> [<surface>]`,
 `/screen-deep-dive <slug> [<surface>]`,
+`/fsd-deep-dive <slug> [<surface>]` (только SPA-поверхности — `type: web` /
+`admin` / `desktop` / `embed`),
 `/telegram-bot-flow-deep-dive <slug> [<surface>]` (только поверхности с
 `type: bot` — композиция бота вместо экранов). Возможности (`capability`)
 тоже живут по поверхности (`capability/<surface>.md`), но входом остаётся

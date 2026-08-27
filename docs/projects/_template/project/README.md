@@ -24,10 +24,11 @@
 вход для соседних слоёв того же проекта, **вложенных в его папку**:
 `<slug>/interface/<surface>/` (UX по поверхности, `/interface-deep-dive`),
 `<slug>/screens/<surface>/` (композиция экранов по поверхности,
-`/screen-deep-dive`), `<slug>/telegram-bot-flow/<surface>/` (композиция
-диалогов bot-поверхности), `<slug>/services/` (сервисная топология бэкенда,
-`/service-deep-dive`; домены по bounded-context внутри сервисов —
-surface-агностичны, `/domain-deep-dive`).
+`/screen-deep-dive`), `<slug>/fsd/<surface>/` (FSD-карта SPA-поверхности —
+мост к коду фронта, `/fsd-deep-dive`), `<slug>/telegram-bot-flow/<surface>/`
+(композиция диалогов bot-поверхности), `<slug>/services/` (сервисная
+топология бэкенда, `/service-deep-dive`; домены по bounded-context внутри
+сервисов — surface-агностичны, `/domain-deep-dive`).
 
 ## Поверхность — хребет продукта
 

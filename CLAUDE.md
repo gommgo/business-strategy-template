@@ -27,7 +27,11 @@ hi-fi субстрат на библиотеке `@stit/ui`) либо — для
 `type: bot` — диалоги телеграм-бота (`telegram-bot-flow/<surface>/` —
 фичи `features/<feature>/` из dialog · window · use-case бота в понятиях
 aiogram_dialog + сквозные реестры command · notification на корне; читает
-форк `telegram-bot-template`). Кросс-поверхностные kind продукта
+форк `telegram-bot-template`). SPA-поверхности (`type: web`/`admin`/
+`desktop`/`embed`) дополнительно несут **FSD-карту** (`fsd/<surface>/` —
+мост «аналитика → фронт-код»: слайсы entities · features · pages · widgets
+из ситуаций, экранов и доменов; `src/`-путей нет; читает форк
+`spa-frontend-template`). Кросс-поверхностные kind продукта
 (`user` · `integration` · `boundary` · `constraint` · `market`) и `vision` —
 плоско в корне проекта. Бэкенд продукта — **сервисная топология**
 (`services/`, обязательна при наличии бэкенда; монолит = один сервис):
@@ -74,6 +78,9 @@ bounded-context, surface-агностичны**, контекст уникале
   формы + данные в одном слое, один на бизнес).
 - `docs/projects/_template/screens/README.md` — канон 4 kind артефактов
   экранов **одной поверхности** (`screens/<surface>/`).
+- `docs/projects/_template/fsd/README.md` — канон FSD-карты **одной
+  SPA-поверхности** (`fsd/<surface>/`): 8 файлов слайсов, мост к коду
+  `<org>/frontend`.
 - `docs/projects/_template/telegram-bot-flow/README.md` — канон слоя
   диалогов **одной bot-поверхности** (`telegram-bot-flow/<surface>/`): ось
   feature (dialog · window · use-case бота в `features/<feature>/`) +
@@ -81,9 +88,11 @@ bounded-context, surface-агностичны**, контекст уникале
 - `docs/projects/project-map.md` — карта стыков между продуктами бизнеса
   (singleton: канон формы + данные в одном файле; бизнес-язык, без техники).
 
-Артефакты — чистая аналитика; на FSD/компоненты напрямую не мапятся.
-Превращение `docs/projects/<slug>/screens/` в wireframe и hi-fi — ручная
-работа автора макета, не отдельный артефакт.
+Артефакты аналитики — чистая аналитика; на FSD/компоненты напрямую не
+мапятся: переход к фронт-коду живёт в отдельном слое `fsd/<surface>/`
+(карта слайсов — единственное место, где FSD-имена легальны). Превращение
+`docs/projects/<slug>/screens/` в wireframe и hi-fi — ручная работа автора
+макета, не отдельный артефакт.
 
 Карта документации и handoff-контракт соседям — `docs/README.md`. Путь
 потребителя форка — `docs/getting-started.md`.
@@ -111,7 +120,9 @@ upstream (read-only, односторонне):
   `services/_shared/` + паспорт `services/<svc>/README.md` (паспорт задаёт
   границы деплой-юнита, домены — начинку; маппинг DDD → Go живёт у backend
   в `docs/reference/domain-mapping.md`);
-- `<org>/frontend` ← `projects/<slug>/{interface,screens}/<surface>/` (fsd-deep-dive, по поверхности);
+- `<org>/frontend` ← `projects/<slug>/fsd/<surface>/` (карта слайсов — её
+  читает `/scaffold` фронта) + `{interface,screens}/<surface>/` (контекст
+  ситуаций и экранов);
 - `<org>/<bot>` ← `projects/<slug>/telegram-bot-flow/<surface>/` (фичи: диалоги,
   окна, use-case'ы бота-оркестратора) (+ `interface/<surface>/`,
   `services/*/domains/` — доменные use-case'ы и события, на которые
@@ -162,15 +173,16 @@ upstream (read-only, односторонне):
 | `docs/projects/<slug>/services/<svc>/domains/` | **какой бизнес-код бэкенда** (по bounded-context, внутри сервиса-владельца) | `/domain-deep-dive <slug> <ctx>` |
 | `docs/projects/infrastructure/` | **где всё это физически живёт** (сервера · рантаймы · общие ресурсы · размещение; один слой на бизнес) | `/infrastructure-deep-dive` |
 | `docs/projects/<slug>/screens/<surface>/` | **как это выглядит и компонуется** (по поверхности) | `/screen-deep-dive <slug> [<surface>]` |
+| `docs/projects/<slug>/fsd/<surface>/` | **как фронт нарезан по слоям FSD** (по SPA-поверхности; мост к коду `<org>/frontend`) | `/fsd-deep-dive <slug> [<surface>]` |
 | `docs/projects/<slug>/telegram-bot-flow/<surface>/` | **как бот ведёт диалог** (по bot-поверхности: фичи — диалоги · окна · use-case'ы бота; сквозные команды · уведомления) | `/telegram-bot-flow-deep-dive <slug> [<surface>]` |
 | `docs/projects/project-map.md` | **как продукты бизнеса стыкуются** | сводится из `integration`, сверяет `/cross-audit` |
 
 Канон формы продуктовых слоёв
-(project/interface/screens/telegram-bot-flow/services/project-map)
+(project/interface/screens/fsd/telegram-bot-flow/services/project-map)
 живёт один раз в `docs/projects/_template/`; данные — в папках проектов. Скилы
 этих слоёв принимают `<project-slug>` первым аргументом (без него — пикер **по
-человекочитаемым именам** проектов, исключая `_template`); interface и screen
-берут вторым аргументом поверхность (без неё — пикер по именам из `surface.md`).
+человекочитаемым именам** проектов, исключая `_template`); interface, screen и
+fsd берут вторым аргументом поверхность (без неё — пикер по именам из `surface.md`).
 Клиент-режим — дружелюбные пикеры «какой продукт обсуждаем» и «где он работает».
 
 **Дружелюбие к аналитику (нейминг).** Жаргон (`slug`/`kind`/`draft`/`stable`)
@@ -560,6 +572,14 @@ Interface-слой (по проекту, **по поверхности**):
   того же проекта), битых ссылок, нарушений slot-fills/accepts и
   семантических подозрений — скилл `screen-audit <slug>`. Связь flow/shell с
   поверхностью структурная (папка).
+- **FSD-карта** (`docs/projects/<slug>/fsd/<surface>/`, для SPA-поверхностей)
+  — через скилл `fsd-deep-dive <slug> [<surface>]`; форма — по
+  `docs/projects/_template/fsd/README.md` (канон слоя; форма одной папки
+  поверхности — в подпапке `_template/`). Мост «аналитика → фронт-код»:
+  слайсы восходят к ситуациям/экранам/доменам; `src/`-путей и библиотек не
+  содержат — их выводит `/scaffold` форка `<org>/frontend` из stable-записей.
+  Битые ссылки на источники, рассинхрон зеркала `widgets.pages`, pages-first
+  и cross-feature — скилл `fsd-audit <slug>`.
 - **Библиотека** — в отдельном репо `ui-lib` как `@stit/ui`;
   проект её потребляет, не правит.
 - **Sweep'ы** (терминология, чистка): 1 агент = 1 непересекающаяся зона.

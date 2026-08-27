@@ -103,7 +103,7 @@ M:N (`vision.addresses-problem`). Превращение `screens/` в маке�
 | Соседний репо | Читает из этого репо |
 |---|---|
 | [`<org>/backend`](https://git.stit.tech/stit-core/go-backend-template) | `projects/<slug>/services/<svc>/domains/<ctx>/` + паспорт сервиса (scaffold доменов в Go по сервису) |
-| [`<org>/frontend`](https://git.stit.tech/stit-core/spa-frontend-template) | `projects/<slug>/{interface,screens}/` (fsd-deep-dive) |
+| [`<org>/frontend`](https://git.stit.tech/stit-core/spa-frontend-template) | `projects/<slug>/fsd/<surface>/` (карта слайсов → scaffold) + `{interface,screens}/` (контекст) |
 | [`<org>/<bot>`](https://git.stit.tech/stit-core/telegram-bot-template) | `projects/<slug>/telegram-bot-flow/<surface>/` (диалоги бота → код) |
 | [`<org>/infra`](https://git.stit.tech/stit-core/project-infra-template-compose) | `projects/<slug>/{vision,surface}` + `services/{service,platform}.md` + `projects/infrastructure/` (init-project + материализация топологии) |
 

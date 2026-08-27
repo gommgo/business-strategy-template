@@ -25,9 +25,10 @@ description: "Единая точка входа аналитика во всю 
 | `docs/projects/<slug>/services/<svc>/domains/<ctx>/` (по bounded-context) | `/domain-deep-dive <slug> <ctx>` |
 | `docs/projects/infrastructure/` (ИТ-периметр бизнеса) | `/infrastructure-deep-dive` |
 | `docs/projects/<slug>/screens/<surface>/` | `/screen-deep-dive <slug> [<surface>]` |
+| `docs/projects/<slug>/fsd/<surface>/` (SPA-поверхности, мост к коду фронта) | `/fsd-deep-dive <slug> [<surface>]` |
 | `docs/projects/<slug>/telegram-bot-flow/<surface>/` (bot-поверхности) | `/telegram-bot-flow-deep-dive <slug> [<surface>]` |
 | `docs/projects/project-map.md` (межпроектные стыки) | `/project-deep-dive <slug>` (авторская сторона — `integration` инициатора) |
-| аудиты | `/swot-audit` · `/hypothesis-map-audit` · `/ajtbd-audit` · `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>` · `/telegram-bot-flow-audit <slug>` · `/service-audit <slug>` · `/infrastructure-audit` · `/cross-audit` |
+| аудиты | `/swot-audit` · `/hypothesis-map-audit` · `/ajtbd-audit` · `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>` · `/fsd-audit <slug>` · `/telegram-bot-flow-audit <slug>` · `/service-audit <slug>` · `/infrastructure-audit` · `/cross-audit` |
 
 Поверхность (`surface`) — ось продукта: реестр-хребет `surface.md`
 партиционирует возможности (`capability/<surface>`), интерфейс
