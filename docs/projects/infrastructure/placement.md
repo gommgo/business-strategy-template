@@ -44,12 +44,13 @@
 
 - `unit` — что размещаем · `` `service:<project>/<svc>` `` \| `` `platform:<project>/<slug>` `` \| `` `shared-platform:<slug>` `` \| `` `job:<slug>` `` · обяз.
 - `runtime` — куда · `` `runtime-slug` `` (строка `runtime.md`) · обяз.
+- `note` — почему именно здесь, когда неочевидно («изоляция чувствительных данных», «рядом с БД-источником», «дешёвый полигон») · текст · опц. (`—` допустим)
 - `status` — зрелость записи · `draft` \| `stable` · обяз.
 
-| unit | runtime | status |
-|---|---|---|
+| unit | runtime | note | status |
+|---|---|---|---|
 
 > Заполняется под бизнес. Примеры: `` `service:crm/orders` `` ·
-> `` `main-cluster` `` · `draft`; `` `service:crm/ai-gateway` `` ·
-> `` `dev-box` `` · `draft`; `` `shared-platform:nats` `` ·
-> `` `main-cluster` `` · `draft`.
+> `` `main-cluster` `` · `—` · `draft`; `` `service:crm/ai-gateway` `` ·
+> `` `dev-box` `` · «дешёвый полигон под эксперименты» · `draft`;
+> `` `shared-platform:nats` `` · `` `main-cluster` `` · `—` · `draft`.

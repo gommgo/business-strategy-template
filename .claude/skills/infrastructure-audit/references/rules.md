@@ -21,7 +21,11 @@ Read-only контекст резолва (исключая `_template`):
 - `docs/projects/<project>/services/service.md` — сервисы-юниты;
 - `docs/projects/<project>/services/platform.md` — проектные ресурсы
   (`provided-by: own` — размещаемые юниты; `provided-by: shared:<slug>` —
-  потребности общих ресурсов).
+  потребности общих ресурсов);
+- `docs/projects/<project>/services/*/README.md` — **только** секции
+  `## Resources` (stateful-ресурсы для R-COV-006) и `## Messaging`
+  (продюсеры топиков для R-SEM-005); остальное содержимое паспортов —
+  зона `/service-audit`.
 
 Синтаксис `placement.unit`: `` `service:<project>/<svc>` `` |
 `` `platform:<project>/<slug>` `` | `` `shared-platform:<slug>` `` |
@@ -278,6 +282,24 @@ state».
 `Verify` или понизить запись в draft через
 `/infrastructure-deep-dive job:<slug>`».
 
+### R-SEM-005 — Topic-триггер джобы без продюсера
+
+**Severity:** `warning`.
+
+**Где:** `job.md` + файлы `jobs/*.md` + секции `## Messaging` паспортов
+`docs/projects/*/services/*/README.md`.
+
+**Обнаружение:** джоба с `trigger: topic:<topic>`, при этом ни один
+паспорт сервиса не несёт строку `produces` с этим `topic` — джоба слушает
+топик, в который никто не публикует, и не исполнится никогда. Проверка:
+собрать топики topic-триггеров; каждый найти среди `produces` секций
+`## Messaging` (читаются только эти секции паспортов).
+
+**Рекомендация:** «джоба X триггерится топиком `<topic>`, продюсера
+которого нет ни в одном `## Messaging`. Поправить триггер через
+`/infrastructure-deep-dive job:<slug>` или завести produces у
+сервиса-владельца через `/service-deep-dive <project>`».
+
 ## Coverage-правила (R-COV-*)
 
 ### R-COV-001 — Сервис проекта без prod-размещения
@@ -350,11 +372,36 @@ state».
 **Рекомендация:** «джоба X не размещена. Разместить через
 `/infrastructure-deep-dive placement`».
 
+### R-COV-006 — Stateful-ресурс без бэкап-джобы
+
+**Severity:** `hint`.
+
+**Где:** секции `## Resources` паспортов `docs/projects/*/services/*/README.md`
++ `docs/projects/*/services/platform.md` (строки `own`) +
+`shared-platform.md` + `job.md`.
+
+**Обнаружение:** ресурс, несущий данные, не входит ни в один `job.target`
+— ни напрямую, ни через владельца. Что считать stateful — суждение по
+технологии: БД (`postgres`/`mysql`/`mongo`/…) и persistent-хранилища из
+`## Resources` (покрытие — через `target: service:<project>/<svc>`
+владельца), объектные хранилища и registry (`shared-platform` / `own`
+типов `object-storage`/`registry`), durable-стримы брокера (jetstream,
+kafka). Эфемерное (кэш, чистый pub/sub) не считается. Если state-заметка
+ресурса/джобы несёт явное решение «не бэкапим, потому что …» — findings
+нет, решение цитируется в reasoning-trace.
+
+**Рекомендация:** «ресурс X несёт данные, но не входит ни в один
+`job.target` — бэкапов нет. Завести джобу через
+`/infrastructure-deep-dive job` или зафиксировать осознанное решение в
+state».
+
 ## Что не делает infrastructure-audit
 
-- Не сверяет паспорта сервисов, домены, interface, screens — из проектов
-  читаются только реестры `services/service.md` и `services/platform.md`
-  (для резолва `placement.unit` и потребностей `shared:`). Внутренности
+- Не сверяет паспорта сервисов по существу, домены, interface, screens —
+  из проектов читаются реестры `services/service.md` и
+  `services/platform.md` (резолв `placement.unit` и потребностей
+  `shared:`) плюс **только** секции `## Resources` / `## Messaging`
+  паспортов (R-COV-006 / R-SEM-005). Внутренности
   проектных слоёв — `/service-audit <slug>` и `/cross-audit` (углы
   `service-placement` · `platform-shared`).
 - Не правит ни периметр, ни проектные файлы — только отчёт.

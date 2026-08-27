@@ -45,11 +45,17 @@ composition).
 - Внутри-контекстный VO как отдельный файл — должен жить inline в
   секции `Value Objects` этого же файла.
 - Mutator без events при том, что мутация бизнес-значимая.
+- Enum-статус в `Properties` при `Lifecycle: N/A` — жизненный цикл
+  недопроектирован: либо таблица переходов покрывает все значения enum,
+  либо статус не enum.
 
 **Порядок копания**:
 
 1. **Identity** (раунд enum): `ID type` (Other), `Mutable` (yes/no),
-   `Visibility` (in-context / published).
+   `Visibility` (in-context / published), `Concurrency`
+   (optimistic-lock (version) / last-write-wins / single-writer /
+   `N/A` для immutable) — вопрос falsifiable: «два параллельных вызова
+   `<Mutator>` по одному `<Name>` — что произойдёт?».
 2. **Properties (таблица + детали)**:
    - таблица `name | type | required | brief` (имена + типы + required)
      — через Other по каждому полю;
@@ -66,6 +72,9 @@ composition).
 5. **Lifecycle** — таблица переходов либо `_N/A (stateless)_`.
    Если есть переходы — AskUserQuestion: «есть state-machine?» (yes/no),
    при yes — построить таблицу `from | event/method | to | guard | side`.
+   Сверить с enum-статусом из `Properties`: каждое значение появляется в
+   таблице; терминальные состояния названы (переходов из них нет);
+   значение-сирота — вопрос архитектору, не молчаливое допущение.
 6. **Boundary** — что внутри транзакционной границы, что снаружи (по ID).
 7. **Contained Entities** — root + child entities (inline-подсекция или
    отдельный entity-файл если сложно).
@@ -142,7 +151,9 @@ ID-ссылки на child entity (только через parent).
    - `Ordering`: enum `none` / `per-aggregate (partition key = <X>ID)` /
      `global`;
    - `Idempotency key`: Other — обычно `EventID`;
-   - `Retention`: Other.
+   - `Retention`: Other;
+   - `Evolution`: enum `additive-only (default)` / Other — breaking-change
+     payload = новое событие, не правка существующего.
 5. `Notes` — опционально (миграционные хвосты, breaking-change policy).
 
 **Тест-критерий**: см. `draft-stable.md § event`.
@@ -154,7 +165,14 @@ ID-ссылки на child entity (только через parent).
 **Обязательные H2**: `Actor`, `Inputs`, `Outputs`, `Dependencies`,
 `Steps`, `Called aggregate methods`, `Events emitted`, `Errors`.
 
-**Опциональные**: `Side effects beyond the aggregate`.
+**Опциональные**: `Idempotency` (у мутирующего use-case'а с повторяемым
+каналом — HTTP retry, топик — секция ожидаема), `Side effects beyond the
+aggregate`.
+
+**Когда файл вообще нужен**: запись — всегда; чтение — только с
+бизнес-правилами (видимость по ролям, доменная агрегация); тривиальный
+`Get`/`List` — строка без ссылки в README контекста, не файл (канон
+`docs/projects/_template/services/README.md § Use-case'ы чтения`).
 
 **Frontmatter**: `id: <ctx>.<Name>`, `kind: use-case`, `relations:
 [<ctx>.<Aggregate>]`, `emits`, `consumes`.
@@ -183,6 +201,11 @@ ID-ссылки на child entity (только через parent).
   функции `integration.md` + клиента `_shared/`.
 - Транспорт (HTTP-метод, endpoint, очередь) в `Steps`/`purpose` use-case —
   домен transport-agnostic; транспорт живёт в клиенте `_shared/`.
+- Мутация **двух** агрегатов в одной транзакции (инвариант слоя «одна
+  транзакция — один агрегат»); второй меняется eventual через событие —
+  либо исключение явно обосновано в `Side effects beyond the aggregate`.
+- Порт-сирота: строка `## Dependencies`, не названная ни в одном шаге
+  `## Steps` (и наоборот — I/O-шаг без порта в таблице).
 
 **Порядок копания**:
 
@@ -210,7 +233,11 @@ ID-ссылки на child entity (только через parent).
    доменов не заводит — нет нужной → `**blocker**` + `/project-deep-dive`.
    Anti-pattern alert: `Authorizer`; пустые `integration`/`functions` у
    внешнего/межпроектного порта; транспорт в use-case вместо клиента.
-5. `Steps` — нумерованный observable список. Other на каждый шаг.
+5. `Steps` — нумерованный observable список. Other на каждый шаг. После
+   списка — сверка: каждый I/O-шаг называет порт из `## Dependencies`,
+   каждый порт назван хотя бы в одном шаге; мутируется ровно один агрегат
+   (двойная мутация → вопрос «второй через событие или обосновать
+   исключение?»).
 6. `Called aggregate methods` — выбор из методов соответствующего
    `<Aggregate>.md` + «нужен новый метод» (Other → правка aggregate'а).
 7. `Events emitted` — выбор из существующих `events/*.md` + «нужно
@@ -218,8 +245,13 @@ ID-ссылки на child entity (только через parent).
 8. `Errors` (таблица `sentinel | when | HTTP status`) — Other; типичные
    `ErrInvalid<X>` 400, `ErrNotFound` 404, `ErrAlreadyExists` 409,
    `ErrForbidden` 403 — как подсказки в свободной форме.
-9. `Side effects beyond the aggregate` — опционально, явно `_нет_` если
-   нет.
+9. `Idempotency` — для мутирующего use-case'а с повторяемым каналом:
+   `Strategy` — enum `natural` / `key-based` / `not-idempotent` (Other —
+   ключ дедупликации или почему допустимо); `Duplicate outcome` — Other.
+   Вопрос falsifiable: «клиент повторил запрос после таймаута — что
+   произойдёт?». Read-only — `_N/A (read-only)_`.
+10. `Side effects beyond the aggregate` — опционально, явно `_нет_` если
+    нет.
 
 **Тест-критерий**: см. `draft-stable.md § use-case`.
 
@@ -336,7 +368,9 @@ ID-ссылки на child entity (только через parent).
 `_templates/context-readme.md`), `Cross-context dependencies`,
 `Ubiquitous Language`.
 
-**Опциональные**: `Glossary notes`, `Architecture notes`.
+**Опциональные**: `Capabilities` (связь с возможностями продукта — см.
+`references/project-context.md`; технический контекст — явное `_нет_`),
+`Glossary notes`, `Architecture notes`.
 
 **Anti-patterns**:
 - Половина aggregate'ов из директории не упомянуты — README обязан их
@@ -348,14 +382,18 @@ ID-ссылки на child entity (только через parent).
 **Порядок копания**:
 
 1. `Purpose`: «что делаем» (Other) + «чего не делаем — граница» (Other).
-2. `Aggregates` — таблица; автозаполнение из `<ctx>/*.md` aggregate-файлов.
-3. `Use cases` — таблица; автозаполнение из `use-cases/*.md`.
-4. `Events`:
+2. `Capabilities` — раунд связи с продуктом (опции — из
+   `<P>/capability/*.md`, см. `references/project-context.md`);
+   технический контекст — явное `_нет (технический контекст)_`.
+3. `Aggregates` — таблица; автозаполнение из `<ctx>/*.md` aggregate-файлов.
+4. `Use cases` — таблица; автозаполнение из `use-cases/*.md`; тривиальные
+   read-операции — строкой без ссылки (см. § use-case, «Когда файл нужен»).
+5. `Events`:
    - `Published` — автозаполнение из `events/*.md`;
    - `Subscribed` — выбор из `events/*.md` других контекстов + Other.
-5. `Cross-context dependencies` — таблица direction/other-context/nature.
-6. `Ubiquitous Language` — таблица с явной колонкой «Не путать с».
+6. `Cross-context dependencies` — таблица direction/other-context/nature.
+7. `Ubiquitous Language` — таблица с явной колонкой «Не путать с».
    Каждый ряд — Other.
-7. `Glossary notes` / `Architecture notes` — Other.
+8. `Glossary notes` / `Architecture notes` — Other.
 
 **Тест-критерий**: см. `draft-stable.md § context-README`.

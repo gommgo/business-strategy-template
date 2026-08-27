@@ -43,6 +43,7 @@ consumes: []
 - **Ordering:** none | per-aggregate (partition key = `<Aggregate>ID`)
 - **Idempotency key:** `EventID` (или `<Aggregate>ID` + дискриминатор)
 - **Retention:** outbox держит до подтверждения всеми консьюмерами
+- **Evolution:** additive-only — новые поля опциональны; переименование/удаление поля или смена семантики = **новое событие**, не правка payload
 
 ## Notes
 

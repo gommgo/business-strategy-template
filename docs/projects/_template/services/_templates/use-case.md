@@ -74,6 +74,7 @@ consumes: []
 ## Steps
 
 > Нумерованный список шагов. Каждый — observable действие (Validate / Load / Construct / Apply / Persist / Emit / Return).
+> Шаг с I/O называет порт из `## Dependencies` (`repo.…`, `<Client>.…`); порт, не появившийся ни в одном шаге, — сирота. Транзакция одна и мутирует **один** агрегат (инвариант слоя); вторая мутация — отдельный use-case, запущенный событием.
 
 1. **Validate inputs:** базовая валидация формата (детальная — в VO-конструкторах)
 2. **Load:** `repo.GetByID(ctx, id)` → `ErrNotFound` если нет (для Update/Delete; не нужно для Create)
@@ -109,6 +110,13 @@ consumes: []
 | `ErrInvalid<Field>` | валидация поля упала | 400 |
 | `ErrNotFound` | агрегат не найден (для Update/Delete) | 404 |
 | `ErrAlreadyExists` | уникальность нарушена | 409 |
+
+## Idempotency
+
+> Опциональная секция: что происходит при повторном вызове с теми же Inputs — retry HTTP-клиента, redelivery брокера, двойной клик. Для read-only операций — `_N/A (read-only)_`; у мутирующего use-case'а с повторяемым каналом (HTTP, топик) секция ожидаема.
+
+- **Strategy:** natural (повтор безопасен по построению) | key-based (`<ключ дедупликации>`) | not-idempotent (<почему это допустимо>)
+- **Duplicate outcome:** <что вернёт / что произойдёт при повторе: тот же DTO, `ErrAlreadyExists`, no-op>
 
 ## Side effects beyond the aggregate
 

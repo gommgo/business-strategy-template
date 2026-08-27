@@ -172,7 +172,11 @@ Other (формулировка архитектора). Опциями пода
      event payload содержит UI-state; spanning invariant между
      aggregate'ами; cross-context relation типа `composition`;
      порт `## Dependencies` к внешней системе / соседнему проекту с
-     пустой колонкой `integration` — пробел продуктового слоя);
+     пустой колонкой `integration` — пробел продуктового слоя;
+     use-case мутирует два агрегата в одной транзакции; порт
+     `## Dependencies`, не названный ни в одном `Step` (и I/O-шаг без
+     порта); enum-статус в `Properties` при `Lifecycle: N/A`;
+     мутирующий use-case с повторяемым каналом без `## Idempotency`);
    - битые cross-ref'ы (`relations`, `emits`, `consumes` указывают на
      несуществующее);
    - frontmatter-дрифт (basename не совпадает с `name`, `id` не равен

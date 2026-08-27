@@ -89,7 +89,10 @@ helm, compose-файлы) — забота того репо, не этого с
      (исключая `_template`) — юниты для размещения;
    - платформенные потребности — `docs/projects/*/services/platform.md`:
      строки `provided-by: shared:<slug>` (потребители общих ресурсов) и
-     `provided-by: own` (ресурсы, требующие собственного placement).
+     `provided-by: own` (ресурсы, требующие собственного placement);
+   - для фазы `jobs` — из паспортов `services/*/README.md` **только**
+     секции `## Resources` (stateful-ресурсы под coverage бэкапов) и
+     `## Messaging` (продюсеры topic-триггеров).
 5. Прочитать свою ветку state
    (`../entrypoint/state/infrastructure/`, если есть) — секции
    `## Открытые вопросы`; пометки `**blocker**` приоритетны.

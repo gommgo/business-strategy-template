@@ -194,8 +194,9 @@ aggregate-файле и kind-ом отдельно не заводится).
 1. **Properties (детали)** — constraints/default/source каждого property всех aggregate'ов.
 2. **Methods (детали)** — params/returns/preconditions/postconditions/events для каждого метода.
 3. **Invariants** — собрать falsifiable-список и привязать каждый к owning method.
-4. **Lifecycle** — таблица переходов (stateful aggregate) или `_N/A (stateless)_`.
-5. **Identity** — ID type, mutability, visibility.
+4. **Lifecycle** — таблица переходов (stateful aggregate) или `_N/A (stateless)_`;
+   сверка с enum-статусом Properties (все значения покрыты, терминальные названы).
+5. **Identity** — ID type, mutability, visibility, concurrency.
 6. **Boundary / VOs / Contained Entities / Spanning Invariants** — границы агрегата.
 7. **Events** — `events/*.md`: Trigger, Payload, Consumers, Delivery.
 8. **Use Cases** — Actor, Inputs, Outputs, Dependencies (колонка
@@ -203,8 +204,10 @@ aggregate-файле и kind-ом отдельно не заводится).
    `` `service:<svc>` `` — другой сервис проекта (functions из его
    `Exposes`), slug провайдера `integration.md` — внешнее/сосед; `functions`
    = дёрнутые функции с префиксом провайдера
-   `` [`<integration>.<fn-slug>`, …] ``), Steps, Called methods,
-   Events, Errors. Порт `service:`/события через брокер → сверить с
+   `` [`<integration>.<fn-slug>`, …] ``), Steps (I/O-шаг называет порт;
+   один агрегат на транзакцию), Called methods,
+   Events, Errors, Idempotency (мутирующие с повторяемым каналом).
+   Порт `service:`/события через брокер → сверить с
    `Dependencies`/`Messaging` паспорта сервиса; рассинхрон — blocker-вопрос
    «обновить паспорт через /service-deep-dive», не молчаливая правка.
 9. **Integration clients** — `services/_shared/integrations/<slug>/` (`integration-client`):

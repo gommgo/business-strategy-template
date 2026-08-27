@@ -1,6 +1,6 @@
 ---
 name: infrastructure-audit
-description: "Узкий аудит консистентности ИТ-периметра бизнеса в `docs/projects/infrastructure/` (server · runtime · shared-platform · job · placement) — слой один на бизнес, аргументов нет, один прогон = весь периметр. Структурные нарушения: `placement.unit` на несуществующий сервис (`service:<project>/<svc>` ↔ реестры `docs/projects/*/services/service.md`), несуществующий проектный ресурс (`platform:<project>/<slug>` ↔ `platform.md` проекта, причём `provided-by` обязан быть `own`) или несуществующий shared-ресурс; `placement.runtime` вне `runtime.md`; `runtime.servers` вне `server.md`; `placement.unit` `job:<slug>` вне `job.md`; `job.target` на неучтённую сущность; рассинхрон реестра job.md и файлов jobs/<slug>.md (включая обязательные секции и stable-джобу без Verify); потребность проекта `provided-by: shared:<slug>` без записи в `shared-platform.md`; дубли slug во всех реестрах; невалидные enum (`type`, `environment`, `status`). Семантические подозрения: IP/hostname/ОС/секреты/runtime-механика в файлах слоя; shared-ресурс-сирота (не потребляет ни один проект); два проекта с own-ресурсом одной технологии (напрашивается общий). Coverage: сервис проекта без prod-размещения; own-ресурс, используемый shared-ресурс или джоба периметра без placement; сервер без единого рантайма; runtime, в который ничего не размещено. Не правит артефакты, только отчёт; деструктивные правки — через `/infrastructure-deep-dive` (периметр) и `/service-deep-dive` (проектные services/). Сквозную сверку с проектными слоями ведёт `/cross-audit` (углы `service-placement` · `platform-shared`). Использовать перед коммитом артефактов периметра, когда `/infrastructure-deep-dive` предлагает прогон в конце сессии, перед `/cross-audit`, или когда архитектор подозревает рассогласование размещения."
+description: "Узкий аудит консистентности ИТ-периметра бизнеса в `docs/projects/infrastructure/` (server · runtime · shared-platform · job · placement) — слой один на бизнес, аргументов нет, один прогон = весь периметр. Структурные нарушения: `placement.unit` на несуществующий сервис (`service:<project>/<svc>` ↔ реестры `docs/projects/*/services/service.md`), несуществующий проектный ресурс (`platform:<project>/<slug>` ↔ `platform.md` проекта, причём `provided-by` обязан быть `own`) или несуществующий shared-ресурс; `placement.runtime` вне `runtime.md`; `runtime.servers` вне `server.md`; `placement.unit` `job:<slug>` вне `job.md`; `job.target` на неучтённую сущность; рассинхрон реестра job.md и файлов jobs/<slug>.md (включая обязательные секции и stable-джобу без Verify); потребность проекта `provided-by: shared:<slug>` без записи в `shared-platform.md`; дубли slug во всех реестрах; невалидные enum (`type`, `environment`, `status`). Семантические подозрения: IP/hostname/ОС/секреты/runtime-механика в файлах слоя; shared-ресурс-сирота (не потребляет ни один проект); два проекта с own-ресурсом одной технологии (напрашивается общий); topic-триггер джобы без продюсера в `## Messaging` паспортов. Coverage: сервис проекта без prod-размещения; own-ресурс, используемый shared-ресурс или джоба периметра без placement; сервер без единого рантайма; runtime, в который ничего не размещено; stateful-ресурс (БД из Resources, объектное хранилище, durable-стрим) без бэкап-джобы. Не правит артефакты, только отчёт; деструктивные правки — через `/infrastructure-deep-dive` (периметр) и `/service-deep-dive` (проектные services/). Сквозную сверку с проектными слоями ведёт `/cross-audit` (углы `service-placement` · `platform-shared`). Использовать перед коммитом артефактов периметра, когда `/infrastructure-deep-dive` предлагает прогон в конце сессии, перед `/cross-audit`, или когда архитектор подозревает рассогласование размещения."
 ---
 
 # infrastructure-audit
@@ -47,7 +47,10 @@ coverage. Семантическую сверку проектных слоёв 
 4. Прочитать read-only межпроектный контекст: все
    `docs/projects/*/services/service.md` и
    `docs/projects/*/services/platform.md` (листингом каталогов, исключая
-   `_template`) — юниты и потребности для резолва рефов и coverage.
+   `_template`) — юниты и потребности для резолва рефов и coverage; из
+   паспортов `services/*/README.md` — **только** секции `## Resources` и
+   `## Messaging` (stateful-ресурсы для R-COV-006, продюсеры топиков для
+   R-SEM-005).
 5. Прочитать ветку state слоя в едином дереве оркестратора
    (`../entrypoint/state/infrastructure/`) — для проверки «stable со
    state-blocker'ами».
@@ -61,8 +64,8 @@ coverage. Семантическую сверку проектных слоёв 
 | severity | смысл | пример |
 |---|---|---|
 | `error` | Структурное нарушение, ломает модель | `placement.unit` на несуществующий сервис/ресурс; `placement.runtime` вне `runtime.md`; `runtime.servers` вне `server.md`; потребность `shared:<slug>` без записи `shared-platform.md`; дубль slug; невалидный enum |
-| `warning` | Семантическое подозрение | IP/hostname/ОС/секрет/runtime-механика в файле слоя; shared-ресурс-сирота; два проекта с `own`-ресурсом одной технологии |
-| `hint` | Coverage / стиль, не ломает | сервис без prod-размещения; размещаемый ресурс без placement; сервер без рантайма; runtime без единого размещения |
+| `warning` | Семантическое подозрение | IP/hostname/ОС/секрет/runtime-механика в файле слоя; shared-ресурс-сирота; два проекта с `own`-ресурсом одной технологии; topic-триггер джобы без продюсера |
+| `hint` | Coverage / стиль, не ломает | сервис без prod-размещения; размещаемый ресурс без placement; сервер без рантайма; runtime без единого размещения; stateful-ресурс без бэкап-джобы |
 
 Подробный реестр — `references/rules.md`.
 
@@ -142,10 +145,11 @@ totals: { error: X, warning: Y, hint: Z }
   `/service-deep-dive <slug>`.
 - **Не читать `_template/`** как данные (это образец формы проектных
   слоёв; периметр в нём не шаблонируется).
-- **Не лезть глубже реестров проектов.** Из проектов читаются только
-  `services/service.md` и `services/platform.md` — для резолва рефов и
-  coverage. Паспорта сервисов, домены, interface — зона `/service-audit`
-  и `/cross-audit`.
+- **Не лезть глубже реестров проектов.** Из проектов читаются
+  `services/service.md`, `services/platform.md` — для резолва рефов и
+  coverage — и **только** секции `## Resources` / `## Messaging` паспортов
+  (R-COV-006 / R-SEM-005). Остальное в паспортах, домены, interface — зона
+  `/service-audit` и `/cross-audit`.
 - **Не понижать `stable → draft`.** Максимум — error в отчёте, архитектор
   понизит руками.
 - **Не выдумывать findings.** Правило не сработало — не писать «возможно,

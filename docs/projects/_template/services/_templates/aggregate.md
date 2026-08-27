@@ -18,6 +18,7 @@ consumes: []
 - **ID type:** <тип, напр. UUID v7 / natural key / composite>
 - **Mutable:** yes/no — изменяется ли entity после создания
 - **Visibility:** in-context | published — видна ли снаружи bounded context'а
+- **Concurrency:** optimistic-lock (version) | last-write-wins | single-writer — как разруливается параллельная мутация одного экземпляра; для immutable — `N/A`
 
 ## Properties
 
@@ -76,6 +77,7 @@ consumes: []
 ## Lifecycle
 
 > Если aggregate stateless — пишется явно: `_Lifecycle: N/A (stateless aggregate)._`. Иначе — таблица переходов.
+> Если в `Properties` есть enum-статус — таблица покрывает **все** его значения (значение без входящего/исходящего перехода — находка); терминальные состояния названы явно (из них переходов нет).
 
 | from | event/method | to | guard | side effects |
 |---|---|---|---|---|
