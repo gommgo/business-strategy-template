@@ -43,7 +43,8 @@ SPA-поверхности. Аргументы позиционны — `<projec
 2. **Поверхность.** Прочитать реестр
    `docs/projects/<project-slug>/surface.md`; кандидаты — только строки с
    `type: web | admin | desktop | embed` (для `type: bot` слой —
-   `telegram-bot-flow/`, для `api` слоя нет). Если следующий аргумент
+   `telegram-bot-flow/`, для `type: mobile` — `mobile/`, для `api` слоя
+   нет). Если следующий аргумент
    совпадает со `slug` такой строки — это `<surface>`. Иначе — пикер по
    именам SPA-поверхностей. Реестр пуст или SPA-поверхностей нет —
    «сначала заведи поверхность в `surface.md` через `/project-deep-dive`»,

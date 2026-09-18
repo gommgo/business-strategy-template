@@ -3,7 +3,7 @@
 Документация — **design-time source of truth** стратегии бизнеса (и проектирования
 продукта, когда он нужен). Здесь нет кода: артефакты — чистая язык-агностичная
 аналитика. Когда стратегия рождает продукт, его артефакты читают соседние форки
-(`<org>/{backend,frontend,infra}` и `<org>/<bot>`) и по ним автор макета вручную собирает hi-fi
+(`<org>/{backend,frontend,mobile,infra}` и `<org>/<bot>`) и по ним автор макета вручную собирает hi-fi
 субстрат на `@stit/ui`. Заполняют артефакты deep-dive-
 скиллы (`.claude/skills/`); рекомендуемый вход — оркестраторы `/entrypoint`
 (аналитик) и `/entrypoint-for-business` (клиент), которые классифицируют сырьё
@@ -25,7 +25,7 @@ SWOT → Карта гипотез (терминал — `task`). Исход —
 | [`hypothesis-map/`](./hypothesis-map/README.md) | **под какие метрики целимся** (Карта гипотез: `goal` · `metric` · `subject` · `hypothesis` · `task`, M:N) | `/hypothesis-map-deep-dive` |
 | [`projects/`](./projects/README.md) | **продукты под бизнес** (опционально, когда исход — продукт; несколько, см. ниже) | `/project-deep-dive <slug>` (аналитик); клиент — `/entrypoint-for-business` |
 | `projects/_template/` | **канон формы** продуктовых слоёв (образец, не данные) | read-only, наследуется форком |
-| `projects/<slug>/` | **данные одного продукта** (vision + surface-реестр + kind + `capability/<surface>` + `interface/<surface>/` + `screens/<surface>/` или `telegram-bot-flow/<surface>/` + `services/`) | скиллы слоёв `<slug>` |
+| `projects/<slug>/` | **данные одного продукта** (vision + surface-реестр + kind + `capability/<surface>` + `interface/<surface>/` + `screens/<surface>/`, `telegram-bot-flow/<surface>/` или `mobile/<surface>/` — по `type` поверхности + `services/`) | скиллы слоёв `<slug>` |
 | `projects/project-map.md` | **карта стыков между продуктами бизнеса** (межпроектный граф) | сводится из `integration`, сверяет `/cross-audit` |
 | [`projects/infrastructure/`](./projects/infrastructure/README.md) | **ИТ-периметр бизнеса** (сервера · рантаймы · общие платформенные ресурсы · джобы · размещение; один на все проекты) | `/infrastructure-deep-dive` |
 
@@ -46,6 +46,11 @@ SWOT → Карта гипотез (терминал — `task`). Исход —
   window / use-case бота) + сквозные `command` / `notification` на корне
   (для поверхностей с `type: bot` — вместо `screens/`) — вход
   `/telegram-bot-flow-deep-dive <slug> [<surface>]`.
+- `mobile/<surface>/` — карта мобильного приложения: entities / screens /
+  flows / features / shell / entry-points / permissions / system-actions /
+  widgets / background-tasks / shared-api / shared-lib (для поверхностей с
+  `type: mobile` — вместо `screens/`) — вход
+  `/mobile-deep-dive <slug> [<surface>]`.
 - `services/` — сервисная топология бэкенда: реестры `service.md` /
   `platform.md`, singleton `architecture.md`, паспорта сервисов — вход
   `/service-deep-dive <slug>`.
@@ -56,8 +61,8 @@ SWOT → Карта гипотез (терминал — `task`). Исход —
 ## Аудиты (только отчёт)
 
 - `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>`
-  · `/telegram-bot-flow-audit <slug>` · `/service-audit <slug>` — узкая
-  консистентность внутри слоя проекта.
+  · `/telegram-bot-flow-audit <slug>` · `/mobile-audit <slug>` ·
+  `/service-audit <slug>` — узкая консистентность внутри слоя проекта.
 - `/infrastructure-audit` — структура ИТ-периметра (размещение, рефы,
   сироты).
 - `/ajtbd-audit` — инварианты методологии графа работ по каждому сегменту (рой).
@@ -76,6 +81,7 @@ SWOT → Карта гипотез (терминал — `task`). Исход —
 | **`<org>/backend`** (`go-backend-template`) | `projects/<slug>/services/<svc>/domains/<ctx>/` + `services/_shared/` (VO + клиенты интеграций) + паспорт `services/<svc>/README.md` (stable) | `/scaffold` domain → Go-код **по сервису**: паспорт задаёт границы деплой-юнита (Exposes / Dependencies / Resources / Messaging), домены — начинку; маппинг DDD → Go (включая `integration-client` → порт/адаптер) живёт у него (`docs/reference/domain-mapping.md`) |
 | **`<org>/frontend`** (`spa-frontend-template`) | `projects/<slug>/fsd/<surface>/` (stable-карта слайсов) + `{interface,screens}/<surface>/` + product-файлы (контекст) | `/scaffold` и `/de-template` фронта разворачивают stable-записи FSD-карты в код (`src/`-пути выводят сами); карта проектируется здесь — `/fsd-deep-dive` (по SPA-поверхности) |
 | **`<org>/<bot>`** (`telegram-bot-template`) | `projects/<slug>/telegram-bot-flow/<surface>/` (фичи: диалоги, окна, use-case'ы бота-оркестратора) + `interface/<surface>/` + `services/*/domains/` (доменные use-case'ы и события под оркестратор) | проектирование и scaffold диалогов бота: StatesGroup, окна, виджеты, getter'ы, сервисы-оркестраторы, обработчики |
+| **`<org>/mobile`** (`mobile-template`) | `projects/<slug>/mobile/<surface>/` (stable-карта приложения, 12 kind) + `interface/<surface>/` + `services/*/domains/` (контекст ситуаций, сущностей и событий) | `/scaffold` и `/de-template` мобильного репо разворачивают stable-записи карты в три места — `shared/`, `androidApp/`, `iosApp/` (пути выводят сами; маппинг kind → код — его `docs/reference/strategy-mapping.md`); карта проектируется здесь — `/mobile-deep-dive` (по мобильной поверхности) |
 | **`<org>/infra`** (`project-infra-template-compose`) | `projects/<slug>/{vision, surface}` + `projects/<slug>/services/{service,platform}.md` + секции `Resources`/`Messaging` паспортов + весь `projects/infrastructure/` | `/init-project` + материализация смысловой топологии e2e: что билдить (сервисы), где располагать (placement/runtime/server), что провижинить (БД/кэши/бакеты/топики); runtime-механика (реплики, размеры, манифесты) — решение infra |
 
 Соседи держат `<org>/strategy` sibling-checkout'ом рядом и резолвят путь через

@@ -27,15 +27,17 @@ description: "Единая точка входа аналитика во всю 
 | `docs/projects/<slug>/screens/<surface>/` | `/screen-deep-dive <slug> [<surface>]` |
 | `docs/projects/<slug>/fsd/<surface>/` (SPA-поверхности, мост к коду фронта) | `/fsd-deep-dive <slug> [<surface>]` |
 | `docs/projects/<slug>/telegram-bot-flow/<surface>/` (bot-поверхности) | `/telegram-bot-flow-deep-dive <slug> [<surface>]` |
+| `docs/projects/<slug>/mobile/<surface>/` (мобильные поверхности, карта приложения и мост к его коду) | `/mobile-deep-dive <slug> [<surface>]` |
 | `docs/projects/project-map.md` (межпроектные стыки) | `/project-deep-dive <slug>` (авторская сторона — `integration` инициатора) |
-| аудиты | `/swot-audit` · `/hypothesis-map-audit` · `/ajtbd-audit` · `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>` · `/fsd-audit <slug>` · `/telegram-bot-flow-audit <slug>` · `/service-audit <slug>` · `/infrastructure-audit` · `/cross-audit` |
+| аудиты | `/swot-audit` · `/hypothesis-map-audit` · `/ajtbd-audit` · `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>` · `/fsd-audit <slug>` · `/telegram-bot-flow-audit <slug>` · `/mobile-audit <slug>` · `/service-audit <slug>` · `/infrastructure-audit` · `/cross-audit` |
 
 Поверхность (`surface`) — ось продукта: реестр-хребет `surface.md`
 партиционирует возможности (`capability/<surface>`), интерфейс
 (`interface/<surface>/`) и композицию — экраны (`screens/<surface>/`) либо
-диалоги бота (`telegram-bot-flow/<surface>/` при `type: bot`) — по своим
-slug'ам. Скилы `interface`/`screen`/`telegram-bot-flow` берут поверхность
-**вторым аргументом** `[<surface>]` — без него предлагают пикер
+диалоги бота (`telegram-bot-flow/<surface>/` при `type: bot`), либо карту
+мобильного приложения (`mobile/<surface>/` при `type: mobile`) — по своим
+slug'ам. Скилы `interface`/`screen`/`telegram-bot-flow`/`mobile` берут
+поверхность **вторым аргументом** `[<surface>]` — без него предлагают пикер
 поверхностей по `surface.name`.
 
 Полная таблица «сигнал → слой → kind → исполнитель → режим» —
@@ -206,7 +208,7 @@ anti-patterns, draft→stable, каскады внутри слоя) — у ис
 ├── infrastructure/                                 ← infrastructure-deep-dive
 └── projects/<slug>/                                ← проектные исполнители
     ├── project/ (vision + плоские kind + capability/<surface>/)
-    ├── interface/<surface>/ · screens/<surface>/ · telegram-bot-flow/<surface>/ ← по поверхности
+    ├── interface/<surface>/ · screens/<surface>/ · telegram-bot-flow/<surface>/ · mobile/<surface>/ ← по поверхности
     ├── services/                                   ← service-deep-dive (топология)
     └── domains/<context>/                          ← по bounded-context (ключ — контекст, не сервис)
 ```
@@ -264,8 +266,8 @@ anti-patterns, draft→stable, каскады внутри слоя) — у ис
    следующий слой / прогнать нужный аудит (`/swot-audit`,
    `/hypothesis-map-audit`, `/ajtbd-audit`, `/project-audit <slug>`,
    `/interface-audit <slug>`, `/screen-audit <slug>`,
-   `/telegram-bot-flow-audit <slug>`, `/service-audit <slug>`,
-   `/infrastructure-audit`, `/cross-audit`).
+   `/telegram-bot-flow-audit <slug>`, `/mobile-audit <slug>`,
+   `/service-audit <slug>`, `/infrastructure-audit`, `/cross-audit`).
 
 ## Запреты
 

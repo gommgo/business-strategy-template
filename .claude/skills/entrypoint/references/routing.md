@@ -25,6 +25,7 @@
 | `docs/projects/<slug>/screens/<surface>/` | `flow` · `screen` · `block` · `shell` | `/screen-deep-dive <slug> [<surface>]` | `/screen-audit <slug>` |
 | `docs/projects/<slug>/fsd/<surface>/` (SPA-поверхности) | `entities` · `features` · `pages` · `widgets` · `app` · `shared-ui` · `shared-api` · `shared-lib` | `/fsd-deep-dive <slug> [<surface>]` | `/fsd-audit <slug>` |
 | `docs/projects/<slug>/telegram-bot-flow/<surface>/` (bot-поверхности) | фичи `features/<feature>/` (`dialog` · `window` · `use-case` бота) + сквозные `command` · `notification` | `/telegram-bot-flow-deep-dive <slug> [<surface>]` | `/telegram-bot-flow-audit <slug>` |
+| `docs/projects/<slug>/mobile/<surface>/` (мобильные поверхности) | `entities` · `screens` · `flows` · `features` · `shell` · `entry-points` · `permissions` · `system-actions` · `widgets` · `background-tasks` · `shared-api` · `shared-lib` | `/mobile-deep-dive <slug> [<surface>]` | `/mobile-audit <slug>` + `/cross-audit` |
 | `docs/projects/project-map.md` (межпроектные стыки) | `project-map` (singleton-граф рёбер) | `/project-deep-dive <slug>` (авторская сторона ребра — `integration` инициатора) | `/cross-audit` |
 | сквозная консистентность | — | — | `/cross-audit` |
 
@@ -34,8 +35,9 @@
 `surface.md` объявляет поверхности, а их slug'и партиционируют возможности
 (`capability/<surface>.md`), интерфейс (`interface/<surface>/`) и
 композицию — экраны (`screens/<surface>/`) либо диалоги бота
-(`telegram-bot-flow/<surface>/` при `type: bot`). Скилы
-`interface`/`screen`/`telegram-bot-flow` берут поверхность
+(`telegram-bot-flow/<surface>/` при `type: bot`), либо карту мобильного
+приложения (`mobile/<surface>/` при `type: mobile`). Скилы
+`interface`/`screen`/`telegram-bot-flow`/`mobile` берут поверхность
 **вторым аргументом** `[<surface>]`; без него — пикер поверхностей по
 `surface.name` (после пикера проекта). Домены (`services/<svc>/domains/<ctx>/`) —
 surface-агностичны, делятся по bounded-context. Межпроектные стыки сводит
@@ -72,6 +74,7 @@ surface-агностичны, делятся по bounded-context. Межпро�
 | «как пользователь взаимодействует, ситуации, зоны, блоки» (на какой поверхности?) | `projects/<slug>/interface/<surface>` / `who` · `situation` · `zone` · `block` · … |
 | «как это выглядит, экраны, композиция» (на какой поверхности?) | `projects/<slug>/screens/<surface>` / `flow` · `screen` · `block` · `shell` |
 | «как бот ведёт диалог: окна, кнопки, команды, уведомления, оркестрация действий» (какая bot-поверхность?) | `projects/<slug>/telegram-bot-flow/<surface>` / фичи `features/<feature>/` (`dialog` · `window` · `use-case` бота) + `command` · `notification` |
+| «мобильное приложение: экраны и переходы, push и напоминания, ссылки в приложение, разрешения, голосовая команда, виджет, что делает в фоне, работа без сети» (какая мобильная поверхность?) | `projects/<slug>/mobile/<surface>` / `screens` · `flows` · `features` · `shell` · `entry-points` · `permissions` · `system-actions` · `widgets` · `background-tasks` · `entities` · `shared-api` · `shared-lib` |
 | «бизнес-код бэкенда, агрегаты, инварианты» (какой bounded-context?) | `projects/<slug>/services/<svc>/domains/<ctx>` |
 | «архитектура приложения: из каких сервисов состоит, монолит/микросервисы, брокер/очередь, gateway, где какая БД, кто продюсер/консьюмер событий» | `projects/<slug>/services` |
 | «сервера, хостинг, кубер vs compose, где будет жить сервис, общий брокер/traefik на все проекты, учёт VPS» | `projects/infrastructure` |
@@ -113,6 +116,7 @@ surface-агностичны, делятся по bounded-context. Межпро�
 | консистентность screens проекта | `/screen-audit <slug>` |
 | консистентность FSD-карты проекта (SPA-поверхности) | `/fsd-audit <slug>` |
 | консистентность telegram-bot-flow проекта (bot-поверхности) | `/telegram-bot-flow-audit <slug>` |
+| консистентность карты мобильного приложения (мобильные поверхности) | `/mobile-audit <slug>` |
 | консистентность сервисной топологии проекта (реестры, паспорта, домены-владельцы) | `/service-audit <slug>` |
 | структура ИТ-периметра бизнеса (размещение, рефы, сироты) | `/infrastructure-audit` |
 | **сквозная** консистентность между всеми слоями и проектами | `/cross-audit` |
@@ -130,16 +134,19 @@ surface-агностичны, делятся по bounded-context. Межпро�
 заводит **авторски снизу-вверх** на своей стороне. Оркестратор лишь следит,
 чтобы смежный слой не потерялся — фиксирует его открытой нитью.
 
-## Выбор поверхности (interface / screens / fsd / telegram-bot-flow / capability)
+## Выбор поверхности (interface / screens / fsd / telegram-bot-flow / mobile / capability)
 
-Слои `interface`, `screens`, `fsd` и `telegram-bot-flow` партиционированы по
-поверхности — путь делегирования несёт **и проект, и поверхность**:
+Слои `interface`, `screens`, `fsd`, `telegram-bot-flow` и `mobile`
+партиционированы по поверхности — путь делегирования несёт **и проект, и
+поверхность**:
 `/interface-deep-dive <slug> [<surface>]`,
 `/screen-deep-dive <slug> [<surface>]`,
 `/fsd-deep-dive <slug> [<surface>]` (только SPA-поверхности — `type: web` /
 `admin` / `desktop` / `embed`),
 `/telegram-bot-flow-deep-dive <slug> [<surface>]` (только поверхности с
-`type: bot` — композиция бота вместо экранов). Возможности (`capability`)
+`type: bot` — композиция бота вместо экранов),
+`/mobile-deep-dive <slug> [<surface>]` (только поверхности с `type: mobile`
+— карта приложения вместо экранов и FSD-карты). Возможности (`capability`)
 тоже живут по поверхности (`capability/<surface>.md`), но входом остаётся
 `/project-deep-dive <slug>` — там поверхность выбирается внутри.
 
@@ -149,7 +156,7 @@ surface-агностичны, делятся по bounded-context. Межпро�
 поверхностей по `surface.name` (после пикера проекта). Поверхность, которой
 нет в реестре `surface.md`, сперва заводится через `/project-deep-dive
 <slug>` (kind `surface`) — каталоги `interface/<surface>/`,
-`screens/<surface>/`, `telegram-bot-flow/<surface>/`,
+`screens/<surface>/`, `telegram-bot-flow/<surface>/`, `mobile/<surface>/`,
 `capability/<surface>.md` руками не создаём, их
 заводят их скилы при первом заходе.
 

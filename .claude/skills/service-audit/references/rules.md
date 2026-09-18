@@ -470,8 +470,8 @@ Messaging. Наполнить через `/service-deep-dive <project-slug> <svc
   use-case'ов, политик) — только структуру владения и существование
   файлов событий и use-case'ов (резолв `Messaging.event` и
   `Exposes.backed-by`). Домены — чек-листы `/domain-deep-dive`.
-- Не сверяет services с `interface/` / `screens/` / `telegram-bot-flow/`
-  и с размещением `infrastructure/placement.md` — это `/cross-audit`
+- Не сверяет services с `interface/` / `screens/` / `telegram-bot-flow/` /
+  `mobile/` и с размещением `infrastructure/placement.md` — это `/cross-audit`
   (углы `service-placement` · `platform-shared`) и
   `/infrastructure-audit`.
 - Не проверяет цепочки интеграций (use-case ↔ клиент `_shared/` ↔

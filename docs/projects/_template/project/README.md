@@ -10,7 +10,8 @@
   возможностей `capability/<surface>.md`, свою папку интерфейса
   `interface/<surface>/` и свою папку композиции — экранов
   `screens/<surface>/` либо, при `type: bot`, диалогов
-  `telegram-bot-flow/<surface>/`.
+  `telegram-bot-flow/<surface>/`, при `type: mobile` — карты приложения
+  `mobile/<surface>/`.
 - **папка возможностей** `capability/<surface>.md` — таблица возможностей
   одной поверхности (по файлу на поверхность).
 - **5 плоских кросс-поверхностных таблиц** `user.md`, `integration.md`,
@@ -26,7 +27,9 @@
 `<slug>/screens/<surface>/` (композиция экранов по поверхности,
 `/screen-deep-dive`), `<slug>/fsd/<surface>/` (FSD-карта SPA-поверхности —
 мост к коду фронта, `/fsd-deep-dive`), `<slug>/telegram-bot-flow/<surface>/`
-(композиция диалогов bot-поверхности), `<slug>/services/` (сервисная
+(композиция диалогов bot-поверхности), `<slug>/mobile/<surface>/` (карта
+мобильного приложения — композиция и мост к коду `<org>/mobile`,
+`/mobile-deep-dive`), `<slug>/services/` (сервисная
 топология бэкенда, `/service-deep-dive`; домены по bounded-context внутри
 сервисов — surface-агностичны, `/domain-deep-dive`).
 
@@ -54,6 +57,8 @@ docs/projects/<slug>/
 │   └── <surface-2>/
 ├── telegram-bot-flow/
 │   └── <bot-surface>/        command.md · notification.md · features/<feature>/{dialog.md,window.md,use-case.md}  (для type: bot — вместо screens)
+├── mobile/
+│   └── <mobile-surface>/     entities · screens · flows · features · shell · entry-points · permissions · system-actions · widgets · background-tasks · shared-*  (для type: mobile — вместо screens)
 └── services/                 service.md + platform.md + architecture.md + _shared/
                               + <service-slug>/ (паспорт + domains/<ctx>/)
 ```
@@ -144,9 +149,9 @@ H1 внутри — `capability`. Русское слово, являющеес�
 **между слоями** через семантический разбор (рой агентов), не через
 ссылочную целостность. Единственное структурное правило — поверхность:
 файл `capability/<surface>.md` и папки `interface/<surface>/`,
-`screens/<surface>/`, `telegram-bot-flow/<surface>/` обязаны
-соответствовать поверхности из реестра `surface.md` (последняя — только
-поверхности с `type: bot`).
+`screens/<surface>/`, `telegram-bot-flow/<surface>/`, `mobile/<surface>/`
+обязаны соответствовать поверхности из реестра `surface.md` (две последние
+— только поверхности с `type: bot` и `type: mobile` соответственно).
 
 Внутри `docs/projects/<slug>/` ожидаются неформальные связи:
 
@@ -219,8 +224,9 @@ state и предлагает переходы через `AskUserQuestion`.
 - ❌ Каталоги-по-сущностям (`users/` с файлом на запись). Один табличный
   файл = один kind. Поверхность — единственная ось партиционирования:
   `capability/<surface>.md` — это таблица, не каталог записей.
-- ❌ Файл возможностей или папка интерфейса/экранов/диалогов для
-  поверхности, которой нет в реестре `surface.md`. Хребет ведёт реестр.
+- ❌ Файл возможностей или папка интерфейса/экранов/диалогов/карты
+  приложения для поверхности, которой нет в реестре `surface.md`. Хребет
+  ведёт реестр.
 - ❌ Несколько vision в **одном проекте**. Один проект (папка
   `docs/projects/<slug>/`) = один продукт = один `vision.md`. Разные
   продукты — разные папки проектов.

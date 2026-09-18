@@ -27,7 +27,12 @@ hi-fi субстрат на библиотеке `@stit/ui`) либо — для
 `type: bot` — диалоги телеграм-бота (`telegram-bot-flow/<surface>/` —
 фичи `features/<feature>/` из dialog · window · use-case бота в понятиях
 aiogram_dialog + сквозные реестры command · notification на корне; читает
-форк `telegram-bot-template`). SPA-поверхности (`type: web`/`admin`/
+форк `telegram-bot-template`), для поверхностей с `type: mobile` — карту
+мобильного приложения (`mobile/<surface>/` — 12 файлов: entities · screens ·
+flows · features · shell · entry-points · permissions · system-actions ·
+widgets · background-tasks · shared-api · shared-lib; одновременно
+композиция и мост «аналитика → код приложения»; читает форк
+`mobile-template`). SPA-поверхности (`type: web`/`admin`/
 `desktop`/`embed`) дополнительно несут **FSD-карту** (`fsd/<surface>/` —
 мост «аналитика → фронт-код»: слайсы entities · features · pages · widgets
 из ситуаций, экранов и доменов; `src/`-путей нет; читает форк
@@ -85,12 +90,18 @@ bounded-context, surface-агностичны**, контекст уникале
   диалогов **одной bot-поверхности** (`telegram-bot-flow/<surface>/`): ось
   feature (dialog · window · use-case бота в `features/<feature>/`) +
   сквозные command · notification на корне.
+- `docs/projects/_template/mobile/README.md` — канон карты приложения
+  **одной мобильной поверхности** (`mobile/<surface>/`): 12 файлов (экраны,
+  сценарии, фичи, оболочка, точки входа, разрешения, системные действия,
+  виджеты, фоновые задачи, сущности, контракт данных, сквозное), мост к коду
+  `<org>/mobile`.
 - `docs/projects/project-map.md` — карта стыков между продуктами бизнеса
   (singleton: канон формы + данные в одном файле; бизнес-язык, без техники).
 
 Артефакты аналитики — чистая аналитика; на FSD/компоненты напрямую не
 мапятся: переход к фронт-коду живёт в отдельном слое `fsd/<surface>/`
-(карта слайсов — единственное место, где FSD-имена легальны). Превращение
+(карта слайсов — единственное место, где FSD-имена легальны), к коду
+мобильного приложения — в слое `mobile/<surface>/`. Превращение
 `docs/projects/<slug>/screens/` в wireframe и hi-fi — ручная работа автора
 макета, не отдельный артефакт.
 
@@ -127,6 +138,12 @@ upstream (read-only, односторонне):
   окна, use-case'ы бота-оркестратора) (+ `interface/<surface>/`,
   `services/*/domains/` — доменные use-case'ы и события, на которые
   опирается оркестратор бота);
+- `<org>/mobile` (форк `mobile-template`) ←
+  `projects/<slug>/mobile/<surface>/` (карта приложения — её читают
+  `/scaffold` и `/de-template` мобильного репо, разворачивая в `shared/` ·
+  `androidApp/` · `iosApp/`) (+ `interface/<surface>/`,
+  `services/*/domains/` — ситуации, сущности и события, на которые опирается
+  карта);
 - `<org>/infra` ← `projects/<slug>/{vision,surface}` +
   `projects/<slug>/services/{service,platform}.md` + секции
   `Resources`/`Messaging` паспортов + весь `projects/infrastructure/`
@@ -175,13 +192,15 @@ upstream (read-only, односторонне):
 | `docs/projects/<slug>/screens/<surface>/` | **как это выглядит и компонуется** (по поверхности) | `/screen-deep-dive <slug> [<surface>]` |
 | `docs/projects/<slug>/fsd/<surface>/` | **как фронт нарезан по слоям FSD** (по SPA-поверхности; мост к коду `<org>/frontend`) | `/fsd-deep-dive <slug> [<surface>]` |
 | `docs/projects/<slug>/telegram-bot-flow/<surface>/` | **как бот ведёт диалог** (по bot-поверхности: фичи — диалоги · окна · use-case'ы бота; сквозные команды · уведомления) | `/telegram-bot-flow-deep-dive <slug> [<surface>]` |
+| `docs/projects/<slug>/mobile/<surface>/` | **как устроено мобильное приложение** (по мобильной поверхности: экраны · сценарии · фичи · входы · разрешения · системные действия · виджеты · фон; мост к коду `<org>/mobile`) | `/mobile-deep-dive <slug> [<surface>]` |
 | `docs/projects/project-map.md` | **как продукты бизнеса стыкуются** | сводится из `integration`, сверяет `/cross-audit` |
 
 Канон формы продуктовых слоёв
-(project/interface/screens/fsd/telegram-bot-flow/services/project-map)
+(project/interface/screens/fsd/telegram-bot-flow/mobile/services/project-map)
 живёт один раз в `docs/projects/_template/`; данные — в папках проектов. Скилы
 этих слоёв принимают `<project-slug>` первым аргументом (без него — пикер **по
-человекочитаемым именам** проектов, исключая `_template`); interface, screen и
+человекочитаемым именам** проектов, исключая `_template`); interface, screen,
+telegram-bot-flow, mobile и
 fsd берут вторым аргументом поверхность (без неё — пикер по именам из `surface.md`).
 Клиент-режим — дружелюбные пикеры «какой продукт обсуждаем» и «где он работает».
 
@@ -218,7 +237,15 @@ bot-поверхности окно (window) реализует блок interfa
 use-case (`use-case:<ctx>.<Operation>`); уведомление (notification)
 триггерится доменным событием (`event:<ctx>.<Event>`) — бот остаётся
 фронтендом без собственных бизнес-правил (правила в домене, оркестрация —
-в use-case бота).
+в use-case бота); в мобильной поверхности экран и фича восходят к ситуации
+interface той же поверхности, сущность — к агрегату домена (или `local`,
+если бэкенда нет), всё, что живёт **вне экранов** (точки входа, системные
+действия, виджеты, фоновые задачи), тоже обосновано ситуацией, а сигналы
+бэкенда (push, обновление виджета, фоновая задача) триггерятся доменным
+событием (`event:<ctx>.<Event>`); внешние посредники платформы (сервис
+доставки push, ассистент системы, облачное распознавание речи) — это
+`integration` продукта, неснимаемые свойства платформы и правила магазина
+— `constraint`.
 Сквозные рёбра авторятся **снизу-вверх** (проектная/UX-сущность
 ссылается на глобальную: `situation.jobs`/`capabilities`/`hypotheses`,
 `capability.jobs`/`hypotheses`, `user.segments`, `subject.segments`);
@@ -240,7 +267,9 @@ use-case (`use-case:<ctx>.<Operation>`); уведомление (notification)
 domains-шаблонов, которые парсит `<org>/backend`, а также структурные
 идентификаторы telegram-bot-flow, которые читает `<org>/<bot>`:
 `states-group` · `state` · `operation` use-case бота · `id` виджетов ·
-ключи getter'а). Эти структурные
+ключи getter'а, и структурные идентификаторы слоя mobile, которые читает
+`<org>/mobile`: имена 12 файлов и их колонок, `key` экрана, push-категория,
+словари состояний и enum-значения форм). Эти структурные
 идентификаторы **не переименовываем** — они часть handoff-контракта. Всё
 остальное — prose, пояснения, человекочитаемые поля — по-русски, без
 полу-калек («пропсы», «варианты-проперти»).
@@ -389,6 +418,12 @@ Interface-слой (по проекту, **по поверхности**):
   как опции — да; тексты — нет.
 - **UX-доменная** (interface): goal, action, when, using-what — только
   от аналитика, не от модели.
+- **Мобильная** (mobile): состав экранов и фич, фразы голосовых команд,
+  тексты обоснований разрешений (`rationale`), обещания свежести виджета и
+  точности напоминаний, поведение без сети и без разрешений (`fallback`) —
+  только от аналитика, через `AskUserQuestion`. Линза платформы задаёт
+  вопросы, но не отвечает за аналитика; «нужно ли продукту» — его решение,
+  включая «не нужно». Anti-patterns как опции — да; тексты — нет.
 - **Бизнес-домен** (домены сервисов): инварианты, preconditions, business
   rules — только от архитектора.
 - **Архитектурная** (services): разбиение на сервисы, владелец данных,
@@ -432,7 +467,7 @@ Interface-слой (по проекту, **по поверхности**):
 Гейты прогонять всегда (`/swot-audit`, `/hypothesis-map-audit`,
 `/ajtbd-audit`, `/project-audit <slug>`, `/interface-audit <slug>`,
 `/screen-audit <slug>`, `/telegram-bot-flow-audit <slug>`,
-`/service-audit <slug>`, `/infrastructure-audit`, и/или
+`/mobile-audit <slug>`, `/service-audit <slug>`, `/infrastructure-audit`, и/или
 `/cross-audit` перед коммитом, если трогали
 несколько слоёв). **Коммит / push — гейт человека.** Без явной просьбы
 агент не коммитит.
@@ -580,6 +615,31 @@ Interface-слой (по проекту, **по поверхности**):
   содержат — их выводит `/scaffold` форка `<org>/frontend` из stable-записей.
   Битые ссылки на источники, рассинхрон зеркала `widgets.pages`, pages-first
   и cross-feature — скилл `fsd-audit <slug>`.
+- **Карта мобильного приложения**
+  (`docs/projects/<slug>/mobile/<surface>/`, для поверхностей с
+  `type: mobile` — вместо screens, без FSD-карты) — через скилл
+  `mobile-deep-dive <slug> [<surface>]`; форма — по
+  `docs/projects/_template/mobile/README.md` (канон слоя; 12 форм одной папки
+  поверхности — в подпапке `_template/`). Слой двухролевой: композиция
+  (экраны · сценарии · оболочка · виджеты) и карта кода (фичи · сущности ·
+  точки входа · системные действия · фоновые задачи · контракт данных).
+  Экран и фича восходят к ситуации interface той же поверхности, сущность —
+  к агрегату домена или `local`; всё, что живёт вне экранов (push и другие
+  входы, голос и системные действия, виджеты, фоновая работа), тоже
+  обосновано ситуацией — «на всякий случай» не заводится. Скилл проводит
+  аналитика по **линзе возможностей платформы** вопросами и не пишет
+  платформенную механику (интервалы, планировщики, имена API) — она живёт в
+  `docs/stack/` код-репо; обещать точное исполнение кода в фоне нельзя,
+  отказ описывается `fallback`'ом. Внешние посредники платформы — в
+  `integration`, её неснимаемые свойства и правила магазина — в
+  `constraint` (слой проекта, `/project-deep-dive`). Структурные
+  идентификаторы (имена файлов и колонок, `key` экрана, push-категория,
+  словари состояний, enum-значения) — английские, часть handoff-контракта;
+  контент — русский. Stable-артефакты читает форк `mobile-template`
+  (`<org>/mobile`). Узкий аудит слоя (источники, рефы, достижимость,
+  зеркало `widgets.actions`, инварианты вне экранов, механика в ячейках) —
+  `mobile-audit <slug>`; сквозную сверку ведёт `/cross-audit` (углы
+  `surface-mobile` · `mobile-domain` · `mobile-service` · `mobile-web`).
 - **Библиотека** — в отдельном репо `ui-lib` как `@stit/ui`;
   проект её потребляет, не правит.
 - **Sweep'ы** (терминология, чистка): 1 агент = 1 непересекающаяся зона.

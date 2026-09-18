@@ -5,7 +5,9 @@
 этого продукта: продуктовый слой (vision + реестр-хребет поверхностей +
 kind), UX-интерфейс (`interface/<surface>/`), композиция экранов
 (`screens/<surface>/`) или диалогов телеграм-бота
-(`telegram-bot-flow/<surface>/` — для bot-поверхностей), FSD-карта фронта
+(`telegram-bot-flow/<surface>/` — для bot-поверхностей), либо карта
+мобильного приложения (`mobile/<surface>/` — для мобильных поверхностей,
+композиция и мост к коду `<org>/mobile`), FSD-карта фронта
 (`fsd/<surface>/` — для SPA-поверхностей, мост к коду `<org>/frontend`) и
 сервисная топология бэкенда (`services/`: сервисы, их паспорта и домены
 внутри них).
@@ -15,8 +17,9 @@ kind), UX-интерфейс (`interface/<surface>/`), композиция эк
 
 **Поверхность (surface) — ось продукта.** Реестр `surface.md` объявляет
 поверхности (web, mobile, бот, API …), а их slug'и партиционируют
-возможности, интерфейс и композицию (экраны — либо диалоги бота, по
-`type` поверхности): каждая поверхность описывается сверху вниз
+возможности, интерфейс и композицию (экраны — либо диалоги бота, либо
+карта мобильного приложения, по `type` поверхности): каждая поверхность
+описывается сверху вниз
 в своей папке. Точки стыка **между проектами** одного бизнеса — в
 [`project-map.md`](project-map.md).
 
@@ -33,6 +36,7 @@ docs/projects/
 │   ├── screens/         канон слоя экранов одной поверхности (flow/screen/block/shell)
 │   ├── fsd/             канон FSD-карты одной SPA-поверхности (8 файлов слайсов, мост к коду фронта)
 │   ├── telegram-bot-flow/  канон слоя диалогов одной bot-поверхности (фичи: dialog/window/use-case + сквозные command/notification)
+│   ├── mobile/          канон карты приложения одной мобильной поверхности (12 файлов: экраны, сценарии, фичи, входы, разрешения, системные действия, виджеты, фон; мост к коду приложения)
 │   └── services/        канон сервисного слоя (реестры, паспорт, _templates/, _shared/)
 └── <project-slug>/      ← ДАННЫЕ одного проекта
     ├── README.md        чем продукт, какие проблемы закрывает
@@ -44,6 +48,7 @@ docs/projects/
     ├── screens/<surface>/        flows/ screens/ blocks/ shells/ assets/
     ├── fsd/<surface>/            entities/features/pages/widgets/app/shared-* (для SPA-поверхностей)
     ├── telegram-bot-flow/<surface>/   command.md notification.md features/<feature>/{dialog.md,window.md,use-case.md}  (для type: bot — вместо screens)
+    ├── mobile/<surface>/         entities/screens/flows/features/shell/entry-points/permissions/system-actions/widgets/background-tasks/shared-*  (для type: mobile — вместо screens)
     └── services/        service.md + platform.md + architecture.md + _shared/
                          + <service-slug>/ (паспорт + domains/<ctx>/)
 ```
@@ -52,10 +57,11 @@ docs/projects/
 данные. Скилы читают форму из `_template/<слой>/`, пишут данные в
 `<project-slug>/...`. `_template/` — read-only образец: его не правят под
 конкретный проект. Форма `_template/interface/`, `_template/screens/`,
-`_template/fsd/` и `_template/telegram-bot-flow/` — канон **одной папки
-поверхности**; в данных она повторяется под каждый slug из реестра
-`surface.md` (композиция — по `type` поверхности: экраны либо диалоги
-бота; FSD-карта — только у SPA-поверхностей).
+`_template/fsd/`, `_template/telegram-bot-flow/` и `_template/mobile/` —
+канон **одной папки поверхности**; в данных она повторяется под каждый
+slug из реестра `surface.md` (композиция — по `type` поверхности: экраны,
+диалоги бота либо карта мобильного приложения; FSD-карта — только у
+SPA-поверхностей).
 
 ## Связь с проблемой (M:N)
 
@@ -78,9 +84,9 @@ docs/projects/
 ## Выбор проекта и поверхности в скилах
 
 Скилы слоёв project / interface / services / domain / screen / fsd /
-telegram-bot-flow работают **в контексте одного проекта**; interface, screen,
-fsd и telegram-bot-flow — ещё и **в контексте одной
-поверхности**. Аналитический скилл принимает `<project-slug>` первым
+telegram-bot-flow / mobile работают **в контексте одного проекта**;
+interface, screen, fsd, telegram-bot-flow и mobile — ещё и **в контексте
+одной поверхности**. Аналитический скилл принимает `<project-slug>` первым
 аргументом (`/interface-deep-dive <slug> [<surface>] …`); без аргументов —
 пикеры по **человекочитаемым именам**: сначала проект (заголовок из
 `vision`), затем поверхность (`surface.name`). Клиент-режим
@@ -89,10 +95,10 @@ fsd и telegram-bot-flow — ещё и **в контексте одной
 
 Новый проект заводит `/project-deep-dive` (копирует форму из
 `_template/project/` в новую папку проекта); папки поверхностей под
-`interface/`/`screens/`/`fsd/`/`telegram-bot-flow/` заводят их скилы
-(`/interface-deep-dive`, `/screen-deep-dive`, `/fsd-deep-dive`,
-`/telegram-bot-flow-deep-dive`) при первом заходе на поверхность —
-каталоги руками не создаём.
+`interface/`/`screens/`/`fsd/`/`telegram-bot-flow/`/`mobile/` заводят их
+скилы (`/interface-deep-dive`, `/screen-deep-dive`, `/fsd-deep-dive`,
+`/telegram-bot-flow-deep-dive`, `/mobile-deep-dive`) при первом заходе на
+поверхность — каталоги руками не создаём.
 
 ## Каноны слоёв
 
@@ -101,6 +107,7 @@ fsd и telegram-bot-flow — ещё и **в контексте одной
 - [`_template/screens/README.md`](_template/screens/README.md) — экраны одной поверхности.
 - [`_template/fsd/README.md`](_template/fsd/README.md) — FSD-карта одной SPA-поверхности (мост к коду `<org>/frontend`).
 - [`_template/telegram-bot-flow/README.md`](_template/telegram-bot-flow/README.md) — диалоги одной bot-поверхности.
+- [`_template/mobile/README.md`](_template/mobile/README.md) — карта приложения одной мобильной поверхности (мост к коду `<org>/mobile`).
 - [`_template/services/README.md`](_template/services/README.md) — сервисная топология и домены бэкенда.
 - [`infrastructure/README.md`](infrastructure/README.md) — ИТ-периметр бизнеса (сервера · рантаймы · общие ресурсы · джобы · размещение).
 - [`project-map.md`](project-map.md) — карта стыков между проектами (singleton, бизнес-язык).
@@ -111,8 +118,10 @@ fsd и telegram-bot-flow — ещё и **в контексте одной
 - ❌ Дублирование канона в папку проекта (`<slug>/interface/README.md`
   и т.п.) — форма живёт один раз в `_template/`.
 - ❌ Папка поверхности (`capability/<surface>.md`, `interface/<surface>/`,
-  `screens/<surface>/`, `fsd/<surface>/`, `telegram-bot-flow/<surface>/`)
-  для поверхности, которой нет в реестре `surface.md`.
+  `screens/<surface>/`, `fsd/<surface>/`, `telegram-bot-flow/<surface>/`,
+  `mobile/<surface>/`) для поверхности, которой нет в реестре `surface.md`.
+- ❌ `screens/<surface>/` или `fsd/<surface>/` для мобильной поверхности —
+  её композиция и мост к коду живут в `mobile/<surface>/`.
 - ❌ Создание каталога проекта или папки поверхности руками вместо скила.
 - ❌ Жёсткие slug-валидации между проектом и `business-problem`. Связь
   семантическая (`addresses-problem`), ловит `/cross-audit`.

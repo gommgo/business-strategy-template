@@ -74,7 +74,8 @@ state оркестратора (`../entrypoint/state/projects/<project-slug>/pro
    - Канон-README **не** копируется — форма живёт один раз в `_template/`.
 3. Зайти в фазу `discovery` на свежем `vision.md` нового проекта.
 
-Соседние слои (`<new-slug>/interface/`, `<new-slug>/screens/`,
+Соседние слои (`<new-slug>/interface/`, `<new-slug>/screens/` — либо, по
+`type` поверхности, `telegram-bot-flow/` и `mobile/`, —
 `<new-slug>/services/` — топология сервисов через `/service-deep-dive`,
 домены внутри сервисов через `/domain-deep-dive <slug> <ctx>`) заводят
 свои скилы по мере надобности — этот
@@ -457,8 +458,9 @@ slug (например, capability упомянула user, которой ещ�
    (`surface`) — её файл возможностей `capability/<surface>.md` и
    ссылки `integration.surface` на неё повисают: показать каскад и решить
    судьбу capability-файла (перенести записи на другую поверхность /
-   удалить). Папки `interface/<surface>/`, `screens/<surface>/` ведут свои
-   скилы — здесь только предупредить, что они осиротеют.
+   удалить). Папки `interface/<surface>/`, `screens/<surface>/`,
+   `fsd/<surface>/`, `telegram-bot-flow/<surface>/`, `mobile/<surface>/`
+   ведут свои скилы — здесь только предупредить, что они осиротеют.
 6. Удалить state-заметку
    (`…/project/<kind>/<slug>.md`; для capability —
    `…/project/capability/<surface>/<slug>.md`).

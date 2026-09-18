@@ -44,8 +44,10 @@ truth; когда дело дошло до продукта, их читают �
    ├─ /service-deep-dive <slug> (сервисная топология) → /service-audit <slug>
    ├─ /domain-deep-dive <slug> <ctx> (DDD внутри сервиса)
    ├─ /screen-deep-dive <slug> [<surface>]     → /screen-audit <slug>
-   └─ /telegram-bot-flow-deep-dive <slug> [<surface>] (bot-поверхности — вместо
-      screen) → /telegram-bot-flow-audit <slug>
+   ├─ /telegram-bot-flow-deep-dive <slug> [<surface>] (bot-поверхности — вместо
+   │  screen) → /telegram-bot-flow-audit <slug>
+   └─ /mobile-deep-dive <slug> [<surface>] (мобильные поверхности — вместо
+      screen) → /mobile-audit <slug>
 5. ИТ-периметр бизнеса → /infrastructure-deep-dive (сервера · рантаймы ·
    общие ресурсы · джобы · размещение) → /infrastructure-audit
 6. /cross-audit — сквозная семантика между слоями (рой)
@@ -121,9 +123,9 @@ truth; когда дело дошло до продукта, их читают �
 Опциональный downstream — когда исход стратегии требует продукта (иначе проблему
 закрывает задача `task` Карты гипотез). Несколько продуктов под одним бизнесом, у
 каждого своя папка. Все скиллы слоёв принимают `<project-slug>` первым аргументом
-(без него — пикер по `docs/projects/`, исключая `_template`); interface, screen
-и telegram-bot-flow берут вторым аргументом поверхность (без неё — пикер по
-именам из `surface.md`).
+(без него — пикер по `docs/projects/`, исключая `_template`); interface, screen,
+telegram-bot-flow и mobile берут вторым аргументом поверхность (без неё — пикер
+по именам из `surface.md`).
 
 - **`/project-deep-dive <slug>`** (аналитик) — vision (+ `addresses-problem`
   M:N к проблемам) + реестр-хребет `surface.md` + кросс-поверхностные kind
@@ -162,6 +164,14 @@ truth; когда дело дошло до продукта, их читают �
   window / use-case бота) + сквозные command / notification в
   `telegram-bot-flow/<surface>/`. Stable-артефакты читает форк
   `<org>/<bot>`.
+- **`/mobile-deep-dive <slug> [<surface>]`** → **`/mobile-audit <slug>`** —
+  карта мобильного приложения по мобильной поверхности (вместо screens):
+  сущности, экраны, сценарии, фичи, оболочка, точки входа (deep link, push,
+  ярлык, share, тап по виджету), разрешения, системные действия (голос,
+  автоматизации, кнопки виджета и уведомления), виджеты и фоновые задачи в
+  `mobile/<surface>/`. Скилл проводит по линзе возможностей платформы —
+  знать заранее, что умеет телефон, не нужно. Stable-артефакты читает форк
+  `<org>/mobile`.
 
 Точки стыка **между продуктами** бизнеса фиксируются в
 `docs/projects/project-map.md` (авторская сторона — `integration` с
@@ -198,7 +208,8 @@ interface ↔ services/domain ↔ screen, по каждой поверхност
 - **Артефакт не `stable`** → доведи через соответствующий deep-dive того же слоя.
 - **Подозрение на рассинхрон внутри слоя** → узкий аудит
   (`/project-audit`, `/interface-audit`, `/screen-audit`,
-  `/telegram-bot-flow-audit`, `/service-audit`, `/infrastructure-audit`,
+  `/telegram-bot-flow-audit`, `/mobile-audit`, `/service-audit`,
+  `/infrastructure-audit`,
   `/swot-audit`, `/hypothesis-map-audit`, `/ajtbd-audit`).
 - **Подозрение на разрыв между слоями** → `/cross-audit`.
 - **Заказчик ведёт сессию сам** → единый вход `/entrypoint-for-business`

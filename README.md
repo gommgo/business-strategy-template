@@ -45,7 +45,8 @@ stakeholder · stakeholder-map
         ├─ interface/          (UX: who / situation / zone)
         ├─ services/           (сервисы: реестр + паспорта + домены внутри)
         ├─ screens/            (flow / screen / block / shell)  →  wireframe → hi-fi на @stit/ui
-        └─ telegram-bot-flow/  (фичи: dialog / window / use-case + сквозные command / notification — bot-поверхности)  →  код-репо читают
+        ├─ telegram-bot-flow/  (фичи: dialog / window / use-case + сквозные command / notification — bot-поверхности)  →  код-репо читают
+        └─ mobile/             (экраны / сценарии / фичи / входы / разрешения / системные действия / виджеты / фон — мобильные поверхности)  →  код-репо читают
 ```
 
 Артефакты — **чистая аналитика**, на код напрямую не мапятся. Сегменты по работам
@@ -84,7 +85,9 @@ M:N (`vision.addresses-problem`). Превращение `screens/` в маке�
 - **projects/`<slug>`** (опционально) — когда исход стратегии — продукт под
   проблему(ы): vision + user / capability / boundary / surface / integration /
   constraint / market, плюс вложенные `interface/`, `services/`, `screens/`
-  (web-поверхности) или `telegram-bot-flow/` (bot-поверхности). Если
+  (web-поверхности), `telegram-bot-flow/` (bot-поверхности) или `mobile/`
+  (мобильные приложения: экраны, push и другие входы, разрешения, голос и
+  системные действия, виджеты, фоновая работа). Если
   проблему закрывает задача (`task`), продуктовый слой не заводится.
 
 Каждый слой ведёт свой deep-dive-скилл через `AskUserQuestion`, пишет state в
@@ -105,6 +108,7 @@ M:N (`vision.addresses-problem`). Превращение `screens/` в маке�
 | [`<org>/backend`](https://git.stit.tech/stit-core/go-backend-template) | `projects/<slug>/services/<svc>/domains/<ctx>/` + паспорт сервиса (scaffold доменов в Go по сервису) |
 | [`<org>/frontend`](https://git.stit.tech/stit-core/spa-frontend-template) | `projects/<slug>/fsd/<surface>/` (карта слайсов → scaffold) + `{interface,screens}/` (контекст) |
 | [`<org>/<bot>`](https://git.stit.tech/stit-core/telegram-bot-template) | `projects/<slug>/telegram-bot-flow/<surface>/` (диалоги бота → код) |
+| [`<org>/mobile`](https://git.stit.tech/stit-core/mobile-template) | `projects/<slug>/mobile/<surface>/` (карта приложения → scaffold в `shared/` · `androidApp/` · `iosApp/`) + `interface/` и домены (контекст) |
 | [`<org>/infra`](https://git.stit.tech/stit-core/project-infra-template-compose) | `projects/<slug>/{vision,surface}` + `services/{service,platform}.md` + `projects/infrastructure/` (init-project + материализация топологии) |
 
 Облик собирается на дизайн-системе
@@ -137,7 +141,7 @@ M:N (`vision.addresses-problem`). Превращение `screens/` в маке�
 
 ```
 business (профиль + реестр проблем + стейкхолдеры) → ajtbd (спрос по работам) → swot (ставки)
-  → hypothesis-map (цель · метрика · task) → [опц.] projects/<slug> (продукт → interface / services / screens / telegram-bot-flow) + infrastructure (ИТ-периметр бизнеса)
+  → hypothesis-map (цель · метрика · task) → [опц.] projects/<slug> (продукт → interface / services / screens / telegram-bot-flow / mobile) + infrastructure (ИТ-периметр бизнеса)
 ```
 
 Под оркестратором — рой исполнителей, прямой вызов которых тоже допустим:
@@ -148,7 +152,7 @@ business (профиль + реестр проблем + стейкхолдер�
 | `ajtbd` | `/segment-deep-dive` · `/job-graph-deep-dive` · `/jtbd-interview` | `/ajtbd-audit` |
 | `swot` | `/swot-deep-dive` | `/swot-audit` |
 | `hypothesis-map` | `/hypothesis-map-deep-dive` | `/hypothesis-map-audit` |
-| `projects/<slug>` (опц.) | `/project-deep-dive` · `/interface-deep-dive` · `/service-deep-dive` · `/domain-deep-dive` · `/screen-deep-dive` · `/telegram-bot-flow-deep-dive` | `/project-audit` · `/interface-audit` · `/service-audit` · `/screen-audit` · `/telegram-bot-flow-audit` |
+| `projects/<slug>` (опц.) | `/project-deep-dive` · `/interface-deep-dive` · `/service-deep-dive` · `/domain-deep-dive` · `/screen-deep-dive` · `/telegram-bot-flow-deep-dive` · `/mobile-deep-dive` | `/project-audit` · `/interface-audit` · `/service-audit` · `/screen-audit` · `/telegram-bot-flow-audit` · `/mobile-audit` |
 | `projects/infrastructure` | `/infrastructure-deep-dive` | `/infrastructure-audit` |
 
 Сквозную семантику всех слоёв ловит рой `/cross-audit`. Когда дозревший продукт

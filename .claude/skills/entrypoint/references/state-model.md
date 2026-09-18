@@ -40,15 +40,16 @@ Forward-only: закрытое **удаляется**, история живёт
     ├── domains/<context>/...                  ← domain-deep-dive (по bounded-context; ключ — контекст, не сервис)
     ├── screens/<surface>/<kind>/<slug>.md     ← screen-deep-dive
     ├── fsd/<surface>/<kind>/<slug>.md         ← fsd-deep-dive (по SPA-поверхности)
-    └── telegram-bot-flow/<surface>/...        ← telegram-bot-flow-deep-dive (по bot-поверхности)
+    ├── telegram-bot-flow/<surface>/...        ← telegram-bot-flow-deep-dive (по bot-поверхности)
+    └── mobile/<surface>/<kind>/<slug>.md      ← mobile-deep-dive (по мобильной поверхности; рамка приложения — `_frame.md`)
 ```
 
 Поверхность (`surface`) — ось продукта. Реестр-хребет `surface.md`
 объявляет поверхности, а их slug'и партиционируют ветки `state/`:
 возможности (`project/capability/<surface>/`), интерфейс
-(`interface/<surface>/`) и композиция — экраны (`screens/<surface>/`) либо
-диалоги бота (`telegram-bot-flow/<surface>/`) — разнесены по
-поверхности. `vision` и кросс-поверхностные kind (`surface`-реестр · `user`
+(`interface/<surface>/`) и композиция — экраны (`screens/<surface>/`),
+диалоги бота (`telegram-bot-flow/<surface>/`) либо карта мобильного
+приложения (`mobile/<surface>/`) — разнесены по поверхности. `vision` и кросс-поверхностные kind (`surface`-реестр · `user`
 · `integration` · `boundary` · `constraint` · `market`) лежат плоско в
 `project/`. Домены (ветка `domains/<context>/`) surface-агностичны — делятся по
 bounded-context. Межпроектные стыки (`projects/project-map.md`) — авторская
