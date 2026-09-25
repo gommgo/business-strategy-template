@@ -366,7 +366,7 @@ H2-секция `## <slug>` (заголовок секции = slug; мета-б
     виджет с `transition: start:<эта-фича>` (вход не выдуман: фича X
     реально входит в эту через `start:`; рассинхрон — сюда же).
 - **пример**: нарушение — `started-by: [main-menu]` (без префикса kind),
-  `started-by: [window:menu]` (форма `window:` упразднена) или
+  `started-by: [window:menu]` (окно не входит в формы входа) или
   `started-by: [feature:main-menu]`, где из фичи `main-menu` нет
   `start:booking`.
 - **рекомендация**: «Поправить входы через
@@ -380,8 +380,8 @@ H2-секция `## <slug>` (заголовок секции = slug; мета-б
 - **проверка**: `starts` — `feature:<slug>` с существующей фичей
   `features/<slug>/` (её диалог) либо `—` (статичный ответ, описан в
   `description`).
-- **пример**: нарушение — `starts: dialog:booking` (форма `dialog:`
-  упразднена) или `starts: feature:bookng` (опечатка); норма —
+- **пример**: нарушение — `starts: dialog:booking` (вне форм `feature:` /
+  `—`) или `starts: feature:bookng` (опечатка); норма —
   `starts: feature:booking`.
 - **рекомендация**: «Завести фичу или поправить реф через
   `/telegram-bot-flow-deep-dive <project-slug> <surface> command:<slug>`».
@@ -393,8 +393,8 @@ H2-секция `## <slug>` (заголовок секции = slug; мета-б
   поверхности.
 - **проверка**: `action` — `command:<slug>` (строка есть в `command.md`),
   `feature:<slug>` (фича `features/<slug>/` существует) либо `—`.
-- **пример**: нарушение — `action: dialog:booking` (форма `dialog:`
-  упразднена); норма — `action: feature:booking` или
+- **пример**: нарушение — `action: dialog:booking` (вне форм `command:` /
+  `feature:` / `—`); норма — `action: feature:booking` или
   `action: command:start-booking-deeplink`.
 - **рекомендация**: «Завести команду-deep-link/фичу или поправить реф
   через `/telegram-bot-flow-deep-dive <project-slug> <surface>

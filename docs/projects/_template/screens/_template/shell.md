@@ -75,9 +75,9 @@
 ```yaml
 tree:
   - layout:stack
-    - ui:Navbar (planned)         # шапка: лого, навигация, меню пользователя
+    - ui:Navbar                  # шапка: лого, навигация, меню пользователя
     - layout:row
-      - ui:Sidebar (planned)   (fills: $side)
+      - ui:Sidebar             (fills: $side)
       - layout:stack           (fills: $main)
       - layout:stack           (fills: $detail)
     - layout:layer             (fills: $overlay)
@@ -85,9 +85,8 @@ tree:
 
 `(fills: $<slot>)` помечает узел shell, в который screen вставит
 содержимое слота с таким именем. Каркас собирается из `layout:`-узлов
-(раскладка — не компоненты, материализуется Tailwind-утилитами при
-сборке) и компонентов манифеста `@stit/ui`; запланированные
-(`notAvailable`) — forward-рефами с пометкой `(planned)`.
+(раскладка — не примитивы, материализуется Tailwind-утилитами при ручной
+сборке) и интерфейсных примитивов проекта (`ui:`).
 
 ## Пример
 
@@ -123,9 +122,9 @@ screen в рамках flow).
 ​```yaml
 tree:
   - layout:stack
-    - ui:Navbar (planned)         # шапка: лого, навигация, меню пользователя
+    - ui:Navbar                  # шапка: лого, навигация, меню пользователя
     - layout:row
-      - ui:Sidebar (planned)   (fills: $side)
+      - ui:Sidebar             (fills: $side)
       - layout:stack           (fills: $main)
       - layout:stack           (fills: $detail)
     - layout:layer             (fills: $overlay)
@@ -135,8 +134,8 @@ tree:
 ## Anti-patterns
 
 - ❌ Содержимое в shell-tree (конкретный блок, конкретный текст).
-- ❌ Оси контекста (`brand`/`scheme`/`density`/`mode`/`dir`) как props
-  узлов shell — они живут на корне приложения (`data-*` / `StitProvider`).
+- ❌ Оси контекста приложения (тема, бренд, плотность, направление письма)
+  как атрибуты узлов shell — их задаёт корень приложения в коде.
 - ❌ Пиксели/raw-CSS в `tree` или `responsive`.
 - ❌ Слот без `accepts` или без `required`.
 - ❌ `responsive`-поведение, не покрытое доступными `behaviour`.

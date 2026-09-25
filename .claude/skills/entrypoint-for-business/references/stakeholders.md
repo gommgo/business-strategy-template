@@ -206,7 +206,7 @@
 - **Строгие поля и критерии записей** — `../../business-deep-dive/references/`
   (`field-checklists.md` § stakeholder / stakeholder-map, `phases.md` фаза
   `stakeholders`, `draft-stable.md`).
-- **Подача находок** (думаем вслух, показываем) — `presentation.md`.
+- **Подача находок** (объясняем, откуда вопрос, показываем) — `presentation.md`.
 - **Anti-patterns из реальных провалов** — `anti-patterns-real.md`.
 - **Куда писать state и как упаковать для аналитика** —
   `state-format-business.md` / `escalation.md`.

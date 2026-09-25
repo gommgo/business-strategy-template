@@ -64,8 +64,9 @@ Vision — обязательны три раздела (Problem, Success, Non-g
 
 ### 5. В state-заметке нет `**blocker**`-вопросов
 
-Путь заметки: `state/<project-slug>/project/<kind>/<slug>.md`; для
-capability — `state/<project-slug>/project/capability/<surface>/<slug>.md`.
+Путь заметки:
+`../entrypoint/state/projects/<project-slug>/project/<kind>/<slug>.md`; для
+capability — `…/project/capability/<surface>/<slug>.md`.
 
 Открытые вопросы без префикса `**blocker**` — не мешают (это
 обычные «копать дальше»). Блокирует только то, что явно помечено как
@@ -101,7 +102,7 @@ X, потому что Y».
 ## Когда чек-лист **нельзя пройти**
 
 Бывают сущности, которые **проектно** не доходят до stable в этой
-сессии — нужно ещё интервью, ещё research, ещё корпоративное решение.
+сессии — нужно ещё интервью, ещё research, ещё решение заказчика.
 Это нормально. Не нужно «натягивать» stable.
 
 Признаки:

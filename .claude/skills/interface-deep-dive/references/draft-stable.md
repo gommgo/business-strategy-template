@@ -71,7 +71,7 @@ hint, но не блокирует stable.
 
 ### 5. State-заметка чиста по `**blocker**`-вопросам
 
-`state/<project-slug>/interface/<surface>/<kind>/<slug>.md`:
+`../entrypoint/state/projects/<project-slug>/interface/<surface>/<kind>/<slug>.md`:
 
 - Не содержит секцию `## Открытые вопросы` ИЛИ
 - Содержит, но в ней нет вопросов с префиксом/суффиксом `**blocker**`.
@@ -87,7 +87,7 @@ hint, но не блокирует stable.
 После любой правки записи:
 
 1. Прочитать строку из артефакта.
-2. Прочитать `state/<project-slug>/interface/<surface>/<kind>/<slug>.md`,
+2. Прочитать `../entrypoint/state/projects/<project-slug>/interface/<surface>/<kind>/<slug>.md`,
    если есть.
 3. Прогнать пункты 1–3, 5 (программно проверяемые).
 4. Если все 4 ✅ — раунд `AskUserQuestion` по тест-критерию (пункт 4).

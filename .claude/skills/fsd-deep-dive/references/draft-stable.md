@@ -12,8 +12,9 @@
 2. **Ссылки на источники валидны** (в слоях той же поверхности того же
    проекта):
    - `features.situation` → запись в `interface/<surface>/situation.md`;
-   - `pages.screen` → запись в `screens/<surface>/screen.md`;
-   - `widgets.block` (если не `—`) → запись в `screens/<surface>/block.md`;
+   - `pages.screen` → экран `screens/<surface>/screens/<slug>/`;
+   - `widgets.block` (если не `—`) → блок
+     `screens/<surface>/blocks/<slug>/`;
    - `entities.source` → агрегат/сущность в `services/<svc>/domains/<ctx>/`
      или запись в `interface/<surface>/data-items.md`.
 
@@ -41,5 +42,6 @@
 - <короткий falsifiable-вопрос>? (**blocker**)
 ```
 
-И не промоушить, пока не закрыта. Помни: stable-записи читает
-`/scaffold` форка `<org>/frontend` — незрелый stable материализуется в код.
+И не промоушить, пока не закрыта: stable-записи читает `/scaffold`
+фронт-форка поверхности (`<org>/frontend` или `<org>/site`), поэтому
+незрелый stable материализуется в код.

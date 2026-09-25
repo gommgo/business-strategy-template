@@ -44,7 +44,8 @@ stakeholder · stakeholder-map
         vision + user / capability / boundary / surface / integration / constraint / market
         ├─ interface/          (UX: who / situation / zone)
         ├─ services/           (сервисы: реестр + паспорта + домены внутри)
-        ├─ screens/            (flow / screen / block / shell)  →  wireframe → hi-fi на @stit/ui
+        ├─ screens/            (flow / screen / block / shell)  →  wireframe → hi-fi вручную
+        ├─ fsd/                (карта слайсов фронтовой поверхности)  →  код-репо читают
         ├─ telegram-bot-flow/  (фичи: dialog / window / use-case + сквозные command / notification — bot-поверхности)  →  код-репо читают
         └─ mobile/             (экраны / сценарии / фичи / входы / разрешения / системные действия / виджеты / фон — мобильные поверхности)  →  код-репо читают
 ```
@@ -85,10 +86,10 @@ M:N (`vision.addresses-problem`). Превращение `screens/` в маке�
 - **projects/`<slug>`** (опционально) — когда исход стратегии — продукт под
   проблему(ы): vision + user / capability / boundary / surface / integration /
   constraint / market, плюс вложенные `interface/`, `services/`, `screens/`
-  (web-поверхности), `telegram-bot-flow/` (bot-поверхности) или `mobile/`
-  (мобильные приложения: экраны, push и другие входы, разрешения, голос и
-  системные действия, виджеты, фоновая работа). Если
-  проблему закрывает задача (`task`), продуктовый слой не заводится.
+  и `fsd/` (web-поверхности), `telegram-bot-flow/` (bot-поверхности) или
+  `mobile/` (мобильные приложения: экраны, push и другие входы, разрешения,
+  голос и системные действия, виджеты, фоновая работа). Если проблему
+  закрывает задача (`task`), продуктовый слой не заводится.
 
 Каждый слой ведёт свой deep-dive-скилл через `AskUserQuestion`, пишет state в
 свою ветку единого дерева оркестратора (`.claude/skills/entrypoint/state/`;
@@ -99,22 +100,43 @@ M:N (`vision.addresses-problem`). Превращение `screens/` в маке�
 ## Место в экосистеме
 
 Это **design-time source of truth** стратегии (и проектирования продукта, когда он
-нужен). Форкается первым (`Use this template` → `<org>/strategy`), наполняется
-аналитикой — и, **когда стратегия рождает продукт**, его stable-артефакты
-**читают** код-репо (read-only, односторонне):
+нужен) — один из 7 шаблонов `stit-core/*`. Форки одной орги лежат рядом
+sibling-checkout'ами:
+
+| Шаблон → форк | Роль |
+|---|---|
+| `business-strategy-template` → `<org>/strategy` | **этот**: бизнес, AJTBD, SWOT, Карта гипотез, продукты (vision/surface, interface, screens, fsd, telegram-bot-flow, mobile, services + domains), ИТ-периметр |
+| [`project-infra-template-compose`](https://git.stit.tech/stit-core/project-infra-template-compose) → `<org>/infra` | runtime проекта (docker-compose на VPS) и операционный хаб: общий план, рассылка агентов по сиблингам, выкатка тегов |
+| [`go-backend-template`](https://git.stit.tech/stit-core/go-backend-template) → `<org>/backend` | Go-сервис |
+| [`spa-frontend-template`](https://git.stit.tech/stit-core/spa-frontend-template) → `<org>/frontend` | React SPA (кабинет, всё за логином) |
+| [`ssr-frontend-template`](https://git.stit.tech/stit-core/ssr-frontend-template) → `<org>/site` | Astro SSR-сайт (индексируемый контент) |
+| [`telegram-bot-template`](https://git.stit.tech/stit-core/telegram-bot-template) → `<org>/<bot>` | Telegram-бот |
+| [`mobile-template`](https://git.stit.tech/stit-core/mobile-template) → `<org>/mobile` | KMP-приложение Android + iOS |
+
+Библиотеки: `golibinfra` (Go-киты), `pylibinfra` (Python-киты).
+
+**Флоу.** Проект стартует здесь: форк `Use this template` → `<org>/strategy`,
+аналитик (`/entrypoint`) или клиент (`/entrypoint-for-business`) проектирует всё,
+что можно, до кода. Спроектированный продукт уходит в хаб `<org>/infra`:
+`/init-project` читает strategy и поднимает инфру, а агенты из хаба расходятся по
+сиблингам. Изменение дизайна по ходу — агент из хаба приходит сюда и работает
+скиллами этого репо.
+
+Когда стратегия рождает продукт, его stable-артефакты **читают** код-репо (read-only,
+односторонне):
 
 | Соседний репо | Читает из этого репо |
 |---|---|
-| [`<org>/backend`](https://git.stit.tech/stit-core/go-backend-template) | `projects/<slug>/services/<svc>/domains/<ctx>/` + паспорт сервиса (scaffold доменов в Go по сервису) |
-| [`<org>/frontend`](https://git.stit.tech/stit-core/spa-frontend-template) | `projects/<slug>/fsd/<surface>/` (карта слайсов → scaffold) + `{interface,screens}/` (контекст) |
-| [`<org>/<bot>`](https://git.stit.tech/stit-core/telegram-bot-template) | `projects/<slug>/telegram-bot-flow/<surface>/` (диалоги бота → код) |
-| [`<org>/mobile`](https://git.stit.tech/stit-core/mobile-template) | `projects/<slug>/mobile/<surface>/` (карта приложения → scaffold в `shared/` · `androidApp/` · `iosApp/`) + `interface/` и домены (контекст) |
-| [`<org>/infra`](https://git.stit.tech/stit-core/project-infra-template-compose) | `projects/<slug>/{vision,surface}` + `services/{service,platform}.md` + `projects/infrastructure/` (init-project + материализация топологии) |
+| `<org>/backend` | `projects/<slug>/services/<svc>/domains/<ctx>/` + паспорт сервиса (scaffold доменов в Go по сервису) |
+| `<org>/frontend` | `projects/<slug>/fsd/<surface>/` (карта слайсов → scaffold) + `{interface,screens}/` и домены (контекст) |
+| `<org>/site` | `projects/<slug>/fsd/<surface>/` (карта слайсов → страницы и коллекции) + `{interface,screens}/` (контекст) |
+| `<org>/<bot>` | `projects/<slug>/telegram-bot-flow/<surface>/` (диалоги бота → код) |
+| `<org>/mobile` | `projects/<slug>/mobile/<surface>/` (карта приложения → scaffold в `shared/` · `androidApp/` · `iosApp/`) + `interface/` и домены (контекст) |
+| `<org>/infra` | скиллы хаба — `projects/<slug>/{vision,surface}.md` (`/init-project`, `/stack-deep-dive`, `/de-template`); `services/`, паспорта и `projects/infrastructure/` — контекст при планировании (`/plan`) |
 
-Облик собирается на дизайн-системе
-[`@stit/ui`](https://git.stit.tech/stit-core/ui-lib) (потребляется, не правится).
-Канон контрактов экосистемы —
-[`corp-infra-template/docs/ecosystem.md`](https://git.stit.tech/stit-core/corp-infra-template/src/branch/main/docs/ecosystem.md).
+Полный контракт — [`docs/README.md`](docs/README.md), раздел «Что docs отдаёт соседям».
+Канон карты экосистемы и флоу —
+[`project-infra-template-compose/docs/reference/ecosystem.md`](https://git.stit.tech/stit-core/project-infra-template-compose/src/branch/main/docs/reference/ecosystem.md).
 
 ## Путь форка
 
@@ -141,7 +163,7 @@ M:N (`vision.addresses-problem`). Превращение `screens/` в маке�
 
 ```
 business (профиль + реестр проблем + стейкхолдеры) → ajtbd (спрос по работам) → swot (ставки)
-  → hypothesis-map (цель · метрика · task) → [опц.] projects/<slug> (продукт → interface / services / screens / telegram-bot-flow / mobile) + infrastructure (ИТ-периметр бизнеса)
+  → hypothesis-map (цель · метрика · task) → [опц.] projects/<slug> (продукт → interface / services / screens / fsd / telegram-bot-flow / mobile) + infrastructure (ИТ-периметр бизнеса)
 ```
 
 Под оркестратором — рой исполнителей, прямой вызов которых тоже допустим:
@@ -152,7 +174,7 @@ business (профиль + реестр проблем + стейкхолдер�
 | `ajtbd` | `/segment-deep-dive` · `/job-graph-deep-dive` · `/jtbd-interview` | `/ajtbd-audit` |
 | `swot` | `/swot-deep-dive` | `/swot-audit` |
 | `hypothesis-map` | `/hypothesis-map-deep-dive` | `/hypothesis-map-audit` |
-| `projects/<slug>` (опц.) | `/project-deep-dive` · `/interface-deep-dive` · `/service-deep-dive` · `/domain-deep-dive` · `/screen-deep-dive` · `/telegram-bot-flow-deep-dive` · `/mobile-deep-dive` | `/project-audit` · `/interface-audit` · `/service-audit` · `/screen-audit` · `/telegram-bot-flow-audit` · `/mobile-audit` |
+| `projects/<slug>` (опц.) | `/project-deep-dive` · `/interface-deep-dive` · `/service-deep-dive` · `/domain-deep-dive` · `/screen-deep-dive` · `/fsd-deep-dive` · `/telegram-bot-flow-deep-dive` · `/mobile-deep-dive` | `/project-audit` · `/interface-audit` · `/service-audit` · `/screen-audit` · `/fsd-audit` · `/telegram-bot-flow-audit` · `/mobile-audit` |
 | `projects/infrastructure` | `/infrastructure-deep-dive` | `/infrastructure-audit` |
 
 Сквозную семантику всех слоёв ловит рой `/cross-audit`. Когда дозревший продукт
@@ -181,8 +203,8 @@ business (профиль + реестр проблем + стейкхолдер�
   (`vision.lifecycle → stable`) питает business (оферы / метрики / реестр проблем)
   через провенанс `from-project`.
 - **Метрика — best-effort таргет, не гарантия.**
-- **Экспертиза священна** — домен/продукт/craft из ответов бизнеса и библиотеки,
-  не из головы агента.
+- **Экспертиза священна** — доменные и продуктовые формулировки дают бизнес,
+  аналитик и архитектор, не голова агента; облик (craft) в артефакты не пишется.
 - **Коммит / push — гейт человека.**
 
 Структура каталогов и каноны слоёв — [`docs/README.md`](docs/README.md) и

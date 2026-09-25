@@ -53,9 +53,9 @@ surface-локален — правило «один датум, один slug»
 `docs/projects/<project-slug>/screens/<surface>/` (композиция; для
 поверхности с `type: bot` — `telegram-bot-flow/<surface>/`, с
 `type: mobile` — `mobile/<surface>/`: композиция и карта кода приложения,
-мост к `<org>/mobile`) и, для SPA-поверхностей, через FSD-карту
-`fsd/<surface>/` (артефакт-мост к коду `<org>/frontend`, читает ситуации и
-данные этого слоя как источник).
+мост к `<org>/mobile`) и, для фронтовых поверхностей, через FSD-карту
+`fsd/<surface>/` (артефакт-мост к коду `<org>/frontend` и `<org>/site`,
+читает ситуации и данные этого слоя как источник).
 
 ## Файлы
 
@@ -193,9 +193,9 @@ interface; ловит `/cross-audit`):
   связность — по умолчанию).
 - ❌ Блок без `ux-substrates` или без `who`.
 - ❌ Код / FSD / компонент / облик в артефактах — это слой кода (ручная
-  сборка по `docs/projects/<project-slug>/screens/<surface>/`; для
-  bot-поверхности композиция — `telegram-bot-flow/<surface>/`, для
-  мобильной — `mobile/<surface>/`) и craft `@stit/ui`.
+  сборка по `docs/projects/<project-slug>/screens/<surface>/` и FSD-карта
+  `fsd/<surface>/`; для bot-поверхности композиция — `telegram-bot-flow/<surface>/`,
+  для мобильной — `mobile/<surface>/`). Облик (craft) в артефакты не пишется.
 - ❌ Ссылка из папки одной поверхности в сущность другой поверхности.
   Поверхности изолированы; общее (один user, один датум на разных
   поверхностях) сводит `/cross-audit`.

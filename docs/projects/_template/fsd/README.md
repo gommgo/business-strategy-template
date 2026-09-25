@@ -1,7 +1,7 @@
 # Артефакты FSD-карты
 
 FSD-слой проекта **партиционируется по поверхности (surface)**: на каждую
-SPA-поверхность из реестра `surface.md` (`type: web` / `admin` / `desktop` /
+фронтовую поверхность из реестра `surface.md` (`type: web` / `admin` / `desktop` /
 `embed`) — своя папка `docs/projects/<project-slug>/fsd/<surface>/` с 8
 плоскими md-файлами. Этот файл — **канон слоя**; форма одной папки
 поверхности (те самые 8 файлов) лежит рядом в [`_template/`](_template/) —
@@ -14,13 +14,16 @@ SPA-поверхность из реестра `surface.md` (`type: web` / `admi
 (`interface/<surface>/`), экраны и блоки (`screens/<surface>/`) и доменные
 сущности (`services/<svc>/domains/<ctx>/`) в карту слайсов по слоям
 Feature-Sliced Design. Это единственное место проекта, где FSD-имена
-легальны: в interface/screens/project их по-прежнему нет (см. их каноны и
-правило R-SEM-003 screen-аудита).
+легальны: в interface/screens/project их нет (см. их каноны и правило
+R-SEM-003 screen-аудита).
 
-Потребитель слоя — форк `<org>/frontend` (шаблон `spa-frontend-template`):
-его `/scaffold` и `/de-template` читают stable-записи cross-repo и сами
-выводят файловую раскладку `src/<layer>/<slice>/` из kind + slug.
-**`src/`-путей, имён файлов и выбора библиотек в артефактах нет** — это
+Потребители слоя — форки `<org>/frontend` (шаблон `spa-frontend-template`,
+React SPA: кабинет за логином) и `<org>/site` (шаблон `ssr-frontend-template`,
+Astro SSR-сайт с индексируемым контентом): их `/scaffold` и `/de-template`
+читают stable-записи cross-repo и сами выводят файловую раскладку
+`src/<layer>/<slice>/` из kind + slug. `type` поверхности технологию не
+задаёт: какой из форков разворачивает карту поверхности, решает привязка в
+код-репо (поле `surface` его `docs/stack/service.md`). **`src/`-путей, имён файлов и выбора библиотек в артефактах нет** — это
 исполнительная сторона фронт-форка (его `docs/stack/`).
 
 ## Структура
@@ -40,7 +43,7 @@ docs/projects/_template/fsd/
 ```
 
 Данные живут в папке поверхности проекта
-`docs/projects/<project-slug>/fsd/<surface>/` (одна папка на SPA-поверхность
+`docs/projects/<project-slug>/fsd/<surface>/` (одна папка на фронтовую поверхность
 из реестра `surface.md`).
 
 ## Файлы
@@ -52,7 +55,7 @@ docs/projects/_template/fsd/
 | [`pages.md`](_template/pages.md) | маршрут (1 page = 1 route) | карта pages: экран-источник, путь, guard, композиция |
 | [`widgets.md`](_template/widgets.md) | переиспользуемый блок | карта widgets: блок-источник, композиция, page-референсы (≥2) |
 | [`app.md`](_template/app.md) | bootstrap поверхности | init-последовательность и providers |
-| [`shared-ui.md`](_template/shared-ui.md) | проектный UI-примитив | карта переиспользуемых компонентов (design-system-agnostic) |
+| [`shared-ui.md`](_template/shared-ui.md) | проектный UI-примитив | карта переиспользуемых компонентов (без привязки к внешней UI-библиотеке) |
 | [`shared-api.md`](_template/shared-api.md) | контракт данных | сценарии данных для мок-режима, покрытие entities |
 | [`shared-lib.md`](_template/shared-lib.md) | сквозная утилита | i18n-локали и generic-состав |
 
@@ -79,11 +82,12 @@ widgets → app → shared-ui → shared-api → shared-lib.
 - **feature → ситуация** (M:1): `features.situation` →
   `interface/<surface>/situation.md`.
 - **feature → сущности** (M:N): `features.entities` → `entities.md`.
-- **page → экран** (M:1): `pages.screen` → `screens/<surface>/screen.md`.
+- **page → экран** (M:1): `pages.screen` → экран
+  `screens/<surface>/screens/<slug>/`.
 - **page → композиция** (M:N): `pages.widgets` / `pages.features` /
   `pages.entities` — канонические источники использования.
 - **widget → блок** (M:1, опц.): `widgets.block` →
-  `screens/<surface>/block.md`.
+  блок `screens/<surface>/blocks/<slug>/`.
 - **widget ← pages** (M:N): `widgets.pages` — **зеркало для наглядности**;
   должно соответствовать фильтру `pages.widgets ∋ <widget>`. Инвариант
   **pages-first**: у widget ≥2 page-референсов, иначе блок остаётся внутри
@@ -98,8 +102,8 @@ widgets → app → shared-ui → shared-api → shared-lib.
 
 Как в interface-слое: `draft` → `stable` через `/fsd-deep-dive` по
 подтверждению архитектора; понижение — только руками. `stable` может
-ссылаться на `draft` (hint в `/fsd-audit`, не блокер). Форк
-`<org>/frontend` разворачивает только stable-записи.
+ссылаться на `draft` (hint в `/fsd-audit`, не блокер). Фронт-форки
+разворачивают только stable-записи.
 
 ## Workflow
 
@@ -116,14 +120,14 @@ widget-с-одним-референсом, cross-feature).
 ## Anti-patterns
 
 - ❌ `src/`-пути, имена файлов, импорты, названия библиотек — исполнительная
-  сторона (`<org>/frontend`, его `docs/stack/` и `/scaffold`).
+  сторона (фронт-форк, его `docs/stack/` и `/scaffold`).
 - ❌ Слайс без источника в аналитике (page без screen, feature без situation,
   entity без домена/data-item) — сначала аналитика, потом карта.
 - ❌ FSD-имена (`widget`, `feature`, `entity`, `page`) в артефактах других
-  слоёв — FSD живёт только здесь (R-SEM-003 в screen-аудите остаётся).
+  слоёв — FSD живёт только здесь (в screens их ловит R-SEM-003 screen-аудита).
 - ❌ Widget с одним page-референсом (pages-first).
 - ❌ Feature, ссылающаяся на feature (cross-feature).
-- ❌ Облик, цвет, размеры, варианты компонентов — это screens + craft
-  `@stit/ui`, не карта слайсов.
+- ❌ Облик, цвет, размеры — craft, в артефакты не пишется; семантические
+  пометки узлов (`variant=accent`) живут в дереве screens, не в карте слайсов.
 - ❌ Ссылка из папки одной поверхности в сущность другой поверхности —
   поверхности изолированы, общее сводит `/cross-audit`.

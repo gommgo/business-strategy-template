@@ -11,7 +11,7 @@
   `interface/<surface>/` и свою папку композиции — экранов
   `screens/<surface>/` либо, при `type: bot`, диалогов
   `telegram-bot-flow/<surface>/`, при `type: mobile` — карты приложения
-  `mobile/<surface>/`.
+  `mobile/<surface>/`; фронтовая поверхность — ещё и FSD-карту `fsd/<surface>/`.
 - **папка возможностей** `capability/<surface>.md` — таблица возможностей
   одной поверхности (по файлу на поверхность).
 - **5 плоских кросс-поверхностных таблиц** `user.md`, `integration.md`,
@@ -25,7 +25,7 @@
 вход для соседних слоёв того же проекта, **вложенных в его папку**:
 `<slug>/interface/<surface>/` (UX по поверхности, `/interface-deep-dive`),
 `<slug>/screens/<surface>/` (композиция экранов по поверхности,
-`/screen-deep-dive`), `<slug>/fsd/<surface>/` (FSD-карта SPA-поверхности —
+`/screen-deep-dive`), `<slug>/fsd/<surface>/` (FSD-карта фронтовой поверхности —
 мост к коду фронта, `/fsd-deep-dive`), `<slug>/telegram-bot-flow/<surface>/`
 (композиция диалогов bot-поверхности), `<slug>/mobile/<surface>/` (карта
 мобильного приложения — композиция и мост к коду `<org>/mobile`,
@@ -55,6 +55,8 @@ docs/projects/<slug>/
 ├── screens/
 │   ├── <surface-1>/          flows · screens · blocks · shells · assets
 │   └── <surface-2>/
+├── fsd/
+│   └── <surface-1>/          entities · features · pages · widgets · app · shared-*  (для фронтовых поверхностей)
 ├── telegram-bot-flow/
 │   └── <bot-surface>/        command.md · notification.md · features/<feature>/{dialog.md,window.md,use-case.md}  (для type: bot — вместо screens)
 ├── mobile/
@@ -82,7 +84,7 @@ docs/projects/<slug>/
 | [`market.md`](market.md) | рыночный аналог / конкурент | slug · name · description · url · sources · status |
 
 Карта межпроектных стыков всего бизнеса — отдельный артефакт уровнем выше:
-[`../project-map.md`](../project-map.md).
+[`docs/projects/project-map.md`](../../project-map.md).
 
 ## Принципы оформления
 
@@ -149,9 +151,11 @@ H1 внутри — `capability`. Русское слово, являющеес�
 **между слоями** через семантический разбор (рой агентов), не через
 ссылочную целостность. Единственное структурное правило — поверхность:
 файл `capability/<surface>.md` и папки `interface/<surface>/`,
-`screens/<surface>/`, `telegram-bot-flow/<surface>/`, `mobile/<surface>/`
-обязаны соответствовать поверхности из реестра `surface.md` (две последние
-— только поверхности с `type: bot` и `type: mobile` соответственно).
+`screens/<surface>/`, `fsd/<surface>/`, `telegram-bot-flow/<surface>/`,
+`mobile/<surface>/` обязаны соответствовать поверхности из реестра
+`surface.md` (`fsd/` — только фронтовым поверхностям, `telegram-bot-flow/` и
+`mobile/` — только поверхностям с `type: bot` и `type: mobile`
+соответственно).
 
 Внутри `docs/projects/<slug>/` ожидаются неформальные связи:
 
@@ -236,6 +240,7 @@ state и предлагает переходы через `AskUserQuestion`.
 - ❌ Жёсткие slug-валидации между project и соседями. Связи —
   семантические; ловит `/cross-audit`, а не grep.
 - ❌ Авто-вписывание результатов web-research в артефакты. Рой агентов
-  кладёт кандидатов в `state/research/` — promotion в `market.md` /
+  кладёт кандидатов в ветку `projects/<slug>/project/research/` state
+  оркестратора (`.claude/skills/entrypoint/state/`) — promotion в `market.md` /
   `constraint.md` только через `AskUserQuestion` аналитика.
 - ❌ Промоушн `stable` руками без чек-листа — это работа скилла.

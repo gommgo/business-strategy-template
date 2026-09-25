@@ -9,18 +9,19 @@
 вызов исполнителя тоже допустим). Семантический поток сверху вниз: бизнес
 заказчика (+ реестр проблем) → сегменты и граф работ → SWOT → Карта гипотез
 (терминал — `task`). Исход — задача, закрывающая проблему, либо **опционально**
-продукт → интерфейс / домены / экраны. Артефакты `docs/` — design-time source of
-truth; когда дело дошло до продукта, их читают соседние форки
-(`<org>/{backend,frontend,infra}` и `<org>/<bot>`).
+продукт → интерфейс / сервисы и домены / экраны. Артефакты `docs/` — design-time
+source of truth; когда дело дошло до продукта, их читают соседние форки
+(`<org>/{backend,frontend,site,mobile,infra}` и `<org>/<bot>`).
 
 ## 0. Форк
 
 1. Gitea (`https://git.stit.tech`) → `stit-core/business-strategy-template` →
    **Use this template** → `<org>/strategy`.
 2. `git clone git@git.stit.tech:<org>/strategy.git && cd strategy`.
-3. Форкается **первым** в экосистеме: когда стратегия рождает продукт,
-   backend/frontend/infra-форки читают `<org>/strategy` как upstream-аналитику
-   (`docs/README.md § Что docs отдаёт соседям`).
+3. Форкается **первым** в экосистеме: проект стартует здесь. Когда стратегия
+   рождает продукт, остальные форки читают `<org>/strategy` как upstream-аналитику
+   (`docs/README.md § Что docs отдаёт соседям`), а операционный хаб проекта —
+   `<org>/infra` (`docs/README.md § Где это в экосистеме`).
 
 ## Путь
 
@@ -44,6 +45,7 @@ truth; когда дело дошло до продукта, их читают �
    ├─ /service-deep-dive <slug> (сервисная топология) → /service-audit <slug>
    ├─ /domain-deep-dive <slug> <ctx> (DDD внутри сервиса)
    ├─ /screen-deep-dive <slug> [<surface>]     → /screen-audit <slug>
+   ├─ /fsd-deep-dive <slug> [<surface>] (фронтовые поверхности) → /fsd-audit <slug>
    ├─ /telegram-bot-flow-deep-dive <slug> [<surface>] (bot-поверхности — вместо
    │  screen) → /telegram-bot-flow-audit <slug>
    └─ /mobile-deep-dive <slug> [<surface>] (мобильные поверхности — вместо
@@ -52,6 +54,7 @@ truth; когда дело дошло до продукта, их читают �
    общие ресурсы · джобы · размещение) → /infrastructure-audit
 6. /cross-audit — сквозная семантика между слоями (рой)
 7. готовый репо стратегии (с продуктами, если до них дошло)
+   → продукт спроектирован: дальше хаб <org>/infra (/init-project)
 ```
 
 Это не жёсткая лестница: информация приходит не линейно, оркестратор ведёт по
@@ -123,9 +126,9 @@ truth; когда дело дошло до продукта, их читают �
 Опциональный downstream — когда исход стратегии требует продукта (иначе проблему
 закрывает задача `task` Карты гипотез). Несколько продуктов под одним бизнесом, у
 каждого своя папка. Все скиллы слоёв принимают `<project-slug>` первым аргументом
-(без него — пикер по `docs/projects/`, исключая `_template`); interface, screen,
-telegram-bot-flow и mobile берут вторым аргументом поверхность (без неё — пикер
-по именам из `surface.md`).
+(без него — пикер по именам проектов, исключая `_template`); interface, screen,
+fsd, telegram-bot-flow и mobile берут вторым аргументом поверхность (без неё —
+пикер по именам из `surface.md`).
 
 - **`/project-deep-dive <slug>`** (аналитик) — vision (+ `addresses-problem`
   M:N к проблемам) + реестр-хребет `surface.md` + кросс-поверхностные kind
@@ -156,8 +159,12 @@ telegram-bot-flow и mobile берут вторым аргументом пов�
   сертификаты), размещение юнитов (`placement.md`). По нему
   `<org>/infra` понимает, что билдить и где располагать.
 - **`/screen-deep-dive <slug> [<surface>]`** → **`/screen-audit <slug>`** —
-  композиция и облик по поверхности (flow / screen / block / shell в
-  `screens/<surface>/`) на инвентаре `@stit/ui`.
+  композиция экранов по поверхности (flow / screen / block / shell в
+  `screens/<surface>/`) в нотации семантического дерева; wireframe и hi-fi по
+  ней автор макета собирает вручную.
+- **`/fsd-deep-dive <slug> [<surface>]`** → **`/fsd-audit <slug>`** — FSD-карта
+  фронтовой поверхности (`fsd/<surface>/`): слайсы из ситуаций, экранов и доменов —
+  мост к коду `<org>/frontend` и `<org>/site`.
 - **`/telegram-bot-flow-deep-dive <slug> [<surface>]`** →
   **`/telegram-bot-flow-audit <slug>`** — диалоги телеграм-бота по
   bot-поверхности (вместо screens): фичи `features/<feature>/` (dialog /
@@ -199,15 +206,20 @@ interface ↔ services/domain ↔ screen, по каждой поверхност
 
 Репо наполнено стратегией бизнеса: свой бизнес, свои проблемы, ставки и гипотезы —
 и продукты, если до них дошло. Дальше — обычный аналитический флоу по воркфлоу
-(`README.md`), под git-ревью. Когда стратегия рождает продукт, соседние форки
-`<org>/{backend,frontend,infra}` и `<org>/<bot>` читают его stable-артефакты
-как upstream (`docs/README.md`).
+(`README.md`), под git-ревью.
+
+Когда продукт спроектирован, следующий шаг — операционный хаб `<org>/infra`:
+`/init-project` читает strategy и поднимает инфру, сквозная задача ведётся
+программой в `.claude/plans/` инфры, агенты из хаба уходят в сиблинги, а соседние
+форки (`<org>/{backend,frontend,site,mobile,infra}` и `<org>/<bot>`) читают
+stable-артефакты как upstream (`docs/README.md`). Изменение дизайна по ходу —
+агент из хаба приходит в `../strategy` и работает скиллами этого репо.
 
 ## Когда что-то идёт не так
 
 - **Артефакт не `stable`** → доведи через соответствующий deep-dive того же слоя.
 - **Подозрение на рассинхрон внутри слоя** → узкий аудит
-  (`/project-audit`, `/interface-audit`, `/screen-audit`,
+  (`/project-audit`, `/interface-audit`, `/screen-audit`, `/fsd-audit`,
   `/telegram-bot-flow-audit`, `/mobile-audit`, `/service-audit`,
   `/infrastructure-audit`,
   `/swot-audit`, `/hypothesis-map-audit`, `/ajtbd-audit`).

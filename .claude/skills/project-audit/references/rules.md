@@ -421,8 +421,9 @@ em-dash).
   — кроме одного структурного исключения: проверки **существования** папки
   соседнего проекта по `integration.sibling-project` (R-SEM-011) только
   листингом `docs/projects/`, без чтения его артефактов. Согласованность
-  трёх сторон стыка (integration ↔ project-map ↔ порт в доменах
-  сервисов) — у `/cross-audit` (угол `integration-domain`).
+  сторон межпроектного стыка (integration ↔ project-map ↔ клиент и
+  функции в use-case ↔ обслуживающая сторона соседа) — у `/cross-audit`
+  (угол `integration-crossproject`).
 - Не предлагает promotion `draft → stable` — это `/project-deep-dive`.
 - Не вызывает `/project-deep-dive` сам — даёт текст, что запустить
   аналитику.

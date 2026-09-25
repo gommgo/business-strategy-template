@@ -69,8 +69,8 @@ hint, но не блокирует stable.
   `block.ux-substrates` interface-блока `window.interface-block`
   (строка с тем же slug в
   `docs/projects/<project-slug>/interface/<surface>/block.md`). При
-  расхождении — политика зеркал из SKILL.md; нерешённое расхождение —
-  `**blocker**` в state, не stable.
+  расхождении — политика зеркал из `interface-context.md`; нерешённое
+  расхождение — `**blocker**` в state, не stable.
 - `dialog.windows` **равно** множеству секций `## <slug>` в `window.md`
   фичи; порядок списка — порядок состояний. Скилл пересчитывает и
   показывает.

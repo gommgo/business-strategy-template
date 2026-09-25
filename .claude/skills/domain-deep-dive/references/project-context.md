@@ -172,9 +172,9 @@ use-case («порт `<port>` дёргает функцию `<fn>`, а её/пр
 файл `capability/<surface>.md` сменился). Скилл при следующем заходе:
 
 1. Не молча удаляет.
-2. `AskUserQuestion`: «Capability X удалена из project. Этот use-case
-   теперь привязан к чему?» — опции: новая capability / технический /
-   удалить use-case.
+2. `AskUserQuestion`: «Capability X удалена из project. К чему привязать
+   этот use-case?» — опции: новая capability / технический / удалить
+   use-case.
 
 ## Cross-audit
 

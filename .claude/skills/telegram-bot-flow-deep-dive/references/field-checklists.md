@@ -167,7 +167,7 @@ JSON-примитивы) + `transitions` (сводное зеркало граф
 4. `ux-substrates`: автоматически предложить весь список
    `ux-substrates` выбранного interface-блока по умолчанию (для
    зеркала). Аналитик может скорректировать; при несовпадении —
-   политика зеркал (см. SKILL.md).
+   политика зеркал (см. `interface-context.md`).
 5. `situations`: мультивыбор из `…/interface/<surface>/situation.md`
    (приоритет — ситуации выбранных субстратов) + «нужна новая»
    (Other → запустить `interface-deep-dive`).
@@ -186,8 +186,8 @@ JSON-примитивы) + `transitions` (сводное зеркало граф
    - `label` / `selected-label` / `validation` — Other (текст
      аналитика);
    - `action` — опции use-case бота **этой фичи** + `—` (чистая
-     навигация) + «нужен новый bot UC» (см. `domain-bridge.md` «Окно →
-     bot UC»; bot UC мостится к домену в своих `Dependencies`);
+     навигация) + «нужен новый bot UC» (см. `domain-bridge.md` «Заведение
+     action / getter.source»; bot UC мостится к домену в своих `Dependencies`);
    - `transition` — опции: окна **этой фичи** / `back` / `done` /
      `start:<feature>` / «условный» (исходы use-case бота → список
      `{ to, when }`, формулировки `when` — Other);
@@ -209,7 +209,7 @@ JSON-примитивы) + `transitions` (сводное зеркало граф
 **После правки `transition`** — пересчитать сводку
 `dialog.transitions` диалога-владельца. **После правки
 `ux-substrates`** — сравнить с `…/interface/<surface>/block.md`; при
-расхождении — политика зеркал (см. SKILL.md).
+расхождении — политика зеркал (см. `interface-context.md`).
 
 ---
 

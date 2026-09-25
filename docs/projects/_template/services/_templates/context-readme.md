@@ -25,7 +25,7 @@
 |---|---|---|
 | [`<Operation>`](use-cases/<Operation>.md) | <actor> | <что делает> |
 
-Read use-case'ы (`Get<Name>`, `List<Name>s`) — добавим при скаффолдинге HTTP-endpoint'ов, если нужны.
+Read use-case'ы (`Get<Name>`, `List<Name>s`) получают файл, только когда несут бизнес-правила; тривиальная выборка — строкой без ссылки (канон слоя, § Use-case'ы чтения).
 
 ## Events
 

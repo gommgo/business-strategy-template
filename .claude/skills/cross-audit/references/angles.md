@@ -1,94 +1,82 @@
 # Углы проверки cross-audit
 
-Каждый lens — отдельный угол семантической проверки. Один lens = один
-агент (для project-скоупленного — один агент на пару `проект × lens`; для
-project×surface-скоупленного — один агент на тройку `проект × поверхность ×
-lens`). Запускаются параллельно.
+Каталог углов: сводная карта и карточка на каждый угол. Один угол — один
+агент на свою единицу раскрытия: верхнеуровневый угол — один агент на
+прогон, пара — на `проект × lens`, тройка — на `проект × поверхность × lens`,
+`dataitems-crosssurface` — на проект (единицы и порядок раскрытия — SKILL.md).
 
-`<slug>` = `<project-slug>` — подставляется на спавне. `<surface>` = slug
-поверхности из реестра `docs/projects/<slug>/surface.md` — подставляется на
-спавне для project×surface-углов. Пути с `<slug>` указывают на папку
-конкретного проекта `docs/projects/<slug>/`; пути с `<surface>` — на
-per-surface артефакт (`capability/<surface>.md`, `interface/<surface>/...`,
-`screens/<surface>/...`, `telegram-bot-flow/<surface>/...`,
-`mobile/<surface>/...`).
+`<slug>` = `<project-slug>`, `<surface>` = slug поверхности из реестра
+`docs/projects/<slug>/surface.md`; оба подставляются на спавне. Пути с
+`<surface>` ведут в папку поверхности (`capability/<surface>.md`,
+`interface/<surface>/…`, `screens/<surface>/…`,
+`telegram-bot-flow/<surface>/…`, `mobile/<surface>/…`). Корневые kind
+продукта (`vision`, `user`, `integration`, `boundary`, `constraint`,
+`market`) и домены `services/<svc>/domains/<ctx>/` (по bounded-context,
+внутри сервиса-владельца из `services/service.md`) кросс-поверхностны.
 
-Структура каждого пункта:
+Карточка угла:
 
-- **Source / Destination** — какие слои читать (с `<slug>`/`<surface>` где
-  project/surface-скоуп).
-- **Скоуп** — `один раз` (верхнеуровневый, без проекта), `по проекту`
-  (раскрывается в пары `проект × lens`) или `по проекту × поверхность`
-  (раскрывается в тройки `проект × поверхность × lens`).
-- **Применим если** — какие слои/каталоги должны существовать.
-- **Что искать** — конкретные семантические паттерны.
-- **Промпт для агента** — добавка к каркасу из SKILL.md.
+- **Source / Destination** — какие слои читать;
+- **Скоуп** — `один раз` (верхнеуровневый), `по проекту` (пара) или
+  `по проекту × поверхность` (тройка);
+- **Применим если** — какие слои и папки должны существовать; иначе
+  единица пропускается с пометкой в отчёте;
+- **Что искать** — семантические паттерны с severity;
+- **Промпт-добавка** — вставляется в промпт-каркас агента из SKILL.md.
 
-## Поверхность (surface) — ось партиционирования
+## Карта углов
 
-Продуктовый слой партиционирован по поверхности: реестр-хребет
-`docs/projects/<slug>/surface.md` объявляет поверхности, и их slug'и —
-ключи трёх per-surface слоёв: возможности (`capability/<surface>.md`),
-интерфейс (`interface/<surface>/...`) и композиция — экраны
-(`screens/<surface>/...`) либо, для поверхностей с `type: bot`, диалоги
-бота (`telegram-bot-flow/<surface>/...`), для поверхностей с
-`type: mobile` — карта мобильного приложения (`mobile/<surface>/...`).
-Кросс-поверхностные kind продукта (`vision`, `user`, `integration`,
-`boundary`, `constraint`, `market`) лежат в корне папки проекта. Домены
-(`services/<svc>/domains/<ctx>/`) **surface-агностичны** — живут внутри сервиса-владельца (реестр `services/service.md`) и партиционируются по
-bounded-context, не по поверхности.
+Строки идут в порядке групп отчёта; спавнятся все агенты параллельно.
+Скоуп: `★` — один раз; `проект` — пара; `проект×поверхность` — тройка.
 
-Поэтому lens, чей source ИЛИ destination — per-surface артефакт,
-раскрывается в **тройки** `проект × поверхность × lens`: на каждую
-поверхность реестра — свой агент. Lens с проектными (корневыми, не
-per-surface) целями раскрывается в **пары** `проект × lens`. Верхнеуровневые —
-один агент.
-
-## Скоуп углов
-
-- **Верхнеуровневые, прогон один раз** (общие слои business ↔ ajtbd ↔
-  swot ↔ hypothesis-map, без проекта): `factor-business`,
-  `currentmetric-metric`, `segmentproblem-bizproblem`, `segment-subject`,
-  `solution-business`, `business-segment`, `prospective-consistency`,
-  `provenance-upstream`, `stakeholder-subject`, `stakeholder-factor`,
-  `stakeholder-strategy`, `projectmap-reciprocity`, `service-placement`
-  (сервисы всех проектов ↔ ИТ-периметр), `platform-shared` (shared-нужды
-  проектов ↔ общие ресурсы бизнеса).
-- **Верхнеуровневый M:N, прогон один раз над всеми проектами**:
-  `addresses-problem-bizproblem`.
-- **По каждому проекту** (пары `проект × lens`; цели — корневые kind
-  продукта `vision`/`user`/`integration`, не per-surface):
-  - swot/hypothesis-map ↔ продукт (скоупится к проблемам, которые проект
-    закрывает через `vision.addresses-problem`): `goal-vision`,
-    `subject-user`.
-  - ajtbd ↔ продукт: `segment-user`, `job-vision`, `segmentproblem-vision`.
-  - продукт ↔ соседние проекты (межпроектный): `integration-crossproject`.
-  - сервисы ↔ продукт (сервисы кросс-поверхностны): `service-capability`.
-- **По каждому проекту × поверхность** (тройки `проект × поверхность × lens`;
-  source ИЛИ destination — per-surface артефакт `capability/<surface>.md`,
-  `interface/<surface>/*`, `screens/<surface>/*`):
-  - swot/hypothesis-map ↔ возможности поверхности (скоупится к проблемам
-    проекта): `bet-capability`, `capability-hypothesis`.
-  - ajtbd ↔ возможности поверхности: `mechanic-capability`, `capability-job`.
-  - продукт ↔ интерфейс/экраны поверхности: `user-who`,
-    `capability-situation`, `surface-zone`, `surface-screen`,
-    `surface-capability`.
-  - продукт/интерфейс ↔ диалоги bot-поверхности: `surface-botflow`.
-  - диалоги bot-поверхности ↔ домены проекта: `botflow-domain`.
-  - диалоги bot-поверхности ↔ сервисы проекта: `botflow-service`.
-  - продукт/интерфейс ↔ карта мобильного приложения: `surface-mobile`.
-  - карта мобильного приложения ↔ домены проекта: `mobile-domain`.
-  - карта мобильного приложения ↔ сервисы проекта: `mobile-service`.
-  - ссылки в мобильное приложение ↔ web-поверхности проекта: `mobile-web`.
-  - поверхность ↔ сервисы проекта: `surface-service`.
-  - возможности поверхности ↔ домены проекта: `capability-domain`.
-  - сквозные рёбра интерфейса поверхности: `situation-job`,
-    `situation-hypothesis`.
-  - интеграция ↔ домены (по поверхностям интеграции): `integration-domain`.
-  - ограничение ↔ поверхность/интеграция (по поверхностям): `constraint-surface`.
-  - рынок ↔ возможности поверхности: `market-capability`.
-- **По проекту, сразу по всем поверхностям** (один агент на проект,
-  читает `data-items.md` всех папок поверхностей): `dataitems-crosssurface`.
+| lens | source | destination | скоуп | основной вопрос |
+|---|---|---|---|---|
+| `factor-business` | `docs/swot/factor.md` | `docs/business/` (profile, competitor, current-metric) | ★ | каждый SWOT-фактор опирается на картину бизнеса? |
+| `currentmetric-metric` | `docs/business/current-metric.md` | `docs/hypothesis-map/metric.md` | ★ | baseline целевой метрики (`current`) взят из текущего KPI бизнеса? |
+| `addresses-problem-bizproblem` | `docs/projects/*/vision.md` (`addresses-problem`) | `docs/business/business-problem.md` | ★ | каждый ref проекта попадает в реальную проблему? есть ли проблема, в которую не бьёт ни один проект? (M:N, обе стороны) |
+| `segmentproblem-bizproblem` | `docs/ajtbd/segment-problem.md` | `docs/business/business-problem.md` | ★ | трение клиента доказывает проблему бизнеса? есть ли проблема бизнеса без единого трения-доказательства? |
+| `segment-subject` | `docs/ajtbd/segment.md` | `docs/hypothesis-map/subject.md` | ★ | субъект влияния вырастает из сегмента? есть ли позитивный субъект без сегмента (негативному не нужен)? |
+| `solution-business` | `docs/ajtbd/solution.md` | `docs/business/` (competitor, offering) | ★ | нанятое решение (`maps-to`) сходится с игроком рынка / собственным офером? |
+| `business-segment` | `docs/business/offering.md` (`for-segment`), `channel.md` (`serves-segment`) | `docs/ajtbd/segment.md` | ★ | межслойные ссылки оферов/каналов попадают в реальные сегменты и осмысленны? |
+| `prospective-consistency` | `docs/projects/*/vision.md` (`market-maturity`, `addresses-problem`) | `docs/ajtbd/segment.md`, `docs/business/business-problem.md` (`served`) | ★ | market-maturity продукта согласован с `served` адресуемых проблем и сегментов? проспективная сущность без адресующего проекта? |
+| `provenance-upstream` | `docs/business/{offering,current-metric,business-problem}.md`, `docs/ajtbd/segment.md` (`from-project`, `served`) | `docs/projects/*/vision.md` (`lifecycle`, `market-maturity`, `addresses-problem`) | ★ | `from-project` ведёт в существующий проект? контур market-maturity ↔ served ↔ from-project согласован и замкнут у stable-продуктов? |
+| `stakeholder-subject` | `docs/business/stakeholder.md` (`manifests-as`) | `docs/hypothesis-map/subject.md` | ★ | лицо-решатель и субъект — один человек (`manifests-as`)? властный блокер ≈ negative-субъект? |
+| `stakeholder-factor` | `docs/business/stakeholder.md` (`attitude`, `power`) | `docs/swot/factor.md` | ★ | властный champion/blocker отражён SWOT-фактором (человек-как-фактор)? |
+| `stakeholder-strategy` | `docs/business/stakeholder.md` (`strategic-stance`) | `docs/swot/bet.md`, `docs/hypothesis-map/goal.md` | ★ | ставка/цель не противоречит стойке властного лица? |
+| `projectmap-reciprocity` | `docs/projects/project-map.md` | каталоги `docs/projects/` + `integration.md` проектов | ★ | рёбра графа стыков осмысленны (оба проекта есть, нет самоссылки, нет дубля вместо duplex, via резолвится)? |
+| `service-placement` | `docs/projects/*/services/service.md` + `platform.md` (`provided-by: own`) | `docs/projects/infrastructure/{placement,runtime,server}.md` | ★ | каждый сервис/own-ресурс размещён хотя бы в prod-рантайм? размещение осмысленно (назначение/ёмкость сервера vs роль юнита)? |
+| `platform-shared` | `docs/projects/*/services/platform.md` (`provided-by: shared:<slug>`) | `docs/projects/infrastructure/shared-platform.md` + `placement.md` | ★ | каждая shared-потребность резолвится в общий ресурс? общий ресурс реально общий (≥1 потребитель) и размещён? технологии не противоречат (проект ждёт kafka — shared даёт nats)? |
+| `goal-vision` | `docs/hypothesis-map/goal.md`, `metric.md` (по проблемам проекта) | `docs/projects/<slug>/vision.md` | проект | цель/метрика закрываемой проблемы отражены в vision.Success (как таргет, не гарантия)? |
+| `subject-user` | `docs/hypothesis-map/subject.md` (по проблемам проекта) | `docs/projects/<slug>/user.md` | проект | субъект влияния соответствует user продукта? |
+| `segment-user` | `docs/ajtbd/segment.md` | `docs/projects/<slug>/user.md` | проект | сегмент рынка соотносится с user продукта (разные сущности, но связаны)? сегмент без пользователя / пользователь без сегмента? |
+| `job-vision` | `docs/ajtbd/job.md` (`big`/`core`) | `docs/projects/<slug>/vision.md` (Success) | проект | успех продукта целит в Big/Core Job сегмента? |
+| `segmentproblem-vision` | `docs/ajtbd/segment-problem.md` | `docs/projects/<slug>/vision.md` (Problem) | проект | трение клиента отражено в vision.Problem продукта? |
+| `integration-crossproject` | `docs/projects/<slug>/integration.md` (`target: sibling-project` + `## Функции`) | `docs/projects/project-map.md` + `<sibling>/` (integration + обслуживающие use-case) + наш клиент `_shared/` + use-case `functions` | проект | стык согласован в обе стороны (integration ↔ project-map ↔ клиент+функции ↔ обслуживающий use-case соседа); наш `out` имеет callee у соседа? |
+| `service-capability` | `docs/projects/<slug>/services/service.md` + паспорта | `docs/projects/<slug>/capability/*.md` (все поверхности) | проект | каждый бизнес-сервис (`api`/`worker`) несёт хотя бы одну capability через свои контексты? сервис без продуктового якоря (для технических `gateway` — пометка, не finding)? |
+| `surface-capability` | `docs/projects/<slug>/surface.md` (строка `<surface>`) | `docs/projects/<slug>/capability/<surface>.md` | проект×поверхность | у поверхности есть возможности? возможности — тем user, кого поверхность обслуживает? |
+| `mechanic-capability` | `docs/ajtbd/job-graph.md` (`value-mechanics`) | `docs/projects/<slug>/capability/<surface>.md` | проект×поверхность | механика ценности из графа реализована capability поверхности? механика без capability? |
+| `bet-capability` | `docs/swot/bet.md`, `goal.md` (по проблемам проекта) | `docs/projects/<slug>/capability/<surface>.md` | проект×поверхность | ставка/цель реализуется хотя бы одной capability поверхности? |
+| `capability-hypothesis` | `docs/projects/<slug>/capability/<surface>.md` (`hypotheses`) | `docs/hypothesis-map/hypothesis.md` (по проблемам проекта) | проект×поверхность | ребро capability→гипотеза резолвится? гипотеза проблемы без реализующей capability? |
+| `capability-job` | `docs/projects/<slug>/capability/<surface>.md` (`jobs`) | `docs/ajtbd/job.md` | проект×поверхность | ребро capability→работа резолвится? Big/Core Job без прямо целящей capability? |
+| `user-who` | `docs/projects/<slug>/user.md` | `docs/projects/<slug>/interface/<surface>/who.md` | проект×поверхность | who поверхности сводимо к user? user поверхности несёт хотя бы одно who? |
+| `surface-zone` | `docs/projects/<slug>/surface.md` (строка `<surface>`) | `docs/projects/<slug>/interface/<surface>/zone.md` | проект×поверхность | зоны поверхности образуют целостный UX для её user? |
+| `capability-situation` | `docs/projects/<slug>/capability/<surface>.md` | `docs/projects/<slug>/interface/<surface>/situation.md` | проект×поверхность | каждая capability поверхности реализуется ≥1 ситуацией той же поверхности? ситуация без capability-якоря? |
+| `situation-job` | `docs/projects/<slug>/interface/<surface>/situation.md` (`jobs`) | `docs/ajtbd/job.md` | проект×поверхность | ребро situation→работа резолвится? |
+| `situation-hypothesis` | `docs/projects/<slug>/interface/<surface>/situation.md` (`hypotheses`) | `docs/hypothesis-map/hypothesis.md` | проект×поверхность | ребро situation→гипотеза резолвится? |
+| `market-capability` | `docs/projects/<slug>/market.md` | `docs/projects/<slug>/capability/<surface>.md` | проект×поверхность | конкуренты покрывают возможности поверхности? gap, где конкурент умеет, а мы нет (signal к новой capability)? |
+| `constraint-surface` | `docs/projects/<slug>/constraint.md` | `docs/projects/<slug>/surface.md` (строка `<surface>`), `integration.md` (поверхности) | проект×поверхность | constraint поверхности привязан к ней или её интеграции? |
+| `surface-service` | `docs/projects/<slug>/surface.md` (строка `<surface>`) | `docs/projects/<slug>/services/service.md` (колонка `surfaces`) + паспорта (`Exposes`) | проект×поверхность | поверхность обслуживается ≥1 сервисом? bot-поверхность — ровно одним `type: bot`? сервис обслуживает поверхность, которой по смыслу не своя? |
+| `capability-domain` | `docs/projects/<slug>/capability/<surface>.md` | `docs/projects/<slug>/services/*/domains/` (если есть) | проект×поверхность | у каждой capability поверхности есть бизнес-код в domain? |
+| `integration-domain` | `docs/projects/<slug>/integration.md` (`## Провайдеры` ∋ `<surface>` + `## Функции`) | `docs/projects/<slug>/services/` (клиент `_shared/integrations/` + use-case `functions` + `fronted-by` gateway) | проект×поверхность | цепочка функции цела: бизнес-каталог ↔ клиент `_shared/` ↔ потребление в use-case? при `fronted-by` остальные ходят через `Exposes` gateway'я? |
+| `surface-screen` | `docs/projects/<slug>/surface.md` + `interface/<surface>/` | `docs/projects/<slug>/screens/<surface>/` (если есть) | проект×поверхность | UX поверхности доведён до композиции экранов той же поверхности? |
+| `surface-botflow` | `docs/projects/<slug>/surface.md` (строка `<surface>`, `type: bot`) + `interface/<surface>/` | `docs/projects/<slug>/telegram-bot-flow/<surface>/` (если есть) | проект×поверхность | UX bot-поверхности доведён до диалогов? зеркала окно↔блок сходятся? есть `/start`? |
+| `botflow-domain` | `docs/projects/<slug>/telegram-bot-flow/<surface>/features/*/use-case.md` (`### Dependencies` — рефы `use-case:<ctx>.<Operation>`) + `notification.md` (`trigger`/`content`) | `docs/projects/<slug>/services/*/domains/` (use-cases, events + Payload; если есть) | проект×поверхность | зависимости bot use-case опираются на доменные use-case? триггеры уведомлений — на события, payload покрывает плейсхолдеры? доменное решение не утекло в `when`/`Steps`? |
+| `botflow-service` | `docs/projects/<slug>/telegram-bot-flow/<surface>/features/*/use-case.md` (рефы `use-case:<ctx>.<Operation>`) + `notification.md` (`trigger: event:<ctx>.<Event>`) | `docs/projects/<slug>/services/service.md` + паспорта сервисов-владельцев контекстов (`Exposes`, `Messaging`) | проект×поверхность | каждый контекст-зависимость бота имеет сервис-владелец и тот достижим боту? событие-триггер уведомления публикуется продюсером в `Messaging` (иначе бот его не получит)? бот заведён сервисом `type: bot`? |
+| `surface-mobile` | `docs/projects/<slug>/surface.md` (строка `<surface>`, `type: mobile`) + `interface/<surface>/` + `capability/<surface>.md` | `docs/projects/<slug>/mobile/<surface>/` (если есть) | проект×поверхность | UX мобильной поверхности доведён до карты приложения (экраны, фичи, входы, системные действия, виджеты, фон)? слой стоит на месте `screens/` и `fsd/`? ценность «вне приложения» из capability получила воплощение? |
+| `mobile-domain` | `docs/projects/<slug>/mobile/<surface>/` (`entities.source`/`domain-ref`/поля, `event:<ctx>.<Event>` в `entry-points.trigger` · `widgets.refresh` · `background-tasks.when`, описания фич) | `docs/projects/<slug>/services/*/domains/` (агрегаты, events + Payload; если есть) | проект×поверхность | сущности карты опираются на агрегаты и не расходятся с ними по полям? события-триггеры существуют? бизнес-правило не утекло в приложение? события для людей дошли до push/виджета? |
+| `mobile-service` | `docs/projects/<slug>/mobile/<surface>/shared-api.md` (ресурсы, владелец, операции) + push-входы с `trigger: event:<ctx>.<Event>` | `docs/projects/<slug>/services/service.md` (колонка `surfaces`) + паспорта сервисов-владельцев (`Exposes`, `Messaging`, `Workers`) + `integration.md` проекта | проект×поверхность | владелец каждого ресурса существует и обслуживает поверхность? событие-триггер push публикуется в `Messaging`, и есть кому отправить уведомление (воркер + провайдер доставки в `integration`)? |
+| `mobile-web` | `docs/projects/<slug>/mobile/<surface>/entry-points.md` (`kind: deep-link`, `pattern`, `target`) | web-поверхности того же проекта: `fsd/<web-surface>/pages.md` (`path`) и/или `screens/<web-surface>/` (`screen.route`) | проект×поверхность | пути ссылок в приложение совпадают с путями web-поверхности (одна ссылка открывается и в вебе, и в приложении)? целевые экран и страница — об одном? |
+| `dataitems-crosssurface` | `docs/projects/<slug>/interface/*/data-items.md` (все поверхности) | (тот же набор) | проект (все поверхности) | один бизнес-датум на разных поверхностях под разными slug / с противоречивыми описаниями? (консистентность словаря) |
 
 ## factor-business
 
@@ -153,10 +141,10 @@ baseline целевой метрики (metric.current) должен брать�
 **Промпт-добавка:**
 ```
 Это единственный M:N-угол через много проектов. Прочитай
-addresses-problem у КАЖДОГО docs/projects/<slug>/vision.md (исключи
+addresses-problem у каждого docs/projects/<slug>/vision.md (исключи
 _template) и строки docs/business/business-problem.md.
 
-Связь slug-явная по форме, но проверяй СМЫСЛОВО, а не строкой: ref
+Связь slug-явная по форме, но проверяй смыслом, а не строкой: ref
 проекта должен указывать на реально существующую проблему business-problem.
 
 Прямая сторона: для каждого ref каждого проекта — есть ли такая строка
@@ -193,21 +181,21 @@ hint про висящую проблему — project: null).
 
 **Промпт-добавка:**
 ```
-segment-problem — трение КЛИЕНТА с нанятым решением (слой ajtbd); business-problem —
-проблема БИЗНЕСА заказчика (business-problem). Это РАЗНЫЕ сущности:
+segment-problem — трение клиента с нанятым решением (слой ajtbd); business-problem —
+проблема бизнеса заказчика (business-problem). Это разные сущности:
 первое доказывает и питает второе (сильное трение при низкой
 удовлетворённости → проблема бизнеса).
 
 Прямая сторона: `feeds-problem` (если задан) должен указывать на реально
 существующую строку business-problem — иначе error. Без `feeds-problem` сопоставляй
-СМЫСЛОВО: какая проблема бизнеса опирается на это трение.
+по смыслу: какая проблема бизнеса опирается на это трение.
 
 Обратная сторона: для каждой строки business-problem — доказывает ли её хоть одно
 трение клиента? Ни одного — warning (проблема бизнеса без трения-
 доказательства).
 
 Сильное трение, не питающее ни одну проблему бизнеса — hint (кандидат в
-новую проблему). НЕ путай слои: segment-problem не подаётся как проблема
+новую проблему). Слои не смешивай: segment-problem не подаётся как проблема
 бизнеса напрямую, он её питает.
 ```
 
@@ -229,7 +217,7 @@ segment-problem — трение КЛИЕНТА с нанятым решение
 ```
 segment — группа клиентов по бандлу работ (слой ajtbd); subject — тот,
 чьё поведение двигает метрику бизнеса (business-problem). Субъект влияния
-обычно ВЫРАСТАЕТ из сегмента.
+обычно вырастает из сегмента.
 
 Для каждого позитивного subject (kind: positive): из какого сегмента он
 выводится (бандл работ / who-context совпадает по смыслу)? Если ни из
@@ -260,9 +248,9 @@ negative — конкурент, регулятор) сегмента не тр�
 
 **Промпт-добавка:**
 ```
-solution — то, что сегмент НАНИМАЕТ сейчас на работу (слой ajtbd);
+solution — то, что сегмент нанимает сейчас на работу (слой ajtbd);
 competitor/offering — игроки рынка и собственный офер бизнеса (business).
-Нанятое решение часто И ЕСТЬ конкурент или офер бизнеса (`maps-to`).
+Нанятое решение часто и есть конкурент или офер бизнеса (`maps-to`).
 
 Прямая сторона: каждый `maps-to` должен резолвиться в реальный
 competitor или offering — иначе warning.
@@ -300,13 +288,13 @@ DIY / субститут / бездействие закономерно иду�
 **Промпт-добавка:**
 ```
 offering.for-segment и channel.serves-segment — межслойные ссылки из
-business в ajtbd/segment. Проверь, что каждая ссылка РЕЗОЛВИТСЯ в
-реальный сегмент (иначе error) и ОСМЫСЛЕННА (офер/канал по смыслу
+business в ajtbd/segment. Проверь, что каждая ссылка резолвится в
+реальный сегмент (иначе error) и осмысленна (офер/канал по смыслу
 подходит бандлу работ и критериям успеха сегмента — иначе warning).
 
 Обратно: сегмент с served=served, который не обслуживает ни офер, ни
 канал — hint (бизнес видит сегмент, но не работает с ним). Сегмент с
-served=prospective без оферов/каналов — НЕ finding (разведка рынка).
+served=prospective без оферов/каналов — не finding (разведка рынка).
 Связь по форме slug-явная, но проверяй смыслом, а не строкой.
 ```
 
@@ -333,9 +321,9 @@ vision проекта <slug> должен решать проблемы, кот�
 (см. список проблем проекта). Скоупь goal/metric к этим проблемам
 через колонку `business-problem` — не тащи цели чужих проблем.
 
-Отражает ли vision.Success целевые метрики его проблем
-(business-problem.metric)? ВАЖНО: метрика — best-effort таргет, НЕ
-гарантия; если в vision она подана как обещание результата — error.
+Отражает ли vision.Success целевые метрики его проблем (metric.md,
+скоуп по колонке business-problem)? Метрика — best-effort таргет, не
+гарантия: если в vision она подана как обещание результата — error.
 Каждая цель (goal) закрываемой проблемы должна просматриваться в vision.
 ```
 
@@ -384,7 +372,7 @@ jobs/pains? Негативный субъект user не требует.
 **Промпт-добавка:**
 ```
 segment — группа клиентов рынка по бандлу работ (слой ajtbd); user —
-пользователь продукта <slug>. Это РАЗНЫЕ сущности, но связанные: продукт
+пользователь продукта <slug>. Это разные сущности, но связанные: продукт
 часто делается для части сегментов рынка.
 
 Сопоставляй по смыслу: бандл работ / who-context / критерии успеха
@@ -414,7 +402,7 @@ segment — группа клиентов рынка по бандлу рабо�
 ```
 job уровня big/core — верхняя мотивация и то, за что сегмент платит
 (слой ajtbd); vision.Success — каким продукт <slug> видит успех. Успех
-продукта должен ЦЕЛИТЬ в Big/Core Job сегмента, который он обслуживает.
+продукта должен целить в Big/Core Job сегмента, который он обслуживает.
 
 Скоупь работы к сегментам, которые продукт обслуживает (через пользователей
 проекта ↔ сегменты). Низкоуровневые работы (`low`) — UX-шаги, не цель;
@@ -440,7 +428,7 @@ job уровня big/core — верхняя мотивация и то, за ч
 
 **Промпт-добавка:**
 ```
-segment-problem — трение КЛИЕНТА с нанятым решением (слой ajtbd);
+segment-problem — трение клиента с нанятым решением (слой ajtbd);
 vision.Problem — какую проблему решает продукт <slug>. Проблема продукта
 выводится из разведанного трения клиента.
 
@@ -449,8 +437,8 @@ vision.Problem — какую проблему решает продукт <slug
 
 Для vision.Problem: опирается ли она на конкретное трение клиента? Не
 опирается — warning. Сильное трение обслуживаемого сегмента без
-отражения в Problem — hint. НЕ путай с проблемой бизнеса (business-problem) — здесь
-проблема ПРОДУКТА.
+отражения в Problem — hint. Здесь сверяется проблема продукта, не проблема
+бизнеса (business-problem).
 ```
 
 ## mechanic-capability
@@ -475,10 +463,10 @@ vision.Problem — какую проблему решает продукт <slug
 value-mechanics — какие из 11 механик создания ценности граф работ
 открывает (кандидаты ценности, слой ajtbd); capability/<surface>.md — что
 поверхность <surface> продукта <slug> умеет. Механика ценности — это
-КАНДИДАТ в capability.
+кандидат в capability.
 
 Скоупь механики к сегментам, которые продукт обслуживает (через пользователей
-проекта ↔ сегменты графа). Сопоставляй только с возможностями ЭТОЙ
+проекта ↔ сегменты графа). Сопоставляй только с возможностями этой
 поверхности; та же механика может быть реализована на другой поверхности —
 её ловит агент той поверхности.
 
@@ -511,8 +499,8 @@ bet/goal — стратегический шаг; capability/<surface>.md — ч
 <surface> продукта <slug> умеет. Скоупь ставки/цели к проблемам этого
 проекта (колонка `business-problem`).
 
-ВАЖНО: ставку/цель проблемы могут реализовывать РАЗНЫЕ проекты И разные
-поверхности одного проекта — воплощение в capability ищи на ЭТОЙ
+Ставку/цель проблемы могут реализовывать разные проекты и разные
+поверхности одного проекта — воплощение в capability ищи на этой
 поверхности; отсутствие здесь не error, а warning (возможно, её несёт
 другая поверхность того же проекта или соседний проект, закрывающий ту же
 проблему — не флагай, если очевидно покрыто другой поверхностью). Для
@@ -546,17 +534,17 @@ bet/goal — стратегический шаг; capability/<surface>.md — ч
 
 ```
 Сопоставь user (корневой файл проекта <slug>, кросс-поверхностный) и who
-ПОВЕРХНОСТИ <surface> (docs/projects/<slug>/interface/<surface>/who.md)
+поверхности <surface> (docs/projects/<slug>/interface/<surface>/who.md)
 семантически. User — это "кто адресат боли продукта" (один на весь
-проект). Who — "роль, выполняющая шаг бизнес-процесса НА ЭТОЙ
+проект). Who — "роль, выполняющая шаг бизнес-процесса на этой
 поверхности". Связь не структурная: одна user может развернуться в
 несколько who (например, user "медсестра партнёрской клиники" → who:
 nurse-partner, nurse-partner-senior), и в несколько поверхностей.
 
 User обслуживается этой поверхностью, если она названа в surface.user
-поверхности <surface> ИЛИ по jobs/context работает через неё. Для такой
+поверхности <surface> или по jobs/context работает через неё. Для такой
 user: несёт ли её хоть одно who этой поверхности? Если нет — warning
-(поверхность для user без роли). User, работающая только через ДРУГУЮ
+(поверхность для user без роли). User, работающая только через другую
 поверхность, — не флаг: её несёт who той поверхности (свой агент).
 
 Для каждого who этой поверхности: какой user он принадлежит? Нет ни одной
@@ -591,7 +579,7 @@ situation.action для сопоставления. В finding указывай 
 **Промпт-добавка:**
 
 ```
-Оба слоя — ПОВЕРХНОСТИ <surface> проекта <slug>:
+Оба слоя — поверхности <surface> проекта <slug>:
 capability/<surface>.md и interface/<surface>/situation.md. Capability —
 устойчивое умение продукта на этой поверхности в языке user. Situation —
 конкретная UX-точка той же поверхности, где умение реализуется
@@ -632,7 +620,7 @@ surface-агностичны).
 ```
 Source — capability/<surface>.md (умения поверхности <surface> проекта
 <slug>); destination — docs/projects/<slug>/services/*/domains/ (бизнес-код,
-ОБЩИЙ для всех поверхностей: домены партиционируются по bounded-context,
+общий для всех поверхностей: домены партиционируются по bounded-context,
 не по surface).
 
 Для каждой capability этой поверхности: есть ли в доменах сервисов проекта (services/*/domains/)
@@ -669,7 +657,7 @@ Source — capability/<surface>.md (умения поверхности <surface
 Source — строка <surface> реестра surface.md проекта <slug>;
 destination — docs/projects/<slug>/interface/<surface>/zone.md. Структурная
 привязка зон к поверхности уже даёт папка (за неё отвечает
-/interface-audit и /project-audit). Здесь — СЕМАНТИКА: образуют ли зоны
+/interface-audit и /project-audit). Здесь — семантика: образуют ли зоны
 этой поверхности целостный UX для user, которого surface.user обслуживает.
 
 Surface существует и stable, но zone.md этой поверхности пуст — error.
@@ -703,8 +691,8 @@ description явно относящаяся к другой поверхност
 ```
 Source — строка <surface> реестра surface.md + UX той же поверхности
 docs/projects/<slug>/interface/<surface>/; destination —
-docs/projects/<slug>/screens/<surface>/ (композиция UX, ассеты,
-hi-fi-материал ТОЙ ЖЕ поверхности). Поверхности изолированы — сопоставляй
+docs/projects/<slug>/screens/<surface>/ (композиция экранов и визуальные
+референсы assets/ той же поверхности). Поверхности изолированы — сопоставляй
 в пределах <surface>.
 
 Папка screens/<surface>/ существует, но пуста при наполненном
@@ -751,7 +739,7 @@ Source — строка <surface> (type: bot) реестра surface.md + UX т�
 поверхности docs/projects/<slug>/interface/<surface>/; destination —
 docs/projects/<slug>/telegram-bot-flow/<surface>/ (фичи в features/<feature>/:
 диалоги, окна, use-case'ы бота; плюс команды и уведомления реестрами корня
-ТОЙ ЖЕ поверхности). Поверхности изолированы — сопоставляй в пределах
+той же поверхности). Поверхности изолированы — сопоставляй в пределах
 <surface>.
 
 features/ пуста (ни одной фичи) при наполненном interface — error; папка у
@@ -810,11 +798,11 @@ notification.md слоя telegram-bot-flow/<surface>/ проекта <slug>: с�
 ### Dependencies всех use-case.md фич + рефы event:<ctx>.<Event>
 (notification.trigger). Destination — services/*/domains/ проекта: use-cases и events
 соответствующих контекстов. widget.action → bot UC и getter.source → bot UC
-— within-layer (их сверяет telegram-bot-flow-audit), ЗДЕСЬ не проверяй.
+— within-layer (их сверяет telegram-bot-flow-audit), здесь не проверяй.
 
 Реф зависимости bot UC на несуществующий доменный use-case — error; триггер
 на несуществующее событие — error. Плейсхолдер content вне Payload события —
-warning. Бизнес-правило в when окна ИЛИ в Steps bot UC вместо исхода
+warning. Бизнес-правило в when окна или в Steps bot UC вместо исхода
 доменного use-case — warning. Bot UC stable без Dependencies на домен —
 warning. Обратная сторона: события домена, по смыслу адресованные человеку,
 без уведомления — hint. Связь семантическая: совпадение по смыслу имени
@@ -859,8 +847,8 @@ surface-агностичны): use-case `## Dependencies` колонки `integr
 **Промпт-добавка:**
 
 ```
-Source — integration.md проекта <slug> (## Провайдеры + ## Функции), СКОУПЬ
-к провайдерам, чья `surface` содержит <surface>. Destination — services/ (клиент _shared/ + домены):
+Source — integration.md проекта <slug> (## Провайдеры + ## Функции);
+скоупь к провайдерам, чья `surface` содержит <surface>. Destination — services/ (клиент _shared/ + домены):
 клиенты _shared/integrations/<integration>/ (## Functions) и use-case
 `## Dependencies` (колонки `integration` + `functions`).
 
@@ -903,7 +891,7 @@ project и surface.
 
 ```
 Constraint (корневой constraint.md проекта <slug>) — обязательное правило
-(закон / SLA / контракт). Скоупь к ПОВЕРХНОСТИ <surface>: строка <surface>
+(закон / SLA / контракт). Скоупь к поверхности <surface>: строка <surface>
 реестра surface.md + интеграции, чья колонка `surface` содержит <surface>.
 
 Для каждого constraint, по смыслу касающегося этой поверхности или её
@@ -942,7 +930,7 @@ surface.
 
 ```
 Market (корневой market.md проекта <slug>) — рыночные аналоги продукта.
-Capability/<surface>.md — умения ПОВЕРХНОСТИ <surface>. Сопоставляй
+Capability/<surface>.md — умения поверхности <surface>. Сопоставляй
 рыночные аналоги с возможностями именно этой поверхности (mobile-аналог —
 с capability mobile-поверхности, и т.д.).
 
@@ -981,7 +969,7 @@ market-maturity на vision описывает, целит ли продукт �
 prospective, business/business-problem.served=prospective). Проверь
 согласованность: market-maturity проекта ↔ served его addresses-problem
 (и связанных сегментов). Проспективная сущность без адресующего проекта —
-hint, не error. НЕ флагай проспективные сущности как «висяк».
+hint, не error. Проспективные сущности как «висяк» не флагай.
 ```
 
 ## provenance-upstream
@@ -1035,7 +1023,7 @@ docs/projects/<slug>/? Нет — error.
 lifecycle: stable — несут ли связанные сущности наверху его from-project и
 повышены ли до served? Нет — hint (повод запустить reconcile-up). Связь
 семантическая (не grep): «связанная сущность» — по vision.addresses-problem
-и адресуемому сегменту. Проспективную сущность без from-project НЕ флагай
+и адресуемому сегменту. Проспективную сущность без from-project не флагай
 как «висяк». В finding указывай проект-провенанс.
 ```
 
@@ -1058,7 +1046,7 @@ lifecycle: stable — несут ли связанные сущности нав
 
 **Промпт-добавка:**
 ```
-stakeholder — человек-решатель ВНУТРИ заказчика; subject — носитель
+stakeholder — человек-решатель внутри заказчика; subject — носитель
 поведения, двигающего метрику. Один человек может быть обоими (через
 stakeholder.manifests-as = subject:<slug>); властный внутренний блокер ≈
 negative-субъект.
@@ -1066,7 +1054,7 @@ negative-субъект.
 Прямая сторона: каждый manifests-as subject:<slug> резолвится в реальный
 subject? Нет — error. Согласованность мотиваций лица и субъекта — рассинхрон
 warning. Властный blocker/skeptic стейкхолдер без negative-субъекта там,
-где он двигает метрику, — hint. НЕ путай: это РАЗНЫЕ сущности, связь
+где он двигает метрику, — hint. Это разные сущности, связь
 семантическая.
 ```
 
@@ -1086,7 +1074,7 @@ warning. Властный blocker/skeptic стейкхолдер без negative
 
 **Промпт-добавка:**
 ```
-Люди-решатели часто И ЕСТЬ внутренние факторы SWOT: властный champion —
+Люди-решатели часто и есть внутренние факторы SWOT: властный champion —
 сила, властный blocker/skeptic — слабость/угроза. Для властных
 стейкхолдеров (power=high) с выраженной стойкой: отражён ли каждый
 соответствующим factor? Не отражён — hint (кандидат в фактор). Связь
@@ -1122,7 +1110,7 @@ strategic-stance — куда властное лицо хочет/не хоче
 
 Обратно: властный стейкхолдер со strategic-stance, чью линию не несёт ни
 одна ставка/цель — hint (незадействованная опора). Скоупь к властным лицам;
-противоречие со слабым лицом — НЕ finding. Связь семантическая, не slug.
+противоречие со слабым лицом — не finding. Связь семантическая, не slug.
 ```
 
 ## capability-hypothesis
@@ -1152,7 +1140,7 @@ hypothesis-map: возможность реализует гипотезу. Ск
 
 Прямая сторона: каждый ref hypotheses этой поверхности резолвится в
 реальную hypothesis? Нет — error. Обратная: гипотеза проблемы проекта без
-реализующей capability на ЭТОЙ поверхности — hint (может нести другая
+реализующей capability на этой поверхности — hint (может нести другая
 поверхность того же проекта или соседний проект; не флагай агрессивно).
 Связь семантическая. В finding указывай project и surface.
 ```
@@ -1181,7 +1169,7 @@ job-graph.value-mechanics).
 
 Прямая сторона: каждый ref jobs этой поверхности резолвится в реальный
 job? Нет — error. Обратная: Big/Core Job обслуживаемого сегмента без
-прямо целящей capability на ЭТОЙ поверхности — hint (может нести другая
+прямо целящей capability на этой поверхности — hint (может нести другая
 поверхность; не флагай агрессивно). Связь семантическая. В finding указывай
 project и surface.
 ```
@@ -1262,8 +1250,8 @@ UX-шаг проверяет/обслуживает гипотезу. Пряма
 Source — строка <surface> реестра surface.md проекта <slug> (с колонкой
 `user` — кого поверхность обслуживает); destination —
 capability/<surface>.md (возможности этой поверхности, у каждой колонка
-`user`). Связь capability → поверхность СТРУКТУРНАЯ (файл лежит в своей
-поверхности — это держит /project-audit); ты проверяешь СМЫСЛ: совпадают
+`user`). Связь capability → поверхность структурная (файл лежит в своей
+поверхности — это держит /project-audit); ты проверяешь смысл: совпадают
 ли адресаты.
 
 Файл capability/<surface>.md пуст при stable-поверхности — error
@@ -1281,8 +1269,8 @@ hint. Связь семантическая (user сопоставляй по с
 **Destination:** `docs/projects/project-map.md` (рёбра) +
 `docs/projects/<sibling>/` (обратная сторона: его `integration.md` +
 обслуживающие `services/*/domains/<ctx>/use-cases/*`) +
-`docs/projects/<slug>/services/*/domains/` (наш клиент `_shared/integrations/<slug>/` +
-use-case `functions`).
+`docs/projects/<slug>/services/` (наш клиент `_shared/integrations/<integration>/` +
+`functions` в use-case'ах доменов).
 **Скоуп:** по проекту (пара `проект × lens`; межпроектный).
 **Применим если:** у проекта есть хотя бы одна `integration` с
 `target: sibling-project`, **или** в `project-map.md` есть ребро с
@@ -1315,17 +1303,17 @@ use-case) ↔ **обслуживающая сторона у соседа** (е�
 
 **Промпт-добавка:**
 ```
-Межпроектный стык согласован В ОБЕ СТОРОНЫ: (1) авторская — integration.md
+Межпроектный стык согласован в обе стороны: (1) авторская — integration.md
 проекта <slug> (target: sibling-project + ## Функции); (2) граф — ребро в
-docs/projects/project-map.md (бизнес-язык, via → integration:<slug>); (3)
-наша техника — клиент _shared/integrations/<slug>/ + use-case functions; (4)
-сторона соседа <X> — обслуживающий use-case (наш out ↔ его принимающий
-Actor) или его исходящая функция.
+docs/projects/project-map.md (бизнес-язык, via → integration:<integration>);
+(3) наша техника — клиент services/_shared/integrations/<integration>/ +
+functions в use-case; (4) сторона соседа <X> — обслуживающий use-case (наш
+out ↔ его принимающий Actor) или его исходящая функция.
 
 Прочитай integration.md проекта <slug> (фильтр target: sibling-project +
 функции), docs/projects/project-map.md, перечень каталогов docs/projects/,
-integration.md соседа <X> и его services/*/domains/use-cases (если есть), services/
-проекта <slug> (клиент _shared/ + functions в use-case).
+integration.md соседа <X> и его services/*/domains/*/use-cases/ (если есть),
+services/ проекта <slug> (клиент _shared/ + functions в use-case).
 
 Найди рассинхрон сторон:
 - integration target: sibling-project без ребра в project-map — error;
@@ -1368,7 +1356,7 @@ integration.md соседа <X> и его services/*/domains/use-cases (если
 **Промпт-добавка:**
 ```
 project-map.md — граф стыков между продуктами одного бизнеса. Проверь
-осмысленность КАЖДОГО ребра и пар рёбер:
+осмысленность каждого ребра и пар рёбер:
 
 - from-project / to-project — реальные каталоги docs/projects/<slug>/ (не
   _template)? Нет — error.
@@ -1406,13 +1394,13 @@ null. Согласованность ребра с конкретной integrat
 
 **Промпт-добавка:**
 ```
-Прочитай data-items.md ВСЕХ папок поверхностей проекта <slug>
+Прочитай data-items.md всех папок поверхностей проекта <slug>
 (docs/projects/<slug>/interface/*/data-items.md). Реестр data-items
-surface-локален: один датум на разных поверхностях — это НАМЕРЕННО разные
-записи (web и бот воплощают его по-разному). НЕ флагай сам факт раздельных
-записей.
+surface-локален: один датум на разных поверхностях — это намеренно разные
+записи (web и бот воплощают его по-разному), и сам факт раздельных записей
+не флагай.
 
-Ищи только СМЫСЛОВЫЕ расхождения словаря данных между поверхностями:
+Ищи только смысловые расхождения словаря данных между поверхностями:
 - один бизнес-датум под разными slug на разных поверхностях — hint
   (согласовать имена);
 - один slug с противоречивыми description на разных поверхностях — hint
@@ -1517,7 +1505,7 @@ service.md и паспорта сервисов-владельцев этих к
 сервис с папкой services/<svc>/domains/<ctx>/). Сверь: владелец существует;
 событие-триггер каждого уведомления публикуется владельцем в Messaging
 (produces, тот же event); бот заведён сервисом type: bot. Содержание
-диалогов и зеркала окон НЕ проверяй (это telegram-bot-flow-audit и
+диалогов и зеркала окон не проверяй (это telegram-bot-flow-audit и
 botflow-domain). В finding указывай project и surface.
 ```
 
@@ -1558,7 +1546,7 @@ botflow-domain). В finding указывай project и surface.
 Source — строка <surface> (type: mobile) реестра surface.md + UX той же
 поверхности docs/projects/<slug>/interface/<surface>/ + возможности
 capability/<surface>.md; destination — docs/projects/<slug>/mobile/<surface>/
-(карта приложения ТОЙ ЖЕ поверхности: entities, screens, flows, features,
+(карта приложения той же поверхности: entities, screens, flows, features,
 shell, entry-points, permissions, system-actions, widgets, background-tasks,
 shared-api, shared-lib). Поверхности изолированы — сопоставляй в пределах
 <surface>.
@@ -1572,7 +1560,7 @@ error. Ситуация/блок interface без носителя в карте
 shell#Offline — иначе warning. Смысловая рифма: зона ≈ группа экранов / таб,
 блок ≈ экран, ситуация ≈ фича, шаг системного участника ≈ фоновая задача —
 её разрывы флагай hint. Структуру слоя (битые рефы, enum'ы, зеркало
-widgets.actions) НЕ проверяй — это mobile-audit. В finding указывай project
+widgets.actions) не проверяй — это mobile-audit. В finding указывай project
 и surface.
 ```
 
@@ -1675,7 +1663,7 @@ entry-points.md с trigger: event:<ctx>.<Event> слоя mobile/<surface>/
 (produces, тот же event); есть кому довезти уведомление до устройства —
 потребитель события (воркер) и провайдер доставки уведомлений в
 integration.md с этой поверхностью в surface. Содержимое экранов и
-внутрислойные рефы НЕ проверяй (это mobile-audit), поля сущностей — это
+внутрислойные рефы не проверяй (это mobile-audit), поля сущностей — это
 mobile-domain. В finding указывай project и surface.
 ```
 
@@ -1714,9 +1702,10 @@ screens/<web-surface>/ (screen.route). Это намеренно кросс-по
 
 Путь deep link без web-страницы — warning; совпавший путь при разном
 смысле цели — warning. Web-страница-двойник с другим путём и экран с
-web-двойником без входа по ссылке — hint. Хосты, схемы и отпечатки НЕ
-проверяй — это stack код-репо. В finding указывай project и обе
-поверхности.
+web-двойником без входа по ссылке — hint. Хосты, схемы и отпечатки не
+проверяй — это stack код-репо. В finding указывай project, в surface —
+мобильную поверхность <surface>, а web-поверхность — в evidence и
+destination-refs.
 ```
 
 ## service-placement
@@ -1744,10 +1733,10 @@ web-двойником без входа по ссылке — hint. Хосты,
 
 ```
 Source — реестры service.md и platform.md (own) всех проектов; destination
-— infrastructure/{placement,runtime,server}.md. Это сверка ПОЛНОТЫ и
-ОСМЫСЛЕННОСТИ размещения: каждый сервис и own-ресурс живёт где-то в prod?
+— infrastructure/{placement,runtime,server}.md. Это сверка полноты и
+осмысленности размещения: каждый сервис и own-ресурс живёт где-то в prod?
 размещение не противоречит назначению/ёмкости сервера? Битые рефы
-placement (unit/runtime/servers) НЕ ищи — это /infrastructure-audit;
+placement (unit/runtime/servers) не ищи — это /infrastructure-audit;
 здесь — семантика.
 ```
 
@@ -1781,110 +1770,3 @@ destination — infrastructure/shared-platform.md и placement.md. Сверь
 стороны: каждая потребность закрыта, каждый общий ресурс кому-то нужен и
 где-то живёт, технологии совпадают.
 ```
-
-## Порядок lens-ов
-
-Все агенты спавнятся в одном message-блоке параллельно — порядок ниже
-лишь логический (как раскладывать findings в отчёте), не очередь
-исполнения.
-
-**Верхнеуровневые (прогон один раз):**
-
-1. `factor-business` (бизнес → проблема)
-2. `currentmetric-metric` (бизнес → проблема)
-3. `addresses-problem-bizproblem` (продукты ↔ проблемы, M:N над всеми
-   проектами)
-4. `segmentproblem-bizproblem` (ajtbd → проблема: трение клиента доказывает
-   проблему бизнеса)
-5. `segment-subject` (ajtbd → проблема: субъект вырастает из сегмента)
-6. `solution-business` (ajtbd → бизнес: нанятое решение ↔ конкурент/офер)
-7. `business-segment` (бизнес → ajtbd: оферы/каналы обслуживают сегменты)
-8. `prospective-consistency` (market-maturity ↔ served сущностей наверху)
-9. `provenance-upstream` (from-project ↔ проект: обратная сторона
-   восходящего потока, согласованность market-maturity ↔ served ↔ from-project)
-10. `stakeholder-subject` (business → hypothesis-map: лицо ↔ субъект через
-    manifests-as; властный блокер ≈ negative-субъект)
-11. `stakeholder-factor` (business → swot: властный champion/blocker как
-    фактор)
-12. `stakeholder-strategy` (business → swot/hypothesis-map: стойка властного
-    лица ↔ bet/goal — стратегия не против ключевого человека)
-13. `projectmap-reciprocity` (граф стыков: осмысленность рёбер project-map)
-14. `service-placement` (сервисы и own-ресурсы всех проектов ↔
-    `infrastructure/{placement,runtime,server}.md`; если есть и services, и
-    периметр)
-15. `platform-shared` (`provided-by: shared:` проектов ↔
-    `infrastructure/shared-platform.md`; если есть периметр)
-
-**По каждому проекту, пары `проект × lens`** (для каждого `<slug>` из
-`docs/projects/`, кроме `_template`; цели — корневые kind продукта
-`vision`/`user`/`integration`):
-
-16. `goal-vision` (проблема → продукт; скоуп к проблемам проекта)
-17. `subject-user` (проблема → продукт; скоуп к проблемам проекта)
-18. `segment-user` (ajtbd → продукт)
-19. `job-vision` (ajtbd → продукт: Big/Core Job ↔ vision.Success)
-20. `segmentproblem-vision` (ajtbd → продукт: трение ↔ vision.Problem)
-21. `integration-crossproject` (межпроектный: integration ↔ project-map ↔
-    domains-порт ↔ обратная сторона соседа; если у проекта есть стыки
-    `target: sibling-project` или ребро в project-map)
-22. `service-capability` (сервисы проекта ↔ его capability; если у проекта
-    есть `services/`)
-
-**По каждому проекту, тройки `проект × поверхность × lens`** (для каждого
-`<slug>` и каждой поверхности `<surface>` из его `surface.md`; source ИЛИ
-destination — per-surface артефакт):
-
-23. `surface-capability` (foundation: реестр поверхности ↔ её возможности)
-24. `mechanic-capability` (ajtbd → продукт: механика ценности ↔ capability
-    поверхности)
-25. `bet-capability` (проблема → продукт; скоуп к проблемам проекта)
-26. `capability-hypothesis` (продукт → hypothesis-map: capability.hypotheses)
-27. `capability-job` (продукт → ajtbd: capability.jobs)
-28. `user-who` (foundation, продукт → interface поверхности)
-29. `surface-zone` (foundation: реестр поверхности ↔ её зоны)
-30. `capability-situation` (foundation: возможности ↔ ситуации поверхности)
-31. `situation-job` (interface поверхности → ajtbd: situation.jobs)
-32. `situation-hypothesis` (interface поверхности → hypothesis-map:
-    situation.hypotheses)
-33. `market-capability` (рынок ↔ возможности поверхности; часто hints)
-34. `constraint-surface` (ограничение ↔ поверхность/её интеграции)
-35. `surface-service` (если у проекта есть `services/service.md`;
-    поверхность обслуживается ≥1 сервисом, bot-поверхность — ровно одним
-    `type: bot`)
-36. `capability-domain` (если у проекта есть `services/` с доменами; возможности
-    поверхности ↔ домены)
-37. `integration-domain` (если у проекта есть `services/`; интеграции
-    поверхности ↔ домены-порты)
-38. `surface-screen` (если у проекта есть `screens/<surface>/`)
-39. `surface-botflow` (если поверхность `type: bot` и есть
-    `telegram-bot-flow/<surface>/` с фичами `features/<feature>/`)
-40. `botflow-domain` (если у проекта есть `services/` с доменами и
-    `telegram-bot-flow/<surface>/`; зависимости use-case'ов бота фич +
-    триггеры уведомлений ↔ домены)
-41. `botflow-service` (если у проекта есть `services/` и
-    `telegram-bot-flow/<surface>/`; контексты-зависимости бота ↔
-    сервисы-владельцы, событие-триггер ↔ их `Messaging`)
-42. `surface-mobile` (если поверхность `type: mobile` и есть
-    `mobile/<surface>/`; UX и возможности поверхности ↔ карта приложения)
-43. `mobile-domain` (если у проекта есть `services/` с доменами и
-    `mobile/<surface>/`; сущности и события-триггеры карты ↔ домены)
-44. `mobile-service` (если у проекта есть `services/` и
-    `mobile/<surface>/`; владельцы ресурсов `shared-api` и публикация
-    событий-триггеров ↔ паспорта сервисов и `integration.md`)
-45. `mobile-web` (если у проекта есть мобильная поверхность с deep
-    link'ами и web-поверхность с `fsd/` или `screens/`; общие пути ссылок)
-
-**По каждому проекту, один агент на проект сразу по всем поверхностям:**
-
-46. `dataitems-crosssurface` (консистентность словаря данных между
-    поверхностями; только если у проекта ≥2 поверхностей)
-
-Полный рой = `15 верхнеуровневых + Σ по проектам (пары проект×lens +
-тройки проект×поверхность×lens применимых углов + dataitems-crosssurface
-для мультиповерхностных проектов)`.
-
-`--quick` запускает по каждому проекту **× каждой поверхности** три
-foundation-угла продукт↔interface (`user-who`, `capability-situation`,
-`surface-zone` — все per-surface, раскрываются в тройки), плюс
-`addresses-problem-bizproblem` один раз. Для верхних слоёв — `goal-vision`,
-`subject-user` (пары по проекту) как быстрый upstream-чек.

@@ -193,9 +193,9 @@ cp $TPL/_templates/service-readme.md <P>/services/<svc>/README.md
      (или остаются фасадом A с новым ребром `service:<B>` — спросить).
 4. Каскад по **соседям**: каждый паспорт с `service:<A>` в `Dependencies`,
    потреблявший функции контекста, — раунд «перевесить на `service:<B>`?»;
-   in-process reader'ы `<ctx>` внутри A теперь ходят в чужой сервис —
-   `**blocker**` для `/domain-deep-dive` (in-process через границу сервиса
-   запрещён).
+   in-process reader'ы `<ctx>` внутри A после переноса ходят в чужой
+   сервис — `**blocker**` для `/domain-deep-dive` (in-process через
+   границу сервиса запрещён).
 5. Пересвести `architecture.md § Topology`; спросить про новую строку
    `Decisions` (почему переехал — словами архитектора).
 6. Прогнать чек-лист по обоим паспортам; предложить `/service-audit`.

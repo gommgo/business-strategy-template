@@ -23,7 +23,7 @@
 | `docs/projects/<slug>/services/<svc>/domains/<ctx>/` (по bounded-context, внутри сервиса-владельца, surface-агностичны) | агрегаты/события/use-case/… | `/domain-deep-dive <slug> <ctx>` | `/service-audit <slug>` + `/cross-audit` |
 | `docs/projects/infrastructure/` (ИТ-периметр бизнеса: сервера · рантаймы · общие ресурсы · джобы · размещение) | server/runtime/shared-platform/job/placement | `/infrastructure-deep-dive` | `/infrastructure-audit` + `/cross-audit` |
 | `docs/projects/<slug>/screens/<surface>/` | `flow` · `screen` · `block` · `shell` | `/screen-deep-dive <slug> [<surface>]` | `/screen-audit <slug>` |
-| `docs/projects/<slug>/fsd/<surface>/` (SPA-поверхности) | `entities` · `features` · `pages` · `widgets` · `app` · `shared-ui` · `shared-api` · `shared-lib` | `/fsd-deep-dive <slug> [<surface>]` | `/fsd-audit <slug>` |
+| `docs/projects/<slug>/fsd/<surface>/` (фронтовые поверхности) | `entities` · `features` · `pages` · `widgets` · `app` · `shared-ui` · `shared-api` · `shared-lib` | `/fsd-deep-dive <slug> [<surface>]` | `/fsd-audit <slug>` |
 | `docs/projects/<slug>/telegram-bot-flow/<surface>/` (bot-поверхности) | фичи `features/<feature>/` (`dialog` · `window` · `use-case` бота) + сквозные `command` · `notification` | `/telegram-bot-flow-deep-dive <slug> [<surface>]` | `/telegram-bot-flow-audit <slug>` |
 | `docs/projects/<slug>/mobile/<surface>/` (мобильные поверхности) | `entities` · `screens` · `flows` · `features` · `shell` · `entry-points` · `permissions` · `system-actions` · `widgets` · `background-tasks` · `shared-api` · `shared-lib` | `/mobile-deep-dive <slug> [<surface>]` | `/mobile-audit <slug>` + `/cross-audit` |
 | `docs/projects/project-map.md` (межпроектные стыки) | `project-map` (singleton-граф рёбер) | `/project-deep-dive <slug>` (авторская сторона ребра — `integration` инициатора) | `/cross-audit` |
@@ -36,8 +36,9 @@
 (`capability/<surface>.md`), интерфейс (`interface/<surface>/`) и
 композицию — экраны (`screens/<surface>/`) либо диалоги бота
 (`telegram-bot-flow/<surface>/` при `type: bot`), либо карту мобильного
-приложения (`mobile/<surface>/` при `type: mobile`). Скилы
-`interface`/`screen`/`telegram-bot-flow`/`mobile` берут поверхность
+приложения (`mobile/<surface>/` при `type: mobile`); фронтовые поверхности несут
+ещё FSD-карту (`fsd/<surface>/`). Скиллы
+`interface`/`screen`/`fsd`/`telegram-bot-flow`/`mobile` берут поверхность
 **вторым аргументом** `[<surface>]`; без него — пикер поверхностей по
 `surface.name` (после пикера проекта). Домены (`services/<svc>/domains/<ctx>/`) —
 surface-агностичны, делятся по bounded-context. Межпроектные стыки сводит
@@ -73,6 +74,7 @@ surface-агностичны, делятся по bounded-context. Межпро�
 | «продукт обменивается с **соседним продуктом** того же бизнеса» | `projects/<slug>` / `integration` (`target: sibling-project`, `sibling-project: <slug-соседа>`) → ребро в `projects/project-map` |
 | «как пользователь взаимодействует, ситуации, зоны, блоки» (на какой поверхности?) | `projects/<slug>/interface/<surface>` / `who` · `situation` · `zone` · `block` · … |
 | «как это выглядит, экраны, композиция» (на какой поверхности?) | `projects/<slug>/screens/<surface>` / `flow` · `screen` · `block` · `shell` |
+| «как фронт нарезан по слоям FSD: страницы, фичи, сущности, виджеты» (какая фронтовая поверхность?) | `projects/<slug>/fsd/<surface>` / `entities` · `features` · `pages` · `widgets` · `app` · `shared-ui` · `shared-api` · `shared-lib` |
 | «как бот ведёт диалог: окна, кнопки, команды, уведомления, оркестрация действий» (какая bot-поверхность?) | `projects/<slug>/telegram-bot-flow/<surface>` / фичи `features/<feature>/` (`dialog` · `window` · `use-case` бота) + `command` · `notification` |
 | «мобильное приложение: экраны и переходы, push и напоминания, ссылки в приложение, разрешения, голосовая команда, виджет, что делает в фоне, работа без сети» (какая мобильная поверхность?) | `projects/<slug>/mobile/<surface>` / `screens` · `flows` · `features` · `shell` · `entry-points` · `permissions` · `system-actions` · `widgets` · `background-tasks` · `entities` · `shared-api` · `shared-lib` |
 | «бизнес-код бэкенда, агрегаты, инварианты» (какой bounded-context?) | `projects/<slug>/services/<svc>/domains/<ctx>` |
@@ -114,7 +116,7 @@ surface-агностичны, делятся по bounded-context. Межпро�
 | внутрипроектная консистентность продукта | `/project-audit <slug>` |
 | консистентность interface проекта | `/interface-audit <slug>` |
 | консистентность screens проекта | `/screen-audit <slug>` |
-| консистентность FSD-карты проекта (SPA-поверхности) | `/fsd-audit <slug>` |
+| консистентность FSD-карты проекта (фронтовые поверхности) | `/fsd-audit <slug>` |
 | консистентность telegram-bot-flow проекта (bot-поверхности) | `/telegram-bot-flow-audit <slug>` |
 | консистентность карты мобильного приложения (мобильные поверхности) | `/mobile-audit <slug>` |
 | консистентность сервисной топологии проекта (реестры, паспорта, домены-владельцы) | `/service-audit <slug>` |
@@ -141,7 +143,7 @@ surface-агностичны, делятся по bounded-context. Межпро�
 поверхность**:
 `/interface-deep-dive <slug> [<surface>]`,
 `/screen-deep-dive <slug> [<surface>]`,
-`/fsd-deep-dive <slug> [<surface>]` (только SPA-поверхности — `type: web` /
+`/fsd-deep-dive <slug> [<surface>]` (только фронтовые поверхности — `type: web` /
 `admin` / `desktop` / `embed`),
 `/telegram-bot-flow-deep-dive <slug> [<surface>]` (только поверхности с
 `type: bot` — композиция бота вместо экранов),
@@ -156,9 +158,22 @@ surface-агностичны, делятся по bounded-context. Межпро�
 поверхностей по `surface.name` (после пикера проекта). Поверхность, которой
 нет в реестре `surface.md`, сперва заводится через `/project-deep-dive
 <slug>` (kind `surface`) — каталоги `interface/<surface>/`,
-`screens/<surface>/`, `telegram-bot-flow/<surface>/`, `mobile/<surface>/`,
-`capability/<surface>.md` руками не создаём, их
-заводят их скилы при первом заходе.
+`screens/<surface>/`, `fsd/<surface>/`, `telegram-bot-flow/<surface>/`,
+`mobile/<surface>/`, `capability/<surface>.md` руками не создаём, их
+заводят их скиллы при первом заходе.
+
+## Продукт спроектирован → следующий шаг флоу
+
+Проектирование продукта здесь закончено, когда слои, которые читают код-репо
+(`services/` с доменами, FSD-карта, `telegram-bot-flow/`, `mobile/` — по типам
+поверхностей), и ИТ-периметр доведены до `stable`, а узкие аудиты и
+`/cross-audit` чистые. Дальше маршрут уходит из этого репо в операционный
+хаб `<org>/infra` (sibling-checkout `../infra`): там `/init-project` читает
+strategy и поднимает инфру, сквозная задача ведётся программой в
+`.claude/plans/` инфры, а агенты из хаба расходятся по сиблингам и работают обвязкой того
+репо. Оркестратор называет этот шаг аналитику, но сам в другие репо не
+переходит. Изменение дизайна по ходу возвращается сюда тем же входом
+`/entrypoint`.
 
 ## Чего оркестратор не делает в маршрутизации
 

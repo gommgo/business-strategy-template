@@ -210,10 +210,10 @@ UX-слой партиционирован по поверхности (surface)
 - **scope**: `<surface>/situation.md`.
 - **проверка**: `using-what` содержит маркеры craft: «primary»,
   «secondary», «md», «sm», «lg», «xl», «иконк», «размер», «цвет»,
-  «hex», «#» с цифрами, упоминания компонентов из библиотеки.
-- **рекомендация**: «`using-what` — бизнес-средство, не облик. Уточнить
-  через `/interface-deep-dive <project-slug> <surface> situation:<slug>`;
-  облик — craft в `@stit/ui`».
+  «hex», «#» с цифрами, имена интерфейсных примитивов (`ui:*`).
+- **рекомендация**: «`using-what` — бизнес-средство, не облик: облик в
+  артефакты не пишется. Уточнить через `/interface-deep-dive
+  <project-slug> <surface> situation:<slug>`».
 
 ### R-SEM-003 «пустой обязательный слот»
 

@@ -19,7 +19,7 @@ Committed-скрипта-валидатора в репо нет — прове�
 - `Fronts` ≠ `_N/A_` только у `type: gateway`;
 - каждая строка реестра `## Workers` имеет файл `workers/<slug>.md` и
   наоборот; обязательные секции файла заполнены (см.
-  `field-checklists.md § worker`);
+  `field-checklists.md § Файл воркера`);
 - `Trigger` вида `topic:<t>` имеет парную строку `consumes` с тем же
   `topic` в `Messaging`; schedule — смысл словами, не cron-выражение
   (cron — runtime, `<org>/infra`);
@@ -122,7 +122,7 @@ Committed-скрипта-валидатора в репо нет — прове�
 `../entrypoint/state/projects/<project-slug>/services/<kind>/<slug>.md`:
 секции `## Открытые вопросы` нет, либо в ней нет пометок `**blocker**`.
 Не-blocker вопросы при stable допустимы («хорошо бы узнать», не «здесь
-смысл сломан»). `## Архитектурные решения` живёт и после stable.
+смысл сломан»). `## Доменные решения` живёт и после stable.
 
 ## Алгоритм проверки скиллом
 

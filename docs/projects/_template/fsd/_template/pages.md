@@ -8,8 +8,8 @@
 
 ## Критерии page
 
-1. **Есть экран-источник.** `screen` указывает на запись в
-   `screens/<surface>/screen.md` — page не выдумывается без экрана.
+1. **Есть экран-источник.** `screen` указывает на экран
+   `screens/<surface>/screens/<slug>/` — page не выдумывается без экрана.
 2. **Адресуемость.** У page есть `path` (маршрут) и `guard` (кто может
    войти: `public` / `authenticated` / роль из `interface who`).
 3. **Композиция, не логика.** Page собирает widgets/features/entities;
@@ -36,7 +36,7 @@
 - `slug` — идентификатор маршрута · строка-идентификатор · обяз.
 - `name` — человекочитаемое имя · строка · обяз.
 - `description` — что здесь происходит · строка · обяз.
-- `screen` — экран-источник · реф → `screens/<surface>/screen.md` · обяз.
+- `screen` — экран-источник · реф → `screens/<surface>/screens/<slug>/` · обяз.
 - `path` — маршрут (`/orders/:id`) · строка · обяз.
 - `guard` — доступ · `public` \| `authenticated` \| реф → `interface/<surface>/who.md` · обяз.
 - `widgets` — используемые widgets · массив ссылок → `widgets` (или `—`) · опц.

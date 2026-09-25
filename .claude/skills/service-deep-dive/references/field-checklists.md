@@ -3,8 +3,9 @@
 Какие слоты обязательны у каждого артефакта сервисного уровня и что
 считается «заполнено». Source of truth канона — формы в
 `docs/projects/_template/services/` (`service.md`, `platform.md`,
-`architecture.md`, `_templates/service-readme.md`); этот файл — рабочая
-шпаргалка скилла для подсчёта дыр в сводке и проверки перед stable.
+`architecture.md`, `_templates/service-readme.md`, `_templates/worker.md`);
+этот файл — рабочая шпаргалка скилла для подсчёта дыр в сводке и проверки
+перед stable.
 
 Общие правила:
 
@@ -14,8 +15,8 @@
   обоснованием, уместным типу сервиса. Молча отсутствующая секция или
   пустая таблица — дыра.
 - Все enum-значения и заголовки таблиц — английские структурные
-  идентификаторы handoff-контракта (их читают `<org>/backend` и
-  `<org>/infra`); проза — по-русски.
+  идентификаторы handoff-контракта (их читает `<org>/backend`); проза —
+  по-русски.
 
 ## Строка реестра `service.md`
 
@@ -68,6 +69,21 @@
 - `produces` пишет только сервис-владелец контекста события (файл
   `domains/<ctx>/events/<Event>.md` лежит в этом сервисе).
 
+## Файл воркера (`<svc>/workers/<slug>.md`, kind `worker`)
+
+Форма — `docs/projects/_template/services/_templates/worker.md`.
+
+| слот | заполнено, если |
+|---|---|
+| frontmatter | `kind: worker` · `slug` (= имя файла и строка реестра `## Workers` паспорта) · `name` · `status` |
+| `Trigger` | `` `topic:<topic>` `` (парная строка `consumes` с тем же `topic` в `## Messaging` паспорта) либо schedule — смысл словами, не cron |
+| `Handles` | таблица `when` · `use-case` (`` `use-case:<ctx>.<Operation>` ``, резолвится в домены проекта) · `purpose` |
+| `Semantics` | Idempotency · Retry · Ordering · Batching — стратегиями, без чисел |
+| `On failure` | поток (DLQ / пропуск / компенсация через доменный use-case) + сигнал |
+| `Notes` | особенности либо `- _нет_` |
+
+`trigger` строки реестра `## Workers` и `Trigger` файла совпадают.
+
 ## Singleton `architecture.md`
 
 | секция | обязательна | заполнено, если |
@@ -88,6 +104,6 @@
 
 - frontmatter: `kind` · `slug` · `ref` (путь к артефакту);
 - секции (любая может отсутствовать): `## Открытые вопросы` (маркер
-  `**blocker**` блокирует stable), `## Архитектурные решения`,
+  `**blocker**` блокирует stable), `## Доменные решения`,
   `## Что копать дальше`;
 - все секции пусты → файл удалить; forward-only.

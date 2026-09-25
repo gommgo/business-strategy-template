@@ -8,7 +8,8 @@ kind), UX-интерфейс (`interface/<surface>/`), композиция эк
 (`telegram-bot-flow/<surface>/` — для bot-поверхностей), либо карта
 мобильного приложения (`mobile/<surface>/` — для мобильных поверхностей,
 композиция и мост к коду `<org>/mobile`), FSD-карта фронта
-(`fsd/<surface>/` — для SPA-поверхностей, мост к коду `<org>/frontend`) и
+(`fsd/<surface>/` — для фронтовых поверхностей, мост к коду `<org>/frontend` и
+`<org>/site`) и
 сервисная топология бэкенда (`services/`: сервисы, их паспорта и домены
 внутри них).
 Рядом с проектами живёт общий **ИТ-периметр бизнеса**
@@ -34,7 +35,7 @@ docs/projects/
 │   ├── project/         канон продуктового слоя (vision + surface-реестр + kind)
 │   ├── interface/       канон UX-слоя одной поверхности (who/stage/situation/…)
 │   ├── screens/         канон слоя экранов одной поверхности (flow/screen/block/shell)
-│   ├── fsd/             канон FSD-карты одной SPA-поверхности (8 файлов слайсов, мост к коду фронта)
+│   ├── fsd/             канон FSD-карты одной фронтовой поверхности (8 файлов слайсов, мост к коду фронта)
 │   ├── telegram-bot-flow/  канон слоя диалогов одной bot-поверхности (фичи: dialog/window/use-case + сквозные command/notification)
 │   ├── mobile/          канон карты приложения одной мобильной поверхности (12 файлов: экраны, сценарии, фичи, входы, разрешения, системные действия, виджеты, фон; мост к коду приложения)
 │   └── services/        канон сервисного слоя (реестры, паспорт, _templates/, _shared/)
@@ -46,7 +47,7 @@ docs/projects/
     ├── capability/<surface>.md   возможности по поверхности
     ├── interface/<surface>/      who/stage/situation/zone/block/ux-substrate/data-items
     ├── screens/<surface>/        flows/ screens/ blocks/ shells/ assets/
-    ├── fsd/<surface>/            entities/features/pages/widgets/app/shared-* (для SPA-поверхностей)
+    ├── fsd/<surface>/            entities/features/pages/widgets/app/shared-* (для фронтовых поверхностей)
     ├── telegram-bot-flow/<surface>/   command.md notification.md features/<feature>/{dialog.md,window.md,use-case.md}  (для type: bot — вместо screens)
     ├── mobile/<surface>/         entities/screens/flows/features/shell/entry-points/permissions/system-actions/widgets/background-tasks/shared-*  (для type: mobile — вместо screens)
     └── services/        service.md + platform.md + architecture.md + _shared/
@@ -61,7 +62,7 @@ docs/projects/
 канон **одной папки поверхности**; в данных она повторяется под каждый
 slug из реестра `surface.md` (композиция — по `type` поверхности: экраны,
 диалоги бота либо карта мобильного приложения; FSD-карта — только у
-SPA-поверхностей).
+фронтовых поверхностей).
 
 ## Связь с проблемой (M:N)
 
@@ -105,7 +106,7 @@ interface, screen, fsd, telegram-bot-flow и mobile — ещё и **в конт�
 - [`_template/project/README.md`](_template/project/README.md) — продукт (vision + surface-реестр + kind).
 - [`_template/interface/README.md`](_template/interface/README.md) — интерфейс одной поверхности.
 - [`_template/screens/README.md`](_template/screens/README.md) — экраны одной поверхности.
-- [`_template/fsd/README.md`](_template/fsd/README.md) — FSD-карта одной SPA-поверхности (мост к коду `<org>/frontend`).
+- [`_template/fsd/README.md`](_template/fsd/README.md) — FSD-карта одной фронтовой поверхности (мост к коду `<org>/frontend` и `<org>/site`).
 - [`_template/telegram-bot-flow/README.md`](_template/telegram-bot-flow/README.md) — диалоги одной bot-поверхности.
 - [`_template/mobile/README.md`](_template/mobile/README.md) — карта приложения одной мобильной поверхности (мост к коду `<org>/mobile`).
 - [`_template/services/README.md`](_template/services/README.md) — сервисная топология и домены бэкенда.

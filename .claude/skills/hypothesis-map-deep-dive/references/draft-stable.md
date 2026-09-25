@@ -9,11 +9,12 @@
    Опциональные могут быть `—`. `hypothesis` — четыре части
    `if/then/because/so`. Для всех 5 kind — **непустой `business-problem`** (массив
    строк реестра проблем).
-2. **`Критерии <kind>` пройдены** — каждый критерий из README слоя
-   (`docs/hypothesis-map/README.md`) явно подтверждён аналитиком через
+2. **`Критерии <kind>` пройдены** — каждый критерий из
+   `docs/hypothesis-map/<kind>.md` явно подтверждён аналитиком через
    `AskUserQuestion` (не «скилл уверен», а «аналитик нажал ✅»).
-3. **`Anti-patterns` не нарушены** — по каждому скилл спросил «не похоже
-   ли?» и получил ❌. Один подтверждённый anti-pattern блокирует stable до
+3. **Anti-patterns не нарушены** (`Что <kind> НЕ` в
+   `docs/hypothesis-map/<kind>.md` и `Anti-patterns` README слоя) — по
+   каждому скилл спросил «не похоже ли?» и получил ❌. Один подтверждённый anti-pattern блокирует stable до
    переформулировки.
 4. **Нет `**blocker**`-вопросов** в `../entrypoint/state/hypothesis-map/<kind>/<slug>.md`.
 

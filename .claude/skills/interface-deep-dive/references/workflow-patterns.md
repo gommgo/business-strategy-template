@@ -32,7 +32,7 @@
    md: ✅/❌ варианты как опции. Аналитик подтверждает.
 7. Применить чек-лист `draft-stable.md`. Если все 5 ✅ — предложить
    повышение в stable.
-8. Записать `state/<project-slug>/interface/<surface>/<kind>/<slug>.md`,
+8. Записать `../entrypoint/state/projects/<project-slug>/interface/<surface>/<kind>/<slug>.md`,
    если есть что (открытые вопросы, неочевидные доменные решения).
 
 ### Пример раунда (situation, после фундамента)
@@ -96,7 +96,7 @@
 
 1. Прочитать строку из данных поверхности
    `docs/projects/<project-slug>/interface/<surface>/<kind>.md`.
-2. Прочитать `state/<project-slug>/interface/<surface>/<kind>/<slug>.md`,
+2. Прочитать `../entrypoint/state/projects/<project-slug>/interface/<surface>/<kind>/<slug>.md`,
    если есть.
 3. Прочитать соседей **той же поверхности**: для situation — `who`,
    `stage`, ссылки на data-items, ux-substrate (по фильтру), block (по

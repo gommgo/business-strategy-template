@@ -7,13 +7,14 @@
 ## A. С аналитикой
 
 **Сигнал**: в `interface/<surface>/situation.md` есть ситуации; экраны в
-`screens/<surface>/screen.md` и/или домены в `services/<svc>/domains/`
+`screens/<surface>/screens/` и/или домены в `services/<svc>/domains/`
 заведены.
 
 1. Освежить канон: `docs/projects/_template/fsd/README.md`.
-2. Прочитать источники: `situation.md`, `data-items.md`, `screen.md`,
-   `block.md`, `services/service.md` + домены сервисов, которые
-   обслуживают поверхность.
+2. Прочитать источники: `situation.md`, `data-items.md`, экраны
+   `screens/<surface>/screens/*/index.md`, блоки
+   `screens/<surface>/blocks/*/index.md`, `services/service.md` + домены
+   сервисов, которые обслуживают поверхность.
 3. Мапить напрямую в порядке inside-out: агрегат/сущность домена (или
    data-item) → entity; ситуация → feature; экран → page; блок с
    повторением на ≥2 экранах → widget.

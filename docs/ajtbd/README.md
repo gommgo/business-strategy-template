@@ -150,11 +150,12 @@ frontmatter. Русское слово-перевод строгого терм�
 Поток discovery: `business` (профиль готов) → `segment-deep-dive` (выбран
 сегмент по Score) → `job-graph-deep-dive` (граф, решения, трения) →
 `business-problem` (трения → проблема) и/или `project` (механики →
-capability). `jtbd-interview` запускается из любой фазы по явному решению,
-кладёт сырьё (транскрипты + кандидаты в `state/`), которое
-`*-deep-dive`-скил разбирает через intake. Рой кладёт кандидатов в
-`state/research/`; promotion в артефакты — только через `AskUserQuestion`.
-Авто-залив из веба и из транскриптов запрещён.
+capability). `jtbd-interview` — отдельный тяжёлый процесс по явному запросу,
+запускается из любой фазы и кладёт сырьё (транскрипты + кандидаты) в ветку
+`ajtbd/_interview/` state оркестратора (`.claude/skills/entrypoint/state/`);
+его разбирает `*-deep-dive`-скилл через intake. Рой web-research кладёт
+кандидатов в ветку `ajtbd/research/`; promotion в артефакты — только через
+`AskUserQuestion`. Авто-залив из веба и из транскриптов запрещён.
 
 ## Anti-patterns
 

@@ -50,7 +50,7 @@ consumes: []
 | port | purpose | adapter | integration | functions |
 |---|---|---|---|---|
 | `<Aggregate>Repository` | хранение корневого агрегата | postgres (pgx + sqlc) | `—` | `—` |
-| `Clock` | детерминированное время | `golibinfra/clock` | `—` | `—` |
+| `Clock` | детерминированное время | `golibinfra/clockkit` | `—` | `—` |
 | `<OtherDomain>Reader` | кросс-контекстный порт — данные из другого контекста **этого же сервиса** | адаптер в `module/adapters.go` чужого домена | `—` | `—` |
 | `<OtherService>Client` | другой сервис этого проекта — зовём его функции из `Exposes` | код сервиса-провайдера | `` `service:<svc-slug>` `` | `` [`<svc-slug>.<fn-slug>`, …] `` |
 | `<ExternalService>` | внешняя система — зовём по функциям, транспорт не знаем | клиент `_shared/integrations/<integration-slug>/` | `` `<integration-slug>` `` | `` [`<integration-slug>.<fn-slug>`, …] `` |

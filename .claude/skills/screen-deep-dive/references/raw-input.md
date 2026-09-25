@@ -47,7 +47,7 @@ URL — картинка, посмотреть её.
 | выделяемая часть слота (toolbar+table, фильтр-панель, preview-карточка) | block |
 | desktop-макет + 2+ mobile-макета одной задачи | flow |
 | sidebar становится drawer на mobile | НЕ flow (это `shell.responsive`) |
-| один компонент (`ui:Button`) | НЕ block (это props компонента) |
+| один примитив (`ui:Button`) | НЕ block (это один узел в дереве блока) |
 | state экрана (loading, empty) | НЕ screen и НЕ block (это `screen.states`) |
 | маршрут как поле | НЕ flow (это `screen.route`) |
 

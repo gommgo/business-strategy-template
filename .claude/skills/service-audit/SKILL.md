@@ -1,6 +1,6 @@
 ---
 name: service-audit
-description: "Узкий аудит консистентности сервисного слоя одного проекта в `docs/projects/<project-slug>/services/` (реестр-хребет service + платформенные ресурсы platform + singleton architecture + паспорта `services/<svc>/README.md` с домен-папками внутри сервисов) — дубли slug, папка сервиса вне реестра / строка без папки, контекст без сервиса-владельца (в т.ч. `domains/` на корне проекта) или в двух сервисах сразу, Dependencies на несуществующий сервис/ресурс, Exposes.audience на поверхность вне surface.md, consumes без парного produces (broker+topic+event), produces-событие без файла в domains, воркер с topic-триггером без consumes / Handles в пустоту / рассинхрон реестра Workers и файлов workers/, ресурс с одним именем у двух сервисов (shared database), `domains/` у gateway/edge/bot, узлы architecture.md вне реестров, невалидные enum, `provided-by: shared:<slug>` без записи в infrastructure/shared-platform.md, runtime-механика в артефактах, платформенный ресурс-сирота, Fronts не по типу, coverage-дыры (пустой сервис, необслуженная поверхность, событие без публики). Принимает `<project-slug>` первым аргументом; без него — пикер по именам проектов. Сквозную сверку с interface/screens/placement и доменное содержимое контекстов ведут `/cross-audit` и доменные чек-листы `/domain-deep-dive`, не этот скилл. Не правит артефакты, только отчёт; деструктивные правки — через `/service-deep-dive`. Использовать перед коммитом артефактов services, когда `/service-deep-dive` предлагает прогон в конце сессии, перед `/cross-audit`, или когда архитектор подозревает рассогласование топологии."
+description: "Узкий аудит консистентности сервисного слоя одного проекта в `docs/projects/<project-slug>/services/` (реестры `service.md` · `platform.md`, свод `architecture.md`, паспорта `services/<svc>/README.md` и владение доменами). Ловит структурные разрывы топологии (дубли slug, папки вне реестра, контекст без владельца или в двух сервисах, рёбра `Dependencies`/`Exposes`/`Messaging` в пустоту, непарные produces/consumes, рассинхрон воркеров), shared database, нарушения типов и enum, узлы свода вне реестров, runtime-механику в артефактах, платформенных сирот и coverage-дыры. Сквозную сверку с interface/screens/placement и содержимое контекстов ведут `/cross-audit` и `/domain-deep-dive`. Только отчёт; правки — через `/service-deep-dive`. Использовать перед коммитом артефактов services, по предложению `/service-deep-dive` в конце сессии, перед `/cross-audit` или при подозрении на рассогласование топологии. Аргумент: `<project-slug>` (без него — пикер по именам проектов)."
 ---
 
 # service-audit
@@ -169,33 +169,18 @@ totals: { error: X, warning: Y, hint: Z }
 
 ## Что не делать
 
-- **Не править артефакты.** Аудит — только отчёт. Правки сервисного
-  уровня — через `/service-deep-dive <project-slug>`, доменные — через
-  `/domain-deep-dive`.
-- **Не смешивать проекты.** Один прогон = один `<project-slug>`. Не читать
-  `_template/` как данные и не аудитить `infrastructure/` (это
-  `/infrastructure-audit`).
-- **Не аудитить содержимое контекстов** (агрегаты, use-case'ы, секции
-  событий) — здесь только структура владения (`Owned Contexts` ↔ папки)
-  и существование файлов событий для Messaging. Домены сверяют чек-листы
-  `/domain-deep-dive`.
+- **Только отчёт.** Правки сервисного уровня — через
+  `/service-deep-dive <project-slug>`, доменные — через
+  `/domain-deep-dive`; аудит их не запускает — это делает архитектор по
+  выводу аудита.
+- **Один проект.** `_template/` — не данные, `infrastructure/` аудитит
+  `/infrastructure-audit`.
 - **Не понижать `stable → draft`.** Максимум — error «несовместимо со
   stable» в отчёте, архитектор понизит руками.
 - **Не выдумывать findings.** Правило не сработало — не писать «возможно,
   тут что-то не так на всякий случай».
-- **Не делать кросс-слойную проверку** (services ↔ interface / screens /
-  placement, цепочки интеграций через `_shared/` и `project-map`) — это
-  `/cross-audit` и `/infrastructure-audit`. Точечные структурные ссылки
-  наружу (`surface.md`, `integration.md`, существование записи
-  `shared-platform.md`) — только на резолв slug'а, без чтения их
-  содержимого по существу.
-- **Не аккумулировать историю** в `audit-state/`. Перезаписывать
-  `<project-slug>/last-report.md` каждый прогон.
-- **Не реализовывать suppressions.** Структурный аудит детерминирован —
-  slug резолвится или нет, пара produces/consumes есть или нет. Ложных
+- **Без suppressions.** Структурный аудит детерминирован — slug
+  резолвится или нет, пара produces/consumes есть или нет. Ложных
   срабатываний не бывает, подавлять нечего.
-- **Не запускать `/service-deep-dive`** автоматически из аудита. Это
-  делает архитектор руками по выводу аудита.
-- **Не предлагать клиенту запустить** `/service-audit`. Это инструмент
-  архитектора; в клиент-режиме (`entrypoint-for-business`) он не
-  упоминается.
+- **Инструмент архитектора.** В клиент-режиме (`entrypoint-for-business`)
+  `/service-audit` клиенту не предлагается.

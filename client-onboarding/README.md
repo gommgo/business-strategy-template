@@ -39,7 +39,7 @@ folder** открывает папку → заказчик пишет `/entrypo
 завершении говорит «передай аналитику», и скилл пушит наработанное в
 единую ветку `client` (`--share`-механизм клиентского оркестратора;
 доступ к репозиторию скилл спрашивает один раз и сохраняет; см.
-`references/escalation.md`).
+`.claude/skills/entrypoint-for-business/references/escalation.md`).
 
 Desktop и CLI — один движок и общий конфиг (CLAUDE.md, skills, settings),
 так что `.claude/skills/entrypoint-for-business` доступен в Code-вкладке как

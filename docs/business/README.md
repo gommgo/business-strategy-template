@@ -31,7 +31,7 @@
 | [`competitor.md`](competitor.md) | игрок на рынке заказчика | slug · name · description · url · position · sources · status |
 | [`current-metric.md`](current-metric.md) | текущий KPI бизнеса — baseline-кандидат | slug · name · description · value · as-of · source · from-project · status |
 | [`material.md`](material.md) | источник, из которого сложен профиль | slug · name · kind · uri · status |
-| [`business-problem.md`](business-problem.md) | реестр проблем бизнеса + граница гарантии и таргета | slug · name · problem · guarantee · target · out-of-control · scope · served · from-project · status |
+| [`business-problem.md`](business-problem.md) | реестр проблем бизнеса + граница гарантии и таргета | slug · name · statement · guarantee · target · out-of-control · scope · served · from-project · status |
 | [`stakeholder.md`](stakeholder.md) | человек, принимающий решение в бизнесе заказчика (конкретное лицо) | slug · name · description · unit · deal-role · power · interest · attitude · motivation · win · strategic-stance · objections · reports-to · manifests-as · status |
 | [`stakeholder-map.md`](stakeholder-map.md) | сборка по инициативе: сетка власть/интерес, граф связей, путь вовлечения | slug · name · scope · business-problem · members · grid · influence-edges · engagement-path · strategy · risks · status |
 
@@ -120,10 +120,11 @@ Frontmatter не нужен. Русское слово-перевод строг
 /cross-audit                    — сквозная проверка с ajtbd / swot / hypothesis-map / project (углы stakeholder-*).
 ```
 
-Слой наполняется приёмом материалов клиента и роем web-research. Рой
-кладёт кандидатов в `state/research/`; promotion в `competitor.md` /
-`current-metric.md` — только через `AskUserQuestion` аналитика. Авто-залив
-из веба запрещён.
+Слой наполняется приёмом материалов клиента и роем web-research (доступен и
+клиенту — через `/entrypoint-for-business`). Рой кладёт кандидатов в ветку
+`business/research/` state оркестратора (`.claude/skills/entrypoint/state/`);
+promotion в `competitor.md` / `current-metric.md` — только через
+`AskUserQuestion` аналитика. Авто-залив из веба запрещён.
 
 ## Anti-patterns
 

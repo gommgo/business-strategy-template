@@ -29,8 +29,8 @@
 - ❌ Не flow: связь desktop ↔ mobile — flow.
 - ❌ Не data-слой: контракт данных — `data:` ссылки на data-items, а
   реальная загрузка/хранение — в коде.
-- ❌ Не FSD-узел: screen не упоминает `pages/`/`widgets/`. FSD-структура
-  появляется в коде вручную при сборке wireframe/hi-fi, не здесь.
+- ❌ Не FSD-узел: screen не упоминает `pages/`/`widgets/`. FSD-структура —
+  отдельный слой `fsd/<surface>/`, который читает экраны как источник.
 
 ## Тест-критерий
 
@@ -75,7 +75,7 @@ slot-fills:
 
 states:
   loading:
-    main:    [ui:Skeleton (planned)]
+    main:    [ui:Skeleton]
     detail:  [ui:Spinner size=lg]
   empty:
     main:
@@ -100,9 +100,8 @@ states:
 `slot-fills` — основная композиция: для каждого слота shell либо
 `block:<slug>`, либо inline-дерево, либо `—` (если опционален). `states`
 — delta-overrides на слот (другие слоты унаследованы из `slot-fills`).
-Облик состояния — композиция и текст; компонент из манифеста
-(`ui:Spinner`) или forward-реф (`ui:Skeleton (planned)`) — когда он
-действительно есть/запланирован в `@stit/ui`.
+Содержимое состояния — композиция и текст, при необходимости —
+`ui:`-примитивы (`ui:Spinner`, `ui:Skeleton`).
 
 ## Пример
 
@@ -135,7 +134,7 @@ slot-fills:
 
 states:
   loading:
-    main:   [ui:Skeleton (planned)]
+    main:   [ui:Skeleton]
     detail: [ui:Spinner size=lg]
   empty:
     main:
@@ -156,10 +155,10 @@ states:
 
 ## Anti-patterns
 
-- ❌ Облик в `slot-fills` (цвета, пиксели, шрифты).
-- ❌ Оси контекста (`brand`, `scheme`, `density`, `mode`, `dir`) как
-  props компонентов в дереве — они живут на корне приложения
-  (`data-*` / `StitProvider`).
+- ❌ Облик в `slot-fills` (цвета, пиксели, шрифты) — craft в артефакты не
+  пишется.
+- ❌ Оси контекста приложения (тема, бренд, плотность, направление письма)
+  как атрибуты узлов дерева — их задаёт корень приложения в коде.
 - ❌ Breakpoints в `slot-fills`. Облицовочный адаптив — в `shell`,
   структурный — через `flow`.
 - ❌ FSD-имена (`widget`, `feature`) в дереве или в frontmatter.

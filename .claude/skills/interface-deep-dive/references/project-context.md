@@ -10,8 +10,8 @@
 `docs/projects/<project-slug>/interface/<surface>/`. Семантическая связь
 между слоями есть, но **slug-валидаций нет** — её ловит `/cross-audit`.
 
-Связь зоны/ситуации с поверхностью теперь **структурная**: сущность лежит
-в папке своей поверхности (`interface/<surface>/`). Поверхность уже задана
+Связь зоны и ситуации с поверхностью **структурная**: сущность лежит в
+папке своей поверхности (`interface/<surface>/`). Поверхность уже задана
 выбором папки на старте — отдельно её **не спрашивать**.
 
 Когда заводишь ключевую сущность в interface, проверь продуктовый файл
@@ -22,7 +22,7 @@
 
 | interface | сосед | поле / как использовать |
 |---|---|---|
-| `who` (роль) | `user` (адресат продукта, **корневой** `user.md` проекта, кросс-поверхностный) | авторское поле `who.users` (опц., массив). При заведении `who` через `AskUserQuestion` предложи опции = существующие user из корневого `docs/projects/<project-slug>/user.md`; «системный актор» → `—`. Результат пишется **в колонку `users`** записи who; «почему» — опц. в `state/<project-slug>/interface/<surface>/who/<slug>.md` |
+| `who` (роль) | `user` (адресат продукта, **корневой** `user.md` проекта, кросс-поверхностный) | авторское поле `who.users` (опц., массив). При заведении `who` через `AskUserQuestion` предложи опции = существующие user из корневого `docs/projects/<project-slug>/user.md`; «системный актор» → `—`. Результат пишется **в колонку `users`** записи who; «почему» — опц. в `../entrypoint/state/projects/<project-slug>/interface/<surface>/who/<slug>.md` |
 | `situation` (UX-ситуация) | `capability` (что продукт умеет **на этой поверхности**) | авторское поле `situation.capabilities` (опц., массив). Опции = существующие capability **той же поверхности** из `docs/projects/<project-slug>/capability/<surface>.md`; системное действие → `—` |
 | `situation` (UX-ситуация) | `job` (`docs/ajtbd/job`, глобальный) | авторское поле `situation.jobs` (опц.). Какие работы сегмента обслуживает шаг |
 | `situation` (UX-ситуация) | `hypothesis` (`docs/hypothesis-map/hypothesis`, глоб.) | авторское поле `situation.hypotheses` (опц.). Какие гипотезы проверяет/обслуживает шаг |
@@ -59,7 +59,7 @@
 
 2. По выбору — записать slug(и) **в колонку `users`** записи who
    (питон-стиль массив, или `—` для системного актора). «Почему» —
-   опционально в `state/<project-slug>/interface/<surface>/who/<slug>.md`
+   опционально в `../entrypoint/state/projects/<project-slug>/interface/<surface>/who/<slug>.md`
    секцию `## Доменные решения`.
 
 3. Если выбран «Системный актор» — `users = —`; в state записать
@@ -85,7 +85,7 @@ options: hypothesis:<slug-i> из docs/hypothesis-map/hypothesis.md / «нет»
 ```
 
 Результат пишется **в соответствующие колонки** записи situation; «почему»
-— опц. в `state/<project-slug>/interface/<surface>/situation/<slug>.md`.
+— опц. в `../entrypoint/state/projects/<project-slug>/interface/<surface>/situation/<slug>.md`.
 
 ### Заведение `zone`
 
@@ -114,7 +114,7 @@ flow.
 ## Что делать, если уже есть запись в state с другой user
 
 Если `who:doctor` в
-`state/<project-slug>/interface/<surface>/who/doctor.md` уже привязан
+`../entrypoint/state/projects/<project-slug>/interface/<surface>/who/doctor.md` уже привязан
 семантически к `user:doctor-clinic-owner`, а в новой сессии аналитик
 хочет связать с `user:doctor-employee` — это **смена контекста**.
 Скилл:
