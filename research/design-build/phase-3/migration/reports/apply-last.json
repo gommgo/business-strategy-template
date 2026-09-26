@@ -1,0 +1,20 @@
+{
+ "repo": "/home/mm/git/stit-core/business-strategy-template",
+ "dry_run": false,
+ "branch": "feat/design-deep-dive",
+ "fingerprint": "192193fb31da8a18b2eb27839d214784644f4e773b99026a1fc841fefabb0965",
+ "forward_only": {
+  "action": "append",
+  "equals_staging": true
+ },
+ "result": "applied",
+ "add": 1780,
+ "update": 0,
+ "same": 0,
+ "forward_only_action": "append",
+ "mark": "write",
+ "agreed_divergences": [],
+ "update_list": [],
+ "verify_mismatch": [],
+ "gitignored": []
+}

@@ -1,0 +1,59 @@
+check: ЗЕЛЁНЫЙ — 2026-09-26 22:10:57
+дерево: .staging
+отпечаток: 192193fb31da8a18b2eb27839d214784644f4e773b99026a1fc841fefabb0965 (1781 файлов, 68.7 МБ)
+
+[ok  ] freeze (hard): источник не менялся с заморозки: добавлено 0, удалено 0, изменено 0
+[ok  ] patches (hard): apply_patches.py --check: правок-файлов: 103, правок: 252, замен: 298, ошибок: 0
+[ok  ] fidelity (hard): дерево = план из текущих входов: нет 0, лишних 0, других 0 (из 1781)
+[ok  ] composition (hard): содержимое 1389 копий + 4 псевдонима (A); код take 75, adapt 103, дублей-псевдонимов 22, передача 266/266 (B); overlay 10; журнал 219; path-map 1807 строк ↔ 1781 файлов
+[ok  ] forbidden (hard): 99-raw/cache, kimi, запретное — 0; мусор вне asset-min — 0; мусор-класс в asset-min — 7 (допустимо, Р57)
+[ok  ] instructions (hard): файлов-инструкций в kb/, scripts/, assets/ и журнале — 0 (кроме навигатора SKILL.md)
+[ok  ] secrets (hard): секретов по шаблонам scan-secrets в 1715 текстовых файлах — 0
+[ok  ] links (hard): ссылок на перенесённое 14785 (файл 12182, каталог 2603) — битых 0; переписано 3346 токенов в 552 файлах зоны (946); короткие адреса: верны 7651 из 7651; ссылки kb/INDEX.md — битых 0; исключения — 4 ссылок на код в производных файлах генераторов с --check (форма генератора после правки B; перевести вместе с генераторами при адаптации)
+         .claude/skills/design-deep-dive/kb/site/09-ai-generation-evaluation/ux-marketing-profile.tsv:23 '99-raw/tools/ia_probe.py' → цель .claude/skills/design-deep-dive/scripts/site/ia_probe.py (генератор scripts/site/build_profile.py)
+         .claude/skills/design-deep-dive/kb/site/09-ai-generation-evaluation/ux-marketing-profile.tsv:24 '99-raw/tools/ia_probe.py' → цель .claude/skills/design-deep-dive/scripts/site/ia_probe.py (генератор scripts/site/build_profile.py)
+         .claude/skills/design-deep-dive/kb/site/09-ai-generation-evaluation/ux-marketing-profile.tsv:176 '99-raw/tools/README.md' → цель .claude/skills/design-deep-dive/scripts/site/README.md (генератор scripts/site/build_profile.py)
+         .claude/skills/design-deep-dive/kb/text/06-anti-slop/lexicon/ux-07-06.yaml:1 '99-raw/tools/ux_dict_to_yaml.py' → цель .claude/skills/design-deep-dive/scripts/text/ux_dict_to_yaml.py (генератор scripts/text/ux_dict_to_yaml.py)
+[ok  ] identifiers (hard): идентификаторы (неймспейсы, URN, URL $id, ключи, проза) по файлам зоны — изменений 0
+[ok  ] calibration (hard): index.yaml: rubric и file → файлы дерева 124/124; кадров 40, записей 40; index.yaml байт в байт как утверждён — да
+[ok  ] gitignore (hard): файлов дерева, которые спрятал бы .gitignore (шаблон main + скилл), — 0; правил-файлов 2
+[ok  ] symlinks (hard): симлинков в дереве — 0
+[ok  ] dest-names (warn): файлов > 5 МБ — 0; совпадений имён без учёта регистра — 0; не-ASCII имён — 2
+[ok  ] home-paths (hard): /home/mm: в scripts/ — 0 файлов, в эталонном коде kb с правкой — 0; в kb всего — 151 (тексты и журналы замеров, уборка)
+[ok  ] forward-only (hard): .claude/rules/forward-only.md = main + абзац-исключение (абзац 1 раз)
+[ok  ] links-baseline (warn): на непереносимое 3769 (база A 3797 + код B 1259; из кода не взято 174); неразрешимые сейчас 6370 (база 6370); короткие не найдены 1345 (база 1345); неразрешённых после переноса 10311 ≤ до 10313; вне базы A — README утилит (Р112): на перенесённое 220, прочих 351, неразрешённых после 307; файлы правил после скана A: на перенесённое 4, прочих 2
+[ok  ] rewrites-baseline (warn): scan-rewrites.tsv A: 2026 токенов — те же 2026, иначе 0, не переписаны 0; сверх базы 1320: README утилит (Р112) 218, цель — код B (tools-map) 1102
+[ok  ] size (warn): 1781 файлов, 68.7 МБ, ≈ 18.31 млн токенов (принято Р111: ≈ 66–68 МБ, ≈ 1,7 тыс. файлов)
+[ok  ] smoke (hard): scripts/tests/smoke.py на дереве (песочница bwrap, без сети, браузеров и Blender): PASS 207, FAIL 0, XFAIL 9, XPASS 0 за 75 с
+[ok  ] tree-after-smoke (hard): смоук не менял файлы дерева (правок 0, удалений 0); после уборки выходов утилит отпечаток тот же
+[ok  ] smoke-outputs (warn): утилиты во время смоука записали внутрь скилла 1 файлов (убраны из .staging): под .gitignore — 1, вне .gitignore — 0
+[ok  ] determinism (hard): план из текущих входов даёт тот же отпечаток (192193fb31da8a18…); последний build — 192193fb31da8a18…
+
+размер и токены по частям:
+| часть | файлов | МБ | тыс. токенов |
+|---|---|---|---|
+| .claude/rules/forward-only.md | 1 | 0.0 | 1 |
+| assets/ | 41 | 15.4 | 0 |
+| kb/INDEX.md | 1 | 0.01 | 5 |
+| kb/ai-media | 175 | 5.1 | 1938 |
+| kb/blender | 512 | 8.78 | 3160 |
+| kb/claude-design | 60 | 0.95 | 343 |
+| kb/creative | 141 | 4.86 | 1343 |
+| kb/site | 113 | 4.87 | 1707 |
+| kb/text | 118 | 4.55 | 1496 |
+| kb/ui | 125 | 5.72 | 2041 |
+| kb/ux | 77 | 6.95 | 2024 |
+| scripts/ | 194 | 6.58 | 2196 |
+| skill: SKILL.md, .gitignore | 2 | 0.01 | 2 |
+| журнал research/design-build/ | 221 | 4.92 | 2052 |
+
+смоук XFAIL (известные ограничения без окружения, code-xfail.tsv):
+  scripts/ai-media/check_icons.py help
+  scripts/ai-media/mp_client.py run selftest
+  scripts/ai-media/polza_catalog.py run selftest
+  scripts/ai-media/prompt_compile.py help
+  scripts/ai-media/provenance_check.py run selftest
+  scripts/ai-media/svg_sheet.py help
+  scripts/ai-media/tests/test_prompt_compile.py run
+  scripts/ai-media/tests/test_prompt_compile_x2.py run
+  scripts/creative/refs_client.py run selftest

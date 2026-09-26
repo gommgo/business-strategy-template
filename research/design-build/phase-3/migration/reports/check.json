@@ -1,0 +1,515 @@
+{
+ "ok": true,
+ "complete": true,
+ "hard_failed": [],
+ "not_run": [],
+ "warnings": [],
+ "fingerprint": "192193fb31da8a18b2eb27839d214784644f4e773b99026a1fc841fefabb0965",
+ "files": 1781,
+ "bytes": 68701361,
+ "root": ".staging",
+ "generated_at": "2026-09-26 22:10:57",
+ "seconds": 92.5,
+ "checks": [
+  {
+   "id": "freeze",
+   "level": "hard",
+   "ok": true,
+   "summary": "источник не менялся с заморозки: добавлено 0, удалено 0, изменено 0",
+   "output": [
+    "добавлено: 0",
+    "удалено: 0",
+    "изменено: 0"
+   ]
+  },
+  {
+   "id": "patches",
+   "level": "hard",
+   "ok": true,
+   "summary": "apply_patches.py --check: правок-файлов: 103, правок: 252, замен: 298, ошибок: 0",
+   "errors": []
+  },
+  {
+   "id": "fidelity",
+   "level": "hard",
+   "ok": true,
+   "summary": "дерево = план из текущих входов: нет 0, лишних 0, других 0 (из 1781)",
+   "missing": [],
+   "extra": [],
+   "changed": []
+  },
+  {
+   "id": "composition",
+   "level": "hard",
+   "ok": true,
+   "summary": "содержимое 1389 копий + 4 псевдонима (A); код take 75, adapt 103, дублей-псевдонимов 22, передача 266/266 (B); overlay 10; журнал 219; path-map 1807 строк ↔ 1781 файлов",
+   "problems": [],
+   "path_map_rows": 1807,
+   "path_map_kinds": {
+    "generated": 3,
+    "copy": 1128,
+    "patched": 103,
+    "rewritten": 547,
+    "alias": 26
+   },
+   "content": {
+    "copies": 1389,
+    "aliases": 4
+   },
+   "code": {
+    "take": 75,
+    "adapt": 103,
+    "aliases": 22,
+    "handoff": "266/266"
+   },
+   "overlay": 10,
+   "journal": {
+    "files": 219,
+    "new_since_expected": 6,
+    "gone_since_expected": 0,
+    "excluded": [
+     "_skill-build/phase-3/migration/reports/apply-last.json",
+     "_skill-build/phase-3/migration/reports/build.json",
+     "_skill-build/phase-3/migration/reports/check.json",
+     "_skill-build/phase-3/migration/reports/check.txt",
+     "_skill-build/phase-3/migration/reports/rewrites.tsv"
+    ]
+   }
+  },
+  {
+   "id": "forbidden",
+   "level": "hard",
+   "ok": true,
+   "summary": "99-raw/cache, kimi, запретное — 0; мусор вне asset-min — 0; мусор-класс в asset-min — 7 (допустимо, Р57)",
+   "forbidden": [],
+   "junk": [],
+   "asset_min_junk": [
+    ".claude/skills/design-deep-dive/kb/blender/12-recipes/examples/01-hero-product/dist/GLTFLoader-FS4445IV.js",
+    ".claude/skills/design-deep-dive/kb/blender/12-recipes/examples/01-hero-product/dist/KTX2Loader-Z4HR2VR5.js",
+    ".claude/skills/design-deep-dive/kb/blender/12-recipes/examples/01-hero-product/dist/RoomEnvironment-F4HHI32D.js",
+    ".claude/skills/design-deep-dive/kb/blender/12-recipes/examples/01-hero-product/dist/chunk-OC64U7VF.js",
+    ".claude/skills/design-deep-dive/kb/blender/12-recipes/examples/01-hero-product/dist/hero.js",
+    ".claude/skills/design-deep-dive/kb/blender/12-recipes/examples/01-hero-product/dist/meshopt_decoder.module-EPC4B2JX.js",
+    ".claude/skills/design-deep-dive/kb/blender/12-recipes/examples/01-hero-product/dist/three.module-EA5U76EO.js"
+   ]
+  },
+  {
+   "id": "instructions",
+   "level": "hard",
+   "ok": true,
+   "summary": "файлов-инструкций в kb/, scripts/, assets/ и журнале — 0 (кроме навигатора SKILL.md)",
+   "hits": []
+  },
+  {
+   "id": "secrets",
+   "level": "hard",
+   "ok": true,
+   "summary": "секретов по шаблонам scan-secrets в 1715 текстовых файлах — 0",
+   "hits": []
+  },
+  {
+   "id": "links",
+   "level": "hard",
+   "ok": true,
+   "summary": "ссылок на перенесённое 14785 (файл 12182, каталог 2603) — битых 0; переписано 3346 токенов в 552 файлах зоны (946); короткие адреса: верны 7651 из 7651; ссылки kb/INDEX.md — битых 0; исключения — 4 ссылок на код в производных файлах генераторов с --check (форма генератора после правки B; перевести вместе с генераторами при адаптации)",
+   "categories": {
+    "to-transferred": 12182,
+    "dir-to-untransferred": 1025,
+    "missing": 6437,
+    "dir-to-transferred": 2603,
+    "short-unresolved": 1379,
+    "to-untransferred": 2902,
+    "short-ok": 7651,
+    "dir-to-handoff": 87,
+    "to-handoff": 161,
+    "empty": 2,
+    "outside": 10,
+    "held-for-generator": 4
+   },
+   "broken": [],
+   "short_broken": [],
+   "token_mismatch": [],
+   "held_for_generators": [
+    ".claude/skills/design-deep-dive/kb/site/09-ai-generation-evaluation/ux-marketing-profile.tsv:23 '99-raw/tools/ia_probe.py' → цель .claude/skills/design-deep-dive/scripts/site/ia_probe.py (генератор scripts/site/build_profile.py)",
+    ".claude/skills/design-deep-dive/kb/site/09-ai-generation-evaluation/ux-marketing-profile.tsv:24 '99-raw/tools/ia_probe.py' → цель .claude/skills/design-deep-dive/scripts/site/ia_probe.py (генератор scripts/site/build_profile.py)",
+    ".claude/skills/design-deep-dive/kb/site/09-ai-generation-evaluation/ux-marketing-profile.tsv:176 '99-raw/tools/README.md' → цель .claude/skills/design-deep-dive/scripts/site/README.md (генератор scripts/site/build_profile.py)",
+    ".claude/skills/design-deep-dive/kb/text/06-anti-slop/lexicon/ux-07-06.yaml:1 '99-raw/tools/ux_dict_to_yaml.py' → цель .claude/skills/design-deep-dive/scripts/text/ux_dict_to_yaml.py (генератор scripts/text/ux_dict_to_yaml.py)"
+   ],
+   "index_broken": [],
+   "by_base": {
+    "ai-media": {
+     "to-transferred": 1566,
+     "dir-to-untransferred": 304,
+     "missing": 1125,
+     "dir-to-transferred": 223,
+     "to-untransferred": 934,
+     "dir-to-handoff": 21,
+     "to-handoff": 18
+    },
+    "blender": {
+     "to-untransferred": 607,
+     "to-transferred": 1253,
+     "dir-to-transferred": 402,
+     "dir-to-untransferred": 220,
+     "missing": 1551,
+     "empty": 1,
+     "dir-to-handoff": 24,
+     "to-handoff": 35,
+     "outside": 1
+    },
+    "claude-design": {
+     "dir-to-untransferred": 30,
+     "to-untransferred": 35,
+     "dir-to-transferred": 74,
+     "missing": 236,
+     "to-transferred": 114,
+     "to-handoff": 4,
+     "dir-to-handoff": 2
+    },
+    "creative": {
+     "to-transferred": 911,
+     "dir-to-transferred": 163,
+     "to-untransferred": 267,
+     "dir-to-untransferred": 117,
+     "missing": 660,
+     "to-handoff": 25,
+     "dir-to-handoff": 9
+    },
+    "site": {
+     "to-transferred": 2806,
+     "dir-to-transferred": 158,
+     "dir-to-untransferred": 144,
+     "missing": 802,
+     "to-untransferred": 314,
+     "to-handoff": 31,
+     "dir-to-handoff": 14
+    },
+    "text": {
+     "missing": 634,
+     "dir-to-transferred": 128,
+     "to-transferred": 1407,
+     "dir-to-untransferred": 109,
+     "to-untransferred": 352,
+     "outside": 6,
+     "to-handoff": 29,
+     "dir-to-handoff": 14
+    },
+    "ui": {
+     "to-transferred": 1662,
+     "dir-to-transferred": 799,
+     "dir-to-untransferred": 66,
+     "missing": 881,
+     "to-untransferred": 212,
+     "dir-to-handoff": 3,
+     "to-handoff": 5
+    },
+    "ux": {
+     "to-transferred": 2463,
+     "missing": 548,
+     "dir-to-transferred": 656,
+     "to-untransferred": 181,
+     "to-handoff": 14,
+     "dir-to-untransferred": 35,
+     "outside": 3,
+     "empty": 1
+    }
+   },
+   "by_group": {
+    "kb": {
+     "to-transferred": 11988,
+     "dir-to-untransferred": 949,
+     "missing": 6360,
+     "dir-to-transferred": 2573,
+     "short-unresolved": 1345,
+     "to-untransferred": 2820,
+     "short-ok": 7641,
+     "dir-to-handoff": 67,
+     "to-handoff": 107,
+     "empty": 2,
+     "outside": 10,
+     "held-for-generator": 4
+    },
+    "new-rule": {
+     "to-transferred": 4,
+     "missing": 2
+    },
+    "readme": {
+     "dir-to-transferred": 30,
+     "dir-to-untransferred": 76,
+     "to-handoff": 54,
+     "to-transferred": 190,
+     "to-untransferred": 82,
+     "short-unresolved": 34,
+     "missing": 75,
+     "dir-to-handoff": 20,
+     "short-ok": 10
+    }
+   }
+  },
+  {
+   "id": "identifiers",
+   "level": "hard",
+   "ok": true,
+   "summary": "идентификаторы (неймспейсы, URN, URL $id, ключи, проза) по файлам зоны — изменений 0",
+   "changed": []
+  },
+  {
+   "id": "calibration",
+   "level": "hard",
+   "ok": true,
+   "summary": "index.yaml: rubric и file → файлы дерева 124/124; кадров 40, записей 40; index.yaml байт в байт как утверждён — да",
+   "missing": []
+  },
+  {
+   "id": "gitignore",
+   "level": "hard",
+   "ok": true,
+   "summary": "файлов дерева, которые спрятал бы .gitignore (шаблон main + скилл), — 0; правил-файлов 2",
+   "ignored": []
+  },
+  {
+   "id": "symlinks",
+   "level": "hard",
+   "ok": true,
+   "summary": "симлинков в дереве — 0",
+   "links": []
+  },
+  {
+   "id": "dest-names",
+   "level": "warn",
+   "ok": true,
+   "summary": "файлов > 5 МБ — 0; совпадений имён без учёта регистра — 0; не-ASCII имён — 2",
+   "big": [],
+   "case": [],
+   "non_ascii": [
+    "research/design-build/phase-2/ux/ux-верх.md",
+    "research/design-build/phase-2/ux/ux-низ.md"
+   ]
+  },
+  {
+   "id": "home-paths",
+   "level": "hard",
+   "ok": true,
+   "summary": "/home/mm: в scripts/ — 0 файлов, в эталонном коде kb с правкой — 0; в kb всего — 151 (тексты и журналы замеров, уборка)",
+   "scripts": [],
+   "refs": []
+  },
+  {
+   "id": "forward-only",
+   "level": "hard",
+   "ok": true,
+   "summary": ".claude/rules/forward-only.md = main + абзац-исключение (абзац 1 раз)"
+  },
+  {
+   "id": "links-baseline",
+   "level": "warn",
+   "ok": true,
+   "summary": "на непереносимое 3769 (база A 3797 + код B 1259; из кода не взято 174); неразрешимые сейчас 6370 (база 6370); короткие не найдены 1345 (база 1345); неразрешённых после переноса 10311 ≤ до 10313; вне базы A — README утилит (Р112): на перенесённое 220, прочих 351, неразрешённых после 307; файлы правил после скана A: на перенесённое 4, прочих 2",
+   "baseline_A": {
+    "to-transferred": 10894,
+    "dir-to-transferred": 2558,
+    "to-handoff": 1177,
+    "dir-to-handoff": 82,
+    "to-untransferred": 2848,
+    "dir-to-untransferred": 949,
+    "missing": 6360,
+    "outside": 10,
+    "short-ok": 7641,
+    "short-to-untransferred": 0,
+    "short-unresolved": 1345,
+    "rewrite": 2026,
+    "unchanged": 11426,
+    "not-resolving-after": 0,
+    "code-would-break": 0
+   },
+   "now": {
+    "to-transferred": 11988,
+    "dir-to-untransferred": 949,
+    "missing": 6360,
+    "dir-to-transferred": 2573,
+    "short-unresolved": 1345,
+    "to-untransferred": 2820,
+    "short-ok": 7641,
+    "dir-to-handoff": 67,
+    "to-handoff": 107,
+    "empty": 2,
+    "outside": 10,
+    "held-for-generator": 4
+   },
+   "after_unresolved": {
+    "dir-to-untransferred": 945,
+    "missing": 6360,
+    "to-untransferred": 2820,
+    "dir-to-handoff": 67,
+    "to-handoff": 107,
+    "empty": 2,
+    "outside": 10
+   },
+   "readme": {
+    "dir-to-transferred": 30,
+    "dir-to-untransferred": 76,
+    "to-handoff": 54,
+    "to-transferred": 190,
+    "to-untransferred": 82,
+    "short-unresolved": 34,
+    "missing": 75,
+    "dir-to-handoff": 20,
+    "short-ok": 10
+   },
+   "readme_after_unresolved": {
+    "dir-to-untransferred": 76,
+    "to-handoff": 54,
+    "to-untransferred": 82,
+    "missing": 75,
+    "dir-to-handoff": 20
+   },
+   "new_rule": {
+    "to-transferred": 4,
+    "missing": 2
+   },
+   "new_rule_after_unresolved": {
+    "missing": 2
+   }
+  },
+  {
+   "id": "rewrites-baseline",
+   "level": "warn",
+   "ok": true,
+   "summary": "scan-rewrites.tsv A: 2026 токенов — те же 2026, иначе 0, не переписаны 0; сверх базы 1320: README утилит (Р112) 218, цель — код B (tools-map) 1102",
+   "differ": [],
+   "only_a": [],
+   "extra": {
+    "цель — код B (tools-map)": 1102,
+    "README утилит (Р112)": 218
+   }
+  },
+  {
+   "id": "size",
+   "level": "warn",
+   "ok": true,
+   "summary": "1781 файлов, 68.7 МБ, ≈ 18.31 млн токенов (принято Р111: ≈ 66–68 МБ, ≈ 1,7 тыс. файлов)",
+   "parts": {
+    ".claude/rules/forward-only.md": {
+     "files": 1,
+     "mb": 0.0,
+     "tokens_k": 1
+    },
+    "assets/": {
+     "files": 41,
+     "mb": 15.4,
+     "tokens_k": 0
+    },
+    "kb/INDEX.md": {
+     "files": 1,
+     "mb": 0.01,
+     "tokens_k": 5
+    },
+    "kb/ai-media": {
+     "files": 175,
+     "mb": 5.1,
+     "tokens_k": 1938
+    },
+    "kb/blender": {
+     "files": 512,
+     "mb": 8.78,
+     "tokens_k": 3160
+    },
+    "kb/claude-design": {
+     "files": 60,
+     "mb": 0.95,
+     "tokens_k": 343
+    },
+    "kb/creative": {
+     "files": 141,
+     "mb": 4.86,
+     "tokens_k": 1343
+    },
+    "kb/site": {
+     "files": 113,
+     "mb": 4.87,
+     "tokens_k": 1707
+    },
+    "kb/text": {
+     "files": 118,
+     "mb": 4.55,
+     "tokens_k": 1496
+    },
+    "kb/ui": {
+     "files": 125,
+     "mb": 5.72,
+     "tokens_k": 2041
+    },
+    "kb/ux": {
+     "files": 77,
+     "mb": 6.95,
+     "tokens_k": 2024
+    },
+    "scripts/": {
+     "files": 194,
+     "mb": 6.58,
+     "tokens_k": 2196
+    },
+    "skill: SKILL.md, .gitignore": {
+     "files": 2,
+     "mb": 0.01,
+     "tokens_k": 2
+    },
+    "журнал research/design-build/": {
+     "files": 221,
+     "mb": 4.92,
+     "tokens_k": 2052
+    }
+   },
+   "total": {
+    "files": 1781,
+    "mb": 68.7,
+    "tokens": 18307610
+   }
+  },
+  {
+   "id": "smoke",
+   "level": "hard",
+   "ok": true,
+   "summary": "scripts/tests/smoke.py на дереве (песочница bwrap, без сети, браузеров и Blender): PASS 207, FAIL 0, XFAIL 9, XPASS 0 за 75 с",
+   "fails": [],
+   "xfail": [
+    "scripts/ai-media/check_icons.py help",
+    "scripts/ai-media/mp_client.py run selftest",
+    "scripts/ai-media/polza_catalog.py run selftest",
+    "scripts/ai-media/prompt_compile.py help",
+    "scripts/ai-media/provenance_check.py run selftest",
+    "scripts/ai-media/svg_sheet.py help",
+    "scripts/ai-media/tests/test_prompt_compile.py run",
+    "scripts/ai-media/tests/test_prompt_compile_x2.py run",
+    "scripts/creative/refs_client.py run selftest"
+   ],
+   "xpass": [],
+   "log": ".staging-smoke/smoke-staging.log",
+   "raw": ".staging-smoke/code-smoke-staging.raw.tsv"
+  },
+  {
+   "id": "tree-after-smoke",
+   "level": "hard",
+   "ok": true,
+   "summary": "смоук не менял файлы дерева (правок 0, удалений 0); после уборки выходов утилит отпечаток тот же",
+   "changed": [],
+   "removed": []
+  },
+  {
+   "id": "smoke-outputs",
+   "level": "warn",
+   "ok": true,
+   "summary": "утилиты во время смоука записали внутрь скилла 1 файлов (убраны из .staging): под .gitignore — 1, вне .gitignore — 0",
+   "covered": [
+    ".claude/skills/design-deep-dive/scripts/text/last-run.txt"
+   ],
+   "uncovered": []
+  },
+  {
+   "id": "determinism",
+   "level": "hard",
+   "ok": true,
+   "summary": "план из текущих входов даёт тот же отпечаток (192193fb31da8a18…); последний build — 192193fb31da8a18…"
+  }
+ ]
+}

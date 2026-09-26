@@ -1,0 +1,217 @@
+path	kind	check	status	rc	seconds	note
+kb/blender/09-web-runtime/examples/camera-path-scroll/build_scene.py	ref	compile	PASS	0	0.0	
+kb/blender/09-web-runtime/examples/hero-lazy/make_poster.py	ref	compile	PASS	0	0.0	
+kb/blender/09-web-runtime/examples/r3f-hero/build.sh	ref	compile	PASS	0	0.0	
+kb/blender/12-recipes/examples/01-hero-product/build.py	ref	compile	PASS	0	0.0	
+kb/blender/12-recipes/examples/01-hero-product/make_poster.py	ref	compile	PASS	0	0.0	
+kb/blender/12-recipes/examples/02-icon-series/build.py	ref	compile	PASS	0	0.0	
+kb/blender/12-recipes/examples/02-icon-series/post.py	ref	compile	PASS	0	0.0	
+kb/blender/12-recipes/examples/03-device-mockup/build.py	ref	compile	PASS	0	0.0	
+kb/blender/12-recipes/examples/04-abstract-sculpture/build.py	ref	compile	PASS	0	0.0	
+kb/blender/12-recipes/examples/05-scroll-showcase/build.py	ref	compile	PASS	0	0.0	
+kb/blender/12-recipes/examples/06-logo-3d-particles/build.py	ref	compile	PASS	0	0.0	
+kb/blender/12-recipes/examples/07-lowpoly-diorama/build.py	ref	compile	PASS	0	0.0	
+kb/blender/12-recipes/examples/08-sequence-video-alpha/build.py	ref	compile	PASS	0	0.0	
+kb/blender/12-recipes/examples/08-sequence-video-alpha/post.py	ref	compile	PASS	0	0.0	
+kb/blender/12-recipes/examples/09-glass-product/build.py	ref	compile	PASS	0	0.0	
+kb/blender/12-recipes/examples/10-instance-field/build.py	ref	compile	PASS	0	0.0	
+kb/blender/12-recipes/examples/12-model-viewer-ar/build.py	ref	compile	PASS	0	0.0	
+kb/blender/15-showcase/_shared/code3d/build.sh	ref	compile	PASS	0	0.0	
+scripts/ai-media/README.md	data	data	PASS		0.0	
+scripts/ai-media/alpha_check.py	utility	help	PASS	0	0.2	
+scripts/ai-media/asset_audit.py	utility	help	PASS	0	0.0	
+scripts/ai-media/asset_inventory.py	utility	help	PASS	0	0.0	
+scripts/ai-media/avif_pick.sh	utility	compile	PASS	0	0.0	
+scripts/ai-media/channel_diff.py	step	compile	PASS	0	0.0	
+scripts/ai-media/check_icons.py	module	help	XFAIL	1	0.1	ModuleNotFoundError: No module named 'cairosvg' · ожидаемо: нужны cairosvg (cairocffi, cffi, системная libcairo), svgelements, scikit-image — ставит install.sh (группа svg)
+scripts/ai-media/composition_metrics.py	module	import-only	PASS	0	0.3	
+scripts/ai-media/data/svgo.keep-signature.config.mjs	data	compile	PASS	0	0.0	
+scripts/ai-media/edit_check.py	utility	help	PASS	0	0.3	
+scripts/ai-media/edit_check.py	utility	run selftest	PASS	0	0.5	
+scripts/ai-media/image_metrics.py	module	import-only	PASS	0	0.1	
+scripts/ai-media/layout_check.py	step	import-only	PASS	0	0.1	
+scripts/ai-media/loop_rife_bridge.py	step	compile	PASS	0	0.0	
+scripts/ai-media/mp_client.py	utility	help	PASS	0	0.1	
+scripts/ai-media/mp_client.py	utility	run selftest	XFAIL	1	0.1	# selftest: 32/41 PASS · ожидаемо: оценки цен требуют снимков каталогов routerai, genapi, polza — install.sh --catalogs
+scripts/ai-media/page_accept.py	utility	help	PASS	0	0.1	
+scripts/ai-media/palette.py	module	import-only	PASS	0	0.1	
+scripts/ai-media/polza.py	utility	help	PASS	0	0.1	
+scripts/ai-media/polza_catalog.py	utility	help	PASS	0	0.0	
+scripts/ai-media/polza_catalog.py	utility	run selftest	XFAIL	1	0.0	снимок не найден: 2026-09-23 · ожидаемо: самопроверка сравнивает снимки 2026-09-23 из кэша источника (99-raw/cache не переносится) — со снимками источника проходит
+scripts/ai-media/prompt_compile.py	utility	help	XFAIL	1	0.1	нет снимков в /home/mm/.cache/design-deep-dive/cache/ai-media/polza · ожидаемо: нужен снимок каталога polza в $DDD_HOME/cache/ai-media/polza — install.sh --catalogs (бесплатный GET, сеть); 99-raw/cache не переносится
+scripts/ai-media/provenance_check.py	utility	help	PASS	0	0.0	
+scripts/ai-media/provenance_check.py	utility	run selftest	XFAIL	1	0.3	FileNotFoundError: [Errno 2] No such file or directory: '/tmp/provself_7in7n9mw/signed.png' · ожидаемо: нужны c2patool 0.27.22 и exiftool 13.59 в $DDD_HOME/bin — install.sh
+scripts/ai-media/routing_check.py	utility	help	PASS	0	0.1	
+scripts/ai-media/series_metrics.py	module	import-only	PASS	0	0.1	
+scripts/ai-media/split_grid.py	module	import-only	PASS	0	0.1	
+scripts/ai-media/split_recraft.py	step	compile	PASS	0	0.0	
+scripts/ai-media/stand_run.py	utility	help	PASS	0	0.0	
+scripts/ai-media/stand_run.py	utility	run selftest	PASS	0	0.1	
+scripts/ai-media/svg_sheet.py	step	help	XFAIL	1	0.0	ModuleNotFoundError: No module named 'cairosvg' · ожидаемо: нужны cairosvg (cairocffi, cffi, системная libcairo) — ставит install.sh (группа svg)
+scripts/ai-media/tests/fixtures/D02/E1.spec.json	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/D02/E2.spec.json	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/D02/E3.spec.json	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/D02/E4.spec.json	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/D02/E5.spec.json	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/D03/B1.spec.json	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/D03/B2.spec.json	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/frame-A.png	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/mask-white-change.png	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/product.png	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/source.png	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/style-ref.png	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/v2-edit.spec.json	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/v2-loop.spec.json	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/v2-product.spec.json	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/v2-series.spec.json	data	data	PASS		0.0	
+scripts/ai-media/tests/fixtures/v2-shots.spec.json	data	data	PASS		0.0	
+scripts/ai-media/tests/test_asset_audit.py	test	help	PASS	0	0.1	
+scripts/ai-media/tests/test_prompt_compile.py	test	run	XFAIL	1	0.1	нет снимков в /home/mm/.cache/design-deep-dive/cache/ai-media/polza · ожидаемо: нужен снимок каталога polza — install.sh --catalogs
+scripts/ai-media/tests/test_prompt_compile_x2.py	test	run	XFAIL	1	0.1	нет снимков в /home/mm/.cache/design-deep-dive/cache/ai-media/polza · ожидаемо: нужен снимок каталога polza — install.sh --catalogs
+scripts/ai-media/text_zone.py	module	import-only	PASS	0	0.1	
+scripts/ai-media/tile_check.py	utility	help	PASS	0	0.1	
+scripts/ai-media/validate_recipes.py	step	compile	PASS	0	0.0	
+scripts/ai-media/video_loop_check.py	utility	help	PASS	0	0.3	
+scripts/ai-media/video_loop_check.py	utility	run selftest	PASS	0	1.1	
+scripts/ai-media/vlm_to_dna.py	utility	help	PASS	0	0.0	
+scripts/ai-media/vm_sheet.py	step	help	PASS	0	0.2	
+scripts/blender/README.md	data	data	PASS		0.0	
+scripts/blender/agent_scene.py	module	compile	PASS	0	0.0	
+scripts/blender/anim_diff.py	utility	help	PASS	0	0.0	
+scripts/blender/animx.py	module	compile	PASS	0	0.0	
+scripts/blender/blender_run.py	utility	help	PASS	0	0.0	
+scripts/blender/blender_supervisor.py	utility	help	PASS	0	0.0	
+scripts/blender/bpy_probe.py	utility	help	PASS	0	0.0	
+scripts/blender/bpyx.py	module	compile	PASS	0	0.0	
+scripts/blender/d1exp.py	module	compile	PASS	0	0.0	
+scripts/blender/d1lib.py	module	compile	PASS	0	0.0	
+scripts/blender/d2lib.py	module	compile	PASS	0	0.0	
+scripts/blender/fx_probe.py	utility	help	PASS	0	0.0	
+scripts/blender/gate_check.py	utility	help	PASS	0	0.0	
+scripts/blender/glb_lint_block.py	module	import-only	PASS	0	0.0	
+scripts/blender/gltf_check.py	utility	help	PASS	0	0.0	
+scripts/blender/gltf_diff.py	utility	help	PASS	0	0.0	
+scripts/blender/gltf_load_bench.py	utility	help	PASS	0	0.0	
+scripts/blender/gltf_web_inspect.py	utility	help	PASS	0	0.0	
+scripts/blender/hygiene.py	module	compile	PASS	0	0.0	
+scripts/blender/img_metrics.py	utility	help	PASS	0	0.1	
+scripts/blender/lint_agent_code.py	utility	import-only	PASS	0	0.0	
+scripts/blender/node/validate.mjs	utility	compile	PASS	0	0.0	
+scripts/blender/passport_asserts.py	module	compile	PASS	0	0.0	
+scripts/blender/preflight_block.py	module	compile	PASS	0	0.0	
+scripts/blender/presets.py	module	compile	PASS	0	0.0	
+scripts/blender/qa_pipeline.py	utility	help rc=3	PASS	3	0.0	
+scripts/blender/regression/make_manifest.py	maint	compile	PASS	0	0.0	
+scripts/blender/regression/run_set.py	maint	compile	PASS	0	0.0	
+scripts/blender/render_views.py	utility	compile	PASS	0	0.0	
+scripts/blender/rk.py	module	compile	PASS	0	0.0	
+scripts/blender/run_doc_blocks.py	utility	import-only	PASS	0	0.0	
+scripts/blender/run_recipes.py	step	import-only	PASS	0	0.0	
+scripts/blender/scene_audit.py	module	compile	PASS	0	0.0	
+scripts/blender/scene_check.py	utility	compile	PASS	0	0.0	
+scripts/blender/serve_br.py	module	import-only	PASS	0	0.0	
+scripts/blender/sheet.py	utility	import-only	PASS	0	0.0	
+scripts/blender/site_probe.py	utility	help	PASS	0	0.0	
+scripts/blender/slot_run.py	utility	import-only	PASS	0	0.0	
+scripts/blender/test_agent_helpers.py	test	compile	PASS	0	0.0	
+scripts/blender/test_bpyx.py	test	compile	PASS	0	0.0	
+scripts/blender/three_probe.py	utility	import-only	PASS	0	0.0	
+scripts/blender/vote/build_pairs.py	utility	import-only	PASS	0	0.0	
+scripts/blender/vote/index.html	data	data	PASS		0.0	
+scripts/blender/vote/tally.py	utility	import-only	PASS	0	0.0	
+scripts/blender/vote/vote_server.py	utility	import-only	PASS	0	0.0	
+scripts/blender/web_view.py	utility	help	PASS	0	0.0	
+scripts/claude-design/kit/canvas.html	kit	data	PASS		0.0	
+scripts/claude-design/kit/diffshots.py	kit	help	PASS	0	0.1	
+scripts/claude-design/kit/example/booking.html	kit	data	PASS		0.0	
+scripts/claude-design/kit/example/canvas.json	kit	data	PASS		0.0	
+scripts/claude-design/kit/example/landing.html	kit	data	PASS		0.0	
+scripts/claude-design/kit/example/site.css	kit	data	PASS		0.0	
+scripts/claude-design/kit/example/tokens.css	kit	data	PASS		0.0	
+scripts/claude-design/kit/export.py	kit	help	PASS	0	0.0	
+scripts/claude-design/kit/marks.js	kit	compile	PASS	0	0.0	
+scripts/claude-design/kit/shot.py	kit	help	PASS	0	0.0	
+scripts/claude-design/lang_check.py	utility	import-only	PASS	0	0.0	
+scripts/claude-design/lang_check.py	utility	run {skill}/scripts/claude-design/kit/example	PASS	0	0.0	
+scripts/claude-design/mockup_checks.py	utility	help	PASS	0	0.0	
+scripts/claude-design/mockup_checks.py	utility	run selftest	PASS	0	0.0	
+scripts/claude-design/shot_v3.py	utility	help	PASS	0	0.0	
+scripts/claude-design/stand_page.py	utility	help	PASS	0	0.0	
+scripts/claude-design/stand_page.py	utility	run selftest	PASS	0	0.2	
+scripts/creative/README.md	data	data	PASS		0.0	
+scripts/creative/ad_check.py	step	run	PASS	0	0.2	
+scripts/creative/idle_probe.py	step	import-only	PASS	0	0.1	
+scripts/creative/marketing_audit.py	utility	help	PASS	0	0.1	
+scripts/creative/marketing_audit.py	utility	run --selftest	PASS	0	0.1	
+scripts/creative/motion_check.py	utility	help	PASS	0	0.1	
+scripts/creative/motion_check.py	utility	run --selftest	PASS	0	0.9	
+scripts/creative/recipe_check.py	step	help	PASS	0	0.1	
+scripts/creative/recipe_check.py	step	run {skill}/kb/creative/10-recipes/recipes/01-lead-services-l0.recipe.yaml	PASS	0	0.7	
+scripts/creative/refs_client.py	utility	help	PASS	0	0.1	
+scripts/creative/refs_client.py	utility	run selftest	XPASS	0	0.2	
+scripts/creative/registry_check.py	step	run	PASS	0	0.1	
+scripts/creative/scroll_record.py	module	import-only	PASS	0	0.0	
+scripts/creative/spec_check.py	step	help	PASS	0	0.1	
+scripts/creative/spec_check.py	step	run --selftest	PASS	0	0.7	
+scripts/creative/validate_stack.py	step	run	PASS	0	0.1	
+scripts/lib/color.py	module	run selftest	PASS	0	0.0	
+scripts/maint/calibrate.py	maint	help	PASS	0	0.0	
+scripts/maint/calibration.json	data	data	PASS		0.0	
+scripts/maint/check_links.py	maint	help	PASS	0	0.0	
+scripts/maint/check_links.py	maint	run --selftest	PASS	0	0.0	
+scripts/maint/count_tokens.py	maint	help	PASS	0	0.0	
+scripts/maint/layers.py	maint	import-only	PASS	0	0.0	
+scripts/maint/orch_check.py	maint	import-only	PASS	0	0.0	
+scripts/site/README.md	data	data	PASS		0.0	
+scripts/site/ab_plan.py	utility	help	PASS	0	0.0	
+scripts/site/ab_plan.py	utility	run --selftest	PASS	0	0.9	
+scripts/site/build_profile.py	step	run --check	PASS	0	0.4	
+scripts/site/checklist_export.py	utility	help	PASS	0	0.0	
+scripts/site/geo_probe.py	utility	help	PASS	0	0.0	
+scripts/site/geo_probe.py	utility	run --selftest	PASS	0	0.0	
+scripts/site/ia_probe.py	utility	help	PASS	0	0.1	
+scripts/site/ia_probe.py	utility	run --selftest	PASS	0	0.6	
+scripts/site/page_anatomy.py	utility	help	PASS	0	0.1	
+scripts/site/page_gates.py	utility	help	PASS	0	0.0	
+scripts/site/page_gates.py	utility	run --selftest	PASS	0	0.3	
+scripts/site/plan_to_assets.py	utility	help	PASS	0	0.0	
+scripts/site/run_axe_targets.py	step	compile	PASS	0	0.0	
+scripts/site/site_validate.py	utility	run --selftest	PASS	0	6.5	
+scripts/site/vocab_lint.py	utility	help	PASS	0	0.0	
+scripts/site/vocab_lint.py	utility	run --selftest	PASS	0	0.1	
+scripts/text/README.md	data	data	PASS		0.0	
+scripts/text/chain_inputs.py	step	help	PASS	0	0.0	
+scripts/text/chain_inputs.py	step	run --selftest	PASS	0	0.1	
+scripts/text/check_intake.py	step	help	PASS	0	0.0	
+scripts/text/check_intake.py	step	run --selftest	PASS	0	0.0	
+scripts/text/claims_check.py	utility	help	PASS	0	0.1	
+scripts/text/claims_check.py	utility	run --selftest	PASS	0	0.6	
+scripts/text/copy_extract.py	utility	help	PASS	0	0.0	
+scripts/text/copy_extract.py	utility	run --selftest	PASS	0	0.0	
+scripts/text/copy_lint.py	utility	help	PASS	0	0.1	
+scripts/text/copy_lint.py	utility	run --selftest	PASS	0	8.4	
+scripts/text/copydeck.py	utility	help	PASS	0	0.1	
+scripts/text/copydeck.py	utility	run --selftest	PASS	0	10.0	
+scripts/text/make_skeleton.py	step	help	PASS	0	0.0	
+scripts/text/run_checks.py	step	run	PASS	0	31.9	
+scripts/text/ux_dict_to_yaml.py	utility	help	PASS	0	0.0	
+scripts/text/ux_dict_to_yaml.py	utility	run --check	PASS	0	0.1	
+scripts/text/validate_any.py	step	import-only	PASS	0	0.1	
+scripts/text/validate_any.py	step	run {skill}/kb/text/02-strategy-messaging/examples/meaning-otves.yaml {skill}/kb/text/02-strategy-messaging/examples/hierarchy-otves-product-aware.yaml	PASS	0	0.2	
+scripts/text/validate_facts.py	step	run	PASS	0	0.3	
+scripts/text/validate_meaning.py	step	run --quiet	PASS	0	0.8	
+scripts/text/validate_voice.py	step	run	PASS	0	0.8	
+scripts/ui/build_reference_tokens.py	utility	help	PASS	0	0.0	
+scripts/ui/build_reference_tokens.py	utility	run --out brt	PASS	0	0.0	
+scripts/ui/measure_ui.py	utility	help	PASS	0	0.0	
+scripts/ui/ui_audit.py	utility	help	PASS	0	0.0	
+scripts/ui/ui_audit.py	utility	run --selftest	PASS	0	0.0	
+scripts/ux/checklist_export.py	utility	import-only	PASS	0	0.0	
+scripts/lib/kbpaths.py	module	help	PASS	0	0.0	
+scripts/lib/kbpaths.py	module	run --selftest	PASS	0	0.0	
+scripts/tests/smoke.py	test	help	PASS	0	0.0	
+scripts/install.sh	maint	compile	PASS	0	0.0	
+scripts/install.sh	maint	run --dry-run	PASS	0	0.1	
+scripts/package.json	data	data	PASS		0.0	
+scripts/requirements.txt	data	data	PASS		0.0	
+scripts/README.md	data	data	PASS		0.0	
