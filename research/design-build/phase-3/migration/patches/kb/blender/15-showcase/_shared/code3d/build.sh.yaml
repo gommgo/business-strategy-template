@@ -1,0 +1,12 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/15-showcase/_shared/code3d/build.sh
+source_sha256: b1a4e8330a0c57780d57d0ea5455873a3d2b936d6f47a6e6e8c79e2a315b0055
+result_sha256: 5852faa3e81955c211a7b5e059e320bdce0980215a3875725c77500813c30763
+dest: .claude/skills/design-deep-dive/kb/blender/15-showcase/_shared/code3d/build.sh
+edits:
+- code: bin
+  find: export PATH=/home/mm/.nvm/versions/node/v24.21.0/bin:$PATH
+  replace: 'export PATH="${DDD_NODE:+$(dirname "$DDD_NODE"):}$PATH"  # перенос: node — из PATH или DDD_NODE'
+- code: node
+  find: N=$HOME/.cache/blender-research/npm-trial/node_modules
+  replace: 'N="${DDD_HOME:-${XDG_CACHE_HOME:-$HOME/.cache}/design-deep-dive}/node/node_modules"  # перенос: npm-зависимости скилла (scripts/package.json)'

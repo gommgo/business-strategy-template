@@ -1,0 +1,28 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: creative-research/99-raw/tools/motion_check.py
+source_sha256: bb712f79120cefe46f02687a26e5c8b5291ba67f1f0be61de280aa2615453d5d
+result_sha256: a3e60fac97022c9b87aff81ee19f160f49abd700c9c2c9cfe541cc072513df71
+dest: .claude/skills/design-deep-dive/scripts/creative/motion_check.py
+edits:
+- code: boot
+  find:
+  - HERE = os.path.dirname(os.path.abspath(__file__))
+  - sys.path.insert(0, HERE)
+  replace:
+  - HERE = os.path.dirname(os.path.abspath(__file__))
+  - sys.path.insert(0, HERE)
+  - 'sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+- code: root
+  find: ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
+  replace: ROOT = str(kbpaths.kb("creative"))
+- code: lock
+  find: LOCKS = ["/home/mm/Документы/app-design/.locks/browser.lock", os.path.join(HERE, ".locks", "browser.lock")]
+  replace: LOCKS = [kbpaths.lock_path("browser"), kbpaths.lock_path("browser", "creative")]
+- code: imp
+  find: os.path.join(HERE, "page_accept.py")
+  replace: str(kbpaths.scripts("ai-media", "page_accept.py"))
+  note: канон page_accept — ai-media (SYNTHESIS §4.1); копия creative не переносится
+- code: out
+  find: os.path.join(ROOT, "99-raw", "cache", "motion", slug)
+  replace: os.path.join(str(kbpaths.out("creative", "motion")), slug)

@@ -1,0 +1,9 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/12-recipes/examples/07-lowpoly-diorama/build.py
+source_sha256: a09cbdf3e13eb952fa6618d4fa2e0ba6a571b2b7f76f306a281a5d5f8904127d
+result_sha256: 39128ccfd41070d6f65116fc70ae8f33712527383ddafe6040143c1055ab8e97
+dest: .claude/skills/design-deep-dive/kb/blender/12-recipes/examples/07-lowpoly-diorama/build.py
+edits:
+- code: imp
+  find: sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
+  replace: 'import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender'

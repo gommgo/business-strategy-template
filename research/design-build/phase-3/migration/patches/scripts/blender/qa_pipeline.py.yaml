@@ -1,0 +1,19 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/99-raw/tools/qa_pipeline.py
+source_sha256: c860e854dd162fe6106db98a1a110099e7f371f852404801f999e55bbaedc114
+result_sha256: f01788f206a7d43e5fbe8493ecfff43782a8fa0f00341d87f6cbc20f4dd4551d
+dest: .claude/skills/design-deep-dive/scripts/blender/qa_pipeline.py
+edits:
+- code: root
+  find:
+  - ROOT = "/home/mm/Документы/app-design/blender-research"
+  - TOOLS = os.path.join(ROOT, "99-raw/tools")
+  - E26 = os.path.join(ROOT, "99-raw/experiments/E/26-doc-snippets")
+  - SERVE_BR = os.path.join(ROOT, "99-raw/experiments/F1/02-hero-variants")
+  replace:
+  - 'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+  - ROOT = str(kbpaths.kb("blender"))
+  - TOOLS = str(kbpaths.scripts("blender"))
+  - 'E26 = TOOLS  # перенос: preflight_block, glb_lint_block — scripts/blender'
+  - 'SERVE_BR = TOOLS  # перенос: serve_br — scripts/blender'

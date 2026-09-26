@@ -1,0 +1,762 @@
+# Правила переноса содержимого базы в шаблон — фаза 3, агент A (26.09.2026).
+# Источник правды раскладки — ../SKILL-MAP.md; решения — ../../DECISIONS.md (Р-номер = строка). Формат — SPEC.md §2.
+# Два упорядоченных набора: rules (всё в *-research/ и калибровка) и journal (всё в _skill-build/); в каждом первое
+# совпадение решает. Шаблоны match — glob от корня app-design: ** — любое число сегментов, * и ? — внутри сегмента,
+# {a,b} — варианты. class — условие на класс inventory.py; when: symlink — только симлинки.
+# action: take — копировать в dest; skip — не переносить; handoff — исполняемый код, место решает tools-map.tsv
+# (агент B); alias — побайтный дубль взятого файла: не копируется, ссылки на него ведут к канону (alias_of);
+# none — не содержимое скилла (файлы журнала вне калибровки).
+# dest — от корня шаблона: {skill}, {journal}, {base} (имя базы без -research), {path} (путь внутри базы),
+# {rest} (путь после буквального префикса match), {name}. По умолчанию: rules — {skill}/kb/{base}/{path};
+# journal — {journal}/{rest}. why — Р-номер, раздел SKILL-MAP или SYNTHESIS; без решения — open + блок open
+# (recommend — рекомендация агента A, она же текущее action; цена — scan-open.tsv и SPEC.md «На решение»).
+version: 1
+roots:
+  source: /home/mm/Документы/app-design
+  template: /home/mm/git/stit-core/business-strategy-template
+  skill: .claude/skills/design-deep-dive
+  journal: research/design-build
+bases:
+  ux-research: ux
+  ui-research: ui
+  site-research: site
+  text-research: text
+  creative-research: creative
+  ai-media-research: ai-media
+  blender-research: blender
+  claude-design-research: claude-design
+inventory:                       # классы — _skill-build/tools/inventory.py (classify), тот же код считает ссылки
+  code: _skill-build/tools/inventory.py
+  take_by_default: [prose, data, code, root-doc]        # SKILL-MAP §2.1
+  skip_by_default: [asset, bundle, junk, service, forbidden, other]
+  handoff_by_default: [tool]                            # 99-raw/tools — агент B
+  service_dirs: [90-sources, 91-videos, 99-raw]
+  junk:                          # копия множеств inventory.py для читателя; действует код inventory.py
+    dirs: [__pycache__, node_modules, .venv, venv, venv-*, site-packages, .cache, .pytest_cache, .mypy_cache, dist, .git,
+           .next, .astro]
+    ext: [.pyc, .pyo, .log, .map, .tmp, .swp, .lock]
+    names: [.DS_Store, package-lock.json, pnpm-lock.yaml, yarn.lock, Thumbs.db]
+  forbidden: [claude-design-research/99-raw/cache/**]
+  instruction_files: [CLAUDE.md, CLAUDE.local.md, AGENTS.md, SKILL.md, GEMINI.md, .mcp.json, .claude/, .git/]
+purposes:
+  kb: тематика и корневые документы базы 1:1 — kb/<база>/<тот же путь>
+  raw-norm: отобранное некодовое из 99-raw с нормами «к разбору» — kb/<база>/99-raw/<старый путь>
+  build-input: входы сверки баз (handoff) — kb/<база>/99-raw/<старый путь>
+  ref-code: эталонный код из 99-raw (исходники рецептов, сцены) — kb/<база>/99-raw/<старый путь>
+  asset-min: минимальные ассеты эталонов (Р41, Р57 вариант А) — на своих местах в kb
+  code-data: файлы, которые читает только код — scripts/<база>/data/
+  calibration: калибровочный набор — assets/calibration/
+  journal: журнал сборки — research/design-build/
+
+rules:
+  # ---------------------------------------------------------------- страховка: то, что не едет никогда
+  - id: g-forbidden
+    match: "claude-design-research/99-raw/cache/**"
+    action: skip
+    why: SYNTHESIS §3.4; Р97
+    note: закрытые тексты Anthropic, снимки промта Claude Design, клон Open Design
+  - id: g-symlink
+    match: "**"
+    when: symlink
+    action: skip
+    why: SKILL-MAP §5
+    note: симлинки не переносятся (их цели — вне базы или дубли); inventory.py их тоже пропускает
+  - id: g-instructions
+    match: ["**/{CLAUDE.md,CLAUDE.local.md,AGENTS.md,SKILL.md,GEMINI.md,.mcp.json}", "**/.claude/**", "**/.git/**"]
+    action: skip
+    why: Р97; SKILL-MAP §5
+    note: файлы, которые Claude Code грузит как инструкции; вне 99-raw/cache такие есть в 99-raw/experiments site и text
+
+  # ---------------------------------------------------------------- исключения из «без ассетов» (до страховки от мусора)
+  - id: cr-asset-fonts
+    match: "creative-research/10-recipes/examples/_shared/fonts/**"
+    action: take
+    purpose: asset-min
+    why: Р41
+    note: 10 woff2 (OFL) + 5 LICENSE
+  - id: cr-asset-img
+    match: "creative-research/10-recipes/examples/l2-zveno/img/*.webp"
+    action: take
+    purpose: asset-min
+    why: Р41
+    note: 7 своих рендеров L2; img/render.log — мусор (g-junk)
+  - id: cr-asset-bundle
+    match: "creative-research/10-recipes/examples/l2-zveno/js/three-scene.js"
+    action: take
+    purpose: asset-min
+    why: Р41
+    note: бандл сцены L2 (класс bundle); исходник — cr-scene-src
+  - id: bl-asset-hero
+    match: ["blender-research/12-recipes/examples/01-hero-product/{case.glb,poster.avif,poster.webp}",
+            "blender-research/12-recipes/examples/01-hero-product/dist/**"]
+    action: take
+    purpose: asset-min
+    why: Р57 (вариант А); SKILL-MAP §2.5
+    note: «постер → 3D после LCP» живым; dist/ — класс junk, берётся исключением
+
+  # ---------------------------------------------------------------- мусор
+  - id: g-junk
+    match: "**"
+    class: [junk]
+    action: skip
+    why: SYNTHESIS §3.4 (мусор)
+  - id: bl-junk-chunk
+    match: "blender-research/15-showcase/zveno/c-hybrid/js/chunks/chunk-2RVMEKYY.js"
+    action: skip
+    why: SYNTHESIS §3.4 (мусор)
+    note: кусок бандла, срез ошибочно пометил кодом
+
+  # ---------------------------------------------------------------- исполняемый код → агент B (tools-map.tsv)
+  - id: g-tools-env
+    match: "*-research/99-raw/tools/{bin,models,.locks}/**"
+    action: skip
+    why: Р55; Р59; Р90
+    note: бинарники, модели ONNX, блокировки — вне репозитория, ставит install.sh
+  - id: g-tools
+    match: "*-research/99-raw/tools/**"
+    action: handoff
+    why: SKILL-MAP §2.2
+    note: утилиты, tests/, node/package.json, README.md (→ scripts/<база>/README.md)
+  - id: cd-kit
+    match: "claude-design-research/04-claude-code-native/kit/**"
+    action: handoff
+    why: SKILL-MAP §1; Р87
+    note: kit → scripts/claude-design/kit/ целиком (вместе с example/ и canvas.json)
+  - id: bl-utils-thematic
+    match: ["blender-research/03-bpy-api/snippets/*.py",
+            "blender-research/12-recipes/examples/_kit/**",
+            "blender-research/11-evaluation-qa/regression/*.py",
+            "blender-research/15-showcase/_shared/{img_metrics,sheet,build_index,rules_journal}.py",
+            "blender-research/15-showcase/gallery/build.py",
+            "blender-research/15-showcase/vote/{build_pairs,tally,vote_server}.py",
+            "blender-research/15-showcase/vote/index.html"]
+    action: handoff
+    why: SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2
+    note: утилиты в тематике; build_index, rules_journal, gallery/build.py — «не брать» (§4.2), решает B
+  - id: text-steps
+    match: ["text-research/99-raw/experiments/I/04-chain-manual/{check_intake,chain_inputs,make_skeleton,validate_any}.py",
+            "text-research/99-raw/experiments/B1/03-schema-validate/validate.py",
+            "text-research/99-raw/experiments/B2/01-schema-validate/validate.py",
+            "text-research/99-raw/experiments/F/03-schema-lint/validate_voice.py"]
+    action: handoff
+    why: Р33
+  - id: text-run-checks
+    match: "text-research/99-raw/experiments/J/08-examples/run_checks.py"
+    action: handoff
+    why: SYNTHESIS §3.2 (кандидат без решения — решает B)
+  - id: cr-validators
+    match: ["creative-research/99-raw/experiments/I/01-schemas/{spec_check,compat_check}.py",
+            "creative-research/99-raw/experiments/A/01-art-direction-examples/ad_check.py",
+            "creative-research/99-raw/experiments/J/03-recipes-check/recipe_check.py",
+            "creative-research/99-raw/experiments/H/03-registry-check/registry_check.py",
+            "creative-research/99-raw/experiments/G/00-registry/validate_stack.py",
+            "creative-research/99-raw/experiments/J/02-l2-zveno/idle_probe.py"]
+    action: handoff
+    why: Р37
+  - id: am-modules
+    match: ["ai-media-research/99-raw/experiments/A/04-image-marker-metrics/image_metrics.py",
+            "ai-media-research/99-raw/experiments/F/02-text-zone/text_zone.py",
+            "ai-media-research/99-raw/experiments/F/04-slop-metrics/composition_metrics.py",
+            "ai-media-research/99-raw/experiments/F/05-color/palette.py",
+            "ai-media-research/99-raw/experiments/F/06-series-metrics/{series_metrics,split_grid}.py",
+            "ai-media-research/99-raw/experiments/G/check_icons.py",
+            "ai-media-research/99-raw/phase5/runs/MS-marea/loop_rife_bridge.py",
+            "ai-media-research/99-raw/phase5/runs/S4-capability/tools/{svg_sheet,vm_sheet}.py",
+            "ai-media-research/99-raw/experiments/B/14-landing-assets/split_recraft.py",
+            "ai-media-research/99-raw/experiments/M/06-og-marketplace/layout_check.py",
+            "ai-media-research/99-raw/experiments/N/04-update-dryrun/channel_diff.py",
+            "ai-media-research/99-raw/experiments/M/10-recipes-yaml/validate_recipes.py"]
+    action: handoff
+    why: Р54
+  - id: am-3d
+    match: "ai-media-research/99-raw/experiments/3D/**/{glb_pipeline,compare_video,glb_probe}.py"
+    action: handoff
+    why: SYNTHESIS §3.2 (кандидат без решения — решает B)
+    note: нужны, только если оставлять управляемый поворот
+  - id: bl-libs
+    match: ["blender-research/99-raw/experiments/D1/_lib/{d1lib,d1exp}.py",
+            "blender-research/99-raw/experiments/D2/_lib/d2lib.py",
+            "blender-research/99-raw/experiments/E/24-presets/presets.py",
+            "blender-research/99-raw/experiments/C1/10-scene-audit/scene_audit.py",
+            "blender-research/99-raw/experiments/C1/16-passport-asserts/passport_asserts.py",
+            "blender-research/99-raw/experiments/E/26-doc-snippets/{preflight_block,glb_lint_block}.py",
+            "blender-research/99-raw/experiments/F1/02-hero-variants/serve_br.py",
+            "blender-research/99-raw/experiments/H/_lib/animx.py",
+            "blender-research/99-raw/experiments/K/01-run-recipes/run_recipes.py"]
+    action: handoff
+    why: Р57
+  - id: site-tools-exp
+    match: ["site-research/99-raw/experiments/K/03-gates-v1/run_axe_targets.py",
+            "site-research/99-raw/experiments/K/02-ux-profile/build_profile.py"]
+    action: handoff
+    why: Р66
+
+  # ---------------------------------------------------------------- данные кода → scripts/<база>/data/
+  - id: am-lucide-ref
+    match: "ai-media-research/99-raw/experiments/G/01-llm-svg-icons/lucide-ref/**"
+    action: take
+    purpose: code-data
+    dest: "{skill}/scripts/ai-media/data/lucide-ref/{rest}"
+    why: Р54; SKILL-MAP §2.4, §2.5
+    note: эталонные иконки для check_icons (ISC)
+  - id: am-genapi-prices
+    match: "ai-media-research/99-raw/experiments/P/04-ru-aggregators/genapi_prices_2026-09-23.json"
+    action: take
+    purpose: code-data
+    dest: "{skill}/scripts/ai-media/data/{name}"
+    why: Р54 (SYNTHESIS §3.1 «прайс P/04»); SKILL-MAP §2.4
+    note: цены Gen-API читает mp_client.py
+  - id: am-routerai-catalog
+    match: "ai-media-research/99-raw/experiments/P/04-ru-aggregators/routerai_models.json"
+    action: skip
+    why: Р76 п. 15
+  - id: bl-hdri
+    match: "blender-research/99-raw/experiments/E/_assets/studio_small_09_1k.hdr"
+    action: take
+    purpose: code-data
+    dest: "{skill}/scripts/blender/data/{name}"
+    why: Р76 п. 18; SKILL-MAP §2.4, §2.5
+    note: HDRI по умолчанию gltf_diff.py (CC0), 1,6 МБ
+
+  # ---------------------------------------------------------------- 99-raw → kb/<база>/99-raw/<старый путь> («к разбору»)
+  - id: ux-x-audit
+    match: "ux-research/99-raw/reports/wave4-X-audit.md"
+    action: take
+    purpose: raw-norm
+    why: Р50; SKILL-MAP §2.4
+    note: §2.1 — таблица канонов (54 строки) нормой
+  - id: ux-handoff-ui
+    match: "ux-research/99-raw/handoff-to-ui-research.md"
+    action: take
+    purpose: build-input
+    why: open
+    open:
+      question: handoff ux → ui (аналог handoff-to-neighbours; §4–§5 — открытые вопросы стыка ux ↔ ui) — брать ли как вход сверки
+      recommend: take
+      alt: skip
+      ref: SKILL-MAP §2.4 (по аналогии); light/ux §3.2
+  - id: site-x-audit
+    match: "site-research/99-raw/reports/wave4-X-audit.md"
+    action: take
+    purpose: raw-norm
+    why: Р66; SKILL-MAP §2.4
+  - id: site-triad
+    match: "site-research/99-raw/notes/triad-contract-2026-09-24.md"
+    action: take
+    purpose: raw-norm
+    why: Р66; SKILL-MAP §2.4
+  - id: site-ac-profile
+    match: "site-research/99-raw/experiments/K/02-ux-profile/ac-profile.tsv"
+    action: take
+    purpose: raw-norm
+    why: Р66; SKILL-MAP §2.4
+  - id: site-common
+    match: "site-research/99-raw/prompts/_common.md"
+    action: take
+    purpose: raw-norm
+    why: open
+    open:
+      question: site _common.md — таблица «Кто чем владеет» (15 строк) и формат файла; 9 ссылок из содержимого
+      recommend: take
+      alt: skip
+      ref: SYNTHESIS §5.3; light/site §2.3
+  - id: text-temp-vocabulary
+    match: "text-research/99-raw/notes/temp-vocabulary-v0.yaml"
+    action: take
+    purpose: raw-norm
+    why: Р33; SKILL-MAP §2.4
+    note: читают copydeck, claims_check, copy_lint, copy_extract; 133 ссылки из crosswalk.tsv site
+  - id: text-voice-facts-demo
+    match: "text-research/99-raw/experiments/F/04-voice-samples/facts-demo-{grafa,peklo}.yaml"
+    action: take
+    purpose: raw-norm
+    why: Р112
+    note: на них ссылаются примеры голоса kb/text/05-voice-editorial/examples (facts_ref); без них падает validate_voice
+  - id: text-x-audit
+    match: "text-research/99-raw/reports/wave4-X-audit.md"
+    action: take
+    purpose: raw-norm
+    why: Р34; SKILL-MAP §2.4
+    note: §6 — канон дублей Д1–Д15, §7 — калибровка К1–К31
+  - id: cr-x-audit
+    match: "creative-research/99-raw/reports/wave4-X-audit.md"
+    action: take
+    purpose: raw-norm
+    why: SKILL-MAP §2.4; SYNTHESIS §5.2
+  - id: cr-common
+    match: "creative-research/99-raw/prompts/_common.md"
+    action: take
+    purpose: raw-norm
+    why: SKILL-MAP §2.4
+    note: «Решения заказчика» п. 1–6 — вторая нумерация решений creative
+  - id: cr-scene-src
+    match: "creative-research/99-raw/experiments/J/04-light-pass/src/scene.js"
+    action: take
+    purpose: ref-code
+    why: Р76 п. 17
+  - id: am-x-audit
+    match: "ai-media-research/99-raw/reports/wave4-X-audit.md"
+    action: take
+    purpose: raw-norm
+    why: SKILL-MAP §2.4
+    note: «отчёты аудита X целиком»; по выжимке §3 и «Продолжение X2» — история, решает уборка
+  - id: am-phase5-format
+    match: "ai-media-research/99-raw/phase5/README.md"
+    action: take
+    purpose: raw-norm
+    why: Р54; SKILL-MAP §2.4
+    note: формат заданий генерации
+  - id: bl-x-audit
+    match: "blender-research/99-raw/reports/wave4-X-audit.md"
+    action: take
+    purpose: raw-norm
+    why: Р76 п. 23; SKILL-MAP §2.4
+    note: §4 — канонические места чисел (нормой)
+  - id: g-handoff-neighbours
+    match: "{site,text,creative,blender}-research/99-raw/handoff-to-neighbours.md"
+    action: take
+    purpose: build-input
+    why: SKILL-MAP §2.4
+  - id: g-module-readmes
+    match: ["ai-media-research/99-raw/experiments/{A/04-image-marker-metrics,B/14-landing-assets,F/02-text-zone,F/04-slop-metrics,F/05-color,F/06-series-metrics,M/06-og-marketplace,M/10-recipes-yaml,N/04-update-dryrun}/README.md",
+            "blender-research/99-raw/experiments/{C1/16-passport-asserts,D1/_lib,E/24-presets,E/26-doc-snippets,F1/02-hero-variants,H/_lib,K/01-run-recipes}/README.md",
+            "creative-research/99-raw/experiments/{A/01-art-direction-examples,G/00-registry,H/03-registry-check,I/01-schemas}/README.md",
+            "site-research/99-raw/experiments/K/{02-ux-profile,03-gates-v1}/README.md",
+            "text-research/99-raw/experiments/{B1/03-schema-validate,B2/01-schema-validate,F/03-schema-lint,I/04-chain-manual,J/08-examples}/README.md"]
+    action: take
+    purpose: raw-norm
+    why: open
+    open:
+      question: README папок опытов, чьи модули и шаги уходят в scripts/ (входы, выходы, проверки шагов; 21 ссылка из содержимого, из них 10 — на I/04-chain-manual text)
+      recommend: take
+      alt: skip
+      ref: Р33, Р37, Р54, Р57, Р66 (берутся модули); SKILL-MAP §2.4
+  - id: g-triad-copies
+    match: "text-research/99-raw/notes/triad-contract-2026-09-24.md"
+    action: alias
+    alias_of: site-research/99-raw/notes/triad-contract-2026-09-24.md
+    why: SKILL-MAP §2.4 (контракт тройки — site); дубль побайтно
+  - id: g-triad-copies-cr
+    match: "creative-research/99-raw/notes/triad-contract-2026-09-24.md"
+    action: alias
+    alias_of: site-research/99-raw/notes/triad-contract-2026-09-24.md
+    why: SKILL-MAP §2.4 (контракт тройки — site); дубль побайтно
+  - id: bl-rc-checks
+    match: "blender-research/99-raw/notes/trial/RC-checks/*.py"
+    action: take
+    purpose: ref-code
+    why: Р76 п. 16
+    note: проверки рецептов 13–17 (rc_vote_tally.py и др.)
+  - id: bl-track-handoff
+    match: "blender-research/99-raw/experiments/{Z,CD,KB,SD,VD}/HANDOFF-3.md"
+    action: take
+    purpose: ref-code
+    why: open
+    open:
+      question: итоговые HANDOFF-3.md пяти дорожек — карта финальных исходников и чисел рецептов 13–17
+      recommend: take
+      alt: skip
+      ref: Р76 п. 16 (берём только исходники); ссылки из VERDICT и рецептов 14–16
+  - id: bl-track-alias-velmora
+    match: "blender-research/99-raw/experiments/VD/01-build/velmora_v6_final.py"
+    action: alias
+    alias_of: blender-research/99-raw/experiments/VD/01-build/velmora.py
+    why: Р76 п. 16; дубль побайтно
+  - id: bl-track-alias-scene-v2
+    match: "blender-research/99-raw/experiments/CD/src/scene-v2.js"
+    action: alias
+    alias_of: creative-research/99-raw/experiments/J/04-light-pass/src/scene.js
+    why: Р76 п. 16, п. 17; дубль побайтно
+  - id: bl-tracks
+    # Выведено rules_eval.py --derive-blender-sources: код дорожек без out/, dist/, бандлов, отладки, запускалок
+    # итераций (из .sh — только build, pack, run_gates*); из семейства версий — файл без версии, иначе старшая.
+    # Дубли исходников страниц 15-showcase и стилей creative (≈ 0,2 МБ) остаются копиями: dedupe рвал бы
+    # относительные импорты внутри деревьев KB/08-pages и SD/pages.
+    action: take
+    purpose: ref-code
+    why: Р57; Р76 п. 16
+    match:
+      - "blender-research/99-raw/experiments/CD/ao/ao.html"
+      - "blender-research/99-raw/experiments/CD/ao/ao.js"
+      - "blender-research/99-raw/experiments/CD/ao/ao_run.py"
+      - "blender-research/99-raw/experiments/CD/ao/build.sh"
+      - "blender-research/99-raw/experiments/CD/ao/w_base.js"
+      - "blender-research/99-raw/experiments/CD/ao/w_gtao.js"
+      - "blender-research/99-raw/experiments/CD/ao/w_n8.js"
+      - "blender-research/99-raw/experiments/CD/ao/w_ssao.js"
+      - "blender-research/99-raw/experiments/CD/bench.html"
+      - "blender-research/99-raw/experiments/CD/build.sh"
+      - "blender-research/99-raw/experiments/CD/hook2/hook2.html"
+      - "blender-research/99-raw/experiments/CD/hook2/hook2_run.py"
+      - "blender-research/99-raw/experiments/CD/hook2/split_inner.mjs"
+      - "blender-research/99-raw/experiments/CD/lp.py"
+      - "blender-research/99-raw/experiments/CD/p2_bench_summary.py"
+      - "blender-research/99-raw/experiments/CD/p2_metrics.py"
+      - "blender-research/99-raw/experiments/CD/preview.html"
+      - "blender-research/99-raw/experiments/CD/run_gates.sh"
+      - "blender-research/99-raw/experiments/CD/run_gates_final.sh"
+      - "blender-research/99-raw/experiments/CD/src/post-v3p1.js"
+      - "blender-research/99-raw/experiments/CD/src/scene-v3p1.js"
+      - "blender-research/99-raw/experiments/CD/tsl/build.sh"
+      - "blender-research/99-raw/experiments/CD/tsl/common.js"
+      - "blender-research/99-raw/experiments/CD/tsl/gl.html"
+      - "blender-research/99-raw/experiments/CD/tsl/gl.js"
+      - "blender-research/99-raw/experiments/CD/tsl/tsl.html"
+      - "blender-research/99-raw/experiments/CD/tsl/tsl.js"
+      - "blender-research/99-raw/experiments/CD/tsl/tsl_run.py"
+      - "blender-research/99-raw/experiments/CD/white_check.py"
+      - "blender-research/99-raw/experiments/CD/write_numbers_p2.py"
+      - "blender-research/99-raw/experiments/CD/write_numbers_p3.py"
+      - "blender-research/99-raw/experiments/KB/01-build/build.py"
+      - "blender-research/99-raw/experiments/KB/01-build/check_weight.py"
+      - "blender-research/99-raw/experiments/KB/01-build/make_atlas.py"
+      - "blender-research/99-raw/experiments/KB/02-light-study/study.py"
+      - "blender-research/99-raw/experiments/KB/03-hero/colorways.py"
+      - "blender-research/99-raw/experiments/KB/03-hero/hero.py"
+      - "blender-research/99-raw/experiments/KB/04-variants/run_three_test.py"
+      - "blender-research/99-raw/experiments/KB/04-variants/variants_export.py"
+      - "blender-research/99-raw/experiments/KB/04-variants/web/index.html"
+      - "blender-research/99-raw/experiments/KB/04-variants/web/src/test.js"
+      - "blender-research/99-raw/experiments/KB/05-code-a/index.html"
+      - "blender-research/99-raw/experiments/KB/05-code-a/shot.py"
+      - "blender-research/99-raw/experiments/KB/05-code-a/src/kb3.js"
+      - "blender-research/99-raw/experiments/KB/05-code-a/src/main.js"
+      - "blender-research/99-raw/experiments/KB/06-export/export_web.py"
+      - "blender-research/99-raw/experiments/KB/06-export/make_web_atlas.py"
+      - "blender-research/99-raw/experiments/KB/06-export/pack.sh"
+      - "blender-research/99-raw/experiments/KB/07-b/brender.py"
+      - "blender-research/99-raw/experiments/KB/07-b/edge_check.py"
+      - "blender-research/99-raw/experiments/KB/07-b/encode.py"
+      - "blender-research/99-raw/experiments/KB/08-pages/build_pages.py"
+      - "blender-research/99-raw/experiments/KB/08-pages/page.css"
+      - "blender-research/99-raw/experiments/KB/08-pages/src/adapter_b.js"
+      - "blender-research/99-raw/experiments/KB/08-pages/src/capture.js"
+      - "blender-research/99-raw/experiments/KB/08-pages/src/main_3d.js"
+      - "blender-research/99-raw/experiments/KB/08-pages/src/main_a.js"
+      - "blender-research/99-raw/experiments/KB/08-pages/src/main_b.js"
+      - "blender-research/99-raw/experiments/KB/08-pages/src/main_c.js"
+      - "blender-research/99-raw/experiments/KB/08-pages/src/model_a.js"
+      - "blender-research/99-raw/experiments/KB/08-pages/src/model_c.js"
+      - "blender-research/99-raw/experiments/KB/08-pages/src/page.js"
+      - "blender-research/99-raw/experiments/KB/08-pages/src/post.js"
+      - "blender-research/99-raw/experiments/KB/08-pages/src/proxy.js"
+      - "blender-research/99-raw/experiments/KB/08-pages/src/stage3d.js"
+      - "blender-research/99-raw/experiments/KB/08-pages/template.html"
+      - "blender-research/99-raw/experiments/KB/09-capture/capture.py"
+      - "blender-research/99-raw/experiments/KB/10-check/drive.py"
+      - "blender-research/99-raw/experiments/KB/10-check/mob_touch.py"
+      - "blender-research/99-raw/experiments/KB/11-gates/run_gates.sh"
+      - "blender-research/99-raw/experiments/KB/11-gates/run_gates_inner.sh"
+      - "blender-research/99-raw/experiments/KB/_lib/kbb.py"
+      - "blender-research/99-raw/experiments/KB/_lib/kbm.py"
+      - "blender-research/99-raw/experiments/KB/_lib/kbp.py"
+      - "blender-research/99-raw/experiments/KB/_lib/kbr.py"
+      - "blender-research/99-raw/experiments/KB/_lib/kbtop.py"
+      - "blender-research/99-raw/experiments/KB/fill_readme.py"
+      - "blender-research/99-raw/experiments/KB/make_numbers.py"
+      - "blender-research/99-raw/experiments/SD/gates/run_gates.sh"
+      - "blender-research/99-raw/experiments/SD/gates/run_gates_sd3.sh"
+      - "blender-research/99-raw/experiments/SD/pagebuild/assets_b.py"
+      - "blender-research/99-raw/experiments/SD/pagebuild/build_pages.py"
+      - "blender-research/99-raw/experiments/SD/pagebuild/fx.css"
+      - "blender-research/99-raw/experiments/SD/pagebuild/fx_assets.py"
+      - "blender-research/99-raw/experiments/SD/pagebuild/icons_web.py"
+      - "blender-research/99-raw/experiments/SD/pagebuild/iso.css"
+      - "blender-research/99-raw/experiments/SD/pagebuild/src/fonarik.js"
+      - "blender-research/99-raw/experiments/SD/pages/a-plan/_shared/fonts.css"
+      - "blender-research/99-raw/experiments/SD/pages/a-plan/_shared/marketing-tokens.css"
+      - "blender-research/99-raw/experiments/SD/pages/a-plan/index.html"
+      - "blender-research/99-raw/experiments/SD/pages/a-plan/style.css"
+      - "blender-research/99-raw/experiments/SD/pages/b-grid/_shared/fonts.css"
+      - "blender-research/99-raw/experiments/SD/pages/b-grid/_shared/marketing-tokens.css"
+      - "blender-research/99-raw/experiments/SD/pages/b-grid/index.html"
+      - "blender-research/99-raw/experiments/SD/pages/b-grid/style.css"
+      - "blender-research/99-raw/experiments/SD/pages/b-plan/_shared/fonts.css"
+      - "blender-research/99-raw/experiments/SD/pages/b-plan/_shared/marketing-tokens.css"
+      - "blender-research/99-raw/experiments/SD/pages/b-plan/index.html"
+      - "blender-research/99-raw/experiments/SD/pages/b-plan/style.css"
+      - "blender-research/99-raw/experiments/SD/scripts/bench_check.py"
+      - "blender-research/99-raw/experiments/SD/scripts/fx_bench2.py"
+      - "blender-research/99-raw/experiments/SD/scripts/fx_shots.py"
+      - "blender-research/99-raw/experiments/SD/scripts/fx_video.py"
+      - "blender-research/99-raw/experiments/SD/scripts/gallery_compose.py"
+      - "blender-research/99-raw/experiments/SD/scripts/gallery_shots.py"
+      - "blender-research/99-raw/experiments/SD/scripts/inspect_blend.py"
+      - "blender-research/99-raw/experiments/SD/scripts/iso_grid.py"
+      - "blender-research/99-raw/experiments/SD/scripts/judge_shots.py"
+      - "blender-research/99-raw/experiments/SD/scripts/make_icon_tex.py"
+      - "blender-research/99-raw/experiments/SD/scripts/onwhite.py"
+      - "blender-research/99-raw/experiments/SD/scripts/passes_convert.py"
+      - "blender-research/99-raw/experiments/SD/scripts/raycheck.py"
+      - "blender-research/99-raw/experiments/SD/scripts/run_hero.py"
+      - "blender-research/99-raw/experiments/SD/scripts/run_icons_v3.py"
+      - "blender-research/99-raw/experiments/SD/scripts/run_objects.py"
+      - "blender-research/99-raw/experiments/SD/scripts/run_stamp.py"
+      - "blender-research/99-raw/experiments/SD/scripts/run_study.py"
+      - "blender-research/99-raw/experiments/SD/scripts/run_v2.py"
+      - "blender-research/99-raw/experiments/SD/scripts/sdano_lib.py"
+      - "blender-research/99-raw/experiments/SD/scripts/sdano_v2.py"
+      - "blender-research/99-raw/experiments/SD/scripts/stamp_comp.py"
+      - "blender-research/99-raw/experiments/SD/scripts/stamp_shots.py"
+      - "blender-research/99-raw/experiments/SD/scripts/stamp_tex.py"
+      - "blender-research/99-raw/experiments/SD/scripts/topdown_hf.py"
+      - "blender-research/99-raw/experiments/VD/01-build/make_label.py"
+      - "blender-research/99-raw/experiments/VD/01-build/velmora.py"
+      - "blender-research/99-raw/experiments/VD/04-judge/judge.py"
+      - "blender-research/99-raw/experiments/VD/04-judge/judge3.py"
+      - "blender-research/99-raw/experiments/VD/06-look/dir_analyze.py"
+      - "blender-research/99-raw/experiments/VD/06-look/look_sheet.py"
+      - "blender-research/99-raw/experiments/VD/07-orbit/run_orbit.py"
+      - "blender-research/99-raw/experiments/VD/08-enc/build_seq.py"
+      - "blender-research/99-raw/experiments/VD/09-page/make_page.py"
+      - "blender-research/99-raw/experiments/VD/09-page/numbers_phase2.py"
+      - "blender-research/99-raw/experiments/VD/10-shots/shots.py"
+      - "blender-research/99-raw/experiments/VD/11-gallery/gallery.py"
+      - "blender-research/99-raw/experiments/VD/tools/peak.py"
+      - "blender-research/99-raw/experiments/Z/check_b.py"
+      - "blender-research/99-raw/experiments/Z/encode_seq.py"
+      - "blender-research/99-raw/experiments/Z/lib/zgeo.py"
+      - "blender-research/99-raw/experiments/Z/lib/zkin.py"
+      - "blender-research/99-raw/experiments/Z/lib/zmat.py"
+      - "blender-research/99-raw/experiments/Z/lib/zpass.py"
+      - "blender-research/99-raw/experiments/Z/lib/zstudio.py"
+      - "blender-research/99-raw/experiments/Z/lpz.py"
+      - "blender-research/99-raw/experiments/Z/make_gallery_z.py"
+      - "blender-research/99-raw/experiments/Z/make_judge2.py"
+      - "blender-research/99-raw/experiments/Z/make_labels.py"
+      - "blender-research/99-raw/experiments/Z/make_sheets.py"
+      - "blender-research/99-raw/experiments/Z/preview.html"
+      - "blender-research/99-raw/experiments/Z/rec_b.py"
+      - "blender-research/99-raw/experiments/Z/rec_c.py"
+      - "blender-research/99-raw/experiments/Z/run_gates.sh"
+      - "blender-research/99-raw/experiments/Z/run_gates_c.sh"
+      - "blender-research/99-raw/experiments/Z/write_numbers.py"
+      - "blender-research/99-raw/experiments/Z/write_numbers2.py"
+      - "blender-research/99-raw/experiments/Z/write_numbers3.py"
+      - "blender-research/99-raw/experiments/Z/zbuild.py"
+      - "blender-research/99-raw/experiments/Z/zmetrics.py"
+      - "blender-research/99-raw/experiments/Z/zq.py"
+      - "blender-research/99-raw/experiments/Z/zrender.py"
+      - "blender-research/99-raw/experiments/Z/zseq.py"
+      - "blender-research/99-raw/experiments/Z/zweb_all.py"
+      - "blender-research/99-raw/experiments/Z/zweb_bake.py"
+      - "blender-research/99-raw/experiments/Z/zweb_tools.py"
+
+  # ---------------------------------------------------------------- тематика: не берём по решениям
+  - id: text-measurements
+    match: "text-research/03-corpus-measured/{measurements,corpus}.tsv"
+    action: skip
+    why: Р32
+  - id: cr-lab
+    match: "creative-research/06-effects-catalog/lab/**"
+    action: skip
+    why: Р39
+  - id: cr-live-sites-md
+    match: "creative-research/03-live-sites-measured/*.md"
+    action: take
+    why: Р39 (md 03/01–02 и README остаются)
+  - id: cr-live-sites
+    match: "creative-research/03-live-sites-measured/**"
+    action: skip
+    why: Р39
+    note: sites.csv и записи замеров чужих сайтов
+  - id: am-model-cards
+    match: "ai-media-research/{03-image-models,04-video-models}/models/**"
+    action: skip
+    why: Р54
+    note: 63 YAML-карточки моделей
+  - id: am-routing-old
+    match: "ai-media-research/13-routing-matrix/routing.{v0,v1}.yaml"
+    action: skip
+    why: Р54
+  - id: site-v0-examples
+    match: ["site-research/01-foundations/site-brief.example.yaml",
+            "site-research/04-blocks/examples/**",
+            "site-research/06-multipage-ia/examples/**"]
+    action: skip
+    why: Р76 п. 19; SKILL-MAP §2.1
+    note: примеры v0/v0.9 — 3 уникальных (школа, услуги города, конференция) и 4 с аналогом v1
+  - id: bl-regression-data
+    match: "blender-research/11-evaluation-qa/regression/{manifest,results_baseline,results_negcheck}.json"
+    action: skip
+    why: Р58
+    note: данные регрессионного набора; протокол (04-regression-set.md, README) и скрипты — едут
+
+  # ---------------------------------------------------------------- тематика: без решения (SYNTHESIS §3.1, выжимки)
+  - id: site-v0-schemas
+    match: ["site-research/01-foundations/site-brief.schema.json",
+            "site-research/04-blocks/{blocks,page-plan}.schema.json",
+            "site-research/06-multipage-ia/site-map.schema.json"]
+    action: take
+    why: open
+    open:
+      question: схемы site v0/v0.9, заменённые v1 в 10-playbooks-contracts/schemas/; на них 35 ссылок (README, PLAN, схемы v1, crawlers.yaml, head-kit.yaml, lead-forms.yaml, text meaning.schema.yaml)
+      recommend: take
+      alt: skip
+      ref: SYNTHESIS §3.1; light/site §2.1
+  - id: site-kimi
+    match: ["site-research/01-foundations/site-brief.kimi-map.tsv",
+            "site-research/10-playbooks-contracts/examples/*/brief.kimi.home.yaml"]
+    action: skip
+    why: open
+    open:
+      question: проекция брифа site в пакет Kimi (kimi-map и выходы site_brief_to_kimi ×3)
+      recommend: skip
+      alt: take
+      ref: Р80 (в шаблоне Kimi не упоминается); SYNTHESIS §3.1, §4.2
+  - id: cr-site-brief-fields
+    match: "creative-research/01-creative-direction/drafts-for-site/site-brief-creative-fields.yaml"
+    action: take
+    why: open
+    open:
+      question: черновик полей creative для site-brief (вошли ли в site-brief v1 — не проверено; 3 ссылки)
+      recommend: take
+      alt: skip
+      ref: SYNTHESIS §3.1; light/creative §3.1
+  - id: am-demo-measure
+    match: "ai-media-research/14-recipes/examples/demo-landing/measure/**/*.json"
+    action: skip
+    why: open
+    open:
+      question: журналы замеров демо-лендинга (JSON с абсолютными путями; числа — в README примера)
+      recommend: skip
+      alt: take
+      ref: SYNTHESIS §3.1; light/ai-media §3.1
+  - id: bl-showcase-journals
+    match: ["blender-research/15-showcase/_shared/rules-journal.{md,json}",
+            "blender-research/15-showcase/vote/ai-screen.{md,json}",
+            "blender-research/15-showcase/verdict/index.html",
+            "blender-research/15-showcase/_shared/index-draft-s1.html",
+            "blender-research/15-showcase/_shared/digests/{01-references,03-web-delivery}.md"]
+    action: skip
+    why: open
+    open:
+      question: журналы витрины — журнал правил, ИИ-отсев, сгенерированный verdict/index.html, черновик индекса, дайджесты 01 и 03 (02 и 04 едут — на них ссылаются нормы)
+      recommend: skip
+      alt: take
+      ref: SYNTHESIS §3.1; light/blender §1.4, §3.1
+  - id: bl-showcase-page-data
+    match: "blender-research/15-showcase/keyboard/*/assets/data/**"
+    action: skip
+    why: open
+    open:
+      question: данные страниц клавиатуры (T_keys.json ×3 и др.) — рабочие данные страниц, без бандлов не открываются
+      recommend: skip
+      alt: take
+      ref: SYNTHESIS §3.1; light/blender §3.1
+  - id: bl-hero-lazy-probe
+    match: "blender-research/09-web-runtime/examples/hero-lazy/probe/**/*.json"
+    action: skip
+    why: open
+    open:
+      question: замеры probe/ эталона hero-lazy (числа — в README примера)
+      recommend: skip
+      alt: take
+      ref: SYNTHESIS §3.1; light/blender §1.7
+  - id: bl-hero-lazy-phone
+    match: "blender-research/09-web-runtime/examples/hero-lazy/assets/{camera_512.glb,poster.avif,poster.webp}"
+    action: skip
+    why: open
+    open:
+      question: телефонный набор hero-lazy (+0,61 МБ) к варианту А ассетов blender («по желанию»)
+      recommend: skip
+      alt: take
+      ref: Р57; SYNTHESIS §3.3
+
+  # ---------------------------------------------------------------- служебное баз
+  - id: g-skills-map
+    match: "{site,text,creative}-research/99-raw/skills-map.md"
+    action: skip
+    why: SKILL-MAP §2.1 (противоречат Р6)
+  - id: g-cache
+    match: "*-research/99-raw/cache/**"
+    action: skip
+    why: SKILL-MAP §5
+  - id: g-raw
+    match: "*-research/99-raw/**"
+    action: skip
+    why: SKILL-MAP §2.4; SYNTHESIS §3.4
+    note: всё не отобранное выше
+  - id: g-sources-videos
+    match: "*-research/{90-sources,91-videos}/**"
+    action: skip
+    why: SKILL-MAP §2.1; SYNTHESIS §3.4
+
+  # ---------------------------------------------------------------- калибровочный набор
+  - id: cal-frames
+    match: "_skill-build/phase-3/calibration/frames/*"
+    action: take
+    purpose: calibration
+    dest: "{skill}/assets/calibration/frames/{name}"
+    why: Р109
+  - id: cal-index
+    match: "_skill-build/phase-3/calibration/index.yaml"
+    action: take
+    purpose: calibration
+    dest: "{skill}/assets/calibration/index.yaml"
+    why: Р109
+    note: file — frames/<кадр> от index.yaml, rubric — уже в раскладке шаблона (kb/…); файл не меняется
+  - id: g-build-other
+    match: "_skill-build/**"
+    action: none
+    why: SKILL-MAP §2.6
+    note: остальное _skill-build — только журнал (набор journal)
+
+  # ---------------------------------------------------------------- умолчания
+  - id: d-root-docs
+    match: "*-research/{README,PLAN,CONTRADICTIONS}.md"
+    action: take
+    why: Р89; SKILL-MAP §2.1
+  - id: d-kb
+    match: "*-research/**"
+    class: [prose, data, code, root-doc]
+    action: take
+    why: SKILL-MAP §2.1
+  - id: d-skip
+    match: "*-research/**"
+    action: skip
+    why: Р16; Р83; SKILL-MAP §2.5
+    note: asset, bundle, other в тематике
+
+journal:
+  - id: j-big-tsv
+    match: "_skill-build/{phase-2,freeze}/inventory/{files,links}.tsv"
+    action: skip
+    why: Р91; SKILL-MAP §2.6
+  - id: j-manifest
+    match: "_skill-build/freeze/manifest.tsv.gz"
+    action: skip
+    why: Р91; SKILL-MAP §2.6
+  - id: j-pycache
+    match: ["_skill-build/**/__pycache__/**", "_skill-build/**/*.pyc"]
+    action: skip
+    why: SKILL-MAP §2.6
+  - id: j-staging
+    match: "_skill-build/phase-3/migration/.staging*/**"
+    action: skip
+    why: SKILL-MAP §2.6
+    note: временные папки сборки (.staging — migrate.py, .staging-code — агент B); rules_eval их не обходит
+  - id: j-calibration-frames
+    match: "_skill-build/phase-3/calibration/frames/**"
+    action: skip
+    why: Р109
+    note: кадры едут в assets/calibration/frames/, в журнал — нет
+  - id: j-calibration-superseded
+    match: "_skill-build/phase-3/calibration/_superseded/**"
+    action: skip
+    why: Р108; Р109
+  - id: j-overlay
+    match: "_skill-build/phase-3/migration/overlay/**"
+    action: skip
+    why: open
+    open:
+      question: копия overlay в журнале даёт второй .claude/skills/design-deep-dive/SKILL.md внутри research/design-build/ — Claude Code находит вложенные .claude/skills; overlay и так ложится в шаблон на свои места
+      recommend: skip
+      alt: take
+      ref: Р91; Р97; SKILL-MAP §2.6, §5
+  - id: j-mirror
+    match: "_skill-build/**"
+    action: take
+    purpose: journal
+    dest: "{journal}/{rest}"
+    why: Р91; SKILL-MAP §2.6

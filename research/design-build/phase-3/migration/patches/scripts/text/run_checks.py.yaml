@@ -1,0 +1,21 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: text-research/99-raw/experiments/J/08-examples/run_checks.py
+source_sha256: 3dbc81077ee82cbce4086fc549d1ac9d9a28bdd6bc7563240be3efbc6322a1f1
+result_sha256: 619da13ad947420fa54af859bc43a6921d4c0269d4a5456b920353a20acd9114
+dest: .claude/skills/design-deep-dive/scripts/text/run_checks.py
+edits:
+- code: root
+  find: ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', '..'))
+  replace:
+  - 'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ''..'', ''lib''))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+  - ROOT = str(kbpaths.kb('text'))
+- code: out
+  find: OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'out')
+  replace: OUT = str(kbpaths.out('text', 'run_checks'))
+- code: imp
+  find: T = os.path.join(ROOT, '99-raw', 'tools')
+  replace: T = str(kbpaths.scripts('text'))
+- code: venv
+  find: VENV = os.path.join(T, 'venv-J', 'bin', 'python')
+  replace: VENV = kbpaths.python()

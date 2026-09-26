@@ -1,0 +1,11 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: creative-research/99-raw/experiments/G/00-registry/validate_stack.py
+source_sha256: 919aa38a99d6e36449f49718afa62be71dba79610c293dff0950a481a828ea3f
+result_sha256: 0323e1e6be57d077cda9e4a766232de9e8c75f26415b9afa8810c99c28aa0d4a
+dest: .claude/skills/design-deep-dive/scripts/creative/validate_stack.py
+edits:
+- code: abs
+  find: ROOT = '/home/mm/Документы/app-design/creative-research/'
+  replace:
+  - 'import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ''..'', ''lib'')); import kbpaths  # перенос: scripts/lib'
+  - ROOT = str(kbpaths.kb('creative')) + '/'

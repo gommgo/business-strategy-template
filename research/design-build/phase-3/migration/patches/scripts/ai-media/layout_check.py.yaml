@@ -1,0 +1,21 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: ai-media-research/99-raw/experiments/M/06-og-marketplace/layout_check.py
+source_sha256: b0c494db9b616bedfca412e92d6f938725530cd6a3f1e8a947df5f9345e885ff
+result_sha256: 58345aaec79cf766c3a840d8317c4080da262e440f2c3c98c0e4efdda11b76e4
+dest: .claude/skills/design-deep-dive/scripts/ai-media/layout_check.py
+edits:
+- code: boot
+  find: HERE = os.path.dirname(os.path.abspath(__file__))
+  replace:
+  - HERE = os.path.dirname(os.path.abspath(__file__))
+  - 'import sys; sys.path.insert(0, os.path.join(HERE, "..", "lib")); import kbpaths  # перенос: scripts/lib'
+  - 'OUT = str(kbpaths.out("ai-media", "layout_check"))  # перенос: выходы — $DDD_HOME/out (входы опыта M/06 не переносятся)'
+- code: out
+  find: pg.screenshot(path=os.path.join(HERE, 'marketplace_textlayer.png'))
+  replace: pg.screenshot(path=os.path.join(OUT, 'marketplace_textlayer.png'))
+- code: out
+  find: open(os.path.join(HERE, 'results_layout.json'), 'w')
+  replace: open(os.path.join(OUT, 'results_layout.json'), 'w')
+- code: out
+  find: open(os.path.join(HERE, 'results_layout_page.json'), 'w')
+  replace: open(os.path.join(OUT, 'results_layout_page.json'), 'w')

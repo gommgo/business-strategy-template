@@ -1,0 +1,15 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: text-research/99-raw/experiments/B1/03-schema-validate/validate.py
+source_sha256: 3fbc33221a0d89ee63ba2d0f631a056467cde9ec8db9cb530adc5678c8e5c75a
+result_sha256: 4a2569b65bcce6f6b12d9e4c290195db91e196a617fd9a1a9f86f08f58738148
+dest: .claude/skills/design-deep-dive/scripts/text/validate_meaning.py
+edits:
+- code: boot
+  find: HERE = os.path.dirname(os.path.abspath(__file__))
+  replace:
+  - HERE = os.path.dirname(os.path.abspath(__file__))
+  - 'sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+- code: root
+  find: ROOT = os.path.normpath(os.path.join(HERE, "..", "..", "..", ".."))
+  replace: ROOT = str(kbpaths.kb("text"))

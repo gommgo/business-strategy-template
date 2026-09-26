@@ -1,0 +1,12 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: claude-design-research/99-raw/tools/stand_page.py
+source_sha256: 62816a15c1f249a43e8d5e87ce953121a5d668d2a81943ee790f265eada67800
+result_sha256: 6ad6d5aabec55cf6ed60518fee9df16f27e5a744f885010113c15839b3c069f3
+dest: .claude/skills/design-deep-dive/scripts/claude-design/stand_page.py
+edits:
+- code: abs
+  find: STAND = Path('/home/mm/Документы/app-design/ai-media-research/99-raw/tools/stand_run.py')
+  replace:
+  - 'sys.path.insert(0, str(Path(__file__).resolve().parent.parent / ''lib''))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+  - STAND = kbpaths.scripts('ai-media', 'stand_run.py')

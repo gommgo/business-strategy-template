@@ -1,0 +1,9 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/99-raw/tools/README.md
+source_sha256: 06853cb86c5e0e8c366391be1a1f7ea54642fc5f0eba386a0f39c22e0225d777
+result_sha256: bf95580031757de09afc2d396b84980d1ae7ba987e313c3fbdeae947f1c41a3d
+dest: .claude/skills/design-deep-dive/scripts/blender/README.md
+edits:
+- code: abs
+  find: '`/home/mm/Документы/app-design/blender-research/`'
+  replace: '`kb/blender/` (от корня скилла)'

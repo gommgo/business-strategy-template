@@ -1,0 +1,17 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: creative-research/99-raw/experiments/I/01-schemas/spec_check.py
+source_sha256: 90e83acbb66a3fd79602ee60c45d692442415f4350bcad299a9317e37601926d
+result_sha256: 5cd66d417246916a9a9aa59f5d52cb346df134b20f2f19bd1c35d4dd63db863e
+dest: .claude/skills/design-deep-dive/scripts/creative/spec_check.py
+edits:
+- code: root
+  find:
+  - ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
+  - APP = os.path.dirname(ROOT)
+  - SITE = os.path.join(APP, 'site-research')
+  replace:
+  - 'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+  - ROOT = str(kbpaths.kb('creative'))
+  - APP = str(kbpaths.kb())
+  - SITE = str(kbpaths.kb('site'))

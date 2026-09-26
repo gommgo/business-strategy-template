@@ -1,0 +1,18 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: site-research/99-raw/tools/orch_check.py
+source_sha256: e35c6e398796c3c5c7f4ea9b3d93c5c267f856f24d2e96ad6cfa84b528b8165d
+result_sha256: 72eda534062cd1d0f620a3a62e5cf42a918b5b0e562d5ffd616775a673d1a4ef
+dest: .claude/skills/design-deep-dive/scripts/maint/orch_check.py
+edits:
+- code: boot
+  find: HERE = os.path.dirname(os.path.abspath(__file__))
+  replace:
+  - HERE = os.path.dirname(os.path.abspath(__file__))
+  - 'sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+- code: root
+  find: ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
+  replace: ROOT = str(kbpaths.kb("site"))
+- code: imp
+  find: '        p = os.path.join(HERE, t)'
+  replace: '        p = str(kbpaths.scripts("site", t))'

@@ -1,0 +1,12 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/99-raw/experiments/D1/_lib/d1lib.py
+source_sha256: 023d9a265772ceca6f2a84aff9cfa1f8ee398cc474fe9116c102261f4d09f519
+result_sha256: 84c48afe3956f2abb57526f08581045a6e7978e90ab58d814a097050d2c06a13
+dest: .claude/skills/design-deep-dive/scripts/blender/d1lib.py
+edits:
+- code: imp
+  find: SNIPPETS = "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets"
+  replace: 'SNIPPETS = os.path.dirname(os.path.abspath(__file__))  # перенос: bpyx.py — рядом (scripts/blender)'
+- code: imp
+  find: '    E24 = "/home/mm/Документы/app-design/blender-research/99-raw/experiments/E/24-presets"'
+  replace: '    E24 = os.path.dirname(os.path.abspath(__file__))  # перенос: presets.py — рядом'

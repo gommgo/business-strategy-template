@@ -1,0 +1,40 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: creative-research/99-raw/tools/refs_client.py
+source_sha256: 899bd3156197a76dd28c0bbe73db74794de339d3da281a175546ef60d9ea93f2
+result_sha256: 427acedaf70992421bb1f08ceacbfc08e7ab98fd5bf547879ab7866a63fe91ff
+dest: .claude/skills/design-deep-dive/scripts/creative/refs_client.py
+edits:
+- code: boot
+  find: HERE = os.path.dirname(os.path.abspath(__file__))
+  replace:
+  - HERE = os.path.dirname(os.path.abspath(__file__))
+  - 'sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+- code: root
+  find: ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
+  replace: ROOT = str(kbpaths.kb("creative"))
+- code: cache
+  find:
+  - JOURNAL = os.path.join(ROOT, "99-raw", "cache", "refs", "journal.tsv")
+  - STATE = os.path.join(ROOT, "99-raw", "cache", "refs", "state.json")
+  replace:
+  - JOURNAL = os.path.join(str(kbpaths.cache("creative", "refs")), "journal.tsv")
+  - STATE = os.path.join(str(kbpaths.cache("creative", "refs")), "state.json")
+- code: lock
+  find: LOCK_TRIAD = "/home/mm/Документы/app-design/.locks/browser.lock"
+  replace: LOCK_TRIAD = kbpaths.lock_path("browser")
+- code: lock
+  find: LOCK_OURS = os.path.join(HERE, ".locks", "browser.lock")
+  replace: LOCK_OURS = kbpaths.lock_path("browser", "creative")
+- code: lock
+  find: LOCK_REFS = "/home/mm/Документы/app-design/.locks/browser-refs.lock"
+  replace: LOCK_REFS = kbpaths.lock_path("browser-refs")
+- code: bin
+  find: BRAVE = "/opt/brave.com/brave/brave"
+  replace: BRAVE = kbpaths.brave()
+- code: abs
+  find: '    python3 /home/mm/Документы/app-design/creative-research/99-raw/tools/refs_client.py login dribbble'
+  replace: '    python3 scripts/creative/refs_client.py login dribbble'
+- code: lock
+  find: слоте тройки /home/mm/Документы/app-design/.locks/browser-refs.lock
+  replace: слоте тройки $DDD_HOME/locks/browser-refs.lock

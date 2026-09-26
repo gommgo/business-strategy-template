@@ -1,0 +1,9 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/09-web-runtime/examples/camera-path-scroll/build_scene.py
+source_sha256: 7f9dcfc1d0e307e288a13916c4fbac596b3d4974c0ed2e6fb9c84ba19e6a34bf
+result_sha256: 6b263024dae1e6f92dbcea9b17214c97e9690a4d9f51ace76b502cbdae780688
+dest: .claude/skills/design-deep-dive/kb/blender/09-web-runtime/examples/camera-path-scroll/build_scene.py
+edits:
+- code: imp
+  find: sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
+  replace: 'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: bpyx.py — scripts/blender'

@@ -1,0 +1,15 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/15-showcase/vote/build_pairs.py
+source_sha256: ad80b28e352be0b280ceb8c03a78624a4eabd728f69205737604bafb195b05ed
+result_sha256: 6f3559c6dcbfd1afd16fb3648ba9fea8f15bfa5979e63598627d827bd9de3603
+dest: .claude/skills/design-deep-dive/scripts/blender/vote/build_pairs.py
+edits:
+- code: boot
+  find: HERE = os.path.dirname(os.path.abspath(__file__))
+  replace:
+  - HERE = os.path.dirname(os.path.abspath(__file__))
+  - 'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+- code: root
+  find: SHOW = os.path.dirname(HERE)
+  replace: 'SHOW = str(kbpaths.kb("blender", "15-showcase"))  # перенос: кадры испытания — kb'

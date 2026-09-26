@@ -1,0 +1,12 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: ai-media-research/99-raw/tools/README.md
+source_sha256: 4dbc85c372b528957807cdf0e92faad1e5aff4cf923cf2dab81c6c18fea0adde
+result_sha256: 94ae48b25d5f95072edee75eb85c93e2f1feeeb0699d14fd6bc5481d70abfaa3
+dest: .claude/skills/design-deep-dive/scripts/ai-media/README.md
+edits:
+- code: abs
+  find: '`/home/mm/Документы/app-design/ai-media-research/`'
+  replace: '`kb/ai-media/` (от корня скилла)'
+- code: bin
+  find: node:/home/mm/.nvm/versions/node/v24.21.0/bin/node
+  replace: node:$(command -v node)

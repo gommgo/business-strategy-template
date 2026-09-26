@@ -1,0 +1,267 @@
+source	rule	why	bytes	class	sha256
+ai-media-research/99-raw/experiments/3D/00-genapi-docs/glb_probe.py	am-3d	SYNTHESIS §3.2 (кандидат без решения — решает B)	8466	service	825065d4caae58e6d7d83cf4346d43513519c27e5c927f4336c6c517f58ccff9
+ai-media-research/99-raw/experiments/3D/01-glb-pipeline/glb_pipeline.py	am-3d	SYNTHESIS §3.2 (кандидат без решения — решает B)	45998	service	48a4e227f138ea246488eaee4f0207bc98e2fe315b8c48dfd8d0d0cf28a800e8
+ai-media-research/99-raw/experiments/3D/04-3d-to-video/compare_video.py	am-3d	SYNTHESIS §3.2 (кандидат без решения — решает B)	5363	service	5ee721c5d327c80aef7075ffe2a0d1539468e2d5f8ae75bfc123e626f3d110b6
+ai-media-research/99-raw/experiments/A/04-image-marker-metrics/image_metrics.py	am-modules	Р54	6588	service	4f1bb13493301566d55cbf05249753d3f02a2c7355228643a72e106654d75dc3
+ai-media-research/99-raw/experiments/B/14-landing-assets/split_recraft.py	am-modules	Р54	4267	service	e07f38363dd559e484e4449fd2eb22b3e82cb4f34392d49e0a7cb507e4163fe7
+ai-media-research/99-raw/experiments/F/02-text-zone/text_zone.py	am-modules	Р54	4766	service	b578209617f8407acff05ab8400979bd9049b7a1326525c5f92b188624f1afd5
+ai-media-research/99-raw/experiments/F/04-slop-metrics/composition_metrics.py	am-modules	Р54	4078	service	873861cd1d40077dd075f78f6a4ad21902d4fb7ec53cf5aa5100c673c208bd48
+ai-media-research/99-raw/experiments/F/05-color/palette.py	am-modules	Р54	6207	service	8f79c02826e75d31bbad01ecba96413f7e66e64b7a32b9e3dfe86ffd63da1d09
+ai-media-research/99-raw/experiments/F/06-series-metrics/series_metrics.py	am-modules	Р54	2973	service	4018f60394fb98ac6a042eae096a4e90c67bcf7424acf1895dae7aae46daa84d
+ai-media-research/99-raw/experiments/F/06-series-metrics/split_grid.py	am-modules	Р54	2065	service	dfd4fc4f4fa332dab1f8b54819ea191937d0d145d2a42620079e972b71333071
+ai-media-research/99-raw/experiments/G/check_icons.py	am-modules	Р54	11574	service	3a250716895ff62c68ede5d0bc47f8aec3fd49b10be8bb1fc4f225c90e6c68fb
+ai-media-research/99-raw/experiments/M/06-og-marketplace/layout_check.py	am-modules	Р54	8004	service	b0c494db9b616bedfca412e92d6f938725530cd6a3f1e8a947df5f9345e885ff
+ai-media-research/99-raw/experiments/M/10-recipes-yaml/validate_recipes.py	am-modules	Р54	5331	service	d4d3bc22c707dab20f8e584c855d3b65fcfb3b3bc07a3d044ff046c74fd29842
+ai-media-research/99-raw/experiments/N/04-update-dryrun/channel_diff.py	am-modules	Р54	3758	service	496238b398c8a54d3c1e1a5dd88a4e958322de8e297c8bf9dde335deca15dc5e
+ai-media-research/99-raw/phase5/runs/MS-marea/loop_rife_bridge.py	am-modules	Р54	2165	service	e0b6501fe9bcee14e750e462eaec358fd111b68b271cd292b35eb6ce9d40f59b
+ai-media-research/99-raw/phase5/runs/S4-capability/tools/svg_sheet.py	am-modules	Р54	14180	service	23aebc7041cb9eaa81d23ea9882334e4b99fbecff8dcafa211f4986f39749e5e
+ai-media-research/99-raw/phase5/runs/S4-capability/tools/vm_sheet.py	am-modules	Р54	8573	service	d42bec007913778f2adb1a807271da9906ab1e362e7f784404fe4672cdf36c0d
+ai-media-research/99-raw/tools/README.md	g-tools	SKILL-MAP §2.2	59665	service	4dbc85c372b528957807cdf0e92faad1e5aff4cf923cf2dab81c6c18fea0adde
+ai-media-research/99-raw/tools/ab_analyze.py	g-tools	SKILL-MAP §2.2	22054	tool	0fbc35efeb6f664d52f4dd9562b56d323858ab7787e64f620cb7678b38934da9
+ai-media-research/99-raw/tools/alpha_check.py	g-tools	SKILL-MAP §2.2	7369	tool	ebddbb01bedf0a86ee67e6d6d432ebd1cea32691ed18cc5c2c5cbff3205ad8b2
+ai-media-research/99-raw/tools/asset_audit.py	g-tools	SKILL-MAP §2.2	160890	tool	96b7c78b2ec6d21b3b32200366ecaa9aea46a33c5c25ff15d5fce28dee6a2818
+ai-media-research/99-raw/tools/asset_inventory.py	g-tools	SKILL-MAP §2.2	48297	tool	4b239638ee70109d300bbfa025bcc9d5766e21f1db513868a733e9bbdcf00616
+ai-media-research/99-raw/tools/avif_pick.sh	g-tools	SKILL-MAP §2.2	1141	tool	7d2d6e2cd3d50d07f8d711a942d28992afe954e4d5b05e87cd1edde6496aaa76
+ai-media-research/99-raw/tools/check_links.py	g-tools	SKILL-MAP §2.2	69405	tool	975a753dcd1df9cff4d97a06435ee97c0e335ed5601b5426960041b022d352f6
+ai-media-research/99-raw/tools/color.py	g-tools	SKILL-MAP §2.2	8142	tool	eac54ad9cba75d7e9a9dac46daa011760e9b3f3178e3dd365680b2f0e9733804
+ai-media-research/99-raw/tools/edit_check.py	g-tools	SKILL-MAP §2.2	26626	tool	161f29ddf1b62f4d0c77049e39672193ff79c39517385b3b7738855efacac0eb
+ai-media-research/99-raw/tools/fetch.py	g-tools	SKILL-MAP §2.2	3375	tool	8f171ff53f4fc4f21955e2cc9e6cefd680c7cf79a2602333b75ea51999606ccb
+ai-media-research/99-raw/tools/mp_client.py	g-tools	SKILL-MAP §2.2	168350	tool	8b86cbf41f3d027aedf88cfcd23043e61deb97fc231b9b3da8e82e8710324b35
+ai-media-research/99-raw/tools/node/package.json	g-tools	SKILL-MAP §2.2	267	service	27f078c48c4afae4a105adeed98b1b762d18c56b773b149fac660cbfd35eb854
+ai-media-research/99-raw/tools/page_accept.py	g-tools	SKILL-MAP §2.2	25867	tool	387697ba8992c626c12f4b3f3f499b53e04185444e6e3993bfe483fc7e81edc7
+ai-media-research/99-raw/tools/polza.py	g-tools	SKILL-MAP §2.2	77085	tool	95c7cdfc4f430e1e118344f40dfed306540a046bfc61e2b0d3f5e148c4ef6b83
+ai-media-research/99-raw/tools/polza_catalog.py	g-tools	SKILL-MAP §2.2	76273	tool	9c23d7b06640c061f49c39401b63c29daacf180623994df7aa417cfa7f7e7e35
+ai-media-research/99-raw/tools/prompt_compile.py	g-tools	SKILL-MAP §2.2	120109	tool	aece342d0364bf228006a488f73a4e3639dfa5d617c41052be9339956116edce
+ai-media-research/99-raw/tools/provenance_check.py	g-tools	SKILL-MAP §2.2	34537	tool	01726bcf737ed3695d0ff7f64b2d88d41d22e6846887490ecb881cd03fb9a5af
+ai-media-research/99-raw/tools/render_fetch.py	g-tools	SKILL-MAP §2.2	4679	tool	67e61b3a28c6ae7a83875fdcba8b512dc93e544f490fa01b2d188f6981b8c2c2
+ai-media-research/99-raw/tools/routing_check.py	g-tools	SKILL-MAP §2.2	24959	tool	069cbea02e9b307700821f9f1fd42b71c073aa3f6a0c442fbefb0cf02db180a8
+ai-media-research/99-raw/tools/site_probe.py	g-tools	SKILL-MAP §2.2	28684	tool	7244212bcd86d152c09b2aede038b6535ac50499debc04ea36df329b9fb51216
+ai-media-research/99-raw/tools/stand_run.py	g-tools	SKILL-MAP §2.2	57411	tool	1241889d7dac0b05838529fb2dadb6594926d38c2176f49497267dbff6981c05
+ai-media-research/99-raw/tools/tests/fixtures/frame-A.png	g-tools	SKILL-MAP §2.2	128	asset	3b5ee46a0350057f4c1cbaadb6915cedb10046d1e722f95e0a2ccc43c1ea19b7
+ai-media-research/99-raw/tools/tests/fixtures/mask-white-change.png	g-tools	SKILL-MAP §2.2	99	asset	42e89be279fb378d06c369b9f7d76b484183d00256a2e8a51d3362b52ab46924
+ai-media-research/99-raw/tools/tests/fixtures/product.png	g-tools	SKILL-MAP §2.2	99	asset	d0472998132d97adf73b66aec43533c0906d1a2b1639f457588aec62dd3cdf69
+ai-media-research/99-raw/tools/tests/fixtures/source.png	g-tools	SKILL-MAP §2.2	128	asset	7286f1374d182ddb7aba022b836bfd9fb0d1dc844222484efb872da7b75738b3
+ai-media-research/99-raw/tools/tests/fixtures/style-ref.png	g-tools	SKILL-MAP §2.2	96	asset	72937c96c9957936fc2b7699bd95a9f57c2e98d11c15efbf3db4b0a43ca30eec
+ai-media-research/99-raw/tools/tests/fixtures/v2-edit.spec.json	g-tools	SKILL-MAP §2.2	1129	service	a163f4ab3bfd3bfcaf2bdc303cc5e26506c211c8d388a66354217ec13fc8e67c
+ai-media-research/99-raw/tools/tests/fixtures/v2-loop.spec.json	g-tools	SKILL-MAP §2.2	1316	service	b446072bdb3801277094dccdec40fe4ce5ea4b2de470802773f0f49e9344dcf8
+ai-media-research/99-raw/tools/tests/fixtures/v2-product.spec.json	g-tools	SKILL-MAP §2.2	1671	service	ea116bbaa1ab8d211cefe9748603dbefc466c65a7f49d1e08f899430829f92d6
+ai-media-research/99-raw/tools/tests/fixtures/v2-series.spec.json	g-tools	SKILL-MAP §2.2	1076	service	1b83ab53943d4023642e5caf249d09fc645678c3e49faa82a668747cfa45421e
+ai-media-research/99-raw/tools/tests/fixtures/v2-shots.spec.json	g-tools	SKILL-MAP §2.2	959	service	8f4d9c3b075c6b1b9a9efb38749c31f41c7389e6ff714136d72d0586b2014d42
+ai-media-research/99-raw/tools/tests/test_asset_audit.py	g-tools	SKILL-MAP §2.2	27495	tool	10e14fab44c5ee91d122325a052dd481cab2c68ce4533f72881761447338e99b
+ai-media-research/99-raw/tools/tests/test_prompt_compile.py	g-tools	SKILL-MAP §2.2	29509	tool	8e53f1bb444235c2b3b89dd5374b90e39f77891a3ee8f8f57dfd59b124b49946
+ai-media-research/99-raw/tools/tests/test_prompt_compile_x2.py	g-tools	SKILL-MAP §2.2	6606	tool	bb2ab9e4a5efb403f1bbdc10f840cb1e456a565ae953e41fe0cdaec53ab06a65
+ai-media-research/99-raw/tools/tile_check.py	g-tools	SKILL-MAP §2.2	5504	tool	5857a77b2202e03f31aad7206f9d7fa7378bb4c015164a5cfc375f5c7dd1ac4a
+ai-media-research/99-raw/tools/video_loop_check.py	g-tools	SKILL-MAP §2.2	29134	tool	7f36fe3069fb1e52ee5d2f7d046a0f5409124a81a268d1d8cc6ae7ec1b00dbbb
+ai-media-research/99-raw/tools/vlm_to_dna.py	g-tools	SKILL-MAP §2.2	73304	tool	6328e384cb022c580cb95636c8ce8cbc0c4077e6b57f8d311f4198a55e234b48
+ai-media-research/99-raw/tools/vtt2md.py	g-tools	SKILL-MAP §2.2	5719	tool	62c05179f495a14baa948d9d57673efb22ecf265f3bfb146e4d7a71f74df97fe
+ai-media-research/99-raw/tools/yt_dl.py	g-tools	SKILL-MAP §2.2	8524	tool	170fb4bf69857667454285d774dd606ec2393419f90b0f229d548ab90dd80eed
+ai-media-research/99-raw/tools/yt_transcript.py	g-tools	SKILL-MAP §2.2	9311	tool	6fb2cf6cbe72eafb719772c73ddef34340c1fab9a7dd659676894eaac13938ec
+blender-research/03-bpy-api/snippets/agent_scene.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	6225	code	86e66e538da5b13ec328ba5186ced1875b75911ff304b72a81313a5c27b1ff64
+blender-research/03-bpy-api/snippets/bpyx.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	63573	code	137a4011ce51833e706cccee6f32c51bcbed0bdbb30ed5f7eb4018e096c6912a
+blender-research/03-bpy-api/snippets/hygiene.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	7966	code	b9fd2e11c32c0a72a443fa6bbf84217e98b7c8df71fce478978b72c900b63824
+blender-research/03-bpy-api/snippets/test_agent_helpers.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	8475	code	923cf342d24eda039f29068f1dcd66ea0a9a872b95f5ebc3e047443ffb93f5d8
+blender-research/03-bpy-api/snippets/test_bpyx.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	24150	code	fb034d342b10883b3d79d1474d1417040a2d836070a3b070d5106f6ff2c29ae0
+blender-research/11-evaluation-qa/regression/make_manifest.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	8846	code	9accd1674a5139c8bb0a67888ccb1b15a7daf8ee6a3fa67b87ad3a28b8ac414b
+blender-research/11-evaluation-qa/regression/run_set.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	6821	code	e2f315c1715c8bb4b9b6c6ae16b7ee55a604762bc871a719af838277fac48cb3
+blender-research/12-recipes/examples/_kit/rk.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	25198	code	1cfa798d5c0ed8f85e598c4a16aa36b73830f80e1acdae6030eac0ae8e9d2049
+blender-research/15-showcase/_shared/build_index.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	22875	code	23ef9f144c4cc45c612afc6ba97dcc4d9b196c6bc7ac20a3729bc2940354f63f
+blender-research/15-showcase/_shared/img_metrics.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	8296	code	85b4fb5fca148553ebbedb9b23b3f20dcf622dcbb0f005cab1c75cfa3b335db9
+blender-research/15-showcase/_shared/rules_journal.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	6378	code	bac66153168ec08e7686693d0a436cc45a59f937db8d9256b9a77ac9145ca3c5
+blender-research/15-showcase/_shared/sheet.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	2761	code	eb3abe618e9e7288557060f651c41ee44a6867c5b901c9b7dffa9c080d5c2bf0
+blender-research/15-showcase/gallery/build.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	11073	code	da8b3624a56929f044f84bb57d90ecbc4214d34eef376284ff0588d14a686ffd
+blender-research/15-showcase/vote/build_pairs.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	15186	code	ad80b28e352be0b280ceb8c03a78624a4eabd728f69205737604bafb195b05ed
+blender-research/15-showcase/vote/index.html	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	21316	code	9aac4fd6fad70f022339ab27bfdb886b6de767d9a4bea3e108574197a1565fc5
+blender-research/15-showcase/vote/tally.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	9280	code	01935bc6d3c7e0a9f0cf2d5d8ceff64d3fc466a9d99da4fb8a1009f9e382999d
+blender-research/15-showcase/vote/vote_server.py	bl-utils-thematic	SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	4517	code	882e9690e6f8d7629035d85dfec89d60cec61dd2a6debb298bb09da99427f5a5
+blender-research/99-raw/experiments/C1/10-scene-audit/scene_audit.py	bl-libs	Р57	14587	service	2fa04b9951f3a4be0c6b77e3604e02e16efa3bfb109c49e3f1cb8e9b65c5481f
+blender-research/99-raw/experiments/C1/16-passport-asserts/passport_asserts.py	bl-libs	Р57	2958	service	b6f74aa12be7f45bba9ad1214b132d2a4bcdfc1bd541df1cbc72d75a0f10df66
+blender-research/99-raw/experiments/D1/_lib/d1exp.py	bl-libs	Р57	4954	service	ca1b1fc37dddc28fdc332b2e9d1a914b4a83690fb4ecfebc1491b7f469adf1ff
+blender-research/99-raw/experiments/D1/_lib/d1lib.py	bl-libs	Р57	61095	service	023d9a265772ceca6f2a84aff9cfa1f8ee398cc474fe9116c102261f4d09f519
+blender-research/99-raw/experiments/D2/_lib/d2lib.py	bl-libs	Р57	4247	service	6e16219a543c069166895512aed7b8d1d4484c89ae6d5a174f0fab95ae860def
+blender-research/99-raw/experiments/E/24-presets/presets.py	bl-libs	Р57	5823	service	4f32f7ef6d8b608baccd124d6c3ed390de450420c31e67f72256fc34927a800c
+blender-research/99-raw/experiments/E/26-doc-snippets/glb_lint_block.py	bl-libs	Р57	5620	service	b1c2a23a0629e50dcc80b31da1b3a50dcd4fcd2a35797fe40db1c4407b4a2efb
+blender-research/99-raw/experiments/E/26-doc-snippets/preflight_block.py	bl-libs	Р57	6952	service	64a39977ae21f65cdfeaf058dc5154a33730181c1a3e34b64a81ee54c1ea6049
+blender-research/99-raw/experiments/F1/02-hero-variants/serve_br.py	bl-libs	Р57	4420	service	432504935937b9daec0ebf6b2656112cf1a238408e794ec1e19074a3e44418ba
+blender-research/99-raw/experiments/H/_lib/animx.py	bl-libs	Р57	13183	service	a1edb23f0e53c7489d39bc06c18ac637db19583c6663af620ecd00af281d77c5
+blender-research/99-raw/experiments/K/01-run-recipes/run_recipes.py	bl-libs	Р57	6409	service	a3d0c7e6a48fe26ac718bd38ee93edf02e47e01920e0b9865c55a2232c16eed5
+blender-research/99-raw/tools/README.md	g-tools	SKILL-MAP §2.2	35883	service	06853cb86c5e0e8c366391be1a1f7ea54642fc5f0eba386a0f39c22e0225d777
+blender-research/99-raw/tools/anim_diff.py	g-tools	SKILL-MAP §2.2	13691	tool	595d2d30e94d17c85d3213b012bfc3655c827e4707728f62fdd519008910692a
+blender-research/99-raw/tools/asr_compare.py	g-tools	SKILL-MAP §2.2	7979	tool	e708c94725e44718aa20e99ec7c22dfb661fd2d2c62d31f65a4b25b11b349bba
+blender-research/99-raw/tools/asr_dl.py	g-tools	SKILL-MAP §2.2	8458	tool	d69f5a88cf0f9ca3a0160c0687174800420f9df35ea0d91c5ff6526c9e69c272
+blender-research/99-raw/tools/asr_feed.py	g-tools	SKILL-MAP §2.2	12856	tool	7844714eb039183fc8275419e2f0704fda1e5716bd71ab0b51c8ccf7b78456e4
+blender-research/99-raw/tools/asr_howto.md	g-tools	SKILL-MAP §2.2	9316	service	e108c90bc3560ea9e27812cfe14c820ccd9e0360a33169df0618404367da1484
+blender-research/99-raw/tools/asr_merge.py	g-tools	SKILL-MAP §2.2	9248	tool	29439d21fca4e7ab3983aa7af93f77d80c75eb81a0938185dc1c5e61ec689380
+blender-research/99-raw/tools/asr_qc.py	g-tools	SKILL-MAP §2.2	16867	tool	332386f6bdc9970396f71860debd4f5f175c0655948cf90a3a3e6a6b7c8e51c7
+blender-research/99-raw/tools/asr_queue.py	g-tools	SKILL-MAP §2.2	2299	tool	dfc95ff3fdd22b3f7ea434d362f0e948427b56e324122088b5773b077cc25275
+blender-research/99-raw/tools/asr_server.py	g-tools	SKILL-MAP §2.2	13010	tool	5e66ed89f4cef5a03f14e8dc76e45e8a144835526ea81105c539839df9e35c01
+blender-research/99-raw/tools/asr_status.py	g-tools	SKILL-MAP §2.2	9781	tool	7aea0dc02945c9aa5716ecc87a32d7ff0f20953f22020d7fbd0d63dd19de4986
+blender-research/99-raw/tools/asr_subs.py	g-tools	SKILL-MAP §2.2	6394	tool	07069b1b52fe694d4ad62d58aece3e4e3733b7e4d78d90ba6abcc9347fca9750
+blender-research/99-raw/tools/asr_terms.py	g-tools	SKILL-MAP §2.2	4274	tool	a25afb1870eda3cd1b94aedeb051ecb7b127076ccacc714cbab371f90df96cfb
+blender-research/99-raw/tools/asr_tunnel.sh	g-tools	SKILL-MAP §2.2	2151	tool	031e998944723711175b91a0b5d17a8c0efc1b52e4f163644d6db5134d2cc844
+blender-research/99-raw/tools/asr_wer.py	g-tools	SKILL-MAP §2.2	4838	tool	95a5b0d5c0b5b3abc2ac3dacdcae47f904154d77aa7c76de138a1242eba6e194
+blender-research/99-raw/tools/atlas_collect.py	g-tools	SKILL-MAP §2.2	78444	tool	74d219e4eb20aeaa5dcaabd5591c9a3fcc8db20d4ec2cdbe680468b9d820e288
+blender-research/99-raw/tools/blender_run.py	g-tools	SKILL-MAP §2.2	4776	tool	196da126ba34038384d010e1e7d3ac571c92d207006316ac2f750e631f0aa26d
+blender-research/99-raw/tools/blender_supervisor.py	g-tools	SKILL-MAP §2.2	17280	tool	88cdc6285cea696724a0de4b8d3afe131f4a5d1a180705cd2e16a73a14d9ab68
+blender-research/99-raw/tools/bpy_probe.py	g-tools	SKILL-MAP §2.2	45683	tool	b803d4319ca7319f6596d1eb56c55971e2e95f6f836d3866726cb169c8bcd422
+blender-research/99-raw/tools/check_links.py	g-tools	SKILL-MAP §2.2	45842	tool	47bfca28797cd889978dc3259c1b5f8de3e1b1b1b8dc6634d2b87a2b33b263ce
+blender-research/99-raw/tools/ctx_watch.py	g-tools	SKILL-MAP §2.2	10147	tool	b89e12b40d30c9b5545d57541eeb493bc57666710bd4fcc71a4cfc32a0b62e0e
+blender-research/99-raw/tools/ctx_watch_v1.py	g-tools	SKILL-MAP §2.2	8146	tool	eae1419bb4aabe5865bb35897c275374ad4255903190a783c44bf805d5d3eae5
+blender-research/99-raw/tools/extract_sections.py	g-tools	SKILL-MAP §2.2	3659	tool	4903eb74d90cf768e23a532e0e938c44f4f68fe25e9f90903659dc8ae4eb0956
+blender-research/99-raw/tools/fetch.py	g-tools	SKILL-MAP §2.2	3375	tool	8f171ff53f4fc4f21955e2cc9e6cefd680c7cf79a2602333b75ea51999606ccb
+blender-research/99-raw/tools/fx_probe.py	g-tools	SKILL-MAP §2.2	13886	tool	177ef26ef33b1f7eaee1dc8307cd0455f24a1d6ebee2e2a8fc7b831bcf9ce379
+blender-research/99-raw/tools/gate_check.py	g-tools	SKILL-MAP §2.2	4949	tool	d41f5b158edba0f717dc1cd88f8e0c9ac598623773471044e27301772d83bfe2
+blender-research/99-raw/tools/gltf_check.py	g-tools	SKILL-MAP §2.2	6159	tool	8ca5e709ac5973098b44660d08f55ac087e4039f6da4135e9fb369781c2a2afc
+blender-research/99-raw/tools/gltf_diff.py	g-tools	SKILL-MAP §2.2	26984	tool	5380f04d031389c1573ba0ff1fc4aae2d87ef6de8349abd1d8fc1e77f5c3b37b
+blender-research/99-raw/tools/gltf_load_bench.py	g-tools	SKILL-MAP §2.2	11412	tool	540058b2cc2d24bc2058319a875ba489dff644d9e8443a71f24c3d61dbf71113
+blender-research/99-raw/tools/gltf_web_inspect.py	g-tools	SKILL-MAP §2.2	13183	tool	d7fae99b3938023e8fd03ff889c91dd973efc635a911ca742e62a3c72ce67220
+blender-research/99-raw/tools/lint_agent_code.py	g-tools	SKILL-MAP §2.2	6000	tool	c0987a95fcef806ed5704fc84f5f661e34cd25ebca349e88d09a20dc5f41fb2e
+blender-research/99-raw/tools/node/package.json	g-tools	SKILL-MAP §2.2	403	service	1457ba00c5c53ba6dcd4cbdce2a170512b32586de6697071c887fbd186322d3a
+blender-research/99-raw/tools/node/validate.mjs	g-tools	SKILL-MAP §2.2	978	tool	05e2436c6dcc8dd401dc1786852d253a5e95078bf8884fca7c4c9ca3aad4cdb4
+blender-research/99-raw/tools/qa_pipeline.py	g-tools	SKILL-MAP §2.2	20045	tool	c860e854dd162fe6106db98a1a110099e7f371f852404801f999e55bbaedc114
+blender-research/99-raw/tools/render_fetch.py	g-tools	SKILL-MAP §2.2	4679	tool	67e61b3a28c6ae7a83875fdcba8b512dc93e544f490fa01b2d188f6981b8c2c2
+blender-research/99-raw/tools/render_views.py	g-tools	SKILL-MAP §2.2	17253	tool	eb54efaec8299f2555dedf2d3bc37f44fd74107dc58a15c0370a15d10ebd7aed
+blender-research/99-raw/tools/run_doc_blocks.py	g-tools	SKILL-MAP §2.2	5697	tool	f133e48f884bc339edca0560a3ac3ef39dd0e31f610dab050cc0647ace08219f
+blender-research/99-raw/tools/scene_check.py	g-tools	SKILL-MAP §2.2	33278	tool	b3fa71a8ad41d4ec95c1cddb74331fd626355a42ee4258ed4aef1a338dcb9bb6
+blender-research/99-raw/tools/site_probe.py	g-tools	SKILL-MAP §2.2	28684	tool	7244212bcd86d152c09b2aede038b6535ac50499debc04ea36df329b9fb51216
+blender-research/99-raw/tools/slot_run.py	g-tools	SKILL-MAP §2.2	15290	tool	408425b56f81322b2a58df5063c86d2f86e7d44f55f87afe1b23221fe96d4f15
+blender-research/99-raw/tools/slot_run_v1.py	g-tools	SKILL-MAP §2.2	5589	tool	c7f13052cb67956b6e0f495ecd1c4a95d675c2988f8b312e16ba47d048c22e4a
+blender-research/99-raw/tools/slot_run_v21.py	g-tools	SKILL-MAP §2.2	13613	tool	f91f09373938a73c9d7e5e3080e7a45a074541094a59661f8494be28e6b577cc
+blender-research/99-raw/tools/sources_collect.py	g-tools	SKILL-MAP §2.2	31347	tool	64eb56ad1a83dce0f0281875d0c7fa28c1a5cdb69ee3ba1a1d97f035f038e00d
+blender-research/99-raw/tools/three_probe.py	g-tools	SKILL-MAP §2.2	3386	tool	4aa5bb17b138003171ba40dc7e9348d50b0697e67fdfdf1b8a44dd2f65e792d7
+blender-research/99-raw/tools/transcribe_local.py	g-tools	SKILL-MAP §2.2	11995	tool	0cdea960401e4c16da745cf92c81b988270267e642546d078279362c61b3fe9d
+blender-research/99-raw/tools/vtt2md.py	g-tools	SKILL-MAP §2.2	5495	tool	302a754996529e2386c16630fed30cf23e1f1da2152cd8b7d308353502a9f395
+blender-research/99-raw/tools/web_view.py	g-tools	SKILL-MAP §2.2	26654	tool	f459783e3deff9683142d4a6604e9cea0d66d60464e0b350bf0d13ea146dc165
+blender-research/99-raw/tools/whisper2md.py	g-tools	SKILL-MAP §2.2	4993	tool	0a404cfe18b6970b57b7a4ce6061a1307bb12e2b616bbda13b02ecff2c92235f
+blender-research/99-raw/tools/yt_transcript.py	g-tools	SKILL-MAP §2.2	9311	tool	6fb2cf6cbe72eafb719772c73ddef34340c1fab9a7dd659676894eaac13938ec
+claude-design-research/04-claude-code-native/kit/canvas.html	cd-kit	SKILL-MAP §1; Р87	11803	code	aef3ac013a8f372e30e5d645e99e87b57e6f0341b594e88d56bbc6de57f0868f
+claude-design-research/04-claude-code-native/kit/diffshots.py	cd-kit	SKILL-MAP §1; Р87	12213	code	29ee5351a90e598c3fc5fba054a16f1a3a5ce28af2d63ae58c16701444153ed1
+claude-design-research/04-claude-code-native/kit/example/booking.html	cd-kit	SKILL-MAP §1; Р87	5147	code	7377844d7154c9e2ccb402c64824d86cee9e7e39cfda89a43ff0686418a58b54
+claude-design-research/04-claude-code-native/kit/example/canvas.json	cd-kit	SKILL-MAP §1; Р87	1084	data	751e8c6119b7337e84d3353e7e325b3f4b2c1b15207186cb45d7ac9c3dc3a552
+claude-design-research/04-claude-code-native/kit/example/landing.html	cd-kit	SKILL-MAP §1; Р87	7055	code	80636c8972c0ac17b238fee3f1de89b6dd6646f27e8c31cab01c4504ca8883ba
+claude-design-research/04-claude-code-native/kit/example/site.css	cd-kit	SKILL-MAP §1; Р87	9545	code	a0a2a7280bc5cb0397bc680f6edff4efcaae33ab83b46654ae9895047b100268
+claude-design-research/04-claude-code-native/kit/example/tokens.css	cd-kit	SKILL-MAP §1; Р87	3372	code	58ba43195925a69b531adfe8392ebf9df566958866d9e8e615a8139725183750
+claude-design-research/04-claude-code-native/kit/export.py	cd-kit	SKILL-MAP §1; Р87	12885	code	b6179109e5c07322bc0e2cf464b93d30680dee62fb818a9bb33e51e8fbf72bc7
+claude-design-research/04-claude-code-native/kit/marks.js	cd-kit	SKILL-MAP §1; Р87	22042	code	3e1f57afc2187e4d8ed00684fab50204e3b145771f4aba53a769fba9f968bca6
+claude-design-research/04-claude-code-native/kit/shot.py	cd-kit	SKILL-MAP §1; Р87	37021	code	546974cfaefcb9d508384020b6588f157bd22d843675cb551cc4e13333feb6e6
+claude-design-research/99-raw/tools/cc_bunfs_extract.py	g-tools	SKILL-MAP §2.2	4262	tool	b1a9462eeb366055af28ed9a80597364bee4c931757c84c04d4707cc6e9742e7
+claude-design-research/99-raw/tools/fetch.py	g-tools	SKILL-MAP §2.2	3375	tool	8f171ff53f4fc4f21955e2cc9e6cefd680c7cf79a2602333b75ea51999606ccb
+claude-design-research/99-raw/tools/lang_check.py	g-tools	SKILL-MAP §2.2	8019	tool	76507dabdbce5fd3d1a5050e0fccae0dd554be0abb4891550836139f5bc6823d
+claude-design-research/99-raw/tools/mockup_checks.py	g-tools	SKILL-MAP §2.2	100961	tool	13ed1447f9218dad6d75d7f67e940e9a48e8f528b35bb91ad0eaeb7dc43ce458
+claude-design-research/99-raw/tools/render_fetch.py	g-tools	SKILL-MAP §2.2	4679	tool	67e61b3a28c6ae7a83875fdcba8b512dc93e544f490fa01b2d188f6981b8c2c2
+claude-design-research/99-raw/tools/shot_v3.py	g-tools	SKILL-MAP §2.2	29282	tool	a38cacc9d26417824b6295a8b0b667807a6a0f0ee58cabf2710adf8761adfc72
+claude-design-research/99-raw/tools/sources_collect.py	g-tools	SKILL-MAP §2.2	7728	tool	6dec370ee25ddb4606105ddc2d988c7e9f616606ae4a7f2475eaf6c916322fad
+claude-design-research/99-raw/tools/stand_page.py	g-tools	SKILL-MAP §2.2	29716	tool	62816a15c1f249a43e8d5e87ce953121a5d668d2a81943ee790f265eada67800
+claude-design-research/99-raw/tools/vtt2md.py	g-tools	SKILL-MAP §2.2	5719	tool	62c05179f495a14baa948d9d57673efb22ecf265f3bfb146e4d7a71f74df97fe
+claude-design-research/99-raw/tools/yt_dl.py	g-tools	SKILL-MAP §2.2	8524	tool	170fb4bf69857667454285d774dd606ec2393419f90b0f229d548ab90dd80eed
+claude-design-research/99-raw/tools/yt_transcript.py	g-tools	SKILL-MAP §2.2	9311	tool	6fb2cf6cbe72eafb719772c73ddef34340c1fab9a7dd659676894eaac13938ec
+creative-research/99-raw/experiments/A/01-art-direction-examples/ad_check.py	cr-validators	Р37	14897	service	6392c441b18dfc6eef5f8fe2d267e9c3f0efd181b248d618ebf50444f8f38c5d
+creative-research/99-raw/experiments/G/00-registry/validate_stack.py	cr-validators	Р37	2285	service	919aa38a99d6e36449f49718afa62be71dba79610c293dff0950a481a828ea3f
+creative-research/99-raw/experiments/H/03-registry-check/registry_check.py	cr-validators	Р37	4606	service	1eeb6e44d02487f41b1c4b991bfc71afd5390873ee22503db31497f5f7b484ec
+creative-research/99-raw/experiments/I/01-schemas/compat_check.py	cr-validators	Р37	2704	service	e4ac4df333865961a6a562cbf9a451381fbc0bb07b731aebb12c68a2bf898dd6
+creative-research/99-raw/experiments/I/01-schemas/spec_check.py	cr-validators	Р37	47605	service	90e83acbb66a3fd79602ee60c45d692442415f4350bcad299a9317e37601926d
+creative-research/99-raw/experiments/J/02-l2-zveno/idle_probe.py	cr-validators	Р37	3563	service	0a51502c20613656f339667311277cabdc25f6eceba3deb0ed2bcb49a430112f
+creative-research/99-raw/experiments/J/03-recipes-check/recipe_check.py	cr-validators	Р37	7634	service	19a1510995d7c8387944659b4aadd2c07cd8b1364f1c1ec8e89469ffada078ce
+creative-research/99-raw/tools/README.md	g-tools	SKILL-MAP §2.2	43718	service	8fdb5e2c80419a2ac23c64a64d45294a27f5ffdbacad39ca226b83f07cfe581b
+creative-research/99-raw/tools/asset_inventory.py	g-tools	SKILL-MAP §2.2	48297	tool	4b239638ee70109d300bbfa025bcc9d5766e21f1db513868a733e9bbdcf00616
+creative-research/99-raw/tools/check_links.py	g-tools	SKILL-MAP §2.2	103296	tool	c30a8740491f32ab5d3fdc449020222268a83f7fad3db88dae2e306e77ceb8bf
+creative-research/99-raw/tools/color.py	g-tools	SKILL-MAP §2.2	8142	tool	eac54ad9cba75d7e9a9dac46daa011760e9b3f3178e3dd365680b2f0e9733804
+creative-research/99-raw/tools/ctx_watch.py	g-tools	SKILL-MAP §2.2	8055	tool	7b2e51cbe008d0d7242bc44776f446e9d3a51045daccb34f93f0d8f42d0041bf
+creative-research/99-raw/tools/effect_bench.py	g-tools	SKILL-MAP §2.2	46148	tool	15373410636474364efa6852979d547ddf7734870aad16bee266d3c5e8962496
+creative-research/99-raw/tools/effects_probe.py	g-tools	SKILL-MAP §2.2	83322	tool	5883e055a057cebc34107638bceed795a34dc2fc6dcffb0f207401df084755f0
+creative-research/99-raw/tools/extract_for_audit.py	g-tools	SKILL-MAP §2.2	7112	tool	8ffd8dd0be8f36aa7daefcfb6f873a319c984300d957508565d382e8cb1ee5f7
+creative-research/99-raw/tools/fetch.py	g-tools	SKILL-MAP §2.2	3375	tool	8f171ff53f4fc4f21955e2cc9e6cefd680c7cf79a2602333b75ea51999606ccb
+creative-research/99-raw/tools/marketing_audit.py	g-tools	SKILL-MAP §2.2	94742	tool	fd3c47c2bde2be65688cc9a7846b193307250e17b6c4a8dc29314cc36fdc3bec
+creative-research/99-raw/tools/measure_ui.py	g-tools	SKILL-MAP §2.2	61789	tool	4b4b9656055c8aee9f007c2f71a4e98292dd3547cf5d57d45583e2660a2125ae
+creative-research/99-raw/tools/motion_check.py	g-tools	SKILL-MAP §2.2	155844	tool	bb712f79120cefe46f02687a26e5c8b5291ba67f1f0be61de280aa2615453d5d
+creative-research/99-raw/tools/orch_check.py	g-tools	SKILL-MAP §2.2	11715	tool	9275da81fafbf217291e07e7184563fd8e98b66ced8733955dd5ee48008d67c0
+creative-research/99-raw/tools/page_accept.py	g-tools	SKILL-MAP §2.2	24328	tool	495889f72d396f3241bc4319941a83f56b4d9d7608bf0bdef466a17d2ea272b5
+creative-research/99-raw/tools/refs_client.py	g-tools	SKILL-MAP §2.2	198719	tool	899bd3156197a76dd28c0bbe73db74794de339d3da281a175546ef60d9ea93f2
+creative-research/99-raw/tools/render_fetch.py	g-tools	SKILL-MAP §2.2	4679	tool	67e61b3a28c6ae7a83875fdcba8b512dc93e544f490fa01b2d188f6981b8c2c2
+creative-research/99-raw/tools/scroll_record.py	g-tools	SKILL-MAP §2.2	18179	tool	2c5ff930fa6d4100a57f83c3f4c9b7b85f0ab4642181ca3f7630c5c47db621a3
+creative-research/99-raw/tools/site_probe.py	g-tools	SKILL-MAP §2.2	28684	tool	7244212bcd86d152c09b2aede038b6535ac50499debc04ea36df329b9fb51216
+creative-research/99-raw/tools/sources_collect.py	g-tools	SKILL-MAP §2.2	93857	tool	a405d835cd3883901f3e565895b7c29a4e8d9898f7a32046414b4ab741af4725
+creative-research/99-raw/tools/transcribe_local.py	g-tools	SKILL-MAP §2.2	11995	tool	0cdea960401e4c16da745cf92c81b988270267e642546d078279362c61b3fe9d
+creative-research/99-raw/tools/ui_audit.py	g-tools	SKILL-MAP §2.2	79143	tool	753482b2b12295a1bca9c20b3959ec13461605408edb27b0b9806b88b5d66fca
+creative-research/99-raw/tools/vtt2md.py	g-tools	SKILL-MAP §2.2	5719	tool	62c05179f495a14baa948d9d57673efb22ecf265f3bfb146e4d7a71f74df97fe
+creative-research/99-raw/tools/yt_dl.py	g-tools	SKILL-MAP §2.2	8524	tool	170fb4bf69857667454285d774dd606ec2393419f90b0f229d548ab90dd80eed
+creative-research/99-raw/tools/yt_frames.py	g-tools	SKILL-MAP §2.2	13602	tool	e964d9fc6c1099532c24185c209bef1f1b9a1693d9e82f08c76a25dccc70f6c0
+creative-research/99-raw/tools/yt_transcript.py	g-tools	SKILL-MAP §2.2	9311	tool	6fb2cf6cbe72eafb719772c73ddef34340c1fab9a7dd659676894eaac13938ec
+site-research/99-raw/experiments/K/02-ux-profile/build_profile.py	site-tools-exp	Р66	75247	service	38748011290df3d8e403c33041bec6769179836cb772d422d66cfe81de94d48c
+site-research/99-raw/experiments/K/03-gates-v1/run_axe_targets.py	site-tools-exp	Р66	4419	service	4eb7251ceec121751f086073e8da99f76b816eae6e86bd5145d84b80738c08f3
+site-research/99-raw/tools/README.md	g-tools	SKILL-MAP §2.2	68946	service	f76d9ef333eaac5d9360a8c2d342764d246450113cc3e1eb3337e0eaeffb4cfe
+site-research/99-raw/tools/ab_plan.py	g-tools	SKILL-MAP §2.2	24621	tool	d77bbcb505d4b5f0932d880da10177a535ad5a93da797cf4734bf3a64bd49d65
+site-research/99-raw/tools/asset_inventory.py	g-tools	SKILL-MAP §2.2	48297	tool	4b239638ee70109d300bbfa025bcc9d5766e21f1db513868a733e9bbdcf00616
+site-research/99-raw/tools/check_links.py	g-tools	SKILL-MAP §2.2	108068	tool	7b81e60781d292f73f7f6f1dd2348230513203c1d848d4cecd8c2ce88309a667
+site-research/99-raw/tools/checklist_export.py	g-tools	SKILL-MAP §2.2	20527	tool	7a7bfccfc208d9e27b756cbc2572dd07747a692f2e6e3ac07632adb45b9e6ab0
+site-research/99-raw/tools/color.py	g-tools	SKILL-MAP §2.2	8142	tool	eac54ad9cba75d7e9a9dac46daa011760e9b3f3178e3dd365680b2f0e9733804
+site-research/99-raw/tools/ctx_watch.py	g-tools	SKILL-MAP §2.2	6287	tool	21d53f1920c5d072e7c6dc14500ce66feeeffa2c2b7c76e42c01016e622ddee3
+site-research/99-raw/tools/extract_for_audit.py	g-tools	SKILL-MAP §2.2	15135	tool	9ca7333b73898c8bae9d07c59f3018a3a000fa8342b0ef24986e7f73efa3b08f
+site-research/99-raw/tools/fetch.py	g-tools	SKILL-MAP §2.2	3375	tool	8f171ff53f4fc4f21955e2cc9e6cefd680c7cf79a2602333b75ea51999606ccb
+site-research/99-raw/tools/geo_probe.py	g-tools	SKILL-MAP §2.2	63068	tool	41f4ca58e0295a7265d1d0388d392084d091f994911db03a4f44afd9c8ac609d
+site-research/99-raw/tools/ia_probe.py	g-tools	SKILL-MAP §2.2	99741	tool	15983fd70fe772b5716ffcfbd33e8a77147a236a43651a763959f5b424052446
+site-research/99-raw/tools/measure_ui.py	g-tools	SKILL-MAP §2.2	61789	tool	4b4b9656055c8aee9f007c2f71a4e98292dd3547cf5d57d45583e2660a2125ae
+site-research/99-raw/tools/node/package.json	g-tools	SKILL-MAP §2.2	55	service	6fd4e2ef06b6c9c90a9db36c0156db77f68a874cd6096260d82203a53b814488
+site-research/99-raw/tools/orch_check.py	g-tools	SKILL-MAP §2.2	11423	tool	e35c6e398796c3c5c7f4ea9b3d93c5c267f856f24d2e96ad6cfa84b528b8165d
+site-research/99-raw/tools/page_accept.py	g-tools	SKILL-MAP §2.2	24328	tool	495889f72d396f3241bc4319941a83f56b4d9d7608bf0bdef466a17d2ea272b5
+site-research/99-raw/tools/page_anatomy.py	g-tools	SKILL-MAP §2.2	224258	tool	6456fd11b57040a1d8cb749f7cbf318a009da3328f592333906745280265b8fa
+site-research/99-raw/tools/page_gates.py	g-tools	SKILL-MAP §2.2	74664	tool	a9dabb35161512c2f5e5e75102186cfde63006147dc77c46da7954ce4f261863
+site-research/99-raw/tools/plan_to_assets.py	g-tools	SKILL-MAP §2.2	10838	tool	4ad7f720794273a5d4e4d6e49705de9e9032d1f10f670048198535f3b8a17d69
+site-research/99-raw/tools/render_fetch.py	g-tools	SKILL-MAP §2.2	4679	tool	67e61b3a28c6ae7a83875fdcba8b512dc93e544f490fa01b2d188f6981b8c2c2
+site-research/99-raw/tools/site_brief_to_kimi.py	g-tools	SKILL-MAP §2.2	29133	tool	098aaaac6d52b39938be9d86e151ec738ae4894ef90c489a26c3f89d9eb3ffb5
+site-research/99-raw/tools/site_probe.py	g-tools	SKILL-MAP §2.2	28684	tool	7244212bcd86d152c09b2aede038b6535ac50499debc04ea36df329b9fb51216
+site-research/99-raw/tools/site_validate.py	g-tools	SKILL-MAP §2.2	81457	tool	b5aa931a2cfbc0a65a70a6979b5e02cfee87273ad08361c3d62dfac6d7658431
+site-research/99-raw/tools/sources_collect.py	g-tools	SKILL-MAP §2.2	97219	tool	e1379baa3a866a68bb66c1bd5e0fdb1f02296d8194765269e27a332a1d87f44b
+site-research/99-raw/tools/transcribe_local.py	g-tools	SKILL-MAP §2.2	11995	tool	0cdea960401e4c16da745cf92c81b988270267e642546d078279362c61b3fe9d
+site-research/99-raw/tools/ui_audit.py	g-tools	SKILL-MAP §2.2	79143	tool	753482b2b12295a1bca9c20b3959ec13461605408edb27b0b9806b88b5d66fca
+site-research/99-raw/tools/vocab_lint.py	g-tools	SKILL-MAP §2.2	19784	tool	d86bc164ebd236de1d1f8a658d349c06c19c42ff25e6b3b482038b30ee96711a
+site-research/99-raw/tools/vtt2md.py	g-tools	SKILL-MAP §2.2	5719	tool	62c05179f495a14baa948d9d57673efb22ecf265f3bfb146e4d7a71f74df97fe
+site-research/99-raw/tools/yt_dl.py	g-tools	SKILL-MAP §2.2	8524	tool	170fb4bf69857667454285d774dd606ec2393419f90b0f229d548ab90dd80eed
+site-research/99-raw/tools/yt_transcript.py	g-tools	SKILL-MAP §2.2	9311	tool	6fb2cf6cbe72eafb719772c73ddef34340c1fab9a7dd659676894eaac13938ec
+text-research/99-raw/experiments/B1/03-schema-validate/validate.py	text-steps	Р33	23089	service	3fbc33221a0d89ee63ba2d0f631a056467cde9ec8db9cb530adc5678c8e5c75a
+text-research/99-raw/experiments/B2/01-schema-validate/validate.py	text-steps	Р33	6685	service	b13dbb1482132b00dee338e3e13a8985320089bc1ff47467416edbeaebfb022c
+text-research/99-raw/experiments/F/03-schema-lint/validate_voice.py	text-steps	Р33	15498	service	65b00306ca4c4ebddf9bfd08783d1c979cee4115234cb0c7a2051ba946b08722
+text-research/99-raw/experiments/I/04-chain-manual/chain_inputs.py	text-steps	Р33	50376	service	e5094ab043ffc451244485c4d3fe095a1a5f65ed6974a00dc6191f870c43c75a
+text-research/99-raw/experiments/I/04-chain-manual/check_intake.py	text-steps	Р33	12721	service	e37b542482f2be00cb797142c7597487eb2632e01038432e1bd48ac1aee66009
+text-research/99-raw/experiments/I/04-chain-manual/make_skeleton.py	text-steps	Р33	8381	service	de5567c755b65613592a2ae22f63bad1d2f77e93e8511d9c4a05399f15b29db4
+text-research/99-raw/experiments/I/04-chain-manual/validate_any.py	text-steps	Р33	2483	service	e3a976a7ef397dda2aee2b1abaa6185a86b57df804fece2d36310a77011dd951
+text-research/99-raw/experiments/J/08-examples/run_checks.py	text-run-checks	SYNTHESIS §3.2 (кандидат без решения — решает B)	4768	service	3dbc81077ee82cbce4086fc549d1ac9d9a28bdd6bc7563240be3efbc6322a1f1
+text-research/99-raw/tools/README.md	g-tools	SKILL-MAP §2.2	59843	service	210e668135f4d769db6b7a52643ad18e610479826132538175251ad308a354d4
+text-research/99-raw/tools/before_after_build.py	g-tools	SKILL-MAP §2.2	46204	tool	05a10940446ee39440d7292999781e4b6437afd18dac8bc2de4edb99e94b11da
+text-research/99-raw/tools/check_links.py	g-tools	SKILL-MAP §2.2	102465	tool	8810c356e53230132f4eca78c48f34b5e8e99ecebef4de260d26e4fd099e0c32
+text-research/99-raw/tools/claims_check.py	g-tools	SKILL-MAP §2.2	194372	tool	a7b52dd4bc292586a65a069255eb3a0e14cf24a9a2054fff77f0a73414f233f0
+text-research/99-raw/tools/copy_extract.py	g-tools	SKILL-MAP §2.2	83094	tool	89272eeeaa6866300d9274c640caf22e0c2e549ca2937d5861e4ee91bfc689d3
+text-research/99-raw/tools/copy_lint.py	g-tools	SKILL-MAP §2.2	113101	tool	3989e5d185199c314cf088d907c28a5de540ea8426e932d802f6ff92584168ac
+text-research/99-raw/tools/copy_metrics.py	g-tools	SKILL-MAP §2.2	41530	tool	a3d56ed0b4ff41a32cddb9f70b0c4682a575e336d62cdaccc8ef97d23c38a7df
+text-research/99-raw/tools/copydeck.py	g-tools	SKILL-MAP §2.2	251675	tool	ebd20ddb267792e2b88a9c5cba67485c6bdc46b084d42aec6425c758b12e2981
+text-research/99-raw/tools/ctx_watch.py	g-tools	SKILL-MAP §2.2	6354	tool	bde4566adbba6697398ff78ebe75fc560f9ffe93266e94373ff92bc7f040b121
+text-research/99-raw/tools/extract_for_audit.py	g-tools	SKILL-MAP §2.2	6759	tool	b8fe61d0dbd5c966c4fce98798ffee0e2f4931853f11d0a5c1d901da80af282e
+text-research/99-raw/tools/fetch.py	g-tools	SKILL-MAP §2.2	3375	tool	8f171ff53f4fc4f21955e2cc9e6cefd680c7cf79a2602333b75ea51999606ccb
+text-research/99-raw/tools/orch_check.py	g-tools	SKILL-MAP §2.2	10467	tool	e2c0ecc1b223648a57742a766869c20b5a28784e9c2db1179547cd7014805aec
+text-research/99-raw/tools/render_fetch.py	g-tools	SKILL-MAP §2.2	4679	tool	67e61b3a28c6ae7a83875fdcba8b512dc93e544f490fa01b2d188f6981b8c2c2
+text-research/99-raw/tools/site_probe.py	g-tools	SKILL-MAP §2.2	28684	tool	7244212bcd86d152c09b2aede038b6535ac50499debc04ea36df329b9fb51216
+text-research/99-raw/tools/sources_collect.py	g-tools	SKILL-MAP §2.2	86578	tool	ab471c4816b00fc38d9964363b43e76e5c4858934b206db44b4939035cf2c950
+text-research/99-raw/tools/transcribe_local.py	g-tools	SKILL-MAP §2.2	11995	tool	0cdea960401e4c16da745cf92c81b988270267e642546d078279362c61b3fe9d
+text-research/99-raw/tools/ux_dict_to_yaml.py	g-tools	SKILL-MAP §2.2	14938	tool	8f0842e4161d7c469f1c7aa27c3c3390e23f0b1ca897fabb2bd3f9c43eaa3aea
+text-research/99-raw/tools/vtt2md.py	g-tools	SKILL-MAP §2.2	5719	tool	62c05179f495a14baa948d9d57673efb22ecf265f3bfb146e4d7a71f74df97fe
+text-research/99-raw/tools/yt_dl.py	g-tools	SKILL-MAP §2.2	8524	tool	170fb4bf69857667454285d774dd606ec2393419f90b0f229d548ab90dd80eed
+text-research/99-raw/tools/yt_transcript.py	g-tools	SKILL-MAP §2.2	9311	tool	6fb2cf6cbe72eafb719772c73ddef34340c1fab9a7dd659676894eaac13938ec
+ui-research/99-raw/tools/analyze_measurements.py	g-tools	SKILL-MAP §2.2	14543	tool	7defdf9b17c612d3b6d97b4e46d7c7582d8fa79c5c30b1730db4e8dee18855db
+ui-research/99-raw/tools/build_reference_tokens.py	g-tools	SKILL-MAP §2.2	92385	tool	15a2ff4c560707055055483333b58593a9f7a7a861ef3fa4382cfb9505f2df34
+ui-research/99-raw/tools/check_links.py	g-tools	SKILL-MAP §2.2	42902	tool	848fd2dbf19031bdb5279e806ef52e60b88f1edd05d7ab690e9e0f7728eb6f6a
+ui-research/99-raw/tools/color.py	g-tools	SKILL-MAP §2.2	8142	tool	eac54ad9cba75d7e9a9dac46daa011760e9b3f3178e3dd365680b2f0e9733804
+ui-research/99-raw/tools/fetch.py	g-tools	SKILL-MAP §2.2	3375	tool	8f171ff53f4fc4f21955e2cc9e6cefd680c7cf79a2602333b75ea51999606ccb
+ui-research/99-raw/tools/measure_ui.py	g-tools	SKILL-MAP §2.2	61789	tool	4b4b9656055c8aee9f007c2f71a4e98292dd3547cf5d57d45583e2660a2125ae
+ui-research/99-raw/tools/render_fetch.py	g-tools	SKILL-MAP §2.2	4679	tool	67e61b3a28c6ae7a83875fdcba8b512dc93e544f490fa01b2d188f6981b8c2c2
+ui-research/99-raw/tools/retry_transcripts.sh	g-tools	SKILL-MAP §2.2	1400	tool	844e8237c931e68b467fb856490b0a3a9c0656055dff0bd5fe49e0147605432f
+ui-research/99-raw/tools/ui_audit.py	g-tools	SKILL-MAP §2.2	79143	tool	753482b2b12295a1bca9c20b3959ec13461605408edb27b0b9806b88b5d66fca
+ui-research/99-raw/tools/yt_transcript.py	g-tools	SKILL-MAP §2.2	9252	tool	dea1e1ee8de2ab556777106c30b5671be6889859a2f1afedb36abd2e594b1da2
+ux-research/99-raw/tools/ax.sh	g-tools	SKILL-MAP §2.2	274	tool	5545215ca1e70cd1cd5a9627a8c84a3e7617db96cf354fccffa1e51094428524
+ux-research/99-raw/tools/before_after_build.py	g-tools	SKILL-MAP §2.2	4948	tool	98a459ca16acaa23c552cb9b1d87a1d5097f076bf5b75c2e55c6cec7540e281f
+ux-research/99-raw/tools/checklist_export.py	g-tools	SKILL-MAP §2.2	11063	tool	d20ba3e39c16f8610df32c886a9b359083d9be70cc7aa962350670cc13e1e87d
+ux-research/99-raw/tools/fetch.py	g-tools	SKILL-MAP §2.2	3375	tool	8f171ff53f4fc4f21955e2cc9e6cefd680c7cf79a2602333b75ea51999606ccb
+ux-research/99-raw/tools/m3_fetch.py	g-tools	SKILL-MAP §2.2	24190	tool	b8f3f39fdffba888a112b4e03d33c3de2994c3cf0bcc56a7220137400e072c5a
+ux-research/99-raw/tools/render_fetch.py	g-tools	SKILL-MAP §2.2	4679	tool	67e61b3a28c6ae7a83875fdcba8b512dc93e544f490fa01b2d188f6981b8c2c2
+ux-research/99-raw/tools/sources_collect.py	g-tools	SKILL-MAP §2.2	19000	tool	73f254f33670410a3131409c1d4d92caf178d4d616a5358835cf87f151d50589
+ux-research/99-raw/tools/transcribe_local.py	g-tools	SKILL-MAP §2.2	10653	tool	e11ff684f46432a86ffc4d2c81dc2b1739cb23947043966908bf1e8a9179585b
+ux-research/99-raw/tools/vtt2md.py	g-tools	SKILL-MAP §2.2	5488	tool	7aae8d907394b5d26e0ed764dd709212f841672c6949861bd7dd7b52155a3d22
+ux-research/99-raw/tools/yt_transcript.py	g-tools	SKILL-MAP §2.2	9324	tool	781d03613a93c23981e1eaf2c49c94ed1b2480be68f350c710513fb66bfc1c7e

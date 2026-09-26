@@ -1,0 +1,9 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/99-raw/tools/anim_diff.py
+source_sha256: 595d2d30e94d17c85d3213b012bfc3655c827e4707728f62fdd519008910692a
+result_sha256: db51ef151ce4119fa6838f8c89fb749363ad0c4cb29a9c187a8787c331e73540
+dest: .claude/skills/design-deep-dive/scripts/blender/anim_diff.py
+edits:
+- code: abs
+  find: TOOLS = "/home/mm/Документы/app-design/blender-research/99-raw/tools"
+  replace: 'TOOLS = os.path.dirname(os.path.abspath(__file__))  # перенос: gltf_diff.py — рядом'

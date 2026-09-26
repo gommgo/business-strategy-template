@@ -1,0 +1,9 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/12-recipes/examples/01-hero-product/make_poster.py
+source_sha256: f7b9404e4ef0ed72ee9c0406e9a4fe27c09432d766e2227b8a910106fe88557d
+result_sha256: 6262d69497f213e8a7762ee0b533c8353f7367da26928e11847fca9b78acf2c2
+dest: .claude/skills/design-deep-dive/kb/blender/12-recipes/examples/01-hero-product/make_poster.py
+edits:
+- code: imp
+  find: sys.path.insert(0, os.path.join(HERE, "../../../99-raw/experiments/F1/02-hero-variants"))
+  replace: 'sys.path.insert(0, os.path.join(HERE, "../../../../../scripts/blender"))  # перенос: serve_br.py — scripts/blender'

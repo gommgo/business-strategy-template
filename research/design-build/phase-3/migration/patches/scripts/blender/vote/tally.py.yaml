@@ -1,0 +1,15 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/15-showcase/vote/tally.py
+source_sha256: 01935bc6d3c7e0a9f0cf2d5d8ceff64d3fc466a9d99da4fb8a1009f9e382999d
+result_sha256: c94a8675ac64febd682dc9cae86f6a25f02d27168fc425df354ead4305dc97a1
+dest: .claude/skills/design-deep-dive/scripts/blender/vote/tally.py
+edits:
+- code: boot
+  find: HERE = os.path.dirname(os.path.abspath(__file__))
+  replace:
+  - HERE = os.path.dirname(os.path.abspath(__file__))
+  - 'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+- code: root
+  find: SHOW = os.path.dirname(HERE)
+  replace: 'SHOW = str(kbpaths.kb("blender", "15-showcase"))  # перенос: VERDICT.md испытания — kb'

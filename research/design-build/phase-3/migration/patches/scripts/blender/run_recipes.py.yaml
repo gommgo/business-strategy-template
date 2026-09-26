@@ -1,0 +1,17 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/99-raw/experiments/K/01-run-recipes/run_recipes.py
+source_sha256: a3d0c7e6a48fe26ac718bd38ee93edf02e47e01920e0b9865c55a2232c16eed5
+result_sha256: fdccc14d84bba459f298e5c66133cf986aa2d70659cc1a02cb46b32835495a3a
+dest: .claude/skills/design-deep-dive/scripts/blender/run_recipes.py
+edits:
+- code: root
+  find:
+  - ROOT = "/home/mm/Документы/app-design/blender-research"
+  - HERE = os.path.dirname(os.path.abspath(__file__))
+  - RES = os.path.join(HERE, "result.json")
+  replace:
+  - 'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+  - ROOT = str(kbpaths.kb("blender"))
+  - HERE = os.path.dirname(os.path.abspath(__file__))
+  - RES = str(kbpaths.out("blender", "run_recipes") / "result.json")

@@ -1,0 +1,19 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/99-raw/tools/slot_run.py
+source_sha256: 408425b56f81322b2a58df5063c86d2f86e7d44f55f87afe1b23221fe96d4f15
+result_sha256: 10065f1e7e1c0a131b59e99565a26aba543fd2bd6043967cc3e9ae20451cad89
+dest: .claude/skills/design-deep-dive/scripts/blender/slot_run.py
+edits:
+- code: boot
+  find:
+  - import time
+  - ''
+  replace:
+  - import time
+  - ''
+  - 'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+  - ''
+- code: lock
+  find: LOCKS = os.environ.get("SLOT_RUN_LOCKS", "/home/mm/Документы/app-design/.locks")
+  replace: LOCKS = os.environ.get("SLOT_RUN_LOCKS", str(kbpaths.locks_dir()))

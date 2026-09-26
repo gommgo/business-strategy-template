@@ -1,0 +1,18 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: ai-media-research/99-raw/tools/prompt_compile.py
+source_sha256: aece342d0364bf228006a488f73a4e3639dfa5d617c41052be9339956116edce
+result_sha256: 99650bb2a46de080173211fa82175c834a20964570657ca22c83ec55555327bc
+dest: .claude/skills/design-deep-dive/scripts/ai-media/prompt_compile.py
+edits:
+- code: boot
+  find:
+  - TOOLS = pathlib.Path(__file__).resolve().parent
+  - sys.path.insert(0, str(TOOLS))
+  replace:
+  - TOOLS = pathlib.Path(__file__).resolve().parent
+  - sys.path.insert(0, str(TOOLS))
+  - 'sys.path.insert(0, str(TOOLS.parent / "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+- code: root
+  find: ROOT = TOOLS.parents[1]
+  replace: ROOT = kbpaths.kb("ai-media")

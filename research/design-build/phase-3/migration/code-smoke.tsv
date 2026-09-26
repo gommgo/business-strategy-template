@@ -1,0 +1,185 @@
+path	source	kind	verdict	smoke	full	faithful	srccache	seconds	note
+kb/blender/09-web-runtime/examples/camera-path-scroll/build_scene.py	blender-research/09-web-runtime/examples/camera-path-scroll/build_scene.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/09-web-runtime/examples/hero-lazy/make_poster.py	blender-research/09-web-runtime/examples/hero-lazy/make_poster.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/09-web-runtime/examples/r3f-hero/build.sh	blender-research/09-web-runtime/examples/r3f-hero/build.sh	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/12-recipes/examples/01-hero-product/build.py	blender-research/12-recipes/examples/01-hero-product/build.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/12-recipes/examples/01-hero-product/make_poster.py	blender-research/12-recipes/examples/01-hero-product/make_poster.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/12-recipes/examples/02-icon-series/build.py	blender-research/12-recipes/examples/02-icon-series/build.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/12-recipes/examples/02-icon-series/post.py	blender-research/12-recipes/examples/02-icon-series/post.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/12-recipes/examples/03-device-mockup/build.py	blender-research/12-recipes/examples/03-device-mockup/build.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/12-recipes/examples/04-abstract-sculpture/build.py	blender-research/12-recipes/examples/04-abstract-sculpture/build.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/12-recipes/examples/05-scroll-showcase/build.py	blender-research/12-recipes/examples/05-scroll-showcase/build.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/12-recipes/examples/06-logo-3d-particles/build.py	blender-research/12-recipes/examples/06-logo-3d-particles/build.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/12-recipes/examples/07-lowpoly-diorama/build.py	blender-research/12-recipes/examples/07-lowpoly-diorama/build.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/12-recipes/examples/08-sequence-video-alpha/build.py	blender-research/12-recipes/examples/08-sequence-video-alpha/build.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/12-recipes/examples/08-sequence-video-alpha/post.py	blender-research/12-recipes/examples/08-sequence-video-alpha/post.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/12-recipes/examples/09-glass-product/build.py	blender-research/12-recipes/examples/09-glass-product/build.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/12-recipes/examples/10-instance-field/build.py	blender-research/12-recipes/examples/10-instance-field/build.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/12-recipes/examples/12-model-viewer-ar/build.py	blender-research/12-recipes/examples/12-model-viewer-ar/build.py	ref	adapt	compile	PASS	PASS	-	0.0	
+kb/blender/15-showcase/_shared/code3d/build.sh	blender-research/15-showcase/_shared/code3d/build.sh	ref	adapt	compile	PASS	PASS	-	0.0	
+scripts/README.md	overlay	data	overlay	data	PASS	PASS	-	0.0	
+scripts/ai-media/README.md	ai-media-research/99-raw/tools/README.md	data	adapt	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/alpha_check.py	ai-media-research/99-raw/tools/alpha_check.py	utility	take	help	PASS	PASS	PASS	0.3	
+scripts/ai-media/asset_audit.py	ai-media-research/99-raw/tools/asset_audit.py	utility	adapt	help	PASS	PASS	PASS	0.0	
+scripts/ai-media/asset_inventory.py	ai-media-research/99-raw/tools/asset_inventory.py	utility	take	help	PASS	PASS	PASS	0.0	
+scripts/ai-media/avif_pick.sh	ai-media-research/99-raw/tools/avif_pick.sh	utility	adapt	compile	PASS	PASS	PASS	0.0	
+scripts/ai-media/channel_diff.py	ai-media-research/99-raw/experiments/N/04-update-dryrun/channel_diff.py	step	adapt	compile	PASS	PASS	PASS	0.0	
+scripts/ai-media/check_icons.py	ai-media-research/99-raw/experiments/G/check_icons.py	module	take	help	XFAIL	XFAIL	XFAIL	0.1	full: help: ModuleNotFoundError: No module named 'cairosvg' · ожидаемо: нужны cairosvg (cairocffi, cffi, системная libcairo), svgelements, scikit-image — ставит install.sh (группа svg); faithful: help: ModuleNotFoundError: No module named 'cairosvg' · ожидаемо: нужны cairosvg (cairocffi, cffi, системная libcairo), svgelements, scikit-image — ставит install.sh (группа svg); srccache: help: ModuleNo
+scripts/ai-media/composition_metrics.py	ai-media-research/99-raw/experiments/F/04-slop-metrics/composition_metrics.py	module	adapt	import-only	PASS	PASS	PASS	0.3	
+scripts/ai-media/data/svgo.keep-signature.config.mjs	ai-media-research/99-raw/experiments/G/02-recraft-svg-hygiene/svgo.keep-signature.config.mjs	data	take	compile	PASS	PASS	PASS	0.0	
+scripts/ai-media/edit_check.py	ai-media-research/99-raw/tools/edit_check.py	utility	take	help; run: selftest	PASS	PASS	PASS	0.9	
+scripts/ai-media/image_metrics.py	ai-media-research/99-raw/experiments/A/04-image-marker-metrics/image_metrics.py	module	take	import-only	PASS	PASS	PASS	0.1	
+scripts/ai-media/layout_check.py	ai-media-research/99-raw/experiments/M/06-og-marketplace/layout_check.py	step	adapt	import-only	PASS	PASS	PASS	0.1	
+scripts/ai-media/loop_rife_bridge.py	ai-media-research/99-raw/phase5/runs/MS-marea/loop_rife_bridge.py	step	adapt	compile	PASS	PASS	PASS	0.0	
+scripts/ai-media/mp_client.py	ai-media-research/99-raw/tools/mp_client.py	utility	adapt	help; run: selftest	XFAIL	XFAIL	XFAIL	0.2	full: run selftest: # selftest: 32/41 PASS · ожидаемо: оценки цен требуют снимков каталогов routerai, genapi, polza — install.sh --catalogs; faithful: run selftest: # selftest: 32/41 PASS · ожидаемо: оценки цен требуют снимков каталогов routerai, genapi, polza — install.sh --catalogs; srccache: run selftest: # selftest: 39/41 PASS · ожидаемо: оценки цен требуют снимков каталогов routerai, genapi, 
+scripts/ai-media/page_accept.py	ai-media-research/99-raw/tools/page_accept.py	utility	adapt	help	PASS	PASS	PASS	0.1	
+scripts/ai-media/palette.py	ai-media-research/99-raw/experiments/F/05-color/palette.py	module	take	import-only	PASS	PASS	PASS	0.1	
+scripts/ai-media/polza.py	ai-media-research/99-raw/tools/polza.py	utility	adapt	help	PASS	PASS	PASS	0.1	
+scripts/ai-media/polza_catalog.py	ai-media-research/99-raw/tools/polza_catalog.py	utility	adapt	help; run: selftest	XFAIL	XFAIL	XPASS	0.0	full: run selftest: снимок не найден: 2026-09-23 · ожидаемо: самопроверка сравнивает снимки 2026-09-23 из кэша источника (99-raw/cache не переносится) — со снимками источника проходит; faithful: run selftest: снимок не найден: 2026-09-23 · ожидаемо: самопроверка сравнивает снимки 2026-09-23 из кэша источника (99-raw/cache не переносится) — со снимками источника проходит
+scripts/ai-media/prompt_compile.py	ai-media-research/99-raw/tools/prompt_compile.py	utility	adapt	help	XFAIL	XFAIL	XPASS	0.1	full: help: нет снимков в /home/mm/Документы/app-design/_skill-build/phase-3/migration/.staging-code/.ddd-home/cache/ai-media/polza · ожидаемо: нужен снимок каталога polza в $DDD_HOME/cache/ai-media/polza — install.sh --catalogs (бесплатный GET, сеть); 99-raw/cache не переносится; faithful: help: нет снимков в /home/mm/Документы/app-design/_skill-build/phase-3/migration/.staging-code-faithful/.ddd
+scripts/ai-media/provenance_check.py	ai-media-research/99-raw/tools/provenance_check.py	utility	adapt	help; run: selftest	XFAIL	XFAIL	XFAIL	0.4	full: run selftest: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/provself_zuz0iqms/signed.png' · ожидаемо: нужны c2patool 0.27.22 и exiftool 13.59 в $DDD_HOME/bin — install.sh; faithful: run selftest: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/provself_d798bioi/signed.png' · ожидаемо: нужны c2patool 0.27.22 и exiftool 13.59 в $DDD_HOME/bin — install.sh; srccache
+scripts/ai-media/routing_check.py	ai-media-research/99-raw/tools/routing_check.py	utility	adapt	help	PASS	PASS	PASS	0.1	
+scripts/ai-media/series_metrics.py	ai-media-research/99-raw/experiments/F/06-series-metrics/series_metrics.py	module	adapt	import-only	PASS	PASS	PASS	0.1	
+scripts/ai-media/split_grid.py	ai-media-research/99-raw/experiments/F/06-series-metrics/split_grid.py	module	take	import-only	PASS	PASS	PASS	0.1	
+scripts/ai-media/split_recraft.py	ai-media-research/99-raw/experiments/B/14-landing-assets/split_recraft.py	step	adapt	compile	PASS	PASS	PASS	0.0	
+scripts/ai-media/stand_run.py	ai-media-research/99-raw/tools/stand_run.py	utility	adapt	help; run: selftest	PASS	PASS	PASS	0.1	
+scripts/ai-media/svg_sheet.py	ai-media-research/99-raw/phase5/runs/S4-capability/tools/svg_sheet.py	step	adapt	help	XFAIL	XFAIL	XFAIL	0.0	full: help: ModuleNotFoundError: No module named 'cairosvg' · ожидаемо: нужны cairosvg (cairocffi, cffi, системная libcairo) — ставит install.sh (группа svg); faithful: help: ModuleNotFoundError: No module named 'cairosvg' · ожидаемо: нужны cairosvg (cairocffi, cffi, системная libcairo) — ставит install.sh (группа svg); srccache: help: ModuleNotFoundError: No module named 'cairosvg' · ожидаемо: ну
+scripts/ai-media/tests/fixtures/D02/E1.spec.json	ai-media-research/99-raw/experiments/D/02-schema-validate/specs/E1.spec.json	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/D02/E2.spec.json	ai-media-research/99-raw/experiments/D/02-schema-validate/specs/E2.spec.json	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/D02/E3.spec.json	ai-media-research/99-raw/experiments/D/02-schema-validate/specs/E3.spec.json	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/D02/E4.spec.json	ai-media-research/99-raw/experiments/D/02-schema-validate/specs/E4.spec.json	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/D02/E5.spec.json	ai-media-research/99-raw/experiments/D/02-schema-validate/specs/E5.spec.json	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/D03/B1.spec.json	ai-media-research/99-raw/experiments/D/03-compile-prototype/ab/B1.spec.json	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/D03/B2.spec.json	ai-media-research/99-raw/experiments/D/03-compile-prototype/ab/B2.spec.json	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/frame-A.png	ai-media-research/99-raw/tools/tests/fixtures/frame-A.png	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/mask-white-change.png	ai-media-research/99-raw/tools/tests/fixtures/mask-white-change.png	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/product.png	ai-media-research/99-raw/tools/tests/fixtures/product.png	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/source.png	ai-media-research/99-raw/tools/tests/fixtures/source.png	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/style-ref.png	ai-media-research/99-raw/tools/tests/fixtures/style-ref.png	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/v2-edit.spec.json	ai-media-research/99-raw/tools/tests/fixtures/v2-edit.spec.json	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/v2-loop.spec.json	ai-media-research/99-raw/tools/tests/fixtures/v2-loop.spec.json	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/v2-product.spec.json	ai-media-research/99-raw/tools/tests/fixtures/v2-product.spec.json	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/v2-series.spec.json	ai-media-research/99-raw/tools/tests/fixtures/v2-series.spec.json	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/fixtures/v2-shots.spec.json	ai-media-research/99-raw/tools/tests/fixtures/v2-shots.spec.json	data	take	data	PASS	PASS	PASS	0.0	
+scripts/ai-media/tests/test_asset_audit.py	ai-media-research/99-raw/tools/tests/test_asset_audit.py	test	adapt	help	PASS	PASS	PASS	0.1	
+scripts/ai-media/tests/test_prompt_compile.py	ai-media-research/99-raw/tools/tests/test_prompt_compile.py	test	adapt	run: 	XFAIL	XFAIL	XPASS	0.8	full: run: нет снимков в /home/mm/Документы/app-design/_skill-build/phase-3/migration/.staging-code/.ddd-home/cache/ai-media/polza · ожидаемо: нужен снимок каталога polza — install.sh --catalogs; faithful: run: нет снимков в /home/mm/Документы/app-design/_skill-build/phase-3/migration/.staging-code-faithful/.ddd-home/cache/ai-media/polza · ожидаемо: нужен снимок каталога polza — install.sh --catal
+scripts/ai-media/tests/test_prompt_compile_x2.py	ai-media-research/99-raw/tools/tests/test_prompt_compile_x2.py	test	adapt	run: 	XFAIL	XFAIL	XPASS	0.2	full: run: нет снимков в /home/mm/Документы/app-design/_skill-build/phase-3/migration/.staging-code/.ddd-home/cache/ai-media/polza · ожидаемо: нужен снимок каталога polza — install.sh --catalogs; faithful: run: нет снимков в /home/mm/Документы/app-design/_skill-build/phase-3/migration/.staging-code-faithful/.ddd-home/cache/ai-media/polza · ожидаемо: нужен снимок каталога polza — install.sh --catal
+scripts/ai-media/text_zone.py	ai-media-research/99-raw/experiments/F/02-text-zone/text_zone.py	module	take	import-only	PASS	PASS	PASS	0.1	
+scripts/ai-media/tile_check.py	ai-media-research/99-raw/tools/tile_check.py	utility	take	help	PASS	PASS	PASS	0.1	
+scripts/ai-media/validate_recipes.py	ai-media-research/99-raw/experiments/M/10-recipes-yaml/validate_recipes.py	step	adapt	compile	PASS	PASS	PASS	0.0	
+scripts/ai-media/video_loop_check.py	ai-media-research/99-raw/tools/video_loop_check.py	utility	take	help; run: selftest	PASS	PASS	PASS	1.4	
+scripts/ai-media/vlm_to_dna.py	ai-media-research/99-raw/tools/vlm_to_dna.py	utility	adapt	help	PASS	PASS	PASS	0.0	
+scripts/ai-media/vm_sheet.py	ai-media-research/99-raw/phase5/runs/S4-capability/tools/vm_sheet.py	step	adapt	help	PASS	PASS	PASS	0.3	
+scripts/blender/README.md	blender-research/99-raw/tools/README.md	data	adapt	data	PASS	PASS	-	0.0	
+scripts/blender/agent_scene.py	blender-research/03-bpy-api/snippets/agent_scene.py	module	take	compile	PASS	PASS	-	0.0	
+scripts/blender/anim_diff.py	blender-research/99-raw/tools/anim_diff.py	utility	adapt	help	PASS	PASS	-	0.0	
+scripts/blender/animx.py	blender-research/99-raw/experiments/H/_lib/animx.py	module	take	compile	PASS	PASS	-	0.0	
+scripts/blender/blender_run.py	blender-research/99-raw/tools/blender_run.py	utility	adapt	help	PASS	PASS	-	0.0	
+scripts/blender/blender_supervisor.py	blender-research/99-raw/tools/blender_supervisor.py	utility	adapt	help	PASS	PASS	-	0.0	
+scripts/blender/bpy_probe.py	blender-research/99-raw/tools/bpy_probe.py	utility	adapt	help	PASS	PASS	-	0.0	
+scripts/blender/bpyx.py	blender-research/03-bpy-api/snippets/bpyx.py	module	take	compile	PASS	PASS	-	0.0	
+scripts/blender/d1exp.py	blender-research/99-raw/experiments/D1/_lib/d1exp.py	module	adapt	compile	PASS	PASS	-	0.0	
+scripts/blender/d1lib.py	blender-research/99-raw/experiments/D1/_lib/d1lib.py	module	adapt	compile	PASS	PASS	-	0.0	
+scripts/blender/d2lib.py	blender-research/99-raw/experiments/D2/_lib/d2lib.py	module	adapt	compile	PASS	PASS	-	0.0	
+scripts/blender/fx_probe.py	blender-research/99-raw/tools/fx_probe.py	utility	take	help	PASS	PASS	-	0.0	
+scripts/blender/gate_check.py	blender-research/99-raw/tools/gate_check.py	utility	take	help	PASS	PASS	-	0.0	
+scripts/blender/glb_lint_block.py	blender-research/99-raw/experiments/E/26-doc-snippets/glb_lint_block.py	module	take	import-only	PASS	PASS	-	0.0	
+scripts/blender/gltf_check.py	blender-research/99-raw/tools/gltf_check.py	utility	adapt	help	PASS	PASS	-	0.0	
+scripts/blender/gltf_diff.py	blender-research/99-raw/tools/gltf_diff.py	utility	adapt	help	PASS	PASS	-	0.0	
+scripts/blender/gltf_load_bench.py	blender-research/99-raw/tools/gltf_load_bench.py	utility	take	help	PASS	PASS	-	0.0	
+scripts/blender/gltf_web_inspect.py	blender-research/99-raw/tools/gltf_web_inspect.py	utility	take	help	PASS	PASS	-	0.0	
+scripts/blender/hygiene.py	blender-research/03-bpy-api/snippets/hygiene.py	module	take	compile	PASS	PASS	-	0.0	
+scripts/blender/img_metrics.py	blender-research/15-showcase/_shared/img_metrics.py	utility	take	help	PASS	PASS	-	0.1	
+scripts/blender/lint_agent_code.py	blender-research/99-raw/tools/lint_agent_code.py	utility	take	import-only	PASS	PASS	-	0.0	
+scripts/blender/node/validate.mjs	blender-research/99-raw/tools/node/validate.mjs	utility	take	compile	PASS	PASS	-	0.0	
+scripts/blender/passport_asserts.py	blender-research/99-raw/experiments/C1/16-passport-asserts/passport_asserts.py	module	take	compile	PASS	PASS	-	0.0	
+scripts/blender/preflight_block.py	blender-research/99-raw/experiments/E/26-doc-snippets/preflight_block.py	module	take	compile	PASS	PASS	-	0.0	
+scripts/blender/presets.py	blender-research/99-raw/experiments/E/24-presets/presets.py	module	take	compile	PASS	PASS	-	0.0	
+scripts/blender/qa_pipeline.py	blender-research/99-raw/tools/qa_pipeline.py	utility	adapt	help rc=3	PASS	PASS	-	0.0	
+scripts/blender/regression/make_manifest.py	blender-research/11-evaluation-qa/regression/make_manifest.py	maint	adapt	compile	PASS	PASS	-	0.0	
+scripts/blender/regression/run_set.py	blender-research/11-evaluation-qa/regression/run_set.py	maint	adapt	compile	PASS	PASS	-	0.0	
+scripts/blender/render_views.py	blender-research/99-raw/tools/render_views.py	utility	take	compile	PASS	PASS	-	0.0	
+scripts/blender/rk.py	blender-research/12-recipes/examples/_kit/rk.py	module	adapt	compile	PASS	PASS	-	0.0	
+scripts/blender/run_doc_blocks.py	blender-research/99-raw/tools/run_doc_blocks.py	utility	adapt	import-only	PASS	PASS	-	0.0	
+scripts/blender/run_recipes.py	blender-research/99-raw/experiments/K/01-run-recipes/run_recipes.py	step	adapt	import-only	PASS	PASS	-	0.0	
+scripts/blender/scene_audit.py	blender-research/99-raw/experiments/C1/10-scene-audit/scene_audit.py	module	take	compile	PASS	PASS	-	0.0	
+scripts/blender/scene_check.py	blender-research/99-raw/tools/scene_check.py	utility	take	compile	PASS	PASS	-	0.0	
+scripts/blender/serve_br.py	blender-research/99-raw/experiments/F1/02-hero-variants/serve_br.py	module	take	import-only	PASS	PASS	-	0.0	
+scripts/blender/sheet.py	blender-research/15-showcase/_shared/sheet.py	utility	take	import-only	PASS	PASS	-	0.0	
+scripts/blender/site_probe.py	blender-research/99-raw/tools/site_probe.py	utility	take	help	PASS	PASS	-	0.0	
+scripts/blender/slot_run.py	blender-research/99-raw/tools/slot_run.py	utility	adapt	import-only	PASS	PASS	-	0.0	
+scripts/blender/test_agent_helpers.py	blender-research/03-bpy-api/snippets/test_agent_helpers.py	test	take	compile	PASS	PASS	-	0.0	
+scripts/blender/test_bpyx.py	blender-research/03-bpy-api/snippets/test_bpyx.py	test	take	compile	PASS	PASS	-	0.0	
+scripts/blender/three_probe.py	blender-research/99-raw/tools/three_probe.py	utility	adapt	import-only	PASS	PASS	-	0.0	
+scripts/blender/vote/build_pairs.py	blender-research/15-showcase/vote/build_pairs.py	utility	adapt	import-only	PASS	PASS	-	0.0	
+scripts/blender/vote/index.html	blender-research/15-showcase/vote/index.html	data	take	data	PASS	PASS	-	0.0	
+scripts/blender/vote/tally.py	blender-research/15-showcase/vote/tally.py	utility	adapt	import-only	PASS	PASS	-	0.0	
+scripts/blender/vote/vote_server.py	blender-research/15-showcase/vote/vote_server.py	utility	take	import-only	PASS	PASS	-	0.0	
+scripts/blender/web_view.py	blender-research/99-raw/tools/web_view.py	utility	take	help	PASS	PASS	-	0.0	
+scripts/claude-design/kit/canvas.html	claude-design-research/04-claude-code-native/kit/canvas.html	kit	take	data	PASS	PASS	-	0.0	
+scripts/claude-design/kit/diffshots.py	claude-design-research/04-claude-code-native/kit/diffshots.py	kit	take	help	PASS	PASS	-	0.1	
+scripts/claude-design/kit/example/booking.html	claude-design-research/04-claude-code-native/kit/example/booking.html	kit	take	data	PASS	PASS	-	0.0	
+scripts/claude-design/kit/example/canvas.json	claude-design-research/04-claude-code-native/kit/example/canvas.json	kit	take	data	PASS	PASS	-	0.0	
+scripts/claude-design/kit/example/landing.html	claude-design-research/04-claude-code-native/kit/example/landing.html	kit	take	data	PASS	PASS	-	0.0	
+scripts/claude-design/kit/example/site.css	claude-design-research/04-claude-code-native/kit/example/site.css	kit	take	data	PASS	PASS	-	0.0	
+scripts/claude-design/kit/example/tokens.css	claude-design-research/04-claude-code-native/kit/example/tokens.css	kit	take	data	PASS	PASS	-	0.0	
+scripts/claude-design/kit/export.py	claude-design-research/04-claude-code-native/kit/export.py	kit	take	help	PASS	PASS	-	0.0	
+scripts/claude-design/kit/marks.js	claude-design-research/04-claude-code-native/kit/marks.js	kit	take	compile	PASS	PASS	-	0.0	
+scripts/claude-design/kit/shot.py	claude-design-research/04-claude-code-native/kit/shot.py	kit	take	help	PASS	PASS	-	0.0	
+scripts/claude-design/lang_check.py	claude-design-research/99-raw/tools/lang_check.py	utility	take	import-only; run: {skill}/scripts/claude-design/kit/example	PASS	PASS	-	0.0	
+scripts/claude-design/mockup_checks.py	claude-design-research/99-raw/tools/mockup_checks.py	utility	take	help; run: selftest	PASS	PASS	-	0.0	
+scripts/claude-design/shot_v3.py	claude-design-research/99-raw/tools/shot_v3.py	utility	take	help	PASS	PASS	-	0.0	
+scripts/claude-design/stand_page.py	claude-design-research/99-raw/tools/stand_page.py	utility	adapt	help; run: selftest	PASS	PASS	-	0.2	
+scripts/creative/README.md	creative-research/99-raw/tools/README.md	data	adapt	data	PASS	PASS	-	0.0	
+scripts/creative/ad_check.py	creative-research/99-raw/experiments/A/01-art-direction-examples/ad_check.py	step	adapt	run: 	PASS	PASS	-	0.2	
+scripts/creative/idle_probe.py	creative-research/99-raw/experiments/J/02-l2-zveno/idle_probe.py	step	adapt	import-only	PASS	PASS	-	0.1	
+scripts/creative/marketing_audit.py	creative-research/99-raw/tools/marketing_audit.py	utility	adapt	help; run: --selftest	PASS	PASS	-	0.3	
+scripts/creative/motion_check.py	creative-research/99-raw/tools/motion_check.py	utility	adapt	help; run: --selftest	PASS	PASS	-	1.1	
+scripts/creative/recipe_check.py	creative-research/99-raw/experiments/J/03-recipes-check/recipe_check.py	step	adapt	help; run: {skill}/kb/creative/10-recipes/recipes/01-lead-services-l0.recipe.yaml	PASS	PASS	-	0.8	
+scripts/creative/refs_client.py	creative-research/99-raw/tools/refs_client.py	utility	adapt	help; run: selftest	XFAIL	XFAIL	-	0.4	full: run selftest: ИТОГ: есть провалы · ожидаемо: самопроверка проверяет, что Brave на месте (DDD_BRAVE или PATH); faithful: run selftest: ИТОГ: есть провалы · ожидаемо: самопроверка проверяет, что Brave на месте (DDD_BRAVE или PATH)
+scripts/creative/registry_check.py	creative-research/99-raw/experiments/H/03-registry-check/registry_check.py	step	adapt	run: 	PASS	PASS	-	0.1	
+scripts/creative/scroll_record.py	creative-research/99-raw/tools/scroll_record.py	module	take	import-only	PASS	PASS	-	0.0	
+scripts/creative/spec_check.py	creative-research/99-raw/experiments/I/01-schemas/spec_check.py	step	adapt	help; run: --selftest	PASS	PASS	-	0.8	
+scripts/creative/validate_stack.py	creative-research/99-raw/experiments/G/00-registry/validate_stack.py	step	adapt	run: 	PASS	PASS	-	0.1	
+scripts/install.sh	overlay	maint	overlay	compile; run: --dry-run	PASS	PASS	-	0.1	
+scripts/lib/color.py	ui-research/99-raw/tools/color.py	module	take	run: selftest	PASS	PASS	-	0.0	
+scripts/lib/kbpaths.py	overlay	module	overlay	help; run: --selftest	PASS	PASS	-	0.0	
+scripts/maint/calibrate.py	_skill-build/tools/calibrate.py	maint	take	help	PASS	PASS	-	0.0	
+scripts/maint/calibration.json	_skill-build/tools/calibration.json	data	take	data	PASS	PASS	-	0.0	
+scripts/maint/check_links.py	site-research/99-raw/tools/check_links.py	maint	adapt	help; run: --selftest	PASS	PASS	-	0.0	
+scripts/maint/count_tokens.py	_skill-build/tools/count_tokens.py	maint	adapt	help	PASS	PASS	-	0.0	
+scripts/maint/layers.py	_skill-build/tools/layers.py	maint	take	import-only	PASS	PASS	-	0.0	
+scripts/maint/orch_check.py	site-research/99-raw/tools/orch_check.py	maint	adapt	import-only	PASS	PASS	-	0.0	
+scripts/package.json	overlay	data	overlay	data	PASS	PASS	-	0.0	
+scripts/requirements.txt	overlay	data	overlay	data	PASS	PASS	-	0.0	
+scripts/site/README.md	site-research/99-raw/tools/README.md	data	adapt	data	PASS	PASS	-	0.0	
+scripts/site/ab_plan.py	site-research/99-raw/tools/ab_plan.py	utility	take	help; run: --selftest	PASS	PASS	-	0.9	
+scripts/site/build_profile.py	site-research/99-raw/experiments/K/02-ux-profile/build_profile.py	step	adapt	run: --check	FAIL	PASS	-	0.4	full: run --check: TSV УСТАРЕЛ: перегенерировать
+scripts/site/checklist_export.py	site-research/99-raw/tools/checklist_export.py	utility	adapt	help	PASS	PASS	-	0.0	
+scripts/site/geo_probe.py	site-research/99-raw/tools/geo_probe.py	utility	adapt	help; run: --selftest	PASS	PASS	-	0.0	
+scripts/site/ia_probe.py	site-research/99-raw/tools/ia_probe.py	utility	adapt	help; run: --selftest	PASS	PASS	-	0.7	
+scripts/site/page_anatomy.py	site-research/99-raw/tools/page_anatomy.py	utility	adapt	help	PASS	PASS	-	0.1	
+scripts/site/page_gates.py	site-research/99-raw/tools/page_gates.py	utility	adapt	help; run: --selftest	PASS	PASS	-	0.3	
+scripts/site/plan_to_assets.py	site-research/99-raw/tools/plan_to_assets.py	utility	adapt	help	PASS	PASS	-	0.0	
+scripts/site/run_axe_targets.py	site-research/99-raw/experiments/K/03-gates-v1/run_axe_targets.py	step	adapt	compile	PASS	PASS	-	0.0	
+scripts/site/site_validate.py	site-research/99-raw/tools/site_validate.py	utility	adapt	run: --selftest	FAIL	PASS	-	6.2	full: run --selftest: OSError: [Errno 30] Read-only file system: '/home/mm/Документы/app-design/_skill-build/phase-3/migration/.staging-code/.claude/skills/design-deep-dive/kb/site/10-playbooks-contracts/examples/.selftest-eb_945tv'
+scripts/site/vocab_lint.py	site-research/99-raw/tools/vocab_lint.py	utility	adapt	help; run: --selftest	PASS	PASS	-	0.1	
+scripts/tests/smoke.py	overlay	test	overlay	help	PASS	PASS	-	0.0	
+scripts/text/README.md	text-research/99-raw/tools/README.md	data	adapt	data	PASS	PASS	-	0.0	
+scripts/text/chain_inputs.py	text-research/99-raw/experiments/I/04-chain-manual/chain_inputs.py	step	adapt	help; run: --selftest	PASS	PASS	-	0.1	
+scripts/text/check_intake.py	text-research/99-raw/experiments/I/04-chain-manual/check_intake.py	step	take	help; run: --selftest	PASS	PASS	-	0.0	
+scripts/text/claims_check.py	text-research/99-raw/tools/claims_check.py	utility	adapt	help; run: --selftest	PASS	PASS	-	0.7	
+scripts/text/copy_extract.py	text-research/99-raw/tools/copy_extract.py	utility	adapt	help; run: --selftest	PASS	PASS	-	0.0	
+scripts/text/copy_lint.py	text-research/99-raw/tools/copy_lint.py	utility	adapt	help; run: --selftest	PASS	PASS	-	8.3	
+scripts/text/copydeck.py	text-research/99-raw/tools/copydeck.py	utility	adapt	help; run: --selftest	PASS	PASS	-	10.1	
+scripts/text/make_skeleton.py	text-research/99-raw/experiments/I/04-chain-manual/make_skeleton.py	step	take	help	PASS	PASS	-	0.0	
+scripts/text/run_checks.py	text-research/99-raw/experiments/J/08-examples/run_checks.py	step	adapt	run: 	PASS	PASS	-	32.3	
+scripts/text/ux_dict_to_yaml.py	text-research/99-raw/tools/ux_dict_to_yaml.py	utility	adapt	help; run: --check	FAIL	PASS	-	0.1	full: run --check: устарел: /home/mm/Документы/app-design/_skill-build/phase-3/migration/.staging-code/.claude/skills/design-deep-dive/kb/text/06-anti-slop/lexicon/ux-07-06.yaml (перегенерировать без --check)
+scripts/text/validate_any.py	text-research/99-raw/experiments/I/04-chain-manual/validate_any.py	step	adapt	import-only; run: {skill}/kb/text/02-strategy-messaging/examples/meaning-otves.yaml {skill}/kb/text/02-strategy-messaging/examples/hierarchy-otves-product-aware.yaml	PASS	PASS	-	0.3	
+scripts/text/validate_facts.py	text-research/99-raw/experiments/B2/01-schema-validate/validate.py	step	adapt	run: 	PASS	PASS	-	0.3	
+scripts/text/validate_meaning.py	text-research/99-raw/experiments/B1/03-schema-validate/validate.py	step	adapt	run: --quiet	PASS	PASS	-	0.8	
+scripts/text/validate_voice.py	text-research/99-raw/experiments/F/03-schema-lint/validate_voice.py	step	adapt	run: 	XPASS	XFAIL	-	0.8	faithful: run: validate_voice: FAIL · ожидаемо: примеры голоса ссылаются на факты 99-raw/experiments/F/04-voice-samples/facts-demo-*.yaml — правила содержимого их не берут («На решение»)
+scripts/ui/build_reference_tokens.py	ui-research/99-raw/tools/build_reference_tokens.py	utility	adapt	help; run: --out brt	PASS	PASS	-	0.0	
+scripts/ui/measure_ui.py	ui-research/99-raw/tools/measure_ui.py	utility	adapt	help	PASS	PASS	-	0.0	
+scripts/ui/ui_audit.py	ui-research/99-raw/tools/ui_audit.py	utility	adapt	help; run: --selftest	PASS	PASS	-	0.0	
+scripts/ux/checklist_export.py	ux-research/99-raw/tools/checklist_export.py	utility	adapt	import-only	PASS	PASS	-	0.0	

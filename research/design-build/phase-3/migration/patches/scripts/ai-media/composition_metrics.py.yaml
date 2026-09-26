@@ -1,0 +1,9 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: ai-media-research/99-raw/experiments/F/04-slop-metrics/composition_metrics.py
+source_sha256: 873861cd1d40077dd075f78f6a4ad21902d4fb7ec53cf5aa5100c673c208bd48
+result_sha256: 7adfee5f13d3ec3c02ec00e3679afbfb57d88593d261d1a70167df0c32244e8f
+dest: .claude/skills/design-deep-dive/scripts/ai-media/composition_metrics.py
+edits:
+- code: imp
+  find: sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../A/04-image-marker-metrics"))
+  replace: 'sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # перенос: image_metrics.py — рядом'

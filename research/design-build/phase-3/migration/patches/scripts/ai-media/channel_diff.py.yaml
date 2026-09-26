@@ -1,0 +1,11 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: ai-media-research/99-raw/experiments/N/04-update-dryrun/channel_diff.py
+source_sha256: 496238b398c8a54d3c1e1a5dd88a4e958322de8e297c8bf9dde335deca15dc5e
+result_sha256: ff2155d4a77b88356ffaa4eb529a4148412c2933a75d526152ef2e320005e281
+dest: .claude/skills/design-deep-dive/scripts/ai-media/channel_diff.py
+edits:
+- code: cache
+  find: CACHE = pathlib.Path('/home/mm/Документы/app-design/ai-media-research/99-raw/cache')
+  replace:
+  - 'import os, sys; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ''..'', ''lib'')); import kbpaths  # перенос'
+  - CACHE = kbpaths.cache('ai-media')

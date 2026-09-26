@@ -1,0 +1,20 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: site-research/99-raw/tools/ia_probe.py
+source_sha256: 15983fd70fe772b5716ffcfbd33e8a77147a236a43651a763959f5b424052446
+result_sha256: ea533fe57ebaa2c016bad4f338d59128470ff44950f116fd594f02017714b853
+dest: .claude/skills/design-deep-dive/scripts/site/ia_probe.py
+edits:
+- code: boot
+  find: from html.parser import HTMLParser
+  replace:
+  - from html.parser import HTMLParser
+  - 'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+- code: out
+  find:
+  - '    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))'
+  - '    out = os.path.join(root, "99-raw", "experiments", "G", "00-selftest", "out")'
+  replace: '    out = str(kbpaths.out("site", "ia_probe", "selftest"))'
+- code: out
+  find: ap.add_argument("--out", default="99-raw/experiments/G/01-ia-probe/out")
+  replace: ap.add_argument("--out", default=str(kbpaths.out("site", "ia_probe")))

@@ -1,0 +1,82 @@
+rule	scope	action	purpose	why	files	bytes	tokens_est	recommend
+g-forbidden	content	skip		SYNTHESIS §3.4; Р97	13373	303191225	0	
+g-symlink	content	skip		SKILL-MAP §5	49	4176	0	
+g-instructions	content	skip		Р97; SKILL-MAP §5	29	162412	0	
+cr-asset-fonts	content	take	asset-min	Р41	15	507222	0	
+cr-asset-img	content	take	asset-min	Р41	7	91718	0	
+cr-asset-bundle	content	take	asset-min	Р41	1	593770	0	
+bl-asset-hero	content	take	asset-min	Р57 (вариант А); SKILL-MAP §2.5	10	913165	0	
+g-junk	content	skip		SYNTHESIS §3.4 (мусор)	2181	25840060	0	
+bl-junk-chunk	content	skip		SYNTHESIS §3.4 (мусор)	1	4777	0	
+g-tools-env	content	skip		Р55; Р59; Р90	357	642318735	0	
+g-tools	content	handoff		SKILL-MAP §2.2	194	6056004	0	
+cd-kit	content	handoff		SKILL-MAP §1; Р87	10	122167	0	
+bl-utils-thematic	content	handoff		SKILL-MAP §2.1; SYNTHESIS §4.1, §4.2	17	252936	0	
+text-steps	content	handoff		Р33	7	119233	0	
+text-run-checks	content	handoff		SYNTHESIS §3.2 (кандидат без решения — решает B)	1	4768	0	
+cr-validators	content	handoff		Р37	7	83294	0	
+am-modules	content	handoff		Р54	14	84529	0	
+am-3d	content	handoff		SYNTHESIS §3.2 (кандидат без решения — решает B)	3	59827	0	
+bl-libs	content	handoff		Р57	11	130248	0	
+site-tools-exp	content	handoff		Р66	2	79666	0	
+am-lucide-ref	content	take	code-data	Р54; SKILL-MAP §2.4, §2.5	25	10971	0	
+am-genapi-prices	content	take	code-data	Р54 (SYNTHESIS §3.1 «прайс P/04»); SKILL-MAP §2.4	1	97412	40229	
+am-routerai-catalog	content	skip		Р76 п. 15	1	857583	0	
+bl-hdri	content	take	code-data	Р76 п. 18; SKILL-MAP §2.4, §2.5	1	1615248	0	
+ux-x-audit	content	take	raw-norm	Р50; SKILL-MAP §2.4	1	184865	60636	
+ux-handoff-ui	content	take	build-input	open	1	44317	16160	take
+site-x-audit	content	take	raw-norm	Р66; SKILL-MAP §2.4	1	218720	73791	
+site-triad	content	take	raw-norm	Р66; SKILL-MAP §2.4	1	55100	16314	
+site-ac-profile	content	take	raw-norm	Р66; SKILL-MAP §2.4	1	9976	5217	
+site-common	content	take	raw-norm	open	1	56998	17168	take
+text-temp-vocabulary	content	take	raw-norm	Р33; SKILL-MAP §2.4	1	20886	7589	
+text-x-audit	content	take	raw-norm	Р34; SKILL-MAP §2.4	1	143705	48041	
+cr-x-audit	content	take	raw-norm	SKILL-MAP §2.4; SYNTHESIS §5.2	1	117947	42727	
+cr-common	content	take	raw-norm	SKILL-MAP §2.4	1	44231	13338	
+cr-scene-src	content	take	ref-code	Р76 п. 17	1	43733	18755	
+am-x-audit	content	take	raw-norm	SKILL-MAP §2.4	1	45564	17103	
+am-phase5-format	content	take	raw-norm	Р54; SKILL-MAP §2.4	1	8890	3223	
+bl-x-audit	content	take	raw-norm	Р76 п. 23; SKILL-MAP §2.4	1	162288	61270	
+g-handoff-neighbours	content	take	build-input	SKILL-MAP §2.4	4	145271	54656	
+g-module-readmes	content	take	raw-norm	open	27	152901	56700	take
+g-triad-copies	content	alias		SKILL-MAP §2.4 (контракт тройки — site); дубль побайтно	1	55100	0	
+g-triad-copies-cr	content	alias		SKILL-MAP §2.4 (контракт тройки — site); дубль побайтно	1	55100	0	
+bl-rc-checks	content	take	ref-code	Р76 п. 16	4	17994	7813	
+bl-track-handoff	content	take	ref-code	open	5	69803	26349	take
+bl-track-alias-velmora	content	alias		Р76 п. 16; дубль побайтно	1	88232	0	
+bl-track-alias-scene-v2	content	alias		Р76 п. 16, п. 17; дубль побайтно	1	43733	0	
+bl-tracks	content	take	ref-code	Р57; Р76 п. 16	165	1369208	619610	
+text-measurements	content	skip		Р32	2	2341055	0	
+cr-lab	content	skip		Р39	212	1949607	0	
+cr-live-sites-md	content	take		Р39 (md 03/01–02 и README остаются)	3	97279	33691	
+cr-live-sites	content	skip		Р39	118	6758546	0	
+am-model-cards	content	skip		Р54	63	405488	0	
+am-routing-old	content	skip		Р54	2	109300	0	
+site-v0-examples	content	skip		Р76 п. 19; SKILL-MAP §2.1	7	179820	0	
+bl-regression-data	content	skip		Р58	3	30111	0	
+site-v0-schemas	content	take		open	4	151559	63020	take
+site-kimi	content	skip		open	4	75243	24113	skip
+cr-site-brief-fields	content	take		open	1	32881	11449	take
+am-demo-measure	content	skip		open	10	196397	99120	skip
+bl-showcase-journals	content	skip		open	8	644385	219436	skip
+bl-showcase-page-data	content	skip		open	13	282782	147699	skip
+bl-hero-lazy-probe	content	skip		open	13	79838	41472	skip
+bl-hero-lazy-phone	content	skip		open	3	609702	0	skip
+g-skills-map	content	skip		SKILL-MAP §2.1 (противоречат Р6)	3	56063	0	
+g-cache	content	skip		SKILL-MAP §5	7099	683376602	0	
+g-raw	content	skip		SKILL-MAP §2.4; SYNTHESIS §3.4	27245	11083009515	0	
+g-sources-videos	content	skip		SKILL-MAP §2.1; SYNTHESIS §3.4	3766	324510882	0	
+cal-frames	content	take	calibration	Р109	40	15328067	0	
+cal-index	content	take	calibration	Р109	1	67980	0	
+g-build-other	content	none		SKILL-MAP §2.6	143	38866732	0	
+d-root-docs	content	take		Р89; SKILL-MAP §2.1	20	2113920	693886	
+d-kb	content	take		SKILL-MAP §2.1	1039	34338174	12075793	
+d-skip	content	skip		Р16; Р83; SKILL-MAP §2.5	1980	200564974	0	
+j-big-tsv	journal	skip		Р91; SKILL-MAP §2.6	4	28321899	0	
+j-manifest	journal	skip		Р91; SKILL-MAP §2.6	1	3041170	0	
+j-pycache	journal	skip		SKILL-MAP §2.6	3	146989	0	
+j-staging	journal	skip		SKILL-MAP §2.6	0	0	0	
+j-calibration-frames	journal	skip		Р109	40	15328067	0	
+j-calibration-superseded	journal	skip		Р108; Р109	31	3362248	0	
+j-overlay	journal	skip		open	4	8506	2465	skip
+j-mirror	journal	take	journal	Р91; SKILL-MAP §2.6	103	4060180	1640537	

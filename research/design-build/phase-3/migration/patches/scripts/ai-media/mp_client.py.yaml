@@ -1,0 +1,28 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: ai-media-research/99-raw/tools/mp_client.py
+source_sha256: 8b86cbf41f3d027aedf88cfcd23043e61deb97fc231b9b3da8e82e8710324b35
+result_sha256: eed4cd7d66c37f7031c3d0781721c16e15b835828ca0e0b1ce46d5f2cc1c8303
+dest: .claude/skills/design-deep-dive/scripts/ai-media/mp_client.py
+edits:
+- code: boot
+  find:
+  - TOOLS = Path(__file__).resolve().parent
+  - sys.path.insert(0, str(TOOLS))
+  replace:
+  - TOOLS = Path(__file__).resolve().parent
+  - sys.path.insert(0, str(TOOLS))
+  - 'sys.path.insert(0, str(TOOLS.parent / "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+- code: cache
+  find: CACHE = ROOT / "99-raw" / "cache"
+  replace: CACHE = kbpaths.cache("ai-media")
+- code: out
+  find:
+  - DEFAULT_LEDGER = ROOT / "99-raw" / "experiments" / "_ledger.jsonl"
+  - DEFAULT_OUT_ROOT = ROOT / "99-raw" / "experiments" / "_mp"
+  replace:
+  - 'DEFAULT_LEDGER = kbpaths.out("ai-media") / "_ledger.jsonl"  # перенос: журнал затрат — общий с polza'
+  - DEFAULT_OUT_ROOT = kbpaths.out("ai-media", "_mp")
+- code: data
+  find: P04 = ROOT / "99-raw" / "experiments" / "P" / "04-ru-aggregators"
+  replace: 'P04 = kbpaths.data("ai-media")  # перенос: прайс Gen-API — scripts/ai-media/data/; routerai_models.json не переносится (Р76 п. 15)'

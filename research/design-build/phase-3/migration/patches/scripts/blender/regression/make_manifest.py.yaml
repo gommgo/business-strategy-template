@@ -1,0 +1,11 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/11-evaluation-qa/regression/make_manifest.py
+source_sha256: 9accd1674a5139c8bb0a67888ccb1b15a7daf8ee6a3fa67b87ad3a28b8ac414b
+result_sha256: 16ddd2f9a6ef670d5909e203ba16334074521216e94981cc4b2f17019655baab
+dest: .claude/skills/design-deep-dive/scripts/blender/regression/make_manifest.py
+edits:
+- code: root
+  find: ROOT = "/home/mm/Документы/app-design/blender-research"
+  replace:
+  - 'import sys; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "lib")); import kbpaths  # перенос'
+  - ROOT = str(kbpaths.kb("blender"))

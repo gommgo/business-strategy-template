@@ -1,0 +1,22 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: site-research/99-raw/tools/checklist_export.py
+source_sha256: 7a7bfccfc208d9e27b756cbc2572dd07747a692f2e6e3ac07632adb45b9e6ab0
+result_sha256: 08f6b669e1b3c484def733672d5de49239f06e93f72c7540f236a8433bcdcf56
+dest: .claude/skills/design-deep-dive/scripts/site/checklist_export.py
+edits:
+- code: boot
+  find: HERE = os.path.dirname(os.path.abspath(__file__))
+  replace:
+  - HERE = os.path.dirname(os.path.abspath(__file__))
+  - 'sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+- code: root
+  find: ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
+  replace: ROOT = str(kbpaths.kb('site'))
+- code: imp
+  find: '    tools = os.path.join(ROOT, ''99-raw'', ''tools'')'
+  replace: '    tools = str(kbpaths.scripts(''site''))  # перенос: утилиты site — scripts/site'
+  note: индекс имён файлов для раскрытия путей чек-листа
+- code: imp
+  find: '            out.setdefault(f, f''99-raw/tools/{f}'')'
+  replace: '            out.setdefault(f, os.path.relpath(os.path.join(tools, f), ROOT))'

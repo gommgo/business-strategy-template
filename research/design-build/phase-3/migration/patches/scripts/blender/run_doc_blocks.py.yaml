@@ -1,0 +1,15 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/99-raw/tools/run_doc_blocks.py
+source_sha256: f133e48f884bc339edca0560a3ac3ef39dd0e31f610dab050cc0647ace08219f
+result_sha256: 3dfc4e0ff1575712a650f9a70717ffd677188adb1c39de71a20b2dd37b951f20
+dest: .claude/skills/design-deep-dive/scripts/blender/run_doc_blocks.py
+edits:
+- code: root
+  find:
+  - ROOT = "/home/mm/Документы/app-design/blender-research"
+  - TOOLS = os.path.join(ROOT, "99-raw/tools")
+  replace:
+  - 'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+  - ROOT = str(kbpaths.kb("blender"))
+  - TOOLS = str(kbpaths.scripts("blender"))

@@ -1,0 +1,9 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/12-recipes/examples/01-hero-product/build.py
+source_sha256: 8ef808382fc404a7556d3bd6cd4346bfd9ec64c15e54b2df388c809e4211c268
+result_sha256: 7ef66b8e306ebb6f51cb25bf98f1c342c6c08efd44811eee51bf57a32cb790b7
+dest: .claude/skills/design-deep-dive/kb/blender/12-recipes/examples/01-hero-product/build.py
+edits:
+- code: imp
+  find: sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
+  replace: 'import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender'

@@ -1,0 +1,12 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: ai-media-research/99-raw/experiments/B/14-landing-assets/split_recraft.py
+source_sha256: e07f38363dd559e484e4449fd2eb22b3e82cb4f34392d49e0a7cb507e4163fe7
+result_sha256: 384bb3b2437986b37eb577fed569648e267d391b851aed48c8b68afa872ef5b2
+dest: .claude/skills/design-deep-dive/scripts/ai-media/split_recraft.py
+edits:
+- code: node
+  find: SVGO = '/home/mm/Документы/app-design/ai-media-research/99-raw/tools/node/node_modules/.bin/svgo'
+  replace:
+  - 'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ''..'', ''lib''))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+  - SVGO = str(kbpaths.node_modules('.bin', 'svgo'))

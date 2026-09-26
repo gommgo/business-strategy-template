@@ -1,0 +1,15 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/99-raw/tools/bpy_probe.py
+source_sha256: b803d4319ca7319f6596d1eb56c55971e2e95f6f836d3866726cb169c8bcd422
+result_sha256: 11d568e0e7d3d336a8f1bf717bd1b3d6575c3d2d83e34d8eff187c6f0a7fcc63
+dest: .claude/skills/design-deep-dive/scripts/blender/bpy_probe.py
+edits:
+- code: boot
+  find: import sys
+  replace:
+  - import sys
+  - 'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+- code: bin
+  find: '    blender = shutil.which("blender") or os.path.expanduser("~/.local/bin/blender")'
+  replace: '    blender = kbpaths.blender()'

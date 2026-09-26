@@ -1,0 +1,41 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/12-recipes/examples/_kit/rk.py
+source_sha256: 1cfa798d5c0ed8f85e598c4a16aa36b73830f80e1acdae6030eac0ae8e9d2049
+result_sha256: 9979a464d66ac9722a90fe3d35634f8275411f01e1731c9cc006b8e84bf85068
+dest: .claude/skills/design-deep-dive/scripts/blender/rk.py
+edits:
+- code: root
+  find:
+  - ROOT = "/home/mm/Документы/app-design/blender-research"
+  - for _p in ("03-bpy-api/snippets", "99-raw/experiments/D1/_lib", "99-raw/experiments/D2/_lib",
+  - '           "99-raw/experiments/E/24-presets"):'
+  - '    if f"{ROOT}/{_p}" not in sys.path:'
+  - '        sys.path.insert(0, f"{ROOT}/{_p}")'
+  replace:
+  - 'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+  - ROOT = str(kbpaths.kb("blender"))
+  - 'for _p in (str(kbpaths.scripts("blender")),):  # перенос: bpyx, d1lib, d1exp, d2lib, presets — scripts/blender'
+  - '    if _p not in sys.path:'
+  - '        sys.path.insert(0, _p)'
+- code: node
+  find:
+  - NODE_DIR = f"{ROOT}/99-raw/tools/node"
+  - NODE_BIN = "/home/mm/.nvm/versions/node/v24.21.0/bin"
+  replace:
+  - 'NODE_DIR = str(kbpaths.node_home())  # перенос: npm-зависимости — $DDD_HOME/node'
+  - NODE_BIN = os.path.dirname(kbpaths.node())
+- code: bin
+  find:
+  - GLTFPACK = f"{ROOT}/99-raw/tools/bin/gltfpack-1.2/gltfpack"
+  - TOKTX_DIR = f"{ROOT}/99-raw/tools/bin/KTX-Software-4.4.2-Linux-x86_64/bin"
+  replace:
+  - GLTFPACK = str(kbpaths.bin_dir("gltfpack-1.2", "gltfpack"))
+  - TOKTX_DIR = str(kbpaths.bin_dir("KTX-Software-4.4.2-Linux-x86_64", "bin"))
+- code: imp
+  find: _exec_tool("99-raw/experiments/C1/10-scene-audit/scene_audit.py", "AUDIT")
+  replace: _exec_tool(os.path.relpath(kbpaths.scripts("blender", "scene_audit.py"), ROOT), "AUDIT")
+  note: '_exec_tool читает f"{ROOT}/{rel}": модули C1/10 и C1/16 теперь в scripts/blender'
+- code: imp
+  find: _exec_tool("99-raw/experiments/C1/16-passport-asserts/passport_asserts.py", "ASSERT")
+  replace: _exec_tool(os.path.relpath(kbpaths.scripts("blender", "passport_asserts.py"), ROOT), "ASSERT")

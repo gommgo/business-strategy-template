@@ -1,0 +1,21 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: ui-research/99-raw/tools/ui_audit.py
+source_sha256: 753482b2b12295a1bca9c20b3959ec13461605408edb27b0b9806b88b5d66fca
+result_sha256: 4640e4ce9c0871734da90433e04f2232b427c8c864268275d9843953c1c61a66
+dest: .claude/skills/design-deep-dive/scripts/ui/ui_audit.py
+edits:
+- code: boot
+  find:
+  - HERE = os.path.dirname(os.path.abspath(__file__))
+  - sys.path.insert(0, HERE)
+  replace:
+  - HERE = os.path.dirname(os.path.abspath(__file__))
+  - sys.path.insert(0, HERE)
+  - 'sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+- code: root
+  find: ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
+  replace: ROOT = str(kbpaths.kb("ui"))
+- code: out
+  find: DEFAULT_OUT = os.path.join(ROOT, "99-raw", "cache", "audit")
+  replace: DEFAULT_OUT = str(kbpaths.out("ui", "audit"))

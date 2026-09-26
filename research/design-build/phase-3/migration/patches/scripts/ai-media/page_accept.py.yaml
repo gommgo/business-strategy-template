@@ -1,0 +1,12 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: ai-media-research/99-raw/tools/page_accept.py
+source_sha256: 387697ba8992c626c12f4b3f3f499b53e04185444e6e3993bfe483fc7e81edc7
+result_sha256: 6fd152d7937703916361c2d0ca4b9d6a85d2c9f7d3916b0b492930b0bb5ce345
+dest: .claude/skills/design-deep-dive/scripts/ai-media/page_accept.py
+edits:
+- code: lock
+  find: LOCK = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.locks', 'browser.lock')
+  replace:
+  - 'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ''..'', ''lib''))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+  - LOCK = kbpaths.lock_path('browser', 'ai-media')

@@ -1,0 +1,15 @@
+# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
+source: blender-research/99-raw/tools/gltf_diff.py
+source_sha256: 5380f04d031389c1573ba0ff1fc4aae2d87ef6de8349abd1d8fc1e77f5c3b37b
+result_sha256: e68d598a23171c2e5cb39f0252ca34cda8cfb29a1ceeb92f8672747eb33e9917
+dest: .claude/skills/design-deep-dive/scripts/blender/gltf_diff.py
+edits:
+- code: boot
+  find: HERE = os.path.dirname(os.path.abspath(__file__))
+  replace:
+  - HERE = os.path.dirname(os.path.abspath(__file__))
+  - 'sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib'
+  - 'import kbpaths  # noqa: E402'
+- code: data
+  find: DEFAULT_HDRI = os.path.normpath(os.path.join(HERE, "..", "experiments", "E", "_assets", "studio_small_09_1k.hdr"))
+  replace: DEFAULT_HDRI = str(kbpaths.data("blender", "studio_small_09_1k.hdr"))
