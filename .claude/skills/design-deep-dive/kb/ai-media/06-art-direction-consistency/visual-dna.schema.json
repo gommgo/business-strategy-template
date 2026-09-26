@@ -1,0 +1,1207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-media-research.local/06-art-direction-consistency/visual-dna.schema.json",
+  "title": "Visual DNA passport (паспорт визуала бренда) v0.1",
+  "description": "Числа и правила изображений бренда: из токенов и стиля UI (derived_from_ui), эталонов (references) и VLM-описания (provenance). Куда идёт каждое поле: → промт (style_blocks, palette.image_palette, light, camera, composition, subject_matter, materials, exclusions, references); → постобработка (grade, post); → приёмка (acceptance). Агент F, волна 2, 23.09.2026. Проверка: python3 ../../scripts/ai-media/vlm_to_dna.py validate FILE. Описание полей: 06-art-direction-consistency/01-visual-dna-from-ui.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "dna_version",
+    "id",
+    "checked_at",
+    "status",
+    "character",
+    "palette",
+    "grade",
+    "light",
+    "camera",
+    "composition",
+    "subject_matter",
+    "style_blocks",
+    "exclusions",
+    "acceptance"
+  ],
+  "properties": {
+    "dna_version": {
+      "const": "0.1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,63}$",
+      "description": "Совпадает с series.id в спецификациях ассетов (05-prompting/asset-spec.schema.json)."
+    },
+    "brand": {
+      "type": "string"
+    },
+    "checked_at": {
+      "type": "string",
+      "pattern": "^20[0-9]{2}-[0-1][0-9]-[0-3][0-9]$"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "approved",
+        "retired"
+      ],
+      "description": "Паспорт собирает машина, утверждает человек: approved только с approved_by."
+    },
+    "approved_by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "derived_from_ui": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Откуда выведено: карточка стиля ui-research 11/01, токены DTCG (09/04), семь ручек (11/02 §3, 09/04 §8).",
+      "properties": {
+        "style_card": {
+          "type": "string",
+          "description": "«../ui/11-styles-trends/01-style-dictionary-for-quiz.md §15» и т. п."
+        },
+        "tokens": {
+          "type": "string",
+          "description": "Путь к tokens.json (DTCG), если паспорт выведен командой vlm_to_dna.py from-tokens."
+        },
+        "knobs": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "accent_hex": {
+              "$ref": "#/$defs/hex"
+            },
+            "accent_oklch": {
+              "$ref": "#/$defs/oklch"
+            },
+            "neutral_temp": {
+              "enum": [
+                "warm",
+                "neutral",
+                "cool"
+              ]
+            },
+            "neutral_C": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.08
+            },
+            "base_L": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "radius_px": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 32
+            },
+            "density": {
+              "enum": [
+                "compact",
+                "default",
+                "comfortable"
+              ]
+            },
+            "font_voice": {
+              "enum": [
+                "neutral-sans",
+                "technical-sans",
+                "humanist-sans",
+                "serif-display",
+                "mono"
+              ]
+            },
+            "depth_model": {
+              "enum": [
+                "flat",
+                "border",
+                "soft-shadow",
+                "hard-shadow",
+                "lightness"
+              ]
+            },
+            "theme": {
+              "enum": [
+                "light",
+                "dark",
+                "both"
+              ]
+            }
+          }
+        },
+        "rules_applied": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Какие правила вывода применены (01-visual-dna-from-ui.md §3)."
+        }
+      }
+    },
+    "character": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adjectives"
+      ],
+      "properties": {
+        "adjectives": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "string"
+          },
+          "description": "Три прилагательных брифа (ui 11/02 §4.2) — не в промт, а для выбора чисел."
+        },
+        "boldness": {
+          "enum": [
+            "restrained",
+            "balanced",
+            "bold"
+          ]
+        },
+        "one_bold_move": {
+          "type": "string",
+          "description": "Единственный смелый приём страницы (A 01/03 §7.1 «сдержанность»)."
+        }
+      }
+    },
+    "palette": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "image_palette"
+      ],
+      "properties": {
+        "image_palette": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 10,
+          "items": {
+            "$ref": "#/$defs/palette_entry"
+          },
+          "description": "Палитра фото и 3D-сцен. → промт (3–5 цветов с названием и привязкой к объекту) и → приёмка (ΔE строгих цветов, баланс белого)."
+        },
+        "illustration_palette": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/palette_entry"
+          },
+          "description": "Палитра плоской графики и 3D-иконок: шаги 200–400 акцента + нейтрали 100–400 (ui 07/02 §2.1), 2–3 акцента + белый + 2–3 серых; цвета обязаны совпасть с токенами (ΔE ≤ 0,02)."
+        },
+        "chroma_caps": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Потолок хромы OKLCH по площади кадра для иллюстраций, 3D и плоской графики: правило ui 11/02 §4.4, на ступень ниже UI. Для фото — median_chroma_max и эталон.",
+          "properties": {
+            "large_area_C_max": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.4,
+              "description": "> 30 % кадра"
+            },
+            "mid_area_C_max": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.4,
+              "description": "5–30 % кадра"
+            },
+            "small_area_C_max": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.4,
+              "description": "< 5 % кадра"
+            }
+          }
+        },
+        "median_chroma_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.4,
+          "description": "Медиана хромы OKLCH кадра (фото); из эталона ×1,2."
+        },
+        "forbidden_hues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "from",
+              "to",
+              "reason"
+            ],
+            "properties": {
+              "from": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "to": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "reason": {
+                "type": "string"
+              },
+              "except_share_max": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Допустимая доля площади (бренд-акцент внутри полосы)."
+              }
+            }
+          }
+        },
+        "neutral_wb": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "target_b",
+            "tol"
+          ],
+          "description": "b OKLab нейтральных пикселей (C < 0,03): баланс белого серии.",
+          "properties": {
+            "target_b": {
+              "type": "number",
+              "minimum": -0.05,
+              "maximum": 0.05
+            },
+            "tol": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.05
+            }
+          }
+        },
+        "env_color": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "hex"
+          ],
+          "description": "Цвет секции страницы, на которой стоит ассет (W5 §8): фон и рефлексы 3D-сцены, фон выреза и контактной тени — иначе ореол и «наклеенность» (IMG-M25). → промт (фон 3D и иконок), постобработка (композит выреза).",
+          "properties": {
+            "hex": {
+              "$ref": "#/$defs/hex"
+            },
+            "token": {
+              "type": "string"
+            },
+            "dark_hex": {
+              "$ref": "#/$defs/hex"
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "grade": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "wb_ab",
+        "chroma",
+        "black",
+        "white",
+        "contrast",
+        "grain_pct"
+      ],
+      "description": "→ постобработка: параметрический грейд одним 3D LUT (.cube) на фото, 3D-рендеры и видео; плоский вектор не грейдить. Генератор: vlm_to_dna.py lut. Формула — ../../scripts/ai-media/palette.py parametric_grade.",
+      "properties": {
+        "wb_ab": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number",
+            "minimum": -0.03,
+            "maximum": 0.03
+          },
+          "description": "Сдвиг a, b OKLab нейтралей (вес падает с хромой до 0 при C = 0,08)."
+        },
+        "chroma": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 1.2,
+          "description": "Множитель хромы."
+        },
+        "black": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.2,
+          "description": "Светлота OKLab чёрной точки после грейда."
+        },
+        "white": {
+          "type": "number",
+          "minimum": 0.8,
+          "maximum": 1,
+          "description": "Светлота OKLab белой точки после грейда."
+        },
+        "contrast": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "description": "Доля S-кривой (smoothstep)."
+        },
+        "grain_pct": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Зерно поверх (CSS или слой), не в LUT; 1–3 % против «пластика»."
+        },
+        "lut": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "size": {
+              "enum": [
+                17,
+                33,
+                65
+              ]
+            },
+            "file": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Путь к .cube, если уже собран; источник истины — числа выше."
+            }
+          }
+        },
+        "applies_to": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "photo",
+              "icon3d",
+              "render3d",
+              "video",
+              "illustration-raster"
+            ]
+          }
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "light": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "direction",
+        "quality"
+      ],
+      "description": "→ промт. Направление — то же, что у теней UI (ui 07/02 §2.2).",
+      "properties": {
+        "direction": {
+          "enum": [
+            "left",
+            "right",
+            "front",
+            "back",
+            "top",
+            "side",
+            "ambient"
+          ],
+          "description": "Как в asset-spec light.direction."
+        },
+        "detail": {
+          "type": "string",
+          "description": "«soft window light from the upper left, 45° above»"
+        },
+        "quality": {
+          "enum": [
+            "soft",
+            "hard",
+            "diffused",
+            "mixed"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "time_of_day": {
+          "type": "string"
+        },
+        "cct_K": {
+          "type": "integer",
+          "minimum": 2000,
+          "maximum": 12000
+        }
+      }
+    },
+    "camera": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lens_mm",
+        "height",
+        "depth_of_field"
+      ],
+      "description": "→ промт (язык фотографии вместо «cinematic»).",
+      "properties": {
+        "lens_mm": {
+          "type": "number",
+          "minimum": 8,
+          "maximum": 400
+        },
+        "height": {
+          "enum": [
+            "ground",
+            "table",
+            "eye-level",
+            "high",
+            "top-down"
+          ]
+        },
+        "angle": {
+          "enum": [
+            "eye-level",
+            "low-angle",
+            "high-angle",
+            "top-down",
+            "45-degree",
+            "over-the-shoulder",
+            "dutch"
+          ],
+          "description": "Как в asset-spec composition.angle."
+        },
+        "depth_of_field": {
+          "enum": [
+            "shallow",
+            "medium",
+            "deep"
+          ]
+        },
+        "capture": {
+          "type": "string",
+          "description": "«documentary, handheld», «tripod still life» …"
+        }
+      }
+    },
+    "composition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subject_region",
+        "negative_space_min",
+        "max_elements",
+        "asymmetry"
+      ],
+      "description": "→ промт и → приёмка (F/02, F/03, F/04).",
+      "properties": {
+        "subject_region": {
+          "enum": [
+            "left-third",
+            "center",
+            "right-third",
+            "top",
+            "bottom",
+            "full-frame"
+          ]
+        },
+        "text_zone_default": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "side",
+            "share"
+          ],
+          "properties": {
+            "side": {
+              "enum": [
+                "left",
+                "right",
+                "top",
+                "bottom"
+              ]
+            },
+            "share": {
+              "type": "number",
+              "minimum": 0.2,
+              "maximum": 0.6
+            },
+            "surface": {
+              "type": "string",
+              "description": "Что видно в зоне текста: «a long, evenly lit lawn». Без новых предметов."
+            }
+          }
+        },
+        "negative_space_min": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.8,
+          "description": "Доля клеток сетки 16×9 с плотностью краёв ≤ 0,06 (composition_metrics.empty_share)."
+        },
+        "max_elements": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "asymmetry": {
+          "type": "boolean",
+          "description": "Против «среднего вида»: объект не по центру (asset-spec series.avoid_average)."
+        },
+        "edge_cut_allowed": {
+          "type": "boolean"
+        },
+        "horizon": {
+          "enum": [
+            "top-third",
+            "middle",
+            "bottom-third",
+            "none"
+          ]
+        },
+        "master_ratio": {
+          "$ref": "#/$defs/ratio"
+        },
+        "phone_frame": {
+          "enum": [
+            "separate-master",
+            "crop",
+            "outpaint"
+          ],
+          "description": "Телефонный кадр 4:5–9:16: отдельный мастер, кроп или аутпейнт (F/03)."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "subject_matter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domain_props",
+        "people_policy",
+        "product_policy"
+      ],
+      "description": "→ промт: сюжеты из предметной области вместо клише (A 01/03 §5.4).",
+      "properties": {
+        "domain_props": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 16,
+          "items": {
+            "type": "string"
+          }
+        },
+        "motifs": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "type": "string"
+          }
+        },
+        "places": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string"
+          }
+        },
+        "people_policy": {
+          "enum": [
+            "none",
+            "real-only",
+            "real-plus-ai-environment",
+            "background-silhouettes"
+          ],
+          "description": "Слоты-доказательства (люди, отзывы, команда) не генерировать (A 01/03 §1–§2)."
+        },
+        "product_policy": {
+          "enum": [
+            "real-photo-only",
+            "reference-locked",
+            "generated-ok"
+          ]
+        }
+      }
+    },
+    "materials": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "string"
+      }
+    },
+    "illustration": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "2D-иллюстрации и spot-картинки (ui 07/02 §2–§3).",
+      "properties": {
+        "medium": {
+          "enum": [
+            "flat-illustration",
+            "vector",
+            "line-art",
+            "watercolor",
+            "gouache",
+            "collage",
+            "other"
+          ]
+        },
+        "line_px": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 8,
+          "description": "Толщина линии при display_px (штрих иконок или +0,5)."
+        },
+        "display_px": {
+          "type": "integer",
+          "minimum": 32,
+          "maximum": 2000
+        },
+        "radius_px": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 48,
+          "description": "Согласован с radius UI."
+        },
+        "perspective": {
+          "enum": [
+            "flat-front",
+            "three-quarter",
+            "isometric-30",
+            "none"
+          ]
+        },
+        "fills": {
+          "enum": [
+            "flat",
+            "tone-on-tone",
+            "textured"
+          ]
+        },
+        "shadows": {
+          "enum": [
+            "none",
+            "flat-tone",
+            "soft"
+          ]
+        },
+        "background": {
+          "enum": [
+            "transparent",
+            "blob",
+            "plate",
+            "pattern"
+          ]
+        },
+        "accents_per_image": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "detail_min_px": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "saturation_offset": {
+          "type": "string",
+          "description": "«на 1–2 шага ниже UI»"
+        },
+        "dark_theme": {
+          "enum": [
+            "two-files",
+            "css-variables",
+            "dim"
+          ]
+        }
+      }
+    },
+    "icon3d": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "3D-иконки и объекты (ui 12/01 §6.2; F-07 «кубик материала»).",
+      "properties": {
+        "material": {
+          "type": "string"
+        },
+        "camera": {
+          "type": "string"
+        },
+        "key_light": {
+          "type": "string"
+        },
+        "fill_pct": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "contact_shadow_alpha_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "margin_pct": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 30
+        },
+        "accent_share_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "abstract": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "policy": {
+          "enum": [
+            "code-first",
+            "generate",
+            "none"
+          ],
+          "description": "Абстрактный фон кодом (CSS/SVG/WebGL), если нечего показывать."
+        },
+        "forms": {
+          "type": "string"
+        }
+      }
+    },
+    "video": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tempo": {
+          "enum": [
+            "still",
+            "slow",
+            "medium"
+          ]
+        },
+        "camera": {
+          "enum": [
+            "static",
+            "slow-dolly",
+            "slow-pan"
+          ]
+        },
+        "loop": {
+          "enum": [
+            "first_last_same",
+            "crossfade_post",
+            "none"
+          ]
+        },
+        "grade_same_lut": {
+          "type": "boolean"
+        }
+      }
+    },
+    "references": {
+      "type": "array",
+      "maxItems": 10,
+      "description": "→ промт (картинки-входы): 1–3 на вызов, одной съёмки, с ролью; работают на классе сюжетов, на котором собраны.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "src",
+          "role",
+          "class"
+        ],
+        "properties": {
+          "src": {
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "style",
+              "palette",
+              "material",
+              "composition",
+              "identity",
+              "subject",
+              "product",
+              "character",
+              "background",
+              "layout",
+              "effect",
+              "pose"
+            ]
+          },
+          "class": {
+            "type": "string",
+            "description": "Класс сюжетов референса: «exterior-park», «interior-cafe», «product-on-white»."
+          },
+          "note": {
+            "type": "string"
+          },
+          "license": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "canaries": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "items": {
+        "type": "string"
+      },
+      "description": "Постоянные тестовые сюжеты разных классов: проверка стиля на новой модели и после обновления (мини-стенд)."
+    },
+    "style_blocks": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "description": "→ промт дословно, первым абзацем (asset-spec series.block); ≤ 80 слов; видимые признаки, без оценочных слов.",
+      "properties": {
+        "photo": {
+          "type": "string"
+        },
+        "illustration": {
+          "type": "string"
+        },
+        "icon3d": {
+          "type": "string"
+        },
+        "abstract": {
+          "type": "string"
+        },
+        "video": {
+          "type": "string"
+        }
+      }
+    },
+    "exclusions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forbidden_markers"
+      ],
+      "properties": {
+        "forbidden_markers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(IMG|VID)-M[0-9]{2}$"
+          },
+          "description": "Коды маркеров A 01/03 §5.2–§5.3 — для приёмки и VLM-вопросов."
+        },
+        "banned_words": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Не писать в промт (антислоп-словарь)."
+        },
+        "replace_with": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "what",
+              "kind"
+            ],
+            "properties": {
+              "what": {
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "service",
+                  "object",
+                  "style",
+                  "artifact"
+                ]
+              },
+              "replace_with": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Как asset-spec exclusions: позитивная замена для моделей без негативов."
+        }
+      }
+    },
+    "post": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "→ постобработка и вёрстка.",
+      "properties": {
+        "grain_pct": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "scrim": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/$defs/hex"
+            },
+            "max_alpha": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "shape": {
+              "enum": [
+                "gradient",
+                "radial",
+                "plate",
+                "blur"
+              ]
+            },
+            "percentile": {
+              "type": "number",
+              "minimum": 90,
+              "maximum": 100
+            }
+          }
+        },
+        "dark_theme": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "method": {
+              "enum": [
+                "separate-asset",
+                "dim",
+                "css-filter"
+              ]
+            },
+            "dim_pct": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 40
+            }
+          }
+        },
+        "focal_required": {
+          "type": "boolean",
+          "description": "Каждый ассет хранит focal {x, y} → object-position (F/03)."
+        }
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "→ приёмка: пороги откалиброваны в опытах F/02–F/06 (фото одной съёмки); для иллюстраций пересчитать на эталоне.",
+      "properties": {
+        "palette_dE_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.3,
+          "description": "ΔE OKLab строгих цветов (strict) к паспорту; UI-норма 0,02."
+        },
+        "series_hue_spread_max_deg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 180
+        },
+        "series_pal_dE_mean_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.3
+        },
+        "series_pal_dE_break": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.3
+        },
+        "series_sd_L_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5
+        },
+        "phash_min": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "text_contrast_min": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 21
+        },
+        "text_zone_percentile": {
+          "type": "number",
+          "minimum": 90,
+          "maximum": 100,
+          "description": "Квантиль яркости полосы текста для расчёта скрима (99,9); формальная проверка — WCAG F83 по худшему участку."
+        },
+        "zone_edge_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "centroid_x_min": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Для зоны текста слева: центр масс значимости правее порога."
+        },
+        "colorfulness_max_rel": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 3,
+          "description": "К эталону бренда; без эталона — к Q3 лидеров 54,5."
+        },
+        "hdr_index_max_delta": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "markers_max": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 25,
+          "description": "Маркеров A §5.2 в ключевом слоте."
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "created_by": {
+          "enum": [
+            "human",
+            "vlm",
+            "script",
+            "mixed"
+          ]
+        },
+        "vlm_model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "runs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "measured": {
+          "type": "object",
+          "description": "Числа, снятые локально с эталонов (palette.py, series_metrics.py)."
+        },
+        "vlm_raw": {
+          "type": "object",
+          "description": "Исходный ответ VLM после разбора (для сверки прогонов)."
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "hex": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$"
+    },
+    "oklch": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5
+        },
+        {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360
+        }
+      ],
+      "description": "[L 0–1, C 0–0,5, H 0–360°]"
+    },
+    "ratio": {
+      "type": "string",
+      "pattern": "^[0-9]{1,2}:[0-9]{1,2}$"
+    },
+    "palette_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "hex",
+        "name",
+        "share_max"
+      ],
+      "properties": {
+        "role": {
+          "enum": [
+            "background",
+            "dominant",
+            "secondary",
+            "accent",
+            "text",
+            "shadow",
+            "highlight"
+          ],
+          "description": "Как в asset-spec palette.role."
+        },
+        "hex": {
+          "$ref": "#/$defs/hex"
+        },
+        "name": {
+          "type": "string",
+          "description": "Название по-английски: hex без названия в промт не отправлять (BFL)."
+        },
+        "share_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Потолок доли площади; в спецификацию уходит как share."
+        },
+        "applies_to": {
+          "type": "string"
+        },
+        "strict": {
+          "type": "boolean",
+          "description": "Бренд-цвет, который обязан совпасть (ΔE ≤ palette_dE_max): доводка постобработкой или HTML-слоем."
+        },
+        "source": {
+          "enum": [
+            "token",
+            "reference",
+            "derived",
+            "vlm"
+          ]
+        },
+        "token": {
+          "type": "string",
+          "description": "Путь токена DTCG: color.accent.solid."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,96 @@
+# Пример treatment v1 — «Отвес», главная (лидогенерация услуг РФ, L1). Учебный, вымышленные данные site.
+# creative-research · 09-ai-execution-evaluation · агент I · волна 3 · 2026-09-24.
+# Формат примеров базы — overlay по id секций v1: в проекте treatment живёт внутри page-plan (sections[].treatment, page.treatment),
+# здесь план site не копируется. Склейка и проверка:
+#   99-raw/tools/venv-I/bin/python ../../scripts/creative/spec_check.py plan \
+#     ../site/10-playbooks-contracts/examples/lead-services-otves/plans/home.yaml \
+#     --overlay 09-ai-execution-evaluation/examples/otves-home.treatment.yaml --spec 09-ai-execution-evaluation/examples/otves-home.motion-spec.yaml
+# Что изменено против treatment v0 в плане site: target пика — id v1 (how-it-works.step вместо kak-rabotaem.step); декоративная линия —
+# fx-элемент; visual_variant из block-treatments.yaml; accents и signature_sections; motion_spec_ref; reduce.stations; mobile.note.
+overlay_version: "1.0"
+checked_at: "2026-09-24"
+example: true
+plan: ../../../site/10-playbooks-contracts/examples/lead-services-otves/plans/home.yaml
+page:
+  art_direction_ref: ../../01-creative-direction/examples/art-direction-otves.json#/directions/0
+  motion_spec_ref: otves-home.motion-spec.yaml
+  motion_level: expressive
+  motion_system:
+    thesis: "Двигается только вертикаль: линия-отвес опускается по этапам работы от замера до сдачи; остальное неподвижно и точно."
+    character: [precise, calm]
+    primitives: [fade-up, line-draw]
+    library: [css]
+    smooth_scroll: false
+    page_transitions: none
+    reduce_toggle: false
+    entrance_system: "первый экран один раз (≤ 500 мс: лид, доказательство и кнопка подъёмом, фото — только сдвиг); ниже — без появления; единственное движение по прокрутке — линия в how-it-works"
+  theme: light
+  tokens_ref: ../../04-visual-language/marketing-tokens.json
+  peaks: [how-it-works]
+  accents: [hero]
+  signature_sections: [how-it-works]
+  status: proposed
+sections:
+  announcement-bar: {level: L0, visual_role: chrome, motion_level: none, visual_variant: static-band}
+  header: {level: L0, visual_role: chrome, motion_level: subtle, visual_variant: solid-minimal}
+  hero:
+    level: L1
+    visual_role: accent
+    motion_level: subtle
+    visual_variant: split-edge-bleed
+    effects:
+      - {ref: "effect:hero-entrance-once", target: hero, trigger: load, purpose: support, class: one-shot, impl: css, moments: [hero-photo-settle, hero-copy-rise]}
+    background: {kind: surface, tone: light, token: color.surface.base}
+    composition: {align: left, text_media: text-left, bleed: edge, asymmetry: mild, height: partial}
+    display_role: display-m
+    reduce: {strategy: final-state}
+    mobile: {strategy: separate-asset, note: "фото прораба 4:5 под заголовком; вес первого экрана ≤ 1,5 МБ (L0 телефона по бюджету site)"}
+    refs: ["ref:example-hero-foreman"]
+    lcp_note: "LCP — фото прораба (hero.visual, lcp_candidate): только transform translateY 24 px → 0; H1 без анимации"
+    motion_spec_ref: otves-home.motion-spec.yaml#/sections/hero
+    status: proposed
+  offer: {level: L0, visual_role: calm, motion_level: none, visual_variant: included-vs-not-columns}
+  pricing: {level: L0, visual_role: calm, motion_level: none, notes: "калькулятор — секция конверсии, L0"}
+  guarantee:
+    level: L0
+    visual_role: support
+    motion_level: none
+    visual_variant: inverse-statement
+    background: {kind: inverse, tone: dark, token: color.surface.inverse, text_contrast: aa}
+  lead-form: {level: L0, visual_role: calm, motion_level: none, visual_variant: form-card}
+  how-it-works:
+    level: L1
+    visual_role: peak
+    motion_level: expressive
+    visual_variant: vertical-progress-line
+    effects:
+      - ref: "effect:scroll-driven-progress"
+        target: how-it-works.fx-plumb-line
+        trigger: scroll
+        purpose: signature
+        class: scroll-linked
+        impl: css-sda
+        moments: [plumb-line-drop, plumb-bob-follow, step-marker-fill]
+        note: "линия-отвес с грузиком опускается вдоль колонки шагов; на каждом шаге — факт из договора (слоты step.fact)"
+    composition: {align: left, asymmetry: mild, text_media: text-only, density: airy, height: content}
+    display_role: display-m
+    reduce: {strategy: final-state, note: "линия нарисована целиком, грузик у последнего шага, маркеры шагов залиты"}
+    mobile: {strategy: simplified, note: "линия 2 px у левого края колонки, без грузика; тот же CSS scroll-driven; маркеры шагов остаются"}
+    refs: ["ref:example-steps-plumb-line"]
+    budget: {js_kb_br: 0, load: eager}
+    motion_spec_ref: otves-home.motion-spec.yaml#/sections/how-it-works
+    status: proposed
+  case-studies: {level: L0, visual_role: support, motion_level: none, notes: "без второй линии: вертикаль на странице одна (тезис)"}
+  testimonials: {level: L0, visual_role: calm, motion_level: none}
+  team:
+    level: L0
+    visual_role: pause
+    motion_level: none
+    visual_variant: lead-person-bleed
+    composition: {bleed: full, text_media: text-over, height: partial}
+    background: {kind: image, media_slot: person-1-photo, text_contrast: aa}
+    mobile: {strategy: separate-asset, note: "портрет 4:5, имя и роль под фото, а не поверх"}
+  comparison: {level: L0, visual_role: calm, motion_level: none}
+  faq: {level: L0, visual_role: calm, motion_level: subtle, visual_variant: accordion-quiet}
+  final-cta: {level: L0, visual_role: calm, motion_level: none, visual_variant: final-on-inverse, background: {kind: inverse, tone: dark, text_contrast: aa}}
+  footer: {level: L0, visual_role: chrome, motion_level: none, visual_variant: minimal-quiet}

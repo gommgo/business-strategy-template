@@ -1,0 +1,291 @@
+{
+  "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
+  "$description": "creative-research marketing tokens (wave 1, agent D, 2026-09-24): display type on clamp(), section rhythm, hero sizes, marketing radius roles, surfaces (glass, grain, scrim), seam gradients, hero CTA. Extends ../../ui/09-design-tokens/04-reference-token-schema.md (DTCG 2025.10, org.ui-research.llm); does NOT replace ui tokens for service screens and does NOT touch ui type.page-title-lg (landing-h1). Fluid values: DTCG dimension has only px/rem, so $value holds the size at 1440 px and $extensions.org.creative-research.fluid holds min, max, viewport range and the compiled clamp(). Brand values (font families, colors) are defaults to be overridden by art-direction.tokens_extension. Motion tokens: group motion.marketing is reserved for agent E (wave 2).",
+  "$extensions": {
+    "org.creative-research.meta": {
+      "version": "0.1",
+      "checked_at": "2026-09-24",
+      "owner": "creative-research · 04-visual-language · D (wave 1); E adds motion.marketing (wave 2)",
+      "fluid_range_px": [360, 1440],
+      "wcag_1_4_4_rule": "every fluid text size has max <= 2.5 x min (Barvian 2023; verified by zoom emulation 99-raw/experiments/D/01-clamp-display/zoom_chromium.json)",
+      "docs": ["01-display-typography.md", "02-composition-rhythm-sections.md", "03-color-surfaces-product.md"]
+    }
+  },
+  "font": {
+    "$type": "fontFamily",
+    "display": {
+      "$value": ["Onest", "Onest fallback", "Arial", "sans-serif"],
+      "$description": "Default display family (OFL, Cyrillic full). Replace from art-direction.visual_language.type.display; check cyrillic-display-fonts.yaml first.",
+      "$extensions": {"org.ui-research.llm": {"usage": ["display-family", "hero-headline", "section-title-display"], "rules": "RECOMMENDED: pick from cyrillic-display-fonts.yaml entries with default_or_option = default or caution. Do NOT use families listed under avoid or no_cyrillic for Russian pages. MUST declare a metric fallback @font-face (size-adjust from k_ru) to keep CLS at 0."}}
+    },
+    "text": {
+      "$value": ["Golos Text", "Golos Text fallback", "Arial", "sans-serif"],
+      "$description": "Default text family for leads and body on marketing pages.",
+      "$extensions": {"org.ui-research.llm": {"usage": ["lead", "body", "eyebrow", "cta-label"], "rules": "RECOMMENDED default for body and lead. Use the display family for body only if its entry lists body in good_for."}}
+    },
+    "mono": {
+      "$value": ["JetBrains Mono", "ui-monospace", "monospace"],
+      "$description": "Outlier family for data, code and measurements only.",
+      "$extensions": {"org.ui-research.llm": {"usage": ["stat-unit", "code", "data-label"], "rules": "Use in at most 2 slots per page (Hallmark 2+1 rule). Do NOT use as a costume for a technical look."}}
+    }
+  },
+  "type": {
+    "$type": "typography",
+    "display-poster": {
+      "$value": {"fontFamily": "{font.display}", "fontSize": {"value": 160, "unit": "px"}, "fontWeight": 700, "letterSpacing": {"value": -1.6, "unit": "px"}, "lineHeight": 0.96},
+      "$description": "Poster statement or footer wordmark: 1-2 words, <= 12 characters total. 64 -> 160 px (360 -> 1440).",
+      "$extensions": {
+        "org.creative-research.fluid": {"min": {"value": 64, "unit": "px"}, "max": {"value": 160, "unit": "px"}, "ratio": 2.5, "css": "clamp(4rem, 2rem + 8.8889vw, 10rem)", "letter_spacing_em": -0.01, "line_height_css": "calc(0.925em + 0.5625rem)"},
+        "org.ui-research.llm": {"usage": ["poster-headline", "footer-wordmark", "hero-stat-number"], "rules": "Use only for 1-2 words (<= 12 characters) at L1-L2. For a brand wordmark in the footer prefer an SVG logotype. Do NOT use for a sentence headline: a 34-character headline at this size breaks into 4+ lines."}
+      }
+    },
+    "display-xl": {
+      "$value": {"fontFamily": "{font.display}", "fontSize": {"value": 120, "unit": "px"}, "fontWeight": 700, "letterSpacing": {"value": -1.8, "unit": "px"}, "lineHeight": 1.0},
+      "$description": "Hero statement up to 20 characters (text-only or text-over hero). 48 -> 120 px.",
+      "$extensions": {
+        "org.creative-research.fluid": {"min": {"value": 48, "unit": "px"}, "max": {"value": 120, "unit": "px"}, "ratio": 2.5, "css": "clamp(3rem, 1.5rem + 6.6667vw, 7.5rem)", "letter_spacing_em": -0.015, "line_height_css": "calc(0.925em + 0.5625rem)"},
+        "org.ui-research.llm": {"usage": ["hero-headline-short", "display-xl", "stat-hero"], "rules": "Use when the H1 has <= 20 characters and the column is >= 960 px wide. With a wide face (k > 0.65, e.g. Unbounded) step down to display-l. Letter-spacing MUST stay >= tracking_touch + 0.005 em of the chosen face (cyrillic-display-fonts.yaml)."}
+      }
+    },
+    "display-l": {
+      "$value": {"fontFamily": "{font.display}", "fontSize": {"value": 96, "unit": "px"}, "fontWeight": 700, "letterSpacing": {"value": -1.44, "unit": "px"}, "lineHeight": 1.02},
+      "$description": "Hero H1 of 21-38 characters in a text-only or text-over hero (column up to 1040 px). 40 -> 96 px.",
+      "$extensions": {
+        "org.creative-research.fluid": {"min": {"value": 40, "unit": "px"}, "max": {"value": 96, "unit": "px"}, "ratio": 2.4, "css": "clamp(2.5rem, 1.3333rem + 5.1852vw, 6rem)", "letter_spacing_em": -0.015, "line_height_css": "calc(0.925em + 0.5625rem)"},
+        "org.ui-research.llm": {"usage": ["hero-headline", "display-l"], "rules": "RECOMMENDED default for a hero H1 of median length (34 characters in Russian) when text is not beside media. MUST fit in <= 2 lines at 1440 px and <= 4 lines at 390 px; if not, step down to display-m. Do NOT use in a split (text-left/right) hero."}
+      }
+    },
+    "display-m": {
+      "$value": {"fontFamily": "{font.display}", "fontSize": {"value": 64, "unit": "px"}, "fontWeight": 700, "letterSpacing": {"value": -0.64, "unit": "px"}, "lineHeight": 1.05},
+      "$description": "Hero H1 beside media (split, column ~600 px) up to 36 characters, or text-only H1 of 39-56 characters. 36 -> 64 px.",
+      "$extensions": {
+        "org.creative-research.fluid": {"min": {"value": 36, "unit": "px"}, "max": {"value": 64, "unit": "px"}, "ratio": 1.78, "css": "clamp(2.25rem, 1.6667rem + 2.5926vw, 4rem)", "letter_spacing_em": -0.01, "line_height_css": "calc(0.925em + 0.5625rem)"},
+        "org.ui-research.llm": {"usage": ["hero-headline-split", "display-m", "section-title-peak"], "rules": "RECOMMENDED for split heroes (text_media text-left or text-right). Also for the title of a peak section. Longer headlines (> 56 characters) MUST be shortened by copy (text), not squeezed."}
+      }
+    },
+    "display-s": {
+      "$value": {"fontFamily": "{font.display}", "fontSize": {"value": 56, "unit": "px"}, "fontWeight": 700, "letterSpacing": {"value": -0.28, "unit": "px"}, "lineHeight": 1.1},
+      "$description": "Display section title (H2) and the fallback for long H1. 30 -> 56 px.",
+      "$extensions": {
+        "org.creative-research.fluid": {"min": {"value": 30, "unit": "px"}, "max": {"value": 56, "unit": "px"}, "ratio": 1.87, "css": "clamp(1.875rem, 1.3333rem + 2.4074vw, 3.5rem)", "letter_spacing_em": -0.005, "line_height_css": "calc(0.925em + 0.5625rem)"},
+        "org.ui-research.llm": {"usage": ["section-title", "display-s", "cta-band-title"], "rules": "RECOMMENDED default for H2 of marketing sections (28 characters median). Use one display size for all H2 of a page; peaks may use display-m."}
+      }
+    },
+    "display-quote": {
+      "$value": {"fontFamily": "{font.display}", "fontSize": {"value": 44, "unit": "px"}, "fontWeight": 500, "letterSpacing": {"value": 0, "unit": "px"}, "lineHeight": 1.2},
+      "$description": "Pull quote fragment up to 120 characters. 26 -> 44 px.",
+      "$extensions": {
+        "org.creative-research.fluid": {"min": {"value": 26, "unit": "px"}, "max": {"value": 44, "unit": "px"}, "ratio": 1.69, "css": "clamp(1.625rem, 1.25rem + 1.6667vw, 2.75rem)", "letter_spacing_em": 0},
+        "org.ui-research.llm": {"usage": ["pull-quote", "testimonial-highlight", "manifesto-line"], "rules": "Use for a quoted fragment only; the full testimonial stays in body size. Do NOT set longer than 3 lines at 1440 px."}
+      }
+    },
+    "lead-hero": {
+      "$value": {"fontFamily": "{font.text}", "fontSize": {"value": 22, "unit": "px"}, "fontWeight": 400, "letterSpacing": {"value": 0, "unit": "px"}, "lineHeight": 1.45},
+      "$description": "Hero subheadline. 18 -> 22 px, measure <= 34em desktop, 27ch phone.",
+      "$extensions": {
+        "org.creative-research.fluid": {"min": {"value": 18, "unit": "px"}, "max": {"value": 22, "unit": "px"}, "ratio": 1.22, "css": "clamp(1.125rem, 1.0417rem + 0.3704vw, 1.375rem)"},
+        "org.ui-research.llm": {"usage": ["hero-lead", "subheadline"], "rules": "MUST keep 4.5:1 contrast on media (it is smaller than large text). Hold to <= 3 lines at 1440 px and <= 4 at 390 px; longer copy is shortened by text, not shrunk."}
+      }
+    },
+    "eyebrow": {
+      "$value": {"fontFamily": "{font.text}", "fontSize": {"value": 15, "unit": "px"}, "fontWeight": 600, "letterSpacing": {"value": 0.3, "unit": "px"}, "lineHeight": 1.3},
+      "$description": "Eyebrow in sentence case (Russian default). Fixed size, no clamp.",
+      "$extensions": {"org.ui-research.llm": {"usage": ["eyebrow", "kicker", "overline"], "rules": "RECOMMENDED default for Russian: sentence case, 14-16 px, weight 500-600. At most one eyebrow per 3 sections, hero included (text copy-slots.yaml, taste). On media the eyebrow sets the scrim alpha: MUST reach 4.5:1."}}
+    },
+    "eyebrow-caps": {
+      "$value": {"fontFamily": "{font.text}", "fontSize": {"value": 13, "unit": "px"}, "fontWeight": 600, "letterSpacing": {"value": 1.04, "unit": "px"}, "lineHeight": 1.3},
+      "$description": "Uppercase eyebrow: 12-13 px, tracking +0.06..+0.10 em.",
+      "$extensions": {"org.ui-research.llm": {"usage": ["eyebrow-caps"], "rules": "Use only when the art direction chooses a caps register; Cyrillic caps read worse than Latin caps (ui 02/03 §2.5). Do NOT place caps eyebrows above every heading."}}
+    },
+    "cta-hero": {
+      "$value": {"fontFamily": "{font.text}", "fontSize": {"value": 18, "unit": "px"}, "fontWeight": 600, "letterSpacing": {"value": 0, "unit": "px"}, "lineHeight": 1.2},
+      "$description": "Label of the hero CTA button (size tokens under size.cta-hero-*).",
+      "$extensions": {"org.ui-research.llm": {"usage": ["cta-hero-label"], "rules": "Label MUST fit one line (<= 25 Russian characters, text copy-slots.yaml). Use 17-18 px, the same as or 1 step above body."}}
+    }
+  },
+  "space": {
+    "$type": "dimension",
+    "page-x": {
+      "$value": {"value": 48, "unit": "px"},
+      "$description": "Page side padding. 16 -> 48 px.",
+      "$extensions": {"org.creative-research.fluid": {"min": {"value": 16, "unit": "px"}, "max": {"value": 48, "unit": "px"}, "css": "clamp(1rem, 0.3333rem + 2.963vw, 3rem)"},
+        "org.ui-research.llm": {"usage": ["page-gutter", "section-inline-padding"], "rules": "MUST be 16 px or more on phones. Full-bleed media ignores it; text never does."}}
+    },
+    "section-s": {
+      "$value": {"value": 64, "unit": "px"},
+      "$description": "Compact floor gap (logo wall, stat strip, sticky-stack step). 48 -> 64 px.",
+      "$extensions": {"org.creative-research.fluid": {"min": {"value": 48, "unit": "px"}, "max": {"value": 64, "unit": "px"}, "css": "clamp(3rem, 2.6667rem + 1.4815vw, 4rem)"},
+        "org.ui-research.llm": {"usage": ["section-padding-compact", "calm-section"], "rules": "Use for short supporting sections and between two sections on the same background."}}
+    },
+    "section-m": {
+      "$value": {"value": 112, "unit": "px"},
+      "$description": "Default floor gap between marketing sections. 64 -> 112 px.",
+      "$extensions": {"org.creative-research.fluid": {"min": {"value": 64, "unit": "px"}, "max": {"value": 112, "unit": "px"}, "css": "clamp(4rem, 3rem + 4.4444vw, 7rem)"},
+        "org.ui-research.llm": {"usage": ["section-padding", "floor-gap"], "rules": "RECOMMENDED default padding-block of a section. Do NOT use ui space.stack.section (24 px) between marketing sections. Padding-bottom may be up to 1.3x padding-top (hero, Birman floors)."}}
+    },
+    "section-l": {
+      "$value": {"value": 160, "unit": "px"},
+      "$description": "Pause, manifesto, peak entry, change of background. 80 -> 160 px.",
+      "$extensions": {"org.creative-research.fluid": {"min": {"value": 80, "unit": "px"}, "max": {"value": 160, "unit": "px"}, "css": "clamp(5rem, 3.3333rem + 7.4074vw, 10rem)"},
+        "org.ui-research.llm": {"usage": ["section-padding-pause", "peak-section", "inverse-section"], "rules": "Use for visual_role pause and for the first section after a background change. At most 1 in 3 sections: large gaps everywhere read as an empty template (NN/g: pages are too sparse)."}}
+    },
+    "stack-display": {
+      "$value": {"value": 24, "unit": "px"},
+      "$description": "Gap between a display heading and its lead. 16 -> 24 px (0.25-0.4 em of the heading).",
+      "$extensions": {"org.creative-research.fluid": {"min": {"value": 16, "unit": "px"}, "max": {"value": 24, "unit": "px"}, "css": "clamp(1rem, 0.8333rem + 0.7407vw, 1.5rem)"},
+        "org.ui-research.llm": {"usage": ["heading-to-lead", "display-margin-bottom"], "rules": "Keep smaller than the half-leading gap between lines of the heading x 3; increasing the heading size does NOT automatically increase this gap (Birman)."}}
+    }
+  },
+  "size": {
+    "$type": "dimension",
+    "container": {"$value": {"value": 1280, "unit": "px"}, "$description": "Marketing content container (Carbon Editorial model: centred).", "$extensions": {"org.ui-research.llm": {"usage": ["container", "section-inner"], "rules": "Use for text and grids; full-bleed media spans the viewport, the text column never exceeds 1040 px."}}},
+    "hero-text-max": {"$value": {"value": 1040, "unit": "px"}, "$description": "Max width of the H1 column in text-only and text-over heroes.", "$extensions": {"org.ui-research.llm": {"usage": ["hero-text-column"], "rules": "Use as max-width of the hero headline block. In split heroes the text column is 5-6 of 12 columns (about 560-640 px at 1440)."}}},
+    "hero-min-offer": {"$value": {"value": 620, "unit": "px"}, "$description": "Hero box for first_screen_policy offer-cta: 60-85 % of viewport height, content fits 800 px.", "$extensions": {"org.creative-research.css": {"min-height": "min(85svh, max(60svh, 38rem))"}, "org.ui-research.llm": {"usage": ["hero-height-offer-cta"], "rules": "MUST leave the top edge of the next section visible at 1440x900 and 1280x800. Do NOT use 100vh or dvh for the hero box."}}},
+    "hero-min-poster": {"$value": {"value": 900, "unit": "px"}, "$description": "Hero box for first_screen_policy poster (campaign L2, portfolio, letter): up to the full small viewport.", "$extensions": {"org.creative-research.css": {"min-height": "100svh"}, "org.ui-research.llm": {"usage": ["hero-height-poster"], "rules": "Use only with the site policy poster and a visible continuation cue; never for paid-search landing pages."}}},
+    "cta-hero-height": {"$value": {"value": 56, "unit": "px"}, "$description": "Hero CTA height: 52 phone, 56-64 desktop.", "$extensions": {"org.creative-research.fluid": {"min": {"value": 52, "unit": "px"}, "max": {"value": 60, "unit": "px"}, "css": "clamp(3.25rem, 3.0833rem + 0.7407vw, 3.75rem)"}, "org.ui-research.llm": {"usage": ["cta-hero", "cta-band-button"], "rules": "Use for the one primary CTA of the hero and the final CTA band; other buttons stay on ui sizes (24-48). Padding-inline = 2x padding-block (Purdila)."}}},
+    "measure-lead": {"$value": {"value": 748, "unit": "px"}, "$description": "Lead measure: 34em of the lead size (748 px at 22 px, about 65 Russian characters), 27ch on phones over media.", "$extensions": {"org.creative-research.css": {"max-width": "34em"}, "org.ui-research.llm": {"usage": ["lead-max-width"], "rules": "Use max-width: 34em for leads; body text follows ui 02/03 §3 (65ch)."}}}
+  },
+  "radius": {
+    "$type": "dimension",
+    "none": {"$value": {"value": 0, "unit": "px"}, "$description": "Sharp system (Swiss, brutal, editorial poster).", "$extensions": {"org.ui-research.llm": {"usage": ["radius-sharp-system"], "rules": "Pick ONE radius family per page: sharp (0), soft (12-24) or pill for interactive only (taste shape lock)."}}},
+    "media": {"$value": {"value": 16, "unit": "px"}, "$description": "Photos, video, product frames in soft systems.", "$extensions": {"org.ui-research.llm": {"usage": ["media-radius", "screenshot-frame"], "rules": "Use 12-16 for media; nested elements use radius minus padding."}}},
+    "card-marketing": {"$value": {"value": 24, "unit": "px"}, "$description": "Bento tiles and feature cards (ui 11/01 §8: 16/24).", "$extensions": {"org.ui-research.llm": {"usage": ["bento-tile", "feature-card"], "rules": "Use 16-24 for large tiles; a non-clickable marketing card has no hover elevation (ux 04/04 §3.1 caution)."}}},
+    "cta-hero": {"$value": {"value": 9999, "unit": "px"}, "$description": "Pill hero CTA in soft or pill systems; in a sharp system use radius.none.", "$extensions": {"org.ui-research.llm": {"usage": ["cta-hero-radius"], "rules": "Use pill only for interactive controls; do NOT mix a pill CTA with sharp cards unless the rule is documented in art-direction."}}}
+  },
+  "color": {
+    "$type": "color",
+    "surface": {
+      "base": {"$value": {"colorSpace": "oklch", "components": [0.985, 0.002, 247], "hex": "#fafafa"}, "$description": "Page surface (default; override from art-direction palette.background).", "$extensions": {"org.ui-research.llm": {"usage": ["page-background", "background-kind-surface"], "rules": "RECOMMENDED chroma <= 0.03 for areas > 30 % of the screen at L0 (ui 01/06 §1.7); L1-L2 may exceed it for a committed or drenched strategy with contrast checked."}}},
+      "tint": {"$value": {"colorSpace": "oklch", "components": [0.955, 0.012, 247], "hex": "#eceff3"}, "$description": "Tinted section in the same family as base (delta L 2-4 %).", "$extensions": {"org.ui-research.llm": {"usage": ["background-kind-tint"], "rules": "Use for rhythm inside one theme; the tint MUST come from the brand hue family, not a random second hue."}}},
+      "inverse": {"$value": {"colorSpace": "oklch", "components": [0.18, 0.01, 260], "hex": "#0f1217"}, "$description": "Inverse section (dark pause on a light page).", "$extensions": {"org.ui-research.llm": {"usage": ["background-kind-inverse", "dark-pause"], "rules": "Use as a deliberate pause or the final CTA; at most 2 inversions per page (one pause + one finale or footer) unless the page theme is mixed by art direction."}}}
+    },
+    "text": {
+      "on-inverse": {"$value": {"colorSpace": "oklch", "components": [0.96, 0.005, 90], "hex": "#f3f2ee"}, "$description": "Text on inverse and dark media.", "$extensions": {"org.ui-research.llm": {"usage": ["text-on-dark"], "rules": "MUST reach 4.5:1 on the lightest point behind it (F83)."}}}
+    },
+    "scrim": {
+      "dark": {"$value": {"colorSpace": "srgb", "components": [0.039, 0.047, 0.063], "alpha": 0.62, "hex": "#0a0c10"}, "$description": "Dark scrim edge alpha under light text (ai-media 10/03 §2.2).", "$extensions": {"org.ui-research.llm": {"usage": ["scrim-dark"], "rules": "Use as a gradient under the text column only (0.62 at the edge -> 0 at 64-68 %); the alpha is set by the smallest text in the zone. Do NOT lay a flat 0.5 box (grey box)."}}},
+      "light": {"$value": {"colorSpace": "srgb", "components": [0.953, 0.937, 0.906], "alpha": 0.46, "hex": "#f3efe7"}, "$description": "Light scrim (paper) under dark text.", "$extensions": {"org.ui-research.llm": {"usage": ["scrim-light"], "rules": "Use under dark text on light frames; on phones the scrim runs top-down."}}}
+    }
+  },
+  "surface": {
+    "glass-light": {
+      "$type": "color",
+      "$value": {"colorSpace": "srgb", "components": [1, 1, 1], "alpha": 0.72, "hex": "#ffffff"},
+      "$description": "Glass layer on busy content: >= 72 % opacity with blur >= 12 px (ui 11/01 §6).",
+      "$extensions": {"org.creative-research.css": {"backdrop-filter": "blur(16px) saturate(180%)", "border": "1px solid rgb(255 255 255 / .35)", "fallback": "@supports not (backdrop-filter: blur(1px)) { background: rgb(255 255 255 / .92) }", "reduced-transparency": "@media (prefers-reduced-transparency: reduce) { background: #fff; backdrop-filter: none }"},
+        "org.ui-research.llm": {"usage": ["glass-panel", "sticky-header-scrolled"], "rules": "Use for 1-2 layers per viewport as a performance budget (cost measured by F); text on glass MUST pass 4.5:1 against the worst backdrop. Do NOT use glass on the sticky header while it is transparent over the hero."}}
+    },
+    "glass-dark": {
+      "$type": "color",
+      "$value": {"colorSpace": "srgb", "components": [0.063, 0.063, 0.078], "alpha": 0.72, "hex": "#101014"},
+      "$description": "Dark glass.",
+      "$extensions": {"org.creative-research.css": {"backdrop-filter": "blur(16px) saturate(180%)", "border": "1px solid rgb(255 255 255 / .10)"}, "org.ui-research.llm": {"usage": ["glass-panel-dark"], "rules": "Same limits as glass-light."}}
+    },
+    "grain-soft": {
+      "$type": "number",
+      "$value": 0.06,
+      "$description": "Grain overlay opacity (SVG feTurbulence 280 B, mix-blend-mode soft-light), under text.",
+      "$extensions": {"org.creative-research.css": {"mix-blend-mode": "soft-light", "z-index": "-1 inside isolation: isolate", "asset": "noise.svg (fractalNoise baseFrequency .9, 2 octaves)"},
+        "org.ui-research.llm": {"usage": ["grain-overlay", "background-kind-grain"], "rules": "Use 0.05-0.09 on photos and CSS gradients; grain >= 0.10 only to hide banding of raster gradients (ai-media 10/03 §4.3). Do NOT grain a page that already has a paper texture."}}
+    }
+  },
+  "gradient": {
+    "$type": "gradient",
+    "seam-to-next": {
+      "$value": [{"color": {"colorSpace": "srgb", "components": [0.98, 0.98, 0.98], "alpha": 0, "hex": "#fafafa"}, "position": 0}, {"color": "{color.surface.base}", "position": 1}],
+      "$description": "Seam at the bottom of a media hero into the next section colour, 96-120 px tall (ai-media 10/03 §4.2).",
+      "$extensions": {"org.creative-research.css": {"background": "linear-gradient(0deg, var(--color-surface-base) 0, rgb(0 0 0 / 0) 120px)"}, "org.ui-research.llm": {"usage": ["hero-seam", "section-seam"], "rules": "Use CSS gradients for seams (0 bytes, no banding). The end colour MUST equal the next section background token."}}
+    },
+    "under-nav": {
+      "$value": [{"color": {"colorSpace": "srgb", "components": [0.039, 0.047, 0.063], "alpha": 0.55, "hex": "#0a0c10"}, "position": 0}, {"color": {"colorSpace": "srgb", "components": [0.039, 0.047, 0.063], "alpha": 0, "hex": "#0a0c10"}, "position": 1}],
+      "$description": "140 px top gradient under a transparent header over media.",
+      "$extensions": {"org.creative-research.css": {"background": "linear-gradient(180deg, rgb(10 12 16 / .55) 0, rgb(10 12 16 / 0) 140px)"}, "org.ui-research.llm": {"usage": ["transparent-header-backdrop"], "rules": "MUST be present when header.variant = transparent-over-hero sits on a photo or video, so header links reach 4.5:1."}}
+    }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "cta-glow": {
+      "$value": {"color": {"colorSpace": "srgb", "components": [0.169, 0.231, 1], "alpha": 0.35, "hex": "#2b3bff"}, "offsetX": {"value": 0, "unit": "px"}, "offsetY": {"value": 8, "unit": "px"}, "blur": {"value": 24, "unit": "px"}, "spread": {"value": -4, "unit": "px"}},
+      "$description": "Coloured glow under the hero CTA (accent hue); replace colour with the brand accent.",
+      "$extensions": {"org.ui-research.llm": {"usage": ["cta-glow"], "rules": "Use only on the single hero or final CTA on a dark or tinted surface, when art-direction lists glow as a decision; offset and blur are required (a zero-offset halo is decoration, impeccable). Do NOT glow on white backgrounds."}}
+    }
+  },
+  "motion": {
+    "marketing": {
+      "$description": "Marketing motion tokens (wave 2, agent E, 2026-09-24): durations by presentation role, stagger, easings, distances, scales, scroll scene lengths, loop speeds, attention budget. Interface feedback of controls stays on ui-research 08-motion tokens; these tokens drive presentation (scenes, reveals, loops, scroll). Every token carries its prefers-reduced-motion value in $extensions.org.creative-research.reduce (resolver modifier 'motion: reduced', ui 08/03 §5.3). CSS: --mm-* in marketing-tokens.css.",
+      "$extensions": {"org.creative-research.meta": {"owner": "E", "status": "draft", "version": "0.1", "checked_at": "2026-09-24",
+        "docs": ["../05-motion/01-motion-principles-and-access.md §7", "../05-motion/02-choreography-scroll-transitions.md", "../05-motion/03-micro-motion-and-performance.md"],
+        "reduce_rule": "reduce, not remove: spatial values -> 0 or 1, stagger -> 0, reveal and scene durations -> crossfade 180 ms or instant, loops paused, scroll-linked -> stations or final state"}},
+      "duration": {
+        "$type": "duration",
+        "feedback": {"$value": {"value": 120, "unit": "ms"}, "$description": "Press, color change of controls. Range 100-160 ms (Emil; ui Interactions 50-150).", "$extensions": {"org.creative-research.reduce": {"value": 120, "unit": "ms"}, "org.ui-research.llm": {"usage": ["press-feedback", "cta-color"], "rules": "Use for direct feedback only; never animate focus rings (0 ms)."}}},
+        "hover": {"$value": {"value": 200, "unit": "ms"}, "$description": "Hover lift 1-2 px, underline, highlight. Range 150-250 ms; leave up to 1.5x.", "$extensions": {"org.creative-research.reduce": {"value": 200, "unit": "ms"}, "org.ui-research.llm": {"usage": ["hover"], "rules": "Gate motion with @media (hover: hover) and (pointer: fine). In reduce keep color, drop the lift."}}},
+        "reveal": {"$value": {"value": 560, "unit": "ms"}, "$description": "One-time reveal of an element on scroll. Range 400-700 ms.", "$extensions": {"org.creative-research.reduce": {"value": 0, "unit": "ms"}, "org.ui-research.llm": {"usage": ["scroll-reveal", "support-section"], "rules": "Fire once; start from opacity .01 (never 0) and translateY(shift-reveal); content visible without JS; not on the LCP element."}}},
+        "split-line": {"$value": {"value": 800, "unit": "ms"}, "$description": "One line or word of a split display heading. Range 600-900 ms.", "$extensions": {"org.creative-research.reduce": {"value": 0, "unit": "ms"}, "org.ui-research.llm": {"usage": ["split-text-reveal"], "rules": "Display roles only, never the LCP heading; total with stagger <= split-total-max."}}},
+        "split-total-max": {"$value": {"value": 1000, "unit": "ms"}, "$description": "Ceiling for a whole split heading reveal including stagger."},
+        "hero-scene": {"$value": {"value": 900, "unit": "ms"}, "$description": "Whole first-screen entrance scene (all elements). Range 600-1200 ms.", "$extensions": {"org.creative-research.reduce": {"value": 0, "unit": "ms"}, "org.ui-research.llm": {"usage": ["hero-entrance-once"], "rules": "LCP element (H1 or poster) has no animation or transform only (99-raw/experiments/E/01-lcp-reveal)."}}},
+        "hero-scene-max": {"$value": {"value": 1200, "unit": "ms"}, "$description": "Ceiling for the first-screen scene."},
+        "state": {"$value": {"value": 320, "unit": "ms"}, "$description": "In-page state change, same-document View Transition. Range 250-400 ms.", "$extensions": {"org.creative-research.reduce": {"value": 180, "unit": "ms"}}},
+        "page": {"$value": {"value": 400, "unit": "ms"}, "$description": "Page transition (SPA View Transitions, Barba, Swup). Range 300-500 ms; multipage repeats 250-400 ms.", "$extensions": {"org.creative-research.reduce": {"value": 0, "unit": "ms"}}},
+        "counter": {"$value": {"value": 1200, "unit": "ms"}, "$description": "Count-up of a proof number, once, <= 1500 ms, tabular-nums, final number in HTML.", "$extensions": {"org.creative-research.reduce": {"value": 0, "unit": "ms"}}},
+        "cta-pulse": {"$value": {"value": 500, "unit": "ms"}, "$description": "One attention pulse of the CTA on an event; at most 2 pulses, whole series < 5 s.", "$extensions": {"org.creative-research.reduce": {"value": 0, "unit": "ms"}}},
+        "intro-max": {"$value": {"value": 3000, "unit": "ms"}, "$description": "Ceiling of an L2-campaign intro; Skip visible from the first second; none on repeat visits and in reduce."},
+        "crossfade-reduce": {"$value": {"value": 180, "unit": "ms"}, "$description": "Opacity-only crossfade used instead of spatial motion under reduce (<= 200 ms)."},
+        "loop-autostop": {"$value": {"value": 4000, "unit": "ms"}, "$description": "A loop without a pause button stops after this plus the end of its cycle (WCAG 2.2.2 stops-within-5s)."},
+        "settle-max": {"$value": {"value": 1000, "unit": "ms"}, "$description": "Max scroll settle tail per wheel step with smooth scrolling (C measured 800-1400 ms on Lenis sites)."},
+        "breathe-period": {"$value": {"value": 12000, "unit": "ms"}, "$description": "Period of a breathing background or floating object; never 2500-6000 ms (0.17-0.4 Hz, Diels 2013; Apple HIG 0.2 Hz); minimum 10000 ms for objects > 10 % of the viewport.", "$extensions": {"org.creative-research.reduce": {"value": 0, "unit": "ms"}}},
+        "vt-timeout-chrome": {"$value": {"value": 4000, "unit": "ms"}, "$description": "Reference only: Chrome skips a cross-document View Transition if navigation takes longer (TimeoutError)."}
+      },
+      "stagger": {
+        "$type": "duration",
+        "text": {"$value": {"value": 60, "unit": "ms"}, "$description": "Step between lines or words of a split heading (40-80 ms).", "$extensions": {"org.creative-research.reduce": {"value": 0, "unit": "ms"}}},
+        "group": {"$value": {"value": 60, "unit": "ms"}, "$description": "Step between items of a list-like group (40-80 ms); first 6-8 items only.", "$extensions": {"org.creative-research.reduce": {"value": 0, "unit": "ms"}}},
+        "group-total-max": {"$value": {"value": 600, "unit": "ms"}, "$description": "Ceiling of the whole cascade of one group."}
+      },
+      "easing": {
+        "$type": "cubicBezier",
+        "out-expo": {"$value": [0.16, 1, 0.3, 1], "$description": "Entrances, reveals, scenes (Hallmark, impeccable)."},
+        "out-strong": {"$value": [0.23, 1, 0.32, 1], "$description": "Interface feedback (Emil Kowalski)."},
+        "in-out": {"$value": [0.65, 0, 0.35, 1], "$description": "On-screen movement, page transitions."},
+        "in": {"$value": [0.7, 0, 0.84, 0], "$description": "Leaving for good; duration about 75 % of the entrance."},
+        "linear": {"$value": [0, 0, 1, 1], "$description": "Marquee, scrub, progress."},
+        "breathe": {"$value": [0.37, 0, 0.63, 1], "$description": "Sine in-out for breathing loops (period >= breathe-period)."}
+      },
+      "distance": {
+        "$type": "dimension",
+        "shift-reveal": {"$value": {"value": 16, "unit": "px"}, "$description": "Reveal travel 8-24 px (generators use 20-40 px).", "$extensions": {"org.creative-research.reduce": {"value": 0, "unit": "px"}}},
+        "shift-hero": {"$value": {"value": 24, "unit": "px"}, "$description": "Max travel of first-screen elements; the LCP heading may use transform only up to this.", "$extensions": {"org.creative-research.reduce": {"value": 0, "unit": "px"}}},
+        "lift-hover": {"$value": {"value": 2, "unit": "px"}, "$description": "Card and button hover lift (ui: 1-2 px, not scale).", "$extensions": {"org.creative-research.reduce": {"value": 0, "unit": "px"}}},
+        "magnet-max": {"$value": {"value": 8, "unit": "px"}, "$description": "Max offset of a magnetic CTA toward the pointer; hover:hover and pointer:fine only.", "$extensions": {"org.creative-research.reduce": {"value": 0, "unit": "px"}}}
+      },
+      "scale": {
+        "$type": "number",
+        "press": {"$value": 0.97, "$description": "Pressed CTA (0.95-0.98).", "$extensions": {"org.creative-research.reduce": 1}},
+        "reveal-in": {"$value": 0.96, "$description": "Start scale of a scale-in reveal (never 0).", "$extensions": {"org.creative-research.reduce": 1}},
+        "cta-pulse-peak": {"$value": 1.04, "$description": "Peak of an event pulse (<= 1.05); infinite pulsing is forbidden.", "$extensions": {"org.creative-research.reduce": 1}},
+        "scroll-max-per-100vh": {"$value": 1.2, "$description": "Max scale change per 100vh of scroll for objects >= 50 % of the viewport.", "$extensions": {"org.creative-research.reduce": 1}}
+      },
+      "scroll": {
+        "$type": "number",
+        "step-vh": {"$value": 120, "$description": "Scroll length of one scene step in vh (100-150); each step ends on a readable station.", "$extensions": {"org.creative-research.css": "120vh"}},
+        "pin-l1-max-vh": {"$value": 150, "$description": "L1: one pinned scene, total scroll length in vh.", "$extensions": {"org.creative-research.css": "150vh"}},
+        "pin-l2-max-vh": {"$value": 400, "$description": "L2: max scroll length of one pinned section, <= 5 steps.", "$extensions": {"org.creative-research.css": "400vh"}},
+        "parallax-ratio-max": {"$value": 0.4, "$description": "Max speed difference between parallax layers; background <= 24vh per 100vh of scroll; text never.", "$extensions": {"org.creative-research.reduce": 0}},
+        "scrub-smoothing-s": {"$value": 0.6, "$description": "ScrollTrigger scrub catch-up in seconds (0.5-1).", "$extensions": {"org.creative-research.reduce": 0}},
+        "lenis-lerp": {"$value": 0.15, "$description": "Lenis lerp for L2 smooth scrolling. Measured wheel-step tail (motion_check.py 0.1.3, desktop Chromium 153, S1 2026-09-25): 0.10 -> 1.28 s, 0.12 -> 1.09-1.13 s (fails the 1.0 s gate), 0.15 -> 0.90 s, 0.20 -> 0.72 s; the 99 % formula (0.6 s at 0.12) underestimates. Lenis disables itself under reduce (respectReducedMotion)."}
+      },
+      "loop": {
+        "marquee-speed": {"$type": "number", "$value": 40, "$description": "Marquee speed in px/s (leaders 30-60; K3 155-164). Period = track width / speed.", "$extensions": {"org.creative-research.reduce": 0}},
+        "float-amplitude-pct": {"$type": "number", "$value": 3, "$description": "Floating or breathing amplitude, % of object height (2-4).", "$extensions": {"org.creative-research.reduce": 0}}
+      },
+      "budget": {
+        "$type": "number",
+        "loops-l0": {"$value": 1, "$description": "Continuous motions (loop objects) visible at once on L0; never under readable text."},
+        "loops-l1": {"$value": 2, "$description": "Same for L1; phone: one less, minimum 1."},
+        "loops-l2": {"$value": 3, "$description": "Same for L2; phone: one less."},
+        "breathe-pixels-pct-max": {"$value": 2.5, "$description": "Share of viewport pixels changing per second of idle for a breathing layer allowed under display text (C: 0.4-2.4 %)."},
+        "loud-pixels-pct": {"$value": 5, "$description": "Above this a loop is loud: first screen of L2 only, pause visible, no text without scrim (C: Squarespace 9.5 %)."}
+      }
+    }
+  }
+}

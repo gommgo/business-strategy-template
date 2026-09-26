@@ -1,0 +1,57 @@
+{
+ "spec_version": "0.2",
+ "checked_at": "2026-09-23",
+ "brief_language": "ru",
+ "id": "t-series-2",
+ "task": "IMG-SERIES",
+ "role": {
+  "section": "features",
+  "slot": "feature-2",
+  "purpose": "серия",
+  "series_id": "onb"
+ },
+ "subject": {
+  "summary": "a paper plane flying above a neat stack of documents"
+ },
+ "composition": {
+  "shot": "medium",
+  "subject_region": "right-third"
+ },
+ "palette": [
+  {
+   "role": "background",
+   "hex": "#F6F1E7",
+   "name": "cream",
+   "share": 0.7
+  },
+  {
+   "role": "accent",
+   "hex": "#FF6B5B",
+   "name": "coral",
+   "share": 0.08,
+   "applies_to": "paper plane"
+  }
+ ],
+ "series": {
+  "id": "onb",
+  "block": "Flat vector illustration for a product onboarding series: uniform 2 px deep navy outlines, flat solid fills, cream background.",
+  "avoid_average": true,
+  "index": 2,
+  "of": 6
+ },
+ "references": [
+  {
+   "id": "s1",
+   "src": "style-ref.png",
+   "role": "style",
+   "note": "line weight and palette only"
+  }
+ ],
+ "text": {
+  "mode": "none"
+ },
+ "output": {
+  "primary_ratio": "4:3",
+  "resolution": "1K"
+ }
+}

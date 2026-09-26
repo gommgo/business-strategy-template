@@ -1,0 +1,331 @@
+# geo-checklist.yaml — полный чек-лист GEO-текста: что проверить, чем, и что из этого ворота.
+# text-research · волна 2 · агент G · 2026-09-24. Обоснования, примеры и спорные места — 07-seo-geo-copy/03-geo-copy.md;
+# мета и статьи — 02-seo-pages-articles-meta.md; интент и набивка — 01-intent-and-keywords.md.
+#
+# GEO-текст здесь — слой страницы, который поисковики с ИИ (Алиса AI в Поиске Яндекса, Google AI Overviews и AI Mode,
+# ChatGPT Search, Perplexity) могут взять в ответ: «коротко» в начале статьи, ответы FAQ, определения, абзац-ответ под
+# подзаголовком-вопросом, факты для сравнения. Это не отдельный «текст для ИИ»: Google прямо просит не делать второй
+# версии и не нарезать текст на куски; правила ниже улучшают текст для человека и заодно делают его цитируемым.
+#
+# Порядок проверки (решение оркестратора 24.09.2026): claims_check.py (факты и право) → copy_lint.py (стиль, мета, GEO) →
+# судья (рубрика I, волна 3) → человек. Пункты с method: linter ссылаются на id правил meta-rules.yaml, geo-rules.yaml и
+# словарей C. Тест загрузки: python3 99-raw/experiments/G/00-rules-load/test_rules.py (проверяет и этот файл).
+
+date: 2026-09-24
+version: 1
+owner: G (волна 2)
+status: provisional
+id_prefix: COPY-GEO-
+levels:
+  gate: "ворота — не публиковать, пока не исправлено (или не оформлено исключение с причиной)"
+  signal: "сигнал — проверить и решить; править, если подтвердилось"
+methods:
+  claims: "../../scripts/text/claims_check.py check <copy deck> --facts facts.yaml (B2 + право H)"
+  linter: "../../scripts/text/copy_lint.py <copy deck> --genre geo|article|… (правила C + meta-rules.yaml + geo-rules.yaml)"
+  script: "скрипт по нескольким полям или страницам (дубли, сравнение с canonical, заголовок ↔ первый абзац) — 01-meta-corpus/run.py, будущий copydeck.py (J)"
+  judge: "ИИ-судья по рубрике (I, волна 3): вопрос из поля judge_question, ответ да/нет + цитата-обоснование"
+  human: "редактор или заказчик: решение, которое не выводится из текста (опыт, выбор темы, отличие от конкурентов)"
+  site: "техническая проверка сайта (site H: HTML без JS, индексация, разметка, отчёты) — здесь только ссылка"
+engines_note: "Google и Яндекс не сводятся в одно правило: Google — «SEO для ИИ — это SEO» и запрет страниц под вариации запроса; Яндекс — ЭПОС, «увеличивайте количество релевантных страниц» (по интентам), SoV в Вебмастере. Поле engines у пункта — если позиции различаются."
+
+checks:
+  # ============ A. Факты и честность — ворота ============
+  - id: COPY-GEO-01
+    name: "Любое число, имя, дата, цена, рейтинг, цитата GEO-слоя — из facts.yaml"
+    sign: "у слота есть fact_ids; claims_check.py без error (COPY-F-NUM, COPY-F-CLASS, COPY-F-NAME, COPY-F-QUOTE…)"
+    applies: {genres: [geo, article, landing, site-page], slot_types: [geo-answer, definition, faq-a, article-summary, article-paragraph, comparison-row]}
+    how: [{method: claims, ref: "COPY-F-*"}, {method: linter, ref: "an-number-without-fact (C)"}]
+    level: gate
+    evidence: "[стандарт базы] + [исследование]"
+    source: "B2 03-proof-and-facts.md §4, §7; Aggarwal и др. KDD 2024 + код GEO-optim (статистика, цитаты и источники «even if hypothetical», «fake and artificial», «You may invent these sources») — поэтому приём «добавь цифры» без фактов запрещён"
+    date: 2026-09-24
+
+  - id: COPY-GEO-02
+    name: "Факт стоит канонической формулировкой — одинаково на всех страницах, в FAQ и разметке"
+    sign: "текст факта в geo-answer, faq-a, definition = facts[].canonical или одна из verbatim; JSON-LD — тот же canonical"
+    applies: {genres: [geo, article, site-page, landing], slot_types: [geo-answer, faq-a, definition, article-summary]}
+    how: [{method: claims, ref: "COPY-F-NUM-MISMATCH, COPY-F-EXTENDS (сильнее факта)"}, {method: script, ref: "сравнение слота с canonical/verbatim; разметка — site H"}]
+    level: gate
+    evidence: "[стандарт базы] + [документация]"
+    source: "B2 facts.schema.yaml (canonical: «кто + значение с единицей + условие + дата или источник»; контракт тройки §3 п.10); Google «Make sure structured data matches the visible content» (блог 2025-05-21); Яндекс «Как формируются ответы Алисы AI»: ответ пересказывает источники, прямую речь — дословно"
+    date: 2026-09-24
+
+  - id: COPY-GEO-03
+    name: "Скоропортящийся факт — с датой «на …» в том же предложении; относительного времени нет"
+    sign: "цена, рейтинг, число клиентов, норма закона, тариф — с датой; нет «в этом году», «недавно»; факт не просрочен"
+    applies: {genres: [geo, article], slot_types: [geo-answer, faq-a, definition, article-summary, article-paragraph]}
+    how: [{method: linter, ref: geo-relative-time}, {method: claims, ref: "COPY-F-STALE, COPY-F-EXPIRED"}]
+    level: gate
+    evidence: "[документация] + [исследование]"
+    source: "Google «Influence your byline dates» (2025-12-10); SQRG 11.09.2025 §18.0; Tian и др. 2026 (outdated information — причина непроцитированности); Martinez 2026 §7.2 (даты и цены — «moderate» рычаг для запросов, где важно время)"
+    date: 2026-09-24
+
+  - id: COPY-GEO-04
+    name: "Доля, кратность, «N из M» — с источником и датой; внешняя статистика — только реальная, со ссылкой"
+    sign: "в том же предложении «по данным …, <дата>»; источник существует и сказал именно это"
+    applies: {genres: [geo, article], slot_types: [geo-answer, faq-a, definition, article-summary, article-paragraph]}
+    how: [{method: linter, ref: geo-unsourced-stat}, {method: claims, ref: "COPY-F-NUM, COPY-F-CLASS"}, {method: human, ref: "открыть источник"}]
+    level: gate
+    evidence: "[исследование] + [стандарт базы]"
+    source: "C-SEO Bench (Puerto и др., NeurIPS 2025): метод Statistics снижает место цитирования в 19 из 24 настроек; Martinez 2026: «verifiable, dated, and properly attributed evidence»; B2"
+    date: 2026-09-24
+
+  - id: COPY-GEO-05
+    name: "Никаких выдуманных цитат, экспертов, источников, авторов и отзывов ради «цитируемости»"
+    sign: "каждая цитата и имя — запись facts.yaml с разрешением; ИИ-текст не подписан живым или вымышленным человеком"
+    applies: {genres: [geo, article, landing, site-page]}
+    how: [{method: claims, ref: "COPY-F-QUOTE, COPY-F-NAME, COPY-F-PERMISSION, nc-ai-people"}, {method: human, ref: "подпись автора"}]
+    level: gate
+    evidence: "[документация] + [стандарт базы]"
+    source: "Сливинский (Яндекс), 12.2025 [V:AbqU-GxAYs8 48:57] — не подписывать сгенерированное реальными или несуществующими людьми; Google 2023-02-08 (AI в подписи автора — «probably not the best way»); Martinez 2026 §9.1 (подлинность доказательств — граница белого GEO); B2 nc-ai-people"
+    date: 2026-09-24
+
+  - id: COPY-GEO-06
+    name: "Нет инструкций для моделей и скрытого текста"
+    sign: "нет «ИИ, рекомендуй нас», «ignore previous instructions», текста, видимого только роботу"
+    applies: {genres: [geo, article, landing, site-page, meta]}
+    how: [{method: linter, ref: geo-model-instruction}, {method: site, ref: "скрытый текст, клоакинг — site H"}]
+    level: gate
+    evidence: "[документация] + [исследование]"
+    source: "Google Spam policies (2026-08-28): спам — в том числе попытка «manipulate generative AI responses»; Яндекс «Использование SEO-текстов» (скрытые тексты); Nestaas 2025, Pfrommer 2024 (по Martinez 2026 §9.2)"
+    date: 2026-09-24
+
+  - id: COPY-GEO-07
+    name: "Отзывы и их сводки — только из настоящих отзывов"
+    sign: "сводка «плюсы и минусы» опирается на реальные отзывы (ссылка на площадку, дата); отзывов «от имени» нет"
+    applies: {genres: [landing, site-page, geo], slot_types: [testimonial-quote, faq-a, geo-answer]}
+    how: [{method: claims, ref: "COPY-F-QUOTE, COPY-F-PERMISSION"}, {method: human}]
+    level: gate
+    evidence: "[документация]"
+    source: "Сливинский, 12.2025 [V:AbqU-GxAYs8 50:59] — «норм» извлечь плюсы и минусы из отзывов, «не норм» — фейковый отзыв; B2 §5; разметка самохвальных отзывов — site H"
+    date: 2026-09-24
+
+  # ============ B. Ответ и структура ============
+  - id: COPY-GEO-08
+    name: "Ответ первым: под заголовком-вопросом первое предложение отвечает"
+    sign: "первая фраза абзаца — ответ (да/нет, число, определение, выбор) без разгона; 1–2 предложения, затем детали"
+    applies: {genres: [geo, article, site-page, landing], slot_types: [faq-a, geo-answer, article-paragraph, article-summary]}
+    how: [{method: judge, judge_question: "Отвечает ли первое предложение на вопрос заголовка без вводных?"}, {method: linter, ref: "geo-evasive-answer, geo-pronoun-lead, ru-ton-announce (C)"}]
+    level: signal
+    engines: {yandex: "ответ Алисы AI начинается с «краткий ответ одним-двумя предложениями» (справка, снято 2026-09-24)", google: "особой формы не требует; featured snippet и ответ ИИ берут фрагмент страницы"}
+    evidence: "[документация] + [консенсус] (перевёрнутая пирамида, A 03 §2.2)"
+    source: "Яндекс «Как формируются ответы Алисы AI»; A 01-foundations/03 (вывод первым); E-GEO (открывающее резюме — в найденной стратегии); higgsfield seo.md GEO п.1 [практика]"
+    date: 2026-09-24
+
+  - id: COPY-GEO-09
+    name: "Абзац самодостаточен: предмет назван, без «как сказано выше» и местоимения в начале"
+    sign: "абзац можно прочитать отдельно — в сниппете, сводке или ответе Алисы — и он понятен"
+    applies: {genres: [geo, article], slot_types: [geo-answer, faq-a, definition, article-summary, article-paragraph]}
+    how: [{method: linter, ref: "geo-pronoun-lead, geo-see-above"}, {method: judge, judge_question: "Понятен ли абзац без предыдущего текста?"}]
+    level: signal
+    evidence: "[практика] + [исследование] (симуляция)"
+    source: "Tian и др. 2026 (фрагментация — причина непроцитированности); Яндекс: одна страница — источник для отдельных параграфов ответа"
+    date: 2026-09-24
+
+  - id: COPY-GEO-10
+    name: "Разделы по смыслу, без нарезки на «чанки» и без второй «ИИ-версии» страницы"
+    sign: "абзацы и разделы — по мыслям для читателя; нет блоков-дублей «коротких ответов для ИИ», нет отдельной страницы или Markdown-версии для моделей"
+    applies: {genres: [geo, article, site-page, landing]}
+    how: [{method: judge, judge_question: "Есть ли на странице блоки, которые повторяют текст страницы короткими кусками без новой информации?"}, {method: human}]
+    level: gate
+    engines: {google: "прямой запрет: «There's no requirement to break your content into tiny pieces»; «Rewriting content just for AI systems» — миф (ai-optimization-guide 2026-07-10); SOTR 01.2026 «we don't want you to do that» [V:i4jDc58ofH4 17:17]", yandex: "особого текста не требует: «принципиально новых требований не возникает» (ЭПОС)"}
+    evidence: "[документация]"
+    source: "Google ai-optimization-guide (2026-07-10); [V:i4jDc58ofH4 17:17]; Tian 2026 (фрагментация мешает синтезу); Яндекс ЭПОС"
+    date: 2026-09-24
+
+  - id: COPY-GEO-11
+    name: "Подзаголовки — вопросы читателя или выводы, не ярлыки"
+    sign: "H2/H3 можно прочитать как запрос или утверждение («Сколько стоит ремонт двушки»), а не «Особенности», «Введение»"
+    applies: {genres: [geo, article, site-page], slot_types: [article-heading, section-title, faq-q]}
+    how: [{method: linter, ref: "geo-heading-label, ru-mkt-label-headings (C)"}, {method: judge, judge_question: "Складываются ли подзаголовки в план ответа на запрос страницы?"}]
+    level: signal
+    evidence: "[документация] + [практика]"
+    source: "Google ai-optimization-guide (headings — «clear structure»); higgsfield seo.md GEO п.6 [практика]; ответ Алисы делится на параграфы по подтемам (справка Яндекса)"
+    date: 2026-09-24
+
+  - id: COPY-GEO-12
+    name: "«Коротко» в начале статьи и абзац-ответ — 40–80 слов, с 2–3 фактами"
+    sign: "article-summary и geo-answer не длиннее 100 слов; внутри — факты с датой, не пересказ оглавления"
+    applies: {genres: [geo, article], slot_types: [article-summary, geo-answer]}
+    how: [{method: linter, ref: geo-summary-long}, {method: claims}]
+    level: signal
+    evidence: "[данные] + [мнение] (порог)"
+    source: "Pew 2025-07-22 (медиана ИИ-сводки Google 67 слов); Яндекс (краткий ответ 1–2 предложения); C-SEO Bench: Markdown-резюме в начале документа помогло только в рекомендациях товаров, не в «вопрос — ответ» — блок «коротко» ради людей, не ради гарантии цитирования"
+    date: 2026-09-24
+
+  - id: COPY-GEO-13
+    name: "Определение термина — «X — это Y, который …»"
+    sign: "первое предложение определения называет термин и родовое понятие; отличие от соседних понятий — вторым"
+    applies: {genres: [geo, article], slot_types: [definition]}
+    how: [{method: linter, ref: geo-definition-form}]
+    level: signal
+    evidence: "[практика]"
+    source: "higgsfield seo.md GEO п.1–2; Tian 2026 (contextual gap — не хватает сущностей и терминов)"
+    date: 2026-09-24
+
+  - id: COPY-GEO-14
+    name: "FAQ: вопросы клиента, ответ 1–3 предложения с фактом, первая фраза — ответ"
+    sign: "вопросы — из voc.yaml, отдела продаж, запросов (Wordstat, Search Console); нет «Почему выбирают нас?»; ответ не уходит от вопроса"
+    applies: {genres: [landing, site-page, article, geo], slot_types: [faq-q, faq-a]}
+    how: [{method: linter, ref: "ru-mkt-faq-template (C), geo-evasive-answer, geo-pronoun-lead"}, {method: claims}, {method: human, ref: "источник вопроса"}]
+    level: signal
+    evidence: "[данные] + [практика]"
+    source: "Pew 2025 (ИИ-сводку получают 60 % вопросов и 53 % запросов из 10+ слов); higgsfield seo.md GEO п.5 [практика]; E-GEO (FAQ — +0,05, в найденной стратегии); E (текст блока FAQ) — 04-copy-by-block; разметка FAQPage — site H"
+    date: 2026-09-24
+
+  - id: COPY-GEO-15
+    name: "Сравнение и выбор — фактами: таблица или развилки «если… → …, потому что…»"
+    sign: "для страниц выбора: условия, при которых вариант подходит и не подходит; строки сравнения — из фактов"
+    applies: {genres: [article, geo, site-page], slot_types: [comparison-row, article-paragraph, geo-answer]}
+    how: [{method: judge, judge_question: "Есть ли условие выбора с фактом («если трава жёсткая → сетевая косилка»), а не одинаковые плюсы у всех вариантов?"}, {method: claims, ref: "сравнение с конкурентами — право H"}]
+    level: signal
+    engines: {yandex: "экспертный контент = рациональный выбор в ситуации читателя через опыт автора [V:XoStBfaV9Gw 24:35]; режим рассуждений Алисы строит таблицы сравнения (блог 2025-05-22)", google: "non-commodity: «unique expert or experienced takes» (2026-07-10)"}
+    evidence: "[документация]"
+    source: "Сливинский 12.2025 [V:AbqU-GxAYs8 46:55–48:57] («пульверизатор» у всех 10 средств; «экстракт опыта»); Сливинский 02.2026 [V:XoStBfaV9Gw 24:35, 1:21:48]; Google ai-optimization-guide"
+    date: 2026-09-24
+
+  - id: COPY-GEO-16
+    name: "Сущности названы одинаково: бренд, продукт, город, адрес, телефон"
+    sign: "одно имя бренда на странице и сайте (без чередования «Отвес», «компания», «мы» в первых фразах); NAP совпадает с карточками на картах"
+    applies: {genres: [geo, site-page, landing, article]}
+    how: [{method: script, ref: "имена из facts.yaml entities[].names; сравнение с карточкой организации"}, {method: human}]
+    level: signal
+    evidence: "[практика]"
+    source: "higgsfield seo.md Entity SEO, Consistent NAP, GEO п.7 [практика]; справка Яндекса «Сниппет» (адресный сниппет — данные Яндекс Бизнеса); Google ai-optimization-guide (Business Profile)"
+    date: 2026-09-24
+
+  - id: COPY-GEO-17
+    name: "GEO-слой — текстом в HTML страницы"
+    sign: "ответы, цены, определения — в исходном HTML, не в картинке, canvas или только после JS"
+    applies: {genres: [geo, landing, site-page, article]}
+    how: [{method: site, ref: "site H: HTML без JS; ai-media 10/01 (текст не в картинке)"}]
+    level: gate
+    evidence: "[документация] + [исследование]"
+    source: "Google ai-features (2025-12-10): «Making sure that important content is available in textual form»; blender 01/02 §6.1 (ИИ-краулеры не исполняют JS — Web Almanac 2025); Tian 2026 (JS-рендеринг — причина провала 10,1 % пар вместе с блокировками); Яндекс: «мало текстового контента» — причина «нет данных» в «Видимости в Алисе AI»"
+    date: 2026-09-24
+
+  # ============ C. Содержание: отличие, опыт, автор ============
+  - id: COPY-GEO-18
+    name: "У статьи и SEO-страницы есть нетиповой элемент (unique_angle)"
+    sign: "в брифе записано, чего нет в топ-5 выдачи: свои данные, опыт, кейс, развилки, позиция — со ссылкой на fact_ids; пусто — не писать"
+    applies: {genres: [article, geo, site-page], page_types: [article-page, seo-landing-page, service-page]}
+    how: [{method: human, ref: "«осмотрись»: 3–5 материалов выдачи по главному запросу до текста"}, {method: judge, judge_question: "Мог ли любой конкурент подписать этот текст без изменений?"}]
+    level: gate
+    engines: {google: "commodity-контент («7 Tips for First-Time Homebuyers») против non-commodity («Why We Waived the Inspection…») — 2026-07-10", yandex: "оригинальность ЭПОС: «уникальный по ценности контент, который трудно или невозможно получить где-то ещё»; «осмотритесь» [V:XoStBfaV9Gw 09:13]"}
+    evidence: "[документация]"
+    source: "Google ai-optimization-guide 2026-07-10; SOTR 12.2025 [V:h1rZdfW5vqM 12:13]; Яндекс ЭПОС; C-SEO Bench и Martinez 2026 (общие приёмы переписывания — ноль или вред; работает релевантность)"
+    date: 2026-09-24
+
+  - id: COPY-GEO-19
+    name: "Опыт из первых рук и автор видны"
+    sign: "подпись реального автора или эксперта с ролью и опытом (из facts.yaml person); где уместно — «как сделано»: сколько проверили, чем мерили"
+    applies: {genres: [article, geo], page_types: [article-page, seo-landing-page]}
+    how: [{method: claims, ref: "факт person с разрешением"}, {method: human}]
+    level: gate
+    engines: {google: "Who, How, Why; bylines «where someone might think, “Who wrote this?”» (helpful content, 2025-12-10); E-E-A-T: Trust главное", yandex: "экспертность ЭПОС: авторы, специализация, сертификаты; генеративная статья без автора — «неизвестный человечеству гений» [V:AbqU-GxAYs8 41:49]"}
+    evidence: "[документация]"
+    source: "Google helpful content (2025-12-10); SQRG 11.09.2025 §3.4; Яндекс ЭПОС; пост Вебмастера 2024-03-22 (медицина — созданное или проверенное экспертами)"
+    date: 2026-09-24
+
+  - id: COPY-GEO-20
+    name: "Нет набивки: ни ключей, ни списков городов, ни страниц под перефразы запроса"
+    sign: "словосочетание запроса — не больше 2 раз в абзаце; нет перечней городов ради поиска; одна страница — один интент"
+    applies: {genres: [article, geo, site-page, landing, meta]}
+    how: [{method: linter, ref: "geo-keyword-stuffing, geo-place-list, meta-title-keyword-repeat, meta-place-list"}, {method: human, ref: "карта интентов — 01-intent-and-keywords.md §5; карта сайта — site G"}]
+    level: gate
+    engines: {google: "keyword stuffing и doorway abuse, scaled content abuse — спам (2026-08-28); отдельные страницы под вариации и fan-out-запросы ради ранжирования — нарушение (2026-07-10)", yandex: "переоптимизация («Баден-Баден», 2017), «Использование SEO-текстов»; при этом «Увеличивайте количество релевантных страниц» (справка «Видимость в Алисе AI») — новая страница только под новый интент"}
+    evidence: "[документация] + [исследование]"
+    source: "Google Spam policies 2026-08-28; Яндекс «Использование SEO-текстов», «Баден-Баден»; Aggarwal 2024 (набивка −8 %, Perplexity −10 %)"
+    date: 2026-09-24
+
+  - id: COPY-GEO-21
+    name: "Текст без рекламного тона и превосходных степеней в GEO-блоках"
+    sign: "нет «лучший», «№ 1», «уникальный» без критерия; нет лозунгов; тон — справочный"
+    applies: {genres: [geo, article, site-page]}
+    how: [{method: linter, ref: "C: MKT, CNT, LEX-02; H: превосходная степень"}, {method: claims, ref: "claims-rules.yaml (H)"}]
+    level: signal
+    evidence: "[исследование] + [стандарт]"
+    source: "E-GEO (arXiv 2511.20867): стиль рекламы −1,82 места, authoritative −1,40 на GPT-5; суперлативы помечаются как сомнительные в 100 %; Aggarwal 2024: «авторитетный тон» без значимого роста; 38-ФЗ ст. 5 — H"
+    date: 2026-09-24
+
+  - id: COPY-GEO-22
+    name: "Регион, валюта и право — российские, если страница для РФ"
+    sign: "город и регион названы; цены в рублях; нормы — российские с редакцией; нет калек зарубежных правил"
+    applies: {genres: [geo, article, site-page]}
+    how: [{method: judge, judge_question: "Совпадают ли регион, валюта и законы в ответе с аудиторией страницы?"}, {method: claims, ref: "право — H"}]
+    level: signal
+    evidence: "[исследование] (симуляция)"
+    source: "Tian и др. 2026 (localization mismatch — «UK laws for US query»); решение заказчика: право по умолчанию РФ (PLAN)"
+    date: 2026-09-24
+
+  - id: COPY-GEO-23
+    name: "Реальные даты публикации и обновления"
+    sign: "видимая дата публикации; «обновлено» — только при содержательной правке (журнал правок); год в title — только при данных этого года"
+    applies: {genres: [article, geo, meta], page_types: [article-page, seo-landing-page]}
+    how: [{method: human, ref: "дифф CMS"}, {method: linter, ref: meta-year-check}]
+    level: gate
+    engines: {google: "«changing the date of pages to make them seem fresh» — сигнал search engine-first (2025-12-10); byline dates: не будущие даты", yandex: "замена «2025» на «2026» 30 декабря — «детский сад» [V:AbqU-GxAYs8 1:05:02]; дата — `article:published_time` или URL"}
+    evidence: "[документация]"
+    source: "Google helpful content и byline dates (2025-12-10); Сливинский 12.2025; справка Яндекса «Отображение даты в сниппете»"
+    date: 2026-09-24
+
+  - id: COPY-GEO-24
+    name: "ИИ-текст опубликован только после сверки фактов, линтера и человека"
+    sign: "в журнале copy deck: claims_check (0 error), copy_lint, подпись редактора; массовая публикация без правки — нет"
+    applies: {genres: [article, geo, site-page, landing]}
+    how: [{method: claims}, {method: linter}, {method: human}]
+    level: gate
+    engines: {google: "генерация многих страниц «without adding value» — scaled content abuse (using-gen-ai-content, 2025-12-10)", yandex: "«массово публиковать тексты без редактуры и фактической проверки» — «плохой путь» [V:AbqU-GxAYs8 1:04:52]; нейросети не негатив, если текст «проверен экспертом» (пост 2025-03-28)"}
+    evidence: "[документация]"
+    source: "Google using-gen-ai-content; Яндекс, блог Вебмастера 2025-03-28; «Малополезный контент» (признаки автогенерации)"
+    date: 2026-09-24
+
+  # ============ D. Мета, сниппет и измерение ============
+  - id: COPY-GEO-25
+    name: "Title и description — по meta-rules.yaml"
+    sign: "0 error правил meta-*; title отвечает на запрос страницы; description — что внутри + факт"
+    applies: {genres: [meta], slot_types: [meta-title, meta-description, og-title, og-description]}
+    how: [{method: linter, ref: "meta-*"}, {method: script, ref: "checks_outside_linter в meta-rules.yaml"}]
+    level: gate
+    evidence: "[документация]"
+    source: "07-seo-geo-copy/meta-rules.yaml; 02-seo-pages-articles-meta.md §4"
+    date: 2026-09-24
+
+  - id: COPY-GEO-26
+    name: "Страница продолжает ответ нейросети, а не повторяет азы (источник трафика ai-answer)"
+    sign: "для трафика ai-answer первый экран — формулировки canonical, ответ на следующий вопрос после сводки (цена, сроки, условия, как заказать)"
+    applies: {genres: [landing, site-page], section_roles: [hero]}
+    how: [{method: judge, judge_question: "Повторяет ли первый экран то, что человек уже прочитал в ответе нейросети?"}, {method: human}]
+    level: signal
+    evidence: "[документация] + [мнение вендора]"
+    source: "B1 02-awareness-hierarchy-objections.md §1.5 (ai-answer → solution-aware); Сливинский 12.2025 [V:AbqU-GxAYs8 55:02] («дальше уже дипдайв»); Google «better state of contextual awareness» [V:h1rZdfW5vqM 26:29] — заявление без данных"
+    date: 2026-09-24
+
+  - id: COPY-GEO-27
+    name: "Видимость в ответах мерить встречаемостью (SoV), а не позицией; до и после правки"
+    sign: "в плане проверки — SoV в «Видимости сайта в Алисе AI» (Яндекс) и показы в Generative AI performance report (Google), 8–12 недель; позиции в ответе Алисы не считать"
+    applies: {genres: [geo]}
+    how: [{method: site, ref: "измерение — site H; живая фаза — отчёт G §5"}]
+    level: signal
+    engines: {yandex: "SoV = доля запросов с упоминанием сайта среди запросов с ответом Алисы AI; позиций нет [V:XoStBfaV9Gw 39:54]", google: "Generative AI performance report — только показы в AI Overviews и AI Mode; измерений по запросам нет (для всех сайтов с 2026-08-31)"}
+    evidence: "[документация]"
+    source: "Яндекс «Видимость сайта в Алисе AI» (снято 2026-09-24); Search Console 16984139; Martinez 2026 §6 (видимость — распределение: повторы, перефразы, даты)"
+    date: 2026-09-24
+
+  - id: COPY-GEO-28
+    name: "Нет обещаний «попадём в ответы нейросетей», «выведем в топ» в текстах самих SEO- и GEO-услуг"
+    sign: "в текстах услуг продвижения нет гарантий позиций, трафика, попадания в ИИ-ответы"
+    applies: {genres: [landing, site-page]}
+    how: [{method: claims, ref: "never_claim, claims-rules.yaml (H)"}]
+    level: gate
+    evidence: "[документация] + [исследование]"
+    source: "Google «Do you need an SEO?» и SOTR 01.2026 [V:i4jDc58ofH4 11:10] («claims are simply claims»); Martinez 2026: «GEO increases visibility by 40%» — отвергнуто как общее утверждение; ни одна техника не показала устойчивого эффекта на органическую обнаруживаемость"
+    date: 2026-09-24
+
+example:                                     # как пункты работают на одном ответе FAQ (ai-self, демо-факты «Отвеса» из B2)
+  slot: {slot_type: faq-a, question: "Сколько стоит ремонт двушки под ключ?"}
+  naive: "Стоимость ремонта рассчитывается индивидуально и зависит от многих факторов. Свяжитесь с нами — наши специалисты всё посчитают."
+  naive_findings: [COPY-GEO-08, COPY-GEO-14]  # linter: geo-evasive-answer; judge: первое предложение не отвечает
+  revised: "Работы под ключ в «Отвесе» стоят от 9 800 ₽ за м² без материалов (прайс 2026 года). Замер и смета — бесплатно в черте города; точную сумму считаем после замера."
+  revised_facts: [price-from-per-m2, estimate-free]
+  note: "производных чисел («двушка 54 м² — от 529 200 ₽») без отдельной записи facts.yaml не писать: claims_check.py их не подтвердит; проверка примера — 99-raw/experiments/G/03-geo-rewrite"

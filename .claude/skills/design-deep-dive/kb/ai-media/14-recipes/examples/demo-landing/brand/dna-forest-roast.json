@@ -1,0 +1,364 @@
+{
+  "dna_version": "0.1",
+  "id": "forest-roast",
+  "brand": "Демо «Лесная обжарка»: обжарочная кофе в зёрнах, D2C, Россия («тёплый, ремесленный, спокойный»); цвета этикетки — 99-raw/phase5/inputs/E/label.json",
+  "checked_at": "2026-09-24",
+  "status": "draft",
+  "approved_by": null,
+  "derived_from_ui": {
+    "tokens": "14-recipes/examples/demo-landing/brand/tokens.json",
+    "knobs": {
+      "accent_hex": "#1F4D3A",
+      "accent_oklch": [
+        0.382,
+        0.061,
+        163.9
+      ],
+      "neutral_temp": "warm",
+      "neutral_C": 0.022,
+      "base_L": 0.954,
+      "radius_px": 14.0,
+      "font_voice": "neutral-sans",
+      "depth_model": "border",
+      "theme": "light"
+    },
+    "rules_applied": [
+      "R1 палитра — нейтрали UI (canvas, neutral 200/400, text.primary) + акцент ≤ 3 % площади фото, ≤ 10 % иллюстрации",
+      "R2 хрома картинок по площади на ступень ниже UI: > 30 % кадра ≤ min(0,02; C нейтрали + 0,005)",
+      "R3 полоса 270–320° запрещена: в бренде нет",
+      "R4 нейтраль warm (C 0.022, H 80°) → b нейтралей кадра +0.010 ± 0.006",
+      "R5 грейд: хрома ×0.85 (акцент C 0.06), баланс белого по нейтрали, зерно 1 %",
+      "R6 свет сверху-слева = направление теней UI (ui 07/02 §2.2)",
+      "R7 иллюстрации: радиус 14 px = radius.md, линия 1,5 = штрих иконок, детали ≥ 4 px",
+      "R8 абстрактный фон — кодом (CSS/SVG/WebGL), не генерацией"
+    ]
+  },
+  "character": {
+    "adjectives": [
+      "тёплый",
+      "ремесленный",
+      "спокойный"
+    ],
+    "boldness": "restrained",
+    "one_bold_move": "одна широкая документальная фотография утреннего стола у окна в hero; остальное — типографика, настоящая банка и керамические 3D-иконки"
+  },
+  "palette": {
+    "image_palette": [
+      {
+        "role": "background",
+        "hex": "#EFE8DC",
+        "name": "cream plaster",
+        "share_max": 0.5,
+        "applies_to": "plaster wall and window light",
+        "source": "derived",
+        "token": "color.bg.canvas"
+      },
+      {
+        "role": "dominant",
+        "hex": "#C9B79C",
+        "name": "pale oak",
+        "share_max": 0.35,
+        "applies_to": "table top and wooden surfaces",
+        "source": "derived"
+      },
+      {
+        "role": "secondary",
+        "hex": "#8C7B66",
+        "name": "warm taupe",
+        "share_max": 0.2,
+        "applies_to": "linen, paper bags, shade on wood",
+        "source": "derived"
+      },
+      {
+        "role": "shadow",
+        "hex": "#2B211A",
+        "name": "dark roast brown",
+        "share_max": 0.12,
+        "applies_to": "coffee, deep shadows",
+        "source": "derived"
+      },
+      {
+        "role": "accent",
+        "hex": "#1F4D3A",
+        "name": "forest green",
+        "share_max": 0.03,
+        "applies_to": "one small object: a tin, a ceramic lid or a linen tag",
+        "strict": true,
+        "source": "token",
+        "token": "color.accent.solid"
+      }
+    ],
+    "illustration_palette": [
+      {
+        "role": "background",
+        "hex": "#FBF8F2",
+        "name": "white",
+        "share_max": 0.6,
+        "applies_to": "background",
+        "source": "token",
+        "token": "color.bg.surface"
+      },
+      {
+        "role": "dominant",
+        "hex": "#E4DCCD",
+        "name": "light warm grey",
+        "share_max": 0.4,
+        "applies_to": "large shapes",
+        "source": "token",
+        "token": "primitive.color.neutral.200"
+      },
+      {
+        "role": "secondary",
+        "hex": "#CFE0D5",
+        "name": "light grey",
+        "share_max": 0.2,
+        "applies_to": "secondary shapes",
+        "source": "token",
+        "token": "primitive.color.accent.200"
+      },
+      {
+        "role": "text",
+        "hex": "#1C1B18",
+        "name": "near black",
+        "share_max": 0.08,
+        "applies_to": "lines and small details",
+        "source": "token",
+        "token": "color.text.primary"
+      },
+      {
+        "role": "accent",
+        "hex": "#1F4D3A",
+        "name": "deep green",
+        "share_max": 0.1,
+        "applies_to": "one key element",
+        "strict": true,
+        "source": "token",
+        "token": "color.accent.solid"
+      }
+    ],
+    "chroma_caps": {
+      "large_area_C_max": 0.02,
+      "mid_area_C_max": 0.06,
+      "small_area_C_max": 0.061
+    },
+    "median_chroma_max": 0.04,
+    "forbidden_hues": [
+      {
+        "from": 270,
+        "to": 320,
+        "reason": "пурпур и неон (IMG-M05); в бренде нет"
+      }
+    ],
+    "neutral_wb": {
+      "target_b": 0.01,
+      "tol": 0.006
+    },
+    "env_color": {
+      "hex": "#F4EFE6",
+      "token": "color.bg.canvas",
+      "note": "фон 3D и выреза = цвет секции страницы"
+    }
+  },
+  "grade": {
+    "wb_ab": [
+      0.002,
+      0.01
+    ],
+    "chroma": 0.85,
+    "black": 0.03,
+    "white": 0.98,
+    "contrast": 0.1,
+    "grain_pct": 1.5,
+    "lut": {
+      "size": 33,
+      "file": null
+    },
+    "applies_to": [
+      "photo",
+      "icon3d",
+      "render3d",
+      "video"
+    ],
+    "note": "выведено из токенов (R5), зерно 1,5 % — позиция M; утвердить глазом на canaries в фазе 5"
+  },
+  "light": {
+    "direction": "right",
+    "detail": "soft morning window light from the right, long gentle shadows across the table",
+    "quality": "soft",
+    "source": "window",
+    "time_of_day": "early morning",
+    "cct_K": 4800
+  },
+  "camera": {
+    "lens_mm": 35,
+    "height": "table",
+    "angle": "eye-level",
+    "depth_of_field": "medium",
+    "capture": "documentary still life, available light, no retouching"
+  },
+  "composition": {
+    "subject_region": "right-third",
+    "text_zone_default": {
+      "side": "left",
+      "share": 0.45,
+      "surface": "evenly lit cream plaster wall"
+    },
+    "negative_space_min": 0.4,
+    "max_elements": 3,
+    "asymmetry": true,
+    "edge_cut_allowed": true,
+    "master_ratio": "16:9",
+    "phone_frame": "separate-master",
+    "note": "Главный объект — в правой трети, может срезаться краем; слева 45 % — ровная штукатурка под HTML-заголовок; телефонный кадр — отдельный мастер 3:4 → кроп 4:5 (у Sunburst в polza нет 4:5), зона текста сверху 35 %."
+  },
+  "subject_matter": {
+    "domain_props": [
+      "ceramic coffee cup",
+      "green coffee tin",
+      "kraft paper bag",
+      "linen napkin",
+      "pale oak table",
+      "coffee beans"
+    ],
+    "motifs": [
+      "morning table by a window",
+      "small-batch roasting"
+    ],
+    "people_policy": "real-only",
+    "product_policy": "real-photo-only"
+  },
+  "illustration": {
+    "medium": "flat-illustration",
+    "line_px": 1.5,
+    "display_px": 160,
+    "radius_px": 14.0,
+    "perspective": "flat-front",
+    "fills": "flat",
+    "shadows": "none",
+    "background": "plate",
+    "accents_per_image": 2,
+    "detail_min_px": 4,
+    "saturation_offset": "на 1–2 шага ниже UI",
+    "dark_theme": "two-files"
+  },
+  "icon3d": {
+    "material": "matte glazed ceramic in warm off-white with one deep forest-green part",
+    "camera": "3/4 view from 30 degrees above, 50mm",
+    "key_light": "soft key from the upper left at 45 degrees, fill 20 percent",
+    "fill_pct": 20,
+    "contact_shadow_alpha_max": 0.15,
+    "margin_pct": 8,
+    "accent_share_max": 0.15
+  },
+  "abstract": {
+    "policy": "code-first"
+  },
+  "canaries": [
+    "object: a ceramic coffee cup on a pale oak table",
+    "interior: a small roastery counter with a scale and kraft paper bags",
+    "nature: a birch forest edge on an early autumn morning",
+    "product-like: a green coffee tin on a folded linen cloth",
+    "abstract: soft leaf shadows on a cream plaster wall"
+  ],
+  "style_blocks": {
+    "illustration": "Flat vector illustration: simple geometric shapes with 14 px rounded corners, flat fills in light warm grey #E4DCCD and warm white #FBF8F2 with deep forest green #1F4D3A as the only accent, uniform 1.5 px lines in near black #1C1B18, smooth flat colour only, one light from the upper left, plain warm white background, generous empty space.",
+    "icon3d": "Single object as a matte glazed ceramic figure in warm off-white with one deep forest-green part; 3/4 view from 30 degrees above, 50mm; soft key light from the upper left, gentle fill; soft contact shadow; plain cream background; clean text-free surfaces.",
+    "photo": "Documentary still-life photograph of everyday objects of a small coffee roastery - glazed off-white ceramics, pale oak, washed linen, kraft paper; soft morning window light from the right with long gentle shadows; warm neutral colour: cream plaster, pale oak and off-white ceramics with one small deep forest-green accent; 35mm lens slightly above table height, medium depth of field; fine natural film grain; unpolished, lived-in details: a few crumbs, a folded napkin, a faint ring on the wood."
+  },
+  "exclusions": {
+    "forbidden_markers": [
+      "IMG-M02",
+      "IMG-M03",
+      "IMG-M05",
+      "IMG-M07",
+      "IMG-M09",
+      "IMG-M10",
+      "IMG-M13",
+      "IMG-M14",
+      "IMG-M21",
+      "IMG-M22"
+    ],
+    "banned_words": [
+      "stunning",
+      "vibrant",
+      "luminous",
+      "radiant",
+      "breathtaking",
+      "gorgeous",
+      "mesmerizing",
+      "cinematic",
+      "epic",
+      "dramatic",
+      "masterpiece",
+      "8k",
+      "hyper-detailed",
+      "hyperrealistic",
+      "award-winning",
+      "golden hour",
+      "hdr"
+    ],
+    "replace_with": [
+      {
+        "what": "people",
+        "kind": "object",
+        "replace_with": "no one in the frame"
+      },
+      {
+        "what": "readable text and logos",
+        "kind": "artifact",
+        "replace_with": "clean unmarked surfaces"
+      },
+      {
+        "what": "steaming latte art close-up",
+        "kind": "style",
+        "replace_with": "plain black coffee seen from slightly above"
+      },
+      {
+        "what": "background blur",
+        "kind": "style",
+        "replace_with": "medium depth of field, the wall stays readable"
+      }
+    ]
+  },
+  "post": {
+    "grain_pct": 1.5,
+    "scrim": {
+      "color": "#F4EFE6",
+      "max_alpha": 0.62,
+      "shape": "gradient",
+      "percentile": 99.9
+    },
+    "focal_required": true,
+    "dark_theme": {
+      "method": "dim",
+      "dim_pct": 12
+    }
+  },
+  "acceptance": {
+    "palette_dE_max": 0.02,
+    "series_hue_spread_max_deg": 10,
+    "series_pal_dE_mean_max": 0.045,
+    "series_pal_dE_break": 0.06,
+    "series_sd_L_max": 0.04,
+    "phash_min": 10,
+    "text_contrast_min": 4.5,
+    "text_zone_percentile": 99.9,
+    "zone_edge_max": 0.06,
+    "centroid_x_min": 0.62,
+    "colorfulness_max_rel": 1.2,
+    "hdr_index_max_delta": 0.1,
+    "markers_max": 1
+  },
+  "provenance": {
+    "created_by": "script",
+    "runs": 0,
+    "notes": "vlm_to_dna.py from-tokens (tokens.json) → ручное заполнение M 24.09.2026: фото-блок, свет справа (как F-04 B), сюжеты, canaries; эталоны бренда — после фазы 5 (F-04, E-10)"
+  },
+  "materials": [
+    "glazed off-white ceramic",
+    "pale oak",
+    "washed linen",
+    "kraft paper"
+  ],
+  "notes": " Иллюстрации: генерация — на ровной тёплой белой подложке #FBF8F2 (у моделей polza альфы нет, «transparent background» в промте рискует нарисованной шахматкой); прозрачность — после векторизации (vtracer --palette) или выреза"
+}

@@ -1,0 +1,583 @@
+/* ------------------------------------------------------------------
+   Слой компонентов для примеров экранов.
+   Правило: ни одного литерала цвета, размера, радиуса, тени и z-index —
+   только семантические переменные из tokens.css (слой 2).
+   Исключения, разрешённые базой: 0, 1px (граница), 100%, auto.
+   ------------------------------------------------------------------ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { color-scheme: light dark; }
+
+body {
+  margin: 0;
+  background: var(--bg-canvas);
+  color: var(--fg-primary);
+  font-family: var(--type-body-family);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
+  font-weight: var(--type-body-weight);
+  -webkit-text-size-adjust: 100%;
+}
+
+::selection { background: var(--selection-bg); color: var(--fg-primary); }
+
+:focus-visible {
+  outline: var(--border-width-focus) solid var(--focus-ring);
+  outline-offset: var(--border-offset-focus);
+}
+
+/* ------------------------------------------------------------------ каркас */
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--size-panel-sidebar) 1fr;
+  grid-template-rows: var(--size-panel-topbar) 1fr;
+  grid-template-areas: "brand topbar" "sidebar main";
+  min-height: 100vh;
+}
+
+.brand {
+  grid-area: brand;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding-inline: var(--space-md);
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--type-body-strong-size);
+  font-weight: var(--type-body-strong-weight);
+}
+
+.topbar {
+  grid-area: topbar;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding-inline: var(--space-inset-page);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.topbar .spacer { flex: 1; }
+
+.sidebar {
+  grid-area: sidebar;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-subtle);
+  padding: var(--space-xs);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+
+.nav-group {
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-2xs);
+  padding-inline: var(--space-xs);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-leading);
+  font-weight: var(--type-caption-strong-weight);
+  letter-spacing: var(--type-caption-strong-tracking);
+  color: var(--fg-tertiary);
+}
+.nav-group:first-child { margin-top: 0; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  height: var(--size-row-sidebar-item);
+  padding-inline: var(--space-xs);
+  border-radius: var(--corner-md);
+  color: var(--fg-secondary);
+  text-decoration: none;
+  font-size: var(--type-button-size);
+  line-height: var(--type-button-leading);
+  font-weight: var(--type-button-weight);
+  transition: background-color var(--motion-hover), color var(--motion-hover);
+}
+.nav-item:hover { background: var(--bg-component); color: var(--fg-primary); }
+.nav-item[aria-current="page"] {
+  background: var(--bg-selected);
+  color: var(--accent-text);
+  font-weight: var(--font-weight-semibold);
+}
+/* selected + hover: роль bg.selected-hover добавлена в схему 22.09.2026 (волна 4); второй признак
+   выбранности — вес и цвет текста, поэтому кольцо больше не нужно */
+.nav-item[aria-current="page"]:hover { background: var(--bg-selected-hover); }
+
+main {
+  grid-area: main;
+  padding: var(--space-inset-page);
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------------ шапка страницы */
+
+.page-header { margin-bottom: var(--space-lg); }
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: var(--size-control-xs);
+  margin-bottom: var(--space-2xs);
+  font-size: var(--type-helper-size);
+  line-height: var(--type-helper-leading);
+  color: var(--fg-tertiary);
+}
+.crumbs a { color: var(--fg-secondary); display: inline-flex; align-items: center; min-height: var(--size-control-xs); transition: color var(--motion-hover); }
+.crumbs a:hover { color: var(--fg-primary); text-decoration: underline; }
+
+.page-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: var(--size-control-md);
+}
+h1 {
+  margin: 0;
+  flex: 1;
+  font-size: var(--type-page-title-size);
+  line-height: var(--type-page-title-leading);
+  font-weight: var(--type-page-title-weight);
+  letter-spacing: var(--type-page-title-tracking);
+}
+h2 {
+  margin: 0 0 var(--space-xs);
+  font-size: var(--type-section-size);
+  line-height: var(--type-section-leading);
+  font-weight: var(--type-section-weight);
+  letter-spacing: var(--type-section-tracking);
+}
+h3 {
+  margin: 0 0 var(--space-2xs);
+  font-size: var(--type-card-title-size);
+  line-height: var(--type-card-title-leading);
+  font-weight: var(--type-card-title-weight);
+}
+.page-desc {
+  margin: var(--space-xs) 0 0;
+  max-width: var(--size-content-form-max);
+  color: var(--fg-secondary);
+}
+
+/* ------------------------------------------------------------------ кнопки */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding-block: 0;                     /* браузерный дефолт 1px вне шкалы */
+  justify-content: center;
+  gap: var(--space-xs);
+  height: var(--size-control-md);
+  padding-inline: var(--space-inset-control-x);
+  border: 1px solid transparent;
+  border-radius: var(--corner-md);
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+  font-family: var(--type-button-family);
+  font-size: var(--type-button-size);
+  line-height: var(--type-button-leading);
+  font-weight: var(--type-button-weight);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--motion-hover), border-color var(--motion-hover), color var(--motion-hover);
+}
+.btn--default { border-color: var(--border-default); }
+.btn--default:hover { background: var(--bg-component); }
+.btn--primary { background: var(--accent-solid); color: var(--fg-on-accent); }
+.btn--primary:hover { background: var(--accent-solid-hover); }
+.btn--ghost { background: transparent; }
+.btn--ghost:hover { background: var(--bg-component); }
+.btn--danger { background: var(--danger-solid); color: var(--danger-on-solid); }
+.btn[disabled] { color: var(--fg-disabled); cursor: default; }
+.btn--icon {
+  width: var(--size-control-md);
+  padding-inline: 0;
+}
+
+/* ------------------------------------------------------------------ поля */
+
+.field { display: flex; flex-direction: column; gap: var(--space-3xs); }
+.field + .field { margin-top: var(--space-stack-field); }
+
+.label {
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-leading);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-tracking);
+  color: var(--fg-secondary);
+}
+.hint, .error {
+  min-height: var(--space-md);
+  font-size: var(--type-helper-size);
+  line-height: var(--type-helper-leading);
+  color: var(--fg-tertiary);
+}
+.error { color: var(--danger-text); }
+
+.input, .select, .textarea {
+  height: var(--size-control-md);
+  padding-block: 0;                     /* иначе браузерный 1px попадает в шкалу отступов */
+  padding-inline: var(--space-inset-control-x);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--corner-md);
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+  font-family: var(--type-body-family);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
+  transition: border-color var(--motion-hover), background-color var(--motion-hover);
+}
+.textarea { height: auto; min-height: var(--space-4xl); padding-block: var(--space-2xs); resize: vertical; }
+.input::placeholder, .textarea::placeholder { color: var(--fg-tertiary); }
+.input:hover, .select:hover, .textarea:hover { background: var(--bg-surface-hover); }
+.input[aria-invalid="true"] { border-color: var(--danger-solid); }
+.input[disabled] { background: var(--bg-component); color: var(--fg-disabled); }
+.select {
+  appearance: none;
+  padding-right: var(--space-xl);
+  background-image: none;
+}
+.select-wrap { position: relative; display: inline-flex; }
+.select-wrap svg {
+  position: absolute;
+  right: var(--space-sm);
+  top: var(--space-xs);
+  pointer-events: none;
+  color: var(--icon-subtle);
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: var(--size-control-xs);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
+}
+.check input {
+  appearance: none;
+  margin: 0;
+  width: var(--size-checkbox);
+  height: var(--size-checkbox);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--corner-sm);
+  background: var(--bg-surface);
+  cursor: pointer;
+  transition: background-color var(--motion-press), border-color var(--motion-press);
+}
+.check input:checked { background: var(--accent-solid); border-color: var(--accent-solid); }
+
+/* ------------------------------------------------------------------ поверхности */
+
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--corner-lg);
+  padding: var(--space-inset-card);
+}
+.card + .card { margin-top: var(--space-md); }
+
+.section + .section { margin-top: var(--space-stack-section); }
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  height: var(--space-3xl);
+  margin-bottom: var(--space-md);
+}
+.toolbar .spacer { flex: 1; }
+
+/* ------------------------------------------------------------------ таблица */
+
+.table-wrap {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--corner-lg);
+}
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  position: sticky;
+  top: var(--size-panel-topbar);
+  z-index: var(--z-raised);
+  height: var(--size-row-table);
+  padding: 0 var(--space-inset-table-cell-x);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+  color: var(--fg-secondary);
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-leading);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-tracking);
+  white-space: nowrap;
+}
+tbody td {
+  height: var(--size-row-table);
+  padding: 0 var(--space-inset-table-cell-x);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--type-body-compact-size);
+  line-height: var(--type-body-compact-leading);
+  white-space: nowrap;
+}
+tbody tr:first-child td { border-top: 0; }
+tbody tr { transition: background-color var(--motion-hover); }
+tbody tr:hover { background: var(--bg-surface-hover); }
+tbody tr[aria-selected="true"] { background: var(--bg-selected); }
+/* selected + hover: роль bg.selected-hover добавлена в схему 22.09.2026 (волна 4); второй признак
+   выбранности — чекбокс в первой колонке */
+tbody tr[aria-selected="true"]:hover { background: var(--bg-selected-hover); }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--type-code-family); font-size: var(--type-code-size); line-height: var(--type-code-leading); }
+.cell-strong { font-weight: var(--font-weight-medium); }
+.col-check { width: var(--space-3xl); }
+.col-actions { width: var(--space-4xl); text-align: right; }
+
+.table-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  height: var(--space-3xl);
+  padding-inline: var(--space-inset-table-cell-x);
+  border-top: 1px solid var(--border-subtle);
+  color: var(--fg-secondary);
+  font-size: var(--type-helper-size);
+  line-height: var(--type-helper-leading);
+  font-variant-numeric: tabular-nums;
+}
+.table-footer .spacer { flex: 1; }
+
+/* ------------------------------------------------------------------ бейджи */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  height: var(--space-lg);
+  padding-inline: var(--space-xs);
+  border-radius: var(--corner-sm);
+  font-size: var(--type-helper-size);
+  line-height: var(--type-helper-leading);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+.badge--success { background: var(--success-bg); color: var(--success-text); }
+.badge--warning { background: var(--warning-bg); color: var(--warning-text); }
+.badge--danger  { background: var(--danger-bg);  color: var(--danger-text); }
+.badge--neutral { background: var(--bg-component); color: var(--fg-secondary); }
+
+/* ------------------------------------------------------------------ дашборд */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--scale-240), 1fr));
+  gap: var(--space-md);
+}
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--scale-360), 1fr));
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+.kpi-label {
+  color: var(--fg-secondary);
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-leading);
+  font-weight: var(--type-label-weight);
+}
+.kpi-value {
+  margin-top: var(--space-2xs);
+  font-size: var(--type-metric-size);
+  line-height: var(--type-metric-leading);
+  font-weight: var(--type-metric-weight);
+  letter-spacing: var(--type-metric-tracking);
+  font-variant-numeric: tabular-nums;
+}
+.kpi-delta {
+  margin-top: var(--space-2xs);
+  font-size: var(--type-helper-size);
+  line-height: var(--type-helper-leading);
+  font-variant-numeric: tabular-nums;
+}
+.kpi-delta--up { color: var(--success-text); }
+.kpi-delta--down { color: var(--danger-text); }
+
+.bars { display: flex; align-items: flex-end; gap: var(--space-xs); height: var(--space-5xl); }
+.bar { flex: 1; background: var(--chart-1); border-radius: var(--corner-xs); }
+.legend { display: flex; flex-wrap: wrap; gap: var(--space-md); margin-top: var(--space-sm); }
+.legend span { display: inline-flex; align-items: center; gap: var(--space-2xs); font-size: var(--type-helper-size); line-height: var(--type-helper-leading); color: var(--fg-secondary); }
+.swatch { width: var(--space-sm); height: var(--space-sm); border-radius: var(--corner-xs); }
+
+/* ------------------------------------------------------------------ пустое состояние */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  min-height: var(--scale-400);
+  padding: var(--space-3xl);
+  text-align: center;
+  background: var(--bg-surface);
+  border: 1px dashed var(--border-default);
+  border-radius: var(--corner-lg);
+}
+.empty p { margin: 0; max-width: var(--scale-400); color: var(--fg-secondary); }
+.empty-art { color: var(--icon-subtle); }
+
+/* ------------------------------------------------------------------ модалка */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: var(--overlay-scrim);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: var(--space-5xl);
+}
+.modal {
+  width: var(--size-modal-form);
+  max-width: 100%;
+  max-height: 85vh;
+  overflow: auto;
+  background: var(--bg-surface-raised);
+  border-radius: var(--corner-lg);
+  box-shadow: var(--elevation-overlay);
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-inset-card);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.modal-head h2 { flex: 1; margin: 0; }
+.modal-body { padding: var(--space-inset-card); }
+/* на приподнятой поверхности третичный текст не набирает 4.5:1 в тёмной теме — берём вторичный */
+.modal-body .hint { color: var(--fg-secondary); }
+.modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-xs);
+  padding: var(--space-inset-card);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.menu {
+  min-width: var(--size-overlay-menu-min);
+  padding: var(--space-2xs);
+  background: var(--bg-surface);
+  border-radius: var(--corner-md);
+  box-shadow: var(--elevation-raised);
+}
+.menu a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  height: var(--size-row-menu-item);
+  padding-inline: var(--space-xs);
+  border-radius: var(--corner-sm);
+  color: var(--fg-primary);
+  text-decoration: none;
+  font-size: var(--type-body-size);
+  transition: background-color var(--motion-hover);
+}
+.menu a:hover { background: var(--bg-component); }
+.menu a.danger { color: var(--danger-text); }
+
+/* ------------------------------------------------------------------ настройки и страница объекта */
+
+.settings { display: grid; grid-template-columns: var(--scale-240) minmax(0, var(--scale-640)); gap: var(--space-lg); }
+.settings-nav { display: flex; flex-direction: column; gap: var(--space-3xs); }
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding-block: var(--space-sm);
+  border-top: 1px solid var(--border-subtle);
+}
+.setting-row:first-of-type { border-top: 0; }
+.setting-row .text { flex: 1; }
+.setting-row .text p { margin: var(--space-3xs) 0 0; color: var(--fg-secondary); font-size: var(--type-helper-size); line-height: var(--type-helper-leading); }
+
+.switch {
+  appearance: none;
+  margin: 0;
+  width: var(--size-switch-width);
+  height: var(--size-switch-height);
+  border: 0;
+  border-radius: var(--corner-full);
+  background: var(--bg-component-active);
+  cursor: pointer;
+  position: relative;
+  transition: background-color var(--motion-press);
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: var(--space-3xs);
+  left: var(--space-3xs);
+  width: var(--space-md);
+  height: var(--space-md);
+  border-radius: var(--corner-full);
+  background: var(--bg-surface);
+  transition: transform var(--motion-press);
+}
+.switch:hover { box-shadow: inset 0 0 0 1px var(--border-strong); }
+.switch:checked { background: var(--accent-solid); }
+.switch:checked:hover { background: var(--accent-solid-hover); box-shadow: none; }
+.switch:checked::after { transform: translateX(var(--space-md)); }
+
+.object { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--space-lg); }
+.props { display: grid; grid-template-columns: var(--scale-96) 1fr; gap: var(--space-xs) var(--space-sm); }
+.props dt { color: var(--fg-secondary); font-size: var(--type-helper-size); line-height: var(--type-helper-leading); }
+.props dd { margin: 0; font-size: var(--type-body-compact-size); line-height: var(--type-body-compact-leading); }
+
+.timeline { display: flex; flex-direction: column; gap: var(--space-sm); }
+.timeline .item { display: flex; gap: var(--space-sm); }
+.avatar {
+  width: var(--size-avatar-lg);
+  height: var(--size-avatar-lg);
+  flex: none;
+  border-radius: var(--corner-full);
+  background: var(--bg-component);
+  color: var(--fg-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--type-helper-size);
+  line-height: var(--type-helper-leading);
+  font-weight: var(--font-weight-medium);
+}
+.timeline time { color: var(--fg-tertiary); font-size: var(--type-caption-size); line-height: var(--type-caption-leading); font-variant-numeric: tabular-nums; }
+
+.tabs { display: flex; gap: var(--space-lg); border-bottom: 1px solid var(--border-subtle); margin-bottom: var(--space-md); }
+.tab {
+  height: var(--size-row-tab);
+  padding-inline: var(--space-xs);
+  margin-inline: calc(var(--space-xs) * -1);
+  line-height: var(--type-button-leading);
+  display: inline-flex;
+  align-items: center;
+  border-bottom: 2px solid transparent;
+  color: var(--fg-secondary);
+  text-decoration: none;
+  font-size: var(--type-button-size);
+  font-weight: var(--type-button-weight);
+  transition: color var(--motion-hover), border-color var(--motion-hover);
+}
+.tab:hover { color: var(--fg-primary); }
+.tab[aria-current="page"] { color: var(--accent-text); border-bottom-color: var(--accent-solid); }
+.tab[aria-current="page"]:hover { color: var(--accent-text); background: var(--bg-component); }
+
+.icon { width: var(--size-icon-md); height: var(--size-icon-md); flex: none; }

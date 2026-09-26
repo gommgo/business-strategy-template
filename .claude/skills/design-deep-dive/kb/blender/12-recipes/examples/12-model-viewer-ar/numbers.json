@@ -1,0 +1,51 @@
+{
+ "ar_lint": {
+  "ok": true,
+  "fails": [],
+  "ignored_in_ar": [
+   "KHR_materials_clearcoat",
+   "KHR_materials_emissive_strength"
+  ],
+  "tris": 1976,
+  "materials": 2,
+  "extensionsUsed": [
+   "KHR_materials_clearcoat",
+   "KHR_materials_emissive_strength"
+  ],
+  "kb": 53.4
+ },
+ "web_glb_lint": {
+  "ok": false,
+  "fails": [
+   "обязательные расширения вне Scene Viewer: ['EXT_meshopt_compression', 'KHR_mesh_quantization']"
+  ],
+  "ignored_in_ar": [
+   "KHR_materials_clearcoat",
+   "KHR_materials_emissive_strength"
+  ],
+  "tris": 1976,
+  "materials": 2,
+  "extensionsUsed": [
+   "EXT_meshopt_compression",
+   "KHR_materials_clearcoat",
+   "KHR_materials_emissive_strength",
+   "KHR_mesh_quantization"
+  ],
+  "kb": 12.3
+ },
+ "usdz": {
+  "upAxis": "Y",
+  "metersPerUnit": 1.0,
+  "size_m": [
+   0.0606,
+   0.0452,
+   0.0223
+  ],
+  "kb": 98.9,
+  "shaders": [
+   "UsdPreviewSurface"
+  ]
+ },
+ "sec_total": 0.2,
+ "blender": "5.2.2 LTS"
+}

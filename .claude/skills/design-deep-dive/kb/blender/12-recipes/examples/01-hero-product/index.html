@@ -1,0 +1,46 @@
+<!doctype html>
+<!-- three r186 — [проверено: 99-raw/experiments/K/01-run-recipes, K/02-hero-page] рецепт 01: эталон hero-lazy (F1) с ассетом рецепта; менялись только HERO_CFG, тексты, пути постера -->
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кейс наушников — рецепт 01 (hero-lazy)</title>
+<meta name="description" content="Эталон hero-блока с 3D: постер из того же GLB, загрузка после LCP, reduced motion, стоп вне экрана.">
+<!-- постер — кандидат LCP: не на весь вьюпорт, высокий приоритет -->
+<link rel="preload" as="image" href="poster.avif" type="image/avif" fetchpriority="high">
+<style>
+  :root { color-scheme: light; --bg: #eceef2; --ink: #16181d; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 18px/1.55 system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  header { padding: 6vh 6vw 2vh; max-width: 60rem; }
+  h1 { font-size: clamp(32px, 5vw, 64px); line-height: 1.05; margin: 0 0 .3em; letter-spacing: -.02em; }
+  .cta { display: inline-block; padding: .7em 1.2em; border-radius: .6em; background: var(--ink); color: #fff; text-decoration: none; }
+  .hero { position: relative; width: min(86vw, 640px); aspect-ratio: 1; margin: 0 auto; }   /* место зарезервировано: CLS 0 */
+  .hero img, .hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .hero canvas { opacity: 0; transition: opacity .4s cubic-bezier(0, 0, .2, 1); }
+  .hero.is-live canvas { opacity: 1; }
+  .hero.is-live img { opacity: 0; transition: opacity .4s .1s; }
+  .hero-pause { position: absolute; right: 8px; bottom: 8px; min-width: 44px; min-height: 44px; padding: 0 .9em;
+    border: 0; border-radius: 22px; background: rgba(22, 24, 29, .78); color: #fff; font: inherit; font-size: 15px; cursor: pointer; }
+  .hero-pause[aria-pressed="true"]::before { content: "▶ "; }
+  .hero-pause[aria-pressed="false"]::before { content: "❚❚ "; }
+  .hero-pause:focus-visible { outline: 3px solid #000; box-shadow: 0 0 0 6px #fff; }
+  @media (prefers-reduced-motion: reduce) { .hero canvas, .hero img { transition: none; } }
+  main { padding: 4vh 6vw 110vh; max-width: 60rem; }
+</style>
+</head><body>
+<header>
+  <h1>Наушники, которые не теряются</h1>
+  <p>Кейс заряжает на 24 часа. Текст, цена и кнопка — в HTML: страница работает и без 3D.</p>
+  <a class="cta" href="#buy">Купить</a>
+</header>
+<div class="hero" id="hero">
+  <picture><source srcset="poster.avif" type="image/avif">
+    <img src="poster.webp" alt="Белый глянцевый кейс для беспроводных наушников с зелёным индикатором" width="1024" height="1024" fetchpriority="high"></picture>
+  <button class="hero-pause" id="hero-pause" type="button" aria-pressed="false" hidden>Вращение</button>
+</div>
+<main>
+  <h2 id="buy">Характеристики</h2>
+  <p>Модель: рецепт 01 (build(P) в Blender 5.2.2), 1 976 треугольников, без текстур, 12 КБ после meshopt.</p>
+</main>
+<script>window.HERO_CFG = { modelPhone: 'case.glb', modelDesktop: 'case.glb' };</script>
+<script type="module" src="dist/hero.js"></script>
+</body></html>

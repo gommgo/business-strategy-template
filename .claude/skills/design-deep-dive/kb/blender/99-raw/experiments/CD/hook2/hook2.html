@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>CD3 · крюк v2: KTX2 и начинка отдельным GLB — замер</title>
+<style>html, body { margin: 0; background: #101215; } canvas { display: block; }</style>
+<script>
+  // длинные задачи с самого начала (TBT-подобная сумма > 50 мс) — до модулей
+  window.__lt = []; try { new PerformanceObserver((l) => l.getEntries().forEach((e) => __lt.push([Math.round(e.startTime), Math.round(e.duration)]))).observe({ type: 'longtask', buffered: true }); } catch (e) {}
+</script></head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+// ?b=c3g|c3k (бандл) &glb=URL &inner=URL &ktx2=1 (предзагрузка транскодера) &mobile=0|1 &w= &h= &dpr= &scan=1 (после начинки — кадр «внутри»)
+const q = new URLSearchParams(location.search);
+const B = { c3g: './b/c3g/three-scene.js', c3k: './b/c3k/three-scene.js' };
+const w = +q.get('w') || 1440, h = +q.get('h') || 900, mobile = q.get('mobile') === '1';
+const c = document.getElementById('c'); c.style.width = w + 'px'; c.style.height = h + 'px';
+const T = {}; const now = () => Math.round(performance.now());
+T.start = now();
+const { createScene } = await import(B[q.get('b') || 'c3g']);
+T.module = now();
+const glb = { url: q.get('glb') };
+if (q.get('inner')) glb.innerUrl = q.get('inner');
+if (q.get('ktx2') === '1') glb.ktx2 = true;
+const s = createScene(c, { dprMax: +q.get('dpr') || 1.5, preserve: true, quality: mobile ? 'low' : 'high', glb });
+const ok = await s.ready; T.ready = now();
+s.resize(w, h, mobile); s.set('story', 0, true); s.renderNow(); T.first_cpu = now();
+const gl = s.renderer.getContext(); const px = new Uint8Array(4); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); T.first_gpu = now();
+performance.mark('hero-first-frame');
+const st0 = s.stats();
+// начинка: ждём отчёт крюка (простой после первого кадра) — не дольше 12 с
+if (glb.innerUrl) { const t1 = performance.now(); while (!s.stats().glbInner && performance.now() - t1 < 12000) await new Promise((r) => setTimeout(r, 50)); T.inner = now(); }
+await new Promise((r) => setTimeout(r, 600));                  // простой: компиляция программ скана (idle) и освобождение воркеров
+// память текстур GLB в GPU (по объектам three: сжатые — сумма мип-уровней, картинки — w·h·4 × 4/3 при мипах)
+const FMT = { 33776: 'BC1', 33777: 'BC1a', 33778: 'BC2', 33779: 'BC3', 36492: 'BC7', 1023: 'RGBA8', 37496: 'ETC2', 36196: 'ETC1', 37808: 'ASTC4x4' };
+function texBytes(t) {
+  if (t.isCompressedTexture) return { w: t.image.width, h: t.image.height, fmt: FMT[t.format] || t.format, levels: t.mipmaps.length, bytes: t.mipmaps.reduce((a, m) => a + m.data.byteLength, 0), compressed: true };
+  const im = t.image || t.source.data; const ww = im.width, hh = im.height;
+  const pot = (x) => (x & (x - 1)) === 0; const mips = t.generateMipmaps && t.minFilter !== 1006 && t.minFilter !== 1003;
+  return { w: ww, h: hh, fmt: 'RGBA8', levels: mips ? Math.floor(Math.log2(Math.max(ww, hh))) + 1 : 1, bytes: Math.round(ww * hh * 4 * (mips ? 4 / 3 : 1)), compressed: false, pot: pot(ww) && pot(hh) };
+}
+const seen = new Map();
+s.__dbg.scene.traverse((o) => { if (!o.isMesh || !o.userData.role) return; (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => {
+  for (const k of ['map', 'aoMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'emissiveMap', 'alphaMap', 'clearcoatMap', 'anisotropyMap']) if (m[k] && !seen.has(m[k].source.uuid)) seen.set(m[k].source.uuid, { name: m[k].name || k, slot: k, ...texBytes(m[k]) }); }); });   // клоны (KHR_texture_transform) делят source — в GPU одна копия
+const tex = [...seen.values()];
+if (q.get('scan') === '1') { s.set('scan', 1.0, true); const t2 = performance.now(); s.renderNow(); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); T.scan_frame_ms = Math.round(performance.now() - t2); }
+const res = performance.getEntriesByType('resource').map((e) => ({ n: e.name.replace(location.origin, ''), tr: e.transferSize, enc: e.encodedBodySize, dec: e.decodedBodySize, st: Math.round(e.startTime), end: Math.round(e.responseEnd) }));
+const lt = window.__lt; const tbt = lt.reduce((a, [, d]) => a + Math.max(0, d - 50), 0);
+const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+window.__res = { ok, T, tex, tex_bytes: tex.reduce((a, t) => a + t.bytes, 0), res, longtasks: lt, tbt, lt_max: lt.reduce((a, [, d]) => Math.max(a, d), 0),
+  stats: s.stats(), first_stats: { calls: st0.calls, tris: st0.tris, programs: st0.programs }, heap: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : null,
+  ext: { s3tc: !!gl.getExtension('WEBGL_compressed_texture_s3tc'), bptc: !!gl.getExtension('EXT_texture_compression_bptc'), etc: !!gl.getExtension('WEBGL_compressed_texture_etc'), astc: !!gl.getExtension('WEBGL_compressed_texture_astc') },
+  gpu: dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : null, mem: s.renderer.info.memory };
+window.__done = true;
+</script>
+</body></html>

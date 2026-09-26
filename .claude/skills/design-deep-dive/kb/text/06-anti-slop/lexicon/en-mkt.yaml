@@ -1,0 +1,156 @@
+# English marketing templates (MKT) and fabricated-precision shapes (CNT). Sources: Hallmark copy.md «Banned opening
+# lines» and microcopy bans (MIT), Gesso anti-slop benefit-speak / fabricated-precision / not-x-but-y (MIT, v0.4.3),
+# impeccable marketing-buzzword (Apache-2.0), taste §9.D, §9.F (MIT), ux 07/06 §4.1, §5.2.
+date: 2026-09-24
+version: 1
+owner: C (волна 1)
+defaults:
+  group: MKT
+  lang: en
+  flags: i
+  count_as_marker: true
+  date: 2026-09-24
+  genres: [landing, site-page, article, meta, geo, email-form]
+rules:
+  - id: en-mkt-banned-openers
+    marker_id: COPY-M-MKT-08
+    level: warning
+    slot_levels: {headline: error, subheadline: error, meta-title: error, meta-description: error, og-title: error, og-description: error, email-subject: error}
+    pattern: '\bbuilt\s+for\s+the\s+modern\b|\bunleash\s+(?:your|the)\b|\bwhere\s+[a-z]+\s+meets\s+[a-z]+|\bempower(?:s|ing)?\s+(?:your|you|teams|businesses|people)\b|\breimagin(?:e|ing)\s+(?:the\s+way|how)\s+you\b|\bsupercharge\s+your\b|\binnovative\s+solutions?\b|\bseamless(?:ly)?\s+integrat\w*|\bin\s+today[''’]s\s+digital\s+landscape\b|\bnext[- ]gen(?:eration)?\b|\bthe\s+future\s+of\s+\w+\s+is\s+(?:here|now)\b|\bwelcome\s+to\s+the\s+(?:future|world)\s+of\b|\bexperience\s+the\s+(?:power|magic|future)\s+of\b|\btake\s+your\s+\w+\s+to\s+the\s+next\s+level\b|\brevolutioni[sz]e\s+(?:the\s+way|how|your)\b|\btransform\s+(?:the\s+way|how)\s+you\b'
+    message: "Banned opening line (Hallmark list and close variants): distribution-default copy with no specificity."
+    replacement: "imitate the kind of specificity — a named place, date, vertical or number; if the brief has nothing, ask one question"
+    examples: {bad: "Built for the modern team. Unleash your potential.", good: "Linear is a purpose-built tool for planning software."}
+    source: "Hallmark skills/hallmark/references/copy.md «Banned opening lines» (MIT): Built for the modern team, Unleash your [X], Where X meets Y, Empower your…, Reimagine the way you…, Supercharge your workflow, Innovative solutions, Seamless integration, In today's digital landscape, Next-generation"
+    evidence: "[практика] чужого автора (Hallmark, MIT)"
+  - id: en-mkt-benefit-speak
+    marker_id: COPY-M-MKT-09
+    level: warning
+    pattern: '\belevat(?:e|es|ed|ing)\b|\bsupercharg(?:e|es|ed|ing)\b|\bstreamlin(?:e|es|ed|ing)\s+(?:your|the|every)\b|\bempower(?:s|ed|ing)?\b|\beffortless(?:ly)?\b|\bseamless(?:ly)?\b|\brevolutioni[sz](?:e|es|ed|ing)\b|\bgame[- ]chang(?:er|ers|ing)\b|\bworld[- ]class\b|\bnext[- ]level\b|\bunleash(?:es|ed|ing)?\b|\bturbocharg(?:e|es|ed|ing)\b|\bunlock(?:s|ed|ing)?\s+(?:the|your|a|new)\b|\bbest[- ]in[- ]class\b|\bindustry[- ]leading\b|\benterprise[- ]grade\b|\bcutting[- ]edge\b|\bmission[- ]critical\b|\bbest\s+of\s+breed\b|\bfuture[- ]proof(?:ed)?\b|\bharness\s+the\s+power\b|\bleverage\s+the\s+power\b|\bdrive\s+(?:engagement|growth|results)\b|\btransform\s+your\s+business\b|\bstate[- ]of[- ]the[- ]art\b'
+    message: "Benefit-speak: verbs and badges that sell nothing specific («supercharge», «seamless», «world-class»)."
+    replacement: "a specific verb + object that can be true: «Search your meeting notes» beats «Unlock your knowledge»"
+    examples: {bad: "Supercharge your workflow and unlock your potential with seamless tools.", good: "Unlock with Face ID in one tap."}
+    source: "Gesso benefit-speak (GATE); impeccable marketing-buzzword (29 phrases); Hallmark microcopy bans; taste §9.D"
+    evidence: "[консенсус] трёх независимых скиллов"
+  - id: en-mkt-universal-benefits
+    marker_id: COPY-M-MKT-05
+    level: warning
+    unless: '\d'
+    pattern: '\bsave\s+(?:you\s+)?time\s+and\s+money\b|\bboost\s+(?:your\s+)?productivity\b|\bgrow\s+your\s+business\b|\ball[- ]in[- ]one\s+(?:platform|solution|tool)\b|\beverything\s+you\s+need\b|\bone[- ]stop[- ]shop\b|\bpeace\s+of\s+mind\b|\bhassle[- ]free\b|\btake\s+(?:it|your\s+\w+)\s+to\s+the\s+next\s+level\b|\breach\s+your\s+(?:full\s+)?potential\b|\bachieve\s+your\s+goals\b|\bworry[- ]free\b'
+    message: "Universal benefit that fits any product («save time and money», «everything you need»)."
+    replacement: "a benefit with a number and a mechanism"
+    examples: {bad: "Save time and money with an all-in-one platform.", good: "Cut invoice processing from 20 to 5 minutes."}
+    source: "Hallmark copy.md; impeccable marketing-buzzword; ux 07/06 §1 («всё, что нужно»)"
+    evidence: "[практика]"
+  - id: en-mkt-weak-cta
+    marker_id: COPY-M-MKT-07
+    level: warning
+    slot_types: [cta-label, cta-secondary-label, email-cta-label]
+    pattern: '^\s*(?:learn\s+more|read\s+more|click\s+here|submit|discover\s+more|find\s+out\s+more|explore|more)\s*[.!]?\s*$'
+    message: "Button with no outcome («Learn more», «Submit», «Click here»)."
+    replacement: "verb + outcome: «Get a quote in 15 minutes», «Book a site visit»"
+    examples: {bad: "Learn more", good: "Get a quote in 15 minutes"}
+    source: "ux 07/06 §4.1; Hallmark copy.md «Buttons»"
+    evidence: "[консенсус]"
+  - id: en-mkt-generic-cta
+    marker_id: COPY-M-MKT-07
+    level: info
+    slot_types: [cta-label, cta-secondary-label, email-cta-label]
+    pattern: '^\s*(?:get\s+started|sign\s+up(?:\s+now)?|contact\s+us|book\s+a\s+demo|request\s+a\s+demo|try\s+(?:it\s+)?(?:now|free)|start\s+now)\s*[.!]?\s*$'
+    message: "Generic action without an outcome («Get started»): legitimate, but weaker than a result."
+    replacement: "name what the person gets: «Start a 14-day trial», «See your first report»"
+    examples: {bad: "Get started", good: "Start a 14-day trial"}
+    source: "Hallmark copy.md («Specific verbs»); CTA norms — agent E (wave 2)"
+    evidence: "[практика]"
+  - id: en-mkt-more-than
+    marker_id: COPY-M-MKT-03
+    level: warning
+    unless: '\d'
+    pattern: '\bmore\s+than\s+(?:just\s+)?(?:a|an)\s+[a-z]+\b|\bso\s+much\s+more\s+than\b'
+    message: "«More than just a…» — a variant of «not just X»."
+    replacement: "say what is included"
+    examples: {bad: "More than just a coffee shop.", good: "30 seats, a laptop zone and beans roasted on Wednesdays."}
+    source: "WP:AISIGNS «Negative parallelisms»; Gesso not-x-but-y-cadence"
+    evidence: "[практика]"
+  - id: en-mkt-headline-that
+    marker_id: COPY-M-MKT-04
+    level: warning
+    slot_types: [headline, subheadline, section-title, card-title, meta-title, og-title, email-subject]
+    pattern: '^(?:the|a|an|your)?\s?[a-z][\w-]*(?:\s[\w-]+){0,4}\s+(?:that|which|who)\s+(?:works|gets|understands|grows|scales|thinks|helps|puts|makes|lets|actually|finally|just)\b'
+    message: "Template headline «The X that actually works»."
+    replacement: "name the outcome or category with a fact"
+    examples: {bad: "The CRM that actually works for you", good: "CRM for coffee shops: payroll in 10 minutes"}
+    source: "Hallmark copy.md (distribution-default openers); ui 11/01 via UI audit §6"
+    evidence: "[практика]"
+  - id: en-mkt-superlatives
+    marker_id: COPY-M-MKT-10
+    level: warning
+    requires_no_fact: true
+    count_as_marker: false
+    pattern: '\bthe\s+best\b|#\s?1\b|\bnumber\s+one\b|\bworld[''’]s\s+(?:first|leading|best|largest)\b|\b(?:industry|market)\s+leader\b|\bunbeatable\b|\bleading\s+provider\b|\bguaranteed\s+results\b|\b100%\s+(?:satisfaction|guaranteed)\b'
+    message: "Superlative or «#1» without substantiation: legal risk (FTC, UCPD; for RU 38-FZ art. 5 — agent H)."
+    replacement: "criterion and source from facts.yaml, or delete"
+    examples: {bad: "The best CRM and the market leader.", good: "Rated 4.8 on G2 (September 2026, 312 reviews)."}
+    source: "PLAN.md risk 6; WP:AISIGNS (newer models avoid «the best»; superlatives are a human trait in encyclopedic text)"
+    evidence: "[стандарт] for law — H; as slop marker [спорно]"
+  - id: en-mkt-false-urgency
+    marker_id: COPY-M-MKT-12
+    level: warning
+    requires_no_fact: true
+    unless: '\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,2}\b|\b\d{1,2}/\d{1,2}\b|\buntil\s+\d'
+    pattern: '\bhurry\b|\bdon[''’]t\s+miss\s+(?:out|this)\b|\blimited\s+time(?:\s+only)?\b|\bact\s+now\b|\bonly\s+\d+\s+left\b|\bwhile\s+(?:supplies|stocks)\s+last\b|\blast\s+chance\b|\boffer\s+ends\s+soon\b'
+    message: "Urgency in words without a real deadline or data."
+    replacement: "a real date or number from facts.yaml, or delete"
+    examples: {bad: "Hurry! Limited time only.", good: "30% off until September 30."}
+    source: "ux 06/04 §8.1 (false urgency — canon); taste §9.F («Reservation 412 of 800» counters)"
+    evidence: "[консенсус]"
+  - id: en-mkt-trusted-round
+    marker_id: COPY-M-CNT-03
+    group: CNT
+    level: warning
+    requires_no_fact: true
+    pattern: '\btrusted\s+by\s+(?:thousands|millions|leading|the\s+world[''’]s|\d[\d,]*\+)|\bloved\s+by\s+\d|\bjoin\s+\d[\d,]*\+|\b99\.9+%|\b\d+x\s+(?:faster|more|better|cheaper)\b'
+    message: "Fabricated-precision shape («Trusted by thousands», «99.9%», «10x faster») with no fact reference."
+    replacement: "exact figure with source and date from facts.yaml, or [PLACEHOLDER]"
+    examples: {bad: "Trusted by thousands of teams. 10x faster onboarding.", good: "Used by 214 clinics (fact: clients-2026-09)."}
+    source: "Gesso fabricated-precision (FLAG); ux 07/06 §5.2; taste §4.9 («Fake-precise numbers are flagged»)"
+    evidence: "[практика]; fact check — claims_check.py (B2)"
+  - id: en-mkt-feeling-promise
+    marker_id: COPY-M-MKT-13
+    level: warning
+    pattern: '\bexperience\s+the\s+(?:power|magic|difference|future)\s+of\b|\bfeel\s+the\s+difference\b|\byou[''’]ll\s+love\b|\bfall\s+in\s+love\s+with\b|\bdelight\s+(?:your|every)\b|\bmagical\s+(?:experience|moments)\b'
+    message: "Promise of a feeling without naming a feature («Experience the power of…»)."
+    replacement: "name the property the feeling comes from"
+    examples: {bad: "Experience the power of AI — you'll love it.", good: "Drafts a reply to each ticket in 3 seconds."}
+    source: "Hallmark copy.md («Experience the power of ___ is empty»)"
+    evidence: "[практика]"
+  - id: en-mkt-label-headings
+    marker_id: COPY-M-MKT-11
+    level: info
+    genres: [landing]
+    slot_types: [section-title]
+    pattern: '^\s*(?:our\s+(?:services|features|benefits|team|clients|values|story|mission)|why\s+(?:choose\s+)?us\??|features|benefits|about\s+us|testimonials|what\s+our\s+(?:clients|customers)\s+say|faq|frequently\s+asked\s+questions)\s*$'
+    message: "Label heading on a landing section: says where you are, not what you claim."
+    replacement: "a claim heading; labels are fine in site navigation"
+    examples: {bad: "Why Choose Us?", good: "Every job signed off with a 40-point checklist"}
+    source: "PLAN.md (inverted outline test for landings); taste §9.F (plain functional labels acceptable for quotes/blog)"
+    evidence: "[практика]"
+  - id: en-mkt-self-praise
+    marker_id: COPY-M-MKT-01
+    level: warning
+    unless: '\d'
+    pattern: '\bteam\s+of\s+(?:experienced\s+|dedicated\s+|passionate\s+|highly\s+skilled\s+)?(?:professionals|experts|specialists)\b|\bdedicated\s+to\s+(?:excellence|providing)\b|\bcommitted\s+to\s+(?:excellence|quality|providing)\b|\bcustomer[- ]centric\b|\btailored\s+solutions\b|\bpassion\s+for\s+(?:excellence|quality)\b|\bhigh[- ]quality\s+(?:service|services|products)\b|\byour\s+trusted\s+partner\b|\btrusted\s+partner\b|\bwe\s+pride\s+ourselves\b'
+    message: "Self-praise every competitor also writes («team of experienced professionals», «committed to excellence»)."
+    replacement: "the fact that sets you apart, from facts.yaml"
+    examples: {bad: "A team of experienced professionals committed to excellence.", good: "Nine engineers, each with 5+ years in dental IT."}
+    source: "humanizer-ru eval 10 (agency «About us»); WP:AISIGNS (press-release tone)"
+    evidence: "[практика]"
+  - id: en-mkt-welcome
+    marker_id: COPY-M-MKT-14
+    level: warning
+    genres: [landing, site-page, article, meta, geo]
+    pattern: '^\s*welcome\s+to\b'
+    message: "«Welcome to…» as the first line."
+    replacement: "open with the offer or a fact; in a welcome email it is fine"
+    examples: {bad: "Welcome to our website!", good: "Dental clinic on Pine St., painless treatment since 2009"}
+    source: "Hallmark banned openers (welcome variants); ux 07/06 §3.2"
+    evidence: "[практика]"

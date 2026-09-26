@@ -1,0 +1,66 @@
+{
+ "spec_version": "0.2",
+ "checked_at": "2026-09-23",
+ "brief_language": "ru",
+ "id": "t-edit",
+ "task": "IMG-EDIT",
+ "role": {
+  "section": "hero",
+  "slot": "hero-bg",
+  "purpose": "правка"
+ },
+ "subject": {
+  "summary": "a reading nook with an armchair by a window"
+ },
+ "composition": {
+  "shot": "medium-wide"
+ },
+ "palette": [
+  {
+   "role": "accent",
+   "hex": "#1F5E3B",
+   "name": "deep green",
+   "share": 0.1
+  }
+ ],
+ "text": {
+  "mode": "none"
+ },
+ "output": {
+  "primary_ratio": "16:9",
+  "resolution": "1K"
+ },
+ "references": [
+  {
+   "id": "src",
+   "src": "source.png",
+   "role": "edit_source"
+  }
+ ],
+ "edit": {
+  "operation": "recolor",
+  "source": "src",
+  "changes": [
+   {
+    "target": "armchair upholstery",
+    "to": "deep green velvet",
+    "value": "#1F5E3B",
+    "where": "in the right third"
+   },
+   {
+    "target": "throw pillow",
+    "to": "a darker pillow"
+   }
+  ],
+  "keep": [
+   "camera angle",
+   "window light",
+   "floor shadows"
+  ],
+  "visible_after": "the same room with a deep green armchair",
+  "mask": {
+   "src": "mask-white-change.png",
+   "polarity": "white=change"
+  }
+ }
+}

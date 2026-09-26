@@ -1,0 +1,184 @@
+/* marketing-tokens.css · creative-research 04-visual-language · D · 2026-09-24 · Chromium 153 / WebKit 26.6 (Playwright)
+   Компиляция marketing-tokens.json (DTCG 2025.10) в CSS-переменные. Fluid 360 → 1440 px; у текста max ≤ 2,5 × min (WCAG 1.4.4).
+   [проверено: 99-raw/experiments/D/01-clamp-display (строки, зум), D/03-font-swap-cls (метрический фолбэк)]
+   Бренд (гарнитуры, цвета) — умолчания; переопределяет art-direction.tokens_extension. Движение — E (волна 2). */
+
+:root {
+  /* гарнитуры: display — из cyrillic-display-fonts.yaml; метрический фолбэк обязателен (см. ниже) */
+  --font-display: "Onest", "Onest fallback", Arial, sans-serif;
+  --font-text: "Golos Text", "Golos Text fallback", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* display-роли (размер выбирается по длине H1 и колонке: 01-display-typography.md §2) */
+  --type-display-poster: clamp(4rem, 2rem + 8.8889vw, 10rem);          /* 64 → 160: 1–2 слова ≤ 12 зн. */
+  --type-display-xl:     clamp(3rem, 1.5rem + 6.6667vw, 7.5rem);       /* 48 → 120: H1 ≤ 20 зн. */
+  --type-display-l:      clamp(2.5rem, 1.3333rem + 5.1852vw, 6rem);    /* 40 → 96: H1 21–38 зн., text-only */
+  --type-display-m:      clamp(2.25rem, 1.6667rem + 2.5926vw, 4rem);   /* 36 → 64: split ≤ 36 зн.; text-only 39–56 */
+  --type-display-s:      clamp(1.875rem, 1.3333rem + 2.4074vw, 3.5rem); /* 30 → 56: H2 секций */
+  --type-display-quote:  clamp(1.625rem, 1.25rem + 1.6667vw, 2.75rem); /* 26 → 44: выдержка из цитаты */
+  --type-lead-hero:      clamp(1.125rem, 1.0417rem + 0.3704vw, 1.375rem); /* 18 → 22 */
+  --type-eyebrow: 0.9375rem;        /* 15 px, обычный регистр (RU по умолчанию) */
+  --type-eyebrow-caps: 0.8125rem;   /* 13 px, капс, трекинг +0.08em */
+  --type-cta-hero: 1.125rem;        /* 18 px */
+
+  /* интерлиньяж display: убывает с кеглем (40 px → 1.15; 72 → 1.05; 120 → 1.0); капс кириллицы — не ниже lh_floor_caps гарнитуры */
+  --lh-display: calc(0.925em + 0.5625rem);
+  --lh-display-caps: 1.12;
+  --lh-lead: 1.45;
+
+  /* трекинг display (em): не туже tracking_touch + 0.005 гарнитуры (тест «ухо», D/02) */
+  --tr-display-xl: -0.015em;
+  --tr-display-l: -0.015em;
+  --tr-display-m: -0.01em;
+  --tr-display-s: -0.005em;
+  --tr-caps: 0.02em;
+  --tr-eyebrow-caps: 0.08em;
+
+  /* ритм секций («этажи») */
+  --space-page-x:     clamp(1rem, 0.3333rem + 2.963vw, 3rem);       /* 16 → 48 */
+  --space-section-s:  clamp(3rem, 2.6667rem + 1.4815vw, 4rem);      /* 48 → 64 */
+  --space-section-m:  clamp(4rem, 3rem + 4.4444vw, 7rem);           /* 64 → 112 — по умолчанию */
+  --space-section-l:  clamp(5rem, 3.3333rem + 7.4074vw, 10rem);     /* 80 → 160 — пауза, пик, смена фона */
+  --space-stack-display: clamp(1rem, 0.8333rem + 0.7407vw, 1.5rem); /* 16 → 24 — от display до лида */
+
+  /* размеры */
+  --size-container: 80rem;         /* 1280 */
+  --size-hero-text-max: 65rem;     /* 1040 */
+  --size-hero-min-offer: min(85svh, max(60svh, 38rem));  /* политика offer-cta */
+  --size-hero-min-poster: 100svh;                         /* политика poster (L2) */
+  --size-cta-hero-h: clamp(3.25rem, 3.0833rem + 0.7407vw, 3.75rem); /* 52 → 60 */
+  --size-measure-lead: 34em;
+
+  /* радиусы маркетинга — одно семейство на страницу */
+  --radius-none: 0;
+  --radius-media: 16px;
+  --radius-card-marketing: 24px;
+  --radius-cta-hero: 9999px;
+
+  /* поверхности (умолчания; палитра — из art-direction) */
+  --color-surface-base: #fafafa;
+  --color-surface-tint: #eceff3;
+  --color-surface-inverse: #0f1217;
+  --color-text-on-inverse: #f3f2ee;
+  --color-scrim-dark: rgb(10 12 16 / .62);
+  --color-scrim-light: rgb(243 239 231 / .46);
+  --surface-glass-light: rgb(255 255 255 / .72);
+  --surface-glass-dark: rgb(16 16 20 / .72);
+  --surface-glass-filter: blur(16px) saturate(180%);
+  --surface-grain-opacity: .06;
+  --shadow-cta-glow: 0 8px 24px -4px rgb(43 59 255 / .35);
+}
+
+/* Метрический фолбэк (пример для Onest 700; size-adjust = k_ru шрифта / k_ru Arial Bold = 0.548 / 0.546).
+   Порядок local(): полное имя и PostScript жирного → Liberation (Linux) → имя семейства (WebKit Linux). [проверено: D/03] */
+@font-face {
+  font-family: "Onest fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT"), local("Liberation Sans Bold"), local("LiberationSans-Bold"), local("Arial"), local("Liberation Sans");
+  font-weight: 700;
+  size-adjust: 100.37%;
+  ascent-override: 96.64%;
+  descent-override: 30.39%;
+  line-gap-override: 0%;
+}
+
+/* Роли */
+.display-xl, .display-l, .display-m, .display-s, .display-poster {
+  font-family: var(--font-display); font-weight: 700; line-height: var(--lh-display);
+  text-wrap: balance; hyphens: manual; margin: 0 0 var(--space-stack-display);
+}
+.display-poster { font-size: var(--type-display-poster); letter-spacing: -0.01em; line-height: 0.96; }
+.display-xl { font-size: var(--type-display-xl); letter-spacing: var(--tr-display-xl); }
+.display-l  { font-size: var(--type-display-l);  letter-spacing: var(--tr-display-l); }
+.display-m  { font-size: var(--type-display-m);  letter-spacing: var(--tr-display-m); }
+.display-s  { font-size: var(--type-display-s);  letter-spacing: var(--tr-display-s); }
+.display-caps { text-transform: uppercase; line-height: var(--lh-display-caps); letter-spacing: var(--tr-caps); }
+.display-quote { font-family: var(--font-display); font-size: var(--type-display-quote); font-weight: 500; line-height: 1.2; text-wrap: balance; }
+.lead-hero { font-family: var(--font-text); font-size: var(--type-lead-hero); line-height: var(--lh-lead); max-width: var(--size-measure-lead); text-wrap: pretty; }
+.eyebrow { font: 600 var(--type-eyebrow)/1.3 var(--font-text); letter-spacing: 0.02em; }
+.eyebrow-caps { font: 600 var(--type-eyebrow-caps)/1.3 var(--font-text); letter-spacing: var(--tr-eyebrow-caps); text-transform: uppercase; }
+/* длинные слова на телефоне: переносы только в display и только при lang="ru" на <html> (Chromium 112+, Safari) */
+@media (max-width: 40rem) { .display-xl, .display-l, .display-m { hyphens: auto; } }
+
+.cta-hero {
+  display: inline-flex; align-items: center; justify-content: center; min-height: var(--size-cta-hero-h);
+  padding-inline: calc(var(--size-cta-hero-h) * .55); border-radius: var(--radius-cta-hero);
+  font: 600 var(--type-cta-hero)/1.2 var(--font-text); white-space: nowrap;
+}
+@media (max-width: 40rem) { .cta-hero { width: 100%; } }
+
+.section   { padding-block: var(--space-section-m); padding-inline: var(--space-page-x); }
+.section-s { padding-block: var(--space-section-s); }
+.section-l { padding-block: var(--space-section-l); }
+.section-inverse { background: var(--color-surface-inverse); color: var(--color-text-on-inverse); }
+.container { max-width: var(--size-container); margin-inline: auto; }
+html, body { overflow-x: clip; }  /* полный вылет без горизонтальной прокрутки; clip сохраняет sticky (Hallmark) */
+
+.hero-offer  { min-height: var(--size-hero-min-offer); }
+.hero-poster { min-height: var(--size-hero-min-poster); }
+
+.glass {
+  background: var(--surface-glass-light); backdrop-filter: var(--surface-glass-filter);
+  border: 1px solid rgb(255 255 255 / .35);
+}
+@supports not (backdrop-filter: blur(1px)) { .glass { background: rgb(255 255 255 / .92); } }
+@media (prefers-reduced-transparency: reduce) { .glass { background: #fff; backdrop-filter: none; } }
+
+.grain { position: relative; isolation: isolate; }
+.grain::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  opacity: var(--surface-grain-opacity); mix-blend-mode: soft-light; background: url("noise.svg");
+}
+.seam-to-next::after { content: ""; position: absolute; inset: auto 0 0 0; height: 120px;
+  background: linear-gradient(0deg, var(--color-surface-base) 0, rgb(0 0 0 / 0) 120px); pointer-events: none; }
+
+@media (forced-colors: active) {
+  /* градиенты и фоновые картинки исчезают: текст держится на системных цветах */
+  .section-inverse, .glass { background: Canvas; color: CanvasText; border-color: CanvasText; }
+}
+
+/* ── motion.marketing · E (волна 2) · 2026-09-24 · Chromium 153 / WebKit 26 ─────────────────────────────────────────────
+   Движение подачи: сцены, появления, петли, прокрутка. Отклик контролов — токены ui-research 08-motion.
+   Правила — 05-motion/01 §4, §7; LCP-заголовок без анимации или только transform [проверено: 99-raw/experiments/E/01-lcp-reveal].
+   Reduce: пространственное → 0 / 1, стаггер → 0, сцены → мгновенно; переключатель сайта [data-motion] побеждает ОС в обе стороны. */
+:root {
+  --mm-dur-feedback: 120ms;  --mm-dur-hover: 200ms;   --mm-dur-reveal: 560ms;  --mm-dur-split-line: 800ms;
+  --mm-dur-hero-scene: 900ms; --mm-dur-state: 320ms;  --mm-dur-page: 400ms;    --mm-dur-counter: 1200ms;
+  --mm-dur-cta-pulse: 500ms; --mm-dur-crossfade-reduce: 180ms; --mm-breathe-period: 12s;
+  --mm-stagger-text: 60ms;   --mm-stagger-group: 60ms;
+  --mm-ease-out-expo: cubic-bezier(.16, 1, .3, 1);   /* входы, появления, сцены */
+  --mm-ease-out-strong: cubic-bezier(.23, 1, .32, 1); /* отклик */
+  --mm-ease-in-out: cubic-bezier(.65, 0, .35, 1);    /* перемещение, переходы страниц */
+  --mm-ease-in: cubic-bezier(.7, 0, .84, 0);          /* уход, ≈ 75 % длительности входа */
+  --mm-ease-breathe: cubic-bezier(.37, 0, .63, 1);    /* «дыхание», период ≥ 10 с */
+  --mm-shift-reveal: 16px;   --mm-shift-hero: 24px;   --mm-lift-hover: 2px;    --mm-magnet-max: 8px;
+  --mm-scale-press: .97;     --mm-scale-reveal-in: .96; --mm-scale-cta-pulse: 1.04;
+  --mm-marquee-speed: 40;    /* px/с; период дорожки = ширина / скорость — пишет скрипт в --mm-marquee-period */
+  --mm-scroll-step: 120vh;   --mm-parallax-bg: 24vh;  /* смещение фона на 100vh прокрутки (≤ 40 % разницы скоростей) */
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mm-shift-reveal: 0px; --mm-shift-hero: 0px; --mm-lift-hover: 0px; --mm-magnet-max: 0px;
+    --mm-scale-press: 1; --mm-scale-reveal-in: 1; --mm-scale-cta-pulse: 1;
+    --mm-stagger-text: 0ms; --mm-stagger-group: 0ms; --mm-parallax-bg: 0vh;
+    --mm-dur-reveal: 0ms; --mm-dur-split-line: 0ms; --mm-dur-hero-scene: 0ms; --mm-dur-page: 0ms;
+    --mm-dur-state: var(--mm-dur-crossfade-reduce); --mm-dur-counter: 0ms; --mm-dur-cta-pulse: 0ms;
+  }
+  html { scroll-behavior: auto; }
+}
+:root[data-motion="reduced"] {       /* переключатель «меньше движения» (L2, CRV-AL-12) — те же значения */
+  --mm-shift-reveal: 0px; --mm-shift-hero: 0px; --mm-lift-hover: 0px; --mm-magnet-max: 0px;
+  --mm-scale-press: 1; --mm-scale-reveal-in: 1; --mm-scale-cta-pulse: 1;
+  --mm-stagger-text: 0ms; --mm-stagger-group: 0ms; --mm-parallax-bg: 0vh;
+  --mm-dur-reveal: 0ms; --mm-dur-split-line: 0ms; --mm-dur-hero-scene: 0ms; --mm-dur-page: 0ms;
+  --mm-dur-state: var(--mm-dur-crossfade-reduce); --mm-dur-counter: 0ms; --mm-dur-cta-pulse: 0ms;
+}
+:root[data-motion="full"] {          /* явный выбор «полное движение» побеждает системный reduce (специфичность выше) */
+  --mm-shift-reveal: 16px; --mm-shift-hero: 24px; --mm-lift-hover: 2px; --mm-magnet-max: 8px;
+  --mm-scale-press: .97; --mm-scale-reveal-in: .96; --mm-scale-cta-pulse: 1.04;
+  --mm-stagger-text: 60ms; --mm-stagger-group: 60ms; --mm-parallax-bg: 24vh;
+  --mm-dur-reveal: 560ms; --mm-dur-split-line: 800ms; --mm-dur-hero-scene: 900ms; --mm-dur-page: 400ms;
+  --mm-dur-state: 320ms; --mm-dur-counter: 1200ms; --mm-dur-cta-pulse: 500ms;
+}
+/* петли (бегущая строка, живой фон, видео, Lottie) стоят в reduce и по кнопке паузы — одна кнопка на все (WCAG 2.2.2) */
+:root[data-motion="reduced"] [data-loop], :root[data-motion="paused"] [data-loop] { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { :root:not([data-motion="full"]) [data-loop] { animation: none; } }

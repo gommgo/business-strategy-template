@@ -1,0 +1,35 @@
+<!doctype html>
+<!-- 02b · Вариант без JS: <video autoplay> + <source media> по prefers-reduced-motion и ширине. Проверено в Chromium 153
+     (99-raw/experiments/J/04-video-page): при reduce не выбран ни один источник → 0 байт видео, виден poster. Ограничения —
+     10-web-integration/02-video-delivery.md §2.3 (media вычисляется один раз; poster — один URL без запаса формата). -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Видео-hero без JS: source media</title>
+<link rel="icon" href="assets/svg/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .hero__media > video { opacity: 1; }                          /* здесь видео видно сразу: подмену делает браузер */
+  @media (prefers-reduced-motion: reduce) { .hero__media > video { display: block; } }
+  .hero--light .hero__lead { color: #1f242c; opacity: 1; }
+</style>
+</head>
+<body>
+<section class="hero hero--light" style="height: 86vh" aria-labelledby="h1">
+  <div class="hero__media">
+    <video autoplay muted loop playsinline aria-hidden="true" poster="assets/video/dawn-1080p-poster.avif">
+      <source media="(prefers-reduced-motion: no-preference) and (max-width: 699px)" src="assets/video/dawn-4x5-720.av1.mp4" type='video/mp4; codecs="av01.0.04M.10"'>
+      <source media="(prefers-reduced-motion: no-preference) and (max-width: 699px)" src="assets/video/dawn-4x5-720.h264.mp4" type='video/mp4; codecs="avc1.64001f"'>
+      <source media="(prefers-reduced-motion: no-preference)" src="assets/video/dawn-1080p.av1.mp4" type='video/mp4; codecs="av01.0.08M.10"'>
+      <source media="(prefers-reduced-motion: no-preference)" src="assets/video/dawn-1080p.h264.mp4" type='video/mp4; codecs="avc1.640032"'>
+    </video>
+  </div>
+  <div class="hero__copy">
+    <h1 id="h1">Утро у воды</h1>
+    <p class="hero__lead">Проверка: какие источники браузер выбирает по media и что грузит при «уменьшить движение».</p>
+  </div>
+</section>
+<section class="section" style="min-height: 120vh"><p>Кнопка паузы в этом варианте всё равно нужна (петля 6 с, WCAG 2.2.2) — без JS её не сделать.</p></section>
+</body>
+</html>

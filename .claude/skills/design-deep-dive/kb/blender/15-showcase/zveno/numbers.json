@@ -1,0 +1,1066 @@
+{
+ "b-blender": {
+  "track": "Z",
+  "phase": 1,
+  "updated": "2026-09-25 20:13",
+  "agent_time": {
+   "start": "2026-09-25 18:29",
+   "end": "2026-09-25 20:13"
+  },
+  "machine_time_s": {
+   "bake": {
+    "runs": 2,
+    "sec": 15
+   },
+   "dbg": {
+    "runs": 1,
+    "sec": 2
+   },
+   "gltfdiff": {
+    "runs": 4,
+    "sec": 88
+   },
+   "hero": {
+    "runs": 10,
+    "sec": 830
+   },
+   "light": {
+    "runs": 5,
+    "sec": 113
+   },
+   "model": {
+    "runs": 14,
+    "sec": 77
+   },
+   "probe": {
+    "runs": 1,
+    "sec": 1
+   },
+   "qa": {
+    "runs": 3,
+    "sec": 112
+   },
+   "webview": {
+    "runs": 2,
+    "sec": 8
+   },
+   "xray": {
+    "runs": 1,
+    "sec": 28
+   },
+   "xray2": {
+    "runs": 1,
+    "sec": 29
+   }
+  },
+  "machine_total_s": 1303,
+  "queue_wait_s": 2038,
+  "model": {
+   "render": {
+    "objects": 466,
+    "unique_mesh_tris": 644157,
+    "build_s": "1,6–4,2"
+   },
+   "note": "метры scene.js (×≈2,7 к паспорту страницы 900 мм)"
+  },
+  "light_study": {
+   "S1.png": {
+    "shell_L": {
+     "p50": 79.0,
+     "p90": 96.6,
+     "p95": 98.0,
+     "p99": 100.0
+    },
+    "hi": 3.23,
+    "bg_dE": 1.88
+   },
+   "S2.png": {
+    "shell_L": {
+     "p50": 57.7,
+     "p90": 97.6,
+     "p95": 98.5,
+     "p99": 99.6
+    },
+    "hi": 4.46,
+    "bg_dE": 0.8
+   },
+   "S3.png": {
+    "shell_L": {
+     "p50": 75.1,
+     "p90": 96.5,
+     "p95": 99.0,
+     "p99": 100.0
+    },
+    "hi": 4.6,
+    "bg_dE": 6.42
+   },
+   "S4.png": {
+    "shell_L": {
+     "p50": 86.1,
+     "p90": 91.3,
+     "p95": 92.1,
+     "p99": 93.6
+    },
+    "hi": 0.91,
+    "bg_dE": 84.09
+   }
+  },
+  "hero": {
+   "H1_S1.png": {
+    "shell_L": {
+     "p50": 82.0,
+     "p90": 97.2,
+     "p95": 98.5,
+     "p99": 100.0
+    },
+    "hi_obj_pct": 4.19,
+    "clip_obj_pct": 1.02,
+    "obj_minus_bg_L": 44.3,
+    "bg_vs_page_dE": 1.88,
+    "edge_bottom_dE": 2.57,
+    "noise_flat_shell_e3": 1.94,
+    "noise_bg_e3": 1.79,
+    "weight_center": [
+     0.568,
+     0.539
+    ],
+    "weight_in_text": 0.226,
+    "obj_area_pct": 8.3
+   },
+   "H2_S1H.png": {
+    "shell_L": {
+     "p50": 82.1,
+     "p90": 97.2,
+     "p95": 98.4,
+     "p99": 100.0
+    },
+    "hi_obj_pct": 4.26,
+    "clip_obj_pct": 1.01,
+    "obj_minus_bg_L": 38.9,
+    "bg_vs_page_dE": 5.76,
+    "edge_bottom_dE": 2.44,
+    "noise_flat_shell_e3": 1.94,
+    "noise_bg_e3": 1.99,
+    "weight_center": [
+     0.564,
+     0.564
+    ],
+    "weight_in_text": 0.211,
+    "obj_area_pct": 8.3
+   },
+   "H3_S1.png": {
+    "shell_L": {
+     "p50": 82.3,
+     "p90": 97.3,
+     "p95": 98.9,
+     "p99": 100.0
+    },
+    "hi_obj_pct": 4.11,
+    "clip_obj_pct": 1.33,
+    "obj_minus_bg_L": 42.4,
+    "bg_vs_page_dE": 1.73,
+    "edge_bottom_dE": 2.28,
+    "noise_flat_shell_e3": 1.87,
+    "noise_bg_e3": 1.78,
+    "weight_center": [
+     0.609,
+     0.519
+    ],
+    "weight_in_text": 0.207,
+    "obj_area_pct": 10.0
+   },
+   "H1b_S1.png": {
+    "shell_L": {
+     "p50": 81.3,
+     "p90": 97.1,
+     "p95": 98.4,
+     "p99": 100.0
+    },
+    "hi_obj_pct": 3.94,
+    "clip_obj_pct": 1.02,
+    "obj_minus_bg_L": 44.5,
+    "bg_vs_page_dE": 1.75,
+    "edge_bottom_dE": 2.51,
+    "noise_flat_shell_e3": 1.92,
+    "noise_bg_e3": 1.75,
+    "weight_center": [
+     0.57,
+     0.538
+    ],
+    "weight_in_text": 0.222,
+    "obj_area_pct": 8.3
+   },
+   "H2b_S1H.png": {
+    "shell_L": {
+     "p50": 82.0,
+     "p90": 97.1,
+     "p95": 98.3,
+     "p99": 100.0
+    },
+    "hi_obj_pct": 3.99,
+    "clip_obj_pct": 1.0,
+    "obj_minus_bg_L": 38.7,
+    "bg_vs_page_dE": 5.76,
+    "edge_bottom_dE": 2.68,
+    "noise_flat_shell_e3": 1.94,
+    "noise_bg_e3": 2.09,
+    "weight_center": [
+     0.557,
+     0.569
+    ],
+    "weight_in_text": 0.234,
+    "obj_area_pct": 8.3
+   },
+   "H3b_S1.png": {
+    "shell_L": {
+     "p50": 81.7,
+     "p90": 97.2,
+     "p95": 98.8,
+     "p99": 100.0
+    },
+    "hi_obj_pct": 3.91,
+    "clip_obj_pct": 1.32,
+    "obj_minus_bg_L": 42.1,
+    "bg_vs_page_dE": 1.73,
+    "edge_bottom_dE": 2.07,
+    "noise_flat_shell_e3": 1.8,
+    "noise_bg_e3": 1.72,
+    "weight_center": [
+     0.611,
+     0.518
+    ],
+    "weight_in_text": 0.203,
+    "obj_area_pct": 10.0
+   },
+   "H1c_S1.png": {
+    "shell_L": {
+     "p50": 81.3,
+     "p75": 92.9,
+     "p90": 97.1,
+     "p95": 98.4,
+     "p99": 100.0
+    },
+    "hi_obj_pct": 3.94,
+    "clip_obj_pct": 1.02,
+    "obj_minus_bg_L": 44.5,
+    "bg_vs_page_dE": 1.75,
+    "edge_bottom_dE": 2.51,
+    "noise_flat_shell_e3": 1.9,
+    "noise_bg_e3": 1.75,
+    "weight_center": [
+     0.57,
+     0.538
+    ],
+    "weight_in_text": 0.222,
+    "obj_area_pct": 8.3
+   },
+   "H4_S1H.png": {
+    "shell_L": {
+     "p50": 82.1,
+     "p75": 91.9,
+     "p90": 97.2,
+     "p95": 98.8,
+     "p99": 100.0
+    },
+    "hi_obj_pct": 3.95,
+    "clip_obj_pct": 1.31,
+    "obj_minus_bg_L": 36.3,
+    "bg_vs_page_dE": 6.15,
+    "edge_bottom_dE": 2.52,
+    "noise_flat_shell_e3": 1.88,
+    "noise_bg_e3": 2.01,
+    "weight_center": [
+     0.6,
+     0.547
+    ],
+    "weight_in_text": 0.213,
+    "obj_area_pct": 10.0
+   },
+   "H4m_S1H.png": {
+    "shell_L": {
+     "p50": 82.3,
+     "p75": 92.0,
+     "p90": 97.2,
+     "p95": 98.8,
+     "p99": 100.0
+    },
+    "hi_obj_pct": 3.95,
+    "clip_obj_pct": 1.31,
+    "obj_minus_bg_L": 36.3,
+    "bg_vs_page_dE": 6.15,
+    "edge_bottom_dE": 2.52,
+    "noise_flat_shell_e3": 1.89,
+    "noise_bg_e3": 2.01,
+    "weight_center": [
+     0.6,
+     0.547
+    ],
+    "weight_in_text": 0.213,
+    "obj_area_pct": 10.0
+   }
+  },
+  "web_j2": {
+   "web": {
+    "bake": {
+     "build_s": 0.08,
+     "tris": 25026,
+     "materials": [
+      "Z_shell_web",
+      "Z_cap_web_axisX",
+      "Z_steel_web",
+      "Z_decal_j2_etch_p_web",
+      "Z_ring_web",
+      "Z_led_web"
+     ],
+     "bake_ao_s": 5.02,
+     "denoise_s": 0.62,
+     "glb_raw_kb": 1322.5,
+     "total_s": 7.51
+    },
+    "glb_kb": 248.5,
+    "diff_mean": {
+     "iou": 0.999,
+     "de2000_mean": 3.067,
+     "de2000_p95": 8.853,
+     "ssim_L": 0.872,
+     "mean_abs_rgb_255": 10.107
+    },
+    "draw_calls": [
+     6,
+     6,
+     6
+    ]
+   },
+   "web_lean": {
+    "bake": {
+     "build_s": 0.06,
+     "tris": 12930,
+     "materials": [
+      "Z_shell_web",
+      "Z_cap_web_axisX",
+      "Z_steel_web",
+      "Z_decal_j2_etch_p_web",
+      "Z_ring_web",
+      "Z_led_web"
+     ],
+     "bake_ao_s": 3.67,
+     "denoise_s": 0.61,
+     "glb_raw_kb": 903.6,
+     "total_s": 6.41
+    },
+    "glb_kb": 174.7,
+    "diff_mean": {
+     "iou": 0.999,
+     "de2000_mean": 2.85,
+     "de2000_p95": 7.53,
+     "ssim_L": 0.895,
+     "mean_abs_rgb_255": 9.543
+    },
+    "draw_calls": [
+     6,
+     6,
+     6
+    ]
+   }
+  },
+  "frames": {
+   "hero": "judge/b-blender__hero.png",
+   "xray": "judge/b-blender__xray.png"
+  },
+  "phase2": {
+   "tracks": "Z2 (25.09 20:17–21:36) → Z3 (26.09 00:05–05:22)",
+   "updated": "2026-09-26 05:22",
+   "agent_time_h": {
+    "Z2": 1.3,
+    "Z3": 5.3
+   },
+   "engine": "Cycles CPU (20 потоков) + OIDN; секвенции 40 спп --fast (телефон 28), кадры судьи 128 спп 1600×1000; EEVEE отклонён (out/engine)",
+   "sets": {
+    "story-d": "90 кадров 1280×800 (0 = постер, 1–17 кран, 18–89 сцена)",
+    "scan-d": "60 кадров 1280×800",
+    "story-m": "60 кадров 720×1560 (0 = постер)",
+    "scan-m": "60 кадров 720×1560"
+   },
+   "frames": {
+    "story-d": {
+     "frames": 65,
+     "sec": 647.5,
+     "vmhwm_mb": 1822,
+     "samples": 40,
+     "sec_per_frame": 10.0
+    },
+    "scan-m": {
+     "frames": 60,
+     "sec": 649.5,
+     "vmhwm_mb": 1921,
+     "samples": 28,
+     "sec_per_frame": 10.8
+    },
+    "scan-d": {
+     "frames": 60,
+     "sec": 614.5,
+     "vmhwm_mb": 1840,
+     "samples": 40,
+     "sec_per_frame": 10.2
+    },
+    "scan-d_cut": {
+     "frames": 60,
+     "sec": 664.8,
+     "vmhwm_mb": 1857,
+     "samples": 40,
+     "sec_per_frame": 11.1
+    },
+    "story-m": {
+     "frames": 59,
+     "sec": 586.9,
+     "vmhwm_mb": 1905,
+     "samples": 28,
+     "sec_per_frame": 9.9
+    },
+    "judge": {
+     "frames": 12,
+     "sec": 523.0,
+     "vmhwm_mb": 2203,
+     "samples": 128,
+     "sec_per_frame": 43.6
+    }
+   },
+   "weights": {
+    "seq_kb": {
+     "story-d": 941.8,
+     "scan-d": 704.4,
+     "story-m": 905.4,
+     "scan-m": 911.2
+    },
+    "img_kb": {
+     "hero-d.avif": 21.0,
+     "hero-d.webp": 29.7,
+     "hero-m.avif": 20.0,
+     "hero-m.webp": 27.1,
+     "st-exploded.webp": 10.7,
+     "st-first-move.webp": 17.8,
+     "st-inside.webp": 16.5,
+     "st-locking.webp": 10.2,
+     "st-scan.webp": 15.9
+    },
+    "session_3d_desktop_kb": 1667.2,
+    "session_3d_phone_kb": 1836.6,
+    "budget_kb": {
+     "desktop": 8192,
+     "phone": 3072
+    }
+   },
+   "posters_kb": {
+    "hero-d.avif": 21.0,
+    "hero-d.webp": 29.7,
+    "hero-m.avif": 20.0,
+    "hero-m.webp": 27.1
+   },
+   "judge_metrics": {
+    "hero": {
+     "shell_p50_p75_p90": [
+      80.8,
+      90.5,
+      97.1
+     ],
+     "clip_obj_pct": 1.31,
+     "obj_minus_bg_L": 31.8,
+     "bg_vs_page_dE": 4.16,
+     "edge_bottom_dE": 2.1,
+     "noise_flat_shell_e3": 1.84,
+     "noise_bg_e3": 1.68
+    },
+    "hero-v2cam": {
+     "shell_p50_p75_p90": [
+      80.9,
+      91.6,
+      96.8
+     ],
+     "clip_obj_pct": 1.11,
+     "obj_minus_bg_L": 37.9,
+     "bg_vs_page_dE": 3.13,
+     "edge_bottom_dE": 2.44,
+     "noise_flat_shell_e3": 1.88,
+     "noise_bg_e3": 1.7
+    },
+    "exploded": {
+     "shell_p50_p75_p90": [
+      86.6,
+      95.7,
+      96.9
+     ],
+     "clip_obj_pct": 1.43,
+     "obj_minus_bg_L": 43.2,
+     "bg_vs_page_dE": 7.44,
+     "edge_bottom_dE": 2.16,
+     "noise_flat_shell_e3": 1.84,
+     "noise_bg_e3": 1.75
+    },
+    "locking": {
+     "shell_p50_p75_p90": [
+      87.1,
+      96.1,
+      97.2
+     ],
+     "clip_obj_pct": 1.83,
+     "obj_minus_bg_L": 52.7,
+     "bg_vs_page_dE": 7.43,
+     "edge_bottom_dE": 2.22,
+     "noise_flat_shell_e3": 2.07,
+     "noise_bg_e3": 1.73
+    },
+    "first-move": {
+     "shell_p50_p75_p90": [
+      83.8,
+      94.0,
+      97.2
+     ],
+     "clip_obj_pct": 0.54,
+     "obj_minus_bg_L": 38.2,
+     "bg_vs_page_dE": 3.88,
+     "edge_bottom_dE": 2.6,
+     "noise_flat_shell_e3": 1.88,
+     "noise_bg_e3": 1.71
+    }
+   },
+   "halo_ring_L_p50_p90_peak": {
+    "H4m_phase1_volume": [
+     37.0,
+     48.8,
+     50.0
+    ],
+    "k3_r0.55": [
+     28.4,
+     31.5,
+     31.9
+    ],
+    "k5_r0.5": [
+     35.7,
+     39.9,
+     40.3
+    ],
+    "k6.5_r0.45": [
+     39.1,
+     44.4,
+     45.1
+    ],
+    "k8_r0.42": [
+     42.1,
+     48.5,
+     49.2
+    ],
+    "chosen": "k 6,5 / r 0,42"
+   },
+   "scan_frame_s": {
+    "before_hide_above_plane": [
+     16.8,
+     17.4
+    ],
+    "after": [
+     13.5,
+     13.9
+    ]
+   },
+   "page_check": {
+    "desk": {
+     "seam_poster_vs_frame0": {
+      "mean": 0.12,
+      "p99": 1.0,
+      "gt24_pct": 0.0
+     },
+     "canvas": {
+      "w": 1440,
+      "h": 900,
+      "cssW": 1440,
+      "cssH": 900,
+      "dpr": 1,
+      "ratio": 1.0
+     },
+     "draws_scroll": 138,
+     "draws_idle_2s": 0,
+     "seq_state": {
+      "story": {
+       "blobs": 90,
+       "bmps": 4,
+       "cur": 89,
+       "win": 12
+      },
+      "scan": {
+       "blobs": 60,
+       "bmps": 4,
+       "cur": 59,
+       "win": 12
+      }
+     },
+     "seq_requests": 152,
+     "seq_sets": [
+      "scan-d",
+      "story-d"
+     ],
+     "console": [
+      "error: Failed to load resource: net::ERR_FAILED",
+      "warning: Z timing {\"firstFrame\":213,\"set\":\"d\",\"engine\":\"canvas2d-seq\"}"
+     ]
+    },
+    "mob": {
+     "seam_poster_vs_frame0": {
+      "mean": 0.54,
+      "p99": 9.0,
+      "gt24_pct": 0.21
+     },
+     "canvas": {
+      "w": 585,
+      "h": 1266,
+      "cssW": 390,
+      "cssH": 844,
+      "dpr": 3,
+      "ratio": 1.5
+     },
+     "draws_scroll": 100,
+     "draws_idle_2s": 0,
+     "seq_state": {
+      "story": {
+       "blobs": 60,
+       "bmps": 3,
+       "cur": 59,
+       "win": 10
+      },
+      "scan": {
+       "blobs": 60,
+       "bmps": 6,
+       "cur": 56,
+       "win": 10
+      }
+     },
+     "seq_requests": 121,
+     "seq_sets": [
+      "scan-m",
+      "story-m"
+     ],
+     "console": [
+      "error: Failed to load resource: net::ERR_FAILED",
+      "warning: Z timing {\"firstFrame\":218,\"set\":\"m\",\"engine\":\"canvas2d-seq\"}"
+     ]
+    },
+    "reduce": {
+     "seq_requests": 0,
+     "stations_visible": 5,
+     "html_class": "js",
+     "stage_opacity": "0"
+    }
+   },
+   "gates": {
+    "desk": {
+     "fail": 0,
+     "rows": [
+      "OK   LCP-элемент не canvas H1 не CANVAS",
+      "OK   LCP, мс 56 1000",
+      "OK   CLS 0 0.1",
+      "OK   ошибки консоли 0 0",
+      "OK   TBT, мс 0 150",
+      "OK   передано, КБ 568.7 7168",
+      "OK   3D-ассеты, КБ 0 1536",
+      "OK   вызовов в кадре 0 60",
+      "OK   DPR canvas 1.0 2.0"
+     ]
+    },
+    "mob": {
+     "fail": 0,
+     "rows": [
+      "OK   LCP-элемент не canvas H1 не CANVAS",
+      "OK   LCP, мс 660 2500",
+      "OK   CLS 0 0.1",
+      "OK   ошибки консоли 0 0",
+      "OK   TBT, мс 28 300",
+      "OK   передано, КБ 695.4 3072",
+      "OK   3D-ассеты, КБ 0 820",
+      "OK   вызовов в кадре 0 30",
+      "OK   DPR canvas 1.5 1.5"
+     ]
+    },
+    "rm": {
+     "fail": 0,
+     "rows": [
+      "OK   LCP-элемент не canvas H1 не CANVAS",
+      "OK   LCP, мс 44 1000",
+      "OK   CLS 0 0.1",
+      "OK   ошибки консоли 0 0",
+      "OK   reduce: вызовов в покое 0 0",
+      "OK   reduce: движение в покое, % 0.0 0.05"
+     ]
+    },
+    "load": [
+     "load_before 0.97 0.69 3.42",
+     "load_after_desk 0.75 0.66 3.37",
+     "load_after_mob 0.69 0.65 3.30",
+     "load_after_rm 0.74 0.66 3.28",
+     "start 05:15:59 load 0.74 0.66 3.28",
+     "motion 05:19:25 код 0 load 0.68 0.69 2.75"
+    ]
+   },
+   "motion_check_L2": {
+    "target": "/home/mm/Документы/app-design/blender-research/15-showcase/zveno/b-blender/index.html",
+    "level": "L2",
+    "fail_B": 0,
+    "fail_S": 0,
+    "fail_D": 0,
+    "na": 2,
+    "spec_fail": 0,
+    "out": "/home/mm/Документы/app-design/blender-research/99-raw/experiments/Z/out/motion_b"
+   },
+   "marketing_audit": {
+    "compare": {
+     "consumer_serious_fail": 20,
+     "removed_by_profile": 20,
+     "kept": 0,
+     "marketing_new_serious": 0
+    },
+    "marketing_fail": 65,
+    "severities": [
+     "полировка"
+    ],
+    "ids": [
+     "A1",
+     "A2",
+     "A3",
+     "A4",
+     "A5",
+     "A6",
+     "B2",
+     "B5",
+     "B7",
+     "C2",
+     "C3",
+     "C4",
+     "H1",
+     "H2",
+     "H3",
+     "H6",
+     "H7",
+     "I5",
+     "I7",
+     "L2",
+     "MKT-T2",
+     "MKT-T4"
+    ],
+    "note": "все FAIL — «полировка» общего style.css A (шкала отступов/кеглей)"
+   }
+  }
+ },
+ "c-hybrid": {
+  "tracks": "Z2 (ассет, 25.09) + Z3 (крюк v2, касательные, 26.09) + CD2/CD3 (крюк _shared/code3d)",
+  "updated": "2026-09-26 05:22",
+  "page": "копия a-code (main.js CD3 01:36, вид p3) + строка glb {url, lowUrl, innerUrl, innerLowUrl}; сборка build.sh --glb (крюк v2)",
+  "glb_kb": {
+   "zveno-main.glb": 1255.5,
+   "zveno-inner.glb": 641.0,
+   "zveno-low-main.glb": 569.1,
+   "zveno-low-inner.glb": 283.5
+  },
+  "glb_full_kb": {
+   "zveno.glb (без касательных)": 1272.8,
+   "zveno-low.glb": 704.6,
+   "zveno.glb с касательными": 1620.2
+  },
+  "tris": {
+   "desktop": 87903,
+   "desktop_main": 63831,
+   "inner": 24072,
+   "phone": 47883,
+   "phone_main": 36439,
+   "phone_inner": 11444
+  },
+  "draw_calls_glb": {
+   "desktop": 66,
+   "phone": 57
+  },
+  "materials": {
+   "desktop": 23,
+   "phone": 22
+  },
+  "ao_atlas": {
+   "desktop": "2048² (24 с запекания)",
+   "phone": "1024² (5 с)"
+  },
+  "tangents": {
+   "main_kb_with": 1255.5,
+   "main_kb_without": 1008.8,
+   "main_kb_br_with": 759,
+   "main_kb_br_without_cd3": 679,
+   "why": "без TANGENT анизотропия крышек в three — «веер» 48 граней; optimize нужен --prune-attributes false"
+  },
+  "hook_v2": {
+   "innerUrl": "взят: −119 КБ br первого экрана десктопа, −62 телефона, первый кадр 309 против 323 мс (замер CD3)",
+   "ktx2": "не взят: сеть +301 КБ br (+38 %), первый кадр +25 мс; выигрыш только память GPU текстур 7,5 против 28,8 МБ"
+  },
+  "checks": {
+   "validator": "0 ошибок / 0 предупреждений (все файлы)",
+   "glb_lint": "0 предупреждений",
+   "three_inspect": "0 ошибок консоли, 66 вызовов, 87 903 треуг.",
+   "gltf_diff": {
+    "iou": 0.986,
+    "de2000_mean": 8.323,
+    "de2000_p95": 28.067,
+    "ssim_L": 0.624,
+    "mean_abs_rgb_255": 24.4
+   },
+   "qa_scene": "review: hidden_inside 8 (начинка, задумано), nonmanifold 1, big_textures, many_materials, no_camera"
+  },
+  "stand": {
+   "hero_calls": 122,
+   "hero_tris": 137290,
+   "scan_calls": 61,
+   "scan_tris": 73655
+  },
+  "gates": {
+   "desk": {
+    "fail": 0,
+    "rows": [
+     "OK   LCP-элемент не canvas H1 не CANVAS",
+     "OK   LCP, мс 56 1000",
+     "OK   CLS 0 0.1",
+     "OK   ошибки консоли 0 0",
+     "OK   TBT, мс 56 150",
+     "OK   передано, КБ 1746.4 7168",
+     "OK   3D-ассеты, КБ 1255.7 1536",
+     "OK   вызовов в кадре 0 60",
+     "OK   DPR canvas 1.0 2.0"
+    ]
+   },
+   "mob": {
+    "fail": 0,
+    "rows": [
+     "OK   LCP-элемент не canvas H1 не CANVAS",
+     "OK   LCP, мс 660 2500",
+     "OK   CLS 0 0.1",
+     "OK   ошибки консоли 0 0",
+     "OK   TBT, мс 146 300",
+     "OK   передано, КБ 961.7 3072",
+     "OK   3D-ассеты, КБ 575.1 820",
+     "OK   вызовов в кадре 0 30",
+     "OK   DPR canvas 1.25 1.5"
+    ]
+   },
+   "rm": {
+    "fail": 0,
+    "rows": [
+     "OK   LCP-элемент не canvas H1 не CANVAS",
+     "OK   LCP, мс 60 1000",
+     "OK   CLS 0 0.1",
+     "OK   ошибки консоли 0 0",
+     "OK   reduce: вызовов в покое 0 0",
+     "OK   reduce: движение в покое, % 0.0 0.05"
+    ]
+   },
+   "load": [
+    "load_before 19.26 19.12 13.94",
+    "load_after_desk 16.45 18.53 13.80",
+    "load_after_mob 11.48 17.18 13.48",
+    "load_after_rm 10.33 16.75 13.38",
+    "start 03:52:14 load 10.33 16.75 13.38",
+    "motion 03:55:52 код 0 load 1.38 8.90 10.92"
+   ]
+  },
+  "motion_check_L2": {
+   "target": "/home/mm/Документы/app-design/blender-research/15-showcase/zveno/c-hybrid/index.html",
+   "level": "L2",
+   "fail_B": 0,
+   "fail_S": 0,
+   "fail_D": 0,
+   "na": 2,
+   "spec_fail": 0,
+   "out": "/home/mm/Документы/app-design/blender-research/99-raw/experiments/Z/out/motion_c"
+  },
+  "marketing_audit": {
+   "compare": {
+    "consumer_serious_fail": 20,
+    "removed_by_profile": 20,
+    "kept": 0,
+    "marketing_new_serious": 0
+   },
+   "marketing_fail": 65,
+   "severities": [
+    "полировка"
+   ],
+   "ids": [
+    "A1",
+    "A2",
+    "A3",
+    "A4",
+    "A5",
+    "A6",
+    "B2",
+    "B5",
+    "B7",
+    "C2",
+    "C3",
+    "C4",
+    "H1",
+    "H2",
+    "H3",
+    "H6",
+    "H7",
+    "I5",
+    "I7",
+    "L2",
+    "MKT-T2",
+    "MKT-T4"
+   ],
+   "note": "все FAIL — «полировка» общего style.css A (шкала отступов/кеглей)"
+  }
+ },
+ "z_machine_phase2": {
+  "Z2": {
+   "runs": {
+    "Z2-dbg": {
+     "runs": 3,
+     "sec": 57
+    },
+    "Z2-engine": {
+     "runs": 1,
+     "sec": 301
+    },
+    "Z2-memprobe": {
+     "runs": 5,
+     "sec": 116
+    },
+    "Z2-model": {
+     "runs": 1,
+     "sec": 5
+    },
+    "Z2-webdry": {
+     "runs": 7,
+     "sec": 13
+    },
+    "Z2-it2": {
+     "runs": 1,
+     "sec": 58
+    },
+    "Z2-cexport": {
+     "runs": 2,
+     "sec": 76
+    },
+    "Z2-cprev": {
+     "runs": 1,
+     "sec": 13
+    },
+    "Z2-memscan": {
+     "runs": 2,
+     "sec": 7
+    }
+   },
+   "machine_total_s": 646,
+   "queue_wait_s": 1022
+  },
+  "Z3": {
+   "runs": {
+    "Z3-it3": {
+     "runs": 1,
+     "sec": 70
+    },
+    "Z3-dbg": {
+     "runs": 2,
+     "sec": 3
+    },
+    "Z3-cinspect": {
+     "runs": 2,
+     "sec": 6
+    },
+    "Z3-cview": {
+     "runs": 1,
+     "sec": 7
+    },
+    "Z3-cqa": {
+     "runs": 1,
+     "sec": 6
+    },
+    "Z3-cdiff-bl": {
+     "runs": 1,
+     "sec": 25
+    },
+    "Z3-cdiff": {
+     "runs": 1,
+     "sec": 25
+    },
+    "Z3-cjudge": {
+     "runs": 3,
+     "sec": 80
+    },
+    "Z3-cposters": {
+     "runs": 5,
+     "sec": 89
+    },
+    "Z3-shots": {
+     "runs": 5,
+     "sec": 181
+    },
+    "Z3-rec-c": {
+     "runs": 3,
+     "sec": 224
+    },
+    "Z3-it4": {
+     "runs": 1,
+     "sec": 42
+    },
+    "Z3-seq-judge_story": {
+     "runs": 1,
+     "sec": 224
+    },
+    "Z3-seq-judge_scan": {
+     "runs": 3,
+     "sec": 302
+    },
+    "Z3-seq-seq_story_d": {
+     "runs": 3,
+     "sec": 911
+    },
+    "Z3-seq-seq_scan_d": {
+     "runs": 4,
+     "sec": 1284
+    },
+    "Z3-gates-c": {
+     "runs": 2,
+     "sec": 326
+    },
+    "Z3-cexport-tan": {
+     "runs": 1,
+     "sec": 24
+    },
+    "Z3-ctan": {
+     "runs": 2,
+     "sec": 23
+    },
+    "Z3-seq-seq_story_m": {
+     "runs": 2,
+     "sec": 589
+    },
+    "Z3-bdesk-all": {
+     "runs": 1,
+     "sec": 38
+    },
+    "Z3-it5": {
+     "runs": 1,
+     "sec": 85
+    },
+    "Z3-gates-all-c2": {
+     "runs": 1,
+     "sec": 269
+    },
+    "Z3-seq-seq_scan_m": {
+     "runs": 2,
+     "sec": 651
+    },
+    "Z3-bfinal-light": {
+     "runs": 1,
+     "sec": 71
+    },
+    "Z3-bfinal-quiet": {
+     "runs": 1,
+     "sec": 280
+    }
+   },
+   "machine_total_s": 5835,
+   "queue_wait_s": 28306
+  }
+ }
+}

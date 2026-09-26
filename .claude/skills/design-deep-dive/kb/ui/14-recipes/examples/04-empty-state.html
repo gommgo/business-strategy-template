@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Клиенты — пустое состояние</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="shell">
+  <div class="brand"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>Логистика</div>
+  <div class="topbar">
+    <div class="select-wrap">
+      <input class="input" type="search" placeholder="Поиск по номеру" aria-label="Поиск" style="width:var(--scale-280)">
+    </div>
+    <span class="spacer"></span>
+    <button class="btn btn--ghost btn--icon" type="button" aria-label="Уведомления"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+    <span class="avatar" aria-hidden="true">АК</span>
+  </div>
+  <nav class="sidebar" aria-label="Разделы">
+      <div class="nav-group">Работа</div>
+      <a class="nav-item" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>Заказы</a>
+      <a class="nav-item" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+      <a class="nav-item" href="#" aria-current="page"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M17 11a3 3 0 1 0 0-6M19 20a5 5 0 0 0-3-4.6"/></svg>Клиенты</a>
+      <div class="nav-group">Система</div>
+      <a class="nav-item" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/></svg>Настройки</a>
+  </nav>
+  <main>
+    <div class="page-header">
+      <nav class="crumbs" aria-label="Хлебные крошки"><a href="#">Работа</a><span aria-hidden="true">/</span><span>Клиенты</span></nav>
+      <div class="page-title-row">
+        <h1>Клиенты</h1>
+        <button class="btn btn--primary" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Добавить клиента</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <input class="input" type="search" placeholder="Поиск по названию или ИНН" aria-label="Поиск клиентов" style="width:var(--scale-280)">
+      <span class="spacer"></span>
+    </div>
+
+    <div class="empty">
+      <div class="empty-art"><svg viewBox="0 0 96 96" width="96" height="96" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="14" y="26" width="68" height="52" rx="6"/><path d="M14 40h68M26 54h26M26 64h16"/><circle cx="70" cy="60" r="12"/><path d="m79 69 6 6"/></svg></div>
+      <h2>Пока ни одного клиента</h2>
+      <p>Клиенты появятся здесь после первого заказа или когда вы добавите их вручную. Импорт из файла тоже доступен.</p>
+      <div class="toolbar" style="margin-bottom:0">
+        <button class="btn btn--primary" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Добавить клиента</button>
+        <button class="btn btn--default" type="button">Импорт из CSV</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

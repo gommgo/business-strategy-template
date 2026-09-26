@@ -1,0 +1,307 @@
+# typography-rules.yaml — нормы набора маркетинговых текстов для copy_lint.py (C): внешний файл правил H.
+# text-research · волна 2 · агент H · 2026-09-24. Не юридическое заключение (правила набора; право — claims-rules.yaml).
+#
+# Подключение: 06-anti-slop/profiles.yaml → external_rules (C) — линтер читает файл сам; разово — `--rules`.
+# Формат — 06-anti-slop/02-linter-spec-and-profiles.md §2 (C): id `typo-…`, marker_id `COPY-T-NN`, group EXT,
+# count_as_marker: false (набор — не слоп и в плотность маркеров не входит), mask_quotes: false (набор проверяется и
+# внутри кавычек: правка пунктуации в цитате допустима — B2 edits.type: punctuation).
+# Зона H — только то, чего нет у C (ru-punct.yaml, artifacts.yaml) и что не частота тире: неразрывные пробелы, висячие
+# предлоги в заголовках, диапазоны, минус, проценты, валюта, разряды, кавычки второго уровня и точка после «ёлочки»,
+# ® и ™, английский набор, числа и единицы, двойные пробелы и пробелы у знаков (правила ux-6-5-07…09 переходят сюда).
+# Решение о тире — 02-typography-for-marketing.md §1: тире по грамматике; «—» с пробелами (перед — неразрывный);
+# диапазон чисел — «–» без пробелов («—» без пробелов, как у Контура и ux 07/03, — допустимо, не ошибка); минус «−»;
+# дефис — внутри слов. Плотность пунктуационных тире в прозе — анализатор C с порогами D, не здесь.
+# Уровни: warning — явная ошибка набора (правится текстом); info — то, что обычно ставит автотипограф при сборке
+# (неразрывные пробелы, узкие знаки): в copy deck — сигнал, в финальном HTML — проверить.
+date: "2026-09-24"
+version: 1
+owner: "H (волна 2) · text-research/08-russian-legal-typography"
+defaults:
+  group: EXT
+  count_as_marker: false
+  mask_quotes: false
+  priority: 60
+  flags: i
+  lang: any
+  date: "2026-09-24"
+  evidence: "[консенсус]"   # набор по гайдам (Контур, Лебедев, ux 07/03); [стандарт] — у правил по ГОСТ 8.417 и ГК
+
+rules:
+  - id: typo-nbsp-before-dash
+    marker_id: COPY-T-01
+    level: info
+    slot_types: [headline, subheadline, section-title, card-title, cta-label, cta-secondary-label, cta-note, pricing-price, pricing-price-note, stat-value, stat-label, badge, eyebrow, hero-proof, meta-title, meta-description, og-title, og-description, article-title, article-heading, form-title]
+    pattern: '(?<=[^\s—–-])\x20(?=—\s)'
+    message: "Перед тире обычный пробел: в коротком слоте тире может уйти в начало строки. Перед «—» — неразрывный пробел (U+00A0), после — обычный; в прозе это делает автотипограф при сборке."
+    replacement: "«Смета — бесплатно»; при сборке — автотипограф (typograf: ru/nbsp/dash)"
+    examples: {bad: "Смета — бесплатно", good: "Смета — бесплатно"}
+    source: "ux 07/03 §6.6 (неразрывные пробелы); Лебедев, «Ководство» § 97 (тире с пробелами); typograf (MIT) — правило ru/nbsp/dash"
+
+  - id: typo-range-hyphen
+    marker_id: COPY-T-02
+    level: warning
+    lang: ru
+    pattern: '(?<![\d.,:/\-‐‑–—])\d+(?:[.,]\d+)?\s?[-‐‑]\s?\d+(?:[.,]\d+)?(?![\d\-‐‑/.,]|\s?[-‐‑]\d)|(?<![\d:])\d{1,2}:\d{2}\s?[-‐‑]\s?\d{1,2}:\d{2}'
+    unless: 'гост|%B%iso%E%|%B%ту\s|№|артикул|модел\w*|тел\.|телефон\w*|\+7|%B%инн%E%|огрн|кпп|%B%бик%E%|isbn|р/с|к/с|[-‐‑]фз'
+    message: "Диапазон чисел, дат или времени набран дефисом. Диапазон — короткое тире «–» без пробелов: «10–15 дней», «9:00–18:00», «2020–2026»."
+    replacement: "«10–15 дней» (U+2013); словами — «с 10 по 15 марта»; «—» без пробелов тоже допустимо (Контур, ux 07/03)"
+    examples: {bad: "Сдача объекта через 10-15 дней", good: "Сдача объекта через 10–15 дней"}
+    source: "Лебедев, «Ководство» § 97 («короткое тире — для числовых диапазонов (1941–1945)»); ux 07/03 §6.3 (Контур: одно тире «—» без пробелов между числами); решение базы — 02-typography-for-marketing.md §1.3"
+
+  - id: typo-range-spaced-dash
+    marker_id: COPY-T-03
+    level: info
+    pattern: '(?<![\d.,])\d+(?:[.,]\d+)?\s+[—–]\s+\d+(?:[.,]\d+)?(?=\s|$)'
+    message: "Диапазон чисел с тире и пробелами: между числами тире ставится без пробелов («10–15 дней»); с пробелами — если это пропуск связки («Этап 1 — 2 недели»), тогда оставить."
+    replacement: "«10–15 дней»"
+    examples: {bad: "Срок изготовления 10 — 15 дней", good: "Срок изготовления 10–15 дней"}
+    source: "Лебедев, «Ководство» § 97; ux 07/03 §6.3 («10—15 марта» без пробелов)"
+
+  - id: typo-minus-sign
+    marker_id: COPY-T-04
+    level: warning
+    pattern: '(?<![\w.,\-‐‑–—−])[-‐‑]\d+(?:[.,]\d+)?\s?(?:%|°)'
+    message: "Отрицательное число или скидка набраны дефисом. Нужен знак минуса «−» (U+2212): у него ширина цифры и высота по центру прописных."
+    replacement: "«−20 %», «−5 °C»"
+    examples: {bad: "Скидка -20% на второй комплект", good: "Скидка −20 % на второй комплект"}
+    source: "ux 07/03 §6.3 (минус — знак числа и арифметика); Контур.Гайды, «Типографика» (плюс и минус); Лебедев § 97 (минус ≠ дефис)"
+
+  - id: typo-percent-space
+    marker_id: COPY-T-05
+    level: info
+    lang: ru
+    pattern: '(?<![\d.,])\d+(?:[.,]\d+)?%(?!-)'
+    message: "В русском тексте знак процента отделяется от числа неразрывным пробелом: «20 %» («20%-ный» — слитно)."
+    replacement: "«20 %»"
+    examples: {bad: "Скидка 20% на всё", good: "Скидка 20 % на всё"}
+    source: "ГОСТ 8.417-2002 п. 8.3 («80 %»); ux 07/03 §6.7; Контур.Гайды, «Типографика» (проценты)"
+    evidence: "[стандарт]"
+
+  - id: typo-currency
+    marker_id: COPY-T-06
+    level: info
+    lang: ru
+    pattern: '\d[\d\s]*(?:руб\.?|р\.)(?![а-яё])|\d₽|₽\s?\d'
+    message: "Валюта: знак рубля «₽» после числа через неразрывный пробел, не «руб.», не «р.», не перед числом."
+    replacement: "«990 ₽»"
+    examples: {bad: "Стоимость 990 руб. за час", good: "Стоимость 990 ₽ за час"}
+    source: "ux 07/03 §6.7; Контур.Гайды, «Типографика» (знаки валют); 38-ФЗ ст. 5 ч. 7.1 (цены — в рублях; claims-rules COPY-L-CUR-01)"
+
+  - id: typo-thousands
+    marker_id: COPY-T-07
+    level: info
+    lang: ru
+    pattern: '(?<![\d.,/\-])\d{5,}(?![\d.,])|(?<![\d.,])\d{4}(?=\s?(?:₽|руб))'
+    unless: '%B%инн%E%|огрн|кпп|%B%бик%E%|индекс|№|артикул|%B%код%E%|сч[её]т|тел|\+7|р/с|к/с|isbn|ean|почтов'
+    message: "Разряды не отделены: 25000 → «25 000»; в ценах — и четырёхзначные («1 500 ₽»). Пробел в числе — неразрывный."
+    replacement: "«25 000 экземпляров», «1 500 ₽»"
+    examples: {bad: "Тираж 25000 экземпляров", good: "Тираж 25 000 экземпляров"}
+    source: "ux 07/03 §6.7 (разряды, включая четырёхзначные); Контур.Гайды, «Типографика» (числа)"
+
+  - id: typo-nbsp-number-unit
+    marker_id: COPY-T-08
+    level: info
+    slot_types: [headline, subheadline, section-title, card-title, cta-label, cta-secondary-label, cta-note, pricing-price, pricing-price-note, stat-value, stat-label, badge, eyebrow, hero-proof]
+    pattern: '\d\x20(?=(?:₽|%|руб|кг%E%|км%E%|м²|м2%E%|см%E%|мм%E%|мин%E%|ч%E%|дн\w*|лет%E%|год\w*|мес\w*|шт%E%|л%E%|мл%E%|г%E%|°))'
+    message: "В коротком слоте между числом и единицей обычный пробел: «45» и «дней» могут разойтись по строкам. Нужен неразрывный пробел."
+    replacement: "«45 дней», «990 ₽» — автотипограф при сборке"
+    examples: {bad: "Ремонт за 45 дней", good: "Ремонт за 45 дней"}
+    source: "ГОСТ 8.417-2002 п. 8.3 (обозначение единицы — в строку с числом, без переноса); ux 07/03 §6.6"
+    evidence: "[стандарт]"
+
+  - id: typo-hanging-preposition
+    marker_id: COPY-T-09
+    level: info
+    slot_types: [headline, subheadline, section-title, card-title, cta-label, cta-secondary-label, eyebrow, article-title, article-heading, form-title, case-title, meta-title, og-title]
+    pattern: '(?<![А-Яа-яЁёA-Za-z\-])(?:в|и|с|к|у|о|а|я|на|по|до|за|от|из|не|но|ни|об|во|со|ко)\x20(?=[А-Яа-яЁё«"\d])'
+    message: "Висячий предлог или союз в заголовке: односложное слово остаётся в конце строки. Связать неразрывным пробелом со следующим словом (text-wrap: balance этого не делает)."
+    replacement: "«Ремонт квартир в Нижнем Новгороде» — автотипограф (typograf: ru/nbsp/afterShortWord)"
+    examples: {bad: "Ремонт квартир в Нижнем Новгороде", good: "Ремонт квартир в Нижнем Новгороде"}
+    source: "ux 07/03 §6.6, §6.11 (перенос по смыслу, без висящих предлогов); ui 02/06 (text-wrap: balance — отдельно); typograf (MIT)"
+
+  - id: typo-quotes-nested
+    marker_id: COPY-T-10
+    level: info
+    lang: ru
+    pattern: '«[^«»\n]*«'
+    message: "Кавычки внутри кавычек набраны теми же «ёлочками». Второй уровень — „лапки“: «ООО „Отвес“»."
+    replacement: "«Студия „Отвес“»"
+    examples: {bad: "ООО «Студия «Отвес»»", good: "ООО «Студия „Отвес“»"}
+    source: "ux 07/03 §6.2 (второй уровень — „лапки“); Контур.Гайды, «Типографика» (кавычки)"
+
+  - id: typo-quote-period
+    marker_id: COPY-T-11
+    level: info
+    lang: ru
+    flags: ''
+    pattern: '[.,](?=»)'
+    message: "Точка или запятая перед закрывающей «ёлочкой»: в русском знак ставится после кавычек («…дней».); внутри остаются только «?», «!», «…»."
+    replacement: "«Сдали за 47 дней»."
+    examples: {bad: "Анна пишет: «Сдали за 47 дней.»", good: "Анна пишет: «Сдали за 47 дней»."}
+    source: "русская пунктуация при цитатах (Розенталь; через Лебедев § 97 — «см. Дитмара Эльяшевича») [практика]; B2 03 §5 (цитата — дословно, пунктуация — допустимая правка)"
+    evidence: "[практика]"
+
+  - id: typo-trademark-space
+    marker_id: COPY-T-12
+    level: info
+    pattern: '\s[®™]'
+    message: "Знак ® или ™ отбит пробелом: ставится вплотную к знаку, при первом упоминании; право ставить ® — только у зарегистрированного знака (COPY-L-TM-01)."
+    replacement: "«Кварц®» (верхний индекс — CSS)"
+    examples: {bad: "Лампа Кварц ® для чтения", good: "Лампа Кварц® для чтения"}
+    source: "ГК РФ ст. 1485 (знак охраны «помещается рядом с товарным знаком»); claims-rules COPY-L-TM-01/02"
+    evidence: "[стандарт]"
+
+  - id: typo-multiply-sign
+    marker_id: COPY-T-13
+    level: info
+    lang: ru
+    pattern: '(?<![\w])\d+(?:[.,]\d+)?\s?[xхXХ*]\s?\d+(?:[.,]\d+)?(?![\w])'
+    message: "Размеры через букву «х» или звёздочку: нужен знак умножения «×» с пробелами."
+    replacement: "«30 × 40 см»"
+    examples: {bad: "Размер 30х40 см", good: "Размер 30 × 40 см"}
+    source: "ux 07/03 §6.11 («×», а не «x»); Контур.Гайды, «Типографика» (арифметические знаки отбиваются)"
+
+  - id: typo-degree-space
+    marker_id: COPY-T-14
+    level: info
+    pattern: '\d°\s?[CСF](?![a-zа-я])'
+    message: "Градусы температуры: «°C» отделяется от числа пробелом («+25 °C»); угловой градус — слитно («20°»)."
+    replacement: "«+25 °C»"
+    examples: {bad: "Хранить при +25°C", good: "Хранить при +25 °C"}
+    source: "ГОСТ 8.417-2002 п. 8.3 («20 °С» правильно; знаки над строкой — слитно: «20°»)"
+    evidence: "[стандарт]"
+
+  - id: typo-ordinal-suffix
+    marker_id: COPY-T-15
+    level: info
+    lang: ru
+    pattern: '\d+-?(?:ый|ой|ий|ая|ое|ые|ого|ому|ым|ых)(?![а-яё])'
+    message: "Наращение порядкового числительного: одна или две буквы через дефис — «2-й», «3-го», «5-е», «10-я» (не «2-ой», «1ый»)."
+    replacement: "«на 2-й этаж», «к 3-му числу»"
+    examples: {bad: "Подъём на 2-ой этаж без лифта", good: "Подъём на 2-й этаж без лифта"}
+    source: "русская норма наращения падежных окончаний у цифр (Мильчин — по вторичным источникам) [практика]; ux 07/03 §6"
+    evidence: "[практика]"
+
+  - id: typo-double-space
+    marker_id: COPY-T-16
+    level: warning
+    pattern: '(?<=\S)[\x20 ]{2,}(?=\S)'
+    message: "Два и больше пробела подряд между словами."
+    replacement: "один пробел"
+    examples: {bad: "Ремонт  под ключ", good: "Ремонт под ключ"}
+    source: "ux 07/06 §6.5 (ux-6-5-07 — переходит сюда по решению C); ux 07/03 §6"
+
+  - id: typo-space-before-punct
+    marker_id: COPY-T-17
+    level: warning
+    pattern: '(?<=[А-Яа-яЁёA-Za-z0-9»")\]])[\x20 ]+[,.;:!?](?![.\d])'
+    message: "Пробел перед знаком препинания."
+    replacement: "«Звоните, ответим»"
+    examples: {bad: "Звоните , ответим за 15 минут", good: "Звоните, ответим за 15 минут"}
+    source: "ux 07/06 §6.5 (ux-6-5-08 — переходит сюда по решению C)"
+
+  - id: typo-no-space-after-punct
+    marker_id: COPY-T-18
+    level: warning
+    flags: ''
+    pattern: '[,;](?=[А-Яа-яЁёA-Za-z])|(?<=[а-яё]{2})[.!?](?=[А-ЯЁ][а-яё])'
+    message: "Нет пробела после запятой, точки с запятой или конца предложения."
+    replacement: "«Звоните, ответим»"
+    examples: {bad: "Звоните,ответим за 15 минут", good: "Звоните, ответим за 15 минут"}
+    source: "ux 07/06 §6.5 (ux-6-5-09 — переходит сюда по решению C; узкий вариант: без дробей, адресов, сокращений «т. е.»)"
+
+  - id: typo-phone-brackets
+    marker_id: COPY-T-19
+    level: info
+    pattern: '\+7\s?\(\d{3}\)'
+    message: "Код сети в скобках: его нельзя опустить, поэтому без скобок — «+7 831 123-45-67» с неразрывными пробелами."
+    replacement: "«+7 831 123-45-67»"
+    examples: {bad: "Звоните: +7 (831) 123-45-67", good: "Звоните: +7 831 123-45-67"}
+    source: "ux 07/03 §6.8; Контур.Гайды, «Типографика» (телефоны)"
+
+  - id: typo-ru-decimal-point
+    marker_id: COPY-T-20
+    level: info
+    lang: ru
+    pattern: '(?<![\d.,\w])\d+\.\d{1,2}(?![\d.]|\s?[a-z])'
+    unless: 'верси\w*|%B%v\d|гост|%B%iso%E%|python|%B%ios%E%|android|windows|№|§|%B%ст\.|%B%п\.|%B%ч\.|пункт\w*|раздел\w*|глав\w*|стать\w*|част[ьи]%E%|\d{1,2}\.\d{1,2}\s+(?:в|с|до|по)\s'
+    message: "Десятичная точка в русском тексте: дробную часть отделяет запятая («4,8 из 5»)."
+    replacement: "«4,8 из 5»"
+    examples: {bad: "Рейтинг 4.8 из 5", good: "Рейтинг 4,8 из 5"}
+    source: "ux 07/03 §6.7 (дробная часть — запятая, в английской версии — точка)"
+
+  - id: typo-double-hyphen
+    marker_id: COPY-T-21
+    level: warning
+    pattern: '(?<=\S)\x20--\x20(?=\S)|(?<=[A-Za-zА-Яа-яЁё])--(?=[A-Za-zА-Яа-яЁё])'
+    message: "Тире набрано двумя дефисами (флаги командной строки «--reset» после пробела не ловятся)."
+    replacement: "«—» с пробелами (перед — неразрывный) или «–» в диапазоне"
+    examples: {bad: "Смета -- бесплатно", good: "Смета — бесплатно"}
+    source: "ux 07/03 §6.11 («—», а не «--»)"
+
+  - id: typo-en-straight-quotes
+    marker_id: COPY-T-22
+    level: info
+    lang: en
+    pattern: '"[^"\n]{1,200}"'
+    message: "Straight quotes in English copy: use curly quotes “…” (and ‘…’ inside)."
+    replacement: "“the easiest setup”"
+    examples: {bad: "Our clients call it \"the easiest setup\"", good: "Our clients call it “the easiest setup”"}
+    source: "Butterick, Practical Typography, «Straight and curly quotes» («Always use curly quotes»); Mailchimp Content Style Guide, Grammar and Mechanics (одинарные — для цитаты внутри цитаты); ux 07/03 §6.2"
+    evidence: "[документация]"
+
+  - id: typo-en-guillemets
+    marker_id: COPY-T-23
+    level: info
+    lang: en
+    pattern: '«[^»\n]{1,200}»'
+    message: "Russian guillemets in English copy: use “…”."
+    replacement: "The “Pro” plan"
+    examples: {bad: "The «Pro» plan", good: "The “Pro” plan"}
+    source: "ux 07/03 §6.2"
+
+  - id: typo-en-decimal-comma
+    marker_id: COPY-T-24
+    level: info
+    lang: en
+    pattern: '(?<![\d,])\d+,\d{1,2}(?!\d)'
+    message: "Decimal comma in English copy: use a decimal point (4.8); commas separate thousands (10,000)."
+    replacement: "Rated 4.8 out of 5"
+    examples: {bad: "Rated 4,8 out of 5", good: "Rated 4.8 out of 5"}
+    source: "Mailchimp Content Style Guide, Grammar and Mechanics (Decimals: 1.375, 47.2); GOV.UK A–Z style guide, Numbers (0.75, 0.45); ux 07/03 §6.7; адаптация, а не перевод (решение заказчика п. 16)"
+    evidence: "[документация]"
+
+  - id: typo-en-space-thousands
+    marker_id: COPY-T-25
+    level: info
+    lang: en
+    pattern: '(?<!\d)\d{1,3}(?:[\x20   ]\d{3})+(?!\d)'
+    unless: '\+\d|\btel\b|phone|call'
+    message: "Russian-style thousands separator in English copy: use commas (10,000)."
+    replacement: "10,000"
+    examples: {bad: "Over 10 000 downloads", good: "Over 10,000 downloads"}
+    source: "Mailchimp Content Style Guide («Numbers over 3 digits get commas»: 1,000); GOV.UK A–Z style guide, Numbers (over 999 — comma: 9,000); адаптация EN-страницы (решение заказчика п. 16)"
+    evidence: "[консенсус]"
+
+  - id: typo-en-percent-space
+    marker_id: COPY-T-26
+    level: info
+    lang: en
+    pattern: '\d[\x20 ]%'
+    message: "In English copy the percent sign is closed up: 20%."
+    replacement: "Save 20% today"
+    examples: {bad: "Save 20 % today", good: "Save 20% today"}
+    source: "Mailchimp Content Style Guide (Percentages: символ %); GOV.UK A–Z style guide, Numbers («50%»); в отличие от ГОСТ 8.417-2002 п. 8.3 для русского («80 %»)"
+    evidence: "[консенсус]"
+
+  - id: typo-en-range-hyphen
+    marker_id: COPY-T-27
+    level: info
+    lang: en
+    pattern: '(?<![\d.,:/\-‐‑–—])\d+(?:[.,]\d+)?[-‐‑]\d+(?:[.,]\d+)?(?![\d\-‐‑/.,])|(?<![\d:])\d{1,2}:\d{2}\s?[-‐‑]\s?\d{1,2}:\d{2}'
+    unless: '\+\d|\btel\b|phone|call|iso|isbn|sku|model|part\s?no|v\d'
+    message: "Number range with a hyphen. Default for this base: en dash without spaces (20–30 days, 9:00–18:00); a house style may choose “to” (GOV.UK, Atlassian) or a hyphen (Mailchimp) — then keep it consistent. After “from” or “between” write “to”/“and”."
+    replacement: "“20–30 days”, “from 9 am to 6 pm”"
+    examples: {bad: "Delivery in 20-30 days", good: "Delivery in 20–30 days"}
+    source: "Microsoft Style Guide, «Em dashes, en dashes, hyphens, and minus signs» (en dash in ranges, no spaces); Butterick, Practical Typography, «Hyphens and dashes» (en dash for ranges; from … to); Mailchimp Content Style Guide (hyphen for ranges); GOV.UK A–Z style guide («500 to 900», not «500-900»); Atlassian Design, Language and grammar («to» in ranges)"
+    evidence: "[спорно]"

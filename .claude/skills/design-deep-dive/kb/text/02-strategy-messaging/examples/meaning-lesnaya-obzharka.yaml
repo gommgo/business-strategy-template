@@ -1,0 +1,208 @@
+# meaning-lesnaya-obzharka.yaml — пример 3: смысл при почти пустом брифе (D2C-обжарочная «Лесная обжарка», демо ai-media)
+# text-research · B1 · 2026-09-24 · формат: ../meaning.schema.yaml (meaning_version 1)
+#
+# Вход: единственное описание бренда — «обжарочная кофе в зёрнах, D2C, Россия („тёплый, ремесленный, спокойный“)» и
+# мотивы «утренний стол у окна», «обжарка малыми партиями» (../../../ai-media-research/14-recipes/examples/demo-landing/
+# brand/dna-forest-roast.json, README.md). Тексты демо-страницы (index.html) написаны ради ассетов («демо ассетов» —
+# решение заказчика п. 16) и заказчиком не подтверждены: их утверждения здесь — basis public-page и missing, а не факты.
+# Что показывает пример: как вести смысл, когда бриф пуст — две кандидатуры позиционирования (x-positioning-candidates),
+# допущение по умолчанию и 6 вопросов заказчику; facts.yaml ещё нет — все доказательства missing (x-missing-proposals).
+
+meaning_version: 1
+date: "2026-09-24"
+status: draft
+site: lesnaya-obzharka
+
+offering_summary:
+  text: "Обжарочная: кофе в зёрнах с доставкой покупателю напрямую (D2C), Россия; банка 250 г, есть подписка."
+  kind: physical-product
+  basis: {kind: brief, ref: "dna-forest-roast.json: brand; банка и подписка — index.html демо (не подтверждено)"}
+
+audience:
+  - id: home-brewers
+    name: "Варят кофе дома каждое утро и покупают зёрна в супермаркете"
+    primary: true
+    role: buyer-user
+    characteristics:
+      - "пьют кофе дома каждый день: турка, френч-пресс, кофеварка"
+      - "покупают зёрна или молотый кофе в супермаркете по привычке"
+      - "не считают себя знатоками и не хотят разбираться в сортах и обжарке"
+    situation: "Когда утром варишь кофе дома и чувствуешь, что он «никакой», а в кофейне — вкуснее"
+    trigger: "Попробовал кофе свежей обжарки у знакомых или в кофейне; закончилась пачка"
+    knows: "Знает, что кофе бывает вкуснее, чем из супермаркета; о свежести обжарки и дате на упаковке может не знать"
+    jobs:
+      - {id: job-good-morning-coffee, type: functional, statement: "Когда варю кофе утром, хочу, чтобы он был вкусным без лишних знаний, чтобы начинать день спокойно", priority: 1, basis: {kind: assumption, question_id: q-alternatives}}
+      - {id: job-no-errands, type: functional, statement: "Когда кофе заканчивается, хочу, чтобы новый приходил сам, чтобы не бегать в магазин", priority: 2, basis: {kind: public-page, ref: "index.html демо: «Подписка: банка каждую неделю»"}}
+      - {id: job-small-ritual, type: emotional, statement: "Когда утро моё, хочу маленький спокойный ритуал, чтобы день начинался хорошо", priority: 3, basis: {kind: brief, ref: "характер бренда «тёплый, ремесленный, спокойный»; мотив «утренний стол у окна»"}}
+    pains:
+      - {id: pain-flat-taste, text: "Кофе из супермаркета «никакой»: горчит, аромата нет", severity: medium, job_ref: job-good-morning-coffee, basis: {kind: assumption, question_id: q-alternatives}}
+      - {id: pain-how-to-brew, text: "Непонятно, какой помол и сколько засыпать под свою турку или френч-пресс", severity: medium, job_ref: job-good-morning-coffee, basis: {kind: public-page, ref: "index.html: «Рецепт в каждой коробке», «Помол под способ»"}}
+      - {id: pain-runs-out, text: "Кофе заканчивается внезапно", severity: low, job_ref: job-no-errands, basis: {kind: assumption, question_id: q-alternatives}}
+    gains:
+      - {id: gain-tasty-at-home, text: "Кофе дома не хуже, чем в кофейне", measure: "сравнение с кофе из супермаркета и из кофейни", job_ref: job-good-morning-coffee, basis: {kind: assumption, question_id: q-alternatives}}
+      - {id: gain-just-follow-card, text: "Сварить по карточке и не думать о помоле", job_ref: job-good-morning-coffee, basis: {kind: public-page, ref: "index.html: рецепт и пропорции на карточке внутри"}}
+    current_alternative_ids: [alt-supermarket, alt-coffee-shop]
+    basis: {kind: assumption, question_id: q-alternatives}
+  - id: specialty-fans
+    name: "Любители кофе свежей обжарки, которые уже покупают у обжарщиков"
+    primary: false
+    role: buyer-user
+    situation: "Когда выбирают нового обжарщика или пробуют новый лот"
+    jobs:
+      - {id: job-new-lot, type: functional, statement: "Когда покупаю зёрна, хочу понятный вкус и дату обжарки, чтобы не ошибиться", priority: 1, basis: {kind: assumption, question_id: q-alternatives}}
+    pains:
+      - {id: pain-stale, text: "Приходит зерно, обжаренное давно", severity: medium, basis: {kind: assumption, question_id: q-alternatives}}
+    gains:
+      - {id: gain-fresh-lot, text: "Зерно свежей обжарки с описанием вкуса", basis: {kind: assumption, question_id: q-alternatives}}
+    current_alternative_ids: [alt-other-roasters]
+    basis: {kind: assumption, question_id: q-alternatives}
+
+awareness:
+  level: solution-aware
+  basis: {kind: assumption, question_id: q-traffic}
+  confidence: low
+  by_source:
+    - {source: marketplace, level: solution-aware, note: "ищет «кофе в зёрнах» на маркетплейсе и сравнивает карточки (в демо есть карточка маркетплейса)"}
+    - {source: search-category, level: solution-aware, note: "«кофе свежей обжарки купить»"}
+    - {source: paid-social, level: problem-aware, note: "увидел пост про утренний кофе — о свежести не думал"}
+
+sophistication:
+  stage: 4
+  claims_heard: ["свежая обжарка", "дата обжарки на упаковке", "арабика 100 %", "спешелти", "одна ферма", "обжариваем под заказ"]
+  basis: {kind: assumption, question_id: q-alternatives}
+
+traffic:
+  ref: "/traffic"
+  sources:
+    - {source: marketplace, temperature: warm, device: mobile, promise_of_source: "карточка товара: банка, вкус, «свежая обжарка»"}
+    - {source: search-category, temperature: warm, device: mixed}
+    - {source: paid-social, temperature: cold, device: mobile}
+
+positioning:
+  alternatives:
+    - {id: alt-supermarket, name: "Кофе в зёрнах или молотый из супермаркета", kind: substitute, why_used: "дёшево, рядом, привычно", limits: "дата обжарки неизвестна, вкус «никакой»", mention_on_page: as-approach, basis: {kind: assumption, question_id: q-alternatives}}
+    - {id: alt-coffee-shop, name: "Покупать кофе в кофейне", kind: substitute, why_used: "вкусно, не надо варить", limits: "дорого каждый день, не дома", mention_on_page: as-approach, basis: {kind: inferred, ref: "мотив «утренний стол» — кофе дома"}}
+    - {id: alt-other-roasters, name: "Другие обжарщики с доставкой", kind: competitor-direct, why_used: "свежая обжарка, выбор лотов", limits: "неизвестно — вопрос q-alternatives", mention_on_page: never, basis: {kind: assumption, question_id: q-alternatives}}
+  unique_attributes:
+    - {id: attr-weekly-roast, attribute: "Обжарка раз в неделю, дата обжарки на крышке", versus: [alt-supermarket], proof_status: needs-proof, proof_ids: ["missing:roast-schedule", "missing:roast-date-label"], basis: {kind: public-page, ref: "index.html: «Обжарка по средам», «дата обжарки на крышке»"}}
+    - {id: attr-recipe-card, attribute: "Рецепт и помол под способ заваривания в каждой коробке", versus: [alt-supermarket, alt-other-roasters], proof_status: needs-proof, proof_ids: ["missing:recipe-card", "missing:grind-by-method"], basis: {kind: public-page, ref: "index.html: «Рецепт в каждой коробке», «Помол под способ»"}}
+    - {id: attr-subscription, attribute: "Подписка: банка каждую неделю, пауза и отмена без звонков", versus: [alt-supermarket, alt-coffee-shop], proof_status: needs-proof, proof_ids: ["missing:subscription-terms"], basis: {kind: public-page, ref: "index.html: «От 790 ₽ за банку, пауза и отмена — в один клик»"}}
+  value_themes:
+    - id: val-fresh-not-flat
+      theme: "Кофе, который обжарили на этой неделе, а не полгода назад"
+      from_attributes: [attr-weekly-roast]
+      customer_measure: "дней от обжарки до чашки (против неизвестной даты в супермаркете)"
+      pain_refs: [pain-flat-taste]
+      gain_refs: [gain-tasty-at-home]
+      proof_ids: ["missing:roast-schedule", "missing:freshness-source"]
+    - id: val-no-barista-skills
+      theme: "Вкусно с первой чашки без знаний бариста: помол и рецепт под вашу турку или френч-пресс"
+      from_attributes: [attr-recipe-card]
+      customer_measure: "сколько попыток нужно, чтобы кофе получился"
+      pain_refs: [pain-how-to-brew]
+      gain_refs: [gain-just-follow-card]
+      proof_ids: ["missing:recipe-card", "missing:grind-by-method"]
+  best_fit:
+    segment_ids: [home-brewers]
+    characteristics: ["варят кофе дома ежедневно", "не хотят разбираться в сортах"]
+    why_care: "Для них разница между свежей и старой обжаркой заметна сразу, а знание бариста заменяет карточка."
+  market_category:
+    name: "кофе свежей обжарки для дома"
+    strategy: big-fish-small-pond
+    parent_category: "кофе в зёрнах"
+    subsegment: "варят дома каждый день и не считают себя знатоками"
+    reference_leader: "кофе в зёрнах из супермаркета"
+    assumptions_true: ["зёрна, которые надо молоть или заказать молотыми", "есть доставка"]
+    assumptions_false: ["свежая обжарка — это сложно, для гурманов и дорогих кофемашин"]
+    basis: {kind: assumption, question_id: q-alternatives}
+  statement:
+    template: dunford-canvas
+    internal_only: true
+    text: "Кандидатура А (по умолчанию): против супермаркета — кофе свежей обжарки для дома, который сваришь вкусно без знаний бариста. Кандидатура Б — x-positioning-candidates."
+  only_we_can_say: []
+
+value_proposition:
+  core:
+    text: "Кофе, обжаренный на этой неделе, с помолом и рецептом под вашу турку или френч-пресс — вкусно с первой чашки, без знаний бариста."
+    basis: {kind: assumption, question_id: q-facts}
+  forces:
+    push:
+      - {text: "Кофе из магазина «никакой»", basis: {kind: assumption, question_id: q-alternatives}}
+    pull:
+      - {text: "Утро с кофе как в кофейне, но дома", basis: {kind: brief, ref: "мотив «утренний стол у окна»"}}
+    anxiety:
+      - {text: "Не почувствую разницы за такие деньги", objection_ids: [obj-no-difference, obj-price]}
+      - {text: "Не знаю, какой помол и как варить", objection_ids: [obj-brewing]}
+      - {text: "Подписка — потом не отпишешься", objection_ids: [obj-subscription-trap]}
+    habit:
+      - {text: "Беру в супермаркете по дороге", objection_ids: [obj-delivery]}
+  fit_status: hypothesis
+
+offer:
+  ref: "/offer"
+  summary: "Банка 250 г; подписка с первой поставкой в ближайшую среду (условия — вопрос q-facts)."
+  proof_ids: ["missing:price-250g", "missing:subscription-terms"]
+
+conversion:
+  action_ref: "buy-or-subscribe"
+  secondary_goal: "Сохранить рецепт или подписаться на письма о новых лотах"
+
+objections:
+  - {id: obj-price, text: "890 ₽ за 250 г — в магазине дешевле", type: price, force: anxiety, severity: major, answer: "Сравнивать с чашкой в кофейне и с выброшенной невкусной пачкой; цена и вес — из фактов", answer_kind: reframe, proof_ids: ["missing:price-250g"], where: [{section_role: pricing, slot_type: pricing-price-note}], awareness_stage: product-aware, status: needs-proof, basis: {kind: public-page, ref: "index.html: 890 ₽"}}
+  - {id: obj-no-difference, text: "Я не почувствую разницы", type: risk, force: anxiety, severity: blocker, answer: "Дать маленький первый шаг (пробный объём или возврат) — если он есть; иначе — описание вкуса и дата обжарки", answer_kind: risk-reversal, proof_ids: ["missing:trial-offer", "missing:taste-notes"], where: [{section_role: product-demo}, {section_role: guarantee}], awareness_stage: solution-aware, status: needs-proof, basis: {kind: assumption, question_id: q-trial}}
+  - {id: obj-brewing, text: "Я не бариста — не знаю, какой помол и как варить", type: not-for-me, force: anxiety, severity: major, answer: "Помол под ваш способ и карточка с пропорциями в коробке", answer_kind: mechanism, proof_ids: ["missing:recipe-card", "missing:grind-by-method"], where: [{section_role: how-it-works}, {section_role: benefits}], awareness_stage: problem-aware, status: needs-proof, basis: {kind: public-page, ref: "index.html"}}
+  - {id: obj-delivery, text: "Когда привезут и сколько стоит доставка?", type: time, force: habit, severity: major, answer: "Срок от обжарки до двери и цена доставки — рядом с кнопкой (в e-commerce это вторая и первая причины бросить корзину — Baymard)", answer_kind: fact, proof_ids: ["missing:delivery-terms"], where: [{section_role: pricing, slot_type: cta-note}, {section_role: faq}], status: needs-proof, basis: {kind: research, ref: "Baymard, cart abandonment 2025: доп. расходы 40 %, медленная доставка 20 %"}}
+  - {id: obj-subscription-trap, text: "Подписка — потом не отпишешься", type: switching-cost, force: anxiety, severity: major, answer: "Условия паузы и отмены — простыми словами и ссылкой на оферту", answer_kind: condition, proof_ids: ["missing:subscription-terms"], where: [{section_role: pricing}], status: needs-proof, basis: {kind: public-page, ref: "index.html: «пауза и отмена — в один клик»"}}
+
+risk_reversal:
+  - {id: rr-trial, type: sample, summary: "Пробный объём или возврат, если вкус не подошёл (есть ли — вопрос q-trial)", fact_id: "missing:trial-offer", answers: [obj-no-difference]}
+
+boundaries:
+  not_for:
+    - "пьёт только растворимый кофе и не хочет варить"
+  not_promised:
+    - {text: "бодрость, польза для здоровья", claim_class: health, why: "пищевой продукт; обещания здоровья — запрет (H)"}
+    - {text: "«без месяцев на складе» как упрёк другим", claim_class: comparison, why: "неявное сравнение с конкурентами без данных (38-ФЗ ст. 5 — H)"}
+    - {text: "«через три недели зерно теряет аромат» без источника", claim_class: fact-property, why: "общее утверждение о кофе требует исследования (missing freshness-source)"}
+
+message_hierarchy_ref: []
+voice_ref: "из брифа: «тёплый, ремесленный, спокойный» — профиль голоса F (волна 2)"
+proof_ref: "facts-lesnaya-obzharka.yaml (не собран)"
+legal_category: [general]
+legal_note: "Пищевой продукт: сведения о товаре (ЗоЗПП ст. 10), никаких обещаний здоровья; дистанционная продажа — site I."
+languages:
+  - {lang: ru, role: primary}
+
+open_questions:
+  - {id: q-alternatives, q: "Где ваши покупатели брали кофе до вас: в супермаркете, у других обжарщиков, в кофейне?", why: "От этого зависит, чем вы отличаетесь: против супермаркета — свежестью, против обжарщиков — нужен другой довод", options: ["в основном супермаркет", "другие обжарщики", "кофейни", "не знаем"], default: "Кандидатура А: против супермаркета, акцент на свежести и простоте", affects: [positioning, audience, sophistication], priority: 1, asked: false}
+  - {id: q-facts, q: "Что из этого правда и можно писать: обжарка по средам, дата на крышке, доставка за 1–2 дня, арабика 100 %, одно хозяйство, рецепт в коробке, помол под способ, 890 ₽ за 250 г, подписка от 790 ₽ с отменой в один клик?", why: "На демо-странице это написано без источника; на сайте — только подтверждённое", options: [], default: "Всё неподтверждённое — [PLACEHOLDER] или убрать", affects: [positioning.unique_attributes, objections, offer], priority: 1, asked: false}
+  - {id: q-traffic, q: "Откуда приходят покупатели: маркетплейсы, поиск, соцсети, рекомендации?", why: "Определяет уровень осведомлённости и первый экран", options: ["маркетплейс", "поиск", "соцсети", "рекомендации"], default: "Поиск и маркетплейс — solution-aware", affects: [awareness, traffic], priority: 2, asked: false}
+  - {id: q-trial, q: "Есть ли маленький объём на пробу или возврат, если вкус не подошёл?", why: "Главная тревога новичка — «не почувствую разницы»", options: ["есть пробник", "есть возврат", "нет"], default: "Не обещаем; снимаем тревогу описанием вкуса и датой обжарки", affects: [risk_reversal, objections], priority: 2, asked: false}
+  - {id: q-freshness-source, q: "На чём основано «через три недели после обжарки зерно теряет аромат»?", why: "Общее утверждение о кофе требует источника", options: [], default: "Фразу не используем", affects: [positioning.value_themes], priority: 3, asked: false}
+
+x-positioning-candidates:
+  - id: candidate-a
+    against: [alt-supermarket, alt-coffee-shop]
+    category: "кофе свежей обжарки для дома"
+    strategy: big-fish-small-pond
+    core: "Свежая обжарка и рецепт под ваш способ — вкусно дома без знаний бариста"
+    status: default
+  - id: candidate-b
+    against: [alt-other-roasters]
+    category: "кофейная подписка для дома"
+    strategy: big-fish-small-pond
+    core: "Банка каждую неделю, без походов в магазин; пауза и отмена — сами (если подтвердится)"
+    status: "если основная альтернатива — другие обжарщики: свежесть у них тоже есть (стадия искушённости 4), отличие — подписка и простота"
+
+x-missing-proposals:
+  # facts.yaml для «Лесной обжарки» не собран; эти пункты — первый список анкеты proof-intake.md (B2)
+  - {id: roast-schedule, what: "как часто и в какой день обжаривают"}
+  - {id: roast-date-label, what: "есть ли дата обжарки на упаковке"}
+  - {id: recipe-card, what: "карточка с рецептом в коробке"}
+  - {id: grind-by-method, what: "помол под способ заваривания"}
+  - {id: subscription-terms, what: "условия подписки: цена, частота, пауза, отмена"}
+  - {id: price-250g, what: "цена банки 250 г"}
+  - {id: delivery-terms, what: "срок и цена доставки, города"}
+  - {id: trial-offer, what: "пробный объём или возврат"}
+  - {id: taste-notes, what: "описание вкуса лота (кто составил)"}
+  - {id: freshness-source, what: "источник утверждения о потере аромата через три недели"}

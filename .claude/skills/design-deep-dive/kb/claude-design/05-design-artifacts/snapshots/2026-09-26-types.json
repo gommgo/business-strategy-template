@@ -1,0 +1,82 @@
+{
+  "date": "2026-09-26",
+  "surface": "Claude Code desktop app, Opus 5.5",
+  "quickstart_design": {
+    "types": ["Design [core]"],
+    "design_systems_in_account": 0
+  },
+  "types": {
+    "Design": {
+      "type_url": "https://claude.ai/artifact/QKN21svewxgyPb6SYRqWnd",
+      "release": "1790365954-8d66",
+      "contract": "0.2.47",
+      "contract_newest_seen": "0.2.60",
+      "capabilities": {
+        "artifact": {},
+        "assets": {},
+        "comments": { "composer_only": true, "customAnchors": true },
+        "db": { "rules": [{ "path": "", "write": "admin" }] },
+        "downloads": {},
+        "flags": { "keys": ["appifact_extra_export_formats", "design_cross_canvas_paste_confirm", "design_vector_pen"] },
+        "room": {},
+        "user": { "scopes": ["profile"] }
+      },
+      "files_bytes": {
+        "SKILL.md": 16050,
+        "index.html": 33120,
+        "artifact-type/app.css": 605352,
+        "artifact-type/app.js": 3382611,
+        "artifact-type/dc-runtime.js": 185864,
+        "artifact-type/reference/brand-colors.md": 2234,
+        "artifact-type/reference/brand-typography.md": 1534,
+        "artifact-type/reference/craft.md": 14787,
+        "artifact-type/reference/design-system-components.md": 11756,
+        "artifact-type/reference/format.md": 10973,
+        "artifact-type/reference/print.md": 5421,
+        "artifact-type/reference/questions.md": 4419,
+        "artifact-type/reference/view-state.md": 7779,
+        "artifact-type/thumbnail/thumbnail.json": 359
+      }
+    },
+    "Design System": {
+      "type_url": "https://claude.ai/artifact/5M7UeXXcx16TP3vzVFNDzd",
+      "release": "1790375513-37cb",
+      "contract": "0.2.47",
+      "capabilities": {
+        "artifact": {},
+        "assets": {},
+        "comments": { "composer_only": true, "customAnchors": true },
+        "db": { "rules": [{ "path": "", "write": "admin" }] },
+        "downloads": {},
+        "user": { "scopes": ["profile"] }
+      },
+      "files_bytes": {
+        "SKILL.md": 15993,
+        "index.html": 31165,
+        "artifact-type/app.css": 549159,
+        "artifact-type/app.js": 1847694,
+        "artifact-type/demo.json": 164928,
+        "artifact-type/run.html": 1022,
+        "artifact-type/reference/cover.md": 6698,
+        "artifact-type/reference/craft.md": 5362,
+        "artifact-type/reference/format.md": 16220,
+        "artifact-type/reference/from-code.md": 11934,
+        "artifact-type/reference/from-design-tool.md": 16122,
+        "artifact-type/reference/migrated-upgrading.md": 10057,
+        "artifact-type/reference/sample-seazar-tokens.json": 11291
+      },
+      "files_sha256": {
+        "artifact-type/reference/cover.md": "d5957e8a4c430a87d8d3c5f28526d0f966dfc28f539039f25252becb32528e3d",
+        "artifact-type/reference/format.md": "d3f8770c36a3da5e2a0eedc1ec5fda7215b1145c9d40035eb1d2d889cab77c5f"
+      }
+    }
+  },
+  "demo_artifacts": {
+    "design_system": { "url": "https://claude.ai/artifact/Y37sUVrZCVTMc9H3bHL6AS", "title": "Спица", "our_version": 2, "page_saved_after_open": "1790406542-f54d" },
+    "canvas": { "url": "https://claude.ai/artifact/SA6g7q7rJCcAkpuaZbUbL5", "title": "Спица — полный цикл Claude Design", "our_version": 8, "editor_saved_before_first_publish": "1790405879-e4b7" }
+  },
+  "editor_behaviour": [
+    "Design: при первом открытии пишет project/canvas.json — {v:3, attachments:{}, boards:{}, createdOnFiles:{at,v}, designSystems:[], launch:{}, notes:{}, order:[], pages:[], title:'Design'} — и сохраняет версию; публикация без чтения отклоняется",
+    "Design System: после открытия страница сохраняет свою версию; перед следующей публикацией — прочитать"
+  ]
+}

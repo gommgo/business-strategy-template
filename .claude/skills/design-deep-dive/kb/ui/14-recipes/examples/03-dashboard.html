@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Дашборд</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="shell">
+  <div class="brand"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>Логистика</div>
+  <div class="topbar">
+    <div class="select-wrap">
+      <input class="input" type="search" placeholder="Поиск по номеру" aria-label="Поиск" style="width:var(--scale-280)">
+    </div>
+    <span class="spacer"></span>
+    <button class="btn btn--ghost btn--icon" type="button" aria-label="Уведомления"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+    <span class="avatar" aria-hidden="true">АК</span>
+  </div>
+  <nav class="sidebar" aria-label="Разделы">
+      <div class="nav-group">Работа</div>
+      <a class="nav-item" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>Заказы</a>
+      <a class="nav-item" href="#" aria-current="page"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+      <a class="nav-item" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M17 11a3 3 0 1 0 0-6M19 20a5 5 0 0 0-3-4.6"/></svg>Клиенты</a>
+      <div class="nav-group">Система</div>
+      <a class="nav-item" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/></svg>Настройки</a>
+  </nav>
+  <main>
+    <div class="page-header">
+      <div class="page-title-row">
+        <h1>Дашборд</h1>
+        <div class="select-wrap">
+          <select class="select" aria-label="Период"><option>Сентябрь 2026</option><option>Август 2026</option></select>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="card">
+        <div class="kpi-label">Заказов за неделю</div>
+        <div class="kpi-value">1 284</div>
+        <div class="kpi-delta kpi-delta--up">+6,4 % к прошлой неделе</div>
+      </div>
+      <div class="card">
+        <div class="kpi-label">Выручка, ₽</div>
+        <div class="kpi-value">8 412 300</div>
+        <div class="kpi-delta kpi-delta--up">+2,1 % к прошлой неделе</div>
+      </div>
+      <div class="card">
+        <div class="kpi-label">Средний чек, ₽</div>
+        <div class="kpi-value">6 551</div>
+        <div class="kpi-delta kpi-delta--down">−1,8 % к прошлой неделе</div>
+      </div>
+      <div class="card">
+        <div class="kpi-label">Просрочено</div>
+        <div class="kpi-value">37</div>
+        <div class="kpi-delta kpi-delta--down">−12 заказов к прошлой неделе</div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="card">
+        <h3>Заказы по дням</h3>
+        <div class="bars" aria-hidden="true"><div class="bar" style="height:42%"></div><div class="bar" style="height:58%"></div><div class="bar" style="height:51%"></div><div class="bar" style="height:74%"></div><div class="bar" style="height:66%"></div><div class="bar" style="height:88%"></div><div class="bar" style="height:61%"></div><div class="bar" style="height:79%"></div><div class="bar" style="height:92%"></div><div class="bar" style="height:70%"></div><div class="bar" style="height:64%"></div><div class="bar" style="height:83%"></div></div>
+        <div class="legend">
+          <span><i class="swatch" style="background:var(--chart-1)"></i>Оформлено</span>
+          <span><i class="swatch" style="background:var(--chart-2)"></i>Доставлено</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Города</h3>
+        <table>
+          <thead><tr><th>Город</th><th class="num">Заказов</th><th class="num">Доля</th></tr></thead>
+          <tbody>
+            <tr><td>Москва</td><td class="num">418</td><td class="num">32,6&nbsp;%</td></tr>
+            <tr><td>Казань</td><td class="num">237</td><td class="num">18,5&nbsp;%</td></tr>
+            <tr><td>Пермь</td><td class="num">196</td><td class="num">15,3&nbsp;%</td></tr>
+            <tr><td>Омск</td><td class="num">151</td><td class="num">11,8&nbsp;%</td></tr>
+            <tr><td>Прочие</td><td class="num">282</td><td class="num">21,8&nbsp;%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

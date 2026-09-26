@@ -1,0 +1,109 @@
+/* site.css — демо-лендинг «Лесная обжарка» (агент M, волна 3, 24.09.2026). Основа — base.css шаблонов J
+   (10-web-integration/pages/css/base.css): hero calc(100svh − 64px) (J/01: не весь вьюпорт), кнопка паузы 44 px, зерно поверх,
+   видео-слой невидим до первого кадра. Токены — brand/tokens.json; шрифт — системный стек (страница не ждёт веб-шрифт).
+   Страница только светлая: 3D-иконки «запечены» на цвете секции #F4EFE6 (env_color паспорта) — см. 14-recipes/02 §4. */
+:root {
+  --canvas: #F4EFE6; --surface: #FBF8F2; --ink: #1C1B18; --ink-2: #5B5750; --line: #E4DCCD;
+  --green: #1F4D3A; --green-2: #163A2B; --gold: #C9A227; --radius: 14px;
+  --gutter: clamp(20px, 5vw, 72px);
+  --serif: "Noto Serif Display", "Noto Serif", Georgia, "Times New Roman", serif;
+  --sans: "Noto Sans", "Inter", "Helvetica Neue", Arial, system-ui, sans-serif;
+  color-scheme: light;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; font: 17px/1.55 var(--sans); color: var(--ink); background: var(--canvas); }
+img, video, svg { display: block; max-width: 100%; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.i { width: 1em; height: 1em; }
+.nw { white-space: nowrap; }                   /* диапазоны «1–2 дня» не рвать на тире */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ---------- шапка ---------- */
+.nav { height: 64px; display: flex; align-items: center; gap: 28px; padding: 0 var(--gutter); background: var(--canvas); position: relative; z-index: 3; }
+.nav__logo { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; letter-spacing: .01em; }
+.nav__logo img { width: 30px; height: 30px; }
+.nav .spacer { flex: 1; }
+.nav a.link { font-size: 15px; color: var(--ink-2); text-decoration: none; }
+.nav a.buy { font-size: 15px; font-weight: 600; text-decoration: none; padding: 9px 16px; border-radius: 999px; background: var(--green); color: #fff; }
+
+/* ---------- hero ---------- */
+.hero { position: relative; isolation: isolate; overflow: hidden; min-height: calc(100svh - 64px); color: var(--ink); background: #dcd2c6; }
+.hero__media, .hero__media > picture, .hero__media > picture > img, .hero__media > video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero__media { z-index: -2; }
+.hero__media > video { opacity: 0; transition: opacity .45s ease; }
+.hero.is-video .hero__media > video { opacity: 1; }
+.hero__scrim { position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(90deg, rgb(244 239 230 / .34) 0%, rgb(244 239 230 / .18) 38%, rgb(244 239 230 / 0) 58%); }
+.hero__copy { position: relative; padding: clamp(84px, 15vh, 156px) var(--gutter) 72px; max-width: 760px; }
+.hero__kicker { font-size: 13px; letter-spacing: .16em; text-transform: uppercase; margin: 0 0 18px; color: var(--green); font-weight: 600; }
+.hero h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(38px, 5.1vw, 70px); line-height: 1.03; letter-spacing: -.012em; margin: 0; text-wrap: balance; }
+.hero__lead { font-size: clamp(17px, 1.35vw, 20px); max-width: 36ch; margin: 22px 0 0; color: #34302A; }
+.cta { display: inline-flex; gap: 10px; align-items: center; margin-top: 30px; padding: 14px 22px; border-radius: 999px;
+  background: var(--green); color: #fff; text-decoration: none; font-weight: 600; }
+.cta svg { width: 18px; height: 18px; }
+.media-toggle { position: absolute; right: var(--gutter); bottom: 24px; z-index: 2; width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid rgb(28 27 24 / .35); background: rgb(244 239 230 / .6); color: var(--ink); cursor: pointer;
+  display: grid; place-items: center; backdrop-filter: blur(6px); }
+.media-toggle svg { width: 18px; height: 18px; }
+.media-toggle[hidden] { display: none; }
+.grain::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .07; mix-blend-mode: soft-light; background: url("../assets/svg/noise.svg"); }
+@media (max-width: 699px) {
+  .hero__copy { padding-top: 40px; }
+  .hero__lead { max-width: 30ch; }
+  .hero__scrim { background: linear-gradient(180deg, rgb(244 239 230 / .30) 0%, rgb(244 239 230 / .14) 45%, rgb(244 239 230 / 0) 62%); }
+  .nav a.link { display: none; }
+}
+
+/* ---------- секции ---------- */
+.section { padding: 88px var(--gutter); max-width: 1180px; margin: 0 auto; }
+.section h2 { font-family: var(--serif); font-weight: 600; font-size: clamp(28px, 3.2vw, 42px); line-height: 1.08; letter-spacing: -.01em; margin: 0 0 14px; }
+.section > p.sub { max-width: 60ch; color: var(--ink-2); margin: 0 0 40px; }
+.features { display: grid; gap: 28px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.feature { background: var(--canvas); }
+.feature img { width: 160px; height: 160px; margin: 0 0 8px -16px; }
+.feature h3 { font-size: 20px; margin: 0 0 8px; }
+.feature p { margin: 0; color: var(--ink-2); }
+.strip { list-style: none; margin: 0; padding: 28px 0; display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.strip li { display: flex; gap: 12px; align-items: center; font-size: 15px; }
+.strip svg { flex: none; width: 24px; height: 24px; color: var(--green); }
+
+/* ---------- товар ---------- */
+.pdp { display: grid; gap: 40px; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; }
+.pdp__main img { width: 100%; height: auto; border-radius: var(--radius); }
+.pdp__thumbs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; max-width: 420px; }
+.pdp__thumbs img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 10px; background: #fff; }
+.pdp__thumbs figure { margin: 0; } .pdp__thumbs figcaption { font-size: 13px; color: var(--ink-2); margin-top: 6px; }
+.pdp h2 { margin-top: 0; }
+.price { font-size: 32px; font-weight: 700; margin: 8px 0 16px; }
+.notes { color: var(--ink-2); margin: 0 0 20px; }
+.specs { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.specs li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.specs span:first-child { color: var(--ink-2); }
+@media (max-width: 859px) { .pdp { grid-template-columns: 1fr; } }
+.mp { display: grid; gap: 32px; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); align-items: center; margin-top: 64px; }
+.mp img { width: 100%; height: auto; border-radius: 12px; box-shadow: 0 10px 30px rgb(28 27 24 / .12); }
+@media (max-width: 699px) { .mp { grid-template-columns: 1fr; } .mp img { max-width: 300px; } }
+
+/* ---------- CTA: цвет — CSS, мешковина — серый тайл (AVIF 4:0:0) поверх в multiply ---------- */
+.band { position: relative; isolation: isolate; overflow: hidden; border-radius: 20px; padding: 64px clamp(24px, 5vw, 64px); color: #F4EFE6; background: var(--green); }
+.band::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: .5; mix-blend-mode: multiply;
+  background-image: image-set(url("../assets/texture/burlap-gray-256.avif") type("image/avif"), url("../assets/texture/burlap-gray-256.webp") type("image/webp"));
+  background-size: 256px 256px; }
+.band::after { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse 60% 90% at 80% 20%, rgb(201 162 39 / .16), rgb(201 162 39 / 0) 70%); }
+.band h2 { color: #fff; margin: 0 0 10px; }
+.band p { margin: 0; color: #E4DCCD; max-width: 52ch; }
+.band .cta { background: var(--gold); color: var(--green-2); }
+
+/* ---------- подвал ---------- */
+footer { padding: 48px var(--gutter) 64px; max-width: 1180px; margin: 0 auto; color: var(--ink-2); font-size: 14px; }
+footer .row { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 24px; }
+footer details { margin-top: 16px; max-width: 70ch; } footer summary { cursor: pointer; color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  .hero__media > video { display: none; }
+}
+.strip li > span { min-width: 0; }            /* подпись — один флекс-элемент: nowrap-«1–2 дня» внутри неё, а не отдельным элементом */

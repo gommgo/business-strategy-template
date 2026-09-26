@@ -1,0 +1,73 @@
+# Рецепт 10 · Тёмный премиальный продукт · L1 — 10-recipes/10-dark-premium-holo-l1.md · J · 2026-09-25
+recipe_version: "0.1"
+id: recipe:dark-premium-holo-l1
+title_ru: "Тёмный премиальный продукт, L1 — перелив, который продаёт покрытие"
+status: proposed
+checked_at: "2026-09-25"
+site_type: landing-site
+page_type: landing-product
+level: L1
+level_why: "товарная страница L1: один шейдерный фон и hover-перелив"
+budget_profile: landing-product@L1
+when: ["перелив — физическое свойство продукта (покрытие, плёнка, решётка)"]
+not_when: ["перелив «для премиальности» без свойства продукта — клише"]
+inputs:
+  playbook: "../site/10-playbooks-contracts/02-playbooks-landings.md#10"
+concept:
+  thesis: "Перелив — это покрытие, которое вы покупаете: блик просветления появляется там, где свет касается линзы."
+  story: {hero: "человек, который выбирает очки или объектив", conflict: "блики и усталость глаз", resolution: "покрытие гасит блик — видно, где он живёт"}
+  signature_move: "шейдер-блик покрытия за пакшотом + hover-перелив карточек"
+ledger:
+  paper: dark
+  display_style: grotesque
+  accent_hue: cool
+  macrostructure: photographic
+  hero_architecture: full-bleed-poster
+  main_technique: "effect:holo-shader-bg"
+  motion_signature: {entrances: "none", tempo: slow, curve: breathe}
+  corner_language: hairline
+page_plan:
+  macrostructure: photographic
+  first_screen_policy: offer-cta
+  length: "7 секций"
+  sections:
+    - {id: hero, block: "block:hero-media", role: hero, level: L1, visual_role: peak, effects: ["effect:holo-shader-bg", "effect:motion-toggle"], reduce: static-poster, mobile: "DPR 1, половина разрешения или постер"}
+    - {id: product-demo, block: "block:product-showcase", role: product-demo, level: L1, visual_role: support, effects: ["effect:tilt-card"], reduce: final-state, mobile: статично}
+    - {id: specs, block: "block:spec-sheet", role: specs, level: L0, visual_role: calm}
+    - {id: comparison, block: "block:comparison-table", role: comparison, level: L0, visual_role: calm}
+    - {id: testimonials, block: "block:review-aggregate", role: testimonials, level: L0, visual_role: calm}
+    - {id: faq, block: "block:faq", role: faq, level: L0, visual_role: calm}
+    - {id: final-cta, block: "block:cta-band", role: final-cta, level: L0, visual_role: calm}
+motion:
+  thesis: "Движется только свет на покрытии: блик дышит медленно и следует за указателем."
+  primitives: [none]
+  peaks: [hero]
+  accents: [product-demo]
+  toggle: button
+  smooth_scroll: false
+  transitions: none
+  loops_in_view_max: 1
+stack:
+  library: ["WebGL2 свой шейдер или @paper-design/shaders 0.0.81", css]
+  js_first_kb_br: 6
+  notes: "1 контекст, пауза вне экрана и в скрытой вкладке, reduce — кадр"
+assets:
+  - {slot: hero-visual, ladder: image, source: real, task_codes: [IMG-CUTOUT], blender_recipe: "../blender/12-recipes/09-glass-product.md", budget_kb: 150}
+  - {slot: background, ladder: shader, source: code, task_codes: [IMG-BG-ABSTRACT], budget_kb: 6}
+copy:
+  promise: "видно, где живёт блик"
+  slots: [headline, subheadline, spec-row, comparison-row, cta-label]
+budget:
+  js_presentation_kb_br: {mobile: 100, desktop: 100}
+  webgl_contexts: {mobile: 1, desktop: 1}
+  first_screen_mb: {mobile: 2.0, desktop: 3.5}
+  source: "ambition-levels.yaml L1"
+gates:
+  tools: ["motion_check.py --level L1 --f83 h1", "page_accept.py --contrast h1"]
+  must_pass: [EG-WEIGHT-03, EG-A11Y-01, EG-A11Y-02, EG-A11Y-03, EG-A11Y-09, EG-A11Y-16, EG-A11Y-22, EG-FB-04]
+  manual: ["цвет перелива на 2–3 экранах (sRGB, P3)", "F83 по кадрам шейдера"]
+decisions:
+  - {id: d-holo, technique: "cliche:iridescent-holo", decision: twist, why: "перелив — покрытие продукта, узкая полоса у блика, не весь экран"}
+  - {id: d-purple, technique: "cliche:purple-neon-band", decision: avoid, why: "оттенки по физике плёнки, без пурпурного фона"}
+  - {id: d-glass, technique: "cliche:glass-object-pastel", decision: avoid, why: "реальная линза на тёмном, не стеклянный тор на пастели"}
+errors: ["перелив на весь фон без концепции", "шейдер в покое и под текстом", "пурпурный градиент вместо спектра", "цвет по одному монитору"]

@@ -1,0 +1,83 @@
+{
+ "source": "Blender 5.2.2 · Cycles 64 спп + OIDN · полный круг 360°, 72 кадра через 5° (порядок −180°…+180°) · 0 ₽ · 26.09.2026",
+ "fps": 12,
+ "frames_video": 73,
+ "duration": 6.0833,
+ "step": 1,
+ "video": {
+  "orbit-h264-g1": {
+   "src": "assets/full360/orbit-h264-g1.mp4",
+   "codec": "h264",
+   "gop": 1,
+   "crf": 22,
+   "bytes": 2532230,
+   "type": "video/mp4; codecs=\"avc1.64001f\""
+  },
+  "orbit-h264-g4": {
+   "src": "assets/full360/orbit-h264-g4.mp4",
+   "codec": "h264",
+   "gop": 4,
+   "crf": 22,
+   "bytes": 2223906,
+   "type": "video/mp4; codecs=\"avc1.64001f\""
+  },
+  "orbit-h264-g8": {
+   "src": "assets/full360/orbit-h264-g8.mp4",
+   "codec": "h264",
+   "gop": 8,
+   "crf": 22,
+   "bytes": 2057410,
+   "type": "video/mp4; codecs=\"avc1.64001f\""
+  },
+  "orbit-av1-g1": {
+   "src": "assets/full360/orbit-av1-g1.mp4",
+   "codec": "av1",
+   "gop": 1,
+   "crf": 32,
+   "bytes": 1459689,
+   "type": "video/mp4; codecs=\"av01.0.05M.10\""
+  },
+  "orbit-av1-g4": {
+   "src": "assets/full360/orbit-av1-g4.mp4",
+   "codec": "av1",
+   "gop": 4,
+   "crf": 32,
+   "bytes": 1259967,
+   "type": "video/mp4; codecs=\"av01.0.05M.10\""
+  },
+  "orbit-av1-g8": {
+   "src": "assets/full360/orbit-av1-g8.mp4",
+   "codec": "av1",
+   "gop": 8,
+   "crf": 32,
+   "bytes": 1119533,
+   "type": "video/mp4; codecs=\"av01.0.05M.10\""
+  }
+ },
+ "frames": {
+  "seq-avif-1280": {
+   "pattern": "assets/full360/seq-avif-1280/f{i}.avif",
+   "count": 73,
+   "format": "avif",
+   "width": 1280,
+   "height": 720,
+   "bytes": 1669428
+  },
+  "seq-webp-1280": {
+   "pattern": "assets/full360/seq-webp-1280/f{i}.webp",
+   "count": 73,
+   "format": "webp",
+   "width": 1280,
+   "height": 720,
+   "bytes": 2192900
+  },
+  "seq-avif-960": {
+   "pattern": "assets/full360/seq-avif-960/f{i}.avif",
+   "count": 73,
+   "format": "avif",
+   "width": 960,
+   "height": 540,
+   "bytes": 1123425
+  }
+ }
+}

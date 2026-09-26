@@ -1,0 +1,174 @@
+# ПРИМЕР J v1 · страница not-found (planlib.py); факты — демо text E.
+page_plan_version: '1'
+checked: '2026-09-24'
+status: proposed
+example: true
+site: okoshko-demo
+refs:
+  brief: ../site-brief.yaml
+  facts: ../facts.yaml
+  blocks: ../../../../04-blocks/blocks.yaml
+  vocabulary: ../../../../02-site-types/vocabulary.yaml
+  lead_forms: ../../../../05-conversion-funnels/lead-forms.yaml
+  events: ../../../../07-seo-geo-performance-analytics/events.yaml
+  legal_requirements: ../../../../08-legal-trust-a11y/legal-requirements.yaml
+  head_kit: ../../../../07-seo-geo-performance-analytics/head-kit.yaml
+  budgets: ../../../../07-seo-geo-performance-analytics/budgets.yaml
+page:
+  id: not-found
+  page_type: not-found-page
+  lang: ru
+  locale: ru-RU
+  jurisdiction:
+  - ru
+  goal: вернуть к пробному периоду
+  primary_action: start-trial
+  cta_target:
+    kind: route
+    value: /signup
+  awareness: product-aware
+  awareness_basis:
+    from: assumption
+    rule: уровень по главному источнику страницы (C 01 §3.1)
+  traffic:
+  - traffic_source: internal
+    temperature: warm
+    device: mixed
+  macrostructure: long-document
+  macrostructure_family: document
+  first_screen_policy: offer-cta-header
+  budget_profile: not-found-page@L0
+  ambition_level: L0
+  navigation:
+    header: landing-minimal
+    archetype: minimal-cta
+    anchor_nav: false
+    logo_link: /
+    breadcrumbs: false
+    footer: minimal
+  seo:
+    indexable: false
+    canonical: self
+    h1: not-found.title
+    structured_data: []
+    ssr_required: false
+    sitemap: false
+  legal:
+    pd_consent: not-collected
+    privacy_policy: /privacy
+    cookie_banner: required
+    cookie_mode: opt-in
+    analytics_before_consent: false
+    withdraw_link: footer
+    ad_marking: false
+    requisites: footer
+    operator_ref: missing:legal-details
+    requirements:
+    - req:LR-RU-10
+    - req:LR-RU-13
+    - req:LR-RU-14
+    - req:LR-RU-16
+    - req:LR-RU-19
+    - req:LR-RU-22
+    - req:LR-RU-24
+    notes: 'регистрация и оплата — в продукте (/signup): согласие и оферта там (I); не юридическое заключение'
+  analytics:
+    systems:
+    - yandex-metrica
+    goals: []
+    load_after_consent: true
+sections:
+- id: header
+  role: header
+  question: как начать и как войти
+  job: логотип → главная, пробный период, вход
+  block: header
+  variant: landing-minimal
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: cta-label
+      slot: cta-label
+      intent: 'cta-label: по иерархии сообщений text'
+    media:
+    - id: logo
+      slot: brand-logo
+      media_role: informational
+      goal: показать brand-logo
+      source: generate
+      authenticity: real-or-generated
+    action:
+    - id: cta
+      slot: cta-primary
+      action: start-trial
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: cta-label
+    - id: login
+      slot: link
+      action: log-in
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'
+- id: not-found
+  role: not-found
+  question: куда идти
+  job: 'пути: главная, тарифы'
+  block: not-found
+  variant: simple
+  next_step: главное действие страницы
+  slots:
+    text:
+    - id: title
+      slot: headline
+      heading: h1
+      intent: 'headline: по иерархии сообщений text'
+    - id: body
+      slot: body
+      intent: 'body: по иерархии сообщений text'
+    - id: cta-label
+      slot: cta-label
+      intent: 'cta-label: по иерархии сообщений text'
+    action:
+    - id: cta
+      slot: cta-primary
+      action: start-trial
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: cta-label
+- id: footer
+  role: footer
+  question: кто продавец, оферта и политика
+  job: реквизиты, правовые ссылки
+  block: footer
+  variant: minimal
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: legal
+      slot: footer-legal
+      intent: 'footer-legal: по иерархии сообщений text'
+    - id: privacy-label
+      slot: nav-label
+      intent: подписи правовых ссылок
+    data:
+    - id: company
+      slot: fact-ref
+      fact: missing:legal-details
+      anatomy: company
+      on_missing: placeholder
+    action:
+    - id: privacy
+      slot: link
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'

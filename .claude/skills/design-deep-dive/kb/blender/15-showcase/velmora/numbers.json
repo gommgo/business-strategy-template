@@ -1,0 +1,263 @@
+{
+ "subject": "velmora",
+ "track": "VD",
+ "note": "Дуэль «нейросеть против Blender»: облёт флакона Velmora. Фаза 1 — кадры и числа; фазы 2–3 — облёт Cycles, страница b-blender на том же scrub.js, судья (velmora/judge/).",
+ "ai_reference": {
+  "source": "SC-03 · Kling 3 std i2v 5 с 720p (+ кадр GPT Image 2.5 Sunburst 2K)",
+  "cost_rub": 57,
+  "frames_on_page": 61,
+  "arc_deg": 25,
+  "push_in_pct": 12,
+  "wire_kb": {
+   "seq_avif_1280": 1250,
+   "seq_webp_1280": 1555,
+   "seq_avif_960": 855,
+   "av1_gop4": 998,
+   "h264_gop4": 1660,
+   "poster_avif": 18
+  },
+  "copy": "velmora/ai/01-mouse-scrub/index.html (как есть, 14 МБ со всеми вариантами доставки)"
+ },
+ "phase1": {
+  "date": "2026-09-25",
+  "agent_clock": {
+   "start": "18:31",
+   "stop": "20:15",
+   "minutes": 104
+  },
+  "machine": {
+   "blender_runs": 37,
+   "blender_s": 1708,
+   "queue_wait_s": 1488,
+   "note": "весь фаза 1; журнал .locks/slot_run.log, метки VD-*"
+  },
+  "scene": {
+   "tris": 185184,
+   "materials": 9,
+   "lights_S1": 13,
+   "label_texture_px": [
+    4096,
+    1244
+   ],
+   "engine": "Cycles CPU 20 потоков",
+   "view": "Khronos PBR Neutral"
+  },
+  "light_study_960x540_32spp_s": {
+   "S1": 11.1,
+   "S2": 14.0,
+   "S3": 21.2
+  },
+  "hero_v1_1280x720_128spp_s": {
+   "f000": 57.8,
+   "f030": 59.9,
+   "f060": 68.4,
+   "f180": 81.1
+  },
+  "hero_v2_1280x720_128spp_s": {
+   "f000": 62.4,
+   "f030": 75.0,
+   "f060": 73.8,
+   "f180": 85.6
+  },
+  "orbit_estimate_machine_h": {
+   "61_frames_1280x720_128spp": 1.2,
+   "120_frames_1280x720_128spp": 2.3,
+   "61_frames_2560x1440_128spp": 4.5,
+   "120_frames_2560x1440_128spp": 9.0,
+   "basis": "68 ± 8 с/кадр (v1–v5, 20 кадров); 2560×1440 — ×4 пикселя; пачки ≤ 15 мин = 12 кадров"
+  },
+  "cost_rub": 0,
+  "hero_v3_1280x720_128spp_s": {
+   "f000": 61.7,
+   "f030": 66.3,
+   "f060": 68.4,
+   "f180": 74.8
+  },
+  "hero_v4_1280x720_128spp_s": {
+   "f000": 60.3,
+   "f030": 64.3,
+   "f060": 68.3,
+   "f180": 75.5
+  },
+  "hero_v5_1280x720_128spp_s": {
+   "f000": 73.5,
+   "f030": 67.3,
+   "f060": 80.8,
+   "f180": 71.8,
+   "final": true
+  },
+  "web_estimate": {
+   "avif_q55_frame_kb_pillow": 15.3,
+   "avif_frame_kb_avifenc_equiv": 17.5,
+   "seq61_avif_kb_equiv": 1070,
+   "ai_seq61_avif_kb": 1250,
+   "note": "Pillow q55 на кадрах нейросети даёт 17,9 КБ против 20,5 КБ avifenc — пересчёт ×1,14"
+  },
+  "gates_v5": {
+   "clip_obj_pct": [
+    0.28,
+    0.24,
+    0.26
+   ],
+   "bg_vs_page_dE": [
+    1.58,
+    1.67,
+    1.67
+   ],
+   "bg_noise_e3": 1.09,
+   "hi_obj_pct": [
+    0.12,
+    0.17,
+    0.19
+   ],
+   "weight_in_text": [
+    0.08,
+    0.11,
+    0.12
+   ],
+   "obj_minus_bg_L": [
+    58.8,
+    58.8,
+    58.6
+   ]
+  }
+ },
+ "phase2": {
+  "date": "2026-09-25/26",
+  "note": "Фаза 2 (VD2, 25.09 20:13–21:36): красота i1–i3, драйверы. Фаза 3 (VD3, 26.09 ночь): облёт, страница, судья.",
+  "scene": "velmora_v6_final.py (i3): лента — купол-среда + дисперсия тремя стёклами, воздух светом по складкам, гранит со слюдой, вторичное движение 12°",
+  "orbit25_spp": 128,
+  "orbit360_spp": 64,
+  "orbit25_s_per_frame": 87.0,
+  "orbit360_s_per_frame": 45.4,
+  "machine": {
+   "orbit25_render_h": 1.48,
+   "orbit360_render_h": 0.91,
+   "poster2k_s": 322.6,
+   "arc": {
+    "frames_done": 61,
+    "frames_expected": 61,
+    "spp": 128,
+    "render_s_sum": 5305.3,
+    "s_per_frame_mean": 87.0,
+    "s_per_frame_min_max": [
+     82.3,
+     112.5
+    ],
+    "batches": 11,
+    "blender_wall_s": 5212.0,
+    "queue_wait_s": 7838.8,
+    "peak_rss_mb_max": 1699,
+    "first_batch_t": "00:28:49",
+    "last_batch_t": "03:51:23"
+   },
+   "full": {
+    "frames_done": 72,
+    "frames_expected": 72,
+    "spp": 64,
+    "render_s_sum": 3266.4,
+    "s_per_frame_mean": 45.4,
+    "s_per_frame_min_max": [
+     38.4,
+     55.1
+    ],
+    "batches": 7,
+    "blender_wall_s": 3165.4,
+    "queue_wait_s": 3171.8,
+    "peak_rss_mb_max": 1724,
+    "first_batch_t": "04:53:50",
+    "last_batch_t": "06:27:56"
+   },
+   "poster2k": {
+    "frames_done": 1,
+    "frames_expected": 1,
+    "spp": 128,
+    "render_s_sum": 322.6,
+    "s_per_frame_mean": 322.6,
+    "s_per_frame_min_max": [
+     322.6,
+     322.6
+    ],
+    "batches": 1,
+    "blender_wall_s": 324.0,
+    "queue_wait_s": 1478.9,
+    "peak_rss_mb_max": 4370,
+    "first_batch_t": "04:21:31",
+    "last_batch_t": "04:21:31"
+   },
+   "full_spp_test": "64 против 96 спп на кадрах 000/036: 52,5/55,1 с против 67,4/76,8 с; зерно фона 1,11e-3 у обоих; глазами неотличимы → 64 (07-orbit/full_spp_test.json, full_t64/_zoom_64_vs_96.png)",
+   "vd3_queue_log": {
+    "runs": 43,
+    "wait_s": 21767,
+    "busy_s": 9741
+   },
+   "note": "render_h — время Blender по пачкам (сборка сцены, BVH, маски — внутри); s_per_frame — чистый рендер кадра; очередь — отдельно"
+  },
+  "encode": {
+   "arc": {
+    "frames": 61,
+    "total_secs": 58.0,
+    "kb": {
+     "seq-avif-1280": 1301.8,
+     "seq-webp-1280": 1712.0,
+     "seq-avif-960": 873.2,
+     "orbit-h264-g1": 1983.1,
+     "orbit-h264-g4": 1300.1,
+     "orbit-h264-g8": 1081.9,
+     "orbit-av1-g1": 1129.0,
+     "orbit-av1-g4": 656.1,
+     "orbit-av1-g8": 503.0
+    },
+    "per_frame_kb_avif1280": 21.3,
+    "poster_kb": {
+     "avif_kb": 18.7,
+     "webp_kb": 34.4
+    },
+    "ssim_av1_g4": 0.986039
+   },
+   "full": {
+    "frames": 73,
+    "total_secs": 69.1,
+    "kb": {
+     "seq-avif-1280": 1630.3,
+     "seq-webp-1280": 2141.5,
+     "seq-avif-960": 1097.1,
+     "orbit-h264-g1": 2472.9,
+     "orbit-h264-g4": 2171.8,
+     "orbit-h264-g8": 2009.2,
+     "orbit-av1-g1": 1425.5,
+     "orbit-av1-g4": 1230.4,
+     "orbit-av1-g8": 1093.3
+    },
+    "per_frame_kb_avif1280": 22.3,
+    "poster_kb": null,
+    "ssim_av1_g4": 0.982659
+   }
+  },
+  "i3_f030": {
+   "clip_obj_pct": 0.481,
+   "hi_obj_pct": 0.168,
+   "bg_vs_page_dE": 1.005,
+   "weight_on_obj": 0.363,
+   "weight_in_text": 0.105,
+   "bg_noise_e3": 1.119,
+   "obj_L_p50": 62.3,
+   "label_L_p50": 70.8
+  },
+  "agent_clock_vd3": {
+   "start": "00:06",
+   "stop": "06:35"
+  },
+  "agent_clock_vd2": {
+   "start": "20:13",
+   "stop": "21:36",
+   "minutes": 83
+  },
+  "machine_vd2": {
+   "blender_runs": 34,
+   "blender_s": 427,
+   "queue_wait_s": 2874
+  },
+  "cost_rub": 0
+ }
+}

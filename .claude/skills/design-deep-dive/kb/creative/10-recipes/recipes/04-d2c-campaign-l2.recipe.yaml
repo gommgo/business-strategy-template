@@ -1,0 +1,83 @@
+# Рецепт 04 · Кампания D2C · L2 — 10-recipes/04-d2c-campaign-l2.md · J · 2026-09-25
+recipe_version: "0.1"
+id: recipe:d2c-campaign-l2
+title_ru: "Кампания D2C, L2 — утро по минутам: от закрытой банки к первой чашке"
+status: proposed
+checked_at: "2026-09-25"
+site_type: campaign-site
+page_type: landing-campaign
+level: L2
+level_why: "кампания — впечатление и есть сообщение (решение заказчика п. 13); соцсети и инфлюенсеры"
+budget_profile: landing-campaign@L2
+when: ["запуск или сезонная кампания марки", "есть съёмка процесса или бюджет на неё"]
+not_when: ["кампания < 2 недель без съёмки — L1 (рецепт 02)", "горячий трафик на покупку — L1"]
+inputs:
+  playbook: "../site/10-playbooks-contracts/02-playbooks-landings.md#5"
+  art_direction_example: "01-creative-direction/examples/art-direction-forest-roast-l2.json"
+  asset_plan_example: "../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md#8"
+  video: ["V:yAWFjiaK1Ek 17:45", "V:ufHQG7fDLQc 05:08"]
+concept:
+  thesis: "Одно утро по минутам: прокрутка ведёт от закрытой банки к первой чашке; зелёный бренда растёт от детали до целого экрана к подписке."
+  story: {hero: "человек в 7:02", conflict: "кофе из капсулы как вчера", resolution: "четыре минуты ритуала и подписка на свежую обжарку"}
+  signature_move: "секвенция кадров по прокрутке с битами-минутами"
+  directions: ["Утро по минутам (выбрано)", "Зелёная банка", "Кривая обжарки"]
+ledger:
+  paper: light-warm
+  display_style: wide
+  accent_hue: cool
+  macrostructure: scroll-story
+  hero_architecture: full-bleed-poster
+  main_technique: "effect:image-sequence"
+  motion_signature: {entrances: "mask у дат", tempo: slow, curve: in-out}
+  corner_language: pill
+moodboard:
+  - {role: motion, query: "продуктовые страницы со скрабом по битам", take: "станции, биты", dont_take: "вечный слоумо"}
+  - {role: material, query: "документальная съёмка утреннего стола", take: "свет из окна, реальные предметы", dont_take: "кофейный сток"}
+page_plan:
+  macrostructure: scroll-story
+  first_screen_policy: poster
+  length: "7 секций (норма 5–9)"
+  sections:
+    - {id: hero, block: "block:hero-media", role: hero, level: L2, visual_role: accent, effects: ["effect:cinemagraph", "effect:motion-toggle"], assets: [hero-visual], reduce: static-poster}
+    - {id: story-open, block: "block:media-band", role: story, level: L2, visual_role: peak, effects: ["effect:image-sequence"], reduce: stations, mobile: "30 кадров, половина веса"}
+    - {id: offer, block: "block:offer-details", role: offer, level: L0, visual_role: calm}
+    - {id: story-brew, block: "block:feature-spotlight", role: story, level: L2, visual_role: peak, effects: ["effect:video-scrub"], reduce: stations}
+    - {id: proof-stats, block: "block:stat-strip", role: proof-stats, level: L0, visual_role: calm}
+    - {id: promo, block: "block:promo-offer", role: promo, level: L1, visual_role: support, effects: ["effect:mask-reveal"]}
+    - {id: final-cta, block: "block:email-capture", role: final-cta, level: L0, visual_role: calm}
+motion:
+  thesis: "Время идёт по минутам только по прокрутке; цвет бренда заливает экран к подписке."
+  primitives: [type-unmask, none]
+  peaks: [story-open, story-brew]
+  accents: [hero, promo]
+  toggle: button
+  smooth_scroll: false
+  transitions: none
+  loops_in_view_max: 1
+stack:
+  library: ["canvas 2D", css]
+  notes: "секвенция по видимости после LCP; видео-скраб с частыми ключевыми кадрами (-g 4)"
+assets:
+  - {slot: hero-visual, ladder: image, source: real, task_codes: [IMG-HERO-PHOTO, IMG-CUTOUT], budget_kb: 150}
+  - {slot: sequence, ladder: video, source: real, task_codes: [VID-I2V-PRODUCT], blender_recipe: "../blender/12-recipes/08-sequence-video-alpha.md", budget_kb: 4000}
+  - {slot: steam, ladder: video, source: generate, task_codes: [VID-CINEMAGRAPH], budget_kb: 300}
+copy:
+  promise: "одно утро — четыре минуты"
+  slots: [headline, section-title, body, badge, disclaimer, email-heading, form-consent]
+  rules: ["биты — HTML ≤ 2 строк", "срок акции — фактом, без таймера со сбросом"]
+budget:
+  js_presentation_kb_br: {mobile: 150, desktop: 200}
+  first_screen_mb: {mobile: 2.5, desktop: 4.0}
+  session_mb: {mobile: 8, desktop: 15}
+  video_kb: {mobile: 4000, desktop: 10000}
+  source: "ambition-levels.yaml L2"
+gates:
+  tools: ["motion_check.py --level L2 --spec", "page_accept.py --contrast h1 (текст на кадре)"]
+  must_pass: [EG-PERF-09, EG-WEIGHT-04, EG-WEIGHT-05, EG-A11Y-01, EG-A11Y-02, EG-A11Y-05, EG-A11Y-12, EG-FB-04]
+  manual: ["F83 по кадрам видео (EG-A11Y-23)", "видео-скраб на реальном iPhone"]
+decisions:
+  - {id: d-slowmo, technique: "cliche:eternal-slowmo", decision: avoid, why: "время в сюжете идёт по минутам, петли нет"}
+  - {id: d-rut, technique: "cliche:category-rut-imagery", decision: twist, why: "кофе — процесс одного утра, а не кофейный сток"}
+  - {id: d-preloader, technique: "cliche:preloader", decision: avoid, why: "постер-кадр секвенции вместо заставки"}
+  - {id: d-warm, technique: "cliche:warm-paper", decision: twist, why: "тёплая бумага только до пара, дальше экран заливает зелёный бренда"}
+errors: ["типовые блоки после истории", "секвенция в первом экране целиком", "таймер со сбросом", "текст в кадрах", "сжатие сюжета на телефоне"]

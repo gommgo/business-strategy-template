@@ -1,0 +1,207 @@
+# ПРИМЕР J v1 · лендинг SaaS · вымышленный сервис онлайн-записи «Окошко». Факты — демо text E, вымышлены.
+# Бриф — перевод демо-брифа E/03 (v0) в схему v1.
+version: 1
+checked: '2026-09-24'
+project:
+  slug: okoshko-demo
+  status: draft
+  prepared_by: Claude (агент site E, демо для примера page-plan)
+site_type: landing-site
+primary_page_type: landing-saas
+business:
+  name: Окошко
+  what: 'Онлайн-запись и напоминания клиентам для барбершопов и салонов: ссылка для самозаписи, напоминания в Telegram, перенос базы
+    бесплатно.'
+  kind: saas
+  goal:
+    primary: signups
+    note: Регистрации в пробный период 14 дней без карты от владельцев и администраторов салонов на 1–5 мастеров.
+  geography:
+    regions:
+    - Россия
+    remote: true
+conversion:
+  action: start-trial
+  target:
+    kind: route
+    value: /signup
+  channels:
+  - form
+  secondary_actions:
+  - message
+  thank_you: Письмо со ссылкой подтверждения адреса и первый шаг — перенос базы.
+traffic:
+  sources:
+  - source: paid-search
+    temperature: warm
+    share: 0.4
+    device: mixed
+    promise_of_source: 'объявление: онлайн-запись для барбершопа, 14 дней бесплатно'
+    entry_page: home
+  - source: search-category
+    temperature: warm
+    share: 0.3
+    device: mixed
+    entry_page: home
+  - source: paid-social
+    temperature: cold
+    share: 0.2
+    device: mobile
+    entry_page: home
+  - source: referral
+    temperature: warm
+    share: 0.1
+    device: mobile
+    entry_page: home
+  note: Доли — допущение E (q-traffic-shares).
+decision_context:
+  market: b2b
+  price_band: low
+  purchase_type: subscription
+  decision_unit: individual
+  cycle: days
+  perceived_risk: medium
+  risk_kinds:
+  - time
+  involvement: low
+offer:
+  kind: trial
+  summary: 14 дней бесплатно без привязки карты; перенос базы клиентов бесплатно за 1 рабочий день.
+  price_refs:
+  - fact:price-master
+  - fact:price-salon
+  - fact:price-network-from
+  terms_refs:
+  - fact:trial-14-days
+  - fact:import-free
+  - fact:cancel-refund
+  - fact:annual-discount
+proof:
+  facts_ref: facts.yaml
+  required_kinds:
+  - company
+  - price
+  - offer-terms
+  - demo
+  wanted_kinds:
+  - metric
+  - rating
+  - case
+  - testimonial
+  - client
+  collection:
+    owner: основатель (демо)
+    agent: агент E text (демо-набор)
+    status: in-progress
+constraints:
+  jurisdiction:
+  - ru
+  legal_category:
+  - general
+  accessibility: wcag22-aa
+  legal_intake:
+    rkn_registry: 'yes'
+    leads_storage: ru
+    sends_marketing: true
+    license: not-needed
+    sells_online: true
+    optional_cookies: true
+    medical: false
+    third_party:
+    - service: Яндекс Метрика
+      purpose: analytics
+      location: ru
+      sets_cookies: true
+  legal_note: 'Пример J v1: ответы правового опросника вымышлены (демо-факты text E).'
+policies:
+  capture_popup: 'off'
+  exit_intent: 'off'
+  chat_widget: 'off'
+  preloader: 'off'
+  cookie_banner: auto
+search:
+  engines:
+  - yandex
+  - google
+  ai_answers:
+  - yandex-alice
+  - google-ai
+  ai_bots_policy: ask
+analytics:
+  system: yandex-metrica
+  ab_testing: later
+languages:
+- lang: ru
+  role: primary
+pages:
+  mode: listed
+  list:
+  - id: home
+    page_type: landing-saas
+    purpose: Регистрация в пробный период
+    priority: must
+    main_sources:
+    - paid-search
+    - search-category
+    - paid-social
+    - referral
+  - id: pricing
+    page_type: pricing-page
+    purpose: Тарифы и сравнение
+    priority: should
+    main_sources:
+    - search-brand
+    - internal
+  - id: spasibo
+    page_type: thank-you-page
+    purpose: Подтвердить почту и перенести базу
+    priority: must
+  - id: privacy
+    page_type: legal-page
+    purpose: Политика обработки ПД
+    priority: must
+  - id: not-found
+    page_type: not-found-page
+    purpose: 404 с кодом 404 и путём к пробному периоду
+    priority: must
+ambition:
+  level: L1
+  source: default
+  by_section_role:
+  - role: pricing
+    level: L0
+    why: тарифы — L0 (creative section_caps)
+questions:
+- id: q-traffic-shares
+  block: traffic
+  q: Какие каналы и доли трафика ожидаются на запуске?
+  why: Порядок секций и первый экран зависят от осведомлённости трафика
+  options: []
+  default: Директ 0,4, поиск 0,3, соцсети 0,2, рекомендации 0,1
+  affects:
+  - /traffic/sources
+  priority: 2
+  asked: false
+  status: assumed
+- id: q-screenshots
+  block: proof
+  q: Пришлите настоящие скриншоты записи, напоминаний и кабинета (без данных клиентов)
+  why: 'SaaS: продукт на странице — только настоящий интерфейс (A: required_kinds demo)'
+  options: []
+  default: Скриншоты — от заказчика; без них hero без кадра продукта
+  affects:
+  - /proof/required_kinds
+  priority: 1
+  asked: false
+  status: open
+- id: q-legal-details
+  block: proof
+  q: Реквизиты юрлица для подвала и оферты?
+  why: Без сведений о продавце страницу не публикуем (I)
+  options: []
+  default: Не публикуем до ответа (missing:legal-details)
+  affects:
+  - /proof/required_kinds
+  priority: 1
+  asked: false
+  status: open

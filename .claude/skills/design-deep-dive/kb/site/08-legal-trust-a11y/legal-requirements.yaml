@@ -1,0 +1,711 @@
+# legal-requirements.yaml — требования закона к элементам сайта: юрисдикция × элемент страницы × норма × дата.
+# Владелец — site I (волна 2). НЕ ЮРИДИЧЕСКОЕ ЗАКЛЮЧЕНИЕ: справочник рисков для агента-генератора; спорное помечено
+# `label: спорно`; решения, от которых зависят деньги клиента, — к юристу заказчика.
+# Разбор и обоснование — 08-legal-trust-a11y/01-law-ru-eu.md (§ указаны в поле `doc`).
+# Ссылки из других форматов — `req:<id>` (пространство `req` в 02-site-types/vocabulary.yaml).
+# Поля:
+#   id           LR-<JUR>-<NN>
+#   jurisdiction ru | eu (id словаря B; kz, by, us, other — не покрыты)
+#   element      form | consent | cookie-banner | footer | pricing | reviews | ads | policy-page | offer-page | analytics |
+#                chat-widget | newsletter
+#   requirement  что должно быть на странице (действие для генератора)
+#   norm         закон, статья, редакция (дата); для разъяснений надзора — в regulator_position
+#   source_url   первоисточник (официальный текст или справочная система с датой редакции)
+#   regulator_position  позиция надзора или практика (РКН, ФАС, EDPB); null — нет найденной
+#   severity     blocker — прямая норма закона с санкцией, генератор не выпускает страницу;
+#                serious — позиция надзора или высокий риск, выпуск только с решением заказчика;
+#                advice  — практика или неполная проверка
+#   label        стандарт | регулятор | спорно | практика | не проверено (метки базы)
+#   check        как проверить (DOM | NET | DOC | HUM — ручная/юрист) — вход для K и page_gates.py (P)
+#   applies_when условие применения
+#   refs         блоки, слоты, правила сестёр (с пространством имён)
+#   sanction     размер штрафа юрлицу (КоАП, ред. от 26.07.2026) — ориентир риска
+#   checked      дата сверки с источником
+version: 1
+checked: 2026-09-24
+default_jurisdiction: ru          # решение заказчика 11: РФ по умолчанию, ЕС — профиль брифа
+disclaimer: "Не юридическое заключение. Редакции законов — на 2026-09-24; перед запуском сайта сверить с юристом."
+
+requirements:
+
+  # ───────────────────────────── РФ: персональные данные (152-ФЗ) ─────────────────────────────
+  - id: LR-RU-01
+    jurisdiction: ru
+    element: consent
+    requirement: >-
+      Согласие на обработку ПД — отдельный элемент формы (своя галочка и свой текст или ссылка на отдельный документ
+      согласия), не внутри оферты, пользовательского соглашения, политики или текста кнопки; согласие на рассылку — своей
+      галочкой.
+    norm: "152-ФЗ ст. 9 ч. 1, 4-е предложение (введено ст. 5 156-ФЗ от 24.06.2025, в силе с 01.09.2025); закон в ред. от 26.07.2026"
+    source_url: "http://www.kremlin.ru/acts/bank/52029 ; https://www.consultant.ru/document/cons_doc_LAW_61801/6c94959bc017ac80140621762d2ac59f6006b08c/"
+    regulator_position: "РКН Хабаровск, 30.10.2024: нарушение — нет возможности дать согласие «путём проставления отметки в чекбоксе, расположенном рядом с формой сбора» (https://27.rkn.gov.ru/news/news347783.htm)"
+    severity: blocker
+    label: стандарт
+    check: "DOM: у каждой формы с полями ПД есть input[type=checkbox] согласия ПД, не общий с офертой/рассылкой; текст согласия — отдельный документ или раскрытие"
+    applies_when: "форма, квиз, калькулятор с контактом, обратный звонок, запись, чат с контактом — любой сбор ПД"
+    refs: [block:lead-form, block:quiz, block:callback-request, block:capture-popup, slot:form-consent, block:legal-text, copy-rule:COPY-L-CONS-01, copy-rule:COPY-L-CONS-02]
+    sanction: "КоАП 13.11 ч. 1 — 150–300 тыс. ₽ (обработка вне законных оснований); ч. 1.1 повторно — 300–500 тыс. ₽"
+    doc: "01 §1.1–1.2"
+    checked: 2026-09-24
+
+  - id: LR-RU-02
+    jurisdiction: ru
+    element: consent
+    requirement: >-
+      Галочка согласия не отмечена по умолчанию; согласие даётся активным действием посетителя. Строка «Нажимая кнопку,
+      вы соглашаетесь…» без отдельной галочки — не использовать (не «отдельно» и спорно по «однозначности»).
+    norm: "152-ФЗ ст. 9 ч. 1 («конкретным, предметным, информированным, сознательным и однозначным»; «оформлено отдельно»), ред. 156-ФЗ; ЗоЗПП ст. 16 п. 3.1 (ред. 69-ФЗ от 07.04.2025) — запрет предотметки платных допуслуг"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_61801/6c94959bc017ac80140621762d2ac59f6006b08c/"
+    regulator_position: "прямой позиции РКН о предотметке не найдено; по смыслу «сознательным и однозначным» — [спорно] для строки «нажимая…»"
+    severity: blocker
+    label: стандарт
+    check: "DOM: у checkbox согласия нет атрибута checked в исходном HTML и после загрузки; нет формы, где согласие — только строка у кнопки"
+    applies_when: "любая форма со сбором ПД"
+    refs: [slot:form-consent, copy-rule:COPY-L-CONS-02, "ux:06-04#8.1"]
+    sanction: "КоАП 13.11 ч. 1 — 150–300 тыс. ₽"
+    doc: "01 §1.2"
+    checked: 2026-09-24
+
+  - id: LR-RU-03
+    jurisdiction: ru
+    element: consent
+    requirement: >-
+      Текст согласия называет оператора (наименование, адрес), цель, перечень ПД, действия со ПД, срок и способ отзыва;
+      цель — одна на одно согласие («для ответа на заявку»), рассылка — отдельное согласие.
+    norm: "152-ФЗ ст. 9 ч. 1 («конкретным, предметным, информированным»); ч. 4 — обязательные реквизиты письменного согласия (где письменная форма требуется законом)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_61801/6c94959bc017ac80140621762d2ac59f6006b08c/"
+    regulator_position: "РКН по Приморскому краю, FAQ: согласие без указания цели и срока — недействительно (https://25.rkn.gov.ru/p17348/p32646/)"
+    severity: serious
+    label: регулятор
+    check: "DOC: документ согласия содержит оператора, цель, перечень ПД, действия, срок, способ отзыва; HUM — юрист"
+    applies_when: "любая форма со сбором ПД"
+    refs: [block:legal-text, slot:form-consent]
+    sanction: "КоАП 13.11 ч. 1 (150–300 тыс. ₽); ч. 2 (300–700 тыс. ₽) — если требовалась письменная форма"
+    doc: "01 §1.2"
+    checked: 2026-09-24
+
+  - id: LR-RU-04
+    jurisdiction: ru
+    element: consent
+    requirement: >-
+      Сайт сохраняет доказательство согласия: версию текста согласия, время, страницу и форму, отметку галочки — вместе с
+      заявкой в CRM; без журнала согласие недоказуемо.
+    norm: "152-ФЗ ст. 9 ч. 3 (доказывает оператор); ст. 15 ч. 1 (для рассылок — без доказательства согласие считается не полученным)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_61801/6c94959bc017ac80140621762d2ac59f6006b08c/"
+    regulator_position: null
+    severity: serious
+    label: стандарт
+    check: "HUM: в заявке, уходящей в CRM или почту, есть поля consent_version, consent_at, page_url; NET: отправка формы передаёт эти поля"
+    applies_when: "любая форма со сбором ПД"
+    refs: [block:lead-form, "site:07-04"]
+    sanction: "риск ч. 1 13.11 при невозможности доказать согласие"
+    doc: "01 §1.2"
+    checked: 2026-09-24
+
+  - id: LR-RU-05
+    jurisdiction: ru
+    element: policy-page
+    requirement: >-
+      Политика обработки ПД и сведения о реализуемых требованиях к защите опубликованы на сайте; ссылка — у каждой формы
+      и в подвале каждой страницы; у документа — дата редакции и оператор.
+    norm: "152-ФЗ ст. 18.1 ч. 2 (ред. 266-ФЗ от 14.07.2022; закон в ред. от 26.07.2026)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_61801/eeeebe22bf738fd65bb66b95cc278911ae2525ee/"
+    regulator_position: "РКН Хабаровск 30.10.2024: нарушение — нет возможности ознакомиться с политикой; политика не соответствует требованиям"
+    severity: blocker
+    label: стандарт
+    check: "DOM: ссылка на политику в каждой форме и в подвале; страница политики отвечает 200 и содержит дату редакции и наименование оператора"
+    applies_when: "сайт собирает ПД (формы, чат, cookie-аналитика)"
+    refs: [block:footer, block:legal-text, slot:footer-legal, page-type:legal-page]
+    sanction: "КоАП 13.11 ч. 3 — 30–60 тыс. ₽ (ИП 10–20 тыс.)"
+    doc: "01 §1.4"
+    checked: 2026-09-24
+
+  - id: LR-RU-06
+    jurisdiction: ru
+    element: form
+    requirement: >-
+      Поля формы — минимум для цели: каждое поле объяснимо следующим шагом продаж (question protocol); «на всякий случай»
+      не спрашивать (дата рождения, отчество, адрес для звонка).
+    norm: "152-ФЗ ст. 5 ч. 5 («не должны быть избыточными по отношению к заявленным целям»)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_61801/96fbc469f91f57235cc842a85e0516a99f23dc85/"
+    regulator_position: null
+    severity: serious
+    label: стандарт
+    check: "HUM: у каждого поля в lead-forms.yaml (F) заполнено why; лишних полей нет"
+    applies_when: "любая форма"
+    refs: [block:lead-form, block:quiz, "site:05-01", "V:Br5O0hAaqt8 15:24"]
+    sanction: "КоАП 13.11 ч. 1 — 150–300 тыс. ₽ (обработка, несовместимая с целями)"
+    doc: "01 §1.2"
+    checked: 2026-09-24
+
+  - id: LR-RU-07
+    jurisdiction: ru
+    element: analytics
+    requirement: >-
+      Данные граждан РФ из форм, чатов и аналитики с ПД сначала записываются в базы данных в РФ: форма не отправляет
+      заявки напрямую в зарубежные сервисы (Google Forms/Sheets, Typeform, HubSpot, зарубежные чаты и CRM).
+    norm: "152-ФЗ ст. 18 ч. 5 (ред. 23-ФЗ от 28.02.2025): запись, систематизация, накопление, хранение, уточнение, извлечение ПД граждан РФ с использованием баз данных за пределами РФ не допускаются"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_61801/cbf4e15b7c330f9372e876cdf2bc928bad7950ef/"
+    regulator_position: null
+    severity: blocker
+    label: стандарт
+    check: "NET: action формы и XHR отправки ведут на российский сервер или сервис с базой в РФ; HUM — где физически CRM"
+    applies_when: "сайт собирает ПД посетителей из РФ"
+    refs: [block:lead-form, block:chat-widget, "site:07-04"]
+    sanction: "КоАП 13.11 ч. 8 — 1–6 млн ₽; ч. 9 повторно — 6–18 млн ₽"
+    doc: "01 §1.5"
+    checked: 2026-09-24
+
+  - id: LR-RU-08
+    jurisdiction: ru
+    element: analytics
+    requirement: >-
+      Передача ПД за рубеж (зарубежная аналитика, пиксели, чат, видеоплеер, шрифты с чужого CDN, CRM) — только после
+      уведомления РКН о трансграничной передаче; в страны вне перечня «адекватных» — не раньше 10 рабочих дней после
+      уведомления. По умолчанию генератор ставит российскую аналитику (Метрика), шрифты со своего домена, видео — через
+      российский хостинг или фасад по нажатию.
+    norm: "152-ФЗ ст. 12 ч. 3, 9, 10, 11 (ред. 266-ФЗ от 14.07.2022; ч. 10–11 — ред. 265-ФЗ от 26.07.2026)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_61801/e4ebbe1780de623c7cf32a59ca82a7bb523a25dd/"
+    regulator_position: "РКН считает cookie и данные метрических программ ПД (заявления 2021 — по вторичке; практика Хабаровск 2024) → зарубежная аналитика = трансграничная передача [спорно]"
+    severity: serious
+    label: спорно
+    check: "NET: список сторонних доменов до и после согласия (page_anatomy.py M: third_party, tracking_before_action); HUM — уведомление РКН, если зарубежные сервисы оставлены"
+    applies_when: "на странице есть сторонние сервисы с серверами вне РФ (GA4, Meta Pixel, YouTube, Google Fonts, Intercom и т. п.)"
+    refs: ["site:07-03", "site:07-04", block:video-showcase, block:chat-widget]
+    sanction: "штраф за неуведомление отдельно не назван в 13.11 — риск по ч. 1 (150–300 тыс. ₽) и ограничение передачи [не проверено]"
+    doc: "01 §1.5"
+    checked: 2026-09-24
+
+  - id: LR-RU-09
+    jurisdiction: ru
+    element: policy-page
+    requirement: >-
+      Оператор (заказчик) до запуска формы подал уведомление в РКН о намерении обрабатывать ПД (реестр операторов); агент
+      спрашивает об этом в брифе и не выпускает форму без ответа.
+    norm: "152-ФЗ ст. 22 ч. 1 (исключения ч. 2 после 01.09.2022 — только неавтоматизированная обработка и спецслучаи)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_61801/d996966e22e1320c9de1ab82d9f6be12c3d9d765/"
+    regulator_position: "РКН ЦФО: уведомление через pd.rkn.gov.ru (бумага, УКЭП или Госуслуги), формы — приказ РКН от 28.10.2022 № 180"
+    severity: serious
+    label: стандарт
+    check: "HUM: номер в реестре операторов pd.rkn.gov.ru (бриф: constraints.legal_note или x-rkn_registry)"
+    applies_when: "сайт собирает ПД автоматизированно (любая веб-форма)"
+    refs: ["site:01-03"]
+    sanction: "КоАП 13.11 ч. 10 — 100–300 тыс. ₽ (введена 420-ФЗ от 30.11.2024)"
+    doc: "01 §1.6"
+    checked: 2026-09-24
+
+  - id: LR-RU-10
+    jurisdiction: ru
+    element: cookie-banner
+    requirement: >-
+      При cookie аналитики и рекламы (Метрика, пиксели, ретаргетинг) — баннер, который сообщает о них и даёт выбор
+      «Принять» / «Отклонить» равного вида на первом уровне; счётчики и пиксели запускаются после «Принять». Если
+      заказчик выбирает режим «уведомление» — только с его решением в брифе и без формулировки «продолжая пользоваться…».
+    norm: "152-ФЗ ст. 9 ч. 1 (согласие сознательное и однозначное); прямой нормы о cookie в законе нет"
+    source_url: "https://27.rkn.gov.ru/news/news347783.htm"
+    regulator_position: "РКН Хабаровск 30.10.2024: нарушение — «отсутствует информирование посетителей сайта о факте обработки сайтом ПД (файл cookie) с использованием метрических программ «Яндекс.Метрика», Facebook Pixel и механизм получения согласия на их обработку на сайте»"
+    severity: serious
+    label: спорно
+    check: "DOM: баннер есть, кнопки «Принять» и «Отклонить» на первом уровне, сопоставимые площадь и контраст; NET: до выбора нет запросов mc.yandex.ru/watch и пикселей (page_anatomy.py: analytics_before_consent = 0)"
+    applies_when: "на сайте есть необязательные cookie (аналитика, реклама, чат с трекингом)"
+    refs: [block:cookie-banner, slot:cookie-text, "site:07-04", "ux:06-04#8.2"]
+    sanction: "требование РКН об устранении; при признании cookie ПД — КоАП 13.11 ч. 1"
+    doc: "01 §1.3"
+    checked: 2026-09-24
+
+  - id: LR-RU-11
+    jurisdiction: ru
+    element: newsletter
+    requirement: >-
+      Подписка на рассылку (email, SMS, мессенджер) — отдельная неотмеченная галочка или отдельная форма с явным
+      предметом «получать рекламу/новости от <компания>»; в каждом письме — отписка.
+    norm: "38-ФЗ ст. 18 ч. 1 (ред. от 04.08.2026); 152-ФЗ ст. 15 ч. 1–2; 149-ФЗ ст. 10 ч. 3 (возможность отказа от информации)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_58968/f892dec1383709792452f18d36e7043306e2be0a/ ; https://www.consultant.ru/document/cons_doc_LAW_61801/5656527e0713bf229a6932ac7084dec50d0ebe1f/"
+    regulator_position: "РКН FAQ «Учёт интернет-рекламы»: email- и push-рассылки с предварительным согласием — erid не нужен, это реклама по сетям электросвязи (https://rkn.gov.ru/treatments/chasto-zadavaemye-voprosy/p1575/)"
+    severity: blocker
+    label: стандарт
+    check: "DOM: согласие на рассылку — отдельный checkbox без checked; HUM — шаблон письма с отпиской"
+    applies_when: "форма предлагает рассылку, лид-магнит с подпиской, waitlist с новостями"
+    refs: [action:subscribe, slot:form-consent, copy-rule:COPY-L-CONS-01]
+    sanction: "КоАП 14.3 ч. 1 — 100–500 тыс. ₽ (реклама без согласия)"
+    doc: "01 §1.7"
+    checked: 2026-09-24
+
+  - id: LR-RU-12
+    jurisdiction: ru
+    element: reviews
+    requirement: >-
+      Отзыв с именем, фото, должностью — только с согласием автора на распространение ПД (отдельным от других согласий,
+      с выбором перечня данных) и согласием на изображение; отзывы с Яндекс Карт, 2ГИС, соцсетей не копировать с именами —
+      показывать виджетом площадки или без ПД со ссылкой на источник.
+    norm: "152-ФЗ ст. 10.1 ч. 1, 2, 8, 12 (ред. 519-ФЗ от 30.12.2020); ГК РФ ст. 152.1 п. 1 (ред. 10.06.2026)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_61801/591acc70f577873c1ee54765eda110b7a0271eaf/"
+    regulator_position: null
+    severity: blocker
+    label: стандарт
+    check: "DOC: у факта testimonial в facts.yaml permission.pd_consent = true и image_consent = true при фото; HUM — документ согласия"
+    applies_when: "блоки отзывов, кейсов с цитатой, команды, спикеров с фото и именами"
+    refs: [block:testimonial-cards, block:testimonial-single, block:hero-quote, block:team-grid, block:review-aggregate, "text:02-strategy-messaging-facts.schema.yaml#permission"]
+    sanction: "КоАП 13.11 ч. 1 — 150–300 тыс. ₽; ГК 152.1 п. 3 — удаление по требованию"
+    doc: "01 §1.8; 02 §2"
+    checked: 2026-09-24
+
+  # ───────────────────────────── РФ: сведения о продавце и владельце сайта ─────────────────────────────
+  - id: LR-RU-13
+    jurisdiction: ru
+    element: footer
+    requirement: >-
+      На сайте — наименование владельца сайта, место нахождения и адрес, адрес электронной почты для заявлений
+      правообладателей (обычно подвал или «Контакты»).
+    norm: "149-ФЗ ст. 10 ч. 2 (ред. 364-ФЗ от 24.11.2014; закон в ред. от 26.06.2026)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_61798/546dcc703c0a1e08647b40a2eeaf9461168c7cb1/"
+    regulator_position: null
+    severity: blocker
+    label: стандарт
+    check: "DOM: подвал или страница контактов содержит наименование, адрес и email"
+    applies_when: "любой сайт владельца-резидента РФ или сайт для аудитории РФ"
+    refs: [block:footer, slot:footer-legal, "fact:company-details"]
+    sanction: "прямой санкции в КоАП не найдено [не проверено]"
+    doc: "01 §2.1"
+    checked: 2026-09-24
+
+  - id: LR-RU-14
+    jurisdiction: ru
+    element: footer
+    requirement: >-
+      Продавец или исполнитель, продающий потребителям, — фирменное наименование, адрес, режим работы, ОГРН (ИП — ФИО и
+      ОГРНИП; самозанятый — ФИО и ИНН); лицензия (номер, срок, орган) — если деятельность лицензируется.
+    norm: "ЗоЗПП ст. 9 п. 1, 1.3 (250-ФЗ от 29.07.2018), п. 2; закон в ред. от 28.12.2025 с изм. от 17.02.2026"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_305/2f56a12846dc7c6a671bc74151ecf9f9beca03b0/"
+    regulator_position: null
+    severity: blocker
+    label: стандарт
+    check: "DOM: подвал содержит наименование и ОГРН/ОГРНИП (page_anatomy.py: footer_ogrn); для лицензируемых — номер лицензии"
+    applies_when: "B2C: услуги, товары, курсы, мероприятия с оплатой; медицина, образование — плюс лицензия"
+    refs: [block:footer, slot:footer-legal, "fact:company-details", copy-rule:COPY-L-DIST-01]
+    sanction: "КоАП 14.8 ч. 1 (нарушение права на информацию) [не проверено — размер не сверен]"
+    doc: "01 §2.1"
+    checked: 2026-09-24
+
+  - id: LR-RU-15
+    jurisdiction: ru
+    element: offer-page
+    requirement: >-
+      При продаже на сайте до заключения договора — основные свойства, цена и условия, доставка, срок гарантии/службы,
+      порядок оплаты, полное наименование и адрес продавца, срок действия предложения; условия возврата: отказ до
+      передачи и 7 дней после, без письменной информации о возврате — 3 месяца.
+    norm: "ЗоЗПП ст. 26.1 п. 2–4 (ред. от 28.12.2025; п. 3–4 — см. Постановление КС РФ от 17.02.2026 № 7-П, не открыто)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_305/1525b1a2f037db240c8e6a749619f86e53857f13/"
+    regulator_position: null
+    severity: blocker
+    label: стандарт
+    check: "DOM/HUM: на странице заказа или оферты есть все пункты; нет «возврату не подлежит»"
+    applies_when: "оплата или заказ товара на сайте (промо товара с корзиной, предзаказ)"
+    refs: [block:pricing-single, block:offer-details, block:guarantee, copy-rule:COPY-L-RET-01, copy-rule:COPY-L-OFFER-01]
+    sanction: "КоАП 14.8 [не проверено]"
+    doc: "01 §2.2"
+    checked: 2026-09-24
+
+  - id: LR-RU-16
+    jurisdiction: ru
+    element: pricing
+    requirement: >-
+      Платные дополнительные товары и услуги — только отдельной неотмеченной галочкой с ценой рядом; цены — в рублях.
+    norm: "ЗоЗПП ст. 16 п. 3.1 (ред. 69-ФЗ от 07.04.2025); 38-ФЗ ст. 5 ч. 7.1; ЗоЗПП ст. 10 п. 2"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_305/9eb0f127ead4dc57e7d0a9d4954cf264c4b3cea8/"
+    regulator_position: null
+    severity: blocker
+    label: стандарт
+    check: "DOM: у checkbox платных опций нет checked; цены содержат ₽"
+    applies_when: "тарифы с опциями, бронь с доплатами, запись со страховкой"
+    refs: [block:pricing-cards, block:pricing-single, copy-rule:COPY-L-CUR-01]
+    sanction: "условие ничтожно (ЗоЗПП ст. 16 п. 1); КоАП 14.8 ч. 2 [не проверено]"
+    doc: "01 §2.2; 02 §4"
+    checked: 2026-09-24
+
+  # ───────────────────────────── РФ: реклама (38-ФЗ) ─────────────────────────────
+  - id: LR-RU-17
+    jurisdiction: ru
+    element: ads
+    requirement: >-
+      Блоки на своём сайте о чужих товарах и компаниях (баннеры партнёров, промо-размещения, «рекомендуем», спонсорские
+      ролики) — реклама: пометка «Реклама», рекламодатель (наименование, ИНН или ссылка на сведения) и erid до показа.
+      Свои товары и акции в потоке своего сайта — не реклама (маркировка не нужна).
+    norm: "38-ФЗ ст. 18.1 ч. 16–17 (ред. 479-ФЗ от 26.12.2024; закон в ред. от 04.08.2026)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_58968/2c4537e4796f6ff8b2736ed1b0d4fef08e14458e/"
+    regulator_position: "ФАС, приказ № 821/23 от 14.11.2023, разд. 9 (своё на своём сайте — не реклама; сведения о других компаниях, привлекающие к ним внимание, — может быть реклама); ФАС «Примеры рекламы в интернете, подлежащей маркировке» (слайды 1–4: свой сайт + чужой товар = реклама)"
+    severity: blocker
+    label: стандарт
+    check: "DOM: у блоков с внешними коммерческими ссылками есть «Реклама» + рекламодатель + erid (в ссылке ?erid= или надпись erid:)"
+    applies_when: "на странице есть сторонняя реклама, партнёрские баннеры, спонсоры вне раздела «Партнёры»"
+    refs: [slot:ad-marking, block:logo-wall, block:promo-offer, copy-rule:COPY-L-AD-01]
+    sanction: "КоАП 14.3 ч. 16 — 200–500 тыс. ₽ (без erid); ч. 1 — 100–500 тыс. ₽"
+    doc: "01 §3.1–3.2"
+    checked: 2026-09-24
+
+  - id: LR-RU-18
+    jurisdiction: ru
+    element: ads
+    requirement: >-
+      Собственный «закреплённый» баннер акции на каждой странице или многократно всплывающее окно акции — считать
+      рекламой: регистрировать у ОРД с отметкой «самореклама», пометка «Реклама» и erid; альтернатива — акция в потоке
+      страницы без закрепления.
+    norm: "38-ФЗ ст. 18.1 ч. 17"
+    source_url: "https://rkn.gov.ru/treatments/chasto-zadavaemye-voprosy/p1575/"
+    regulator_position: "РКН FAQ, вопрос 10: для «закрепленных» или неоднократно «всплывающих» баннеров собственной рекламы на собственном ресурсе у ОРД есть отметка «самореклама»; ФАС 821/23: стационарный баннер на каждой странице, не связанный с содержанием, может быть рекламой"
+    severity: serious
+    label: регулятор
+    check: "DOM: sticky/fixed-промо-баннер или авто-поп-ап с акцией → есть erid и «Реклама»"
+    applies_when: "липкая полоса акции, повторяющийся поп-ап акции, баннер на всех страницах"
+    refs: [block:promo-offer, block:capture-popup, slot:ad-marking]
+    sanction: "КоАП 14.3 ч. 16 — 200–500 тыс. ₽"
+    doc: "01 §3.2"
+    checked: 2026-09-24
+
+  - id: LR-RU-19
+    jurisdiction: ru
+    element: ads
+    requirement: >-
+      Объявление, которое ведёт на лендинг (Директ, VK, посевы, баннеры), маркируется само (erid в ссылке); посадочная
+      страница маркировки не требует, но сохраняет erid в URL (не срезать параметр редиректами) и совпадает с объявлением
+      по условиям предложения.
+    norm: "38-ФЗ ст. 18.1 ч. 17; требования к размещению erid — приказ РКН от 25.03.2025 № 68"
+    source_url: "https://rkn.gov.ru/treatments/chasto-zadavaemye-voprosy/p1575/"
+    regulator_position: "РКН FAQ: идентификатор предпочтительно в ссылке https://site.ru/?erid=…; срок действия erid не ограничен"
+    severity: advice
+    label: регулятор
+    check: "NET: переход по рекламной ссылке сохраняет ?erid= до загрузки страницы (нет редиректа, выбрасывающего параметр)"
+    applies_when: "трафик из платной интернет-рекламы"
+    refs: ["site:03-02", "site:07-04"]
+    sanction: null
+    doc: "01 §3.3"
+    checked: 2026-09-24
+
+  - id: LR-RU-20
+    jurisdiction: ru
+    element: ads
+    requirement: >-
+      Реклама товаров при дистанционной продаже (объявление, лендинг под трафик с заказом) — наименование, место
+      нахождения и ОГРН продавца (ИП — ФИО и ОГРНИП; самозанятый — ФИО и ИНН) в самой рекламе или на странице.
+    norm: "38-ФЗ ст. 8 (ред. 302-ФЗ от 10.07.2023)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_58968/b606ec51a053c12b78e7ab9a8c007fa723e6f321/"
+    regulator_position: null
+    severity: blocker
+    label: стандарт
+    check: "DOM: на странице с заказом — наименование и ОГРН (подвал или у кнопки)"
+    applies_when: "промо товара с заказом, предзаказ, доставка"
+    refs: [block:footer, copy-rule:COPY-L-DIST-01]
+    sanction: "КоАП 14.3 ч. 1 — 100–500 тыс. ₽"
+    doc: "01 §2.1"
+    checked: 2026-09-24
+
+  - id: LR-RU-21
+    jurisdiction: ru
+    element: ads
+    requirement: >-
+      Медицинские услуги: без «до/после», случаев излечения и улучшения здоровья, благодарностей пациентов и
+      предположений о болезни у читателя на посадочных страницах; предупреждение о противопоказаниях и консультации
+      специалиста.
+    norm: "38-ФЗ ст. 24 ч. 1 п. 2–3, 5; ч. 3; ч. 7 (закон в ред. от 04.08.2026)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_58968/8fbc3d05dbc778e17bfc1b45fb7339df525c1985/"
+    regulator_position: "УФАС — дела по медицинской рекламе (Коми ПК/1782/24 от 27.03.2024 — у text H)"
+    severity: blocker
+    label: стандарт
+    check: "HUM/IMG: нет галерей «до/после» и отзывов-благодарностей на странице медуслуги; есть предупреждение (≥ 5 % площади — text H)"
+    applies_when: "brief.constraints.legal_category = medical"
+    refs: [block:case-study, block:gallery, block:testimonial-cards, copy-rule:COPY-L-MED-01, copy-rule:COPY-L-MED-02]
+    sanction: "КоАП 14.3 ч. 5 [не проверено] / ч. 1 — 100–500 тыс. ₽"
+    doc: "02 §2.3"
+    checked: 2026-09-24
+
+  # ───────────────────────────── РФ: отзывы, доказательства, чат ─────────────────────────────
+  - id: LR-RU-22
+    jurisdiction: ru
+    element: reviews
+    requirement: >-
+      Отзывы и рекомендации — реальные, дословные, с датой; без выдуманных, купленных и ИИ-отзывов; витринная подборка на
+      лендинге подписана «подборка» со ссылкой на все отзывы или площадку; раздел отзывов публикует и отрицательные,
+      не редактирует тексты, помечает отзывы за вознаграждение.
+    norm: "38-ФЗ ст. 5 ч. 3 п. 10 (недостоверные сведения о рекомендациях); ЗоЗПП ст. 8, 10 (достоверность); ГОСТ Р ИСО 20488-2023 (добровольный, п. 5.6, 6.8, 7.2, 7.6)"
+    source_url: "https://meganorm.ru/Data/813/81352.pdf"
+    regulator_position: "ФАС 821/23: отзывы в специальных разделах — не реклама; вынесенные на лендинг — часть рекламы (text H §7)"
+    severity: blocker
+    label: стандарт
+    check: "DOC: каждый отзыв — факт testimonial с source и permission (facts.yaml); HUM — политика отзывов на сайте"
+    applies_when: "блоки отзывов, рейтингов, «нам доверяют»"
+    refs: [block:testimonial-cards, block:review-aggregate, page-type:reviews-page, copy-rule:COPY-L-REV-01]
+    sanction: "КоАП 14.3 ч. 1 — 100–500 тыс. ₽ (если реклама)"
+    doc: "02 §1–§3"
+    checked: 2026-09-24
+
+  - id: LR-RU-23
+    jurisdiction: ru
+    element: chat-widget
+    requirement: >-
+      Чат, собирающий имя и телефон, — те же правила, что форма: согласие и политика до отправки контакта, серверы с базой
+      в РФ; скрипт чата грузится по нажатию (фасад); ИИ-ассистент в чате подписан как ИИ.
+    norm: "152-ФЗ ст. 9 ч. 1, ст. 18 ч. 5, ст. 18.1 ч. 2"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_61801/cbf4e15b7c330f9372e876cdf2bc928bad7950ef/"
+    regulator_position: null
+    severity: serious
+    label: стандарт
+    check: "DOM/NET: чат-виджет — фасад; в окне чата ссылка на политику и согласие до поля телефона; домен виджета"
+    applies_when: "на сайте чат-виджет (Jivo, Bitrix24, Carrot quest, Intercom…)"
+    refs: [block:chat-widget, "ux:06-04#6.4"]
+    sanction: "как LR-RU-01, LR-RU-07"
+    doc: "01 §1.5"
+    checked: 2026-09-24
+
+  - id: LR-RU-24
+    jurisdiction: ru
+    element: form
+    requirement: >-
+      Если на сайте есть вход или регистрация пользователей из РФ — авторизация только способами, разрешёнными для РФ
+      (российский номер телефона, Госуслуги, ЕБС, российская система); «Войти через Google/Apple» для РФ не ставить.
+    norm: "149-ФЗ (изм. 406-ФЗ от 31.07.2023, с 01.12.2023) — статья не сверена"
+    source_url: "https://www.consultant.ru/legalnews/23004/"
+    regulator_position: null
+    severity: advice
+    label: не проверено
+    check: "DOM: кнопки входа через иностранные сервисы на страницах для РФ"
+    applies_when: "SaaS-лендинг с регистрацией, личный кабинет курса"
+    refs: ["ux:05-01"]
+    sanction: "законопроект о штрафах — статус не проверен"
+    doc: "01 §2.3"
+    checked: 2026-09-24
+
+  # ───────────────────────────── ЕС (профиль eu) ─────────────────────────────
+  - id: LR-EU-01
+    jurisdiction: eu
+    element: cookie-banner
+    requirement: >-
+      Необязательные cookie и схожие технологии (аналитика, пиксели, реклама, чат с трекингом, встроенное видео с cookie)
+      ставятся только после согласия; без согласия — только строго необходимые.
+    norm: "Directive 2002/58/EC (ePrivacy) art. 5(3), консолидированная ред. 19.12.2009 (Directive 2009/136/EC)"
+    source_url: "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02002L0058-20091219"
+    regulator_position: "EDPB Cookie Banner Taskforce, 17.01.2023: по умолчанию cookie, требующие согласия, не ставятся до позитивного действия"
+    severity: blocker
+    label: стандарт
+    check: "NET: до выбора нет запросов аналитики и пикселей, нет cookie кроме необходимых (page_anatomy.py: tracking_before_action пусто)"
+    applies_when: "профиль eu; любые необязательные cookie"
+    refs: [block:cookie-banner, "site:07-03", "site:07-04"]
+    sanction: "национальные законы ЕС; CNIL — штрафы до 150 млн € крупным платформам (ux 01/04 §7)"
+    doc: "01 §4.1"
+    checked: 2026-09-24
+
+  - id: LR-EU-02
+    jurisdiction: eu
+    element: cookie-banner
+    requirement: >-
+      «Отклонить» — кнопка на первом уровне рядом с «Принять», сопоставимые вид и контраст; не ссылка в тексте; баннер не
+      закрывает содержимое («cookie wall» запрещён).
+    norm: "GDPR art. 4(11), art. 7 (условия согласия) через ePrivacy art. 5(3)"
+    source_url: "https://www.edpb.europa.eu/system/files/2023-01/edpb_20230118_report_cookie_banner_taskforce_en.pdf"
+    regulator_position: "EDPB Taskforce 2023: отсутствие «отклонить» на уровне с «принять» — нарушение по мнению большинства надзоров (type A); ссылка вместо кнопки без визуальной поддержки — невалидно (type C); нечитаемый контраст кнопки отказа — явно вводит в заблуждение (type D/E). EDPB 05/2020 Example 6a — cookie wall: согласие не свободно"
+    severity: blocker
+    label: регулятор
+    check: "DOM: на первом уровне баннера button «Отклонить» с площадью и контрастом ≥ 0,8 от «Принять»; баннер не модальный"
+    applies_when: "профиль eu; баннер согласия"
+    refs: [block:cookie-banner, "ux:06-04#8.2"]
+    sanction: "национальные надзоры"
+    doc: "01 §4.1"
+    checked: 2026-09-24
+
+  - id: LR-EU-03
+    jurisdiction: eu
+    element: cookie-banner
+    requirement: >-
+      Категории cookie во втором уровне не отмечены заранее; прокрутка, продолжение навигации, закрытие баннера — не
+      согласие.
+    norm: "GDPR recital 32; art. 4(11)"
+    source_url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng"
+    regulator_position: "EDPB Taskforce 2023 type B (предотметки невалидны); EDPB Guidelines 05/2020 v1.1, п. 86, Example 16 (прокрутка не является ясным утвердительным действием ни при каких обстоятельствах)"
+    severity: blocker
+    label: стандарт
+    check: "DOM: в настройках cookie все необязательные переключатели выключены; нет текста «продолжая пользоваться»"
+    applies_when: "профиль eu"
+    refs: [block:cookie-banner, slot:cookie-text]
+    sanction: "национальные надзоры"
+    doc: "01 §4.1"
+    checked: 2026-09-24
+
+  - id: LR-EU-04
+    jurisdiction: eu
+    element: cookie-banner
+    requirement: >-
+      Отозвать согласие так же легко, как дать: постоянная ссылка «Настройки cookie» в подвале или маленькая иконка на всех
+      страницах; выбор хранится ≤ 12 месяцев, затем спросить снова.
+    norm: "GDPR art. 7(3)"
+    source_url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng"
+    regulator_position: "EDPB Taskforce 2023 type K: иконка или ссылка в видимом стандартном месте; GOV.UK Cookie banner: хранить выбор 1 год"
+    severity: blocker
+    label: стандарт
+    check: "DOM: в подвале ссылка на настройки cookie, открывающая выбор без перезагрузки"
+    applies_when: "профиль eu; баннер согласия"
+    refs: [block:footer, block:cookie-banner]
+    sanction: "национальные надзоры"
+    doc: "01 §4.1"
+    checked: 2026-09-24
+
+  - id: LR-EU-05
+    jurisdiction: eu
+    element: policy-page
+    requirement: >-
+      Страница cookie со списком используемых cookie, их целей и сроков; «строго необходимые» — только действительно
+      необходимые (сессия, выбор cookie, корзина, балансировка, безопасность).
+    norm: "ePrivacy art. 5(3) («clear and comprehensive information… about the purposes»); GDPR art. 13"
+    source_url: "https://www.edpb.europa.eu/system/files/2023-01/edpb_20230118_report_cookie_banner_taskforce_en.pdf"
+    regulator_position: "EDPB Taskforce 2023 type I: владелец сайта ведёт список cookie и доказывает «необходимость»"
+    severity: serious
+    label: регулятор
+    check: "DOC: страница cookie с таблицей (имя, поставщик, цель, срок); сверка со снятыми cookie"
+    applies_when: "профиль eu"
+    refs: [block:legal-text, page-type:legal-page]
+    sanction: null
+    doc: "01 §4.1"
+    checked: 2026-09-24
+
+  - id: LR-EU-06
+    jurisdiction: eu
+    element: form
+    requirement: >-
+      Заявка на расчёт, звонок, демо по просьбе посетителя — основание «шаги до договора по запросу субъекта»: галочка
+      согласия на ПД не нужна; нужна информация при сборе (кто, цель, основание, получатели, срок, права, жалоба) — ссылка
+      на уведомление о конфиденциальности у формы; рассылка — отдельное согласие.
+    norm: "GDPR art. 6(1)(b), art. 13(1)–(2), art. 5(1)(c)"
+    source_url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng"
+    regulator_position: null
+    severity: serious
+    label: стандарт
+    check: "DOM: у формы ссылка на privacy notice; галочка — только у рассылки"
+    applies_when: "профиль eu; лид-форма"
+    refs: [block:lead-form, slot:form-consent]
+    sanction: "GDPR art. 83 (до 20 млн € или 4 % оборота — для нарушений art. 5–7, 12–22)"
+    doc: "01 §4.2"
+    checked: 2026-09-24
+
+  - id: LR-EU-07
+    jurisdiction: eu
+    element: newsletter
+    requirement: >-
+      Email-маркетинг — предварительное согласие; исключение «soft opt-in» — своим покупателям о похожих своих товарах с
+      отказом при сборе и в каждом письме; отправитель не скрыт, адрес для отказа действует.
+    norm: "ePrivacy art. 13(1), (2), (4)"
+    source_url: "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02002L0058-20091219"
+    regulator_position: null
+    severity: blocker
+    label: стандарт
+    check: "DOM: отдельная неотмеченная галочка рассылки; HUM — шаблон письма"
+    applies_when: "профиль eu; подписка, waitlist с новостями"
+    refs: [action:subscribe]
+    sanction: "национальные законы"
+    doc: "01 §4.2"
+    checked: 2026-09-24
+
+  - id: LR-EU-08
+    jurisdiction: eu
+    element: reviews
+    requirement: >-
+      Если сайт показывает отзывы — сказать, проверяет ли и как, что их пишут реальные покупатели; не публиковать
+      фальшивые и заказные отзывы, не показывать только положительные, скрывая отрицательные.
+    norm: "UCPD 2005/29/EC art. 7(6), Annex I points 23b, 23c (введены Directive (EU) 2019/2161, OJ L 328, 18.12.2019)"
+    source_url: "https://www.legislation.gov.uk/eudr/2019/2161/pdfs/eudr_20192161_adopted_en.pdf"
+    regulator_position: "Omnibus, recital 49: «publishing only positive reviews and deleting the negative ones» — манипуляция"
+    severity: blocker
+    label: стандарт
+    check: "DOM: у блока отзывов строка «Как мы проверяем отзывы» со ссылкой; DOC — факты testimonial"
+    applies_when: "профиль eu; отзывы, рейтинги"
+    refs: [block:testimonial-cards, block:review-aggregate, copy-rule:COPY-L-EU-03]
+    sanction: "UCPD art. 13 в ред. Omnibus — национальные штрафы"
+    doc: "02 §3.4"
+    checked: 2026-09-24
+
+  - id: LR-EU-09
+    jurisdiction: eu
+    element: pricing
+    requirement: >-
+      Объявление о снижении цены показывает прежнюю цену — минимальную за не менее 30 дней до снижения; зачёркнутая цена
+      берётся из истории цен (факт с valid.from), не из «рекомендованной».
+    norm: "Directive 98/6/EC art. 6a (введена Directive (EU) 2019/2161)"
+    source_url: "https://www.legislation.gov.uk/eudr/2019/2161/pdfs/eudr_20192161_adopted_en.pdf"
+    regulator_position: null
+    severity: blocker
+    label: стандарт
+    check: "DOC: у слота price-old факт с историей цены за 30 дней"
+    applies_when: "профиль eu; акция со скидкой"
+    refs: [slot:price-old, block:promo-offer, copy-rule:COPY-L-EU-01]
+    sanction: "национальные законы"
+    doc: "02 §4"
+    checked: 2026-09-24
+
+  - id: LR-EU-10
+    jurisdiction: eu
+    element: offer-page
+    requirement: >-
+      Сайт, через который потребитель заключает договор (покупка, бронь, подписка), — e-commerce service по EAA:
+      доступность по WCAG 2.1 AA (EN 301 549; ориентир — WCAG 2.2 AA), заявление о доступности; микропредприятия (< 10
+      человек и оборот или баланс ≤ 2 млн €) освобождены.
+    norm: "Directive (EU) 2019/882 (EAA) art. 3 (определения e-commerce services, microenterprise), art. 4(5), Annex I; применяется с 28.06.2025"
+    source_url: "https://eur-lex.europa.eu/eli/dir/2019/882/oj/eng"
+    regulator_position: null
+    severity: serious
+    label: стандарт
+    check: "AXE + ручной протокол (03 §7); DOC — заявление о доступности"
+    applies_when: "профиль eu; B2C-продажа или бронирование на сайте; не микропредприятие"
+    refs: ["site:08-03", "ux:08-04#7.1"]
+    sanction: "национальные законы о переносе EAA"
+    doc: "01 §4.4; 03 §7"
+    checked: 2026-09-24
+
+  - id: LR-EU-11
+    jurisdiction: eu
+    element: chat-widget
+    requirement: >-
+      ИИ-чат на сайте сообщает, что посетитель общается с ИИ, — ясно и не позже первой реплики, в доступной форме.
+    norm: "Regulation (EU) 2024/1689 (AI Act) art. 50(1), 50(5); применяется с 02.08.2026"
+    source_url: "https://artificialintelligenceact.eu/article/50/"
+    regulator_position: null
+    severity: blocker
+    label: стандарт
+    check: "DOM: в шапке окна чата или первой реплике — «ИИ-ассистент»"
+    applies_when: "профиль eu; чат с ИИ"
+    refs: [block:chat-widget, "ai-media:12-02#1"]
+    sanction: "AI Act art. 99"
+    doc: "01 §4.5"
+    checked: 2026-09-24
+
+  - id: LR-EU-12
+    jurisdiction: eu
+    element: pricing
+    requirement: >-
+      Ложная срочность и дефицит (таймер без реального срока, «осталось 2» без данных) — недобросовестная практика; на
+      сайте-не-платформе запрет вытекает из UCPD, а не из DSA art. 25.
+    norm: "UCPD 2005/29/EC art. 6–7, Annex I (пункт о ложной срочности — консолидированный текст не открыт); DSA art. 3(i), 19, 25(2)"
+    source_url: "https://eur-lex.europa.eu/eli/reg/2022/2065/oj/eng"
+    regulator_position: null
+    severity: blocker
+    label: спорно
+    check: "HUM: таймер привязан к дате факта promo; повторная загрузка не сбрасывает"
+    applies_when: "профиль eu; акции, таймеры, остатки"
+    refs: [block:promo-offer, "ux:06-04#3.6", "site:08-02"]
+    sanction: "национальные законы"
+    doc: "02 §4"
+    checked: 2026-09-24
+
+  - id: LR-EU-13
+    jurisdiction: eu
+    element: footer
+    requirement: >-
+      Сведения о поставщике услуг информационного общества: наименование, географический адрес, email, регистрационный
+      номер, НДС — в подвале или на странице «Импрессум/Контакты».
+    norm: "Directive 2000/31/EC art. 5 (текст не открыт — по памяти) + национальные законы (напр., DE DDG § 5)"
+    source_url: "https://eur-lex.europa.eu/eli/dir/2000/31/oj/eng"
+    regulator_position: null
+    severity: advice
+    label: не проверено
+    check: "DOM: подвал или контакты с названными сведениями"
+    applies_when: "профиль eu"
+    refs: [block:footer]
+    sanction: null
+    doc: "01 §4.3"
+    checked: 2026-09-24

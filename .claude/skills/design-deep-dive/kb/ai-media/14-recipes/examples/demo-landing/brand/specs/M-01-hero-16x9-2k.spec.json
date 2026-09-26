@@ -1,0 +1,169 @@
+{
+  "spec_version": "0.2",
+  "id": "forest-roast-hero-16x9-2k",
+  "checked_at": "2026-09-24",
+  "brief_language": "en",
+  "task": "IMG-HERO-PHOTO",
+  "role": {
+    "section": "hero",
+    "slot": "hero",
+    "purpose": "hero desktop master 2K: the approved F-04 composition re-rendered at 2K",
+    "series_id": "forest-roast",
+    "priority": "lcp"
+  },
+  "subject": {
+    "summary": "a glazed off-white ceramic cup of black coffee on a pale oak table by a tall window in the morning"
+  },
+  "composition": {
+    "shot": "medium",
+    "subject_region": "right-third",
+    "angle": "eye-level",
+    "text_zone": {
+      "side": "left",
+      "rect": [
+        0,
+        0,
+        0.45,
+        1
+      ],
+      "tone": "even, low contrast",
+      "surface": "evenly lit cream plaster wall",
+      "purpose": "headline"
+    },
+    "focal_point": {
+      "x": 0.74,
+      "y": 0.62
+    }
+  },
+  "palette": [
+    {
+      "role": "dominant",
+      "hex": "#C9B79C",
+      "name": "pale oak",
+      "share": 0.284,
+      "applies_to": "table top and wooden surfaces"
+    },
+    {
+      "role": "background",
+      "hex": "#EFE8DC",
+      "name": "cream plaster",
+      "share": 0.406,
+      "applies_to": "plaster wall and window light"
+    },
+    {
+      "role": "secondary",
+      "hex": "#8C7B66",
+      "name": "warm taupe",
+      "share": 0.162,
+      "applies_to": "linen, paper bags, shade on wood"
+    },
+    {
+      "role": "accent",
+      "hex": "#1F4D3A",
+      "name": "forest green",
+      "share": 0.03,
+      "applies_to": "one small object: a tin, a ceramic lid or a linen tag",
+      "strict": true
+    },
+    {
+      "role": "shadow",
+      "hex": "#2B211A",
+      "name": "dark roast brown",
+      "share": 0.097,
+      "applies_to": "coffee, deep shadows"
+    }
+  ],
+  "text": {
+    "mode": "html_overlay"
+  },
+  "output": {
+    "primary_ratio": "16:9",
+    "resolution": "2K",
+    "format": "avif",
+    "max_kb": 150,
+    "aspect_ratios": [
+      "16:9",
+      "40:21"
+    ],
+    "variants": [
+      {
+        "ratio": "16:9",
+        "strategy": "generate"
+      },
+      {
+        "ratio": "40:21",
+        "strategy": "crop"
+      },
+      {
+        "ratio": "4:5",
+        "strategy": "generate",
+        "text_zone": {
+          "side": "top",
+          "rect": [
+            0,
+            0,
+            1,
+            0.35
+          ],
+          "purpose": "headline"
+        },
+        "subject_region": "bottom"
+      }
+    ]
+  },
+  "camera": {
+    "lens_mm": 35,
+    "depth_of_field": "medium",
+    "capture": "documentary still life, available light, no retouching"
+  },
+  "light": {
+    "direction": "right",
+    "quality": "soft",
+    "time_of_day": "early morning",
+    "source": "window"
+  },
+  "materials": [
+    "glazed off-white ceramic",
+    "pale oak",
+    "washed linen"
+  ],
+  "style": {
+    "medium": "photograph",
+    "grain": "fine natural film grain"
+  },
+  "series": {
+    "id": "forest-roast",
+    "block": "Documentary still-life photograph of everyday objects of a small coffee roastery - glazed off-white ceramics, pale oak, washed linen, kraft paper; soft morning window light from the right with long gentle shadows; warm neutral colour: cream plaster, pale oak and off-white ceramics with one small deep forest-green accent; 35mm lens slightly above table height, medium depth of field; fine natural film grain; unpolished, lived-in details: a few crumbs, a folded napkin, a faint ring on the wood.",
+    "avoid_average": true
+  },
+  "exclusions": [
+    {
+      "what": "people",
+      "kind": "object",
+      "replace_with": "no one in the frame"
+    },
+    {
+      "what": "readable text and logos",
+      "kind": "artifact",
+      "replace_with": "clean unmarked surfaces"
+    },
+    {
+      "what": "steaming latte art close-up",
+      "kind": "style",
+      "replace_with": "plain black coffee seen from slightly above"
+    },
+    {
+      "what": "background blur",
+      "kind": "style",
+      "replace_with": "medium depth of field, the wall stays readable"
+    }
+  ],
+  "references": [
+    {
+      "id": "comp",
+      "src": "../../../../../99-raw/phase5/inputs/M/hero-16x9-stub.png",
+      "role": "composition",
+      "note": "keep the exact scene, objects, camera angle, crop and light of this image; re-render it at higher detail"
+    }
+  ]
+}

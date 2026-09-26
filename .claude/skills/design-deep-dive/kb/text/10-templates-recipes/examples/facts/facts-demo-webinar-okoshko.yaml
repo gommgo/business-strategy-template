@@ -1,0 +1,646 @@
+# facts-demo-webinar-okoshko.yaml — ДЕМО-ФАКТЫ агента J3 для примера страницы вебинара (10-templates-recipes/examples/ru-okoshko-webinar.yaml)
+# text-research · волна 3 · J3 · 2026-09-24 · формат: 02-strategy-messaging/facts.schema.yaml (facts_version 1)
+#
+# ДЕМО. Вебинар, спикер, даты и документы выдуманы агентом J3; «Окошко» — демо-сервис агента E. Не публиковать и не выдавать
+# за реальную компанию или человека. Факты продукта (reminders, self-booking-link, import-free, trial-14-days, review-ruslan) —
+# копии из 99-raw/experiments/E/facts-demo-saas-okoshko.yaml с теми же id; у трёх use дополнен event-program (тема программы).
+# Что показывает: дата и время с часовым поясом, длительность, «бесплатно» с условием, запись и срок доступа (E 03 §3.5),
+# спикер с согласием на ФИО, пробел организатора (ворота публикации) и пробел числа мест с fallback omit-block.
+
+facts_version: 1
+date: '2026-09-24'
+site: okoshko-demo
+lang: ru
+jurisdiction: ru
+status: draft
+owner:
+  role: основатель (демо-заказчик)
+collected_by: агент J3 (демо-набор для примера вебинара, 2026-09-24)
+never_claim_defaults: ru-default-1
+entities:
+- id: product-okoshko
+  type: product
+  names:
+  - «Окошко»
+  - Окошко
+  - «Окошка»
+  - Окошка
+  - Okoshko
+- id: person-marina
+  type: person
+  names:
+  - Марина Белова
+  - Марина
+  fact_id: speaker-marina
+- id: person-ruslan
+  type: person
+  names:
+  - Руслан
+  fact_id: review-ruslan
+- id: city-kazan
+  type: place
+  names:
+  - Казань
+  - Казани
+facts:
+- id: webinar-date
+  kind: date
+  claim_class:
+  - fact-number
+  verbatim:
+  - 15 октября 2026 года, 19:00 по Москве
+  - Начало — 19:00 по Москве
+  canonical: Вебинар «Окошка» о записи и напоминаниях — 15 октября 2026 года, начало в 19:00 по московскому времени, онлайн.
+  values:
+  - date: '2026-10-15'
+    what: дата вебинара
+  - value: 19
+    unit: h
+    what: начало вебинара, время по Москве
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: план вебинара, письмо спикера
+    date: '2026-09-20'
+    derivation: direct
+    quote: Вебинар 15.10.2026, 19:00 МСК, онлайн
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - hero
+    - event-program
+    - lead-form
+    - final-cta
+    - faq
+    slot_types:
+    - subheadline
+    - cta-note
+    - hero-proof
+    - section-title
+    - list-item
+    - form-title
+    - form-lead
+    - faq-a
+    - body
+  valid:
+    until: '2026-10-15'
+  notes: ДЕМО-факт J3 (пример вебинара).
+  lang: ru
+- id: webinar-duration
+  kind: property
+  claim_class:
+  - fact-number
+  verbatim:
+  - '60 минут: 40 минут разбора и 20 минут ответов на вопросы'
+  - 60 минут
+  canonical: 'Вебинар длится 60 минут: 40 минут разбора настройки и 20 минут ответов на вопросы участников.'
+  values:
+  - value: 60
+    unit: min
+    what: длительность вебинара
+  - value: 40
+    unit: min
+    what: разбор
+  - value: 20
+    unit: min
+    what: ответы на вопросы
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: план вебинара, письмо спикера
+    date: '2026-09-20'
+    derivation: direct
+    quote: 'Длительность 60 мин: 40 мин разбор, 20 мин вопросы'
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - hero
+    - event-program
+    - faq
+    slot_types:
+    - subheadline
+    - section-title
+    - list-item
+    - faq-a
+    - body
+  notes: ДЕМО-факт J3 (пример вебинара).
+  lang: ru
+- id: webinar-free
+  kind: offer-terms
+  claim_class:
+  - price-discount
+  - purchase-terms
+  verbatim:
+  - Участие бесплатное, нужна регистрация по почте
+  - Участие бесплатное — ссылка придёт на почту после регистрации
+  canonical: 'Участие в вебинаре бесплатное: нужна регистрация по почте; ссылка на трансляцию приходит в письме за час до начала.'
+  values:
+  - value: 0
+    unit: RUB
+    what: стоимость участия
+    qualifier: регистрация по почте
+  - value: 1
+    unit: h
+    what: письмо со ссылкой до начала
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: план вебинара, письмо спикера
+    date: '2026-09-20'
+    derivation: direct
+    quote: Участие бесплатное, регистрация по email, ссылка на трансляцию — письмом за час
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - hero
+    - lead-form
+    - faq
+    - final-cta
+    slot_types:
+    - cta-note
+    - form-lead
+    - form-success
+    - faq-a
+    requires_nearby: 'условие: «регистрац»'
+  notes: ДЕМО-факт J3 (пример вебинара).
+  lang: ru
+- id: webinar-recording
+  kind: offer-terms
+  claim_class:
+  - purchase-terms
+  verbatim:
+  - Запись пришлём всем зарегистрированным, она доступна 7 дней
+  - Запись доступна 7 дней
+  canonical: Запись вебинара получают все зарегистрированные участники; ссылка на запись действует 7 дней после эфира.
+  values:
+  - value: 7
+    unit: days
+    what: доступ к записи
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: план вебинара, письмо спикера
+    date: '2026-09-20'
+    derivation: direct
+    quote: Запись — всем зарегистрированным, доступ 7 дней
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - hero
+    - lead-form
+    - faq
+    - event-program
+    slot_types:
+    - subheadline
+    - cta-note
+    - form-lead
+    - faq-a
+    - list-item
+  notes: ДЕМО-факт J3 (пример вебинара).
+  lang: ru
+- id: speaker-marina
+  kind: person
+  claim_class:
+  - fact-property
+  - fact-number
+  verbatim:
+  - Марина Белова, руководитель поддержки «Окошка»
+  - С 2023 года помогает салонам переносить запись в «Окошко»
+  canonical: Марина Белова — руководитель поддержки «Окошка»; с 2023 года помогает салонам и барбершопам переносить запись в «Окошко».
+  values:
+  - value: 2023
+    unit: year
+    what: год начала работы в поддержке «Окошка»
+  entities:
+  - product-okoshko
+  - person-marina
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: план вебинара, письмо спикера
+    date: '2026-09-20'
+    derivation: direct
+    quote: Марина Белова, руководитель поддержки, в Окошке с 2023 года, помогает салонам с переездом записи
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: granted
+    subject: Марина Белова (демо)
+    form: signed-consent
+    scope:
+    - site
+    document: согласие на распространение ПДн от 2026-09-20 (демо)
+    date: '2026-09-20'
+    shows:
+    - full-name
+    - position
+    - photo
+    pd_consent: true
+    image_consent: true
+  use:
+    section_roles:
+    - team
+    - hero
+    - event-program
+    - about
+    slot_types:
+    - card-title
+    - card-body
+    - hero-proof
+    - body
+    - list-item
+  attribution:
+    name: Марина Белова
+    display: full-name
+    role: руководитель поддержки «Окошка»
+    relation: employee
+  notes: ДЕМО-факт J3 (пример вебинара).
+  lang: ru
+- id: trial-14-days
+  kind: offer-terms
+  claim_class:
+  - price-discount
+  - purchase-terms
+  verbatim:
+  - 14 дней бесплатно, без привязки карты
+  - Пробный период — 14 дней
+  canonical: Любой тариф «Окошко» можно пробовать 14 дней бесплатно без привязки банковской карты; после пробного периода запись закрывается,
+    пока не выбран тариф, данные хранятся 90 дней.
+  values:
+  - value: 14
+    unit: days
+    what: пробный период
+    qualifier: без привязки карты
+  - value: 90
+    unit: days
+    what: хранение данных после пробного периода
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: оферта, раздел 3
+    date: '2026-09-01'
+    document: oferta-2026-09.pdf (демо), п. 3.2
+    quote: Пробный период — 14 календарных дней, без ввода платёжных данных; по окончании онлайн-запись приостанавливается, данные хранятся 90
+      дней
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - hero
+    - pricing
+    - final-cta
+    - faq
+    - lead-form
+    slot_types:
+    - cta-note
+    - cta-label
+    - pricing-price-note
+    - faq-a
+    - form-next-steps
+    - form-lead
+    - email-subject
+    - email-preheader
+    - email-body
+    requires_nearby: «без привязки карты» или что будет после 14 дней
+  translations:
+    en:
+      canonical: Any Okoshko plan is free for 14 days with no card required; after the trial, booking pauses until you pick a plan and your data
+        is kept for 90 days.
+  notes: 'ДЕМО-факт E. Копия факта E (facts-demo-saas-okoshko.yaml) с тем же id; J3: use дополнен event-program, если факт — тема программы вебинара.'
+  lang: ru
+- id: reminders
+  kind: property
+  claim_class:
+  - fact-property
+  verbatim:
+  - Напоминание клиенту в Telegram за 24 часа и за 2 часа до визита
+  - Напоминания в Telegram входят в тариф
+  canonical: «Окошко» напоминает клиенту о записи в Telegram за 24 и за 2 часа до визита; напоминания в Telegram входят в любой тариф.
+  values:
+  - value: 24
+    unit: hours
+    what: первое напоминание до визита
+  - value: 2
+    unit: hours
+    what: второе напоминание до визита
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: описание функций
+    date: '2026-09-01'
+    document: features-2026-09.pdf (демо)
+    quote: Напоминания в Telegram за 24 ч и за 2 ч до визита — во всех тарифах
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - hero
+    - solution
+    - benefits
+    - how-it-works
+    - pricing
+    - faq
+    - event-program
+    slot_types:
+    - headline
+    - subheadline
+    - card-title
+    - card-body
+    - step-body
+    - pricing-feature
+    - faq-a
+    - list-item
+  translations:
+    en:
+      canonical: Okoshko reminds clients of their booking in Telegram 24 hours and 2 hours before the visit; Telegram reminders are included in
+        every plan.
+  notes: 'ДЕМО-факт E. SMS — отдельный факт sms-price: «бесплатные напоминания» без оговорки про SMS нарушают условие рядом (H COPY-L-FREE-01).
+    Копия факта E (facts-demo-saas-okoshko.yaml) с тем же id; J3: use дополнен event-program, если факт — тема программы вебинара.'
+  lang: ru
+- id: self-booking-link
+  kind: property
+  claim_class:
+  - fact-property
+  verbatim:
+  - Клиент сам выбирает мастера и свободное время по ссылке
+  - Ссылку на запись ставят в Telegram, VK и на сайт
+  canonical: 'Клиент салона записывается сам: по ссылке «Окошко» выбирает услугу, мастера и свободное время; ссылку размещают в Telegram, VK,
+    на картах и на сайте, виджет на сайт ставится кодом из настроек.'
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: описание функций
+    date: '2026-09-01'
+    document: features-2026-09.pdf (демо)
+    quote: 'Онлайн-запись по ссылке: услуга → мастер → время; размещение — Telegram, VK, карты, сайт (виджет)'
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - hero
+    - solution
+    - benefits
+    - how-it-works
+    - event-program
+    slot_types:
+    - subheadline
+    - card-title
+    - card-body
+    - step-title
+    - step-body
+    - body
+    - list-item
+  translations:
+    en:
+      canonical: 'Clients book themselves: through an Okoshko link they choose a service, a stylist and a free slot; the link goes into Telegram,
+        VK, maps and the website.'
+  notes: 'ДЕМО-факт E. Копия факта E (facts-demo-saas-okoshko.yaml) с тем же id; J3: use дополнен event-program, если факт — тема программы вебинара.'
+  lang: ru
+- id: import-free
+  kind: offer-terms
+  claim_class:
+  - purchase-terms
+  - price-discount
+  verbatim:
+  - Базу клиентов из Excel или Google Таблиц перенесём бесплатно за 1 рабочий день
+  - Перенос базы — бесплатно
+  canonical: Поддержка «Окошко» бесплатно переносит клиентскую базу из файла Excel или Google Таблиц за 1 рабочий день после получения файла.
+  values:
+  - value: 1
+    unit: days
+    what: срок переноса базы, рабочие дни
+    qualifier: после получения файла
+  - value: 0
+    unit: RUB
+    what: стоимость переноса базы
+    qualifier: из Excel или Google Таблиц
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: регламент поддержки
+    date: '2026-09-01'
+    document: support-sla-2026.pdf (демо), п. 2
+    quote: Импорт базы из xlsx/Google Sheets силами поддержки — бесплатно, 1 рабочий день
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - how-it-works
+    - objections
+    - faq
+    - pricing
+    - benefits
+    - hero
+    - event-program
+    slot_types:
+    - step-body
+    - objection-answer
+    - faq-a
+    - pricing-feature
+    - card-title
+    - card-body
+    - cta-note
+    - list-item
+    requires_nearby: из Excel или Google Таблиц
+  translations:
+    en:
+      canonical: Okoshko support migrates your client list from Excel or Google Sheets for free within 1 business day of receiving the file.
+  notes: 'ДЕМО-факт E. Снимает возражение switching-cost (B1 02 §4.1). Копия факта E (facts-demo-saas-okoshko.yaml) с тем же id; J3: use дополнен
+    event-program, если факт — тема программы вебинара.'
+  lang: ru
+- id: review-ruslan
+  kind: testimonial
+  claim_class:
+  - testimonial-quote
+  verbatim:
+  - «Раньше вечером обзванивал всех, кто записан на завтра. Теперь напоминания уходят сами, а я звоню только тем, кто не подтвердил»
+  canonical: 'Руслан (владелец барбершопа, Казань): «Раньше вечером обзванивал всех, кто записан на завтра. Теперь напоминания уходят сами, а
+    я звоню только тем, кто не подтвердил».'
+  entities:
+  - person-ruslan
+  - product-okoshko
+  - city-kazan
+  source:
+    type: interview
+    who: Руслан (клиент)
+    where: интервью после кейса, запись созвона
+    date: '2026-06-05'
+    quote: раньше вечером обзванивал всех, кто записан на завтра. теперь напоминания уходят сами, а я звоню только тем, кто не подтвердил
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: granted
+    subject: Руслан
+    form: written-email
+    scope:
+    - site
+    document: письмо от 2026-06-10 (демо)
+    date: '2026-06-10'
+    shows:
+    - first-name
+    - position
+    - city
+    pd_consent: true
+    image_consent: false
+  original_ref: evidence/interviews/2026-06-05-ruslan.txt (демо)
+  translations:
+    en:
+      verbatim:
+      - “I used to spend my evenings calling everyone booked for the next day. Now reminders go out on their own, and I only call those who haven't
+        confirmed”
+      canonical: 'Ruslan (barbershop owner, Kazan): “I used to spend my evenings calling everyone booked for the next day. Now reminders go out
+        on their own, and I only call those who haven''t confirmed” (translated from Russian).'
+      note: перевод цитаты — с пометкой «translated from Russian» рядом (B2 §5.1)
+  attribution:
+    name: Руслан
+    display: first-name-initial
+    role: владелец барбершопа
+    city: Казань
+    verified_customer: true
+    relation: customer
+  use:
+    section_roles:
+    - testimonials
+    - case-studies
+    slot_types:
+    - testimonial-quote
+    - testimonial-attribution
+  valid:
+    review_by: '2027-06-05'
+  notes: 'ДЕМО-факт E. Копия факта E (facts-demo-saas-okoshko.yaml) с тем же id; J3: use дополнен event-program, если факт — тема программы вебинара.'
+  lang: ru
+missing:
+- id: organizer-legal
+  what: 'организатор вебинара и оператор персональных данных: название юрлица, ОГРН, адрес, ссылка на политику обработки ПДн'
+  kind: company
+  claim_class:
+  - company-details
+  placeholder: '[PLACEHOLDER: организатор — юрлицо, ОГРН, адрес; политика обработки ПДн]'
+  who: демо-заказчик (юрист)
+  needed_for:
+    section_roles:
+    - footer
+    - lead-form
+    slot_types:
+    - footer-legal
+    - form-consent
+  asked: '2026-09-24'
+  blocking: true
+  fallback: placeholder
+  question: 'Кто организатор вебинара и оператор данных участников: юрлицо, ОГРН, адрес, ссылка на политику обработки ПДн?'
+- id: seats-limit
+  what: есть ли ограничение числа участников и живой счётчик мест
+  kind: availability
+  claim_class:
+  - availability-scarcity
+  placeholder: '[PLACEHOLDER: число мест]'
+  who: демо-заказчик
+  asked: '2026-09-24'
+  blocking: false
+  fallback: omit-block
+  question: Ограничено ли число участников? Если да — сколько мест и откуда будет виден остаток?
+never_claim:
+- id: nc-revenue-growth
+  text: «увеличим выручку салона на N %», «окупится за месяц» — обещание дохода без исследования
+  claim_class:
+  - income-finance
+  - forecast
+  patterns:
+  - увелич\w*\s+выручк
+  - удво\w*\s+выручк
+  - окуп\w*\s+за
+  - doubl\w*\s+(your\s+)?(\w+\s+)?revenue
+  - increas\w*\s+(your\s+)?(\w+\s+)?revenue
+  lift: never
+  reason: 38-ФЗ ст. 5 ч. 3 п. 2; forecast без basis (B2, H)
+  source:
+    who: агент E (демо)
+    date: '2026-09-24'
+- id: nc-zero-noshow
+  text: «без неявок», «забудьте о неявках» — абсолютное обещание результата, который зависит от клиентов салона
+  claim_class:
+  - guarantee
+  - forecast
+  patterns:
+  - без\s+неяв\w*
+  - забудьте\s+о\s+неяв\w*
+  lift: never
+  reason: гарантия результата (H COPY-L-GUAR-01); кейс даёт 6 %, не ноль
+  source:
+    who: агент E (демо)
+    date: '2026-09-24'
+- id: nc-webinar-scarcity
+  text: «места ограничены», «успейте зарегистрироваться» без живого счётчика мест
+  claim_class:
+  - availability-scarcity
+  - promo-deadline
+  patterns:
+  - мест\w*\s+ограничен
+  - успе\w*\s+зарегистр
+  - осталось\s+\d+\s+мест
+  lift: with-fact
+  reason: 38-ФЗ ст. 5 ч. 3 п. 1 (недостоверность об условиях); E 03 §3.5
+  source:
+    who: агент J3 (демо)
+    date: '2026-09-24'

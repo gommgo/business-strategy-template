@@ -1,0 +1,79 @@
+# hero-two-states.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/01-hero-recipes.md#5; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+recipe_version: 1
+checked_at: '2026-09-25'
+author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
+id: hero-two-states
+title: Hero с двумя состояниями и прожектором за курсором
+doc: 14-recipes/01-hero-recipes.md#5
+task_codes:
+- IMG-EDIT
+- VID-HERO-LOOP
+slot: hero
+ladder: image
+ai_fit: conditional
+legal_row: 5
+route:
+  source: IMG-EDIT
+  steps:
+  - role: второе состояние правкой света от мастера
+    model: openai/gpt-image-2.5-sunburst
+    params:
+      image_resolution: 2K
+      aspect_ratio: '16:9'
+    price_rub: 7.0
+    test: M-06
+    note: 'фаза 5: M-06 не запускался; правка «другой свет» NB2 2K (7,2 ₽) сгенерирована, сдвиг не мерен'
+  - role: 'запас: сохранность остального'
+    model: google/gemini-3.1-flash-image-preview
+    params:
+      image_resolution: 2K
+    price_rub: 7.2
+spec:
+  example: 14-recipes/examples/demo-landing/brand/specs/M-06-hero-evening-edit.spec.json
+  must:
+  - edit.changes[].op
+  - цель числом (2700 K)
+  - edit.keep без артиклей
+  ancestors:
+  - ../../scripts/ai-media/tests/fixtures/D02/E1.spec.json
+compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+  <тест> --agent <агент> --out 99-raw/phase5/jobs/<файл>.jsonl
+phase5:
+  jobs:
+  - 99-raw/phase5/jobs/M-06-hero-evening-edit.jsonl
+  reuse:
+  - M-01
+  - J-03
+  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
+steps:
+- id: edit-check
+  cmd: python3 ../../scripts/ai-media/edit_check.py check m01.png m06.png --out out/ (без маски; edges_iou ≥ 0,9)
+  status: checked
+  evidence: 99-raw/experiments/H/03-edit-check
+- id: page
+  cmd: python3 ../../scripts/ai-media/page_accept.py page04.html --out out/ --click "[data-state-toggle]" --contrast ".hero h1"
+  status: checked
+  evidence: 99-raw/experiments/J/06-pages-measure
+accept:
+  thresholds:
+  - edit.edges_iou_min
+  - text_zone.edge_density_max
+  page_accept:
+    modes:
+    - desktop
+    - mobile
+    checks:
+    - F83 обоих состояний
+    - видео верхнего слоя 0 байт без взаимодействия
+delivery:
+  template: 10-web-integration/pages/04-two-states-spotlight.html
+provenance:
+  dst: trained
+  visible_label: false
+numbers:
+  phase5_spotlight: 'прожектор честен только на совмещённых кадрах: концы одного FLF с fixed_lens совпадают до пикселя, две отдельные генерации — нет — 99-raw/phase5/showcase/demos/05-spotlight/'
+status:
+  local: checked
+  generation: unchecked
+sources:
+- 91-videos/digests/SLnGJ9iezYo.md

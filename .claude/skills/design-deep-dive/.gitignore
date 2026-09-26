@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+node_modules/
+out/
+scripts/blender/vote/img/
+scripts/blender/vote/votes/
+scripts/blender/vote/votes-test/
+scripts/blender/vote/pairs*.json
+scripts/blender/vote/results.*
+kb/site/10-playbooks-contracts/examples/.selftest-*/
+scripts/text/last-run.txt

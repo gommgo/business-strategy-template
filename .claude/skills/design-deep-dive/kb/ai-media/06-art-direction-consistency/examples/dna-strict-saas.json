@@ -1,0 +1,388 @@
+{
+  "dna_version": "0.1",
+  "id": "strict-saas",
+  "brand": "Пример: B2B-биллинг («строгий, надёжный, точный»; доверие к деньгам и данным)",
+  "checked_at": "2026-09-23",
+  "status": "draft",
+  "approved_by": null,
+  "derived_from_ui": {
+    "style_card": "../ui/11-styles-trends/01-style-dictionary-for-quiz.md §15 «Stripe-стиль» (bg.subtle #f7fafc, text.primary #1a2c44, accent.solid #5469d4, синеватая нейтраль C 0,015–0,019, мягкие тени, радиус 4–8)",
+    "knobs": {
+      "accent_hex": "#5469D4",
+      "accent_oklch": [
+        0.56,
+        0.165,
+        271.7
+      ],
+      "neutral_temp": "cool",
+      "neutral_C": 0.019,
+      "base_L": 1.0,
+      "radius_px": 6,
+      "density": "default",
+      "font_voice": "neutral-sans",
+      "depth_model": "soft-shadow",
+      "theme": "light"
+    },
+    "rules_applied": [
+      "R1 палитра картинок — нейтрали UI (bg.subtle, border.subtle, text.tertiary, text.primary) + акцент ≤ 3 % площади",
+      "R2 потолок хромы по площади на ступень ниже UI: > 30 % кадра C ≤ 0,02",
+      "R3 бренд-акцент 272° лежит у края полосы 270–320°: полоса 285–330° запрещена, 270–285° — только акцент ≤ 3 %",
+      "R4 холодная нейтраль → баланс белого b −0,003 ± 0,004",
+      "R6 свет сверху-слева = мягкие тени карточек UI",
+      "R7 иллюстрации: изометрия по карточке §15, радиус 6 = radius.md, линия 1,5 = штрих иконок",
+      "R8 абстракция — кодом: градиентные ленты карточки §15 рядом с клише «пурпурные 3D-ленты» (A 01/03 §5.4)"
+    ]
+  },
+  "character": {
+    "adjectives": [
+      "строгий",
+      "надёжный",
+      "точный"
+    ],
+    "boldness": "restrained",
+    "one_bold_move": "настоящий интерфейс продукта крупно в hero, без метафор"
+  },
+  "palette": {
+    "image_palette": [
+      {
+        "role": "background",
+        "hex": "#F7FAFC",
+        "name": "cool paper white",
+        "share_max": 0.6,
+        "applies_to": "paper, walls, empty desk surface",
+        "source": "token",
+        "token": "color.bg.subtle"
+      },
+      {
+        "role": "dominant",
+        "hex": "#E3E8EE",
+        "name": "light blue-grey",
+        "share_max": 0.4,
+        "applies_to": "desk and large surfaces",
+        "source": "token",
+        "token": "color.border.subtle"
+      },
+      {
+        "role": "secondary",
+        "hex": "#697386",
+        "name": "slate grey",
+        "share_max": 0.2,
+        "applies_to": "devices, folders, secondary objects",
+        "source": "token",
+        "token": "color.text.tertiary"
+      },
+      {
+        "role": "shadow",
+        "hex": "#1A2C44",
+        "name": "deep navy ink",
+        "share_max": 0.12,
+        "applies_to": "ink, shadows, dark device edges",
+        "source": "token",
+        "token": "color.text.primary"
+      },
+      {
+        "role": "accent",
+        "hex": "#5469D4",
+        "name": "indigo blue",
+        "share_max": 0.03,
+        "applies_to": "one small object: a pen cap or a sticky note",
+        "strict": true,
+        "source": "token",
+        "token": "color.accent.solid"
+      }
+    ],
+    "illustration_palette": [
+      {
+        "role": "background",
+        "hex": "#FFFFFF",
+        "name": "white",
+        "share_max": 0.6,
+        "applies_to": "background and top faces",
+        "source": "token",
+        "token": "color.bg.surface"
+      },
+      {
+        "role": "dominant",
+        "hex": "#E3E8EE",
+        "name": "light blue-grey",
+        "share_max": 0.4,
+        "applies_to": "large isometric faces",
+        "source": "token",
+        "token": "color.border.subtle"
+      },
+      {
+        "role": "secondary",
+        "hex": "#697386",
+        "name": "slate grey",
+        "share_max": 0.2,
+        "applies_to": "side faces and details",
+        "source": "token",
+        "token": "color.text.tertiary"
+      },
+      {
+        "role": "text",
+        "hex": "#1A2C44",
+        "name": "deep navy",
+        "share_max": 0.08,
+        "applies_to": "1.5 px lines and small details",
+        "source": "token",
+        "token": "color.text.primary"
+      },
+      {
+        "role": "accent",
+        "hex": "#5469D4",
+        "name": "indigo blue",
+        "share_max": 0.1,
+        "applies_to": "one key element",
+        "strict": true,
+        "source": "token",
+        "token": "color.accent.solid"
+      }
+    ],
+    "chroma_caps": {
+      "large_area_C_max": 0.02,
+      "mid_area_C_max": 0.05,
+      "small_area_C_max": 0.165
+    },
+    "median_chroma_max": 0.03,
+    "forbidden_hues": [
+      {
+        "from": 285,
+        "to": 330,
+        "reason": "пурпур и маджента (IMG-M05): клише ИИ-инфраструктуры"
+      },
+      {
+        "from": 270,
+        "to": 285,
+        "reason": "полоса бренд-акцента: только акцент",
+        "except_share_max": 0.03
+      }
+    ],
+    "neutral_wb": {
+      "target_b": -0.003,
+      "tol": 0.004
+    },
+    "env_color": {
+      "hex": "#F7FAFC",
+      "token": "color.bg.subtle",
+      "note": "секции фич на bg.subtle: фон 3D-иконок и рефлексы — этот цвет, контактная тень под него"
+    }
+  },
+  "grade": {
+    "wb_ab": [
+      -0.001,
+      -0.004
+    ],
+    "chroma": 0.85,
+    "black": 0.03,
+    "white": 0.985,
+    "contrast": 0.1,
+    "grain_pct": 0.8,
+    "lut": {
+      "size": 33,
+      "file": null
+    },
+    "applies_to": [
+      "photo",
+      "icon3d",
+      "render3d",
+      "video"
+    ],
+    "note": "Нейтрально-холодный, приглушённый; скриншоты UI и плоский вектор не грейдить (цвета обязаны совпасть с токенами)."
+  },
+  "light": {
+    "direction": "left",
+    "detail": "soft overcast daylight from a large window on the left",
+    "quality": "diffused",
+    "source": "window",
+    "time_of_day": "overcast midday",
+    "cct_K": 5600
+  },
+  "camera": {
+    "lens_mm": 50,
+    "height": "table",
+    "angle": "high-angle",
+    "depth_of_field": "medium",
+    "capture": "tripod still life, documentary, no styling props"
+  },
+  "composition": {
+    "subject_region": "right-third",
+    "text_zone_default": {
+      "side": "left",
+      "share": 0.45,
+      "surface": "evenly lit light oak desk surface"
+    },
+    "negative_space_min": 0.4,
+    "max_elements": 3,
+    "asymmetry": true,
+    "edge_cut_allowed": true,
+    "horizon": "none",
+    "master_ratio": "16:9",
+    "phone_frame": "separate-master",
+    "note": "Hero — настоящий интерфейс в мокапе (IMG-MOCKUP, скриншот вставляется кодом или композитом); фото работы — фон и вторичные слоты."
+  },
+  "subject_matter": {
+    "domain_props": [
+      "printed invoice",
+      "card payment terminal",
+      "laptop with the real dashboard composited on screen",
+      "receipt roll",
+      "paper folders",
+      "fountain pen",
+      "desk calculator",
+      "coffee cup"
+    ],
+    "motifs": [
+      "paper and numbers",
+      "a clean desk in the middle of work"
+    ],
+    "places": [
+      "small office",
+      "shop counter",
+      "home desk by a window"
+    ],
+    "people_policy": "real-only",
+    "product_policy": "real-photo-only"
+  },
+  "materials": [
+    "matte paper",
+    "brushed aluminium",
+    "matte plastic",
+    "light oak"
+  ],
+  "illustration": {
+    "medium": "flat-illustration",
+    "line_px": 1.5,
+    "display_px": 160,
+    "radius_px": 6,
+    "perspective": "isometric-30",
+    "fills": "tone-on-tone",
+    "shadows": "flat-tone",
+    "background": "transparent",
+    "accents_per_image": 2,
+    "detail_min_px": 4,
+    "saturation_offset": "на 1–2 шага ниже UI",
+    "dark_theme": "two-files"
+  },
+  "icon3d": {
+    "material": "matte light blue-grey ceramic #E3E8EE with one indigo-blue #5469D4 part",
+    "camera": "3/4 view from 35 degrees above, 85mm",
+    "key_light": "soft key from the upper left at 45 degrees, fill 20 percent",
+    "fill_pct": 20,
+    "contact_shadow_alpha_max": 0.12,
+    "margin_pct": 8,
+    "accent_share_max": 0.15
+  },
+  "abstract": {
+    "policy": "code-first",
+    "forms": "мягкий градиент 2–3 тонов одного оттенка кодом (CSS/WebGL); пурпурные ленты и светящиеся сферы — нет"
+  },
+  "video": {
+    "tempo": "still",
+    "camera": "static",
+    "loop": "first_last_same",
+    "grade_same_lut": true
+  },
+  "references": [],
+  "canaries": [
+    "object: a printed invoice and a pen on a light oak desk",
+    "interior: a small shop counter with a card terminal",
+    "product-like: a closed laptop on a desk by a window",
+    "object: a stack of paper folders on a shelf",
+    "abstract: tone-on-tone paper shapes in cool greys"
+  ],
+  "style_blocks": {
+    "photo": "Documentary still-life photograph of everyday work objects on a light oak desk; soft overcast daylight from a large window on the left; cool neutral white balance, muted colour, white paper and blue-grey tones, one small indigo-blue object as the only accent; 50mm lens at table height, 30 degrees above, medium depth of field; fine natural grain; tidy but used: a folded corner, a pen cap, faint fingerprints.",
+    "illustration": "Flat isometric vector illustration on a 30-degree grid; cool greys #E3E8EE and #697386, deep navy #1A2C44 details, indigo blue #5469D4 as the only accent; tone-on-tone flat shadows, flat colour fills only, 1.5 px lines, 6 px rounded corners; one light source from the upper left; plain flat cool paper white #F7FAFC background; simple geometric objects of billing and paperwork.",
+    "icon3d": "Single object as a matte light blue-grey ceramic figure with one indigo-blue part; 3/4 view from 35 degrees above, 85mm; soft key light from the upper left, faint fill; soft contact shadow; plain very light blue-grey background; clean text-free surfaces with soft studio reflections only."
+  },
+  "exclusions": {
+    "forbidden_markers": [
+      "IMG-M02",
+      "IMG-M03",
+      "IMG-M05",
+      "IMG-M06",
+      "IMG-M07",
+      "IMG-M08",
+      "IMG-M09",
+      "IMG-M11",
+      "IMG-M12",
+      "IMG-M13",
+      "IMG-M14",
+      "IMG-M21",
+      "IMG-M22"
+    ],
+    "banned_words": [
+      "stunning",
+      "vibrant",
+      "luminous",
+      "futuristic",
+      "cinematic",
+      "epic",
+      "dramatic",
+      "masterpiece",
+      "8k",
+      "hyper-detailed",
+      "neon",
+      "glowing",
+      "holographic"
+    ],
+    "replace_with": [
+      {
+        "what": "people",
+        "kind": "object",
+        "replace_with": "no one in the frame"
+      },
+      {
+        "what": "holographic interface",
+        "kind": "object",
+        "replace_with": "only real physical objects"
+      },
+      {
+        "what": "glowing globe or network lines",
+        "kind": "object",
+        "replace_with": "plain, unlit surfaces"
+      },
+      {
+        "what": "readable text on paper",
+        "kind": "artifact",
+        "replace_with": "clean unmarked paper"
+      }
+    ]
+  },
+  "post": {
+    "grain_pct": 0.8,
+    "scrim": {
+      "color": "#1A2C44",
+      "max_alpha": 0.5,
+      "shape": "gradient",
+      "percentile": 99.9
+    },
+    "dark_theme": {
+      "method": "separate-asset"
+    },
+    "focal_required": true
+  },
+  "acceptance": {
+    "palette_dE_max": 0.02,
+    "series_hue_spread_max_deg": 10,
+    "series_pal_dE_mean_max": 0.045,
+    "series_pal_dE_break": 0.06,
+    "series_sd_L_max": 0.04,
+    "phash_min": 10,
+    "text_contrast_min": 4.5,
+    "text_zone_percentile": 99.9,
+    "zone_edge_max": 0.06,
+    "centroid_x_min": 0.62,
+    "colorfulness_max_rel": 1.1,
+    "hdr_index_max_delta": 0.08,
+    "markers_max": 1
+  },
+  "provenance": {
+    "created_by": "human",
+    "vlm_model": null,
+    "runs": 0,
+    "notes": "Выведен F2 из карточки стиля §15 без брендовых фото: эталон серии — первая утверждённая генерация по canaries; до неё references пуст."
+  },
+  "notes": "Фото людей, отзывы, команда — только настоящие (people_policy real-only); картинки-доказательства не генерировать."
+}

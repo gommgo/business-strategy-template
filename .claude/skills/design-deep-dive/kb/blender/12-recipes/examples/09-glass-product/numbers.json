@@ -1,0 +1,161 @@
+{
+ "asserts": {
+  "ok": true,
+  "fails": [],
+  "dims_m": [
+   0.2,
+   0.12,
+   0.1235
+  ],
+  "tris": 7688,
+  "materials": 5,
+  "gaps_m": {
+   "Bottle_Glass~Plinth": 0.0,
+   "Bottle_Neck~Bottle_Glass": 0.0,
+   "Bottle_Cap~Bottle_Neck": 0.0,
+   "Pebble_0~Plinth": 0.0,
+   "Pebble_1~Plinth": 0.0
+  }
+ },
+ "audit": {
+  "flags": [
+   "ngons: Plinth",
+   "ngons: Bottle_Glass",
+   "raw_sharp_edges: Bottle_Neck",
+   "interpenetration: Plinth×Bottle_Glass:44; Plinth×Pebble_0:48; Plinth×Pebble_1:48; Bottle_Glass×Bottle_Neck:48; Bottle_Glass×Pebble_1:75; Bottle_Neck×Bottle_Cap:104",
+   "cropped: x -0.62..1.52 y -0.24..0.92"
+  ],
+  "tris": 7688,
+  "draw_calls": 6,
+  "dims_m": [
+   0.2,
+   0.12,
+   0.123
+  ],
+  "frame": {
+   "x": [
+    -0.618,
+    1.523
+   ],
+   "y": [
+    -0.236,
+    0.918
+   ],
+   "area": 0.918
+  },
+  "view": "Khronos PBR Neutral"
+ },
+ "renders": {
+  "poster_eevee_rt": {
+   "sec": 7.13,
+   "kb": 836.7,
+   "res": [
+    768,
+    1024
+   ]
+  }
+ },
+ "glb": {
+  "glass": {
+   "raw": {
+    "kb": 195.3,
+    "tris": 7688,
+    "nodes": 6,
+    "materials": [
+     "Cap_Gold",
+     "Glass_Amber",
+     "Pebble_0",
+     "Pebble_1",
+     "Plinth_Stone"
+    ],
+    "extensionsUsed": [
+     "KHR_materials_transmission",
+     "KHR_materials_ior",
+     "KHR_materials_volume"
+    ],
+    "instanced_nodes": 0
+   },
+   "web": {
+    "kb": 49.6,
+    "tris": 7688,
+    "nodes": 6,
+    "materials": [
+     "PaletteMaterial001",
+     "PaletteMaterial003",
+     "PaletteMaterial004",
+     "PaletteMaterial002"
+    ],
+    "extensionsUsed": [
+     "EXT_meshopt_compression",
+     "EXT_texture_webp",
+     "KHR_materials_ior",
+     "KHR_materials_transmission",
+     "KHR_materials_volume",
+     "KHR_mesh_quantization"
+    ],
+    "instanced_nodes": 0
+   },
+   "preset": "static_hero"
+  }
+ },
+ "glass_material": {
+  "doubleSided": false,
+  "extensions": {
+   "KHR_materials_transmission": {
+    "transmissionFactor": 1
+   },
+   "KHR_materials_volume": {
+    "attenuationColor": [
+     0.8069522380828857,
+     0.44520118832588196,
+     0.1946178376674652
+    ],
+    "attenuationDistance": 0.3333333333333333,
+    "thicknessFactor": 0.029999999329447746
+   },
+   "KHR_materials_ior": {
+    "ior": 1.5199999809265137
+   }
+  },
+  "name": "Glass_Amber",
+  "pbrMetallicRoughness": {
+   "metallicFactor": 0,
+   "roughnessFactor": 0.019999999552965164
+  }
+ },
+ "passport": {
+  "W": 0.06,
+  "D": 0.032,
+  "H": 0.084,
+  "corner": 0.009,
+  "edge": 0.004,
+  "cap_r": 0.013,
+  "cap_h": 0.022,
+  "neck_r": 0.006,
+  "neck_h": 0.006,
+  "glass_tint": [
+   "#E8B27A",
+   3.0
+  ],
+  "thickness": 0.03,
+  "cap": "gold",
+  "plinth": "#CFC7BC",
+  "pebbles": [
+   "#C8674A",
+   "#7C8B5A"
+  ],
+  "bg": "#EFE9E1",
+  "cam": {
+   "az": 22,
+   "el": 9,
+   "lens": 90,
+   "margin": 1.18,
+   "res": [
+    768,
+    1024
+   ]
+  }
+ },
+ "sec_total": 7.6,
+ "blender": "5.2.2 LTS"
+}

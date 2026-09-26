@@ -1,0 +1,69 @@
+# texture-pattern.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/03-vector-text-og-recipes.md#3; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+recipe_version: 1
+checked_at: '2026-09-25'
+author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
+id: texture-pattern
+title: 'Паттерны и текстуры: код или генерация + разрез по линии наименьшего различия'
+doc: 14-recipes/03-vector-text-og-recipes.md#3
+task_codes:
+- VEC-PATTERN
+- IMG-TEXTURE
+slot: section
+ladder: css
+ai_fit: allowed
+legal_row: 1
+route:
+  source: IMG-TEXTURE
+  steps:
+  - role: паттерн кодом
+    model: SVG/CSS
+    price_rub: 0.0
+  - role: текстура генерацией
+    model: bytedance/seedream-4
+    params:
+      image_resolution: 2K
+      aspect_ratio: '1:1'
+    price_rub: 3.0
+    test: H-09
+phase5:
+  jobs:
+  - 99-raw/phase5/jobs/H-09-texture-seam.jsonl
+  reuse:
+  - H-09
+  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
+steps:
+- id: check
+  cmd: python3 ../../scripts/ai-media/tile_check.py check tile.png
+  status: checked
+  evidence: 99-raw/experiments/M/07-texture
+- id: cut
+  cmd: python3 ../../scripts/ai-media/tile_check.py cut crop.png tile.png --overlap 96
+  status: checked
+  evidence: 99-raw/experiments/M/07-texture
+- id: gray-avif
+  cmd: avifenc -q 65 -s 6 -y 400 -j 4 tile_gray.png tile.avif
+  status: checked
+  evidence: 99-raw/experiments/M/07-texture
+accept:
+  thresholds:
+  - texture.seam_ratio_max
+  - texture.seam_ratio_fail
+  - budget.image.texture_kb
+delivery:
+  formats:
+  - avif 4:0:0
+  - webp
+  budget_kb:
+    tile: 30
+  rule: цвет — CSS, фактура — серый тайл в multiply
+provenance:
+  dst: trained
+  visible_label: false
+numbers:
+  gray_avif_256_kb: 9.8
+  gray_avif_384_kb: 24.5
+  color_webp_384_kb: 49.6
+  phase5_status: 'H-09 (текстура Seedream 4 и заделка шва Qwen) не запускался — отменено заказчиком 25.09'
+status:
+  local: checked
+  generation: unchecked

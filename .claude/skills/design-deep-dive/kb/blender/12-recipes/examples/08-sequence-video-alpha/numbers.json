@@ -1,0 +1,22 @@
+{
+ "frames": 24,
+ "sec_per_frame": 0.93,
+ "sec_frames": 22.2,
+ "passport": {
+  "glb": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/04-abstract-sculpture/sculpture_ink_34_raw.glb",
+  "frames": 24,
+  "res": [
+   512,
+   512
+  ],
+  "samples": 16,
+  "cam": {
+   "az": 30,
+   "el": 12,
+   "lens": 85,
+   "margin": 1.12
+  }
+ },
+ "sec_total": 22.3,
+ "blender": "5.2.2 LTS"
+}

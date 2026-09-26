@@ -1,0 +1,702 @@
+{
+  "art_direction_version": 0,
+  "id": "forest-roast-l2",
+  "site": "lesnaya-obzharka",
+  "example": true,
+  "status": "proposed",
+  "approved_by": null,
+  "checked_at": "2026-09-24",
+  "refs": {
+    "meaning": "../../../text/02-strategy-messaging/examples/meaning-lesnaya-obzharka.yaml",
+    "visual_dna": "../../../ai-media/14-recipes/examples/demo-landing/brand/dna-forest-roast.json",
+    "brand": "../../../ai-media/14-recipes/examples/demo-landing/brand/tokens.json"
+  },
+  "inputs": {
+    "site_type": "landing-site",
+    "page_type": "landing-campaign",
+    "audience": "Варят кофе дома каждое утро и покупают зёрна в супермаркете; вторично — любители свежей обжарки (meaning text, home-brewers)",
+    "job": "Оформить подписку «банка каждую неделю» (действие кампании не подтверждено заказчиком)",
+    "awareness": "problem-aware",
+    "traffic": "допущение: соцсети и рассылка кампании, телефон 70 %",
+    "proof": [
+      "missing:roast-schedule",
+      "missing:roast-date-label",
+      "missing:recipe-card",
+      "missing:subscription-terms"
+    ],
+    "brand_status": "draft",
+    "brand_expression_mode": "extend",
+    "must_keep": [
+      "лесной зелёный #1F4D3A",
+      "золото #C9A227",
+      "банка «ЛЕСНАЯ ОБЖАРКА» — настоящий товар"
+    ],
+    "customer_words": [
+      "тёплый, ремесленный, спокойный"
+    ],
+    "assets": "рендер и GLB банки (blender), кадр утреннего стола (F-04), синемаграф пара",
+    "constraints": [
+      "учебный вариант: тот же бренд, если заказчик решит сделать кампанию подписки уровня L2",
+      "все утверждения — missing до facts.yaml",
+      "прелоадер не нужен (policies.preloader off)"
+    ]
+  },
+  "ambition": {
+    "level": "L2",
+    "source": "claude",
+    "budget_profile": "landing-campaign@L2",
+    "motion_cap": "cinematic",
+    "rationale": "Учебное сравнение уровней (опыт A/01): кампания — умолчание L2 (решение п. 13). Та же концепция утра, но как сюжет на прокрутке; «вау» догружается после LCP; блок подписки и формы — L0.",
+    "by_section_role": [
+      {
+        "role": "pricing",
+        "level": "L0",
+        "why": "условия подписки читаются"
+      },
+      {
+        "role": "lead-form",
+        "level": "L0"
+      }
+    ]
+  },
+  "concept": {
+    "design_read": "Читаю это как: кампания подписки на кофе для тех, кто варит дома, язык документального утра, растянутого в сюжет на прокрутке, тянется к секвенции кадров и одному 3D-предмету",
+    "mechanism": "Кофе обжаривают раз в неделю и привозят по подписке с помолом под способ заваривания (утверждения демо — missing)",
+    "audience_scene": "Утро буднего дня, телефон в руке у плиты, пока закипает турка; вечером — ноутбук и спокойный просмотр",
+    "first_screen_proves": "Это одно конкретное утро с этой банкой: первый кадр сюжета — стол у окна, где ещё ничего не заварено",
+    "thesis": "Одно утро по минутам: прокрутка ведёт от закрытой банки к первой чашке — зерно, помол, вода, пар; зелёный бренда растёт от детали до целого экрана к подписке",
+    "metaphor": "утро по минутам (сюжет из 5 глав)",
+    "material": "штукатурка, светлый дуб, лён, крафт, жесть банки",
+    "energy": "measured",
+    "rut": "Кинематографичный кофе: дымка, контровой свет, медленный пар, латте-арт, «эпичная» музыкальная заставка, прелоадер с зерном",
+    "rut_opposite": "Тот же лендинг L0 с добавленным появлением секций — «вау» без сюжета",
+    "not_this": [
+      "без дымки и контрового света (IMG-M02)",
+      "без вечного слоумо без сюжета (VID-M13)",
+      "без прелоадера"
+    ]
+  },
+  "territories": [
+    {
+      "id": "morning-table",
+      "name": "Утро по минутам",
+      "source": "утренний ритуал заваривания дома",
+      "family": "ritual-event",
+      "why": "тот же мир, что на L0, но растянутый во времени — сюжет прокрутки"
+    },
+    {
+      "id": "green-tin",
+      "name": "Зелёная банка",
+      "source": "банка бренда и её цвет",
+      "family": "craft-making",
+      "why": "3D-банка — пик страницы; цвет банки заливает финальный экран"
+    },
+    {
+      "id": "roast-log",
+      "name": "Журнал обжарки",
+      "source": "дата, партия, кривая температуры",
+      "family": "data-notation",
+      "why": "кривая обжарки может прочерчиваться прокруткой"
+    },
+    {
+      "id": "kraft-label",
+      "name": "Крафт и этикетка",
+      "source": "упаковка и штамп даты",
+      "family": "document-print",
+      "why": "фактура крафта — поверхность секции подписки"
+    },
+    {
+      "id": "forest",
+      "name": "Лес",
+      "source": "имя бренда",
+      "family": "nature-material",
+      "literal": true,
+      "why": "буквальное прочтение имени",
+      "rejected_because": "лес как происхождение кофе вводит в заблуждение"
+    }
+  ],
+  "directions": [
+    {
+      "id": "a",
+      "name": "Утро по минутам",
+      "recommended": true,
+      "thesis": "Сюжет из пяти глав на прокрутке: банка → зерно → помол → заваривание → чашка; кадры одной съёмки, тексты короткими подписями",
+      "territory": "morning-table",
+      "axes": {
+        "paper": "light",
+        "paper_temperature": "warm",
+        "display_style": "grotesque",
+        "accent_hue": "chromatic-other",
+        "macrostructure": "scroll-story",
+        "imagery": "photo",
+        "energy": "measured"
+      },
+      "palette": {
+        "background": "#F4EFE6",
+        "surface": "#FBF8F2",
+        "text": "#1C1B18",
+        "accent": "#1F4D3A",
+        "on_accent": "#FFFFFF",
+        "extra": [
+          {
+            "hex": "#12352A",
+            "role": "финальный экран подписки (заливка)",
+            "share_max": 0.2
+          },
+          {
+            "hex": "#C9A227",
+            "role": "цена и одна деталь",
+            "share_max": 0.03
+          }
+        ]
+      },
+      "color_strategy": "committed",
+      "type": {
+        "display": "Commissioner",
+        "text": "Golos Text",
+        "cyrillic_checked": false,
+        "license": "OFL"
+      },
+      "signature_move": {
+        "what": "Закреплённая сцена: секвенция кадров утра скрабится прокруткой (100–150vh на главу), подписи сменяются по главам",
+        "where": "section-role:story",
+        "effects": [
+          "effect:image-sequence",
+          "effect:pin-scrub-story"
+        ],
+        "min_level": "L2",
+        "concept_link": "утро и есть продукт: его показывают по минутам, а не описывают"
+      },
+      "first_viewport": "Первый кадр сюжета на весь экран (постер = LCP): стол у окна с закрытой банкой; слева короткий заголовок и кнопка подписки; внизу признак продолжения",
+      "imagery": "одна съёмка утра секвенцией (рендер blender или съёмка заказчика), банка — GLB",
+      "motion": "сюжет прокрутки + банка поворачивается к финалу",
+      "risk": "Секвенция тяжёлая (1–5 МБ): телефону — половина кадров; тёплое поле — примета эпохи",
+      "cost": "дорого: секвенция 90–120 кадров, GLB, две версии для телефона",
+      "level_fit": [
+        "L2"
+      ]
+    },
+    {
+      "id": "b",
+      "name": "Зелёная банка",
+      "thesis": "Цвет банки заливает страницу: 3D-банка поворачивается по прокрутке на поле своего цвета, золото — цена",
+      "territory": "green-tin",
+      "axes": {
+        "paper": "dark",
+        "paper_temperature": "cool",
+        "display_style": "wide",
+        "accent_hue": "warm",
+        "macrostructure": "marquee-hero",
+        "imagery": "3d",
+        "energy": "calm"
+      },
+      "palette": {
+        "background": "#12352A",
+        "surface": "#1F4D3A",
+        "text": "#F1EDE4",
+        "accent": "#C9A227",
+        "on_accent": "#12352A"
+      },
+      "color_strategy": "drenched",
+      "type": {
+        "display": "Unbounded",
+        "text": "Golos Text",
+        "cyrillic_checked": true,
+        "license": "OFL"
+      },
+      "signature_move": {
+        "what": "GLB-банка тон-в-тон с полем поворачивается по прокрутке и открывает крышку к блоку подписки",
+        "where": "section-role:hero",
+        "effects": [
+          "effect:3d-object",
+          "effect:pin-scrub-story"
+        ],
+        "min_level": "L2",
+        "concept_link": "бренд узнаётся по банке; подписка — это банка каждую неделю"
+      },
+      "first_viewport": "Лесной зелёный на весь экран, банка справа, заголовок широким гротеском слева, кнопка золотом",
+      "imagery": "3D-банка, рендеры деталей",
+      "motion": "банка по прокрутке, остальное спокойно",
+      "risk": "Тёмная заливка тяжелее для чтения; точность цвета рендера к полю (ΔE ≤ 2)",
+      "cost": "средне: GLB уже есть",
+      "level_fit": [
+        "L1",
+        "L2"
+      ]
+    },
+    {
+      "id": "c",
+      "name": "Кривая обжарки",
+      "thesis": "Кривая температуры обжарки прочерчивается прокруткой через всю страницу; даты и партии — крупными узкими цифрами",
+      "territory": "roast-log",
+      "axes": {
+        "paper": "light",
+        "paper_temperature": "neutral",
+        "display_style": "condensed",
+        "accent_hue": "chromatic-other",
+        "macrostructure": "narrative-workflow",
+        "imagery": "typographic",
+        "energy": "lively"
+      },
+      "palette": {
+        "background": "#F4F4F3",
+        "surface": "#FFFFFF",
+        "text": "#141414",
+        "accent": "#1F4D3A",
+        "on_accent": "#FFFFFF"
+      },
+      "color_strategy": "restrained",
+      "type": {
+        "display": "Sofia Sans Condensed",
+        "text": "Golos Text",
+        "cyrillic_checked": false,
+        "license": "OFL",
+        "note": "замена X 2026-09-25: Oswald → Sofia Sans Condensed (cyrillic-display-fonts.yaml: Oswald — avoid, type.today «нельзя»)"
+      },
+      "signature_move": {
+        "what": "SVG-кривая обжарки рисуется прокруткой, этапы отмечаются на ней",
+        "where": "section-role:how-it-works",
+        "effects": [
+          "effect:scroll-driven-progress"
+        ],
+        "min_level": "L1",
+        "concept_link": "свежесть и ремесло показаны процессом"
+      },
+      "first_viewport": "Крупная дата обжарки, начало кривой и кнопка",
+      "imagery": "типографика и SVG",
+      "motion": "линия по прокрутке",
+      "risk": "Без фактов об обжарке — пустая форма; на L2 мало «вау»",
+      "cost": "дёшево",
+      "level_fit": [
+        "L1",
+        "L2"
+      ]
+    }
+  ],
+  "choice": {
+    "chosen": "a",
+    "chosen_by": "default",
+    "date": "2026-09-24",
+    "why": "Рекомендуемое по умолчанию: продолжает мир L0 (утренний стол), поэтому бренд остаётся тем же на обоих уровнях; из B взята 3D-банка как финальный пик перед подпиской.",
+    "merged_from": [
+      "b"
+    ],
+    "rejected": [
+      {
+        "id": "c",
+        "why": "мало «вау» для кампании и держится на фактах, которых нет"
+      }
+    ]
+  },
+  "visual_language": {
+    "color_strategy": "committed",
+    "palette": {
+      "background": "#F4EFE6",
+      "surface": "#FBF8F2",
+      "text": "#1C1B18",
+      "accent": "#1F4D3A",
+      "on_accent": "#FFFFFF",
+      "extra": [
+        {
+          "hex": "#12352A",
+          "role": "финальный экран подписки",
+          "share_max": 0.2
+        },
+        {
+          "hex": "#C9A227",
+          "role": "цена",
+          "share_max": 0.03
+        }
+      ]
+    },
+    "accent_rule": "зелёный растёт по сюжету: деталь → кнопка → вся финальная секция; золото — только цена",
+    "type": {
+      "display": "Commissioner",
+      "text": "Golos Text",
+      "cyrillic_checked": false,
+      "license": "OFL"
+    },
+    "composition": [
+      "главы сюжета — полноэкранные кадры, подписи слева в зоне стены",
+      "финальная секция — заливка лесным зелёным"
+    ],
+    "surfaces": [
+      "крафт-фактура только у блока подписки"
+    ],
+    "imagery": {
+      "kinds": [
+        "photo",
+        "3d"
+      ],
+      "subject": "утро по минутам: банка, зерно, помол, заваривание, чашка",
+      "source_policy": "секвенция — рендер blender или съёмка заказчика; генерация видео — только по паспорту ai-media",
+      "people_policy": "real-only",
+      "product_policy": "real-photo-only"
+    },
+    "theme": "mixed"
+  },
+  "motion_system": {
+    "thesis": "Прокрутка — это время утра: сцена закреплена, кадры меняются со скоростью прокрутки, ничего не движется само",
+    "level": "cinematic",
+    "entrance_system": "первый экран без анимации (постер = LCP); далее одна закреплённая сцена из 5 глав; финал — банка поворачивается; появление подписей — по главам, не по секциям",
+    "library": [
+      "gsap@3 + ScrollTrigger",
+      "lenis@1",
+      "@google/model-viewer@4 или three (GLB)"
+    ],
+    "smooth_scroll": true,
+    "page_transitions": "none",
+    "reduce": "5 кадров глав статичными изображениями с подписями; банка — постер; плавная прокрутка выключена",
+    "by_section": [
+      {
+        "section": "section-role:hero",
+        "motion_level": "subtle",
+        "visual_role": "accent"
+      },
+      {
+        "section": "section-role:story",
+        "motion_level": "cinematic",
+        "visual_role": "peak"
+      },
+      {
+        "section": "section-role:benefits",
+        "motion_level": "subtle",
+        "visual_role": "calm"
+      },
+      {
+        "section": "section-role:product-demo",
+        "motion_level": "expressive",
+        "visual_role": "peak"
+      },
+      {
+        "section": "section-role:pricing",
+        "motion_level": "none",
+        "visual_role": "calm"
+      }
+    ]
+  },
+  "effects_by_section": [
+    {
+      "section": "section-role:story",
+      "level": "L2",
+      "effects": [
+        "effect:image-sequence",
+        "effect:pin-scrub-story",
+        "effect:smooth-scroll"
+      ],
+      "purpose": "signature",
+      "why": "утро по минутам"
+    },
+    {
+      "section": "section-role:product-demo",
+      "level": "L2",
+      "effects": [
+        "effect:3d-object"
+      ],
+      "purpose": "signature",
+      "why": "банка поворачивается и открывается к подписке"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-warm-field",
+      "technique": "cliche:warm-paper",
+      "decision": "twist",
+      "criteria": {
+        "concept": {
+          "result": "pass",
+          "note": "поле — стена утреннего кадра, как на L0"
+        },
+        "brand": {
+          "result": "pass",
+          "note": "тёплая нейтраль из токенов бренда"
+        },
+        "execution": {
+          "result": "pass",
+          "note": "контраст текста 15:1; финал уходит в лесной зелёный"
+        },
+        "epoch": {
+          "result": "pass",
+          "note": "насыщено с 2025: без антиквы и терракоты"
+        },
+        "singularity": {
+          "result": "pass"
+        }
+      },
+      "why": "Тот же мир, что на L0: бренд не меняется при смене уровня",
+      "k3_allow": "warm"
+    },
+    {
+      "id": "d-smooth-scroll",
+      "technique": "effect:smooth-scroll",
+      "decision": "use",
+      "criteria": {
+        "concept": {
+          "result": "pass",
+          "note": "скраб секвенции без рывков колеса"
+        },
+        "brand": {
+          "result": "na"
+        },
+        "execution": {
+          "result": "pass",
+          "note": "Lenis без изменения скорости; якоря и Tab работают; при reduce выключено"
+        },
+        "epoch": {
+          "result": "pass",
+          "note": "норма жанра сайта-истории"
+        },
+        "singularity": {
+          "result": "pass",
+          "note": "одна сцена"
+        }
+      },
+      "why": "Нужна для скраба секвенции; только L2"
+    },
+    {
+      "id": "d-preloader",
+      "technique": "cliche:preloader",
+      "decision": "avoid",
+      "criteria": {
+        "concept": {
+          "result": "fail",
+          "note": "утро не начинается с ожидания"
+        },
+        "brand": {
+          "result": "na"
+        },
+        "execution": {
+          "result": "fail",
+          "note": "прячет LCP"
+        },
+        "epoch": {
+          "result": "na"
+        },
+        "singularity": {
+          "result": "na"
+        }
+      },
+      "why": "Первый кадр сюжета — постер и LCP; секвенция догружается после"
+    },
+    {
+      "id": "d-slowmo-steam",
+      "technique": "cliche:eternal-slowmo (VID-M13)",
+      "decision": "avoid",
+      "criteria": {
+        "concept": {
+          "result": "fail",
+          "note": "движение без сюжета"
+        },
+        "brand": {
+          "result": "na"
+        },
+        "execution": {
+          "result": "na"
+        },
+        "epoch": {
+          "result": "fail"
+        },
+        "singularity": {
+          "result": "na"
+        }
+      },
+      "why": "Пар появляется только в главе заваривания и управляется прокруткой"
+    }
+  ],
+  "exclusions": {
+    "forbidden_hues": [
+      {
+        "from": 270,
+        "to": 320,
+        "reason": "пурпур и неон (IMG-M05)"
+      }
+    ],
+    "forbidden_markers": [
+      "IMG-M02",
+      "IMG-M03",
+      "IMG-M05",
+      "IMG-M07",
+      "IMG-M09",
+      "IMG-M10",
+      "IMG-M21",
+      "IMG-M22",
+      "VID-M07",
+      "VID-M13"
+    ],
+    "k3_allow": [
+      "warm"
+    ],
+    "bans": [
+      "прелоадер",
+      "дымка и контровой свет",
+      "латте-арт",
+      "люди в кадре"
+    ]
+  },
+  "budget": {
+    "profile": "landing-campaign@L2",
+    "spend": [
+      {
+        "what": "постер первого кадра (AVIF)",
+        "kb": 120,
+        "device": "both",
+        "load": "eager"
+      },
+      {
+        "what": "секвенция утра: 60 кадров телефон / 120 десктоп (AVIF)",
+        "kb": 3500,
+        "device": "desktop",
+        "load": "after-lcp"
+      },
+      {
+        "what": "секвенция телефон",
+        "kb": 1500,
+        "device": "mobile",
+        "load": "after-lcp"
+      },
+      {
+        "what": "GLB банки",
+        "kb": 600,
+        "device": "both",
+        "load": "on-visible"
+      },
+      {
+        "what": "gsap + ScrollTrigger + lenis (br)",
+        "kb": 45,
+        "device": "both",
+        "load": "after-lcp"
+      }
+    ]
+  },
+  "handoff": {
+    "visual_dna": {
+      "character": {
+        "adjectives": [
+          "тёплый",
+          "ремесленный",
+          "спокойный"
+        ],
+        "boldness": "bold",
+        "one_bold_move": "утро по минутам: закреплённая сцена, где прокрутка ведёт от закрытой банки к первой чашке"
+      },
+      "palette_forbidden_hues": [
+        {
+          "from": 270,
+          "to": 320,
+          "reason": "пурпур и неон (IMG-M05)"
+        }
+      ],
+      "exclusions": {
+        "forbidden_markers": [
+          "IMG-M02",
+          "IMG-M03",
+          "IMG-M05",
+          "IMG-M07",
+          "IMG-M09",
+          "IMG-M10",
+          "IMG-M21",
+          "IMG-M22",
+          "VID-M07",
+          "VID-M13"
+        ],
+        "replace_with": [
+          {
+            "what": "people",
+            "kind": "object",
+            "replace_with": "no one in the frame"
+          }
+        ]
+      },
+      "abstract": {
+        "policy": "none"
+      },
+      "video": {
+        "tempo": "slow",
+        "camera": "static",
+        "loop": "none"
+      },
+      "composition": {
+        "subject_region": "right-third",
+        "text_zone_default": {
+          "side": "left",
+          "share": 0.4,
+          "surface": "evenly lit plaster wall"
+        },
+        "negative_space_min": 0.35,
+        "max_elements": 4,
+        "asymmetry": true
+      },
+      "subject_matter": {
+        "domain_props": [
+          "green coffee tin",
+          "coffee beans",
+          "hand grinder",
+          "turkish cezve",
+          "ceramic cup",
+          "pale oak table"
+        ],
+        "motifs": [
+          "one morning minute by minute"
+        ],
+        "people_policy": "real-only",
+        "product_policy": "real-photo-only"
+      },
+      "materials": [
+        "pale oak",
+        "washed linen",
+        "kraft paper",
+        "painted tin"
+      ]
+    },
+    "blender": {
+      "role_in_story": "секвенция утра (5 глав) и GLB банки для финального пика",
+      "series_style": "документальный предмет на светлом дубе, один кадр съёмки на главу",
+      "page_background": "#F4EFE6",
+      "materials": [
+        "жесть #1F4D3A",
+        "керамика",
+        "дуб"
+      ],
+      "light_mood": "мягкий утренний свет справа, 4800 K",
+      "motion": "секвенция скрабится прокруткой; банка поворачивается на 120° и открывает крышку",
+      "budget": "секвенция ≤ 3,5 МБ десктоп / 1,5 МБ телефон; GLB ≤ 0,6 МБ"
+    },
+    "kimi": {
+      "design_system_style": "одно утро по минутам: сюжет прокрутки из пяти глав одной съёмки",
+      "direction": {
+        "visual_thesis": "прокрутка — это время утра",
+        "paper": "light warm #F4EFE6 → финал лесной зелёный",
+        "display_style": "grotesque Commissioner",
+        "accent_rule": "зелёный растёт по сюжету; золото — цена",
+        "imagery": "секвенция одной съёмки и GLB банки; без людей",
+        "macrostructure": "poster-led"
+      },
+      "motion": {
+        "level": "cinematic",
+        "thesis": "скраб секвенции по главам; банка к финалу",
+        "library": "gsap@3 + ScrollTrigger + lenis@1"
+      },
+      "bans": [
+        "прелоадер",
+        "дымка",
+        "латте-арт"
+      ],
+      "allow": [
+        "warm"
+      ]
+    }
+  },
+  "lifecycle": {
+    "version": "0.1",
+    "history": [
+      {
+        "version": "0.1",
+        "date": "2026-09-24",
+        "change": "учебный вариант L2 к демо ai-media (сравнение с forest-roast-l0)",
+        "by": "Claude (пример A/01)"
+      }
+    ],
+    "review_by": "2027-03-24",
+    "on_brand_change": "как L0; при отказе от кампании — вернуться к forest-roast-l0"
+  }
+}

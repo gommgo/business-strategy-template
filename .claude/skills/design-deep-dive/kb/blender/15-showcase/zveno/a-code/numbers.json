@@ -1,0 +1,2691 @@
+{
+ "variant": "a-code",
+ "title": "«Звено» A — код v3 (дорожка CD)",
+ "phase": 3,
+ "date": "2026-09-26",
+ "look": "p3",
+ "look_note": "p3 = p2 + приём 8 «контровой свет в дымке» (десктоп, пост) + приём 10 «след инструмента» (IK, первое движение); main.js: look: \"p3\"",
+ "stack": {
+  "three": "0.186.0",
+  "renderer": "WebGLRenderer",
+  "postprocessing": "6.39.5",
+  "n8ao": "2.0.1",
+  "esbuild": "0.28.2",
+  "browser": "Chromium 153 headless, ANGLE GL, Intel Iris Xe (Mesa)"
+ },
+ "source": "15-showcase/_shared/code3d/src/ (общий код A и C)",
+ "time": {
+  "agent_clock_phase3": "00:05–02:40",
+  "machine_browser_runs_phase3": 26,
+  "heavy_runs_phase3": 6,
+  "machine_browser_s_phase3": 1840,
+  "queue_wait_s_phase3": 5563,
+  "machine_blender_s": 0,
+  "phase2": {
+   "agent_clock_phase2": "20:15–(см. NOTES)",
+   "machine_browser_runs_phase2": 17,
+   "machine_browser_s_phase2": 1575,
+   "queue_wait_s_phase2": 1156,
+   "machine_blender_s": 0,
+   "phase1": {
+    "agent_clock": "18:30–20:15 (≈ 1 ч 45 мин по часам, фаза 1)",
+    "machine_browser_s": 1795,
+    "machine_browser_runs": 30,
+    "machine_blender_s": 0,
+    "note": "браузер — через slot_run --kind browser (кадры, постеры, стенды, зонды) ≈ 30 мин; motion_check — отдельно (5 + 1 + 1 режимов ≈ 10 мин), сам берёт замки"
+   }
+  },
+  "phase1": {
+   "agent_clock": "18:30–20:15 (≈ 1 ч 45 мин по часам, фаза 1)",
+   "machine_browser_s": 1795,
+   "machine_browser_runs": 30,
+   "machine_blender_s": 0,
+   "note": "браузер — через slot_run --kind browser (кадры, постеры, стенды, зонды) ≈ 30 мин; motion_check — отдельно (5 + 1 + 1 режимов ≈ 10 мин), сам берёт замки"
+  }
+ },
+ "weight_kb_br": {
+  "method": "brotli q11 по файлам a-code/js (сборка 26.09 01:36)",
+  "files": {
+   "chunks/chunk-AGLPBZOW.js": 118.73,
+   "chunks/post-CCX4XNEH.js": 98.43,
+   "main.js": 3.48,
+   "motion.js": 1.05,
+   "three-scene.js": 16.96
+  },
+  "desktop_3d": 234.12,
+  "mobile_3d": 135.69,
+  "techniques_8_10": 2.3,
+  "assets_3d_kb": 0,
+  "phase2_same_method": [
+   231.2,
+   134.3
+  ]
+ },
+ "frame_ms_quiet_phase3": {
+  "q-desk": {
+   "desk|c3:all:p2": {
+    "n": 3,
+    "frame_med": 0.6,
+    "frame_med_min": 0.5,
+    "frame_med_max": 0.6,
+    "frame_p90": 1.1,
+    "mean_el_n": 4.35,
+    "cpu_med": 0.5,
+    "stalls50": 16,
+    "stall_max": 1276,
+    "calls_story": 92,
+    "calls_scan": 40,
+    "tris_story": 77190,
+    "programs": 34,
+    "first_frame_ms": 235,
+    "ready_ms": 171,
+    "load": 12.8,
+    "console": []
+   },
+   "desk|c3:all:p3": {
+    "n": 3,
+    "frame_med": 0.5,
+    "frame_med_min": 0.5,
+    "frame_med_max": 0.7,
+    "frame_p90": 1.2,
+    "mean_el_n": 4.72,
+    "cpu_med": 0.4,
+    "stalls50": 18,
+    "stall_max": 1385,
+    "calls_story": 98,
+    "calls_scan": 47,
+    "tris_story": 77220,
+    "programs": 39,
+    "first_frame_ms": 235,
+    "ready_ms": 179,
+    "load": 11.9,
+    "console": []
+   },
+   "desk|c3:none:p2": {
+    "n": 3,
+    "frame_med": 0.2,
+    "frame_med_min": 0.2,
+    "frame_med_max": 0.2,
+    "frame_p90": 0.4,
+    "mean_el_n": 1.32,
+    "cpu_med": 0.1,
+    "stalls50": 29,
+    "stall_max": 717,
+    "calls_story": 49,
+    "calls_scan": 17,
+    "tris_story": 31037,
+    "programs": 10,
+    "first_frame_ms": 117,
+    "ready_ms": 86,
+    "load": 11.1,
+    "console": []
+   }
+  },
+  "q-desk-ik": {
+   "desk|c3:all:p2": {
+    "n": 3,
+    "frame_med": 0.6,
+    "frame_med_min": 0.3,
+    "frame_med_max": 0.6,
+    "frame_p90": 1,
+    "mean_el_n": 4.29,
+    "cpu_med": 0.5,
+    "stalls50": 18,
+    "stall_max": 1408,
+    "calls_story": 92,
+    "calls_scan": 40,
+    "tris_story": 77190,
+    "programs": 34,
+    "first_frame_ms": 203,
+    "ready_ms": 170,
+    "load": 7.3,
+    "console": []
+   },
+   "desk|c3:all:p3": {
+    "n": 3,
+    "frame_med": 0.6,
+    "frame_med_min": 0.6,
+    "frame_med_max": 0.6,
+    "frame_p90": 1.3,
+    "mean_el_n": 4.54,
+    "cpu_med": 0.4,
+    "stalls50": 16,
+    "stall_max": 1374,
+    "calls_story": 98,
+    "calls_scan": 47,
+    "tris_story": 76924,
+    "programs": 39,
+    "first_frame_ms": 224,
+    "ready_ms": 175,
+    "load": 6.4,
+    "console": []
+   }
+  },
+  "q-mob": {
+   "mob|c3:all:p2": {
+    "n": 3,
+    "frame_med": 0.1,
+    "frame_med_min": 0.1,
+    "frame_med_max": 0.1,
+    "frame_p90": 0.3,
+    "mean_el_n": 0.54,
+    "cpu_med": 0.1,
+    "stalls50": 57,
+    "stall_max": 304,
+    "calls_story": 35,
+    "calls_scan": 12,
+    "tris_story": 17981,
+    "programs": 9,
+    "first_frame_ms": 125,
+    "ready_ms": 103,
+    "load": 5.1,
+    "console": []
+   },
+   "mob|c3:all:p3": {
+    "n": 3,
+    "frame_med": 0.1,
+    "frame_med_min": 0.1,
+    "frame_med_max": 0.1,
+    "frame_p90": 0.2,
+    "mean_el_n": 0.53,
+    "cpu_med": 0.1,
+    "stalls50": 50,
+    "stall_max": 322,
+    "calls_story": 35,
+    "calls_scan": 12,
+    "tris_story": 17981,
+    "programs": 10,
+    "first_frame_ms": 127,
+    "ready_ms": 103,
+    "load": 4.7,
+    "console": []
+   }
+  }
+ },
+ "draw_calls_desktop_p3": {
+  "hero": {
+   "calls": 99,
+   "tris": 77244,
+   "programs": 37
+  },
+  "exploded": {
+   "calls": 99,
+   "tris": 77244,
+   "programs": 37
+  },
+  "locking": {
+   "calls": 96,
+   "tris": 76864,
+   "programs": 37
+  },
+  "first-move": {
+   "calls": 98,
+   "tris": 76924,
+   "programs": 37
+  },
+  "scan-half": {
+   "calls": 47,
+   "tris": 18912,
+   "programs": 37
+  },
+  "inside": {
+   "calls": 47,
+   "tris": 18912,
+   "programs": 37
+  },
+  "hero-ik": {
+   "calls": 99,
+   "tris": 77244,
+   "programs": 37
+  },
+  "lock-flash": {
+   "calls": 96,
+   "tris": 76864,
+   "programs": 37
+  },
+  "first-move-ik": {
+   "calls": 98,
+   "tris": 76924,
+   "programs": 37
+  }
+ },
+ "draw_calls_mobile_p3": {
+  "hero": {
+   "calls": 35,
+   "tris": 17981,
+   "programs": 10
+  },
+  "exploded": {
+   "calls": 35,
+   "tris": 17981,
+   "programs": 10
+  },
+  "first-move": {
+   "calls": 35,
+   "tris": 17981,
+   "programs": 10
+  },
+  "scan-half": {
+   "calls": 12,
+   "tris": 7697,
+   "programs": 10
+  },
+  "hero-ik": {
+   "calls": 35,
+   "tris": 17981,
+   "programs": 10
+  }
+ },
+ "img_metrics_p3": {
+  "hero": {
+   "bg_vs_page_dE": 2.996,
+   "hi_obj_pct": 0.724,
+   "clip_obj_pct": 0.635,
+   "obj_minus_bg_L": 36.253,
+   "weight_in_text": 0.249,
+   "weight_on_obj": 0.335
+  },
+  "hero-ik": {
+   "bg_vs_page_dE": 3.02,
+   "hi_obj_pct": 0.574,
+   "clip_obj_pct": 0.785,
+   "obj_minus_bg_L": 38.766,
+   "weight_in_text": 0.247,
+   "weight_on_obj": 0.332
+  },
+  "exploded": {
+   "bg_vs_page_dE": 3.088,
+   "hi_obj_pct": 4.587,
+   "clip_obj_pct": 0.471,
+   "obj_minus_bg_L": 53.22,
+   "weight_in_text": 0.301,
+   "weight_on_obj": 0.183
+  },
+  "locking": {
+   "bg_vs_page_dE": 3.076,
+   "hi_obj_pct": 5.371,
+   "clip_obj_pct": 1.462,
+   "obj_minus_bg_L": 61.071,
+   "weight_in_text": 0.291,
+   "weight_on_obj": 0.205
+  },
+  "first-move": {
+   "bg_vs_page_dE": 3.22,
+   "hi_obj_pct": 0.742,
+   "clip_obj_pct": 0.903,
+   "obj_minus_bg_L": 40.873,
+   "weight_in_text": 0.25,
+   "weight_on_obj": 0.368
+  },
+  "scan-half": {
+   "bg_vs_page_dE": 2.341,
+   "hi_obj_pct": 0.097,
+   "clip_obj_pct": 1.108,
+   "obj_minus_bg_L": 12.989,
+   "weight_in_text": 0.574,
+   "weight_on_obj": 0.496
+  },
+  "inside": {
+   "bg_vs_page_dE": 2.328,
+   "hi_obj_pct": 0.055,
+   "clip_obj_pct": 1.75,
+   "obj_minus_bg_L": 13.608,
+   "weight_in_text": 0.595,
+   "weight_on_obj": 0.509
+  }
+ },
+ "img_metrics_p2_same_run": {
+  "hero": {
+   "bg_vs_page_dE": 2.501,
+   "hi_obj_pct": 0.722,
+   "clip_obj_pct": 0.581,
+   "obj_minus_bg_L": 35.525,
+   "weight_in_text": 0.253,
+   "weight_on_obj": 0.355
+  },
+  "exploded": {
+   "bg_vs_page_dE": 2.817,
+   "hi_obj_pct": 4.407,
+   "clip_obj_pct": 0.455,
+   "obj_minus_bg_L": 51.985,
+   "weight_in_text": 0.301,
+   "weight_on_obj": 0.198
+  },
+  "first-move": {
+   "bg_vs_page_dE": 2.656,
+   "hi_obj_pct": 0.781,
+   "clip_obj_pct": 0.851,
+   "obj_minus_bg_L": 40.125,
+   "weight_in_text": 0.251,
+   "weight_on_obj": 0.39
+  }
+ },
+ "gates_site_probe_quiet_p3": {
+  "a-desk": {
+   "lcp_ms": 68,
+   "lcp_el": "H1",
+   "tbt_ms": 83,
+   "longest_task_ms": 94,
+   "cls": 0,
+   "transfer_kb": 461.5,
+   "console_errors": 0,
+   "first_frame_3d_ms": "1142",
+   "idle_dc_max": 0,
+   "idle_motion_pct": 0.0,
+   "fail": 0
+  },
+  "a-mob": {
+   "lcp_ms": 644,
+   "lcp_el": "H1",
+   "tbt_ms": 162,
+   "longest_task_ms": 124,
+   "cls": 0,
+   "transfer_kb": 356.1,
+   "console_errors": 0,
+   "first_frame_3d_ms": "3106",
+   "idle_dc_max": 0,
+   "idle_motion_pct": 0.0,
+   "fail": 0
+  },
+  "a-rm": {
+   "lcp_ms": 56,
+   "lcp_el": "H1",
+   "tbt_ms": 0,
+   "longest_task_ms": 0,
+   "cls": 0,
+   "transfer_kb": 263.7,
+   "console_errors": 0,
+   "first_frame_3d_ms": null,
+   "idle_dc_max": 0,
+   "idle_motion_pct": 0.0,
+   "fail": 0
+  },
+  "v2-desk": {
+   "lcp_ms": 60,
+   "lcp_el": "H1",
+   "tbt_ms": 74,
+   "longest_task_ms": 96,
+   "cls": 0,
+   "transfer_kb": 344.2,
+   "console_errors": 0,
+   "first_frame_3d_ms": null,
+   "idle_dc_max": 0,
+   "idle_motion_pct": 0.0,
+   "fail": 0
+  },
+  "v2-mob": {
+   "lcp_ms": 644,
+   "lcp_el": "H1",
+   "tbt_ms": 144,
+   "longest_task_ms": 120,
+   "cls": 0,
+   "transfer_kb": 341.3,
+   "console_errors": 0,
+   "first_frame_3d_ms": null,
+   "idle_dc_max": 0,
+   "idle_motion_pct": 0.0,
+   "fail": 0
+  }
+ },
+ "gates_dir": "gates2",
+ "motion_check_L2": {
+  "p3_final": {
+   "target": "/home/mm/Документы/app-design/blender-research/15-showcase/zveno/a-code/index.html",
+   "level": "L2",
+   "fail_B": 0,
+   "fail_S": 0,
+   "fail_D": 0,
+   "na": 2,
+   "spec_fail": 0,
+   "out": "/home/mm/Документы/app-design/blender-research/99-raw/experiments/CD/out/cd3/gates2/motion-l2"
+  },
+  "p3_01_52": {
+   "target": "/home/mm/Документы/app-design/blender-research/15-showcase/zveno/a-code/index.html",
+   "level": "L2",
+   "fail_B": 0,
+   "fail_S": 0,
+   "fail_D": 0,
+   "na": 2,
+   "spec_fail": 0,
+   "out": "/home/mm/Документы/app-design/blender-research/99-raw/experiments/CD/out/cd3/gates/motion-l2"
+  },
+  "p2_00_54": {
+   "target": "/home/mm/Документы/app-design/blender-research/15-showcase/zveno/a-code/index.html",
+   "level": "L2",
+   "fail_B": 0,
+   "fail_S": 0,
+   "fail_D": 0,
+   "na": 2,
+   "spec_fail": 0,
+   "out": "/home/mm/Документы/app-design/blender-research/99-raw/experiments/CD/out/cd3/motion-l2-a"
+  }
+ },
+ "marketing_audit_L2_00_54": {
+  "blockers": 0,
+  "serious": 0,
+  "polish": 65,
+  "report": "99-raw/experiments/CD/out/cd3/mkt-a/zveno-a-code.marketing.md"
+ },
+ "experiments_phase3": {
+  "ao_tsl": {
+   "method": "пропускная: окно 2500 мс / число кадров после ожидания простоя (медиана интервалов rAF при --disable-gpu-vsync непригодна — CD/15)",
+   "ao": {
+    "none": {
+     "ms_per_frame": [
+      1.49,
+      1.53,
+      1.52
+     ],
+     "med": 1.52,
+     "first_ms": [
+      261,
+      24,
+      23
+     ],
+     "calls": 74,
+     "programs": 31,
+     "stalls50": [
+      16,
+      13,
+      12
+     ],
+     "loadavg": [
+      2.8,
+      2.4,
+      2.1
+     ],
+     "delta_vs_none": 0.0
+    },
+    "n8pm": {
+     "ms_per_frame": [
+      2.59,
+      2.44,
+      2.56
+     ],
+     "med": 2.56,
+     "first_ms": [
+      49,
+      37,
+      38
+     ],
+     "calls": 83,
+     "programs": 27,
+     "stalls50": [
+      9,
+      9,
+      8
+     ],
+     "loadavg": [
+      2.8,
+      2.4,
+      2.0
+     ],
+     "delta_vs_none": 1.04
+    },
+    "n8": {
+     "ms_per_frame": [
+      3.17,
+      3.38,
+      3.28
+     ],
+     "med": 3.28,
+     "first_ms": [
+      75,
+      37,
+      39
+     ],
+     "calls": 116,
+     "programs": 37,
+     "stalls50": [
+      10,
+      10,
+      11
+     ],
+     "loadavg": [
+      2.7,
+      2.4,
+      1.9
+     ],
+     "delta_vs_none": 1.76
+    },
+    "gtao": {
+     "ms_per_frame": [
+      4.78,
+      4.9,
+      4.78
+     ],
+     "med": 4.78,
+     "first_ms": [
+      107,
+      45,
+      45
+     ],
+     "calls": 114,
+     "programs": 38,
+     "stalls50": [
+      8,
+      6,
+      7
+     ],
+     "loadavg": [
+      2.7,
+      2.2,
+      1.8
+     ],
+     "delta_vs_none": 3.26
+    },
+    "ssao": {
+     "ms_per_frame": [
+      3.26,
+      3.42,
+      3.42
+     ],
+     "med": 3.42,
+     "first_ms": [
+      58,
+      36,
+      38
+     ],
+     "calls": 113,
+     "programs": 37,
+     "stalls50": [
+      8,
+      6,
+      8
+     ],
+     "loadavg": [
+      2.6,
+      2.1,
+      1.8
+     ],
+     "delta_vs_none": 1.9
+    }
+   },
+   "tsl": {
+    "gl": {
+     "backend": "webgl2",
+     "ms_per_frame": [
+      0.72,
+      0.7,
+      0.71
+     ],
+     "med": 0.71,
+     "first_ms": [
+      216,
+      209,
+      196
+     ],
+     "init_ms": [
+      151,
+      190,
+      159
+     ],
+     "loadavg": [
+      1.9,
+      2.2,
+      1.9
+     ]
+    },
+    "webgpu": {
+     "backend": "webgpu",
+     "ms_per_frame": [
+      1.12,
+      1.13,
+      1.13
+     ],
+     "med": 1.13,
+     "first_ms": [
+      210,
+      94,
+      92
+     ],
+     "init_ms": [
+      102,
+      95,
+      95
+     ],
+     "loadavg": [
+      2.0,
+      2.1,
+      1.9
+     ]
+    },
+    "fallback": {
+     "backend": "webgl2-fallback",
+     "ms_per_frame": [
+      1.04,
+      1.04,
+      1.04
+     ],
+     "med": 1.04,
+     "first_ms": [
+      323,
+      307,
+      312
+     ],
+     "init_ms": [
+      207,
+      200,
+      202
+     ],
+     "loadavg": [
+      2.1,
+      2.0,
+      1.9
+     ]
+    }
+   },
+   "weights_kb_br": {
+    "n8ao": 77.6,
+    "gtao": 7.1,
+    "ssao": 4.7,
+    "effectcomposer_base": 2.4,
+    "tsl_stand": 260.5,
+    "glsl_stand": 153.1
+   }
+  },
+  "hook_v2": {
+   "webp": {
+    "n": 3,
+    "ready_ms": 270,
+    "first_frame_gpu_ms": 323,
+    "inner_ms": 0,
+    "scan_frame_ms": 21,
+    "tbt_ms": 3,
+    "longtask_max_ms": 53,
+    "tex_gpu_MB": 28.76,
+    "transfer_kb": {
+     "glb": 798.2,
+     "inner_glb": 0.0,
+     "basis": 0.0,
+     "ktx2_chunk": 0.0,
+     "glb_chunk": 20.8,
+     "js": 239.2
+    },
+    "glb_parse_ms": 47,
+    "glb_fetch_ms": 12,
+    "heap_MB": 15,
+    "calls": 115,
+    "tris": 137236,
+    "tex": [
+     {
+      "name": "zveno_ao",
+      "slot": "aoMap",
+      "w": 2048,
+      "h": 2048,
+      "fmt": "RGBA8",
+      "levels": 12,
+      "bytes": 22369621,
+      "compressed": false,
+      "pot": true
+     },
+     {
+      "name": "lbl_zveno_mark",
+      "slot": "map",
+      "w": 2048,
+      "h": 408,
+      "fmt": "RGBA8",
+      "levels": 12,
+      "bytes": 4456448,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_j1",
+      "slot": "map",
+      "w": 337,
+      "h": 364,
+      "fmt": "RGBA8",
+      "levels": 9,
+      "bytes": 654229,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_spec",
+      "slot": "map",
+      "w": 2048,
+      "h": 125,
+      "fmt": "RGBA8",
+      "levels": 12,
+      "bytes": 1365333,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_j2",
+      "slot": "map",
+      "w": 337,
+      "h": 364,
+      "fmt": "RGBA8",
+      "levels": 9,
+      "bytes": 654229,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_j3",
+      "slot": "map",
+      "w": 337,
+      "h": 364,
+      "fmt": "RGBA8",
+      "levels": 9,
+      "bytes": 654229,
+      "compressed": false,
+      "pot": false
+     }
+    ],
+    "ext": {
+     "s3tc": true,
+     "bptc": true,
+     "etc": true,
+     "astc": true
+    },
+    "gpu": "ANGLE (Intel, Mesa Intel(R) Iris(R) Xe Graphics (RPL-P), OpenGL ES 3.2)",
+    "loadavg": [
+     20.0,
+     17.2,
+     14.8
+    ]
+   },
+   "ktx2": {
+    "n": 3,
+    "ready_ms": 325,
+    "first_frame_gpu_ms": 348,
+    "inner_ms": 0,
+    "scan_frame_ms": 15,
+    "tbt_ms": 0,
+    "longtask_max_ms": 0,
+    "tex_gpu_MB": 7.49,
+    "transfer_kb": {
+     "glb": 865.5,
+     "inner_glb": 0.0,
+     "basis": 212.8,
+     "ktx2_chunk": 20.7,
+     "glb_chunk": 20.9,
+     "js": 239.4
+    },
+    "glb_parse_ms": 125,
+    "glb_fetch_ms": 13,
+    "heap_MB": 28,
+    "calls": 115,
+    "tris": 137236,
+    "tex": [
+     {
+      "name": "zveno_ao",
+      "slot": "aoMap",
+      "w": 2048,
+      "h": 2048,
+      "fmt": "BC7",
+      "levels": 12,
+      "bytes": 5592432,
+      "compressed": true
+     },
+     {
+      "name": "lbl_zveno_mark",
+      "slot": "map",
+      "w": 2196,
+      "h": 440,
+      "fmt": "BC7",
+      "levels": 12,
+      "bytes": 1290976,
+      "compressed": true
+     },
+     {
+      "name": "lbl_j1",
+      "slot": "map",
+      "w": 340,
+      "h": 364,
+      "fmt": "BC7",
+      "levels": 9,
+      "bytes": 166432,
+      "compressed": true
+     },
+     {
+      "name": "lbl_spec",
+      "slot": "map",
+      "w": 2376,
+      "h": 148,
+      "fmt": "BC7",
+      "levels": 12,
+      "bytes": 474192,
+      "compressed": true
+     },
+     {
+      "name": "lbl_j2",
+      "slot": "map",
+      "w": 340,
+      "h": 364,
+      "fmt": "BC7",
+      "levels": 9,
+      "bytes": 166432,
+      "compressed": true
+     },
+     {
+      "name": "lbl_j3",
+      "slot": "map",
+      "w": 340,
+      "h": 364,
+      "fmt": "BC7",
+      "levels": 9,
+      "bytes": 166432,
+      "compressed": true
+     }
+    ],
+    "ext": {
+     "s3tc": true,
+     "bptc": true,
+     "etc": true,
+     "astc": true
+    },
+    "gpu": "ANGLE (Intel, Mesa Intel(R) Iris(R) Xe Graphics (RPL-P), OpenGL ES 3.2)",
+    "loadavg": [
+     18.5,
+     16.1,
+     14.8
+    ]
+   },
+   "ktx2-pre": {
+    "n": 3,
+    "ready_ms": 314,
+    "first_frame_gpu_ms": 341,
+    "inner_ms": 0,
+    "scan_frame_ms": 29,
+    "tbt_ms": 0,
+    "longtask_max_ms": 0,
+    "tex_gpu_MB": 7.49,
+    "transfer_kb": {
+     "glb": 865.5,
+     "inner_glb": 0.0,
+     "basis": 212.8,
+     "ktx2_chunk": 20.7,
+     "glb_chunk": 20.9,
+     "js": 239.4
+    },
+    "glb_parse_ms": 99,
+    "glb_fetch_ms": 18,
+    "heap_MB": 28,
+    "calls": 115,
+    "tris": 137236,
+    "tex": [
+     {
+      "name": "zveno_ao",
+      "slot": "aoMap",
+      "w": 2048,
+      "h": 2048,
+      "fmt": "BC7",
+      "levels": 12,
+      "bytes": 5592432,
+      "compressed": true
+     },
+     {
+      "name": "lbl_zveno_mark",
+      "slot": "map",
+      "w": 2196,
+      "h": 440,
+      "fmt": "BC7",
+      "levels": 12,
+      "bytes": 1290976,
+      "compressed": true
+     },
+     {
+      "name": "lbl_j1",
+      "slot": "map",
+      "w": 340,
+      "h": 364,
+      "fmt": "BC7",
+      "levels": 9,
+      "bytes": 166432,
+      "compressed": true
+     },
+     {
+      "name": "lbl_spec",
+      "slot": "map",
+      "w": 2376,
+      "h": 148,
+      "fmt": "BC7",
+      "levels": 12,
+      "bytes": 474192,
+      "compressed": true
+     },
+     {
+      "name": "lbl_j2",
+      "slot": "map",
+      "w": 340,
+      "h": 364,
+      "fmt": "BC7",
+      "levels": 9,
+      "bytes": 166432,
+      "compressed": true
+     },
+     {
+      "name": "lbl_j3",
+      "slot": "map",
+      "w": 340,
+      "h": 364,
+      "fmt": "BC7",
+      "levels": 9,
+      "bytes": 166432,
+      "compressed": true
+     }
+    ],
+    "ext": {
+     "s3tc": true,
+     "bptc": true,
+     "etc": true,
+     "astc": true
+    },
+    "gpu": "ANGLE (Intel, Mesa Intel(R) Iris(R) Xe Graphics (RPL-P), OpenGL ES 3.2)",
+    "loadavg": [
+     18.5,
+     16.1,
+     14.8
+    ]
+   },
+   "split": {
+    "n": 3,
+    "ready_ms": 289,
+    "first_frame_gpu_ms": 309,
+    "inner_ms": 360,
+    "scan_frame_ms": 28,
+    "tbt_ms": 0,
+    "longtask_max_ms": 0,
+    "tex_gpu_MB": 28.76,
+    "transfer_kb": {
+     "glb": 679.6,
+     "inner_glb": 121.0,
+     "basis": 0.0,
+     "ktx2_chunk": 0.0,
+     "glb_chunk": 20.8,
+     "js": 239.2
+    },
+    "glb_parse_ms": 46,
+    "glb_fetch_ms": 9,
+    "heap_MB": 16,
+    "calls": 115,
+    "tris": 137236,
+    "tex": [
+     {
+      "name": "zveno_ao",
+      "slot": "aoMap",
+      "w": 2048,
+      "h": 2048,
+      "fmt": "RGBA8",
+      "levels": 12,
+      "bytes": 22369621,
+      "compressed": false,
+      "pot": true
+     },
+     {
+      "name": "lbl_zveno_mark",
+      "slot": "map",
+      "w": 2048,
+      "h": 408,
+      "fmt": "RGBA8",
+      "levels": 12,
+      "bytes": 4456448,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_j1",
+      "slot": "map",
+      "w": 337,
+      "h": 364,
+      "fmt": "RGBA8",
+      "levels": 9,
+      "bytes": 654229,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_spec",
+      "slot": "map",
+      "w": 2048,
+      "h": 125,
+      "fmt": "RGBA8",
+      "levels": 12,
+      "bytes": 1365333,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_j2",
+      "slot": "map",
+      "w": 337,
+      "h": 364,
+      "fmt": "RGBA8",
+      "levels": 9,
+      "bytes": 654229,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_j3",
+      "slot": "map",
+      "w": 337,
+      "h": 364,
+      "fmt": "RGBA8",
+      "levels": 9,
+      "bytes": 654229,
+      "compressed": false,
+      "pot": false
+     }
+    ],
+    "ext": {
+     "s3tc": true,
+     "bptc": true,
+     "etc": true,
+     "astc": true
+    },
+    "gpu": "ANGLE (Intel, Mesa Intel(R) Iris(R) Xe Graphics (RPL-P), OpenGL ES 3.2)",
+    "loadavg": [
+     18.5,
+     16.1,
+     14.8
+    ]
+   },
+   "split-ao": {
+    "n": 3,
+    "ready_ms": 279,
+    "first_frame_gpu_ms": 308,
+    "inner_ms": 365,
+    "scan_frame_ms": 21,
+    "tbt_ms": 0,
+    "longtask_max_ms": 0,
+    "tex_gpu_MB": 50.09,
+    "transfer_kb": {
+     "glb": 679.6,
+     "inner_glb": 496.2,
+     "basis": 0.0,
+     "ktx2_chunk": 0.0,
+     "glb_chunk": 20.8,
+     "js": 239.2
+    },
+    "glb_parse_ms": 44,
+    "glb_fetch_ms": 10,
+    "heap_MB": 17,
+    "calls": 115,
+    "tris": 137236,
+    "tex": [
+     {
+      "name": "zveno_ao",
+      "slot": "aoMap",
+      "w": 2048,
+      "h": 2048,
+      "fmt": "RGBA8",
+      "levels": 12,
+      "bytes": 22369621,
+      "compressed": false,
+      "pot": true
+     },
+     {
+      "name": "lbl_zveno_mark",
+      "slot": "map",
+      "w": 2048,
+      "h": 408,
+      "fmt": "RGBA8",
+      "levels": 12,
+      "bytes": 4456448,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_j1",
+      "slot": "map",
+      "w": 337,
+      "h": 364,
+      "fmt": "RGBA8",
+      "levels": 9,
+      "bytes": 654229,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_spec",
+      "slot": "map",
+      "w": 2048,
+      "h": 125,
+      "fmt": "RGBA8",
+      "levels": 12,
+      "bytes": 1365333,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_j2",
+      "slot": "map",
+      "w": 337,
+      "h": 364,
+      "fmt": "RGBA8",
+      "levels": 9,
+      "bytes": 654229,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_j3",
+      "slot": "map",
+      "w": 337,
+      "h": 364,
+      "fmt": "RGBA8",
+      "levels": 9,
+      "bytes": 654229,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "zveno_ao",
+      "slot": "aoMap",
+      "w": 2048,
+      "h": 2048,
+      "fmt": "RGBA8",
+      "levels": 12,
+      "bytes": 22369621,
+      "compressed": false,
+      "pot": true
+     }
+    ],
+    "ext": {
+     "s3tc": true,
+     "bptc": true,
+     "etc": true,
+     "astc": true
+    },
+    "gpu": "ANGLE (Intel, Mesa Intel(R) Iris(R) Xe Graphics (RPL-P), OpenGL ES 3.2)",
+    "loadavg": [
+     17.2,
+     16.1,
+     13.6
+    ]
+   },
+   "webp-low": {
+    "n": 3,
+    "ready_ms": 169,
+    "first_frame_gpu_ms": 232,
+    "inner_ms": 0,
+    "scan_frame_ms": 8,
+    "tbt_ms": 12,
+    "longtask_max_ms": 62,
+    "tex_gpu_MB": 12.76,
+    "transfer_kb": {
+     "glb": 426.6,
+     "inner_glb": 0.0,
+     "basis": 0.0,
+     "ktx2_chunk": 0.0,
+     "glb_chunk": 20.8,
+     "js": 142.1
+    },
+    "glb_parse_ms": 23,
+    "glb_fetch_ms": 8,
+    "heap_MB": 15,
+    "calls": 51,
+    "tris": 37024,
+    "tex": [
+     {
+      "name": "zveno-low_ao",
+      "slot": "aoMap",
+      "w": 1024,
+      "h": 1024,
+      "fmt": "RGBA8",
+      "levels": 11,
+      "bytes": 5592405,
+      "compressed": false,
+      "pot": true
+     },
+     {
+      "name": "lbl_zveno_mark",
+      "slot": "map",
+      "w": 2048,
+      "h": 408,
+      "fmt": "RGBA8",
+      "levels": 12,
+      "bytes": 4456448,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_j1",
+      "slot": "map",
+      "w": 337,
+      "h": 364,
+      "fmt": "RGBA8",
+      "levels": 9,
+      "bytes": 654229,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_spec",
+      "slot": "map",
+      "w": 2048,
+      "h": 125,
+      "fmt": "RGBA8",
+      "levels": 12,
+      "bytes": 1365333,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_j2",
+      "slot": "map",
+      "w": 337,
+      "h": 364,
+      "fmt": "RGBA8",
+      "levels": 9,
+      "bytes": 654229,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_j3",
+      "slot": "map",
+      "w": 337,
+      "h": 364,
+      "fmt": "RGBA8",
+      "levels": 9,
+      "bytes": 654229,
+      "compressed": false,
+      "pot": false
+     }
+    ],
+    "ext": {
+     "s3tc": true,
+     "bptc": true,
+     "etc": true,
+     "astc": true
+    },
+    "gpu": "ANGLE (Intel, Mesa Intel(R) Iris(R) Xe Graphics (RPL-P), OpenGL ES 3.2)",
+    "loadavg": [
+     17.2,
+     16.1,
+     13.6
+    ]
+   },
+   "split-low": {
+    "n": 3,
+    "ready_ms": 193,
+    "first_frame_gpu_ms": 247,
+    "inner_ms": 298,
+    "scan_frame_ms": 9,
+    "tbt_ms": 0,
+    "longtask_max_ms": 0,
+    "tex_gpu_MB": 12.76,
+    "transfer_kb": {
+     "glb": 365.1,
+     "inner_glb": 63.2,
+     "basis": 0.0,
+     "ktx2_chunk": 0.0,
+     "glb_chunk": 20.8,
+     "js": 142.1
+    },
+    "glb_parse_ms": 25,
+    "glb_fetch_ms": 7,
+    "heap_MB": 15,
+    "calls": 51,
+    "tris": 37024,
+    "tex": [
+     {
+      "name": "zveno-low_ao",
+      "slot": "aoMap",
+      "w": 1024,
+      "h": 1024,
+      "fmt": "RGBA8",
+      "levels": 11,
+      "bytes": 5592405,
+      "compressed": false,
+      "pot": true
+     },
+     {
+      "name": "lbl_zveno_mark",
+      "slot": "map",
+      "w": 2048,
+      "h": 408,
+      "fmt": "RGBA8",
+      "levels": 12,
+      "bytes": 4456448,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_j1",
+      "slot": "map",
+      "w": 337,
+      "h": 364,
+      "fmt": "RGBA8",
+      "levels": 9,
+      "bytes": 654229,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_spec",
+      "slot": "map",
+      "w": 2048,
+      "h": 125,
+      "fmt": "RGBA8",
+      "levels": 12,
+      "bytes": 1365333,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_j2",
+      "slot": "map",
+      "w": 337,
+      "h": 364,
+      "fmt": "RGBA8",
+      "levels": 9,
+      "bytes": 654229,
+      "compressed": false,
+      "pot": false
+     },
+     {
+      "name": "lbl_j3",
+      "slot": "map",
+      "w": 337,
+      "h": 364,
+      "fmt": "RGBA8",
+      "levels": 9,
+      "bytes": 654229,
+      "compressed": false,
+      "pot": false
+     }
+    ],
+    "ext": {
+     "s3tc": true,
+     "bptc": true,
+     "etc": true,
+     "astc": true
+    },
+    "gpu": "ANGLE (Intel, Mesa Intel(R) Iris(R) Xe Graphics (RPL-P), OpenGL ES 3.2)",
+    "loadavg": [
+     17.2,
+     14.8,
+     13.6
+    ]
+   }
+  }
+ },
+ "files": {
+  "sheets": [
+   "99-raw/experiments/CD/out/cd3/pairs-judge-p2-p3.jpg",
+   "99-raw/experiments/CD/out/cd3/pairs-p2-p3b.jpg",
+   "99-raw/experiments/CD/out/cd3/abc_judge.jpg",
+   "99-raw/experiments/CD/out/cd3/ao_sheet.jpg",
+   "99-raw/experiments/CD/out/cd3/tsl_sheet.jpg",
+   "99-raw/experiments/CD/out/cd3/sweep/sheet3.jpg",
+   "99-raw/experiments/CD/out/cd3/final/trail-1600/hero.png"
+  ],
+  "judge": [
+   "15-showcase/zveno/judge/a-code__hero.png",
+   "15-showcase/zveno/judge/a-code__hero-ik.png",
+   "15-showcase/zveno/judge/a-code__exploded.png",
+   "15-showcase/zveno/judge/a-code__locking.png",
+   "15-showcase/zveno/judge/a-code__first-move.png",
+   "15-showcase/zveno/judge/a-code__scan-half.png",
+   "15-showcase/zveno/judge/a-code__inside.png"
+  ]
+ },
+ "phase2": {
+  "variant": "a-code",
+  "title": "«Звено» A — код v3 (дорожка CD)",
+  "phase": 2,
+  "date": "2026-09-25",
+  "look": "p2",
+  "stack": {
+   "three": "0.186.0",
+   "renderer": "WebGLRenderer",
+   "postprocessing": "6.39.5",
+   "n8ao": "2.0.1",
+   "esbuild": "0.28.2",
+   "browser": "Chromium 153 headless, ANGLE GL, Intel Iris Xe (Mesa)"
+  },
+  "source": "15-showcase/_shared/code3d/src/ (общий код A и C); фаза 1 — 99-raw/experiments/CD/src/scene-v3p1.js",
+  "time": {
+   "agent_clock_phase2": "20:15–(см. NOTES)",
+   "machine_browser_runs_phase2": 17,
+   "machine_browser_s_phase2": 1575,
+   "queue_wait_s_phase2": 1156,
+   "machine_blender_s": 0,
+   "phase1": {
+    "agent_clock": "18:30–20:15 (≈ 1 ч 45 мин по часам, фаза 1)",
+    "machine_browser_s": 1795,
+    "machine_browser_runs": 30,
+    "machine_blender_s": 0,
+    "note": "браузер — через slot_run --kind browser (кадры, постеры, стенды, зонды) ≈ 30 мин; motion_check — отдельно (5 + 1 + 1 режимов ≈ 10 мин), сам берёт замки"
+   }
+  },
+  "weight_kb_br": {
+   "method": "brotli q11 по файлам сборки (out/kb.json)",
+   "desktop_total": 231.2,
+   "mobile_total": 134.3,
+   "files": {
+    "three-scene.js": 15.9,
+    "chunks/post-Z4LRACI7.js": 96.9,
+    "chunks/chunk-NWBIV3XA.js": 118.4
+   },
+   "per_technique_desktop": {
+    "detail": 0.7,
+    "ik": 0.5,
+    "post": 98.2,
+    "studio": 0.3,
+    "world": 1.3
+   },
+   "hybrid_build": {
+    "files": {
+     "three-scene.js": [
+      39471,
+      14.1
+     ],
+     "chunk-WNGBTU7F.js": [
+      4777,
+      1.2
+     ],
+     "post-THQPKX6M.js": [
+      251458,
+      96.8
+     ],
+     "chunk-TE4JCCOD.js": [
+      609250,
+      124.3
+     ],
+     "glb-modules-UD6JPEOW.js": [
+      76215,
+      19.9
+     ]
+    },
+    "desktop_br": 256.3,
+    "mobile_br": 159.5,
+    "glb_chunk_br": 19.9
+   },
+   "phase1_same_method": {
+    "files": {
+     "three-scene.js": [
+      40037,
+      13.8
+     ],
+     "post-JDOXSZIT.js": [
+      251450,
+      96.8
+     ],
+     "chunk-NWBIV3XA.js": [
+      580198,
+      118.4
+     ]
+    },
+    "desktop_br": 229.0,
+    "mobile_br": 132.2,
+    "glb_chunk_br": 0
+   },
+   "assets_3d_kb": 0
+  },
+  "frame_ms_quiet_phase2": {
+   "desk|v2:all": {
+    "n": 3,
+    "frame_med": 0.2,
+    "frame_med_min": 0.2,
+    "frame_med_max": 0.2,
+    "frame_p90": 0.6,
+    "mean_el_n": 1.43,
+    "cpu_med": 0.2,
+    "stalls50": 26,
+    "stall_max": 776,
+    "calls_story": 49,
+    "calls_scan": 17,
+    "tris_story": 31037,
+    "programs": 9,
+    "first_frame_ms": 153,
+    "ready_ms": 108,
+    "load": 7.2,
+    "console": []
+   },
+   "desk|v3p1:all": {
+    "n": 3,
+    "frame_med": 0.8,
+    "frame_med_min": 0.6,
+    "frame_med_max": 0.8,
+    "frame_p90": 1.3,
+    "mean_el_n": 4.78,
+    "cpu_med": 0.6,
+    "stalls50": 15,
+    "stall_max": 1047,
+    "calls_story": 94,
+    "calls_scan": 42,
+    "tris_story": 77192,
+    "programs": 33,
+    "first_frame_ms": 303,
+    "ready_ms": 208,
+    "load": 6.6,
+    "console": []
+   },
+   "desk|v3:none": {
+    "n": 6,
+    "frame_med": 0.2,
+    "frame_med_min": 0.2,
+    "frame_med_max": 0.3,
+    "frame_p90": 0.5,
+    "mean_el_n": 1.35,
+    "cpu_med": 0.1,
+    "stalls50": 56,
+    "stall_max": 776,
+    "calls_story": 49,
+    "calls_scan": 17,
+    "tris_story": 31037,
+    "programs": 10,
+    "first_frame_ms": 125,
+    "ready_ms": 88,
+    "load": 3.7,
+    "console": []
+   },
+   "desk|v3:studio": {
+    "n": 3,
+    "frame_med": 0.2,
+    "frame_med_min": 0.2,
+    "frame_med_max": 0.2,
+    "frame_p90": 0.5,
+    "mean_el_n": 1.41,
+    "cpu_med": 0.2,
+    "stalls50": 25,
+    "stall_max": 722,
+    "calls_story": 49,
+    "calls_scan": 17,
+    "tris_story": 31037,
+    "programs": 10,
+    "first_frame_ms": 114,
+    "ready_ms": 94,
+    "load": 5.7,
+    "console": []
+   },
+   "desk|v3:world": {
+    "n": 3,
+    "frame_med": 0.3,
+    "frame_med_min": 0.3,
+    "frame_med_max": 0.4,
+    "frame_p90": 0.8,
+    "mean_el_n": 1.83,
+    "cpu_med": 0.3,
+    "stalls50": 22,
+    "stall_max": 716,
+    "calls_story": 57,
+    "calls_scan": 17,
+    "tris_story": 33089,
+    "programs": 19,
+    "first_frame_ms": 173,
+    "ready_ms": 148,
+    "load": 5.4,
+    "console": []
+   },
+   "desk|v3:ao": {
+    "n": 3,
+    "frame_med": 0.6,
+    "frame_med_min": 0.3,
+    "frame_med_max": 0.6,
+    "frame_p90": 1.3,
+    "mean_el_n": 2.58,
+    "cpu_med": 0.4,
+    "stalls50": 15,
+    "stall_max": 1101,
+    "calls_story": 58,
+    "calls_scan": 26,
+    "tris_story": 31046,
+    "programs": 20,
+    "first_frame_ms": 177,
+    "ready_ms": 137,
+    "load": 5.4,
+    "console": []
+   },
+   "desk|v3:fx": {
+    "n": 3,
+    "frame_med": 0.3,
+    "frame_med_min": 0.3,
+    "frame_med_max": 0.3,
+    "frame_p90": 0.9,
+    "mean_el_n": 2.17,
+    "cpu_med": 0.2,
+    "stalls50": 17,
+    "stall_max": 1037,
+    "calls_story": 59,
+    "calls_scan": 27,
+    "tris_story": 31047,
+    "programs": 19,
+    "first_frame_ms": 157,
+    "ready_ms": 135,
+    "load": 4.9,
+    "console": []
+   },
+   "desk|v3:detail": {
+    "n": 3,
+    "frame_med": 0.3,
+    "frame_med_min": 0.2,
+    "frame_med_max": 0.5,
+    "frame_p90": 0.6,
+    "mean_el_n": 1.45,
+    "cpu_med": 0.2,
+    "stalls50": 32,
+    "stall_max": 459,
+    "calls_story": 64,
+    "calls_scan": 23,
+    "tris_story": 60605,
+    "programs": 17,
+    "first_frame_ms": 194,
+    "ready_ms": 138,
+    "load": 4.9,
+    "console": []
+   },
+   "desk|v3:texture": {
+    "n": 3,
+    "frame_med": 0.2,
+    "frame_med_min": 0.2,
+    "frame_med_max": 0.3,
+    "frame_p90": 0.6,
+    "mean_el_n": 1.45,
+    "cpu_med": 0.2,
+    "stalls50": 25,
+    "stall_max": 729,
+    "calls_story": 49,
+    "calls_scan": 17,
+    "tris_story": 31037,
+    "programs": 11,
+    "first_frame_ms": 135,
+    "ready_ms": 109,
+    "load": 4.8,
+    "console": []
+   },
+   "desk|v3:all": {
+    "n": 6,
+    "frame_med": 0.65,
+    "frame_med_min": 0.6,
+    "frame_med_max": 1.1,
+    "frame_p90": 1.25,
+    "mean_el_n": 4.31,
+    "cpu_med": 0.5,
+    "stalls50": 31,
+    "stall_max": 1132,
+    "calls_story": 92,
+    "calls_scan": 40,
+    "tris_story": 77190,
+    "programs": 34,
+    "first_frame_ms": 264,
+    "ready_ms": 186,
+    "load": 3.1,
+    "console": []
+   },
+   "desk|v3:ik": {
+    "n": 3,
+    "frame_med": 0.2,
+    "frame_med_min": 0.2,
+    "frame_med_max": 0.2,
+    "frame_p90": 0.5,
+    "mean_el_n": 1.27,
+    "cpu_med": 0.1,
+    "stalls50": 26,
+    "stall_max": 867,
+    "calls_story": 49,
+    "calls_scan": 17,
+    "tris_story": 31037,
+    "programs": 10,
+    "first_frame_ms": 105,
+    "ready_ms": 88,
+    "load": 2.7,
+    "console": []
+   },
+   "mob|v2:all": {
+    "n": 3,
+    "frame_med": 0.1,
+    "frame_med_min": 0.1,
+    "frame_med_max": 0.1,
+    "frame_p90": 0.2,
+    "mean_el_n": 0.38,
+    "cpu_med": 0.1,
+    "stalls50": 46,
+    "stall_max": 348,
+    "calls_story": 26,
+    "calls_scan": 9,
+    "tris_story": 15521,
+    "programs": 5,
+    "first_frame_ms": 83,
+    "ready_ms": 74,
+    "load": 2.1,
+    "console": []
+   },
+   "mob|v3p1:all": {
+    "n": 3,
+    "frame_med": 0.1,
+    "frame_med_min": 0.1,
+    "frame_med_max": 0.1,
+    "frame_p90": 0.2,
+    "mean_el_n": 0.52,
+    "cpu_med": 0.1,
+    "stalls50": 55,
+    "stall_max": 290,
+    "calls_story": 35,
+    "calls_scan": 12,
+    "tris_story": 17981,
+    "programs": 8,
+    "first_frame_ms": 118,
+    "ready_ms": 96,
+    "load": 2.0,
+    "console": []
+   },
+   "mob|v3:none": {
+    "n": 3,
+    "frame_med": 0.1,
+    "frame_med_min": 0.1,
+    "frame_med_max": 0.1,
+    "frame_p90": 0.2,
+    "mean_el_n": 0.38,
+    "cpu_med": 0.1,
+    "stalls50": 45,
+    "stall_max": 378,
+    "calls_story": 26,
+    "calls_scan": 9,
+    "tris_story": 15521,
+    "programs": 6,
+    "first_frame_ms": 83,
+    "ready_ms": 74,
+    "load": 1.9,
+    "console": []
+   },
+   "mob|v3:all": {
+    "n": 3,
+    "frame_med": 0.1,
+    "frame_med_min": 0.1,
+    "frame_med_max": 0.1,
+    "frame_p90": 0.2,
+    "mean_el_n": 0.51,
+    "cpu_med": 0.1,
+    "stalls50": 54,
+    "stall_max": 274,
+    "calls_story": 35,
+    "calls_scan": 12,
+    "tris_story": 17981,
+    "programs": 9,
+    "first_frame_ms": 120,
+    "ready_ms": 100,
+    "load": 2.1,
+    "console": []
+   },
+   "desk|c3:all": {
+    "n": 3,
+    "frame_med": 0.5,
+    "frame_med_min": 0.4,
+    "frame_med_max": 0.6,
+    "frame_p90": 1,
+    "mean_el_n": 4.32,
+    "cpu_med": 0.4,
+    "stalls50": 19,
+    "stall_max": 1299,
+    "calls_story": 92,
+    "calls_scan": 40,
+    "tris_story": 77190,
+    "programs": 34,
+    "first_frame_ms": 208,
+    "ready_ms": 164,
+    "load": 1.8,
+    "console": []
+   },
+   "desk|c3g:all": {
+    "n": 3,
+    "frame_med": 0.4,
+    "frame_med_min": 0.4,
+    "frame_med_max": 0.4,
+    "frame_p90": 0.9,
+    "mean_el_n": 2.77,
+    "cpu_med": 0.3,
+    "stalls50": 20,
+    "stall_max": 972,
+    "calls_story": 86,
+    "calls_scan": 33,
+    "tris_story": 88285,
+    "programs": 31,
+    "first_frame_ms": 239,
+    "ready_ms": 208,
+    "load": 1.7,
+    "console": []
+   },
+   "mob|c3:all": {
+    "n": 3,
+    "frame_med": 0.1,
+    "frame_med_min": 0.1,
+    "frame_med_max": 0.1,
+    "frame_p90": 0.2,
+    "mean_el_n": 0.52,
+    "cpu_med": 0.1,
+    "stalls50": 58,
+    "stall_max": 289,
+    "calls_story": 35,
+    "calls_scan": 12,
+    "tris_story": 17981,
+    "programs": 9,
+    "first_frame_ms": 128,
+    "ready_ms": 105,
+    "load": 1.3,
+    "console": []
+   },
+   "mob|c3g:all": {
+    "n": 3,
+    "frame_med": 0.1,
+    "frame_med_min": 0.1,
+    "frame_med_max": 0.1,
+    "frame_p90": 0.2,
+    "mean_el_n": 0.53,
+    "cpu_med": 0.1,
+    "stalls50": 56,
+    "stall_max": 289,
+    "calls_story": 36,
+    "calls_scan": 12,
+    "tris_story": 27147,
+    "programs": 11,
+    "first_frame_ms": 164,
+    "ready_ms": 137,
+    "load": 1.3,
+    "console": []
+   }
+  },
+  "frame_ms_quiet_phase1_code": {
+   "desk|v2:all": {
+    "n": 3,
+    "frame_med": 1.79,
+    "frame_med_min": 1.73,
+    "frame_med_max": 1.8,
+    "frame_p90": 0,
+    "mean_el_n": 1.79,
+    "cpu_med": 1.1,
+    "stalls50": 0,
+    "stall_max": 0,
+    "calls_story": 49,
+    "calls_scan": 17,
+    "tris_story": 31037,
+    "programs": 9,
+    "first_frame_ms": 151,
+    "ready_ms": 106,
+    "load": 2.1,
+    "console": []
+   },
+   "desk|v3p1:none": {
+    "n": 6,
+    "frame_med": 1.725,
+    "frame_med_min": 1.58,
+    "frame_med_max": 1.93,
+    "frame_p90": 0.0,
+    "mean_el_n": 1.73,
+    "cpu_med": 0.895,
+    "stalls50": 0,
+    "stall_max": 0,
+    "calls_story": 49,
+    "calls_scan": 17,
+    "tris_story": 31037,
+    "programs": 9,
+    "first_frame_ms": 128,
+    "ready_ms": 103,
+    "load": 2.2,
+    "console": []
+   },
+   "desk|v3p1:studio": {
+    "n": 3,
+    "frame_med": 1.85,
+    "frame_med_min": 1.82,
+    "frame_med_max": 1.86,
+    "frame_p90": 0,
+    "mean_el_n": 1.85,
+    "cpu_med": 1.03,
+    "stalls50": 0,
+    "stall_max": 0,
+    "calls_story": 49,
+    "calls_scan": 17,
+    "tris_story": 31037,
+    "programs": 9,
+    "first_frame_ms": 143,
+    "ready_ms": 116,
+    "load": 2.0,
+    "console": []
+   },
+   "desk|v3p1:world": {
+    "n": 3,
+    "frame_med": 2.23,
+    "frame_med_min": 2.14,
+    "frame_med_max": 2.43,
+    "frame_p90": 0,
+    "mean_el_n": 2.23,
+    "cpu_med": 1.19,
+    "stalls50": 0,
+    "stall_max": 0,
+    "calls_story": 57,
+    "calls_scan": 17,
+    "tris_story": 33089,
+    "programs": 17,
+    "first_frame_ms": 170,
+    "ready_ms": 143,
+    "load": 2.0,
+    "console": []
+   },
+   "desk|v3p1:ao": {
+    "n": 3,
+    "frame_med": 3,
+    "frame_med_min": 2.59,
+    "frame_med_max": 3.2,
+    "frame_p90": 0,
+    "mean_el_n": 3,
+    "cpu_med": 1.66,
+    "stalls50": 0,
+    "stall_max": 0,
+    "calls_story": 58,
+    "calls_scan": 26,
+    "tris_story": 31046,
+    "programs": 19,
+    "first_frame_ms": 193,
+    "ready_ms": 141,
+    "load": 1.8,
+    "console": []
+   },
+   "desk|v3p1:fx": {
+    "n": 3,
+    "frame_med": 8.72,
+    "frame_med_min": 3.95,
+    "frame_med_max": 8.75,
+    "frame_p90": 0,
+    "mean_el_n": 8.72,
+    "cpu_med": 1.76,
+    "stalls50": 0,
+    "stall_max": 0,
+    "calls_story": 60,
+    "calls_scan": 28,
+    "tris_story": 31048,
+    "programs": 17,
+    "first_frame_ms": 183,
+    "ready_ms": 135,
+    "load": 1.8,
+    "console": []
+   },
+   "desk|v3p1:detail": {
+    "n": 3,
+    "frame_med": 1.94,
+    "frame_med_min": 1.76,
+    "frame_med_max": 1.99,
+    "frame_p90": 0,
+    "mean_el_n": 1.94,
+    "cpu_med": 1.25,
+    "stalls50": 0,
+    "stall_max": 0,
+    "calls_story": 64,
+    "calls_scan": 23,
+    "tris_story": 60605,
+    "programs": 16,
+    "first_frame_ms": 188,
+    "ready_ms": 147,
+    "load": 2.1,
+    "console": []
+   },
+   "desk|v3p1:texture": {
+    "n": 3,
+    "frame_med": 1.82,
+    "frame_med_min": 1.74,
+    "frame_med_max": 1.85,
+    "frame_p90": 0,
+    "mean_el_n": 1.82,
+    "cpu_med": 1.01,
+    "stalls50": 0,
+    "stall_max": 0,
+    "calls_story": 49,
+    "calls_scan": 17,
+    "tris_story": 31037,
+    "programs": 10,
+    "first_frame_ms": 130,
+    "ready_ms": 104,
+    "load": 2.1,
+    "console": []
+   },
+   "desk|v3p1:all": {
+    "n": 3,
+    "frame_med": 11.41,
+    "frame_med_min": 4.94,
+    "frame_med_max": 11.56,
+    "frame_p90": 0,
+    "mean_el_n": 11.41,
+    "cpu_med": 3.13,
+    "stalls50": 0,
+    "stall_max": 0,
+    "calls_story": 94,
+    "calls_scan": 42,
+    "tris_story": 77192,
+    "programs": 33,
+    "first_frame_ms": 285,
+    "ready_ms": 201,
+    "load": 2.1,
+    "console": []
+   },
+   "desk|v3p1:ik": {
+    "n": 3,
+    "frame_med": 1.83,
+    "frame_med_min": 1.82,
+    "frame_med_max": 1.86,
+    "frame_p90": 0,
+    "mean_el_n": 1.83,
+    "cpu_med": 1.08,
+    "stalls50": 0,
+    "stall_max": 0,
+    "calls_story": 49,
+    "calls_scan": 17,
+    "tris_story": 31037,
+    "programs": 9,
+    "first_frame_ms": 127,
+    "ready_ms": 103,
+    "load": 2.6,
+    "console": []
+   },
+   "mob|v2:all": {
+    "n": 3,
+    "frame_med": 0.51,
+    "frame_med_min": 0.51,
+    "frame_med_max": 0.52,
+    "frame_p90": 0,
+    "mean_el_n": 0.51,
+    "cpu_med": 0.33,
+    "stalls50": 0,
+    "stall_max": 0,
+    "calls_story": 26,
+    "calls_scan": 9,
+    "tris_story": 15521,
+    "programs": 5,
+    "first_frame_ms": 100,
+    "ready_ms": 89,
+    "load": 2.6,
+    "console": []
+   },
+   "mob|v3p1:none": {
+    "n": 3,
+    "frame_med": 0.5,
+    "frame_med_min": 0.5,
+    "frame_med_max": 0.5,
+    "frame_p90": 0,
+    "mean_el_n": 0.5,
+    "cpu_med": 0.3,
+    "stalls50": 0,
+    "stall_max": 0,
+    "calls_story": 26,
+    "calls_scan": 9,
+    "tris_story": 15521,
+    "programs": 5,
+    "first_frame_ms": 109,
+    "ready_ms": 98,
+    "load": 2.6,
+    "console": []
+   },
+   "mob|v3p1:all": {
+    "n": 3,
+    "frame_med": 0.68,
+    "frame_med_min": 0.66,
+    "frame_med_max": 0.69,
+    "frame_p90": 0,
+    "mean_el_n": 0.68,
+    "cpu_med": 0.51,
+    "stalls50": 0,
+    "stall_max": 0,
+    "calls_story": 35,
+    "calls_scan": 12,
+    "tris_story": 17981,
+    "programs": 8,
+    "first_frame_ms": 166,
+    "ready_ms": 134,
+    "load": 2.5,
+    "console": []
+   }
+  },
+  "draw_calls_desktop": {
+   "hero-ik": {
+    "calls": 92,
+    "tris": 77190,
+    "programs": 32
+   },
+   "first-move-ik": {
+    "calls": 91,
+    "tris": 76870,
+    "programs": 32
+   }
+  },
+  "draw_calls_mobile": {
+   "hero": {
+    "calls": 35,
+    "tris": 17981,
+    "programs": 9
+   },
+   "exploded": {
+    "calls": 35,
+    "tris": 17981,
+    "programs": 9
+   },
+   "first-move": {
+    "calls": 35,
+    "tris": 17981,
+    "programs": 9
+   },
+   "scan-half": {
+    "calls": 12,
+    "tris": 7697,
+    "programs": 9
+   },
+   "hero-ik": {
+    "calls": 35,
+    "tris": 17981,
+    "programs": 9
+   }
+  },
+  "img_metrics_hero": {
+   "p1": {
+    "bg_vs_page_dE": 2.504,
+    "hi_obj_pct": 0.709,
+    "clip_obj_pct": 1.085,
+    "crush_obj_pct": 7.149,
+    "obj_minus_bg_L": 35.045,
+    "weight_in_text": 0.253,
+    "weight_on_obj": 0.357
+   },
+   "p2": {
+    "bg_vs_page_dE": 2.502,
+    "hi_obj_pct": 0.718,
+    "clip_obj_pct": 0.63,
+    "crush_obj_pct": 4.608,
+    "obj_minus_bg_L": 35.486,
+    "weight_in_text": 0.253,
+    "weight_on_obj": 0.355
+   }
+  },
+  "look_p2_vs_p1": {
+   "flash_blob_p1": {
+    "area_pct": 4.47,
+    "energy_dL_sum_k": 441.5,
+    "dL_p99": 44.6,
+    "bbox": [
+     486,
+     13,
+     688,
+     581
+    ]
+   },
+   "flash_blob_p2": {
+    "area_pct": 0.84,
+    "energy_dL_sum_k": 127.5,
+    "dL_p99": 19.9,
+    "bbox": [
+     546,
+     18,
+     686,
+     595
+    ]
+   },
+   "ring_hero_p1": {
+    "n": 912,
+    "L50": 64.1,
+    "C50": 65.3,
+    "h50": 37.8,
+    "L90": 67.4,
+    "top10_h": 36.0,
+    "top10_C": 57.3,
+    "dE00_median_to_hex": 8.5,
+    "hex_Lch": [
+     60.5,
+     87.3,
+     46.2
+    ],
+    "pinkish_pct": 12.83,
+    "a50": 51.7,
+    "b50": 40.1
+   },
+   "ring_hero_p2": {
+    "n": 912,
+    "L50": 64.6,
+    "C50": 64.6,
+    "h50": 39.0,
+    "L90": 69.5,
+    "top10_h": 36.5,
+    "top10_C": 48.9,
+    "dE00_median_to_hex": 8.2,
+    "hex_Lch": [
+     60.5,
+     87.3,
+     46.2
+    ],
+    "pinkish_pct": 2.52,
+    "a50": 50.4,
+    "b50": 40.5
+   },
+   "cap_hero_p1": {
+    "n": 8371,
+    "L50": 7.6,
+    "C50": 10.3,
+    "h50": 286.7,
+    "L90": 36.9,
+    "top10_h": 278.0,
+    "top10_C": 8.0,
+    "dE00_median_to_hex": 19.4,
+    "hex_Lch": [
+     33.9,
+     5.4,
+     268.7
+    ],
+    "pinkish_pct": 0.0,
+    "a50": 4.7,
+    "b50": -6.6
+   },
+   "cap_hero_p2": {
+    "n": 8371,
+    "L50": 8.9,
+    "C50": 9.9,
+    "h50": 276.3,
+    "L90": 37.8,
+    "top10_h": 274.8,
+    "top10_C": 8.4,
+    "dE00_median_to_hex": 17.9,
+    "hex_Lch": [
+     33.9,
+     5.4,
+     268.7
+    ],
+    "pinkish_pct": 0.0,
+    "a50": 1.1,
+    "b50": -9.8
+   }
+  },
+  "gates_site_probe_quiet": {
+   "v2-desk": {
+    "lcp_ms": 48,
+    "lcp_el": "H1",
+    "first_frame_3d_ms": null,
+    "tbt_ms": 79,
+    "longest_task_ms": 94,
+    "cls": 0,
+    "transfer_kb": 344.2,
+    "console_errors": 0,
+    "idle_dc_max": 0,
+    "idle_motion_pct": 0.0,
+    "fail": 0,
+    "gate_lines": []
+   },
+   "v2-mob": {
+    "lcp_ms": 652,
+    "lcp_el": "H1",
+    "first_frame_3d_ms": null,
+    "tbt_ms": 178,
+    "longest_task_ms": 129,
+    "cls": 0,
+    "transfer_kb": 341.3,
+    "console_errors": 0,
+    "idle_dc_max": 0,
+    "idle_motion_pct": 0.0,
+    "fail": 0,
+    "gate_lines": []
+   },
+   "v3-desk": {
+    "lcp_ms": 60,
+    "lcp_el": "H1",
+    "first_frame_3d_ms": "1138",
+    "tbt_ms": 64,
+    "longest_task_ms": 92,
+    "cls": 0,
+    "transfer_kb": 457.7,
+    "console_errors": 0,
+    "idle_dc_max": 0,
+    "idle_motion_pct": 0.0,
+    "fail": 0,
+    "gate_lines": []
+   },
+   "v3-mob": {
+    "lcp_ms": 652,
+    "lcp_el": "H1",
+    "first_frame_3d_ms": "3138",
+    "tbt_ms": 208,
+    "longest_task_ms": 154,
+    "cls": 0,
+    "transfer_kb": 354.4,
+    "console_errors": 0,
+    "idle_dc_max": 0,
+    "idle_motion_pct": 0.0,
+    "fail": 0,
+    "gate_lines": []
+   },
+   "v3-rm": {
+    "lcp_ms": 56,
+    "lcp_el": "H1",
+    "first_frame_3d_ms": null,
+    "tbt_ms": 0,
+    "longest_task_ms": 0,
+    "cls": 0,
+    "transfer_kb": 261.7,
+    "console_errors": 0,
+    "idle_dc_max": 0,
+    "idle_motion_pct": 0.0,
+    "fail": 0,
+    "gate_lines": []
+   }
+  },
+  "motion_check_L2": null,
+  "marketing_audit": null,
+  "hybrid_hook": {
+   "path": "15-showcase/_shared/code3d/",
+   "test_glb": "99-raw/experiments/Z/out/web_lean/j2.glb",
+   "frames": "out/p2/hy2-*",
+   "sheet": "99-raw/experiments/CD/sheet-hook-glb.jpg",
+   "hero_calls_tris_programs": {
+    "calls": 88,
+    "tris": 88287,
+    "programs": 28
+   }
+  },
+  "experiments": {
+   "ao": null,
+   "ao_weights_kb_br": {
+    "gtao": {
+     "min_kb": 31.0,
+     "br_kb": 7.1
+    },
+    "ssao": {
+     "min_kb": 17.7,
+     "br_kb": 4.7
+    },
+    "n8": {
+     "min_kb": 155.4,
+     "br_kb": 77.6
+    },
+    "base": {
+     "min_kb": 9.8,
+     "br_kb": 2.4
+    }
+   },
+   "tsl": null,
+   "tsl_weights": "tsl 1232.0 КБ min, 260.5 КБ br\ngl 730.8 КБ min, 153.1 КБ br"
+  },
+  "files": {
+   "sheets": [
+    "99-raw/experiments/CD/pairs-p1-p2-desk.jpg",
+    "99-raw/experiments/CD/sheet-hook-glb.jpg",
+    "99-raw/experiments/CD/judge-pair-hero.jpg",
+    "99-raw/experiments/CD/judge-pair-hero-ik.jpg",
+    "99-raw/experiments/CD/out/p2/look/sheet-ik5.jpg",
+    "99-raw/experiments/CD/out/p2/page-ik-p1-p2.jpg"
+   ],
+   "judge": [
+    "15-showcase/zveno/judge/a-code__hero.png",
+    "15-showcase/zveno/judge/a-code__hero-ik.png",
+    "15-showcase/zveno/judge/a-code__exploded.png",
+    "15-showcase/zveno/judge/a-code__locking.png",
+    "15-showcase/zveno/judge/a-code__first-move.png",
+    "15-showcase/zveno/judge/a-code__scan-half.png",
+    "15-showcase/zveno/judge/a-code__inside.png"
+   ]
+  }
+ },
+ "phase1": {
+  "variant": "a-code",
+  "title": "«Звено» A — код v3 (дорожка CD)",
+  "phase": 1,
+  "date": "2026-09-25",
+  "stack": {
+   "three": "0.186.0",
+   "renderer": "WebGLRenderer",
+   "postprocessing": "6.39.5",
+   "n8ao": "2.0.1",
+   "esbuild": "0.28.2",
+   "browser": "Chromium 153 headless, ANGLE GL, Intel Iris Xe (Mesa)"
+  },
+  "machine_load_note": "load average 15–30 во время замеров (общая машина): мс и TBT завышены, сравнивать только внутри одного прогона",
+  "time": {
+   "agent_clock": "18:30–20:15 (≈ 1 ч 45 мин по часам, фаза 1)",
+   "machine_browser_s": 1795,
+   "machine_browser_runs": 30,
+   "machine_blender_s": 0,
+   "note": "браузер — через slot_run --kind browser (кадры, постеры, стенды, зонды) ≈ 30 мин; motion_check — отдельно (5 + 1 + 1 режимов ≈ 10 мин), сам берёт замки"
+  },
+  "weight_kb_br": {
+   "v2_bundle": 123.2,
+   "v3_desktop_total": 227.3,
+   "v3_mobile_total": 132.0,
+   "v3_files": {
+    "three-scene.js": 13.6,
+    "chunks/chunk-*.js (three)": 118.4,
+    "chunks/post-*.js (только десктоп)": 95.3
+   },
+   "per_technique_desktop": {
+    "post (ao+fx)": 96.8,
+    "of_which_n8ao": 77.1,
+    "of_which_pmndrs_base": 13.4,
+    "of_which_fx_effects": 5.8,
+    "world": 1.3,
+    "detail": 0.7,
+    "ik": 0.5,
+    "studio": 0.2,
+    "v3_scaffold_vs_v2": 4.7
+   },
+   "assets_3d_kb": 0,
+   "posters_kb": {
+    "hero-d": 22.8,
+    "hero-m": 15.8,
+    "stations": [
+     9.6,
+     10.6,
+     16.0,
+     16.7,
+     17.8
+    ]
+   }
+  },
+  "frame_ms_novsync_median": {
+   "method": "bench.html, --disable-gpu-vsync --disable-frame-rate-limit, 3 чередованных прогона по 2,5 с, load ≈ 24–27",
+   "desktop_1440x900_dpr1.5": {
+    "v2": 3.38,
+    "v3_none": 3.84,
+    "studio": 3.62,
+    "world": 4.87,
+    "ao": 4.5,
+    "fx": 5.1,
+    "detail": 3.96,
+    "v3_all": 5.87,
+    "ik_with_pointer": 3.93,
+    "none_with_pointer": 3.66
+   },
+   "mobile_412x915_dpr1.25_low": {
+    "v2": 1.92,
+    "v3_none": 1.71,
+    "v3_all": 2.09
+   }
+  },
+  "draw_calls_per_frame": {
+   "desktop_story_scan": {
+    "v2": [
+     49,
+     17
+    ],
+    "world": [
+     57,
+     17
+    ],
+    "ao": [
+     57,
+     25
+    ],
+    "fx": [
+     60,
+     28
+    ],
+    "detail": [
+     64,
+     23
+    ],
+    "v3_all": [
+     93,
+     41
+    ]
+   },
+   "mobile_story_scan": {
+    "v2": [
+     26,
+     9
+    ],
+    "v3_all": [
+     35,
+     12
+    ]
+   },
+   "idle_all_profiles": 0
+  },
+  "triangles": {
+   "v2_object": 15521,
+   "v3_object_mobile_no_shadow": 17981,
+   "v3_frame_desktop_all_passes": 77191
+  },
+  "programs": {
+   "v2": 9,
+   "v3_all": 31
+  },
+  "img_metrics_hero": {
+   "v2": {
+    "obj_L_p50": 43.93,
+    "obj_L_p95": 95.99,
+    "bg_L_p50": 9.16,
+    "obj_minus_bg": 34.78,
+    "white_clip_pct": 0.13,
+    "hi97_pct": 2.4,
+    "bg_vs_page_dE": 2.8,
+    "weight_in_text": 0.16,
+    "weight_on_obj": 0.45
+   },
+   "v3": {
+    "obj_L_p50": 40.44,
+    "obj_L_p95": 94.6,
+    "bg_L_p50": 5.42,
+    "obj_minus_bg": 35.02,
+    "white_clip_pct": 0.01,
+    "any_channel_254_pct": 1.08,
+    "hi97_pct": 0.67,
+    "bg_vs_page_dE": 2.5,
+    "weight_in_text": 0.25,
+    "weight_on_obj": 0.36
+   },
+   "note": "any_channel_254 у v3 — R = 255 горящего кольца (#ff5a1f); маска объекта — той же сценой (?mask=1)"
+  },
+  "gates_site_probe_same_run": {
+   "load_average": 24,
+   "v3_desktop": {
+    "lcp_ms": 316,
+    "lcp_el": "H1",
+    "cls": 0,
+    "console_errors": 0,
+    "tbt_ms": 929,
+    "transfer_kb": 453.5,
+    "js_kb": 233.2,
+    "kb3d": 0,
+    "idle_dc": 0,
+    "first_frame_ms": 4440
+   },
+   "v2_desktop": {
+    "lcp_ms": 256,
+    "tbt_ms": 827,
+    "transfer_kb": 344.2,
+    "js_kb": 126.8,
+    "idle_dc": 0
+   },
+   "v3_mobile_thr": {
+    "lcp_ms": 1196,
+    "cls": 0,
+    "console_errors": 0,
+    "tbt_ms": 2738,
+    "transfer_kb": 352.4,
+    "js_kb": 136.4,
+    "idle_dc": 0,
+    "dpr": 1.25,
+    "first_frame_ms": 6834
+   },
+   "v2_mobile_thr": {
+    "lcp_ms": 1456,
+    "tbt_ms": 2131,
+    "transfer_kb": 341.3
+   },
+   "v3_reduce": {
+    "lcp_ms": 244,
+    "tbt_ms": 0,
+    "idle_dc": 0,
+    "idle_motion_pct": 0.0,
+    "js_kb": 4.2
+   },
+   "verdict": "всё, кроме TBT и первого кадра, проходит; TBT не проходит и у v2 в том же прогоне (J/04 в тишине: 76–137 мс) — перемерить"
+  },
+  "files": {
+   "sheets": [
+    "99-raw/experiments/CD/pairs-v2-v3-desk.jpg",
+    "99-raw/experiments/CD/pairs-v2-v3-mob.jpg",
+    "99-raw/experiments/CD/sheet-techniques.jpg",
+    "99-raw/experiments/CD/sheet-page-v3.jpg",
+    "99-raw/experiments/CD/sheet-page-v3-mob.jpg",
+    "99-raw/experiments/CD/judge-pair-hero.jpg"
+   ],
+   "judge": [
+    "15-showcase/zveno/judge/a-code__hero.png",
+    "a-code__hero-ik.png",
+    "a-code__exploded.png",
+    "a-code__locking.png",
+    "a-code__first-move.png",
+    "a-code__scan-half.png",
+    "a-code__inside.png"
+   ]
+  },
+  "gates_site_probe_calm": {
+   "load_average": 6,
+   "time": "20:10",
+   "v3_desktop": {
+    "fail": 0,
+    "lcp_ms": 72,
+    "tbt_ms": 72,
+    "longest_task_ms": 90,
+    "js_kb": 233.2,
+    "idle_dc": 0,
+    "first_frame_ms": 1154
+   },
+   "v3_mobile_thr": {
+    "fail": 0,
+    "lcp_ms": 664,
+    "tbt_ms": 207,
+    "longest_task_ms": 122,
+    "js_kb": 136.4,
+    "idle_dc": 0,
+    "first_frame_ms": 3033
+   },
+   "v3_reduce": {
+    "fail": 0,
+    "lcp_ms": 60,
+    "idle_dc": 0
+   },
+   "v2_desktop": {
+    "fail": 0,
+    "tbt_ms": 132
+   },
+   "v2_mobile_thr": {
+    "fail": 0,
+    "tbt_ms": 233
+   }
+  },
+  "motion_check_L2": {
+   "all_modes_final_code_before_phone_fix": {
+    "B": 0,
+    "S": 1,
+    "D": 2,
+    "S_item": "EG-PERF-01 телефон 4,44 % (v2 1,29 % в тот же час)"
+   },
+   "desk_after_ik_tail_fix": {
+    "B": 0,
+    "S": 0,
+    "D": 1
+   },
+   "mob_after_screws_out_of_low": {
+    "B": 0,
+    "S": 0,
+    "D": 0,
+    "loaf_pct": 0.21,
+    "tbt_ms": 106
+   },
+   "contrast_live": {
+    "h1": 15.12,
+    "lead": 10.79
+   }
+  }
+ }
+}

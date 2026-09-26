@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сверка — выписка из банка сходится со счетами сама · демо L1</title>
+<meta name="description" content="Сервис сверки банковских выписок со счетами из 1С для бухгалтеров. Демо-страница рецепта 02 базы creative-research.">
+<!-- Рабочий пример L1 · рецепт 10-recipes/02-saas-l1.md · агент J · волна 3 · 2026-09-25 · Chromium 153 / WebKit 26.6
+     Демо: сервис «Сверка», банки, суммы и цифры вымышлены. Ассеты — только код (HTML-фрагмент интерфейса, SVG, CSS) и шрифты OFL.
+     Фирменный приём — одна sticky-сцена на CSS scroll-driven (0 КБ JS): платежи встают напротив счетов. -->
+<link rel="preload" href="../_shared/fonts/literata/literata-cyrillic-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../_shared/fonts/literata/literata-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../_shared/fonts/commissioner/commissioner-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../_shared/fonts/commissioner/commissioner-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../_shared/fonts.css">
+<link rel="stylesheet" href="../_shared/marketing-tokens.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">К содержанию</a>
+
+<header class="top" data-section="header">
+  <div class="top__in">
+    <a class="logo" href="./" aria-label="Сверка — на главную"><span class="logo__mark" aria-hidden="true"></span>Сверка</a>
+    <nav class="top__nav" aria-label="Разделы"><a href="#how">Как работает</a><a href="#pricing">Цены</a><a href="#faq">Вопросы</a></nav>
+    <a class="top__login" href="#login">Войти</a>
+    <a class="btn btn--small" href="#start" data-slot="cta-primary">Попробовать</a>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="hero" data-section="hero" aria-labelledby="h1">
+  <p class="eyebrow" data-slot="eyebrow">Для бухгалтеров малого бизнеса и&nbsp;аутсорсинговых бухгалтерий</p>
+  <h1 id="h1" class="hero__title" data-slot="headline">Выписка сходится со&nbsp;счетами сама</h1>
+  <p class="hero__lead" data-slot="subheadline" data-moment="hero-copy-rise">Сверка сопоставляет платежи из&nbsp;банка со&nbsp;счетами из&nbsp;1С и&nbsp;оставляет вам только расхождения — обычно три-пять строк вместо трёхсот.</p>
+  <div class="hero__actions">
+    <a class="btn" id="start" href="#start" data-slot="cta-primary">Попробовать 14&nbsp;дней бесплатно</a>
+    <p class="hero__note" data-slot="cta-note">Без карты. Банк подключается выгрузкой или по&nbsp;API.</p>
+  </div>
+</section>
+
+<section class="demo" id="how-demo" data-section="product-demo" aria-labelledby="demo-h">
+  <div class="demo__sticky">
+    <div class="demo__head">
+      <h2 id="demo-h" class="h2">Триста строк за&nbsp;минуту. Вам остаётся одна</h2>
+      <p class="demo__status" data-slot="stat-value">Сопоставлено <b class="demo__n" aria-hidden="true"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></b><span class="visually-hidden">5</span> из&nbsp;6 · <span class="demo__flag-note">1&nbsp;платёж без&nbsp;счёта</span></p>
+    </div>
+    <div class="ledger" data-slot="screenshot" data-fx="ledger" data-moment="ledger-match">
+      <div class="ledger__col ledger__col--bank">
+        <p class="ledger__cap">Выписка · банк, 24&nbsp;сентября</p>
+        <ol class="ledger__rows">
+          <li class="row" style="--i:0"><span>ООО «Северный ветер»</span><b>48&nbsp;200,00</b></li>
+          <li class="row" style="--i:1"><span>ИП Гарина&nbsp;А.&nbsp;С.</span><b>12&nbsp;750,00</b></li>
+          <li class="row" style="--i:2"><span>ООО «Кедр и&nbsp;Ко»</span><b>7&nbsp;980,00</b></li>
+          <li class="row" style="--i:3"><span>АО «Литейный двор»</span><b>156&nbsp;000,00</b></li>
+          <li class="row row--flag" style="--i:5"><span>ИП Орлов&nbsp;Д.&nbsp;В.</span><b>3&nbsp;400,00</b><em class="row__flag">нет счёта</em></li>
+          <li class="row" style="--i:4"><span>ООО «Плюс Сервис»</span><b>21&nbsp;090,00</b></li>
+        </ol>
+      </div>
+      <svg class="ledger__links" viewBox="0 0 100 600" preserveAspectRatio="none" aria-hidden="true">
+        <path style="--i:0" pathLength="1" d="M0 50 C 50 50, 50 50, 100 50"/>
+        <path style="--i:1" pathLength="1" d="M0 150 C 50 150, 50 150, 100 150"/>
+        <path style="--i:2" pathLength="1" d="M0 250 C 50 250, 50 250, 100 250"/>
+        <path style="--i:3" pathLength="1" d="M0 350 C 50 350, 50 350, 100 350"/>
+        <path style="--i:4" pathLength="1" d="M0 550 C 50 550, 50 550, 100 550"/>
+      </svg>
+      <div class="ledger__col ledger__col--docs">
+        <p class="ledger__cap">Счета · 1С:Бухгалтерия</p>
+        <ol class="ledger__rows">
+          <li class="row" style="--i:0; --from: 2"><span>Счёт №&nbsp;214</span><b>48&nbsp;200,00</b></li>
+          <li class="row" style="--i:1; --from: 4"><span>Счёт №&nbsp;219</span><b>12&nbsp;750,00</b></li>
+          <li class="row" style="--i:2; --from: -2"><span>Счёт №&nbsp;207</span><b>7&nbsp;980,00</b></li>
+          <li class="row" style="--i:3; --from: -2"><span>Счёт №&nbsp;221</span><b>156&nbsp;000,00</b></li>
+          <li class="row row--empty" aria-hidden="true"></li>
+          <li class="row" style="--i:4; --from: -2"><span>Счёт №&nbsp;199</span><b>21&nbsp;090,00</b></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats" data-section="proof-stats" aria-label="Коротко о сервисе">
+  <ul class="stats__in">
+    <li><b>97&nbsp;%</b><span>платежей сопоставляются без&nbsp;участия бухгалтера</span></li>
+    <li><b>12&nbsp;мин</b><span>от&nbsp;регистрации до&nbsp;первой сверки</span></li>
+    <li><b>9</b><span>банков и&nbsp;1С:Бухгалтерия 3.0 — выгрузкой и&nbsp;по&nbsp;API</span></li>
+  </ul>
+</section>
+
+<section class="section how" id="how" data-section="how-it-works" aria-labelledby="how-h">
+  <div class="container">
+    <h2 id="how-h" class="h2">Три шага до&nbsp;первой сверки</h2>
+    <ol class="how__list">
+      <li><span class="how__n">1</span><h3>Подключите банк</h3><p>Выгрузка в&nbsp;формате 1С или доступ по&nbsp;API банка. Данные только читаются.</p></li>
+      <li><span class="how__n">2</span><h3>Загрузите счета</h3><p>Из&nbsp;1С:Бухгалтерии — одной кнопкой обработки, из&nbsp;таблицы — файлом.</p></li>
+      <li><span class="how__n">3</span><h3>Разберите расхождения</h3><p>Сверка показывает только то, что не&nbsp;сошлось, и&nbsp;подсказывает, какой счёт подходит.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="section pricing" id="pricing" data-section="pricing" aria-labelledby="price-h">
+  <div class="container">
+    <h2 id="price-h" class="h2">Цены</h2>
+    <ul class="plans">
+      <li class="plan"><h3>Один бизнес</h3><p class="plan__price">990&nbsp;₽ <span>в&nbsp;месяц</span></p><p>1 юрлицо, 2 банковских счёта, до&nbsp;1&nbsp;000 платежей.</p></li>
+      <li class="plan plan--main"><h3>Бухгалтер</h3><p class="plan__price">2&nbsp;900&nbsp;₽ <span>в&nbsp;месяц</span></p><p>До&nbsp;15 юрлиц, любые банки, до&nbsp;10&nbsp;000 платежей.</p></li>
+      <li class="plan"><h3>Бюро</h3><p class="plan__price">от&nbsp;7&nbsp;500&nbsp;₽ <span>в&nbsp;месяц</span></p><p>Команда, роли, выгрузка отчётов, поддержка по&nbsp;телефону.</p></li>
+    </ul>
+    <p class="note">Все тарифы — 14&nbsp;дней бесплатно, без карты.</p>
+  </div>
+</section>
+
+<section class="section faq" id="faq" data-section="faq" aria-labelledby="faq-h">
+  <div class="container faq__in">
+    <h2 id="faq-h" class="h2">Вопросы</h2>
+    <div class="faq__list">
+      <details><summary>Сверка меняет что-то в&nbsp;1С?</summary><p data-slot="faq-a">Нет. Сервис только читает выгрузки и&nbsp;показывает расхождения. Проводки делаете вы.</p></details>
+      <details><summary>Где хранятся выписки?</summary><p>На&nbsp;серверах в&nbsp;России, у&nbsp;облачного провайдера с&nbsp;аттестацией по&nbsp;152-ФЗ.</p></details>
+      <details><summary>Что если платёж закрывает несколько счетов?</summary><p>Сверка предложит сочетания счетов на&nbsp;эту сумму; вы выбираете нужное.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="section final" data-section="final-cta" aria-labelledby="final-h">
+  <div class="container final__in">
+    <h2 id="final-h" class="h2">Загрузите выписку — первая сверка бесплатно</h2>
+    <a class="btn" href="#start">Попробовать 14&nbsp;дней</a>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot" data-section="footer">
+  <div class="container">
+    <p><b>Сверка</b> · сервис для&nbsp;бухгалтеров · ИНН 0000000000 · <a href="#policy" id="policy">Политика обработки данных</a> · <a href="#login" id="login">Вход</a></p>
+    <p class="foot__demo">Демо-страница базы creative-research (рецепт 02, уровень L1): сервис, банки, суммы и&nbsp;цифры вымышлены.</p>
+  </div>
+</footer>
+</body>
+</html>

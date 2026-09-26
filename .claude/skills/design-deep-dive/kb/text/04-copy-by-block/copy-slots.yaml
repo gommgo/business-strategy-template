@@ -1,0 +1,4094 @@
+# copy-slots.yaml — правила текста по типам слотов (text-research, 04-copy-by-block, агент E, волна 2, 2026-09-24).
+# СОБИРАЕТСЯ СКРИПТОМ: python3 99-raw/experiments/E/02-copy-slots/build_copy_slots.py --lengths final
+# Руками не править — правки в 99-raw/experiments/E/02-copy-slots/src-*.yaml и crosswalk.yaml, затем пересборка.
+# Читают: J (copydeck.py validate: length.{ru,en}.{words,chars}.{min,max}, fact_required, section_roles, genre),
+# I (промты по слотам), F (образцы строк по slot_type), G (мета и FAQ — ссылкой), creative (длины строк в макете).
+# Длины — D thresholds.yaml v2 (03-corpus-measured/thresholds.yaml → genres.<жанр>.slots, 03-thresholds-by-genre.md §4; лидеры, выборка «marketing» = лендинги + страницы сайта; сообщение оркестратора 2026-09-24).
+
+copy_slots_version: 1
+date: '2026-09-24'
+status: draft
+owner: text-research · 04-copy-by-block · E (волна 2)
+description: "Правила текста по типам слотов (slot_type): назначение, роли секций, длины RU и EN по замеру D, структура, формулы A, запреты, профиль линтера C, нужен ли факт B2, юридические правила H, примеры «плохо / хорошо» (ai-self, проверены claims_check.py и copy_lint.py). Ключ — slot_type; site_slot — id слота site после S1."
+doc: "04-copy-by-block/01-hero-and-cta.md, 02-section-blocks.md, 03-page-types.md, 04-form-emails-notifications.md"
+build: "python3 99-raw/experiments/E/02-copy-slots/build_copy_slots.py --lengths final"
+lengths_source: "D thresholds.yaml v2 (03-corpus-measured/thresholds.yaml → genres.<жанр>.slots, 03-thresholds-by-genre.md §4; лидеры, выборка «marketing» = лендинги + страницы сайта; сообщение оркестратора 2026-09-24)"
+length_rule: "min = floor(p10 лидеров), target = round(p50), max = ceil(p90); RU — в знаках (primary: chars), EN — в словах; hard_* — грубый выход D (error_low/high); provisional — n < 12 страниц лидеров или лидеры + средний рынок; длина — сигнал (warning/info), не ворота: вне диапазона на 10 страницах лидеров 52 % — ошибки разметки, 47 % — законные формы (опыт E/01)"
+fact_required_values:
+  always: "в слоте всегда факт (fact_ids) или [PLACEHOLDER]"
+  if-claim: "факт нужен, если в тексте число, имя, дата, цитата, рейтинг, цена, гарантия, превосходная степень"
+  never: "текст без утверждений (кнопка-навигация, пункт меню)"
+examples_rule: "RU и EN, метка ai-self; факты — 02-strategy-messaging/examples/facts-*.yaml (otves, kvarts) и 99-raw/experiments/E/facts-demo-saas-okoshko.yaml (okoshko, ДЕМО); проверка — 99-raw/experiments/E/02-copy-slots/test_examples.py (claims_check.py → copy_lint.py)"
+vocabulary: "99-raw/notes/temp-vocabulary-v0.yaml (63 slot_type) + предложения E (proposal: true)"
+renames: {}
+proposals: [promise, stat-source, price-old, spec-row, image-caption, announcement]
+composites:
+  hero-core:
+    definition: "ядро первого экрана = headline + subheadline + cta-label + cta-note + hero-proof (по одному экземпляру первой секции; D §2.5)"
+    max_words: 40
+    rule: "не больше 40 слов: у лидеров RU — 100 % страниц (медиана 16–19,5), EN — 88–92 % (медиана 26); ai-self — медиана 36, p10 28 (D §2.5)"
+    lengths:
+      ru:
+        words: {p10: 6.0, p50: 19.5, p90: 34.2}
+        n_pages: 14
+        source: D thresholds.yaml v2 · genres.landing.slots.hero-core
+      en:
+        words: {p10: 5.7, p50: 26.0, p90: 37.5}
+        n_pages: 24
+        source: D thresholds.yaml v2 · genres.landing.slots.hero-core
+    check: "сумма слов слотов первой секции; превышение — warning (длинный подзаголовок сокращает остальное)"
+slot_types:
+- id: eyebrow
+  site_slot: ''
+  name: Надзаголовок (над H1 или H2)
+  purpose: "Бирка над заголовком: категория, сегмент, место и дата события, имя бренда для product-aware — снимает подробности с основной строки заголовка."
+  section_roles: [hero, benefits, how-it-works, case-studies, pricing, event-program, faq]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: micro
+  length:
+    ru:
+      words: {min: 1, target: 3, max: 5}
+      hard_words: [1, 8]
+      ai_p50_words: 3.5
+      chars: {min: 5, target: 18, max: 27}
+      hard_chars: [2, 54]
+      ai_p50_chars: 21.0
+      primary: chars
+      n_pages: 14
+      source: D thresholds.yaml v2 · genres.landing.slots.eyebrow.ru
+    en:
+      words: {min: 1, target: 3, max: 6}
+      hard_words: [1, 9]
+      ai_p50_words: 3.0
+      chars: {min: 4, target: 13, max: 34}
+      hard_chars: [2, 50]
+      ai_p50_chars: 17.0
+      primary: words
+      n_pages: 15
+      source: D thresholds.yaml v2 · genres.landing.slots.eyebrow.en
+    exceptions:
+    - "Мероприятие: дата, город и формат в надзаголовке — до 8 слов («24 октября, Казань, офлайн»)."
+  structure: "Именная группа без глагола: категория («Студия ремонта»), сегмент («Для барбершопов»), дата и место события, рубрика."
+  formula_ids: []
+  rules:
+  - "Не чаще чем у каждой третьей секции страницы, первый экран считается (taste; у лидеров D медиана 0, p90 — 0,28 секции)."
+  - "Несёт информацию, которой нет в заголовке: кто, для кого, где и когда; повтор заголовка или жанра секции — удалить."
+  - "В copy deck — обычный регистр; капс, разрядка и моноширинный шрифт — CSS (creative)."
+  - "Для product-aware — имя бренда или студии; для problem-aware — сегмент или ситуация, не бренд."
+  bans:
+  - "Нумерация секций («01 —», «002 · Capabilities») и цепочки через «·»."
+  - "Ярлыки «Наши преимущества», «Почему мы», «Why choose us» (COPY-M-MKT-11)."
+  - "Метки версии («BETA», «v2.0», «Early access») вне страницы запуска."
+  fact_required: if-claim
+  claim_classes: [company-details, award-press]
+  legal_rules: [COPY-L-SUP-01, COPY-L-AWARD-01]
+  lint_markers: [COPY-M-STR-10, COPY-M-MKT-11, COPY-M-MKT-08]
+  voice: "Словарь бренда F: как компания называет свою категорию; табу голоса."
+  examples:
+    ru:
+      facts: otves
+      bad: ПОЧЕМУ ВЫБИРАЮТ НАС
+      good: Студия ремонта «Отвес»
+      fact_ids: []
+      note: "product-aware: бирка говорит, кого нашёл посетитель; капс — ярлык без информации"
+    en:
+      facts: okoshko
+      bad: WHY CHOOSE US
+      good: Online booking for barbershops
+      fact_ids: []
+      note: категория словами клиента вместо ярлыка
+  sources:
+  - "06-anti-slop/01 §5, §11 (COPY-M-STR-10)"
+  - 03-corpus-measured/02 §7
+  - "[V:y0iIV5meaB4 30:50] бирка"
+  - taste SKILL.md (EYEBROW RESTRAINT)
+  date: '2026-09-24'
+- id: headline
+  site_slot: ''
+  name: Заголовок первого экрана (H1)
+  purpose: "Что это и чем ценно для этого посетителя; тип задаёт уровень осведомлённости (hero_approach B1): сделка, продукт с превосходством, решение против альтернатив, узнаваемая ситуация, идентичность."
+  section_roles: [hero]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: title
+  kimi: h
+  length:
+    ru:
+      words: {min: 2, target: 5, max: 10}
+      hard_words: [1, 15]
+      ai_p50_words: 7.0
+      chars: {min: 19, target: 34, max: 73}
+      hard_chars: [9, 109]
+      ai_p50_chars: 48.5
+      primary: chars
+      n_pages: 22
+      source: D thresholds.yaml v2 · genres.landing.slots.headline.ru
+    en:
+      words: {min: 2, target: 7, max: 15}
+      hard_words: [1, 23]
+      ai_p50_words: 5.0
+      chars: {min: 14, target: 45, max: 91}
+      hard_chars: [7, 157]
+      ai_p50_chars: 28.0
+      primary: words
+      n_pages: 26
+      source: D thresholds.yaml v2 · genres.landing.slots.headline.en
+    exceptions:
+    - "Манифест, письмо (Hallmark H5 Letter), кино-hero: до 25 слов EN и 20 RU — у Oatly 21 слово (опыт E/01); подзаголовка тогда нет."
+    - "Название категории как hero для most-aware и страницы услуги: 1–2 слова («Поддерживающая уборка») — законно."
+    - "Число-заголовок (Hallmark H4 Stat led): число + объект счёта, 2–5 слов, факт обязателен."
+    viewport:
+      desktop: "не больше 2 строк при 1440 px (kimi 04 T8); размер кегля — creative"
+      mobile: не больше 4 строк при 390 px (kimi 04 T8)
+  length_by_page_type:
+    note: "люди (лидеры + средний рынок) D tables.md; p50 [p10–p90] слов, страниц"
+    ru:
+      landing-lead-services: "6 [2–9,2] 23"
+      landing-saas: "4 [2,8–8,6] 9"
+      landing-product+campaign: "3 [3–5] 3"
+      home-multipage: "4 [2,8–10,4] 13"
+    en:
+      landing-lead-services: "6 [3,8–9] 13"
+      landing-saas: "7 [4–13] 19"
+      landing-product+campaign: "9 [2–18,8] 7"
+      home-multipage: "4,5 [1–11] 4"
+  structure: "direct-offer: «[услуга] — [цена или условие]»; product-benefit: «[имя или категория] + [превосходство с фактом]»; solution-vs-alternatives: «[категория словами клиента] + [чем лучше привычного способа]»; problem-story: «[узнаваемая ситуация] + [намёк на выход]»; identity: «[для кого]»."
+  formula_ids: [category-statement, four-u, three-questions-dry, caples-headline-qualities, four-p]
+  rules:
+  - "Суть — в первых двух-трёх словах: у лидеров RU первые два слова укладываются в 11 знаков лишь в трети заголовков, поэтому ориентир — первые 2–3 слова, а не 11 знаков (D §2.5, A/02)."
+  - "Глагол и результат в заголовке оффера допустимы («Сдаём ремонт по договору…»): правило ux 07/02 §4.1 написано для экранов приложения."
+  - "Продолжает обещание источника трафика смыслом, не обязательно дословно (message match, B1 §1.6)."
+  - "Каждое обещание заголовка находится на странице: заголовок не сильнее содержания и фактов ([V:y0iIV5meaB4 31:52], B2 §4.4)."
+  - "Вопрос — только тот, который посетитель уже задаёт себе, и с «вы»; по умолчанию утверждение (Fang & Wheeler 2026, A/02 §7)."
+  - "«X, который Y» — только с фактическим Y («Лампа, которая сама подбирает свет»); пустое Y («сервис, который понимает ваш бизнес») — переписать (D: у лидеров RU 1,5 % заголовков, 4 из 6 — фактические)."
+  bans:
+  - "Запрещённые первые фразы: «Откройте для себя», «Добро пожаловать в мир…», «нового поколения», Unleash, Where X meets Y (COPY-M-MKT-08 — error)."
+  - "Превосходная степень без критерия и источника в самом тексте (COPY-L-SUP-01 — error, 135-ФЗ ст. 14.3 и вне рекламы)."
+  - "Восклицательный знак, Title Case, капс, «→»; обещание чувства без свойства (COPY-M-MKT-13)."
+  fact_required: if-claim
+  claim_classes: [superlative, comparison, fact-number, price-discount, guarantee, health, income-finance]
+  legal_rules: [COPY-L-SUP-01, COPY-L-UNIQ-01, COPY-L-CMP-01, COPY-L-FREE-01, COPY-L-GUAR-01, COPY-L-HEALTH-01, COPY-L-EDU-01]
+  lint_markers: [COPY-M-MKT-08, COPY-M-MKT-09, COPY-M-MKT-04, COPY-M-MKT-13, COPY-M-MKT-10, COPY-M-PUN-09]
+  voice: "Оси голоса F (формальность, серьёзность); табу; образцы строк F для headline."
+  examples:
+    ru:
+      facts: otves
+      bad: Откройте для себя ремонт нового поколения
+      good: Ремонт квартир под ключ в Нижнем Новгороде с 2014 года
+      fact_ids: [company-since-2014]
+      note: "product-aware: категория, город и срок работы — всё проверяемо"
+    en:
+      facts: okoshko
+      bad: Unleash the power of seamless online booking
+      good: Online booking with Telegram reminders for barbershops
+      fact_ids: [reminders, self-booking-link]
+      note: "category-statement: категория + отличие, которое можно проверить"
+  sources:
+  - "02-strategy-messaging/02 §1.2, §1.6, §2.3"
+  - "03-corpus-measured/02 §2.1, §7"
+  - 01-foundations/02 §7
+  - 99-raw/experiments/E/01-slot-lengths
+  - Hallmark copy.md (banned opening lines)
+  - "[V:F_urkVueszI 07:07]"
+  date: '2026-09-24'
+- id: subheadline
+  site_slot: ''
+  name: "Подзаголовок, лид первого экрана"
+  purpose: "Второй слой первого экрана: механизм или результат и чем это подтверждено; раскрывает заголовок, а не повторяет его."
+  section_roles: [hero]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: subtitle
+  kimi: lead
+  length:
+    ru:
+      words: {min: 6, target: 11, max: 29}
+      hard_words: [3, 56]
+      ai_p50_words: 19.5
+      chars: {min: 30, target: 86, max: 221}
+      hard_chars: [15, 416]
+      ai_p50_chars: 140.0
+      primary: chars
+      n_pages: 15
+      source: D thresholds.yaml v2 · genres.landing.slots.subheadline.ru
+    en:
+      words: {min: 8, target: 16, max: 32}
+      hard_words: [4, 74]
+      ai_p50_words: 25.0
+      chars: {min: 49, target: 111, max: 220}
+      hard_chars: [24, 510]
+      ai_p50_chars: 152.0
+      primary: words
+      n_pages: 19
+      source: D thresholds.yaml v2 · genres.landing.slots.subheadline.en
+    exceptions:
+    - "Ядро первого экрана (заголовок + подзаголовок + кнопка + строка у кнопки + микродоказательство) — не больше 40 слов: у лидеров RU 100 % страниц, EN 88 % (D §2.5); длинный подзаголовок сокращает остальное."
+    - "Норма taste «subtext ≤ 20 слов» режет треть подзаголовков лидеров (RU 0,67–0,69, EN 0,64–0,68 — опыт E/01): не применять как ворота."
+    viewport:
+      mobile: "3–4 строки при 390 px; длиннее — сократить, а не уменьшать кегль (решение creative)"
+  length_by_page_type:
+    note: "люди (лидеры + средний рынок) D tables.md; p50 [p10–p90] слов, страниц"
+    ru:
+      landing-lead-services: "13 [6–45] 17"
+      landing-saas: "12 [9–29] 4"
+      landing-product+campaign: "12 [6–23] 3"
+      home-multipage: "10 [6,2–33,8] 7"
+    en:
+      landing-lead-services: "25 [10–32,8] 7"
+      landing-saas: "16,5 [10–28] 16"
+      landing-product+campaign: "15 [5–19] 4"
+  structure: "1–2 предложения: механизм или результат + доказательство или снятие главного возражения («[утверждение], даже если [возражение]»)."
+  formula_ids: [four-p, even-if-objection, category-statement, three-questions-dry, fact-scenario]
+  rules:
+  - "Отвечает на то, что заголовок оставил открытым: как работает, для кого, чем подтверждено (B1 §2.3: что, для кого, результат, отличие, шаг)."
+  - "Числа и имена — только с fact_ids; нет факта — [PLACEHOLDER: что именно]."
+  - "Первое слово не повторяет первое слово заголовка; первое предложение — не пересказ заголовка другими словами."
+  - "Снимает главный блокер, если он снимается фактом: «…даже если [возражение]» (Wiebe; B1 §4.3)."
+  bans:
+  - "Самопохвала без числа: «команда профессионалов», «индивидуальный подход» (COPY-M-MKT-01)."
+  - "Универсальная выгода «экономьте время и деньги» (COPY-M-MKT-05); тройки оценок (COPY-M-SYN-…)."
+  - "Штамп вступления «В современном мире…» (error в подзаголовке)."
+  fact_required: if-claim
+  claim_classes: [fact-number, fact-property, guarantee, price-discount, comparison]
+  legal_rules: [COPY-L-FREE-01, COPY-L-GUAR-02, COPY-L-CMP-01, COPY-L-PRICE-03]
+  lint_markers: [COPY-M-MKT-01, COPY-M-MKT-05, COPY-M-MKT-09, COPY-M-LEX-05]
+  voice: Оси голоса F; образцы строк F для subheadline.
+  examples:
+    ru:
+      facts: otves
+      bad: "Мы — команда профессионалов с многолетним опытом: индивидуальный подход, высокое качество и доступные цены."
+      good: "1 146 квартир сдали по акту с 2014 года. Гарантия на работы — 3 года по договору."
+      fact_ids: [flats-completed, guarantee-3-years]
+      note: оценки заменены числом с объектом счёта и условием гарантии
+    en:
+      facts: okoshko
+      bad: "Our innovative all-in-one platform helps you save time and money and delight every client."
+      good: "Clients pick a stylist and an open slot through your link and get a Telegram reminder 24 hours before the visit."
+      fact_ids: [self-booking-link, reminders]
+      note: механизм вместо обещания чувства
+  sources:
+  - "02-strategy-messaging/02 §2.3, §4.3"
+  - "03-corpus-measured/02 §2.1, §2.5"
+  - 99-raw/experiments/E/01-slot-lengths
+  - "[V:F_urkVueszI 07:07]"
+  date: '2026-09-24'
+- id: hero-proof
+  site_slot: ''
+  name: Микродоказательство в первом экране
+  purpose: "Одна строка доказательства рядом с кнопкой или заголовком: рейтинг площадки с датой, счётчик с объектом счёта и датой, гарантия по договору, узнаваемый клиент с разрешением."
+  section_roles: [hero]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: micro
+  length:
+    ru:
+      words: {min: 2, target: 6, max: 11}
+      hard_words: [1, 16]
+      ai_p50_words: 4.0
+      chars: {min: 10, target: 29, max: 66}
+      hard_chars: [5, 99]
+      ai_p50_chars: 30.0
+      primary: chars
+      n_pages: 8
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.hero-proof.ru
+    en:
+      words: {min: 4, target: 6, max: 9}
+      hard_words: [2, 14]
+      ai_p50_words: 2.7
+      chars: {min: 22, target: 32, max: 58}
+      hard_chars: [11, 87]
+      ai_p50_chars: 11.0
+      primary: words
+      n_pages: 11
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.hero-proof.en
+  structure: "[значение] + [объект или площадка] + [дата или источник]; источник можно вынести в соседний слот stat-source."
+  formula_ids: [fact-scenario, three-questions-dry]
+  rules:
+  - "Только факт из facts.yaml; источник и дата — в той же строке или в слоте stat-source рядом (B2 §1.3; requires_nearby факта)."
+  - "Одно доказательство на первый экран: product-aware и most-aware — рейтинг, счётчик, гарантия; problem-aware — механизм в подзаголовке, рейтинг ниже по странице (B1 §1.4, опыт B1/02)."
+  - "Число, которое меняет решение, а не фактоид («450 работ»): срок, рейтинг с числом оценок, гарантия ([V:1UVkeqxuNRs 09:12, 24:49])."
+  - "Поправка к taste («no trust micro-strip in hero»): одна строка доказательства допустима, если иерархия product-aware и у строки есть факт."
+  bans:
+  - "«Тысячи довольных клиентов», «10 000+», «№ 1» без записи в facts.yaml (COPY-M-CNT-…, COPY-L-SUP-01)."
+  - "Рейтинг 5,0 без числа оценок; «отзывов» вместо «оценок» у Яндекс Карт (B2 §5.2)."
+  fact_required: always
+  claim_classes: [rating, fact-number, client-logo, award-press, guarantee]
+  legal_rules: [COPY-L-SUP-01, COPY-L-REV-01, COPY-L-AWARD-01, COPY-L-GUAR-02]
+  lint_markers: [COPY-M-CNT-02, COPY-M-MKT-10]
+  examples:
+    ru:
+      facts: otves
+      bad: Тысячи довольных клиентов по всей России
+      good: "4,8 из 5 на Яндекс Картах — 214 оценок"
+      fact_ids: [rating-yandex-maps]
+      companions:
+      - slot_type: stat-source
+        text: "Яндекс Карты, 01.09.2026"
+      note: "число, шкала, число оценок; источник и дата — соседним слотом"
+    en:
+      facts: okoshko
+      bad: "Trusted by 10,000+ happy salons worldwide"
+      good: "Rated 4.7 out of 5 on RuStore, 860 ratings as of 1 September 2026"
+      fact_ids: [rating-rustore]
+      allow_warn: [COPY-F-NAME]
+      note: "площадка, число оценок и дата снимка; COPY-F-NAME на «RuStore» — ложное срабатывание эвристики имён (передано B2)"
+  sources:
+  - "02-strategy-messaging/03 §1.3–1.4, §5.2"
+  - 02-strategy-messaging/02 §1.4
+  - "[V:1UVkeqxuNRs 09:12]"
+  - taste SKILL.md
+  date: '2026-09-24'
+- id: cta-label
+  site_slot: ''
+  name: Подпись главной кнопки
+  purpose: "Называет, что случится сразу после нажатия, или повторяет ценность заголовка; одна задача — получить нажатие."
+  section_roles: [hero, cta-band, final-cta, pricing, lead-form]
+  genres: [landing, site-page, email-form]
+  genre: landing
+  ux_role: action
+  kimi: btn
+  length:
+    ru:
+      words: {min: 1, target: 2, max: 4}
+      hard_words: [1, 8]
+      ai_p50_words: 2.0
+      chars: {min: 9, target: 15, max: 25}
+      hard_chars: [4, 60]
+      ai_p50_chars: 16.0
+      primary: chars
+      n_pages: 20
+      source: D thresholds.yaml v2 · genres.landing.slots.cta-label.ru
+    en:
+      words: {min: 2, target: 2, max: 4}
+      hard_words: [1, 7]
+      ai_p50_words: 3.0
+      chars: {min: 7, target: 12, max: 22}
+      hard_chars: [3, 42]
+      ai_p50_chars: 15.0
+      primary: words
+      n_pages: 25
+      source: D thresholds.yaml v2 · genres.landing.slots.cta-label.en
+    exceptions:
+    - "Кнопка в одну строку на любом вьюпорте: не длиннее 25 знаков RU и 21 EN (p90 лидеров); не помещается — менять формулировку, а не переносить (ux 07/02 §1.1)."
+    - "Липкая кнопка на телефоне (Hallmark C4): 1–3 слова, та же формулировка, что у главной; строка снятия риска — отдельно, cta-note до 40 знаков."
+    viewport:
+      mobile: "одна строка; кнопка во всю ширину 343 px вмещает ≈ 30 знаков при 16 px — расчёт E [мнение], проверка — creative"
+  structure: "RU: инфинитив совершенного вида + объект («Вызвать замерщика», «Посмотреть программу»); EN: глагол + объект или первое лицо («Show me my schedule») — развилка RU/EN."
+  formula_ids: [question-proof-action]
+  rules:
+  - "Кнопка — следствие нажатия или ценность заголовка: «Preview the agenda» вместо «Sign up for free webcast» (+83 %, [кейс]) [V:F_urkVueszI 23:37]."
+  - "Не обещает работу: «Заполнить анкету», «Add it to WordPress» проигрывают низкопороговым глаголам [V:F_urkVueszI 11:14–14:17]."
+  - "Русская кнопка — инфинитив совершенного вида, без «Жми», «Сохраните», существительного-процесса (ux 07/02 §1.3); у лидеров RU инфинитив в двух третях кнопок (D §7)."
+  - "Одна формулировка главного действия на всю страницу: hero, липкая кнопка и финальный призыв называют одно и то же."
+  - "«Бесплатно», «попробовать бесплатно» — только если условие видно рядом (cta-note), 38-ФЗ ст. 5 ч. 7 (H)."
+  bans:
+  - "«Отправить», «Подробнее», «Узнать больше», «Submit», «Learn more», «Click here» (COPY-M-MKT-07, ux 07/02 §1.4)."
+  - "Стрелка «→» и эмодзи в тексте кнопки (иконку решает creative); капс; восклицание."
+  fact_required: if-claim
+  claim_classes: [price-discount, purchase-terms]
+  legal_rules: [COPY-L-FREE-01, COPY-L-FREE-02]
+  lint_markers: [COPY-M-MKT-07, COPY-M-PUN-07]
+  voice: Обращение F (вы / ты); глагольный словарь бренда.
+  examples:
+    ru:
+      facts: otves
+      bad: Отправить
+      good: Вызвать замерщика
+      fact_ids: []
+      note: "называет, что произойдёт: приедет замерщик"
+    en:
+      facts: okoshko
+      bad: Learn more
+      good: Set up my booking link
+      fact_ids: []
+      note: "ближайшее следствие нажатия, от первого лица (развилка EN)"
+  sources:
+  - "[V:F_urkVueszI 07:07–14:17, 23:37]"
+  - ux 07/02 §1.1–1.4
+  - 03-corpus-measured/02 §7
+  - 06-anti-slop/01 §8 (COPY-M-MKT-07)
+  date: '2026-09-24'
+- id: cta-secondary-label
+  site_slot: ''
+  name: Подпись второстепенной кнопки или ссылки
+  purpose: "Путь для не готового действовать: посмотреть пример, цены, программу, переслать смету — вторая цель страницы (B1 goal.secondary_goal)."
+  section_roles: [hero, pricing, final-cta, case-studies]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: link
+  kimi: btn
+  length:
+    ru:
+      words: {min: 1, target: 2, max: 5}
+      hard_words: [1, 15]
+      ai_p50_words: 2.0
+      chars: {min: 6, target: 15, max: 33}
+      hard_chars: [3, 95]
+      ai_p50_chars: 16.5
+      primary: chars
+      n_pages: 21
+      source: "D thresholds.yaml v2 · genres.landing.slots.cta-secondary-label.ru"
+    en:
+      words: {min: 2, target: 2, max: 4}
+      hard_words: [1, 6]
+      ai_p50_words: 2.0
+      chars: {min: 8, target: 14, max: 22}
+      hard_chars: [4, 40]
+      ai_p50_chars: 15.0
+      primary: words
+      n_pages: 24
+      source: "D thresholds.yaml v2 · genres.landing.slots.cta-secondary-label.en"
+  structure: "Глагол + объект, который откроется: «Посмотреть пример сметы», «See pricing»."
+  formula_ids: []
+  rules:
+  - "Называет, что откроется, — ссылка читается отдельно от текста вокруг (ux 07/02 §2.1; Hallmark: link text stands alone)."
+  - "Слабее главной по обязательству, но не по смыслу: «Посмотреть цены», «Скачать пример договора» — не «Подробнее»."
+  - "В навигации многостраничника «Все услуги» — конвенция; в секции — назвать содержимое."
+  bans:
+  - "«Подробнее» как единственная подпись (у лидеров RU — частая вторичная; ux 07/02 §1.4 — запрет)."
+  - "Вторая кнопка, которая конкурирует с главной тем же действием."
+  fact_required: never
+  claim_classes: []
+  legal_rules: []
+  lint_markers: [COPY-M-MKT-07]
+  examples:
+    ru:
+      facts: otves
+      bad: Подробнее
+      good: Посмотреть пример сметы
+      fact_ids: []
+      note: "вторая цель: сохранить и переслать домашним (иерархия B1)"
+    en:
+      facts: okoshko
+      bad: Learn more
+      good: See all plans and prices
+      fact_ids: []
+      note: "называет, что откроется"
+  sources:
+  - "ux 07/02 §2.1, §1.4"
+  - 02-strategy-messaging/02 §1.6 (вторая цель)
+  - 03-corpus-measured/02 §7
+  date: '2026-09-24'
+- id: cta-note
+  site_slot: ''
+  name: "Строка у кнопки: снятие риска, что будет дальше, цена и время"
+  purpose: "Отвечает на страх «закрытой двери»: что будет после нажатия, сколько стоит, что не обязывает; снимает блокер до главного призыва."
+  section_roles: [hero, cta-band, final-cta, pricing, lead-form]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: hint
+  kimi: micro
+  length:
+    ru:
+      words: {min: 2, target: 7, max: 11}
+      hard_words: [1, 17]
+      ai_p50_words: 6.0
+      chars: {min: 17, target: 48, max: 72}
+      hard_chars: [8, 108]
+      ai_p50_chars: 40.0
+      primary: chars
+      n_pages: 8
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.cta-note.ru
+    en:
+      words: {min: 4, target: 9, max: 18}
+      provisional: true
+      source: "правило E: у лидеров EN замера нет; по RU (3–7–11 слов) с запасом на условие"
+    exceptions:
+    - "Условие «бесплатно», скидки, пробного периода, возврата удлиняет строку до 20 слов: условие не режется ради длины (38-ФЗ ст. 5 ч. 7; опыт E/01 — законные длинные строки с условиями)."
+  structure: "Что будет дальше + цена или срок + что не обязывает: «[следующий шаг] — [стоимость/срок]; [условие]»; или «[утверждение], даже если [возражение]»."
+  formula_ids: [even-if-objection, question-proof-action, four-p]
+  rules:
+  - "Отвечает на один вопрос из трёх: что будет после нажатия, сколько это стоит, что если передумаю (B1 §4.3)."
+  - "Условия «бесплатно», скидки, пробного периода — в той же строке, тем же кеглем (H: COPY-L-FREE-01, TERMS-01)."
+  - "Время и стоимость шага называются числом, если они есть в фактах (GOV.UK: стоимость и примерное время, ux 05/01 §7.5)."
+  - "Блокер основного сегмента снимается здесь, а не в FAQ (B1 §4.3, валидатор B1)."
+  bans:
+  - "Пустое «Гарантия качества», «Надёжно и безопасно», «Без скрытых платежей» без условия договора (H COPY-L-GUAR-05; B1 частые ошибки)."
+  - "«Подробности уточняйте у менеджера» вместо условия (COPY-L-TERMS-01)."
+  - "Ложная срочность «Осталось 3 места», таймер без реальной даты (COPY-M-MKT-12, ux 06/04 §8.1)."
+  fact_required: if-claim
+  claim_classes: [price-discount, purchase-terms, guarantee, promo-deadline, availability-scarcity]
+  legal_rules: [COPY-L-FREE-01, COPY-L-TERMS-01, COPY-L-GUAR-02, COPY-L-GUAR-03, COPY-L-PROMO-02, COPY-L-SCAR-01, COPY-L-RET-02]
+  lint_markers: [COPY-M-MKT-12]
+  examples:
+    ru:
+      facts: otves
+      bad: "Замер бесплатно! Успейте оставить заявку"
+      good: Смета и выезд замерщика — бесплатно в черте города
+      fact_ids: [estimate-free]
+      note: условие «в черте города» рядом (requires_nearby факта)
+    en:
+      facts: okoshko
+      bad: "Totally free, no strings attached!"
+      good: "Cancel in settings on any day; unused days refunded within 10 days"
+      fact_ids: [cancel-refund]
+      note: что если передумаю — условие из оферты
+  sources:
+  - 02-strategy-messaging/02 §4.3
+  - "08-russian-legal-typography/01 §4.1, §5.1"
+  - ux 05/01 §7.5
+  - ux 06/04 §8.1
+  date: '2026-09-24'
+- id: promise
+  site_slot: ''
+  name: Обещание первого экрана (product.goal kimi)
+  purpose: "Одна фраза главного обещания для исполнителя (K3 ставит её в первый экран); сверяется с фактами как текст страницы."
+  proposal: true
+  proposal_note: "предложение к временному словарю (вслед за J, схема copy-deck v1): обещание первого экрана = product.goal пакета kimi (строка «Promise:» в TASK) — B2 отчёт п. 9"
+  lint_as: subheadline
+  section_roles: [hero]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: subtitle
+  kimi: product.goal
+  length:
+    ru:
+      words: {min: 6, target: 14, max: 30}
+      provisional: true
+      source: "правило E: как подзаголовок (D: RU 6–29, EN 8–32 слова); одна фраза"
+    en:
+      words: {min: 6, target: 16, max: 32}
+      provisional: true
+      source: "правило E: как подзаголовок (D: RU 6–29, EN 8–32 слова); одна фраза"
+  structure: "Главное сообщение иерархии (core_message B1) без внутренних пометок: что + для кого + главное отличие с фактом."
+  formula_ids: [category-statement, four-p]
+  rules:
+  - "Выводится из core_message иерархии B1, только утверждения с доказательством (x-kimi-map B1)."
+  - "Проходит claims_check.py как текст страницы: обещание здоровья, дохода, «без усталости глаз» здесь так же запрещено («Кварц», B2/02)."
+  - "Не больше, чем подтверждено: если опора в missing — обещание без неё."
+  bans:
+  - "Любое утверждение классов health и income-finance без документа (nc-health, nc-income)."
+  fact_required: always
+  claim_classes: [fact-property, fact-number, guarantee, health, income-finance]
+  legal_rules: [COPY-L-HEALTH-01, COPY-L-GUAR-01, COPY-L-EDU-01]
+  lint_markers: [COPY-M-MKT-13]
+  examples:
+    ru:
+      facts: kvarts
+      bad: Лампа для чтения без усталости глаз
+      good: "Настольная лампа сама подстраивает свет под книгу и время суток"
+      fact_ids: [auto-light]
+      note: "обещание здоровья (nc-eyes-health) заменено свойством из факта"
+    en:
+      facts: okoshko
+      bad: The booking app that doubles your salon revenue
+      good: "Online booking with Telegram reminders for barbershops and beauty salons"
+      fact_ids: [reminders, self-booking-link]
+      note: обещание дохода (nc-revenue-growth) заменено механизмом
+  sources:
+  - "02-strategy-messaging/03 §7 (Promise:)"
+  - 99-raw/notes/wave3/J-notes.md (slot_type promise)
+  - ../kimi-research/07-brief-handoff/templates/TASK.md
+  date: '2026-09-24'
+- id: section-title
+  site_slot: ''
+  name: Заголовок секции (H2)
+  purpose: "Ответ на вопрос посетителя, который закрывает секция (sections[].question иерархии B1); заголовки секций вместе пересказывают страницу."
+  section_roles: [problem, solution, benefits, how-it-works, case-studies, testimonials, proof-stats, comparison, pricing, guarantee, objections, faq, about, team, final-cta]
+  genres: [landing, site-page, article]
+  genre: landing
+  ux_role: section-title
+  kimi: h
+  length:
+    ru:
+      words: {min: 2, target: 4, max: 8}
+      hard_words: [1, 13]
+      ai_p50_words: 3.0
+      chars: {min: 14, target: 28, max: 57}
+      hard_chars: [6, 86]
+      ai_p50_chars: 21.0
+      primary: chars
+      n_pages: 23
+      source: D thresholds.yaml v2 · genres.landing.slots.section-title.ru
+    en:
+      words: {min: 2, target: 6, max: 11}
+      hard_words: [1, 17]
+      ai_p50_words: 5.0
+      chars: {min: 16, target: 35, max: 61}
+      hard_chars: [8, 92]
+      ai_p50_chars: 26.0
+      primary: words
+      n_pages: 25
+      source: D thresholds.yaml v2 · genres.landing.slots.section-title.en
+    exceptions:
+    - "Заголовок-предложение в EN (утверждение с условием или числом) — до 18 слов (Pilot, опыт E/01)."
+    - "Одно слово-метка («Changelog», «Цены») — законно в навигационных секциях многостраничника."
+  structure: "По умолчанию — ответ-утверждение: «[что получает посетитель] + [чем подтверждено]»; вопрос — только словами клиента и с ответом первой фразой секции."
+  formula_ids: [question-proof-action, even-if-objection, three-questions-dry]
+  rules:
+  - "Outline-тест лендинга инвертирован: прочитать подряд только H2 — должен сложиться сюжет страницы (C §10; A: заголовки секций пересказывают страницу)."
+  - "Вопрос посетителя из иерархии превращается в ответ: «Почему ремонты затягиваются?» → «Ремонт затягивается, когда мастера ждут друг друга» (решение E: ответ по умолчанию, вопрос — в FAQ и секциях возражений)."
+  - "Соседние заголовки начинаются по-разному (ux 07/02 §4.2; обход строк с одинаковым началом, NN/g)."
+  - "Число или имя в заголовке — с fact_ids; обещание заголовка раскрывается в первой фразе секции."
+  bans:
+  - "Ярлыки «Наши преимущества», «Почему мы», «Отзывы клиентов», «Why Choose Us» (COPY-M-MKT-11); «Услуги» — только в навигации."
+  - "Title Case, капс, «!», «:» в конце; «X, который Y» с пустым Y (COPY-M-MKT-04)."
+  fact_required: if-claim
+  claim_classes: [fact-number, guarantee, superlative, comparison]
+  legal_rules: [COPY-L-SUP-01, COPY-L-CMP-01, COPY-L-GUAR-02]
+  lint_markers: [COPY-M-MKT-11, COPY-M-MKT-04, COPY-M-MKT-10]
+  voice: Образцы строк F для section-title.
+  examples:
+    ru:
+      facts: otves
+      bad: Наши преимущества
+      good: Гарантия 3 года на работы — по договору
+      fact_ids: [guarantee-3-years]
+      section_role: guarantee
+      note: ярлык заменён утверждением с условием
+    en:
+      facts: okoshko
+      bad: "Why Choose Us?"
+      good: Your client list moves over from Excel in one business day
+      fact_ids: [import-free]
+      note: ответ на возражение «переезд — долго» числом из факта
+  sources:
+  - 02-strategy-messaging/02 §2.4
+  - "06-anti-slop/01 §5, §10"
+  - ux 07/02 §4.2
+  - 03-corpus-measured/03 §4
+  date: '2026-09-24'
+- id: section-lead
+  site_slot: ''
+  name: Лид секции
+  purpose: "1–2 предложения под заголовком секции: сообщение секции (message иерархии) с фактом; дальше — карточки, шаги или тело."
+  section_roles: [problem, solution, benefits, how-it-works, case-studies, pricing, guarantee, about, integrations]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: lead
+  length:
+    ru:
+      words: {min: 6, target: 11, max: 26}
+      hard_words: [3, 66]
+      ai_p50_words: 12.7
+      chars: {min: 33, target: 71, max: 209}
+      hard_chars: [16, 548]
+      ai_p50_chars: 80.7
+      primary: chars
+      n_pages: 22
+      source: D thresholds.yaml v2 · genres.landing.slots.section-lead.ru
+    en:
+      words: {min: 8, target: 19, max: 41}
+      hard_words: [4, 97]
+      ai_p50_words: 23.0
+      chars: {min: 43, target: 116, max: 262}
+      hard_chars: [21, 582]
+      ai_p50_chars: 132.9
+      primary: words
+      n_pages: 23
+      source: D thresholds.yaml v2 · genres.landing.slots.section-lead.en
+    exceptions:
+    - "Лид секции формы или тарифов объясняет, что будет после отправки, — до 35 слов (Эльба, опыт E/01)."
+  structure: "Ответ на вопрос секции первой фразой → факт или механизм → (необязательно) переход к карточкам."
+  formula_ids: [inverted-pyramid, question-proof-action, pas, bab, problem-transformation-outcome]
+  rules:
+  - "Первая фраза — ответ на вопрос секции; не пересказ заголовка другими словами."
+  - "PAS — без нормализации потери («80 % компаний теряют…») и без запугивания; в медицине и финансах не брать (A formulas.yaml)."
+  - "Одна мысль: второе сообщение — вторая секция."
+  bans:
+  - "Штамп вступления («В современном мире…», «In today's fast-paced world») — error в лиде; «не только…, но и» (COPY-M-SYN-01)."
+  - "Анонсы и дидактика: «Давайте разберёмся», «Важно отметить» (COPY-M-TON-…)."
+  fact_required: if-claim
+  claim_classes: [fact-number, fact-property, price-discount, guarantee]
+  legal_rules: [COPY-L-FREE-01, COPY-L-PRICE-03]
+  lint_markers: [COPY-M-LEX-05, COPY-M-SYN-01, COPY-M-MKT-05]
+  examples:
+    ru:
+      facts: otves
+      bad: "В современном мире ремонт — это не только стены и полы, но и нервы, время и деньги."
+      good: "Работы — от 9 800 ₽ за м² без материалов. Точную сумму покажет смета: замер и смета бесплатны в черте города."
+      fact_ids: [price-from-per-m2, estimate-free]
+      section_role: pricing
+      note: "цена «от» с составом и условие «бесплатно» в том же предложении"
+    en:
+      facts: okoshko
+      bad: "In today's fast-paced world, salons need more than just a booking tool."
+      good: "Clients book themselves through your link, and Telegram reminders go out 24 hours and 2 hours before each visit."
+      fact_ids: [self-booking-link, reminders]
+      note: механизм вместо разгона
+  sources:
+  - "01-foundations/formulas.yaml (pas, inverted-pyramid)"
+  - 06-anti-slop/01 §2–3
+  - 03-corpus-measured/03 §4
+  date: '2026-09-24'
+- id: body
+  site_slot: ''
+  name: "Проза блока: абзацы «о нас», история, описание услуги"
+  purpose: "Абзац, который объясняет механизм, историю или условия так, чтобы посетитель сам сделал вывод («не выводы, а то, из чего их делают»)."
+  section_roles: [about, solution, how-it-works, problem, team, guarantee]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 12, target: 30, max: 60}
+      provisional: true
+      source: "правило E: у D «body» — сборная категория фрагментов (RU 1–4–16,5 слова) и не норма абзаца; ориентир — абзац статьи D (RU 24 [7–49], EN 27 [6–64]); длинные абзацы при дорогом решении законны (опыт E/01)"
+    en:
+      words: {min: 12, target: 35, max: 70}
+      provisional: true
+      source: "правило E: у D «body» — сборная категория фрагментов (RU 1–4–16,5 слова) и не норма абзаца; ориентир — абзац статьи D (RU 24 [7–49], EN 27 [6–64]); длинные абзацы при дорогом решении законны (опыт E/01)"
+    exceptions:
+    - "Дорогое и тревожное решение (франшиза, ремонт, B2B-внедрение): абзацы до 60 слов RU законны — длина следует из числа сомнений (MECLABS [V:gMzwsAWipNo 19:21])."
+  structure: "Факт → «и что с того?» → ситуация клиента; история — из фактов (company, person, case), без выдуманных деталей."
+  formula_ids: [fact-scenario, bab, star-story-solution, problem-transformation-outcome]
+  rules:
+  - "Не пиши выводы, которые должен сделать читатель, — давай факты, из которых он их сделает ([V:1UVkeqxuNRs 21:46])."
+  - "Каждому факту — сценарий из голоса клиента или брифа («консультант 24/7» → «платёжка 31 декабря в 23:55») [V:_jwKQ6ZCeAI 26:34]; сценарий не выдумывать."
+  - "Ритм лендинга ровнее эссе: у лидеров RU средняя разница длин соседних предложений 4 слова, не 6 — не рубить текст ради «живости» (D §3)."
+  - "О компании — что получает клиент, а не миссия и ценности ([V:_jwKQ6ZCeAI 20:24])."
+  bans:
+  - "Самопохвала и внутренняя кухня: «ценим каждого клиента», «собираем обратную связь» ([V:1UVkeqxuNRs 16:26], COPY-M-MKT-01)."
+  - "Связки «является», «представляет собой»; деепричастные хвосты «…, подчёркивая статус» (COPY-M-LEX-…, SYN-…)."
+  - "Сверхкоррекция: фразы по 1–3 слова подряд, ноль связок (вердикт overcorrected, C §13)."
+  fact_required: if-claim
+  claim_classes: [fact-number, fact-property, company-details, guarantee]
+  legal_rules: [COPY-L-SUP-01, COPY-L-GUAR-02]
+  lint_markers: [COPY-M-MKT-01, COPY-M-TON-08, COPY-M-STR-06]
+  voice: "Голос бренда F: оси, «мы / мы не», словарь; истории — поле F «сторителлинг» только из фактов."
+  examples:
+    ru:
+      facts: otves
+      bad: "Мы — надёжная компания, которая ценит каждого клиента. Наши мастера — настоящие профессионалы своего дела, а качество работ является нашим главным приоритетом."
+      good: "Прораб Сергей Лапин ведёт ремонты квартир 11 лет. На выполненные работы действует гарантия 3 года по договору подряда, пункт 7.2."
+      fact_ids: [foreman-lapin, guarantee-3-years]
+      section_role: guarantee
+      note: человек с опытом и условие гарантии вместо самохвалы
+    en:
+      facts: okoshko
+      bad: "We are passionate about empowering beauty professionals to unlock their full potential and deliver exceptional experiences."
+      good: "Ruslan, who owns a barbershop in Kazan, used to spend his evenings calling everyone booked for the next day. Now reminders go out on their own, and he calls only the clients who haven't confirmed."
+      fact_ids: [review-ruslan, reminders]
+      note: пересказ отзыва без кавычек честно передаёт опыт (B2 §5.1)
+  sources:
+  - "[V:1UVkeqxuNRs 21:46]"
+  - "[V:_jwKQ6ZCeAI 22:30–26:34]"
+  - 03-corpus-measured/02 §3
+  - 06-anti-slop/01 §13
+  date: '2026-09-24'
+- id: list-item
+  site_slot: ''
+  name: Пункт списка
+  purpose: "Состав услуги или тарифа, что входит, для кого, условия — по одной мысли на пункт."
+  section_roles: [benefits, pricing, how-it-works, about, event-program]
+  genres: [landing, site-page, article]
+  genre: landing
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 1, target: 5, max: 15}
+      hard_words: [1, 34]
+      ai_p50_words: 5.0
+      chars: {min: 6, target: 38, max: 130}
+      hard_chars: [3, 245]
+      ai_p50_chars: 38.6
+      primary: chars
+      n_pages: 26
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.list-item.ru
+    en:
+      words: {min: 1, target: 6, max: 21}
+      hard_words: [1, 56]
+      ai_p50_words: 6.0
+      chars: {min: 9, target: 33, max: 147}
+      hard_chars: [4, 357]
+      ai_p50_chars: 36.0
+      primary: words
+      n_pages: 16
+      source: D thresholds.yaml v2 · genres.landing.slots.list-item.en
+  structure: "Параллельная грамматика внутри списка: все пункты — существительные или все — глаголы; сначала суть, потом условие."
+  formula_ids: [fab, four-u]
+  rules:
+  - "Пункты начинаются по-разному: сканирующий читатель пропускает строки с одинаковым началом (NN/g, A/01)."
+  - "Число, срок, цена — с fact_ids; условие пишется в том же пункте."
+  - "Три пункта — не правило: список такой длины, сколько фактов (у ai-self RU ровно три карточки в 42 % секций, у лидеров — 0; D §7)."
+  bans:
+  - "Пункты-оценки: «Качество», «Надёжность», «Профессионализм» (COPY-M-SYN тройки, MKT-01)."
+  - "Запрещённые первые фразы и «Seamless integration» (COPY-M-MKT-08)."
+  fact_required: if-claim
+  claim_classes: [fact-number, fact-property, price-discount, purchase-terms]
+  legal_rules: [COPY-L-FREE-01, COPY-L-PRICE-03]
+  lint_markers: [COPY-M-MKT-08, COPY-M-MKT-05]
+  examples:
+    ru:
+      facts: otves
+      bad: Высокое качество и индивидуальный подход
+      good: "Работы под ключ — от 9 800 ₽ за м², материалы оплачиваются отдельно"
+      fact_ids: [price-from-per-m2]
+      section_role: pricing
+      note: что входит и что нет — в том же пункте
+    en:
+      facts: okoshko
+      bad: Seamless integration
+      good: "Client list import from Excel or Google Sheets within 1 business day"
+      fact_ids: [import-free]
+      note: срок и источник данных вместо «seamless»
+  sources:
+  - "01-foundations/01 (bypassing, NN/g)"
+  - 03-corpus-measured/02 §7
+  - 08-russian-legal-typography/01 §4.2
+  date: '2026-09-24'
+- id: card-title
+  site_slot: ''
+  name: "Заголовок карточки (фича, выгода, услуга)"
+  purpose: "Короткое обещание или название возможности; первая фраза карточки объясняет его механизмом."
+  section_roles: [benefits, solution, how-it-works, pricing, team, portfolio, integrations]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: section-title
+  kimi: h
+  length:
+    ru:
+      words: {min: 1, target: 3, max: 6}
+      hard_words: [1, 11]
+      ai_p50_words: 2.0
+      chars: {min: 8, target: 18, max: 37}
+      hard_chars: [4, 77]
+      ai_p50_chars: 17.0
+      primary: chars
+      n_pages: 18
+      source: D thresholds.yaml v2 · genres.landing.slots.card-title.ru
+    en:
+      words: {min: 2, target: 3, max: 8}
+      hard_words: [1, 12]
+      ai_p50_words: 2.0
+      chars: {min: 10, target: 22, max: 49}
+      hard_chars: [5, 74]
+      ai_p50_chars: 17.4
+      primary: words
+      n_pages: 21
+      source: D thresholds.yaml v2 · genres.landing.slots.card-title.en
+    exceptions:
+    - "Карточка-оффер с условием («Эльба за 0 ₽ в месяц со счётом в Контур. Банке», «первые 25 документов бесплатно») — 8–12 слов законны: условие не режется (опыт E/01)."
+  structure: "Именная группа или глагол + объект: возможность, выгода с числом, название услуги."
+  formula_ids: [fab, three-questions-dry, fact-scenario]
+  rules:
+  - "Заголовок-обещание требует ответа «почему» в первой фразе карточки ([V:1UVkeqxuNRs 20:38–21:46])."
+  - "Карточки в ряду начинаются по-разному и не повторяют заголовок секции."
+  - "Проверка тремя вопросами: можно представить, опровергнуть, не скажет ли конкурент (formulas.yaml three-questions-dry)."
+  bans:
+  - "Однословные оценки «Надёжность», «Качество», «Инновации»; Title Case в EN."
+  fact_required: if-claim
+  claim_classes: [fact-number, fact-property, guarantee, price-discount]
+  legal_rules: [COPY-L-FREE-01, COPY-L-GUAR-05]
+  lint_markers: [COPY-M-MKT-08, COPY-M-MKT-09]
+  examples:
+    ru:
+      facts: otves
+      bad: Надёжность
+      good: Гарантия 3 года на работы
+      fact_ids: [guarantee-3-years]
+      section_role: guarantee
+      note: оценка заменена условием
+    en:
+      facts: okoshko
+      bad: Seamless Experience
+      good: Reminders in Telegram
+      fact_ids: [reminders]
+      note: называет возможность; механизм — в тексте карточки
+  sources:
+  - "[V:1UVkeqxuNRs 20:38]"
+  - 01-foundations/formulas.yaml
+  - 03-corpus-measured/03 §4
+  date: '2026-09-24'
+- id: card-body
+  site_slot: ''
+  name: Текст карточки
+  purpose: "Механизм или факт, который объясняет заголовок карточки, и что это меняет для клиента."
+  section_roles: [benefits, solution, how-it-works, team, integrations, portfolio]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 2, target: 8, max: 19}
+      hard_words: [1, 38]
+      ai_p50_words: 11.0
+      chars: {min: 17, target: 55, max: 136}
+      hard_chars: [8, 297]
+      ai_p50_chars: 78.1
+      primary: chars
+      n_pages: 17
+      source: D thresholds.yaml v2 · genres.landing.slots.card-body.ru
+    en:
+      words: {min: 2, target: 12, max: 35}
+      hard_words: [1, 60]
+      ai_p50_words: 11.0
+      chars: {min: 12, target: 71, max: 224}
+      hard_chars: [6, 377]
+      ai_p50_chars: 78.0
+      primary: words
+      n_pages: 19
+      source: D thresholds.yaml v2 · genres.landing.slots.card-body.en
+    exceptions:
+    - "Дорогое решение с долгим выбором (франшиза, внедрение B2B): карточки 20–45 слов законны (Додо Франшиза, 25 из 120 «выбросов» опыта E/01)."
+    - "Ровные по длине карточки — норма раскладки; ровные по шаблону предложения во всех карточках — примета наивного ИИ (CV длины 0,18 против 0,4 у людей, D §7)."
+  length_by_page_type:
+    note: "люди (лидеры + средний рынок) D tables.md; p50 [p10–p90] слов, страниц"
+    ru:
+      landing-lead-services: "6 [2–28,6] 20"
+      landing-saas: "10 [2–18,9] 7"
+      landing-product+campaign: "4,4 [1–15] 3"
+      home-multipage: "9 [4–19] 9"
+    en:
+      landing-lead-services: "14 [3–49,5] 11"
+      landing-saas: "11 [2–28] 17"
+      home-multipage: "25,2 [8–47,7] 3"
+  structure: "Первая фраза — механизм или факт; вторая (необязательно) — ситуация клиента, в которой это срабатывает."
+  formula_ids: [fab, fact-scenario, question-proof-action]
+  rules:
+  - "Первая фраза объясняет заголовок фактом, а не повторяет его: не «Более 8 лет разрабатываем…» под «Дешевле и быстрее» ([V:1UVkeqxuNRs 20:38])."
+  - "FAB — от задачи клиента (B1 value_themes), а не список свойств ради списка; FAB [спорно] в сложных B2B-продажах."
+  - "Тревогу снимают конкретной деталью, а не новыми выгодами («More features create actually anxiety» [V:xQV7HVyAJjc 11:38])."
+  bans:
+  - "«Мы предлагаем…», «Наша команда…» первыми словами; превосходная степень без критерия."
+  - "Глаголы-обещания elevate, supercharge, streamline, «прокачайте», «трансформируйте» (COPY-M-MKT-09)."
+  fact_required: if-claim
+  claim_classes: [fact-number, fact-property, guarantee, price-discount, superlative]
+  legal_rules: [COPY-L-SUP-01, COPY-L-FREE-01, COPY-L-GUAR-02]
+  lint_markers: [COPY-M-MKT-09, COPY-M-MKT-01, COPY-M-MKT-05]
+  voice: Образцы строк F для card-body.
+  examples:
+    ru:
+      facts: otves
+      bad: "Мы предлагаем лучшие условия и индивидуальный подход к каждому клиенту."
+      good: "Пункт 7.2 договора: гарантийный срок на выполненные работы — 3 года с даты подписания акта."
+      fact_ids: [guarantee-3-years]
+      section_role: guarantee
+      note: факт из документа вместо превосходной степени
+    en:
+      facts: okoshko
+      bad: "Our cutting-edge reminders streamline your workflow and supercharge your business."
+      good: "Clients get a reminder in Telegram 24 hours and 2 hours before the visit. Telegram reminders are included in every plan."
+      fact_ids: [reminders]
+      note: механизм и условие вместо глаголов-обещаний
+  sources:
+  - "[V:1UVkeqxuNRs 20:38]"
+  - "[V:xQV7HVyAJjc 11:38]"
+  - 01-foundations/formulas.yaml (fab)
+  - 03-corpus-measured/02 §7
+  - 99-raw/experiments/E/01-slot-lengths
+  date: '2026-09-24'
+- id: step-title
+  site_slot: ''
+  name: Заголовок шага «как это работает»
+  purpose: "Название шага с точки зрения клиента: что происходит и кто действует."
+  section_roles: [how-it-works]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: section-title
+  kimi: h
+  length:
+    ru:
+      words: {min: 2, target: 4, max: 7}
+      provisional: true
+      source: "правило E: у D нет замера шагов; по card-title (RU 1–3–6, EN 2–3–8 слов) + глагол"
+    en:
+      words: {min: 2, target: 4, max: 8}
+      provisional: true
+      source: "правило E: у D нет замера шагов; по card-title (RU 1–3–6, EN 2–3–8 слов) + глагол"
+  structure: "Глагол действия + объект («Замер и смета», «Договор с этапами»); нумерация — вёрстка, не текст."
+  formula_ids: [question-proof-action]
+  rules:
+  - "Шаги показывают, где риски клиента под контролем (срок этапа, приёмка, оплата), а не очевидную процедуру («Оставьте заявку → Мы перезвоним»)."
+  - "Схема «запрос клиента → результат» объясняет услугу лучше перечня этапов ([V:1UVkeqxuNRs 04:04–08:12])."
+  bans:
+  - "Очевидные шаги без информации: «Выберите отправку. Рассчитайте стоимость. Вызовите курьера» (Бирман [34:40])."
+  - "Номера и «Шаг 1:» в тексте (вёрстка — creative)."
+  fact_required: if-claim
+  claim_classes: [purchase-terms, fact-number]
+  legal_rules: []
+  lint_markers: [COPY-M-STR-10]
+  examples:
+    ru:
+      facts: otves
+      bad: "Шаг 1: Оставьте заявку"
+      good: Замер и смета до договора
+      fact_ids: []
+      note: "шаг с информацией о риске: смета — до обязательств"
+    en:
+      facts: okoshko
+      bad: "Step 1: Sign Up"
+      good: Send us your client list
+      fact_ids: []
+      note: действие клиента с объектом
+  sources:
+  - "[V:1UVkeqxuNRs 04:04]"
+  - "ux 91-videos b2VdPF9svEU [34:40]"
+  - 02-strategy-messaging/02 §2.4 (how-it-works)
+  date: '2026-09-24'
+- id: step-body
+  site_slot: ''
+  name: Текст шага
+  purpose: "Что происходит на шаге, сколько длится, что получает клиент и что его защищает."
+  section_roles: [how-it-works]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 5, target: 12, max: 25}
+      provisional: true
+      source: "правило E: у D нет замера; по card-body (RU 2,6–8–19, EN 2–12–35 слов)"
+    en:
+      words: {min: 6, target: 14, max: 30}
+      provisional: true
+      source: "правило E: у D нет замера; по card-body (RU 2,6–8–19, EN 2–12–35 слов)"
+  structure: "Кто делает → что получает клиент → срок или условие (из фактов)."
+  formula_ids: [question-proof-action, problem-transformation-outcome, fact-scenario]
+  rules:
+  - "Срок, стоимость и документ шага — числом из фактов; нет факта — [PLACEHOLDER: …] (missing deadline-terms, payment-stages у «Отвеса»)."
+  - "Шаги снимают тревогу деталью: как упакуют, застрахуют, кто придёт (Бирман [38:46])."
+  bans:
+  - "«Мы свяжемся с вами в ближайшее время» без срока; «быстро», «легко» без числа (COPY-M-LEX-13, mkt-role-easy-fast)."
+  fact_required: if-claim
+  claim_classes: [purchase-terms, fact-number, price-discount]
+  legal_rules: [COPY-L-FREE-01]
+  lint_markers: [COPY-M-MKT-05]
+  examples:
+    ru:
+      facts: otves
+      bad: Наш специалист быстро приедет и всё легко рассчитает.
+      good: "Замерщик приезжает на объект и составляет смету; замер и смета бесплатны в черте города."
+      fact_ids: [estimate-free]
+      allow_warn: [COPY-F-USE]
+      note: "условие «бесплатно» в том же предложении; COPY-F-USE — use факта B2 не включает how-it-works, хотя иерархия B1 ставит estimate-free в эту секцию (передано B2)"
+    en:
+      facts: okoshko
+      bad: Our team will get in touch shortly and make everything easy.
+      good: "Send a file from Excel or Google Sheets, and support moves your client list over within 1 business day."
+      fact_ids: [import-free]
+      note: срок из регламента вместо «shortly»
+  sources:
+  - "ux 91-videos b2VdPF9svEU [38:46]"
+  - "06-anti-slop/01 §11 (легко, быстро)"
+  date: '2026-09-24'
+- id: stat-value
+  site_slot: ''
+  name: Число в ряду цифр
+  purpose: "Значение с единицей; объект счёта — в подписи (stat-label), источник и дата — в stat-source."
+  section_roles: [proof-stats, hero, about, case-studies]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 1, target: 2, max: 3}
+      hard_words: [1, 5]
+      ai_p50_words: 1.0
+      chars: {min: 3, target: 8, max: 20}
+      hard_chars: [1, 30]
+      ai_p50_chars: 4.0
+      primary: chars
+      n_pages: 14
+      source: D thresholds.yaml v2 · genres.landing.slots.stat-value.ru
+    en:
+      words: {min: 1, target: 2, max: 3}
+      hard_words: [1, 5]
+      ai_p50_words: 2.0
+      chars: {min: 3, target: 6, max: 20}
+      hard_chars: [1, 29]
+      ai_p50_chars: 6.0
+      primary: words
+      n_pages: 13
+      source: D thresholds.yaml v2 · genres.landing.slots.stat-value.en
+  structure: "[число][единица] — «1 146», «4,8 из 5», «47 дней»; 3–5 чисел в ряду (Hallmark T4)."
+  formula_ids: [fact-scenario]
+  rules:
+  - "Только из facts.yaml с as_of; округление — только в безопасную сторону («Более 1 100» при 1 146; «1 200+» нельзя) (B2 §4.4)."
+  - "Число выбирают по тому, меняет ли оно решение: срок, гарантия, рейтинг с числом оценок, а не «450 работ» ([V:1UVkeqxuNRs 09:12, 24:49])."
+  - "Маленькое для категории число работает против — лучше кейс или отзыв (B2 §1.4)."
+  bans:
+  - "«10 000+», «99,9 %», «x10» без факта — «идеальные» числа (COPY-M-CNT-…)."
+  fact_required: always
+  claim_classes: [fact-number, rating]
+  legal_rules: [COPY-L-REV-01, COPY-L-SUP-01]
+  lint_markers: [COPY-M-CNT-02]
+  examples:
+    ru:
+      facts: otves
+      bad: 10 000+
+      good: 1 146
+      fact_ids: [flats-completed]
+      companions:
+      - {slot_type: stat-label, text: квартир сдали по акту с 2014 года}
+      note: число с объектом счёта в подписи
+    en:
+      facts: okoshko
+      bad: "99.9%"
+      good: "1,380"
+      fact_ids: [salons-count]
+      companions:
+      - {slot_type: stat-label, text: salons and barbershops on paid plans as of 1 September 2026}
+      known_false: [COPY-F-NUM-MISMATCH]
+      note: "объект счёта и дата в подписи; «1,380» claims_check читает как 1,38 — ложное (передано B2)"
+  sources:
+  - "02-strategy-messaging/03 §1.2, §1.4, §4.4"
+  - "[V:1UVkeqxuNRs 09:12]"
+  - Hallmark component-cookbook T4
+  date: '2026-09-24'
+- id: stat-label
+  site_slot: ''
+  name: Подпись числа
+  purpose: "Объект счёта, период или дата; при нехватке места — источник выносится в stat-source."
+  section_roles: [proof-stats, hero, about, case-studies]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: caption
+  kimi: micro
+  length:
+    ru:
+      words: {min: 1, target: 4, max: 9}
+      hard_words: [1, 13]
+      ai_p50_words: 2.0
+      chars: {min: 11, target: 26, max: 63}
+      hard_chars: [5, 94]
+      ai_p50_chars: 18.0
+      primary: chars
+      n_pages: 11
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.stat-label.ru
+    en:
+      words: {min: 1, target: 3, max: 8}
+      hard_words: [1, 12]
+      ai_p50_words: 2.4
+      chars: {min: 9, target: 21, max: 33}
+      hard_chars: [4, 58]
+      ai_p50_chars: 18.0
+      primary: words
+      n_pages: 11
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.stat-label.en
+    exceptions:
+    - "Подпись с объектом счёта и периодом — до 14 слов законна («Выплатили клиентам, пострадавшим из-за отзыва лицензии у банка…» — Точка, опыт E/01)."
+  structure: "Что считали + за какой период или на какую дату; оценочные прилагательные («довольных») — только если измерены."
+  formula_ids: []
+  rules:
+  - "Объект счёта — ровно тот, что в факте: «квартир сдали по акту», а не «довольных клиентов» (B2 §4.4: не о другом объекте)."
+  - Скоропортящееся число — с датой рядом (B2 §1.3).
+  bans:
+  - "«довольных клиентов», «успешных проектов» без измерения; «лет на рынке» без года основания в фактах."
+  fact_required: always
+  claim_classes: [fact-number, rating]
+  legal_rules: [COPY-L-REV-01]
+  lint_markers: [COPY-M-CNT-02]
+  examples:
+    ru:
+      facts: otves
+      bad: довольных клиентов
+      bad_companions:
+      - {slot_type: stat-value, text: 5000+}
+      good: квартир сдали по акту с 2014 года
+      fact_ids: [flats-completed]
+      companions:
+      - {slot_type: stat-value, text: 1 146}
+      note: объект счёта из факта
+    en:
+      facts: okoshko
+      bad: happy customers
+      bad_companions:
+      - slot_type: stat-value
+        text: "10,000+"
+      good: salons and barbershops on paid plans as of 1 September 2026
+      fact_ids: [salons-count]
+      companions:
+      - slot_type: stat-value
+        text: "1,380"
+      known_false: [COPY-F-NUM-MISMATCH]
+      note: "объект счёта и дата; «1,380» — ложное COPY-F-NUM-MISMATCH (разделитель разрядов EN)"
+  sources:
+  - "02-strategy-messaging/03 §4.4, §1.3"
+  - 99-raw/experiments/E/01-slot-lengths
+  date: '2026-09-24'
+- id: logos-caption
+  site_slot: ''
+  name: Подпись ряда логотипов («Нам доверяют»)
+  purpose: "Называет связь компаний с продуктом (клиенты по договору, интеграции, партнёры) — ряд логотипов без подписи читается как «нам доверяют все»."
+  section_roles: [proof-logos, integrations, hero]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: micro
+  length:
+    en:
+      words: {min: 1, target: 5, max: 12}
+      hard_words: [1, 18]
+      chars: {min: 8, target: 31, max: 79}
+      hard_chars: [4, 119]
+      primary: words
+      n_pages: 6
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.logos-caption.en
+    ru:
+      words: {min: 2, target: 5, max: 9}
+      provisional: true
+      source: "правило E: у лидеров RU замера нет; EN — D (n < 12)"
+  structure: "Кто эти компании для нас: «Салоны, которые разрешили показать свой логотип», «Интеграции с кассами», «Клиенты с договором 2026 года»."
+  formula_ids: []
+  rules:
+  - "Логотип — только реальная связь, файл от клиента и письменное согласие (B2 §1.5, 38-ФЗ ст. 5 ч. 3 п. 10); нет согласий — блок не выводится (fallback omit-block)."
+  - "Подпись называет связь и, если есть, период; «Нам доверяют» разрешено только при fact_ids (поправка к ux 07/06 §5.2)."
+  bans:
+  - "«Нам доверяют лидеры рынка», «Trusted by industry leaders» без фактов (COPY-M-CNT-…, ux-5-2-*)."
+  fact_required: always
+  claim_classes: [client-logo, fact-number]
+  legal_rules: [COPY-L-SUP-01]
+  lint_markers: [COPY-M-CNT-02]
+  examples:
+    ru:
+      facts: okoshko
+      bad: Нам доверяют лидеры рынка
+      good: "[PLACEHOLDER: логотипы клиентов с согласием]"
+      fact_ids: []
+      allow_warn: [art-placeholder, COPY-F-PLACEHOLDER]
+      note: "пока нет согласий — плейсхолдер и вопрос заказчику (missing client-logos), блок не публикуется"
+    en:
+      facts: okoshko
+      bad: Trusted by industry leaders
+      good: "[PLACEHOLDER: client logos with written consent]"
+      fact_ids: []
+      allow_warn: [art-placeholder, COPY-F-PLACEHOLDER]
+      note: то же для EN
+  sources: [02-strategy-messaging/03 §1.5, PLAN «Поправки к правилам соседей» (ux 07/06 §5.2), Hallmark component-cookbook T2]
+  date: '2026-09-24'
+- id: testimonial-quote
+  site_slot: ''
+  name: Текст отзыва
+  purpose: "Слова клиента о его ситуации и результате — дословно из facts.yaml (verbatim), с разрешением автора."
+  section_roles: [testimonials, case-studies, hero]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: user-content
+  kimi: body
+  length:
+    ru:
+      words: {min: 12, target: 28, max: 86}
+      hard_words: [6, 144]
+      ai_p50_words: 21.0
+      chars: {min: 88, target: 190, max: 583}
+      hard_chars: [44, 1027]
+      ai_p50_chars: 139.0
+      primary: chars
+      n_pages: 16
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.landing.slots.testimonial-quote.ru"
+    en:
+      words: {min: 13, target: 24, max: 29}
+      hard_words: [6, 89]
+      ai_p50_words: 25.3
+      chars: {min: 71, target: 144, max: 188}
+      hard_chars: [35, 506]
+      ai_p50_chars: 145.3
+      primary: words
+      n_pages: 10
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.landing.slots.testimonial-quote.en"
+    exceptions:
+    - "Длину отзыва не правят ради макета: сокращение — только многоточием по журналу edits с согласия автора (B2 §5.1); длинный — делить на крупную цитату и полный текст."
+  structure: "Цитата в «ёлочках» (EN — “…”); крупно — фрагмент о типичной трудной ситуации ([V:1UVkeqxuNRs 38:01]), полный текст рядом."
+  formula_ids: [star-story-solution]
+  rules:
+  - "Дословно: опечатки и пунктуация — можно, слова и смысл — нет; многоточие — только по edits (B2 §5.1, ГК ст. 1266)."
+  - "Подборка подписана («последние отзывы с Яндекс Карт»), не только лучшие, 5★ не первыми по умолчанию (B2 §5.2)."
+  - "Отзыв о ключевом свойстве (срок, бюджет, результат) — рядом обычный результат или рамка «так было у…»; «результаты индивидуальны» не работает (B2 §5.4)."
+  - "Крупно выносить отзыв о типичной трудной ситуации, а не самый восторженный (поправка к Ильяхову [V:1UVkeqxuNRs 29:54] по B2 §5.2)."
+  - "Стиль отзыва линтер не правит (роль user-content); обещание из отзыва голосом компании не повторяется (COPY-F-NEVER)."
+  bans:
+  - "Выдуманный или сгенерированный отзыв, склейка двух отзывов, ИИ-лицо (B2, H §7; 38-ФЗ ст. 5 ч. 3 п. 10)."
+  - "В медицине и БАД — отзывы-благодарности в рекламе (H: COPY-L-MED-02)."
+  fact_required: always
+  claim_classes: [testimonial-quote]
+  legal_rules: [COPY-L-MED-02, COPY-L-US-01, COPY-L-EU-03]
+  lint_markers: []
+  voice: "Голос клиента, не бренда: F не правит."
+  examples:
+    ru:
+      facts: otves
+      bad: "«Отличная компания! Всё сделали быстро и качественно, рекомендую всем!»"
+      good: "«Сдали двушку за 47 рабочих дней — на три дня раньше, чем в договоре. Прораб каждый вечер присылал фото… Смета не выросла ни на рубль»"
+      fact_ids: [review-anna-k]
+      allow_warn: [COPY-F-TYPICALITY]
+      note: "дословно с многоточием по edits; TYPICALITY — по замыслу B2: рядом нужна рамка опыта одного клиента или договорное правило о смете"
+    en:
+      facts: okoshko
+      bad: "“Best booking app ever! It totally transformed our business!”"
+      good: "“I used to spend my evenings calling everyone booked for the next day. Now reminders go out on their own, and I only call those who haven't confirmed”"
+      fact_ids: [review-ruslan]
+      companions:
+      - slot_type: testimonial-attribution
+        text: "Ruslan, barbershop owner, Kazan (translated from Russian)"
+      note: перевод цитаты с пометкой
+  sources:
+  - 02-strategy-messaging/03 §5
+  - 08-russian-legal-typography/01 §7
+  - "[V:1UVkeqxuNRs 29:54, 38:01]"
+  - 03-corpus-measured/03 §4
+  date: '2026-09-24'
+- id: testimonial-attribution
+  site_slot: ''
+  name: "Подпись отзыва: имя, должность, компания"
+  purpose: "Кто сказал и в какой ситуации — ровно в объёме разрешения (permission.shows); связь с компанией раскрыта рядом."
+  section_roles: [testimonials, case-studies, hero]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: caption
+  kimi: micro
+  length:
+    ru:
+      words: {min: 1, target: 2, max: 6}
+      hard_words: [1, 9]
+      ai_p50_words: 2.5
+      chars: {min: 6, target: 15, max: 38}
+      hard_chars: [3, 72]
+      ai_p50_chars: 15.0
+      primary: chars
+      n_pages: 12
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.landing.slots.testimonial-attribution.ru"
+    en:
+      words: {min: 1, target: 2, max: 4}
+      hard_words: [1, 8]
+      ai_p50_words: 3.0
+      chars: {min: 6, target: 13, max: 31}
+      hard_chars: [3, 55]
+      ai_p50_chars: 26.0
+      primary: words
+      n_pages: 12
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.landing.slots.testimonial-attribution.en"
+    exceptions:
+    - "Длинная должность («Директор департамента по работе с корпоративным сегментом») — законна, не сокращать без согласия (опыт E/01)."
+  structure: "Имя (или имя с инициалом) + город или роль + вид заказа и год: «Анна К., Нижний Новгород, ремонт двухкомнатной квартиры, 2026»."
+  formula_ids: []
+  rules:
+  - "Поля — по permission.shows: полное имя и фото — только с согласием на ПДн и изображение (152-ФЗ ст. 10.1, ГК ст. 152.1)."
+  - "Сотрудник, партнёр, подарок или скидка за отзыв — раскрыть рядом (B2 §5.3, FTC 255.5)."
+  - Вид заказа и год помогают примерить опыт на себя (B2 §5.3).
+  bans:
+  - "Стоковые имена «Иван Иванов», «John Smith», «Jane Doe»; должность, которой нет в факте."
+  fact_required: always
+  claim_classes: [testimonial-quote]
+  legal_rules: []
+  lint_markers: [COPY-M-ART-04]
+  examples:
+    ru:
+      facts: otves
+      bad: "Анна Кузнецова, генеральный директор"
+      bad_fact_ids: [review-anna-k]
+      good: "Анна К., Нижний Новгород, ремонт двухкомнатной квартиры, 2026"
+      fact_ids: [review-anna-k]
+      note: имя с инициалом и город — по permission.shows
+    en:
+      facts: okoshko
+      bad: "John Smith, CEO"
+      good: "Ruslan, barbershop owner, Kazan (translated from Russian)"
+      fact_ids: [review-ruslan]
+      note: роль и город — по разрешению; пометка перевода
+  sources: [02-strategy-messaging/03 §5.3, Hallmark copy.md (stock placeholder names)]
+  date: '2026-09-24'
+- id: case-title
+  site_slot: ''
+  name: Заголовок кейса
+  purpose: "Ситуация клиента и результат числом — так, чтобы похожий клиент узнал себя."
+  section_roles: [case-studies]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: section-title
+  kimi: h
+  length:
+    ru:
+      words: {min: 2, target: 4, max: 7}
+      hard_words: [1, 11]
+      chars: {min: 13, target: 29, max: 46}
+      hard_chars: [5, 69]
+      primary: chars
+      n_pages: 6
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.case-title.ru
+    en:
+      words: {min: 5, target: 10, max: 16}
+      provisional: true
+      source: "правило E: у лидеров EN замера нет; по RU (n < 12)"
+  structure: "[объект или клиент] + [задача словами клиента] + [результат числом]: «Двушка 54 м² в Сормове: 47 рабочих дней при 50 по договору»."
+  formula_ids: [star-story-solution, bab]
+  rules:
+  - "Результат — число из факта (акт, CRM, договор), с объектом и сроком; лучший кейс не выдаётся за типичный (B2 §5.4)."
+  - "Задача клиента — его словами: «прорекламировать продукт, у которого 20 конкурентов» ([V:1UVkeqxuNRs 39:02])."
+  bans:
+  - "«Кейс: успешный проект», «История успеха», «+300 %» без базы и срока."
+  fact_required: always
+  claim_classes: [fact-number]
+  legal_rules: [COPY-L-SUP-01]
+  lint_markers: [COPY-M-MKT-11]
+  examples:
+    ru:
+      facts: otves
+      bad: "Кейс: успешный ремонт квартиры под ключ"
+      good: "Двушка 54 м² в Сормове: ремонт под ключ за 47 рабочих дней при сроке по договору 50"
+      fact_ids: [case-two-room-47-days]
+      note: "объект, срок факта и срок договора"
+    en:
+      facts: okoshko
+      bad: "Success story: how we transformed a barbershop"
+      good: "A 4-chair barbershop in Kazan: no-shows down from 14% to 6% in three months"
+      fact_ids: [case-noshow-kazan]
+      note: ситуация и результат числом
+  sources:
+  - "[V:1UVkeqxuNRs 39:02]"
+  - 02-strategy-messaging/03 §1.1 (case)
+  date: '2026-09-24'
+- id: case-summary
+  site_slot: ''
+  name: "Кейс: ситуация, задача, решение"
+  purpose: "2–4 предложения: что было, какая задача, что сделали; результат — в case-result."
+  section_roles: [case-studies]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 20, target: 45, max: 90}
+      provisional: true
+      source: "правило E: у D нет замера; 2–4 предложения по 12–22 слова (абзац статьи D RU 24 [7–49])"
+    en:
+      words: {min: 20, target: 50, max: 100}
+      provisional: true
+      source: "правило E: у D нет замера; 2–4 предложения по 12–22 слова (абзац статьи D RU 24 [7–49])"
+  structure: "Ситуация (объект, срок, ограничения) → задача словами клиента → решение (что сделали иначе) → переход к результату."
+  formula_ids: [star-story-solution, bab, problem-transformation-outcome]
+  rules:
+  - "Все числа — из одного кейса-факта; разрешение клиента — permission (B2)."
+  - "Герой — клиент, не бренд (formulas.yaml star-story-solution avoid_when)."
+  bans:
+  - "«Клиент обратился к нам с задачей…», «Наша команда справилась на отлично»."
+  fact_required: always
+  claim_classes: [fact-number]
+  legal_rules: []
+  lint_markers: [COPY-M-MKT-01]
+  voice: Сторителлинг F — только из фактов.
+  examples:
+    ru:
+      facts: otves
+      bad: "Клиент обратился к нам с задачей сделать качественный ремонт. Наша команда профессионалов справилась с задачей на отлично."
+      good: "Двухкомнатная квартира 54 м² в Сормовском районе, ремонт под ключ. Ремонт занял 47 рабочих дней при сроке по договору 50; акт подписан 30 мая 2026 года."
+      fact_ids: [case-two-room-47-days]
+      note: "объект, условие договора и документ"
+    en:
+      facts: okoshko
+      bad: "The client faced numerous challenges, and our innovative solution helped them achieve outstanding results."
+      good: "A barbershop with 4 chairs in Kazan saw 14% of bookings end in no-shows in February. After three months of Telegram reminders, the no-show rate was 6%."
+      fact_ids: [case-noshow-kazan, reminders]
+      note: ситуация и результат числами одного кейса
+  sources:
+  - "01-foundations/formulas.yaml (star-story-solution, bab)"
+  - 02-strategy-messaging/03 §5.4
+  date: '2026-09-24'
+- id: case-result
+  site_slot: ''
+  name: Результат кейса (число из фактов)
+  purpose: "Результат клиента числом с базой и сроком — и рядом обычный результат (B2 §5.4)."
+  section_roles: [case-studies, hero]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 3, target: 10, max: 20}
+      provisional: true
+      source: "правило E: у D нет замера; число + объект + срок + обычный результат"
+    en:
+      words: {min: 3, target: 10, max: 20}
+      provisional: true
+      source: "правило E: у D нет замера; число + объект + срок + обычный результат"
+  structure: "«с [база] до [результат] за [срок]» + «в среднем у [выборка] — [обычный результат]»."
+  formula_ids: [fact-scenario]
+  rules:
+  - "База и срок обязательны: «−8 п. п. за три месяца», не «+300 %» (B2 §1.1)."
+  - "Рядом — обычный результат с основанием: иначе результат одного клиента читается как типичный (FTC 255.2(b), B2 §5.4)."
+  bans:
+  - "Рост выручки, дохода, «окупилось за месяц» — класс income-finance без документа (nc-income)."
+  fact_required: always
+  claim_classes: [fact-number, income-finance, forecast]
+  legal_rules: [COPY-L-EDU-01, COPY-L-FIN-05]
+  lint_markers: [COPY-M-CNT-02]
+  examples:
+    ru:
+      facts: okoshko
+      bad: "Рост выручки на 300 %!"
+      good: "Неявки — с 14 % до 6 % за три месяца. В среднем у 212 салонов неявок стало меньше на 4 процентных пункта."
+      fact_ids: [case-noshow-kazan, noshow-average]
+      note: результат одного клиента и обычный результат рядом
+    en:
+      facts: okoshko
+      bad: "Revenue up 300%!"
+      good: "No-shows fell from 14% to 6% in three months; across 212 salons, the average drop was 4 percentage points."
+      fact_ids: [case-noshow-kazan, noshow-average]
+      note: типичный результат рядом
+  sources:
+  - "02-strategy-messaging/03 §1.1, §5.4"
+  - 08-russian-legal-typography/01 §7
+  date: '2026-09-24'
+- id: pricing-plan-name
+  site_slot: ''
+  name: Название тарифа
+  purpose: "Имя тарифа говорит, для кого он или какого объёма: «Мастер», «Салон», «Сеть» — а не ступени «Базовый / Стандарт / Премиум»."
+  section_roles: [pricing]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: section-title
+  kimi: h
+  length:
+    ru:
+      words: {min: 1, target: 4, max: 12}
+      hard_words: [1, 34]
+      ai_p50_words: 1.0
+      chars: {min: 11, target: 32, max: 71}
+      hard_chars: [5, 217]
+      ai_p50_chars: 7.5
+      primary: chars
+      n_pages: 19
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-plan-name.ru"
+    en:
+      words: {min: 2, target: 3, max: 6}
+      hard_words: [1, 9]
+      ai_p50_words: 2.0
+      chars: {min: 10, target: 19, max: 36}
+      hard_chars: [4, 54]
+      ai_p50_chars: 14.0
+      primary: words
+      n_pages: 9
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-plan-name.en"
+  structure: "Имя по размеру клиента или сценарию; при необходимости через двоеточие — объём («Салон: до 5 мастеров»)."
+  formula_ids: []
+  rules:
+  - "Название отвечает на «это для меня?»: размер команды, объём, сценарий (у ai-self RU тариф — 1 слово «Базовый», D §2.1)."
+  - "Соседние тарифы сравнимы: одинаковый набор строк, цены в одинаковом составе (ux 06/04 §8.2)."
+  bans:
+  - "«Самый выгодный», «Лучший выбор», «Оптимальный» без основания (COPY-L-SUP-01); Title Case в EN."
+  fact_required: if-claim
+  claim_classes: [price-discount, superlative]
+  legal_rules: [COPY-L-SUP-01]
+  lint_markers: [COPY-M-MKT-10]
+  examples:
+    ru:
+      facts: okoshko
+      bad: Самый выгодный
+      good: "Салон: до 5 мастеров"
+      fact_ids: [price-salon]
+      section_role: pricing
+      note: имя по размеру клиента вместо превосходной степени
+    en:
+      facts: okoshko
+      bad: Best Value
+      good: "Salon: up to 5 stylists"
+      fact_ids: [price-salon]
+      section_role: pricing
+      note: имя по размеру команды
+  sources: [03-corpus-measured/02 §2.1, ux 06/04 §8.2]
+  date: '2026-09-24'
+- id: pricing-plan-summary
+  site_slot: ''
+  name: "Кому подходит тариф, описание"
+  purpose: "Для кого тариф и чем он отличается от соседнего — одной фразой, из которой посетитель выбирает сам."
+  section_roles: [pricing]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 2, target: 9, max: 30}
+      hard_words: [1, 55]
+      ai_p50_words: 7.0
+      chars: {min: 11, target: 61, max: 230}
+      hard_chars: [4, 351]
+      ai_p50_chars: 62.0
+      primary: chars
+      n_pages: 14
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-plan-summary.ru"
+    en:
+      words: {min: 2, target: 23, max: 75}
+      hard_words: [1, 112]
+      ai_p50_words: 13.4
+      chars: {min: 14, target: 129, max: 414}
+      hard_chars: [7, 621]
+      ai_p50_chars: 81.0
+      primary: words
+      n_pages: 6
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-plan-summary.en"
+  structure: "«Для [кого, размер]: [что входит главное]»; граница — «если больше N мастеров — тариф „Сеть“»."
+  formula_ids: [fab, question-proof-action]
+  rules:
+  - "Описание отличает тариф от соседнего по признаку клиента, а не прилагательными."
+  - "Всё, что входит и стоит отдельно, — в pricing-feature и pricing-price-note, с числами из фактов."
+  bans:
+  - "«Идеальное решение для вашего бизнеса», «всё необходимое для роста» (COPY-M-MKT-05)."
+  fact_required: if-claim
+  claim_classes: [price-discount, fact-property]
+  legal_rules: [COPY-L-PRICE-01]
+  lint_markers: [COPY-M-MKT-05]
+  examples:
+    ru:
+      facts: okoshko
+      bad: Идеальное решение для вашего бизнеса
+      good: "Для команды до 5 мастеров: онлайн-запись и напоминания в Telegram для каждого"
+      fact_ids: [price-salon, reminders]
+      section_role: pricing
+      note: кому подходит и что входит
+    en:
+      facts: okoshko
+      bad: The perfect solution for growing businesses
+      good: "For teams of up to 5 stylists: online booking and Telegram reminders for each of them"
+      fact_ids: [price-salon, reminders]
+      section_role: pricing
+      note: признак клиента вместо «perfect»
+  sources: [ux 06/04 §8.2, 06-anti-slop/01 §8]
+  date: '2026-09-24'
+- id: pricing-price
+  site_slot: ''
+  name: Цена
+  purpose: "Сколько стоит — в рублях, с единицей и периодом; «от» — с составом рядом."
+  section_roles: [pricing, hero]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 1, target: 3, max: 7}
+      hard_words: [1, 10]
+      ai_p50_words: 3.0
+      chars: {min: 3, target: 10, max: 36}
+      hard_chars: [2, 53]
+      ai_p50_chars: 11.0
+      primary: chars
+      n_pages: 10
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.pricing-price.ru
+    en:
+      words: {min: 1, target: 2, max: 5}
+      hard_words: [1, 8]
+      ai_p50_words: 2.0
+      chars: {min: 4, target: 6, max: 16}
+      hard_chars: [2, 36]
+      ai_p50_chars: 7.0
+      primary: words
+      n_pages: 9
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.pricing-price.en
+  structure: "«[от ]N ₽ [за единицу] [в период]»; валюта кроме рублей — только дополнительно: «2 490 ₽ в месяц ($29)»."
+  formula_ids: []
+  rules:
+  - "Стоимостные показатели — в рублях; иностранная валюта — только дополнительно (38-ФЗ ст. 5 ч. 7.1 — COPY-L-CUR-01, error)."
+  - "«От» — минимальная цена: единица и состав рядом («от 9 800 ₽ за м² без материалов»), иначе читатель берёт её за цену своего заказа (COPY-L-PRICE-03)."
+  - "Цену не прятать за формой: «по запросу» — только для нестандартного заказа и с тем, от чего она зависит (COPY-L-PRICE-05; Яндекс [V:AbqU-GxAYs8 1:05:28])."
+  - "Зачёркнутая «старая» цена — отдельный слот price-old и только реально действовавшая (факт с периодом; COPY-L-PRICE-04)."
+  bans:
+  - "«$29/mo» на русском сайте; «Цена по запросу» без объяснения; «копейки», «дёшево» без числа."
+  fact_required: always
+  claim_classes: [price-discount]
+  legal_rules: [COPY-L-CUR-01, COPY-L-PRICE-03, COPY-L-PRICE-04, COPY-L-PRICE-05]
+  lint_markers: []
+  examples:
+    ru:
+      facts: otves
+      bad: Цена по запросу
+      good: от 9 800 ₽ за м²
+      fact_ids: [price-from-per-m2]
+      section_role: pricing
+      companions:
+      - {slot_type: pricing-price-note, text: работы под ключ без материалов}
+      note: «от» с единицей; состав — в строке условий рядом
+    en:
+      facts: okoshko
+      bad: $29/mo
+      good: 990 ₽ a month
+      fact_ids: [price-master]
+      section_role: pricing
+      note: "рубли на сайте российской компании; валюта — только дополнительно"
+  sources:
+  - 08-russian-legal-typography/01 §4.2
+  - "[V:AbqU-GxAYs8 1:05:28]"
+  - ux 06/04 §8.1 п. 13
+  date: '2026-09-24'
+- id: pricing-price-note
+  site_slot: ''
+  name: "Условия цены: «от», период, скидка, пробный период"
+  purpose: "Условия, без которых цена или скидка вводят в заблуждение: что входит, от чего зависит итог, срок и условия акции, что после пробного периода."
+  section_roles: [pricing, hero, final-cta]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: hint
+  kimi: micro
+  length:
+    ru:
+      words: {min: 1, target: 2, max: 11}
+      hard_words: [1, 16]
+      ai_p50_words: 4.0
+      chars: {min: 5, target: 17, max: 60}
+      hard_chars: [2, 101]
+      ai_p50_chars: 23.0
+      primary: chars
+      n_pages: 8
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-price-note.ru"
+    en:
+      words: {min: 2, target: 3, max: 7}
+      hard_words: [1, 11]
+      ai_p50_words: 3.0
+      chars: {min: 11, target: 16, max: 34}
+      hard_chars: [4, 51]
+      ai_p50_chars: 18.1
+      primary: words
+      n_pages: 9
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-price-note.en"
+    exceptions:
+    - "Условие не режется ради длины: «Стоимость поддерживающей уборки квартиры с одним санузлом без дополнительных услуг при отсутствии повышенного спроса» (14 слов, Qlean — законно, опыт E/01)."
+  structure: "Что входит / не входит + условие акции (срок с датой, для кого, на что) + что будет после пробного периода."
+  formula_ids: [question-proof-action]
+  rules:
+  - "Условие — в том же носителе и тем же кеглем: «подробности уточняйте» умолчание не исправляет (38-ФЗ ст. 5 ч. 7; Пленум ВАС № 58 п. 24, 28; COPY-L-TERMS-01)."
+  - "«До N %» — максимум: рядом, на что действует и какие лимиты (COPY-L-PRICE-02); «на всё» — с исключениями (PRICE-01)."
+  - "Срок акции — реальная дата из факта (valid.until); после неё строка снимается (COPY-F-EXPIRED)."
+  - "Регулярный платёж: сумма, период, дата первого списания — до подтверждения (ux 06/04 §8.1 п. 14)."
+  bans:
+  - "«Скидки до 50 %! Подробности у менеджера», «Акция ограничена» без даты (COPY-M-MKT-12)."
+  fact_required: always
+  claim_classes: [price-discount, purchase-terms, promo-deadline]
+  legal_rules: [COPY-L-TERMS-01, COPY-L-PRICE-01, COPY-L-PRICE-02, COPY-L-FREE-01, COPY-L-PROMO-02]
+  lint_markers: [COPY-M-MKT-12]
+  examples:
+    ru:
+      facts: otves
+      bad: "Скидки до 50 %! Подробности уточняйте у менеджера"
+      good: "−10 % на работы при договоре до 31 октября 2026 года, без материалов"
+      fact_ids: [promo-october-10]
+      section_role: pricing
+      note: "на что, до какой даты и что не входит"
+    en:
+      facts: okoshko
+      bad: "Save up to 50% today only!"
+      good: Pay for 12 months in advance and get 2 months free
+      fact_ids: [annual-discount]
+      section_role: pricing
+      note: условие скидки в той же строке
+  sources: [08-russian-legal-typography/01 §4.1–4.3, ux 06/04 §8.1, 99-raw/experiments/E/01-slot-lengths]
+  date: '2026-09-24'
+- id: pricing-feature
+  site_slot: ''
+  name: Пункт состава тарифа
+  purpose: "Что входит в тариф и что стоит отдельно — одинаковым набором строк у всех тарифов."
+  section_roles: [pricing]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 1, target: 3, max: 10}
+      hard_words: [1, 25]
+      ai_p50_words: 3.0
+      chars: {min: 14, target: 24, max: 67}
+      hard_chars: [5, 173]
+      ai_p50_chars: 21.5
+      primary: chars
+      n_pages: 10
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-feature.ru"
+    en:
+      words: {min: 2, target: 8, max: 20}
+      hard_words: [1, 30]
+      ai_p50_words: 4.0
+      chars: {min: 13, target: 56, max: 85}
+      hard_chars: [6, 128]
+      ai_p50_chars: 31.4
+      primary: words
+      n_pages: 5
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-feature.en"
+  structure: "Возможность + ограничение или цена сверх тарифа («SMS — 4 ₽ за сообщение сверх тарифа»)."
+  formula_ids: [fab]
+  rules:
+  - "У всех тарифов одинаковый набор строк; отличия — значениями, не наличием строк (ux 06/04 §8.2)."
+  - Платное сверх тарифа называется в той же строке с ценой.
+  bans:
+  - "«Безлимитные возможности», «всё включено» при платных опциях (ux 07/01 §5.4)."
+  fact_required: if-claim
+  claim_classes: [price-discount, fact-property, purchase-terms]
+  legal_rules: [COPY-L-FREE-01, COPY-L-PRICE-01]
+  lint_markers: [COPY-M-MKT-05]
+  examples:
+    ru:
+      facts: okoshko
+      bad: Безлимитные возможности для роста
+      good: SMS-напоминания — 4 ₽ за сообщение сверх тарифа
+      fact_ids: [sms-price]
+      section_role: pricing
+      note: платное названо с ценой
+    en:
+      facts: okoshko
+      bad: Unlimited everything
+      good: "SMS reminders: 4 ₽ per message on top of the plan"
+      fact_ids: [sms-price]
+      section_role: pricing
+      note: цена опции в той же строке
+  sources: [ux 06/04 §8.2, ux 07/01 §5.4]
+  date: '2026-09-24'
+- id: badge
+  site_slot: ''
+  name: "Бейдж на карточке («Популярный», «Новое»)"
+  purpose: "Метка с проверяемым основанием: условие скидки, новизна с датой, доля выбора по данным."
+  section_roles: [pricing, benefits, portfolio]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: badge
+  kimi: micro
+  length:
+    ru:
+      words: {min: 1, target: 2, max: 4}
+      chars: {min: 3, target: 12, max: 24}
+      provisional: true
+      source: "правило E: одна строка на карточке; у D RU — 1 слово (n 5, provisional) — не норма: бейдж с числом («−17 % за год») законен, условие — в pricing-price-note"
+    en:
+      words: {min: 1, target: 2, max: 4}
+      chars: {min: 3, target: 12, max: 24}
+      provisional: true
+      source: "правило E: одна строка на карточке; у D RU — 1 слово (n 5, provisional) — не норма: бейдж с числом («−17 % за год») законен, условие — в pricing-price-note"
+  structure: "Число или признак: «−17 % за год», «Новое в 2026», «Выбирают 6 из 10 салонов» (при факте)."
+  formula_ids: []
+  rules:
+  - "«Популярный» — только при данных о выборе тарифа; «Новое» — с датой запуска в фактах; скидка — с условием рядом."
+  - "Бейдж не заменяет условие: условие — в pricing-price-note той же карточки."
+  bans:
+  - "«Лучший выбор», «Хит», «Выгодно!» без основания (COPY-L-SUP-01, COPY-M-MKT-10)."
+  fact_required: always
+  claim_classes: [price-discount, superlative, fact-number]
+  legal_rules: [COPY-L-SUP-01, COPY-L-FREE-01]
+  lint_markers: [COPY-M-MKT-10]
+  examples:
+    ru:
+      facts: okoshko
+      bad: Лучший выбор
+      good: "−17 % за год"
+      fact_ids: [annual-discount]
+      section_role: pricing
+      companions:
+      - {slot_type: pricing-price-note, text: при оплате за 12 месяцев вперёд}
+      note: условие скидки — строкой рядом
+    en:
+      facts: okoshko
+      bad: Best choice
+      good: 2 months free
+      fact_ids: [annual-discount]
+      section_role: pricing
+      companions:
+      - {slot_type: pricing-price-note, text: when you pay for 12 months in advance}
+      note: условие — в строке рядом
+  sources:
+  - "08-russian-legal-typography/01 §3.1, §4.1"
+  date: '2026-09-24'
+- id: guarantee-text
+  site_slot: ''
+  name: "Текст гарантии, снятия риска"
+  purpose: "На что гарантия, какой срок, что будет, если…, и где это записано — снимает тревогу условием, а не словом «гарантируем»."
+  section_roles: [guarantee, pricing, final-cta, faq]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 10, target: 25, max: 50}
+      provisional: true
+      source: "правило E: у D нет замера; предмет + срок + порядок + документ — 1–3 предложения"
+    en:
+      words: {min: 10, target: 28, max: 55}
+      provisional: true
+      source: "правило E: у D нет замера; предмет + срок + порядок + документ — 1–3 предложения"
+  structure: "Предмет гарантии → срок → что делаем, если… → документ (пункт договора, оферта); для возврата — срок и порядок."
+  formula_ids: [fact-scenario, even-if-objection]
+  rules:
+  - "Гарантия — условие договора с документом: на что, срок, случай, где условия (COPY-L-GUAR-02); вернуть деньги — срок, случай, порядок (GUAR-03)."
+  - "Гарантия результата, дохода, топа, излечения — нельзя (COPY-L-GUAR-01); общая «гарантия качества» — пустая (GUAR-05)."
+  - "Возврат при дистанционной продаже — не позже 10 дней с требования (ЗоЗПП ст. 26.1; COPY-L-RET-02)."
+  - "Малоизвестному бренду с дорогим продуктом щедрой гарантии не верят без подкрепления: документ, реквизиты, отзыв о возврате (B1 §4.4)."
+  bans:
+  - "«100 % гарантия», «гарантируем качество», «Try it risk-free» без условий; «возврат невозможен» (RET-01)."
+  fact_required: always
+  claim_classes: [guarantee, purchase-terms]
+  legal_rules: [COPY-L-GUAR-01, COPY-L-GUAR-02, COPY-L-GUAR-03, COPY-L-GUAR-04, COPY-L-GUAR-05, COPY-L-RET-01, COPY-L-RET-02]
+  lint_markers: []
+  examples:
+    ru:
+      facts: otves
+      bad: "Гарантируем 100 % качество и результат, который превзойдёт ожидания"
+      good: "Гарантийный срок на выполненные работы — 3 года с даты подписания акта, пункт 7.2 договора подряда."
+      fact_ids: [guarantee-3-years]
+      section_role: guarantee
+      note: "предмет, срок и документ"
+    en:
+      facts: okoshko
+      bad: "100% satisfaction guaranteed or your money back!"
+      good: "Switch it off in settings on any day; unused days are refunded within 10 days of your request."
+      fact_ids: [cancel-refund]
+      section_role: guarantee
+      note: "срок и порядок возврата вместо «100 %»"
+  sources: [08-russian-legal-typography/01 §5, 02-strategy-messaging/02 §4.4]
+  date: '2026-09-24'
+- id: objection-answer
+  site_slot: ''
+  name: Ответ на возражение вне FAQ
+  purpose: "Снимает блокер до главного призыва: возражение словами клиента → ответ фактом → граница «не подходит, если…»."
+  section_roles: [objections, how-it-works, pricing, guarantee, hero]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 12, target: 30, max: 60}
+      provisional: true
+      source: "правило E: у D нет замера; по faq-a (RU 3–22–43, EN 3–22–46) + место для границы"
+    en:
+      words: {min: 12, target: 32, max: 65}
+      provisional: true
+      source: "правило E: у D нет замера; по faq-a (RU 3–22–43, EN 3–22–46) + место для границы"
+  structure: "«[возражение словами клиента]» → факт или условие → что делать, если случай особый; или «[утверждение], даже если [возражение]»."
+  formula_ids: [even-if-objection, question-proof-action]
+  rules:
+  - "Тревогу снимают доказательством и снятием риска, привычку — маленьким обратимым шагом (перенос данных, бесплатный первый шаг, отмена) — не новыми выгодами (B1 §4.1; [V:xQV7HVyAJjc 11:38])."
+  - "Возражение — из голоса клиента (voc.yaml), не придуманное; блокер — до кнопки, не в конце FAQ (B1 §4.3)."
+  - "Честное «не подходит, если…» — законный ответ (answer_kind boundary)."
+  bans:
+  - "«Не волнуйтесь», «это просто», «надёжно и прозрачно» без факта; обесценивание возражения."
+  fact_required: if-claim
+  claim_classes: [purchase-terms, guarantee, price-discount, fact-property]
+  legal_rules: [COPY-L-FREE-01, COPY-L-GUAR-02]
+  lint_markers: [COPY-M-TON-…]
+  voice: Тон F для тревожных ситуаций.
+  examples:
+    ru:
+      facts: okoshko
+      bad: "Не волнуйтесь, у нас всё просто и удобно!"
+      good: "Переносить базу вручную не придётся: пришлите файл из Excel или Google Таблиц, и поддержка перенесёт клиентов бесплатно в течение 1 рабочего дня после получения файла."
+      fact_ids: [import-free]
+      section_role: objections
+      note: привычка снята маленьким шагом и сроком
+    en:
+      facts: okoshko
+      bad: "Don't worry, it's super easy!"
+      good: "No manual re-entry: send a file from Excel or Google Sheets, and support moves your clients over for free within 1 business day."
+      fact_ids: [import-free]
+      section_role: objections
+      note: "то же возражение, адаптация"
+  sources:
+  - "02-strategy-messaging/02 §4.1, §4.3"
+  - "[V:xQV7HVyAJjc 11:38]"
+  date: '2026-09-24'
+- id: comparison-row
+  site_slot: ''
+  name: Строка сравнения с альтернативой
+  purpose: "Сравнение по подходам (сделать самому, частник, таблица, другой класс решения) по одному критерию — без имён конкурентов, с «когда подходит»."
+  section_roles: [comparison]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: column-header
+  kimi: body
+  length:
+    ru:
+      words: {min: 3, target: 10, max: 18}
+      provisional: true
+      source: "правило E: у D нет замера; критерий + наш подход + альтернатива"
+    en:
+      words: {min: 3, target: 10, max: 18}
+      provisional: true
+      source: "правило E: у D нет замера; критерий + наш подход + альтернатива"
+  structure: "«[критерий] — [наш подход] / [альтернативный подход]»; значения — из фактов о себе и из определения подхода, а не из оценок чужих."
+  formula_ids: [question-proof-action]
+  rules:
+  - "Сравнение по подходам без имён (Dunford [V:1DxQddmWqzQ 23:26]); по имени конкурента — только с фактом, критерием, методом и датой (COPY-L-CMP-01, CMP-03)."
+  - "Негатив о конкурентах без проверяемого факта порочит репутацию (COPY-L-CMP-02)."
+  - "Строка «когда подходит альтернатива» — честная граница; одинаковые плюсы у всех вариантов — спам по Яндексу ([V:XoStBfaV9Gw 1:21:48], G COPY-GEO-15)."
+  bans:
+  - "«В 2 раза быстрее конкурентов», «10x faster than any other app» без базы (COPY-L-CMP-01, CMP-03 — error)."
+  fact_required: always
+  claim_classes: [comparison, guarantee, fact-property]
+  legal_rules: [COPY-L-CMP-01, COPY-L-CMP-02, COPY-L-CMP-03]
+  lint_markers: [COPY-M-MKT-10]
+  examples:
+    ru:
+      facts: otves
+      bad: Мы в 2 раза быстрее конкурентов
+      good: "Гарантия на работы — 3 года по договору / без договора — только устная договорённость"
+      fact_ids: [guarantee-3-years]
+      section_role: guarantee
+      note: "сравнение с подходом, а не с фирмой"
+    en:
+      facts: okoshko
+      bad: 10x faster than any other booking app
+      good: "Client reminders — Telegram messages sent automatically / by phone — someone calls every client the evening before"
+      fact_ids: [reminders]
+      section_role: comparison
+      note: подход против подхода
+  sources:
+  - "[V:1DxQddmWqzQ 23:26]"
+  - 08-russian-legal-typography/01 §3.3
+  - 07-seo-geo-copy/geo-checklist.yaml COPY-GEO-15
+  date: '2026-09-24'
+- id: faq-q
+  site_slot: ''
+  name: Вопрос FAQ
+  purpose: "Вопрос, который клиенты задают до покупки, их словами (voc.yaml, отдел продаж, поиск) — по одному предмету."
+  section_roles: [faq]
+  genres: [landing, site-page, article, geo]
+  genre: landing
+  ux_role: section-title
+  kimi: h
+  length:
+    ru:
+      words: {min: 3, target: 6, max: 9}
+      hard_words: [1, 14]
+      ai_p50_words: 4.0
+      chars: {min: 21, target: 42, max: 65}
+      hard_chars: [10, 98]
+      ai_p50_chars: 28.5
+      primary: chars
+      n_pages: 25
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.faq-q.ru
+    en:
+      words: {min: 3, target: 8, max: 11}
+      hard_words: [1, 17]
+      ai_p50_words: 6.1
+      chars: {min: 20, target: 43, max: 62}
+      hard_chars: [8, 93]
+      ai_p50_chars: 37.2
+      primary: words
+      n_pages: 12
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.faq-q.en
+  structure: "Вопрос от первого лица клиента или с вопросительным словом в начале: «Сколько стоит выезд замерщика?»"
+  formula_ids: [question-proof-action]
+  rules:
+  - "Вопросы — из тем голоса клиента (voc.yaml B2) и запросов (G: Wordstat, Search Console); остаток после секций — не блокеры (B1 §4.3)."
+  - "Формат «вопрос — ответ» для поиска и GEO (FAQPage, ответ первым) — G COPY-GEO-14; текст — здесь."
+  bans:
+  - "«Почему стоит выбрать именно нас?», «Чем мы лучше?» (COPY-M-MKT-06)."
+  fact_required: never
+  claim_classes: []
+  legal_rules: [COPY-L-MED-05]
+  lint_markers: [COPY-M-MKT-06]
+  examples:
+    ru:
+      facts: otves
+      bad: "Почему стоит выбрать именно нас?"
+      good: "Сколько стоит выезд замерщика?"
+      fact_ids: []
+      section_role: faq
+      note: "вопрос клиента, а не повод похвалиться"
+    en:
+      facts: okoshko
+      bad: "Why should you choose us?"
+      good: "Can I move my client list from Excel?"
+      fact_ids: []
+      section_role: faq
+      note: вопрос о переходе — возражение switching-cost
+  sources: [06-anti-slop/01 §8 (COPY-M-MKT-06), 02-strategy-messaging/04 (голос клиента), 07-seo-geo-copy/geo-checklist.yaml COPY-GEO-14]
+  date: '2026-09-24'
+- id: faq-a
+  site_slot: ''
+  name: Ответ FAQ
+  purpose: "Ответ первой фразой (да / нет / число / условие), затем подробность и факт; самодостаточен для выдачи и нейросетей."
+  section_roles: [faq]
+  genres: [landing, site-page, article, geo]
+  genre: landing
+  ux_role: help
+  kimi: body
+  length:
+    ru:
+      words: {min: 3, target: 22, max: 44}
+      hard_words: [1, 92]
+      ai_p50_words: 11.0
+      chars: {min: 24, target: 157, max: 323}
+      hard_chars: [10, 711]
+      ai_p50_chars: 74.0
+      primary: chars
+      n_pages: 15
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.faq-a.ru
+    en:
+      words: {min: 3, target: 22, max: 46}
+      hard_words: [1, 122]
+      ai_p50_words: 16.9
+      chars: {min: 17, target: 140, max: 296}
+      hard_chars: [8, 711]
+      ai_p50_chars: 98.4
+      primary: words
+      n_pages: 10
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.faq-a.en
+  structure: "Ответ (1 предложение) → условие или факт → что делать дальше (при необходимости)."
+  formula_ids: [inverted-pyramid, question-proof-action]
+  rules:
+  - "Первая фраза отвечает на вопрос; 1–3 предложения с фактом (G COPY-GEO-14; geo-evasive-answer, geo-pronoun-lead)."
+  - "Каноническая формулировка факта совпадает с canonical facts.yaml и разметкой (B2 §4.2)."
+  - "Условия «бесплатно», сроки, цены — с условием в том же ответе (H)."
+  bans:
+  - "«Мы стараемся…», «Свяжитесь с нами, и мы всё расскажем» вместо ответа; ответ, который начинается с «Это»/«Он»."
+  fact_required: if-claim
+  claim_classes: [price-discount, purchase-terms, guarantee, fact-number, fact-property]
+  legal_rules: [COPY-L-FREE-01, COPY-L-GUAR-02, COPY-L-RET-02, COPY-L-MED-05]
+  lint_markers: [COPY-M-MKT-06]
+  examples:
+    ru:
+      facts: otves
+      bad: "Мы стараемся сделать всё, чтобы каждый клиент остался доволен. Свяжитесь с нами, и мы всё расскажем!"
+      good: "Бесплатно в черте города: замерщик приезжает, делает замер и составляет смету до договора."
+      fact_ids: [estimate-free]
+      section_role: faq
+      allow_warn: [COPY-F-USE]
+      note: "ответ первым словом и условие; COPY-F-USE — use факта B2 не включает faq-a (передано B2)"
+    en:
+      facts: okoshko
+      bad: "We do our best to make every client happy. Contact us to learn more!"
+      good: "Yes. Send a file from Excel or Google Sheets, and support moves your client list over for free within 1 business day."
+      fact_ids: [import-free]
+      section_role: faq
+      note: «Yes» — ответ первым словом
+  sources: [07-seo-geo-copy/geo-checklist.yaml COPY-GEO-14, 02-strategy-messaging/03 §4.2, 03-corpus-measured/03 §4]
+  date: '2026-09-24'
+- id: form-title
+  site_slot: ''
+  name: Заголовок формы
+  purpose: "Что человек получит, отправив форму, — продолжение главной кнопки, а не название процедуры."
+  section_roles: [lead-form, final-cta, hero]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: title
+  kimi: h
+  length:
+    ru:
+      words: {min: 2, target: 5, max: 9}
+      provisional: true
+      source: "правило E: у D нет замера; как заголовок секции (RU 2–4–8, EN 2–6–11)"
+    en:
+      words: {min: 2, target: 5, max: 10}
+      provisional: true
+      source: "правило E: у D нет замера; как заголовок секции (RU 2–4–8, EN 2–6–11)"
+  structure: "Результат или следующий шаг: «Вызов замерщика», «Смета до договора», «Set up your booking link»."
+  formula_ids: [question-proof-action]
+  rules:
+  - "Совпадает по смыслу с кнопкой, которая привела к форме: одно имя действия на весь поток (ux 07/02 §1.6)."
+  - "Не называет процедуру («Форма обратной связи», «Заявка») и не командует («Заполните форму ниже» — ux 07/02 §3.5: без указания направления)."
+  bans:
+  - "«Оставьте заявку», «Заполните форму ниже», «Свяжитесь с нами» как заголовок."
+  fact_required: if-claim
+  claim_classes: [price-discount]
+  legal_rules: [COPY-L-FREE-01]
+  lint_markers: [COPY-M-MKT-07]
+  examples:
+    ru:
+      facts: otves
+      bad: Заполните форму ниже
+      good: Вызов замерщика и смета до договора
+      fact_ids: []
+      section_role: lead-form
+      note: "что получит человек, а не что он должен сделать"
+    en:
+      facts: okoshko
+      bad: Fill out the form below
+      good: Set up your booking link
+      fact_ids: []
+      section_role: lead-form
+      note: результат отправки
+  sources:
+  - "ux 07/02 §1.6, §3.5"
+  - "[V:F_urkVueszI 14:17] одна задача на элемент"
+  date: '2026-09-24'
+- id: form-lead
+  site_slot: ''
+  name: "Ценность формы: что получите"
+  purpose: "Одна-две фразы: что будет результатом, сколько стоит и сколько займёт; для лид-магнита — объём, состав, автор."
+  section_roles: [lead-form, final-cta]
+  genres: [landing, site-page, email-form]
+  genre: landing
+  ux_role: marketing
+  kimi: lead
+  length:
+    ru:
+      words: {min: 7, target: 9, max: 15}
+      hard_words: [3, 22]
+      chars: {min: 40, target: 62, max: 105}
+      hard_chars: [20, 158]
+      primary: chars
+      n_pages: 8
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.form-lead.ru
+    en:
+      words: {min: 7, target: 11, max: 18}
+      provisional: true
+      source: "правило E: у лидеров EN замера нет; по RU (7–9–14,5, n 8)"
+  structure: "Результат → стоимость и время → условие; лид-магнит: «[что] на [N страниц / минут], [состав], [кто автор]»."
+  formula_ids: [four-p, question-proof-action]
+  rules:
+  - "Стоимость и примерное время — числом, если есть в фактах (GOV.UK: стоимость и время прохождения, ux 05/01 §7.5)."
+  - "Описание материала за контакт — объём, состав, автор, формат; без «уникальный гайд» ([V:gMzwsAWipNo], W1)."
+  - Условие «бесплатно» — в той же фразе (H).
+  bans:
+  - "«Мы свяжемся с вами в ближайшее время» вместо ценности; «уникальный чек-лист», «секретная методика»."
+  fact_required: if-claim
+  claim_classes: [price-discount, purchase-terms]
+  legal_rules: [COPY-L-FREE-01, COPY-L-FREE-02]
+  lint_markers: [COPY-M-MKT-05]
+  examples:
+    ru:
+      facts: otves
+      bad: "Оставьте заявку, и мы свяжемся с вами в ближайшее время!"
+      good: "Замерщик приедет, сделает замер и составит смету; в черте города — бесплатно."
+      fact_ids: [estimate-free]
+      section_role: lead-form
+      note: что будет и на каком условии
+    en:
+      facts: okoshko
+      bad: "Get started today and unlock amazing results!"
+      good: "Free for 14 days, no card required: set up your link and send it to clients today."
+      fact_ids: [trial-14-days]
+      section_role: lead-form
+      note: "срок, условие и первый шаг"
+  sources: [ux 05/01 §7.5, 91-videos/digests/gMzwsAWipNo.md, 08-russian-legal-typography/01 §4.1]
+  date: '2026-09-24'
+- id: form-next-steps
+  site_slot: ''
+  name: Что будет после отправки
+  purpose: "Кто, когда и каким каналом ответит, что подготовить — снимает страх «закрытой двери» у формы."
+  section_roles: [lead-form, final-cta]
+  genres: [landing, site-page, email-form]
+  genre: landing
+  ux_role: hint
+  kimi: micro
+  length:
+    ru:
+      words: {min: 8, target: 18, max: 35}
+      provisional: true
+      source: "правило E: у D нет замера; 1–2 предложения: кто, когда, как, что подготовить"
+    en:
+      words: {min: 8, target: 20, max: 38}
+      provisional: true
+      source: "правило E: у D нет замера; 1–2 предложения: кто, когда, как, что подготовить"
+  structure: "«[Кто] [свяжется / пришлёт] [когда] [каким каналом]; [что подготовить]»."
+  formula_ids: [question-proof-action]
+  rules:
+  - "Срок ответа — числом из фактов (регламент, данные поддержки); нет факта — [PLACEHOLDER: срок ответа на заявку]."
+  - "Называет канал (звонок, письмо, мессенджер) и что понадобится (план квартиры, файл базы) — ux 05/01 §7.5."
+  bans:
+  - "«В ближайшее время», «скоро», «оперативно» без числа."
+  fact_required: if-claim
+  claim_classes: [purchase-terms, fact-number]
+  legal_rules: []
+  lint_markers: [COPY-M-LEX-13]
+  voice: "Тон F: спокойно, без восклицаний."
+  examples:
+    ru:
+      facts: okoshko
+      bad: "Наш менеджер оперативно свяжется с вами в самое ближайшее время!"
+      good: "Вопросы по настройке — в чат поддержки с 9:00 до 21:00 по Москве; в августе первый ответ приходил в среднем за 7 минут."
+      fact_ids: [support-chat]
+      section_role: faq
+      note: "канал, часы и срок из отчёта поддержки"
+    en:
+      facts: okoshko
+      bad: "Our team will reach out to you shortly!"
+      good: "Questions about setup go to the support chat, 9:00 to 21:00 Moscow time; in August the first reply came in 7 minutes on average."
+      fact_ids: [support-chat]
+      section_role: faq
+      note: "то же, адаптация"
+  sources: [ux 05/01 §7.5, 02-strategy-messaging/02 §4.3 (закрытая дверь)]
+  date: '2026-09-24'
+- id: form-consent
+  site_slot: ''
+  name: "Строка о персональных данных, согласие"
+  purpose: "Отдельное конкретное согласие на обработку ПДн для ответа на заявку и отдельная необязательная галочка на рекламные письма."
+  section_roles: [lead-form, final-cta, footer]
+  genres: [landing, site-page, email-form]
+  genre: landing
+  ux_role: checkbox-label
+  kimi: micro
+  length:
+    ru:
+      words: {min: 5, target: 8, max: 21}
+      hard_words: [2, 31]
+      ai_p50_words: 7.5
+      chars: {min: 42, target: 63, max: 167}
+      hard_chars: [21, 250]
+      ai_p50_chars: 68.5
+      primary: chars
+      n_pages: 18
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.landing.slots.form-consent.ru
+    en:
+      words: {min: 8, target: 16, max: 28}
+      provisional: true
+      source: "правило E: у лидеров EN замера нет; по шаблону H 01 §8.1"
+  structure: "Две строки у двух пустых галочек: «Согласен на обработку персональных данных для [цель]. Условия — в политике обработки персональных данных.» и «Хочу получать письма о [чём] (необязательно; отписка — ссылкой в каждом письме)»."
+  formula_ids: []
+  rules:
+  - "Согласие на ПДн — отдельно от иных документов, конкретное и предметное (152-ФЗ ст. 9 ч. 1, ред. 156-ФЗ; H 01 §8.1 — COPY-L-CONS-01)."
+  - "Согласие на рекламу — отдельная необязательная галочка (38-ФЗ ст. 18 ч. 1; Пленум ВАС № 58 п. 15 — COPY-L-CONS-01/02)."
+  - "Галочки не предотмечены; отказ равного веса (ux 06/04 §8.1 п. 2–3, 5); механика и ссылки на документы — site I."
+  - "Текст полного согласия и политики пишет юрист; в copy deck — строки у формы по шаблону H."
+  bans:
+  - "«Нажимая кнопку, вы соглашаетесь с Политикой…» (COPY-L-CONS-02), согласие на рекламу внутри согласия на ПДн, двойные отрицания."
+  fact_required: never
+  claim_classes: []
+  legal_rules: [COPY-L-CONS-01, COPY-L-CONS-02]
+  lint_markers: []
+  examples:
+    ru:
+      facts: otves
+      bad: "Нажимая кнопку, вы соглашаетесь с Политикой конфиденциальности и получением рекламы"
+      good: "Согласен на обработку персональных данных для ответа на заявку. Условия — в политике обработки персональных данных."
+      fact_ids: []
+      section_role: lead-form
+      note: шаблон H 01 §8.1; реклама — отдельной галочкой
+    en:
+      facts: okoshko
+      bad: "By clicking Submit, you agree to our Privacy Policy and to receive marketing emails"
+      good: "I agree to the processing of my personal data to reply to this request. Details are in the personal data policy."
+      fact_ids: []
+      section_role: lead-form
+      note: адаптация шаблона H; сайт российской компании — 152-ФЗ
+  sources: [08-russian-legal-typography/01 §8.1–8.2, ux 06/04 §8.1, ../ux/07-ux-writing/02-microcopy-by-component.md §3]
+  date: '2026-09-24'
+- id: form-success
+  site_slot: ''
+  name: Экран или блок «спасибо»
+  purpose: "Подтверждает, что заявка принята, говорит, что будет дальше, и даёт вторую цель: что можно сделать сейчас."
+  section_roles: [lead-form]
+  genres: [landing, site-page, email-form]
+  genre: landing
+  ux_role: inline-message
+  kimi: micro
+  length:
+    ru:
+      words: {min: 8, target: 22, max: 45}
+      provisional: true
+      source: "правило E: у D нет замера (экран после отправки не снимался); 2–3 предложения"
+    en:
+      words: {min: 8, target: 24, max: 48}
+      provisional: true
+      source: "правило E: у D нет замера (экран после отправки не снимался); 2–3 предложения"
+  structure: "Статус («Заявка принята») → что дальше (кто, когда) → одно действие сейчас (посмотреть пример, добавить в календарь) → при необходимости — что делать, если не пришло письмо."
+  formula_ids: [question-proof-action]
+  rules:
+  - "Первое слово — статус, не «Спасибо!»; благодарность — по голосу бренда, без восклицаний подряд."
+  - "Одно следующее действие — вторая цель страницы (B1 goal.secondary_goal); не повторять форму."
+  - "Двойная подписка: прямо сказать, что письмо с подтверждением отправлено и что без него подписки нет (04 §2)."
+  bans:
+  - "«Спасибо! Ваша заявка успешно отправлена!» без следующего шага; «Мы обязательно свяжемся»."
+  fact_required: if-claim
+  claim_classes: [purchase-terms]
+  legal_rules: []
+  lint_markers: [COPY-M-PUN-09]
+  voice: "Тон F после действия пользователя (ux 07/01 §6: тон зависит от ситуации)."
+  examples:
+    ru:
+      facts: otves
+      bad: "Спасибо!!! Ваша заявка успешно отправлена!"
+      good: "Заявка принята. Замерщик позвонит, чтобы договориться о времени замера. Пока можно посмотреть пример сметы и переслать его домашним."
+      fact_ids: []
+      section_role: lead-form
+      note: "статус, следующий шаг, вторая цель"
+    en:
+      facts: okoshko
+      bad: "Thank you!!! Your submission has been received!"
+      good: "Your booking link is ready. Send it to a few regular clients today and see how booking looks from their side."
+      fact_ids: []
+      section_role: lead-form
+      note: статус и одно действие сейчас
+  sources: [02-strategy-messaging/02 §1.6 (вторая цель), ux 07/02 §8.3, 04-copy-by-block/04 §2]
+  date: '2026-09-24'
+- id: nav-label
+  site_slot: ''
+  name: Пункт навигации
+  purpose: "Называет раздел так, как его ищут: конвенции «Услуги», «Цены», «О компании», «Контакты» на многостраничнике."
+  section_roles: [footer]
+  genres: [site-page, landing]
+  genre: site-page
+  ux_role: nav
+  kimi: micro
+  length:
+    ru:
+      words: {min: 1, target: 1, max: 3}
+      chars: {min: 4, target: 8, max: 20}
+      provisional: true
+      source: "правило E: пункт меню — 1–2 слова; у D не нормируется"
+    en:
+      words: {min: 1, target: 1, max: 3}
+      chars: {min: 4, target: 8, max: 18}
+      provisional: true
+      source: "правило E: пункт меню — 1–2 слова; у D не нормируется"
+  structure: "Существительное — название раздела: «Услуги», «Цены», «Кейсы», «Контакты»; на лендинге — якоря по содержанию («Как проходит ремонт»)."
+  formula_ids: []
+  rules:
+  - "«Услуги», «Решения», «Каталог» в навигации многостраничника — конвенция (закон Якоба; поправка к ux 07/06 §3.2); в заголовке секции — назвать содержимое."
+  - "Одинаковые названия с заголовками страниц, на которые ведут (ux 07/02 §12)."
+  bans:
+  - "Метафоры и «фирменные» имена разделов («Наша магия»); «Подробнее» как пункт меню."
+  fact_required: never
+  claim_classes: []
+  legal_rules: []
+  lint_markers: [COPY-M-MKT-07]
+  examples:
+    ru:
+      facts: otves
+      genre: site-page
+      bad: Подробнее
+      good: Цены
+      fact_ids: []
+      section_role: footer
+      note: название раздела по конвенции
+    en:
+      facts: okoshko
+      genre: site-page
+      bad: Learn more
+      good: Pricing
+      fact_ids: []
+      section_role: footer
+      note: то же
+  sources: [PLAN «Поправки к правилам соседей» (ux 07/06 §3.2), ux 07/02 §12, 06-anti-slop/01 §11]
+  date: '2026-09-24'
+- id: footer-tagline
+  site_slot: ''
+  name: Строка бренда в подвале
+  purpose: "Одна строка о том, что делает компания и для кого, — последняя формулировка категории на странице."
+  section_roles: [footer]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: micro
+  length:
+    ru:
+      words: {min: 3, target: 8, max: 15}
+      provisional: true
+      source: "правило E: у D нет замера; одна строка категории"
+    en:
+      words: {min: 3, target: 8, max: 15}
+      provisional: true
+      source: "правило E: у D нет замера; одна строка категории"
+  structure: "Категория + для кого или где + с какого года (факт): формула category-statement."
+  formula_ids: [category-statement]
+  rules:
+  - "Повторяет позиционирование фактом, а не слоганом-пустышкой; год и город — из фактов."
+  bans:
+  - "«Ваш надёжный партнёр», «Мы делаем мир лучше», «Your trusted partner» (COPY-M-MKT-01)."
+  fact_required: if-claim
+  claim_classes: [company-details, superlative]
+  legal_rules: [COPY-L-SUP-01]
+  lint_markers: [COPY-M-MKT-01]
+  voice: Слоган и словарь бренда F.
+  examples:
+    ru:
+      facts: otves
+      bad: Ваш надёжный партнёр в мире ремонта
+      good: Ремонт квартир под ключ в Нижнем Новгороде с 2014 года
+      fact_ids: [company-since-2014]
+      section_role: footer
+      note: "категория, город и год из ЕГРЮЛ"
+    en:
+      facts: okoshko
+      bad: Your trusted partner for success
+      good: "Online booking and Telegram reminders for barbershops and salons"
+      fact_ids: [reminders, self-booking-link]
+      section_role: footer
+      note: категория и для кого
+  sources: [01-foundations/formulas.yaml (category-statement), 06-anti-slop/01 §8]
+  date: '2026-09-24'
+- id: footer-legal
+  site_slot: ''
+  name: "Реквизиты, правовые строки подвала"
+  purpose: "Сведения о продавце и документы: наименование, ОГРН или ИНН, адрес, оферта, политика ПДн; пометка рекламы и отраслевые оговорки — где требуются."
+  section_roles: [footer, contacts]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: caption
+  kimi: micro
+  length:
+    note: "длина не нормируется: состав задаёт закон (38-ФЗ ст. 8; ЗоЗПП ст. 26.1 п. 2 — через site I)"
+  structure: "«[Полное наименование], ОГРН [..], ИНН [..], [адрес]» · «Политика обработки персональных данных» · «Публичная оферта» или «Договор (образец)» · © [год] [бренд]."
+  formula_ids: []
+  rules:
+  - "Реквизиты — только из facts.yaml (company-details); нет — [PLACEHOLDER: реквизиты ООО], публикация заблокирована (missing blocking у «Отвеса» и «Кварца»)."
+  - "Блок «продавец» — на любой странице с оплатой или бронью (H: COPY-L-DIST-01)."
+  - "Отраслевые оговорки (медицина, БАД, финансы) — дословно по шаблону H 01 §6, тем же кеглем, что текст, к которому относятся."
+  bans:
+  - "«© Все права защищены» вместо реквизитов; вымышленные ИНН, ОГРН и адреса (claims_check: число без факта)."
+  fact_required: always
+  claim_classes: [company-details]
+  legal_rules: [COPY-L-DIST-01, COPY-L-AD-01, COPY-L-MED-01, COPY-L-BAD-01, COPY-L-FIN-01]
+  lint_markers: [COPY-M-ART-04]
+  examples:
+    ru:
+      facts: otves
+      bad: "ООО «Отвес», ИНН 5260123456, Нижний Новгород"
+      good: "[PLACEHOLDER: реквизиты ООО]; политика обработки персональных данных; образец договора подряда"
+      fact_ids: []
+      section_role: footer
+      allow_warn: [art-placeholder, COPY-F-PLACEHOLDER]
+      note: "реквизиты не выдумываются: пробел missing legal-details (blocking), публикация после ответа заказчика; «·» между ссылками — примета ИИ-вёрстки (ux-5-3-02), разделители — вёрстка"
+    en:
+      facts: okoshko
+      bad: "Okoshko LLC, INN 1655123456, Kazan"
+      good: "[PLACEHOLDER: company legal details]; personal data policy; public offer"
+      fact_ids: []
+      section_role: footer
+      allow_warn: [art-placeholder, COPY-F-PLACEHOLDER]
+      note: "то же для EN-версии: выдуманный ИНН — ошибка сверки"
+  sources:
+  - "08-russian-legal-typography/01 §4.4, §6, §8.3"
+  - "02-strategy-messaging/examples/facts-service-renovation.yaml (missing legal-details)"
+  date: '2026-09-24'
+- id: meta-title
+  site_slot: ''
+  name: "<title>"
+  purpose: "Название страницы в выдаче и вкладке: что на странице и чья она; ключевая фраза — в первых 55 знаках."
+  rules_owner: "G — 07-seo-geo-copy/meta-rules.yaml (limits.meta-title, правила meta-title-*), 02-seo-pages-articles-meta.md"
+  genres: [meta]
+  genre: meta
+  ux_role: ''
+  kimi: ''
+  length:
+    ru:
+      chars: {min: 40, target: 60, max: 70}
+      provisional: true
+      source: "G meta-rules.yaml limits.meta-title.write (RU 40–70, EN 35–60 знаков); корпус D: RU лидеры 32–69–118, EN 28–50–73 (03 §5)"
+    en:
+      chars: {min: 35, target: 50, max: 60}
+      provisional: true
+      source: "G meta-rules.yaml limits.meta-title.write (RU 40–70, EN 35–60 знаков); корпус D: RU лидеры 32–69–118, EN 28–50–73 (03 §5)"
+  structure: "«[что на странице] — [бренд]»; главная — «[бренд] — [категория]»."
+  formula_ids: [four-u, caples-headline-qualities, benefit-prism]
+  rules:
+  - "Правила — G (meta-rules.yaml): не общий («Главная»), без набивки и перечня городов, без кликбейта; год — только если содержание этого года."
+  - "Факты в title — те же, что на странице, с fact_ids (B2)."
+  bans:
+  - "«Главная», «Home», «Услуги» как title (meta-title-generic — error); три и больше «|»."
+  fact_required: if-claim
+  claim_classes: [superlative, fact-number, price-discount]
+  legal_rules: [COPY-L-SUP-01, COPY-L-FREE-01]
+  lint_markers: [COPY-M-MKT-08]
+  examples:
+    ru:
+      facts: otves
+      genre: meta
+      bad: Главная
+      good: Ремонт квартир под ключ в Нижнем Новгороде — студия «Отвес»
+      fact_ids: []
+      note: что на странице и чья она
+    en:
+      facts: okoshko
+      genre: meta
+      bad: Home
+      good: "Online booking with Telegram reminders for barbershops — Okoshko"
+      fact_ids: [reminders]
+      note: категория и бренд
+  sources: [07-seo-geo-copy/meta-rules.yaml, 03-corpus-measured/03 §5]
+  date: '2026-09-24'
+- id: meta-description
+  site_slot: ''
+  name: meta description
+  purpose: "Сниппет: что получит человек на странице, с фактом; главное — в первых 120 знаках."
+  rules_owner: "G — meta-rules.yaml (limits.meta-description, meta-desc-*)"
+  genres: [meta]
+  genre: meta
+  ux_role: ''
+  kimi: ''
+  length:
+    ru:
+      chars: {min: 110, target: 150, max: 180}
+      provisional: true
+      source: "G meta-rules.yaml limits.meta-description.write (RU 110–180, EN 100–160); корпус D: RU лидеры 130–182–276, EN 93–138–167"
+    en:
+      chars: {min: 100, target: 130, max: 160}
+      provisional: true
+      source: "G meta-rules.yaml limits.meta-description.write (RU 110–180, EN 100–160); корпус D: RU лидеры 130–182–276, EN 93–138–167"
+  structure: "1–2 предложения: что это и для кого + факт + условие или следующий шаг."
+  formula_ids: [category-statement, benefit-prism]
+  rules:
+  - "Правила — G: предложение, а не список ключей; без капса; условие «бесплатно» — рядом (H)."
+  bans:
+  - "Список ключевых слов через запятую (meta-desc-keyword-list); «по лучшим ценам» без критерия."
+  fact_required: if-claim
+  claim_classes: [fact-number, price-discount, guarantee, superlative]
+  legal_rules: [COPY-L-SUP-01, COPY-L-FREE-01, COPY-L-GUAR-02]
+  lint_markers: []
+  examples:
+    ru:
+      facts: otves
+      genre: meta
+      bad: "Ремонт квартир, ремонт квартир под ключ, ремонт квартир недорого, ремонт квартир Нижний Новгород"
+      good: "Ремонт квартир под ключ с 2014 года: 1 146 квартир сдали по акту, гарантия на работы 3 года по договору."
+      fact_ids: [company-since-2014, flats-completed, guarantee-3-years]
+      allow_warn: [COPY-F-USE]
+      note: "факты вместо набивки; COPY-F-USE — в use фактов B2 нет мета-слотов (передано B2)"
+    en:
+      facts: okoshko
+      genre: meta
+      bad: "Booking, online booking, booking app, salon booking, barber booking"
+      good: "Clients book an open slot through your link and get a Telegram reminder 24 hours before the visit. Free for 14 days, no card required."
+      fact_ids: [self-booking-link, reminders, trial-14-days]
+      note: механизм и условие пробного периода
+  sources: [07-seo-geo-copy/meta-rules.yaml, 03-corpus-measured/03 §5]
+  date: '2026-09-24'
+- id: og-title
+  site_slot: ''
+  name: "og:title"
+  purpose: "Заголовок превью ссылки в мессенджерах и соцсетях: как title, но без бренда или короче; не кликбейт."
+  rules_owner: "G — meta-rules.yaml (limits.og-title); превью — ai-media 10/01 §7"
+  genres: [meta]
+  genre: meta
+  ux_role: ''
+  kimi: ''
+  length:
+    ru:
+      words: {min: 2, target: 6, max: 16}
+      hard_words: [1, 24]
+      chars: {min: 17, target: 60, max: 117}
+      hard_chars: [8, 175]
+      primary: chars
+      n_pages: 27
+      source: D thresholds.yaml v2 · genres.meta.slots.og-title.ru
+    en:
+      words: {min: 4, target: 7, max: 10}
+      hard_words: [1, 17]
+      ai_p50_words: 6.0
+      chars: {min: 26, target: 47, max: 65}
+      hard_chars: [5, 112]
+      ai_p50_chars: 34.0
+      primary: words
+      n_pages: 32
+      source: D thresholds.yaml v2 · genres.meta.slots.og-title.en
+  structure: Главное сообщение страницы коротко; может повторять H1.
+  formula_ids: [four-u]
+  rules:
+  - "Правила — G; ИИ-страницы пишут og:title реже и не совпадающим с title (D: 57 % против 94–96 % у людей) — заполнять всегда."
+  bans:
+  - "Восклицания и капс (примета ai-self в мета, D §5)."
+  fact_required: if-claim
+  claim_classes: [superlative, fact-number]
+  legal_rules: [COPY-L-SUP-01]
+  lint_markers: [COPY-M-MKT-08]
+  examples:
+    ru:
+      facts: otves
+      genre: meta
+      bad: "Лучший ремонт в Нижнем Новгороде!!!"
+      good: Ремонт квартир под ключ в Нижнем Новгороде с 2014 года
+      fact_ids: [company-since-2014]
+      note: факт вместо превосходной степени
+    en:
+      facts: okoshko
+      genre: meta
+      bad: "The Best Booking App Ever!!!"
+      good: Online booking with Telegram reminders
+      fact_ids: [reminders]
+      note: категория и отличие
+  sources: [07-seo-geo-copy/meta-rules.yaml, 03-corpus-measured/03 §5]
+  date: '2026-09-24'
+- id: og-description
+  site_slot: ''
+  name: "og:description"
+  purpose: "Одно предложение превью: что получит человек, открыв ссылку."
+  rules_owner: G — meta-rules.yaml (limits.og-description)
+  genres: [meta]
+  genre: meta
+  ux_role: ''
+  kimi: ''
+  length:
+    ru:
+      words: {min: 5, target: 21, max: 38}
+      hard_words: [2, 57]
+      chars: {min: 34, target: 164, max: 284}
+      hard_chars: [17, 426]
+      primary: chars
+      n_pages: 29
+      source: D thresholds.yaml v2 · genres.meta.slots.og-description.ru
+    en:
+      words: {min: 14, target: 21, max: 28}
+      hard_words: [7, 42]
+      ai_p50_words: 17.0
+      chars: {min: 90, target: 133, max: 169}
+      hard_chars: [45, 253]
+      ai_p50_chars: 93.0
+      primary: words
+      n_pages: 31
+      source: D thresholds.yaml v2 · genres.meta.slots.og-description.en
+  structure: Факт или механизм одной фразой.
+  formula_ids: [fact-scenario]
+  rules:
+  - "Правила — G; при повторе description находки линтера удваиваются (H) — лучше своя фраза."
+  bans:
+  - "«Откройте для себя…», «Discover the future of…» (COPY-M-MKT-08 — error в мета)."
+  fact_required: if-claim
+  claim_classes: [fact-number, fact-property]
+  legal_rules: [COPY-L-SUP-01]
+  lint_markers: [COPY-M-MKT-08]
+  examples:
+    ru:
+      facts: otves
+      genre: meta
+      bad: "Откройте для себя новый уровень комфорта!"
+      good: "1 146 квартир сдали по акту с 2014 года. Гарантия на работы — 3 года по договору."
+      fact_ids: [flats-completed, guarantee-3-years]
+      allow_warn: [COPY-F-USE]
+      note: "факты вместо штампа; COPY-F-USE — в use фактов B2 нет мета-слотов"
+    en:
+      facts: okoshko
+      genre: meta
+      bad: "Discover the future of salon management today!"
+      good: "Clients book themselves, and reminders go out in Telegram 24 hours and 2 hours before the visit."
+      fact_ids: [self-booking-link, reminders]
+      note: механизм одной фразой
+  sources: [07-seo-geo-copy/meta-rules.yaml, 08-russian-legal-typography (отчёт H §4 G)]
+  date: '2026-09-24'
+- id: og-image-alt
+  site_slot: ''
+  name: "og:image:alt"
+  purpose: "Что на картинке превью ссылки — для читалок и сервисов без картинок."
+  rules_owner: "ai-media — ../ai-media/10-web-integration/01-images-delivery.md §7–8; G — meta-rules.yaml limits.og-image-alt"
+  genres: [meta]
+  genre: meta
+  ux_role: alt
+  kimi: ''
+  length:
+    ru:
+      words: {min: 3, target: 8, max: 16}
+      provisional: true
+      source: "правило E по ai-media 10/01 §8: одно предложение о содержании картинки"
+    en:
+      words: {min: 3, target: 8, max: 16}
+      provisional: true
+      source: "правило E по ai-media 10/01 §8: одно предложение о содержании картинки"
+  structure: "«Обложка: [заголовок на картинке]» или что изображено."
+  formula_ids: []
+  rules:
+  - "Описывает содержание картинки; текст, запечённый в картинку, передаётся дословно (ai-media 10/01 §8) — через двоеточие, без «ёлочек»: claims_check.py принимает кавычки за цитату отзыва (COPY-F-QUOTE, ложное для alt — передано B2)."
+  bans:
+  - "«Картинка», «image», «фото счастливого клиента» для сгенерированного кадра."
+  fact_required: if-claim
+  claim_classes: [fact-number]
+  legal_rules: []
+  lint_markers: []
+  examples:
+    ru:
+      facts: otves
+      genre: meta
+      bad: Картинка
+      good: "Обложка страницы: ремонт квартир под ключ в Нижнем Новгороде"
+      fact_ids: []
+      note: что на картинке и текст с неё через двоеточие
+    en:
+      facts: okoshko
+      genre: meta
+      bad: image
+      good: "Page cover: online booking with Telegram reminders"
+      fact_ids: []
+      note: то же
+  sources:
+  - "../ai-media/10-web-integration/01-images-delivery.md §7–8"
+  date: '2026-09-24'
+- id: article-title
+  site_slot: ''
+  name: Заголовок статьи (H1)
+  purpose: Кто читатель и какую пользу получит; не сильнее содержания.
+  rules_owner: "G — 07-seo-geo-copy/02-seo-pages-articles-meta.md; кликбейт — meta-clickbait (G)"
+  section_roles: [article-body]
+  genres: [article]
+  genre: article
+  ux_role: title
+  kimi: h
+  length:
+    ru:
+      words: {min: 3, target: 5, max: 9}
+      hard_words: [1, 13]
+      ai_p50_words: 7.5
+      chars: {min: 27, target: 37, max: 60}
+      hard_chars: [13, 89]
+      ai_p50_chars: 59.0
+      primary: chars
+      n_pages: 9
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.article.slots.article-title.ru
+    en:
+      words: {min: 6, target: 10, max: 14}
+      hard_words: [3, 20]
+      ai_p50_words: 12.5
+      chars: {min: 35, target: 55, max: 72}
+      hard_chars: [17, 108]
+      ai_p50_chars: 66.5
+      primary: words
+      n_pages: 9
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.article.slots.article-title.en
+  structure: "Польза + кому + ограничение (Ильяхов: кто и какая польза → сузить → ценность формата → бирка) [V:y0iIV5meaB4 27:42]."
+  formula_ids: [benefit-prism, four-u, caples-headline-qualities]
+  rules:
+  - "Правила — G; обещание заголовка находится в тексте (обманутое ожидание — [V:y0iIV5meaB4 31:52])."
+  bans:
+  - "Кликбейт («Номер 3 вас удивит»), негатив ради клика на странице бренда (A/02 §7)."
+  fact_required: if-claim
+  claim_classes: [fact-number]
+  legal_rules: []
+  lint_markers: [COPY-M-MKT-08]
+  voice: Допустимые рычаги заголовка — поле голоса F.
+  examples:
+    ru:
+      facts: otves
+      genre: article
+      bad: "10 шокирующих секретов ремонта, о которых молчат строители"
+      good: "Как проверить смету на ремонт квартиры до подписания договора"
+      fact_ids: []
+      note: польза и момент решения вместо интриги
+    en:
+      facts: okoshko
+      genre: article
+      bad: "You Won't Believe These 7 Booking Hacks"
+      good: How to cut no-shows at a small barbershop with reminders
+      fact_ids: []
+      note: кому и какая польза
+  sources:
+  - "[V:y0iIV5meaB4 27:42, 31:52]"
+  - 07-seo-geo-copy/02
+  - 03-corpus-measured/03 §4
+  date: '2026-09-24'
+- id: article-lead
+  site_slot: ''
+  name: Лид статьи
+  purpose: "Кому статья и что он узнает; ответ на главный вопрос — первыми фразами."
+  rules_owner: "G — 07-seo-geo-copy/02, 03"
+  section_roles: [article-body]
+  genres: [article]
+  genre: article
+  ux_role: marketing
+  kimi: lead
+  length:
+    ru:
+      words: {min: 14, target: 38, max: 47}
+      hard_words: [7, 70]
+      ai_p50_words: 45.0
+      chars: {min: 116, target: 273, max: 377}
+      hard_chars: [52, 565]
+      ai_p50_chars: 334.0
+      primary: chars
+      n_pages: 11
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.article.slots.article-lead.ru
+    en:
+      words: {min: 5, target: 29, max: 72}
+      hard_words: [2, 108]
+      ai_p50_words: 62.5
+      chars: {min: 27, target: 155, max: 422}
+      hard_chars: [13, 633]
+      ai_p50_chars: 376.5
+      primary: words
+      n_pages: 9
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.article.slots.article-lead.en
+  structure: Ситуация читателя → что узнает → опыт автора (E-E-A-T).
+  formula_ids: [inverted-pyramid, benefit-prism]
+  rules:
+  - "Правила — G; первые пять слов — о читателе, а не об авторе ([V:_jwKQ6ZCeAI 04:05])."
+  bans:
+  - "«В этой статье мы расскажем…», «Давайте разберёмся» (анонс), разгон «В современном мире…»."
+  fact_required: if-claim
+  claim_classes: [fact-number]
+  legal_rules: []
+  lint_markers: [COPY-M-LEX-05]
+  examples:
+    ru:
+      facts: otves
+      genre: article
+      bad: "В современном мире ремонт — непростая задача. В этой статье мы расскажем, как сделать его правильно."
+      good: "Смета растёт, когда в ней нет позиций, которые всё равно придётся делать. Показываем, какие строки проверить до подписания договора и какие вопросы задать прорабу."
+      fact_ids: []
+      note: ответ и польза первыми фразами
+    en:
+      facts: okoshko
+      genre: article
+      bad: "In today's fast-paced world, no-shows are a common challenge. In this article, we'll explore how to tackle them."
+      good: "A client who forgot about the booking leaves the chair empty for an hour. Here is how barbershops set up reminders and what to do with clients who never confirm."
+      fact_ids: []
+      note: ситуация читателя вместо разгона
+  sources:
+  - "[V:_jwKQ6ZCeAI 04:05]"
+  - 07-seo-geo-copy/02
+  date: '2026-09-24'
+- id: article-summary
+  site_slot: ''
+  name: «Коротко» в начале статьи
+  purpose: "Ответ на вопрос статьи в 40–80 словах с 2–3 фактами — для читателя и для ответов нейросетей."
+  rules_owner: "G — geo-checklist.yaml (COPY-GEO-08…10, «коротко» 40–80 слов), 03-geo-copy.md §3"
+  section_roles: [article-body]
+  genres: [article, geo]
+  genre: geo
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 40, target: 60, max: 80}
+      provisional: true
+      source: "G geo-checklist.yaml: «коротко» и абзац-ответ — 40–80 слов, не длиннее 100 (Pew 2025: медиана ИИ-сводки Google 67 слов)"
+    en:
+      words: {min: 40, target: 60, max: 80}
+      provisional: true
+      source: "G geo-checklist.yaml: «коротко» и абзац-ответ — 40–80 слов, не длиннее 100 (Pew 2025: медиана ИИ-сводки Google 67 слов)"
+  structure: "Ответ → 2–3 факта с датой и источником → условие применимости."
+  formula_ids: [inverted-pyramid]
+  rules: [Правила — G; факты — canonical из facts.yaml (B2 §4.2).]
+  bans: [Пересказ оглавления вместо ответа; «Подводя итог».]
+  fact_required: always
+  claim_classes: [fact-number, price-discount, guarantee]
+  legal_rules: [COPY-L-FREE-01]
+  lint_markers: []
+  examples:
+    ru:
+      facts: otves
+      genre: geo
+      section_role: pricing
+      bad: "В этой статье мы подробно рассмотрим все аспекты ремонта квартиры под ключ, разберём основные этапы и дадим полезные советы, которые помогут вам избежать ошибок и сэкономить время и деньги."
+      good: "Ремонт квартиры под ключ в студии «Отвес» стоит от 9 800 ₽ за м² без материалов (прайс на 2026 год). Точную сумму показывает смета: замер и смета бесплатны в черте города. На выполненные работы действует гарантия 3 года по договору подряда, пункт 7.2. Двушку 54 м² в Сормове в 2026 году сдали за 47 рабочих дней при сроке по договору 50."
+      fact_ids: [price-from-per-m2, estimate-free, guarantee-3-years, case-two-room-47-days]
+      allow_warn: [COPY-F-USE]
+      note: "canonical-формулировки фактов; COPY-F-USE — у фактов B2 нет article-body в use (для статей use расширить — B2)"
+    en:
+      facts: okoshko
+      genre: geo
+      section_role: article-body
+      bad: "In this article, we'll take a deep dive into everything you need to know about online booking and share valuable tips to help you save time and money."
+      good: "Okoshko reminds clients of their booking in Telegram 24 hours and 2 hours before the visit. Across 212 salons that switched reminders on from January to May 2026, the no-show rate fell by 4 percentage points on average after three months. Any plan is free for 14 days with no card required."
+      fact_ids: [reminders, noshow-average, trial-14-days]
+      note: ответ и факты с периодом
+  sources: [07-seo-geo-copy/geo-checklist.yaml, 07-seo-geo-copy/03-geo-copy.md §3]
+  date: '2026-09-24'
+- id: article-heading
+  site_slot: ''
+  name: "Подзаголовок статьи (H2, H3)"
+  purpose: "Вопрос или тезис раздела — так, как его ищут; разделы по смыслу, не по чанкам для ИИ."
+  rules_owner: "G — 07-seo-geo-copy/02, 03 (COPY-GEO-09, -10)"
+  section_roles: [article-body]
+  genres: [article]
+  genre: article
+  ux_role: section-title
+  kimi: h
+  length:
+    ru:
+      words: {min: 1, target: 3, max: 9}
+      hard_words: [1, 14]
+      ai_p50_words: 2.0
+      chars: {min: 8, target: 24, max: 59}
+      hard_chars: [4, 89]
+      ai_p50_chars: 23.1
+      primary: chars
+      n_pages: 11
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.article.slots.article-heading.ru"
+    en:
+      words: {min: 3, target: 6, max: 10}
+      hard_words: [1, 15]
+      ai_p50_words: 5.0
+      chars: {min: 21, target: 36, max: 58}
+      hard_chars: [10, 87]
+      ai_p50_chars: 26.5
+      primary: words
+      n_pages: 8
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.article.slots.article-heading.en"
+  structure: "Вопрос читателя или тезис: «Какие работы чаще всего забывают в смете»."
+  formula_ids: [question-proof-action]
+  rules:
+  - "Правила — G; Google против дробления на «bite-sized chunks» ради LLM ([V:i4jDc58ofH4])."
+  bans:
+  - "«Введение», «Заключение», «Подводя итоги» как H2."
+  fact_required: never
+  claim_classes: []
+  legal_rules: []
+  lint_markers: [COPY-M-MKT-11]
+  examples:
+    ru:
+      facts: otves
+      genre: article
+      bad: Заключение
+      good: Какие работы чаще всего забывают внести в смету
+      fact_ids: []
+      note: вопрос читателя вместо служебного слова
+    en:
+      facts: okoshko
+      genre: article
+      bad: Conclusion
+      good: What to do with clients who never confirm
+      fact_ids: []
+      note: то же
+  sources:
+  - 07-seo-geo-copy/03-geo-copy.md §3.2
+  - "[V:i4jDc58ofH4]"
+  date: '2026-09-24'
+- id: article-paragraph
+  site_slot: ''
+  name: Абзац статьи
+  purpose: "Одна мысль с фактом или примером из опыта; абзац понятен без соседних."
+  rules_owner: G — 07-seo-geo-copy/02; ритм и маркеры — C (профиль article)
+  section_roles: [article-body]
+  genres: [article]
+  genre: article
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 6, target: 23, max: 45}
+      hard_words: [3, 70]
+      ai_p50_words: 27.3
+      chars: {min: 41, target: 171, max: 331}
+      hard_chars: [20, 497]
+      ai_p50_chars: 244.5
+      primary: chars
+      n_pages: 12
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.article.slots.article-paragraph.ru"
+    en:
+      words: {min: 5, target: 23, max: 63}
+      hard_words: [2, 95]
+      ai_p50_words: 34.6
+      chars: {min: 30, target: 139, max: 397}
+      hard_chars: [15, 595]
+      ai_p50_chars: 194.4
+      primary: words
+      n_pages: 9
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "D thresholds.yaml v2 · genres.article.slots.article-paragraph.en"
+  structure: "Тезис → факт или пример из опыта автора → вывод для читателя."
+  formula_ids: [inverted-pyramid, fact-scenario]
+  rules:
+  - "Правила — G и C (article: ритм «≥ 6» у лидеров статей работает — D §3); опыт из первых рук — E-E-A-T."
+  bans:
+  - "Абзацы «под копирку» (CV длины абзацев у ai-self 0,36 против 0,54–0,61 у людей, D §3)."
+  fact_required: if-claim
+  claim_classes: [fact-number, price-discount]
+  legal_rules: []
+  lint_markers: [COPY-M-STR-06]
+  examples:
+    ru:
+      facts: otves
+      genre: article
+      bad: "Важно отметить, что ремонт является сложным и многогранным процессом, который требует внимательного подхода и учёта множества факторов."
+      good: "Если в смете нет строки об электромонтаже, спросите прораба, где она: провода меняют до чистовой отделки, поэтому эту работу планируют заранее. Уточните и число точек — розеток и выключателей."
+      fact_ids: []
+      note: пример из практики вместо «важно отметить»
+    en:
+      facts: okoshko
+      genre: article
+      bad: "It's important to note that client communication plays a pivotal role in the modern beauty industry landscape."
+      good: "A reminder the evening before works only if the client can answer it. Ask for a one-tap confirmation, and call only those who stay silent."
+      fact_ids: []
+      note: действие вместо «pivotal role»
+  sources: [03-corpus-measured/02 §3, 07-seo-geo-copy/02]
+  date: '2026-09-24'
+- id: article-author
+  site_slot: ''
+  name: "Автор, его опыт (E-E-A-T)"
+  purpose: "Кто пишет и почему ему можно верить: должность, опыт в годах и объектах — только из фактов."
+  rules_owner: "G — 07-seo-geo-copy/03 §3.5 (COPY-GEO-05, -19)"
+  section_roles: [article-body]
+  genres: [article]
+  genre: article
+  ux_role: caption
+  kimi: micro
+  length:
+    ru:
+      words: {min: 4, target: 10, max: 20}
+      provisional: true
+      source: "правило E: у D нет замера; имя + роль + опыт одной строкой"
+    en:
+      words: {min: 4, target: 10, max: 20}
+      provisional: true
+      source: "правило E: у D нет замера; имя + роль + опыт одной строкой"
+  structure: "«[Имя], [роль], [опыт числом]» — из факта person с согласием."
+  formula_ids: []
+  rules:
+  - "Только реальный человек с согласием (B2 person); ИИ-текст под именем человека — недостоверная рекомендация (H §7, Яндекс [V:AbqU-GxAYs8 48:57])."
+  bans:
+  - "«Эксперт с многолетним опытом», выдуманный автор, сгенерированное фото."
+  fact_required: always
+  claim_classes: [fact-number, fact-property]
+  legal_rules: [COPY-L-REV-01]
+  lint_markers: [COPY-M-MKT-01]
+  examples:
+    ru:
+      facts: otves
+      genre: article
+      section_role: about
+      bad: Эксперт с многолетним опытом работы в сфере ремонта
+      good: "Сергей Лапин, прораб, 11 лет в ремонте"
+      fact_ids: [foreman-lapin]
+      note: человек с согласием и опытом числом
+    en:
+      facts: okoshko
+      genre: article
+      section_role: about
+      bad: An industry expert with years of experience
+      good: "Ruslan, barbershop owner in Kazan"
+      fact_ids: [review-ruslan]
+      note: "реальный клиент с разрешением на имя, роль и город"
+  sources: [07-seo-geo-copy/03-geo-copy.md §3.5, 08-russian-legal-typography/01 §7]
+  date: '2026-09-24'
+- id: geo-answer
+  site_slot: ''
+  name: Самодостаточный абзац-ответ для цитирования нейросетью
+  purpose: "Ответ на один вопрос, понятный без окружения: сущность названа, факт с датой и источником."
+  rules_owner: "G — 07-seo-geo-copy/geo-checklist.yaml, geo-rules.yaml, 03-geo-copy.md"
+  section_roles: [faq, about, article-body, pricing]
+  genres: [geo]
+  genre: geo
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 40, target: 60, max: 80}
+      provisional: true
+      source: "G geo-checklist.yaml: абзац-ответ 40–80 слов, не длиннее 100"
+    en:
+      words: {min: 40, target: 60, max: 80}
+      provisional: true
+      source: "G geo-checklist.yaml: абзац-ответ 40–80 слов, не длиннее 100"
+  structure: "«[Сущность] — [категория], [главное отличие с фактом]. [Факт 2 с датой]. [Условие]»."
+  formula_ids: [inverted-pyramid, category-statement]
+  rules:
+  - "Правила — G (ответ первым, абзац самодостаточен, canonical, без местоимения в начале — geo-pronoun-lead)."
+  bans:
+  - "«Мы» без названия сущности; «как известно», «эксперты считают» (размытая атрибуция — error в geo)."
+  fact_required: always
+  claim_classes: [fact-number, price-discount, guarantee, company-details]
+  legal_rules: [COPY-L-FREE-01]
+  lint_markers: []
+  examples:
+    ru:
+      facts: otves
+      genre: geo
+      section_role: about
+      bad: "Мы — одна из ведущих компаний на рынке, которая, по мнению экспертов, предлагает лучшие решения для ремонта."
+      good: "Студия «Отвес» ремонтирует квартиры под ключ в Нижнем Новгороде с 2014 года. С 2014 по сентябрь 2026 года студия сдала 1 146 квартир (данные CRM на 1 сентября 2026 года). На выполненные работы действует гарантия 3 года по договору подряда, пункт 7.2."
+      fact_ids: [company-since-2014, flats-completed, guarantee-3-years]
+      allow_warn: [COPY-F-USE]
+      note: "сущность названа, факты — canonical; COPY-F-USE — у гарантии B2 нет about в use"
+    en:
+      facts: okoshko
+      genre: geo
+      section_role: about
+      bad: "We are a leading innovative platform that experts agree is the best choice for modern salons."
+      good: "Okoshko is an online booking service for barbershops and beauty salons. Clients pick a service, a stylist and an open slot through a link, and get a Telegram reminder 24 hours and 2 hours before the visit. As of 1 September 2026, 1,380 salons and barbershops use it on a paid plan."
+      fact_ids: [self-booking-link, reminders, salons-count]
+      known_false: [COPY-F-NUM-MISMATCH]
+      note: "сущность и категория в первой фразе; «1,380» — известное ложное срабатывание"
+  sources: [07-seo-geo-copy/geo-checklist.yaml, 07-seo-geo-copy/03-geo-copy.md §3]
+  date: '2026-09-24'
+- id: definition
+  site_slot: ''
+  name: Определение термина или сущности
+  purpose: "«X — это Y, который Z» одной-двумя фразами: для глоссария, FAQ и ответов нейросетей."
+  rules_owner: "G — geo-rules.yaml (geo-definition-form), 03-geo-copy.md §3.6"
+  section_roles: [faq, article-body, about]
+  genres: [geo, article]
+  genre: geo
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 12, target: 25, max: 45}
+      provisional: true
+      source: "правило E по G: определение — 1–2 предложения"
+    en:
+      words: {min: 12, target: 25, max: 45}
+      provisional: true
+      source: "правило E по G: определение — 1–2 предложения"
+  structure: "«[Термин] — [род], [видовое отличие]; [пример или условие]»."
+  formula_ids: [category-statement]
+  rules:
+  - "Правила — G; определение не рекламирует: без «лучший», «уникальный»."
+  bans:
+  - "Определение через само слово («Ремонт под ключ — это ремонт под ключ»); оценки вместо признаков."
+  fact_required: if-claim
+  claim_classes: [fact-property]
+  legal_rules: [COPY-L-SUP-01]
+  lint_markers: []
+  examples:
+    ru:
+      facts: otves
+      genre: geo
+      section_role: faq
+      bad: "Ремонт под ключ — это лучший и самый удобный способ сделать ремонт без забот."
+      good: "Ремонт под ключ — ремонт, при котором подрядчик выполняет все работы от замера до сдачи по акту; материалы по договору оплачиваются отдельно или входят в смету."
+      fact_ids: []
+      note: "род, отличие и условие вместо оценки"
+    en:
+      facts: okoshko
+      genre: geo
+      section_role: faq
+      bad: "A no-show is the most frustrating and costly nightmare for every salon owner."
+      good: "A no-show is a booked client who neither arrives nor cancels, so the slot stays empty and cannot be offered to anyone else."
+      fact_ids: []
+      note: признаки вместо оценок
+  sources: [07-seo-geo-copy/geo-rules.yaml, 07-seo-geo-copy/03-geo-copy.md §3.6]
+  date: '2026-09-24'
+- id: email-subject
+  site_slot: ''
+  name: Тема письма
+  purpose: "Одна задача — чтобы письмо открыли и узнали: суть в первых двух словах, обещание темы выполняется в первой строке."
+  genres: [email-form]
+  genre: email-form
+  ux_role: email
+  kimi: ''
+  length:
+    ru:
+      words: {min: 2, target: 5, max: 8}
+      chars: {min: 15, target: 35, max: 50}
+      provisional: true
+      source: "ux 07/02 §16.1: суть в первых двух словах, ≤ 50 знаков; D писем не мерил (живая фаза)"
+    en:
+      words: {min: 2, target: 6, max: 9}
+      chars: {min: 15, target: 35, max: 50}
+      provisional: true
+      source: "ux 07/02 §16.1: суть в первых двух словах, ≤ 50 знаков; D писем не мерил (живая фаза)"
+  structure: "«[Событие или действие]: [деталь]» — «Заявка на замер принята», «Подтвердите адрес — пробный период начнётся сразу»."
+  formula_ids: [four-u, benefit-prism]
+  rules:
+  - "Тема отвечает только за открытие и узнавание; не пересказывает письмо и не продаёт ([V:F_urkVueszI 17:24])."
+  - "Письмо о событии (заявка, подтверждение) — «робот»: коротко, без приветствий; рассылка — от команды, с подписью (ux 07/02 §16.1, Контур)."
+  - "«Can I ask you something?» открывают, если письмо действительно спрашивает ([V:F_urkVueszI 18:25], [кейс])."
+  bans:
+  - "Капс, «!!!», «пустой чемодан» ради открытия; «Re:» и «Fwd:» без переписки; «Спасибо за обращение в нашу компанию»."
+  fact_required: if-claim
+  claim_classes: [price-discount, promo-deadline]
+  legal_rules: [COPY-L-FREE-01, COPY-L-PROMO-02]
+  lint_markers: [COPY-M-MKT-08, COPY-M-MKT-04, COPY-M-MKT-12]
+  examples:
+    ru:
+      facts: otves
+      genre: email-form
+      bad: "Благодарим за обращение в нашу компанию!!!"
+      good: Заявка на замер принята
+      fact_ids: []
+      note: событие первыми словами
+    en:
+      facts: okoshko
+      genre: email-form
+      bad: "Welcome to the Okoshko family!!!"
+      good: Confirm your email to start the trial
+      fact_ids: []
+      note: действие и его результат
+  sources:
+  - ux 07/02 §16.1
+  - "[V:F_urkVueszI 17:24–22:34]"
+  date: '2026-09-24'
+- id: email-preheader
+  site_slot: ''
+  name: Прехедер
+  purpose: "Строка после темы в списке писем: продолжает тему следующим важным фактом, а не повторяет её."
+  genres: [email-form]
+  genre: email-form
+  ux_role: email
+  kimi: ''
+  length:
+    ru:
+      words: {min: 5, target: 10, max: 16}
+      chars: {min: 35, target: 70, max: 100}
+      provisional: true
+      source: "правило E [не проверено]: видимая длина зависит от почтового клиента; проверка — живая фаза"
+    en:
+      words: {min: 5, target: 11, max: 18}
+      chars: {min: 35, target: 70, max: 100}
+      provisional: true
+      source: "правило E [не проверено]: видимая длина зависит от почтового клиента; проверка — живая фаза"
+  structure: "Следующий шаг или условие: «Замерщик позвонит, чтобы договориться о времени»."
+  formula_ids: []
+  rules:
+  - "Не повторяет тему и не остаётся служебной строкой («Посмотреть в браузере»); условие «бесплатно» — рядом."
+  bans:
+  - "«Нажмите, чтобы узнать больше», «Если письмо отображается некорректно…» первой строкой."
+  fact_required: if-claim
+  claim_classes: [price-discount, purchase-terms]
+  legal_rules: [COPY-L-FREE-01, COPY-L-FREE-02]
+  lint_markers: [COPY-M-MKT-07]
+  examples:
+    ru:
+      facts: otves
+      genre: email-form
+      bad: Посмотреть это письмо в браузере
+      good: "Замерщик позвонит, чтобы договориться о времени визита"
+      fact_ids: []
+      note: следующий шаг вместо служебной строки
+    en:
+      facts: okoshko
+      genre: email-form
+      bad: View this email in your browser
+      good: "One click confirms your address; no card is needed for the 14-day trial"
+      fact_ids: [trial-14-days]
+      note: шаг и условие пробного периода
+  sources:
+  - ux 07/02 §16.1
+  - "[V:F_urkVueszI 17:24]"
+  date: '2026-09-24'
+- id: email-heading
+  site_slot: ''
+  name: Заголовок письма
+  purpose: "Первая строка тела: статус события или вопрос, ради которого письмо; выполняет обещание темы."
+  genres: [email-form]
+  genre: email-form
+  ux_role: email
+  kimi: ''
+  length:
+    ru:
+      words: {min: 2, target: 5, max: 9}
+      provisional: true
+      source: "правило E: как заголовок формы"
+    en:
+      words: {min: 2, target: 5, max: 10}
+      provisional: true
+      source: "правило E: как заголовок формы"
+  structure: "Статус или действие: «Заявка на замер принята», «Подтвердите адрес»."
+  formula_ids: []
+  rules:
+  - "Письмо начинается с дела (ux 07/02 §16.1); благодарность — после статуса и одной фразой."
+  bans:
+  - "«Благодарим за выбор нашей компании», «Welcome aboard!», «Уважаемый клиент!» как заголовок."
+  fact_required: never
+  claim_classes: []
+  legal_rules: []
+  lint_markers: [COPY-M-MKT-14]
+  examples:
+    ru:
+      facts: otves
+      genre: email-form
+      bad: "Благодарим за выбор нашей компании!"
+      good: Заявка на замер принята
+      fact_ids: []
+      note: статус события
+    en:
+      facts: okoshko
+      genre: email-form
+      bad: "Welcome aboard!"
+      good: Confirm your email address
+      fact_ids: []
+      note: "действие, ради которого письмо"
+  sources: [ux 07/02 §16.1]
+  date: '2026-09-24'
+- id: email-body
+  site_slot: ''
+  name: Тело письма
+  purpose: "Что произошло, что будет дальше и что сделать сейчас; одно действие — одна кнопка."
+  genres: [email-form]
+  genre: email-form
+  ux_role: email
+  kimi: ''
+  length:
+    ru:
+      words: {min: 25, target: 60, max: 120}
+      provisional: true
+      source: "правило E [не проверено]: 2–5 коротких абзацев; писем в корпусе D нет (живая фаза)"
+    en:
+      words: {min: 25, target: 65, max: 130}
+      provisional: true
+      source: "правило E [не проверено]: 2–5 коротких абзацев; писем в корпусе D нет (живая фаза)"
+  structure: "Статус → что дальше (кто, когда, каким каналом) → одно действие → условие или реквизит; для рассылки — подпись человека."
+  formula_ids: [inverted-pyramid, four-p, pas, bab]
+  rules:
+  - "Первая строка выполняет обещание темы; «if something isn't doing work in the copy… it doesn't belong there» ([V:F_urkVueszI 22:34])."
+  - "Письмо о событии — без рекламы; реклама в письме — только с согласием на рекламу (38-ФЗ ст. 18; 04 §5)."
+  - "Условия и сроки — числом из фактов; нет факта — [PLACEHOLDER: …]."
+  bans:
+  - "«Уважаемый клиент! Благодарим вас за выбор…», «Dear valued customer», «высочайший уровень сервиса» (MKT-01, SUP-01)."
+  fact_required: if-claim
+  claim_classes: [price-discount, purchase-terms, fact-number, guarantee]
+  legal_rules: [COPY-L-FREE-01, COPY-L-SUP-01, COPY-L-GUAR-02]
+  lint_markers: [COPY-M-MKT-01, COPY-M-MKT-14]
+  voice: "Голос F: письма «робота» и «команды» различаются (ux 07/02 §16.1)."
+  examples:
+    ru:
+      facts: otves
+      genre: email-form
+      section_role: lead-form
+      bad: "Уважаемый клиент! Благодарим вас за выбор нашей компании. Мы ценим каждого клиента и стремимся предоставить высочайший уровень сервиса. Наши специалисты свяжутся с вами в ближайшее время."
+      good: "Здравствуйте! Заявка на замер получена. Замерщик позвонит, чтобы договориться о времени визита. Замер и смета бесплатны в черте города. Если заявку отправили не вы, просто не отвечайте на это письмо."
+      fact_ids: [estimate-free]
+      note: "статус, следующий шаг, условие, что делать при ошибке"
+    en:
+      facts: okoshko
+      genre: email-form
+      section_role: lead-form
+      bad: "Dear valued customer, we're thrilled to welcome you to our innovative platform! Get ready to unlock amazing results."
+      good: "Hi! Confirm this address to start your 14-day trial. No card is required: after the trial, booking pauses until you pick a plan, and your data is kept for 90 days."
+      fact_ids: [trial-14-days]
+      note: действие и что будет после пробного периода
+  sources:
+  - ux 07/02 §16
+  - "[V:F_urkVueszI 17:24–22:34]"
+  - 04-copy-by-block/04
+  date: '2026-09-24'
+- id: email-cta-label
+  site_slot: ''
+  name: Кнопка в письме
+  purpose: "Одно действие письма, названное результатом: «Подтвердить адрес», «Посмотреть программу»."
+  genres: [email-form]
+  genre: email-form
+  ux_role: action
+  kimi: ''
+  length:
+    ru:
+      words: {min: 1, target: 2, max: 3}
+      hard_words: [1, 7]
+      ai_p50_words: 2.0
+      chars: {min: 6, target: 14, max: 25}
+      hard_chars: [3, 58]
+      ai_p50_chars: 16.0
+      primary: chars
+      n_pages: 22
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.email-form.slots.cta-label.ru
+    en:
+      words: {min: 2, target: 2, max: 4}
+      hard_words: [1, 7]
+      ai_p50_words: 3.0
+      chars: {min: 7, target: 12, max: 21}
+      hard_chars: [3, 42]
+      ai_p50_chars: 15.0
+      primary: words
+      n_pages: 26
+      provisional: true
+      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: D thresholds.yaml v2 · genres.email-form.slots.cta-label.en
+  structure: "Инфинитив совершенного вида + объект (RU); глагол + объект или первое лицо (EN)."
+  formula_ids: []
+  rules:
+  - "Как cta-label: следствие нажатия, одна кнопка на письмо; ссылка для тех, у кого кнопка не отрисовалась, — рядом текстом."
+  bans:
+  - "«Нажмите здесь», «Click here», «Подробнее»."
+  fact_required: never
+  claim_classes: []
+  legal_rules: []
+  lint_markers: [COPY-M-MKT-07]
+  examples:
+    ru:
+      facts: otves
+      genre: email-form
+      bad: Нажмите здесь
+      good: Подтвердить адрес
+      fact_ids: []
+      note: что произойдёт
+    en:
+      facts: okoshko
+      genre: email-form
+      bad: Click here
+      good: Confirm my email
+      fact_ids: []
+      note: первое лицо — развилка EN
+  sources:
+  - ux 07/02 §1.4
+  - "[V:F_urkVueszI 07:07]"
+  date: '2026-09-24'
+- id: email-footer
+  site_slot: ''
+  name: "Подвал письма: почему пришло, отписка, реквизиты"
+  purpose: "Почему человек получил письмо, как отписаться одним действием, кто отправитель (реквизиты)."
+  genres: [email-form]
+  genre: email-form
+  ux_role: email
+  kimi: ''
+  length:
+    ru:
+      words: {min: 10, target: 25, max: 45}
+      provisional: true
+      source: "правило E: причина + отписка + отправитель"
+    en:
+      words: {min: 10, target: 25, max: 45}
+      provisional: true
+      source: "правило E: причина + отписка + отправитель"
+  structure: "«Письмо пришло, потому что [действие человека]. [Отписка — одной ссылкой, если рассылка]. [Реквизиты отправителя]»."
+  formula_ids: []
+  rules:
+  - "Рекламная рассылка — только с предварительного согласия и с отпиской в каждом письме (38-ФЗ ст. 18 ч. 1; H §8.2); отписка тем же каналом, без входа (ux 06/04 §8.1 п. 15)."
+  - "Транзакционное письмо говорит, что оно не рассылка, и не содержит рекламы."
+  bans:
+  - "«Чтобы отписаться, свяжитесь с менеджером», «отписка в личном кабинете после входа» (obstruction, ux 06/04 §3.8)."
+  fact_required: if-claim
+  claim_classes: [company-details]
+  legal_rules: [COPY-L-CONS-01, COPY-L-AD-01]
+  lint_markers: []
+  examples:
+    ru:
+      facts: otves
+      genre: email-form
+      bad: "Чтобы отписаться от рассылки, свяжитесь с нашим менеджером по телефону."
+      good: "Письмо пришло, потому что вы оставили заявку на замер на сайте. Это не рассылка: рекламных писем без вашего отдельного согласия не будет."
+      fact_ids: []
+      note: причина и граница рекламы
+    en:
+      facts: okoshko
+      genre: email-form
+      bad: "To unsubscribe, please contact our support team by phone."
+      good: "You received this email because you started a trial on our website. We send marketing emails only with your separate consent, and every one of them has an unsubscribe link."
+      fact_ids: []
+      note: причина и отписка одной ссылкой
+  sources:
+  - 08-russian-legal-typography/01 §8.2
+  - "ux 06/04 §3.8, §8.1"
+  date: '2026-09-24'
+- id: image-alt
+  site_slot: ''
+  name: alt картинки
+  purpose: "Что изображено и зачем картинка на странице — для читалок и поиска; правила доставки — ai-media."
+  rules_owner: "ai-media — ../ai-media/10-web-integration/01-images-delivery.md §8"
+  section_roles: [hero, case-studies, team, portfolio, product-demo]
+  genres: [landing, site-page, article]
+  genre: landing
+  ux_role: alt
+  kimi: ''
+  length:
+    ru:
+      words: {min: 3, target: 10, max: 20}
+      provisional: true
+      source: "правило E по ai-media 10/01 §8: одно предложение; декоративная — пустой alt"
+    en:
+      words: {min: 3, target: 10, max: 20}
+      provisional: true
+      source: "правило E по ai-media 10/01 §8: одно предложение; декоративная — пустой alt"
+  structure: "Кто или что + действие или состояние + деталь, важная для страницы; декоративная картинка — пустой alt."
+  formula_ids: []
+  rules:
+  - "Правила — ai-media 10/01 §8; люди и объекты на фото — только настоящие, с согласием (B2 person, H §7)."
+  bans:
+  - "«Изображение», «фото», «картинка»; alt-реклама («лучший ремонт в городе»)."
+  fact_required: if-claim
+  claim_classes: [fact-property]
+  legal_rules: [COPY-L-SUP-01]
+  lint_markers: []
+  examples:
+    ru:
+      facts: otves
+      bad: Фото счастливого клиента в лучшей квартире города
+      good: "Прораб Сергей Лапин проверяет уровень пола в квартире перед укладкой плитки"
+      fact_ids: [foreman-lapin]
+      section_role: team
+      note: что происходит на настоящем фото
+    en:
+      facts: okoshko
+      bad: Image of a happy customer using our amazing app
+      good: Booking link settings with three services and two stylists
+      fact_ids: []
+      section_role: product-demo
+      note: что на скриншоте
+  sources:
+  - "../ai-media/10-web-integration/01-images-delivery.md §8"
+  date: '2026-09-24'
+- id: in-image-text
+  site_slot: ''
+  name: Строка в картинке
+  purpose: "Короткая надпись, запечённая в картинку (OG-шаблон, баннер): ≤ 3 строк, ≤ 40 знаков; факты — как в тексте страницы."
+  rules_owner: "ai-media — ../ai-media/05-prompting/03-asset-spec-and-dialects.md §7"
+  section_roles: [hero]
+  genres: [landing]
+  genre: landing
+  ux_role: ''
+  kimi: ''
+  length:
+    ru:
+      chars: {min: 8, target: 25, max: 40}
+      provisional: true
+      source: "ai-media 05/03 §7: ≤ 3 строк, ≤ 40 знаков"
+    en:
+      chars: {min: 8, target: 25, max: 40}
+      provisional: true
+      source: "ai-media 05/03 §7: ≤ 3 строк, ≤ 40 знаков"
+  structure: "Главное сообщение или цена коротко; дословно совпадает с текстом страницы и copy deck."
+  formula_ids: []
+  rules:
+  - "Правила — ai-media 05/03 §7; текст — HTML поверх фона там, где можно (ai-media 01/01 §2.1: OG — шаблон)."
+  - "Сверяется claims_check.py как текст страницы; alt картинки повторяет надпись дословно."
+  bans:
+  - "Превосходная степень и цены без условия (в картинке оговорку не видно — H, ст. 5 ч. 7)."
+  fact_required: if-claim
+  claim_classes: [price-discount, superlative]
+  legal_rules: [COPY-L-SUP-01, COPY-L-FREE-01, COPY-L-PRICE-03]
+  lint_markers: []
+  examples:
+    ru:
+      facts: otves
+      bad: "Лучший ремонт в городе по самым низким ценам!"
+      good: Ремонт под ключ от 9 800 ₽ за м²
+      fact_ids: [price-from-per-m2]
+      section_role: pricing
+      note: цена «от» из факта; состав — в тексте страницы рядом
+    en:
+      facts: okoshko
+      bad: "The #1 booking app in the world!"
+      good: 990 ₽ a month for one stylist
+      fact_ids: [price-master]
+      section_role: pricing
+      note: цена с единицей
+  sources:
+  - "../ai-media/05-prompting/03-asset-spec-and-dialects.md §7"
+  - "../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md §2.1"
+  date: '2026-09-24'
+- id: stat-source
+  site_slot: ''
+  name: "Источник и дата числа, рейтинга, подборки отзывов"
+  purpose: "Короткая строка «кто посчитал и когда» рядом с числом: делает доказательство проверяемым (на живых лендингах источник виден у 25 % доказательных утверждений — B2/04)."
+  proposal: true
+  proposal_note: "предложение B2 (x-vocabulary-proposals), принято E: источник и дата числа, рейтинга, подборки отзывов — requires_nearby фактов"
+  lint_as: stat-label
+  section_roles: [proof-stats, hero, testimonials, case-studies]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: caption
+  kimi: micro
+  length:
+    ru:
+      words: {min: 2, target: 4, max: 8}
+      provisional: true
+      source: "правило E: площадка или документ + дата"
+    en:
+      words: {min: 2, target: 4, max: 8}
+      provisional: true
+      source: "правило E: площадка или документ + дата"
+  structure: "«[площадка или документ], [дата]»: «Яндекс Карты, 01.09.2026», «CRM, акты на 01.09.2026», «Подборка: последние 6 отзывов с Яндекс Карт»."
+  formula_ids: []
+  rules:
+  - "Ставится у каждого скоропортящегося числа и у подборки отзывов (B2 §1.3, §5.2); ссылка на карточку площадки — лучше (внешнее сильнее своего)."
+  - "Текст совпадает с requires_nearby факта (claims_check COPY-F-NEARBY)."
+  bans:
+  - "«По данным исследований», «по мнению экспертов», «according to experts» — размытая атрибуция."
+  fact_required: always
+  claim_classes: [rating, fact-number, testimonial-quote]
+  legal_rules: [COPY-L-REV-01]
+  lint_markers: []
+  examples:
+    ru:
+      facts: otves
+      bad: по данным исследований
+      bad_companions:
+      - slot_type: stat-value
+        text: "4,9 из 5"
+      good: "Яндекс Карты, 01.09.2026"
+      fact_ids: [rating-yandex-maps]
+      section_role: proof-stats
+      companions:
+      - slot_type: stat-value
+        text: "4,8 из 5 — 214 оценок"
+      note: площадка и дата снимка
+    en:
+      facts: okoshko
+      bad: according to experts
+      bad_companions:
+      - {slot_type: stat-value, text: 4.9 out of 5}
+      good: "RuStore, as of 1 September 2026"
+      fact_ids: [rating-rustore]
+      section_role: proof-stats
+      companions:
+      - slot_type: stat-value
+        text: "4.7 out of 5, 860 ratings"
+      allow_warn: [COPY-F-NAME]
+      note: площадка и дата; COPY-F-NAME на «RuStore» — известное ложное
+  sources:
+  - "02-strategy-messaging/03 §1.3, §5.2, §6"
+  - "02-strategy-messaging/facts.schema.yaml (x-vocabulary-proposals)"
+  date: '2026-09-24'
+- id: price-old
+  site_slot: ''
+  name: Прежняя (зачёркнутая) цена
+  purpose: "Цена, по которой товар или услугу реально продавали в указанный период; без такого факта слот не заполняется."
+  proposal: true
+  proposal_note: "предложение B2, принято E: зачёркнутая «старая» цена — отдельный слот, чтобы use.not_in: [price-old] и правило H COPY-L-PRICE-04 работали"
+  lint_as: pricing-price
+  section_roles: [pricing, hero]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 1, target: 2, max: 4}
+      provisional: true
+      source: "правило E: как pricing-price"
+    en:
+      words: {min: 1, target: 2, max: 4}
+      provisional: true
+      source: "правило E: как pricing-price"
+  structure: "«[N] ₽» + период продаж по этой цене — в pricing-price-note."
+  formula_ids: []
+  rules:
+  - "Только цена, реально действовавшая (факт с valid.from и периодом); ЕС — минимальная за 30 дней до снижения (H §11)."
+  - "«Цена после предзаказа» — не старая цена: зачёркивать нельзя («Кварц», use.not_in: [price-old] — COPY-F-USE error)."
+  bans:
+  - "Зачёркнутая цена товара, который ещё не продавался; «было 11 900 ₽» без периода."
+  fact_required: always
+  claim_classes: [price-discount]
+  legal_rules: [COPY-L-PRICE-04, COPY-L-EU-01]
+  lint_markers: []
+  examples:
+    ru:
+      facts: kvarts
+      bad: 11 900 ₽
+      bad_fact_ids: [price-after-preorder]
+      good: "[PLACEHOLDER: цена, по которой лампу реально продавали, и период продаж]"
+      fact_ids: []
+      section_role: pricing
+      allow_warn: [art-placeholder, COPY-F-PLACEHOLDER]
+      note: "факта о прежней цене нет — слот пустой; «11 900 ₽ после предзаказа» — в pricing-price-note"
+    en:
+      facts: okoshko
+      bad: "Was 1,490 ₽"
+      good: "[PLACEHOLDER: price actually charged before and the period]"
+      fact_ids: []
+      section_role: pricing
+      allow_warn: [art-placeholder, COPY-F-PLACEHOLDER]
+      note: без факта о прежней цене — плейсхолдер
+  sources:
+  - 08-russian-legal-typography/01 §4.2
+  - "02-strategy-messaging/examples/facts-kvarts.yaml (price-after-preorder, not_in)"
+  date: '2026-09-24'
+- id: spec-row
+  site_slot: ''
+  name: "Строка характеристик: параметр — значение"
+  purpose: "Измеримое свойство товара или сервиса в табличной форме — для продуктовой страницы и сравнения тарифов."
+  proposal: true
+  proposal_note: "предложение B2 (specs, spec-row), принято E: строка характеристик для продуктовой страницы (Hallmark F3 Tabular spec sheet); роль секции specs — предложение к section_roles (site)"
+  lint_as: list-item
+  section_roles: [solution, pricing, comparison]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  kimi: body
+  length:
+    ru:
+      words: {min: 2, target: 5, max: 10}
+      provisional: true
+      source: "правило E: параметр + значение с единицей; у D метки характеристик («Zigbee», «LED-дисплей») размечены как card-body (опыт E/01)"
+    en:
+      words: {min: 2, target: 5, max: 10}
+      provisional: true
+      source: "правило E: параметр + значение с единицей; у D метки характеристик («Zigbee», «LED-дисплей») размечены как card-body (опыт E/01)"
+  structure: "«[параметр] — [значение с единицей]»: «Цветовая температура — 2700–5000 K»."
+  formula_ids: []
+  rules:
+  - "Значение и единица — из факта; диапазон «2700–5000 K» — с коротким тире без пробелов (H)."
+  - "Технические характеристики для экспертов — таблицей без сценария (formulas.yaml fact-scenario: avoid_when)."
+  bans:
+  - "«Инновационная система», «AI-powered» без механизма (fact-property без выдержки — COPY-F-PROPERTY)."
+  fact_required: always
+  claim_classes: [fact-property, fact-number, origin]
+  legal_rules: [COPY-L-ECO-02]
+  lint_markers: [COPY-M-MKT-08]
+  examples:
+    ru:
+      facts: kvarts
+      bad: Инновационная система умного освещения
+      good: Цветовая температура — 2700–5000 K
+      fact_ids: [color-temperature]
+      section_role: solution
+      note: параметр и значение из факта
+    en:
+      facts: okoshko
+      bad: Cutting-edge AI-powered notifications
+      good: "Reminders — Telegram, 24 hours and 2 hours before the visit"
+      fact_ids: [reminders]
+      section_role: solution
+      note: канал и время из факта
+  sources:
+  - "02-strategy-messaging/facts.schema.yaml (x-vocabulary-proposals)"
+  - Hallmark component-cookbook F3
+  - 99-raw/experiments/E/01-slot-lengths
+  date: '2026-09-24'
+- id: image-caption
+  site_slot: ''
+  name: Подпись к изображению
+  purpose: "Что на фото или скриншоте, где и когда, какая задача клиента — видимая подпись, в отличие от alt."
+  proposal: true
+  proposal_note: "предложение E (вслед за J: asset_ref image-caption в схеме copy-deck v1): подпись к фото работы, объекта, скриншоту; alt — отдельный слот"
+  lint_as: stat-label
+  section_roles: [portfolio, case-studies, product-demo, team]
+  genres: [landing, site-page, article]
+  genre: landing
+  ux_role: caption
+  kimi: micro
+  length:
+    ru:
+      words: {min: 3, target: 8, max: 16}
+      provisional: true
+      source: "правило E: одна строка подписи"
+    en:
+      words: {min: 3, target: 8, max: 16}
+      provisional: true
+      source: "правило E: одна строка подписи"
+  structure: "«[объект], [место или задача], [дата]»; для портфолио — задача клиента его словами ([V:1UVkeqxuNRs 39:02])."
+  formula_ids: []
+  rules:
+  - "Фото — настоящее, от заказчика, с согласием на показ (B2: asset, permission); сгенерированное — с меткой (ai-media 12/02 §7)."
+  - "Подпись не дублирует alt: alt — что видно, подпись — контекст (где, когда, зачем)."
+  bans:
+  - "«Наша работа», «Our amazing work», стоковое фото с подписью о «клиенте»."
+  fact_required: if-claim
+  claim_classes: [fact-number, fact-property]
+  legal_rules: []
+  lint_markers: []
+  examples:
+    ru:
+      facts: otves
+      bad: Наша лучшая работа
+      good: "Двушка 54 м² в Сормове после ремонта, май 2026"
+      fact_ids: [case-two-room-47-days]
+      section_role: case-studies
+      note: "объект, место и дата из кейса"
+    en:
+      facts: okoshko
+      bad: Our amazing work
+      good: "Booking link settings: services, stylists and working hours"
+      fact_ids: []
+      section_role: product-demo
+      note: что на скриншоте
+  sources:
+  - "[V:1UVkeqxuNRs 39:02]"
+  - 10-templates-recipes/copy-deck.schema.json (asset_ref)
+  - Hallmark component-cookbook H6
+  date: '2026-09-24'
+- id: announcement
+  site_slot: ''
+  name: Строка объявления над навигацией
+  purpose: "Короткое объявление на всех страницах: акция с датой окончания, событие, важное изменение условий."
+  proposal: true
+  proposal_note: "предложение E: строка объявления над навигацией (Hallmark N12 Announcement banner) — акция с датой, событие, изменение; как баннер — реклама с пометкой (H §8.3)"
+  lint_as: cta-note
+  section_roles: [hero]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: hint
+  kimi: micro
+  length:
+    ru:
+      words: {min: 4, target: 9, max: 16}
+      provisional: true
+      source: "правило E: одна строка на телефоне (≈ 40–45 знаков) допускает перенос на две"
+    en:
+      words: {min: 4, target: 9, max: 16}
+      provisional: true
+      source: "правило E: одна строка на телефоне (≈ 40–45 знаков) допускает перенос на две"
+  structure: "«[что] + [условие] + [до какой даты]»; ссылка — на условия."
+  formula_ids: [four-u]
+  rules:
+  - "Срок — реальная дата из факта, условия — в той же строке (H COPY-L-PROMO-02, FREE-01); после даты строка снимается."
+  - "Баннер или промо-строка чужого товара — реклама: пометка «Реклама» и рекламодатель (38-ФЗ ст. 18.1; COPY-L-AD-01)."
+  bans:
+  - "«Успейте!», «Только сегодня!», таймер без реального дедлайна (ux 06/04 §8.1 п. 10)."
+  fact_required: always
+  claim_classes: [price-discount, promo-deadline]
+  legal_rules: [COPY-L-PROMO-02, COPY-L-FREE-01, COPY-L-AD-01]
+  lint_markers: [COPY-M-MKT-12]
+  examples:
+    ru:
+      facts: otves
+      bad: "Успейте! Скидки только сегодня!"
+      good: "−10 % на работы при договоре до 31 октября 2026 года"
+      fact_ids: [promo-october-10]
+      section_role: pricing
+      note: на что и до какой даты
+    en:
+      facts: okoshko
+      bad: "Hurry! Limited time offer!"
+      good: Pay for 12 months in advance and get 2 months free
+      fact_ids: [annual-discount]
+      section_role: pricing
+      note: условие в той же строке
+  sources:
+  - Hallmark component-cookbook N12
+  - "08-russian-legal-typography/01 §4.3, §8.3"
+  - ux 06/04 §8.1
+  date: '2026-09-24'
+crosswalk:
+  note: "Соответствие slot_type → слоты ассетов ai-media, элементы copy.md kimi, архетипы секций Hallmark. site_slot (id слота blocks.yaml site) — заполнить после S1."
+  ai_media_asset_slots:
+    source: "../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md §2.1 (19 слотов ассетов)"
+    map:
+    - asset_slot: Hero
+      text_slots: [eyebrow, headline, subheadline, hero-proof, cta-label, cta-note, image-alt, in-image-text]
+    - asset_slot: Логотипы клиентов
+      text_slots: [logos-caption, image-alt]
+      note: логотипы не генерируются; без согласий блок не выводится
+    - asset_slot: Фичи (3–6 блоков)
+      text_slots: [card-title, card-body, image-alt, image-caption]
+    - asset_slot: "«Как это работает», интеграции"
+      text_slots: [step-title, step-body, section-lead, image-alt]
+    - asset_slot: "Витрина, галерея работ"
+      text_slots: [image-caption, case-title, image-alt]
+    - asset_slot: Отзывы
+      text_slots: [testimonial-quote, testimonial-attribution, stat-source, image-alt]
+      note: "фото автора — только настоящее, с согласием"
+    - asset_slot: "Кейсы, цифры"
+      text_slots: [case-title, case-summary, case-result, stat-value, stat-label, stat-source]
+    - asset_slot: Тарифы
+      text_slots: [pricing-plan-name, pricing-plan-summary, pricing-price, price-old, pricing-price-note, pricing-feature, badge]
+    - asset_slot: CTA-полоса
+      text_slots: [section-title, cta-label, cta-note]
+    - asset_slot: Подвал
+      text_slots: [footer-tagline, footer-legal, nav-label]
+    - asset_slot: "Фоны секций, текстуры"
+      text_slots: []
+      note: текста нет; alt декоративной картинки — пустой
+    - asset_slot: OG и соцсети
+      text_slots: [og-title, og-description, og-image-alt, in-image-text]
+    - asset_slot: Фавиконы
+      text_slots: []
+      note: текста нет
+    - asset_slot: "Команда, «о нас»"
+      text_slots: [card-title, card-body, body, image-alt, image-caption]
+    - asset_slot: Обложки блога
+      text_slots: [article-title, image-alt, in-image-text]
+    - asset_slot: Галерея товара (PDP)
+      text_slots: [spec-row, image-alt, image-caption, pricing-price]
+    - asset_slot: Key visual кампании
+      text_slots: [headline, in-image-text, image-alt]
+    - asset_slot: Инфографика карточки маркетплейса (RU)
+      text_slots: [in-image-text]
+      note: "вне рамок базы (маркетплейс); строки ≤ 40 знаков — ai-media 05/03 §7"
+    - asset_slot: "404, пустые состояния, онбординг"
+      text_slots: []
+      note: "микрокопи — ux 07/02 §5, §15"
+  kimi_copy_md:
+    source: "../kimi-research/07-brief-handoff/templates/copy.md (ключи [элемент]: текст по секциям site.sections[].id) и brief.yaml"
+    map:
+      h: [headline, section-title, card-title, step-title, case-title, pricing-plan-name, faq-q, form-title, article-title, article-heading]
+      lead: [subheadline, section-lead, form-lead, article-lead]
+      body: [body, list-item, card-body, step-body, stat-value, testimonial-quote, case-summary, case-result, pricing-plan-summary, pricing-price, price-old, pricing-feature, spec-row, guarantee-text, objection-answer, comparison-row, faq-a, article-summary, article-paragraph, geo-answer, definition]
+      btn: [cta-label, cta-secondary-label]
+      micro: [eyebrow, hero-proof, cta-note, stat-label, stat-source, logos-caption, testimonial-attribution, pricing-price-note, badge, form-next-steps, form-consent, form-success, nav-label, footer-tagline, footer-legal, article-author, image-caption, announcement]
+      brief.yaml product.goal: [promise]
+      head (мета): [meta-title, meta-description, og-title, og-description, og-image-alt]
+      assets alt / caption: [image-alt, image-caption]
+      "text.mode: in_image": [in-image-text]
+      вне пакета K3 (письма): [email-subject, email-preheader, email-heading, email-body, email-cta-label, email-footer]
+  hallmark_archetypes:
+    source: "../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md (MIT; клон 2026-09-23)"
+    map:
+    - archetype: H1 Marquee
+      text_slots: [headline]
+      note: "манифест-hero: подзаголовка и кнопки в первом экране нет — исключение длины headline"
+    - archetype: H2 Split diptych
+      text_slots: [headline, subheadline, cta-label, cta-note]
+    - archetype: H3 Quote led
+      text_slots: [testimonial-quote, testimonial-attribution, stat-source]
+      note: "цитата — только дословная, с разрешением (B2)"
+    - archetype: H4 Stat led
+      text_slots: [stat-value, stat-label, stat-source]
+    - archetype: H5 Letter hero
+      text_slots: [body]
+      note: "письмо от первого лица основателя — только из фактов; кнопок в первом экране нет"
+    - archetype: H6 Photographic fold
+      text_slots: [image-caption, image-alt]
+    - archetype: H7 Demo video / H8 Mockup split / H9 Illustration
+      text_slots: [headline, subheadline, cta-label, image-alt]
+    - archetype: S1 Left margin numbered
+      text_slots: [eyebrow, section-title]
+      note: "номера «01 —» база не пишет в текст (taste, C STR-10): нумерация — вёрстка"
+    - archetype: S2–S5 Section heads
+      text_slots: [section-title, section-lead]
+    - archetype: F1 Bento / F2 Sticky scroll
+      text_slots: [card-title, card-body, image-caption]
+    - archetype: F3 Tabular spec sheet
+      text_slots: [spec-row]
+    - archetype: F4 Step sequence
+      text_slots: [step-title, step-body]
+    - archetype: F5 Annotated screenshot
+      text_slots: [image-caption, list-item]
+    - archetype: F6 Product card grid
+      text_slots: [card-title, pricing-price, cta-label]
+    - archetype: C1 Outlined chip
+      text_slots: [cta-label]
+    - archetype: C2 Inline form as CTA
+      text_slots: [form-lead, cta-label, form-consent]
+      note: "«Submit →» из cookbook — против правил базы: кнопка называет результат, стрелка не текст"
+    - archetype: C3 Typographic link
+      text_slots: [cta-secondary-label]
+    - archetype: C4 Sticky bottom bar
+      text_slots: [cta-label, cta-note]
+    - archetype: T1 Pull quote with marginalia
+      text_slots: [testimonial-quote, testimonial-attribution, stat-source]
+    - archetype: T2 Logo wall hairline
+      text_slots: [logos-caption]
+    - archetype: T3 Single huge quote
+      text_slots: [testimonial-quote, testimonial-attribution]
+    - archetype: T4 Numbered stat strip
+      text_slots: [stat-value, stat-label, stat-source]
+    - archetype: Ft1 Mast headed / Ft5 Statement / Ft6 Letter close
+      text_slots: [footer-tagline, footer-legal]
+    - archetype: Ft2 Inline rule / Ft4 Dense typographic
+      text_slots: [footer-legal]
+    - archetype: Ft3 Index style category list
+      text_slots: [nav-label]
+    - archetype: Ft7 Newsletter first
+      text_slots: [form-title, form-lead, form-consent, cta-label]
+    - archetype: "N1–N11, N13 Navigation"
+      text_slots: [nav-label, cta-label]
+    - archetype: N12 Announcement banner
+      text_slots: [announcement]
+  temp_vocabulary_kimi_ux:
+    note: "ux_role и kimi каждого типа — в записи slot_types (из временного словаря, для предложений — от E)"

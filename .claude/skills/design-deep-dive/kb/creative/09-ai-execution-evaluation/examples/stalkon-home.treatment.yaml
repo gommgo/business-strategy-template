@@ -1,0 +1,66 @@
+# Пример treatment v1 — «Сталькон», главная корпоративного многостраничника B2B (L1). Учебный; в плане site treatment пуст — заполнен с нуля.
+# creative-research · 09-ai-execution-evaluation · агент I · волна 3 · 2026-09-24.
+# Art-direction для «Сталькона» у A нет: тезис движения задан здесь (в проекте он берётся из art-direction.motion_system).
+# Показывает: L1 без пиков (корпоративная главная — ритм акцентов), класс transition (карточка кейса → страница кейса, View Transitions
+# между документами), повторяемость перехода в многостраничнике (250–400 мс — E 02 §8.3).
+overlay_version: "1.0"
+checked_at: "2026-09-24"
+example: true
+plan: ../../../site/10-playbooks-contracts/examples/corporate-b2b-stalkon/plans/home.yaml
+page:
+  motion_spec_ref: stalkon-home.motion-spec.yaml
+  motion_level: expressive
+  motion_system:
+    thesis: "Сталь не суетится: страница стоит, двигается только путь от карточки объекта к его кейсу — обложка переезжает на новую страницу."
+    character: [heavy, precise]
+    primitives: [fade-up, none]
+    library: [css, view-transitions]
+    smooth_scroll: false
+    page_transitions: view-transitions
+    reduce_toggle: false
+    entrance_system: "первый экран один раз (фото объекта оседает сдвигом, текст поддержки — подъём); ниже без появления; переход карточка кейса → кейс"
+  theme: light
+  tokens_ref: ../../04-visual-language/marketing-tokens.json
+  peaks: []
+  accents: [hero, final-cta]
+  signature_sections: [case-studies]
+  status: draft
+sections:
+  header: {level: L0, visual_role: chrome, motion_level: subtle, visual_variant: solid-minimal}
+  hero:
+    level: L1
+    visual_role: accent
+    motion_level: subtle
+    visual_variant: split-framed
+    effects:
+      - {ref: "effect:hero-entrance-once", target: hero, trigger: load, purpose: support, class: one-shot, impl: css, moments: [hero-photo-settle, hero-copy-rise]}
+    background: {kind: surface, tone: light, token: color.surface.base}
+    composition: {align: left, text_media: text-left, bleed: none, height: partial}
+    display_role: display-m
+    reduce: {strategy: final-state}
+    mobile: {strategy: separate-asset, note: "фото объекта 4:5 под заголовком"}
+    lcp_note: "LCP — фото объекта (hero.visual lcp_candidate): только transform; H1 без анимации"
+    motion_spec_ref: stalkon-home.motion-spec.yaml#/sections/hero
+    status: draft
+  services: {level: L0, visual_role: support, motion_level: none, visual_variant: cards-with-price-quiet}
+  proof-stats: {level: L0, visual_role: support, motion_level: none, visual_variant: numbers-row-quiet, notes: "без счётчиков; числа — facts.yaml"}
+  case-studies:
+    level: L1
+    visual_role: support
+    motion_level: expressive
+    visual_variant: grid-media-first
+    effects:
+      - {ref: "effect:page-transition", target: case-studies.case, trigger: click, purpose: signature, class: transition, impl: css, moments: [case-cover-to-page],
+         note: "обложка карточки становится hero страницы кейса (общий элемент); переход повторяется на каждом клике — короткий"}
+    reduce: {strategy: crossfade, note: "@view-transition навигация отключена при reduce — мгновенная смена страницы"}
+    mobile: {strategy: same}
+    motion_spec_ref: stalkon-home.motion-spec.yaml#/sections/case-studies
+    status: draft
+  about: {level: L0, visual_role: calm, motion_level: none, visual_variant: short-quiet}
+  final-cta:
+    level: L1
+    visual_role: accent
+    motion_level: none
+    visual_variant: final-inverse
+    background: {kind: inverse, tone: dark, token: color.surface.inverse, text_contrast: aa}
+  footer: {level: L0, visual_role: chrome, motion_level: none, visual_variant: minimal-quiet}

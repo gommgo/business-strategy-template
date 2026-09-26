@@ -1,0 +1,110 @@
+# hero-floating-object.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/01-hero-recipes.md#3; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+recipe_version: 1
+checked_at: '2026-09-25'
+author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
+id: hero-floating-object
+title: 'Hero с парящим объектом: кадр на ключе → i2v fixed_lens → кеинг → stacked alpha → параллакс'
+doc: 14-recipes/01-hero-recipes.md#3
+task_codes:
+- VID-ALPHA
+- IMG-CUTOUT
+- IMG-EDIT
+slot: hero
+ladder: video
+ai_fit: conditional
+legal_row: 4
+route:
+  source: VID-ALPHA
+  steps:
+  - role: объект на ключе (объект вымышленный)
+    model: openai/gpt-image-2.5-sunburst
+    params:
+      image_resolution: 1K
+      aspect_ratio: '16:9'
+    price_rub: 4.0
+    test: M-07
+  - role: объект на ключе правкой сцены
+    model: google/gemini-3.1-flash-image-preview
+    params:
+      image_resolution: 1K
+    price_rub: 4.8
+    test: H-07
+  - role: петля на ключе
+    model: bytedance/seedance-1.5-pro
+    params:
+      resolution: 480p
+      duration: '4'
+      generate_audio: 'false'
+      fixed_lens: 'true'
+      aspect_ratio: '16:9'
+    images: '[B, B]'
+    price_rub: 5.25
+    test: I-06
+    note: 'фаза 5: I-06 не запускался; Seedance 1.5 Pro на ключе наезжает (площадь ×1,8–2,1 в 3 из 4, D2-11); Grok 1.5 с запретами движения — дрейф 8,1 % (D2-08)'
+spec:
+  example: 14-recipes/examples/demo-landing/brand/specs/M-07b-floating-beans-loop.spec.json
+  must:
+  - 'ключ по оттенку объекта: золото/бронза/жёлтое/зелёное → #FF00FF, красное/розовое/фиолетовое → #00B140'
+  - 'motion.forbid: zoom, spin, reposition_subject, camera_move'
+  ancestors:
+  - ../../scripts/ai-media/tests/fixtures/D02/E1.spec.json
+  - ../../scripts/ai-media/tests/fixtures/D02/E4.spec.json
+compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+  <тест> --agent <агент> --out 99-raw/phase5/jobs/<файл>.jsonl
+phase5:
+  jobs:
+  - 99-raw/phase5/jobs/M-07a-floating-beans-chroma.jsonl
+  - 99-raw/phase5/jobs/M-07b-floating-beans-loop.jsonl
+  - 99-raw/phase5/jobs/I-06-alpha-green-fixedlens.json
+  reuse:
+  - I-06
+  - H-07
+  - D2-08
+  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
+steps:
+- id: chroma
+  cmd: python3 ../../scripts/ai-media/video_loop_check.py chroma out.mp4 --key auto
+  status: checked
+  evidence: 99-raw/experiments/I/03-chroma-key
+- id: key
+  cmd: ffmpeg chromakey (similarity 0,10–0,15, blend 0,08) + despill geq G ≤ max(R, B)
+  status: checked
+  evidence: 99-raw/experiments/I/03-chroma-key
+- id: halo
+  cmd: python3 ../../scripts/ai-media/alpha_check.py halo keyed.png --bg "#E8E8E8"
+  status: checked
+  evidence: 99-raw/experiments/H/01-background-removal
+- id: stacked
+  cmd: ffmpeg … alphaextract … vstack → libsvtav1 -crf 40 (+ HEVC, H.264)
+  status: checked
+  evidence: 99-raw/experiments/J/05-assets/make_alpha.py
+accept:
+  asset_audit:
+    mode: video-alpha
+    verdict: без fail
+  thresholds:
+  - video_alpha.bg_ok_min
+  - video_alpha.key_de
+  - video_alpha.obj_drift_max_pct_w
+  - cutout.halo_px_max
+delivery:
+  template: 10-web-integration/pages/03-alpha-object-hero.html
+  formats:
+  - stacked av1
+  - stacked hevc
+  - stacked h264
+  - avif с альфой (статика)
+  motion: ≤ 5 с, стоп на кадре 0, повтор по наведению
+provenance:
+  dst: trained
+  visible_label: false
+numbers:
+  stacked_av1_kb_2s_160x272: 12.5
+  still_avif_alpha_kb: 2.2
+  phase5_d2_08_forbid: 'Grok 1.5 на ключе: запреты предложениями — дрейф объекта 8,1 % против 19,1 % ширины, масштаб ±1,2 % (n = 2) — 99-raw/phase5/runs/3-prompt-form/README.md'
+  phase5_alpha_image: 'картинка с альфой генерацией: Qwen 2.1 transparent 63,6 % прозрачных (T2); GPT 2.5 transparent через RouterAI 1,45 ₽ (H-03): мех — годен, стекло — нет (облако фона до 152 px, внутри тела 0 % полупрозрачных) — 99-raw/phase5/runs/S5-analysis/H-03_alpha.json'
+status:
+  local: checked
+  generation: unchecked
+sources:
+- 91-videos/digests/BVMuRw8BgJg.md

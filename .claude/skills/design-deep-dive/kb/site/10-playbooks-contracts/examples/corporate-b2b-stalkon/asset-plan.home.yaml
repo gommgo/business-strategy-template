@@ -1,0 +1,86 @@
+# asset-plan.yaml — КАРКАС из home.yaml (plan_to_assets.py, site-research J). Формат — ai-media 01/01 §8.
+# TODO-поля заполняют Claude (subject, goal) и ai-media (size, formats, max_kb, маршрут задачи); бюджеты — профиль P.
+plan_version: 1
+checked: '2026-09-24'
+page:
+  id: home
+  page_type: corporate
+  locale: ru-RU
+  audience: 'home: запрос расчёта или переход к нужному разделу'
+  x_site:
+    page_plan: stalkon/home
+    page_type: home-multipage
+    mapping: crosswalk §8 (broader)
+brand:
+  palette_tokens: TODO art-direction creative
+  style_passport: TODO
+  photo_language: TODO
+  forbidden_markers: []
+budgets:
+  first_screen_kb:
+    mobile: 2000
+    desktop: 3500
+    basis: 'S-creative-C1; M SaaS десктоп медиана 3 824, телефон 3 350; WA: 2–3 МБ — CWV прошли 45 % телефонных главных'
+  session_kb:
+    mobile: 5000
+    desktop: 10000
+    basis: S-creative-C1; ai-media лидеры SaaS сессия 7,1 МБ
+policy:
+  no_ai_subjects:
+  - hero-visual
+  disclosure: per-slot
+slots:
+- id: header-logo
+  section: header
+  role: informational
+  goal: показать brand-logo
+  ladder: svg
+  source: generate
+  task_codes: []
+  subject: TODO Claude и ai-media (паспорт визуала, art-direction)
+  must_include: []
+  must_avoid: []
+  variants:
+  - id: default
+    ratio: TODO
+    size: TODO ai-media
+    formats: TODO ai-media
+    max_kb: TODO ai-media
+  motion:
+    type: none
+  delivery:
+    lcp_candidate: false
+    loading: lazy
+  alt: 'TODO: id текстового слота image-alt'
+  ai_fit: conditional
+- id: hero-visual
+  section: hero
+  role: informational
+  goal: показать hero-visual
+  ladder: image
+  source: real
+  task_codes: []
+  subject: TODO Claude и ai-media (паспорт визуала, art-direction)
+  must_include: []
+  must_avoid: []
+  variants:
+  - id: desktop
+    ratio: '16:9'
+    size: TODO ai-media
+    formats: TODO ai-media
+    max_kb: TODO ai-media
+  - id: mobile
+    ratio: '4:5'
+    size: TODO ai-media
+    formats: TODO ai-media
+    max_kb: TODO ai-media
+  motion:
+    type: none
+  delivery:
+    lcp_candidate: true
+    loading: eager
+    fetchpriority: high
+  alt: 'TODO: id текстового слота image-alt'
+  ai_fit: forbidden
+  note: 'ждём материалы заказчика (source: customer-tbd в плане); подлинность real-only: люди, работы, товар, скриншоты —
+    только настоящие (I 08/02 §1.2)'

@@ -1,0 +1,355 @@
+# facts-service-renovation.yaml — пример 2: услуга с лидогенерацией (ремонт квартир под ключ), приоритет 1 заказчика
+# text-research · B2 · 2026-09-24 · формат: ../facts.schema.yaml (facts_version 1)
+#
+# ВЫМЫШЛЕННАЯ компания «Отвес» (Нижний Новгород) и синтетические данные: имена, числа, адреса и ссылки — для примера
+# формата, не для публикации. Ссылки на площадки — шаблоны вида <id-организации>.
+# Что показывает пример: все виды доказательств лидогенерации услуг (число из CRM, рейтинг площадки со снимком,
+# отзыв с разрешением и журналом правок, кейс без имени клиента, гарантия по договору, цена «от» со сроком, акция с
+# датой окончания, человек команды с согласием, реквизиты в missing как ворота публикации), разрешение «pending»,
+# проектный never_claim с lift: with-fact и английскую адаптацию canonical.
+
+facts_version: 1
+date: "2026-09-24"
+site: otves-remont-nn
+lang: ru
+jurisdiction: ru
+status: draft
+owner: {role: "директор (заказчик)", contact: "почта заказчика из брифа"}
+collected_by: "редактор по анкете proof-intake.md"
+intake: {form: "proof-intake.md@2026-09-24", asked: "2026-09-10", answered: "2026-09-18", channel: "общий документ + созвон с записью"}
+never_claim_defaults: ru-default-1
+
+entities:
+  - {id: company-otves, type: company, names: ["«Отвес»", "Отвес", "студия ремонта «Отвес»"]}
+  - {id: city-nn, type: place, names: ["Нижний Новгород", "Нижнем Новгороде", "Нижегородская область"]}
+  - {id: platform-yandex-maps, type: platform, names: ["Яндекс Карты", "Яндекс Картах", "Яндекс.Карты"]}
+  - {id: person-lapin, type: person, names: ["Сергей Лапин", "Сергей"], fact_id: foreman-lapin}
+  - {id: person-anna-k, type: person, names: ["Анна К.", "Анна"], fact_id: review-anna-k}
+
+facts:
+  - id: flats-completed
+    kind: metric
+    claim_class: [fact-number]
+    verbatim:
+      - "1 146 квартир сдали с 2014 года"
+      - "1 146 квартир"
+      - "Более 1 100 квартир с 2014 года"
+    canonical: "С 2014 по сентябрь 2026 года студия «Отвес» сдала 1 146 квартир в Нижнем Новгороде (данные CRM на 1 сентября 2026 года)."
+    values:
+      - {value: 1146, unit: pcs, what: "квартиры, сданные по акту", as_of: "2026-09-01"}
+      - {value: 2014, unit: year, what: "год начала работы"}
+    entities: [company-otves, city-nn]
+    source: {type: customer-system, who: "заказчик (директор)", where: "выгрузка CRM, актов сдачи-приёмки", date: "2026-09-01", document: "crm-export-2026-09-01.xlsx, лист «Акты»", quote: "Подписанных актов сдачи: 1146 (с 03.2014)", derivation: direct}
+    verification: {status: verified, by: "редактор", date: "2026-09-18", method: "число строк выгрузки совпало с отчётом CRM; выборочно 10 актов"}
+    permission: {status: not-required}
+    use: {page_types: [landing-lead-services, home-multipage, about-page], section_roles: [hero, proof-stats, about], slot_types: [hero-proof, stat-value, stat-label, body]}
+    valid: {review_by: "2026-12-01"}
+    notes: "«Более 1 100» — округление вниз допустимо; «1 200+» — нет (текст не может быть больше факта)."
+    translations:
+      en: {canonical: "From 2014 to September 2026, Otves renovated and handed over 1,146 apartments in Nizhny Novgorod (CRM data as of 1 September 2026).", note: "адаптация; числа по-английски с запятой"}
+    lang: ru
+
+  - id: rating-yandex-maps
+    kind: rating
+    claim_class: [rating]
+    verbatim:
+      - "4,8 из 5 на Яндекс Картах — 214 оценок"
+      - "Рейтинг 4,8 на Яндекс Картах"
+    canonical: "По данным Яндекс Карт на 1 сентября 2026 года, рейтинг студии «Отвес» — 4,8 из 5 по 214 оценкам."
+    values:
+      - {value: 4.8, unit: stars, scale: 5, count: 214, what: "рейтинг организации", as_of: "2026-09-01"}
+    entities: [company-otves, platform-yandex-maps]
+    source: {type: platform, who: "Яндекс Карты", where: "карточка организации", date: "2026-09-01", url: "https://yandex.ru/maps/org/<id-организации>/reviews/", derivation: direct}
+    verification: {status: verified, by: "редактор", date: "2026-09-18", method: "снимок карточки сохранён: evidence/ym-2026-09-01.png"}
+    permission: {status: not-required, form: platform-terms}
+    use:
+      section_roles: [hero, testimonials, proof-stats]
+      slot_types: [hero-proof, stat-value, stat-label, stat-source]
+      requires_nearby: "источник и дата: «Яндекс Карты, 01.09.2026» или ссылка на карточку"
+    valid: {from: "2026-09-01", until: "2026-12-01", review_by: "2026-11-01"}
+    schema_org: {type: AggregateRating, note: "Google не показывает звёзды для самохвальных отзывов об организации на её сайте — решают G и site H"}
+    lang: ru
+
+  - id: review-anna-k
+    kind: testimonial
+    claim_class: [testimonial-quote]
+    verbatim:
+      - "«Сдали двушку за 47 рабочих дней — на три дня раньше, чем в договоре. Прораб каждый вечер присылал фото… Смета не выросла ни на рубль»"
+    canonical: "Анна К. (Нижний Новгород, ремонт двухкомнатной квартиры, 2026): «Сдали двушку за 47 рабочих дней — на три дня раньше, чем в договоре. Прораб каждый вечер присылал фото… Смета не выросла ни на рубль»."
+    values:
+      - {value: 47, unit: days, what: "срок ремонта, рабочие дни", qualifier: "по словам клиента"}
+    entities: [person-anna-k, company-otves]
+    source: {type: platform, who: "Анна К. (клиент)", where: "отзыв на Яндекс Картах", date: "2026-06-14", url: "https://yandex.ru/maps/org/<id-организации>/reviews/?review=<id>", quote: "Сдали двушку за 47 рабочих дней — на три дня раньше, чем в договоре. Прораб каждый вечер присылал фото в вотсап, я ни разу не приезжала без повода. Смета не выросла ни на рубль, хотя я меняла плитку", derivation: direct}
+    verification: {status: verified, by: "редактор", date: "2026-09-18", method: "договор № 2026-041 и акт от 2026-05-30 у заказчика; срок по договору — 50 рабочих дней"}
+    permission:
+      status: granted
+      subject: "Анна К. (автор отзыва)"
+      form: written-email
+      scope: [site]
+      document: "письмо от 2026-09-16 в архиве заказчика"
+      date: "2026-09-16"
+      shows: [first-name, initials, city]
+      pd_consent: true
+      image_consent: false
+    attribution: {name: "Анна К.", display: first-name-initial, role: "ремонт двухкомнатной квартиры", city: "Нижний Новгород", verified_customer: true, relation: customer}
+    original_ref: "evidence/reviews/ym-2026-06-14-anna-k.txt"
+    edits:
+      - {type: ellipsis, what: "сокращено «в вотсап, я ни разу не приезжала без повода»", approved_by: "Анна К.", date: "2026-09-16"}
+      - {type: trim-end, what: "убран хвост «, хотя я меняла плитку» — смысл не меняется", approved_by: "Анна К.", date: "2026-09-16"}
+    use: {section_roles: [testimonials, hero, case-studies], slot_types: [testimonial-quote, testimonial-attribution, hero-proof]}
+    valid: {review_by: "2027-06-14"}
+    lang: ru
+
+  - id: review-igor-pending
+    kind: testimonial
+    claim_class: [testimonial-quote]
+    verbatim:
+      - "«Бригада убирала за собой каждый день, соседи ни разу не жаловались»"
+    canonical: "Игорь (Нижний Новгород): «Бригада убирала за собой каждый день, соседи ни разу не жаловались»."
+    entities: [company-otves]
+    source: {type: interview, who: "Игорь (клиент)", where: "интервью после сдачи объекта, запись созвона", date: "2026-08-22", quote: "бригада убирала за собой каждый день, соседи ни разу не жаловались", derivation: direct}
+    verification: {status: verified, by: "редактор", date: "2026-09-18", method: "запись созвона у заказчика"}
+    permission: {status: pending, subject: "Игорь (клиент)", form: written-email, shows: [first-name, city], pd_consent: false}
+    attribution: {name: "Игорь", display: first-name-initial, city: "Нижний Новгород", verified_customer: true, relation: customer}
+    original_ref: "evidence/interviews/2026-08-22-igor.txt"
+    use: {section_roles: [testimonials], slot_types: [testimonial-quote, testimonial-attribution]}
+    notes: "До письменного разрешения не публикуется: сверка даёт error COPY-F-PERMISSION; как голос клиента (voc) — можно парафразом без кавычек."
+    lang: ru
+
+  - id: case-two-room-47-days
+    kind: case
+    claim_class: [fact-number, testimonial-quote]
+    verbatim:
+      - "Двушка 54 м² в Сормове: ремонт под ключ за 47 рабочих дней при сроке по договору 50"
+      - "47 рабочих дней вместо 50 по договору"
+    canonical: "Ремонт двухкомнатной квартиры 54 м² под ключ в Сормовском районе Нижнего Новгорода занял 47 рабочих дней при сроке по договору 50 (договор № 2026-041, акт от 30 мая 2026 года)."
+    values:
+      - {value: 54, unit: m2, what: "площадь квартиры"}
+      - {value: 47, unit: days, what: "срок ремонта, рабочие дни"}
+      - {value: 50, unit: days, what: "срок по договору, рабочие дни"}
+    entities: [company-otves, person-anna-k, city-nn]
+    source: {type: contract, who: "заказчик", where: "договор подряда и акт сдачи-приёмки", date: "2026-05-30", document: "договор № 2026-041; акт от 30.05.2026", quote: "Объект: квартира, 2 комнаты, 54 м²; срок выполнения работ — 50 рабочих дней; работы приняты 30.05.2026 (47-й рабочий день)", derivation: direct}
+    verification: {status: verified, by: "редактор", date: "2026-09-18"}
+    permission: {status: granted, subject: "Анна К. (владелец квартиры)", form: written-email, document: "письмо от 2026-09-16", date: "2026-09-16", shows: [city], pd_consent: false, image_consent: false}
+    asset: "assets/cases/2026-041/ (фото до и после от заказчика; адрес на фото скрыт)"
+    related: [review-anna-k]
+    use: {page_types: [landing-lead-services, case-page, service-page], section_roles: [case-studies], slot_types: [case-title, case-summary, case-result]}
+    lang: ru
+
+  - id: guarantee-3-years
+    kind: guarantee
+    claim_class: [guarantee]
+    verbatim:
+      - "Гарантия 3 года на работы — пункт 7.2 договора"
+      - "3 года гарантии на работы"
+    canonical: "Студия «Отвес» даёт гарантию 3 года на выполненные работы по договору подряда (пункт 7.2)."
+    values:
+      - {value: 3, unit: years, what: "гарантийный срок на работы"}
+    entities: [company-otves]
+    source: {type: contract, who: "заказчик", where: "типовой договор подряда, п. 7.2", date: "2026-01-15", document: "dogovor-podryada-2026.pdf, п. 7.2", quote: "Гарантийный срок на выполненные работы составляет 3 (три) года с даты подписания акта", derivation: direct}
+    verification: {status: verified, by: "редактор", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [guarantee, hero, pricing, faq], slot_types: [guarantee-text, cta-note, faq-a, hero-proof]}
+    legal: {flags: [38fz-5-3-6], review: {status: not-needed}, disclaimer: ""}
+    lang: ru
+
+  - id: price-from-per-m2
+    kind: price
+    claim_class: [price-discount]
+    verbatim:
+      - "от 9 800 ₽ за м² — работы под ключ без материалов"
+      - "Ремонт под ключ — от 9 800 ₽/м²"
+    canonical: "Стоимость ремонта квартиры под ключ в студии «Отвес» — от 9 800 ₽ за квадратный метр без учёта материалов (прайс на 2026 год)."
+    values:
+      - {value: 9800, unit: RUB, what: "цена работ за м²", comparator: gte, qualifier: "под ключ, без материалов"}
+    entities: [company-otves]
+    source: {type: customer-document, who: "заказчик", where: "прайс-лист 2026", date: "2026-01-15", document: "price-2026.pdf, строка «Ремонт под ключ, эконом»", quote: "Ремонт под ключ (работы) — от 9 800 руб./м²", derivation: direct}
+    verification: {status: verified, by: "редактор", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [pricing, hero], slot_types: [pricing-price, pricing-price-note, cta-note], requires_nearby: "что входит и что не входит в цену «от» (без материалов)"}
+    valid: {from: "2026-01-15", until: "2026-12-31", review_by: "2026-12-01"}
+    lang: ru
+
+  - id: estimate-free
+    kind: offer-terms
+    claim_class: [price-discount, purchase-terms]
+    verbatim:
+      - "Смета и выезд замерщика — бесплатно"
+      - "Бесплатный замер и смета"
+    canonical: "Выезд замерщика и смета в студии «Отвес» бесплатны в пределах Нижнего Новгорода."
+    values:
+      - {value: 0, unit: RUB, what: "стоимость замера и сметы", qualifier: "в пределах города"}
+    entities: [company-otves, city-nn]
+    source: {type: customer-document, who: "заказчик", where: "прайс-лист 2026", date: "2026-01-15", document: "price-2026.pdf, примечание 1", quote: "Замер и составление сметы — бесплатно (в черте города)", derivation: direct}
+    verification: {status: verified, by: "редактор", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, lead-form, pricing, final-cta], slot_types: [cta-label, cta-note, form-lead, pricing-price-note], requires_nearby: "«в черте города»"}
+    valid: {until: "2026-12-31"}
+    lang: ru
+
+  - id: promo-october-10
+    kind: promo
+    claim_class: [price-discount, promo-deadline]
+    verbatim:
+      - "−10 % на работы при договоре до 31 октября 2026 года"
+      - "Скидка 10 % на работы — до 31 октября"
+    canonical: "При заключении договора до 31 октября 2026 года студия «Отвес» даёт скидку 10 % на стоимость работ (без материалов)."
+    values:
+      - {value: 10, unit: "%", what: "скидка на работы", qualifier: "договор до 31.10.2026, без материалов"}
+      - {date: "2026-10-31", what: "окончание акции"}
+    entities: [company-otves]
+    source: {type: customer-document, who: "заказчик", where: "приказ об акции", date: "2026-09-15", document: "prikaz-akciya-2026-10.pdf", quote: "скидка 10% на работы по договорам, заключённым с 15.09 по 31.10.2026", derivation: direct}
+    verification: {status: verified, by: "редактор", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, pricing, cta-band, final-cta], slot_types: [cta-note, pricing-price-note, badge], requires_nearby: "условия: только работы, до 31.10.2026"}
+    valid: {from: "2026-09-15", until: "2026-10-31"}
+    notes: "После 31.10.2026 сверка даёт error COPY-F-EXPIRED; таймер допустим только до этой даты и без сброса (ux 06/04 §8.1 п.10)."
+    lang: ru
+
+  - id: foreman-lapin
+    kind: person
+    claim_class: [fact-number, fact-property]
+    verbatim:
+      - "Сергей Лапин, прораб, 11 лет в ремонте"
+      - "Ваш прораб — Сергей Лапин"
+    canonical: "Сергей Лапин — прораб студии «Отвес», опыт в ремонте квартир 11 лет."
+    values:
+      - {value: 11, unit: years, what: "опыт в ремонте"}
+    entities: [person-lapin, company-otves]
+    source: {type: customer-document, who: "заказчик", where: "анкета сотрудника, трудовая книжка (сведения о работе)", date: "2026-09-12", document: "hr/lapin-2026-09-12.pdf", quote: "стаж в строительно-отделочных работах с 2015 г.", derivation: computed, computation: "2026 − 2015 = 11 лет"}
+    verification: {status: verified, by: "редактор", date: "2026-09-18"}
+    permission: {status: granted, subject: "Сергей Лапин", form: signed-consent, scope: [site], document: "согласие на распространение ПДн от 2026-09-12", date: "2026-09-12", shows: [full-name, photo, position], pd_consent: true, image_consent: true}
+    attribution: {name: "Сергей Лапин", display: full-name, role: "прораб", relation: employee}
+    asset: "assets/team/lapin.jpg (фото заказчика)"
+    use: {section_roles: [team, about, how-it-works], slot_types: [card-title, card-body, body]}
+    valid: {review_by: "2027-09-12"}
+    lang: ru
+
+  - id: company-since-2014
+    kind: company
+    claim_class: [company-details, fact-number]
+    verbatim:
+      - "Ремонтируем квартиры в Нижнем Новгороде с 2014 года"
+      - "С 2014 года"
+    canonical: "Студия «Отвес» ремонтирует квартиры в Нижнем Новгороде с 2014 года."
+    values:
+      - {value: 2014, unit: year, what: "год начала работы"}
+    entities: [company-otves, city-nn]
+    source: {type: registry, who: "ЕГРЮЛ", where: "выписка", date: "2026-09-10", document: "egrul-2026-09-10.pdf", quote: "Дата регистрации: 11.03.2014", derivation: direct}
+    verification: {status: verified, by: "редактор", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {any: true}
+    lang: ru
+
+missing:
+  - id: legal-details
+    what: "реквизиты для подвала: полное название, ОГРН, ИНН, адрес (сведения о продавце — site I)"
+    kind: company
+    claim_class: [company-details]
+    placeholder: "[PLACEHOLDER: реквизиты ООО]"
+    who: "заказчик (бухгалтер)"
+    needed_for: {section_roles: [footer, contacts], slot_types: [footer-legal]}
+    asked: "2026-09-10"
+    due: "2026-09-30"
+    blocking: true
+    fallback: placeholder
+    question: "Пришлите полное название юрлица, ОГРН, ИНН и юридический адрес — как в ЕГРЮЛ."
+  - id: permission-igor
+    what: "письменное разрешение Игоря на публикацию отзыва с именем и городом"
+    kind: testimonial
+    claim_class: [testimonial-quote]
+    placeholder: "[PLACEHOLDER: отзыв клиента]"
+    who: "заказчик → клиент Игорь"
+    needed_for: {section_roles: [testimonials]}
+    asked: "2026-09-18"
+    fallback: omit-block
+    question: "Попросите Игоря ответить письмом: «Разрешаю опубликовать мой отзыв … с подписью „Игорь, Нижний Новгород“ на сайте otves-remont-nn»."
+  - id: before-after-photos
+    what: "фото «до / после» по 3 объектам с разрешением владельцев (адреса и лица скрыты)"
+    kind: demo
+    claim_class: [fact-property]
+    placeholder: "[PLACEHOLDER: фото объекта]"
+    who: "заказчик"
+    needed_for: {section_roles: [case-studies, portfolio]}
+    fallback: omit-block
+    question: "Есть ли фото до и после по трём последним объектам и согласие владельцев показать их без адреса?"
+
+  # Пробелы ниже заведены под опоры иерархии B1 (examples/hierarchy-otves-*.yaml, meaning-otves.yaml: proof_ids missing:*)
+  - id: foreman-per-object
+    what: "правда ли, что один прораб ведёт объект от замера до сдачи (и сколько объектов у прораба одновременно)"
+    kind: property
+    claim_class: [fact-property, fact-number]
+    placeholder: "[PLACEHOLDER: как закреплён прораб за объектом]"
+    who: "заказчик (директор)"
+    needed_for: {section_roles: [solution, how-it-works], slot_types: [card-body, step-body]}
+    asked: "2026-09-18"
+    fallback: rewrite-without
+    question: "Один прораб ведёт объект от замера до сдачи? Сколько объектов у него одновременно? Это записано в договоре или регламенте?"
+  - id: photo-report-process
+    what: "фотоотчёт каждый день: правило компании или привычка одного прораба (в отзыве — «каждый вечер присылал фото»)"
+    kind: property
+    claim_class: [fact-property]
+    placeholder: "[PLACEHOLDER: как устроены фотоотчёты]"
+    who: "заказчик"
+    needed_for: {section_roles: [how-it-works], slot_types: [step-body, card-body]}
+    asked: "2026-09-18"
+    fallback: rewrite-without
+    question: "Фотоотчёт в конце дня получает каждый клиент? Каким каналом? Если это не правило — писать только отзыв Анны К., без обещания всем."
+  - id: estimate-change-policy
+    what: "когда и как может измениться смета после договора (пункт договора)"
+    kind: offer-terms
+    claim_class: [purchase-terms, guarantee]
+    placeholder: "[PLACEHOLDER: условия изменения сметы]"
+    who: "заказчик (юрист)"
+    needed_for: {section_roles: [guarantee, faq, objections], slot_types: [faq-a, objection-answer, guarantee-text]}
+    asked: "2026-09-18"
+    blocking: false
+    fallback: rewrite-without
+    question: "Какой пункт договора описывает изменение сметы (кто согласует, в каких случаях)? Нужен дословно."
+  - id: deadline-terms
+    what: "как срок фиксируется в договоре (этапы, ответственность за просрочку)"
+    kind: offer-terms
+    claim_class: [purchase-terms]
+    placeholder: "[PLACEHOLDER: сроки по договору]"
+    who: "заказчик (юрист)"
+    needed_for: {section_roles: [how-it-works, faq, case-studies], slot_types: [step-body, faq-a]}
+    asked: "2026-09-18"
+    fallback: rewrite-without
+    question: "Срок ремонта в договоре — общий или по этапам? Есть ли неустойка за просрочку?"
+  - id: payment-stages
+    what: "порядок оплаты: предоплата, этапы, материалы"
+    kind: offer-terms
+    claim_class: [purchase-terms, price-discount]
+    placeholder: "[PLACEHOLDER: порядок оплаты]"
+    who: "заказчик (бухгалтер)"
+    needed_for: {section_roles: [pricing, faq, hero], slot_types: [pricing-price-note, faq-a, cta-note]}
+    asked: "2026-09-18"
+    blocking: true
+    fallback: placeholder
+    question: "Как клиент платит: есть ли предоплата, по каким этапам, как оплачиваются материалы?"
+  - id: min-job-size
+    what: "минимальный объём работ (берётесь ли за одну комнату, санузел)"
+    kind: offer-terms
+    claim_class: [purchase-terms]
+    placeholder: "[PLACEHOLDER: минимальный заказ]"
+    who: "заказчик"
+    needed_for: {section_roles: [pricing, faq], slot_types: [pricing-price-note, faq-a]}
+    asked: "2026-09-18"
+    fallback: omit-block
+    question: "Какой минимальный заказ: квартира целиком, одна комната, санузел?"
+
+never_claim:
+  - id: nc-best-in-city
+    text: "«лучший ремонт в городе», «№ 1 в Нижнем Новгороде», «самые низкие цены» — нет независимого рейтинга или исследования"
+    claim_class: [superlative, comparison]
+    patterns: ["лучш\\w*\\s+(ремонт|студи|в\\s+город)", "сам\\w*\\s+низк\\w*\\s+цен"]
+    lift: with-fact
+    reason: "Пленум ВАС № 58 п. 29: нужен критерий и объективное подтверждение"
+    source: {who: "редактор по анкете", date: "2026-09-18"}
+  - id: nc-no-extra-cost-promise
+    text: "«смета никогда не меняется» как гарантия всем клиентам — в договоре такого пункта нет (есть только отзыв одного клиента)"
+    claim_class: [guarantee]
+    patterns: ["смет\\w*\\s+(никогда\\s+)?не\\s+(меня|раст|вырос)"]
+    lift: with-fact
+    reason: "слова отзыва нельзя превращать в обещание компании"
+    source: {who: "редактор по анкете", date: "2026-09-18"}

@@ -1,0 +1,44 @@
+# favicons.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/03-vector-text-og-recipes.md#5; схема — recipe.schema.json
+recipe_version: 1
+checked_at: '2026-09-24'
+author: агент M, волна 3
+id: favicons
+title: 'Фавиконы: 3 файла сайта + 3 для PWA из готового знака'
+doc: 14-recipes/03-vector-text-og-recipes.md#5
+task_codes:
+- VEC-TRACE
+slot: meta
+ladder: svg
+ai_fit: forbidden
+legal_row: 2
+route:
+  source: VEC-TRACE
+  steps:
+  - role: из логотипа
+    model: resvg-js 2.6.2 + Pillow
+    price_rub: 0.0
+phase5:
+  jobs: []
+  reuse: []
+  estimate: не нужно (0 ₽)
+steps:
+- id: build
+  cmd: python3 99-raw/experiments/M/08-svg-favicons/build.py
+  status: checked
+  evidence: 99-raw/experiments/M/08-svg-favicons/results_svg.json
+accept:
+  extra: ICO 32 одним размером; SVG с prefers-color-scheme; apple-touch 180 без прозрачности; maskable — рисунок в круге ⌀ 409,6
+delivery:
+  template: 10-web-integration/pages/08-svg-icons-favicons.html
+  budget_kb:
+    set: 30
+provenance:
+  dst: null
+  visible_label: false
+numbers:
+  ico_bytes: 1005
+  svg_bytes: 469
+  apple_bytes: 2778
+status:
+  local: checked
+  generation: not-applicable

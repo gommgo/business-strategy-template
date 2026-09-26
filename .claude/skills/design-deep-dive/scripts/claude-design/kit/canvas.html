@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Холст макета</title>
+<!--
+  kit/canvas.html — холст: несколько артбордов рядом (агент D, claude-design-research, 2026-09-25, v1).
+  Открывать по http (python3 kit/shot.py serve <папка проекта>), иначе браузер не даст прочитать canvas.json и вложить метки.
+  Параметры адреса:
+    m=/canvas.json        манифест (по умолчанию canvas.json рядом со страницей); пути артбордов — относительно манифеста
+    marks=1               нумерованные метки #N (номера едины для всех рамок одного файла: блоки #1–#99, #101–#199, …)
+    pin=/_virtual/pin.json закреплённые номера {файл: {селектор: номер}} (их даёт shot.py, чтобы холст и кадры совпадали)
+    theme=light|dark      тема для всех рамок (иначе — поле theme рамки)
+    set=--a:1px;--b:#000  временная подмена CSS-переменных во всех рамках («ручки» без правки файлов)
+    zoom=0.5              масштаб холста
+    only=landing.html     показать рамки одного файла
+  Готовность для скриптов: window.__kitCanvasReady === true, результат меток — window.__kitCanvasMarks.
+-->
+<style>
+  :root { --kit-bg: #e8e9ed; --kit-ink: #23262d; --kit-muted: #5d6370; --kit-line: #c9ccd4; --kit-accent: #e5006a; color-scheme: light; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--kit-bg); color: var(--kit-ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+  .top { padding: 20px 40px 8px; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline; }
+  .top h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0; }
+  .top .meta { color: var(--kit-muted); font-size: 13px; }
+  .top .legend { color: var(--kit-muted); font-size: 13px; }
+  .top .legend b { color: var(--kit-accent); }
+  .notes { display: flex; flex-wrap: wrap; gap: 12px; padding: 0 40px 8px; }
+  .note { max-width: 420px; background: #fff7c2; border: 1px solid #e3d98a; padding: 8px 10px; font-size: 13px; white-space: pre-line; border-radius: 2px; }
+  .board { padding: 24px 40px 80px; display: flex; flex-direction: column; gap: 120px; width: max-content; }
+  .row { display: flex; gap: 80px; align-items: flex-start; }
+  .frame { display: flex; flex-direction: column; gap: 8px; }
+  .label { display: flex; gap: 10px; align-items: baseline; font-size: 13px; color: var(--kit-muted); white-space: nowrap; }
+  .label b { color: var(--kit-ink); font-weight: 600; font-size: 14px; }
+  .frame iframe { display: block; border: 0; background: #fff; box-shadow: 0 0 0 1px var(--kit-line), 0 8px 24px rgba(20, 24, 32, .12); }
+  .error { margin: 40px; padding: 16px; background: #fff; border: 1px solid var(--kit-line); max-width: 760px; }
+</style>
+<!-- kit:embed-point (export.py standalone вставляет сюда манифест, файлы артбордов и marks.js) -->
+</head>
+<body>
+<header class="top">
+  <h1 id="kit-title">Холст</h1>
+  <span class="meta" id="kit-meta"></span>
+  <span class="legend" id="kit-legend"></span>
+</header>
+<div class="notes" id="kit-notes"></div>
+<main class="board" id="kit-board"></main>
+<script>
+(function () {
+  'use strict';
+  var q = new URLSearchParams(location.search);
+  var marksOn = q.get('marks') === '1';
+  var forcedTheme = q.get('theme');
+  var only = q.get('only');
+  var zoom = parseFloat(q.get('zoom') || '1') || 1;
+  var setVars = (q.get('set') || '').split(';').map(function (s) { return s.trim(); }).filter(Boolean);
+  var embedded = window.__KIT_STANDALONE__ || null;          // {manifest, files: {name: html}, marksSource}
+  var kitBase = new URL('.', location.href);                  // marks.js лежит рядом с canvas.html
+
+  function el(tag, attrs, text) {
+    var e = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (text != null) { e.textContent = text; }
+    return e;
+  }
+
+  function loadManifest() {
+    if (embedded) { return Promise.resolve({ manifest: embedded.manifest, base: null }); }
+    var murl = new URL(q.get('m') || 'canvas.json', location.href);
+    return fetch(murl.href, { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) { throw new Error('HTTP ' + r.status + ' ' + murl.href); }
+      return r.json();
+    }).then(function (m) { return { manifest: m, base: new URL('.', murl) }; });
+  }
+
+  function loadPin() {
+    var p = q.get('pin');
+    if (!p) { return Promise.resolve(null); }
+    return fetch(new URL(p, location.href).href, { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+  }
+
+  function frameLoaded(ifr) {
+    return new Promise(function (resolve) {
+      var done = false;
+      function ok() { if (!done) { done = true; resolve(); } }
+      ifr.addEventListener('load', ok);
+      setTimeout(ok, 15000);
+    }).then(function () {
+      var d = ifr.contentDocument;
+      if (d && d.fonts && d.fonts.ready) { return Promise.race([d.fonts.ready, new Promise(function (r) { setTimeout(r, 5000); })]); }
+    });
+  }
+
+  function applyTheme(doc, theme) {
+    if (!doc || !theme || theme === 'auto') { return; }
+    doc.documentElement.setAttribute('data-theme', theme);
+    doc.documentElement.style.colorScheme = theme;
+  }
+
+  function applySet(doc) {
+    if (!doc || !setVars.length) { return; }
+    var css = setVars.map(function (kv) {
+      var i = kv.indexOf(':');
+      return i > 0 ? kv.slice(0, i).trim() + ':' + kv.slice(i + 1).trim() + ' !important;' : '';
+    }).join('');
+    var st = doc.getElementById('kit-set') || doc.createElement('style');
+    st.id = 'kit-set';
+    st.textContent = ':root, :root[data-theme]{' + css + '}';
+    (doc.head || doc.documentElement).appendChild(st);
+  }
+
+  function injectMarks(doc) {
+    return new Promise(function (resolve) {
+      if (!doc) { return resolve(false); }
+      if (doc.defaultView && doc.defaultView.__kitMarks) { return resolve(true); }
+      var s = doc.createElement('script');
+      doc.defaultView.__kitMarksManual = true;
+      if (embedded && embedded.marksSource) {
+        s.textContent = embedded.marksSource;
+        (doc.head || doc.documentElement).appendChild(s);
+        return resolve(!!doc.defaultView.__kitMarks);
+      }
+      s.src = new URL('marks.js', kitBase).href;
+      s.onload = function () { resolve(true); };
+      s.onerror = function () { resolve(false); };
+      (doc.head || doc.documentElement).appendChild(s);
+    });
+  }
+
+  function fit(ifr, ab) {
+    if (ab.fit === false) { return; }
+    var d = ifr.contentDocument;
+    if (!d) { return; }
+    var h = Math.max(d.documentElement.scrollHeight, d.body ? d.body.scrollHeight : 0);
+    ifr.style.height = Math.max(ab.h || 0, h) + 'px';
+  }
+
+  function build(res, pin) {
+    var m = res.manifest;
+    var title = m.title || 'Холст';
+    document.title = title;
+    document.getElementById('kit-title').textContent = title;
+    document.getElementById('kit-meta').textContent = [m.iteration, m.date].filter(Boolean).join(' · ');
+    document.getElementById('kit-legend').innerHTML = marksOn
+      ? 'Метки: <b>#N</b> — адрес правки в чате; карта номеров — marks.json (номер → селектор, текст, размеры)'
+      : 'Метки выключены (добавьте ?marks=1)';
+    (m.annotations || []).forEach(function (a) { document.getElementById('kit-notes').appendChild(el('div', { 'class': 'note' }, a.text || '')); });
+
+    var board = document.getElementById('kit-board');
+    if (zoom !== 1) { board.style.zoom = String(zoom); }
+    var files = [];
+    var frames = (m.artboards || []).filter(function (ab) { return !only || ab.file === only; });
+    frames.forEach(function (ab) { if (files.indexOf(ab.file) < 0) { files.push(ab.file); } });
+    var rows = {};
+    files.forEach(function (f) { rows[f] = el('div', { 'class': 'row', 'data-file': f }); board.appendChild(rows[f]); });
+    var all = [];
+    frames.forEach(function (ab, i) {
+      var theme = forcedTheme || ab.theme || 'light';
+      var box = el('section', { 'class': 'frame', 'data-file': ab.file, 'data-index': String(i) });
+      var lab = el('div', { 'class': 'label' });
+      lab.appendChild(el('b', {}, ab.title || ab.file));
+      lab.appendChild(el('span', {}, ab.file + ' · ' + ab.w + '×' + ab.h + ' · ' + (theme === 'dark' ? 'тёмная' : theme === 'light' ? 'светлая' : theme)));
+      box.appendChild(lab);
+      var ifr = el('iframe', { title: ab.title || ab.file, width: String(ab.w), height: String(ab.h), loading: 'eager' });
+      ifr.style.width = ab.w + 'px';
+      ifr.style.height = ab.h + 'px';
+      if (embedded) { ifr.srcdoc = embedded.files[ab.file] || '<p>нет файла ' + ab.file + '</p>'; }
+      else { ifr.src = new URL(ab.file, res.base).href; }
+      box.appendChild(ifr);
+      rows[ab.file].appendChild(box);
+      all.push({ ab: ab, ifr: ifr, theme: theme });
+    });
+
+    return Promise.all(all.map(function (f) { return frameLoaded(f.ifr); })).then(function () {
+      all.forEach(function (f) { applyTheme(f.ifr.contentDocument, f.theme); applySet(f.ifr.contentDocument); });
+      return new Promise(function (r) { setTimeout(r, 150); });
+    }).then(function () {
+      all.forEach(function (f) { fit(f.ifr, f.ab); });
+      return new Promise(function (r) { setTimeout(r, 150); });
+    }).then(function () {
+      if (!marksOn) { return null; }
+      return Promise.all(all.map(function (f) { return injectMarks(f.ifr.contentDocument); })).then(function () {
+        var out = {};
+        files.forEach(function (file, k) {
+          var group = all.filter(function (f) { return f.ab.file === file; });
+          var base = (m.marks && m.marks[file] && m.marks[file].base != null) ? m.marks[file].base : k * 100;
+          var filePin = pin && pin[file] ? pin[file] : null;
+          if (!filePin) {
+            var w0 = group[0].ifr.contentWindow;
+            if (!w0.__kitMarks) { return; }
+            filePin = {};
+            w0.__kitMarks.number(w0.__kitMarks.collect(), { base: base }).forEach(function (c) { filePin[c.selector] = c.n; });
+          }
+          out[file] = { base: base, frames: group.map(function (f) {
+            var w = f.ifr.contentWindow;
+            return { title: f.ab.title || '', w: f.ab.w, theme: f.theme, result: w.__kitMarks ? w.__kitMarks.run({ base: base, pin: filePin }) : null };
+          }) };
+        });
+        return out;
+      });
+    }).then(function (marks) {
+      window.__kitCanvasMarks = marks;
+      window.__kitCanvasReady = true;
+      document.documentElement.setAttribute('data-kit-ready', '1');
+    });
+  }
+
+  Promise.all([loadManifest(), loadPin()]).then(function (r) { return build(r[0], r[1]); }).catch(function (e) {
+    var box = el('div', { 'class': 'error' });
+    box.appendChild(el('p', {}, 'Холст не загрузился: ' + e.message));
+    box.appendChild(el('p', {}, 'Откройте по http: python3 kit/shot.py serve <папка проекта> — и адрес /_kit/canvas.html?m=/canvas.json'));
+    document.getElementById('kit-board').appendChild(box);
+    window.__kitCanvasError = String(e && e.message || e);
+    window.__kitCanvasReady = true;
+  });
+})();
+</script>
+</body>
+</html>

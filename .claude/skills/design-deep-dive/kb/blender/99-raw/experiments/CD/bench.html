@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>CD · цена кадра «Звено» v2 / v3 по флагам без vsync</title>
+<style>html, body { margin: 0; background: #0d0f12; } canvas { display: block; }</style></head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+// Цена кадра (метод J/04): ?b=v2|v3 &f=… &w= &h= &mobile=0|1 &q=high|low &dpr= &ms= &ik=1 (указатель ходит по кругу — IK считается в кадре)
+// Chromium с --disable-gpu-vsync --disable-frame-rate-limit: каждый rAF — новый прогресс (история 0→2, затем скан 0→1), рендер синхронно.
+const q = new URLSearchParams(location.search);
+const B = { v2: './v2-ref/three-scene-v2-0.186.0.js', v3: '../../../15-showcase/zveno/a-code/js/three-scene.js', v3p1: './v3p1-ref/three-scene.js', c3: './c3/three-scene.js', c3g: './c3-glb/three-scene.js', c: '../../../15-showcase/zveno/c-hybrid/js/three-scene.js' };   // c — страница C (Z2), собранная build.sh --glb   // v3p1 — бандл фазы 1 (20:04); c3 — _shared/code3d; c3g — он же с крюком GLB (--glb)
+const ALL = ['studio', 'ik', 'world', 'ao', 'fx', 'detail', 'texture'];
+function flags(s) {
+  if (!s || s === 'all') return undefined;
+  if (s === 'none') return Object.fromEntries(ALL.map((k) => [k, false]));
+  const parts = s.split(',');
+  if (parts.every((p) => p.startsWith('-'))) return Object.fromEntries(ALL.map((k) => [k, !parts.includes('-' + k)]));
+  return Object.fromEntries(ALL.map((k) => [k, parts.includes(k)]));
+}
+const w = +q.get('w') || 1440, h = +q.get('h') || 900, mobile = q.get('mobile') === '1', dur = +q.get('ms') || 4000, ikOn = q.get('ik') === '1';
+const c = document.getElementById('c');
+c.style.width = w + 'px'; c.style.height = h + 'px';
+const lt = [];
+try { new PerformanceObserver((l) => l.getEntries().forEach((e) => lt.push(Math.round(e.duration)))).observe({ type: 'longtask', buffered: true }); } catch (e) {}
+const tImp = performance.now();
+const { createScene } = await import(B[q.get('b') || 'v3']);
+const t0 = performance.now();
+const glb = q.get('glb') ? { url: q.get('glb'), only: q.get('glbOnly') ? q.get('glbOnly').split(',') : undefined, materials: q.get('glbMat') || 'glb',
+  map: q.get('glbMap') ? Object.fromEntries(q.get('glbMap').split(',').map((p) => p.split(':'))) : undefined, ao: q.get('glbAo') === '1' } : undefined;
+const lk = q.get('lk') ? q.get('lk').split(',').reduce((o, p) => { const [k, v] = p.split(':'); const [a, b] = k.split('.'); const val = isNaN(+v) ? (v === 'true' ? true : v === 'false' ? false : v) : +v;
+  if (b) { o[a] = o[a] || {}; o[a][b] = val; } else o[a] = val; return o; }, {}) : undefined;
+const s = createScene(c, { dprMax: +q.get('dpr') || 1.5, quality: q.get('q') || (mobile ? 'low' : 'high'), flags: flags(q.get('f')), look: q.get('look') || undefined, glb, lk });
+const tCreate = performance.now() - t0;
+if (s.ready) await s.ready;
+const tReady = performance.now() - t0;
+s.resize(w, h, mobile);
+const gl = s.renderer.getContext();
+const px = new Uint8Array(4);
+const sync = () => gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+s.set('story', 0, true); s.renderNow(); sync();
+const tFirst = performance.now() - t0;
+for (const [p, t] of [['story', 1.42], ['scan', 0.5], ['story', 2.0], ['story', 0]]) { s.set(p, t, true); s.renderNow(); }
+sync();
+const tWarm = performance.now() - t0;
+await new Promise((r) => setTimeout(r, 150));
+// фаза 2: дождаться простоя — сцена компилирует программы скана в requestIdleCallback (timeout 2 с); без этого компиляция
+// попадала внутрь замера (зависание ≥ 1 с, 0 кадров скана в повторах 1–2 у fx/all, CD2 20:21)
+await new Promise((r) => (window.requestIdleCallback ? requestIdleCallback(() => r(), { timeout: 3000 }) : setTimeout(r, 500)));
+await new Promise((r) => setTimeout(r, 300));
+const ltBoot = lt.splice(0);
+const calls = { story: [], scan: [] }, tris = { story: [], scan: [] };
+let n = 0, cpu = 0;
+const dts = [], cpus = [];                                         // длительность каждого кадра (rAF → rAF) и CPU кадра
+let prevT = 0;
+const start = performance.now();
+function loop() {
+  const now0 = performance.now();
+  if (prevT) dts.push(now0 - prevT); prevT = now0;
+  const el = now0 - start;
+  if (el >= dur) return finish(el);
+  const u = el / dur;
+  const [p, t] = u < 0.66 ? ['story', (u / 0.66) * 2] : ['scan', (u - 0.66) / 0.34];
+  const a = performance.now();
+  if (ikOn && s.pointer && p === 'story') s.pointer(Math.sin(u * 40) * 0.8, Math.cos(u * 31) * 0.5);
+  s.set(p, t, true); s.renderNow(); const c1 = performance.now() - a; cpu += c1; cpus.push(c1); n++;
+  const st = s.stats(); calls[p].push(st.calls); tris[p].push(st.tris);
+  requestAnimationFrame(loop);
+}
+const med = (a) => { if (!a.length) return null; const b = [...a].sort((x, y) => x - y); return b[Math.floor(b.length / 2)]; };
+function finish(el) {
+  sync();
+  const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+  window.__res = { b: q.get('b') || 'v3', f: q.get('f') || 'all', flags: s.flags || null, w, h, mobile, dpr: s.renderer.getPixelRatio(), q: q.get('q') || (mobile ? 'low' : 'high'),
+    frames: n, ms: Math.round(el), fps: +(n / (el / 1000)).toFixed(1), frame_ms: +(el / n).toFixed(2), cpu_ms: +(cpu / n).toFixed(2),
+    frame_med: +med(dts).toFixed(3), frame_p90: +[...dts].sort((x, y) => x - y)[Math.floor(dts.length * 0.9)].toFixed(3),
+    cpu_med: +med(cpus).toFixed(3), stalls50: dts.filter((x) => x > 50).length, stall_max: Math.round(Math.max(...dts)),
+    calls_story: med(calls.story), calls_scan: med(calls.scan), tris_story: med(tris.story), tris_scan: med(tris.scan),
+    import_ms: Math.round(t0 - tImp), create_ms: Math.round(tCreate), ready_ms: Math.round(tReady), first_frame_ms: Math.round(tFirst), warm_ms: Math.round(tWarm),
+    boot_longtasks: ltBoot, boot_longtask_max: ltBoot.length ? Math.max(...ltBoot) : 0,
+    programs: s.stats().programs, gpu: dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : null };
+  window.__done = true;
+}
+requestAnimationFrame(loop);
+</script>
+</body></html>

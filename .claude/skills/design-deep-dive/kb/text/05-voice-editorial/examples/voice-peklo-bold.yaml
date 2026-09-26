@@ -1,0 +1,255 @@
+# voice-peklo-bold.yaml — пример 3 из 3: дерзкий потребительский голос, кампания запуска уровня L2 (острый соус, D2C)
+# text-research · F · 2026-09-24 · формат: ../voice.schema.yaml (voice_version 1)
+#
+# Бренд «Пекло» — ВЫМЫШЛЕННЫЙ; ДЕМО-факты и демо-бриф — ../../99-raw/experiments/F/04-voice-samples/facts-demo-peklo.yaml
+# (агент F: дерзкий голос нужно показывать на фактах). Образцы строк — ai-self, прошли claims_check.py и copy_lint.py:
+# 99-raw/experiments/F/04-voice-samples/README.md.
+# Что показывает пример: дерзость живёт в контрасте, позиции и точных числах, а не в «ты», восклицаниях и капсе; юмор —
+# над категорией и над собой, не над читателем; шутка стоит рядом с фактом и не заменяет его; эмодзи разрешены голосом,
+# но не в заголовках, CTA, цене и праве (поправка профиля линтера `ru-pun-emoji-body: off`); история основателя — только
+# из фактов интервью. Обращение — «вы» (решение заказчика п. 16 для примеров); «ты» — только решением заказчика.
+
+voice_version: 1
+date: "2026-09-24"
+status: draft
+voice_id: peklo-bold
+
+brand:
+  name: "Пекло"
+  site: peklo-demo
+  category: "острый соус с цифрой остроты на этикетке"
+  facts_ref: "../../99-raw/experiments/F/04-voice-samples/facts-demo-peklo.yaml"
+
+scope:
+  genres: [landing, email-form, meta]
+  surfaces:
+    - {surface: marketing-site, voice: brand, note: "страница запуска (landing-campaign, L2)"}
+    - {surface: lead-emails, voice: brand}
+    - {surface: social, voice: brand, note: "соцсети — вне рамок базы, голос тот же"}
+    - {surface: transactional-emails, voice: product, note: "заказ, оплата, доставка — коротко, без шуток о деньгах"}
+    - {surface: legal, voice: neutral-legal}
+
+derived_from:
+  purpose: "Дать любителям острого соус, у которого острота измерена числом, а не обещана словом «огненный»."
+  audience: "20–35 лет, любят острое, готовят дома; устали от «острых» соусов для галочки. Цена ошибки низкая (590 ₽), покупка импульсная — голос может рисковать."
+  subject_risk: low
+  brand_familiarity: unknown
+  category_norms: "«Взрыв вкуса», «огненный», «для настоящих мужчин», «не для слабаков», перцы в огне на картинках."
+  differs_from_competitors: "Острота числом (SHU по замеру лаборатории и своя шкала 1–5), ирония над категорией и над собой, без мачизма и страшилок."
+  brief_adjectives: ["дерзкие", "смешные", "честные про остроту"]
+  basis:
+    - {kind: brief, ref: "демо-бриф в facts-demo-peklo.yaml: «дерзкие, смешные, честные про остроту; не для всех — и это нормально»"}
+    - {kind: interview, ref: "fact:origin-story-staff-sauce, fact:founder-kim — интервью основателя (демо)"}
+    - {kind: inferred, ref: "низкая цена ошибки → допустима высокая точка на осях юмора и непочтительности (ux 07/01 §7.2)"}
+
+summary: >-
+  «Пекло» говорит как повар, который сам варит соус и не любит, когда острым называют кетчуп: коротко, смешно и с цифрой
+  в кармане. Смеёмся над категорией и над собой, никогда — над тем, кто острое не ест. Шутка стоит рядом с фактом и не
+  заменяет его. Никакой медицины и никакого мачизма; про остроту — честно, даже когда смешно.
+
+key_phrase:
+  ru: "по нашей шкале"
+  en: "on our heat scale"
+  rule: "рядом с оценкой остроты 1–5 — это своя шкала бренда, а не рейтинг третьей стороны"
+  basis: {kind: brief, ref: "fact:house-scale-no3: «3 из 5 по нашей шкале остроты»"}
+
+principles:
+  - id: short-punches
+    name: "Короткие удары, живой ритм"
+    why: "Кампания L2 читается на бегу; дерзость — в краткости и контрасте (Ross: bold → short, sharp statements)."
+    execution:
+      - "Заголовок и CTA — 2–9 слов; в прозе короткое чередуем с длинным, серий из трёх рубленых фраз нет"
+      - "Контраст внутри строки: число и шутка, ожидание и факт («120 000 единиц по Сковиллу — и это 3 из 5 по нашей шкале»)"
+      - "Одна шутка на блок; вторую убираем"
+    is_not: "Не рубленый драматизм «Остро. Честно. Вкусно.» (COPY-M-SYN-06) — это шаблон слогана, а не голос."
+    do: ["120 000 единиц по Сковиллу — и это 3 из 5 по нашей шкале"]
+    dont: ["Остро. Дерзко. Незабываемо."]
+    checked_by: [copy_lint, judge]
+  - id: heat-as-number
+    name: "Острота — числом, а не эпитетом"
+    why: "Категория говорит «огненный» и «взрыв вкуса»; число можно проверить (Dry: «can I falsify it?»)."
+    execution:
+      - "Вместо «супер-острый» — 120 000 SHU по замеру лаборатории и 3 из 5 по нашей шкале (факты)"
+      - "Сравнения — только с тем, что есть у читателя на кухне, без чужих марок и «острее всех» (H, never_claim:nc-hottest)"
+    is_not: "Не протокол лаборатории: число живёт в шутке или сцене, а не в таблице «SHU: 120 000»."
+    do: ["Острота с протоколом: 120 000 единиц по шкале Сковилла по замеру лаборатории."]
+    dont: ["Самый острый соус в России!"]
+    checked_by: [claims_check, copy_lint, judge]
+  - id: laugh-at-category
+    name: "Смеёмся над категорией и над собой, не над читателем"
+    why: "Ирония отличает от конкурентов, но юмор снижает доверие к источнику (Eisend 2009) — поэтому рядом всегда факт."
+    execution:
+      - "Объект иронии — «острые» соусы для галочки и наша собственная острота; читатель всегда в порядке (Ильяхов)"
+      - "Никаких «не для слабаков» и «для настоящих мужчин»: не стыдим тех, кто не ест острое (never_claim:nc-danger-hype)"
+      - "В строке с шуткой — хотя бы одно проверяемое: число, состав, город, дата"
+    is_not: "Не травля и не мачизм: «слабакам не брать» — стыд вместо довода."
+    do: ["Варим в Краснодаре. Остужайте сами."]
+    dont: ["Не для слабаков! Только для настоящих мужчин!"]
+    checked_by: [copy_lint, judge, human]
+  - id: honest-about-heat
+    name: "Честно про последствия, без медицины"
+    why: "Острота — реальный риск для непривычного; пищевой продукт не обещает пользы (never_claim:nc-health, H)."
+    execution:
+      - "Предупреждаем прямо и с улыбкой: «начните с половины капли»; ни слова о пользе, метаболизме и иммунитете"
+      - "Страшилки ради хайпа («опасно для жизни») не пишем"
+    is_not: "Не пугалка и не аптека: без «осторожно, опасно!» и без «полезно для здоровья»."
+    do: ["Если вы обычно просите «поострее», начните с половины капли."]
+    dont: ["Острота ускоряет метаболизм и сжигает калории!"]
+    checked_by: [claims_check, judge]
+
+pairs:
+  - {we_are: "дерзко", we_are_not: "хамски", why: "дерзость — к категории, уважение — к читателю"}
+  - {we_are: "смешно", we_are_not: "клоунада (больше одной шутки на блок)", why: "шутка рядом с фактом, а не вместо"}
+  - {we_are: "уверенно", we_are_not: "хвастливо («самый острый в России» — never_claim)", why: "уверенность держится на замере"}
+  - {we_are: "коротко", we_are_not: "рублено («Остро. Честно. Вкусно.»)", why: "короткое чередуем с длинным"}
+  - {we_are: "честно про остроту", we_are_not: "запугивающе («опасно для жизни»)", why: "предупреждение без страшилки"}
+
+axes:
+  formality: {point: 5, note: "разговорно, как повар у плиты; «вы» сохраняем"}
+  humor: {point: 4, note: "ирония и самоирония в заголовках, CTA, подвале, письмах; в цене и праве — нет"}
+  respect: {point: 4, note: "непочтительно к категории «острых» соусов, почтительно к читателю"}
+  enthusiasm: {point: 4, note: "азарт в ритме и контрасте, а не в восклицаниях"}
+
+tone_words:
+  do: [witty, irreverent, frank, playful]
+  dont: [coarse, snarky, formal, sarcastic]
+
+address:
+  ru_form: vy
+  capital_vy: false
+  self_reference: we
+  en_form: you
+  exceptions:
+    - {where: "подпись основателя в письме о старте продаж", form: vy, why: "«я» Артёма в письме, обращение «вы» остаётся"}
+
+vocabulary:
+  use:
+    - {term: "острота, SHU (при первом упоминании — «единиц по шкале Сковилла»)", why: "число вместо эпитета"}
+    - {term: "варка, варим", instead_of: "партия, производим", why: "ремесло, а не завод"}
+    - {term: "капля", why: "мера, которой меряет сам покупатель"}
+    - {term: "по нашей шкале", why: "ключевое слово: своя шкала 1–5 — честно названа своей"}
+  avoid:
+    - {term: "взрыв* вкуса", use_instead: "ингредиенты и число остроты", reason: "штамп категории", level: warning}
+    - {term: "огненн*", use_instead: "120 000 SHU", reason: "эпитет вместо числа", level: warning}
+    - {term: "незабываем*", use_instead: "факт или сцена", reason: "обещание чувства без факта", level: warning}
+    - {term: "уникальн*", use_instead: "что именно отличает — фактом", reason: "оценка без факта", level: warning}
+    - {term: "полезн*", unless: "никогда о здоровье", use_instead: "не писать", reason: "never_claim:nc-health", level: error}
+    - {term: "метаболизм*", use_instead: "не писать", reason: "never_claim:nc-health", level: error}
+    - {term: "не для слабаков", use_instead: "«начните с половины капли»", reason: "стыд вместо довода (never_claim:nc-danger-hype)", level: error}
+    - {term: "настоящ* мужчин*", use_instead: "без гендерных стереотипов", reason: "мачизм (never_claim:nc-danger-hype)", level: error}
+    - {term: "натуральн*", unless: "рядом состав из fact:ingredients-no3", use_instead: "перечислить 6 ингредиентов", reason: "маркетинговое слово без определения (H)", level: warning}
+  use_with_care:
+    - {term: "остро, острый", condition: "с числом или своей шкалой рядом; без «самый»"}
+    - {term: "эмодзи 🌶", condition: "не больше одного на блок и только в прозе писем и подвала; никогда в заголовке, CTA, цене"}
+  spellings:
+    - {preferred: "SHU", variants: ["ШУ", "shu"], lang: ru, note: "латиницей, при первом упоминании — «единиц по шкале Сковилла»"}
+    - {preferred: "«Пекло № 3»", variants: ["Пекло №3", "Пекло 3"], lang: ru, note: "знак номера с неразрывным пробелом (H)"}
+  category_name: {ru: "острый соус", en: "hot sauce"}
+
+punctuation:
+  emoji:
+    policy: rare
+    allowed_slot_types: [email-body, footer-tagline, body]
+    max_per_block: 1
+    never_in: [hero, pricing, pricing-terms, guarantee, legal, form-consent, complaint-response]
+  exclamation: {policy: rare, max_per_page: 1, never_in: [hero, pricing-terms, legal, form-consent, guarantee]}
+  rhetorical_questions: rare
+  caps: never
+  dash: grammar
+
+humor:
+  level: playful
+  forms: [irony-about-subject, self-irony, understatement, contrast]
+  allowed_in: [hero, benefits, faq, form-success, footer, campaign-slogan, lead-email, about]
+  never_in: [pricing-terms, guarantee, legal, form-consent, complaint-response]
+  note: "Шутим над «острыми» соусами для галочки и над своей остротой; не шутим над тем, кто острое не ест, над здоровьем и над деньгами."
+
+tone_map:
+  - {situation: campaign-slogan, rules: ["одна фраза с контрастом; факт рядом — в подзаголовке", "без восклицательного знака: дерзость в словах"]}
+  - {situation: pricing-terms, axes_delta: {formality: -2, humor: -3, enthusiasm: -2}, rules: ["цена, объём, дата старта, доставка — сухо и полностью"]}
+  - {situation: faq, rules: ["первое предложение — ответ с числом, шутка — после"]}
+  - {situation: complaint-response, axes_delta: {formality: -2, humor: -3}, rules: ["без шуток: признать, назвать шаг и срок"]}
+  - {situation: about, rules: ["история основателя — только из фактов интервью (fact:origin-story-staff-sauce)"]}
+
+taboos:
+  - {id: shame, what: "стыдить тех, кто не ест острое", why: "читатель всегда в порядке", refs: ["never_claim:nc-danger-hype"]}
+  - {id: machismo, what: "гендерные стереотипы («для настоящих мужчин»)", why: "мачизм — штамп категории и исключает половину аудитории"}
+  - {id: health, what: "польза, лечение, метаболизм, иммунитет", why: "пищевой продукт (H)", refs: ["never_claim:nc-health"]}
+  - {id: alcohol, what: "связка с алкоголем в шутках («под водочку»)", why: "реклама алкоголя — отраслевые запреты (H)"}
+  - {id: fake-scarcity, what: "«осталось N бутылок», таймер", why: "ложная срочность", refs: ["never_claim:nc-scarcity"]}
+
+claims_boundaries_ref: "../../99-raw/experiments/F/04-voice-samples/facts-demo-peklo.yaml#never_claim"
+
+samples:
+  # --- русский (10 типов слотов) — ai-self, ДЕМО-факты «Пекла»
+  - {id: ru-headline, slot_type: headline, lang: ru, situation: campaign-slogan, text: "120 000 единиц по Сковиллу — и это 3 из 5 по нашей шкале", fact_ids: ["fact:heat-shu-no3", "fact:house-scale-no3"], principle_ids: [short-punches, heat-as-number]}
+  - {id: ru-subheadline, slot_type: subheadline, lang: ru, situation: hero, text: "6 ингредиентов и ни грамма сахара. Продажи — с 1 октября 2026 года.", fact_ids: ["fact:ingredients-no3", "fact:launch-date"]}
+  - {id: ru-cta-label, slot_type: cta-label, lang: ru, situation: hero, text: "Напомните 1 октября", fact_ids: ["fact:launch-date"], note: "кнопка — реплика покупателя (Бирман): «Напомните», а не «Подписаться на рассылку»"}
+  - {id: ru-cta-note, slot_type: cta-note, lang: ru, situation: pricing-terms, text: "100 мл — 590 ₽. Продажи — с 1 октября 2026 года.", fact_ids: ["fact:price-no3", "fact:launch-date"]}
+  - {id: ru-card-title, slot_type: card-title, lang: ru, situation: benefits, text: "Острота с протоколом", fact_ids: ["fact:heat-shu-no3"], principle_ids: [laugh-at-category], note: "игра слов: протокол испытаний лаборатории"}
+  - {id: ru-card-body, slot_type: card-body, lang: ru, situation: benefits, text: "120 000 единиц по шкале Сковилла — по замеру лаборатории. На этикетке это 3 из 5 по нашей шкале остроты.", fact_ids: ["fact:heat-shu-no3", "fact:house-scale-no3"], principle_ids: [heat-as-number]}
+  - {id: ru-body-founder, slot_type: body, lang: ru, situation: about, text: "Первый соус Артём сварил в 2019 году для персонала своего ресторана. С 2023 года соусы продаются на фермерских рынках Краснодара, а с 1 октября — на этом сайте.", fact_ids: ["fact:origin-story-staff-sauce", "fact:launch-date"], note: "история основателя из фактов интервью (03 §3)"}
+  - {id: ru-faq-a, slot_type: faq-a, lang: ru, situation: faq, text: "120 000 единиц по шкале Сковилла. Если вы обычно просите «поострее», начните с половины капли.", fact_ids: ["fact:heat-shu-no3"], principle_ids: [honest-about-heat], note: "вопрос: «Насколько это остро?»"}
+  - {id: ru-email-subject, slot_type: email-subject, lang: ru, situation: lead-email, text: "«Пекло № 3» в продаже: 590 ₽ за 100 мл", fact_ids: ["fact:price-no3"]}
+  - {id: ru-footer-tagline, slot_type: footer-tagline, lang: ru, situation: footer, text: "Варим в Краснодаре. Остужайте сами.", fact_ids: ["fact:made-in-krasnodar"], principle_ids: [laugh-at-category]}
+  # --- английский (адаптация: англоязычные любители острого в России; SHU известен — не поясняем; шутка про молоко вместо калькы)
+  - {id: en-headline, slot_type: headline, lang: en, situation: campaign-slogan, adaptation_of: ru-headline, text: "120,000 Scoville units, and that’s a 3 out of 5 on our heat scale", fact_ids: ["fact:heat-shu-no3", "fact:house-scale-no3"]}
+  - {id: en-subheadline, slot_type: subheadline, lang: en, situation: hero, adaptation_of: ru-subheadline, text: "6 ingredients, zero sugar. Available from 1 October 2026.", fact_ids: ["fact:ingredients-no3", "fact:launch-date"]}
+  - {id: en-cta-label, slot_type: cta-label, lang: en, situation: hero, adaptation_of: ru-cta-label, text: "Remind me on 1 October", fact_ids: ["fact:launch-date"]}
+  - {id: en-cta-note, slot_type: cta-note, lang: en, situation: pricing-terms, adaptation_of: ru-cta-note, text: "₽590 for a 100 ml bottle. Available from 1 October 2026.", fact_ids: ["fact:price-no3", "fact:launch-date"]}
+  - {id: en-card-title, slot_type: card-title, lang: en, situation: benefits, adaptation_of: ru-card-title, text: "Heat, measured in a lab", fact_ids: ["fact:heat-shu-no3"], note: "игра «с протоколом» по-английски не работает — адаптация без каламбура"}
+  - {id: en-card-body, slot_type: card-body, lang: en, situation: benefits, adaptation_of: ru-card-body, text: "120,000 Scoville heat units, per a lab test. On the label that’s a 3 out of 5 on our own heat scale.", fact_ids: ["fact:heat-shu-no3", "fact:house-scale-no3"]}
+  - {id: en-body-founder, slot_type: body, lang: en, situation: about, adaptation_of: ru-body-founder, text: "Artyom cooked his first sauce in 2019 for the staff of his restaurant. Since 2023 the sauces have sold at farmers’ markets in Krasnodar, and from 1 October you can order them here.", fact_ids: ["fact:origin-story-staff-sauce", "fact:launch-date"]}
+  - {id: en-faq-a, slot_type: faq-a, lang: en, situation: faq, adaptation_of: ru-faq-a, text: "120,000 Scoville units. If you usually ask for extra hot, start with half a drop.", fact_ids: ["fact:heat-shu-no3"]}
+  - {id: en-email-subject, slot_type: email-subject, lang: en, situation: lead-email, adaptation_of: ru-email-subject, text: "Peklo No. 3 is out: ₽590 for 100 ml", fact_ids: ["fact:price-no3"]}
+  - {id: en-footer-tagline, slot_type: footer-tagline, lang: en, situation: footer, adaptation_of: ru-footer-tagline, text: "Cooked in Krasnodar. Bring your own milk.", fact_ids: ["fact:made-in-krasnodar"], note: "адаптация шутки: молоко гасит остроту — понятно англоязычному читателю"}
+
+style_sheet:
+  yo: always
+  numbers: digits
+  currency: "₽"
+  company_names: as-they-write
+  product_names:
+    - {name: "«Пекло № 3»", rule: "в кавычках, «№» с неразрывным пробелом; бренд без номера — «Пекло», склоняется («в „Пекле“»)"}
+  terms:
+    - {term: "SHU", definition: "единицы по шкале Сковилла — при первом упоминании на странице пояснить", not: ["градусы остроты"]}
+    - {term: "шкала «Пекла»", definition: "своя шкала остроты бренда 1–5 на этикетке", not: ["рейтинг", "уровень опасности"]}
+
+lint:
+  base_profile: landing
+  level_overrides:
+    ru-pun-emoji-body: "off"
+  address_rule: true
+
+projections:
+  tone_of_voice: "На «вы», коротко и дерзко: острота числом (SHU и своя шкала 1–5), ирония над категорией, не над читателем. Без медицины, мачизма и «!» в заголовках."
+  brand_voice:
+    tone: "повар, который сам варит соус: коротко, смешно, с цифрой в кармане"
+    use: ["острота", "SHU", "по нашей шкале", "варка", "капля"]
+    avoid: ["взрыв вкуса", "огненный", "незабываемый", "полезно", "не для слабаков", "настоящие мужчины"]
+  prompt_brief: >-
+    Голос «Пекла»: повар, который сам варит соус. На «вы», о себе — «мы». Коротко: заголовок и кнопка 2–9 слов, в прозе
+    короткое чередуем с длинным. Острота — числом из facts.yaml (120 000 SHU по замеру лаборатории, 3 из 5 по нашей
+    шкале), не эпитетом. Одна шутка на блок, над категорией или над собой, рядом — факт. Нельзя: польза и здоровье,
+    «самый острый», «не для слабаков», «для настоящих мужчин», алкоголь, «осталось N». Эмодзи — только в прозе писем и
+    подвала, не больше одного. «!» — не больше одного на страницу, не в заголовке и цене. Нет факта — [PLACEHOLDER].
+
+languages:
+  - {lang: ru, role: primary}
+  - lang: en
+    role: adaptation
+    audience_note: "Англоязычные любители острого в России (экспаты): шкалу Сковилла знают лучше русских читателей, каламбуры с «протоколом» не поймут."
+    adaptation_rules:
+      - "сохраняем точки осей, одну шутку на блок и запреты (здоровье, мачизм, алкоголь)"
+      - "каламбуры не переводим: заменяем шуткой из англоязычного быта («Bring your own milk») или пишем без каламбура"
+      - "SHU без пояснения, «Scoville units» — в заголовке"
+
+open_questions:
+  - {id: q-address, q: "«Вы» или «ты»? Для дерзкого потребительского бренда «ты» естественно, но умолчание базы — «вы».", why: "Обращение меняет все тексты разом", options: ["вы", "ты"], default: "«вы»: дерзость — в словах и контрасте, не в обращении", affects: [address]}
+  - {id: q-next-heat, q: "Будут ли соусы с остротой 4 и 5 по вашей шкале?", why: "Шутка «и это только тройка» намекает на продолжение линейки — без факта намёк нельзя", default: "Намёков на будущие соусы нет", affects: [samples]}
+
+review:
+  method: editor
+  result: "черновик; образцы: claims_check — 0 error, copy_lint — clean/review (99-raw/experiments/F/04-voice-samples)"
+  by: "агент F (ai-self)"
+  date: "2026-09-24"

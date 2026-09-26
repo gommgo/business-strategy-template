@@ -1,0 +1,254 @@
+{
+  "art_direction_version": 0,
+  "id": "kvarts-preorder",
+  "site": "kvarts-preorder",
+  "example": true,
+  "status": "approved",
+  "approved_by": "заказчик (вымышленный: ответ 3 = A в kimi F/03)",
+  "approved_at": "2026-09-24",
+  "checked_at": "2026-09-24",
+  "refs": {
+    "brief": "../../../kimi-research/99-raw/experiments/F/03-package-from-description/landing-kvarts/brief.yaml",
+    "facts": "../../../text/02-strategy-messaging/examples/facts-kvarts.yaml",
+    "visual_dna": "(не собран: ai-media собирает паспорт по handoff.visual_dna)"
+  },
+  "inputs": {
+    "site_type": "landing-site",
+    "page_type": "landing-product",
+    "audience": "Люди 28–45 лет, много читают, вечером с книгой; приходят из Telegram-каналов о книгах, чаще с телефона",
+    "job": "Внести бронь 990 ₽ на лампу из первой партии",
+    "awareness": "problem-aware и solution-aware: знают, что свет в комнате мешает читать; о лампе узнают из поста канала",
+    "traffic": "Telegram-каналы о книгах, тёплый трафик, телефон 390×844",
+    "proof": ["fact:color-temperature", "fact:scenarios-4", "fact:usb-c-18w", "fact:auto-light", "fact:price-first-batch", "fact:deposit-refund", "fact:shipping-date"],
+    "brand_status": "draft",
+    "brand_expression_mode": "extend",
+    "must_keep": ["логотип SVG как есть", "ультрамарин #2B3BFF"],
+    "customer_words": ["Нравятся сайты Teenage Engineering и Nothing", "не хотим «как у всех» — никакого бежевого"],
+    "references_given": ["refs/01-grid.jpg — сетка и подача предмета (скриншот заказчика)", "refs/02-type.jpg — масштаб заголовка", "refs/03-preorder.jpg — блок цены и брони"],
+    "assets": "логотип SVG, GLB-модель лампы от дизайнера, 6 фото прототипа",
+    "constraints": ["первый экран телефона ≤ 1,5 МБ", "без обещаний про здоровье глаз (text: nc-eyes-health)", "без счётчика «осталось N» и таймера", "без зачёркнутой «старой» цены: товар ещё не продавался (text B2, 38-ФЗ ст. 5)"]
+  },
+  "ambition": {
+    "level": "L1",
+    "source": "default",
+    "budget_profile": "landing-product@L1",
+    "motion_cap": "expressive",
+    "rationale": "Промо товара — умолчание L1 (решение заказчика п. 13). Трафик тёплый, но с телефона из Telegram: вес первого экрана как у L0 (≤ 1,5 МБ). Один фирменный приём (свет теплеет в секции how) и один 3D-объект после LCP; цена и бронь — L0.",
+    "by_section_role": [{"role": "pricing", "level": "L0", "why": "цена и условия брони читаются, а не смотрятся"}]
+  },
+  "concept": {
+    "design_read": "Читаю это как: лендинг предзаказа лампы для читающих людей 28–45 с телефона, язык инженерного паспорта предмета, тянется к строгой сетке и одному яркому цвету (Teenage Engineering и Nothing — уровень ремесла, не образец для копии)",
+    "mechanism": "Лампа сама меняет цветовую температуру 2700–5000 K и яркость под книгу и время суток и помнит 4 сценария",
+    "audience_scene": "Вечер, около 22:00, кресло или кровать, в руке телефон с книжным Telegram-каналом; в комнате — верхний плафон или ночник",
+    "first_screen_proves": "Лампа настоящая (фото прототипа) и управляет светом: одна и та же страница книги под 5000 K и под 2700 K",
+    "thesis": "Инженерный паспорт вещи, которая управляет светом: холодная точная сетка, один ультрамарин и страница книги, на которой видно, как меняется свет",
+    "metaphor": "паспорт изделия с живым образцом света",
+    "material": "бумага технической документации и свет на странице книги",
+    "energy": "measured",
+    "rut": "Тёмный hero со светящейся лампой по центру, сине-фиолетовый «умный» градиент, три карточки функций с иконками, отзывы и логотипы СМИ, которых нет",
+    "rut_opposite": "Уютный бежевый «уголок для чтения» с антиквой и тёплым светом",
+    "not_this": ["без неона «умного дома»", "без бежевого (запрет заказчика)", "без обещаний про зрение", "без зачёркнутой цены"]
+  },
+  "territories": [
+    {"id": "datasheet", "name": "Паспорт изделия", "source": "техническая документация, упаковка и инструкции электроники", "family": "document-print", "why": "аудитория ценит вещи с инженерной честностью (TE, Nothing); механизм показывается числами 2700–5000 K, 4 сценария, 18 Вт"},
+    {"id": "kelvin", "name": "Шкала Кельвина", "source": "шкала цветовой температуры, экспонометр и баланс белого фотографа", "family": "data-notation", "why": "работа лампы — движение по шкале; страница может сама пройти по ней"},
+    {"id": "book-margins", "name": "Поля книги", "source": "книжный разворот: поля, сноски, колонтитулы", "family": "document-print", "why": "аудитория читает; лампа служит странице, характеристики — как сноски"},
+    {"id": "blue-hour", "name": "Синий час", "source": "вечерний переход от дневного света к тёплому", "family": "nature-material", "why": "сценарии лампы привязаны ко времени суток"},
+    {"id": "reading-room", "name": "Читальный зал", "source": "зал библиотеки с настольными лампами", "family": "place-architecture", "why": "общая память читающих", "rejected_because": "клише зелёной «банкирской» лампы и тёплая бумага — колея категории"},
+    {"id": "channel-post", "name": "Пост канала", "source": "посты книжных Telegram-каналов", "family": "screen-interface", "why": "аудитория приходит оттуда", "rejected_because": "имитация чужого интерфейса и бренда мессенджера"},
+    {"id": "quartz", "name": "Кристалл кварца", "source": "имя продукта", "family": "nature-material", "literal": true, "why": "буквальное прочтение имени", "rejected_because": "грани и блеск ведут к стеклу и хрому без связи с механизмом (IMG-M06)"}
+  ],
+  "directions": [
+    {
+      "id": "a",
+      "name": "Паспорт изделия",
+      "recommended": true,
+      "thesis": "Инженерный паспорт предмета: строгая сетка, крупный левый заголовок, характеристики таблицей, ультрамарин только на действии",
+      "territory": "datasheet",
+      "axes": {"paper": "light", "paper_temperature": "cool", "display_style": "wide", "accent_hue": "cool", "macrostructure": "split-studio", "imagery": "photo", "energy": "measured"},
+      "palette": {"background": "#F5F7FA", "surface": "#FFFFFF", "text": "#0E1220", "muted": "#4A5263", "accent": "#2B3BFF", "on_accent": "#FFFFFF"},
+      "color_strategy": "restrained",
+      "type": {"display": "Unbounded", "text": "Golos Text", "cyrillic_checked": true, "license": "OFL", "note": "кириллица — fontsource subsets (kimi 07/03 §4.4, 2026-09-24)"},
+      "signature_move": {"what": "Подписи-выноски у деталей лампы на фото прототипа, как в паспорте изделия", "where": "section-role:hero", "effects": [], "min_level": "L0", "concept_link": "паспорт показывает устройство вещи, а не хвалит её"},
+      "first_viewport": "Слева крупный заголовок в 2 строки (72/40 px) и кнопка «Забронировать за 990 ₽», под ней строка о возврате брони; справа фото прототипа на светлом поле с 3 выносками",
+      "imagery": "6 фото прототипа на светлом поле; 3D-лампа в отдельной секции",
+      "motion": "почти неподвижно: отклик кнопки 2 px",
+      "risk": "Сухо, если фото прототипа слабые; без приёма из B страница остаётся «документацией»",
+      "cost": "дёшево: фото заказчика, без 3D в первом экране",
+      "level_fit": ["L0", "L1"]
+    },
+    {
+      "id": "b",
+      "name": "Шкала Кельвина",
+      "thesis": "Страница идёт по шкале цветовой температуры: вверху холодный дневной свет, к форме брони — тёплый вечерний, число в кельвинах — главный шрифтовой образ",
+      "territory": "kelvin",
+      "axes": {"paper": "light", "paper_temperature": "neutral", "display_style": "condensed", "accent_hue": "cool", "macrostructure": "stat-led", "imagery": "typographic", "energy": "lively"},
+      "palette": {"background": "#F3F5F8", "surface": "#FFFFFF", "text": "#16181D", "accent": "#2B3BFF", "on_accent": "#FFFFFF", "extra": [{"hex": "#F2B267", "role": "образец 2700 K (только в демонстрации света)", "share_max": 0.1}]},
+      "color_strategy": "full-palette",
+      "type": {"display": "Sofia Sans Condensed", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL", "note": "узкий гротеск с кириллицей — проверить подмножество до сборки; замена X 2026-09-25: Oswald → Sofia Sans Condensed (cyrillic-display-fonts.yaml: Oswald — avoid, type.today «нельзя»)"},
+      "signature_move": {"what": "Прокрутка ведёт свет по шкале 5000 → 2700 K: фон секции и образец страницы теплеют, крупное число кельвинов меняется", "where": "section-role:how-it-works", "effects": ["effect:scroll-driven-progress"], "min_level": "L1", "concept_link": "страница делает то, что делает лампа"},
+      "first_viewport": "Крупное «2700–5000 K» во всю ширину, под ним одна строка обещания и кнопка; фото лампы маленьким кадром справа внизу",
+      "imagery": "типографика и два кадра страницы книги под разным светом",
+      "motion": "одна сцена прокрутки: свет теплеет",
+      "risk": "Тёплый конец шкалы легко становится бежевым фоном — запрет заказчика; число без фото продукта теряет доверие",
+      "cost": "средне: сцена прокрутки и два кадра",
+      "level_fit": ["L1", "L2"]
+    },
+    {
+      "id": "c",
+      "name": "Поля книги",
+      "thesis": "Страница как книжный разворот: широкие поля, сноски вместо карточек, лампа светит на страницу",
+      "territory": "book-margins",
+      "axes": {"paper": "light", "paper_temperature": "neutral", "display_style": "serif", "accent_hue": "cool", "macrostructure": "long-document", "imagery": "photo", "energy": "calm"},
+      "palette": {"background": "#FFFFFF", "surface": "#F3F1EC", "text": "#1B1F2A", "accent": "#2B3BFF", "on_accent": "#FFFFFF"},
+      "color_strategy": "restrained",
+      "type": {"display": "Literata", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL"},
+      "signature_move": {"what": "Характеристики — сносками на полях разворота; фото страницы под светом лампы на всю ширину", "where": "section-role:specs", "effects": [], "min_level": "L0", "concept_link": "лампа нужна странице — страница и есть сайт"},
+      "first_viewport": "Разворот: слева заголовок антиквой и кнопка, справа фото раскрытой книги под светом лампы; поле с одной сноской-ценой",
+      "imagery": "съёмка страницы книги под лампой (заказчик или рендер blender)",
+      "motion": "без движения, кроме отклика",
+      "risk": "Книжная тема тянет к «кремовой бумаге и антикве» — кластер ИИ 2025–26 (ui 11/04 §4.1) и примета K3 serif",
+      "cost": "дёшево, но нужна своя съёмка",
+      "level_fit": ["L0", "L1"]
+    },
+    {
+      "id": "d",
+      "name": "Синий час",
+      "thesis": "Ночная страница глубокого синего цвета, где единственный тёплый свет — от лампы на фото",
+      "territory": "blue-hour",
+      "axes": {"paper": "dark", "paper_temperature": "cool", "display_style": "grotesque", "accent_hue": "cool", "macrostructure": "photographic", "imagery": "photo", "energy": "calm"},
+      "palette": {"background": "#0B1020", "surface": "#141A2E", "text": "#E8EDF5", "accent": "#2B3BFF", "on_accent": "#FFFFFF"},
+      "color_strategy": "committed",
+      "type": {"display": "Onest", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL"},
+      "signature_move": {"what": "Фото лампы в тёмной комнате: тёплое пятно света на странице — единственный тёплый цвет сайта", "where": "section-role:hero", "effects": [], "min_level": "L0", "concept_link": "лампа нужна вечером; её свет — событие"},
+      "first_viewport": "Полноэкранное тёмное фото с тёплым пятном лампы справа, заголовок слева светлым текстом на подложке, кнопка ультрамарином с белой обводкой",
+      "imagery": "вечерняя съёмка лампы в комнате",
+      "motion": "без движения",
+      "risk": "«Почти-чёрный + один яркий акцент» — кластер шаблонов (ui 11/04 §4.1 №2); ультрамарин на тёмном теряет контраст (нужна обводка)",
+      "cost": "нужна постановочная вечерняя съёмка",
+      "level_fit": ["L1", "L2"]
+    }
+  ],
+  "choice": {
+    "chosen": "a",
+    "chosen_by": "customer",
+    "date": "2026-09-24",
+    "why": "Заказчик выбрал A (ответ 3 в kimi F/03): ближе к TE и Nothing, без бежевого. Главный приём страницы взят из B: свет теплеет по прокрутке в секции how — это показывает механизм и совпадает с «Going with» F/03.",
+    "merged_from": ["b"],
+    "rejected": [
+      {"id": "c", "why": "антиква и книжная тема тянут к кремовой колее и примете K3 serif"},
+      {"id": "d", "why": "тёмный фон + один яркий акцент — кластер шаблонов; нужна дорогая вечерняя съёмка"}
+    ]
+  },
+  "moodboard": [
+    {"url": "refs/01-grid.jpg (скриншот заказчика, 1440×900, 2026-09-24)", "role": "composition", "applies_to": "section-role:hero", "take": ["строгая 12-колоночная сетка", "предмет на светлом поле без сцены", "короткие подписи у деталей предмета"], "dont_take": ["оранжевый акцент", "моноширинный шрифт", "их фото товаров", "бегущая строка"]},
+    {"url": "refs/02-type.jpg (скриншот заказчика)", "role": "typography", "applies_to": "page", "take": ["заголовок слева в 1–2 строки ≈ 72–80 px", "один цвет-акцент"], "dont_take": ["точечный шрифт", "красный акцент", "тёмный фон секций"]},
+    {"url": "refs/03-preorder.jpg (скриншот заказчика)", "role": "block-solution", "applies_to": "section-role:pricing", "take": ["одна строка о брони под ценой", "кнопка сразу под условием"], "dont_take": ["зачёркнутая старая цена (38-ФЗ: товар не продавался)", "таймер", "счётчик «осталось N»"]}
+  ],
+  "visual_language": {
+    "color_strategy": "restrained",
+    "palette": {"background": "#F5F7FA", "surface": "#FFFFFF", "text": "#0E1220", "muted": "#4A5263", "accent": "#2B3BFF", "on_accent": "#FFFFFF", "extra": [{"hex": "#F2B267", "role": "образец 2700 K в демонстрации света (секция how)", "share_max": 0.1}]},
+    "accent_rule": "ультрамарин только на главной кнопке, ссылках и активных состояниях; тёплый образец — только внутри демонстрации света",
+    "type": {"display": "Unbounded", "text": "Golos Text", "cyrillic_checked": true, "license": "OFL"},
+    "composition": ["12 колонок; предмет справа на светлом поле, текст слева", "характеристики — таблица на всю ширину", "выноски у деталей предмета текстовым шрифтом 13–14 px"],
+    "surfaces": ["светлое холодное поле без фактур; глубина только у 3D-лампы"],
+    "imagery": {"kinds": ["photo", "3d"], "subject": "прототип лампы на светлом поле; страница книги под 5000 K и 2700 K", "source_policy": "фото прототипа и GLB — от заказчика; страница книги — съёмка заказчика или рендер blender; текст в кадре не генерировать", "people_policy": "none", "product_policy": "real-photo-only"},
+    "theme": "light",
+    "d_refs": ["04-visual-language/01 (дисплейные роли — D, волна 1)", "04-visual-language/03 (подача продукта — D)"]
+  },
+  "motion_system": {
+    "thesis": "Движется только свет: в секции how страница книги теплеет от 5000 K к 2700 K по мере прокрутки; остальное неподвижно, отклик кнопки 2 px",
+    "level": "expressive",
+    "entrance_system": "первый экран без анимации появления; одна сцена прокрутки в how; 3D — вращение пальцем по запросу",
+    "library": ["css (scroll-driven animations с @supports)", "@google/model-viewer@4"],
+    "smooth_scroll": false,
+    "page_transitions": "none",
+    "reduce": "в how — два статичных кадра рядом (5000 K и 2700 K); 3D — постер",
+    "by_section": [
+      {"section": "hero", "motion_level": "none", "visual_role": "accent"},
+      {"section": "how", "motion_level": "expressive", "visual_role": "peak"},
+      {"section": "object3d", "motion_level": "subtle", "visual_role": "support"},
+      {"section": "price", "motion_level": "none", "visual_role": "calm"}
+    ]
+  },
+  "effects_by_section": [
+    {"section": "how", "level": "L1", "effects": ["effect:scroll-driven-progress"], "purpose": "signature", "why": "механизм лампы показан, а не описан"},
+    {"section": "object3d", "level": "L1", "effects": ["effect:3d-object"], "purpose": "support", "why": "товар ещё не продаётся — его можно рассмотреть"}
+  ],
+  "decisions": [
+    {"id": "d-warm-paper", "technique": "cliche:warm-paper (кремовый и бежевый фон)", "decision": "avoid",
+     "criteria": {"concept": {"result": "fail", "note": "тепло — свойство света лампы, а не бумаги"}, "brand": {"result": "fail", "note": "запрет заказчика"}, "execution": {"result": "na"}, "epoch": {"result": "fail", "note": "кластер ИИ 2025–26: крем + антиква (ui 11/04 §5)"}, "singularity": {"result": "na"}},
+     "why": "Тёплый цвет живёт только внутри демонстрации 2700 K"},
+    {"id": "d-scroll-light", "technique": "effect:scroll-driven-progress", "decision": "use",
+     "criteria": {"concept": {"result": "pass", "note": "страница делает то, что делает лампа"}, "brand": {"result": "pass", "note": "холодный конец шкалы — ультрамарин бренда"}, "execution": {"result": "pass", "note": "CSS scroll-driven + @supports; без поддержки и при reduce — два кадра"}, "epoch": {"result": "pass", "note": "демонстрация механизма, а не декоративное появление"}, "singularity": {"result": "pass", "note": "единственный пик страницы"}},
+     "why": "Главный приём страницы", "where": "how"},
+    {"id": "d-3d-viewer", "technique": "effect:3d-object (model-viewer)", "decision": "use",
+     "criteria": {"concept": {"result": "pass", "note": "предмет предзаказа можно рассмотреть"}, "brand": {"result": "pass", "note": "GLB дизайнера"}, "execution": {"result": "pass", "note": "постер из того же GLB, загрузка по взаимодействию, ≤ 0,8 МБ телефон"}, "epoch": {"result": "pass"}, "singularity": {"result": "pass", "note": "один 3D на странице"}},
+     "why": "Доказывает форму товара, которого ещё нет в продаже", "where": "object3d"},
+    {"id": "d-mono-captions", "technique": "cliche:mono-captions (template chrome)", "decision": "avoid",
+     "criteria": {"concept": {"result": "na"}, "brand": {"result": "fail", "note": "в бренде моно нет"}, "execution": {"result": "na"}, "epoch": {"result": "fail", "note": "шаблонный хром ui 11/04 кластер 5; K3-MONO-LABELS"}, "singularity": {"result": "na"}},
+     "why": "Выноски паспорта — текстовым шрифтом, а не моноширинным"}
+  ],
+  "exclusions": {
+    "forbidden_hues": [
+      {"from": 20, "to": 60, "reason": "бежевые и тёплые заливки фона — запрет заказчика; тёплый только в демонстрации 2700 K", "except_share_max": 0.1},
+      {"from": 270, "to": 320, "reason": "пурпур и неон «умного дома» (IMG-M05); ультрамарин бренда 268° — у края полосы, вне её"}
+    ],
+    "forbidden_markers": ["IMG-M02", "IMG-M03", "IMG-M05", "IMG-M06", "IMG-M07", "IMG-M09", "IMG-M21", "IMG-M22", "IMG-M24"],
+    "k3_allow": [],
+    "bans": ["бежевый и кремовый фон", "обещания про здоровье глаз", "счётчик «осталось N» и таймер", "зачёркнутая «старая» цена", "моноширинные подписи", "люди в кадре"]
+  },
+  "budget": {
+    "profile": "landing-product@L1",
+    "spend": [
+      {"what": "фото прототипа в hero (AVIF 828 px телефон / 1600 px десктоп)", "kb": 150, "device": "both", "load": "eager"},
+      {"what": "два кадра страницы книги для сцены how", "kb": 160, "device": "both", "load": "on-visible"},
+      {"what": "GLB лампы", "kb": 800, "device": "mobile", "load": "on-interaction"},
+      {"what": "model-viewer (бандл с three, br)", "kb": 240, "device": "both", "load": "on-interaction"}
+    ],
+    "overrides": [
+      {"metric": "effects.js_3d_kb_br.mobile", "value": 240, "why": "model-viewer 4 весит 240 КБ br (blender A/03) при потолке 200; грузится только по нажатию «Рассмотреть» и не входит в первый экран", "approved_by": "арт-директор (Claude), пример"}
+    ]
+  },
+  "handoff": {
+    "visual_dna": {
+      "character": {"adjectives": ["точный", "спокойный", "предметный"], "boldness": "balanced", "one_bold_move": "страница книги под светом лампы в секции how: свет теплеет от 5000 K к 2700 K; остальное — сетка и фото прототипа"},
+      "palette_forbidden_hues": [
+        {"from": 20, "to": 60, "reason": "тёплые заливки фона — запрет заказчика", "except_share_max": 0.1},
+        {"from": 270, "to": 320, "reason": "пурпур и неон (IMG-M05)"}
+      ],
+      "exclusions": {"forbidden_markers": ["IMG-M02", "IMG-M03", "IMG-M05", "IMG-M06", "IMG-M07", "IMG-M09", "IMG-M21", "IMG-M22", "IMG-M24"], "replace_with": [{"what": "people", "kind": "object", "replace_with": "no one in the frame"}, {"what": "readable text on the book page", "kind": "artifact", "replace_with": "soft out-of-focus lines of print"}]},
+      "abstract": {"policy": "none"},
+      "video": {"tempo": "still"},
+      "composition": {"subject_region": "right-third", "text_zone_default": {"side": "left", "share": 0.45, "surface": "evenly lit cool light-grey field"}, "negative_space_min": 0.4, "max_elements": 3, "asymmetry": true},
+      "subject_matter": {"domain_props": ["prototype reading lamp", "open paperback book", "bedside table", "USB-C cable"], "motifs": ["the same book page under cool and warm light"], "people_policy": "none", "product_policy": "real-photo-only"},
+      "materials": ["uncoated book paper", "lamp body exactly as in the prototype photos"]
+    },
+    "blender": {
+      "role_in_story": "секция object3d: рассмотреть и повернуть лампу; постер из того же GLB",
+      "series_style": "предметная съёмка на светлом холодном поле, без сцены",
+      "page_background": "#F5F7FA",
+      "materials": ["по GLB дизайнера, без переосмысления"],
+      "light_mood": "ровный дневной свет около 5000 K, мягкая контактная тень",
+      "motion": "вращение пальцем (model-viewer), без автоповорота",
+      "budget": "GLB ≤ 0,8 МБ телефон / 1,5 МБ десктоп, ≤ 50 тыс. треугольников (blender 01/02 §3.1)"
+    },
+    "kimi": {
+      "design_system_style": "инженерный паспорт предмета — строгая сетка, крупный левый заголовок, характеристики таблицей",
+      "direction": {"visual_thesis": "инженерный паспорт вещи, которая управляет светом", "paper": "light cool #F5F7FA", "display_style": "wide grotesque Unbounded, без курсива", "accent_rule": "ультрамарин только на главной кнопке, ссылках и активных состояниях", "imagery": "фото прототипа и 3D-лампа; без людей и стока", "macrostructure": "document-led"},
+      "motion": {"level": "expressive", "thesis": "движется только свет: страница книги теплеет по прокрутке в how", "library": "css + @google/model-viewer@4"},
+      "bans": ["бежевый и кремовый фон", "зачёркнутая старая цена", "счётчик и таймер", "моноширинные подписи"],
+      "allow": [],
+      "design_md_overview": "Кварц — лампа, которая сама подбирает свет для чтения. Страница — паспорт изделия: светлое холодное поле, сетка 12 колонок, Unbounded в заголовках, ультрамарин только на действии. Один приём: в секции «Как работает» страница книги теплеет от 5000 K к 2700 K по мере прокрутки."
+    }
+  },
+  "lifecycle": {
+    "version": "1.0",
+    "history": [
+      {"version": "0.1", "date": "2026-09-24", "change": "4 направления показаны заказчику", "by": "Claude (пример A/01)"},
+      {"version": "1.0", "date": "2026-09-24", "change": "выбрано A с приёмом из B", "by": "заказчик (вымышленный)"}
+    ],
+    "review_by": "2027-03-24",
+    "on_brand_change": "пересобрать palette, type, exclusions, handoff; концепция и территории остаются, пока механизм продукта тот же"
+  }
+}

@@ -1,0 +1,747 @@
+# effect-gates.yaml — ворота эффектов подачи (creative-research) · v0.2
+# 09-ai-execution-evaluation · волна 3 · агент K · 2026-09-24; v0.2 — продолжатель K2, 2026-09-25 (поле changes ниже).
+# Описание и обоснование — 03-verification-loop-and-gates.md §3; итоги на лаборатории F и странице I/02 — там же §5.
+#
+# Иерархия (контракт тройки v2 §2): ворота страницы site (../site/07-seo-geo-performance-analytics/page-gates.yaml
+# v1.2) ВЫШЕ этих; ворота ассетов (ai-media page_accept.py, blender 09/05 §7.2) страницу не блокируют за чужие байты.
+# Здесь — то, что добавляет подача: движение, петли, reduce, фолбэки, вес и цена эффектов. Там, где метрика совпадает с
+# воротами site (LCP, TBT, вес страницы, CLS загрузки), наша строка — «зеркало» с серьёзностью D и полем site: владелец —
+# site, повторного блокера нет.
+#
+# Автопроверка: ../../scripts/creative/motion_check.py ЦЕЛЬ --level L0|L1|L2 → results.json → gates.md (правило → найдено → порог → где).
+# Поле metric — путь в results.json[<режим>]; modes — режимы motion_check (desk 1440×900 · mob Pixel 7 + CPU×4 · rm reduce ·
+# nojs · nogl); op — <=, >=, ==, empty (список пуст), false (ложь); threshold — число, {L0|L1|L2|all: число | {desktop, mobile}};
+# threshold_ref — путь в levels[<уровень>] файла 01-creative-direction/ambition-levels.yaml (единый источник бюджетов), scale —
+# множитель к нему; levels — к каким уровням строка относится; auto: false — проверка вручную или другим инструментом.
+# Серьёзность — как у site: B блокер (страница не принимается), S серьёзно (исправить или x-gate-exception {id, why, who, until}
+# в page-plan), D желательно. Пороги с меткой [гипотеза] — кандидаты по данным C, E, F, G; калибровка — живая фаза.
+version: "0.2"
+status: draft
+checked_at: "2026-09-25"
+owner: "creative-research · 09-ai-execution-evaluation · K (волна 3); v0.2 — продолжатель K2"
+tool: "../../scripts/creative/motion_check.py 0.1.3; статические визуальные проверки — ../../scripts/creative/marketing_audit.py 0.1.1 (профиль marketing)"
+changes:
+  - "0.2 (2026-09-25, K2): + EG-PERF-11 (CLS окна сессии с атрибуцией узлов, зеркало SG-PERF-03), EG-A11Y-24 (переключатель «Меньше» работает — нажатие), EG-A11Y-25 («Полное» в reduce включает движение), EG-A11Y-26 (F83 по буквам автоматом при --f83, B), EG-A11Y-27 (контраст над живым фоном, --contrast, S); EG-A11Y-11 — исключения (JS ≤ 3 КБ br, script[data-motion-toggle]); пороги и id прежних строк не менялись. Ложные S motion_check 0.1 (петля в покое из кадров прокрутки, станции холста, радиогруппа не видна) исправлены в 0.1.2."
+  - "0.1 (2026-09-24, K): 50 строк, 42 автоматические."
+  - "правки аудита без смены версии (2026-09-25, S1b по X-10): EG-PERF-03 fix — lerp ≥ 0,15 (замер S1: 0,12 даёт 1 094–1 125 мс — провал этих же ворот); ссылка blender — 09-web-runtime/05 (путь 09-perf-access-seo не существует); tool — marketing_audit.py 0.1.1. Пороги, id и серьёзность не менялись."
+levels_source: "01-creative-direction/ambition-levels.yaml v0.2 (budgets.effects — наш профиль эффектов; budgets.page — предложение site P, принято как goal)"
+site_gates: "../site/07-seo-geo-performance-analytics/page-gates.yaml v1.2 (62 строки; page_gates.py v1.2)"
+neighbours:
+  ai_media: "../../scripts/ai-media/page_accept.py (копия ai-media J): вес первого экрана, LCP, CLS, TBT, пауза видео на 6-й с, reduce 0 байт видео и < 0,5 % движения, F83 по буквам и кадрам видео"
+  blender: "../blender/09-web-runtime/05-performance-a11y-fallbacks.md §7.2 — 11 порогов страницы с 3D (site_probe.py + gate_check): вызовы в кадре ≤ 30/60, reduce 0 вызовов и ≤ 0,05 % движения, DPR ≤ 1,5, первый кадр модели ≤ 5000/2000 мс"
+  kimi: "../kimi-research/99-raw/tools/k3_checks.py — приметы K3 (K3-*, --allow), M-H1-LINES, M-OVERFLOW, M-NAV; ACCEPTANCE F2/F3, D1"
+severity:
+  B: "блокер: страница не принимается, пока не исправлено"
+  S: "серьёзно: исправить или записать обоснование в page-plan (x-gate-exception: {id, why, who, until})"
+  D: "желательно или зеркало ворот site/соседа: показать, не блокировать"
+modes:
+  desk: "Chromium 153 headless 1440×900, DPR 1; запись 960×600; load → 5 с → синхровспышка → покой 1 с (6-я секунда) → прокрутка колесом 0,8 экрана на шаг, пауза 1,4 с → петли через 6 с → Tab ×25 → пауза-тест"
+  mob: "Pixel 7 (412×839, DPR 2,625, тач, UA HeadlessChrome) + CPU ×4 (CDP); запись 412×839; без Tab"
+  rm: "desk + prefers-reduced-motion: reduce; запись всей страницы"
+  nojs: "desk без JavaScript; кадр и видимость H1, текста и призыва"
+  nogl: "desk с --disable-webgl --disable-webgl2; кадр, H1, ошибки консоли"
+exceptions: "как у site: page-plan x-gate-exception: [{id: EG-…, why, who, until}] — S снимается с записью, B — нет"
+
+gates:
+  # ------------------------------------------------------------------ PERF — цена движения при прокрутке и LCP
+  - id: EG-PERF-01
+    name: "Длинные кадры (LoAF ≥ 50 мс) при прокрутке, % окна прокрутки"
+    group: perf
+    modes: [desk, mob]
+    metric: scroll.loaf_pct
+    op: "<="
+    threshold: {all: {desktop: 2, mobile: 10}}
+    severity: S
+    spec_override: budget.long_frames_pct_max
+    where: scroll.cls_sources
+    source: "E 05-motion/03 §3.2 (кандидаты по квартилям C: десктоп медиана 0, Q3 0,5; телефон CPU×4 медиана 3, Q3 10,2); CRV-PF-11"
+    label: "[данные: C] [гипотеза: порог]"
+    site: "дополняет SG-PERF-04/05 (INP и TBT прокрутку не видят — web.dev)"
+    fix: "тяжёлое — вне кадра прокрутки: WebGL и видео по видимости, меньше ScrollTrigger, будить эффект по IntersectionObserver"
+  - id: EG-PERF-02
+    name: "CLS при прокрутке (фаза прокрутки, без недавнего ввода)"
+    group: perf
+    modes: [desk, mob]
+    metric: scroll.cls
+    op: "<="
+    threshold: 0.1
+    severity: S
+    spec_override: budget.cls_scroll_max
+    where: scroll.cls_sources
+    source: "E 05-motion/03 §3.2; E/02 (pin ScrollTrigger через position: fixed — 1,6–2,0; sticky и pinType: 'transform' — 0)"
+    label: "[проверено: 99-raw/experiments/E/02-scroll-scene]"
+    site: "дополняет SG-PERF-03 (CLS страницы web-vitals после прокрутки): наш — только фаза прокрутки, указывает на эффект"
+    fix: "pinType: 'transform' или position: sticky вместо pin через fixed; размеры медиа до загрузки"
+  - id: EG-PERF-03
+    name: "Хвост прокрутки после шага колеса (медиана), мс"
+    group: perf
+    modes: [desk, mob]
+    metric: scroll.tail_ms_median
+    op: "<="
+    threshold: 1000
+    severity: S
+    source: "E 05-motion/01 и токен motion.marketing.duration.settle-max 1000; E/02 (Lenis 800–1050 мс на шаг); C (живые сайты 0,8–1,4 с)"
+    label: "[проверено: E/02] [данные: C]"
+    site: "—"
+    fix: "Lenis только на L2 и с lerp ≥ 0,15 (токен scroll.lenis-lerp; замер S1 2026-09-25: 0,12 — 1 094–1 125 мс, 0,15 — 896 мс); на L0–L1 — родная прокрутка"
+  - id: EG-PERF-04
+    name: "Частота кадров rAF при прокрутке"
+    group: perf
+    modes: [desk, mob]
+    levels: [L1, L2]
+    metric: scroll.fps
+    op: ">="
+    threshold_ref: budgets.page.scroll_fps_min
+    severity: D
+    source: "A ambition-levels.yaml budgets.page.scroll_fps_min (30 / 50); F 03-effects-lab-method: в лаборатории все эффекты дают 60 — не критерий"
+    label: "[гипотеза] [проверено: F — не различает]"
+    site: "—"
+  - id: EG-PERF-05
+    name: "TBT до прокрутки (зеркало ворот site)"
+    group: perf
+    modes: [desk, mob]
+    metric: vitals.tbt_ms
+    op: "<="
+    threshold_ref: budgets.page.tbt_ms_lab
+    severity: D
+    source: "A budgets.page.tbt_ms_lab; blender 01/02 §8"
+    label: "[документация] + [данные]"
+    site: "= SG-PERF-05 (владелец site; у site — S)"
+  - id: EG-PERF-06
+    name: "LCP в лаборатории без троттлинга сети (зеркало, мс)"
+    group: perf
+    modes: [desk, mob]
+    metric: vitals.lcp_ms
+    op: "<="
+    threshold_ref: budgets.page.lcp_s_lab
+    scale: 1000
+    severity: D
+    source: "A budgets.page.lcp_s_lab; сеть не замедляется — порог site (1,6 Мбит/с, RTT 150) строже"
+    label: "[гипотеза]"
+    site: "= SG-PERF-01/02 (владелец site, методика page_accept --throttle)"
+  - id: EG-PERF-07
+    name: "H1 первого экрана выпал из LCP (крупнее LCP-элемента, но не он)"
+    group: perf
+    modes: [desk, mob]
+    metric: vitals.h1_lcp_dropped
+    op: "false"
+    severity: S
+    where: vitals.lcp_sel
+    source: "E/01: H1 из opacity 0, за маской строк или скрытый скриптом — не кандидат LCP в Chromium 153, LCP уходит на лид в 5× меньше"
+    label: "[проверено: 99-raw/experiments/E/01-lcp-reveal]"
+    site: "= SG-PERF-06 v1.2 (S) — владелец site"
+    fix: "H1 без анимации или только transform ≤ 24 px; split по строкам без overflow: hidden; reduce — видно с первого кадра"
+  - id: EG-PERF-08
+    name: "LCP-элемент — canvas"
+    group: perf
+    modes: [desk, mob]
+    metric: vitals.lcp_canvas
+    op: "false"
+    severity: B
+    source: "CRV-AL-04; blender 09/05 §7.2 №1; blender 01/04 A/04"
+    label: "[проверено] у соседей"
+    site: "= SG-PERF-06 (B)"
+  - id: EG-PERF-09
+    name: "Есть хотя бы одна запись LCP (не всё появляется из opacity: 0)"
+    group: perf
+    modes: [desk, mob]
+    metric: vitals.lcp_entries
+    op: ">="
+    threshold: 1
+    severity: B
+    source: "page_accept.py verdict: «нет ни одной записи LCP (всё появляется из opacity 0?)»; E/01"
+    label: "[проверено] у ai-media"
+    site: "= SG-PERF-06 (B «LCP нет»)"
+  - id: EG-PERF-10
+    name: "H1 невидим в первом кадре (opacity 0 на DOMContentLoaded)"
+    group: perf
+    modes: [desk, rm]
+    metric: vitals.h1_first_frame_invisible
+    op: "false"
+    severity: {L0: S, L1: S, L2: D}
+    source: "E/01; CRV-AL-09 (LCP-элемент не анимируется из opacity: 0); на L2 — только если LCP-элемент другой (постер) и H1 — не LCP"
+    label: "[проверено: E/01]"
+    site: "дополняет SG-PERF-06"
+  - id: EG-PERF-11
+    name: "CLS страницы: наибольшее окно сессии (загрузка + прокрутка), с атрибуцией узлов (зеркало)"
+    group: perf
+    modes: [desk, mob]
+    metric: cls.window_max
+    op: "<="
+    threshold: 0.1
+    severity: D
+    where: cls.top_sources
+    source: "web.dev CLS (окно сессии: разрыв < 1 с, окно ≤ 5 с); F2/12 cls_sources.py (причины в лаборатории: pin через fixed 0,35–0,99, подпись, вставленная скриптом, подмена латинского подмножества шрифта 0,15); motion_check 0.1.2 — cls.load, cls.scroll, cls.total, cls.top_sources (узел, откуда → куда)"
+    label: "[документация] + [проверено: F2/12]"
+    site: "= SG-PERF-03 (владелец site); наша добавка — атрибуция: какой эффект сдвигает"
+    fix: "размеры медиа и шрифтов до загрузки (preload обоих подмножеств шрифта), вставки скриптом — в зарезервированное место, pin — pinType: 'transform' или sticky"
+
+  # ------------------------------------------------------------------ WEIGHT — вес и цена эффектов
+  - id: EG-WEIGHT-01
+    name: "JS эффектов и движения (br) до первого взаимодействия"
+    group: weight
+    modes: [desk, mob]
+    metric: net.js_effects_first_kb
+    op: "<="
+    threshold_ref: budgets.effects.js_presentation_kb_br
+    severity: S
+    spec_override: budget.js_kb_br_effects_max
+    where: net.effects_js
+    source: "G 07/02 §5–6 и ворота G (1); A budgets.effects.js_presentation_kb_br (L0 20, L1 100, L2 150/200); G/01 (gsap+ST 39,7 КБ br, «набор Awwwards» 52,4)"
+    label: "[проверено: G/01] + [гипотеза: порог]"
+    site: "часть SG-WEIGHT-03 (JS первого экрана — все источники)"
+    fix: "загрузчик [data-effect] с динамическим импортом за 200 px до экрана (G/03); тяжёлое — только в init() через прокладку"
+  - id: EG-WEIGHT-02
+    name: "JS и wasm 3D (three, OGL, pixi, Spline, Unicorn) за сессию, КБ"
+    group: weight
+    modes: [desk, mob]
+    metric: net.js_3d_session_kb
+    op: "<="
+    threshold_ref: budgets.effects.js_3d_kb_br
+    severity: S
+    source: "A budgets.effects.js_3d_kb_br (L0 0, L1 200/300, L2 250/350); blender A/03 (three core 109, R3F + drei + post 345 КБ br)"
+    label: "[данные] [спорно] у blender"
+    site: "SG-WEIGHT-08: доля 3D — ворота blender, не страницы"
+  - id: EG-WEIGHT-03
+    name: "Число WebGL-контекстов"
+    group: weight
+    modes: [desk, mob]
+    metric: derived.webgl_contexts
+    op: "<="
+    threshold_ref: budgets.effects.webgl_contexts
+    severity: S
+    source: "A budgets.effects.webgl_contexts (L0 0, L1 1, L2 1/2)"
+    label: "[решение уровня] + [гипотеза]"
+    site: "—"
+  - id: EG-WEIGHT-04
+    name: "Видео первого экрана без действия пользователя, КБ"
+    group: weight
+    modes: [desk, mob]
+    metric: net.video_first_kb
+    op: "<="
+    threshold: {L0: {desktop: 300, mobile: 300}, L1: {desktop: 1500, mobile: 600}, L2: {desktop: 2500, mobile: 1000}}
+    severity: S
+    source: "A budgets.effects: L0 video_autoplay_kb 300 (только синемаграф), L1 video_hero_loop_kb 600/1500; L2 — предложение K (C: 15 из 49 эффектных страниц > 5 МБ видео до прокрутки)"
+    label: "[данные: ai-media 01/02 §4.3] + [гипотеза K для L2]"
+    site: "SG-WEIGHT-09 показывает отдельно (D; S — одно видео больше всего первого экрана)"
+    fix: "постер + видео 720p на телефоне, preload=metadata, запуск по видимости; сюжетное видео — по клику"
+  - id: EG-WEIGHT-05
+    name: "Видео за сессию без кликов, МБ"
+    group: weight
+    modes: [desk, mob]
+    levels: [L1, L2]
+    metric: net.video_session_mb
+    op: "<="
+    threshold_ref: budgets.effects.video_autoplay_session_mb
+    severity: S
+    source: "A budgets.effects.video_autoplay_session_mb (L1 2/5, L2 4/10); ai-media 01/02 §4.3"
+    label: "[данные] + [практика]"
+    site: "часть SG-WEIGHT-02"
+  - id: EG-WEIGHT-06
+    name: "Видео за сессию на L0, КБ (только тихий синемаграф)"
+    group: weight
+    modes: [desk, mob]
+    levels: [L0]
+    metric: net.video_session_kb
+    op: "<="
+    threshold_ref: budgets.effects.video_autoplay_kb
+    severity: S
+    source: "A levels[L0].allowed quiet-loop ≤ 300 КБ; сюжетное видео — по клику"
+    label: "[проверено] у ai-media + [гипотеза]"
+    site: "—"
+  - id: EG-WEIGHT-07
+    name: "Шрифты за сессию, КБ (зеркало)"
+    group: weight
+    modes: [desk, mob]
+    metric: net.font_kb
+    op: "<="
+    threshold_ref: budgets.effects.fonts_kb
+    severity: D
+    source: "A budgets.effects.fonts_kb (150 / 250 / 300); Web Almanac 2025"
+    label: "[данные]"
+    site: "= SG-WEIGHT-04 (владелец site)"
+  - id: EG-WEIGHT-08
+    name: "Первый экран, МБ (зеркало)"
+    group: weight
+    modes: [desk, mob]
+    metric: net.first_mb
+    op: "<="
+    threshold_ref: budgets.page.first_screen_mb
+    severity: D
+    source: "A budgets.page.first_screen_mb; окно motion_check — load + ≈ 5 с"
+    label: "[данные] [спорно]"
+    site: "= SG-WEIGHT-01 (владелец site, S по профилю)"
+  - id: EG-WEIGHT-09
+    name: "Сессия без кликов, МБ (зеркало)"
+    group: weight
+    modes: [desk, mob]
+    metric: net.session_mb
+    op: "<="
+    threshold_ref: budgets.page.session_mb
+    severity: D
+    source: "A budgets.page.session_mb"
+    label: "[данные] [гипотеза]"
+    site: "= SG-WEIGHT-02 (владелец site)"
+  - id: EG-WEIGHT-10
+    name: "Код эффектов, wasm и 3D с публичных CDN (jsDelivr, unpkg, cdnjs, esm.sh, Unicorn, Spline)"
+    group: weight
+    modes: [desk, mob]
+    metric: net.cdn
+    op: "empty"
+    severity: S
+    where: net.cdn
+    source: "ворота G (3): самохостинг библиотек и wasm (setWasmUrl); CDN — лишнее соединение, приватность и отказ при блокировке домена"
+    label: "[практика] G 07/02"
+    site: "дополняет SG-WEIGHT-05/06 (сторонние домены и байты) и SG-LEGAL-07"
+
+  # ------------------------------------------------------------------ A11Y — движение и доступность (WCAG 2.2.2, 2.3.1, 2.3.3)
+  - id: EG-A11Y-01
+    name: "Первый экран движется на 6-й секунде, а кнопки паузы или переключателя движения нет (WCAG 2.2.2)"
+    group: a11y
+    modes: [desk, mob]
+    metric: derived.moving_6s_without_pause
+    op: "false"
+    severity: B
+    source: "WCAG 2.2 SC 2.2.2 (A); E 05-motion/01 §3.3; page_accept.py (движение ≥ 0,5 % пикселей или видео играет на 6-й с)"
+    label: "[стандарт] [проверено] у ai-media"
+    site: "= SG-A11Y-03 (B), у site — только первый экран"
+    fix: "видимая кнопка с aria-pressed и именем «Остановить движение» (одна на все петли) или остановка ≤ 5 с (loop-autostop 4000)"
+  - id: EG-A11Y-02
+    name: "Петли на всей странице движутся через 6 с после показа без механизма паузы"
+    group: a11y
+    modes: [desk, mob]
+    metric: derived.loops_without_pause
+    op: "empty"
+    severity: B
+    where: derived.loops_without_pause
+    source: "WCAG 2.2 SC 2.2.2: движение, запущенное при прокрутке в зону видимости, дольше 5 с и параллельно контенту; E 05-motion/01 §3.2"
+    label: "[стандарт]"
+    site: "дополняет SG-A11Y-03 ниже первого экрана (page_accept видит только первый экран)"
+  - id: EG-A11Y-03
+    name: "Кнопка паузы работает: после нажатия бесконечные анимации, видео и пиксели стоят"
+    group: a11y
+    modes: [desk]
+    metric: derived.pause_works
+    op: "true"
+    severity: S
+    source: "E 05-motion/01 §3.3 («проверка поведением»); W3C: один механизм на все петли"
+    label: "[стандарт] [практика]"
+    site: "—"
+  - id: EG-A11Y-04
+    name: "Вспышки: > 3 общих или красных в любую секунду на ≥ 25 % поля 10° (341×256 CSS px) — WCAG 2.3.1"
+    group: a11y
+    modes: [desk, mob]
+    metric: derived.flash_fail
+    op: "false"
+    severity: B
+    where: video.flash
+    source: "WCAG 2.2 SC 2.3.1 (A) и Understanding (пара противоположных изменений относительной яркости ≥ 10 % при тёмном < 0,80); E 05-motion/01 §3.4; покадрово 25 к/с по записи"
+    label: "[стандарт] [проверено: самопроверка motion_check — 10 Гц провал, 1 Гц норма]"
+    site: "автоматизирует SG-A11Y-04 (у site — method: human)"
+  - id: EG-A11Y-05
+    name: "reduce: байты видео за всю запись"
+    group: a11y
+    modes: [rm]
+    metric: net.video_session_kb
+    op: "<="
+    threshold: 0
+    severity: S
+    source: "CRV-AL-01; E 05-motion/01 §4.5; page_accept.py (reduce media > 0 = FAIL)"
+    label: "[стандарт] для 2.3.3 + [проверено] у соседей"
+    site: "= SG-A11Y-07 (S) — у site только первый экран"
+  - id: EG-A11Y-06
+    name: "reduce: движение первого экрана, % пикселей за 1 с"
+    group: a11y
+    modes: [rm]
+    metric: derived.idle_first_pct_1s
+    op: "<="
+    threshold: 0.3
+    severity: S
+    source: "E 05-motion/01 §4.5 (0,3 %/с; кандидат C, принят E); blender 09/05 §7.2 №8 (≤ 0,05 % для 3D)"
+    label: "[данные: C] [гипотеза: порог]"
+    site: "строже SG-A11Y-07 (< 0,5 %)"
+  - id: EG-A11Y-07
+    name: "reduce: паузы записи с непрерывным движением (вся страница)"
+    group: a11y
+    modes: [rm]
+    metric: derived.continuous_windows
+    op: "<="
+    threshold: 0
+    severity: S
+    source: "E 05-motion/01 §4.5 («ни одной паузы с непрерывным движением на всей записи»); C: у Stripe 1 из 13, у Lisa — все"
+    label: "[данные: C]"
+    site: "дополняет SG-A11Y-07 (запись всей страницы — v1.2 ссылается на E §4.5)"
+  - id: EG-A11Y-08
+    name: "reduce: бегущие бесконечные анимации"
+    group: a11y
+    modes: [rm]
+    metric: derived.infinite_running
+    op: "<="
+    threshold: 0
+    severity: S
+    source: "E 05-motion/01 §4.5 (0 бегущих бесконечных CSS-анимаций, в том числе в скрытых элементах)"
+    label: "[данные: C]"
+    site: "—"
+  - id: EG-A11Y-09
+    name: "reduce: WebGL рисует в покое (пауз с вызовами отрисовки)"
+    group: a11y
+    modes: [rm]
+    metric: derived.webgl_idle_calls
+    op: "<="
+    threshold: 0
+    severity: S
+    source: "CRV-AL-01, CRV-AL-10; E §4.5 (0 вызовов WebGL в покое); blender 09/05 §7.2 №8; C: WebGL рисует под reduce у 11 из 12"
+    label: "[проверено] у blender + [данные: C]"
+    site: "—"
+  - id: EG-A11Y-10
+    name: "reduce: текст ниже первого экрана скрыт до прокрутки (появление не отключено)"
+    group: a11y
+    modes: [rm]
+    metric: derived.hidden_below_before_scroll
+    op: "<="
+    threshold: 0
+    severity: S
+    where: page_first.hidEx
+    source: "E 05-motion/01 §4.5 («содержимое и CTA видимы»), §4.3 (html.js .reveal; анимации только под no-preference)"
+    label: "[практика] + [данные: C]"
+    site: "—"
+  - id: EG-A11Y-11
+    name: "reduce: библиотеки эффектов всё равно загружены"
+    group: a11y
+    modes: [rm]
+    metric: derived.effects_libs_loaded
+    op: "empty"
+    severity: D
+    where: derived.effects_libs_loaded
+    source: "ворота G (2); G/03 (reduce — GSAP и шейдер не грузятся, ≈ 2 КБ br JS); E/02 (статический импорт — 115–133 КБ и в reduce). Исключения (v0.2): файл ≤ 3 КБ br (переключатель, загрузчик — F2 motion.js 1,1 КБ обязан грузиться и в reduce) и script[data-motion-toggle]; список — derived.effects_libs_exempt. Библиотека распознаётся по имени и по содержимому (__THREE__, GreenSock, pin-spacer, lenis-smooth, bodymovin…)"
+    label: "[проверено: G/03]"
+    site: "—"
+  - id: EG-A11Y-12
+    name: "L2: переключатель «меньше движения» на странице"
+    group: a11y
+    modes: [desk]
+    levels: [L2]
+    metric: derived.toggle
+    op: "true"
+    severity: S
+    source: "CRV-AL-12; E 05-motion/01 §4.4 (data-motion: reduced | full | paused, запоминается). v0.2: распознаётся и радиогруппа или select «Движение» (F2 lab/motion-toggle), [data-motion-toggle], [data-motion-set]"
+    label: "[гипотеза] A → принято E"
+    site: "—"
+  - id: EG-A11Y-24
+    name: "Переключатель «меньше движения» работает: после нажатия «Меньше» первый экран ≤ 0,3 %/с, 0 вызовов WebGL, 0 бесконечных анимаций, видео стоит"
+    group: a11y
+    modes: [desk]
+    metric: derived.toggle_works
+    op: "true"
+    severity: S
+    where: derived.toggle_summary
+    source: "CRV-AL-12; E 05-motion/01 §4.4 и §4.5 (0,3 %/с); F2/12 (lab/motion-toggle: 3,94 → 0 %/с, WebGL «static», видео на паузе, GSAP ctx.revert, Lenis destroy). Переключателя нет — N/A (на L2 его требует EG-A11Y-12)"
+    label: "[проверено: F2/12, K2 K/02]"
+    site: "—"
+    fix: "всё JS-движение подписано на выбор (Motion.on): WebGL — один статичный кадр и отмена rAF, видео — pause() и постер, GSAP — context().revert(), Lenis — destroy(); CSS-петли слушают html[data-motion]"
+  - id: EG-A11Y-25
+    name: "Выбор посетителя сильнее ОС: в reduce вариант «Полное» включает движение"
+    group: a11y
+    modes: [rm]
+    levels: [L2]
+    metric: derived.toggle_full_in_reduce
+    op: "true"
+    severity: D
+    where: derived.toggle_summary
+    source: "E 05-motion/01 §4.4 (выбор побеждает ОС в обе стороны); F2/12 (?start=full при системном reduce — 3,6 %/с; Lenis — respectReducedMotion: false, иначе ОС перебьёт выбор). Варианта «Полное» нет — N/A"
+    label: "[практика] E + [проверено: F2/12]"
+    site: "—"
+  - id: EG-A11Y-13
+    name: "Фокус после Tab на экране (плавная прокрутка не ломает прокрутку к фокусу)"
+    group: a11y
+    modes: [desk]
+    metric: derived.focus_off_screen
+    op: "empty"
+    severity: S
+    where: derived.focus_off_screen
+    source: "CRV-AL-07; WCAG 2.2 SC 2.4.11 (фокус не скрыт), 2.1.1"
+    label: "[стандарт]"
+    site: "дополняет SG-A11Y-05"
+  - id: EG-A11Y-14
+    name: "Фокус на невидимом элементе (opacity < 0,1 — появление не сработало)"
+    group: a11y
+    modes: [desk]
+    metric: derived.focus_invisible
+    op: "empty"
+    severity: S
+    where: derived.focus_invisible
+    source: "CRV-AL-07; W1 (порядок DOM = визуальный после анимаций)"
+    label: "[стандарт] [практика]"
+    site: "—"
+  - id: EG-A11Y-15
+    name: "Остановки Tab без видимого кольца (эвристика; точная проверка — marketing_audit G2–G5)"
+    group: a11y
+    modes: [desk]
+    metric: derived.focus_no_ring
+    op: "empty"
+    severity: D
+    where: derived.focus_no_ring
+    source: "ui_audit.py G2 (блокер) — точнее, со сравнением стилей в покое"
+    label: "[стандарт] 2.4.7"
+    site: "—"
+  - id: EG-A11Y-16
+    name: "Петля под читаемым текстом (абзацы ≥ 60 знаков ≤ 24 px)"
+    group: a11y
+    modes: [desk, mob]
+    metric: loops.under_text
+    op: "empty"
+    severity: S
+    where: loops.under_text
+    source: "E 05-motion/01 §5.3 (ни одного движения под читаемым текстом; перекрытие ≥ 10 % с полем 24 px); kimi T7"
+    label: "[исследование: качественное NN/g] + [гипотеза: геометрия]"
+    site: "—"
+  - id: EG-A11Y-17
+    name: "Непрерывных движений в видимой зоне (объекты, максимум по паузам)"
+    group: a11y
+    modes: [desk, mob]
+    metric: loops.loops_in_view_max
+    op: "<="
+    threshold: {L0: {desktop: 1, mobile: 1}, L1: {desktop: 2, mobile: 1}, L2: {desktop: 3, mobile: 2}}
+    severity: S
+    spec_override: budget.loops_in_view_max
+    source: "E 05-motion/01 §5.2 (L0 ≤ 1, L1 ≤ 2, L2 ≤ 3; телефон на 1 меньше, минимум 1); A motion_hints"
+    label: "[гипотеза] A, согласовано с практикой C"
+    site: "—"
+  - id: EG-A11Y-18
+    name: "Колебание крупного объекта (≥ 25 % меньшей стороны экрана) с периодом 2,5–6 с"
+    group: a11y
+    modes: [desk, mob]
+    metric: loops.oscillation
+    op: "empty"
+    severity: S
+    where: loops.oscillation
+    source: "E 05-motion/01 §6.3 (период ≥ 10 с или шум; 2,5–6 с — около 0,2 Гц — не делать)"
+    label: "[исследование] + [гипотеза: период]"
+    site: "—"
+  - id: EG-A11Y-19
+    name: "Скорость бегущей строки, px/с"
+    group: a11y
+    modes: [desk]
+    metric: loops.marquee_speed_max
+    op: "<="
+    threshold: 60
+    severity: D
+    where: loops.marquee
+    source: "E 05-motion/01 §7.1 (30–60 px/с); токен motion.marketing.loop.marquee-speed 40"
+    label: "[мнение] + [данные: C]"
+    site: "—"
+  - id: EG-A11Y-20
+    name: "Бесконечная пульсация призыва (CTA)"
+    group: a11y
+    modes: [desk, mob]
+    metric: loops.pulsing_cta
+    op: "empty"
+    severity: S
+    where: loops.pulsing_cta
+    source: "cliche-registry pulsing-cta (S); E 05-motion/01 §6.4 (пульсация — ≤ 2 раз и стоп)"
+    label: "[практика] H"
+    site: "—"
+  - id: EG-A11Y-21
+    name: "Перехват прокрутки: путь колеса меняет скорость (доля < 0,5 или > 1,6 от ожидаемого)"
+    group: a11y
+    modes: [desk, mob]
+    metric: derived.scroll_jacking
+    op: "false"
+    severity: S
+    source: "E 05-motion/02 (скорость и направление не меняются никогда; pin со скрабом — не перехват); motion-spec page.scroll.jacking: never; A L0–L1 forbidden scroll-jacking"
+    label: "[исследование: NN/g] [практика]"
+    site: "—"
+  - id: EG-A11Y-22
+    name: "«Громкие» паузы (> 5 % пикселей за 1 с)"
+    group: a11y
+    modes: [desk]
+    metric: derived.loud_windows
+    op: "<="
+    threshold: {L0: 0, L1: 0, L2: 1}
+    severity: S
+    source: "E 05-motion/01 §5.4 (громкая петля > 5 % — только L2 и первый экран, пауза видна сразу, текст на скриме)"
+    label: "[данные: C]"
+    site: "—"
+  - id: EG-A11Y-23
+    name: "Контраст текста на медиа по F83 в худшем кадре (H1, лид, призыв поверх фото, видео, шейдера)"
+    group: a11y
+    auto: false
+    method: "motion_check.py … --f83 'h1' '.lead' (делегирует page_accept.py --contrast) или page_accept.py PAGE --contrast SELECTOR"
+    threshold_text: "≥ 4,5:1 (крупный ≥ 3:1) в самой светлой точке зоны текста и по кадрам видео 0/25/50/75 %"
+    severity: B
+    source: "CRV-AL-08; ai-media 10/03 §1 (F83 по буквам); WCAG 2.2 SC 1.4.3"
+    label: "[стандарт] F83 [проверено] у ai-media"
+    site: "SG-A11Y-01: color-contrast B только у ключевых узлов"
+  - id: EG-A11Y-26
+    name: "F83 по буквам автоматом (motion_check --f83 → page_accept.py): контраст текста на медиа ниже 4,5:1 (крупный 3:1)"
+    group: a11y
+    modes: [desk]
+    metric: derived.f83_fail
+    op: "empty"
+    severity: B
+    where: derived.f83_min
+    source: "CRV-AL-08; ai-media 10/03 §1 и page_accept.py (F83 по буквам, кадры видео); автоматическая форма EG-A11Y-23 — если motion_check вызван с --f83 (иначе N/A, остаётся ручная EG-A11Y-23). v0.2: page_accept получает адрес сервера motion_check (стили страницы находятся)"
+    label: "[стандарт] F83 [проверено] у ai-media + K2 K/02"
+    site: "SG-A11Y-01 (color-contrast B у ключевых узлов)"
+  - id: EG-A11Y-27
+    name: "Контраст текста над живым фоном — худший из кадров первого экрана (текст прозрачен, 95-й или 5-й перцентиль яркости под строками)"
+    group: a11y
+    modes: [desk, mob]
+    metric: derived.contrast_live_fail
+    op: "empty"
+    severity: S
+    where: derived.contrast_live_min
+    source: "F2 99-raw/experiments/F/14-holo-look/contrast.py (худший из N положений по границам текста) — встроено в motion_check 0.1.3 (--contrast SEL …): 4 кадра по 0,45 с и 5 положений указателя на десктопе; порог WCAG 1.4.3 4,5:1, крупный 3:1. Эвристика по фону без текста — точная проверка по буквам — EG-A11Y-26 (B). Не запускали — N/A"
+    label: "[проверено: F2/14, K2 K/02]"
+    site: "дополняет SG-A11Y-01"
+    fix: "скрим под текстом (фон с альфой ≥ 0,6 или затемнение медиа под колонкой), светлая точка фона не под строками, «дыхание» ≤ 2,5 %"
+
+  # ------------------------------------------------------------------ FALLBACK — без JS, без WebGL
+  - id: EG-FB-01
+    name: "Без JS: H1, видимый с JS, пропал"
+    group: fallback
+    modes: [nojs]
+    metric: derived.h1_lost
+    op: "false"
+    severity: S
+    source: "CRV-AL-05 (фолбэк без JS); E §4.3 (html.js .reveal — скрывать только при JS)"
+    label: "[практика]"
+    site: "SG-GEO-01 (смысл в HTML сервера) — дополняет"
+  - id: EG-FB-02
+    name: "Без JS: доля скрытого текста (opacity 0 или visibility: hidden)"
+    group: fallback
+    modes: [nojs]
+    metric: derived.text_hidden_share
+    op: "<="
+    threshold: 0.05
+    severity: S
+    source: "CRV-AL-05; F 10-nojs-fix (опыт F)"
+    label: "[практика] + [проверено: F/10]"
+    site: "—"
+  - id: EG-FB-03
+    name: "Без JS: призыв первого экрана, видимый с JS, пропал"
+    group: fallback
+    modes: [nojs]
+    metric: derived.cta_lost
+    op: "false"
+    severity: S
+    source: "CRV-AL-05"
+    label: "[практика]"
+    site: "дополняет SG-CONTENT-07"
+  - id: EG-FB-04
+    name: "Без WebGL: первый экран не пуст (σ яркости верхних 60 % кадра ≥ 2)"
+    group: fallback
+    modes: [nogl]
+    metric: derived.hero_blank
+    op: "false"
+    severity: S
+    source: "CRV-AL-05; F effect_bench nogl (blank_check σ < 2 — кадр однотонный); blender 09/05 §6 (постер = 3D)"
+    label: "[практика] + [проверено: F]"
+    site: "—"
+  - id: EG-FB-05
+    name: "Без WebGL: H1, видимый с WebGL, пропал"
+    group: fallback
+    modes: [nogl]
+    metric: derived.h1_lost
+    op: "false"
+    severity: S
+    source: "CRV-AL-04, CRV-AL-05"
+    label: "[практика]"
+    site: "—"
+  - id: EG-FB-06
+    name: "Ошибки консоли"
+    group: fallback
+    modes: [desk, nogl]
+    metric: console_errors
+    op: "<="
+    threshold: 0
+    severity: D
+    where: errors
+    source: "blender 09/05 §7.2 №9"
+    label: "[практика]"
+    site: "= SG-CONTENT-04 (владелец site)"
+
+  # ------------------------------------------------------------------ MOB, CHOR, CODE
+  - id: EG-MOB-01
+    name: "Телефон: горизонтальное переполнение документа, px"
+    group: mobile
+    modes: [mob]
+    metric: derived.h_overflow_px
+    op: "<="
+    threshold: 2
+    severity: D
+    source: "D (волна 1) и kimi ACCEPTANCE D1"
+    label: "[практика]"
+    site: "= SG-MOB-01 (B при расширении области — владелец site)"
+  - id: EG-CHOR-01
+    name: "«Вау»-переходы (≥ 10 % пикселей за 0,25 с сразу после шага прокрутки)"
+    group: choreography
+    modes: [desk]
+    metric: video.wow_transitions
+    op: "<="
+    threshold: {L0: 1, L1: 4, L2: 6}
+    severity: D
+    source: "C 03-live-sites-measured/02 (1–4 на страницу из 12 шагов, больше 4 не встретилось); E 05-motion/01 §5.5 (пики L0 0, L1 ≤ 2, L2 2–4)"
+    label: "[данные: C] [гипотеза: порог]"
+    site: "—"
+  - id: EG-CODE-01
+    name: "После __fx.destroyAll() не осталось pin-spacer (чистое разрушение эффектов)"
+    group: code
+    modes: [desk]
+    metric: destroy.pins_after
+    op: "<="
+    threshold: 0
+    severity: D
+    source: "ворота G (4); G/03 (destroyAll → 0 ScrollTrigger, 0 обёрток split, canvas и pin-spacer удалены)"
+    label: "[проверено: G/03]"
+    site: "—"
+  - id: EG-CODE-02
+    name: "ScrollTrigger.refresh() после View Transition, меняющего раскладку"
+    group: code
+    auto: false
+    method: "чтение кода (grep startViewTransition → finished.then(… ScrollTrigger.refresh())) или сценарий G/02"
+    threshold_text: "есть"
+    severity: S
+    source: "ворота G (6); G/02 (без refresh старт pin устаревает в Chromium и WebKit)"
+    label: "[проверено: G/02]"
+    site: "—"
+  - id: EG-CODE-03
+    name: "Лицензионные комментарии GSAP в бандле"
+    group: code
+    auto: false
+    method: "grep -c '@license' в собранном JS, если GSAP есть"
+    threshold_text: "есть"
+    severity: D
+    source: "ворота G (5); лицензия GSAP (бесплатна с 3.13, условия — stack.yaml)"
+    label: "[документация]"
+    site: "—"
+  - id: EG-CODE-04
+    name: "«Грязный» компонент: прямой доступ к DOM или canvas в декларативном приложении очищается при размонтировании (useGSAP, revert), анимации выхода проверены"
+    group: code
+    auto: false
+    method: "чтение кода + переход по страницам SPA туда и обратно ×3: число canvas, ScrollTrigger и слушателей не растёт"
+    threshold_text: "не растёт"
+    severity: S
+    source: "W2 (волна 2) — чек-лист «грязного» компонента"
+    label: "[практика]"
+    site: "—"
+  - id: EG-3D-01
+    name: "Страница с 3D проходит ворота blender 09/05 §7.2 (вызовы в кадре, reduce, DPR, первый кадр модели)"
+    group: neighbour
+    auto: false
+    method: "python3 ../../scripts/blender/site_probe.py URL out/ [--mobile] [--reduced-motion] + gate_check (blender 09/05 §7.2)"
+    threshold_text: "11 порогов blender"
+    severity: D
+    source: "blender 09/05 §7.2; контракт v2 §2 (ворота ассета не блокируют страницу за чужие байты)"
+    label: "[проверено] у blender"
+    site: "SG-WEIGHT-08"
+  - id: EG-LIVE-01
+    name: "Реальный телефон: плавность сцен, Lottie и Rive (память, FPS), нагрев"
+    group: live
+    auto: false
+    method: "живая фаза: Android среднего класса и iPhone, запись экрана, chrome://inspect"
+    threshold_text: "сцены без рывков; память стабильна 60 с"
+    severity: D
+    source: "W2 (Прокопьев: замер на одном телефоне — перепроверить); E 05-motion/03 §3 (headless ≠ телефон)"
+    label: "[не проверено]"
+    site: "—"

@@ -1,0 +1,162 @@
+# ПРИМЕР J v1 · корпоративный многостраничник B2B · вымышленный завод «Сталькон». Бриф и факты вымышлены.
+version: 1
+checked: '2026-09-24'
+intake:
+  received: '2026-09-10'
+  channel: почта + созвон с записью
+  raw_ref: ../../text-research/99-raw/experiments/B1/01-briefs-to-meaning/README.md#вход
+  what_ordered: landing
+  notes: Сайта нет; заявки сейчас — с Яндекс Карт и по рекомендациям; планируется Яндекс Директ.
+project:
+  slug: stalkon
+  status: draft
+  prepared_by: Claude (агент site J, демо-пример; бриф и факты вымышлены)
+site_type: corporate-site
+primary_page_type: home-multipage
+business:
+  name: Сталькон
+  what: Проектирование, изготовление и монтаж металлоконструкций для складов, цехов и мостов (демо)
+  kind: service
+  goal:
+    primary: leads
+    note: запросы расчёта от застройщиков; вторично — найм монтажников
+  geography:
+    regions:
+    - Центральный и Приволжский федеральные округа
+    remote: false
+decision_context:
+  market: b2b
+  price_band: very-high
+  purchase_type: one-off
+  decision_unit: committee
+  cycle: months
+  perceived_risk: high
+  risk_kinds:
+  - money
+  - time
+  - safety
+  involvement: high
+conversion:
+  action: request-quote
+  target:
+    kind: route
+    value: /zapros-rascheta/
+  channels:
+  - form
+  - phone
+  - email
+  secondary_actions:
+  - apply-job
+traffic:
+  sources:
+  - source: search-brand
+    temperature: hot
+    share: 0.3
+    device: desktop
+  - source: search-category
+    temperature: warm
+    share: 0.3
+    device: desktop
+  - source: referral
+    temperature: warm
+    share: 0.2
+    device: desktop
+  - source: direct
+    temperature: hot
+    share: 0.2
+    device: mixed
+offer:
+  kind: quote
+  summary: Расчёт стоимости и срока по чертежам или ТЗ за 3 рабочих дня (демо)
+proof:
+  facts_ref: facts.yaml
+  required_kinds:
+  - company
+  wanted_kinds:
+  - case
+  - certificate
+  - client
+  - metric
+constraints:
+  jurisdiction:
+  - ru
+  legal_category:
+  - general
+  legal_note: 'Пример J v1: бриф, ответы и факты вымышлены.'
+  hosting: 'не задан — допущение: хостинг в РФ (формы с ПД; q-hosting)'
+  integrations:
+  - CRM — не задана (q-crm)
+  - телефония — номер компании
+  accessibility: wcag22-aa
+  legal_intake:
+    rkn_registry: 'yes'
+    leads_storage: ru
+    sends_marketing: false
+    license: has
+    sells_online: false
+    optional_cookies: true
+    medical: false
+    third_party:
+    - service: Яндекс Метрика
+      purpose: analytics
+      location: ru
+      sets_cookies: true
+policies:
+  capture_popup: 'off'
+  exit_intent: 'off'
+  chat_widget: 'off'
+  preloader: 'off'
+  cookie_banner: auto
+analytics:
+  system: yandex-metrica
+  call_tracking: false
+  ab_testing: later
+  note: Цели по conversion.action и secondary_actions (события — P, events.yaml).
+search:
+  engines:
+  - yandex
+  - google
+  ai_answers:
+  - yandex-alice
+  - google-ai
+  - chatgpt-search
+  - perplexity
+  ai_bots_policy: ask
+  regions:
+  - Нижний Новгород
+  profiles:
+  - platform: yandex-business
+    url: https://yandex.ru/maps/org/otves-example/0000000000/ (вымышленный адрес карточки)
+languages:
+- lang: ru
+  role: primary
+- lang: en
+  role: adaptation
+  scope: selected-pages
+pages:
+  mode: by-type
+  note: карта по умолчанию corporate-site (G 01 §2.1) + документы и вакансии — site-map.yaml
+ambition:
+  level: L1
+  source: default
+  note: 'корпоративный сайт: главная и хабы L1, внутренние L0 (решение 20)'
+brand:
+  name: Отвес
+  status: none
+assets_available:
+  real_photos: few
+  photo_subjects:
+  - work-results
+  - process
+  real_video: false
+  logo_vector: false
+  notes: Фото «до и после» — missing:before-after-photos в facts.yaml; людей на фото — только с согласием.
+questions:
+- id: q-en-pages
+  block: languages
+  q: 'Какие страницы нужны на английском: направления и проекты или весь сайт?'
+  default: главная, направления, проекты, контакты — адаптация
+  affects:
+  - /languages
+  priority: 2
+  status: assumed

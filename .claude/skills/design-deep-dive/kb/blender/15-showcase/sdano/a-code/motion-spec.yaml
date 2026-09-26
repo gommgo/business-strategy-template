@@ -1,0 +1,144 @@
+# motion-spec v1 — рабочий пример L0 «Сдано» (лидогенерация услуг РФ). Рецепт 10-recipes/01-lead-services-l0.md.
+# creative-research · 10-recipes · агент J · волна 3 · 2026-09-25. Демо: компания и цифры вымышлены.
+# Проверка схемой: 99-raw/tools/venv-I/bin/python 99-raw/experiments/I/01-schemas/spec_check.py spec 10-recipes/examples/l0-sdano/motion-spec.yaml
+# Сверка сборки: python3 99-raw/tools/motion_check.py 10-recipes/examples/l0-sdano/index.html --level L0 --spec <этот файл>
+motion_spec_version: "1.0"
+id: sdano-home
+example: true
+status: proposed
+checked_at: "2026-09-25"
+refs:
+  page_plan: "../../recipes/01-lead-services-l0.recipe.yaml#/page_plan"
+  tokens: ../../../04-visual-language/marketing-tokens.json
+  effects: ../../../06-effects-catalog/effects.yaml
+  block_treatments: ../../../09-ai-execution-evaluation/block-treatments.yaml
+level: L0
+executor: {target: any, harness: any, video_in: false}
+page:
+  thesis: "Двигается только красная отметка дефекта: план один раз ставит номера замечаний, остальное стоит, как подписанный акт."
+  character: [precise, calm]
+  base: {duration_ms: 560, easing: {token: motion.marketing.easing.out-expo}}
+  primitives: [fade-up, none]
+  lcp: {target: hero.headline, entrance: none, note: "H1 — кандидат LCP, без анимации (E 05/02 §10); план — inline SVG, не кандидат"}
+  toggle: {required: false, attr: data-motion, states: [system, reduced, full], placement: sticky-header, remember: false}
+  scroll: {smooth: false, tail_ms_max: 0, jacking: never}
+  transitions: {kind: none}
+  properties_allowed: [transform, opacity, scale, translate, background-color, rotate]
+  budget: {loops_in_view_max: 0, loops_in_view_max_mobile: 0, first_screen_scene_ms_max: 600, js_kb_br_effects_max: 1, long_frames_pct_max: 2, cls_scroll_max: 0.1}
+  never:
+    - "появление секций ниже первого экрана (fade-and-slide-up на каждой секции — почерк генератора, cliche:section-fade-up)"
+    - "счётчики у цены, сроков и числа пунктов: цифры стоят с первого кадра"
+    - "бегущая строка, свой курсор, параллакс, плавная прокрутка, WebGL — запрет уровня L0"
+    - "анимация H1 и любые эффекты в форме заявки (конверсия — L0)"
+sections:
+  - id: hero
+    block: hero-media
+    role: accent
+    level: L0
+    intent: "первый экран собирается один раз за 600 мс: заголовок стоит, лид и кнопка поднимаются на 16 px, на плане по очереди встают семь красных номеров"
+    moments:
+      - id: hero-copy-rise
+        class: one-shot
+        purpose: guide
+        transition_type: entrance
+        effect: "effect:hero-entrance-once"
+        target: hero.subheadline
+        selector_hint: ".hero__lead"
+        stagger_targets: [hero.hero-proof, hero.cta]
+        trigger: {type: load, delay_ms: 60}
+        model: time
+        tracks:
+          - {property: transform, from: "translateY(var(--mm-shift-reveal))", to: "none", unit_note: "--mm-shift-reveal = 16px"}
+          - {property: opacity, from: 0.01, to: 1}
+        duration: {ms: 560}
+        easing: {token: motion.marketing.easing.out-expo}
+        stagger: {each: {ms: 50}, order: dom, max_items: 3, total_ms_max: 600}
+        repeat: once
+        interrupt: jump-to-end
+        lcp: not-lcp
+        reduce: {strategy: final-state, describe: "лид, цена и кнопка видны с первого кадра"}
+        mobile: {strategy: same}
+      - id: hero-marks
+        class: one-shot
+        purpose: attention
+        transition_type: entrance
+        effect: "effect:hero-entrance-once"
+        target: hero.hero-visual
+        selector_hint: ".plan__marks .mark"
+        trigger: {type: load, delay_ms: 80}
+        model: time
+        tracks:
+          - {property: scale, from: 0.5, to: 1, unit_note: "центр масштаба — центр отметки (внутренняя группа без transform)"}
+          - {property: opacity, from: 0.01, to: 1}
+        duration: {share: 0.5}
+        note: "половина базы 560 мс = 280 мс; задержка 80 + 40 × номер; последняя отметка заканчивается на 600 мс"
+        easing: {token: motion.marketing.easing.out-expo}
+        stagger: {each: {ms: 40}, order: dom, max_items: 7, total_ms_max: 540}
+        repeat: once
+        interrupt: jump-to-end
+        lcp: not-lcp
+        reduce: {strategy: final-state, describe: "все семь отметок на плане с первого кадра"}
+        mobile: {strategy: same, describe: "план под текстом; отметки встают, когда план уже ниже сгиба — не видно, не мешает"}
+    storyboard:
+      frames:
+        - {id: hero-t0, at: {time_ms: 0}, viewport: desktop, describe: "H1 и план уже на месте, красных номеров нет, лид почти прозрачен", check: "H1 видим в первом кадре"}
+        - {id: hero-t700, at: {time_ms: 700}, viewport: desktop, describe: "всё на местах, движение первого экрана закончено", check: "движение в покое 0 %"}
+    reduce: {strategy: final-state, describe: "первый экран полон с первого кадра"}
+    mobile: {strategy: stacked, describe: "текст, кнопка на всю ширину, затем план"}
+    budget: {js_kb_br: 0, loops_in_view: 0, load: eager}
+    acceptance:
+      - {id: hero-h1-first, check: "H1 видим в первом кадре и не выпал из LCP", tool: motion_check, gate: EG-PERF-07, metric: vitals.h1_lcp_dropped, at: desktop}
+      - {id: hero-idle, check: "на 6-й секунде первый экран неподвижен", tool: motion_check, gate: EG-A11Y-01, metric: derived.moving_6s_without_pause, at: desktop}
+  - id: faq
+    block: faq
+    role: calm
+    level: L0
+    intent: "ответ открывается сразу (высота не анимируется — свойство раскладки), текст ответа проявляется за 320 мс со сдвигом 4 px; стрелка поворачивается"
+    moments:
+      - id: faq-open
+        class: transition
+        purpose: feedback
+        transition_type: entrance
+        target: faq.faq-a
+        selector_hint: ".faq details[open] p"
+        trigger: {type: click}
+        model: time
+        tracks:
+          - {property: opacity, from: 0.01, to: 1}
+          - {property: transform, from: "translateY(4px)", to: "none"}
+        duration: {token: motion.marketing.duration.state}
+        easing: {token: motion.marketing.easing.out-strong}
+        repeat: once
+        interrupt: jump-to-end
+        reduce: {strategy: crossfade, describe: "--mm-dur-state в reduce = 180 мс, сдвиг 0"}
+        mobile: {strategy: same}
+    reduce: {strategy: crossfade, describe: "ответ проявляется за 180 мс без сдвига"}
+    mobile: {strategy: same, describe: "то же"}
+    budget: {js_kb_br: 0, loops_in_view: 0, load: eager}
+  - id: sticky-cta
+    block: sticky-cta
+    role: chrome
+    level: L0
+    intent: "на телефоне полоса с призывом выезжает снизу, когда кнопка первого экрана и форма вне вида"
+    moments:
+      - id: sticky-cta-in
+        class: transition
+        purpose: guide
+        transition_type: persistent
+        target: sticky-cta
+        selector_hint: ".sticky-cta"
+        trigger: {type: state}
+        model: time
+        tracks:
+          - {property: translate, from: "0 110%", to: "0 0"}
+        duration: {token: motion.marketing.duration.state}
+        easing: {token: motion.marketing.easing.out-strong}
+        repeat: once
+        interrupt: reverse
+        reduce: {strategy: crossfade, describe: "--mm-dur-state в reduce = 180 мс"}
+        mobile: {strategy: same}
+    reduce: {strategy: crossfade, describe: "полоса появляется за 180 мс"}
+    mobile: {strategy: same, describe: "только ширина ≤ 40rem; на десктопе полосы нет"}
+    budget: {js_kb_br: 0.5, loops_in_view: 0, load: eager}
+open_questions:
+  - "Отметки на плане — scale + opacity; примитивов появления в схеме v1 для «pop-in» нет (fade-up, type-unmask, sweep, number-tick, line-draw) — записано как часть hero-entrance-once."

@@ -1,0 +1,77 @@
+{
+ "spec_version": "0.2",
+ "checked_at": "2026-09-23",
+ "brief_language": "ru",
+ "id": "t-loop",
+ "task": "VID-HERO-LOOP",
+ "role": {
+  "section": "hero",
+  "slot": "hero-bg",
+  "purpose": "фон hero"
+ },
+ "subject": {
+  "summary": "a ceramic cup of tea on a sunlit windowsill"
+ },
+ "composition": {
+  "shot": "medium",
+  "angle": "eye-level",
+  "subject_region": "right-third"
+ },
+ "palette": [
+  {
+   "role": "background",
+   "hex": "#EFE9E1",
+   "name": "warm white",
+   "share": 0.6
+  }
+ ],
+ "text": {
+  "mode": "html_overlay"
+ },
+ "output": {
+  "primary_ratio": "16:9",
+  "resolution": "480p"
+ },
+ "exclusions": [
+  {
+   "what": "subtitles",
+   "kind": "service"
+  },
+  {
+   "what": "music",
+   "kind": "service"
+  }
+ ],
+ "motion": {
+  "kind": "loop",
+  "duration_s": 4,
+  "camera": {
+   "move": "static"
+  },
+  "background_motion": [
+   {
+    "element": "thin steam from the cup",
+    "motion": "rises slowly and drifts to the left"
+   },
+   {
+    "element": "the sheer curtain",
+    "motion": "sways gently in a light breeze"
+   }
+  ],
+  "still": [
+   "the cup",
+   "the windowsill",
+   "the window frame"
+  ],
+  "forbid": [
+   "zoom",
+   "spin",
+   "reposition_subject"
+  ],
+  "tempo": "slow",
+  "loop": "first_last_same",
+  "start_frame": "frame-A.png",
+  "end_frame": "frame-A.png",
+  "audio": false
+ }
+}

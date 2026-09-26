@@ -1,0 +1,273 @@
+# meaning-kvarts.yaml — пример 2: смысл для лендинга предзаказа товара («Кварц», вымышленный продукт kimi F/03)
+# text-research · B1 · 2026-09-24 · формат: ../meaning.schema.yaml (meaning_version 1)
+#
+# Вход: описание заказчика и ответы (../../../kimi-research/99-raw/experiments/F/03-package-from-description/landing-kvarts/
+# 01-description-and-questions.md, brief.yaml); факты — ../examples/facts-kvarts.yaml (B2, исправленный инвентарь).
+# Что показывает пример: смысл, выведенный из брифа, в котором отличие держится на механизме, которого нет в фактах
+# («сама подстраивает» — как?): проверка «только мы можем это сказать» не пройдена, главный вопрос заказчику —
+# механизм; обещание здоровья — в границах (not_promised), а не в цели страницы (урок аудита KIMI §2.7).
+# Противоречия исходных текстов kimi с этим смыслом — 99-raw/experiments/B1/01-briefs-to-meaning/README.md §1.
+
+meaning_version: 1
+date: "2026-09-24"
+status: proposed
+site: kvarts-preorder
+
+offering_summary:
+  text: >-
+    Настольная лампа для чтения «Кварц»: сама подстраивает цветовую температуру и яркость под книгу и время суток,
+    запоминает 4 сценария, заряжает телефон по USB-C (18 Вт). Предзаказ: бронь 990 ₽ входит в цену, первые 300 ламп —
+    8 900 ₽, после предзаказа — 11 900 ₽; отгрузка — декабрь 2026.
+  kind: physical-product
+  basis: {kind: brief, ref: "описание заказчика и ответы на вопросы, 2026-09-24 (kimi F/03 01 §1, §4)"}
+
+audience:
+  - id: evening-readers
+    name: "Читатели бумажных книг по вечерам"
+    primary: true
+    role: buyer-user
+    characteristics:
+      - "читают бумажные книги несколько вечеров в неделю"
+      - "подписаны на книжные Telegram-каналы и доверяют их рекомендациям"
+      - "читают там, где свет рассчитан на комнату: в кресле, в кровати"
+    situation: "Когда вечером садится читать бумажную книгу, а свет в комнате — верхний или ночник"
+    trigger: "Пост в книжном канале о лампе; новая стопка книг; переезд или обустройство места для чтения"
+    knows: >-
+      Знает, что читать при верхнем свете или ночнике неудобно, но вряд ли ищет «лампу, которая подстраивает свет»;
+      «Кварц» не знает — продукт новый. Приходит после поста в канале, с телефона.
+    jobs:
+      - {id: job-read-evening, type: functional, statement: "Когда читаю вечером, хочу ровный свет на странице, чтобы не отвлекаться на лампу и читать дольше", priority: 1, basis: {kind: inferred, ref: "fact:auto-light — «подстраивает … под книгу и время суток»"}}
+      - {id: job-switch-places, type: functional, statement: "Когда пересаживаюсь из кресла за стол, хочу поменять свет одним действием, чтобы не настраивать заново", priority: 2, basis: {kind: fact, ref: "fact:scenarios-4"}}
+      - {id: job-reading-ritual, type: emotional, statement: "Когда вечер мой, хочу уютное место для чтения, чтобы отдыхать с книгой, а не с экраном", priority: 3, basis: {kind: assumption, question_id: q-why-buy}}
+    pains:
+      - {id: pain-wrong-light, text: "Верхний свет бликует на странице, ночник слишком тусклый", severity: medium, job_ref: job-read-evening, basis: {kind: assumption, question_id: q-why-buy}}
+      - {id: pain-fiddling, text: "Каждый раз двигать лампу и подбирать яркость под место и время", severity: low, job_ref: job-switch-places, basis: {kind: assumption, question_id: q-why-buy}}
+      - {id: pain-phone-dead, text: "Телефон разряжается у кресла, розетка далеко", severity: low, basis: {kind: inferred, ref: "fact:usb-c-18w — заказчик считает зарядку важной функцией"}}
+    gains:
+      - {id: gain-just-read, text: "Сел — и читаешь: свет уже подходит", measure: "сколько раз за вечер приходится трогать свет (против обычной лампы)", job_ref: job-read-evening, basis: {kind: inferred, ref: "fact:auto-light"}}
+      - {id: gain-scenes, text: "Кресло и стол — по одному касанию или кнопке (как именно — подтвердить)", job_ref: job-switch-places, basis: {kind: fact, ref: "fact:scenarios-4; missing:scenario-switch"}}
+      - {id: gain-phone-charged, text: "Телефон заряжается рядом с книгой", basis: {kind: fact, ref: "fact:usb-c-18w"}}
+    current_alternative_ids: [alt-room-light, alt-ordinary-lamp, alt-smart-light]
+    basis: {kind: brief, ref: "«Аудитория — люди 28–45, много читают, приходят из Telegram-каналов о книгах»"}
+  - id: gift-buyers
+    name: "Покупают в подарок читающему человеку"
+    primary: false
+    role: buyer
+    situation: "Когда ищут подарок к праздникам человеку, который много читает"
+    jobs:
+      - {id: job-gift, type: social, statement: "Когда выбираю подарок читающему другу, хочу вещь, которую он будет трогать каждый вечер, чтобы подарок не лёг в шкаф", priority: 1, basis: {kind: assumption, question_id: q-segments}}
+    pains:
+      - {id: pain-generic-gift, text: "Книгу дарить рискованно — может уже быть", severity: low, basis: {kind: assumption, question_id: q-segments}}
+    gains:
+      - {id: gain-useful-gift, text: "Подарок, которым пользуются каждый вечер", basis: {kind: assumption, question_id: q-segments}}
+    basis: {kind: assumption, question_id: q-segments}
+
+awareness:
+  level: problem-aware
+  basis: {kind: inferred, ref: "главный источник — посты книжных Telegram-каналов: неудобство света знакомо, решение «лампа сама подстраивает свет» — нет; продукт новый"}
+  confidence: low
+  by_source:
+    - {source: social-organic, level: problem-aware, note: "пост в книжном канале; уровень зависит от текста поста (q-post)"}
+    - {source: search-brand, level: product-aware, note: "после поста ищут «лампа Кварц»"}
+
+sophistication:
+  stage: 3
+  claims_heard:
+    - "без мерцания"
+    - "регулировка яркости и цветовой температуры"
+    - "свет как дневной"
+    - "умная лампа с приложением и расписанием"
+  basis: {kind: assumption, question_id: q-competitors}
+
+traffic:
+  ref: "/traffic"
+  sources:
+    - {source: social-organic, temperature: warm, share: 0.8, device: mobile, promise_of_source: "пост книжного канала (текст — вопрос q-post)"}
+    - {source: search-brand, temperature: hot, share: 0.2, device: mobile}
+
+positioning:
+  alternatives:
+    - {id: alt-room-light, name: "Верхний свет и ночник, которые уже есть", kind: do-nothing, why_used: "уже есть, привычно, бесплатно", limits: "блики на странице, мало света у кресла", mention_on_page: as-approach, basis: {kind: inferred, ref: "лампа «для чтения» — значит, сейчас читают при другом свете"}}
+    - {id: alt-ordinary-lamp, name: "Обычная настольная лампа", kind: substitute, why_used: "дёшево, продаётся везде", limits: "один оттенок и яркость, подстраивать руками", mention_on_page: as-approach, basis: {kind: inferred, ref: "fact:color-temperature — диапазон 2700–5000 K как отличие от обычной лампы"}}
+    - {id: alt-smart-light, name: "Умная лампочка или лампа с приложением и расписанием", kind: competitor-indirect, why_used: "меняет оттенок по времени", limits: "неизвестно для этой аудитории — вопрос q-competitors", mention_on_page: as-approach, basis: {kind: assumption, question_id: q-competitors}}
+    - {id: alt-ereader, name: "Электронная книга с подсветкой", kind: substitute, why_used: "свет встроен", limits: "не для бумажных книг", mention_on_page: never, basis: {kind: inferred, ref: "читатели книг выбирают формат"}}
+  unique_attributes:
+    - {id: attr-auto-light, attribute: "Сама подстраивает цветовую температуру и яркость под книгу и время суток", versus: [alt-room-light, alt-ordinary-lamp, alt-smart-light], proof_status: needs-proof, proof_ids: ["fact:auto-light", "missing:light-mechanism"], basis: {kind: fact, ref: "fact:auto-light (stated); механизм не назван"}}
+    - {id: attr-temperature-range, attribute: "Цветовая температура 2700–5000 K", versus: [alt-ordinary-lamp], proof_status: has-proof, proof_ids: ["fact:color-temperature"], basis: {kind: fact, ref: "fact:color-temperature"}}
+    - {id: attr-scenarios, attribute: "Помнит 4 сценария света", versus: [alt-room-light, alt-ordinary-lamp], proof_status: has-proof, proof_ids: ["fact:scenarios-4", "missing:scenario-switch"], basis: {kind: fact, ref: "fact:scenarios-4"}}
+    - {id: attr-usb-c, attribute: "Заряжает телефон по USB-C, 18 Вт", versus: [alt-room-light, alt-ordinary-lamp], proof_status: has-proof, proof_ids: ["fact:usb-c-18w"], basis: {kind: fact, ref: "fact:usb-c-18w"}}
+  value_themes:
+    - id: val-no-fiddling
+      theme: "Свет у кресла, который не надо настраивать: сел и читаешь"
+      from_attributes: [attr-auto-light, attr-scenarios]
+      chain:
+        - {attribute_ref: attr-auto-light, benefit: "оттенок и яркость меняются без участия читателя", value: "вечер уходит на книгу, а не на лампу"}
+        - {attribute_ref: attr-scenarios, benefit: "кресло и стол — готовые настройки", value: "пересел — и не надо подбирать свет заново"}
+      customer_measure: "сколько раз за вечер трогаешь свет (против обычной лампы и верхнего света)"
+      pain_refs: [pain-wrong-light, pain-fiddling]
+      gain_refs: [gain-just-read, gain-scenes]
+      proof_ids: ["fact:auto-light", "fact:scenarios-4", "missing:light-mechanism"]
+    - id: val-reading-spot
+      theme: "Одно место для чтения: свет и зарядка телефона в одном предмете"
+      from_attributes: [attr-usb-c, attr-temperature-range]
+      chain:
+        - {attribute_ref: attr-usb-c, benefit: "телефон заряжается у книги", value: "не нужен удлинитель и отдельный зарядник у кресла"}
+      customer_measure: "сколько вещей нужно у кресла, чтобы читать вечером"
+      pain_refs: [pain-phone-dead]
+      gain_refs: [gain-phone-charged]
+      proof_ids: ["fact:usb-c-18w", "fact:color-temperature"]
+  best_fit:
+    segment_ids: [evening-readers]
+    characteristics: ["читает бумажные книги вечером в двух и более местах (кресло, стол, кровать)", "не хочет ставить приложение ради света"]
+    why_care: "Чем чаще и в большем числе мест человек читает, тем больше раз за вечер ему приходится подстраивать обычный свет."
+  market_category:
+    name: "лампа для чтения"
+    strategy: big-fish-small-pond
+    parent_category: "настольные и умные лампы"
+    subsegment: "читатели бумажных книг по вечерам"
+    reference_leader: "обычная настольная лампа; умные лампы с приложением"
+    assumptions_true: ["даёт направленный свет на страницу", "регулируется яркость"]
+    assumptions_false: ["нужна для рабочего стола и компьютера", "управляется только из приложения", "«для чтения» значит «для здоровья глаз» — это обещание не делаем"]
+    basis: {kind: inferred, ref: "бриф: «настольная лампа для чтения»; подсегмент — книжные каналы"}
+  statement:
+    template: moore
+    internal_only: true
+    text: >-
+      Для тех, кто читает бумажные книги по вечерам и кому неудобно при верхнем свете или ночнике, «Кварц» — лампа для
+      чтения, которая сама подстраивает цветовую температуру и яркость под книгу и время суток. В отличие от обычной лампы,
+      её не надо настраивать под каждое место и время; кроме того, она помнит 4 сценария и заряжает телефон.
+  only_we_can_say: []
+
+value_proposition:
+  core:
+    text: "Для тех, кто читает бумажные книги вечером: лампа сама подстраивает оттенок и яркость света под книгу и время суток, помнит 4 сценария и заряжает телефон."
+    basis: {kind: fact, ref: "fact:auto-light, fact:scenarios-4, fact:usb-c-18w"}
+  pain_relievers:
+    - {id: pr-auto, text: "Подстройка оттенка и яркости без участия читателя", pain_refs: [pain-wrong-light, pain-fiddling], proof_ids: ["fact:auto-light", "missing:light-mechanism"]}
+    - {id: pr-usb, text: "USB-C в лампе", pain_refs: [pain-phone-dead], proof_ids: ["fact:usb-c-18w"]}
+  gain_creators:
+    - {id: gc-scenes, text: "4 сохранённых сценария", gain_refs: [gain-scenes], proof_ids: ["fact:scenarios-4"]}
+  forces:
+    push:
+      - {text: "Неудобно читать при верхнем свете и ночнике", basis: {kind: assumption, question_id: q-why-buy}}
+    pull:
+      - {text: "Уютное место для чтения, где ничего не надо настраивать", basis: {kind: inferred, ref: "val-no-fiddling"}}
+      - {text: "Цена первой партии ниже цены после предзаказа", basis: {kind: fact, ref: "fact:price-first-batch, fact:price-after-preorder"}}
+    anxiety:
+      - {text: "Стартап — вдруг не привезут и пропадут с бронью", objection_ids: [obj-will-ship]}
+      - {text: "«Сама подстраивает» — а как? Вдруг это маркетинг", objection_ids: [obj-does-it-work]}
+      - {text: "8 900 ₽ за лампу", objection_ids: [obj-price]}
+    habit:
+      - {text: "Лампа уже есть, и в целом нормально", objection_ids: [obj-have-lamp]}
+      - {text: "Ждать до декабря", objection_ids: [obj-wait]}
+  fit_status: hypothesis
+
+offer:
+  ref: "/offer"
+  summary: "Бронь 990 ₽ входит в цену; первые 300 ламп — 8 900 ₽ (после предзаказа — 11 900 ₽); бронь возвращается в течение 14 дней по заявке."
+  proof_ids: ["fact:deposit-included", "fact:price-first-batch", "fact:price-after-preorder", "fact:deposit-refund"]
+  risk_reversal_ids: [rr-deposit-refund]
+
+conversion:
+  action_ref: "preorder-deposit"
+  secondary_goal: "Сохранить страницу или переслать тому, кто много читает"
+
+objections:
+  - id: obj-price
+    text: "8 900 ₽ за лампу — дорого, обычная стоит в разы меньше"
+    type: price
+    force: anxiety
+    severity: major
+    answer: "Цена первой партии ниже цены после предзаказа; бронь 990 ₽ входит в цену; сравнивать не с обычной лампой, а с тем, что делает эта (подстройка, сценарии, зарядка)."
+    answer_kind: fact
+    proof_ids: ["fact:price-first-batch", "fact:price-after-preorder", "fact:deposit-included"]
+    where: [{section_role: pricing, slot_type: pricing-price-note}]
+    awareness_stage: product-aware
+    status: answered
+    basis: {kind: inferred, ref: "цены из фактов против «обычной лампы» альтернативы"}
+  - id: obj-will-ship
+    text: "Это стартап — вдруг не привезут, а бронь пропадёт"
+    type: trust
+    force: anxiety
+    severity: blocker
+    answer: "Кто принимает бронь (юрлицо), где условия предзаказа, срок отгрузки, возврат брони в течение 14 дней по заявке."
+    answer_kind: condition
+    proof_ids: ["fact:deposit-refund", "fact:shipping-date", "missing:legal-entity", "missing:preorder-offer"]
+    risk_reversal_ids: [rr-deposit-refund]
+    where: [{section_role: pricing, slot_type: cta-note}, {section_role: faq}, {section_role: footer, slot_type: footer-legal}]
+    awareness_stage: product-aware
+    status: needs-proof
+    basis: {kind: inferred, ref: "предзаказ у неизвестной компании; missing legal-entity и preorder-offer — blocking у B2"}
+  - id: obj-does-it-work
+    text: "А как она «сама» понимает, какой нужен свет?"
+    type: risk
+    force: anxiety
+    severity: blocker
+    answer: "Назвать механизм (датчик, время суток или приложение) и показать его в работе; до ответа заказчика — не писать «датчик»."
+    answer_kind: mechanism
+    proof_ids: ["fact:auto-light", "missing:light-mechanism"]
+    where: [{section_role: how-it-works}, {section_role: product-demo}]
+    awareness_stage: solution-aware
+    status: needs-proof
+    basis: {kind: fact, ref: "facts-kvarts.yaml: missing light-mechanism"}
+  - id: obj-have-lamp
+    text: "У меня уже есть лампа (или умная лампочка)"
+    type: status-quo
+    force: habit
+    severity: major
+    answer: "Обычная лампа светит одинаково; «Кварц» меняет оттенок и яркость сам и помнит сценарии; сравнение с умными лампами — после ответа о механизме."
+    answer_kind: mechanism
+    proof_ids: ["fact:auto-light", "fact:scenarios-4", "fact:color-temperature"]
+    where: [{section_role: solution}, {section_role: comparison}]
+    awareness_stage: problem-aware
+    status: answered
+    basis: {kind: inferred, ref: "альтернативы alt-ordinary-lamp, alt-smart-light"}
+  - id: obj-wait
+    text: "Ждать до декабря"
+    type: time
+    force: habit
+    severity: minor
+    answer: "Отгрузка первой партии — декабрь 2026; бронь можно вернуть в течение 14 дней по заявке."
+    answer_kind: fact
+    proof_ids: ["fact:shipping-date", "fact:deposit-refund"]
+    where: [{section_role: pricing}, {section_role: faq}]
+    status: answered
+    basis: {kind: fact, ref: "fact:shipping-date"}
+  - id: obj-ereader
+    text: "Я читаю с электронной книги"
+    type: not-for-me
+    force: habit
+    severity: minor
+    answer: "Честно: лампа для бумажных книг; у электронной книги свой свет."
+    answer_kind: boundary
+    where: [{section_role: faq}]
+    status: answered
+    basis: {kind: inferred, ref: "alt-ereader"}
+
+risk_reversal:
+  - {id: rr-deposit-refund, type: refund, summary: "Бронь 990 ₽ возвращается в течение 14 дней по заявке (условия — в оферте предзаказа)", fact_id: "fact:deposit-refund", answers: [obj-will-ship, obj-wait]}
+
+boundaries:
+  not_for:
+    - "читает в основном с экрана или электронной книги"
+  not_promised:
+    - {text: "«без усталости глаз», «бережёт зрение» и любые обещания здоровья", claim_class: health, why: "запрет заказчика и 38-ФЗ (B2 nc-eyes-health, lift: never); в kimi это стояло в product.goal"}
+    - {text: "«датчик меряет свет», пока механизм не подтверждён", claim_class: fact-property, why: "missing light-mechanism"}
+    - {text: "«сборка в Казани»", claim_class: origin, why: "известен только город компании (B2 company-city, missing assembly-place)"}
+    - {text: "«первая партия — 300 ламп» как размер партии", claim_class: availability-scarcity, why: "заказчик назвал цену для первых 300 ламп, не размер партии (missing first-batch-size)"}
+
+message_hierarchy_ref: ["hierarchy-kvarts-problem-aware.yaml"]
+voice_ref: "черновик: на «вы», коротко; словарь заказчика — свет, книга, вечер; избегать — здоровье глаз, революционный, уникальный (kimi brief.yaml brand.voice)"
+proof_ref: "facts-kvarts.yaml"
+legal_category: [general]
+legal_note: "Предзаказ и дистанционная продажа — оферта, возврат брони, сведения о продавце (site I, H); обещания здоровья — запрет."
+languages:
+  - {lang: ru, role: primary}
+
+open_questions:
+  - {id: q-mechanism, q: "Как «Кварц» понимает, какой нужен свет: датчик освещённости, время суток, приложение?", why: "На этом держится единственное отличие от обычной лампы; без ответа его нельзя объяснить и доказать", options: ["датчик освещённости", "по времени суток", "приложение", "комбинация"], default: "Пишем «сама подстраивает под время суток» только по вашему подтверждению; иначе главным делаем 4 сценария", affects: [positioning.unique_attributes, positioning.value_themes, objections], priority: 1, asked: true}
+  - {id: q-legal, q: "Какое юрлицо принимает бронь и где условия предзаказа (бронь, возврат, доплата, перенос отгрузки)?", why: "Без этого страницу предзаказа не публикуем: главный страх — «стартап пропадёт с деньгами»", options: [], default: "Страница не публикуется; в тексте [PLACEHOLDER]", affects: [objections, offer], priority: 1, asked: true}
+  - {id: q-competitors, q: "С чем читатели сравнивают «Кварц», когда видят прототип: обычная лампа, умная лампочка, лампы конкретных брендов?", why: "От альтернатив зависит, что считать отличием и какие обещания рынок уже слышал", options: [], default: "Сравниваем только с подходами (верхний свет, обычная лампа), бренды не называем", affects: [positioning.alternatives, sophistication], priority: 1, asked: true}
+  - {id: q-post, q: "Что будет написано в постах книжных каналов (тезисы или текст)?", why: "Первый экран обязан продолжить обещание поста", options: [], default: "Первый экран продолжает тему «свет для чтения вечером»", affects: [traffic, awareness], priority: 2, asked: true}
+  - {id: q-why-buy, q: "Что говорили люди, которые видели прототип: зачем им лампа, что не устраивает в нынешнем свете? Есть ли записи или переписка?", why: "Боли сейчас — наши допущения; слова клиентов сделают их правдой", options: [], default: "Боли пишем как ситуацию («вечером, в кресле»), без утверждений о свете и зрении", affects: [audience], priority: 2, asked: true}
+  - {id: q-segments, q: "Покупают ли «Кварц» в подарок? Успевает ли отгрузка к Новому году?", why: "Если да — второй сегмент и отдельный блок", options: ["да, успевает", "нет, отгрузка после праздников", "не знаем"], default: "Подарочную тему не делаем", affects: [audience], priority: 3, asked: true}

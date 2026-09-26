@@ -1,0 +1,318 @@
+<title>Кадр против кадра</title>
+<meta name="description" content="Слепое попарное сравнение вариантов испытания «3D для сайта»: код, Blender, гибрид, нейросеть и наградные сайты.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Literata:opsz,wght@7..72,500&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+  /* Одна тёмная нейтральная тема — осознанно: кадры судят на одинаковом сером поле, без влияния темы зрителя. */
+  :root {
+    color-scheme: dark;
+    --ground: #16171a;
+    --surface: #1e2024;
+    --raise: #262930;
+    --line: #2f333a;
+    --ink: #ecebe7;
+    --muted: #9ea2aa;
+    --pick: #e3bd6d;      /* выбор и фокус — тёплый янтарь, не цвет ни одного из брендов испытания */
+    --pick-ink: #16171a;
+    --ok: #8fc79a;
+    --serif: "Literata", "Noto Serif", Georgia, serif;
+    --sans: "Onest", "Noto Sans", "DejaVu Sans", system-ui, sans-serif;
+    --mono: "JetBrains Mono", "DejaVu Sans Mono", ui-monospace, monospace;
+  }
+  [hidden] { display: none !important; }
+  html, body { background: var(--ground); color: var(--ink); }
+  .stack { display: grid; gap: 16px; }
+  body { margin: 0; font: 16px/1.5 var(--sans); }
+  .wrap { max-width: 1720px; margin: 0 auto; padding-inline: clamp(16px, 3vw, 40px); padding-block: 20px 40px; display: grid; gap: 20px; }
+  .bar { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
+  .brand { font: 600 15px/1.2 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .count { font: 500 14px/1.2 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .track { height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
+  .track > i { display: block; height: 100%; width: 0; background: var(--pick); transition: width .25s ease; }
+  h1 { font: 500 clamp(28px, 4vw, 46px)/1.12 var(--serif); margin: 8px 0 0; text-wrap: balance; max-width: 22ch; }
+  .lead { max-width: 62ch; color: var(--ink); margin: 0; }
+  .lead + .lead { color: var(--muted); }
+  .keys { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--muted); font-size: 14px; margin: 0; padding: 0; list-style: none; }
+  kbd { font: 500 12px/1 var(--mono); padding: 3px 6px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; color: var(--ink); background: var(--surface); }
+  .q { font: 500 clamp(20px, 2.4vw, 28px)/1.25 var(--serif); margin: 0; text-wrap: balance; }
+  .group { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .side { margin: 0; display: grid; gap: 8px; }
+  .media { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; cursor: zoom-in; }
+  .media img, .media video { display: block; width: 100%; height: auto; max-width: 100%; }
+  .side figcaption { display: flex; justify-content: space-between; color: var(--muted); font-size: 14px; }
+  .choices { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  button { font: 500 16px/1.2 var(--sans); color: var(--ink); background: var(--raise); border: 1px solid var(--line); border-radius: 8px; padding: 14px 12px; cursor: pointer; min-height: 48px; }
+  button:hover { border-color: var(--muted); }
+  button:focus-visible, .media:focus-visible { outline: 3px solid var(--pick); outline-offset: 2px; }
+  button.primary { background: var(--pick); color: var(--pick-ink); border-color: var(--pick); font-weight: 600; justify-self: start; padding-inline: 28px; }
+  button.quiet { background: transparent; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .note { color: var(--muted); font-size: 14px; margin: 0; }
+  .store { font: 500 12px/1.2 var(--mono); color: var(--muted); }
+  .store.ok { color: var(--ok); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; }
+  td.num { font: 500 14px/1.4 var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .scroll { overflow-x: auto; }
+  .win { color: var(--pick); }
+  .lightbox { position: fixed; inset: 0; background: rgba(10, 11, 13, .94); display: grid; place-items: center; padding: 16px; z-index: 5; cursor: zoom-out; }
+  .lightbox img, .lightbox video { max-width: 100%; max-height: 100%; object-fit: contain; }
+  @media (max-width: 760px) {
+    .pair { grid-template-columns: 1fr; }
+    .choices { grid-template-columns: 1fr 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { .track > i { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="bar">
+    <span class="brand">Испытание «3D для сайта» · слепые пары</span>
+    <span class="count" id="count">—</span>
+  </header>
+  <div class="track" aria-hidden="true"><i id="fill"></i></div>
+
+  <section id="intro" class="stack">
+    <h1>Два кадра — какой сильнее?</h1>
+    <p class="lead">Подписей нет: какой вариант сделан кодом, какой в Blender, какой нейросетью или взят с наградного сайта — покажу в конце. Каждая пара встретится дважды, стороны меняются местами.</p>
+    <p class="lead">Отвечайте быстро, по первому впечатлению. Займёт 10–15 минут; можно прерваться и продолжить с того же места. Кадр можно открыть крупно щелчком.</p>
+    <ul class="keys">
+      <li><kbd>←</kbd> левый</li><li><kbd>→</kbd> правый</li><li><kbd>↓</kbd> одинаково</li><li><kbd>X</kbd> оба слабо</li><li><kbd>Z</kbd> вернуть предыдущий</li>
+    </ul>
+    <div class="row">
+      <button class="primary" id="start" type="button">Начать</button>
+      <span class="store" id="store">подключаю хранилище…</span>
+    </div>
+    <p class="note" id="loadnote"></p>
+  </section>
+
+  <section id="trial" class="stack" hidden>
+    <div>
+      <p class="group" id="group"></p>
+      <p class="q" id="q"></p>
+    </div>
+    <div class="pair">
+      <figure class="side"><div class="media" id="mL" tabindex="0" aria-label="Левый кадр, открыть крупно"></div><figcaption><span>Слева</span><span><kbd>←</kbd></span></figcaption></figure>
+      <figure class="side"><div class="media" id="mR" tabindex="0" aria-label="Правый кадр, открыть крупно"></div><figcaption><span>Справа</span><span><kbd>→</kbd></span></figcaption></figure>
+    </div>
+    <div class="choices" role="group" aria-label="Ваш выбор">
+      <button type="button" data-c="left" id="cL">Левый сильнее</button>
+      <button type="button" data-c="equal" id="cE">Одинаково</button>
+      <button type="button" data-c="right" id="cR">Правый сильнее</button>
+      <button type="button" data-c="both_bad" id="cX">Оба слабо</button>
+    </div>
+    <div class="row">
+      <button class="quiet" type="button" id="undo">Вернуть предыдущий</button>
+      <span class="store" id="store2"></span>
+    </div>
+  </section>
+
+  <section id="done" class="stack" hidden>
+    <h1>Готово — спасибо</h1>
+    <p class="lead" id="donelead"></p>
+    <div class="scroll"><table id="res"><thead><tr><th>Группа</th><th>Вариант A</th><th>Вариант B</th><th>Итог</th><th>Ответы</th></tr></thead><tbody></tbody></table></div>
+    <div class="row">
+      <button type="button" id="copy">Скопировать результаты (JSON)</button>
+      <button class="quiet" type="button" id="again">Пройти ещё раз</button>
+    </div>
+    <p class="note" id="copynote"></p>
+  </section>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var S = { pairs: [], questions: {}, trials: [], answers: {}, voter: null, store: null, i: 0, shownAt: 0, lastKey: null };
+
+  // ---------- хранилище: db страницы (claude.ai) → локальный сервер → браузер ----------
+  function localId() {
+    try { var v = localStorage.getItem('kvk-voter'); if (v) return v; v = 'local-' + Math.random().toString(36).slice(2, 10); localStorage.setItem('kvk-voter', v); return v; } catch (e) { return 'local-anon'; }
+  }
+  function chain() { var p = Promise.resolve(); return function (fn) { p = p.then(fn, fn); return p; }; }
+  async function pickStore() {
+    if (window.claude && typeof window.claude.use === 'function') {           // опубликованная страница
+      try {
+        var r = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+        var db = r[0], user = r[1];
+        var uid = user ? await user.id() : null;
+        if (db && uid) {
+          var ref = db.doc('votes/' + uid), q = chain();
+          return { kind: 'общая база страницы', voter: uid,
+            load: async function () { var s = await ref.get(); return s.exists ? s.data() : null; },
+            save: function (doc) { return q(function () { return ref.set(doc); }); } };
+        }
+      } catch (e) { /* ниже — запасные пути */ }
+    }
+    if (/^https?:$/.test(location.protocol) && /^(127\.0\.0\.1|localhost)$/.test(location.hostname)) {   // локальный сервер
+      try {
+        var ping = await fetch('api/ping', { cache: 'no-store' });
+        if (ping.ok) {
+          var id = localId(), q2 = chain();
+          return { kind: 'файл на этой машине', voter: id,
+            load: async function () { var x = await fetch('api/votes?voter=' + encodeURIComponent(id), { cache: 'no-store' }); return x.ok ? x.json() : null; },
+            save: function (doc) { return q2(function () { return fetch('api/votes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ voter: id, doc: doc }) }); }); } };
+        }
+      } catch (e) { /* нет сервера */ }
+    }
+    var id2 = localId();
+    return { kind: 'только этот браузер — в конце скопируйте результаты', voter: id2, local: true,
+      load: async function () { try { return JSON.parse(localStorage.getItem('kvk-doc') || 'null'); } catch (e) { return null; } },
+      save: async function (doc) { try { localStorage.setItem('kvk-doc', JSON.stringify(doc)); } catch (e) {} } };
+  }
+
+  // ---------- испытания: каждая пара дважды, стороны меняются; порядок — по семени зрителя ----------
+  function rng(seed) { var h = 2166136261; for (var k = 0; k < seed.length; k++) { h ^= seed.charCodeAt(k); h = Math.imul(h, 16777619); } return function () { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 1e9) / 1e9; }; }
+  function buildTrials(pairs, seed) {
+    var t = [];
+    pairs.forEach(function (p) { t.push({ key: p.id + ':0', pair: p, flip: false }); t.push({ key: p.id + ':1', pair: p, flip: true }); });
+    var r = rng(seed);
+    for (var i = t.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)); var x = t[i]; t[i] = t[j]; t[j] = x; }
+    for (var k = 1; k < t.length; k++) {                // одна пара подряд дважды — развести
+      if (t[k].pair.id === t[k - 1].pair.id) { var m = (k + 2) % t.length; var y = t[k]; t[k] = t[m]; t[m] = y; }
+    }
+    return t;
+  }
+
+  function mediaEl(item, kind) {
+    var el;
+    if (kind === 'video') {
+      el = document.createElement('video'); el.src = item.src; el.muted = true; el.loop = true; el.playsInline = true; el.autoplay = true; el.setAttribute('playsinline', '');
+      if (item.poster) el.poster = item.poster;
+    } else { el = document.createElement('img'); el.src = item.src; el.decoding = 'async'; el.alt = ''; }
+    return el;
+  }
+  function preload(n) {
+    for (var k = n; k < Math.min(S.trials.length, n + 3); k++) {
+      var p = S.trials[k].pair; if (p.kind === 'video') continue;
+      [p.a.src, p.b.src].forEach(function (s) { var im = new Image(); im.src = s; });
+    }
+  }
+  function nextIndex() { for (var k = 0; k < S.trials.length; k++) if (!S.answers[S.trials[k].key]) return k; return -1; }
+  function progress() {
+    var n = Object.keys(S.answers).length, tot = S.trials.length;
+    $('count').textContent = n + ' из ' + tot;
+    $('fill').style.width = (tot ? (100 * n / tot) : 0) + '%';
+  }
+  function show(k) {
+    S.i = k; var t = S.trials[k], p = t.pair;
+    var L = t.flip ? p.b : p.a, R = t.flip ? p.a : p.b;
+    $('group').textContent = p.group || '';
+    $('q').textContent = p.question || S.questions[p.q] || 'Какой вариант сильнее?';
+    ['mL', 'mR'].forEach(function (id, idx) {
+      var box = $(id); box.textContent = '';
+      var m = mediaEl(idx ? R : L, p.kind); box.appendChild(m); box.__src = (idx ? R : L);
+    });
+    if (p.kind === 'video') {                             // оба ролика — с начала одновременно
+      var vs = document.querySelectorAll('#trial video');
+      Promise.all(Array.prototype.map.call(vs, function (v) { return new Promise(function (res) { if (v.readyState >= 2) res(); else v.addEventListener('canplay', res, { once: true }); }); }))
+        .then(function () { Array.prototype.forEach.call(vs, function (v) { v.currentTime = 0; v.play().catch(function () {}); }); });
+    }
+    S.shownAt = performance.now(); preload(k + 1); progress();
+  }
+  function docOut() { return { v: 1, voter: S.voter, updated: new Date().toISOString(), answers: S.answers }; }
+  async function answer(c) {
+    if ($('trial').hidden) return;
+    var t = S.trials[S.i];
+    S.answers[t.key] = { pair: t.pair.id, flip: t.flip, c: c, ms: Math.round(performance.now() - S.shownAt), at: new Date().toISOString() };
+    S.lastKey = t.key;
+    save();
+    var n = nextIndex();
+    if (n < 0) finish(); else show(n);
+  }
+  function save() {
+    $('store2').textContent = 'сохраняю…'; $('store2').className = 'store';
+    Promise.resolve(S.store.save(docOut())).then(function () { $('store2').textContent = 'сохранено · ' + S.store.kind; $('store2').className = 'store ok'; },
+      function () { $('store2').textContent = 'не сохранилось — ответы остаются в этой вкладке, в конце скопируйте результаты'; });
+  }
+  function undo() {
+    if (!S.lastKey) return;
+    delete S.answers[S.lastKey];
+    var k = S.trials.findIndex(function (t) { return t.key === S.lastKey; });
+    S.lastKey = null; save(); $('done').hidden = true; $('trial').hidden = false; show(k);
+  }
+
+  // ---------- итог: пара засчитывается победой, только если оба порядка согласны (иначе ничья) ----------
+  function verdicts() {
+    return S.pairs.map(function (p) {
+      var a0 = S.answers[p.id + ':0'], a1 = S.answers[p.id + ':1'];
+      function pref(ans) { if (!ans) return null; if (ans.c === 'equal') return '='; if (ans.c === 'both_bad') return 'x'; var leftIsA = !ans.flip; return (ans.c === 'left') === leftIsA ? 'A' : 'B'; }
+      var x = pref(a0), y = pref(a1), res;
+      if (x === null || y === null) res = '—';
+      else if (x === 'x' && y === 'x') res = 'оба слабо';
+      else if (x === y && (x === 'A' || x === 'B')) res = x;
+      else res = 'ничья';
+      return { p: p, res: res, raw: [x, y] };
+    });
+  }
+  function finish() {
+    $('trial').hidden = true; $('done').hidden = false; progress();
+    var v = verdicts(), tb = $('res').querySelector('tbody'); tb.textContent = '';
+    var wins = 0, ties = 0;
+    v.forEach(function (r) {
+      var tr = document.createElement('tr');
+      [r.p.group || r.p.id, r.p.a.v || 'A', r.p.b.v || 'B'].forEach(function (s) { var td = document.createElement('td'); td.textContent = s; tr.appendChild(td); });
+      var td = document.createElement('td');
+      td.textContent = r.res === 'A' ? 'сильнее A' : r.res === 'B' ? 'сильнее B' : r.res;
+      if (r.res === 'A' || r.res === 'B') { td.className = 'win'; wins++; } else if (r.res === 'ничья') ties++;
+      tr.appendChild(td);
+      var td2 = document.createElement('td'); td2.className = 'num'; td2.textContent = r.raw.map(function (z) { return z || '·'; }).join(' / '); tr.appendChild(td2);
+      tb.appendChild(tr);
+    });
+    $('donelead').textContent = 'Пар: ' + v.length + ' · решённых в обоих порядках: ' + wins + ' · ничьих: ' + ties + '. Ответы сохранены: ' + S.store.kind + '.';
+  }
+
+  // ---------- крупный просмотр ----------
+  function zoom(box) {
+    var src = box.__src; if (!src) return;
+    var lb = document.createElement('div'); lb.className = 'lightbox'; lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-label', 'Кадр крупно — щелчок или Esc закрывает');
+    var kind = S.trials[S.i] ? S.trials[S.i].pair.kind : 'image';
+    var m = mediaEl(src, kind); if (kind === 'video') m.controls = true; lb.appendChild(m);
+    function close() { lb.remove(); document.removeEventListener('keydown', esc, true); box.focus(); }
+    function esc(e) { if (e.key === 'Escape') { e.stopPropagation(); close(); } }
+    lb.addEventListener('click', close); document.addEventListener('keydown', esc, true);
+    document.body.appendChild(lb);
+  }
+
+  // ---------- запуск ----------
+  async function boot() {
+    try {
+      var r = await fetch('pairs.json', { cache: 'no-store' });
+      var data = await r.json();
+      S.pairs = data.pairs || []; S.questions = data.questions || {};
+      $('loadnote').textContent = 'Пар в наборе: ' + S.pairs.length + ' · вопросов: ' + (S.pairs.length * 2) + '.';
+    } catch (e) { $('loadnote').textContent = 'Не удалось загрузить список пар (pairs.json). Откройте страницу через её адрес, а не как файл.'; return; }
+    S.store = await pickStore(); S.voter = S.store.voter;
+    $('store').textContent = 'ответы сохраняются: ' + S.store.kind; $('store').className = 'store ok';
+    try { var prev = await S.store.load(); if (prev && prev.answers) S.answers = prev.answers; } catch (e) {}
+    S.trials = buildTrials(S.pairs, S.voter || 'seed');
+    progress();
+    if (Object.keys(S.answers).length) $('start').textContent = nextIndex() < 0 ? 'Показать итог' : 'Продолжить';
+  }
+  $('start').addEventListener('click', function () {
+    if (!S.trials.length) return;
+    $('intro').hidden = true;
+    var n = nextIndex();
+    if (n < 0) finish(); else { $('trial').hidden = false; show(n); $('cE').focus(); }
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.choices button'), function (b) { b.addEventListener('click', function () { answer(b.dataset.c); }); });
+  $('undo').addEventListener('click', undo);
+  ['mL', 'mR'].forEach(function (id) { var b = $(id); b.addEventListener('click', function () { zoom(b); }); b.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); zoom(b); } }); });
+  document.addEventListener('keydown', function (e) {
+    if (document.querySelector('.lightbox') || $('trial').hidden) return;
+    var k = e.key.toLowerCase();
+    if (k === 'arrowleft') answer('left'); else if (k === 'arrowright') answer('right'); else if (k === 'arrowdown') answer('equal');
+    else if (k === 'x' || k === 'ч') answer('both_bad'); else if (k === 'z' || k === 'я') undo(); else return;
+    e.preventDefault();
+  });
+  $('copy').addEventListener('click', function () {
+    var txt = JSON.stringify({ doc: docOut(), verdicts: verdicts().map(function (r) { return { pair: r.p.id, group: r.p.group, a: r.p.a.v, b: r.p.b.v, res: r.res, raw: r.raw }; }) }, null, 1);
+    var note = $('copynote');
+    navigator.clipboard.writeText(txt).then(function () { note.textContent = 'Скопировано.'; }, function () { note.textContent = 'Буфер недоступен — выделите текст ниже и скопируйте вручную.'; var pre = document.createElement('pre'); pre.textContent = txt; pre.style.whiteSpace = 'pre-wrap'; note.after(pre); });
+  });
+  $('again').addEventListener('click', function () { S.answers = {}; S.lastKey = null; save(); $('done').hidden = true; $('trial').hidden = false; show(0); });
+  boot();
+})();
+</script>

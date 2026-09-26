@@ -1,0 +1,185 @@
+{
+ "spec_version": "0.1",
+ "checked_at": "2026-09-23",
+ "brief_language": "ru",
+ "id": "ab-b1-hero",
+ "task": "IMG-HERO-PHOTO",
+ "role": {
+  "page_type": "landing",
+  "section": "hero",
+  "slot": "hero-bg",
+  "priority": "lcp",
+  "purpose": "фон hero сервиса подписки на книги; заголовок и кнопка — HTML слева"
+ },
+ "subject": {
+  "summary": "a quiet reading nook by a tall window in a small city apartment",
+  "elements": [
+   {
+    "id": "chair",
+    "what": "mustard velvet armchair",
+    "position": "right third",
+    "attributes": [
+     "with slightly worn armrests"
+    ]
+   },
+   {
+    "id": "table",
+    "what": "small round oak side table",
+    "relation": "to the left of the armchair"
+   },
+   {
+    "id": "mug",
+    "what": "white ceramic mug with a thin wisp of steam",
+    "relation": "on the side table"
+   },
+   {
+    "id": "books",
+    "what": "stack of three hardcover books",
+    "relation": "on the floor beside the armchair"
+   }
+  ],
+  "environment": "early morning in a small apartment, tall window with a sheer linen curtain on the right"
+ },
+ "composition": {
+  "shot": "medium-wide",
+  "angle": "eye-level",
+  "subject_region": "right-third",
+  "focal_point": {
+   "x": 0.72,
+   "y": 0.58
+  },
+  "text_zone": {
+   "side": "left",
+   "rect": [
+    0.0,
+    0.0,
+    0.4,
+    1.0
+   ],
+   "surface": "warm-grey plaster wall",
+   "tone": "evenly lit and low in contrast",
+   "purpose": "headline",
+   "text_color_on_top": "#1E1E1E"
+  },
+  "safe_zones": [
+   {
+    "ratio": "4:5",
+    "keep_rect": [
+     0.5,
+     0.1,
+     0.95,
+     0.95
+    ]
+   },
+   {
+    "ratio": "9:16",
+    "keep_rect": [
+     0.55,
+     0.15,
+     0.9,
+     0.95
+    ]
+   }
+  ],
+  "depth_layers": [
+   "foreground: armchair and side table",
+   "background: window with a sheer curtain"
+  ]
+ },
+ "camera": {
+  "lens_mm": 35,
+  "aperture": "f/4",
+  "depth_of_field": "medium",
+  "capture": "35mm film photograph"
+ },
+ "light": {
+  "source": "window daylight",
+  "direction": "right",
+  "quality": "soft",
+  "time_of_day": "early morning",
+  "interaction": "long soft shadows across the wooden floor"
+ },
+ "palette": [
+  {
+   "role": "background",
+   "hex": "#D9D4CC",
+   "name": "warm grey",
+   "share": 0.55,
+   "applies_to": "wall"
+  },
+  {
+   "role": "secondary",
+   "hex": "#A0785A",
+   "name": "light oak",
+   "share": 0.2,
+   "applies_to": "floor and side table"
+  },
+  {
+   "role": "accent",
+   "hex": "#C9A227",
+   "name": "mustard",
+   "share": 0.15,
+   "applies_to": "armchair"
+  },
+  {
+   "role": "accent",
+   "hex": "#2F4A3A",
+   "name": "deep green",
+   "share": 0.05,
+   "applies_to": "book spines"
+  }
+ ],
+ "materials": [
+  "velvet",
+  "oak",
+  "linen",
+  "plaster",
+  "ceramic"
+ ],
+ "style": {
+  "medium": "photograph",
+  "anchors": [
+   "editorial interior photography",
+   "natural color balance"
+  ],
+  "grain": "subtle film grain"
+ },
+ "mood": [
+  "calm",
+  "unhurried"
+ ],
+ "exclusions": [
+  {
+   "what": "people",
+   "kind": "object",
+   "replace_with": "an empty room with nobody present"
+  },
+  {
+   "what": "watermark",
+   "kind": "service"
+  }
+ ],
+ "text": {
+  "mode": "html_overlay",
+  "copy": [
+   "Читайте медленно",
+   "Подписка на бумажные книги"
+  ]
+ },
+ "output": {
+  "primary_ratio": "16:9",
+  "aspect_ratios": [
+   "16:9"
+  ],
+  "resolution": "1K",
+  "format": "avif",
+  "max_kb": 220
+ },
+ "variants": {
+  "count": 4,
+  "vary": [
+   "seed"
+  ],
+  "first_iteration_variable": "light direction"
+ }
+}

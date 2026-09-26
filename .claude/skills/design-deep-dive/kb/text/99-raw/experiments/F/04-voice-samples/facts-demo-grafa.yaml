@@ -1,0 +1,298 @@
+# facts-demo-grafa.yaml — ДЕМО-ФАКТЫ для примера голоса «сдержанный B2B» (05-voice-editorial/examples/voice-grafa-b2b.yaml)
+# text-research · F · 2026-09-24 · формат: ../../../../02-strategy-messaging/facts.schema.yaml (facts_version 1, B2)
+#
+# ВЫМЫШЛЕННАЯ компания «Графа» (бухгалтерское сопровождение ООО и ИП, Екатеринбург, работа удалённо) и синтетические
+# данные: числа, имена, документы и ссылки — для примера голоса, не для публикации. Совпадения с реальными компаниями
+# случайны. Факты написал агент F (ai-self) по образцу facts-service-renovation.yaml (B2); проверка — validate_voice.py
+# (схема B2) и `claims_check.py lint-facts`.
+# Зачем: у базы нет B2B-набора фактов (B2 сделал «Отвес» и «Кварц»), а образцы строк голоса обязаны опираться на факты.
+
+facts_version: 1
+date: "2026-09-24"
+site: grafa-buh-demo
+lang: ru
+jurisdiction: ru
+status: draft
+owner: {role: "директор (заказчик, вымышленный)"}
+collected_by: "агент F по анкете proof-intake.md (демо)"
+never_claim_defaults: ru-default-1
+
+entities:
+  - {id: company-grafa, type: company, names: ["«Графа»", "Графа", "Grafa"]}
+  - {id: city-ekb, type: place, names: ["Екатеринбург", "Екатеринбурге", "Yekaterinburg"]}
+  - {id: person-chernova, type: person, names: ["Ольга Чернова", "Ольга", "Olga Chernova", "Olga"], fact_id: accountant-chernova}
+  - {id: person-dmitry-k, type: person, names: ["Дмитрий К.", "Дмитрий", "Dmitry K."], fact_id: review-dmitry-k}
+
+facts:
+  - id: company-since-2016
+    kind: company
+    claim_class: [company-details, fact-number]
+    verbatim:
+      - "Ведём бухгалтерию ООО и ИП с 2016 года"
+      - "С 2016 года"
+    canonical: "Компания «Графа» (Екатеринбург) ведёт бухгалтерию ООО и ИП с 2016 года."
+    values:
+      - {value: 2016, unit: year, what: "год начала работы"}
+    entities: [company-grafa, city-ekb]
+    source: {type: registry, who: "ЕГРЮЛ", where: "выписка", date: "2026-09-10", document: "egrul-grafa-2026-09-10.pdf", quote: "Дата регистрации: 14.04.2016; вид деятельности 69.20 — деятельность по оказанию услуг в области бухгалтерского учёта", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {any: true}
+    translations:
+      en: {canonical: "Grafa (Yekaterinburg) has been doing the books for Russian LLCs and sole proprietors since 2016.", note: "адаптация"}
+    lang: ru
+
+  - id: clients-on-service
+    kind: metric
+    claim_class: [fact-number]
+    verbatim:
+      - "187 компаний и ИП на обслуживании"
+      - "187 клиентов на обслуживании"
+    canonical: "На 1 сентября 2026 года на обслуживании у «Графы» 187 компаний и ИП (данные CRM)."
+    values:
+      - {value: 187, unit: clients, what: "компании и ИП на обслуживании", as_of: "2026-09-01"}
+    entities: [company-grafa]
+    source: {type: customer-system, who: "заказчик (директор)", where: "CRM, отчёт «Активные договоры»", date: "2026-09-01", document: "crm-active-2026-09-01.xlsx", quote: "Активных договоров обслуживания: 187 (компании и ИП)", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18", method: "число строк выгрузки совпало с отчётом CRM"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, proof-stats, about], slot_types: [hero-proof, stat-value, stat-label, body], requires_nearby: "источник и дата снимка: по данным CRM на дату выгрузки"}
+    valid: {review_by: "2026-12-01"}
+    translations:
+      en: {canonical: "As of 1 September 2026, 187 companies and sole proprietors are on Grafa's books (CRM data).", note: "адаптация; числа по-английски"}
+    lang: ru
+
+  - id: deadline-reminders
+    kind: offer-terms
+    claim_class: [purchase-terms]
+    verbatim:
+      - "За неделю до каждого срока присылаем письмо: что платить и сколько"
+      - "О каждом налоге предупреждаем за неделю"
+      - "За 7 дней до срока — письмо с суммой"
+    canonical: "За 7 календарных дней до срока уплаты налога или сдачи отчёта «Графа» присылает клиенту письмо с суммой и сроком (регламент обслуживания, п. 3.4)."
+    values:
+      - {value: 7, unit: days, what: "за сколько дней до срока приходит письмо", qualifier: "календарных"}
+    entities: [company-grafa]
+    source: {type: customer-document, who: "заказчик", where: "регламент обслуживания, п. 3.4", date: "2026-01-20", document: "reglament-2026.pdf", quote: "За 7 календарных дней (за неделю) до срока уплаты налога или сдачи отчёта Исполнитель направляет Заказчику письмо: что платить, сколько и до какой даты", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, benefits, how-it-works, faq], slot_types: [headline, subheadline, card-title, card-body, step-body, faq-a]}
+    translations:
+      en: {canonical: "Seven calendar days before every tax payment or filing deadline, Grafa emails the client the amount and the due date (service regulations, clause 3.4).", note: "адаптация"}
+    lang: ru
+
+  - id: response-2h
+    kind: offer-terms
+    claim_class: [purchase-terms, fact-number]
+    verbatim:
+      - "Отвечаем на вопросы в рабочие дни в течение 2 часов"
+      - "в течение 2 рабочих часов"
+    canonical: "На вопросы клиентов «Графа» отвечает в рабочие дни с 9:00 до 18:00 (мск) в течение 2 рабочих часов — пункт 4.2 договора."
+    values:
+      - {value: 2, unit: hours, what: "срок ответа на вопрос клиента", qualifier: "рабочие часы, будни 9:00–18:00 мск"}
+    entities: [company-grafa]
+    source: {type: contract, who: "заказчик", where: "типовой договор, п. 4.2", date: "2026-01-20", document: "dogovor-grafa-2026.pdf, п. 4.2", quote: "Исполнитель отвечает на вопросы Заказчика в рабочие дни с 9:00 до 18:00 (мск) в течение 2 рабочих часов", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, benefits, faq], slot_types: [subheadline, card-body, faq-a, cta-note], requires_nearby: "«рабочих часов»"}
+    translations:
+      en: {canonical: "Grafa answers client questions within 2 business hours on business days, 9:00–18:00 Moscow time (contract, clause 4.2).", note: "адаптация"}
+    lang: ru
+
+  - id: price-from-ip-usn
+    kind: price
+    claim_class: [price-discount]
+    verbatim:
+      - "от 6 500 ₽ в месяц для ИП на УСН без сотрудников"
+      - "ИП на УСН без сотрудников — от 6 500 ₽ в месяц"
+    canonical: "Бухгалтерское сопровождение ИП на УСН без сотрудников в «Графе» — от 6 500 ₽ в месяц (прайс 2026)."
+    values:
+      - {value: 6500, unit: RUB, what: "цена в месяц", comparator: gte, qualifier: "ИП на УСН без сотрудников"}
+    entities: [company-grafa]
+    source: {type: customer-document, who: "заказчик", where: "прайс-лист 2026", date: "2026-01-20", document: "price-grafa-2026.pdf, строка «ИП, УСН, без сотрудников»", quote: "ИП на УСН без сотрудников — от 6 500 руб. в месяц", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, pricing], slot_types: [subheadline, pricing-price, pricing-price-note, cta-note, email-subject], requires_nearby: "для кого цена: «ИП на УСН без сотрудников»"}
+    valid: {from: "2026-01-20", until: "2026-12-31", review_by: "2026-12-01"}
+    lang: ru
+
+  - id: price-from-llc-usn
+    kind: price
+    claim_class: [price-discount]
+    verbatim:
+      - "от 12 000 ₽ в месяц для ООО на УСН с 1–3 сотрудниками"
+      - "ООО на УСН с 1–3 сотрудниками — от 12 000 ₽ в месяц"
+    canonical: "Бухгалтерское сопровождение ООО на УСН с 1–3 сотрудниками в «Графе» — от 12 000 ₽ в месяц (прайс 2026)."
+    values:
+      - {value: 12000, unit: RUB, what: "цена в месяц", comparator: gte, qualifier: "ООО на УСН, 1–3 сотрудника"}
+    entities: [company-grafa]
+    source: {type: customer-document, who: "заказчик", where: "прайс-лист 2026", date: "2026-01-20", document: "price-grafa-2026.pdf, строка «ООО, УСН, 1–3 сотрудника»", quote: "ООО на УСН с 1–3 сотрудниками — от 12 000 руб. в месяц", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, pricing], slot_types: [subheadline, pricing-price, pricing-price-note, cta-note, email-subject], requires_nearby: "для кого цена: «ООО на УСН с 1–3 сотрудниками»"}
+    valid: {from: "2026-01-20", until: "2026-12-31", review_by: "2026-12-01"}
+    translations:
+      en: {canonical: "Bookkeeping for an LLC on the simplified tax system (USN) with 1–3 employees starts at ₽12,000 a month (Grafa price list, 2026).", note: "адаптация: объяснить УСН"}
+    lang: ru
+
+  - id: quote-free-1day
+    kind: offer-terms
+    claim_class: [price-discount, purchase-terms]
+    verbatim:
+      - "Расчёт стоимости — бесплатно, пришлём в течение рабочего дня"
+      - "Расчёт пришлём на почту в течение рабочего дня"
+    canonical: "Расчёт стоимости обслуживания «Графа» делает бесплатно и присылает на почту в течение рабочего дня после заявки."
+    values:
+      - {value: 0, unit: RUB, what: "стоимость расчёта"}
+      - {value: 1, unit: days, what: "срок расчёта", qualifier: "рабочий день после заявки"}
+    entities: [company-grafa]
+    source: {type: customer-document, who: "заказчик", where: "регламент продаж, п. 1.3", date: "2026-01-20", document: "reglament-prodazh-2026.pdf", quote: "Расчёт стоимости — бесплатно; расчёт направляется на почту Заказчика в течение рабочего дня после заявки", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, lead-form, final-cta], slot_types: [cta-note, form-lead, form-next-steps, form-success, email-body]}
+    translations:
+      en: {canonical: "Grafa prepares a quote free of charge and emails it within one business day of the request.", note: "адаптация"}
+    lang: ru
+
+  - id: fines-compensation
+    kind: guarantee
+    claim_class: [guarantee]
+    verbatim:
+      - "Штраф из-за ошибки нашего бухгалтера оплачиваем мы — пункт 6.3 договора"
+      - "Штрафы и пени, начисленные из-за ошибки бухгалтера «Графы», возмещаем — пункт 6.3 договора"
+      - "Штраф из-за нашей ошибки оплачиваем мы"
+      - "Если налоговая начислит штраф или пени из-за нашей ошибки, возместим их полностью — это пункт 6.3 договора"
+    canonical: "Штрафы и пени, начисленные клиенту из-за ошибки бухгалтера «Графы», компания возмещает в полном объёме по пункту 6.3 договора."
+    entities: [company-grafa]
+    source: {type: contract, who: "заказчик", where: "типовой договор, п. 6.3", date: "2026-01-20", document: "dogovor-grafa-2026.pdf, п. 6.3", quote: "Штрафы и пени, начисленные Заказчику вследствие ошибки бухгалтера Исполнителя, Исполнитель возмещает в полном объёме (памятка для клиентов: «штраф из-за нашей ошибки оплачиваем мы — возместим их полностью»)", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [benefits, guarantee, faq, hero], slot_types: [card-title, card-body, guarantee-text, faq-a, hero-proof], requires_nearby: "условие: «из-за нашей ошибки»"}
+    legal: {flags: [38fz-5-3-6], review: {status: not-needed}, disclaimer: ""}
+    translations:
+      en: {canonical: "If a fine or late-payment interest is charged because of a Grafa accountant's mistake, Grafa reimburses it in full under clause 6.3 of the contract.", note: "адаптация"}
+    lang: ru
+
+  - id: liability-insurance
+    kind: guarantee
+    claim_class: [guarantee, fact-number]
+    verbatim:
+      - "Ответственность застрахована на 5 млн ₽"
+      - "профессиональная ответственность застрахована на 5 млн ₽"
+      - "Мы застраховали ответственность на 5 млн ₽"
+    canonical: "Профессиональная ответственность «Графы» застрахована на 5 млн ₽ (полис действует до 31 декабря 2026 года)."
+    values:
+      - {value: 5000000, unit: RUB, what: "страховая сумма ответственности"}
+      - {date: "2026-12-31", what: "окончание полиса"}
+    entities: [company-grafa]
+    source: {type: contract, who: "страховая компания (демо)", where: "полис страхования профессиональной ответственности", date: "2026-01-10", document: "polis-2026-demo.pdf", quote: "Страхователь — «Графа»; объект — профессиональная ответственность; страховая сумма — 5 000 000 рублей (ответственность застрахована на 5 млн ₽, мы застраховали ответственность); срок действия — до 31.12.2026", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [benefits, guarantee, faq], slot_types: [card-body, guarantee-text, faq-a]}
+    valid: {until: "2026-12-31", review_by: "2026-12-01"}
+    translations:
+      en: {canonical: "Grafa's professional liability is insured for ₽5 million (policy valid until 31 December 2026).", note: "адаптация"}
+    lang: ru
+
+  - id: switch-10-days
+    kind: offer-terms
+    claim_class: [purchase-terms, fact-number]
+    verbatim:
+      - "Переход от прежнего бухгалтера — 10 рабочих дней: принимаем базу 1С и документы, сверяем остатки"
+      - "Переход занимает 10 рабочих дней"
+    canonical: "Переход клиента от прежнего бухгалтера к «Графе» занимает 10 рабочих дней: компания принимает базу 1С и документы и сверяет остатки (регламент приёма клиента)."
+    values:
+      - {value: 10, unit: days, what: "срок перехода", qualifier: "рабочие дни"}
+    entities: [company-grafa]
+    source: {type: customer-document, who: "заказчик", where: "регламент приёма клиента, п. 2", date: "2026-01-20", document: "reglament-priema-2026.pdf", quote: "Переход от прежнего бухгалтера — 10 рабочих дней: принимаем базу 1С и документы, сверяем остатки и сообщаем, что нужно исправить до ближайшего отчёта", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [how-it-works, faq, objections], slot_types: [step-body, faq-a, objection-answer]}
+    translations:
+      en: {canonical: "Switching from a previous accountant to Grafa takes 10 business days: Grafa takes over the 1C database and documents and reconciles the balances.", note: "адаптация; 1C пояснить как учётную программу"}
+    lang: ru
+
+  - id: accountant-chernova
+    kind: person
+    claim_class: [fact-number, fact-property]
+    verbatim:
+      - "Ольга Чернова, главный бухгалтер, стаж 14 лет"
+      - "Ваш главный бухгалтер — Ольга Чернова"
+    canonical: "Ольга Чернова — главный бухгалтер «Графы», стаж в бухгалтерском учёте 14 лет."
+    values:
+      - {value: 14, unit: years, what: "стаж в бухгалтерском учёте"}
+    entities: [person-chernova, company-grafa]
+    source: {type: customer-document, who: "заказчик", where: "анкета сотрудника, сведения о трудовой деятельности", date: "2026-09-12", document: "hr/chernova-2026-09-12.pdf", quote: "стаж в бухгалтерском учёте с 2012 г.", derivation: computed, computation: "2026 − 2012 = 14 лет"}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: granted, subject: "Ольга Чернова", form: signed-consent, scope: [site], document: "согласие на распространение ПДн от 2026-09-12 (демо)", date: "2026-09-12", shows: [full-name, position], pd_consent: true, image_consent: false}
+    attribution: {name: "Ольга Чернова", display: full-name, role: "главный бухгалтер", relation: employee}
+    use: {section_roles: [team, about, how-it-works, lead-form], slot_types: [card-title, card-body, body, form-success, email-body]}
+    lang: ru
+
+  - id: review-dmitry-k
+    kind: testimonial
+    claim_class: [testimonial-quote]
+    verbatim:
+      - "«Раньше про требования налоговой я узнавал от банка — когда счёт уже блокировали. Теперь узнаю за неделю и сразу получаю письмо, что делать»"
+    canonical: "Дмитрий К. (ИП, интернет-магазин, клиент «Графы» с 2024 года): «Раньше про требования налоговой я узнавал от банка — когда счёт уже блокировали. Теперь узнаю за неделю и сразу получаю письмо, что делать»."
+    entities: [person-dmitry-k, company-grafa]
+    source: {type: interview, who: "Дмитрий К. (клиент)", where: "интервью после года обслуживания, запись созвона (демо)", date: "2026-08-20", quote: "Раньше про требования налоговой я узнавал от банка — когда счёт уже блокировали. Теперь узнаю за неделю и сразу получаю письмо, что делать", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18", method: "запись созвона у заказчика"}
+    permission:
+      status: granted
+      subject: "Дмитрий К. (автор отзыва)"
+      form: written-email
+      scope: [site]
+      document: "письмо от 2026-09-15 (демо)"
+      date: "2026-09-15"
+      shows: [first-name, initials]
+      pd_consent: true
+      image_consent: false
+    attribution: {name: "Дмитрий К.", display: first-name-initial, role: "ИП, интернет-магазин", verified_customer: true, relation: customer}
+    original_ref: "evidence/interviews/2026-08-20-dmitry-k.txt (демо)"
+    use: {section_roles: [testimonials, hero], slot_types: [testimonial-quote, testimonial-attribution]}
+    notes: "Слова клиента не превращаются в обещание компании: «узнаю за неделю» опирается на факт deadline-reminders, а не наоборот."
+    lang: ru
+
+missing:
+  - id: legal-details
+    what: "реквизиты для подвала: полное название, ОГРН, ИНН, адрес"
+    kind: company
+    claim_class: [company-details]
+    placeholder: "[PLACEHOLDER: реквизиты ООО «Графа»]"
+    who: "заказчик (директор)"
+    needed_for: {section_roles: [footer, contacts], slot_types: [footer-legal]}
+    blocking: true
+    fallback: placeholder
+    question: "Пришлите полное название юрлица, ОГРН, ИНН и адрес — как в ЕГРЮЛ."
+  - id: payment-terms
+    what: "как клиент платит: ежемесячно, по счёту, есть ли предоплата"
+    kind: offer-terms
+    claim_class: [purchase-terms]
+    placeholder: "[PLACEHOLDER: порядок оплаты]"
+    who: "заказчик (бухгалтер)"
+    needed_for: {section_roles: [pricing, faq], slot_types: [pricing-price-note, faq-a]}
+    fallback: placeholder
+    question: "Как клиент платит за обслуживание: ежемесячно по счёту? Есть ли предоплата?"
+
+never_claim:
+  - id: nc-no-audits
+    text: "«с нами не будет проверок», «никаких штрафов», «гарантируем отсутствие претензий налоговой» — этого не может обещать никто"
+    claim_class: [guarantee]
+    patterns: ["не\\s+будет\\s+(налоговых\\s+)?проверок", "никаких\\s+штрафов", "гарантиру\\w*\\s+отсутстви\\w*"]
+    lift: never
+    reason: "обещание результата, который не зависит от исполнителя (38-ФЗ ст. 5 ч. 3 п. 1, ч. 7 — H)"
+    source: {who: "редактор (демо)", date: "2026-09-18"}
+  - id: nc-tax-savings
+    text: "«сэкономим на налогах», «снизим налоги на X %», «законная оптимизация» — нет расчёта и основания"
+    claim_class: [income-finance, forecast]
+    patterns: ["сэконом\\w*\\s+на\\s+налог", "сниз\\w*\\s+налог", "оптимизац\\w*\\s+налог"]
+    lift: never
+    reason: "прогноз финансового результата без основания (H)"
+    source: {who: "редактор (демо)", date: "2026-09-18"}
+  - id: nc-best
+    text: "«лучшая бухгалтерия», «№ 1», «самые низкие цены» — нет рейтинга с критерием"
+    claim_class: [superlative, comparison]
+    patterns: ["лучш\\w*\\s+бухгалтер", "сам\\w*\\s+низк\\w*\\s+цен"]
+    lift: with-fact
+    reason: "Пленум ВАС № 58 п. 29"
+    source: {who: "редактор (демо)", date: "2026-09-18"}

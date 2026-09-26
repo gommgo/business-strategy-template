@@ -1,0 +1,108 @@
+{
+ "spec_version": "0.1",
+ "checked_at": "2026-09-23",
+ "brief_language": "ru",
+ "id": "onboarding-plane-02",
+ "task": "IMG-SERIES",
+ "role": {
+  "page_type": "saas",
+  "section": "onboarding",
+  "slot": "onboarding-step-2",
+  "series_id": "onboarding-flat-v1",
+  "purpose": "шаг 2 из 4 онбординга: «отправьте документы»; текст шага — HTML рядом"
+ },
+ "subject": {
+  "summary": "a paper plane flying above a neat stack of documents",
+  "elements": [
+   {
+    "id": "plane",
+    "what": "folded paper plane",
+    "position": "upper center",
+    "attributes": [
+     "in coral"
+    ],
+    "action": "gliding upward to the right"
+   },
+   {
+    "id": "docs",
+    "what": "flat documents with simple line details",
+    "count": 3,
+    "relation": "stacked below the plane"
+   }
+  ],
+  "environment": "plain cream background with two short dotted motion lines behind the plane"
+ },
+ "composition": {
+  "shot": "medium",
+  "subject_region": "center",
+  "focal_point": {
+   "x": 0.5,
+   "y": 0.4
+  }
+ },
+ "palette": [
+  {
+   "role": "background",
+   "hex": "#F6F1E7",
+   "name": "cream",
+   "share": 0.7,
+   "applies_to": "background"
+  },
+  {
+   "role": "dominant",
+   "hex": "#1F3A5F",
+   "name": "deep navy",
+   "share": 0.2,
+   "applies_to": "outlines and documents"
+  },
+  {
+   "role": "accent",
+   "hex": "#FF6B5B",
+   "name": "coral",
+   "share": 0.08,
+   "applies_to": "paper plane"
+  }
+ ],
+ "style": {
+  "medium": "flat-illustration",
+  "anchors": [
+   "flat vector shapes",
+   "soft rounded geometry"
+  ],
+  "line": "uniform 2 px deep navy outlines with rounded caps",
+  "finish": "matte",
+  "series_block": "Flat vector illustration for a product onboarding series: uniform 2 px deep navy outlines with rounded caps, flat solid fills, generous cream background, coral only on the key object, soft rounded geometric shapes."
+ },
+ "references": [
+  {
+   "src": "series/onboarding-01.png",
+   "role": "style",
+   "note": "approved step 1: keep line weight, palette and shapes"
+  }
+ ],
+ "exclusions": [
+  {
+   "what": "gradients and shading",
+   "kind": "style",
+   "replace_with": "flat solid fills"
+  }
+ ],
+ "text": {
+  "mode": "none"
+ },
+ "output": {
+  "primary_ratio": "4:3",
+  "aspect_ratios": [
+   "4:3"
+  ],
+  "resolution": "1K",
+  "format": "webp",
+  "max_kb": 60
+ },
+ "variants": {
+  "count": 3,
+  "vary": [
+   "seed"
+  ]
+ }
+}

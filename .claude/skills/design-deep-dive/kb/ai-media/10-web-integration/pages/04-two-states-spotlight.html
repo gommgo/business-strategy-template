@@ -1,0 +1,104 @@
+<!doctype html>
+<!-- 04 · Hero с двумя состояниями: «ночь» — основа, «рассвет» открывается прожектором за курсором; кнопка переключает
+     состояние целиком (касание, клавиатура, reduce); две выровненные петли 6 с, общий старт и одна кнопка паузы;
+     постеры — кадры 0 обеих петель (LCP — постер основы); градиент сверху под навигацию, снизу — в цвет следующей секции.
+     Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/08-effects и 06-pages-measure (Chromium 153). -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тихая вода — два состояния</title>
+<link rel="icon" href="assets/svg/favicon.ico" sizes="32x32">
+<link rel="icon" href="assets/svg/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/base.css">
+<style>
+  @property --r { syntax: '<length>'; inherits: true; initial-value: 0px; }
+  .hero { min-height: calc(100svh - 56px); --x: 60%; --y: 50%; --r: 0px; transition: --r .7s cubic-bezier(.2, .7, .2, 1); color: #fff; }
+  .layer { position: absolute; inset: 0; z-index: -2; }
+  .layer picture, .layer img, .layer video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .layer video { opacity: 0; transition: opacity .45s ease; }
+  .layer video.is-on { opacity: 1; }
+  /* верхний слой «рассвет»: видна только круглая зона вокруг курсора, край сильно растушёван */
+  .layer--top { -webkit-mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), #000 0%, #000 35%, transparent 100%);
+                        mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), #000 0%, #000 35%, transparent 100%); }
+  .hero.is-dawn .layer--top { -webkit-mask-image: none; mask-image: none; }
+  .hero.is-dawn { color: #111418; }
+  .hero.is-dawn .hero__cta { background: #111418; color: #fff; }
+  /* градиенты: сверху — под навигацию, снизу — в цвет следующей секции (стык без «ступеньки») */
+  .hero__scrim { background: linear-gradient(180deg, rgb(10 12 16 / .55) 0, rgb(10 12 16 / 0) 140px),
+                            linear-gradient(90deg, rgb(10 12 16 / .62) 0%, rgb(10 12 16 / .42) 42%, rgb(10 12 16 / 0) 68%),
+                            linear-gradient(0deg, var(--paper) 0, rgb(0 0 0 / 0) 120px); }
+  @media (max-width: 699px) {   /* телефон: текст сверху по яркому небу — скрим сверху вниз (альфа из проверки F83, J/06) */
+    .hero__scrim { background: linear-gradient(180deg, rgb(10 12 16 / .80) 0%, rgb(10 12 16 / .68) 50%, rgb(10 12 16 / .15) 72%, rgb(10 12 16 / 0) 84%),
+                              linear-gradient(0deg, var(--paper) 0, rgb(0 0 0 / 0) 96px); }
+    .hero.is-dawn .hero__scrim { background: linear-gradient(180deg, rgb(243 239 231 / .44) 0%, rgb(243 239 231 / .30) 55%, rgb(243 239 231 / 0) 75%),
+                                           linear-gradient(0deg, var(--paper) 0, rgb(0 0 0 / 0) 96px); }
+    .hero__copy { padding-top: 88px; } }
+  .hero.is-dawn .hero__scrim { background: linear-gradient(90deg, rgb(243 239 231 / .46) 0%, rgb(243 239 231 / .34) 40%, rgb(243 239 231 / 0) 64%),
+                                           linear-gradient(0deg, var(--paper) 0, rgb(0 0 0 / 0) 120px); }
+  .topbar { position: absolute; top: 0; left: 0; right: 0; height: 56px; display: flex; align-items: center; gap: 20px; padding: 0 var(--gutter); z-index: 3; }
+  .topbar a { color: inherit; text-decoration: none; font-weight: 600; }
+  .state-toggle { margin-left: auto; display: inline-flex; gap: 8px; align-items: center; padding: 8px 14px; border-radius: 999px;
+    border: 1px solid currentColor; background: transparent; color: inherit; font: inherit; font-size: 14px; cursor: pointer; }
+  .state-toggle svg { width: 16px; height: 16px; }
+  .hint { position: absolute; left: var(--gutter); bottom: 28px; font-size: 13px; opacity: .8; }
+  @media (hover: none) { .hint { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .hero { transition: none; } .layer video { display: none; } }
+</style>
+</head>
+<body>
+<section class="hero" data-spotlight aria-labelledby="h1">
+  <div class="layer layer--base" aria-hidden="true">
+    <picture>
+      <source media="(max-width: 699px)" type="image/avif" srcset="assets/video/night-4x5-720-poster.avif">
+      <source type="image/avif" srcset="assets/video/night-1080p-poster.avif">
+      <img src="assets/video/night-1080p-poster.webp" width="1920" height="1080" alt="" fetchpriority="high">
+    </picture>
+    <video muted loop playsinline preload="none" tabindex="-1" data-video>
+      <source data-src="assets/video/night-4x5-720.av1.mp4" data-media="(max-width: 699px)" type='video/mp4; codecs="av01.0.04M.10"'>
+      <source data-src="assets/video/night-4x5-720.h264.mp4" data-media="(max-width: 699px)" type='video/mp4; codecs="avc1.64001f"'>
+      <source data-src="assets/video/night-1080p.av1.mp4" type='video/mp4; codecs="av01.0.08M.10"'>
+      <source data-src="assets/video/night-1080p.h264.mp4" type='video/mp4; codecs="avc1.640032"'>
+    </video>
+  </div>
+  <div class="layer layer--top" aria-hidden="true">
+    <picture>
+      <source media="(max-width: 699px)" type="image/avif" srcset="assets/video/dawn-4x5-720-poster.avif">
+      <source type="image/avif" srcset="assets/video/dawn-1080p-poster.avif">
+      <img src="assets/video/dawn-1080p-poster.webp" width="1920" height="1080" alt="" loading="lazy">
+    </picture>
+    <video muted loop playsinline preload="none" tabindex="-1" data-video>
+      <source data-src="assets/video/dawn-4x5-720.av1.mp4" data-media="(max-width: 699px)" type='video/mp4; codecs="av01.0.04M.10"'>
+      <source data-src="assets/video/dawn-4x5-720.h264.mp4" data-media="(max-width: 699px)" type='video/mp4; codecs="avc1.64001f"'>
+      <source data-src="assets/video/dawn-1080p.av1.mp4" type='video/mp4; codecs="av01.0.08M.10"'>
+      <source data-src="assets/video/dawn-1080p.h264.mp4" type='video/mp4; codecs="avc1.640032"'>
+    </video>
+  </div>
+  <div class="hero__scrim" aria-hidden="true"></div>
+  <div class="topbar" style="position: fixed; background: rgb(10 12 16 / .0)">
+    <a href="#"><img src="assets/svg/icon.svg" width="24" height="24" alt="" style="display:inline;vertical-align:-6px;margin-right:8px">Тихая вода</a>
+    <button class="state-toggle" type="button" aria-pressed="false" data-state-toggle>
+      <svg aria-hidden="true"><use href="assets/svg/sprite.svg#i-sun"/></svg><span>Показать рассвет</span></button>
+  </div>
+  <div class="hero__copy">
+    <p class="hero__kicker">Ретрит · 12–15 октября</p>
+    <h1 id="h1">Ночь у воды. Утро — через шаг</h1>
+    <p class="hero__lead">Проведите курсором по кадру: под ночным небом — тот же берег на рассвете.</p>
+    <a class="hero__cta" href="#book">Выбрать даты</a>
+  </div>
+  <p class="hint" aria-hidden="true">Курсор открывает рассвет</p>
+  <button class="media-toggle" type="button" aria-pressed="false" hidden>
+    <span class="sr-only">Остановить фоновое видео</span>
+    <svg class="i-pause" aria-hidden="true"><use href="assets/svg/sprite.svg#i-pause"/></svg>
+    <svg class="i-play" aria-hidden="true" style="display:none"><use href="assets/svg/sprite.svg#i-play"/></svg>
+  </button>
+</section>
+<section class="section" style="min-height: 120vh">
+  <h2>Почему без экрана загрузки</h2>
+  <p>Экран-заставка «пока грузятся видео» прячет H1 и постер → LCP сдвигается к концу заставки. Здесь постер основы виден сразу
+     (он же LCP), видео основы подменяет его после load, а видео верхнего слоя грузится только при первом наведении или нажатии
+     кнопки — без взаимодействия оно не стоит ни байта.</p>
+</section>
+<script type="module" src="js/spotlight.js"></script>
+</body>
+</html>

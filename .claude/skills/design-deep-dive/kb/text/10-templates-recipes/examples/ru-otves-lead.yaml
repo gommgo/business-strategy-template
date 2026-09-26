@@ -1,0 +1,660 @@
+# ru-otves-lead.yaml — пример copy deck v1 (10-templates-recipes, J3, 2026-09-24): основа — E3 deck-otves-lead-v0.yaml; тексты ai-self (E3, правки J3).
+# Факты — 02-strategy-messaging/examples/facts-service-renovation.yaml (вымышленные / ДЕМО, не публиковать). Проверки — 02-examples-ru.md §3.
+copy_deck:
+  version: 1
+  date: '2026-09-24'
+  site: otves-remont-nn
+  product_name: Отвес
+  lang: ru
+  voice_ref: ../../05-voice-editorial/examples/voice-otves-warm.yaml
+  facts_ref: ../../02-strategy-messaging/examples/facts-service-renovation.yaml
+  meaning_ref: ../../../../02-strategy-messaging/examples/meaning-otves.yaml
+  copy_slots_ref: ../../04-copy-by-block/copy-slots.yaml
+  jurisdiction: ru
+  legal_category:
+  - general
+  authors:
+  - E3 (ai-self, 2026-09-24)
+  - J3 (upgrade, пути, голос F; 2026-09-24)
+  pages:
+  - page_id: otves-product-aware
+    page_type: landing-lead-services
+    awareness: product-aware
+    hierarchy_ref: ../../02-strategy-messaging/examples/hierarchy-otves-product-aware.yaml
+    primary_action: Позвать замерщика
+    cta_primary: otves-product-aware/hero/cta
+    notes: 'Секция proof-stats иерархии B1 снята (правка 1): в ряд цифр по use B2 проходят только flats-completed и rating-yandex-maps, оба уже
+      в первом экране; ряд из 3–5 чисел не набирается (03 §2). FAQ «как с соседями» не написан: отзыв Игоря — pending.'
+    promise:
+      from: otves-product-aware/hero/h1
+      basis: hierarchy.core_message + first_screen (B1)
+    meta:
+      title: Ремонт квартир под ключ в Нижнем Новгороде — студия «Отвес»
+      description: Ремонтируем квартиры под ключ с 2014 года, сдали 1 146 квартир. Гарантия 3 года на работы по договору. Замер и смета — бесплатно
+        в черте города.
+      og_title: 'Студия «Отвес»: ремонт квартир под ключ в Нижнем Новгороде'
+      og_description: 1 146 квартир сдали с 2014 года. Гарантия 3 года на работы — пункт 7.2 договора.
+      fact_ids:
+      - company-since-2014
+      - flats-completed
+      - guarantee-3-years
+      - estimate-free
+    sections:
+    - section_id: hero
+      block: hero
+      section_role: hero
+      question: Это та студия, про которую я слышал? Им можно доверять?
+      message: 12 лет в городе, 4,8 из 5 на Яндекс Картах, гарантия 3 года; замер бесплатно
+      slots:
+      - slot_id: eyebrow
+        slot_type: eyebrow
+        variants:
+        - id: a
+          text: Студия ремонта «Отвес»
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: имя студии для product-aware (01 §5)
+      - slot_id: h1
+        slot_type: headline
+        variants:
+        - id: a
+          text: Ремонт квартир под ключ в Нижнем Новгороде с 2014 года
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - company-since-2014
+        claim_flags:
+        - company-details
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: product-benefit (01 §2.1); год проверяется по ЕГРЮЛ
+      - slot_id: sub
+        slot_type: subheadline
+        variants:
+        - id: a
+          text: 1 146 квартир сдали по акту, гарантия 3 года по договору
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - flats-completed
+        - guarantee-3-years
+        claim_flags:
+        - fact-number
+        - guarantee
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: отличие фактом (01 §3)
+      - slot_id: proof
+        slot_type: hero-proof
+        variants:
+        - id: a
+          text: 4,8 из 5 на Яндекс Картах — 214 оценок
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - rating-yandex-maps
+        claim_flags:
+        - rating
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: verbatim факта; источник и дата — соседний слот proof-source
+      - slot_id: proof-source
+        slot_type: stat-source
+        variants:
+        - id: a
+          text: Яндекс Карты, 01.09.2026
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - rating-yandex-maps
+        claim_flags:
+        - rating
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: requires_nearby факта (B2)
+      - slot_id: cta
+        slot_type: cta-label
+        variants:
+        - id: a
+          text: Позвать замерщика
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: образец голоса F (voice-otves-warm, ru-cta-label); одно имя действия на всю страницу (01 §6.3)
+      - slot_id: cta-note
+        slot_type: cta-note
+        variants:
+        - id: a
+          text: Выезд замерщика и смета — бесплатно в черте города
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - estimate-free
+        claim_flags:
+        - price-discount
+        - purchase-terms
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: условие «в черте города» в той же строке (H FREE-01)
+    - section_id: review
+      block: testimonials
+      section_role: testimonials
+      question: Что говорят те, кто уже делал у вас ремонт?
+      message: Отзыв с подробностями — срок, смета, связь с прорабом
+      slots:
+      - slot_id: h2
+        slot_type: section-title
+        variants:
+        - id: a
+          text: Анна К. о ремонте своей двушки — срок, смета и прораб
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - review-anna-k
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: заголовок называет, о чём отзыв, а не «Отзывы клиентов» (02 §5.3)
+      - slot_id: quote
+        slot_type: testimonial-quote
+        variants:
+        - id: a
+          text: «Сдали двушку за 47 рабочих дней — на три дня раньше, чем в договоре. Прораб каждый вечер присылал фото… Смета не выросла ни на
+            рубль»
+          status: draft
+          source: customer
+        chosen: a
+        fact_ids:
+        - review-anna-k
+        claim_flags:
+        - testimonial-quote
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: дословно verbatim (B2 §5.1); роль user-content — стиль не проверяется
+      - slot_id: author
+        slot_type: testimonial-attribution
+        variants:
+        - id: a
+          text: Анна К., Нижний Новгород, ремонт двухкомнатной квартиры, 2026
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - review-anna-k
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: подпись по permission.shows (имя, инициал, город)
+      - slot_id: frame
+        slot_type: body
+        variants:
+        - id: a
+          text: 'Это опыт Анны: смета каждого ремонта зависит от объёма работ и выбранных материалов.'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: 'рамка типичности рядом с отзывом о смете (B2 §5.4); голосом компании «смета не меняется» — нельзя (nc-no-extra-cost-promise);
+          правка 2: пробел estimate-change-policy — fallback rewrite-without (COPY-D-FALLBACK): пункт договора не упоминаем до ответа заказчика'
+    - section_id: case
+      block: case-studies
+      section_role: case-studies
+      question: Сдаёте в срок?
+      message: 'Двушка 54 м²: 47 рабочих дней при 50 по договору'
+      slots:
+      - slot_id: title
+        slot_type: case-title
+        variants:
+        - id: a
+          text: 'Двушка в Сормове: 47 рабочих дней вместо 50 по договору'
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - case-two-room-47-days
+        claim_flags:
+        - fact-number
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: 'правка 1: 17 слов → 10 (COPY-D-LEN: грубая граница D для case-title — 11 слов, provisional); форма из verbatim «47 рабочих дней
+          вместо 50 по договору»'
+      - slot_id: summary
+        slot_type: case-summary
+        variants:
+        - id: a
+          text: Двухкомнатная квартира 54 м² в Сормовском районе, ремонт под ключ. Ремонт занял 47 рабочих дней при сроке по договору 50; акт
+            подписан 30 мая 2026 года.
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - case-two-room-47-days
+        claim_flags:
+        - fact-number
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: ситуация → результат с базой и сроком; задача клиента его словами — нет в фактах (03 §4.4)
+    - section_id: guarantee
+      block: guarantee
+      section_role: guarantee
+      question: Что если что-то пойдёт не так?
+      message: Гарантия 3 года на работы — пункт 7.2 договора
+      slots:
+      - slot_id: h2
+        slot_type: section-title
+        variants:
+        - id: a
+          text: Гарантия 3 года на работы — по договору
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - guarantee-3-years
+        claim_flags:
+        - guarantee
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: заголовок-ответ (02 §1)
+      - slot_id: text
+        slot_type: guarantee-text
+        variants:
+        - id: a
+          text: 'Отошла плитка через год после ремонта — звоните нам: гарантия на работы действует 3 года с даты акта, это пункт 7.2 договора.'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - guarantee-3-years
+        claim_flags:
+        - guarantee
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: образец голоса F (факт → сцена, voice-otves-warm ru-card-body); предмет, срок, документ (H §5.1)
+      - slot_id: people
+        slot_type: body
+        variants:
+        - id: a
+          text: Прораб Сергей Лапин ведёт ремонты квартир 11 лет.
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - foreman-lapin
+        claim_flags:
+        - fact-number
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: 'правка 1: человек по имени с разрешением (permission.shows full-name); из ряда цифр убран — use факта не включает proof-stats;
+          «объект ведёт один прораб» — нельзя (missing foreman-per-object)'
+    - section_id: pricing
+      block: pricing
+      section_role: pricing
+      question: Сколько стоит и есть ли скидка сейчас?
+      message: От 9 800 ₽ за м² без материалов; смета бесплатно; минус 10 % на работы при договоре до 31 октября
+      slots:
+      - slot_id: h2
+        slot_type: section-title
+        variants:
+        - id: a
+          text: Ремонт под ключ — от 9 800 ₽ за м² без материалов
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - price-from-per-m2
+        claim_flags:
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: цена «от» с тем, что не входит (H PRICE-03)
+      - slot_id: lead
+        slot_type: section-lead
+        variants:
+        - id: a
+          text: 'Точную сумму покажет смета: замер и смета бесплатны в черте города.'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - estimate-free
+        claim_flags:
+        - price-discount
+        - purchase-terms
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: от чего зависит итог (03 §4.2)
+      - slot_id: promo
+        slot_type: pricing-price-note
+        variants:
+        - id: a
+          text: При договоре до 31 октября 2026 года — скидка 10 % на работы; на материалы скидка не действует.
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - promo-october-10
+        claim_flags:
+        - price-discount
+        - promo-deadline
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: срок и предмет скидки в той же строке (H PROMO-01)
+      - slot_id: cta
+        slot_type: cta-label
+        variants:
+        - id: a
+          text: Позвать замерщика
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: то же имя действия, что в hero
+    - section_id: form
+      block: lead-form
+      section_role: lead-form
+      question: Как записаться на замер?
+      message: Замер бесплатно и ни к чему не обязывает; перезвоним и согласуем время
+      slots:
+      - slot_id: title
+        slot_type: form-title
+        variants:
+        - id: a
+          text: Вызов замерщика и смета до договора
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: lead
+        slot_type: form-lead
+        variants:
+        - id: a
+          text: Приедем, измерим и посчитаем смету. В черте города — бесплатно.
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - estimate-free
+        claim_flags:
+        - price-discount
+        - purchase-terms
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: образец голоса F (voice-otves-warm, ru-form-lead)
+      - slot_id: button
+        slot_type: cta-label
+        variants:
+        - id: a
+          text: Позвать замерщика
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: consent
+        slot_type: form-consent
+        variants:
+        - id: a
+          text: Согласен на обработку персональных данных для ответа на заявку. Условия — в политике обработки персональных данных.
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: шаблон H 01 §8.1; галочка пустая — механика site
+      - slot_id: success
+        slot_type: form-success
+        variants:
+        - id: a
+          text: Заявка принята. Замерщик позвонит, чтобы договориться о времени замера.
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: что будет дальше (04 §1.5); срок звонка — нет в фактах, поэтому без «в течение N минут»
+    - section_id: faq
+      block: faq
+      section_role: faq
+      question: Возьмёте только ванную? Как платить?
+      message: Оплата и выезд замерщика
+      notes: 'правка 2: пара «Можно ли сделать только ванную?» снята — пробел min-job-size с fallback omit-block (COPY-D-FALLBACK): вернуть, когда
+        заказчик ответит'
+      slots:
+      - slot_id: q1
+        slot_type: faq-q
+        group: faq-1
+        variants:
+        - id: a
+          text: Сколько стоит выезд замерщика?
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: a1
+        slot_type: faq-a
+        group: faq-1
+        variants:
+        - id: a
+          text: 'Бесплатно в черте города: замерщик приезжает, делает замер и составляет смету до договора.'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - estimate-free
+        claim_flags:
+        - price-discount
+        - purchase-terms
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: q3
+        slot_type: faq-q
+        group: faq-3
+        variants:
+        - id: a
+          text: Как платить за ремонт?
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: a3
+        slot_type: faq-a
+        group: faq-3
+        variants:
+        - id: a
+          text: '[PLACEHOLDER: порядок оплаты по договору — есть ли предоплата, по каким этапам, как оплачиваются материалы]'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        missing_ids:
+        - payment-stages
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: блокирующий пробел B2 — страница не публикуется до ответа
+    - section_id: final
+      block: final-cta
+      section_role: final-cta
+      question: Что сделать сейчас?
+      message: Вызвать замерщика; пример сметы — переслать домашним
+      slots:
+      - slot_id: h2
+        slot_type: section-title
+        variants:
+        - id: a
+          text: Начните с замера и сметы
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: cta
+        slot_type: cta-label
+        variants:
+        - id: a
+          text: Позвать замерщика
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: cta-note
+        slot_type: cta-note
+        variants:
+        - id: a
+          text: Замер и смета — бесплатно в черте города
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - estimate-free
+        claim_flags:
+        - price-discount
+        - purchase-terms
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+    - section_id: footer
+      block: footer
+      section_role: footer
+      message: Кто продавец услуги и где документы
+      slots:
+      - slot_id: tagline
+        slot_type: footer-tagline
+        variants:
+        - id: a
+          text: Ремонт квартир под ключ в Нижнем Новгороде с 2014 года
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - company-since-2014
+        claim_flags:
+        - company-details
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: legal
+        slot_type: footer-legal
+        variants:
+        - id: a
+          text: '[PLACEHOLDER: наименование, ОГРН, ИНН и адрес — как в ЕГРЮЛ]; политика обработки персональных данных; образец договора подряда'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        missing_ids:
+        - legal-details
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: блокирующий пробел B2 (H DIST-01)
+    status: draft
+  notes: 'Пример J3 (фаза 2 J): основа — страница E3 99-raw/experiments/E/04-copy-deck-v0/deck-otves-lead-v0.yaml (ai-self E3, 0 error), upgrade
+    v0 → v1 copydeck.py; правки J3 — в notes слотов и в 02-examples-ru.md.'

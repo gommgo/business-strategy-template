@@ -1,0 +1,106 @@
+# pdp-packshot-scene.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/02-series-product-recipes.md#2; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+recipe_version: 1
+checked_at: '2026-09-25'
+author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
+id: pdp-packshot-scene
+title: 'PDP «пакшот + ИИ-сцена»: настоящий товар композитом'
+doc: 14-recipes/02-series-product-recipes.md#2
+task_codes:
+- IMG-PRODUCT
+- IMG-EDIT
+- IMG-CUTOUT
+slot: product
+ladder: image
+ai_fit: conditional
+legal_row: 7
+route:
+  source: IMG-PRODUCT
+  steps:
+  - role: сцена вокруг товара
+    model: openai/gpt-image-2.5-sunburst
+    params:
+      image_resolution: 1K
+      aspect_ratio: '4:3'
+    images: '[фото товара]'
+    price_rub: 4.0
+    test: E-10
+  - role: сохранность остального
+    model: google/gemini-3.1-flash-image-preview
+    params:
+      image_resolution: 1K
+    price_rub: 4.8
+    test: E-10
+spec:
+  example: 99-raw/phase5/jobs/E-10-product.jsonl
+  must:
+  - product.identity, product.locks
+  - текст этикетки дословно
+  - product.dimensions
+  - --opt order=product7
+  ancestors:
+  - 13-routing-matrix/stand/briefs/S03-product-scene.spec.json
+compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+  <тест> --agent <агент> --out 99-raw/phase5/jobs/<файл>.jsonl --opt order=product7
+phase5:
+  jobs:
+  - 99-raw/phase5/jobs/E-10-product.jsonl
+  - 99-raw/phase5/jobs/E-15-edit.jsonl
+  - 99-raw/phase5/jobs/H-07-product-edit.jsonl
+  reuse:
+  - E-10
+  - E-15
+  - H-07
+  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
+steps:
+- id: protect
+  cmd: python3 ../../scripts/ai-media/edit_check.py check orig.png edited.png --mask target.png --protect product_mask.png --match-color --composite --out
+    out/
+  status: checked
+  evidence: 99-raw/experiments/M/05-product/edit_check
+- id: local-shift
+  cmd: python3 ../../scripts/ai-media/asset_audit.py audit edited.png --mode edit --orig orig.png --mask target.png --protect product_mask.png --out audit_edit/
+  status: checked
+  evidence: 99-raw/experiments/M/05-product/audit_edit
+- id: ocr-label
+  cmd: python3 ../../scripts/ai-media/asset_audit.py ocr scene.png --expect "ЛЕСНАЯ ОБЖАРКА"
+  status: checked
+  evidence: 99-raw/experiments/K/01-ocr-cyrillic
+- id: shadow
+  cmd: 'слой тени RGB = onbg / clean → mix-blend-mode: multiply'
+  status: checked
+  evidence: 99-raw/experiments/J/07-shadow-layer
+- id: stamp
+  cmd: python3 ../../scripts/ai-media/provenance_check.py stamp <производная> <производная> --dst composite --system "<модель> via <канал>"
+  status: unchecked
+accept:
+  thresholds:
+  - edit.leak_frac_max
+  - edit.global_drift_max
+  - edit.protect_ssim_min
+  - edit.local_shift_de
+  - budget.image.product_kb
+delivery:
+  formats:
+  - avif
+  - webp
+  budget_kb:
+    frame: 150
+provenance:
+  dst: composite
+  visible_label: false
+  note: строка 8 L (окружение меняет представление о товаре) — спросить, AI MODIFIED
+numbers:
+  demo_leak: 0.0012
+  demo_protect_ssim: 0.968
+  demo_protect_de: 0.88
+  demo_can_identical_share: 0.961
+  phase5_e10_label_front: 'этикетка сохранена у 4 из 4 моделей, OCR дословно — Sunburst, NB2, Seedream 5 Pro; сбоку дословно — только Sunburst — 99-raw/phase5/runs/2.5-stand/E-10.ocr.txt'
+  phase5_e15_edit_leak: 'правка без маски — LEAK в 5 из 6 (3 модели × 2 сцены); Seedream 5 Pro удаление — PASS 0,01; Qwen + маска — вне маски 0, «призрак» — 99-raw/phase5/runs/4-edits/E-15-check/'
+  phase5_h07: 'H-07 (окружение правкой вокруг настоящего товара) не запускался — отменено заказчиком 25.09'
+status:
+  local: checked
+  generation: checked
+sources:
+- 91-videos/digests/5dnNUB27HBQ.md
+- 91-videos/digests/AxV8TR3BdqI.md
+- 91-videos/digests/XLHTLJhzDyQ.md

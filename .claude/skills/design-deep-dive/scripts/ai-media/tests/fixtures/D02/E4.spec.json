@@ -1,0 +1,131 @@
+{
+ "spec_version": "0.1",
+ "checked_at": "2026-09-23",
+ "brief_language": "ru",
+ "id": "hero-loop-steam",
+ "task": "VID-HERO-LOOP",
+ "role": {
+  "page_type": "landing",
+  "section": "hero",
+  "slot": "hero-video",
+  "priority": "above-fold",
+  "purpose": "фоновая петля hero чайного магазина; постер = стартовый кадр; заголовок — HTML слева"
+ },
+ "subject": {
+  "summary": "a ceramic cup of tea on a sunlit windowsill",
+  "elements": [
+   {
+    "id": "cup",
+    "what": "handmade ceramic cup of amber tea",
+    "position": "right third"
+   },
+   {
+    "id": "curtain",
+    "what": "sheer linen curtain",
+    "relation": "behind the cup"
+   }
+  ],
+  "environment": "quiet morning kitchen window"
+ },
+ "composition": {
+  "shot": "medium",
+  "angle": "eye-level",
+  "subject_region": "right-third",
+  "focal_point": {
+   "x": 0.7,
+   "y": 0.6
+  },
+  "text_zone": {
+   "side": "left",
+   "rect": [
+    0.0,
+    0.0,
+    0.4,
+    1.0
+   ],
+   "surface": "warm white wall",
+   "tone": "even and low in contrast",
+   "purpose": "headline"
+  }
+ },
+ "camera": {
+  "lens_mm": 50,
+  "depth_of_field": "shallow",
+  "capture": "cinematic video"
+ },
+ "light": {
+  "source": "window daylight",
+  "direction": "left",
+  "quality": "soft",
+  "time_of_day": "morning"
+ },
+ "palette": [
+  {
+   "role": "background",
+   "hex": "#EFE9E1",
+   "name": "warm white",
+   "share": 0.6,
+   "applies_to": "wall"
+  },
+  {
+   "role": "secondary",
+   "hex": "#A9B8A0",
+   "name": "sage",
+   "share": 0.2,
+   "applies_to": "curtain"
+  },
+  {
+   "role": "accent",
+   "hex": "#B8742A",
+   "name": "amber",
+   "share": 0.08,
+   "applies_to": "tea"
+  }
+ ],
+ "references": [
+  {
+   "src": "frames/hero-still.png",
+   "role": "first_frame"
+  },
+  {
+   "src": "frames/hero-still.png",
+   "role": "last_frame"
+  }
+ ],
+ "motion": {
+  "kind": "loop",
+  "duration_s": 4,
+  "camera": {
+   "move": "static"
+  },
+  "subject_motion": "Thin steam rises slowly from the cup and drifts to the left",
+  "environment_motion": "The sheer curtain sways gently in a light breeze",
+  "loop": "first_last_same",
+  "start_frame": "frames/hero-still.png",
+  "end_frame": "frames/hero-still.png",
+  "cuts": "none",
+  "audio": false
+ },
+ "exclusions": [
+  {
+   "what": "subtitles",
+   "kind": "service"
+  },
+  {
+   "what": "music",
+   "kind": "service"
+  }
+ ],
+ "text": {
+  "mode": "html_overlay"
+ },
+ "output": {
+  "primary_ratio": "16:9",
+  "aspect_ratios": [
+   "16:9"
+  ],
+  "resolution": "720p",
+  "format": "mp4",
+  "max_kb": 1500
+ }
+}

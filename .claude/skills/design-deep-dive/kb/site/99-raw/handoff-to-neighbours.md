@@ -1,0 +1,111 @@
+# Сводные предложения site-research соседям и сёстрам (J, волна 3; обновление S1, волна 4, 2026-09-25)
+
+Файлы соседей и сестёр не правятся (контракт §2, §6.4): здесь — «файл § → что предложить → почему → где в базе → чем
+подтверждено → статус». Основа — сводка J (волна 3, 2026-09-24: отчёты A, B, C, E, F, G, H, I, P, опыты J); обновление S1 —
+по аудиту X (`reports/wave4-X-audit.md` §1.2, §8, §9.4), отчёту механики X2 (`reports/wave4-X2-checks.md` §7), решениям S2
+(`notes/wave4/S2-notes.md` «## Для S1») и пакету creative волны 3 (`notes/sync/creative-wave3-for-site-2026-09-25/README.md`).
+Решают владельцы; пакеты для сестёр собирает оркестратор (сверка тройки S2).
+
+Как читать: «Файл соседа §» — путь от папки соседа в заголовке раздела; «База» — агент и файл базы (`C 03 §2.3` =
+`03-page-structure/03-…` §2.3; `PLAN №N` — таблица «Поправки к правилам соседей» в `PLAN.md`); номера строк чужих файлов —
+на дату проверки (2026-09-25), при расхождении искать по тексту. Статус: **ждёт** — решение за владельцем; **сделано у site** —
+наша сторона готова; **закрыто** — владелец принял или вопрос снят.
+
+## kimi-research (`../../kimi-research/07-brief-handoff/templates/`, `08-director-loop-qa/`)
+
+| № | Файл соседа § | Предложение | Почему | База · чем подтверждено | Статус |
+|---|---|---|---|---|---|
+| K1 | `build_package.py` стр. 376 (`A3_FIRST_SCREEN`), `ACCEPTANCE.md` A3 | брать A3 из `page-plan.first_screen_policy` — три строки: `offer-cta`, `offer-cta-header`, `poster` (константа `A3` в `site_brief_to_kimi.py`) | константа запрещает законные формы (плакат кампании, Letter, сайт-история) | C 03 §2.2–§2.3; PLAN №23 · опыт J/03 (три примера) | ждёт; пока kimi не принял — пакет L2 `poster` правится вручную (`decisions.extra`) |
+| K2 | `build_package.py` стр. 375 (A2: «one primary CTA style… no competing primary buttons») | «одно главное действие, его призыв повторяется; второй путь — иным стилем» | повтор призыва на длинной странице — норма рынка | F 01 §1.1–§1.4; PLAN №1, №24 · M: медиана 4 призыва вне подвала `[проверено: M/03]` | ждёт |
+| K3 | `build_package.py` стр. 465 (`NAV_RULE`) | лендинг — `minimal-cta`; многостраничник — архетип и пункты из `site-map.chrome.header`; пакет на шаблон, шапка и подвал — общие компоненты пакета 1; приёмка «каждая ссылка навигации ведёт на маршрут карты» | NAV_RULE = гейт 42 Hallmark «AI nav»; `build.routes` есть только у webapp | G 02 §1.2 (поправка к NAV_RULE); PLAN №24 · опыт J/03 | ждёт; пока — вручную (`decisions.extra`) |
+| K4 | `brief.yaml` + `lint_brief` (`KNOWN_TOP`, стр. 217) | пропускать раздел-ссылку `x_site: {site_type, page_type, plan_ref, brief_ref}` | проекция теряет связь с контрактами сайта; неизвестный ключ — ошибка | B 01 §7; контракт §3 п. 14; PLAN №25 · опыт A/02 | ждёт |
+| K5 | `brief.yaml` `site.sections[].id` | id — из `section_role` или `block` словаря site; `lint_brief` сверяет со словарём | в «Кварце» 4 из 8 id самодельные; секции не сводятся с планом | B 02 §4; K SITE-PRE-15 · словарь v1 (443 id) | ждёт |
+| K6 | `brief.yaml` стр. 72 (`direction.macrostructure`) | id `macrostructure` словаря + семейство `flow-led` (квиз, страница-форма) | четвёртая форма рынка РФ; сейчас `flow` → `document-led` | C 01 §4.1 (семейство `flow`), «Открытые» №6 · предложение базы, до решения kimi — проекция в `document-led` | ждёт |
+| K7 | `ACCEPTANCE.md` (после H) | блоки приёмки I «SEO и мета», J «право», K «формы», L «события» (состав — K 09/01 §6.2; заполненные — `examples/*/acceptance-site.home.md`) | в приёмке K3 нет SEO, права, форм, событий; строками `decisions.extra` TASK выходит 10 276 знаков > 4 000 для `/goal` | K 09/01 §6.2; J 10/01 шаг 8; PLAN №25 · опыт J/03, пересборка X2 | ждёт |
+| K8 | `build_package.py` H7 (формы только для webapp) | проверка форм и для `landing` по `lead-forms.yaml` (поля, согласие, антиспам, `<form>` + submit) | формы — слабое место генерации (DEF-15, 17, 19) | F 01 §3, §9; `lead-forms.yaml` 1.0; PLAN №25 · K/03 | ждёт |
+| K9 | `templates/facts.md` стр. 25–30 («Never claim») | `{{=NEVER_ROWS}}` из `facts.yaml` вместо четырёх строк-запретов | шаблон запрещает числа и рейтинги, которые стоят в таблице проверенных фактов того же файла | I 02 §5; A 03 §6; PLAN №26 · опыт A/02, text B2 | ждёт |
+| K10 | `brief.yaml` `missing[]` | поле `blocking: true` → ворота публикации | блокирующий пробел (реквизиты, скриншоты SaaS) иначе теряется | A 03 §6; PLAN №26 · опыт J/03 («Окошко»: `legal-details`, `product-screenshots`) | ждёт |
+| K11 | `brief.yaml` `build.out_of_scope` по умолчанию | не исключать «analytics» для сайтов | события и цели — часть задачи сайта (блок L) | P 04 §1; PLAN №25 · A/02 | ждёт |
+| K12 | `brief.yaml` `build.perf` | профиль `budget_profile` (`budgets.yaml` P) вместо одного числа | вес первого экрана и LCP зависят от типа страницы и уровня | P 03 §3; PLAN №17 · P/02 `[проверено]` | ждёт |
+| K13 | `08-director-loop-qa/02-checks-k3.md` §3, стр. 183 («hero height <= 80vh») | по политике первого экрана: `offer-cta` 60–85 %, `poster` до `100svh`; кадры — в состоянии «первый визит» с баннером cookie | у 3 из 27 живых страниц баннер прячет призыв | C 03 §2.4, §1.4 · C/02 `[проверено]` | ждёт |
+| K14 | `07-brief-handoff/` пакет многостраничника | пакет на шаблон в порядке `site-map.build_order`; `product.screens` — id страницы; строка «shared header/footer from package 1» | многостраничник сейчас собирается как один лендинг | G 01 §6; J 10/01 §9.3 · пример J «Сталькон» | ждёт |
+| K15 | `build_package.py` `decisions.three_d.notes` | не требовать маршрута для пустых заметок при `mode: none` | непустая строка «3D нет» даёт GAP | J 10/01 шаг 8 · опыт J/03 | ждёт |
+| K16 | `07-brief-handoff/01-from-app-description-to-brief.md` §2.2 | маршрут `landing` → тип посадочной словаря site (`page_type` `landing-*`) | один маршрут на 9 разных типов посадочных | B 01 §3.5–§3.9 (поправка) · словарь v1 | ждёт |
+| K17 | `05-reviews-practice/03-default-look-k3.md` §5.3 («no marquee») | запрет визуального шаблона, а не макроструктуры `marquee-hero` | правило режет законную форму первого экрана | B 02 §4.4 (поправка) · C 01 §4.3 | ждёт |
+| K18 | `08-director-loop-qa/02-checks-k3.md` §6 и проверки K3 | проверки K3 для сайта — через SITE-* и ворота страницы; «не комментируй SEO» совместимо с осью 08 из ворот | ворота страницы выше проверок исполнителя (контракт v2) | K 09/01 §3, K 09/03 §6 (поправки) · K/03 | ждёт |
+
+## ai-media-research (`../../ai-media/`)
+
+| № | Файл соседа § | Предложение | Почему | База · чем подтверждено | Статус |
+|---|---|---|---|---|---|
+| M1 | `01-web-assets-landscape/01-asset-slots-by-page-type.md` §1 п. 1 и «Чек-лист плана ассетов» п. 1 | «секции — из UX» → ссылка на `site/02-site-types/vocabulary.yaml` и порядок C | ux лендинги исключает — висячая ссылка | B 02; C 01; PLAN №16 · аудит MEDIA §4.8 | ждёт |
+| M2 | там же §8 `slots[].section` | `section` = id секции `page-plan` (роль или блок), `role` ← `media_role`, признак подлинности `real-only` → `ai_fit: forbidden` | связка плана и ассетов без свободных строк; генератор — `plan_to_assets.py` | E 03 §6.3; PLAN №16 · опыт J/03 | ждёт |
+| M3 | там же §8 `page.page_type` и `05-prompting/asset-spec.schema.json` | один перечень `page_type` + проекция по `crosswalk.tsv` (строки `broader`) | в одной базе два словаря типов страниц | B 02 §5; PLAN №16 · `crosswalk.tsv` (710 строк) | ждёт |
+| M4 | `99-raw/phase5/M-plan.md` (демо-лендинг M) | «демо ассетов», не эталон структуры; пересборка по `page-plan` («Окошко» или «Отвес») — по решению заказчика | урезанная структура без доказательств, тарифов, FAQ и формы | решение 15; PLAN №19 · аудит MEDIA §4.11 | ждёт заказчика (вопрос X 9.6 п. 4; по умолчанию — «демо ассетов») |
+| M5 | `11-evaluation-qa/03-checklists-by-asset.md` стр. 67, `01-web-assets-landscape/03-ai-fit-trust-and-slop.md` §1.1, `12-legal-provenance/04-agent-policy.md` стр. 117, `03-image-models/03-capabilities-by-task.md` стр. 13, `13-routing-matrix/stand/tasks.yaml` стр. 39 | одна строка «люди на сайте»: реальные — с разрешением; ИИ-люди не изображают клиентов, команду, авторов отзывов; ИИ-люди как приём кампании — с раскрытием и согласием | пять расходящихся позиций | I 02 §2; решение 15; PLAN №18 · аудит MEDIA §4.7 (строки сверены 2026-09-25) | ждёт |
+| M6 | `10-web-integration/04-budgets-and-acceptance.md` §3.2, `page_accept.py` | вес первого экрана — предупреждение по профилю (`--budget-profile`), не FAIL 2 500 КБ | вес — корреляция, блокирует исход (LCP, INP, CLS) | P 03 §3, §6; PLAN №17 · P/02, M «Открытые» №8 | ждёт |
+| M7 | `crosswalk.tsv` §8 (ведёт site B) | строки проекции для 10 новых `page_type` v1 | каркас плана ассетов брал запасное правило по классу страницы | B 02; J 10/03 · `plan_to_assets.py` («Сталькон» `documents-page` → `corporate` по строке §8) | сделано у site (S1, 2026-09-25: 10 строк, `build_crosswalk.py`); ждёт подтверждения значений ai-media |
+| M8 | `10-web-integration/` (OG и превью), план ассетов §8 (`og`) | `og:image` — абсолютный URL; все `og:*` — в первых 1 МБ HTML | относительный `og:image` и OG после первого мегабайта превью не дают | H 07/01 §3 (таблица head), `head-kit.yaml` · H/02: абсолютный `og:image` у 71 % страниц M | ждёт |
+| M9 | `01-web-assets-landscape/01-asset-slots-by-page-type.md` §3.6 | «корпоративный» — тип сайта (`corporate-site`), а не страницы | анатомия корпоративной «страницы» смешивает главную, услугу и «О компании» | B 01 §2 (поправка) · словарь v1 | ждёт |
+
+## blender-research (`../../blender/`)
+
+| № | Файл соседа § | Предложение | Почему | База · чем подтверждено | Статус |
+|---|---|---|---|---|---|
+| B1 | `12-recipes/00-how-to-use.md` | теги рецептов `slot:model-3d` / `slot:scene-3d` и `block:` → подбор рецепта по `page-plan` (`3d`-слот: `recipe:`, `poster`, `load`, `cta_before_3d`) | план страницы уже называет рецепт и постер | E 03 §6.4; схема `page-plan` v1 · пример J | ждёт |
+| B2 | `11-evaluation-qa/05-master-checklist.md` §9 (WEB-01, WEB-04) | доля 3D (≤ 820/1 536 КБ, TBT 3D), а не вес и LCP всей страницы; LCP десктопа 2 000–2 500 мс, не 1 000 | ворота ассета не блокируют страницу за чужие байты (иерархия ворот контракта v2) | P 03 §6; PLAN №20 · P/02: WEB-04 провалил 6 из 10 страниц M | ждёт |
+| B3 | `01-web-3d-landscape/02-when-3d-budgets-loading.md` §1.3 | «прайсинг и лиды — 3D вредит» → по секциям: 3D в первом экране лидогенерации допустим, если LCP — H1 или постер, а призыв и форма работают до загрузки 3D; в блоках цены и форм — нет | правило уровня страницы отсекает законный приём | E 01 §3.2 (поправка); SITE-CTA-12; PLAN №22 | ждёт |
+| B4 | `09-web-runtime/05-performance-a11y-fallbacks.md` §5.2 («не больше одного постоянно движущегося элемента») | бюджет одновременного движения — по уровню амбиций (creative); ворота сайта — пауза для движения, которое стартует само, длится > 5 с и идёт параллельно контенту (2.2.2), и 2.3.1 | правило рабочего экрана на сайте запрещает законный приём | I 03 §2.1, §8; SITE-A11Y-01; PLAN №21 · creative `05-motion/01` §3.1–§3.3 | ждёт |
+
+## ux-research (закрыта; в «Что не покрыто» при следующем обновлении)
+
+| № | Файл соседа § | Предложение | База · чем подтверждено | Статус |
+|---|---|---|---|---|
+| U1 | `13-app-types/04-master-procedure-brief-to-screens.md` §1 | ссылка «сайты и лендинги — `site/10-playbooks-contracts/01-procedure-brief-to-pages.md`» (своя процедура) | J 10/01; PLAN №10 · K 09/02 (профиль) | ждёт |
+| U2 | `12-evaluation-checklists/02-master-checklist.md` | маркетинговый профиль UX-* для страниц сайтов: `09-ai-generation-evaluation/ux-marketing-profile.tsv` (434 пункта: keep 133, modify 89, off 156, replaced 56) | K 09/02 §5; PLAN №11 · K/02: срабатываний 84 → 37, ложных 73 → 1 | ждёт |
+| U3 | `03-layout-placement/04-placement-conventions-and-redundancy.md` §12 | консистентность шаблонов — внутри сайта; между проектами хвост страницы различается (гейт 8 Hallmark) | C 01 §3.4; G 01 §3.3 (поправка); PLAN №8 · C/01 | ждёт |
+| U4 | `06-feedback-states-motion/04-dark-patterns-and-ethics.md` §7.1, §7.4 | DSA ст. 25 к лендингу не применяется (онлайн-платформы; малые и микро освобождены); норма ЕС для тёмных паттернов сайта — UCPD | I 01 §4.6 (поправка) · текст DSA ст. 3(i), 19, 25(2) `[стандарт]` | ждёт |
+| U5 | `13-app-types/02-client-facing-app-playbook.md` §3; `01-foundations/02-myths-and-misapplied-laws.md` §8 | третий фактор доверия — честность (Mayer 1995), а не «надёжность»; «рекламный язык ≈ −21 % к объективному» (объективный +27 %), а не −27 % | A 01 §5, A 02 §5 (поправки) · `[проверено: text A/01]` (пересчёт NN/g 1997) | ждёт |
+| U6 | правила ux для рабочих экранов, неверные для сайта (PLAN №1–15) | не переносить на сайт без строки поправки; поправки оформлены в файлах базы: №1 — F 01 §1.1, A 02 §5; №2 — C 03 §1.2; №3 — C 03 §1.4; №4 — профиль K (UX-LAY-03); №5 — F 01 §11; №6 — профиль K (UX-OVL-02), I 03 §5; №7 — I 02, профиль K (UX-AIG-01); №8 — C 01 §3.4; №9 — B 02 §4.6; №10 — K 09/02, J 10/01; №11 — K `ux-marketing-profile.tsv`; №12 — P 04; №13 — P 03 §6; №14 — C 01 §3.2, H 01 §4.2; №15 — E 01 §1.3 | аудит X §1.2: ✔ 19, ◐ 7 (строки №2 и №5 добавил S1) | сделано у site |
+| U7 | `03-layout-placement/03-hierarchy-and-attention.md` §4.3; `02-ia-navigation/02-navigation-patterns.md` §8.2, §12.4; `04-components-patterns/05-forms-and-validation.md` §2.5; `12-evaluation-checklists/01-expert-review-protocols.md` §3.1, §4.2, §7.2; `08-accessibility/02-…`, `03-…` | поправки вне таблицы PLAN: повтор призыва и липкая панель на длинной странице — норма (C 02 §1.4, F 01 §2); прозрачная шапка над hero — при контрасте ≥ 4,5:1 и непрозрачности после прокрутки (C 03 §4.1); мега-меню на сайте законно (G 02 §1.3); поля формы по question protocol (A 02 §5); экспертный протокол сайта — 8 осей и шесть линз (K 09/03 §1.2, §2.6); правила доступности для агентов — как есть (H 07/02 §8.2) | аудит X §1.2 (поправки вне PLAN — «оформлено верно») | сделано у site |
+
+## ui-research (`../../ui/`)
+
+| № | Файл соседа § | Предложение | База · чем подтверждено | Статус |
+|---|---|---|---|---|
+| UI1 | `06-components-visual/01-buttons-and-actions.md` §2.1 («одна сплошная акцентная кнопка»); `ui_audit.py` J8 (`<header>` ≤ 120 px), J2 («сайдбар») | логика — как PLAN №1 (одно действие, повтор призыва); `<header>` — только шапка сайта, hero — `<section>` внутри `<main>`; визуальный профиль `ui_audit.py` для сайта — creative | E 01 §1.3 (поправка к J8); F 01 §1; PLAN №15 · аудит UI (ложные «серьёзно»); J2 отдельной строкой не оформлен | ждёт |
+
+## Сёстры (через оркестратора; сверка тройки S2)
+
+### text-research (`../../text/`)
+
+| № | Файл сестры § | Предложение | Почему | База · чем подтверждено | Статус |
+|---|---|---|---|---|---|
+| T1 | `02-strategy-messaging/facts.schema.yaml` `use` | `use.slot_types` — ориентир, а не белый список; медиа-слоты людей (фото с согласием) и `hero` у `case-page` — в `use` | планы используют факты шире (E/01); X44 (первый экран кейса) закрывается этим | E 03 §1.6; C 03 §1.3 · опыт E/01; X С-04 | ждёт |
+| T2 | `99-raw/experiments/E/facts-demo-saas-okoshko.yaml` | пробел вида `demo` (скриншоты, `blocking: true`) | SaaS без настоящего продукта не публикуется | J 10/02 §4 · пример «Окошко» (`facts.yaml` — копия с пробелом) | ждёт |
+| T3 | `04-copy-by-block/copy-slots.yaml` | правила для слотов site без правил (`disclaimer`, `ad-marking`, `event-meta`, `quiz-question`, `quiz-option`, `result-summary`, `contact-info`, `cookie-text`, `article-date`, `article-sources`) и нового `cta-next-label` (как `cta-label`) | иначе у слотов нет правил текста | E 03 §1.3; словарь v1 · `build_crosswalk.py` (автосверка слотов) | ждёт |
+| T4 | `10-templates-recipes/copy-deck.schema.json` | стык полей: `site_section_id` = id секции плана (роль или блок), `site_slot_id` = `anatomy` («группа.элемент»), `group` = «группа-N»; заглушка — `../10-playbooks-contracts/examples/lead-services-otves/stubs-sisters.yaml` | id плана v1 стабилизированы | E 03 §6.1; схема `page-plan` v1 · пример J | ждёт |
+| T5 | `10-templates-recipes/examples/*.yaml` (8 примеров copy-deck), поле `block` | в `block` — id блока `blocks.yaml` v1 (`hero-media`, `pricing-cards` …) или убрать поле: сейчас там id ролей (44 значения) | роль уже есть в `section_role`; поле `block` ломает стык | E 03 §6.1 · скрипт X §8: 0 из 44 значений — id блока | ждёт |
+| T6 | `CONTRADICTIONS.md` X7 | закрыть: температура — сила намерения по источнику (`vocabulary.yaml` v1 `traffic_temperature`); отношения с брендом — признак источника; осведомлённость — отдельная ось | определение выбирал site | A 01 §3 (правка S1); словарь v1 · X С-01 | ждёт text |
+| T7 | `CONTRADICTIONS.md` X32; `08-…/01` §1.1 (H text) | одна планка достоверности для всего текста сайта (38-ФЗ ст. 5 для рекламы, ЗоЗПП и 135-ФЗ — вне её); посадочная под трафик не маркируется, erid — объявление и закреплённые или повторяющиеся баннеры своей акции; сузить «лендинги под трафик — реклама» до «планка — как у рекламы» | спор о квалификации, а не о тексте | I 01 §3.1–§3.3 `[регулятор: ФАС 821/23]` · X С-02 | ждёт text |
+| T8 | `CONTRADICTIONS.md` X44 | закрыть: у `case-page` первый экран — роль `hero`, правило ядра ≤ 40 слов действует (при T1) | C и J ставят `hero` перед кейсом | C 03 §1.3; J пример `corporate-b2b-stalkon/plans/project.yaml` · X С-04 | ждёт text |
+| T9 | `01-foundations/formulas.yaml` стр. 30, 46, 59 (`site_ref`) | ссылка → `../site/03-page-structure/01-narratives-and-section-order.md` §2 | сейчас без имени файла и раздела | C 01 §2 · X С-07 | ждёт text |
+| T10 | README text (слоты-предложения) | закрыть: `promise`, `stat-source`, `price-old`, `spec-row`, `image-caption`, `announcement` — в словаре v1 | вопрос открыт у text | словарь v1 · X С-10 | ждёт text |
+| T11 | `03-corpus-measured/thresholds.yaml` (`hero-core`); `06-anti-slop/lexicon/ru-punct.yaml` (слот `hr`) | `hero-core` внесён в `crosswalk.tsv` как композит text (6 строк `broader`: headline, subheadline, cta-label, cta-secondary-label, cta-note, hero-proof); `hr` — что это? | стык id | `crosswalk.tsv` (S1, 2026-09-25) · X С-11 | сделано у site (hero-core); `hr` — вопрос text |
+| T12 | `COPY-C-18` (`09-ai-generation-evaluation/copy-checklist.yaml`) | порог капс-надзаголовков — один на тройку: ≤ ceil(N/3) секций (визуал — `cliche:caps-eyebrow` creative, текст — COPY-C-18, маркер страницы — AIL-52 `proposed`) | три базы считают одно и то же по-разному | `ai-landing-markers.yaml` AIL-52 · creative H/01; X С-32 | ждёт сверки S2 |
+| T13 | правила текста для сцен прокрутки | в закреплённой сцене L1 (≤ 150vh) `card-body` рядов — коротко, ≈ 2–3 строки | пакет creative волны 3 п. 5 | — (подача сцены — creative) · пакет creative волны 3 п. 5 | ждёт сверки S2 |
+
+### creative-research (`../../creative/`)
+
+| № | Файл сестры § | Предложение | Почему | База · чем подтверждено | Статус |
+|---|---|---|---|---|---|
+| C1 | `01-creative-direction/ambition-levels.yaml` `defaults_by_page_type` | уровни 5 активных типов v1: `specialist-page`, `location-page`, `documents-page`, `search-results-page` — L0, `program-catalog-page` — L1; 5 `proposed` — после решения владельца | таблица creative их не знает (SM-21 берёт умолчание) | `budgets.yaml` `page_type_levels` (добавлено S1 2026-09-25); J 10/03 · X С-12 | сделано у site; ждёт creative |
+| C2 | `09-ai-execution-evaluation/treatment.schema.json` v1; примеры подачи | ссылки `treatment` на секции — по id v1 (роль или блок); `media_slot.motion` в плане — только вид ассета | в опыте A/02 creative ключи были старыми id секций E | `page-plan.schema.json` v1 → `treatment:1`, `site_validate.py` → схема v1; примеры: `how-it-works.step`, `product-demo.row`, hero «Окошка» без появления · `spec_check.py plan` — 0 ошибок на трёх `home.yaml` | закрыто (S1, 2026-09-25) |
+| C3 | `09-ai-execution-evaluation/block-treatments.yaml` | варианты подачи нового блока `service-area` и варианта `capture-popup.engaged-slide-in` (немодальный, ≤ 25 % экрана телефона) | `blocks.yaml` v1 | E `blocks.yaml` v1 · пакет creative волны 3 п. 3 (84 блока, `vocab_lint.py` — 0 ошибок) | закрыто (creative) |
+| C4 | `06-effects-catalog/effects.yaml`, ключ `section_role` | переименовать в `effect_role` или описать омоним в глоссарии тройки | у site `section_role` — 42 роли сюжета; агент, читающий оба файла, спутает | словарь v1 · X С-13 | ждёт |
+| C5 | пакет волны 2, п. 4 (ссылка «`05-motion/01` §2» для 2.2.2) | ссылка — `05-motion/01` §3.1–§3.3 | в §2 — поправки к соседям | проверено по заголовкам (K4, X С-14) | ждёт |
+| C6 | `08-uniqueness-anti-slop/cliche-registry.yaml` `crosswalk_external` (AIL-47) | с `cliche:aurora-blobs` и `floating-orbs` — только `related`: AIL-47 у нас — перехват нажатия прозрачным слоем над призывом (B) | разные дефекты | `ai-landing-markers.yaml` `crosswalk_external` (зеркальные строки S1: AIL-08, -17 — narrower, AIL-49 — equal, AIL-47 — related) · X С-25 | ждёт |
+| C7 | пакеты волны 2 (ч. 1 пп. 1–11, ч. 2 пп. 12–19) | приняты: пп. 1–4 — ворота и чек-лист (K4); 5–6 — ссылкой (G 02 §1.5, P 03 §3.4); 7 — `constraints.cms` `enum` (схема v1); 8 и 18 — слои `budgets.yaml` (`wasm_first_screen_kb`, `presentation_kb_by_mode`); 9 — G 01 §4.5; 10 — довод J 10/02 §2.4; 12 — зеркало AIL; 13 — AIL-52 `proposed`; 14 — SG-PERF-16; 15–16 — I 03 §2.1, §2.3; 17 — SITE-A11Y-03; п. 11 — вопрос брифа низкого приоритета; п. 19 — к сверке с text | — | журнал правок `experiments/S1/journal.tsv` · X С-18…С-32 | сделано у site |
+| C8 | `05-motion/01-motion-principles-and-access.md` §4.5 | порог reduce берём ваш: запись всей страницы, 0,3 % пикселей в секунду; 0,5 % — грубый фильтр до перенастройки `page_accept.py` | ворота страницы не мягче ворот эффектов | `page-gates.yaml` v1.3 SG-A11Y-07 · X С-15 | сделано у site |
+| C9 | пакет волны 3 п. 4 `[гипотеза]` | `blocks.yaml` `steps.mobile` — линия-прогресс полосой 2 px у края; `site_validate.py` PL-C01 — счёт акцентов и секций с фирменным приёмом | предложение creative | не внесено: решение — живая фаза или следующая редакция `blocks.yaml` и валидатора | ждёт решения site |
+| C10 | `08-uniqueness-anti-slop/` (правила шаблонного хрома) | порог маркера AIL-52 (капс-надзаголовки, «пилюля» над H1, номера секций, «модные» шрифты, курсив) — калибровать вместе на страницах K3 и выборке M; Gesso — не ворота | одна выборка (H/01) | `ai-landing-markers.yaml` AIL-52 (`proposed`, D) · X С-26 | ждёт |

@@ -1,0 +1,1234 @@
+# ПРИМЕР J v1 · план лендинга SaaS — перевод плана E v0.9 в v1; подача — treatment creative A/02.
+page_plan_version: '1'
+checked: '2026-09-24'
+status: proposed
+example: true
+site: okoshko-demo
+refs:
+  brief: ../site-brief.yaml
+  facts: ../facts.yaml
+  blocks: ../../../../04-blocks/blocks.yaml
+  vocabulary: ../../../../02-site-types/vocabulary.yaml
+  lead_forms: ../../../../05-conversion-funnels/lead-forms.yaml
+  events: ../../../../07-seo-geo-performance-analytics/events.yaml
+  legal_requirements: ../../../../08-legal-trust-a11y/legal-requirements.yaml
+  head_kit: ../../../../07-seo-geo-performance-analytics/head-kit.yaml
+  budgets: ../../../../07-seo-geo-performance-analytics/budgets.yaml
+page:
+  id: home
+  page_type: landing-saas
+  template: false
+  url: /
+  lang: ru
+  locale: ru-RU
+  jurisdiction:
+  - ru
+  goal: Регистрации в пробный период 14 дней без карты от владельцев и администраторов салонов на 1–5 мастеров
+  primary_action: start-trial
+  secondary_actions:
+  - message
+  cta_target:
+    kind: route
+    value: /signup
+  secondary_goal: Не готов регистрироваться — задать вопрос в поддержку (чат ежедневно 9:00–21:00 МСК)
+  awareness: solution-aware
+  awareness_basis:
+    from: assumption
+    main_sources:
+    - paid-search
+    - search-category
+    - paid-social
+    - referral
+    by_source:
+    - traffic_source: paid-search
+      awareness: solution-aware
+      share: 0.4
+    - traffic_source: search-category
+      awareness: solution-aware
+      share: 0.3
+    - traffic_source: paid-social
+      awareness: problem-aware
+      share: 0.2
+    - traffic_source: referral
+      awareness: product-aware
+      share: 0.1
+    rule: Смысла (meaning) у демо нет — уровни по таблице C 02 §4. Порядок под solution-aware (0,7); для problem-aware из соцсетей (0,2)
+      — секция проблемы третьей; отдельная страница не нужна (различается один признак)
+  traffic:
+  - traffic_source: paid-search
+    temperature: warm
+    share: 0.4
+    device: mixed
+    promise_of_source: онлайн-запись для барбершопа, 14 дней бесплатно
+  - traffic_source: search-category
+    temperature: warm
+    share: 0.3
+    device: mixed
+  - traffic_source: paid-social
+    temperature: cold
+    share: 0.2
+    device: mobile
+    in_app_browser: true
+  - traffic_source: referral
+    temperature: warm
+    share: 0.1
+    device: mobile
+  macrostructure: workbench
+  macrostructure_family: document
+  macrostructure_alternatives:
+  - bento-grid
+  - stat-led
+  first_screen_policy: offer-cta
+  first_screen:
+    must_show:
+    - hero.headline
+    - hero.subheadline
+    - hero.cta
+    - hero.cta-note
+    - hero.screenshot
+    core_words_max: 40
+    message_match:
+    - traffic_source: paid-search
+      promise: онлайн-запись для барбершопа, 14 дней бесплатно
+      match:
+      - subject
+      - audience
+      - offer
+      - action
+      slots:
+      - hero.headline
+      - hero.cta-label
+      - hero.cta-note
+    - traffic_source: paid-social
+      promise: 'визуал креатива: мастер и телефон с напоминанием'
+      match:
+      - visual
+      - subject
+      slots:
+      - hero.visual
+    variant_map:
+      param: utm_content
+      render: server
+      default: salon
+      variants:
+      - id: salon
+        when:
+        - salon
+        - beauty
+        slots:
+        - hero.headline
+      - id: barbershop
+        when:
+        - barber
+        - barbershop
+        slots:
+        - hero.headline
+        - hero.eyebrow
+      event_param: hero_variant (параметр события — P)
+  length:
+    sections_min: 7
+    sections_max: 11
+    basis: 'C 02 §1.3: SaaS 7–11'
+  budget_profile: landing-saas@L1
+  ambition_level: L1
+  navigation:
+    header: landing-minimal
+    archetype: minimal-cta
+    anchor_nav: false
+    logo_link: /
+    breadcrumbs: false
+    footer: minimal
+  seo:
+    indexable: true
+    h1: hero.headline
+    ssr_required: true
+    notes: разметка SoftwareApplication и Offer — решение H; цены тарифов — текстом в HTML
+    canonical: self
+    structured_data:
+    - Organization
+    - WebSite
+    - SoftwareApplication
+    sitemap: true
+    hreflang: false
+  legal:
+    pd_consent: not-collected
+    privacy_policy: /privacy
+    cookie_banner: required
+    cookie_mode: opt-in
+    analytics_before_consent: false
+    withdraw_link: footer
+    ad_marking: false
+    requisites: footer
+    operator_ref: missing:legal-details
+    requirements:
+    - req:LR-RU-10
+    - req:LR-RU-13
+    - req:LR-RU-14
+    - req:LR-RU-16
+    - req:LR-RU-19
+    - req:LR-RU-22
+    - req:LR-RU-24
+    notes: 'регистрация и оплата — в продукте (/signup): согласие и оферта там (I); не юридическое заключение'
+  analytics:
+    systems:
+    - yandex-metrica
+    goals:
+    - start-trial
+    - message
+    load_after_consent: true
+    notes: trial-start и sign-up-complete — события продукта на /signup (P); на лендинге — cta-click с параметром места
+  treatment:
+    art_direction_ref: ../../../creative-research/01-creative-direction/examples/art-direction-okoshko.json#/directions/0
+    motion_level: expressive
+    motion_system:
+      thesis: 'Пустые окна расписания заполняются записями: одна закреплённая сцена показывает день салона в продукте.'
+      library:
+      - css
+      - gsap
+      - scrolltrigger
+      smooth_scroll: false
+      page_transitions: none
+      entrance_system: hero — без появления (art-direction); в сцене функций — смена состояний интерфейса по прокрутке; остальное без появления
+    theme: light
+    peaks:
+    - product-demo
+page_slots:
+  text:
+  - id: meta-title
+    slot: meta-title
+    intent: онлайн-запись и напоминания для салонов и барбершопов
+  - id: meta-description
+    slot: meta-description
+    intent: самозапись по ссылке, напоминания в Telegram, 14 дней бесплатно без карты
+  - id: og-title
+    slot: og-title
+  - id: og-description
+    slot: og-description
+  - id: og-image-alt
+    slot: og-image-alt
+  media:
+  - id: og-image
+    slot: og-image
+    media_role: informational
+    goal: превью ссылки
+    source: template
+    ratio:
+      desktop: 1.91:1
+    alt: og-image-alt
+  data:
+  - id: trial
+    slot: price-ref
+    fact: fact:trial-14-days
+    binds:
+    - meta-description
+sections:
+- id: header
+  role: header
+  block: header
+  variant: landing-minimal
+  slots:
+    text:
+    - id: cta-label
+      slot: cta-label
+      intent: попробовать бесплатно
+    media:
+    - id: logo
+      slot: brand-logo
+      media_role: informational
+      source: customer-tbd
+    action:
+    - id: cta
+      slot: cta-primary
+      action: start-trial
+      target:
+        kind: route
+        value: /signup
+      style: primary
+      label: cta-label
+      event: event:cta-click
+    - id: login
+      slot: link
+      action: log-in
+      target:
+        kind: url
+        value: адрес входа в продукт
+      style: link
+      event: event:login-click
+  mobile:
+  - stack
+  notes:
+    conversion: «Войти» — служебная ссылка (log-in, micro), не второй призыв
+  events:
+  - trigger: click
+    target: cta
+    action: start-trial
+    event: event:cta-click
+  treatment:
+    level: L0
+    visual_role: chrome
+    motion_level: subtle
+- id: hero
+  role: hero
+  question: Это онлайн-запись для моего салона? Сколько стоит попробовать?
+  job: Сказать, что это онлайн-запись с напоминаниями для барбершопов и салонов, показать продукт и дать начать 14 дней без карты
+  block: hero-media
+  variant: product-frame
+  next_step: Сколько салонов уже пользуются (tsifry) или сразу регистрация
+  carries:
+  - core
+  mobile:
+  - reframe
+  - stack
+  slots:
+    text:
+    - id: eyebrow
+      slot: eyebrow
+      intent: для барбершопов и салонов
+    - id: headline
+      slot: headline
+      heading: h1
+      intent: онлайн-запись и напоминания, чтобы клиенты приходили
+      variants: 2
+    - id: subheadline
+      slot: subheadline
+      intent: клиенты записываются сами по ссылке, напоминания уходят в Telegram
+    - id: hero-proof
+      slot: hero-proof
+      intent: 1 380 салонов и барбершопов на 1 сентября 2026
+    - id: cta-label
+      slot: cta-label
+      intent: попробовать 14 дней бесплатно
+    - id: cta-secondary-label
+      slot: cta-secondary-label
+      intent: посмотреть тарифы
+    - id: cta-note
+      slot: cta-note
+      intent: без привязки карты
+    - id: alt
+      slot: image-alt
+      intent: 'экран записи: свободное время мастера'
+    media:
+    - id: visual
+      slot: hero-visual
+      media_role: informational
+      goal: 'кадр hero: рамка окна или телефона с настоящим экраном записи поверх фона из токенов'
+      source: code
+      authenticity: code
+      ratio:
+        desktop: '16:10'
+        mobile: '4:5'
+      lcp_candidate: false
+      loading: eager
+      alt: alt
+      note: 'фон кодом (ai-media 01/01 §8.1: shader + скриншот слоем); LCP — H1'
+    - id: screenshot
+      slot: screenshot
+      media_role: informational
+      goal: экран самозаписи клиента и экран напоминаний
+      source: customer-tbd
+      authenticity: real-only
+      ratio:
+        desktop: '16:10'
+        mobile: '9:16'
+      loading: eager
+      alt: alt
+      note: факта вида demo нет в демо-наборе (бриф q-screenshots)
+    data:
+    - id: salons
+      slot: metric-ref
+      anatomy: proof
+      fact: fact:salons-count
+      binds:
+      - hero-proof
+      on_missing: omit-slot
+    - id: trial
+      slot: price-ref
+      fact: fact:trial-14-days
+      binds:
+      - cta-label
+      - cta-note
+    - id: link
+      slot: fact-ref
+      fact: fact:self-booking-link
+      binds:
+      - subheadline
+    - id: reminders
+      slot: fact-ref
+      fact: fact:reminders
+      binds:
+      - subheadline
+    action:
+    - id: cta
+      slot: cta-primary
+      action: start-trial
+      target:
+        kind: route
+        value: /signup
+      style: primary
+      label: cta-label
+      event: event:cta-click
+    - id: cta-secondary
+      slot: cta-secondary
+      action: view-pricing
+      target:
+        kind: anchor
+        value: '#tarify'
+      style: secondary
+      label: cta-secondary-label
+      event: event:cta-click
+  treatment:
+    level: L1
+    visual_role: accent
+    motion_level: none
+    background:
+      kind: tint
+      tone: light
+    composition:
+      align: left
+      text_media: text-left
+      bleed: edge
+      overlap: true
+      height: partial
+    display_role: display-l
+    reduce:
+      strategy: final-state
+    mobile:
+      strategy: separate-asset
+      note: скриншот телефона вместо окна десктопа
+  notes:
+    seo: H1 — категория словами запроса; вариант по utm_content — на сервере
+    a11y: скриншот с alt по задаче; мелкий текст интерфейса не несёт смысл
+  events:
+  - trigger: view
+    target: hero
+    event: event:section-view
+  - trigger: click
+    target: cta
+    action: start-trial
+    event: event:cta-click
+  - trigger: click
+    target: cta-secondary
+    action: view-pricing
+    event: event:cta-click
+- id: proof-stats
+  role: proof-stats
+  question: Этим кто-то пользуется? Сервис надёжный?
+  job: Показать масштаб и оценку тремя числами с датой и источником
+  block: stat-strip
+  variant: row
+  next_step: Какую проблему это снимает (problema)
+  mobile:
+  - stack
+  slots:
+    text:
+    - id: title
+      slot: section-title
+      heading: h2
+      intent: визуально скрытый заголовок «Окошко в цифрах»
+    - id: source
+      slot: stat-source
+      intent: данные биллинга и RuStore на 1 сентября 2026
+    - id: stat-1-value
+      slot: stat-value
+      anatomy: stat.value
+      group: stat-1
+    - id: stat-1-label
+      slot: stat-label
+      anatomy: stat.label
+      group: stat-1
+    - id: stat-2-value
+      slot: stat-value
+      anatomy: stat.value
+      group: stat-2
+    - id: stat-2-label
+      slot: stat-label
+      anatomy: stat.label
+      group: stat-2
+    - id: stat-3-value
+      slot: stat-value
+      anatomy: stat.value
+      group: stat-3
+    - id: stat-3-label
+      slot: stat-label
+      anatomy: stat.label
+      group: stat-3
+    data:
+    - id: salons
+      slot: metric-ref
+      anatomy: stat.metric
+      group: stat-1
+      fact: fact:salons-count
+      binds:
+      - stat-1-value
+      - stat-1-label
+      - source
+    - id: rating
+      slot: metric-ref
+      anatomy: stat.metric
+      group: stat-2
+      fact: fact:rating-rustore
+      binds:
+      - stat-2-value
+      - stat-2-label
+      - source
+    - id: noshow
+      slot: metric-ref
+      anatomy: stat.metric
+      group: stat-3
+      fact: fact:noshow-average
+      binds:
+      - stat-3-value
+      - stat-3-label
+      - source
+    - id: logos
+      slot: client-ref
+      fact: missing:client-logos
+      on_missing: omit-block
+      note: логотипов клиентов с согласием нет — блок logo-wall не ставится
+  notes:
+    structure: логотипы — только после письменных согласий (missing:client-logos)
+    legal: числа — с датой и источником (I)
+  treatment:
+    level: L0
+    visual_role: support
+    motion_level: none
+    notes: числа — только факты; без счётчиков (почерк генераторов)
+- id: problem
+  role: problem
+  question: Почему клиенты не приходят и зачем мне ещё один сервис?
+  job: 'Назвать ситуацию владельца: неявки, вечерний обзвон, запись вручную'
+  block: pain-points
+  variant: voice-quotes
+  next_step: Как «Окошко» это снимает (funktsii)
+  mobile:
+  - stack
+  slots:
+    text:
+    - id: title
+      slot: section-title
+      heading: h2
+      intent: неявки и обзвон съедают вечер
+    - id: pain-1-title
+      slot: card-title
+      anatomy: pain.title
+      group: pain-1
+      intent: клиенты забывают о записи
+    - id: pain-2-title
+      slot: card-title
+      anatomy: pain.title
+      group: pain-2
+      intent: вечером обзваниваешь всех, кто записан на завтра
+    - id: pain-3-title
+      slot: card-title
+      anatomy: pain.title
+      group: pain-3
+      intent: запись в мессенджере и тетради — путаница
+    - id: bridge
+      slot: body
+      intent: мост к решению одной фразой
+    data:
+    - id: voice
+      slot: testimonial-ref
+      fact: fact:review-ruslan
+      binds:
+      - pain-2-title
+      note: ситуация словами клиента (с разрешением)
+  notes:
+    structure: секция для problem-aware трафика из соцсетей (0,2); без запугивания
+  treatment:
+    level: L0
+    visual_role: calm
+    motion_level: none
+- id: product-demo
+  role: product-demo
+  question: Как это выглядит и что сервис делает за меня?
+  job: 'Показать три функции в деле: самозапись по ссылке, напоминания, перенос базы'
+  block: feature-alternating
+  variant: claim-proof
+  next_step: Результат похожего барбершопа (keis)
+  mobile:
+  - stack
+  slots:
+    text:
+    - id: row-1-title
+      slot: card-title
+      anatomy: row.title
+      group: row-1
+      heading: h3
+      intent: клиенты записываются сами
+    - id: row-1-body
+      slot: card-body
+      anatomy: row.body
+      group: row-1
+      intent: ссылка в Telegram, VK и на картах; услуга, мастер, свободное время
+    - id: row-1-alt
+      slot: image-alt
+      anatomy: row.alt
+      group: row-1
+    - id: row-2-title
+      slot: card-title
+      anatomy: row.title
+      group: row-2
+      heading: h3
+      intent: напоминания за 24 и за 2 часа
+    - id: row-2-body
+      slot: card-body
+      anatomy: row.body
+      group: row-2
+      intent: Telegram — в тарифе; SMS — отдельно, 4 ₽ за сообщение
+    - id: row-2-alt
+      slot: image-alt
+      anatomy: row.alt
+      group: row-2
+    - id: row-2-quote
+      slot: testimonial-quote
+      anatomy: row.quote
+      group: row-2
+      intent: короткая выдержка из отзыва Руслана об обзвоне
+    - id: row-3-title
+      slot: card-title
+      anatomy: row.title
+      group: row-3
+      heading: h3
+      intent: перенесём базу бесплатно за день
+    - id: row-3-body
+      slot: card-body
+      anatomy: row.body
+      group: row-3
+      intent: из Excel или Google Таблиц за 1 рабочий день
+    - id: row-3-alt
+      slot: image-alt
+      anatomy: row.alt
+      group: row-3
+    media:
+    - id: row-1-media
+      slot: screenshot
+      anatomy: row.media
+      group: row-1
+      media_role: informational
+      goal: экран самозаписи на телефоне клиента
+      source: customer-tbd
+      authenticity: real-only
+      ratio:
+        desktop: '4:5'
+        mobile: '9:16'
+      loading: lazy
+      alt: row-1-alt
+    - id: row-2-media
+      slot: screenshot
+      anatomy: row.media
+      group: row-2
+      media_role: informational
+      goal: напоминание в Telegram
+      source: customer-tbd
+      authenticity: real-only
+      ratio:
+        desktop: '4:5'
+        mobile: '9:16'
+      loading: lazy
+      alt: row-2-alt
+    - id: row-3-media
+      slot: screenshot
+      anatomy: row.media
+      group: row-3
+      media_role: informational
+      goal: экран импорта базы
+      source: customer-tbd
+      authenticity: real-only
+      ratio:
+        desktop: '16:10'
+        mobile: '4:5'
+      loading: lazy
+      alt: row-3-alt
+    data:
+    - id: link
+      slot: fact-ref
+      fact: fact:self-booking-link
+      binds:
+      - row-1-body
+    - id: reminders
+      slot: fact-ref
+      fact: fact:reminders
+      binds:
+      - row-2-title
+      - row-2-body
+    - id: sms
+      slot: price-ref
+      fact: fact:sms-price
+      binds:
+      - row-2-body
+    - id: quote
+      slot: testimonial-ref
+      fact: fact:review-ruslan
+      binds:
+      - row-2-quote
+    - id: import
+      slot: price-ref
+      fact: fact:import-free
+      binds:
+      - row-3-title
+      - row-3-body
+  notes:
+    conversion: «бесплатные напоминания» — только с условием про SMS рядом (факт sms-price)
+    a11y: DOM «текст → медиа» во всех рядах
+  treatment:
+    level: L1
+    visual_role: peak
+    motion_level: expressive
+    effects:
+    - ref: effect:sticky-stack
+      target: product-demo.row
+      trigger: pin-scroll
+      purpose: signature
+      note: окно расписания закреплено, записи появляются по мере прокрутки текста
+    composition:
+      align: left
+      text_media: text-left
+      height: scene
+    reduce:
+      strategy: static-poster
+      note: три состояния интерфейса статичными кадрами рядом с текстом
+    mobile:
+      strategy: static
+      note: кадры интерфейса между абзацами
+    budget:
+      js_kb_br: 45
+      load: after-lcp
+- id: case-studies
+  role: case-studies
+  question: У похожих салонов правда меньше неявок?
+  job: Показать результат барбершопа в Казани и рядом — обычный результат по 212 салонам
+  block: case-study
+  variant: quote-led
+  next_step: Сколько стоит (tarify)
+  mobile:
+  - stack
+  slots:
+    text:
+    - id: title
+      slot: case-title
+      heading: h2
+      intent: 'барбершоп на 4 кресла: неявки с 14 % до 6 % за три месяца'
+    - id: summary
+      slot: case-summary
+      intent: что было и что включили
+    - id: result
+      slot: case-result
+      intent: результат числом с базой и сроком
+    - id: quote
+      slot: testimonial-quote
+    - id: attribution
+      slot: testimonial-attribution
+    - id: disclaimer
+      slot: disclaimer
+      intent: 'обычный результат: в среднем у 212 салонов (январь — май 2026)'
+    data:
+    - id: case
+      slot: case-ref
+      anatomy: case
+      fact: fact:case-noshow-kazan
+      binds:
+      - title
+      - summary
+      - result
+    - id: testimonial
+      slot: testimonial-ref
+      anatomy: testimonial
+      fact: fact:review-ruslan
+      binds:
+      - quote
+      - attribution
+    - id: typical
+      slot: metric-ref
+      fact: fact:noshow-average
+      binds:
+      - disclaimer
+  notes:
+    legal: не обещать «без неявок» (never_claim nc-zero-noshow) и рост выручки (nc-revenue-growth)
+    structure: типичный результат рядом с лучшим — text B2 §5.4
+  treatment:
+    level: L0
+    visual_role: support
+    motion_level: subtle
+- id: pricing
+  role: pricing
+  anchor: tarify
+  question: Сколько стоит и что будет после пробного периода?
+  job: Показать три тарифа с ценой в месяц, скидку за год и что SMS — отдельно
+  block: pricing-cards
+  variant: with-period-toggle
+  next_step: Остальные вопросы (voprosy) или регистрация
+  mobile:
+  - stack
+  slots:
+    text:
+    - id: title
+      slot: section-title
+      heading: h2
+      intent: тарифы
+    - id: period-note
+      slot: pricing-price-note
+      intent: при оплате за 12 месяцев — платите за 10
+    - id: disclaimer
+      slot: disclaimer
+      intent: 'SMS-напоминания оплачиваются отдельно: 4 ₽ за сообщение'
+    - id: plan-1-name
+      slot: pricing-plan-name
+      anatomy: plan.name
+      group: plan-1
+      heading: h3
+      intent: Мастер
+    - id: plan-1-summary
+      slot: pricing-plan-summary
+      anatomy: plan.summary
+      group: plan-1
+      intent: для одного мастера
+    - id: plan-1-price
+      slot: pricing-price
+      anatomy: plan.price
+      group: plan-1
+    - id: plan-1-price-note
+      slot: pricing-price-note
+      anatomy: plan.price-note
+      group: plan-1
+    - id: plan-1-feature-1
+      slot: pricing-feature
+      anatomy: plan.feature
+      group: plan-1
+    - id: plan-1-cta-label
+      slot: cta-label
+      anatomy: plan.cta-label
+      group: plan-1
+    - id: plan-2-name
+      slot: pricing-plan-name
+      anatomy: plan.name
+      group: plan-2
+      heading: h3
+      intent: Салон
+    - id: plan-2-summary
+      slot: pricing-plan-summary
+      anatomy: plan.summary
+      group: plan-2
+      intent: команда до 5 мастеров
+    - id: plan-2-price
+      slot: pricing-price
+      anatomy: plan.price
+      group: plan-2
+    - id: plan-2-price-note
+      slot: pricing-price-note
+      anatomy: plan.price-note
+      group: plan-2
+    - id: plan-2-feature-1
+      slot: pricing-feature
+      anatomy: plan.feature
+      group: plan-2
+    - id: plan-2-cta-label
+      slot: cta-label
+      anatomy: plan.cta-label
+      group: plan-2
+    - id: plan-3-name
+      slot: pricing-plan-name
+      anatomy: plan.name
+      group: plan-3
+      heading: h3
+      intent: Сеть
+    - id: plan-3-summary
+      slot: pricing-plan-summary
+      anatomy: plan.summary
+      group: plan-3
+      intent: 6+ мастеров и филиалы
+    - id: plan-3-price
+      slot: pricing-price
+      anatomy: plan.price
+      group: plan-3
+      intent: от 6 900 ₽ в месяц — с тем, от чего зависит итог
+    - id: plan-3-price-note
+      slot: pricing-price-note
+      anatomy: plan.price-note
+      group: plan-3
+    - id: plan-3-feature-1
+      slot: pricing-feature
+      anatomy: plan.feature
+      group: plan-3
+    - id: plan-3-cta-label
+      slot: cta-label
+      anatomy: plan.cta-label
+      group: plan-3
+    data:
+    - id: plan-1-fact
+      slot: price-ref
+      anatomy: plan.price-fact
+      group: plan-1
+      fact: fact:price-master
+      binds:
+      - plan-1-price
+      - plan-1-price-note
+      - plan-1-summary
+    - id: plan-2-fact
+      slot: price-ref
+      anatomy: plan.price-fact
+      group: plan-2
+      fact: fact:price-salon
+      binds:
+      - plan-2-price
+      - plan-2-price-note
+      - plan-2-summary
+    - id: plan-3-fact
+      slot: price-ref
+      anatomy: plan.price-fact
+      group: plan-3
+      fact: fact:price-network-from
+      binds:
+      - plan-3-price
+      - plan-3-price-note
+      - plan-3-summary
+    - id: annual
+      slot: price-ref
+      fact: fact:annual-discount
+      binds:
+      - period-note
+    - id: sms
+      slot: price-ref
+      fact: fact:sms-price
+      binds:
+      - disclaimer
+    - id: trial
+      slot: price-ref
+      fact: fact:trial-14-days
+      binds:
+      - plan-1-cta-label
+      - plan-2-cta-label
+      - plan-3-cta-label
+    action:
+    - id: plan-1-cta
+      slot: cta-primary
+      anatomy: plan.cta
+      group: plan-1
+      action: start-trial
+      target:
+        kind: route
+        value: /signup?plan=master
+      style: primary
+      label: plan-1-cta-label
+      event: event:cta-click
+    - id: plan-2-cta
+      slot: cta-primary
+      anatomy: plan.cta
+      group: plan-2
+      action: start-trial
+      target:
+        kind: route
+        value: /signup?plan=salon
+      style: primary
+      label: plan-2-cta-label
+      event: event:cta-click
+    - id: plan-3-cta
+      slot: cta-primary
+      anatomy: plan.cta
+      group: plan-3
+      action: start-trial
+      target:
+        kind: route
+        value: /signup?plan=network
+      style: primary
+      label: plan-3-cta-label
+      event: event:cta-click
+  notes:
+    seo: цены обоих периодов — текстом в HTML
+    legal: условия отмены и возврата — ссылкой рядом (I)
+    conversion: состав тарифов — одинаковым набором строк; пункты составов дописывает text по фактам
+  events:
+  - trigger: view
+    target: pricing
+    event: event:pricing-view
+  - trigger: click
+    target: plan-1-cta
+    action: start-trial
+    event: event:cta-click
+  - trigger: click
+    target: plan-2-cta
+    action: start-trial
+    event: event:cta-click
+  - trigger: click
+    target: plan-3-cta
+    action: start-trial
+    event: event:cta-click
+  treatment:
+    level: L0
+    visual_role: calm
+    motion_level: none
+- id: faq
+  role: faq
+  question: Где хранятся данные, как отменить, что платно?
+  job: Ответить на остаточные вопросы о данных, отмене, SMS и поддержке
+  block: faq
+  variant: accordion
+  next_step: Регистрация (final)
+  mobile:
+  - accordion
+  slots:
+    text:
+    - id: title
+      slot: section-title
+      heading: h2
+    - id: qa-1-q
+      slot: faq-q
+      anatomy: qa.q
+      group: qa-1
+      intent: где хранятся данные моих клиентов?
+    - id: qa-1-a
+      slot: faq-a
+      anatomy: qa.a
+      group: qa-1
+    - id: qa-2-q
+      slot: faq-q
+      anatomy: qa.q
+      group: qa-2
+      intent: как отменить подписку и вернуть деньги?
+    - id: qa-2-a
+      slot: faq-a
+      anatomy: qa.a
+      group: qa-2
+    - id: qa-3-q
+      slot: faq-q
+      anatomy: qa.q
+      group: qa-3
+      intent: напоминания бесплатные?
+    - id: qa-3-a
+      slot: faq-a
+      anatomy: qa.a
+      group: qa-3
+    - id: qa-4-q
+      slot: faq-q
+      anatomy: qa.q
+      group: qa-4
+      intent: кто поможет с настройкой?
+    - id: qa-4-a
+      slot: faq-a
+      anatomy: qa.a
+      group: qa-4
+    data:
+    - id: data
+      slot: fact-ref
+      anatomy: qa.fact
+      group: qa-1
+      fact: fact:data-in-russia
+      binds:
+      - qa-1-a
+    - id: cancel
+      slot: fact-ref
+      anatomy: qa.fact
+      group: qa-2
+      fact: fact:cancel-refund
+      binds:
+      - qa-2-a
+    - id: sms
+      slot: fact-ref
+      anatomy: qa.fact
+      group: qa-3
+      fact: fact:sms-price
+      binds:
+      - qa-3-a
+    - id: reminders
+      slot: fact-ref
+      anatomy: qa.fact
+      group: qa-3
+      fact: fact:reminders
+      binds:
+      - qa-3-a
+    - id: support
+      slot: fact-ref
+      anatomy: qa.fact
+      group: qa-4
+      fact: fact:support-chat
+      binds:
+      - qa-4-a
+    - id: import
+      slot: fact-ref
+      anatomy: qa.fact
+      group: qa-4
+      fact: fact:import-free
+      binds:
+      - qa-4-a
+  notes:
+    seo: ответы — в HTML; FAQPage — решение H
+  treatment:
+    level: L0
+    visual_role: calm
+    motion_level: subtle
+- id: final-cta
+  role: final-cta
+  question: С чего начать прямо сейчас?
+  job: Повторить пробный период без карты и дать второй путь — вопрос в поддержку
+  block: cta-band
+  variant: final
+  next_step: Регистрация (/signup) или чат поддержки
+  carries:
+  - core
+  mobile:
+  - stack
+  slots:
+    text:
+    - id: title
+      slot: section-title
+      heading: h2
+      intent: начните с 14 дней бесплатно
+    - id: cta-label
+      slot: cta-label
+    - id: cta-secondary-label
+      slot: cta-secondary-label
+      intent: задать вопрос в поддержку
+    - id: cta-note
+      slot: cta-note
+      intent: без карты; перенесём базу бесплатно
+    data:
+    - id: trial
+      slot: price-ref
+      fact: fact:trial-14-days
+      binds:
+      - cta-note
+    - id: import
+      slot: price-ref
+      fact: fact:import-free
+      binds:
+      - cta-note
+    - id: support
+      slot: fact-ref
+      anatomy: proof
+      fact: fact:support-chat
+      binds:
+      - cta-secondary-label
+    action:
+    - id: cta
+      slot: cta-primary
+      action: start-trial
+      target:
+        kind: route
+        value: /signup
+      style: primary
+      label: cta-label
+      event: event:cta-click
+    - id: cta-secondary
+      slot: cta-secondary
+      action: message
+      target:
+        kind: messenger
+        value: чат поддержки или Telegram — F
+      style: secondary
+      label: cta-secondary-label
+      event: event:messenger-click
+  events:
+  - trigger: click
+    target: cta
+    action: start-trial
+    event: event:cta-click
+  - trigger: click
+    target: cta-secondary
+    action: message
+    event: event:messenger-click
+  treatment:
+    level: L1
+    visual_role: accent
+    motion_level: subtle
+    background:
+      kind: inverse
+      tone: dark
+- id: footer
+  role: footer
+  block: footer
+  variant: minimal
+  slots:
+    text:
+    - id: legal
+      slot: footer-legal
+    - id: privacy-label
+      slot: nav-label
+      intent: политика обработки персональных данных
+    - id: offer-label
+      slot: nav-label
+      anatomy: privacy-label
+      intent: оферта и условия подписки
+    data:
+    - id: company
+      slot: fact-ref
+      anatomy: company
+      fact: missing:legal-details
+      binds:
+      - legal
+      on_missing: placeholder
+    action:
+    - id: privacy
+      slot: link
+      action: read-more
+      target:
+        kind: route
+        value: /privacy
+      style: link
+      label: privacy-label
+    - id: offer
+      slot: link
+      anatomy: privacy
+      action: read-more
+      target:
+        kind: route
+        value: /offer
+      style: link
+      label: offer-label
+  mobile:
+  - stack
+  treatment:
+    level: L0
+    visual_role: chrome
+    motion_level: none
+overlays:
+- id: sticky-cta
+  block: sticky-cta
+  state: 'on'
+  when: телефон (соцсети 0,2 и рекомендации — во встроенном браузере); после того как призыв hero ушёл из экрана
+  hide_when:
+  - виден призыв hero
+  - видна секция tarify или final
+  - открыта экранная клавиатура
+  slots:
+    text:
+    - id: cta-label
+      slot: cta-label
+      intent: попробовать бесплатно
+    action:
+    - id: cta
+      slot: cta-primary
+      action: start-trial
+      target:
+        kind: route
+        value: /signup
+      style: primary
+      label: cta-label
+      event: event:cta-click
+  notes: запас снизу для панели встроенного браузера (C 02 §4)
+- id: cookie
+  block: cookie-banner
+  state: auto
+  slots:
+    text:
+    - id: text
+      slot: cookie-text
+    - id: accept
+      slot: cta-label
+    - id: reject
+      slot: cta-label
+  notes: Метрика — после согласия (I, P)
+- id: chat
+  block: chat-widget
+  state: 'off'
+  notes: 'политика брифа chat_widget: off; второй путь — ссылка на поддержку в final'
+- id: popup
+  block: capture-popup
+  state: 'off'
+open_questions:
+- Скриншоты продукта (вид факта demo) — нет в демо-наборе фактов; без них hero и функции без кадров (бриф q-screenshots; сообщение для
+  text)
+- Реквизиты (missing:legal-details, blocking) — страница не публикуется до ответа
+- Логотипы салонов с согласием (missing:client-logos) — блок logo-wall не ставится
+- Интеграции (missing:integrations-list) — секция integrations не ставится до списка
+- Состав тарифов по пунктам — одинаковый набор строк у всех тарифов; пункты — из фактов (text)
+- Форма регистрации и письмо подтверждения (missing:confirm-link-expiry) — F и text; экран регистрации — ux 05-01

@@ -1,0 +1,142 @@
+# hero-pair.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/01-hero-recipes.md#1; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+recipe_version: 1
+checked_at: '2026-09-25'
+author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
+id: hero-pair
+title: 'Hero-пара: 16:9 для десктопа и отдельный телефонный кадр 4:5'
+doc: 14-recipes/01-hero-recipes.md#1
+task_codes:
+- IMG-HERO-PHOTO
+slot: hero
+ladder: image
+ai_fit: conditional
+legal_row: 5
+route:
+  source: IMG-HERO-PHOTO
+  steps:
+  - role: перебор композиции
+    model: openai/gpt-image-2.5-sunburst
+    params:
+      image_resolution: 1K
+      aspect_ratio: '16:9'
+    price_rub: 4.0
+    test: F-04
+  - role: финал десктопа по выбранному кадру
+    model: openai/gpt-image-2.5-sunburst
+    params:
+      image_resolution: 2K
+      aspect_ratio: '16:9'
+    price_rub: 7.0
+    test: M-01
+    note: 'фаза 5: M-01 не запускался; та же схема (проба 1K → 2K с пробой-референсом) проверена на MS-02, n = 1'
+  - role: финал телефона (3:4 → кроп 4:5)
+    model: openai/gpt-image-2.5-sunburst
+    params:
+      image_resolution: 2K
+      aspect_ratio: '3:4'
+    price_rub: 7.0
+    test: M-02
+    note: 'фаза 5: M-02 не запускался; телефонный 3:4 проверен на MS-02 (1536×2048, 7 ₽, warn QA-COMP-CLUTTER)'
+  - role: запас
+    model: google/gemini-3.1-flash-image-preview
+    params:
+      image_resolution: 2K
+      aspect_ratio: '16:9'
+    price_rub: 7.2
+spec:
+  from_passport: vlm_to_dna.py to-spec --kind photo --task IMG-HERO-PHOTO --slot hero
+  example: 14-recipes/examples/demo-landing/brand/specs/M-01-hero-16x9-2k.spec.json
+  must:
+  - composition.text_zone (слева 0,45; телефон — сверху 0,35)
+  - composition.focal_point {x, y}
+  - output.aspect_ratios
+  - references[role=composition] — кадр F-04
+  ancestors:
+  - ../../scripts/ai-media/tests/fixtures/D02/E1.spec.json
+  - 13-routing-matrix/stand/briefs/S01-hero-interior.spec.json
+compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+  <тест> --agent <агент> --out 99-raw/phase5/jobs/<файл>.jsonl
+phase5:
+  jobs:
+  - 99-raw/phase5/jobs/M-01-hero-16x9-2k.jsonl
+  - 99-raw/phase5/jobs/M-02-hero-phone-3x4-2k.jsonl
+  reuse:
+  - F-04
+  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
+steps:
+- id: scan
+  cmd: python3 ../../scripts/ai-media/provenance_check.py scan <выход как скачан> --corners --trust --out prov/
+  status: checked
+  evidence: 99-raw/experiments/L/01-provenance-check
+- id: audit-master
+  cmd: python3 ../../scripts/ai-media/asset_audit.py audit master.png --slot hero --text-zone 0,0,0.45,1 --dna <паспорт> --out audit/ --strict
+  status: checked
+  evidence: 99-raw/experiments/M/02-hero-pair/audit_16x9
+- id: crop-phone
+  cmd: 'Pillow: кроп 3:4 → 4:5 по focal_point (−6,25 % высоты)'
+  status: unchecked
+- id: upscale-if-needed
+  cmd: Pillow resize(LANCZOS) — только если мастер меньше слота (H/02)
+  status: checked
+  evidence: 99-raw/experiments/M/02-hero-pair/make_hero.py
+- id: grade
+  cmd: python3 ../../scripts/ai-media/vlm_to_dna.py lut <паспорт> --out brand.cube && ffmpeg -threads 4 -i in.png -vf "lut3d=file=brand.cube:interp=tetrahedral"
+    out.png
+  status: checked
+  evidence: 99-raw/experiments/M/02-hero-pair/make_hero.py
+- id: ladder
+  cmd: 99-raw/tools/avif_pick.sh <ширина>.png <имя>-<ширина>.avif 80 (+ cwebp по s2 ≥ 80); ширины 640/960/1280/1920/2560 и 480/720/1080
+  status: checked
+  evidence: 99-raw/experiments/M/02-hero-pair/results_hero.json
+- id: stamp
+  cmd: python3 ../../scripts/ai-media/provenance_check.py stamp <производная> <производная> --dst trained --system "<модель> via <канал>"
+  status: unchecked
+- id: page
+  cmd: python3 ../../scripts/ai-media/page_accept.py <страница> --out out/ [--mobile] [--throttle] --contrast ".hero h1" ".hero__lead" ".hero__kicker"
+  status: checked
+  evidence: 14-recipes/examples/demo-landing/measure
+accept:
+  asset_audit:
+    mode: image
+    verdict: без fail; needs_human — глазом
+  thresholds:
+  - image.hero_master_min_px
+  - composition.centroid_x_min
+  - text_zone.edge_density_max
+  - encoding.ssimulacra2_hero_min
+  - budget.image.hero_kb
+  page_accept:
+    modes:
+    - desktop
+    - mobile
+    - desktop --throttle
+    - mobile --throttle
+    contrast:
+    - .hero h1
+    - .hero__lead
+    - .hero__kicker
+delivery:
+  template: 10-web-integration/pages/00-hero-summary.html
+  formats:
+  - avif
+  - webp
+  budget_kb:
+    desktop: 150
+    mobile: 80
+  lcp: fetchpriority=high, без lazy; hero calc(100svh − 64px)
+provenance:
+  dst: trained
+  visible_label: false
+numbers:
+  demo_avif_1536_kb: 3.2
+  demo_avif_4x5_820_kb: 2.6
+  lcp_mobile_ms: 80
+  lcp_desktop: VIDEO 204 мс / H1 120 мс при reduce
+  phase5_f04_composition_block: 'центр масс x 0,81–0,85 против 0,30–0,39 без блока; пестрота 25–31 против 51–53; 3 + 3 кадра — 99-raw/phase5/runs/2.5-stand/audit-F-04/audit.json'
+  phase5_e08_blind_vote: 'хорошо — Sunburst, Flare, NB2; NB Pro «слишком ровно»; Seedream 5 Pro «сразу минус»; FLUX.2 Pro «так себе» (голос заказчика вслепую, 1 чел.) — 99-raw/phase5/runs/2.5-stand/E-08_blind_key.json'
+  phase5_ms02_reference_chain: 'проба 1K 4 ₽ → 2K с пробой-референсом 7 ₽ почти копирует кадр; без референса — другой кадр; n = 1 — 99-raw/phase5/runs/MS-marea/audit-MS-02/audit.md'
+  phase5_outpaint_9x16: 'аутпейнт 16:9 → 9:16 перерисовывает центр (резкость 0,14 / 0,56 < 0,85) — телефону свой мастер — 99-raw/phase5/runs/4-edits/H-08-check/'
+  phase5_n01_routerai_quality: 'Sunburst через RouterAI quality medium 0,93 ₽ и high 3,57 ₽ (оба 1536×864) не различимы, polza 1K того же класса; списание — только выходные токены (n = 2 брифа) — 99-raw/phase5/runs/S5-analysis/N-01_metrics.json'
+status:
+  local: checked
+  generation: checked

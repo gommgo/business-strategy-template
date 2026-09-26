@@ -1,0 +1,96 @@
+{
+  "spec_version": "0.2",
+  "id": "forest-roast-icon3d-box",
+  "checked_at": "2026-09-24",
+  "brief_language": "en",
+  "task": "IMG-ICON3D",
+  "role": {
+    "section": "features",
+    "slot": "feature-icon-box",
+    "purpose": "3D icon of the features series (F-07 method: shape from our render, material from the cube)",
+    "series_id": "forest-roast-icons"
+  },
+  "subject": {
+    "summary": "a rounded parcel box with a band around it"
+  },
+  "composition": {
+    "shot": "close-up",
+    "subject_region": "center",
+    "angle": "high-angle"
+  },
+  "palette": [
+    {
+      "role": "dominant",
+      "hex": "#E4DCCD",
+      "name": "light warm grey",
+      "share": 0.3,
+      "applies_to": "object body"
+    },
+    {
+      "role": "background",
+      "hex": "#F4EFE6",
+      "name": "warm light grey",
+      "share": 0.55,
+      "applies_to": "plain background"
+    },
+    {
+      "role": "accent",
+      "hex": "#1F4D3A",
+      "name": "deep green",
+      "share": 0.1,
+      "applies_to": "single accent part of the object",
+      "strict": true
+    }
+  ],
+  "text": {
+    "mode": "none"
+  },
+  "output": {
+    "primary_ratio": "1:1",
+    "resolution": "1K",
+    "format": "avif",
+    "max_kb": 40
+  },
+  "light": {
+    "direction": "left",
+    "quality": "soft",
+    "source": "soft key from the upper left at 45 degrees, fill 20 percent"
+  },
+  "style": {
+    "medium": "clay-3d"
+  },
+  "materials": [
+    "matte glazed ceramic in warm off-white with one deep forest-green part"
+  ],
+  "series": {
+    "id": "forest-roast",
+    "block": "Single object as a matte glazed ceramic figure in warm off-white with one deep forest-green part; 3/4 view from 30 degrees above, 50mm; soft key light from the upper left, gentle fill; soft contact shadow; plain cream background; clean text-free surfaces.",
+    "avoid_average": false,
+    "reference_ids": [
+      "form",
+      "mat"
+    ]
+  },
+  "exclusions": [
+    {
+      "what": "readable text and logos",
+      "kind": "artifact",
+      "replace_with": "clean unmarked surfaces"
+    }
+  ],
+  "references": [
+    {
+      "id": "form",
+      "src": "../../../../../99-raw/phase5/inputs/M/form_box.png",
+      "role": "composition",
+      "note": "the exact shape, silhouette, size, position, camera angle and light direction to keep"
+    },
+    {
+      "id": "mat",
+      "src": "../../../../../99-raw/phase5/inputs/M/material_cube_ceramic.png",
+      "role": "material",
+      "note": "matte glazed off-white ceramic with one deep forest-green part"
+    }
+  ],
+  "notes": "фон = цвет секции #F4EFE6 (env_color паспорта): альфа не нужна, иконка кладётся на тот же цвет; у Sunburst в polza прозрачности нет"
+}

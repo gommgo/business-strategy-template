@@ -1,0 +1,92 @@
+
+/* ── 15-showcase «Сдано» · B/C фаза 2 · дорожка SD · изометрия Blender крупно ─────────────────────────────────────────────
+   Правая колонка первого экрана — кадр Cycles до правого края окна на всю высоту блока; номера-выноски и подписи комнат —
+   HTML поверх кадра (координаты из Blender, доли кадра; размеры — доли ширины кадра, cqw). Связь «пункт акта ↔ булавка» —
+   только CSS :has()/:hover, 0 КБ JS. Телефон — свой портретный кадр (та же камера, вырезка), только номера, список ниже. */
+.hero--iso .hero__in { max-width: none; margin: 0; min-height: 0; align-items: stretch;
+  padding: 0 0 0 max(var(--space-page-x), calc((100vw - var(--size-container)) / 2 + var(--space-page-x)));
+  grid-template-columns: minmax(0, .48fr) minmax(0, .52fr); gap: clamp(24px, 3vw, 48px); }
+.hero--iso .hero__text { align-self: center; padding-block: clamp(28px, 4vw, 64px); max-width: 39rem; }
+.plan--iso { position: relative; margin: 0; border: 0; background: transparent; align-self: start; }
+.plan__stage { position: relative; aspect-ratio: 1800 / 1905; container-type: inline-size; }
+.plan__stage picture { position: absolute; inset: 0; }
+.plan__img { width: 100%; height: 100%; display: block; }
+
+/* первая страница акта — карточка в пустом верхнем левом углу кадра (десктоп) */
+.plan--iso .plan__cap { position: absolute; left: 0; top: 10px; width: min(22rem, 50%); z-index: 2; font-size: .9rem;
+  background: var(--c-paper); border: 1px solid var(--c-line); box-shadow: 0 14px 32px -24px rgb(0 0 0 / .4); padding: 14px 16px 16px; }
+.plan--iso .plan__list { grid-template-columns: 1fr; gap: 2px; }
+.plan--iso .plan__list li { padding: 5px 6px; margin: 0 -6px; transition: background-color var(--mm-dur-hover) var(--mm-ease-out-strong); }
+
+/* номера-выноски на головках булавок */
+.plan__pins { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.pin { position: absolute; left: var(--x); top: var(--y); translate: -50% -50%; pointer-events: auto; }
+.pin b { display: grid; place-items: center; width: clamp(26px, 4.4cqw, 38px); aspect-ratio: 1; border-radius: 50%; background: var(--c-mark);
+  color: #fff; font: 700 clamp(13px, 2.3cqw, 18px)/1 var(--font-text); box-shadow: 0 0 0 2px #fff;
+  transition: scale var(--mm-dur-hover) var(--mm-ease-out-strong), box-shadow var(--mm-dur-hover) var(--mm-ease-out-strong); }
+.pin__tip { position: absolute; left: calc(100% + 8px); top: 50%; translate: 0 -50%; white-space: nowrap; pointer-events: none;
+  background: var(--c-paper); border: 1px solid var(--c-line); padding: 5px 9px; font: 600 .875rem/1.2 var(--font-text); color: var(--c-ink);
+  opacity: 0; transition: opacity var(--mm-dur-hover) var(--mm-ease-out-strong); }
+.pin[data-d="4"] .pin__tip { left: auto; right: calc(100% + 8px); }
+/* булавка под курсором (или в луче фонаря C) — поверх соседей: подсказка «1» не прячется под номером «3» (SD3) */
+.pin:hover, .pin.is-lit,
+.hero:has(.plan__list li[data-d="1"]:hover) .pin[data-d="1"], .hero:has(.plan__list li[data-d="2"]:hover) .pin[data-d="2"],
+.hero:has(.plan__list li[data-d="3"]:hover) .pin[data-d="3"], .hero:has(.plan__list li[data-d="4"]:hover) .pin[data-d="4"] { z-index: 3; }
+.pin:hover b,
+.hero:has(.plan__list li[data-d="1"]:hover) .pin[data-d="1"] b, .hero:has(.plan__list li[data-d="2"]:hover) .pin[data-d="2"] b,
+.hero:has(.plan__list li[data-d="3"]:hover) .pin[data-d="3"] b, .hero:has(.plan__list li[data-d="4"]:hover) .pin[data-d="4"] b {
+  scale: 1.22; box-shadow: 0 0 0 2px #fff, 0 0 0 9px rgb(207 36 25 / .22); }
+.pin:hover .pin__tip,
+.hero:has(.plan__list li[data-d="1"]:hover) .pin[data-d="1"] .pin__tip, .hero:has(.plan__list li[data-d="2"]:hover) .pin[data-d="2"] .pin__tip,
+.hero:has(.plan__list li[data-d="3"]:hover) .pin[data-d="3"] .pin__tip, .hero:has(.plan__list li[data-d="4"]:hover) .pin[data-d="4"] .pin__tip { opacity: 1; }
+.plan__list li:hover,
+.hero:has(.pin[data-d="1"]:hover) .plan__list li[data-d="1"], .hero:has(.pin[data-d="2"]:hover) .plan__list li[data-d="2"],
+.hero:has(.pin[data-d="3"]:hover) .plan__list li[data-d="3"], .hero:has(.pin[data-d="4"]:hover) .plan__list li[data-d="4"] { background: #fcefee; }
+@media (prefers-reduced-motion: no-preference) {
+  .pin { animation: mark-in calc(var(--mm-dur-reveal) / 2) var(--mm-ease-out-expo) both; animation-delay: calc(80ms + var(--i) * 40ms); }
+}
+
+/* подписи комнат (площади — по геометрии чертежа; на телефоне скрыты) */
+.plan__rooms { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; pointer-events: none; }
+.plan__rooms li { position: absolute; left: var(--x); top: var(--y); translate: -50% -50%; white-space: nowrap; text-align: center;
+  font: 600 clamp(11px, 1.9cqw, 15px)/1.15 var(--font-text); color: var(--c-ink-2);
+  text-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 7px rgb(255 255 255 / .85); }
+.plan__rooms span { display: block; font-weight: 400; font-size: .86em; color: var(--c-muted); }
+
+/* приборы инженера — серия Blender одним паспортом */
+.kit { list-style: none; margin: 0 0 clamp(20px, 3vw, 36px); padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.kit li { display: grid; justify-items: center; align-content: start; gap: 4px; text-align: center; }
+.kit img { width: clamp(88px, 9vw, 128px); height: auto; }
+.kit span { font: 600 .95rem/1.2 var(--font-text); color: var(--c-ink-2); }
+
+/* штамп «СДАНО» на образце акта (SD2/SD3): клип Blender поверх листа с multiply — белое клипа исчезает и на бумаге, и на фоне;
+   под таблицей — «зона штампа» (штамп стоит на акте рядом с местом оттиска). SD3: высота зоны = 0,83 высоты клипа + 6 px —
+   линия таблицы на уровне 17 % кадра (штамп в полёте поднимается до 16,8 %, стоящий — до 26,5 %), а верх клипа погашен маской
+   0 → 5 % → 16 %: мягкая дымка тени (241–250 в верхних 3–24 % кадра) не ложится на последнюю строку. Без JS и в reduce — кадр конца. */
+.doc--stamp { padding-bottom: calc(12px + 0.41 * min(64%, 470px)); }
+.doc__stamp3d { position: absolute; right: 16px; bottom: 6px; width: min(64%, 470px); aspect-ratio: 800 / 392; pointer-events: none;
+  mix-blend-mode: multiply; mask-image: linear-gradient(#0000 5%, #000 16%); }
+.doc__stamp3d img, .doc__stamp3d video { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* видео прячем прозрачностью, а не visibility: скрытое видео Chrome не запускает (политика автозапуска немых видео) */
+.stamp3d__start { visibility: hidden; }
+.stamp3d__clip { opacity: 0; }
+.doc__stamp3d.is-armed .stamp3d__end { visibility: hidden; }
+.doc__stamp3d.is-armed .stamp3d__start { visibility: visible; }
+.doc__stamp3d.is-play .stamp3d__start { visibility: hidden; }
+.doc__stamp3d.is-play .stamp3d__clip { opacity: 1; }
+
+@media (max-width: 60rem) {
+  .hero--iso .hero__in { grid-template-columns: 1fr; padding: clamp(28px, 5vw, 72px) var(--space-page-x) clamp(32px, 5vw, 80px); }
+  .hero--iso .hero__text { padding-block: 0; max-width: none; }
+  .plan__stage { aspect-ratio: 1402 / 1758; }
+  .pin { left: var(--xm); top: var(--ym); }
+  .pin__tip, .plan__rooms { display: none; }
+  .pin b { width: clamp(26px, 7.6cqw, 34px); font-size: clamp(13px, 3.9cqw, 16px); }
+  .plan--iso .plan__cap { position: static; width: auto; box-shadow: none; border: 0; border-top: 1px solid var(--c-line); padding: 14px 0 0; }
+}
+@media (max-width: 40rem) {
+  .kit { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .kit img { width: 96px; }
+  .doc--stamp { padding-bottom: calc(14px + 0.41 * (100% - 20px)); }
+  .doc__stamp3d { right: 10px; bottom: 6px; width: calc(100% - 20px); }
+}

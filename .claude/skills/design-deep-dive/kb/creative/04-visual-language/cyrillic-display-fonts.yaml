@@ -1,0 +1,233 @@
+# cyrillic-display-fonts.yaml — display-гарнитуры с кириллицей для маркетинговых страниц: лицензия, оси, качество кириллицы,
+# замеренные метрики, роли. creative-research · 04-visual-language · волна 1 · агент D · 2026-09-24.
+#
+# Как читать. default_or_option: default — открытая (OFL) и годится по экспертизе или замеру (решение заказчика 13: по умолчанию
+# открытые); option — платная, по решению заказчика и после покупки веб-лицензии; caution — брать с оговоркой из quality.note;
+# avoid — кириллица плохая по экспертизе (использовать нельзя без явного решения арт-директора).
+# quality.source: tt:<эпизод> — type.today «Кириллица в Google Fonts» (Струков, Остроменцкий, Рудерман; дата эпизода);
+# ui — ../ui/02-typography/01-font-selection.md §3.2 (там же эпизоды tt-neo 19.03.2024 и tt-humanist 27.06.2024);
+# none — экспертной рецензии нет, оценка по замеру D/02 и образцу (sheet_chromium.jpg) — [не проверено экспертом].
+# metrics (опыт D/02, Chromium 153, вес display из weight_tested): k — средняя ширина знака русского заголовка, em (для формулы
+# кегля 01-display-typography.md §2.3); xh — высота строчных, em; lh_floor_lc / lh_floor_caps — минимальный интерлиньяж без
+# касания «чернил» (строчные: б й ё ф над р у д щ ц; прописные: Ё Й над Д Ц Щ); tracking_touch — трекинг (em), при котором у–х
+# касаются (тест «ухо», пиксельный, 240 px): трекинг display не ниже tracking_touch + 0,005.
+# Технические данные (подмножества, оси, версии) — fontsource API (GF), снято 2026-09-24.
+
+version: 1
+status: draft
+checked_at: "2026-09-24"
+owner: "creative-research · 04-visual-language · D (волна 1)"
+sources:
+  - "type.today: display (04.11.2025), display2 (16.01.2026), geo (11.02.2021), old-style (01.06.2021), transitional (02.11.2021), gfdidones (11.07.2023) — 99-raw/cache/type.today_ru_journal_*"
+  - "ui-research 02-typography/01-font-selection.md §2.6–3.4 (tt-neo, tt-humanist, метрики S24)"
+  - "fontsource API v1 /fonts?subsets=cyrillic и /variable/<id> — 99-raw/cache/fontsource_fonts.json, 99-raw/experiments/D/02-cyrillic-display-fonts/meta/"
+  - "опыт D/02: 99-raw/experiments/D/02-cyrillic-display-fonts/results_table.json, touch_chromium.json"
+  - "type.today: Druk, Graphik, Stratos (страницы гарнитур, 2026-09-24); лицензии — type.today/ru/journal/whytheprice, typetype.org/licensing"
+schema:
+  fields: [id, family, source, license, web_license, default_or_option, class, display_style, axes, weights, italic, cyrillic, quality, metrics, weight_tested, good_for, pair_with, notes]
+  cyrillic: "full = cyrillic + cyrillic-ext (украинский, казахский и др.); basic = только cyrillic (русский, белорусский, сербский базово)"
+  good_for: "hero | section | stat | quote | footer-wordmark | body (body — только если годится для текста)"
+
+fonts:
+  # ---------------- ОТКРЫТЫЕ (OFL), ГРОТЕСКИ ----------------
+  - {id: golos-text, family: "Golos Text", source: "Google Fonts / Paratype", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: sans-neo, display_style: grotesque, axes: {wght: [400, 900]}, weights: "400–900", italic: false, cyrillic: full,
+     quality: {verdict: good, source: "ui (tt-neo 19.03.2024)", note: "функциональная, «decent Cyrillic»; сербские ћђ низкие"},
+     metrics: {k: 0.554, xh: 0.530, lh_floor_lc: 0.955, lh_floor_caps: 1.045, tracking_touch: -0.040}, weight_tested: 700,
+     good_for: [hero, section, stat, body], pair_with: "сам с собой (display 700–900 + текст 400)", notes: "нет Light — контраст весов только вверх"}
+  - {id: onest, family: "Onest", source: "Google Fonts / Simpals", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: sans-neo-geo, display_style: grotesque, axes: {wght: [100, 900]}, weights: "100–900", italic: false, cyrillic: full,
+     quality: {verdict: unreviewed, source: none, note: "экспертной рецензии нет (ui 02/01 §3.3); образец D/02 — формы без явных дефектов"},
+     metrics: {k: 0.548, xh: 0.530, lh_floor_lc: 0.985, lh_floor_caps: 1.105, tracking_touch: -0.015}, weight_tested: 700,
+     good_for: [hero, section, stat, body], notes: "трекинг жирного display не туже −0,01 em (у–х касаются при −0,015); usWin 1,546 — проверить высоту строки на Windows"}
+  - {id: geist, family: "Geist", source: "Google Fonts / Vercel", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: sans-neo, display_style: grotesque, axes: {wght: [100, 900], ital: [0, 1]}, weights: "100–900", italic: true, cyrillic: full,
+     quality: {verdict: unreviewed, source: none, note: "кириллица с v1.7.0 (29.01.2026), рецензий нет (ui 02/01 §3.3) — [спорно]"},
+     metrics: {k: 0.561, xh: 0.540, lh_floor_lc: 0.890, lh_floor_caps: 1.065, tracking_touch: -0.030}, weight_tested: 700,
+     good_for: [hero, section, body], pair_with: "Geist Mono (данные, outlier)", notes: "вид «Vercel»; на RU-странице проверять ю, д, л на образце"}
+  - {id: commissioner, family: "Commissioner", source: "Google Fonts / K. Bartsokas", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: sans-humanist, display_style: grotesque, axes: {wght: [100, 900], slnt: [-12, 0], FLAR: [0, 100], VOLM: [0, 100]}, weights: "100–900", italic: false, cyrillic: full,
+     quality: {verdict: good, source: "ui (tt-humanist 27.06.2024)", note: "«systematic solutions, designs that look natural»"},
+     metrics: {k: 0.517, xh: 0.505, lh_floor_lc: 0.950, lh_floor_caps: 1.115, tracking_touch: -0.035}, weight_tested: 700,
+     good_for: [hero, section, quote, body], notes: "оси FLAR/VOLM дают фирменный display из той же семьи; нет tnum — для чисел в stat брать другую"}
+  - {id: ibm-plex-sans, family: "IBM Plex Sans", source: "Google Fonts / IBM", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: sans-neo, display_style: grotesque, axes: {wght: [100, 700], wdth: [75, 100], ital: [0, 1]}, weights: "100–700", italic: true, cyrillic: full,
+     quality: {verdict: good, source: "ui (tt-neo)", note: "«proper and balanced Cyrillic»; кириллица шире латиницы ×1,173"},
+     metrics: null, weight_tested: null, good_for: [section, stat, body], pair_with: "IBM Plex Mono, IBM Plex Serif", notes: "Condensed-семейство без кириллицы — сужать через ось wdth"}
+  - {id: rubik, family: "Rubik", source: "Google Fonts / Hubert & Fischer", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: sans-rounded, display_style: rounded, axes: {wght: [300, 900], ital: [0, 1]}, weights: "300–900", italic: true, cyrillic: full,
+     quality: {verdict: caution, source: "tt-geo 11.02.2021; tt-display2 16.01.2026", note: "Rubik Mono One годится для акциденции; основному шрифту эксперты предпочли бы качественный DIN; Rubik Generative Fonts — «можно пользоваться»"},
+     metrics: {k: 0.564, xh: 0.520, lh_floor_lc: 0.965, lh_floor_caps: 1.065, tracking_touch: -0.045}, weight_tested: 700,
+     good_for: [hero, section], notes: "мягкий тон; семья генеративных вариантов (Wet Paint, Glitch, Doodle) — только как осознанный приём L2"}
+  - {id: montserrat, family: "Montserrat", source: "Google Fonts", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: sans-geometric, display_style: grotesque, axes: {wght: [100, 900], ital: [0, 1]}, weights: "100–900", italic: true, cyrillic: full,
+     quality: {verdict: ok-display, source: "tt-geo 11.02.2021", note: "«для заголовков и акциденции кириллица в целом подходит»"},
+     metrics: {k: 0.599, xh: 0.540, lh_floor_lc: 0.970, lh_floor_caps: 1.055, tracking_touch: 0.010}, weight_tested: 700,
+     good_for: [hero, section], notes: "примета генераторов (Hallmark banned defaults) — только с причиной; у–х касаются уже при 0: отрицательный трекинг жирному не давать"}
+  - {id: unbounded, family: "Unbounded", source: "Google Fonts", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: sans-wide, display_style: wide, axes: {wght: [200, 900]}, weights: "200–900", italic: false, cyrillic: full,
+     quality: {verdict: unreviewed, source: none, note: "рецензии нет; в примерах A (Кварц, Лесная обжарка L2) — отмечен cyrillic_checked"},
+     metrics: {k: 0.711, xh: 0.575, lh_floor_lc: 1.000, lh_floor_caps: 1.145, tracking_touch: -0.010}, weight_tested: 600,
+     good_for: [hero, stat, footer-wordmark], notes: "широкая: k 0,711 → роль на шаг меньше (опыт D/01); трекинг ≥ 0; без метрического фолбэка CLS 0,042–0,065 (D/03)"}
+  - {id: geologica, family: "Geologica", source: "Google Fonts / Monokrom", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: sans, display_style: grotesque, axes: {wght: [100, 900], slnt: [-12, 0], CRSV: [0, 1], SHRP: [0, 100]}, weights: "100–900", italic: false, cyrillic: full,
+     quality: {verdict: unreviewed, source: none, note: "рецензии нет"},
+     metrics: {k: 0.567, xh: 0.510, lh_floor_lc: 0.995, lh_floor_caps: 1.140, tracking_touch: -0.025}, weight_tested: 700,
+     good_for: [hero, section], notes: "оси SHRP (острота) и CRSV (курсивность) — приём display без второй гарнитуры"}
+  - {id: sofia-sans-condensed, family: "Sofia Sans Condensed / Semi Condensed / Extra Condensed", source: "Google Fonts / Lettersoup", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: sans-condensed, display_style: condensed, axes: {wght: [1, 1000], ital: [0, 1]}, weights: "100–900", italic: true, cyrillic: full,
+     quality: {verdict: unreviewed, source: none, note: "болгарские авторы: проверить, что при lang=ru рисуются русские формы (д, л, в) — в образце D/02 русские"},
+     metrics: {k: 0.349, xh: 0.495, lh_floor_lc: 0.900, lh_floor_caps: 0.985, tracking_touch: -0.030}, weight_tested: 800,
+     good_for: [hero, stat, section], notes: "Extra Condensed: k 0,349 — длинные русские заголовки в 2 строки при крупном кегле; без метрического фолбэка CLS до 0,070 (D/03)"}
+  - {id: science-gothic, family: "Science Gothic", source: "Google Fonts", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: sans-gothic, display_style: condensed, axes: {wdth: [50, 200], wght: [100, 900], slnt: [-10, 0], CTRS: [0, 85]}, weights: "100–900", italic: false, cyrillic: full,
+     quality: {verdict: unreviewed, source: none, note: "новая (2025-11), рецензий нет"},
+     metrics: {k: 0.690, xh: 0.510, lh_floor_lc: 0.960, lh_floor_caps: 1.045, tracking_touch: -0.025}, weight_tested: 700,
+     good_for: [hero, stat, footer-wordmark], notes: "ширина 50–200 и контраст CTRS в одном файле — ширину подбирать под длину заголовка (k измерен при wdth 100)"}
+  - {id: tektur, family: "Tektur", source: "Google Fonts / A. Jagosz", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: display-industrial, display_style: display, axes: {wdth: [75, 100], wght: [400, 900]}, weights: "400–900", italic: false, cyrillic: full,
+     quality: {verdict: caution, source: "tt-display 04.11.2025", note: "качественный, кириллица неидеальна (Ч, Ю, плечи Щ Ц Д в лёгких) — с осторожностью"},
+     metrics: {k: 0.565, xh: 0.560, lh_floor_lc: 0.885, lh_floor_caps: 1.025, tracking_touch: -0.035}, weight_tested: 700,
+     good_for: [hero, stat], notes: "индустриальный, «технический» тон"}
+  - {id: russo-one, family: "Russo One", source: "Google Fonts", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: display-geometric, display_style: display, axes: {}, weights: "400", italic: false, cyrillic: basic,
+     quality: {verdict: unreviewed, source: none, note: "рецензии нет; одно начертание"},
+     metrics: {k: 0.574, xh: 0.530, lh_floor_lc: 0.920, lh_floor_caps: 1.040, tracking_touch: 0.025}, weight_tested: 400,
+     good_for: [hero, stat], notes: "у–х касаются при 0 — только нулевой или положительный трекинг"}
+  - {id: arsenal, family: "Arsenal", source: "Google Fonts", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: sans-humanist, display_style: grotesque, axes: {}, weights: "400, 700", italic: true, cyrillic: full,
+     quality: {verdict: good-display-only, source: "ui (tt-humanist)", note: "«this Cyrillic is indeed very decent», но шрифт дисплейный"},
+     metrics: null, weight_tested: null, good_for: [hero, section, quote], notes: "статический, 2 веса"}
+  - {id: pt-sans-narrow, family: "PT Sans Narrow / PT Sans Caption", source: "Google Fonts / Paratype", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: sans-humanist, display_style: condensed, axes: {}, weights: "400, 700", italic: false, cyrillic: full,
+     quality: {verdict: good, source: "ui (tt-humanist: PT Sans)", note: "семья PT Sans — «reasonable in quality»"},
+     metrics: null, weight_tested: null, good_for: [section, stat], notes: "узкая с проверенной кириллицей; нет переменного файла"}
+  - {id: oi, family: "Oi", source: "Google Fonts", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: display-fat-slab, display_style: display, axes: {}, weights: "400", italic: false, cyrillic: full,
+     quality: {verdict: good, source: "tt-display 04.11.2025", note: "«кириллица качественная и естественная — её можно использовать»"},
+     metrics: {k: 0.899, xh: 0.715, lh_floor_lc: 1.055, lh_floor_caps: 1.020, tracking_touch: -0.015}, weight_tested: 400,
+     good_for: [hero, footer-wordmark], notes: "сверхжирный акцидентный: 1–3 слова, только L1–L2 как главный приём; k 0,899 — очень широкий"}
+  - {id: kablammo, family: "Kablammo", source: "Google Fonts", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: display-decorative, display_style: display, axes: {MORF: [0, 60]}, weights: "400", italic: false, cyrillic: full,
+     quality: {verdict: good, source: "tt-display 04.11.2025", note: "«кириллица качественная и функциональная, ей можно пользоваться»"},
+     metrics: null, weight_tested: null, good_for: [hero, footer-wordmark], notes: "ось MORF анимируется (движение текста — E, эффекты — F); игровой тон"}
+  # ---------------- ОТКРЫТЫЕ (OFL), АНТИКВЫ ----------------
+  - {id: literata, family: "Literata", source: "Google Fonts / TypeTogether", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: serif-transitional, display_style: serif, axes: {opsz: [7, 72], wght: [200, 900], ital: [0, 1]}, weights: "200–900", italic: true, cyrillic: full,
+     quality: {verdict: good, source: "tt-transitional 02.11.2021", note: "«продуманное, развитое семейство с качественной кириллицей»"},
+     metrics: {k: 0.562, xh: 0.520, lh_floor_lc: 1.010, lh_floor_caps: 1.105, tracking_touch: 0.025}, weight_tested: 600,
+     good_for: [hero, section, quote, body], notes: "opsz до 72 — display-оптика автоматически (font-optical-sizing: auto); у–х засечки касаются при 0 — трекинг не отрицательный; антиква = примета «тёплой колеи» (не больше 1 направления)"}
+  - {id: playfair, family: "Playfair (2.0)", source: "Google Fonts / C. Forsberg", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: serif-display, display_style: serif, axes: {opsz: [5, 1200], wdth: [87.5, 112.5], wght: [300, 900], ital: [0, 1]}, weights: "300–900", italic: true, cyrillic: full,
+     quality: {verdict: caution, source: "tt-transitional (о Playfair Display, 02.11.2021)", note: "у Playfair Display «кириллица далеко не идеальна, пользоваться очень осторожно»; версия 2.0 отдельно не рецензирована"},
+     metrics: {k: 0.464, xh: 0.420, lh_floor_lc: 0.835, lh_floor_caps: 0.885, tracking_touch: -0.025}, weight_tested: 600,
+     good_for: [hero, quote], notes: "opsz до 1200 — контраст растёт с кеглем; низкие строчные (xh 0,42) — визуально мельче при том же кегле"}
+  - {id: prata, family: "Prata", source: "Google Fonts", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: serif-didone, display_style: serif, axes: {}, weights: "400", italic: false, cyrillic: full,
+     quality: {verdict: ok-display, source: "tt-gfdidones 11.07.2023", note: "«приемлемого качества, найдёт применение в акцидентном наборе»"},
+     metrics: {k: 0.550, xh: 0.520, lh_floor_lc: 1.100, lh_floor_caps: 1.235, tracking_touch: 0.010}, weight_tested: 400,
+     good_for: [hero, quote], notes: "самый высокий пол интерлиньяжа в выборке: капс ≥ 1,24, строчные ≥ 1,1"}
+  - {id: cormorant, family: "Cormorant / Cormorant Garamond", source: "Google Fonts / C. Fahrenheit", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: serif-oldstyle, display_style: serif, axes: {wght: [300, 700], ital: [0, 1]}, weights: "300–700", italic: true, cyrillic: full,
+     quality: {verdict: ok, source: "tt-old-style 01.06.2021", note: "«пригоден, но нужна незаурядная внимательность в системе начертаний»"},
+     metrics: {k: 0.440, xh: 0.390, lh_floor_lc: 1.005, lh_floor_caps: 1.005, tracking_touch: 0.000}, weight_tested: 600,
+     good_for: [hero, quote], notes: "очень низкие строчные (xh 0,39) — только крупно; «люкс»-колея — с причиной"}
+  - {id: piazzolla, family: "Piazzolla", source: "Google Fonts / Huerta Tipográfica", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: serif-oldstyle, display_style: serif, axes: {opsz: [8, 30], wght: [100, 900], ital: [0, 1]}, weights: "100–900", italic: true, cyrillic: full,
+     quality: {verdict: good, source: "tt-old-style 01.06.2021", note: "«практичное и выразительное, качественная кириллица, небольшие технические недочёты»"},
+     metrics: {k: 0.487, xh: 0.490, lh_floor_lc: 0.955, lh_floor_caps: 1.085, tracking_touch: 0.020}, weight_tested: 700,
+     good_for: [hero, section, quote, body], notes: "трекинг не отрицательный (засечки касаются при +0,02)"}
+  - {id: lora, family: "Lora", source: "Google Fonts / Cyreal", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: serif-transitional, display_style: serif, axes: {wght: [400, 700], ital: [0, 1]}, weights: "400–700", italic: true, cyrillic: full,
+     quality: {verdict: good, source: "tt-transitional 02.11.2021", note: "«выразительный, с качественной кириллицей»"},
+     metrics: null, weight_tested: null, good_for: [section, quote, body], notes: "Hallmark считает пересоленной как текст — в display реже"}
+  - {id: spectral, family: "Spectral", source: "Google Fonts / Production Type (полная версия — type.today)", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: serif-oldstyle, display_style: serif, axes: {}, weights: "200–800", italic: true, cyrillic: full,
+     quality: {verdict: good, source: "tt-old-style 01.06.2021", note: "версия type.today — с капителью и расширенной кириллицей; слишком большое межсловное"},
+     metrics: null, weight_tested: null, good_for: [quote, body], notes: "статические файлы"}
+  - {id: alice, family: "Alice", source: "Google Fonts", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: serif-display, display_style: serif, axes: {}, weights: "400", italic: false, cyrillic: full,
+     quality: {verdict: good-display-only, source: "tt-transitional 02.11.2021", note: "«для акциденции и крупных кеглей, где нужен сказочный характер»; расширенная кириллица — с ошибками"},
+     metrics: null, weight_tested: null, good_for: [hero, quote], notes: "узкий тон — «сказка», детское, книжное"}
+  - {id: source-serif-4, family: "Source Serif 4", source: "Google Fonts / Adobe", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: serif-transitional, display_style: serif, axes: {opsz: [8, 60], wght: [200, 900], ital: [0, 1]}, weights: "200–900", italic: true, cyrillic: full,
+     quality: {verdict: ok, source: "tt-transitional (Source Serif Pro)", note: "«приемлемая кириллица»; светлый, с просторными выносными — плотный интерлиньяж не подходит"},
+     metrics: null, weight_tested: null, good_for: [section, quote, body], notes: "opsz до 60 — display-оптика"}
+  - {id: yeseva-one, family: "Yeseva One", source: "Google Fonts", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: serif-fatface, display_style: serif, axes: {}, weights: "400", italic: false, cyrillic: full,
+     quality: {verdict: unreviewed, source: none, note: "рецензии нет"},
+     metrics: {k: 0.572, xh: 0.500, lh_floor_lc: 0.965, lh_floor_caps: 1.085, tracking_touch: 0.025}, weight_tested: 400,
+     good_for: [hero, footer-wordmark], notes: "жирная антиква «fat face»; трекинг ≥ 0"}
+  - {id: roboto-serif, family: "Roboto Serif", source: "Google Fonts", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: serif, display_style: serif, axes: {opsz: [8, 144], wdth: [50, 150], wght: [100, 900], GRAD: [-50, 100], ital: [0, 1]}, weights: "100–900", italic: true, cyrillic: full,
+     quality: {verdict: unreviewed, source: none, note: "рецензии нет; у Roboto (гротеск) кириллица «questionable» (ui tt-neo) — проверять глазами"},
+     metrics: null, weight_tested: null, good_for: [hero, section], notes: "ширина и opsz в одном файле"}
+  - {id: noto-serif-display, family: "Noto Serif Display", source: "Google Fonts", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: serif-display, display_style: serif, axes: {wdth: [62.5, 100], wght: [100, 900], ital: [0, 1]}, weights: "100–900", italic: true, cyrillic: full,
+     quality: {verdict: caution, source: "tt-transitional (Noto Serif)", note: "у текстового Noto Serif «кириллицу использовать нельзя»; display-версия отдельно не рецензирована"},
+     metrics: null, weight_tested: null, good_for: [hero], notes: "только после проверки образца по ui 02/01 §3.1"}
+  # ---------------- МОНО (outlier: данные, вордмарк) ----------------
+  - {id: jetbrains-mono, family: "JetBrains Mono", source: "Google Fonts / JetBrains", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: mono, display_style: mono, axes: {wght: [100, 800], ital: [0, 1]}, weights: "100–800", italic: true, cyrillic: full,
+     quality: {verdict: unreviewed, source: none, note: "x-height 0,550; лигатуры calt — выключать в данных"}, metrics: null, weight_tested: null,
+     good_for: [stat], notes: "моно только для данных, кода, измерений (impeccable: mono как костюм — отказ)"}
+  - {id: geist-mono, family: "Geist Mono", source: "Google Fonts / Vercel", license: OFL-1.1, web_license: included, default_or_option: caution,
+     class: mono, display_style: mono, axes: {wght: [100, 900], ital: [0, 1]}, weights: "100–900", italic: true, cyrillic: full,
+     quality: {verdict: unreviewed, source: none, note: "кириллица с 1.7.0"}, metrics: null, weight_tested: null, good_for: [stat], notes: "пара к Geist"}
+  - {id: ibm-plex-mono, family: "IBM Plex Mono", source: "Google Fonts / IBM", license: OFL-1.1, web_license: included, default_or_option: default,
+     class: mono, display_style: mono, axes: {}, weights: "100–700", italic: true, cyrillic: full,
+     quality: {verdict: good-pair, source: "ui 02/01 §3.3", note: "пара к Plex Sans"}, metrics: null, weight_tested: null, good_for: [stat], notes: "статические файлы"}
+
+  # ---------------- КОММЕРЧЕСКИЕ (опция; веб-лицензия покупается у вендора) ----------------
+  - {id: druk-cyrillic, family: "Druk / Druk Condensed / Druk Text Wide (Cyrillic)", source: "type.today (Commercial Type, кириллица CSTM Fonts с 2014)", license: commercial,
+     web_license: "per-style; type.today — от $50 за начертание для сайта до 15 тыс. посетителей в месяц, дороже с трафиком", default_or_option: option,
+     class: display-grotesque, display_style: condensed, axes: {}, weights: "по вендору", italic: true, cyrillic: full,
+     quality: {verdict: good, source: "вендор (кириллица делали эксперты CSTM)", note: "[мнение вендора]"}, metrics: null, weight_tested: null,
+     good_for: [hero, stat, footer-wordmark], notes: "плакатный сверхузкий/сверхширокий гротеск; Druk Text — для малых кеглей"}
+  - {id: graphik-cyrillic, family: "Graphik (Cyrillic)", source: "type.today (Commercial Type, кириллица И. Рудерман, 2015)", license: commercial,
+     web_license: "per-style; Commercial Type — от $50 за начертание в одном формате, семья целиком $1500 (162 начертания)", default_or_option: option,
+     class: sans-neo, display_style: grotesque, axes: {}, weights: "по вендору", italic: true, cyrillic: full,
+     quality: {verdict: good, source: "вендор", note: "[мнение вендора]"}, metrics: null, weight_tested: null, good_for: [hero, section, body], notes: ""}
+  - {id: stratos-cyrillic, family: "Stratos (Cyrillic)", source: "type.today (кириллица Рудерман и Остроменцкий, CSTM, 2017)", license: commercial,
+     web_license: "per-style; добавление кириллицы и греческого подняло цену ≈ 30 → 60 € (type.today)", default_or_option: option,
+     class: sans-geometric, display_style: display, axes: {}, weights: "по вендору", italic: false, cyrillic: full,
+     quality: {verdict: good, source: "вендор", note: "узкие прописные в духе деревянных гротесков + геометрические строчные"}, metrics: null, weight_tested: null,
+     good_for: [hero, section], notes: ""}
+  - {id: typetype-catalog, family: "Каталог TypeType (TT-семьи с кириллицей)", source: "typetype.org/fonts", license: commercial,
+     web_license: "по месячным просмотрам и сроку (бессрочная или годовая), на домены лицензиата (typetype.org/licensing)", default_or_option: option,
+     class: vendor, display_style: grotesque, axes: {}, weights: "по вендору", italic: null, cyrillic: full,
+     quality: {verdict: unreviewed, source: none, note: "конкретную гарнитуру проверять по ui 02/01 §3.1 до покупки"}, metrics: null, weight_tested: null,
+     good_for: [hero, section, body], notes: "российский вендор; годовая лицензия — файлы удалить с сервера по окончании"}
+  - {id: paratype-catalog, family: "Каталог ПараТайп", source: "paratype.ru", license: commercial,
+     web_license: "по условиям вендора (проверить при покупке)", default_or_option: option,
+     class: vendor, display_style: grotesque, axes: {}, weights: "по вендору", italic: null, cyrillic: full,
+     quality: {verdict: unreviewed, source: none, note: "автор бесплатных PT Sans / PT Serif / Golos; сайт с этой машины 2026-09-24 не открылся (ошибка сертификата)"},
+     metrics: null, weight_tested: null, good_for: [hero, section, body], notes: ""}
+
+# Нельзя или не стоит (кириллица с ошибками по экспертизе) — не брать как display без явного решения арт-директора
+avoid:
+  - {family: "Oswald", source: "ui (tt-humanist 27.06.2024) — «нельзя», множественные ошибки", note: "в примерах A (Лесная обжарка, Кварц B, Окошко C) — заменить на Sofia Sans Condensed, PT Sans Narrow или Druk (опция); замер D/02: капс-пол 1,20"}
+  - {family: "Inter / Inter Tight", source: "ui (tt-neo 19.03.2024) — «should not be used»; Бурба — д и л", note: "Inter Tight — та же кириллица"}
+  - {family: "Manrope", source: "ui (tt-neo) — «a bad choice no matter what your task is»"}
+  - {family: "Roboto / Roboto Condensed / Open Sans / Source Sans 3", source: "ui (tt-neo)"}
+  - {family: "Fira Sans (все ширины)", source: "ui (tt-humanist) — «a true failure»"}
+  - {family: "Exo 2, Alumni Sans, Overpass, Jost, Play, Didact Gothic, Jura", source: "ui (tt-humanist), tt-geo 11.02.2021"}
+  - {family: "Dela Gothic One, Rampart One, Reggae One, Stick, Train One, Kelly Slab, Pixelify Sans", source: "tt-display 04.11.2025, tt-display2 16.01.2026"}
+  - {family: "Noto Serif, Ledger, Brygada 1918, Old Standard TT, STIX Two, Tinos", source: "tt-transitional 02.11.2021, tt-gfdidones 11.07.2023"}
+  - {family: "Merriweather, Vollkorn, EB Garamond, Alegreya (капитель)", source: "tt-transitional, tt-old-style", note: "ограниченно: только прописные/мелкие кегли — не display"}
+
+# Нет кириллицы (fontsource/GF, 2026-09-24) — латинские display-дефолты Hallmark и taste, в RU не работают
+no_cyrillic: [Fraunces, "Instrument Serif", "Bricolage Grotesque", "Space Grotesk", Syne, Anton, "Bebas Neue", "League Gothic", "Big Shoulders Display",
+  "Mona Sans", "Hubot Sans", "Bodoni Moda", "DM Serif Display", Newsreader, Cardo, "Crimson Pro", "Libre Baskerville", "Gilda Display", "Instrument Sans",
+  "DM Sans", Poppins, Outfit, Sora, Figtree, "Public Sans", Lato, "Albert Sans", "Schibsted Grotesk", Gabarito]
+no_cyrillic_note: "Plus Jakarta Sans, Hanken Grotesk — cyrillic-ext без базового cyrillic; Jost — без cyrillic-ext (ui 02/01 §3.4); Fontshare (Satoshi, General Sans, Clash, Cabinet) — своя лицензия, кириллицу проверять"
+
+# Проверка A (примеры art-direction, cyrillic_checked: false): Commissioner ✓ (tt), Onest — кириллица есть, рецензии нет; Nunito — «средне» (ui tt-humanist);
+# Literata ✓ (tt); Geist — есть с 01.2026, рецензии нет [спорно]; Oswald ✗ (tt) — заменить.
+a_examples_check:
+  Commissioner: good
+  Onest: unreviewed-ok-by-sample
+  Nunito: "average (ui tt-humanist: «cannot boast… exceptional quality of Cyrillic»)"
+  Literata: good
+  Geist: unreviewed-new
+  Oswald: avoid

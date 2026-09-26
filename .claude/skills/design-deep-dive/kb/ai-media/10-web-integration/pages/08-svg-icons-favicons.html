@@ -1,0 +1,49 @@
+<!doctype html>
+<!-- 08 · SVG на странице: спрайт <symbol> + <use> (один файл, кэшируется), currentColor в светлой и тёмной теме, анимация
+     inline SVG с блоком reduce, анимированный SVG через <img> — статичная копия в <picture media="(prefers-reduced-motion: reduce)">,
+     паттерн mask-image + цвет из токена, фавиконы из 3 файлов (Evil Martians 2026). Правила и проверки — агент G
+     (07-vector-svg-icons/03 §3–§5, 04 §2–§3); здесь — сборка на одной странице. Агент J, волна 3, 23.09.2026 · проверено: J/06. -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SVG, иконки и фавиконы</title>
+<link rel="icon" href="assets/svg/favicon.ico" sizes="32x32">
+<link rel="icon" href="assets/svg/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/svg/apple-touch-icon.png">
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .icons { display: flex; gap: 18px; align-items: center; color: var(--accent); }
+  .icons svg { width: 28px; height: 28px; }
+  .pattern { height: 140px; border-radius: 16px; background-color: var(--accent); opacity: .9;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M-2 2 2-2M0 16 16 0M14 18l4-4' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E") repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M-2 2 2-2M0 16 16 0M14 18l4-4' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E") repeat; }
+  .spin { transform-origin: 12px 12px; animation: r 1s linear infinite; } @keyframes r { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+  @media (prefers-color-scheme: dark) { :root { --accent: #7fc7bf; } }
+</style>
+</head>
+<body>
+<section class="section">
+  <h2>Иконки из спрайта</h2>
+  <p>Один файл <code>sprite.svg</code> (1,2 КБ) вместо россыпи inline-SVG в каждой странице; цвет — <code>currentColor</code>, в тёмной теме
+     меняется токен, а не файл.</p>
+  <div class="icons">
+    <svg aria-hidden="true"><use href="assets/svg/sprite.svg#i-sun"/></svg>
+    <svg aria-hidden="true"><use href="assets/svg/sprite.svg#i-moon"/></svg>
+    <svg aria-hidden="true"><use href="assets/svg/sprite.svg#i-wave"/></svg>
+    <svg role="img" aria-label="Загрузка" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path class="spin" d="M21 12a9 9 0 1 1-6.2-8.56"/></svg>
+  </div>
+</section>
+<section class="section">
+  <h2>Анимированный SVG через &lt;img&gt;</h2>
+  <p>Внутри <code>&lt;img&gt;</code> медиазапрос reduce не срабатывает (G/05) — статичную копию выбирает <code>&lt;picture&gt;</code>.</p>
+  <picture><source srcset="assets/svg/wave-static.svg" media="(prefers-reduced-motion: reduce)"><img src="assets/svg/wave-anim.svg" width="120" height="40" alt=""></picture>
+</section>
+<section class="section">
+  <h2>Паттерн кодом</h2>
+  <p>Плитка 166 байт в <code>mask-image</code>, цвет — из токена; растровая текстура для такого фона не нужна.</p>
+  <div class="pattern" aria-hidden="true"></div>
+</section>
+</body>
+</html>

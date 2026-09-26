@@ -1,0 +1,484 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:app-design:site-research:site-map:0",
+  "title": "site-map v0 — карта многостраничного сайта: страницы, шаблоны, общая шапка и подвал, перелинковка, языки, модель контента, порядок сборки",
+  "description": "Владелец — site-research (06-multipage-ia, агент G, волна 2; v1 — J, волна 3). Контракт тройки §3 п.2. Строится из site-brief (pages.mode: by-type — карта по умолчанию для site_type из 06-multipage-ia/01 §2; listed — список брифа) и порождает page-plan на каждый шаблон или уникальную страницу (04-blocks/page-plan.schema.json: page.id = pages[].id, page.template = templates[].instances == 'collection'). Общие шапка и подвал живут здесь один раз (chrome); page-plan только выбирает вариант (navigation.header/footer). Пакет исполнителя kimi — один на шаблон (templates[].package), первый пакет строит главную и общие компоненты. Id — словарь B (02-site-types/vocabulary.yaml); новые id — пометка «(новый id)» в описании страницы и заметка «## Для J». Проверки: форма — эта схема; id — vocab_lint.py; связи (шаблон есть, родитель есть, пункты меню ведут на страницы карты, у формы есть thank-you) — site_validate.py (J).",
+  "x-version": 0,
+  "x-checked": "2026-09-24",
+  "x-owner": "site-research · 06-multipage-ia · G (v0, волна 2); J (v1, волна 3)",
+  "x-doc": "06-multipage-ia/01-sitemaps-templates-content-model.md, 06-multipage-ia/02-navigation-linking-i18n.md",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {"^x-": {"description": "Расширения проекта; валидатор не проверяет."}},
+  "required": ["site_map_version", "checked", "status", "site", "site_type", "refs", "derived_from", "languages", "url_policy", "templates", "pages", "chrome", "linking", "utility_pages", "build_order"],
+  "properties": {
+    "site_map_version": {"type": "string", "pattern": "^0(\\.[0-9]+)?$|^1(\\.[0-9]+)*$", "description": "0 — G, волна 2; 1 — J."},
+    "checked": {"$ref": "#/$defs/date"},
+    "status": {"enum": ["draft", "proposed", "approved", "built"], "description": "draft — пишется; proposed — показана заказчику; approved — утверждена; built — все пакеты собраны."},
+    "example": {"type": "boolean", "description": "true — учебный пример формата (вымышленные данные, факты — заглушки fact:)."},
+    "site": {"$ref": "#/$defs/id", "description": "slug проекта = site-brief project.slug = page-plan site = copy-deck site."},
+    "site_type": {
+      "enum": ["services-site", "corporate-site", "saas-marketing-site", "portfolio-site", "event-site", "personal-brand-site", "school-site", "campaign-site", "landing-site"],
+      "description": "Тип сайта (словарь B, site_type). landing-site допустим: карта из лендинга и служебных страниц."
+    },
+    "refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {"^x-": {}},
+      "required": ["brief", "vocabulary"],
+      "description": "Пути от этого файла.",
+      "properties": {
+        "brief": {"type": "string"},
+        "facts": {"type": ["string", "null"]},
+        "vocabulary": {"type": "string"},
+        "blocks": {"type": "string"},
+        "page_plans": {"type": "string", "description": "Папка page-plan (файл на шаблон или уникальную страницу)."},
+        "legal_requirements": {"type": "string", "description": "legal-requirements.yaml I — юридический набор страниц."},
+        "head_kit": {"type": "string", "description": "head-kit.yaml H — sitemap.xml, hreflang, canonical, BreadcrumbList."}
+      }
+    },
+    "derived_from": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pages_mode"],
+      "description": "Как получена карта: из карты по умолчанию для типа сайта или из списка брифа; что добавлено и исключено.",
+      "properties": {
+        "pages_mode": {"enum": ["by-type", "listed"], "description": "= site-brief pages.mode."},
+        "default_map": {"type": "string", "description": "Ссылка на карту по умолчанию: site:06-01#2.<n>."},
+        "added": {"type": "array", "items": {"$ref": "#/$defs/id"}, "description": "Страницы сверх карты по умолчанию (id pages[])."},
+        "excluded": {"type": "array", "items": {"$ref": "#/$defs/id"}, "description": "page_type, исключённые заказчиком (= brief pages.exclude) или по отсутствию фактов."},
+        "missing_facts_blocked": {"type": "array", "items": {"$ref": "#/$defs/id"}, "description": "Страницы, отложенные до фактов (нет отзывов — нет reviews-page)."},
+        "why": {"type": "string"}
+      }
+    },
+    "languages": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary", "structure"],
+      "description": "Языковые версии: набор — из site-brief languages[]; структура адресов и переключатель — G; hreflang и x-default — H.",
+      "properties": {
+        "primary": {"$ref": "#/$defs/lang"},
+        "structure": {"enum": ["single", "subdirectory", "subdomain", "cctld"], "description": "single — один язык; subdirectory — /en/ (по умолчанию для второго языка); subdomain — en.example.ru; cctld — example.de. Параметр ?lang= запрещён (Google 2025-12-10)."},
+        "primary_prefix": {"type": "boolean", "default": false, "description": "Есть ли префикс у основного языка (/ru/). По умолчанию нет: основной язык в корне."},
+        "versions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["lang", "role", "scope"],
+            "properties": {
+              "lang": {"$ref": "#/$defs/lang"},
+              "role": {"enum": ["primary", "adaptation"], "description": "adaptation — адаптация под свою аудиторию, не дословный перевод (решение заказчика)."},
+              "scope": {"enum": ["all-pages", "selected-pages"]},
+              "pages": {"type": "array", "items": {"$ref": "#/$defs/id"}, "description": "При selected-pages — какие страницы есть в этой версии."},
+              "base": {"type": "string", "description": "Корень версии: /en/, https://en.example.ru/."},
+              "untranslated_fallback": {"enum": ["language-home", "hide-link"], "default": "language-home", "description": "Куда ведёт переключатель со страницы, которой нет в этой версии."}
+            }
+          }
+        },
+        "switcher": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "placement": {"enum": ["header-utility", "footer", "header-and-footer"], "default": "header-utility"},
+            "label": {"enum": ["native-name", "native-code"], "default": "native-name", "description": "Самоназвание языка («English»); флаги запрещены (ux 07-05 §11)."},
+            "same_page": {"type": "boolean", "default": true, "description": "Ведёт на ту же страницу в другой версии, а не на её главную."},
+            "auto_redirect": {"const": false, "description": "Автоматического перенаправления по IP или Accept-Language нет (Google; ux 07-05 §11)."}
+          }
+        }
+      }
+    },
+    "url_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case", "word_separator", "slug_source", "trailing_slash", "max_depth"],
+      "description": "Правила адресов (06-02 §4). Техника canonical и sitemap.xml — H.",
+      "properties": {
+        "case": {"const": "lower"},
+        "word_separator": {"const": "-", "description": "Дефис; подчёркивание не используется (Google)."},
+        "slug_source": {"enum": ["translit", "english", "native"], "description": "translit — латиница по правилам транслитерации для кириллицы (Яндекс: транслитерация помогает роботу); english — для англоязычной версии; native — кириллица в пути (percent-encoding, UTF-8)."},
+        "translit_scheme": {"type": "string", "description": "Например: «ГОСТ 7.79-2000 Б» или «Яндекс»; одна схема на сайт."},
+        "trailing_slash": {"type": "boolean", "description": "Одна форма для всех страниц; вторая — 301 на первую."},
+        "max_depth": {"type": "integer", "minimum": 1, "maximum": 5, "description": "Сегментов пути у самой глубокой страницы без учёта языкового префикса; по умолчанию 3."},
+        "section_prefixes": {"type": "boolean", "default": true, "description": "Коллекции живут под своим сегментом (/uslugi/…, /blog/…)."},
+        "ids_in_urls": {"type": "boolean", "default": false, "description": "Числовые id вместо слов — только у коллекций без устойчивых названий."},
+        "dates_in_urls": {"type": "boolean", "default": false},
+        "file_extensions": {"type": "boolean", "default": false},
+        "keep_existing": {"type": "boolean", "description": "= site-brief search.existing_site.keep_urls: при редизайне адреса сохраняются."},
+        "redirects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from", "code"],
+            "properties": {
+              "from": {"type": "string"},
+              "to": {"type": "string"},
+              "code": {"enum": [301, 308, 404, 410], "description": "301/308 — на равноценную страницу; 404/410 — содержимое удалено без замены."},
+              "why": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "templates": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Шаблоны: у каждой страницы карты ровно один шаблон. Шаблон single — одна страница с собственным page-plan; collection — серия однотипных страниц, один page-plan (page.template: true) и коллекция данных.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "page_type", "instances", "page_plan", "package", "breadcrumbs", "indexable"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "page_type": {"$ref": "#/$defs/id", "description": "page_type словаря B (новые — с пометкой в note)."},
+          "name": {"type": "string"},
+          "instances": {"enum": ["single", "collection"]},
+          "collection": {"$ref": "#/$defs/id", "description": "id коллекции (collections[]) — обязателен при instances: collection."},
+          "page_plan": {"type": "string", "description": "Путь к page-plan шаблона или страницы."},
+          "header": {"enum": ["site", "landing-minimal", "none"], "default": "site", "description": "Вариант шапки страниц шаблона (= page-plan navigation.header)."},
+          "footer": {"enum": ["site", "minimal"], "default": "site"},
+          "breadcrumbs": {"type": "boolean", "description": "Правило: true для страниц глубины ≥ 2 от главной у раздела со своей страницей-хабом (06-02 §3)."},
+          "local_nav": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {"enum": ["siblings", "subpages", "anchors"], "description": "siblings — соседи раздела; subpages — подстраницы программы или модели (обзор, преподаватели, цены); anchors — оглавление по странице."},
+              "sticky": {"type": "boolean"}
+            }
+          },
+          "related": {"$ref": "#/$defs/id", "description": "id правила linking.related_rules."},
+          "indexable": {"type": "boolean"},
+          "macrostructure": {"$ref": "#/$defs/id"},
+          "package": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["order"],
+            "description": "Пакет исполнителя (kimi 07-brief-handoff): один на шаблон. order — порядок сборки; builds_chrome — пакет, который собирает общую шапку, подвал и DESIGN.md (главная).",
+            "properties": {
+              "order": {"type": "integer", "minimum": 1},
+              "builds_chrome": {"type": "boolean", "default": false},
+              "depends_on": {"type": "array", "items": {"$ref": "#/$defs/id"}, "description": "id шаблонов, чьи компоненты переиспользуются."},
+              "sample_instances": {"type": "integer", "minimum": 1, "maximum": 5, "default": 2, "description": "Сколько экземпляров коллекции собрать и проверить в пакете (остальные — данными)."}
+            }
+          },
+          "note": {"type": "string"}
+        },
+        "allOf": [
+          {"if": {"properties": {"instances": {"const": "collection"}}, "required": ["instances"]}, "then": {"required": ["collection"]}}
+        ]
+      }
+    },
+    "pages": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Все страницы (уникальные и экземпляры-образцы коллекций). Экземпляры коллекций целиком — в данных CMS; здесь — хаб и 1–3 образца.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "page_type", "template", "url", "parent", "priority"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id", "description": "= site-brief pages.list[].id = page-plan page.id."},
+          "page_type": {"$ref": "#/$defs/id"},
+          "template": {"$ref": "#/$defs/id"},
+          "title": {"type": "string", "description": "Рабочее название (не текст страницы — copy-deck text)."},
+          "url": {"type": "string", "pattern": "^/(?:(?:[a-z0-9]+(?:-[a-z0-9]+)*|\\{[a-z_]+\\})(?:/|$))*$", "description": "Путь от корня языковой версии, строчными, через дефис; шаблон коллекции — с {slug}."},
+          "parent": {"oneOf": [{"$ref": "#/$defs/id"}, {"type": "null"}], "description": "Канонический родитель (для крошек и URL); null — только у главной и служебных вне иерархии."},
+          "also_listed_in": {"type": "array", "items": {"$ref": "#/$defs/id"}, "maxItems": 2, "description": "Полииерархия: дополнительные хабы со ссылкой на страницу (≤ 2; крошки — по parent)."},
+          "priority": {"enum": ["must", "should", "could"], "description": "= brief pages.list[].priority."},
+          "main_sources": {"type": "array", "items": {"$ref": "#/$defs/id"}, "description": "traffic_source словаря B."},
+          "action": {"$ref": "#/$defs/id", "description": "Главное действие страницы (action, macro), если отличается от conversion.action брифа."},
+          "indexable": {"type": "boolean", "default": true},
+          "lang_versions": {"type": "array", "items": {"$ref": "#/$defs/lang"}, "description": "В каких языковых версиях есть страница (по умолчанию — все)."},
+          "status": {"enum": ["planned", "content-ready", "built", "blocked-facts"], "default": "planned"},
+          "note": {"type": "string"}
+        }
+      }
+    },
+    "collections": {
+      "type": "array",
+      "description": "Модель контента CMS: типы записей серии страниц, поля, связи (06-01 §4). Поля — данные, слоты page-plan читают их по id.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "template", "url_pattern", "fields"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "name": {"type": "string"},
+          "template": {"$ref": "#/$defs/id"},
+          "url_pattern": {"type": "string", "description": "Например /uslugi/{slug}/ или /programmy/{slug}/."},
+          "hub_page": {"$ref": "#/$defs/id", "description": "Страница-хаб (список) коллекции."},
+          "expected_items": {"type": "integer", "minimum": 0},
+          "sort": {"type": "string"},
+          "facets": {"type": "array", "items": {"$ref": "#/$defs/id"}, "description": "Поля-фильтры хаба; страницы фильтров не индексируются (Google, пагинация)."},
+          "pagination": {"enum": ["none", "pages", "load-more-with-links"], "default": "none"},
+          "fields": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "type", "required"],
+              "properties": {
+                "id": {"$ref": "#/$defs/id"},
+                "type": {"enum": ["text", "rich-text", "slug", "number", "date", "enum", "boolean", "url", "media", "fact-ref", "reference", "reference-list", "seo-meta"]},
+                "required": {"type": "boolean"},
+                "unique": {"type": "boolean"},
+                "values": {"type": "array", "items": {"type": "string"}, "description": "Для enum."},
+                "ref": {"$ref": "#/$defs/id", "description": "Для reference и reference-list — id коллекции."},
+                "fact_kinds": {"type": "array", "items": {"type": "string"}, "description": "Для fact-ref — виды фактов text facts.schema.yaml."},
+                "slot": {"$ref": "#/$defs/id", "description": "id слота словаря B (без префикса), куда идёт поле в page-plan."},
+                "note": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "chrome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["header", "footer", "breadcrumbs", "search"],
+      "description": "Общие шапка, подвал, крошки, поиск — один раз на сайт (WCAG 2.2: 3.2.3 Consistent Navigation, 3.2.6 Consistent Help; 06-02 §1). page-plan только выбирает вариант.",
+      "properties": {
+        "header": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["archetype", "items", "utilities", "mobile"],
+          "properties": {
+            "block": {"const": "header", "description": "id блока E (blocks.yaml)"},
+            "archetype": {"$ref": "#/$defs/header-archetype"},
+            "hallmark_ref": {"type": "string", "description": "Архетип Hallmark для подачи (N1b, N5, N6, N9, N11, N12, N13) — выбор creative; структура — archetype."},
+            "items": {
+              "type": "array",
+              "minItems": 0,
+              "maxItems": 9,
+              "description": "Пункты верхнего уровня по порядку: только страницы карты. ≤ 7 рекомендуется; 8–9 — при группировке и коротких подписях.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["page", "presentation"],
+                "properties": {
+                  "page": {"$ref": "#/$defs/id", "description": "Страница-хаб пункта (у раскрываемого пункта — тоже страница: ссылка + отдельная кнопка раскрытия)."},
+                  "label_hint": {"type": "string", "description": "Рабочая подпись (финальная — copy-deck text, slot:nav-label)."},
+                  "presentation": {"enum": ["link", "dropdown", "mega"]},
+                  "groups": {
+                    "type": "array",
+                    "maxItems": 5,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["label_hint", "pages"],
+                      "properties": {
+                        "label_hint": {"type": "string"},
+                        "pages": {"type": "array", "minItems": 1, "maxItems": 8, "items": {"$ref": "#/$defs/id"}},
+                        "from_collection": {"$ref": "#/$defs/id", "description": "Группа строится из коллекции (первые N по sort)."}
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "utilities": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "phone": {"type": "boolean"},
+                "messenger": {"type": "boolean"},
+                "address_or_city": {"type": "boolean"},
+                "search": {"type": "boolean"},
+                "lang_switch": {"type": "boolean"},
+                "login": {"type": "boolean", "description": "«Войти» в продукт — action log-in (micro)."},
+                "cta": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "action": {"$ref": "#/$defs/id"},
+                    "target": {"type": "string", "description": "id страницы или #якорь формы."}
+                  }
+                }
+              }
+            },
+            "sticky": {"enum": ["none", "sticky", "partial"], "default": "partial"},
+            "mobile": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["pattern", "keep_visible"],
+              "properties": {
+                "pattern": {"enum": ["full-screen-list", "drill-down", "visible-links"], "description": "visible-links — до 4 пунктов видимы без меню (NN/g); full-screen-list — кнопка «Меню» и список; drill-down — последовательное меню для мега-меню (NN/g 2024, п.9)."},
+                "keep_visible": {"type": "array", "items": {"enum": ["logo", "cta", "phone", "search", "lang_switch"]}}
+              }
+            },
+            "landing_minimal_pages": {"type": "array", "items": {"$ref": "#/$defs/id"}, "description": "Страницы под платный трафик без меню сайта (C 02 §2.3)."},
+            "announcement": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "fact": {"type": "string", "pattern": "^fact:[a-z0-9]+(-[a-z0-9]+)*$"},
+                "until": {"$ref": "#/$defs/date"},
+                "link": {"$ref": "#/$defs/id"}
+              }
+            }
+          }
+        },
+        "footer": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["variant", "legal"],
+          "properties": {
+            "block": {"const": "footer"},
+            "variant": {"enum": ["site", "minimal", "statement", "newsletter-first"], "description": "Варианты block:footer E; site — группы разделов (карта подвала)."},
+            "groups": {
+              "type": "array",
+              "maxItems": 6,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["label_hint", "pages"],
+                "properties": {
+                  "label_hint": {"type": "string"},
+                  "pages": {"type": "array", "minItems": 1, "maxItems": 8, "items": {"$ref": "#/$defs/id"}}
+                }
+              }
+            },
+            "legal": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/id"}, "description": "Юридические страницы (состав — I, legal-requirements.yaml)."},
+            "requisites_fact": {"type": "string", "pattern": "^(fact|missing):[a-z0-9]+(-[a-z0-9]+)*$", "description": "Сведения о продавце: наименование, ОГРН/ИНН, адрес (I)."},
+            "contacts": {"type": "boolean", "default": true},
+            "html_sitemap_link": {"type": "boolean"},
+            "mobile": {"enum": ["open-list", "accordion-groups"], "default": "open-list", "description": "open-list — всё видно (NN/g: подвал не сворачивать); accordion-groups — только группы разделов при > 25 ссылок, служебные ссылки видимы всегда [спорно]."}
+          }
+        },
+        "breadcrumbs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["rule"],
+          "properties": {
+            "block": {"const": "breadcrumbs"},
+            "rule": {"enum": ["depth-2-plus", "none"], "description": "depth-2-plus — на страницах глубины ≥ 2 от главной (главная → раздел → страница); none — сайт в 1–2 уровня."},
+            "mobile": {"enum": ["full-no-wrap", "parent-only"], "default": "parent-only"},
+            "structured_data": {"const": "H", "description": "BreadcrumbList — H; первый трейл разметки = видимому."}
+          }
+        },
+        "search": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "why"],
+          "properties": {
+            "enabled": {"type": "boolean"},
+            "why": {"type": "string", "description": "Правило 06-02 §2.4: число страниц, коллекции, поиск по названию."},
+            "results_page": {"$ref": "#/$defs/id"},
+            "results_indexable": {"const": false}
+          }
+        },
+        "html_sitemap": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {"type": "boolean"},
+            "page": {"$ref": "#/$defs/id"}
+          }
+        }
+      }
+    },
+    "linking": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min_inbound_links"],
+      "description": "Перелинковка (06-02 §3): хабы, связанные материалы, контекстные ссылки, запрет сирот.",
+      "properties": {
+        "min_inbound_links": {"type": "integer", "minimum": 1, "default": 1, "description": "Каждая индексируемая страница — со ссылкой хотя бы с одной другой страницы (Google, Яндекс)."},
+        "hubs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["page", "lists"],
+            "properties": {
+              "page": {"$ref": "#/$defs/id"},
+              "lists": {"$ref": "#/$defs/id", "description": "id коллекции или шаблона, который хаб перечисляет полностью."}
+            }
+          }
+        },
+        "related_rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "from", "to", "by", "max"],
+            "properties": {
+              "id": {"$ref": "#/$defs/id"},
+              "from": {"$ref": "#/$defs/id", "description": "id шаблона-источника."},
+              "to": {"$ref": "#/$defs/id", "description": "id коллекции или шаблона-цели."},
+              "by": {"enum": ["reference-field", "same-category", "same-location", "shared-tag", "editor-pick", "next-step"]},
+              "field": {"$ref": "#/$defs/id", "description": "Поле связи в коллекции (при reference-field)."},
+              "max": {"type": "integer", "minimum": 1, "maximum": 8},
+              "block": {"enum": ["related-links", "article-cards", "case-cards", "service-cards", "team-grid"], "description": "id блока E (blocks.yaml)"},
+              "placement": {"enum": ["after-final-cta", "in-content", "sidebar"], "default": "after-final-cta"}
+            }
+          }
+        },
+        "contextual_links": {"type": "boolean", "default": true, "description": "Ссылки в тексте на связанные страницы с описательным текстом ссылки."},
+        "orphans_allowed": {"type": "array", "items": {"$ref": "#/$defs/id"}, "description": "Только неиндексируемые: «спасибо», служебные посадочные под рекламу."}
+      }
+    },
+    "utility_pages": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["not_found", "legal_set"],
+      "properties": {
+        "not_found": {"$ref": "#/$defs/id", "description": "not-found-page: код 404 (H), пути на хабы, поиск при chrome.search.enabled, без крошек."},
+        "thank_you": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["after", "page"],
+            "properties": {
+              "after": {"type": "string", "description": "Форма или действие: id страницы с формой или action."},
+              "page": {"$ref": "#/$defs/id"}
+            }
+          }
+        },
+        "legal_set": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/id"}, "description": "Состав — I (legal-requirements.yaml)."},
+        "search_results": {"$ref": "#/$defs/id"}
+      }
+    },
+    "build_order": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Порядок пакетов исполнителя: 1 — главная с общей шапкой, подвалом и DESIGN.md; дальше — шаблоны по трафику и зависимостям (06-01 §6).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["step", "template", "why"],
+        "properties": {
+          "step": {"type": "integer", "minimum": 1},
+          "template": {"$ref": "#/$defs/id"},
+          "why": {"type": "string"},
+          "acceptance": {"type": "array", "items": {"type": "string"}, "description": "Проверки перехода к следующему шагу."}
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "Второй язык требует структуры адресов, отличной от single.",
+      "if": {"properties": {"languages": {"properties": {"versions": {"minItems": 2}}, "required": ["versions"]}}},
+      "then": {"properties": {"languages": {"properties": {"structure": {"not": {"const": "single"}}}}}}
+    },
+    {
+      "$comment": "Поиск по сайту включён — нужна страница результатов.",
+      "if": {"properties": {"chrome": {"properties": {"search": {"properties": {"enabled": {"const": true}}}}}}},
+      "then": {"properties": {"chrome": {"properties": {"search": {"required": ["results_page"]}}}}}
+    }
+  ],
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"},
+    "date": {"type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?$"},
+    "lang": {"type": "string", "pattern": "^[a-z]{2}(-[A-Z]{2})?$"},
+    "header-archetype": {
+      "enum": ["minimal-cta", "bar-links", "bar-dropdowns", "two-tier", "mega-menu", "search-led", "editorial-masthead"],
+      "description": "Структурные архетипы шапки G (06-02 §1.2): minimal-cta — логотип + призыв + контакт (лендинг, промо, landing-minimal); bar-links — 3–7 ссылок без подменю; bar-dropdowns — пункты с одноуровневыми списками ≤ 8; two-tier — утилитарная полоса (телефон, город, адрес, язык, вход) над основной (услуги РФ, корпоративный); mega-menu — панели с группами и описаниями (≥ 2 пунктов по ≥ 10 страниц); search-led — поле поиска на виду + меню (сотни страниц: сеть клиник, каталог программ, база знаний); editorial-masthead — название по центру, только редакционный жанр и с явной ссылкой «Главная». Подача (Hallmark N1b, N5, N6, N9, N11, N12, N13) — creative."
+    }
+  }
+}

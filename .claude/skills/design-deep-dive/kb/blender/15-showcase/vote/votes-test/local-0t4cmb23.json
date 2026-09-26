@@ -1,0 +1,49 @@
+{
+ "v": 1,
+ "voter": "local-0t4cmb23",
+ "updated": "2026-09-25T15:36:23.603Z",
+ "answers": {
+  "test-case-island:0": {
+   "pair": "test-case-island",
+   "flip": false,
+   "c": "both_bad",
+   "ms": 3970,
+   "at": "2026-09-25T15:36:11.215Z"
+  },
+  "test-sculpt:1": {
+   "pair": "test-sculpt",
+   "flip": true,
+   "c": "right",
+   "ms": 2696,
+   "at": "2026-09-25T15:36:16.243Z"
+  },
+  "test-case-island:1": {
+   "pair": "test-case-island",
+   "flip": true,
+   "c": "both_bad",
+   "ms": 1354,
+   "at": "2026-09-25T15:36:17.598Z"
+  },
+  "test-case-sculpt:0": {
+   "pair": "test-case-sculpt",
+   "flip": false,
+   "c": "right",
+   "ms": 1494,
+   "at": "2026-09-25T15:36:19.092Z"
+  },
+  "test-sculpt:0": {
+   "pair": "test-sculpt",
+   "flip": false,
+   "c": "left",
+   "ms": 2540,
+   "at": "2026-09-25T15:36:21.632Z"
+  },
+  "test-case-sculpt:1": {
+   "pair": "test-case-sculpt",
+   "flip": true,
+   "c": "left",
+   "ms": 1971,
+   "at": "2026-09-25T15:36:23.603Z"
+  }
+ }
+}

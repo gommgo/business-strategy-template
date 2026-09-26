@@ -1,0 +1,71 @@
+# Рецепт 07 · Промо приложения · L1 — 10-recipes/07-app-promo-l1.md · J · 2026-09-25
+recipe_version: "0.1"
+id: recipe:app-promo-l1
+title_ru: "Промо мобильного приложения, L1 — экран, который отвечает"
+status: proposed
+checked_at: "2026-09-25"
+site_type: landing-site
+page_type: landing-app
+level: L1
+level_why: "лендинг — L1 по умолчанию; приём один — состояния экрана"
+budget_profile: landing-app@L1
+when: ["приложение с понятным сценарием 3–4 экрана", "трафик с телефона"]
+not_when: ["нет реальных макетов экранов"]
+inputs:
+  playbook: "../site/10-playbooks-contracts/02-playbooks-landings.md#8"
+  video: ["V:v5oxrZWAq78 18:41", "V:QA5f2loqtM4 16:16"]
+concept:
+  thesis: "Экран, который отвечает: вы нажимаете — интерфейс показывает, что будет дальше."
+  story: {hero: "пациент, который записывается к врачу с телефона", conflict: "звонки и ожидание", resolution: "четыре тапа и напоминание"}
+  signature_move: "экран-DOM с 3–4 состояниями через same-document View Transition"
+ledger:
+  paper: mid
+  display_style: rounded
+  accent_hue: cool
+  macrostructure: feature-stack
+  hero_architecture: split-text-right
+  main_technique: "effect:view-transition"
+  motion_signature: {entrances: "sweep состояний экрана", tempo: brisk, curve: out-strong}
+  corner_language: pill
+page_plan:
+  macrostructure: feature-stack
+  first_screen_policy: offer-cta
+  length: "6 секций (норма 5–7)"
+  sections:
+    - {id: hero, block: "block:hero-media", role: hero, level: L1, visual_role: accent, effects: ["effect:hero-entrance-once"], reduce: final-state}
+    - {id: product-demo, block: "block:interactive-demo", role: product-demo, level: L1, visual_role: peak, effects: ["effect:view-transition", "effect:button-expand-label"], reduce: "мгновенная смена состояний", mobile: "тап «дальше»"}
+    - {id: benefits, block: "block:feature-alternating", role: benefits, level: L0, visual_role: support}
+    - {id: testimonials, block: "block:review-aggregate", role: testimonials, level: L0, visual_role: calm}
+    - {id: faq, block: "block:faq", role: faq, level: L0, visual_role: calm}
+    - {id: final-cta, block: "block:app-download", role: final-cta, level: L0, visual_role: calm}
+motion:
+  thesis: "Двигается только интерфейс внутри экрана и только в ответ на действие."
+  primitives: [fade-up, sweep]
+  peaks: [product-demo]
+  accents: [hero]
+  toggle: none
+  smooth_scroll: false
+  transitions: view-transitions
+  loops_in_view_max: 0
+stack:
+  library: [css, "View Transitions API (same-document)"]
+  js_first_kb_br: 2
+assets:
+  - {slot: screen, ladder: text, source: code, note: "HTML из реальных макетов"}
+  - {slot: feature-icons, ladder: svg, source: real, task_codes: [VEC-ICON-LINE]}
+  - {slot: og-image, ladder: image, source: template, task_codes: [IMG-TEXT-CYR]}
+copy:
+  promise: "записаться за четыре тапа"
+  slots: [headline, subheadline, app-store-link, list-item, testimonial-quote, faq-q, faq-a]
+budget:
+  js_presentation_kb_br: {mobile: 100, desktop: 100}
+  first_screen_mb: {mobile: 2.0, desktop: 3.5}
+  source: "ambition-levels.yaml L1"
+gates:
+  tools: ["motion_check.py --level L1", "marketing_audit.py --level L1"]
+  must_pass: [EG-PERF-07, EG-A11Y-06, EG-A11Y-10, EG-A11Y-13, EG-A11Y-14, EG-MOB-01]
+decisions:
+  - {id: d-frame, technique: "cliche:dashboard-in-browser-frame", decision: avoid, why: "экран без рамки iPhone, своя простая форма"}
+  - {id: d-bob, technique: "cliche:floating-bob-loop", decision: avoid, why: "телефон не качается, движется только интерфейс по действию"}
+  - {id: d-icons, technique: "cliche:glossy-3d-icons", decision: avoid, why: "иконки функций линейные из набора продукта"}
+errors: ["PNG телефона с парением", "демо только по наведению", "разные высоты значков магазинов", "отзывы без даты"]

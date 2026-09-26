@@ -1,0 +1,1377 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:app-design:site-research:page-plan:0.9",
+  "title": "page-plan v0.9 — план одной страницы или шаблона: цель, трафик, форма, секции по порядку, слоты, события",
+  "description": "ЗАМЕНЕНО v1: ../10-playbooks-contracts/schemas/page-plan.schema.json (J, волна 3, 2026-09-24); эта схема v0.9 остаётся для файлов версии 0.9. Владелец — site-research (04-blocks, агент E, волна 2; v1 — J, волна 3). Контракт тройки §3 п.3. Id — словарь B (02-site-types/vocabulary.yaml), блоки и элементы анатомии — 04-blocks/blocks.yaml. Потребители: text (copy-deck: section.id → section_id и site_section_id, role → section_role, block → block, текстовый слот id → slot_id, slot → slot_type, anatomy → site_slot_id, group → group; факты — data[].binds), creative (treatment{} — подсхема creative, пока пустой контейнер), ai-media (media[] → план ассетов 01/01 §8), blender (3d[] → рецепты 12-recipes), kimi (sections[].id и job → site.sections[{id, job}]; first_screen_policy → A3; macrostructure_family → direction.macrostructure). Проверки: форма — эта схема; id — vocab_lint.py; связи (блок есть, слот разрешён блоку, факт есть и разрешён слоту) — 99-raw/experiments/E/01-… (plan_check.py), итог — site_validate.py (J).",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^x-": {}
+  },
+  "required": [
+    "page_plan_version",
+    "checked",
+    "status",
+    "site",
+    "refs",
+    "page",
+    "sections"
+  ],
+  "properties": {
+    "page_plan_version": {
+      "type": "string",
+      "pattern": "^0\\.9(\\.[0-9]+)?$|^1(\\.[0-9]+)*$",
+      "description": "0.9 — черновик E к S1; 1 — J."
+    },
+    "checked": {
+      "$ref": "#/$defs/date",
+      "description": "Дата сверки плана с брифом, фактами и blocks.yaml."
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "proposed",
+        "approved",
+        "built"
+      ],
+      "description": "draft — пишется; proposed — показан заказчику; approved — утверждён; built — собран исполнителем."
+    },
+    "example": {
+      "type": "boolean",
+      "description": "true — учебный пример формата (вымышленные данные)."
+    },
+    "site": {
+      "$ref": "#/$defs/id",
+      "description": "slug проекта = site-brief project.slug = facts.yaml site = copy-deck site."
+    },
+    "refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^x-": {}
+      },
+      "required": [
+        "brief",
+        "facts",
+        "blocks",
+        "vocabulary"
+      ],
+      "description": "Пути от этого файла.",
+      "properties": {
+        "brief": {
+          "type": "string"
+        },
+        "brief_page": {
+          "type": "string",
+          "description": "JSON Pointer страницы в брифе: /pages/list/0."
+        },
+        "facts": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "facts.yaml (формат text B2). null — фактов нет: все data-слоты — missing:."
+        },
+        "meaning": {
+          "type": "string"
+        },
+        "hierarchy": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Иерархии сообщений text (message-hierarchy) по уровням осведомлённости."
+        },
+        "blocks": {
+          "type": "string"
+        },
+        "vocabulary": {
+          "type": "string"
+        },
+        "site_map": {
+          "type": "string",
+          "description": "site-map G (многостраничник)."
+        },
+        "copy_deck": {
+          "type": "string"
+        },
+        "asset_plan": {
+          "type": "string"
+        },
+        "lead_forms": {
+          "type": "string",
+          "description": "lead-forms.yaml F."
+        },
+        "treatment": {
+          "type": "string",
+          "description": "art-direction / treatment creative (после C1)."
+        }
+      }
+    },
+    "page": {
+      "$ref": "#/$defs/page"
+    },
+    "page_slots": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Слоты уровня страницы (scope: page словаря): мета, Open Graph, фавиконы, письма после формы.",
+      "properties": {
+        "text": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/text-slot"
+          }
+        },
+        "media": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/media-slot"
+          }
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/data-slot"
+          }
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Секции потока по порядку DOM (он же визуальный порядок на всех экранах — C 03 §5.1): шапка первой, подвал последним.",
+      "items": {
+        "$ref": "#/$defs/section"
+      }
+    },
+    "overlays": {
+      "type": "array",
+      "description": "Элементы вне потока: липкий призыв, баннер cookie, чат, окно захвата (по умолчанию выключено — решение заказчика 15).",
+      "items": {
+        "$ref": "#/$defs/overlay"
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Что не решено в плане (id вопросов брифа, пробелы фактов, решения F, H, I, P)."
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$"
+    },
+    "fact-ref": {
+      "type": "string",
+      "pattern": "^(fact|missing):[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Как $defs.fact-ref брифа: fact:<id> — факт есть; missing:<id> — факта нет."
+    },
+    "ambition-level": {
+      "enum": [
+        "L0",
+        "L1",
+        "L2"
+      ]
+    },
+    "heading": {
+      "enum": [
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "none"
+      ]
+    },
+    "length-class": {
+      "enum": [
+        "label",
+        "phrase",
+        "sentence",
+        "paragraph",
+        "long"
+      ]
+    },
+    "mobile-behavior": {
+      "enum": [
+        "stack",
+        "accordion",
+        "rail",
+        "hide-decor",
+        "reframe",
+        "toggle",
+        "none"
+      ]
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "value"
+      ],
+      "description": "Как conversion.target брифа.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "anchor",
+            "route",
+            "url",
+            "tel",
+            "messenger",
+            "store",
+            "external"
+          ]
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^x-": {}
+      },
+      "required": [
+        "id",
+        "page_type",
+        "goal",
+        "primary_action",
+        "awareness",
+        "traffic",
+        "macrostructure",
+        "macrostructure_family",
+        "first_screen_policy",
+        "budget_profile",
+        "ambition_level",
+        "jurisdiction",
+        "locale"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id",
+          "description": "= pages.list[].id брифа = id страницы site-map = page_id copy-deck."
+        },
+        "page_type": {
+          "$ref": "#/$defs/id"
+        },
+        "template": {
+          "type": "boolean",
+          "description": "true — план шаблона серии страниц (G); false — одна страница."
+        },
+        "segment": {
+          "type": "string",
+          "description": "Сегмент или источник, для которого этот вариант плана (C 02 §3.4: отдельная страница — если различаются ≥ 2 признака)."
+        },
+        "url": {
+          "type": "string"
+        },
+        "lang": {
+          "type": "string",
+          "pattern": "^[a-z]{2}$"
+        },
+        "locale": {
+          "type": "string",
+          "pattern": "^[a-z]{2}-[A-Z]{2}$"
+        },
+        "jurisdiction": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "Первый — основной (бриф constraints.jurisdiction)."
+        },
+        "goal": {
+          "type": "string",
+          "description": "Цель страницы одной фразой: какое действие и от кого."
+        },
+        "primary_action": {
+          "$ref": "#/$defs/id",
+          "description": "Одно главное действие (action, macro) — бриф conversion.action или pages.list[].action."
+        },
+        "secondary_actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "Вторая цель и каналы того же действия (иным стилем)."
+        },
+        "cta_target": {
+          "$ref": "#/$defs/target"
+        },
+        "secondary_goal": {
+          "type": "string",
+          "description": "Переходный призыв для не готовых сейчас (C 02 §2.1; meaning.conversion.secondary_goal)."
+        },
+        "awareness": {
+          "$ref": "#/$defs/id",
+          "description": "Уровень осведомлённости, под который собран порядок секций."
+        },
+        "awareness_basis": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Откуда уровень: бриф pages.list[].main_sources → meaning.awareness.by_source (сообщение оркестратора 2026-09-24).",
+          "properties": {
+            "from": {
+              "enum": [
+                "brief-main-sources",
+                "brief-meaning-level",
+                "assumption"
+              ]
+            },
+            "main_sources": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/id"
+              }
+            },
+            "by_source": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "traffic_source",
+                  "awareness"
+                ],
+                "properties": {
+                  "traffic_source": {
+                    "$ref": "#/$defs/id"
+                  },
+                  "awareness": {
+                    "$ref": "#/$defs/id"
+                  },
+                  "share": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              }
+            },
+            "rule": {
+              "type": "string",
+              "description": "Как свели несколько уровней в один (например, по доле трафика; остальные — вариантными слотами или другой страницей)."
+            }
+          }
+        },
+        "traffic": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "traffic_source",
+              "temperature"
+            ],
+            "properties": {
+              "traffic_source": {
+                "$ref": "#/$defs/id"
+              },
+              "temperature": {
+                "enum": [
+                  "cold",
+                  "warm",
+                  "hot"
+                ]
+              },
+              "share": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "device": {
+                "enum": [
+                  "mobile",
+                  "desktop",
+                  "mixed"
+                ]
+              },
+              "promise_of_source": {
+                "type": "string"
+              },
+              "in_app_browser": {
+                "type": "boolean",
+                "description": "Трафик открывается во встроенном браузере соцсети или мессенджера (C 02 §4)."
+              }
+            }
+          }
+        },
+        "macrostructure": {
+          "$ref": "#/$defs/id"
+        },
+        "macrostructure_family": {
+          "enum": [
+            "grid",
+            "document",
+            "poster",
+            "flow"
+          ],
+          "description": "layout_family макроструктуры (C 01 §4.1); проекция в kimi: flow → document-led."
+        },
+        "macrostructure_alternatives": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "Две другие формы из разных семейств, показанные заказчику (C 01 §4.3)."
+        },
+        "first_screen_policy": {
+          "enum": [
+            "offer-cta",
+            "offer-cta-header",
+            "poster"
+          ],
+          "description": "C 03 §2.2; источник строки A3 в ACCEPTANCE.md kimi."
+        },
+        "first_screen": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "must_show": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Что обязано быть выше черты первого экрана (C 03 §1.3) — id элементов «секция.слот»."
+            },
+            "core_words_max": {
+              "type": "integer",
+              "description": "Ядро первого экрана (text hero-core, по умолчанию 40)."
+            },
+            "message_match": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "traffic_source",
+                  "match"
+                ],
+                "properties": {
+                  "traffic_source": {
+                    "$ref": "#/$defs/id"
+                  },
+                  "promise": {
+                    "type": "string",
+                    "description": "Обещание источника (бриф traffic.sources[].promise_of_source)."
+                  },
+                  "match": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "subject",
+                        "price",
+                        "offer",
+                        "geo",
+                        "audience",
+                        "action",
+                        "visual"
+                      ]
+                    },
+                    "description": "Что совпадает с источником (C 02 §3.1)."
+                  },
+                  "slots": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Где совпадает: «секция.слот»."
+                  }
+                }
+              }
+            },
+            "variant_map": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "param",
+                "default",
+                "variants"
+              ],
+              "description": "Подстановка по UTM или ключу — белый список вариантов, до первой отрисовки (C 02 §3.3).",
+              "properties": {
+                "param": {
+                  "enum": [
+                    "utm_term",
+                    "utm_content",
+                    "utm_campaign",
+                    "keyword",
+                    "matchtype"
+                  ]
+                },
+                "render": {
+                  "enum": [
+                    "server",
+                    "build",
+                    "edge"
+                  ],
+                  "default": "server"
+                },
+                "default": {
+                  "$ref": "#/$defs/id"
+                },
+                "variants": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "id",
+                      "when"
+                    ],
+                    "properties": {
+                      "id": {
+                        "$ref": "#/$defs/id"
+                      },
+                      "when": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "slots": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Какие слоты меняются: «секция.слот»; тексты вариантов — copy-deck."
+                      }
+                    }
+                  }
+                },
+                "event_param": {
+                  "type": "string",
+                  "description": "Как вариант попадает в событие аналитики (P)."
+                }
+              }
+            }
+          }
+        },
+        "length": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sections_min": {
+              "type": "integer"
+            },
+            "sections_max": {
+              "type": "integer"
+            },
+            "basis": {
+              "type": "string"
+            }
+          }
+        },
+        "budget_profile": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*@L[0-2]$",
+          "description": "Профиль бюджета P: <page_type>@<уровень амбиций> (budgets.yaml P, волна 2)."
+        },
+        "ambition_level": {
+          "$ref": "#/$defs/ambition-level"
+        },
+        "navigation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "header": {
+              "enum": [
+                "landing-minimal",
+                "site",
+                "none"
+              ],
+              "description": "landing-minimal — логотип (ссылка на главную), призыв, контакт без меню сайта (платный трафик, C 02 §2.3); site — шапка сайта (G)."
+            },
+            "archetype": {
+              "type": "string",
+              "description": "Архетип шапки (G, по типу сайта в site-map)."
+            },
+            "anchor_nav": {
+              "type": "boolean"
+            },
+            "logo_link": {
+              "type": "string",
+              "default": "/"
+            },
+            "footer": {
+              "enum": [
+                "minimal",
+                "site"
+              ]
+            }
+          }
+        },
+        "seo": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^x-": {}
+          },
+          "description": "Техническое SEO и GEO — H (head-kit.yaml); здесь — решения уровня страницы.",
+          "properties": {
+            "indexable": {
+              "type": "boolean"
+            },
+            "canonical": {
+              "type": "string"
+            },
+            "h1": {
+              "type": "string",
+              "description": "Где H1: «секция.слот» (ровно один на странице)."
+            },
+            "structured_data": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Типы schema.org (решение H)."
+            },
+            "ssr_required": {
+              "type": "boolean",
+              "description": "Смысловой текст, цены и CTA — в исходном HTML (ИИ-краулеры JS не исполняют)."
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        },
+        "legal": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^x-": {}
+          },
+          "description": "Требования I (legal-requirements.yaml) по юрисдикции.",
+          "properties": {
+            "pd_consent": {
+              "enum": [
+                "separate-document",
+                "checkbox-and-link",
+                "not-collected"
+              ],
+              "description": "152-ФЗ: отдельное согласие с 01.09.2025 (I)."
+            },
+            "privacy_policy": {
+              "type": "string"
+            },
+            "cookie_banner": {
+              "enum": [
+                "required",
+                "not-needed",
+                "auto"
+              ]
+            },
+            "ad_marking": {
+              "type": "boolean"
+            },
+            "requisites": {
+              "enum": [
+                "footer",
+                "contacts-page",
+                "both"
+              ]
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        },
+        "analytics": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^x-": {}
+          },
+          "description": "События и цели — P (events.yaml); правовые условия — I.",
+          "properties": {
+            "systems": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "yandex-metrica",
+                  "ga4",
+                  "server",
+                  "other"
+                ]
+              }
+            },
+            "goals": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/id"
+              },
+              "description": "action id, по которым ставятся цели."
+            },
+            "load_after_consent": {
+              "type": "boolean"
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        },
+        "treatment": {
+          "$ref": "#/$defs/treatment"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^x-": {}
+      },
+      "required": [
+        "id",
+        "role",
+        "block",
+        "slots"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id",
+          "description": "Уникален на странице; = site.sections[].id kimi = section_id copy-deck = section в плане ассетов."
+        },
+        "role": {
+          "$ref": "#/$defs/id",
+          "description": "section_role словаря; other запрещён."
+        },
+        "question": {
+          "type": "string",
+          "description": "Вопрос посетителя, на который отвечает секция (C 01 §1.1; text sections[].question)."
+        },
+        "job": {
+          "type": "string",
+          "description": "Работа секции одной фразой → site.sections[].job kimi."
+        },
+        "block": {
+          "$ref": "#/$defs/id",
+          "description": "id блока blocks.yaml."
+        },
+        "variant": {
+          "$ref": "#/$defs/id",
+          "description": "id структурного варианта блока (blocks.yaml variants)."
+        },
+        "next_step": {
+          "type": "string",
+          "description": "Куда секция ведёт посетителя дальше (следующая роль или действие)."
+        },
+        "objections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "id возражений meaning text, которые закрывает секция."
+        },
+        "carries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Опоры иерархии сообщений text (id) или core."
+        },
+        "anchor": {
+          "type": "string",
+          "description": "id якоря в разметке (#zamer)."
+        },
+        "condition": {
+          "type": "string",
+          "description": "Условие существования секции (например, «только при fact:…»)."
+        },
+        "mobile": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/mobile-behavior"
+          }
+        },
+        "slots": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/text-slot"
+              }
+            },
+            "media": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/media-slot"
+              }
+            },
+            "3d": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/slot-3d"
+              }
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/data-slot"
+              }
+            },
+            "action": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/action-slot"
+              }
+            }
+          }
+        },
+        "treatment": {
+          "$ref": "#/$defs/treatment"
+        },
+        "notes": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "seo": {
+              "type": "string"
+            },
+            "a11y": {
+              "type": "string"
+            },
+            "conversion": {
+              "type": "string"
+            },
+            "legal": {
+              "type": "string"
+            },
+            "structure": {
+              "type": "string"
+            }
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/event"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "not": {
+                  "enum": [
+                    "header",
+                    "footer",
+                    "utility",
+                    "legal"
+                  ]
+                }
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "question",
+              "next_step"
+            ]
+          }
+        }
+      ]
+    },
+    "text-slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "slot"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id",
+          "description": "Локальный id слота, уникален в секции (= slot_id copy-deck)."
+        },
+        "slot": {
+          "$ref": "#/$defs/id",
+          "description": "id слота словаря (= slot_type copy-deck)."
+        },
+        "anatomy": {
+          "$ref": "#/$defs/anatomy-ref"
+        },
+        "group": {
+          "$ref": "#/$defs/group-instance"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "heading": {
+          "$ref": "#/$defs/heading"
+        },
+        "intent": {
+          "type": "string",
+          "description": "Что должен сказать текст (из иерархии сообщений text); сам текст — copy-deck."
+        },
+        "length": {
+          "$ref": "#/$defs/length-class"
+        },
+        "variants": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Сколько вариантов текста нужно (подстановка, A/B)."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "media-slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "slot",
+        "media_role"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id",
+          "description": "Локальный id; в плане ассетов — <секция>-<id>."
+        },
+        "slot": {
+          "$ref": "#/$defs/id"
+        },
+        "anatomy": {
+          "$ref": "#/$defs/anatomy-ref"
+        },
+        "group": {
+          "$ref": "#/$defs/group-instance"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "media_role": {
+          "enum": [
+            "informational",
+            "decorative"
+          ],
+          "description": "= role плана ассетов ai-media."
+        },
+        "goal": {
+          "type": "string",
+          "description": "Что медиа должно показать (= goal плана ассетов)."
+        },
+        "source": {
+          "enum": [
+            "real",
+            "edit-real",
+            "generate",
+            "code",
+            "template",
+            "customer-tbd"
+          ],
+          "description": "= source плана ассетов; customer-tbd — ждёт материалов заказчика."
+        },
+        "authenticity": {
+          "enum": [
+            "real-only",
+            "real-or-generated",
+            "generated-ok",
+            "code"
+          ],
+          "description": "Правило подлинности I: люди-клиенты, команда, отзывы, работы, товар — real-only."
+        },
+        "task": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^task:[A-Z0-9-]+$"
+          },
+          "description": "Подсказка кодов задач ai-media (routing.yaml); итог выбирает ai-media."
+        },
+        "ratio": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "desktop": {
+              "type": "string"
+            },
+            "mobile": {
+              "type": "string"
+            }
+          }
+        },
+        "text_zone": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "side": {
+              "enum": [
+                "left",
+                "right",
+                "top",
+                "bottom",
+                "center",
+                "none"
+              ]
+            },
+            "share": {
+              "type": "number"
+            }
+          }
+        },
+        "lcp_candidate": {
+          "type": "boolean"
+        },
+        "loading": {
+          "enum": [
+            "eager",
+            "lazy"
+          ]
+        },
+        "alt": {
+          "type": "string",
+          "description": "id текстового слота image-alt этой секции или «decorative» (alt=\"\")."
+        },
+        "caption": {
+          "type": "string",
+          "description": "id текстового слота image-caption."
+        },
+        "poster_for": {
+          "type": "string",
+          "description": "Этот кадр — постер для видео или 3D-слота (id)."
+        },
+        "motion": {
+          "enum": [
+            "none",
+            "loop",
+            "video-controls",
+            "shader",
+            "scroll"
+          ],
+          "description": "Только вид; параметры движения — creative, пауза и reduce — ворота (P, I)."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "slot-3d": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "slot",
+        "poster"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "slot": {
+          "enum": [
+            "model-3d",
+            "scene-3d"
+          ]
+        },
+        "anatomy": {
+          "$ref": "#/$defs/anatomy-ref"
+        },
+        "goal": {
+          "type": "string"
+        },
+        "recipe": {
+          "type": "string",
+          "pattern": "^recipe:[a-z0-9-]+$",
+          "description": "Рецепт blender 12-recipes (recipe:01-hero-product)."
+        },
+        "poster": {
+          "type": "string",
+          "description": "id media-слота с постером того же ракурса (запасной вариант и кандидат LCP)."
+        },
+        "load": {
+          "enum": [
+            "after-lcp",
+            "on-visible",
+            "on-interaction"
+          ],
+          "default": "after-lcp"
+        },
+        "cta_before_3d": {
+          "type": "boolean",
+          "default": true,
+          "description": "Призыв и форма работают до загрузки 3D (поправка PLAN №22)."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "data-slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "slot",
+        "fact"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "slot": {
+          "$ref": "#/$defs/id",
+          "description": "fact-ref, testimonial-ref, client-ref, metric-ref, price-ref, case-ref, person-ref, credential-ref."
+        },
+        "fact": {
+          "$ref": "#/$defs/fact-ref"
+        },
+        "binds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "id слотов этой секции (text, media), которые показывают факт; copy-deck берёт отсюда fact_ids."
+        },
+        "group": {
+          "$ref": "#/$defs/group-instance"
+        },
+        "on_missing": {
+          "enum": [
+            "omit-block",
+            "omit-slot",
+            "rewrite-without",
+            "placeholder"
+          ],
+          "description": "Что делать, пока факта нет (как fallback пробела в facts.yaml text): omit-block — снять секцию; omit-slot — снять слот; rewrite-without — текст без этого утверждения; placeholder — [PLACEHOLDER], страница не публикуется до факта (blocking)."
+        },
+        "note": {
+          "type": "string"
+        },
+        "anatomy": {
+          "$ref": "#/$defs/anatomy-ref"
+        }
+      }
+    },
+    "action-slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "slot",
+        "action"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "slot": {
+          "$ref": "#/$defs/id",
+          "description": "cta-primary, cta-secondary, form, link, phone-link, messenger-link, email-link, app-store-link, download-link."
+        },
+        "anatomy": {
+          "$ref": "#/$defs/anatomy-ref"
+        },
+        "group": {
+          "$ref": "#/$defs/group-instance"
+        },
+        "action": {
+          "$ref": "#/$defs/id",
+          "description": "id действия словаря (macro или micro)."
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "style": {
+          "enum": [
+            "primary",
+            "secondary",
+            "link",
+            "channel"
+          ],
+          "description": "primary — главный призыв (повторяется); secondary — второй путь иным стилем; channel — телефон и мессенджер как каналы того же действия."
+        },
+        "label": {
+          "type": "string",
+          "description": "id текстового слота с подписью (cta-label …)."
+        },
+        "form": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ref": {
+              "type": "string",
+              "description": "Набор полей F (lead-forms.yaml#<id>)."
+            },
+            "fields_visible_max": {
+              "type": "integer"
+            },
+            "steps": {
+              "type": "integer"
+            },
+            "consent": {
+              "enum": [
+                "separate-checkbox",
+                "link-only",
+                "none"
+              ],
+              "description": "Согласие на ПД — I (152-ФЗ)."
+            },
+            "success": {
+              "enum": [
+                "inline",
+                "thank-you-page"
+              ]
+            },
+            "thank_you_page": {
+              "type": "string"
+            }
+          }
+        },
+        "event": {
+          "type": "string",
+          "pattern": "^event:[a-z0-9-]+$",
+          "description": "id события P (events.yaml) — когда будет."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trigger",
+        "target"
+      ],
+      "properties": {
+        "trigger": {
+          "enum": [
+            "view",
+            "click",
+            "submit",
+            "start",
+            "step",
+            "play",
+            "expand",
+            "scroll-depth",
+            "copy",
+            "error"
+          ]
+        },
+        "target": {
+          "type": "string",
+          "description": "id слота или секции."
+        },
+        "action": {
+          "$ref": "#/$defs/id"
+        },
+        "event": {
+          "type": "string",
+          "pattern": "^event:[a-z0-9-]+$"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "overlay": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^x-": {}
+      },
+      "required": [
+        "id",
+        "block",
+        "state"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "block": {
+          "enum": [
+            "sticky-cta",
+            "cookie-banner",
+            "chat-widget",
+            "capture-popup",
+            "contact-channels"
+          ],
+          "description": "contact-channels — плавающий кластер мессенджеров и звонка (вариант floating-cluster)."
+        },
+        "state": {
+          "enum": [
+            "on",
+            "off",
+            "auto"
+          ],
+          "description": "auto — по юрисдикции и составу скриптов (баннер cookie — I)."
+        },
+        "when": {
+          "type": "string"
+        },
+        "hide_when": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "slots": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/text-slot"
+              }
+            },
+            "action": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/action-slot"
+              }
+            }
+          }
+        },
+        "notes": {
+          "type": "string"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/event"
+          }
+        }
+      }
+    },
+    "treatment": {
+      "type": "object",
+      "description": "Контейнер подачи creative (контракт §2, §3 п.12): подсхема treatment — владелец creative-research; до точки C1 поля не задаются и не выдумываются. После C1 здесь будет $ref на ../../creative-research/<папка>/treatment.schema.json. Ключи словаря site для treatment-слотов (visual-role, effect-ref, motion-level) — предложение имён, значения — creative.",
+      "$comment": "C1 не наступила на 2026-09-24: creative-research не запущена. Не добавлять свойства до подсхемы creative.",
+      "additionalProperties": true
+    },
+    "anatomy-ref": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(\\.[a-z0-9]+(-[a-z0-9]+)*)?$",
+      "description": "Элемент анатомии блока в blocks.yaml (= site_slot_id copy-deck): id элемента блока или <группа>.<элемент> для повторяемого набора (step.title). По умолчанию равен id слота плана."
+    },
+    "group-instance": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*-[0-9]+$",
+      "description": "Экземпляр повторяемого набора: <id группы>-<номер> (card-1, step-2, qa-3) = group copy-deck."
+    }
+  }
+}

@@ -1,0 +1,175 @@
+# motion-spec v1 — «Сдано», вариант B (Blender, L0). 15-showcase · дорожка SD · фаза 2 (SD2) · 2026-09-25.
+# Основа — motion-spec A (l0-sdano, агент J); отличия: цель отметок — булавки HTML на изометрии Blender (.plan__pins .pin, 4 шт.),
+# LCP — кадр изометрии (<img>, не H1), новый момент act-stamp (клип штампа «СДАНО» на «Образце акта», один раз при появлении).
+# Проверка схемой: creative-research/99-raw/tools/venv-I/bin/python scripts/creative/spec_check.py spec <файл>
+# Сверка сборки: python3 scripts/creative/motion_check.py <index.html> --level L0 --spec <этот файл>
+motion_spec_version: "1.0"
+id: sdano-b-blender
+example: true
+status: proposed
+checked_at: "2026-09-25"
+refs:
+  page_plan: "../../../../creative/10-recipes/recipes/01-lead-services-l0.recipe.yaml#/page_plan"
+  tokens: ../../../../creative/04-visual-language/marketing-tokens.json
+  effects: ../../../../creative/06-effects-catalog/effects.yaml
+  block_treatments: ../../../../creative/09-ai-execution-evaluation/block-treatments.yaml
+level: L0
+executor: {target: any, harness: any, video_in: false}
+page:
+  thesis: "Двигается только красная отметка: на изометрии один раз встают четыре номера; штамп «СДАНО» ставится на образец акта один раз, когда акт виден. Остальное стоит, как подписанный акт."
+  character: [precise, calm]
+  base: {duration_ms: 560, easing: {token: motion.marketing.easing.out-expo}}
+  primitives: [fade-up, none]
+  lcp: {target: hero.hero-visual, entrance: none, note: "LCP — кадр изометрии Blender (<picture> AVIF, fetchpriority high, без анимации); H1 без анимации"}
+  toggle: {required: false, attr: data-motion, states: [system, reduced, full], placement: sticky-header, remember: false}
+  scroll: {smooth: false, tail_ms_max: 0, jacking: never}
+  transitions: {kind: none}
+  properties_allowed: [transform, opacity, scale, translate, background-color, rotate]
+  budget: {loops_in_view_max: 0, loops_in_view_max_mobile: 0, first_screen_scene_ms_max: 600, js_kb_br_effects_max: 1.1, long_frames_pct_max: 2, cls_scroll_max: 0.1}
+  never:
+    - "появление секций ниже первого экрана (fade-and-slide-up на каждой секции — почерк генератора, cliche:section-fade-up)"
+    - "счётчики у цены, сроков и числа пунктов: цифры стоят с первого кадра"
+    - "бегущая строка, свой курсор, параллакс, плавная прокрутка, WebGL — запрет уровня L0"
+    - "анимация H1 и кадра изометрии (LCP), любые эффекты в форме заявки (конверсия — L0)"
+    - "повтор клипа штампа: без loop, второй раз не играет"
+sections:
+  - id: hero
+    block: hero-media
+    role: accent
+    level: L0
+    intent: "первый экран собирается один раз за 600 мс: заголовок и кадр изометрии стоят, лид и кнопка поднимаются на 16 px, на булавках по очереди встают четыре красных номера"
+    moments:
+      - id: hero-copy-rise
+        class: one-shot
+        purpose: guide
+        transition_type: entrance
+        effect: "effect:hero-entrance-once"
+        target: hero.subheadline
+        selector_hint: ".hero__lead"
+        stagger_targets: [hero.hero-proof, hero.cta]
+        trigger: {type: load, delay_ms: 60}
+        model: time
+        tracks:
+          - {property: transform, from: "translateY(var(--mm-shift-reveal))", to: "none", unit_note: "--mm-shift-reveal = 16px"}
+          - {property: opacity, from: 0.01, to: 1}
+        duration: {ms: 560}
+        easing: {token: motion.marketing.easing.out-expo}
+        stagger: {each: {ms: 50}, order: dom, max_items: 3, total_ms_max: 600}
+        repeat: once
+        interrupt: jump-to-end
+        lcp: not-lcp
+        reduce: {strategy: final-state, describe: "лид, цена и кнопка видны с первого кадра"}
+        mobile: {strategy: same}
+      - id: hero-marks
+        class: one-shot
+        purpose: attention
+        transition_type: entrance
+        effect: "effect:hero-entrance-once"
+        target: hero.hero-visual.pins
+        selector_hint: ".plan__pins .pin"
+        trigger: {type: load, delay_ms: 80}
+        model: time
+        tracks:
+          - {property: scale, from: 0.5, to: 1, unit_note: "номер-выноска HTML на головке булавки; центр масштаба — центр номера (translate −50 % −50 %)"}
+          - {property: opacity, from: 0.01, to: 1}
+        duration: {share: 0.5}
+        note: "половина базы 560 мс = 280 мс; задержка 80 + 40 × номер; четвёртая отметка заканчивается на 480 мс. Кадр Blender (LCP) не анимируется"
+        easing: {token: motion.marketing.easing.out-expo}
+        stagger: {each: {ms: 40}, order: dom, max_items: 4, total_ms_max: 400}
+        repeat: once
+        interrupt: jump-to-end
+        lcp: not-lcp
+        reduce: {strategy: final-state, describe: "четыре номера на булавках с первого кадра"}
+        mobile: {strategy: same, describe: "свой портретный кадр (вырезка того же рендера), только номера; список пунктов — под кадром"}
+    storyboard:
+      frames:
+        - {id: hero-t0, at: {time_ms: 0}, viewport: desktop, describe: "H1 и кадр изометрии на месте, номеров нет, лид почти прозрачен", check: "H1 и кадр видимы в первом кадре"}
+        - {id: hero-t700, at: {time_ms: 700}, viewport: desktop, describe: "всё на местах, движение первого экрана закончено", check: "движение в покое 0 %"}
+    reduce: {strategy: final-state, describe: "первый экран полон с первого кадра"}
+    mobile: {strategy: stacked, describe: "текст, кнопка на всю ширину, затем портретный кадр с номерами и список"}
+    budget: {js_kb_br: 0, loops_in_view: 0, load: eager}
+    acceptance:
+      - {id: hero-h1-first, check: "H1 видим в первом кадре и не выпал из LCP", tool: motion_check, gate: EG-PERF-07, metric: vitals.h1_lcp_dropped, at: desktop}
+      - {id: hero-idle, check: "на 6-й секунде первый экран неподвижен", tool: motion_check, gate: EG-A11Y-01, metric: derived.moving_6s_without_pause, at: desktop}
+  - id: case-studies
+    block: case-studies
+    role: calm
+    level: L0
+    intent: "на образце акта один раз ставится чёрный штамп «СДАНО»: клип Blender 1,58 с (штамп стоит на акте, поднимается, переносится дугой, удар, возвращается — остаётся оттиск), играет при 60 % акта в кадре; дальше — неподвижный кадр оттиска"
+    moments:
+      - id: act-stamp
+        class: one-shot
+        purpose: narrate
+        transition_type: entrance
+        effect: "effect:cinemagraph"
+        target: case-studies
+        selector_hint: ".doc__stamp3d"
+        trigger: {type: in-view, threshold: 0.6, once: true}
+        model: time
+        tracks:
+          - {property: opacity, from: 0.01, to: 1, unit_note: "видимый результат — оттиск «СДАНО» на акте; движение штампа — внутри клипа Blender 38 кадров @24 = 1,58 с (VP9 webm 54 КБ, запас H.264 mp4 55 КБ), без loop; последний кадр = постер WebP; ошибка декодера или клип не доиграл за 4,5 с — сразу кадр конца (SD3)"}
+        duration: {share: 2.83}
+        easing: {token: motion.marketing.easing.out-expo}
+        repeat: once
+        interrupt: jump-to-end
+        lcp: not-lcp
+        reduce: {strategy: static-poster, describe: "сразу кадр оттиска (WebP), видео не грузится — 0 байт"}
+        mobile: {strategy: same, describe: "тот же клип; без JS и в reduce — кадр оттиска"}
+        note: "длительность 1,58 с = 2,83 × база 560 мс (клип 38 кадров @24; доля до 4 допускается схемой). Дорожка currentTime на L0 схемой не допускается (E П12) — описан видимый результат. Отличие от синемаграфа каталога: последний кадр ≠ первому (сюжет «поставили штамп»), играет по видимости, а не по load; белое клипа уходит в mix-blend-mode: multiply, поэтому клип ложится и на бумагу акта, и на фон секции"
+    reduce: {strategy: final-state, describe: "оттиск «СДАНО» на акте с первого кадра"}
+    mobile: {strategy: same, describe: "то же"}
+    budget: {js_kb_br: 0.45, loops_in_view: 0, load: on-visible}
+  - id: faq
+    block: faq
+    role: calm
+    level: L0
+    intent: "ответ открывается сразу (высота не анимируется — свойство раскладки), текст ответа проявляется за 320 мс со сдвигом 4 px; стрелка поворачивается"
+    moments:
+      - id: faq-open
+        class: transition
+        purpose: feedback
+        transition_type: entrance
+        target: faq.faq-a
+        selector_hint: ".faq details[open] p"
+        trigger: {type: click}
+        model: time
+        tracks:
+          - {property: opacity, from: 0.01, to: 1}
+          - {property: transform, from: "translateY(4px)", to: "none"}
+        duration: {token: motion.marketing.duration.state}
+        easing: {token: motion.marketing.easing.out-strong}
+        repeat: once
+        interrupt: jump-to-end
+        reduce: {strategy: crossfade, describe: "--mm-dur-state в reduce = 180 мс, сдвиг 0"}
+        mobile: {strategy: same}
+    reduce: {strategy: crossfade, describe: "ответ проявляется за 180 мс без сдвига"}
+    mobile: {strategy: same, describe: "то же"}
+    budget: {js_kb_br: 0, loops_in_view: 0, load: eager}
+  - id: sticky-cta
+    block: sticky-cta
+    role: chrome
+    level: L0
+    intent: "на телефоне полоса с призывом выезжает снизу, когда кнопка первого экрана и форма вне вида"
+    moments:
+      - id: sticky-cta-in
+        class: transition
+        purpose: guide
+        transition_type: persistent
+        target: sticky-cta
+        selector_hint: ".sticky-cta"
+        trigger: {type: state}
+        model: time
+        tracks:
+          - {property: translate, from: "0 110%", to: "0 0"}
+        duration: {token: motion.marketing.duration.state}
+        easing: {token: motion.marketing.easing.out-strong}
+        repeat: once
+        interrupt: reverse
+        reduce: {strategy: crossfade, describe: "--mm-dur-state в reduce = 180 мс"}
+        mobile: {strategy: same}
+    reduce: {strategy: crossfade, describe: "полоса появляется за 180 мс"}
+    mobile: {strategy: same, describe: "только ширина ≤ 40rem; на десктопе полосы нет"}
+    budget: {js_kb_br: 0.5, loops_in_view: 0, load: eager}
+open_questions:
+  - "Отметки — scale + opacity; примитива «pop-in» в схеме v1 нет — записано как часть hero-entrance-once (как у A)."
+  - "Клип штампа — эффект cinemagraph по бюджету (L0 ≤ 300 КБ, ≤ 5 с, без паузы), но сюжетный и по видимости; отдельного id «one-shot clip in-view» в каталоге нет."

@@ -1,0 +1,91 @@
+# abstract-background.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/01-hero-recipes.md#6; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+recipe_version: 1
+checked_at: '2026-09-25'
+author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
+id: abstract-background
+title: 'Абстрактный фон: CSS → SVG → шейдер → картинка → видео'
+doc: 14-recipes/01-hero-recipes.md#6
+task_codes:
+- IMG-BG-ABSTRACT
+- VID-ABSTRACT
+- VEC-PATTERN
+slot: section
+ladder: css
+ai_fit: allowed
+legal_row: 1
+route:
+  source: IMG-BG-ABSTRACT
+  steps:
+  - role: по умолчанию
+    model: код (CSS/SVG/WebGL)
+    price_rub: 0.0
+  - role: картинка с hex
+    model: black-forest-labs/flux.2-pro
+    params:
+      image_resolution: 1K
+    price_rub: 5.0
+    test: E-13
+  - role: сверхширокий 8:1
+    model: google/gemini-3.1-flash-lite-image
+    params:
+      aspect_ratio: '8:1'
+    price_rub: 2.9
+  - role: видео по кадру (routing v2 VID-ABSTRACT — основной)
+    model: bytedance/seedance-1.5-pro
+    params:
+      resolution: 720p
+      duration: '4'
+      generate_audio: 'false'
+      fixed_lens: 'true'
+      aspect_ratio: '16:9'
+    images: '[A]'
+    price_rub: 10.5
+    test: MS-03
+    note: 'фаза 5: спокойное движение крупной формы (0,61); петля — [A, A] + RIFE-мост (hero-loop)'
+  - role: 'видео без кадра (routing v2 — запас)'
+    model: bytedance/seedance-2-mini
+    params:
+      resolution: 480p
+      duration: '5'
+      generate_audio: 'false'
+    price_rub: 12.825
+    note: 'routing v0 округляет до 12,8; фаза 5: Seedance 2 Mini [A,A] — images как референсы, петлю не строит (I-08: шов 7,21); петля — Seedance 1.5 Pro (hero-loop)'
+compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+  <тест> --agent <агент> --out 99-raw/phase5/jobs/<файл>.jsonl
+phase5:
+  jobs:
+  - 99-raw/phase5/jobs/E-13-bg-hex.jsonl
+  reuse:
+  - E-13
+  - E-01
+  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
+steps:
+- id: audit
+  cmd: python3 ../../scripts/ai-media/asset_audit.py audit bg.png --dna <паспорт> --out audit/
+  status: checked
+  evidence: 99-raw/experiments/K
+- id: grain
+  cmd: 'CSS: .grain::after { background: url(noise.svg); opacity: .07; mix-blend-mode: soft-light }'
+  status: checked
+  evidence: 99-raw/experiments/J/03-banding-browser
+accept:
+  thresholds:
+  - palette.min_matched
+  - image.purple_share_max
+  - encoding.ssimulacra2_min
+delivery:
+  template: 10-web-integration/pages/07-effects-grain-layers.html
+  rule: тёмный градиент — только CSS (ступень 0,04 против 0,35–0,55 у AVIF/AV1)
+provenance:
+  dst: trained
+  visible_label: false
+numbers:
+  phase5_sc01_backgrounds: 'тёмный фон с переливом: Sunburst 2K 7 ₽ / Flare 1K 4 ₽ / NB2 1K 4,8 ₽; AVIF при s2 ≥ 80 — 91 / 40 / 20 КБ — 99-raw/experiments/B/12-demo-assets/README.md'
+  phase5_e13: 'E-13 (hex фона у FLUX.2 / Flare / NB2) не запускался — отменено заказчиком 25.09'
+status:
+  local: checked
+  generation: unchecked
+spec:
+  ancestors:
+  - ../../scripts/ai-media/tests/fixtures/D02/E3.spec.json
+  - 13-routing-matrix/stand/briefs/S05-bg-abstract.spec.json

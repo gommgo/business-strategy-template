@@ -1,0 +1,240 @@
+{
+ "rubric": "product",
+ "title": "Товар по референсу, сцена с товаром, мокап",
+ "version": "1.0",
+ "checked_at": "2026-09-23",
+ "author": "агент K, волна 3",
+ "applies_to": [
+  "IMG-PRODUCT",
+  "IMG-MOCKUP"
+ ],
+ "slot": "product",
+ "automated": {
+  "tool": "../../scripts/ai-media/asset_audit.py audit",
+  "mode": "image",
+  "checks": [
+   "edit --protect (товар по альфе) или сравнение с референсом",
+   "ocr этикетки (--expect, --allow-text)",
+   "slop_color",
+   "palette",
+   "provenance"
+  ],
+  "fail_codes": [
+   "QA-PROTECT-CHANGED",
+   "QA-TEXT-MISMATCH",
+   "QA-DIMS-RATIO"
+  ],
+  "warn_codes": [
+   "QA-TEXT-CHECK",
+   "QA-EDIT-LEAK",
+   "QA-EDIT-LOCAL-SHIFT",
+   "QA-COLOR-OVERSAT"
+  ],
+  "thresholds": "11-evaluation-qa/thresholds.yaml"
+ },
+ "vlm": {
+  "role": "фильтр и сортировка best-of-N по смыслу; не финальный арбитр (KLDdXOw6jIc 43:47); доверие — только после калибровки K-01/K-02",
+  "modes": [
+   "checklist",
+   "defects",
+   "pairwise"
+  ],
+  "checklist_generic": [
+   {
+    "id": "g1",
+    "q": "Is the product shown in full, without being cut off by the frame?",
+    "type": "composition"
+   },
+   {
+    "id": "g2",
+    "q": "Does the product stand on a surface with a visible contact shadow?",
+    "type": "relation"
+   },
+   {
+    "id": "g3",
+    "q": "Is the product label readable?",
+    "type": "text"
+   }
+  ],
+  "checklist_note": "вопросы по пунктам конкретного брифа — атомарные, позитивные, с depends (формат 99-raw/phase5/inputs/D2/questions_v2.json); общие — только если брифа нет",
+  "defect_questions": [
+   {
+    "code": "IMG-M03",
+    "q": "Do the colors look unnaturally intense, or are there bright halos around high-contrast edges?",
+    "vlm": "yes"
+   },
+   {
+    "code": "IMG-M21",
+    "q": "Does the scene look unnaturally clean and empty, without any trace of use?",
+    "vlm": "yes"
+   },
+   {
+    "code": "IMG-M22",
+    "q": "Could this exact image be used for almost any company in any industry?",
+    "vlm": "yes"
+   },
+   {
+    "code": "IMG-M23",
+    "q": "Is there a visible watermark, sparkle icon or generator logo in the image?",
+    "vlm": "yes"
+   },
+   {
+    "code": "RUB-PRODUCT-FLOATING",
+    "q": "Does the product look unnaturally placed in the scene (wrong scale, floating, no contact)?",
+    "vlm": "yes",
+    "source": "W5: естественность встройки товара"
+   },
+   {
+    "code": "RUB-DUP-SUBJECT",
+    "q": "Does the same main subject (person, product) appear more than once where only one was asked for?",
+    "vlm": "yes",
+    "source": "H6ZXujE1qBA 12:11 (персонаж дважды в каждом кадре)"
+   },
+   {
+    "code": "RUB-UNASKED-ACCESSORY",
+    "q": "Are there accessories or marks nobody asked for (rings, jewelry, watches, tattoos, logos)?",
+    "vlm": "yes",
+    "source": "KLDdXOw6jIc 40:44 (кольца — reward hacking)"
+   },
+   {
+    "code": "RUB-OVERPROCESSED",
+    "q": "Does the image look over-processed (over-sharpened, over-saturated, HDR-like)?",
+    "vlm": "yes",
+    "source": "W5; KLDdXOw6jIc 34:38"
+   },
+   {
+    "code": "RUB-LEGAL-FACE",
+    "q": "Is there a human face large and sharp enough to be recognized (close-up or medium shot)?",
+    "vlm": "yes",
+    "source": "L 12-legal-provenance/04 §5 п. 3 (узнаваемые люди, двойники) — решает человек"
+   },
+   {
+    "code": "RUB-LEGAL-MARK",
+    "q": "Apart from the main product (if any), is there a real brand logo, trademark or recognizable branded packaging?",
+    "vlm": "yes",
+    "source": "L 12-legal-provenance/04 §5 п. 4 (чужие знаки, упаковка) — решает человек; текст — OCR K"
+   }
+  ],
+  "defect_questions_screen_only": [
+   {
+    "code": "IMG-M12",
+    "q": "Are there garbled, broken or meaningless letters, signs or logos anywhere in the image?",
+    "vlm": "partial"
+   },
+   {
+    "code": "IMG-M17",
+    "q": "Does an object look pasted in, or is the background an illegible mush of small details?",
+    "vlm": "partial"
+   },
+   {
+    "code": "IMG-M25",
+    "q": "Does an inserted object lack a contact shadow or have lighting from a different direction than the scene?",
+    "vlm": "partial"
+   }
+  ],
+  "pairwise_questions": [
+   {
+    "id": "slot",
+    "q": "Which image works better in its slot on a website page, as it would actually be placed?"
+   },
+   {
+    "id": "natural",
+    "q": "Which image looks more natural and closer to the brief (less 'made by AI')?"
+   }
+  ],
+  "not_allowed": [
+   {
+    "what": "анатомия: руки, пальцы, зубы, глаза, лишние конечности (IMG-M11, RUB-EXTRA-LIMBS)",
+    "why": "o3 назвал уродливую руку «mostly natural» [V:h5ItAJuB3Fc 00:01]; VLM ≈ случай в назывании артефактов (Artifact-Bench, 9,8 %)",
+    "instead": "человек: зум 200 % по сетке 3×3; людей в hero не генерировать (A 01/03 §1)"
+   },
+   {
+    "what": "точный текст на картинке (IMG-M12 — чтение)",
+    "why": "VQA-совпадение по тексту 13,7 % (DSG); VLM «догадывается» по языку",
+    "instead": "asset_audit.py ocr (PP-OCRv5 eslav) + чтение по буквам человеком в ключевом слоте (K/01)"
+   },
+   {
+    "what": "счёт предметов",
+    "why": "PaLI ошибается в ≈ 40 % при счёте до 5 (DSG)",
+    "instead": "человек или детектор с проверкой"
+   },
+   {
+    "what": "точный цвет и палитра (hex, «оттенок бренда»)",
+    "why": "VLM «придумывает» цвета: заглушка «golden yellow 30 %» покрывает 0,1 % пикселей (F/07)",
+    "instead": "asset_audit.py: палитра OKLab, покрытие цвета (vlm_to_dna.palette_check)"
+   },
+   {
+    "what": "эстетика, «красиво», «годится как финальный ассет», «дорого»",
+    "why": "у Google нет автооценщика эстетики [V:H6ZXujE1qBA 25:29]; VLM-«визуальный оптимизм» (ui 12/01 §1.4); GPT-4o 45,6 % на 4 классах предпочтения (GenAI-Bench)",
+    "instead": "слепые попарные голоса заказчика (stand_run.py page)"
+   },
+   {
+    "what": "функциональные ошибки предметов и физика теней (IMG-M15, IMG-M16)",
+    "why": "самые частые (58,7 % трудных ИИ-картинок) и самые незаметные, требуют времени (Kamali, CHI 2025)",
+    "instead": "человек: перечислить предметы и проверить каждый; смотреть ≥ 10–20 с"
+   },
+   {
+    "what": "сходство с оригиналом (персонаж, товар, знаменитость)",
+    "why": "судит тот, кто знает оригинал (W2; bH2nP-aCFjk); знаменитость — правовой риск (L)",
+    "instead": "заказчик; для товара — SSIM/ΔE области товара к референсу (edit_check --protect)"
+   },
+   {
+    "what": "абсолютные баллы 1–10",
+    "why": "эффект потолка и расхождение баллов у людей и моделей (GEditBench v2; b_PmGocP4rc 09:15)",
+    "instead": "попарно A/B и бинарные вопросы"
+   },
+   {
+    "what": "вопрос с полным промтом «насколько соответствует»",
+    "why": "судья додумывает соответствие по тексту промта (TIIF-Bench)",
+    "instead": "атомарные вопросы по пунктам брифа (DSG)"
+   }
+  ],
+  "metric_markers": [],
+  "human_markers": [
+   "IMG-M15",
+   "IMG-M24",
+   "RUB-CELEBRITY",
+   "RUB-EXTRA-LIMBS"
+  ]
+ },
+ "judge": {
+  "model_default": "google/gemini-3.1-flash-lite",
+  "model_cross_vendor": "qwen/qwen3-vl-235b-a22b-instruct",
+  "system": "You are a strict visual inspector of images made for websites. Judge only what is clearly visible in the image. Do not assume the image matches any description. Reply only with JSON in the requested format. If you cannot see something clearly, answer \"unsure\".",
+  "checklist_intro": "Answer every question about the image with yes, no or unsure. Questions:",
+  "defects_intro": "Inspect the image for each listed defect. For every code set present to yes, no or unsure. If yes, you must fill `where` with a short location in the image (for example \"left hand of the man\", \"top-right corner\") and set severity to minor or major. Report a defect only if you can point to it. Defects:",
+  "pairwise_intro": "Images A and B are two candidates for the same website slot. Brief: {brief}. For each question choose A, B, tie (equally good) or both_bad (neither is usable). Judge only visible content; ignore differences in file size and compression artifacts. Questions:",
+  "max_tokens": 700,
+  "reasoning_effort": "low",
+  "structured": true,
+  "temperature": 0,
+  "seed": 7,
+  "repeat_share": 0.1,
+  "swap_sides": true
+ },
+ "human": [
+  "Товар рядом с фото-референсом в одном масштабе: форма, пропорции, логотип, число деталей (решает тот, кто знает товар)",
+  "Этикетка: прочитать по буквам на 200 % (OCR не видит латиницу-«близнеца», K/01)",
+  "Контактная тень и направление света совпадают со сценой",
+  "5-секундный взгляд в реальном размере в слоте (скриншот страницы или макет с заголовком): что заметно сразу"
+ ],
+ "decision": {
+  "fail": "любой fail автоматической проверки (asset_audit) → перегенерировать или чинить по подсказке (композит, срез, кроссфейд)",
+  "cluster": "≥ 3 подтверждённых маркеров (метрика + глаз или VLM с «где»), в ключевом слоте ≥ 2 → не публиковать (A 01/03 §5.1)",
+  "vlm_defect": "VLM нашёл маркер с «где» → показать человеку этот фрагмент (needs_human), а не браковать сам",
+  "pass": "автоматика без fail + VLM без подтверждённых маркеров → ручная приёмка ≈ 2 мин по чек-листу 03",
+  "choice": "из нескольких годных — слепые попарные голоса заказчика; VLM-попарный — только если K-01 показал ≥ 0,8 согласия",
+  "legal": "RUB-LEGAL-FACE / RUB-LEGAL-MARK «да» с «где» → ворота L (12-legal-provenance/04 §5 п. 3–4): человек решает — перегенерировать без людей и знаков или согласие; автоматически не fail",
+  "product": "товар генерацией не создаётся: изменение товара (SSIM < 0,9 или ΔE медиана > 5 по маске) → вставить оригинал по альфе (H 08/02 §3)"
+ },
+ "notes": [],
+ "sources": [
+  "A 01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5–§6",
+  "E-helper-judging §7–§12, «Рекомендации» 16–18",
+  "DSG arXiv 2310.18235; TIIF-Bench 2506.02161; NegBench 2501.09425; GEditBench v2 2603.28547; Artifact-Bench 2605.18984",
+  "дайджесты b_PmGocP4rc, KLDdXOw6jIc, h5ItAJuB3Fc, H6ZXujE1qBA, bH2nP-aCFjk",
+  "L 12-legal-provenance/04 §5 (ворота перед публикацией: люди, знаки, метки вендора — provenance_check.py scan --corners)",
+  "H 08-image-post-processing/02 §3",
+  "W5 (естественность встройки, знаменитость, лишние конечности)"
+ ]
+}

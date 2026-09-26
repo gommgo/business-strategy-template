@@ -1,0 +1,160 @@
+# ПРИМЕР J v1 · служебная страница not-found (planlib.py); факты — демо text.
+page_plan_version: '1'
+checked: '2026-09-24'
+status: proposed
+example: true
+site: otves-remont-nn
+refs:
+  brief: ../site-brief.yaml
+  facts: ../../../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml
+  blocks: ../../../../04-blocks/blocks.yaml
+  vocabulary: ../../../../02-site-types/vocabulary.yaml
+  events: ../../../../07-seo-geo-performance-analytics/events.yaml
+page:
+  id: not-found
+  page_type: not-found-page
+  lang: ru
+  locale: ru-RU
+  jurisdiction:
+  - ru
+  goal: объяснить, что страницы нет, и вернуть к замеру или телефону
+  primary_action: booking
+  cta_target:
+    kind: anchor
+    value: '#lead-form'
+  awareness: product-aware
+  awareness_basis:
+    from: assumption
+    rule: уровень по главному источнику страницы (C 01 §3.1)
+  traffic:
+  - traffic_source: internal
+    temperature: hot
+    device: mixed
+  macrostructure: long-document
+  macrostructure_family: document
+  first_screen_policy: offer-cta-header
+  budget_profile: not-found-page@L0
+  ambition_level: L0
+  navigation:
+    header: landing-minimal
+    archetype: minimal-cta
+    logo_link: /
+    breadcrumbs: false
+    footer: minimal
+  seo:
+    indexable: false
+    canonical: self
+    h1: not-found.title
+    structured_data: []
+    ssr_required: false
+    sitemap: false
+  legal:
+    pd_consent: not-collected
+    privacy_policy: /privacy
+    cookie_banner: required
+    cookie_mode: opt-in
+    analytics_before_consent: false
+    withdraw_link: footer
+    requisites: footer
+    operator_ref: missing:legal-details
+  analytics:
+    systems:
+    - yandex-metrica
+    goals: []
+    load_after_consent: true
+sections:
+- id: header
+  role: header
+  question: куда вернуться и как связаться
+  job: логотип → главная, призыв, телефон
+  block: header
+  variant: landing-minimal
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: cta-label
+      slot: cta-label
+      intent: 'cta-label: по иерархии сообщений text'
+    media:
+    - id: logo
+      slot: brand-logo
+      media_role: informational
+      goal: показать brand-logo
+      source: generate
+      authenticity: real-or-generated
+    action:
+    - id: cta
+      slot: cta-primary
+      action: booking
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: cta-label
+    - id: phone
+      slot: phone-link
+      action: call
+      style: channel
+      target:
+        kind: tel
+        value: 'tel: номер из facts.yaml'
+      event: event:phone-click
+- id: not-found
+  role: not-found
+  question: куда я попал и куда идти
+  job: '«Страница не найдена» без шуток, пути: главная, замер, телефон'
+  block: not-found
+  variant: simple
+  next_step: главное действие страницы
+  slots:
+    text:
+    - id: title
+      slot: headline
+      heading: h1
+      intent: 'headline: по иерархии сообщений text'
+    - id: body
+      slot: body
+      intent: 'body: по иерархии сообщений text'
+    - id: cta-label
+      slot: cta-label
+      intent: 'cta-label: по иерархии сообщений text'
+    action:
+    - id: cta
+      slot: cta-primary
+      action: booking
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: cta-label
+- id: footer
+  role: footer
+  question: кто продавец и где документы
+  job: реквизиты, правовые ссылки, контакты
+  block: footer
+  variant: minimal
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: legal
+      slot: footer-legal
+      intent: 'footer-legal: по иерархии сообщений text'
+    - id: privacy-label
+      slot: nav-label
+      intent: подписи правовых ссылок
+    data:
+    - id: company
+      slot: fact-ref
+      fact: missing:legal-details
+      anatomy: company
+      on_missing: placeholder
+    action:
+    - id: privacy
+      slot: link
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'

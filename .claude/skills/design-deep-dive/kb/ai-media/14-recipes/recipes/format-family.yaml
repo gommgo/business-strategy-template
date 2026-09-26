@@ -1,0 +1,68 @@
+# format-family.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/02-series-product-recipes.md#5; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+recipe_version: 1
+checked_at: '2026-09-25'
+author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
+id: format-family
+title: Семейство форматов из мастера с защитой продукта
+doc: 14-recipes/02-series-product-recipes.md#5
+task_codes:
+- IMG-OUTPAINT
+slot: any
+ladder: image
+ai_fit: conditional
+legal_row: 7
+route:
+  source: IMG-OUTPAINT
+  steps:
+  - role: аутпейнт правкой (адаптация баннера)
+    model: google/gemini-3.1-flash-image-preview
+    params:
+      image_resolution: 1K
+      aspect_ratio: '9:16'
+    images: '[исходник]'
+    price_rub: 4.8
+    test: H-08
+  - role: аутпейнт правкой, альтернатива
+    model: openai/gpt-image-2.5-sunburst
+    params:
+      image_resolution: 1K
+      aspect_ratio: '21:9'
+    images: '[исходник]'
+    price_rub: 4.0
+    test: H-08
+spec:
+  must:
+  - output.aspect_ratios
+  - output.variants[].strategy
+  - composition.safe_zones
+  ancestors:
+  - ../../scripts/ai-media/tests/fixtures/D02/E1.spec.json
+compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py ratios <spec>
+phase5:
+  jobs:
+  - 99-raw/phase5/jobs/H-08-outpaint.jsonl
+  reuse:
+  - H-08
+  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
+steps:
+- id: outpaint-check
+  cmd: python3 ../../scripts/ai-media/edit_check.py outpaint src.png extended.png --composite --feather 6 --out out/
+  status: checked
+  evidence: 99-raw/experiments/H/03-edit-check
+accept:
+  thresholds:
+  - edit.outpaint_edge_sharpness_min
+  - edit.protect_ssim_min
+  extra: SSIM центра ≥ 0,9 и ΔE00 ≤ 3 и резкость ≥ 0,85
+provenance:
+  dst: composite
+  visible_label: false
+numbers:
+  phase5_h08_9x16: 'Sunburst 4 ₽ и NB2 4,8 ₽ — REGENERATED: SSIM центра 0,94 / 0,98, ΔE00 1,15 / 0,97, резкость краёв 0,14 / 0,56 < 0,85 → композит — 99-raw/phase5/runs/4-edits/H-08-check/'
+  phase5_h08_21x9: 'аутпейнт 16:9 → 21:9 не запускался — отменено заказчиком 25.09'
+status:
+  local: checked
+  generation: checked
+sources:
+- 91-videos/digests/AxV8TR3BdqI.md
+- 91-videos/digests/BVMuRw8BgJg.md

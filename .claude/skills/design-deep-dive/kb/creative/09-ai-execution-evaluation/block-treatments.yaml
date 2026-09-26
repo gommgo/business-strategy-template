@@ -1,0 +1,723 @@
+# block-treatments.yaml — визуальные варианты подачи и допустимые эффекты по блокам site (blocks.yaml 1.0, 84 блока).
+# creative-research · 09-ai-execution-evaluation · волна 3 · агент I · 2026-09-24.
+# Документ: 01-presentation-spec-and-block-treatments.md §3. Проверка: ../../scripts/creative/spec_check.py blocks
+# (все 84 id blocks.yaml есть здесь и наоборот; эффекты есть в effects.yaml; уровень эффекта ≤ ключа списка; cliche:<id> есть в реестре;
+# structural — варианты блока site). Структура и конверсия — site; тексты — text; здесь только подача.
+block_treatments_version: "1.0"
+checked_at: "2026-09-24"
+status: draft
+owner: "creative-research · 09-ai-execution-evaluation · агент I (волна 3)"
+sources:
+  blocks: "../../site/04-blocks/blocks.yaml 1.0 (84 блока, sha256 83fc60eb1e6f; только чтение)"
+  effects: "../06-effects-catalog/effects.yaml 0.1 (49 id, level_min, limits — F); S1 2026-09-25 — по v0.3: page-transition L1 (X-21)"
+  levels: "../01-creative-direction/ambition-levels.yaml 0.1 (section_caps, section_distribution — A)"
+  motion: "../05-motion/01 §1.3, §4.2, §5; ../05-motion/02 §1.2, §2.2, §10 (E)"
+  visual: "../04-visual-language/01 §2 (роли display), 02 §2.1 (text_media) (D)"
+  cliches: "../08-uniqueness-anti-slop/cliche-registry.yaml 0.1 (H)"
+conventions:
+  inherit: "поле блока перекрывает поле семейства (families); effects накопительно: L1 = L0 + L1, L2 = L1 + L2; effects: {} у блока — эффектов нет"
+  level_max: "потолок уровня секции с этим блоком; секции конверсии — L0 (ambition-levels.yaml section_caps)"
+  roles: "допустимые treatment.visual_role"
+  signature: "может ли секция нести фирменный приём (effects[].purpose: signature)"
+  visual_variants: "визуальные варианты поверх структурного variant site: id уникален в блоке (treatment.visual_variant); structural — к каким вариантам site применим; composition и display_role — умолчания treatment"
+  mobile: "умолчание treatment.mobile.strategy и что меняется; раскладка на телефоне — blocks.yaml mobile (site)"
+  a11y: "правила подачи этого блока сверх общих CRV-AL-* (A) и CRV-MO-* (E)"
+  avoid: "записи реестра клише, которые блок притягивает: брать только с решением art-direction (decisions[], H 01 §6)"
+  label: "[практика] по E, D, F, H; конкретные списки по блокам — [гипотеза], калибрует K на рецептах J и живой фазе"
+
+families:
+  header-nav:
+    level_max: L0
+    roles: [chrome]
+    signature: false
+    effects: {L0: []}
+    mobile: {strategy: same, note: "только отклик; меню — кнопка с aria-expanded"}
+    a11y: ["смена фона шапки после первого экрана — 200–300 мс, без сдвига раскладки", "фокус видим ≥ 3:1 поверх любого фона"]
+  hero:
+    level_max: L2
+    roles: [accent, peak, pause]
+    signature: true
+    effects:
+      L0: [effect:hero-entrance-once, effect:mask-reveal, effect:grain-overlay, effect:gradient-seams, effect:mesh-gradient-css, effect:cinemagraph]
+      L1: [effect:split-text-reveal, effect:kinetic-headline, effect:shader-bg, effect:aurora-css, effect:holo-shader-bg, effect:video-loop-hero, effect:alpha-video-object, effect:3d-object, effect:depth-parallax-25d, effect:parallax-layers, effect:scroll-mask-expand, effect:text-mask-media, effect:cursor-accent, effect:magnetic-cta]
+      L2: [effect:3d-scene, effect:video-scrub, effect:image-sequence, effect:particles-webgl, effect:variable-font-pointer, effect:custom-cursor]
+    mobile: {strategy: simplified, note: "кадр 4:5 или 9:16 (нативный, не центр-кроп), видео — постер при save-data, 3D и шейдер — постер; CTA выше черты первого экрана"}
+    a11y: ["LCP-элемент (H1 или постер) — без анимации или только transform ≤ 24 px; split, маска строк, opacity: 0 — не на нём (E 02 §10)", "сцена первого экрана ≤ 1 200 мс, стаггер ≤ 80 мс", "петля hero рядом с H1 — параллельно контенту: пауза (page-toggle или кнопка) — WCAG 2.2.2", "текст поверх медиа — F83 в самой светлой точке зоны текста"]
+    avoid: [cliche:hero-media-veil, cliche:webgl-centerpiece, cliche:giant-display-type, cliche:logo-orbit-hero, cliche:purple-gradient-hero, cliche:accent-word-headline, cliche:caps-eyebrow, cliche:pill-announcement-chip]
+  proof:
+    level_max: L1
+    roles: [support, calm, accent, pause]
+    signature: false
+    effects:
+      L0: [effect:counter-up, effect:mask-reveal, effect:marquee-logos]
+      L1: [effect:scroll-reveal-system, effect:scroll-text-highlight, effect:svg-line-draw]
+    mobile: {strategy: same, note: "сетки — стопкой или лентой с видимым краем (rail site)"}
+    a11y: ["числа и имена — только факты facts.yaml (fact:<id>); финальное число — в HTML до JS"]
+    avoid: [cliche:section-fade-up, cliche:hover-lift-all, cliche:bento-uniform-tiles]
+  value:
+    level_max: L2
+    roles: [peak, accent, support, calm, pause]
+    signature: true
+    effects:
+      L0: [effect:scroll-driven-progress, effect:sticky-stack, effect:mask-reveal, effect:counter-up, effect:grain-overlay, effect:cinemagraph]
+      L1: [effect:scroll-reveal-system, effect:svg-line-draw, effect:pin-scrub-story, effect:parallax-layers, effect:scroll-text-highlight, effect:text-path, effect:view-transition, effect:tilt-card, effect:hover-distort-dom, effect:glass-panel, effect:3d-object, effect:depth-parallax-25d, effect:alpha-video-object, effect:video-loop-hero, effect:scroll-mask-expand]
+      L2: [effect:horizontal-scroll, effect:3d-scene, effect:video-scrub, effect:image-sequence, effect:particles-webgl]
+    mobile: {strategy: simplified, note: "закреплённая сцена → стопка кадров-станций (stacked); горизонталь → вертикальная стопка; 3D и секвенция → постер"}
+    a11y: ["текст в сцене не меняется при прокрутке, пока его читают; скорость прокрутки не меняется", "не закреплять текст длиннее 3 строк, формы и тарифы (E 02 §4.1)"]
+    avoid: [cliche:section-fade-up, cliche:parallax-everything, cliche:bento-uniform-tiles, cliche:dashboard-in-browser-frame, cliche:glassmorphism-panels]
+  offer:
+    level_max: L1
+    roles: [calm, support, accent]
+    signature: false
+    effects:
+      L0: [effect:mask-reveal]
+      L1: [effect:scroll-reveal-system]
+    mobile: {strategy: same, note: "тарифы — не больше двух рядом (site)"}
+    a11y: ["цены и условия — текстом в HTML, без анимации под ними"]
+    avoid: [cliche:glassmorphism-panels, cliche:neon-glow, cliche:hover-lift-all]
+  conversion:
+    level_max: L0
+    roles: [calm]
+    signature: false
+    effects: {L0: []}
+    mobile: {strategy: same, note: "поля на всю ширину, кнопка ≥ 48 px"}
+    a11y: ["никаких эффектов на форме и полях; отклик фокуса и ошибок — 100–200 мс, без смещения полей", "никаких петель в секции и под ней (E 01 §5.3)"]
+    avoid: [cliche:pulsing-cta, cliche:magnetic-button, cliche:glassmorphism-panels]
+  cta:
+    level_max: L1
+    roles: [accent, calm, pause, chrome]
+    signature: false
+    effects:
+      L0: [effect:mask-reveal, effect:mesh-gradient-css, effect:grain-overlay, effect:gradient-seams]
+      L1: [effect:shader-bg, effect:split-text-reveal, effect:magnetic-cta]
+    mobile: {strategy: simplified, note: "живой фон — статичный кадр; CTA на всю ширину"}
+    a11y: ["с формой — L0 (ambition-levels.yaml final_cta_rule)", "пульсация CTA — 1–2 импульса по событию, масштаб ≤ 1,05, серия < 5 с (E 01 §6.4)"]
+    avoid: [cliche:pulsing-cta, cliche:neon-glow, cliche:magnetic-button]
+  faq:
+    level_max: L0
+    roles: [calm]
+    signature: false
+    effects: {L0: []}
+    mobile: {strategy: same}
+    a11y: ["раскрытие — мгновенно или содержимое opacity ≤ 200 мс; высоту не анимировать (свойство раскладки; interpolate-size — [спорно])"]
+  about-team:
+    level_max: L1
+    roles: [support, calm, pause, accent]
+    signature: true
+    effects:
+      L0: [effect:mask-reveal, effect:counter-up, effect:scroll-driven-progress]
+      L1: [effect:scroll-reveal-system, effect:scroll-text-highlight, effect:svg-line-draw, effect:parallax-layers]
+    mobile: {strategy: same}
+    a11y: ["фото людей — только настоящие (authenticity real-only site)"]
+    avoid: [cliche:category-rut-imagery, cliche:hover-lift-all]
+  contacts:
+    level_max: L0
+    roles: [calm, support]
+    signature: false
+    effects: {L0: []}
+    mobile: {strategy: same, note: "карта — статичная картинка; живой виджет — по нажатию (load on-interaction)"}
+    a11y: ["адрес, телефон, часы — текстом; карта не единственный носитель адреса"]
+  portfolio-gallery:
+    level_max: L2
+    roles: [support, accent, peak, pause]
+    signature: true
+    effects:
+      L0: [effect:mask-reveal]
+      L1: [effect:scroll-reveal-system, effect:parallax-layers, effect:view-transition, effect:page-transition, effect:hover-distort-dom, effect:webgl-image-distortion, effect:tilt-card, effect:cursor-accent]
+      L2: [effect:horizontal-scroll, effect:custom-cursor]
+    mobile: {strategy: simplified, note: "наведение → нажатие; горизонталь → стопка или лента rail"}
+    a11y: ["каждая работа — ссылка с текстом; эффект наведения не единственный носитель смысла"]
+    avoid: [cliche:liquid-hover-distortion, cliche:custom-cursor-follower, cliche:hover-lift-all]
+  event:
+    level_max: L1
+    roles: [support, calm, accent]
+    signature: false
+    effects:
+      L0: [effect:mask-reveal, effect:counter-up]
+      L1: [effect:scroll-reveal-system, effect:view-transition]
+    mobile: {strategy: same, note: "дни — вкладки или аккордеон (site)"}
+    a11y: ["время и место — текстом; обратный отсчёт — обновление ≤ 1 раз в минуту или пауза (2.2.2: авто-обновление)"]
+  course:
+    level_max: L0
+    roles: [calm, support]
+    signature: false
+    effects: {L0: [effect:mask-reveal]}
+    mobile: {strategy: same}
+  resources-blog:
+    level_max: L1
+    roles: [calm, support]
+    signature: false
+    effects:
+      L0: []
+      L1: [effect:view-transition]
+    mobile: {strategy: same}
+    a11y: ["текст статьи — без движения рядом и под ним"]
+  footer:
+    level_max: L1
+    roles: [chrome, pause]
+    signature: false
+    effects: {L0: []}
+    mobile: {strategy: same}
+    avoid: [cliche:giant-display-type]
+  utility:
+    level_max: L0
+    roles: [chrome, calm]
+    signature: false
+    effects: {L0: []}
+    mobile: {strategy: same}
+    avoid: [cliche:pulsing-cta]
+
+blocks:
+  # ── header-nav ────────────────────────────────────────────────────────────────────────────────────────────
+  header:
+    family: header-nav
+    effects: {L0: [effect:motion-toggle]}
+    visual_variants:
+      - {id: solid-minimal, structural: [landing-minimal, site-nav], composition: {align: left}, note: "непрозрачная, логотип слева → главная, CTA справа"}
+      - {id: transparent-over-hero, structural: [transparent-over-hero], note: "поверх hero: контраст текста шапки на реальном кадре (F83), после первого экрана — непрозрачная (background-color 200–300 мс, D; логика — site)"}
+    a11y: ["переключатель «меньше движения» (L2 обязательно, L1 — при page-toggle) — в шапке: кнопка с aria-pressed, видна при любой прокрутке"]
+  announcement-bar:
+    family: header-nav
+    visual_variants:
+      - {id: static-band, structural: [static, dismissible, retract-on-scroll], note: "одна строка, фон — токен акцента или inverse; без бегущей строки"}
+    avoid: [cliche:marquee-strip, cliche:pill-announcement-chip]
+  anchor-nav:
+    family: header-nav
+    effects: {L0: [effect:scroll-driven-progress]}
+    visual_variants:
+      - {id: sticky-bar-progress, structural: [sticky-bar], note: "индикатор прогресса чтения scaleX 0→1 — scroll-driven CSS, без JS"}
+      - {id: side-rail-dots, structural: [side-rail], note: "только десктоп ≥ 1024 px; активный пункт — вес и полоса, не только цвет"}
+  breadcrumbs:
+    family: header-nav
+    visual_variants: []
+
+  # ── hero ──────────────────────────────────────────────────────────────────────────────────────────────────
+  hero-text:
+    family: hero
+    visual_variants:
+      - {id: statement-left, structural: [statement-cta], composition: {align: left, text_media: text-only, height: partial}, display_role: [display-l, display-xl], levels: [L0, L1, L2], note: "самый быстрый hero (LCP 2,3 с — D 02 §2.1); сила — кегль, ритм строк, цвет"}
+      - {id: statement-poster, structural: [statement-cta], composition: {align: left, text_media: text-only, height: full}, display_role: [display-poster], levels: [L1, L2], note: "1–2 слова ≤ 12 знаков (D); длинный H1 — не poster"}
+      - {id: type-over-living-bg, structural: [statement-cta], composition: {text_media: text-only, height: full}, display_role: [display-xl, display-l], background: [mesh-gradient, shader, gradient], levels: [L1, L2], note: "«дыхание» фона ≤ 2,5 % пикселей/с, период ≥ 10 с; F83 в худшем кадре"}
+      - {id: marquee-headline, structural: [marquee], composition: {text_media: text-only}, display_role: [display-xl], levels: [L1, L2], note: "effect:marquee-text 30–60 px/с, пауза page-toggle; H1 — статичная копия в HTML (не дорожка)"}
+  hero-media:
+    family: hero
+    visual_variants:
+      - {id: split-framed, structural: [split], composition: {align: left, text_media: text-left, bleed: none, height: partial}, display_role: [display-m], background: [surface, tint], levels: [L0, L1, L2], note: "медиа в сетке 5/7; H1 ≤ 36 зн."}
+      - {id: split-edge-bleed, structural: [split, product-frame], composition: {align: left, text_media: text-left, bleed: edge, asymmetry: mild, height: partial}, display_role: [display-m], background: [surface, tint], levels: [L0, L1, L2], note: "медиа до края окна с одной стороны; объект кадра — на противоположной трети"}
+      - {id: product-overlap, structural: [product-frame], composition: {text_media: text-left, bleed: edge, overlap: true}, display_role: [display-m], levels: [L1, L2], note: "настоящий скриншот без нарисованной рамки браузера; заходит на следующую секцию; телефон — свой кадр (separate-asset)"}
+      - {id: over-local-scrim, structural: [background, video-loop], composition: {text_media: text-over, bleed: full, height: full}, display_role: [display-l, display-xl], background: [image, video-loop], levels: [L0, L1, L2], note: "скрим только под зоной текста (35–45 % кадра), не вуаль на весь кадр; video-loop — с L1, постер = LCP"}
+      - {id: poster-type, structural: [poster-image], composition: {text_media: text-over, bleed: full, height: full}, display_role: [display-poster], levels: [L2], note: "кампания: образ + слово ≤ 12 зн.; призыв в шапке (first_screen_policy poster site)"}
+      - {id: scene-poster-first, structural: [scene-3d], composition: {text_media: media-led, height: full}, display_role: [display-m, display-s], background: [webgl-3d], levels: [L1, L2], note: "LCP — H1 или постер; 3D после load + простоя; призыв работает до загрузки 3D"}
+      - {id: illustration-center, structural: [illustration], composition: {align: center, text_media: text-under}, display_role: [display-l, display-m], levels: [L0, L1], note: "иллюстрация по паспорту стиля ai-media; не библиотечная"}
+    avoid: [cliche:hero-media-veil, cliche:dashboard-in-browser-frame, cliche:webgl-centerpiece, cliche:eternal-slowmo, cliche:category-rut-imagery]
+  hero-form:
+    family: hero
+    level_max: L1
+    roles: [accent, calm]
+    signature: false
+    effects:
+      L0: [effect:hero-entrance-once, effect:grain-overlay, effect:gradient-seams, effect:mesh-gradient-css]
+      L1: [effect:shader-bg]
+    visual_variants:
+      - {id: form-card-on-surface, structural: [form-side, form-below, inline-one-field], composition: {text_media: text-left}, display_role: [display-m], note: "форма — непрозрачная карточка; эффекты только у фона"}
+      - {id: form-over-image, structural: [form-side], composition: {text_media: text-over, bleed: full}, background: [image], note: "форма на сплошной подложке ≥ 4,5:1 для подписей полей"}
+      - {id: quiz-start-card, structural: [quiz-start], note: "первый вопрос квиза — кнопки-ответы ≥ 48 px, без анимации выбора сверх отклика"}
+    a11y: ["форма и поля — L0 без эффектов (hero_form_rule); фон — до L1"]
+  hero-input:
+    family: hero
+    level_max: L1
+    signature: false
+    effects:
+      L0: [effect:hero-entrance-once, effect:grain-overlay]
+      L1: [effect:shader-bg, effect:mesh-gradient-css]
+    visual_variants:
+      - {id: prompt-box-center, structural: [prompt-box, url-input, search], composition: {align: center, text_media: text-only}, display_role: [display-l, display-m], note: "центр законен при ≤ 4 элементах (D); поле — главный объект первого экрана"}
+    a11y: ["поле ввода без анимации текста-подсказки (typewriter-подсказка — только как статичный пример)"]
+  hero-stat:
+    family: hero
+    visual_variants:
+      - {id: number-poster, structural: [single-number], display_role: [display-poster, display-xl], levels: [L1, L2], note: "число — факт; tabular-nums; счёт number-tick ≤ 1 500 мс, но число — не LCP-элемент при счёте"}
+      - {id: number-with-proof, structural: [number-with-secondary], display_role: [display-xl, display-l], levels: [L0, L1, L2]}
+    a11y: ["финальное число в HTML; счётчик — aria-hidden копия или без счёта в reduce"]
+  hero-quote:
+    family: hero
+    effects:
+      L0: [effect:hero-entrance-once, effect:mask-reveal]
+      L1: [effect:parallax-layers]
+    visual_variants:
+      - {id: quote-first-type, structural: [quote-first], display_role: [display-quote, display-m], levels: [L0, L1, L2], note: "цитата — LCP-элемент: без split и маски"}
+      - {id: quote-with-portrait, structural: [quote-with-media], composition: {text_media: text-left}, levels: [L0, L1, L2], note: "портрет — настоящий (real-only)"}
+  hero-letter:
+    family: hero
+    level_max: L1
+    effects: {L0: [effect:hero-entrance-once]}
+    visual_variants:
+      - {id: letter-column, structural: [letter], composition: {align: left, text_media: text-only, density: airy}, display_role: [display-m, display-s], levels: [L0, L1], note: "письмо, манифест: колонка 60–70 зн., без движения под текстом"}
+  hero-carousel:
+    family: hero
+    level_max: L1
+    effects: {L0: [effect:hero-entrance-once]}
+    visual_variants:
+      - {id: manual-slides, structural: [manual], note: "только ручное переключение; смена слайда — crossfade ≤ 320 мс (duration.state)"}
+    a11y: ["без автопрокрутки; пауза — первым элементом, если заказчик настоял на автопрокрутке (site)"]
+
+  # ── proof ─────────────────────────────────────────────────────────────────────────────────────────────────
+  logo-wall:
+    family: proof
+    visual_variants:
+      - {id: row-mono, structural: [row, grid], note: "логотипы в одном тоне (монохром), выравнивание по оптическому весу"}
+      - {id: marquee-paused, structural: [marquee], levels: [L0, L1], note: "effect:marquee-logos 30–60 px/с (токен loop.marquee-speed 40); loops 1; loop_control page-toggle или pause-button; одна строка на страницу"}
+    a11y: ["дорожка — <ul> с alt; дубли для бесшовности — aria-hidden; в reduce — статичный ряд или сетка"]
+    avoid: [cliche:marquee-strip, cliche:logo-orbit-hero]
+  stat-strip:
+    family: proof
+    visual_variants:
+      - {id: numbers-row-quiet, structural: [row], display_role: [display-m, display-l], note: "без счётчиков по умолчанию: ряд цифр — примета K3 (stats); число — факт"}
+      - {id: number-with-quote, structural: [stat-with-quote], display_role: [display-l, display-quote]}
+    a11y: ["counter-up — один раз, ≤ 1 500 мс, при reduce — финальное число"]
+  testimonial-cards:
+    family: proof
+    effects:
+      L0: []
+      L1: [effect:scroll-reveal-system]
+    visual_variants:
+      - {id: grid-quiet, structural: [grid], note: "без тени, если карточка не ссылка"}
+      - {id: rail-manual, structural: [rail], note: "лента с видимым краем и кнопками; без автопрокрутки"}
+      - {id: video-cards-poster, structural: [video-cards], note: "видео по нажатию с контролами и субтитрами; постер; без автозапуска"}
+  testimonial-single:
+    family: proof
+    roles: [pause, accent, support]
+    visual_variants:
+      - {id: pull-quote-type, structural: [pull-quote, quote-with-stat], display_role: [display-quote], note: "выдержка ≤ 120 зн.; полный отзыв — текстовым кеглем"}
+      - {id: huge-quote-pause, structural: [huge-quote], display_role: [display-quote, display-m], levels: [L1], note: "роль pause: одна цитата на экран; effect:scroll-text-highlight допустим (L1) — подсветка слов, не смена текста"}
+  review-aggregate:
+    family: proof
+    roles: [calm, support]
+    effects: {L0: []}
+    visual_variants: []
+  case-cards:
+    family: proof
+    effects:
+      L0: [effect:mask-reveal]
+      L1: [effect:view-transition, effect:page-transition, effect:hover-distort-dom]
+    visual_variants:
+      - {id: grid-media-first, structural: [grid], note: "карточка = ссылка на кейс; переход карточка → кейс с общим элементом (медиа) — effect:page-transition (кросс-документный VT, многостраничник) или effect:view-transition (SPA)"}
+      - {id: featured-large, structural: [featured-plus-list], composition: {asymmetry: strong}, note: "одна крупная работа + список; эффект наведения — только на крупной"}
+    avoid: [cliche:liquid-hover-distortion, cliche:hover-lift-all]
+  case-study:
+    family: proof
+    roles: [support, accent, calm]
+    effects:
+      L0: [effect:mask-reveal, effect:scroll-driven-progress]
+      L1: [effect:svg-line-draw]
+    visual_variants:
+      - {id: problem-solution-result-quiet, structural: [problem-solution-result, quote-led]}
+      - {id: timeline-line, structural: [timeline-case], note: "линия времени рисуется прокруткой (scroll-driven-progress L0 или svg-line-draw L1); в reduce — нарисована целиком"}
+  before-after:
+    family: proof
+    effects: {L0: [effect:mask-reveal]}
+    visual_variants:
+      - {id: slider-compare-honest, structural: [slider-compare], note: "ползунок — взаимодействие (клавиатура: стрелки), не эффект; стартовая позиция 50 %"}
+      - {id: pairs-side-by-side, structural: [side-by-side, pairs-grid]}
+    a11y: ["ползунок сравнения — role=slider с aria-valuenow, управление с клавиатуры"]
+  awards-press:
+    family: proof
+    roles: [calm, support]
+    effects: {L0: []}
+    visual_variants: []
+  credentials:
+    family: proof
+    roles: [calm, support]
+    effects: {L0: []}
+    visual_variants: []
+
+  # ── value ─────────────────────────────────────────────────────────────────────────────────────────────────
+  feature-grid:
+    family: value
+    level_max: L1
+    roles: [support, calm]
+    signature: false
+    effects:
+      L0: [effect:mask-reveal]
+      L1: [effect:scroll-reveal-system]
+    visual_variants:
+      - {id: cards-quiet, structural: [cards, with-media], note: "без тени у некликабельной карточки; появление — каскад группы 40–80 мс, ≤ 6–8 элементов"}
+      - {id: icon-list-type, structural: [icon-list, numbered], note: "номера — только у реальной последовательности (не декоративные 01/02/03)"}
+    avoid: [cliche:hover-lift-all, cliche:glossy-3d-icons, cliche:section-fade-up]
+  feature-bento:
+    family: value
+    level_max: L1
+    roles: [support, accent]
+    signature: false
+    effects:
+      L0: [effect:mask-reveal]
+      L1: [effect:scroll-reveal-system, effect:tilt-card, effect:glass-panel]
+    visual_variants:
+      - {id: bento-varied, structural: [features-only, mixed-proof], composition: {asymmetry: strong}, note: "ячейки разного размера и типа содержимого (скриншот, число, цитата); одинаковые плитки — клише"}
+      - {id: product-tiles, structural: [product-tiles], note: "каждая плитка — настоящий фрагмент продукта"}
+    avoid: [cliche:bento-uniform-tiles, cliche:glassmorphism-panels, cliche:glossy-3d-icons]
+  feature-alternating:
+    family: value
+    visual_variants:
+      - {id: zigzag-edge, structural: [zigzag, same-side], composition: {text_media: text-left, bleed: edge, asymmetry: mild}, levels: [L0, L1, L2], note: "медиа до края; смена стороны — ритм, не обязательна"}
+      - {id: claim-proof-sticky, structural: [claim-proof], composition: {text_media: text-left, height: scene}, levels: [L0, L1, L2], note: "медиа закреплено (sticky-stack L0 — CSS sticky; pin-scrub-story L1 — смена состояний по станциям), текст прокручивается; телефон — кадр между абзацами (stacked)"}
+  feature-tabs:
+    family: value
+    level_max: L1
+    roles: [support, accent, calm]
+    effects:
+      L0: [effect:sticky-stack, effect:scroll-driven-progress]
+      L1: [effect:view-transition]
+    visual_variants:
+      - {id: tabs-state-vt, structural: [tabs, accordion-media], note: "смена вкладки — view-transition 250–400 мс (same-document), reduce — мгновенно"}
+      - {id: sticky-scroll-list, structural: [sticky-scroll], composition: {height: scene}, note: "список слева прокручивается, медиа справа закреплено (sticky); активный пункт — вес и полоса"}
+  feature-spotlight:
+    family: value
+    visual_variants:
+      - {id: media-full-bleed-pause, structural: [media-full-bleed, media-contained], composition: {bleed: full, height: full}, levels: [L0, L1, L2], note: "роль pause или peak; видео-петля — с L1, постер, пауза"}
+      - {id: story-beat-pin, structural: [story-beat], composition: {height: scene}, levels: [L1, L2], note: "пик: pin-scrub-story, L1 ≤ 150vh одна сцена, L2 — шаги 100–150vh, ≤ 5 шагов, станции"}
+      - {id: model-turntable, structural: [model-3d], composition: {text_media: media-led}, levels: [L1, L2], note: "3d-object (L1) — ручной поворот или предрендер; 3d-scene — только L2; постер — LCP"}
+  benefit-list:
+    family: value
+    level_max: L0
+    roles: [calm, support]
+    signature: false
+    effects: {L0: [effect:mask-reveal]}
+    visual_variants:
+      - {id: checklist-quiet, structural: [checklist, two-columns]}
+  steps:
+    family: value
+    visual_variants:
+      - {id: vertical-progress-line, structural: [vertical], composition: {align: left, asymmetry: mild, text_media: text-only}, levels: [L0, L1, L2], note: "линия прогресса вдоль шагов: effect:scroll-driven-progress (CSS scroll-driven, 0,2 КБ) или svg-line-draw (L1); станции — шаги; reduce — линия целиком"}
+      - {id: horizontal-track, structural: [horizontal], levels: [L0, L1, L2], note: "3–4 коротких шага на десктопе статично; горизонтальная прокрутка шагов — только L2 (effect:horizontal-scroll, ≤ 5 панелей), телефон — стопка"}
+    mobile: {strategy: simplified, note: "линия — у левого края 2 px, без декоративных деталей (грузик, маркеры); решение site 2026-09-25 (C9, ответ на пакет W4): линия-прогресс 2 px на телефоне — вариант подачи creative (здесь), структура steps у site на телефоне — stack (blocks.yaml v1 не меняется); счёт акцентов и фирменных секций — spec_check.py creative"}
+  product-showcase:
+    family: value
+    visual_variants:
+      - {id: annotated-callouts, structural: [annotated], levels: [L0, L1, L2], note: "выноски рисуются линиями (svg-line-draw L1) по станциям; подписи — текст HTML"}
+      - {id: real-screens-hairline, structural: [browser-frame, device-frames], levels: [L0, L1, L2], note: "только настоящие скриншоты; рамка — тонкая линия или без неё; нарисованный браузер вокруг выдуманного дашборда — клише"}
+    avoid: [cliche:dashboard-in-browser-frame]
+  video-showcase:
+    family: value
+    level_max: L1
+    roles: [support, accent, pause]
+    signature: false
+    effects: {L0: []}
+    visual_variants:
+      - {id: inline-poster-click, structural: [inline-player, lightbox, embed-facade], note: "постер + кнопка; видео по нажатию с контролами и субтитрами; iframe — фасадом (load on-interaction)"}
+    a11y: ["без автозапуска со звуком никогда; субтитры"]
+  interactive-demo:
+    family: value
+    level_max: L1
+    roles: [support, accent]
+    signature: true
+    effects: {L0: []}
+    visual_variants:
+      - {id: sandbox-framed, structural: [sandbox, configurator], note: "демо грузится по нажатию или при видимости (budget.load on-interaction); статичный кадр до загрузки"}
+  audience-grid:
+    family: value
+    level_max: L1
+    roles: [support, calm]
+    signature: false
+    effects: {L0: [effect:mask-reveal], L1: [effect:scroll-reveal-system]}
+    visual_variants: []
+  pain-points:
+    family: value
+    level_max: L1
+    roles: [calm, support, pause]
+    signature: false
+    effects: {L0: [effect:mask-reveal], L1: [effect:scroll-text-highlight]}
+    visual_variants:
+      - {id: voice-quotes-type, structural: [voice-quotes], display_role: [display-quote, display-s], note: "голоса аудитории крупной выдержкой — роль pause"}
+      - {id: list-quiet, structural: [list, cards]}
+  integrations-grid:
+    family: value
+    level_max: L0
+    roles: [calm, support]
+    signature: false
+    effects: {L0: []}
+    visual_variants:
+      - {id: logo-grid-mono, structural: [logo-grid, categorized], note: "логотипы монохромом; без орбиты и бегущей строки"}
+    avoid: [cliche:logo-orbit-hero, cliche:marquee-strip]
+  spec-sheet:
+    family: value
+    level_max: L0
+    roles: [calm]
+    signature: false
+    effects: {L0: []}
+    visual_variants: []
+  prose:
+    family: value
+    level_max: L1
+    roles: [calm, pause, accent]
+    signature: true
+    effects:
+      L0: [effect:mask-reveal]
+      L1: [effect:scroll-text-highlight, effect:split-text-reveal]
+    visual_variants:
+      - {id: manifesto-type, structural: [manifesto], composition: {align: left, density: airy}, display_role: [display-l, display-m], levels: [L0, L1], note: "манифест 2–5 фраз крупно; подсветка слов прокруткой (scroll-text-highlight) — один раз на страницу"}
+      - {id: reading-column, structural: [story, explainer, seo-text], levels: [L0, L1], note: "колонка 60–75 зн.; без движения рядом с текстом"}
+  media-band:
+    family: value
+    level_max: L2
+    roles: [pause, accent, peak]
+    effects:
+      L0: [effect:cinemagraph, effect:grain-overlay]
+      L1: [effect:parallax-layers, effect:video-loop-hero, effect:scroll-mask-expand]
+      L2: [effect:video-scrub, effect:image-sequence]
+    visual_variants:
+      - {id: photo-bleed-pause, structural: [photo], composition: {bleed: full, height: partial}, background: [image], levels: [L0, L1, L2], note: "кадр на всю ширину — вдох между секциями; параллакс одного слоя ≤ 24vh на 100vh (L1)"}
+      - {id: video-band-paused, structural: [video-loop], composition: {bleed: full}, background: [video-loop], levels: [L1, L2], note: "немая петля 6–12 с, ≤ 600/1 500 КБ (F), пауза page-toggle, постер; flash_check"}
+    a11y: ["петля без текста поверх — не «параллельна чтению», но параллельна странице: пауза обязательна (2.2.2)"]
+    avoid: [cliche:eternal-slowmo, cliche:parallax-everything]
+
+  # ── offer ─────────────────────────────────────────────────────────────────────────────────────────────────
+  service-cards:
+    family: offer
+    visual_variants:
+      - {id: cards-with-price-quiet, structural: [cards-with-price, compact-list, cross-sell], note: "цена «от» — факт; карточка — ссылка на услугу; без свечения"}
+  pricing-cards:
+    family: offer
+    level_max: L0
+    roles: [calm]
+    effects: {L0: []}
+    visual_variants:
+      - {id: tiers-highlight-border, structural: [tiers, with-period-toggle], note: "рекомендуемый тариф — рамка или фон токена, не свечение и не масштаб; переключатель периода — мгновенная смена цен"}
+    avoid: [cliche:neon-glow, cliche:glassmorphism-panels]
+  pricing-table:
+    family: offer
+    level_max: L0
+    roles: [calm]
+    effects: {L0: []}
+    visual_variants: []
+  pricing-single:
+    family: offer
+    level_max: L0
+    roles: [calm]
+    effects: {L0: []}
+    visual_variants:
+      - {id: package-card, structural: [package, ticket, product-buy]}
+  comparison-table:
+    family: offer
+    level_max: L0
+    roles: [calm]
+    effects: {L0: []}
+    visual_variants: []
+  offer-details:
+    family: offer
+    level_max: L0
+    roles: [calm, support]
+    effects: {L0: []}
+    visual_variants:
+      - {id: included-vs-not-columns, structural: [included-list, included-vs-not]}
+  key-facts:
+    family: offer
+    roles: [support, calm]
+    visual_variants:
+      - {id: facts-row-type, structural: [row, in-hero], display_role: [display-m, display-s], note: "числа — факты; без счётчиков по умолчанию"}
+  promo-offer:
+    family: offer
+    roles: [accent, support]
+    effects: {L0: [effect:mask-reveal]}
+    visual_variants:
+      - {id: band-inverse, structural: [band, card-with-countdown, limited-quantity], note: "срок — фактом со сроком (site expires); таймер — ≤ 1 обновления в минуту или пауза"}
+    a11y: ["обратный отсчёт по секундам — авто-обновление (2.2.2): механизм паузы или обновление ≤ 1 раз в минуту"]
+  guarantee:
+    family: offer
+    roles: [support, calm]
+    effects: {L0: []}
+    visual_variants:
+      - {id: inverse-statement, structural: [statement, near-price, claim-steps], display_role: [display-s], note: "инверсный фон — ритм страницы; текст ≥ 4,5:1"}
+
+  # ── conversion (всегда L0) ────────────────────────────────────────────────────────────────────────────────
+  lead-form:
+    family: conversion
+    visual_variants:
+      - {id: form-card, structural: [short, with-details, multi-step], note: "карточка на surface; шаги — индикатор без анимации сверх отклика"}
+      - {id: final-on-inverse, structural: [final], note: "финальная форма на инверсном фоне; поля — светлые, ≥ 4,5:1"}
+  quiz:
+    family: conversion
+    visual_variants: []
+  calculator:
+    family: conversion
+    visual_variants: []
+    a11y: ["результат — aria-live polite; пересчёт без анимации чисел"]
+  callback-request:
+    family: conversion
+    visual_variants: []
+  booking-widget:
+    family: conversion
+    visual_variants: []
+    a11y: ["виджет третьей стороны — фасадом до нажатия (load on-interaction)"]
+  email-capture:
+    family: conversion
+    visual_variants: []
+  lead-magnet:
+    family: conversion
+    visual_variants: []
+  contact-channels:
+    family: conversion
+    visual_variants: []
+    avoid: [cliche:pulsing-cta]
+  app-download:
+    family: conversion
+    visual_variants:
+      - {id: badges-with-qr-quiet, structural: [badges, badges-with-qr, platform-button]}
+
+  # ── cta ───────────────────────────────────────────────────────────────────────────────────────────────────
+  cta-band:
+    family: cta
+    visual_variants:
+      - {id: final-inverse, structural: [final, final-with-channels, mid], composition: {align: left}, display_role: [display-m, display-l], background: [inverse], levels: [L0, L1], note: "смена фона — ритм финала; без эффектов"}
+      - {id: final-breathing-bg, structural: [final, mid], display_role: [display-l], background: [mesh-gradient, shader], levels: [L1], note: "accent: «дыхание» фона ≤ 2,5 %/с, период ≥ 10 с; loops 1 → loop_control; F83 в худшем кадре"}
+  sticky-cta:
+    family: cta
+    level_max: L0
+    roles: [chrome]
+    effects: {L0: []}
+    visual_variants:
+      - {id: bottom-bar-solid, structural: [bottom-bar, top-on-scroll], note: "появление после первого экрана — transform translateY 200–320 мс (duration.state); не перекрывает фокус и поля"}
+  capture-popup:
+    family: cta
+    level_max: L0
+    roles: [chrome]
+    effects: {L0: []}
+    visual_variants:
+      - {id: dialog-on-click, structural: [on-click], note: "модальный <dialog> по нажатию: вход opacity + scale .96→1 ≤ 320 мс, reduce — мгновенно; фокус внутрь, Esc закрывает"}
+      - {id: engaged-slide-in-corner, structural: [engaged-slide-in], note: "C3: немодальная карточка в углу, ≤ 25 % высоты экрана телефона, без затемнения фона и без захвата фокуса; вход translateY(16px)→0 + opacity .01→1, 320 мс out-expo, reduce — без смещения; после ≥ 60 % прокрутки ключевой секции, один раз за визит, после закрытия — не показывать ≥ 30 дней; не на посадочной под платный трафик (site F 05-…/01 §11)"}
+    a11y: ["engaged-slide-in: role=complementary или region с aria-label, кнопка «Закрыть» первой в порядке фокуса внутри, объявление aria-live=polite без переноса фокуса"]
+
+  # ── faq ───────────────────────────────────────────────────────────────────────────────────────────────────
+  faq:
+    family: faq
+    visual_variants:
+      - {id: accordion-quiet, structural: [accordion, grouped, objections-near-cta], note: "заголовок пункта — кнопка; значок +/− поворот ≤ 200 мс (transform)"}
+      - {id: open-list-type, structural: [open-list]}
+
+  # ── about-team ────────────────────────────────────────────────────────────────────────────────────────────
+  about-story:
+    family: about-team
+    visual_variants:
+      - {id: short-quiet, structural: [short-with-link], levels: [L0, L1]}
+      - {id: story-chapters, structural: [full-story], composition: {density: airy}, display_role: [display-m], levels: [L0, L1], note: "главы с крупными выдержками; подсветка ключевой фразы прокруткой — один раз"}
+  team-grid:
+    family: about-team
+    visual_variants:
+      - {id: lead-person-bleed, structural: [lead-person], composition: {bleed: full, text_media: text-over, height: partial}, background: [image], levels: [L0, L1], note: "роль pause: портрет ведущего на всю ширину, текст в спокойной зоне, F83"}
+      - {id: portraits-grid, structural: [cards, compact-list], note: "настоящие фото одной съёмки; без масштаба на наведении у всех карточек"}
+  founder-note:
+    family: about-team
+    visual_variants:
+      - {id: note-with-portrait, structural: [note-with-photo], display_role: [display-quote]}
+      - {id: video-message-poster, structural: [video-message], note: "видео по нажатию с контролами и субтитрами"}
+  timeline:
+    family: about-team
+    level_max: L2
+    effects:
+      L2: [effect:horizontal-scroll]
+    visual_variants:
+      - {id: line-progress, structural: [vertical, process-schedule], levels: [L0, L1, L2], note: "линия времени — scroll-driven-progress (L0) или svg-line-draw (L1); годы — текст"}
+      - {id: horizontal-track, structural: [horizontal], levels: [L2], note: "горизонталь в закреплении — пик L2, ≤ 5 панелей; телефон — вертикальная стопка"}
+  job-list:
+    family: about-team
+    level_max: L0
+    roles: [calm]
+    signature: false
+    effects: {L0: []}
+    visual_variants: []
+
+  # ── contacts ──────────────────────────────────────────────────────────────────────────────────────────────
+  contact-details:
+    family: contacts
+    visual_variants: []
+  location-map:
+    family: contacts
+    visual_variants:
+      - {id: static-map-image, structural: [static-image, venue, service-area], note: "картинка карты (не WebGL) — LCP-безопасно; кнопка «Открыть в картах»"}
+      - {id: widget-facade, structural: [embedded-widget], note: "виджет карты по нажатию (фасад), не при загрузке"}
+  service-area:
+    family: contacts
+    visual_variants:
+      - {id: districts-columns, structural: [list], note: "C3: районы колонками (2–3 на десктопе, 1–2 на телефоне), условия выезда рядом; без эффектов"}
+      - {id: zone-map-static, structural: [map-and-list], note: "C3: зона — статичная SVG-карта с заливкой зоны (цвет токена, контур ≥ 3:1), список ниже; живая карта — по нажатию"}
+      - {id: address-check-form, structural: [address-check], note: "C3: поле адреса → ответ текстом (aria-live polite); это форма — L0, без эффектов"}
+
+  # ── portfolio-gallery ─────────────────────────────────────────────────────────────────────────────────────
+  portfolio-grid:
+    family: portfolio-gallery
+    visual_variants:
+      - {id: grid-varied-scale, structural: [grid], composition: {asymmetry: strong}, levels: [L1, L2], note: "работы разного масштаба по важности; переход работа → кейс — effect:page-transition (многостраничник) или effect:view-transition (SPA), общий элемент — обложка"}
+      - {id: list-hover-preview, structural: [list-with-thumbnails], levels: [L1, L2], note: "список названий; превью появляется у курсора (cursor-accent) — только десктоп с точным указателем, телефон — миниатюры в строке"}
+      - {id: filterable-vt, structural: [filterable], levels: [L1, L2], note: "фильтр — view-transition перестановки (persistent, FLIP), reduce — мгновенно"}
+  gallery:
+    family: portfolio-gallery
+    level_max: L1
+    visual_variants:
+      - {id: rail-manual, structural: [rail], note: "лента с видимым краем и кнопками"}
+      - {id: lightbox-grid-quiet, structural: [grid, lightbox-grid, ugc]}
+
+  # ── event, course, resources ──────────────────────────────────────────────────────────────────────────────
+  event-agenda:
+    family: event
+    roles: [calm, support]
+    visual_variants:
+      - {id: days-tabs-vt, structural: [multi-day-tabs, tracks], note: "смена дня — view-transition ≤ 400 мс (L1), reduce — мгновенно"}
+      - {id: single-day-list, structural: [single-day]}
+  speakers-grid:
+    family: event
+    visual_variants:
+      - {id: keynote-bleed, structural: [keynote-plus-grid], composition: {asymmetry: strong}, note: "главный спикер крупно; портреты — настоящие"}
+      - {id: portraits-grid, structural: [grid]}
+  curriculum:
+    family: course
+    visual_variants: []
+  article-cards:
+    family: resources-blog
+    visual_variants:
+      - {id: cards-quiet, structural: [grid, list, featured-plus-list], note: "обложка → статья — view-transition (L1)"}
+  article-body:
+    family: resources-blog
+    level_max: L0
+    effects: {L0: []}
+    visual_variants:
+      - {id: reading-column, structural: [longread, how-to, glossary-entry], note: "колонка 60–75 зн.; индикатор чтения — только в anchor-nav"}
+  author-bio:
+    family: resources-blog
+    level_max: L0
+    effects: {L0: []}
+    visual_variants: []
+  resource-list:
+    family: resources-blog
+    level_max: L0
+    effects: {L0: []}
+    visual_variants: []
+  related-links:
+    family: resources-blog
+    level_max: L0
+    effects: {L0: []}
+    visual_variants: []
+
+  # ── footer и utility ──────────────────────────────────────────────────────────────────────────────────────
+  footer:
+    family: footer
+    visual_variants:
+      - {id: minimal-quiet, structural: [minimal, site, newsletter-first]}
+      - {id: statement-wordmark, structural: [statement], levels: [L1], note: "крупный SVG-логотип или фраза-финал; гигантский вордмарк в подвале без концепции — примета K3 (2 из 15, kimi 05/03)"}
+  cookie-banner:
+    family: utility
+    visual_variants:
+      - {id: bar-bottom-quiet, structural: [bar-bottom, in-flow-top], note: "не перекрывает CTA первого экрана на телефоне больше чем на 25 %; появление без анимации"}
+  thank-you:
+    family: utility
+    visual_variants: []
+  not-found:
+    family: utility
+    visual_variants:
+      - {id: routes-quiet, structural: [simple, with-routes]}
+  legal-text:
+    family: utility
+    visual_variants: []
+  chat-widget:
+    family: utility
+    visual_variants:
+      - {id: launcher-facade-still, structural: [launcher-facade, messenger-links], note: "кнопка без пульсации и подпрыгивания; скрипт чата — по нажатию"}

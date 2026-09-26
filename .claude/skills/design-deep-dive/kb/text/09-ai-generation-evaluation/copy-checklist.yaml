@@ -1,0 +1,458 @@
+# copy-checklist.yaml — чек-лист проверки маркетинговых текстов (text-research, волна 3, агент I, фаза 1)
+# Каждый пункт: вопрос «да / нет», уровень (gate — блокирует переход статуса; signal — повод перечитать; judge — ИИ-судья,
+# сигнал; human — только человек; people — тест с людьми из аудитории), способ, инструмент, источник, что делать при «нет».
+# Порядок исполнения — поле order: 1 факты и право → 2 стиль → 3 длины и мета → 4 рубрика и судья → 5 человек → 6 люди.
+# Решение оркестратора 24.09.2026: сначала claims_check.py, потом copy_lint.py (_common-wave2.md, «Свежие факты»).
+# Статусы copy deck (PLAN, v0): draft → checked → approved | rejected; поле stage — на каком переходе пункт обязателен.
+# Правила и доказательства — 03-evaluation.md; критерии рубрики — copy-rubric.yaml.
+# Проверка: python3 99-raw/experiments/I/01-rubric-corpus/check_rubric.py (загрузка, уникальность id, ссылки).
+# v1.1 (2026-09-24): финальные файлы D, G, H учтены (C-02, C-08, C-10, C-12, C-15), пункт C-18 — приметы шаблона ИИ по
+# замеру D, к C-20 и C-23 — итоги опыта I/03 (99-raw/experiments/I/03-rubric-blind-D2/).
+
+checklist: copy-checklist
+version: "1.1"
+date: "2026-09-24"
+owner: text-research/I
+status: draft-phase-1        # фаза 2 добавит пункты цепочки (разбор брифа, смысл, иерархия) и правила E, F, G, H
+
+levels:
+  gate: "ворота: «нет» блокирует переход статуса; исправляется правкой или фактом, не голосованием"
+  signal: "автоматический сигнал: «нет» — перечитать и чаще всего править; сам статус не меняет"
+  judge: "ИИ-судья: сигнал с цитатой; доверие — по калибровке (copy-rubric.yaml → calibration)"
+  human: "только человек: редактор, заказчик, юрист"
+  people: "тест с людьми из аудитории (живая фаза или своя аудитория заказчика)"
+
+stages: [draft-to-checked, checked-to-approved, before-publish, live-phase]
+
+items:
+
+  # ── 1. Факты и право (ворота) ─────────────────────────────────────────────────────────────
+  - id: COPY-C-01
+    order: 1
+    question: "Сверка с facts.yaml прошла без error: каждое число, имя, дата, цитата, рейтинг, цена и гарантия ссылаются на запись, never_claim не нарушен, факты не истекли?"
+    level: gate
+    stage: draft-to-checked
+    method: claims-check
+    tool: "python3 ../../scripts/text/claims_check.py <deck.yaml> --facts <facts.yaml> --json out.json"
+    pass_when: "код выхода 0; summary.error = 0"
+    on_fail: "правка по находкам COPY-F-…: fact_ids на запись или [PLACEHOLDER: что именно] и вопрос заказчику; не придумывать"
+    genres: all
+    evidence: "[проверено: B2/02 — 3 из 3 эталонных провалов «Кварца» и 4 новых]"
+    source: "02-strategy-messaging/03-proof-and-facts.md §7; ../../scripts/text/README.md (claims_check.py)"
+
+  - id: COPY-C-02
+    order: 1
+    question: "Правовые правила (claims-rules.yaml H, юрисдикция и отрасль из шапки copy deck) не дали error?"
+    level: gate
+    stage: draft-to-checked
+    method: claims-check-legal
+    tool: "python3 ../../scripts/text/claims_check.py <deck.yaml> --facts <facts.yaml> [--legal-category medical|finance|…] [--jurisdiction ru|eu|us]; только право — --legal-only --json out.json (правовой модуль 2.0 H, 66 правил COPY-L-…)"
+    pass_when: "нет error правил COPY-L-…; warning права → COPY-C-34. Режим с фактами (--facts) — для copy deck; без фактов модуль работает как аудит: правила с условием факта становятся вопросами"
+    on_fail: "добавить критерий и источник рядом (превосходная степень), условие в том же предложении («бесплатно», скидка), убрать запрещённое"
+    genres: all
+    evidence: "[стандарт] 38-ФЗ, ЗоЗПП (ред. на 2026-09-24) через H; не юридическое заключение; [проверено: H/01 — 20 страниц корпуса D, ложных 7 из 30 до правок правил, 1 из 30 после; регрессия — 99-raw/experiments/H/01-corpus20/judgments.tsv]"
+    source: "08-russian-legal-typography/claims-rules.yaml; 08-russian-legal-typography/01-advertising-law-claims.md; ../../scripts/text/README.md (раздел права H)"
+
+  - id: COPY-C-03
+    order: 1
+    question: "Отзывы и цитаты стоят дословно, с разрешением и подписью по permission.shows, без склейки и отбора «только лучших»?"
+    level: gate
+    stage: draft-to-checked
+    method: claims-check
+    tool: "claims_check.py: правила COPY-F-QUOTE, QUOTE-EDIT, QUOTE-RECUT, PERMISSION, TYPICALITY"
+    pass_when: "0 error по этим правилам"
+    on_fail: "вернуть дословный текст из facts.yaml; нет разрешения — убрать отзыв или [PLACEHOLDER]"
+    genres: [landing, site-page, email-form]
+    evidence: "[стандарт] FTC 16 CFR 465, 255 (ориентир); [исследование] Spiegel 2017 (B2)"
+    source: "02-strategy-messaging/03-proof-and-facts.md §5"
+
+  - id: COPY-C-04
+    order: 1
+    question: "Перед публикацией в тексте нет ни одного [PLACEHOLDER], а все заглушки перечислены в missing[] facts.yaml?"
+    level: gate
+    stage: before-publish
+    method: lint-final
+    tool: "python3 ../../scripts/text/copy_lint.py <deck.yaml> --final; claims_check.py (COPY-F-PLACEHOLDER-UNLISTED — error всегда)"
+    pass_when: "0 [PLACEHOLDER]; на стадии draft и checked заглушки допустимы, если перечислены в missing[]"
+    on_fail: "получить факт у заказчика (proof-intake.md) или переписать фразу без утверждения"
+    genres: all
+    evidence: "[стандарт базы] PLAN, риск 3"
+    source: "02-strategy-messaging/proof-intake.md; 06-anti-slop/02-linter-spec-and-profiles.md §4"
+
+  # ── 2. Стиль (ворота линтера) ─────────────────────────────────────────────────────────────
+  - id: COPY-C-05
+    order: 2
+    question: "Линтер copy_lint.py в профиле жанра не дал error (артефакты чат-бота, шаблоны, запрещённые первые фразы и «не только…, но и» в заголовке и мета, стрелка в кнопке)?"
+    level: gate
+    stage: draft-to-checked
+    method: lint
+    tool: "python3 ../../scripts/text/copy_lint.py <deck.yaml> --json out.json (жанр — из page_type)"
+    pass_when: "код выхода 0; summary.error = 0"
+    on_fail: "протокол правки C (COPY-C-17): все error в первом проходе; законный случай — lint_allow с причиной"
+    genres: all
+    evidence: "[проверено: C/01, C/02]"
+    source: "06-anti-slop/02-linter-spec-and-profiles.md §7–§9"
+
+  - id: COPY-C-06
+    order: 2
+    question: "Вердикт линтера — не overcorrected (связки на месте, короткие фразы — точечно)?"
+    level: gate
+    stage: draft-to-checked
+    method: lint
+    tool: "copy_lint.py: summary.verdict != overcorrected (анализатор an-overcorrection)"
+    pass_when: "verdict ∈ {clean, review, rewrite, fail→исправлен}"
+    on_fail: "вернуть связки и нормальные предложения; не лечить маркеры по одному"
+    genres: [landing, site-page, article, email-form]
+    evidence: "[проверено: C/04 — 5 из 5 пойманы, 0 из 8 ложных]"
+    source: "06-anti-slop/01-text-slop-markers-by-genre.md §13"
+
+  # ── 3. Длины (сигнал, COPY-C-07), мета и GEO (ворота и сигналы G) ──────────────────────────
+  - id: COPY-C-07
+    order: 3
+    question: "Длина и структура каждого слота в пределах copy-slots.yaml (E) для его типа, ядро первого экрана ≤ 40 слов?"
+    level: signal
+    stage: draft-to-checked
+    method: slot-rules
+    tool: "python3 ../../scripts/text/copydeck.py validate <deck> (J) читает 04-copy-by-block/copy-slots.yaml (E, 69 типов слотов): выход за hard_* — warning, за p10–p90 лидеров — info, hero-core > 40 слов — warning"
+    pass_when: "нет warning длины; info — повод перечитать"
+    on_fail: "сократить по смыслу (вода, а не доводы), не резать факт и условие; после смены голоса длины перепроверить (F/01: дерзкий голос +41…87 % в заголовках)"
+    genres: all
+    evidence: "[проверено: D/03 — длины по лидерам; E/01 — вне диапазона на 10 страницах лидеров: 52 % ошибки разметки, 47 % законные формы → длина — сигнал, не ворота]"
+    source: "04-copy-by-block/copy-slots.yaml (E, length_rule); 03-corpus-measured/thresholds.yaml (D)"
+
+  - id: COPY-C-08
+    order: 3
+    question: "Мета, OG и GEO-блоки проходят meta-rules.yaml, geo-rules.yaml и пункты-ворота geo-checklist.yaml (G)?"
+    level: gate
+    stage: draft-to-checked
+    method: lint-external
+    tool: "copy_lint.py подхватывает 07-seo-geo-copy/meta-rules.yaml, geo-rules.yaml через profiles.yaml → external_rules; geo-checklist.yaml — 28 пунктов COPY-GEO-…, из них 8 с judge_question (COPY-GEO-08, 09, 10, 11, 15, 18, 22, 26) — вопросы судьи в формате рубрики: «да / нет» с цитатой"
+    pass_when: "0 error правил meta-, geo-; пункты level: gate geo-checklist — «да»; ответы judge_question — сигнал до калибровки (COPY-C-22)"
+    on_fail: "по правилам G; «добавь цифры» без facts.yaml запрещено (COPY-GEO-01: прирост «+40 % GEO» получен на выдуманном материале)"
+    genres: [meta, geo, article]
+    evidence: "[документация] Google Search Central, Яндекс (через G); [исследование] Aggarwal и др. KDD 2024 с разбором кода (G)"
+    source: "07-seo-geo-copy/geo-checklist.yaml; 07-seo-geo-copy/03-geo-copy.md; 07-seo-geo-copy/02-seo-pages-articles-meta.md"
+
+  # ── 4. Автоматические сигналы ────────────────────────────────────────────────────────────
+  - id: COPY-C-10
+    order: 2
+    question: "Плотность маркеров слопа ниже порога жанра, а находки не из одной семьи?"
+    level: signal
+    stage: draft-to-checked
+    method: lint
+    tool: "copy_lint.py: metrics.markers.per_100w против thresholds (an-marker-density)"
+    pass_when: "per_100w < warn порога жанра"
+    on_fail: "кластеры правки (COPY-C-17); на лендингах плотность не отделяет ИИ от людей — смотреть содержание и приметы COPY-C-18"
+    genres: [landing, site-page, article, email-form]
+    evidence: "[проверено: C/02 — «наивная» проза ИИ 6,7–10,5 на 100 слов; D/03 — на живых лендингах плотность ИИ не выше людей (EN 0,25 против 0,88, δ −0,59; RU ai-self 1,22 против 1,05, δ −0,08); пороги D: landing 2,71 / 4,07, site-page 2,87 / 4,31, article 1,04 / 2,02]"
+    source: "06-anti-slop/02-linter-spec-and-profiles.md §5; 03-corpus-measured/thresholds.yaml (D, version 2); 99-raw/reports/wave1-D-report.md §2"
+
+  - id: COPY-C-11
+    order: 2
+    question: "В headline, subheadline, cta-label и мета нет warning линтера?"
+    level: signal
+    stage: checked-to-approved
+    method: lint
+    tool: "copy_lint.py: findings[].level == warning и slot.slot_type в ключевых"
+    pass_when: "0 warning в ключевых слотах — условие остановки протокола правки"
+    on_fail: "одна правка на короткий слот за проход (протокол C §9)"
+    genres: [landing, site-page, meta, email-form]
+    evidence: "[практика + мнение базы] C §9"
+    source: "06-anti-slop/02-linter-spec-and-profiles.md §9 п.7"
+
+  - id: COPY-C-12
+    order: 2
+    question: "Конкретика (числа, месяцы, имена) на 100 слов прозы не ниже порога жанра?"
+    level: signal
+    stage: draft-to-checked
+    method: lint
+    tool: "copy_lint.py: an-low-concreteness"
+    pass_when: "concreteness_per_100w ≥ порога жанра из 03-corpus-measured/thresholds.yaml (D: лендинг 3,08, статья 1,13; geo 3,0 — требование G, выше медианы статей лидеров 2,6)"
+    on_fail: "заменить оценку фактом из facts.yaml; нет факта — [PLACEHOLDER], не выдумка"
+    genres: [landing, site-page, article, geo]
+    evidence: "[исследование] AINL-Eval 2025 (RU, люди ставят в 10 раз больше цифр); [проверено: D/03 — пороги по лидерам; I/01 — число цифр на 100 слов с рубрикой не связано (Спирмен 0,00): цифры без факта не качество]"
+    source: "06-anti-slop/01-text-slop-markers-by-genre.md §7 CNT-01"
+
+  - id: COPY-C-13
+    order: 2
+    question: "У каждого слота с числом, «N+», «№ 1», рейтингом есть fact_ids?"
+    level: signal
+    stage: draft-to-checked
+    method: lint
+    tool: "copy_lint.py: an-number-without-fact (warning в copy deck)"
+    pass_when: "0 находок an-number-without-fact"
+    on_fail: "fact_ids или [PLACEHOLDER]; ворота — COPY-C-01"
+    genres: all
+    evidence: "[стандарт базы]"
+    source: "06-anti-slop/01-text-slop-markers-by-genre.md CNT-02"
+
+  - id: COPY-C-14
+    order: 2
+    question: "Тире не заменены дефисом, а пунктуационных тире в прозе не больше порога жанра?"
+    level: signal
+    stage: draft-to-checked
+    method: lint
+    tool: "copy_lint.py: an-dash-density (только пунктуационные), ru-pun-hyphen-as-dash; typography-rules.yaml (H)"
+    pass_when: "hyphen_as_dash = 0; dash_punct_per_100w < порога"
+    on_fail: "перестроить часть фраз; обязательное тире не трогать"
+    genres: [landing, site-page, article, email-form]
+    evidence: "[проверено: C/05 — деление тире 0,96]"
+    source: "06-anti-slop/01-text-slop-markers-by-genre.md §4.1; 08-russian-legal-typography/typography-rules.yaml"
+
+  - id: COPY-C-15
+    order: 2
+    question: "Формулы читаемости и балл Главреда использованы только как справка, а не как решение?"
+    level: signal
+    stage: draft-to-checked
+    method: metrics
+    tool: "copy_metrics.py readability (D) — справочно"
+    pass_when: "решение не принималось по баллу"
+    on_fail: "решать по находкам линтера и рубрике"
+    genres: all
+    evidence: "[проверено: A/02 — формула выбрала сильный текст в 5 из 9 пар, маркеры — в 9 из 9; D/03 — индекс Оборневой не различает группы корпуса]"
+    source: "01-foundations/02-what-copy-changes-evidence.md §4"
+
+  - id: COPY-C-16
+    order: 2
+    question: "Детектор ИИ не запускался и его балл нигде не учитывается?"
+    level: signal
+    stage: draft-to-checked
+    method: policy
+    tool: "—"
+    pass_when: "да"
+    on_fail: "убрать балл детектора из решения; цель — качество текста, не «непохожесть на машину»"
+    genres: all
+    evidence: "[исследование] Liang 2023 (61,22 % ложных на эссе неносителей), RAID 2024, AINL-Eval 2025; StoryScope 2026 — структура выдаёт ИИ сильнее слов"
+    source: "06-anti-slop/01-text-slop-markers-by-genre.md §12"
+
+  - id: COPY-C-17
+    order: 2
+    question: "Правка шла по протоколу: за проход ≤ 5 кластеров на 300 слов прозы, ≤ 3 проходов, после каждого — перезапуск claims_check и copy_lint, новых фактов 0?"
+    level: signal
+    stage: draft-to-checked
+    method: process
+    tool: "edit_log в copy deck (предложение J); claims_check.py после каждого прохода"
+    pass_when: "проходов ≤ 3, error = 0, плотность ниже прежней, новых семей маркеров нет, fact_ids на месте"
+    on_fail: "после 3 проходов — остаток человеку или судье; четвёртый проход ведёт к сверхкоррекции"
+    genres: all
+    evidence: "[мнение] C по опытам C/01, C/04; на генерации не проверено → LT-03"
+    source: "06-anti-slop/02-linter-spec-and-profiles.md §9"
+
+  - id: COPY-C-18
+    order: 2
+    question: "Нет примет шаблона ИИ из замера D: карточки секции разной длины по содержанию, числа-утверждения только с fact_ids, в EN — надзаголовок не над каждой секцией, тире и «·» в прозе по порогу, ядро первого экрана ≤ 40 слов?"
+    level: signal
+    stage: draft-to-checked
+    method: lint
+    tool: "copy_lint.py: an-number-without-fact, an-eyebrow-rate, an-dash-density, metrics.middots; разброс длины карточек — вручную или copy_metrics.py (D) до анализатора C (предложение an-cards-uniform: CV карточек секции < 0,25)"
+    pass_when: "каждая примета в пределах лидеров жанра и языка (thresholds.yaml D; надзаголовок — не чаще 1 на 3 секции)"
+    on_fail: "это не детектор ИИ, а дефекты: одинаковые карточки — общие выгоды (переписать по фактам секции), числа без факта — выдумка (COPY-C-01), надзаголовок над каждой секцией — шум; править дефект, а не «человечность»"
+    genres: [landing, site-page]
+    evidence: "[проверено: D/03 — δ Клиффа: карточки одной длины −0,76 и числа без факта 0,76 (RU ai-self), надзаголовки 0,72, тире 0,78, «·» 0,60 (EN ИИ); I/03 — на 10 текстах приметы разделили ИИ и людей полностью (δ ±1,0 внутри языка), рубрика — нет (δ −0,08)]"
+    source: "03-corpus-measured/02-measurements.md §9, §11; 99-raw/experiments/I/03-rubric-blind-D2/README.md"
+
+  # ── 5. ИИ-судья (сигнал) ─────────────────────────────────────────────────────────────────
+  - id: COPY-C-20
+    order: 4
+    question: "Ключевые слоты оценены судьёй по рубрике COPY-R-01…09 (вопросы «да / нет» с цитатой), версия рубрики и промта записана?"
+    level: judge
+    stage: checked-to-approved
+    method: judge-checklist
+    tool: "промт судьи — фаза 2 (prompts/); запись — variants[].checks.rubric (предложение J)"
+    pass_when: "запускается только после COPY-C-01 = pass (без facts.yaml рубрика поощряет правдоподобную выдумку); нет критериев ≤ 2 на ключевых слотах (DR-1); находки с цитатой переданы человеку"
+    on_fail: "DR-1…DR-2 рубрики: переписать слот или проверить факты"
+    genres: [landing, site-page, email-form, article, meta]
+    evidence: "[исследование] POLLUX 2025: судьи с экспертами — Спирмен ≤ 0,73 по задачам, 0,03–0,52 по «мягким» критериям; [проверено: I/01, I/03 — рубрика отделяет лидеров от среднего рынка (3,96–4,07 против 2,52–2,71), но не ИИ от людей; демо K3 с выдуманными отзывами — 5,0 из 5]; согласие с людьми [не проверено] → LT-04"
+    source: "copy-rubric.yaml; 03-evaluation.md §4"
+
+  - id: COPY-C-21
+    order: 4
+    question: "Судья проверил утверждения без чисел и маркеров («свойства»): у каждого названа запись facts.yaml?"
+    level: judge
+    stage: draft-to-checked
+    method: judge-fact-support
+    tool: "вопрос COPY-R-03 q1 по слоту с приложенным facts.yaml"
+    pass_when: "0 утверждений без записи или все переданы человеку"
+    on_fail: "claims_check.py --strict по слоту и вопрос заказчику (DR-2)"
+    genres: all
+    evidence: "[не проверено] — живой тест B2-2 (полнота и точность ≥ 0,8)"
+    source: "99-raw/reports/wave1-B2-report.md §4, §5"
+
+  - id: COPY-C-22
+    order: 4
+    question: "Если судья сортирует варианты, его согласие с решающими голосами заказчика ≥ 0,8 при нижней границе Уилсона ≥ 0,65 и n ≥ 20?"
+    level: judge
+    stage: checked-to-approved
+    method: judge-calibration
+    tool: "../../scripts/ai-media/asset_audit.py agree --answers … --votes … --key … (только чтение, образец); для текстов — адаптация в живой фазе"
+    pass_when: "да → сортировать best-of-N; 0,7–0,8 → только отсев брака; < 0,7 → не использовать. Так же калибруются judge_question GEO-чек-листа G (COPY-C-08); набор для калибровки — новый, с маскировкой брендов и мета (I/03: набор с видимыми брендами угадывается 10 из 10)"
+    on_fail: "судья не сортирует; выбор — только человеком"
+    genres: all
+    evidence: "[практика] ai-media 11/02 §6; порог F1 ≥ 0,8 (NN/g через ux 11/02 §4.3)"
+    source: "../ai-media/11-evaluation-qa/02-vlm-critic-and-rubrics.md §6"
+
+  - id: COPY-C-23
+    order: 4
+    question: "Судья вызван надёжно: оба порядка вариантов, победа только при совпадении, ≥ 3 повтора (спорные — до 11), доля выборов «A» в 0,35–0,65, имена моделей скрыты, судья другого вендора, чем генератор?"
+    level: judge
+    stage: checked-to-approved
+    method: judge-protocol
+    tool: "журнал прогонов судьи (variants[].checks.rubric.judge)"
+    pass_when: "все условия выполнены и записаны"
+    on_fail: "результат судьи не использовать"
+    genres: all
+    evidence: "[исследование] перевороты при перестановке: медиана 41,3 % у 36 моделей (lechmazur 2026), 13,6 % у повторов, 11 повторов для 95 % (arXiv 2606.13685); самопредпочтение (arXiv 2404.13076, MT-Bench); [проверено: I/03 — один оценщик на тех же 5 текстах через ≈ 50 минут: ответы совпали в 0,90, баллы критериев — в 0,74]"
+    source: "03-evaluation.md §4.2–4.3"
+
+  - id: COPY-C-24
+    order: 4
+    question: "Судья НЕ использован для предсказания победителя A/B, оценки «естественности», «интересно написано» и распознавания ИИ?"
+    level: judge
+    stage: checked-to-approved
+    method: policy
+    tool: "—"
+    pass_when: "да"
+    on_fail: "удалить такие оценки из решения"
+    genres: all
+    evidence: "[исследование] LOLA 2024 (Upworthy 17 681 тест — чуть выше случая); arXiv 2608.07517 (κ = 0,14; эксперты CRO ≈ 0); POLLUX (naturalness ρ ≤ 0,17); JUDGE-BENCH (engagingness низко)"
+    source: "03-evaluation.md §4.4, §6.4"
+
+  # ── 6. Только человек ───────────────────────────────────────────────────────────────────
+  - id: COPY-C-30
+    order: 5
+    question: "Человек подтвердил, что текст звучит голосом бренда по профилю (is / is_not) и одним регистром на странице?"
+    level: human
+    stage: checked-to-approved
+    method: human-review
+    tool: "рубрика COPY-R-10; профиль голоса по 05-voice-editorial/voice.schema.yaml (F), образцы — 05-voice-editorial/examples/voice-*.yaml; словарь профиля — в copy_lint.py через --rules/--profiles (F/03)"
+    pass_when: "COPY-R-10 ≥ 3 по оценке человека"
+    on_fail: "правка голоса по профилю, без смены фактов"
+    genres: [landing, site-page, email-form, article]
+    evidence: "[практика] Ross [V:cqnZtGXGwsw]; судьи слабо согласуются по тону (POLLUX); узнаваемость голоса судьёй по профилю [не проверено] — F/02: признаки-слова 15/15 на строках автора, 7/15 на новых"
+    source: "05-voice-editorial/01-brand-voice.md (F, волна 2)"
+
+  - id: COPY-C-31
+    order: 5
+    question: "Редактор-носитель подтвердил естественность языка и что текст интересно читать (COPY-R-11, COPY-R-12 ≥ 3)?"
+    level: human
+    stage: checked-to-approved
+    method: human-review
+    tool: "рубрика COPY-R-11, COPY-R-12"
+    pass_when: "оба ≥ 3; для hero и оффера — ≥ 4"
+    on_fail: "точечная правка редактором; не «перепиши живее» моделью без находок"
+    genres: [landing, site-page, article, email-form]
+    evidence: "[исследование] POLLUX 2025 (эксперты упрекают тексты моделей в «lack of soul»)"
+    source: "copy-rubric.yaml COPY-R-11, COPY-R-12"
+
+  - id: COPY-C-32
+    order: 5
+    question: "Заголовок, оффер и кнопку выбрал заказчик слепым попарным сравнением 2–4 вариантов (имена моделей скрыты, стороны перемешаны)?"
+    level: human
+    stage: checked-to-approved
+    method: blind-pairwise
+    tool: "страница выбора: ../kimi-research/99-raw/experiments/G/05-variants-page/ (адаптер stand_run.py page) — для текстов карточки-картинки или адаптация; итог — tally (Брэдли — Терри, Уилсон)"
+    pass_when: "выбран вариант; при пересекающихся интервалах — решение по брифу и цене правок"
+    on_fail: "«оба не годятся» → менять подход (смысл, факты), а не модель"
+    genres: [landing, site-page, meta, email-form]
+    evidence: "[практика] Dry «feedback on versions» [V:TUMjnmfsPeM 36:33, 59:50]; ai-media 11/02 §6.3 (20–30 голосов на пару для лидера)"
+    source: "live-test-plan.md §5; 03-evaluation.md §7"
+
+  - id: COPY-C-33
+    order: 5
+    question: "Ключевые слоты прочитаны в макете страницы на десктопе и телефоне, а не только в таблице copy deck?"
+    level: human
+    stage: before-publish
+    method: human-review
+    tool: "превью сборки (kimi shot.py, copy_extract.py D против copy deck — J)"
+    pass_when: "да; переносы и длины не ломают смысл"
+    on_fail: "сократить или перестроить слот; раскладку решают site и creative"
+    genres: [landing, site-page, meta]
+    evidence: "[практика] Dry [V:TUMjnmfsPeM 24:22]"
+    source: "10-templates-recipes/ (J)"
+
+  - id: COPY-C-34
+    order: 5
+    question: "Флаги права высокого риска (медицина, финансы, гарантии, превосходная степень с критерием, сравнение с конкурентами) проверил юрист или заказчик письменно?"
+    level: human
+    stage: before-publish
+    method: legal-review
+    tool: "claim_flags слота; legal_review: approved в факте (claims_check requires)"
+    pass_when: "да или флагов нет"
+    on_fail: "снять формулировку или добавить оговорку по H"
+    genres: all
+    evidence: "[стандарт] 38-ФЗ ст. 5, 24, 28 через H; не юридическое заключение"
+    source: "08-russian-legal-typography/01-advertising-law-claims.md"
+
+  - id: COPY-C-35
+    order: 5
+    question: "Факты, разрешения на отзывы, имена и фото подтверждены заказчиком (proof-intake), а не выведены моделью?"
+    level: human
+    stage: draft-to-checked
+    method: human-review
+    tool: "claims_check.py lint-facts facts.yaml (INFERRED, EXPIRED, PERMISSION)"
+    pass_when: "lint-facts без error; verification.status: verified"
+    on_fail: "вопрос заказчику по proof-intake.md"
+    genres: all
+    evidence: "[проверено: B2/02 — выдумка живёт в самих фактах: «сборка в Казани» из «стартап из Казани»]"
+    source: "02-strategy-messaging/proof-intake.md"
+
+  # ── 7. Люди из аудитории (живая фаза, по желанию) ───────────────────────────────────────
+  - id: COPY-C-40
+    order: 6
+    question: "5-секундный тест первого экрана: ≥ 80 % людей из аудитории верно называют, что это, для кого и что сделать?"
+    level: people
+    stage: live-phase
+    method: five-second-test
+    tool: "своя аудитория заказчика или панель (Анкетолог — 90 ₽ за ответ + 10 ₽ за параметр, снимок 2026-09-24)"
+    pass_when: "≥ 8 из 10 (B1) или короткая версия ≥ длинной на 10 п. п. при 20 на версию (A)"
+    on_fail: "переписать hero по COPY-R-01"
+    genres: [landing, site-page]
+    evidence: "[практика] Perfetti 2005 (через A 01/02 §8)"
+    source: "01-foundations/02-what-copy-changes-evidence.md §8; live-test-plan.md LT-05"
+
+  - id: COPY-C-41
+    order: 6
+    question: "Для сложных условий (тарифы, оферта, гарантия) cloze-тест даёт ≥ 60 % верных?"
+    level: people
+    stage: live-phase
+    method: cloze
+    tool: "каждое 6-е слово — пропуск, синонимы засчитываются"
+    pass_when: "≥ 60 % верных у аудитории"
+    on_fail: "упростить формулировку условий, не выкидывая условие"
+    genres: [landing, site-page, email-form]
+    evidence: "[практика] NN/g 2011 (через A 01/02 §8)"
+    source: "01-foundations/02-what-copy-changes-evidence.md §8"
+
+  - id: COPY-C-42
+    order: 6
+    question: "Тест сообщения задаёт открытые вопросы без наведения (что говорит текст, что непонятно, чем отличается), а не «нравится ли»?"
+    level: people
+    stage: live-phase
+    method: message-test
+    tool: "вопросы — 03-evaluation.md §6.3; правила The Mom Test [V:0MRJVoiqpXg]"
+    pass_when: "вопросы о понимании и прошлом опыте; ответы кодируются по ясности, релевантности, ценности, отличию"
+    on_fail: "переформулировать вопросы"
+    genres: [landing, site-page]
+    evidence: "[практика] Wynter (через A 01/02 §8), Замесин [V:0MRJVoiqpXg 36:16]"
+    source: "03-evaluation.md §6"
+
+  - id: COPY-C-43
+    order: 6
+    question: "Решение «какой текст лучше продаёт» принято по A/B на живом трафике (методика site), а не по судье или предсказанию модели?"
+    level: people
+    stage: live-phase
+    method: ab-test
+    tool: "методика site; числа трезвости — Kohavi (A 01/02 §8)"
+    pass_when: "да, либо решение явно помечено как гипотеза"
+    on_fail: "пометить выбор как [гипотеза] до теста"
+    genres: [landing, site-page, email-form]
+    evidence: "[исследование] Kohavi 2022; Spotify 2026 (LLM-исходы возвращают 39 % эффекта); arXiv 2608.07517"
+    source: "../site-research/ (A/B — site); 01-foundations/02-what-copy-changes-evidence.md §8"
+
+example_run:               # как выглядит прогон по одному copy deck (демо «Отвес», B1/02)
+  deck: 99-raw/experiments/B1/02-two-hierarchies/deck-otves-ai-self.yaml
+  steps:
+    - {item: COPY-C-01, result: pass, note: "claims_check.py — см. 99-raw/experiments/B1/02-two-hierarchies/claims-check.md"}
+    - {item: COPY-C-05, result: pass, note: "copy_lint.py — 0 error, 3 warning ([PLACEHOLDER])"}
+    - {item: COPY-C-04, result: fail-expected, note: "стадия draft: заглушки допустимы, перед публикацией — вопрос заказчику"}
+    - {item: COPY-C-32, result: pending, note: "два hero (problem-aware / product-aware) — попарный выбор заказчиком в живой фазе"}

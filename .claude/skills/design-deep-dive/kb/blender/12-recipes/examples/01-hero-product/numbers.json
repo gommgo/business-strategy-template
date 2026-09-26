@@ -1,0 +1,116 @@
+{
+ "asserts": {
+  "ok": true,
+  "fails": [],
+  "dims_m": [
+   0.0606,
+   0.0223,
+   0.0452
+  ],
+  "tris": 1976,
+  "materials": 2,
+  "gaps_m": {
+   "Case_LED~Case_Base": 0.0
+  }
+ },
+ "audit": {
+  "flags": [
+   "raw_sharp_edges: Case_Base",
+   "ngons: Case_Base",
+   "raw_sharp_edges: Case_Lid",
+   "ngons: Case_Lid",
+   "interpenetration: Case_Base×Case_LED:28"
+  ],
+  "tris": 1976,
+  "draw_calls": 3,
+  "dims_m": [
+   0.061,
+   0.022,
+   0.045
+  ],
+  "frame": {
+   "x": [
+    0.103,
+    0.892
+   ],
+   "y": [
+    0.187,
+    0.863
+   ],
+   "area": 0.534
+  },
+  "view": "Khronos PBR Neutral"
+ },
+ "renders": {
+  "poster_blender": {
+   "sec": 4.28,
+   "kb": 1074.2,
+   "res": [
+    1024,
+    1024
+   ]
+  }
+ },
+ "glb": {
+  "case": {
+   "raw": {
+    "kb": 53.4,
+    "tris": 1976,
+    "nodes": 3,
+    "materials": [
+     "Case_Plastic",
+     "Case_LED"
+    ],
+    "extensionsUsed": [
+     "KHR_materials_clearcoat",
+     "KHR_materials_emissive_strength"
+    ],
+    "instanced_nodes": 0
+   },
+   "web": {
+    "kb": 12.3,
+    "tris": 1976,
+    "nodes": 3,
+    "materials": [
+     "Case_Plastic",
+     "Case_LED"
+    ],
+    "extensionsUsed": [
+     "EXT_meshopt_compression",
+     "KHR_materials_clearcoat",
+     "KHR_materials_emissive_strength",
+     "KHR_mesh_quantization"
+    ],
+    "instanced_nodes": 0
+   },
+   "preset": "static_hero"
+  }
+ },
+ "passport": {
+  "W": 0.0606,
+  "D": 0.0217,
+  "H": 0.0452,
+  "corner": 0.0105,
+  "edge": 0.0085,
+  "power": 2.6,
+  "seam_z": 0.0335,
+  "gap": 0.0003,
+  "lid_open_deg": 0,
+  "body": "#F4F3F0",
+  "led": "#39D98A",
+  "bg": "#ECEEF2",
+  "cam": {
+   "az": 28,
+   "el": 16,
+   "lens": 90,
+   "margin": 1.25,
+   "res": [
+    1024,
+    1024
+   ]
+  },
+  "max_tris": 20000
+ },
+ "sec_total": 4.9,
+ "blender": "5.2.2 LTS"
+}

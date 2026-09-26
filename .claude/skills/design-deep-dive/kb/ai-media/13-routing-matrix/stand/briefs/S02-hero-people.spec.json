@@ -1,0 +1,148 @@
+{
+ "spec_version": "0.1",
+ "checked_at": "2026-09-23",
+ "brief_language": "ru",
+ "id": "stand-s02-hero-people",
+ "task": "IMG-HERO-PHOTO",
+ "role": {
+  "page_type": "saas",
+  "section": "hero",
+  "slot": "hero-bg",
+  "priority": "lcp",
+  "purpose": "hero сервиса для малых мастерских; заголовок и кнопка — HTML справа"
+ },
+ "subject": {
+  "summary": "two woodworkers, a woman in her 40s and a man in his 30s, planning a chair design at a workbench",
+  "elements": [
+   {
+    "id": "people",
+    "what": "two woodworkers in canvas aprons",
+    "position": "left third",
+    "attributes": [
+     "looking at the sketch, not at the camera",
+     "natural relaxed hands, one holding a pencil"
+    ]
+   },
+   {
+    "id": "sketch",
+    "what": "large paper sketch of a chair",
+    "relation": "on the workbench between them"
+   },
+   {
+    "id": "tools",
+    "what": "a few hand planes and clamps",
+    "relation": "on the pegboard behind them"
+   }
+  ],
+  "environment": "small bright woodworking studio with pale plywood walls"
+ },
+ "composition": {
+  "shot": "medium",
+  "angle": "eye-level",
+  "subject_region": "left-third",
+  "focal_point": {
+   "x": 0.3,
+   "y": 0.5
+  },
+  "text_zone": {
+   "side": "right",
+   "rect": [
+    0.6,
+    0.0,
+    1.0,
+    1.0
+   ],
+   "surface": "pale plywood wall",
+   "tone": "evenly lit and low in contrast",
+   "purpose": "headline",
+   "text_color_on_top": "#1E1E1E"
+  }
+ },
+ "camera": {
+  "lens_mm": 35,
+  "aperture": "f/4",
+  "depth_of_field": "medium",
+  "capture": "35mm film photograph"
+ },
+ "light": {
+  "source": "large window",
+  "direction": "left",
+  "quality": "soft",
+  "time_of_day": "late morning",
+  "interaction": "soft shadows, visible wood dust in the light"
+ },
+ "palette": [
+  {
+   "role": "background",
+   "hex": "#E8DFD0",
+   "name": "pale plywood",
+   "share": 0.5,
+   "applies_to": "walls"
+  },
+  {
+   "role": "secondary",
+   "hex": "#8A6A4F",
+   "name": "walnut brown",
+   "share": 0.2,
+   "applies_to": "workbench"
+  },
+  {
+   "role": "accent",
+   "hex": "#2E5E4E",
+   "name": "forest green",
+   "share": 0.08,
+   "applies_to": "aprons"
+  }
+ ],
+ "materials": [
+  "wood",
+  "canvas",
+  "paper",
+  "steel"
+ ],
+ "style": {
+  "medium": "photograph",
+  "anchors": [
+   "documentary workplace photography",
+   "natural skin texture"
+  ],
+  "grain": "subtle film grain"
+ },
+ "mood": [
+  "focused",
+  "warm"
+ ],
+ "exclusions": [
+  {
+   "what": "watermark",
+   "kind": "service"
+  },
+  {
+   "what": "logos",
+   "kind": "service"
+  }
+ ],
+ "text": {
+  "mode": "html_overlay",
+  "copy": [
+   "Мастерская без хаоса",
+   "Заказы, склад и сроки в одном окне"
+  ]
+ },
+ "output": {
+  "primary_ratio": "16:9",
+  "aspect_ratios": [
+   "16:9"
+  ],
+  "resolution": "1K",
+  "format": "avif",
+  "max_kb": 220
+ },
+ "variants": {
+  "count": 2,
+  "vary": [
+   "seed"
+  ]
+ },
+ "notes": "новый бриф стенда E: люди, руки, взгляд не в камеру"
+}

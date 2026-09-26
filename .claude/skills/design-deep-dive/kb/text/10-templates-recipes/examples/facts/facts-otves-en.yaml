@@ -1,0 +1,402 @@
+# facts-otves-en.yaml — английская адаптация набора B2 «Отвес» (02-strategy-messaging/examples/facts-service-renovation.yaml) с теми же id
+# text-research · волна 3 · J3 · 2026-09-24 · формат: 02-strategy-messaging/facts.schema.yaml (facts_version 1)
+#
+# ВЫМЫШЛЕННАЯ студия «Отвес» (B2) и синтетические данные — не публиковать. Зачем отдельный файл, а не translations.en:
+# claims_check.py сверяет объект счёта (values[].what), условие «рядом» и цитаты на языке факта (E/03, F/05, I/04).
+# Шесть фактов, нужных примеру en-otves-case.yaml; verbatim гарантии, цены и сметы — из EN-оверлея F
+# (99-raw/experiments/F/04-voice-samples/en-overlays/otves-remont-nn.yaml; «₽9,800» → «₽9800»: запятую тысяч сверка читает
+# как десятичную — ограничение B2, E/03), кейс и отзыв — перевод J3 с пометкой.
+
+facts_version: 1
+date: '2026-09-24'
+site: otves-remont-nn-en
+lang: en
+jurisdiction: ru
+status: draft
+owner:
+  role: директор (заказчик)
+  contact: почта заказчика из брифа
+collected_by: агент J3 (английская адаптация набора B2 «Отвес», 2026-09-24)
+never_claim_defaults: ru-default-1
+entities:
+- id: company-otves
+  type: company
+  names:
+  - Otves
+- id: city-nn
+  type: place
+  names:
+  - Nizhny Novgorod
+- id: district-sormovo
+  type: place
+  names:
+  - Sormovo
+  - Sormovsky district
+- id: person-anna-k
+  type: person
+  names:
+  - Anna K.
+  - Anna
+  fact_id: review-anna-k
+facts:
+- id: company-since-2014
+  kind: company
+  claim_class:
+  - company-details
+  - fact-number
+  verbatim:
+  - Apartment renovation in Nizhny Novgorod since 2014
+  - since 2014
+  canonical: Otves has been renovating apartments in Nizhny Novgorod since 2014.
+  values:
+  - value: 2014
+    unit: year
+    what: year the studio started work
+  entities:
+  - company-otves
+  - city-nn
+  source:
+    type: registry
+    who: ЕГРЮЛ
+    where: выписка
+    date: '2026-09-10'
+    document: egrul-2026-09-10.pdf
+    quote: 'Дата регистрации: 11.03.2014'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: not-required
+  use:
+    any: true
+  lang: en
+  notes: Английская адаптация факта B2 с тем же id (J3; verbatim guarantee, price, estimate — из EN-оверлея F/04). Источник (source.quote) — русские
+    слова заказчика, не переводится.
+- id: case-two-room-47-days
+  kind: case
+  claim_class:
+  - fact-number
+  - testimonial-quote
+  verbatim:
+  - 'A 54 m² two-room apartment in Sormovo: turnkey renovation in 47 working days against 50 in the contract'
+  - 47 working days instead of the 50 in the contract
+  canonical: A turnkey renovation of a 54 m² two-room apartment in the Sormovsky district of Nizhny Novgorod took 47 working days against the
+    50 set in the contract (contract No. 2026-041, handover certificate signed on 30 May 2026).
+  values:
+  - value: 54
+    unit: m2
+    what: apartment area
+  - value: 47
+    unit: days
+    what: renovation time, working days
+  - value: 50
+    unit: days
+    what: contract term, working days
+  entities:
+  - company-otves
+  - person-anna-k
+  - city-nn
+  source:
+    type: contract
+    who: заказчик
+    where: договор подряда и акт сдачи-приёмки
+    date: '2026-05-30'
+    document: договор № 2026-041; акт от 30.05.2026
+    quote: 'Объект: квартира, 2 комнаты, 54 м²; срок выполнения работ — 50 рабочих дней; работы приняты 30.05.2026 (47-й рабочий день)'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: granted
+    subject: Анна К. (владелец квартиры)
+    form: written-email
+    document: письмо от 2026-09-16
+    date: '2026-09-16'
+    shows:
+    - city
+    pd_consent: false
+    image_consent: false
+  asset: assets/cases/2026-041/ (фото до и после от заказчика; адрес на фото скрыт)
+  related:
+  - review-anna-k
+  use:
+    page_types:
+    - landing-lead-services
+    - case-page
+    - service-page
+    section_roles:
+    - case-studies
+    slot_types:
+    - case-title
+    - case-summary
+    - case-result
+  lang: en
+  notes: Английская адаптация факта B2 с тем же id (J3; verbatim guarantee, price, estimate — из EN-оверлея F/04). Источник (source.quote) — русские
+    слова заказчика, не переводится.
+- id: review-anna-k
+  kind: testimonial
+  claim_class:
+  - testimonial-quote
+  verbatim:
+  - “We got the two-room flat back in 47 working days, three days ahead of the contract. The site manager sent photos every evening… The estimate
+    didn't grow by a single rouble”
+  canonical: 'Anna K. (Nizhny Novgorod, two-room apartment renovation, 2026): “We got the two-room flat back in 47 working days, three days ahead
+    of the contract. The site manager sent photos every evening… The estimate didn''t grow by a single rouble” (translated from Russian).'
+  values:
+  - value: 47
+    unit: days
+    what: renovation time, working days
+    qualifier: in the client's words
+  entities:
+  - person-anna-k
+  - company-otves
+  source:
+    type: platform
+    who: Анна К. (клиент)
+    where: отзыв на Яндекс Картах
+    date: '2026-06-14'
+    url: https://yandex.ru/maps/org/<id-организации>/reviews/?review=<id>
+    quote: Сдали двушку за 47 рабочих дней — на три дня раньше, чем в договоре. Прораб каждый вечер присылал фото в вотсап, я ни разу не приезжала
+      без повода. Смета не выросла ни на рубль, хотя я меняла плитку
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+    method: договор № 2026-041 и акт от 2026-05-30 у заказчика; срок по договору — 50 рабочих дней
+  permission:
+    status: granted
+    subject: Анна К. (автор отзыва)
+    form: written-email
+    scope:
+    - site
+    document: письмо от 2026-09-16 в архиве заказчика
+    date: '2026-09-16'
+    shows:
+    - first-name
+    - initials
+    - city
+    pd_consent: true
+    image_consent: false
+  attribution:
+    name: Анна К.
+    display: first-name-initial
+    role: ремонт двухкомнатной квартиры
+    city: Нижний Новгород
+    verified_customer: true
+    relation: customer
+  original_ref: evidence/reviews/ym-2026-06-14-anna-k.txt
+  edits:
+  - type: ellipsis
+    what: сокращено «в вотсап, я ни разу не приезжала без повода»
+    approved_by: Анна К.
+    date: '2026-09-16'
+  - type: trim-end
+    what: убран хвост «, хотя я меняла плитку» — смысл не меняется
+    approved_by: Анна К.
+    date: '2026-09-16'
+  use:
+    section_roles:
+    - testimonials
+    - hero
+    - case-studies
+    slot_types:
+    - testimonial-quote
+    - testimonial-attribution
+    - hero-proof
+  valid:
+    review_by: '2027-06-14'
+  lang: en
+  notes: Английская адаптация факта B2 с тем же id (J3; verbatim guarantee, price, estimate — из EN-оверлея F/04). Источник (source.quote) — русские
+    слова заказчика, не переводится. Перевод цитаты — с пометкой «translated from Russian» рядом (B2 §5.1).
+- id: guarantee-3-years
+  kind: guarantee
+  claim_class:
+  - guarantee
+  verbatim:
+  - a 3-year warranty, written into clause 7.2 of the contract
+  - 3-year warranty on the work
+  canonical: Otves gives a 3-year warranty on completed work under the construction contract (clause 7.2).
+  values:
+  - value: 3
+    unit: years
+    what: warranty on work, years
+  entities:
+  - company-otves
+  source:
+    type: contract
+    who: заказчик
+    where: типовой договор подряда, п. 7.2
+    date: '2026-01-15'
+    document: dogovor-podryada-2026.pdf, п. 7.2
+    quote: Гарантийный срок на выполненные работы составляет 3 (три) года с даты подписания акта
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - guarantee
+    - hero
+    - pricing
+    - faq
+    slot_types:
+    - guarantee-text
+    - cta-note
+    - faq-a
+    - hero-proof
+  legal:
+    flags:
+    - 38fz-5-3-6
+    review:
+      status: not-needed
+    disclaimer: ''
+  lang: en
+  notes: Английская адаптация факта B2 с тем же id (J3; verbatim guarantee, price, estimate — из EN-оверлея F/04). Источник (source.quote) — русские
+    слова заказчика, не переводится.
+- id: price-from-per-m2
+  kind: price
+  claim_class:
+  - price-discount
+  verbatim:
+  - Labour from ₽9800 per m², materials not included
+  - Turnkey renovation from ₽9800 per m²
+  canonical: Turnkey apartment renovation at Otves costs from ₽9800 per square metre, materials not included (2026 price list).
+  values:
+  - value: 9800
+    unit: RUB
+    what: labour price per m2
+    comparator: gte
+    qualifier: turnkey, materials not included
+  entities:
+  - company-otves
+  source:
+    type: customer-document
+    who: заказчик
+    where: прайс-лист 2026
+    date: '2026-01-15'
+    document: price-2026.pdf, строка «Ремонт под ключ, эконом»
+    quote: Ремонт под ключ (работы) — от 9 800 руб./м²
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - pricing
+    - hero
+    slot_types:
+    - pricing-price
+    - pricing-price-note
+    - cta-note
+    requires_nearby: «materials not included»
+  valid:
+    from: '2026-01-15'
+    until: '2026-12-31'
+    review_by: '2026-12-01'
+  lang: en
+  notes: Английская адаптация факта B2 с тем же id (J3; verbatim guarantee, price, estimate — из EN-оверлея F/04). Источник (source.quote) — русские
+    слова заказчика, не переводится.
+- id: estimate-free
+  kind: offer-terms
+  claim_class:
+  - price-discount
+  - purchase-terms
+  verbatim:
+  - The visit and the estimate are free within city limits
+  - Free within city limits
+  canonical: The measurer's visit and the estimate are free within Nizhny Novgorod city limits.
+  values:
+  - value: 0
+    unit: RUB
+    what: cost of the visit and the estimate
+    qualifier: within city limits
+  entities:
+  - company-otves
+  - city-nn
+  source:
+    type: customer-document
+    who: заказчик
+    where: прайс-лист 2026
+    date: '2026-01-15'
+    document: price-2026.pdf, примечание 1
+    quote: Замер и составление сметы — бесплатно (в черте города)
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - hero
+    - lead-form
+    - pricing
+    - final-cta
+    slot_types:
+    - cta-label
+    - cta-note
+    - form-lead
+    - pricing-price-note
+    requires_nearby: «within city limits»
+  valid:
+    until: '2026-12-31'
+  lang: en
+  notes: Английская адаптация факта B2 с тем же id (J3; verbatim guarantee, price, estimate — из EN-оверлея F/04). Источник (source.quote) — русские
+    слова заказчика, не переводится.
+missing:
+- id: legal-details
+  what: 'company details for the footer: full legal name, OGRN, INN, address (seller information)'
+  kind: company
+  claim_class:
+  - company-details
+  placeholder: '[PLACEHOLDER: company details]'
+  who: customer (accountant)
+  blocking: true
+  fallback: placeholder
+- id: payment-stages
+  what: 'payment terms: prepayment, stages, materials'
+  kind: offer-terms
+  claim_class:
+  - purchase-terms
+  placeholder: '[PLACEHOLDER: payment terms]'
+  who: customer
+  blocking: false
+  fallback: placeholder
+never_claim:
+- id: nc-best-in-city
+  text: “best renovation in the city”, “No. 1 in Nizhny Novgorod”, “lowest prices” — no independent rating or price study
+  claim_class:
+  - superlative
+  patterns:
+  - best\s+(renovation|studio|in\s+(the\s+)?city)
+  - no\.?\s*1\s+in
+  - lowest\s+prices?
+  lift: with-fact
+  reason: 135-ФЗ ст. 14.3; 38-ФЗ ст. 5 ч. 3 п. 1 (H)
+  source:
+    who: B2 (RU), EN — J3
+    date: '2026-09-24'
+- id: nc-no-extra-cost-promise
+  text: “the estimate never changes” as a promise to every client — the contract has no such clause
+  claim_class:
+  - guarantee
+  - price-discount
+  patterns:
+  - estimate\w*\s+(never|won.t|will\s+not|does\s+not)\s+(change|grow|go\s+up|increase)
+  lift: with-fact
+  reason: 'B2: пробел estimate-change-policy'
+  source:
+    who: B2 (RU), EN — J3
+    date: '2026-09-24'

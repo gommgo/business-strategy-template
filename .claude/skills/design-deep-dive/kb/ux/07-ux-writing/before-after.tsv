@@ -1,0 +1,138 @@
+before	after	rule_ref	lang	why
+«Обработка»	«Обрабатывается»	07-ux-writing/02-microcopy-by-component.md §11.1	ru	Отвечает на «какой?», а не «что происходит?»
+«Заявки в обработке»	«В обработке банком»	07-ux-writing/02-microcopy-by-component.md §11.1	ru	Снимает вопрос «кем обрабатывается» [V:hDqJzydcHMc 19:29]
+«Готово»	«Готов к отправке»	07-ux-writing/02-microcopy-by-component.md §11.1	ru	Называет, к чему готов
+«Ошибка»	«Не отправлен»	07-ux-writing/02-microcopy-by-component.md §11.1	ru	Называет состояние объекта, а не факт сбоя
+**«успешно»**	«Платёж отправлен»	07-ux-writing/03-russian-interface-text.md §7.2	ru	
+**«автоматически»**	«Создадим заявку»	07-ux-writing/03-russian-interface-text.md §7.2	ru	
+**«вручную»**	«Заполните форму»	07-ux-writing/03-russian-interface-text.md §7.2	ru	
+**пассивный залог**	«Активируем овердрафт»	07-ux-writing/03-russian-interface-text.md §7.2	ru	
+«Ошибка сохранения»	«Не удалось сохранить отчёт»	07-ux-writing/03-russian-interface-text.md §8.1	ru	Первое называет категорию, второе — что именно не произошло
+«Ошибка 500»	«Сервис недоступен»	07-ux-writing/03-russian-interface-text.md §8.1	ru	Код — не сообщение
+«Неверный формат»	«Формат: дд.мм.гггг, например 14.03.2026»	07-ux-writing/03-russian-interface-text.md §8.1	ru	Первое констатирует, второе помогает
+«Вы не заполнили обязательные поля»	«Заполните: фамилия, ИНН»	07-ux-writing/03-russian-interface-text.md §8.1	ru	Обвинение → инструкция
+«Некорректное значение»	«Сумма от 100 до 500 000 ₽»	07-ux-writing/03-russian-interface-text.md §8.1	ru	«Некорректное» ничего не говорит
+«Что-то пошло не так»	«Не удалось загрузить список. Мы уже чиним»	07-ux-writing/03-russian-interface-text.md §8.1	ru	Оставляет вопрос «не я ли виноват»
+«Доступ запрещён»	«Нет доступа к разделу „Отчёты“»	07-ux-writing/03-russian-interface-text.md §8.1	ru	«Запрещён» звучит как наказание
+«Удалить 3 файл»	«Удалить 3 файла» (ICU plural, §4)	07-ux-writing/03-russian-interface-text.md §9.2	ru	
+«Выбрано 1 запись»	«Выбрана 1 запись» / «Выбрано записей: 1»	07-ux-writing/03-russian-interface-text.md §9.2	ru	
+«Строка 1 из 50 выбран»	«Выбрана строка 1 из 50»	07-ux-writing/03-russian-interface-text.md §9.2	ru	
+«Загружено 2 файлов»	«Загружено 2 файла»	07-ux-writing/03-russian-interface-text.md §9.2	ru	
+`save_1`, `save_2`	`order.form.submit`, `settings.profile.submit`	07-ux-writing/05-localization-and-i18n.md §3.1	code	
+`text_error_404`	`error.page.404.title`	07-ux-writing/05-localization-and-i18n.md §3.1	code	
+`Сохранить` (ключ равен значению)	`project.editor.action.save_draft`	07-ux-writing/05-localization-and-i18n.md §3.1	ru	
+`msg1`	`project.delete.confirm.body`	07-ux-writing/05-localization-and-i18n.md §3.1	code	
+«[Узнайте больше о защите от чарджбэков]»	«Избегайте расходов на чарджбэки с [Shopify Protect]»	07-ux-writing/05-localization-and-i18n.md §4.3	ru	
+«[Управляйте каналами], через которые продаёте»	«Управляйте [каналами], через которые продаёте»	07-ux-writing/05-localization-and-i18n.md §4.3	ru	
+мощный, мощнейший	назвать, что делает функция	07-ux-writing/06-banned-words-and-patterns.md §1	ru	уровень: запрет
+бесшовный, бесшовно	убрать или «без перехода», «в одном окне»	07-ux-writing/06-banned-words-and-patterns.md §1	ru	уровень: запрет
+интуитивный, интуитивно понятный	убрать (`../01-foundations/02-myths-and-misapplied-laws.md`: «интуитивно понятный» — миф)	07-ux-writing/06-banned-words-and-patterns.md §1	ru	уровень: запрет
+уникальный	назвать отличие конкретно	07-ux-writing/06-banned-words-and-patterns.md §1	ru	уровень: запрет
+инновационный, передовой, революционный	убрать	07-ux-writing/06-banned-words-and-patterns.md §1	ru	уровень: запрет
+ключевой, важнейший, решающий	убрать или назвать роль	07-ux-writing/06-banned-words-and-patterns.md §1	ru	уровень: запрет
+комплексный, всесторонний, многогранный	перечислить, что входит	07-ux-writing/06-banned-words-and-patterns.md §1	ru	уровень: запрет
+эффективный, оптимальный	число или критерий	07-ux-writing/06-banned-words-and-patterns.md §1	ru	уровень: предупреждение
+легко, просто, всего за	убрать; «making things easy is not the same as making things seem easy»	07-ux-writing/06-banned-words-and-patterns.md §1	ru	уровень: предупреждение
+наслаждайтесь, откройте для себя, погрузитесь	убрать	07-ux-writing/06-banned-words-and-patterns.md §1	ru	уровень: запрет
+решение (как замена названию функции)	назвать функцию	07-ux-writing/06-banned-words-and-patterns.md §1	ru	уровень: предупреждение
+экосистема, платформа (о себе)	назвать продукт	07-ux-writing/06-banned-words-and-patterns.md §1	ru	уровень: предупреждение
+ваш надёжный помощник, всё, что нужно	убрать	07-ux-writing/06-banned-words-and-patterns.md §1	ru	уровень: запрет
+! в конце маркетинговой фразы	убрать	07-ux-writing/06-banned-words-and-patterns.md §1	ru	уровень: предупреждение
+является, являются	тире, глагол или ничего: «Поле является обязательным» → «Обязательное поле»	07-ux-writing/06-banned-words-and-patterns.md §2.1	ru	уровень: запрет
+представляет собой	тире или «это»	07-ux-writing/06-banned-words-and-patterns.md §2.1	ru	уровень: запрет
+осуществить, осуществление, осуществляется	конкретный глагол: «осуществить сохранение» → «сохранить»	07-ux-writing/06-banned-words-and-patterns.md §2.1	ru	уровень: запрет
+производить, производится (о действии)	конкретный глагол	07-ux-writing/06-banned-words-and-patterns.md §2.1	ru	уровень: запрет
+выполнить действие, произвести операцию	назвать действие	07-ux-writing/06-banned-words-and-patterns.md §2.1	ru	уровень: запрет
+обеспечивает, позволяет, способствует	конкретный глагол: «позволяет сохранить» → «сохраняет»	07-ux-writing/06-banned-words-and-patterns.md §2.1	ru	уровень: предупреждение
+реализовать, реализация	«сделать», «настроить»	07-ux-writing/06-banned-words-and-patterns.md §2.1	ru	уровень: предупреждение
+имеет возможность, имеется возможность	глагол	07-ux-writing/06-banned-words-and-patterns.md §2.1	ru	уровень: запрет
+в случае необходимости	«при необходимости» или убрать	07-ux-writing/06-banned-words-and-patterns.md §2.1	ru	уровень: запрет
+с целью, в целях	«чтобы»	07-ux-writing/06-banned-words-and-patterns.md §2.1	ru	уровень: запрет
+в связи с тем что, ввиду того что	«потому что»	07-ux-writing/06-banned-words-and-patterns.md §2.1	ru	уровень: запрет
+на данный момент, в настоящее время	«сейчас» или убрать	07-ux-writing/06-banned-words-and-patterns.md §2.1	ru	уровень: запрет
+в дальнейшем, впоследствии	«потом», «позже»	07-ux-writing/06-banned-words-and-patterns.md §2.1	ru	уровень: предупреждение
+данный, данная, данное, данные (как указательное)	«этот» или убрать: «данная операция» → «операция»	07-ux-writing/06-banned-words-and-patterns.md §2.2	ru	уровень: запрет
+вышеуказанный, нижеследующий, вышеперечисленный	убрать; в интерфейсе ещё и directional language	07-ux-writing/06-banned-words-and-patterns.md §2.2	ru	уровень: запрет
+соответствующий	назвать, какой именно	07-ux-writing/06-banned-words-and-patterns.md §2.2	ru	уровень: предупреждение
+определённый (в значении «некоторый»)	убрать или назвать	07-ux-writing/06-banned-words-and-patterns.md §2.2	ru	уровень: предупреждение
+будет выполнено, будет произведено, будет осуществлено	«выполним», «сделаем»	07-ux-writing/06-banned-words-and-patterns.md §2.3	ru	уровень: запрет
+будет отправлено, будет создано (о действии системы)	«отправим», «создадим» — или безлично «Отправлено»	07-ux-writing/06-banned-words-and-patterns.md §2.3	ru	уровень: предупреждение
+взимается, начисляется, списывается (без субъекта)	назвать, кто взимает	07-ux-writing/06-banned-words-and-patterns.md §2.3	ru	уровень: предупреждение
+активируется, настраивается (о действии системы)	«активируем», «настроим»	07-ux-writing/06-banned-words-and-patterns.md §2.3	ru	уровень: предупреждение
+сущ. + сущ.(род.) + сущ.(род.) + сущ.(род.)	«Отчёт о движении средств»	07-ux-writing/06-banned-words-and-patterns.md §2.4	ru	
+успешно	убрать: «Платёж отправлен»	07-ux-writing/06-banned-words-and-patterns.md §3.1	ru	уровень: запрет
+автоматически	убрать	07-ux-writing/06-banned-words-and-patterns.md §3.1	ru	уровень: предупреждение
+вручную	убрать	07-ux-writing/06-banned-words-and-patterns.md §3.1	ru	уровень: запрет
+корректно, некорректно	назвать требование	07-ux-writing/06-banned-words-and-patterns.md §3.1	ru	уровень: запрет
+Каталог (как название)	назвать содержимое: «Обои»	07-ux-writing/06-banned-words-and-patterns.md §3.2	ru	уровень: предупреждение
+Список (как название)	назвать содержимое	07-ux-writing/06-banned-words-and-patterns.md §3.2	ru	уровень: запрет
+Перечень (как название)	назвать содержимое	07-ux-writing/06-banned-words-and-patterns.md §3.2	ru	уровень: запрет
+Продукция, Продукты, Услуги, Решения (как раздел)	перечислить	07-ux-writing/06-banned-words-and-patterns.md §3.2	ru	уровень: предупреждение
+Дополнительно, Прочее, Разное, Другое	переклассифицировать	07-ux-writing/06-banned-words-and-patterns.md §3.2	ru	уровень: предупреждение
+Информация о …, Данные о …	убрать обёртку: «Информация о тарифе» → «Тариф»	07-ux-writing/06-banned-words-and-patterns.md §3.2	ru	уровень: запрет
+Подробнее (как единственный текст ссылки)	назвать, что откроется	07-ux-writing/06-banned-words-and-patterns.md §3.2	ru	уровень: запрет
+Основной, Главный (в подписи)	убрать	07-ux-writing/06-banned-words-and-patterns.md §3.2	ru	уровень: предупреждение
+Уважаемые …, Здравствуйте (в интерфейсе)	убрать	07-ux-writing/06-banned-words-and-patterns.md §3.2	ru	уровень: запрет
+Что-то пошло не так	назвать, что именно не удалось, и что делать	07-ux-writing/06-banned-words-and-patterns.md §3.3	ru	уровень: запрет
+Произошла ошибка, Неизвестная ошибка, Системная ошибка	назвать, что остановилось	07-ux-writing/06-banned-words-and-patterns.md §3.3	ru	уровень: запрет
+Ошибка <код> как единственный текст	человеческое сообщение; код второстепенно	07-ux-writing/06-banned-words-and-patterns.md §3.3	ru	уровень: запрет
+Ой, Упс, Ойой	убрать	07-ux-writing/06-banned-words-and-patterns.md §3.3	ru	уровень: запрет
+Неверно, неверный, неправильно	сказать, что нужно: «Формат: дд.мм.гггг»	07-ux-writing/06-banned-words-and-patterns.md §3.3	ru	уровень: запрет
+Недопустимо, недопустимый	то же	07-ux-writing/06-banned-words-and-patterns.md §3.3	ru	уровень: запрет
+Запрещено, не разрешено	сказать, что разрешено	07-ux-writing/06-banned-words-and-patterns.md §3.3	ru	уровень: запрет
+Вы не заполнили, вы ошиблись, вы забыли	безлично или инструкция	07-ux-writing/06-banned-words-and-patterns.md §3.3	ru	уровень: запрет
+Обратитесь к администратору (без идентификатора и контакта)	добавить, к кому и с чем	07-ux-writing/06-banned-words-and-patterns.md §3.3	ru	уровень: предупреждение
+Пожалуйста, попробуйте позже (без срока и без причины)	назвать причину и срок	07-ux-writing/06-banned-words-and-patterns.md §3.3	ru	уровень: предупреждение
+Проверьте правильность заполнения	назвать конкретное поле и требование	07-ux-writing/06-banned-words-and-patterns.md §3.3	ru	уровень: запрет
+Приносим извинения за доставленные неудобства	сказать, что случилось и что делается	07-ux-writing/06-banned-words-and-patterns.md §3.3	ru	уровень: запрет
+Доступ запрещён	«Нет доступа к разделу «…»»	07-ux-writing/06-banned-words-and-patterns.md §3.3	ru	уровень: предупреждение
+Нет данных, Здесь пусто, Ничего нет (как полный текст пустого состояния)	заголовок + что появится + действие	07-ux-writing/06-banned-words-and-patterns.md §3.3	ru	уровень: запрет
+Вы уверены	«Удалить проект «Альфа»?»	07-ux-writing/06-banned-words-and-patterns.md §3.4	ru	уровень: запрет
+Вы действительно хотите	то же	07-ux-writing/06-banned-words-and-patterns.md §3.4	ru	уровень: запрет
+Хотите ли вы	«Получить чек?»	07-ux-writing/06-banned-words-and-patterns.md §3.4	ru	уровень: запрет
+Подтвердите действие	назвать действие	07-ux-writing/06-banned-words-and-patterns.md §3.4	ru	уровень: запрет
+Нажмите здесь, нажмите сюда	назвать действие	07-ux-writing/06-banned-words-and-patterns.md §3.4	ru	уровень: запрет
+Введите / Укажите / Заполните в подписи поля	существительное: «Фамилия»	07-ux-writing/06-banned-words-and-patterns.md §3.4	ru	уровень: запрет
+по данной операции, для данного действия	убрать	07-ux-writing/06-banned-words-and-patterns.md §3.4	ru	уровень: запрет
+Два отрицания в одной подписи	«Получать письма» (галочка = согласие)	07-ux-writing/06-banned-words-and-patterns.md §3.6	ru	
+Отрицание в подписи чекбокса	«Показывать подсказки» (галочка = включено)	07-ux-writing/06-banned-words-and-patterns.md §3.6	ru	
+Отрицание с исключением	переписать утвердительно	07-ux-writing/06-banned-words-and-patterns.md §3.6	ru	
+Вопрос в отрицательной форме	«Отменить изменения?» с кнопками-глаголами	07-ux-writing/06-banned-words-and-patterns.md §3.6	ru	
+Инвертированная галочка	отмечать то, что нужно	07-ux-writing/06-banned-words-and-patterns.md §3.6	ru	
+справа, слева, сверху, снизу, выше, ниже (как указание на элемент)	назвать элемент по имени	07-ux-writing/06-banned-words-and-patterns.md §3.7	ru	уровень: предупреждение
+Oops, Uh-oh, Whoops, Yikes	убрать	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: запрет
+Something went wrong	назвать, что не удалось, и что делать	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: запрет
+An error occurred, Unknown error, Unexpected error	назвать, что остановилось	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: запрет
+Error \d+ как единственный текст	человеческое сообщение	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: запрет
+Invalid, illegal, incorrect	сказать, что нужно	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: запрет
+Are you sure	вопрос с объектом	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: запрет
+Click here, Here, Read more, Learn more (как весь текст ссылки)	назвать назначение	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: запрет
+Submit	назвать результат	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: запрет
+OK, Ok, Okay (как подтверждение действия)	«Close», «Got it», глагол	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: запрет
+Please (более одного раза на экран)	оставить один раз или убрать	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: предупреждение
+Simply, Just, Easily, Quickly	убрать	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: предупреждение
+Powerful, Seamless, Intuitive, Robust, Cutting-edge, Best-in-class	назвать, что делает	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: запрет
+Unleash, Unlock the power, Supercharge, Revolutionize, Delight	убрать	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: запрет
+We're sorry for any inconvenience	сказать, что случилось и что делается	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: запрет
+Unfortunately	сразу к сути	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: предупреждение
+Above, below, to the right, to the left	назвать элемент	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: предупреждение
+he/she, s/he, (s)he	«you», множественное, роль, единичное «they»	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: запрет
+master/slave, whitelist, blacklist	primary/subordinate, allowlist, blocklist	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: запрет
+Suffering from, stricken with, wheelchair-bound	фокус на людях	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: запрет
+You can (разрешительная конструкция в инструкции)	начать с глагола	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: предупреждение
+There is, There are	переписать	07-ux-writing/06-banned-words-and-patterns.md §4.1	en	уровень: предупреждение
+Нажмите здесь, если да / Нажмите здесь, если нет	Да / Нет	91-videos/digests/6Vh49gMvirE.md	ru	дайджест: Мастер-класс Ильи Бирмана о синтаксисе элементов интерфейса
+Каталог обоев	Обои	91-videos/digests/6Vh49gMvirE.md	ru	дайджест: Мастер-класс Ильи Бирмана о синтаксисе элементов интерфейса
+Список литературы	Литература	91-videos/digests/6Vh49gMvirE.md	ru	дайджест: Мастер-класс Ильи Бирмана о синтаксисе элементов интерфейса
+Upload it to your server	Click here to finish	91-videos/digests/6Vh49gMvirE.md	en	дайджест: Мастер-класс Ильи Бирмана о синтаксисе элементов интерфейса
+Сохранить и посмотреть	Опубликовать заметку	91-videos/digests/6Vh49gMvirE.md	ru	дайджест: Мастер-класс Ильи Бирмана о синтаксисе элементов интерфейса
+Custom	Настроить	91-videos/digests/6Vh49gMvirE.md [20:36]	ru	дайджест: Мастер-класс Ильи Бирмана о синтаксисе элементов интерфейса
+овердрафт активируется	активируем овердрафт	91-videos/digests/hDqJzydcHMc.md	ru	дайджест: «С хорошим текстом понятнее» (Анна Кочеткова, Тинькофф Бизне
+овердрафт где-то активируется сам	мы активируем овердрафт	91-videos/digests/hDqJzydcHMc.md	ru	дайджест: «С хорошим текстом понятнее» (Анна Кочеткова, Тинькофф Бизне
+Подробнее	Схема	91-videos/digests/hDqJzydcHMc.md [37:00]	ru	дайджест: «С хорошим текстом понятнее» (Анна Кочеткова, Тинькофф Бизне
+Для чего будет использоваться касса	чтобы брать деньги с покупателей	91-videos/digests/hDqJzydcHMc.md	ru	дайджест: «С хорошим текстом понятнее» (Анна Кочеткова, Тинькофф Бизне
+1–2 дня	1–2 рабочих дня	91-videos/digests/AVKz9ZYoxgo.md [1:47:53]	ru	дайджест: Fixing Frustrating Design Patterns For 2025 / 2026
+люди, которые любят кино	одержимые кино	91-videos/digests/vxGrL3YSBvw.md [03:18]	ru	дайджест: The New Rules of UX Writing with NICK DILALLO — SmashingConf
+Scary movies? Yes/No	How do you feel about scary movies? Love them / Not for me	91-videos/digests/vxGrL3YSBvw.md	en	дайджест: The New Rules of UX Writing with NICK DILALLO — SmashingConf
+Find my Panama	Search	91-videos/digests/2juq00vrvl0.md [19:33]	en	дайджест: Designing for Accessibility Right from the Start (Stéphanie
+Keep me in the loop	Send me text alerts	91-videos/digests/2juq00vrvl0.md [19:33]	en	дайджест: Designing for Accessibility Right from the Start (Stéphanie

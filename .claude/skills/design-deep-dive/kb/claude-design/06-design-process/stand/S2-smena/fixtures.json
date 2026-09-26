@@ -1,0 +1,80 @@
+{
+ "_note": "SYNTHETIC, anonymised sample of the customer's Excel export (F/03). Edge cases: long name, one bottle, zero bottles, no courier, cancelled.",
+ "orders_today": [
+  {
+   "id": 1042,
+   "client": "ООО «Длинное-предлинное название клиента Ёжиков и партнёры»",
+   "address": "Казань, ул. Баумана, 1, офис 402",
+   "window": "10:00–12:00",
+   "bottles": 6,
+   "status": "in_transit",
+   "courier": "Ильдар Г."
+  },
+  {
+   "id": 1043,
+   "client": "ИП Ли",
+   "address": "Казань, пр. Победы, 100",
+   "window": "12:00–14:00",
+   "bottles": 1,
+   "status": "new",
+   "courier": null
+  },
+  {
+   "id": 1044,
+   "client": "Школа № 19",
+   "address": "Казань, ул. Чистопольская, 7",
+   "window": "08:00–10:00",
+   "bottles": 24,
+   "status": "delivered",
+   "courier": "Мария С."
+  },
+  {
+   "id": 1045,
+   "client": "Кафе «Ёлка»",
+   "address": "Казань, ул. Кремлёвская, 21",
+   "window": "14:00–16:00",
+   "bottles": 0,
+   "status": "cancelled",
+   "courier": null
+  }
+ ],
+ "orders_empty": [],
+ "orders_one": [
+  {
+   "id": 1042,
+   "client": "ООО «Длинное-предлинное название клиента Ёжиков и партнёры»",
+   "address": "Казань, ул. Баумана, 1, офис 402",
+   "window": "10:00–12:00",
+   "bottles": 6,
+   "status": "in_transit",
+   "courier": "Ильдар Г."
+  }
+ ],
+ "couriers": [
+  {
+   "name": "Ильдар Г.",
+   "phone": "+7 900 000-00-01",
+   "status": "on_route",
+   "orders_today": 7
+  },
+  {
+   "name": "Мария С.",
+   "phone": "+7 900 000-00-02",
+   "status": "free",
+   "orders_today": 5
+  },
+  {
+   "name": "Константин Константинопольский",
+   "phone": null,
+   "status": "off",
+   "orders_today": 0
+  }
+ ],
+ "shift": {
+  "date": "2026-09-24",
+  "planned": 64,
+  "delivered": 51,
+  "late": 3,
+  "cancelled": 2
+ }
+}

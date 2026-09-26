@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сдано — приёмка квартиры в новостройке с инженером · демо L0</title>
+<meta name="description" content="Инженер технадзора проверит квартиру по 147 пунктам и составит акт осмотра с фото. Демо-страница рецепта 01 базы creative-research.">
+<!-- Рабочий пример L0 · рецепт 10-recipes/01-lead-services-l0.md · агент J · волна 3 · 2026-09-25 · Chromium 153 / WebKit 26.6
+     Демо: компания «Сдано», цены и цифры вымышлены. Ассеты — только код (SVG, CSS) и шрифты OFL. JS подачи — 0 байт. -->
+<!-- оба подмножества шрифта первого экрана: цифры, «», — и двоеточие русского текста — в latin (F2: без неё CLS загрузки 0,15) -->
+<link rel="preload" href="../_shared/fonts/golos-text/golos-text-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../_shared/fonts/golos-text/golos-text-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../_shared/fonts.css">
+<link rel="stylesheet" href="../_shared/marketing-tokens.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">К содержанию</a>
+
+<header class="top" data-section="header">
+  <div class="top__in">
+    <a class="logo" href="./" aria-label="Сдано — на главную"><span class="logo__mark" aria-hidden="true"></span>Сдано</a>
+    <a class="top__phone" href="tel:+74950000000">+7&nbsp;495&nbsp;000-00-00</a>
+    <a class="btn btn--small" href="#zayavka" data-slot="cta-primary">Заказать приёмку</a>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="hero" data-section="hero" aria-labelledby="h1">
+  <div class="hero__in">
+    <div class="hero__text">
+      <p class="eyebrow hero__eyebrow" data-slot="eyebrow">Технадзор при&nbsp;приёмке новостройки · Москва и&nbsp;область</p>
+      <h1 id="h1" class="hero__title" data-slot="headline">Найдём дефекты до&nbsp;подписи акта</h1>
+      <p class="hero__lead" data-slot="subheadline" data-moment="hero-copy-rise">Инженер приедет с&nbsp;приборами, проверит квартиру по&nbsp;147&nbsp;пунктам и&nbsp;в&nbsp;тот&nbsp;же день отдаст акт осмотра с&nbsp;фото каждого замечания. С&nbsp;этим актом исправлять будет застройщик, а&nbsp;не&nbsp;вы.</p>
+      <p class="hero__proof" data-slot="hero-proof">от&nbsp;7&nbsp;900&nbsp;₽ за&nbsp;квартиру до&nbsp;60&nbsp;м² · повторный выезд бесплатно</p>
+      <div class="hero__actions">
+        <a class="btn" href="#zayavka" data-slot="cta-primary">Заказать приёмку</a>
+        <a class="link-phone" href="tel:+74950000000">или позвоните: +7&nbsp;495&nbsp;000-00-00</a>
+      </div>
+    </div>
+
+    <figure class="plan" data-slot="hero-visual" aria-labelledby="plan-cap">
+      <svg class="plan__svg" viewBox="0 0 640 470" role="img" aria-labelledby="plan-title plan-desc">
+        <title id="plan-title">План двухкомнатной квартиры 58 м² с отметками семи дефектов</title>
+        <desc id="plan-desc">Отметки: 1 — трещина в стяжке гостиной, 2 — продувает окно, 3 — уклон пола 9 мм, 4 — розетка без заземления, 5 — течь под раковиной, 6 — нет тяги в вентиляции кухни, 7 — дверь не закрывается.</desc>
+        <defs>
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="var(--c-grid)" stroke-width="1"/></pattern>
+        </defs>
+        <rect x="0" y="0" width="640" height="470" fill="url(#grid)"/>
+        <g class="plan__walls" fill="none" stroke="var(--c-ink)" stroke-linecap="square">
+          <path d="M40 40H600V430H40Z" stroke-width="10"/>
+          <path d="M300 40V250M300 300V430M40 260H130M180 260H300M300 190H430M480 190H600M430 300H600M430 300V430M370 300H430" stroke-width="5"/>
+          <path d="M40 330H120" stroke-width="5"/>
+        </g>
+        <g class="plan__windows" stroke="var(--c-paper)" stroke-width="6">
+          <path d="M90 40H230M370 40H540M600 230V280M90 430H230M470 430H560"/>
+        </g>
+        <g fill="none" stroke="var(--c-ink)" stroke-width="1.5">
+          <path d="M90 36H230M90 44H230M370 36H540M370 44H540M596 230V280M604 230V280M90 426H230M90 434H230M470 426H560M470 434H560"/>
+        </g>
+        <g class="plan__doors" fill="none" stroke="var(--c-ink-2)" stroke-width="1.5">
+          <path d="M130 260A50 50 0 0 1 180 210M180 260V210"/>
+          <path d="M300 250A50 50 0 0 0 350 300M300 300H350"/>
+          <path d="M430 190A50 50 0 0 1 480 240M480 190V240"/>
+          <path d="M370 300A60 60 0 0 1 310 360"/>
+        </g>
+        <g class="plan__labels" fill="var(--c-ink-2)" font-size="15">
+          <text x="70" y="120">Гостиная</text><text x="70" y="140" class="plan__area">17,8 м²</text>
+          <text x="340" y="100">Спальня</text><text x="340" y="120" class="plan__area">13,4 м²</text>
+          <text x="70" y="300">Прихожая</text><text x="70" y="320" class="plan__area">7,6 м²</text>
+          <text x="455" y="350">Кухня</text><text x="455" y="370" class="plan__area">11,2 м²</text>
+          <text x="315" y="385">С/у</text><text x="315" y="405" class="plan__area">4,1 м²</text>
+        </g>
+        <g class="plan__marks" data-moment="hero-marks">
+          <g transform="translate(190 175)"><g class="mark" style="--i:0"><circle r="14"/><text y="5">1</text></g></g>
+          <g transform="translate(160 62)"><g class="mark" style="--i:1"><circle r="14"/><text y="5">2</text></g></g>
+          <g transform="translate(235 225)"><g class="mark" style="--i:2"><circle r="14"/><text y="5">3</text></g></g>
+          <g transform="translate(575 150)"><g class="mark" style="--i:3"><circle r="14"/><text y="5">4</text></g></g>
+          <g transform="translate(395 340)"><g class="mark" style="--i:4"><circle r="14"/><text y="5">5</text></g></g>
+          <g transform="translate(575 405)"><g class="mark" style="--i:5"><circle r="14"/><text y="5">6</text></g></g>
+          <g transform="translate(455 262)"><g class="mark" style="--i:6"><circle r="14"/><text y="5">7</text></g></g>
+        </g>
+      </svg>
+      <figcaption id="plan-cap" class="plan__cap">
+        <span class="plan__cap-lead">Так выглядит первая страница акта:</span>
+        <ol class="plan__list">
+          <li><b>1</b> Трещина в&nbsp;стяжке гостиной</li>
+          <li><b>2</b> Продувает окно: нет пароизоляции шва</li>
+          <li><b>3</b> Уклон пола 9&nbsp;мм на&nbsp;2&nbsp;м</li>
+          <li><b>4</b> Розетка без заземления</li>
+        </ol>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="stats" data-section="proof-stats" aria-label="Коротко о приёмке">
+  <ul class="stats__in">
+    <li><span class="stats__v">147</span><span class="stats__l">пунктов в&nbsp;чек-листе инженера</span></li>
+    <li><span class="stats__v">2–3&nbsp;ч</span><span class="stats__l">на&nbsp;осмотр двухкомнатной квартиры</span></li>
+    <li><span class="stats__v">0&nbsp;₽</span><span class="stats__l">за&nbsp;повторный выезд после исправлений</span></li>
+  </ul>
+</section>
+
+<section class="section offer" data-section="offer" aria-labelledby="offer-h">
+  <div class="container">
+    <h2 id="offer-h" class="h2">Что проверяет инженер</h2>
+    <ol class="act">
+      <li class="act__row"><span class="act__n">01</span><span class="act__what">Стены и&nbsp;потолки</span><span class="act__how">двухметровое правило, лазерный уровень</span></li>
+      <li class="act__row"><span class="act__n">02</span><span class="act__what">Полы и&nbsp;стяжка</span><span class="act__how">уклон, пустоты, трещины — простукивание и&nbsp;уровень</span></li>
+      <li class="act__row"><span class="act__n">03</span><span class="act__what">Окна и&nbsp;входная дверь</span><span class="act__how">тепловизор, геометрия створок, фурнитура</span></li>
+      <li class="act__row"><span class="act__n">04</span><span class="act__what">Электрика</span><span class="act__how">каждая розетка и&nbsp;автомат — тестер и&nbsp;проверка заземления</span></li>
+      <li class="act__row"><span class="act__n">05</span><span class="act__what">Сантехника и&nbsp;отопление</span><span class="act__how">подключения, опрессовка, радиаторы</span></li>
+      <li class="act__row"><span class="act__n">06</span><span class="act__what">Вентиляция</span><span class="act__how">тяга в&nbsp;каждом канале — анемометр</span></li>
+    </ol>
+  </div>
+</section>
+
+<section class="section pricing" data-section="pricing" aria-labelledby="price-h">
+  <div class="container">
+    <h2 id="price-h" class="h2">Цена приёмки</h2>
+    <table class="price">
+      <caption class="visually-hidden">Цена приёмки по площади квартиры</caption>
+      <thead><tr><th scope="col">Площадь квартиры</th><th scope="col">Цена</th><th scope="col">Время на&nbsp;объекте</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">до&nbsp;60&nbsp;м²</th><td>7&nbsp;900&nbsp;₽</td><td>2–3&nbsp;часа</td></tr>
+        <tr><th scope="row">60–100&nbsp;м²</th><td>9&nbsp;900&nbsp;₽</td><td>3–4&nbsp;часа</td></tr>
+        <tr><th scope="row">больше 100&nbsp;м²</th><td>12&nbsp;900&nbsp;₽</td><td>от&nbsp;4&nbsp;часов</td></tr>
+      </tbody>
+    </table>
+    <p class="note">В цену входят выезд по&nbsp;Москве, акт осмотра и&nbsp;повторная приёмка после исправлений. Область — +1&nbsp;000&nbsp;₽.</p>
+  </div>
+</section>
+
+<section class="section steps" data-section="how-it-works" aria-labelledby="steps-h">
+  <div class="container">
+    <h2 id="steps-h" class="h2">Как проходит приёмка</h2>
+    <ol class="steps__list">
+      <li><span class="steps__n">1</span><h3>Заявка</h3><p>Вы оставляете телефон и&nbsp;дату, которую назначил застройщик. Перезваниваем за&nbsp;15&nbsp;минут в&nbsp;рабочее время.</p></li>
+      <li><span class="steps__n">2</span><h3>Осмотр</h3><p>Инженер приезжает к&nbsp;началу приёмки и&nbsp;проверяет квартиру по&nbsp;чек-листу вместе с&nbsp;представителем застройщика.</p></li>
+      <li><span class="steps__n">3</span><h3>Акт</h3><p>Каждое замечание — с&nbsp;фото, местом на&nbsp;плане и&nbsp;способом проверки. Акт подписываете вы и&nbsp;застройщик.</p></li>
+      <li><span class="steps__n">4</span><h3>Повторная приёмка</h3><p>Когда застройщик сообщит об&nbsp;исправлениях, инженер приедет снова и&nbsp;проверит каждый пункт акта.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="section sample" data-section="case-studies" aria-labelledby="sample-h">
+  <div class="container sample__in">
+    <div class="sample__text">
+      <h2 id="sample-h" class="h2">Образец акта</h2>
+      <p>Так выглядит страница акта после осмотра двухкомнатной квартиры. Номер пункта совпадает с&nbsp;отметкой на&nbsp;плане, у&nbsp;каждого — фото и&nbsp;способ проверки.</p>
+    </div>
+    <div class="doc" role="group" aria-label="Образец акта осмотра">
+      <p class="doc__stamp" aria-hidden="true">Образец</p>
+      <p class="doc__head">Акт осмотра квартиры · 58&nbsp;м² · замечаний: 23</p>
+      <table class="doc__table">
+        <thead><tr><th scope="col">№</th><th scope="col">Где</th><th scope="col">Замечание</th><th scope="col">Проверка</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Гостиная</td><td>Трещина в&nbsp;стяжке 0,8&nbsp;м</td><td>осмотр, фото</td></tr>
+          <tr><td>2</td><td>Гостиная</td><td>Продувание по&nbsp;монтажному шву окна</td><td>тепловизор</td></tr>
+          <tr><td>3</td><td>Прихожая</td><td>Уклон пола 9&nbsp;мм на&nbsp;2&nbsp;м</td><td>уровень</td></tr>
+          <tr><td>4</td><td>Спальня</td><td>Розетка без заземления</td><td>тестер</td></tr>
+          <tr><td>5</td><td>С/у</td><td>Подтекает соединение под&nbsp;раковиной</td><td>осмотр</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section faq" data-section="faq" aria-labelledby="faq-h">
+  <div class="container faq__in">
+    <h2 id="faq-h" class="h2">Частые вопросы</h2>
+    <div class="faq__list">
+      <details><summary>Нужно ли мне быть на&nbsp;приёмке?</summary><p data-slot="faq-a" data-moment="faq-open">Да, акт подписывает собственник или его представитель по&nbsp;доверенности. Инженер ведёт осмотр и&nbsp;объясняет каждое замечание.</p></details>
+      <details><summary>Что если застройщик не&nbsp;согласен с&nbsp;замечанием?</summary><p>Замечание всё равно записывается в&nbsp;акт с&nbsp;фото и&nbsp;способом проверки. Спорные пункты инженер обсуждает с&nbsp;представителем застройщика на&nbsp;месте.</p></details>
+      <details><summary>Какие приборы берёт инженер?</summary><p>Двухметровое правило, лазерный уровень, тепловизор, тестер розеток, анемометр, влагомер и&nbsp;фонарь.</p></details>
+      <details><summary>Можно ли заказать приёмку в&nbsp;выходные?</summary><p>Да, если застройщик назначил осмотр на&nbsp;субботу или воскресенье. Цена та&nbsp;же.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="section lead" id="zayavka" data-section="lead-form" aria-labelledby="form-h">
+  <div class="container lead__in">
+    <div class="lead__text">
+      <h2 id="form-h" class="h2">Заявка на&nbsp;приёмку</h2>
+      <p>Оставьте телефон и&nbsp;дату осмотра, которую назначил застройщик. Перезвоним за&nbsp;15&nbsp;минут с&nbsp;9:00 до&nbsp;21:00.</p>
+    </div>
+    <form class="form" action="#zayavka" method="post" data-slot="form">
+      <label class="field"><span>Имя</span><input name="name" autocomplete="name" required></label>
+      <label class="field"><span>Телефон</span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+7" required></label>
+      <label class="field"><span>ЖК и&nbsp;корпус</span><input name="object" autocomplete="off"></label>
+      <label class="field"><span>Дата осмотра</span><input name="date" type="date"></label>
+      <label class="consent"><input type="checkbox" name="consent" required><span>Согласен на&nbsp;обработку персональных данных по&nbsp;<a href="#policy">политике</a></span></label>
+      <button class="btn btn--wide" type="submit">Отправить заявку</button>
+      <p class="form__done" role="status" hidden>Заявка принята (демо: данные никуда не&nbsp;отправлены).</p>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot" data-section="footer">
+  <div class="container foot__in">
+    <p><b>Сдано</b> · технадзор при&nbsp;приёмке новостроек · ИНН 0000000000</p>
+    <p><a id="policy" href="#policy">Политика обработки персональных данных</a></p>
+    <p class="foot__demo">Демо-страница базы creative-research (рецепт 01, уровень L0): компания, цены и&nbsp;цифры вымышлены.</p>
+  </div>
+</footer>
+
+<div class="sticky-cta" data-section="sticky-cta">
+  <a class="btn btn--wide" href="#zayavka">Заказать приёмку</a>
+  <a class="sticky-cta__tel" href="tel:+74950000000" aria-label="Позвонить +7 495 000-00-00">Позвонить</a>
+</div>
+
+<script>
+/* ≈ 0,5 КБ, единственный скрипт L0 (бюджет JS подачи L0 — 20 КБ br):
+   1) липкий призыв на телефоне прячется, пока видна кнопка первого экрана или форма (без JS — виден всегда);
+   2) демо-форма без отправки (без JS уходит на якорь #zayavka — страница не ломается). */
+(function () {
+  var bar = document.querySelector('.sticky-cta');
+  var seen = new Set();
+  if (bar && 'IntersectionObserver' in window) {
+    bar.classList.add('is-off');
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) seen.add(e.target); else seen.delete(e.target); });
+      bar.classList.toggle('is-off', seen.size > 0);
+    });
+    io.observe(document.querySelector('.hero__actions'));
+    io.observe(document.querySelector('.form'));
+  }
+  document.querySelector('.form').addEventListener('submit', function (e) {
+    e.preventDefault(); this.querySelector('.form__done').hidden = false;
+  });
+})();
+</script>
+</body>
+</html>

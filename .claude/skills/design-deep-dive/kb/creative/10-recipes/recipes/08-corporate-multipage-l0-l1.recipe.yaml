@@ -1,0 +1,79 @@
+# Рецепт 08 · Корпоративный многостраничник · L0/L1 — 10-recipes/08-corporate-multipage-l0-l1.md · J · 2026-09-25
+recipe_version: "0.1"
+id: recipe:corporate-multipage-l0-l1
+title_ru: "Корпоративный многостраничник, L0/L1 — система, а не 15 лендингов; вау — отдельной промо-страницей"
+status: proposed
+checked_at: "2026-09-25"
+site_type: corporate-site
+page_type: home-multipage
+level: L1
+level_why: "главная и «о компании» — L1, внутренние шаблоны — L0 (A defaults_by_page_type); вау — на отдельной промо-странице"
+budget_profile: home-multipage@L1
+when: ["корпоративный сайт B2B, 10–20 шаблонов", "аудитория закупщиков и инженеров"]
+not_when: ["нужен вау-опыт — отдельная промо-страница по рецепту 03 или 04"]
+inputs:
+  site_example: "../site/10-playbooks-contracts/examples/corporate-b2b-stalkon/plans/home.yaml"
+  playbook: "../site/10-playbooks-contracts/03-playbooks-multipage.md"
+  treatment_example: "09-ai-execution-evaluation/examples/stalkon-home.treatment.yaml"
+  motion_spec_example: "09-ai-execution-evaluation/examples/stalkon-home.motion-spec.yaml"
+  video: ["V:ilNOMaR6x_U 23:48", "V:UcXWY057YuQ 12:33"]
+concept:
+  thesis: "Сварной шов вместо рекламы: каждая страница собрана из одних узлов — фото объекта, цифра проекта, чертёжная сетка."
+  story: {hero: "закупщик или главный инженер", conflict: "сайты подрядчиков одинаково обещают", resolution: "объекты, цифры и документы в одной системе"}
+  signature_move: "единая система + переход «общая ось» + маска-раскрытие фото проектов"
+ledger:
+  paper: light
+  display_style: grotesque
+  accent_hue: neutral
+  macrostructure: index-first
+  hero_architecture: split-text-left
+  main_technique: "effect:mask-reveal"
+  motion_signature: {entrances: "mask у фото проектов", tempo: slow, curve: out-expo}
+  corner_language: sharp
+page_plan:
+  macrostructure: index-first
+  first_screen_policy: offer-cta
+  length: "главная 7 секций; 15 шаблонов"
+  sections:
+    - {id: header, block: "block:header", role: header, level: L0, visual_role: chrome, effects: ["effect:header-shrink-on-scroll"]}
+    - {id: hero, block: "block:hero-media", role: hero, level: L1, visual_role: accent, effects: ["effect:mask-reveal", "effect:page-transition"], reduce: final-state}
+    - {id: services, block: "block:service-cards", role: services, level: L0, visual_role: support}
+    - {id: proof-stats, block: "block:stat-strip", role: proof-stats, level: L0, visual_role: calm}
+    - {id: case-studies, block: "block:case-cards", role: case-studies, level: L1, visual_role: support, effects: ["effect:mask-reveal"]}
+    - {id: about, block: "block:about-story", role: about, level: L0, visual_role: calm}
+    - {id: final-cta, block: "block:cta-band", role: final-cta, level: L0, visual_role: calm}
+motion:
+  thesis: "Движение показывает только монтаж и переход между страницами; сайт спокоен."
+  primitives: [sweep, none]
+  peaks: []
+  accents: [hero, case-studies]
+  toggle: none
+  smooth_scroll: false
+  transitions: view-transitions
+  loops_in_view_max: 0
+stack:
+  library: [css, "@view-transition (cross-document)"]
+  js_first_kb_br: 5
+  platforms:
+    1c-bitrix: "один бандл через Asset::addString; композитный кэш и html.js"
+    wordpress: "wp_enqueue_script_module (6.5+)"
+    static: "Astro 7 или static"
+assets:
+  - {slot: hero-visual, ladder: image, source: real, budget_kb: 150, note: "фото объектов заказчика"}
+  - {slot: project-photos, ladder: image, source: real, budget_kb: 120}
+copy:
+  promise: "объекты, цифры и документы — в одной системе"
+  slots: [headline, stat-value, stat-source, card-title, case-title, case-result]
+budget:
+  js_presentation_kb_br: {mobile: 100, desktop: 100, internal_L0: 20}
+  first_screen_mb: {mobile: 2.0, desktop: 3.5, internal_L0: 1.5}
+  source: "ambition-levels.yaml L0/L1"
+gates:
+  tools: ["motion_check.py --level L1 (главная), --level L0 (шаблоны)"]
+  must_pass: [EG-PERF-07, EG-PERF-09, EG-A11Y-10, EG-FB-01, EG-FB-03]
+  manual: ["переход страниц в Firefox и при reduce", "Битрикс: порядок скриптов"]
+decisions:
+  - {id: d-fade, technique: "cliche:section-fade-up", decision: avoid, why: "появлений секций нет на всех шаблонах; маска только у фото проектов"}
+  - {id: d-parallax, technique: "cliche:parallax-everything", decision: avoid, why: "параллакса нет, движение — монтаж и переход"}
+  - {id: d-dark-pause, technique: "cliche:dark-pause-section", decision: avoid, why: "ритм — фото объектов на всю ширину, не тёмные паузы"}
+errors: ["разный стиль шаблонов", "переход 700 мс со шторкой", "вау на главной с формой тендера", "несколько addJs в Битриксе", "анимация высоты шапки"]

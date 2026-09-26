@@ -1,0 +1,12 @@
+{
+ "frames": 24,
+ "seq_total_kb": {
+  "png": 5111.0,
+  "webp_q80": 381.5,
+  "avif_q55": 228.0
+ },
+ "video_kb": {
+  "turn_vp9_alpha.webm": 124.4,
+  "turn_stacked_av1.mp4": 80.1
+ }
+}

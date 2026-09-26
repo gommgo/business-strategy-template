@@ -1,0 +1,80 @@
+# Рецепт 09 · Промо для рунета с кириллическим display · L1 — 10-recipes/09-runet-cyrillic-display-l1.md · J · 2026-09-25
+recipe_version: "0.1"
+id: recipe:runet-cyrillic-display-l1
+title_ru: "Промо для рунета с кириллическим display, L1 — онлайн-школа на Тильде"
+status: proposed
+checked_at: "2026-09-25"
+site_type: school-site
+page_type: landing-course
+level: L1
+level_why: "лендинг курса — L1; конверсия (форма, тарифы) — L0"
+budget_profile: landing-course@L1
+when: ["рунет, кириллический заголовок — главный визуальный рычаг", "платформа Тильда"]
+not_when: ["нет времени на выбор и проверку гарнитуры — L0 с Golos Text"]
+inputs:
+  playbook: "../site/10-playbooks-contracts/02-playbooks-landings.md#7"
+concept:
+  thesis: "Заголовок, который дышит смыслом: главное слово курса раскрывается по ширине, пока вы читаете программу."
+  story: {hero: "человек, который хочет писать профессионально", conflict: "инфобиз с таймерами и одинаковыми обещаниями", resolution: "программа и правки выпускников видны целиком"}
+  signature_move: "одно слово курса по оси ширины на прокрутке + подсветка строк программы"
+ledger:
+  paper: dark-warm
+  display_style: condensed
+  accent_hue: warm
+  macrostructure: sales-longread
+  hero_architecture: stacked-center
+  main_technique: "effect:kinetic-headline"
+  motion_signature: {entrances: "none; ось ширины по прокрутке", tempo: measured, curve: linear-scrub}
+  corner_language: soft
+page_plan:
+  macrostructure: sales-longread
+  first_screen_policy: offer-cta
+  length: "10 секций (норма 10–16)"
+  sections:
+    - {id: hero, block: "block:hero-text", role: hero, level: L1, visual_role: accent, effects: ["effect:kinetic-headline"], reduce: final-state}
+    - {id: audience, block: "block:audience-grid", role: audience, level: L0, visual_role: calm}
+    - {id: curriculum, block: "block:curriculum", role: how-it-works, level: L1, visual_role: peak, effects: ["effect:scroll-text-highlight"], reduce: final-state}
+    - {id: team, block: "block:team-grid", role: team, level: L0, visual_role: support}
+    - {id: case-studies, block: "block:before-after", role: case-studies, level: L0, visual_role: support}
+    - {id: testimonials, block: "block:testimonial-cards", role: testimonials, level: L0, visual_role: calm}
+    - {id: pricing, block: "block:pricing-cards", role: pricing, level: L0, visual_role: calm}
+    - {id: guarantee, block: "block:guarantee", role: guarantee, level: L0, visual_role: calm}
+    - {id: faq, block: "block:faq", role: faq, level: L0, visual_role: calm}
+    - {id: final-cta, block: "block:lead-form", role: lead-form, level: L0, visual_role: calm}
+motion:
+  thesis: "Движется только смысл: слово курса разворачивается, строки программы проявляются по чтению."
+  primitives: [none]
+  peaks: [curriculum]
+  accents: [hero]
+  toggle: none
+  smooth_scroll: false
+  transitions: none
+  loops_in_view_max: 0
+stack:
+  library: [css]
+  js_first_kb_br: 0
+  platforms:
+    tilda: "Zero Block (hero), T123 — @font-face и CSS SDA; шрифты на своём хостинге; проверка на опубликованной"
+    static: "как примеры J"
+assets:
+  - {slot: team-photo, ladder: image, source: real, budget_kb: 80}
+  - {slot: before-after, ladder: image, source: real, note: "правки выпускников с согласием"}
+  - {slot: og-image, ladder: image, source: template, task_codes: [IMG-TEXT-CYR]}
+copy:
+  promise: "писать так, чтобы правили меньше"
+  slots: [headline, subheadline, list-item, pricing-price, guarantee-text, testimonial-quote, testimonial-attribution, form-title]
+  rules: ["&nbsp; после предлогов и союзов", "без таймеров и «осталось 3 места» без факта"]
+budget:
+  js_presentation_kb_br: {mobile: 100, desktop: 100}
+  first_screen_mb: {mobile: 2.0, desktop: 3.5}
+  fonts_kb: {mobile: 250, desktop: 250}
+  source: "ambition-levels.yaml L1"
+gates:
+  tools: ["marketing_audit.py --level L1 (MKT-T1…T5)", "motion_check.py --level L1"]
+  must_pass: [EG-PERF-07, EG-PERF-10, EG-A11Y-06, EG-A11Y-10, EG-FB-02]
+  manual: ["CLS загрузки шрифтов ≤ 0,1 (preload cyrillic + latin)", "Тильда: опубликованная страница"]
+decisions:
+  - {id: d-variable, technique: "cliche:variable-axis-gimmick", decision: twist, why: "ось ширины несёт смысл черновик → текст и работает у одного слова"}
+  - {id: d-caps, technique: "cliche:caps-eyebrow", decision: avoid, why: "надзаголовки обычным регистром"}
+  - {id: d-giant, technique: "cliche:giant-display-type", decision: twist, why: "гигантский кегль у одного слова курса, не у декоративного вордмарка"}
+errors: ["Montserrat по умолчанию", "трекинг −0,05 em у кириллицы", "preload только cyrillic", "split каждого заголовка", "ложная срочность"]

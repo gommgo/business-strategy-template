@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:app-design:creative-research:recipe:0",
+  "title": "Рецепт эффектной страницы от брифа до кода (creative-research · 10-recipes · J · волна 3)",
+  "description": "Машиночитаемая половина рецепта NN-<тип>-<уровень>.md. Ссылки на чужие id — с пространством имён (block:, effect:, cliche:, recipe:) или по файлу соседа. Проверка: 99-raw/tools/venv-J/bin/python ../../scripts/creative/recipe_check.py 10-recipes/recipes/*.recipe.yaml (схема + id блоков site, эффектов F, клише H, ворот K + журнал вариативности ≥ 4 из 8 осей). checked_at 2026-09-25.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["recipe_version", "id", "title_ru", "status", "checked_at", "page_type", "level", "budget_profile", "inputs", "concept", "ledger", "page_plan", "motion", "stack", "assets", "copy", "budget", "gates", "decisions", "errors"],
+  "properties": {
+    "recipe_version": {"const": "0.1"},
+    "id": {"type": "string", "pattern": "^recipe:[a-z0-9]+(-[a-z0-9]+)*$"},
+    "title_ru": {"type": "string", "minLength": 10},
+    "status": {"enum": ["draft", "proposed", "verified"], "description": "verified — есть рабочий пример, прошедший ворота K (0 FAIL B и S)"},
+    "checked_at": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+    "site_type": {"type": "string", "description": "site_type словаря site (landing-site, corporate-site, campaign-site, portfolio-site …)"},
+    "page_type": {"type": "string", "description": "page_type словаря site (landing-lead-services, landing-saas, landing-campaign …)"},
+    "level": {"enum": ["L0", "L1", "L2"]},
+    "level_why": {"type": "string"},
+    "budget_profile": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*@L[0-2]$"},
+    "when": {"type": "array", "items": {"type": "string"}},
+    "not_when": {"type": "array", "items": {"type": "string"}},
+    "inputs": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "site_example": {"type": "string"}, "playbook": {"type": "string"}, "art_direction_example": {"type": "string"},
+        "copy_deck_example": {"type": "string"}, "asset_plan_example": {"type": "string"}, "treatment_example": {"type": "string"},
+        "motion_spec_example": {"type": "string"}, "kimi": {"type": "string"}, "video": {"type": "array", "items": {"type": "string", "pattern": "^V:[A-Za-z0-9_-]{11} \\d{1,2}:\\d{2}"}}
+      }
+    },
+    "concept": {
+      "type": "object", "additionalProperties": false, "required": ["thesis", "story", "signature_move"],
+      "properties": {
+        "thesis": {"type": "string", "maxLength": 240},
+        "story": {"type": "object", "additionalProperties": false, "required": ["hero", "conflict", "resolution"],
+          "properties": {"hero": {"type": "string"}, "conflict": {"type": "string"}, "resolution": {"type": "string"}}},
+        "signature_move": {"type": "string"},
+        "directions": {"type": "array", "items": {"type": "string"}, "maxItems": 5}
+      }
+    },
+    "ledger": {
+      "type": "object", "additionalProperties": false,
+      "required": ["paper", "display_style", "accent_hue", "macrostructure", "hero_architecture", "main_technique", "motion_signature", "corner_language"],
+      "description": "8 осей журнала вариативности H (08-uniqueness-anti-slop/02 §3.2): рецепты подряд различаются ≥ 4 осями; смена только палитры = 1 ось.",
+      "properties": {
+        "paper": {"enum": ["light", "light-warm", "mid", "dark", "dark-warm"]},
+        "display_style": {"enum": ["serif", "grotesque", "condensed", "wide", "mono", "rounded", "script"]},
+        "accent_hue": {"enum": ["warm", "cool", "neutral"]},
+        "macrostructure": {"type": "string"},
+        "hero_architecture": {"enum": ["split-text-left", "split-text-right", "full-bleed-poster", "masked", "rail", "stacked-center"]},
+        "main_technique": {"type": "string", "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$"},
+        "motion_signature": {"type": "object", "additionalProperties": false, "required": ["entrances", "tempo", "curve"],
+          "properties": {"entrances": {"type": "string"}, "tempo": {"enum": ["still", "slow", "measured", "brisk"]}, "curve": {"type": "string"}}},
+        "corner_language": {"enum": ["sharp", "soft", "pill", "hairline"]}
+      }
+    },
+    "moodboard": {
+      "type": "array", "maxItems": 8,
+      "items": {"type": "object", "additionalProperties": false, "required": ["role", "take", "dont_take"],
+        "properties": {"role": {"enum": ["mood", "composition", "type", "motion", "material", "product", "antiref"]},
+          "ref": {"type": "string"}, "query": {"type": "string"}, "take": {"type": "string"}, "dont_take": {"type": "string"}}}
+    },
+    "page_plan": {
+      "type": "object", "additionalProperties": false, "required": ["macrostructure", "first_screen_policy", "sections"],
+      "properties": {
+        "macrostructure": {"type": "string"},
+        "first_screen_policy": {"enum": ["offer-cta", "offer-cta-header", "poster"]},
+        "length": {"type": "string"},
+        "sections": {"type": "array", "minItems": 4, "items": {"$ref": "#/$defs/section"}}
+      }
+    },
+    "motion": {
+      "type": "object", "additionalProperties": false, "required": ["thesis", "primitives", "peaks", "accents", "toggle", "smooth_scroll", "transitions"],
+      "properties": {
+        "thesis": {"type": "string"},
+        "primitives": {"type": "array", "maxItems": 3, "items": {"enum": ["fade-up", "type-unmask", "sweep", "number-tick", "line-draw", "none"]}},
+        "peaks": {"type": "array", "items": {"type": "string"}},
+        "accents": {"type": "array", "items": {"type": "string"}},
+        "toggle": {"enum": ["none", "button", "page-toggle"]},
+        "smooth_scroll": {"type": "boolean"},
+        "transitions": {"enum": ["none", "view-transitions", "library"]},
+        "loops_in_view_max": {"type": "integer", "minimum": 0, "maximum": 3},
+        "motion_spec_example": {"type": "string"}
+      }
+    },
+    "stack": {
+      "type": "object", "additionalProperties": false, "required": ["library"],
+      "properties": {
+        "library": {"type": "array", "items": {"type": "string"}},
+        "js_first_kb_br": {"type": "number"},
+        "notes": {"type": "string"},
+        "platforms": {"type": "object", "additionalProperties": {"type": "string"}}
+      }
+    },
+    "assets": {
+      "type": "array",
+      "items": {"type": "object", "additionalProperties": false, "required": ["slot", "ladder", "source"],
+        "properties": {
+          "slot": {"type": "string"}, "ladder": {"enum": ["text", "svg", "css", "shader", "image", "video", "3d"]},
+          "source": {"enum": ["generate", "edit-real", "real", "code", "template", "render"]},
+          "task_codes": {"type": "array", "items": {"type": "string", "pattern": "^(IMG|VID|VEC)-[A-Z0-9-]+$"}},
+          "blender_recipe": {"type": "string"}, "budget_kb": {"type": "number"}, "note": {"type": "string"}}}
+    },
+    "copy": {
+      "type": "object", "additionalProperties": false,
+      "properties": {"promise": {"type": "string"}, "slots": {"type": "array", "items": {"type": "string"}}, "deck_example": {"type": "string"}, "rules": {"type": "array", "items": {"type": "string"}}}
+    },
+    "budget": {
+      "type": "object", "additionalProperties": false, "required": ["js_presentation_kb_br", "first_screen_mb"],
+      "properties": {
+        "js_presentation_kb_br": {"type": "object"}, "js_3d_kb_br": {"type": "object"}, "webgl_contexts": {"type": "object"},
+        "first_screen_mb": {"type": "object"}, "session_mb": {"type": "object"}, "fonts_kb": {"type": "object"}, "video_kb": {"type": "object"},
+        "source": {"type": "string"}
+      }
+    },
+    "gates": {
+      "type": "object", "additionalProperties": false, "required": ["tools", "must_pass"],
+      "properties": {
+        "tools": {"type": "array", "items": {"type": "string"}},
+        "must_pass": {"type": "array", "items": {"type": "string", "pattern": "^(EG|SG)-[A-Z0-9]+-\\d{2}$"}},
+        "watch": {"type": "array", "items": {"type": "string"}},
+        "manual": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "decisions": {"type": "array", "minItems": 2, "maxItems": 5, "items": {"$ref": "#/$defs/decision"}},
+    "errors": {"type": "array", "minItems": 3, "items": {"type": "string"}},
+    "example": {
+      "type": "object", "additionalProperties": false,
+      "properties": {"path": {"type": "string"}, "gates": {"type": "string"}, "result": {"type": "string"}}
+    },
+    "notes": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "section": {
+      "type": "object", "additionalProperties": false, "required": ["id", "block", "role", "level", "visual_role"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"},
+        "block": {"type": "string", "pattern": "^block:[a-z0-9]+(-[a-z0-9]+)*$"},
+        "role": {"type": "string", "description": "section_role словаря site"},
+        "level": {"enum": ["L0", "L1", "L2"]},
+        "visual_role": {"enum": ["chrome", "accent", "peak", "calm", "support", "pause"]},
+        "effects": {"type": "array", "items": {"type": "string", "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$"}},
+        "assets": {"type": "array", "items": {"type": "string"}},
+        "copy_slots": {"type": "array", "items": {"type": "string"}},
+        "reduce": {"type": "string"},
+        "mobile": {"type": "string"},
+        "note": {"type": "string"}
+      }
+    },
+    "decision": {
+      "type": "object", "additionalProperties": false, "required": ["id", "technique", "decision", "why"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^d-[a-z0-9]+(-[a-z0-9]+)*$"},
+        "technique": {"type": "string", "pattern": "^(cliche|effect|k3):[a-z0-9]+(-[a-z0-9]+)*$"},
+        "decision": {"enum": ["use", "avoid", "twist"]},
+        "why": {"type": "string", "minLength": 10},
+        "k3_allow": {"type": "string"}
+      }
+    }
+  }
+}

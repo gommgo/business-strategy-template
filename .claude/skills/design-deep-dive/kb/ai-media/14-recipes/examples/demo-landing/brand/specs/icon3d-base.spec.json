@@ -1,0 +1,75 @@
+{
+  "spec_version": "0.2",
+  "id": "forest-roast-feature-icon-icon3d",
+  "checked_at": "2026-09-24",
+  "brief_language": "en",
+  "task": "IMG-ICON3D",
+  "role": {
+    "section": "feature-icon",
+    "slot": "feature-icon",
+    "purpose": "icon3d of the forest-roast series",
+    "series_id": "forest-roast"
+  },
+  "subject": {
+    "summary": "a coffee bean with a single groove"
+  },
+  "composition": {
+    "shot": "close-up",
+    "subject_region": "center",
+    "angle": "high-angle"
+  },
+  "palette": [
+    {
+      "role": "dominant",
+      "hex": "#E4DCCD",
+      "name": "light warm grey",
+      "share": 0.3,
+      "applies_to": "object body"
+    },
+    {
+      "role": "background",
+      "hex": "#F4EFE6",
+      "name": "warm light grey",
+      "share": 0.55,
+      "applies_to": "plain background"
+    },
+    {
+      "role": "accent",
+      "hex": "#1F4D3A",
+      "name": "deep green",
+      "share": 0.1,
+      "applies_to": "single accent part of the object",
+      "strict": true
+    }
+  ],
+  "text": {
+    "mode": "none"
+  },
+  "output": {
+    "primary_ratio": "1:1",
+    "resolution": "1K"
+  },
+  "light": {
+    "direction": "left",
+    "quality": "soft",
+    "source": "soft key from the upper left at 45 degrees, fill 20 percent"
+  },
+  "style": {
+    "medium": "clay-3d"
+  },
+  "materials": [
+    "matte glazed ceramic in warm off-white with one deep forest-green part"
+  ],
+  "series": {
+    "id": "forest-roast",
+    "block": "Single object as a matte glazed ceramic figure in warm off-white with one deep forest-green part; 3/4 view from 30 degrees above, 50mm; soft key light from the upper left, gentle fill; soft contact shadow; plain cream background; clean text-free surfaces.",
+    "avoid_average": false
+  },
+  "exclusions": [
+    {
+      "what": "readable text and logos",
+      "kind": "artifact",
+      "replace_with": "clean unmarked surfaces"
+    }
+  ]
+}

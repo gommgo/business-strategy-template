@@ -1,0 +1,2759 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:app-design:site-research:site-brief:1",
+  "title": "site-brief v1 — бриф сайта (лендинг или многостраничный сайт)",
+  "description": "Единый бриф сайта для тройки site · text · creative и проекции в brief.yaml kimi. Владелец схемы — site (01-foundations/03-site-brief.md). Блок meaning — схема text ($ref), proof — ссылка на facts.yaml text, ambition/references/brand — поля creative. Пустое поле — решение, отданное модели: минимум по типу сайта задан условиями allOf ниже. Идентификаторы site_type, page_type, action, traffic_source, jurisdiction — словарь v1 (02-site-types/vocabulary.yaml v1 released, 2026-09-24): site_type, page_type, action, traffic_source, jurisdiction, conversion_channel. v1 (J, волна 3): поля подачи creative C1 (ambition.*, brand.expression, references[].applies_to/captured/take/dont_take), политика окна захвата engaged (F), обещание срока ответа (F), правовой опросник constraints.legal_intake (I 01 §6 шаг 1), исходные данные редизайна intake.baseline (V, W: «новый сайт — с проверкой»), новые page_type G. Журнал — 10-playbooks-contracts/README.md.",
+  "x-version": 1,
+  "x-checked": "2026-09-24",
+  "x-owner": "site-research · v0 — агент A (01-foundations, волна 1); v1 — агент J (10-playbooks-contracts/schemas, волна 3)",
+  "x-doc": "01-foundations/03-site-brief.md",
+  "x-kimi-projection": "01-foundations/site-brief.kimi-map.tsv (колонки site_path, kimi_path, rule, note; rule ∈ copy | map | derive | drop | claude_fills)",
+  "x-fill-legend": {
+    "customer": "знает только заказчик: спросить (факты — свободным ответом)",
+    "claude": "Claude выводит сам из брифа и материалов и показывает в блоке «Going with»",
+    "default": "умолчание решения заказчика (PLAN.md «Решения заказчика» п. 10–15); меняется только по слову заказчика",
+    "derive": "вычисляется из других полей брифа",
+    "sister:text": "заполняет text-research (meaning, facts.yaml, copy-deck)",
+    "sister:creative": "заполняет creative-research (уровень амбиций, референсы, выражение бренда)"
+  },
+  "type": "object",
+  "required": [
+    "version",
+    "checked",
+    "project",
+    "site_type",
+    "business",
+    "conversion",
+    "constraints",
+    "languages",
+    "questions"
+  ],
+  "additionalProperties": false,
+  "patternProperties": {
+    "^x-": {
+      "description": "Расширения проекта; валидатор их не проверяет, в kimi не уходят."
+    }
+  },
+  "properties": {
+    "version": {
+      "const": 1,
+      "description": "Версия формата site-brief (эта схема — v1; файлы v0 проверяются схемой 01-foundations).",
+      "x-owner": "site"
+    },
+    "checked": {
+      "$ref": "#/$defs/date",
+      "description": "Дата последней сверки брифа целиком (строкой в кавычках).",
+      "x-owner": "site",
+      "x-fill": "claude"
+    },
+    "intake": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Откуда пришёл бриф и что заказано на самом деле (шаг «разбор», ux 13/04 §2).",
+      "x-owner": "site",
+      "x-fill": "claude",
+      "properties": {
+        "received": {
+          "$ref": "#/$defs/date"
+        },
+        "channel": {
+          "type": "string",
+          "description": "Почта, мессенджер, созвон, документ."
+        },
+        "raw_ref": {
+          "type": "string",
+          "description": "Путь к исходному тексту заказчика (не копировать в бриф)."
+        },
+        "what_ordered": {
+          "enum": [
+            "landing",
+            "multipage",
+            "redesign",
+            "new-page",
+            "section",
+            "audit",
+            "other"
+          ],
+          "description": "Что куплено: новый лендинг, многостраничный сайт, редизайн, новая страница существующего сайта, секция, аудит."
+        },
+        "analysis_ref": {
+          "type": "string",
+          "description": "Путь к записи «Бриф: разбор» (четыре списка: заказано, факты, ограничения, пробелы)."
+        },
+        "notes": {
+          "type": "string"
+        },
+        "baseline": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Исходные данные до работы (редизайн или новая страница существующего сайта): что меряем и за какой период — «новый сайт — с проверкой, а не редизайн вслепую» (V: uK9S_VQY8G8; W: hEzpiDuYFoE — Кохави о редизайнах).",
+          "properties": {
+            "analytics_access": {
+              "type": "boolean",
+              "description": "Есть доступ к Метрике или GA4 и CRM текущего сайта."
+            },
+            "period": {
+              "type": "string",
+              "description": "Период исходных данных, например «2026-06-01…2026-08-31»."
+            },
+            "metrics": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Исходные значения: конверсия в заявку, доля квалифицированных, отказы в форме (P 04)."
+            },
+            "research": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "analytics-review",
+                  "session-recordings",
+                  "user-interviews",
+                  "usability-test",
+                  "five-second-test",
+                  "survey",
+                  "competitor-review",
+                  "none"
+                ]
+              },
+              "uniqueItems": true
+            },
+            "rollout": {
+              "enum": [
+                "by-parts",
+                "full-with-holdout",
+                "full"
+              ],
+              "default": "by-parts",
+              "description": "by-parts — меняем по частям с проверкой; full-with-holdout — целиком, но с контрольной долей трафика; full — только без трафика для проверки (причина в notes)."
+            }
+          }
+        }
+      }
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slug",
+        "status"
+      ],
+      "description": "Паспорт брифа. Пути project.slug и project.status совпадают с brief.yaml kimi.",
+      "x-owner": "site",
+      "properties": {
+        "slug": {
+          "$ref": "#/$defs/id",
+          "description": "Имя проекта латиницей: как в facts.yaml (site), meaning (site) и project.slug kimi.",
+          "x-fill": "claude"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "proposed",
+            "approved"
+          ],
+          "description": "draft — черновик Claude; proposed — показан заказчику с вопросами и «Going with»; approved — заказчик подтвердил (в kimi: proposed → draft).",
+          "x-fill": "claude"
+        },
+        "prepared_by": {
+          "type": "string",
+          "description": "Кто собрал бриф (агент, роль)."
+        },
+        "approval": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "by",
+            "date"
+          ],
+          "description": "Кто и когда утвердил бриф; обязательно при status: approved.",
+          "properties": {
+            "by": {
+              "type": "string",
+              "description": "Роль у заказчика (имя — только с его согласия)."
+            },
+            "date": {
+              "$ref": "#/$defs/date"
+            },
+            "channel": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "site_type": {
+      "$ref": "#/$defs/site-type",
+      "description": "Тип сайта (словарь B). Задаёт карту страниц по умолчанию (G) и плейбук (J); вместе с primary_page_type — минимум полей брифа.",
+      "x-owner": "site (B — словарь; A — выбор в брифе)",
+      "x-fill": "claude"
+    },
+    "primary_page_type": {
+      "$ref": "#/$defs/page-type",
+      "description": "Тип главной посадочной страницы: для landing-site обязателен и относится к классу landing (landing-lead-services, landing-saas…); для многостраничника — страница, куда ведёт основной трафик (по умолчанию home-multipage).",
+      "x-owner": "site",
+      "x-fill": "claude"
+    },
+    "business": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "what",
+        "goal"
+      ],
+      "description": "Бизнес и цель сайта (контракт v2 §3 п.1).",
+      "x-owner": "site",
+      "x-fill": "customer",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Название бренда или компании, как на сайте (→ product.name kimi)."
+        },
+        "legal_name": {
+          "type": "string",
+          "description": "Юрлицо или ИП — только если есть в facts.yaml (kind: company); иначе пусто и missing в facts.yaml."
+        },
+        "what": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Что продаём, одной-двумя фразами словами брифа (без оценок)."
+        },
+        "kind": {
+          "enum": [
+            "service",
+            "saas",
+            "physical-product",
+            "app",
+            "event",
+            "course",
+            "campaign",
+            "personal-brand",
+            "other"
+          ],
+          "description": "Вид предложения (совпадает с meaning.offering_summary.kind text; personal-brand — предложение site)."
+        },
+        "goal": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "primary"
+          ],
+          "properties": {
+            "primary": {
+              "enum": [
+                "leads",
+                "sales",
+                "signups",
+                "bookings",
+                "registrations",
+                "awareness",
+                "hiring",
+                "other"
+              ],
+              "description": "Бизнес-цель сайта: заявки, продажи, регистрации в продукте, записи, регистрации на событие, узнаваемость (кампания), найм."
+            },
+            "note": {
+              "type": "string",
+              "description": "Бизнес-цель словами заказчика (→ product.goal kimi, если нет обещания в meaning)."
+            }
+          }
+        },
+        "kpi": {
+          "type": "array",
+          "description": "Как заказчик поймёт, что сайт работает: метрика, цель, текущее значение (для P: события и A/B).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "metric"
+            ],
+            "properties": {
+              "metric": {
+                "type": "string",
+                "description": "Например: «заявки в месяц», «доля квалифицированных заявок», «стоимость заявки»."
+              },
+              "target": {
+                "type": "string"
+              },
+              "current": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string",
+                "description": "Откуда число (CRM, Метрика) — не из головы."
+              }
+            }
+          }
+        },
+        "geography": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Где работает бизнес: обязательно для локальных услуг (карта, SEO по городу, LocalBusiness).",
+          "properties": {
+            "regions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Города и регионы словами."
+            },
+            "radius_km": {
+              "type": "number",
+              "minimum": 0
+            },
+            "remote": {
+              "type": "boolean",
+              "description": "Работает удалённо или по всей стране."
+            },
+            "address_ref": {
+              "$ref": "#/$defs/fact-ref",
+              "description": "Адрес — факт facts.yaml (kind: company)."
+            }
+          }
+        }
+      }
+    },
+    "decision_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Как принимается решение о покупке: меняет длину страницы, долю доказательств и силу призыва (01-how-visitors-decide.md §6).",
+      "x-owner": "site (A)",
+      "x-fill": "claude",
+      "properties": {
+        "market": {
+          "enum": [
+            "b2c",
+            "b2b",
+            "b2g",
+            "b2b2c",
+            "mixed"
+          ]
+        },
+        "price_band": {
+          "enum": [
+            "low",
+            "mid",
+            "high",
+            "very-high"
+          ],
+          "description": "Цена относительно бюджета покупателя, а не рынка."
+        },
+        "price_note": {
+          "type": "string"
+        },
+        "purchase_type": {
+          "enum": [
+            "one-off",
+            "repeat",
+            "subscription",
+            "seasonal"
+          ]
+        },
+        "decision_unit": {
+          "enum": [
+            "individual",
+            "couple-family",
+            "small-group",
+            "committee"
+          ],
+          "description": "Кто решает: один человек, пара или семья, несколько человек, закупочный комитет (B2B)."
+        },
+        "cycle": {
+          "enum": [
+            "minutes",
+            "days",
+            "weeks",
+            "months"
+          ],
+          "description": "Типичное время от первого визита до действия."
+        },
+        "perceived_risk": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "risk_kinds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "money",
+              "time",
+              "health",
+              "safety",
+              "reputation",
+              "privacy",
+              "legal",
+              "switching"
+            ]
+          }
+        },
+        "involvement": {
+          "enum": [
+            "low",
+            "high"
+          ],
+          "description": "Вовлечённость (Petty и Cacioppo, ELM): high — читает доводы, low — решает по периферийным сигналам."
+        }
+      }
+    },
+    "conversion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action"
+      ],
+      "description": "Целевое действие страницы или сайта. Текст кнопки — copy-deck text; механика форм — F.",
+      "x-owner": "site (A — поле; B — словарь action; F — механика)",
+      "x-fill": "claude",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/action-id",
+          "description": "Одно главное действие (временный id словаря action)."
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "value"
+          ],
+          "description": "Куда ведёт главный призыв (→ site.cta.target kimi).",
+          "properties": {
+            "kind": {
+              "enum": [
+                "anchor",
+                "route",
+                "url",
+                "tel",
+                "messenger",
+                "store",
+                "external"
+              ]
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "description": "#form, /preorder, tel:+7…, https://…"
+            }
+          }
+        },
+        "channels": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/conversion-channel"
+          },
+          "description": "Каналы, через которые принимается действие (временные id; механика и число полей — F)."
+        },
+        "secondary_actions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/action-id"
+          },
+          "description": "Вторая цель для тех, кто не готов сейчас (подписка, сохранить, позвонить) — иным стилем, не второй главной кнопкой."
+        },
+        "response_time_ref": {
+          "$ref": "#/$defs/fact-ref",
+          "description": "Срок ответа на заявку — факт (для страницы «спасибо» и строки у формы)."
+        },
+        "qualification_note": {
+          "type": "string",
+          "description": "Какие заявки нужны и какие нет (качество лида против числа; поля — F)."
+        },
+        "thank_you": {
+          "type": "string",
+          "description": "Следующий шаг после действия словами заказчика (что и когда произойдёт)."
+        },
+        "response_time_promised": {
+          "type": "boolean",
+          "default": false,
+          "description": "Страница обещает срок ответа («перезвоним за 15 минут»): тогда обязателен response_time_ref — факт с регламентом (F 03 §3.3)."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "response_time_promised"
+            ],
+            "properties": {
+              "response_time_promised": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "response_time_ref"
+            ]
+          }
+        }
+      ]
+    },
+    "traffic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sources"
+      ],
+      "description": "Источники и температура трафика — поле site (ответ на вопрос 1 text B1). Осведомлённость по источникам — meaning.awareness.by_source (text).",
+      "x-owner": "site",
+      "x-fill": "customer",
+      "properties": {
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "source",
+              "temperature"
+            ],
+            "properties": {
+              "source": {
+                "$ref": "#/$defs/traffic-source"
+              },
+              "temperature": {
+                "enum": [
+                  "cold",
+                  "warm",
+                  "hot"
+                ]
+              },
+              "share": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Доля трафика (0–1), если известна; сумма долей ≤ 1."
+              },
+              "device": {
+                "enum": [
+                  "mobile",
+                  "desktop",
+                  "mixed"
+                ],
+                "description": "Преобладающее устройство источника (→ product.viewport_primary kimi)."
+              },
+              "promise_of_source": {
+                "type": "string",
+                "description": "Что обещает источник: текст объявления, запрос, тема письма — первый экран продолжает это обещание (message match)."
+              },
+              "entry_page": {
+                "$ref": "#/$defs/id",
+                "description": "id страницы из pages.list, куда ведёт источник."
+              },
+              "campaign": {
+                "type": "string",
+                "description": "Кампания или UTM-метка источника (utm_source/utm_campaign)."
+              },
+              "geo": {
+                "type": "string"
+              },
+              "in_app_browser": {
+                "type": "boolean",
+                "description": "Источник открывается во встроенном браузере соцсети или мессенджера (C 02 §4): липкие слои и формы проверять там."
+              }
+            }
+          }
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "offer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "summary"
+      ],
+      "description": "Что посетитель получает за целевое действие (обмен). Поле site; meaning.offer ссылается сюда (ответ на вопрос 2 text B1). Числа и условия — только ссылками на facts.yaml.",
+      "x-owner": "site (A — поле; F — механика оффера; text — слова)",
+      "x-fill": "customer",
+      "properties": {
+        "kind": {
+          "enum": [
+            "free-consultation",
+            "free-estimate",
+            "quote",
+            "trial",
+            "freemium",
+            "demo",
+            "purchase",
+            "preorder",
+            "booking",
+            "registration",
+            "lead-magnet",
+            "discount",
+            "sample",
+            "other"
+          ],
+          "description": "Вид обмена: бесплатная консультация, замер и смета, коммерческое предложение, пробный период, бесплатный тариф, демо, покупка, предзаказ, запись или бронь, регистрация, материал за контакт, скидка, образец."
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Внутренняя формулировка обмена одной фразой (не текст страницы)."
+        },
+        "includes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Что входит в предложение (по пунктам)."
+        },
+        "price_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/fact-ref"
+          }
+        },
+        "terms_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/fact-ref"
+          },
+          "description": "Условия: сроки, оплата, возврат, что бесплатно."
+        },
+        "incentive_ref": {
+          "$ref": "#/$defs/fact-ref",
+          "description": "Стимул (акция, бонус) — факт с valid.until."
+        },
+        "deadline_ref": {
+          "$ref": "#/$defs/fact-ref",
+          "description": "Реальный срок стимула; без него срочность на странице запрещена."
+        },
+        "risk_reversal_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "id из meaning.risk_reversal (гарантия, пробный период, оплата после)."
+        }
+      }
+    },
+    "meaning": {
+      "description": "Блок «смысл» — схема text-research (meaning.schema.yaml, B1): аудитория, задачи, осведомлённость, позиционирование, ценностное предложение, возражения, снятие риска. Поля site (traffic, offer, conversion.action) здесь только ссылками.",
+      "x-owner": "text (B1)",
+      "x-fill": "sister:text",
+      "allOf": [
+        {
+          "$ref": "urn:app-design:text-research:meaning:1"
+        },
+        {
+          "properties": {
+            "traffic": {
+              "not": {
+                "required": [
+                  "sources"
+                ]
+              },
+              "properties": {
+                "ref": {
+                  "const": "/traffic"
+                }
+              },
+              "description": "Внутри site-brief источники трафика живут только в /traffic (один источник правды)."
+            },
+            "offer": {
+              "properties": {
+                "ref": {
+                  "const": "/offer"
+                }
+              }
+            },
+            "conversion": {
+              "properties": {
+                "action_ref": {
+                  "const": "/conversion/action"
+                }
+              }
+            },
+            "proof_ref": {
+              "description": "Должен совпадать с proof.facts_ref (проверка валидатора, не схемы)."
+            },
+            "open_questions": {
+              "maxItems": 0,
+              "description": "Внутри site-brief вопросы живут в общем журнале questions[] (поле block: meaning); ответ на вопрос 4 text B1."
+            },
+            "legal_category": {
+              "description": "Внутри site-brief — constraints.legal_category (ответ на вопрос 5 text B1); здесь не заполнять."
+            }
+          },
+          "not": {
+            "required": [
+              "legal_category"
+            ]
+          }
+        }
+      ]
+    },
+    "meaning_ref": {
+      "type": "string",
+      "description": "Путь к отдельному meaning.yaml (формат text), если смысл ведётся отдельным файлом. Не вместе с meaning.",
+      "x-owner": "text (B1)",
+      "x-fill": "sister:text"
+    },
+    "proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "facts_ref",
+        "required_kinds"
+      ],
+      "description": "Инвентарь доказательств — только ссылкой на facts.yaml (формат text B2, контракт v2 §3 п.10). Пробелы не копировать: они в facts.yaml missing[] (blocking: true — ворота публикации).",
+      "x-owner": "site (A — поля связи; F — механика доказательств; I — подлинность); формат фактов — text (B2)",
+      "x-fill": "customer",
+      "properties": {
+        "facts_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Путь к facts.yaml проекта (facts_version: 1). Любое число, отзыв, логотип, награда, рейтинг, цена и человек на сайте — только отсюда."
+        },
+        "required_kinds": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "$ref": "urn:app-design:text-research:facts:1#/$defs/kind"
+          },
+          "description": "Виды фактов, без которых страница этого типа не публикуется: минимум по типу — allOf ниже; бриф может добавить."
+        },
+        "wanted_kinds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:app-design:text-research:facts:1#/$defs/kind"
+          },
+          "description": "Желательные виды по возражениям аудитории (опоры иерархии сообщений text); их нет — блок не строится, а не выдумывается."
+        },
+        "collection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status"
+          ],
+          "description": "Кто и когда собирает доказательства у заказчика (анкета text proof-intake.md).",
+          "properties": {
+            "owner": {
+              "type": "string",
+              "description": "Роль у заказчика, которая даёт факты и разрешения."
+            },
+            "agent": {
+              "type": "string",
+              "description": "Кто ведёт анкету proof-intake.md."
+            },
+            "asked": {
+              "$ref": "#/$defs/date"
+            },
+            "due": {
+              "$ref": "#/$defs/date"
+            },
+            "status": {
+              "enum": [
+                "not-started",
+                "in-progress",
+                "done"
+              ]
+            }
+          }
+        },
+        "intake_form": {
+          "type": "string",
+          "description": "Анкета и её версия, например text/02-strategy-messaging/proof-intake.md@2026-09-24."
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "jurisdiction"
+      ],
+      "description": "Ограничения: право, платформа, стек, сроки, бюджет.",
+      "x-owner": "site (I — право; J — стек и CMS)",
+      "x-fill": "customer",
+      "properties": {
+        "jurisdiction": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "ru",
+              "eu",
+              "kz",
+              "by",
+              "us",
+              "other"
+            ]
+          },
+          "default": [
+            "ru"
+          ],
+          "description": "Право, по которому проверяется сайт: РФ по умолчанию, ЕС — переключаемый профиль (решение заказчика п. 11). Первый элемент — основной (как facts.jurisdiction)."
+        },
+        "legal_category": {
+          "$ref": "urn:app-design:text-research:meaning:1#/properties/legal_category",
+          "description": "Отраслевой режим формулировок (перечень text B1; general — «ничего особого»). Рядом с юрисдикцией — ответ на вопрос 5 text B1."
+        },
+        "legal_note": {
+          "type": "string"
+        },
+        "cms": {
+          "type": "string",
+          "enum": [
+            "tilda",
+            "wordpress",
+            "1c-bitrix",
+            "webflow",
+            "framer",
+            "custom",
+            "static",
+            "none"
+          ],
+          "description": "Платформа заказчика (перечень creative — от значения зависит стек подачи, 07-stack-implementation/stack.yaml): tilda, wordpress, 1c-bitrix, webflow, framer, custom (прочее), static, none."
+        },
+        "stack": {
+          "type": "string",
+          "description": "Стек, если задан заказчиком (→ build.stack kimi)."
+        },
+        "hosting": {
+          "type": "string",
+          "description": "Где размещается сайт и формы (важно для локализации ПД в РФ — I)."
+        },
+        "integrations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "CRM, телефония, календарь записи, оплата, рассылка."
+        },
+        "deadline": {
+          "$ref": "#/$defs/date"
+        },
+        "budget": {
+          "type": "string",
+          "description": "Бюджет словами заказчика (на сайт, генерацию ассетов, тесты)."
+        },
+        "accessibility": {
+          "enum": [
+            "wcag22-aa",
+            "wcag21-aa",
+            "not-specified"
+          ],
+          "default": "wcag22-aa",
+          "description": "Целевой уровень доступности (I; EAA требует EN 301 549)."
+        },
+        "legal_intake": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Ответы заказчика на правовые вопросы до плана страниц (I 08-legal-trust-a11y/01 §6 шаг 1): из них выводятся page.legal планов и набор req:LR-* (legal-requirements.yaml). Не юридическое заключение.",
+          "x-owner": "site (I — вопросы и нормы; заказчик — ответы)",
+          "x-fill": "customer",
+          "properties": {
+            "rkn_registry": {
+              "enum": [
+                "yes",
+                "no",
+                "unknown"
+              ],
+              "description": "Оператор ПД подал уведомление в РКН (req:LR-RU-09)."
+            },
+            "leads_storage": {
+              "enum": [
+                "ru",
+                "abroad",
+                "unknown"
+              ],
+              "description": "Где хранятся заявки (CRM, почта): первичная запись ПД граждан РФ — в РФ (req:LR-RU-07)."
+            },
+            "third_party": {
+              "type": "array",
+              "description": "Сторонние сервисы страницы: где сервер и зачем (трансграничная передача — req:LR-RU-08; cookie — LR-RU-10, LR-EU-01).",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "service",
+                  "purpose"
+                ],
+                "properties": {
+                  "service": {
+                    "type": "string"
+                  },
+                  "purpose": {
+                    "enum": [
+                      "analytics",
+                      "ads-pixel",
+                      "chat",
+                      "video",
+                      "maps",
+                      "fonts",
+                      "captcha",
+                      "crm",
+                      "payments",
+                      "booking",
+                      "other"
+                    ]
+                  },
+                  "location": {
+                    "enum": [
+                      "ru",
+                      "abroad",
+                      "unknown"
+                    ]
+                  },
+                  "sets_cookies": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "sends_marketing": {
+              "type": "boolean",
+              "description": "Будут рассылки (email, SMS, мессенджер): отдельная неотмеченная галочка (req:LR-RU-11)."
+            },
+            "license": {
+              "enum": [
+                "not-needed",
+                "has",
+                "needed",
+                "unknown"
+              ],
+              "description": "Лицензия или допуск отрасли (медицина, образование, строительство СРО): факт credential."
+            },
+            "sells_online": {
+              "type": "boolean",
+              "description": "Оплата или заказ на сайте: сведения о продавце и условия до договора (req:LR-RU-14, 15, 20)."
+            },
+            "optional_cookies": {
+              "type": "boolean",
+              "description": "Есть необязательные cookie (Метрика, пиксели, ретаргетинг, чат с трекингом) — нужен баннер (req:LR-RU-10; eu — LR-EU-01…04)."
+            },
+            "medical": {
+              "type": "boolean",
+              "description": "Медицинские услуги: без «до/после» и благодарностей пациентов (req:LR-RU-21); дублирует legal_category, если та задана."
+            }
+          }
+        }
+      }
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Решения по спорным приёмам. Умолчания — решения заказчика п. 15 (PLAN.md); включение — только с условиями F и согласием заказчика.",
+      "x-owner": "site (F — условия; заказчик — решение)",
+      "x-fill": "default",
+      "properties": {
+        "capture_popup": {
+          "enum": [
+            "off",
+            "engaged",
+            "on"
+          ],
+          "default": "off",
+          "description": "Окно сбора контакта: off — по умолчанию (решение заказчика 15); engaged — немодальная панель после вовлечения (F 01 §11, block:capture-popup вариант engaged-slide-in); on — иное окно по условиям F. engaged и on — только с rationale и согласием заказчика."
+        },
+        "exit_intent": {
+          "enum": [
+            "off",
+            "on"
+          ],
+          "default": "off"
+        },
+        "chat_widget": {
+          "enum": [
+            "off",
+            "on"
+          ],
+          "default": "off",
+          "description": "Сторонний чат (вес, доступность, согласие на ПД — P и I)."
+        },
+        "preloader": {
+          "enum": [
+            "off",
+            "on"
+          ],
+          "default": "off",
+          "description": "Прелоадер — только в L2-кампаниях по явному решению."
+        },
+        "cookie_banner": {
+          "enum": [
+            "auto",
+            "none"
+          ],
+          "default": "auto",
+          "description": "auto — по юрисдикции и составу скриптов (I)."
+        },
+        "rationale": {
+          "type": "string",
+          "description": "Почему включён приём, выключенный по умолчанию (условия F, дата согласия заказчика). Для engaged и on — условия F 01 §11 и дата согласия заказчика."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "anyOf": [
+              {
+                "required": [
+                  "capture_popup"
+                ],
+                "properties": {
+                  "capture_popup": {
+                    "enum": [
+                      "on",
+                      "engaged"
+                    ]
+                  }
+                }
+              },
+              {
+                "required": [
+                  "exit_intent"
+                ],
+                "properties": {
+                  "exit_intent": {
+                    "const": "on"
+                  }
+                }
+              },
+              {
+                "required": [
+                  "preloader"
+                ],
+                "properties": {
+                  "preloader": {
+                    "const": "on"
+                  }
+                }
+              }
+            ]
+          },
+          "then": {
+            "required": [
+              "rationale"
+            ]
+          }
+        }
+      ]
+    },
+    "analytics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "system"
+      ],
+      "description": "Аналитика и цели. События выводятся из conversion.action (P, events.yaml); правовые условия — I.",
+      "x-owner": "site (P)",
+      "x-fill": "default",
+      "properties": {
+        "system": {
+          "enum": [
+            "yandex-metrica",
+            "ga4",
+            "both",
+            "none"
+          ],
+          "default": "yandex-metrica"
+        },
+        "crm": {
+          "type": "string"
+        },
+        "call_tracking": {
+          "type": "boolean"
+        },
+        "ab_testing": {
+          "enum": [
+            "none",
+            "later",
+            "planned"
+          ],
+          "default": "later",
+          "description": "Планируются ли A/B — методика и выборка у P."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "search": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Входы заказчика для SEO и технической части GEO (правила — H, волна 2).",
+      "x-owner": "site (H)",
+      "x-fill": "customer",
+      "properties": {
+        "engines": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "yandex",
+              "google",
+              "bing",
+              "other"
+            ]
+          },
+          "default": [
+            "yandex",
+            "google"
+          ]
+        },
+        "ai_answers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "yandex-alice",
+              "google-ai",
+              "chatgpt-search",
+              "perplexity",
+              "claude",
+              "other"
+            ]
+          },
+          "default": [
+            "yandex-alice",
+            "google-ai",
+            "chatgpt-search",
+            "perplexity"
+          ],
+          "description": "Приоритет ИИ-ответов (решение заказчика п. 15: Яндекс и Google, затем ChatGPT Search и Perplexity)."
+        },
+        "ai_bots_policy": {
+          "enum": [
+            "allow-all",
+            "allow-search-deny-training",
+            "deny-all",
+            "ask"
+          ],
+          "default": "ask",
+          "description": "Разрешать ли ИИ-ботам поиск и обучение — решение заказчика; варианты и боты — H (crawlers.yaml). Если заказчик промолчал — allow-all (H: 07-…/crawlers.yaml policies; исключение — «текст и есть продукт»)."
+        },
+        "regions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "existing_site": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "url": {
+              "type": "string"
+            },
+            "keep_urls": {
+              "type": "boolean",
+              "description": "Сохранять адреса или ставить редиректы (G, H)."
+            },
+            "has_search_traffic": {
+              "type": "boolean"
+            }
+          }
+        },
+        "profiles": {
+          "type": "array",
+          "description": "Профили компании вне сайта (сущность и sameAs для H).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "platform",
+              "url"
+            ],
+            "properties": {
+              "platform": {
+                "enum": [
+                  "yandex-business",
+                  "google-business",
+                  "2gis",
+                  "vk",
+                  "telegram",
+                  "youtube",
+                  "wikidata",
+                  "wikipedia",
+                  "other"
+                ]
+              },
+              "url": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "queries_known": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Запросы, которые знает заказчик (семантику собирает text)."
+        }
+      }
+    },
+    "languages": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Языковые версии сайта: владелец списка — site; meaning.languages обязан совпадать по набору (проверка валидатора). Второй язык — адаптация, а не перевод (решение заказчика).",
+      "x-owner": "site (G — структура)",
+      "x-fill": "customer",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "lang",
+          "role"
+        ],
+        "properties": {
+          "lang": {
+            "$ref": "#/$defs/lang"
+          },
+          "role": {
+            "enum": [
+              "primary",
+              "adaptation"
+            ]
+          },
+          "scope": {
+            "enum": [
+              "all-pages",
+              "selected-pages"
+            ],
+            "default": "all-pages"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "contains": {
+        "type": "object",
+        "required": [
+          "role"
+        ],
+        "properties": {
+          "role": {
+            "const": "primary"
+          }
+        }
+      },
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "pages": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode"
+      ],
+      "description": "Нужные страницы: определить по типу сайта (карта по умолчанию — G, плейбуки — J) или списком.",
+      "x-owner": "site (G)",
+      "x-fill": "claude",
+      "properties": {
+        "mode": {
+          "enum": [
+            "by-type",
+            "listed"
+          ]
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/page"
+          }
+        },
+        "exclude": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/page-type"
+          },
+          "description": "Типы страниц, которые заказчик явно не хочет."
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "listed"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "required": [
+              "list"
+            ],
+            "properties": {
+              "list": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ambition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level"
+      ],
+      "description": "Уровень амбиций подачи. Определения, разрешено и обязательно, профили бюджета — creative (../creative/01-creative-direction/ambition-levels.yaml v0.1); умолчания — решения заказчика 15 и 20 (сервисы L0, лендинги L1, кампании L2; лидогенерация услуг — L0 при горячем мобильном трафике ≥ 50 % и price_band low|mid; внутренние страницы — таблица defaults_by_page_type).",
+      "x-owner": "creative (определения); site — поле и правило «страница ≤ сайт»",
+      "x-fill": "default",
+      "properties": {
+        "level": {
+          "$ref": "#/$defs/ambition-level"
+        },
+        "source": {
+          "enum": [
+            "default",
+            "customer",
+            "claude"
+          ],
+          "default": "default",
+          "description": "Откуда уровень: умолчание по типу, слово заказчика, вывод Claude (не default → note обязателен)."
+        },
+        "by_page": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "page",
+              "level"
+            ],
+            "properties": {
+              "page": {
+                "$ref": "#/$defs/id"
+              },
+              "level": {
+                "$ref": "#/$defs/ambition-level"
+              },
+              "why": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "by_section_role": {
+          "type": "array",
+          "description": "Уровень секций по роли (section_role словаря): не выше level; lead-form и pricing — только L0 (ambition-levels.yaml section_caps).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "role",
+              "level"
+            ],
+            "properties": {
+              "role": {
+                "$ref": "#/$defs/id"
+              },
+              "level": {
+                "$ref": "#/$defs/ambition-level"
+              },
+              "why": {
+                "type": "string"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "role": {
+                      "enum": [
+                        "lead-form",
+                        "pricing"
+                      ]
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "level": {
+                      "const": "L0"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "motion_cap": {
+          "enum": [
+            "none",
+            "subtle",
+            "expressive",
+            "cinematic"
+          ],
+          "description": "Потолок движения kimi поверх уровня (аудитория 45+, B2G, вестибулярная чувствительность, слово заказчика)."
+        },
+        "allow": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "markers": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "warm",
+                  "accent-word",
+                  "serif",
+                  "eyebrow",
+                  "photo-hero",
+                  "center-hero",
+                  "stats",
+                  "cards",
+                  "gradient",
+                  "glass",
+                  "pill",
+                  "dots",
+                  "arrows",
+                  "mono",
+                  "numbered",
+                  "marquee",
+                  "chrome",
+                  "caps"
+                ]
+              },
+              "description": "Ключи --allow k3_checks.py 1.0 (kimi-research/99-raw/tools/k3_checks.py ALLOW_KEYS, 2026-09-24): приметы, которые заказчик заказал сам."
+            },
+            "effects": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$"
+              }
+            },
+            "why": {
+              "type": "string",
+              "minLength": 5
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "markers"
+                    ],
+                    "properties": {
+                      "markers": {
+                        "minItems": 1
+                      }
+                    }
+                  },
+                  {
+                    "required": [
+                      "effects"
+                    ],
+                    "properties": {
+                      "effects": {
+                        "minItems": 1
+                      }
+                    }
+                  }
+                ]
+              },
+              "then": {
+                "required": [
+                  "why"
+                ]
+              }
+            }
+          ]
+        },
+        "forbid": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "effects": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$"
+              }
+            },
+            "cliches": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "words": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 2
+              },
+              "description": "Дословно от заказчика."
+            },
+            "why": {
+              "type": "string"
+            }
+          }
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "source"
+            ],
+            "properties": {
+              "source": {
+                "enum": [
+                  "customer",
+                  "claude"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "note"
+            ]
+          }
+        }
+      ]
+    },
+    "brand": {
+      "type": "object",
+      "description": "Бренд: логотип, цвета ролями, шрифты с кириллицей, голос — структура brief.yaml kimi `brand` (templates/brand.json; путь совпадает). Выражение бренда на сайте — creative; очистка и проверка — Claude (kimi 07/03 §4).",
+      "x-owner": "customer (исходники) · creative (выражение)",
+      "x-fill": "customer",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "none",
+            "draft",
+            "verified"
+          ]
+        },
+        "guidelines_ref": {
+          "type": "string",
+          "description": "Путь к брендбуку или гайду."
+        },
+        "logo": {
+          "type": "object"
+        },
+        "colors": {
+          "type": "object"
+        },
+        "fonts": {
+          "type": "object"
+        },
+        "voice": {
+          "type": "object",
+          "description": "Голос бренда — профиль голоса text (voice_ref) после волны 2."
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expression": {
+          "type": "object",
+          "additionalProperties": false,
+          "x-owner": "creative",
+          "description": "Выражение бренда на сайте (creative C1): что обязательно, что свободно, чего избегать, насколько строго; выбранное направление art-direction.",
+          "properties": {
+            "mode": {
+              "enum": [
+                "strict",
+                "extend",
+                "open"
+              ]
+            },
+            "must_keep": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "aspect",
+                  "what"
+                ],
+                "properties": {
+                  "aspect": {
+                    "$ref": "#/$defs/brand-aspect"
+                  },
+                  "what": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "source": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "free": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/$defs/brand-aspect"
+              }
+            },
+            "avoid": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "what"
+                ],
+                "properties": {
+                  "what": {
+                    "type": "string"
+                  },
+                  "why": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "direction": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "art_direction_ref",
+                "chosen"
+              ],
+              "properties": {
+                "art_direction_ref": {
+                  "type": "string"
+                },
+                "chosen": {
+                  "type": "string"
+                },
+                "chosen_by": {
+                  "type": "string"
+                },
+                "date": {
+                  "$ref": "#/$defs/date"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "references": {
+      "type": "array",
+      "description": "Референсы: id библиотеки creative (`ref:<id>`) или URL с ролью; файлы и замеры для kimi готовит Claude.",
+      "x-owner": "creative",
+      "x-fill": "sister:creative",
+      "items": {
+        "$ref": "#/$defs/reference"
+      }
+    },
+    "assets_available": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Какие настоящие материалы есть у заказчика (для плана ассетов ai-media и доверия: реальные фото сильнее стока).",
+      "x-owner": "customer",
+      "x-fill": "customer",
+      "properties": {
+        "real_photos": {
+          "enum": [
+            "none",
+            "few",
+            "library"
+          ]
+        },
+        "photo_subjects": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "team",
+              "work-results",
+              "process",
+              "office",
+              "product",
+              "clients-with-permission",
+              "events"
+            ]
+          }
+        },
+        "real_video": {
+          "type": "boolean"
+        },
+        "product_ui": {
+          "type": "boolean",
+          "description": "Настоящие скриншоты или запись интерфейса (SaaS, приложение)."
+        },
+        "logo_vector": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "questions": {
+      "type": "array",
+      "description": "Единый журнал вопросов брифа (ответ на вопрос 4 text B1): вопросы всех блоков, допущения (status: assumed) и ответы. Путь совпадает с questions[] kimi; лишние ключи проекция отбрасывает.",
+      "x-owner": "site",
+      "x-fill": "claude",
+      "items": {
+        "$ref": "#/$defs/question"
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "Бриф, показанный заказчику или утверждённый, содержит все разделы контракта v2 §3 п.1.",
+      "if": {
+        "$ref": "#/$defs/is-not-draft"
+      },
+      "then": {
+        "required": [
+          "traffic",
+          "offer",
+          "proof",
+          "pages",
+          "ambition",
+          "search",
+          "analytics",
+          "decision_context"
+        ],
+        "anyOf": [
+          {
+            "required": [
+              "meaning"
+            ]
+          },
+          {
+            "required": [
+              "meaning_ref"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "$comment": "Смысл — либо встроенный блок, либо файл, не оба.",
+      "not": {
+        "required": [
+          "meaning",
+          "meaning_ref"
+        ]
+      }
+    },
+    {
+      "$comment": "Утверждённый бриф: есть подпись и нет открытых вопросов приоритета 1.",
+      "if": {
+        "required": [
+          "project"
+        ],
+        "properties": {
+          "project": {
+            "required": [
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "const": "approved"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "project": {
+            "required": [
+              "approval"
+            ]
+          },
+          "questions": {
+            "items": {
+              "if": {
+                "required": [
+                  "priority"
+                ],
+                "properties": {
+                  "priority": {
+                    "const": 1
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "assumed",
+                      "answered",
+                      "withdrawn"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "Лендинг (landing-site): тип посадочной страницы обязателен и относится к классу landing словаря B.",
+      "if": {
+        "required": [
+          "site_type"
+        ],
+        "properties": {
+          "site_type": {
+            "const": "landing-site"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "primary_page_type"
+        ],
+        "properties": {
+          "primary_page_type": {
+            "$ref": "#/$defs/landing-page-type"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "Минимум для всех коммерческих типов: сведения о компании (продавце) в инвентаре.",
+      "if": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/is-not-draft"
+          },
+          {
+            "required": [
+              "site_type"
+            ],
+            "properties": {
+              "site_type": {
+                "not": {
+                  "const": "personal-brand-site"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "proof": {
+            "properties": {
+              "required_kinds": {
+                "contains": {
+                  "const": "company"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "Личный бренд: вместо компании — человек.",
+      "if": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/is-not-draft"
+          },
+          {
+            "required": [
+              "site_type"
+            ],
+            "properties": {
+              "site_type": {
+                "const": "personal-brand-site"
+              }
+            }
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "proof": {
+            "properties": {
+              "required_kinds": {
+                "contains": {
+                  "const": "person"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "Лидогенерация услуг (приоритет 1 заказчика): цена или условия, география, канал заявки.",
+      "if": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/is-not-draft"
+          },
+          {
+            "anyOf": [
+              {
+                "required": [
+                  "site_type"
+                ],
+                "properties": {
+                  "site_type": {
+                    "const": "services-site"
+                  }
+                }
+              },
+              {
+                "required": [
+                  "primary_page_type"
+                ],
+                "properties": {
+                  "primary_page_type": {
+                    "enum": [
+                      "landing-lead-services",
+                      "service-page",
+                      "seo-landing-page"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "proof": {
+            "properties": {
+              "required_kinds": {
+                "anyOf": [
+                  {
+                    "contains": {
+                      "const": "price"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "offer-terms"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "business": {
+            "required": [
+              "geography"
+            ]
+          },
+          "conversion": {
+            "required": [
+              "channels"
+            ],
+            "properties": {
+              "channels": {
+                "contains": {
+                  "enum": [
+                    "form",
+                    "quiz",
+                    "calculator",
+                    "phone",
+                    "callback",
+                    "messenger",
+                    "booking-widget"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "SaaS и приложение: настоящий продукт на странице (скриншоты, демо).",
+      "if": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/is-not-draft"
+          },
+          {
+            "anyOf": [
+              {
+                "required": [
+                  "site_type"
+                ],
+                "properties": {
+                  "site_type": {
+                    "const": "saas-marketing-site"
+                  }
+                }
+              },
+              {
+                "required": [
+                  "primary_page_type"
+                ],
+                "properties": {
+                  "primary_page_type": {
+                    "enum": [
+                      "landing-saas",
+                      "landing-app"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "proof": {
+            "properties": {
+              "required_kinds": {
+                "contains": {
+                  "const": "demo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "Промо товара: свойства, цена, настоящий товар.",
+      "if": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/is-not-draft"
+          },
+          {
+            "required": [
+              "primary_page_type"
+            ],
+            "properties": {
+              "primary_page_type": {
+                "const": "landing-product"
+              }
+            }
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "proof": {
+            "properties": {
+              "required_kinds": {
+                "allOf": [
+                  {
+                    "contains": {
+                      "const": "property"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "price"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "demo"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "Мероприятие: дата и условия участия.",
+      "if": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/is-not-draft"
+          },
+          {
+            "anyOf": [
+              {
+                "required": [
+                  "site_type"
+                ],
+                "properties": {
+                  "site_type": {
+                    "const": "event-site"
+                  }
+                }
+              },
+              {
+                "required": [
+                  "primary_page_type"
+                ],
+                "properties": {
+                  "primary_page_type": {
+                    "const": "landing-event"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "proof": {
+            "properties": {
+              "required_kinds": {
+                "allOf": [
+                  {
+                    "contains": {
+                      "const": "date"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "offer-terms"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "Курс и школа: цена и люди, которые учат.",
+      "if": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/is-not-draft"
+          },
+          {
+            "anyOf": [
+              {
+                "required": [
+                  "site_type"
+                ],
+                "properties": {
+                  "site_type": {
+                    "const": "school-site"
+                  }
+                }
+              },
+              {
+                "required": [
+                  "primary_page_type"
+                ],
+                "properties": {
+                  "primary_page_type": {
+                    "const": "landing-course"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "proof": {
+            "properties": {
+              "required_kinds": {
+                "allOf": [
+                  {
+                    "contains": {
+                      "const": "price"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "person"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "Лид-магнит: обмен — материал за контакт; действие — скачать или подписаться.",
+      "if": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/is-not-draft"
+          },
+          {
+            "required": [
+              "primary_page_type"
+            ],
+            "properties": {
+              "primary_page_type": {
+                "const": "landing-lead-magnet"
+              }
+            }
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "offer": {
+            "properties": {
+              "kind": {
+                "const": "lead-magnet"
+              }
+            }
+          },
+          "conversion": {
+            "properties": {
+              "action": {
+                "enum": [
+                  "download",
+                  "subscribe",
+                  "lead-request"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "Портфолио и студия: работы или кейсы.",
+      "if": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/is-not-draft"
+          },
+          {
+            "required": [
+              "site_type"
+            ],
+            "properties": {
+              "site_type": {
+                "const": "portfolio-site"
+              }
+            }
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "proof": {
+            "properties": {
+              "required_kinds": {
+                "anyOf": [
+                  {
+                    "contains": {
+                      "const": "case"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "demo"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "Стимул со сроком: без реальной даты срочность запрещена.",
+      "if": {
+        "required": [
+          "offer"
+        ],
+        "properties": {
+          "offer": {
+            "required": [
+              "incentive_ref"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "offer": {
+            "required": [
+              "deadline_ref"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Латиница в kebab-case."
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?$",
+      "description": "ISO-дата ГГГГ-ММ-ДД или ГГГГ-ММ строкой (как в схемах text)."
+    },
+    "lang": {
+      "type": "string",
+      "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+    },
+    "fact-ref": {
+      "type": "string",
+      "pattern": "^(fact|missing):[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Ссылка на facts.yaml: fact:<id> — факт есть; missing:<id> — факта нет, на странице [PLACEHOLDER]."
+    },
+    "is-not-draft": {
+      "required": [
+        "project"
+      ],
+      "properties": {
+        "project": {
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "proposed",
+                "approved"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "site-type": {
+      "description": "Тип сайта — пространство site_type словаря B (02-site-types/vocabulary.yaml v0 draft, revision 1, 2026-09-24): landing-site — одностраничный, остальные — многостраничные. Вне рамок (ecommerce-store, web-app, media-portal, docs-site, marketplace) брифом site не описываются.",
+      "x-vocabulary": "site_type (v1)",
+      "enum": [
+        "landing-site",
+        "services-site",
+        "corporate-site",
+        "saas-marketing-site",
+        "portfolio-site",
+        "event-site",
+        "personal-brand-site",
+        "school-site",
+        "campaign-site"
+      ]
+    },
+    "page-type": {
+      "description": "Тип страницы — пространство page_type словаря v1 (43 id в рамках: 33 v0 + 5 G + 5 proposed); ecommerce-*, web-app-screen — вне рамок.",
+      "x-vocabulary": "page_type (v1)",
+      "enum": [
+        "landing-lead-services",
+        "landing-saas",
+        "landing-product",
+        "landing-campaign",
+        "landing-event",
+        "landing-course",
+        "landing-app",
+        "landing-waitlist",
+        "landing-lead-magnet",
+        "home-multipage",
+        "services-index-page",
+        "service-page",
+        "seo-landing-page",
+        "feature-page",
+        "use-case-page",
+        "pricing-page",
+        "comparison-page",
+        "alternatives-page",
+        "case-page",
+        "case-list-page",
+        "portfolio-page",
+        "about-page",
+        "team-page",
+        "reviews-page",
+        "faq-page",
+        "contacts-page",
+        "careers-page",
+        "form-page",
+        "blog-index-page",
+        "article-page",
+        "thank-you-page",
+        "not-found-page",
+        "legal-page",
+        "specialist-page",
+        "location-page",
+        "program-catalog-page",
+        "documents-page",
+        "search-results-page",
+        "event-program-page",
+        "speakers-page",
+        "integrations-page",
+        "security-page",
+        "html-sitemap-page"
+      ]
+    },
+    "landing-page-type": {
+      "description": "Тип посадочной страницы (класс landing словаря B) — задаёт минимум брифа для landing-site.",
+      "enum": [
+        "landing-lead-services",
+        "landing-saas",
+        "landing-product",
+        "landing-campaign",
+        "landing-event",
+        "landing-course",
+        "landing-app",
+        "landing-waitlist",
+        "landing-lead-magnet"
+      ]
+    },
+    "action-id": {
+      "description": "Целевое действие — пространство action словаря B (v0 draft, revision 1), только уровень macro: главное и вторые действия брифа. Micro (view-pricing, watch-video, explore-product, read-more, log-in) — промежуточные события P, не цель брифа. События аналитики строятся по этим id (P, events.yaml).",
+      "x-vocabulary": "action (v1, level: macro)",
+      "enum": [
+        "lead-request",
+        "request-quote",
+        "callback-request",
+        "call",
+        "message",
+        "booking",
+        "request-demo",
+        "sign-up",
+        "start-trial",
+        "purchase",
+        "preorder",
+        "join-waitlist",
+        "event-registration",
+        "download",
+        "subscribe",
+        "install-app",
+        "apply-job",
+        "visit-location"
+      ]
+    },
+    "conversion-channel": {
+      "description": "Канал приёма действия — пространство conversion_channel словаря v1 (механика — F). Не путать с атрибутом channel у traffic_source.",
+      "x-vocabulary": "conversion_channel (словарь v1, J)",
+      "enum": [
+        "form",
+        "quiz",
+        "calculator",
+        "phone",
+        "callback",
+        "messenger",
+        "chat",
+        "email",
+        "booking-widget",
+        "checkout",
+        "store",
+        "external-platform"
+      ]
+    },
+    "traffic-source": {
+      "description": "Источник трафика — пространство traffic_source словаря B (v0 draft): 9 id временного словаря text + 6 предложений text B1 + 3 id B (paid-display, influencer, internal).",
+      "x-vocabulary": "traffic_source (v1)",
+      "enum": [
+        "search-problem",
+        "search-category",
+        "search-brand",
+        "paid-search",
+        "paid-social",
+        "paid-display",
+        "retargeting",
+        "influencer",
+        "social-organic",
+        "messenger",
+        "email",
+        "maps-local",
+        "marketplace",
+        "referral",
+        "ai-answer",
+        "offline",
+        "direct",
+        "internal"
+      ]
+    },
+    "ambition-level": {
+      "description": "Уровень амбиций подачи: L0 спокойно, L1 выразительно, L2 иммерсивно («вау»). Определения — creative.",
+      "enum": [
+        "L0",
+        "L1",
+        "L2"
+      ]
+    },
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "page_type"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "page_type": {
+          "$ref": "#/$defs/page-type"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "Зачем страница: какой вопрос посетителя закрывает."
+        },
+        "priority": {
+          "enum": [
+            "must",
+            "should",
+            "could"
+          ],
+          "default": "must"
+        },
+        "main_sources": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/traffic-source"
+          },
+          "description": "Главные источники трафика страницы — по ним page-plan берёт осведомлённость из meaning.awareness.by_source."
+        },
+        "action": {
+          "$ref": "#/$defs/action-id",
+          "description": "Своё действие страницы, если отличается от conversion.action."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "take",
+        "dont_take"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "ref"
+          ]
+        },
+        {
+          "required": [
+            "url"
+          ]
+        }
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "pattern": "^ref:[a-z0-9]+(-[a-z0-9]+)*$",
+          "description": "id записи библиотеки референсов creative."
+        },
+        "url": {
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "composition",
+            "typography",
+            "rhythm",
+            "motion",
+            "block-solution",
+            "brand",
+            "structure",
+            "color",
+            "material",
+            "imagery",
+            "effect",
+            "other"
+          ]
+        },
+        "applies_to": {
+          "type": "string",
+          "pattern": "^(page|section-role:[a-z0-9]+(-[a-z0-9]+)*|block:[a-z0-9]+(-[a-z0-9]+)*)$",
+          "description": "Где применяется: page, section-role:<id> или block:<id>; один референс — одно место."
+        },
+        "take": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 3
+          }
+        },
+        "dont_take": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 3
+          }
+        },
+        "source": {
+          "enum": [
+            "customer",
+            "claude",
+            "creative-library"
+          ]
+        },
+        "captured": {
+          "type": "string",
+          "description": "Для url: дата и вьюпорт снятия («2026-09-24 1440x900»)."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "block",
+        "q",
+        "default",
+        "affects"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "block": {
+          "enum": [
+            "intake",
+            "project",
+            "site_type",
+            "primary_page_type",
+            "business",
+            "decision_context",
+            "conversion",
+            "traffic",
+            "offer",
+            "meaning",
+            "proof",
+            "constraints",
+            "policies",
+            "analytics",
+            "search",
+            "languages",
+            "pages",
+            "ambition",
+            "brand",
+            "references",
+            "assets_available"
+          ],
+          "description": "Раздел брифа, к которому вопрос относится."
+        },
+        "q": {
+          "type": "string",
+          "minLength": 5
+        },
+        "why": {
+          "type": "string",
+          "description": "Зачем спрашиваем — одна строка."
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "2–4 варианта для решений; для фактов — пусто (свободный ответ)."
+        },
+        "default": {
+          "type": "string",
+          "description": "Что будет, если заказчик не ответит (строка блока «Going with»)."
+        },
+        "affects": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "JSON Pointer полей, которые закрывает ответ (/offer/deadline_ref, /meaning/objections…)."
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3,
+          "description": "1 — без ответа нельзя строить страницу честно; 3 — уточнение."
+        },
+        "asked": {
+          "type": "boolean"
+        },
+        "answer": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string",
+          "description": "Кто и где ответил."
+        },
+        "date": {
+          "$ref": "#/$defs/date"
+        },
+        "status": {
+          "enum": [
+            "open",
+            "assumed",
+            "answered",
+            "withdrawn"
+          ],
+          "default": "open",
+          "description": "assumed — действует умолчание (допущение) до ответа."
+        }
+      }
+    },
+    "brand-aspect": {
+      "enum": [
+        "logo",
+        "color",
+        "typography",
+        "shape",
+        "material",
+        "pattern",
+        "imagery",
+        "motion",
+        "layout"
+      ]
+    }
+  },
+  "x-supersedes": "01-foundations/site-brief.schema.json (v0) — остаётся для файлов с version: 0"
+}

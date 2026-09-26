@@ -1,0 +1,57 @@
+{
+ "spec_version": "0.2",
+ "checked_at": "2026-09-23",
+ "brief_language": "ru",
+ "id": "t-shots",
+ "task": "VID-LONG",
+ "role": {
+  "section": "story",
+  "slot": "story-1",
+  "purpose": "история"
+ },
+ "subject": {
+  "summary": "a potter shaping a clay bowl in a sunlit studio"
+ },
+ "composition": {
+  "shot": "medium"
+ },
+ "palette": [
+  {
+   "role": "background",
+   "hex": "#D8C3A5",
+   "name": "clay beige",
+   "share": 0.6
+  }
+ ],
+ "text": {
+  "mode": "none"
+ },
+ "output": {
+  "primary_ratio": "16:9",
+  "resolution": "720p"
+ },
+ "motion": {
+  "kind": "camera-move",
+  "duration_s": 10,
+  "camera": {
+   "move": "dolly-in",
+   "amplitude": "small",
+   "speed": "slow"
+  },
+  "shots": [
+   {
+    "t0": 0,
+    "t1": 4,
+    "framing": "wide shot",
+    "action": "the potter centers the clay on the wheel"
+   },
+   {
+    "t0": 4,
+    "t1": 10,
+    "framing": "close-up",
+    "action": "wet hands raise the bowl wall"
+   }
+  ],
+  "cuts": "allowed"
+ }
+}

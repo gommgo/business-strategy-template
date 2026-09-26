@@ -1,0 +1,220 @@
+# asset-plan.yaml — КАРКАС из home.yaml (plan_to_assets.py, site-research J). Формат — ai-media 01/01 §8.
+# TODO-поля заполняют Claude (subject, goal) и ai-media (size, formats, max_kb, маршрут задачи); бюджеты — профиль P.
+plan_version: 1
+checked: '2026-09-24'
+page:
+  id: home
+  page_type: saas-landing
+  locale: ru-RU
+  audience: Регистрации в пробный период 14 дней без карты от владельцев и администраторов салонов на 1–5 мастеров
+  x_site:
+    page_plan: okoshko-demo/home
+    page_type: landing-saas
+    mapping: crosswalk §8 (equal)
+brand:
+  palette_tokens: TODO art-direction creative
+  style_passport: TODO
+  photo_language: TODO
+  forbidden_markers: []
+budgets:
+  first_screen_kb:
+    mobile: 2000
+    desktop: 3500
+    basis: 'S-creative-C1; M SaaS десктоп медиана 3 824, телефон 3 350; WA: 2–3 МБ — CWV прошли 45 % телефонных главных'
+  session_kb:
+    mobile: 5000
+    desktop: 10000
+    basis: S-creative-C1; ai-media лидеры SaaS сессия 7,1 МБ
+policy:
+  no_ai_subjects:
+  - screenshot
+  disclosure: per-slot
+slots:
+- id: header-logo
+  section: header
+  role: informational
+  goal: 'TODO Claude: что показать за 3 секунды'
+  ladder: svg
+  source: real
+  task_codes: []
+  subject: TODO Claude и ai-media (паспорт визуала, art-direction)
+  must_include: []
+  must_avoid: []
+  variants:
+  - id: default
+    ratio: TODO
+    size: TODO ai-media
+    formats: TODO ai-media
+    max_kb: TODO ai-media
+  motion:
+    type: none
+  delivery:
+    lcp_candidate: false
+    loading: lazy
+  alt: 'TODO: id текстового слота image-alt'
+  ai_fit: conditional
+  note: 'ждём материалы заказчика (source: customer-tbd в плане)'
+- id: hero-visual
+  section: hero
+  role: informational
+  goal: 'кадр hero: рамка окна или телефона с настоящим экраном записи поверх фона из токенов'
+  ladder: svg
+  source: code
+  task_codes: []
+  subject: TODO Claude и ai-media (паспорт визуала, art-direction)
+  must_include: []
+  must_avoid: []
+  variants:
+  - id: desktop
+    ratio: '16:10'
+    size: TODO ai-media
+    formats: TODO ai-media
+    max_kb: TODO ai-media
+  - id: mobile
+    ratio: '4:5'
+    size: TODO ai-media
+    formats: TODO ai-media
+    max_kb: TODO ai-media
+  motion:
+    type: none
+  delivery:
+    lcp_candidate: false
+    loading: eager
+  alt: текст — copy-deck text, слот hero.alt
+  ai_fit: allowed
+- id: hero-screenshot
+  section: hero
+  role: informational
+  goal: экран самозаписи клиента и экран напоминаний
+  ladder: image
+  source: real
+  task_codes: []
+  subject: TODO Claude и ai-media (паспорт визуала, art-direction)
+  must_include: []
+  must_avoid: []
+  variants:
+  - id: desktop
+    ratio: '16:10'
+    size: TODO ai-media
+    formats: TODO ai-media
+    max_kb: TODO ai-media
+  - id: mobile
+    ratio: '9:16'
+    size: TODO ai-media
+    formats: TODO ai-media
+    max_kb: TODO ai-media
+  motion:
+    type: none
+  delivery:
+    lcp_candidate: false
+    loading: eager
+  alt: текст — copy-deck text, слот hero.alt
+  ai_fit: forbidden
+  note: 'ждём материалы заказчика (source: customer-tbd в плане); подлинность real-only: люди, работы, товар, скриншоты —
+    только настоящие (I 08/02 §1.2)'
+- id: product-demo-row-1-media
+  section: product-demo
+  role: informational
+  goal: экран самозаписи на телефоне клиента
+  ladder: image
+  source: real
+  task_codes: []
+  subject: TODO Claude и ai-media (паспорт визуала, art-direction)
+  must_include: []
+  must_avoid: []
+  variants:
+  - id: desktop
+    ratio: '4:5'
+    size: TODO ai-media
+    formats: TODO ai-media
+    max_kb: TODO ai-media
+  - id: mobile
+    ratio: '9:16'
+    size: TODO ai-media
+    formats: TODO ai-media
+    max_kb: TODO ai-media
+  motion:
+    type: none
+  delivery:
+    lcp_candidate: false
+    loading: lazy
+  alt: текст — copy-deck text, слот product-demo.row-1-alt
+  ai_fit: forbidden
+  note: 'ждём материалы заказчика (source: customer-tbd в плане); подлинность real-only: люди, работы, товар, скриншоты —
+    только настоящие (I 08/02 §1.2)'
+- id: product-demo-row-2-media
+  section: product-demo
+  role: informational
+  goal: напоминание в Telegram
+  ladder: image
+  source: real
+  task_codes: []
+  subject: TODO Claude и ai-media (паспорт визуала, art-direction)
+  must_include: []
+  must_avoid: []
+  variants:
+  - id: desktop
+    ratio: '4:5'
+    size: TODO ai-media
+    formats: TODO ai-media
+    max_kb: TODO ai-media
+  - id: mobile
+    ratio: '9:16'
+    size: TODO ai-media
+    formats: TODO ai-media
+    max_kb: TODO ai-media
+  motion:
+    type: none
+  delivery:
+    lcp_candidate: false
+    loading: lazy
+  alt: текст — copy-deck text, слот product-demo.row-2-alt
+  ai_fit: forbidden
+  note: 'ждём материалы заказчика (source: customer-tbd в плане); подлинность real-only: люди, работы, товар, скриншоты —
+    только настоящие (I 08/02 §1.2)'
+- id: product-demo-row-3-media
+  section: product-demo
+  role: informational
+  goal: экран импорта базы
+  ladder: image
+  source: real
+  task_codes: []
+  subject: TODO Claude и ai-media (паспорт визуала, art-direction)
+  must_include: []
+  must_avoid: []
+  variants:
+  - id: desktop
+    ratio: '16:10'
+    size: TODO ai-media
+    formats: TODO ai-media
+    max_kb: TODO ai-media
+  - id: mobile
+    ratio: '4:5'
+    size: TODO ai-media
+    formats: TODO ai-media
+    max_kb: TODO ai-media
+  motion:
+    type: none
+  delivery:
+    lcp_candidate: false
+    loading: lazy
+  alt: текст — copy-deck text, слот product-demo.row-3-alt
+  ai_fit: forbidden
+  note: 'ждём материалы заказчика (source: customer-tbd в плане); подлинность real-only: люди, работы, товар, скриншоты —
+    только настоящие (I 08/02 §1.2)'
+- id: og-image
+  section: meta
+  role: informational
+  goal: превью ссылки
+  ladder: image
+  source: template
+  task_codes: []
+  variants:
+  - id: og-image
+    ratio: 1.91:1
+  motion:
+    type: none
+  delivery:
+    lcp_candidate: false
+    loading: lazy
+  ai_fit: allowed

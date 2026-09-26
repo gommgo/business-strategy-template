@@ -1,0 +1,321 @@
+# Формулы маркетингового текста как инструменты: уровень, шаги, когда брать и когда нет, жанры, слоты, метка.
+# Пишет агент A (волна 1); читают E (copy-slots.yaml), I (промты и рубрика), J (примеры). Разбор — 01-foundations/03 §2.
+# Проверка загрузки и полей: python3 99-raw/experiments/A/04-formulas-yaml-check/check_formulas.py
+date: 2026-09-24
+version: 1
+status: draft            # draft — до сверки с site C (порядок секций) и E (слоты)
+owner: text-research · агент A · волна 1
+description: >-
+  Формулы — черновой каркас хода мысли после смысла (B1) и фактов (B2), а не шаблон предложения и не гарантия
+  результата. Сравнительных тестов формул с методикой не найдено; последовательность «внимание → интерес → желание →
+  действие» не подтверждена обзором > 250 работ (Vakratsas & Ambler 1999). Для level: page — только ссылка на site C.
+fields:
+  id: латиница, kebab-case, уникален
+  name: название формулы (как в практике)
+  level: page — порядок секций страницы (решает site C); block — ход текста секции или письма; sentence — заголовок, фраза
+  also_levels: где формулу ещё применяют (необязательно)
+  steps: шаги по порядку
+  use_when: условия, при которых формула уместна
+  avoid_when: условия, при которых формулу не брать
+  genres: подмножество landing, site-page, article, meta, geo, email-form
+  slots: slot_type из 99-raw/notes/temp-vocabulary-v0.yaml (для page — пусто)
+  evidence: метка доказательности базы
+  source: откуда формула и где разбор
+  site_ref: для page — ссылка на site C (разбора здесь нет)
+  example: пример RU (и EN, если нужен); факты — плейсхолдеры
+  antiexample: как не надо
+  notes: оговорки
+  date: дата записи
+levels:
+  page: порядок секций всей страницы — решает site C (../site-research/03-page-structure/01, план; до выхода файлов site — временные роли секций из temp-vocabulary-v0.yaml)
+  block: ход текста внутри одной секции, карточки, письма
+  sentence: заголовок, подзаголовок, фраза, строка CTA, тема письма
+formulas:
+  # ---------------------------------------------------------------- page (только ссылка на site C)
+  - id: aida
+    name: AIDA (Attention, Interest, Desire, Action)
+    level: page
+    also_levels: [block]
+    steps: ["внимание", "интерес", "желание", "действие"]
+    use_when: ["→ site C: порядок секций; как чек-лист блока — «есть ли желание, кроме внимания и призыва»"]
+    avoid_when: ["→ site C; не выдавать за закон: последовательность иерархии эффектов не подтверждена"]
+    genres: [landing, email-form]
+    slots: []
+    evidence: "[практика]"
+    source: "E. St. Elmo Lewis (1898–1910; Printers' Ink, 09.02.1898); критика — Vakratsas & Ambler, J. of Marketing 63(1), 1999; 01-foundations/03 §2.3"
+    site_ref: ../site-research/03-page-structure/01
+    notes: "варианты AIDCA/IDCA (+ убеждённость: отзывы, данные, гарантии; IDCA — когда внимание уже поймано объявлением)"
+    date: 2026-09-24
+  - id: storybrand-sb7
+    name: StoryBrand SB7
+    level: page
+    steps: ["герой-клиент чего-то хочет", "проблема (внешняя, внутренняя, философская)", "проводник (эмпатия и авторитет)", "план из 3–4 шагов", "призыв (прямой и переходный)", "что будет при провале", "успех"]
+    use_when: ["→ site C"]
+    avoid_when: ["→ site C; буквальное применение делает сайты одинаковыми"]
+    genres: [landing, site-page]
+    slots: []
+    evidence: "[практика]"
+    source: "Miller D., «Building a StoryBrand», 2017 (конспект grahammann.net); 01-foundations/03 §2.3"
+    site_ref: ../site-research/03-page-structure/01
+    notes: «мозг экономит калории» — поп-нейро без данных
+    date: 2026-09-24
+  - id: big8-four-layers
+    name: Big 8 и «четыре слоя» (стратегия, сюжет, опыт, рост)
+    level: page
+    steps: ["продуманный дизайн", "ясный путь клиента", "визуальный рассказ", "сильный конкретный текст", "свои изображения", "осмысленные взаимодействия", "ясный призыв", "система поиска и контента"]
+    use_when: ["→ site C; как рубрика приёмки страницы, с измерениями, а не «на глаз»"]
+    avoid_when: ["→ site C; не как текст страницы"]
+    genres: [landing]
+    slots: []
+    evidence: "[мнение]"
+    source: "Samin Yasar, YouTube, 07.2026 — ../kimi-research/91-videos/digests/p1J5uWcn3hI.md §2.3"
+    site_ref: ../site-research/03-page-structure/01
+    notes: карточки «question → proof → action» и «problem → transformation → outcome» вынесены в формулы уровня block
+    date: 2026-09-24
+  - id: protagonist-payoff
+    name: Protagonist / Payoff (сайт-история)
+    level: page
+    steps: ["герой-объект", "3–5 битов сюжета", "итоговое состояние", "целевое действие"]
+    use_when: ["→ site C; кампании и запуски уровня L2 с прокруткой-историей"]
+    avoid_when: ["→ site C"]
+    genres: [landing]
+    slots: []
+    evidence: "[мнение]"
+    source: "Jack Roberts, YouTube, 07.2026 — ../kimi-research/91-videos/digests/weoV4dm-X1A.md"
+    site_ref: ../site-research/03-page-structure/01
+    date: 2026-09-24
+  - id: pastor
+    name: PASTOR (Person/Problem, Amplify, Story, Testimony, Offer, Response)
+    level: page
+    steps: ["человек и боль", "последствия бездействия", "история и решение", "свидетельства", "предложение", "призыв"]
+    use_when: ["→ site C; длинная продающая страница, курс, вебинар"]
+    avoid_when: ["→ site C; нет реальных отзывов (выдумка — запрет, B2)"]
+    genres: [landing]
+    slots: []
+    evidence: "[практика]"
+    source: "Ray Edwards — по Copyhackers «Copywriting Formulas», 2015/2023"
+    site_ref: ../site-research/03-page-structure/01
+    date: 2026-09-24
+  - id: quest
+    name: QUEST (Qualify, Understand, Educate, Stimulate, Transition)
+    level: page
+    steps: ["отобрать своего читателя", "показать понимание его ситуации", "объяснить лучший способ", "вызвать желание", "перевести в клиенты"]
+    use_when: ["→ site C"]
+    avoid_when: ["→ site C"]
+    genres: [landing]
+    slots: []
+    evidence: "[практика]"
+    source: "Michel Fortin — по Copyhackers «Copywriting Formulas», 2015/2023"
+    site_ref: ../site-research/03-page-structure/01
+    date: 2026-09-24
+  - id: acca
+    name: ACCA (Awareness, Comprehension, Conviction, Action)
+    level: page
+    steps: ["показать проблему", "объяснить её", "убедить действовать", "призвать"]
+    use_when: ["→ site C; некоммерческие и социальные кампании"]
+    avoid_when: ["→ site C"]
+    genres: [landing]
+    slots: []
+    evidence: "[практика]"
+    source: "по Copyhackers «Copywriting Formulas», 2015/2023"
+    site_ref: ../site-research/03-page-structure/01
+    date: 2026-09-24
+  # ---------------------------------------------------------------- block
+  - id: pas
+    name: PAS (Problem, Agitate, Solve)
+    level: block
+    also_levels: [page]
+    steps: ["узнаваемая проблема словами клиента", "последствия — конкретно и без запугивания", "решение с фактом"]
+    use_when: ["секция «проблема» или «почему это важно»", "посетитель problem-aware", "письмо после заявки на материал"]
+    avoid_when: ["посетитель most-aware (нужна сделка)", "медицина и финансы (страх — правовой риск, H)", "нет проверяемого решения", "проблему можно описать только как массовую («80 % компаний теряют…» нормализует потерю)"]
+    genres: [landing, site-page, email-form]
+    slots: [section-lead, body, card-body, email-body]
+    evidence: "[практика]"
+    source: "Copyhackers «Copywriting Formulas», 2015/2023 (цитата Дэна Кеннеди — вендор курса); нормы — Cialdini 2003; 01-foundations/03 §2.3"
+    example:
+      ru: "Штраф за опоздание с отчётом приходит через месяц, когда бухгалтер в отпуске. Мы сдаём отчёты за три рабочих дня до срока и присылаем квитанции о приёме [PLACEHOLDER: fact:deadline-policy]."
+      en: "Late-filing fines arrive a month later, when your bookkeeper is on vacation. We file three business days early and send you the receipts [PLACEHOLDER]."
+    antiexample: "Вы теряете клиентов каждый день! 80 % компаний разоряются из-за ошибок в учёте. Не рискуйте — действуйте сейчас!"
+    notes: нагнетание — не больше одной фразы; ложная срочность — тёмный паттерн (../ux/06-feedback-states-motion/04-dark-patterns-and-ethics.md)
+    date: 2026-09-24
+  - id: bab
+    name: BAB (Before, After, Bridge)
+    level: block
+    steps: ["как сейчас", "как будет", "что переводит из «сейчас» в «будет»"]
+    use_when: ["результат видим и доказуем фактом", "кейс", "секция «как это работает»", "письмо"]
+    avoid_when: ["результат не гарантирован или не измерен", "«после» звучит как обещание здоровья или дохода (H)"]
+    genres: [landing, site-page, email-form]
+    slots: [section-lead, body, case-summary, email-body]
+    evidence: "[практика]"
+    source: "происхождение не установлено; описания — блоги практиков (GMass и др.); 01-foundations/03 §2.4"
+    example:
+      ru: "Сейчас: первичка в почте, в мессенджере и в бардачке. Через месяц: все документы в одном кабинете, отчёты сданы. Между ними — перенос учёта за 10 рабочих дней [PLACEHOLDER: fact:onboarding-days]."
+    antiexample: "Представьте жизнь без забот! С нами всё изменится навсегда."
+    date: 2026-09-24
+  - id: fab
+    name: FAB (Features, Advantages, Benefits)
+    level: block
+    steps: ["свойство", "что оно даёт", "зачем это этому клиенту"]
+    use_when: ["карточки фич", "когда потребность клиента известна из смысла (B1) или голоса клиента (B2)"]
+    avoid_when: ["сложные B2B-продажи без выявленной потребности", "список фич ради списка"]
+    genres: [landing, site-page]
+    slots: [card-title, card-body, list-item]
+    evidence: "[спорно]"
+    source: "практика продаж; SPIN (Rackham, 35 000 звонков, 1976–1986) — по поисковым сводкам: «преимущества» без запроса вызывают возражения в крупных продажах; 01-foundations/03 §2.3"
+    example:
+      ru: "Письма и звонки клиента видны в его карточке — новый менеджер разберётся в истории за пять минут [PLACEHOLDER: fact:onboarding-manager]."
+    antiexample: "Мощная интеграция с телефонией — преимущество, которое выведет ваш бизнес на новый уровень."
+    date: 2026-09-24
+  - id: four-p
+    name: 4P (Problem/Picture, Promise, Proof, Proposal/Push)
+    level: block
+    also_levels: [page]
+    steps: ["проблема или картина", "обещание", "доказательство", "предложение"]
+    use_when: ["связка hero + одна секция", "письмо", "короткий лендинг"]
+    avoid_when: ["нет доказательства обещания в facts.yaml", "«картина» на главной звучит как навязывание"]
+    genres: [landing, email-form]
+    slots: [headline, subheadline, hero-proof, cta-note, email-body]
+    evidence: "[практика]"
+    source: "Henry Hoke Sr. (Picture, Promise, Prove, Push) и Ray Edwards (Problem, Promise, Proof, Proposal) — по Copyhackers «Copywriting Formulas», 2015/2023"
+    date: 2026-09-24
+  - id: star-story-solution
+    name: Star, Story, Solution
+    level: block
+    steps: ["герой (клиент или продукт)", "его история", "решение", "которое помогло"]
+    use_when: ["кейс клиента с разрешением", "история основателя из фактов", "письмо"]
+    avoid_when: ["нет реальной истории и разрешения (выдумка — запрет, B2)", "герой — сам бренд вместо клиента"]
+    genres: [landing, site-page, article, email-form]
+    slots: [case-title, case-summary, case-result, testimonial-quote, email-body]
+    evidence: "[практика]"
+    source: "по Copyhackers «Copywriting Formulas», 2015/2023"
+    date: 2026-09-24
+  - id: question-proof-action
+    name: Вопрос → доказательство → действие
+    level: block
+    steps: ["вопрос", "который посетитель задаёт в этой секции", "доказательство из facts.yaml", "следующий шаг"]
+    use_when: ["любая секция лендинга или страницы услуги; снятие возражения до CTA"]
+    avoid_when: ["нет доказательства — ставить needs-proof", "а не писать общие слова"]
+    genres: [landing, site-page]
+    slots: [section-title, section-lead, body, objection-answer, faq-a, cta-note]
+    evidence: "[практика]"
+    source: "карточка Big 8 «Clear customer journey» (../kimi-research/91-videos/digests/p1J5uWcn3hI.md §2.3); B1 — 02-strategy-messaging/02 §2.4"
+    example:
+      ru: "Что будет, если налоговая выставит штраф по нашей ошибке? Его оплачиваем мы — это пункт 6.2 договора [PLACEHOLDER: fact:contract-6-2]. Скачайте договор и прочитайте пункт до звонка."
+      en: "What if the tax office fines you for our mistake? We pay it — clause 6.2 of our contract [PLACEHOLDER]. Read the contract before you call."
+    date: 2026-09-24
+  - id: problem-transformation-outcome
+    name: Проблема → трансформация → результат
+    level: block
+    steps: ["проблема", "что меняется и как", "результат в числах или сцене"]
+    use_when: ["секция «решение»", "визуальный рассказ", "кейс"]
+    avoid_when: ["результат не измерен и не подтверждён"]
+    genres: [landing, site-page]
+    slots: [section-lead, body, step-body, case-summary]
+    evidence: "[мнение]"
+    source: "карточка Big 8 «Visual storytelling» (../kimi-research/91-videos/digests/p1J5uWcn3hI.md §2.3)"
+    date: 2026-09-24
+  - id: inverted-pyramid
+    name: Перевёрнутая пирамида
+    level: block
+    also_levels: [page]
+    steps: ["вывод или ответ", "главное", "детали", "фон"]
+    use_when: ["статья", "ответ FAQ", "GEO-ответ", "письмо", "описание услуги"]
+    avoid_when: ["сайт-история с намеренной интригой (L2)"]
+    genres: [article, geo, email-form, site-page]
+    slots: [article-lead, article-paragraph, faq-a, geo-answer, email-body, section-lead]
+    evidence: "[консенсус]"
+    source: "журналистская практика; NN/g, Schade, «Inverted Pyramid», 2018 (без данных исследований); Morkes & Nielsen 1997 (участники ценят резюме и вывод первым)"
+    example:
+      ru: "Онлайн-выписку о своей квартире можно бесплатно получить на госуслугах за несколько минут. Дальше — чем она отличается от обычной и кому её показывать."
+    date: 2026-09-24
+  # ---------------------------------------------------------------- sentence
+  - id: four-u
+    name: 4U (Useful, Urgent, Unique, Ultra-specific)
+    level: sentence
+    steps: ["полезно ли", "есть ли реальная причина не откладывать", "чем отличается", "конкретно ли (факты и числа)"]
+    use_when: ["проверка заголовка", "буллита", "темы письма"]
+    avoid_when: ["срочности нет — не придумывать (ложная срочность — тёмный паттерн)"]
+    genres: [landing, article, meta, email-form]
+    slots: [headline, subheadline, list-item, article-title, meta-title, email-subject]
+    evidence: "[практика]"
+    source: "Masterson M., Bonner B., «A Review of the 4 U's», AWAI, 2001-06-18"
+    notes: проверка — наличие каждого U, без баллов
+    date: 2026-09-24
+  - id: three-questions-dry
+    name: Три вопроса Гарри Драя
+    level: sentence
+    steps: ["можно представить?", "можно опровергнуть?", "может ли это сказать конкурент?"]
+    use_when: ["любая ключевая фраза: заголовок", "подзаголовок", "выгода", "строка доказательства"]
+    avoid_when: ["юридические формулировки и оговорки (правила — H)"]
+    genres: [landing, site-page, meta, email-form, article]
+    slots: [headline, subheadline, hero-proof, card-title, card-body, meta-description, email-subject]
+    evidence: "[практика]"
+    source: "Harry Dry, подкаст David Perell, 2024 — [V:TUMjnmfsPeM 01:00–10:09]; Vikki Ross согласна, формулу в её ролике пересказывает ведущий — [V:cqnZtGXGwsw 26:37, 27:41]"
+    example:
+      ru: "Носят супермодели в Лондоне и папы в Огайо — вместо «Не просто кроссовки, а стиль жизни»."
+      en: "Worn by supermodels in London and dads in Ohio."
+    antiexample: "Don't just get a job, change an entire industry."
+    date: 2026-09-24
+  - id: caples-headline-qualities
+    name: Качества заголовка по Кейплзу
+    level: sentence
+    steps: ["выгода для читателя", "новость", "любопытство — только вместе с выгодой или новостью"]
+    use_when: ["заголовки статей", "объявлений", "hero"]
+    avoid_when: ["заголовок держится на одном любопытстве (расплывчатые заголовки проигрывают — Upworthy, 2025)"]
+    genres: [landing, article, meta]
+    slots: [headline, article-title, meta-title, email-subject]
+    evidence: "[практика]"
+    source: "Caples J., «Tested Advertising Methods», 1932 — по вторичным пересказам; данные: Aubin Le Quéré & Matias 2025"
+    date: 2026-09-24
+  - id: benefit-prism
+    name: Призма полезного действия (Ильяхов)
+    level: sentence
+    steps: ["прагматическая польза (деньги, время, здоровье)", "социальная (принадлежность, статус, темы для разговора)", "эмоциональная (смех, возмущение, драма)"]
+    use_when: ["заголовок статьи", "тема письма", "анонс"]
+    avoid_when: ["лендинг most-aware — нужна сделка", "а не анонс"]
+    genres: [article, meta, email-form]
+    slots: [article-title, meta-title, meta-description, email-subject]
+    evidence: "[практика]"
+    source: "Ильяхов М., «Ваша последняя лекция про текст», Prosmotr 2019 — [V:_jwKQ6ZCeAI 07:06–19:20]; пример заголовка — «Боеспособный заголовок», 2017 [V:y0iIV5meaB4 29:50–30:50]"
+    example:
+      ru: "Три короткие игры, которые защитят зрение ребёнка в начальной школе · советы педиатра"
+    date: 2026-09-24
+  - id: fact-scenario
+    name: Факт → «и что с того?» → сцена
+    level: sentence
+    also_levels: [block]
+    steps: ["факт из facts.yaml", "ответ на «и что с того?»", "ситуация", "в которой читатель видит пользу"]
+    use_when: ["фичи", "преимущества", "гарантии", "условия"]
+    avoid_when: ["технические характеристики для экспертов", "которым нужна таблица"]
+    genres: [landing, site-page, email-form]
+    slots: [card-body, body, guarantee-text, hero-proof]
+    evidence: "[практика]"
+    source: "Ильяхов М., Prosmotr 2019 — [V:_jwKQ6ZCeAI 22:30–27:36]"
+    example:
+      ru: "Нужно отправить платёжку 31 декабря в 23:55 — консультант ответит [PLACEHOLDER: fact:support-hours]."
+    antiexample: "Консультант на связи 24/7."
+    date: 2026-09-24
+  - id: even-if-objection
+    name: Утверждение, даже если возражение
+    level: sentence
+    steps: ["утверждение", "«даже если» + возражение клиента", "факт", "который его снимает"]
+    use_when: ["подзаголовок", "строка у CTA", "заголовок секции возражений"]
+    avoid_when: ["возражение не снимается фактом"]
+    genres: [landing, site-page]
+    slots: [subheadline, cta-note, section-title, objection-answer]
+    evidence: "[практика]"
+    source: "Wiebe (Copyhackers) — по B1 02-strategy-messaging/02 §4.3"
+    date: 2026-09-24
+  - id: category-statement
+    name: Продукт — категория, которая делает главное отличие
+    level: sentence
+    steps: ["{продукт} — {рыночная категория}", "которая {главное отличие с фактом}"]
+    use_when: ["hero", "meta-description", "«о компании»", "сниппет"]
+    avoid_when: ["новая категория без объяснения (B1 02/01 §2.5–2.6)"]
+    genres: [landing, site-page, meta, geo]
+    slots: [headline, subheadline, meta-description, section-lead, geo-answer]
+    evidence: "[практика]"
+    source: "шаблон TechCrunch по Copyhackers «Copywriting Formulas»; согласуется с позиционированием Dunford (B1 02/01 §2.5)"
+    example:
+      ru: "Сервис бухгалтерии для ООО на УСН, который сам сдаёт отчёты за три дня до срока [PLACEHOLDER: fact:deadline-policy]"
+    date: 2026-09-24

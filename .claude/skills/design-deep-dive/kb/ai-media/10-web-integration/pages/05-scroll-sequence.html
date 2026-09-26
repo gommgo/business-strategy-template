@@ -1,0 +1,49 @@
+<!doctype html>
+<!-- 05 · Товар поворачивается по прокрутке (VID-SCROLL): AVIF-секвенция 48 кадров → canvas (по умолчанию) или видео GOP 8 с
+     перемоткой (?mode=video). Липкая сцена, текст — обычный HTML; reduce — один кадр, прокрутка ничего не вращает.
+     Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/09-scroll (Chromium 153). -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VELMORA — со всех сторон</title>
+<link rel="icon" href="assets/svg/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/base.css">
+<style>
+  body { background: #ece8e1; color: #15171b; }
+  .intro { padding: 120px var(--gutter) 40px; max-width: 900px; }
+  .intro h1 { font-size: clamp(34px, 4.6vw, 60px); line-height: 1.04; letter-spacing: -.02em; margin: 0; }
+  .intro p { color: #50545c; max-width: 52ch; }
+  .scene { position: relative; height: 320vh; }
+  .stage { position: sticky; top: 0; height: 100svh; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 4vw; padding: 0 var(--gutter); }
+  .viewer { position: relative; aspect-ratio: 768 / 432; border-radius: 18px; overflow: hidden; background: #d9d4cc; box-shadow: 0 30px 60px -30px rgb(40 30 20 / .35); }
+  .viewer canvas, .viewer img, .viewer video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .notes { display: grid; gap: 30vh; }
+  .notes h2 { font-size: clamp(22px, 2.2vw, 30px); margin: 0 0 8px; letter-spacing: -.01em; }
+  .notes p { margin: 0; color: #50545c; max-width: 40ch; }
+  @media (max-width: 799px) { .stage { grid-template-columns: 1fr; align-content: center; } .notes { gap: 8vh; } }
+</style>
+</head>
+<body>
+<header class="intro">
+  <h1>Флакон, который приятно повертеть в руках</h1>
+  <p>Прокрутите вниз — флакон повернётся на полный оборот. Кадры — 48 AVIF по 2,3 КБ; при «уменьшить движение» показан один кадр.</p>
+</header>
+<section class="scene" data-scroll-seq data-frames="48" data-pattern="assets/scroll/seq/f{i}.avif" data-rest="6" aria-label="Флакон со всех сторон">
+  <div class="stage">
+    <div class="viewer">
+      <img src="assets/scroll/seq/f06.avif" width="768" height="432" fetchpriority="high" alt="Флакон крема VELMORA: белый корпус, золотая крышка, вид в три четверти">
+      <canvas width="768" height="432" hidden aria-hidden="true"></canvas>
+      <video muted playsinline preload="none" hidden aria-hidden="true" tabindex="-1" data-src="assets/scroll/turn.h264.g8.mp4"></video>
+    </div>
+    <div class="notes">
+      <div><h2>Корпус из керамики</h2><p>Матовая глазурь не скользит в руке и не собирает отпечатки.</p></div>
+      <div><h2>Крышка из латуни</h2><p>Со временем темнеет и становится только красивее.</p></div>
+      <div><h2>75 мл на сезон</h2><p>Плотная текстура: одной порции хватает на обе руки.</p></div>
+    </div>
+  </div>
+</section>
+<section class="section"><p>Дальше — обычная страница.</p></section>
+<script type="module" src="js/scroll-seq.js"></script>
+</body>
+</html>

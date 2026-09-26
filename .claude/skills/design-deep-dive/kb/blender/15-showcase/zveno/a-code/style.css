@@ -1,0 +1,222 @@
+/* style.css · L2 «Звено» · агент J · 2026-09-25 · Chromium 153 / WebKit 26.6
+   Мир: тёмная студия, белые корпуса, алюминий, сигнальный оранжевый кольца-замка. Display — Science Gothic узкий (wdth 72),
+   текст — Onest. Ритм «спокойно ↔ вау»: hero (акцент) → модули (пик) → цифры (спокойно) → внутри (пик) → программа (акцент DOM)
+   → задачи, цена, форма (спокойно, L0). Холст сцены — один, fixed, рисует только при изменении (0 кадров в покое). */
+:root {
+  --font-display: "Science Gothic", "Science Gothic fallback", "Arial Narrow", sans-serif;
+  --font-text: "Onest", "Onest text fallback", Arial, sans-serif;
+  --c-bg: #101215;
+  --c-bg-2: #15181c;
+  --c-panel: rgb(18 20 24 / .9);
+  --c-ink: #ecebe6;
+  --c-ink-2: #c3c6cb;
+  --c-muted: #9aa0a7;
+  --c-line: #2a2e34;
+  --c-accent: #ff5a1f;            /* 6,1:1 на #101215 — подписи и фокус; кнопка — тёмный текст на оранжевом 7,1:1 */
+  --c-on-accent: #111214;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; background: var(--c-bg); }
+body { margin: 0; color: var(--c-ink); font: 400 1.0625rem/1.55 var(--font-text);
+  background: radial-gradient(120% 90% at 70% 40%, #1d2026 0%, #111316 60%, #0d0f12 100%) fixed, var(--c-bg); }
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--c-accent); outline-offset: 3px; }
+.skip { position: absolute; left: 12px; top: -60px; background: var(--c-accent); color: var(--c-on-accent); padding: 10px 14px; z-index: 20; }
+.skip:focus { top: 12px; }
+.eyebrow { font: 600 var(--type-eyebrow)/1.3 var(--font-text); letter-spacing: .02em; color: var(--c-accent); margin: 0 0 14px; }
+.h2 { font: 750 var(--type-display-s)/1.0 var(--font-display); font-stretch: 72%; letter-spacing: -0.005em; margin: 0 0 clamp(18px, 2.6vw, 34px); text-wrap: balance; }
+.container { max-width: var(--size-container); margin: 0 auto; }
+.section { position: relative; z-index: 1; padding: var(--space-section-m) var(--space-page-x); background: var(--c-bg); }
+.section p { max-width: 60ch; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: var(--size-cta-hero-h); padding: 0 1.5em;
+  background: var(--c-accent); color: var(--c-on-accent); font: 650 var(--type-cta-hero)/1.2 var(--font-text); text-decoration: none;
+  border: 0; border-radius: 4px; cursor: pointer;
+  transition: background-color var(--mm-dur-hover) var(--mm-ease-out-strong), transform var(--mm-dur-feedback) var(--mm-ease-out-strong); }
+.btn:hover { background: #ff7440; }
+.btn:active { transform: scale(var(--mm-scale-press)); }
+.btn--small { min-height: 44px; font-size: .98rem; padding: 0 1.1em; }
+.btn--wide { width: 100%; }
+
+/* шапка: сплошная, не стекло; логотип слева; переключатель движения виден всегда (CRV-AL-12, EG-A11Y-12) */
+.top { position: fixed; top: 0; left: 0; right: 0; z-index: 10; background: rgb(14 16 19 / .96); border-bottom: 1px solid var(--c-line); }
+:target, section[id] { scroll-margin-top: 72px; }
+.top__in { max-width: var(--size-container); margin: 0 auto; padding: 10px var(--space-page-x); display: flex; align-items: center; gap: 22px; }
+.logo { display: inline-flex; align-items: center; gap: 10px; font: 800 1.5rem/1 var(--font-display); font-stretch: 72%; text-decoration: none; margin-right: auto; }
+.logo__mark { width: 30px; height: 24px; fill: none; stroke: var(--c-accent); stroke-width: 2.4; }
+.top__nav { display: flex; gap: 20px; font-size: .98rem; }
+.top__nav a { text-decoration: none; color: var(--c-ink-2); }
+.top__nav a:hover { color: var(--c-ink); }
+.motion-btn { min-height: 44px; padding: 0 14px 0 34px; border: 1px solid #3a3f46; border-radius: 4px; background: transparent; color: var(--c-ink-2);
+  font: 500 .92rem/1 var(--font-text); cursor: pointer; position: relative; }
+.motion-btn::before { content: ""; position: absolute; left: 12px; top: 50%; width: 12px; height: 12px; translate: 0 -50%; border-radius: 50%;
+  border: 2px solid var(--c-ink-2); background: transparent; }
+.motion-btn[aria-pressed="true"] { color: var(--c-ink); border-color: var(--c-accent); }
+.motion-btn[aria-pressed="true"]::before { background: var(--c-accent); border-color: var(--c-accent); }
+
+/* холст сцены: один на страницу, под контентом; до готовности и без WebGL — не виден */
+.stage { position: fixed; inset: 0; width: 100vw; height: 100svh; z-index: 0; opacity: 0; pointer-events: none;
+  transition: opacity 600ms var(--mm-ease-out-expo); }
+html.gl-on .stage { opacity: 1; }
+html.gl-on .stage.is-hidden { visibility: hidden; }
+
+/* первый экран: постер своего рендера = LCP и фолбэк; при готовности сцены постер гаснет, под ним тот же кадр холста */
+/* hero = ровно окно (шапка fixed поверх): постер 16:10 / ≈ 1:2,2 совпадает с первым кадром холста того же размера */
+.hero { position: relative; z-index: 1; min-height: 100svh; padding-top: 64px; display: grid; align-items: center; overflow: clip; }
+.hero__poster { position: absolute; inset: 0; z-index: -1; }
+.hero__poster img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
+html.gl-on .hero__poster { opacity: 0; transition: opacity 600ms var(--mm-ease-out-expo) 150ms; }
+.hero__in { max-width: var(--size-container); width: 100%; margin: 0 auto; padding: clamp(24px, 5vw, 64px) var(--space-page-x) clamp(64px, 8vw, 120px); }
+.hero__title { font: 800 clamp(2.75rem, 1.4rem + 4.9vw, 5.75rem)/0.95 var(--font-display); font-stretch: 72%; letter-spacing: -0.01em;
+  margin: 0 0 var(--space-stack-display); max-width: 11ch; text-wrap: balance; }
+.hero__lead { font-size: var(--type-lead-hero); line-height: var(--lh-lead); max-width: 30em; color: var(--c-ink-2); margin: 0 0 28px; }
+.hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; margin-bottom: 36px; }
+.link-more { color: var(--c-ink-2); text-underline-offset: 4px; }
+.hero__facts { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 28px; color: var(--c-muted); font-size: .95rem; }
+.hero__facts b { color: var(--c-ink); font: 700 1.2rem/1 var(--font-display); font-stretch: 80%; margin-right: 4px; }
+
+/* первый экран: одно появление лида, кнопок и фактов (H1 и постер — без анимации: LCP) */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="reduced"]) .hero__lead, :root:not([data-motion="reduced"]) .hero__actions, :root:not([data-motion="reduced"]) .hero__facts {
+    animation: rise var(--mm-dur-reveal) var(--mm-ease-out-expo) both; }
+  :root:not([data-motion="reduced"]) .hero__actions { animation-delay: 60ms; }
+  :root:not([data-motion="reduced"]) .hero__facts { animation-delay: 120ms; }
+}
+@keyframes rise { from { opacity: .01; transform: translateY(var(--mm-shift-reveal)); } }
+
+/* сцены прокрутки: высота = длина сцены; шаги едут поверх холста в своих панелях (текст в сцене не меняется при чтении) */
+.scene { position: relative; z-index: 1; padding: var(--space-section-l) var(--space-page-x); }
+.scene__head { max-width: var(--size-container); margin: 0 auto 40px; }
+.scene__head .h2 { max-width: 12ch; }
+.steps { list-style: none; margin: 0 auto; padding: 0; max-width: var(--size-container); display: grid; gap: 28px; }
+.step { background: var(--c-panel); border: 1px solid var(--c-line); border-left: 3px solid var(--c-accent); padding: 26px 28px; max-width: 34rem; }
+.step__t { font: 750 clamp(1.5rem, 1.2rem + 1vw, 2.1rem)/1.05 var(--font-display); font-stretch: 76%; margin: 0 0 10px; }
+.step p { margin: 0; color: var(--c-ink-2); }
+.station { margin: 18px 0 0; }
+.station img { width: 100%; height: auto; border: 1px solid var(--c-line); }
+.station figcaption { color: var(--c-muted); font-size: .85rem; margin-top: 6px; }
+html.gl-pending .station, html.gl-on .station { display: none; }
+/* 3D: длина сцены задана высотой секции (модули 320svh, внутри 260svh); шаг стоит там, где его станция: центр шага на середине
+   окна при прогрессе --at (0–1) — те же доли, что в motion-spec (stations) и в scene.js. Без 3D шаги идут обычным списком. */
+html.gl-pending .scene, html.gl-on .scene { padding: 0; }
+html.gl-pending .scene--modules, html.gl-on .scene--modules { height: 320svh; }
+html.gl-pending .scene--inside, html.gl-on .scene--inside { height: 260svh; }
+html.gl-pending .scene__head, html.gl-on .scene__head { position: absolute; top: 14svh; left: 0; right: 0; margin: 0; padding: 0 var(--space-page-x);
+  max-width: none; }
+html.gl-pending .scene__head > *, html.gl-on .scene__head > * { max-width: var(--size-container); margin-inline: auto; }
+html.gl-pending .steps, html.gl-on .steps { position: absolute; inset: 0; margin: 0; padding: 0; max-width: none; display: block; }
+html.gl-pending .step, html.gl-on .step { position: absolute; width: min(34rem, calc(100vw - 2 * var(--space-page-x)));
+  top: calc(var(--at) * (100% - 100svh) + 50svh); translate: 0 -50%;
+  left: max(var(--space-page-x), calc((100vw - var(--size-container)) / 2 + var(--space-page-x))); }
+html.gl-pending .steps--right .step, html.gl-on .steps--right .step { left: auto;
+  right: max(var(--space-page-x), calc((100vw - var(--size-container)) / 2 + var(--space-page-x))); }
+.scene__head--right, .steps--right { justify-items: end; }
+.scene__head--right { text-align: left; display: grid; justify-items: end; }
+.scene__head--right > * { width: min(34rem, 100%); }
+.scene--modules .scene__head .h2, .scene--inside .scene__head .h2 { text-shadow: 0 2px 24px rgb(0 0 0 / .6); }
+
+/* цифры */
+.specs { background: var(--c-bg-2); border-top: 1px solid var(--c-line); border-bottom: 1px solid var(--c-line); }
+.specs__grid { display: grid; grid-template-columns: repeat(4, 1fr); margin: 0; border-top: 2px solid var(--c-ink); }
+.specs__grid div { padding: 22px 20px 0 0; }
+.specs__grid div + div { border-left: 1px solid var(--c-line); padding-left: 20px; }
+.specs__grid dt { color: var(--c-muted); font-size: .95rem; }
+.specs__grid dd { margin: 6px 0 0; font: 800 clamp(2.2rem, 1.6rem + 2.4vw, 3.6rem)/1 var(--font-display); font-stretch: 72%; font-variant-numeric: tabular-nums; }
+.specs__note { color: var(--c-muted); margin-top: 26px; }
+
+/* программа: интерфейс продукта DOM-анимацией (не рамка браузера — cliche:dashboard-in-browser-frame) */
+.program__in { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 5vw, 80px); align-items: center; }
+.app { background: #f1efe9; color: #17191c; border-radius: 14px; overflow: hidden; box-shadow: 0 30px 80px -40px rgb(0 0 0 / .8); font-size: .95rem; }
+.app__bar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #d9d6ce; font-weight: 600; }
+.app__dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c-accent); }
+.app__mode { margin-left: auto; font-size: .8rem; padding: 4px 10px; border-radius: 99px; background: #17191c; color: #f1efe9; }
+.app__body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); }
+.app__pts { list-style: none; margin: 0; padding: 12px 0; border-right: 1px solid #d9d6ce; font-variant-numeric: tabular-nums; }
+.app__pts li { padding: 9px 16px; border-bottom: 1px solid #e5e2da; color: #3a3d42; }
+.app__pts b { display: inline-block; width: 2.4em; color: #17191c; }
+.app__map { width: 100%; height: auto; padding: 10px; }
+.app__reach { fill: none; stroke: #c9c5bb; stroke-dasharray: 3 5; }
+.app__base { fill: #17191c; }
+.app__path { fill: none; stroke: var(--c-accent); stroke-width: 3; stroke-linecap: round; }
+.app__marks circle { fill: #17191c; }
+.app__foot { display: flex; gap: 10px; padding: 12px 16px; border-top: 1px solid #d9d6ce; }
+.app__btn { padding: 9px 14px; border-radius: 8px; border: 1px solid #b9b5ab; font-weight: 600; }
+.app__btn--go { background: #17191c; color: #f1efe9; border-color: #17191c; }
+/* одноразовая сборка интерфейса при входе в вид (класс ставит main.js; без JS и в reduce — конечное состояние) */
+@media (prefers-reduced-motion: no-preference) {
+  :root.js:not([data-motion="reduced"]) .app:not(.is-in) .app__pts li { opacity: .01; transform: translateX(-10px); }
+  :root.js:not([data-motion="reduced"]) .app:not(.is-in) .app__path { stroke-dashoffset: 1; }
+  :root.js:not([data-motion="reduced"]) .app__pts li { transition: opacity var(--mm-dur-reveal) var(--mm-ease-out-expo), transform var(--mm-dur-reveal) var(--mm-ease-out-expo);
+    transition-delay: calc(var(--i) * 60ms); }
+  :root.js:not([data-motion="reduced"]) .app__path { stroke-dasharray: 1; transition: stroke-dashoffset 900ms var(--mm-ease-in-out) 200ms; }
+}
+
+.tasks__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 2px solid var(--c-ink); }
+.tasks__list li { padding: 22px 22px 0 0; }
+.tasks__list li + li { border-left: 1px solid var(--c-line); padding-left: 22px; }
+.tasks__list h3 { font: 750 1.5rem/1.1 var(--font-display); font-stretch: 76%; margin: 0 0 8px; }
+.tasks__list p { color: var(--c-ink-2); margin: 0; }
+
+.pricing { background: var(--c-bg-2); }
+.pricing__in { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(24px, 4vw, 64px); align-items: start; }
+.price-card { border-top: 2px solid var(--c-accent); padding-top: 18px; }
+.price-card__v { font: 800 clamp(2.4rem, 1.6rem + 3vw, 4.2rem)/1 var(--font-display); font-stretch: 72%; margin: 0 0 14px; font-variant-numeric: tabular-nums; }
+.price-card__what { color: var(--c-ink-2); margin: 0 0 8px; }
+.price-card__when { color: var(--c-muted); margin: 0; }
+
+/* форма — конверсия L0: без эффектов */
+.final__in { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(24px, 4vw, 64px); }
+.form { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 20px; max-width: 640px; }
+.field { display: grid; gap: 6px; font-weight: 600; font-size: .95rem; }
+.field input { font: 400 1.0625rem/1.3 var(--font-text); padding: 0 14px; height: 54px; border: 1px solid #4a5058; border-radius: 4px; background: #0c0e10; color: var(--c-ink); }
+.field input::placeholder { color: #8b9097; }
+.consent { grid-column: 1 / -1; display: flex; gap: 10px; align-items: flex-start; font-size: .95rem; color: var(--c-ink-2); }
+.consent input { width: 20px; height: 20px; margin-top: 3px; accent-color: var(--c-accent); }
+.form .btn, .form__done { grid-column: 1 / -1; }
+.form__done { margin: 0; font-weight: 600; }
+
+.foot { position: relative; z-index: 1; background: var(--c-bg); border-top: 1px solid var(--c-line); padding: 32px var(--space-page-x) 40px; color: var(--c-muted); font-size: .95rem; }
+.foot p { margin: 0 0 8px; }
+.foot__demo { font-size: .85rem; }
+
+@media (max-width: 60rem) {
+  .top__nav { display: none; }
+  .program__in, .pricing__in, .final__in { grid-template-columns: 1fr; }
+  .specs__grid { grid-template-columns: 1fr 1fr; }
+  .specs__grid div:nth-child(3) { border-left: 0; padding-left: 0; }
+  .tasks__list { grid-template-columns: 1fr; }
+  .tasks__list li + li { border-left: 0; padding-left: 0; }
+}
+@media (max-width: 40rem) {
+  .top__in { gap: 10px; }
+  .logo { font-size: 1.3rem; }
+  .motion-btn { padding: 0 10px 0 28px; font-size: .82rem; }
+  .motion-btn::before { left: 9px; width: 10px; height: 10px; }
+  .top .btn--small { display: none; }
+  .hero { align-items: end; }
+  .hero__in { padding-bottom: 28px; position: relative; z-index: 1; }
+  /* J2: на телефоне H1 и лид лежат на нижней половине руки (белые корпуса под белым H1 — кадры J/04 `out/mob-first-ab.jpg`,
+     и у v1 тоже): затемнение снизу вверх в слое hero — над постером и холстом (холст под hero), под текстом; рука над текстом светлая */
+  .hero::after { content: ""; position: absolute; inset: 22% 0 0; z-index: 0; pointer-events: none;
+    background: linear-gradient(180deg, rgb(13 15 18 / 0) 0, rgb(13 15 18 / .82) 24%, rgb(13 15 18 / .9) 100%); }
+  .hero__poster img { object-position: 50% 30%; }
+  .hero__title { max-width: none; }
+  .hero__actions .btn { width: 100%; }
+  /* телефон: рука — в верхней части кадра, шаг — в нижней трети; сцены короче */
+  html.gl-pending .scene--modules, html.gl-on .scene--modules { height: 280svh; }
+  html.gl-pending .scene--inside, html.gl-on .scene--inside { height: 230svh; }
+  html.gl-pending .step, html.gl-on .step { top: calc(var(--at) * (100% - 100svh) + 76svh); }
+  .step { padding: 20px; }
+  .app__body { grid-template-columns: 1fr; }
+  .app__pts { border-right: 0; border-bottom: 1px solid #d9d6ce; }
+  .form { grid-template-columns: 1fr; }
+  .specs__grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ширина display: Science Gothic при wdth 100 широкий (k 0,69, D) — узкий экземпляр 60 % читается как инженерная шкала,
+   а не «игровой» шрифт (кадры J/02, прогон 1: 72 % — тяжело и широко); фолбэк пересчитан под wdth 60 (J/00) */
+.h2, .logo, .hero__title, .step__t, .specs__grid dd, .tasks__list h3, .price-card__v { font-stretch: 60%; }
+.hero__title { font-weight: 760; letter-spacing: 0; }
+.hero__facts b { font-stretch: 66%; }

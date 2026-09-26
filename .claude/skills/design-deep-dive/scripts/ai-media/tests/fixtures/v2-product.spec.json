@@ -1,0 +1,96 @@
+{
+ "spec_version": "0.2",
+ "checked_at": "2026-09-23",
+ "brief_language": "ru",
+ "id": "t-product",
+ "task": "IMG-PRODUCT",
+ "role": {
+  "section": "hero",
+  "slot": "pdp-hero",
+  "purpose": "товар"
+ },
+ "subject": {
+  "summary": "a skincare bottle on a travertine block in soft morning light"
+ },
+ "composition": {
+  "shot": "close-up",
+  "angle": "eye-level",
+  "subject_region": "center"
+ },
+ "product": {
+  "identity": "a matte white 250 ml bottle with rounded shoulders and a black flip cap",
+  "parts": [
+   {
+    "part": "cap",
+    "color": "black",
+    "hex": "#111111"
+   },
+   {
+    "part": "label text",
+    "color": "charcoal"
+   }
+  ],
+  "locks": [
+   "label layout",
+   "cap shape",
+   "proportions"
+  ],
+  "dimensions": "the bottle is 18 cm tall"
+ },
+ "light": {
+  "source": "window daylight",
+  "direction": "left",
+  "quality": "soft"
+ },
+ "camera": {
+  "capture": "studio product photo",
+  "lens_mm": 85,
+  "aperture": "f/5.6"
+ },
+ "palette": [
+  {
+   "role": "background",
+   "hex": "#E9E1D6",
+   "name": "travertine beige",
+   "share": 0.6
+  },
+  {
+   "role": "accent",
+   "hex": "#111111",
+   "name": "black",
+   "share": 0.05,
+   "applies_to": "cap"
+  }
+ ],
+ "text": {
+  "mode": "in_image",
+  "strict_spelling": true,
+  "strings": [
+   {
+    "text": "CALM SERUM",
+    "language": "en",
+    "script": "Latin",
+    "role": "label",
+    "position": "on the bottle label"
+   }
+  ]
+ },
+ "references": [
+  {
+   "id": "p",
+   "src": "product.png",
+   "role": "product",
+   "note": "label and cap exactly"
+  }
+ ],
+ "output": {
+  "primary_ratio": "4:5",
+  "resolution": "1K"
+ },
+ "exclusions": [
+  {
+   "what": "watermark",
+   "kind": "service"
+  }
+ ]
+}

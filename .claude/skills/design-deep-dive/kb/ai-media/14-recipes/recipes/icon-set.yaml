@@ -1,0 +1,60 @@
+# icon-set.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/03-vector-text-og-recipes.md#1; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+recipe_version: 1
+checked_at: '2026-09-25'
+author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
+id: icon-set
+title: 'Набор линейных иконок: набор → LLM по шаблону → проверка → лист → узнаваемость'
+doc: 14-recipes/03-vector-text-og-recipes.md#1
+task_codes:
+- VEC-ICON-LINE
+slot: icon
+ladder: svg
+ai_fit: allowed
+legal_row: 2
+route:
+  source: VEC-ICON-LINE
+  steps:
+  - role: набор продукта
+    model: lucide-static 1.47.0 (ISC)
+    price_rub: 0.0
+  - role: новая метафора
+    model: Claude в сессии / polza-chat G-01…G-04
+    price_rub: 0.0
+    test: G-01
+phase5:
+  jobs:
+  - 99-raw/phase5/jobs/G-01-llm-svg-gpt56sol.polza-chat.json
+  - 99-raw/phase5/jobs/G-06-vlm-recognition.polza-chat.json
+  reuse:
+  - G-01
+  - G-02
+  - G-03
+  - G-06
+  estimate: python3 ../../scripts/ai-media/mp_client.py estimate 99-raw/phase5/jobs/G-0*.polza-chat.json --summary
+steps:
+- id: check
+  cmd: 99-raw/tools/venv-G/bin/python ../../scripts/ai-media/check_icons.py new-icons/ --json check.json
+  status: checked
+  evidence: 99-raw/experiments/M/08-svg-favicons/check_icons.json
+- id: sheet
+  cmd: python3 99-raw/experiments/M/08-svg-favicons/build.py (лист 16/24/48, светлый/тёмный; спрайт)
+  status: checked
+  evidence: 99-raw/experiments/M/08-svg-favicons/icons_sheet.png
+accept:
+  thresholds:
+  - svg.check_icons_flags
+  - svg.icon_kb_max
+  extra: узнаваемость ≥ 4 из 6 (VLM без подсказки или человек 5 с)
+delivery:
+  template: 10-web-integration/pages/08-svg-icons-favicons.html
+  formats:
+  - svg-спрайт <symbol>
+provenance:
+  dst: null
+  visible_label: false
+  note: вне 50(2)
+numbers:
+  phase5_llm_svg: 'G-01 GPT-5.6 Sol 3,43 ₽ и G-02 Gemini 3.8 Flash 0,84 ₽ — по 6 из 6 валидных SVG 24/2; G-03 Sonnet 5 — 9,77 ₽ за пустой ответ; G-04 DeepSeek V4.1 Flash — 1,17 ₽ и 0 SVG; по полю и зазору check_icons — 4 из 6 у обеих (Claude в сессии — 6 из 6), новые метафоры съезжают к знакомым глифам (гиря ≈ lock 0,547) — 99-raw/phase5/runs/S5-analysis/G-llm-svg/G-01-gpt56sol.check.md'
+status:
+  local: checked
+  generation: unchecked

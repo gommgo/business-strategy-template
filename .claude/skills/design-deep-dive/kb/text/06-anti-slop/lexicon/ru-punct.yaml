@@ -1,0 +1,201 @@
+# Пунктуация и набор (группа PUN) — только приметы генерации и жанровые ошибки. Канон русского набора — ux 07/03 §6 и
+# ui 02/06 §3; маркетинговая типографика, решение по тире и автоматический типограф — агент H (волна 2,
+# 08-russian-legal-typography/typography-rules.yaml подключается через profiles.yaml → external_rules).
+# Тире НЕ запрещается и НЕ подменяется дефисом: плотность пунктуационных тире в прозе — анализатор an-dash-density.
+date: 2026-09-24
+version: 1
+owner: C (волна 1)
+defaults:
+  group: PUN
+  lang: ru
+  flags: ''
+  count_as_marker: true
+  date: 2026-09-24
+  genres: [landing, site-page, article, meta, geo, email-form]
+rules:
+  - id: ru-pun-hyphen-as-dash
+    marker_id: COPY-M-PUN-02
+    level: warning
+    count_as_marker: false
+    pattern: '(?<=[А-Яа-яЁё»")\d])\s-\s(?=[А-Яа-яЁё«"(\d])'
+    message: "Дефис вместо тире. Для русского это ошибка набора; так пишут и «очеловеченные» тексты (humanizer-ru требует «-» вместо «—»)."
+    replacement: "поставить тире «—» с пробелами (или перестроить фразу, если тире лишнее); решение по набору — H"
+    examples: {bad: "Анамнез - это разговор с пациентом.", good: "Анамнез — это разговор с пациентом."}
+    source: "гайд заказчика §C («подмена дефисом выглядит как типографская ошибка»); PLAN.md, поправка к kimi 05/03 §5.3 и taste §9.G; ux 07/03 §6"
+    evidence: "[стандарт] русской типографики; humanizer-ru SKILL.md и taste §9.G — против, для русского неверно"
+  - id: ru-pun-colon-reveal
+    marker_id: COPY-M-PUN-03
+    level: warning
+    flags: i
+    pattern: '%B%(?:самое\s+(?:главное|интересное|важное|приятное|ценное)|лучшая\s+часть|главная\s+деталь|фишка\s+в\s+том|секрет\s+(?:прост|в\s+том|успеха)|суть\s+(?:проста|в\s+том)|вс[её]\s+просто|ответ\s+прост|итог\s+(?:прост|очевиден)|результат\s+(?:не\s+заставил\s+себя\s+ждать|очевиден)|деталь,\s+которая\s+[^:\n]{0,35}|вот\s+в\s+ч[её]м\s+дело|спойлер|лайфхак)\s*:'
+    message: "Двоеточие-подводка к «раскрытию» («Самое главное: …», «Секрет прост: …»)."
+    replacement: "раскрытие написать обычным предложением без подводки"
+    examples: {bad: "Самое главное: вы платите только за результат.", good: "Список документов: паспорт, СНИЛС."}
+    source: "гайд Б3 («двоеточие-подводка»); humanizer-ru SKILL.md (жёсткий запрет) и lint.py COLON_REVEAL"
+    evidence: "[практика]"
+  - id: ru-pun-capital-after-colon
+    marker_id: COPY-M-PUN-04
+    level: info
+    slot_types: [body, section-lead, article-paragraph, article-lead, article-summary, geo-answer, definition, faq-a, email-body, case-summary, guarantee-text, objection-answer, card-body, step-body, pricing-plan-summary, subheadline, cta-note, form-lead, form-next-steps]
+    pattern: ':\s+(?![А-ЯЁ]{2,}|[А-ЯЁ]\.)[А-ЯЁ][а-яё]{2,}'
+    message: "Заглавная буква после двоеточия в прозе (калька английского набора). Имена собственные — законное исключение."
+    replacement: "строчная после двоеточия, если дальше не имя собственное и не прямая речь"
+    examples: {bad: "Результат превзошёл ожидания: Клиент получил скидку.", good: "Результат превзошёл ожидания: клиент получил скидку."}
+    source: "гайд Б3, §E п.25; ux 07/06 §6.4; domate.ru через гайд [мнение]"
+    evidence: "[стандарт] русской пунктуации; как примета ИИ — [практика]"
+  - id: ru-pun-emoji-heading
+    marker_id: COPY-M-PUN-05
+    level: warning
+    lang: any
+    slot_types: [headline, subheadline, section-title, card-title, step-title, eyebrow, cta-label, cta-secondary-label, email-cta-label, meta-title, meta-description, og-title, og-description, email-subject, pricing-plan-name, form-title, article-title, article-heading, badge, faq-q]
+    pattern: '[\U0001F300-\U0001FAFF☀-➿⭐⭕‼⁉]'
+    message: "Эмодзи в заголовке, кнопке или мета: декор вместо смысла."
+    replacement: "убрать; эмодзи в тексте — только если голос бренда их допускает (профиль голоса, F)"
+    examples: {bad: "🚀 Запуск за 10 минут", good: "Запуск за 10 минут"}
+    source: "гайд Б3; ux 07/06 §5.3 (эмодзи в подписях — запрет); humanizer-ru п.21; WP:AISIGNS «Emoji as formatting»"
+    evidence: "[консенсус] для заголовков; в прозе — [спорно], по голосу"
+  - id: ru-pun-emoji-body
+    marker_id: COPY-M-PUN-05
+    level: info
+    lang: any
+    min_count: 2
+    exclude_slot_types: [headline, subheadline, section-title, card-title, step-title, eyebrow, cta-label, cta-secondary-label, email-cta-label, meta-title, meta-description, og-title, og-description, email-subject, pricing-plan-name, form-title, article-title, article-heading, badge, faq-q, testimonial-quote]
+    pattern: '[\U0001F300-\U0001FAFF☀-➿⭐⭕]'
+    message: "Эмодзи в прозе (два и больше в блоке): уместны, только если их допускает голос бренда."
+    replacement: "свериться с профилем голоса (F); по умолчанию — убрать"
+    examples: {bad: "Доставим завтра 🚚 и соберём мебель 🔧", good: "Доставим завтра и соберём мебель."}
+    source: "PLAN.md «Жанры» (эмодзи — по голосу, не в заголовках и CTA); humanizer-ru п.21"
+    evidence: "[спорно]"
+  - id: ru-pun-straight-quotes
+    marker_id: COPY-M-PUN-06
+    level: warning
+    count_as_marker: false
+    mask_quotes: false
+    pattern: '"[^"\n]{1,200}"'
+    message: "Прямые кавычки «лапки» в русском тексте."
+    replacement: "«ёлочки», внутри — „лапки“; автотипограф — H"
+    examples: {bad: "Проект \"Альфа\" запущен.", good: "Проект «Альфа» запущен."}
+    source: "гайд Б3, §E п.25; ux 07/03 §6.2; humanizer-ru SKILL.md «Стиль»"
+    evidence: "[стандарт]"
+  - id: ru-pun-english-quotes
+    marker_id: COPY-M-PUN-06
+    level: info
+    count_as_marker: false
+    mask_quotes: false
+    pattern: '“[^”\n]{1,200}”'
+    message: "Английские кавычки “…” в русском тексте (ChatGPT и DeepSeek ставят их по умолчанию)."
+    replacement: "«ёлочки»"
+    examples: {bad: "Проект “Альфа” запущен.", good: "Проект «Альфа» запущен."}
+    source: "WP:AISIGNS «Curly quotation marks»; ux 07/03 §6.2"
+    evidence: "[практика]"
+  - id: ru-pun-arrows-math
+    marker_id: COPY-M-PUN-07
+    level: warning
+    flags: i
+    exclude_slot_types: [cta-label, cta-secondary-label, email-cta-label, stat-value, pricing-price, comparison-row, nav-label]
+    pattern: '[→←⇒➔➜↗]|(?<=\s)(?:=|>|<|≈|≠|≥|≤)(?=\s)|%B%vs\.?%E%|(?<=[а-яё])\s\+\s(?=[а-яё])'
+    message: "Математические и кодовые знаки в прозе (→, =, >, ≈, vs, +)."
+    replacement: "словами: «A → B» → «из A получается B»; «A > B» → «A важнее B»"
+    examples: {bad: "Скорость > идеальности. Идея → прототип → продукт.", good: "Скорость важнее идеальности."}
+    source: "гайд Б3; humanizer-ru п.23 (жёсткий запрет) и lint.py; ux 07/06 §6.4"
+    evidence: "[практика]"
+  - id: ru-pun-arrow-cta
+    marker_id: COPY-M-PUN-07
+    level: error
+    lang: any
+    mask_quotes: false
+    slot_types: [cta-label, cta-secondary-label, email-cta-label, nav-label]
+    pattern: '[→←⇒➔➜↗›]\s*$|^\s*[→←⇒➔➜↗]'
+    message: "Стрелка — часть текста кнопки или ссылки. Иконку решает подача (creative), не copy deck."
+    replacement: "убрать стрелку из текста"
+    examples: {bad: "Начать →", good: "Начать"}
+    source: "PLAN.md поправка к ux 07/06 §5.3 и ui 11/04 m34 («стрелка не входит в текст кнопки»); kimi 05/03 (стрелки 7/15 работ K3)"
+    evidence: "[практика] + [проверено kimi E/03]"
+  - id: ru-pun-middot
+    marker_id: COPY-M-PUN-08
+    level: info
+    lang: any
+    pattern: '\s·\s[^\n]*\s·\s'
+    message: "Мета-строка через средние точки «A · B · C» — хром генераторов."
+    replacement: "обычная подпись с ролью или разделение пространством (вёрстка)"
+    examples: {bad: "Дизайн · 12 мин · 2026", good: "Дизайн, 12 минут чтения"}
+    source: "ux 07/06 §5.3; ui 11/04 m32; taste §9.F («middle-dot is rationed»); kimi 05/03 («·» у 8/15 работ K3)"
+    evidence: "[практика] + [проверено kimi E/03]"
+  - id: ru-pun-caps-text
+    marker_id: COPY-M-PUN-09
+    level: info
+    lang: any
+    count_as_marker: false
+    slot_types: [eyebrow, headline, subheadline, section-title, cta-label, cta-secondary-label, badge, card-title, stat-label, step-title]
+    pattern: '%B%[А-ЯЁA-Z]{3,}(?:\s+[А-ЯЁA-Z]{2,})+%E%'
+    message: "Капс набран буквами. В copy deck пишите обычным регистром: капс — это стиль (text-transform), его решает подача."
+    replacement: "«НАШИ УСЛУГИ» → «Наши услуги» (и проверить, нужен ли надзаголовок вообще)"
+    examples: {bad: "НАШИ ПРЕИМУЩЕСТВА", good: "Почему мы"}
+    source: "ux 07/06 §5.3 (ALL-CAPS eyebrow); ui 11/04 m8, m30; PLAN.md поправка (eyebrow как визуал — creative)"
+    evidence: "[практика]"
+  - id: ru-pun-title-case
+    marker_id: COPY-M-PUN-09
+    level: warning
+    slot_types: [headline, subheadline, section-title, card-title, step-title, article-title, article-heading, case-title, form-title, meta-title, og-title, pricing-plan-name, email-subject, faq-q]
+    pattern: '^(?:[А-ЯЁ][а-яё]*[\s,]+){2,}[А-ЯЁ][а-яё]+[.!?]?$'
+    message: "Каждое слово заголовка с заглавной (английская привычка Title Case)."
+    replacement: "в русском заголовке с заглавной — только первое слово и имена собственные"
+    examples: {bad: "Ранняя Жизнь И Образование", good: "Ранняя жизнь и образование"}
+    source: "WP:AISIGNS «Title case»; ВП:ИИЗБ («Заглавная буква»); ux 07/06 §9 п.20"
+    evidence: "[стандарт] русской типографики + [практика] как примета"
+  - id: ru-pun-exclamation-heading
+    marker_id: COPY-M-PUN-10
+    level: warning
+    lang: any
+    slot_types: [headline, subheadline, section-title, card-title, eyebrow, cta-label, cta-secondary-label, meta-title, meta-description, og-title, og-description, article-title, article-heading, badge, form-title]
+    pattern: '!'
+    message: "Восклицательный знак в заголовке, кнопке или мета."
+    replacement: "убрать: сила — в содержании, а не в знаке"
+    examples: {bad: "Лучшие цены в городе!", good: "Цены от 900 ₽ за час"}
+    source: "ux 07/06 §1 («!» в конце маркетинговой фразы — предупреждение); humanizer-ru eval 12 (пуш с «!»)"
+    evidence: "[практика]"
+  - id: ru-pun-exclamation-double
+    marker_id: COPY-M-PUN-10
+    level: warning
+    lang: any
+    pattern: '!{2,}|!\?|\?!'
+    message: "Двойной восклицательный знак или «?!»."
+    replacement: "один знак или ни одного"
+    examples: {bad: "Скидки до 50 %!!", good: "Скидки до 50 %"}
+    source: "ux 07/06 §1; редакторская норма"
+    evidence: "[практика]"
+  - id: ru-pun-bold-overuse
+    marker_id: COPY-M-PUN-11
+    level: info
+    lang: any
+    min_count: 3
+    mask_quotes: false
+    pattern: '\*\*[^*\n]+\*\*'
+    message: "Жирным выделено слово за словом (три и больше в блоке) — «ключевые мысли» вместо текста."
+    replacement: "одно выделение на экран или ни одного; иерархию даёт вёрстка"
+    examples: {bad: "**Скорость**, **качество** и **надёжность** — наши принципы.", good: "Сдаём квартиры за 30 дней."}
+    source: "WP:AISIGNS «Overuse of boldface»; humanizer-ru lint.py (жирный > слов/200 + 1); гайд Б3"
+    evidence: "[консенсус]"
+  - id: ru-pun-hr
+    marker_id: COPY-M-PUN-12
+    level: warning
+    lang: any
+    slot_types: [hr]
+    mask_quotes: false
+    pattern: '^(?:-{3,}|\*{3,}|_{3,})$'
+    message: "Горизонтальный разделитель «---» в тексте: разметка чат-бота."
+    replacement: "убрать; границы секций задаёт структура страницы"
+    examples: {bad: "---", good: "Следующий раздел"}
+    source: "гайд Б3; humanizer-ru SKILL.md (жёсткий запрет) и lint.py; WP:AISIGNS «Thematic breaks»"
+    evidence: "[практика]"
+  - id: ru-pun-ellipsis-dots
+    marker_id: COPY-M-PUN-13
+    level: info
+    lang: any
+    count_as_marker: false
+    pattern: '(?<!\.)\.\.\.(?!\.)'
+    message: "Три точки вместо многоточия «…» (набор — H)."
+    replacement: "«…» — автотипограф"
+    examples: {bad: "И это ещё не всё...", good: "И это ещё не всё…"}
+    source: "Hallmark copy.md «Proper typography» (Ellipsis: …, never ...); ux 07/03 §6"
+    evidence: "[стандарт]"

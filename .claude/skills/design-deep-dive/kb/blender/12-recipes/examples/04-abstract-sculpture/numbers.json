@@ -1,0 +1,133 @@
+{
+ "asserts": {
+  "ok": true,
+  "fails": [],
+  "dims_m": [
+   0.2096,
+   0.17,
+   0.25
+  ],
+  "tris": 26400,
+  "materials": 3,
+  "gaps_m": {
+   "Sc_Ribbon~Sc_Plinth": 0.0,
+   "Sc_Orb~Sc_Plinth": 0.0
+  }
+ },
+ "audit": {
+  "flags": [
+   "interpenetration: Sc_Plinth×Sc_Ribbon:142; Sc_Plinth×Sc_Orb:36"
+  ],
+  "tris": 26400,
+  "draw_calls": 3,
+  "dims_m": [
+   0.21,
+   0.17,
+   0.25
+  ],
+  "frame": {
+   "x": [
+    0.305,
+    0.712
+   ],
+   "y": [
+    0.085,
+    0.938
+   ],
+   "area": 0.348
+  },
+  "view": "Khronos PBR Neutral"
+ },
+ "renders": {
+  "hero_pearl_23": {
+   "sec": 3.26,
+   "kb": 973.4,
+   "res": [
+    1280,
+    720
+   ]
+  },
+  "hero_ink_34": {
+   "sec": 3.05,
+   "kb": 993.0,
+   "res": [
+    1280,
+    720
+   ]
+  }
+ },
+ "glb": {
+  "sculpture_pearl_23": {
+   "raw": {
+    "kb": 593.4,
+    "tris": 26400,
+    "nodes": 3,
+    "materials": [
+     "Sc_Orb",
+     "Sc_Stone",
+     "Sc_Ribbon"
+    ],
+    "extensionsUsed": [
+     "KHR_materials_clearcoat"
+    ],
+    "instanced_nodes": 0
+   },
+   "web": {
+    "kb": 117.2,
+    "tris": 26400,
+    "nodes": 3,
+    "materials": [
+     "Sc_Orb",
+     "Sc_Stone",
+     "Sc_Ribbon"
+    ],
+    "extensionsUsed": [
+     "EXT_meshopt_compression",
+     "KHR_materials_clearcoat",
+     "KHR_mesh_quantization"
+    ],
+    "instanced_nodes": 0
+   },
+   "preset": "static_hero"
+  },
+  "sculpture_ink_34": {
+   "raw": {
+    "kb": 593.4,
+    "tris": 26400,
+    "nodes": 3,
+    "materials": [
+     "Sc_Orb",
+     "Sc_Stone",
+     "Sc_Ribbon"
+    ],
+    "extensionsUsed": [
+     "KHR_materials_clearcoat"
+    ],
+    "instanced_nodes": 0
+   },
+   "web": {
+    "kb": 117.3,
+    "tris": 26400,
+    "nodes": 3,
+    "materials": [
+     "Sc_Orb",
+     "Sc_Stone",
+     "Sc_Ribbon"
+    ],
+    "extensionsUsed": [
+     "EXT_meshopt_compression",
+     "KHR_materials_clearcoat",
+     "KHR_mesh_quantization"
+    ],
+    "instanced_nodes": 0
+   },
+   "preset": "static_hero"
+  }
+ },
+ "variants": [
+  "pearl_23",
+  "ink_34"
+ ],
+ "sec_total": 7.3,
+ "blender": "5.2.2 LTS"
+}

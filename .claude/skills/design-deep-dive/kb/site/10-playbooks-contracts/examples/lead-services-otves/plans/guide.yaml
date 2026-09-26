@@ -1,0 +1,187 @@
+# ПРИМЕР J v1 · служебная страница guide (planlib.py); факты — демо text.
+page_plan_version: '1'
+checked: '2026-09-24'
+status: proposed
+example: true
+site: otves-remont-nn
+refs:
+  brief: ../site-brief.yaml
+  facts: ../../../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml
+  blocks: ../../../../04-blocks/blocks.yaml
+  vocabulary: ../../../../02-site-types/vocabulary.yaml
+  events: ../../../../07-seo-geo-performance-analytics/events.yaml
+page:
+  id: guide
+  page_type: article-page
+  lang: ru
+  locale: ru-RU
+  jurisdiction:
+  - ru
+  goal: ответить на вопрос «как контролировать ремонт без времени» и предложить замер
+  primary_action: booking
+  cta_target:
+    kind: anchor
+    value: '#lead-form'
+  awareness: problem-aware
+  awareness_basis:
+    from: assumption
+    rule: уровень по главному источнику страницы (C 01 §3.1)
+  traffic:
+  - traffic_source: search-problem
+    temperature: cold
+    device: mixed
+  macrostructure: long-document
+  macrostructure_family: document
+  first_screen_policy: offer-cta-header
+  budget_profile: article-page@L0
+  ambition_level: L0
+  navigation:
+    header: landing-minimal
+    archetype: minimal-cta
+    logo_link: /
+    breadcrumbs: false
+    footer: minimal
+  seo:
+    indexable: true
+    canonical: self
+    h1: article-body.title
+    structured_data:
+    - Article
+    - BreadcrumbList
+    ssr_required: true
+    sitemap: true
+  legal:
+    pd_consent: not-collected
+    privacy_policy: /privacy
+    cookie_banner: required
+    cookie_mode: opt-in
+    analytics_before_consent: false
+    withdraw_link: footer
+    requisites: footer
+    operator_ref: missing:legal-details
+  analytics:
+    systems:
+    - yandex-metrica
+    goals: []
+    load_after_consent: true
+sections:
+- id: header
+  role: header
+  question: куда вернуться и как связаться
+  job: логотип → главная, призыв, телефон
+  block: header
+  variant: landing-minimal
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: cta-label
+      slot: cta-label
+      intent: 'cta-label: по иерархии сообщений text'
+    media:
+    - id: logo
+      slot: brand-logo
+      media_role: informational
+      goal: показать brand-logo
+      source: generate
+      authenticity: real-or-generated
+    action:
+    - id: cta
+      slot: cta-primary
+      action: booking
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: cta-label
+    - id: phone
+      slot: phone-link
+      action: call
+      style: channel
+      target:
+        kind: tel
+        value: 'tel: номер из facts.yaml'
+      event: event:phone-click
+- id: article-body
+  role: article-body
+  question: как контролировать ремонт, если нет времени
+  job: экспертный ответ первым абзацем, шаги контроля, источники
+  block: article-body
+  variant: longread
+  next_step: главное действие страницы
+  slots:
+    text:
+    - id: title
+      slot: article-title
+      heading: h1
+      intent: 'article-title: по иерархии сообщений text'
+    - id: lead
+      slot: article-lead
+      intent: 'article-lead: по иерархии сообщений text'
+    - id: summary
+      slot: article-summary
+      intent: ответ на вопрос статьи в начале (GEO — text)
+    - id: date
+      slot: article-date
+      intent: 'article-date: по иерархии сообщений text'
+    - id: author
+      slot: article-author
+      intent: 'article-author: по иерархии сообщений text'
+    - id: sources
+      slot: article-sources
+      intent: 'article-sources: по иерархии сообщений text'
+- id: cta-band
+  role: cta-band
+  question: помогут ли мне с этим
+  job: переход к бесплатному замеру
+  block: cta-band
+  variant: mid
+  next_step: главное действие страницы
+  slots:
+    text:
+    - id: title
+      slot: section-title
+      heading: h2
+      intent: 'section-title: по иерархии сообщений text'
+    - id: cta-label
+      slot: cta-label
+      intent: 'cta-label: по иерархии сообщений text'
+    action:
+    - id: cta
+      slot: cta-primary
+      action: booking
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: cta-label
+- id: footer
+  role: footer
+  question: кто продавец и где документы
+  job: реквизиты, правовые ссылки, контакты
+  block: footer
+  variant: minimal
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: legal
+      slot: footer-legal
+      intent: 'footer-legal: по иерархии сообщений text'
+    - id: privacy-label
+      slot: nav-label
+      intent: подписи правовых ссылок
+    data:
+    - id: company
+      slot: fact-ref
+      fact: missing:legal-details
+      anatomy: company
+      on_missing: placeholder
+    action:
+    - id: privacy
+      slot: link
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'

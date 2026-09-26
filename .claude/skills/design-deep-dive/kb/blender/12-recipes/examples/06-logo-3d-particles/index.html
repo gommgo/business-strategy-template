@@ -1,0 +1,74 @@
+<!doctype html>
+<!-- three r186 — [проверено: 99-raw/experiments/K/04-particles-page] рецепт 06: облако точек → логотип по прокрутке; формы — .bin из Blender -->
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOVA — логотип из частиц (рецепт 06)</title>
+<style>
+  :root { color-scheme: dark; --bg: #0e0f12; --ink: #f2f0ec; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 18px/1.5 system-ui, sans-serif; }
+  canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
+  header { position: relative; z-index: 1; padding: 8vh 6vw 0; max-width: 40rem; }
+  h1 { font-size: clamp(28px, 4vw, 48px); margin: 0 0 .3em; letter-spacing: .08em; }
+  main { position: relative; z-index: 1; height: 260vh; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js" } }</script>
+</head><body>
+<header><h1>NOVA</h1><p>Прокрутите — облако соберётся в логотип. Логотип продублирован текстом: canvas — только украшение.</p></header>
+<main></main>
+<canvas id="c" aria-hidden="true"></canvas>
+<script type="module">
+import * as THREE from 'three';
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, powerPreference: 'high-performance' });
+const dpr = Math.min(devicePixelRatio, 1.5);
+renderer.setPixelRatio(dpr);
+const meta = await (await fetch('points.json')).json();
+const [A, B] = await Promise.all(['cloud.bin', 'logo.bin'].map(async (u) => new Float32Array(await (await fetch(u)).arrayBuffer())));
+if (A.length !== B.length || A.length !== meta.count * 3) throw new Error('формы с разным N — морфинг по индексу невозможен');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, 1, 0.01, 100);
+const [cx, cy, cz] = meta.center;
+const dist = meta.radius / Math.sin(THREE.MathUtils.degToRad(35 / 2)) * 1.15;
+camera.position.set(cx, cy, cz + dist); camera.lookAt(cx, cy, cz);
+const g = new THREE.BufferGeometry();
+g.setAttribute('position', new THREE.BufferAttribute(A, 3));
+g.setAttribute('aTarget', new THREE.BufferAttribute(B, 3));
+const mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false,
+  uniforms: { uP: { value: 0 }, uSize: { value: 2.0 * dpr }, uDist: { value: dist }, uColor: { value: new THREE.Color('#8B7CFF') } },
+  vertexShader: `uniform float uP, uSize, uDist; attribute vec3 aTarget;
+    void main() { vec3 pos = mix(position, aTarget, smoothstep(0., 1., uP));
+      vec4 mv = modelViewMatrix * vec4(pos, 1.); gl_Position = projectionMatrix * mv; gl_PointSize = uSize * (uDist / -mv.z); }`,
+  fragmentShader: `uniform vec3 uColor;
+    void main() { float d = length(gl_PointCoord - .5); if (d > .5) discard; gl_FragColor = vec4(uColor, smoothstep(.5, .2, d));
+    #include <colorspace_fragment>
+    }` });
+const points = new THREE.Points(g, mat);
+points.frustumCulled = false;                       // bbox считается по position (облако), логотип внутри — но не рисковать
+scene.add(points);
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h;
+  camera.fov = w < h ? 55 : 35; camera.updateProjectionMatrix();
+}
+resize();
+const timer = new THREE.Timer(); timer.connect(document);
+let current = reduce ? 1 : 0, target = current, raf = 0;
+const progress = () => Math.min(1, Math.max(0, scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight)));
+function frame(t) {
+  timer.update(t);
+  current = THREE.MathUtils.damp(current, target, 6, Math.min(timer.getDelta(), 0.1));
+  if (Math.abs(current - target) < 1e-4) current = target;
+  mat.uniforms.uP.value = current;
+  renderer.render(scene, camera);
+  window.__state = { current, target };
+  raf = current !== target ? requestAnimationFrame(frame) : 0;
+}
+function wake() { target = reduce ? 1 : progress(); if (!raf) raf = requestAnimationFrame(frame); }
+addEventListener('resize', () => { resize(); wake(); });
+if (!reduce) addEventListener('scroll', wake, { passive: true });
+renderer.render(scene, camera); mat.uniforms.uP.value = current; renderer.render(scene, camera);
+window.__ready = true;
+</script>
+</body></html>

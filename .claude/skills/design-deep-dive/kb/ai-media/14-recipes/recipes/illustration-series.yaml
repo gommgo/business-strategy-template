@@ -1,0 +1,103 @@
+# illustration-series.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/02-series-product-recipes.md#1; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+recipe_version: 1
+checked_at: '2026-09-25'
+author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
+id: illustration-series
+title: Серия иллюстраций фич и пустых состояний от эталона
+doc: 14-recipes/02-series-product-recipes.md#1
+task_codes:
+- IMG-ILLUSTR
+- IMG-SERIES
+- VEC-ILLUSTR
+- VEC-TRACE
+slot: section
+ladder: image
+ai_fit: allowed
+legal_row: 3
+route:
+  source: IMG-SERIES
+  steps:
+  - role: эталон (выбор из 3)
+    model: openai/gpt-image-2.5-flare
+    params:
+      image_resolution: 1K
+    price_rub: 4.0
+    test: E-11
+  - role: сетка 2×2 одной генерацией
+    model: openai/gpt-image-2.5-flare
+    params:
+      image_resolution: 2K
+      aspect_ratio: '1:1'
+    price_rub: 7.0
+    test: M-08
+  - role: вектор сразу
+    model: recraft/recraft-v4.1-vector
+    channel: routerai
+    price_rub: 8.83
+    test: G-10
+    note: 'фаза 5: паспорт CM-01 25.09 — 8,83 ₽ (было 8,74); G-10 заменён CM-01; наборы и спот — Pro Vector 33,11 ₽'
+spec:
+  example: 14-recipes/examples/demo-landing/brand/specs/M-08-howto-illustrations-grid.spec.json
+  must:
+  - series.block дословно из паспорта
+  - references одной серии, роль style
+  - фон plain, не transparent
+  ancestors:
+  - ../../scripts/ai-media/tests/fixtures/D02/E2.spec.json
+  - 13-routing-matrix/stand/briefs/S04-illustr-onboarding.spec.json
+compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+  <тест> --agent <агент> --out 99-raw/phase5/jobs/<файл>.jsonl
+phase5:
+  jobs:
+  - 99-raw/phase5/jobs/M-08-howto-illustrations-grid.jsonl
+  - 99-raw/phase5/jobs/E-11-illustr.jsonl
+  - 99-raw/phase5/jobs/E-12-series.jsonl
+  reuse:
+  - E-11
+  - E-12
+  - G-10
+  - G-11
+  - G-12
+  - F-02
+  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
+steps:
+- id: split
+  cmd: python3 ../../scripts/ai-media/split_grid.py grid.png cells/ 2 2
+  status: checked
+  evidence: 99-raw/experiments/F/06-series-metrics
+- id: series
+  cmd: python3 ../../scripts/ai-media/asset_audit.py audit cells/*.png --mode series --dna <паспорт> --out audit_series/
+  status: checked
+  evidence: 99-raw/experiments/M/01-icon3d-forms/audit_series
+- id: vectorize
+  cmd: 99-raw/tools/bin/vtracer-1.0.0a4/vtracer -i c.png -o c.svg --palette '<вся палитра + контур + фон>' --simplify 1.5 --optimize 2
+  status: checked
+  evidence: 99-raw/experiments/G/03-vectorize
+accept:
+  thresholds:
+  - series.hue_spread_max_deg
+  - series.pal_de_mean_max
+  - series.sd_L_max
+  - series.phash_dup_max
+  - svg.illustration_kb_max
+delivery:
+  formats:
+  - svg через <img>
+  - avif
+  budget_kb:
+    svg: 40
+provenance:
+  dst: trained
+  visible_label: false
+numbers:
+  phase5_note: 'id Flare в polza с 25.09 — openai/gpt-image-2.5-flare (было gpt-image-2-5-flare), цены 4 / 7 ₽ те же'
+  phase5_f01_palette_de_oklab: '3 референса + роль + блок — 0,031–0,035 (3 из 3 ≤ 0,05); только блок — 0,042–0,058; мудборд из 8 — 0,035–0,041 — 99-raw/phase5/runs/2.3-series/F-01_sheet.jpg'
+  phase5_f02_grid_2x2: 'Sunburst 2K 7 ₽ за 4 клетки 1152×768, ΔE 0,031–0,036, свет единый (n = 1) — 99-raw/phase5/runs/2.3-series/F-02.log'
+  phase5_e12_style_holder: 'из 4 моделей стиль эталона держит Flare; NB2, NB Pro, Seedream 4.5 сменили палитру — 99-raw/phase5/runs/2.3-series/E-12_blind_sheet.jpg'
+  phase5_e11_reference: '3 модели — «все по-своему хороши» (голос заказчика вслепую), эталон — по брифу — 99-raw/phase5/runs/2.3-series/E-11_blind_key.json'
+status:
+  local: checked
+  generation: checked
+sources:
+- 91-videos/digests/AO46uxbfpUU.md
+- 91-videos/digests/AxV8TR3BdqI.md

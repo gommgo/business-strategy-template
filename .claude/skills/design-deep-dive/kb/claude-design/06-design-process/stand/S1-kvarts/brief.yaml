@@ -1,0 +1,241 @@
+# ── Копия БЕЗ ПРАВОК (26.09.2026) брифа стенда S1 «Кварц» от 24.09.2026, md5 оригинала b26cac80a39410e5419b3132f6264e8e.
+# Стенд — 06-design-process/06-test-stand.md §2; поля брифа — 06-design-process/01-brief-and-questions.md §7.
+# Что убрать или заменить при адаптации:
+#   1. Блок `run` (harness, model, effort, timeout_s, prompt_variant) и `build.skill` — параметры другого исполнителя: убрать
+#      (модель — Opus 5.5, effort — в журнал прогона).
+#   2. `references[].source` и `assets[].source` ведут на синтетические заглушки src/refs, src/assets (не копировались): заменить
+#      реальными кадрами референсов и ассетами ai-media / blender, одними на все условия; id загрузок — в ARTIFACTS.md.
+#   3. `references[].measured`: оценки `estimated` → замер `measure_ui.py` (`measured`).
+#   4. Две строки происхождения ниже (опыт старой базы, «входы синтетические») — убрать.
+#   5. Английские строки в `decisions` можно перевести: довода за английский для Claude нет.
+# ──
+# brief.yaml — пример 1 (лендинг предзаказа), вымышленный продукт «Кварц» · F/03 · 2026-09-24
+# Заполнен Claude по описанию заказчика и ответам (01-description-and-questions.md). Входы в src/ синтетические.
+project:
+  slug: kvarts-preorder
+  type: landing
+  date: 2026-09-24
+  status: approved
+  iteration: 1
+  scope: the whole page in src/ (first build)
+
+product:
+  name: Кварц
+  description: Кварц — настольная лампа для чтения, которая сама подстраивает свет под книгу и время суток
+  target_user: люди 28–45 лет, много читают, приходят из Telegram-каналов о книгах, чаще с телефона
+  goal: читать вечером без усталости глаз от неподходящего света, не настраивая лампу вручную
+  primary_action: внести бронь 990 ₽ на лампу из первой партии
+  screens: [landing]
+  locale: ru
+  platforms: [desktop, mobile]
+  viewport_primary: 390x844
+
+design_system:
+  style: инженерный паспорт предмета — строгая сетка, крупный левый заголовок, характеристики таблицей
+  knobs:
+    accent: "#2B3BFF"
+    neutral: холодная, тонирована в акцент
+    radius: "4"
+    density: default
+    font_display: Unbounded
+    font_text: Golos Text
+    shadows: none
+    theme: light
+  palette:
+    background: "#F5F7FA"
+    surface: "#FFFFFF"
+    text: "#0E1220"
+    muted: "#4A5263"
+    border: "#D5DAE3"
+    accent: "#2B3BFF"
+    accent_hover: "#1E2BD6"
+    on_accent: "#FFFFFF"
+    focus: "#2B3BFF"
+  type_scale:
+    display: {size: 72, mobile: 40, line: 1.02, weight: 700, tracking: -0.02em}
+    h2: {size: 40, mobile: 28, line: 1.1, weight: 700}
+    h3: {size: 24, mobile: 20, line: 1.25, weight: 600}
+    body: {size: 18, mobile: 17, line: 1.5, weight: 400}
+    small: {size: 14, mobile: 14, line: 1.4, weight: 400}
+    button: {size: 16, mobile: 16, line: 1.2, weight: 600}
+  spacing: [4, 8, 12, 16, 24, 32, 48, 64, 96, 120]
+  layout: {max_width: 1200, columns: 12, gutter: 24, margin_desktop: 48, margin_mobile: 20, section_gap: 120, section_gap_mobile: 72}
+  radius_scale: {sm: 4, md: 8, lg: 12}
+  motion_tokens: {fast: 150, base: 240, slow: 400, ease_out: "cubic-bezier(0.23, 1, 0.32, 1)", ease_in_out: "cubic-bezier(0.77, 0, 0.175, 1)"}
+  elevation: границы 1 px цвета border, без теней; глубина — только у 3D-лампы
+  visual_mood: [точный, спокойный, предметный]
+  tone_of_voice: на «вы», коротко, по делу, без восклицаний и медицинских обещаний
+  bans: [бежевый и кремовый фон (запрет заказчика), обещания про здоровье глаз, счётчик «осталось N ламп», таймер обратного отсчёта]
+
+direction:
+  visual_thesis: инженерный паспорт предмета — точный, холодный, спокойный, с одним ярким цветом
+  paper: "light (L > 95 %), cool neutral #F5F7FA"
+  display_style: широкий гротеск Unbounded, строчные и прописные как в тексте, без курсива
+  accent_rule: ультрамарин только на главной кнопке, ссылках и активных состояниях
+  imagery: фото прототипа из assets/img на светлом поле и 3D-лампа; без людей, без стока
+  macrostructure: grid-led, 12 колонок; предмет справа, текст слева; характеристики — таблица на всю ширину
+
+references:
+  - file: refs/01-grid.jpg
+    source: src/refs/01-grid.jpg
+    captured: "сайт-референс 1 (скриншот заказчика), 1440x900, 2026-09-24"
+    role: сетка и подача предмета
+    take: [строгая 12-колоночная сетка, предмет на светлом поле без фона-сцены, короткие подписи рядом с деталями предмета]
+    dont_take: [оранжевый акцент, моноширинный шрифт, их фото товаров, бегущая строка]
+    measured: "estimated: колонка 80 px, gutter 24 px, подписи 13–14 px, поля страницы 48 px"
+  - file: refs/02-type.jpg
+    source: src/refs/02-type.jpg
+    captured: "сайт-референс 2 (скриншот заказчика), 1440x900, 2026-09-24"
+    role: масштаб и позиция заголовка
+    take: [очень крупный заголовок слева в одну-две строки, контраст чёрного текста и белого поля, один цвет-акцент]
+    dont_take: [точечный (dot-matrix) шрифт, красный акцент, тёмный фон секций]
+    measured: "estimated: заголовок ≈ 72–80 px, межстрочный ≈ 1.0, текст 18 px"
+  - file: refs/03-preorder.jpg
+    source: src/refs/03-preorder.jpg
+    captured: "сайт-референс 3 (скриншот заказчика), 1440x900, 2026-09-24"
+    role: блок цены и брони
+    take: [старая цена зачёркнута рядом с новой, одна строка о брони под ценой, кнопка сразу под условием]
+    dont_take: [таймер обратного отсчёта, счётчик «осталось N штук», всплывающие окна]
+    measured: "estimated: цена 48 px, старая цена 20 px muted, кнопка 56 px высотой"
+
+site:
+  cta: {label: "Забронировать за 990 ₽", target: /preorder}
+  sections:
+    - {id: hero, job: обещание и кнопка брони}
+    - {id: problem, job: почему обычный свет утомляет при чтении — 2 факта из facts.md}
+    - {id: how, job: "как работает — 3 функции (подстройка света, 4 сценария, USB-C)"}
+    - {id: object3d, job: лампу можно рассмотреть и повернуть}
+    - {id: specs, job: характеристики таблицей}
+    - {id: price, job: "цена первой партии, условия брони и возврата"}
+    - {id: faq, job: 4 вопроса о брони и доставке}
+    - {id: final_cta, job: повтор обещания и кнопки}
+
+content:
+  copy_source: ""
+  facts_source: ""
+copy:
+  hero:
+    h1: Лампа, которая сама подбирает свет для чтения
+    lead: Кварц подстраивает цветовую температуру и яркость под книгу и время суток. Первые 300 ламп — по цене предзаказа.
+    cta: Забронировать за 990 ₽
+    note: Бронь возвращаем в течение 14 дней по заявке.
+  problem:
+    h2: Свет в комнате не рассчитан на книгу
+    p1: Верхний свет даёт блики на странице, а тёплый ночник слишком тусклый для мелкого шрифта.
+    p2: Кварц держит нужную яркость на странице и меняет температуру света вечером сам.
+  how:
+    h2: Как работает
+    item1_title: Подстраивает свет
+    item1_text: Датчик меряет свет в комнате, лампа выставляет температуру от 2700 до 5000 K.
+    item2_title: Помнит 4 сценария
+    item2_text: Роман в кресле, конспект за столом — сценарий включается одним касанием.
+    item3_title: Заряжает телефон
+    item3_text: Порт USB-C в основании — 18 Вт.
+  object3d:
+    h2: Рассмотрите лампу
+    hint: Поверните модель пальцем или мышью.
+  specs:
+    h2: Характеристики
+    row1: Цветовая температура — 2700–5000 K
+    row2: Сценарии — 4, переключение касанием
+    row3: Зарядка телефона — USB-C, 18 Вт
+    row4: Сборка — Казань
+  price:
+    h2: Первая партия — 300 ламп
+    price_now: 8 900 ₽
+    price_old: 11 900 ₽
+    deposit: Бронь 990 ₽ входит в цену. Вернём её в течение 14 дней по заявке.
+    shipping: Отгрузка — декабрь 2026.
+  faq:
+    q1: Что будет после брони?
+    a1: Мы напишем, когда лампа будет готова к отгрузке, и пришлём ссылку на доплату.
+    q2: Можно вернуть бронь?
+    a2: Да, в течение 14 дней по заявке.
+    q3: Когда доставка?
+    a3: Отгрузка первой партии — декабрь 2026.
+    q4: Кто производитель?
+    a4: "[PLACEHOLDER: юрлицо]"
+  final_cta:
+    h2: Читайте вечером при правильном свете
+    cta: Забронировать за 990 ₽
+  footer:
+    legal: "[PLACEHOLDER: юрлицо], Казань"
+facts:
+  - {id: F1, text: "8 900 ₽ — цена для первых 300 ламп", source: "заказчик, сообщение 2026-09-24", use: "price, hero"}
+  - {id: F2, text: "11 900 ₽ — обычная цена", source: "заказчик, сообщение 2026-09-24", use: price}
+  - {id: F3, text: "бронь 990 ₽ входит в цену", source: "заказчик, сообщение 2026-09-24", use: "hero, price, CTA"}
+  - {id: F4, text: "бронь возвращается в течение 14 дней по заявке", source: "заказчик, ответ на вопрос 1, 2026-09-24", use: "hero, price, faq"}
+  - {id: F5, text: "отгрузка первой партии — декабрь 2026", source: "заказчик, ответ на вопрос 1, 2026-09-24", use: "price, faq"}
+  - {id: F6, text: "4 сценария света", source: "заказчик, сообщение 2026-09-24", use: "how, specs"}
+  - {id: F7, text: "цветовая температура 2700–5000 K", source: "заказчик, ответ на вопрос 1, 2026-09-24", use: "how, specs"}
+  - {id: F8, text: "USB-C, 18 Вт", source: "заказчик, ответ на вопрос 1, 2026-09-24", use: "how, specs"}
+  - {id: F9, text: "сборка в Казани", source: "заказчик, сообщение 2026-09-24 («стартап из Казани»)", use: specs}
+missing:
+  - {id: M1, what: юрлицо для подвала и ответа в FAQ, placeholder: юрлицо, who: заказчик}
+never_claim: [любые обещания про здоровье и зрение, отзывы и оценки покупателей, упоминания в СМИ, «осталось N ламп»]
+
+brand:
+  status: verified
+  verified_at: 2026-09-24
+  sources: ["logo.svg заказчика", "цвет #2B3BFF из сообщения заказчика", "остальные роли — вывод Claude (холодная нейтраль)"]
+  cleaning_notes: ["фирменного шрифта нет — пара Unbounded + Golos Text выбрана по направлению A", "ультрамарин на белом тексте 6,6:1"]
+  name: Кварц
+  mode: light
+  colors: {background: "#F5F7FA", surface: "#FFFFFF", text: "#0E1220", muted: "#4A5263", border: "#D5DAE3", accent: "#2B3BFF", accent_hover: "#1E2BD6", on_accent: "#FFFFFF", focus: "#2B3BFF"}
+  accent_role: главная кнопка, ссылки, активные состояния
+  extra_colors: []
+  fonts:
+    display: {family: Unbounded, brand_family: "", status: web, files: "npm @fontsource/unbounded@5 (cyrillic, latin)", weights: [700], cyrillic: true, why_substitute: ""}
+    text: {family: Golos Text, brand_family: "", status: web, files: "npm @fontsource/golos-text@5 (cyrillic, latin)", weights: [400, 600], cyrillic: true, why_substitute: ""}
+  heading_style: предложение с заглавной, без точки в конце, без курсива
+  logo: {primary: assets/brand/logo.svg, on_dark: "", mark: "", min_width_px: 96, clear_space: высота буквы К со всех сторон, never: [redraw, recolor, stretch or rotate, add effects or shadows]}
+  imagery: {style: фото прототипа на светлом поле, products_dir: assets/img/, people_policy: людей нет}
+  voice: {tone: на «вы», коротко, use: [свет, книга, вечер], avoid: [здоровье глаз, революционный, уникальный]}
+
+assets:
+  - {file: assets/img/lamp-desk.jpg, source: src/assets/img/lamp-desk.jpg, slot: problem, role: informational, caption: "Кварц у кресла для чтения, прототип", alt: "Настольная лампа Кварц у кресла рядом со стопкой книг", focal: "60% 45%", variants: "1600x1067", licence: "фото заказчика, 2026"}
+  - {file: assets/img/lamp-detail.jpg, source: src/assets/img/lamp-detail.jpg, slot: how, role: informational, caption: "Кольцо яркости", alt: "Крупный план кольца регулировки яркости лампы Кварц", focal: "50% 50%", variants: "1200x1200", licence: "фото заказчика, 2026"}
+  - {file: assets/img/lamp-usb.jpg, source: src/assets/img/lamp-usb.jpg, slot: specs, role: informational, caption: "Порт USB-C в основании", alt: "Порт USB-C в основании лампы Кварц", focal: "40% 70%", variants: "1200x900", licence: "фото заказчика, 2026"}
+  - {file: assets/brand/logo.svg, source: src/assets/brand/logo.svg, slot: header and footer, role: informational, caption: "Логотип Кварц", alt: "Кварц", licence: "логотип заказчика"}
+  - {file: assets/3d/kvarts.glb, source: src/assets/3d/kvarts.glb, slot: object3d, role: informational, caption: "3D-модель лампы Кварц", alt: "Трёхмерная модель лампы Кварц, её можно повернуть", licence: "модель дизайнера заказчика; экспорт — blender-research пресет E"}
+  - {file: assets/3d/kvarts-poster.jpg, source: src/assets/3d/kvarts-poster.jpg, slot: object3d, role: informational, caption: "Постер 3D-модели", alt: "Лампа Кварц, вид три четверти", focal: "50% 50%", variants: "1024x1024", licence: "рендер из той же модели (blender)"}
+missing_slots: []
+
+decisions:
+  mobile: responsive (on phones the 3D block shows the poster until the visitor taps it)
+  motion:
+    level: subtle
+    thesis: свет лампы в блоке «как работает» теплеет, когда блок входит в экран
+    moments: ["how enters the viewport: warm light layer opacity 0 -> 1, 400 ms, ease-out", "primary button hover: translateY(-2px), 150 ms"]
+    library: css
+  assets_mode: provided
+  three_d: {mode: model-viewer, files: [assets/3d/kvarts.glb], poster: assets/3d/kvarts-poster.jpg, notes: "camera-controls on, auto-rotate off, no AR button"}
+  variants: 1
+  iterations_max: 3
+  extra: ["No reviews, press logos or countdown timers"]
+
+build:
+  stack: Vite + vanilla TypeScript (no framework), one page
+  allowed_packages: [vite@8, typescript@7, "@google/model-viewer@4", "@fontsource/unbounded@5", "@fontsource/golos-text@5"]
+  dev_cmd: npm run dev -- --port 5173
+  build_cmd: npm run build
+  dev_url: "http://localhost:5173"
+  viewports: ["1440x900", "768x1024", "390x844"]
+  routes: []
+  selector: "main > section"
+  src_layout: ""
+  out_of_scope: [payment backend (the /preorder link is a placeholder route), analytics, tests, CMS]
+  perf: {hero_image_kb: 150, first_screen_kb_mobile: 1500, lcp_s_mobile: 2.5}
+  skill: kimi-design-executor
+
+run:
+  harness: both
+  model: kimi-code/k3
+  effort: high
+  timeout_s: 2400
+  prompt_variant: C
+
+questions:
+  - {q: "Главная кнопка", asked: true, answer: "«Забронировать за 990 ₽» → /preorder", source: заказчик, date: 2026-09-24}
+  - {q: "Направление", asked: true, answer: "A — Инженерный паспорт", source: заказчик, date: 2026-09-24}
+  - {q: "3D и фото", asked: true, answer: "фото заказчика + 3D с вращением (model-viewer), постер из той же модели", source: заказчик, date: 2026-09-24}

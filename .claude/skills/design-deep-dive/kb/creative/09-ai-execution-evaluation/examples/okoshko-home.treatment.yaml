@@ -1,0 +1,80 @@
+# Пример treatment v1 — «Окошко», главная (SaaS для салонов, L1). Учебный, вымышленные данные site.
+# creative-research · 09-ai-execution-evaluation · агент I · волна 3 · 2026-09-24.
+# Overlay по id секций v1 плана site; склейка и проверка — spec_check.py plan (см. otves-home.treatment.yaml).
+# Против treatment v0 в плане site: hero без появления (так решила art-direction A: «hero — без появления»), акцент — композицией;
+# пик product-demo: target product-demo.row (было funktsii.row), sticky-stack на CSS (0 КБ JS вместо GSAP 45 КБ — E 02 §3.2: прилипающая стопка
+# = sticky + view()), reduce stations (E 01 §4.2) вместо static-poster; stats — осознанный twist (k3_allow stats в art-direction).
+overlay_version: "1.0"
+checked_at: "2026-09-24"
+example: true
+plan: ../../../site/10-playbooks-contracts/examples/saas-okoshko/plans/home.yaml
+page:
+  art_direction_ref: ../../01-creative-direction/examples/art-direction-okoshko.json#/directions/0
+  motion_spec_ref: okoshko-home.motion-spec.yaml
+  motion_level: expressive
+  motion_system:
+    thesis: "Двигается только расписание: пустые окна дня заполняются записями по мере чтения, неявка исправляется красной пометкой; остальное неподвижно."
+    character: [measured, precise]
+    primitives: [none]
+    library: [css]
+    smooth_scroll: false
+    page_transitions: none
+    reduce_toggle: false
+    entrance_system: "первый экран — без появления; единственная сцена — окно расписания в product-demo; тарифы, кейс, FAQ — без анимации"
+  theme: light
+  tokens_ref: ../../04-visual-language/marketing-tokens.json
+  peaks: [product-demo]
+  accents: [hero, final-cta]
+  signature_sections: [product-demo]
+  status: proposed
+sections:
+  header: {level: L0, visual_role: chrome, motion_level: subtle, visual_variant: solid-minimal}
+  hero:
+    level: L1
+    visual_role: accent
+    motion_level: none
+    visual_variant: product-overlap
+    background: {kind: tint, tone: light, token: color.surface.tint}
+    composition: {align: left, text_media: text-left, bleed: edge, overlap: true, height: partial}
+    display_role: display-m
+    mobile: {strategy: separate-asset, note: "скриншот расписания телефона (9:19) вместо окна десктопа, под заголовком"}
+    lcp_note: "LCP — H1 (скриншот справа меньше по площади; hero.visual lcp_candidate: false в плане); ничего не анимируется"
+    notes: "акцент — композиция: настоящий скриншот заходит на следующую секцию, одна запись с красной пометкой (art-direction first_viewport)"
+  proof-stats:
+    level: L0
+    visual_role: support
+    motion_level: none
+    visual_variant: numbers-row-quiet
+    notes: "ряд цифр — осознанный twist (art-direction decisions d-stats-row, k3_allow stats): числа из facts.yaml, без счётчиков"
+  problem: {level: L0, visual_role: calm, motion_level: none, visual_variant: voice-quotes-type}
+  product-demo:
+    level: L1
+    visual_role: peak
+    motion_level: expressive
+    visual_variant: claim-proof-sticky
+    effects:
+      - ref: "effect:sticky-stack"
+        target: product-demo.row
+        trigger: scroll
+        purpose: signature
+        class: scroll-linked
+        impl: css-sda
+        moments: [schedule-state-2, schedule-state-3, no-show-mark]
+        note: "окно расписания закреплено справа (sticky), текст трёх функций прокручивается слева; с каждой функцией окно меняет состояние"
+    composition: {align: left, text_media: text-left, height: scene}
+    reduce: {strategy: stations, stations: 3, note: "без закрепления: три состояния расписания статичными кадрами рядом со своим текстом"}
+    mobile: {strategy: stacked, note: "кадр интерфейса телефона после каждого абзаца, без закрепления и смены состояний"}
+    budget: {js_kb_br: 0, load: eager}
+    motion_spec_ref: okoshko-home.motion-spec.yaml#/sections/product-demo
+    status: proposed
+  case-studies: {level: L0, visual_role: support, motion_level: none, visual_variant: problem-solution-result-quiet}
+  pricing: {level: L0, visual_role: calm, motion_level: none, visual_variant: tiers-highlight-border}
+  faq: {level: L0, visual_role: calm, motion_level: subtle, visual_variant: accordion-quiet}
+  final-cta:
+    level: L1
+    visual_role: accent
+    motion_level: none
+    visual_variant: final-inverse
+    background: {kind: inverse, tone: dark, token: color.surface.inverse, text_contrast: aa}
+    notes: "акцент — смена фона на тёмный в финале; без живого фона (страница — «измеренная»)"
+  footer: {level: L0, visual_role: chrome, motion_level: none, visual_variant: minimal-quiet}

@@ -1,0 +1,100 @@
+<!doctype html>
+<!-- 01 · Картинка-hero: <picture> с отдельным телефонным кадром, AVIF → WebP, srcset/sizes, fetchpriority, LQIP,
+     object-position по фокусу, цвет текста по зоне, lazy ниже первого экрана, OG и фавиконы.
+     Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/06-pages-measure (Chromium 153, 1440×900 и Pixel 7). -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Утро у воды — ретрит на озере</title>
+<meta name="description" content="Тестовая страница J/01: доставка картинки hero.">
+<meta name="theme-color" content="#b6b1a9">
+<link rel="icon" href="assets/svg/favicon.ico" sizes="32x32">
+<link rel="icon" href="assets/svg/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/svg/apple-touch-icon.png">
+<meta property="og:title" content="Утро у воды — ретрит на озере">
+<meta property="og:image" content="assets/og/og-1200x630.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Озеро на рассвете, сухое дерево у берега и заголовок «Утро у воды»">
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .nav { height: 64px; display: flex; align-items: center; gap: 28px; padding: 0 var(--gutter); background: var(--paper); }
+  .nav__logo { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.01em; text-decoration: none; }
+  .nav__logo img { width: 26px; height: 26px; }
+  .nav a.link { font-size: 15px; color: var(--muted); text-decoration: none; }
+  .nav .spacer { flex: 1; }
+  /* LQIP: средний цвет кадра + 32-px WebP (138 Б) — видны до прихода AVIF; сама картинка — LCP */
+  .hero__media { background: #b6b1a9 url("data:image/webp;base64,UklGRoIAAABXRUJQVlA4IHYAAADQBACdASogABIAPxFuslAsJiSisBgMAOIliQAAWpp0TqGgF5Yv4qJmdB2trACb/L2eqaSmpnm7XEz4+Q3/zCnZ8AbPbNP44XBwJK8HO7mgvPWvnaQ/cS6pkIG/UWHm/wAA") center / cover no-repeat; }
+  @media (max-width: 699px) { .hero__media { background-color: #c6c2bd; } .hero__copy { padding-top: 56px; }
+    .nav a.link:not(:last-child) { display: none; } .hero__lead { max-width: 27ch; } }
+  /* текст тёмный: зона слева — светлая вода и небо рассвета (F83 без скрима, см. J/06) */
+  .hero--light .hero__lead { color: #1f242c; opacity: 1; }
+  /* светлый скрим под колонкой текста (тёмный текст на светлом кадре): альфа подобрана проверкой F83 по буквам (J/06) */
+  .hero--light .hero__scrim { background: linear-gradient(90deg, rgb(243 239 231 / .46) 0%, rgb(243 239 231 / .34) 40%, rgb(243 239 231 / 0) 64%); }
+  @media (max-width: 699px) { .hero--light .hero__scrim { background: linear-gradient(180deg, rgb(243 239 231 / .40) 0%, rgb(243 239 231 / .28) 55%, rgb(243 239 231 / 0) 75%); } }
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__logo" href="#"><img src="assets/svg/icon.svg" width="26" height="26" alt="">Тихая вода</a>
+  <a class="link" href="#programm">Программа</a><a class="link" href="#place">Место</a>
+  <span class="spacer"></span><a class="link" href="#book">Забронировать</a>
+</header>
+
+<section class="hero hero--light hero--screen" aria-labelledby="h1">
+  <div class="hero__media">
+    <picture>
+      <!-- телефон: отдельный кадр 4:5 (небо сверху под текст), не обрезка десктопного -->
+      <source media="(max-width: 699px)" type="image/avif" sizes="100vw" width="1080" height="1350"
+              srcset="assets/hero/dawn-4x5-480.avif 480w, assets/hero/dawn-4x5-720.avif 720w, assets/hero/dawn-4x5-1080.avif 1080w">
+      <source media="(max-width: 699px)" type="image/webp" sizes="100vw" width="1080" height="1350"
+              srcset="assets/hero/dawn-4x5-480.webp 480w, assets/hero/dawn-4x5-720.webp 720w, assets/hero/dawn-4x5-1080.webp 1080w">
+      <source type="image/avif" sizes="100vw" width="2560" height="1440"
+              srcset="assets/hero/dawn-16x9-640.avif 640w, assets/hero/dawn-16x9-960.avif 960w, assets/hero/dawn-16x9-1280.avif 1280w,
+                      assets/hero/dawn-16x9-1920.avif 1920w, assets/hero/dawn-16x9-2560.avif 2560w">
+      <img src="assets/hero/dawn-16x9-1280.webp" sizes="100vw" width="2560" height="1440" alt="" fetchpriority="high" decoding="async"
+           srcset="assets/hero/dawn-16x9-640.webp 640w, assets/hero/dawn-16x9-960.webp 960w, assets/hero/dawn-16x9-1280.webp 1280w,
+                   assets/hero/dawn-16x9-1920.webp 1920w"
+           data-focal='{"16:9":[0.56,0.5,0.66,0.5],"4:5":[0.70,0.62,0.86,0.62]}'>
+    </picture>
+  </div>
+  <div class="hero__scrim" aria-hidden="true"></div>
+  <div class="hero__copy">
+    <p class="hero__kicker">Ретрит · 12–15 октября</p>
+    <h1 id="h1">Утро у воды — тишина, в которой хорошо думать</h1>
+    <p class="hero__lead">Четыре дня без уведомлений: прогулки вдоль берега, долгие завтраки и время на одно главное дело.</p>
+    <a class="hero__cta" href="#book">Выбрать даты <svg width="18" height="18" aria-hidden="true"><use href="assets/svg/sprite.svg#i-arrow"/></svg></a>
+  </div>
+</section>
+
+<section class="section" id="place">
+  <h2>Место</h2>
+  <p>Картинки ниже первого экрана — <code>loading="lazy"</code> и <code>sizes="auto"</code>: браузер знает ширину колонки только
+     после раскладки и берёт файл под неё.</p>
+  <div class="grid">
+    <figure class="card"><picture>
+      <source type="image/avif" sizes="auto, (min-width: 1180px) 360px, 100vw"
+              srcset="assets/cards/sky-480.avif 480w, assets/cards/sky-720.avif 720w, assets/cards/sky-960.avif 960w">
+      <img loading="lazy" decoding="async" width="960" height="720" alt="Персиковое небо над гладкой водой на рассвете" sizes="auto, (min-width: 1180px) 360px, 100vw"
+           src="assets/cards/sky-720.webp" srcset="assets/cards/sky-480.webp 480w, assets/cards/sky-720.webp 720w, assets/cards/sky-960.webp 960w">
+    </picture><p>Рассветы с террасы</p></figure>
+    <figure class="card"><picture>
+      <source type="image/avif" sizes="auto, (min-width: 1180px) 360px, 100vw"
+              srcset="assets/cards/tree-480.avif 480w, assets/cards/tree-720.avif 720w, assets/cards/tree-960.avif 960w">
+      <img loading="lazy" decoding="async" width="960" height="720" alt="Силуэт сухого дерева на фоне вечерней воды" sizes="auto, (min-width: 1180px) 360px, 100vw"
+           src="assets/cards/tree-720.webp" srcset="assets/cards/tree-480.webp 480w, assets/cards/tree-720.webp 720w, assets/cards/tree-960.webp 960w">
+    </picture><p>Вечер у берега</p></figure>
+    <figure class="card"><picture>
+      <source type="image/avif" sizes="auto, (min-width: 1180px) 360px, 100vw"
+              srcset="assets/cards/hills-480.avif 480w, assets/cards/hills-720.avif 720w, assets/cards/hills-960.avif 960w">
+      <img loading="lazy" decoding="async" width="960" height="720" alt="Холмы над озером в утреннем свете" sizes="auto, (min-width: 1180px) 360px, 100vw"
+           src="assets/cards/hills-720.webp" srcset="assets/cards/hills-480.webp 480w, assets/cards/hills-720.webp 720w, assets/cards/hills-960.webp 960w">
+    </picture><p>Тропа по холмам</p></figure>
+  </div>
+  <p class="note">Карточки — AVIF по порогу SSIMULACRA2 ≥ 70 (второстепенные), hero — ≥ 80; запасной формат — WebP через
+     <code>&lt;picture&gt;&lt;source type&gt;</code>: у <code>srcset</code> без <code>type</code> запаса формата нет.</p>
+</section>
+<script type="module" src="js/focal.js"></script>
+</body>
+</html>

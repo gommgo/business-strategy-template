@@ -1,0 +1,69 @@
+{
+  "spec_version": "0.2",
+  "id": "forest-roast-floating-beans-chroma",
+  "checked_at": "2026-09-24",
+  "brief_language": "ru",
+  "task": "IMG-CUTOUT",
+  "role": {
+    "page_type": "ecommerce",
+    "section": "hero",
+    "slot": "hero-floating-object",
+    "purpose": "three roasted beans on a flat chroma key for i2v and keying (floating object layer)",
+    "priority": "above-fold",
+    "series_id": "forest-roast"
+  },
+  "subject": {
+    "summary": "three roasted coffee beans floating in the air at slightly different angles, spaced apart"
+  },
+  "composition": {
+    "shot": "close-up",
+    "subject_region": "center",
+    "angle": "eye-level"
+  },
+  "palette": [
+    {
+      "role": "background",
+      "hex": "#FF00FF",
+      "name": "chroma key magenta",
+      "share": 0.8,
+      "applies_to": "perfectly flat uniform background",
+      "strict": true
+    },
+    {
+      "role": "dominant",
+      "hex": "#4A2C1A",
+      "name": "roasted coffee brown",
+      "share": 0.12,
+      "applies_to": "coffee beans"
+    }
+  ],
+  "text": {
+    "mode": "none"
+  },
+  "output": {
+    "primary_ratio": "16:9",
+    "resolution": "1K",
+    "format": "png"
+  },
+  "light": {
+    "direction": "left",
+    "quality": "soft",
+    "source": "softbox"
+  },
+  "style": {
+    "medium": "photograph"
+  },
+  "exclusions": [
+    {
+      "what": "shadows or gradients on the background",
+      "kind": "artifact",
+      "replace_with": "a perfectly flat, evenly lit magenta background"
+    },
+    {
+      "what": "magenta reflections on the beans",
+      "kind": "artifact",
+      "replace_with": "neutral warm highlights on the beans"
+    }
+  ],
+  "notes": "ключ пурпурный: зёрна коричнево-бронзовые (I 09/02 §1.1: золото, бронза, жёлтое, зелёное → #FF00FF; пурпурный прощает ошибку similarity)"
+}

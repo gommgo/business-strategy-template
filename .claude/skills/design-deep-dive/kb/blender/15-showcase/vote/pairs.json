@@ -1,0 +1,523 @@
+{
+ "questions": {
+  "concept": "Где сильнее идея — что 3D показывает о продукте и зачем оно здесь?",
+  "craft": "Какой кадр выглядит дороже, чётче и убедительнее?",
+  "page": "Какой первый экран сильнее как сайт?",
+  "motion": "Где движение лучше?"
+ },
+ "pairs": [
+  {
+   "id": "z-hero-ab",
+   "group": "«Звено» · главный кадр",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p01-1.jpg",
+    "v": "A код",
+    "from": "zveno/judge/a-code__hero.png"
+   },
+   "b": {
+    "src": "img/p01-2.jpg",
+    "v": "B Blender",
+    "from": "zveno/judge/b-blender__hero.png"
+   }
+  },
+  {
+   "id": "z-hero-bc",
+   "group": "«Звено» · главный кадр",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p02-1.jpg",
+    "v": "B Blender",
+    "from": "zveno/judge/b-blender__hero.png"
+   },
+   "b": {
+    "src": "img/p02-2.jpg",
+    "v": "C гибрид",
+    "from": "zveno/judge/c-hybrid__hero.png"
+   }
+  },
+  {
+   "id": "z-hero-ac",
+   "group": "«Звено» · главный кадр",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p03-1.jpg",
+    "v": "A код",
+    "from": "zveno/judge/a-code__hero.png"
+   },
+   "b": {
+    "src": "img/p03-2.jpg",
+    "v": "C гибрид",
+    "from": "zveno/judge/c-hybrid__hero.png"
+   }
+  },
+  {
+   "id": "z-v2-a",
+   "group": "«Звено» · главный кадр",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p04-1.jpg",
+    "v": "v2 база",
+    "from": "zveno/judge/v2-base__hero.png"
+   },
+   "b": {
+    "src": "img/p04-2.jpg",
+    "v": "A код",
+    "from": "zveno/judge/a-code__hero.png"
+   }
+  },
+  {
+   "id": "z-scan-ab",
+   "group": "«Звено» · скан сустава",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p05-1.jpg",
+    "v": "A код",
+    "from": "zveno/judge/a-code__scan-half.png"
+   },
+   "b": {
+    "src": "img/p05-2.jpg",
+    "v": "B Blender",
+    "from": "zveno/judge/b-blender__scan-half.png"
+   }
+  },
+  {
+   "id": "z-inside-ab",
+   "group": "«Звено» · сустав изнутри",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p06-1.jpg",
+    "v": "A код",
+    "from": "zveno/judge/a-code__inside.png"
+   },
+   "b": {
+    "src": "img/p06-2.jpg",
+    "v": "B Blender",
+    "from": "zveno/judge/b-blender__inside.png"
+   }
+  },
+  {
+   "id": "z-exploded-ac",
+   "group": "«Звено» · разборка",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p07-1.jpg",
+    "v": "A код",
+    "from": "zveno/judge/a-code__exploded.png"
+   },
+   "b": {
+    "src": "img/p07-2.jpg",
+    "v": "C гибрид",
+    "from": "zveno/judge/c-hybrid__exploded.png"
+   }
+  },
+  {
+   "id": "z-exploded-bc",
+   "group": "«Звено» · разборка",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p08-1.jpg",
+    "v": "B Blender",
+    "from": "zveno/judge/b-blender__exploded.png"
+   },
+   "b": {
+    "src": "img/p08-2.jpg",
+    "v": "C гибрид",
+    "from": "zveno/judge/c-hybrid__exploded.png"
+   }
+  },
+  {
+   "id": "z-motion-bc",
+   "group": "«Звено» · движение 10 с",
+   "kind": "video",
+   "q": "motion",
+   "a": {
+    "src": "img/p09-1.webm",
+    "v": "B Blender",
+    "from": "zveno/judge/b-blender__scroll-10s.webm"
+   },
+   "b": {
+    "src": "img/p09-2.webm",
+    "v": "C гибрид",
+    "from": "zveno/judge/c-hybrid__ik-10s.webm"
+   }
+  },
+  {
+   "id": "z-anchor",
+   "group": "«Звено» · первый экран",
+   "kind": "image",
+   "q": "concept",
+   "a": {
+    "src": "img/p10-1.jpg",
+    "v": "наш лучший",
+    "from": "zveno/judge/c-hybrid__page-desk.jpg"
+   },
+   "b": {
+    "src": "img/p10-2.jpg",
+    "v": "якорь hubtown",
+    "from": "../99-raw/experiments/A/sites/hubtown/shot_0.jpg"
+   }
+  },
+  {
+   "id": "z-anchor-craft",
+   "group": "«Звено» · первый экран",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p11-1.jpg",
+    "v": "наш лучший",
+    "from": "zveno/judge/c-hybrid__page-desk.jpg"
+   },
+   "b": {
+    "src": "img/p11-2.jpg",
+    "v": "якорь hubtown",
+    "from": "../99-raw/experiments/A/sites/hubtown/shot_0.jpg"
+   }
+  },
+  {
+   "id": "k-first-ab",
+   "group": "Клавиатура «Ё» · первый экран",
+   "kind": "image",
+   "q": "page",
+   "a": {
+    "src": "img/p12-1.jpg",
+    "v": "A код",
+    "from": "keyboard/judge/a-code__first-screen-desk.png"
+   },
+   "b": {
+    "src": "img/p12-2.jpg",
+    "v": "B Blender",
+    "from": "keyboard/judge/b-blender__first-screen-desk.png"
+   }
+  },
+  {
+   "id": "k-exploded-ac",
+   "group": "Клавиатура «Ё» · разборка",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p13-1.jpg",
+    "v": "A код",
+    "from": "keyboard/judge/a-code__exploded.png"
+   },
+   "b": {
+    "src": "img/p13-2.jpg",
+    "v": "C гибрид",
+    "from": "keyboard/judge/c-hybrid__exploded.png"
+   }
+  },
+  {
+   "id": "k-typing-bc-desk",
+   "group": "Клавиатура «Ё» · набор",
+   "kind": "image",
+   "q": "page",
+   "a": {
+    "src": "img/p14-1.jpg",
+    "v": "B Blender",
+    "from": "keyboard/judge/b-blender__typing-desk.png"
+   },
+   "b": {
+    "src": "img/p14-2.jpg",
+    "v": "C гибрид",
+    "from": "keyboard/judge/c-hybrid__typing-desk.png"
+   }
+  },
+  {
+   "id": "k-typing-bc-mob",
+   "group": "Клавиатура «Ё» · набор на телефоне",
+   "kind": "image",
+   "q": "page",
+   "a": {
+    "src": "img/p15-1.jpg",
+    "v": "B Blender",
+    "from": "keyboard/judge/b-blender__typing-mob.png"
+   },
+   "b": {
+    "src": "img/p15-2.jpg",
+    "v": "C гибрид",
+    "from": "keyboard/judge/c-hybrid__typing-mob.png"
+   }
+  },
+  {
+   "id": "k-colors-ac",
+   "group": "Клавиатура «Ё» · расцветка",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p16-1.jpg",
+    "v": "A код",
+    "from": "keyboard/judge/a-code__colorways-graphite.png"
+   },
+   "b": {
+    "src": "img/p16-2.jpg",
+    "v": "C гибрид",
+    "from": "keyboard/judge/c-hybrid__colorways-graphite.png"
+   }
+  },
+  {
+   "id": "k-exploded-bc",
+   "group": "Клавиатура «Ё» · разборка",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p17-1.jpg",
+    "v": "B Blender",
+    "from": "keyboard/judge/b-blender__exploded.png"
+   },
+   "b": {
+    "src": "img/p17-2.jpg",
+    "v": "C гибрид",
+    "from": "keyboard/judge/c-hybrid__exploded.png"
+   }
+  },
+  {
+   "id": "k-typing-ac",
+   "group": "Клавиатура «Ё» · набор 10 с",
+   "kind": "video",
+   "q": "motion",
+   "a": {
+    "src": "img/p18-1.webm",
+    "v": "A код",
+    "from": "keyboard/judge/a-code__typing-10s.webm"
+   },
+   "b": {
+    "src": "img/p18-2.webm",
+    "v": "C гибрид",
+    "from": "keyboard/judge/c-hybrid__typing-10s.webm"
+   }
+  },
+  {
+   "id": "k-typing-bc",
+   "group": "Клавиатура «Ё» · набор 10 с",
+   "kind": "video",
+   "q": "motion",
+   "a": {
+    "src": "img/p19-1.webm",
+    "v": "B Blender",
+    "from": "keyboard/judge/b-blender__typing-10s.webm"
+   },
+   "b": {
+    "src": "img/p19-2.webm",
+    "v": "C гибрид",
+    "from": "keyboard/judge/c-hybrid__typing-10s.webm"
+   }
+  },
+  {
+   "id": "k-anchor",
+   "group": "Клавиатура «Ё» · первый экран",
+   "kind": "image",
+   "q": "concept",
+   "a": {
+    "src": "img/p20-1.jpg",
+    "v": "наш лучший",
+    "from": "keyboard/judge/c-hybrid__first-screen-desk.png"
+   },
+   "b": {
+    "src": "img/p20-2.jpg",
+    "v": "якорь Apple AirPods Pro",
+    "from": "../99-raw/experiments/A/sites/apple-airpods-pro/shot_0.jpg"
+   }
+  },
+  {
+   "id": "k-anchor-craft",
+   "group": "Клавиатура «Ё» · первый экран",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p21-1.jpg",
+    "v": "наш лучший",
+    "from": "keyboard/judge/c-hybrid__first-screen-desk.png"
+   },
+   "b": {
+    "src": "img/p21-2.jpg",
+    "v": "якорь Apple AirPods Pro",
+    "from": "../99-raw/experiments/A/sites/apple-airpods-pro/shot_0.jpg"
+   }
+  },
+  {
+   "id": "s-first-ab",
+   "group": "«Сдано» · первый экран",
+   "kind": "image",
+   "q": "page",
+   "a": {
+    "src": "img/p22-1.jpg",
+    "v": "A SVG",
+    "from": "sdano/judge/a-code__first-screen-desk.png"
+   },
+   "b": {
+    "src": "img/p22-2.jpg",
+    "v": "B Blender",
+    "from": "sdano/judge/b-blender__first-screen-desk.png"
+   }
+  },
+  {
+   "id": "s-beam-bc",
+   "group": "«Сдано» · план с дефектами",
+   "kind": "image",
+   "q": "page",
+   "a": {
+    "src": "img/p23-1.jpg",
+    "v": "B Blender",
+    "from": "sdano/judge/b-blender__first-screen-desk.png"
+   },
+   "b": {
+    "src": "img/p23-2.jpg",
+    "v": "C фонарик",
+    "from": "sdano/judge/c-hybrid__beam-on.png"
+   }
+  },
+  {
+   "id": "s-mob-ab",
+   "group": "«Сдано» · телефон",
+   "kind": "image",
+   "q": "page",
+   "a": {
+    "src": "img/p24-1.jpg",
+    "v": "A SVG",
+    "from": "sdano/judge/a-code__first-screen-mob.png"
+   },
+   "b": {
+    "src": "img/p24-2.jpg",
+    "v": "B Blender",
+    "from": "sdano/judge/b-blender__first-screen-mob.png"
+   }
+  },
+  {
+   "id": "s-icons-ab",
+   "group": "«Сдано» · блок «что проверяет инженер»",
+   "kind": "image",
+   "q": "page",
+   "a": {
+    "src": "img/p25-1.jpg",
+    "v": "A SVG",
+    "from": "sdano/judge/a-code__icons.png"
+   },
+   "b": {
+    "src": "img/p25-2.jpg",
+    "v": "B Blender",
+    "from": "sdano/judge/b-blender__icons.png"
+   }
+  },
+  {
+   "id": "s-stamp-ab",
+   "group": "«Сдано» · акт со штампом",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p26-1.jpg",
+    "v": "A SVG",
+    "from": "sdano/judge/a-code__act-stamp.png"
+   },
+   "b": {
+    "src": "img/p26-2.jpg",
+    "v": "B Blender",
+    "from": "sdano/judge/b-blender__act-stamp.png"
+   }
+  },
+  {
+   "id": "v-f000",
+   "group": "Velmora · кадр облёта 1",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p27-1.jpg",
+    "v": "нейросеть",
+    "from": "velmora/judge/ai__f000.png"
+   },
+   "b": {
+    "src": "img/p27-2.jpg",
+    "v": "Blender",
+    "from": "velmora/judge/b-blender__f000.png"
+   }
+  },
+  {
+   "id": "v-f030",
+   "group": "Velmora · кадр облёта 2",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p28-1.jpg",
+    "v": "нейросеть",
+    "from": "velmora/judge/ai__f030.png"
+   },
+   "b": {
+    "src": "img/p28-2.jpg",
+    "v": "Blender",
+    "from": "velmora/judge/b-blender__f030.png"
+   }
+  },
+  {
+   "id": "v-f060",
+   "group": "Velmora · кадр облёта 3",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p29-1.jpg",
+    "v": "нейросеть",
+    "from": "velmora/judge/ai__f060.png"
+   },
+   "b": {
+    "src": "img/p29-2.jpg",
+    "v": "Blender",
+    "from": "velmora/judge/b-blender__f060.png"
+   }
+  },
+  {
+   "id": "v-motion",
+   "group": "Velmora · облёт мышью 10 с",
+   "kind": "video",
+   "q": "motion",
+   "a": {
+    "src": "img/p30-1.webm",
+    "v": "нейросеть",
+    "from": "velmora/judge/vote/ai__mouse-10s-stage.webm"
+   },
+   "b": {
+    "src": "img/p30-2.webm",
+    "v": "Blender",
+    "from": "velmora/judge/vote/b-blender__mouse-10s-stage.webm"
+   }
+  },
+  {
+   "id": "v-anchor",
+   "group": "Velmora · первый экран",
+   "kind": "image",
+   "q": "concept",
+   "a": {
+    "src": "img/p31-1.jpg",
+    "v": "наш лучший",
+    "from": "velmora/judge/b-blender__first-screen-desk.png"
+   },
+   "b": {
+    "src": "img/p31-2.jpg",
+    "v": "якорь Shopify Editions",
+    "from": "../99-raw/experiments/A/sites/shopify-editions/shot_0.jpg"
+   }
+  },
+  {
+   "id": "v-anchor-craft",
+   "group": "Velmora · первый экран",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/p32-1.jpg",
+    "v": "наш лучший",
+    "from": "velmora/judge/b-blender__first-screen-desk.png"
+   },
+   "b": {
+    "src": "img/p32-2.jpg",
+    "v": "якорь Shopify Editions",
+    "from": "../99-raw/experiments/A/sites/shopify-editions/shot_0.jpg"
+   }
+  }
+ ],
+ "note": "Сборка build_pairs.py; поле from — исходник кадра (для итогов, на странице не показывается)."
+}

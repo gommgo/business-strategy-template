@@ -1,0 +1,162 @@
+{
+ "asserts": {
+  "ok": true,
+  "fails": [],
+  "dims_m": [
+   0.0727,
+   0.0106,
+   0.147
+  ],
+  "tris": 4718,
+  "materials": 6,
+  "gaps_m": {
+   "Phone_CameraIsland~Phone_Body": 0.0,
+   "Phone_Lens0~Phone_CameraIsland": 0.0,
+   "Phone_Screen~Phone_Body": 0.0001,
+   "Phone_BtnPower~Phone_Body": 0.0
+  }
+ },
+ "audit": {
+  "flags": [
+   "ngons: Phone_Body",
+   "raw_sharp_edges: Phone_CameraIsland",
+   "ngons: Phone_CameraIsland",
+   "raw_sharp_edges: Phone_Lens0",
+   "raw_sharp_edges: Phone_Lens1",
+   "raw_sharp_edges: Phone_Lens2",
+   "raw_sharp_edges: Phone_BtnAction",
+   "ngons: Phone_BtnAction",
+   "raw_sharp_edges: Phone_BtnVolUp",
+   "ngons: Phone_BtnVolUp",
+   "raw_sharp_edges: Phone_BtnPower",
+   "ngons: Phone_BtnPower",
+   "interpenetration: Phone_Body×Phone_CameraIsland:20; Phone_Body×Phone_BtnAction:6; Phone_Body×Phone_BtnVolUp:6; Phone_Body×Phone_BtnPower:6; Phone_CameraIsland×Phone_Lens0:40; Phone_CameraIsland×Phone_Lens2:42"
+  ],
+  "tris": 4694,
+  "draw_calls": 14,
+  "dims_m": [
+   0.073,
+   0.011,
+   0.147
+  ],
+  "frame": {
+   "x": [
+    0.244,
+    0.771
+   ],
+   "y": [
+    0.085,
+    0.911
+   ],
+   "area": 0.436
+  },
+  "view": "Khronos PBR Neutral"
+ },
+ "renders": {
+  "poster_blender": {
+   "sec": 3.14,
+   "kb": 819.5,
+   "res": [
+    768,
+    1024
+   ]
+  }
+ },
+ "glb": {
+  "phone": {
+   "raw": {
+    "kb": 186.0,
+    "tris": 4718,
+    "nodes": 10,
+    "materials": [
+     "Phone_Frame",
+     "Phone_BackGlass",
+     "Phone_FrontGlass",
+     "Phone_LensRing",
+     "Phone_Lens",
+     "Screen"
+    ],
+    "extensionsUsed": [
+     "KHR_materials_clearcoat"
+    ],
+    "instanced_nodes": 0
+   },
+   "web": {
+    "kb": 53.1,
+    "tris": 2638,
+    "nodes": 10,
+    "materials": [
+     "Screen",
+     "PaletteMaterial001",
+     "PaletteMaterial002",
+     "PaletteMaterial003"
+    ],
+    "extensionsUsed": [
+     "EXT_meshopt_compression",
+     "EXT_texture_webp",
+     "KHR_materials_clearcoat",
+     "KHR_mesh_quantization"
+    ],
+    "instanced_nodes": 0
+   },
+   "phone": {
+    "kb": 30.9,
+    "tris": 2614,
+    "nodes": 9,
+    "materials": [
+     "Phone_Frame",
+     "Phone_BackGlass",
+     "Phone_FrontGlass",
+     "Phone_LensRing",
+     "Phone_Lens",
+     "Screen"
+    ],
+    "extensionsUsed": [
+     "KHR_mesh_quantization",
+     "EXT_meshopt_compression",
+     "KHR_texture_transform",
+     "KHR_materials_clearcoat",
+     "KHR_texture_basisu"
+    ],
+    "instanced_nodes": 0
+   },
+   "preset": "static_hero"
+  }
+ },
+ "passport": {
+  "W": 0.0715,
+  "D": 0.147,
+  "H": 0.0078,
+  "corner": 0.0115,
+  "edge": 0.0011,
+  "bezel": 0.0018,
+  "screen_corner": 0.0098,
+  "island": 0.034,
+  "island_corner": 0.0085,
+  "island_h": 0.0011,
+  "island_margin": 0.0045,
+  "lens_r": 0.0056,
+  "lens_h": 0.0016,
+  "btn_t": 0.0006,
+  "frame": "#8E9196",
+  "back": "#C9C4BC",
+  "glass": "#0B0C0E",
+  "lens": "#1A1C20",
+  "ring": "#B7BABF",
+  "bg": "#ECEEF2",
+  "tex_w": 540,
+  "cam": {
+   "az": -18,
+   "el": 8,
+   "lens": 85,
+   "margin": 1.2,
+   "res": [
+    768,
+    1024
+   ]
+  },
+  "max_tris": 10000
+ },
+ "sec_total": 4.4,
+ "blender": "5.2.2 LTS"
+}

@@ -1,0 +1,309 @@
+# facts-kvarts.yaml — пример 1: исправленный инвентарь «Кварц» (лендинг предзаказа; вымышленный продукт kimi F/03)
+# text-research · B2 · 2026-09-24 · формат: ../facts.schema.yaml (facts_version 1)
+#
+# Откуда: ../../../kimi-research/99-raw/experiments/F/03-package-from-description/landing-kvarts/ (описание заказчика,
+# ответы на вопросы, brief.yaml) и out/kvarts-preorder/brief/facts.md (F1–F9, M1, Never claim).
+# Что исправлено против facts.md kimi (опыт 99-raw/experiments/B2/02-kvarts/):
+#   1. F9 «сборка в Казани» выведен из «стартап из Казани» — снят; вместо него факт о городе компании (дословная
+#      выдержка) и вопрос в missing: где собирают лампу.
+#   2. «Датчик» в тексте не опирался ни на что — в missing вопрос о механизме подстройки света.
+#   3. «Переключение касанием», «одним касанием» — в описании нет; в missing.
+#   4. «11 900 ₽ — обычная цена» подавалась как зачёркнутая «старая» цена товара, который ещё не продавался: «было»
+#      вводит в заблуждение (38-ФЗ ст. 5 ч. 3 п. 4 — H); формулировка — «цена после предзаказа».
+#   5. «Первая партия — 300 ламп»: заказчик назвал цену для первых 300 ламп, но не размер партии — в missing.
+#   6. Обещание «без усталости глаз» — в never_claim заказчика (lift: never) и в классе health набора по умолчанию.
+#   7. Добавлены canonical (одна формулировка для JSON-LD и ответов нейросетей), values, use по временному словарю,
+#      сроки действия цены предзаказа, разрешения, ответственный.
+# Числа и тексты — из описания заказчика (вымышленного); даты ответов — 2026-09-24.
+
+facts_version: 1
+date: "2026-09-24"
+site: kvarts-preorder
+lang: ru
+jurisdiction: ru
+status: draft
+owner: {role: "основатель стартапа (заказчик)"}
+collected_by: "Claude (copy-strategy), вопросы одним сообщением — kimi 07/01 §4.4"
+intake: {form: "kimi landing-kvarts/01 §3 (вопрос 1 «Факты»); повторный запрос — proof-intake.md@2026-09-24", asked: "2026-09-24", answered: "2026-09-24", channel: "сообщение"}
+never_claim_defaults: ru-default-1
+
+entities:
+  - {id: product-kvarts, type: product, names: ["Кварц", "«Кварц»", "лампа Кварц", "Kvarts"]}
+  - {id: city-kazan, type: place, names: ["Казань", "Казани", "из Казани"], note: "город компании, не место производства"}
+
+facts:
+  - id: price-first-batch
+    aliases: [F1]
+    kind: price
+    claim_class: [price-discount]
+    verbatim:
+      - "8 900 ₽ — цена для первых 300 ламп"
+      - "Первые 300 ламп — по цене предзаказа"
+      - "8 900 ₽"
+    canonical: "Цена настольной лампы «Кварц» для первых 300 покупателей по предзаказу — 8 900 ₽."
+    values:
+      - {value: 8900, unit: RUB, what: "цена лампы", qualifier: "для первых 300 ламп по предзаказу"}
+      - {value: 300, unit: pcs, what: "лампы по цене предзаказа", comparator: eq}
+    entities: [product-kvarts]
+    source: {type: customer-message, who: "заказчик", where: "описание проекта", date: "2026-09-24", quote: "Первые 300 ламп — 8 900 ₽ вместо 11 900 ₽.", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "со слов заказчика; оферта предзаказа — в missing"}
+    permission: {status: not-required}
+    use: {page_types: [landing-waitlist], section_roles: [hero, pricing], slot_types: [subheadline, pricing-price, pricing-price-note, cta-note]}
+    valid: {from: "2026-09-24", until: "2026-12-31", review_by: "2026-11-01"}
+    schema_org: {type: Offer, property: price, note: "priceCurrency RUB; availability PreOrder — решает G"}
+    related: [price-after-preorder, deposit-included]
+    lang: ru
+
+  - id: price-after-preorder
+    aliases: [F2]
+    kind: price
+    claim_class: [price-discount]
+    verbatim:
+      - "Цена после предзаказа — 11 900 ₽"
+      - "11 900 ₽ после предзаказа"
+    canonical: "После предзаказа лампа «Кварц» будет стоить 11 900 ₽."
+    values:
+      - {value: 11900, unit: RUB, what: "цена лампы после предзаказа"}
+    entities: [product-kvarts]
+    source: {type: customer-message, who: "заказчик", where: "описание проекта", date: "2026-09-24", quote: "Первые 300 ламп — 8 900 ₽ вместо 11 900 ₽.", derivation: direct}
+    verification: {status: stated, date: "2026-09-24"}
+    permission: {status: not-required}
+    use: {section_roles: [pricing], slot_types: [pricing-price-note], not_in: [price-old, headline]}
+    valid: {from: "2026-09-24", review_by: "2026-11-01"}
+    notes: "Не «было 11 900 ₽»: товар ещё не продавался по этой цене. Зачёркивание — только если заказчик подтвердит период продаж по обычной цене (вопрос в missing)."
+    lang: ru
+
+  - id: deposit-included
+    aliases: [F3]
+    kind: offer-terms
+    claim_class: [purchase-terms, price-discount]
+    verbatim:
+      - "Бронь 990 ₽ входит в цену"
+      - "Забронировать за 990 ₽"
+    canonical: "Бронь лампы «Кварц» стоит 990 ₽ и входит в цену лампы."
+    values:
+      - {value: 990, unit: RUB, what: "бронь"}
+    entities: [product-kvarts]
+    source: {type: customer-message, who: "заказчик", where: "описание проекта", date: "2026-09-24", quote: "хотим, чтобы люди вносили бронь 990 ₽", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "«входит в цену» — ответ заказчика на вопрос 1"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, pricing, final-cta], slot_types: [cta-label, cta-note, pricing-price-note]}
+    lang: ru
+
+  - id: deposit-refund
+    aliases: [F4]
+    kind: offer-terms
+    claim_class: [purchase-terms]
+    verbatim:
+      - "Бронь возвращаем в течение 14 дней по заявке"
+      - "Вернём её в течение 14 дней по заявке"
+      - "Да, в течение 14 дней по заявке"
+    canonical: "Бронь 990 ₽ за лампу «Кварц» возвращается в течение 14 дней после заявки покупателя."
+    values:
+      - {value: 14, unit: days, what: "срок возврата брони", qualifier: "по заявке"}
+    entities: [product-kvarts]
+    source: {type: customer-message, who: "заказчик", where: "ответ на вопрос 1", date: "2026-09-24", quote: "бронь возвращаем в течение 14 дней по заявке", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "условия брони в оферте — в missing"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, pricing, faq], slot_types: [cta-note, pricing-price-note, faq-a]}
+    lang: ru
+
+  - id: shipping-date
+    aliases: [F5]
+    kind: date
+    claim_class: [purchase-terms]
+    verbatim:
+      - "Отгрузка — декабрь 2026"
+      - "Отгрузка первых ламп — декабрь 2026"
+    canonical: "Отгрузка первых ламп «Кварц» по предзаказу — декабрь 2026 года."
+    values:
+      - {date: "2026-12", what: "отгрузка первых ламп"}
+    entities: [product-kvarts]
+    source: {type: customer-message, who: "заказчик", where: "вопрос 1 («когда отгрузка первых ламп») и ответ", date: "2026-09-24", quote: "когда отгрузка первых ламп — Отгрузка — декабрь 2026", derivation: direct}
+    verification: {status: stated, date: "2026-09-24"}
+    permission: {status: not-required}
+    use: {section_roles: [pricing, faq], slot_types: [pricing-price-note, faq-a]}
+    valid: {review_by: "2026-11-01"}
+    lang: ru
+
+  - id: scenarios-4
+    aliases: [F6]
+    kind: property
+    claim_class: [fact-property, fact-number]
+    verbatim:
+      - "Помнит 4 сценария"
+      - "Сценарии — 4"
+      - "4 сценария света"
+    canonical: "Лампа «Кварц» запоминает 4 сценария света."
+    values:
+      - {value: 4, unit: pcs, what: "сценарии света"}
+    entities: [product-kvarts]
+    source: {type: customer-message, who: "заказчик", where: "описание проекта", date: "2026-09-24", quote: "запоминает 4 сценария", derivation: direct}
+    verification: {status: stated, date: "2026-09-24"}
+    permission: {status: not-required}
+    use: {section_roles: [how-it-works, specs], slot_types: [card-title, card-body, spec-row]}
+    lang: ru
+
+  - id: color-temperature
+    aliases: [F7]
+    kind: property
+    claim_class: [fact-property, fact-number]
+    verbatim:
+      - "Цветовая температура — 2700–5000 K"
+      - "температуру от 2700 до 5000 K"
+    canonical: "Цветовая температура света лампы «Кварц» — от 2700 до 5000 K."
+    values:
+      - {range: [2700, 5000], unit: K, what: "цветовая температура"}
+    entities: [product-kvarts]
+    source: {type: customer-message, who: "заказчик", where: "ответ на вопрос 1", date: "2026-09-24", quote: "2700–5000 K и 18 Вт — можно", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "паспорт изделия — запросить (missing: product-passport)"}
+    permission: {status: not-required}
+    use: {section_roles: [how-it-works, specs], slot_types: [card-body, spec-row]}
+    schema_org: {type: PropertyValue, property: "colorTemperature (additionalProperty)", note: "решает G"}
+    lang: ru
+
+  - id: usb-c-18w
+    aliases: [F8]
+    kind: property
+    claim_class: [fact-property, fact-number]
+    verbatim:
+      - "Зарядка телефона — USB-C, 18 Вт"
+      - "Порт USB-C — 18 Вт"
+      - "заряжает телефон по USB-C"
+    canonical: "Лампа «Кварц» заряжает телефон через порт USB-C мощностью 18 Вт."
+    values:
+      - {value: 18, unit: W, what: "мощность зарядки USB-C"}
+    entities: [product-kvarts]
+    source: {type: customer-message, who: "заказчик", where: "описание проекта и ответ на вопрос 1", date: "2026-09-24", quote: "заряжает телефон по USB-C; 2700–5000 K и 18 Вт — можно", derivation: direct}
+    verification: {status: stated, date: "2026-09-24"}
+    permission: {status: not-required}
+    use: {section_roles: [how-it-works, specs], slot_types: [card-title, card-body, spec-row]}
+    notes: "«в основании» — только если заказчик подтвердит (фото прототипа lamp-usb.jpg — подпись писал Claude, не заказчик)."
+    lang: ru
+
+  - id: auto-light
+    kind: property
+    claim_class: [fact-property]
+    verbatim:
+      - "Кварц сам подстраивает цветовую температуру и яркость под книгу и время суток"
+      - "сама подстраивает свет под книгу и время суток"
+    canonical: "Лампа «Кварц» сама подстраивает цветовую температуру и яркость света под книгу и время суток."
+    entities: [product-kvarts]
+    source: {type: customer-message, who: "заказчик", where: "описание проекта", date: "2026-09-24", quote: "Она сама подстраивает цветовую температуру и яркость под книгу и время суток", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "механизм (датчик или расписание) не назван — missing: light-mechanism"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, solution, how-it-works], slot_types: [headline, subheadline, card-title, card-body, body]}
+    lang: ru
+
+  - id: company-city
+    kind: company
+    claim_class: [company-details]
+    verbatim:
+      - "Мы — стартап из Казани"
+      - "Казань"
+    canonical: "Лампу «Кварц» делает стартап из Казани."
+    entities: [city-kazan]
+    source: {type: customer-message, who: "заказчик", where: "описание проекта", date: "2026-09-24", quote: "Мы — стартап из Казани", derivation: direct}
+    verification: {status: stated, date: "2026-09-24"}
+    permission: {status: not-required}
+    use: {section_roles: [about, footer], slot_types: [body, footer-legal, footer-tagline]}
+    notes: "Город компании ≠ место сборки (38-ФЗ ст. 5 ч. 3 п. 2 — место происхождения). «Сборка — Казань» без ответа заказчика нельзя."
+    lang: ru
+
+missing:
+  - id: legal-entity
+    aliases: [M1]
+    what: "юрлицо (название, ОГРН или ИНН) для подвала и ответа «Кто производитель?»"
+    kind: company
+    claim_class: [company-details]
+    placeholder: "[PLACEHOLDER: юрлицо]"
+    who: "заказчик"
+    needed_for: {section_roles: [footer, faq], slot_types: [footer-legal, faq-a]}
+    asked: "2026-09-24"
+    blocking: true
+    fallback: placeholder
+    question: "Как называется юрлицо, от имени которого принимается бронь (название, ОГРН или ИНН)? Без этого страницу предзаказа публиковать нельзя."
+  - id: assembly-place
+    what: "где собирают лампу: город, собственное производство или контрактное"
+    kind: property
+    claim_class: [origin]
+    placeholder: "[PLACEHOLDER: место сборки]"
+    who: "заказчик"
+    needed_for: {section_roles: [specs], slot_types: [spec-row]}
+    asked: "2026-09-24"
+    fallback: omit-block
+    question: "Где собирают «Кварц»? Можно ли писать «Сборка — Казань»?"
+  - id: light-mechanism
+    what: "как лампа подстраивает свет: датчик освещённости, расписание по времени суток, приложение"
+    kind: property
+    claim_class: [fact-property]
+    placeholder: "[PLACEHOLDER: как лампа подстраивает свет]"
+    who: "заказчик"
+    needed_for: {section_roles: [how-it-works], slot_types: [card-body]}
+    asked: "2026-09-24"
+    fallback: rewrite-without
+    question: "Как «Кварц» понимает, какой нужен свет: есть датчик освещённости или лампа работает по времени суток?"
+  - id: scenario-switch
+    what: "как переключаются 4 сценария (касание, кнопка, кольцо, приложение)"
+    kind: property
+    claim_class: [fact-property]
+    placeholder: "[PLACEHOLDER: как переключаются сценарии]"
+    who: "заказчик"
+    needed_for: {section_roles: [how-it-works, specs], slot_types: [card-body, spec-row]}
+    fallback: rewrite-without
+    question: "Как включается сохранённый сценарий: касанием, кнопкой или в приложении?"
+  - id: first-batch-size
+    what: "размер первой партии (фраза «Первая партия — 300 ламп»)"
+    kind: availability
+    claim_class: [availability-scarcity, fact-number]
+    placeholder: "[PLACEHOLDER: размер первой партии]"
+    who: "заказчик"
+    needed_for: {section_roles: [pricing], slot_types: [section-title]}
+    fallback: rewrite-without
+    question: "Первая партия — это 300 ламп, или цена 8 900 ₽ действует для первых 300 из большей партии?"
+  - id: balance-payment
+    what: "как проходит доплата после брони и как покупатель узнаёт об отгрузке"
+    kind: offer-terms
+    claim_class: [purchase-terms]
+    placeholder: "[PLACEHOLDER: как проходит доплата и отгрузка после брони]"
+    who: "заказчик"
+    needed_for: {section_roles: [faq], slot_types: [faq-a]}
+    asked: "2026-09-24"
+    fallback: placeholder
+    question: "Что происходит после брони: как и когда покупатель доплачивает 7 910 ₽ и как узнаёт об отгрузке?"
+  - id: preorder-offer
+    what: "оферта предзаказа: условия брони, возврата, срок доплаты, что при срыве отгрузки"
+    kind: offer-terms
+    claim_class: [purchase-terms]
+    placeholder: "[PLACEHOLDER: ссылка на условия предзаказа]"
+    who: "заказчик (юрист)"
+    needed_for: {section_roles: [pricing, faq, footer]}
+    blocking: true
+    fallback: placeholder
+    question: "Есть ли документ с условиями предзаказа (бронь, возврат, доплата, перенос отгрузки)? Нужна ссылка рядом с кнопкой."
+
+never_claim:
+  - id: nc-eyes-health
+    text: "любые обещания про здоровье и зрение («без усталости глаз», «бережёт зрение», «полезно для глаз»)"
+    claim_class: [health]
+    patterns: ["глаз", "зрени", "устал\\w*\\s+глаз", "бережёт\\s+зрение"]
+    lift: never
+    reason: "запрет заказчика (brand.voice.avoid, bans); для немедицинского товара 38-ФЗ ст. 5 ч. 5 п. 6 (H)"
+    source: {who: "заказчик", date: "2026-09-24"}
+  - id: nc-reviews
+    text: "отзывы и оценки покупателей (лампа ещё не продавалась)"
+    claim_class: [testimonial-quote, rating]
+    lift: with-fact
+    source: {who: "заказчик", date: "2026-09-24"}
+  - id: nc-press
+    text: "упоминания в СМИ"
+    claim_class: [award-press]
+    lift: with-fact
+    source: {who: "заказчик", date: "2026-09-24"}
+  - id: nc-left-n
+    text: "«осталось N ламп», таймер обратного отсчёта"
+    claim_class: [availability-scarcity, promo-deadline]
+    patterns: ["осталось\\s+\\d", "остал\\w*\\s+(всего\\s+)?\\d+\\s+ламп"]
+    lift: never
+    reason: "запрет заказчика; ux 06/04 §8.1 п.10–11"
+    source: {who: "заказчик", date: "2026-09-24"}

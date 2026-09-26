@@ -1,0 +1,137 @@
+# hierarchy-kvarts-problem-aware.yaml — иерархия лендинга предзаказа «Кварц» для трафика из книжных Telegram-каналов
+# text-research · B1 · 2026-09-24 · формат: ../message-hierarchy.schema.yaml (hierarchy_version 1)
+# Смысл — meaning-kvarts.yaml; факты — facts-kvarts.yaml (B2). Сравнение с секциями brief.yaml kimi F/03 —
+# 99-raw/experiments/B1/01-briefs-to-meaning/README.md §1 (что меняется в сообщениях секций).
+
+hierarchy_version: 1
+date: "2026-09-24"
+status: draft
+id: hierarchy-kvarts-problem-aware
+site: kvarts-preorder
+meaning_ref: meaning-kvarts.yaml
+lang: ru
+
+page:
+  page_type: landing-waitlist
+  segment_ref: evening-readers
+  awareness: problem-aware
+  traffic_sources: [social-organic]
+  sophistication_stage: 3
+  promise_of_source: "пост книжного канала о лампе для чтения (текст поста — вопрос q-post)"
+  argument_depth: medium
+  goal:
+    action_ref: preorder-deposit
+    secondary_goal: "Сохранить страницу или переслать тому, кто много читает"
+
+core_message:
+  text: "Вечером у кресла свет не надо подбирать: «Кварц» сам подстраивает оттенок и яркость под книгу и время суток; бронь первой партии — 990 ₽."
+  hero_approach: problem-story
+  value_theme_refs: [val-no-fiddling]
+  proof_ids: ["fact:auto-light", "fact:deposit-included"]
+  must_not_say:
+    - "любые обещания про зрение и усталость (B2 nc-eyes-health, lift: never)"
+    - "«датчик» — до ответа q-mechanism"
+    - "«сборка в Казани», «первая партия — 300 ламп»"
+
+first_screen:
+  what: "лампа для чтения"
+  for_whom: "тем, кто читает бумажные книги вечером"
+  outcome: "сел и читаешь — свет уже подходит"
+  differentiator: "сама подстраивает оттенок и яркость под книгу и время суток (механизм — подтвердить)"
+  next_step: "забронировать за 990 ₽: бронь входит в цену и возвращается в течение 14 дней по заявке"
+  proof_ids: ["fact:auto-light", "fact:deposit-included", "fact:deposit-refund"]
+  message_match: "пост про свет для вечернего чтения → первый экран продолжает тему вечера с книгой, а не открывается характеристиками"
+
+pillars:
+  - id: pl-auto
+    message: "Лампа сама подстраивает оттенок и яркость под книгу и время суток"
+    value_theme_refs: [val-no-fiddling]
+    layer: differentiation
+    proof_status: has-proof
+    proof_ids: ["fact:auto-light", "missing:light-mechanism"]
+    objection_ids: [obj-does-it-work, obj-have-lamp]
+    counter: "Показать, как именно (механизм), а не повторять «умная»"
+  - id: pl-scenes
+    message: "4 сценария: кресло, стол и другие места — без повторной настройки"
+    value_theme_refs: [val-no-fiddling]
+    layer: value
+    proof_status: has-proof
+    proof_ids: ["fact:scenarios-4", "missing:scenario-switch"]
+    objection_ids: [obj-have-lamp]
+  - id: pl-reading-spot
+    message: "Свет и зарядка телефона в одном предмете у книги"
+    value_theme_refs: [val-reading-spot]
+    layer: value
+    proof_status: has-proof
+    proof_ids: ["fact:usb-c-18w"]
+  - id: pl-preorder
+    message: "Бронь 990 ₽ входит в цену и возвращается по заявке; первые 300 ламп — 8 900 ₽; отгрузка — декабрь 2026"
+    layer: friction
+    proof_status: has-proof
+    proof_ids: ["fact:deposit-included", "fact:deposit-refund", "fact:price-first-batch", "fact:price-after-preorder", "fact:shipping-date"]
+    objection_ids: [obj-price, obj-will-ship, obj-wait]
+
+sections:
+  - order: 1
+    section_role: hero
+    question: "Что это за лампа из поста?"
+    message: "Лампа для вечернего чтения, которая сама подстраивает свет; бронь первой партии — 990 ₽."
+    carries: [core]
+    proof_ids: ["fact:auto-light", "fact:deposit-included"]
+    next_step: "Призыв «Забронировать за 990 ₽» + строка о возврате брони у кнопки"
+    awareness_shift: {from: problem-aware, to: solution-aware}
+  - order: 2
+    section_role: problem
+    question: "Почему при обычном свете неудобно читать вечером?"
+    message: "Свет в комнате рассчитан на комнату, а не на страницу: верхний бликует, ночник тусклый."
+    next_step: "Переход к тому, что делает лампа"
+    notes: "Боль — допущение (q-why-buy): писать как узнаваемую ситуацию, без утверждений о глазах и здоровье."
+  - order: 3
+    section_role: solution
+    question: "Что «Кварц» делает иначе, чем обычная лампа?"
+    message: "Меняет оттенок от тёплого к холодному (2700–5000 K) и яркость сам — под книгу и время суток."
+    carries: [pl-auto]
+    proof_ids: ["fact:auto-light", "fact:color-temperature"]
+    objection_ids: [obj-have-lamp]
+    awareness_shift: {from: solution-aware, to: product-aware}
+  - order: 4
+    section_role: how-it-works
+    question: "А как она понимает, какой нужен свет?"
+    message: "Механизм подстройки простыми словами; 4 сценария для разных мест."
+    carries: [pl-auto, pl-scenes]
+    proof_ids: ["missing:light-mechanism", "fact:scenarios-4", "missing:scenario-switch"]
+    objection_ids: [obj-does-it-work]
+  - order: 5
+    section_role: product-demo
+    question: "Как она выглядит у кресла и что ещё умеет?"
+    message: "3D-модель и фото прототипа; зарядка телефона по USB-C, 18 Вт."
+    carries: [pl-reading-spot]
+    proof_ids: ["fact:usb-c-18w"]
+  - order: 6
+    section_role: pricing
+    question: "Сколько стоит и что с бронью?"
+    message: "Первые 300 ламп — 8 900 ₽ (после предзаказа — 11 900 ₽); бронь 990 ₽ входит в цену и возвращается в течение 14 дней по заявке; отгрузка — декабрь 2026."
+    carries: [pl-preorder]
+    proof_ids: ["fact:price-first-batch", "fact:price-after-preorder", "fact:deposit-included", "fact:deposit-refund", "fact:shipping-date"]
+    objection_ids: [obj-price, obj-will-ship, obj-wait]
+  - order: 7
+    section_role: faq
+    question: "Кто производитель и где условия предзаказа?"
+    message: "Юрлицо, оферта предзаказа, что будет при переносе отгрузки; лампа — для бумажных книг."
+    proof_ids: ["missing:legal-entity", "missing:preorder-offer"]
+    objection_ids: [obj-will-ship, obj-ereader]
+  - order: 8
+    section_role: final-cta
+    question: "Бронировать сейчас?"
+    message: "Бронь 990 ₽ в счёт цены первой партии, с возвратом по заявке."
+    carries: [core]
+    proof_ids: ["fact:deposit-included", "fact:deposit-refund"]
+
+proof_order: ["fact:auto-light", "fact:color-temperature", "missing:light-mechanism", "fact:scenarios-4", "fact:usb-c-18w",
+              "fact:price-first-batch", "fact:price-after-preorder", "fact:deposit-included", "fact:deposit-refund",
+              "fact:shipping-date", "missing:legal-entity", "missing:preorder-offer"]
+
+not_said:
+  - "Отзывы и упоминания в СМИ — их нет (B2 nc-reviews, nc-press)"
+  - "Таблица характеристик в первом экране — трафик из поста ещё не решил, нужна ли ему такая лампа"
+  - "Счётчик «осталось N ламп», таймер"

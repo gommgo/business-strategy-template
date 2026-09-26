@@ -1,0 +1,72 @@
+/* base.css — общие токены и раскладка тестовых страниц J (волна 3, 23.09.2026).
+   Проверено в Chromium 153 (99-raw/experiments/J/06-pages-measure). Шрифт — системный стек: страница не ждёт веб-шрифт
+   (LCP-текст рисуется сразу); если нужен фирменный шрифт — preload + font-display: swap (шаблон — 04-budgets §3). */
+:root {
+  --ink: #0e0f12;
+  --paper: #f3efe7;
+  --muted: #5d6068;
+  --accent: #2f6f6a;
+  --scrim: 20 24 31;            /* тёмная нейтраль паспорта (post.scrim.color), RGB для rgb(var(--scrim) / α) */
+  --radius: 14px;
+  --gutter: clamp(20px, 5vw, 72px);
+  --font: "Inter", "Helvetica Neue", Arial, "Noto Sans", system-ui, sans-serif;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --ink: #eef0f3; --paper: #0f1115; --muted: #a2a6ae; }
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; font: 17px/1.5 var(--font); color: var(--ink); background: var(--paper); }
+img, video, canvas, svg { display: block; max-width: 100%; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid #ffd166; outline-offset: 3px; }
+
+/* ---------- hero ---------- */
+.hero { position: relative; isolation: isolate; overflow: hidden; color: #fff; background: #1b2230; }
+.hero--screen { min-height: calc(100svh - 64px); }                 /* не ровно на весь экран: J/01 — иначе LCP = H1 */
+.hero__media, .hero__media > img, .hero__media > picture, .hero__media > picture > img, .hero__media > video, .hero__media > canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero__media { z-index: -2; }
+.hero__scrim { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.hero__copy { position: relative; padding: clamp(96px, 16vh, 168px) var(--gutter) 72px; max-width: 760px; }
+.hero__kicker { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; opacity: .86; margin: 0 0 18px; }
+.hero h1 { font-size: clamp(36px, 5.2vw, 68px); line-height: 1.02; letter-spacing: -.022em; margin: 0; font-weight: 650;
+           text-wrap: balance; }
+.hero__lead { font-size: clamp(17px, 1.4vw, 20px); max-width: 34ch; margin: 22px 0 0; opacity: .92; }
+.hero__cta { display: inline-flex; gap: 10px; align-items: center; margin-top: 30px; padding: 14px 22px; border-radius: 999px;
+             background: #fff; color: #10131a; text-decoration: none; font-weight: 600; }
+.hero--light { color: #111418; }
+.hero--light .hero__cta { background: #111418; color: #fff; }
+
+/* ---------- кнопка паузы (WCAG 2.2.2): видна, с доступным именем, не перекрывает текст ---------- */
+.media-toggle { position: absolute; right: var(--gutter); bottom: 24px; z-index: 2; width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid rgb(255 255 255 / .55); background: rgb(12 14 18 / .45); color: #fff; cursor: pointer;
+  display: grid; place-items: center; backdrop-filter: blur(6px); }
+.media-toggle svg { width: 18px; height: 18px; }
+.media-toggle[hidden] { display: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ---------- секции ниже первого экрана ---------- */
+.section { padding: 88px var(--gutter); max-width: 1180px; margin: 0 auto; }
+.section h2 { font-size: clamp(26px, 3vw, 38px); letter-spacing: -.015em; line-height: 1.1; margin: 0 0 16px; }
+.section p { max-width: 62ch; color: var(--muted); }
+.grid { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.card { border-radius: var(--radius); overflow: hidden; background: rgb(127 127 127 / .08); }
+.card img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
+.card p { padding: 14px 18px 18px; margin: 0; }
+.note { font-size: 13px; color: var(--muted); }
+
+/* ---------- зерно поверх (J/03): шум после декодирования, в файле дизеринг не выживает ---------- */
+.grain::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .06; mix-blend-mode: soft-light;
+  background: url("../assets/svg/noise.svg"); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+                           transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* видео-слой hero: невидим (и не кандидат LCP — opacity 0), пока не показан первый кадр; hero-video.js добавляет .is-video */
+.hero__media > video { opacity: 0; transition: opacity .45s ease; }
+.hero.is-video .hero__media > video { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .hero__media > video { display: none; } }

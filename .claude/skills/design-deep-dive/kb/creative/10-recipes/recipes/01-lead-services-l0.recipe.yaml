@@ -1,0 +1,116 @@
+# Рецепт 01 · Лидогенерация услуг РФ · L0 — машиночитаемая часть 10-recipes/01-lead-services-l0.md
+# creative-research · 10-recipes · J · волна 3 · 2026-09-25 · схема recipe.schema.json (urn:app-design:creative-research:recipe:0)
+recipe_version: "0.1"
+id: recipe:lead-services-l0
+title_ru: "Лидогенерация услуг РФ, L0 — страница как первый лист акта"
+status: verified
+checked_at: "2026-09-25"
+site_type: landing-site
+page_type: landing-lead-services
+level: L0
+level_why: "горячий мобильный трафик ≥ 50 % и price_band low/mid (ambition-levels.yaml L0 conditions[0], решение 20 site); иначе ветка L1 (Отвес)"
+budget_profile: landing-lead-services@L0
+when:
+  - "одна цель — заявка или звонок; человек сравнивает 3–5 подрядчиков с телефона"
+  - "реклама с намерением, карты, ретаргетинг; чек до ≈ 30 тыс. ₽"
+not_when:
+  - "высокий чек и длинное решение — ветка L1 (how-it-works со скрабом CSS, I otves-home)"
+  - "кампания, где впечатление и есть сообщение — рецепт 04"
+inputs:
+  site_example: "../site/10-playbooks-contracts/examples/lead-services-otves/plans/home.yaml"
+  playbook: "../site/10-playbooks-contracts/02-playbooks-landings.md#3"
+  art_direction_example: "01-creative-direction/examples/art-direction-otves.json"
+  copy_deck_example: "../text/10-templates-recipes/examples/ru-otves-lead.yaml"
+  asset_plan_example: "../site/10-playbooks-contracts/examples/lead-services-otves/asset-plan.home.yaml"
+  treatment_example: "09-ai-execution-evaluation/examples/otves-home.treatment.yaml"
+  motion_spec_example: "10-recipes/examples/l0-sdano/motion-spec.yaml"
+  kimi: "../kimi-research/03-prompting/04-template-library.md (T7 не нужен: движения почти нет; T8 — типографика)"
+  video: ["V:yAWFjiaK1Ek 10:59"]
+concept:
+  thesis: "Страница — первый лист акта осмотра: план квартиры с красными номерами дефектов, чёрная тушь, ни одного обещания без пункта и способа проверки."
+  story: {hero: "владелец квартиры перед подписью акта", conflict: "застройщик торопит, скрытое после подписи станет вашим", resolution: "инженер находит и записывает — исправляет застройщик"}
+  signature_move: "ключевой визуал из материала услуги — векторный план с отметками дефектов и легендой «первая страница акта»"
+  directions: ["A «Акт» — белая бумага, гротеск, красная отметка (выбран)", "B «Лупа» — макрофото реальных дефектов", "C «Таймер приёмки» — хронология осмотра, антиква"]
+ledger:
+  paper: light
+  display_style: grotesque
+  accent_hue: warm
+  macrostructure: split-studio
+  hero_architecture: split-text-left
+  main_technique: "effect:hero-entrance-once"
+  motion_signature: {entrances: "none ниже первого экрана; pop-in отметок", tempo: still, curve: out-expo}
+  corner_language: sharp
+moodboard:
+  - {role: composition, query: "технический бланк, акт осмотра, чертёж БТИ", take: "сетка граф, нумерация пунктов, линейки", dont_take: "газетный хром ради хрома"}
+  - {role: type, ref: "04-visual-language/cyrillic-display-fonts.yaml#golos-text", take: "гротеск 800 в 2–3 строки, tabular-nums", dont_take: "капс-надзаголовки"}
+  - {role: antiref, query: "приёмка квартиры под ключ лендинг", take: "—", dont_take: "фото прораба под вуалью, три карточки «почему мы», счётчики"}
+page_plan:
+  macrostructure: split-studio
+  first_screen_policy: offer-cta
+  length: "10 секций (норма 8–12)"
+  sections:
+    - {id: header, block: "block:header", role: header, level: L0, visual_role: chrome}
+    - {id: hero, block: "block:hero-media", role: hero, level: L0, visual_role: accent, effects: ["effect:hero-entrance-once"], assets: [hero-visual], copy_slots: [eyebrow, headline, subheadline, hero-proof, cta-label], reduce: final-state, mobile: "stacked: текст, кнопка на всю ширину, план"}
+    - {id: proof-stats, block: "block:stat-strip", role: proof-stats, level: L0, visual_role: calm, copy_slots: [stat-value, stat-label, stat-source]}
+    - {id: offer, block: "block:offer-details", role: offer, level: L0, visual_role: calm, copy_slots: [section-title, list-item]}
+    - {id: pricing, block: "block:pricing-table", role: pricing, level: L0, visual_role: calm, copy_slots: [pricing-price, pricing-price-note]}
+    - {id: how-it-works, block: "block:steps", role: how-it-works, level: L0, visual_role: support, copy_slots: [step-title, step-body], note: "на L1 — линия-отвес (I otves-home)"}
+    - {id: case-studies, block: "block:case-study", role: case-studies, level: L0, visual_role: support, note: "образец акта с печатью «Образец»"}
+    - {id: faq, block: "block:faq", role: faq, level: L0, visual_role: calm, effects: ["effect:details-accordion"], reduce: crossfade}
+    - {id: lead-form, block: "block:lead-form", role: lead-form, level: L0, visual_role: calm, copy_slots: [form-title, form-consent]}
+    - {id: footer, block: "block:footer", role: footer, level: L0, visual_role: chrome, copy_slots: [footer-legal]}
+    - {id: sticky-cta, block: "block:sticky-cta", role: utility, level: L0, visual_role: chrome, mobile: "только ≤ 40rem; прячется, пока видна кнопка hero или форма"}
+motion:
+  thesis: "Двигается только красная отметка дефекта: план один раз ставит номера замечаний, остальное стоит, как подписанный акт."
+  primitives: [fade-up, none]
+  peaks: []
+  accents: [hero]
+  toggle: none
+  smooth_scroll: false
+  transitions: none
+  loops_in_view_max: 0
+  motion_spec_example: "10-recipes/examples/l0-sdano/motion-spec.yaml"
+stack:
+  library: [css]
+  js_first_kb_br: 0.5
+  notes: "без GSAP, Lenis, WebGL (запрет L0); один встроенный скрипт IO для липкого призыва"
+  platforms:
+    tilda: "Zero Block; появление Step-by-step ≤ 600 мс (на телефоне выключено по умолчанию); код §6 — один T123; проверка на опубликованной"
+    1c-bitrix: "CSS шаблона + один бандл через Asset::addString(<script type=module>); проверить порядок html.js до стилей"
+    static: "как пример J/01"
+assets:
+  - {slot: hero-visual, ladder: svg, source: code, task_codes: [VEC-TRACE], budget_kb: 15, note: "план — код; обвод плана БТИ заказчика VEC-TRACE, если есть"}
+  - {slot: team-photo, ladder: image, source: real, budget_kb: 150, note: "только реальные люди с согласием"}
+  - {slot: og-image, ladder: image, source: template, task_codes: [IMG-TEXT-CYR], budget_kb: 300}
+copy:
+  promise: "найдём дефекты до подписи акта"
+  slots: [eyebrow, headline, subheadline, hero-proof, cta-label, stat-value, stat-label, step-title, step-body, faq-q, faq-a, form-title, form-consent, footer-legal]
+  deck_example: "../text/10-templates-recipes/examples/ru-otves-lead.yaml"
+  rules: ["H1 ≤ 38 знаков", "цены и цифры — fact_ids", "висячие предлоги — &nbsp; (MKT-T5)", "без отзывов, если нет фактов"]
+budget:
+  js_presentation_kb_br: {mobile: 20, desktop: 20, example: 0.5}
+  first_screen_mb: {mobile: 1.5, desktop: 2.5, example: 0.071}
+  session_mb: {mobile: 3, desktop: 5, example: 0.071}
+  fonts_kb: {mobile: 150, desktop: 150, example: 58.9}
+  source: "01-creative-direction/ambition-levels.yaml L0; пример — 99-raw/experiments/J/01-l0-sdano/motion/gates.md"
+gates:
+  tools: ["motion_check.py --level L0 --spec", "marketing_audit.py --level L0"]
+  must_pass: [EG-PERF-07, EG-PERF-09, EG-A11Y-01, EG-A11Y-06, EG-A11Y-10, EG-FB-01, EG-FB-03, EG-WEIGHT-01]
+  watch: ["H12 tabular-nums после шортката font", "B3 одна высота контролов", "J1 форма ≤ 640 px", "EG-PERF-07 на телефоне: LCP может быть лидом"]
+  manual: ["публикация на Тильде: анимация Zero на телефоне", "право: согласие 152-ФЗ и политика — site"]
+decisions:
+  - {id: d-veil, technique: "cliche:hero-media-veil", decision: avoid, why: "фото под вуалью прячет доказательство; ключевой визуал — план, текст на бумаге"}
+  - {id: d-hairlines, technique: "cliche:broadsheet-hairlines", decision: twist, why: "линейки — язык акта из концепции, а не газетный декор; радиус 0 только у документа и кнопки"}
+  - {id: d-fade, technique: "cliche:section-fade-up", decision: avoid, why: "появление только в первом экране; ниже чтение, цены и форма видны сразу"}
+  - {id: d-caps, technique: "cliche:caps-eyebrow", decision: avoid, why: "надзаголовок обычным регистром 15 px, токен --type-eyebrow"}
+errors:
+  - "фото прораба на весь hero под вуалью (hero-media-veil)"
+  - "счётчики у цены и числа пунктов"
+  - "fade-up на каждой секции (у K3 — 6 из 15 работ прячут ≥ 10 % элементов)"
+  - "анимация высоты FAQ (interpolate-size) — MKT-M2, схема motion-spec"
+  - "font: шорткат снимает tabular-nums (H12)"
+  - "три призыва в одном экране телефона (шапка + hero + липкий)"
+example:
+  path: "10-recipes/examples/l0-sdano/"
+  gates: "99-raw/experiments/J/01-l0-sdano/motion-0.1.3/gates.md"
+  result: "motion_check L0: FAIL 0 (B 0, S 0, D 0) — J на 0.1 (J/01-l0-sdano/motion) и перепрогон J2 на 0.1.3, ворота v0.2 (N/A 5, F83 h1 18,4:1); marketing_audit: B 0, S 7 → 3 → 0 (правки B3, J1, H12)"

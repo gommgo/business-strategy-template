@@ -1,0 +1,40 @@
+<!doctype html>
+<!-- R3F 9.8 + drei 10.7.8 + three r186 — [проверено: 99-raw/experiments/F2/02-r3f-hero] hero для React-проекта -->
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>R3F hero</title>
+<style>
+  body { margin: 0; font: 18px/1.5 system-ui, sans-serif; background: #e9e6f2; color: #1b1530; }
+  header { padding: 6vh 6vw 1vh; max-width: 900px; }
+  h1 { font-size: clamp(32px, 5vw, 60px); margin: 0 0 .3em; line-height: 1.05; }
+  /* место под 3D зарезервировано (CLS 0); градиент — запасной вид без WebGL */
+  .hero { position: relative; width: min(92vw, 880px); aspect-ratio: 16 / 10; margin: 0 auto;
+          background: radial-gradient(55% 60% at 50% 50%, #ffffff 0%, #efeaf7 45%, #e9e6f2 75%); }
+  .hero canvas { opacity: 0; transition: opacity .5s; }
+  .hero.is-live canvas { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .hero canvas { transition: none; } }
+  main { padding: 4vh 6vw 110vh; max-width: 900px; }
+</style>
+</head><body>
+<header><h1>Жемчужный узел</h1><p>Текст и кнопка — в HTML; 3D грузится после LCP отдельным чанком.</p><a href="#buy">Купить</a></header>
+<div class="hero" id="hero"></div>
+<main><p id="buy">Характеристики — обычный HTML.</p></main>
+<script type="module">
+const hero = document.getElementById('hero');
+const hasWebGL2 = (() => { try { return !!document.createElement('canvas').getContext('webgl2'); } catch (e) { return false; } })();
+if (hasWebGL2) {
+  const io = new IntersectionObserver(async (es) => {
+    if (!es.some((e) => e.isIntersecting)) return;
+    io.disconnect();
+    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 200));
+    const go = () => idle(async () => {
+      const { mount } = await import('./hero.js');       // чанк React + R3F + drei + three
+      mount(hero);
+      const wait = () => (window.__ready ? hero.classList.add('is-live') : requestAnimationFrame(wait)); wait();
+    }, { timeout: 2000 });
+    if (document.readyState === 'complete') go(); else addEventListener('load', go, { once: true });
+  }, { rootMargin: '200px' });
+  io.observe(hero);
+} else { window.__ready = true; }
+</script>
+</body></html>

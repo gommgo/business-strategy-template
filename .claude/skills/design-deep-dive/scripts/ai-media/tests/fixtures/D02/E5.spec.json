@@ -1,0 +1,144 @@
+{
+ "spec_version": "0.1",
+ "checked_at": "2026-09-23",
+ "brief_language": "ru",
+ "id": "promo-banner-cyr",
+ "task": "IMG-TEXT-CYR",
+ "role": {
+  "page_type": "ecommerce",
+  "section": "promo",
+  "slot": "promo-banner",
+  "purpose": "баннер весенней распродажи; надпись — в картинке (декоративная), запасной путь — HTML"
+ },
+ "subject": {
+  "summary": "a flat lay of spring gardening tools and seed packets on a light wooden table",
+  "elements": [
+   {
+    "id": "tools",
+    "what": "small trowel and pruning shears with sage-green handles",
+    "position": "right half"
+   },
+   {
+    "id": "seeds",
+    "what": "plain kraft-paper seed packets",
+    "position": "right half"
+   },
+   {
+    "id": "sprout",
+    "what": "terracotta pot with a young seedling",
+    "position": "lower right"
+   }
+  ],
+  "environment": "light wooden tabletop",
+  "culture": "Russian dacha spring gardening"
+ },
+ "composition": {
+  "shot": "flat-lay",
+  "angle": "top-down",
+  "subject_region": "right-third",
+  "focal_point": {
+   "x": 0.72,
+   "y": 0.55
+  },
+  "text_zone": {
+   "side": "left",
+   "rect": [
+    0.04,
+    0.08,
+    0.5,
+    0.6
+   ],
+   "surface": "clear light wood surface",
+   "tone": "even",
+   "purpose": "headline"
+  }
+ },
+ "light": {
+  "source": "soft overcast daylight",
+  "direction": "top",
+  "quality": "soft"
+ },
+ "palette": [
+  {
+   "role": "background",
+   "hex": "#E8DCC8",
+   "name": "light birch wood",
+   "share": 0.55,
+   "applies_to": "tabletop"
+  },
+  {
+   "role": "secondary",
+   "hex": "#8FA382",
+   "name": "sage green",
+   "share": 0.2,
+   "applies_to": "tool handles and leaves"
+  },
+  {
+   "role": "accent",
+   "hex": "#C1653A",
+   "name": "terracotta",
+   "share": 0.1,
+   "applies_to": "flower pot"
+  },
+  {
+   "role": "text",
+   "hex": "#1F3A2E",
+   "name": "dark forest green",
+   "share": 0.05,
+   "applies_to": "headline"
+  }
+ ],
+ "style": {
+  "medium": "photograph",
+  "anchors": [
+   "clean product flat lay",
+   "true-to-life colors"
+  ]
+ },
+ "text": {
+  "mode": "in_image",
+  "fallback": "html_overlay",
+  "ocr_check": true,
+  "strings": [
+   {
+    "text": "Весенняя распродажа",
+    "language": "ru",
+    "script": "Cyrillic",
+    "role": "headline",
+    "position": "in the upper left area",
+    "typography": "bold rounded sans-serif",
+    "color": "#1F3A2E",
+    "size": "xl"
+   },
+   {
+    "text": "до 31 марта",
+    "language": "ru",
+    "script": "Cyrillic",
+    "role": "subhead",
+    "position": "directly below the headline",
+    "typography": "regular rounded sans-serif",
+    "color": "#1F3A2E",
+    "size": "medium"
+   }
+  ]
+ },
+ "exclusions": [
+  {
+   "what": "watermark",
+   "kind": "service"
+  },
+  {
+   "what": "logo",
+   "kind": "service"
+  }
+ ],
+ "output": {
+  "primary_ratio": "16:9",
+  "aspect_ratios": [
+   "16:9"
+  ],
+  "resolution": "2K",
+  "format": "webp",
+  "max_kb": 200
+ }
+}

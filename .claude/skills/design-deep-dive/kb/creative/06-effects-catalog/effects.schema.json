@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://creative-research.local/06-effects-catalog/effects.schema.json",
+  "title": "effects.yaml — каталог эффектов подачи (creative-research)",
+  "description": "Каталог не-3D эффектов маркетинговых страниц с ценой, фолбэками, reduce, телефоном и риском клише; 3D и эффекты J ai-media — ссылками. Контракт тройки §3 п.6. Поле reduce.strategy — перечисление treatment v1 (I, 09-ai-execution-evaluation/treatment.schema.json; + stations с S1 2026-09-25), mobile.behavior — перечисление treatment.v0 (A); motion.kind, attention_cost, loop_control — запрос E.",
+  "x-version": "0.3",
+  "x-checked": "2026-09-25",
+  "x-owner": "creative F (волна 2); правки по аудиту X — S1 (волна 4, 2026-09-25): reduce.strategy v1, roles → effect_role, cliche.status; S1b (2026-09-25): motion.kind — строка или список (X-64)",
+  "x-doc": "06-effects-catalog/01-effects-catalog.md",
+  "type": "object",
+  "required": ["version", "checked_at", "effects"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "string" },
+    "checked_at": { "type": "string", "format": "date" },
+    "owner": { "type": "string" },
+    "doc": { "type": "string" },
+    "method": { "type": "string", "description": "Где метод замеров (03-effects-lab-method.md) и какие браузеры." },
+    "families": { "type": "array", "items": { "type": "object", "required": ["id", "name_ru"], "additionalProperties": false,
+      "properties": { "id": { "$ref": "#/$defs/family" }, "name_ru": { "type": "string" }, "doc": { "type": "string" } } } },
+    "id_map": { "type": "array", "description": "Соответствие временных id A (treatment.v0 x-effect-ids-v0) и id каталога; по нему I и K правят ссылки.",
+      "items": { "type": "object", "required": ["old", "new"], "additionalProperties": false,
+        "properties": { "old": { "$ref": "#/$defs/effect-ref" }, "new": { "$ref": "#/$defs/effect-ref" }, "note": { "type": "string" } } } },
+    "effects": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/effect" } }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "effect-ref": { "type": "string", "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$" },
+    "level": { "enum": ["L0", "L1", "L2"] },
+    "family": { "enum": ["text", "marquee", "scroll", "pin", "transition", "cursor", "background", "surface", "mask", "video", "image", "3d", "number", "page", "micro", "vector"], "description": "micro и vector — добавлены F2 2026-09-25 (микровзаимодействия; Lottie и Rive)." },
+    "nullable-number": { "type": ["number", "null"] },
+    "effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name_ru", "family", "purpose", "level_min", "status", "motion", "implementation", "cost", "fallback", "mobile", "a11y", "cliche", "evidence", "checked_at"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name_ru": { "type": "string" },
+        "name_en": { "type": "string" },
+        "family": { "$ref": "#/$defs/family" },
+        "purpose": { "type": "string", "description": "Зачем приём на странице: какую задачу подачи решает (одной фразой)." },
+        "effect_role": { "type": "array", "items": { "enum": ["signature", "support", "feedback"] },
+          "description": "Роль эффекта — как обычно используется в treatment.effects[].purpose (signature — фирменный приём, support — поддержка системы, feedback — отклик). До S1 2026-09-25 ключ назывался roles; не путать с section_role site (роль секции сюжета) и visual_role treatment (X-54, site C4)." },
+        "level_min": { "$ref": "#/$defs/level" },
+        "limits": { "type": "object", "description": "Потолки по уровню и странице: per_page_L0/L1/L2 (null — по бюджету внимания), scroll_vh_L1 и т. п.",
+          "additionalProperties": { "type": ["number", "string", "null", "array"] } },
+        "status": { "enum": ["measured", "draft", "external"],
+          "description": "measured — есть lab/<id>/ и замер effect_bench; draft — страница есть, замера нет; external — только ссылки на соседей (3D, секвенции)." },
+        "replaces": { "type": "array", "items": { "$ref": "#/$defs/effect-ref" } },
+        "motion": {
+          "type": "object", "additionalProperties": false, "required": ["kind", "attention_cost"],
+          "properties": {
+            "kind": { "description": "Класс движения эффекта; список — у эффекта с несколькими классами моментов (первый — главный; 3d-scene: скраб сюжета + разовое пробуждение). MS-05 spec_check.py принимает класс момента из списка (X-64, S1b 2026-09-25)", "anyOf": [ { "enum": ["one-shot", "scroll-linked", "loop", "pointer", "transition", "static"] }, { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "enum": ["one-shot", "scroll-linked", "loop", "pointer", "transition", "static"] } } ] },
+            "trigger": { "type": "array", "items": { "enum": ["load", "in-view", "scroll", "pin-scroll", "hover", "click", "idle-loop", "page-transition"] } },
+            "attention_cost": { "type": "integer", "minimum": 0, "maximum": 3,
+              "description": "Сколько непрерывных движений добавляет в видимую зону в покое: петля = 1 на объект (дорожка бегущей строки = 1), остальное 0 (E)." },
+            "duration_ms": { "type": ["array", "null"], "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+            "scroll_vh": { "type": ["array", "null"], "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+            "props": { "type": "array", "items": { "type": "string" }, "description": "Анимируемые свойства (transform, opacity, clip-path, mask-position, font-variation-settings, uniform …)." },
+            "rules_ref": { "type": "string", "description": "Где нормы движения (E, 05-motion/…)." }
+          }
+        },
+        "implementation": {
+          "type": "object", "additionalProperties": false, "required": ["type"],
+          "properties": {
+            "type": { "enum": ["css", "js", "webgl", "video", "lottie", "rive", "svg"] },
+            "libs": { "type": "array", "items": { "type": "object", "required": ["name"], "additionalProperties": false,
+              "properties": { "name": { "type": "string" }, "version": { "type": "string" }, "kb_br": { "type": "number" }, "license": { "type": "string" }, "optional": { "type": "boolean" } } } },
+            "demo": { "type": ["string", "null"], "pattern": "^lab/[a-z0-9-]+/(\\?.*)?$" },
+            "variants": { "type": "array", "items": { "type": "object", "required": ["id", "type"], "additionalProperties": false,
+              "properties": { "id": { "type": "string" }, "type": { "enum": ["css", "js", "webgl", "video", "lottie", "rive", "svg"] },
+                "demo": { "type": "string" }, "libs": { "type": "array", "items": { "type": "string" } }, "note": { "type": "string" } } } },
+            "external_ref": { "type": "array", "items": { "type": "string", "pattern": "^(blender|ai-media|ui|ux|kimi|site|text):[0-9a-z]{2}-[0-9a-z]{2}#[0-9.]+|^(blender|ai-media|ui|ux|kimi|site|text):" } },
+            "code_ref": { "type": "string" },
+            "stack_ref": { "type": "string", "description": "Строка stack.yaml G (выбор библиотеки)." },
+            "support": { "type": "object", "additionalProperties": { "type": "string" },
+              "description": "Поддержка ключевой возможности браузерами с датой: {\"animation-timeline\": \"Chrome 115+, Safari 26+, Firefox — флаг (MDN BCD 2026-09-24)\"}." }
+          }
+        },
+        "cost": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "bytes_br": { "$ref": "#/$defs/nullable-number", "description": "Байты эффекта по сети (свой код + библиотеки + медиа; br q11 для текста), без общей обвязки и шрифтов." },
+            "js_kb_br": { "$ref": "#/$defs/nullable-number" },
+            "fps_desktop": { "$ref": "#/$defs/nullable-number" },
+            "fps_mobile_emulated": { "$ref": "#/$defs/nullable-number", "description": "Chromium, Pixel 7, CPU ×4 (эмуляция, не телефон)." },
+            "fps_webkit": { "$ref": "#/$defs/nullable-number" },
+            "fps_webkit_mobile": { "$ref": "#/$defs/nullable-number", "description": "WebKit 26.6 Playwright, дескриптор iPhone 13 (без троттлинга CPU; прокрутка — scrollBy). Добавлено F2 2026-09-24." },
+            "frame_ms_unlimited": { "$ref": "#/$defs/nullable-number", "description": "1000 / кадров в секунду без vsync (Chromium, Iris Xe) — относительная цена кадра." },
+            "loaf_ms": { "$ref": "#/$defs/nullable-number", "description": "Сумма long-animation-frame за 4-секундный сценарий, телефон CPU ×4." },
+            "cls": { "$ref": "#/$defs/nullable-number" },
+            "input_delay_ms_mobile": { "$ref": "#/$defs/nullable-number", "description": "Длительность Event Timing клика-зонда посреди сценария, телефон CPU ×4." },
+            "inp_risk": { "enum": ["low", "mid", "high", null], "description": "low < 100 мс, mid 100–200, high > 200 по input_delay_ms_mobile." },
+            "gpu": { "type": "string", "description": "Вид нагрузки: compositor (transform/opacity), paint, filter (blur/backdrop), webgl-1-pass, webgl-N, video-decode." },
+            "note": { "type": "string" },
+            "measured": { "type": "object", "description": "Сырые медианы effect_bench по режимам (desk, unl, rm, nogl, nojs, mob, wk, wkrm, wkmob); unl у прокрутки — прокрутка из rAF (F2)." }
+          }
+        },
+        "fallback": {
+          "type": "object", "additionalProperties": false, "required": ["no_js", "reduce"],
+          "properties": {
+            "no_js": { "oneOf": [ { "type": "string" }, { "type": "object" } ] },
+            "no_webgl": { "oneOf": [ { "type": "string" }, { "type": "object" }, { "type": "null" } ] },
+            "no_support": { "type": "string", "description": "Без поддержки ключевой возможности (animation-timeline, View Transitions): что видит пользователь." },
+            "reduce": {
+              "type": "object", "additionalProperties": false, "required": ["strategy"],
+              "properties": {
+                "strategy": { "enum": ["final-state", "crossfade", "static-poster", "stations", "no-motion-needed", "custom"],
+                  "description": "Перечисление treatment v1 (I): stations — скраб → 2–6 дискретных кадров-станций без закрепления и инерции (E 05-motion/01 §4.2); custom — описать в note. До S1 2026-09-25 — перечисление v0 без stations (X-05)." },
+                "note": { "type": "string" },
+                "measured": { "type": "object" }
+              }
+            }
+          }
+        },
+        "mobile": {
+          "type": "object", "additionalProperties": false, "required": ["behavior"],
+          "properties": {
+            "behavior": { "enum": ["same", "simplified", "static", "poster", "hidden-decor", "separate-asset"], "description": "Перечисление treatment.v0 mobile.strategy (A)." },
+            "touch_alt": { "type": ["string", "null"] },
+            "disabled_below_px": { "type": ["integer", "null"] },
+            "note": { "type": "string" }
+          }
+        },
+        "a11y": {
+          "type": "object", "additionalProperties": false, "required": ["wcag", "pause_required", "flashes"],
+          "properties": {
+            "wcag": { "type": "array", "items": { "type": "string", "pattern": "^[1-4]\\.[0-9]+\\.[0-9]+$" } },
+            "pause_required": { "type": "boolean" },
+            "loop_control": { "type": "array", "items": { "enum": ["pause-button", "stops-within-5s", "not-parallel-content"] } },
+            "flashes": { "enum": ["none", "below-3-per-s", "risk"] },
+            "note": { "type": "string" }
+          }
+        },
+        "assets": { "type": "object", "additionalProperties": false,
+          "properties": { "ai_media": { "type": "array", "items": { "type": "string" } }, "blender": { "type": "array", "items": { "type": "string" } }, "note": { "type": "string" } } },
+        "cliche": {
+          "type": "object", "additionalProperties": false, "required": ["risk", "registry_id"],
+          "properties": {
+            "risk": { "enum": ["low", "mid", "high"] },
+            "status": { "type": "string", "description": "Копия статуса реестра H на дату сборки + пояснение (fresh / rising / saturated / dated / n/a). Канон — 08-uniqueness-anti-slop/cliche-registry.yaml по registry_id; при registry_id слово статуса сверяет check_refs.py (S1 2026-09-25)." },
+            "dated": { "type": "string" },
+            "registry_id": { "type": ["string", "null"], "pattern": "^(cliche:[a-z0-9]+(-[a-z0-9]+)*|tbd)$" },
+            "turn": { "type": "string", "description": "Поворот, который выводит приём из клише (предложение F; решение — H)." }
+          }
+        },
+        "rules": { "type": "array", "items": { "type": "string" }, "description": "Короткие исполнимые правила для исполнителя (условие + число)." },
+        "evidence": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "checked_at": { "type": "string", "format": "date" },
+        "verified": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    }
+  },
+  "examples": [
+    {
+      "version": "0.1", "checked_at": "2026-09-24",
+      "effects": [ {
+        "id": "marquee-logos", "name_ru": "Бегущая строка логотипов", "family": "marquee",
+        "purpose": "Показать ширину клиентской базы одной строкой без сетки из 12 плиток.", "level_min": "L0", "status": "measured",
+        "motion": { "kind": "loop", "trigger": ["idle-loop"], "attention_cost": 1, "props": ["transform"] },
+        "implementation": { "type": "css", "demo": "lab/marquee-logos/" },
+        "cost": { "bytes_br": 1500, "js_kb_br": 0.5, "fps_desktop": 60, "gpu": "compositor" },
+        "fallback": { "no_js": "дорожка едет с длительностью по умолчанию; пауза — чекбокс :has()", "reduce": { "strategy": "final-state", "note": "статичная сетка без дубля" } },
+        "mobile": { "behavior": "same" },
+        "a11y": { "wcag": ["2.2.2"], "pause_required": true, "loop_control": ["pause-button"], "flashes": "none" },
+        "cliche": { "risk": "mid", "registry_id": "cliche:marquee-strip" },
+        "evidence": ["[проверено: 99-raw/experiments/F/01-pilot]"], "checked_at": "2026-09-24"
+      } ]
+    }
+  ]
+}

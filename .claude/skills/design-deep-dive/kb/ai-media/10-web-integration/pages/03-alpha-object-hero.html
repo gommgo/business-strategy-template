@@ -1,0 +1,80 @@
+<!doctype html>
+<!-- 03 · Hero с парящим объектом: подложка AVIF + прозрачное видео объекта (stacked alpha → WebGL2; AV1 → HEVC → H.264) +
+     HTML-текст + параллакс слоёв по прокрутке (scroll-driven animations) + слой тени (multiply). Движение объекта ≤ 5 с, затем
+     стоп на кадре 0 (WCAG 2.2.2 без кнопки), повтор — по наведению/фокусу; reduce → статичный AVIF с альфой, без параллакса.
+     Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/06-pages-measure (Chromium 153). -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VELMORA — крем для рук</title>
+<link rel="icon" href="assets/svg/favicon.ico" sizes="32x32">
+<link rel="icon" href="assets/svg/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .hero { min-height: 88svh; background: #1a1714; }
+  .layer { position: absolute; inset: 0; }
+  .layer--back img { width: 100%; height: 100%; object-fit: cover; object-position: 60% 50%; }
+  .layer--back::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgb(20 18 16 / .72) 0%, rgb(20 18 16 / .45) 42%, rgb(20 18 16 / 0) 70%); }
+  .object { position: absolute; left: 62%; top: 18%; width: clamp(150px, 16vw, 230px); aspect-ratio: 160 / 272; }
+  .object canvas, .object img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .object img.is-hidden { visibility: hidden; }
+  .object canvas:not(.is-live) { visibility: hidden; }
+  .object video { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  .shadow { position: absolute; left: calc(62% - 2vw); top: calc(18% + clamp(150px, 16vw, 230px) * 1.75); width: clamp(190px, 20vw, 290px);
+    height: 44px; border-radius: 50%; background: radial-gradient(closest-side, rgb(0 0 0 / .55), rgb(0 0 0 / 0)); mix-blend-mode: multiply; }
+  @media (max-width: 699px) {
+    /* телефон: текст сверху по яркому небу — скрим сверху вниз (альфа из проверки F83 по буквам, J/06); флакон — слева от дерева */
+    .layer--back::after { background: linear-gradient(180deg, rgb(20 18 16 / .80) 0%, rgb(20 18 16 / .66) 48%, rgb(20 18 16 / .15) 70%, rgb(20 18 16 / 0) 82%); }
+    .object { left: 14%; top: auto; bottom: 9%; width: 112px; }
+    .shadow { left: 9%; top: auto; bottom: 6%; width: 150px; }
+    .hero__copy { padding-top: 64px; }
+  }
+  /* параллакс слоёв: подложка отстаёт (≈ 40 %), объект уходит быстрее; только при no-preference и поддержке */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: scroll()) {
+      .layer--back { animation: back linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
+      .object, .shadow { animation: front linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
+      @keyframes back { to { transform: translateY(24vh); } }
+      @keyframes front { to { transform: translateY(-12vh); } }
+    }
+  }
+</style>
+</head>
+<body>
+<section class="hero" aria-labelledby="h1">
+  <div class="layer layer--back" aria-hidden="true">
+    <picture>
+      <source media="(max-width: 699px)" type="image/avif" srcset="assets/hero/night-4x5-720.avif 720w, assets/hero/night-4x5-1080.avif 1080w" sizes="100vw" width="1080" height="1350">
+      <source type="image/avif" srcset="assets/hero/night-16x9-1280.avif 1280w, assets/hero/night-16x9-1920.avif 1920w, assets/hero/night-16x9-2560.avif 2560w" sizes="100vw" width="2560" height="1440">
+      <img src="assets/hero/night-16x9-1280.webp" srcset="assets/hero/night-16x9-1280.webp 1280w, assets/hero/night-16x9-1920.webp 1920w" sizes="100vw" width="2560" height="1440" alt="" fetchpriority="high">
+    </picture>
+  </div>
+  <div class="shadow" aria-hidden="true"></div>
+  <div class="object" data-stacked-alpha data-motion-seconds="3">
+    <picture><source type="image/avif" srcset="assets/alpha/bottle-still.avif"><img src="assets/alpha/bottle-still.webp" width="160" height="272"
+         alt="Флакон крема для рук VELMORA с золотой крышкой"></picture>
+    <canvas width="160" height="272" aria-hidden="true"></canvas>
+    <video muted loop playsinline preload="none" aria-hidden="true" tabindex="-1">
+      <source data-src="assets/alpha/bottle.stacked.av1.mp4" type='video/mp4; codecs="av01.0.00M.08"'>
+      <source data-src="assets/alpha/bottle.stacked.hevc.mp4" type='video/mp4; codecs="hvc1.1.6.L60.B0"'>
+      <source data-src="assets/alpha/bottle.stacked.h264.mp4" type='video/mp4; codecs="avc1.64000d"'>
+    </video>
+  </div>
+  <div class="hero__copy">
+    <p class="hero__kicker">VELMORA · уход за руками</p>
+    <h1 id="h1">Крем, который хочется держать под рукой</h1>
+    <p class="hero__lead">Плотная текстура без липкости, запах ночного сада. 75 мл — на целый сезон.</p>
+    <a class="hero__cta" href="#buy">Купить за 1 490 ₽</a>
+  </div>
+</section>
+<section class="section" style="min-height: 120vh">
+  <h2>Как собран этот экран</h2>
+  <p>Подложка — AVIF 1920 px (82 КБ); флакон — прозрачное видео 160×272 «двойной высоты» (AV1 12,5 КБ, запас HEVC 15,7 КБ и H.264
+     21,5 КБ) через WebGL2; до первого кадра и при «уменьшить движение» — статичный AVIF с альфой 2,2 КБ. Тень — радиальный градиент
+     с multiply (для реального товара — слой тени из рендера, страница 07).</p>
+</section>
+<script type="module" src="js/stacked-alpha.js"></script>
+</body>
+</html>

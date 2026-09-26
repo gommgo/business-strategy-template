@@ -1,0 +1,221 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "ai-media-research/14-recipes/recipe.schema.json",
+ "title": "Рецепт «бриф → ассет → страница» (M, волна 3)",
+ "type": "object",
+ "required": [
+  "recipe_version",
+  "id",
+  "title",
+  "checked_at",
+  "doc",
+  "task_codes",
+  "slot",
+  "ladder",
+  "ai_fit",
+  "legal_row",
+  "route",
+  "steps",
+  "accept",
+  "provenance",
+  "status"
+ ],
+ "properties": {
+  "recipe_version": {
+   "const": 1
+  },
+  "id": {
+   "type": "string",
+   "pattern": "^[a-z0-9-]+$"
+  },
+  "title": {
+   "type": "string"
+  },
+  "checked_at": {
+   "type": "string"
+  },
+  "author": {
+   "type": "string"
+  },
+  "doc": {
+   "type": "string"
+  },
+  "task_codes": {
+   "type": "array",
+   "items": {
+    "type": "string",
+    "pattern": "^(IMG|VID|VEC)-[A-Z0-9-]+$"
+   },
+   "minItems": 1
+  },
+  "slot": {
+   "type": "string"
+  },
+  "ladder": {
+   "enum": [
+    "text",
+    "svg",
+    "css",
+    "shader",
+    "image",
+    "video",
+    "3d"
+   ]
+  },
+  "ai_fit": {
+   "enum": [
+    "allowed",
+    "conditional",
+    "forbidden"
+   ]
+  },
+  "legal_row": {
+   "type": "integer",
+   "minimum": 1,
+   "maximum": 25
+  },
+  "route": {
+   "type": "object",
+   "required": [
+    "source",
+    "steps"
+   ],
+   "properties": {
+    "source": {
+     "type": "string"
+    },
+    "steps": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "role",
+       "model",
+       "price_rub"
+      ]
+     }
+    }
+   }
+  },
+  "spec": {
+   "type": "object",
+   "properties": {
+    "ancestors": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "sources": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "compile": {
+   "type": "string"
+  },
+  "phase5": {
+   "type": "object",
+   "properties": {
+    "jobs": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "reuse": {
+     "type": "array"
+    },
+    "estimate": {
+     "type": "string"
+    }
+   }
+  },
+  "steps": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "cmd",
+     "status"
+    ],
+    "properties": {
+     "status": {
+      "enum": [
+       "checked",
+       "unchecked"
+      ]
+     },
+     "evidence": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "accept": {
+   "type": "object",
+   "properties": {
+    "thresholds": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "delivery": {
+   "type": "object"
+  },
+  "provenance": {
+   "type": "object",
+   "required": [
+    "dst",
+    "visible_label"
+   ],
+   "properties": {
+    "dst": {
+     "enum": [
+      "trained",
+      "composite",
+      null
+     ]
+    },
+    "visible_label": {
+     "type": "boolean"
+    }
+   }
+  },
+  "numbers": {
+   "type": "object"
+  },
+  "status": {
+   "type": "object",
+   "required": [
+    "local",
+    "generation"
+   ],
+   "properties": {
+    "local": {
+     "enum": [
+      "checked",
+      "partial",
+      "unchecked"
+     ]
+    },
+    "generation": {
+     "enum": [
+      "checked",
+      "unchecked",
+      "not-applicable"
+     ]
+    }
+   }
+  }
+ },
+ "additionalProperties": false
+}

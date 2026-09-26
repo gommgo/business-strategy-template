@@ -1,0 +1,157 @@
+# ПРИМЕР J v1 · служебная страница consent (planlib.py); факты — демо text.
+page_plan_version: '1'
+checked: '2026-09-24'
+status: proposed
+example: true
+site: otves-remont-nn
+refs:
+  brief: ../site-brief.yaml
+  facts: ../../../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml
+  blocks: ../../../../04-blocks/blocks.yaml
+  vocabulary: ../../../../02-site-types/vocabulary.yaml
+  events: ../../../../07-seo-geo-performance-analytics/events.yaml
+page:
+  id: consent
+  page_type: legal-page
+  lang: ru
+  locale: ru-RU
+  jurisdiction:
+  - ru
+  goal: опубликовать текст согласия на обработку ПД отдельным документом с оператором и датой редакции
+  primary_action: booking
+  cta_target:
+    kind: anchor
+    value: '#lead-form'
+  awareness: product-aware
+  awareness_basis:
+    from: assumption
+    rule: уровень по главному источнику страницы (C 01 §3.1)
+  traffic:
+  - traffic_source: internal
+    temperature: hot
+    device: mixed
+  macrostructure: long-document
+  macrostructure_family: document
+  first_screen_policy: offer-cta-header
+  budget_profile: legal-page@L0
+  ambition_level: L0
+  navigation:
+    header: landing-minimal
+    archetype: minimal-cta
+    logo_link: /
+    breadcrumbs: false
+    footer: minimal
+  seo:
+    indexable: true
+    canonical: self
+    h1: legal.title
+    structured_data: []
+    ssr_required: true
+    sitemap: true
+  legal:
+    pd_consent: not-collected
+    privacy_policy: /privacy
+    cookie_banner: required
+    cookie_mode: opt-in
+    analytics_before_consent: false
+    withdraw_link: footer
+    requisites: footer
+    operator_ref: missing:legal-details
+  analytics:
+    systems:
+    - yandex-metrica
+    goals: []
+    load_after_consent: true
+sections:
+- id: header
+  role: header
+  question: куда вернуться и как связаться
+  job: логотип → главная, призыв, телефон
+  block: header
+  variant: landing-minimal
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: cta-label
+      slot: cta-label
+      intent: 'cta-label: по иерархии сообщений text'
+    media:
+    - id: logo
+      slot: brand-logo
+      media_role: informational
+      goal: показать brand-logo
+      source: generate
+      authenticity: real-or-generated
+    action:
+    - id: cta
+      slot: cta-primary
+      action: booking
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: cta-label
+    - id: phone
+      slot: phone-link
+      action: call
+      style: channel
+      target:
+        kind: tel
+        value: 'tel: номер из facts.yaml'
+      event: event:phone-click
+- id: legal
+  role: legal
+  question: кто обрабатывает мои данные и зачем
+  job: текст согласия на обработку ПД отдельным документом
+  block: legal-text
+  variant: privacy-policy
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: title
+      slot: article-title
+      heading: h1
+      intent: 'article-title: по иерархии сообщений text'
+    - id: date
+      slot: article-date
+      intent: дата редакции
+    - id: operator
+      slot: footer-legal
+      intent: 'оператор ПД или продавец: наименование, ОГРН или ИНН, адрес'
+    data:
+    - id: company
+      slot: fact-ref
+      fact: fact:company-since-2014
+      anatomy: company
+      binds:
+      - date
+- id: footer
+  role: footer
+  question: кто продавец и где документы
+  job: реквизиты, правовые ссылки, контакты
+  block: footer
+  variant: minimal
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: legal
+      slot: footer-legal
+      intent: 'footer-legal: по иерархии сообщений text'
+    - id: privacy-label
+      slot: nav-label
+      intent: подписи правовых ссылок
+    data:
+    - id: company
+      slot: fact-ref
+      fact: missing:legal-details
+      anatomy: company
+      on_missing: placeholder
+    action:
+    - id: privacy
+      slot: link
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'

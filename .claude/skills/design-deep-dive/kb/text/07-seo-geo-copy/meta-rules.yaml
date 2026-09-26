@@ -1,0 +1,297 @@
+# meta-rules.yaml — мета и OG: правила для линтера copy_lint.py (профиль meta) + справочник длин и шаблонов.
+# text-research · волна 2 · агент G · 2026-09-24. Подробности, примеры и спорные места — 07-seo-geo-copy/02-seo-pages-articles-meta.md §4–5.
+#
+# Как работает.
+# - Блок `rules` — формат спецификации C (06-anti-slop/02-linter-spec-and-profiles.md §2). Файл уже подключён в
+#   06-anti-slop/profiles.yaml → external_rules; линтер читает только `defaults`, `rules`, `overrides`, остальные ключи
+#   (`engines`, `limits`, `templates`, `checks_outside_linter`) — справочник для генерации (E, I, J) и для человека.
+# - Правила ищут по тексту одного слота. Мета-юниты: copy deck `meta.title / description / og_title / og_description`
+#   (жанр слота — meta), HTML `<title>`, `meta description`, `og:*` (жанр — жанр документа). Поэтому фильтр — slot_types,
+#   а genres — все жанры страниц, кроме email-form.
+# - Длина считается в знаках Python (кодовые точки). Поисковики режут по ширине экрана, а не по числу знаков: числа
+#   ниже — сигнал «проверь, что главное в начале», а не ворота. Ворота (error) — только то, что поисковики прямо называют
+#   плохим: пустой или общий title, набивка повторами, кликбейт.
+# - Проверки между полями и страницами (дубли title на сайте, description = title, og:title без title) регулярками не
+#   делаются — `checks_outside_linter`, скрипт опыта 99-raw/experiments/G/01-meta-corpus/run.py.
+# Тест загрузки: python3 ../../scripts/text/copy_lint.py --selftest (примеры каждого правила) и
+#               python3 99-raw/experiments/G/00-rules-load/test_rules.py (YAML, поля, прогон примеров по слотам).
+
+date: 2026-09-24
+version: 1
+owner: G (волна 2)
+status: provisional
+provisional: true          # пороги длины сверены с корпусом D (n страниц — в 01-meta-corpus/README.md); пересмотр после живой фазы
+
+defaults:
+  group: EXT
+  lang: any
+  flags: i
+  count_as_marker: false
+  mask_quotes: false
+  priority: 55
+  genres: [meta, landing, site-page, article, geo]
+  date: 2026-09-24
+
+# ---------------------------------------------------------------------------------------------------------------
+rules:
+  # --- ворота: пустой, общий или шаблонный title ------------------------------------------------------------------
+  - id: meta-title-generic
+    level: error
+    slot_types: [meta-title, og-title]
+    priority: 60
+    pattern: '\A\s*(?:главная(?:\s+страница)?|домашняя\s+страница|home(?:\s*page)?|untitled(?:\s+document)?|без\s+названия|новая\s+страница|страница|page\s+title|app\s+title|site\s+title|document|react\s+app|vite\s*\+\s*react|my\s*app|website|сайт|добро\s+пожаловать!?|welcome!?|контакты|contacts?|contact\s+us|услуги|services|о\s+(?:нас|компании)|about(?:\s+us)?|блог|blog|каталог|catalog|профиль|profile|новости|news)\s*\Z'
+    message: "Пустой или общий title («Главная», «Услуги», «Home», «App Title»): поисковик заменит его сам или покажет ссылку, по которой непонятно, что внутри."
+    replacement: "что это + для кого или где + бренд: «Ремонт квартир под ключ в Нижнем Новгороде — Отвес»; главная — бренд и чем занимаетесь"
+    examples: {bad: "Главная", good: "Ремонт квартир под ключ в Нижнем Новгороде — Отвес"}
+    source: "Google Search Central «Influencing your title links» (обновлено 2025-12-10): «Avoid vague descriptors like “Home”», half-empty titles; Яндекс Вебмастер «Как правильно написать title» (снято 2026-09-24): не «Главная», «Контакты»; higgsfield seo.md Pitfalls 3 (App Title)"
+    evidence: "[документация]"
+
+  - id: meta-title-too-short
+    level: warning
+    slot_types: [meta-title, og-title]
+    slot_levels: {og-title: info}
+    pattern: '\A\s*[^\s|:—–-]+(?:\s+[^\s|:—–-]+)?\s*\Z'
+    message: "Title из одного-двух слов: не видно, что на странице и кому она нужна."
+    replacement: "добавить предмет страницы и уточнение (город, аудиторию, формат): «Бюро Горбунова» → «Бюро Горбунова — названия, логотипы, книги»"
+    examples: {bad: "Отвес", good: "Отвес — ремонт квартир в Нижнем Новгороде"}
+    source: "Google «Influencing your title links» (descriptive and concise; главная — место для «additional information about your site»); Яндекс «Как правильно написать title» («Следите, чтобы заголовок был информативным»)"
+    evidence: "[документация]"
+
+  - id: meta-title-keyword-repeat
+    level: error
+    slot_types: [meta-title, og-title]
+    pattern: '(?<![а-яёa-z])([а-яёa-z]{5})[а-яёa-z]*(?:[\s\S]*?(?<![а-яёa-z])\1[а-яёa-z]*){2}'
+    message: "Одно слово (по основе из 5 букв) три раза и больше: набивка ключей. Google и Яндекс прямо называют такие заголовки спамными."
+    replacement: "одна формулировка запроса + то, чем страница отличается: «Ремонт квартир под ключ в Екатеринбурге — от 9 800 ₽/м², гарантия 3 года»"
+    examples: {bad: "Ремонт квартир под ключ в Екатеринбурге | Ремонт квартир в новостройке | Ремонт ручной работы", good: "Ремонт квартир под ключ в Екатеринбурге — работаем с новостройками"}
+    source: "Google «Influencing your title links» («Foobar, foo bar, foobars, foo bars»; keyword stuffing); Google Spam policies (обновлено 2026-08-28) — keyword stuffing; Яндекс «Как правильно написать title» («не повторяйте их несколько раз… поиск может посчитать такой заголовок спамом»); плохой пример — title страницы корпуса D (ru-mid, имя сайта не приводим; 99-raw/experiments/G/01-meta-corpus)"
+    evidence: "[документация]"
+    note: "основа — первые 5 букв: ловит словоформы («квартир», «квартиры»); редкие ложные — однокоренные разные слова"
+
+  - id: meta-desc-keyword-repeat
+    level: info
+    slot_types: [meta-description, og-description]
+    pattern: '(?<![а-яёa-z])([а-яёa-z]{5})[а-яёa-z]*(?:[\s\S]*?(?<![а-яёa-z])\1[а-яёa-z]*){3}'
+    message: "Одно слово (по основе) четыре раза и больше в описании: похоже на набивку; Яндекс просит описание «без злоупотребления ключевыми словами»."
+    replacement: "одно упоминание предмета + факты: «Натяжные потолки в Казани: от 918 ₽/м² с установкой, замер бесплатно»"
+    examples: {bad: "Натяжные потолки недорого. Цена потолка под ключ. Заказать натяжной потолок, установка потолков в Казани.", good: "Натяжные потолки в Казани: от 918 ₽/м² с установкой, замер бесплатно в пределах города."}
+    source: "Яндекс «Как правильно составить description» (снято 2026-09-24); Google «Control your snippets» («long strings of keywords»); порог 4 — корпус D: 3 повтора в описаниях часто естественны (19 из ≈ 100), 4 — в основном набивка (5 из 6; 01-meta-corpus)"
+    evidence: "[документация] + [проверено: 99-raw/experiments/G/01-meta-corpus]"
+    note: "ложное — линейка товаров («iPhone Duo, iPhone 18 Pro…»); законный случай — lint_allow"
+
+  - id: meta-clickbait
+    level: error
+    slot_types: [meta-title, og-title, article-title, meta-description, og-description]
+    slot_levels: {meta-description: warning, og-description: warning}
+    count_as_marker: true
+    pattern: '%B%(?:вас\s+удивит|удивит\s+(?:вас|всех|каждого)|шок%E%(?!-)|шокирующ%W%|вы\s+не\s+поверите|не\s+поверите|раскрыл[аи]?\s+(?:все\s+)?(?:тайн%W%|секрет%W%)|все\s+тайны|(?:никто|никому)\s+не\s+(?:говорит|рассказывает|расскажет)|врачи\s+(?:скрывают|в\s+шоке|молчат)|один\s+простой\s+(?:трюк|способ|секрет)|это\s+изменит\s+(?:всё|все|вашу\s+жизнь)|спас(?:ут|ёт|ет)\s+[^.!?\n]{0,30}\s+от\s+краха|то,\s+что\s+произошло\s+(?:дальше|потом)|you\s+won.?t\s+believe|shocking|mind[- ]blowing|this\s+one\s+(?:simple\s+)?trick|doctors\s+hate|what\s+happens\s+next|will\s+blow\s+your\s+mind|nobody\s+(?:is\s+)?talking\s+about|jaw[- ]dropping)|\A\s*названы\s|\A\s*стало\s+известно'
+    message: "Кликбейт: заголовок обещает сенсацию, которой нет в тексте. Google просит title без преувеличений и шока, Яндекс — «Избегайте кликбейта»; асессоры Google ставят таким страницам Low."
+    replacement: "польза + сужение + источник: «Вас удивит, сколько стоит ремонт» → «Сколько стоит ремонт двушки в 2026 году: смета 54 м² по статьям»"
+    examples: {bad: "Вы не поверите, сколько стоит ремонт квартиры", good: "Сколько стоит ремонт двушки в 2026 году: смета 54 м² по статьям"}
+    source: "Google «Creating helpful, reliable, people-first content» (обновлено 2025-12-10): «Does the main heading or page title avoid exaggerating or being shocking in nature?»; Google SQRG 11.09.2025: «Exaggerated or shocking titles are evidence of Low quality»; Яндекс, блог Вебмастера 2024-03-22 («Избегайте кликбейта»); Ильяхов, «Боеспособный заголовок», 2017 [V:y0iIV5meaB4 31:52] — обманутое ожидание; список фраз — W2 (кандидаты в маркеры C)"
+    evidence: "[документация] + [практика]"
+    note: "предложение C: новый маркер COPY-M-… «кликбейт» (article, meta, email-form)"
+
+  - id: meta-title-boilerplate-tail
+    level: warning
+    slot_types: [meta-title, og-title]
+    slot_levels: {og-title: info}
+    pattern: '%B%(?:описани[еяю]|цен[аыу]|стоимост[ьи]|характеристик[иа]|фото(?:графии)?|отзыв%W%|купить|заказать|доставк[аиу]|недорого|дешево|дёшево|в\s+наличии|скидк[иа]|акци[ияй]|инструкци[ия]|видео|обзор%W%|сроки|гарантия|прайс|reviews?|prices?|photos?|specs|buy|cheap|deals?|free\s+shipping)%E%(?:\s*[,|/;]\s*|\s+и\s+|\s+and\s+|\s*[—–-]\s*)%B%(?:описани[еяю]|цен[аыу]|стоимост[ьи]|характеристик[иа]|фото(?:графии)?|отзыв%W%|купить|заказать|доставк[аиу]|недорого|дешево|дёшево|в\s+наличии|скидк[иа]|акци[ияй]|инструкци[ия]|видео|обзор%W%|сроки|гарантия|прайс|reviews?|prices?|photos?|specs|buy|cheap|deals?|free\s+shipping)%E%(?:\s*[,|/;]\s*|\s+и\s+|\s+and\s+|\s*[—–-]\s*)%B%(?:описани[еяю]|цен[аыу]|стоимост[ьи]|характеристик[иа]|фото(?:графии)?|отзыв%W%|купить|заказать|доставк[аиу]|недорого|дешево|дёшево|в\s+наличии|скидк[иа]|акци[ияй]|инструкци[ия]|видео|обзор%W%|сроки|гарантия|прайс|reviews?|prices?|photos?|specs|buy|cheap|deals?|free\s+shipping)%E%'
+    message: "Шаблонный хвост из трёх и больше «типов содержимого» («описание, цены, характеристики, фото, отзывы»): Яндекс называет такой title малоинформативным."
+    replacement: "оставить только то, что на странице есть, и заменить слово фактом: «— цены, сроки, гарантия» → «— от 9 800 ₽/м², гарантия 3 года»"
+    examples: {bad: "Диван Лофт — описание, цены, характеристики, фото, отзывы", good: "Диван Лофт 3-местный: от 54 900 ₽, доставка по Москве за 2 дня"}
+    source: "Яндекс Вебмастер «Как правильно написать title» (снято 2026-09-24): «<Название товара> — описание, цены, характеристики, фото, отзывы. Такой заголовок малоинформативен»; Google «Influencing your title links»: boilerplate «See videos, lyrics, posters…»"
+    evidence: "[документация]"
+
+  - id: meta-title-delimiters
+    level: warning
+    slot_types: [meta-title, og-title]
+    pattern: '(?:[^|\n]*\|){3,}'
+    message: "Три и больше вертикальных черты в title: склейка нескольких формулировок запроса вместо одного заголовка."
+    replacement: "один заголовок + бренд через один разделитель: «Ремонт квартир под ключ в Екатеринбурге | Отвес»"
+    examples: {bad: "Ремонт квартир | Ремонт под ключ | Дизайн интерьера | Отвес", good: "Ремонт квартир под ключ в Екатеринбурге | Отвес"}
+    source: "Google «Influencing your title links» (бренд «at the beginning or end… separated… with a delimiter such as a hyphen, colon, or pipe»); Яндекс «Как правильно написать title» (бренд через двоеточие, дефис или вертикальную черту); корпус D (01-meta-corpus)"
+    evidence: "[документация] + [проверено: 99-raw/experiments/G/01-meta-corpus]"
+
+  - id: meta-place-list
+    level: warning
+    flags: ''
+    slot_types: [meta-title, og-title, meta-description, og-description]
+    pattern: '(?:(?<![А-Яа-яЁёA-Za-z])[А-ЯЁA-Z][а-яёa-z]+(?:[- ][А-ЯЁA-Z]?[а-яёa-z]+)?\s*,\s*){3,}(?<![А-Яа-яЁёA-Za-z])[А-ЯЁA-Z][а-яёa-z]+'
+    message: "Перечень из четырёх и больше названий через запятую (города, районы, бренды): Google называет списки городов, под которые страница хочет ранжироваться, набивкой."
+    replacement: "одна география — одна страница с настоящим различием; в мета — город страницы и чем там работаете"
+    examples: {bad: "Ремонт квартир: Москва, Химки, Балашиха, Мытищи, Королёв", good: "Ремонт квартир в Химках: выезд замерщика в день звонка"}
+    source: "Google Spam policies (обновлено 2026-08-28), keyword stuffing: «Blocks of text that list cities and regions that a web page is trying to rank for»; doorway abuse: «pages targeted at specific regions or cities that funnel users to one page»"
+    evidence: "[документация]"
+    note: "ложное — перечень брендов товара в каталоге; решает человек, законный случай — lint_allow с причиной"
+
+  - id: meta-caps-words
+    level: warning
+    flags: ''
+    slot_types: [meta-title, og-title, meta-description, og-description]
+    pattern: '(?<![А-Яа-яЁёA-Za-z])[А-ЯЁA-Z]{3,}(?:\s+[А-ЯЁA-Z]{3,})+(?![А-Яа-яЁёA-Za-z])'
+    message: "Слова капсом подряд в мета: Яндекс просит описание «без злоупотребления… заглавными буквами»."
+    replacement: "обычный регистр; аббревиатуры (ООО, ГОСТ) по одной — законны"
+    examples: {bad: "РЕМОНТ КВАРТИР ПОД КЛЮЧ в Нижнем Новгороде", good: "Ремонт квартир под ключ в Нижнем Новгороде — Отвес"}
+    source: "Яндекс Вебмастер «Как правильно составить description» (снято 2026-09-24); C ru-pun-caps-text (мета не покрывает)"
+    evidence: "[документация]"
+
+  - id: meta-desc-keyword-list
+    level: warning
+    slot_types: [meta-description, og-description]
+    pattern: '\A\s*(?:[^,.!?:;\d\n]{2,40},\s*){4,}[^,.!?:;\d\n]{2,40}\.?\s*\Z'
+    message: "Description — список ключевых слов через запятую, без предложения: такой текст Google показывает реже, Яндекс просит «правильно выстроенные предложения»."
+    replacement: "одно-два предложения: что на странице и чем полезно + факт (цена, срок, место): «Всё для шитья: пряжа, нитки, иглы и машины. Открыто пн–пт 8–17, Швейный квартал»"
+    examples: {bad: "Швейная фурнитура, пряжа, цветные карандаши, швейные машины, нитки, шпульки, иглы", good: "Всё для шитья: пряжа, нитки, иглы и машины. Открыто пн–пт 8–17, Швейный квартал."}
+    source: "Google «Control your snippets» (обновлено 2026-04-20): «Bad (list of keywords)», «long strings of keywords… less likely to be displayed»; Яндекс «Как правильно составить description»"
+    evidence: "[документация]"
+
+  # --- длины: сигналы, не ворота --------------------------------------------------------------------------------------
+  - id: meta-title-long
+    level: info
+    slot_types: [meta-title]
+    pattern: '\A[\s\S]{81,}\Z'
+    message: "Title длиннее 80 знаков: в выдаче Google видна примерно первая половина (≈ 55–60 знаков кириллицей при ширине ≈ 600 px — оценка), хвост поисковик обрежет или перепишет."
+    replacement: "главное — в первых 55 знаках: предмет страницы + отличие; бренд — в конец; перечни и повторы — убрать"
+    examples: {bad: "Сеть клиник и медицинских центров — клинико-диагностические центры, детские клиники и клинические больницы", good: "Клиники «Икс» в Нижнем Новгороде: взрослые и детские"}
+    source: "Google «Influencing your title links» («no limit on how long a <title> element can be… truncated… to fit the device width»); Яндекс «Как правильно написать title» («Длина заголовка ограниченна шириной экрана»); порог — корпус D (медиана title RU-лидеров 69 знаков, p75 ≈ 85) и расчёт ширины Liberation Sans = Arial 20 px (01-meta-corpus)"
+    evidence: "[документация] + [проверено: 99-raw/experiments/G/01-meta-corpus]; ширина 600 px — [мнение вендора]"
+
+  - id: meta-title-very-long
+    level: warning
+    slot_types: [meta-title]
+    pattern: '\A[\s\S]{111,}\Z'
+    message: "Title длиннее 110 знаков: больше половины не увидят ни в Google, ни в Яндексе; так длинно пишут, когда склеивают ключи."
+    replacement: "сократить до одной мысли; перечни видов услуг — в H2 и текст страницы"
+    examples: {bad: "Онлайн-курс «Аналитик данных»: обучение анализу данных с нуля, программа для начинающих, стажировка и помощь с трудоустройством — Школа Икс", good: "Курс «Аналитик данных» с нуля — Школа Икс"}
+    source: "Google и Яндекс (см. meta-title-long); порог — корпус D (p90 title RU-лидеров ≈ 118 знаков)"
+    evidence: "[документация] + [проверено: 99-raw/experiments/G/01-meta-corpus]"
+
+  - id: meta-desc-long
+    level: info
+    slot_types: [meta-description]
+    pattern: '\A[\s\S]{201,}\Z'
+    message: "Description длиннее 200 знаков: видимая часть сниппета короче (≈ 130–150 знаков кириллицей на десктопе Google — оценка); Яндекс просит главное ставить в начало."
+    replacement: "главное — в первых 120 знаках: что на странице + факт; остальное можно оставить"
+    examples: {bad: "Мы занимаемся ремонтом квартир под ключ в Нижнем Новгороде уже много лет и предлагаем нашим клиентам полный комплекс услуг от дизайн-проекта и сметы до чистовой отделки, уборки и сдачи объекта по акту с гарантией.", good: "Ремонт квартир под ключ в Нижнем Новгороде: от 9 800 ₽/м² без материалов, гарантия 3 года по договору."}
+    source: "Google «Control your snippets» (обновлено 2026-04-20: «no limit… truncated… to fit the device width»); Яндекс «Как правильно составить description» («Размещение важной информации в конце текста» — плохо); порог — корпус D (медиана RU 181 знак)"
+    evidence: "[документация] + [проверено: 99-raw/experiments/G/01-meta-corpus]"
+
+  - id: meta-desc-short
+    level: warning
+    slot_types: [meta-description, og-description]
+    slot_levels: {og-description: info}
+    pattern: '\A\s*\S[\s\S]{0,48}\Z'
+    message: "Description короче 50 знаков: Google приводит такое («Mechanical pencil») как плохой пример, Яндекс — «Краткое описание, из нескольких слов»."
+    replacement: "что это, для кого и один факт: «Ремонт квартир под ключ в Нижнем Новгороде с 2014 года: смета и замер бесплатно»"
+    examples: {bad: "Ремонт квартир под ключ", good: "Ремонт квартир под ключ в Нижнем Новгороде с 2014 года: замер и смета бесплатно в черте города."}
+    source: "Google «Control your snippets» («Bad (too short)»); Яндекс «Как правильно составить description» («Краткое описание, из нескольких слов»)"
+    evidence: "[документация]"
+
+  - id: meta-year-check
+    level: info
+    slot_types: [meta-title, og-title, article-title]
+    pattern: '%B%20[2-3]\d%E%'
+    message: "Год в заголовке: ставьте только если содержание этого года. Замена «2025» на «2026» без правки текста — «детский сад» (Сливинский) и сигнал search engine-first контента (Google)."
+    replacement: "год — при реальном обновлении цен или данных; рядом на странице — дата обновления"
+    examples: {bad: "Цены на ремонт квартир в 2026 году", good: "Цены на ремонт квартир: смета двушки по статьям"}
+    source: "Google «Creating helpful…» («changing the date of pages to make them seem fresh when the content has not substantially changed»); Google title-link: obsolete titles; Сливинский, 12.2025 [V:AbqU-GxAYs8 1:05:02]"
+    evidence: "[документация]"
+    note: "сигнал, а не ошибка: для ежегодного события и свежего прайса год законен; «хороший» пример в selftest — без года"
+
+# ---------------------------------------------------------------------------------------------------------------
+# Справочник (линтер не читает).
+engines:
+  google:
+    as_of: 2026-09-24
+    title:
+      limit_chars: none                      # «no limit on how long a <title> element can be» (title-link, 2025-12-10)
+      display: "обрезается по ширине устройства; ссылку может переписать из h1, og:title, крупного текста, анкоров"
+      sources_of_title_link: [title, main-visual-title, h1, og:title, large-prominent-text, page-text, anchor-text, inbound-link-text, WebSite-structured-data]
+      rewrites_when: [half-empty, obsolete-year, inaccurate, micro-boilerplate, no-clear-main-title, language-mismatch, duplicated-site-name]
+      brand: "в начале или в конце, разделитель «-», «:» или «|»"
+    description:
+      limit_chars: none                      # «There's no limit on how long a meta description can be» (snippet, 2026-04-20)
+      used_when: "если описывает страницу точнее, чем текст страницы; сниппет часто собирается из текста под запрос"
+      form: "не обязательно предложение: для статьи — автор, дата; для товара — цена, производитель"
+      unique: "уникальное для каждой страницы; программная генерация допустима, если «human-readable and diverse»"
+    og_title: "один из источников title link (title-link, 2025-12-10)"
+    ai_features: "AI Overviews и AI Mode показывают ссылки из индекса; отдельной «мета для ИИ» нет (ai-optimization-guide, 2026-07-10)"
+  yandex:
+    as_of: 2026-09-24
+    title:
+      limit_chars: none                      # «Длина заголовка ограниченна шириной экрана устройства»
+      rules: ["информативный, не «Главная», «Контакты»", "не слишком длинный", "не повторять ключи — «поиск может посчитать… спамом»",
+              "минимум шаблонных title; не «<Товар> — описание, цены, характеристики, фото, отзывы»", "бренд в начале или конце через «:», «-» или «|»"]
+    description:
+      limit_chars: none                      # «Длина описания ограничена шириной экрана»
+      rules: ["на всех страницах", "уникальное", "предложения, без злоупотребления ключами, заглавными буквами, рекламными лозунгами",
+              "полезное: цена, цвет, город доставки", "язык = язык страницы", "отличается от title", "важное — в начале",
+              "не временная и служебная информация, не устаревшее, не «из нескольких слов»"]
+    snippet: "заголовок и описание собираются из title, description, текста страницы (со schema.org), Маркета и текстов ссылок; «наиболее информативный и релевантный поисковому запросу текст»"
+    og: "Open Graph поддерживается как семантическая разметка (справка «Сниппет»)"
+    direct_dynamic_places: "объявление «динамических мест» Директа собирается из сниппета страницы — title и описание работают и в платном показе (справка Директа, β; W2)"
+
+limits:                                    # ориентиры для генерации; линтер — по правилам выше
+  width_estimate:
+    note: "ширина строки выдачи не документирована; ≈ 600 px для title (Arial 20 px) и ≈ 920 px для description (Arial 14 px) — оценки SEO-вендоров [мнение вендора]"
+    ru_px_per_char_title: 10.0             # Liberation Sans (метрически = Arial) 20 px, фразы RU; EN ≈ 9,1 — расчёт 01-meta-corpus
+    ru_chars_visible_title_est: 60         # 600 / 10,0; EN ≈ 65
+    ru_chars_visible_description_est: 130  # 920 / (10,0 × 14/20); EN ≈ 140
+  meta-title:
+    ru: {write: [40, 70], key_phrase_within: 55, info_over: 80, warning_over: 110, words_min: 3}
+    en: {write: [35, 60], key_phrase_within: 55, info_over: 80, warning_over: 110, words_min: 3}
+    corpus_d: "RU лидеры: медиана 69, p90 ≈ 118; RU средний рынок: 68 / 103; EN лидеры: 47,5 / 73 (01-meta-corpus)"
+  meta-description:
+    ru: {write: [110, 180], key_info_within: 120, info_over: 200, warning_under: 50}
+    en: {write: [100, 160], key_info_within: 110, info_over: 200, warning_under: 50}
+    corpus_d: "RU лидеры: медиана 182, p90 ≈ 265; EN лидеры: 132 / 164,5 (01-meta-corpus)"
+  og-title: {rule: "как title без бренда или короче; не обязан совпадать; не кликбейт", limit_chars: none, data: "превью Telegram, VK, «Макс» не проверены (ai-media 10/01 §7)"}
+  og-description: {rule: "одно предложение: что получит человек, открыв ссылку", limit_chars: none}
+  og-image-alt: {rule: "что на картинке, без «фото…» для ИИ-кадра", ref: "../ai-media/10-web-integration/01-images-delivery.md §7–8"}
+
+templates:                                 # шаблон — порядок смысловых частей, не текст; примеры — ai-self, факты «Отвеса» демо (B2)
+  landing-lead-services:
+    title: "{услуга} {где} — {отличие-факт} | {бренд}"
+    description: "{что делаете и где}: {факт-1: цена от / срок / гарантия}. {снятие риска: замер, смета}."
+    example_ru: {title: "Ремонт квартир под ключ в Нижнем Новгороде — гарантия 3 года | Отвес", description: "Ремонт квартир под ключ в Нижнем Новгороде: от 9 800 ₽/м² без материалов, гарантия 3 года по договору. Замер и смета — бесплатно в черте города."}
+    facts: [price-from-per-m2, guarantee-3-years, estimate-free]
+  service-page:
+    title: "{услуга} {где} | {бренд}"
+    description: "{что входит}, {цена от или срок}. {для кого или когда нужна}."
+  seo-landing-page:
+    title: "{запрос словами клиента}: {что страница даёт} — {бренд}"
+    description: "{ответ на запрос одной фразой с фактом}. {что ещё на странице}."
+    note: "одна страница — один интент; город в title — только если страница действительно про этот город (07/01 §5)"
+  landing-saas:
+    title: "{категория словами покупателя} для {кого} — {бренд}"
+    description: "{что делает продукт} {для кого}. {факт: интеграции, цена, пробный период}."
+  landing-product:
+    title: "{товар} {модель} — {главное свойство-факт} | {бренд}"
+    description: "{свойство-факт}. {цена или предзаказ, срок доставки}."
+  landing-campaign: {title: "{название кампании} — {что и до какой даты}", description: "{суть предложения}, {срок акции датой}."}
+  landing-event: {title: "{название} — {дата}, {место или онлайн}", description: "{чему посвящено}, {кто выступает}, {как попасть}."}
+  landing-course: {title: "Курс «{название}» — {результат или формат} | {бренд}", description: "{чему научит}, {длительность}, {формат}, {цена от}."}
+  landing-app: {title: "{бренд} — {что делает приложение}", description: "{главный сценарий}. {платформы}."}
+  landing-waitlist: {title: "{продукт} — лист ожидания", description: "{что это}, {когда откроется — дата из фактов}."}
+  home-multipage: {title: "{бренд} — {чем занимаетесь} {где}", description: "{чем занимаетесь}, {для кого}, {1–2 факта}."}
+  about-page: {title: "О компании {бренд}: {год, чем известны}", description: "{история одной фразой}, {факт}."}
+  case-page: {title: "{задача клиента}: {результат числом} — кейс {бренд}", description: "{ситуация}, {что сделали}, {результат с датой}."}
+  pricing-page: {title: "Цены на {услугу или продукт} {год-если-прайс-этого-года} | {бренд}", description: "{от какой цены}, {что входит}, {от чего зависит}."}
+  careers-page: {title: "Вакансии {бренд}: {направления}", description: "{кого ищем}, {где}, {условия-факты}."}
+  contacts-page: {title: "Контакты {бренд} — {город}, {адрес или район}", description: "{адрес}, {часы работы}, {телефон или как добраться}."}
+  portfolio-page: {title: "Работы {бренд}: {тип работ}", description: "{сколько работ или какие}, {для кого}."}
+  article-page:
+    title: "{ответ или вопрос читателя} — {уточнение: для кого, где, год-если-данные}"
+    description: "{вывод статьи одной фразой}. {автор или источник данных, дата}."
+    note: "не кликбейт; «7 советов…» — commodity, «Почему мы отказались от…: разбор» — опыт (Google, 2026-07-10)"
+
+checks_outside_linter:                     # делаются скриптом опыта или человеком (cross-slot, cross-page)
+  - {id: meta-x-duplicate-title, check: "одинаковые title у разных страниц сайта", level: error, source: "Google title-link (boilerplate); Яндекс (Вебмастер сообщает о повторах)", how: "01-meta-corpus/run.py --site"}
+  - {id: meta-x-duplicate-description, check: "одинаковые description у разных страниц", level: warning, source: "Google snippet; Яндекс description", how: "скрипт"}
+  - {id: meta-x-desc-equals-title, check: "description совпадает с title или начинается с него", level: warning, source: "Яндекс «description отличается от содержимого элемента title»", how: "скрипт"}
+  - {id: meta-x-title-vs-h1, check: "title и H1 про разное (предмет не совпадает)", level: warning, source: "Google title-link (inaccurate; no clear main title)", how: "судья или человек"}
+  - {id: meta-x-missing, check: "нет title или description", level: error, source: "Google и Яндекс: title на каждой странице; Яндекс: description на всех страницах", how: "скрипт"}
+  - {id: meta-x-lang-mismatch, check: "язык мета не совпадает с языком страницы", level: warning, source: "Google title-link; Яндекс description", how: "скрипт (detect_lang)"}
+  - {id: meta-x-fact-in-meta, check: "число, цена, рейтинг в мета без записи facts.yaml", level: error, source: "B2 claims_check.py (мета — тоже слот)", how: "claims_check.py check deck.yaml"}
+  - {id: meta-x-og-missing, check: "нет og:title / og:description / og:image", level: warning, source: "higgsfield seo.md audit 10 [практика]; ai-media 10/01 §7", how: "скрипт; техника — site H"}

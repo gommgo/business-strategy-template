@@ -1,0 +1,64 @@
+# product-in-interior.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/02-series-product-recipes.md#3; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+recipe_version: 1
+checked_at: '2026-09-25'
+author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
+id: product-in-interior
+title: 'Товар в интерьере со сверкой спецификации: масштаб и цветовая температура'
+doc: 14-recipes/02-series-product-recipes.md#3
+task_codes:
+- IMG-PRODUCT
+slot: product
+ladder: image
+ai_fit: conditional
+legal_row: 7
+route:
+  source: IMG-PRODUCT
+  steps:
+  - role: сцена
+    model: openai/gpt-image-2.5-sunburst
+    params:
+      image_resolution: 1K
+    price_rub: 4.0
+    test: E-10
+spec:
+  must:
+  - product.dimensions («13 cm tall and 9 cm wide»)
+  - предмет известного размера на той же глубине
+  - 'light: «4800 K»'
+  ancestors:
+  - 13-routing-matrix/stand/briefs/S03-product-scene.spec.json
+  - 13-routing-matrix/stand/briefs/S09-product-tea-count.spec.json
+compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+  <тест> --agent <агент> --out 99-raw/phase5/jobs/<файл>.jsonl
+phase5:
+  jobs:
+  - 99-raw/phase5/jobs/E-10-product.jsonl
+  reuse:
+  - E-10
+  - W5-10
+  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
+steps:
+- id: scale
+  cmd: отношение высот рамок масок товара и эталонного предмета на одной глубине, допуск ±15 %
+  status: checked
+  evidence: 99-raw/experiments/M/05-product
+- id: cct
+  cmd: python3 ../../scripts/ai-media/asset_audit.py audit scene.png --dna <паспорт> (slop_color.warm_b, neutral_wb)
+  status: checked
+  evidence: 99-raw/experiments/M/02-hero-pair/audit_16x9
+accept:
+  thresholds:
+  - image.warm_b_max
+  - edit.protect_ssim_min
+provenance:
+  dst: composite
+  visible_label: false
+numbers:
+  phase5_e10_scene_by_reference: 'сцена по фото товара: этикетка во фронте 4 из 4, сбоку дословно 1 из 4; у Qwen 2.1 масштаб завышен → композит настоящего — 99-raw/phase5/runs/2.5-stand/E-10_sheet.jpg'
+status:
+  local: checked
+  generation: checked
+sources:
+- 91-videos/transcripts/12pQ0W2bCDE.md
+- 91-videos/digests/5dnNUB27HBQ.md
+- 91-videos/digests/AxV8TR3BdqI.md

@@ -1,0 +1,268 @@
+# English syntax (SYN), structure (STR), tone (TON), content (CNT). Sources: WP:Signs of AI writing (negative
+# parallelisms, rule of three, superficial analyses with -ing tails, section summaries, challenges and prospects,
+# didactic disclaimers, collaborative communication), Reinhart et al. 2025 (PNAS: present participial clauses and
+# nominalizations over-used by instruction-tuned models), impeccable aphoristic-cadence, Gesso not-x-but-y-cadence,
+# Russell et al. 2025 guidebook, Hallmark copy.md.
+date: 2026-09-24
+version: 1
+owner: C (волна 1)
+defaults:
+  lang: en
+  flags: i
+  count_as_marker: true
+  date: 2026-09-24
+  genres: [landing, site-page, article, meta, geo, email-form]
+rules:
+  - id: en-syn-not-only-but-also
+    marker_id: COPY-M-SYN-01
+    group: SYN
+    level: warning
+    slot_levels: {headline: error, subheadline: error, meta-description: error, og-description: error}
+    pattern: '\bnot\s+only\b[^.!?\n]{1,80}?\bbut(?:\s+also)?\b'
+    message: "«Not only X but also Y»."
+    replacement: "two plain sentences or one without the contrast"
+    examples: {bad: "It not only saves time but also cuts costs.", good: "It saves 5 hours a week."}
+    source: "WP:AISIGNS «Not just X, but also Y»; Russell et al. 2025 Table 12"
+    evidence: "[консенсус]"
+  - id: en-syn-not-just
+    marker_id: COPY-M-SYN-02
+    group: SYN
+    level: warning
+    slot_levels: {headline: error, subheadline: error}
+    pattern: '\b(?:it[''’]s|this\s+is|that[''’]s|we[''’]re|they[''’]re|it\s+is)\s+not\s+(?:just|only|merely|simply)\b[^.!?\n]{1,60}?(?:[,;—–-]\s*|[.!]\s+)(?:it[''’]s|it\s+is|this\s+is|we[''’]re|they[''’]re)\b|\bnot\s+just\b[^.!?\n]{1,60}?,\s*but\b|\bisn[''’]t\s+just\s+[^.!?\n]{1,40}[.,;—–-]\s*(?:it[''’]s|it\s+is)\b|\bit[''’]s\s+not\s+about\b[^.!?\n]{1,60}?,?\s*it[''’]s\s+about\b'
+    message: "«It's not just X — it's Y», «It's not about X, it's about Y»: manufactured rebuttal."
+    replacement: "say what it is, with a fact"
+    examples: {bad: "It's not just a tool — it's a movement.", good: "It's a tool for tracking invoices."}
+    source: "WP:AISIGNS «Negative parallelisms»; Gesso not-x-but-y-cadence; Russell et al. 2025 («it's not about ___ it's about ___»)"
+    evidence: "[консенсус]"
+  - id: en-syn-not-x-but-y
+    marker_id: COPY-M-SYN-03
+    group: SYN
+    level: info
+    pattern: '\bnot\s+(?!only\b|just\b)[^.,;:!?\n]{1,40},\s+but\b'
+    message: "«Not X, but Y»: fine once, a tic when repeated. Counted in density."
+    replacement: "keep one per page where the contrast is the positioning"
+    examples: {bad: "We are not a vendor, but a partner.", good: "We sell accounting software."}
+    source: "WP:AISIGNS «Not X, but Y»"
+    evidence: "[спорно]"
+    threshold_ref: "03-corpus-measured/thresholds.yaml#genres.<жанр>.analyzers.not_x_but_y"
+  - id: en-syn-aphoristic-cadence
+    marker_id: COPY-M-SYN-06
+    group: SYN
+    level: info
+    flags: ''
+    min_count: 2
+    pattern: '\bNot\s+an?\s+[a-z][^.!?\n]{1,40}[.!]\s+[A-Z][^.!?\n]{1,60}[.!]|\b[A-Z][^.!?\n]{4,80}[.!]\s+(?:No|Just)\s+[a-z][^.!?\n]{2,60}[.!]'
+    message: "Aphoristic cadence: «Not a feature. A platform.», «Built fast. No shortcuts.» (two or more in a block)."
+    replacement: "once can be voice; the pattern is the tell — rewrite the rest as plain claims"
+    examples: {bad: "Not a feature. A platform. Built fast. No shortcuts.", good: "Invoices in one place, synced every hour."}
+    source: "impeccable aphoristic-cadence (≥ 3 per page: «Once is fine; the pattern is the tell»)"
+    evidence: "[практика]"
+  - id: en-syn-chopped
+    marker_id: COPY-M-SYN-06
+    group: SYN
+    level: warning
+    flags: m
+    pattern: '(?:^|(?<=[.!?]\s))(?:[A-Z][a-z0-9''’-]*(?:\s+[a-z0-9''’-]+){0,2}[.!]\s+){2,}[A-Z][a-z0-9''’-]*(?:\s+[a-z0-9''’-]+){0,2}[.!]|\b(?:No|Zero)\s+[a-z]+(?:\s[a-z]+)?\.\s+(?:No|Zero)\s+[a-z]+'
+    message: "Chopped drama: three or more one-to-three-word sentences in a row («Fast. Simple. Reliable.»)."
+    replacement: "one sentence with a fact"
+    examples: {bad: "Fast. Simple. Reliable.", good: "Set up in a day, no on-site visit."}
+    source: "humanizer-ru п.27; WP:AISIGNS «no …, no …, just …»"
+    evidence: "[консенсус]"
+  - id: en-syn-participle-tail
+    marker_id: COPY-M-SYN-08
+    group: SYN
+    level: warning
+    pattern: ',\s+(?:highlighting|underscoring|emphasizing|showcasing|reflecting|symbolizing|ensuring|fostering|contributing\s+to|cementing|solidifying|paving\s+the\s+way|setting\s+the\s+stage|marking|making\s+it\s+(?:a|an|the)|empowering)\b[^.!?\n]{0,100}[.!?]'
+    message: "Superficial-analysis -ing tail: «…, highlighting its commitment to growth»."
+    replacement: "cut the tail or make it a sentence with a subject and a fact"
+    examples: {bad: "The team opened a new office, highlighting its commitment to growth.", good: "The team opened a 40-seat office in Austin."}
+    source: "WP:AISIGNS «Superficial analyses»; Reinhart et al. PNAS 122(8) 2025 (present participial clauses over-used by instruction-tuned LLMs)"
+    evidence: "[исследование]"
+  - id: en-syn-false-range
+    marker_id: COPY-M-SYN-05
+    group: SYN
+    level: info
+    unless: '\d'
+    pattern: '\bfrom\s+(?!\d)[a-z]+(?:\s+[a-z]+){0,2}\s+to\s+(?!\d)[a-z]+(?:\s+[a-z]+){0,2}\b'
+    message: "«From X to Y» with no real scale (merism)."
+    replacement: "list what is included; fine for process steps and numbers"
+    examples: {bad: "We help with everything from strategy to execution.", good: "Delivery takes 2 to 5 days."}
+    source: "WP:AISIGNS; ВП:ЛОЖДИА; humanizer-ru п.16"
+    evidence: "[практика]"
+  - id: en-syn-false-range-chain
+    marker_id: COPY-M-SYN-05
+    group: SYN
+    level: warning
+    pattern: '\bfrom\s+[a-z][^.!?\n]{2,40}?\s+to\s+[a-z][^.!?\n]{2,40}?,\s+from\s+[a-z][^.!?\n]{2,40}?\s+to\s+[a-z]'
+    message: "Chain of false ranges «from X to Y, from A to B»."
+    replacement: "a plain list of services"
+    examples: {bad: "From strategy to execution, from design to launch, we have you covered.", good: "We do strategy, design and launch."}
+    source: "humanizer-ru п.16; WP:AISIGNS"
+    evidence: "[практика]"
+  - id: en-syn-rhetorical-cliche
+    marker_id: COPY-M-SYN-07
+    group: SYN
+    level: warning
+    pattern: '\b(?:sound\s+familiar|the\s+result|the\s+best\s+part|what\s+does\s+this\s+mean(?:\s+for\s+you)?|why\s+does\s+(?:this|it)\s+matter|so\s+what[''’]s\s+the\s+secret|what[''’]s\s+the\s+catch|the\s+catch|ready\s+to\s+(?:take|transform|level\s+up|get\s+started)[^?\n]{0,40})\?'
+    message: "Rhetorical set-up question («Sound familiar?», «The result?», «Ready to transform…?»)."
+    replacement: "state the answer"
+    examples: {bad: "Sound familiar? The result? Chaos.", good: "Response time fell by 23%."}
+    source: "WP:AISIGNS; Russell et al. 2025 guidebook; humanizer-ru (rhetorical questions — hard ban in essays)"
+    evidence: "[практика]"
+  - id: en-syn-colon-reveal
+    marker_id: COPY-M-PUN-03
+    group: PUN
+    level: warning
+    pattern: '\b(?:the\s+best\s+part|here[''’]s\s+the\s+(?:kicker|twist|catch|thing|deal)|the\s+secret|the\s+result|bottom\s+line|the\s+takeaway|spoiler|pro\s+tip)\s*:'
+    message: "Colon reveal set-up («Here's the kicker: …»)."
+    replacement: "write the reveal as a plain sentence"
+    examples: {bad: "Here's the kicker: it runs offline.", good: "Features: offline mode, export to CSV."}
+    source: "humanizer-ru COLON_REVEAL; WP:AISIGNS"
+    evidence: "[практика]"
+  - id: en-str-transitions-stack
+    marker_id: COPY-M-STR-02
+    group: STR
+    level: info
+    flags: ''
+    scope: doc
+    min_count: 3
+    pattern: '(?:^|(?<=[.!?]\s))(?:Additionally|Furthermore|Moreover|In\s+addition|Notably|Consequently|Firstly|Secondly|Thirdly|Lastly|Another\s+(?:key|important|notable)\s+(?:aspect|benefit|feature|factor))\b'
+    message: "Stack of sentence-initial transitions (three or more per text). Weak in isolation; strong as a stack."
+    replacement: "link paragraphs by meaning (reference, pick-up, contrast), not by glue words"
+    examples: {bad: "Additionally, it syncs. Moreover, it exports. Furthermore, it scales.", good: "It syncs every hour and exports to CSV."}
+    source: "WP:AISIGNS «Ineffective indicators: transition words (in isolation)»; Kobak et al. 2025 (additionally, notably in the common set)"
+    evidence: "[исследование] корпусное; одиночное — не примета"
+  - id: en-str-summary
+    marker_id: COPY-M-STR-03
+    group: STR
+    level: warning
+    flags: ''
+    pattern: '(?:^|(?<=[.!?]\s))(?:In\s+conclusion|In\s+summary|To\s+sum\s+up|To\s+summari[sz]e|Overall|All\s+in\s+all|Ultimately|In\s+short)\b'
+    message: "Summary ending («In conclusion», «Overall»): retelling instead of something new."
+    replacement: "end on the last concrete fact, a next step or a caveat"
+    examples: {bad: "In conclusion, the tool is useful for teams.", good: "The tool saves 40 minutes a day; setup takes one afternoon."}
+    source: "WP:AISIGNS «Section summaries» (historical for newer models); Russell et al. 2025 («always ends with a neat conclusion»)"
+    evidence: "[консенсус]"
+  - id: en-str-summary-heading
+    marker_id: COPY-M-STR-03
+    group: STR
+    level: warning
+    slot_types: [section-title, article-heading, card-title]
+    pattern: '^\s*(?:conclusion|summary|final\s+thoughts|key\s+takeaways|the\s+bottom\s+line|wrapping\s+up)\s*$'
+    message: "«Conclusion» / «Key Takeaways» section retelling the text."
+    replacement: "drop it or give something new: a checklist, a decision, a next step"
+    examples: {bad: "Key Takeaways", good: "What to check before you sign"}
+    source: "WP:AISIGNS «Section summaries»"
+    evidence: "[практика]"
+  - id: en-str-challenges
+    marker_id: COPY-M-STR-04
+    group: STR
+    level: warning
+    pattern: '\bdespite\s+(?:its|their|these|the)\b[^.!?\n]{0,60}?\b(?:faces?|facing)\s+(?:several\s+|many\s+|numerous\s+|a\s+number\s+of\s+)?challenges\b|\bdespite\s+these\s+challenges\b|\bchallenges\s+and\s+(?:future\s+)?(?:prospects|outlook|opportunities)\b|\bfuture\s+outlook\b'
+    message: "«Despite its…, faces several challenges» + rosy outlook formula."
+    replacement: "a dated, concrete problem and a concrete action"
+    examples: {bad: "Despite its growth, the company faces several challenges.", good: "In 2025 traffic on I-35 doubled, so we opened a second warehouse."}
+    source: "WP:AISIGNS «Outline-like conclusions about challenges and future prospects»"
+    evidence: "[консенсус]"
+  - id: en-str-positive-finale
+    marker_id: COPY-M-STR-05
+    group: STR
+    level: warning
+    pattern: '\bthe\s+future\s+(?:looks|is)\s+(?:bright|promising|exciting)\b|\bexciting\s+times\s+(?:lie\s+)?ahead\b|\ba\s+(?:bright|promising)\s+future\b|\bcontinues\s+to\s+thrive\b|\bpoised\s+for\s+(?:growth|success)\b|\bjourney\s+(?:towards|to)\s+(?:excellence|success)\b|\bstep\s+in\s+the\s+right\s+direction\b|\btogether,?\s+we\s+(?:can|will)\b'
+    message: "Vague upbeat finale («the future looks bright», «together we can»)."
+    replacement: "end on a dated next step or the last fact"
+    examples: {bad: "The future looks bright — together we can do more!", good: "Next year we open two offices, in Denver and Austin."}
+    source: "WP:AISIGNS; Russell et al. 2025 («inherently positive… towards the conclusion»); humanizer-ru п.20"
+    evidence: "[консенсус]"
+  - id: en-ton-didactic
+    marker_id: COPY-M-TON-05
+    group: TON
+    level: warning
+    pattern: '\bit[''’]s\s+(?:important|crucial|essential|worth|vital)\s+(?:to\s+(?:note|remember|consider|understand|keep\s+in\s+mind)|noting|mentioning)\b|\bit\s+is\s+(?:important|crucial|essential|worth)\s+(?:to\s+note|noting)\b|\bkeep\s+in\s+mind\s+that\b|\bit\s+should\s+be\s+noted\b'
+    message: "Didactic disclaimer («It's important to note that…»)."
+    replacement: "delete the frame and state the point"
+    examples: {bad: "It's important to note that setup takes 3 days.", good: "Setup takes 3 days."}
+    source: "WP:AISIGNS «Didactic disclaimers» (historical: Nov 2022–2024); Russell et al. 2025 Table 12"
+    evidence: "[консенсус]; для новых моделей реже"
+  - id: en-ton-announce
+    marker_id: COPY-M-TON-06
+    group: TON
+    level: warning
+    pattern: '\blet[''’]s\s+(?:dive|delve)\s+(?:in|into)\b|\blet[''’]s\s+(?:explore|break\s+(?:it|this)\s+down|take\s+a\s+(?:closer\s+)?look)\b|\bin\s+this\s+(?:article|post|guide|blog\s+post),?\s+(?:we[''’]ll|we\s+will|you[''’]ll|you\s+will|I[''’]ll)\b|\bwithout\s+further\s+ado\b|\bhere[''’]s\s+(?:everything|what)\s+you\s+need\s+to\s+know\b|\bbuckle\s+up\b|\bjoin\s+us\s+as\s+we\b'
+    message: "Announcement instead of content («Let's dive in», «In this article we'll…»)."
+    replacement: "start with the answer"
+    examples: {bad: "Let's dive into how caching works.", good: "A cache stores ready answers so the server does not compute them twice."}
+    source: "humanizer-ru п.26; WP:AISIGNS"
+    evidence: "[консенсус]"
+  - id: en-ton-fake-candor
+    marker_id: COPY-M-TON-02
+    group: TON
+    level: warning
+    pattern: '\bhonestly\?|\blet[''’]s\s+be\s+honest\b|\btruth\s+be\s+told\b|\bI[''’]ll\s+be\s+honest\b|\bto\s+be\s+(?:perfectly\s+)?honest\b'
+    message: "Fake candor set-up."
+    replacement: "drop the set-up"
+    examples: {bad: "Is it worth it? Honestly? It depends.", good: "It pays off above 50 orders a day."}
+    source: "humanizer-ru п.29"
+    evidence: "[практика]"
+  - id: en-ton-pseudo-therapy
+    marker_id: COPY-M-TON-03
+    group: TON
+    level: warning
+    pattern: '\band\s+that[''’]s\s+(?:okay|ok|alright|fine|normal)\b|\byou[''’]re\s+not\s+alone\b|\bgive\s+yourself\s+permission\b|\bit[''’]s\s+(?:completely|totally|perfectly)\s+(?:normal|natural|okay)\b|\bbe\s+gentle\s+with\s+yourself\b'
+    message: "Pseudo-therapeutic register («and that's okay», «you're not alone»)."
+    replacement: "talk about the task and facts, not the reader's feelings"
+    examples: {bad: "Not everyone keeps up with AI news, and that's okay.", good: "No one keeps up: 40 models shipped last week."}
+    source: "humanizer-ru п.37"
+    evidence: "[практика]"
+  - id: en-ton-hedge-cascade
+    marker_id: COPY-M-TON-04
+    group: TON
+    level: warning
+    pattern: '\b(?:may|might|could|perhaps|possibly|potentially|arguably|somewhat|to\s+some\s+extent|in\s+some\s+cases|generally|typically|likely|probably)\b[^.!?\n]*?\b(?:may|might|could|perhaps|possibly|potentially|arguably|somewhat|to\s+some\s+extent|in\s+some\s+cases|generally|typically|likely|probably)\b[^.!?\n]*?\b(?:may|might|could|perhaps|possibly|potentially|arguably|somewhat|to\s+some\s+extent|in\s+some\s+cases|generally|typically|likely|probably)\b'
+    message: "Hedge cascade: three or more softeners in one sentence."
+    replacement: "keep one hedge or make a direct claim with a fact"
+    examples: {bad: "It might possibly help in some cases.", good: "It helps when you ship over 50 orders a day."}
+    source: "humanizer-ru п.19 (for RU); WP:AISIGNS (single hedges are human — cascade only)"
+    evidence: "[практика]"
+  - id: en-ton-sycophancy
+    marker_id: COPY-M-TON-07
+    group: TON
+    level: warning
+    pattern: '\bgreat\s+question\b|\byou[''’]re\s+absolutely\s+right\b|\bwhat\s+a\s+(?:great|fantastic|wonderful)\s+(?:question|choice|idea)\b|\bexcellent\s+choice\b'
+    message: "Sycophancy aimed at the reader."
+    replacement: "delete; after a purchase, say what happens next"
+    examples: {bad: "Excellent choice! You're absolutely right to plan ahead.", good: "Order confirmed: it arrives Friday by noon."}
+    source: "WP:AISIGNS «Collaborative communication»; humanizer-ru п.17"
+    evidence: "[консенсус]"
+  - id: en-ton-meta-commentary
+    marker_id: COPY-M-TON-09
+    group: TON
+    level: warning
+    pattern: '\bno\s+(?:fluff|BS|buzzwords|jargon|hype|marketing\s+speak|gimmicks)\b|\bwithout\s+the\s+(?:hype|fluff|buzzwords|jargon)\b|\bwe\s+won[''’]t\s+bore\s+you\b|\bwe[''’]re\s+not\s+going\s+to\s+(?:tell|promise)\s+you\b|\bno\s+marketing\s+(?:fluff|speak)\b'
+    message: "Performative refusal of clichés («no fluff», «without the hype») — a cliché of its own."
+    replacement: "delete the remark; give the fact it was hiding"
+    examples: {bad: "No fluff, no buzzwords — just great software.", good: "Payroll for 40 staff in ten minutes."}
+    source: "humanizer-ru eval 5, 10 (meta-commentary trap)"
+    evidence: "[практика]"
+  - id: en-cnt-speculative
+    marker_id: COPY-M-CNT-04
+    group: CNT
+    level: info
+    pattern: '\bwhile\s+(?:specific\s+)?details\s+(?:are|remain)\s+(?:limited|scarce)\b|\bnot\s+widely\s+(?:available|documented|disclosed|reported)\b|\bbased\s+on\s+(?:the\s+)?available\s+information\b|\bmaintains\s+a\s+low\s+profile\b|\bkeeps\s+(?:personal\s+)?details\s+private\b'
+    message: "Speculative gap-filling («details are limited, but likely…»)."
+    replacement: "say what is unknown or delete"
+    examples: {bad: "While details are limited, she likely grew up in Ohio.", good: "She founded the company in 2012 (state registry)."}
+    source: "WP:AISIGNS «Knowledge-cutoff disclaimers and speculation about gaps in sources»"
+    evidence: "[консенсус]"
+  - id: en-cnt-vague-benefit
+    marker_id: COPY-M-CNT-01
+    group: CNT
+    level: warning
+    unless: '\d'
+    pattern: '\b(?:fast\s+and\s+reliable|quick\s+and\s+easy|in\s+no\s+time|in\s+just\s+a\s+few\s+clicks|with\s+just\s+one\s+click|at\s+affordable\s+prices|competitive\s+pricing|affordable\s+prices|top\s+quality|high\s+quality|lightning[- ]fast|blazing(?:ly)?[- ]fast)\b'
+    message: "Benefit without a fact («fast and reliable», «in just a few clicks») and no number nearby."
+    replacement: "time, price or steps from facts.yaml: «in 3 fields», «from $9 a month»"
+    examples: {bad: "Fast and reliable service at affordable prices.", good: "Same-day repair from $49."}
+    source: "PLAN.md correction to ux 07/06 §1 (easy/fast only with a fact); ux 07/06 §4.1 (simply, just, easily, quickly)"
+    evidence: "[практика]"

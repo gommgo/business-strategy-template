@@ -1,0 +1,132 @@
+# Профили жанров линтера copy_lint.py: какие группы правил включены, потолки уровней, анализаторы и их пороги.
+# ВСЕ числа порогов — стартовые (provisional: true): источники — гайд заказчика §D (ритм), humanizer-ru scripts/lint.py
+# (ритм, абзацы, списки), impeccable (тире ≥ 8 и ≥ 1 на 500 знаков), taste (надзаголовки ≤ 1 на 3 секции), опыты C
+# (99-raw/experiments/C/). Итоговые пороги по жанрам ставит агент D в 03-corpus-measured/thresholds.yaml; copy_lint.py
+# читает оттуда genres.<жанр>.analyzers и сливает поверх этих значений (формат — 02-linter-spec-and-profiles.md §6).
+date: 2026-09-24
+version: 1
+owner: C (волна 1)
+provisional: true
+thresholds_ref: 03-corpus-measured/thresholds.yaml
+vocabulary_ref: 99-raw/notes/temp-vocabulary-v0.yaml
+lexicon_dir: 06-anti-slop/lexicon
+# Внешние файлы правил других агентов (формат правила — как в lexicon/*.yaml). Отсутствующие пропускаются с заметкой.
+external_rules:
+  - {path: 07-seo-geo-copy/meta-rules.yaml, owner: G, wave: 2, note: "длины и шаблоны title/description/OG, проверки мета"}
+  - {path: 07-seo-geo-copy/geo-rules.yaml, owner: G, wave: 2, note: "текстовые проверки GEO-абзацев (если G вынесет их из geo-checklist.yaml)"}
+  - {path: 08-russian-legal-typography/typography-rules.yaml, owner: H, wave: 2, note: "набор: тире, неразрывные пробелы, кавычки, цены, диапазоны"}
+  - {path: 08-russian-legal-typography/claims-rules.yaml, owner: H, wave: 2, note: "текстовые сигналы права для линтера; ворота права — claims_check.py"}
+
+defaults:
+  groups:
+    ART: {enabled: true}
+    CNT: {enabled: true}
+    UX:  {enabled: true}
+    EXT: {enabled: true}
+    LEX: {enabled: true}
+    SYN: {enabled: true}
+    PUN: {enabled: true}
+    TON: {enabled: true}
+    MKT: {enabled: true}
+    STR: {enabled: true}
+  # слоты с прозой: на них считаются ритм, абзацы, тире, конкретика и сверхкоррекция
+  prose_slot_types: [body, section-lead, article-paragraph, article-lead, article-summary, geo-answer, definition, faq-a,
+                     email-body, case-summary, guarantee-text, objection-answer, pricing-plan-summary]
+  level_overrides: {}
+  analyzers:
+    marker_density: {enabled: true, min_words: 40, min_count: 2, warn_per_100w: 1.5, error_per_100w: 4.0, allow_error: true, level: warning, provisional: true}
+    rhythm: {enabled: true, min_sentences: 8, mean_diff_min: 4, min_mean_len: 9, target: 6, min_sentences_short: 10, level: info, provisional: true}
+    paragraph_uniformity: {enabled: true, min_paragraphs: 5, cv_min: 0.25, level: info, provisional: true}
+    dash_density: {enabled: true, min_count: 3, warn_per_100w: 1.5, level: info, provisional: true}
+    concreteness: {enabled: true, min_words: 60, min_per_100w: 1.5, level: info, provisional: true}
+    verb_repeat: {enabled: true, level: info}   # без pymorphy3 — только частые глаголы-дубли (опыт C/02)
+    overcorrection: {enabled: true, min_sentences: 8, fragment_share_min: 0.3, connective_share_max: 0.25,
+                     para_fragment_share_min: 0.8, informal_per_100w_min: 1.5, mean_diff_max: 12, min_signals: 3,
+                     level: warning, provisional: true}
+    not_x_but_y: {enabled: true, min_words: 60, min_count: 2, warn_per_100w: 0.5, level: info, provisional: true}
+    questions: {enabled: true, min_words: 60, min_count: 3, warn_per_100w: 1.0, level: info, provisional: true}
+    triads: {enabled: true, min_words: 60, min_count: 3, warn_per_100w: 1.0, level: info, provisional: true}
+    exclamations: {enabled: true, min_words: 60, min_count: 2, warn_per_100w: 0.5, level: info, provisional: true}
+    eyebrow_rate: {enabled: true, level: warning}
+    lists_of_three: {enabled: true, min_lists: 2, level: info}
+    numbers_without_fact: {enabled: true, level_known_empty: warning, level_unknown: info, check_quotes: false}
+
+profiles:
+  landing:
+    genre: landing
+    description: "Лендинг и его блоки: hero, CTA, фичи, доказательства, отзывы, тарифы, FAQ, гарантии, финальный CTA, тексты вокруг форм"
+    groups:
+      STR: {enabled: true, max_level: warning}
+    level_overrides:
+      ru-syn-sales-question: info
+      ru-syn-chopped: warning
+    analyzers:
+      lists_of_three: {enabled: false}          # три карточки фич — норма раскладки (PLAN.md, «Жанры»)
+      questions: {warn_per_100w: 1.5}
+      paragraph_uniformity: {level: info}
+  site-page:
+    genre: site-page
+    description: "Страницы многостраничника: главная, услуги, о компании, кейсы, тарифы, вакансии, контакты"
+    groups:
+      STR: {enabled: true, max_level: warning}
+    analyzers:
+      lists_of_three: {enabled: false}
+      questions: {warn_per_100w: 1.5}
+  article:
+    genre: article
+    description: "Статьи блога, справочные, категорийные и сервисные SEO-тексты"
+    level_overrides:
+      ru-syn-not-x-but-y: info
+    analyzers:
+      rhythm: {level: info}                    # опыт C/02: 2 из 8 человеческих колонок получали warning
+      paragraph_uniformity: {level: info}
+      dash_density: {warn_per_100w: 1.2}
+      concreteness: {min_per_100w: 2.0}
+      marker_density: {warn_per_100w: 1.2, error_per_100w: 3.5}
+  meta:
+    genre: meta
+    description: "title, description, og:title, og:description, og:image:alt — короткие тексты: анализаторы прозы выключены"
+    level_overrides:
+      "ru-lex-intro-cliche": error
+      "en-lex-intro-cliche": error
+      "ru-mkt-banned-openers": error
+      "en-mkt-banned-openers": error
+    analyzers:
+      marker_density: {min_words: 8, warn_per_100w: 4.0, error_per_100w: 10.0}
+      rhythm: {enabled: false}
+      paragraph_uniformity: {enabled: false}
+      dash_density: {enabled: false}
+      concreteness: {enabled: false}
+      overcorrection: {enabled: false}
+      not_x_but_y: {enabled: false}
+      questions: {enabled: false}
+      triads: {enabled: false}
+      exclamations: {enabled: false}
+      lists_of_three: {enabled: false}
+      eyebrow_rate: {enabled: false}
+  geo:
+    genre: geo
+    description: "Тексты для ответов нейросетей: «коротко» в начале, вопрос — ответ, определения, факты с источником и датой"
+    level_overrides:
+      "ru-syn-rhetorical-cliche": error
+      "en-syn-rhetorical-cliche": error
+      "ru-lex-vague-attribution": error
+      "en-lex-vague-attribution": error
+    analyzers:
+      questions: {enabled: false}               # вопрос — ответ законен
+      rhythm: {level: info}                    # ответы-определения могут быть ровными
+      concreteness: {min_per_100w: 3.0, level: warning}
+      paragraph_uniformity: {enabled: false}
+      lists_of_three: {level: info}
+  email-form:
+    genre: email-form
+    description: "Письма и уведомления вокруг форм: подтверждение заявки, двойная подписка, выдача материала, напоминания"
+    level_overrides:
+      "ru-ton-sycophancy": warning
+    analyzers:
+      exclamations: {warn_per_100w: 1.0}
+      rhythm: {level: info}
+      paragraph_uniformity: {enabled: false}
+      concreteness: {min_words: 40, min_per_100w: 1.0}
+      lists_of_three: {enabled: false}
+      eyebrow_rate: {enabled: false}

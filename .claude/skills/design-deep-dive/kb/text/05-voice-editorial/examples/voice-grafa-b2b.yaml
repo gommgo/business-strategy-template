@@ -1,0 +1,256 @@
+# voice-grafa-b2b.yaml — пример 1 из 3: сдержанный B2B (бухгалтерия на аутсорсе для ООО и ИП; лидогенерация услуги)
+# text-research · F · 2026-09-24 · формат: ../voice.schema.yaml (voice_version 1)
+#
+# Бренд «Графа» — ВЫМЫШЛЕННАЯ компания; ДЕМО-факты — ../../99-raw/experiments/F/04-voice-samples/facts-demo-grafa.yaml
+# (написал агент F по формату B2: у базы не было B2B-набора). Образцы строк — ai-self, прошли claims_check.py и
+# copy_lint.py: 99-raw/experiments/F/04-voice-samples/README.md.
+# Что показывает пример: голос для предмета с высокой ценой ошибки (деньги, налоги) и незнакомого бренда — формальнее
+# середины (Gretry 2017: неформальность снижает доверие к незнакомым брендам), без юмора и эмодзи; факт + условие вместо
+# «надёжности»; ключевое слово «заранее» опирается на факт, а не на слова отзыва; английский — адаптация для иностранных
+# владельцев российских ООО (пояснить УСН и 1С), а не перевод.
+
+voice_version: 1
+date: "2026-09-24"
+status: draft
+voice_id: grafa-b2b
+
+brand:
+  name: "Графа"
+  site: grafa-buh-demo
+  category: "бухгалтерия на аутсорсе для ООО и ИП"
+  facts_ref: "../../99-raw/experiments/F/04-voice-samples/facts-demo-grafa.yaml"
+
+scope:
+  genres: [landing, site-page, email-form, article, meta]
+  surfaces:
+    - {surface: marketing-site, voice: brand}
+    - {surface: blog, voice: brand, note: "статьи о налогах — функциональный текст (Сарычева): ответ первым, термин с пояснением"}
+    - {surface: lead-emails, voice: brand}
+    - {surface: transactional-emails, voice: product, note: "письма-напоминания о сроках — «робот»: сумма, срок, что сделать"}
+    - {surface: product-ui, voice: product, note: "личный кабинет — голос продукта (ux 07/01 §6–8), тот же словарь терминов"}
+    - {surface: legal, voice: neutral-legal}
+
+derived_from:
+  purpose: "Снять с владельца малого бизнеса бухгалтерию и отчётность так, чтобы о налогах и сроках он узнавал заранее, а не из блокировки счёта."
+  audience: "Владельцы ООО и ИП на УСН без своего бухгалтера; боятся штрафов и блокировки счёта, в налоговых терминах разбираются частично. Решение про деньги и ответственность — цена ошибки высокая."
+  subject_risk: high
+  brand_familiarity: unknown
+  category_norms: "«Команда профессионалов», «индивидуальный подход», «полный спектр бухгалтерских услуг», «надёжность и конфиденциальность»; цена «по запросу»."
+  differs_from_competitors: "Называем срок, сумму и пункт договора; объясняем налоговые слова один раз и по-человечески; не пугаем штрафами."
+  brief_adjectives: ["надёжные", "профессиональные", "современные"]
+  basis:
+    - {kind: brief, ref: "демо-бриф агента F: бухгалтерия для ООО и ИП на УСН, удалённо"}
+    - {kind: voc, ref: "fact:review-dmitry-k — «Раньше про требования налоговой я узнавал от банка — когда счёт уже блокировали»"}
+    - {kind: inferred, ref: "цена ошибки и незнакомость бренда → формальнее середины (ux 07/01 §7.2; Gretry 2017)"}
+    - {kind: assumption, ref: "прилагательные брифа «надёжные, профессиональные, современные»", question_id: q-adjectives}
+
+summary: >-
+  «Графа» говорит как главный бухгалтер, которому доверили деньги: спокойно, точно и заранее. Сначала — что нужно сделать
+  и к какому сроку, потом — почему. Называем пункт договора, сумму и дату вместо «надёжности» и «профессионализма».
+  Налоговые слова объясняем один раз и простыми словами. Не пугаем штрафами и не шутим о деньгах клиента.
+
+key_phrase:
+  ru: "заранее"
+  en: "ahead of time"
+  rule: "в hero и финальном призыве; только рядом с фактом о напоминаниях за 7 дней (fact:deadline-reminders)"
+  basis: {kind: voc, ref: "fact:review-dmitry-k — «Теперь узнаю за неделю»; держится на fact:deadline-reminders, а не на отзыве"}
+
+principles:
+  - id: facts-not-adjectives
+    name: "Факты вместо оценок"
+    why: "Категория говорит «надёжно и профессионально»; доверие в B2B держится на проверяемом (NN/g: доверие объясняет 52 % желания рекомендовать)."
+    execution:
+      - "В каждом блоке — хотя бы одно проверяемое: срок, сумма, пункт договора, число из facts.yaml"
+      - "«Надёжный», «профессиональный», «качественный», «индивидуальный подход» не пишем: вместо них — условие договора"
+      - "Условие стоит в той же строке, что обещание: «из-за ошибки нашего бухгалтера», «в рабочие дни»"
+    is_not: "Не справка: голый факт («Пункт 6.3») без того, что он значит для клиента, — это выписка, а не довод."
+    do: ["Штраф из-за ошибки нашего бухгалтера оплачиваем мы — пункт 6.3 договора."]
+    dont: ["Гарантируем надёжность и высокое качество услуг."]
+    checked_by: [claims_check, copy_lint, judge]
+  - id: what-first-then-why
+    name: "Сначала что и к какому сроку, потом почему"
+    why: "Владелец бизнеса читает, чтобы решить и сделать (функциональный текст — Сарычева [V:XuQQwB7R-Os 10:28])."
+    execution:
+      - "Первое предложение блока — действие или результат со сроком или суммой"
+      - "Предложения 8–20 слов; одно предложение — одна мысль; без парцелляции («Быстро. Чётко. В срок.»)"
+      - "Вопрос в заголовке — только в FAQ, и ответ начинается с сути («Переход занимает 10 рабочих дней»)"
+    is_not: "Не телеграф: рубленые фразы без связок — та же сухость, только модная (сверхкоррекция, C)."
+    do: ["Переход занимает 10 рабочих дней: принимаем базу 1С и документы, сверяем остатки."]
+    dont: ["Переход? Легко. Быстро. Без стресса."]
+    checked_by: [copy_lint, judge]
+  - id: calm-about-money
+    name: "Спокойно о деньгах и налогах"
+    why: "Страх — не довод: «штрафы до 100 000 ₽!» нормализует проблему и приписывает читателю беспомощность (Чалдини; Ильяхов «читатель в порядке»)."
+    execution:
+      - "Не пугаем суммами штрафов: пишем, что делаем, чтобы штрафа не было, и что будет, если ошибёмся мы"
+      - "Неприятная ситуация — о постороннем или безлично («если налоговая пришлёт требование…»), не «вы нарушили» (Т—Ж 3.8)"
+      - "Без восклицательных знаков, эмодзи и капса"
+    is_not: "Не безразлично: сочувствие — действием и сроком, а не «понимаем, как вам тяжело»."
+    do: ["Если налоговая пришлёт требование, ответим на него за вас — [PLACEHOLDER: срок ответа на требование]."]
+    dont: ["Штрафы до 100 000 ₽ и блокировка счёта! Не рискуйте!"]
+    checked_by: [copy_lint, judge]
+  - id: terms-once
+    name: "Термин — один раз и по-человечески"
+    why: "Простой язык нужен и экспертам (NN/g 2017; GOV.UK: «people with higher levels of literacy prefer plain English»)."
+    execution:
+      - "Налоговый термин при первом упоминании поясняем: «УСН — упрощённая система налогообложения»"
+      - "Без пояснения — только ИП, ООО, НДС и названия отчётов, которые владелец видит в письмах налоговой"
+    is_not: "Не ликбез: не объясняем то, что знает любой владелец ООО («что такое налог»), — «читатель в порядке»."
+    do: ["ИП на УСН (упрощённой системе налогообложения) без сотрудников — от 6 500 ₽ в месяц."]
+    dont: ["Осуществляем ведение учёта по УСН, ОСНО, ЕНВД, ПСН, АУСН."]
+    checked_by: [judge, human]
+
+pairs:
+  - {we_are: "по делу", we_are_not: "сухо, как справочник", why: "факт + что он значит для клиента"}
+  - {we_are: "точно", we_are_not: "канцелярски («осуществляем ведение учёта»)", why: "точность — в числах и условиях, а не в оборотах"}
+  - {we_are: "спокойно", we_are_not: "безразлично", why: "сочувствие — действием и сроком"}
+  - {we_are: "уверенно — срок и пункт договора", we_are_not: "самоуверенно («с нами не будет проверок» — never_claim)", why: "никто не может обещать отсутствие проверок"}
+  - {we_are: "вежливо, на «вы»", we_are_not: "подобострастно («Уважаемый клиент! Благодарим за выбор…»)", why: "уважение — смыслом, а не заглавной «Вы» (Контур)"}
+
+axes:
+  formality: {point: 2, note: "вежливо и нейтрально: «вы» со строчной, без разговорных слов и сокращений, но и без канцелярита"}
+  humor: {point: 1, note: "юмора нет: деньги и ответственность"}
+  respect: {point: 1, note: "уважительно к предмету и читателю"}
+  enthusiasm: {point: 2, note: "по фактам; ни одного восклицания"}
+
+tone_words:
+  do: [professional, trustworthy, informative, frank]
+  dont: [cheerful, playful, sarcastic, provocative]
+
+address:
+  ru_form: vy
+  capital_vy: false
+  self_reference: mixed
+  en_form: you
+
+vocabulary:
+  use:
+    - {term: "ведём бухгалтерию", instead_of: "осуществляем бухгалтерское сопровождение", why: "глагол вместо отглагольного существительного"}
+    - {term: "сдаём отчётность, считаем налоги", why: "что именно делаем"}
+    - {term: "требование налоговой", why: "так клиент называет письмо, которого боится (fact:review-dmitry-k)"}
+    - {term: "заранее, за неделю", why: "ключевое слово бренда — только с fact:deadline-reminders"}
+    - {term: "пункт договора", why: "обещание привязано к документу"}
+  avoid:
+    - {term: "команд* профессионалов", use_instead: "имя главного бухгалтера и стаж (fact:accountant-chernova)", reason: "медиана категории", level: warning}
+    - {term: "индивидуальн* подход*", use_instead: "что именно настраиваем под компанию — фактом", reason: "пустой штамп", level: warning}
+    - {term: "надёжн*", unless: "в отзыве клиента в кавычках", use_instead: "условие договора (п. 6.3) или страховка ответственности", reason: "оценка без факта", level: warning}
+    - {term: "профессионализм*", use_instead: "стаж, число клиентов, пункт договора", reason: "оценка без факта", level: warning}
+    - {term: "полн* спектр*", use_instead: "перечислить услуги", reason: "штамп категории", level: warning}
+    - {term: "осуществля*", use_instead: "глагол действия: ведём, сдаём, считаем", reason: "канцелярит", level: warning}
+    - {term: "уважаем* клиент*", use_instead: "обращение по имени в письме или без обращения", reason: "подобострастие (пара «вежливо / подобострастно»)", level: warning}
+    - {term: "оптимизац* налог*", use_instead: "не обещаем экономию на налогах", reason: "never_claim:nc-tax-savings", level: error}
+    - {term: "не будет проверок", use_instead: "что делаем, если придёт требование", reason: "never_claim:nc-no-audits", level: error}
+    - {term: "спешите", use_instead: "срок из факта, если он есть", reason: "ложная срочность", level: warning}
+  use_with_care:
+    - {term: "аутсорсинг, аутсорс", condition: "в title, мета и заголовке SEO-страницы (слово запроса — G); в тексте — «ведём бухгалтерию»"}
+    - {term: "сопровождение", condition: "только в названии тарифа; в тексте — глаголы"}
+    - {term: "бесплатно", condition: "рядом — что именно бесплатно («расчёт стоимости») (H: COPY-L-FREE-01)"}
+  spellings:
+    - {preferred: "1С", variants: ["1C", "1-С", "1с"], lang: ru, note: "кириллическая «С»"}
+    - {preferred: "УСН", variants: ["упрощёнка", "упрощенка"], lang: ru, note: "разговорное — только в цитате клиента"}
+    - {preferred: "ИП", variants: ["И.П."], lang: ru}
+  category_name: {ru: "бухгалтерия на аутсорсе для ООО и ИП", en: "outsourced bookkeeping for Russian LLCs and sole proprietors"}
+
+punctuation:
+  emoji: {policy: never}
+  exclamation: {policy: never}
+  rhetorical_questions: faq-only
+  caps: never
+  dash: grammar
+
+humor:
+  level: none
+  forms: []
+  allowed_in: []
+  never_in: [hero, pricing, pricing-terms, guarantee, legal, form-consent, complaint-response, faq, objections, lead-email, reminder-email]
+  note: "Юмора нет: предмет — деньги и ответственность перед налоговой; незнакомому бренду шутка стоит доверия (Eisend 2009; NN/g, страховка)."
+
+tone_map:
+  - {situation: hero, rules: ["что делаем + главное условие (напоминание за 7 дней); без эпитетов"]}
+  - {situation: pricing-terms, rules: ["цена «от» + для кого (ИП на УСН без сотрудников) + что не входит; порядок оплаты — [PLACEHOLDER], пока нет факта"]}
+  - {situation: guarantee, rules: ["обещание + условие + пункт договора в одной строке"]}
+  - {situation: reminder-email, axes_delta: {formality: -1}, rules: ["тема письма: налог, сумма, срок; тело — что сделать и до какого числа; без приветствий до сути"]}
+  - {situation: complaint-response, rules: ["признать, что случилось, назвать шаг и срок; ответственность — по п. 6.3, если ошибка наша"]}
+
+taboos:
+  - {id: fear-appeal, what: "страх как рычаг: «штрафы до…!», «заблокируют счёт!»", why: "нормализует проблему и приписывает читателю беспомощность"}
+  - {id: tax-savings, what: "обещания сэкономить на налогах", why: "прогноз без основания", refs: ["never_claim:nc-tax-savings"]}
+  - {id: no-audits, what: "обещание, что проверок и штрафов не будет", why: "не зависит от исполнителя", refs: ["never_claim:nc-no-audits"]}
+  - {id: jokes-about-tax-office, what: "шутки о налоговой и о деньгах клиента", why: "humor.level: none"}
+
+claims_boundaries_ref: "../../99-raw/experiments/F/04-voice-samples/facts-demo-grafa.yaml#never_claim"
+
+samples:
+  # --- русский (10 типов слотов) — ai-self, ДЕМО-факты «Графы»
+  - {id: ru-headline, slot_type: headline, lang: ru, situation: hero, text: "Ведём бухгалтерию ООО и ИП. О каждом налоге предупреждаем за неделю", fact_ids: ["fact:deadline-reminders"], principle_ids: [what-first-then-why]}
+  - {id: ru-subheadline, slot_type: subheadline, lang: ru, situation: hero, text: "Считаем налоги, сдаём отчётность и отвечаем на вопросы в течение 2 рабочих часов. ИП на УСН без сотрудников — от 6 500 ₽ в месяц.", fact_ids: ["fact:response-2h", "fact:price-from-ip-usn"], principle_ids: [facts-not-adjectives]}
+  - {id: ru-hero-proof, slot_type: hero-proof, lang: ru, situation: hero, text: "187 компаний и ИП на обслуживании — по данным CRM на 1 сентября 2026 года", fact_ids: ["fact:clients-on-service"]}
+  - {id: ru-cta-label, slot_type: cta-label, lang: ru, situation: hero, text: "Рассчитать стоимость", fact_ids: []}
+  - {id: ru-cta-note, slot_type: cta-note, lang: ru, situation: hero, text: "Расчёт стоимости — бесплатно, пришлём в течение рабочего дня", fact_ids: ["fact:quote-free-1day"]}
+  - {id: ru-card-title, slot_type: card-title, lang: ru, situation: guarantee, text: "Штраф из-за нашей ошибки оплачиваем мы", fact_ids: ["fact:fines-compensation"], principle_ids: [facts-not-adjectives]}
+  - {id: ru-card-body, slot_type: card-body, lang: ru, situation: guarantee, text: "Если налоговая начислит штраф или пени из-за нашей ошибки, возместим их полностью — это пункт 6.3 договора. Мы застраховали ответственность на 5 млн ₽.", fact_ids: ["fact:fines-compensation", "fact:liability-insurance"], principle_ids: [facts-not-adjectives, calm-about-money]}
+  - {id: ru-faq-a, slot_type: faq-a, lang: ru, situation: faq, text: "Переход занимает 10 рабочих дней: принимаем базу 1С и документы, сверяем остатки и сообщаем, что нужно исправить до ближайшего отчёта.", fact_ids: ["fact:switch-10-days"], principle_ids: [what-first-then-why], note: "вопрос: «Как перейти от прежнего бухгалтера?»"}
+  - {id: ru-form-success, slot_type: form-success, lang: ru, situation: form-success, text: "Заявка у нас. Расчёт пришлём на почту в течение рабочего дня.", fact_ids: ["fact:quote-free-1day"]}
+  - {id: ru-email-subject, slot_type: email-subject, lang: ru, situation: lead-email, text: "Расчёт для ИП на УСН без сотрудников: от 6 500 ₽ в месяц", fact_ids: ["fact:price-from-ip-usn"]}
+  # --- английский (адаптация: иностранные владельцы российских ООО; УСН и 1С пояснить; цена — для ООО, а не для ИП)
+  - {id: en-headline, slot_type: headline, lang: en, situation: hero, adaptation_of: ru-headline, text: "Bookkeeping for your Russian LLC, with an email a week before every tax is due", fact_ids: ["fact:deadline-reminders"], note: "адаптация: «ваше российское ООО» — аудитория иностранных владельцев"}
+  - {id: en-subheadline, slot_type: subheadline, lang: en, situation: hero, adaptation_of: ru-subheadline, text: "We calculate your taxes, file your reports and answer questions within 2 business hours. An LLC on the simplified tax system (USN) with 1–3 employees starts at ₽12,000 a month.", fact_ids: ["fact:response-2h", "fact:price-from-llc-usn"], note: "адаптация: другой факт цены — для ООО"}
+  - {id: en-hero-proof, slot_type: hero-proof, lang: en, situation: hero, adaptation_of: ru-hero-proof, text: "187 companies and sole proprietors on our books as of 1 September 2026", fact_ids: ["fact:clients-on-service"]}
+  - {id: en-cta-label, slot_type: cta-label, lang: en, situation: hero, adaptation_of: ru-cta-label, text: "Get a quote", fact_ids: []}
+  - {id: en-cta-note, slot_type: cta-note, lang: en, situation: hero, adaptation_of: ru-cta-note, text: "The quote is free. We email it within one business day", fact_ids: ["fact:quote-free-1day"]}
+  - {id: en-card-title, slot_type: card-title, lang: en, situation: guarantee, adaptation_of: ru-card-title, text: "If our mistake leads to a fine, we pay it", fact_ids: ["fact:fines-compensation"]}
+  - {id: en-card-body, slot_type: card-body, lang: en, situation: guarantee, adaptation_of: ru-card-body, text: "If the tax office charges a fine or late-payment interest because of our mistake, we reimburse it in full under clause 6.3 of our contract. We have insured our professional liability for ₽5 million.", fact_ids: ["fact:fines-compensation", "fact:liability-insurance"]}
+  - {id: en-faq-a, slot_type: faq-a, lang: en, situation: faq, adaptation_of: ru-faq-a, text: "Switching takes 10 business days: we take over your 1C accounting database and documents, reconcile the balances and tell you what needs fixing before the next report.", fact_ids: ["fact:switch-10-days"], note: "1С → «1C accounting database»: назвать, что это"}
+  - {id: en-form-success, slot_type: form-success, lang: en, situation: form-success, adaptation_of: ru-form-success, text: "Thanks, we have your request. Your quote will arrive by email within one business day.", fact_ids: ["fact:quote-free-1day"]}
+  - {id: en-email-subject, slot_type: email-subject, lang: en, situation: lead-email, adaptation_of: ru-email-subject, text: "Your quote: an LLC on USN with 1–3 employees, from ₽12,000 a month", fact_ids: ["fact:price-from-llc-usn"]}
+
+style_sheet:
+  yo: always
+  numbers: digits
+  currency: "₽"
+  company_names: as-they-write
+  product_names:
+    - {name: "«Графа»", rule: "в кавычках, склоняется («в „Графе“»); в первом упоминании — «компания „Графа“»"}
+  terms:
+    - {term: "УСН", definition: "упрощённая система налогообложения — при первом упоминании на странице пояснить", not: ["упрощёнка"]}
+    - {term: "требование налоговой", definition: "письмо ФНС с запросом пояснений или документов", not: ["претензия налоговой"]}
+
+lint:
+  base_profile: landing
+  level_overrides:
+    "ru-pun-emoji-*": warning
+  address_rule: true
+
+projections:
+  tone_of_voice: "На «вы», спокойно и точно: срок, сумма и пункт договора вместо «надёжности». Термин — с пояснением. Без юмора, эмодзи и восклицаний."
+  brand_voice:
+    tone: "как главный бухгалтер, которому доверили деньги: спокойно, точно, заранее"
+    use: ["ведём бухгалтерию", "заранее", "пункт договора", "требование налоговой"]
+    avoid: ["команда профессионалов", "индивидуальный подход", "надёжность", "полный спектр", "оптимизация налогов"]
+  prompt_brief: >-
+    Голос «Графы»: главный бухгалтер, которому доверили деньги. На «вы», о себе — «мы», в первом упоминании — «компания
+    „Графа“». Сначала что сделать и к какому сроку, потом почему. В каждом блоке — проверяемое из facts.yaml: срок, сумма,
+    пункт договора; условие — в той же строке. Налоговый термин поясняем при первом упоминании. Нельзя: «надёжный»,
+    «профессиональный», «индивидуальный подход», «полный спектр», страх штрафами, обещания экономии на налогах и
+    «проверок не будет». Юмора, эмодзи, восклицаний и капса нет. Нет факта — [PLACEHOLDER].
+
+languages:
+  - {lang: ru, role: primary}
+  - lang: en
+    role: adaptation
+    audience_note: "Иностранные владельцы российских ООО: не знают УСН, 1С и сроков российской отчётности; для них главный риск — не понять требование налоговой на русском."
+    adaptation_rules:
+      - "сохраняем принципы, точки осей и отсутствие юмора"
+      - "УСН → «the simplified tax system (USN)» в первом упоминании; 1С → «1C accounting database»"
+      - "выбираем факт под аудиторию: цена для ООО (fact:price-from-llc-usn), а не для ИП"
+      - "английские стяжения (we’re) допустимы в письмах, на странице — умеренно"
+
+open_questions:
+  - {id: q-adjectives, q: "«Надёжные, профессиональные, современные» — какие поступки за этими словами? Что вы делаете, чего не делают другие бухгалтерии?", why: "Прилагательные подходят любой бухгалтерии (Ross); голос держится на поступках", default: "Принципы строим на фактах договора и регламента", affects: [principles, derived_from]}
+  - {id: q-requirement-sla, q: "За какой срок отвечаете на требование налоговой за клиента?", why: "Без срока сцена «ответим за вас» — обещание без факта", default: "[PLACEHOLDER] в образцах", affects: [principles.calm-about-money]}
+
+review:
+  method: editor
+  result: "черновик; образцы: claims_check — 0 error, copy_lint — clean/review (99-raw/experiments/F/04-voice-samples)"
+  by: "агент F (ai-self)"
+  date: "2026-09-24"

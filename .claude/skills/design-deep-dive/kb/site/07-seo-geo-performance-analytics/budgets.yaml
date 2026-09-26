@@ -1,0 +1,199 @@
+# budgets.yaml — профили бюджета страницы «тип страницы × уровень амбиций» (site-research, владелец — P; v1 — K, волна 3)
+# Человеческое описание, основания и таблица расхождений с соседями — 03-performance-budgets-gates.md.
+# Ворота, которые применяют эти числа, — page-gates.yaml; автопроверка — ../../scripts/site/page_gates.py.
+# Правило PLAN (поправка 17): вес — предупреждение, а не блокер; блокируют исходы (LCP, CLS, INP-сценарий) и
+# индексируемость. Профили эффектов (JS подачи, WebGL, 3D, видео, GPU) — creative, здесь только ссылка.
+version: 0
+checked: 2026-09-24
+status: draft
+owner: "site-research · агент P (волна 2); v1 — K (волна 3)"
+profile_id_format: "<page_type>@L<n>  (page-plan.page.budget_profile, схема E: ^[a-z0-9]+(-[a-z0-9]+)*@L[0-2]$)"
+
+sources:
+  S-vitals: "web.dev, Web Vitals (обн. 2024-10-31): LCP ≤ 2,5 с, INP ≤ 200 мс, CLS ≤ 0,1 на p75, раздельно телефон/десктоп"
+  S-thresholds: "web.dev, Defining the CWV thresholds (обн. 2025-05-07): плохо > 4 с / > 500 мс / > 0,25; пороги по достижимости на телефоне"
+  S-tbt: "web.dev, TBT (обн. 2025-10-15): < 200 мс на средней мобильной технике; прокси INP, не замена"
+  S-labfield: "web.dev, Why lab and field data can be different"
+  S-wa-perf: "Web Almanac 2025 Performance (2026-01): CWV хорошо — телефон 48 %, десктоп 56 %; TBT HTTP Archive телефон медиана 1 916 мс"
+  S-wa-pw: "Web Almanac 2025 Page Weight (2026-01): главная медиана 2 559 / 2 862 КБ; доля прошедших CWV падает с весом"
+  S-M: "замер M (02-site-types/pages.csv 15:23, valid=1: 40 десктоп + 42 телефон; лаборатория без замедления сети, телефон CPU×4)"
+  S-creative-C1: "../creative/01-creative-direction/ambition-levels.yaml v0 (2026-09-24): budgets.page — предложение для P"
+  S-aimedia: "../ai-media/10-web-integration/04-budgets-and-acceptance.md §1.1 (нормы ассетов первого экрана)"
+  S-blender: "../blender/09-web-runtime/05-performance-a11y-fallbacks.md §1.1, §7.2 (доля 3D)"
+  S-everts: "[V:cnr3CJwpaps 32:32] Tammy Everts: бюджет = худшее значение за 2–4 недели; цель отдельно"
+  S-googlebot: "[V:kype1JQbrks 08:18] + документация Googlebot (2026-02-03): первые 2 МБ несжатого файла"
+  S-plan20: "PLAN.md решение 20 (2026-09-24): умолчания уровня по типу страницы; lead-services L1 с первым экраном L0"
+
+# ---------------------------------------------------------------- условия замера
+conditions:
+  field:
+    what: "поле: CrUX (28 дней, p75, Chrome без iOS и без Яндекс Браузера) или свой RUM (web-vitals onLCP/onINP/onCLS)"
+    percentile: 75
+    segments: [mobile, desktop]
+    note: "у нового сайта поля нет; поле действует с живой фазы (≥ 4 недели трафика)"
+  lab_mobile:
+    tool: "page_accept.py --mobile --throttle (или Lighthouse mobile)"
+    device: "Pixel 7 эмуляция 412×839, DPR 2,625"
+    cpu_slowdown: 4
+    network: {down_kbps: 1600, rtt_ms: 150}
+    runs: 3
+    statistic: median
+    note: "условия близки к Lighthouse mobile; без замедления сети (как замер M) — только для диагностики"
+  lab_desktop:
+    tool: "page_accept.py (десктоп)"
+    device: "1440×900, DPR 1"
+    cpu_slowdown: 1
+    network: none
+    runs: 3
+    statistic: median
+  inp_scenario:
+    what: "лабораторный INP по сценарию (как page_anatomy.py --inp): меню, CTA, аккордеон, фокус в поле; + одно нажатие во время загрузки (DCL + 500 мс)"
+    note: "сценарий после загрузки занижает INP: M — 0 из 111 прогонов > 200 мс при TBT телефона > 200 мс у 55 %"
+
+# ---------------------------------------------------------------- слои веса (называть слой всегда)
+layers:
+  first_screen_kb: "передано по сети за load + 4–6 с без прокрутки и кликов, включая видео, стартующее само (ai-media 10/04 §1.2; M first_screen_kb)"
+  session_kb: "передано за программную прокрутку до конца страницы без кликов (M session_kb)"
+  js_first_screen_kb: "JS (все источники), переданный в слое first_screen"
+  third_party_first_screen_kb: "сторонние домены (eTLD+1 ≠ сайта) в слое first_screen"
+  third_party_origins_before_input: "число сторонних eTLD+1 до первого ввода пользователя"
+  fonts_kb: "шрифты за сессию"
+  html_transfer_kb: "HTML-документ по сети (сжатый)"
+  html_uncompressed_kb: "HTML без сжатия (предел Googlebot — 2 048 КБ на файл)"
+  inline_data_uri_kb: "сумма data:-URI картинок внутри HTML и CSS"
+  wasm_first_screen_kb: "wasm-рантаймы подачи в слое first_screen (dotLottie ≈ 379 КБ br, Rive 272–613 КБ br) — отдельно от js_first_screen_kb; загрузка с jsDelivr или unpkg — сторонний домен (third_party_*), самохостинг — setWasmUrl (creative G; аудит X С-21, S1 2026-09-25)"
+  presentation_kb_by_mode: "JS и данные подачи — отдельно для режимов desktop, mobile, reduce (условная загрузка: закреплённая сцена GSAP 45,7 КБ br на десктопе и 3,9 КБ на телефоне и при reduce; SplitText 30 КБ против 0 — creative F); пороги эффектов — creative (effects_ref), здесь — слой отчёта (аудит X С-31, S1 2026-09-25)"
+
+# ---------------------------------------------------------------- виды порогов
+kinds:
+  goal: "цель приёмки новой страницы (лаборатория) и цель поля (p75). Превышение — серьёзность из page-gates.yaml"
+  poor: "граница «плохо»: превышение исхода (LCP, CLS, INP) — блокер ворот"
+  budget: "бюджет регрессии живой страницы: худшее значение метрики за последние 2–4 недели, пересмотр каждые 2–4 недели (Everts); заполняется в живой фазе"
+
+# ---------------------------------------------------------------- профили уровней (страница целиком)
+levels:
+  L0:
+    name: "Сдержанно"
+    effects_ref: "../creative/01-creative-direction/ambition-levels.yaml#levels.L0.budgets.effects"
+    outcome:
+      lcp_ms_field_p75: {goal: 2500, poor: 4000, basis: S-vitals}
+      inp_ms_field_p75: {goal: 200, poor: 500, basis: S-vitals}
+      cls_field_p75: {goal: 0.1, poor: 0.25, basis: S-vitals}
+      lcp_ms_lab: {mobile: {goal: 2500, poor: 4000}, desktop: {goal: 2000, poor: 4000}, basis: "S-vitals; S-creative-C1 (десктоп 2,0)"}
+      cls_lab: {goal: 0.1, poor: 0.25, basis: S-thresholds}
+      inp_ms_lab_scenario: {goal: 200, poor: 500, basis: "S-vitals; занижен — см. conditions.inp_scenario"}
+      tbt_ms_lab: {mobile: {goal: 200}, desktop: {goal: 150}, basis: "S-tbt; S-creative-C1"}
+    weight:
+      first_screen_kb: {mobile: 1500, desktop: 2500, basis: "S-creative-C1 = ai-media Q1 лидеров; M все страницы телефон медиана 2 056"}
+      session_kb: {mobile: 3000, desktop: 5000, basis: "S-creative-C1; M телефон медиана 3 497"}
+      js_first_screen_kb: {mobile: 300, desktop: 300, basis: "WA 2025 JS p25 270 КБ; M многостраничники медиана 283; Russell 2024 ≈ 365 КБ JS на p75-телефоне [мнение эксперта через blender 01/02 §3.2]"}
+      fonts_kb: {mobile: 150, desktop: 150, basis: "S-creative-C1; WA 2025 медиана шрифтов 122 / 139 КБ"}
+      third_party_origins_before_input: {max: 1, basis: "до ввода — только CMP (0, если свой); счётчики и пиксели — после согласия (SG-LEGAL-01, позиция I по умолчанию [спорно]); карты, чат, видео, запись — по видимости или нажатию (03 §5); M медиана 7"}
+      third_party_first_screen_kb: {max: 200, basis: "Метрика ≈ 120 КБ за сессию (M vendors.tsv; реимплементация X2 — 124 КБ, vendors-final.tsv; ориентир) + CMP 16–84 КБ"}
+  L1:
+    name: "Выразительно"
+    effects_ref: "../creative/01-creative-direction/ambition-levels.yaml#levels.L1.budgets.effects"
+    outcome:
+      lcp_ms_field_p75: {goal: 2500, poor: 4000, basis: S-vitals}
+      inp_ms_field_p75: {goal: 200, poor: 500, basis: S-vitals}
+      cls_field_p75: {goal: 0.1, poor: 0.25, basis: S-vitals}
+      lcp_ms_lab: {mobile: {goal: 2500, poor: 4000}, desktop: {goal: 2500, poor: 4000}, basis: "S-vitals; S-creative-C1"}
+      cls_lab: {goal: 0.1, poor: 0.25, basis: S-thresholds}
+      inp_ms_lab_scenario: {goal: 200, poor: 500, basis: S-vitals}
+      tbt_ms_lab: {mobile: {goal: 300}, desktop: {goal: 200}, basis: "S-creative-C1 (эффекты L1 + 1 контекст WebGL); M лидген телефон медиана 508 — L1 строже рынка"}
+    weight:
+      first_screen_kb: {mobile: 2000, desktop: 3500, basis: "S-creative-C1; M SaaS десктоп медиана 3 824, телефон 3 350; WA: 2–3 МБ — CWV прошли 45 % телефонных главных"}
+      session_kb: {mobile: 5000, desktop: 10000, basis: "S-creative-C1; ai-media лидеры SaaS сессия 7,1 МБ"}
+      js_first_screen_kb: {mobile: 450, desktop: 450, basis: "L0 + JS подачи ≤ 100 КБ (creative) + запас на аналитику; WA медиана 646 КБ"}
+      fonts_kb: {mobile: 250, desktop: 250, basis: "S-creative-C1; ai-media лидеры медиана 190, Q3 328"}
+      third_party_origins_before_input: {max: 2, basis: "CMP + 1 (видео-CDN); счётчики — после согласия; шрифты — со своего домена (SG-LEGAL-07)"}
+      third_party_first_screen_kb: {max: 300, basis: "L0 + видеоплеер или второй счётчик"}
+  L2:
+    name: "Иммерсивно, «вау»"
+    effects_ref: "../creative/01-creative-direction/ambition-levels.yaml#levels.L2.budgets.effects"
+    three_d_ref: "../blender/09-web-runtime/05-performance-a11y-fallbacks.md §7.2 (WEB-01…16: доля 3D ≤ 820/1536 КБ, TBT 3D ≤ 300/150)"
+    outcome:
+      lcp_ms_field_p75: {goal: 2500, poor: 4000, basis: "S-vitals: «вау» после LCP — порог тот же"}
+      inp_ms_field_p75: {goal: 200, poor: 500, basis: S-vitals}
+      cls_field_p75: {goal: 0.1, poor: 0.25, basis: S-vitals}
+      lcp_ms_lab: {mobile: {goal: 3000, poor: 4000}, desktop: {goal: 2500, poor: 4000}, basis: "S-creative-C1 (телефон 3,0 с — постер после прелоадера запрещён: прелоадер только по решению)"}
+      cls_lab: {goal: 0.1, poor: 0.25, basis: S-thresholds}
+      inp_ms_lab_scenario: {goal: 200, poor: 500, basis: S-vitals}
+      tbt_ms_lab: {mobile: {goal: 600}, desktop: {goal: 300}, basis: "blender 01/02 §8 (страница CPU×4 ≤ 600); S-creative-C1"}
+    weight:
+      first_screen_kb: {mobile: 2500, desktop: 4000, basis: "S-creative-C1; ai-media Awwwards до прокрутки медиана 3,8 МБ"}
+      session_kb: {mobile: 8000, desktop: 15000, basis: "S-creative-C1; Awwwards сессия медиана 20,9 МБ — L2 строже жанра"}
+      js_first_screen_kb: {mobile: 750, desktop: 900, basis: "L1 + JS 3D 250/350 КБ br (creative, blender A/03); WA p75 1 233 КБ"}
+      fonts_kb: {mobile: 300, desktop: 300, basis: S-creative-C1}
+      third_party_origins_before_input: {max: 2, basis: "как L1"}
+      third_party_first_screen_kb: {max: 300, basis: "как L1: «вау» делает свой код, а не сторонние виджеты"}
+
+# ---------------------------------------------------------------- общие для всех уровней
+all_levels:
+  html_uncompressed_kb: {max: 2048, severity_hint: blocker, owner: H, basis: S-googlebot}
+  css_js_file_uncompressed_kb: {max: 2048, severity_hint: blocker, owner: H, basis: "S-googlebot: предел на каждый файл"}
+  html_transfer_kb: {goal: 150, basis: "WA 2025 HTML p90 151–155 КБ; M медиана 57 КБ"}
+  inline_data_uri_kb: {goal: 10, basis: "[V:kype1JQbrks 12:26] base64 раздувает HTML; иконки SVG — допустимы"}
+  lcp_resource_rules: "LCP — H1 или картинка/постер в исходном HTML; LCP-картинка без loading=lazy (блокер), с fetchpriority=high (предупреждение); не canvas; без появления из opacity 0 (S-optlcp; ai-media 01/02 §5)"
+
+# ---------------------------------------------------------------- сетка «тип страницы → уровень» (PLAN решение 20)
+page_type_levels:
+  default:
+    L0: [service-page, seo-landing-page, pricing-page, comparison-page, alternatives-page, faq-page, contacts-page, form-page, thank-you-page, legal-page, article-page, blog-index-page, careers-page, case-list-page, not-found-page, specialist-page, location-page, documents-page, search-results-page]
+    L1: [landing-lead-services, landing-saas, landing-app, landing-product, landing-event, landing-course, landing-waitlist, landing-lead-magnet, home-multipage, services-index-page, feature-page, use-case-page, about-page, case-page, reviews-page, team-page, program-catalog-page]
+    L2: [landing-campaign, portfolio-page]
+  rules:
+    - "уровень страницы не выше уровня сайта в брифе (site-brief.ambition.level)"
+    - "landing-lead-services: L0 по умолчанию, если доля горячего трафика с телефонов ≥ 50 % и decision_context.price_band ∈ {low, mid} (решение 20)"
+    - "секции lead-form и pricing — эффекты L0 при любом уровне страницы (creative CRV-AL; решение 20)"
+    - "отклонение от умолчания — только с причиной: site-brief.ambition.source ≠ default + note"
+    - "specialist-page, location-page, documents-page, search-results-page — L0, program-catalog-page — L1 (5 активных типов словаря v1; S1 2026-09-25 по предложению J и G; 5 типов proposed — после решения владельца)"
+
+# ---------------------------------------------------------------- исключения по типу страницы (накладываются на уровень)
+overrides:
+  landing-lead-services@L1:
+    weight: {first_screen_kb: {mobile: 1500, desktop: 2500}}
+    why: "решение 20: вес первого экрана на телефоне всегда по L0; горячий платный трафик с телефона; M лидген РФ телефон медиана 2 296 КБ (Q1 1 344) — цель ≈ Q1 рынка"
+  landing-lead-services@L2:
+    weight: {first_screen_kb: {mobile: 1500, desktop: 2500}}
+    why: "то же правило при любом уровне"
+  thank-you-page@L0:
+    weight: {first_screen_kb: {mobile: 800, desktop: 1200}, third_party_origins_before_input: {max: 1}}
+    why: "служебная страница после заявки: цель Метрики и пиксели срабатывают здесь — не грузить лишнего (события — events.yaml)"
+  not-found-page@L0:
+    weight: {first_screen_kb: {mobile: 800, desktop: 1200}}
+    why: "служебная страница"
+  article-page@L0:
+    weight: {fonts_kb: {mobile: 200, desktop: 200}}
+    why: "текстовая страница: допустима вторая гарнитура для текста (кириллица)"
+
+# ---------------------------------------------------------------- как разрешать профиль
+resolve:
+  - "1. Разобрать budget_profile '<page_type>@L<n>'; если его нет — уровень из page_type_levels.default и правил."
+  - "2. Взять levels[L<n>] (outcome, weight) + all_levels."
+  - "3. Наложить overrides['<page_type>@L<n>'] (поле за полем)."
+  - "4. Проверить: L<n> ≤ уровня сайта; для lead-services — правило горячего мобильного трафика."
+  - "5. Секции с 3D — дополнительно ворота blender (доля 3D) по three_d_ref; эффекты — ворота creative по effects_ref."
+  - "Реализация — page_gates.py resolve_profile(); самопроверка — page_gates.py --selftest."
+
+# ---------------------------------------------------------------- бюджеты регрессии живой страницы (Everts)
+regression_budget:
+  metrics: [lcp_ms_field_p75, inp_ms_field_p75, cls_field_p75, first_screen_kb, js_first_screen_kb, third_party_first_screen_kb, image_kb_first_screen]
+  rule: "budget = худшее значение за последние 4 недели (RUM p75 или медиана синтетики на заданных URL); пересмотр каждые 2–4 недели, только вниз"
+  alert: "нарушение бюджета → разбор: какое изменение (картинка, тег, код) его вызвало; цель (goal) не путать с бюджетом"
+  pages_first: "посадочные под платный трафик, страницы услуг с формой, тарифы — там решается действие"
+  status: "заполняется в живой фазе (нужен трафик и RUM или ключ CrUX API)"
+
+# ---------------------------------------------------------------- ориентиры рынка (не нормы)
+market_reference:
+  M_all_mobile_median: {lcp_ms_lab_unthrottled: 1854, first_screen_kb: 1781, session_kb: 3497, tbt_ms: 234, js_first_screen_kb: 475, third_party_domains: 7}
+  M_all_desktop_median: {lcp_ms_lab_unthrottled: 2706, first_screen_kb: 2801, session_kb: 3620, tbt_ms: 0}
+  M_lead_ru_mobile_median: {first_screen_kb: 2508, session_kb: 3565, tbt_ms: 508, lcp_ms_lab_unthrottled: 2068}
+  M_saas_mobile_median: {first_screen_kb: 3350, session_kb: 4961, tbt_ms: 446, lcp_ms_lab_unthrottled: 2728}
+  WA2025_home_mobile_median_kb: 2559
+  WA2025_inner_mobile_median_kb: 1769
+  WA2025_js_mobile_percentiles_kb: {p25: 270, p50: 646, p75: 1233, p90: 1910}
+  WA2025_cwv_pass_home_mobile_by_weight: {"<=1MB": 0.57, "1-2MB": 0.52, "2-3MB": 0.45, "3-4MB": 0.38, "4-5MB": 0.34, ">=5MB": 0.30}
+  WA2025_lcp_p75_home_mobile_by_weight_s: {"<=1MB": 2.6, "1-2MB": 3.0, "2-3MB": 3.2, "3-4MB": 3.4, "4-5MB": 3.6, ">=5MB": 3.8}
+  creative_C_L2_desktop_first_screen_mb_no_video: {range: "8,2–9,4", n: "3 из 4 L2-страниц C", status: "предварительно (C1 creative 2026-09-24 16:22, 99-raw/notes/sync/C1-creative-2026-09-24/README.md п. 3)", note: "жанр наградных сайтов, не норма: цель L2 (4,0 МБ десктоп) остаётся; превышение — S и x-gate-exception с причиной и автором (аудит X В-09, решение S2)"}
+  creative_C_first_screen_video_max_mb: {value: 140.6, note: "видео первого экрана без действия пользователя у эффектных сайтов C — считать отдельной цифрой (SG-WEIGHT-09)"}

@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ai-media/11-evaluation-qa/rubrics/judge-response.schema.json",
+  "title": "Ответ VLM-судьи (asset-audit judge/1)",
+  "description": "Четыре режима судьи — checklist (атомарные вопросы брифа, DSG), defects (маркеры «сгенерированности» с обязательным «где»), pairwise (A/B/tie/both_bad по вопросам) и transcribe (дословная расшифровка текста — сверка с OCR, K-05). Формат «сразу вердикт» без рассуждения (GEditBench v2: у малых моделей рассуждение первым ухудшает точность). Подмножество, которое принимает structured output Gemini/OpenAI: object, required, enum, additionalProperties false. Агент K, 23.09.2026; разбор — ../../scripts/ai-media/asset_audit.py judge-parse.",
+  "$defs": {
+    "checklist_answer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "answers"
+      ],
+      "properties": {
+        "answers": {
+          "type": "array",
+          "description": "Один элемент на вопрос; id — как в задании (q1, c3, p1 …).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "answer"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "answer": {
+                "type": "string",
+                "enum": [
+                  "yes",
+                  "no",
+                  "unsure"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "defects_answer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "defects"
+      ],
+      "properties": {
+        "defects": {
+          "type": "array",
+          "description": "Один элемент на код из задания. present = yes только вместе с непустым where (иначе judge-parse понижает до unsure).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "present",
+              "where",
+              "severity"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "IMG-Mxx, VID-Mxx или RUB-* из рубрики"
+              },
+              "present": {
+                "type": "string",
+                "enum": [
+                  "yes",
+                  "no",
+                  "unsure"
+                ]
+              },
+              "where": {
+                "type": "string",
+                "description": "Короткое место в кадре («left hand», «top-right corner»); пусто, если no"
+              },
+              "severity": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "minor",
+                  "major"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "pairwise_answer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "answers",
+        "defect_codes"
+      ],
+      "properties": {
+        "answers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "winner"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "slot, natural … — те же id, что на странице голосования stand_run.py"
+              },
+              "winner": {
+                "type": "string",
+                "enum": [
+                  "A",
+                  "B",
+                  "tie",
+                  "both_bad"
+                ]
+              }
+            }
+          }
+        },
+        "defect_codes": {
+          "type": "array",
+          "description": "Коды рубрики, которые решили выбор (у проигравшей), можно пусто",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "transcribe_answer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lines"
+      ],
+      "properties": {
+        "lines": {
+          "type": "array",
+          "description": "Строки текста как на картинке, без исправлений; пусто, если текста нет",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/checklist_answer"
+    },
+    {
+      "$ref": "#/$defs/defects_answer"
+    },
+    {
+      "$ref": "#/$defs/pairwise_answer"
+    },
+    {
+      "$ref": "#/$defs/transcribe_answer"
+    }
+  ]
+}

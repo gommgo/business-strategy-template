@@ -1,0 +1,77 @@
+# Рецепт 05 · Мероприятие · L1 — 10-recipes/05-event-l1.md · J · 2026-09-25
+recipe_version: "0.1"
+id: recipe:event-l1
+title_ru: "Мероприятие, L1 — зал уже шумит: видео-петля прошлого года и программа как табло"
+status: proposed
+checked_at: "2026-09-25"
+site_type: event-site
+page_type: landing-event
+level: L1
+level_why: "лендинг события — L1 по умолчанию; L2 — только фестиваль и культура (ветка §8)"
+budget_profile: landing-event@L1
+when: ["есть видео прошлого события", "программа — главный довод"]
+not_when: ["горячий мобильный трафик последней недели — L0-hero с фото"]
+inputs:
+  playbook: "../site/10-playbooks-contracts/02-playbooks-landings.md#6"
+  copy_deck_example: "../text/10-templates-recipes/examples/ru-okoshko-webinar.yaml"
+  video: ["V:UcXWY057YuQ 12:33"]
+concept:
+  thesis: "Зал уже шумит: сначала прошлогодний зал в движении, затем табло программы, где каждый доклад — строка с временем."
+  story: {hero: "специалист, который выбирает, куда ехать", conflict: "десять конференций с одинаковыми спикерами на фото", resolution: "живой зал и конкретные доклады с временем"}
+  signature_move: "видео-петля настоящей съёмки + программа-табло"
+ledger:
+  paper: dark
+  display_style: grotesque
+  accent_hue: warm
+  macrostructure: event-schedule
+  hero_architecture: full-bleed-poster
+  main_technique: "effect:video-loop-hero"
+  motion_signature: {entrances: "fade-up только hero", tempo: brisk, curve: out-expo}
+  corner_language: soft
+page_plan:
+  macrostructure: event-schedule
+  first_screen_policy: offer-cta
+  length: "8 секций"
+  sections:
+    - {id: hero, block: "block:hero-media", role: hero, level: L1, visual_role: accent, effects: ["effect:video-loop-hero", "effect:motion-toggle"], reduce: static-poster, mobile: "720p 9:16 или постер при Save-Data"}
+    - {id: proof-logos, block: "block:logo-wall", role: proof-logos, level: L1, visual_role: support, effects: ["effect:marquee-logos"], reduce: final-state, mobile: "статичный ряд — на телефоне петель в зоне ≤ 1 (EG-A11Y-17 L1)"}
+    - {id: event-program, block: "block:event-agenda", role: event-program, level: L0, visual_role: calm}
+    - {id: team, block: "block:speakers-grid", role: team, level: L0, visual_role: support}
+    - {id: offer, block: "block:offer-details", role: offer, level: L0, visual_role: calm}
+    - {id: pricing, block: "block:pricing-cards", role: pricing, level: L0, visual_role: calm}
+    - {id: faq, block: "block:faq", role: faq, level: L0, visual_role: calm}
+    - {id: final-cta, block: "block:lead-form", role: lead-form, level: L0, visual_role: calm}
+motion:
+  thesis: "Двигается только зал на видео и строка партнёров; обе останавливаются одной кнопкой."
+  primitives: [fade-up, none]
+  peaks: []
+  accents: [hero, proof-logos]
+  toggle: button
+  smooth_scroll: false
+  transitions: none
+  loops_in_view_max: 2
+stack:
+  library: [css, "video"]
+  js_first_kb_br: 5
+  notes: "видео после load, пауза вне экрана (IO), одна кнопка на все петли"
+assets:
+  - {slot: hero-video, ladder: video, source: real, budget_kb: 1500, note: "реальная съёмка; телефон 600 КБ; без съёмки — фото зала"}
+  - {slot: speakers, ladder: image, source: real, budget_kb: 60}
+  - {slot: logos, ladder: svg, source: real}
+copy:
+  promise: "где этот доклад и когда"
+  slots: [headline, event-meta, cta-label, list-item, faq-q, faq-a, form-title, form-consent]
+budget:
+  js_presentation_kb_br: {mobile: 100, desktop: 100}
+  first_screen_mb: {mobile: 2.0, desktop: 3.5}
+  video_kb: {mobile: 600, desktop: 1500}
+  source: "ambition-levels.yaml L1"
+gates:
+  tools: ["motion_check.py --level L1 --f83 h1", "page_accept.py --contrast h1 --budget-first-kb 3500"]
+  must_pass: [EG-A11Y-01, EG-A11Y-02, EG-A11Y-03, EG-A11Y-05, EG-A11Y-16, EG-A11Y-17, EG-A11Y-19, EG-WEIGHT-04]
+  manual: ["F83 по кадрам видео (EG-A11Y-23)"]
+decisions:
+  - {id: d-veil, technique: "cliche:hero-media-veil", decision: twist, why: "скрим только под текстовой колонкой, зал читается"}
+  - {id: d-marquee, technique: "cliche:marquee-strip", decision: twist, why: "одна строка, реальные партнёры, 40 px/с, общая пауза"}
+  - {id: d-glow, technique: "cliche:neon-glow", decision: avoid, why: "табло без неонового свечения, жёлто-оранжевый — сигнал"}
+errors: ["видео без постера и паузы", "ИИ-видео зала с людьми", "сетка 12 аватаров", "программа с анимацией высоты", "видео 20 МБ в первом экране"]

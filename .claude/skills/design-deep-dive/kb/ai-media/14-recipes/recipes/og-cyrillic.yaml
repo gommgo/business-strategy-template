@@ -1,0 +1,74 @@
+# og-cyrillic.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/03-vector-text-og-recipes.md#4; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+recipe_version: 1
+checked_at: '2026-09-25'
+author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
+id: og-cyrillic
+title: 'OG 1200×630 с кириллицей: ИИ-фон + HTML-шаблон → Playwright → JPEG'
+doc: 14-recipes/03-vector-text-og-recipes.md#4
+task_codes:
+- IMG-TEXT-CYR
+- IMG-BG-ABSTRACT
+slot: og
+ladder: image
+ai_fit: allowed
+legal_row: 1
+route:
+  source: IMG-TEXT-CYR
+  steps:
+  - role: текст
+    model: HTML/CSS-шаблон
+    price_rub: 0.0
+  - role: фон
+    model: кроп hero 40:21 или openai/gpt-image-2.5-sunburst 1K
+    price_rub: 0.0
+phase5:
+  jobs:
+  - 99-raw/phase5/jobs/E-02-cyr-screen.jsonl
+  reuse:
+  - M-01
+  - E-02
+  - E-03
+  - E-04
+  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
+steps:
+- id: render
+  cmd: flock -w 900 99-raw/tools/.locks/browser.lock python3 99-raw/experiments/M/06-og-marketplace/render.py
+  status: checked
+  evidence: 99-raw/experiments/M/06-og-marketplace
+- id: layout-safe-zone
+  cmd: 'DOM: рамки строк (Range.getClientRects) внутри 1100×530 по центру, переполнений нет — JS из ../../scripts/ai-media/layout_check.py'
+  status: checked
+  evidence: 99-raw/experiments/M/06-og-marketplace/results_layout_og.json
+- id: ocr
+  cmd: python3 ../../scripts/ai-media/asset_audit.py audit og.jpg --mode og --slot og --stage web --expect "<каждая строка вёрстки>"
+  status: checked
+  evidence: 99-raw/experiments/M/09-demo-acceptance/audit_og_full
+accept:
+  thresholds:
+  - og.size
+  - og.kb_max
+  - og.formats
+delivery:
+  formats:
+  - jpeg
+  budget_kb:
+    og: 300
+  meta:
+  - og:image
+  - og:image:width
+  - og:image:height
+  - og:image:alt
+provenance:
+  dst: trained
+  visible_label: false
+numbers:
+  demo_jpeg_q86_kb: 46.4
+  ocr_lines_exact: 5
+  phase5_e02_models_verbatim: 'баннер из 3 строк дословно у 6 из 9 моделей polza, с Recraft V4.1 растром на том же промте (E-07) — 7 из 10; Qwen 2.1 и FLUX.2 Pro — ошибки; Sunburst — «– 30» → HTML-шаблон остаётся умолчанием — 99-raw/phase5/runs/2.1-cyrillic/E-02.ocr.txt'
+  phase5_k05_ocr: 'OCR ловит 15 из 24 заложенных ошибок, VLM — 11 из 24, «близнецов» не ловит никто — 99-raw/phase5/runs/2.1-cyrillic/K-05_verdicts.json'
+status:
+  local: checked
+  generation: unchecked
+spec:
+  ancestors:
+  - ../../scripts/ai-media/tests/fixtures/D02/E5.spec.json

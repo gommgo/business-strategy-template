@@ -1,0 +1,394 @@
+# ПРИМЕР J v1 · страница pricing (planlib.py); факты — демо text E.
+page_plan_version: '1'
+checked: '2026-09-24'
+status: proposed
+example: true
+site: okoshko-demo
+refs:
+  brief: ../site-brief.yaml
+  facts: ../facts.yaml
+  blocks: ../../../../04-blocks/blocks.yaml
+  vocabulary: ../../../../02-site-types/vocabulary.yaml
+  lead_forms: ../../../../05-conversion-funnels/lead-forms.yaml
+  events: ../../../../07-seo-geo-performance-analytics/events.yaml
+  legal_requirements: ../../../../08-legal-trust-a11y/legal-requirements.yaml
+  head_kit: ../../../../07-seo-geo-performance-analytics/head-kit.yaml
+  budgets: ../../../../07-seo-geo-performance-analytics/budgets.yaml
+page:
+  id: pricing
+  page_type: pricing-page
+  lang: ru
+  locale: ru-RU
+  jurisdiction:
+  - ru
+  goal: показать тарифы и условия, чтобы выбрать и начать пробный период
+  primary_action: start-trial
+  cta_target:
+    kind: route
+    value: /signup
+  awareness: product-aware
+  awareness_basis:
+    from: assumption
+    rule: уровень по главному источнику страницы (C 01 §3.1)
+  traffic:
+  - traffic_source: search-brand
+    temperature: hot
+    device: mixed
+  - traffic_source: internal
+    temperature: warm
+    device: mixed
+  macrostructure: pricing-first
+  macrostructure_family: document
+  first_screen_policy: offer-cta-header
+  budget_profile: pricing-page@L0
+  ambition_level: L0
+  navigation:
+    header: landing-minimal
+    archetype: minimal-cta
+    anchor_nav: false
+    logo_link: /
+    breadcrumbs: false
+    footer: minimal
+  seo:
+    indexable: true
+    canonical: self
+    h1: hero.headline
+    structured_data:
+    - BreadcrumbList
+    - SoftwareApplication
+    ssr_required: true
+    sitemap: true
+  legal:
+    pd_consent: not-collected
+    privacy_policy: /privacy
+    cookie_banner: required
+    cookie_mode: opt-in
+    analytics_before_consent: false
+    withdraw_link: footer
+    ad_marking: false
+    requisites: footer
+    operator_ref: missing:legal-details
+    requirements:
+    - req:LR-RU-10
+    - req:LR-RU-13
+    - req:LR-RU-14
+    - req:LR-RU-16
+    - req:LR-RU-19
+    - req:LR-RU-22
+    - req:LR-RU-24
+    notes: 'регистрация и оплата — в продукте (/signup): согласие и оферта там (I); не юридическое заключение'
+  analytics:
+    systems:
+    - yandex-metrica
+    goals: []
+    load_after_consent: true
+sections:
+- id: header
+  role: header
+  question: как начать и как войти
+  job: логотип → главная, пробный период, вход
+  block: header
+  variant: landing-minimal
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: cta-label
+      slot: cta-label
+      intent: 'cta-label: по иерархии сообщений text'
+    media:
+    - id: logo
+      slot: brand-logo
+      media_role: informational
+      goal: показать brand-logo
+      source: generate
+      authenticity: real-or-generated
+    action:
+    - id: cta
+      slot: cta-primary
+      action: start-trial
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: cta-label
+    - id: login
+      slot: link
+      action: log-in
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'
+- id: hero
+  role: hero
+  question: сколько стоит и что входит
+  job: короткий заголовок тарифов
+  block: hero-text
+  variant: statement-cta
+  next_step: главное действие страницы
+  slots:
+    text:
+    - id: headline
+      slot: headline
+      heading: h1
+      intent: 'headline: по иерархии сообщений text'
+- id: pricing
+  role: pricing
+  question: какой тариф мне подходит
+  job: три тарифа из фактов, без метки «популярный»
+  block: pricing-cards
+  variant: tiers
+  next_step: главное действие страницы
+  slots:
+    text:
+    - id: title
+      slot: section-title
+      heading: h2
+      intent: 'section-title: по иерархии сообщений text'
+    - id: plan-1-name
+      slot: pricing-plan-name
+      anatomy: plan.name
+      group: plan-1
+      heading: h3
+      intent: 'pricing-plan-name: по иерархии сообщений text'
+    - id: plan-1-summary
+      slot: pricing-plan-summary
+      anatomy: plan.summary
+      group: plan-1
+      intent: 'pricing-plan-summary: по иерархии сообщений text'
+    - id: plan-1-price
+      slot: pricing-price
+      anatomy: plan.price
+      group: plan-1
+      intent: 'pricing-price: по иерархии сообщений text'
+    - id: plan-1-price-note
+      slot: pricing-price-note
+      anatomy: plan.price-note
+      group: plan-1
+      intent: 'pricing-price-note: по иерархии сообщений text'
+    - id: plan-1-feature
+      slot: pricing-feature
+      anatomy: plan.feature
+      group: plan-1
+      intent: 'pricing-feature: по иерархии сообщений text'
+    - id: plan-1-cta-label
+      slot: cta-label
+      anatomy: plan.cta-label
+      group: plan-1
+      intent: 'cta-label: по иерархии сообщений text'
+    - id: plan-2-name
+      slot: pricing-plan-name
+      anatomy: plan.name
+      group: plan-2
+      heading: h3
+      intent: 'pricing-plan-name: по иерархии сообщений text'
+    - id: plan-2-summary
+      slot: pricing-plan-summary
+      anatomy: plan.summary
+      group: plan-2
+      intent: 'pricing-plan-summary: по иерархии сообщений text'
+    - id: plan-2-price
+      slot: pricing-price
+      anatomy: plan.price
+      group: plan-2
+      intent: 'pricing-price: по иерархии сообщений text'
+    - id: plan-2-price-note
+      slot: pricing-price-note
+      anatomy: plan.price-note
+      group: plan-2
+      intent: 'pricing-price-note: по иерархии сообщений text'
+    - id: plan-2-feature
+      slot: pricing-feature
+      anatomy: plan.feature
+      group: plan-2
+      intent: 'pricing-feature: по иерархии сообщений text'
+    - id: plan-2-cta-label
+      slot: cta-label
+      anatomy: plan.cta-label
+      group: plan-2
+      intent: 'cta-label: по иерархии сообщений text'
+    - id: plan-3-name
+      slot: pricing-plan-name
+      anatomy: plan.name
+      group: plan-3
+      heading: h3
+      intent: 'pricing-plan-name: по иерархии сообщений text'
+    - id: plan-3-summary
+      slot: pricing-plan-summary
+      anatomy: plan.summary
+      group: plan-3
+      intent: 'pricing-plan-summary: по иерархии сообщений text'
+    - id: plan-3-price
+      slot: pricing-price
+      anatomy: plan.price
+      group: plan-3
+      intent: 'pricing-price: по иерархии сообщений text'
+    - id: plan-3-price-note
+      slot: pricing-price-note
+      anatomy: plan.price-note
+      group: plan-3
+      intent: 'pricing-price-note: по иерархии сообщений text'
+    - id: plan-3-feature
+      slot: pricing-feature
+      anatomy: plan.feature
+      group: plan-3
+      intent: 'pricing-feature: по иерархии сообщений text'
+    - id: plan-3-cta-label
+      slot: cta-label
+      anatomy: plan.cta-label
+      group: plan-3
+      intent: 'cta-label: по иерархии сообщений text'
+    data:
+    - id: plan-1-price-fact
+      slot: price-ref
+      anatomy: plan.price-fact
+      group: plan-1
+      fact: fact:price-master
+      binds:
+      - plan-1-name
+    - id: plan-2-price-fact
+      slot: price-ref
+      anatomy: plan.price-fact
+      group: plan-2
+      fact: fact:price-salon
+      binds:
+      - plan-1-name
+    - id: plan-3-price-fact
+      slot: price-ref
+      anatomy: plan.price-fact
+      group: plan-3
+      fact: fact:price-network-from
+      binds:
+      - plan-1-name
+    action:
+    - id: plan-1-cta
+      slot: cta-primary
+      anatomy: plan.cta
+      group: plan-1
+      action: start-trial
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: plan-1-cta-label
+    - id: plan-2-cta
+      slot: cta-primary
+      anatomy: plan.cta
+      group: plan-2
+      action: start-trial
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: plan-1-cta-label
+    - id: plan-3-cta
+      slot: cta-primary
+      anatomy: plan.cta
+      group: plan-3
+      action: start-trial
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: plan-1-cta-label
+- id: faq
+  role: faq
+  question: оплата, отмена, SMS
+  job: остаток вопросов об оплате
+  block: faq
+  variant: accordion
+  next_step: главное действие страницы
+  slots:
+    text:
+    - id: title
+      slot: section-title
+      heading: h2
+      intent: 'section-title: по иерархии сообщений text'
+    - id: qa-1-q
+      slot: faq-q
+      anatomy: qa.q
+      group: qa-1
+      intent: 'faq-q: по иерархии сообщений text'
+    - id: qa-1-a
+      slot: faq-a
+      anatomy: qa.a
+      group: qa-1
+      intent: 'faq-a: по иерархии сообщений text'
+    - id: qa-2-q
+      slot: faq-q
+      anatomy: qa.q
+      group: qa-2
+      intent: 'faq-q: по иерархии сообщений text'
+    - id: qa-2-a
+      slot: faq-a
+      anatomy: qa.a
+      group: qa-2
+      intent: 'faq-a: по иерархии сообщений text'
+    - id: qa-3-q
+      slot: faq-q
+      anatomy: qa.q
+      group: qa-3
+      intent: 'faq-q: по иерархии сообщений text'
+    - id: qa-3-a
+      slot: faq-a
+      anatomy: qa.a
+      group: qa-3
+      intent: 'faq-a: по иерархии сообщений text'
+- id: final-cta
+  role: final-cta
+  question: как начать
+  job: пробный период 14 дней (факт)
+  block: cta-band
+  variant: mid
+  next_step: главное действие страницы
+  slots:
+    text:
+    - id: title
+      slot: section-title
+      heading: h2
+      intent: 'section-title: по иерархии сообщений text'
+    - id: cta-label
+      slot: cta-label
+      intent: 'cta-label: по иерархии сообщений text'
+    action:
+    - id: cta
+      slot: cta-primary
+      action: start-trial
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: cta-label
+- id: footer
+  role: footer
+  question: кто продавец, оферта и политика
+  job: реквизиты, правовые ссылки
+  block: footer
+  variant: minimal
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: legal
+      slot: footer-legal
+      intent: 'footer-legal: по иерархии сообщений text'
+    - id: privacy-label
+      slot: nav-label
+      intent: подписи правовых ссылок
+    data:
+    - id: company
+      slot: fact-ref
+      fact: missing:legal-details
+      anatomy: company
+      on_missing: placeholder
+    action:
+    - id: privacy
+      slot: link
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'

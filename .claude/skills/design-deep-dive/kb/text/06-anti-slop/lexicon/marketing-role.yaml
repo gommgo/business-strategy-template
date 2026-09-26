@@ -1,0 +1,135 @@
+# Правила для роли marketing линтера ux 07/06 и поправки «для сайта» (PLAN.md, «Поправки к правилам соседей»).
+# ux 07/06 §1 (стр. 55–57): маркетинговый словарь к роли marketing не применяется, правил для неё нет — их пишет эта
+# база (контракт тройки §6 п.9). Здесь: (1) overrides унаследованных правил ux-07-06.yaml там, где сайт иначе, чем
+# интерфейс; (2) правила роли marketing, которых нет в ru-/en-словарях; (3) явные «нормы жанра» (level: off) — чтобы
+# агент видел, что правило ux на сайте намеренно выключено, и не включал его обратно.
+date: 2026-09-24
+version: 1
+owner: C (волна 1)
+defaults:
+  group: MKT
+  lang: ru
+  flags: i
+  count_as_marker: true
+  date: 2026-09-24
+  genres: [landing, site-page, article, meta, geo, email-form]
+overrides:
+  - target: "ux-5-2-0[1235]"
+    set: {level: warning, requires_no_fact: true, excludes: [user-content]}
+    note: "поправка PLAN к ux 07/06 §5.2 и AC-TXT-02: на сайте число, «10 000+», «4,9 из 5» разрешены при записи facts.yaml (fact_ids); без записи — сигнал, ворота — claims_check.py (B2)"
+  - target: "ux-5-2-02"
+    set: {level: info, requires_no_fact: true, excludes: [user-content]}
+    note: "«Нам доверяют» / «Trusted by» — законная подпись ряда логотипов, если логотипы из facts.yaml с разрешением"
+  - target: "ux-5-2-0[67]"
+    set: {level: warning, requires_no_fact: true}
+    note: "дефицит и чужая активность — только с реальными данными; механика — ux 06/04, site"
+  - target: "ux-5-1-06"
+    set: {level: warning}
+    note: "«Скоро» / «Coming soon» законно на странице листа ожидания (landing-waitlist)"
+  - target: "ux-6-5-0[789]"
+    set: {level: info, count_as_marker: false}
+    note: "типографика — H (typography-rules.yaml); в прозе сайта ложные срабатывания на URL, «т.е.», «Яндекс.Карты»"
+  - target: "ux-2-1-04"
+    set: {pattern: '(?<![А-Яа-яЁё])производ(?:ить|ит|ят|ится|ятся|ил|ила|или|ило|ится|имый|имая|имое|имые)(?![А-Яа-яЁё])'}
+    note: "регулярка ux «производ[иия]\\w*» ловит существительные «производитель», «производительность» (опыт C/02: «Кто производитель?» в FAQ Кварца) — предложение ux"
+  - target: "ux-2-4-01"
+    set: {level: "off"}
+    note: "дублирует ru-syn-genitive-chain; регулярка по окончаниям -а/-я шумит на подписях картинок (опыт C/02)"
+  - target: "ux-5-3-03"
+    set: {appliesTo: [], excludes: [user-content], slot_types: [headline, subheadline, section-title, card-title, step-title, eyebrow, badge, stat-label, pricing-plan-name, article-title, article-heading, case-title, form-title, nav-label]}
+    note: "ux 07/06 §5.3 «WORD — fragment» — про заголовки и подписи; в прозе (guarantee-text) это обязательное тире «Смета — бесплатно» (находка B1, опыт B1/02)"
+  - target: "ux-6-4-11"
+    set: {flags: ""}
+    note: "«Заглавная после двоеточия» — только заглавные: с флагом i класс [А-ЯЁ] ловит и строчные (находка B1: «в Сормове: ремонт»); конвертер уже снимает флаг, override — страховка"
+  - target: "ux-3-2-0[14]"
+    set: {excludes: [marketing, help, user-content, nav]}
+    note: "поправка PLAN к ux 07/06 §3.2: «Услуги», «Решения», «Каталог» в навигации многостраничника — конвенция (закон Якоба)"
+rules:
+  - id: mkt-role-easy-fast
+    marker_id: COPY-M-CNT-01
+    group: CNT
+    level: warning
+    genres: [landing, site-page, meta, email-form]
+    unless: '\d|\?'
+    appliesTo: [marketing, title, subtitle, section-title, caption, hint]
+    pattern: '%B%(?:легко|л[её]гк(?:ий|ая|ое|ие)\s+(?:старт|запуск|подключени[ея]|способ)|быстро|моментально|мгновенно|без\s+усилий|с\s+л[её]гкостью|всего\s+за(?!\s+\d)|проще\s+простого|легко\s+и\s+просто|просто\s+и\s+(?:удобно|быстро|понятно))%E%'
+    message: "«Легко», «быстро», «мгновенно» без факта: обещание, которое нечем проверить."
+    replacement: "число или механизм: «подключение за 10 минут», «3 поля в форме» (из facts.yaml)"
+    examples: {bad: "Подключиться легко и быстро.", good: "Подключение за 10 минут."}
+    source: "PLAN.md поправка к ux 07/06 §1 («легко», «быстро» — только с фактом); ux 07/06 §1 («making things easy is not the same as making things seem easy» [V:vxGrL3YSBvw 26:32])"
+    evidence: "[практика]"
+  - id: mkt-role-power-words
+    marker_id: COPY-M-LEX-02
+    group: LEX
+    level: warning
+    genres: [landing, site-page, meta, email-form]
+    unless: '\d'
+    appliesTo: [marketing, title, subtitle, section-title, caption]
+    pattern: '%B%(?:мощн[а-яё]*|интуитивн[а-яё]*|интуитивно\s+понятн[а-яё]*)%E%'
+    message: "«Мощный», «интуитивно понятный» без характеристики (в интерфейсе — запрет ux 07/06 §1; на сайте — только с фактом)."
+    replacement: "назвать, что делает: «мощная аналитика» → «отчёт по 40 магазинам на одном экране»; «интуитивный» — миф, убрать"
+    examples: {bad: "Мощная и интуитивно понятная CRM.", good: "CRM на 40 магазинов с отчётом за 5 секунд."}
+    source: "ux 07/06 §1 (мощный, интуитивный — запрет в интерфейсе); ux 01/02 («интуитивно понятный» — миф)"
+    evidence: "[практика]"
+  - id: mkt-role-category-words
+    marker_id: COPY-M-LEX-02
+    group: LEX
+    level: "off"
+    appliesTo: [marketing, title, subtitle, section-title]
+    pattern: '%B%(?:платформ[а-яё]*|решени[а-яё]*|экосистем[а-яё]*)%E%'
+    message: "Норма жанра: «платформа», «решение» законны как название рыночной категории (позиционирование). Слоп — только синонимы-циклы (ru-syn-product-synonyms)."
+    replacement: "не трогать одно упоминание категории; не называть продукт тремя разными словами"
+    examples: {bad: "Платформа для кофеен", good: "Платформа для кофеен"}
+    source: "PLAN.md поправка к ux 07/06 §1 (категория продукта — элемент позиционирования, Dunford); ux 07/06 §1 (в интерфейсе — предупреждение)"
+    evidence: "[практика]; решение базы"
+    note: "level: off — правило записано, чтобы его не включили обратно по ux"
+  - id: mkt-role-headline-verb
+    marker_id: COPY-M-MKT-04
+    group: MKT
+    level: "off"
+    slot_types: [headline, subheadline]
+    pattern: '^\s*(?:получите|сэкономьте|запустите|откройте|создайте|найдите|сделайте|научитесь|продавайте|считайте)%E%'
+    message: "Норма жанра: заголовок оффера может начинаться с глагола или называть результат (правило ux 07/02 §4.1 «в заголовке глаголу не место» написано для экранов приложения)."
+    replacement: "не трогать"
+    examples: {bad: "Считайте зарплату за 10 минут", good: "Считайте зарплату за 10 минут"}
+    source: "PLAN.md поправка к ux 07/02 §4.1 (стр. 344); аудит UX §4 п.9"
+    evidence: "[практика]; решение базы"
+    note: "level: off — документирует выключенное правило соседа"
+  - id: mkt-role-social-proof-caption
+    marker_id: COPY-M-CNT-02
+    group: CNT
+    level: info
+    count_as_marker: false
+    requires_no_fact: true
+    slot_types: [logos-caption, section-title, eyebrow, hero-proof, stat-label]
+    pattern: '%B%(?:нам\s+доверяют|нас\s+выбирают|наши\s+клиенты|с\s+нами\s+работают|trusted\s+by|used\s+by|our\s+customers)%E%'
+    message: "Подпись соцдоказательства: законна, если логотипы и названия — из facts.yaml с разрешением на публикацию."
+    replacement: "fact_ids на записи логотипов (вид «логотип», разрешение); без разрешения — блок не выводить"
+    examples: {bad: "Нам доверяют", good: "Кофейни, которые считают с нами зарплату"}
+    source: "PLAN.md поправка к ux 07/06 §5.2 и AC-TXT-02; аудит UX §4 п.7; контракт тройки §6 п.10"
+    evidence: "[практика]"
+  - id: mkt-role-eyebrow-generic
+    marker_id: COPY-M-STR-10
+    group: STR
+    level: warning
+    slot_types: [eyebrow]
+    pattern: '^\s*(?:преимущества|наши\s+преимущества|услуги|наши\s+услуги|о\s+нас|о\s+компании|отзывы|кейсы|портфолио|как\s+это\s+работает|как\s+мы\s+работаем|faq|вопросы|тарифы|цены|контакты|команда|features|benefits|services|about(?:\s+us)?|testimonials|pricing|how\s+it\s+works|our\s+team)\s*[.:]?\s*$'
+    message: "Надзаголовок-ярлык не несёт информации: повторяет, что секция и так показывает."
+    replacement: "убрать; оставить надзаголовок только с информацией (этап «Шаг 2 из 3», дата, категория клиента)"
+    examples: {bad: "Преимущества", good: "Для сетей от 10 точек"}
+    source: "PLAN.md поправка к ux 07/06 §5.3 и AC-TXT-13 («слово над заголовком — только если несёт информацию»); taste EYEBROW RESTRAINT; impeccable («eyebrow — ban, not a default»)"
+    evidence: "[практика]"
+  - id: mkt-role-easy-fast-en
+    marker_id: COPY-M-CNT-01
+    group: CNT
+    level: warning
+    lang: en
+    genres: [landing, site-page, meta, email-form]
+    unless: '\d|\?'
+    appliesTo: [marketing, title, subtitle, section-title, caption, hint]
+    pattern: '\b(?:(?:it[''’]s|is|made|so|super|really|incredibly)\s+easy|easy\s+to\s+(?:use|set\s+up|start|install|learn|manage)|easily|effortless(?:ly)?|instantly|in\s+(?:seconds|minutes)|quick\s+and\s+easy|simple\s+and\s+(?:fast|easy))\b'
+    message: "«Easy», «quick», «instantly» without a fact."
+    replacement: "a number or mechanism: «set up in 10 minutes», «3 fields»"
+    examples: {bad: "Get started easily and quickly.", good: "Set up in 10 minutes."}
+    source: "ux 07/06 §4.1 (Simply, Just, Easily, Quickly — interface warning); PLAN.md correction to ux 07/06 §1"
+    evidence: "[практика]"

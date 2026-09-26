@@ -1,0 +1,711 @@
+# ПРИМЕР J v1 · лидогенерация услуг РФ · вымышленная студия «Отвес» (Нижний Новгород). Факты — демо text, вымышлены.
+# Бриф — перевод брифа A v0 (01-foundations/site-brief.example.yaml) в схему v1: 10-playbooks-contracts/schemas/site-brief.schema.json.
+version: 1
+checked: '2026-09-24'
+intake:
+  received: '2026-09-10'
+  channel: почта + созвон с записью
+  raw_ref: ../../text-research/99-raw/experiments/B1/01-briefs-to-meaning/README.md#вход
+  what_ordered: landing
+  notes: Сайта нет; заявки сейчас — с Яндекс Карт и по рекомендациям; планируется Яндекс Директ.
+project:
+  slug: otves-remont-nn
+  status: proposed
+  prepared_by: Claude (агент site A, пример формата)
+site_type: landing-site
+primary_page_type: landing-lead-services
+business:
+  name: Отвес
+  what: 'Ремонт квартир под ключ в Нижнем Новгороде: замер и смета бесплатно, работы по договору подряда с гарантией 3 года, объект
+    ведёт один прораб.'
+  kind: service
+  goal:
+    primary: leads
+    note: Заявки на бесплатный замер от владельцев квартир 40–80 м² под полный ремонт (не косметика одной комнаты).
+  kpi:
+  - metric: заявки на замер в месяц
+    source: CRM заказчика — число не получено (вопрос q-kpi)
+  - metric: доля заявок, дошедших до договора
+    source: CRM заказчика — вопрос q-kpi
+  geography:
+    regions:
+    - Нижний Новгород
+    remote: false
+decision_context:
+  market: b2c
+  price_band: high
+  purchase_type: one-off
+  decision_unit: couple-family
+  cycle: weeks
+  perceived_risk: high
+  risk_kinds:
+  - money
+  - time
+  involvement: high
+conversion:
+  action: booking
+  target:
+    kind: anchor
+    value: '#zamer'
+  channels:
+  - form
+  - phone
+  - messenger
+  secondary_actions:
+  - download
+  - call
+  qualification_note: Нужны заявки на полный ремонт; косметику одной комнаты не берут (граница — meaning.boundaries).
+  thank_you: Прораб перезванивает и договаривается о дне замера — срок ответа не подтверждён (q-response-time).
+traffic:
+  sources:
+  - source: paid-search
+    temperature: warm
+    share: 0.5
+    device: mixed
+    promise_of_source: объявление Директа (текст не утверждён — q-direct-ad)
+    entry_page: home
+    campaign: yandex-direct / remont-pod-klyuch
+  - source: maps-local
+    temperature: hot
+    share: 0.25
+    device: mobile
+    promise_of_source: 'карточка организации на Яндекс Картах: рейтинг, фото, «ремонт квартир»'
+    entry_page: home
+  - source: referral
+    temperature: hot
+    share: 0.15
+    device: mobile
+    entry_page: home
+  - source: search-problem
+    temperature: cold
+    share: 0.1
+    device: mixed
+    promise_of_source: статья о контроле ремонта (страница не решена — pages.list[guide])
+  note: Доли — оценка заказчика на время запуска Директа (допущение до первого месяца Метрики).
+offer:
+  kind: free-estimate
+  summary: Бесплатный выезд замерщика и смета; при договоре до 31 октября 2026 года — скидка 10 % на работы.
+  includes:
+  - выезд замерщика в пределах города
+  - смета до договора
+  price_refs:
+  - fact:price-from-per-m2
+  terms_refs:
+  - fact:estimate-free
+  - missing:payment-stages
+  - missing:deadline-terms
+  incentive_ref: fact:promo-october-10
+  deadline_ref: fact:promo-october-10
+  risk_reversal_refs:
+  - rr-free-estimate
+  - rr-guarantee
+meaning:
+  meaning_version: 1
+  date: '2026-09-24'
+  status: proposed
+  site: otves-remont-nn
+  offering_summary:
+    text: 'Ремонт квартир под ключ в Нижнем Новгороде: замер и смета бесплатно, договор подряда с гарантией 3 года, объект ведёт один
+      прораб; от 9 800 ₽ за м² без материалов.'
+    kind: service
+    basis:
+      kind: brief
+      ref: сообщение заказчика, 2026-09-10
+  audience:
+  - id: busy-owners
+    name: Владельцы квартиры, которые не могут стоять над ремонтом
+    primary: true
+    role: buyer-user
+    situation: Когда купили или освободили квартиру и надо сделать полный ремонт за 1,5–3 месяца, а следить за бригадой некогда
+    trigger: Близкий срок переезда; истории знакомых о затянутом ремонте
+    knows: Знает, что нужен ремонт под ключ, слышал о сорванных сроках и растущих сметах; сравнивает цену за метр
+    jobs:
+    - id: job-renovate-on-time
+      type: functional
+      statement: Когда делаю ремонт, хочу получить квартиру в срок и в сумму из договора, чтобы вовремя переехать
+      priority: 1
+      basis:
+        kind: fact
+        ref: fact:review-anna-k
+    - id: job-control-remotely
+      type: functional
+      statement: Когда не могу приезжать на объект, хочу видеть, что сделано за день
+      priority: 1
+      basis:
+        kind: brief
+        ref: «клиенты хвалят, что видят всё по фото»
+    pains:
+    - id: pain-budget-grows
+      text: Смета растёт по ходу ремонта
+      severity: high
+      job_ref: job-renovate-on-time
+    - id: pain-delays
+      text: Срок срывается, а аренда и ипотека идут одновременно
+      severity: high
+      job_ref: job-renovate-on-time
+    - id: pain-blind
+      text: Не видно, что происходит на объекте, пока не приедешь
+      severity: high
+      job_ref: job-control-remotely
+    gains:
+    - id: gain-move-in-date
+      text: Заехать в дату из договора
+      job_ref: job-renovate-on-time
+      basis:
+        kind: fact
+        ref: fact:case-two-room-47-days
+    - id: gain-known-total
+      text: Знать итоговую сумму до начала работ
+      job_ref: job-renovate-on-time
+      basis:
+        kind: assumption
+        question_id: q-estimate-changes
+    basis:
+      kind: inferred
+      ref: 'сообщение заказчика: «дешёвые заказы не берём», козыри «прораб», «видят по фото», «гарантия»'
+  awareness:
+    level: solution-aware
+    basis:
+      kind: inferred
+      ref: основной будущий трафик — Директ по запросам «ремонт квартир под ключ нижний новгород»
+    confidence: medium
+    by_source:
+    - source: paid-search
+      level: solution-aware
+    - source: maps-local
+      level: product-aware
+    - source: referral
+      level: product-aware
+    - source: search-problem
+      level: problem-aware
+  sophistication:
+    stage: 4
+    claims_heard:
+    - ремонт под ключ
+    - гарантия качества
+    - соблюдаем сроки
+    basis:
+      kind: assumption
+      question_id: q-competitors
+  traffic:
+    ref: /traffic
+  positioning:
+    alternatives:
+    - id: alt-private-crew
+      name: Частная бригада по знакомству или с досок объявлений
+      kind: hire-someone
+      mention_on_page: as-approach
+      basis:
+        kind: brief
+        ref: «дешёвые заказы не берём»
+    - id: alt-self-managed
+      name: Вести ремонт самому, нанимая мастеров по отдельности
+      kind: diy-manual
+      mention_on_page: as-approach
+      basis:
+        kind: inferred
+        ref: типовой путь при ремонте
+    - id: alt-other-studios
+      name: Другие студии ремонта под ключ в городе
+      kind: competitor-direct
+      mention_on_page: never
+      basis:
+        kind: assumption
+        question_id: q-competitors
+    unique_attributes:
+    - id: attr-one-foreman
+      attribute: Один прораб ведёт объект от замера до сдачи
+      versus:
+      - alt-private-crew
+      - alt-self-managed
+      proof_status: needs-proof
+      proof_ids:
+      - missing:foreman-per-object
+      - fact:foreman-lapin
+    - id: attr-contract-guarantee
+      attribute: Договор подряда с гарантией 3 года на работы
+      versus:
+      - alt-private-crew
+      - alt-self-managed
+      proof_status: has-proof
+      proof_ids:
+      - fact:guarantee-3-years
+    - id: attr-track-record
+      attribute: С 2014 года и 1 146 сданных квартир в одном городе
+      versus:
+      - alt-private-crew
+      - alt-other-studios
+      proof_status: has-proof
+      proof_ids:
+      - fact:flats-completed
+      - fact:company-since-2014
+      - fact:rating-yandex-maps
+    value_themes:
+    - id: val-control-without-visits
+      theme: Ремонт идёт под присмотром, даже когда вы на работе
+      from_attributes:
+      - attr-one-foreman
+      pain_refs:
+      - pain-blind
+      proof_ids:
+      - missing:foreman-per-object
+      - fact:foreman-lapin
+    - id: val-predictable
+      theme: Срок и сумма — в договоре, работа — на гарантии 3 года
+      from_attributes:
+      - attr-contract-guarantee
+      pain_refs:
+      - pain-delays
+      - pain-budget-grows
+      proof_ids:
+      - fact:guarantee-3-years
+      - fact:case-two-room-47-days
+    best_fit:
+      segment_ids:
+      - busy-owners
+      why_care: Каждая неделя задержки и каждая поездка «проверить» стоят им денег и нервов — присмотр и договор ценнее низкой цены
+        за метр.
+    market_category:
+      name: ремонт квартир под ключ в Нижнем Новгороде
+      strategy: head-to-head
+      basis:
+        kind: inferred
+        ref: локальный рынок услуг без явного лидера
+  value_proposition:
+    core:
+      text: 'Ремонт под ключ для тех, кому некогда следить: объект ведёт один прораб, срок и смета в договоре, гарантия 3 года — вместо
+        частной бригады «на словах».'
+      basis:
+        kind: inferred
+        ref: value_themes val-control-without-visits + val-predictable
+    forces:
+      push:
+      - text: Близкий срок переезда; аренда и ипотека одновременно
+      pull:
+      - text: Заехать в дату из договора
+        basis:
+          kind: fact
+          ref: fact:case-two-room-47-days
+      anxiety:
+      - text: Смета вырастет по ходу
+        objection_ids:
+        - obj-budget-grows
+      - text: Возьмут предоплату и пропадут
+        objection_ids:
+        - obj-trust
+      habit:
+      - text: «Найду бригаду по знакомству, как все»
+        objection_ids:
+        - obj-diy-crew
+    fit_status: hypothesis
+  offer:
+    ref: /offer
+    proof_ids:
+    - fact:estimate-free
+    - fact:promo-october-10
+    risk_reversal_ids:
+    - rr-free-estimate
+    - rr-guarantee
+  conversion:
+    action_ref: /conversion/action
+    secondary_goal: Сохранить или переслать домашним пример сметы и договора, чтобы вернуться после обсуждения
+  objections:
+  - id: obj-price
+    text: 'Дорого: частники берут меньше за метр'
+    type: price
+    force: anxiety
+    severity: major
+    answer: В цену входят прораб, договор и гарантия; точную сумму показываем в бесплатной смете до договора
+    answer_kind: fact
+    proof_ids:
+    - fact:price-from-per-m2
+    - fact:estimate-free
+    - fact:guarantee-3-years
+    where:
+    - section_role: pricing
+    status: answered
+  - id: obj-budget-grows
+    text: Смета вырастет по ходу
+    type: risk
+    force: anxiety
+    severity: blocker
+    answer: Смета — часть договора; как меняется сумма — по пункту договора (не обещать «никогда не меняется»)
+    answer_kind: condition
+    proof_ids:
+    - missing:estimate-change-policy
+    - fact:review-anna-k
+    where:
+    - section_role: how-it-works
+    - section_role: faq
+    status: needs-proof
+  - id: obj-delays
+    text: Затянут срок, а у меня аренда
+    type: time
+    force: anxiety
+    severity: blocker
+    answer: 'Срок — в договоре по этапам; пример: двушка за 47 рабочих дней при 50 по договору'
+    answer_kind: fact
+    proof_ids:
+    - fact:case-two-room-47-days
+    - missing:deadline-terms
+    where:
+    - section_role: case-studies
+    status: answered
+  - id: obj-trust
+    text: Кто вы такие? Возьмут предоплату и пропадут
+    type: trust
+    force: anxiety
+    severity: blocker
+    answer: С 2014 года в городе, 1 146 квартир, 4,8 из 5 на Яндекс Картах; реквизиты в подвале; оплата поэтапно (подтвердить)
+    answer_kind: fact
+    proof_ids:
+    - fact:company-since-2014
+    - fact:flats-completed
+    - fact:rating-yandex-maps
+    - missing:legal-details
+    - missing:payment-stages
+    where:
+    - section_role: hero
+    - section_role: proof-stats
+    - section_role: footer
+    status: answered
+  - id: obj-diy-crew
+    text: Найду бригаду сам, по знакомству дешевле
+    type: status-quo
+    force: habit
+    severity: major
+    answer: Тогда закупка, контроль и приёмка на вас, а спросить без договора не с кого
+    answer_kind: mechanism
+    proof_ids:
+    - fact:foreman-lapin
+    - fact:guarantee-3-years
+    where:
+    - section_role: comparison
+    status: answered
+  - id: obj-decision-maker
+    text: Надо обсудить дома
+    type: decision-maker
+    force: habit
+    severity: minor
+    answer: 'Дать то, что удобно переслать: пример сметы и договора, кейс, отзыв'
+    answer_kind: fact
+    proof_ids:
+    - fact:case-two-room-47-days
+    - fact:review-anna-k
+    where:
+    - section_role: final-cta
+    status: answered
+  risk_reversal:
+  - id: rr-free-estimate
+    type: free-first-step
+    summary: Замер и смета бесплатно в пределах города; решение о договоре — после сметы
+    fact_id: fact:estimate-free
+    answers:
+    - obj-price
+  - id: rr-guarantee
+    type: guarantee
+    summary: Гарантия 3 года на работы по договору
+    fact_id: fact:guarantee-3-years
+    answers:
+    - obj-diy-crew
+  boundaries:
+    not_for:
+    - нужна косметика одной комнаты
+    - главное — самая низкая цена за метр, договор не нужен
+    not_promised:
+    - text: «смета никогда не меняется» как гарантия всем
+      claim_class: guarantee
+      why: в договоре такого пункта нет
+    - text: «лучший ремонт в городе», «№ 1»
+      claim_class: superlative
+      why: нет независимого рейтинга
+  message_hierarchy_ref:
+  - ../../text-research/02-strategy-messaging/examples/hierarchy-otves-product-aware.yaml
+  voice_ref: 'черновик: спокойно и по делу, на «вы», без восклицаний; профиль голоса — text F (волна 2)'
+  proof_ref: ../../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml
+  languages:
+  - lang: ru
+    role: primary
+proof:
+  facts_ref: ../../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml
+  required_kinds:
+  - company
+  - price
+  - offer-terms
+  wanted_kinds:
+  - testimonial
+  - case
+  - rating
+  - guarantee
+  - person
+  - demo
+  collection:
+    owner: директор (заказчик)
+    agent: редактор по анкете proof-intake.md
+    asked: '2026-09-10'
+    due: '2026-10-01'
+    status: in-progress
+  intake_form: text/02-strategy-messaging/proof-intake.md@2026-09-24
+constraints:
+  jurisdiction:
+  - ru
+  legal_category:
+  - general
+  legal_note: 'Бытовой подряд (ГК, ЗоЗПП): сведения о продавце, цена «от», скидка с датой, гарантия — формулировки text H, требования
+    site I. Пример J v1: ответы правового опросника вымышлены (как и факты text).'
+  hosting: 'не задан — допущение: хостинг в РФ (формы с ПД; q-hosting)'
+  integrations:
+  - CRM — не задана (q-crm)
+  - телефония — номер компании
+  accessibility: wcag22-aa
+  legal_intake:
+    rkn_registry: unknown
+    leads_storage: ru
+    sends_marketing: false
+    license: not-needed
+    sells_online: false
+    optional_cookies: true
+    medical: false
+    third_party:
+    - service: Яндекс Метрика
+      purpose: analytics
+      location: ru
+      sets_cookies: true
+    - service: Яндекс Карты (статичная картинка, ссылка «Открыть в Картах»)
+      purpose: maps
+      location: ru
+      sets_cookies: false
+policies:
+  capture_popup: 'off'
+  exit_intent: 'off'
+  chat_widget: 'off'
+  preloader: 'off'
+  cookie_banner: auto
+analytics:
+  system: yandex-metrica
+  call_tracking: false
+  ab_testing: later
+  note: Цели по conversion.action и secondary_actions (события — P, events.yaml).
+search:
+  engines:
+  - yandex
+  - google
+  ai_answers:
+  - yandex-alice
+  - google-ai
+  - chatgpt-search
+  - perplexity
+  ai_bots_policy: ask
+  regions:
+  - Нижний Новгород
+  profiles:
+  - platform: yandex-business
+    url: https://yandex.ru/maps/org/otves-example/0000000000/ (вымышленный адрес карточки)
+languages:
+- lang: ru
+  role: primary
+pages:
+  mode: listed
+  list:
+  - id: home
+    page_type: landing-lead-services
+    purpose: Заявка на бесплатный замер
+    priority: must
+    main_sources:
+    - paid-search
+    - maps-local
+    - referral
+  - id: spasibo
+    page_type: thank-you-page
+    purpose: Что будет дальше и когда перезвонят
+    priority: must
+  - id: privacy
+    page_type: legal-page
+    purpose: Политика обработки ПД (152-ФЗ; I)
+    priority: must
+  - id: consent
+    page_type: legal-page
+    purpose: Согласие на обработку ПД отдельным документом (с 01.09.2025; I)
+    priority: must
+  - id: guide
+    page_type: article-page
+    purpose: Как контролировать ремонт, если нет времени — для search-problem
+    priority: could
+    main_sources:
+    - search-problem
+  - id: not-found
+    page_type: not-found-page
+    purpose: Страница 404 с кодом 404 и путями к замеру и телефону
+    priority: must
+  note: 'Многостраничник не нужен: одна услуга, один город; SEO-страницы услуг — после первого месяца Директа.'
+ambition:
+  level: L1
+  note: 'Выразительно, но без тяжёлого hero: основной трафик — телефон с Яндекс Карт.'
+  source: default
+  by_section_role:
+  - role: lead-form
+    level: L0
+    why: секции конверсии — L0 (creative section_caps)
+  - role: pricing
+    level: L0
+    why: калькулятор и цена — L0
+brand:
+  name: Отвес
+  status: none
+references: []
+assets_available:
+  real_photos: few
+  photo_subjects:
+  - work-results
+  - process
+  real_video: false
+  logo_vector: false
+  notes: Фото «до и после» — missing:before-after-photos в facts.yaml; людей на фото — только с согласием.
+questions:
+- id: q-photo-reports
+  block: meaning
+  q: Фото сделанного за день — правило для всех объектов? Можно показать пример отчёта без адреса?
+  why: Главный отличительный довод держится на одном отзыве
+  options:
+  - да, каждый вечер в мессенджере
+  - да, раз в несколько дней
+  - нет, по запросу
+  default: Не обещаем фотоотчёт; говорим «один прораб ведёт объект»
+  affects:
+  - /meaning/positioning/unique_attributes
+  - /meaning/value_proposition
+  priority: 1
+  asked: true
+  status: assumed
+- id: q-estimate-changes
+  block: meaning
+  q: Что в договоре о смене сметы? Можно процитировать пункт?
+  why: Главный страх клиентов — растущая смета
+  options:
+  - фиксирована, кроме допработ по письменному согласию
+  - меняется при изменении цен материалов
+  - другое
+  default: О неизменной смете не пишем; «смета — часть договора»
+  affects:
+  - /meaning/objections
+  priority: 1
+  asked: true
+  status: assumed
+- id: q-competitors
+  block: meaning
+  q: С кем вас чаще сравнивают и почему выбирают вас?
+  why: Без альтернатив отличие не проверить
+  options: []
+  default: Сравниваем с частными бригадами и ремонтом своими силами; студии не называем
+  affects:
+  - /meaning/positioning/alternatives
+  - /meaning/sophistication
+  priority: 2
+  asked: true
+  status: assumed
+- id: q-legal-details
+  block: proof
+  q: Полное название юрлица, ОГРН или ИНН, адрес — как в ЕГРЮЛ?
+  why: Без сведений о продавце страницу услуги не публикуем (I)
+  options: []
+  default: Страница не публикуется до ответа (missing:legal-details, blocking)
+  affects:
+  - /proof/required_kinds
+  priority: 1
+  asked: true
+  status: open
+- id: q-payment
+  block: offer
+  q: 'Как устроена оплата: предоплата, поэтапно после приёмки этапа?'
+  why: Возражение «возьмут предоплату и пропадут» — блокер
+  options:
+  - поэтапно после приёмки
+  - аванс + этапы
+  - другое
+  default: Об оплате не пишем до ответа
+  affects:
+  - /offer/terms_refs
+  - /meaning/objections
+  priority: 1
+  asked: true
+  status: open
+- id: q-direct-ad
+  block: traffic
+  q: Какой текст у объявлений Директа (или пришлём черновик на согласование)?
+  why: Первый экран продолжает обещание объявления (message match)
+  options:
+  - пришлём свой
+  - согласуем ваш черновик
+  default: Черновик объявления пишем вместе с первым экраном
+  affects:
+  - /traffic/sources/0/promise_of_source
+  priority: 2
+  asked: true
+  status: assumed
+- id: q-kpi
+  block: business
+  q: Сколько заявок на замер в месяц сейчас и сколько из них доходит до договора?
+  why: База для целей Метрики и честной оценки сайта
+  options: []
+  default: 'Меряем с нуля: цели Метрики с первого дня'
+  affects:
+  - /business/kpi
+  priority: 3
+  asked: true
+  status: assumed
+- id: q-hosting
+  block: constraints
+  q: Где будет сайт и куда уходят заявки (CRM, почта)?
+  why: Персональные данные из форм — хранение и передача по 152-ФЗ (I)
+  options:
+  - хостинг в РФ + почта
+  - CRM (какая?)
+  - решите за нас
+  default: Хостинг в РФ, заявки на почту и в мессенджер менеджера
+  affects:
+  - /constraints/hosting
+  - /constraints/integrations
+  priority: 2
+  asked: true
+  status: assumed
+- id: q-brand
+  block: brand
+  q: Есть ли логотип и фирменные цвета? Если нет — выберите одно из трёх направлений
+  why: Пустое поле уйдёт дефолту модели
+  options:
+  - есть логотип (пришлём)
+  - нет, выберем направление
+  default: Направление A из предложенных creative; логотип — словесный знак
+  affects:
+  - /brand
+  - /references
+  - /ambition
+  priority: 2
+  asked: true
+  status: assumed
+- id: q-ai-bots
+  block: search
+  q: Разрешаем ли ИИ-сервисам (Алиса, ChatGPT, Perplexity) читать сайт для ответов, а для обучения моделей?
+  why: Видимость в ответах нейросетей против использования текстов для обучения
+  options:
+  - ответы — да, обучение — да
+  - ответы — да, обучение — нет
+  - нет
+  default: Ответы — да; обучение — по умолчанию H (волна 2)
+  affects:
+  - /search/ai_bots_policy
+  priority: 3
+  asked: false
+  status: open
+- id: q-zamer-slots
+  block: conversion
+  q: Есть ли у замерщика расписание со свободными окнами, чтобы записывать на время?
+  why: набор lead-forms booking требует реальных слотов; нет — consultation-request
+  options:
+  - да, календарь
+  - нет, перезваниваем
+  default: перезваниваем и согласуем время (consultation-request)
+  affects:
+  - /conversion/channels
+  priority: 2
+  status: open

@@ -1,0 +1,841 @@
+# facts.schema.yaml — формат facts.yaml: белый список фактов сайта (общий формат тройки site · creative · text)
+# text-research · волна 1 · агент B2 · 2026-09-24 · версия формата 1 (v1 волны 1; черновик T1 — 07:06)
+#
+# Что это. JSON Schema (draft 2020-12), записанная в YAML. Экземпляр — файл `facts.yaml` проекта: любое число, имя, дата,
+# цитата, логотип, рейтинг, цена и гарантия в текстах сайта ссылаются на запись `facts[]` с источником; чего нет —
+# `missing[]` и `[PLACEHOLDER: …]`; чего нельзя утверждать — `never_claim[]` (+ набор по умолчанию `x-never-claim-defaults`).
+# Правила и примеры — `03-proof-and-facts.md` §4–§7; сверка текстов — `../../scripts/text/claims_check.py`.
+#
+# Кто на это ссылается (контракт тройки v2 §3 п.10, п.15):
+#   site-brief (site)   → `proof.facts_ref: <путь к facts.yaml>`; поля фактов в бриф не копируются;
+#   page-plan (site)    → слоты `data: [fact:<id>, …]`;
+#   copy-deck (text)    → `slots[].fact_ids: [<id>]` (в полях, где смешаны ссылки, — `fact:<id>`);
+#   пакет kimi          → `brief/facts.md` и `brief.yaml` (`facts`, `missing`, `never_claim`) — проекция, `x-kimi-map`;
+#   schema.org (G, site H) → текст разметки = `canonical` факта (одна формулировка на все страницы).
+# Идентификаторы страниц, секций и слотов в `use` — временный словарь оркестратора
+#   `99-raw/notes/temp-vocabulary-v0.yaml` (page_types, section_roles, slot_types) до S0 site; новые id — предложения
+#   к словарю (список — `x-vocabulary-proposals`).
+#
+# Даты — строкой ISO `ГГГГ-ММ-ДД` или `ГГГГ-ММ` (месяц точности: «отгрузка — декабрь 2026» → 2026-12). YAML читает
+# `2026-09-24` без кавычек как дату; валидатор и claims_check.py приводят её к строке, но надёжнее писать в кавычках.
+#
+# Проверка: `99-raw/tools/venv-B2/bin/python ../../scripts/text/validate_facts.py`
+#   (загрузка yaml.safe_load, валидация двух примеров `examples/facts-*.yaml` и отрицательных случаев).
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "urn:app-design:text-research:facts:1"
+title: "facts.yaml — белый список фактов сайта"
+description: >-
+  Инвентарь доказательств проекта: только реальные факты с источником, датой, разрешением и областью применения;
+  пробелы (missing) с текстом-заглушкой; запреты (never_claim). Любое утверждение текста сайта, которое можно проверить,
+  ссылается на факт отсюда. Факт не может происходить от модели, пишущей тексты: источник — заказчик, его документы,
+  публичные страницы и площадки, реестры, исследования (ux 12/03, стр. 1077: иначе сверка вырождается).
+date: "2026-09-24"
+x-version: 1
+x-status: "v1 по итогам волны 1 (2026-09-24); черновик T1 выпущен в 07:06, после него добавлено never_claim[].voice"
+x-owner: "text-research · 02-strategy-messaging · B2 (контракт тройки v2 §2, §3 п.10)"
+x-doc: "02-strategy-messaging/03-proof-and-facts.md"
+
+type: object
+required: [facts_version, date, site, lang, facts]
+additionalProperties: false
+patternProperties:
+  "^x-": {description: "Расширения проекта; claims_check.py их игнорирует."}
+properties:
+  facts_version:
+    const: 1
+    description: "Версия формата facts.yaml (эта схема)."
+  date:
+    $ref: "#/$defs/date"
+    description: "Дата последнего изменения инвентаря."
+  site:
+    $ref: "#/$defs/id"
+    description: "slug проекта: как в site-brief и `project.slug` brief.yaml kimi."
+  lang:
+    $ref: "#/$defs/lang"
+    description: "Язык сайта по умолчанию для verbatim и canonical."
+  jurisdiction:
+    enum: [ru, eu, us, other]
+    default: ru
+    description: "Право по умолчанию (решение заказчика 24.09.2026: РФ; ЕС — профиль по запросу). Нужно H и claims_check.py для выбора правил."
+  status:
+    enum: [draft, confirmed]
+    default: draft
+    description: "confirmed — заказчик подтвердил список фактов и разрешений целиком (дата — date)."
+  owner:
+    $ref: "#/$defs/responsible"
+    description: "Кто у заказчика отвечает за инвентарь: даёт факты, документы, разрешения, продлевает сроки."
+  collected_by:
+    type: string
+    description: "Кто вёл сбор (агент, редактор) — по анкете 02-strategy-messaging/proof-intake.md."
+  intake:
+    type: object
+    additionalProperties: false
+    description: "След анкеты сбора: когда спросили, когда ответили."
+    properties:
+      form: {type: string, description: "Анкета и её версия, например proof-intake.md@2026-09-24."}
+      asked: {$ref: "#/$defs/date"}
+      answered: {$ref: "#/$defs/date"}
+      channel: {type: string, description: "Почта, мессенджер, созвон (с записью), общий документ."}
+  never_claim_defaults:
+    enum: [ru-default-1, none]
+    default: ru-default-1
+    description: "Подключить набор запретов по умолчанию x-never-claim-defaults (снимаются проверенным фактом по правилу lift). none — только для тестов."
+  entities:
+    type: array
+    items: {$ref: "#/$defs/entity"}
+    description: "Известные имена: продукт, компания, бренды, люди, клиенты, партнёры, места, площадки. Имя в тексте, которого нет здесь и в фактах, сверка считает неизвестным."
+  facts:
+    type: array
+    items: {$ref: "#/$defs/fact"}
+  missing:
+    type: array
+    items: {$ref: "#/$defs/missing"}
+  never_claim:
+    type: array
+    items: {$ref: "#/$defs/never-claim"}
+
+$defs:
+
+  id:
+    type: string
+    pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+    description: "Латиница в kebab-case. Ссылка из других форматов — `fact:<id>`, `entity:<id>`, `missing:<id>`."
+
+  vocab-id:
+    type: string
+    pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+    description: "id из временного словаря 99-raw/notes/temp-vocabulary-v0.yaml (после S0 — vocabulary.yaml site)."
+
+  date:
+    type: string
+    pattern: "^[0-9]{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?$"
+    description: "ISO-дата ГГГГ-ММ-ДД или ГГГГ-ММ."
+
+  lang:
+    type: string
+    pattern: "^[a-z]{2}(-[A-Z]{2})?$"
+
+  responsible:
+    type: object
+    additionalProperties: false
+    required: [role]
+    properties:
+      name: {type: string, description: "Имя — только если заказчик согласен хранить его в инвентаре; иначе роль."}
+      role: {type: string, description: "Основатель, маркетолог, юрист, менеджер продукта…"}
+      contact: {type: string, description: "Канал связи (без паролей и токенов)."}
+
+  kind:
+    description: "Вид факта или доказательства (контракт v2 §3 п.10 + 03-proof-and-facts.md §1). Описания — x-kinds."
+    enum:
+      - metric          # число, метрика, счётчик, срок, объём
+      - property        # характеристика, свойство, функция, состав, комплектация
+      - price           # цена, скидка, условия оплаты, «бесплатно»
+      - offer-terms     # условия: бронь, возврат, доставка, пробный период, сроки
+      - guarantee       # гарантия, возврат денег
+      - testimonial     # отзыв клиента, цитата клиента
+      - expert-quote    # цитата эксперта, партнёра, СМИ о продукте
+      - case            # кейс клиента: ситуация → решение → результат
+      - client          # клиент (название, логотип)
+      - partner         # партнёр, интеграция, поставщик
+      - award           # награда, премия, диплом, место в рейтинге жюри
+      - certificate     # сертификат, декларация, лицензия, аккредитация, членство
+      - press           # публикация в СМИ
+      - rating          # рейтинг третьей стороны (площадка отзывов, магазин приложений)
+      - person          # человек: команда, эксперт, автор, основатель; люди на фото
+      - demo            # скриншот, демо, видео, фото продукта как доказательство
+      - company         # компания: год основания, город, юрлицо, реквизиты, контакты
+      - date            # дата: запуск, отгрузка, мероприятие
+      - availability    # наличие, остаток, партия (живой или фиксированный)
+      - promo           # акция, её сроки и условия
+      - research        # исследование, испытание, опрос — основание сравнений и превосходных степеней
+      - forecast        # прогноз, расчёт будущего результата
+
+  claim-class:
+    description: "Класс утверждения (03-proof-and-facts.md §3; требования и флаги права — x-claim-classes; правила H — 08-russian-legal-typography/claims-rules.yaml)."
+    enum:
+      - fact-number
+      - fact-property
+      - comparison
+      - superlative
+      - guarantee
+      - health
+      - income-finance
+      - price-discount
+      - availability-scarcity
+      - promo-deadline
+      - award-press
+      - client-logo
+      - testimonial-quote
+      - rating
+      - forecast
+      - origin              # предложение B2
+      - certification       # предложение B2
+      - eco-natural         # предложение B2
+      - company-details     # предложение B2
+      - purchase-terms      # предложение B2
+
+  value:
+    type: object
+    additionalProperties: false
+    description: "Машиночитаемое значение для сверки чисел: число или диапазон, единица, объект счёта."
+    properties:
+      value: {type: number}
+      range:
+        type: array
+        items: {type: number}
+        minItems: 2
+        maxItems: 2
+      unit:
+        type: string
+        description: "Единица: RUB, USD, EUR, %, pcs, days, hours, minutes, months, years, K, W, kg, m, m2, people, clients, orders, reviews, stars… (claims_check.py понимает русские и английские синонимы)."
+      what:
+        type: string
+        description: "Что считается: «клиенты», «заказы», «лампы первой партии». Сверка сравнивает объект счёта: «10 000 клиентов» ≠ «10 000 заказов»."
+      qualifier: {type: string, description: "Уточнение: «для первых 300 ламп», «при оплате за год», «в среднем по 214 отзывам»."}
+      approx: {type: boolean, default: false, description: "true — значение округлено у источника («более 200»); тексту нельзя делать его точнее или больше."}
+      comparator:
+        enum: [eq, gte, gt, lte, lt]
+        default: eq
+        description: "Как читать число: gte — «от», «не меньше», «200+»; lte — «до», «не больше»."
+      scale: {type: number, description: "Для рейтинга: максимум шкалы (5, 10, 100)."}
+      count: {type: integer, description: "Для рейтинга: число оценок или отзывов."}
+      as_of: {$ref: "#/$defs/date", description: "На какую дату значение верно (снимок площадки, выгрузка CRM)."}
+      date: {$ref: "#/$defs/date", description: "Значение-дата (отгрузка, запуск, окончание акции)."}
+    anyOf:
+      - required: [value]
+      - required: [range]
+      - required: [date]
+
+  source:
+    type: object
+    additionalProperties: false
+    required: [type, who, date]
+    description: "Откуда факт. Модель, пишущая тексты, источником быть не может."
+    properties:
+      type:
+        enum: [customer-message, customer-document, customer-system, public-page, platform, registry, publication, research, interview, contract]
+        description: "customer-message — сообщение заказчика; customer-document — прайс, паспорт изделия, отчёт, сертификат; customer-system — выгрузка CRM, аналитики, остатков; public-page — страница заказчика или третьей стороны (URL + дата снятия); platform — площадка отзывов и рейтингов; registry — госреестр (ЕГРЮЛ, реестры сертификатов и лицензий, Роспатент); publication — СМИ; research — исследование с методикой; interview — интервью или опрос клиентов с записью; contract — договор, оферта."
+      who: {type: string, description: "Кто утверждает: «заказчик (основатель)», «Яндекс Карты», «РБК», «ФГИС Росаккредитации»."}
+      where: {type: string, description: "Где: канал, раздел документа, страница."}
+      date: {$ref: "#/$defs/date", description: "Дата сообщения, документа или снятия страницы."}
+      url: {type: string}
+      document: {type: string, description: "Документ-основание: имя файла в архиве заказчика, номер, раздел."}
+      quote:
+        type: string
+        description: "Дословная выдержка из источника, на которой держится факт. Сверка проверяет, что слова факта есть в выдержке (иначе факт — вывод, а не факт: «стартап из Казани» ≠ «сборка в Казани»)."
+      derivation:
+        enum: [direct, computed, inferred]
+        default: direct
+        description: "direct — сказано источником; computed — посчитано по данным источника (правило в computation); inferred — выведено агентом: публиковать нельзя, только вопрос заказчику (в missing)."
+      computation: {type: string, description: "Для computed: формула и входные факты, например «(11 900 − 8 900) / 11 900 = 25 %; fact:price-regular, fact:price-first-batch»."}
+
+  verification:
+    type: object
+    additionalProperties: false
+    required: [status]
+    properties:
+      status:
+        enum: [verified, stated, unverified]
+        description: "verified — сверено с документом, реестром или публичной страницей; stated — со слов заказчика, документа нет (допустимо для собственных свойств и цен; для классов с x-claim-classes.needs_document — нет); unverified — не публиковать."
+      by: {type: string}
+      date: {$ref: "#/$defs/date"}
+      method: {type: string, description: "Что сверено: «сертификат в реестре ФГИС по номеру», «отзыв открыт на площадке 2026-09-24»."}
+
+  permission:
+    type: object
+    additionalProperties: false
+    required: [status]
+    description: "Разрешение на публикацию. Для чужих имён, цитат, фото, логотипов — письменное, от субъекта; собственные факты заказчика — not-required (распоряжение заказчика — в source)."
+    properties:
+      status:
+        enum: [granted, not-required, pending, denied, expired, unknown]
+      subject: {type: string, description: "Чьё разрешение: человек, компания-клиент, правообладатель знака, издание."}
+      form:
+        enum: [written-email, signed-consent, contract-clause, platform-terms, public-license, verbal-recorded]
+        description: "verbal-recorded — только как временная мера до письменного; platform-terms — встраивание официальным виджетом площадки."
+      scope:
+        type: array
+        items: {enum: [site, ads, social, email, print, presentations, marketplaces]}
+        description: "Где можно публиковать. По умолчанию — только site."
+      document: {type: string, description: "Где лежит разрешение (архив заказчика, номер письма). Сам документ в facts.yaml не копировать."}
+      date: {$ref: "#/$defs/date"}
+      until: {$ref: "#/$defs/date", description: "Срок разрешения (если ограничен); после — status: expired."}
+      shows:
+        type: array
+        items: {enum: [full-name, first-name, initials, photo, position, company, city, logo, voice, video]}
+        description: "Что из персональных данных и знаков разрешено показать."
+      pd_consent:
+        type: boolean
+        description: "Есть согласие субъекта на распространение персональных данных (152-ФЗ ст. 10.1; детали и форма — H). Обязательно, если shows содержит full-name, photo или сочетание, по которому человек узнаётся."
+      image_consent:
+        type: boolean
+        description: "Есть согласие на использование изображения гражданина (ГК РФ ст. 152.1; H)."
+      withdrawn: {$ref: "#/$defs/date", description: "Дата отзыва разрешения: факт снимается со всех страниц."}
+
+  use:
+    type: object
+    additionalProperties: false
+    description: "Где факт можно использовать. Пусто или any: true — везде. Сверка выдаёт предупреждение COPY-F-USE, если факт стоит вне этих мест."
+    properties:
+      any: {type: boolean, default: false}
+      page_types: {type: array, items: {$ref: "#/$defs/vocab-id"}}
+      section_roles: {type: array, items: {$ref: "#/$defs/vocab-id"}}
+      slot_types: {type: array, items: {$ref: "#/$defs/vocab-id"}}
+      pages: {type: array, items: {$ref: "#/$defs/id"}, description: "id страниц site-map (когда появятся)."}
+      not_in:
+        type: array
+        items: {$ref: "#/$defs/vocab-id"}
+        description: "Слоты или роли, где нельзя: например headline (без оговорки рядом)."
+      requires_nearby:
+        type: string
+        description: "Что должно стоять рядом при использовании: оговорка, сноска, источник («по данным Яндекс Карт на 01.09.2026»)."
+
+  valid:
+    type: object
+    additionalProperties: false
+    properties:
+      from: {$ref: "#/$defs/date"}
+      until: {$ref: "#/$defs/date", description: "После этой даты факт недействителен: сверка — error COPY-F-EXPIRED (цены, акции, остатки, рейтинги-снимки)."}
+      review_by: {$ref: "#/$defs/date", description: "Дата пересмотра (свежесть): после неё — warning COPY-F-STALE."}
+
+  basis:
+    type: object
+    additionalProperties: false
+    description: "Основание сравнения, превосходной степени, прогноза, исследования (ВАС № 58 п. 29: конкретный критерий и объективное подтверждение)."
+    required: [criterion]
+    properties:
+      criterion: {type: string, description: "По какому признаку сравнение или «первенство»: «скорость отклика на 3G, медиана 20 замеров»."}
+      compared_with: {type: string, description: "С чем: конкретные товары, прошлая версия, рынок региона."}
+      method: {type: string}
+      sample: {type: string}
+      period: {type: string}
+      by: {type: string, description: "Кто установил: независимая лаборатория, агентство, сам заказчик (слабее)."}
+      independent: {type: boolean}
+      document: {type: string}
+      url: {type: string}
+      date: {$ref: "#/$defs/date"}
+
+  legal:
+    type: object
+    additionalProperties: false
+    description: "Юридические флаги и проверка (правила — H, claims-rules.yaml; не юридическое заключение)."
+    properties:
+      flags:
+        type: array
+        items: {type: string}
+        description: "Флаги классов и норм, например 38fz-5-3-1, 38fz-5-5-6 (формат id — H)."
+      review:
+        type: object
+        additionalProperties: false
+        required: [status]
+        properties:
+          status: {enum: [required, approved, rejected, not-needed]}
+          by: {type: string}
+          date: {$ref: "#/$defs/date"}
+          note: {type: string}
+      disclaimer: {type: string, description: "Текст оговорки, который обязан стоять рядом (например «Результат зависит от…», «Не является публичной офертой»)."}
+
+  attribution:
+    type: object
+    additionalProperties: false
+    description: "Подпись отзыва или цитаты. Показываем только то, что разрешено в permission.shows."
+    properties:
+      name: {type: string}
+      display: {enum: [full-name, first-name-initial, initials, anonymous, company-only], description: "Как подписывать на странице."}
+      role: {type: string, description: "Должность или роль («владелец кофейни»)."}
+      company: {type: string}
+      city: {type: string}
+      segment: {type: string, description: "Сегмент клиента из голоса клиента (voc.schema.yaml)."}
+      photo: {type: string, description: "Путь к файлу фото от заказчика (не генерация: ai-media 12/04 §2 №14)."}
+      verified_customer: {type: boolean, description: "Подтверждено, что автор — реальный клиент (номер заказа, договор, публичный профиль)."}
+      relation:
+        enum: [customer, former-customer, partner, employee, expert, investor, gifted-product, paid, other]
+        description: "Связь с компанией. employee, investor, gifted-product, paid — раскрывать рядом (FTC 16 CFR 255, 465.5 для EN; H)."
+
+  edit:
+    type: object
+    additionalProperties: false
+    required: [type]
+    properties:
+      type:
+        enum: [ellipsis, typo, punctuation, case, trim-start, trim-end, translation, anonymize, clarification-brackets]
+        description: "Допустимые правки отзыва (03-proof-and-facts.md §5): сокращение с многоточием, опечатка, пунктуация, регистр, обрезка без смены смысла, перевод с пометкой, обезличивание, пояснение в [квадратных скобках]. Смена смысла, склейка отзывов, дописывание — не edit, а запрет."
+      what: {type: string}
+      approved_by: {type: string, description: "Кто согласовал правку (автор отзыва — для всего, кроме опечаток и пунктуации)."}
+      date: {$ref: "#/$defs/date"}
+
+  translation:
+    type: object
+    additionalProperties: false
+    properties:
+      verbatim: {type: array, items: {type: string, minLength: 1}}
+      canonical: {type: string}
+      note: {type: string, description: "Адаптация, а не дословный перевод (решение заказчика п. 16); у цитат — пометка перевода."}
+
+  entity:
+    type: object
+    additionalProperties: false
+    required: [id, type, names]
+    properties:
+      id: {$ref: "#/$defs/id"}
+      type: {enum: [product, company, brand, person, client, partner, place, platform, publication, award, organization, other]}
+      names:
+        type: array
+        items: {type: string, minLength: 1}
+        minItems: 1
+        description: "Все допустимые написания: «Кварц», «Kvarts», «лампа Кварц»."
+      fact_id: {$ref: "#/$defs/id", description: "Для client, partner, person, publication, award: факт с разрешением. Без него имя в тексте — ошибка COPY-F-NAME."}
+      note: {type: string}
+
+  fact:
+    type: object
+    additionalProperties: false
+    required: [id, kind, claim_class, verbatim, canonical, source, verification, permission, lang]
+    properties:
+      id: {$ref: "#/$defs/id"}
+      aliases:
+        type: array
+        items: {type: string}
+        description: "Прежние id (F1 из facts.md kimi, номер строки анкеты); сверка принимает их в fact_ids."
+      kind: {$ref: "#/$defs/kind"}
+      claim_class:
+        type: array
+        items: {$ref: "#/$defs/claim-class"}
+        minItems: 1
+        uniqueItems: true
+      verbatim:
+        type: array
+        items: {type: string, minLength: 1}
+        minItems: 1
+        description: "Формулировки, в которых факт может стоять на странице (первая — основная). Правка текста страницы, которая меняет число, объект, условие или силу утверждения, требует новой строки здесь."
+      canonical:
+        type: string
+        minLength: 1
+        description: "Одна полная формулировка для всех страниц, JSON-LD и ответов нейросетей (G): кто или что + значение с единицей + условие + дата или источник, если нужны. Пример: «По данным Яндекс Карт на 1 сентября 2026 года, рейтинг студии „Отвес“ — 4,8 из 5 по 214 отзывам.»"
+      values:
+        type: array
+        items: {$ref: "#/$defs/value"}
+      entities:
+        type: array
+        items: {$ref: "#/$defs/id"}
+        description: "Ссылки на entities[].id, которых касается факт."
+      source: {$ref: "#/$defs/source"}
+      verification: {$ref: "#/$defs/verification"}
+      permission: {$ref: "#/$defs/permission"}
+      use: {$ref: "#/$defs/use"}
+      valid: {$ref: "#/$defs/valid"}
+      basis: {$ref: "#/$defs/basis"}
+      legal: {$ref: "#/$defs/legal"}
+      attribution: {$ref: "#/$defs/attribution"}
+      original_ref:
+        type: string
+        description: "Для отзывов и цитат: где лежит исходный текст целиком (файл, URL площадки). Исходник с персональными данными в facts.yaml не копировать."
+      edits:
+        type: array
+        items: {$ref: "#/$defs/edit"}
+        description: "Журнал правок опубликованной формы против исходника."
+      asset:
+        type: string
+        description: "Файл-доказательство: логотип клиента (SVG от клиента), скан диплома, скриншот продукта, фото (путь в assets/)."
+      responsible: {$ref: "#/$defs/responsible"}
+      lang: {$ref: "#/$defs/lang"}
+      translations:
+        type: object
+        propertyNames: {$ref: "#/$defs/lang"}
+        additionalProperties: {$ref: "#/$defs/translation"}
+      schema_org:
+        type: object
+        additionalProperties: false
+        description: "Подсказка для разметки (решают G и site H): тип и свойство schema.org, в которые идёт canonical или values."
+        properties:
+          type: {type: string}
+          property: {type: string}
+          note: {type: string}
+      related:
+        type: array
+        items: {$ref: "#/$defs/id"}
+        description: "Связанные факты: обычная цена к скидке, исследование к сравнению, клиент к кейсу."
+      tags: {type: array, items: {type: string}}
+      notes: {type: string}
+    allOf:
+      - if: {properties: {kind: {const: testimonial}}}
+        then:
+          required: [attribution, original_ref]
+          properties: {permission: {required: [status, subject, form, shows]}}
+      - if: {properties: {kind: {const: expert-quote}}}
+        then:
+          required: [attribution]
+          properties: {permission: {required: [status, subject]}}
+      - if: {properties: {kind: {enum: [client, partner]}}}
+        then:
+          required: [entities]
+          properties: {permission: {required: [status, subject, form]}}
+      - if: {properties: {kind: {const: person}}}
+        then:
+          properties: {permission: {required: [status, subject, shows]}}
+      - if: {properties: {kind: {const: rating}}}
+        then:
+          required: [values, valid]
+          properties:
+            source:
+              required: [type, who, date, url]
+              properties: {type: {enum: [platform, public-page]}}
+            values:
+              items: {required: [scale, count, as_of]}
+      - if: {properties: {kind: {const: case}}}
+        then:
+          required: [entities]
+          properties: {permission: {required: [status, subject]}}
+      - if: {properties: {kind: {enum: [award, certificate, press]}}}
+        then:
+          properties:
+            source:
+              anyOf: [{required: [url]}, {required: [document]}]
+      - if:
+          properties: {claim_class: {contains: {enum: [superlative, comparison, forecast]}}}
+        then:
+          required: [basis]
+      - if:
+          properties: {claim_class: {contains: {enum: [promo-deadline, availability-scarcity]}}}
+        then:
+          required: [valid]
+          properties: {valid: {required: [until]}}
+      - if:
+          properties: {claim_class: {contains: {enum: [health, income-finance]}}}
+        then:
+          required: [legal]
+          properties: {legal: {required: [review]}}
+      - if:
+          properties: {claim_class: {contains: {const: guarantee}}}
+        then:
+          properties:
+            source:
+              anyOf: [{required: [document]}, {required: [url]}]
+
+  missing:
+    type: object
+    additionalProperties: false
+    required: [id, what, placeholder, who]
+    properties:
+      id: {$ref: "#/$defs/id"}
+      aliases: {type: array, items: {type: string}}
+      what: {type: string, description: "Чего не хватает, одной строкой."}
+      kind: {$ref: "#/$defs/kind"}
+      claim_class:
+        type: array
+        items: {$ref: "#/$defs/claim-class"}
+      placeholder:
+        type: string
+        pattern: "^\\[PLACEHOLDER(: [^\\]]+)?\\]$"
+        description: "Текст на странице до ответа: [PLACEHOLDER: что именно]."
+      who: {type: string, description: "Кто даст: заказчик, юрист заказчика, клиент заказчика (для разрешения)."}
+      needed_for: {$ref: "#/$defs/use"}
+      asked: {$ref: "#/$defs/date"}
+      due: {$ref: "#/$defs/date"}
+      blocking:
+        type: boolean
+        default: false
+        description: "true — без этого страницу нельзя публиковать (реквизиты продавца, условия оферты, цена на странице цены)."
+      fallback:
+        enum: [placeholder, omit-block, rewrite-without, ask-again]
+        default: placeholder
+        description: "Что делать до ответа: заглушка; убрать блок; переписать текст без утверждения; повторить вопрос."
+      question: {type: string, description: "Вопрос заказчику дословно (proof-intake.md)."}
+
+  never-claim:
+    type: object
+    additionalProperties: false
+    required: [id, text]
+    properties:
+      id: {$ref: "#/$defs/id"}
+      text: {type: string, description: "Что нельзя утверждать — человеческой фразой (так уходит в facts.md kimi)."}
+      claim_class:
+        type: array
+        items: {$ref: "#/$defs/claim-class"}
+        description: "Классы, к которым относится запрет: claims_check.py берёт маркеры класса."
+      patterns:
+        type: array
+        items: {type: string}
+        description: "Дополнительные регулярные выражения (Python re, без флагов в строке; регистр не важен): «глаз», «зрени», «устал»."
+      lift:
+        enum: [never, with-fact, legal-review]
+        default: never
+        description: "never — запрет политики (заказчик, закон); with-fact — снимается проверенным фактом того же класса с разрешением; legal-review — снимается фактом с legal.review.status: approved."
+      scope: {$ref: "#/$defs/use"}
+      voice:
+        enum: [company, any]
+        default: company
+        description: "company — запрет на утверждение от имени компании: дословная цитата клиента с разрешением его не нарушает (claims_check.py даёт warning COPY-F-TYPICALITY: подпись, не повторять голосом компании, оговорка о типичности — 03-proof-and-facts.md §5.4); any — запрет и в цитатах (здоровье, доход, ИИ-люди, одобрение властей)."
+      reason: {type: string}
+      source:
+        type: object
+        additionalProperties: false
+        properties:
+          who: {type: string}
+          date: {$ref: "#/$defs/date"}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Аннотации (не проверяются валидатором; читает claims_check.py и экспорт J)
+
+x-kinds:
+  metric: {name: "Число, метрика", needs: [values], example: "12 лет на рынке; 1 400 объектов; ответ за 15 минут"}
+  property: {name: "Свойство, характеристика", needs: [source], example: "температура света 2700–5000 K; корпус из алюминия"}
+  price: {name: "Цена, скидка", needs: [values, valid], example: "8 900 ₽ для первых 300 ламп; от 9 500 ₽ за м²"}
+  offer-terms: {name: "Условия предложения", needs: [source], example: "бронь возвращаем в течение 14 дней по заявке"}
+  guarantee: {name: "Гарантия", needs: ["source.document"], example: "гарантия 3 года на работы по договору"}
+  testimonial: {name: "Отзыв клиента", needs: [attribution, permission, original_ref], example: "«Сделали за 47 дней, как в договоре» — Анна, Казань"}
+  expert-quote: {name: "Цитата эксперта или партнёра", needs: [attribution, permission]}
+  case: {name: "Кейс", needs: [entities, permission, values], example: "ресторан X: заявки +38 % за 3 месяца (данные CRM клиента)"}
+  client: {name: "Клиент, логотип", needs: [entities, permission, asset]}
+  partner: {name: "Партнёр, интеграция", needs: [entities, permission]}
+  award: {name: "Награда", needs: ["source.url | source.document", "valid"], note: "метка тройки [награда]: признание жюри, не доказательство конверсии"}
+  certificate: {name: "Сертификат, лицензия, декларация", needs: ["source.document", "valid.until"]}
+  press: {name: "Пресса", needs: ["source.url", "source.date"]}
+  rating: {name: "Рейтинг третьей стороны", needs: ["values: value, scale, count, as_of", "source.url", "valid"]}
+  person: {name: "Человек: команда, эксперт, автор", needs: [permission], note: "реальные фото только от заказчика с согласием; ИИ-люди — нет (ai-media 12/04 §2 №14)"}
+  demo: {name: "Демо, скриншот, фото продукта", needs: [asset, "source.date"], note: "настоящий интерфейс или товар; генерация — нет (ai-media 01/03 §1.1)"}
+  company: {name: "Компания и реквизиты", needs: [source], example: "ООО «Отвес», ИНН …; основана в 2014 году"}
+  date: {name: "Дата", needs: [values], example: "отгрузка первой партии — декабрь 2026"}
+  availability: {name: "Наличие, остаток", needs: [valid], note: "статичное «осталось N» — нет; живой остаток — из системы с as_of"}
+  promo: {name: "Акция", needs: ["valid.until", "source"], note: "таймер — только до реальной даты (ux 06/04 §8.1 п.10)"}
+  research: {name: "Исследование, испытание", needs: [basis], note: "38-ФЗ ст. 5 ч. 3 п. 11"}
+  forecast: {name: "Прогноз, расчёт", needs: [basis, "legal.disclaimer"]}
+
+x-claim-classes:
+  # needs — что обязано быть в факте, чтобы утверждение этого класса прошло сверку; needs_document — stated (со слов)
+  # недостаточно, нужен документ, реестр или публичная страница; permission — нужно разрешение третьего лица;
+  # legal — флаг для H: none | check (проверить формулировку) | required (без проверки не публиковать);
+  # law — ориентир нормы (РФ, ред. на 2026-09-24; толкование и полные требования — H); default_never — id запрета по умолчанию.
+  - id: fact-number
+    name: "Факт-число"
+    covers: "метрики, счётчики клиентов и заказов, сроки, объёмы, годы на рынке, проценты роста"
+    needs: [values]
+    needs_document: false
+    permission: false
+    legal: check
+    law: "38-ФЗ ст. 5 ч. 3 п. 2 (характеристики), п. 13 (размер спроса), п. 14 (объём производства и продажи)"
+    default_never: nc-counts
+  - id: fact-property
+    name: "Факт-свойство"
+    covers: "состав, материал, функция, датчик, комплектация, способ изготовления, совместимость"
+    needs: [verbatim]
+    needs_document: false
+    permission: false
+    legal: check
+    law: "38-ФЗ ст. 5 ч. 3 п. 2–3, п. 11 (испытания)"
+  - id: comparison
+    name: "Сравнение"
+    covers: "с конкурентом, аналогом, рынком, прошлой версией; «в N раз», «быстрее, чем»"
+    needs: [basis]
+    needs_document: true
+    permission: false
+    legal: required
+    law: "38-ФЗ ст. 5 ч. 2 п. 1 (некорректное сравнение), ч. 3 п. 1; Пленум ВАС № 58 п. 9, п. 29"
+    default_never: nc-comparisons
+  - id: superlative
+    name: "Превосходная степень"
+    covers: "лучший, № 1, самый, первый, лидер, единственный, непревзойдённый"
+    needs: [basis]
+    needs_document: true
+    permission: false
+    legal: required
+    law: "38-ФЗ ст. 5 ч. 3 п. 1; Пленум ВАС № 58 п. 29 (конкретный критерий + объективное подтверждение); 135-ФЗ ст. 14.3 п. 1; руководство ФАС (приказ № 1079/23)"
+    default_never: nc-superlatives
+  - id: guarantee
+    name: "Гарантия"
+    covers: "гарантия, возврат денег, «гарантируем результат», «вернём»"
+    needs: ["source.document | source.url", "legal.review (срок и случай гарантии — H, случай «Кварца»)"]
+    needs_document: true
+    permission: false
+    legal: check
+    law: "38-ФЗ ст. 5 ч. 3 п. 6; ЗоЗПП ст. 10 п. 2, ст. 19 (H)"
+    default_never: nc-prices-terms
+  - id: health
+    name: "Здоровье"
+    covers: "лечебные и профилактические свойства, «без усталости глаз», «безопасно для здоровья», иммунитет, похудение, зрение, сон"
+    needs: [legal.review]
+    needs_document: true
+    permission: false
+    legal: required
+    law: "38-ФЗ ст. 5 ч. 5 п. 6 (лечебные свойства — только лекарства, мед. изделия, мед. услуги), ч. 5 п. 4; ст. 24, 25 (H)"
+    default_never: nc-health
+  - id: income-finance
+    name: "Доход и финансы"
+    covers: "заработок, доход, окупаемость, прибыль, ставки, кредиты, инвестиции, «пассивный доход»"
+    needs: [legal.review, basis]
+    needs_document: true
+    permission: false
+    legal: required
+    law: "38-ФЗ ст. 28 (финансовые услуги) и ст. 5 ч. 3 (H)"
+    default_never: nc-income
+  - id: price-discount
+    name: "Цена и скидка"
+    covers: "цена, «от», старая цена, скидка, «бесплатно», рассрочка, пробный период, тариф"
+    needs: [values]
+    needs_document: false
+    permission: false
+    legal: check
+    law: "38-ФЗ ст. 5 ч. 3 п. 4, ч. 7 (существенные условия); ЗоЗПП ст. 10 (H)"
+    default_never: nc-prices-terms
+  - id: availability-scarcity
+    name: "Наличие и дефицит"
+    covers: "в наличии, осталось N, последние места, ограниченная партия"
+    needs: ["valid.until", "values.as_of"]
+    needs_document: false
+    permission: false
+    legal: check
+    law: "38-ФЗ ст. 5 ч. 3 п. 3; ux 06/04 §8.1 п.11"
+    default_never: nc-scarcity
+  - id: promo-deadline
+    name: "Срок акции"
+    covers: "до даты, только сегодня, таймер, «успейте»"
+    needs: ["valid.until"]
+    needs_document: false
+    permission: false
+    legal: check
+    law: "38-ФЗ ст. 5 ч. 3 п. 3–4, ст. 9 (стимулирующие мероприятия); ux 06/04 §8.1 п.10"
+    default_never: nc-deadline
+  - id: award-press
+    name: "Награда и пресса"
+    covers: "премии, дипломы, места в рейтингах жюри, «о нас пишут», логотипы СМИ"
+    needs: ["source.url | source.document", "source.date"]
+    needs_document: true
+    permission: false
+    legal: check
+    law: "38-ФЗ ст. 5 ч. 3 п. 9; логотипы СМИ — товарные знаки (ГК ст. 1484, H)"
+    default_never: nc-awards-press
+  - id: client-logo
+    name: "Клиент и логотип"
+    covers: "«нам доверяют», названия и логотипы клиентов и партнёров, «работаем с…»"
+    needs: [permission, asset]
+    needs_document: false
+    permission: true
+    legal: check
+    law: "38-ФЗ ст. 5 ч. 3 п. 10 (одобрение юрлицами); ГК ст. 1484 (товарный знак) (H)"
+    default_never: nc-trusted-by
+  - id: testimonial-quote
+    name: "Отзыв и цитата"
+    covers: "отзывы, цитаты клиентов и экспертов, истории клиентов с именем"
+    needs: [attribution, permission, original_ref]
+    needs_document: false
+    permission: true
+    legal: check
+    law: "38-ФЗ ст. 5 ч. 3 п. 10; 152-ФЗ ст. 10.1 (распространение ПДн); ГК ст. 152.1 (изображение); для EN — FTC 16 CFR 465 и 255 (H)"
+    default_never: nc-testimonials
+  - id: rating
+    name: "Рейтинг"
+    covers: "«4,9 из 5», звёзды, место в рейтинге площадки, «топ-10 на…»"
+    needs: ["values: scale, count, as_of", "source.url"]
+    needs_document: true
+    permission: false
+    legal: check
+    law: "38-ФЗ ст. 5 ч. 3 п. 9–10 (H)"
+    default_never: nc-ratings
+  - id: forecast
+    name: "Прогноз"
+    covers: "будущий результат: «сэкономите 30 %», «окупится за 6 месяцев», «увеличит продажи»"
+    needs: [basis, legal.disclaimer]
+    needs_document: true
+    permission: false
+    legal: required
+    law: "38-ФЗ ст. 5 ч. 1, ч. 3 п. 2 (потребительские свойства) (H)"
+    default_never: nc-forecast
+  - id: origin
+    name: "Происхождение и производство (предложение B2)"
+    covers: "«сделано в России», «сборка в Казани», «собственное производство», страна происхождения"
+    needs: [source.quote]
+    needs_document: true
+    permission: false
+    legal: check
+    law: "38-ФЗ ст. 5 ч. 3 п. 2 («о месте его происхождения»)"
+  - id: certification
+    name: "Сертификаты, лицензии, одобрения (предложение B2)"
+    covers: "сертификат, декларация, ГОСТ, ISO, лицензия, аккредитация, «одобрено», «рекомендовано»"
+    needs: ["source.document | source.url", "valid.until"]
+    needs_document: true
+    permission: false
+    legal: check
+    law: "38-ФЗ ст. 5 ч. 3 п. 2 (наличие сертификата), ч. 5 п. 2 (одобрение органами власти — запрет)"
+    default_never: nc-prices-terms
+  - id: eco-natural
+    name: "Экологичность и натуральность (предложение B2)"
+    covers: "эко, натуральный, органический, без химии, биоразлагаемый, углеродно-нейтральный"
+    needs: ["source.document"]
+    needs_document: true
+    permission: false
+    legal: required
+    law: "38-ФЗ ст. 5 ч. 3 п. 2; маркировка органической продукции и зелёные заявления — H"
+  - id: company-details
+    name: "Реквизиты и контакты (предложение B2)"
+    covers: "юрлицо, ИНН, ОГРН, адрес, телефон, почта, часы работы, год основания"
+    needs: [source]
+    needs_document: false
+    permission: false
+    legal: check
+    law: "38-ФЗ ст. 5 ч. 3 п. 20 (об изготовителе или продавце); сведения о продавце на сайте — site I"
+  - id: purchase-terms
+    name: "Условия покупки (предложение B2)"
+    covers: "порядок оплаты, бронь, предоплата, доставка, отгрузка, сроки выполнения, возврат и обмен, пробный период"
+    needs: [source, "legal.review (сроки возврата и отказа — H, случай «Кварца»)"]
+    needs_document: false
+    permission: false
+    legal: check
+    law: "38-ФЗ ст. 5 ч. 3 п. 4 (порядок оплаты, условия приобретения), п. 5 (доставка, обмен, ремонт, обслуживание)"
+    default_never: nc-prices-terms
+
+x-never-claim-defaults:
+  # Набор ru-default-1. Поправка к ../kimi-research/07-brief-handoff/templates/facts.md (Never claim, стр. 25–29) для
+  # сайта: запрет действует на НЕПРОВЕРЕННОЕ; проверенный факт класса с разрешением снимает запрет (lift: with-fact);
+  # запреты политики и закона не снимаются (lift: never) или снимаются только юристом (legal-review).
+  - {id: nc-counts, text: "Счётчики клиентов, пользователей, заказов и рост в процентах без факта с источником и датой", claim_class: [fact-number], lift: with-fact}
+  - {id: nc-ratings, text: "Рейтинги и звёзды без факта с площадкой, шкалой, числом оценок и датой снимка", claim_class: [rating], lift: with-fact}
+  - {id: nc-trusted-by, text: "«Нам доверяют», названия и логотипы клиентов и партнёров без факта с письменным разрешением клиента", claim_class: [client-logo], lift: with-fact}
+  - {id: nc-awards-press, text: "Награды, премии, «о нас пишут», логотипы СМИ без факта со ссылкой или документом", claim_class: [award-press], lift: with-fact}
+  - {id: nc-testimonials, text: "Отзывы, цитаты, имена и фото людей без факта с письменным разрешением (и согласием на распространение ПДн)", claim_class: [testimonial-quote], lift: with-fact}
+  - {id: nc-prices-terms, text: "Цены, скидки, сроки доставки, гарантии, сертификаты без факта", claim_class: [price-discount, purchase-terms, guarantee, certification], lift: with-fact}
+  - {id: nc-superlatives, text: "«Лучший», «№ 1», «самый», «первый», «лидер» без критерия и объективного подтверждения (Пленум ВАС № 58 п. 29)", claim_class: [superlative], lift: with-fact}
+  - {id: nc-comparisons, text: "Сравнения с конкурентами и «в N раз» без метода, даты и документа", claim_class: [comparison], lift: with-fact}
+  - {id: nc-health, text: "Обещания здоровья и лечебного эффекта (для немедицинских товаров и услуг — никогда)", claim_class: [health], lift: legal-review, voice: any}
+  - {id: nc-income, text: "Обещания дохода, заработка, окупаемости", claim_class: [income-finance], lift: legal-review, voice: any}
+  - {id: nc-scarcity, text: "«Осталось N», «последние места» без живого источника остатка", claim_class: [availability-scarcity], lift: with-fact}
+  - {id: nc-deadline, text: "Сроки акций и таймеры без реальной даты окончания", claim_class: [promo-deadline], lift: with-fact}
+  - {id: nc-forecast, text: "Прогнозы результата без расчёта и оговорки", claim_class: [forecast], lift: with-fact}
+  - {id: nc-official-approval, text: "Указание на одобрение органами власти («одобрено Минздравом»)", claim_class: [certification], patterns: ["одобрен\\w*\\s+(минздрав|министерств|правительств|государств|роспотребнадзор)", "рекомендован\\w*\\s+(минздрав|министерств|роспотребнадзор)"], lift: never, voice: any}
+  - {id: nc-ai-people, text: "ИИ-люди в роли клиентов, команды, авторов отзывов; выдуманные имена и лица", claim_class: [testimonial-quote, client-logo], lift: never, voice: any}
+
+x-kimi-map:
+  # Проекция facts.yaml → пакет kimi (brief/facts.md, brief.yaml). Экспорт пишет J (copydeck.py export-kimi).
+  publish_filter: "в Facts попадают только факты: verification.status ∈ {verified, stated} (stated — если класс не needs_document), permission.status ∈ {granted, not-required}, derivation ≠ inferred, valid.until ≥ дата сборки, legal.review ≠ required|rejected для классов legal: required; остальные — строками Missing с placeholder"
+  facts_md:
+    "ID": "id (kimi принимает любой идентификатор; aliases — для обратной совместимости с F1…)"
+    "Fact, exactly as it may appear": "verbatim[0]; каждый следующий verbatim — отдельная строка с id «<id>.2», «<id>.3»"
+    "Source (who / where / date)": "source.who / source.where / source.date (+ source.url)"
+    "Where it may be used": "use.section_roles → id секций site.sections[] (через page-plan); без page-plan — сами section_roles"
+  missing_md:
+    "ID": "missing.id"
+    "What is missing": "missing.what"
+    "Text on the page until provided": "missing.placeholder"
+    "Who provides": "missing.who"
+  never_claim_md: "строки never_claim[].text + x-never-claim-defaults, у которых lift: never или нет снимающего факта; четыре жёстких строки шаблона facts.md (стр. 26–29) заменяются этим списком (предложение kimi: плейсхолдер {{=NEVER_ROWS}})"
+  brief_yaml:
+    facts: "[{id, text: verbatim[0], source: 'who, where, date', use: 'id секций через запятую'}]"
+    missing: "[{id, what, placeholder: текст внутри [PLACEHOLDER: …], who}]"
+    never_claim: "[text, …] — тот же список, что never_claim_md"
+
+x-site-brief-proof:
+  # Предложение site A для блока proof в site-brief (поля фактов не дублируются; контракт v2 §3 п.10).
+  facts_ref: "путь к facts.yaml проекта (формат: text/02-strategy-messaging/facts.schema.yaml, facts_version: 1)"
+  required_kinds: "виды фактов, без которых страница этого типа не публикуется (решает site по page_type; пример: landing-lead-services → company, price | offer-terms, contacts)"
+  wanted_kinds: "желательные виды доказательств по возражениям аудитории (B1 message-hierarchy: proof_ids опор)"
+  collection: "{owner: роль у заказчика, agent: кто ведёт анкету proof-intake.md, asked: дата, due: дата, status: not-started | in-progress | done}"
+  gaps: "не копировать — брать из facts.yaml missing[] (blocking: true — ворота публикации)"
+
+x-vocabulary-proposals:
+  # id, которых нет во временном словаре 99-raw/notes/temp-vocabulary-v0.yaml; предложения к словарю (отчёт B2).
+  section_roles:
+    - {id: specs, name: "Характеристики товара (таблица)", why: "«Кварц»: секция specs; у продуктовых страниц — обязательная"}
+  slot_types:
+    - {id: spec-row, name: "Строка характеристик «параметр — значение»", why: "«Кварц» specs.row1–row4; у каждой строки — факт"}
+    - {id: price-old, name: "Зачёркнутая обычная цена", why: "38-ФЗ ст. 5 ч. 3 п. 4: старая цена — отдельный факт с периодом действия"}
+    - {id: stat-source, name: "Строка источника у числа или рейтинга («по данным … на дату»)", why: "use.requires_nearby; GEO-канон; источник, видимый на странице"}

@@ -1,0 +1,36 @@
+
+/* ── C «фонарик инженера» (L1): canvas поверх кадра Blender — только после готовности и только при наведении/касании ──────
+   Canvas скрыт, пока фонарь выключен: первый кадр шейдера при полумраке 0 равен постеру (ΔE замерен), поэтому появление
+   слоя незаметно. Полумрак: подписи комнат светлеют (тёмный ореол), булавки в луче — кольцо и подсказка, найденные
+   пункты акта отмечаются. reduce и без WebGL2 — ничего из этого не включается (светлый кадр B). */
+.plan__fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; pointer-events: none; }
+.plan--iso.fx-on .plan__fx { opacity: 1; }
+.plan--iso.fx-ready .plan__stage { cursor: crosshair; touch-action: pan-y; }
+.plan__rooms li, .plan__rooms span { transition: color var(--mm-dur-state) var(--mm-ease-out-strong), text-shadow var(--mm-dur-state) var(--mm-ease-out-strong); }
+.plan--iso.is-dark .plan__rooms li { color: #ece9e2; text-shadow: 0 0 2px #0c0d0f, 0 0 6px rgb(0 0 0 / .85); }
+.plan--iso.is-dark .plan__rooms span { color: #c4bfb5; }
+
+/* подсказка — в пустом нижнем левом углу кадра; появляется, когда шейдер готов */
+.plan__hint { position: absolute; left: 12px; bottom: 14px; z-index: 2; margin: 0; max-width: min(24rem, 70%); padding: 7px 11px;
+  font: 600 .875rem/1.25 var(--font-text); color: var(--c-ink); background: rgb(255 255 255 / .94); border: 1px solid var(--c-line);
+  opacity: 0; pointer-events: none; transition: opacity var(--mm-dur-state) var(--mm-ease-out-strong); }
+.plan__hint::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%;
+  background: #f2c46b; box-shadow: 0 0 0 3px rgb(242 196 107 / .35); vertical-align: 1px; }
+.plan--iso.fx-ready .plan__hint { opacity: 1; }
+
+/* булавка в луче: кольцо + подсказка; найденная — остаётся отмеченной */
+.pin b { position: relative; }
+.pin.is-lit b { scale: 1.22; box-shadow: 0 0 0 2px #fff, 0 0 0 9px rgb(242 196 107 / .45); }
+.pin.is-lit .pin__tip { opacity: 1; }
+.pin.is-found b::after { content: ""; position: absolute; inset: -9px; border-radius: 50%; border: 2px solid #f2c46b; opacity: 0;
+  animation: found-ring 800ms var(--mm-ease-out-expo) 1 both; pointer-events: none; }
+@keyframes found-ring { from { opacity: 1; scale: .55; } to { opacity: 0; scale: 1.5; } }
+/* найденный пункт акта — тон фона и золотое кольцо у номера, без текста: строки не переносятся, раскладка не сдвигается
+   (SD3: метка «найдено» текстом переносила строки — сдвиг списка под планом на телефоне без ввода посетителя); счёт — в подсказке */
+.plan__list li.is-found { background: #fcefee; }
+.plan__list li b { transition: box-shadow var(--mm-dur-state) var(--mm-ease-out-strong); }
+.plan__list li.is-found b { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #f2c46b; }
+@media (prefers-reduced-motion: reduce) { .plan__fx, .plan__hint { display: none; } }
+@media (max-width: 60rem) {
+  .plan__hint { left: 8px; bottom: 8px; font-size: .8rem; padding: 6px 9px; }
+}

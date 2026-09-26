@@ -1,0 +1,74 @@
+<!doctype html>
+<!-- 07 · Эффекты поверх ИИ-ассетов: зерно поверх (SVG feTurbulence, 280 Б) против «пластика»; тёмный градиент CTA-полосы CSS-ом
+     (Chromium дизерит CSS-градиент, а AVIF/WebP/AV1 — нет: J/03); 2.5D — объект с альфой + слой тени (RGB, multiply) на цвете
+     секции + лёгкий параллакс за курсором (только hover и no-preference). Агент J, волна 3, 23.09.2026 · проверено: J/03, J/07, J/06. -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Эффекты поверх ИИ-ассетов</title>
+<link rel="icon" href="assets/svg/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .split figure { position: relative; margin: 0; border-radius: 14px; overflow: hidden; aspect-ratio: 16 / 10; isolation: isolate; }
+  .split img { width: 100%; height: 100%; object-fit: cover; }
+  .split figcaption { position: absolute; left: 14px; bottom: 12px; z-index: 2; font-size: 13px; color: #111418; background: rgb(243 239 231 / .8); padding: 4px 10px; border-radius: 99px; }
+  .grainy::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: .09; mix-blend-mode: soft-light;
+                   background: url("assets/svg/noise.svg"); }
+  .band { margin: 0 auto; max-width: 1180px; border-radius: 20px; padding: 72px var(--gutter); color: #eef0f3;
+          background: radial-gradient(ellipse 60% 90% at 78% 30%, rgb(84 58 140 / .55), rgb(84 58 140 / 0) 70%), linear-gradient(90deg, #0b1026, #2e1e54); }
+  .band h2 { font-size: clamp(26px, 3vw, 40px); margin: 0 0 12px; letter-spacing: -.015em; }
+  .band p { margin: 0; color: #c9cbe0; max-width: 52ch; }
+  .stage2d { position: relative; aspect-ratio: 16 / 9; border-radius: 20px; overflow: hidden; background: #e9e2d6; isolation: isolate; }
+  .stage2d img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .stage2d .shadow { mix-blend-mode: multiply; }
+  .stage2d .obj, .stage2d .shadow { transform: translate3d(calc(var(--px, 0) * -12px), calc(var(--py, 0) * -6px), 0); transition: transform .2s ease-out; }
+  .stage2d .shadow { transform: translate3d(calc(var(--px, 0) * -6px), calc(var(--py, 0) * -3px), 0); }
+  .swatches { display: flex; gap: 8px; margin-top: 12px; }
+  .swatches button { width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgb(0 0 0 / .2); cursor: pointer; }
+  @media (max-width: 699px) { .split { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) { .stage2d .obj, .stage2d .shadow { transform: none !important; } }
+</style>
+</head>
+<body>
+<section class="section">
+  <h2>Зерно поверх, а не в файле</h2>
+  <p>Шум, «впечённый» в картинку до сжатия, AVIF/WebP/JPEG съедают (H/05) и платите весом ×10. SVG-шум в CSS — 280 байт,
+     рисуется после декодирования и снимает «пластиковую» гладкость ИИ-кадра. Справа — тот же AVIF с зерном 9 % (soft-light).</p>
+  <div class="split">
+    <figure><img src="assets/hero/dawn-16x9-960.avif" width="960" height="540" alt="Озеро на рассвете, без зерна" fetchpriority="high"><figcaption>без зерна</figcaption></figure>
+    <figure class="grainy"><img src="assets/hero/dawn-16x9-960.avif" width="960" height="540" alt="Тот же кадр с тонким зерном поверх"><figcaption>зерно 9 %, soft-light</figcaption></figure>
+  </div>
+</section>
+<section class="band" aria-labelledby="cta">
+  <h2 id="cta">Тёмный градиент — только кодом</h2>
+  <p>Эта полоса — CSS (0 байт): Chromium дизерит CSS-градиент (ступень 0,04 кода), а тот же градиент в AVIF 8 бит даёт 0,55,
+     в AVIF 10 бит — 0,35–0,39, в видео AV1 10 бит — 0,35 (J/03): 10 бит в браузере бандинг не лечит.</p>
+</section>
+<section class="section">
+  <h2>2.5D: объект, тень, цвет секции</h2>
+  <p>Объект с альфой (AVIF 15 КБ) и слой тени (RGB-отношение «кадр / чистая подложка», AVIF 7 КБ, multiply) кладутся на любой
+     цвет секции — тень и рефлексы остаются. В Chromium композит совпадает с расчётом (ΔE00 p99 ≤ 2,2, J/07).</p>
+  <div class="stage2d" data-parallax>
+    <picture><source type="image/avif" srcset="assets/layers/shadow-rgb.avif"><img class="shadow" src="assets/layers/shadow-rgb.webp" width="1536" height="864" alt=""></picture>
+    <picture><source type="image/avif" srcset="assets/layers/object.avif"><img class="obj" src="assets/layers/object.webp" width="1536" height="864" alt="Красная глянцевая банка и жёлтый шар на однотонном фоне"></picture>
+  </div>
+  <div class="swatches" role="group" aria-label="Цвет секции">
+    <button type="button" style="background:#e9e2d6" data-bg="#e9e2d6" aria-label="Бежевый"></button>
+    <button type="button" style="background:#dfe7e3" data-bg="#dfe7e3" aria-label="Мятный"></button>
+    <button type="button" style="background:#f4f4f2" data-bg="#f4f4f2" aria-label="Белый"></button>
+    <button type="button" style="background:#c9d3e6" data-bg="#c9d3e6" aria-label="Голубой"></button>
+  </div>
+</section>
+<script>
+  const st = document.querySelector('[data-parallax]');
+  document.querySelectorAll('[data-bg]').forEach(b => b.addEventListener('click', () => st.style.background = b.dataset.bg));
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    st.addEventListener('pointermove', e => { const r = st.getBoundingClientRect();
+      st.style.setProperty('--px', ((e.clientX - r.left) / r.width - .5).toFixed(3)); st.style.setProperty('--py', ((e.clientY - r.top) / r.height - .5).toFixed(3)); });
+    st.addEventListener('pointerleave', () => { st.style.setProperty('--px', 0); st.style.setProperty('--py', 0); });
+  }
+</script>
+</body>
+</html>

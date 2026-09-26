@@ -1,0 +1,1884 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "urn:app-design:creative-research:art-direction:1",
+ "title": "art-direction v1 — v0 (A) + эмоциональная цель, money idea, мотив, характер и примитивы движения, прототип главного эффекта, вариативность, блок исполнителя",
+ "description": "Формат №5 контракта тройки v2 (§3 п.5), владелец — creative-research. Один документ на сайт (или на мир сайта: маркетинг и продукт — два документа). Питает паспорт визуала ai-media (visual-dna.schema.json) через блок handoff.visual_dna, спецификации blender (handoff.blender), пакет kimi (handoff.kimi) и treatment секций page-plan (effects_by_section, motion_system). Процедура заполнения — 01-concept-and-directions.md; поля и соответствия — 02-art-direction-document.md; уровни — ambition-levels.yaml. v0 — агент A (волна 1); v1 — агент I (волна 3). Правила, которые JSON Schema выразить не может (различие направлений по осям, критерии приёмов, соответствие уровню), проверяет ../../scripts/creative/ad_check.py.",
+ "x-version": 0,
+ "x-checked": "2026-09-24",
+ "x-owner": "creative-research · 01-creative-direction · A (v0), I (v1)",
+ "type": "object",
+ "additionalProperties": false,
+ "patternProperties": {
+  "^x-": {}
+ },
+ "required": [
+  "art_direction_version",
+  "id",
+  "site",
+  "status",
+  "checked_at",
+  "inputs",
+  "ambition",
+  "concept",
+  "territories",
+  "directions",
+  "lifecycle"
+ ],
+ "properties": {
+  "art_direction_version": {
+   "enum": [
+    0,
+    "1.0"
+   ]
+  },
+  "id": {
+   "$ref": "#/$defs/id",
+   "description": "id документа; = visual-dna.id паспорта, который он питает (если паспорт один)."
+  },
+  "site": {
+   "$ref": "#/$defs/id",
+   "description": "= site-brief project.slug."
+  },
+  "example": {
+   "type": "boolean",
+   "description": "true — учебный пример на вымышленных данных."
+  },
+  "status": {
+   "enum": [
+    "draft",
+    "proposed",
+    "approved",
+    "superseded"
+   ],
+   "description": "draft — пишется; proposed — направления показаны заказчику; approved — выбор сделан и подписан; superseded — заменён новой версией."
+  },
+  "approved_by": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "Роль у заказчика (имя — только с согласия); обязательно при approved."
+  },
+  "approved_at": {
+   "$ref": "#/$defs/date"
+  },
+  "checked_at": {
+   "$ref": "#/$defs/date"
+  },
+  "refs": {
+   "type": "object",
+   "additionalProperties": false,
+   "description": "Пути от этого файла.",
+   "properties": {
+    "brief": {
+     "type": "string",
+     "description": "site-brief.yaml (site)."
+    },
+    "meaning": {
+     "type": "string",
+     "description": "meaning.yaml или блок meaning брифа (text)."
+    },
+    "facts": {
+     "type": "string",
+     "description": "facts.yaml (text)."
+    },
+    "page_plans": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "description": "page-plan (site)."
+    },
+    "library": {
+     "type": "string",
+     "description": "Библиотека референсов (creative B)."
+    },
+    "visual_dna": {
+     "type": "string",
+     "description": "Паспорт визуала ai-media, который питает документ."
+    },
+    "tokens": {
+     "type": "string",
+     "description": "marketing-tokens.json проекта (creative D, E)."
+    },
+    "brand": {
+     "type": "string",
+     "description": "brand.json kimi или брендбук."
+    }
+   }
+  },
+  "inputs": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "site_type",
+    "page_type",
+    "audience",
+    "job",
+    "brand_status"
+   ],
+   "description": "Что взято из брифа (поля смысла — text, логики — site): коротко, со ссылками, без копий фактов.",
+   "properties": {
+    "site_type": {
+     "$ref": "#/$defs/id",
+     "description": "site_type словаря site."
+    },
+    "page_type": {
+     "$ref": "#/$defs/id",
+     "description": "primary_page_type брифа или page_type плана."
+    },
+    "audience": {
+     "type": "string",
+     "minLength": 10,
+     "description": "Кто и в какой ситуации — одна фраза из meaning.audience (text)."
+    },
+    "job": {
+     "type": "string",
+     "minLength": 5,
+     "description": "Одно действие страницы (conversion.action site) словами."
+    },
+    "awareness": {
+     "type": "string",
+     "description": "Уровень осведомлённости основного трафика (meaning.awareness text)."
+    },
+    "traffic": {
+     "type": "string",
+     "description": "Основные источники, температура и устройство одной строкой (traffic site)."
+    },
+    "proof": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/fact-ref"
+     },
+     "description": "Факты, которые подача должна показать (fact:<id>) — первый экран доказывает их, а не обещает."
+    },
+    "brand_status": {
+     "enum": [
+      "none",
+      "draft",
+      "verified"
+     ]
+    },
+    "brand_expression_mode": {
+     "enum": [
+      "strict",
+      "extend",
+      "open"
+     ]
+    },
+    "must_keep": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "description": "Что из бренда обязательно (site-brief brand.expression.must_keep)."
+    },
+    "customer_words": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "description": "Дословные пожелания и запреты заказчика о подаче."
+    },
+    "references_given": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "description": "Референсы заказчика (ref:<id> или URL) — из них берутся направления, а не контент."
+    },
+    "assets": {
+     "type": "string",
+     "description": "Какие настоящие материалы есть (assets_available site)."
+    },
+    "constraints": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "description": "Ограничения, влияющие на подачу: право, стек, устройства, отрасль."
+    }
+   }
+  },
+  "ambition": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "level",
+    "budget_profile",
+    "rationale"
+   ],
+   "properties": {
+    "level": {
+     "$ref": "#/$defs/level"
+    },
+    "source": {
+     "enum": [
+      "default",
+      "customer",
+      "claude"
+     ],
+     "default": "default"
+    },
+    "budget_profile": {
+     "type": "string",
+     "pattern": "^[a-z0-9]+(-[a-z0-9]+)*@L[0-2]$",
+     "description": "Профиль бюджета <page_type>@<уровень> (page-plan site; числа — ambition-levels.yaml и budgets.yaml site P)."
+    },
+    "motion_cap": {
+     "$ref": "#/$defs/motion-level"
+    },
+    "rationale": {
+     "type": "string",
+     "minLength": 10,
+     "description": "Почему этот уровень: тип страницы, цель, аудитория, трафик, устройство (процедура 03-ambition-levels.md §5)."
+    },
+    "by_section_role": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "role",
+       "level"
+      ],
+      "properties": {
+       "role": {
+        "$ref": "#/$defs/id"
+       },
+       "level": {
+        "$ref": "#/$defs/level"
+       },
+       "why": {
+        "type": "string"
+       }
+      }
+     }
+    },
+    "scale": {
+     "type": "object",
+     "additionalProperties": false,
+     "properties": {
+      "approval_chain": {
+       "enum": [
+        "short",
+        "long"
+       ]
+      },
+      "project_scale": {
+       "enum": [
+        "small",
+        "mid",
+        "large"
+       ]
+      }
+     },
+     "description": "[мнение] [V:ilNOMaR6x_U 23:48]: «вау» реже доживает в длинной цепочке согласования."
+    }
+   }
+  },
+  "concept": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "thesis",
+    "mechanism",
+    "audience_scene",
+    "first_screen_proves",
+    "rut",
+    "design_read"
+   ],
+   "description": "Концепция словами до выбора эффектов.",
+   "properties": {
+    "design_read": {
+     "type": "string",
+     "minLength": 20,
+     "description": "Одна строка: «Читаю это как: <тип страницы> для <аудитории>, язык <…>, тянется к <…>» (taste §0.B)."
+    },
+    "mechanism": {
+     "type": "string",
+     "minLength": 10,
+     "description": "Что продукт или услуга делает, одной фразой — то, что должна показать подача."
+    },
+    "audience_scene": {
+     "type": "string",
+     "minLength": 10,
+     "description": "Реальная сцена аудитории: где, когда, при каком свете и с каким устройством смотрит страницу."
+    },
+    "first_screen_proves": {
+     "type": "string",
+     "minLength": 10,
+     "description": "Что первый экран доказывает (показывает), а не обещает — тест «ушёл после первого экрана: что опишет через час?»."
+    },
+    "thesis": {
+     "type": "string",
+     "minLength": 15,
+     "maxLength": 240,
+     "description": "Тезис подачи одной фразой: настроение, материал, энергия (OpenAI visual thesis; kimi direction.visual_thesis)."
+    },
+    "metaphor": {
+     "type": "string",
+     "description": "Сквозная метафора или мир (concept spine higgsfield: «сайт — калибровочный прибор», «архивное досье»)."
+    },
+    "material": {
+     "type": "string",
+     "description": "Материал мира: из чего «сделана» страница (бумага, стекло, металл, свет, ткань, экран)."
+    },
+    "energy": {
+     "enum": [
+      "still",
+      "calm",
+      "measured",
+      "lively",
+      "intense"
+     ],
+     "description": "Энергия подачи; связана с уровнем движения, но не равна ему."
+    },
+    "rut": {
+     "type": "string",
+     "minLength": 10,
+     "description": "Страница-колея категории — как её сделал бы генератор по умолчанию (impeccable new-work §3); направления её избегают."
+    },
+    "rut_opposite": {
+     "type": "string",
+     "description": "Предсказуемая противоположность колеи — тоже колея."
+    },
+    "not_this": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "description": "Что концепция сознательно не делает (антитезисы)."
+    },
+    "emotional_goal": {
+     "type": "string",
+     "maxLength": 160,
+     "description": "Как человек должен себя почувствовать на пике страницы (W2)."
+    },
+    "money_idea": {
+     "type": "string",
+     "maxLength": 160,
+     "description": "«Сайт, где …» — фраза, которой проект пересказывают [V:Ulgy6xIrdPg 07:23]."
+    },
+    "motif_source": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "kind"
+     ],
+     "properties": {
+      "kind": {
+       "enum": [
+        "logo",
+        "product",
+        "material",
+        "ritual",
+        "place",
+        "none"
+       ]
+      },
+      "note": {
+       "type": "string"
+      }
+     },
+     "description": "Откуда мотив опыта [V:xQnJLYTVl_E 23:30]."
+    }
+   }
+  },
+  "territories": {
+   "type": "array",
+   "minItems": 5,
+   "maxItems": 9,
+   "description": "Кандидаты-миры из мира аудитории (артефакты, места, ритуалы, визуальные системы), упорядочены по резонансу; ≥ 3 материальных семейства; буквальное прочтение имени или метафоры брифа — не больше одного кандидата.",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "name",
+     "source",
+     "family",
+     "why"
+    ],
+    "properties": {
+     "id": {
+      "$ref": "#/$defs/id"
+     },
+     "name": {
+      "type": "string"
+     },
+     "source": {
+      "type": "string",
+      "description": "Откуда мир: предмет, место, ритуал, графическая традиция аудитории."
+     },
+     "family": {
+      "enum": [
+       "document-print",
+       "tool-instrument",
+       "place-architecture",
+       "nature-material",
+       "screen-interface",
+       "ritual-event",
+       "craft-making",
+       "data-notation",
+       "body-motion",
+       "other"
+      ]
+     },
+     "why": {
+      "type": "string",
+      "description": "Почему резонирует и может нести механизм продукта."
+     },
+     "literal": {
+      "type": "boolean",
+      "description": "Буквальное прочтение имени, метафоры или предмета брифа."
+     },
+     "rejected_because": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "directions": {
+   "type": "array",
+   "minItems": 3,
+   "maxItems": 5,
+   "description": "3–5 направлений: каждые два различаются минимум по двум осям (paper, display_style, accent_hue, macrostructure); тёплая бумага или антиква — не больше чем у одного, если не бренд (kimi 03/04 T2a). Одно направление может быть canon — категорийный стандарт, сыгранный честно.",
+   "items": {
+    "$ref": "#/$defs/direction"
+   }
+  },
+  "choice": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "chosen",
+    "chosen_by",
+    "date",
+    "why"
+   ],
+   "properties": {
+    "chosen": {
+     "$ref": "#/$defs/id"
+    },
+    "chosen_by": {
+     "enum": [
+      "customer",
+      "art-director",
+      "default"
+     ],
+     "description": "default — заказчик не ответил, действует рекомендуемое (строка Going with)."
+    },
+    "date": {
+     "$ref": "#/$defs/date"
+    },
+    "why": {
+     "type": "string",
+     "minLength": 10
+    },
+    "merged_from": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/id"
+     },
+     "description": "Что взято из других направлений (осознанное смешение, а не компромисс)."
+    },
+    "rejected": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "id",
+       "why"
+      ],
+      "properties": {
+       "id": {
+        "$ref": "#/$defs/id"
+       },
+       "why": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   }
+  },
+  "moodboard": {
+   "type": "array",
+   "maxItems": 12,
+   "description": "Референсы выбранного направления: записи библиотеки B (ref:<id>) или URL; роль и «что взять / чего не брать»; один референс — одна секция.",
+   "items": {
+    "$ref": "#/$defs/reference"
+   }
+  },
+  "visual_language": {
+   "type": "object",
+   "additionalProperties": false,
+   "description": "Решения визуального языка выбранного направления; нормы и числа — D (04-visual-language/), токены — marketing-tokens.json.",
+   "properties": {
+    "color_strategy": {
+     "enum": [
+      "restrained",
+      "committed",
+      "full-palette",
+      "drenched"
+     ],
+     "description": "impeccable §4: restrained — нейтрали + один акцент; committed — один насыщенный цвет на 30–60 % поверхности; full-palette — 3–4 роли; drenched — поверхность и есть цвет."
+    },
+    "palette": {
+     "$ref": "#/$defs/palette"
+    },
+    "accent_rule": {
+     "type": "string",
+     "description": "Где живёт акцент (→ direction.accent_rule kimi)."
+    },
+    "type": {
+     "$ref": "#/$defs/type"
+    },
+    "composition": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "description": "Принципы композиции (асимметрия, вылет, текст ↔ медиа, сетка) — ссылки на D."
+    },
+    "surfaces": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "description": "Поверхности и фактуры: бумага, зерно, стекло, металл — с причиной."
+    },
+    "imagery": {
+     "type": "object",
+     "additionalProperties": false,
+     "properties": {
+      "kinds": {
+       "type": "array",
+       "items": {
+        "enum": [
+         "photo",
+         "illustration",
+         "3d",
+         "ui-screenshot",
+         "video",
+         "typographic",
+         "abstract-code",
+         "data-graphic"
+        ]
+       }
+      },
+      "subject": {
+       "type": "string"
+      },
+      "source_policy": {
+       "type": "string",
+       "description": "Что настоящее, что генерируется (ai-media), что кодом."
+      },
+      "people_policy": {
+       "enum": [
+        "none",
+        "real-only",
+        "real-plus-ai-environment",
+        "background-silhouettes"
+       ]
+      },
+      "product_policy": {
+       "enum": [
+        "real-photo-only",
+        "reference-locked",
+        "generated-ok"
+       ]
+      }
+     }
+    },
+    "theme": {
+     "enum": [
+      "light",
+      "dark",
+      "mixed"
+     ]
+    },
+    "d_refs": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "description": "Ссылки на разделы D, по которым приняты решения."
+    }
+   }
+  },
+  "tokens_extension": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "tokens_ref": {
+     "type": "string"
+    },
+    "overrides": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "token",
+       "value",
+       "why"
+      ],
+      "properties": {
+       "token": {
+        "type": "string"
+       },
+       "value": {
+        "type": [
+         "string",
+         "number"
+        ]
+       },
+       "why": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   }
+  },
+  "motion_system": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "thesis",
+    "level"
+   ],
+   "description": "Система движения страницы; нормы — E (05-motion/), спецификация — motion-spec I.",
+   "properties": {
+    "thesis": {
+     "type": "string",
+     "maxLength": 240
+    },
+    "level": {
+     "$ref": "#/$defs/motion-level"
+    },
+    "entrance_system": {
+     "type": "string",
+     "description": "Что появляется, в каком порядке и чем различается — не одинаковый fade на всём."
+    },
+    "library": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "smooth_scroll": {
+     "type": "boolean"
+    },
+    "page_transitions": {
+     "enum": [
+      "none",
+      "view-transitions",
+      "library",
+      "custom"
+     ]
+    },
+    "reduce": {
+     "type": "string",
+     "description": "Стратегия reduced motion страницы (reduce, not remove)."
+    },
+    "by_section": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "section",
+       "motion_level"
+      ],
+      "properties": {
+       "section": {
+        "type": "string",
+        "description": "id секции page-plan или section-role:<id>."
+       },
+       "motion_level": {
+        "$ref": "#/$defs/motion-level"
+       },
+       "visual_role": {
+        "enum": [
+         "peak",
+         "accent",
+         "support",
+         "calm",
+         "pause",
+         "chrome"
+        ]
+       },
+       "note": {
+        "type": "string"
+       }
+      }
+     }
+    },
+    "e_refs": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "character": {
+     "type": "array",
+     "maxItems": 3,
+     "uniqueItems": true,
+     "items": {
+      "enum": [
+       "energetic",
+       "friendly",
+       "bold",
+       "playful",
+       "balanced",
+       "measured",
+       "calm",
+       "subtle",
+       "soft",
+       "stable",
+       "precise",
+       "heavy"
+      ]
+     }
+    },
+    "primitives": {
+     "type": "array",
+     "maxItems": 3,
+     "uniqueItems": true,
+     "items": {
+      "enum": [
+       "fade-up",
+       "type-unmask",
+       "sweep",
+       "number-tick",
+       "line-draw",
+       "none"
+      ]
+     }
+    },
+    "spec_ref": {
+     "type": "string",
+     "description": "Путь к motion-spec страницы (09-ai-execution-evaluation/motion-spec.schema.json)."
+    }
+   }
+  },
+  "effects_by_section": {
+   "type": "array",
+   "description": "Эффекты по секциям (id effects.yaml F; до волны 2 — временные id treatment.v0 x-effect-ids-v0).",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "section",
+     "effects"
+    ],
+    "properties": {
+     "section": {
+      "type": "string"
+     },
+     "level": {
+      "$ref": "#/$defs/level"
+     },
+     "effects": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/effect-ref"
+      }
+     },
+     "purpose": {
+      "enum": [
+       "signature",
+       "support",
+       "feedback"
+      ]
+     },
+     "why": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "decisions": {
+   "type": "array",
+   "description": "Решения о приёмах и клише по пяти критериям H (концепция, бренд, исполнение, эпоха, единственность). Реестр и критерии — 08-uniqueness-anti-slop (H, волна 2); здесь — принятые решения с обоснованием.",
+   "items": {
+    "$ref": "#/$defs/decision"
+   }
+  },
+  "exclusions": {
+   "type": "object",
+   "additionalProperties": false,
+   "description": "Что уходит в паспорт визуала и в проверки исполнителя.",
+   "properties": {
+    "forbidden_hues": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "from",
+       "to",
+       "reason"
+      ],
+      "properties": {
+       "from": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 360
+       },
+       "to": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 360
+       },
+       "reason": {
+        "type": "string"
+       },
+       "except_share_max": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+       }
+      }
+     }
+    },
+    "forbidden_markers": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "pattern": "^(IMG|VID)-M[0-9]{2}$"
+     },
+     "description": "Маркеры ai-media 01/03 §5 (IMG-Mnn), которые остаются запретом для этого сайта."
+    },
+    "lifted_markers": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "marker",
+       "decision_ref"
+      ],
+      "properties": {
+       "marker": {
+        "type": "string"
+       },
+       "decision_ref": {
+        "$ref": "#/$defs/id"
+       }
+      }
+     },
+     "description": "Умолчания L0 соседей, снятые решением (decisions[].id)."
+    },
+    "k3_allow": {
+     "type": "array",
+     "uniqueItems": true,
+     "items": {
+      "enum": [
+       "warm",
+       "accent-word",
+       "serif",
+       "eyebrow",
+       "photo-hero",
+       "center-hero",
+       "stats",
+       "cards",
+       "gradient",
+       "glass",
+       "pill",
+       "dots",
+       "arrows",
+       "mono",
+       "numbered",
+       "marquee",
+       "chrome",
+       "caps"
+      ]
+     },
+     "description": "Ключи --allow k3_checks.py 1.0: приметы, заказанные брифом или решением."
+    },
+    "bans": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "description": "Конкретные запреты для исполнителя (→ design_system.bans kimi)."
+    },
+    "executor_block": {
+     "type": "string",
+     "description": "Блок «чего не ставить» для K3 (H 08/01 §6.2) — путь или текст."
+    }
+   }
+  },
+  "budget": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "profile": {
+     "type": "string",
+     "pattern": "^[a-z0-9]+(-[a-z0-9]+)*@L[0-2]$"
+    },
+    "spend": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "what",
+       "kb"
+      ],
+      "properties": {
+       "what": {
+        "type": "string"
+       },
+       "kb": {
+        "type": "number",
+        "minimum": 0
+       },
+       "device": {
+        "enum": [
+         "mobile",
+         "desktop",
+         "both"
+        ]
+       },
+       "load": {
+        "enum": [
+         "eager",
+         "after-lcp",
+         "on-visible",
+         "on-interaction"
+        ]
+       }
+      }
+     },
+     "description": "На что уходит бюджет эффектов (крупные позиции)."
+    },
+    "overrides": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "metric",
+       "value",
+       "why",
+       "approved_by"
+      ],
+      "properties": {
+       "metric": {
+        "type": "string"
+       },
+       "value": {
+        "type": "number"
+       },
+       "why": {
+        "type": "string"
+       },
+       "approved_by": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   }
+  },
+  "handoff": {
+   "type": "object",
+   "additionalProperties": false,
+   "description": "Проекции для соседей: значения, которые уходят в их форматы (таблица соответствия — 02-art-direction-document.md §4).",
+   "properties": {
+    "visual_dna": {
+     "type": "object",
+     "additionalProperties": false,
+     "description": "Поля паспорта visual-dna.schema.json (ai-media 06); проверяются подсхемами паспорта.",
+     "properties": {
+      "character": {
+       "type": "object",
+       "description": "→ visual-dna character (adjectives[3], boldness, one_bold_move)."
+      },
+      "palette_forbidden_hues": {
+       "type": "array",
+       "description": "→ visual-dna palette.forbidden_hues."
+      },
+      "exclusions": {
+       "type": "object",
+       "description": "→ visual-dna exclusions (forbidden_markers, banned_words, replace_with)."
+      },
+      "abstract": {
+       "type": "object",
+       "description": "→ visual-dna abstract (policy code-first | generate | none, forms)."
+      },
+      "video": {
+       "type": "object",
+       "description": "→ visual-dna video (tempo still | slow | medium, camera, loop)."
+      },
+      "composition": {
+       "type": "object",
+       "description": "→ visual-dna composition (subject_region, text_zone_default, …)."
+      },
+      "subject_matter": {
+       "type": "object",
+       "description": "→ visual-dna subject_matter (domain_props, motifs, places, people_policy, product_policy)."
+      },
+      "materials": {
+       "type": "array",
+       "description": "→ visual-dna materials."
+      }
+     }
+    },
+    "blender": {
+     "type": "object",
+     "additionalProperties": false,
+     "description": "→ бриф и паспорт серии blender 04/04 §2–3.",
+     "properties": {
+      "role_in_story": {
+       "type": "string"
+      },
+      "series_style": {
+       "type": "string"
+      },
+      "page_background": {
+       "$ref": "#/$defs/hex"
+      },
+      "materials": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      },
+      "light_mood": {
+       "type": "string"
+      },
+      "motion": {
+       "type": "string"
+      },
+      "budget": {
+       "type": "string"
+      }
+     }
+    },
+    "kimi": {
+     "type": "object",
+     "additionalProperties": false,
+     "description": "→ brief.yaml и DESIGN.md пакета kimi.",
+     "properties": {
+      "design_system_style": {
+       "type": "string"
+      },
+      "direction": {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "visual_thesis": {
+         "type": "string"
+        },
+        "paper": {
+         "type": "string"
+        },
+        "display_style": {
+         "type": "string"
+        },
+        "accent_rule": {
+         "type": "string"
+        },
+        "imagery": {
+         "type": "string"
+        },
+        "macrostructure": {
+         "enum": [
+          "grid-led",
+          "document-led",
+          "poster-led"
+         ]
+        }
+       }
+      },
+      "motion": {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "level": {
+         "$ref": "#/$defs/motion-level"
+        },
+        "thesis": {
+         "type": "string"
+        },
+        "library": {
+         "type": "string"
+        }
+       }
+      },
+      "bans": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      },
+      "allow": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      },
+      "design_md_overview": {
+       "type": "string",
+       "description": "Абзац Overview DESIGN.md (характер продукта и главный приём)."
+      }
+     }
+    },
+    "generated": {
+     "type": "object",
+     "properties": {
+      "by": {
+       "type": "string"
+      },
+      "at": {
+       "type": "string"
+      }
+     }
+    }
+   }
+  },
+  "lifecycle": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "version",
+    "history"
+   ],
+   "properties": {
+    "version": {
+     "type": "string",
+     "pattern": "^[0-9]+\\.[0-9]+$",
+     "description": "major.minor: minor — уточнение без смены направления; major — новое направление, смена уровня или бренда."
+    },
+    "history": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "version",
+       "date",
+       "change"
+      ],
+      "properties": {
+       "version": {
+        "type": "string"
+       },
+       "date": {
+        "$ref": "#/$defs/date"
+       },
+       "change": {
+        "type": "string"
+       },
+       "by": {
+        "type": "string"
+       }
+      }
+     }
+    },
+    "review_by": {
+     "$ref": "#/$defs/date",
+     "description": "Когда пересмотреть: клише и тренды датируются, пересмотр ≤ 6 месяцев."
+    },
+    "supersedes": {
+     "type": "string"
+    },
+    "on_brand_change": {
+     "type": "string",
+     "description": "Что делать при смене бренда: какие поля пересобрать."
+    }
+   }
+  },
+  "notes": {
+   "type": "string"
+  },
+  "prototype": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "status"
+   ],
+   "properties": {
+    "status": {
+     "enum": [
+      "none",
+      "planned",
+      "built",
+      "approved"
+     ]
+    },
+    "effect": {
+     "type": "string",
+     "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "lab_path": {
+     "type": "string"
+    },
+    "recording": {
+     "type": "string"
+    },
+    "notes": {
+     "type": "string"
+    }
+   },
+   "description": "Прототип главного эффекта до утверждения направления [V:7nEvk6nFeS4 05:20]; запись — видео-референс для K3."
+  },
+  "variation": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "ledger_ref": {
+     "type": "string"
+    },
+    "entry": {
+     "type": "object",
+     "properties": {
+      "paper": {},
+      "display_style": {},
+      "accent_hue": {},
+      "macrostructure": {},
+      "hero_architecture": {},
+      "main_technique": {},
+      "motion_signature": {},
+      "corner_language": {}
+     },
+     "additionalProperties": false
+    },
+    "differs_from": {
+     "type": "string"
+    },
+    "changed_axes": {
+     "type": "array",
+     "items": {
+      "enum": [
+       "paper",
+       "display_style",
+       "accent_hue",
+       "macrostructure",
+       "hero_architecture",
+       "main_technique",
+       "motion_signature",
+       "corner_language"
+      ]
+     }
+    }
+   },
+   "description": "Запись журнала вариативности H 08/02 §3.2 (8 осей; проекты подряд — ≥ 4 отличий)."
+  }
+ },
+ "allOf": [
+  {
+   "$comment": "Утверждённый документ: есть выбор и подпись.",
+   "if": {
+    "required": [
+     "status"
+    ],
+    "properties": {
+     "status": {
+      "const": "approved"
+     }
+    }
+   },
+   "then": {
+    "required": [
+     "choice",
+     "approved_by",
+     "approved_at",
+     "visual_language",
+     "motion_system",
+     "handoff"
+    ],
+    "properties": {
+     "approved_by": {
+      "type": "string",
+      "minLength": 2
+     }
+    }
+   }
+  },
+  {
+   "$comment": "Показанные заказчику направления сопровождаются рекомендацией (выбор по умолчанию).",
+   "if": {
+    "required": [
+     "status"
+    ],
+    "properties": {
+     "status": {
+      "const": "proposed"
+     }
+    }
+   },
+   "then": {
+    "properties": {
+     "directions": {
+      "contains": {
+       "required": [
+        "recommended"
+       ],
+       "properties": {
+        "recommended": {
+         "const": true
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ ],
+ "$defs": {
+  "id": {
+   "type": "string",
+   "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+  },
+  "date": {
+   "type": "string",
+   "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$"
+  },
+  "hex": {
+   "type": "string",
+   "pattern": "^#[0-9A-Fa-f]{6}$"
+  },
+  "level": {
+   "enum": [
+    "L0",
+    "L1",
+    "L2"
+   ]
+  },
+  "motion-level": {
+   "enum": [
+    "none",
+    "subtle",
+    "expressive",
+    "cinematic"
+   ]
+  },
+  "fact-ref": {
+   "type": "string",
+   "pattern": "^(fact|missing):[a-z0-9]+(-[a-z0-9]+)*$"
+  },
+  "effect-ref": {
+   "type": "string",
+   "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$"
+  },
+  "palette": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "background",
+    "text",
+    "accent"
+   ],
+   "properties": {
+    "background": {
+     "$ref": "#/$defs/hex"
+    },
+    "surface": {
+     "$ref": "#/$defs/hex"
+    },
+    "text": {
+     "$ref": "#/$defs/hex"
+    },
+    "muted": {
+     "$ref": "#/$defs/hex"
+    },
+    "accent": {
+     "$ref": "#/$defs/hex"
+    },
+    "on_accent": {
+     "$ref": "#/$defs/hex"
+    },
+    "extra": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "hex",
+       "role"
+      ],
+      "properties": {
+       "hex": {
+        "$ref": "#/$defs/hex"
+       },
+       "role": {
+        "type": "string"
+       },
+       "share_max": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+       }
+      }
+     }
+    }
+   }
+  },
+  "type": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "display",
+    "text"
+   ],
+   "properties": {
+    "display": {
+     "type": "string",
+     "description": "Семейство заголовков с кириллицей (или замена с причиной)."
+    },
+    "text": {
+     "type": "string"
+    },
+    "mono": {
+     "type": "string"
+    },
+    "cyrillic_checked": {
+     "type": "boolean",
+     "description": "Кириллица проверена (fontsource subsets ∋ cyrillic или файл шрифта)."
+    },
+    "license": {
+     "type": "string",
+     "description": "OFL по умолчанию (решение заказчика п. 13); платные — опция."
+    },
+    "note": {
+     "type": "string"
+    }
+   }
+  },
+  "axes": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "paper",
+    "display_style",
+    "accent_hue",
+    "macrostructure"
+   ],
+   "description": "Оси различия направлений (kimi 07/01 §2.4, 03/04 T2a; оси тем Hallmark).",
+   "properties": {
+    "paper": {
+     "enum": [
+      "dark",
+      "mid",
+      "light"
+     ],
+     "description": "Светлота фона: dark L < 30 %, mid, light L > 85 %."
+    },
+    "paper_temperature": {
+     "enum": [
+      "warm",
+      "neutral",
+      "cool"
+     ],
+     "description": "Тонировка бумаги; warm — примета K3, нужна причина."
+    },
+    "display_style": {
+     "enum": [
+      "serif",
+      "grotesque",
+      "condensed",
+      "wide",
+      "mono",
+      "rounded",
+      "display"
+     ]
+    },
+    "accent_hue": {
+     "enum": [
+      "warm",
+      "cool",
+      "neutral",
+      "chromatic-other"
+     ]
+    },
+    "macrostructure": {
+     "$ref": "#/$defs/id",
+     "description": "id macrostructure словаря site (bento-grid, split-studio, scroll-story…)."
+    },
+    "imagery": {
+     "enum": [
+      "photo",
+      "illustration",
+      "3d",
+      "ui",
+      "typographic",
+      "abstract-code",
+      "mixed"
+     ]
+    },
+    "energy": {
+     "enum": [
+      "still",
+      "calm",
+      "measured",
+      "lively",
+      "intense"
+     ]
+    }
+   }
+  },
+  "direction": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "id",
+    "name",
+    "thesis",
+    "territory",
+    "axes",
+    "palette",
+    "type",
+    "signature_move",
+    "first_viewport",
+    "risk",
+    "level_fit"
+   ],
+   "properties": {
+    "id": {
+     "$ref": "#/$defs/id"
+    },
+    "name": {
+     "type": "string"
+    },
+    "canon": {
+     "type": "boolean",
+     "description": "Категорийный стандарт, сыгранный честно (standing exit impeccable)."
+    },
+    "recommended": {
+     "type": "boolean"
+    },
+    "thesis": {
+     "type": "string",
+     "minLength": 15,
+     "maxLength": 240
+    },
+    "territory": {
+     "$ref": "#/$defs/id"
+    },
+    "axes": {
+     "$ref": "#/$defs/axes"
+    },
+    "palette": {
+     "$ref": "#/$defs/palette"
+    },
+    "color_strategy": {
+     "enum": [
+      "restrained",
+      "committed",
+      "full-palette",
+      "drenched"
+     ]
+    },
+    "type": {
+     "$ref": "#/$defs/type"
+    },
+    "signature_move": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "what",
+      "where"
+     ],
+     "description": "Главный приём направления: одна запоминающаяся вещь; всё вокруг — спокойно.",
+     "properties": {
+      "what": {
+       "type": "string",
+       "minLength": 10
+      },
+      "where": {
+       "type": "string",
+       "description": "section-role:<id> или id секции плана."
+      },
+      "effects": {
+       "type": "array",
+       "items": {
+        "$ref": "#/$defs/effect-ref"
+       }
+      },
+      "min_level": {
+       "$ref": "#/$defs/level"
+      },
+      "concept_link": {
+       "type": "string",
+       "description": "Связь с концепцией одной фразой без слов «современно», «красиво» (критерий 1 H)."
+      }
+     }
+    },
+    "first_viewport": {
+     "type": "string",
+     "minLength": 20,
+     "description": "Точная композиция первого экрана: что где и какого размера, где главное действие."
+    },
+    "imagery": {
+     "type": "string"
+    },
+    "motion": {
+     "type": "string",
+     "description": "Тезис движения направления одной фразой."
+    },
+    "refs": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/reference"
+     },
+     "maxItems": 5
+    },
+    "risk": {
+     "type": "string",
+     "minLength": 10,
+     "description": "Главный риск одной строкой (в том числе близость к кластеру клише)."
+    },
+    "cost": {
+     "type": "string",
+     "description": "Во что обходится: ассеты, вес, время исполнителя."
+    },
+    "level_fit": {
+     "type": "array",
+     "minItems": 1,
+     "uniqueItems": true,
+     "items": {
+      "$ref": "#/$defs/level"
+     },
+     "description": "На каких уровнях направление работает."
+    }
+   }
+  },
+  "reference": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "role",
+    "take",
+    "dont_take"
+   ],
+   "anyOf": [
+    {
+     "required": [
+      "ref"
+     ]
+    },
+    {
+     "required": [
+      "url"
+     ]
+    }
+   ],
+   "properties": {
+    "ref": {
+     "type": "string",
+     "pattern": "^ref:[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "url": {
+     "type": "string"
+    },
+    "role": {
+     "enum": [
+      "composition",
+      "typography",
+      "rhythm",
+      "motion",
+      "block-solution",
+      "brand",
+      "structure",
+      "color",
+      "material",
+      "imagery",
+      "effect",
+      "other"
+     ]
+    },
+    "applies_to": {
+     "type": "string"
+    },
+    "take": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "string"
+     }
+    },
+    "dont_take": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "string"
+     }
+    },
+    "note": {
+     "type": "string"
+    }
+   }
+  },
+  "decision": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "id",
+    "technique",
+    "decision",
+    "criteria",
+    "why"
+   ],
+   "properties": {
+    "id": {
+     "$ref": "#/$defs/id"
+    },
+    "technique": {
+     "type": "string",
+     "description": "Приём или клише: effect:<id>, cliche:<id> реестра H (волна 2) или слово до реестра."
+    },
+    "decision": {
+     "enum": [
+      "use",
+      "avoid",
+      "twist"
+     ],
+     "description": "use — приём оправдан; avoid — не используем; twist — используем с поворотом (насыщенный приём)."
+    },
+    "criteria": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "concept",
+      "brand",
+      "execution",
+      "epoch",
+      "singularity"
+     ],
+     "description": "Пять проверок «приём или клише» (PLAN §2, H): pass | fail | na.",
+     "properties": {
+      "concept": {
+       "$ref": "#/$defs/criterion"
+      },
+      "brand": {
+       "$ref": "#/$defs/criterion"
+      },
+      "execution": {
+       "$ref": "#/$defs/criterion"
+      },
+      "epoch": {
+       "$ref": "#/$defs/criterion"
+      },
+      "singularity": {
+       "$ref": "#/$defs/criterion"
+      }
+     }
+    },
+    "why": {
+     "type": "string",
+     "minLength": 10
+    },
+    "where": {
+     "type": "string"
+    },
+    "k3_allow": {
+     "type": "string",
+     "description": "Ключ --allow, если решение снимает примету K3."
+    }
+   },
+   "allOf": [
+    {
+     "$comment": "Приём используется только если ни одна проверка не провалена.",
+     "if": {
+      "properties": {
+       "decision": {
+        "enum": [
+         "use",
+         "twist"
+        ]
+       }
+      }
+     },
+     "then": {
+      "properties": {
+       "criteria": {
+        "properties": {
+         "concept": {
+          "properties": {
+           "result": {
+            "not": {
+             "const": "fail"
+            }
+           }
+          }
+         },
+         "brand": {
+          "properties": {
+           "result": {
+            "not": {
+             "const": "fail"
+            }
+           }
+          }
+         },
+         "execution": {
+          "properties": {
+           "result": {
+            "not": {
+             "const": "fail"
+            }
+           }
+          }
+         },
+         "epoch": {
+          "properties": {
+           "result": {
+            "not": {
+             "const": "fail"
+            }
+           }
+          }
+         },
+         "singularity": {
+          "properties": {
+           "result": {
+            "not": {
+             "const": "fail"
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  "criterion": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "result"
+   ],
+   "properties": {
+    "result": {
+     "enum": [
+      "pass",
+      "fail",
+      "na"
+     ]
+    },
+    "note": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "x-generated": {
+  "by": "99-raw/experiments/I/03-art-direction-v1/build_ad_v1.py",
+  "from": "urn:app-design:creative-research:art-direction:0",
+  "at": "2026-09-25",
+  "doc": "09-ai-execution-evaluation/01-presentation-spec-and-block-treatments.md §5",
+  "owner_note": "владелец формата — A; перенос в 01-creative-direction — синтез S"
+ }
+}

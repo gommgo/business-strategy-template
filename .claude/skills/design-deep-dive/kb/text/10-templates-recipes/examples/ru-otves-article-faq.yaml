@@ -1,0 +1,232 @@
+# ru-otves-article-faq.yaml — пример copy deck v1.1 (10-templates-recipes, J3, 2026-09-24): статья с блоком «коротко» и FAQ
+# (article-page). Тексты — ai-self J3. Факты — ../../02-strategy-messaging/examples/facts-service-renovation.yaml (вымышленная
+# студия B2, не публиковать). Мета — по шаблону G article-page, два варианта title с планом теста; бриф статьи — page.article (G 07/02 §1.1).
+copy_deck:
+  version: 1
+  date: '2026-09-24'
+  site: otves-remont-nn
+  product_name: Отвес
+  lang: ru
+  voice_ref: ../../05-voice-editorial/examples/voice-otves-warm.yaml
+  facts_ref: ../../02-strategy-messaging/examples/facts-service-renovation.yaml
+  copy_slots_ref: ../../04-copy-by-block/copy-slots.yaml
+  jurisdiction: ru
+  legal_category: [general]
+  authors: ['J3 (ai-self, 2026-09-24)']
+  notes: >-
+    Статья отвечает на вопрос сделки фактами (G 07/02): цена «от» с условием рядом, смета, срок на примере одного кейса с
+    рамкой, гарантия. Блок «коротко» — первым после лида (40–80 слов, G 07/03 §3.1), FAQ — ответ первой фразой
+    (COPY-GEO-14). Подпись автора — только после того, как Сергей Лапин прочитал и одобрил текст (ИИ-текст не
+    подписывается чужим именем — H, F); до этого страница — draft. article.serp_scan не заполнен: живой выдачи в опыте
+    нет (сеть не использовалась) — перед публикацией 3–5 материалов {url, note, date} (G «осмотрись»).
+  pages:
+  - page_id: article-turnkey-price
+    page_type: article-page
+    status: draft
+    awareness: solution-aware
+    primary_action: Вызвать замерщика
+    cta_primary: article-turnkey-price/final/cta
+    article:
+      intent: 'информационный с коммерческим хвостом: сколько стоит ремонт под ключ и из чего складывается цена'
+      main_query: 'сколько стоит ремонт квартиры под ключ нижний новгород'
+      unique_angle:
+        text: 'что входит в цену «от» за м² и что нет — на прайсе студии и одном кейсе со сроком по договору'
+        fact_ids: [price-from-per-m2, case-two-room-47-days]
+      author: foreman-lapin
+      update_policy: 'пересмотр при смене прайса (valid.until факта цены — 2026-12-31) и не реже раза в год'
+      published: '2026-09-24'
+    meta:
+      title: 'Сколько стоит ремонт квартиры под ключ — Нижний Новгород, 2026'
+      description: 'Работы под ключ — от 9 800 ₽ за м² без материалов, замер и смета бесплатно в черте города. Цены — по прайсу студии «Отвес» на 2026 год.'
+      og_title: 'Сколько стоит ремонт квартиры под ключ в Нижнем Новгороде'
+      og_description: 'Что входит в цену от 9 800 ₽ за м², что нет и как узнать сумму для своей квартиры.'
+      fact_ids: [price-from-per-m2, estimate-free]
+      variants:
+        title:
+        - {id: a, text: 'Сколько стоит ремонт квартиры под ключ — Нижний Новгород, 2026', status: draft, source: ai-self}
+        - {id: b, text: 'Цена ремонта под ключ в Нижнем Новгороде: что входит в метр', status: draft, source: ai-self}
+      test_plan: 'Вебмастер и Search Console: 4 недели на варианте a, затем 4 недели на b; метрика — CTR по запросу main_query (G 07/02 §4.3).'
+      review_by: '2027-01-15'
+      notes: 'Шаблон G article-page: title «{ответ или вопрос читателя} — {уточнение: где, год-если-данные}»; description «{вывод}. {источник данных, дата}».'
+    sections:
+    - section_id: article
+      section_role: article-body
+      block: article-body
+      message: 'Цена за метр — только работы; сумму даёт смета; срок — на примере одного кейса'
+      question: 'Сколько будет стоить ремонт моей квартиры?'
+      slots:
+      - slot_id: title
+        slot_type: article-title
+        variants:
+        - {id: a, text: 'Сколько стоит ремонт квартиры под ключ в Нижнем Новгороде', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: lead
+        slot_type: article-lead
+        variants:
+        - {id: a, text: 'В студии «Отвес» ремонт под ключ считают за квадратный метр работ, а материалы — отдельно. Ниже — что входит в цену от 9 800 ₽ за м², как узнать сумму для своей квартиры и сколько шёл ремонт одной двушки в Сормове.', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: [price-from-per-m2]
+        claim_flags: [price-discount]
+      - slot_id: summary
+        slot_type: article-summary
+        variants:
+        - {id: a, text: 'Коротко: работы под ключ стоят от 9 800 ₽ за м², материалы в эту цену не входят. Смета и выезд замерщика — бесплатно в черте города, гарантия на работы — 3 года по пункту 7.2 договора. Пример срока: двушку 54 м² в Сормове сдали за 47 рабочих дней при сроке по договору 50.', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: [price-from-per-m2, estimate-free, guarantee-3-years, case-two-room-47-days]
+        claim_flags: [price-discount, guarantee, fact-number]
+        notes: 'Блок «коротко» (GEO): самодостаточный ответ 40–80 слов, каждое число — факт; не отдельная «LLM-версия» страницы (G).'
+      - slot_id: h2-price
+        slot_type: article-heading
+        variants:
+        - {id: a, text: 'Что входит в цену за метр', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: p-price
+        slot_type: article-paragraph
+        variants:
+        - {id: a, text: 'Цена от 9 800 ₽ за м² — это работы под ключ, без материалов. Сколько добавят материалы, зависит от того, что вы выберете, поэтому в цену за метр они не входят.', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: [price-from-per-m2]
+        claim_flags: [price-discount]
+      - slot_id: h2-estimate
+        slot_type: article-heading
+        variants:
+        - {id: a, text: 'Как узнать сумму для своей квартиры', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: p-estimate
+        slot_type: article-paragraph
+        variants:
+        - {id: a, text: 'Сумму для конкретной квартиры показывает смета. Смета и выезд замерщика — бесплатно в черте города: замерщик приезжает, делает замер, по нему составляют смету.', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: [estimate-free]
+        claim_flags: [price-discount]
+      - slot_id: h2-term
+        slot_type: article-heading
+        variants:
+        - {id: a, text: 'Сколько длится ремонт двушки', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: p-term
+        slot_type: article-paragraph
+        variants:
+        - {id: a, text: 'Пример из практики студии: двушку 54 м² в Сормове сдали за 47 рабочих дней при сроке по договору 50. Это один ремонт — срок вашего зависит от площади и объёма работ.', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: [case-two-room-47-days]
+        claim_flags: [fact-number]
+      - slot_id: h2-guarantee
+        slot_type: article-heading
+        variants:
+        - {id: a, text: 'Гарантия на работы', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: p-guarantee
+        slot_type: article-paragraph
+        variants:
+        - {id: a, text: 'На работы — гарантия 3 года, это пункт 7.2 договора подряда.', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: [guarantee-3-years]
+        claim_flags: [guarantee]
+      - slot_id: author
+        slot_type: article-author
+        variants:
+        - {id: a, text: 'Сергей Лапин, прораб студии «Отвес», 11 лет в ремонте', status: draft, source: fact}
+        chosen: a
+        fact_ids: [foreman-lapin]
+        claim_flags: []
+        notes: 'Подпись — после чтения и одобрения текста Сергеем (человек: COPY-C-30, C-31); без этого approve не ставить.'
+    - section_id: faq
+      section_role: faq
+      block: faq
+      message: 'Материалы, смета, гарантия, оплата — ответ первой фразой'
+      slots:
+      - slot_id: q1
+        slot_type: faq-q
+        group: q1
+        variants:
+        - {id: a, text: 'Входят ли материалы в цену за метр?', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: a1
+        slot_type: faq-a
+        group: q1
+        variants:
+        - {id: a, text: 'Нет: от 9 800 ₽ за м² — это работы под ключ без материалов.', status: draft, source: fact}
+        chosen: a
+        fact_ids: [price-from-per-m2]
+        claim_flags: [price-discount]
+      - slot_id: q2
+        slot_type: faq-q
+        group: q2
+        variants:
+        - {id: a, text: 'Сколько стоят замер и смета?', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: a2
+        slot_type: faq-a
+        group: q2
+        variants:
+        - {id: a, text: 'Бесплатно в черте города: замерщик приезжает, делает замер и составляет смету.', status: draft, source: fact}
+        chosen: a
+        fact_ids: [estimate-free]
+        claim_flags: [price-discount]
+      - slot_id: q3
+        slot_type: faq-q
+        group: q3
+        variants:
+        - {id: a, text: 'Какая гарантия на работы?', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: a3
+        slot_type: faq-a
+        group: q3
+        variants:
+        - {id: a, text: '3 года — это пункт 7.2 договора подряда.', status: draft, source: fact}
+        chosen: a
+        fact_ids: [guarantee-3-years]
+        claim_flags: [guarantee]
+      - slot_id: q4
+        slot_type: faq-q
+        group: q4
+        variants:
+        - {id: a, text: 'Как платить за ремонт?', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: a4
+        slot_type: faq-a
+        group: q4
+        variants:
+        - {id: a, text: '[PLACEHOLDER: порядок оплаты]', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        missing_ids: [payment-stages]
+        claim_flags: [purchase-terms]
+    - section_id: final
+      section_role: final-cta
+      block: final-cta
+      message: 'Узнать сумму — вызвать замерщика'
+      slots:
+      - slot_id: cta
+        slot_type: cta-label
+        variants:
+        - {id: a, text: 'Вызвать замерщика', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: cta-note
+        slot_type: cta-note
+        variants:
+        - {id: a, text: 'Смета и выезд замерщика — бесплатно в черте города', status: draft, source: fact}
+        chosen: a
+        fact_ids: [estimate-free]
+        claim_flags: [price-discount]

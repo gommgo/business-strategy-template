@@ -1,0 +1,321 @@
+# ambition-levels.yaml — уровни амбиций подачи L0 / L1 / L2: что разрешено, что обязательно, черновые профили бюджета.
+# creative-research · 01-creative-direction · волна 1 · агент A · v0 (ранний выпуск C1 для site) · 2026-09-24
+#
+# Статус: ЧЕРНОВИК v0. Определения уровней — creative (контракт тройки v2 §2, §3 п.12). Профили бюджета — ПРЕДЛОЖЕНИЕ
+# для site (владелец ворот страницы и budgets.yaml агента P; профиль страницы в page-plan — `<page_type>@<уровень>`).
+# Итоговые числа сводят K (creative, волна 3: effect-gates.yaml) и site P; иерархия ворот (контракт v2): ворота страницы
+# выше ворот эффектов и ассетов.
+# Описание и обоснование — 03-ambition-levels.md; процедура выбора уровня — там же §5.
+#
+# Два слоя бюджета:
+#   budgets.effects — сколько добавляет подача (JS движения и эффектов, 3D, видео, GPU, непрерывные движения): владелец
+#                     creative, это наш профиль эффектов;
+#   budgets.page    — потолки страницы целиком (первый экран, сессия, CWV, TBT): предложение site P; у каждого числа —
+#                     источник (`source`) и метка доказательности (`label`).
+# Единицы: вес — байты «на проводе» (как считают ai-media 01/02, blender 01/04, site M: CDP / responseBodySize);
+# «первый экран» = всё, что пришло за load + 5–6 с до действий пользователя; «сессия» = с прокруткой страницы до конца.
+# Телефон — эмуляция Pixel 7 (412×839, DPR 2,625) с CPU ×4; десктоп — 1440×900, CPU ×1 (методы site M и ai-media).
+#
+# Сокращения источников: `ai-media:01-02#4.3` = ../ai-media/01-web-assets-landscape/02-live-sites-measured.md §4.3;
+# `blender:01-02#3.1` = ../blender/01-web-3d-landscape/02-when-3d-budgets-loading.md §3.1; `A/03` = наш опыт
+# 99-raw/experiments/A/03-budget-quartiles (квартили по ai-media, blender, site M, 2026-09-24 15:03).
+
+version: "0.2"
+# 0.1 (2026-09-24 16:22, оркестратор по отчёту A2): путь decision_context.price_band вместо offer.price_band (в site-brief v0 у offer такого поля нет); CRV-AL-07 — источник контраста фокуса 1.4.11. Числа не менялись.
+changelog:
+  - "0.2 (2026-09-25, K волна 3; сверка с воротами site page-gates.yaml v1.2 и словарём site v1): defaults_by_page_type — типы site v1 по пакету C1 (../site/99-raw/handoff-to-neighbours.md, «Сёстры»): specialist-page, location-page, documents-page, search-results-page → L0; program-catalog-page → L1; предложенные site типы (status proposed) — в defaults_by_page_type.proposed; ecommerce-* вне рамок site — не добавлены. Числа бюджетов не менялись: они — источник порогов 09-ai-execution-evaluation/effect-gates.yaml v0.1 (threshold_ref); scroll_fps_min — только зеркало D (F: в лаборатории FPS эффекты не различает), решение по длинным кадрам — EG-PERF-01 (LoAF ≤ 2 % десктоп / ≤ 10 % телефон CPU×4)."
+  - "0.2 + правки S1 (2026-09-25, аудит X, без смены чисел бюджетов): levels.L1.section_distribution.rule — три счёта по I (X-19); L1 view-transitions и L2 page-transitions — нативный кросс-документный VT с L1, библиотеки — L2 (X-21, решение оркестратора); fonts_kb.source L0 — уточнение «на главных страницах» (сверено по кэшу Almanac)."
+status: draft
+checked_at: "2026-09-25"
+effect_gates: "09-ai-execution-evaluation/effect-gates.yaml v0.1 — ворота эффектов берут пороги budgets.* отсюда по threshold_ref (motion_check.py)"
+consumed_by: "site P budgets.yaml v0 (2026-09-24 15:35) — числа budgets.page приняты как goal-пороги профилей"
+owner: "creative-research · 01-creative-direction · A (v0, волна 1); K сверяет с воротами site (волна 3)"
+consumers:
+  site: "site-brief.ambition.level, page-plan page.ambition_level и budget_profile (<page_type>@L0|L1|L2), budgets.yaml P"
+  creative: "art-direction (уровень и профиль), treatment секций (level, motion_level), effects.yaml (min_level), effect-gates.yaml K"
+  kimi: "decisions.motion.level, decisions.motion.library, decisions.three_d.mode, build.perf (проекция — поле maps_to.kimi)"
+  ai-media: "visual-dna character.boldness и one_bold_move (maps_to.visual_dna)"
+
+# ------------------------------------------------------------------------------------------------------------------
+# Обязательно на всех уровнях. id с префиксом CRV- (контракт v2 §3 п.16). «L2+» — дополнительно на L2.
+mandatory_all_levels:
+  - id: CRV-AL-01
+    rule: "Вариант при prefers-reduced-motion: конечные состояния без анимации появления и прокрутки, 0 байт видео при загрузке, 0 вызовов отрисовки WebGL в покое; смысл и CTA на месте (reduce, not remove — движение заменяется, а не пропадает без следа)."
+    source: "WCAG 2.2 SC 2.3.3 (AAA) + техника C39; ui-research 08-motion/03 §2; page_accept.py (0 байт видео, движение < 0,5 %); blender 09/05 §5"
+    label: "[стандарт] для 2.3.3; [проверено] у соседей"
+  - id: CRV-AL-02
+    rule: "Движение, запущенное автоматически, дольше 5 с и показанное вместе с другим контентом (бегущая строка, живой фон, видео-петля, Lottie-петля) — видимая пауза или остановка за ≤ 5 с."
+    source: "WCAG 2.2 SC 2.2.2 (A) Pause, Stop, Hide; ai-media 10/02 §5 (пауза видео)"
+    label: "[стандарт]"
+  - id: CRV-AL-03
+    rule: "Не больше 3 вспышек в секунду (стробы, мигающие переходы, быстрые смены кадра высокой яркости)."
+    source: "WCAG 2.2 SC 2.3.1 (A) Three Flashes or Below Threshold"
+    label: "[стандарт]"
+  - id: CRV-AL-04
+    rule: "Смысловой текст, заголовки, цены и CTA — в HTML (не в canvas, не в картинке, не в видео); LCP-элемент — текст, картинка или постер, не canvas."
+    source: "blender 01/02 §6.1 (ИИ-краулеры JS не исполняют), blender 01/04 A/04 (canvas не становится LCP); ai-media 10/01 §4.3"
+    label: "[проверено] у соседей"
+  - id: CRV-AL-05
+    rule: "Фолбэк без WebGL и без JS: страница читается, CTA и форма работают; эффект — прогрессивное улучшение (@supports, проверка возможностей, matchMedia)."
+    source: "blender 01/01 §1.4; blender 09/05 §5; PLAN.md риск 6"
+    label: "[практика]"
+  - id: CRV-AL-06
+    rule: "Своя облегчённая версия для телефона: тяжёлые сцены — постер, видео 9:16 или 4:5 легче десктопного, 3D — половина ассетов, DPR ≤ 1,5."
+    source: "blender 01/02 §3.1, §7 (ограничения ветки «телефон основной»); ai-media 01/02 §4.3; kimi 07/01 §6.1"
+    label: "[практика]"
+  - id: CRV-AL-07
+    rule: "Клавиатура и фокус не ломаются: плавная прокрутка и перехват колеса не мешают Tab, якорям, поиску по странице; видимый фокус ≥ 3:1."
+    source: "WCAG 2.2 SC 2.1.1, 2.4.7, 2.4.11 (фокус не скрыт), 1.4.11 (контраст индикатора фокуса 3:1); ux-research 08-accessibility"
+    label: "[стандарт]"
+  - id: CRV-AL-08
+    rule: "Контраст текста на медиа (фото, видео, шейдер, 3D, градиент) — по F83 в самой светлой точке зоны текста и по кадрам видео; иначе подложка или скрим."
+    source: "ai-media 10/03 §1 и 06/03 (F83, p99,9); blender 09/05 §5 L221–222"
+    label: "[стандарт] F83; [проверено] у ai-media"
+  - id: CRV-AL-09
+    rule: "«Вау» догружается после LCP: 3D, шейдер, секвенции, тяжёлое видео — после load и простоя; LCP-элемент не анимируется из opacity: 0 (только transform, clip-path или появление из 0,01)."
+    source: "blender 01/02 §4.1 (порядок загрузки hero, проверено A/07); ai-media 10/01 §4.3, стр. 249–254"
+    label: "[проверено] у соседей"
+  - id: CRV-AL-10
+    rule: "Вне экрана цикл отрисовки и петли стоят (IntersectionObserver, visibilitychange); в покое без движения — 0 кадров WebGL."
+    source: "blender 01/01 §1.4; blender 01/02 §1.3 (25 из 33 сайтов рендерят без движения)"
+    label: "[проверено] у blender"
+  - id: CRV-AL-11
+    rule: "Конвенции взаимодействия сохраняются на любом уровне: логотип слева со ссылкой на главную, навигация сверху, предсказуемые формы и кнопки; выразительность — в концепции, визуале, композиции, движении и тексте."
+    source: "контракт тройки v2 §6 п.11; ux-research 03-layout-placement/04 §12, 10-design-systems-consistency/02 §5.3; Tuch 2012 через ui 13/02 §3.3"
+    label: "[консенсус]"
+  - id: CRV-AL-12
+    applies_to: [L2]
+    rule: "L2+: заметный переключатель «меньше движения» на странице (для тех, у кого не выставлена системная настройка), состояние запоминается; содержимое доступно без интро (кнопка «пропустить» или его отсутствие)."
+    source: "WCAG 2.2 SC 2.3.3 Understanding (механизм отключения движения от взаимодействия); PLAN.md стартовая таблица уровней"
+    label: "[гипотеза] — E и K подтверждают в волнах 2–3"
+
+# ------------------------------------------------------------------------------------------------------------------
+levels:
+
+  - id: L0
+    name_ru: "Сдержанно"
+    name_en: "restrained"
+    essence: "Подача держится на типографике, композиции, цвете и реальном материале (фото работ, продукта, людей с согласием). Движение — отклик на действия и одно оркестрованное появление первого экрана. Выразительность — в качестве исполнения, а не в эффектах."
+    signature_moves_max: 1          # один смелый приём (типографика, цвет, кадр, композиция), не эффект с JS
+    allowed:
+      - {id: css-feedback, what: "hover, focus, press, раскрытие аккордеона — CSS-переходы 100–300 мс"}
+      - {id: hero-entrance-once, what: "одно появление первого экрана ≤ 600 мс без каскада по секциям; LCP-элемент не из opacity: 0"}
+      - {id: static-backgrounds, what: "цвет, статичный градиент, зерно, маски, фото; смена фона секций как ритм"}
+      - {id: video-on-demand, what: "сюжетное видео — постер и запуск по клику; без автозапуска"}
+      - {id: quiet-loop, what: "одна тихая петля первого экрана: синемаграф ≤ 300 КБ или CSS/SVG, остановка ≤ 5 с или пауза, при reduce — постер (effect:cinemagraph)", limit: "≤ 1"}
+      - {id: marquee-paused, what: "бегущая строка логотипов только из фактов заказчика, с паузой и остановкой при reduce", limit: "≤ 1 на страницу"}
+    forbidden:
+      - {id: webgl, why: "нет задачи, которую на L0 не решает CSS, SVG или картинка; цена TBT и батареи (blender 01/02 §1.3)"}
+      - {id: smooth-scroll, why: "перехват прокрутки ломает ожидания и доступность на страницах «прочитать и решить»"}
+      - {id: pin-scrub, why: "закреплённые сцены удлиняют путь к форме"}
+      - {id: scroll-reveal-every-section, why: "почерк генераторов: fade-and-slide-up на каждой секции (ui 11/04 маркер 28)"}
+      - {id: preloader, why: "решение заказчика п. 13: прелоадер только в L2-кампании"}
+      - {id: autoplay-video-bg, why: "сюжетное видео-фон с автозапуском: вес и отвлечение на странице с формой (site 01/02 M6); тихий синемаграф — см. quiet-loop"}
+    motion_hints:                  # предварительно; нормы движения пишет E (волна 2)
+      continuous_motions_in_view_max: 1
+      hero_entrance_ms: [300, 600]
+      scroll_driven_sections_max: 0
+      label: "[гипотеза] → E"
+    budgets:
+      effects:
+        js_presentation_kb_br: {mobile: 20, desktop: 20, source: "без библиотек движения: CSS + до 1 малого скрипта IntersectionObserver; ср. blender A/03: gsap+ScrollTrigger 40 КБ br — уже выше", label: "[гипотеза]"}
+        js_3d_kb_br: {mobile: 0, desktop: 0, source: "L0 без WebGL", label: "[решение уровня]"}
+        webgl_contexts: {mobile: 0, desktop: 0, source: "L0 без WebGL", label: "[решение уровня]"}
+        video_autoplay_kb: {mobile: 300, desktop: 300, source: "только тихий синемаграф (quiet-loop); ai-media 14 демо «Лесная обжарка»: синемаграф пара 18,5 КБ в первом экране 84,8 КБ; сюжетное видео — по клику", label: "[проверено] у ai-media + [гипотеза]"}
+        hero_image_kb: {mobile: 80, desktop: 150, source: "ai-media:01-02#4.3 (медиана hero 55 КБ, Q3 131 КБ); kimi brief.yaml l.136 hero_image_kb 150", label: "[данные] + [практика]"}
+        fonts_kb: {mobile: 150, desktop: 150, source: "Web Almanac 2025 Page Weight: медиана шрифтов на главных страницах 122 КБ моб. / 139 КБ деск. (рис. распределения по типам ресурсов; сверено S1 по кэшу 2026-09-25); ai-media 01/02 §4.1 лидеры Q1 128 КБ", label: "[данные]"}
+      page:
+        first_screen_mb: {mobile: 1.5, desktop: 2.5, source: "ai-media:01-02#4.3 (≤ 2,5 МБ десктоп = Q1 лидеров, ≤ 1,5 МБ телефон); kimi brief.yaml l.136 first_screen_kb_mobile 1500; A/03: посадочные рынка (site M) телефон Q1 1,0 / медиана 2,0 МБ", label: "[данные] [спорно]"}
+        session_mb: {mobile: 3, desktop: 5, source: "A/03: лидогенерация рынка сессия телефон медиана 3,5 МБ, десктоп 3,5 МБ; blender:01-02#3.1 страница ≤ 3/7 МБ", label: "[данные] [гипотеза]"}
+        lcp_s_field_p75: {mobile: 2.5, desktop: 2.5, source: "web.dev/articles/vitals (обновлено 2024-10-31): хорошо ≤ 2,5 с на p75", label: "[документация]"}
+        inp_ms_field_p75: {mobile: 200, desktop: 200, source: "web.dev/articles/vitals: хорошо ≤ 200 мс", label: "[документация]"}
+        cls_field_p75: {mobile: 0.1, desktop: 0.1, source: "web.dev/articles/vitals: хорошо ≤ 0,1", label: "[документация]"}
+        lcp_s_lab: {mobile: 2.5, desktop: 2.0, source: "A/03: лидогенерация рынка лаборатория телефон CPU×4 медиана 2,3 с, десктоп 2,5 с; blender 09/05 §7.2 WEB-01 (1,0 с десктоп — блокер у blender, у нас не принят)", label: "[гипотеза]"}
+        tbt_ms_lab: {mobile: 200, desktop: 150, source: "blender:01-02#2.2 и #3.1 (web.dev: TBT < 200 мс на средней мобильной технике; десктоп 150); A/03: рынок телефон медиана 344 мс, Q1 135 мс", label: "[документация] + [данные]"}
+    appropriate_for:
+      page_types: [service-page, seo-landing-page, pricing-page, comparison-page, alternatives-page, faq-page, contacts-page, form-page, thank-you-page, legal-page, article-page, blog-index-page, careers-page, case-list-page, not-found-page]
+      conditions:
+        - "лидогенерация услуг: L0 по умолчанию, если доля горячего трафика с телефонов ≥ 50 % (traffic.sources: temperature hot × device mobile — карты, рекомендации, ретаргетинг, поиск с намерением) и decision_context.price_band ∈ {low, mid}; иначе L1 с L0-блоками конверсии (решение 20 site, 2026-09-24 ≈ 15:35: заказчик «реши сам», решил оркестратор site по предложению C1)"
+        - "аудитория 45+ — предпочитает низкую визуальную сложность (Reinecke и др., CHI 2013, 548 человек, через ui 13/02 §3.1)"
+        - "B2G, регулируемые отрасли (finance, medical, dietary-supplements) и страницы, где доверие важнее впечатления (taste 1.A: trust-first → MOTION 2–3)"
+        - "внутренние страницы многостраничника и шаблоны серии (единство системы важнее «вау»)"
+        - "сервисы и рабочие экраны — не L0, а нормы ui-research и ux-research (движение kimi none)"
+    avoid_for:
+      - "кампания или запуск, где впечатление и есть сообщение (landing-campaign, campaign-site)"
+      - "портфолио студии и креативных профессий (работа показывает мастерство — impeccable: режим Experience)"
+    section_distribution:
+      rule: "все секции L0; допускается один смелый приём (типографика, цвет, кадр) в первом экране"
+      peaks_max: 0
+      conversion_cap: L0
+    maps_to:
+      kimi: {motion_level: subtle, motion_level_service_ui: none, library: css, three_d_mode: none, note: "kimi 07/01 §6.2: subtle — тезис + ≤ 3 момента, transform/opacity, reduce → конечное состояние"}
+      visual_dna: {character.boldness: restrained, one_bold_move: "обязателен, одна строка: где живёт смелость (типографика, цвет или кадр)", note: "ai-media 01/03:423 «1 смелый приём; ≤ 2 хроматических цвета» — норма именно L0"}
+      taste: {MOTION_INTENSITY: [2, 4], DESIGN_VARIANCE: [3, 6], label: "[мнение вендора]"}
+      impeccable_register: "Persuade (страницы продаж) или Read (статьи); Operate — сервисы, вне уровней"
+      higgsfield_tier: "editorial (типографика + изображения + микродвижение)"
+
+  - id: L1
+    name_ru: "Выразительно"
+    name_en: "expressive"
+    essence: "Один-два фирменных приёма (эффект первого экрана, одна сцена прокрутки, живой фон) на спокойной основе L0. Приём связан с концепцией; остальные секции спокойные; блоки конверсии — L0."
+    signature_moves_max: 2
+    allowed:
+      - {id: scroll-driven, what: "анимации по прокрутке (CSS scroll-driven или ScrollTrigger)", limit: "≤ 2 секции"}
+      - {id: pin-scene, what: "одна закреплённая сцена со скрабом, без изменения скорости прокрутки", limit: "≤ 1 на страницу, ≤ 150vh"}
+      - {id: marquee, what: "бегущая строка с паузой", limit: "≤ 1"}
+      - {id: headline-effects, what: "раскрытие заголовков по строкам и словам (split), кинетическая типографика одного заголовка"}
+      - {id: shader-bg, what: "один шейдерный фон или mesh-градиент (1 контекст WebGL, пауза вне экрана)", limit: "≤ 1 контекст"}
+      - {id: video-loop-hero, what: "немая видео-петля первого экрана с постером, паузой и reduce"}
+      - {id: 3d-object, what: "один 3D-объект товара: предрендер, петля, model-viewer или hero-GLB после LCP (blender 01/02 §7)", limit: "≤ 1 контекст, 3D ≤ 0,8/1,5 МБ"}
+      - {id: cursor-accent, what: "курсорный акцент на десктопе (магнит CTA, подсветка) без замены системного курсора"}
+      - {id: view-transitions, what: "View Transitions, где поддерживается: между страницами многостраничника — нативный кросс-документный (effect:page-transition, 0 КБ JS, @supports, анимация только при prefers-reduced-motion: no-preference, ≤ 400 мс) и состояния блока (effect:view-transition); без поддержки — обычный переход (X-21, решение оркестратора 2026-09-25)"}
+    forbidden:
+      - {id: smooth-scroll, why: "на L1 не нужен: сцены работают с родной прокруткой; цена — ожидания и доступность"}
+      - {id: scroll-jacking, why: "изменение скорости и направления прокрутки — только L2 и только закрепление со скрабом"}
+      - {id: horizontal-scroll-section, why: "L2-приём; на L1 — одна закреплённая сцена"}
+      - {id: custom-cursor, why: "замена системного курсора — L2"}
+      - {id: preloader, why: "решение заказчика п. 13"}
+      - {id: effects-in-conversion, why: "форма, цена, калькулятор — L0 (blender 01/02 §1.3: «прайсинг и лиды — 3D вредит»)"}
+    motion_hints:
+      continuous_motions_in_view_max: 2
+      hero_scene_ms: [600, 1200]
+      scroll_driven_sections_max: 2
+      label: "[гипотеза] → E"
+    budgets:
+      effects:
+        js_presentation_kb_br: {mobile: 100, desktop: 100, source: "blender A/03 (2026-09-22): gsap + ScrollTrigger 40 КБ br, lenis 4,9, motion 22, OGL 12, @paper-design/shaders 6; + свой код ≈ 30–50 КБ", label: "[данные] + [гипотеза]"}
+        js_3d_kb_br: {mobile: 200, desktop: 300, source: "blender:01-02#3.1 JS для 3D ≤ 200/300 КБ br; только при 3d-object", label: "[спорно] у blender"}
+        webgl_contexts: {mobile: 1, desktop: 1, source: "PLAN.md стартовая таблица; blender 09/04 §2 шейдерный фон — 1 вызов, 1,45 мс на кадр", label: "[гипотеза] + [проверено] у blender"}
+        three_d_first_screen_mb: {mobile: 0.8, desktop: 1.5, source: "blender:01-02#3.1 (Q1 наградных 1,05 МБ)", label: "[спорно] у blender"}
+        video_hero_loop_kb: {mobile: 600, desktop: 1500, source: "ai-media:01-02#4.3 (петля 6–10 с, 1080p ≈ 150–200 КБ/с; 720p на телефоне)", label: "[данные]"}
+        video_autoplay_session_mb: {mobile: 2, desktop: 5, source: "ai-media:01-02#4.3 (видео за сессию без явного действия пользователя)", label: "[данные] + [практика]"}
+        hero_image_kb: {mobile: 80, desktop: 150, source: "ai-media:01-02#4.3", label: "[данные]"}
+        fonts_kb: {mobile: 250, desktop: 250, source: "ai-media 01/02 §4.1: лидеры медиана 190 КБ, Q3 328 КБ (display + текстовая с кириллицей)", label: "[данные] [гипотеза]"}
+        draw_calls_max: {mobile: 30, desktop: 60, source: "blender:01-02#3.1", label: "[спорно] у blender"}
+      page:
+        first_screen_mb: {mobile: 2.0, desktop: 3.5, source: "A/03: SaaS-лидеры десктоп медиана 3,4 МБ (Q1 2,3); посадочные рынка телефон медиана 2,0 МБ; Web Almanac 2025 рис. 14.56: доля хорошего LCP главных 65 % при 1–2 МБ против 59 % при 2–3 МБ (моб.)", label: "[данные] [гипотеза]"}
+        first_screen_mb_lead_services: {mobile: 1.5, desktop: 2.5, source: "исключение профиля landing-lead-services@L1: горячий мобильный трафик (site-brief.example «Отвес»: 40 % hot mobile) — вес первого экрана как у L0", label: "[гипотеза]"}
+        session_mb: {mobile: 5, desktop: 10, source: "A/03: SaaS-лидеры сессия медиана 7,1 МБ (Q1 2,8); посадочные рынка SaaS телефон медиана 4,8 МБ", label: "[данные] [гипотеза]"}
+        lcp_s_field_p75: {mobile: 2.5, desktop: 2.5, source: "web.dev/articles/vitals", label: "[документация]"}
+        inp_ms_field_p75: {mobile: 200, desktop: 200, source: "web.dev/articles/vitals", label: "[документация]"}
+        cls_field_p75: {mobile: 0.1, desktop: 0.1, source: "web.dev/articles/vitals", label: "[документация]"}
+        lcp_s_lab: {mobile: 2.5, desktop: 2.5, source: "A/03: SaaS рынка телефон CPU×4 медиана 2,5 с", label: "[гипотеза]"}
+        tbt_ms_lab: {mobile: 300, desktop: 200, source: "blender:01-02#3.1 (TBT от 3D ≤ 300/150); A/03: SaaS рынка телефон медиана 520 мс — L1 строже рынка", label: "[гипотеза]"}
+        scroll_fps_min: {mobile: 30, desktop: 50, source: "blender 01/04: наградные 3D FPS прокрутки Q1 55,6, медиана 59,8 (десктоп); телефон — эмуляция, порог задаёт K", label: "[гипотеза] → K"}
+    appropriate_for:
+      page_types: [landing-lead-services, landing-saas, landing-app, landing-product, landing-event, landing-course, landing-waitlist, landing-lead-magnet, home-multipage, services-index-page, feature-page, use-case-page, about-page, case-page, portfolio-page, reviews-page, team-page]
+      conditions:
+        - "умолчание для лендингов (решение заказчика п. 13); лидогенерация услуг — L1 с L0-блоками конверсии и весом первого экрана L0 на телефоне"
+        - "главные страницы брендов, запуски средней значимости, мероприятия (крупные — L2)"
+        - "бренд с выраженным характером, которому одного L0-приёма мало"
+    avoid_for:
+      - "страницы, где задача — прочитать и купить быстро: тарифы, формы, сравнение (их секции — L0 внутри L1-страницы)"
+      - "низкие устройства и медленная сеть как основной трафик (решает доля мобильного горячего трафика)"
+    section_distribution:
+      rule: "hero — L1 или L0; пиков (visual_role peak) ≤ 2, акцентов (accent) ≤ 3, секций с фирменным приёмом (effects[].purpose: signature) ≤ 2 — три разные величины, счёт и проверка — I 09-ai-execution-evaluation/01 §2.4 и spec_check.py (S1 2026-09-25 по X-19; было «≤ 2 секции с фирменным приёмом (peak или accent)»); остальное L0; секции конверсии (lead-form, pricing, калькулятор, квиз, final-cta с формой) — всегда L0"
+      peaks_max: 2
+      conversion_cap: L0
+    maps_to:
+      kimi: {motion_level: expressive, library: "css по умолчанию; gsap@3 — если есть pin-scene, split или scroll-driven шире CSS", three_d_mode: "none | prerender | model-viewer | hero-glb", note: "kimi 07/01 §6.2: expressive — 3 момента при прокрутке, отдельный проход T7; при motion_cap subtle — subtle"}
+      visual_dna: {character.boldness: balanced, one_bold_move: "фирменный приём страницы одной строкой (совпадает с art-direction.signature_move)"}
+      taste: {MOTION_INTENSITY: [5, 7], DESIGN_VARIANCE: [6, 8], label: "[мнение вендора]"}
+      impeccable_register: "Persuade"
+      higgsfield_tier: "между editorial и cinema: 1–2 момента, без плавной прокрутки"
+
+  - id: L2
+    name_ru: "Иммерсивно, «вау»"
+    name_en: "immersive"
+    essence: "Страница как опыт: сквозная сцена или мир, 3D или видео-сюжет на прокрутке, переходы, «вау» в нескольких точках по ритму «спокойно ↔ эффектно». Страница L2 — это не «вау» в каждой секции: между пиками — спокойные секции, блоки конверсии — L0."
+    signature_moves_max: 4
+    allowed:
+      - {id: webgl-3d-scene, what: "3D-сцены и миры по прокрутке (бюджеты blender 09/05 §1.1, §7.2)", limit: "≤ 2 одновременно активных контекста"}
+      - {id: image-sequence, what: "секвенции кадров и видео-скраб по прокрутке", limit: "1–5 МБ, телефон — половина (blender 01/02 §7)"}
+      - {id: horizontal-scroll-section, what: "горизонтальные секции в закреплении"}
+      - {id: custom-cursor, what: "свой курсор на десктопе (системный — на полях ввода и при reduce)"}
+      - {id: smooth-scroll, what: "плавная прокрутка (Lenis) без изменения скорости и без ломки якорей и Tab"}
+      - {id: page-transitions, what: "переходы страниц на библиотеках (Barba, Swup) и JS-переходы с заставкой или шторкой; нативный кросс-документный VT — уже с L1 (view-transitions, X-21)"}
+      - {id: preloader, what: "прелоадер — только кампания по явному решению (site-brief policies.preloader: on + rationale); LCP-элемент и CTA вне заставки"}
+      - {id: all-l1, what: "всё, что разрешено на L1, в большем числе секций"}
+    forbidden:
+      - {id: text-in-canvas, why: "смысл и CTA — только HTML (CRV-AL-04)"}
+      - {id: gate-before-content, why: "ворота «Enter» без доступного контента — только кампания-мир по явному решению; для продукта — потеря конверсии (blender 01/04 §7)"}
+      - {id: effects-in-conversion, why: "форма, цена, калькулятор — L0"}
+      - {id: scroll-speed-change, why: "перехват прокрутки с изменением скорости — никогда; только закрепление со скрабом"}
+    motion_hints:
+      continuous_motions_in_view_max: 3
+      hero_scene_ms: [600, 1200]
+      scroll_scene_length_vh: [100, 150]
+      label: "[гипотеза] → E; длина сцены — [мнение] blender 07/04 §5"
+    budgets:
+      effects:
+        js_presentation_kb_br: {mobile: 150, desktop: 200, source: "blender A/03: gsap + ScrollTrigger 40, lenis 4,9, motion 22 КБ br; переходы и курсор — свой код", label: "[данные] + [гипотеза]"}
+        js_3d_kb_br: {mobile: 250, desktop: 350, source: "blender A/03: three core 109, three + загрузчики 158, R3F + drei 286, R3F + drei + post 345 КБ br; blender:01-02#3.1 (≤ 200/300) — для кампании мягче", label: "[данные] [спорно]"}
+        webgl_contexts: {mobile: 1, desktop: 2, source: "предложение: один полноэкранный canvas на сцены; второй — только десктоп", label: "[гипотеза]"}
+        three_d_first_screen_mb: {mobile: 0.8, desktop: 1.5, source: "blender:01-02#3.1 — первый экран как у продукта; остальное прогрессивно", label: "[спорно]"}
+        three_d_session_mb: {mobile: 3, desktop: 8, source: "blender:01-02#7 (история на прокрутке 5–15 МБ прогрессивно; мир 5–20 МБ); blender 08/03 §6.5 (3D всей страницы ≤ 8–10 МБ десктоп, [мнение])", label: "[спорно]"}
+        video_autoplay_session_mb: {mobile: 4, desktop: 10, source: "ai-media:01-02#4.3 (5/2 МБ для обычной страницы) × 2 для видео-сюжета; тяжелее — только после явного действия", label: "[гипотеза]"}
+        fonts_kb: {mobile: 300, desktop: 300, source: "ai-media 01/02 §4.1: Q3 лидеров 328 КБ", label: "[данные] [гипотеза]"}
+        draw_calls_max: {mobile: 30, desktop: 100, source: "blender:01-02#3.1 (≤ 100 для «мира»)", label: "[спорно] у blender"}
+      page:
+        first_screen_mb: {mobile: 2.5, desktop: 4.0, source: "ai-media:01-02#4.1: Awwwards SOTD до прокрутки медиана 3,8 МБ (A/03: Q1 3,2); blender 01/02 §4.1 — «вау» после LCP", label: "[данные] [спорно]"}
+        session_mb: {mobile: 8, desktop: 15, source: "blender:01-02#3.1 (страница 3/7 МБ) × 2–3 для кампании (у blender ×3–5); A/03: Awwwards сессия медиана 20,9 МБ, наградные 3D медиана 12,6 МБ (blender называет медиану антиориентиром); Almanac 2025 рис. 14.54: ≥ 5 МБ — CWV проходят 30 % моб. / 38 % деск.", label: "[спорно]"}
+        lcp_s_field_p75: {mobile: 2.5, desktop: 2.5, source: "web.dev/articles/vitals — одинаково на всех уровнях: «вау» после LCP", label: "[документация]"}
+        inp_ms_field_p75: {mobile: 200, desktop: 200, source: "web.dev/articles/vitals", label: "[документация]"}
+        cls_field_p75: {mobile: 0.1, desktop: 0.1, source: "web.dev/articles/vitals", label: "[документация]"}
+        lcp_s_lab: {mobile: 3.0, desktop: 2.5, source: "A/03: Awwwards лаборатория десктоп медиана 4,1 с — L2 строже медианы жанра; телефон — после постера", label: "[гипотеза]"}
+        tbt_ms_lab: {mobile: 600, desktop: 300, source: "blender:01-02#8 (TBT страницы CPU×4 ≤ 600 мс, вклад 3D ≤ 300); вне сцены", label: "[спорно] у blender"}
+        scroll_fps_min: {mobile: 30, desktop: 50, source: "blender 01/04 (десктоп Q1 55,6); порог — K", label: "[гипотеза] → K"}
+    appropriate_for:
+      page_types: [landing-campaign, portfolio-page]
+      site_types: [campaign-site, portfolio-site]
+      conditions:
+        - "кампании и флагманские запуски, где впечатление и есть сообщение (решение заказчика п. 13: кампании — L2)"
+        - "крупное мероприятие, мода и культура, портфолио студий, рекрутинг в креативные команды"
+        - "брендовый и прямой трафик, заметная доля десктопа, тёплая и лояльная аудитория"
+        - "landing-product — только флагманский запуск по явному решению заказчика"
+    avoid_for:
+      - "лидогенерация услуг, тарифы, B2B-закупки и госсектор как основная цель"
+      - "платный горячий мобильный трафик (реклама → форма)"
+      - "аудитория 45+ как основная; регулируемые отрасли"
+      - "SEO-посадочные: контент должен работать без JS"
+    section_distribution:
+      rule: "пики (visual_role peak) — 2–4 секции по ритму; между двумя пиками — хотя бы одна спокойная секция (calm или pause); hero — L2 или L1; секции конверсии — L0; story-секции могут быть L2"
+      peaks_max: 4
+      calm_between_peaks_min: 1
+      conversion_cap: L0
+      label: "[гипотеза] → E (хореография)"
+    maps_to:
+      kimi: {motion_level: "cinematic — только с готовыми роликами 16:9 и 9:16 и постерами ai-media или рендером blender; иначе expressive + разрешённые эффекты", library: "gsap@3 (+ lenis@1 при smooth-scroll)", three_d_mode: "hero-glb | scroll | model-viewer | prerender", note: "kimi 07/01 §6.2 и §2.2: «сайт-история, кино-скролл, 3D-мир» → landing + cinematic"}
+      visual_dna: {character.boldness: bold, one_bold_move: "главный приём страницы; остальные пики перечисляются в art-direction.peaks"}
+      taste: {MOTION_INTENSITY: [8, 10], DESIGN_VARIANCE: [8, 10], label: "[мнение вендора]"}
+      impeccable_register: "Persuade (кампания) или Experience (портфолио)"
+      higgsfield_tier: "cinema или spectacle"
+
+# ------------------------------------------------------------------------------------------------------------------
+# Уровни секций и потолки. Секционный уровень ≤ уровня страницы; роли конверсии — не выше L0.
+section_caps:
+  conversion_roles_max_L0: [lead-form, pricing]      # section_role словаря site
+  conversion_blocks_max_L0: [lead-form, calculator, quiz, pricing-cards, pricing-table, pricing-single, email-capture, booking-widget]   # block: словаря site; плюс любая секция с action-slot form
+  hero_form_rule: "block:hero-form — фон и визуал первого экрана по уровню страницы (до L1), сама форма и поля — без эффектов (L0)"
+  final_cta_rule: "final-cta без формы — до L1 (accent), с формой — L0"
+  chrome_roles: [header, footer, utility, legal]     # вне ритма: visual_role chrome, движение — только отклик
+  label: "[практика] blender 01/02 §1.3 + [гипотеза] для списка блоков"
+
+# Умолчания уровня по типу страницы — решение заказчика п. 13 (сервисы L0, лендинги L1, кампании L2) и таблица site
+# 03-site-brief.md §3. Отклонение — только с причиной (site-brief ambition.source + note).
+defaults_by_page_type:
+  L0: [service-page, seo-landing-page, pricing-page, comparison-page, alternatives-page, faq-page, contacts-page, form-page, thank-you-page, legal-page, article-page, blog-index-page, careers-page, case-list-page, not-found-page, specialist-page, location-page, documents-page, search-results-page]
+  L1: [landing-lead-services, landing-saas, landing-app, landing-product, landing-event, landing-course, landing-waitlist, landing-lead-magnet, home-multipage, services-index-page, feature-page, use-case-page, about-page, case-page, reviews-page, team-page, program-catalog-page]
+  L2: [landing-campaign, portfolio-page]
+  proposed:                        # типы site со status proposed (vocabulary.yaml v1, 2026-09-24); переносятся в L0/L1 вместе с их выпуском у site
+    L0: [event-program-page, integrations-page, security-page, html-sitemap-page]   # «прочитать и найти»: расписание, каталог, доверие, навигация
+    L1: [speakers-page]                                                            # витрина людей события; фото с согласием
+    why: "K 0.2: уровень по задаче страницы — чтение и поиск → L0, витрина → L1 (решение заказчика п. 13; site 03-site-brief.md §3); ecommerce-catalog-page и ecommerce-product-page — вне рамок site (промо товара — landing-product); уровни пяти proposed подтверждены site 2026-09-25 (C1, ответ на пакет W4), сами типы у site — proposed до сверки тройки S2 (для active нужны head-kit, budgets, плейбук, проверки)"
+  note: "таблица принята site (решение 20 site PLAN, 2026-09-24; budgets.yaml P page_type_levels): service-page, seo-landing-page, pricing-page и прочие внутренние — L0 (решение п. 13 их не называет); landing-lead-services — L1 с L0-блоками конверсии и весом первого экрана L0 на телефоне, L0 при горячем мобильном трафике ≥ 50 % и price_band low/mid (levels[L0].appropriate_for.conditions[0])"
+  rules:
+    - "уровень страницы не выше уровня сайта в брифе (site-brief ambition.level) — ограничение site"
+    - "подъём внутренней страницы на уровень — только с причиной в брифе (ambition.by_page[].why)"
+    - "L0 — сдержанная подача в той же визуальной системе сайта, а не «без дизайна» (формулировка site, решение 20)"
+
+# Потолок движения поверх уровня (site-brief ambition.motion_cap): визуальный уровень L1, движение — subtle.
+motion_caps: [none, subtle, expressive, cinematic]

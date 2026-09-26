@@ -1,0 +1,28 @@
+<!doctype html>
+<!-- model-viewer 4.3.1 — [проверено: 99-raw/experiments/K/09-mv-page — загрузка и рендер в Chromium; AR на устройствах не проверен] рецепт 12 -->
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кейс в AR — рецепт 12</title>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4.3.1/dist/model-viewer.min.js"></script>
+<style>
+  body { margin: 0; background: #eceef2; font: 18px/1.5 system-ui, sans-serif; color: #16181d; }
+  main { max-width: 720px; margin: 0 auto; padding: 5vh 5vw; }
+  model-viewer { display: block; width: 100%; height: auto; aspect-ratio: 1; background: #eceef2; --poster-color: transparent; }  /* :host задаёт 300×150 — height: auto обязателен для aspect-ratio */
+  button[slot="ar-button"] { position: absolute; right: 12px; bottom: 12px; min-height: 44px; padding: 0 1em; border: 0;
+    border-radius: 22px; background: #16181d; color: #fff; font: inherit; }
+</style></head><body><main>
+<h1>Кейс для наушников</h1>
+<model-viewer id="mv" src="case_ar.glb" ios-src="case.usdz" poster="poster.webp"
+  alt="Белый глянцевый кейс для беспроводных наушников с зелёным индикатором"
+  loading="eager" reveal="auto" camera-controls touch-action="pan-y" tone-mapping="neutral" shadow-intensity="0.6"
+  ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed">
+  <button slot="ar-button">Посмотреть у себя на столе</button>
+</model-viewer>
+<p>Размер в AR — реальный: 60,6 × 45,2 × 21,7 мм. <span id="st">3D: загрузка…</span></p>
+</main>
+<script>
+  const mv = document.getElementById('mv'), st = document.getElementById('st');
+  mv.addEventListener('load', () => { st.textContent = '3D: загружено, AR ' + (mv.canActivateAR ? 'доступен' : 'недоступен на этом устройстве'); window.__ready = true; }, { once: true });
+  mv.addEventListener('error', (e) => { st.textContent = '3D: ошибка ' + (e.detail && e.detail.type); window.__ready = true; });
+  setTimeout(() => { window.__ready = true; }, 8000);
+</script>
+</body></html>

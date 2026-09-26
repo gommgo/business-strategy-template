@@ -1,0 +1,160 @@
+<!doctype html>
+<!-- Демо-лендинг «Лесная обжарка» — собран рецептами 14-recipes/ (агент M, волна 3, 24.09.2026).
+     Сейчас — на своих и CC0-материалах: рендеры Blender (hero, 3D-иконки, банка E), процедурный пар (синемаграф), CC0 Poly Haven
+     (мешковина), иконки Lucide (ISC); ИИ-генераций на странице НЕТ. После фазы 5 файлы подменяются 1:1 по именам
+     (карта слот → задание — README.md). Шаблон доставки — 10-web-integration/pages/00-hero-summary.html (J). -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лесная обжарка — кофе в зёрнах со свежей обжаркой</title>
+<meta name="description" content="Обжариваем раз в неделю и привозим за 1–2 дня. Арабика 100 %, зерно одного хозяйства, дата обжарки на каждой банке.">
+<meta name="theme-color" content="#1F4D3A">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Лесная обжарка — кофе в зёрнах">
+<meta property="og:description" content="Обжариваем раз в неделю и привозим за 1–2 дня.">
+<meta property="og:image" content="assets/og/og-1200x630.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Чашка чёрного кофе на светлом столе у окна и заголовок «Лесная обжарка»">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/svg/favicon.ico" sizes="32x32">
+<link rel="icon" href="assets/svg/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/svg/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+<header class="nav">
+  <a class="nav__logo" href="#"><img src="assets/svg/logo.svg" width="30" height="30" alt="">Лесная обжарка</a>
+  <a class="link" href="#features">Почему свежая</a><a class="link" href="#product">Зёрна</a>
+  <span class="spacer"></span><a class="buy" href="#product">Купить</a>
+</header>
+
+<!-- hero: телефон — отдельный кадр 4:5 без видео; десктоп — постер = кадр 0 финального AV1 + видео-слой пара (≥ 700 px) -->
+<section class="hero grain" data-hero-video aria-labelledby="h1">
+  <div class="hero__media">
+    <picture>
+      <source media="(max-width: 699px)" type="image/avif" sizes="100vw" width="820" height="1024"
+              srcset="assets/hero/hero-4x5-480.avif 480w, assets/hero/hero-4x5-720.avif 720w, assets/hero/hero-4x5-820.avif 820w">
+      <source media="(max-width: 699px)" type="image/webp" sizes="100vw" width="820" height="1024"
+              srcset="assets/hero/hero-4x5-480.webp 480w, assets/hero/hero-4x5-720.webp 720w, assets/hero/hero-4x5-820.webp 820w">
+      <source type="image/avif" sizes="100vw" width="1536" height="864"
+              srcset="assets/video/hero-steam-poster-960.avif 960w, assets/video/hero-steam-poster-1536.avif 1536w">
+      <img src="assets/video/hero-steam-poster-1536.webp" width="1536" height="864" sizes="100vw" alt="" fetchpriority="high"
+           srcset="assets/video/hero-steam-poster-960.webp 960w, assets/video/hero-steam-poster-1536.webp 1536w"
+           data-focal='{"16:9":[0.74,0.62,0.74,0.62],"4:5":[0.57,0.76,0.62,0.78]}'>
+    </picture>
+    <video muted loop playsinline preload="none" aria-hidden="true" tabindex="-1" data-video>
+      <source data-src="assets/video/hero-steam.av1.mp4" data-media="(min-width: 700px)" type='video/mp4; codecs="av01.0.08M.10"'>
+      <source data-src="assets/video/hero-steam.h264.mp4" data-media="(min-width: 700px)" type='video/mp4; codecs="avc1.640028"'>
+    </video>
+  </div>
+  <div class="hero__scrim" aria-hidden="true"></div>
+  <div class="hero__copy">
+    <p class="hero__kicker">Обжарочная · кофе в зёрнах</p>
+    <h1 id="h1">Кофе, который обжаривают раз в&nbsp;неделю</h1>
+    <p class="hero__lead">Свежая обжарка по средам, зерно одного хозяйства и доставка за <span class="nw">1–2 дня</span> — без месяцев на складе.</p>
+    <a class="cta" href="#product">Выбрать зёрна <svg aria-hidden="true"><use href="assets/svg/sprite.svg#i-arrow-right"/></svg></a>
+  </div>
+  <button class="media-toggle" type="button" aria-pressed="false" hidden>
+    <span class="sr-only">Остановить фоновое видео</span>
+    <svg class="i-pause" aria-hidden="true"><use href="assets/svg/sprite.svg#i-pause"/></svg>
+    <svg class="i-play" aria-hidden="true" style="display:none"><use href="assets/svg/sprite.svg#i-play"/></svg>
+  </button>
+</section>
+
+<section class="section" id="features" aria-labelledby="h-features">
+  <h2 id="h-features">Почему свежая обжарка</h2>
+  <p class="sub">Через три недели после обжарки зерно теряет аромат. Мы не держим склад: обжариваем под заказы недели.</p>
+  <div class="features">
+    <article class="feature">
+      <picture><source type="image/avif" srcset="assets/icons3d/icon-bean-320.avif 320w, assets/icons3d/icon-bean-480.avif 480w" sizes="160px">
+        <img src="assets/icons3d/icon-bean-320.webp" srcset="assets/icons3d/icon-bean-320.webp 320w, assets/icons3d/icon-bean-480.webp 480w" sizes="160px"
+             width="160" height="160" loading="lazy" decoding="async" alt=""></picture>
+      <h3>Обжарка по средам</h3><p>Каждая банка — из партии этой недели, дата обжарки на крышке.</p>
+    </article>
+    <article class="feature">
+      <picture><source type="image/avif" srcset="assets/icons3d/icon-cup-320.avif 320w, assets/icons3d/icon-cup-480.avif 480w" sizes="160px">
+        <img src="assets/icons3d/icon-cup-320.webp" srcset="assets/icons3d/icon-cup-320.webp 320w, assets/icons3d/icon-cup-480.webp 480w" sizes="160px"
+             width="160" height="160" loading="lazy" decoding="async" alt=""></picture>
+      <h3>Рецепт в каждой коробке</h3><p>Пропорции и помол для турки, френч-пресса и воронки — на карточке внутри.</p>
+    </article>
+    <article class="feature">
+      <picture><source type="image/avif" srcset="assets/icons3d/icon-box-320.avif 320w, assets/icons3d/icon-box-480.avif 480w" sizes="160px">
+        <img src="assets/icons3d/icon-box-320.webp" srcset="assets/icons3d/icon-box-320.webp 320w, assets/icons3d/icon-box-480.webp 480w" sizes="160px"
+             width="160" height="160" loading="lazy" decoding="async" alt=""></picture>
+      <h3>Доставка за <span class="nw">1–2 дня</span></h3><p>Отправляем в день обжарки: курьером по Москве, в остальные города — службой доставки.</p>
+    </article>
+  </div>
+  <ul class="strip" aria-label="Коротко">
+    <li><svg aria-hidden="true"><use href="assets/svg/sprite.svg#i-flame"/></svg><span>Обжарка по средам</span></li>
+    <li><svg aria-hidden="true"><use href="assets/svg/sprite.svg#i-bean"/></svg><span>Арабика 100 %</span></li>
+    <li><svg aria-hidden="true"><use href="assets/svg/sprite.svg#i-sprout"/></svg><span>Одно хозяйство</span></li>
+    <li><svg aria-hidden="true"><use href="assets/svg/sprite.svg#i-grinder"/></svg><span>Помол под способ</span></li>
+    <li><svg aria-hidden="true"><use href="assets/svg/sprite.svg#i-truck"/></svg><span>Доставка <span class="nw">1–2&nbsp;дня</span></span></li>
+    <li><svg aria-hidden="true"><use href="assets/svg/sprite.svg#i-repeat"/></svg><span>Подписка без обязательств</span></li>
+  </ul>
+</section>
+
+<section class="section" id="product" aria-labelledby="h-product">
+  <div class="pdp">
+    <div>
+      <picture class="pdp__main"><source type="image/avif" sizes="(min-width: 1180px) 620px, (min-width: 860px) 52vw, 100vw"
+              srcset="assets/product/scene-brandwall-640.avif 640w, assets/product/scene-brandwall-1024.avif 1024w">
+        <img src="assets/product/scene-brandwall-640.webp" sizes="(min-width: 1180px) 620px, (min-width: 860px) 52vw, 100vw"
+             srcset="assets/product/scene-brandwall-640.webp 640w, assets/product/scene-brandwall-1024.webp 1024w" width="1024" height="576"
+             loading="lazy" decoding="async" alt="Банка кофе «Лесная обжарка» и белая чашка на деревянном столе у тёмно-зелёной стены"></picture>
+      <div class="pdp__thumbs">
+        <figure><picture><source type="image/avif" srcset="assets/product/packshot-480.avif 480w, assets/product/packshot-720.avif 720w" sizes="(min-width: 860px) 200px, 33vw">
+          <img src="assets/product/packshot-480.webp" srcset="assets/product/packshot-480.webp 480w, assets/product/packshot-720.webp 720w" sizes="(min-width: 860px) 200px, 33vw"
+               width="480" height="480" loading="lazy" decoding="async" alt="Банка кофе «Лесная обжарка» на белом фоне"></picture><figcaption>Пакшот</figcaption></figure>
+        <figure><picture><source type="image/avif" srcset="assets/product/label-detail-424.avif">
+          <img src="assets/product/label-detail-424.webp" width="424" height="424" loading="lazy" decoding="async" alt="Этикетка крупно: «Лесная обжарка, кофе в зёрнах, 250 г»"></picture><figcaption>Этикетка</figcaption></figure>
+      </div>
+    </div>
+    <div>
+      <h2 id="h-product">Лесная обжарка, 250&nbsp;г</h2>
+      <p class="price">890&nbsp;₽</p>
+      <p class="notes">Средняя обжарка: грецкий орех, какао, сухофрукты. Мягкая кислотность.</p>
+      <ul class="specs">
+        <li><span>Сорт</span><span>Арабика 100 %</span></li>
+        <li><span>Обжарка</span><span>Средняя, по средам</span></li>
+        <li><span>Помол</span><span>Зёрна или под способ</span></li>
+        <li><span>Вес</span><span>250 г</span></li>
+      </ul>
+      <a class="cta" href="#subscribe">В корзину</a>
+    </div>
+  </div>
+  <div class="mp">
+    <picture><img src="assets/marketplace/card-450x600.webp" srcset="assets/marketplace/card-450x600.webp 450w, assets/marketplace/card-900x1200.webp 900w"
+         sizes="300px" width="450" height="600" loading="lazy" decoding="async" alt="Карточка товара для маркетплейса «Кофе в зёрнах, арабика 100 %, 250 г»"></picture>
+    <div><h2>Карточка для маркетплейса</h2>
+      <p class="notes">Текст на карточке — HTML-шаблон (кириллица набрана, а не нарисована моделью), банка — настоящий вырез, фон — CSS.
+        Один шаблон даёт карточки на все вкусы линейки.</p></div>
+  </div>
+</section>
+
+<section class="section" id="subscribe">
+  <div class="band">
+    <h2>Подписка: банка каждую неделю</h2>
+    <p>От 790 ₽ за банку, пауза и отмена — в один клик. Первая поставка — в ближайшую среду.</p>
+    <a class="cta" href="#product">Оформить подписку</a>
+  </div>
+</section>
+
+<footer>
+  <div class="row"><span>© Лесная обжарка — демо-бренд базы ai-media-research</span><a href="#ai">Об ИИ-контенте</a></div>
+  <details id="ai"><summary>Об ИИ-контенте</summary>
+    <p>На этой демо-странице изображения — рендеры и открытые материалы (CC0), генераций ИИ нет. В версии после живой фазы часть
+       изображений создаётся или меняется с помощью ИИ: в файлах — машиночитаемая метка, товар везде настоящий.</p></details>
+</footer>
+<script>
+  // object-position видео = как у постера (focal.js считает для <img>) — приём страницы J 00
+  const img = document.querySelector('.hero__media img'), vid = document.querySelector('.hero__media video');
+  new MutationObserver(() => { vid.style.objectPosition = img.style.objectPosition; }).observe(img, {attributes: true, attributeFilter: ['style']});
+</script>
+<script type="module" src="js/focal.js"></script>
+<script type="module" src="js/hero-video.js"></script>
+</body>
+</html>

@@ -1,0 +1,994 @@
+# КОПИЯ демо-фактов text E (../../../../text-research/99-raw/experiments/E/facts-demo-saas-okoshko.yaml) — вымышлены; J добавил пробел product-screenshots
+# (вид demo, blocking: true): SaaS без настоящего продукта не публикуется (A allOf; E/03 SB-P01).
+facts_version: 1
+date: '2026-09-24'
+site: okoshko-demo
+lang: ru
+jurisdiction: ru
+status: draft
+owner:
+  role: основатель (демо-заказчик)
+  contact: почта заказчика из брифа (демо)
+collected_by: агент E (демо-набор для примеров, 2026-09-24)
+never_claim_defaults: ru-default-1
+entities:
+- id: product-okoshko
+  type: product
+  names:
+  - «Окошко»
+  - Окошко
+  - Okoshko
+- id: platform-rustore
+  type: platform
+  names:
+  - RuStore
+- id: city-kazan
+  type: place
+  names:
+  - Казань
+  - Казани
+- id: person-ruslan
+  type: person
+  names:
+  - Руслан
+  - Ruslan
+  fact_id: review-ruslan
+facts:
+- id: price-master
+  kind: price
+  claim_class:
+  - price-discount
+  verbatim:
+  - 990 ₽ в месяц за одного мастера
+  - Тариф «Мастер» — 990 ₽ в месяц
+  canonical: 'Тариф «Мастер» сервиса «Окошко» стоит 990 ₽ в месяц: онлайн-запись и напоминания для одного мастера (прайс на сентябрь
+    2026 года).'
+  values:
+  - value: 990
+    unit: RUB
+    what: тариф «Мастер», в месяц
+    qualifier: один мастер
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: прайс 2026
+    date: '2026-09-01'
+    document: price-2026-09.pdf (демо)
+    quote: Мастер — 990 руб./мес., 1 мастер
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - pricing
+    - hero
+    slot_types:
+    - pricing-price
+    - pricing-plan-summary
+    - cta-note
+    - faq-a
+  valid:
+    from: '2026-09-01'
+    review_by: '2026-12-01'
+  translations:
+    en:
+      canonical: The Master plan of Okoshko costs 990 ₽ per month for one stylist (price list, September 2026).
+      note: адаптация; рубли — основная валюта (38-ФЗ ст. 5 ч. 7.1)
+  notes: ДЕМО-факт E.
+  lang: ru
+- id: price-salon
+  kind: price
+  claim_class:
+  - price-discount
+  verbatim:
+  - 2 490 ₽ в месяц — до 5 мастеров
+  - Тариф «Салон» — 2 490 ₽ в месяц
+  canonical: Тариф «Салон» сервиса «Окошко» стоит 2 490 ₽ в месяц для команды до 5 мастеров (прайс на сентябрь 2026 года).
+  values:
+  - value: 2490
+    unit: RUB
+    what: тариф «Салон», в месяц
+    qualifier: до 5 мастеров
+  - value: 5
+    unit: pcs
+    what: мастеров в тарифе «Салон»
+    comparator: lte
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: прайс 2026
+    date: '2026-09-01'
+    document: price-2026-09.pdf (демо)
+    quote: Салон — 2490 руб./мес., до 5 мастеров
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - pricing
+    slot_types:
+    - pricing-price
+    - pricing-plan-summary
+    - pricing-feature
+  valid:
+    from: '2026-09-01'
+    review_by: '2026-12-01'
+  translations:
+    en:
+      canonical: The Salon plan of Okoshko costs 2,490 ₽ per month for up to 5 stylists (price list, September 2026).
+  notes: ДЕМО-факт E.
+  lang: ru
+- id: price-network-from
+  kind: price
+  claim_class:
+  - price-discount
+  verbatim:
+  - от 6 900 ₽ в месяц — от 6 мастеров и несколько филиалов
+  - Тариф «Сеть» — от 6 900 ₽ в месяц
+  canonical: Тариф «Сеть» сервиса «Окошко» — от 6 900 ₽ в месяц для 6 и более мастеров и нескольких филиалов; итог зависит от числа
+    мастеров (прайс на сентябрь 2026 года).
+  values:
+  - value: 6900
+    unit: RUB
+    what: тариф «Сеть», в месяц
+    comparator: gte
+    qualifier: от 6 мастеров, итог зависит от числа мастеров
+  - value: 6
+    unit: pcs
+    what: мастеров в тарифе «Сеть»
+    comparator: gte
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: прайс 2026
+    date: '2026-09-01'
+    document: price-2026-09.pdf (демо)
+    quote: Сеть — от 6900 руб./мес., от 6 мастеров, филиалы; +900 руб. за каждого мастера сверх 6
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - pricing
+    slot_types:
+    - pricing-price
+    - pricing-price-note
+    - pricing-plan-summary
+    requires_nearby: 'от чего зависит итог: число мастеров'
+  valid:
+    from: '2026-09-01'
+    review_by: '2026-12-01'
+  notes: ДЕМО-факт E.
+  lang: ru
+- id: annual-discount
+  kind: offer-terms
+  claim_class:
+  - price-discount
+  - purchase-terms
+  verbatim:
+  - При оплате за год — 2 месяца в подарок
+  - −17 % при оплате за год
+  canonical: При оплате любого тарифа «Окошко» за 12 месяцев вперёд клиент платит за 10 месяцев (скидка ≈ 17 %); условие действует с
+    1 сентября 2026 года.
+  values:
+  - value: 17
+    unit: '%'
+    what: скидка при оплате за год
+    approx: true
+    qualifier: оплата за 12 месяцев вперёд
+  - value: 2
+    unit: months
+    what: месяцы в подарок при оплате за год
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: прайс 2026
+    date: '2026-09-01'
+    document: price-2026-09.pdf (демо), примечание 2
+    quote: Оплата за 12 мес. — счёт за 10 мес. (2 мес. в подарок, скидка около 17 %)
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - pricing
+    slot_types:
+    - pricing-price-note
+    - badge
+    - faq-a
+    requires_nearby: 'условие: оплата за 12 месяцев вперёд'
+  notes: ДЕМО-факт E. «2 месяца в подарок» — только с условием в той же строке (H COPY-L-FREE-01).
+  lang: ru
+- id: trial-14-days
+  kind: offer-terms
+  claim_class:
+  - price-discount
+  - purchase-terms
+  verbatim:
+  - 14 дней бесплатно, без привязки карты
+  - Пробный период — 14 дней
+  canonical: Любой тариф «Окошко» можно пробовать 14 дней бесплатно без привязки банковской карты; после пробного периода запись закрывается,
+    пока не выбран тариф, данные хранятся 90 дней.
+  values:
+  - value: 14
+    unit: days
+    what: пробный период
+    qualifier: без привязки карты
+  - value: 90
+    unit: days
+    what: хранение данных после пробного периода
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: оферта, раздел 3
+    date: '2026-09-01'
+    document: oferta-2026-09.pdf (демо), п. 3.2
+    quote: Пробный период — 14 календарных дней, без ввода платёжных данных; по окончании онлайн-запись приостанавливается, данные хранятся
+      90 дней
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - hero
+    - pricing
+    - final-cta
+    - faq
+    - lead-form
+    slot_types:
+    - cta-note
+    - cta-label
+    - pricing-price-note
+    - faq-a
+    - form-next-steps
+    - form-lead
+    - email-subject
+    - email-preheader
+    - email-body
+    requires_nearby: «без привязки карты» или что будет после 14 дней
+  translations:
+    en:
+      canonical: Any Okoshko plan is free for 14 days with no card required; after the trial, booking pauses until you pick a plan and
+        your data is kept for 90 days.
+  notes: ДЕМО-факт E.
+  lang: ru
+- id: reminders
+  kind: property
+  claim_class:
+  - fact-property
+  verbatim:
+  - Напоминание клиенту в Telegram за 24 часа и за 2 часа до визита
+  - Напоминания в Telegram входят в тариф
+  canonical: «Окошко» напоминает клиенту о записи в Telegram за 24 и за 2 часа до визита; напоминания в Telegram входят в любой тариф.
+  values:
+  - value: 24
+    unit: hours
+    what: первое напоминание до визита
+  - value: 2
+    unit: hours
+    what: второе напоминание до визита
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: описание функций
+    date: '2026-09-01'
+    document: features-2026-09.pdf (демо)
+    quote: Напоминания в Telegram за 24 ч и за 2 ч до визита — во всех тарифах
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - hero
+    - solution
+    - benefits
+    - how-it-works
+    - pricing
+    - faq
+    slot_types:
+    - headline
+    - subheadline
+    - card-title
+    - card-body
+    - step-body
+    - pricing-feature
+    - faq-a
+  translations:
+    en:
+      canonical: Okoshko reminds clients of their booking in Telegram 24 hours and 2 hours before the visit; Telegram reminders are
+        included in every plan.
+  notes: 'ДЕМО-факт E. SMS — отдельный факт sms-price: «бесплатные напоминания» без оговорки про SMS нарушают условие рядом (H COPY-L-FREE-01).'
+  lang: ru
+- id: sms-price
+  kind: price
+  claim_class:
+  - price-discount
+  verbatim:
+  - SMS-напоминание — 4 ₽ за сообщение
+  - 'SMS оплачиваются отдельно: 4 ₽ за сообщение'
+  canonical: 'SMS-напоминания «Окошко» оплачиваются отдельно от тарифа: 4 ₽ за сообщение (прайс на сентябрь 2026 года).'
+  values:
+  - value: 4
+    unit: RUB
+    what: цена одного SMS-напоминания
+    qualifier: сверх тарифа
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: прайс 2026
+    date: '2026-09-01'
+    document: price-2026-09.pdf (демо)
+    quote: SMS — 4 руб./шт., оплачиваются сверх тарифа
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - pricing
+    - faq
+    slot_types:
+    - pricing-feature
+    - pricing-price-note
+    - faq-a
+  valid:
+    from: '2026-09-01'
+    review_by: '2026-12-01'
+  translations:
+    en:
+      canonical: 'Okoshko SMS reminders are billed on top of the plan: 4 ₽ per message (price list, September 2026).'
+  notes: ДЕМО-факт E.
+  lang: ru
+- id: self-booking-link
+  kind: property
+  claim_class:
+  - fact-property
+  verbatim:
+  - Клиент сам выбирает мастера и свободное время по ссылке
+  - Ссылку на запись ставят в Telegram, VK и на сайт
+  canonical: 'Клиент салона записывается сам: по ссылке «Окошко» выбирает услугу, мастера и свободное время; ссылку размещают в Telegram,
+    VK, на картах и на сайте, виджет на сайт ставится кодом из настроек.'
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: описание функций
+    date: '2026-09-01'
+    document: features-2026-09.pdf (демо)
+    quote: 'Онлайн-запись по ссылке: услуга → мастер → время; размещение — Telegram, VK, карты, сайт (виджет)'
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - hero
+    - solution
+    - benefits
+    - how-it-works
+    slot_types:
+    - subheadline
+    - card-title
+    - card-body
+    - step-title
+    - step-body
+    - body
+  translations:
+    en:
+      canonical: 'Clients book themselves: through an Okoshko link they choose a service, a stylist and a free slot; the link goes into
+        Telegram, VK, maps and the website.'
+  notes: ДЕМО-факт E.
+  lang: ru
+- id: import-free
+  kind: offer-terms
+  claim_class:
+  - purchase-terms
+  - price-discount
+  verbatim:
+  - Базу клиентов из Excel или Google Таблиц перенесём бесплатно за 1 рабочий день
+  - Перенос базы — бесплатно
+  canonical: Поддержка «Окошко» бесплатно переносит клиентскую базу из файла Excel или Google Таблиц за 1 рабочий день после получения
+    файла.
+  values:
+  - value: 1
+    unit: days
+    what: срок переноса базы, рабочие дни
+    qualifier: после получения файла
+  - value: 0
+    unit: RUB
+    what: стоимость переноса базы
+    qualifier: из Excel или Google Таблиц
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: регламент поддержки
+    date: '2026-09-01'
+    document: support-sla-2026.pdf (демо), п. 2
+    quote: Импорт базы из xlsx/Google Sheets силами поддержки — бесплатно, 1 рабочий день
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - how-it-works
+    - objections
+    - faq
+    - pricing
+    - benefits
+    - hero
+    slot_types:
+    - step-body
+    - objection-answer
+    - faq-a
+    - pricing-feature
+    - card-title
+    - card-body
+    - cta-note
+    requires_nearby: из Excel или Google Таблиц
+  translations:
+    en:
+      canonical: Okoshko support migrates your client list from Excel or Google Sheets for free within 1 business day of receiving the
+        file.
+  notes: ДЕМО-факт E. Снимает возражение switching-cost (B1 02 §4.1).
+  lang: ru
+- id: salons-count
+  kind: metric
+  claim_class:
+  - fact-number
+  verbatim:
+  - 1 380 салонов и барбершопов работают в «Окошке»
+  - 1 380 салонов
+  canonical: На 1 сентября 2026 года онлайн-запись «Окошко» используют 1 380 салонов и барбершопов с оплаченным тарифом (данные биллинга).
+  values:
+  - value: 1380
+    unit: pcs
+    what: салоны и барбершопы с оплаченным тарифом
+    as_of: '2026-09-01'
+  entities:
+  - product-okoshko
+  source:
+    type: customer-system
+    who: демо-заказчик
+    where: выгрузка биллинга
+    date: '2026-09-01'
+    document: billing-2026-09-01.csv (демо)
+    quote: 'Активных платящих аккаунтов: 1380'
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - hero
+    - proof-stats
+    - proof-logos
+    slot_types:
+    - hero-proof
+    - stat-value
+    - stat-label
+    - stat-source
+    - logos-caption
+  valid:
+    review_by: '2026-12-01'
+  translations:
+    en:
+      canonical: As of 1 September 2026, 1,380 salons and barbershops use Okoshko on a paid plan (billing data).
+  notes: ДЕМО-факт E. «Более 1 300» — можно; «1 500+» — нет.
+  lang: ru
+- id: rating-rustore
+  kind: rating
+  claim_class:
+  - rating
+  verbatim:
+  - 4,7 из 5 в RuStore — 860 оценок
+  canonical: По данным RuStore на 1 сентября 2026 года, приложение «Окошко» для мастеров имеет оценку 4,7 из 5 по 860 оценкам.
+  values:
+  - value: 4.7
+    unit: stars
+    scale: 5
+    count: 860
+    what: оценка приложения для мастеров
+    as_of: '2026-09-01'
+  entities:
+  - product-okoshko
+  - platform-rustore
+  source:
+    type: platform
+    who: RuStore
+    where: страница приложения
+    date: '2026-09-01'
+    url: https://www.rustore.ru/catalog/app/<id-приложения>
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор (демо)
+    date: '2026-09-24'
+    method: 'демо: снимок страницы с датой evidence/rustore-2026-09-01.png'
+  permission:
+    status: not-required
+    form: platform-terms
+  use:
+    section_roles:
+    - hero
+    - proof-stats
+    - testimonials
+    slot_types:
+    - hero-proof
+    - stat-value
+    - stat-label
+    - stat-source
+    requires_nearby: источник и дата снимка площадки (RuStore, 01.09.2026)
+  valid:
+    from: '2026-09-01'
+    until: '2026-12-01'
+    review_by: '2026-11-01'
+  translations:
+    en:
+      canonical: As of 1 September 2026, the Okoshko app for stylists is rated 4.7 out of 5 on RuStore (860 ratings).
+  notes: ДЕМО-факт E.
+  lang: ru
+- id: case-noshow-kazan
+  kind: case
+  claim_class:
+  - fact-number
+  verbatim:
+  - 'Барбершоп на 4 кресла в Казани: неявки снизились с 14 % до 6 % за три месяца'
+  canonical: В барбершопе на 4 кресла в Казани доля неявок снизилась с 14 % до 6 % за три месяца после включения напоминаний «Окошко»
+    (журнал записей, март — май 2026 года).
+  values:
+  - value: 14
+    unit: '%'
+    what: доля неявок до напоминаний
+    as_of: '2026-02-28'
+  - value: 6
+    unit: '%'
+    what: доля неявок после трёх месяцев
+    as_of: '2026-05-31'
+  - value: 4
+    unit: pcs
+    what: кресла в барбершопе
+  entities:
+  - product-okoshko
+  - city-kazan
+  - person-ruslan
+  source:
+    type: customer-system
+    who: клиент (владелец барбершопа) через демо-заказчика
+    where: журнал записей «Окошко»
+    date: '2026-06-05'
+    document: case-kazan-2026.xlsx (демо)
+    quote: 'Барбершоп, 4 кресла, Казань. Неявки: февраль 14 %, май 6 %'
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: granted
+    subject: Руслан (владелец барбершопа)
+    form: written-email
+    document: письмо от 2026-06-10 (демо)
+    date: '2026-06-10'
+    shows:
+    - first-name
+    - city
+    - position
+    pd_consent: true
+    image_consent: false
+  related:
+  - noshow-average
+  - review-ruslan
+  use:
+    section_roles:
+    - case-studies
+    - hero
+    slot_types:
+    - case-title
+    - case-summary
+    - case-result
+  notes: 'ДЕМО-факт E. Типичность (B2 §5.4): рядом — обычный результат noshow-average.'
+  lang: ru
+- id: noshow-average
+  kind: metric
+  claim_class:
+  - fact-number
+  verbatim:
+  - В среднем неявок стало меньше на 4 процентных пункта — 212 салонов, 2026 год
+  canonical: У 212 салонов, включивших напоминания «Окошко» в январе — мае 2026 года, доля неявок через три месяца снизилась в среднем
+    на 4 процентных пункта (медиана — 3 п. п.; данные сервиса).
+  values:
+  - value: 4
+    unit: п. п.
+    what: среднее снижение доли неявок за три месяца
+    qualifier: 212 салонов, январь — май 2026
+  - value: 3
+    unit: п. п.
+    what: медианное снижение доли неявок
+  - value: 212
+    unit: pcs
+    what: салоны в выборке
+  entities:
+  - product-okoshko
+  source:
+    type: customer-system
+    who: демо-заказчик (аналитик)
+    where: выгрузка журналов записей
+    date: '2026-08-15'
+    document: noshow-2026-h1.csv (демо)
+    quote: 'n=212; Δ неявок за 90 дней: среднее −4,1 п.п., медиана −3,0 п.п.'
+    derivation: computed
+    computation: округление −4,1 → 4 п. п.
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - case-studies
+    - testimonials
+    - proof-stats
+    slot_types:
+    - case-result
+    - stat-value
+    - stat-label
+    - testimonial-attribution
+    - body
+  notes: ДЕМО-факт E. Обычный результат рядом с кейсом (FTC 255.2(b), B2 §5.4).
+  lang: ru
+- id: review-ruslan
+  kind: testimonial
+  claim_class:
+  - testimonial-quote
+  verbatim:
+  - «Раньше вечером обзванивал всех, кто записан на завтра. Теперь напоминания уходят сами, а я звоню только тем, кто не подтвердил»
+  canonical: 'Руслан (владелец барбершопа, Казань): «Раньше вечером обзванивал всех, кто записан на завтра. Теперь напоминания уходят
+    сами, а я звоню только тем, кто не подтвердил».'
+  entities:
+  - person-ruslan
+  - product-okoshko
+  - city-kazan
+  source:
+    type: interview
+    who: Руслан (клиент)
+    where: интервью после кейса, запись созвона
+    date: '2026-06-05'
+    quote: раньше вечером обзванивал всех, кто записан на завтра. теперь напоминания уходят сами, а я звоню только тем, кто не подтвердил
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: granted
+    subject: Руслан
+    form: written-email
+    scope:
+    - site
+    document: письмо от 2026-06-10 (демо)
+    date: '2026-06-10'
+    shows:
+    - first-name
+    - position
+    - city
+    pd_consent: true
+    image_consent: false
+  original_ref: evidence/interviews/2026-06-05-ruslan.txt (демо)
+  translations:
+    en:
+      verbatim:
+      - “I used to spend my evenings calling everyone booked for the next day. Now reminders go out on their own, and I only call those
+        who haven't confirmed”
+      canonical: 'Ruslan (barbershop owner, Kazan): “I used to spend my evenings calling everyone booked for the next day. Now reminders
+        go out on their own, and I only call those who haven''t confirmed” (translated from Russian).'
+      note: перевод цитаты — с пометкой «translated from Russian» рядом (B2 §5.1)
+  attribution:
+    name: Руслан
+    display: first-name-initial
+    role: владелец барбершопа
+    city: Казань
+    verified_customer: true
+    relation: customer
+  use:
+    section_roles:
+    - testimonials
+    - case-studies
+    slot_types:
+    - testimonial-quote
+    - testimonial-attribution
+  valid:
+    review_by: '2027-06-05'
+  notes: ДЕМО-факт E.
+  lang: ru
+- id: support-chat
+  kind: property
+  claim_class:
+  - fact-property
+  - fact-number
+  verbatim:
+  - Поддержка в чате с 9:00 до 21:00 по Москве, ответ в среднем за 7 минут
+  canonical: Поддержка «Окошко» отвечает в чате ежедневно с 9:00 до 21:00 по московскому времени; среднее время первого ответа в августе
+    2026 года — 7 минут.
+  values:
+  - value: 7
+    unit: minutes
+    what: среднее время первого ответа поддержки
+    as_of: '2026-08-31'
+  entities:
+  - product-okoshko
+  source:
+    type: customer-system
+    who: демо-заказчик
+    where: отчёт службы поддержки
+    date: '2026-09-01'
+    document: support-2026-08.pdf (демо)
+    quote: FRT среднее за август — 6 мин 48 с; часы работы 9–21 МСК
+    derivation: computed
+    computation: 6 мин 48 с ≈ 7 минут (округление вверх)
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - objections
+    - faq
+    - pricing
+    - how-it-works
+    slot_types:
+    - objection-answer
+    - faq-a
+    - pricing-feature
+    - cta-note
+    - form-next-steps
+  valid:
+    review_by: '2026-10-01'
+  notes: ДЕМО-факт E.
+  lang: ru
+- id: cancel-refund
+  kind: offer-terms
+  claim_class:
+  - purchase-terms
+  - guarantee
+  verbatim:
+  - Отключить можно в настройках в любой день; за неоплаченные дни вернём деньги в течение 10 дней
+  canonical: Подписку «Окошко» можно отключить в настройках в любой день; деньги за оставшиеся дни оплаченного периода возвращаются
+    в течение 10 дней после заявки (оферта, п. 7.4).
+  values:
+  - value: 10
+    unit: days
+    what: срок возврата денег за неиспользованные дни
+    qualifier: после заявки
+  entities:
+  - product-okoshko
+  source:
+    type: contract
+    who: демо-заказчик
+    where: оферта, п. 7.4
+    date: '2026-09-01'
+    document: oferta-2026-09.pdf (демо), п. 7.4
+    quote: Возврат за неиспользованный период — не позднее 10 дней с даты заявки
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор (демо)
+    date: '2026-09-24'
+    method: 'демо: сверено с офертой, п. 7.4'
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - guarantee
+    - pricing
+    - faq
+    - final-cta
+    slot_types:
+    - guarantee-text
+    - pricing-price-note
+    - faq-a
+    - cta-note
+    - objection-answer
+  legal:
+    flags:
+    - zozpp-32
+    review:
+      status: not-needed
+    disclaimer: ''
+  translations:
+    en:
+      canonical: You can switch off your Okoshko subscription in settings on any day; the unused part of a paid period is refunded within
+        10 days of your request.
+  notes: ДЕМО-факт E. Срок 10 дней — в пределах требования H (COPY-L-RET-02).
+  lang: ru
+- id: data-in-russia
+  kind: property
+  claim_class:
+  - fact-property
+  verbatim:
+  - Данные клиентов хранятся на серверах в России
+  canonical: Персональные данные клиентов салонов в «Окошке» хранятся и обрабатываются на серверах в России (152-ФЗ ст. 18 ч. 5).
+  entities:
+  - product-okoshko
+  source:
+    type: customer-document
+    who: демо-заказчик
+    where: политика обработки ПДн, п. 5
+    date: '2026-09-01'
+    document: privacy-2026.pdf (демо)
+    quote: Базы данных размещены на территории РФ
+    derivation: direct
+  verification:
+    status: stated
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - faq
+    - objections
+    - footer
+    slot_types:
+    - faq-a
+    - objection-answer
+    - body
+  notes: ДЕМО-факт E.
+  lang: ru
+missing:
+- id: legal-details
+  what: 'реквизиты: полное название юрлица, ОГРН, ИНН, адрес (сведения о продавце — site I; блок «продавец» — H)'
+  kind: company
+  claim_class: &id001
+  - company-details
+  placeholder: '[PLACEHOLDER: реквизиты ООО]'
+  who: демо-заказчик (бухгалтер)
+  needed_for: &id002
+    section_roles:
+    - footer
+    - pricing
+    slot_types:
+    - footer-legal
+  asked: '2026-09-24'
+  blocking: true
+  fallback: placeholder
+  question: Пришлите полное название юрлица, ОГРН, ИНН и адрес — как в ЕГРЮЛ.
+- id: confirm-link-expiry
+  what: 'сколько действует ссылка подтверждения адреса и что будет после (GOV.UK: у ссылки должен быть срок)'
+  kind: offer-terms
+  claim_class:
+  - purchase-terms
+  placeholder: '[PLACEHOLDER: срок действия ссылки подтверждения]'
+  who: демо-заказчик (разработка)
+  needed_for:
+    slot_types:
+    - email-body
+  fallback: placeholder
+  question: Сколько часов действует ссылка подтверждения адреса? Можно ли отправить её ещё раз?
+- id: integrations-list
+  what: с какими кассами и мессенджерами есть интеграции (список и что передаётся)
+  kind: property
+  claim_class:
+  - fact-property
+  placeholder: '[PLACEHOLDER: список интеграций]'
+  who: демо-заказчик
+  needed_for:
+    section_roles:
+    - integrations
+    - faq
+    slot_types:
+    - card-title
+    - faq-a
+  fallback: omit-block
+  question: С какими кассами и сервисами есть готовая интеграция и что именно передаётся?
+- id: client-logos
+  what: логотипы салонов-клиентов с письменным согласием
+  kind: client
+  claim_class:
+  - client-logo
+  placeholder: '[PLACEHOLDER: логотипы клиентов с согласием]'
+  who: демо-заказчик
+  needed_for:
+    section_roles:
+    - proof-logos
+    slot_types:
+    - logos-caption
+  fallback: omit-block
+  question: Какие салоны разрешили показать свой логотип? Нужны письма-согласия и файлы от клиентов.
+- id: product-screenshots
+  what: 'настоящие скриншоты интерфейса «Окошко»: запись по ссылке, напоминания, журнал'
+  kind: demo
+  claim_class: *id001
+  placeholder: '[PLACEHOLDER: скриншот интерфейса — от заказчика]'
+  who: демо-заказчик (бухгалтер)
+  needed_for: *id002
+  asked: '2026-09-24'
+  blocking: true
+  fallback: placeholder
+  question: Пришлите полное название юрлица, ОГРН, ИНН и адрес — как в ЕГРЮЛ.
+never_claim:
+- id: nc-revenue-growth
+  text: «увеличим выручку салона на N %», «окупится за месяц» — обещание дохода без исследования
+  claim_class:
+  - income-finance
+  - forecast
+  patterns:
+  - увелич\w*\s+выручк
+  - удво\w*\s+выручк
+  - окуп\w*\s+за
+  - doubl\w*\s+(your\s+)?(\w+\s+)?revenue
+  - increas\w*\s+(your\s+)?(\w+\s+)?revenue
+  lift: never
+  reason: 38-ФЗ ст. 5 ч. 3 п. 2; forecast без basis (B2, H)
+  source:
+    who: агент E (демо)
+    date: '2026-09-24'
+- id: nc-zero-noshow
+  text: «без неявок», «забудьте о неявках» — абсолютное обещание результата, который зависит от клиентов салона
+  claim_class:
+  - guarantee
+  - forecast
+  patterns:
+  - без\s+неяв\w*
+  - забудьте\s+о\s+неяв\w*
+  lift: never
+  reason: гарантия результата (H COPY-L-GUAR-01); кейс даёт 6 %, не ноль
+  source:
+    who: агент E (демо)
+    date: '2026-09-24'

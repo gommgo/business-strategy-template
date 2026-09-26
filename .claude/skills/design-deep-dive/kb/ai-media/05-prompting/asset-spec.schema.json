@@ -1,0 +1,420 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-media-research.local/05-prompting/asset-spec.schema.json",
+  "title": "Asset spec (спецификация визуального ассета сайта)",
+  "description": "Единый контракт ассета без привязки к модели: из него компилятор (../../scripts/ai-media/prompt_compile.py) собирает промт в диалекте модели по dialects.yaml. Описательные поля — по-английски (язык промта), служебные — любые. Подробности и правила отображения: 05-prompting/03-asset-spec-and-dialects.md (v0.1), 05-prompting/04–06 (v0.2: видео, правки, референсы, серии, продукт, опции компиляции). Волна 1, агент D; v0.2 — D2, волна 2.",
+  "x-version": "0.2",
+  "x-changelog": [
+    "0.1 (2026-09-23, D, волна 1): базовая схема",
+    "0.2 (2026-09-23, D2, волна 2): только добавления, v0.1 валидна без изменений — spec_version 0.2; references[].id/kind и роли identity/material/layout/effect/pose/video_motion; блоки product, series, edit, compile; motion.background_motion/still/forbid/tempo/shots/reference_mode/frame_annotations/source_video; text.strict_spelling; output.variants",
+    "0.2 + D2b (2026-09-23 вечер): необязательные edit.changes[].op (смешанная правка) и motion.camera.target; spec_version не меняется"
+  ],
+  "x-checked-at": "2026-09-23",
+  "x-sources": [
+    "05-prompting/01-vendor-prompt-guides.md",
+    "05-prompting/03-asset-spec-and-dialects.md",
+    "../ui/12-ai-generated-ui/04-steering-brief-prompts-pipeline.md §2.2 (Frequency палитры)",
+    "black-forest-labs/skills flux-3-prompt-doctor templates/brief.md (Text strategy, First iteration variable)"
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["spec_version", "id", "checked_at", "task", "role", "subject", "composition", "palette", "text", "output"],
+  "properties": {
+    "spec_version": {"enum": ["0.1", "0.2"], "description": "0.2 — D2, волна 2 (обратно совместима с 0.1)."},
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$", "description": "Устойчивый id ассета (слаг)."},
+    "checked_at": {"type": "string", "format": "date", "description": "Дата последней сверки спецификации с каталогом и диалектами."},
+    "brief_language": {"type": "string", "default": "ru", "description": "Язык исходного брифа заказчика (BCP-47). Описательные поля спецификации всё равно пишутся по-английски."},
+    "task": {"$ref": "#/$defs/task_code"},
+    "role": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["section", "slot", "purpose"],
+      "properties": {
+        "page_type": {"enum": ["landing", "product", "marketing", "ecommerce", "saas", "portfolio", "blog", "other"]},
+        "section": {"type": "string", "description": "hero, features, empty-state, onboarding, pricing, testimonials, footer, og, 404 …"},
+        "slot": {"type": "string", "description": "Имя слота в плане ассетов страницы (hero-bg, feature-3-illustration …)."},
+        "purpose": {"type": "string", "description": "Зачем ассет на странице, одной фразой. В промт не идёт."},
+        "priority": {"enum": ["lcp", "above-fold", "below-fold", "decorative"]},
+        "series_id": {"type": "string", "description": "Id серии: ассеты одной серии разделяют style и palette дословно."}
+      }
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary"],
+      "properties": {
+        "summary": {"type": "string", "maxLength": 240, "description": "Сюжет одной фразой по-английски, конкретно (не «futuristic technology»)."},
+        "elements": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "what"],
+            "properties": {
+              "id": {"type": "string", "pattern": "^[a-z0-9_-]+$"},
+              "what": {"type": "string", "description": "Объект с признаками: «mustard velvet armchair»."},
+              "count": {"type": "integer", "minimum": 1, "maximum": 12},
+              "position": {"type": "string", "description": "left third / right third / center / foreground left / on the table …"},
+              "attributes": {"type": "array", "items": {"type": "string"}, "maxItems": 6},
+              "relation": {"type": "string", "description": "Пространственная связь: «left of teapot», «above the stack»."},
+              "action": {"type": "string"}
+            }
+          }
+        },
+        "action": {"type": "string", "description": "Главное действие (для людей, животных, видео)."},
+        "environment": {"type": "string", "description": "Место и контекст: «a quiet reading nook by a tall window»."},
+        "culture": {"type": "string", "description": "Явный культурный контекст словами (LingT2I: метка сильнее языка промта): «Russian provincial town, Cyrillic shop signs»."}
+      }
+    },
+    "composition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["shot"],
+      "properties": {
+        "shot": {"enum": ["extreme-close-up", "close-up", "medium", "medium-wide", "wide", "establishing", "top-down", "macro", "flat-lay", "full-bleed-abstract"]},
+        "angle": {"enum": ["eye-level", "low-angle", "high-angle", "top-down", "45-degree", "over-the-shoulder", "dutch"]},
+        "subject_region": {"enum": ["left-third", "center", "right-third", "top", "bottom", "full-frame"]},
+        "focal_point": {"$ref": "#/$defs/point", "description": "Фокусная точка в долях кадра основного соотношения (x слева направо, y сверху вниз)."},
+        "text_zone": {"$ref": "#/$defs/text_zone"},
+        "safe_zones": {
+          "type": "array",
+          "description": "Для каждого соотношения — прямоугольник (в долях кадра основного соотношения), который должен остаться в кадре при кадрировании; фокусная точка обязана лежать внутри.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["ratio", "keep_rect"],
+            "properties": {
+              "ratio": {"$ref": "#/$defs/ratio"},
+              "keep_rect": {"$ref": "#/$defs/rect"}
+            }
+          }
+        },
+        "depth_layers": {"type": "array", "items": {"type": "string"}, "maxItems": 3, "description": "foreground / midground / background — по-английски."},
+        "layout_note": {"type": "string", "description": "Дополнительное указание раскладки (сетка, диагональ)."}
+      }
+    },
+    "camera": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lens_mm": {"type": "number", "minimum": 8, "maximum": 800},
+        "aperture": {"type": "string", "pattern": "^f/[0-9.]+$"},
+        "depth_of_field": {"enum": ["shallow", "medium", "deep"]},
+        "capture": {"type": "string", "description": "Носитель: «35mm film photograph», «smartphone photo», «medium-format», «studio product photo»."},
+        "film_stock": {"type": "string"}
+      }
+    },
+    "light": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {"type": "string", "description": "window daylight / overcast sky / golden-hour sun / practical lamp / softbox."},
+        "direction": {"enum": ["left", "right", "front", "back", "top", "side", "ambient"]},
+        "quality": {"enum": ["soft", "hard", "diffused", "mixed"]},
+        "time_of_day": {"type": "string"},
+        "interaction": {"type": "string", "description": "Что свет делает с поверхностями: long soft shadows, specular highlights."}
+      }
+    },
+    "palette": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "description": "Роли и доли площади как «Frequency» в ui-research 12/04 §2.2. Сумма share ≤ 1 (проверяет компилятор). Больше 5 цветов модели выполняют хуже (BFL).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "hex", "name"],
+        "properties": {
+          "role": {"enum": ["background", "dominant", "secondary", "accent", "text", "shadow", "highlight"]},
+          "hex": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+          "name": {"type": "string", "description": "Название цвета по-английски: hex без названия не отправлять (BFL)."},
+          "share": {"type": "number", "minimum": 0, "maximum": 1},
+          "applies_to": {"type": "string", "description": "Объект или зона, к которой привязан цвет (hex работает при привязке к объекту)."},
+          "strict": {"type": "boolean", "default": false, "description": "Бренд-цвет, обязанный совпасть: значит, доводка постобработкой или HTML-слоем."}
+        }
+      }
+    },
+    "materials": {"type": "array", "items": {"type": "string"}, "maxItems": 6},
+    "style": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "medium": {"enum": ["photograph", "3d-render", "clay-3d", "glass-3d", "flat-illustration", "vector", "line-art", "watercolor", "gouache", "collage", "abstract-gradient", "other"]},
+        "anchors": {"type": "array", "items": {"type": "string"}, "maxItems": 4, "description": "Видимые признаки стиля (не прилагательные): «named capture format, grain structure, practical light»."},
+        "grain": {"type": "string"},
+        "finish": {"type": "string", "description": "matte, satin, glossy …"},
+        "line": {"type": "string", "description": "Для иллюстраций: толщина и характер линии."},
+        "series_block": {"type": "string", "description": "Постоянный блок стиля серии — компилятор вставляет его дословно."}
+      }
+    },
+    "references": {
+      "type": "array",
+      "maxItems": 14,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["src", "role"],
+        "properties": {
+          "src": {"type": "string", "description": "Путь (относительно файла спецификации) или URL."},
+          "role": {"enum": ["style", "subject", "character", "product", "composition", "palette", "background", "first_frame", "last_frame", "edit_source", "mask", "identity", "material", "layout", "effect", "pose", "video_motion"], "description": "identity … video_motion — D2, волна 2 (05-prompting/05 §3)."},
+          "note": {"type": "string", "description": "Что именно взять: «line weight and palette only»."},
+          "id": {"type": "string", "pattern": "^[a-z0-9_-]+$", "description": "D2: id для ссылок из edit.source, product.reference_ids, series.reference_ids."},
+          "kind": {"enum": ["image", "video"], "default": "image", "description": "D2: видео-референс (Seedance 2.x, Omni)."}
+        }
+      }
+    },
+    "mood": {"type": "array", "items": {"type": "string"}, "maxItems": 3},
+    "exclusions": {
+      "type": "array",
+      "description": "Запреты. kind=service — текст, водяной знак, логотип, субтитры, музыка (можно словами у класса A и у видео); kind=object/style/artifact — компилятор переписывает позитивом через replace_with.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["what", "kind"],
+        "properties": {
+          "what": {"type": "string"},
+          "kind": {"enum": ["service", "object", "style", "artifact"]},
+          "replace_with": {"type": "string", "description": "Позитивная замена: «an empty, quiet room», «clean unmarked surfaces»."}
+        }
+      }
+    },
+    "text": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false, "required": ["mode"],
+          "properties": {"mode": {"const": "none"}}
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["mode"],
+          "properties": {
+            "mode": {"const": "html_overlay"},
+            "copy": {"type": "array", "items": {"type": "string"}, "description": "Текст для HTML-слоя (в промт не идёт)."}
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["mode", "strings"],
+          "properties": {
+            "mode": {"const": "in_image"},
+            "strings": {
+              "type": "array", "minItems": 1, "maxItems": 3,
+              "items": {
+                "type": "object", "additionalProperties": false,
+                "required": ["text", "language", "script", "role", "position"],
+                "properties": {
+                  "text": {"type": "string", "maxLength": 40, "description": "Дословно. 1–4 слова надёжно."},
+                  "language": {"type": "string", "description": "BCP-47: ru, en …"},
+                  "script": {"enum": ["Latin", "Cyrillic", "Other"]},
+                  "role": {"enum": ["headline", "subhead", "label", "sign", "logo", "caption"]},
+                  "position": {"type": "string"},
+                  "typography": {"type": "string", "description": "bold condensed sans-serif, serif italic …"},
+                  "color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+                  "size": {"enum": ["small", "medium", "large", "xl"]},
+                  "surface": {"type": "string", "description": "Если текст — часть сцены: «painted on the shop window»."}
+                }
+              }
+            },
+            "fallback": {"enum": ["html_overlay", "post_composite", "none"], "default": "html_overlay"},
+            "ocr_check": {"type": "boolean", "default": true},
+            "strict_spelling": {"type": "boolean", "default": false, "description": "D2: блок типографики продукта — «no misspellings, no extra letters, and no warped glyphs» (Magnific) или позитивная форма у FLUX.2."}
+          }
+        }
+      ]
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary_ratio"],
+      "properties": {
+        "primary_ratio": {"$ref": "#/$defs/ratio"},
+        "aspect_ratios": {"type": "array", "items": {"$ref": "#/$defs/ratio"}, "description": "Все соотношения, которые нужны странице (кадрирование или аутпейнт)."},
+        "resolution": {"enum": ["0.5K", "1K", "2K", "4K", "480p", "720p", "768p", "1080p"]},
+        "format": {"enum": ["avif", "webp", "jpeg", "png", "mp4", "webm"]},
+        "alpha": {"type": "boolean", "default": false},
+        "max_kb": {"type": "integer", "minimum": 1},
+        "variants": {
+          "type": "array",
+          "description": "D2: как получить каждое соотношение страницы — генерировать отдельно, кадрировать мастер по safe_zones или аутпейнтить (05-prompting/05 §6).",
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["ratio", "strategy"],
+            "properties": {
+              "ratio": {"$ref": "#/$defs/ratio"},
+              "strategy": {"enum": ["generate", "crop", "outpaint"]},
+              "text_zone": {"$ref": "#/$defs/text_zone"},
+              "subject_region": {"enum": ["left-third", "center", "right-third", "top", "bottom", "full-frame"]}
+            }
+          }
+        }
+      }
+    },
+    "motion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "duration_s", "camera"],
+      "properties": {
+        "kind": {"enum": ["loop", "cinemagraph", "camera-move", "i2v-product", "abstract", "character"]},
+        "duration_s": {"type": "number", "minimum": 1, "maximum": 30},
+        "camera": {
+          "type": "object", "additionalProperties": false, "required": ["move"],
+          "properties": {
+            "move": {"enum": ["static", "dolly-in", "dolly-out", "pan-left", "pan-right", "tilt-up", "tilt-down", "truck-left", "truck-right", "pedestal-up", "pedestal-down", "orbit", "tracking", "crane-up", "crane-down", "zoom-in", "zoom-out"]},
+            "amplitude": {"enum": ["small", "medium", "large"]},
+            "speed": {"enum": ["slow", "medium", "fast"]},
+            "target": {"type": "string", "description": "D2b: на чём держится неподвижная камера — Kling «The camera remains fixed on {target}» (по умолчанию «the subject»)."}
+          }
+        },
+        "subject_motion": {"type": "string", "description": "Одно действие субъекта, общими словами (the subject …)."},
+        "environment_motion": {"type": "string", "description": "Движение среды: fog, steam, leaves, light."},
+        "loop": {"enum": ["first_last_same", "crossfade_post", "none"], "default": "none"},
+        "start_frame": {"type": "string", "description": "Путь к стартовому кадру (i2v)."},
+        "end_frame": {"type": "string", "description": "Путь к конечному кадру; для петли — тот же, что start_frame."},
+        "cuts": {"enum": ["none", "allowed"], "default": "none"},
+        "audio": {"type": "boolean", "default": false},
+        "timeline": {
+          "type": "array", "maxItems": 4,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["t0", "t1", "beat"],
+            "properties": {"t0": {"type": "number", "minimum": 0}, "t1": {"type": "number", "minimum": 0}, "beat": {"type": "string"}}
+          }
+        },
+        "background_motion": {
+          "type": "array", "maxItems": 8,
+          "description": "D2: движение каждого элемента фона — «что не названо, то не движется» [V:OA4xB5EY02g 32:46].",
+          "items": {"type": "object", "additionalProperties": false, "required": ["element", "motion"],
+                    "properties": {"element": {"type": "string"}, "motion": {"type": "string"}}}
+        },
+        "still": {"type": "array", "items": {"type": "string"}, "maxItems": 8, "description": "D2: элементы, которые остаются неподвижными."},
+        "forbid": {
+          "type": "array", "uniqueItems": true,
+          "description": "D2: запреты движения [V:BVMuRw8BgJg 02:39]; форма (предложение или позитив) — по семейству.",
+          "items": {"enum": ["zoom", "spin", "reposition_subject", "camera_move", "cuts", "shake", "morph", "new_objects", "text", "fast_motion"]}
+        },
+        "tempo": {"enum": ["slow", "medium", "fast"], "description": "D2: общий темп движения."},
+        "shots": {
+          "type": "array", "minItems": 2, "maxItems": 6,
+          "description": "D2: мульти-шот (Kling, Wan 2.6/3.0, Seedance 2.x); сумма длительностей = duration_s.",
+          "items": {"type": "object", "additionalProperties": false, "required": ["t0", "t1", "action"],
+                    "properties": {"t0": {"type": "number", "minimum": 0}, "t1": {"type": "number", "minimum": 0},
+                                   "framing": {"type": "string"}, "camera": {"type": "string"}, "action": {"type": "string"}}}
+        },
+        "reference_mode": {"enum": ["frames", "references"], "default": "frames", "description": "D2: картинки — кадры (первый/последний) или референсы (Seedance 2.x, Veo REFERENCE_2_VIDEO, Omni)."},
+        "frame_annotations": {"type": "boolean", "default": false, "description": "D2: на первом кадре нарисованы пометки — «follow the instructions on the image, then remove them» [V:g3w9wemFlmw 14:25]."},
+        "source_video": {"type": "string", "description": "D2: исходное видео для правки (v2v, Omni)."}
+      }
+    },
+    "product": {
+      "type": "object", "additionalProperties": false,
+      "description": "D2: идентичность продукта для промта из 7 блоков [V:XLHTLJhzDyQ 01:01–05:05].",
+      "properties": {
+        "identity": {"type": "string", "description": "Неизменные видимые признаки: «matte white 250 ml bottle with rounded shoulders, black flip cap»."},
+        "parts": {"type": "array", "maxItems": 6, "items": {"type": "object", "additionalProperties": false, "required": ["part", "color"],
+                  "properties": {"part": {"type": "string"}, "color": {"type": "string"}, "hex": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"}}}},
+        "locks": {"type": "array", "items": {"type": "string"}, "maxItems": 8, "description": "Что нельзя менять: label layout, cap shape, proportions."},
+        "dimensions": {"type": "string", "description": "Габариты для масштаба: «45 cm tall lamp on a 75 cm table»."},
+        "reference_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "series": {
+      "type": "object", "additionalProperties": false, "required": ["id", "block"],
+      "description": "D2: серия — дословный блок стиля + слоты; одинаковый block во всех спецификациях серии (проверяет компилятор).",
+      "properties": {
+        "id": {"type": "string"},
+        "block": {"type": "string", "description": "Дословный постоянный блок стиля (заменяет style.series_block)."},
+        "effect_block": {"type": "string", "description": "«Шаблон эффекта» [V:nBd9JJuAT1Y 44:00] — дословно для разных объектов."},
+        "slots": {"type": "object", "additionalProperties": {"type": "string"}},
+        "index": {"type": "integer", "minimum": 1},
+        "of": {"type": "integer", "minimum": 1},
+        "locks": {"type": "array", "items": {"type": "string"}},
+        "reference_ids": {"type": "array", "items": {"type": "string"}},
+        "avoid_average": {"type": "boolean", "default": false, "description": "Против «среднего» вида: не по центру, взгляд не в камеру [V:AxV8TR3BdqI 30:46]."}
+      }
+    },
+    "edit": {
+      "type": "object", "additionalProperties": false, "required": ["operation", "source"],
+      "description": "D2: правка по инструкции/маске: что → на что → сохранить положение и размер → что видно → больше ничего (05-prompting/05 §1).",
+      "properties": {
+        "operation": {"enum": ["replace", "remove", "add", "recolor", "relight", "restyle", "extend", "text_replace", "translate_text", "background_swap", "inpaint"]},
+        "source": {"type": "string", "description": "id референса с ролью edit_source или путь."},
+        "changes": {"type": "array", "maxItems": 12, "items": {"type": "object", "additionalProperties": false, "required": ["target", "to"],
+                    "properties": {"target": {"type": "string"}, "to": {"type": "string"}, "where": {"type": "string"},
+                                   "value": {"type": "string", "description": "Целевое значение: «#1F5E3B», «2700 K», «45 cm»."},
+                                   "op": {"enum": ["replace", "recolor", "add", "remove"], "description": "D2b: операция этого изменения в смешанной правке (по умолчанию — edit.operation); add — «to» + «where», remove — «to» = что видно на месте."}}}},
+        "keep": {"type": "array", "items": {"type": "string"}, "maxItems": 10},
+        "visible_after": {"type": "string", "description": "Что видно в кадре после правки (формула Jamey)."},
+        "mask": {"type": "object", "additionalProperties": false, "required": ["src", "polarity"],
+                 "properties": {"src": {"type": "string"}, "polarity": {"enum": ["white=change", "black=change", "alpha=change"]}}},
+        "preserve_suffix": {"type": "boolean", "default": true, "description": "«Maintain the original composition and subject.» [V:8kM5aDD5gLI 24:36]."},
+        "caption": {"type": "string", "description": "Описание исходника для шаблонов инпейнта и аутпейнта Qwen."},
+        "target_ratio": {"$ref": "#/$defs/ratio"},
+        "chain": {"enum": ["from_source", "sequential"], "default": "sequential", "description": "Порции: следующая от результата предыдущей или каждая от исходника."}
+      }
+    },
+    "compile": {
+      "type": "object", "additionalProperties": false,
+      "description": "D2: опции компилятора (не в промт) — рычаги A/B формы при неизменном содержании (05-prompting/06).",
+      "properties": {
+        "order": {"enum": ["family", "product7", "shuffled", "custom"], "default": "family"},
+        "custom_order": {"type": "array", "items": {"type": "string"}},
+        "shuffle_seed": {"type": "integer"},
+        "length": {"enum": ["full", "short"], "default": "full"},
+        "text_zone_style": {"enum": ["base", "vendor", "google", "openai", "copyspace"], "default": "base"},
+        "negation": {"enum": ["family", "positive", "sentence"], "default": "family"},
+        "palette_form": {"enum": ["family", "hex", "names"], "default": "family"},
+        "fit": {"enum": ["fail", "drop"], "default": "fail"},
+        "drop_priority": {"type": "array", "items": {"type": "string"}},
+        "language": {"enum": ["en", "ru"], "default": "en"},
+        "quality_words": {"type": "boolean", "default": false},
+        "enhancer": {"enum": ["off", "on"], "default": "off"},
+        "labels": {"enum": ["global", "family"], "default": "global"},
+        "refs": {"enum": ["declare", "silent"], "default": "declare"},
+        "anti_average": {"type": "boolean", "default": false},
+        "i2v": {"enum": ["motion_only", "full"], "default": "motion_only", "description": "full — плечо A/B «пересказ сцены» в i2v."},
+        "forbid_style": {"enum": ["sentence", "positive"], "description": "Форма запретов движения поверх семейства (плечо A/B)."},
+        "max_changes": {"type": "integer", "minimum": 1, "maximum": 12, "description": "Лимит изменений правки за вызов (контрольное плечо «10 за вызов»)."}
+      }
+    },
+    "variants": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "count": {"type": "integer", "minimum": 1, "maximum": 8},
+        "vary": {"type": "array", "items": {"enum": ["seed", "composition", "palette", "subject", "light"]}},
+        "first_iteration_variable": {"type": "string", "description": "Что менять первым при промахе (BFL prompt-doctor)."}
+      }
+    },
+    "notes": {"type": "string"}
+  },
+  "$defs": {
+    "task_code": {
+      "enum": [
+        "IMG-HERO-PHOTO", "IMG-PRODUCT", "IMG-ILLUSTR", "IMG-SERIES", "IMG-ICON3D", "IMG-CUTOUT", "IMG-BG-ABSTRACT",
+        "IMG-TEXTURE", "IMG-TEXT-LATIN", "IMG-TEXT-CYR", "IMG-EDIT", "IMG-OUTPAINT", "IMG-MOCKUP", "IMG-UPSCALE", "IMG-DRAFT",
+        "VID-HERO-LOOP", "VID-CINEMAGRAPH", "VID-I2V-PRODUCT", "VID-ABSTRACT", "VID-CAMERA", "VID-CHARACTER", "VID-LONG",
+        "VID-V2V", "VID-ALPHA", "VID-SCROLL", "VID-UPSCALE",
+        "VEC-ICON-LINE", "VEC-ICON-FILLED", "VEC-ILLUSTR", "VEC-PATTERN", "VEC-ANIM", "VEC-TRACE"
+      ]
+    },
+    "ratio": {"type": "string", "pattern": "^[0-9]{1,2}:[0-9]{1,2}$"},
+    "point": {
+      "type": "object", "additionalProperties": false, "required": ["x", "y"],
+      "properties": {"x": {"type": "number", "minimum": 0, "maximum": 1}, "y": {"type": "number", "minimum": 0, "maximum": 1}}
+    },
+    "rect": {
+      "type": "array", "description": "[x0, y0, x1, y1] в долях кадра, x0 < x1, y0 < y1 (проверяет компилятор).",
+      "minItems": 4, "maxItems": 4, "items": {"type": "number", "minimum": 0, "maximum": 1}
+    },
+    "text_zone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["side", "rect", "purpose"],
+      "properties": {
+        "side": {"enum": ["left", "right", "top", "bottom", "center", "top-left", "top-right", "bottom-left", "bottom-right"]},
+        "rect": {"$ref": "#/$defs/rect"},
+        "surface": {"type": "string", "description": "Что видно в зоне: «evenly lit warm-grey plaster wall», «clear pale sky»."},
+        "tone": {"type": "string", "description": "Тон и контраст зоны: «even, low contrast, light»."},
+        "purpose": {"enum": ["headline", "body", "cta", "logo", "caption"]},
+        "text_color_on_top": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$", "description": "Цвет HTML-текста поверх — для проверки контраста (агент K)."}
+      }
+    }
+  }
+}

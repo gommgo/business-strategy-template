@@ -1,0 +1,92 @@
+# icon3d-series.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/02-series-product-recipes.md#4; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+recipe_version: 1
+checked_at: '2026-09-25'
+author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
+id: icon3d-series
+title: 'Серия 3D-иконок: форма — свой рендер, материал — «кубик»'
+doc: 14-recipes/02-series-product-recipes.md#4
+task_codes:
+- IMG-ICON3D
+- IMG-SERIES
+slot: section
+ladder: image
+ai_fit: allowed
+legal_row: 4
+route:
+  source: IMG-ICON3D
+  steps:
+  - role: материал на форму
+    model: openai/gpt-image-2.5-sunburst
+    params:
+      image_resolution: 1K
+      aspect_ratio: '1:1'
+    images: '[форма, кубик]'
+    price_rub: 4.0
+    test: M-04
+    note: 'фаза 5: M-04 не запускался; метод «форма + кубик материала» проверен F-07'
+  - role: точный маршрут
+    model: Blender 5.2.2 (своё)
+    price_rub: 0.0
+spec:
+  example: 14-recipes/examples/demo-landing/brand/specs/M-04-icon3d-cup.spec.json
+  must:
+  - 'references: composition (форма) + material (кубик)'
+  - без output.alpha у Sunburst
+  - фон = palette.env_color
+  ancestors:
+  - 13-routing-matrix/stand/briefs/S06-icons-grid.spec.json
+compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+  <тест> --agent <агент> --out 99-raw/phase5/jobs/<файл>.jsonl
+phase5:
+  jobs:
+  - 99-raw/phase5/jobs/M-04-icon3d-material.jsonl
+  - 99-raw/phase5/jobs/F-07-material-cube.jsonl
+  reuse:
+  - F-07
+  - E-14
+  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
+steps:
+- id: render
+  cmd: flock -w 1800 99-raw/tools/.locks/blender.lock python3 ../../scripts/blender/blender_run.py 99-raw/experiments/M/01-icon3d-forms/render_forms.py
+    -- <out>
+  status: checked
+  evidence: 99-raw/experiments/M/01-icon3d-forms
+- id: deliver
+  cmd: python3 99-raw/experiments/M/01-icon3d-forms/make_icons.py (α < 0,06 → 0; кроп; на цвете секции)
+  status: checked
+  evidence: 99-raw/experiments/M/01-icon3d-forms/results_icons.json
+- id: series
+  cmd: python3 ../../scripts/ai-media/asset_audit.py audit icon_*.png --mode series --out audit_series/
+  status: checked
+  evidence: 99-raw/experiments/M/01-icon3d-forms/audit_series
+accept:
+  thresholds:
+  - series.hue_spread_max_deg
+  - series.pal_de_mean_max
+  extra: IoU силуэта с маской формы ≥ 0,9 (F-07)
+delivery:
+  formats:
+  - avif
+  - webp
+  budget_kb:
+    icon: 3
+  rule: без альфы на цвете секции; секция не меняет цвет в тёмной теме
+provenance:
+  dst: trained
+  visible_label: false
+numbers:
+  flat_avif_320_kb:
+  - 0.85
+  - 1.17
+  alpha_avif_320_kb:
+  - 2.25
+  - 2.72
+  series_hue_spread_deg: 0.6
+  phase5_f07_silhouette_iou: '0,95 и 0,92 (2 из 2 ≥ 0,9; Sunburst 1K 4 ₽) — 99-raw/phase5/runs/2.3-series/F-07_sheet.jpg'
+  phase5_e14_grid: 'E-14 (3D-иконки сеткой на 4 моделях) не запускался — отменено заказчиком 25.09'
+status:
+  local: checked
+  generation: checked
+sources:
+- 91-videos/transcripts/9_8f1J-5t3k.md
+- 91-videos/digests/RIS8ckTfKAg.md

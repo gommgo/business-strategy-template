@@ -1,0 +1,567 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "urn:app-design:creative-research:refs-library:1",
+ "title": "Запись библиотеки референсов creative-research (refs-library/1)",
+ "description": "Одна строка library.jsonl. Пишет refs_client.py (search, get, enrich, arena pull), правят lib tag и мудборд. Библиотека заказчика живёт ВНЕ базы (~/.local/share/creative-refs/, каталоги 700, файлы 600); в базе — только пример на публичных наградных сайтах (library-example/). Контракт тройки v2 §3 п.7; поле id — это <id> в ссылке ref:<id> брифа site (site-brief.schema.json $defs/reference). Волна 1 · агент B · 2026-09-24.",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "schema",
+  "id",
+  "source",
+  "url",
+  "captured_at",
+  "media",
+  "tags",
+  "roles",
+  "rights",
+  "take",
+  "dont_take",
+  "boards"
+ ],
+ "properties": {
+  "schema": {
+   "const": "refs-library/1"
+  },
+  "id": {
+   "type": "string",
+   "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+   "maxLength": 90,
+   "description": "Стабильный id из канонического адреса: dribbble-shot-<n>, behance-project-<n>, dprofile-case-<n>, site-<домен>[-<путь>], arena-block-<n>. В брифе site — ref:<id>.",
+   "examples": [
+    "dribbble-shot-27190142",
+    "site-example-com",
+    "dprofile-case-193521"
+   ]
+  },
+  "source": {
+   "type": "string",
+   "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+   "description": "id площадки из sources.yaml (dribbble, behance, dprofile, awwwards, cssda, …) или site — сайт по прямой ссылке, customer — файл заказчика."
+  },
+  "url": {
+   "type": "string",
+   "format": "uri",
+   "description": "Канонический адрес работы или сайта (без трекинга и запроса)."
+  },
+  "source_url": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "format": "uri",
+   "description": "Где найдено: страница выдачи, галереи, канал Are.na."
+  },
+  "title": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "maxLength": 200
+  },
+  "author": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "maxLength": 120,
+   "description": "Имя автора или студии — только для атрибуции; других персональных данных не хранить."
+  },
+  "author_url": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "format": "uri"
+  },
+  "published_at": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "format": "date",
+   "description": "Дата публикации работы (если площадка её показывает)."
+  },
+  "captured_at": {
+   "type": "string",
+   "format": "date-time"
+  },
+  "first_captured_at": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "format": "date-time"
+  },
+  "preview": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "pattern": "^previews/[a-z0-9-]+\\.webp$",
+   "description": "Путь от корня библиотеки. Превью ≤ 800 px (в library-example ≤ 400 px), WebP q80. null — превью не получено."
+  },
+  "preview_meta": {
+   "type": [
+    "object",
+    "null"
+   ],
+   "additionalProperties": false,
+   "required": [
+    "w",
+    "h",
+    "bytes",
+    "dhash",
+    "from"
+   ],
+   "properties": {
+    "w": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 800
+    },
+    "h": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 800
+    },
+    "bytes": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "dhash": {
+     "type": "string",
+     "pattern": "^[0-9a-f]{16}$",
+     "description": "Разностный хэш 64 бита (9×8, оттенки серого); дубль-кандидат — расстояние Хэмминга ≤ 6."
+    },
+    "from": {
+     "enum": [
+      "page-response",
+      "page-response-poster",
+      "page-response-largest",
+      "own-element-screenshot",
+      "own-screenshot-1440x900",
+      "arena-image",
+      "customer-file",
+      "selftest"
+     ],
+     "description": "Откуда картинка: ответ, который страница получила сама; наш снимок элемента или экрана; картинка Are.na; файл заказчика."
+    },
+    "palette": {
+     "type": "array",
+     "maxItems": 8,
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "hex",
+       "share"
+      ],
+      "properties": {
+       "hex": {
+        "type": "string",
+        "pattern": "^#[0-9a-f]{6}$"
+       },
+       "share": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+       },
+       "L": {
+        "type": "number"
+       },
+       "C": {
+        "type": "number"
+       },
+       "h": {
+        "type": "number"
+       }
+      }
+     },
+     "description": "k-means (k ≤ 5) в OKLab по превью 64×64 (перевод — ../../scripts/lib/color.py); кластеры < 2 % отброшены."
+    }
+   }
+  },
+  "media": {
+   "enum": [
+    "image",
+    "video",
+    "gif",
+    "site"
+   ]
+  },
+  "media_url": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "format": "uri",
+   "description": "Ссылка на медиа работы (видео не скачивается)."
+  },
+  "tags": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "style",
+    "effect",
+    "section_type",
+    "device",
+    "mood",
+    "color",
+    "era",
+    "source_tags"
+   ],
+   "properties": {
+    "style": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+     },
+     "uniqueItems": true,
+     "description": "Стиль (kebab-case): editorial, brutalist, swiss, y2k, dark-premium, …"
+    },
+    "effect": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$"
+     },
+     "uniqueItems": true,
+     "description": "id эффектов effects.yaml (F, волна 2): effect:marquee-logos, effect:pin-scrub-story; до выхода каталога — временные id с пометкой в notes."
+    },
+    "section_type": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "pattern": "^(block|section-role):[a-z0-9]+(-[a-z0-9]+)*$"
+     },
+     "uniqueItems": true,
+     "description": "Секция: block:<id> из ../site/04-blocks/blocks.yaml или section-role:<id> словаря site."
+    },
+    "device": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "uniqueItems": true,
+     "description": "Приём словами или id: split-screen hero, огромный номер, сетка 12 колонок…"
+    },
+    "mood": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "uniqueItems": true
+    },
+    "color": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "pattern": "^#[0-9a-f]{6}$"
+     },
+     "description": "Палитра превью (hex по убыванию доли)."
+    },
+    "era": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "pattern": "^\\d{4}$",
+     "description": "Год публикации (для датировки приёма — H)."
+    },
+    "source_tags": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "description": "Теги и категории площадки как есть."
+    },
+    "source_colors": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "description": "Цвета, которые показывает площадка (Dribbble)."
+    }
+   }
+  },
+  "roles": {
+   "type": "array",
+   "uniqueItems": true,
+   "items": {
+    "enum": [
+     "composition",
+     "typography",
+     "rhythm",
+     "motion",
+     "block-solution",
+     "brand",
+     "structure",
+     "color",
+     "material",
+     "imagery",
+     "effect",
+     "other"
+    ]
+   },
+   "description": "Для чего годится: роли site-brief v0 (composition … other) + color, material, imagery, effect — как в art-direction.schema.json $defs/reference (A). Роль в конкретном брифе или мудборде выбирается при передаче (одна)."
+  },
+  "rights": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "use",
+    "do_not_publish"
+   ],
+   "properties": {
+    "use": {
+     "const": "internal-only",
+     "description": "Референс — только для внутренней работы; никогда не ассет страницы."
+    },
+    "do_not_publish": {
+     "type": "boolean",
+     "description": "true для чужих работ всегда; в базу — только ссылка, метаданные и Take."
+    },
+    "license": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Если известна (например, CC BY у Codrops-демо)."
+    },
+    "holder": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "terms": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Какие условия площадки действуют (пункты, редакция)."
+    }
+   }
+  },
+  "take": {
+   "type": "array",
+   "items": {
+    "type": "string",
+    "minLength": 3
+   },
+   "description": "Что взять: объект + свойство + число («заголовок слева 2 строки ≈ 96 px»)."
+  },
+  "dont_take": {
+   "type": "array",
+   "items": {
+    "type": "string",
+    "minLength": 3
+   },
+   "description": "Чего не брать (в задании — avoid[]; имя как в site-brief). Всегда: логотип, тексты, фото, цвета чужого бренда."
+  },
+  "notes": {
+   "type": "string",
+   "description": "Что работает — словами (для модели без зрения): 1–3 предложения."
+  },
+  "boards": {
+   "type": "array",
+   "uniqueItems": true,
+   "items": {
+    "type": "string"
+   }
+  },
+  "found": {
+   "type": "array",
+   "maxItems": 10,
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+     "mode": {
+      "enum": [
+       "search",
+       "assistant",
+       "manual"
+      ]
+     },
+     "q": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "rank": {
+      "type": [
+       "integer",
+       "null"
+      ]
+     },
+     "at": {
+      "type": "string"
+     },
+     "via": {
+      "type": [
+       "string",
+       "null"
+      ]
+     }
+    }
+   }
+  },
+  "stats": {
+   "type": "object",
+   "additionalProperties": {
+    "type": [
+     "string",
+     "integer",
+     "null"
+    ]
+   },
+   "description": "Лайки, просмотры как на площадке (снимок на captured_at)."
+  },
+  "awards": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   },
+   "description": "Награды: «Awwwards SOTD 2026-08-14», «Dprofile рекомендует»… — метка [награда], не доказательство."
+  },
+  "description": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "maxLength": 400
+  },
+  "site": {
+   "type": "object",
+   "additionalProperties": true,
+   "description": "Для media=site: язык, og:image и т. п."
+  }
+ },
+ "allOf": [
+  {
+   "if": {
+    "properties": {
+     "source": {
+      "enum": [
+       "dribbble",
+       "behance",
+       "dprofile",
+       "pinterest",
+       "savee",
+       "cosmos"
+      ]
+     }
+    }
+   },
+   "then": {
+    "properties": {
+     "rights": {
+      "properties": {
+       "do_not_publish": {
+        "const": true
+       }
+      }
+     }
+    }
+   }
+  }
+ ],
+ "examples": [
+  {
+   "schema": "refs-library/1",
+   "id": "site-example-com",
+   "source": "site",
+   "url": "https://example.com/",
+   "source_url": null,
+   "title": "Example Studio",
+   "author": null,
+   "author_url": null,
+   "published_at": null,
+   "captured_at": "2026-09-24T16:00:00+03:00",
+   "first_captured_at": "2026-09-24T16:00:00+03:00",
+   "preview": "previews/site-example-com.webp",
+   "preview_meta": {
+    "w": 400,
+    "h": 250,
+    "bytes": 14210,
+    "dhash": "0f1e3c78f0e1c387",
+    "from": "own-screenshot-1440x900",
+    "palette": [
+     {
+      "hex": "#0d0d0d",
+      "share": 0.62
+     },
+     {
+      "hex": "#f2efe9",
+      "share": 0.31
+     }
+    ]
+   },
+   "media": "site",
+   "media_url": null,
+   "tags": {
+    "style": [
+     "editorial"
+    ],
+    "effect": [
+     "effect:split-text-reveal"
+    ],
+    "section_type": [
+     "block:hero-media-split"
+    ],
+    "device": [
+     "заголовок во всю ширину"
+    ],
+    "mood": [
+     "спокойный"
+    ],
+    "color": [
+     "#0d0d0d",
+     "#f2efe9"
+    ],
+    "era": "2026",
+    "source_tags": []
+   },
+   "roles": [
+    "typography"
+   ],
+   "rights": {
+    "use": "internal-only",
+    "do_not_publish": true,
+    "license": null,
+    "holder": "example.com",
+    "terms": null
+   },
+   "take": [
+    "заголовок во всю ширину, 2 строки ≈ 12vw",
+    "межстрочный 0,9"
+   ],
+   "dont_take": [
+    "их логотип, тексты, фото и цвет бренда",
+    "курсор-кружок"
+   ],
+   "notes": "ОБРАЗЕЦ ФОРМАТА (example.com, числа вымышлены): сила — в масштабе и тишине, один гигантский заголовок и много воздуха.",
+   "boards": [
+    "demo"
+   ],
+   "found": [
+    {
+     "mode": "assistant",
+     "q": null,
+     "rank": null,
+     "at": "2026-09-24T16:00:00+03:00",
+     "via": null
+    }
+   ],
+   "stats": {},
+   "awards": [
+    "<площадка> <награда> <дата> — образец формата"
+   ],
+   "description": null
+  }
+ ]
+}

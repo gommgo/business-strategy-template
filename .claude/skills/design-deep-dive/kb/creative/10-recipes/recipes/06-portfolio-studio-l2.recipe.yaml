@@ -1,0 +1,71 @@
+# Рецепт 06 · Портфолио студии · L2 — 10-recipes/06-portfolio-studio-l2.md · J · 2026-09-25
+recipe_version: "0.1"
+id: recipe:portfolio-studio-l2
+title_ru: "Портфолио студии, L2 — работа как экспонат: кейсы открываются переходом"
+status: proposed
+checked_at: "2026-09-25"
+site_type: portfolio-site
+page_type: portfolio-page
+level: L2
+level_why: "портфолио студии — L2 по умолчанию A; вау и есть продукт"
+budget_profile: portfolio-page@L2
+when: ["работы реальные и с правами", "прямой трафик и галереи, доля десктопа заметна"]
+not_when: ["студия продаёт массовые услуги с телефона — рецепт 01 с кейсами"]
+inputs:
+  playbook: "../site/10-playbooks-contracts/03-playbooks-multipage.md"
+  video: ["V:QA5f2loqtM4 16:16", "V:UcXWY057YuQ 12:33"]
+concept:
+  thesis: "Работа как экспонат: каждый кейс лежит на полке зала, шаг внутрь — переход, а не новая страница."
+  story: {hero: "арт-директор заказчика, выбирающий студию", conflict: "одинаковые сетки кейсов", resolution: "кейс раскрывается из карточки, видно роль и год"}
+  signature_move: "View Transition карточка → кейс с общим элементом"
+ledger:
+  paper: light
+  display_style: serif
+  accent_hue: neutral
+  macrostructure: portfolio-grid
+  hero_architecture: masked
+  main_technique: "effect:page-transition"
+  motion_signature: {entrances: "type-unmask строк манифеста", tempo: slow, curve: in-out}
+  corner_language: hairline
+page_plan:
+  macrostructure: portfolio-grid
+  first_screen_policy: offer-cta-header
+  length: "6 секций главной"
+  sections:
+    - {id: hero, block: "block:hero-text", role: hero, level: L2, visual_role: accent, effects: ["effect:text-mask-media", "effect:motion-toggle"], reduce: final-state}
+    - {id: portfolio, block: "block:portfolio-grid", role: portfolio, level: L2, visual_role: peak, effects: ["effect:page-transition", "effect:view-transition", "effect:custom-cursor"], reduce: "мгновенная навигация, системный курсор"}
+    - {id: case-studies, block: "block:case-cards", role: case-studies, level: L2, visual_role: peak, effects: ["effect:horizontal-scroll"], reduce: "вертикальная стопка", mobile: "свайп-ряд со snap"}
+    - {id: about, block: "block:about-story", role: about, level: L0, visual_role: calm}
+    - {id: awards-press, block: "block:awards-press", role: awards-press, level: L0, visual_role: calm}
+    - {id: final-cta, block: "block:contact-channels", role: contacts, level: L0, visual_role: calm}
+motion:
+  thesis: "Движение — шаг внутрь работы: переход и лента; остальное — зал в тишине."
+  primitives: [type-unmask, none]
+  peaks: [portfolio, case-studies]
+  accents: [hero]
+  toggle: button
+  smooth_scroll: false
+  transitions: view-transitions
+  loops_in_view_max: 0
+stack:
+  library: ["@view-transition (CSS)", "gsap@3.15.0 + ScrollTrigger (лента, pinType transform)", "astro@7 или static"]
+  notes: "ScrollTrigger.refresh() после VT; Swup 4 — если нужно состояние между страницами"
+assets:
+  - {slot: case-cover, ladder: image, source: real, budget_kb: 150, note: "реальные работы студии, права"}
+  - {slot: case-video, ladder: video, source: real, note: "по клику"}
+copy:
+  promise: "работа, которую можно потрогать переходом"
+  slots: [headline, case-title, case-summary, case-result, footer-tagline, contact-info]
+budget:
+  js_presentation_kb_br: {mobile: 150, desktop: 200}
+  first_screen_mb: {mobile: 2.5, desktop: 4.0}
+  source: "ambition-levels.yaml L2"
+gates:
+  tools: ["motion_check.py --level L2", "чтение кода: EG-CODE-02 refresh после VT"]
+  must_pass: [EG-A11Y-12, EG-A11Y-13, EG-A11Y-14, EG-A11Y-21, EG-PERF-02, EG-CODE-02]
+decisions:
+  - {id: d-cursor, technique: "cliche:custom-cursor-follower", decision: twist, why: "курсор подписывает действие над кейсом; на полях и в reduce — системный"}
+  - {id: d-smooth, technique: "cliche:smooth-scroll-default", decision: avoid, why: "без WebGL-сцены прокрутка родная"}
+  - {id: d-liquid, technique: "cliche:liquid-hover-distortion", decision: avoid, why: "работа не искажается, hover — масштаб 1,02 и подпись"}
+  - {id: d-giant, technique: "cliche:giant-display-type", decision: avoid, why: "вордмарк в подвале без задачи не нужен"}
+errors: ["VT без @supports и при reduce", "pin без pinType transform", "Lenis + скраб на телефоне", "точка-курсор над текстом", "кейс без названия и года в HTML"]

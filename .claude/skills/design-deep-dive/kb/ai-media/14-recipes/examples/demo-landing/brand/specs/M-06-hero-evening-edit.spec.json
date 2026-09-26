@@ -1,0 +1,149 @@
+{
+  "spec_version": "0.2",
+  "id": "forest-roast-hero-evening-edit",
+  "checked_at": "2026-09-24",
+  "brief_language": "en",
+  "task": "IMG-EDIT",
+  "role": {
+    "section": "hero",
+    "slot": "hero-state-2",
+    "purpose": "second hero state (evening) for the spotlight reveal; edit of the M-01 master",
+    "series_id": "forest-roast",
+    "priority": "above-fold"
+  },
+  "subject": {
+    "summary": "a glazed off-white ceramic cup of black coffee on a pale oak table by a tall window in the morning"
+  },
+  "composition": {
+    "shot": "medium",
+    "subject_region": "right-third",
+    "angle": "eye-level",
+    "text_zone": {
+      "side": "left",
+      "rect": [
+        0,
+        0,
+        0.45,
+        1
+      ],
+      "tone": "even, low contrast",
+      "surface": "evenly lit cream plaster wall",
+      "purpose": "headline"
+    }
+  },
+  "palette": [
+    {
+      "role": "dominant",
+      "hex": "#C9B79C",
+      "name": "pale oak",
+      "share": 0.284,
+      "applies_to": "table top and wooden surfaces"
+    },
+    {
+      "role": "background",
+      "hex": "#EFE8DC",
+      "name": "cream plaster",
+      "share": 0.406,
+      "applies_to": "plaster wall and window light"
+    },
+    {
+      "role": "secondary",
+      "hex": "#8C7B66",
+      "name": "warm taupe",
+      "share": 0.162,
+      "applies_to": "linen, paper bags, shade on wood"
+    },
+    {
+      "role": "accent",
+      "hex": "#1F4D3A",
+      "name": "forest green",
+      "share": 0.03,
+      "applies_to": "one small object: a tin, a ceramic lid or a linen tag",
+      "strict": true
+    },
+    {
+      "role": "shadow",
+      "hex": "#2B211A",
+      "name": "dark roast brown",
+      "share": 0.097,
+      "applies_to": "coffee, deep shadows"
+    }
+  ],
+  "text": {
+    "mode": "html_overlay"
+  },
+  "output": {
+    "primary_ratio": "16:9",
+    "resolution": "2K",
+    "format": "avif",
+    "max_kb": 150
+  },
+  "camera": {
+    "lens_mm": 35,
+    "depth_of_field": "medium",
+    "capture": "documentary still life, available light, no retouching"
+  },
+  "light": {
+    "direction": "right",
+    "quality": "soft",
+    "time_of_day": "early morning",
+    "source": "window"
+  },
+  "materials": [
+    "glazed off-white ceramic",
+    "pale oak",
+    "washed linen"
+  ],
+  "style": {
+    "medium": "photograph",
+    "grain": "fine natural film grain"
+  },
+  "exclusions": [
+    {
+      "what": "people",
+      "kind": "object",
+      "replace_with": "no one in the frame"
+    },
+    {
+      "what": "readable text and logos",
+      "kind": "artifact",
+      "replace_with": "clean unmarked surfaces"
+    },
+    {
+      "what": "steaming latte art close-up",
+      "kind": "style",
+      "replace_with": "plain black coffee seen from slightly above"
+    },
+    {
+      "what": "background blur",
+      "kind": "style",
+      "replace_with": "medium depth of field, the wall stays readable"
+    }
+  ],
+  "references": [
+    {
+      "id": "src",
+      "src": "../../../../../99-raw/phase5/inputs/M/hero-16x9-stub.png",
+      "role": "edit_source"
+    }
+  ],
+  "edit": {
+    "operation": "relight",
+    "source": "src",
+    "changes": [
+      {
+        "op": "replace",
+        "target": "the morning daylight",
+        "to": "late-evening light: the window turns deep dusk blue and a small warm table lamp off-frame on the left lights the cup and the wall",
+        "value": "2700 K lamp light"
+      }
+    ],
+    "keep": [
+      "cup, napkin and table exactly as they are",
+      "camera angle and crop",
+      "empty plaster wall on the left 45 percent of the frame"
+    ],
+    "visible_after": "the same table at dusk, lit by a warm lamp from the left, the wall still empty for the headline",
+    "preserve_suffix": true
+  }
+}

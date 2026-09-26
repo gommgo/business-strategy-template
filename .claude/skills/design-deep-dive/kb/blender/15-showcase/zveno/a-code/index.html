@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Звено — модульный манипулятор, который собирают за 30 минут · демо L2</title>
+<meta name="description" content="Робот-манипулятор из восьми модулей: соединяются поворотом кольца, программируются показом. Демо-страница рецепта 03 базы creative-research.">
+<!-- Рабочий пример L2 · рецепт 10-recipes/03-product-launch-l2.md · агент J · волна 3 · 2026-09-25 · Chromium 153 / WebKit 26.6
+     Демо: бренд «Звено», характеристики и цены вымышлены. 3D — только код (three 0.186.1, процедурная геометрия), постеры — свой рендер
+     той же сцены; шрифты OFL; без CDN. Сюжет «история продукта»: модули → сборка → внутри сустава → программирование показом. -->
+<script>
+/* до первой отрисовки: выбор «движения» из localStorage (переключатель F2 motion-toggle), класс js и режим сцены.
+   gl-pending — ждём 3D: станции-картинки скрыты, сцены высокие; в reduce класса нет → страница-стопка станций. */
+(function () {
+  var d = document.documentElement, m = null;
+  try { m = localStorage.getItem('motion'); } catch (e) {}
+  if (m === 'reduced' || m === 'full') d.dataset.motion = m;
+  d.classList.add('js');
+  var reduce = m === 'reduced' || (m !== 'full' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  if (!reduce) d.classList.add('gl-pending');
+})();
+</script>
+<!-- оба подмножества шрифтов первого экрана (цифры, «», —, двоеточие — в latin; F2: без предзагрузки CLS загрузки 0,15) -->
+<link rel="preload" href="_shared/fonts/science-gothic/science-gothic-cyrillic-wdth-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="_shared/fonts/science-gothic/science-gothic-latin-wdth-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="_shared/fonts/onest/onest-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="_shared/fonts/onest/onest-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="_shared/fonts.css">
+<link rel="stylesheet" href="_shared/marketing-tokens.css">
+<link rel="stylesheet" href="style.css">
+<script src="js/motion.js" defer></script>
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">К содержанию</a>
+
+<header class="top" data-section="header">
+  <div class="top__in">
+    <a class="logo" href="./" aria-label="Звено — на главную"><svg class="logo__mark" viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="12" r="5"/><circle cx="17" cy="12" r="5"/></svg>Звено</a>
+    <nav class="top__nav" aria-label="Разделы">
+      <a href="#modules">Модули</a><a href="#inside">Внутри</a><a href="#program">Программа</a><a href="#pricing">Цена</a>
+    </nav>
+    <button class="motion-btn" type="button" data-motion-toggle aria-pressed="false">Меньше движения</button>
+    <a class="btn btn--small" href="#demo" data-slot="cta-primary">Запросить демо</a>
+  </div>
+</header>
+
+<canvas class="stage" data-fx="stage" aria-hidden="true"></canvas>
+
+<main id="main">
+
+<section class="hero" data-section="hero" aria-labelledby="h1">
+  <picture class="hero__poster" data-slot="hero-visual">
+    <source media="(max-width: 40rem)" srcset="img/hero-m.webp" width="600" height="1300">
+    <img src="img/hero-d.webp" width="1600" height="1000" fetchpriority="high" decoding="async"
+      alt="Манипулятор «Звено»: основание, три белых сустава, два алюминиевых звена, запястье и захват; на стыках — оранжевые кольца-замки">
+  </picture>
+  <div class="hero__in">
+    <p class="eyebrow hero__eyebrow" data-slot="eyebrow">Модульный манипулятор для&nbsp;цехов и&nbsp;лабораторий</p>
+    <h1 id="h1" class="hero__title" data-slot="headline">Робот, которого собирают за&nbsp;30&nbsp;минут</h1>
+    <p class="hero__lead" data-slot="subheadline" data-moment="hero-copy-rise">Восемь модулей соединяются поворотом кольца. Собирает ваш инженер, программирует — рукой, показывая движение, без&nbsp;кода.</p>
+    <div class="hero__actions">
+      <a class="btn" href="#demo" data-slot="cta-primary">Запросить демонстрацию</a>
+      <a class="link-more" href="#modules">Как он устроен</a>
+    </div>
+    <ul class="hero__facts" data-slot="hero-proof">
+      <li><b>5&nbsp;кг</b> полезной нагрузки</li><li><b>900&nbsp;мм</b> вылет</li><li><b>±0,05&nbsp;мм</b> повторяемость</li>
+    </ul>
+  </div>
+</section>
+
+<section class="scene scene--modules" id="modules" data-section="story-modules" data-scene="story" aria-labelledby="mod-h">
+  <div class="scene__head">
+    <p class="eyebrow">01 · Модули</p>
+    <h2 id="mod-h" class="h2">Восемь модулей — одна рука</h2>
+  </div>
+  <ol class="steps" data-slot="steps">
+    <li class="step" data-group="step-1" style="--at: .42">
+      <h3 class="step__t">Разберём, чтобы&nbsp;показать</h3>
+      <p>Основание, три сустава, два звена, запястье и&nbsp;захват. Каждый модуль — отдельная деталь с&nbsp;мотором и&nbsp;электроникой внутри.</p>
+      <figure class="station"><img src="img/st-exploded.webp" width="1200" height="750" loading="lazy" decoding="async" alt="Манипулятор разнесён на восемь модулей, как на сборочном чертеже"><figcaption>Станция 1 · модули разнесены</figcaption></figure>
+    </li>
+    <li class="step" data-group="step-2" style="--at: .8">
+      <h3 class="step__t">Кольцо-замок</h3>
+      <p>Модуль садится на&nbsp;предыдущий и&nbsp;фиксируется поворотом оранжевого кольца на&nbsp;90°. В&nbsp;одном разъёме — механика, питание и&nbsp;шина данных.</p>
+      <figure class="station"><img src="img/st-locking.webp" width="1200" height="750" loading="lazy" decoding="async" alt="Модули садятся снизу вверх, верхние ещё не на месте"><figcaption>Станция 2 · сборка снизу вверх</figcaption></figure>
+    </li>
+    <li class="step" data-group="step-3" style="--at: .99">
+      <h3 class="step__t">Первое движение — через&nbsp;30&nbsp;минут</h3>
+      <p>От&nbsp;коробки до&nbsp;первого движения — полчаса и&nbsp;шестигранный ключ для&nbsp;основания. Интегратор не&nbsp;нужен.</p>
+      <figure class="station"><img src="img/st-first-move.webp" width="1200" height="750" loading="lazy" decoding="async" alt="Собранный манипулятор поворачивается и опускает захват"><figcaption>Станция 3 · собран и двигается</figcaption></figure>
+    </li>
+  </ol>
+</section>
+
+<section class="section specs" data-section="specs" aria-labelledby="specs-h">
+  <div class="container">
+    <h2 id="specs-h" class="h2">Цифры, которые спрашивают первыми</h2>
+    <dl class="specs__grid">
+      <div><dt>Полезная нагрузка</dt><dd>5&nbsp;кг</dd></div>
+      <div><dt>Вылет</dt><dd>600–900&nbsp;мм</dd></div>
+      <div><dt>Повторяемость</dt><dd>±0,05&nbsp;мм</dd></div>
+      <div><dt>Масса</dt><dd>14&nbsp;кг</dd></div>
+    </dl>
+    <p class="specs__note">Вылет зависит от&nbsp;длины звеньев: короткие — 600&nbsp;мм, длинные — 900&nbsp;мм. Звенья меняются так&nbsp;же, как суставы.</p>
+  </div>
+</section>
+
+<section class="scene scene--inside" id="inside" data-section="story-inside" data-scene="scan" aria-labelledby="in-h">
+  <div class="scene__head scene__head--right">
+    <p class="eyebrow">02 · Внутри сустава</p>
+    <h2 id="in-h" class="h2">Сустав — целый привод в&nbsp;одном корпусе</h2>
+  </div>
+  <ol class="steps steps--right">
+    <li class="step" data-group="step-1" style="--at: .3">
+      <h3 class="step__t">Мотор</h3>
+      <p>Бесколлекторный мотор с&nbsp;обмоткой из&nbsp;меди. Тормоз держит руку, если пропало питание.</p>
+      <figure class="station"><img src="img/st-scan.webp" width="1200" height="750" loading="lazy" decoding="async" alt="Корпус сустава наполовину снят оранжевой линией скана, внутри видны обмотки мотора"><figcaption>Станция 4 · скан снимает корпус</figcaption></figure>
+    </li>
+    <li class="step" data-group="step-2" style="--at: .64">
+      <h3 class="step__t">Волновой редуктор и&nbsp;датчик</h3>
+      <p>Редуктор 100:1 без&nbsp;люфта и&nbsp;абсолютный датчик положения: рука знает, где она, сразу после включения.</p>
+      <figure class="station"><img src="img/st-inside.webp" width="1200" height="750" loading="lazy" decoding="async" alt="Слои сустава разведены вдоль оси: мотор, зубчатое колесо редуктора, диск датчика положения"><figcaption>Станция 5 · слои привода</figcaption></figure>
+    </li>
+    <li class="step" data-group="step-3" style="--at: .95">
+      <h3 class="step__t">Меняется целиком</h3>
+      <p>Сустав не&nbsp;ремонтируют на&nbsp;месте: снимают кольцом и&nbsp;ставят запасной за&nbsp;пять минут. Старый уходит в&nbsp;сервис.</p>
+    </li>
+  </ol>
+</section>
+
+<section class="section program" id="program" data-section="product-demo" aria-labelledby="prog-h">
+  <div class="container program__in">
+    <div class="program__text">
+      <p class="eyebrow">03 · Программирование</p>
+      <h2 id="prog-h" class="h2">Программируют показом</h2>
+      <p>Включите режим обучения, проведите руку по&nbsp;траектории и&nbsp;сохраните точки. Приложение соберёт программу и&nbsp;покажет путь сверху — его можно поправить пальцем.</p>
+    </div>
+    <div class="app" data-slot="screenshot" data-moment="app-build" role="img" aria-label="Приложение «Звено»: список из пяти точек траектории и вид сверху на путь захвата">
+      <div class="app__bar"><span class="app__dot"></span>Программа · перекладка коробок<span class="app__mode">Обучение</span></div>
+      <div class="app__body">
+        <ol class="app__pts">
+          <li style="--i:0"><b>P1</b> забрать · 420, −180, 90</li>
+          <li style="--i:1"><b>P2</b> поднять · 420, −180, 260</li>
+          <li style="--i:2"><b>P3</b> перенести · 120, 240, 260</li>
+          <li style="--i:3"><b>P4</b> опустить · 120, 240, 110</li>
+          <li style="--i:4"><b>P5</b> отпустить · 120, 240, 110</li>
+        </ol>
+        <svg class="app__map" viewBox="0 0 320 240" aria-hidden="true">
+          <circle cx="160" cy="200" r="120" class="app__reach"/>
+          <circle cx="160" cy="200" r="10" class="app__base"/>
+          <path class="app__path" pathLength="1" d="M252 84 C 236 70, 205 58, 186 70 S 108 118, 96 146"/>
+          <g class="app__marks"><circle cx="252" cy="84" r="6"/><circle cx="96" cy="146" r="6"/></g>
+        </svg>
+      </div>
+      <div class="app__foot"><span class="app__btn">Записать точку</span><span class="app__btn app__btn--go">Воспроизвести</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section tasks" data-section="benefits" aria-labelledby="tasks-h">
+  <div class="container">
+    <h2 id="tasks-h" class="h2">Задачи, под которые его берут</h2>
+    <ul class="tasks__list">
+      <li><h3>Перекладка и паллетизация</h3><p>Коробки до&nbsp;5&nbsp;кг с&nbsp;конвейера на&nbsp;паллет по&nbsp;схеме укладки.</p></li>
+      <li><h3>Обслуживание станка</h3><p>Заготовку — в&nbsp;патрон, деталь — в&nbsp;тару, пока оператор у&nbsp;соседнего станка.</p></li>
+      <li><h3>Лаборатория</h3><p>Пробирки из&nbsp;штатива в&nbsp;центрифугу и&nbsp;обратно, одинаково в&nbsp;каждом цикле.</p></li>
+    </ul>
+  </div>
+</section>
+
+<section class="section pricing" id="pricing" data-section="pricing" aria-labelledby="price-h">
+  <div class="container pricing__in">
+    <h2 id="price-h" class="h2">Цена комплекта</h2>
+    <div class="price-card">
+      <p class="price-card__v">от&nbsp;1&nbsp;890&nbsp;000&nbsp;₽</p>
+      <p class="price-card__what">Восемь модулей, контроллер в&nbsp;основании, приложение для&nbsp;планшета, два дня обучения на&nbsp;вашем участке.</p>
+      <p class="price-card__when">Поставка — 6&nbsp;недель. Запасной сустав — 190&nbsp;000&nbsp;₽.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section final" id="demo" data-section="final-cta" aria-labelledby="demo-h">
+  <div class="container final__in">
+    <div>
+      <h2 id="demo-h" class="h2">Покажем робота на&nbsp;вашей задаче</h2>
+      <p>Опишите, что нужно перекладывать или обслуживать. Инженер приедет с&nbsp;собранной рукой и&nbsp;за&nbsp;день покажет цикл на&nbsp;вашем участке.</p>
+    </div>
+    <form class="form" action="#demo" method="post" data-slot="form">
+      <label class="field"><span>Имя</span><input name="name" autocomplete="name" required></label>
+      <label class="field"><span>Компания</span><input name="org" autocomplete="organization"></label>
+      <label class="field"><span>Телефон или почта</span><input name="contact" autocomplete="email" required></label>
+      <label class="field"><span>Задача</span><input name="task" autocomplete="off" placeholder="например, перекладка коробок"></label>
+      <label class="consent"><input type="checkbox" name="consent" required><span>Согласен на&nbsp;обработку персональных данных по&nbsp;<a href="#policy">политике</a></span></label>
+      <button class="btn btn--wide" type="submit">Запросить демонстрацию</button>
+      <p class="form__done" role="status" hidden>Заявка принята (демо: данные никуда не&nbsp;отправлены).</p>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot" data-section="footer">
+  <div class="container">
+    <p><b>Звено</b> · модульные манипуляторы · ИНН 0000000000 · <a id="policy" href="#policy">Политика обработки данных</a></p>
+    <p class="foot__demo">Демо-страница базы creative-research (рецепт 03, уровень L2): бренд, характеристики и&nbsp;цены вымышлены; 3D — код, постеры — рендер той&nbsp;же сцены.</p>
+  </div>
+</footer>
+</body>
+</html>

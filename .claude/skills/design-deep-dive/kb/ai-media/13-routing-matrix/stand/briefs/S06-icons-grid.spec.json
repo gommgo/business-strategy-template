@@ -1,0 +1,108 @@
+{
+ "spec_version": "0.1",
+ "id": "stand-s06-icons-grid",
+ "brief_language": "ru",
+ "task": "IMG-ICON3D",
+ "role": {
+  "page_type": "saas",
+  "section": "features",
+  "slot": "feature-icons",
+  "priority": "below-fold",
+  "purpose": "4 объёмные иконки фич в одном стиле; подписи — HTML"
+ },
+ "subject": {
+  "summary": "a 2 by 2 grid of four separate 3D icons on a plain background",
+  "elements": [
+   {
+    "id": "bag",
+    "what": "a shopping bag icon",
+    "position": "top-left cell"
+   },
+   {
+    "id": "chat",
+    "what": "a speech bubble icon",
+    "position": "top-right cell"
+   },
+   {
+    "id": "cal",
+    "what": "a calendar icon",
+    "position": "bottom-left cell"
+   },
+   {
+    "id": "shield",
+    "what": "a shield icon",
+    "position": "bottom-right cell"
+   }
+  ]
+ },
+ "composition": {
+  "shot": "medium",
+  "angle": "45-degree",
+  "subject_region": "full-frame",
+  "layout_note": "equal cells, one icon centered in each cell, same size and same camera angle"
+ },
+ "light": {
+  "source": "studio softbox",
+  "direction": "top",
+  "quality": "soft",
+  "interaction": "soft contact shadow under each icon"
+ },
+ "palette": [
+  {
+   "role": "background",
+   "hex": "#F2F0EC",
+   "name": "warm off-white",
+   "share": 0.7,
+   "applies_to": "background"
+  },
+  {
+   "role": "dominant",
+   "hex": "#3D6BF2",
+   "name": "bright blue",
+   "share": 0.18,
+   "applies_to": "icons"
+  },
+  {
+   "role": "accent",
+   "hex": "#FFB547",
+   "name": "warm amber",
+   "share": 0.05,
+   "applies_to": "small details on the icons"
+  }
+ ],
+ "materials": [
+  "matte clay"
+ ],
+ "style": {
+  "medium": "clay-3d",
+  "anchors": [
+   "soft matte clay 3D icons",
+   "rounded chunky shapes"
+  ],
+  "series_block": "soft matte clay 3D icons, rounded chunky shapes, bright blue with small warm amber details, same camera angle and same soft top light for every icon"
+ },
+ "exclusions": [
+  {
+   "what": "text or letters",
+   "kind": "service"
+  },
+  {
+   "what": "watermark",
+   "kind": "service"
+  }
+ ],
+ "text": {
+  "mode": "none"
+ },
+ "output": {
+  "primary_ratio": "1:1",
+  "aspect_ratios": [
+   "1:1"
+  ],
+  "resolution": "1K",
+  "format": "png",
+  "max_kb": 200
+ },
+ "notes": "новый бриф стенда E: сетка 2×2 одной генерацией → нарезка (гипотеза W2-10 о согласованности)",
+ "checked_at": "2026-09-23"
+}

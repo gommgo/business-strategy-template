@@ -1,0 +1,440 @@
+# ДЕМО-ФАКТЫ J · «Сталькон» — ВЫМЫШЛЕНЫ (формат text facts.yaml; поля — по образцу демо-фактов text «Отвес»).
+facts_version: 1
+date: '2026-09-24'
+site: stalkon
+lang: ru
+jurisdiction: ru
+status: draft
+owner:
+  role: директор (заказчик)
+  contact: почта заказчика из брифа
+collected_by: редактор по анкете proof-intake.md
+intake:
+  form: proof-intake.md@2026-09-24
+  asked: '2026-09-10'
+  answered: '2026-09-18'
+  channel: общий документ + созвон с записью
+never_claim_defaults: ru-default-1
+entities:
+- id: company-otves
+  type: company
+  names:
+  - «Отвес»
+  - Отвес
+  - студия ремонта «Отвес»
+- id: city-nn
+  type: place
+  names:
+  - Нижний Новгород
+  - Нижнем Новгороде
+  - Нижегородская область
+- id: platform-yandex-maps
+  type: platform
+  names:
+  - Яндекс Карты
+  - Яндекс Картах
+  - Яндекс.Карты
+- id: person-lapin
+  type: person
+  names:
+  - Сергей Лапин
+  - Сергей
+  fact_id: foreman-lapin
+- id: person-anna-k
+  type: person
+  names:
+  - Анна К.
+  - Анна
+  fact_id: review-anna-k
+facts:
+- id: company-requisites
+  kind: company
+  claim_class:
+  - company-details
+  - fact-number
+  verbatim:
+  - ООО «Сталькон» (вымышленная демо-компания J), ОГРН 0000000000000 — ДЕМО
+  canonical: Студия «Отвес» ремонтирует квартиры в Нижнем Новгороде с 2014 года.
+  values:
+  - value: 2014
+    unit: year
+    what: год начала работы
+  entities:
+  - company-otves
+  - city-nn
+  source:
+    type: registry
+    who: ЕГРЮЛ
+    where: выписка
+    date: '2026-09-10'
+    document: egrul-2026-09-10.pdf
+    quote: 'Дата регистрации: 11.03.2014'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: not-required
+  use:
+    section_roles: []
+    slot_types: []
+  lang: ru
+- id: company-since-2009
+  kind: company
+  claim_class:
+  - company-details
+  - fact-number
+  verbatim:
+  - Работаем с 2009 года (демо)
+  canonical: Студия «Отвес» ремонтирует квартиры в Нижнем Новгороде с 2014 года.
+  values:
+  - value: 2014
+    unit: year
+    what: год начала работы
+  entities:
+  - company-otves
+  - city-nn
+  source:
+    type: registry
+    who: ЕГРЮЛ
+    where: выписка
+    date: '2026-09-10'
+    document: egrul-2026-09-10.pdf
+    quote: 'Дата регистрации: 11.03.2014'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: not-required
+  use:
+    section_roles: []
+    slot_types: []
+  lang: ru
+- id: projects-count
+  kind: metric
+  claim_class:
+  - fact-number
+  verbatim:
+  - 312 объектов с 2009 года (демо)
+  canonical: С 2014 по сентябрь 2026 года студия «Отвес» сдала 1 146 квартир в Нижнем Новгороде (данные CRM на 1 сентября 2026 года).
+  values:
+  - value: 1146
+    unit: pcs
+    what: квартиры, сданные по акту
+    as_of: '2026-09-01'
+  - value: 2014
+    unit: year
+    what: год начала работы
+  entities:
+  - company-otves
+  - city-nn
+  source:
+    type: customer-system
+    who: заказчик (директор)
+    where: выгрузка CRM, актов сдачи-приёмки
+    date: '2026-09-01'
+    document: crm-export-2026-09-01.xlsx, лист «Акты»
+    quote: 'Подписанных актов сдачи: 1146 (с 03.2014)'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+    method: число строк выгрузки совпало с отчётом CRM; выборочно 10 актов
+  permission:
+    status: not-required
+  use:
+    section_roles: []
+    slot_types: []
+  notes: «Более 1 100» — округление вниз допустимо; «1 200+» — нет (текст не может быть больше факта).
+  translations:
+    en:
+      canonical: From 2014 to September 2026, Otves renovated and handed over 1,146 apartments in Nizhny Novgorod (CRM data as of 1
+        September 2026).
+      note: адаптация; числа по-английски с запятой
+  lang: ru
+- id: capacity-tons
+  kind: metric
+  claim_class:
+  - fact-number
+  verbatim:
+  - 1 800 тонн металлоконструкций в месяц (демо)
+  canonical: С 2014 по сентябрь 2026 года студия «Отвес» сдала 1 146 квартир в Нижнем Новгороде (данные CRM на 1 сентября 2026 года).
+  values:
+  - value: 1146
+    unit: pcs
+    what: квартиры, сданные по акту
+    as_of: '2026-09-01'
+  - value: 2014
+    unit: year
+    what: год начала работы
+  entities:
+  - company-otves
+  - city-nn
+  source:
+    type: customer-system
+    who: заказчик (директор)
+    where: выгрузка CRM, актов сдачи-приёмки
+    date: '2026-09-01'
+    document: crm-export-2026-09-01.xlsx, лист «Акты»
+    quote: 'Подписанных актов сдачи: 1146 (с 03.2014)'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+    method: число строк выгрузки совпало с отчётом CRM; выборочно 10 актов
+  permission:
+    status: not-required
+  use:
+    section_roles: []
+    slot_types: []
+  notes: «Более 1 100» — округление вниз допустимо; «1 200+» — нет (текст не может быть больше факта).
+  translations:
+    en:
+      canonical: From 2014 to September 2026, Otves renovated and handed over 1,146 apartments in Nizhny Novgorod (CRM data as of 1
+        September 2026).
+      note: адаптация; числа по-английски с запятой
+  lang: ru
+- id: case-warehouse
+  kind: case
+  claim_class:
+  - fact-number
+  - testimonial-quote
+  verbatim:
+  - Склад 12 000 м² за 94 дня (демо)
+  canonical: Ремонт двухкомнатной квартиры 54 м² под ключ в Сормовском районе Нижнего Новгорода занял 47 рабочих дней при сроке по договору
+    50 (договор № 2026-041, акт от 30 мая 2026 года).
+  values:
+  - value: 54
+    unit: m2
+    what: площадь квартиры
+  - value: 47
+    unit: days
+    what: срок ремонта, рабочие дни
+  - value: 50
+    unit: days
+    what: срок по договору, рабочие дни
+  entities:
+  - company-otves
+  - person-anna-k
+  - city-nn
+  source:
+    type: contract
+    who: заказчик
+    where: договор подряда и акт сдачи-приёмки
+    date: '2026-05-30'
+    document: договор № 2026-041; акт от 30.05.2026
+    quote: 'Объект: квартира, 2 комнаты, 54 м²; срок выполнения работ — 50 рабочих дней; работы приняты 30.05.2026 (47-й рабочий день)'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: granted
+    subject: Анна К. (владелец квартиры)
+    form: written-email
+    document: письмо от 2026-09-16
+    date: '2026-09-16'
+    shows:
+    - city
+    pd_consent: false
+    image_consent: false
+  asset: assets/cases/2026-041/ (фото до и после от заказчика; адрес на фото скрыт)
+  related:
+  - review-anna-k
+  use:
+    section_roles: []
+    slot_types: []
+  lang: ru
+- id: case-bridge
+  kind: case
+  claim_class:
+  - fact-number
+  - testimonial-quote
+  verbatim:
+  - Пешеходный мост 48 м за 60 дней (демо)
+  canonical: Ремонт двухкомнатной квартиры 54 м² под ключ в Сормовском районе Нижнего Новгорода занял 47 рабочих дней при сроке по договору
+    50 (договор № 2026-041, акт от 30 мая 2026 года).
+  values:
+  - value: 54
+    unit: m2
+    what: площадь квартиры
+  - value: 47
+    unit: days
+    what: срок ремонта, рабочие дни
+  - value: 50
+    unit: days
+    what: срок по договору, рабочие дни
+  entities:
+  - company-otves
+  - person-anna-k
+  - city-nn
+  source:
+    type: contract
+    who: заказчик
+    where: договор подряда и акт сдачи-приёмки
+    date: '2026-05-30'
+    document: договор № 2026-041; акт от 30.05.2026
+    quote: 'Объект: квартира, 2 комнаты, 54 м²; срок выполнения работ — 50 рабочих дней; работы приняты 30.05.2026 (47-й рабочий день)'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: granted
+    subject: Анна К. (владелец квартиры)
+    form: written-email
+    document: письмо от 2026-09-16
+    date: '2026-09-16'
+    shows:
+    - city
+    pd_consent: false
+    image_consent: false
+  asset: assets/cases/2026-041/ (фото до и после от заказчика; адрес на фото скрыт)
+  related:
+  - review-anna-k
+  use:
+    section_roles: []
+    slot_types: []
+  lang: ru
+- id: person-chief-engineer
+  kind: person
+  claim_class:
+  - fact-number
+  - fact-property
+  verbatim:
+  - Главный инженер — демо-персона, согласие на изображение (демо)
+  canonical: Сергей Лапин — прораб студии «Отвес», опыт в ремонте квартир 11 лет.
+  values:
+  - value: 11
+    unit: years
+    what: опыт в ремонте
+  entities:
+  - person-lapin
+  - company-otves
+  source:
+    type: customer-document
+    who: заказчик
+    where: анкета сотрудника, трудовая книжка (сведения о работе)
+    date: '2026-09-12'
+    document: hr/lapin-2026-09-12.pdf
+    quote: стаж в строительно-отделочных работах с 2015 г.
+    derivation: computed
+    computation: 2026 − 2015 = 11 лет
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: granted
+    subject: Сергей Лапин
+    form: signed-consent
+    scope:
+    - site
+    document: согласие на распространение ПДн от 2026-09-12
+    date: '2026-09-12'
+    shows:
+    - full-name
+    - photo
+    - position
+    pd_consent: true
+    image_consent: true
+  attribution:
+    name: Сергей Лапин
+    display: full-name
+    role: прораб
+    relation: employee
+  asset: assets/team/lapin.jpg (фото заказчика)
+  use:
+    section_roles: []
+    slot_types: []
+  lang: ru
+- id: certificate-sro
+  kind: certificate
+  claim_class:
+  - fact-number
+  verbatim:
+  - Допуск СРО № ДЕМО-0000 (демо, срок — до 2027-12-31)
+  canonical: С 2014 по сентябрь 2026 года студия «Отвес» сдала 1 146 квартир в Нижнем Новгороде (данные CRM на 1 сентября 2026 года).
+  values:
+  - value: 1146
+    unit: pcs
+    what: квартиры, сданные по акту
+    as_of: '2026-09-01'
+  - value: 2014
+    unit: year
+    what: год начала работы
+  entities:
+  - company-otves
+  - city-nn
+  source:
+    type: customer-system
+    who: заказчик (директор)
+    where: выгрузка CRM, актов сдачи-приёмки
+    date: '2026-09-01'
+    document: crm-export-2026-09-01.xlsx, лист «Акты»
+    quote: 'Подписанных актов сдачи: 1146 (с 03.2014)'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+    method: число строк выгрузки совпало с отчётом CRM; выборочно 10 актов
+  permission:
+    status: not-required
+  use:
+    section_roles: []
+    slot_types: []
+  notes: «Более 1 100» — округление вниз допустимо; «1 200+» — нет (текст не может быть больше факта).
+  translations:
+    en:
+      canonical: From 2014 to September 2026, Otves renovated and handed over 1,146 apartments in Nizhny Novgorod (CRM data as of 1
+        September 2026).
+      note: адаптация; числа по-английски с запятой
+  lang: ru
+  valid:
+    until: '2027-12-31'
+missing:
+- id: client-logos
+  what: логотипы клиентов с письменным разрешением
+  kind: client
+  claim_class:
+  - company-details
+  placeholder: '[PLACEHOLDER: реквизиты ООО]'
+  who: заказчик (бухгалтер)
+  needed_for:
+    section_roles:
+    - footer
+    - contacts
+    slot_types:
+    - footer-legal
+  asked: '2026-09-10'
+  due: '2026-09-30'
+  blocking: false
+  fallback: omit-block
+  question: Пришлите полное название юрлица, ОГРН, ИНН и юридический адрес — как в ЕГРЮЛ.
+- id: job-openings
+  what: список открытых вакансий с датами
+  kind: availability
+  claim_class:
+  - company-details
+  placeholder: '[PLACEHOLDER: реквизиты ООО]'
+  who: заказчик (бухгалтер)
+  needed_for:
+    section_roles:
+    - footer
+    - contacts
+    slot_types:
+    - footer-legal
+  asked: '2026-09-10'
+  due: '2026-09-30'
+  blocking: false
+  fallback: omit-block
+  question: Пришлите полное название юрлица, ОГРН, ИНН и юридический адрес — как в ЕГРЮЛ.
+never_claim: []

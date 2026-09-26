@@ -1,0 +1,776 @@
+# ru-okoshko-saas.yaml — пример copy deck v1 (10-templates-recipes, J3, 2026-09-24): основа — E3 deck-okoshko-saas-v0.yaml; тексты ai-self (E3, правки J3).
+# Факты — 10-templates-recipes/examples/facts/facts-demo-saas-okoshko.yaml (вымышленные / ДЕМО, не публиковать). Проверки — 02-examples-ru.md §3.
+copy_deck:
+  version: 1
+  date: '2026-09-24'
+  site: okoshko-demo
+  product_name: Окошко
+  lang: ru
+  voice_ref: ../../05-voice-editorial/examples/voice-grafa-b2b.yaml
+  facts_ref: facts/facts-demo-saas-okoshko.yaml
+  copy_slots_ref: ../../04-copy-by-block/copy-slots.yaml
+  jurisdiction: ru
+  legal_category:
+  - general
+  authors:
+  - E3 (ai-self, 2026-09-24)
+  - J3 (upgrade, пути, голос F; 2026-09-24)
+  pages:
+  - page_id: okoshko-solution-aware
+    page_type: landing-saas
+    awareness: solution-aware
+    primary_action: Настроить ссылку на запись
+    cta_primary: okoshko-solution-aware/hero/cta
+    notes: 'Трафик: категорийный поиск «онлайн-запись для барбершопа», статьи, ответы нейросетей (solution-aware, B1 §1.5). hero-proof нет: для
+      solution-aware первым идёт механизм (01 §4). Логотипов клиентов нет (missing client-logos) — блок не выводится.'
+    promise:
+      variants:
+      - id: a
+        text: Онлайн-запись с напоминаниями в Telegram для барбершопов и салонов
+        status: draft
+        source: ai-self
+      chosen: a
+      fact_ids:
+      - reminders
+      - self-booking-link
+      basis: 03 §3.2 (solution-vs-alternatives); product.goal пакета kimi
+    meta:
+      title: Онлайн-запись с напоминаниями в Telegram — «Окошко»
+      description: Клиенты записываются по ссылке сами и получают напоминание в Telegram за 24 и за 2 часа до визита. 14 дней бесплатно, без привязки
+        карты.
+      og_title: '«Окошко»: напоминания в Telegram вместо вечерних обзвонов'
+      og_description: Тариф для одного мастера — 990 ₽ в месяц. Пробный период — 14 дней, без привязки карты.
+      fact_ids:
+      - self-booking-link
+      - reminders
+      - trial-14-days
+      - price-master
+    sections:
+    - section_id: hero
+      block: hero
+      section_role: hero
+      question: Чем это лучше, чем обзванивать клиентов самому?
+      message: Клиенты записываются сами, напоминание уходит без вас; первый шаг — 14 дней бесплатно без карты
+      slots:
+      - slot_id: eyebrow
+        slot_type: eyebrow
+        variants:
+        - id: a
+          text: Онлайн-запись для барбершопов и салонов
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: категория и сегмент (03 §3.2)
+      - slot_id: h1
+        slot_type: headline
+        variants:
+        - id: a
+          text: Напоминания в Telegram вместо вечерних обзвонов
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - reminders
+        claim_flags:
+        - fact-property
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: solution-vs-alternatives (01 §2.1)
+      - slot_id: sub
+        slot_type: subheadline
+        variants:
+        - id: a
+          text: Клиенты записываются по ссылке сами и получают напоминание за 24 часа и за 2 часа до визита.
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - self-booking-link
+        - reminders
+        claim_flags:
+        - fact-property
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: механизм фактом (03 §3.2)
+      - slot_id: cta
+        slot_type: cta-label
+        variants:
+        - id: a
+          text: Настроить ссылку на запись
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: следствие вместо процедуры «Зарегистрироваться» (01 §6.1)
+      - slot_id: cta-note
+        slot_type: cta-note
+        variants:
+        - id: a
+          text: 14 дней бесплатно, без привязки карты
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - trial-14-days
+        claim_flags:
+        - price-discount
+        - purchase-terms
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: условие «бесплатно» в той же строке (H FREE-01)
+    - section_id: how
+      block: benefits
+      section_role: benefits
+      question: Что именно делает сервис?
+      message: Запись по ссылке и напоминания в Telegram
+      slots:
+      - slot_id: h2
+        slot_type: section-title
+        variants:
+        - id: a
+          text: Клиенты записываются сами, а напоминания уходят без вас
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - self-booking-link
+        - reminders
+        claim_flags:
+        - fact-property
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: заголовок-ответ, не ярлык «Возможности» (02 §1)
+      - slot_id: c1-title
+        slot_type: card-title
+        group: card-1
+        variants:
+        - id: a
+          text: Запись по ссылке
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - self-booking-link
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: c1-body
+        slot_type: card-body
+        group: card-1
+        variants:
+        - id: a
+          text: Клиент сам выбирает услугу, мастера и свободное время; ссылку ставят в Telegram, VK, на карты и на сайт.
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - self-booking-link
+        claim_flags:
+        - fact-property
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: c2-title
+        slot_type: card-title
+        group: card-2
+        variants:
+        - id: a
+          text: Напоминания в Telegram
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - reminders
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: c2-body
+        slot_type: card-body
+        group: card-2
+        variants:
+        - id: a
+          text: За 24 часа и за 2 часа до визита; напоминания в Telegram входят в любой тариф.
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - reminders
+        claim_flags:
+        - fact-property
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: 'карточек две — по числу фактов о продукте, не три по шаблону (02 §3; D: три карточки — примета ИИ)'
+    - section_id: case
+      block: case-studies
+      section_role: case-studies
+      question: Это правда снижает неявки?
+      message: 'Лучший случай и средний результат рядом: 14 % → 6 % в одном барбершопе, в среднем −4 п. п. у 212 салонов'
+      slots:
+      - slot_id: title
+        slot_type: case-title
+        variants:
+        - id: a
+          text: 'Барбершоп в Казани: неявки — с 14 % до 6 % за три месяца'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - case-noshow-kazan
+        claim_flags:
+        - fact-number
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: 'правка 1: verbatim факта (15 слов) сокращён до 11 — COPY-D-LEN, грубая граница D для case-title (provisional); число кресел —
+          в тексте кейса'
+      - slot_id: result
+        slot_type: case-result
+        variants:
+        - id: a
+          text: Неявки — с 14 % до 6 % за три месяца. В среднем у 212 салонов неявок стало меньше на 4 процентных пункта.
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - case-noshow-kazan
+        - noshow-average
+        claim_flags:
+        - fact-number
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: обычный результат рядом с лучшим (B2 §5.4)
+      - slot_id: quote
+        slot_type: testimonial-quote
+        variants:
+        - id: a
+          text: «Раньше вечером обзванивал всех, кто записан на завтра. Теперь напоминания уходят сами, а я звоню только тем, кто не подтвердил»
+          status: draft
+          source: customer
+        chosen: a
+        fact_ids:
+        - review-ruslan
+        claim_flags:
+        - testimonial-quote
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: дословно verbatim; отзыв о типичной ситуации, а не о восторге (02 §5.3)
+      - slot_id: author
+        slot_type: testimonial-attribution
+        variants:
+        - id: a
+          text: Руслан, владелец барбершопа, Казань
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - review-ruslan
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: подпись по permission.shows (имя, должность, город)
+    - section_id: switch
+      block: objections
+      section_role: objections
+      question: Переносить базу и учить мастеров — морока?
+      message: Базу переносит поддержка за 1 рабочий день; данные — на серверах в России
+      slots:
+      - slot_id: h2
+        slot_type: section-title
+        variants:
+        - id: a
+          text: Базу клиентов из Excel перенесём за 1 рабочий день
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - import-free
+        claim_flags:
+        - purchase-terms
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: a1
+        slot_type: objection-answer
+        variants:
+        - id: a
+          text: 'Переносить базу вручную не придётся: пришлите файл из Excel или Google Таблиц, и поддержка перенесёт клиентов бесплатно в течение
+            1 рабочего дня после получения файла.'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - import-free
+        claim_flags:
+        - purchase-terms
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: привычку снимает маленький обратимый шаг (02 §8)
+      - slot_id: a2
+        slot_type: objection-answer
+        variants:
+        - id: a
+          text: Вопросы по настройке — в чат поддержки с 9:00 до 21:00 по Москве; в августе первый ответ приходил в среднем за 7 минут.
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - support-chat
+        claim_flags:
+        - fact-property
+        - fact-number
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: a3
+        slot_type: objection-answer
+        variants:
+        - id: a
+          text: Данные клиентов хранятся на серверах в России.
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - data-in-russia
+        claim_flags:
+        - fact-property
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+    - section_id: pricing
+      block: pricing
+      section_role: pricing
+      question: Сколько стоит и что будет после пробного периода?
+      message: Тарифы по размеру салона; 14 дней бесплатно без карты; отключить — в любой день
+      slots:
+      - slot_id: h2
+        slot_type: section-title
+        variants:
+        - id: a
+          text: 'Тарифы «Окошка»: от 990 ₽ в месяц за мастера'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - price-master
+        claim_flags:
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: p1-name
+        slot_type: pricing-plan-name
+        group: plan-master
+        variants:
+        - id: a
+          text: Мастер
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - price-master
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: p1-price
+        slot_type: pricing-price
+        group: plan-master
+        variants:
+        - id: a
+          text: 990 ₽ в месяц
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - price-master
+        claim_flags:
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: p1-summary
+        slot_type: pricing-plan-summary
+        group: plan-master
+        variants:
+        - id: a
+          text: 'Для одного мастера: онлайн-запись и напоминания в Telegram'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - price-master
+        - reminders
+        claim_flags:
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: p2-name
+        slot_type: pricing-plan-name
+        group: plan-salon
+        variants:
+        - id: a
+          text: 'Салон: до 5 мастеров'
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - price-salon
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: p2-price
+        slot_type: pricing-price
+        group: plan-salon
+        variants:
+        - id: a
+          text: 2 490 ₽ в месяц
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - price-salon
+        claim_flags:
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: p2-summary
+        slot_type: pricing-plan-summary
+        group: plan-salon
+        variants:
+        - id: a
+          text: 'Для команды до 5 мастеров: онлайн-запись и напоминания в Telegram для каждого'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - price-salon
+        - reminders
+        claim_flags:
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: p3-name
+        slot_type: pricing-plan-name
+        group: plan-network
+        variants:
+        - id: a
+          text: Сеть
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - price-network-from
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: p3-price
+        slot_type: pricing-price
+        group: plan-network
+        variants:
+        - id: a
+          text: от 6 900 ₽ в месяц
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - price-network-from
+        claim_flags:
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: p3-summary
+        slot_type: pricing-plan-summary
+        group: plan-network
+        variants:
+        - id: a
+          text: От 6 мастеров и несколько филиалов; итог зависит от числа мастеров
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - price-network-from
+        claim_flags:
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: от чего зависит итог «от» (H PRICE-03)
+      - slot_id: sms
+        slot_type: pricing-feature
+        variants:
+        - id: a
+          text: SMS-напоминания — 4 ₽ за сообщение сверх тарифа
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - sms-price
+        claim_flags:
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: платное сверх тарифа — с ценой в той же строке (ux 06/04 §8.2)
+      - slot_id: annual
+        slot_type: pricing-price-note
+        variants:
+        - id: a
+          text: При оплате за 12 месяцев вперёд — 2 месяца в подарок
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - annual-discount
+        claim_flags:
+        - price-discount
+        - purchase-terms
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: cancel
+        slot_type: guarantee-text
+        variants:
+        - id: a
+          text: Подписку можно отключить в настройках в любой день; деньги за оставшиеся дни оплаченного периода вернём в течение 10 дней после
+            заявки.
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - cancel-refund
+        claim_flags:
+        - purchase-terms
+        - guarantee
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: 'формулировка по canonical: в verbatim демо-факта описка «за неоплаченные дни» (передать владельцу фактов)'
+      - slot_id: cta
+        slot_type: cta-label
+        variants:
+        - id: a
+          text: Настроить ссылку на запись
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: cta-note
+        slot_type: cta-note
+        variants:
+        - id: a
+          text: 'Без привязки карты: после 14 дней запись приостановится, пока вы не выберете тариф.'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - trial-14-days
+        claim_flags:
+        - purchase-terms
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: что будет после пробного периода (03 §4.5)
+    - section_id: faq
+      block: faq
+      section_role: faq
+      question: Что будет после пробного периода?
+      message: Остаток вопросов после секций
+      notes: 'правка 2: пара об интеграциях с кассами снята — пробел integrations-list с fallback omit-block (COPY-D-FALLBACK)'
+      slots:
+      - slot_id: q1
+        slot_type: faq-q
+        group: faq-1
+        variants:
+        - id: a
+          text: Что будет, когда закончится пробный период?
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - trial-14-days
+        claim_flags:
+        - price-discount
+        - purchase-terms
+        notes: 'правка 2: вопрос о пробном периоде — тоже утверждение класса price-discount (COPY-F-CLASS info): fact_ids и claim_flags'
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: a1
+        slot_type: faq-a
+        group: faq-1
+        variants:
+        - id: a
+          text: Запись приостановится, пока вы не выберете тариф, а данные сохранятся 90 дней. Пробный период — без привязки карты.
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - trial-14-days
+        claim_flags:
+        - price-discount
+        - purchase-terms
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: 'ответ первой фразой (02 §9; G COPY-GEO-14); правка 1: «без привязки карты» дословно — requires_nearby факта (COPY-F-NEARBY)'
+    - section_id: final
+      block: final-cta
+      section_role: final-cta
+      question: Попробовать сейчас?
+      message: Тот же первый шаг — 14 дней без карты
+      slots:
+      - slot_id: h2
+        slot_type: section-title
+        variants:
+        - id: a
+          text: Начните с 14 дней без оплаты
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - trial-14-days
+        claim_flags:
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: cta
+        slot_type: cta-label
+        variants:
+        - id: a
+          text: Настроить ссылку на запись
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: cta-note
+        slot_type: cta-note
+        variants:
+        - id: a
+          text: 14 дней бесплатно, без привязки карты
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - trial-14-days
+        claim_flags:
+        - price-discount
+        - purchase-terms
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+    - section_id: footer
+      block: footer
+      section_role: footer
+      message: Кто продавец и где документы
+      slots:
+      - slot_id: tagline
+        slot_type: footer-tagline
+        notes: 'правка 1: факты о напоминаниях убраны из подвала — use B2 не включает footer (COPY-F-USE); строка бренда — категория без утверждения'
+        variants:
+        - id: a
+          text: «Окошко» — онлайн-запись для барбершопов и салонов
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: legal
+        slot_type: footer-legal
+        variants:
+        - id: a
+          text: '[PLACEHOLDER: наименование, ОГРН, ИНН и адрес — как в ЕГРЮЛ]; политика обработки персональных данных; оферта'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        missing_ids:
+        - legal-details
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: блокирующий пробел (H DIST-01)
+    status: draft
+  notes: 'Пример J3 (фаза 2 J): основа — страница E3 99-raw/experiments/E/04-copy-deck-v0/deck-okoshko-saas-v0.yaml (ai-self E3, 0 error), upgrade
+    v0 → v1 copydeck.py; правки J3 — в notes слотов и в 02-examples-ru.md. voice_ref: профиль F «Графа» (сдержанный B2B, «вы») как ближайший —
+    своего профиля голоса у бренда нет (E, F: профилей SaaS и товара нет); у E3 было: ''черновик: на «вы», спокойно и по делу, без восклицаний;
+    профиля голоса F для «Окошка» нет''.'

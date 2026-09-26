@@ -1,0 +1,180 @@
+/* style.css · L1 «Сверка» · агент J · 2026-09-25 · Chromium 153 / WebKit 26.6 (Firefox — конечное состояние сцены)
+   Концепция «книга учёта на холодной бумаге»: антиква Literata (opsz) для заголовков и сумм, Commissioner для текста, один зелёный
+   «сошлось» и один красный «нет счёта» внутри интерфейса. Фирменный приём L1 — одна sticky-сцена 150svh на CSS scroll-driven, 0 КБ JS. */
+:root {
+  --font-display: "Literata", "Literata fallback", Georgia, serif;
+  --font-text: "Commissioner", "Commissioner fallback", Arial, sans-serif;
+  --c-paper: #edf0f3;
+  --c-surface: #ffffff;
+  --c-ink: #15181c;
+  --c-ink-2: #3b424a;
+  --c-muted: #59616b;
+  --c-line: #cfd5dc;
+  --c-accent: #0b7a55;          /* «сошлось»: 5,3:1 на белом, 4,8:1 на бумаге; кнопка — белый текст на зелёном */
+  --c-match: #dcf2e8;
+  --c-flag: #b42318;            /* «нет счёта»: только в интерфейсе */
+  --c-flag-bg: #fde8e6;
+  --row-h: 64px;
+  color-scheme: light;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--c-paper); color: var(--c-ink); font: 400 1.0625rem/1.55 var(--font-text); }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--c-accent); outline-offset: 3px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.skip { position: absolute; left: 12px; top: -60px; background: var(--c-ink); color: #fff; padding: 10px 14px; z-index: 10; }
+.skip:focus { top: 12px; }
+.eyebrow { font: 500 var(--type-eyebrow)/1.35 var(--font-text); color: var(--c-muted); margin: 0 0 18px; }
+.h2 { font: 600 var(--type-display-s)/1.08 var(--font-display); letter-spacing: 0; margin: 0 0 clamp(18px, 2.6vw, 32px); text-wrap: balance; }
+.container { max-width: var(--size-container); margin: 0 auto; }
+.section { padding: var(--space-section-m) var(--space-page-x); }
+.section p { max-width: 60ch; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: var(--size-cta-hero-h); padding: 0 1.5em;
+  background: var(--c-accent); color: #fff; font: 600 var(--type-cta-hero)/1.2 var(--font-text); text-decoration: none; border-radius: 10px;
+  transition: background-color var(--mm-dur-hover) var(--mm-ease-out-strong), transform var(--mm-dur-feedback) var(--mm-ease-out-strong); }
+.btn:hover { background: #096646; }
+.btn:active { transform: scale(var(--mm-scale-press)); }
+.btn--small { min-height: 44px; font-size: 1rem; padding: 0 1.1em; }
+
+.top { background: var(--c-paper); border-bottom: 1px solid var(--c-line); }
+.top__in { max-width: var(--size-container); margin: 0 auto; padding: 12px var(--space-page-x); display: flex; align-items: center; gap: 26px; }
+.logo { display: inline-flex; align-items: center; gap: 10px; font: 700 1.45rem/1 var(--font-display); text-decoration: none; margin-right: auto; }
+.logo__mark { width: 22px; height: 22px; border-radius: 5px; background: linear-gradient(90deg, var(--c-ink) 0 45%, transparent 45% 55%, var(--c-accent) 55%); }
+.top__nav { display: flex; gap: 22px; }
+.top__nav a, .top__login { text-decoration: none; color: var(--c-ink-2); }
+
+/* первый экран: по центру, ≤ 4 элементов (D: центр законен при ≤ 4); интерфейс ниже — продолжение, сцена начинается сразу */
+.hero { text-align: center; padding: clamp(40px, 6vw, 88px) var(--space-page-x) clamp(8px, 2vw, 24px); max-width: 64rem; margin: 0 auto; }
+.hero__title { font: 600 clamp(2.75rem, 1.5rem + 4.6vw, 5.5rem)/1.02 var(--font-display); letter-spacing: 0; margin: 0 auto var(--space-stack-display); max-width: 16ch; text-wrap: balance; }
+.hero__lead { font-size: var(--type-lead-hero); line-height: var(--lh-lead); color: var(--c-ink-2); margin: 0 auto 30px; max-width: 34em; }
+.hero__actions { display: grid; justify-items: center; gap: 12px; }
+.hero__note { margin: 0; color: var(--c-muted); font-size: .95rem; }
+@media (prefers-reduced-motion: no-preference) {
+  .hero__lead, .hero__actions { animation: rise var(--mm-dur-reveal) var(--mm-ease-out-expo) both; }
+  .hero__actions { animation-delay: 60ms; }
+}
+@keyframes rise { from { opacity: .01; transform: translateY(var(--mm-shift-reveal)); } }
+
+/* сцена «сверка»: секция 250svh, внутри — sticky 100svh; прогресс = view-timeline секции (contain 0–100 % = 150svh прокрутки) */
+.demo { height: 250svh; }
+/* содержимое прижато к верху sticky-коробки: заголовок сцены и верх книги видны уже в первом экране — продолжение hero */
+.demo__sticky { position: sticky; top: 0; height: 100svh; display: grid; align-content: start; gap: clamp(16px, 2.4vw, 28px);
+  padding: max(24px, 7svh) var(--space-page-x) 24px; max-width: calc(var(--size-container) + 2 * var(--space-page-x)); margin: 0 auto; }
+.demo__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
+.demo__head .h2 { margin: 0; max-width: 24ch; }
+.demo__status { margin: 0; font-weight: 600; color: var(--c-ink-2); font-variant-numeric: tabular-nums; }
+/* счётчик «сопоставлено»: шесть цифр стопкой в одной ячейке, видна одна (J2): counter() от анимированного @property <integer>
+   WebKit 26.6 не обновляет по ходу сцены — стоял 0, пока строки уже зелёные (кадры J/05-webkit). Без SDA и в reduce — видна 5. */
+.demo__n { display: inline-grid; color: var(--c-accent); font: 700 1.25rem/1 var(--font-display); }
+.demo__n > span { grid-area: 1 / 1; }
+.demo__n > span:not(:last-child) { opacity: 0; }
+.demo__flag-note { color: var(--c-flag); }
+
+.ledger { display: grid; grid-template-columns: minmax(0, 1fr) clamp(28px, 7vw, 96px) minmax(0, 1fr); background: var(--c-surface);
+  border: 1px solid var(--c-line); border-radius: 16px; padding: 18px clamp(12px, 2vw, 24px) 22px; box-shadow: 0 24px 60px -40px rgb(20 30 40 / .45); }
+.ledger__cap { margin: 0; height: 36px; font-size: .9rem; color: var(--c-muted); font-weight: 600; }
+.ledger__rows { list-style: none; margin: 0; padding: 0; position: relative; }
+.row { height: var(--row-h); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 14px;
+  border-bottom: 1px solid #e3e7ec; background: var(--c-match); position: relative; }
+.row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row b { font: 600 1.05rem/1 var(--font-display); font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; }
+.row--flag { background: var(--c-flag-bg); box-shadow: inset 3px 0 0 var(--c-flag); }
+.row__flag { position: absolute; right: 14px; bottom: 4px; font: 600 .72rem/1 var(--font-text); color: var(--c-flag); font-style: normal; }
+.row--empty { background: repeating-linear-gradient(135deg, transparent 0 8px, #eef1f4 8px 9px); }
+.ledger__links { width: 100%; height: calc(6 * var(--row-h)); margin-top: 36px; overflow: visible; }
+.ledger__links path { fill: none; stroke: var(--c-accent); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 0; }
+
+/* treatment: product-demo · peak · L1 · effect:pin-scrub-story (sticky + view-timeline) · motion-spec: sverka-home · ledger-match
+ * reduce: final-state · mobile: simplified · js: 0 KB · нет поддержки SDA (Firefox 2026-09) → конечное состояние */
+@supports ((animation-timeline: view()) and (animation-range: 0% 100%)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .demo { view-timeline: --demo block; }
+    .ledger__col--docs .row:not(.row--empty) { animation: slot linear both, matched linear both; animation-timeline: --demo, --demo;
+      animation-range: contain calc(8% + var(--i) * 15%) contain calc(24% + var(--i) * 15%); }
+    .ledger__col--bank .row:not(.row--flag) { animation: matched linear both; animation-timeline: --demo;
+      animation-range: contain calc(8% + var(--i) * 15%) contain calc(24% + var(--i) * 15%); }
+    .ledger__links path { animation: draw linear both; animation-timeline: --demo;
+      animation-range: contain calc(8% + var(--i) * 15%) contain calc(24% + var(--i) * 15%); }
+    .row--flag { animation: flag linear both; animation-timeline: --demo; animation-range: contain 84% contain 94%; }
+    .row--flag .row__flag, .demo__flag-note { animation: flag-in linear both; animation-timeline: --demo; animation-range: contain 84% contain 94%; }
+    /* цифра k видна, пока сошлись k пар: пара i зеленеет на 19,5–24 + 15·i % (последние 28 % её отрезка), счёт растёт на середине
+       позеленения — 22 + 15·i %; значит 0 — до 22 %, k — 22 + 15·(k−1)…22 + 15·k %, 5 — с 82 % (станции 0,24 · 0,54 · 0,94 → 1 · 3 · 5;
+       граница ровно на станции давала 0 и 2 — кадры J/05 l1b) */
+    .demo__n > span { opacity: 0; animation: digit linear none; animation-timeline: --demo; }
+    .demo__n > span:nth-child(1) { animation-fill-mode: backwards; animation-range: contain 0% contain 22%; }
+    .demo__n > span:nth-child(2) { animation-range: contain 22% contain 37%; }
+    .demo__n > span:nth-child(3) { animation-range: contain 37% contain 52%; }
+    .demo__n > span:nth-child(4) { animation-range: contain 52% contain 67%; }
+    .demo__n > span:nth-child(5) { animation-range: contain 67% contain 82%; }
+    .demo__n > span:nth-child(6) { animation-fill-mode: forwards; animation-range: contain 82% contain 100%; }
+  }
+}
+@keyframes slot { from { translate: 0 calc(var(--from, 0) * 100%); } 70%, to { translate: 0 0; } }
+@keyframes matched { 0%, 72% { background-color: var(--c-surface); } to { background-color: var(--c-match); } }
+@keyframes draw { 0%, 55% { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes flag { from { background-color: var(--c-surface); box-shadow: inset 0 0 0 var(--c-flag); } }
+@keyframes flag-in { from { opacity: .01; } }
+@keyframes digit { from, to { opacity: 1; } }
+
+.stats { padding: 0 var(--space-page-x); }
+.stats__in { list-style: none; margin: 0 auto; padding: 0; max-width: var(--size-container); display: grid; grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--c-line); border-bottom: 1px solid var(--c-line); }
+.stats__in li { display: grid; gap: 6px; padding: 26px 24px 28px 0; }
+.stats__in li + li { border-left: 1px solid var(--c-line); padding-left: 24px; }
+.stats__in b { font: 600 clamp(2.2rem, 1.6rem + 2.2vw, 3.4rem)/1 var(--font-display); font-variant-numeric: tabular-nums lining-nums; }
+.stats__in span { color: var(--c-muted); }
+
+.how__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(20px, 3vw, 40px); }
+.how__n { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--c-ink); font: 600 1rem/1 var(--font-display); }
+.how__list h3 { font: 600 1.35rem/1.2 var(--font-display); margin: 14px 0 8px; }
+.how__list p { margin: 0; color: var(--c-ink-2); }
+
+.pricing { background: var(--c-surface); border-top: 1px solid var(--c-line); border-bottom: 1px solid var(--c-line); }
+.plans { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.plan { border: 1px solid var(--c-line); border-radius: 16px; padding: 24px; background: var(--c-paper); }
+.plan--main { border-color: var(--c-accent); box-shadow: inset 0 0 0 1px var(--c-accent); background: #f4fbf8; }
+.plan h3 { font: 600 1.3rem/1.2 var(--font-display); margin: 0 0 10px; }
+.plan__price { font: 600 2rem/1.1 var(--font-display); margin: 0 0 12px; font-variant-numeric: tabular-nums lining-nums; }
+.plan__price span { font: 400 1rem/1 var(--font-text); color: var(--c-muted); }
+.plan p:last-child { margin: 0; color: var(--c-ink-2); }
+.note { color: var(--c-muted); margin: 18px 0 0; }
+
+.faq__in { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: clamp(24px, 4vw, 64px); }
+.faq__list { border-top: 1px solid var(--c-ink); }
+.faq details { border-bottom: 1px solid var(--c-line); }
+.faq summary { cursor: pointer; list-style: none; padding: 18px 40px 18px 0; font: 600 1.2rem/1.3 var(--font-display); position: relative; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; position: absolute; right: 8px; top: 14px; font: 400 1.6rem/1 var(--font-text); transition: rotate var(--mm-dur-state) var(--mm-ease-out-strong); }
+.faq details[open] summary::after { rotate: 45deg; }
+.faq details p { margin: 0 0 18px; color: var(--c-ink-2); }
+.faq details[open] p { animation: answer-in var(--mm-dur-state) var(--mm-ease-out-strong) both; }
+@keyframes answer-in { from { opacity: .01; transform: translateY(calc(var(--mm-shift-reveal) / 4)); } }
+
+.final { text-align: center; }
+.final__in { display: grid; justify-items: center; gap: 8px; }
+.final .h2 { max-width: 18ch; }
+
+.foot { border-top: 1px solid var(--c-line); padding: 32px var(--space-page-x) 40px; color: var(--c-muted); font-size: .95rem; }
+.foot p { margin: 0 0 8px; }
+.foot__demo { font-size: .85rem; }
+
+@media (max-width: 60rem) {
+  .top__nav { display: none; }
+  .how__list, .plans { grid-template-columns: 1fr; }
+  .faq__in { grid-template-columns: 1fr; }
+}
+@media (max-width: 40rem) {
+  :root { --row-h: 54px; }
+  .top__login { display: none; }
+  .demo { height: 230svh; }
+  .ledger { padding: 14px 10px 16px; grid-template-columns: minmax(0, 1fr) 22px minmax(0, 1fr); }
+  .row { padding: 0 8px; font-size: .8rem; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; }
+  .row b { font-size: .95rem; }
+  .row__flag { right: 6px; bottom: 3px; }
+  .ledger__cap { font-size: .75rem; height: 34px; }
+  .ledger__links { margin-top: 34px; }
+  .stats__in { grid-template-columns: 1fr; }
+  .stats__in li + li { border-left: 0; padding-left: 0; border-top: 1px solid var(--c-line); }
+}

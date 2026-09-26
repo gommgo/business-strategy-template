@@ -1,0 +1,120 @@
+{
+ "spec_version": "0.1",
+ "id": "stand-s03-product-scene",
+ "brief_language": "ru",
+ "task": "IMG-PRODUCT",
+ "role": {
+  "page_type": "ecommerce",
+  "section": "product-gallery",
+  "slot": "pdp-lifestyle",
+  "priority": "above-fold",
+  "purpose": "лайфстайл-кадр карточки товара: банка кофе на кухне; товар обязан совпасть с референсом"
+ },
+ "subject": {
+  "summary": "the reference coffee tin standing on a light travertine kitchen counter next to a window",
+  "elements": [
+   {
+    "id": "tin",
+    "what": "the coffee tin from the reference image, 13 cm tall and 9 cm wide",
+    "position": "center",
+    "attributes": [
+     "same shape, lid, green label and label text as the reference"
+    ]
+   },
+   {
+    "id": "beans",
+    "what": "a small scatter of roasted coffee beans",
+    "relation": "in front of the tin"
+   },
+   {
+    "id": "grinder",
+    "what": "a manual coffee grinder, about the same height as the tin",
+    "relation": "out of focus behind the tin on the right"
+   }
+  ],
+  "environment": "bright Scandinavian kitchen in the morning"
+ },
+ "composition": {
+  "shot": "medium",
+  "angle": "eye-level",
+  "subject_region": "center",
+  "focal_point": {
+   "x": 0.5,
+   "y": 0.55
+  }
+ },
+ "camera": {
+  "lens_mm": 85,
+  "aperture": "f/2.8",
+  "depth_of_field": "shallow",
+  "capture": "product photograph"
+ },
+ "light": {
+  "source": "window daylight",
+  "direction": "right",
+  "quality": "soft",
+  "time_of_day": "morning",
+  "interaction": "soft contact shadow under the tin to the left"
+ },
+ "palette": [
+  {
+   "role": "background",
+   "hex": "#E9E4DC",
+   "name": "travertine beige",
+   "share": 0.55,
+   "applies_to": "counter and wall"
+  },
+  {
+   "role": "accent",
+   "hex": "#1F4D3A",
+   "name": "deep forest green",
+   "share": 0.12,
+   "applies_to": "tin label",
+   "strict": true
+  }
+ ],
+ "materials": [
+  "brushed metal",
+  "paper label",
+  "travertine",
+  "coffee beans"
+ ],
+ "style": {
+  "medium": "photograph",
+  "anchors": [
+   "editorial product photography",
+   "natural color balance"
+  ]
+ },
+ "references": [
+  {
+   "src": "99-raw/phase5/inputs/E/product_ref.png",
+   "role": "product",
+   "note": "shape, lid, label design and label text"
+  }
+ ],
+ "exclusions": [
+  {
+   "what": "extra text",
+   "kind": "service"
+  },
+  {
+   "what": "watermark",
+   "kind": "service"
+  }
+ ],
+ "text": {
+  "mode": "none"
+ },
+ "output": {
+  "primary_ratio": "4:3",
+  "aspect_ratios": [
+   "4:3"
+  ],
+  "resolution": "1K",
+  "format": "webp",
+  "max_kb": 180
+ },
+ "notes": "новый бриф стенда E; эталон товара — свой рендер Blender (99-raw/experiments/E/01-stand-inputs)",
+ "checked_at": "2026-09-23"
+}

@@ -1,0 +1,100 @@
+{
+  "spec_version": "0.2",
+  "id": "forest-roast-howto-illustrations-grid",
+  "checked_at": "2026-09-24",
+  "brief_language": "ru",
+  "task": "IMG-SERIES",
+  "role": {
+    "page_type": "ecommerce",
+    "section": "how-it-works",
+    "slot": "howto-illustrations",
+    "purpose": "four step illustrations in one generation for consistency; sliced and vectorised",
+    "priority": "below-fold",
+    "series_id": "forest-roast-illustrations"
+  },
+  "subject": {
+    "summary": "a 2 by 2 grid of four separate flat illustrations of one consistent set, equal cells with wide empty gutters",
+    "elements": [
+      {
+        "id": "farm",
+        "what": "a map pin over a small striped coffee field",
+        "position": "top-left cell"
+      },
+      {
+        "id": "roaster",
+        "what": "a round coffee roaster drum with three beans in front",
+        "position": "top-right cell"
+      },
+      {
+        "id": "bag",
+        "what": "a kraft paper coffee bag with a folded top",
+        "position": "bottom-left cell"
+      },
+      {
+        "id": "box",
+        "what": "a small delivery box with a leaf-shaped tag",
+        "position": "bottom-right cell"
+      }
+    ]
+  },
+  "composition": {
+    "shot": "full-bleed-abstract",
+    "subject_region": "full-frame",
+    "layout_note": "four equal cells, one object centered in each cell, same size and same front view"
+  },
+  "palette": [
+    {
+      "role": "background",
+      "hex": "#FBF8F2",
+      "name": "warm white",
+      "share": 0.55,
+      "applies_to": "background of every cell"
+    },
+    {
+      "role": "dominant",
+      "hex": "#E4DCCD",
+      "name": "light warm grey",
+      "share": 0.25,
+      "applies_to": "large flat shapes"
+    },
+    {
+      "role": "text",
+      "hex": "#1C1B18",
+      "name": "near black",
+      "share": 0.06,
+      "applies_to": "1.5 px lines and small details"
+    },
+    {
+      "role": "accent",
+      "hex": "#1F4D3A",
+      "name": "forest green",
+      "share": 0.08,
+      "applies_to": "one key element per cell",
+      "strict": true
+    }
+  ],
+  "text": {
+    "mode": "none"
+  },
+  "output": {
+    "primary_ratio": "1:1",
+    "resolution": "2K",
+    "format": "png"
+  },
+  "style": {
+    "medium": "flat-illustration",
+    "line": "uniform 1.5 px near-black lines at 320 px cell width"
+  },
+  "series": {
+    "id": "forest-roast-illustrations",
+    "block": "Flat vector illustration: simple geometric shapes with 14 px rounded corners, flat fills in light warm grey #E4DCCD and warm white #FBF8F2 with deep forest green #1F4D3A as the only accent, uniform 1.5 px lines in near black #1C1B18, smooth flat colour only, one light from the upper left, plain warm white background, generous empty space.",
+    "avoid_average": false
+  },
+  "exclusions": [
+    {
+      "what": "readable text and logos",
+      "kind": "artifact",
+      "replace_with": "clean unmarked surfaces"
+    }
+  ]
+}

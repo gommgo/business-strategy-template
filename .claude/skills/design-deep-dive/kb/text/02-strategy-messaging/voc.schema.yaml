@@ -1,0 +1,364 @@
+# voc.schema.yaml — формат voc.yaml: голос клиента (voice of customer) — источники, закодированные фрагменты, темы
+# text-research · волна 1 · агент B2 · 2026-09-24 · версия формата 1
+#
+# Что это. JSON Schema (draft 2020-12) в YAML. Экземпляр — `voc.yaml` проекта: откуда взяты слова клиентов (отзывы,
+# интервью о переключении, обращения в поддержку, записи продаж, опросы, форумы), дословные фрагменты с кодами (задача,
+# триггер, боль, желаемый результат, тревога, привычка, возражение, альтернатива, эмоция, сила JTBD) и темы-кластеры,
+# из которых пишутся заголовки, возражения и FAQ. Метод — `04-voice-of-customer.md`.
+#
+# Граница с facts.yaml: голос клиента — сырьё для слов и смысла; **цитата на странице — только через facts.yaml**
+# (факт `kind: testimonial` с разрешением). Парафраз темы — не цитата и не отзыв: без кавычек и без подписи.
+# Ссылки из других форматов — `voc:<id темы>` (B1: meaning.schema.yaml, message-hierarchy.schema.yaml — поле voc_ids).
+# Персональные данные: в voc.yaml — без ФИО, телефонов, почты, адресов; исходники с ПДн — у заказчика (`storage`),
+# основание обработки — `sources[].legal` (152-ФЗ; детали — H).
+#
+# Проверка: `99-raw/tools/venv-B2/bin/python ../../scripts/text/validate_facts.py` (метасхема и пример
+# `examples[0]` ниже).
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "urn:app-design:text-research:voc:1"
+title: "voc.yaml — голос клиента: источники, фрагменты, темы"
+description: >-
+  Дословные слова клиентов с кодами и темами. Нужен, чтобы заголовки, возражения, FAQ и язык страницы брались из слов
+  аудитории, а не из головы автора (Wiebe; Griffin & Hauser 1993). Частота упоминания не равна важности: важность —
+  отдельным методом (importance.method).
+date: "2026-09-24"
+x-version: 1
+x-owner: "text-research · 02-strategy-messaging · B2"
+x-doc: "02-strategy-messaging/04-voice-of-customer.md"
+
+type: object
+required: [voc_version, date, site, lang, sources, snippets]
+additionalProperties: false
+patternProperties:
+  "^x-": {description: "Расширения проекта."}
+properties:
+  voc_version: {const: 1}
+  date: {$ref: "#/$defs/date"}
+  site: {$ref: "#/$defs/id", description: "slug проекта (как в site-brief и facts.yaml)."}
+  lang: {$ref: "#/$defs/lang"}
+  facts_ref: {type: string, description: "Путь к facts.yaml проекта: туда попадают цитаты с разрешением."}
+  segments:
+    type: array
+    items: {$ref: "#/$defs/segment"}
+  sources:
+    type: array
+    minItems: 1
+    items: {$ref: "#/$defs/source"}
+  snippets:
+    type: array
+    items: {$ref: "#/$defs/snippet"}
+  themes:
+    type: array
+    items: {$ref: "#/$defs/theme"}
+  analysis: {$ref: "#/$defs/analysis"}
+
+$defs:
+  id:
+    type: string
+    pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+  date:
+    type: string
+    pattern: "^[0-9]{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?$"
+  lang:
+    type: string
+    pattern: "^[a-z]{2}(-[A-Z]{2})?$"
+
+  segment:
+    type: object
+    additionalProperties: false
+    required: [id, name]
+    properties:
+      id: {$ref: "#/$defs/id"}
+      name: {type: string}
+      description: {type: string, description: "Кто это: ситуация, а не демография («переезжают через 2–3 месяца, платят аренду и ипотеку»)."}
+
+  source:
+    type: object
+    additionalProperties: false
+    required: [id, type, where, collected, n_items, legal]
+    properties:
+      id: {$ref: "#/$defs/id"}
+      type:
+        enum: [own-reviews, platform-reviews, competitor-reviews, marketplace-reviews, interview-switch, interview-customer,
+               interview-lost, support-tickets, sales-calls, survey-post-purchase, survey-onsite, forum, social, chat]
+        description: "interview-switch — интервью о переключении (JTBD); interview-lost — с теми, кто не купил; survey-post-purchase — вопросы после покупки («что чуть не остановило»)."
+      where: {type: string, description: "Площадка, раздел, URL или «записи звонков CRM, сентябрь 2026»."}
+      period:
+        type: object
+        additionalProperties: false
+        properties:
+          from: {$ref: "#/$defs/date"}
+          to: {$ref: "#/$defs/date"}
+      collected: {$ref: "#/$defs/date"}
+      n_items: {type: integer, minimum: 0, description: "Сколько единиц просмотрено (отзывов, интервью, обращений, ответов)."}
+      sampling: {type: string, description: "Как отбирали: все за период, случайные 50, недавно переключившиеся 30–90 дней…"}
+      collected_by: {type: string}
+      storage: {type: string, description: "Где лежат исходники и записи (у заказчика); ПДн сюда не копируются."}
+      legal:
+        type: object
+        additionalProperties: false
+        required: [basis, pd]
+        properties:
+          basis:
+            enum: [public-page, platform-terms, consent, contract, customer-own-data]
+            description: "На каком основании используем: публичная страница (только анализ, не цитирование), условия площадки, согласие участника интервью, договор с заказчиком, собственные данные заказчика."
+          pd:
+            enum: [none, removed, pseudonymized, consented]
+            description: "Что с персональными данными во фрагментах: нет; удалены; заменены псевдонимами; есть согласие."
+          recording_consent: {type: boolean, description: "Интервью записано с согласия участника."}
+          terms_checked: {type: boolean, description: "Условия площадки проверены (скрейпинг, копирование)."}
+          note: {type: string}
+
+  codes:
+    type: object
+    additionalProperties: false
+    description: "Коды фрагмента: кратко своими словами аналитика; слова клиента — в snippet.text и theme.customer_words."
+    properties:
+      job: {type: string, description: "Задача (JTBD): какой прогресс нужен клиенту."}
+      trigger: {type: string, description: "Событие, после которого начал искать."}
+      pain: {type: string}
+      outcome: {type: string, description: "Желаемый результат."}
+      anxiety: {type: string, description: "Тревога насчёт нового решения."}
+      habit: {type: string, description: "Что держит на старом (привычка, издержки перехода)."}
+      objection: {type: string}
+      alternative: {type: string, description: "Чем решал до или вместо (включая «ничего не делать»)."}
+      question: {type: string, description: "Вопрос, который клиент задавал до покупки (сырьё FAQ)."}
+      emotion:
+        type: array
+        items: {enum: [fear, frustration, relief, joy, pride, shame, distrust, anger, surprise, calm]}
+
+  snippet:
+    type: object
+    additionalProperties: false
+    required: [id, source, text, lang]
+    properties:
+      id: {$ref: "#/$defs/id"}
+      source: {$ref: "#/$defs/id"}
+      item_ref: {type: string, description: "Ссылка на исходную единицу без ПДн: «отзыв 2026-06-14 №3», «интервью 2 мин 14:20»."}
+      text: {type: string, minLength: 1, maxLength: 400, description: "Дословно, с опечатками источника; без ФИО и контактов."}
+      lang: {$ref: "#/$defs/lang"}
+      segment: {$ref: "#/$defs/id"}
+      date: {$ref: "#/$defs/date"}
+      stars: {type: integer, minimum: 1, maximum: 5}
+      sentiment: {enum: [positive, negative, mixed, neutral]}
+      force: {enum: [push, pull, anxiety, habit, none], description: "Сила прогресса (Moesta, Spiek)."}
+      sticky: {type: boolean, description: "«Липкая» фраза: необычно точная, образная, повторяется у разных людей (Wiebe)."}
+      codes: {$ref: "#/$defs/codes"}
+      theme_ids:
+        type: array
+        items: {$ref: "#/$defs/id"}
+      quote_permission:
+        type: object
+        additionalProperties: false
+        description: "Можно ли цитировать фрагмент на сайте. Цитата живёт в facts.yaml; здесь — только ссылка на факт."
+        properties:
+          status: {enum: [none, requested, granted, denied]}
+          fact_id: {$ref: "#/$defs/id"}
+
+  theme:
+    type: object
+    additionalProperties: false
+    required: [id, kind, label, snippet_ids]
+    properties:
+      id: {$ref: "#/$defs/id", description: "Ссылка из других форматов — voc:<id>."}
+      kind: {enum: [job, trigger, pain, outcome, anxiety, habit, objection, alternative, question, phrase, criterion]}
+      label: {type: string, description: "Тема словами аналитика — коротко."}
+      customer_words:
+        type: array
+        items: {type: string}
+        description: "Как это говорят клиенты — дословные короткие формулировки (без ПДн); из них — слова заголовков и FAQ."
+      snippet_ids:
+        type: array
+        items: {$ref: "#/$defs/id"}
+        minItems: 1
+      count: {type: integer, minimum: 1, description: "Сколько фрагментов в теме."}
+      sources_count: {type: integer, minimum: 1, description: "Из скольких независимых источников."}
+      customers_count: {type: integer, minimum: 1, description: "Сколько разных людей это сказали."}
+      segments:
+        type: array
+        items: {$ref: "#/$defs/id"}
+      importance:
+        type: object
+        additionalProperties: false
+        required: [method]
+        properties:
+          method:
+            enum: [frequency-only, ranking-survey, rating-survey, interview-emphasis, analyst]
+            description: "frequency-only — только частота (не доказывает важность: Griffin & Hauser 1993); ranking-survey / rating-survey — клиенты ранжировали или оценили; interview-emphasis — повторялось как решающее в интервью о переключении."
+          value: {type: number}
+          note: {type: string}
+      confidence:
+        enum: [low, medium, high]
+        description: "low — < 3 человек или 1 источник; medium — ≥ 3 человек из ≥ 2 источников; high — насыщение (новые интервью не дают новых кодов) и ≥ 2 кодировщика."
+      use:
+        type: object
+        additionalProperties: false
+        description: "Где тема работает в тексте (id временного словаря 99-raw/notes/temp-vocabulary-v0.yaml)."
+        properties:
+          page_types: {type: array, items: {$ref: "#/$defs/id"}}
+          section_roles: {type: array, items: {$ref: "#/$defs/id"}}
+          slot_types: {type: array, items: {$ref: "#/$defs/id"}}
+      copy_hints:
+        type: array
+        items: {type: string}
+        description: "Как тема идёт в текст: заголовок из слов клиента, возражение → ответ с фактом, вопрос → FAQ."
+      fact_ids:
+        type: array
+        items: {$ref: "#/$defs/id"}
+        description: "Факты facts.yaml, которыми тема подтверждается или снимается (ответ на тревогу — гарантия, кейс)."
+
+  analysis:
+    type: object
+    additionalProperties: false
+    properties:
+      codebook_version: {type: string}
+      coders: {type: integer, minimum: 1, description: "Сколько человек кодировали; один аналитик находит около половины нужд (Griffin & Hauser 1993)."}
+      agreement: {type: string, description: "Как сводили расхождения кодировщиков."}
+      saturation:
+        type: object
+        additionalProperties: false
+        properties:
+          interviews: {type: integer}
+          new_codes_last_3: {type: integer, description: "Сколько новых кодов дали последние 3 интервью (0 — признак насыщения)."}
+          note: {type: string}
+      limits: {type: string}
+
+examples:
+  - voc_version: 1
+    date: "2026-09-24"
+    site: otves-remont-nn
+    lang: ru
+    facts_ref: "examples/facts-service-renovation.yaml"
+    segments:
+      - {id: seg-moving-soon, name: "Переезд скоро", description: "Купили вторичку, живут на съёмной, переезд через 2–4 месяца; платят аренду и ипотеку одновременно"}
+      - {id: seg-first-renovation, name: "Первый ремонт", description: "Ремонт впервые, боятся роста сметы и срыва сроков"}
+    sources:
+      - id: src-own-ym-reviews
+        type: platform-reviews
+        where: "Яндекс Карты, карточка студии «Отвес» (вымышленная), все отзывы с текстом"
+        period: {from: "2025-09-01", to: "2026-09-01"}
+        collected: "2026-09-18"
+        n_items: 96
+        sampling: "все отзывы с текстом за 12 месяцев; только анализ, без цитирования"
+        collected_by: "редактор"
+        storage: "выгрузка у заказчика: voc/ym-2026-09.csv"
+        legal: {basis: public-page, pd: removed, terms_checked: true, note: "имена авторов в voc.yaml не переносятся"}
+      - id: src-competitor-reviews
+        type: competitor-reviews
+        where: "отзывы о трёх студиях ремонта Нижнего Новгорода на Яндекс Картах и 2ГИС"
+        collected: "2026-09-18"
+        n_items: 210
+        sampling: "1–3★ и 5★ за 2025–2026, по 70 на студию"
+        legal: {basis: public-page, pd: removed, terms_checked: true}
+      - id: src-switch-interviews
+        type: interview-switch
+        where: "5 интервью с клиентами, подписавшими договор в июле–августе 2026 (созвоны с записью)"
+        collected: "2026-09-12"
+        n_items: 5
+        sampling: "переключились 30–90 дней назад; 2 из них сначала работали с частной бригадой"
+        storage: "записи и расшифровки у заказчика"
+        legal: {basis: consent, pd: pseudonymized, recording_consent: true}
+    snippets:
+      - id: s-001
+        source: src-competitor-reviews
+        item_ref: "2ГИС, студия B, отзыв 2026-03, 2★"
+        text: "смета выросла почти в полтора раза, каждую неделю новые допработы"
+        lang: ru
+        segment: seg-first-renovation
+        stars: 2
+        sentiment: negative
+        force: push
+        sticky: false
+        codes: {pain: "бюджет растёт по ходу работ", anxiety: "не знаю итоговую сумму", emotion: [frustration, distrust]}
+        theme_ids: [pain-budget-grows]
+      - id: s-002
+        source: src-switch-interviews
+        item_ref: "интервью 2, 12:40"
+        text: "я не могу каждый день ездить на объект, мне нужен один человек, который отвечает за всё"
+        lang: ru
+        segment: seg-moving-soon
+        force: pull
+        sticky: true
+        codes: {job: "сделать ремонт, не бросая работу", outcome: "один ответственный", alternative: "частная бригада, контроль самому", emotion: [fear]}
+        theme_ids: [outcome-one-responsible]
+      - id: s-003
+        source: src-own-ym-reviews
+        item_ref: "Яндекс Карты, отзыв 2026-06-14"
+        text: "Прораб каждый вечер присылал фото, я ни разу не приезжала без повода"
+        lang: ru
+        stars: 5
+        sentiment: positive
+        force: pull
+        sticky: true
+        codes: {outcome: "видеть ход работ без поездок", emotion: [relief]}
+        theme_ids: [outcome-one-responsible, phrase-photo-every-evening]
+        quote_permission: {status: granted, fact_id: review-anna-k}
+      - id: s-004
+        source: src-switch-interviews
+        item_ref: "интервью 4, 05:10"
+        text: "главный страх был, что затянут, а у нас аренда до конца ноября"
+        lang: ru
+        segment: seg-moving-soon
+        force: anxiety
+        codes: {trigger: "покупка квартиры, срок аренды", anxiety: "срыв срока", emotion: [fear]}
+        theme_ids: [anxiety-deadline]
+    themes:
+      - id: pain-budget-grows
+        kind: pain
+        label: "Смета растёт по ходу ремонта"
+        customer_words: ["смета выросла", "каждую неделю новые допработы", "насчитали сверху"]
+        snippet_ids: [s-001]
+        count: 23
+        sources_count: 2
+        customers_count: 21
+        segments: [seg-first-renovation]
+        importance: {method: interview-emphasis, note: "в 4 из 5 интервью названо первым страхом"}
+        confidence: high
+        use: {section_roles: [problem, objections, guarantee, faq], slot_types: [section-title, objection-answer, faq-q]}
+        copy_hints: ["вопрос FAQ словами клиента: «Вырастет ли смета?»", "ответ — только по пункту договора (missing: estimate-change-policy), не обещание"]
+        fact_ids: [review-anna-k]
+      - id: outcome-one-responsible
+        kind: outcome
+        label: "Один ответственный и ход работ без поездок"
+        customer_words: ["один человек, который отвечает за всё", "присылал фото", "не приезжала без повода"]
+        snippet_ids: [s-002, s-003]
+        count: 11
+        sources_count: 2
+        customers_count: 10
+        segments: [seg-moving-soon]
+        importance: {method: frequency-only, note: "важность не измерена — проверить опросом"}
+        confidence: medium
+        use: {section_roles: [hero, solution, how-it-works], slot_types: [subheadline, card-title, step-body]}
+        copy_hints: ["подзаголовок из слов клиента — без кавычек, как обещание процесса, только если процесс подтверждён (missing: foreman-per-object, photo-report-process)"]
+        fact_ids: [foreman-lapin]
+      - id: anxiety-deadline
+        kind: anxiety
+        label: "Срыв срока, когда платишь аренду"
+        customer_words: ["затянут", "а у нас аренда", "к переезду не успеют"]
+        snippet_ids: [s-004]
+        count: 9
+        sources_count: 2
+        customers_count: 9
+        segments: [seg-moving-soon]
+        importance: {method: interview-emphasis}
+        confidence: medium
+        use: {section_roles: [case-studies, objections], slot_types: [case-result, objection-answer]}
+        copy_hints: ["кейс со сроком по договору и фактическим — fact:case-two-room-47-days"]
+        fact_ids: [case-two-room-47-days]
+      - id: phrase-photo-every-evening
+        kind: phrase
+        label: "Липкая фраза: «каждый вечер присылал фото»"
+        customer_words: ["каждый вечер присылал фото"]
+        snippet_ids: [s-003]
+        count: 1
+        customers_count: 1
+        confidence: low
+        copy_hints: ["как цитата — только отзыв fact:review-anna-k; как обещание всем — нельзя до ответа о правиле фотоотчётов"]
+        fact_ids: [review-anna-k]
+    analysis:
+      codebook_version: "b2-voc-codebook-1"
+      coders: 2
+      agreement: "расхождения обсуждены, спорные фрагменты помечены"
+      saturation: {interviews: 5, new_codes_last_3: 1, note: "5 интервью — мало для high по интервью; темы high — за счёт отзывов"}
+      limits: "отзывы конкурентов смещены к крайним оценкам; интервью только с теми, кто купил"

@@ -1,0 +1,76 @@
+{
+ "renders": {
+  "field_blender": {
+   "sec": 2.41,
+   "kb": 1237.9,
+   "res": [
+    1280,
+    720
+   ]
+  }
+ },
+ "glb": {
+  "field": {
+   "raw": {
+    "kb": 44.8,
+    "tris": 236,
+    "nodes": 1,
+    "materials": [
+     "Field_Plastic"
+    ],
+    "extensionsUsed": [
+     "KHR_materials_clearcoat",
+     "EXT_mesh_gpu_instancing"
+    ],
+    "instanced_nodes": 1
+   },
+   "web": {
+    "kb": 22.0,
+    "tris": 236,
+    "nodes": 1,
+    "materials": [
+     "Field_Plastic"
+    ],
+    "extensionsUsed": [
+     "EXT_mesh_gpu_instancing",
+     "EXT_meshopt_compression",
+     "KHR_materials_clearcoat",
+     "KHR_mesh_quantization"
+    ],
+    "instanced_nodes": 1
+   },
+   "preset": "instances"
+  }
+ },
+ "instances": 900,
+ "passport": {
+  "n": 30,
+  "size": 1.2,
+  "tile": [
+   0.034,
+   0.034,
+   0.1
+  ],
+  "corner": 0.006,
+  "edge": 0.003,
+  "h": [
+   0.2,
+   1.6
+  ],
+  "seed": 11,
+  "color": "#635BFF",
+  "bg": "#EEF0F6",
+  "cam": {
+   "az": 35,
+   "el": 32,
+   "lens": 70,
+   "margin": 1.05,
+   "res": [
+    1280,
+    720
+   ]
+  }
+ },
+ "sec_total": 2.9,
+ "blender": "5.2.2 LTS"
+}

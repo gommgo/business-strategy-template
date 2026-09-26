@@ -1,0 +1,581 @@
+# ru-kvarts-preorder.yaml — пример copy deck v1 (10-templates-recipes, J3, 2026-09-24): основа — E3 deck-kvarts-preorder-v0.yaml; тексты ai-self (E3, правки J3).
+# Факты — 02-strategy-messaging/examples/facts-kvarts.yaml (вымышленные / ДЕМО, не публиковать). Проверки — 02-examples-ru.md §3.
+copy_deck:
+  version: 1
+  date: '2026-09-24'
+  site: kvarts-preorder
+  product_name: Кварц
+  lang: ru
+  voice_ref: ../../05-voice-editorial/examples/voice-grafa-b2b.yaml
+  facts_ref: ../../02-strategy-messaging/examples/facts-kvarts.yaml
+  meaning_ref: ../../../../02-strategy-messaging/examples/meaning-kvarts.yaml
+  copy_slots_ref: ../../04-copy-by-block/copy-slots.yaml
+  jurisdiction: ru
+  legal_category:
+  - general
+  authors:
+  - E3 (ai-self, 2026-09-24)
+  - J3 (upgrade, пути, голос F; 2026-09-24)
+  pages:
+  - page_id: kvarts-problem-aware
+    page_type: landing-waitlist
+    awareness: problem-aware
+    hierarchy_ref: ../../02-strategy-messaging/examples/hierarchy-kvarts-problem-aware.yaml
+    primary_action: Забронировать за 990 ₽
+    cta_primary: kvarts-problem-aware/hero/cta
+    notes: 'Трафик — пост книжного канала о свете для вечернего чтения (message match: тема вечера с книгой, не характеристики). Отзывов, прессы,
+      счётчика «осталось N» нет — never_claim B2.'
+    promise:
+      variants:
+      - id: a
+        text: Настольная лампа сама подстраивает свет под книгу и время суток
+        status: draft
+        source: ai-self
+      chosen: a
+      fact_ids:
+      - auto-light
+      basis: hierarchy.core_message (B1); урок «Кварца» — обещание про глаза в product.goal (01 §8)
+    meta:
+      title: Настольная лампа «Кварц» для вечернего чтения — предзаказ
+      description: Лампа сама подстраивает оттенок и яркость света под книгу и время суток. Первые 300 ламп — 8 900 ₽, бронь 990 ₽ входит в цену.
+      og_title: Читаете вечером — свет подстраивается сам
+      og_description: Бронь 990 ₽ входит в цену лампы «Кварц». Отгрузка первых ламп — декабрь 2026.
+      fact_ids:
+      - auto-light
+      - price-first-batch
+      - deposit-included
+      - shipping-date
+    sections:
+    - section_id: hero
+      block: hero
+      section_role: hero
+      question: Что это за лампа из поста?
+      message: Лампа для вечернего чтения, которая сама подстраивает свет; бронь первой партии — 990 ₽
+      slots:
+      - slot_id: h1
+        slot_type: headline
+        variants:
+        - id: a
+          text: Читаете вечером — свет подстраивается сам
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - auto-light
+        claim_flags:
+        - fact-property
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: problem-story (01 §2.1) — сцена из поста, отличие фактом auto-light
+      - slot_id: sub
+        slot_type: subheadline
+        variants:
+        - id: a
+          text: Настольная лампа «Кварц» сама подстраивает оттенок и яркость света под книгу и время суток.
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - auto-light
+        claim_flags:
+        - fact-property
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: что это и что делает (03 §3.3); без обещаний о глазах (nc-eyes-health)
+      - slot_id: cta
+        slot_type: cta-label
+        variants:
+        - id: a
+          text: Забронировать за 990 ₽
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - deposit-included
+        claim_flags:
+        - purchase-terms
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: цена шага на кнопке (01 §6.1)
+      - slot_id: cta-note
+        slot_type: cta-note
+        variants:
+        - id: a
+          text: Бронь 990 ₽ входит в цену лампы
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - deposit-included
+        claim_flags:
+        - purchase-terms
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: 'правка 1: факт заказчика «возвращаем в течение 14 дней» нарушает ЗоЗПП ст. 26.1 п. 4 (COPY-L-RET-02) — срок не пишем до исправления
+          факта и оферты (закон: не позднее 10 дней); вопрос заказчику; правка 2: без числа внутри заглушки (an-number-without-fact) и словами
+          пробела preorder-offer (COPY-F-PLACEHOLDER-UNLISTED); правка 3: «возврат» в одной фразе с фактом брони — COPY-F-EXTENDS (error), строка
+          у кнопки отвечает на один вопрос — цена шага (01 §7); возврат — в тарифах, пробелом'
+    - section_id: problem
+      block: problem
+      section_role: problem
+      question: Почему при обычном свете неудобно читать вечером?
+      message: Свет в комнате рассчитан на комнату, а не на страницу
+      slots:
+      - slot_id: h2
+        slot_type: section-title
+        variants:
+        - id: a
+          text: Верхний свет бликует, ночник светит тускло
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: 'ситуация вместо «проблемы»; боль — допущение B1 (q-why-buy): подтвердить у заказчика'
+      - slot_id: body
+        slot_type: body
+        variants:
+        - id: a
+          text: Верхний свет рассчитан на всю комнату и бликует на странице, ночник светит слишком тускло, а обычная настольная лампа весь вечер
+            светит одинаково.
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: без статистики и страха, без утверждений о зрении (02 §2)
+    - section_id: solution
+      block: solution
+      section_role: solution
+      question: Что «Кварц» делает иначе, чем обычная лампа?
+      message: Меняет оттенок (2700–5000 K) и яркость сам — под книгу и время суток
+      notes: 'правка 4: карточка «4 сценария света» снята — как включить сценарий, неизвестно (scenario-switch, fallback rewrite-without); факт
+        «4 сценария» остаётся строкой характеристик'
+      slots:
+      - slot_id: h2
+        slot_type: section-title
+        variants:
+        - id: a
+          text: Оттенок и яркость света меняются сами
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - auto-light
+        claim_flags:
+        - fact-property
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: 'правка 1: «от 2700 до 5000 K» убрано из заголовка — use факта color-temperature: только card-body и spec-row (COPY-F-USE); число
+          — в строке характеристик'
+      - slot_id: body
+        slot_type: body
+        variants:
+        - id: a
+          text: Лампа сама меняет цветовую температуру и яркость под книгу и время суток.
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - auto-light
+        claim_flags:
+        - fact-property
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: 'механизм — пробел B2 light-mechanism с fallback rewrite-without (правка 4, COPY-D-FALLBACK): без заглушки и без «датчика» (must_not_say
+          иерархии)'
+    - section_id: specs
+      block: product-demo
+      section_role: product-demo
+      question: Как она выглядит у кресла и что ещё умеет?
+      message: Фото прототипа; характеристики строками
+      notes: 'правка 1: подпись к фото снята — фото прототипа нет ни в фактах, ни в ассетах (COPY-F-PLACEHOLDER-UNLISTED, COPY-D-ASSET); вернуть
+        с asset_ref, когда будет снимок'
+      slots:
+      - slot_id: spec-1
+        slot_type: spec-row
+        group: specs
+        variants:
+        - id: a
+          text: Цветовая температура — 2700–5000 K
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - color-temperature
+        claim_flags:
+        - fact-number
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: spec-2
+        slot_type: spec-row
+        group: specs
+        variants:
+        - id: a
+          text: Зарядка телефона — USB-C, 18 Вт
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - usb-c-18w
+        claim_flags:
+        - fact-number
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: spec-3
+        slot_type: spec-row
+        group: specs
+        variants:
+        - id: a
+          text: Сценарии — 4
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - scenarios-4
+        claim_flags:
+        - fact-number
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: место сборки — нет в фактах (missing assembly-place), строки нет
+    - section_id: pricing
+      block: pricing
+      section_role: pricing
+      question: Сколько стоит и что с бронью?
+      message: Первые 300 ламп — 8 900 ₽; бронь 990 ₽ входит в цену; отгрузка — декабрь 2026
+      slots:
+      - slot_id: h2
+        slot_type: section-title
+        variants:
+        - id: a
+          text: Первые 300 ламп — 8 900 ₽
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - price-first-batch
+        claim_flags:
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: price
+        slot_type: pricing-price
+        variants:
+        - id: a
+          text: 8 900 ₽
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - price-first-batch
+        claim_flags:
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: note-price
+        slot_type: pricing-price-note
+        variants:
+        - id: a
+          text: Первые 300 ламп — 8 900 ₽; после предзаказа — 11 900 ₽
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - price-first-batch
+        - price-after-preorder
+        claim_flags:
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: цена после предзаказа — не «было» (use.not_in price-old)
+      - slot_id: note-deposit
+        slot_type: pricing-price-note
+        variants:
+        - id: a
+          text: Бронь 990 ₽ входит в цену лампы
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - deposit-included
+        claim_flags:
+        - purchase-terms
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: 'правка 1: «доплата» в одной фразе с фактом брони — COPY-F-EXTENDS (error): условие доплаты вынесено в свой слот-пробел'
+      - slot_id: note-balance
+        slot_type: pricing-price-note
+        variants:
+        - id: a
+          text: '[PLACEHOLDER: как и когда покупатель доплачивает остаток и как узнаёт об отгрузке]'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        missing_ids:
+        - balance-payment
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: сумму доплаты (8 900 − 990) не считаем сами — вывод без факта
+      - slot_id: note-shipping
+        slot_type: pricing-price-note
+        variants:
+        - id: a
+          text: Отгрузка первых ламп — декабрь 2026
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - shipping-date
+        claim_flags:
+        - purchase-terms
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: note-refund
+        slot_type: pricing-price-note
+        variants:
+        - id: a
+          text: '[PLACEHOLDER: ссылка на условия предзаказа — срок и порядок возврата брони]'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        missing_ids:
+        - preorder-offer
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: 'правка 1: verbatim «Бронь возвращаем в течение 14 дней по заявке» — COPY-L-RET-02 (ЗоЗПП ст. 26.1 п. 4: не позднее 10 дней); факт
+          исправляет заказчик'
+      - slot_id: cta
+        slot_type: cta-label
+        variants:
+        - id: a
+          text: Забронировать за 990 ₽
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - deposit-included
+        claim_flags:
+        - purchase-terms
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+    - section_id: faq
+      block: faq
+      section_role: faq
+      question: Кто производитель и где условия предзаказа?
+      message: Юрлицо и оферта предзаказа — блокирующие пробелы
+      slots:
+      - slot_id: q1
+        slot_type: faq-q
+        group: faq-1
+        variants:
+        - id: a
+          text: Кто принимает бронь?
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: a1
+        slot_type: faq-a
+        group: faq-1
+        variants:
+        - id: a
+          text: '[PLACEHOLDER: юрлицо — название, ОГРН или ИНН, адрес]'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        missing_ids:
+        - legal-entity
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: блокирующий пробел B2 (H DIST-01)
+      - slot_id: q2
+        slot_type: faq-q
+        group: faq-2
+        variants:
+        - id: a
+          text: Где прочитать условия предзаказа?
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: a2
+        slot_type: faq-a
+        group: faq-2
+        variants:
+        - id: a
+          text: '[PLACEHOLDER: ссылка на условия предзаказа — бронь, возврат, доплата, перенос отгрузки]'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        missing_ids:
+        - preorder-offer
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: блокирующий пробел B2
+    - section_id: final
+      block: final-cta
+      section_role: final-cta
+      question: Бронировать сейчас?
+      message: Бронь 990 ₽ в счёт цены первой партии, с возвратом по заявке
+      slots:
+      - slot_id: h2
+        slot_type: section-title
+        variants:
+        - id: a
+          text: Бронь — 990 ₽ в счёт цены лампы
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - deposit-included
+        claim_flags:
+        - purchase-terms
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: cta
+        slot_type: cta-label
+        variants:
+        - id: a
+          text: Забронировать за 990 ₽
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - deposit-included
+        claim_flags:
+        - purchase-terms
+        - price-discount
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+      - slot_id: cta-note
+        slot_type: cta-note
+        variants:
+        - id: a
+          text: Бронь 990 ₽ входит в цену лампы
+          status: draft
+          source: fact
+        chosen: a
+        fact_ids:
+        - deposit-included
+        claim_flags:
+        - purchase-terms
+        notes: 'правка 1: дата отгрузки — вне use факта для final-cta (COPY-F-USE), срок возврата 14 дней — COPY-L-RET-02; остаётся условие брони'
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+    - section_id: footer
+      block: footer
+      section_role: footer
+      message: Кто продавец и где документы
+      slots:
+      - slot_id: tagline
+        slot_type: footer-tagline
+        variants:
+        - id: a
+          text: «Кварц» — настольная лампа от стартапа из Казани
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids:
+        - company-city
+        claim_flags:
+        - company-details
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: город компании ≠ место сборки (B2 §1.2)
+      - slot_id: legal
+        slot_type: footer-legal
+        variants:
+        - id: a
+          text: '[PLACEHOLDER: юрлицо, ОГРН или ИНН, адрес]; условия предзаказа; политика обработки персональных данных'
+          status: draft
+          source: ai-self
+        chosen: a
+        fact_ids: []
+        missing_ids:
+        - legal-entity
+        - preorder-offer
+        claim_flags: []
+        lint:
+          profile: landing
+          errors: 0
+          warnings: 0
+        notes: блокирующие пробелы B2 (H DIST-01)
+    status: draft
+  notes: 'Пример J3 (фаза 2 J): основа — страница E3 99-raw/experiments/E/04-copy-deck-v0/deck-kvarts-preorder-v0.yaml (ai-self E3, 0 error),
+    upgrade v0 → v1 copydeck.py; правки J3 — в notes слотов и в 02-examples-ru.md. voice_ref: профиль F «Графа» (сдержанный B2B, «вы») как ближайший
+    — своего профиля голоса у бренда нет (E, F: профилей SaaS и товара нет); у E3 было: ''черновик: на «вы», спокойно, с одной сценой на экран;
+    профиля голоса F для «Кварца» нет''.'

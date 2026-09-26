@@ -1,0 +1,80 @@
+<!doctype html>
+<!-- 02 · Видео-hero: картинка-постер (кадр 0 финального AV1) — LCP; видео-слой после load + простоя; AV1 первым, H.264 запасом;
+     телефон — свой ролик 4:5 720×900; reduce, Save-Data, 2G → видео не запрашивается; кнопка паузы (WCAG 2.2.2); пауза вне экрана.
+     Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/04-video-page и 06-pages-measure (Chromium 153). -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Утро у воды — видео-hero</title>
+<link rel="icon" href="assets/svg/favicon.ico" sizes="32x32">
+<link rel="icon" href="assets/svg/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/svg/apple-touch-icon.png">
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .nav { height: 64px; display: flex; align-items: center; gap: 28px; padding: 0 var(--gutter); background: var(--paper); }
+  .nav__logo { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; }
+  .nav .spacer { flex: 1; } .nav a.link { font-size: 15px; color: var(--muted); text-decoration: none; }
+  .hero__media { background: #b6b1a9; }
+  .hero--light .hero__lead { color: #1f242c; opacity: 1; }
+  .hero--light .media-toggle { border-color: rgb(17 20 24 / .35); background: rgb(243 239 231 / .55); color: #111418; }
+  @media (max-width: 699px) { .hero__media { background: #c6c2bd; } .hero__copy { padding-top: 56px; } .hero__lead { max-width: 27ch; }
+    .nav a.link:not(:last-child) { display: none; } }
+  /* светлый скрим под колонкой текста (тёмный текст на светлом кадре): альфа подобрана проверкой F83 по буквам (J/06) */
+  .hero--light .hero__scrim { background: linear-gradient(90deg, rgb(243 239 231 / .46) 0%, rgb(243 239 231 / .34) 40%, rgb(243 239 231 / 0) 64%); }
+  @media (max-width: 699px) { .hero--light .hero__scrim { background: linear-gradient(180deg, rgb(243 239 231 / .40) 0%, rgb(243 239 231 / .28) 55%, rgb(243 239 231 / 0) 75%); } }
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__logo" href="#"><img src="assets/svg/icon.svg" width="26" height="26" alt="">Тихая вода</a>
+  <a class="link" href="#programm">Программа</a><span class="spacer"></span><a class="link" href="#book">Забронировать</a>
+</header>
+
+<section class="hero hero--light hero--screen" data-hero-video aria-labelledby="h1">
+  <div class="hero__media">
+    <picture>
+      <!-- постер = декодированный кадр 0 финального AV1 (PNG ffmpeg → Pillow → AVIF): подмена на видео без скачка -->
+      <source media="(max-width: 699px)" type="image/avif" srcset="assets/video/dawn-4x5-720-poster.avif" width="720" height="900">
+      <source media="(max-width: 699px)" type="image/webp" srcset="assets/video/dawn-4x5-720-poster.webp" width="720" height="900">
+      <source type="image/avif" srcset="assets/video/dawn-1080p-poster.avif" width="1920" height="1080">
+      <img src="assets/video/dawn-1080p-poster.webp" width="1920" height="1080" alt="" fetchpriority="high"
+           data-focal='{"16:9":[0.56,0.5,0.66,0.5],"4:5":[0.70,0.62,0.86,0.62]}'>
+    </picture>
+    <!-- без src и autoplay: hero-video.js подставит подходящие источники после load (или не подставит при reduce/Save-Data) -->
+    <video muted loop playsinline preload="none" aria-hidden="true" tabindex="-1" data-video
+           data-focal-note="object-position берётся тот же, что у постера">
+      <source data-src="assets/video/dawn-4x5-720.av1.mp4" data-media="(max-width: 699px)" type='video/mp4; codecs="av01.0.04M.10"'>
+      <source data-src="assets/video/dawn-4x5-720.h264.mp4" data-media="(max-width: 699px)" type='video/mp4; codecs="avc1.64001f"'>
+      <source data-src="assets/video/dawn-1080p.av1.mp4" type='video/mp4; codecs="av01.0.08M.10"'>
+      <source data-src="assets/video/dawn-1080p.h264.mp4" type='video/mp4; codecs="avc1.640032"'>
+    </video>
+  </div>
+  <div class="hero__scrim" aria-hidden="true"></div>
+  <div class="hero__copy">
+    <p class="hero__kicker">Ретрит · 12–15 октября</p>
+    <h1 id="h1">Утро у воды — тишина, в которой хорошо думать</h1>
+    <p class="hero__lead">Четыре дня без уведомлений: прогулки вдоль берега, долгие завтраки и время на одно главное дело.</p>
+    <a class="hero__cta" href="#book">Выбрать даты <svg width="18" height="18" aria-hidden="true"><use href="assets/svg/sprite.svg#i-arrow"/></svg></a>
+  </div>
+  <button class="media-toggle" type="button" aria-pressed="false" hidden>
+    <span class="sr-only">Остановить фоновое видео</span>
+    <svg class="i-pause" aria-hidden="true"><use href="assets/svg/sprite.svg#i-pause"/></svg>
+    <svg class="i-play" aria-hidden="true" style="display:none"><use href="assets/svg/sprite.svg#i-play"/></svg>
+  </button>
+</section>
+
+<section class="section" id="programm" style="min-height: 140vh">
+  <h2>Программа</h2>
+  <p>Фоновая петля 6 с: при «уменьшить движение», Save-Data и 2G браузер не скачивает ни байта видео — остаётся кадр-постер.
+     Кнопка паузы запоминает выбор до конца сеанса; видео замирает, когда hero уходит из экрана или вкладка скрыта.</p>
+</section>
+<script>
+  // object-position видео = как у постера (focal.js считает для <img>; копируем на <video> при каждом пересчёте)
+  const img = document.querySelector('.hero__media img'), vid = document.querySelector('.hero__media video');
+  new MutationObserver(() => { vid.style.objectPosition = img.style.objectPosition; }).observe(img, {attributes: true, attributeFilter: ['style']});
+</script>
+<script type="module" src="js/focal.js"></script>
+<script type="module" src="js/hero-video.js"></script>
+</body>
+</html>

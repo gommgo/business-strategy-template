@@ -1,0 +1,219 @@
+# motion-spec v1 — «Сдано», вариант C (Blender + «фонарик инженера», L1). 15-showcase · дорожка SD · фаза 2 (SD2) · 2026-09-25.
+# Основа — motion-spec B; отличие: ветка L1 — момент fonarik (WebGL2, переосвещение кадра Blender по его проходам светом за курсором;
+# телефон — касание), только по вводу посетителя, 0 кадров в покое; остальное — как B (L0).
+# Проверка схемой: creative-research/99-raw/tools/venv-I/bin/python scripts/creative/spec_check.py spec <файл>
+# Сверка сборки: python3 scripts/creative/motion_check.py <index.html> --level L0 --spec <этот файл>
+motion_spec_version: "1.0"
+id: sdano-c-hybrid
+example: true
+status: proposed
+checked_at: "2026-09-25"
+refs:
+  page_plan: "../../../../creative/10-recipes/recipes/01-lead-services-l0.recipe.yaml#/page_plan"
+  tokens: ../../../../creative/04-visual-language/marketing-tokens.json
+  effects: ../../../../creative/06-effects-catalog/effects.yaml
+  block_treatments: ../../../../creative/09-ai-execution-evaluation/block-treatments.yaml
+level: L1
+executor: {target: any, harness: any, video_in: false}
+page:
+  thesis: "Свет — по воле посетителя: курсор над планом — полумрак, фонарь инженера идёт за ним и находит дефекты акта. Без ввода — как B; телефон — один показ после прокрутки."
+  character: [precise, calm]
+  base: {duration_ms: 560, easing: {token: motion.marketing.easing.out-expo}}
+  primitives: [fade-up, none]
+  lcp: {target: hero.hero-visual, entrance: none, note: "LCP — кадр изометрии Blender (<picture> AVIF, fetchpriority high, без анимации); H1 без анимации"}
+  toggle: {required: false, attr: data-motion, states: [system, reduced, full], placement: sticky-header, remember: false}
+  scroll: {smooth: false, tail_ms_max: 0, jacking: never}
+  transitions: {kind: none}
+  properties_allowed: [transform, opacity, scale, translate, background-color, rotate]
+  # SD4 (26.09 05:45): бюджет петель 0 → 1. Однократный показ фонаря на телефоне (fonarik-tour, 2,24 с после прокрутки
+  # посетителя) motion_check считает «движением в видимой зоне» в паузе после шага прокрутки (EG-A11Y-17 mob = 1 при 0 по
+  # этой спеке — fail_S прогона SD3 04:55). Одно движение за раз = норма L1 для телефона (effect-gates: L1 desktop 2 / mobile 1);
+  # петель нет, на десктопе без ввода — 0. motion_check читает только loops_in_view_max (одно число на оба режима).
+  budget: {loops_in_view_max: 1, loops_in_view_max_mobile: 1, first_screen_scene_ms_max: 600, js_kb_br_effects_max: 8, long_frames_pct_max: 2, cls_scroll_max: 0.1}
+  never:
+    - "появление секций ниже первого экрана (fade-and-slide-up на каждой секции — почерк генератора, cliche:section-fade-up)"
+    - "счётчики у цены, сроков и числа пунктов: цифры стоят с первого кадра"
+    - "бегущая строка, свой курсор, параллакс, плавная прокрутка; WebGL — только фонарь по вводу (один контекст, 0 кадров в покое)"
+    - "автопоказ фонаря на десктопе, петли и повторы показа; на телефоне — только один показ ≈ 3 с после прокрутки посетителя (момент fonarik-tour)"
+    - "анимация H1 и кадра изометрии (LCP), любые эффекты в форме заявки (конверсия — L0)"
+    - "повтор клипа штампа: без loop, второй раз не играет"
+sections:
+  - id: hero
+    block: hero-media
+    role: accent
+    level: L1
+    intent: "первый экран собирается один раз за 600 мс, как в B; после load в простое готов фонарь: курсор над планом — полумрак и луч, который находит четыре дефекта (булавка в луче — кольцо и подсказка, пункт акта — «найдено»)"
+    moments:
+      - id: hero-copy-rise
+        class: one-shot
+        purpose: guide
+        transition_type: entrance
+        effect: "effect:hero-entrance-once"
+        target: hero.subheadline
+        selector_hint: ".hero__lead"
+        stagger_targets: [hero.hero-proof, hero.cta]
+        trigger: {type: load, delay_ms: 60}
+        model: time
+        tracks:
+          - {property: transform, from: "translateY(var(--mm-shift-reveal))", to: "none", unit_note: "--mm-shift-reveal = 16px"}
+          - {property: opacity, from: 0.01, to: 1}
+        duration: {ms: 560}
+        easing: {token: motion.marketing.easing.out-expo}
+        stagger: {each: {ms: 50}, order: dom, max_items: 3, total_ms_max: 600}
+        repeat: once
+        interrupt: jump-to-end
+        lcp: not-lcp
+        reduce: {strategy: final-state, describe: "лид, цена и кнопка видны с первого кадра"}
+        mobile: {strategy: same}
+      - id: hero-marks
+        class: one-shot
+        purpose: attention
+        transition_type: entrance
+        effect: "effect:hero-entrance-once"
+        target: hero.hero-visual.pins
+        selector_hint: ".plan__pins .pin"
+        trigger: {type: load, delay_ms: 80}
+        model: time
+        tracks:
+          - {property: scale, from: 0.5, to: 1, unit_note: "номер-выноска HTML на головке булавки; центр масштаба — центр номера (translate −50 % −50 %)"}
+          - {property: opacity, from: 0.01, to: 1}
+        duration: {share: 0.5}
+        note: "половина базы 560 мс = 280 мс; задержка 80 + 40 × номер; четвёртая отметка заканчивается на 480 мс. Кадр Blender (LCP) не анимируется"
+        easing: {token: motion.marketing.easing.out-expo}
+        stagger: {each: {ms: 40}, order: dom, max_items: 4, total_ms_max: 400}
+        repeat: once
+        interrupt: jump-to-end
+        lcp: not-lcp
+        reduce: {strategy: final-state, describe: "четыре номера на булавках с первого кадра"}
+        mobile: {strategy: same, describe: "свой портретный кадр (вырезка того же рендера), только номера; список пунктов — под кадром"}
+      - id: fonarik
+        class: pointer
+        purpose: inform
+        transition_type: persistent
+        effect: "effect:depth-parallax-25d"
+        target: hero.hero-visual.fx
+        selector_hint: ".plan__fx"
+        trigger: {type: pointer}
+        model: time
+        tracks:
+          - {property: "uniform:uDark", from: 0, to: 1, unit_note: "полумрак 0 → 1 за 450 мс при наведении (сглаживание smoothstep), 1 → 0 за 600 мс при уходе"}
+          - {property: "uniform:uTarget", from: "курсор", to: "курсор", unit_note: "луч догоняет курсор экспонентой λ = 14 1/с, фонарь — с запаздыванием λ = 7 1/с (вторичное движение: тени качаются)"}
+        duration: {token: motion.marketing.duration.state}
+        easing: {token: motion.marketing.easing.out-strong}
+        repeat: each-entry
+        interrupt: follow-input
+        lcp: not-lcp
+        reduce: {strategy: static-poster, describe: "WebGL не создаётся: светлый кадр B, номера и подписи HTML; 0 вызовов отрисовки"}
+        mobile: {strategy: touch-alternative, describe: "касание ставит луч (горизонтальное ведение пальцем двигает его, вертикальное — прокрутка); 9 с без касаний или уход плана с экрана — свет возвращается; DPR ≤ 1,5"}
+        note: "переосвещение по проходам Blender (альбедо, нормали камеры, высота из глубины, AO) — пробела каталога нет id; ближе всего depth-parallax-25d (картинка + карта глубины, pointer, L1). Кадры только по требованию: пока курсор стоит — 0 кадров"
+      - id: fonarik-tour
+        class: one-shot
+        purpose: guide
+        transition_type: entrance
+        target: hero.hero-visual.fx
+        selector_hint: ".plan__fx"
+        trigger: {type: in-view, threshold: 0.7, once: true, delay_ms: 350}
+        model: time
+        tracks:
+          - {property: "uniform:uDark", from: 0, to: 1, unit_note: "полумрак 0 → 1 за 450 мс; луч по точкам дефектов 2 → 1 → 3 (0 / 0,75 / 1,3 с); с 1,64 с свет возвращается за 600 мс — итого 2,24 с"}
+        duration: {share: 4}
+        easing: {token: motion.marketing.easing.out-strong}
+        repeat: once
+        interrupt: follow-input
+        lcp: not-lcp
+        reduce: {strategy: static-poster, describe: "WebGL не создаётся — показа нет, светлый кадр B"}
+        mobile: {strategy: same, describe: "только телефон (hover: none) и только после прокрутки посетителя (scrollY > 40, план ≥ 70 % в кадре): первый экран при загрузке неподвижен; касание прерывает показ; на десктопе показа нет — фонарь по наведению"}
+        note: "решение оркестратора SD3 (2): однократный короткий показ, чтобы на телефоне было видно, что план «живой»; < 5 с и без петли — кнопка паузы не нужна (WCAG 2.2.2); находит 3 из 4 дефектов, подсказка зовёт коснуться плана и найти остальные"
+    storyboard:
+      frames:
+        - {id: hero-t0, at: {time_ms: 0}, viewport: desktop, describe: "H1 и кадр изометрии на месте, номеров нет, лид почти прозрачен", check: "H1 и кадр видимы в первом кадре"}
+        - {id: hero-t700, at: {time_ms: 700}, viewport: desktop, describe: "всё на местах, движение первого экрана закончено", check: "движение в покое 0 %"}
+    reduce: {strategy: final-state, describe: "первый экран полон с первого кадра"}
+    mobile: {strategy: stacked, describe: "текст, кнопка на всю ширину, затем портретный кадр с номерами и список"}
+    budget: {js_kb_br: 6, loops_in_view: 0, load: after-lcp}
+    acceptance:
+      - {id: hero-h1-first, check: "H1 видим в первом кадре и не выпал из LCP", tool: motion_check, gate: EG-PERF-07, metric: vitals.h1_lcp_dropped, at: desktop}
+      - {id: hero-idle, check: "на 6-й секунде первый экран неподвижен", tool: motion_check, gate: EG-A11Y-01, metric: derived.moving_6s_without_pause, at: desktop}
+  - id: case-studies
+    block: case-studies
+    role: calm
+    level: L0
+    intent: "на образце акта один раз ставится чёрный штамп «СДАНО»: клип Blender 1,58 с (штамп стоит на акте, поднимается, переносится дугой, удар, возвращается — остаётся оттиск), играет при 60 % акта в кадре; дальше — неподвижный кадр оттиска"
+    moments:
+      - id: act-stamp
+        class: one-shot
+        purpose: narrate
+        transition_type: entrance
+        effect: "effect:cinemagraph"
+        target: case-studies
+        selector_hint: ".doc__stamp3d"
+        trigger: {type: in-view, threshold: 0.6, once: true}
+        model: time
+        tracks:
+          - {property: opacity, from: 0.01, to: 1, unit_note: "видимый результат — оттиск «СДАНО» на акте; движение штампа — внутри клипа Blender 38 кадров @24 = 1,58 с (VP9 webm 54 КБ, запас H.264 mp4 55 КБ), без loop; последний кадр = постер WebP; ошибка декодера или клип не доиграл за 4,5 с — сразу кадр конца (SD3)"}
+        duration: {share: 2.83}
+        easing: {token: motion.marketing.easing.out-expo}
+        repeat: once
+        interrupt: jump-to-end
+        lcp: not-lcp
+        reduce: {strategy: static-poster, describe: "сразу кадр оттиска (WebP), видео не грузится — 0 байт"}
+        mobile: {strategy: same, describe: "тот же клип; без JS и в reduce — кадр оттиска"}
+        note: "длительность 1,58 с = 2,83 × база 560 мс (клип 38 кадров @24; доля до 4 допускается схемой). Дорожка currentTime на L0 схемой не допускается (E П12) — описан видимый результат. Отличие от синемаграфа каталога: последний кадр ≠ первому (сюжет «поставили штамп»), играет по видимости, а не по load; белое клипа уходит в mix-blend-mode: multiply, поэтому клип ложится и на бумагу акта, и на фон секции"
+    reduce: {strategy: final-state, describe: "оттиск «СДАНО» на акте с первого кадра"}
+    mobile: {strategy: same, describe: "то же"}
+    budget: {js_kb_br: 0.45, loops_in_view: 0, load: on-visible}
+  - id: faq
+    block: faq
+    role: calm
+    level: L0
+    intent: "ответ открывается сразу (высота не анимируется — свойство раскладки), текст ответа проявляется за 320 мс со сдвигом 4 px; стрелка поворачивается"
+    moments:
+      - id: faq-open
+        class: transition
+        purpose: feedback
+        transition_type: entrance
+        target: faq.faq-a
+        selector_hint: ".faq details[open] p"
+        trigger: {type: click}
+        model: time
+        tracks:
+          - {property: opacity, from: 0.01, to: 1}
+          - {property: transform, from: "translateY(4px)", to: "none"}
+        duration: {token: motion.marketing.duration.state}
+        easing: {token: motion.marketing.easing.out-strong}
+        repeat: once
+        interrupt: jump-to-end
+        reduce: {strategy: crossfade, describe: "--mm-dur-state в reduce = 180 мс, сдвиг 0"}
+        mobile: {strategy: same}
+    reduce: {strategy: crossfade, describe: "ответ проявляется за 180 мс без сдвига"}
+    mobile: {strategy: same, describe: "то же"}
+    budget: {js_kb_br: 0, loops_in_view: 0, load: eager}
+  - id: sticky-cta
+    block: sticky-cta
+    role: chrome
+    level: L0
+    intent: "на телефоне полоса с призывом выезжает снизу, когда кнопка первого экрана и форма вне вида"
+    moments:
+      - id: sticky-cta-in
+        class: transition
+        purpose: guide
+        transition_type: persistent
+        target: sticky-cta
+        selector_hint: ".sticky-cta"
+        trigger: {type: state}
+        model: time
+        tracks:
+          - {property: translate, from: "0 110%", to: "0 0"}
+        duration: {token: motion.marketing.duration.state}
+        easing: {token: motion.marketing.easing.out-strong}
+        repeat: once
+        interrupt: reverse
+        reduce: {strategy: crossfade, describe: "--mm-dur-state в reduce = 180 мс"}
+        mobile: {strategy: same}
+    reduce: {strategy: crossfade, describe: "полоса появляется за 180 мс"}
+    mobile: {strategy: same, describe: "только ширина ≤ 40rem; на десктопе полосы нет"}
+    budget: {js_kb_br: 0.5, loops_in_view: 0, load: eager}
+open_questions:
+  - "Фонарь — pointer-эффект без петли и без автопоказа: пауза не нужна (WCAG 2.2.2 не применяется — движение только от ввода)."
+  - "Отметки — scale + opacity; примитива «pop-in» в схеме v1 нет — записано как часть hero-entrance-once (как у A)."
+  - "Клип штампа — эффект cinemagraph по бюджету (L0 ≤ 300 КБ, ≤ 5 с, без паузы), но сюжетный и по видимости; отдельного id «one-shot clip in-view» в каталоге нет."

@@ -1,0 +1,644 @@
+{
+ "art_direction_version": "1.0",
+ "id": "okoshko",
+ "site": "okoshko",
+ "example": true,
+ "status": "proposed",
+ "approved_by": null,
+ "checked_at": "2026-09-25",
+ "refs": {
+  "brief": "../../../site-research/99-raw/experiments/E/03-saas-demo-brief/site-brief-okoshko-demo.yaml",
+  "facts": "../../../text-research/99-raw/experiments/E/facts-demo-saas-okoshko.yaml",
+  "page_plans": [
+   "../../../site-research/04-blocks/examples/page-plan-saas-okoshko.yaml"
+  ]
+ },
+ "inputs": {
+  "site_type": "landing-site",
+  "page_type": "landing-saas",
+  "audience": "Владельцы и мастера барбершопов и салонов, которые ведут запись в тетради или мессенджере и теряют клиентов на неявках",
+  "job": "Начать пробный период 14 дней",
+  "awareness": "solution-aware (поиск «онлайн-запись для барбершопа»)",
+  "traffic": "Директ (тёплый, 0,4), поиск по категории (0,3), соцсети (холодный, телефон, 0,2), рекомендации (0,1)",
+  "proof": [
+   "fact:trial-14-days",
+   "fact:reminders",
+   "fact:self-booking-link",
+   "fact:salons-count",
+   "fact:noshow-average",
+   "fact:case-noshow-kazan",
+   "fact:rating-rustore",
+   "fact:price-master"
+  ],
+  "brand_status": "none",
+  "brand_expression_mode": "open",
+  "must_keep": [
+   "название «Окошко» словесным знаком"
+  ],
+  "customer_words": [],
+  "assets": "настоящих скриншотов нет (q-screenshots, customer-tbd) — продукт показывать только после их получения",
+  "constraints": [
+   "SaaS: только настоящий интерфейс (site: required_kinds demo)",
+   "числа — только из фактов, без счётчиков-анимаций",
+   "данные хранятся в РФ (fact:data-in-russia) — можно показать, не выдумывать"
+  ]
+ },
+ "ambition": {
+  "level": "L1",
+  "source": "default",
+  "budget_profile": "landing-saas@L1",
+  "motion_cap": "expressive",
+  "rationale": "SaaS-лендинг — умолчание L1 (решение п. 13). Фирменный приём — продукт в работе (закреплённая сцена расписания); тарифы — L0; холодный мобильный трафик из соцсетей → первый экран ≤ 2 МБ, сцена после LCP.",
+  "by_section_role": [
+   {
+    "role": "pricing",
+    "level": "L0"
+   }
+  ]
+ },
+ "concept": {
+  "design_read": "Читаю это как: SaaS-лендинг онлайн-записи для владельцев барбершопов и салонов, язык рабочего журнала записи, тянется к показу продукта в работе и одному тёплому акценту-пометке",
+  "mechanism": "Клиенты записываются сами по ссылке, а сервис напоминает им о визите — пустых окон и неявок меньше",
+  "audience_scene": "Мастер между клиентами, 5 минут, телефон в руке; владелец вечером сверяет запись в тетради и мессенджере",
+  "first_screen_proves": "Настоящее расписание мастера на день: окна заполняются записями, под одной из них — отправленное напоминание",
+  "thesis": "Журнал записи, который ведёт себя сам: сетка дня, где пустые окна заполняются, и одна красная пометка там, где раньше была неявка",
+  "metaphor": "журнал записи (сетка дня)",
+  "material": "разлинованная бумага журнала и экран телефона",
+  "energy": "measured",
+  "rut": "SaaS-hero с макетом дашборда в рамке браузера, фиолетовый градиент, три карточки функций, ряд анимированных счётчиков, стена логотипов",
+  "rut_opposite": "Ретро-барбершоп: полосатый столб, винтажные ножницы и антиква",
+  "not_this": [
+   "без выдуманного интерфейса (нет скриншотов — нет кадра продукта)",
+   "без барбер-клише (столб, усы, ножницы)",
+   "без счётчиков, растущих от нуля"
+  ],
+  "money_idea": "сайт, где журнал записи заполняется сам, пока читаешь",
+  "emotional_goal": "облегчение: пустые окна и неявки перестают быть заботой хозяйки салона",
+  "motif_source": {
+   "kind": "product",
+   "note": "сетка дня журнала записи"
+  }
+ },
+ "territories": [
+  {
+   "id": "appointment-book",
+   "name": "Журнал записи",
+   "source": "бумажная тетрадь записи на стойке салона",
+   "family": "document-print",
+   "why": "так аудитория работает сейчас; продукт — этот журнал, который заполняется сам"
+  },
+  {
+   "id": "reminder-chat",
+   "name": "Напоминание",
+   "source": "сообщение-напоминание клиенту в мессенджере",
+   "family": "screen-interface",
+   "why": "механизм, снижающий неявки, — это сообщение"
+  },
+  {
+   "id": "departure-board",
+   "name": "Табло",
+   "source": "табло расписаний с перекидными цифрами",
+   "family": "data-notation",
+   "why": "расписание дня как табло: окна, время, статус"
+  },
+  {
+   "id": "the-cut",
+   "name": "45 минут в кресле",
+   "source": "ритуал стрижки: одно окно в расписании",
+   "family": "ritual-event",
+   "why": "единица продукта — окно времени"
+  },
+  {
+   "id": "window",
+   "name": "Окошко",
+   "source": "имя продукта — окно в стене",
+   "family": "place-architecture",
+   "literal": true,
+   "why": "буквальное прочтение имени",
+   "rejected_because": "нужны фото реальных салонов (нет); окно-рамка тянет к рамкам браузера — клише"
+  },
+  {
+   "id": "barber-pole",
+   "name": "Барбер-столб",
+   "source": "вывеска барбершопа",
+   "family": "place-architecture",
+   "why": "узнаваемо",
+   "rejected_because": "клише категории; SaaS не только для барбершопов"
+  }
+ ],
+ "directions": [
+  {
+   "id": "a",
+   "name": "Журнал записи",
+   "recommended": true,
+   "thesis": "Сетка дня как структура страницы: окна времени, записи, одна красная пометка-исправление там, где сервис спас окно",
+   "territory": "appointment-book",
+   "axes": {
+    "paper": "light",
+    "paper_temperature": "neutral",
+    "display_style": "grotesque",
+    "accent_hue": "warm",
+    "macrostructure": "workbench",
+    "imagery": "ui",
+    "energy": "measured"
+   },
+   "palette": {
+    "background": "#F7F8F6",
+    "surface": "#FFFFFF",
+    "text": "#15181C",
+    "muted": "#5C636B",
+    "accent": "#C2401F",
+    "on_accent": "#FFFFFF"
+   },
+   "color_strategy": "restrained",
+   "type": {
+    "display": "Onest",
+    "text": "Golos Text",
+    "cyrillic_checked": false,
+    "license": "OFL"
+   },
+   "signature_move": {
+    "what": "Закреплённое окно расписания дня: по мере прокрутки текста функций пустые окна заполняются записями, напоминание уходит, неявка исправляется красной пометкой",
+    "where": "section-role:product-demo",
+    "effects": [
+     "effect:sticky-stack"
+    ],
+    "min_level": "L1",
+    "concept_link": "продукт показан за работой: журнал заполняется сам"
+   },
+   "first_viewport": "Слева заголовок (56/36 px), подзаголовок про 14 дней и кнопка; справа окно расписания дня мастера на настоящем скриншоте, одна запись подсвечена красной пометкой",
+   "imagery": "настоящие скриншоты интерфейса (после q-screenshots), без рамок устройств",
+   "motion": "одна сцена прокрутки в функциях; остальное — отклик",
+   "risk": "Без настоящих скриншотов приём невозможен (customer-tbd); сетка расписания легко превращается в «скучную таблицу»",
+   "cost": "средне: скриншоты заказчика и сцена",
+   "level_fit": [
+    "L1"
+   ]
+  },
+  {
+   "id": "b",
+   "name": "Напоминание",
+   "thesis": "Страница как день глазами клиента: сообщения-напоминания приходят по ходу прокрутки, каждое снимает одно возражение",
+   "territory": "reminder-chat",
+   "axes": {
+    "paper": "mid",
+    "paper_temperature": "cool",
+    "display_style": "rounded",
+    "accent_hue": "cool",
+    "macrostructure": "conversational-faq",
+    "imagery": "ui",
+    "energy": "lively"
+   },
+   "palette": {
+    "background": "#E9EEF3",
+    "surface": "#FFFFFF",
+    "text": "#101820",
+    "accent": "#1F6FEB",
+    "on_accent": "#FFFFFF"
+   },
+   "color_strategy": "restrained",
+   "type": {
+    "display": "Commissioner",
+    "text": "Golos Text",
+    "cyrillic_checked": false,
+    "license": "OFL",
+    "note": "v1: Nunito → Commissioner по cyrillic-display-fonts.yaml (Oswald — avoid, Nunito — average)"
+   },
+   "signature_move": {
+    "what": "Пузыри сообщений появляются по одному при прокрутке, как в чате",
+    "where": "section-role:how-it-works",
+    "effects": [
+     "effect:scroll-reveal-system"
+    ],
+    "min_level": "L1",
+    "concept_link": "неявки снимает сообщение — его и показываем"
+   },
+   "first_viewport": "Телефон с одним напоминанием «Завтра в 14:00, мастер Руслан» и кнопкой пробного периода рядом",
+   "imagery": "сообщения, свёрстанные кодом (не скриншот мессенджера)",
+   "motion": "появление сообщений по одному",
+   "risk": "Имитация чужого мессенджера (бренд, интерфейс); появление по одному — почерк генераторов, если без системы",
+   "cost": "дёшево",
+   "level_fit": [
+    "L0",
+    "L1"
+   ]
+  },
+  {
+   "id": "c",
+   "name": "Табло",
+   "thesis": "Тёмное табло дня: время, мастер, статус; главное число — доля неявок из фактов, одно перелистывание цифр",
+   "territory": "departure-board",
+   "axes": {
+    "paper": "dark",
+    "paper_temperature": "neutral",
+    "display_style": "condensed",
+    "accent_hue": "warm",
+    "macrostructure": "stat-led",
+    "imagery": "typographic",
+    "energy": "lively"
+   },
+   "palette": {
+    "background": "#121418",
+    "surface": "#1C1F24",
+    "text": "#F2F2EE",
+    "accent": "#F5C518",
+    "on_accent": "#121418"
+   },
+   "color_strategy": "committed",
+   "type": {
+    "display": "Sofia Sans Condensed",
+    "text": "Golos Text",
+    "cyrillic_checked": false,
+    "license": "OFL",
+    "note": "v1: Oswald → Sofia Sans Condensed по cyrillic-display-fonts.yaml (Oswald — avoid, Nunito — average)"
+   },
+   "signature_move": {
+    "what": "Перекидные цифры табло один раз показывают долю неявок до и после (fact:noshow-average, fact:case-noshow-kazan)",
+    "where": "section-role:proof-stats",
+    "effects": [
+     "effect:counter-up"
+    ],
+    "min_level": "L1",
+    "concept_link": "расписание — это табло; результат — число"
+   },
+   "first_viewport": "Крупное табло «сегодня 14:00 — занято» и одна строка обещания с кнопкой",
+   "imagery": "типографика",
+   "motion": "одно перелистывание цифр",
+   "risk": "Почти-чёрный + жёлтый акцент — кластер ui 11/04 №2; ряд цифр — примета K3 stats; счётчики — клише",
+   "cost": "дёшево",
+   "level_fit": [
+    "L1",
+    "L2"
+   ]
+  },
+  {
+   "id": "d",
+   "name": "Канон SaaS",
+   "canon": true,
+   "thesis": "Категорийный стандарт, сыгранный честно: светлая страница, продукт крупно, бенто функций, реальные цифры и тарифы",
+   "territory": "the-cut",
+   "axes": {
+    "paper": "light",
+    "paper_temperature": "neutral",
+    "display_style": "grotesque",
+    "accent_hue": "cool",
+    "macrostructure": "bento-grid",
+    "imagery": "ui",
+    "energy": "calm"
+   },
+   "palette": {
+    "background": "#FFFFFF",
+    "surface": "#F4F6F8",
+    "text": "#0F172A",
+    "accent": "#2563EB",
+    "on_accent": "#FFFFFF"
+   },
+   "color_strategy": "restrained",
+   "type": {
+    "display": "Geist",
+    "text": "Golos Text",
+    "cyrillic_checked": false,
+    "license": "OFL"
+   },
+   "signature_move": {
+    "what": "Бенто из настоящих экранов продукта разного размера",
+    "where": "section-role:benefits",
+    "effects": [],
+    "min_level": "L0",
+    "concept_link": "знакомая форма для покупателя SaaS"
+   },
+   "first_viewport": "Заголовок по центру-слева, кнопка, под ним крупный скриншот продукта",
+   "imagery": "настоящие скриншоты",
+   "motion": "отклик",
+   "risk": "Сходится с десятками SaaS-страниц (Kilo: мокап дашборда в hero — признак сходимости); выбор по «безопасности»",
+   "cost": "дёшево",
+   "level_fit": [
+    "L0",
+    "L1"
+   ]
+  }
+ ],
+ "choice": {
+  "chosen": "a",
+  "chosen_by": "default",
+  "date": "2026-09-24",
+  "why": "Рекомендуемое: совпадает с макроструктурой workbench плана site и с механизмом продукта; держится на настоящем интерфейсе. Статус proposed: заказчик демо не отвечал.",
+  "rejected": [
+   {
+    "id": "b",
+    "why": "имитация мессенджера и появление по одному — риск почерка генераторов"
+   },
+   {
+    "id": "c",
+    "why": "кластер «почти-чёрный + жёлтый» и примета stats"
+   },
+   {
+    "id": "d",
+    "why": "канон оставлен как дверь для заказчика, а не как рекомендация"
+   }
+  ]
+ },
+ "visual_language": {
+  "color_strategy": "restrained",
+  "palette": {
+   "background": "#F7F8F6",
+   "surface": "#FFFFFF",
+   "text": "#15181C",
+   "muted": "#5C636B",
+   "accent": "#C2401F",
+   "on_accent": "#FFFFFF"
+  },
+  "accent_rule": "красный карандаш — главная кнопка и пометки «окно спасено» в интерфейсе; больше нигде",
+  "type": {
+   "display": "Onest",
+   "text": "Golos Text",
+   "cyrillic_checked": false,
+   "license": "OFL"
+  },
+  "composition": [
+   "сетка дня (часовые линии) как фоновая структура секций продукта",
+   "скриншоты без рамок устройств, с тонкой границей 1 px"
+  ],
+  "surfaces": [
+   "разлиновка журнала — тонкие линии 1 px цвета границы; без бумажных фактур"
+  ],
+  "imagery": {
+   "kinds": [
+    "ui-screenshot"
+   ],
+   "subject": "настоящее расписание мастера, запись клиента, напоминание",
+   "source_policy": "только скриншоты заказчика без данных клиентов; до их получения — кадр продукта не показывается",
+   "people_policy": "none",
+   "product_policy": "real-photo-only"
+  },
+  "theme": "light"
+ },
+ "motion_system": {
+  "thesis": "Двигается только расписание: окна заполняются по мере чтения, остальное неподвижно",
+  "level": "expressive",
+  "entrance_system": "hero — без появления; сцена расписания закреплена в секции функций; кейс и тарифы — без анимации",
+  "library": [
+   "css",
+   "gsap@3 + ScrollTrigger"
+  ],
+  "smooth_scroll": false,
+  "page_transitions": "none",
+  "reduce": "три состояния расписания статичными кадрами рядом с текстом",
+  "by_section": [
+   {
+    "section": "hero",
+    "motion_level": "subtle",
+    "visual_role": "accent"
+   },
+   {
+    "section": "funktsii",
+    "motion_level": "expressive",
+    "visual_role": "peak"
+   },
+   {
+    "section": "tarify",
+    "motion_level": "none",
+    "visual_role": "calm"
+   }
+  ],
+  "character": [
+   "measured",
+   "precise"
+  ],
+  "primitives": [
+   "none"
+  ],
+  "spec_ref": "../../09-ai-execution-evaluation/examples/okoshko-home.motion-spec.yaml"
+ },
+ "effects_by_section": [
+  {
+   "section": "funktsii",
+   "level": "L1",
+   "effects": [
+    "effect:sticky-stack"
+   ],
+   "purpose": "signature",
+   "why": "журнал заполняется сам"
+  }
+ ],
+ "decisions": [
+  {
+   "id": "d-stats-row",
+   "technique": "k3:stats (ряд цифр)",
+   "decision": "twist",
+   "criteria": {
+    "concept": {
+     "result": "pass",
+     "note": "неявки — главный довод, их число из фактов"
+    },
+    "brand": {
+     "result": "na"
+    },
+    "execution": {
+     "result": "pass",
+     "note": "только fact:salons-count, fact:noshow-average, fact:rating-rustore; без счётчиков"
+    },
+    "epoch": {
+     "result": "pass",
+     "note": "насыщен: поворот — статичные числа с датой источника"
+    },
+    "singularity": {
+     "result": "pass",
+     "note": "один ряд"
+    }
+   },
+   "why": "Ряд цифр оставлен по брифу (ambition.allow stats), без анимации от нуля",
+   "k3_allow": "stats"
+  },
+  {
+   "id": "d-dashboard-frame",
+   "technique": "cliche:dashboard-in-browser-frame",
+   "decision": "avoid",
+   "criteria": {
+    "concept": {
+     "result": "fail",
+     "note": "рамка показывает браузер, а не работу"
+    },
+    "brand": {
+     "result": "na"
+    },
+    "execution": {
+     "result": "na"
+    },
+    "epoch": {
+     "result": "fail",
+     "note": "сходимость генераторов (kimi 05/03, Kilo)"
+    },
+    "singularity": {
+     "result": "na"
+    }
+   },
+   "why": "Скриншоты без рамок устройств"
+  }
+ ],
+ "exclusions": {
+  "forbidden_hues": [
+   {
+    "from": 270,
+    "to": 320,
+    "reason": "фиолетовый SaaS-градиент (IMG-M05, ui 11/04 §5)"
+   }
+  ],
+  "forbidden_markers": [
+   "IMG-M05",
+   "IMG-M06",
+   "IMG-M07",
+   "IMG-M08",
+   "IMG-M22"
+  ],
+  "k3_allow": [
+   "stats"
+  ],
+  "bans": [
+   "выдуманный интерфейс",
+   "рамки браузера и телефона",
+   "счётчики от нуля",
+   "барбер-столб, усы, ножницы"
+  ],
+  "executor_block": "08-uniqueness-anti-slop/01-cliche-policy.md §6.2 + k3_allow: stats"
+ },
+ "budget": {
+  "profile": "landing-saas@L1",
+  "spend": [
+   {
+    "what": "скриншот расписания в hero (AVIF)",
+    "kb": 120,
+    "device": "both",
+    "load": "eager"
+   },
+   {
+    "what": "три состояния расписания для сцены",
+    "kb": 240,
+    "device": "both",
+    "load": "on-visible"
+   },
+   {
+    "what": "gsap + ScrollTrigger (br)",
+    "kb": 40,
+    "device": "both",
+    "load": "after-lcp"
+   }
+  ]
+ },
+ "handoff": {
+  "visual_dna": {
+   "character": {
+    "adjectives": [
+     "деловой",
+     "точный",
+     "дружелюбный"
+    ],
+    "boldness": "balanced",
+    "one_bold_move": "настоящий интерфейс расписания крупно; окна заполняются по прокрутке"
+   },
+   "palette_forbidden_hues": [
+    {
+     "from": 270,
+     "to": 320,
+     "reason": "фиолетовый SaaS-градиент (IMG-M05)"
+    }
+   ],
+   "exclusions": {
+    "forbidden_markers": [
+     "IMG-M05",
+     "IMG-M06",
+     "IMG-M07",
+     "IMG-M08",
+     "IMG-M22"
+    ]
+   },
+   "abstract": {
+    "policy": "none"
+   },
+   "video": {
+    "tempo": "still"
+   },
+   "composition": {
+    "subject_region": "right-third",
+    "text_zone_default": {
+     "side": "left",
+     "share": 0.45,
+     "surface": "flat light neutral field"
+    },
+    "negative_space_min": 0.3,
+    "max_elements": 3,
+    "asymmetry": true
+   },
+   "subject_matter": {
+    "domain_props": [
+     "day schedule of a barber",
+     "booking link on a phone",
+     "reminder message"
+    ],
+    "motifs": [
+     "empty slots filling up"
+    ],
+    "people_policy": "none",
+    "product_policy": "real-photo-only"
+   }
+  },
+  "kimi": {
+   "design_system_style": "журнал записи, который ведёт себя сам: сетка дня и одна красная пометка",
+   "direction": {
+    "visual_thesis": "продукт показан за работой: окна заполняются",
+    "paper": "light neutral #F7F8F6",
+    "display_style": "grotesque Onest",
+    "accent_rule": "красный #C2401F — главная кнопка и пометки в интерфейсе",
+    "imagery": "только настоящие скриншоты без рамок",
+    "macrostructure": "document-led"
+   },
+   "motion": {
+    "level": "expressive",
+    "thesis": "двигается только расписание",
+    "library": "gsap@3 + ScrollTrigger"
+   },
+   "bans": [
+    "рамки устройств",
+    "счётчики",
+    "выдуманный интерфейс"
+   ],
+   "allow": [
+    "stats"
+   ]
+  }
+ },
+ "lifecycle": {
+  "version": "0.1",
+  "history": [
+   {
+    "version": "0.1",
+    "date": "2026-09-24",
+    "change": "4 направления для демо SaaS",
+    "by": "Claude (пример A/01)"
+   }
+  ],
+  "review_by": "2027-03-24",
+  "on_brand_change": "если появится логотип и цвет — пересобрать palette и accent_rule; сетка дня остаётся"
+ },
+ "prototype": {
+  "status": "planned",
+  "effect": "effect:sticky-stack",
+  "notes": "лабораторная страница окна расписания — до показа направления заказчику"
+ },
+ "variation": {
+  "entry": {
+   "paper": "light",
+   "display_style": "grotesque",
+   "accent_hue": "warm",
+   "macrostructure": "workbench",
+   "hero_architecture": "split-text-left",
+   "main_technique": "effect:sticky-stack",
+   "motion_signature": {
+    "entrances": "none",
+    "tempo": "measured",
+    "curve": "out-expo"
+   },
+   "corner_language": "soft"
+  }
+ }
+}

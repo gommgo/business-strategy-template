@@ -1,0 +1,3915 @@
+# Машиночитаемая версия 09-ai-generation-evaluation/02-site-checklist.md (сводный чек-лист сайта, агент K).
+# Сгенерировано ../../scripts/site/checklist_export.py — правки вносить в Markdown и перегенерировать.
+version: "1.0"
+generated_at: "2026-09-25 00:56"
+checked: "2026-09-25"
+source_md: "09-ai-generation-evaluation/02-site-checklist.md"
+source_md_meta: "Свод правил базы в форме «да / нет» для проверки плана, собранной страницы и сайта: **248 пунктов в 15 блоках** плюс каталог"
+items_count: 248
+defects_count: 50
+severity_scale: {B: блокер, S: серьёзно, D: желательно}
+severity_note: "серьёзность на маршруте «визит → действие» (поправка PLAN №10), назначена агентом K, не измерена; [спорно] — не выше S"
+check_method_codes: {DOM: dom, LNT: script, AXE: script, SCR: scenario, IMG: visual, JDG: judge, HUM: human}
+check_method_note: "первый способ — основной; JDG и HUM не ставят автоматических ворот (auto_gate: false)"
+steps: [step:intake, step:proof, step:site-type, step:site-map, step:page-plan, step:sister-sync, step:plan-check, step:package, step:build-loop, step:gates, step:fix, step:acceptance, step:measure]
+blocks:
+  - {code: PRE, title: "бриф и план до сборки (входной контракт)", items: 26, B: 16, S: 9, D: 1}
+  - {code: STR, title: "структура, сюжет, первый экран", items: 20, B: 1, S: 17, D: 2}
+  - {code: BLK, title: "блоки и разметка секций", items: 14, B: 0, S: 12, D: 2}
+  - {code: CTA, title: "призывы и окна", items: 13, B: 3, S: 9, D: 1}
+  - {code: FRM, title: "формы, квизы, «спасибо»", items: 18, B: 5, S: 12, D: 1}
+  - {code: PRF, title: "доказательства, цена и честность", items: 22, B: 10, S: 11, D: 1}
+  - {code: NAV, title: "шапка, подвал, ИА", items: 21, B: 0, S: 17, D: 4}
+  - {code: SEO, title: "поиск Google и Яндекса", items: 19, B: 8, S: 8, D: 3}
+  - {code: GEO, title: "доступность для ИИ-поиска (техническая часть)", items: 10, B: 4, S: 4, D: 2}
+  - {code: PERF, title: "скорость и вес по профилю", items: 16, B: 2, S: 12, D: 2}
+  - {code: A11Y, title: "доступность маркетинговой страницы", items: 18, B: 8, S: 10, D: 0}
+  - {code: LEGAL, title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)", items: 16, B: 8, S: 7, D: 1}
+  - {code: TRK, title: "аналитика и события", items: 10, B: 1, S: 5, D: 4}
+  - {code: MOB, title: "телефон", items: 12, B: 3, S: 9, D: 0}
+  - {code: OUT, title: "ворота выдачи", items: 13, B: 5, S: 8, D: 0}
+items:
+  - id: SITE-PRE-01
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Бриф — YAML по `site-brief.schema.json`; валидатор — 0 ошибок; статус `approved` с подписью, нет открытых вопросов приоритета 1"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["01-foundations/03-site-brief.md"]
+    source_section: "§4; DEF-01"
+    source_raw: "`../01-foundations/03-site-brief.md` §4; DEF-01"
+    evidence_level: []
+    related_ids: [DEF-01]
+  - id: SITE-PRE-02
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "`site_type` и `primary_page_type` — из словаря; у `landing-site` тип посадочной — класса landing"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["01-foundations/03-site-brief.md"]
+    source_section: "§2.1"
+    source_raw: "`../01-foundations/03-site-brief.md` §2.1"
+    evidence_level: []
+  - id: SITE-PRE-03
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Одно целевое действие — macro-id `action:` (`conversion.action`); вторая цель — `secondary_actions`, иным стилем"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["01-foundations/03-site-brief.md"]
+    source_section: "§2.3; DEF-14"
+    source_raw: "`../01-foundations/03-site-brief.md` §2.3; DEF-14"
+    evidence_level: []
+    related_ids: [DEF-14]
+  - id: SITE-PRE-04
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "У источников трафика — температура, устройство, доля и обещание источника (реклама, письмо); уровень осведомлённости страницы выведен из главного источника"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT, HUM]
+    check_method_class: [script, human]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["01-foundations/01-how-visitors-decide.md"]
+    source_section: "§3"
+    source_raw: "`../01-foundations/01-how-visitors-decide.md` §3"
+    evidence_level: []
+  - id: SITE-PRE-05
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "`proof.facts_ref` ведёт на `facts.yaml`; обязательные виды доказательств типа закрыты фактом или блокирующим пробелом; у фактов источник, дата, разрешение"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["01-foundations/03-site-brief.md"]
+    source_section: "§3, §6; DEF-05"
+    source_raw: "`../01-foundations/03-site-brief.md` §3, §6; DEF-05"
+    evidence_level: []
+    related_ids: [DEF-05]
+  - id: SITE-PRE-06
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Стимул и срок акции — только фактом с `valid.until`; таймер без реальной даты не планируется"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["01-foundations/03-site-brief.md"]
+    source_section: "§2.5; DEF-21"
+    source_raw: "`../01-foundations/03-site-brief.md` §2.5; DEF-21"
+    evidence_level: []
+    related_ids: [DEF-21]
+  - id: SITE-PRE-07
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Юрисдикция и отраслевой режим заданы (`constraints.jurisdiction`, `legal_category`)"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/01-law-ru-eu.md"]
+    source_section: "§6"
+    source_raw: "`../08-legal-trust-a11y/01-law-ru-eu.md` §6"
+    evidence_level: []
+  - id: SITE-PRE-08
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Окно захвата, exit-intent, автооткрытие чата, прелоадер — `off` или включены с `policies.rationale` и согласием заказчика"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md"]
+    source_section: "§11; DEF-24"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §11; DEF-24"
+    evidence_level: []
+    related_ids: [DEF-24]
+  - id: SITE-PRE-09
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Уровень амбиций — id L0 / L1 / L2 по решению заказчика 20; уровень страницы не выше уровня сайта; отклонение — с причиной"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/budgets.yaml"]
+    source_section: ""
+    source_raw: "`../07-seo-geo-performance-analytics/budgets.yaml` `page_type_levels`"
+    evidence_level: []
+  - id: SITE-PRE-10
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Многостраничник: `site-map` валиден; страницы брифа — в `pages[]`; у страницы шаблон и план; у формы — «спасибо»; пункты шапки и подвала — существующие страницы; задан `build_order`"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["06-multipage-ia/01-sitemaps-templates-content-model.md"]
+    source_section: "SITE-NAV-01, SITE-NAV-02"
+    source_raw: "`../06-multipage-ia/01-sitemaps-templates-content-model.md`; SITE-NAV-01, SITE-NAV-02"
+    evidence_level: []
+    related_ids: [SITE-NAV-01, SITE-NAV-02]
+  - id: SITE-PRE-11
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "У каждой страницы и шаблона есть `page-plan`, валидный по схеме и валидатору (0 error)"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["04-blocks/03-slots-and-page-plan.md", "99-raw/experiments/E/01-validate/validate.py"]
+    source_section: ""
+    source_raw: "`../04-blocks/03-slots-and-page-plan.md`; `../99-raw/experiments/E/01-validate/validate.py`"
+    evidence_level: []
+  - id: SITE-PRE-12
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Макроструктура выбрана до секций; заказчику показаны две альтернативы из других семейств; форма не повторяет прошлую страницу проекта того же типа"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT, HUM]
+    check_method_class: [script, human]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["03-page-structure/01-narratives-and-section-order.md"]
+    source_section: "§4.3; DEF-03"
+    source_raw: "`../03-page-structure/01-narratives-and-section-order.md` §4.3; DEF-03"
+    evidence_level: []
+    related_ids: [DEF-03]
+  - id: SITE-PRE-13
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "`first_screen_policy` соответствует макроструктуре и трафику (`poster` — не для лидогенерации под контекстную рекламу); `first_screen.must_show` перечисляет обязательное для типа"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["03-page-structure/03-first-screen-and-mobile.md"]
+    source_section: "§1.3, §2.2; DEF-10"
+    source_raw: "`../03-page-structure/03-first-screen-and-mobile.md` §1.3, §2.2; DEF-10"
+    evidence_level: []
+    related_ids: [DEF-10]
+  - id: SITE-PRE-14
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Для платных источников заданы `message_match` (предмет, цена или условие, география, действие) и шапка `landing-minimal`; подстановка по метке — белым списком"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["03-page-structure/02-length-goal-message-match.md"]
+    source_section: "§2.3, §3; DEF-09"
+    source_raw: "`../03-page-structure/02-length-goal-message-match.md` §2.3, §3; DEF-09"
+    evidence_level: []
+    related_ids: [DEF-09]
+  - id: SITE-PRE-15
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "У каждой секции — роль словаря (не `other`), вопрос посетителя, блок `blocks.yaml` с вариантом и следующий шаг; id секции — из роли или блока, не самодельный"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["03-page-structure/01-narratives-and-section-order.md"]
+    source_section: "§1.1; AIL-31; DEF-04"
+    source_raw: "`../03-page-structure/01-narratives-and-section-order.md` §1.1; AIL-31; DEF-04"
+    evidence_level: []
+    related_ids: [AIL-31, DEF-04]
+  - id: SITE-PRE-16
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Порядок ролей выведен из осведомлённости и типа страницы или отклонение объяснено; хвост — из возражений этой страницы"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [HUM, JDG]
+    check_method_class: [human, judge]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["03-page-structure/01-narratives-and-section-order.md"]
+    source_section: "§3.1, §3.4; DEF-02"
+    source_raw: "`../03-page-structure/01-narratives-and-section-order.md` §3.1, §3.4; DEF-02"
+    evidence_level: []
+    related_ids: [DEF-02]
+  - id: SITE-PRE-17
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Число секций — в диапазоне типа или причина записана в `length.basis`"
+    severity: D
+    severity_label: "желательно"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["03-page-structure/02-length-goal-message-match.md"]
+    source_section: "§1.3; DEF-11"
+    source_raw: "`../03-page-structure/02-length-goal-message-match.md` §1.3; DEF-11"
+    evidence_level: []
+    related_ids: [DEF-11]
+  - id: SITE-PRE-18
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Каждый слот `data` ссылается на существующий допущенный `fact:`; пробел `missing` — с `on_missing`; блоки с `requires_facts` без фактов сняты"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md"]
+    source_section: "§1.2; SG-CONTENT-01; DEF-05"
+    source_raw: "`../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md` §1.2; SG-CONTENT-01; DEF-05"
+    evidence_level: []
+    related_ids: [DEF-05, SG-CONTENT-01]
+  - id: SITE-PRE-19
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Ровно один H1 (`seo.h1` = «секция.слот» hero); заданы `indexable`, `canonical`, `structured_data` по head-kit и `ssr_required: true`"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: ""
+    source_raw: "`../07-seo-geo-performance-analytics/head-kit.yaml` `plan_fields`"
+    evidence_level: []
+  - id: SITE-PRE-20
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Главный призыв — одно `action` стиля `primary` с повторами в местах решения; второй путь — `secondary`; у каждой формы `form.ref` на набор `lead-forms.yaml`"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md", "05-conversion-funnels/lead-forms.yaml"]
+    source_section: "§1.2"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §1.2; `../05-conversion-funnels/lead-forms.yaml`"
+    evidence_level: []
+  - id: SITE-PRE-21
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Раздел `legal` плана заполнен по `legal-requirements.yaml`: согласие ПД при сборе ПД в РФ, политика, баннер cookie, маркировка, реквизиты"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/legal-requirements.yaml"]
+    source_section: "LR-RU-01, LR-RU-05"
+    source_raw: "`../08-legal-trust-a11y/legal-requirements.yaml`; LR-RU-01, LR-RU-05"
+    evidence_level: []
+    related_ids: [LR-RU-01, LR-RU-05]
+  - id: SITE-PRE-22
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "События плана — id `events.yaml`; цель главного действия — по успеху сервера; счётчики — после согласия там, где требует юрисдикция"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/events.yaml"]
+    source_section: "DEF-44"
+    source_raw: "`../07-seo-geo-performance-analytics/events.yaml`; DEF-44"
+    evidence_level: []
+    related_ids: [DEF-44]
+  - id: SITE-PRE-23
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "`budget_profile` = `<page_type>@<уровень>` разрешается `page_gates.py --resolve`; виджеты — `load: on-visible` или `on-interaction`"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/03-performance-budgets-gates.md"]
+    source_section: "§3, §5"
+    source_raw: "`../07-seo-geo-performance-analytics/03-performance-budgets-gates.md` §3, §5"
+    evidence_level: []
+  - id: SITE-PRE-24
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "`overlays` плана согласованы с политиками брифа: баннер cookie — по юрисдикции, окно захвата — только при политике"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["04-blocks/03-slots-and-page-plan.md"]
+    source_section: "DEF-24"
+    source_raw: "`../04-blocks/03-slots-and-page-plan.md`; DEF-24"
+    evidence_level: []
+    related_ids: [DEF-24]
+  - id: SITE-PRE-25
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Сёстры закрыли свои входы: copy-deck по слотам прошёл сверку с фактами (COPY-C-01…04), treatment — по уровню, план ассетов — по медиа-слотам, у 3D-слота есть постер"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT, HUM]
+    check_method_class: [script, human]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["../text/09-ai-generation-evaluation/03-evaluation.md"]
+    source_section: "§2; CRV-AL-09"
+    source_raw: "`../../text/09-ai-generation-evaluation/03-evaluation.md` §2; CRV-AL-09"
+    evidence_level: []
+    related_ids: [COPY-C-01, CRV-AL-09]
+  - id: SITE-PRE-26
+    block: PRE
+    block_title: "бриф и план до сборки (входной контракт)"
+    text: "Проекция в пакет исполнителя проходит `build_package.py questions`, `build`, `check`; в TASK — структура из плана, A3 — из `first_screen_policy`, в ACCEPTANCE — блоки I–L (§6.2 файла 01)"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["09-ai-generation-evaluation/01-generators-and-ai-landing-markers.md", "../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md"]
+    source_section: "§6"
+    source_raw: "`01-generators-and-ai-landing-markers.md` §6; `../../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md`"
+    evidence_level: []
+  - id: SITE-STR-01
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "Порядок секций выведен из типа страницы, осведомлённости и трафика; нет шаблона генератора («hero → фичи → отзывы → тарифы → CTA» или чередования «ряд чисел ↔ фичи») без вопроса посетителя у секций"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [JDG, HUM]
+    check_method_class: [judge, human]
+    check_method_main: judge
+    auto_gate: false
+    source_file: ["03-page-structure/01-narratives-and-section-order.md"]
+    source_section: "§3.1, §3.4 ; AIL-01, AIL-02; DEF-02"
+    source_raw: "`../03-page-structure/01-narratives-and-section-order.md` §3.1, §3.4 `[проверено: C/01]`; AIL-01, AIL-02; DEF-02"
+    evidence_level: ["проверено"]
+    related_ids: [AIL-01, AIL-02, DEF-02]
+  - id: SITE-STR-02
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "Хвост (последние 3–4 секции) выведен из возражений страницы; форма страницы не повторяет прошлую страницу проекта того же типа"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [JDG]
+    check_method_class: [judge]
+    check_method_main: judge
+    auto_gate: false
+    source_file: ["03-page-structure/01-narratives-and-section-order.md"]
+    source_section: "§3.4; AIL-03; DEF-03"
+    source_raw: "`../03-page-structure/01-narratives-and-section-order.md` §3.4; AIL-03; DEF-03"
+    evidence_level: []
+    related_ids: [AIL-03, DEF-03]
+  - id: SITE-STR-03
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "Каждая секция служит цели страницы: в таблице конгруэнтности нет секций с 0 баллов (`03-expert-review-and-judge.md` §2.4)"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [JDG]
+    check_method_class: [judge]
+    check_method_main: judge
+    auto_gate: false
+    source_file: ["09-ai-generation-evaluation/03-expert-review-and-judge.md"]
+    source_section: "§2.4; [V:w87hTii1Dao 36:07]"
+    source_raw: "`03-expert-review-and-judge.md` §2.4; [V:w87hTii1Dao 36:07]"
+    evidence_level: []
+    videos: ["w87hTii1Dao"]
+  - id: SITE-STR-04
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "Число секций — в диапазоне типа (лидогенерация 8–12, рынок РФ — 11–16, SaaS 7–11, продукт 6–10, кампания 5–9, курс 10–16, главная 8–12, лид-магнит 3–5) или отклонение объяснено"
+    severity: D
+    severity_label: "желательно"
+    check_method: [DOM, LNT]
+    check_method_class: [dom, script]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["03-page-structure/02-length-goal-message-match.md"]
+    source_section: "§1.3; DEF-11"
+    source_raw: "`../03-page-structure/02-length-goal-message-match.md` §1.3; DEF-11"
+    evidence_level: []
+    related_ids: [DEF-11]
+  - id: SITE-STR-05
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "Решающее — что это, цена или условие, главное доказательство, призыв — в первых трёх экранах"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR, JDG]
+    check_method_class: [scenario, judge]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["03-page-structure/02-length-goal-message-match.md"]
+    source_section: "§1.1"
+    source_raw: "`../03-page-structure/02-length-goal-message-match.md` §1.1 `[исследование: NN/g 2018]`"
+    evidence_level: ["исследование"]
+  - id: SITE-STR-06
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "Первый экран 1440×900 и 390×844 (с баннером cookie, без кликов) показывает обязательное для типа по `first_screen_policy`; картинка без смысла не выталкивает заголовок и призыв за сгиб"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR, IMG]
+    check_method_class: [scenario, visual]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["03-page-structure/03-first-screen-and-mobile.md"]
+    source_section: "§1.3, §2.2; [V:F5x6ilNpfDo 28:44] ; DEF-07; AIL-49"
+    source_raw: "`../03-page-structure/03-first-screen-and-mobile.md` §1.3, §2.2; [V:F5x6ilNpfDo 28:44] `[кейс]`; DEF-07; AIL-49"
+    evidence_level: ["кейс"]
+    videos: ["F5x6ilNpfDo"]
+    related_ids: [AIL-49, DEF-07]
+  - id: SITE-STR-07
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "H1 или соседний надзаголовок называет категорию (не слоган без категории); ядро первого экрана ≤ 40 слов"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, JDG]
+    check_method_class: [dom, judge]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["03-page-structure/03-first-screen-and-mobile.md"]
+    source_section: "§1.2; COPY-C-07; AIL-05"
+    source_raw: "`../03-page-structure/03-first-screen-and-mobile.md` §1.2; COPY-C-07; AIL-05"
+    evidence_level: []
+    related_ids: [AIL-05, COPY-C-07]
+  - id: SITE-STR-08
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "При `poster`: призыв в шапке, видимый признак продолжения, первый призыв в потоке не ниже 2-го экрана на десктопе и 3-го на телефоне"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["03-page-structure/03-first-screen-and-mobile.md"]
+    source_section: "§2.2"
+    source_raw: "`../03-page-structure/03-first-screen-and-mobile.md` §2.2"
+    evidence_level: []
+  - id: SITE-STR-09
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "Нет ложного пола: hero на весь экран — с признаком продолжения; у `offer-cta` коробка hero 60–85 % высоты окна и край следующей секции виден"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR, IMG]
+    check_method_class: [scenario, visual]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["03-page-structure/03-first-screen-and-mobile.md"]
+    source_section: "§2.2, §2.4 ; AIL-06"
+    source_raw: "`../03-page-structure/03-first-screen-and-mobile.md` §2.2, §2.4 `[исследование: NN/g]`; AIL-06"
+    evidence_level: ["исследование"]
+    related_ids: [AIL-06]
+  - id: SITE-STR-10
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "Первый экран продолжает обещание источника трафика: предмет, цена или условие, география, действие (message match); акция из объявления есть на странице"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [JDG, HUM]
+    check_method_class: [judge, human]
+    check_method_main: judge
+    auto_gate: false
+    source_file: ["03-page-structure/02-length-goal-message-match.md", "05-conversion-funnels/03-multi-page-funnels.md"]
+    source_section: "§3.1; §2.1; DEF-09"
+    source_raw: "`../03-page-structure/02-length-goal-message-match.md` §3.1; `../05-conversion-funnels/03-multi-page-funnels.md` §2.1; DEF-09"
+    evidence_level: []
+    related_ids: [DEF-09]
+  - id: SITE-STR-11
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "Реклама ведёт на посадочную с предложением кампании, а не на главную"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [HUM]
+    check_method_class: [human]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["03-page-structure/02-length-goal-message-match.md"]
+    source_section: "§3.1"
+    source_raw: "`../03-page-structure/02-length-goal-message-match.md` §3.1 `[консенсус]`"
+    evidence_level: ["консенсус"]
+  - id: SITE-STR-12
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "Блокирующее возражение закрыто до финального призыва — у кнопки, цены или формы; блок FAQ — для остатка"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [JDG]
+    check_method_class: [judge]
+    check_method_main: judge
+    auto_gate: false
+    source_file: ["03-page-structure/01-narratives-and-section-order.md", "01-foundations/01-how-visitors-decide.md"]
+    source_section: "§3.2; §4; AIL-39; DEF-12"
+    source_raw: "`../03-page-structure/01-narratives-and-section-order.md` §3.2; `../01-foundations/01-how-visitors-decide.md` §4; AIL-39; DEF-12"
+    evidence_level: []
+    related_ids: [AIL-39, DEF-12]
+  - id: SITE-STR-13
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "У лидогенерации цена или состав услуги — не ниже 4-й секции или есть причина"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["03-page-structure/01-narratives-and-section-order.md"]
+    source_section: "§3.2"
+    source_raw: "`../03-page-structure/01-narratives-and-section-order.md` §3.2 `[проверено: C/01]`"
+    evidence_level: ["проверено"]
+  - id: SITE-STR-14
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "SEO-текст, перелинковка и смежные продажи стоят после главного призыва, не между оффером и формой"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["03-page-structure/01-narratives-and-section-order.md"]
+    source_section: "§3.2"
+    source_raw: "`../03-page-structure/01-narratives-and-section-order.md` §3.2"
+    evidence_level: []
+  - id: SITE-STR-15
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "Макроструктура подходит задаче: плакатные формы (poster, Letter, Manifesto, Marquee) — не для страницы, которую нужно понять за секунды; Stat-Led и Quote-Led — только с реальными фактами"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [JDG]
+    check_method_class: [judge]
+    check_method_main: judge
+    auto_gate: false
+    source_file: ["03-page-structure/01-narratives-and-section-order.md"]
+    source_section: "§4.2"
+    source_raw: "`../03-page-structure/01-narratives-and-section-order.md` §4.2"
+    evidence_level: []
+  - id: SITE-STR-16
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "Конвенции взаимодействия сохранены: логотип слева ведёт на главную, навигация сверху, формы и ссылки предсказуемы"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, SCR]
+    check_method_class: [dom, scenario]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["04-blocks/blocks.yaml"]
+    source_section: "контракт v2 §6 п.11; CRV-AL-11"
+    source_raw: "контракт v2 §6 п.11; CRV-AL-11; `../04-blocks/blocks.yaml` `conventions.logo-home`"
+    evidence_level: []
+    related_ids: [CRV-AL-11]
+  - id: SITE-STR-17
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "На странице длиннее ≈ 8 экранов есть якорная навигация"
+    severity: D
+    severity_label: "желательно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["03-page-structure/02-length-goal-message-match.md"]
+    source_section: "§1.4"
+    source_raw: "`../03-page-structure/02-length-goal-message-match.md` §1.4"
+    evidence_level: []
+  - id: SITE-STR-18
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "Отдельная страница под сегмент — только при ≥ 2 различиях; подстановка по метке — из белого списка, до первой отрисовки, с вариантом по умолчанию"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT, SCR]
+    check_method_class: [script, scenario]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["03-page-structure/02-length-goal-message-match.md"]
+    source_section: "§3.3–3.4"
+    source_raw: "`../03-page-structure/02-length-goal-message-match.md` §3.3–3.4"
+    evidence_level: []
+  - id: SITE-STR-19
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "Главная многостраничника — маршрутизатор: что делаете и для кого → пути по задачам → доказательства → о компании → контакты"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [JDG]
+    check_method_class: [judge]
+    check_method_main: judge
+    auto_gate: false
+    source_file: ["03-page-structure/01-narratives-and-section-order.md"]
+    source_section: "§3.3"
+    source_raw: "`../03-page-structure/01-narratives-and-section-order.md` §3.3 `[консенсус]`"
+    evidence_level: ["консенсус"]
+  - id: SITE-STR-20
+    block: STR
+    block_title: "структура, сюжет, первый экран"
+    text: "Сайт-история (кампания L2): после истории нет «типовых блоков» без роли; предложение — с честным сроком"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [JDG]
+    check_method_class: [judge]
+    check_method_main: judge
+    auto_gate: false
+    source_file: ["03-page-structure/01-narratives-and-section-order.md"]
+    source_section: "§3.3; AIL-04"
+    source_raw: "`../03-page-structure/01-narratives-and-section-order.md` §3.3; AIL-04"
+    evidence_level: []
+    related_ids: [AIL-04]
+  - id: SITE-BLK-01
+    block: BLK
+    block_title: "блоки и разметка секций"
+    text: "Каждая секция собрана из блока `blocks.yaml` в объявленном варианте; обязательные элементы анатомии на месте"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT, DOM]
+    check_method_class: [script, dom]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["04-blocks/01-blocks-catalog.md", "99-raw/experiments/E/01-validate/validate.py"]
+    source_section: "§1.1"
+    source_raw: "`../04-blocks/01-blocks-catalog.md` §1.1; `../99-raw/experiments/E/01-validate/validate.py`"
+    evidence_level: []
+  - id: SITE-BLK-02
+    block: BLK
+    block_title: "блоки и разметка секций"
+    text: "`<header>` — только шапка сайта; hero и секции — `<section>` внутри `<main>` со своим заголовком; подвал — `<footer>`"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["04-blocks/blocks.yaml"]
+    source_section: "поправка PLAN №4, №15"
+    source_raw: "`../04-blocks/blocks.yaml` `conventions.landmarks`; поправка PLAN №4, №15"
+    evidence_level: []
+  - id: SITE-BLK-03
+    block: BLK
+    block_title: "блоки и разметка секций"
+    text: "Ровно один H1 (в hero или заголовке статьи); секции — H2, карточки и шаги — H3; уровни не пропущены"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["04-blocks/blocks.yaml"]
+    source_section: "SG-SEO-03"
+    source_raw: "`../04-blocks/blocks.yaml` `conventions.one-h1`; SG-SEO-03 `[проверено: M — 81 % страниц]`"
+    evidence_level: ["проверено"]
+    related_ids: [SG-SEO-03]
+  - id: SITE-BLK-04
+    block: BLK
+    block_title: "блоки и разметка секций"
+    text: "Визуальный порядок = порядок DOM на всех экранах: секции не переставлены `order`, `row-reverse`, `grid-area`; в ряду «текст ↔ медиа» текст первым в DOM"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["04-blocks/blocks.yaml"]
+    source_section: ""
+    source_raw: "`../04-blocks/blocks.yaml` `conventions.dom-order` `[стандарт: WCAG 1.3.2, 2.4.3]`"
+    evidence_level: ["стандарт"]
+  - id: SITE-BLK-05
+    block: BLK
+    block_title: "блоки и разметка секций"
+    text: "Две секции не повторяют один блок в одном варианте (кроме полосы призыва и повтора формы); у повторяющегося блока доказательства — один вариант на странице"
+    severity: D
+    severity_label: "желательно"
+    check_method: [DOM, JDG]
+    check_method_class: [dom, judge]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["04-blocks/blocks.yaml", "05-conversion-funnels/02-proof-pricing-risk.md"]
+    source_section: "§1.3"
+    source_raw: "`../04-blocks/blocks.yaml` `conventions.vary-blocks`; `../05-conversion-funnels/02-proof-pricing-risk.md` §1.3"
+    evidence_level: []
+  - id: SITE-BLK-06
+    block: BLK
+    block_title: "блоки и разметка секций"
+    text: "В hero — словесный H1 с категорией; число, цитата, образ — рядом с H1, а не вместо него"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["04-blocks/01-blocks-catalog.md"]
+    source_section: "§3.2"
+    source_raw: "`../04-blocks/01-blocks-catalog.md` §3.2"
+    evidence_level: []
+  - id: SITE-BLK-07
+    block: BLK
+    block_title: "блоки и разметка секций"
+    text: "Главное сообщение hero не в слайдере; карусели не прокручиваются сами по умолчанию"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, SCR]
+    check_method_class: [dom, scenario]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["04-blocks/01-blocks-catalog.md", "03-page-structure/03-first-screen-and-mobile.md"]
+    source_section: "§3.1; §3.1 ; AIL-36"
+    source_raw: "`../04-blocks/01-blocks-catalog.md` §3.1; `../03-page-structure/03-first-screen-and-mobile.md` §3.1 `[консенсус]`; AIL-36"
+    evidence_level: ["консенсус"]
+    related_ids: [AIL-36]
+  - id: SITE-BLK-08
+    block: BLK
+    block_title: "блоки и разметка секций"
+    text: "Продукт SaaS и приложения показан настоящим интерфейсом (`block:product-showcase`, `block:feature-alternating`, `block:feature-tabs`), а не тремя одинаковыми карточками"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [JDG, IMG]
+    check_method_class: [judge, visual]
+    check_method_main: judge
+    auto_gate: false
+    source_file: ["04-blocks/01-blocks-catalog.md"]
+    source_section: "§5.1; AIL-07"
+    source_raw: "`../04-blocks/01-blocks-catalog.md` §5.1; AIL-07"
+    evidence_level: []
+    related_ids: [AIL-07]
+  - id: SITE-BLK-09
+    block: BLK
+    block_title: "блоки и разметка секций"
+    text: "Бенто — только из плиток разного содержания (функция, число, цитата, кадр), не «шесть плиток иконка + два слова»"
+    severity: D
+    severity_label: "желательно"
+    check_method: [JDG]
+    check_method_class: [judge]
+    check_method_main: judge
+    auto_gate: false
+    source_file: ["04-blocks/01-blocks-catalog.md"]
+    source_section: "§5.2 ; AIL-08"
+    source_raw: "`../04-blocks/01-blocks-catalog.md` §5.2 `[мнение вендора]`; AIL-08"
+    evidence_level: ["мнение вендора"]
+    related_ids: [AIL-08]
+  - id: SITE-BLK-10
+    block: BLK
+    block_title: "блоки и разметка секций"
+    text: "Таблица сравнения — до 5 вариантов, строки одинаковы по смыслу, не картинкой; на телефоне — две колонки и переключатель"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["04-blocks/01-blocks-catalog.md"]
+    source_section: "§6.3 ; AIL-38"
+    source_raw: "`../04-blocks/01-blocks-catalog.md` §6.3 `[практика: NN/g 2024]`; AIL-38"
+    evidence_level: ["практика"]
+    related_ids: [AIL-38]
+  - id: SITE-BLK-11
+    block: BLK
+    block_title: "блоки и разметка секций"
+    text: "Калькулятор — 1–3 понятных параметра (жёстко ≤ 5), итог сразу, пометка «ориентировочно»"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["04-blocks/01-blocks-catalog.md", "05-conversion-funnels/01-cta-and-lead-capture.md"]
+    source_section: "§6.2; §5.4"
+    source_raw: "`../04-blocks/01-blocks-catalog.md` §6.2; `../05-conversion-funnels/01-cta-and-lead-capture.md` §5.4"
+    evidence_level: []
+  - id: SITE-BLK-12
+    block: BLK
+    block_title: "блоки и разметка секций"
+    text: "Содержимое вкладок, аккордеонов, FAQ и «до/после» — в HTML, а не подгружается по нажатию"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["04-blocks/blocks.yaml", "07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: "блоков"
+    source_raw: "`../04-blocks/blocks.yaml` `errors` блоков `feature-tabs`, `faq`; `../07-seo-geo-performance-analytics/head-kit.yaml` `hk-access-hidden-text`"
+    evidence_level: []
+  - id: SITE-BLK-13
+    block: BLK
+    block_title: "блоки и разметка секций"
+    text: "Характеристики, программа, прайс, адрес и телефон — текстом, не картинкой и не только в PDF"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, IMG]
+    check_method_class: [dom, visual]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["04-blocks/blocks.yaml"]
+    source_section: "блоков"
+    source_raw: "`../04-blocks/blocks.yaml` `errors` блоков `spec-sheet`, `event-agenda`, `pricing-table`, `contact-details`"
+    evidence_level: []
+  - id: SITE-BLK-14
+    block: BLK
+    block_title: "блоки и разметка секций"
+    text: "Кнопки и ссылки — настоящие `<button>` и `<a href>`, а не `<div>` с обработчиком (клавиатура, скринридер, агенты-браузеры)"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/02-geo-ai-search.md", "../ux/08-accessibility/02-keyboard-focus-semantics.md"]
+    source_section: "«Частые ошибки»; ; AIL-46"
+    source_raw: "`../07-seo-geo-performance-analytics/02-geo-ai-search.md` «Частые ошибки»; `../../ux/08-accessibility/02-keyboard-focus-semantics.md`; AIL-46"
+    evidence_level: []
+    related_ids: [AIL-46]
+  - id: SITE-CTA-01
+    block: CTA
+    block_title: "призывы и окна"
+    text: "У страницы одно целевое действие; вторая цель для неготовых — переходный призыв иным стилем; на продающей посадочной нет выходов, не ведущих к действию («поделиться», чужие ссылки у призыва)"
+    severity: B
+    severity_label: "блокер"
+    check_method: [DOM, JDG]
+    check_method_class: [dom, judge]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md", "03-page-structure/02-length-goal-message-match.md"]
+    source_section: "§1.1; §2.1; [V:F5x6ilNpfDo 27:42] ; DEF-14; AIL-50"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §1.1; `../03-page-structure/02-length-goal-message-match.md` §2.1; [V:F5x6ilNpfDo 27:42] `[кейс]`; DEF-14; AIL-50"
+    evidence_level: ["кейс"]
+    videos: ["F5x6ilNpfDo"]
+    related_ids: [AIL-50, DEF-14]
+  - id: SITE-CTA-02
+    block: CTA
+    block_title: "призывы и окна"
+    text: "Главный призыв повторяется в местах решения (шапка, hero, после доказательств, финал, липкий на телефоне при длине > 3 экранов), но не после каждой секции"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md"]
+    source_section: "§1.2; поправка PLAN №1; UX-LAY-02 ; AIL-33; DEF-13"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §1.2; поправка PLAN №1; UX-LAY-02 `[проверено: M — медиана 4 призыва]`; AIL-33; DEF-13"
+    evidence_level: ["проверено"]
+    related_ids: [AIL-33, DEF-13, UX-LAY-02]
+  - id: SITE-CTA-03
+    block: CTA
+    block_title: "призывы и окна"
+    text: "Подпись призыва называет результат действия и одна во всех местах («Вызвать замерщика», а не «Отправить», «Подробнее»)"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, JDG]
+    check_method_class: [dom, judge]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md"]
+    source_section: "§1.3; COPY-R-09; AIL-32; DEF-13"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §1.3; COPY-R-09; AIL-32; DEF-13"
+    evidence_level: []
+    related_ids: [AIL-32, COPY-R-09, DEF-13]
+  - id: SITE-CTA-04
+    block: CTA
+    block_title: "призывы и окна"
+    text: "Второй путь — иным стилем и не вплотную к главной кнопке; двух равных кнопок разных действий рядом нет; главный призыв — сплошной, не «призрачная» кнопка"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, IMG]
+    check_method_class: [dom, visual]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md"]
+    source_section: "§1.4; [V:w87hTii1Dao 08:19] ; [V:F5x6ilNpfDo 37:53] ; AIL-48"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §1.4; [V:w87hTii1Dao 08:19] `[кейс]`; [V:F5x6ilNpfDo 37:53] `[кейс]`; AIL-48"
+    evidence_level: ["кейс"]
+    videos: ["F5x6ilNpfDo", "w87hTii1Dao"]
+    related_ids: [AIL-48]
+  - id: SITE-CTA-05
+    block: CTA
+    block_title: "призывы и окна"
+    text: "У кнопки — фраза, снимающая сомнение шага, только из фактов (срок ответа, «без предоплаты»); нет общих заверений «мы не спамим»"
+    severity: D
+    severity_label: "желательно"
+    check_method: [JDG]
+    check_method_class: [judge]
+    check_method_main: judge
+    auto_gate: false
+    source_file: ["05-conversion-funnels/02-proof-pricing-risk.md", "01-foundations/01-how-visitors-decide.md"]
+    source_section: "§3.3; §4 ; AIL-35"
+    source_raw: "`../05-conversion-funnels/02-proof-pricing-risk.md` §3.3; `../01-foundations/01-how-visitors-decide.md` §4 `[кейс]`; AIL-35"
+    evidence_level: ["кейс"]
+    related_ids: [AIL-35]
+  - id: SITE-CTA-06
+    block: CTA
+    block_title: "призывы и окна"
+    text: "Липкий призыв на телефоне ≤ 72 px + safe area, скрыт, пока виден призыв hero, форма или финал, и при открытой клавиатуре; не перекрывает кнопку отправки и фокус"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md", "03-page-structure/03-first-screen-and-mobile.md"]
+    source_section: "§2; §4.3"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §2; `../03-page-structure/03-first-screen-and-mobile.md` §4.3"
+    evidence_level: []
+  - id: SITE-CTA-07
+    block: CTA
+    block_title: "призывы и окна"
+    text: "Окно захвата открывается только по нажатию; автопоказ по таймеру, прокрутке или уходу — только решением заказчика по условиям F; на странице под Директ — никогда"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md", "05-conversion-funnels/lead-forms.yaml"]
+    source_section: "§11; ; решение заказчика 15; AIL-12; DEF-24"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §11; `lead-forms.yaml` `timed-capture-popup`; решение заказчика 15; AIL-12; DEF-24"
+    evidence_level: []
+    related_ids: [AIL-12, DEF-24]
+  - id: SITE-CTA-08
+    block: CTA
+    block_title: "призывы и окна"
+    text: "Чат не открывается сам; кнопки мессенджеров не перекрывают кнопку отправки и липкий призыв"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md", "04-blocks/blocks.yaml"]
+    source_section: "§4; блока"
+    source_raw: "`../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md` §4; `../04-blocks/blocks.yaml` `errors` блока `contact-channels`"
+    evidence_level: []
+  - id: SITE-CTA-09
+    block: CTA
+    block_title: "призывы и окна"
+    text: "Отказ в окне и форме — нейтральной подписью («Не сейчас»), без конфирмшейминга"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, JDG]
+    check_method_class: [dom, judge]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md", "../ux/06-feedback-states-motion/04-dark-patterns-and-ethics.md"]
+    source_section: "§4; §3.3"
+    source_raw: "`../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md` §4; `../../ux/06-feedback-states-motion/04-dark-patterns-and-ethics.md` §3.3"
+    evidence_level: []
+  - id: SITE-CTA-10
+    block: CTA
+    block_title: "призывы и окна"
+    text: "Каналы связи РФ: форма и `tel:`; мессенджеры — только ведущиеся и не единственным каналом; у банков, НФО, маркетплейсов — без иностранных"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, HUM]
+    check_method_class: [dom, human]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md", "05-conversion-funnels/lead-forms.yaml"]
+    source_section: "§6.3"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §6.3; `lead-forms.yaml` `blocked-messenger-only`, `foreign-messenger-regulated`"
+    evidence_level: []
+  - id: SITE-CTA-11
+    block: CTA
+    block_title: "призывы и окна"
+    text: "Срок ответа («перезвоним за 5 минут») — только фактом заказчика; таймера обратного звонка нет"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT, HUM]
+    check_method_class: [script, human]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md", "04-blocks/blocks.yaml"]
+    source_section: "§6.2; блока"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §6.2; `../04-blocks/blocks.yaml` `errors` блока `callback-request`"
+    evidence_level: []
+  - id: SITE-CTA-12
+    block: CTA
+    block_title: "призывы и окна"
+    text: "Призыв и форма видимы и нажимаемы до загрузки 3D, видео и эффектов; блоки цены и формы — эффекты L0 при любом уровне"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/budgets.yaml"]
+    source_section: "решение заказчика 20; CRV-AL-05"
+    source_raw: "решение заказчика 20; CRV-AL-05; `../07-seo-geo-performance-analytics/budgets.yaml` `page_type_levels.rules`"
+    evidence_level: []
+    related_ids: [CRV-AL-05]
+  - id: SITE-CTA-13
+    block: CTA
+    block_title: "призывы и окна"
+    text: "Призыв нажимается: в центре кнопки `elementFromPoint` возвращает её саму (нет прозрачных слоёв, баннеров и чата поверх)"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["99-raw/notes/wave2/H-notes.md"]
+    source_section: "«## Для K» (прозрачные слои над CTA); AIL-47"
+    source_raw: "`../99-raw/notes/wave2/H-notes.md` «## Для K» (прозрачные слои над CTA); AIL-47"
+    evidence_level: []
+    related_ids: [AIL-47]
+  - id: SITE-FRM-01
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Форма — `<form>` с `type=submit` и серверной обработкой; успех показан состоянием страницы или «спасибо», а не `alert()` и не `mailto:`"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR, DOM]
+    check_method_class: [scenario, dom]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md"]
+    source_section: "§9; SG-CONTENT-02; AIL-10; DEF-15"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §9; SG-CONTENT-02; AIL-10; DEF-15"
+    evidence_level: []
+    related_ids: [AIL-10, DEF-15, SG-CONTENT-02]
+  - id: SITE-FRM-02
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Форма собрана по набору `lead-forms.yaml` (`form.ref`); у каждого поля есть `why`; обязательно только нужное следующему шагу продаж"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md"]
+    source_section: "§3; LR-RU-06; AIL-41; DEF-17"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §3; LR-RU-06; AIL-41; DEF-17"
+    evidence_level: []
+    related_ids: [AIL-41, DEF-17, LR-RU-06]
+  - id: SITE-FRM-03
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Видимых полей ≤ 3 в первом экране и ≤ 5 в потоке; форма в окне — ≤ 4 поля без прокрутки"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/lead-forms.yaml"]
+    source_section: ""
+    source_raw: "`../05-conversion-funnels/lead-forms.yaml` `defaults.modal_max_fields` `[проверено: M — 19 из 26 форм РФ по 1–2 поля]`"
+    evidence_level: ["проверено"]
+  - id: SITE-FRM-04
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Подписи видимы над полями и связаны с ними (`label[for]`; плейсхолдер не заменяет подпись); одна колонка; `autocomplete` у каждого поля; телефон — `type=tel` с прощающей маской; первый пункт `select` пустой (умолчание — только с причиной); кнопка называет результат, а не «Отправить»"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, AXE]
+    check_method_class: [dom, script]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/lead-forms.yaml", "../ux/04-components-patterns/05-forms-and-validation.md"]
+    source_section: "§2.1, §3.1; [V:hPS7LUW7SlA 11:23] [V:hPS7LUW7SlA 21:42]; AIL-41"
+    source_raw: "`../05-conversion-funnels/lead-forms.yaml` `defaults.layout`; `../../ux/04-components-patterns/05-forms-and-validation.md` §2.1, §3.1; [V:hPS7LUW7SlA 11:23] [V:hPS7LUW7SlA 21:42]; AIL-41"
+    evidence_level: []
+    videos: ["hPS7LUW7SlA"]
+    related_ids: [AIL-41]
+  - id: SITE-FRM-05
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Нет запретов набора: «повторите почту», обязательный комментарий, `autocomplete=off`, кнопка `disabled` до нажатия, `type=reset`, арифметическая капча; у формы в окне есть видимая кнопка закрытия и Esc"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/lead-forms.yaml"]
+    source_section: "[V:hPS7LUW7SlA 09:18] [V:hPS7LUW7SlA 24:45] (канон форм ux важнее Grundy в пяти расходящихся пунктах — отчёт W2 §3)"
+    source_raw: "`../05-conversion-funnels/lead-forms.yaml` `forbidden`; [V:hPS7LUW7SlA 09:18] [V:hPS7LUW7SlA 24:45] `[консенсус]` (канон форм ux важнее Grundy в пяти расходящихся пунктах — отчёт W2 §3)"
+    evidence_level: ["консенсус"]
+    videos: ["hPS7LUW7SlA"]
+  - id: SITE-FRM-06
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Проверка ввода на сервере и в браузере; введённое сохраняется при ошибке; сообщение связано с полем"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["05-conversion-funnels/lead-forms.yaml", "../ux/04-components-patterns/05-forms-and-validation.md"]
+    source_section: ""
+    source_raw: "`../05-conversion-funnels/lead-forms.yaml` `defaults.validation`; `../../ux/04-components-patterns/05-forms-and-validation.md`"
+    evidence_level: []
+  - id: SITE-FRM-07
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Антиспам без трения: honeypot, временная ловушка, лимиты; видимой капчи нет; reCAPTCHA на сайте для РФ по умолчанию нет"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md", "05-conversion-funnels/lead-forms.yaml"]
+    source_section: "§8; ; DEF-20"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §8; `lead-forms.yaml` `defaults.antispam`; DEF-20"
+    evidence_level: []
+    related_ids: [DEF-20]
+  - id: SITE-FRM-08
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Скрытые поля источника (`utm_*`, `yclid`, `ym_client_id`, `landing_url`, `page_url`, `form_id`, `variant`) есть и доходят до CRM"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, HUM]
+    check_method_class: [dom, human]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md", "05-conversion-funnels/03-multi-page-funnels.md"]
+    source_section: "§9.4; §6.1; DEF-18"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §9.4; `../05-conversion-funnels/03-multi-page-funnels.md` §6.1; DEF-18"
+    evidence_level: []
+    related_ids: [DEF-18]
+  - id: SITE-FRM-09
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Квиз: 3–7 вопросов, вариант «не знаю», честный прогресс, «Назад», итог показан или честно обещан в начале, контакт — последним"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR, JDG]
+    check_method_class: [scenario, judge]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md"]
+    source_section: "§5.3"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §5.3 `[проверено: F/01]`"
+    evidence_level: ["проверено"]
+  - id: SITE-FRM-10
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "В квизе и у формы нет катящихся сроков («акция до завтра» скриптом) и скидки «для всех» как стимула"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["05-conversion-funnels/lead-forms.yaml", "99-raw/experiments/F/01-quiz-forms-ru/deep_check.py"]
+    source_section: "AIL-13; DEF-21"
+    source_raw: "`../05-conversion-funnels/lead-forms.yaml` `rolling-deadline`; `../99-raw/experiments/F/01-quiz-forms-ru/deep_check.py` `[проверено: 2 из 5 квизов]`; AIL-13; DEF-21"
+    evidence_level: ["проверено"]
+    related_ids: [AIL-13, DEF-21]
+  - id: SITE-FRM-11
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "«Спасибо»: статус первым, что дальше, кто и когда свяжется (срок — факт), канал, номер обращения, один следующий шаг; без рекламы сразу"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, JDG]
+    check_method_class: [dom, judge]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md", "05-conversion-funnels/lead-forms.yaml"]
+    source_section: "§10; ; [V:w87hTii1Dao 44:20]; AIL-34; DEF-16"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §10; `lead-forms.yaml` `defaults.success`; [V:w87hTii1Dao 44:20]; AIL-34; DEF-16"
+    evidence_level: []
+    videos: ["w87hTii1Dao"]
+    related_ids: [AIL-34, DEF-16]
+  - id: SITE-FRM-12
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Персональные данные не попадают в адрес «спасибо» и перехода в продукт; «спасибо» — `noindex` и вне sitemap"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR, DOM]
+    check_method_class: [scenario, dom]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["05-conversion-funnels/03-multi-page-funnels.md", "04-blocks/blocks.yaml"]
+    source_section: "§4.2; блока ; DEF-49"
+    source_raw: "`../05-conversion-funnels/03-multi-page-funnels.md` §4.2; `../04-blocks/blocks.yaml` `errors` блока `thank-you`; DEF-49"
+    evidence_level: []
+    related_ids: [DEF-49]
+  - id: SITE-FRM-13
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Имя услуги, тарифа и номер заявки одинаковы на странице, в форме, на «спасибо», в письме и SMS"
+    severity: D
+    severity_label: "желательно"
+    check_method: [HUM]
+    check_method_class: [human]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["05-conversion-funnels/03-multi-page-funnels.md"]
+    source_section: "§2"
+    source_raw: "`../05-conversion-funnels/03-multi-page-funnels.md` §2"
+    evidence_level: []
+  - id: SITE-FRM-14
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Вебинар и событие: дата, время и часовой пояс; «добавить в календарь»; после эфира страница меняет состояние"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, HUM]
+    check_method_class: [dom, human]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/03-multi-page-funnels.md"]
+    source_section: "§3"
+    source_raw: "`../05-conversion-funnels/03-multi-page-funnels.md` §3"
+    evidence_level: []
+  - id: SITE-FRM-15
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Лист ожидания — одно поле и явный предмет; счётчик очереди живой или его нет"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, HUM]
+    check_method_class: [dom, human]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/03-multi-page-funnels.md"]
+    source_section: "§4.1"
+    source_raw: "`../05-conversion-funnels/03-multi-page-funnels.md` §4.1"
+    evidence_level: []
+  - id: SITE-FRM-16
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Лид-магнит выдаётся сразу на странице и копией письмом; выдача не равна подписке на рекламу"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["05-conversion-funnels/03-multi-page-funnels.md"]
+    source_section: "§5.1"
+    source_raw: "`../05-conversion-funnels/03-multi-page-funnels.md` §5.1"
+    evidence_level: []
+  - id: SITE-FRM-17
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Пробный период: сумма и дата первого списания видны до ввода карты"
+    severity: B
+    severity_label: "блокер"
+    check_method: [DOM, HUM]
+    check_method_class: [dom, human]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/03-multi-page-funnels.md", "08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md"]
+    source_section: "§4.2; §4"
+    source_raw: "`../05-conversion-funnels/03-multi-page-funnels.md` §4.2; `../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md` §4"
+    evidence_level: []
+  - id: SITE-FRM-18
+    block: FRM
+    block_title: "формы, квизы, «спасибо»"
+    text: "Форма доступна: `<label>` связан с полем, галочка согласия — `<input>` с `<label>`, ошибка объявляется"
+    severity: B
+    severity_label: "блокер"
+    check_method: [AXE]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/03-a11y-marketing-pages.md"]
+    source_section: "§6"
+    source_raw: "`../08-legal-trust-a11y/03-a11y-marketing-pages.md` §6 `[проверено: I/02 — label 3 из 10]`"
+    evidence_level: ["проверено"]
+  - id: SITE-PRF-01
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Каждое число, отзыв, логотип, рейтинг, награда, кейс, упоминание СМИ и человек на фото — слот `data` с `fact:<id>`, допущенным по таблице I (источник, дата, разрешение)"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md"]
+    source_section: "§1.2–1.3; SG-CONTENT-01; COPY-C-01; UX-AIG-01; поправка PLAN №7; AIL-18, AIL-19; DEF-06"
+    source_raw: "`../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md` §1.2–1.3; SG-CONTENT-01; COPY-C-01; UX-AIG-01; поправка PLAN №7; AIL-18, AIL-19; DEF-06"
+    evidence_level: []
+    related_ids: [AIL-18, AIL-19, COPY-C-01, DEF-06, SG-CONTENT-01, UX-AIG-01]
+  - id: SITE-PRF-02
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Блок доказательств без фактов не поставлен «на вырост»; нет «заглушки отзывов», «fictional brand», примеров «для наглядности»"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT, DOM]
+    check_method_class: [script, dom]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["05-conversion-funnels/02-proof-pricing-risk.md", "04-blocks/blocks.yaml"]
+    source_section: "§1.5; ; AIL-09; DEF-05"
+    source_raw: "`../05-conversion-funnels/02-proof-pricing-risk.md` §1.5; `../04-blocks/blocks.yaml` `conventions.no-fact-no-block`; AIL-09; DEF-05"
+    evidence_level: []
+    related_ids: [AIL-09, DEF-05]
+  - id: SITE-PRF-03
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "У каждого блока доказательства есть сомнение, которое он снимает, и он стоит у точки решения (цена, форма, призыв), а не стеной в хвосте"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [JDG]
+    check_method_class: [judge]
+    check_method_main: judge
+    auto_gate: false
+    source_file: ["05-conversion-funnels/02-proof-pricing-risk.md"]
+    source_section: "§1.2"
+    source_raw: "`../05-conversion-funnels/02-proof-pricing-risk.md` §1.2"
+    evidence_level: []
+  - id: SITE-PRF-04
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Минимумы: логотипов ≥ 4, чисел 2–5, отзывов ≥ 2; малых чисел («нам доверяют 37 клиентов») нет"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, JDG]
+    check_method_class: [dom, judge]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/02-proof-pricing-risk.md", "04-blocks/01-blocks-catalog.md"]
+    source_section: "§1.3; §4.1"
+    source_raw: "`../05-conversion-funnels/02-proof-pricing-risk.md` §1.3; `../04-blocks/01-blocks-catalog.md` §4.1"
+    evidence_level: []
+  - id: SITE-PRF-05
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Число — с подписью, источником и датой, округлено только вниз; итоговое значение счётчика есть в HTML (не «0» до прокрутки)"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["04-blocks/01-blocks-catalog.md", "05-conversion-funnels/02-proof-pricing-risk.md"]
+    source_section: "§4.2; §1.6; AIL-18, AIL-20"
+    source_raw: "`../04-blocks/01-blocks-catalog.md` §4.2; `../05-conversion-funnels/02-proof-pricing-risk.md` §1.6; AIL-18, AIL-20"
+    evidence_level: []
+    related_ids: [AIL-18, AIL-20]
+  - id: SITE-PRF-06
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Рейтинг — площадка, шкала, число оценок, дата снимка и ссылка на карточку или официальный виджет по видимости"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/02-proof-pricing-risk.md"]
+    source_section: "§1.4; ГОСТ Р ИСО 20488-2023 п. 7.2 по I"
+    source_raw: "`../05-conversion-funnels/02-proof-pricing-risk.md` §1.4; ГОСТ Р ИСО 20488-2023 п. 7.2 по I"
+    evidence_level: []
+  - id: SITE-PRF-07
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Отзывы дословны, с датой и подписью по разрешению; нет ИИ-лиц; не «только пятёрки» без источника"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT, HUM]
+    check_method_class: [script, human]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md"]
+    source_section: "§3; LR-RU-12, LR-RU-22; COPY-C-03; AIL-45"
+    source_raw: "`../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md` §3; LR-RU-12, LR-RU-22; COPY-C-03; AIL-45"
+    evidence_level: []
+    related_ids: [AIL-45, COPY-C-03, LR-RU-12, LR-RU-22]
+  - id: SITE-PRF-08
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Люди-доказательства (команда, эксперт, автор отзыва, клиент) — реальные, с согласием на изображение; ИИ-людей и стока в этих ролях нет"
+    severity: B
+    severity_label: "блокер"
+    check_method: [HUM, IMG]
+    check_method_class: [human, visual]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md"]
+    source_section: "§2; решение заказчика 15; AIL-14; DEF-41"
+    source_raw: "`../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md` §2; решение заказчика 15; AIL-14; DEF-41"
+    evidence_level: []
+    related_ids: [AIL-14, DEF-41]
+  - id: SITE-PRF-09
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Цена показана: точная, «от» с реальной конфигурацией, цены типовых случаев или честное «по запросу» с диапазоном, факторами и сроком расчёта; доплаты рядом, в рублях"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, JDG]
+    check_method_class: [dom, judge]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/02-proof-pricing-risk.md"]
+    source_section: "§2.1–2.3 ; DEF-22"
+    source_raw: "`../05-conversion-funnels/02-proof-pricing-risk.md` §2.1–2.3 `[исследование: NN/g 2013]`; DEF-22"
+    evidence_level: ["исследование"]
+    related_ids: [DEF-22]
+  - id: SITE-PRF-10
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Цены, условия и тарифы — текстом в исходном HTML (не картинкой, не только PDF, не только скриптом)"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/02-proof-pricing-risk.md"]
+    source_section: "§2.8; SG-GEO-01"
+    source_raw: "`../05-conversion-funnels/02-proof-pricing-risk.md` §2.8; SG-GEO-01 `[проверено: M — у четверти русских страниц с ценами 40 % цен и больше из скрипта]`"
+    evidence_level: ["проверено"]
+    related_ids: [SG-GEO-01]
+  - id: SITE-PRF-11
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Тарифов 2–4 с одинаковыми строками; «Популярный» — только с фактом доли продаж; на телефоне рядом ≤ 2"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, LNT]
+    check_method_class: [dom, script]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/02-proof-pricing-risk.md"]
+    source_section: "§2.4–2.5; AIL-15; DEF-23"
+    source_raw: "`../05-conversion-funnels/02-proof-pricing-risk.md` §2.4–2.5; AIL-15; DEF-23"
+    evidence_level: []
+    related_ids: [AIL-15, DEF-23]
+  - id: SITE-PRF-12
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Зачёркнутая цена — из истории цен (ЕС — минимальная за 30 дней), скидка посчитана от неё"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["05-conversion-funnels/02-proof-pricing-risk.md"]
+    source_section: "§2.6; LR-EU-09"
+    source_raw: "`../05-conversion-funnels/02-proof-pricing-risk.md` §2.6; LR-EU-09"
+    evidence_level: []
+    related_ids: [LR-EU-09]
+  - id: SITE-PRF-13
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Годовая оплата не предвыбрана; сумма, период и дата списания — у кнопки; платные опции — отдельной неотмеченной галочкой с ценой"
+    severity: B
+    severity_label: "блокер"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["05-conversion-funnels/02-proof-pricing-risk.md"]
+    source_section: "§2.7; LR-RU-16"
+    source_raw: "`../05-conversion-funnels/02-proof-pricing-risk.md` §2.7; LR-RU-16"
+    evidence_level: []
+    related_ids: [LR-RU-16]
+  - id: SITE-PRF-14
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Срок акции — дата факта `valid.until` текстом; таймер не сбрасывается при перезагрузке и повторном визите; после даты блок исчезает"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["05-conversion-funnels/02-proof-pricing-risk.md", "08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md"]
+    source_section: "§4; §4; LR-EU-12; AIL-13"
+    source_raw: "`../05-conversion-funnels/02-proof-pricing-risk.md` §4; `../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md` §4; LR-EU-12; AIL-13"
+    evidence_level: []
+    related_ids: [AIL-13, LR-EU-12]
+  - id: SITE-PRF-15
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Остаток («осталось N») — живые данные с временем обновления; нет «мало» у всех позиций"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR, HUM]
+    check_method_class: [scenario, human]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md"]
+    source_section: "§4 (38-ФЗ ст. 5 ч. 3 п. 3)"
+    source_raw: "`../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md` §4 (38-ФЗ ст. 5 ч. 3 п. 3)"
+    evidence_level: []
+  - id: SITE-PRF-16
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Нет виджетов фальшивой активности («Мария из Самары записалась 2 минуты назад», «12 человек смотрят»)"
+    severity: B
+    severity_label: "блокер"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md"]
+    source_section: "§4; AIL-16"
+    source_raw: "`../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md` §4; AIL-16"
+    evidence_level: []
+    related_ids: [AIL-16]
+  - id: SITE-PRF-17
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Гарантия — из договора, конкретна, стоит у цены и перед формой; нарисованных печатей нет"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [HUM, JDG]
+    check_method_class: [human, judge]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["05-conversion-funnels/02-proof-pricing-risk.md", "04-blocks/01-blocks-catalog.md"]
+    source_section: "§3.1; §6.5"
+    source_raw: "`../05-conversion-funnels/02-proof-pricing-risk.md` §3.1; `../04-blocks/01-blocks-catalog.md` §6.5"
+    evidence_level: []
+  - id: SITE-PRF-18
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Кейс — с числом, сроком и типичным результатом рядом; имя клиента — с разрешением"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT, HUM]
+    check_method_class: [script, human]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md"]
+    source_section: "§1.2"
+    source_raw: "`../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md` §1.2"
+    evidence_level: []
+  - id: SITE-PRF-19
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "«До/после» — реальные фото одного ракурса и света, с датой и согласием; в медицине на посадочной их нет"
+    severity: B
+    severity_label: "блокер"
+    check_method: [HUM, IMG]
+    check_method_class: [human, visual]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md"]
+    source_section: "§1.2, §2.3; LR-RU-21"
+    source_raw: "`../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md` §1.2, §2.3; LR-RU-21"
+    evidence_level: []
+    related_ids: [LR-RU-21]
+  - id: SITE-PRF-20
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Скриншоты и фото продукта — настоящие: нет ИИ-интерфейса и нарисованной рамки браузера"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [HUM, IMG]
+    check_method_class: [human, visual]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md"]
+    source_section: "§1.2; гейт Hallmark 47; AIL-17"
+    source_raw: "`../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md` §1.2; гейт Hallmark 47; AIL-17"
+    evidence_level: []
+    related_ids: [AIL-17]
+  - id: SITE-PRF-21
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Внешние доказательства доступны: ссылки на карточку в картах и площадки отзывов; сведения на сайте совпадают с профилями"
+    severity: D
+    severity_label: "желательно"
+    check_method: [HUM]
+    check_method_class: [human]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["01-foundations/01-how-visitors-decide.md"]
+    source_section: "§5"
+    source_raw: "`../01-foundations/01-how-visitors-decide.md` §5 `[исследование: NN/g 2016]`"
+    evidence_level: ["исследование"]
+  - id: SITE-PRF-22
+    block: PRF
+    block_title: "доказательства, цена и честность"
+    text: "Награды — название, год, номинация, ссылка на организатора; «о нас пишут» — ссылками на публикации"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, HUM]
+    check_method_class: [dom, human]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md"]
+    source_section: "§1.2"
+    source_raw: "`../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md` §1.2"
+    evidence_level: []
+  - id: SITE-NAV-01
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "Шапка, подвал, крошки и поиск описаны один раз в `site-map.chrome`; `page-plan.navigation` только выбирает вариант"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§1.5"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §1.5"
+    evidence_level: []
+  - id: SITE-NAV-02
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "Каждый пункт шапки и каждая страница групп подвала есть в `pages[]`; у пункта с подменю есть хаб"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§1.2, §3.2"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §1.2, §3.2"
+    evidence_level: []
+  - id: SITE-NAV-03
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "Архетип шапки выбран по порядку G §1.2 с записанной причиной; NAV_RULE kimi к многостраничнику не применён"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT, JDG]
+    check_method_class: [script, judge]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§1.2; поправка PLAN №24; гейт Hallmark 42; AIL-11"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §1.2; поправка PLAN №24; гейт Hallmark 42; AIL-11"
+    evidence_level: []
+    related_ids: [AIL-11]
+  - id: SITE-NAV-04
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "Пунктов верхнего уровня ≤ 7 (8–9 — с короткими подписями); подписи не переносятся на самом длинном языке"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§1.2; гейт Hallmark 49"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §1.2; гейт Hallmark 49"
+    evidence_level: []
+  - id: SITE-NAV-05
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "Подменю — по клику и Enter; ссылка и кнопка `aria-expanded`; Esc закрывает; роли `menu` нет; каскада второго уровня нет"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR, DOM]
+    check_method_class: [scenario, dom]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§1.3; AIL-22"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §1.3; AIL-22"
+    evidence_level: []
+    related_ids: [AIL-22]
+  - id: SITE-NAV-06
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "На десктопе нет гамбургера; на телефоне видны ≤ 4 пунктов или кнопка со словом «Меню» с тем же порядком; иконки навигации и категорий — с видимыми подписями; мега-меню на телефоне — последовательным меню"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§1.3; [V:XPH01OGrinQ 21:37] ; AIL-22; AIL-51"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §1.3; [V:XPH01OGrinQ 21:37] `[практика]`; AIL-22; AIL-51"
+    evidence_level: ["практика"]
+    videos: ["XPH01OGrinQ"]
+    related_ids: [AIL-22, AIL-51]
+  - id: SITE-NAV-07
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "На телефоне без меню видны логотип и действие (у услуг — `tel:`); шапка ≤ 64 px, липкая частично, фокус не перекрыт"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§1.1"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §1.1"
+    evidence_level: []
+  - id: SITE-NAV-08
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "В подвале каждой страницы — контакты, юридические ссылки и реквизиты; группы — из реальных страниц; на телефоне подвал открыт"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§1.4; LR-RU-13; AIL-21"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §1.4; LR-RU-13; AIL-21"
+    evidence_level: []
+    related_ids: [AIL-21, LR-RU-13]
+  - id: SITE-NAV-09
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "Шапка и подвал собраны в пакете 1 и совпадают на всех страницах (кроме `aria-current`), без эффектов L1"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§1.5; AIL-23"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §1.5; AIL-23"
+    evidence_level: []
+    related_ids: [AIL-23]
+  - id: SITE-NAV-10
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "Крошки — только на страницах глубины ≥ 2 у разделов с хабом; одна строка на телефоне; трейл по `parent`; BreadcrumbList = видимому"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§2.1; AIL-24"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §2.1; AIL-24"
+    evidence_level: []
+    related_ids: [AIL-24]
+  - id: SITE-NAV-11
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "Раздел текущей страницы подсвечен ≥ 2 признаками; `aria-current=\"page\"`; `<title>` уникален"
+    severity: D
+    severity_label: "желательно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§2.3"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §2.3"
+    evidence_level: []
+  - id: SITE-NAV-12
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "Решение о поиске по сайту записано в `chrome.search.why`; страницы результатов — `Disallow` шаблона (новый сайт) или `noindex` (уже в индексе), не оба"
+    severity: D
+    severity_label: "желательно"
+    check_method: [LNT, DOM]
+    check_method_class: [script, dom]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§2.4"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §2.4"
+    evidence_level: []
+  - id: SITE-NAV-13
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "Хабы перечисляют коллекции полностью; пагинация и «Показать ещё» — ссылками `<a href>`; фильтры не индексируются"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§3.2"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §3.2"
+    evidence_level: []
+  - id: SITE-NAV-14
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "«Связанные» строятся из полей связи, 2–8 ссылок; на посадочной под рекламу их нет"
+    severity: D
+    severity_label: "желательно"
+    check_method: [DOM, LNT]
+    check_method_class: [dom, script]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§3.3"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §3.3"
+    evidence_level: []
+  - id: SITE-NAV-15
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "У каждой индексируемой страницы ≥ 1 входящая ссылка; сироты — только неиндексируемые"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md", "../../scripts/site/ia_probe.py"]
+    source_section: "§3.5; ; DEF-50"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §3.5; `../../../scripts/site/ia_probe.py`; DEF-50"
+    evidence_level: []
+    related_ids: [DEF-50]
+  - id: SITE-NAV-16
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "Все ссылки навигации — `<a href>` в исходном HTML, а не кнопки с `onclick` и не меню, собранное скриптом"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md", "07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: "§3.6; ; [V:Vkn3R6DUJ34 12:16]"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §3.6; `head-kit.yaml` `hk-access-links`; [V:Vkn3R6DUJ34 12:16]"
+    evidence_level: []
+    videos: ["Vkn3R6DUJ34"]
+  - id: SITE-NAV-17
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "URL строчными, через дефис, одна схема транслита, путь = трейл, у предков есть страницы, глубина ≤ 3, одна форма слэша"
+    severity: D
+    severity_label: "желательно"
+    check_method: [SCR, LNT]
+    check_method_class: [scenario, script]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§4.1"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §4.1"
+    evidence_level: []
+  - id: SITE-NAV-18
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "При смене адресов — таблица 301 на равноценные страницы; меню и ссылки обновлены"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR, HUM]
+    check_method_class: [scenario, human]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§4.3"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §4.3"
+    evidence_level: []
+  - id: SITE-NAV-19
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "У второго языка отдельные URL (`/en/` по умолчанию); переключатель — самоназвание, ведёт на ту же страницу, без автоперенаправления; на странице один язык"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["06-multipage-ia/02-navigation-linking-i18n.md"]
+    source_section: "§5.2–5.3; AIL-25"
+    source_raw: "`../06-multipage-ia/02-navigation-linking-i18n.md` §5.2–5.3; AIL-25"
+    evidence_level: []
+    related_ids: [AIL-25]
+  - id: SITE-NAV-20
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "Логотип слева ведёт на главную на всех страницах, включая посадочные без меню"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["04-blocks/blocks.yaml", "../ux/02-ia-navigation/02-navigation-patterns.md"]
+    source_section: "§7"
+    source_raw: "`../04-blocks/blocks.yaml` `conventions.logo-home`; `../../ux/02-ia-navigation/02-navigation-patterns.md` §7 `[проверено: M — ссылка найдена у 77 %]`"
+    evidence_level: ["проверено"]
+  - id: SITE-NAV-21
+    block: NAV
+    block_title: "шапка, подвал, ИА"
+    text: "Посадочная под платный трафик — шапка `landing-minimal`: логотип, призыв, у услуг телефон и мессенджер; без меню сайта и выходов в hero; контакты и юридические ссылки остаются"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["03-page-structure/02-length-goal-message-match.md", "04-blocks/01-blocks-catalog.md"]
+    source_section: "§2.3 ; §2.1"
+    source_raw: "`../03-page-structure/02-length-goal-message-match.md` §2.3 `[кейс]` `[спорно]`; `../04-blocks/01-blocks-catalog.md` §2.1"
+    evidence_level: ["кейс", "спорно"]
+  - id: SITE-SEO-01
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "Индексируемая страница отдаёт 200 без редиректа по устройству и JS; несуществующий URL — 404 (не 200 и не редирект на главную); удалённые — 301, 404 или 410"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: "DEF-28, DEF-49"
+    source_raw: "`../07-seo-geo-performance-analytics/head-kit.yaml` `hk-access-status`, `hk-access-404`; DEF-28, DEF-49"
+    evidence_level: []
+    related_ids: [DEF-28, DEF-49]
+  - id: SITE-SEO-02
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "`/robots.txt` — 200 и `text/plain` или 404; не 5xx, не HTML-заглушка, не редирект; ≤ 500 KiB; только поддерживаемые поля"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: "[V:DchuJS7JWvk]"
+    source_raw: "`head-kit.yaml` `hk-access-robots-file` `[стандарт: RFC 9309]`; [V:DchuJS7JWvk]"
+    evidence_level: ["стандарт"]
+    videos: ["DchuJS7JWvk"]
+  - id: SITE-SEO-03
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "Robots meta и `X-Robots-Tag` по `seo.indexable`: у индексируемой нет `noindex`; у «спасибо» и служебных — `noindex`; у результатов поиска — `noindex` или `Disallow` шаблона (SITE-SEO-18); `noindex` не сочетается с `Disallow`"
+    severity: B
+    severity_label: "блокер"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/01-seo-google-yandex.md"]
+    source_section: "«Частые ошибки» 5, 15"
+    source_raw: "`../07-seo-geo-performance-analytics/01-seo-google-yandex.md` «Частые ошибки» 5, 15"
+    evidence_level: []
+    related_ids: [SITE-SEO-18]
+  - id: SITE-SEO-04
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "Canonical один, абсолютный, на себя (или на канон дубля), без параметров, в сыром HTML; варианты под рекламу — один URL"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/01-seo-google-yandex.md", "07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: ""
+    source_raw: "`../07-seo-geo-performance-analytics/01-seo-google-yandex.md`; `head-kit.yaml` `checks`"
+    evidence_level: []
+  - id: SITE-SEO-05
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "Есть один уникальный `<title>`"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: "()"
+    source_raw: "`../07-seo-geo-performance-analytics/head-kit.yaml` `checks` (`no-title`)"
+    evidence_level: []
+  - id: SITE-SEO-06
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "Несжатый HTML ≤ 2 МБ, каждый CSS и JS ≤ 2 МБ; H1, текст, цены, CTA и JSON-LD — в начале документа"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: "SG-SEO-01"
+    source_raw: "`head-kit.yaml` `hk-access-html-limit` `[документация: Googlebot 2026-02-03]`; SG-SEO-01"
+    evidence_level: ["документация"]
+    related_ids: [SG-SEO-01]
+  - id: SITE-SEO-07
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "JSON-LD — только типы из head-kit для `page_type`; значения видимы и совпадают с фактами; нет FAQPage и SearchAction «для полноты» (FAQ-сниппеты Google сняты 2026-05-07), `AggregateRating` о себе, `Event` без события"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, LNT]
+    check_method_class: [dom, script]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml", "07-seo-geo-performance-analytics/01-seo-google-yandex.md"]
+    source_section: "ошибки 9–10; AIL-28; DEF-29"
+    source_raw: "`head-kit.yaml` `jsonld_policy`; `../07-seo-geo-performance-analytics/01-seo-google-yandex.md` ошибки 9–10; AIL-28; DEF-29"
+    evidence_level: []
+    related_ids: [AIL-28, DEF-29]
+  - id: SITE-SEO-08
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "Есть description и `lang` в BCP 47; Open Graph: `og:title`, `og:description`, абсолютный `og:image` (в первом 1 МБ HTML — S), `twitter:card`"
+    severity: D
+    severity_label: "желательно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: "(, , , )"
+    source_raw: "`head-kit.yaml` `checks` (`no-description`, `no-lang`, `no-og-image`, `og-after-1mb`) `[проверено: M — lang нет у 4 из 14 лидогенов РФ]`"
+    evidence_level: ["проверено"]
+  - id: SITE-SEO-09
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "Sitemap — только канонические индексируемые URL, абсолютные, с честным `lastmod`; строка в robots.txt; отправлен в Search Console и Вебмастер"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR, HUM]
+    check_method_class: [scenario, human]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/01-seo-google-yandex.md", "../../scripts/site/ia_probe.py"]
+    source_section: ""
+    source_raw: "`../07-seo-geo-performance-analytics/01-seo-google-yandex.md`; `../../../scripts/site/ia_probe.py`"
+    evidence_level: []
+  - id: SITE-SEO-10
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "`hreflang` (если есть языки) — в HTML, взаимный, с `x-default`"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/01-seo-google-yandex.md"]
+    source_section: "SITE-NAV-19"
+    source_raw: "`../07-seo-geo-performance-analytics/01-seo-google-yandex.md`; SITE-NAV-19"
+    evidence_level: []
+    related_ids: [SITE-NAV-19]
+  - id: SITE-SEO-11
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "Страницы «услуга × город» — с локальными фактами; нет клонов с заменой топонима и списков городов в подвале"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [JDG, HUM]
+    check_method_class: [judge, human]
+    check_method_main: judge
+    auto_gate: false
+    source_file: ["07-seo-geo-performance-analytics/01-seo-google-yandex.md", "03-page-structure/02-length-goal-message-match.md"]
+    source_section: "ошибка 11; §3.4"
+    source_raw: "`../07-seo-geo-performance-analytics/01-seo-google-yandex.md` ошибка 11; `../03-page-structure/02-length-goal-message-match.md` §3.4"
+    evidence_level: []
+  - id: SITE-SEO-12
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "Нет текста только для роботов; аккордеоны и вкладки — с содержимым в HTML; анимация появления заканчивается видимым состоянием"
+    severity: B
+    severity_label: "блокер"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: ""
+    source_raw: "`head-kit.yaml` `hk-access-hidden-text`"
+    evidence_level: []
+  - id: SITE-SEO-13
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "Сертификат TLS проверяется общепризнанными корнями (сертификат НУЦ Минцифры — только вторым)"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: ""
+    source_raw: "`head-kit.yaml` `hk-access-tls` `[проверено: H/01, M]`"
+    evidence_level: ["проверено"]
+  - id: SITE-SEO-14
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "Антибот, CDN и WAF не отдают YandexBot и Googlebot заглушку"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: ""
+    source_raw: "`head-kit.yaml` `hk-access-waf` `[проверено: H/01]`"
+    evidence_level: ["проверено"]
+  - id: SITE-SEO-15
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "Для Яндекса: адрес и телефон текстом; профиль Яндекс Бизнеса связан с сайтом; регион задан в Вебмастере"
+    severity: D
+    severity_label: "желательно"
+    check_method: [HUM]
+    check_method_class: [human]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["07-seo-geo-performance-analytics/01-seo-google-yandex.md"]
+    source_section: "«Чек-лист»"
+    source_raw: "`../07-seo-geo-performance-analytics/01-seo-google-yandex.md` «Чек-лист»"
+    evidence_level: []
+  - id: SITE-SEO-16
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "После публикации страница проверена в Search Console («Проверка URL») и Вебмастере («Проверка ответа сервера»)"
+    severity: D
+    severity_label: "желательно"
+    check_method: [HUM]
+    check_method_class: [human]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["07-seo-geo-performance-analytics/01-seo-google-yandex.md"]
+    source_section: "«Чек-лист»"
+    source_raw: "`../07-seo-geo-performance-analytics/01-seo-google-yandex.md` «Чек-лист»"
+    evidence_level: []
+  - id: SITE-SEO-17
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "Код ответа и директивы robots одинаковы в 10–20 повторах запроса (нет «плавающего» `noindex` за CDN)"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/crawlers.yaml"]
+    source_section: "SG-SEO-02"
+    source_raw: "`../07-seo-geo-performance-analytics/crawlers.yaml` `rt-cdn-directives-stable`; SG-SEO-02"
+    evidence_level: []
+    related_ids: [SG-SEO-02]
+  - id: SITE-SEO-18
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "Поиск по сайту, фильтры и календари закрыты: `/search?q=<случайное>` — `Disallow` одним правилом на шаблон или `noindex`, не 5xx"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml", "07-seo-geo-performance-analytics/crawlers.yaml"]
+    source_section: "()"
+    source_raw: "`head-kit.yaml` `site_checks` (`hk-site-search-pages`); `crawlers.yaml` `rt-infinite-spaces`"
+    evidence_level: []
+  - id: SITE-SEO-19
+    block: SEO
+    block_title: "поиск Google и Яндекса"
+    text: "Дисплейный заголовок первого экрана размечен H1 (не `div` и не `p`); H1 видим и не мельче 24 px"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, SCR]
+    check_method_class: [dom, scenario]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md"]
+    source_section: "SG-SEO-03; п.2 ; SITE-BLK-03"
+    source_raw: "SG-SEO-03; `../99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md` п.2 `[данные: creative C — H1 ≠ дисплейному заголовку у 18 из 49: H1 нет у 11, меньше 24 px у 7]`; SITE-BLK-03"
+    evidence_level: ["данные"]
+    related_ids: [SG-SEO-03, SITE-BLK-03]
+  - id: SITE-GEO-01
+    block: GEO
+    block_title: "доступность для ИИ-поиска (техническая часть)"
+    text: "H1, смысловой текст, цены, условия, главный CTA и навигация — в HTML сервера без исполнения JS; доля текста без JS ≥ 0,8"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR, DOM]
+    check_method_class: [scenario, dom]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: "SG-GEO-01; CRV-AL-04 ; AIL-26; DEF-27"
+    source_raw: "`head-kit.yaml` `hk-access-ssr`; SG-GEO-01; CRV-AL-04 `[проверено: M — 3 страницы почти без текста без JS]`; AIL-26; DEF-27"
+    evidence_level: ["проверено"]
+    related_ids: [AIL-26, CRV-AL-04, DEF-27, SG-GEO-01]
+  - id: SITE-GEO-02
+    block: GEO
+    block_title: "доступность для ИИ-поиска (техническая часть)"
+    text: "Смысл не в canvas, картинке или видео; кинетическая типографика — поверх HTML-текста"
+    severity: B
+    severity_label: "блокер"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: "CRV-AL-04; AIL-27"
+    source_raw: "`head-kit.yaml` `hk-access-ssr`; CRV-AL-04; AIL-27"
+    evidence_level: []
+    related_ids: [AIL-27, CRV-AL-04]
+  - id: SITE-GEO-03
+    block: GEO
+    block_title: "доступность для ИИ-поиска (техническая часть)"
+    text: "robots.txt и мета не закрывают поисковых ботов (Googlebot, YandexBot — B) и ИИ-ботов поверхностей из `search.ai_answers` (S); боты обучения — по `search.ai_bots_policy`; управляемый robots.txt CDN (Cloudflare) сверен с политикой"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml", "07-seo-geo-performance-analytics/crawlers.yaml"]
+    source_section: "(); v1.0; SG-GEO-02"
+    source_raw: "`head-kit.yaml` `hk-access-bots-allowed`, `info_flags` (`cloudflare-managed-robots`); `../07-seo-geo-performance-analytics/crawlers.yaml` v1.0; SG-GEO-02"
+    evidence_level: []
+    related_ids: [SG-GEO-02]
+  - id: SITE-GEO-04
+    block: GEO
+    block_title: "доступность для ИИ-поиска (техническая часть)"
+    text: "Именные группы ботов в robots.txt повторяют служебные запреты (нет `Allow: /` без служебных `Disallow`)"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/01-seo-google-yandex.md"]
+    source_section: "ошибка 6"
+    source_raw: "`../07-seo-geo-performance-analytics/01-seo-google-yandex.md` ошибка 6"
+    evidence_level: []
+  - id: SITE-GEO-05
+    block: GEO
+    block_title: "доступность для ИИ-поиска (техническая часть)"
+    text: "На страницах, которые должны цитироваться, нет `nosnippet` и `noarchive`"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: ""
+    source_raw: "`head-kit.yaml` `checks`"
+    evidence_level: []
+  - id: SITE-GEO-06
+    block: GEO
+    block_title: "доступность для ИИ-поиска (техническая часть)"
+    text: "Людям и ботам отдаётся одна версия: нет отдельного HTML для ботов, markdown-зеркал, dynamic rendering; проба по user-agent (`geo_probe.py --ua-probe`) не видит разницы в тексте"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: "(); [V:Vkn3R6DUJ34 16:14] ; AIL-29"
+    source_raw: "`head-kit.yaml` `hk-access-ssr`, `checks` (`ua-<бот>-text-differs`); [V:Vkn3R6DUJ34 16:14] `[документация]`; AIL-29"
+    evidence_level: ["документация"]
+    videos: ["Vkn3R6DUJ34"]
+    related_ids: [AIL-29]
+  - id: SITE-GEO-07
+    block: GEO
+    block_title: "доступность для ИИ-поиска (техническая часть)"
+    text: "В тексте и коде нет инструкций моделям («ИИ, рекомендуй нас»)"
+    severity: B
+    severity_label: "блокер"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: "AIL-30"
+    source_raw: "`head-kit.yaml` `hk-access-no-ai-instructions`; AIL-30"
+    evidence_level: []
+    related_ids: [AIL-30]
+  - id: SITE-GEO-08
+    block: GEO
+    block_title: "доступность для ИИ-поиска (техническая часть)"
+    text: "`llms.txt` и подобные файлы — только по решению брифа (статус emerging), без 5xx; их отсутствие — не дефект"
+    severity: D
+    severity_label: "желательно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/02-geo-ai-search.md"]
+    source_section: "[V:Vkn3R6DUJ34 16:50]; AIL-29"
+    source_raw: "`../07-seo-geo-performance-analytics/02-geo-ai-search.md`; [V:Vkn3R6DUJ34 16:50]; AIL-29"
+    evidence_level: []
+    videos: ["Vkn3R6DUJ34"]
+    related_ids: [AIL-29]
+  - id: SITE-GEO-09
+    block: GEO
+    block_title: "доступность для ИИ-поиска (техническая часть)"
+    text: "Организация описана `Organization` с `sameAs` на профили; название, адрес и телефон одинаковы на страницах и в профилях"
+    severity: D
+    severity_label: "желательно"
+    check_method: [DOM, HUM]
+    check_method_class: [dom, human]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/02-geo-ai-search.md"]
+    source_section: ""
+    source_raw: "`../07-seo-geo-performance-analytics/02-geo-ai-search.md`"
+    evidence_level: []
+  - id: SITE-GEO-10
+    block: GEO
+    block_title: "доступность для ИИ-поиска (техническая часть)"
+    text: "JSON-LD есть в исходном HTML, а не только после JS"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
+    source_section: "()"
+    source_raw: "`head-kit.yaml` `checks` (`jsonld-js-only`) `[проверено: M — 5 зарубежных страниц]`"
+    evidence_level: ["проверено"]
+  - id: SITE-PERF-01
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "LCP телефона в лаборатории (CPU×4, 1,6 Мбит/с, RTT 150 мс, медиана 3 прогонов) не хуже цели профиля; хуже «плохо» (4 000 мс) — блокер"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/03-performance-budgets-gates.md"]
+    source_section: "SG-PERF-01; §2.1"
+    source_raw: "SG-PERF-01; `../07-seo-geo-performance-analytics/03-performance-budgets-gates.md` §2.1 `[документация: web.dev]`"
+    evidence_level: ["документация"]
+    related_ids: [SG-PERF-01]
+  - id: SITE-PERF-02
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "LCP десктопа не хуже цели профиля; хуже 4 000 мс — блокер"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: []
+    source_section: "SG-PERF-02"
+    source_raw: "SG-PERF-02"
+    evidence_level: []
+    related_ids: [SG-PERF-02]
+  - id: SITE-PERF-03
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "CLS загрузки и прокрутки всей страницы ≤ 0,1; > 0,25 — блокер; мерить прокруткой до конца (web-vitals, окно сессии), а не только после загрузки: закрепление `pin` ScrollTrigger через `position: fixed` даёт 1,6–2,0 при прокрутке, `position: sticky` и `pinType: 'transform'` — 0"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["../creative-research/99-raw/experiments/E/02-scroll-scene/README.md", "99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md", "99-raw/experiments/K/03-gates-v1/README.md"]
+    source_section: "SG-PERF-03; ; п.2"
+    source_raw: "SG-PERF-03; `../../creative-research/99-raw/experiments/E/02-scroll-scene/README.md` `[проверено: creative E/02]`; `../99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md` п.2; `../99-raw/experiments/K/03-gates-v1/README.md` `[проверено: K/03 — сумма сдвигов 0,42 против 0,15 окна сессии]`"
+    evidence_level: ["проверено"]
+    related_ids: [SG-PERF-03]
+  - id: SITE-PERF-04
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "INP по сценарию (меню, CTA, аккордеон, поле и нажатие во время загрузки) ≤ 200 мс; TBT телефона — в профиле"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: []
+    source_section: "SG-PERF-04, SG-PERF-05"
+    source_raw: "SG-PERF-04, SG-PERF-05 `[проверено: M — TBT телефона медиана 272 мс]`"
+    evidence_level: ["проверено"]
+    related_ids: [SG-PERF-04, SG-PERF-05]
+  - id: SITE-PERF-05
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "LCP-элемент есть и не canvas: H1 или картинка/постер из исходного HTML, без `loading=lazy`, с `fetchpriority=high`; H1 первого экрана появляется без `opacity: 0`, маски строк и скрытия скриптом (в Chromium такой H1 выпадает из LCP и кандидатом становится лид — S), `opacity` ≥ 0,01 и `clip-path` показывают LCP раньше текста (D); честно — только `transform`"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR, DOM]
+    check_method_class: [scenario, dom]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["04-blocks/blocks.yaml", "../creative-research/99-raw/experiments/E/01-lcp-reveal/README.md", "99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md"]
+    source_section: "SG-PERF-06; ; CRV-AL-09; DEF-31; ; п.1"
+    source_raw: "SG-PERF-06; `../04-blocks/blocks.yaml` `conventions.lcp-eager`; CRV-AL-09; DEF-31; `../../creative-research/99-raw/experiments/E/01-lcp-reveal/README.md` `[проверено: creative E/01, Chromium 153]`; `../99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md` п.1"
+    evidence_level: ["проверено"]
+    related_ids: [CRV-AL-09, DEF-31, SG-PERF-06]
+  - id: SITE-PERF-06
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "Тяжёлые виджеты (чат, карты, запись, видео, отзывы-виджеты) — фасадом, по видимости или нажатию"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: []
+    source_section: "SG-PERF-09; DEF-32"
+    source_raw: "SG-PERF-09; DEF-32"
+    evidence_level: []
+    related_ids: [DEF-32, SG-PERF-09]
+  - id: SITE-PERF-07
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "Сторонние скрипты не синхронные в `<head>`; счётчики — async или defer"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: []
+    source_section: "SG-PERF-08"
+    source_raw: "SG-PERF-08"
+    evidence_level: []
+    related_ids: [SG-PERF-08]
+  - id: SITE-PERF-08
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "Баннер cookie не сдвигает содержимое и не создаёт долгой задачи при нажатии"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: []
+    source_section: "SG-PERF-10"
+    source_raw: "SG-PERF-10"
+    evidence_level: []
+    related_ids: [SG-PERF-10]
+  - id: SITE-PERF-09
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "Клиентский A/B не скрывает страницу до выбора варианта и не задерживает LCP больше чем на 10 %"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: []
+    source_section: "SG-PERF-11"
+    source_raw: "SG-PERF-11"
+    evidence_level: []
+    related_ids: [SG-PERF-11]
+  - id: SITE-PERF-10
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "Шрифты: текст виден до загрузки (`font-display: swap` или `optional`); 1–2 шрифта первого экрана с preload; шрифты — со своего домена"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: []
+    source_section: "SG-PERF-13; SG-LEGAL-07"
+    source_raw: "SG-PERF-13; SG-LEGAL-07"
+    evidence_level: []
+    related_ids: [SG-LEGAL-07, SG-PERF-13]
+  - id: SITE-PERF-11
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "Картинки и встраивания первого экрана с `width`/`height` или `aspect-ratio`"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: []
+    source_section: "SG-PERF-14"
+    source_raw: "SG-PERF-14"
+    evidence_level: []
+    related_ids: [SG-PERF-14]
+  - id: SITE-PERF-12
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "Вес первого экрана, сессии, JS, шрифтов и сторонних — в профиле; превышение без нарушения исходов — S, а не блокер"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: []
+    source_section: "SG-WEIGHT-01…06; поправка PLAN №17; DEF-33"
+    source_raw: "SG-WEIGHT-01…06; поправка PLAN №17; DEF-33"
+    evidence_level: []
+    related_ids: [DEF-33, SG-WEIGHT-01]
+  - id: SITE-PERF-13
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "Видео первого экрана, стартующее без действия, — с постером, в бюджете профиля и отдельной цифрой в отчёте, не грузится при reduce; телефону — облегчённый вертикальный файл; LCP-элемент hero — не `VIDEO` без постера, постер ≥ 0,05 бит на отображаемый пиксель"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/budgets.yaml", "99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md"]
+    source_section: "SG-WEIGHT-09, SG-PERF-16; CRV-AL-01, CRV-AL-06; ; п.3, п.5"
+    source_raw: "SG-WEIGHT-09, SG-PERF-16; CRV-AL-01, CRV-AL-06; `../07-seo-geo-performance-analytics/budgets.yaml` `layers.first_screen_kb`; `../99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md` п.3, п.5 `[данные: creative C — > 5 МБ видео до прокрутки у 15 из 49, постер у 1 из 23 автовидео]`"
+    evidence_level: ["данные"]
+    related_ids: [CRV-AL-01, CRV-AL-06, SG-PERF-16, SG-WEIGHT-09]
+  - id: SITE-PERF-14
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "Метки рекламы не ломают кэш CDN; от объявления до страницы ≤ 1 редиректа"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: []
+    source_section: "SG-PERF-12"
+    source_raw: "SG-PERF-12"
+    evidence_level: []
+    related_ids: [SG-PERF-12]
+  - id: SITE-PERF-15
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "HTML по сети ≤ 150 КБ; встроенных data:-картинок ≤ 10 КБ"
+    severity: D
+    severity_label: "желательно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: []
+    source_section: "SG-WEIGHT-07; [V:kype1JQbrks 12:26]"
+    source_raw: "SG-WEIGHT-07; [V:kype1JQbrks 12:26]"
+    evidence_level: []
+    videos: ["kype1JQbrks"]
+    related_ids: [SG-WEIGHT-07]
+  - id: SITE-PERF-16
+    block: PERF
+    block_title: "скорость и вес по профилю"
+    text: "3D и эффекты грузятся после LCP и в покое не рисуют кадры; доля 3D — ворота blender, страницу не блокирует"
+    severity: D
+    severity_label: "желательно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: []
+    source_section: "SG-WEIGHT-08; CRV-AL-09, CRV-AL-10"
+    source_raw: "SG-WEIGHT-08; CRV-AL-09, CRV-AL-10"
+    evidence_level: []
+    related_ids: [CRV-AL-09, CRV-AL-10, SG-WEIGHT-08]
+  - id: SITE-A11Y-01
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "Движение, которое стартует само (при загрузке или при прокрутке в видимую область), длится дольше 5 с и идёт параллельно контенту (видео, бегущая строка, карусель, Lottie, живой фон или градиент, idle 3D), — видимая пауза с именем или остановка ≤ 5 с; разовое появление короче 5 с и движение, которое ведёт прокрутка (скраб, pin, параллакс), под 2.2.2 не попадают — для них reduce (SITE-A11Y-03)"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/03-a11y-marketing-pages.md", "../creative/05-motion/01-motion-principles-and-access.md", "99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md"]
+    source_section: "§2.1 ; §3.2; SG-A11Y-03; CRV-AL-02; п.5 ; DEF-34"
+    source_raw: "`../08-legal-trust-a11y/03-a11y-marketing-pages.md` §2.1 `[стандарт: WCAG 2.2.2]`; `../../creative/05-motion/01-motion-principles-and-access.md` §3.2; SG-A11Y-03; CRV-AL-02; `../99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md` п.5 `[данные: creative C — пауза у непрерывного движения у 1 из 20 эффектных страниц]`; DEF-34"
+    evidence_level: ["данные", "стандарт"]
+    related_ids: [CRV-AL-02, DEF-34, SG-A11Y-03, SITE-A11Y-03]
+  - id: SITE-A11Y-02
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "Нет вспышек > 3 в секунду (ИИ-видео — покадрово); нет автозвука дольше 3 с"
+    severity: B
+    severity_label: "блокер"
+    check_method: [HUM, SCR]
+    check_method_class: [human, scenario]
+    check_method_main: human
+    auto_gate: false
+    source_file: []
+    source_section: "SG-A11Y-04; CRV-AL-03"
+    source_raw: "SG-A11Y-04; CRV-AL-03 `[стандарт: WCAG 2.3.1, 1.4.2]`"
+    evidence_level: ["стандарт"]
+    related_ids: [CRV-AL-03, SG-A11Y-04]
+  - id: SITE-A11Y-03
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "При `prefers-reduced-motion: reduce` — конечные состояния, видео не скачивается, WebGL в покое не рисует кадры, смысл и CTA на месте (требовать явно в TASK: рынок это почти не делает); проверять парой записей всей страницы, а не первым экраном; начальное состояние появления ставит класс от JS (`html.js .reveal`), а не голый CSS `opacity: 0` — без JS контент видим; видимость — прокруткой до самого низа, `rootMargin` снизу у последних секций не урезать"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["../creative/05-motion/01-motion-principles-and-access.md", "99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md", "99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md"]
+    source_section: "SG-A11Y-07; CRV-AL-01; §4.5; п.3, п.17; п.5"
+    source_raw: "SG-A11Y-07; CRV-AL-01; `../../creative/05-motion/01-motion-principles-and-access.md` §4.5; `../99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md` п.3, п.17; `../99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md` п.5 `[данные: creative C — reduce полностью у 4 из 21, WebGL под reduce рисует у 11 из 12]`"
+    evidence_level: ["данные"]
+    related_ids: [CRV-AL-01, SG-A11Y-07]
+  - id: SITE-A11Y-04
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "Контраст H1, лида, призыва и строки согласия ≥ 4,5:1 (крупный ≥ 3:1), в том числе на медиа по F83 и худшему кадру"
+    severity: B
+    severity_label: "блокер"
+    check_method: [AXE, SCR]
+    check_method_class: [script, scenario]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/03-a11y-marketing-pages.md"]
+    source_section: "§4, §8 ; SG-A11Y-01; CRV-AL-08; DEF-35"
+    source_raw: "`../08-legal-trust-a11y/03-a11y-marketing-pages.md` §4, §8 `[проверено: I/02 — 9 из 10]`; SG-A11Y-01; CRV-AL-08; DEF-35"
+    evidence_level: ["проверено"]
+    related_ids: [CRV-AL-08, DEF-35, SG-A11Y-01]
+  - id: SITE-A11Y-05
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "У ссылок и кнопок есть имя (иконки соцсетей и мессенджеров, стрелки, «закрыть»)"
+    severity: B
+    severity_label: "блокер"
+    check_method: [AXE]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/03-a11y-marketing-pages.md"]
+    source_section: "§8"
+    source_raw: "`../08-legal-trust-a11y/03-a11y-marketing-pages.md` §8 `[проверено: I/02 — 7 из 10]`"
+    evidence_level: ["проверено"]
+  - id: SITE-A11Y-06
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "У полей есть подпись; галочка согласия — `<input>` с `<label>`"
+    severity: B
+    severity_label: "блокер"
+    check_method: [AXE]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/03-a11y-marketing-pages.md"]
+    source_section: "§6, §8; SITE-FRM-18"
+    source_raw: "`../08-legal-trust-a11y/03-a11y-marketing-pages.md` §6, §8; SITE-FRM-18"
+    evidence_level: []
+    related_ids: [SITE-FRM-18]
+  - id: SITE-A11Y-07
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "Масштабирование не запрещено (`user-scalable=no`, `maximum-scale` < 2 — нет)"
+    severity: B
+    severity_label: "блокер"
+    check_method: [AXE]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/03-a11y-marketing-pages.md"]
+    source_section: "§8"
+    source_raw: "`../08-legal-trust-a11y/03-a11y-marketing-pages.md` §8 `[проверено: I/02 — 3 из 10]`"
+    evidence_level: ["проверено"]
+  - id: SITE-A11Y-08
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "Цели касания ≥ 24×24 CSS px; главные призывы, поля и кнопка «Меню» на телефоне — 44×44"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [AXE, SCR]
+    check_method_class: [script, scenario]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["04-blocks/blocks.yaml"]
+    source_section: ""
+    source_raw: "`../04-blocks/blocks.yaml` `conventions.target-size` `[стандарт: WCAG 2.5.8]`"
+    evidence_level: ["стандарт"]
+  - id: SITE-A11Y-09
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "Информативные картинки с alt (логотипы клиентов и схемы — обязательно), декоративные — `alt=\"\"`"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [AXE]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/03-a11y-marketing-pages.md"]
+    source_section: "§8"
+    source_raw: "`../08-legal-trust-a11y/03-a11y-marketing-pages.md` §8"
+    evidence_level: []
+  - id: SITE-A11Y-10
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "`lang` задан и верен; у iframe (карта, видео, виджет) есть `title`"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [AXE]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/03-a11y-marketing-pages.md"]
+    source_section: "§8"
+    source_raw: "`../08-legal-trust-a11y/03-a11y-marketing-pages.md` §8"
+    evidence_level: []
+  - id: SITE-A11Y-11
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "Фокус видим (контраст ≥ 3:1) и не закрыт баннером cookie, липкой шапкой, липким призывом и чатом; `scroll-padding` на их высоту"
+    severity: B
+    severity_label: "блокер"
+    check_method: [HUM, SCR]
+    check_method_class: [human, scenario]
+    check_method_main: human
+    auto_gate: false
+    source_file: []
+    source_section: "SG-A11Y-05; CRV-AL-07 ; DEF-36"
+    source_raw: "SG-A11Y-05; CRV-AL-07 `[стандарт: WCAG 2.4.11, 1.4.11]`; DEF-36"
+    evidence_level: ["стандарт"]
+    related_ids: [CRV-AL-07, DEF-36, SG-A11Y-05]
+  - id: SITE-A11Y-12
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "Порядок фокуса = порядку чтения; Tab проходит шапку, призыв, форму и баннер; плавная прокрутка и перехват колеса не мешают Tab и якорям"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR, HUM]
+    check_method_class: [scenario, human]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["../ux/08-accessibility/02-keyboard-focus-semantics.md"]
+    source_section: "CRV-AL-07"
+    source_raw: "CRV-AL-07; `../../ux/08-accessibility/02-keyboard-focus-semantics.md`"
+    evidence_level: []
+    related_ids: [CRV-AL-07]
+  - id: SITE-A11Y-13
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "Видео с речью и видеоотзывы — с субтитрами; трансляции — с живыми субтитрами"
+    severity: B
+    severity_label: "блокер"
+    check_method: [HUM]
+    check_method_class: [human]
+    check_method_main: human
+    auto_gate: false
+    source_file: []
+    source_section: "SG-A11Y-06"
+    source_raw: "SG-A11Y-06 `[стандарт: WCAG 1.2.2, 1.2.4]`"
+    evidence_level: ["стандарт"]
+    related_ids: [SG-A11Y-06]
+  - id: SITE-A11Y-14
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "Баннер cookie — рано в DOM, немодальный, кнопки ≥ 24×24; выбор подтверждается объявлением"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, SCR]
+    check_method_class: [dom, scenario]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/03-a11y-marketing-pages.md"]
+    source_section: "§5"
+    source_raw: "`../08-legal-trust-a11y/03-a11y-marketing-pages.md` §5"
+    evidence_level: []
+  - id: SITE-A11Y-15
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "Видимой капчи нет или у неё есть альтернатива"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/03-a11y-marketing-pages.md"]
+    source_section: "§6"
+    source_raw: "`../08-legal-trust-a11y/03-a11y-marketing-pages.md` §6"
+    evidence_level: []
+  - id: SITE-A11Y-16
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "axe (wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa) прогнан в состоянии «первый визит» (баннер показан) и после выбора, на десктопе и телефоне; 0 находок axe не принят как «доступно»"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [AXE, HUM]
+    check_method_class: [script, human]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["08-legal-trust-a11y/03-a11y-marketing-pages.md", "../ux/12-evaluation-checklists/03-automated-checks.md"]
+    source_section: "§8; §10.5"
+    source_raw: "`../08-legal-trust-a11y/03-a11y-marketing-pages.md` §8; `../../ux/12-evaluation-checklists/03-automated-checks.md` §10.5"
+    evidence_level: []
+  - id: SITE-A11Y-17
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "Прокрутка нативная: колесо, клавиши, якоря, «прокрутка к блоку» и поиск по странице двигают документ (`scrollY` растёт); виртуальная прокрутка сцены WebGL при `scrollY` = 0 — только L2 с рабочими якорями и фолбэком"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md"]
+    source_section: "п.1 ; CRV-AL-11; SITE-STR-17"
+    source_raw: "`../99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md` п.1 `[данные: creative C — 3 из 23 наградных страниц]`; CRV-AL-11; SITE-STR-17"
+    evidence_level: ["данные"]
+    related_ids: [CRV-AL-11, SITE-STR-17]
+  - id: SITE-A11Y-18
+    block: A11Y
+    block_title: "доступность маркетинговой страницы"
+    text: "Текст растёт при зуме 200 %: у кеглей на `clamp()` и `vw` максимум ≤ 2,5 × минимума"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md"]
+    source_section: "п.9 ; SG-A11Y-08"
+    source_raw: "`../99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md` п.9 `[стандарт: WCAG 1.4.4]` `[данные: creative D — 40→160 px даёт рост 1,25–1,78 вместо 2]`; SG-A11Y-08"
+    evidence_level: ["данные", "стандарт"]
+    related_ids: [SG-A11Y-08]
+  - id: SITE-LEGAL-01
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "Форма с ПД (РФ): отдельный неотмеченный чекбокс согласия на обработку ПД; не «нажимая кнопку…» и не одно согласие на всё"
+    severity: B
+    severity_label: "блокер"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: []
+    source_section: "LR-RU-01, LR-RU-02 ; SG-LEGAL-03 ; AIL-42; DEF-19"
+    source_raw: "LR-RU-01, LR-RU-02 `[стандарт: 152-ФЗ в ред. 156-ФЗ, с 01.09.2025]`; SG-LEGAL-03 `[проверено: M — 9 из 17 без согласия]`; AIL-42; DEF-19"
+    evidence_level: ["проверено", "стандарт"]
+    related_ids: [AIL-42, DEF-19, LR-RU-01, LR-RU-02, SG-LEGAL-03]
+  - id: SITE-LEGAL-02
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "Ссылка на политику ПД — в каждой форме и в подвале; страница политики отвечает 200, с датой редакции и наименованием оператора"
+    severity: B
+    severity_label: "блокер"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: []
+    source_section: "LR-RU-05; SG-LEGAL-04"
+    source_raw: "LR-RU-05; SG-LEGAL-04"
+    evidence_level: []
+    related_ids: [LR-RU-05, SG-LEGAL-04]
+  - id: SITE-LEGAL-03
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "Согласие на рассылку — отдельная неотмеченная галочка"
+    severity: B
+    severity_label: "блокер"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: []
+    source_section: "LR-RU-11, LR-EU-07"
+    source_raw: "LR-RU-11, LR-EU-07"
+    evidence_level: []
+    related_ids: [LR-EU-07, LR-RU-11]
+  - id: SITE-LEGAL-04
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "Реквизиты: наименование, адрес, email; у продавца B2C — ОГРН или ОГРНИП; у лицензируемых — номер лицензии"
+    severity: B
+    severity_label: "блокер"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: []
+    source_section: "LR-RU-13, LR-RU-14; SG-LEGAL-05 ; DEF-38"
+    source_raw: "LR-RU-13, LR-RU-14; SG-LEGAL-05 `[проверено: M — ИНН/ОГРН в подвале у 3 из 14 лидогенов РФ]`; DEF-38"
+    evidence_level: ["проверено"]
+    related_ids: [DEF-38, LR-RU-13, LR-RU-14, SG-LEGAL-05]
+  - id: SITE-LEGAL-05
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "Трекинг до выбора: ЕС — до выбора нет аналитики и пикселей; РФ — позиция по умолчанию «счётчики после согласия»"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: []
+    source_section: "LR-RU-10, LR-EU-01; SG-LEGAL-01 для РФ; ЕС — B; DEF-37"
+    source_raw: "LR-RU-10, LR-EU-01; SG-LEGAL-01 `[спорно]` для РФ; ЕС — B; DEF-37"
+    evidence_level: ["спорно"]
+    related_ids: [DEF-37, LR-EU-01, LR-RU-10, SG-LEGAL-01]
+  - id: SITE-LEGAL-06
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "Баннер cookie: «Отклонить» на первом уровне рядом с «Принять», равного вида; нет «продолжая пользоваться»; настройки доступны из подвала"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: []
+    source_section: "LR-RU-10, LR-EU-02, LR-EU-03, LR-EU-04; SG-LEGAL-02 (ЕС — B); UX-OVL-02; AIL-43"
+    source_raw: "LR-RU-10, LR-EU-02, LR-EU-03, LR-EU-04; SG-LEGAL-02 (ЕС — B); UX-OVL-02; AIL-43"
+    evidence_level: []
+    related_ids: [AIL-43, LR-EU-02, LR-EU-03, LR-EU-04, LR-RU-10, SG-LEGAL-02, UX-OVL-02]
+  - id: SITE-LEGAL-07
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "Форма отправляется на сервер в РФ; журнал согласия (версия текста, время, страница, форма) сохраняется"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR, HUM]
+    check_method_class: [scenario, human]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: []
+    source_section: "LR-RU-04, LR-RU-07; SG-LEGAL-06"
+    source_raw: "LR-RU-04, LR-RU-07; SG-LEGAL-06"
+    evidence_level: []
+    related_ids: [LR-RU-04, LR-RU-07, SG-LEGAL-06]
+  - id: SITE-LEGAL-08
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "Зарубежные сервисы (GA4, Meta, YouTube, Google Fonts, reCAPTCHA) отсутствуют или отмечены в брифе с уведомлением РКН о трансграничной передаче"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR, HUM]
+    check_method_class: [scenario, human]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: []
+    source_section: "LR-RU-08; SG-LEGAL-07"
+    source_raw: "LR-RU-08; SG-LEGAL-07"
+    evidence_level: []
+    related_ids: [LR-RU-08, SG-LEGAL-07]
+  - id: SITE-LEGAL-09
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "Чужая реклама и собственный закреплённый баннер акции — «Реклама», рекламодатель и erid"
+    severity: B
+    severity_label: "блокер"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: []
+    source_section: "LR-RU-17, LR-RU-18; SG-LEGAL-08; DEF-39"
+    source_raw: "LR-RU-17, LR-RU-18; SG-LEGAL-08; DEF-39"
+    evidence_level: []
+    related_ids: [DEF-39, LR-RU-17, LR-RU-18, SG-LEGAL-08]
+  - id: SITE-LEGAL-10
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "Страница заказа: свойства, цена, условия, доставка и возврат — до договора; нет «возврату не подлежит»"
+    severity: B
+    severity_label: "блокер"
+    check_method: [DOM, HUM]
+    check_method_class: [dom, human]
+    check_method_main: dom
+    auto_gate: true
+    source_file: []
+    source_section: "LR-RU-15"
+    source_raw: "LR-RU-15"
+    evidence_level: []
+    related_ids: [LR-RU-15]
+  - id: SITE-LEGAL-11
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "Медицина: нет «до/после», историй излечения и благодарностей на посадочной; предупреждение есть"
+    severity: B
+    severity_label: "блокер"
+    check_method: [HUM]
+    check_method_class: [human]
+    check_method_main: human
+    auto_gate: false
+    source_file: []
+    source_section: "LR-RU-21; SG-LEGAL-09; DEF-40"
+    source_raw: "LR-RU-21; SG-LEGAL-09; DEF-40"
+    evidence_level: []
+    related_ids: [DEF-40, LR-RU-21, SG-LEGAL-09]
+  - id: SITE-LEGAL-12
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "Раздел отзывов — реальные дословные отзывы с датой, с правилами модерации (ЕС — как проверяются)"
+    severity: B
+    severity_label: "блокер"
+    check_method: [HUM, DOM]
+    check_method_class: [human, dom]
+    check_method_main: human
+    auto_gate: false
+    source_file: []
+    source_section: "LR-RU-22, LR-EU-08"
+    source_raw: "LR-RU-22, LR-EU-08"
+    evidence_level: []
+    related_ids: [LR-EU-08, LR-RU-22]
+  - id: SITE-LEGAL-13
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "Чат, собирающий имя и телефон, — фасад; согласие и политика до поля телефона; ИИ-чат (ЕС) называет себя ИИ"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: []
+    source_section: "LR-RU-23, LR-EU-11"
+    source_raw: "LR-RU-23, LR-EU-11"
+    evidence_level: []
+    related_ids: [LR-EU-11, LR-RU-23]
+  - id: SITE-LEGAL-14
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "«Лучший», «№ 1», сравнение с конкурентом — с критерием и источником (проверяет text)"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT, HUM]
+    check_method_class: [script, human]
+    check_method_main: script
+    auto_gate: true
+    source_file: []
+    source_section: "COPY-C-02, COPY-C-34 (38-ФЗ ст. 5 по text H)"
+    source_raw: "COPY-C-02, COPY-C-34 (38-ФЗ ст. 5 по text H)"
+    evidence_level: []
+    related_ids: [COPY-C-02, COPY-C-34]
+  - id: SITE-LEGAL-15
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "Медицина, финансы, гарантии, сравнения с конкурентами проверил юрист или заказчик"
+    severity: D
+    severity_label: "желательно"
+    check_method: [HUM]
+    check_method_class: [human]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["08-legal-trust-a11y/01-law-ru-eu.md"]
+    source_section: "COPY-C-34"
+    source_raw: "`../08-legal-trust-a11y/01-law-ru-eu.md`; COPY-C-34"
+    evidence_level: []
+    related_ids: [COPY-C-34]
+  - id: SITE-LEGAL-16
+    block: LEGAL
+    block_title: "право (РФ по умолчанию, ЕС — профиль брифа; не юридическое заключение)"
+    text: "ЕС и продажа потребителю через сайт: доступность по EAA и заявление о доступности"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [HUM, AXE]
+    check_method_class: [human, script]
+    check_method_main: human
+    auto_gate: false
+    source_file: []
+    source_section: "LR-EU-10"
+    source_raw: "LR-EU-10"
+    evidence_level: []
+    related_ids: [LR-EU-10]
+  - id: SITE-TRK-01
+    block: TRK
+    block_title: "аналитика и события"
+    text: "Главная конверсия — `lead-submit` по успеху сервера, а не клик, автоцель «отправка формы» или просмотр «спасибо» по закладке"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md", "07-seo-geo-performance-analytics/04-analytics-experiments.md"]
+    source_section: "§9.3; §2; SG-CONTENT-02; DEF-18"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §9.3; `../07-seo-geo-performance-analytics/04-analytics-experiments.md` §2; SG-CONTENT-02; DEF-18"
+    evidence_level: []
+    related_ids: [DEF-18, SG-CONTENT-02]
+  - id: SITE-TRK-02
+    block: TRK
+    block_title: "аналитика и события"
+    text: "События плана срабатывают на своих триггерах; имена — из `events.yaml`"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/events.yaml"]
+    source_section: "SG-CONTENT-03; ; DEF-44"
+    source_raw: "SG-CONTENT-03; `../07-seo-geo-performance-analytics/events.yaml`; DEF-44"
+    evidence_level: []
+    related_ids: [DEF-44, SG-CONTENT-03]
+  - id: SITE-TRK-03
+    block: TRK
+    block_title: "аналитика и события"
+    text: "Метки (`utm_*`, `yclid`, `gclid`, erid) переживают редирект и доходят до формы и CRM; URL короче 4 096 байт"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["05-conversion-funnels/03-multi-page-funnels.md"]
+    source_section: "§2.2; LR-RU-19"
+    source_raw: "`../05-conversion-funnels/03-multi-page-funnels.md` §2.2; LR-RU-19"
+    evidence_level: []
+    related_ids: [LR-RU-19]
+  - id: SITE-TRK-04
+    block: TRK
+    block_title: "аналитика и события"
+    text: "Счётчики и ретаргетинг загружаются после согласия там, где этого требует юрисдикция"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/events.yaml"]
+    source_section: "SITE-LEGAL-05"
+    source_raw: "SITE-LEGAL-05; `events.yaml` `defaults.consent`"
+    evidence_level: []
+    related_ids: [SITE-LEGAL-05]
+  - id: SITE-TRK-05
+    block: TRK
+    block_title: "аналитика и события"
+    text: "Микрособытия трения (`form-view`, `form-start`, `form-step`, `form-error`, `quiz-complete`) размечены"
+    severity: D
+    severity_label: "желательно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/events.yaml"]
+    source_section: ""
+    source_raw: "`events.yaml`"
+    evidence_level: []
+  - id: SITE-TRK-06
+    block: TRK
+    block_title: "аналитика и события"
+    text: "Статусы CRM (квалифицирован, сделка) загружаются офлайн-конверсиями; звонки учитывает коллтрекинг, если он есть"
+    severity: D
+    severity_label: "желательно"
+    check_method: [HUM]
+    check_method_class: [human]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["05-conversion-funnels/03-multi-page-funnels.md"]
+    source_section: "§6.3"
+    source_raw: "`../05-conversion-funnels/03-multi-page-funnels.md` §6.3"
+    evidence_level: []
+  - id: SITE-TRK-07
+    block: TRK
+    block_title: "аналитика и события"
+    text: "A/B: гипотеза, OEC, guardrail, выборка и длительность по `ab_plan.py`; проверка SRM; без подглядывания; при малом трафике — не тестировать"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT, HUM]
+    check_method_class: [script, human]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/04-analytics-experiments.md", "../../scripts/site/ab_plan.py"]
+    source_section: "§5; ; [V:hEzpiDuYFoE]"
+    source_raw: "`../07-seo-geo-performance-analytics/04-analytics-experiments.md` §5; `../../../scripts/site/ab_plan.py`; [V:hEzpiDuYFoE]"
+    evidence_level: []
+    videos: ["hEzpiDuYFoE"]
+  - id: SITE-TRK-08
+    block: TRK
+    block_title: "аналитика и события"
+    text: "Эффект ≥ 10 % от мелкой правки перепроверен до внедрения (закон Твимана)"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [HUM]
+    check_method_class: [human]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["07-seo-geo-performance-analytics/04-analytics-experiments.md"]
+    source_section: "§5; [V:hEzpiDuYFoE 1:00:11]"
+    source_raw: "`../07-seo-geo-performance-analytics/04-analytics-experiments.md` §5; [V:hEzpiDuYFoE 1:00:11] `[данные]`"
+    evidence_level: ["данные"]
+    videos: ["hEzpiDuYFoE"]
+  - id: SITE-TRK-09
+    block: TRK
+    block_title: "аналитика и события"
+    text: "ИИ-реферы (chatgpt.com, perplexity.ai и др.) выделены в отчёте источников"
+    severity: D
+    severity_label: "желательно"
+    check_method: [HUM]
+    check_method_class: [human]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["07-seo-geo-performance-analytics/events.yaml", "07-seo-geo-performance-analytics/02-geo-ai-search.md"]
+    source_section: ""
+    source_raw: "`events.yaml` `attribution`; `../07-seo-geo-performance-analytics/02-geo-ai-search.md`"
+    evidence_level: []
+  - id: SITE-TRK-10
+    block: TRK
+    block_title: "аналитика и события"
+    text: "Вариант подстановки по метке передаётся событием"
+    severity: D
+    severity_label: "желательно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["03-page-structure/02-length-goal-message-match.md"]
+    source_section: "§3.3"
+    source_raw: "`../03-page-structure/02-length-goal-message-match.md` §3.3"
+    evidence_level: []
+  - id: SITE-MOB-01
+    block: MOB
+    block_title: "телефон"
+    text: "Нет горизонтальной прокрутки на 390 и 360 px"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_section: "§2 B; UX-MOB-01 ; DEF-42"
+    source_raw: "`../../kimi-research/08-director-loop-qa/02-checks-k3.md` §2 B; UX-MOB-01 `[проверено: M — 4 из 51]`; DEF-42"
+    evidence_level: ["проверено"]
+    related_ids: [DEF-42, UX-MOB-01]
+  - id: SITE-MOB-02
+    block: MOB
+    block_title: "телефон"
+    text: "Навигация на телефоне есть: кнопка «Меню» или ≥ 2 видимые ссылки; логотип и действие видны без меню (размер кнопки 44×44 — SITE-A11Y-08, S)"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_section: "§2 B (M-NAV); SITE-NAV-06, SITE-NAV-07"
+    source_raw: "`../../kimi-research/08-director-loop-qa/02-checks-k3.md` §2 B (M-NAV); SITE-NAV-06, SITE-NAV-07"
+    evidence_level: []
+    related_ids: [SITE-A11Y-08, SITE-NAV-06, SITE-NAV-07]
+  - id: SITE-MOB-03
+    block: MOB
+    block_title: "телефон"
+    text: "Текст тела ≥ 16 px; ничего мельче 12 px"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md"]
+    source_section: "D2, D3"
+    source_raw: "`../../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md` D2, D3"
+    evidence_level: []
+  - id: SITE-MOB-04
+    block: MOB
+    block_title: "телефон"
+    text: "Первый экран телефона с баннером cookie показывает заголовок и призыв (или начало формы); баннер и окна не прячут призыв"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR, IMG]
+    check_method_class: [scenario, visual]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["03-page-structure/03-first-screen-and-mobile.md"]
+    source_section: "§1.4 ; DEF-08"
+    source_raw: "`../03-page-structure/03-first-screen-and-mobile.md` §1.4 `[проверено: C/02 — 3 из 27]`; DEF-08"
+    evidence_level: ["проверено"]
+    related_ids: [DEF-08]
+  - id: SITE-MOB-05
+    block: MOB
+    block_title: "телефон"
+    text: "Липкие слои (шапка ≤ 64 px, панель ≤ 72 px + safe area) вместе ≤ 20 % высоты экрана"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["03-page-structure/03-first-screen-and-mobile.md"]
+    source_section: "§4.2"
+    source_raw: "`../03-page-structure/03-first-screen-and-mobile.md` §4.2 `[проверено: C/02 — максимум 30,6 %]`"
+    evidence_level: ["проверено"]
+  - id: SITE-MOB-06
+    block: MOB
+    block_title: "телефон"
+    text: "Hero телефона — свой кадр 4:5 или 9:16; видео — только вертикальным файлом; десктопное видео телефону не отдаётся"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR, IMG]
+    check_method_class: [scenario, visual]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["03-page-structure/03-first-screen-and-mobile.md"]
+    source_section: "§5.3; CRV-AL-06; AIL-37; DEF-43"
+    source_raw: "`../03-page-structure/03-first-screen-and-mobile.md` §5.3; CRV-AL-06; AIL-37; DEF-43"
+    evidence_level: []
+    related_ids: [AIL-37, CRV-AL-06, DEF-43]
+  - id: SITE-MOB-07
+    block: MOB
+    block_title: "телефон"
+    text: "Высота hero — в `svh` или процентах; `100vh` (и `100dvh` для hero) на телефоне нет"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["03-page-structure/03-first-screen-and-mobile.md"]
+    source_section: "§2.4; AIL-37"
+    source_raw: "`../03-page-structure/03-first-screen-and-mobile.md` §2.4; AIL-37"
+    evidence_level: []
+    related_ids: [AIL-37]
+  - id: SITE-MOB-08
+    block: MOB
+    block_title: "телефон"
+    text: "Контент телефона равен десктопному: детали свёрнуты в аккордеоны, а не вырезаны"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["03-page-structure/03-first-screen-and-mobile.md"]
+    source_section: "§5.2"
+    source_raw: "`../03-page-structure/03-first-screen-and-mobile.md` §5.2 `[документация: Google mobile-first]`"
+    evidence_level: ["документация"]
+  - id: SITE-MOB-09
+    block: MOB
+    block_title: "телефон"
+    text: "Порядок и названия секций одинаковы на телефоне и десктопе"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM]
+    check_method_class: [dom]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["03-page-structure/03-first-screen-and-mobile.md"]
+    source_section: "§5.1"
+    source_raw: "`../03-page-structure/03-first-screen-and-mobile.md` §5.1"
+    evidence_level: []
+  - id: SITE-MOB-10
+    block: MOB
+    block_title: "телефон"
+    text: "Смена ширины 1440 → 390 → 1440 без перезагрузки сохраняет раскладку, навигацию и медиа (hero за 1 с)"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_section: "§2 B (H5)"
+    source_raw: "`../../kimi-research/08-director-loop-qa/02-checks-k3.md` §2 B (H5)"
+    evidence_level: []
+  - id: SITE-MOB-11
+    block: MOB
+    block_title: "телефон"
+    text: "Для трафика из соцсетей и мессенджеров страница проверена во встроенном браузере: липкие элементы с запасом снизу, без двойного меню"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [HUM]
+    check_method_class: [human]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["03-page-structure/02-length-goal-message-match.md"]
+    source_section: "§4"
+    source_raw: "`../03-page-structure/02-length-goal-message-match.md` §4"
+    evidence_level: []
+  - id: SITE-MOB-12
+    block: MOB
+    block_title: "телефон"
+    text: "Сравнение и тарифы на телефоне читаются без горизонтальной прокрутки: две колонки и переключатель, тарифов рядом ≤ 2"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["04-blocks/01-blocks-catalog.md", "05-conversion-funnels/02-proof-pricing-risk.md"]
+    source_section: "§6.3; §2.4"
+    source_raw: "`../04-blocks/01-blocks-catalog.md` §6.3; `../05-conversion-funnels/02-proof-pricing-risk.md` §2.4"
+    evidence_level: []
+  - id: SITE-OUT-01
+    block: OUT
+    block_title: "ворота выдачи"
+    text: "Ворота `page-gates.yaml` по профилю пройдены: 0 провалов B; каждый S исправлен или записан в `x-gate-exception` плана"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR, LNT]
+    check_method_class: [scenario, script]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["07-seo-geo-performance-analytics/page-gates.yaml", "../../scripts/site/page_gates.py"]
+    source_section: ""
+    source_raw: "`../07-seo-geo-performance-analytics/page-gates.yaml`; `../../../scripts/site/page_gates.py`"
+    evidence_level: []
+  - id: SITE-OUT-02
+    block: OUT
+    block_title: "ворота выдачи"
+    text: "Все пункты B этого чек-листа пройдены на 1440×900, 390×844 и 360×800"
+    severity: B
+    severity_label: "блокер"
+    check_method: [SCR, HUM]
+    check_method_class: [scenario, human]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_section: "§1.4; §2 B"
+    source_raw: "§1.4; `../../kimi-research/08-director-loop-qa/02-checks-k3.md` §2 B"
+    evidence_level: []
+  - id: SITE-OUT-03
+    block: OUT
+    block_title: "ворота выдачи"
+    text: "Нет заглушек: `[PLACEHOLDER]`, lorem, «Feature 1», «John Doe», «fictional brand»; пробелы `missing` закрыты или блоки сняты"
+    severity: B
+    severity_label: "блокер"
+    check_method: [DOM, LNT]
+    check_method_class: [dom, script]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_section: "COPY-C-04; §2 D (F-FILLER); AIL-09, AIL-44; DEF-48"
+    source_raw: "COPY-C-04; `../../kimi-research/08-director-loop-qa/02-checks-k3.md` §2 D (F-FILLER); AIL-09, AIL-44; DEF-48"
+    evidence_level: []
+    related_ids: [AIL-09, AIL-44, COPY-C-04, DEF-48]
+  - id: SITE-OUT-04
+    block: OUT
+    block_title: "ворота выдачи"
+    text: "Тексты страницы совпадают с copy-deck, прошедшим сверку с фактами и линтер"
+    severity: B
+    severity_label: "блокер"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: ["../text/09-ai-generation-evaluation/03-evaluation.md"]
+    source_section: "COPY-C-01, COPY-C-05; §2"
+    source_raw: "COPY-C-01, COPY-C-05; `../../text/09-ai-generation-evaluation/03-evaluation.md` §2"
+    evidence_level: []
+    related_ids: [COPY-C-01, COPY-C-05]
+  - id: SITE-OUT-05
+    block: OUT
+    block_title: "ворота выдачи"
+    text: "В консоли нет ошибок; битых картинок и ресурсов нет"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md"]
+    source_section: "SG-CONTENT-04; G1"
+    source_raw: "SG-CONTENT-04; `../../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md` G1"
+    evidence_level: []
+    related_ids: [SG-CONTENT-04]
+  - id: SITE-OUT-06
+    block: OUT
+    block_title: "ворота выдачи"
+    text: "Проверки выполнены своими инструментами и кадрами, а не по самоотчёту исполнителя"
+    severity: B
+    severity_label: "блокер"
+    check_method: [HUM]
+    check_method_class: [human]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_section: "§1; DEF-45"
+    source_raw: "`../../kimi-research/08-director-loop-qa/02-checks-k3.md` §1; DEF-45"
+    evidence_level: []
+    related_ids: [DEF-45]
+  - id: SITE-OUT-07
+    block: OUT
+    block_title: "ворота выдачи"
+    text: "После каждой правки — полный прогон автопроверок страницы; регресс вне пунктов правки — откат"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_section: "§8; DEF-46"
+    source_raw: "`../../kimi-research/08-director-loop-qa/02-checks-k3.md` §8; DEF-46"
+    evidence_level: []
+    related_ids: [DEF-46]
+  - id: SITE-OUT-08
+    block: OUT
+    block_title: "ворота выдачи"
+    text: "Маркеры `ai-landing-markers.yaml`: нет маркеров серьёзности B; маркеры S сняты или разрешены брифом (`allow`)"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [DOM, JDG]
+    check_method_class: [dom, judge]
+    check_method_main: dom
+    auto_gate: true
+    source_file: ["09-ai-generation-evaluation/ai-landing-markers.yaml", "09-ai-generation-evaluation/01-generators-and-ai-landing-markers.md"]
+    source_section: "§4"
+    source_raw: "`ai-landing-markers.yaml`; `01-generators-and-ai-landing-markers.md` §4"
+    evidence_level: []
+  - id: SITE-OUT-09
+    block: OUT
+    block_title: "ворота выдачи"
+    text: "Экспертный проход отдельной сессией нашёл ≥ 1 проблему (ноль находок — неудачный прогон), все его B закрыты"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [JDG]
+    check_method_class: [judge]
+    check_method_main: judge
+    auto_gate: false
+    source_file: ["09-ai-generation-evaluation/03-expert-review-and-judge.md"]
+    source_section: "§1; UX-OUT-12; DEF-47"
+    source_raw: "`03-expert-review-and-judge.md` §1; UX-OUT-12; DEF-47"
+    evidence_level: []
+    related_ids: [DEF-47, UX-OUT-12]
+  - id: SITE-OUT-10
+    block: OUT
+    block_title: "ворота выдачи"
+    text: "Профиль рубрики `site-rubric.json`: ни одной оси ниже 3 на осях «ясность», «путь к действию», «честность» (3 прогона, согласие ≥ 2)"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [JDG]
+    check_method_class: [judge]
+    check_method_main: judge
+    auto_gate: false
+    source_file: ["09-ai-generation-evaluation/03-expert-review-and-judge.md", "09-ai-generation-evaluation/site-rubric.json"]
+    source_section: "§4"
+    source_raw: "`03-expert-review-and-judge.md` §4; `site-rubric.json`"
+    evidence_level: []
+  - id: SITE-OUT-11
+    block: OUT
+    block_title: "ворота выдачи"
+    text: "Ворота эффектов creative и приёмка ассетов ai-media и blender пройдены; чужие байты страницу не блокируют"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [LNT]
+    check_method_class: [script]
+    check_method_main: script
+    auto_gate: true
+    source_file: []
+    source_section: "контракт v2 §2 (иерархия ворот); CRV-AL-01…12"
+    source_raw: "контракт v2 §2 (иерархия ворот); CRV-AL-01…12"
+    evidence_level: []
+    related_ids: [CRV-AL-01]
+  - id: SITE-OUT-12
+    block: OUT
+    block_title: "ворота выдачи"
+    text: "Решения вкуса, фактов, прав на фото и тона вынесены заказчику одним блоком; список `[PLACEHOLDER]` передан"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [HUM]
+    check_method_class: [human]
+    check_method_main: human
+    auto_gate: false
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_section: "§7"
+    source_raw: "`../../kimi-research/08-director-loop-qa/02-checks-k3.md` §7"
+    evidence_level: []
+  - id: SITE-OUT-13
+    block: OUT
+    block_title: "ворота выдачи"
+    text: "Многостраничник: `ia_probe.py` по сайту — 0 битых ссылок меню и подвала, 404 отдаёт 404, сирот среди индексируемых нет"
+    severity: S
+    severity_label: "серьёзно"
+    check_method: [SCR]
+    check_method_class: [scenario]
+    check_method_main: scenario
+    auto_gate: true
+    source_file: ["../../scripts/site/ia_probe.py"]
+    source_section: "SITE-NAV-15, SITE-NAV-16"
+    source_raw: "`../../../scripts/site/ia_probe.py`; SITE-NAV-15, SITE-NAV-16"
+    evidence_level: []
+    related_ids: [SITE-NAV-15, SITE-NAV-16]
+defects:
+  - id: DEF-01
+    text: "«Медианный лендинг»: пустые поля брифа решила модель (порядок, тексты, доказательства по умолчанию)"
+    steps: [step:intake]
+    caught_by: [SITE-PRE-01, SITE-PRE-02, SITE-PRE-03, SITE-PRE-04, SITE-PRE-05, SITE-PRE-06, SITE-PRE-07, SITE-PRE-08, SITE-PRE-09]
+    markers: [AIL-01]
+  - id: DEF-02
+    text: "Шаблонный порядок секций без вопроса посетителя (старый шаблон или «ряд чисел ↔ фичи»)"
+    steps: [step:page-plan]
+    caught_by: [SITE-STR-01, SITE-PRE-16]
+    markers: [AIL-01, AIL-02]
+  - id: DEF-03
+    text: "Общий хвост; одна и та же форма страницы у разных проектов"
+    steps: [step:page-plan]
+    caught_by: [SITE-STR-02, SITE-PRE-12]
+    markers: [AIL-03]
+  - id: DEF-04
+    text: "Секции без роли и вопроса, самодельные id секций"
+    steps: [step:page-plan]
+    caught_by: [SITE-PRE-15]
+    markers: [AIL-31]
+  - id: DEF-05
+    text: "Секция, требующая фактов, без фактов («на вырост»)"
+    steps: [step:proof, step:page-plan]
+    caught_by: [SITE-PRE-05, SITE-PRE-18, SITE-PRF-02]
+    markers: [AIL-09]
+  - id: DEF-06
+    text: "Выдуманное число, отзыв, логотип, рейтинг, награда, пресса, человек"
+    steps: [step:proof, step:sister-sync]
+    caught_by: [SITE-PRF-01, SITE-PRF-07]
+    caught_by_other: [COPY-C-01]
+    markers: [AIL-18, AIL-19]
+  - id: DEF-07
+    text: "Первый экран без категории, действия или признака продолжения"
+    steps: [step:page-plan]
+    caught_by: [SITE-STR-06, SITE-STR-07, SITE-STR-09]
+    markers: [AIL-05, AIL-06]
+  - id: DEF-08
+    text: "Призыв закрыт баннером cookie, окном или липкими слоями на телефоне"
+    steps: [step:build-loop]
+    caught_by: [SITE-MOB-04, SITE-MOB-05, SITE-A11Y-11]
+    markers: [AIL-43]
+  - id: DEF-09
+    text: "Посадочная не продолжает объявление; акции из объявления нет"
+    steps: [step:page-plan]
+    caught_by: [SITE-STR-10, SITE-PRE-14]
+    markers: []
+  - id: DEF-10
+    text: "Политика первого экрана не по форме страницы (плакат у лидогенерации, «CTA в первом экране» у плаката)"
+    steps: [step:page-plan, step:package]
+    caught_by: [SITE-PRE-13, SITE-STR-08]
+    markers: []
+  - id: DEF-11
+    text: "Длина не по типу: 15 секций у бесплатного, 4 — у дорогой услуги холодному трафику"
+    steps: [step:page-plan]
+    caught_by: [SITE-PRE-17, SITE-STR-04]
+    markers: []
+  - id: DEF-12
+    text: "Блокирующее возражение в FAQ; цена в конце у лидогенерации"
+    steps: [step:page-plan]
+    caught_by: [SITE-STR-12, SITE-STR-13]
+    markers: [AIL-39]
+  - id: DEF-13
+    text: "Одна кнопка на длинную страницу или полоса призыва после каждой секции; разные подписи одного действия"
+    steps: [step:page-plan, step:sister-sync]
+    caught_by: [SITE-CTA-02, SITE-CTA-03]
+    markers: [AIL-32, AIL-33]
+  - id: DEF-14
+    text: "Две главные цели или второй путь того же стиля вплотную к главному"
+    steps: [step:intake, step:page-plan]
+    caught_by: [SITE-PRE-03, SITE-CTA-01, SITE-CTA-04]
+    markers: []
+  - id: DEF-15
+    text: "Форма не работает: `div` без `<form>`, нет submit, успех в `alert()`, `mailto:`"
+    steps: [step:build-loop]
+    caught_by: [SITE-FRM-01]
+    caught_by_other: [SG-CONTENT-02]
+    markers: [AIL-10]
+  - id: DEF-16
+    text: "Нет подтверждения; «спасибо» без срока, канала и следующего шага"
+    steps: [step:page-plan]
+    caught_by: [SITE-FRM-11]
+    markers: [AIL-34]
+  - id: DEF-17
+    text: "Поля без `why`, обязательный комментарий, «повторите почту», плейсхолдер вместо подписи"
+    steps: [step:page-plan]
+    caught_by: [SITE-FRM-02, SITE-FRM-04, SITE-FRM-05]
+    markers: [AIL-41]
+  - id: DEF-18
+    text: "Конверсия по клику; нет скрытых полей источника; редирект срезает метки"
+    steps: [step:page-plan, step:build-loop]
+    caught_by: [SITE-TRK-01, SITE-TRK-03, SITE-FRM-08]
+    markers: []
+  - id: DEF-19
+    text: "Согласие ПД предотмечено, «нажимая кнопку…», одно на всё; нет ссылки на политику"
+    steps: [step:page-plan, step:build-loop]
+    caught_by: [SITE-LEGAL-01, SITE-LEGAL-02]
+    markers: [AIL-42]
+  - id: DEF-20
+    text: "Видимая капча, reCAPTCHA на сайте для РФ вместо невидимого антиспама"
+    steps: [step:package]
+    caught_by: [SITE-FRM-07]
+    markers: []
+  - id: DEF-21
+    text: "Ложная срочность и активность: таймер со сбросом, катящийся срок, «осталось N», «Мария купила»"
+    steps: [step:proof, step:build-loop]
+    caught_by: [SITE-FRM-10, SITE-PRF-14, SITE-PRF-15, SITE-PRF-16]
+    markers: [AIL-13, AIL-16]
+  - id: DEF-22
+    text: "Цена скрыта или вводит в заблуждение: «по запросу» при известных ценах, «от» ниже реальных, прайс картинкой"
+    steps: [step:proof, step:page-plan]
+    caught_by: [SITE-PRF-09, SITE-PRF-10]
+    markers: []
+  - id: DEF-23
+    text: "Тарифы из шаблона: выдуманные цены, «Популярный» без факта, разные строки, годовой предвыбран"
+    steps: [step:proof, step:page-plan]
+    caught_by: [SITE-PRF-11, SITE-PRF-12, SITE-PRF-13]
+    markers: [AIL-15]
+  - id: DEF-24
+    text: "Окно захвата при входе, exit-intent, чат открывается сам"
+    steps: [step:page-plan]
+    caught_by: [SITE-CTA-07, SITE-CTA-08, SITE-PRE-24]
+    markers: [AIL-12]
+  - id: DEF-25
+    text: "Шапка-отпечаток ИИ, гамбургер на десктопе, подменю по наведению, `role=menu`"
+    steps: [step:site-map]
+    caught_by: [SITE-NAV-03, SITE-NAV-05, SITE-NAV-06]
+    markers: [AIL-11, AIL-22]
+  - id: DEF-26
+    text: "Логотип не ведёт на главную; нет контактов и реквизитов в подвале; полное меню на посадочной под рекламу"
+    steps: [step:site-map, step:page-plan]
+    caught_by: [SITE-NAV-08, SITE-NAV-20, SITE-NAV-21]
+    markers: [AIL-21]
+  - id: DEF-27
+    text: "Смысл, цены и CTA только в JS; текст в canvas, картинке или видео"
+    steps: [step:package, step:build-loop]
+    caught_by: [SITE-GEO-01, SITE-GEO-02]
+    markers: [AIL-26, AIL-27]
+  - id: DEF-28
+    text: "Индексация сломана: `noindex`, robots закрывает, canonical не на себя, 200 на 404, robots.txt 5xx, HTML > 2 МБ"
+    steps: [step:build-loop]
+    caught_by: [SITE-SEO-01, SITE-SEO-02, SITE-SEO-03, SITE-SEO-04, SITE-SEO-05, SITE-SEO-06, SITE-SEO-13, SITE-SEO-14]
+    markers: []
+  - id: DEF-29
+    text: "Разметка не равна видимому: выдуманные даты и рейтинги, FAQPage ради сниппета, AggregateRating о себе"
+    steps: [step:page-plan, step:build-loop]
+    caught_by: [SITE-SEO-07]
+    markers: [AIL-28]
+  - id: DEF-30
+    text: "Инструкции моделям в тексте; «файлы для ИИ» без нужды"
+    steps: [step:package]
+    caught_by: [SITE-GEO-07, SITE-GEO-08]
+    markers: [AIL-29, AIL-30]
+  - id: DEF-31
+    text: "LCP испорчен: картинка с `lazy`, canvas, появление из `opacity: 0`, тяжёлый скриншот в hero"
+    steps: [step:page-plan, step:build-loop]
+    caught_by: [SITE-PERF-01, SITE-PERF-05]
+    markers: []
+  - id: DEF-32
+    text: "Виджеты и счётчики в первом экране до ввода или согласия"
+    steps: [step:page-plan]
+    caught_by: [SITE-PERF-06, SITE-LEGAL-05]
+    markers: []
+  - id: DEF-33
+    text: "Вес и JS выше профиля (без нарушения исходов)"
+    steps: [step:gates]
+    caught_by: [SITE-PERF-12]
+    markers: []
+  - id: DEF-34
+    text: "Движение > 5 с без паузы, вспышки, reduce не учтён"
+    steps: [step:sister-sync, step:build-loop]
+    caught_by: [SITE-A11Y-01, SITE-A11Y-02, SITE-A11Y-03]
+    markers: [AIL-36]
+  - id: DEF-35
+    text: "Контраст призыва, лида, согласия и текста на медиа; иконки без имени; поля без label; запрет зума"
+    steps: [step:build-loop]
+    caught_by: [SITE-A11Y-04, SITE-A11Y-05, SITE-A11Y-06, SITE-A11Y-07]
+    markers: []
+  - id: DEF-36
+    text: "Фокус закрыт баннером и липкими слоями; липкие слои > 20 % экрана"
+    steps: [step:build-loop]
+    caught_by: [SITE-A11Y-11, SITE-MOB-05]
+    markers: []
+  - id: DEF-37
+    text: "Трекинг до согласия; баннер cookie с неравными кнопками или «продолжая пользоваться»"
+    steps: [step:package, step:build-loop]
+    caught_by: [SITE-LEGAL-05, SITE-LEGAL-06]
+    markers: [AIL-43]
+  - id: DEF-38
+    text: "Нет реквизитов продавца и политики ПД; сервер формы вне РФ"
+    steps: [step:proof, step:build-loop]
+    caught_by: [SITE-LEGAL-02, SITE-LEGAL-04, SITE-LEGAL-07]
+    markers: []
+  - id: DEF-39
+    text: "Реклама и промо без «Реклама», рекламодателя и erid"
+    steps: [step:page-plan]
+    caught_by: [SITE-LEGAL-09]
+    markers: []
+  - id: DEF-40
+    text: "Медицина: «до/после», благодарности, нет предупреждения"
+    steps: [step:proof]
+    caught_by: [SITE-LEGAL-11, SITE-PRF-19]
+    markers: []
+  - id: DEF-41
+    text: "ИИ-люди в роли клиентов, команды, авторов отзывов; сток как «наши»"
+    steps: [step:proof, step:sister-sync]
+    caught_by: [SITE-PRF-08]
+    markers: [AIL-14]
+  - id: DEF-42
+    text: "Телефон: горизонтальная прокрутка, меню не сворачивается, контент вырезан, порядок через CSS, `100vh`"
+    steps: [step:build-loop]
+    caught_by: [SITE-MOB-01, SITE-MOB-02, SITE-MOB-07, SITE-MOB-08, SITE-MOB-09]
+    markers: [AIL-37]
+  - id: DEF-43
+    text: "Hero телефона — десктопный кадр или видео, не перекадрирован"
+    steps: [step:sister-sync]
+    caught_by: [SITE-MOB-06]
+    markers: [AIL-37]
+  - id: DEF-44
+    text: "События не размечены или имена не из `events.yaml`"
+    steps: [step:page-plan, step:build-loop]
+    caught_by: [SITE-TRK-02, SITE-PRE-22]
+    markers: []
+  - id: DEF-45
+    text: "Самоотчёт исполнителя принят без своих проверок"
+    steps: [step:gates]
+    caught_by: [SITE-OUT-06]
+    markers: []
+  - id: DEF-46
+    text: "Правка сломала другое место (регресс вне пунктов)"
+    steps: [step:fix]
+    caught_by: [SITE-OUT-07]
+    markers: []
+  - id: DEF-47
+    text: "Проверка с нулём находок принята как «чисто»"
+    steps: [step:gates]
+    caught_by: [SITE-OUT-09]
+    markers: []
+  - id: DEF-48
+    text: "Заглушки на публикации: `[PLACEHOLDER]`, lorem, «Feature 1», «fictional brand», `href=\"#\"`"
+    steps: [step:acceptance]
+    caught_by: [SITE-OUT-03]
+    caught_by_other: [COPY-C-04]
+    markers: [AIL-09, AIL-44]
+  - id: DEF-49
+    text: "Мягкая 404; «спасибо» в индексе или с ПД в адресе"
+    steps: [step:build-loop]
+    caught_by: [SITE-SEO-01, SITE-FRM-12]
+    markers: []
+  - id: DEF-50
+    text: "Многостраничник: сироты, разные шапки на страницах, крошки на 1-м уровне, переключатель языка ведёт на главную"
+    steps: [step:site-map]
+    caught_by: [SITE-NAV-09, SITE-NAV-10, SITE-NAV-15, SITE-NAV-19]
+    markers: [AIL-23, AIL-24, AIL-25]

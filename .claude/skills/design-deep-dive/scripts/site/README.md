@@ -1,0 +1,459 @@
+# Утилиты site-research
+
+Все пути — от корня `kb/site/` (от корня скилла). Утилиты скопированы архитектором 24.09.2026 (05:46)
+**без изменений** — совпадение с источником проверено побайтно (`cmp`); смоук-тест в этой базе: `py_compile` 12/12,
+`color.py selftest` — OK, `ui_audit.py --selftest` — OK (пресеты `admin`, `consumer`; 14 групп проверок),
+`page_accept.py --help`, `asset_inventory.py --help` — OK. Машина: Debian 13, 20 потоков, 15 ГБ ОЗУ (в 05:47 свободно ≈ 5 ГБ:
+параллельно работают сессии других баз), Intel Iris Xe без CUDA; Python 3.13 (Playwright + Chromium, Pillow, numpy, scipy,
+PyYAML), Node 24.21 (`node` из PATH или DDD_NODE), yt-dlp 2026.08.18.122307 (`~/.local/bin/yt-dlp`),
+llama.cpp `~/.local/bin/llama-mtmd-cli` с моделью Qwen3-ASR-1.7B-Q8_0 (`~/.cache/huggingface/hub/models--ggml-org--Qwen3-ASR-1.7B-GGUF/`),
+ffmpeg 7.1.5.
+
+**Пути.** Все скопированные утилиты считают пути от своего расположения (`HERE`/`ROOT`) — копии пишут в эту базу; жёстких
+путей к чужим базам нет (урок ai-media: `vtt2md.py` когда-то писал в blender-research — в этой копии исправлено). Абсолютные
+пути только к окружению: Node (`yt_dl.py`, `transcribe_local.py`), yt-dlp, llama.cpp и модель распознавания — всё на месте.
+Докстринг `site_probe.py` упоминает `web_view.py` — он не нужен и не импортируется.
+
+## Скопировано
+
+| Утилита | Откуда (дата файла) | Зачем здесь | Запуск |
+|---|---|---|---|
+| `fetch.py` | `../kimi-research/99-raw/tools/` (23.09 19:29; исходно ai-media) | Страница → Markdown в `99-raw/cache/`, PDF — через `pdftotext`; печатает путь | `python3 99-raw/tools/fetch.py "URL"` |
+| `render_fetch.py` | там же (23.09 19:29) | То же через headless-браузер: SPA, документация на JS | `python3 99-raw/tools/render_fetch.py "URL" --scroll [--html]` |
+| `site_probe.py` | там же (23.09 19:29; исходно blender, агент A) | Замер живого сайта: байты по категориям, LCP с элементом, TBT, WebGL, прокрутка, `--mobile`, `--throttle`, `--reduced-motion` | `python3 ../blender/site_probe.py https://site out/ [--mobile] [--throttle]` |
+| `measure_ui.py` | там же (23.09 19:29; исходно ui-research) | `getComputedStyle` видимых элементов: кегли, цвета, отступы, каркас; скриншоты; здесь — для структурных признаков (смена фона секций) | `python3 ../ui/measure_ui.py URL [--viewport 390x844] [--full-page]` |
+| `ui_audit.py` | там же (23.09 19:29; исходно ui-research) | Визуальный QA по порогам ui-research. **На лендинге даёт ложные находки** (J2 «сайдбар», J8 `<header>` ≤ 120 px, H1–H2 кегли, A1 шкала до 96, B2 высоты кнопок, L5 гарнитуры — аудит UI §4.3, аудит KIMI §4 п.14): здесь только сырой замер; маркетинговый визуальный профиль — creative | `python3 ../ui/ui_audit.py URL --preset consumer --viewport 1440x900` · `--selftest` |
+| `color.py` | там же (23.09 19:29; исходно ui-research) | WCAG 2 и APCA, hex ↔ OKLCH, ΔE, композитинг альфы; импортируется `measure_ui.py` и `ui_audit.py` | `python3 ../lib/color.py selftest` |
+| `yt_dl.py` | там же (23.09 19:29; способ агента V ai-media) | Субтитры без HTTP 429: `meta` — метаданные; `subs` — **одна дорожка на ролик** (ручные на языке оригинала → автоматические `<язык>-orig` → ручные en/ru), ссылка из сохранённого `info.json`, пауза 6 с, при 429 — 90 и 120 с, после трёх роликов подряд с 429 — остановка; `comm` — 100 верхних комментариев; `pick` — показать выбор дорожки без сети. Файлы — `99-raw/youtube/{meta,subs,comments}/`, журнал `99-raw/youtube/yt_dl.log`. Список: id, после TAB — что угодно, `#` — комментарий | `python3 99-raw/tools/yt_dl.py meta ids.txt && python3 99-raw/tools/yt_dl.py subs ids.txt` |
+| `vtt2md.py` | там же (23.09 19:29; пути исправлены оркестратором ai-media 23.09) | Транскрипты `91-videos/transcripts/<id>.md` из скачанных `.vtt` и метаданных без обращения к YouTube. **Список — только id по строке** | `python3 99-raw/tools/vtt2md.py 99-raw/youtube/ids_p1.txt` |
+| `yt_transcript.py` | там же (23.09 19:29) | Поиск по YouTube без API (`--search "запрос" -n 20`) — для V; старый способ субтитров не использовать (есть `yt_dl.py`) | `python3 99-raw/tools/yt_transcript.py --search "запрос" -n 20` |
+| `transcribe_local.py` | `../blender-research/99-raw/tools/` (23.09 02:35) | Локальное распознавание речи роликов без субтитров: Qwen3-ASR-1.7B Q8_0 через `llama-mtmd-cli` на CPU (около 0,43 реального времени: час речи — около 26 минут), нарезка по паузам на куски около 4 минут, докачка после обрыва; промежуточное — `99-raw/youtube/audio/<id>/`. Запускать по одному ролику, при `free -g` ≥ 3 ГБ | `python3 99-raw/tools/transcribe_local.py URL` |
+| `asset_inventory.py` | `../ai-media-research/99-raw/tools/` (23.09 10:53; агент A ai-media) | Инвентарь визуальных ассетов живой страницы (картинки, CSS-фоны, видео, SVG, Lottie, canvas; сеть через CDP; LCP до прокрутки, CLS, TBT, og:image, фавиконы); десктоп 1440×900 или Pixel 7. Ограничения: cookie-баннеры не закрывает, антибот, один браузер за раз. Основа `page_anatomy.py` | `python3 ../ai-media/asset_inventory.py URL OUT_DIR [--mobile] [--quick] [--throttle]` |
+| `page_accept.py` | `../ai-media-research/99-raw/tools/` (23.09 20:58; агент J ai-media) | Приёмка страницы: байты первого экрана (CDP), LCP, CLS, TBT, `alt`/`width`/`height`, атрибуты видео, пауза движения, reduce, контраст F83; сама берёт блокировку `99-raw/tools/.locks/browser.lock` (ждёт до 900 с). **Порог первого экрана 2500 КБ здесь не норма** — бюджеты по профилям задаёт P (таблица «Поправки» в `PLAN.md`, строка 17). INP не меряет, Safari нет | `python3 ../ai-media/page_accept.py PAGE.html\|URL --out DIR [--mobile] [--throttle] [--budget-first-kb N]` |
+
+## Будут добавлены агентами
+
+Каждый агент дописывает **свой раздел в конец этого файла** (запуск, флаги, что меряет, ограничения, чем проверено) —
+единственное общее место, куда пишут несколько агентов; чужие разделы не менять.
+
+| Утилита | Назначение | Агент, волна |
+|---|---|---|
+| `page_anatomy.py` | Структура живой страницы: секции и их классы по словарю, призывы, формы и согласия, шапка и подвал, заголовки, мета, OG, JSON-LD, аналитика и cookie-баннер (закрытие «Отклонить»), LCP, CLS, TBT, лабораторный INP по сценарию (web-vitals `onINP`), поле CrUX (PageSpeed Insights API без ключа), доля текста без JS, телефон | M, 1 |
+| `vocab_lint.py` | Идентификаторы в YAML и JSON — только из `../../kb/site/02-site-types/vocabulary.yaml` | B, 1 |
+| `ia_probe.py` | Структура многостраничника: `robots.txt`, `sitemap.xml`, типы URL, глубина, шапка и подвал, крошки, `hreflang`, 404 (≤ 1 запроса в секунду, ≤ 200 адресов из sitemap) | G, 2 |
+| `geo_probe.py` | Доступность для ИИ: правила `robots.txt` для ботов из `crawlers.yaml`, `llms.txt`, доля смыслового текста без JS, JSON-LD, `robots` и `X-Robots-Tag`, canonical, OG | H, 2 |
+| `page_gates.py` | Единые ворота страницы по профилю из `budgets.yaml` и `page-gates.yaml` поверх `page_accept.py`, `site_probe.py`, `page_anatomy.py` (v0 — P; v1 со строками SEO, GEO, A11Y, LEGAL — K) | P, 2; K, 3 |
+| `ab_plan.py` | Размер выборки и длительность A/B, проверка SRM | P, 2 |
+| `checklist_export.py` | `../../kb/site/09-ai-generation-evaluation/site-checklist.yaml` из Markdown чек-листа | K, 3 |
+| `site_validate.py` | Схемы и перекрёстные ссылки: блоки плана есть в `blocks.yaml`, слоты разрешены блоку, id фактов есть в брифе, действия и события — в словарях, у страниц карты есть планы | J, 3 |
+| `site_brief_to_kimi.py` | Проекция `site-brief` + `page-plan` в `brief.yaml` kimi (проверка — `build_package.py check`, выход только в `../../kb/site/99-raw/experiments/`) | J, 3 |
+| `plan_to_assets.py` | Каркас плана ассетов ai-media (`../../kb/ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md` §8) из медиа-слотов `page-plan` | J, 3 |
+| `check_links.py` | Ссылки `→ §`, `../../kb/site/99-raw/`, `[S<n>]`, `[V:<id>]`, README папок, разделы формата, метки опытов — копия версии text, адаптированная оркестратором перед аудитом (не копия kimi, как планировалось); раздел ниже | оркестратор; правки X2, S1 — 4 |
+| `sources_collect.py` | `90-sources/sources.tsv` и автоблок `90-sources/README.md` из разделов «Источники» и шапок дайджестов (копия версии text) | S1, 4 (v1.1 — S1b) |
+
+Не скопированы намеренно: `yt_frames.py` (kimi; кадры видео — ролики трека вербальные; если W понадобятся слайды с
+числами, оркестратор копирует утилиту и создаёт `91-videos/frames/`); `k3_checks.py`, `kimi_run.py`, `build_package.py`
+(kimi) — используются на месте только для чтения и сухой проверки проекций.
+
+## Правила
+
+- Python-пакеты — только в venv внутри `99-raw/tools/` (`uv venv 99-raw/tools/venv-<буква>`); npm — в `99-raw/tools/node`
+  или в папке опыта; `sudo` запрещён; глобально ничего не ставить.
+- Браузер — один за раз на агента и через блокировку:
+  `flock -w 900 $DDD_HOME/locks/site/browser.lock <команда>` (`page_accept.py`
+  берёт её сам); перед тяжёлым прогоном `free -g` ≥ 3 ГБ; фоновых процессов не оставлять.
+- Клоны репозиториев — `99-raw/cache/repos/<org>__<repo>/` (`git clone --depth 1`); клоны kimi в
+  `../kimi-research/99-raw/cache/repos/` — только читать.
+- Ключи и токены не заводить и не печатать; PageSpeed Insights API — без ключа; платных вызовов нет; Kimi не запускать.
+- При замерах: рекламу не кликать, формы не отправлять и в поля чужих сайтов ничего не вводить (для лабораторного INP —
+  только фокус в поле; ввод символов — на своей тестовой странице), на cookie-баннере — «Отклонить», если есть.
+
+## `ctx_watch.py` — сторож контекста агентов (оркестратор волн site, 24.09.2026)
+
+Копия утилиты оркестратора волн text-research (`../text-research/99-raw/tools/ctx_watch.py`, 24.09.2026 11:21); изменён
+только путь к транскриптам агентов: переменная окружения `CTX_WATCH_TASKS` или папка задач сессии оркестратора волн site.
+Реализует правило заказчика «до автосжатия доводить не надо никогда» (`PLAN.md`, решение 17): контекст агента считается
+точно по полю `usage` последнего ответа модели (`input_tokens` + `cache_creation_input_tokens` + `cache_read_input_tokens`).
+Реестр — `99-raw/notes/agents-running.tsv` (метка, id агента, статус `running | stopping | done`; ведёт оркестратор).
+
+- `python3 99-raw/tools/ctx_watch.py status` — таблица: агент, контекст, время последнего ответа, число сжатий, пометка об
+  ошибке API;
+- `python3 99-raw/tools/ctx_watch.py watch --wrap 800000 --hard 900000 --every 60` — строка-событие при первом пересечении
+  порога каждым агентом (WRAP — «ЗАКРУГЛЯЙСЯ СЕЙЧАС», HARD — жёсткая граница) и при новом автосжатии (COMPACT); для Monitor.
+
+Агентам не нужен: им команды присылает оркестратор.
+Путь по умолчанию в коде — папка задач сессии 1; сессия 2 (24–25.09) задаёт
+`CTX_WATCH_TASKS=/tmp/claude-1000/<проект>/<id сессии>/tasks` (журнал оркестратора, 2026-09-24).
+
+## `vocab_lint.py` — идентификаторы вне словаря (агент B, волна 1, 24.09.2026)
+
+Проверяет YAML, JSON и Markdown на id, которых нет в `../../kb/site/02-site-types/vocabulary.yaml` (14 пространств: `site_type`,
+`page_type`, `section_role`, `block_family`, `block`, `slot_kind`, `slot`, `macrostructure`, `action`, `awareness`,
+`traffic_temperature`, `traffic_source`, `jurisdiction`, `ambition_level`). Только стандартная библиотека и PyYAML; сеть и
+браузер не нужны.
+
+- Запуск: `python3 vocab_lint.py ../../kb/site/04-blocks/blocks.yaml 04-blocks/examples/page-plan-*.yaml` · `--selftest`.
+- Что ловит: (1) значения ключей из карты по умолчанию (`page_type`, `site_type`, `role`/`section_role`/`serves`, `block`,
+  `family`, `slot`, `slot_kind`, `macrostructure`, `action`/`primary_action`/`secondary_actions`, `awareness`,
+  `temperature`, `traffic_source(s)`, `jurisdiction`, `ambition_level`) на любой глубине, строка или список; (2) ссылки с
+  префиксом в любой строке и в Markdown (`block:`, `slot:`, `section-role:`, `page-type:`, `site-type:`, `action:`,
+  `macrostructure:` …; чужие `effect:`, `fact:`, `task:`, `recipe:`, `copy-rule:` пропускаются); (3) ключи-id
+  (`--keys-as-ids blocks=block`); (4) статусы: `deprecated` и `out-of-scope` — предупреждение (с заменой), `measurement-only`
+  — ошибка (кроме `--allow-measurement`), `proposed` — сведение (`--show-info`).
+- Карта: `--map KEY=NAMESPACE` (много раз); ключ с точкой — суффикс пути (`--map site.sections.id=section_role`);
+  `--no-default-map` — для чужих форматов, где `role`, `family`, `id` значат другое (опыт B/03: без этого 31–34 ложные
+  ошибки на файлах соседей).
+- Подсказки: ближайший id при опечатке (`difflib`, порог 0,75); с `--crosswalk ../../kb/site/02-site-types/crosswalk.tsv` — наш id для
+  чужого термина (приоритет equal → narrower → related → broader; `--source-base` ограничивает базу); `--stats` — сводка
+  mapped / none / absent.
+- Выход: `путь:строка: уровень пространство 'id' — сообщение`, сводка; код 1 при ошибках. Номера строк — из узлов PyYAML
+  (JSON разбирается тем же парсером).
+- Проверено: `--selftest` 9/9 PASS (опыт `99-raw/experiments/B/04-selftest/`); прогон по плану ассетов ai-media и брифам
+  kimi — `99-raw/experiments/B/03-lint-foreign/`. Ограничения: не проверяет, что слот разрешён блоку и что факт существует
+  (это `site_validate.py`, J); ключи-свободные строки соседей (`primary_action` kimi) без проекции всегда дают ошибку.
+
+## `page_anatomy.py` — анатомия живой страницы (агент M, волна 1, 2026-09-24)
+
+Структура и техника живой посадочной страницы или страницы сайта за один прогон «страница × устройство»: секции с ролью
+(`section_role`) и блоком (`block`) по черновику словаря B, призывы, формы и согласия, шапка и подвал, заголовки, мета,
+Open Graph, JSON-LD, платформа, сторонние домены по категориям, cookie-баннер и трекинг до выбора, LCP, CLS, TBT, FCP, TTFB,
+лабораторный INP по сценарию, текст без JS, контактный лист секций. Основа — функции `asset_inventory.py` (сеть CDP,
+наблюдатели LCP/CLS/долгих задач), `page_accept.py` (локальный сервер, блокировка), `measure_ui.py` (исключения
+виджетов и баннеров), `site_probe.py`; чужие файлы не менялись. Зависимости: Python 3.13, Playwright 1.63 (Chromium 153,
+`channel=chromium`), Pillow; web-vitals 6.2.2 — `99-raw/tools/node/node_modules/web-vitals` (`npm install --prefix
+99-raw/tools/node web-vitals@6.2.2`).
+
+| Запуск | Что делает |
+|---|---|
+| `flock -w 900 …/.locks/browser.lock flock -w 900 99-raw/tools/.locks/browser.lock python3 page_anatomy.py URL OUT [--mobile] [--inp] [--label PAGE_TYPE] [--id ID] [--market ru\|intl]` | одна страница; `--quick` — без прокрутки и листа; `--no-cmp-close` — баннер не трогать; `--timeout` (с), `--wait` (мс), `--cpu N` (по умолчанию ×1 десктоп, ×4 телефон); `--crux` — PSI (ключ только из `PSI_API_KEY`) |
+| `python3 page_anatomy.py --batch pages.tsv --out DIR [--devices desktop,mobile] [--inp] [--only a,b] [--skip-done]` | партия: сама берёт обе блокировки на каждую страницу × устройство (не дольше `--page-timeout` 270 с), ждёт `MemAvailable` ≥ 3 ГБ, журнал `DIR/batch.log` |
+| `--reclassify DIR` · `--csv DIR --pages pages.tsv > pages.csv` · `--net-of HOST…` · `--crux-batch pages.tsv --out DIR` · `--selftest` | пересчёт классов без браузера; сводная таблица; страна и AS сервера (IP не печатается); поле CrUX; самопроверка на `99-raw/experiments/M/00-selftest/` |
+
+Выход: `OUT/anatomy_<desktop|mobile>.json` (поля `dom` — сырые признаки; `classes` — роли и блоки с top-3 и причинами;
+`summary` — строка CSV; `network`, `cmp`, `inp`, `nojs`, `first_screen`), `sheet_<устройство>.jpg` (контактный лист с
+границами и подписями секций), `cmp_<устройство>.jpg` (кадр с баннером). Правила замера: рекламу не кликать, формы не
+отправлять и ничего не вводить (для INP — только фокус), на баннере — «Отклонить», если есть; **«Принять» утилита не нажимает**.
+
+**Версия 1.1 (продолжатель M2, 2026-09-24): правка только Python-классификатора** (`99-raw/experiments/M/04-classifier-accuracy/patch_classifier.py`;
+JS-разбор и сырые признаки те же, страницы пересчитаны `--reclassify` без перемера): роли ред. 2 словаря `services`,
+`seo-text`, `cross-sell`, `header` (полосы меню над hero); главный заголовок 5 баллов, подзаголовки и заголовки карточек 2;
+суженные общие слова; смысл заголовка сильнее ценовых признаков; фоллбэк `benefits` с низкой уверенностью. По выборке M/03
+(десктоп): `other` 29 % → 14 % секций, уверенных (`conf` ≥ 0,5) 51 % → 62 %.
+
+**Точность классификатора** (опыт M/04, ручная разметка одним агентом): границы секций верны у 84–85 % сегментов; роль
+верна у **62 %** секций отложенной выборки (46 сегментов, 4 страницы; v1 — 51 %), блок — у 36 %; при `conf` ≥ 0,5 роль верна
+в 86–92 %. Надёжны `hero`, `footer`, `faq`, `pricing`, `testimonials`; размыты `benefits`, `related`, `seo-text`,
+`guarantee`, `contacts`. Для частот и последовательностей брать роли с `conf` ≥ 0,5, остальные — подсказка.
+
+**Скрипты выборки M/03** (`99-raw/experiments/M/03-sample/`): `make_csv.py` — `../../kb/site/02-site-types/pages.csv` (строки
+`build_csv` + колонки `measured_at, net_period, attempt, valid, speed_valid, exclude, note, seg_flag`); `analyze.py
+[--module …]` — `analysis.md`, все сводки файла 03; `rerun.py` — перемер недостающих прогонов с блокирующим `flock -w 900`
+на обе блокировки; `summarize.py` — ранняя сводка M. **`dual_lock` исправлен** (M2, 16:55): раньше он опрашивал
+блокировку раз в 2 с и в очереди агентов с блокирующим `flock -w` голодал (партия и самопроверка уходили по тайм-ауту
+900 с); теперь ждёт в очереди ядра (`fcntl.flock` с тайм-аутом через `SIGALRM`) — как `flock -w`.
+
+Ограничения: лаборатория ≠ поле (сеть без замедления, телефон — эмуляция с CPU×4); одна сеть с раздельной маршрутизацией
+(поле `net` — по стране сервера; anycast-CDN — `unknown`); проба маршрута через эхо-сервисы ненадёжна (не отвечала при
+нормальной загрузке) — в годности строки не участвует; PSI API без ключа — квота 0 (2026-09-24); INP — ≤ 4 взаимодействия
+после загрузки (занижает INP во время загрузки); антибот и заглушки — `blocked`; сегментация срывается, когда подвал или
+общая обёртка проглатывают страницу (`seg_flag=fail`); слайды hero на y = 0 и группы FAQ дают лишние секции; «умная» шапка,
+появляющаяся при прокрутке вверх, не ловится; уведомления о cookie без платформы согласия иногда не распознаются (Мегаплан);
+страницы шире экрана телефона расширяют область Chrome — пороги от ширины устройства, клики на таких страницах могут не
+проходить (баннер тогда скрывается CSS); сертификат НУЦ Минцифры (Russian Trusted CA) Chromium не принимает —
+`ERR_CERT_AUTHORITY_INVALID`. Проверено: самопроверка 28/28 (десктоп и телефон), пилот 4 страницы, выборка 72 страницы.
+
+**Правка оркестратора волн site в `vocab_lint.py` (24.09.2026 15:25).** В карту ключей добавлены пути без id словаря
+(значение `None` — ключ пропускается, строка только сканируется на префиксные ссылки): `references.role` (роль референса у
+creative — `rhythm`, `composition` …; замечание creative в точке C1), `audience.role`, `languages.role`, `questions.block`
+(поля `site-brief`, давшие 13 ложных ошибок на `01-foundations/site-brief.example.yaml`). Самопроверка — OK; пример брифа —
+0 ошибок; `../../kb/site/04-blocks/` — без изменений (1 ошибка `block:service-area` — новый id для J); файлы C1 creative — 0 ошибок. 15:33 — добавлен `versions.role` (роль языковой версии в `site-map` G — ложная ошибка на примерах G).
+
+## `page_gates.py` — единые ворота страницы по профилю (агент P, волна 2, 2026-09-24; v1 — K)
+
+Сводит готовые замеры страницы в вердикт по `../../kb/site/07-seo-geo-performance-analytics/page-gates.yaml` с порогами профиля
+`<page_type>@L<n>` из `budgets.yaml`. Браузер не запускает: читает `anatomy_<device>.json` (`page_anatomy.py`) и, если есть,
+`accept_*.json` (`page_accept.py`: LCP с троттлингом, lazy/fetchpriority, пауза, reduce, F83). Python 3.13 + PyYAML.
+
+| Запуск | Что делает |
+|---|---|
+| `python3 page_gates.py --profile landing-lead-services@L1 --anatomy DIR [--accept DIR] [--jurisdiction ru\|eu\|none] [--json]` | вердикт `accepted` / `accepted_with_notes` / `blocked`, строки PASS/FAIL/SKIP с порогом и серьёзностью; код 1 при B |
+| `python3 page_gates.py --resolve landing-lead-services [--site-level L1] [--hot-mobile-share 0.6 --price-band mid]` | профиль по сетке решения 20 с исключениями и журналом решений |
+| `python3 page_gates.py --selftest` | 15 проверок: YAML ворот, разрешение профиля, B против S, право ru/eu |
+
+Автоматические строки: SG-PERF-01…06, 09; SG-WEIGHT-01…07; SG-SEO-02, 03; SG-GEO-01; SG-LEGAL-01…05, 07. Остальные — SKIP
+(человек, axe, K, соседние утилиты). Замер без троттлинга сети (как у M) для SG-PERF-01 помечается `lab-unthrottled` —
+диагностика, не приёмка; для приёмки — `page_accept.py --mobile --throttle`. Ограничения: сторонние КБ первого экрана —
+верхняя оценка (КБ домена за сессию); INP-сценарий после загрузки занижен. Проверено: самопроверка 15/15; опыт
+`99-raw/experiments/P/02-page-gates-m10/` (10 страниц M × 2 профиля).
+
+## `ab_plan.py` — план и проверка A/B (агент P, волна 2, 2026-09-24)
+
+Только стандартная библиотека. Подкоманды: `size` (выборка на вариант: точная формула без объединения дисперсий и правило
+16σ²/δ²; Бонферрони для A/B/n; при `--visits-per-day` — полные недели и вердикт ok / long / infeasible), `duration`, `mde`
+(обнаружимый эффект за N недель), `srm` (хи-квадрат, порог ExP p < 0,0005; код 2 при SRM), `fpr` (риск ложной победы по доле
+успешных идей; α для FPR 5 %), `analyze` (SRM → z-тест двух долей, интервалы, FPR, флаги: план не набран, Твиман > +30 %,
+0,01 < p < 0,05 → повтор), `peeking` (ложные при k просмотрах и порог Pocock симуляцией). `--json` — машинный вывод.
+
+- Примеры: `python3 ab_plan.py size --base 0.03 --mde-rel 0.2 --visits-per-day 300`;
+  `python3 ab_plan.py srm 5104 4893`; `python3 ab_plan.py peeking --looks 14`.
+- Проверено: `--selftest` 35/35 — опыт A/04 (4 строки), Kohavi–Deng–Vermeer 2022 (16σ²/δ² = 41 642; 15 значений FPR; α 0,0016;
+  пост-хок 74 %), Fabijan 2019 (χ² 22,77, p 1,8·10⁻⁶), пороги Pocock / Evan Miller для 2–11 анализов, Монте-Карло мощности и
+  ложных; опыт `99-raw/experiments/P/01-ab-plan-selftest/`.
+- Ограничения: доли (конверсии), не средние выручки; последовательные always-valid методы не реализованы; биномиальная
+  выборка в самопроверке — нормальное приближение.
+
+## `ia_probe.py` — структура многостраничника по HTTP (агент G, волна 2, 2026-09-24; раздел — продолжатель G2)
+
+Меряет устройство сайта целиком, без браузера: robots.txt → sitemap.xml (индексы, gzip, `hreflang` и `lastmod` в sitemap,
+относительные `<loc>`) → адреса (шаблоны путей, тип раздела по сегменту — русский транслит и английский, глубина, языковые
+префиксы и поддомены, гигиена: параметры, слэш, регистр) → страницы только из sitemap плюс корень: шапка (пункты верхнего
+уровня, подменю, признаки мега-меню, поиск, телефон, вход, переключатель языка, кнопки), подвал (ссылки, группы,
+юридические ссылки, реквизиты, соцсети, «Карта сайта»), крошки (HTML и BreadcrumbList в JSON-LD, microdata, RDFa),
+`hreflang` в `<head>`, canonical, title, H1, контекстные ссылки и блоки «читайте также» → ответ на несуществующий адрес
+(честная 404, мягкая 404, редирект на главную). Python 3.13, только стандартная библиотека.
+
+| Запуск | Что делает |
+|---|---|
+| `python3 ia_probe.py https://example.ru --out DIR [--id ID] [--sample 14]` | один сайт → `DIR/<id>/ia.json`, `ia.md`, `pages/NN.html.gz`, `sitemap_urls.txt.gz`; коротко — в stdout |
+| `python3 ia_probe.py --batch sites.tsv --out DIR [--skip-done]` | партия по TSV `id, url, site_type, market, note`; `--skip-done` пропускает сайты с готовым `ia.json` |
+| `python3 ia_probe.py --summary DIR > DIR/summary.tsv` | сводная таблица по всем `ia.json` (44 колонки) |
+| `python3 ia_probe.py --reanalyse DIR` | пересчёт разбора по сохранённому HTML без сети (после правки эвристик) |
+| `python3 ia_probe.py --selftest` | 26 проверок на локальном сервере с фикстурами |
+
+Флаги: `--delay` (с, не меньше 1), `--budget` (запросов на сайт, не больше 200), `--sample` (страниц из sitemap, по умолчанию
+14), `--max-sitemaps` (файлов sitemap, по умолчанию 12), `--timeout` (с, по умолчанию 20; проба 404 — 30), `--no-save-html`.
+
+- **Вежливость** (условие задания G): ≤ 1 запроса в секунду на хост, каждый редирект — отдельный запрос с паузой; ≤ 200
+  запросов на сайт (robots, sitemap, страницы, проба 404; на 20 сайтах G/01 — 5–36); страницы — только адреса из sitemap и
+  корень, по ссылкам не ходит; robots.txt по RFC 9309: 4xx — ограничений нет, 5xx или недоступен — страницы не
+  запрашиваются; `Crawl-delay` соблюдается до 10 с; адреса под `Disallow` пропускаются; антибот (ответ 401, 403, 429, 503 или
+  заглушка Cloudflare, DDoS-Guard, Qrator при малом числе ссылок и слов) — отметка `blocked` и остановка без обхода; после
+  сетевой ошибки — один повтор через 5 с. User-Agent называет утилиту и её правила.
+- **Выборка** детерминированная: по странице из крупнейших шаблонов пути (середина отсортированного списка), затем вторые
+  и третьи, плюс самая глубокая страница — не больше 3 страниц с шаблона; при одном шаблоне в sitemap выборка мала (croc в
+  G/01 — 5 страниц).
+- **Выход**: `ia.json` — `robots`, `sitemap` (файлы, число URL, `lastmod`, `hreflang`, `relative_locs`), `urls` (хосты,
+  глубина, шаблоны с примерами, типы разделов, языковые префиксы, гигиена), `pages` (по странице: шапка, подвал, крошки,
+  поиск, язык, `hreflang`, canonical, title, H1, ссылки), `not_found`, `summary`, `request_log`, `politeness`; `ia.md` —
+  коротко для человека.
+- **Сводка** (`--summary`): `robots`, `sm_declared`, `sm_files`, `urls`, `main_host_share`, `depth_med`, `depth_p90`,
+  `depth_max`, `templates`, `lang_prefixes`, `sm_hreflang_urls`, `hreflang_pages`, `header_method` (`header-tag`, `class`,
+  `none`), `header_top`, `dropdown`, `mega`, `max_sub`, `search_any`, `search_in_header`, `phone`, `login`, `lang_switch`,
+  `footer_links`, `footer_groups`, `footer_legal`, `requisites`, `sitemap_link`, `crumbs_inner_pct`, `crumbs_deep_pct`
+  (доля страниц глубины ≥ 2 с крошками в HTML или BreadcrumbList), `bc_ld_pct`, `related_pages`, `content_links_med`,
+  `tpl_from_home_pct` (доля шаблонов пути со ссылкой прямо с главной), `home_links_not_in_sm`, `header_semantic_issue`,
+  `sm_relative_locs`, `sampled_redirecting`, `sampled_errors`, `not_found`, `blocked`, `requests`. Шапка, подвал, телефон
+  и поиск в шапке — по главной; крошки, поиск, язык, `hreflang` — по всей выборке.
+- **Проверено**: `--selftest` 26/26 (опыт `99-raw/experiments/G/00-selftest/`, повтор 24.09 16:22); пилот на 3 сайтах нашёл
+  6 дефектов разбора — исправлены; 20 многостраничников, 13 русских (опыт `99-raw/experiments/G/01-ia-probe/`);
+  предварительная сверка с браузерным замером M (`../../kb/site/02-site-types/pages.csv`) на 4 общих доменах.
+- **Ограничения**: без браузера не видит меню, панели и телефон, которые вставляет скрипт (браузер M видит мега-меню у
+  kontur и practicum и телефон в шапке у stamus, которых нет в исходном HTML), и видимость элементов на телефоне; счёт
+  пунктов шапки включает утилиты и списки языков; подвал без `<footer>` и узнаваемого класса не находит; реквизиты и
+  подписи — эвристики; у сайтов с уникальными путями шаблоны дробятся (artlebedev — 716 шаблонов на 6815 URL); уникальность
+  содержимого серий не проверяет. Годится как автопроверка собранного сайта (ссылки навигации в исходном HTML, код 404,
+  sitemap с абсолютными каноническими URL, крошки по глубине) — предложение K и J.
+
+## `geo_probe.py` — доступность страницы для поисковых и ИИ-ботов (агент H, волна 2, 2026-09-24; раздел — продолжатель H2)
+
+Что видит бот без исполнения JS: для каждого бота из `../../kb/site/07-seo-geo-performance-analytics/crawlers.yaml` — разрешён ли URL в
+robots.txt (RFC 9309 + особенности платформ: цепочки групп «YandexBot → Yandex → *», «Applebot → Googlebot → *»,
+AdsBot-Google и YandexAdditional без группы `*`); код, размер, BOM, `Sitemap`, `Content-Signal`, `Content-Usage`, блок
+Cloudflare Managed в robots.txt; `/llms.txt` и `/llms-full.txt` (Markdown по llmstxt.org или HTML-заглушка); страница —
+код, редиректы, `X-Robots-Tag`, CDN и антибот-заглушка, несжатый размер HTML и смещения `</head>`, первого H1 и последнего
+`og:*`; head (title, description, robots для `robots`/`googlebot`/`yandex`/`bingbot`/`applebot`, canonical, hreflang, lang,
+OG, Twitter); текст без JS (определения как у M `nojs_compare`: слова вне `script, style, noscript, template, svg, iframe,
+object, head, canvas`), H1, цены, призывы, признаки SPA и платформы; JSON-LD (разбор, `@type` с `@graph`, базовые
+обязательные свойства по документации Google, `sameAs`, `@id`) и микроразметка. Python 3.13 + requests 2.32 + PyYAML 6.0;
+для `--render` — Playwright 1.63 + Chromium.
+
+| Запуск | Что делает |
+|---|---|
+| `python3 geo_probe.py URL [--out DIR] [--id ID]` | одна страница, только HTTP; печатает флаги и решения robots.txt по ботам, JSON — в `DIR/<id>.json` |
+| `… URL --render` | + Chromium без взаимодействия: доля слов без JS, H1 и главный призыв в сыром HTML, цены, JSON-LD только из JS; сам берёт обе блокировки браузера и ждёт `MemAvailable` ≥ 3 ГБ |
+| `… URL --ua-probe` | + запросы с UA Googlebot, YandexBot, OAI-SearchBot, GPTBot, PerplexityBot, ClaudeBot: код и объём против браузерного UA (только сигнал: WAF законно режет поддельный UA с чужого IP) |
+| `… --batch pages.tsv --out DIR [--render] [--ua-probe] [--only a,b] [--skip-done] [--insecure-retry]` | партия; `pages.tsv` — колонки `id` и `url` (остальные — в `meta`), журнал `DIR/batch.log`; `--insecure-retry` читает страницу с недоверенной цепочкой TLS (сертификат НУЦ «Russian Trusted Sub CA») без проверки и ставит флаг `tls-untrusted-chain` |
+| `… --summary DIR > summary.tsv` · `--revalidate DIR` · `--crawlers PATH` · `--selftest` | сводная таблица (57 колонок); пересчёт JSON-LD и решений robots.txt по сохранённым данным без сети; другой каталог ботов; самопроверка |
+
+Флаги (`flags` в JSON; серьёзность B/S/D — `head-kit.yaml` `checks`, сведения — `info_flags`; строки ворот — SG-SEO-01…04,
+SG-GEO-01…02 в `page-gates.yaml`): `page-status-<код>`, `antibot-challenge`, `tls-untrusted-chain`, `html-over-2mb`,
+`og-after-1mb`, `noindex`, `nosnippet`, `noarchive-or-nocache`, `no-title`, `no-description`, `no-canonical`,
+`multiple-canonical`, `canonical-elsewhere`, `no-lang`, `no-og-image`, `og-image-relative`, `no-h1-in-raw`, `multiple-h1`,
+`raw-text-under-50-words`, `raw-text-under-200-words`, `csr-shell`, `no-jsonld`, `jsonld-parse-error`,
+`jsonld-missing-required`, `robots-5xx-or-unreachable`, `robots-is-html`, `robots-star-disallow-all`, `blocked-<id бота>`
+(Googlebot, YandexBot, YandexAdditional, OAI-SearchBot, PerplexityBot, Claude-SearchBot, bingbot, AdsBot), `content-signal`,
+`cloudflare-managed-robots`, `llms-txt`; с `--render` — `nojs-ratio-under-0.5`, `h1-js-only`, `cta-js-only`,
+`prices-js-only`, `jsonld-js-only`; с `--ua-probe` — `ua-<бот>-status-<код>`, `ua-<бот>-text-differs`.
+
+Правила: ≤ 1 запроса в секунду на хост, повтор при сетевом сбое через 5 с; формы не отправляет, ничего не вводит, по рекламе не
+ходит; браузер — только с `--render`. Ограничения: без `--render` не видит текст, меню и телефон, которые вставляет скрипт
+(для них — `page_anatomy.py` M); `--ua-probe` не заменяет «Проверку URL» Search Console и «Проверку ответа сервера»
+Вебмастера — настоящих IP ботов у утилиты нет; что видят зарубежные боты на российских сайтах (TLS, антибот) — только с
+зарубежного адреса; сопоставление групп Яндекса — по цепочке токенов из `crawlers.yaml`, а не по любой подстроке «Yandex»;
+при robots.txt длиннее 4 000 символов `--revalidate` решения по ботам не пересчитывает (в JSON хранится начало файла);
+распознавание антибот-заглушек и CTA — эвристики (регулярные выражения). Проверено: `--selftest` 33/33 (разбор групп,
+самое длинное совпадение, `$` и `*`, регистр токена, цепочки Яндекса и Apple, AdsBot без `*`, JSON-LD с `@graph`, вложенные
+отзывы, FAQPage, `llms.txt` против HTML-заглушки); опыты `99-raw/experiments/H/01-geo-probe-corpus-d/` (116 страниц корпуса
+text D) и `H/02-geo-probe-sample-m/` (52 посадочные M; пересчёт X2 на итоговой выборке — 70, ответили 69) — без браузера.
+
+## `page_gates.py` v1–v1.2 и `checklist_export.py` (агент K, волна 3, 2026-09-24; v1.2 — продолжатели K3, K4)
+
+**`page_gates.py` v1** — продолжение раздела P выше (v0 сохранён в `99-raw/experiments/K/03-gates-v1/page_gates.v0.py`).
+Ворота — `../../kb/site/07-seo-geo-performance-analytics/page-gates.yaml` v1 (60 строк: PERF 15, WEIGHT 8, SEO 8, GEO 2, A11Y 7, LEGAL 9,
+CONTENT 7, NAV 2, MOB 2; у каждой строки `site_checklist` — пункты SITE-* сводного чек-листа; `scope: site` у строк уровня
+сайта). Браузер не запускает; новые входы (все необязательные):
+
+| Флаг | Что читает | Какие ворота |
+|---|---|---|
+| `--geo FILE` | JSON `geo_probe.py` (флаги `head-kit.yaml checks`, серьёзность берётся из head-kit 1.0) | SG-SEO-01…05, SG-GEO-01…02 (строка `device: raw`) |
+| `--ia FILE` | `ia.json` `ia_probe.py` | SG-SEO-01 (мягкая 404), SG-SEO-06 (sitemap), SG-SEO-08 (hreflang), SG-NAV-01 (меню в HTML), SG-NAV-02 (крошки) |
+| `--axe FILE` | JSON axe: счётчики (`run_axe.py` опыта I/02), `axe.run` или узлы с адресами (`run_axe_targets.py` опыта K/03 — флаги `in_h1`, `action`, `in_form`, `cookie`, `first_screen`, `in_header`, `in_footer`, `text`) | SG-A11Y-01 (B: link-name, button-name, label, meta-viewport, color-contrast ключевого узла — H1, лид первого экрана, призыв, согласие и баннер cookie; S: контраст прочих узлов; без адресов узлов — S, которое `x-gate-exception` не снимает), SG-A11Y-02 (S: target-size, image-alt, frame-title, html-has-lang, html-lang-valid) |
+| `--plan FILE` | page-plan: `first_screen_policy`, `seo.indexable`, `seo.structured_data`, `x-gate-exception[{id, why, who, until}]` | SG-CONTENT-07; условия SEO; исключения (S снимается до `until`, B — никогда) |
+| `--html FILE` | сохранённый HTML страницы | SG-CONTENT-05 (заглушки, `href="#"` у призыва — B), SG-CONTENT-06 (маркеры AIL-13, 16, 20, 46) |
+| `--ai-bots-policy`, `--ads-google` | условия брифа для флагов ботов | закрытые ИИ-боты при `deny-all` — не дефект; AdsBot — B только для посадочной под Google Ads |
+| `--css FILE …` (v1.1, K2) | файлы CSS страницы (если стили внешние; `<style>` и `style=` берутся из `--html`) | SG-A11Y-08: `font-size: clamp(min, …, max)` — S при max / min > 2,5 (WCAG 1.4.4; `var()` не раскрывается) |
+
+Из анатомии v1 добавились SG-MOB-01 (переполнение телефона — B), SG-MOB-02 (меню телефона — S, подтверждать кадром),
+SG-CONTENT-07 (призыв в первом экране по политике плана), SG-CONTENT-04 (консоль из `accept_*.json`). **v1.1 (K2, 18:20):** SG-WEIGHT-09 — видео первого экрана без действия отдельной цифрой (`first_screen.by_type_kb.media`: S, если одно видео больше бюджета первого экрана профиля; D, если видео есть) и SG-A11Y-08 — по замечаниям creative (`99-raw/notes/sync/creative-wave1-for-site-2026-09-24/`); всего 62 строки. Код приведён к
+строкам H2: SG-GEO-01 — H1 только после JS B, CTA и цены после JS S, доля текста без JS < 0,5 S, < 0,8 D; SG-SEO-02 — нет
+`lang` D; SG-SEO-03 — нет H1 S, больше одного D. `--json` добавляет к каждой строке `site_checklist` и `scope`.
+**v1.2 (K3 — код, K4 — строки `page-gates.yaml` v1.2; калибровка опыта K/03 на 8 страницах):** SG-PERF-03 — CLS окна сессии
+web-vitals после прокрутки (`fin.wv_cls`) вместо суммы всех сдвигов; SG-GEO-01 — «H1 только после JS» B только без H1 в сыром
+HTML (иначе текст сверяется буквами, расхождение — D); SG-MOB-01 — B при `layout_zoomed`, скрытое переполнение — D; SG-LEGAL-01
+для ЕС — S, если до выбора загружены только библиотеки без событий и cookie трекинга; SG-LEGAL-04 для ЕС — S (LR-EU-06);
+SG-A11Y-01 — контраст по классам узлов (профиль I `08/03` §8); SG-PERF-06 — «H1 первого экрана выпал из LCP» (появление из
+`opacity: 0`, маской строк, скрытием скриптом — creative E/01): S при признаке у H1 или 4 ближайших предков в `--html`/`--css`
+(стиль, классы `opacity-0`, `invisible`, правило CSS или `@keyframes` из `opacity: 0`, SplitText с маской), D без признака и при
+`opacity` 0 < x < 0,1 или `clip-path` (время LCP раньше видимости). Самопроверка: `python3 page_gates.py --selftest`
+— **64/64** (15 проверок v0 + 23 v1 + 5 v1.1 + 8 v1.2 K3 + 13 v1.2 K4, в том числе ссылки `site_checklist` на существующие
+пункты `site-checklist.yaml`). Опыт — `../../kb/site/99-raw/experiments/K/03-gates-v1/` (README: прогоны 1–3, 32 → 25 → 23 строки B).
+
+**`checklist_export.py`** — `../../kb/site/09-ai-generation-evaluation/site-checklist.yaml` из `02-site-checklist.md` (образец —
+`../ux/checklist_export.py`). Разбирает строки `| SITE-<БЛОК>-<NN> | … | B|S|D | способы | источник |`
+и каталог `| DEF-<NN> | … | step:… | ловят | маркер |`; поля пункта: `block`, `text`, `severity`, `check_method`,
+`check_method_class`, `auto_gate` (false у JDG и HUM), `source_file` (пути от корня базы; чужие базы — `../<база>/…`),
+`source_section`, `evidence_level`, `videos`, `related_ids` (UX-, AC-, COPY-, CRV-, SG-, LR-, AIL-, DEF-, SITE-). Проверки
+целостности: повтор id, блок строки = раздел, способы из словаря, номера подряд, ссылки DEF → SITE, ссылки AIL → `ai-landing-markers.yaml`,
+существование файлов-источников. Запуск: `python3 checklist_export.py` (запись и сводка) · `--check` (YAML
+совпадает с Markdown, код 1 — нет) · `--selftest` (16 проверок разбора) · `--md FILE --out FILE`. Только стандартная
+библиотека (PyYAML — если есть — для проверки валидности).
+
+## `site_validate.py`, `site_brief_to_kimi.py`, `plan_to_assets.py` — контракты v1 (агент J, волна 3, 2026-09-24)
+
+Python 3.13 + PyYAML; схемы — jsonschema + referencing (нет в системном python — `site_validate.py` сам перезапускается в
+`venv-J` | `venv-A` | `venv-E`). Сеть и браузер не нужны. Kimi не запускается.
+
+| Запуск | Что делает |
+|---|---|
+| `python3 site_validate.py PATH… [--today ГГГГ-ММ-ДД] [--json OUT] [--quiet]` | тип файла по ключам: бриф (SB-*), план (PL-*), карта (SM-*), каталог (BL-*), формы (LF-*); папка — проект (бриф + `facts.yaml` + `site-map.yaml` + `plans/*.yaml`, PJ-*); схема по полю версии (v0/v0.9 владельцев или v1 `../../kb/site/10-playbooks-contracts/schemas/`); код 1 при error |
+| `python3 site_validate.py --all` | все контракты базы: `blocks.yaml`, `lead-forms.yaml`, бриф A, планы E, карты G, примеры J |
+| `python3 site_validate.py --selftest` | пример `lead-services-otves` проходит, 15 отрицательных случаев падают своим кодом |
+| `python3 99-raw/tools/site_brief_to_kimi.py --brief B --plan P --out DIR [--sitemap M] [--fills F] [--copy-deck C] [--check]` | `brief.yaml` kimi (только ключи шаблона), `acceptance-site.md` (блоки I–L), `projection.tsv`; `--check` — `build_package.py questions/build/check` в DIR (выход — только в `../../kb/site/99-raw/experiments/`) |
+| `python3 plan_to_assets.py PLAN [--out F] [--check]` | каркас плана ассетов ai-media (01/01 §8) из медиа- и 3D-слотов; `--check` — поля и перечисления §8 |
+
+- Перенесено: SB-* — `99-raw/experiments/A/01-schema-validate/validate.py` (A); проверки плана и каталога — `99-raw/experiments/E/01-validate/validate.py`
+  (E); проекция — `99-raw/experiments/A/02-kimi-projection/project.py` (A). Добавлено: 23 проверки карты G (включая граф входящих
+  ссылок и крошки по глубине), право I (согласие ПД в ru, `req:`, оператор, cookie), события P, профиль бюджета и уровни (решение 20),
+  `x-gate-exception`, `plan_cross` creative, `expires`, «популярный», минимумы доказательств F, id секций из роли или блока (K).
+- Проверено (опыт J/04): `--all` — error 0 (warning 12 объяснены в README опыта); `--selftest` — OK; проекции трёх примеров — `build_package.py`
+  0 ошибок (J/03); каркасы плана ассетов — 0 ошибок полей §8.
+- Ограничения: длины текстов не проверяются (text); порядок ролей из осведомлённости — человек и судья; `claude_fills` в проекции — из
+  `--fills` (по умолчанию помеченная заглушка A/02); A3 и NAV_RULE kimi не заменяются — строки в `decisions.extra`.
+
+## `sources_collect.py` — сводная библиография (агент S1, волна 4, 2026-09-25; v1.1 — продолжатель S1b)
+
+Собирает `90-sources/sources.tsv` (8 колонок: `url, title, author_org, year, type, used_in, reliability, notes`) и автоблок
+сводки `90-sources/README.md` (текст между `<!-- sources_collect:begin -->` и `<!-- sources_collect:end -->`) из разделов
+«## Источники» содержательных файлов папок 01–10 и шапок дайджестов `91-videos/digests/`. Копия
+`../text-research/99-raw/tools/sources_collect.py` (S1b text, 2026-09-24; её образец — ux), адаптированная скриптом
+`99-raw/experiments/S1/sources/adapt_from_text.py` (30 проверенных замен: соседи и сёстры site, буквы агентов site без
+точки — «J. Wiebe» не агент J, демо-наборы «Отвес», «Окошко», «Сталькон», домены стандартов, надзоров, данных, вендоров
+CRO и конструкторов, директивы ЕС вида `2005/29/EC`). Только стандартная библиотека; сеть и браузер не нужны; файлы базы
+и соседей только читает, пишет только `90-sources/` (или `--out`).
+
+| Запуск | Что делает |
+|---|---|
+| `python3 99-raw/tools/sources_collect.py` (или `--write`) | пересобрать `sources.tsv` и автоблок README; ручные разделы README не трогает |
+| `python3 99-raw/tools/sources_collect.py --check` | собрать во временную папку и сравнить: код 0 — TSV и автоблок (без даты сборки) совпадают, 1 — нет (до 5 строк расхождения) |
+| `python3 99-raw/tools/sources_collect.py --selftest` | офлайн-тест на мини-базе во временной папке: 32 проверки (нормализация URL, деление записей, слияние законов, ролики, соседи, кэш, README, ручная таблица типов) |
+| `… --stats` · `… --unparsed` | сводка без записи; внутренние записи, пути соседей не на диске, снятые таблицей и оставшиеся `web` — с ключами записей |
+| `--out ФАЙЛ` · `--no-readme` · `--root ПУТЬ` | TSV в другой файл; без автоблока; другой корень базы |
+
+- Метод, колонки, типы, уровни надёжности, не открывшиеся источники и ограничения — ручные разделы `90-sources/README.md`.
+- **v1.1 (S1b):** таблица `TYPE_OVERRIDES` — ключ записи → тип или None («не источник»): 22 записи с типом `web` размечены
+  (research 8, vendor 6, media 7, practice 1), 3 ссылки на файлы базы, принятые за внешнюю работу, сняты; ключ таблицы без
+  записи — строка «ВНИМАНИЕ» в сводке; `--write` — псевдоним пересборки. Прежняя версия —
+  `99-raw/experiments/S1/sources/sources_collect.before-S1b.py`; журнал — `99-raw/experiments/S1/journal.tsv`.
+- Проверено (2026-09-25): `--selftest` 32/32; `--check` — совпадает: 389 источников (607 записей 30 файлов и 16 дайджестов;
+  внутренних 91, влито 22, снято таблицей 3). Коды выхода: 0 — готово или совпадает; 1 — расхождение или падение самотеста;
+  2 — ошибка входа.
+- Ограничения: название, автор, год и тип — эвристики версии text, для site не калибровались (огрехи названий — README
+  `90-sources/`); надёжность — по меткам и словам-пометкам записи, а не повторная проверка; один источник под разными
+  адресами — несколько строк.
+
+## `check_links.py` — перекрёстные ссылки и структура базы (оркестратор волн site, 24.09.2026; правки X2 и S1 — волна 4)
+
+Копия `../maint/check_links.py` (версия X2 text, 24.09.2026; md5 исходника в докстринге), адаптированная
+оркестратором перед аудитом волны 4: соседи ux, ui, ai-media, blender, kimi и сёстры text и creative (text — только как
+«text-research» или «text NN»: слово text в базе ещё и `slot_kind`), буквы агентов site → папки 01–10 и 91, `schemas/` среди
+подпапок, самопроверка на мини-базе site. Обходит `.md` папок 00–10, 90, 91 и корня (`README.md`, `PLAN.md`), а этот
+README — только для проверок (а) и (ж). Только стандартная библиотека.
+
+Проверки: (а) относительные пути к файлам и папкам, в том числе соседей (многоточие — префикс, `*` — глоб, диапазон `01–04` —
+оба конца); (б) ссылки на разделы `§N.M` — есть ли заголовок в целевом файле; (в) `[S<n>]` — определён ли номер в
+«Источниках»; (г) `[V:<id> mm:ss]` — дайджест, транскрипт или строка каталога, таймкод не больше длительности; (д) README
+папок против диска и заявленное в таблице число строк; (е) обязательные разделы содержательных файлов и дайджестов (формат
+W site); (ж) метки опытов → папки опытов (свои, соседей, сестёр). Уровни ERROR, WARN, INFO; код 1 при ERROR.
+
+| Запуск | Что делает |
+|---|---|
+| `python3 ../maint/check_links.py [--quiet-info]` | отчёт в stdout: сводка по проверкам (а)–(ж) и находки |
+| `… --out ФАЙЛ` · `--json ФАЙЛ` · `--only а,б` · `--no-raw` · `--root ПУТЬ` | отчёт в файл; находки в JSON; только названные проверки; без этого README; другой корень |
+| `python3 ../maint/check_links.py --selftest` | офлайн-тест на временной мини-базе |
+
+- Правки X2 (8; в коде — «X2 site»; копия до правок — `99-raw/experiments/X2/check_links.orig.py`; подробно —
+  `99-raw/reports/wave4-X2-checks.md`): «аудит MEDIA / KIMI / UI / BLENDER §N» — заметки аудита соседей; буква агента со
+  скобкой перед номером файла — папка агента; «→» в конце строки и «§N» на следующей — свой файл; «§N этого файла»; пустое
+  `[V:]` — формат, не ссылка; разделы дайджеста — по формату W site; опыт соседа по пути `../../<база>/99-raw/experiments/…`;
+  префикс базы действует на перечень опытов через «,» и «и». X2b утилиту не правил. Правка S1: метка опыта сестры вида
+  «проверено: text A/01» (копия до правки — `99-raw/experiments/S1/check_links.before.py`; журнал S1).
+- Проверено: самопроверка 27/27 (оркестратор) → 37/37 (X2) → **39/39** (S1); по базе 2026-09-25 — ERROR 0, WARN 0.
+- Ограничения: ссылки на внешние документы (законы, WCAG, условия вендоров), на отчёты и заметки агентов («отчёт A §4») и на
+  источники вида «S1 §14» не проверяются (INFO); путь от корня базы внутри подпапки принимается (INFO).
+
+## `orch_check.py` и `extract_for_audit.py` — приёмка и извлечения для аудита (оркестратор волн site, 24.09.2026)
+
+**`orch_check.py`** — приёмочная проверка файлов (основа — утилита оркестратора волн text; списки папок, меток и утилит — site).
+Python 3.13 + PyYAML.
+
+- Запуск: `python3 ../maint/orch_check.py all` (папки 00–10, 90, 91) или по папкам:
+  `python3 ../maint/orch_check.py 03-page-structure 90-sources`; `--selftest-tools` — ещё `--selftest` утилит агентов
+  (`vocab_lint.py`, `page_anatomy.py`, `ia_probe.py`, `geo_probe.py`, `page_gates.py`, `ab_plan.py`, `checklist_export.py`,
+  `site_validate.py`, `site_brief_to_kimi.py`, `plan_to_assets.py`; тайм-аут 600 с на утилиту). Ключ `--md` есть в справке,
+  но не реализован. Код 1 — есть error.
+- Содержательный `.md` (не README и не `91-videos/`): пять обязательных разделов формата (warning), строка метаданных, число
+  строк (info: меньше 150 или больше 700), пометка `<!-- ЧЕРНОВИК` (первой строкой — error); у любого `.md` — метки
+  доказательности (известные и незнакомые: слово кириллицей в квадратных скобках вне таблицы меток), штампы стиля
+  («является», «данный», «важно отметить» и др.), ссылки `](../…)`, `](NN-…)` и `../…` в обратных кавычках (warning, если
+  цели нет ни от файла, ни от корня); YAML — загрузка (error) и поле `date` (info); JSON — загрузка (error), у
+  `*.schema.json` — `$schema`; README в папке с файлами (кроме 00, 90, 91).
+- Правка сессии 2: скобки внутри кода в обратных кавычках — не метки (перед поиском незнакомых меток код вырезается).
+- Проверено (2026-09-25): `all` — 131 файл, 0 ошибок. Ограничения: акты приёмки примеров J
+  (`10-playbooks-contracts/examples/*/acceptance-site.home.md`) проверяются как содержательные файлы — 3 ложных
+  предупреждения о разделах формата (отмечено X2); ссылки на разделы `§` не проверяет (это `check_links.py`).
+
+**`extract_for_audit.py`** — компактные извлечения базы для аудитора X и синтезатора S (основа — утилита оркестратора волн
+text; урок ux и text: аудитор гибнет на чтении больших файлов). Только стандартная библиотека; сеть и браузер не нужны; базу
+только читает.
+
+- Запуск: `python3 99-raw/tools/extract_for_audit.py [--out 99-raw/notes/wave4/extracts] [--only 09-ai-generation-evaluation]`;
+  перезаписывает файлы в `--out` (извлечения волны 4 — `99-raw/notes/wave4/extracts/`, их готовит оркестратор: перед X и
+  после правок X2 — перед S).
+- Выход: `<папка>.md` для 01–10 (у содержательных файлов — заголовок, метаданные, «Выжимка», «Открытые вопросы», «Чек-лист»;
+  README — целиком; YAML и JSON — строки, ключи, `version`, `status`, `checked` или `date`; TSV и CSV — строки и шапка);
+  `reports-wave<N>.md` (из отчётов волны: находки, противоречия и слабые места, «что учесть», живая фаза, предложения,
+  пробелы, термины, «не удалось»); `amendments.md` (строки «Поправка к …» и таблица поправок `PLAN.md`); `labels.md`
+  (перепись меток и прочих пометок в квадратных скобках); `sync.md` (README пакетов `99-raw/notes/sync/*/`); `videos.md`;
+  `_inventory.md` (файлы с числом строк).
+- Ограничения: разделы выбираются по заголовкам (регулярные выражения `KEEP_CONTENT`, `KEEP_REPORT`) — раздел с другим
+  заголовком в извлечение не попадёт; числа и ссылки сверять по файлу базы.

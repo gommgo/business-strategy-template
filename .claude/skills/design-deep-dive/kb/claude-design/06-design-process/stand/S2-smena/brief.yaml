@@ -1,0 +1,225 @@
+# ── Копия БЕЗ ПРАВОК (26.09.2026) брифа стенда S2 «Смена» от 24.09.2026, md5 оригинала 33ca17de5bc94f6adc3bc76599179087.
+# Стенд — 06-design-process/06-test-stand.md §2; поля брифа — 06-design-process/01-brief-and-questions.md §7.
+# Что убрать или заменить при адаптации:
+#   1. Блок `run` (harness, model, effort, timeout_s, prompt_variant B1) и `build.skill` — параметры другого исполнителя: убрать
+#      (модель — Opus 5.5; «план и вопросы до сборки» — страницы «Направления» и «Вайрфрейм» холста).
+#   2. `app.fixtures_source: src/fixtures.json` → `fixtures.json` рядом с этим файлом (скопирован без правок).
+#   3. `references[].source` ведут на синтетические заглушки src/refs (не копировались): заменить реальными кадрами (плотность
+#      таблицы, master-detail) с `measured` из `measure_ui.py`.
+#   4. Две строки происхождения ниже — убрать. Английские строки в `decisions` можно перевести.
+# ──
+# brief.yaml — пример 2 (веб-приложение, панель диспетчера), вымышленная служба «Вода-Казань» · F/03 · 2026-09-24
+# Заполнен Claude по описанию и ответам (01-description-and-questions.md). Данные в src/fixtures.json обезличены.
+project:
+  slug: smena-dispatch
+  type: webapp
+  date: 2026-09-24
+  status: approved
+  iteration: 1
+  scope: all four screens in src/ (first build, UI only, data from brief/fixtures.json)
+
+product:
+  name: Смена
+  description: Смена — панель диспетчера службы доставки воды «Вода-Казань»
+  target_user: диспетчеры 8–10 часов в смену за двумя мониторами; руководитель раз в неделю смотрит отчёт с телефона
+  goal: диспетчер видит все заказы дня и назначает курьера на заказ за два клика вместо Excel и WhatsApp
+  primary_action: назначить курьера на новый заказ
+  screens: [orders, order, couriers, report]
+  locale: ru
+  platforms: [desktop, mobile]
+  viewport_primary: 1440x900
+
+design_system:
+  style: корпоративная классика (ui-research 11/01 §17) — плотно, спокойно, границы вместо теней
+  knobs:
+    accent: "#0A66C2"
+    neutral: slate
+    radius: "6"
+    density: compact
+    font_display: Golos Text
+    font_text: Golos Text
+    shadows: ring-only
+    theme: light
+  palette:
+    background: "#F6F7F9"
+    surface: "#FFFFFF"
+    text: "#111827"
+    muted: "#4B5563"
+    border: "#D1D5DB"
+    accent: "#0A66C2"
+    accent_hover: "#084F96"
+    on_accent: "#FFFFFF"
+    focus: "#0A66C2"
+  type_scale:
+    display: {size: 24, mobile: 22, line: 1.25, weight: 600}
+    h2: {size: 18, mobile: 18, line: 1.33, weight: 600}
+    h3: {size: 16, mobile: 16, line: 1.4, weight: 600}
+    body: {size: 14, mobile: 16, line: 1.43, weight: 400}
+    small: {size: 12, mobile: 13, line: 1.33, weight: 400}
+    button: {size: 14, mobile: 16, line: 1.2, weight: 600}
+  spacing: [4, 8, 12, 16, 24, 32, 48]
+  layout: {max_width: 1600, columns: 12, gutter: 16, margin_desktop: 24, margin_mobile: 16, section_gap: 32, section_gap_mobile: 24}
+  radius_scale: {sm: 4, md: 6, lg: 8}
+  motion_tokens: {fast: 100, base: 150, slow: 200, ease_out: "cubic-bezier(0, 0, 0.2, 1)", ease_in_out: "cubic-bezier(0.4, 0, 0.2, 1)"}
+  elevation: карточки и таблицы на границе 1 px без тени; тень только у выпадающего меню и модального окна
+  visual_mood: [плотный, спокойный, рабочий]
+  tone_of_voice: коротко и по делу; глагол в кнопках; ошибки называют причину и следующий шаг
+  bans: [градиенты, стекло, эмодзи, карточки-метрики в ряд по три с иконками, цветные левые полосы у карточек, анимация появления секций]
+
+direction:
+  visual_thesis: рабочий пульт диспетчера — плотный, спокойный, всё главное в одной таблице
+  paper: "light, cool neutral #F6F7F9"
+  display_style: гротеск Golos Text 600, без отдельного акцидентного шрифта
+  accent_rule: синий только на главной кнопке экрана, ссылках, выбранной строке и активном пункте меню
+  imagery: без фото и иллюстраций; иконки только стрелка сортировки и шеврон, inline SVG 16 px
+  macrostructure: сайдбар 240 px + шапка 48 px; контент без ограничения ширины до 1600 px; таблица на всю ширину
+
+references:
+  - file: refs/01-table-density.jpg
+    source: src/refs/01-table-density.jpg
+    captured: "скриншот приложения, который нравится диспетчерам, 1440x900, 2026-09-24"
+    role: плотность таблицы
+    take: [строка таблицы 36 px, липкая шапка таблицы, статусы маленькими чипами с текстом, числа выровнены вправо табличными цифрами]
+    dont_take: [тёмная тема, фиолетовый акцент, аватары пользователей в каждой строке]
+    measured: "estimated: строка 36 px, кегль таблицы 14 px, шапка 12 px 600, отступ ячейки 12 px"
+  - file: refs/02-dispatch-board.jpg
+    source: src/refs/02-dispatch-board.jpg
+    captured: "скриншот приложения, который нравится диспетчерам, 1440x900, 2026-09-24"
+    role: раскладка назначения
+    take: [список слева и карточка выбранного справа (master-detail), назначение из выпадающего списка в строке]
+    dont_take: [карта с маршрутами, перетаскивание карточек между колонками]
+    measured: "estimated: список 60 % ширины, панель деталей 40 %, панель 24 px отступы"
+
+site: {}
+
+app:
+  roles:
+    - {name: диспетчер, posture: sovereign, hours: "8–10 ч в смену", device: "десктоп, 2 монитора, мышь"}
+    - {name: руководитель, posture: transient, hours: "раз в неделю, 10 минут", device: "телефон"}
+  objects:
+    - {name: Заказ, fields: ["№ (1042)", "клиент", "адрес", "окно доставки (10:00–12:00)", "бутыли, шт.", "статус", "курьер"], actions: [назначить курьера, отметить доставку, отменить]}
+    - {name: Курьер, fields: [имя, телефон, статус, заказов сегодня], actions: [назначить на заказ]}
+    - {name: Смена, fields: [дата, план, доставлено, опоздания, отменено], actions: [посмотреть отчёт]}
+  screens:
+    - {id: orders, route: /orders, title: Заказы на сегодня, template: список объектов, main_task: "найти новый заказ и назначить курьера", key_action: Назначить курьера, roles: [диспетчер]}
+    - {id: order, route: /orders/1042, title: Заказ № 1042, template: карточка объекта, main_task: "проверить адрес и окно, сменить статус", key_action: Отметить доставку, roles: [диспетчер]}
+    - {id: couriers, route: /couriers, title: Курьеры, template: master-detail, main_task: "увидеть загрузку курьеров", key_action: Назначить на заказ, roles: [диспетчер]}
+    - {id: report, route: /report, title: Отчёт смены, template: дашборд, main_task: "увидеть план, факт, опоздания и отмены", key_action: Скачать CSV, roles: [диспетчер, руководитель]}
+  shell: "сайдбар 240 px (Заказы, Курьеры, Отчёт) + шапка 48 px с датой смены; на телефоне — нижняя панель из трёх пунктов"
+  fixtures_source: src/fixtures.json
+  states: [loading, empty-first-use, empty-filter, one-record, load-error]
+
+feature:
+  - screen_id: orders
+    function: список заказов дня с фильтром по статусу и назначением курьера в строке
+    content: ["№, клиент, адрес, окно, бутыли, статус, курьер — из fixtures.json orders_today", "фильтр: Все / Новые / В пути / Доставлены / Отменены"]
+    information_architecture: "новые без курьера — сверху; статус и курьер — главные колонки; адрес — вторичный"
+    empty_state: "Заказов на сегодня пока нет. Новые заказы появятся здесь автоматически."
+    error_state: "Не удалось загрузить заказы. Проверьте соединение и нажмите «Повторить»."
+    loading_state: "скелетон таблицы на 8 строк"
+
+component:
+  - type: выбор курьера в строке заказа
+    interactivity: [hover, focus-visible, keyboard arrows, Enter]
+    state: [default, open, selected, disabled (курьер не на линии), error]
+    content: "Назначить курьера"
+    properties: {}
+
+content:
+  copy_source: ""
+  facts_source: ""
+copy:
+  shell:
+    nav_orders: Заказы
+    nav_couriers: Курьеры
+    nav_report: Отчёт
+    shift_label: Смена
+  orders:
+    h1: Заказы на сегодня
+    filter_all: Все
+    filter_new: Новые
+    filter_transit: В пути
+    filter_done: Доставлены
+    filter_cancelled: Отменены
+    col_id: №
+    col_client: Клиент
+    col_address: Адрес
+    col_window: Окно
+    col_bottles: Бутыли
+    col_status: Статус
+    col_courier: Курьер
+    assign: Назначить курьера
+    empty_first: Заказов на сегодня пока нет. Новые заказы появятся здесь автоматически.
+    empty_filter: По этому фильтру заказов нет. Сбросить фильтр
+    error: Не удалось загрузить заказы. Проверьте соединение и нажмите «Повторить».
+    retry: Повторить
+  order:
+    h1: "Заказ № 1042"
+    mark_delivered: Отметить доставку
+    cancel: Отменить заказ
+    status_new: Новый
+    status_assigned: Назначен
+    status_transit: В пути
+    status_delivered: Доставлен
+    status_cancelled: Отменён
+  couriers:
+    h1: Курьеры
+    assign_to_order: Назначить на заказ
+    status_on_route: На маршруте
+    status_free: Свободен
+    status_off: Не на линии
+    no_phone: Телефон не указан
+  report:
+    h1: Отчёт смены
+    planned: План
+    delivered: Доставлено
+    late: Опоздания
+    cancelled: Отменено
+    late_hint: Опоздание — доставка позже конца окна клиента.
+    download: Скачать CSV
+facts:
+  - {id: F1, text: "Вода-Казань", source: "заказчик, сообщение 2026-09-24", use: "шапка, заголовок вкладки"}
+  - {id: F2, text: "бутыли 19 л", source: "заказчик, сообщение 2026-09-24", use: "подпись колонки при необходимости"}
+  - {id: F3, text: "статусы: новый → назначен → в пути → доставлен / отменён", source: "заказчик, ответ на вопрос 1, 2026-09-24", use: "чипы статусов"}
+  - {id: F4, text: "опоздание — доставка позже конца окна клиента", source: "заказчик, ответ на вопрос 2, 2026-09-24", use: report}
+  - {id: F5, text: "все записи заказов, курьеров и смены — только из brief/fixtures.json", source: "обезличенная выгрузка заказчика, 2026-09-24", use: "все экраны"}
+missing: []
+never_claim: [реальные имена и телефоны клиентов (в фикстурах они обезличены), показатели эффективности, которых нет в fixtures.json]
+
+brand: {}
+assets: []
+missing_slots: []
+
+decisions:
+  mobile: "responsive: /report is fully usable at 390x844 (manager on a phone); other screens fall back to one column without horizontal page scroll (wide tables scroll inside their container)"
+  motion: {level: none, thesis: "", moments: [], library: css}
+  assets_mode: typographic
+  three_d: {mode: none, files: [], poster: "", notes: ""}
+  variants: 1
+  iterations_max: 3
+  extra: ["No map and no drag-and-drop (out of scope)", "Dark theme — later, as a separate pass"]
+
+build:
+  stack: Vite + React + TypeScript, CSS modules, react-router
+  allowed_packages: [vite@8, typescript@7, react@19, react-dom@19, "@vitejs/plugin-react@6", react-router@8, "@fontsource/golos-text@5"]
+  dev_cmd: npm run dev -- --port 5173
+  build_cmd: npm run build
+  dev_url: "http://localhost:5173"
+  viewports: ["1440x900", "768x1024", "390x844"]
+  routes: [/orders, /orders/1042, /couriers, /report]
+  selector: ""
+  src_layout: ""
+  out_of_scope: [backend and API, authentication, map and courier routes, notifications, tests]
+  perf: {hero_image_kb: 100, first_screen_kb_mobile: 800, lcp_s_mobile: 2.5}
+  skill: kimi-design-executor
+
+run:
+  harness: kimi
+  model: kimi-code/k3
+  effort: high
+  timeout_s: 2400
+  prompt_variant: B1
+
+questions:
+  - {q: "Статусы заказа", asked: true, answer: "новый → назначен → в пути → доставлен / отменён; меняет диспетчер, «доставлен» — ещё и курьер", source: заказчик, date: 2026-09-24}
+  - {q: "Руководитель с телефона", asked: true, answer: "только отчёт смены (адаптив /report)", source: заказчик, date: 2026-09-24}

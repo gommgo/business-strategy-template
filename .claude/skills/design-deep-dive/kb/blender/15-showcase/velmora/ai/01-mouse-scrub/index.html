@@ -1,0 +1,188 @@
+<!doctype html>
+<!-- Приём 1 · «мышь ведёт видео»: облёт флакона SC-03 (Kling 3 std 5 с 720p, 50 ₽) — горизонталь указателя выбирает кадр,
+     сцена догоняет плавно (lerp 160 мс), при неподвижной руке — холостой дрейф с кнопкой паузы (WCAG 2.2.2).
+     Доставка — на выбор в «лаборатории» ниже: видео с коротким GOP (AV1 / H.264, GOP 1 / 4 / 8) или секвенция кадров на canvas.
+     Постер = декодированный кадр 0 финального AV1 (LCP). reduce / Save-Data — 0 байт медиа, облёт по кнопке.
+     Агент B, сессия 4, 25.09.2026. Сборка ассетов — 99-raw/experiments/B/10-scrub-delivery/build_scrub.py. -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мышь ведёт видео — облёт флакона · галерея приёмов MAREA</title>
+<meta name="description" content="Горизонталь курсора управляет облётом камеры вокруг флакона: видео Kling 3, перемотка с плавным догоном и холостым дрейфом.">
+<meta name="theme-color" content="#050607">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../fonts/noto-serif-display-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../css/demos.css">
+<style>
+  .stage { touch-action: pan-y; }
+  @media (hover: hover) and (pointer: fine) { .stage { cursor: ew-resize; } }
+  .stage__media { background: #050607; }
+  .stage__media > picture > img, .stage__media > img { transition: opacity .6s var(--ease); object-position: 60% 50%; }
+  .scrub-layer { opacity: 0; transition: opacity .6s var(--ease); object-position: 60% 50%; }
+  .scrub-layer.is-on { opacity: 1; }
+  .stage__scrim { background:
+      linear-gradient(180deg, rgb(5 6 8 / .55) 0, rgb(5 6 8 / 0) 120px),
+      linear-gradient(90deg, rgb(5 6 8 / .74) 0%, rgb(5 6 8 / .5) 36%, rgb(5 6 8 / 0) 60%),
+      linear-gradient(0deg, var(--bg) 0, rgb(5 6 8 / 0) 140px); }
+  .scrub-range { position: absolute; z-index: 4; left: var(--gutter); right: calc(var(--gutter) + 64px); bottom: 38px; display: block; }
+  .scrub-range input { width: 100%; margin: 0; -webkit-appearance: none; appearance: none; background: transparent; height: 22px; cursor: pointer; }
+  .scrub-range input::-webkit-slider-runnable-track { height: 1px; background: rgb(255 255 255 / .28); }
+  .scrub-range input::-moz-range-track { height: 1px; background: rgb(255 255 255 / .28); }
+  .scrub-range input::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%;
+    background: var(--pearl); box-shadow: 0 0 0 6px rgb(239 230 220 / .12); }
+  .scrub-range input::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: var(--pearl); }
+  .scrub-range .ticks { position: absolute; left: 0; right: 0; top: 17px; display: flex; justify-content: space-between; font-size: 11px;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--faint); pointer-events: none; }
+  .stage[data-state="reduce"] .hint, .stage[data-state="save-data"] .hint { display: none; }
+  .optin { margin-top: 26px; }
+  /* кольцо-курсор: только точный указатель и без reduce; мягко догоняет (CSS-переменные ставит скрипт ниже) */
+  .ring { position: fixed; z-index: 6; left: 0; top: 0; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%;
+    border: 1px solid rgb(239 230 220 / .55); pointer-events: none; opacity: 0; transition: opacity .3s, width .3s, height .3s;
+    transform: translate3d(var(--cx, -100px), var(--cy, -100px), 0); display: grid; place-items: center; color: var(--pearl); }
+  .ring svg { width: 30px; height: 12px; }
+  .stage:hover ~ .ring { opacity: 1; }
+  @media (hover: none), (prefers-reduced-motion: reduce) { .ring { display: none; } }
+  .lab-note { margin-top: 14px; }
+  .stage__copy { padding-top: clamp(96px, 16vh, 150px); padding-bottom: 110px; }
+  .only-touch { display: none; }
+  @media (hover: none) { .only-fine { display: none; } .only-touch { display: inline; } }
+  @media (max-width: 700px) {
+    /* телефон: текст сверху на тёмном, кадр — нижние 60 % сцены, флакон целиком (фокус x ≈ 0,74) */
+    .stage { min-height: 100svh; }
+    .stage__media { inset: 40% 0 0 0; }
+    .stage__media > picture > img, .scrub-layer { object-position: 74% 45%; }
+    .stage__scrim { background: linear-gradient(180deg, #050607 0%, #050607 40%, rgb(5 6 8 / .0) 56%),
+                                linear-gradient(0deg, var(--bg) 0, rgb(5 6 8 / 0) 90px); }
+    .stage__copy { padding-top: 76px; padding-bottom: 0; }
+    .display { font-size: clamp(32px, 9vw, 40px); }
+    .lead { font-size: 15px; margin-top: 14px; }
+    .hint { margin-top: 16px; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="crumb" href="../index.html"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>Галерея приёмов</a>
+  <span class="spacer"></span><span>01 / 08</span>
+</header>
+
+<section class="stage grain" data-scrub data-default="seq-avif-1280" data-default-touch="orbit-av1-g4" data-fallback="orbit-h264-g4" data-rest="0.5" aria-labelledby="h1">
+  <div class="stage__media">
+    <picture>
+      <source type="image/avif" srcset="assets/poster.avif">
+      <img src="assets/poster.webp" width="1280" height="720" fetchpriority="high"
+           alt="Флакон крема VELMORA из рифлёного стекла с золотой крышкой на чёрном камне, за ним — переливающаяся прозрачная лента">
+    </picture>
+  </div>
+  <div class="stage__scrim" aria-hidden="true"></div>
+  <div class="stage__copy">
+    <p class="kicker">Приём 1 · мышь ведёт видео</p>
+    <h1 class="display" id="h1">Курсор ведёт <em>камеру</em> вокруг флакона</h1>
+    <p class="lead">Пять секунд облёта стали материалом под рукой: горизонталь указателя выбирает кадр, сцена догоняет мягко,
+      а когда рука замирает — медленно дышит сама.</p>
+    <p class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="7" y="3" width="10" height="16" rx="5"/><path d="M12 6.5v3M3 12h2M19 12h2M3.8 12l1.4-1.2M3.8 12l1.4 1.2M20.2 12l-1.4-1.2M20.2 12l-1.4 1.2"/></svg>
+      <span class="only-fine">Ведите мышь влево и вправо</span><span class="only-touch">Проведите пальцем по кадру</span></p>
+    <p class="optin"><button class="btn btn--solid" type="button" data-scrub-optin hidden>Показать облёт · <span data-size>≈ 1 МБ</span></button></p>
+  </div>
+  <label class="scrub-range"><span class="sr-only">Положение камеры вокруг флакона</span>
+    <input type="range" min="0" max="1000" value="0" step="1" data-scrub-range>
+    <span class="ticks" aria-hidden="true"><span>фас</span><span>облёт 25°</span></span></label>
+  <button class="motion-toggle" type="button" aria-pressed="false" hidden>
+    <span class="sr-only">Остановить движение сцены</span>
+    <svg class="i-pause" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true"><rect x="4" y="3" width="3.4" height="12" rx="1"/><rect x="10.6" y="3" width="3.4" height="12" rx="1"/></svg>
+    <svg class="i-play" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true" style="display:none"><path d="M5 3.2v11.6c0 .6.7 1 1.2.7l9-5.8c.5-.3.5-1.1 0-1.4l-9-5.8C5.7 2.2 5 2.6 5 3.2z"/></svg>
+  </button>
+</section>
+<div class="ring" aria-hidden="true"><svg viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M6 1 1 6l5 5M24 1l5 5-5 5"/></svg></div>
+
+<section class="section" aria-labelledby="how">
+  <h2 id="how">Как сделано</h2>
+  <ul class="credits" aria-label="Паспорт приёма">
+    <li><b>Модель</b><span>Kling 3 std, i2v 5 с 720p (облёт 25° + наезд) от кадра GPT Image 2.5 Sunburst 2K</span></li>
+    <li><b>Цена</b><span>50 ₽ видео + 7 ₽ кадр = 57 ₽</span></li>
+    <li><b>Вес на проводе</b><span>постер 18 КБ · мышь: 61 кадр AVIF 1 250 КБ («грубо → точно») · касание: AV1 GOP 4 — 998 КБ (запас H.264 — 1 660 КБ)</span></li>
+    <li><b>Как сделано</b><span>без звука → BT.601 → BT.709 с полными тегами → AV1 CRF 32 / H.264 CRF 22, ключ каждые 4 кадра → <code>scrub.js</code></span></li>
+  </ul>
+  <p class="note lab-note">Исходник: <a href="../../../../experiments/_polza/SC/2026-09-25/SC-03-kling-orbit-velmora__kling-v3__gen_2214660770481180673.mp4">SC-03 · kling/v3 · 3,7 МБ</a>
+    (кадр-вход <a href="../../../../experiments/_polza/SC/2026-09-25/SC-02-product-designed-sunburst-2k__openai-gpt-image-2.5-sunburst__gen_2214658960213676033.png">SC-02 Sunburst 2K</a>);
+    флакон и надпись VELMORA придуманы моделью по брифу витрины. Метка AIGC Kling в файлах сохранена.</p>
+
+  <div class="cols" style="margin-top:40px">
+    <div>
+      <h3>Что происходит под рукой</h3>
+      <p>Положение указателя по горизонтали (без 8 % по краям) — это цель от 0 до 1. Каждый кадр экрана текущее положение подтягивается
+        к цели по экспоненте с постоянной 160 мс: рука дёргается, а камера едет плавно. Видео при этом не играет — из него
+        <em>выбирают кадр</em>: у секвенции рисуется кадр <code>p × 60</code> и поверх — следующий с прозрачностью дробной части,
+        у видео <code>currentTime</code> ставится в середину кадра <code>round(p × 120)</code>, а пока идёт перемотка, новые цели «сливаются» в одну.</p>
+      <p>Если рука замерла на 1,4 с, цель начинает медленно покачиваться вокруг середины облёта (две синусоиды, 11 и 4,7 с) — сцена живёт
+        сама. Это движение дольше 5 секунд, поэтому в углу есть кнопка паузы; при «уменьшить движение» дрейфа нет вовсе, а облёт
+        не грузится, пока вы не попросите.</p>
+    </div>
+    <div>
+      <h3>Две доставки — и что выбрано по умолчанию</h3>
+      <p><b>Секвенция кадров</b> на canvas (для мыши): кадр рисуется сразу, соседние смешиваются по дробной части — плавность «между
+        кадрами», прыжок через весь облёт — за один кадр экрана (17 мс). Цена — 61 запрос и ≈ 214 МБ раскодированных кадров 1280 px
+        в памяти; кадры приходят «грубо → точно» (0, 60, 30, 15…), крутить можно почти сразу.</p>
+      <p><b>Видео с коротким GOP</b> (для касания): один файл, в памяти один кадр, аппаратный декодер телефона. Перемотка к кадру
+        декодирует от ближайшего ключевого: в замере AV1 GOP 4 — 16 мс медиана, прыжок догоняется за 50–80 мс, при слежении камера
+        отстаёт на 3–4 кадра. Всё видно в лаборатории ниже: переключайте варианты и водите мышью.</p></div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="lab" style="padding-top:0">
+  <h2 id="lab">Лаборатория доставки</h2>
+  <div class="lab">
+    <fieldset>
+      <legend>Вариант</legend>
+      <label><input type="radio" name="scrub-variant" value="orbit-av1-g4"><span>AV1 · ключ каждые 4 кадра</span><small>998 КБ</small></label>
+      <label><input type="radio" name="scrub-variant" value="orbit-av1-g1"><span>AV1 · каждый кадр ключевой</span><small>2 065 КБ</small></label>
+      <label><input type="radio" name="scrub-variant" value="orbit-av1-g8"><span>AV1 · ключ каждые 8 кадров</span><small>664 КБ</small></label>
+      <label><input type="radio" name="scrub-variant" value="orbit-h264-g4"><span>H.264 · ключ каждые 4 кадра</span><small>1 660 КБ</small></label>
+      <label><input type="radio" name="scrub-variant" value="orbit-h264-g1"><span>H.264 · каждый кадр ключевой</span><small>3 172 КБ</small></label>
+      <label><input type="radio" name="scrub-variant" value="orbit-h264-g8"><span>H.264 · ключ каждые 8 кадров</span><small>1 264 КБ</small></label>
+      <label><input type="radio" name="scrub-variant" value="seq-avif-1280"><span>Кадры AVIF 1280 · 61 шт.</span><small>1 250 КБ</small></label>
+      <label><input type="radio" name="scrub-variant" value="seq-webp-1280"><span>Кадры WebP 1280 · 61 шт.</span><small>1 555 КБ</small></label>
+      <label><input type="radio" name="scrub-variant" value="seq-avif-960"><span>Кадры AVIF 960 · 61 шт.</span><small>855 КБ</small></label>
+    </fieldset>
+    <div>
+      <div class="stats" data-scrub-hud aria-live="off">
+        <div><b data-k="bytes">—</b><span>получено</span></div>
+        <div><b data-k="load">—</b><span>до первого кадра</span></div>
+        <div><b data-k="seek">—</b><span>перемотка / декод: медиана · p95</span></div>
+        <div><b data-k="state">—</b><span>состояние</span></div>
+      </div>
+      <p class="note" data-k-wrap>Счётчик: <span data-scrub-hud-extra></span></p>
+      <div class="table-wrap" style="margin-top:22px">
+        <table class="data" id="bench-table">
+          <caption class="sr-only">Замеры доставки облёта в Chromium</caption>
+          <thead><tr><th>Вариант</th><th>Вес</th><th>Десктоп: перемотка / декод, мс</th><th>Слежение, кадров · прыжок</th><th>Pixel 7, CPU×4</th></tr></thead>
+          <tbody data-bench-rows><tr data-v="orbit-h264-g1"><td>H.264 · GOP 1</td><td class="num">3 172 КБ</td><td>9,7 · 14,5</td><td class="num">2,13 · 45 мс</td><td>9,5 · 12,8 · 1,29 · 33 мс</td></tr><tr data-v="orbit-h264-g4"><td>H.264 · GOP 4</td><td class="num">1 660 КБ</td><td>15,8 · 28,5</td><td class="num">3,30 · 74 мс</td><td>15,3 · 21,7 · 1,84 · 34 мс</td></tr><tr data-v="orbit-h264-g8"><td>H.264 · GOP 8</td><td class="num">1 264 КБ</td><td>17,6 · 25,9</td><td class="num">3,43 · 63 мс</td><td>19,5 · 25,1 · 1,98 · 50 мс</td></tr><tr data-v="orbit-av1-g1"><td>AV1 · GOP 1</td><td class="num">2 065 КБ</td><td>8,2 · 16,7</td><td class="num">3,11 · 67 мс</td><td>10,1 · 27,8 · 2,04 · 40 мс</td></tr><tr data-v="orbit-av1-g4"><td>AV1 · GOP 4</td><td class="num">997 КБ</td><td>16,8 · 35,2</td><td class="num">3,97 · 81 мс</td><td>15,9 · 33,9 · 2,79 · 48 мс</td></tr><tr data-v="orbit-av1-g8"><td>AV1 · GOP 8</td><td class="num">664 КБ</td><td>22 · 48</td><td class="num">5,01 · 106 мс</td><td>22,7 · 41,1 · 2,73 · 50 мс</td></tr><tr data-v="seq-avif-1280"><td>кадры AVIF 1280 ×61</td><td class="num">1 250 КБ</td><td>декод 8 · 16</td><td class="num">0 · 17 мс</td><td>декод 35 · 63 · 0 · 17 мс</td></tr><tr data-v="seq-webp-1280"><td>кадры WebP 1280 ×61</td><td class="num">1 555 КБ</td><td>декод 9 · 14</td><td class="num">0 · 17 мс</td><td>декод 61 · 82 · 0 · 18 мс</td></tr><tr data-v="seq-avif-960"><td>кадры AVIF 960 ×61</td><td class="num">855 КБ</td><td>декод 8 · 12</td><td class="num">0 · 17 мс</td><td>декод 36 · 72 · 0 · 17 мс</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">Галерея приёмов MAREA SPACE · ai-media-research, фаза 5, сессия 4 (25.09.2026) · <a href="../index.html">все приёмы</a> ·
+  ассет сгенерирован нейросетью (Kling 3, GPT Image 2.5) — метки вендора сохранены.</footer>
+
+<script type="application/json" id="scrub-manifest">{"source": "SC-03 · kling/v3 std 5 с 720p · 50 ₽ · 25.09.2026", "fps": 24, "frames_video": 121, "duration": 5.0417, "step": 2, "video": {"orbit-h264-g1": {"src": "assets/orbit-h264-g1.mp4", "codec": "h264", "gop": 1, "crf": 22, "bytes": 3248250, "type": "video/mp4; codecs=\"avc1.64001f\""}, "orbit-h264-g4": {"src": "assets/orbit-h264-g4.mp4", "codec": "h264", "gop": 4, "crf": 22, "bytes": 1700036, "type": "video/mp4; codecs=\"avc1.64001f\""}, "orbit-h264-g8": {"src": "assets/orbit-h264-g8.mp4", "codec": "h264", "gop": 8, "crf": 22, "bytes": 1294233, "type": "video/mp4; codecs=\"avc1.64001f\""}, "orbit-av1-g1": {"src": "assets/orbit-av1-g1.mp4", "codec": "av1", "gop": 1, "crf": 32, "bytes": 2114304, "type": "video/mp4; codecs=\"av01.0.05M.10\""}, "orbit-av1-g4": {"src": "assets/orbit-av1-g4.mp4", "codec": "av1", "gop": 4, "crf": 32, "bytes": 1021393, "type": "video/mp4; codecs=\"av01.0.05M.10\""}, "orbit-av1-g8": {"src": "assets/orbit-av1-g8.mp4", "codec": "av1", "gop": 8, "crf": 32, "bytes": 680313, "type": "video/mp4; codecs=\"av01.0.05M.10\""}}, "frames": {"seq-avif-1280": {"pattern": "assets/seq-avif-1280/f{i}.avif", "count": 61, "format": "avif", "width": 1280, "height": 720, "bytes": 1279539}, "seq-webp-1280": {"pattern": "assets/seq-webp-1280/f{i}.webp", "count": 61, "format": "webp", "width": 1280, "height": 720, "bytes": 1592746}, "seq-avif-960": {"pattern": "assets/seq-avif-960/f{i}.avif", "count": 61, "format": "avif", "width": 960, "height": 540, "bytes": 875967}}}</script>
+<script>
+  // кольцо-курсор: мягко догоняет указатель (только точный указатель и без reduce)
+  (function () {
+    var ring = document.querySelector('.ring');
+    if (!matchMedia('(hover: hover) and (pointer: fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var x = -100, y = -100, cx = -100, cy = -100, raf = 0;
+    var step = function () { cx += (x - cx) * 0.22; cy += (y - cy) * 0.22; ring.style.setProperty('--cx', cx.toFixed(1) + 'px');
+      ring.style.setProperty('--cy', cy.toFixed(1) + 'px'); raf = Math.abs(x - cx) + Math.abs(y - cy) > 0.3 ? requestAnimationFrame(step) : 0; };
+    addEventListener('pointermove', function (e) { if (e.pointerType !== 'mouse') return; x = e.clientX; y = e.clientY; if (!raf) raf = requestAnimationFrame(step); }, {passive: true});
+  })();
+  // счётчик «extra» из HUD-а скрипта
+  (function () { var el = document.querySelector('[data-scrub-hud-extra]'); var hud = document.querySelector('[data-scrub-hud]');
+    var b = document.createElement('b'); b.dataset.k = 'extra'; b.hidden = true; hud.appendChild(b);
+    setInterval(function () { el.textContent = b.textContent || '—'; }, 400); })();
+</script>
+<script src="../js/scrub.js"></script>
+</body>
+</html>

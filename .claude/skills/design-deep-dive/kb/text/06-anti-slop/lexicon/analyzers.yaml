@@ -1,0 +1,146 @@
+# Анализаторы без регулярных выражений: объявления для copy_lint.py (id, маркер, сообщение, правка, источник).
+# Пороги — в 06-anti-slop/profiles.yaml (стартовые, provisional: true) и в 03-corpus-measured/thresholds.yaml (D).
+# Уровень здесь — справочный: фактический уровень задаёт профиль жанра (analyzers.<имя>.level).
+date: 2026-09-24
+version: 1
+owner: C (волна 1)
+defaults:
+  kind: analyzer
+  lang: any
+  group: STR
+  date: 2026-09-24
+rules:
+  - id: an-marker-density
+    marker_id: COPY-M-STR-11
+    level: warning
+    count_as_marker: false
+    message: "Плотность маркеров слопа на 100 слов выше порога жанра: править кластерами, начиная с семей с наибольшим числом находок."
+    replacement: "удалить → заменить фактом → переписать проще; не заменять синонимом"
+    source: "humanizer-ru scripts/lint.py (вердикт по сумме находок); Kobak и др. 2025 (плотность, а не вхождение); WP:AISIGNS «AI vocabulary»: «lots of them, lots of times»"
+    evidence: "[практика] + [исследование]; пороги [не проверено] до замера D"
+    threshold_ref: "03-corpus-measured/thresholds.yaml#genres.<жанр>.analyzers.marker_density"
+  - id: an-rhythm-monotone
+    marker_id: COPY-M-STR-06
+    level: warning
+    count_as_marker: false
+    message: "Монотонный ритм: соседние предложения почти одной длины."
+    replacement: "после длинного периода — короткая фраза; разбить одно длинное, склеить два коротких по смыслу"
+    examples: {bad: "12 предложений по 7–9 слов подряд", good: "фраза на 30 слов, затем на 5"}
+    source: "гайд заказчика §D (средняя разница ≥ 6, < 4 — монотонно); humanizer-ru lint.py (mean_diff < 4, ≥ 8 предложений)"
+    evidence: "[практика]; перенос на лендинг — только проза блоков [мнение]"
+    threshold_ref: "thresholds.yaml#genres.<жанр>.analyzers.rhythm"
+  - id: an-rhythm-no-short
+    marker_id: COPY-M-STR-06
+    level: warning
+    count_as_marker: false
+    message: "В прозе нет ни одного предложения короче 9 слов."
+    replacement: "дать одну короткую фразу там, где нужен акцент (не в каждом абзаце — это сверхкоррекция)"
+    source: "гайд заказчика §E п.20; humanizer-ru lint.py (≥ 10 предложений и ни одного ≤ 8)"
+    evidence: "[практика]"
+    threshold_ref: "thresholds.yaml#genres.<жанр>.analyzers.rhythm"
+  - id: an-paragraphs-uniform
+    marker_id: COPY-M-STR-07
+    level: info
+    count_as_marker: false
+    message: "Абзацы прозы одинаковой длины («под копирку»). Для карточек и пунктов это норма раскладки — анализатор считает только прозу."
+    replacement: "переставить или слить абзацы по смыслу; один абзац — сравнение или возражение"
+    source: "гайд заказчика §D (разброс ≥ 40 %, < 25 % — под копирку); humanizer-ru lint.py (CV < 0,25 при ≥ 5 абзацах)"
+    evidence: "[практика]"
+    threshold_ref: "thresholds.yaml#genres.<жанр>.analyzers.paragraph_uniformity"
+  - id: an-dash-density
+    marker_id: COPY-M-PUN-01
+    level: warning
+    count_as_marker: false
+    message: "Тире в прозе чаще порога жанра. Не заменять дефисом и не выбрасывать обязательные: перестроить часть фраз (глагол-связка, «не», сравнительный союз, точка, запятая с придаточным)."
+    replacement: "гайд заказчика §C, приёмы 1–10; обязательное тире оставить"
+    source: "гайд заказчика §C; impeccable em-dash-overuse (≥ 8 и ≥ 1 на 500 знаков, advisory); Gesso --marketing (em dash — «defensible choice» в лонгриде); The Economist 2026-07-30 через WP:AISIGNS (из моделей чаще профессионалов тире ставит только Claude)"
+    evidence: "[спорно]: для русского тире местами обязательно; порог [не проверено] до замера D"
+    threshold_ref: "thresholds.yaml#genres.<жанр>.analyzers.dash_density"
+  - id: an-low-concreteness
+    marker_id: COPY-M-CNT-01
+    level: info
+    count_as_marker: false
+    message: "Мало конкретики в прозе: чисел, дат, имён, названий на 100 слов меньше порога."
+    replacement: "оценку заменить характеристикой из facts.yaml («быстро» → «за 15 минут»); нет факта — удалить оценку"
+    source: "гайд заказчика §C, §D; AINL-Eval 2025 (в человеческих аннотациях цифр в 10 раз больше, чем в сгенерированных); Russell и др. 2025 (эксперты: у людей много конкретных проверяемых утверждений)"
+    evidence: "[исследование] для научного жанра; для маркетинга [не проверено] до замера D"
+    threshold_ref: "thresholds.yaml#genres.<жанр>.analyzers.concreteness"
+  - id: an-verb-repeat
+    marker_id: COPY-M-SYN-12
+    level: info
+    count_as_marker: true
+    message: "Один глагол в соседних предложениях («X позволяет… Y позволяет…»)."
+    replacement: "второй глагол подобрать к своему подлежащему; намеренная анафора для ритма — не трогать"
+    examples: {bad: "Сервис позволяет считать. Отчёт позволяет сравнивать.", good: "Сервис считает. Отчёт показывает разницу."}
+    source: "гайд заказчика §E п.18; humanizer-ru паттерн 33 (слепой тест Tangem 2026 — [кейс])"
+    evidence: "[практика]"
+  - id: an-overcorrection
+    marker_id: COPY-M-TON-10
+    level: warning
+    count_as_marker: false
+    message: "Сверхкоррекция: нарочитая рваность, ноль связок, разговорные вставки при чистой грамматике — след хуманайзера."
+    replacement: "вернуть связки и нормальные предложения; рваность — точечно, в 1–2 местах, где нужен акцент"
+    source: "гайд заказчика §F «Предупреждение о сверхкоррекции»; humanizer-ru SKILL.md detect-режим п.4, v1.7; Russell и др. 2025 (гуманизация не убирает подпись)"
+    evidence: "[практика]; пороги калиброваны на 5 абзацах ai-self (99-raw/experiments/C/04-overcorrection) [проверено]"
+    threshold_ref: "thresholds.yaml#genres.<жанр>.analyzers.overcorrection"
+  - id: an-not-x-but-y-density
+    marker_id: COPY-M-SYN-03
+    level: info
+    count_as_marker: false
+    message: "Частые «не X, а Y»: противопоставление стало тиком."
+    replacement: "оставить одно, где контраст — суть позиционирования; остальные — прямым утверждением"
+    source: "гайд заказчика Б2; WP:AISIGNS «Negative parallelisms»; Gesso not-x-but-y-cadence (FLAG); impeccable aphoristic-cadence (≥ 3)"
+    evidence: "[консенсус] как примета; порог [не проверено]"
+    threshold_ref: "thresholds.yaml#genres.<жанр>.analyzers.not_x_but_y"
+  - id: an-question-density
+    marker_id: COPY-M-SYN-07
+    level: info
+    count_as_marker: false
+    message: "Много вопросов вне FAQ: риторические вопросы подменяют утверждения."
+    replacement: "вопрос оставить там, где это голос клиента или заголовок FAQ; остальное — ответом"
+    source: "гайд заказчика Б2; humanizer-ru (жёсткий запрет — для эссе); ux 07/06 §6.2 (вопрос законен в интерфейсе)"
+    evidence: "[практика]; порог [не проверено]"
+    threshold_ref: "thresholds.yaml#genres.<жанр>.analyzers.questions"
+  - id: an-triad-density
+    marker_id: COPY-M-SYN-04
+    level: info
+    count_as_marker: false
+    message: "Много троек однородных членов («X, Y и Z»)."
+    replacement: "тройку сократить до одного точного слова или расширить фактом; не заменять новой тройкой"
+    source: "гайд заказчика Б2, §E п.14; WP:AISIGNS «Rule of three»; Russell и др. 2025"
+    evidence: "[консенсус]; порог [не проверено]"
+    threshold_ref: "thresholds.yaml#genres.<жанр>.analyzers.triads"
+  - id: an-exclamation-density
+    marker_id: COPY-M-PUN-10
+    level: info
+    count_as_marker: false
+    message: "Много восклицаний."
+    replacement: "восклицание — только в реплике голоса бренда, не в заголовках и не в каждом абзаце"
+    source: "ux 07/06 §1 («!» в конце маркетинговой фразы — предупреждение); Hallmark copy.md (без «!» в ошибках)"
+    evidence: "[практика]; порог [не проверено]"
+    threshold_ref: "thresholds.yaml#genres.<жанр>.analyzers.exclamations"
+  - id: an-eyebrow-rate
+    marker_id: COPY-M-STR-10
+    level: warning
+    count_as_marker: false
+    message: "Надзаголовок чаще, чем у каждой третьей секции."
+    replacement: "оставить надзаголовок только там, где он несёт информацию (категория, дата, этап); остальные удалить"
+    source: "PLAN.md поправка к ux 07/06 §5.3 и AC-TXT-13; taste EYEBROW RESTRAINT (≤ 1 на 3 секции); ui 11/04 маркер 30; kimi 05/03 (эйбрау над H2 ≈ 12/15 работ K3)"
+    evidence: "[практика] + [проверено kimi E/03]"
+  - id: an-lists-of-three
+    marker_id: COPY-M-STR-08
+    level: info
+    count_as_marker: false
+    message: "Все списки ровно по три пункта."
+    replacement: "длина списка — по содержанию; одинаковые три карточки фич — норма раскладки, но не всех списков"
+    source: "гайд заказчика Б4; humanizer-ru lint.py (≥ 2 списков, все по 3)"
+    evidence: "[практика]"
+  - id: an-number-without-fact
+    marker_id: COPY-M-CNT-02
+    level: warning
+    group: CNT
+    count_as_marker: false
+    message: "Число, рейтинг или соцдоказательство без ссылки на факт."
+    replacement: "в copy deck — fact_ids на запись facts.yaml; нет записи — [PLACEHOLDER] и строка в missing"
+    source: "PLAN.md риск 3 и поправка к ux 07/06 §5.2 / AC-TXT-02; kimi facts.md (never_claim); эталон провала «Кварц» (kimi F/03)"
+    evidence: "[практика]; проверка — claims_check.py (B2), линтер только сигналит"

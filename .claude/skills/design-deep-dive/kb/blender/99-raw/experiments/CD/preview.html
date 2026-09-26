@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>CD · кадр сцены «Звено» v2 / v3 по флагам</title>
+<style>
+  html, body { margin: 0; background: radial-gradient(120% 90% at 70% 40%, #1d2026 0%, #111316 60%, #0d0f12 100%); }
+  canvas { display: block; }
+  @font-face { font-family: "Science Gothic"; font-weight: 100 900; font-stretch: 50% 200%; src: url(../../../15-showcase/zveno/a-code/_shared/fonts/science-gothic/science-gothic-cyrillic-wdth-normal.woff2) format("woff2"); unicode-range: U+0400-045F; }
+  @font-face { font-family: "Science Gothic"; font-weight: 100 900; font-stretch: 50% 200%; src: url(../../../15-showcase/zveno/a-code/_shared/fonts/science-gothic/science-gothic-latin-wdth-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F; }
+</style></head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+// ?mask=1 — маска объекта вместо кадра (только v3) · ?b=v2|v3 &phase=story|scan &t= &w= &h= &mobile=0|1 &q=high|low &f=all|none|studio,world|-ao &px= &py= (указатель −1…1, IK) &dpr= &msaa=
+// v2 — бандл J2 (собран здесь же на three 0.186.0, байт в байт равен бандлу l2-zveno на 0.186.1), v3 — бандл страницы a-code.
+const q = new URLSearchParams(location.search);
+const B = { v2: './v2-ref/three-scene-v2-0.186.0.js', v3: '../../../15-showcase/zveno/a-code/js/three-scene.js', v3p1: './v3p1-ref/three-scene.js', c3: './c3/three-scene.js', c3g: './c3-glb/three-scene.js', c: '../../../15-showcase/zveno/c-hybrid/js/three-scene.js' };   // c — страница C (Z2), собранная build.sh --glb   // v3p1 — бандл фазы 1 (20:04); c3 — _shared/code3d; c3g — он же с крюком GLB (--glb)
+const ALL = ['studio', 'ik', 'world', 'ao', 'fx', 'detail', 'texture'];
+function flags(s) {
+  if (!s || s === 'all') return undefined;
+  if (s === 'none') return Object.fromEntries(ALL.map((k) => [k, false]));
+  const parts = s.split(',');
+  if (parts.every((p) => p.startsWith('-'))) return Object.fromEntries(ALL.map((k) => [k, !parts.includes('-' + k)]));
+  return Object.fromEntries(ALL.map((k) => [k, parts.includes(k)]));
+}
+try { await Promise.race([Promise.all([document.fonts.load('800 64px "Science Gothic"', 'ЗВЕНО J1'), document.fonts.load('700 64px "Science Gothic"', 'J1')]), new Promise((r) => setTimeout(r, 1500))]); } catch (e) {}
+const { createScene } = await import(B[q.get('b') || 'v3']);
+const w = +q.get('w') || 1440, h = +q.get('h') || 900, mobile = q.get('mobile') === '1';
+const c = document.getElementById('c');
+c.style.width = w + 'px'; c.style.height = h + 'px';
+const t0 = performance.now();
+const glb = q.get('glb') ? { url: q.get('glb'), only: q.get('glbOnly') ? q.get('glbOnly').split(',') : undefined, materials: q.get('glbMat') || 'glb',
+  map: q.get('glbMap') ? Object.fromEntries(q.get('glbMap').split(',').map((p) => p.split(':'))) : undefined, ao: q.get('glbAo') === '1' } : undefined;
+// ?lk=ringFlash:0.5,ik.plane:0 — переопределить параметры «вида» (подбор доводки)
+const lk = q.get('lk') ? q.get('lk').split(',').reduce((o, p) => { const [k, v] = p.split(':'); const [a, b] = k.split('.'); const val = isNaN(+v) ? (v === 'true' ? true : v === 'false' ? false : v) : +v;
+  if (b) { o[a] = o[a] || {}; o[a][b] = val; } else o[a] = val; return o; }, {}) : undefined;
+const s = createScene(c, { dprMax: +q.get('dpr') || 1, preserve: true, quality: q.get('q') || (mobile ? 'low' : 'high'),
+  flags: flags(q.get('f')), msaa: q.has('msaa') ? +q.get('msaa') : undefined, look: q.get('look') || undefined, glb, lk });
+if (s.ready) await s.ready;
+s.resize(w, h, mobile);
+if (q.get('ikb') && s.ikBounds) { const [bx, by] = q.get('ikb').split(',').map(Number); s.ikBounds(bx, by); }   // граница текста, как у страницы
+s.set(q.get('phase') || 'story', +q.get('t') || 0, true);
+s.renderNow();
+if (q.get('demo') === 'ik' && q.get('path')) {                // CD3: рука ведётся указателем по дуге настоящими кадрами (след, IK) — кадр в движении
+  const [x0, y0, x1, y1] = q.get('path').split(',').map(Number), ms = +q.get('ms') || 520, sleep = (m) => new Promise((r) => setTimeout(r, m));
+  s.pointer(x0, y0); s.renderNow(); await sleep(700);
+  const t1 = performance.now();
+  await new Promise((res) => { (function step() { const u = Math.min(1, (performance.now() - t1) / ms);
+    s.pointer(x0 + (x1 - x0) * u, y0 + (y1 - y0) * u - 0.18 * Math.sin(Math.PI * u)); if (u < 1) requestAnimationFrame(step); else res(); })(); });
+  await sleep(+q.get('hold') || 90); s.stop();
+} else if (q.has('px')) { s.pointer(+q.get('px'), +q.get('py') || 0); s.renderNow(); s.renderNow(); }
+else s.renderNow();
+if (q.get('mask') === '1' && s.mask) s.mask();                 // маска объекта (белое на чёрном) для img_metrics --mask
+else if (q.get('mask') && s.mask) s.mask(q.get('mask'));       // ?mask=ring|cap|shell — маска одной роли материала (замер цвета)
+const gl = s.renderer.getContext();
+const px = new Uint8Array(4); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+window.__stats = { ...s.stats(), flags: s.flags || null, init_ms: Math.round(performance.now() - t0), gpu: dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : null };
+window.__done = true;
+</script>
+</body></html>

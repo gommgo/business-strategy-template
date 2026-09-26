@@ -1,0 +1,144 @@
+# English lexicon (group LEX): AI-vocabulary by era, copula avoidance, puffery, vague attribution, intro clichés.
+# Sources: WP:Signs of AI writing (oldid 1376434705, 2026-09-24) — «AI vocabulary» by era, Juzek & Ward 2025, Kobak et
+# al. 2025 (Science Advances 11(27); 291 rare excess style words of 2024, Figure S6), Russell et al. 2025 (ACL; expert
+# guidebook, Table 12), Reinhart et al. 2025 (PNAS); ux 07/06 §4.1–4.2 (interface words — inherited in ux-07-06.yaml).
+# WP caveat: «a word being overused by AI does not imply that its synonyms are also overused»; one or two words may be
+# coincidental — density and clusters matter (min_count, marker density analyzer).
+date: 2026-09-24
+version: 1
+owner: C (волна 1)
+defaults:
+  group: LEX
+  lang: en
+  flags: i
+  count_as_marker: true
+  date: 2026-09-24
+  genres: [landing, site-page, article, meta, geo, email-form]
+rules:
+  - id: en-lex-copula-avoidance
+    marker_id: COPY-M-LEX-01
+    level: warning
+    pattern: '\b(?:serves|served|serving|stands|stood|functions|acts)\s+as\s+(?:a|an|the)\b|\bboasts?\s+(?:a|an|the|over|more|some)\b|\brepresents\s+a\s+(?:shift|milestone|turning\s+point|new\s+era|leap)\b|\bmarks\s+a\s+(?:shift|milestone|turning\s+point|new\s+era|new\s+chapter)\b'
+    message: "Copula avoidance: «serves as», «stands as», «boasts» instead of «is» / «has»."
+    replacement: "use «is» / «has»: «serves as a hub» → «is a hub»"
+    examples: {bad: "The platform serves as a hub and boasts a clean interface.", good: "The platform is a hub with a clean interface."}
+    source: "WP:AISIGNS «Avoidance of basic copulatives» (−10 % is/are in 2023 academic writing, Geng & Trotta); humanizer-ru п.3"
+    evidence: "[исследование] для академического EN; для маркетинга [практика]"
+  - id: en-lex-ai-vocab-strong
+    marker_id: COPY-M-LEX-11
+    level: warning
+    pattern: '\b(?:delv(?:e|es|ed|ing)|tapestry|testament\s+to|underscor(?:e|es|ed|ing)|intricate|intricacies|interplay|meticulous(?:ly)?|bolster(?:s|ed|ing)?|garner(?:s|ed|ing)?|realm|embark(?:s|ed|ing)?\s+on|a\s+myriad\s+of|plethora|ever-evolving)\b'
+    message: "High-signal AI vocabulary (GPT-4 era): delve, tapestry, testament, underscore, intricate, realm, myriad."
+    replacement: "delete or say the plain thing; do not swap for a synonym from the same list"
+    examples: {bad: "Let us delve into the intricate tapestry of modern logistics.", good: "We ship 1,200 parcels a day from two warehouses."}
+    source: "WP:AISIGNS «AI vocabulary» (2023–mid-2024); Kobak et al. 2025 (delves r = 28.0, underscores r = 13.8); Juzek & Ward 2025; Russell et al. 2025 Table 12"
+    evidence: "[исследование] (научные тексты) + [консенсус]"
+  - id: en-lex-ai-vocab-common
+    marker_id: COPY-M-LEX-11
+    level: info
+    min_count: 3
+    pattern: '\b(?:crucial|pivotal|vibrant|showcas(?:e|es|ed|ing)|foster(?:s|ed|ing)?|align(?:s|ed)?\s+with|resonat(?:e|es|ed|ing)\s+with|multifaceted|nuanced|paramount|invaluable|noteworthy|commendable|comprehensive|enhanc(?:e|es|ed|ing)|highlight(?:s|ing)|emphasiz(?:e|es|ed|ing)|navigat(?:e|es|ing)\s+the\s+(?:complexities|challenges|landscape|world))\b'
+    message: "Cluster of common AI-vocabulary words (three or more in a block; GPT-4o and GPT-5 era)."
+    replacement: "cut most of them; keep a word only where it carries a specific meaning"
+    examples: {bad: "A comprehensive guide that showcases crucial ways to enhance and foster growth.", good: "A 12-page guide to pricing a bakery."}
+    source: "WP:AISIGNS AI vocabulary (mid-2024–mid-2025: align with, enhance, fostering, highlighting, pivotal, showcasing; mid-2025+: emphasizing, enhance, highlighting, showcasing); Kobak et al. 2025 common set (crucial, comprehensive, enhancing, notably…)"
+    evidence: "[исследование] корпусное; для одного текста — кластер, не вхождение"
+  - id: en-lex-kobak-2024
+    marker_id: COPY-M-LEX-11
+    level: info
+    min_count: 4
+    count_as_marker: false
+    kind: words
+    words: [accentuates, acknowledges, acknowledging, addresses, adept, adhered, adhering, advancement, advancements, advancing, advocates, advocating, affirming, afflicted, aiding, akin, align, aligning, aligns, alongside, amidst, assessments, attains, attributed, augmenting, avenue, avenues, bolster, bolstered, bolstering, broader, burgeoning, capabilities, capitalizing, categorized, categorizes, categorizing, combating, commendable, compelling, complicates, complicating, comprehending, comprising, consequently, consolidates, contributing, conversely, correlating, crafted, crafting, culminating, customizing, delineates, delve, delved, delves, delving, demonstrating, dependability, dependable, detailing, detrimentally, diminishes, diminishing, discern, discerned, discernible, discerning, displaying, disrupts, distinctions, distinctive, elevate, elevates, elevating, elucidate, elucidates, elucidating, embracing, emerges, emphasises, emphasising, emphasize, emphasizes, emphasizing, employing, employs, empowers, emulating, emulation, enabling, encapsulates, encompass, encompassed, encompasses, encompassing, endeavors, endeavours, enduring, enhancements, enhances, ensuring, equipping, escalating, evaluates, evolving, exacerbating, examines, exceeding, excels, exceptional, exceptionally, exerting, exhibiting, exhibits, expedite, expediting, exploration, explores, facilitated, facilitates, facilitating, featuring, formidable, fostering, fosters, foundational, furnish, garnered, garnering, gauged, grappling, groundbreaking, groundwork, harness, harnesses, harnessing, heighten, heightened, hinder, hinges, hinting, hold, holds, illuminates, illuminating, imbalances, impacting, impede, impeding, imperative, impressive, inadequately, incorporates, incorporating, influencing, inherent, initially, innovative, inquiries, integrates, integrating, integration, interconnectedness, interplay, intricacies, intricate, intricately, introduces, invaluable, investigates, involves, juxtaposed, leverages, leveraging, maintaining, merges, methodologies, meticulous, meticulously, multifaceted, necessitate, necessitates, necessitating, necessity, notable, noteworthy, nuanced, nuances, offering, optimizing, orchestrating, outlines, overlook, overlooking, paving, persist, pinpoint, pinpointed, pinpointing, pioneering, pioneers, pivotal, poised, pose, posed, poses, posing, predominantly, preserving, pressing, promise, pronounced, propelling, realm, realms, recognizing, refine, refines, refining, remarkable, renowned, revealing, reveals, revolutionize, revolutionizing, revolves, scrutinize, scrutinized, scrutinizing, seamless, seamlessly, seeks, serves, serving, shaping, shedding, showcased, showcases, showcasing, signifying, solidify, spanned, spanning, spurred, stands, stemming, strategically, streamline, streamlined, streamlines, streamlining, struggle, substantiated, substantiates, surged, surmount, surpass, surpassed, surpasses, surpassing, swift, swiftly, thorough, transformative, typically, ultimately, uncharted, uncovering, underexplored, underscore, underscored, underscores, underscoring, unexplored, unlocking, unparalleled, unraveling, unveil, unveiled, unveiling, unveils, uphold, upholding, urging, utilizes, varying, versatility, warranting, yielding]
+    message: "Four or more words from the 2024 excess-style-vocabulary list (Kobak et al. 2025, 291 words): corpus-level signal of LLM editing."
+    replacement: "treat as a hint to reread the block; the list is from biomedical abstracts — do not edit word by word"
+    examples: {bad: "We meticulously delve into intricate avenues, underscoring pivotal insights.", good: "We interviewed 40 clinic owners in March."}
+    source: "Kobak, González-Márquez, Horvát, Lause. Science Advances 11(27), 2025; arXiv 2406.07016 Figure S6 (данные статьи; github.com/berenslab/llm-excess-vocab)"
+    evidence: "[исследование]; жанр — биомедицинские аннотации, перенос на маркетинг [спорно]"
+  - id: en-lex-empty-adjectives
+    marker_id: COPY-M-LEX-02
+    level: warning
+    unless: '\d'
+    pattern: '\b(?:innovative|revolutionary|groundbreaking|unparalleled|unrivall?ed|unmatched|exceptional|premier|top-notch|holistic|transformative|robust|powerful|intuitive|dynamic)\b'
+    message: "Empty evaluative adjective with no number or fact nearby."
+    replacement: "replace with a characteristic: «powerful analytics» → «reports for 40 stores in one view»"
+    examples: {bad: "An innovative, powerful and intuitive platform.", good: "Payroll for 40 staff in ten minutes."}
+    source: "ux 07/06 §4.1 (Powerful, Seamless, Intuitive, Robust — interface ban); Hallmark copy.md; WP:AISIGNS «Promotional language»"
+    evidence: "[консенсус]"
+  - id: en-lex-significance
+    marker_id: COPY-M-LEX-06
+    level: warning
+    pattern: '\b(?:plays?|played|playing)\s+a\s+(?:crucial|pivotal|vital|key|significant|central|critical|major)\s+role\b|\b(?:is|stands\s+as|serves\s+as)\s+a\s+testament\s+to\b|\bmarks?\s+a\s+(?:significant|pivotal|major)\s+(?:shift|milestone|moment|step)\b|\b(?:key|pivotal)\s+turning\s+point\b|\bsetting\s+the\s+stage\s+for\b|\bpaving\s+the\s+way\s+for\b|\bindelible\s+mark\b|\bdeeply\s+rooted\b|\bleft\s+a\s+lasting\s+(?:impact|legacy|impression)\b|\ba\s+(?:new|bold)\s+era\s+of\b|\bcornerstone\s+of\b|\bat\s+the\s+forefront\s+of\b|\bevolving\s+landscape\b|\bfocal\s+point\b'
+    message: "Puffed-up significance: «plays a pivotal role», «a testament to», «paving the way»."
+    replacement: "say what would break without it, with a fact"
+    examples: {bad: "Logistics plays a pivotal role and is a testament to our commitment.", good: "If a shipment is a day late, the line stops."}
+    source: "WP:AISIGNS «Undue emphasis on significance, legacy, and broader trends»"
+    evidence: "[консенсус]"
+  - id: en-lex-vague-attribution
+    marker_id: COPY-M-LEX-07
+    level: warning
+    unless: '\d{4}|\d+\s?%'
+    pattern: '\bexperts\s+(?:say|agree|argue|believe|note|suggest)\b|\bstudies\s+(?:show|suggest|have\s+shown|indicate)\b|\bresearch\s+(?:shows|suggests|indicates|has\s+shown)\b|\bindustry\s+(?:reports|experts|insiders)\b|\bobservers\s+have\s+(?:cited|noted)\b|\bmany\s+(?:experts|people|businesses)\s+(?:believe|agree|say)\b|\bit\s+is\s+widely\s+(?:believed|accepted|recognized|known)\b|\bcritics\s+(?:argue|say)\b'
+    message: "Vague attribution: opinion credited to «experts» or «studies» without a name, year or number."
+    replacement: "name the source, year and figure from facts.yaml — or drop the claim"
+    examples: {bad: "Experts agree that remote teams are more productive.", good: "A 2024 Stanford study of 1,600 employees found hybrid work kept output flat."}
+    source: "WP:AISIGNS «Vague attributions and overgeneralization of opinions»"
+    evidence: "[консенсус]"
+  - id: en-lex-intensifiers
+    marker_id: COPY-M-LEX-08
+    level: info
+    min_count: 2
+    pattern: '\b(?:very|really|truly|incredibly|extremely|absolutely|genuinely|highly|remarkably|exceptionally|utterly)\b'
+    message: "Intensifiers (two or more in a block)."
+    replacement: "delete and check the meaning survives"
+    examples: {bad: "It is truly incredibly easy and absolutely safe.", good: "The card works offline."}
+    source: "ux 07/06 §4.2 (very, quite, really, extremely); WP:AISIGNS (hedges and intensifiers are more common in human text — hence info and clusters only)"
+    evidence: "[спорно]"
+  - id: en-lex-intro-cliche
+    marker_id: COPY-M-LEX-05
+    level: warning
+    slot_levels: {headline: error, subheadline: error, meta-title: error, meta-description: error, og-title: error, og-description: error, article-lead: error, email-subject: error}
+    pattern: '\bin\s+today[''’]s\s+(?:fast-paced\s+|digital\s+|modern\s+|ever-changing\s+|ever-evolving\s+|competitive\s+|interconnected\s+|data-driven\s+)*(?:world|landscape|era|age|environment|market|business\s+environment)\b|\bin\s+an\s+(?:era|age|world)\s+(?:of|where)\b|\bin\s+the\s+(?:modern|digital)\s+(?:age|era|world)\b|\bnow\s+more\s+than\s+ever\b|\bit[''’]s\s+no\s+secret\s+that\b|\bit\s+goes\s+without\s+saying\b|\bas\s+we\s+all\s+know\b|\bwhen\s+it\s+comes\s+to\b|\bin\s+a\s+world\s+(?:where|of)\b'
+    message: "Intro cliché: «In today's fast-paced world», «In an era of», «When it comes to»."
+    replacement: "open with a specific situation, number or observation"
+    examples: {bad: "In today's fast-paced digital world, every business needs speed.", good: "Last year 214 coffee shops opened in Austin."}
+    source: "Hallmark copy.md «In today's digital landscape»; Russell et al. 2025 Table 12 (in a world of/where, when it comes to)"
+    evidence: "[консенсус]"
+  - id: en-lex-pseudo-depth
+    marker_id: COPY-M-LEX-09
+    level: warning
+    pattern: '\bat\s+its\s+core\b|\bthe\s+real\s+question\s+is\b|\bwhat\s+(?:most\s+people|everyone|many)\s+(?:miss|misses|get\s+wrong|overlook)\b|\bhere[''’]s\s+the\s+(?:thing|truth|kicker|catch)\b|\bthe\s+truth\s+is\b|\bthe\s+reality\s+is\b|\bat\s+the\s+end\s+of\s+the\s+day\b|\bwhat\s+nobody\s+tells\s+you\b'
+    message: "Pseudo-depth and faux-insight setups."
+    replacement: "drop the setup; let the statement stand alone"
+    examples: {bad: "Here's the thing: at its core, distribution wins.", good: "Distribution decides: 70% of our sales come from partners."}
+    source: "humanizer-ru п.25 (faux-insight setups); Russell et al. 2025 guidebook"
+    evidence: "[практика]"
+  - id: en-lex-promo-epithets
+    marker_id: COPY-M-LEX-13
+    level: warning
+    pattern: '\bbreathtaking\b|\bstunning\b|\bnestled\b|\bin\s+the\s+heart\s+of\b|\bboasts\b|\bsecond\s+to\s+none\b|\bexquisite\b|\bunforgettable\b|\bmust-see\b|\brich\s+(?:history|heritage|tapestry|culture)\b|\bvibrant\s+(?:community|culture|city|atmosphere|neighborhood)\b|\bhidden\s+gem\b|\bone-of-a-kind\b'
+    message: "Travel-guide and press-release epithets: «nestled in the heart of», «breathtaking», «rich heritage»."
+    replacement: "concrete detail: «nestled in the heart of downtown» → «on 5th and Pine, two minutes from the station»"
+    examples: {bad: "Nestled in the heart of the city, our cozy café offers an unforgettable experience.", good: "Our café is on 5th and Pine: 30 seats, open till 10 pm."}
+    source: "WP:AISIGNS «Promotional and advertisement-like language» (boasts, vibrant, rich, nestled, in the heart of, groundbreaking, renowned)"
+    evidence: "[консенсус]"
+  - id: en-lex-simple-words
+    marker_id: COPY-M-LEX-04
+    level: info
+    min_count: 2
+    pattern: '\butili[sz](?:e|es|ed|ing|ation)\b|\bfacilitat(?:e|es|ed|ing)\b|\bin\s+order\s+to\b|\bmake\s+use\s+of\b|\bcommenc(?:e|es|ed|ing)\b|\bendeavou?rs?\b|\bprior\s+to\b|\ba\s+(?:wide|broad)\s+(?:range|array|variety)\s+of\b|\bnumerous\b|\bin\s+terms\s+of\b|\bwith\s+regard\s+to\b'
+    message: "Stiff words where plain ones work (two or more in a block): utilize, facilitate, in order to, a wide range of."
+    replacement: "use, help, to, many"
+    examples: {bad: "We utilize a wide range of tools in order to facilitate growth.", good: "We use 12 tools to help you grow."}
+    source: "ux 07/06 §4.2 (Microsoft simple words); WP:AISIGNS «Signs of human writing» (used vs utilized)"
+    evidence: "[практика]"
+  - id: en-lex-vague-connection
+    marker_id: COPY-M-LEX-07
+    level: info
+    min_count: 2
+    pattern: '\b(?:in\s+connection\s+with|associated\s+with|connected\s+(?:with|to)|in\s+association\s+with)\b'
+    message: "Vague connection instead of a direct relation (two or more in a block)."
+    replacement: "state the relation: «associated with leadership of ExampleCorp» → «was CEO of ExampleCorp»"
+    examples: {bad: "She is associated with the brand and connected with its growth.", good: "She was CEO of the brand from 2019 to 2024."}
+    source: "WP:AISIGNS «Vague expression of connection or association»"
+    evidence: "[практика]"

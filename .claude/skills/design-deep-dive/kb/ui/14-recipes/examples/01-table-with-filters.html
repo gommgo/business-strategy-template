@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Заказы — таблица с фильтрами</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="shell">
+  <div class="brand"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>Логистика</div>
+  <div class="topbar">
+    <div class="select-wrap">
+      <input class="input" type="search" placeholder="Поиск по номеру" aria-label="Поиск" style="width:var(--scale-280)">
+    </div>
+    <span class="spacer"></span>
+    <button class="btn btn--ghost btn--icon" type="button" aria-label="Уведомления"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+    <span class="avatar" aria-hidden="true">АК</span>
+  </div>
+  <nav class="sidebar" aria-label="Разделы">
+      <div class="nav-group">Работа</div>
+      <a class="nav-item" href="#" aria-current="page"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>Заказы</a>
+      <a class="nav-item" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+      <a class="nav-item" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M17 11a3 3 0 1 0 0-6M19 20a5 5 0 0 0-3-4.6"/></svg>Клиенты</a>
+      <div class="nav-group">Система</div>
+      <a class="nav-item" href="#"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/></svg>Настройки</a>
+  </nav>
+  <main>
+    <div class="page-header">
+      <nav class="crumbs" aria-label="Хлебные крошки"><a href="#">Работа</a><span aria-hidden="true">/</span><span>Заказы</span></nav>
+      <div class="page-title-row">
+        <h1>Заказы</h1>
+        <button class="btn btn--default" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4"/></svg>Фильтры</button>
+        <button class="btn btn--primary" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Создать заказ</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="select-wrap">
+        <select class="select" aria-label="Статус"><option>Все статусы</option><option>Доставлен</option><option>В пути</option></select>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <div class="select-wrap">
+        <select class="select" aria-label="Город"><option>Все города</option><option>Москва</option><option>Казань</option></select>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <label class="check"><input type="checkbox"> Только просроченные</label>
+      <span class="spacer"></span>
+      <span class="hint">Период: сентябрь 2026</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-check"><label class="check"><input type="checkbox" aria-label="Выбрать все"></label></th>
+            <th>Номер</th><th>Клиент</th><th>Город</th><th>Статус</th>
+            <th class="num">Сумма, ₽</th><th class="num">Дата</th><th class="col-actions"><span class="hint">Ещё</span></th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td class="col-check"><label class="check"><input type="checkbox" aria-label="Выбрать ЗК-10241"></label></td>
+          <td class="cell-strong">ЗК-10241</td>
+          <td>ООО «Северный путь»</td>
+          <td>Москва</td>
+          <td><span class="badge badge--success">Доставлен</span></td>
+          <td class="num">12 480,00</td>
+          <td class="num">22.09.2026</td>
+          <td class="col-actions"><button class="btn btn--ghost btn--icon" type="button" aria-label="Действия для ЗК-10241"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+        </tr>
+        <tr aria-selected="true">
+          <td class="col-check"><label class="check"><input type="checkbox" aria-label="Выбрать ЗК-10240"></label></td>
+          <td class="cell-strong">ЗК-10240</td>
+          <td>ИП Ковалёв А. С.</td>
+          <td>Казань</td>
+          <td><span class="badge badge--warning">В пути</span></td>
+          <td class="num">4 950,00</td>
+          <td class="num">22.09.2026</td>
+          <td class="col-actions"><button class="btn btn--ghost btn--icon" type="button" aria-label="Действия для ЗК-10240"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+        </tr>
+        <tr>
+          <td class="col-check"><label class="check"><input type="checkbox" aria-label="Выбрать ЗК-10239"></label></td>
+          <td class="cell-strong">ЗК-10239</td>
+          <td>АО «Термопласт»</td>
+          <td>Пермь</td>
+          <td><span class="badge badge--neutral">Собирается</span></td>
+          <td class="num">31 200,50</td>
+          <td class="num">21.09.2026</td>
+          <td class="col-actions"><button class="btn btn--ghost btn--icon" type="button" aria-label="Действия для ЗК-10239"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+        </tr>
+        <tr>
+          <td class="col-check"><label class="check"><input type="checkbox" aria-label="Выбрать ЗК-10238"></label></td>
+          <td class="cell-strong">ЗК-10238</td>
+          <td>ООО «Гранит»</td>
+          <td>Сочи</td>
+          <td><span class="badge badge--danger">Отменён</span></td>
+          <td class="num">890,00</td>
+          <td class="num">21.09.2026</td>
+          <td class="col-actions"><button class="btn btn--ghost btn--icon" type="button" aria-label="Действия для ЗК-10238"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+        </tr>
+        <tr>
+          <td class="col-check"><label class="check"><input type="checkbox" aria-label="Выбрать ЗК-10237"></label></td>
+          <td class="cell-strong">ЗК-10237</td>
+          <td>ООО «Северный путь»</td>
+          <td>Москва</td>
+          <td><span class="badge badge--success">Доставлен</span></td>
+          <td class="num">7 640,00</td>
+          <td class="num">20.09.2026</td>
+          <td class="col-actions"><button class="btn btn--ghost btn--icon" type="button" aria-label="Действия для ЗК-10237"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+        </tr>
+        <tr>
+          <td class="col-check"><label class="check"><input type="checkbox" aria-label="Выбрать ЗК-10236"></label></td>
+          <td class="cell-strong">ЗК-10236</td>
+          <td>ИП Носова Е. В.</td>
+          <td>Омск</td>
+          <td><span class="badge badge--success">Доставлен</span></td>
+          <td class="num">2 115,40</td>
+          <td class="num">20.09.2026</td>
+          <td class="col-actions"><button class="btn btn--ghost btn--icon" type="button" aria-label="Действия для ЗК-10236"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+        </tr>
+        <tr>
+          <td class="col-check"><label class="check"><input type="checkbox" aria-label="Выбрать ЗК-10235"></label></td>
+          <td class="cell-strong">ЗК-10235</td>
+          <td>АО «Термопласт»</td>
+          <td>Пермь</td>
+          <td><span class="badge badge--warning">В пути</span></td>
+          <td class="num">18 300,00</td>
+          <td class="num">19.09.2026</td>
+          <td class="col-actions"><button class="btn btn--ghost btn--icon" type="button" aria-label="Действия для ЗК-10235"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+        </tr>
+        <tr>
+          <td class="col-check"><label class="check"><input type="checkbox" aria-label="Выбрать ЗК-10234"></label></td>
+          <td class="cell-strong">ЗК-10234</td>
+          <td>ООО «Гранит»</td>
+          <td>Сочи</td>
+          <td><span class="badge badge--neutral">Собирается</span></td>
+          <td class="num">5 070,00</td>
+          <td class="num">19.09.2026</td>
+          <td class="col-actions"><button class="btn btn--ghost btn--icon" type="button" aria-label="Действия для ЗК-10234"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+        </tr>
+        <tr>
+          <td class="col-check"><label class="check"><input type="checkbox" aria-label="Выбрать ЗК-10233"></label></td>
+          <td class="cell-strong">ЗК-10233</td>
+          <td>ООО «Белый ключ»</td>
+          <td>Тверь</td>
+          <td><span class="badge badge--success">Доставлен</span></td>
+          <td class="num">9 812,60</td>
+          <td class="num">18.09.2026</td>
+          <td class="col-actions"><button class="btn btn--ghost btn--icon" type="button" aria-label="Действия для ЗК-10233"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+        </tr>
+        <tr>
+          <td class="col-check"><label class="check"><input type="checkbox" aria-label="Выбрать ЗК-10232"></label></td>
+          <td class="cell-strong">ЗК-10232</td>
+          <td>ИП Ковалёв А. С.</td>
+          <td>Казань</td>
+          <td><span class="badge badge--success">Доставлен</span></td>
+          <td class="num">1 430,00</td>
+          <td class="num">18.09.2026</td>
+          <td class="col-actions"><button class="btn btn--ghost btn--icon" type="button" aria-label="Действия для ЗК-10232"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+        </tr>
+        <tr>
+          <td class="col-check"><label class="check"><input type="checkbox" aria-label="Выбрать ЗК-10231"></label></td>
+          <td class="cell-strong">ЗК-10231</td>
+          <td>ООО «Северный путь»</td>
+          <td>Москва</td>
+          <td><span class="badge badge--warning">В пути</span></td>
+          <td class="num">24 900,00</td>
+          <td class="num">17.09.2026</td>
+          <td class="col-actions"><button class="btn btn--ghost btn--icon" type="button" aria-label="Действия для ЗК-10231"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+        </tr>
+        <tr>
+          <td class="col-check"><label class="check"><input type="checkbox" aria-label="Выбрать ЗК-10230"></label></td>
+          <td class="cell-strong">ЗК-10230</td>
+          <td>АО «Термопласт»</td>
+          <td>Пермь</td>
+          <td><span class="badge badge--success">Доставлен</span></td>
+          <td class="num">3 205,00</td>
+          <td class="num">17.09.2026</td>
+          <td class="col-actions"><button class="btn btn--ghost btn--icon" type="button" aria-label="Действия для ЗК-10230"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></td>
+        </tr>
+        </tbody>
+      </table>
+      <div class="table-footer">
+        <span>1–12 из 340</span>
+        <span class="spacer"></span>
+        <button class="btn btn--default" type="button" disabled>Назад</button>
+        <button class="btn btn--default" type="button">Вперёд</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

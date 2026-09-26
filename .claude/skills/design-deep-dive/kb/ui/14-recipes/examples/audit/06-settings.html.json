@@ -1,0 +1,2887 @@
+{
+ "target": "14-recipes/examples/06-settings.html",
+ "preset": "admin",
+ "runs": [
+  "light/1440x900",
+  "dark/1440x900",
+  "light/1440x900/reduced"
+ ],
+ "findings": [
+  {
+   "id": "A1",
+   "group": "Отступы",
+   "rule": "Доля padding/margin/gap из шкалы",
+   "found": "100.0 %",
+   "threshold": "≥ 95 %",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "A2",
+   "group": "Отступы",
+   "rule": "Значения, кратные 5 и не кратные 4 («шкала десятками»)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "A3",
+   "group": "Отступы",
+   "rule": "Уникальных значений gap",
+   "found": 5,
+   "threshold": "≤ 6",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "2, 8, 12, 16, 24"
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "A4",
+   "group": "Отступы",
+   "rule": "Доля дробных значений отступа",
+   "found": "0.0 %",
+   "threshold": "≤ 3 %",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "A5",
+   "group": "Отступы",
+   "rule": "Уникальных значений отступа",
+   "found": 6,
+   "threshold": "≤ 15",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "2, 4, 8, 12, 16, 24"
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "A6",
+   "group": "Отступы",
+   "rule": "Внешний padding контейнера ≥ внутренних зазоров",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "B1",
+   "group": "Размеры",
+   "rule": "Уникальных высот контролов",
+   "found": 1,
+   "threshold": "≤ 3",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    "32"
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "B2",
+   "group": "Размеры",
+   "rule": "Высоты вне ряда 20.0/24.0/28.0/32.0/36.0/40.0/44.0/48.0/56.0",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "B3",
+   "group": "Размеры",
+   "rule": "Одна высота контролов в горизонтальном ряду",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "B4",
+   "group": "Размеры",
+   "rule": "Иконочные кнопки квадратные",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "B5",
+   "group": "Размеры",
+   "rule": "Размеры иконок из ряда [12, 14, 16, 20, 24]",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "B5b",
+   "group": "Размеры",
+   "rule": "Пиктограммы и иллюстрации (svg крупнее 32 px)",
+   "found": 0,
+   "threshold": "информативно",
+   "verdict": "WARN",
+   "severity": "полировка",
+   "examples": [],
+   "note": "граница классов: до 32 px иконка, 48–96 пиктограмма, от 120 иллюстрация (07-iconography-imagery/02 §4.2)",
+   "run": "light/1440x900"
+  },
+  {
+   "id": "B6",
+   "group": "Размеры",
+   "rule": "Один набор иконок (один viewBox, одна толщина штриха)",
+   "found": "viewBox: 1, stroke-width: 1",
+   "threshold": "1 / 1",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "0 0 24 24",
+    "2px"
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "B7",
+   "group": "Размеры",
+   "rule": "Строки одного списка/таблицы одной высоты",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "C1",
+   "group": "Форма",
+   "rule": "Уникальных значений border-radius",
+   "found": 3,
+   "threshold": "≤ 6",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "6, 8, 9999"
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "C2",
+   "group": "Форма",
+   "rule": "Радиусы вне шкалы",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "C3",
+   "group": "Форма",
+   "rule": "Вложенный радиус не больше внешнего",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "C4",
+   "group": "Форма",
+   "rule": "Толщины границ только 0 / 1 / 2 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "C5",
+   "group": "Форма",
+   "rule": "Радиус ≤ 25 % меньшей стороны элемента",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "D1",
+   "group": "Глубина",
+   "rule": "Уникальных значений box-shadow",
+   "found": 0,
+   "threshold": "≤ 7",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "D2",
+   "group": "Глубина",
+   "rule": "Один источник света (одинаковое направление теней)",
+   "found": 0,
+   "threshold": "≤ 1",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "D3",
+   "group": "Глубина",
+   "rule": "Элементов с backdrop-filter",
+   "found": 0,
+   "threshold": "≤ 2",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "D4",
+   "group": "Глубина",
+   "rule": "Свечения (тень с нулевым смещением и blur > 8)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "D5",
+   "group": "Глубина",
+   "rule": "Доля блоков с тенью",
+   "found": "0.0 %",
+   "threshold": "≤ 15 %",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "D6",
+   "group": "Глубина",
+   "rule": "Глубина вложенности элементов с тенью",
+   "found": 0,
+   "threshold": "≤ 2",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "E1",
+   "group": "Слои",
+   "rule": "z-index вне шкалы",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "E2",
+   "group": "Слои",
+   "rule": "z-index больше 1500",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "F1",
+   "group": "Цели",
+   "rule": "Цели меньше 24×24 без зазора 4 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "блокер",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "F2",
+   "group": "Цели",
+   "rule": "Всего целей меньше 24×24 (включая разнесённые)",
+   "found": "3 из 18 (ещё 0 инлайновых ссылок вне нормы)",
+   "threshold": "информативно",
+   "verdict": "WARN",
+   "severity": "серьёзно",
+   "examples": [
+    "input.switch 36×20",
+    "input.switch 36×20",
+    "input.switch 36×20"
+   ],
+   "note": "SC 2.5.8 допускает недоразмерную цель, если круги диаметром 24 px вокруг центров соседних целей не пересекаются; нарушение этого условия ловит F1",
+   "run": "light/1440x900"
+  },
+  {
+   "id": "G1",
+   "group": "Фокус",
+   "rule": "Интерактивные элементы без outline и без box-shadow в покое",
+   "found": 18,
+   "threshold": "информативно",
+   "verdict": "WARN",
+   "severity": "полировка",
+   "examples": [
+    "input.input",
+    "button.btn.btn--ghost",
+    "a.nav-item",
+    "a.nav-item",
+    "a.nav-item",
+    "a.nav-item"
+   ],
+   "note": "сам по себе не дефект: кольцо может появляться только в :focus-visible, см. G3",
+   "run": "light/1440x900"
+  },
+  {
+   "id": "H1",
+   "group": "Типографика",
+   "rule": "Уникальных размеров шрифта (у элементов с собственным текстом)",
+   "found": 5,
+   "threshold": "≤ 8",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    "11, 12, 14, 16, 20"
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "H2",
+   "group": "Типографика",
+   "rule": "Кегли вне шкалы",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "H3",
+   "group": "Типографика",
+   "rule": "Уникальных весов шрифта",
+   "found": 4,
+   "threshold": "≤ 4",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "400, 500, 600, 700"
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "H4",
+   "group": "Типографика",
+   "rule": "Веса легче 400",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "H5",
+   "group": "Типографика",
+   "rule": "line-height: normal",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "H6",
+   "group": "Типографика",
+   "rule": "Дробные line-height в px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "H7",
+   "group": "Типографика",
+   "rule": "Интерлиньяж тела в коридоре 1.28–1.55",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "H8",
+   "group": "Типографика",
+   "rule": "Абзацы шире 720 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "H9",
+   "group": "Типографика",
+   "rule": "Атрибут lang на <html>",
+   "found": "ru",
+   "threshold": "задан",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "H10",
+   "group": "Типографика",
+   "rule": "text-transform: uppercase / capitalize",
+   "found": 0,
+   "threshold": "0 (кроме осознанных капс-лейблов)",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "H11",
+   "group": "Типографика",
+   "rule": "text-align: justify",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "H12",
+   "group": "Типографика",
+   "rule": "tabular-nums в числовых ячейках таблиц",
+   "found": "0 из 0",
+   "threshold": "все",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "H13",
+   "group": "Типографика",
+   "rule": "Английский формат разрядов (1,234) в русском тексте",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "H14",
+   "group": "Типографика",
+   "rule": "Знак % слитно с числом",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "H15",
+   "group": "Типографика",
+   "rule": "Программистские кавычки в русском тексте",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "I1",
+   "group": "Цвет",
+   "rule": "Контраст текста ≥ 4.5:1 (крупный ≥ 3.0:1)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "блокер",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "I1c",
+   "group": "Цвет",
+   "rule": "Отключённые элементы в коридоре APCA Lc 30–60 (WCAG 1.4.3 их не нормирует, но невидимая кнопка — тоже дефект)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "I2",
+   "group": "Цвет",
+   "rule": "Контраст границы поля ввода ≥ 1.2:1 (режим практики)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "I3",
+   "group": "Цвет",
+   "rule": "Уникальных цветов текста",
+   "found": 5,
+   "threshold": "≤ 9",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "#0f172b, #1447e6, #45556c, #62748e, #ffffff"
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "I4",
+   "group": "Цвет",
+   "rule": "Уникальных цветов фона",
+   "found": 6,
+   "threshold": "≤ 10",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "#155dfc, #cad5e2, #dbeafe, #f1f5f9, #f8fafc, #ffffff"
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "I5",
+   "group": "Цвет",
+   "rule": "Уникальных цветов границ",
+   "found": 2,
+   "threshold": "≤ 5",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "#62748e, #e2e8f0"
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "I6",
+   "group": "Цвет",
+   "rule": "Цвета, которых нет в наборе токенов",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    ""
+   ],
+   "note": "полупрозрачные слои (скрим, границы через альфу) исключены: их результат вычисляется, а не хранится в наборе",
+   "run": "light/1440x900"
+  },
+  {
+   "id": "I7",
+   "group": "Цвет",
+   "rule": "Нейтраль одного семейства (разброс оттенка тонированных серых)",
+   "found": "11°",
+   "threshold": "≤ 40°",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "хрома до 0.046"
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "J1",
+   "group": "Раскладка",
+   "rule": "Формы не шире 640 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "J2",
+   "group": "Раскладка",
+   "rule": "Сайдбар в коридоре 200–300 px",
+   "found": 240,
+   "threshold": "200–300",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    "nav.sidebar"
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "J3",
+   "group": "Раскладка",
+   "rule": "Контентной области остаётся ≥ 640 px",
+   "found": 1200,
+   "threshold": "≥ 640",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "J4",
+   "group": "Раскладка",
+   "rule": "Сумма прилипших полос ≤ 192 px",
+   "found": 48,
+   "threshold": "≤ 192",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "div.topbar 48px"
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "J5",
+   "group": "Раскладка",
+   "rule": "Нет горизонтальной прокрутки документа",
+   "found": "1440 vs 1440",
+   "threshold": "scrollWidth ≤ innerWidth",
+   "verdict": "OK",
+   "severity": "блокер",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "J6",
+   "group": "Раскладка",
+   "rule": "Сетки с жёстко заданным числом равных колонок",
+   "found": 0,
+   "threshold": "≤ 2",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "J7",
+   "group": "Раскладка",
+   "rule": "Контент не центрирован при наличии сайдбара",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "J8",
+   "group": "Раскладка",
+   "rule": "Шапка страницы не выше 120 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "K1",
+   "group": "Движение",
+   "rule": "transition: all",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "K2",
+   "group": "Движение",
+   "rule": "Длительности вне шкалы",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "K3",
+   "group": "Движение",
+   "rule": "Доля длительностей 300 ms",
+   "found": "0.0 %",
+   "threshold": "≤ 20 %",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "L1",
+   "group": "Антислоп",
+   "rule": "Эмодзи в интерфейсе",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "L2",
+   "group": "Антислоп",
+   "rule": "«Почти, но не совсем»: пары величин с разницей 1–3 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "",
+    "",
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "L3",
+   "group": "Антислоп",
+   "rule": "Литералы цвета в inline-стилях",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "L4",
+   "group": "Антислоп",
+   "rule": "Крупные градиентные заливки",
+   "found": 0,
+   "threshold": "информативно",
+   "verdict": "WARN",
+   "severity": "полировка",
+   "examples": [],
+   "note": "фиолетово-синий градиент — главный цветовой маркер генерации, см. 01-color/06 §4.2",
+   "run": "light/1440x900"
+  },
+  {
+   "id": "L5",
+   "group": "Антислоп",
+   "rule": "Гарнитур в интерфейсе",
+   "found": 1,
+   "threshold": "≤ 2 (текстовая + моно)",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "Inter"
+   ],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "G2",
+   "group": "Фокус",
+   "rule": "Видимый индикатор фокуса при обходе Tab (18 остановок)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "блокер",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "G3",
+   "group": "Фокус",
+   "rule": "Толщина индикатора ≥ 2 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "G4",
+   "group": "Фокус",
+   "rule": "Индикатор не обрезан предком с overflow",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "G5",
+   "group": "Фокус",
+   "rule": "Контраст кольца фокуса к элементу ≥ 3:1",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "S1",
+   "group": "Состояния",
+   "rule": "У интерактивных элементов есть hover (проверено 9)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "S2",
+   "group": "Состояния",
+   "rule": "ΔL hover в коридоре 2–8 п.п. светлоты",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900"
+  },
+  {
+   "id": "A1",
+   "group": "Отступы",
+   "rule": "Доля padding/margin/gap из шкалы",
+   "found": "100.0 %",
+   "threshold": "≥ 95 %",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "A2",
+   "group": "Отступы",
+   "rule": "Значения, кратные 5 и не кратные 4 («шкала десятками»)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "A3",
+   "group": "Отступы",
+   "rule": "Уникальных значений gap",
+   "found": 5,
+   "threshold": "≤ 6",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "2, 8, 12, 16, 24"
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "A4",
+   "group": "Отступы",
+   "rule": "Доля дробных значений отступа",
+   "found": "0.0 %",
+   "threshold": "≤ 3 %",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "A5",
+   "group": "Отступы",
+   "rule": "Уникальных значений отступа",
+   "found": 6,
+   "threshold": "≤ 15",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "2, 4, 8, 12, 16, 24"
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "A6",
+   "group": "Отступы",
+   "rule": "Внешний padding контейнера ≥ внутренних зазоров",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "B1",
+   "group": "Размеры",
+   "rule": "Уникальных высот контролов",
+   "found": 1,
+   "threshold": "≤ 3",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    "32"
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "B2",
+   "group": "Размеры",
+   "rule": "Высоты вне ряда 20.0/24.0/28.0/32.0/36.0/40.0/44.0/48.0/56.0",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "B3",
+   "group": "Размеры",
+   "rule": "Одна высота контролов в горизонтальном ряду",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "B4",
+   "group": "Размеры",
+   "rule": "Иконочные кнопки квадратные",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "B5",
+   "group": "Размеры",
+   "rule": "Размеры иконок из ряда [12, 14, 16, 20, 24]",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "B5b",
+   "group": "Размеры",
+   "rule": "Пиктограммы и иллюстрации (svg крупнее 32 px)",
+   "found": 0,
+   "threshold": "информативно",
+   "verdict": "WARN",
+   "severity": "полировка",
+   "examples": [],
+   "note": "граница классов: до 32 px иконка, 48–96 пиктограмма, от 120 иллюстрация (07-iconography-imagery/02 §4.2)",
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "B6",
+   "group": "Размеры",
+   "rule": "Один набор иконок (один viewBox, одна толщина штриха)",
+   "found": "viewBox: 1, stroke-width: 1",
+   "threshold": "1 / 1",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "0 0 24 24",
+    "2px"
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "B7",
+   "group": "Размеры",
+   "rule": "Строки одного списка/таблицы одной высоты",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "C1",
+   "group": "Форма",
+   "rule": "Уникальных значений border-radius",
+   "found": 3,
+   "threshold": "≤ 6",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "6, 8, 9999"
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "C2",
+   "group": "Форма",
+   "rule": "Радиусы вне шкалы",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "C3",
+   "group": "Форма",
+   "rule": "Вложенный радиус не больше внешнего",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "C4",
+   "group": "Форма",
+   "rule": "Толщины границ только 0 / 1 / 2 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "C5",
+   "group": "Форма",
+   "rule": "Радиус ≤ 25 % меньшей стороны элемента",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "D1",
+   "group": "Глубина",
+   "rule": "Уникальных значений box-shadow",
+   "found": 0,
+   "threshold": "≤ 7",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "D2",
+   "group": "Глубина",
+   "rule": "Один источник света (одинаковое направление теней)",
+   "found": 0,
+   "threshold": "≤ 1",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "D3",
+   "group": "Глубина",
+   "rule": "Элементов с backdrop-filter",
+   "found": 0,
+   "threshold": "≤ 2",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "D4",
+   "group": "Глубина",
+   "rule": "Свечения (тень с нулевым смещением и blur > 8)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "D5",
+   "group": "Глубина",
+   "rule": "Доля блоков с тенью",
+   "found": "0.0 %",
+   "threshold": "≤ 15 %",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "D6",
+   "group": "Глубина",
+   "rule": "Глубина вложенности элементов с тенью",
+   "found": 0,
+   "threshold": "≤ 2",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "E1",
+   "group": "Слои",
+   "rule": "z-index вне шкалы",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "E2",
+   "group": "Слои",
+   "rule": "z-index больше 1500",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "F1",
+   "group": "Цели",
+   "rule": "Цели меньше 24×24 без зазора 4 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "блокер",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "F2",
+   "group": "Цели",
+   "rule": "Всего целей меньше 24×24 (включая разнесённые)",
+   "found": "3 из 18 (ещё 0 инлайновых ссылок вне нормы)",
+   "threshold": "информативно",
+   "verdict": "WARN",
+   "severity": "серьёзно",
+   "examples": [
+    "input.switch 36×20",
+    "input.switch 36×20",
+    "input.switch 36×20"
+   ],
+   "note": "SC 2.5.8 допускает недоразмерную цель, если круги диаметром 24 px вокруг центров соседних целей не пересекаются; нарушение этого условия ловит F1",
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "G1",
+   "group": "Фокус",
+   "rule": "Интерактивные элементы без outline и без box-shadow в покое",
+   "found": 18,
+   "threshold": "информативно",
+   "verdict": "WARN",
+   "severity": "полировка",
+   "examples": [
+    "input.input",
+    "button.btn.btn--ghost",
+    "a.nav-item",
+    "a.nav-item",
+    "a.nav-item",
+    "a.nav-item"
+   ],
+   "note": "сам по себе не дефект: кольцо может появляться только в :focus-visible, см. G3",
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "H1",
+   "group": "Типографика",
+   "rule": "Уникальных размеров шрифта (у элементов с собственным текстом)",
+   "found": 5,
+   "threshold": "≤ 8",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    "11, 12, 14, 16, 20"
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "H2",
+   "group": "Типографика",
+   "rule": "Кегли вне шкалы",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "H3",
+   "group": "Типографика",
+   "rule": "Уникальных весов шрифта",
+   "found": 4,
+   "threshold": "≤ 4",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "400, 500, 600, 700"
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "H4",
+   "group": "Типографика",
+   "rule": "Веса легче 400",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "H5",
+   "group": "Типографика",
+   "rule": "line-height: normal",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "H6",
+   "group": "Типографика",
+   "rule": "Дробные line-height в px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "H7",
+   "group": "Типографика",
+   "rule": "Интерлиньяж тела в коридоре 1.28–1.55",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "H8",
+   "group": "Типографика",
+   "rule": "Абзацы шире 720 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "H9",
+   "group": "Типографика",
+   "rule": "Атрибут lang на <html>",
+   "found": "ru",
+   "threshold": "задан",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "H10",
+   "group": "Типографика",
+   "rule": "text-transform: uppercase / capitalize",
+   "found": 0,
+   "threshold": "0 (кроме осознанных капс-лейблов)",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "H11",
+   "group": "Типографика",
+   "rule": "text-align: justify",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "H12",
+   "group": "Типографика",
+   "rule": "tabular-nums в числовых ячейках таблиц",
+   "found": "0 из 0",
+   "threshold": "все",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "H13",
+   "group": "Типографика",
+   "rule": "Английский формат разрядов (1,234) в русском тексте",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "H14",
+   "group": "Типографика",
+   "rule": "Знак % слитно с числом",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "H15",
+   "group": "Типографика",
+   "rule": "Программистские кавычки в русском тексте",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "I1",
+   "group": "Цвет",
+   "rule": "Контраст текста ≥ 4.5:1 (крупный ≥ 3.0:1)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "блокер",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "I1c",
+   "group": "Цвет",
+   "rule": "Отключённые элементы в коридоре APCA Lc 30–60 (WCAG 1.4.3 их не нормирует, но невидимая кнопка — тоже дефект)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "I2",
+   "group": "Цвет",
+   "rule": "Контраст границы поля ввода ≥ 1.2:1 (режим практики)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "I3",
+   "group": "Цвет",
+   "rule": "Уникальных цветов текста",
+   "found": 5,
+   "threshold": "≤ 9",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "#020618, #8ec5ff, #aebccf, #cad5e2, #f1f5f9"
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "I4",
+   "group": "Цвет",
+   "rule": "Уникальных цветов фона",
+   "found": 6,
+   "threshold": "≤ 10",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "#0f172b, #162456, #1d293d, #314158, #51a2ff, #62748e"
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "I5",
+   "group": "Цвет",
+   "rule": "Уникальных цветов границ",
+   "found": 2,
+   "threshold": "≤ 5",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "#1d293d, #62748e"
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "I6",
+   "group": "Цвет",
+   "rule": "Цвета, которых нет в наборе токенов",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    ""
+   ],
+   "note": "полупрозрачные слои (скрим, границы через альфу) исключены: их результат вычисляется, а не хранится в наборе",
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "I7",
+   "group": "Цвет",
+   "rule": "Нейтраль одного семейства (разброс оттенка тонированных серых)",
+   "found": "17°",
+   "threshold": "≤ 40°",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "хрома до 0.046"
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "I8",
+   "group": "Цвет",
+   "rule": "Фон тёмной темы в коридоре OKLCH L 13–22 %",
+   "found": "20.8 %",
+   "threshold": "13–22 %",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "I9",
+   "group": "Цвет",
+   "rule": "Чистый белый текст крупным кеглем в тёмной теме",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "J1",
+   "group": "Раскладка",
+   "rule": "Формы не шире 640 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "J2",
+   "group": "Раскладка",
+   "rule": "Сайдбар в коридоре 200–300 px",
+   "found": 240,
+   "threshold": "200–300",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    "nav.sidebar"
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "J3",
+   "group": "Раскладка",
+   "rule": "Контентной области остаётся ≥ 640 px",
+   "found": 1200,
+   "threshold": "≥ 640",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "J4",
+   "group": "Раскладка",
+   "rule": "Сумма прилипших полос ≤ 192 px",
+   "found": 48,
+   "threshold": "≤ 192",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "div.topbar 48px"
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "J5",
+   "group": "Раскладка",
+   "rule": "Нет горизонтальной прокрутки документа",
+   "found": "1440 vs 1440",
+   "threshold": "scrollWidth ≤ innerWidth",
+   "verdict": "OK",
+   "severity": "блокер",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "J6",
+   "group": "Раскладка",
+   "rule": "Сетки с жёстко заданным числом равных колонок",
+   "found": 0,
+   "threshold": "≤ 2",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "J7",
+   "group": "Раскладка",
+   "rule": "Контент не центрирован при наличии сайдбара",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "J8",
+   "group": "Раскладка",
+   "rule": "Шапка страницы не выше 120 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "K1",
+   "group": "Движение",
+   "rule": "transition: all",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "K2",
+   "group": "Движение",
+   "rule": "Длительности вне шкалы",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "K3",
+   "group": "Движение",
+   "rule": "Доля длительностей 300 ms",
+   "found": "0.0 %",
+   "threshold": "≤ 20 %",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "L1",
+   "group": "Антислоп",
+   "rule": "Эмодзи в интерфейсе",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "L2",
+   "group": "Антислоп",
+   "rule": "«Почти, но не совсем»: пары величин с разницей 1–3 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "",
+    "",
+    ""
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "L3",
+   "group": "Антислоп",
+   "rule": "Литералы цвета в inline-стилях",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "L4",
+   "group": "Антислоп",
+   "rule": "Крупные градиентные заливки",
+   "found": 0,
+   "threshold": "информативно",
+   "verdict": "WARN",
+   "severity": "полировка",
+   "examples": [],
+   "note": "фиолетово-синий градиент — главный цветовой маркер генерации, см. 01-color/06 §4.2",
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "L5",
+   "group": "Антислоп",
+   "rule": "Гарнитур в интерфейсе",
+   "found": 1,
+   "threshold": "≤ 2 (текстовая + моно)",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "Inter"
+   ],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "G2",
+   "group": "Фокус",
+   "rule": "Видимый индикатор фокуса при обходе Tab (18 остановок)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "блокер",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "G3",
+   "group": "Фокус",
+   "rule": "Толщина индикатора ≥ 2 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "G4",
+   "group": "Фокус",
+   "rule": "Индикатор не обрезан предком с overflow",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "G5",
+   "group": "Фокус",
+   "rule": "Контраст кольца фокуса к элементу ≥ 3:1",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "S1",
+   "group": "Состояния",
+   "rule": "У интерактивных элементов есть hover (проверено 9)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "S2",
+   "group": "Состояния",
+   "rule": "ΔL hover в коридоре 2–12 п.п. светлоты",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "dark/1440x900"
+  },
+  {
+   "id": "A1",
+   "group": "Отступы",
+   "rule": "Доля padding/margin/gap из шкалы",
+   "found": "100.0 %",
+   "threshold": "≥ 95 %",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "A2",
+   "group": "Отступы",
+   "rule": "Значения, кратные 5 и не кратные 4 («шкала десятками»)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "A3",
+   "group": "Отступы",
+   "rule": "Уникальных значений gap",
+   "found": 5,
+   "threshold": "≤ 6",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "2, 8, 12, 16, 24"
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "A4",
+   "group": "Отступы",
+   "rule": "Доля дробных значений отступа",
+   "found": "0.0 %",
+   "threshold": "≤ 3 %",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "A5",
+   "group": "Отступы",
+   "rule": "Уникальных значений отступа",
+   "found": 6,
+   "threshold": "≤ 15",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "2, 4, 8, 12, 16, 24"
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "A6",
+   "group": "Отступы",
+   "rule": "Внешний padding контейнера ≥ внутренних зазоров",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "B1",
+   "group": "Размеры",
+   "rule": "Уникальных высот контролов",
+   "found": 1,
+   "threshold": "≤ 3",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    "32"
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "B2",
+   "group": "Размеры",
+   "rule": "Высоты вне ряда 20.0/24.0/28.0/32.0/36.0/40.0/44.0/48.0/56.0",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "B3",
+   "group": "Размеры",
+   "rule": "Одна высота контролов в горизонтальном ряду",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "B4",
+   "group": "Размеры",
+   "rule": "Иконочные кнопки квадратные",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "B5",
+   "group": "Размеры",
+   "rule": "Размеры иконок из ряда [12, 14, 16, 20, 24]",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "B5b",
+   "group": "Размеры",
+   "rule": "Пиктограммы и иллюстрации (svg крупнее 32 px)",
+   "found": 0,
+   "threshold": "информативно",
+   "verdict": "WARN",
+   "severity": "полировка",
+   "examples": [],
+   "note": "граница классов: до 32 px иконка, 48–96 пиктограмма, от 120 иллюстрация (07-iconography-imagery/02 §4.2)",
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "B6",
+   "group": "Размеры",
+   "rule": "Один набор иконок (один viewBox, одна толщина штриха)",
+   "found": "viewBox: 1, stroke-width: 1",
+   "threshold": "1 / 1",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "0 0 24 24",
+    "2px"
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "B7",
+   "group": "Размеры",
+   "rule": "Строки одного списка/таблицы одной высоты",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "C1",
+   "group": "Форма",
+   "rule": "Уникальных значений border-radius",
+   "found": 3,
+   "threshold": "≤ 6",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "6, 8, 9999"
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "C2",
+   "group": "Форма",
+   "rule": "Радиусы вне шкалы",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "C3",
+   "group": "Форма",
+   "rule": "Вложенный радиус не больше внешнего",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "C4",
+   "group": "Форма",
+   "rule": "Толщины границ только 0 / 1 / 2 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "C5",
+   "group": "Форма",
+   "rule": "Радиус ≤ 25 % меньшей стороны элемента",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "D1",
+   "group": "Глубина",
+   "rule": "Уникальных значений box-shadow",
+   "found": 0,
+   "threshold": "≤ 7",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "D2",
+   "group": "Глубина",
+   "rule": "Один источник света (одинаковое направление теней)",
+   "found": 0,
+   "threshold": "≤ 1",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "D3",
+   "group": "Глубина",
+   "rule": "Элементов с backdrop-filter",
+   "found": 0,
+   "threshold": "≤ 2",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "D4",
+   "group": "Глубина",
+   "rule": "Свечения (тень с нулевым смещением и blur > 8)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "D5",
+   "group": "Глубина",
+   "rule": "Доля блоков с тенью",
+   "found": "0.0 %",
+   "threshold": "≤ 15 %",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "D6",
+   "group": "Глубина",
+   "rule": "Глубина вложенности элементов с тенью",
+   "found": 0,
+   "threshold": "≤ 2",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "E1",
+   "group": "Слои",
+   "rule": "z-index вне шкалы",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "E2",
+   "group": "Слои",
+   "rule": "z-index больше 1500",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "F1",
+   "group": "Цели",
+   "rule": "Цели меньше 24×24 без зазора 4 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "блокер",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "F2",
+   "group": "Цели",
+   "rule": "Всего целей меньше 24×24 (включая разнесённые)",
+   "found": "3 из 18 (ещё 0 инлайновых ссылок вне нормы)",
+   "threshold": "информативно",
+   "verdict": "WARN",
+   "severity": "серьёзно",
+   "examples": [
+    "input.switch 36×20",
+    "input.switch 36×20",
+    "input.switch 36×20"
+   ],
+   "note": "SC 2.5.8 допускает недоразмерную цель, если круги диаметром 24 px вокруг центров соседних целей не пересекаются; нарушение этого условия ловит F1",
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "G1",
+   "group": "Фокус",
+   "rule": "Интерактивные элементы без outline и без box-shadow в покое",
+   "found": 18,
+   "threshold": "информативно",
+   "verdict": "WARN",
+   "severity": "полировка",
+   "examples": [
+    "input.input",
+    "button.btn.btn--ghost",
+    "a.nav-item",
+    "a.nav-item",
+    "a.nav-item",
+    "a.nav-item"
+   ],
+   "note": "сам по себе не дефект: кольцо может появляться только в :focus-visible, см. G3",
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "H1",
+   "group": "Типографика",
+   "rule": "Уникальных размеров шрифта (у элементов с собственным текстом)",
+   "found": 5,
+   "threshold": "≤ 8",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    "11, 12, 14, 16, 20"
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "H2",
+   "group": "Типографика",
+   "rule": "Кегли вне шкалы",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "H3",
+   "group": "Типографика",
+   "rule": "Уникальных весов шрифта",
+   "found": 4,
+   "threshold": "≤ 4",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "400, 500, 600, 700"
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "H4",
+   "group": "Типографика",
+   "rule": "Веса легче 400",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "H5",
+   "group": "Типографика",
+   "rule": "line-height: normal",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "H6",
+   "group": "Типографика",
+   "rule": "Дробные line-height в px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "H7",
+   "group": "Типографика",
+   "rule": "Интерлиньяж тела в коридоре 1.28–1.55",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "H8",
+   "group": "Типографика",
+   "rule": "Абзацы шире 720 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "H9",
+   "group": "Типографика",
+   "rule": "Атрибут lang на <html>",
+   "found": "ru",
+   "threshold": "задан",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "H10",
+   "group": "Типографика",
+   "rule": "text-transform: uppercase / capitalize",
+   "found": 0,
+   "threshold": "0 (кроме осознанных капс-лейблов)",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "H11",
+   "group": "Типографика",
+   "rule": "text-align: justify",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "H12",
+   "group": "Типографика",
+   "rule": "tabular-nums в числовых ячейках таблиц",
+   "found": "0 из 0",
+   "threshold": "все",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "H13",
+   "group": "Типографика",
+   "rule": "Английский формат разрядов (1,234) в русском тексте",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "H14",
+   "group": "Типографика",
+   "rule": "Знак % слитно с числом",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "H15",
+   "group": "Типографика",
+   "rule": "Программистские кавычки в русском тексте",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "I1",
+   "group": "Цвет",
+   "rule": "Контраст текста ≥ 4.5:1 (крупный ≥ 3.0:1)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "блокер",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "I1c",
+   "group": "Цвет",
+   "rule": "Отключённые элементы в коридоре APCA Lc 30–60 (WCAG 1.4.3 их не нормирует, но невидимая кнопка — тоже дефект)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "I2",
+   "group": "Цвет",
+   "rule": "Контраст границы поля ввода ≥ 1.2:1 (режим практики)",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "I3",
+   "group": "Цвет",
+   "rule": "Уникальных цветов текста",
+   "found": 5,
+   "threshold": "≤ 9",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "#0f172b, #1447e6, #45556c, #62748e, #ffffff"
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "I4",
+   "group": "Цвет",
+   "rule": "Уникальных цветов фона",
+   "found": 6,
+   "threshold": "≤ 10",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "#155dfc, #cad5e2, #dbeafe, #f1f5f9, #f8fafc, #ffffff"
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "I5",
+   "group": "Цвет",
+   "rule": "Уникальных цветов границ",
+   "found": 2,
+   "threshold": "≤ 5",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "#62748e, #e2e8f0"
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "I6",
+   "group": "Цвет",
+   "rule": "Цвета, которых нет в наборе токенов",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    ""
+   ],
+   "note": "полупрозрачные слои (скрим, границы через альфу) исключены: их результат вычисляется, а не хранится в наборе",
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "I7",
+   "group": "Цвет",
+   "rule": "Нейтраль одного семейства (разброс оттенка тонированных серых)",
+   "found": "11°",
+   "threshold": "≤ 40°",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "хрома до 0.046"
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "J1",
+   "group": "Раскладка",
+   "rule": "Формы не шире 640 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "J2",
+   "group": "Раскладка",
+   "rule": "Сайдбар в коридоре 200–300 px",
+   "found": 240,
+   "threshold": "200–300",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [
+    "nav.sidebar"
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "J3",
+   "group": "Раскладка",
+   "rule": "Контентной области остаётся ≥ 640 px",
+   "found": 1200,
+   "threshold": "≥ 640",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "J4",
+   "group": "Раскладка",
+   "rule": "Сумма прилипших полос ≤ 192 px",
+   "found": 48,
+   "threshold": "≤ 192",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "div.topbar 48px"
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "J5",
+   "group": "Раскладка",
+   "rule": "Нет горизонтальной прокрутки документа",
+   "found": "1440 vs 1440",
+   "threshold": "scrollWidth ≤ innerWidth",
+   "verdict": "OK",
+   "severity": "блокер",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "J6",
+   "group": "Раскладка",
+   "rule": "Сетки с жёстко заданным числом равных колонок",
+   "found": 0,
+   "threshold": "≤ 2",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "J7",
+   "group": "Раскладка",
+   "rule": "Контент не центрирован при наличии сайдбара",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "J8",
+   "group": "Раскладка",
+   "rule": "Шапка страницы не выше 120 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "K1",
+   "group": "Движение",
+   "rule": "transition: all",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "K2",
+   "group": "Движение",
+   "rule": "Длительности вне шкалы",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "K3",
+   "group": "Движение",
+   "rule": "Доля длительностей 300 ms",
+   "found": "0.0 %",
+   "threshold": "≤ 20 %",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "L1",
+   "group": "Антислоп",
+   "rule": "Эмодзи в интерфейсе",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "L2",
+   "group": "Антислоп",
+   "rule": "«Почти, но не совсем»: пары величин с разницей 1–3 px",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "",
+    "",
+    ""
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "L3",
+   "group": "Антислоп",
+   "rule": "Литералы цвета в inline-стилях",
+   "found": 0,
+   "threshold": "0",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "L4",
+   "group": "Антислоп",
+   "rule": "Крупные градиентные заливки",
+   "found": 0,
+   "threshold": "информативно",
+   "verdict": "WARN",
+   "severity": "полировка",
+   "examples": [],
+   "note": "фиолетово-синий градиент — главный цветовой маркер генерации, см. 01-color/06 §4.2",
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "L5",
+   "group": "Антислоп",
+   "rule": "Гарнитур в интерфейсе",
+   "found": 1,
+   "threshold": "≤ 2 (текстовая + моно)",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    "Inter"
+   ],
+   "note": null,
+   "run": "light/1440x900/reduced"
+  },
+  {
+   "id": "M1",
+   "group": "Сокращённое движение",
+   "rule": "Длительности сокращаются при prefers-reduced-motion",
+   "found": "100 ms → 100 ms",
+   "threshold": "меньше или равно, и не 0",
+   "verdict": "OK",
+   "severity": "серьёзно",
+   "examples": [],
+   "note": "«reduce, not remove»: обнуление ломает компоненты, ждущие transitionend",
+   "run": "light/reduced"
+  },
+  {
+   "id": "M2",
+   "group": "Сокращённое движение",
+   "rule": "Циклические анимации выключены",
+   "found": 0,
+   "threshold": "0 (кроме спиннера, если он единственный сигнал загрузки)",
+   "verdict": "OK",
+   "severity": "полировка",
+   "examples": [
+    ""
+   ],
+   "note": null,
+   "run": "light/reduced"
+  }
+ ]
+}

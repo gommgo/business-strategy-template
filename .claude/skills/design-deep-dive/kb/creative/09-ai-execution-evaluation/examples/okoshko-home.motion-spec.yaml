@@ -1,0 +1,136 @@
+# Пример motion-spec v1 — «Окошко», главная (SaaS, L1). Учебный.
+# creative-research · 09-ai-execution-evaluation · агент I · волна 3 · 2026-09-24.
+# Проверка: spec_check.py spec … --plan ../site/10-playbooks-contracts/examples/saas-okoshko/plans/home.yaml --overlay okoshko-home.treatment.yaml
+# Приём: sticky-окно расписания + смена состояний по прокрутке текста (CSS sticky + view(), 0 КБ JS). Уроки опыта I/02 учтены сразу:
+# subject диапазона — текст ряда, станции по якорям, пометка неявки через clip-path своего ряда, ветка unsupported.
+motion_spec_version: "1.0"
+id: okoshko-home
+example: true
+status: proposed
+checked_at: "2026-09-24"
+refs:
+  page_plan: ../../../site/10-playbooks-contracts/examples/saas-okoshko/plans/home.yaml
+  art_direction: ../../01-creative-direction/examples/art-direction-okoshko.json#/directions/0
+  tokens: ../../04-visual-language/marketing-tokens.json
+  effects: ../../06-effects-catalog/effects.yaml
+  block_treatments: ../block-treatments.yaml
+level: L1
+executor: {target: any, harness: any, video_in: false}
+page:
+  thesis: "Двигается только расписание: пустые окна дня заполняются записями по мере чтения, неявка исправляется красной пометкой; остальное неподвижно."
+  character: [measured, precise]
+  base: {duration_ms: 320, easing: {token: motion.marketing.easing.out-expo}}
+  primitives: [none]
+  lcp: {target: hero.headline, entrance: none, note: "H1 — кандидат LCP; первый экран без появления (art-direction)"}
+  toggle: {required: false, attr: data-motion, states: [system, reduced, full], placement: sticky-header, remember: false}
+  scroll: {smooth: false, tail_ms_max: 0, jacking: never}
+  transitions: {kind: none}
+  properties_allowed: [transform, opacity, clip-path, background-color, color]
+  budget: {loops_in_view_max: 0, loops_in_view_max_mobile: 0, first_screen_scene_ms_max: 0, js_kb_br_effects_max: 0, long_frames_pct_max: 2, cls_scroll_max: 0.1}
+  never:
+    - "появление секций, счётчики у цифр proof-stats, анимация тарифов и переключателя периода (цены меняются мгновенно)"
+    - "нарисованная рамка браузера вокруг скриншотов; выдуманный дашборд"
+    - "закрепление дольше 150vh; смена текста функций при прокрутке"
+sections:
+  - id: hero
+    block: hero-media
+    role: accent
+    level: L1
+    intent: "без движения: акцент — скриншот, заходящий на следующую секцию, и одна красная пометка"
+    moments: []
+    reduce: {strategy: no-motion-needed, describe: "как есть"}
+    mobile: {strategy: separate-asset, describe: "скриншот телефона под заголовком"}
+  - id: product-demo
+    block: feature-alternating
+    role: peak
+    level: L1
+    intent: "окно расписания дня закреплено справа; пока читаются три функции, окно проходит три состояния: пустые окна → окна заполнены записями → неявка исправлена красной пометкой"
+    scene:
+      pin: sticky
+      length_vh: 150
+      length_vh_mobile: 0
+      stations:
+        - {id: s1, anchor: product-demo.row-1, anchor_line: viewport-center, describe: "функция 1 «Онлайн-запись по ссылке»: окно показывает день с пустыми окнами (row-1-media)"}
+        - {id: s2, anchor: product-demo.row-2, anchor_line: viewport-center, describe: "функция 2 «Напоминания»: окна заполнены записями, у одной — отметка «напоминание отправлено» (row-2-media)"}
+        - {id: s3, anchor: product-demo.row-3, anchor_line: viewport-center, describe: "функция 3 «Импорт клиентов»: одна запись с неявкой исправлена, поверх неё красная пометка (row-3-media + пометка)"}
+    moments:
+      - id: schedule-state-2
+        class: scroll-linked
+        purpose: continuity
+        transition_type: persistent
+        effect: "effect:sticky-stack"
+        target: product-demo.row-2.media
+        trigger:
+          type: scroll-scrub
+          subject: product-demo.row-2
+          range: {start: "cover 40vh", end: "cover 50vh"}
+        model: scrub
+        tracks:
+          - {property: opacity, from: 0, to: 1, unit_note: "скриншоты трёх состояний лежат стопкой в одном закреплённом окне; состояние 2 проявляется поверх 1, пока верх текста ряда 2 идёт от 60 % до 50 % высоты окна"}
+        easing: {none: true}
+        interrupt: follow-input
+        reduce: {strategy: stations, describe: "кадр состояния 2 статично рядом с текстом ряда 2"}
+        mobile: {strategy: stacked, describe: "кадр состояния 2 после абзаца ряда 2"}
+      - id: schedule-state-3
+        class: scroll-linked
+        purpose: continuity
+        transition_type: persistent
+        effect: "effect:sticky-stack"
+        target: product-demo.row-3.media
+        trigger:
+          type: scroll-scrub
+          subject: product-demo.row-3
+          range: {start: "cover 40vh", end: "cover 50vh"}
+        model: scrub
+        tracks:
+          - {property: opacity, from: 0, to: 1}
+        easing: {none: true}
+        interrupt: follow-input
+        reduce: {strategy: stations, describe: "кадр состояния 3 статично рядом с текстом ряда 3"}
+        mobile: {strategy: stacked, describe: "кадр состояния 3 после абзаца ряда 3"}
+      - id: no-show-mark
+        class: scroll-linked
+        purpose: attention
+        transition_type: entrance
+        effect: "effect:sticky-stack"
+        target: product-demo.fx-no-show-mark
+        attach: {to: product-demo.row-3.media, point: center}
+        trigger:
+          type: scroll-scrub
+          subject: product-demo.row-3
+          range: {start: "cover 50vh", end: "cover 58vh"}
+        model: scrub
+        tracks:
+          - {property: clip-path, from: "inset(0 100% 0 0)", to: "inset(0 0 0 0)", unit_note: "красная пометка (акцент #C2401F, 2 px, скруглённая рамка вокруг исправленной записи) прочерчивается слева направо после проявления состояния 3"}
+        easing: {none: true}
+        interrupt: follow-input
+        reduce: {strategy: final-state, describe: "пометка видна на кадре состояния 3"}
+        mobile: {strategy: static, describe: "пометка уже на кадре состояния 3"}
+    storyboard:
+      frames:
+        - {id: pd-s1, at: {station: s1}, viewport: desktop, describe: "Слева текст функции 1 (заголовок display-s, абзац), справа закреплённое окно расписания (≈ 6 из 12 колонок) — день с пустыми окнами.", check: "видно состояние 1; окно не двигается относительно окна браузера"}
+        - {id: pd-s2, at: {station: s2}, viewport: desktop, describe: "Текст функции 2 на середине; окно то же, внутри — заполненный день.", check: "состояние 2 непрозрачно (opacity 1), состояние 1 под ним"}
+        - {id: pd-s3, at: {station: s3}, viewport: desktop, describe: "Текст функции 3; в окне — день с исправленной неявкой, вокруг записи красная рамка целиком.", check: "пометка прочерчена полностью"}
+        - {id: pd-m, at: {progress: 0.5}, viewport: mobile, describe: "Телефон: абзац функции 2, под ним кадр состояния 2 во всю ширину колонки; ничего не закреплено."}
+        - {id: pd-r, at: {station: s2}, viewport: reduce, describe: "Reduce: три кадра рядом со своими абзацами, без закрепления; пометка на третьем кадре.", check: "движение 0 %, закрепления нет"}
+    reduce: {strategy: stations, describe: "три состояния статичными кадрами рядом со своим текстом, без закрепления и проявлений"}
+    mobile: {strategy: stacked, describe: "кадр интерфейса телефона после каждого абзаца; без закрепления"}
+    fallback:
+      no_js: "эффект без JS — работает как есть"
+      unsupported: "нет CSS scroll-driven: раскладка reduce (три кадра рядом с текстом); sticky без смены состояний не оставлять — окно показывало бы только состояние 1"
+    budget: {js_kb_br: 0, loops_in_view: 0, long_frames_pct_max: 2, idle_motion_pct_s_max: 0, cls_scroll_max: 0.1, load: eager}
+    acceptance:
+      - {id: pd-states, check: "зонд станций: на s2 и s3 видимо ровно своё состояние (opacity ≥ 0,99), на s3 пометка clip-path = inset(0)", tool: eye, at: "s1–s3"}
+      - {id: pd-cls, check: "CLS при прокрутке ≤ 0,1 (sticky без pin-spacer)", tool: motion_check, gate: EG-PERF-02, metric: scroll.cls, at: desktop, threshold: 0.1}
+      - {id: pd-reduce, check: "reduce: нет закрепления и движения, три кадра видимы", tool: motion_check, metric: rm.idle_first_pct, at: reduce, threshold: 0}
+  - id: final-cta
+    block: cta-band
+    role: accent
+    level: L1
+    intent: "без движения: финал — смена фона на тёмный"
+    moments: []
+    reduce: {strategy: no-motion-needed, describe: "как есть"}
+    mobile: {strategy: same, describe: "кнопка на всю ширину"}
+open_questions:
+  - "В плане site hero несёт effect:hero-entrance-once (target hero.visual), art-direction A — «hero без появления». Пример следует art-direction; site — поправить план при v1 примеров."
+  - "Длина sticky-сцены 150vh (потолок L1) требует коротких текстов функций (≈ 50vh на ряд): ограничение для text (copy-deck) — длина card-body."

@@ -1,0 +1,1249 @@
+# Паспорт площадок референсов · creative-research · волна 1 · агент B · 2026-09-24
+# Подробно и дословно — 01-sources-landscape.md; клиент — 02-refs-client-and-library.md.
+version: sources/1
+checked_at: '2026-09-24'
+owner: creative-research B (волна 1)
+legend:
+  value: 'ценность для базы: 3 — основной источник, 2 — полезен в своей роли, 1 — редко'
+  client.mode: search/assistant/off — сервисы со входом (решение заказчика); public — галерея без входа (robots.txt + 10 с);
+    manual — только ссылки заказчика; api — через API
+  alive: как проверено и когда; [B/01] — зонд браузером без подмены UA, [B/06]/[B/07] — живые запросы клиента
+sources:
+- id: dribbble
+  name: Dribbble
+  group: portfolio-shots
+  url: https://dribbble.com/
+  alive: 'жив: 6 запросов и 2 get через сессию заказчика (Brave 153), челленджей нет [проверено: B/06]'
+  value: 3
+  useful_for:
+  - статика-концепты
+  - видео-шоты (движение)
+  - палитры шота
+  - теги
+  search:
+    url_templates:
+    - https://dribbble.com/search?q=<запрос> → /search/<запрос-через-дефис>
+    - https://dribbble.com/shots/<id>-<slug>
+    - https://dribbble.com/tags/<тег>
+    - https://dribbble.com/colors/<hex>
+    paging: бесконечная прокрутка, порция ≈ 24–34 шота
+  api:
+    exists: true
+    access: OAuth; только шоты авторизованного пользователя (GET /user/shots, /shots/:id)
+    limits: 60/мин, 1 440/сутки
+  login:
+    needed: нет для выдачи; сессия заказчика — для клиента
+    paid: Pro — не нужен
+  antibot: 'AWS WAF: curl → 202 challenge; браузер проходит сам'
+  robots: не проверен (площадка — решение заказчика)
+  terms:
+    url: https://dribbble.com/terms
+    revision: Updated March 17, 2025
+    clauses:
+    - 7.1 scraping
+    - 7.2 не больше запросов, чем человек в браузере
+    - 7.5 нагрузка
+    - 7.7 сбор User information, including account names
+    - 7.11 доступ средствами, не предоставленными сервисом
+    - 7.12 обход ограничений
+    - 11 копирование и производные Dribbble Content
+    - 'API Terms: «Scraping, copying, saving, or storing our data is strictly prohibited»'
+  client:
+    mode: search
+    since: 2026-09-24 ≈15:00
+    adapter: проверен вживую
+  rate: 10 с + U(0; 6) с; 60 страниц в сутки
+  notes: 'Концепты, не продакшн: выдача «saas landing page» — средний SaaS (градиенты, bento).'
+  checked_at: '2026-09-24'
+- id: behance
+  name: Behance
+  group: portfolio-shots
+  url: https://www.behance.net/
+  alive: жив по разведке оркестратора; curl и безголовый без cookie → 403 JS-челлендж Fastly
+  value: 2
+  useful_for:
+  - кейсы с процессом
+  - айдентика
+  - 3D и моушн
+  search:
+    url_templates:
+    - https://www.behance.net/search/projects?search=<запрос>
+    - https://www.behance.net/gallery/<id>/<slug>
+    paging: первая страница — серверный HTML, дальше POST /v3/graphql
+  api:
+    exists: false
+    access: новых ключей API не выдают (сообщество Adobe, 03.2026 — по заданию B)
+    limits: —
+  login:
+    needed: Adobe ID (бесплатный)
+    paid: нет
+  antibot: Fastly/Varnish JS-челлендж (403)
+  robots: не проверен
+  terms:
+    url: https://wwwimages2.adobe.com/content/dam/cc/en/legal/servicetou/Behance-Product-Specific-Terms-en_US-20240618.pdf
+    revision: Last updated June 18, 2024
+    clauses:
+    - 2.1 не собирать чужую информацию без согласия, не фреймить, не копировать look-and-feel
+    - '6 API: только некоммерческое, не скрывать личность приложения (6.4), не хранить > 30 дней (6.6)'
+    - 'Adobe General Terms (Published/Effective October 3, 2025; при конфликте главнее PST, п. 1.2): 6.6 «access or attempt
+      to access the Services and Software by any means other than the interface we provide or authorize»'
+    - 6.18 «use any data mining or similar data gathering and extraction methods… including data scraping for machine learning
+      or other purposes»; 6.7 обход ограничений; 6.21 фреймы; разд. 17 — не обучать ИИ на контенте сервиса
+    general_terms_url: https://www.adobe.com/legal/terms.html (WebFetch ×2 2026-09-24; прямой доступ — тайм-аут)
+  client:
+    mode: 'off'
+    since: 2026-09-24 15:33
+    adapter: не проверен вживую
+  rate: 10 с + U(0; 6) с; 40 страниц в сутки
+  notes: Отложен заказчиком («давай пока без беханса»).
+  checked_at: '2026-09-24'
+- id: dprofile
+  name: Dprofile
+  group: portfolio-shots
+  url: https://dprofile.ru/
+  alive: 'жив: 0,7–1 с; 3 запроса + 2 повтора через сессию заказчика, челленджей нет [проверено: B/07]'
+  value: 3
+  useful_for:
+  - русский дизайн и кириллица
+  - кейсы (обложки — мокапы)
+  - награды площадки
+  search:
+    url_templates:
+    - https://dprofile.ru/cases/search?query=<q>&sortType=DATE (+isPro=1, hasAchievement=all, verified=1)
+    - https://dprofile.ru/case/<id>/<slug>
+    paging: 1-я страница — серверный HTML (10 карточек), дальше GET /api/v1/m-search/cases?page=N&perPage=10 от самой страницы
+  api:
+    exists: false
+    access: публичного API нет; фронтенд шлёт Access-Token (константа) — клиент не использует
+    limits: —
+  login:
+    needed: нет для поиска; вход — избранное, подписки
+    paid: PRO/PRO+ — не нужны
+  antibot: нет (nginx)
+  robots: не проверен
+  terms:
+    url: https://dprofile.ru/terms → /storage/dprofile-terms.pdf
+    revision: Last-Modified 2026-08-11 (даты в тексте нет)
+    clauses:
+    - 2.1 соглашение принимается просмотром
+    - 11.1 копировать на другие сайты — с указанием источника и с разрешения; использовать в личных некоммерческих целях
+    - 11.3 «Не использовать скрипты (программы) для автоматизированного сбора Информации и/или взаимодействия с Сайтом»
+    - 15.2 не копировать ПО, не проникать в ПО
+  client:
+    mode: search
+    since: 2026-09-24 16:24
+    adapter: проверен вживую
+  rate: 10 с + U(0; 6) с; 60 страниц в сутки
+  notes: Риск п. 11.3 принял заказчик.
+  checked_at: '2026-09-24'
+- id: awwwards
+  name: Awwwards
+  group: site-galleries
+  url: https://www.awwwards.com/
+  alive: 'жив: браузер 200 за 5,7 с (зонд 18:08), HTTP 200 за 0,7 с (17:02); в 16:00 — тайм-аут 40 с (VPN)'
+  value: 3
+  useful_for:
+  - выборка живых наградных сайтов (C)
+  - критерии жюри
+  search:
+    url_templates:
+    - https://www.awwwards.com/websites/sites_of_the_day/ (31 сайт; ?page=N разрешён robots)
+    - …/sites_of_the_month/
+    - …/sites_of_the_year/
+    - https://www.awwwards.com/sites/<slug>
+    paging: '?page=N (правило «Disallow: /websites/?» его не закрывает)'
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: Pro — для жюри и сабмитов
+  antibot: нет (не замечено)
+  robots: 'Disallow: /websites/? (только с параметрами), /inspiration/search, /search-websites, /gallery/, /vote/; SOTD разрешён
+    по RFC 9309'
+  terms:
+    url: https://www.awwwards.com/terms/
+    revision: даты нет
+    clauses:
+    - «any unauthorized use or reproduction is strictly prohibited. Our content may not be used for commercial purposes unless
+      expressly authorized»
+    - «Websites featured on our site remain the intellectual property of their creators»
+  client:
+    mode: public
+    adapter: 'адаптер есть (B/02): `search awwwards sotd`; вживую 20/20 (18:00); на SOTD — невидимый reCAPTCHA v3 форм, клиент
+      отличает его от вызова'
+  rate: 10 с между страницами; 40 в сутки
+  notes: 'Оценка: Design 40 %, Usability 30 %, Creativity 20 %, Content 10 % (about-evaluation).'
+  checked_at: '2026-09-24'
+- id: cssda
+  name: CSS Design Awards
+  group: site-galleries
+  url: https://www.cssdesignawards.com/
+  alive: 'жив: 200, 3,9 с в безголовом Brave [B/01]; честному UA — 403 (и robots.txt) [B/02]'
+  value: 3
+  useful_for:
+  - WOTD, Special Kudos, номинанты — прямые ссылки на сайты
+  search:
+    url_templates:
+    - https://www.cssdesignawards.com/wotd-award-winners (WOTD с датой)
+    - …/wotm-award-winners, …/woty-award-winners, …/special-kudos-award-winners
+    - https://www.cssdesignawards.com/sites/<slug>/<id>/
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: сабмит платный
+  antibot: для не-браузера 403 (robots)
+  robots: недоступен (403)
+  terms:
+    url: https://www.cssdesignawards.com/terms
+    revision: даты нет
+    clauses:
+    - «It is a strong condition of use that you do not copy any content and data from the CSSDA website without our permission.
+      This includes … website screenshots, website descriptions, designer information…»
+  client:
+    mode: public
+    adapter: 'адаптер есть (B/02): `search cssda wotd`; вживую 18/18 (18:00)'
+  rate: 10 с; 40 в сутки
+  notes: WOTD — средний балл > 8,0 (фундамент).
+  checked_at: '2026-09-24'
+- id: fwa
+  name: FWA
+  group: site-galleries
+  url: https://thefwa.com/
+  alive: 'жив: 200, 7,7 с [проверено: B/01]'
+  value: 2
+  useful_for:
+  - FOTD, кейсы студий
+  search:
+    url_templates:
+    - https://thefwa.com/ (3 верхних FOTD — JSON caseMenu в HTML, лента — запросами страницы)
+    - https://thefwa.com/cases/<slug>
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: сабмит
+  antibot: не замечено
+  robots: 'Disallow: /admin/'
+  terms:
+    url: https://thefwa.com/terms-conditions
+    revision: даты нет (render_fetch.py, 2026-09-24)
+    clauses:
+    - II.2 «FWA reserves all its rights and strictly forbids any unauthorised use or duplication… No material, however, can
+      be used for any commercial purpose whatsoever»
+    - II.4 «Unless otherwise expressly permitted in writing, you may not create a database in any form whatsoever of these
+      web pages» [спорно]
+  client:
+    mode: hold
+    adapter: 'адаптер есть (B/02): вживую 19/19 до hold; hold до решения заказчика (условия II.4)'
+    since: 2026-09-24 18:11
+  rate: 10 с; 40 в сутки
+  notes: 'В JSON агентств — почты и соцсети: клиент берёт только имя.'
+  checked_at: '2026-09-24'
+- id: recent-design
+  name: Recent (прежний Godly)
+  group: site-galleries
+  url: https://recent.design/
+  alive: 'жив: 200, 10 с, Cloudflare; godly.website → recent.design/?ref=godly [проверено: B/01]'
+  value: 3
+  useful_for:
+  - сайты с датой, категорией и тегами стека (framework, hosting, library, interaction)
+  - запись экрана сайта (ссылка на mp4)
+  search:
+    url_templates:
+    - https://recent.design/websites (20 сайтов)
+    - https://recent.design/i/<id>-<slug>
+    paging: прокрутка; данные первой страницы — состояние seroval в HTML
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: —
+  antibot: Cloudflare (браузер проходит)
+  robots: 'Allow: /'
+  terms:
+    url: —
+    revision: ссылки на условия на главной нет (только x.com)
+    clauses: []
+  client:
+    mode: public
+    adapter: 'адаптер есть (опыт B/02, продолжатель B2): `search recent latest`; офлайн 20/20: сайт, дата, теги стека; вживую
+      20/20 (дата и теги — из серверного HTML)'
+  rate: 10 с; 40 в сутки
+  notes: 'godly.website → recent.design/?ref=godly, у сайтов — ?ref=godly: это прежний Godly [данные]. Раздел /websites: последняя
+    запись 2026-07-04 (на 24.09.2026).'
+  checked_at: '2026-09-24'
+- id: godly-design
+  name: Godly (godly.design)
+  group: site-galleries
+  url: https://godly.design/
+  alive: 'жив: 200, 23 с, «Godly — Design Inspiration», Cloudflare [проверено: B/01]'
+  value: 2
+  useful_for:
+  - галерея сайтов
+  search:
+    url_templates:
+    - https://godly.design/websites (40 сайтов)
+    - https://godly.design/ (смешанная лента)
+    - https://godly.design/hero, /cta, /footer (разделы секций)
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: —
+  antibot: Cloudflare (браузер проходит)
+  robots: 'Allow: /'
+  terms:
+    url: —
+    revision: не найдены
+    clauses: []
+  client:
+    mode: public
+    adapter: 'адаптер есть (опыт B/02, продолжатель B2): `search godly websites`; офлайн 40/40: сайт; дат нет; вживую 20/20'
+  rate: 10 с
+  notes: 'Другой сайт, не Recent: ссылки на сайты с ?ref=saaspo.com; в ленте — посты X, логотипы, OG-картинки.'
+  checked_at: '2026-09-24'
+- id: landbook
+  name: Land-book
+  group: site-galleries
+  url: https://land-book.com/
+  alive: 'антибот: безголовому браузеру — челлендж Cloudflare [B/01]; обычный HTTP пускает (условия прочитаны fetch.py, 2026-09-24)'
+  value: 2
+  useful_for:
+  - секции и лендинги по категориям
+  search:
+    url_templates:
+    - https://land-book.com/
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: Pro
+  antibot: Cloudflare challenge
+  robots: 'ИИ-краулеры явно разрешены, общие запреты: /admin/, /login, /api/ …'
+  terms:
+    url: https://land-book.com/terms_of_use
+    revision: 'Last updated: January 2026'
+    clauses:
+    - §3 не «use bots, crawlers, or scrapers to collect or copy content»; не «circumvent security or access controls»; не
+      «data harvesting»
+    - §7 «You may not use Landbook's content or data for machine learning, AI training, or commercial reuse without written
+      consent»; права на сайты — у авторов
+  client:
+    mode: manual
+    adapter: нет (антибот)
+  rate: —
+  notes: Только вручную заказчиком → enrich по ссылкам (если хост пустит).
+  checked_at: '2026-09-24'
+- id: lapaninja
+  name: Lapa Ninja
+  group: site-galleries
+  url: https://www.lapa.ninja/
+  alive: 'антибот: безголовому браузеру — Cloudflare «Attention Required!» 403 [B/01]; обычный HTTP — 200'
+  value: 2
+  useful_for:
+  - лендинги по категориям
+  search:
+    url_templates:
+    - https://www.lapa.ninja/
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: —
+  antibot: Cloudflare 403
+  robots: 'Allow: /, Disallow: /api/'
+  terms:
+    url: https://www.lapa.ninja/policy/
+    revision: 'Last updated: September 13, 2026'
+    clauses:
+    - §1 «You may browse, save and share content for personal or professional inspiration. You may not scrape, bulk-download,
+      or redistribute the gallery, its screenshots or its data without written permission»
+    - §4 скриншоты — «© of their respective owners»; не выдавать их за ассеты оригинального сайта
+  client:
+    mode: manual
+    adapter: нет (антибот)
+  rate: —
+  notes: ''
+  checked_at: '2026-09-24'
+- id: siteinspire
+  name: SiteInspire
+  group: site-galleries
+  url: https://www.siteinspire.com/
+  alive: 'жив в браузере: 200, 4,1 с [B/01]; не-браузеру — 429 «Vercel Security Checkpoint» (JS-проверка) [B/02]'
+  value: 2
+  useful_for:
+  - редакционные сайты по стилю и типу
+  search:
+    url_templates:
+    - https://www.siteinspire.com/
+    - https://www.siteinspire.com/website/<id>-<slug>
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: —
+  antibot: Vercel Security Checkpoint (429 + JS) для не-браузера; клиент ждёт ≤ 20 с, пока браузер пройдёт сам
+  robots: 32 именованных агента
+  terms:
+    url: https://www.siteinspire.com/terms
+    revision: 'условий нет: /terms в браузере — «Page not found» (2026-09-24); ссылки на главной нет'
+    clauses: []
+  client:
+    mode: public
+    adapter: 'адаптер есть (B/02): `search siteinspire latest`; вживую 20/20 с адресом сайта'
+  rate: 10 с; 40 в сутки
+  notes: ''
+  checked_at: '2026-09-24'
+- id: onepagelove
+  name: One Page Love
+  group: site-galleries
+  url: https://onepagelove.com/
+  alive: 'жив: 200 за 2,9 с (зонд 18:08); в 16:00 — тайм-аут 40 с (VPN)'
+  value: 2
+  useful_for:
+  - одностраничники, шаблоны, секции
+  search:
+    url_templates:
+    - https://onepagelove.com/
+    - https://onepagelove.com/llms.txt
+    paging: —
+  api:
+    exists: в разработке
+    access: 'robots.txt: «official API… Free tier + API key»; /api: «in active development», лист ожидания'
+    limits: —
+  login:
+    needed: нет
+    paid: —
+  antibot: не замечено
+  robots: зовёт к API вместо scraping; блокирует Bytespider, Amazonbot и др.
+  terms:
+    url: —
+    revision: не найдены (/terms — 404)
+    clauses: []
+  client:
+    mode: public
+    adapter: не написан; ждать API
+  rate: 10 с
+  notes: 'Противоречие: robots обещает API, страница API — лист ожидания.'
+  checked_at: '2026-09-24'
+- id: httpster
+  name: Httpster
+  group: site-galleries
+  url: https://httpster.net/
+  alive: 'жив: 200, 11 с [B/01]; последняя запись 2025-05-26 — не обновляется [B/02]; robots.txt 404 (24.09 и сетевой сбой)'
+  value: 1
+  useful_for:
+  - редакционные сайты
+  search:
+    url_templates:
+    - https://httpster.net/ (24)
+    - https://httpster.net/page/<N>/
+    - https://httpster.net/style/<стиль>/ (brutalist, dark, grid, typographic …)
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: —
+  antibot: не замечено
+  robots: нет файла (404)
+  terms:
+    url: —
+    revision: не найдены
+    clauses: []
+  client:
+    mode: public
+    adapter: 'адаптер есть (опыт B/02, продолжатель B2): `search httpster latest`; офлайн 23/23: сайт, дата; вживую 20/20'
+  rate: 10 с
+  notes: ''
+  checked_at: '2026-09-24'
+- id: minimal-gallery
+  name: Minimal Gallery
+  group: site-galleries
+  url: https://minimal.gallery/
+  alive: 'жив: 200, 20 с [B/01]'
+  value: 1
+  useful_for:
+  - минималистичные сайты
+  search:
+    url_templates:
+    - https://minimal.gallery/ (23)
+    - https://minimal.gallery/websites/page/<N>/
+    - https://minimal.gallery/tag/<тег>/
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: —
+  antibot: не замечено
+  robots: 'Disallow: /wp-admin/'
+  terms:
+    url: https://minimal.gallery/legal/
+    revision: Last updated May, 2026
+    clauses:
+    - нельзя воспроизводить скриншоты и контент в коммерческих или публичных целях без разрешения, «This includes scraping,
+      downloading images in bulk»
+    - «Limited personal use (e.g., viewing and bookmarking for inspiration) is permitted»
+  client:
+    mode: public
+    adapter: 'адаптер есть (опыт B/02, продолжатель B2): `search minimal latest`; офлайн 23/23: сайт, дата; вживую 20/20;
+      --shots 3 — наши снимки'
+  rate: 10 с
+  notes: ''
+  checked_at: '2026-09-24'
+- id: landingfolio
+  name: Landingfolio
+  group: site-galleries
+  url: https://www.landingfolio.com/
+  alive: 'жив: 200, 26 с [B/01]'
+  value: 2
+  useful_for:
+  - секции лендингов, шаблоны
+  search:
+    url_templates:
+    - https://www.landingfolio.com/ (80)
+    - https://www.landingfolio.com/inspiration/landing-page/<отрасль>
+    - https://www.landingfolio.com/inspiration/post/<slug>
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: шаблоны
+  antibot: не замечено
+  robots: 'Disallow: /dashboard, /login …'
+  terms:
+    url: https://www.landingfolio.com/legal/terms-and-conditions
+    revision: даты нет
+    clauses:
+    - «You agree to not copy, duplicate or otherwise reproduce any part of our website»
+  client:
+    mode: public
+    adapter: 'адаптер есть (опыт B/02, продолжатель B2): `search landingfolio latest`; офлайн 80/80: сайт, дата, отрасль,
+      палитра; вживую 20/20'
+  rate: 10 с
+  notes: ''
+  checked_at: '2026-09-24'
+- id: refero
+  name: Refero
+  group: ui-flows
+  url: https://refero.design/
+  alive: 'жив: 200, 11 с [B/01]'
+  value: 2
+  useful_for:
+  - экраны продуктов, веб-страницы, потоки
+  search:
+    url_templates:
+    - https://refero.design/
+    paging: —
+  api:
+    exists: true
+    access: API и MCP (тариф)
+    limits: по тарифу
+  login:
+    needed: да для библиотеки
+    paid: подписка
+  antibot: не замечено
+  robots: GPTBot запрещён
+  terms:
+    url: https://doc.refero.design/legal/terms-of-use
+    revision: 'Last updated: August 3, 2026'
+    clauses:
+    - запрет «scraping, crawling, automation, or systematic extraction to copy Refero Content outside documented download
+      features»
+    - нельзя обучать ML
+    - «normal design work and product improvement based on what you learn from Refero are allowed»
+  client:
+    mode: manual
+    adapter: нет; кандидат — API/MCP
+  rate: —
+  notes: ''
+  checked_at: '2026-09-24'
+- id: mobbin
+  name: Mobbin
+  group: ui-flows
+  url: https://mobbin.com/
+  alive: 'жив: 200, 10 с [B/01]'
+  value: 2
+  useful_for:
+  - экраны приложений и веба, потоки
+  search:
+    url_templates:
+    - https://mobbin.com/
+    paging: —
+  api:
+    exists: true
+    access: API и MCP — «personal or internal business use»
+    limits: AI-кредиты
+  login:
+    needed: да
+    paid: подписка
+  antibot: не замечено
+  robots: GPTBot — только llms-файлы
+  terms:
+    url: https://mobbin.com/terms
+    revision: 'Effective date: May 16, 2026'
+    clauses:
+    - запрет scraper, robot, bot, spider, crawler (кроме поисковиков по robots.txt с условиями)
+    - запрет обхода rate-limit
+    - нельзя обучать ИИ
+  client:
+    mode: manual
+    adapter: нет; кандидат — API/MCP
+  rate: —
+  notes: ''
+  checked_at: '2026-09-24'
+- id: pageflows
+  name: Page Flows
+  group: ui-flows
+  url: https://pageflows.com/
+  alive: 'жив: 200, 9 с [B/01]'
+  value: 1
+  useful_for:
+  - видео и скриншоты сценариев
+  search:
+    url_templates:
+    - https://pageflows.com/
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: да
+    paid: подписка
+  antibot: не замечено
+  robots: 'Disallow: /search'
+  terms:
+    url: https://pageflows.com/terms/
+    revision: 'Last updated: January 16th, 2025'
+    clauses:
+    - контент — скриншоты чужих интерфейсов; DMCA
+  client:
+    mode: manual
+    adapter: нет
+  rate: —
+  notes: ''
+  checked_at: '2026-09-24'
+- id: codrops
+  name: Codrops
+  group: effects-code
+  url: https://tympanus.net/codrops/
+  alive: 'жив (curl 200 — фундамент); зонд B/01 2026-09-24 18:08–18:11: 200, 5,7 с'
+  value: 3
+  useful_for:
+  - эффекты с кодом и разбором
+  search:
+    url_templates:
+    - https://tympanus.net/codrops/
+    - https://tympanus.net/codrops/category/tutorials/
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: —
+  antibot: не замечено
+  robots: не прочитан (URLError)
+  terms:
+    url: https://tympanus.net/codrops/licensing/
+    revision: © 2026 Codrops
+    clauses:
+    - демо — MIT, если не указано иное
+    - freebies — в коммерческих проектах, без перепродажи
+    - статьи целиком не перепубликовать
+  client:
+    mode: manual
+    adapter: нет (F берёт вручную)
+  rate: —
+  notes: Код демо можно использовать по MIT (с уведомлением).
+  checked_at: '2026-09-24'
+- id: codepen
+  name: CodePen
+  group: effects-code
+  url: https://codepen.io/
+  alive: 'для не-браузера 403 (фундамент, robots, /legal/tos); зонд B/01 2026-09-24 18:08–18:11: 403 в безголовом браузере'
+  value: 3
+  useful_for:
+  - эффекты с кодом
+  search:
+    url_templates:
+    - https://codepen.io/<user>/pen/<id>
+    - https://codepen.io/search/pens?q=<запрос>
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: Pro
+  antibot: 403 для не-браузера
+  robots: не прочитан (403)
+  terms:
+    url: https://blog.codepen.io/legal/terms-of-service/ (codepen.io/legal/tos/ — 403 не-браузеру)
+    revision: 'Last Update: December 11, 2017'
+    clauses:
+    - доступ — «solely with supported browsers through the Internet for your own internal purposes»
+    - контент публичного пена — «Specifically, the MIT license»; приватный, никогда не публичный пен — «unlicensed»
+  client:
+    mode: manual
+    adapter: нет
+  rate: —
+  notes: Публичный пен — MIT по условиям CodePen (сохранять уведомление); редакцию 2017 г. сверить с codepen.io/legal/tos.
+  checked_at: '2026-09-24'
+- id: gsap-showcase
+  name: Витрина GSAP
+  group: effects-code
+  url: https://gsap.com/showcase/
+  alive: 'жив (robots 200); зонд B/01 2026-09-24 18:08–18:11: 200, 27,7 с'
+  value: 2
+  useful_for:
+  - сайты на GSAP
+  search:
+    url_templates:
+    - https://gsap.com/showcase/
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: —
+  antibot: не замечено
+  robots: 'Allow: /'
+  terms:
+    url: https://gsap.com/community/standard-license
+    revision: стандартная лицензия GSAP (Webflow)
+    clauses:
+    - коммерческое использование GSAP бесплатно, включая бывшие плагины Club
+  client:
+    mode: public
+    adapter: не написан
+  rate: 10 с
+  notes: ''
+  checked_at: '2026-09-24'
+- id: threejs-forum
+  name: Форум three.js, раздел Showcase
+  group: effects-code
+  url: https://discourse.threejs.org/c/showcase/7
+  alive: 'жив (robots 200); зонд B/01 2026-09-24 18:08–18:11: 200, 14 с'
+  value: 2
+  useful_for:
+  - WebGL-проекты с обсуждением
+  search:
+    url_templates:
+    - https://discourse.threejs.org/c/showcase/7
+    paging: Discourse
+  api:
+    exists: Discourse API
+    access: не изучено
+    limits: —
+  login:
+    needed: нет
+    paid: —
+  antibot: не замечено
+  robots: 6 именованных агентов
+  terms:
+    url: https://discourse.threejs.org/tos
+    revision: не прочитано (страница на JS)
+    clauses: []
+  client:
+    mode: manual
+    adapter: нет
+  rate: —
+  notes: ''
+  checked_at: '2026-09-24'
+- id: shadertoy
+  name: Shadertoy
+  group: effects-code
+  url: https://www.shadertoy.com/
+  alive: 'для не-браузера 403 или тайм-аут (фундамент, robots); зонд B/01 2026-09-24 18:08–18:11: 403 в безголовом браузере'
+  value: 2
+  useful_for:
+  - шейдеры
+  search:
+    url_templates:
+    - https://www.shadertoy.com/view/<id>
+    paging: —
+  api:
+    exists: API (ключ)
+    access: не изучено
+    limits: —
+  login:
+    needed: нет
+    paid: —
+  antibot: 403 для не-браузера
+  robots: не прочитан
+  terms:
+    url: https://www.shadertoy.com/terms
+    revision: снимок Wayback 2025-10-01 (прямой адрес — 403)
+    clauses:
+    - шейдер без лицензии автора — «Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported» (лицензия по умолчанию)
+    - публичный API — только для шейдеров «Public + API»; пунктов об автоматах нет
+  client:
+    mode: manual
+    adapter: нет
+  rate: —
+  notes: Шейдер без явной лицензии — не для коммерческого сайта (NC).
+  checked_at: '2026-09-24'
+- id: vimeo
+  name: Vimeo
+  group: motion
+  url: https://vimeo.com/
+  alive: 'жив (robots 200); зонд B/01 2026-09-24 18:08–18:11: 200, 9,9 с'
+  value: 2
+  useful_for:
+  - ролики кейсов студий, записи сайтов
+  search:
+    url_templates:
+    - https://vimeo.com/search?q=<запрос>
+    paging: —
+  api:
+    exists: true
+    access: API по API License Addendum
+    limits: —
+  login:
+    needed: нет
+    paid: —
+  antibot: не замечено
+  robots: 24 именованных агента
+  terms:
+    url: https://vimeo.com/terms
+    revision: 'Last Updated: July 8, 2024 (effective August 15, 2024)'
+    clauses:
+    - запрет доступа «using any automated means (such as robots, botnets, or scrapers)» кроме API, поисковиков по robots.txt
+      и письменного разрешения
+    - запрет «download, reproduce, redistribute, frame, mirror»
+    - запрет обхода rate-limiting
+  client:
+    mode: manual
+    adapter: нет; видео — трек V
+  rate: —
+  notes: Видео ищет только агент V (решение 6).
+  checked_at: '2026-09-24'
+- id: lottiefiles
+  name: LottieFiles
+  group: motion
+  url: https://lottiefiles.com/
+  alive: 'для не-браузера 403 (фундамент, robots, terms); зонд B/01 2026-09-24 18:08–18:11: 403 в безголовом браузере'
+  value: 2
+  useful_for:
+  - Lottie-анимации
+  search:
+    url_templates:
+    - https://lottiefiles.com/free-animations/<тег>
+    paging: —
+  api:
+    exists: есть (не изучено)
+    access: —
+    limits: —
+  login:
+    needed: для скачивания
+    paid: —
+  antibot: 403 для не-браузера
+  robots: не прочитан
+  terms:
+    url: https://lottiefiles.com/page/terms-and-conditions
+    revision: снимок Wayback 2026-07-12 (прямой адрес — 403; даты в тексте нет)
+    clauses:
+    - не «Use any robot, spider, or other automatic device, process, or means to access the Website for any purpose»; не «data
+      mining, or similar data gathering and extraction methods»
+    - бесплатные ассеты — «Lottie Simple License»; «The Individual Plan and Free Plan are strictly for non-commercial use
+      only» [спорно]
+  client:
+    mode: manual
+    adapter: нет
+  rate: —
+  notes: Перед использованием — лицензия конкретной анимации; коммерческое — Team/Enterprise или Simple License ассета.
+  checked_at: '2026-09-24'
+- id: rive
+  name: Rive (маркетплейс, сообщество)
+  group: motion
+  url: https://rive.app/marketplace
+  alive: 'жив (фундамент: marketplace и community/files 200; /community 404); зонд B/01 2026-09-24 18:08–18:11: 200, 6,2 с'
+  value: 2
+  useful_for:
+  - интерактивные анимации .riv
+  search:
+    url_templates:
+    - https://rive.app/marketplace
+    - https://rive.app/community/files
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: для ремикса
+    paid: —
+  antibot: не замечено
+  robots: минимальный
+  terms:
+    url: —
+    revision: не найдены (/legal — 404)
+    clauses: []
+  client:
+    mode: manual
+    adapter: нет
+  rate: —
+  notes: ''
+  checked_at: '2026-09-24'
+- id: fontsinuse
+  name: Fonts In Use
+  group: typography
+  url: https://fontsinuse.com/
+  alive: 'жив (robots 200, 10 именованных агентов); зонд B/01 2026-09-24 18:08–18:11: 200, 4,3 с'
+  value: 3
+  useful_for:
+  - шрифты в реальном применении, в т. ч. кириллица
+  search:
+    url_templates:
+    - https://fontsinuse.com/typefaces/<id>/<slug>
+    - https://fontsinuse.com/tags/<тег>
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: —
+  antibot: не замечено
+  robots: 10 именованных агентов
+  terms:
+    url: https://fontsinuse.com/terms
+    revision: не прочитано
+    clauses: []
+  client:
+    mode: manual
+    adapter: нет
+  rate: —
+  notes: ''
+  checked_at: '2026-09-24'
+- id: typewolf
+  name: Typewolf
+  group: typography
+  url: https://www.typewolf.com/
+  alive: 'жив (robots 200); зонд B/01 2026-09-24 18:08–18:11: тайм-аут 40 с (перемерить)'
+  value: 2
+  useful_for:
+  - пары шрифтов, сайты по шрифтам
+  search:
+    url_templates:
+    - https://www.typewolf.com/site-of-the-day
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: —
+  antibot: не замечено
+  robots: 8 именованных агентов
+  terms:
+    url: —
+    revision: не найдены (/terms — 404)
+    clauses: []
+  client:
+    mode: manual
+    adapter: нет
+  rate: —
+  notes: ''
+  checked_at: '2026-09-24'
+- id: arena
+  name: Are.na
+  group: moodboards
+  url: https://www.are.na/
+  alive: 'жив; API v3 прочитан (OpenAPI 3.0.0); зонд B/01 2026-09-24 18:08–18:11: 200, 5,8 с'
+  value: 3
+  useful_for:
+  - хранилище мудбордов заказчика
+  - чтение каналов по API
+  search:
+    url_templates:
+    - https://www.are.na/<user>/<channel>
+    - GET https://api.are.na/v3/channels/<slug>/contents
+    paging: per ≤ 100
+  api:
+    exists: true
+    access: 'Bearer (personal access token: read/write); поиск — Premium'
+    limits: гость 30/мин (IP), Free 120, Premium 300, Supporter 600
+  login:
+    needed: для записи
+    paid: Premium — поиск
+  antibot: не замечено
+  robots: 33 именованных агента
+  terms:
+    url: https://www.are.na/terms
+    revision: дата не извлечена
+    clauses:
+    - запрещены «Automated data scraping or crawling», «Bulk and Automated Downloads», «excessive, or abusive use» API
+    - 'API: «not for scraping or bulk data collection»'
+  client:
+    mode: api
+    adapter: arena pull / push (private)
+  rate: ≤ 24 запросов в минуту
+  notes: Аккаунта и токена у заказчика нет (вопрос 8).
+  checked_at: '2026-09-24'
+- id: pinterest
+  name: Pinterest
+  group: moodboards
+  url: https://www.pinterest.com/
+  alive: 'жив; robots.txt закрыт для «*» (309 именованных агентов); зонд B/01 2026-09-24 18:08–18:11: 200, стена «зарегистрируйтесь»'
+  value: 1
+  useful_for:
+  - доски заказчика
+  search:
+    url_templates:
+    - https://www.pinterest.com/search/pins/?q=<запрос>
+    paging: —
+  api:
+    exists: true
+    access: API по Developer Guidelines (хранить данные нельзя)
+    limits: —
+  login:
+    needed: да
+    paid: —
+  antibot: не проверено
+  robots: Disallow для «*»
+  terms:
+    url: https://policy.pinterest.com/en/terms-of-service
+    revision: 'Effective date: April 30, 2025'
+    clauses:
+    - «not scrape, collect, search, copy or otherwise access data or content from Pinterest in unauthorized ways, such as
+      by using automated means»
+    - 'Developer Guidelines: не хранить данные API, не scraping, не обучать ИИ'
+  client:
+    mode: manual
+    adapter: нет — только ручной сбор заказчиком
+  rate: —
+  notes: ''
+  checked_at: '2026-09-24'
+- id: savee
+  name: Savee
+  group: moodboards
+  url: https://savee.com/
+  alive: 'жив (savee.it → savee.com); robots — URLError; зонд B/01 2026-09-24 18:08–18:11: 200, 10,8 с'
+  value: 2
+  useful_for:
+  - визуальные закладки дизайнеров
+  search:
+    url_templates:
+    - https://savee.com/
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: да
+    paid: Pro
+  antibot: не замечено
+  robots: не прочитан
+  terms:
+    url: https://savee.com/terms
+    revision: дата не извлечена
+    clauses:
+    - запрет «Scrape, crawl, or otherwise extract data or content from Savee without our prior written permission»
+  client:
+    mode: manual
+    adapter: нет
+  rate: —
+  notes: ''
+  checked_at: '2026-09-24'
+- id: cosmos
+  name: Cosmos
+  group: moodboards
+  url: https://www.cosmos.so/
+  alive: 'жив (robots 200, 12 именованных агентов); зонд B/01 2026-09-24 18:08–18:11: 200, 5,2 с'
+  value: 2
+  useful_for:
+  - визуальные коллекции
+  search:
+    url_templates:
+    - https://www.cosmos.so/
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: да
+    paid: —
+  antibot: не замечено
+  robots: 12 именованных агентов
+  terms:
+    url: https://www.cosmos.so/legal/terms-conditions (/terms — профиль пользователя)
+    revision: Last updated September 25, 2025
+    clauses:
+    - 8(F) не «access or search the Services or download content… using any engine, software, tool, agent, device, or mechanism
+      (including spiders, robots, crawlers, data mining tools…) other than… generally available third-party web browsers»
+    - 8(I) не собирать персональные данные пользователей; 8(B) не зеркалить и не фреймить
+  client:
+    mode: manual
+    adapter: нет
+  rate: —
+  notes: ''
+  checked_at: '2026-09-24'
+- id: milanote
+  name: Milanote
+  group: moodboards
+  url: https://milanote.com/
+  alive: 'жив (robots 200); зонд B/01 2026-09-24 18:08–18:11: 200, 12,2 с'
+  value: 1
+  useful_for:
+  - инструмент досок, не источник
+  search:
+    url_templates:
+    - https://milanote.com/
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: да
+    paid: тариф
+  antibot: не замечено
+  robots: минимальный
+  terms:
+    url: —
+    revision: не найдены (/terms — 404)
+    clauses: []
+  client:
+    mode: manual
+    adapter: нет
+  rate: —
+  notes: ''
+  checked_at: '2026-09-24'
+- id: ratingruneta
+  name: Рейтинг Рунета
+  group: russian
+  url: https://ratingruneta.ru/
+  alive: 'жив (robots 200); итоги премий — awards.ratingruneta.ru (кэш других агентов); зонд B/01 2026-09-24 18:08–18:11:
+    200, 6,7 с'
+  value: 2
+  useful_for:
+  - русские победители по отраслям
+  search:
+    url_templates:
+    - https://awards.ratingruneta.ru/
+    - https://ratingruneta.ru/
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: участие
+  antibot: не замечено
+  robots: 2 именованных агента
+  terms:
+    url: —
+    revision: не прочитаны
+    clauses: []
+  client:
+    mode: public
+    adapter: не написан
+  rate: 10 с
+  notes: ''
+  checked_at: '2026-09-24'
+- id: goldensite
+  name: Золотой сайт
+  group: russian
+  url: https://goldensite.ru/
+  alive: 'жив (robots 200); итоги — goldensite.ru/results (кэш других агентов); зонд B/01 2026-09-24 18:08–18:11: 200, 2,9
+    с'
+  value: 2
+  useful_for:
+  - русские конкурсные сайты
+  search:
+    url_templates:
+    - https://goldensite.ru/results/
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: участие
+  antibot: не замечено
+  robots: минимальный
+  terms:
+    url: —
+    revision: не прочитаны
+    clauses: []
+  client:
+    mode: public
+    adapter: не написан
+  rate: 10 с
+  notes: ''
+  checked_at: '2026-09-24'
+- id: tagline
+  name: Tagline
+  group: russian
+  url: https://tagline.ru/
+  alive: 'жив (curl 200 за 16 с); robots — URLError для urllib; зонд B/01 2026-09-24 18:08–18:11: 200, 4 с'
+  value: 2
+  useful_for:
+  - премия Tagline Awards
+  search:
+    url_templates:
+    - https://tagline.ru/awards/
+    paging: —
+  api:
+    exists: false
+    access: —
+    limits: —
+  login:
+    needed: нет
+    paid: участие
+  antibot: не замечено
+  robots: не прочитан
+  terms:
+    url: —
+    revision: не прочитаны
+    clauses: []
+  client:
+    mode: public
+    adapter: не написан
+  rate: 10 с
+  notes: ''
+  checked_at: '2026-09-24'

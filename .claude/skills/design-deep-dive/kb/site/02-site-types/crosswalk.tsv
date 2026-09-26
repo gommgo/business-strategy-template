@@ -1,0 +1,711 @@
+source_base	source_file	source_section	source_vocab	source_term	namespace	our_id	relation	note
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	genres	genre	landing	page_type		none	жанр text; у site — поле page_type.genre=landing (все landing-*)
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	genres	genre	site-page	page_type		none	жанр text; у site — поле page_type.genre=site-page
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	genres	genre	article	page_type		none	жанр text; у site — поле page_type.genre=article (article-page, seo-landing-page, alternatives-page, blog-index-page)
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	genres	genre	meta	slot		none	жанр текста без типа страницы; слоты meta-* со scope: page
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	genres	genre	geo	slot		none	жанр текста; слоты geo-answer, definition, article-summary
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	genres	genre	email-form	slot		none	жанр текста; слоты email-*; механика писем — site F
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-lead-services	page_type	landing-lead-services	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-saas	page_type	landing-saas	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-product	page_type	landing-product	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-campaign	page_type	landing-campaign	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-event	page_type	landing-event	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-course	page_type	landing-course	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-app	page_type	landing-app	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-waitlist	page_type	landing-waitlist	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	home-multipage	page_type	home-multipage	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	service-page	page_type	service-page	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	about-page	page_type	about-page	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	case-page	page_type	case-page	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	pricing-page	page_type	pricing-page	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	careers-page	page_type	careers-page	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	contacts-page	page_type	contacts-page	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	portfolio-page	page_type	portfolio-page	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	article-page	page_type	article-page	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	seo-landing-page	page_type	seo-landing-page	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	hero	section_role	hero	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	problem	section_role	problem	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	solution	section_role	solution	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	benefits	section_role	benefits	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	how-it-works	section_role	how-it-works	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	product-demo	section_role	product-demo	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	proof-logos	section_role	proof-logos	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	proof-stats	section_role	proof-stats	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	testimonials	section_role	testimonials	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	case-studies	section_role	case-studies	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	awards-press	section_role	awards-press	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	comparison	section_role	comparison	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	pricing	section_role	pricing	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	guarantee	section_role	guarantee	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	objections	section_role	objections	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	faq	section_role	faq	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	about	section_role	about	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	team	section_role	team	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	portfolio	section_role	portfolio	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	integrations	section_role	integrations	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	event-program	section_role	event-program	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	cta-band	section_role	cta-band	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	lead-form	section_role	lead-form	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	final-cta	section_role	final-cta	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	contacts	section_role	contacts	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	footer	section_role	footer	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	article-body	section_role	article-body	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	related	section_role	related	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	meta-title	slot	meta-title	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	meta-description	slot	meta-description	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	og-title	slot	og-title	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	og-description	slot	og-description	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	og-image-alt	slot	og-image-alt	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	eyebrow	slot	eyebrow	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	headline	slot	headline	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	subheadline	slot	subheadline	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	hero-proof	slot	hero-proof	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	cta-label	slot	cta-label	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	cta-secondary-label	slot	cta-secondary-label	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	cta-note	slot	cta-note	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	section-title	slot	section-title	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	section-lead	slot	section-lead	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	body	slot	body	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	list-item	slot	list-item	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	card-title	slot	card-title	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	card-body	slot	card-body	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	step-title	slot	step-title	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	step-body	slot	step-body	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	stat-value	slot	stat-value	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	stat-label	slot	stat-label	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	logos-caption	slot	logos-caption	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	testimonial-quote	slot	testimonial-quote	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	testimonial-attribution	slot	testimonial-attribution	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	case-title	slot	case-title	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	case-summary	slot	case-summary	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	case-result	slot	case-result	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	pricing-plan-name	slot	pricing-plan-name	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	pricing-plan-summary	slot	pricing-plan-summary	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	pricing-price	slot	pricing-price	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	pricing-price-note	slot	pricing-price-note	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	pricing-feature	slot	pricing-feature	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	badge	slot	badge	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	guarantee-text	slot	guarantee-text	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	objection-answer	slot	objection-answer	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	comparison-row	slot	comparison-row	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	faq-q	slot	faq-q	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	faq-a	slot	faq-a	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	form-title	slot	form-title	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	form-lead	slot	form-lead	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	form-next-steps	slot	form-next-steps	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	form-consent	slot	form-consent	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	form-success	slot	form-success	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	nav-label	slot	nav-label	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	footer-tagline	slot	footer-tagline	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	footer-legal	slot	footer-legal	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	article-title	slot	article-title	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	article-lead	slot	article-lead	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	article-summary	slot	article-summary	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	article-heading	slot	article-heading	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	article-paragraph	slot	article-paragraph	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	article-author	slot	article-author	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	geo-answer	slot	geo-answer	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	definition	slot	definition	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	email-subject	slot	email-subject	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	email-preheader	slot	email-preheader	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	email-heading	slot	email-heading	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	email-body	slot	email-body	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	email-cta-label	slot	email-cta-label	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	email-footer	slot	email-footer	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	image-alt	slot	image-alt	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	in-image-text	slot	in-image-text	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	awareness	awareness	unaware	awareness	unaware	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	awareness	awareness	problem-aware	awareness	problem-aware	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	awareness	awareness	solution-aware	awareness	solution-aware	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	awareness	awareness	product-aware	awareness	product-aware	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	awareness	awareness	most-aware	awareness	most-aware	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.temperature	traffic	cold	traffic_temperature	cold	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.temperature	traffic	warm	traffic_temperature	warm	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.temperature	traffic	hot	traffic_temperature	hot	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	search-problem	traffic_source	search-problem	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	search-category	traffic_source	search-category	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	search-brand	traffic_source	search-brand	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	paid-social	traffic_source	paid-social	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	paid-search	traffic_source	paid-search	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	ai-answer	traffic_source	ai-answer	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	referral	traffic_source	referral	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	email	traffic_source	email	equal	id взят как есть
+text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	direct	traffic_source	direct	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	eyebrow	slot	eyebrow	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	headline	slot	headline	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	subheadline	slot	subheadline	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	hero-proof	slot	hero-proof	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	cta-label	slot	cta-label	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	cta-secondary-label	slot	cta-secondary-label	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	cta-note	slot	cta-note	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	promise	slot	promise	equal	предложение E text (proposal) — принято, status: proposed
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	section-title	slot	section-title	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	section-lead	slot	section-lead	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	body	slot	body	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	list-item	slot	list-item	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	card-title	slot	card-title	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	card-body	slot	card-body	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	step-title	slot	step-title	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	step-body	slot	step-body	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	stat-value	slot	stat-value	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	stat-label	slot	stat-label	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	logos-caption	slot	logos-caption	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	testimonial-quote	slot	testimonial-quote	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	testimonial-attribution	slot	testimonial-attribution	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	case-title	slot	case-title	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	case-summary	slot	case-summary	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	case-result	slot	case-result	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	pricing-plan-name	slot	pricing-plan-name	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	pricing-plan-summary	slot	pricing-plan-summary	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	pricing-price	slot	pricing-price	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	pricing-price-note	slot	pricing-price-note	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	pricing-feature	slot	pricing-feature	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	badge	slot	badge	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	guarantee-text	slot	guarantee-text	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	objection-answer	slot	objection-answer	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	comparison-row	slot	comparison-row	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	faq-q	slot	faq-q	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	faq-a	slot	faq-a	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	form-title	slot	form-title	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	form-lead	slot	form-lead	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	form-next-steps	slot	form-next-steps	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	form-consent	slot	form-consent	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	form-success	slot	form-success	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	nav-label	slot	nav-label	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	footer-tagline	slot	footer-tagline	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	footer-legal	slot	footer-legal	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	meta-title	slot	meta-title	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	meta-description	slot	meta-description	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	og-title	slot	og-title	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	og-description	slot	og-description	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	og-image-alt	slot	og-image-alt	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	article-title	slot	article-title	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	article-lead	slot	article-lead	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	article-summary	slot	article-summary	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	article-heading	slot	article-heading	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	article-paragraph	slot	article-paragraph	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	article-author	slot	article-author	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	geo-answer	slot	geo-answer	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	definition	slot	definition	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	email-subject	slot	email-subject	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	email-preheader	slot	email-preheader	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	email-heading	slot	email-heading	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	email-body	slot	email-body	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	email-cta-label	slot	email-cta-label	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	email-footer	slot	email-footer	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	image-alt	slot	image-alt	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	in-image-text	slot	in-image-text	equal	id взят как есть
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	stat-source	slot	stat-source	equal	предложение E text (proposal) — принято, status: proposed
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	price-old	slot	price-old	equal	предложение E text (proposal) — принято, status: proposed
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	spec-row	slot	spec-row	equal	предложение E text (proposal) — принято, status: proposed
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	image-caption	slot	image-caption	equal	предложение E text (proposal) — принято, status: proposed
+text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	announcement	slot	announcement	equal	предложение E text (proposal) — принято, status: proposed
+text-research	../text/04-copy-by-block/copy-slots.yaml	composites	slot_type	hero-core	slot	headline	broader	составной слот text: заголовок + подзаголовок + кнопки + строка у кнопки + микродоказательство ≤ 40 слов — правило text; наш слот — часть
+text-research	../text/04-copy-by-block/copy-slots.yaml	composites	slot_type	hero-core	slot	subheadline	broader	то же
+text-research	../text/04-copy-by-block/copy-slots.yaml	composites	slot_type	hero-core	slot	cta-label	broader	то же
+text-research	../text/04-copy-by-block/copy-slots.yaml	composites	slot_type	hero-core	slot	cta-secondary-label	broader	то же
+text-research	../text/04-copy-by-block/copy-slots.yaml	composites	slot_type	hero-core	slot	cta-note	broader	то же
+text-research	../text/04-copy-by-block/copy-slots.yaml	composites	slot_type	hero-core	slot	hero-proof	broader	то же
+text-research	../text-research/03-corpus-measured/corpus.tsv	колонка page_type	page_type	about-page	page_type	about-page	equal	id взят как есть
+text-research	../text-research/03-corpus-measured/corpus.tsv	колонка page_type	page_type	article-page	page_type	article-page	equal	id взят как есть
+text-research	../text-research/03-corpus-measured/corpus.tsv	колонка page_type	page_type	careers-page	page_type	careers-page	equal	id взят как есть
+text-research	../text-research/03-corpus-measured/corpus.tsv	колонка page_type	page_type	home-multipage	page_type	home-multipage	equal	id взят как есть
+text-research	../text-research/03-corpus-measured/corpus.tsv	колонка page_type	page_type	landing-campaign	page_type	landing-campaign	equal	id взят как есть
+text-research	../text-research/03-corpus-measured/corpus.tsv	колонка page_type	page_type	landing-course	page_type	landing-course	equal	id взят как есть
+text-research	../text-research/03-corpus-measured/corpus.tsv	колонка page_type	page_type	landing-event	page_type	landing-event	equal	id взят как есть
+text-research	../text-research/03-corpus-measured/corpus.tsv	колонка page_type	page_type	landing-lead-services	page_type	landing-lead-services	equal	id взят как есть
+text-research	../text-research/03-corpus-measured/corpus.tsv	колонка page_type	page_type	landing-product	page_type	landing-product	equal	id взят как есть
+text-research	../text-research/03-corpus-measured/corpus.tsv	колонка page_type	page_type	landing-saas	page_type	landing-saas	equal	id взят как есть
+text-research	../text-research/03-corpus-measured/corpus.tsv	колонка page_type	page_type	portfolio-page	page_type	portfolio-page	equal	в корпусе это главные студий (ideo.com, artlebedev.ru, bureau.ru) — у site: portfolio-page ИЛИ home-multipage + site_type portfolio-site
+text-research	../text-research/03-corpus-measured/corpus.tsv	колонка page_type	page_type	pricing-page	page_type	pricing-page	equal	id взят как есть
+text-research	../text-research/03-corpus-measured/corpus.tsv	колонка page_type	page_type	service-page	page_type	service-page	equal	id взят как есть
+text-research	../text-research/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	retargeting	traffic_source	retargeting	equal	предложение B1 text — принято
+text-research	../text-research/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	maps-local	traffic_source	maps-local	equal	предложение B1 text — принято
+text-research	../text-research/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	social-organic	traffic_source	social-organic	equal	предложение B1 text — принято
+text-research	../text-research/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	marketplace	traffic_source	marketplace	equal	предложение B1 text — принято; + агрегаторы услуг (Авито, Профи)
+text-research	../text-research/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	messenger	traffic_source	messenger	equal	предложение B1 text — принято
+text-research	../text-research/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	offline	traffic_source	offline	equal	предложение B1 text — принято
+text-research	../text-research/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	specs	section_role	specs	equal	предложение B2 text — принято
+text-research	../text-research/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	spec-row	slot	spec-row	equal	предложение B2 text — принято (proposed)
+text-research	../text-research/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	price-old	slot	price-old	equal	предложение B2 text — принято (proposed); право цены «до скидки» — I
+text-research	../text-research/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	stat-source	slot	stat-source	equal	предложение B2 text — принято (proposed)
+text-research	../text-research/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	article-date	slot	article-date	equal	предложение G text — принято (proposed)
+text-research	../text-research/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	article-sources	slot	article-sources	equal	предложение G text — принято (proposed)
+text-research	../text-research/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	ux_role: meta	slot		none	предложение C и G text — поле ux_role text, не пространство site; принято как поле text; у site мета-слоты — scope: page
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Hero	section_role	hero	related	слот ai-media = секция + её визуал; визуал — slot hero-visual
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Hero	slot	hero-visual	related	главный визуал первого экрана
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Логотипы клиентов	block	logo-wall	related	блок; ассет — slot logo (не генерировать)
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Логотипы клиентов	slot	logo	narrower	у site logo — клиенты, партнёры, СМИ
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Фичи (3–6 блоков)	section_role	benefits	related	блоки: feature-grid, feature-alternating, feature-bento
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Фичи (3–6 блоков)	slot	illustration	related	также screenshot, icon, video по лестнице ai-media
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	«Как это работает», интеграции	section_role	how-it-works	related	интеграции — section_role integrations
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	«Как это работает», интеграции	slot	diagram	related	схема SVG кодом
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Витрина, галерея работ	section_role	portfolio	related	блоки portfolio-grid, gallery
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Отзывы	section_role	testimonials	related	ассет — slot avatar (реальные фото)
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Отзывы	slot	avatar	related	
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Кейсы, цифры	section_role	case-studies	related	цифры — section_role proof-stats (текст, не картинка)
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Кейсы, цифры	slot	cover-image	related	обложка кейса
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Тарифы	section_role	pricing	related	картинок почти нет
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	CTA-полоса	block	cta-band	related	ассет — slot background
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Подвал	block	footer	related	ассет — slot brand-logo
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Фоны секций, текстуры	slot	background	equal	
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	OG и соцсети	slot	og-image	equal	scope: page
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Фавиконы	slot	favicon	equal	scope: page
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Команда, «о нас»	section_role	team	related	о нас — section_role about
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Команда, «о нас»	slot	photo	related	только реальные фото
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Обложки блога	slot	cover-image	narrower	
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Галерея товара (PDP)	page_type	ecommerce-product-page	related	вне рамок; для промо товара — slot product-photo
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Key visual кампании	slot	hero-visual	narrower	страница — landing-campaign
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Инфографика карточки маркетплейса (RU)	slot		none	вне рамок site (маркетплейс)
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	404, пустые состояния, онбординг	page_type	not-found-page	related	пустые состояния и онбординг — сервисы (ux, ui), не site
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.1 Лендинг SaaS и ИИ-продукта	page_type	landing-saas	equal	порядок секций там — наблюдение по ассетам, порядок — C
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.2 Продуктовая страница «как у Apple»	page_type	landing-product	equal	
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.3 E-commerce: главная и карточка товара	page_type	ecommerce-catalog-page	related	вне рамок
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.3 E-commerce: главная и карточка товара	page_type	ecommerce-product-page	related	вне рамок
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.4 Маркетинговая кампания и D2C-бренд	page_type	landing-campaign	broader	D2C-главные — ещё и home-multipage
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.5 Студия и портфолио	page_type	portfolio-page	related	сайт — site_type portfolio-site
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.5 Студия и портфолио	site_type	portfolio-site	related	
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.6 Корпоративный сайт (услуги, B2B, недвижимость, туризм)	site_type	corporate-site	broader	у site разделено: corporate-site и services-site
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.6 Корпоративный сайт (услуги, B2B, недвижимость, туризм)	site_type	services-site	broader	
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.7 Блог и медиа	page_type	article-page	broader	и blog-index-page; медиа-портал — вне рамок
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.7 Блог и медиа	page_type	blog-index-page	broader	
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.8 Вставки в веб-сервисы	page_type	web-app-screen	related	вне рамок site (ux, ui)
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	about-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	blog	page_type	alternatives-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	blog	page_type	article-page	equal	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	blog	page_type	blog-index-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	careers-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	studio	page_type	case-list-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	studio	page_type	case-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	saas-landing	page_type	comparison-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	contacts-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	documents-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	ecom-home	page_type	ecommerce-catalog-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	ecom-pdp	page_type	ecommerce-product-page	equal	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	campaign	page_type	event-program-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	faq-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	saas-landing	page_type	feature-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	form-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	home-multipage	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	html-sitemap-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	saas-landing	page_type	integrations-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	product	page_type	landing-app	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	campaign	page_type	landing-campaign	equal	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	landing-course	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	campaign	page_type	landing-event	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	landing-lead-magnet	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	landing-lead-services	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	product	page_type	landing-product	equal	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	saas-landing	page_type	landing-saas	equal	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	campaign	page_type	landing-waitlist	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	legal-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	location-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	web-app-inserts	page_type	not-found-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	studio	page_type	portfolio-page	equal	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	saas-landing	page_type	pricing-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	program-catalog-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	reviews-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	web-app-inserts	page_type	search-results-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	saas-landing	page_type	security-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	seo-landing-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	service-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	services-index-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	campaign	page_type	speakers-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	specialist-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	team-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	corporate	page_type	thank-you-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	saas-landing	page_type	use-case-page	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (page.page_type)	page_type (план ассетов)	web-app-inserts	page_type	web-app-screen	broader	проекция site → ai-media: наш page_type пишется в план ассетов этим значением
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (slots[].section — свободная строка)	section	hero	section_role	hero	equal	предложение ai-media: section = id секции page-plan, значения — section_role
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (slots[].section — свободная строка)	section	social-proof	section_role	proof-logos	broader	social-proof шире: ещё testimonials, proof-stats, case-studies
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8 (slots[].section — свободная строка)	section	meta	slot		none	не секция: мета страницы — слоты со scope: page (og-image, favicon, meta-*)
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8, §8.1, §8.2 (slots[].id в примерах)	slot id плана	hero	slot	hero-visual	related	
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8, §8.1, §8.2 (slots[].id в примерах)	slot id плана	logos	slot	logo	related	
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8, §8.1, §8.2 (slots[].id в примерах)	slot id плана	og	slot	og-image	equal	
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8, §8.1, §8.2 (slots[].id в примерах)	slot id плана	favicons	slot	favicon	equal	
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8, §8.1, §8.2 (slots[].id в примерах)	slot id плана	features	block	feature-grid	related	id слота плана = секция; медиа — illustration
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8, §8.1, §8.2 (slots[].id в примерах)	slot id плана	testimonials	slot	avatar	related	
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8, §8.1, §8.2 (slots[].id в примерах)	slot id плана	cta-band	slot	background	related	фон полосы призыва
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8, §8.1, §8.2 (slots[].id в примерах)	slot id плана	gallery	slot	product-photo	related	PDP — вне рамок; для промо товара — product-photo
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8, §8.1, §8.2 (slots[].id в примерах)	slot id плана	product-video	slot	video	related	
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8, §8.1, §8.2 (slots[].id в примерах)	slot id плана	marketplace-infographic	slot		none	вне рамок (маркетплейс)
+ai-media-research	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§8, §8.1, §8.2 (slots[].id в примерах)	slot id плана	role: informational | decorative	slot		none	свойство ассета ai-media; в page-plan — поле слота media, не id
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	about-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	blog	page_type	alternatives-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	blog	page_type	article-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	blog	page_type	blog-index-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	careers-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	portfolio	page_type	case-list-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	portfolio	page_type	case-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	saas	page_type	comparison-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	contacts-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	documents-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	ecommerce	page_type	ecommerce-catalog-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	ecommerce	page_type	ecommerce-product-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	event-program-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	faq-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	saas	page_type	feature-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	form-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	home-multipage	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	html-sitemap-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	integrations-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	product	page_type	landing-app	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	landing	page_type	landing-campaign	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	landing	page_type	landing-course	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	landing	page_type	landing-event	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	landing	page_type	landing-lead-magnet	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	landing	page_type	landing-lead-services	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	product	page_type	landing-product	equal	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	saas	page_type	landing-saas	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	landing	page_type	landing-waitlist	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	legal-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	location-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	not-found-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	portfolio	page_type	portfolio-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	saas	page_type	pricing-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	program-catalog-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	reviews-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	search-results-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	security-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	seo-landing-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	service-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	services-index-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	speakers-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	specialist-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	team-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	marketing	page_type	thank-you-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	saas	page_type	use-case-page	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.page_type (enum)	page_type (спецификация)	other	page_type	web-app-screen	broader	проекция site → спецификация ассета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.section (строка; примеры в description)	section	hero	section_role	hero	equal	
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.section (строка; примеры в description)	section	features	section_role	benefits	related	
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.section (строка; примеры в description)	section	empty-state	section_role		none	сервисы — ux, ui
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.section (строка; примеры в description)	section	onboarding	section_role		none	сервисы — ux, ui
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.section (строка; примеры в description)	section	pricing	section_role	pricing	equal	
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.section (строка; примеры в description)	section	testimonials	section_role	testimonials	equal	
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.section (строка; примеры в description)	section	footer	section_role	footer	equal	
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.section (строка; примеры в description)	section	og	slot	og-image	related	не секция — мета
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.section (строка; примеры в description)	section	404	page_type	not-found-page	related	
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.slot (строка; примеры)	slot	hero-bg	slot	background	related	фон hero; главный визуал — hero-visual
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.slot (строка; примеры)	slot	feature-3-illustration	slot	illustration	related	номер экземпляра — в page-plan, не в id
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.priority (enum)	priority	lcp	slot		none	свойство медиа-слота (LCP-кандидат, выше или ниже сгиба); в page-plan — поле, не id
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.priority (enum)	priority	above-fold	slot		none	свойство медиа-слота (LCP-кандидат, выше или ниже сгиба); в page-plan — поле, не id
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.priority (enum)	priority	below-fold	slot		none	свойство медиа-слота (LCP-кандидат, выше или ниже сгиба); в page-plan — поле, не id
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	role.priority (enum)	priority	decorative	slot		none	свойство медиа-слота (LCP-кандидат, выше или ниже сгиба); в page-plan — поле, не id
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	$defs.text_zone.purpose (enum)	purpose	headline	slot	headline	related	зона под заголовок
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	$defs.text_zone.purpose (enum)	purpose	body	slot	body	related	
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	$defs.text_zone.purpose (enum)	purpose	cta	slot	cta-label	related	
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	$defs.text_zone.purpose (enum)	purpose	logo	slot	brand-logo	related	
+ai-media-research	../ai-media/05-prompting/asset-spec.schema.json	$defs.text_zone.purpose (enum)	purpose	caption	slot	image-caption	related	
+ai-media-research	../ai-media-research/11-evaluation-qa/rubrics/*.rubric.json	поле slot (13 рубрик)	slot рубрики	hero	slot	hero-visual	related	рубрики hero-photo, video-loop
+ai-media-research	../ai-media-research/11-evaluation-qa/rubrics/*.rubric.json	поле slot (13 рубрик)	slot рубрики	section	slot		none	обобщённое «секция» (bg-abstract, edit, icon3d, illustration, series): у site — конкретный slot (background, illustration, icon) и block
+ai-media-research	../ai-media-research/11-evaluation-qa/rubrics/*.rubric.json	поле slot (13 рубрик)	slot рубрики	product	slot	product-photo	related	рубрики product, cutout, video-product
+ai-media-research	../ai-media-research/11-evaluation-qa/rubrics/*.rubric.json	поле slot (13 рубрик)	slot рубрики	icon	slot	icon	equal	рубрика svg-icon
+ai-media-research	../ai-media-research/11-evaluation-qa/rubrics/*.rubric.json	поле slot (13 рубрик)	slot рубрики	og	slot	og-image	equal	рубрика text-image
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	404	page_type	not-found-page	related	
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	banner	block	promo-offer	related	промо-баннер с текстом; строка — in-image-text
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	blog-cover	slot	cover-image	narrower	
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	campaign	page_type	landing-campaign	related	
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	case	section_role	case-studies	related	
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	case-cover	slot	cover-image	narrower	
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	cta	block	cta-band	related	
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	empty-state	section_role		none	сервисы — ux, ui
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	favicons	slot	favicon	equal	
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	feature	section_role	benefits	related	блоки feature-*
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	footer	block	footer	equal	
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	gallery	block	gallery	equal	
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	hero	section_role	hero	equal	
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	how-it-works	section_role	how-it-works	equal	
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	integrations	section_role	integrations	equal	
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	key-visual	slot	hero-visual	narrower	кампания
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	marketplace-card	slot		none	вне рамок
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	nav	block	header	related	
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	og	slot	og-image	equal	
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	onboarding	section_role		none	сервисы — ux, ui
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	pdp-gallery	page_type	ecommerce-product-page	related	вне рамок; промо — product-photo
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	pricing	section_role	pricing	equal	
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	product-story	block	feature-spotlight	related	секция-история продукта; роль story
+ai-media-research	../ai-media/13-routing-matrix/routing.yaml	routes.<код>.slots (v1, checked 2026-09-24)	slug	section-bg	slot	background	equal	
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	ai	page_type	home-multipage	related	главные ИИ-компаний; сайт — saas-marketing-site
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	saas	page_type	home-multipage	related	главные SaaS; сайт — saas-marketing-site
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	ecom-home	page_type	ecommerce-catalog-page	related	вне рамок
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	studio	page_type	portfolio-page	related	
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	ecom-pdp	page_type	ecommerce-product-page	equal	вне рамок
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	product	page_type	landing-product	related	
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	d2c-brand	page_type	landing-campaign	related	главная D2C-бренда
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	corporate-product	site_type	corporate-site	related	
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	product-page	page_type	landing-product	related	
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	travel-brand	site_type	services-site	related	
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	corporate	site_type	corporate-site	related	
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	campaign	page_type	landing-campaign	equal	
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	media	site_type	media-portal	related	вне рамок
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	bank	site_type	corporate-site	related	отрасль, не тип
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	edu	site_type	school-site	related	
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	fintech	site_type	saas-marketing-site	related	отрасль, не тип
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	template	page_type		none	шаблон витрины, не тип
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	report	page_type	article-page	related	отчёт-лонгрид
+ai-media-research	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	ecom-campaign	page_type	landing-campaign	related	
+kimi-research	../kimi-research/07-brief-handoff/templates/brief.yaml	project.type (стр. 13)	type	landing	site_type	landing-site	broader	у kimi landing — любой сайт-страница; у site тип сайта + page_type
+kimi-research	../kimi-research/07-brief-handoff/templates/brief.yaml	project.type (стр. 13)	type	webapp	site_type	web-app	equal	вне рамок site
+kimi-research	../kimi-research/07-brief-handoff/templates/brief.yaml	direction.macrostructure (стр. 72)	группа формы	grid-led	macrostructure	bento-grid	broader	группа Hallmark (SKILL.md стр. 286: «grid-led like Bento»); полный состав — поле layout_mode (C)
+kimi-research	../kimi-research/07-brief-handoff/templates/brief.yaml	direction.macrostructure (стр. 72)	группа формы	document-led	macrostructure	long-document	broader	«document-led like Long Document»
+kimi-research	../kimi-research/07-brief-handoff/templates/brief.yaml	direction.macrostructure (стр. 72)	группа формы	poster-led	macrostructure	manifesto	broader	«poster-led like Manifesto»
+kimi-research	../kimi-research/07-brief-handoff/templates/brief.yaml	site.sections[].id (стр. 85–86)	section id	hero	section_role	hero	equal	поле свободное; предложение kimi: id секции = section_role (или block), job — строка
+kimi-research	../kimi-research/07-brief-handoff/templates/brief.yaml	product.primary_action (стр. 23)	свободная строка	«глагол + объект»	action		none	проекция site → kimi: подпись из action + cta-label; обратная — вручную
+kimi-research	../kimi-research/05-reviews-practice/03-default-look-k3.md	§3.3 (типовые скелеты K3)	скелет	Лендинг «гостеприимство / люкс»	page_type	landing-lead-services	related	главное действие — booking (бронирование)
+kimi-research	../kimi-research/05-reviews-practice/03-default-look-k3.md	§3.3 (типовые скелеты K3)	скелет	Магазин	site_type	ecommerce-store	related	вне рамок; промо товара — landing-product
+kimi-research	../kimi-research/05-reviews-practice/03-default-look-k3.md	§3.3 (типовые скелеты K3)	скелет	Портфолио / студия / выставка	page_type	portfolio-page	related	сайт — portfolio-site; выставка — landing-event
+kimi-research	../kimi-research/91-videos/digests/weoV4dm-X1A.md	стр. 196–210 (карточка брифа скилла Jack)	тип сайта	Product/launch	page_type	landing-product	related	запуск — ещё landing-campaign
+kimi-research	../kimi-research/91-videos/digests/weoV4dm-X1A.md	стр. 196–210 (карточка брифа скилла Jack)	тип сайта	Product/launch	page_type	landing-campaign	related	
+kimi-research	../kimi-research/91-videos/digests/weoV4dm-X1A.md	стр. 196–210 (карточка брифа скилла Jack)	тип сайта	Personal brand	site_type	personal-brand-site	equal	
+kimi-research	../kimi-research/91-videos/digests/weoV4dm-X1A.md	стр. 196–210 (карточка брифа скилла Jack)	тип сайта	SaaS landing	page_type	landing-saas	equal	
+kimi-research	../kimi-research/91-videos/digests/weoV4dm-X1A.md	стр. 196–210 (карточка брифа скилла Jack)	тип сайта	Event/experience	page_type	landing-event	related	«experience» — ещё landing-campaign L2
+kimi-research	../kimi-research/91-videos/digests/weoV4dm-X1A.md	стр. 196–210 (карточка брифа скилла Jack)	тип сайта	Other	page_type		none	
+kimi-research	../kimi-research/91-videos/digests/weoV4dm-X1A.md	стр. 196–210 (карточка брифа скилла Jack)	результат	Purchase	action	purchase	equal	
+kimi-research	../kimi-research/91-videos/digests/weoV4dm-X1A.md	стр. 196–210 (карточка брифа скилла Jack)	результат	Join waitlist	action	join-waitlist	equal	
+kimi-research	../kimi-research/91-videos/digests/weoV4dm-X1A.md	стр. 196–210 (карточка брифа скилла Jack)	результат	Remember brand	action		none	цель осведомлённости, не действие; измеряется иначе (P)
+kimi-research	../kimi-research/91-videos/digests/weoV4dm-X1A.md	стр. 196–210 (карточка брифа скилла Jack)	результат	Trust the work	action		none	цель доверия (портфолио); действие — lead-request или message
+kimi-research	../kimi-research/07-brief-handoff/01-from-app-description-to-brief.md	§2.2 (стр. 108–116)	тип приложения	«сайт + личный кабинет»	site_type	saas-marketing-site	related	два пакета с общим DESIGN.md: сайт (site) + web-app (ux, ui)
+kimi-research	../kimi-research/07-brief-handoff/01-from-app-description-to-brief.md	§2.2 (стр. 108–116)	тип приложения	«сайт-история, кино-скролл, 3D-мир»	macrostructure	scroll-story	related	у kimi: landing + decisions.motion: cinematic; уровень — L2 (creative)
+blender-research	../blender/12-recipes/00-how-to-use.md	§1 (дерево «задача страницы → рецепт»)	рецепт	01-hero-product	slot	model-3d	related	в блоке hero-media
+blender-research	../blender/12-recipes/00-how-to-use.md	§1 (дерево «задача страницы → рецепт»)	рецепт	02-icon-series	slot	icon	related	3D-иконки фич
+blender-research	../blender/12-recipes/00-how-to-use.md	§1 (дерево «задача страницы → рецепт»)	рецепт	03-device-mockup	slot	screenshot	related	мокап устройства
+blender-research	../blender/12-recipes/00-how-to-use.md	§1 (дерево «задача страницы → рецепт»)	рецепт	04-abstract-sculpture	slot	model-3d	related	hero без продукта
+blender-research	../blender/12-recipes/00-how-to-use.md	§1 (дерево «задача страницы → рецепт»)	рецепт	05-scroll-showcase	block	feature-spotlight	related	раскрытие по прокрутке; роль story или product-demo
+blender-research	../blender/12-recipes/00-how-to-use.md	§1 (дерево «задача страницы → рецепт»)	рецепт	06-logo-3d-particles	slot	model-3d	related	
+blender-research	../blender/12-recipes/00-how-to-use.md	§1 (дерево «задача страницы → рецепт»)	рецепт	07-lowpoly-diorama	slot	scene-3d	related	
+blender-research	../blender/12-recipes/00-how-to-use.md	§1 (дерево «задача страницы → рецепт»)	рецепт	08-sequence-video-alpha	slot	video	related	видео с альфой вместо реалтайма
+blender-research	../blender/12-recipes/00-how-to-use.md	§1 (дерево «задача страницы → рецепт»)	рецепт	09-glass-product	slot	model-3d	related	
+blender-research	../blender/12-recipes/00-how-to-use.md	§1 (дерево «задача страницы → рецепт»)	рецепт	10-instance-field	slot	scene-3d	related	паттерн «город данных»
+blender-research	../blender/12-recipes/00-how-to-use.md	§1 (дерево «задача страницы → рецепт»)	рецепт	11-shader-background	slot	background	related	шейдерный фон без Blender
+blender-research	../blender/12-recipes/00-how-to-use.md	§1 (дерево «задача страницы → рецепт»)	рецепт	12-model-viewer-ar	block	interactive-demo	related	покрутить и «поставить на стол»
+blender-research	../blender/01-web-3d-landscape/02-when-3d-budgets-loading.md	§7 (цель страницы)	цель	Продать/объяснить товар (продуктовый лендинг, e-commerce)	page_type	landing-product	broader	e-commerce — вне рамок
+blender-research	../blender/01-web-3d-landscape/02-when-3d-budgets-loading.md	§7 (цель страницы)	цель	Бренд/SaaS без физического товара	page_type	landing-saas	related	
+blender-research	../blender/01-web-3d-landscape/02-when-3d-budgets-loading.md	§7 (цель страницы)	цель	Кампания, запуск, портфолио студии (опыт и есть продукт)	page_type	landing-campaign	related	
+blender-research	../blender/01-web-3d-landscape/02-when-3d-budgets-loading.md	§7 (цель страницы)	цель	Кампания, запуск, портфолио студии (опыт и есть продукт)	site_type	portfolio-site	related	
+ux-research	../ux/01-foundations/03-frameworks-domain-to-screens.md	§4 (CTA-матрица OOUX)	CTA	CTA (роль × объект × действие)	action		none	омоним: на сайте CTA — призыв (slot cta-primary), действия посетителя — пространство action (PLAN, поправка 9)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	01 · Bento Grid	macrostructure	bento-grid	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	02 · Long Document	macrostructure	long-document	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	03 · Marquee Hero	macrostructure	marquee-hero	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	04 · Stat-Led	macrostructure	stat-led	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	05 · Workbench	macrostructure	workbench	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	06 · Conversational FAQ	macrostructure	conversational-faq	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	07 · Manifesto	macrostructure	manifesto	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	08 · Photographic	macrostructure	photographic	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	09 · Quote-Led	macrostructure	quote-led	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	10 · Specimen	macrostructure	specimen	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	11 · Catalogue	macrostructure	catalogue	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	12 · Letter	macrostructure	letter	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	13 · Index-First	macrostructure	index-first	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	14 · Narrative Workflow	macrostructure	narrative-workflow	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	15 · Split Studio	macrostructure	split-studio	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	16 · Feature Stack	macrostructure	feature-stack	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	17 · Type Specimen	macrostructure	type-specimen	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	18 · Portfolio Grid	macrostructure	portfolio-grid	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	19 · Map / Diagram	macrostructure	map-diagram	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	20 · Ecosystem Index	macrostructure	ecosystem-index	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/macrostructures.md	The 21 macrostructures — index	macrostructure	21 · Component Playground	macrostructure	component-playground	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/structure.md	Domain → trio (стр. 133–152)	домен	podcast, audio, music	site_type	personal-brand-site	related	трио Photographic·Quote-Led·Letter
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/structure.md	Domain → trio (стр. 133–152)	домен	shop, store, product, commerce	site_type	ecommerce-store	related	вне рамок; промо — landing-product
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/structure.md	Domain → trio (стр. 133–152)	домен	docs, CLI, SDK, API	site_type	docs-site	related	вне рамок
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/structure.md	Domain → trio (стр. 133–152)	домен	platform, infra, B2B tool, try-or-talk-to-sales	page_type	landing-saas	related	трио Bento·Workbench·Stat-Led
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/structure.md	Domain → trio (стр. 133–152)	домен	agency, studio, case studies, portfolio	site_type	portfolio-site	equal	трио Portfolio Grid·Split Studio·Index-First
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/structure.md	Domain → trio (стр. 133–152)	домен	personal one-pager, about-me	site_type	personal-brand-site	narrower	трио Long Document·Letter·Index-First
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/structure.md	Domain → trio (стр. 133–152)	домен	restaurant, café, bar, food	site_type	services-site	narrower	трио Photographic·Long Document·Catalogue
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/structure.md	Domain → trio (стр. 133–152)	домен	fashion, apparel, beauty, lookbook	page_type	landing-campaign	related	трио Photographic·Catalogue·Marquee Hero
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/structure.md	Domain → trio (стр. 133–152)	домен	fintech, banking, payments	site_type	saas-marketing-site	related	трио Stat-Led·Workbench·Long Document
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/structure.md	Domain → trio (стр. 133–152)	домен	manifesto, campaign, cause, advocacy	page_type	landing-campaign	related	трио Manifesto·Quote-Led·Stat-Led
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/structure.md	Domain → trio (стр. 133–152)	домен	editorial, foundry, magazine	site_type	media-portal	related	вне рамок; трио Specimen·Long Document·Type Specimen
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/structure.md	Domain → trio (стр. 133–152)	домен	product launch, SaaS marketing, B2B	page_type	landing-saas	related	трио Bento·Workbench·Stat-Led
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/structure.md	Domain → trio (стр. 133–152)	домен	conference, event, speaker, keynote	page_type	landing-event	equal	трио Marquee Hero·Manifesto·Photographic
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/structure.md	Domain → trio (стр. 133–152)	домен	fallback (no signal)	page_type		none	трио Bento·Long Document·Manifesto — у site спросить тип (дерево выбора)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	H1 Marquee	block	hero-text	narrower	вариант: одно заявление без кнопки в первом экране
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	H2 Split diptych	block	hero-media	narrower	вариант раскладки split
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	H3 Quote led	block	hero-quote	equal	
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	H4 Stat led	block	hero-stat	equal	
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	H5 Letter hero	block	hero-letter	equal	
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	H6 Photographic fold	block	hero-media	narrower	вариант: фото на весь экран
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	H7 Demo video clipped by viewport edge	block	hero-media	narrower	вариант: видео продукта
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	H8 Mockup split browser framed	block	hero-media	narrower	вариант: мокап
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	H9 Custom illustration centerpiece	block	hero-media	narrower	вариант: иллюстрация
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	F1 Bento grid	block	feature-bento	equal	
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	F2 Sticky scroll stack	block	feature-tabs	narrower	вариант: липкая колонка
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	F3 Tabular spec sheet	block	spec-sheet	equal	
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	F4 Step sequence	block	steps	equal	
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	F5 Annotated screenshot	block	product-showcase	equal	
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	F6 Product card grid	block	service-cards	related	карточки товаров — магазин вне рамок
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	C2 Inline form as cta	block	email-capture	related	форма-призыв в одну строку
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	C4 Sticky bottom bar	block	sticky-cta	equal	
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	T1 Pull quote with marginalia	block	testimonial-single	narrower	
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	T2 Logo wall hairline	block	logo-wall	narrower	
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	T3 Single huge quote	block	testimonial-single	narrower	
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	T4 Numbered stat strip	block	stat-strip	narrower	
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	N12 Announcement banner + retracting nav	block	announcement-bar	related	и header
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	S1 Left margin numbered	block		none	заголовок секции — слоты eyebrow, section-title любого блока; раскладка — вариант (E), подача — creative
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	S2 Hanging	block		none	заголовок секции — слоты eyebrow, section-title любого блока; раскладка — вариант (E), подача — creative
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	S3 Sticky pinned	block		none	заголовок секции — слоты eyebrow, section-title любого блока; раскладка — вариант (E), подача — creative
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	S4 Inline no break	block		none	заголовок секции — слоты eyebrow, section-title любого блока; раскладка — вариант (E), подача — creative
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	S5 Bottom anchored	block		none	заголовок секции — слоты eyebrow, section-title любого блока; раскладка — вариант (E), подача — creative
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	C1 Outlined chip	slot	cta-primary	related	визуал кнопки — creative; слот — cta-primary
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	C3 Typographic link	slot	cta-secondary	related	ссылка-призыв
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	Ft1 Mast headed	block	footer	narrower	вариант подвала (E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	Ft2 Inline rule single line	block	footer	narrower	вариант подвала (E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	Ft3 Index style category list	block	footer	narrower	вариант подвала (E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	Ft4 Dense typographic	block	footer	narrower	вариант подвала (E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	Ft5 Statement	block	footer	narrower	вариант подвала (E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	Ft6 Letter close	block	footer	narrower	вариант подвала (E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	Ft7 Newsletter first	block	footer	narrower	вариант подвала (E); Ft7 содержит email-capture
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	Ft8 Marquee scroll	block	footer	narrower	вариант подвала (E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	N1a Wordmark 2 links	block	header	narrower	вариант шапки (G, E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	N1b Canonical SaaS three-section	block	header	narrower	архетип шапки выбирается по типу сайта в site-map (G); N1b = «AI nav» гейта 42
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	N2 Floating chip	block	header	narrower	вариант шапки (G, E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	N3 Side rail	block	header	narrower	вариант шапки (G, E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	N4 Hidden behind k	block	header	narrower	вариант шапки (G, E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	N5 Floating pill	block	header	narrower	вариант шапки (G, E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	N6 Newspaper masthead	block	header	narrower	вариант шапки (G, E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	N7 Brutal slab	block	header	narrower	вариант шапки (G, E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	N8 Terminal command	block	header	narrower	вариант шапки (G, E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	N9 Edge aligned minimal	block	header	narrower	вариант шапки (G, E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	N10 Floating on scroll morph	block	header	narrower	вариант шапки (G, E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	N11 Mega-menu panel	block	header	narrower	вариант шапки (G, E, creative)
+hallmark	../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md	Archetype index	архетип	N13 Inline cmdK search pill	block	header	narrower	вариант шапки (G, E, creative)
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	hero-features-cta	macrostructure		none	шаблонный порядок «hero → фичи → CTA» (гейт 8 Hallmark) — не форма, а дефект по умолчанию (C)
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	hero-testimonials-cta	macrostructure		none	порядок секций, не форма (C)
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	product-demo-features	macrostructure	workbench	related	
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	minimal-single-column	macrostructure		none	короткая страница — вопрос длины (C)
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	funnel-3-step-conversion	macrostructure		none	сюжетный каркас PAS (C)
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	comparison-table-cta	macrostructure	comparison-led	related	страница — comparison-page
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	lead-magnet-form	page_type	landing-lead-magnet	equal	
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	pricing-page-cta	page_type	pricing-page	equal	
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	video-first-hero	block	hero-media	narrower	вариант hero с видео
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	scroll-triggered-storytelling	macrostructure	scroll-story	equal	
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	ai-personalization-landing	macrostructure		none	приём подстановки под сегмент (message match — C)
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	waitlist-coming-soon	page_type	landing-waitlist	equal	
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	comparison-table-focus	macrostructure	comparison-led	equal	
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	pricing-focused-landing	macrostructure	pricing-first	equal	
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	app-store-style-landing	page_type	landing-app	equal	
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	faq-documentation-landing	macrostructure	conversational-faq	related	документация — вне рамок
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	immersive-interactive-experience	macrostructure	scroll-story	related	L2
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	event-conference-landing	page_type	landing-event	equal	форма — event-schedule
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	product-review-ratings-focused	macrostructure	quote-led	related	страница — reviews-page
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	community-forum-landing	site_type		none	сообщество — вне рамок
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	before-after-transformation	block	before-after	related	
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	marketplace-directory	macrostructure	directory	equal	сайт — marketplace (вне рамок)
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	newsletter-content-first	page_type	landing-lead-magnet	related	действие — subscribe
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	webinar-registration	page_type	landing-event	narrower	вебинар — вид события
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	enterprise-gateway	page_type	home-multipage	related	сайт — corporate-site
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	portfolio-grid	macrostructure	portfolio-grid	equal	
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	horizontal-scroll-journey	macrostructure	scroll-story	related	горизонтальная прокрутка — эффект creative
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	bento-grid-showcase	macrostructure	bento-grid	equal	
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	interactive-3d-configurator	block	interactive-demo	related	страница — landing-product
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	ai-driven-dynamic-landing	block	hero-input	related	
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	feature-rich-showcase	macrostructure	feature-stack	related	
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	hero-centric-design	macrostructure	marquee-hero	related	
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	trust-authority-conversion	page_type	landing-lead-services	related	B2B: доказательства → решение → «Get Quote»
+ui-ux-pro-max	../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/src/ui-ux-pro-max/data/landing.csv	Pattern ID (34 паттерна)	pattern	real-time-operations-landing	macrostructure	stat-led	related	
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	Hero Header Sections	block_family	hero	equal	
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	Header Sections	block	hero-text	related	шапки внутренних страниц
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	Feature Sections	block_family	value	broader	
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	CTA Sections	block	cta-band	equal	
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	Navbar	block	header	equal	
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	Footer	block	footer	equal	
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	Contact Sections	block_family	contacts	equal	
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	Pricing Sections	block	pricing-cards	broader	и pricing-table, pricing-single
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	FAQ Sections	block	faq	equal	
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	Testimonial Sections	block	testimonial-cards	broader	и testimonial-single
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	Logo Sections	block	logo-wall	equal	
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	Blog Sections	block	article-cards	related	
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	Gallery Sections	block	gallery	equal	
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	Banner	block	announcement-bar	related	
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	Portfolio	block	portfolio-grid	equal	
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	Product List	block		none	магазин — вне рамок
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	E-Commerce	block_family		none	вне рамок
+relume	https://www.relume.io/react/marketing-components (категории — выдача поиска и дока 2026-09-24; неполно)	категории библиотеки	категория	Application UI	block_family		none	сервисы — ux, ui
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	CR — обложка	block_family	hero	equal	
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	AB — о проекте	block	about-story	related	часто — offer-details
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	ME — меню	block	header	equal	
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	CL — колонки	block		none	раскладка, не блок
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	FR — преимущества, списки	block	feature-grid	related	и benefit-list
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	GL — галерея	block	gallery	equal	
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	CN — контакты	block	contact-details	equal	
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	TE — плитка и ссылки	block	article-cards	related	
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	TX — текст	block	prose	equal	
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	DV — разделитель	block		none	визуал — creative
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	ST — магазин	block		none	вне рамок
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	IP — крупный текст	block	prose	related	заявление, манифест
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	PL — тарифы и цены	block	pricing-cards	broader	и pricing-table
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	FT — подвал	block	footer	equal	
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	HW — этапы	block	steps	equal	и timeline
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	TM — команда	block	team-grid	equal	
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	TS — отзывы	block	testimonial-cards	equal	
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	VD — видео	block	video-showcase	equal	
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	QT — цитата, прямая речь	block	testimonial-single	related	и founder-note
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	IM — изображение	block	media-band	related	
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	SN — соцсети	block	contact-channels	related	
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	TL — заголовок	slot	section-title	related	не блок, а слот
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	TB — таблица, таймлайн	block	timeline	related	и spec-sheet
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	IX — блог-сетка	block	article-cards	equal	
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	PR — партнёры, логотипы	block	logo-wall	equal	
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	BF — кнопки, формы, интеграции	block	lead-form	related	и cta-band
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	NY — эффект	block		none	эффект — creative
+tilda	https://roman-kosov.ru/blocks/ (индекс 558 блоков Tilda, 2021-08-25; вторично)	префикс кода блока	категория	QZ — квиз (QZ101)	block	quiz	equal	разведка архитектора, blog.tilda.cc
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Обложка	section_role	hero	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	О проекте	section_role	about	related	и offer
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Преимущества	section_role	benefits	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Сценарии использования и выгода	section_role	audience	related	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Целевая аудитория	section_role	audience	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Тарифы и цены	section_role	pricing	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Призыв к действию и мотивирующая кнопка	section_role	cta-band	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Форма регистрации или подписки	section_role	lead-form	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Отзывы	section_role	testimonials	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Галерея	block	gallery	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Расписание	section_role	event-program	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Часто задаваемые вопросы	section_role	faq	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Контакты	section_role	contacts	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Команда	section_role	team	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Факты в цифрах	section_role	proof-stats	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Список тезисов	block	benefit-list	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Сертификаты и благодарственные письма	block	credentials	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Истории успеха	section_role	case-studies	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Портфолио	section_role	portfolio	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Вдохновляющая фраза	section_role	story	related	блок prose
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Счётчик	block	promo-offer	related	таймер — честная срочность (F)
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Всплывающие окна	block	capture-popup	related	по умолчанию выключены
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Виджеты обратной связи	block	chat-widget	related	и callback-request
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Меню	block	header	equal	
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Кнопки социальных сетей	block	contact-channels	related	
+schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	AboutPage	page_type	about-page	equal	
+schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	CheckoutPage	page_type		none	оформление заказа — вне рамок
+schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	CollectionPage	page_type	blog-index-page	broader	и case-list-page, services-index-page
+schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	CollectionPage	page_type	case-list-page	broader	
+schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	CollectionPage	page_type	services-index-page	broader	
+schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	ContactPage	page_type	contacts-page	equal	
+schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	FAQPage	page_type	faq-page	equal	разметка FAQ и её выдача — H
+schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	ItemPage	page_type	service-page	broader	и case-page, feature-page
+schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	MedicalWebPage	page_type	service-page	related	отраслевой подтип
+schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	ProfilePage	page_type	team-page	related	профиль человека
+schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	QAPage	page_type		none	вопрос-ответ сообщества
+schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	RealEstateListing	page_type		none	объявление недвижимости — вне рамок
+schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	SearchResultsPage	page_type		none	поиск по сайту — G
+schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	Event	page_type	landing-event	related	разметка — H
+schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	Course	page_type	landing-course	related	
+schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	MobileApplication	page_type	landing-app	related	
+schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	Product	page_type	landing-product	related	
+schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	Service	page_type	service-page	related	
+schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	Article	page_type	article-page	related	и BlogPosting
+schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	JobPosting	page_type	careers-page	related	
+schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	LocalBusiness	site_type	services-site	related	
+schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	Organization	page_type	about-page	related	сущность сайта — H
+schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	EducationalOrganization	site_type	school-site	related	
+unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Click-through landing page	action	read-more	related	призыв ведёт на следующий шаг (регистрация, оформление)
+unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Lead capture landing page (squeeze)	page_type	landing-lead-services	related	и landing-lead-magnet
+unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Long-form sales landing page	macrostructure	sales-longread	equal	
+unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Brand awareness (viral) landing page	page_type	landing-campaign	related	
+unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Microsite	site_type	campaign-site	equal	
+unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Product landing page	page_type	landing-product	related	
+unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Homepage	page_type	home-multipage	related	как посадочная — не по умолчанию
+unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Video landing page	block	hero-media	related	видео — вариант hero или video-showcase
+unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Pre-launch landing page	page_type	landing-waitlist	equal	
+unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Lead magnet landing page	page_type	landing-lead-magnet	equal	
+unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Referral landing page	page_type		none	реферальная программа — кандидат в v1 (J)
+unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	404 landing page	page_type	not-found-page	equal	
+unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Thank you landing page	page_type	thank-you-page	equal	

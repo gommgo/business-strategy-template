@@ -1,0 +1,77 @@
+{
+  "spec_version": "0.2",
+  "id": "forest-roast-floating-beans-loop",
+  "checked_at": "2026-09-24",
+  "brief_language": "ru",
+  "task": "VID-ALPHA",
+  "role": {
+    "page_type": "ecommerce",
+    "section": "hero",
+    "slot": "hero-floating-object",
+    "purpose": "slow floating loop of the beans on chroma for keying to stacked alpha",
+    "priority": "above-fold",
+    "series_id": "forest-roast"
+  },
+  "subject": {
+    "summary": "three roasted coffee beans floating on a flat chroma green background"
+  },
+  "composition": {
+    "shot": "close-up",
+    "subject_region": "center",
+    "angle": "eye-level"
+  },
+  "palette": [
+    {
+      "role": "background",
+      "hex": "#FF00FF",
+      "name": "chroma key magenta",
+      "share": 0.8,
+      "applies_to": "flat background"
+    }
+  ],
+  "text": {
+    "mode": "none"
+  },
+  "output": {
+    "primary_ratio": "16:9",
+    "resolution": "480p",
+    "format": "mp4"
+  },
+  "references": [
+    {
+      "id": "f",
+      "src": "../../../../../99-raw/phase5/inputs/M/beans-chroma-stub.png",
+      "role": "first_frame"
+    },
+    {
+      "id": "l",
+      "src": "../../../../../99-raw/phase5/inputs/M/beans-chroma-stub.png",
+      "role": "last_frame"
+    }
+  ],
+  "motion": {
+    "kind": "loop",
+    "duration_s": 4,
+    "camera": {
+      "move": "static",
+      "target": "the beans"
+    },
+    "subject_motion": "The beans turn slowly around their long axes and drift a few millimetres up and down",
+    "still": [
+      "the flat magenta background"
+    ],
+    "forbid": [
+      "zoom",
+      "spin",
+      "reposition_subject",
+      "camera_move"
+    ],
+    "tempo": "slow",
+    "loop": "first_last_same",
+    "start_frame": "../../../../../99-raw/phase5/inputs/M/beans-chroma-stub.png",
+    "end_frame": "../../../../../99-raw/phase5/inputs/M/beans-chroma-stub.png",
+    "cuts": "none",
+    "audio": false,
+    "reference_mode": "frames"
+  }
+}

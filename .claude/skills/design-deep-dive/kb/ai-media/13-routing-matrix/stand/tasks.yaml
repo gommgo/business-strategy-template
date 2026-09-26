@@ -1,0 +1,252 @@
+# Стенд моделей ai-media-research · агент E, волна 2 · 2026-09-23
+# Каталог задач стенда (S*), пресеты моделей и рецепты заданий фазы 5 (E-NN). Сборка заданий:
+#   99-raw/tools/venv-D/bin/python ../../scripts/ai-media/stand_run.py build        → 99-raw/phase5/jobs/E-*.jsonl
+#   python3 ../../scripts/ai-media/stand_run.py estimate                             → сумма по тестам (для E-plan.md)
+# Промт — закреплённый фактор: брифы (briefs/*.spec.json, схема 05-prompting/asset-spec.schema.json) компилирует
+# ../../scripts/ai-media/prompt_compile.py в диалект семейства по умолчанию (05-prompting/dialects.yaml); тексты, правки и
+# референс-оговорки — одинаковые буквальные строки для всех моделей. ПЕРЕКОМПИЛИРОВАТЬ ПЕРЕД ФАЗОЙ 5 версией D2.
+version: 0.1
+checked_at: "2026-09-23"
+catalog_snapshot: 99-raw/cache/polza/2026-09-23
+compiler: "../../scripts/ai-media/prompt_compile.py (прототип D, 2026-09-23)"
+provider_default: {only: [mie], allow_fallbacks: false}
+seeds: [101, 202]            # только у моделей с параметром seed (qwen/image-2.1, bytedance/seedream-4)
+
+# ---------------------------------------------------------------- пресеты моделей (конфигурация polza, не вендора)
+models:
+  sunburst-1k: {model: openai/gpt-image-2.5-sunburst, params: {image_resolution: "1K"}}
+  sunburst-2k: {model: openai/gpt-image-2.5-sunburst, params: {image_resolution: "2K"}}
+  sunburst-4k: {model: openai/gpt-image-2.5-sunburst, params: {image_resolution: "4K"}}
+  flare-1k:    {model: gpt-image-2-5-flare, params: {image_resolution: "1K"}}
+  gpt2-1k:     {model: openai/gpt-5.4-image-2, params: {image_resolution: "1K"}}
+  nb2-1k:      {model: google/gemini-3.1-flash-image-preview, params: {image_resolution: "1K"}}
+  nb2lite:     {model: google/gemini-3.1-flash-lite-image, params: {}}
+  nbpro-1k:    {model: google/gemini-3-pro-image-preview, params: {image_resolution: "1K"}, note: "если T5 фазы 0 ок — provider google-vertex/global/flex (≈7,94 ₽)"}
+  nbpro-2k:    {model: google/gemini-3-pro-image-preview, params: {image_resolution: "2K"}, note: "2K по цене 1K (13,50 ₽); Google: мелкий текст у NB Pro «still fails», текст — крупный и в 2K (W6, y-RQ48sfPgM)"}
+  nbpro-4k:    {model: google/gemini-3-pro-image-preview, params: {image_resolution: "4K"}}
+  sd5pro:      {model: seedream/5-pro-text-to-image, params: {quality: basic}, note: "basic = 1K; +0,30 ₽ за референс сверх первого"}
+  sd45:        {model: bytedance/seedream-4.5, params: {quality: basic}, note: "basic = 2K"}
+  sd4-4k:      {model: bytedance/seedream-4, params: {image_resolution: "4K"}, note: "4K по цене 1K (3 ₽); seed"}
+  qwen21-1k:   {model: qwen/image-2.1, params: {image_resolution: "1K", enhance_prompt: false}, note: "веса — Qwen Research License (флаг L)"}
+  flux2pro-1k: {model: black-forest-labs/flux.2-pro, params: {image_resolution: "1K"}, note: "переписывает промт (disable_pup не выставлен)"}
+  zimage:      {model: tongyi-mai/z-image, params: {}}
+
+# ---------------------------------------------------------------- каталог задач стенда (для фазы 5, перезапусков и мини-стенда)
+# metrics — автометрики stand_run.py metrics; judge — metric | vlm | votes; reg — входит в регрессионный набор новой модели
+tasks:
+  S01: {code: IMG-HERO-PHOTO, title: "hero-интерьер без людей, зона текста слева 40 %", brief: briefs/S01-hero-interior.spec.json,
+        metrics: [dims, text_zone, slop_color, palette_de], vlm: D-B1, judge: [votes, metric, vlm], reg: true}
+  S02: {code: IMG-HERO-PHOTO, title: "hero с людьми: руки, кожа, взгляд не в камеру", brief: briefs/S02-hero-people.spec.json,
+        metrics: [dims, text_zone, slop_color], judge: [votes, vlm], reg: true}
+  S03: {code: IMG-PRODUCT, title: "товар по референсу в сцене (этикетка кириллицей)", brief: briefs/S03-product-scene.spec.json,
+        metrics: [dims, ocr_label, palette_de], judge: [votes, metric, vlm], reg: true}
+  S04: {code: IMG-ILLUSTR, title: "плоская иллюстрация шага онбординга", brief: briefs/S04-illustr-onboarding.spec.json,
+        metrics: [dims, palette_de], vlm: D-B2, judge: [votes, vlm], reg: true}
+  S05: {code: IMG-BG-ABSTRACT, title: "абстрактный фон с 3 hex и зоной под заголовок", brief: briefs/S05-bg-abstract.spec.json,
+        metrics: [dims, palette_de, text_zone], vlm: D-B3, judge: [metric, votes], reg: true}
+  S06: {code: IMG-ICON3D, title: "4 clay-иконки сеткой 2×2 одной генерацией", brief: briefs/S06-icons-grid.spec.json,
+        metrics: [dims, alpha, palette_de], judge: [votes, vlm], reg: false}
+  S07: {code: IMG-SERIES, title: "серия по стилевому эталону: 2 новых сюжета", brief: literal, metrics: [palette_de, phash],
+        judge: [votes, vlm], reg: true}
+  S08: {code: IMG-TEXT-CYR, title: "баннер: EN-промт, 3 русские строки (2, 6, 1 слово)", brief: literal,
+        expect: ["Весенняя распродажа", "Скидки до −30 % на всю мебель", "Подробнее"], metrics: [dims, ocr_cyr], judge: [metric], reg: true}
+  S09: {code: IMG-PRODUCT, title: "счёт и связи: 2 чашки слева от чайника (анти-дефолт)", brief: briefs/S09-product-tea-count.spec.json,
+        vlm: D-B4, judge: [vlm], reg: true}
+  S10: {code: IMG-TEXT-CYR, title: "карточка: RU-промт, панграмма, «1 290 ₽»", brief: literal,
+        expect: ["Съешь же ещё этих мягких французских булок", "Цена: 1 290 ₽", "Доставка завтра", "В корзину"], metrics: [ocr_cyr], judge: [metric], reg: false}
+  S11: {code: IMG-TEXT-CYR, title: "вывеска и ценник в фото-сцене", brief: literal, expect: ["Свежая выпечка", "250 ₽"],
+        metrics: [ocr_cyr], judge: [metric, votes], reg: false}
+  S12: {code: IMG-TEXT-CYR, title: "перевод готового баннера правкой EN → RU", brief: literal,
+        expect: ["ЛЕСНАЯ ОБЖАРКА", "Кофе в зёрнах · 250 г", "Купить"], metrics: [ocr_cyr, edit_diff], judge: [metric], reg: false,
+        source: 99-raw/phase5/inputs/E/banner_en.png, target_rect: [40, 150, 520, 410]}
+  S13: {code: IMG-TEXT-LATIN, title: "контроль: тот же баннер латиницей", brief: literal,
+        expect: ["Spring Sale", "Up to −30 % off all furniture", "Learn more"], metrics: [ocr_lat], judge: [metric], reg: true}
+  S14: {code: IMG-EDIT, title: "перекрасить стену в #1F5E3B, остальное не трогать", brief: literal,
+        metrics: [edit_diff, palette_de, ocr_label], judge: [metric, votes], reg: true,
+        source: 99-raw/phase5/inputs/E/scene.png, target: 99-raw/phase5/inputs/E/scene_mask_wall.png, target_hex: "#1F5E3B"}
+  S15: {code: IMG-EDIT, title: "убрать чашку, дорисовать стол и стену", brief: literal, metrics: [edit_diff, ocr_label],
+        judge: [metric, votes], reg: false, source: 99-raw/phase5/inputs/E/scene.png, target: 99-raw/phase5/inputs/E/scene_mask_cup_dilated.png}
+  S16: {code: IMG-DRAFT, title: "черновик Z-Image → финал Flare: промтом или референсом", brief: literal,
+        metrics: [phash, ssim_layout], judge: [vlm, votes], reg: false}
+  S17: {code: IMG-CUTOUT, owner: H, title: "нативная альфа против матирования (стекло, волосы)", judge: [metric], reg: true}
+  S18: {code: IMG-TEXTURE, owner: H, title: "бесшовность после сдвига 50 %", judge: [metric], reg: false}
+  S19: {code: IMG-OUTPAINT, owner: H, title: "16:9 → 21:9 и 4:5 с композитом центра", judge: [metric], reg: false}
+  S20: {code: IMG-UPSCALE, owner: H, title: "Topaz ×2 против Real-ESRGAN и перегенерации 4K", judge: [metric, votes], reg: false}
+  S21: {code: IMG-MOCKUP, title: "скриншот в устройстве (ожидаемый провал → композит)", judge: [metric], reg: false, phase5: later}
+  S22: {code: IMG-HERO-PHOTO, title: "анти-дефолт: левша пишет, часы 3:40, бокал налит на треть", judge: [vlm], reg: true, phase5: later,
+        prompts: ["A left-handed woman writing in a notebook with her left hand, close-up, natural light.",
+                  "A wall clock showing exactly 3:40, analog face, plain wall, product photo.",
+                  "A wine glass filled exactly one third with red wine on a white table, studio photo."]}
+  S23: {code: IMG-HERO-PHOTO, title: "сетка 36 подписанных объектов (связывание, счёт)", judge: [vlm], reg: true, phase5: later, source: "W2-11 [V:bH2nP-aCFjk 06:12]"}
+  S24: {code: IMG-BG-ABSTRACT, title: "лента 8:1 без повторов (только NB2 Lite)", judge: [metric], reg: false, phase5: later, source: C1-11}
+  S25: {code: IMG-HERO-PHOTO, title: "2K против 4K: зерно против «пластика»", judge: [votes], reg: false}
+  S26: {code: ALL, title: "что реально отдаёт polza: 4K, видимый знак Seedream, метаданные", judge: [metric], reg: true}
+  V01: {code: VID-HERO-LOOP, owner: I, title: "петля [A,A]: шов, «живость», статичный коллапс", judge: [metric, votes]}
+  V02: {code: VID-CINEMAGRAPH, owner: I, title: "fixed_lens: дрейф фона", judge: [metric]}
+  V03: {code: VID-I2V-PRODUCT, owner: I, title: "логотип и надпись по кадрам", judge: [metric, votes]}
+  V04: {code: VID-ABSTRACT, owner: I, title: "абстрактный моушн-фон, дешёвый перебор", judge: [votes]}
+  V05: {code: VID-CAMERA, owner: I, title: "словарь камеры: наезд, орбита", judge: [metric]}
+
+# ---------------------------------------------------------------- буквальные промты (одинаковые для всех моделей)
+literals:
+  cyr_a_en: |-
+    Web banner, 16:9, clean modern layout on a warm off-white background with a simple green sofa photo on the right.
+    Render exactly this Russian text (Cyrillic script), each line exactly once, in a bold geometric sans-serif, dark green, left-aligned:
+    line 1 (large headline): "Весенняя распродажа"
+    line 2 (medium): "Скидки до −30 % на всю мебель"
+    button (rounded, green, white text): "Подробнее"
+    No other text, no English words, no logos, no watermark.
+  cyr_a_ru: |-
+    Веб-баннер 16:9, чистая современная вёрстка на тёплом светлом фоне, справа — фотография простого зелёного дивана.
+    Напиши ровно этот текст на русском, каждую строку один раз, жирным геометрическим гротеском, тёмно-зелёным, по левому краю:
+    строка 1 (крупный заголовок): «Весенняя распродажа»
+    строка 2 (средний размер): «Скидки до −30 % на всю мебель»
+    кнопка (скруглённая, зелёная, белый текст): «Подробнее»
+    Никакого другого текста, латиницы, логотипов и водяных знаков.
+  cyr_b_ru: |-
+    Карточка товара для интернет-магазина, 16:9, светлый фон, слева фотография свежего багета на деревянной доске.
+    Справа напиши ровно этот текст на русском, каждую строку один раз, шрифт — строгий гротеск, тёмно-серый:
+    заголовок: «Съешь же ещё этих мягких французских булок»
+    цена (крупно): «Цена: 1 290 ₽»
+    строка: «Доставка завтра»
+    кнопка (оранжевая, белый текст): «В корзину»
+    Никакого другого текста, латиницы, логотипов и водяных знаков.
+  cyr_sign: |-
+    Street photograph, 16:9, a small bakery storefront on a quiet street in Moscow in the morning, eye level, 35mm lens, natural light.
+    The shop sign above the window reads exactly "Свежая выпечка" in Russian (Cyrillic script), white serif letters on a dark green board.
+    A small chalkboard price tag in the window reads exactly "250 ₽".
+    No other readable text anywhere in the image, no logos, no watermark.
+  cyr_translate: |-
+    Image 1 is a web banner. Translate its three English text elements into Russian, keeping the same font style, size, color, position and alignment:
+    "FOREST ROAST" → "ЛЕСНАЯ ОБЖАРКА"
+    "Whole bean coffee · 250 g" → "Кофе в зёрнах · 250 г"
+    "Shop now" → "Купить"
+    Change nothing else: keep the product, the label on the tin, the background, the button shape and the layout exactly as they are.
+  lat_a_en: |-
+    Web banner, 16:9, clean modern layout on a warm off-white background with a simple green sofa photo on the right.
+    Render exactly this English text, each line exactly once, in a bold geometric sans-serif, dark green, left-aligned:
+    line 1 (large headline): "Spring Sale"
+    line 2 (medium): "Up to −30 % off all furniture"
+    button (rounded, green, white text): "Learn more"
+    No other text, no logos, no watermark.
+  street_en: "A busy pedestrian street in an old European city on a sunny afternoon, cafés and small shops, people walking, documentary street photograph, 16:9."
+  street_ru: "Оживлённая пешеходная улица старого европейского города солнечным днём, кафе и небольшие магазины, прохожие, документальная уличная фотография, 16:9."
+  street_ru_notext: "Оживлённая пешеходная улица старого европейского города солнечным днём, кафе и небольшие магазины, прохожие, документальная уличная фотография, 16:9. Без надписей, вывесок и текста."
+  product_prefix: |-
+    Image 1 is the product reference: a coffee tin. Keep exactly this product — the same shape and proportions, the brass lid, the dark green label with the gold emblem and the label text "ЛЕСНАЯ ОБЖАРКА" and "кофе в зёрнах · 250 г". Do not redesign, relabel or add text to the product.
+  product_side: " Show the tin in a three-quarter view from the left so that the label is seen at an angle."
+  edit_wall: |-
+    Change only the wall behind the objects to a solid deep green (#1F5E3B), matte paint, same lighting and exposure.
+    Keep the coffee tin, its label and all label text, the cup, the table, the shadows and the camera exactly the same.
+  edit_cup: |-
+    Remove the white coffee cup completely and fill its area with the same wooden table and wall, matching the light and shadows.
+    Keep the coffee tin, its label and all label text, the table, the wall and the camera exactly the same.
+  series_prefix: |-
+    Image 1 is the style reference. Create a new illustration in exactly the same style — the same line weight, flat fills, palette, level of detail and framing — showing: {subject}. Do not copy the subject of image 1. No text.
+  draft_prefix: "Image 1 is a rough draft: keep its composition, layout and camera exactly, and render it as a finished image following this description: "
+
+# ---------------------------------------------------------------- рецепты заданий фазы 5 (E-NN → 99-raw/phase5/jobs/E-NN-имя.jsonl)
+# job: task — бриф или literal; use — пресеты; samples — повторы (варианты); images/mask — входы (путь от корня проекта);
+# inputs_from — вход из другого теста (заглушка в inputs/E, оркестратор подставит файл); params — поверх пресета.
+phase5:
+  - {test: E-01, file: E-01-polza-reality.jsonl, value: 3, order: 1, title: "что реально отдаёт polza: 4K и видимый знак Seedream",
+     hypothesis: "mie не ставит видимый «AI-generated» у Seedream; 4K у Seedream 4 и Sunburst — настоящие ≥ 3800 px",
+     judge: metric, success: "нет надписи справа внизу; длинная сторона ≥ 3800 px; поля model/provider в паспорте",
+     overlaps: [C1-2, C1-7, B-12, B-13, W5-11],
+     jobs: [{task: S05, use: [sd4-4k], params: {aspect_ratio: "21:9"}, vote_groups: ["E-13/S05"]},
+            {task: S01, use: [sunburst-4k], params: {aspect_ratio: "16:9"}, vote_groups: ["E-09/{model}"]}]}
+  - {test: E-02, file: E-02-cyr-screen.jsonl, value: 3, order: 2, title: "кириллица, ступень 1: 9 моделей, EN-промт",
+     hypothesis: "крупная русская строка дословна хотя бы у 2 моделей polza; мелкая строка со знаком −30 % ломается чаще",
+     judge: metric, success: "строка = эталону по кодовым точкам после нормализации двойников; 0 латинских недвойников; 0 лишних слов",
+     overlaps: [C1-1, V-4, A-7, D-6, P-7], depends: [E-01],
+     jobs: [{task: S08, prompt: cyr_a_en, use: [sunburst-1k, flare-1k, gpt2-1k, nb2-1k, nbpro-2k, sd5pro, sd45, qwen21-1k, flux2pro-1k],
+             params: {aspect_ratio: "16:9"}}]}
+  - {test: E-03, file: E-03-cyr-card.jsonl, value: 3, order: 3, title: "кириллица, ступень 2: RU-промт, панграмма и «₽»",
+     hypothesis: "панграмма (33 буквы) и «₽» ломают даже лидеров ступени 1", judge: metric,
+     success: "как E-02 для 4 строк; отдельно — все 33 буквы и U+20BD", overlaps: [C1-1], depends: [E-02],
+     note: "запускать только для моделей, давших в E-02 ≥ 1 дословную строку",
+     jobs: [{task: S10, prompt: cyr_b_ru, use: [sunburst-1k, flare-1k, gpt2-1k, nb2-1k, sd5pro, qwen21-1k], params: {aspect_ratio: "16:9"}}]}
+  - {test: E-04, file: E-04-cyr-form.jsonl, value: 3, order: 4, title: "кириллица: форма промта и устойчивость у 3 лучших",
+     hypothesis: "EN-промт со строкой в кавычках не хуже полностью русского; лидер держит строки во 2-м повторе",
+     judge: metric, success: "лидер: 3 из 3 картинок (E-02 + 2 здесь) с дословными строками 1 и 3",
+     overlaps: [D-6], depends: [E-02], note: "модели — 3 лучших из E-02 (по умолчанию sunburst, gpt2, nb2)",
+     jobs: [{task: S08, prompt: cyr_a_en, use: [sunburst-1k, gpt2-1k, nb2-1k], params: {aspect_ratio: "16:9"}, variant_base: 2},
+            {task: S08, prompt: cyr_a_ru, use: [sunburst-1k, gpt2-1k, nb2-1k], params: {aspect_ratio: "16:9"}, arm: ru}]}
+  - {test: E-05, file: E-05-cyr-scene.jsonl, value: 2, order: 9, title: "кириллица в фото-сцене и язык случайных надписей",
+     hypothesis: "вывеска в сцене пишется хуже баннера; русский промт NB2 рождает русские случайные вывески, запрет их убирает",
+     judge: metric, success: "вывеска дословна у ≥ 1 модели; в RU-плече OCR находит кириллицу, в EN — нет, в RU+запрет — текста нет",
+     overlaps: [A-7, W5-9],
+     jobs: [{task: S11, prompt: cyr_sign, use: [sunburst-1k, nb2-1k], params: {aspect_ratio: "16:9"}},
+            {task: S11, prompt: street_en, use: [nb2-1k], params: {aspect_ratio: "16:9"}, arm: street-en},
+            {task: S11, prompt: street_ru, use: [nb2-1k], params: {aspect_ratio: "16:9"}, arm: street-ru},
+            {task: S11, prompt: street_ru_notext, use: [nb2-1k], params: {aspect_ratio: "16:9"}, arm: street-ru-notext}]}
+  - {test: E-06, file: E-06-cyr-translate.jsonl, value: 2, order: 10, title: "перевод готового баннера правкой",
+     hypothesis: "правка переводит 3 строки дословно и не трогает товар и фон", judge: metric,
+     success: "3 строки дословны; SSIM вне прямоугольника текста ≥ 0,95; этикетка банки читается", overlaps: [W3-5, W6-5],
+     jobs: [{task: S12, prompt: cyr_translate, use: [sunburst-1k, nb2-1k], images: [99-raw/phase5/inputs/E/banner_en.png], params: {aspect_ratio: "16:9"}}]}
+  - {test: E-08, file: E-08-hero.jsonl, value: 3, order: 5, title: "hero-фото: почерк моделей и пригодность для слота",
+     hypothesis: "в конфигурации polza (без quality) GPT Image 2.5 сохраняет лидерство арен; NB2 перенасыщает; Flare ≈ Sunburst",
+     judge: "votes + metric", success: "победитель выигрывает ≥ 70 % своих пар по вопросу «лучше для слота» и не хуже по «естественнее»",
+     overlaps: [A-1, C1-3, W3-4, W5-12, W1-1],
+     jobs: [{task: S01, use: [sunburst-1k, flare-1k, nb2-1k, nbpro-2k, sd5pro, flux2pro-1k], vote_extra: "E-09/{model}"},
+            {task: S02, use: [sunburst-1k, flare-1k, nb2-1k, nbpro-2k, sd5pro]}]}
+  - {test: E-09, file: E-09-2k-4k.jsonl, value: 2, order: 11, title: "2K против 4K на фото-hero",
+     hypothesis: "2K выглядит «более фото», чем 4K (зерно против пластика)", judge: votes,
+     success: "2K выигрывает обе пары (Sunburst 2K↔4K из E-01, NB Pro 2K из E-08 ↔ 4K) у заказчика",
+     overlaps: [W1-1, W5-11], depends: [E-01, E-08],
+     jobs: [{task: S01, use: [sunburst-2k, nbpro-4k], params: {aspect_ratio: "16:9"}, vote_groups: ["E-09/{model}"]}]}
+  - {test: E-10, file: E-10-product.jsonl, value: 3, order: 6, title: "товар по референсу в сцене",
+     hypothesis: "этикетка и форма сохраняются у GPT 2.5 лучше, чем у NB2, Seedream 5 Pro и Qwen 2.1; вид сбоку труднее",
+     judge: "metric + votes", success: "OCR «ЛЕСНАЯ ОБЖАРКА» дословно; силуэт и крышка совпадают (VLM/человек); ΔE зелёного этикетки ≤ 8",
+     overlaps: [C1-6, W2-4, W5-8, W5-10, A-3],
+     jobs: [{task: S03, prefix: product_prefix, images: [99-raw/phase5/inputs/E/product_ref.png], use: [sunburst-1k, nb2-1k, sd5pro, qwen21-1k]},
+            {task: S03, prefix: product_prefix, suffix: product_side, images: [99-raw/phase5/inputs/E/product_ref.png], use: [sunburst-1k, nb2-1k, sd5pro, qwen21-1k], arm: side, value: 2}]}
+  - {test: E-11, file: E-11-illustr.jsonl, value: 2, order: 7, title: "плоская иллюстрация (эталон серии выбирает заказчик)",
+     hypothesis: "второе место за Flare спорно между NB2 (AA) и Seedream 5 Pro (LMArena)", judge: "votes + vlm",
+     success: "победитель пар + ≥ 9/11 бинарных вопросов D-B2", overlaps: [C1-5],
+     jobs: [{task: S04, use: [flare-1k, nb2-1k, sd5pro]}]}
+  - {test: E-12, file: E-12-series.jsonl, value: 3, order: 8, title: "серия по стилевому эталону",
+     hypothesis: "стиль серии (не персонаж) держит NB Pro или GPT 2.5 лучше Seedream 4.5 и NB2", judge: "votes + vlm + metric",
+     success: "победитель: обе картинки «того же стиля» (заказчик), ΔE доминант к эталону ≤ 6", overlaps: [C1-5, V-5, W1-6, F-*],
+     depends: [E-11], note: "эталон — победитель E-11 (заглушка stub_16x9.png); метод F — постоянный фактор",
+     jobs: [{task: S07, prompt: series_prefix, subject: "an open cardboard box with a checkmark card floating above it",
+             images: [99-raw/phase5/inputs/E/stub_16x9.png], inputs_from: {"images[0]": "E-11#winner/0"}, use: [flare-1k, nbpro-2k, sd45, nb2-1k], params: {aspect_ratio: "16:9"}, arm: box},
+            {task: S07, prompt: series_prefix, subject: "a magnifying glass over a simple bar chart with three bars",
+             images: [99-raw/phase5/inputs/E/stub_16x9.png], inputs_from: {"images[0]": "E-11#winner/0"}, use: [flare-1k, nbpro-2k, sd45, nb2-1k], params: {aspect_ratio: "16:9"}, arm: chart}]}
+  - {test: E-13, file: E-13-bg-hex.jsonl, value: 2, order: 12, title: "абстрактный фон: попадание в 3 hex",
+     hypothesis: "FLUX.2 попадает в hex точнее (hex документирован), но переписывание промта (pup) мешает", judge: metric,
+     success: "ΔE2000 доминант ≤ 5 для ≥ 2 из 3 цветов; зона под заголовок пустая", overlaps: [C1-8], depends: [E-01],
+     jobs: [{task: S05, use: [flux2pro-1k, flare-1k, nb2-1k], vote_groups: ["E-13/S05"]}]}
+  - {test: E-14, file: E-14-icons3d.jsonl, value: 2, order: 13, title: "4 clay-иконки сеткой 2×2",
+     hypothesis: "сетка одной генерацией даёт единый свет и ракурс; Qwen 2.1 даёт сразу альфу", judge: "votes + metric",
+     success: "4 иконки в едином стиле (заказчик), клетки разрезаются без пересечений; у Qwen альфа есть", overlaps: [W2-10, W5-4, G-*],
+     jobs: [{task: S06, use: [sunburst-1k, nb2-1k, sd45], vote_groups: ["E-14/S06"]},
+            {task: S06, use: [qwen21-1k], params: {background: transparent, output_format: png}, arm: alpha, vote_groups: ["E-14/S06"]}]}
+  - {test: E-15, file: E-15-edit.jsonl, value: 3, order: 14, title: "правка по инструкции: сравнение моделей",
+     hypothesis: "GPT 2.5 выполняет и не трогает лишнее лучше NB2 и Seedream 5 Pro; маска Qwen 2.1 держит границу",
+     judge: "metric + votes", success: "стена ΔE ≤ 6 к #1F5E3B; вне маски ΔE00 среднее ≤ 2 и SSIM ≥ 0,95; этикетка читается",
+     overlaps: [W2-1, W2-2, W4-3, W1-5, C1-12, B-14, D-3, H-edit],
+     jobs: [{task: S14, prompt: edit_wall, images: [99-raw/phase5/inputs/E/scene.png], use: [sunburst-1k, nb2-1k, sd5pro], params: {aspect_ratio: "16:9"}, vote_groups: ["E-15/S14"]},
+            {task: S14, prompt: edit_wall, images: [99-raw/phase5/inputs/E/scene.png], mask: 99-raw/phase5/inputs/E/scene_mask_wall.png, use: [qwen21-1k], params: {aspect_ratio: "16:9"}, arm: mask, vote_groups: ["E-15/S14"]},
+            {task: S15, prompt: edit_cup, images: [99-raw/phase5/inputs/E/scene.png], use: [sunburst-1k, nb2-1k, sd5pro], params: {aspect_ratio: "16:9"}, value: 2, vote_groups: ["E-15/S15"]},
+            {task: S15, prompt: edit_cup, images: [99-raw/phase5/inputs/E/scene.png], mask: 99-raw/phase5/inputs/E/scene_mask_cup_dilated.png, use: [qwen21-1k], params: {aspect_ratio: "16:9"}, arm: mask, value: 2, vote_groups: ["E-15/S15"]}]}
+  - {test: E-16, file: E-16-draft.jsonl, value: 2, order: 15, title: "черновик Z-Image → финал Flare",
+     hypothesis: "черновик как референс переносит композицию лучше, чем повтор промта", judge: vlm,
+     success: "VLM «та же раскладка» да в 2/2 для референса и ≤ 1/2 для промта", overlaps: [C1-9],
+     jobs: [{task: S04, use: [zimage], arm: draft, vote_groups: []},
+            {task: S09, use: [zimage], arm: draft, vote_groups: []},
+            {task: S04, use: [flare-1k], arm: final-prompt, vote_groups: ["E-16/S04"], vote_by_arm: true},
+            {task: S09, use: [flare-1k], arm: final-prompt, vote_groups: ["E-16/S09"], vote_by_arm: true},
+            {task: S04, prefix: draft_prefix, images: [99-raw/phase5/inputs/E/stub_16x9.png], inputs_from: {"images[0]": "E-16/S04-draft#1/0"}, use: [flare-1k], arm: final-ref, vote_groups: ["E-16/S04"], vote_by_arm: true},
+            {task: S09, prefix: draft_prefix, images: [99-raw/phase5/inputs/E/stub_16x9.png], inputs_from: {"images[0]": "E-16/S09-draft#1/0"}, use: [flare-1k], arm: final-ref, vote_groups: ["E-16/S09"], vote_by_arm: true}]}
+  - {test: E-17, file: E-17-latin-control.jsonl, value: 2, order: 16, title: "контроль латиницы на том же макете",
+     hypothesis: "разница «латиница − кириллица» у NB2, Qwen и Seedream 4.5 больше, чем у GPT 2.x; Seedream 4.5 — лидер читаемости латиницы (Rapidata Text Coherence №1, WeGenBench Char F1 0,79)", judge: metric,
+     success: "3 строки дословны; сравнение с E-02 по тем же моделям", overlaps: [C1-15],
+     jobs: [{task: S13, prompt: lat_a_en, use: [nb2-1k, qwen21-1k, sd45], params: {aspect_ratio: "16:9"}}]}
+
+# ---------------------------------------------------------------- задания вне Media API polza
+external:
+  - {test: E-07, file: E-07-recraft-cyr.routerai.json, value: 2, channel: routerai, model: recraft/recraft-v4.1, price_rub: 3.825,
+     price_source: "routerai.ru/api/v1/models, 23.09.2026 (99-raw/experiments/P/04-ru-aggregators/routerai_models.json)",
+     docs: "99-raw/cache/routerai.ru_docs_guides_overview_multimodal_image-generation_753f42c7.md", prompt: cyr_a_en,
+     overlaps: [W2-6, G-recraft], note: "Recraft V3 кириллицу не рендерит (набор символов); V4.x — «multi-language» без списка"}

@@ -1,0 +1,636 @@
+/* ------------------------------------------------------------------
+   Эталонный набор токенов ui-research, пресет «плотная админка».
+   Сгенерировано из tokens.json (99-raw/tools/build_reference_tokens.py).
+   Слой 1 — примитивы, слой 2 — семантика. Компоненты используют
+   ТОЛЬКО переменные слоя 2.
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light dark;
+
+  /* примитивы: цвет */
+  --palette-neutral-50: #f8fafc;
+  --palette-neutral-100: #f1f5f9;
+  --palette-neutral-200: #e2e8f0;
+  --palette-neutral-300: #cad5e2;
+  --palette-neutral-350: #aebccf;
+  --palette-neutral-400: #90a1b9;
+  --palette-neutral-450: #7d8fa8;
+  --palette-neutral-500: #62748e;
+  --palette-neutral-600: #45556c;
+  --palette-neutral-700: #314158;
+  --palette-neutral-800: #1d293d;
+  --palette-neutral-900: #0f172b;
+  --palette-neutral-950: #020618;
+  --palette-accent-50: #eff6ff;
+  --palette-accent-100: #dbeafe;
+  --palette-accent-200: #bedbff;
+  --palette-accent-300: #8ec5ff;
+  --palette-accent-400: #51a2ff;
+  --palette-accent-500: #2b7fff;
+  --palette-accent-600: #155dfc;
+  --palette-accent-700: #1447e6;
+  --palette-accent-800: #193cb8;
+  --palette-accent-900: #1c398e;
+  --palette-accent-950: #162456;
+  --palette-red-100: #ffe2e2;
+  --palette-red-300: #ffa2a2;
+  --palette-red-500: #fb2c36;
+  --palette-red-600: #e7000b;
+  --palette-red-700: #c10007;
+  --palette-red-900: #82181a;
+  --palette-red-950: #460809;
+  --palette-amber-100: #fef3c6;
+  --palette-amber-300: #ffd230;
+  --palette-amber-400: #ffb900;
+  --palette-amber-600: #e17100;
+  --palette-amber-900: #7b3306;
+  --palette-amber-950: #461901;
+  --palette-green-100: #dcfce7;
+  --palette-green-300: #7bf1a8;
+  --palette-green-400: #05df72;
+  --palette-green-500: #00c950;
+  --palette-green-700: #008236;
+  --palette-green-900: #0d542b;
+  --palette-green-950: #032e15;
+  --palette-white: #ffffff;
+
+  /* примитивы: размеры */
+  --scale-0: 0px;
+  --scale-1: 1px;
+  --scale-2: 2px;
+  --scale-4: 4px;
+  --scale-6: 6px;
+  --scale-8: 8px;
+  --scale-10: 10px;
+  --scale-12: 12px;
+  --scale-14: 14px;
+  --scale-16: 16px;
+  --scale-20: 20px;
+  --scale-24: 24px;
+  --scale-28: 28px;
+  --scale-32: 32px;
+  --scale-36: 36px;
+  --scale-40: 40px;
+  --scale-44: 44px;
+  --scale-48: 48px;
+  --scale-56: 56px;
+  --scale-64: 64px;
+  --scale-80: 80px;
+  --scale-96: 96px;
+  --scale-180: 180px;
+  --scale-240: 240px;
+  --scale-280: 280px;
+  --scale-288: 288px;
+  --scale-360: 360px;
+  --scale-400: 400px;
+  --scale-480: 480px;
+  --scale-560: 560px;
+  --scale-640: 640px;
+  --scale-880: 880px;
+  --scale-1280: 1280px;
+
+  /* примитивы: шрифт */
+  --font-family-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-size-11: 11px;
+  --font-size-12: 12px;
+  --font-size-14: 14px;
+  --font-size-16: 16px;
+  --font-size-20: 20px;
+  --font-size-24: 24px;
+  --font-size-28: 28px;
+  --font-size-32: 32px;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* примитивы: движение */
+  --duration-0: 0ms;
+  --duration-50: 50ms;
+  --duration-100: 100ms;
+  --duration-150: 150ms;
+  --duration-200: 200ms;
+  --duration-300: 300ms;
+  --duration-400: 400ms;
+  --duration-600: 600ms;
+  --easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-entrance: cubic-bezier(0, 0, 0.2, 1);
+  --easing-exit: cubic-bezier(0.4, 0, 1, 1);
+  --easing-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --easing-linear: cubic-bezier(0, 0, 1, 1);
+
+  /* семантика: цвет */
+  --bg-canvas: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-raised: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --bg-subtle: #f1f5f9;
+  --bg-component: #f1f5f9;
+  --bg-component-hover: #e2e8f0;
+  --bg-component-active: #cad5e2;
+  --bg-selected: #dbeafe;
+  --bg-selected-hover: #bedbff;
+  --bg-inverse: #1d293d;
+  --border-subtle: #e2e8f0;
+  --border-default: #cad5e2;
+  --border-strong: #62748e;
+  --fg-primary: #0f172b;
+  --fg-secondary: #45556c;
+  --fg-tertiary: #62748e;
+  --fg-disabled: #90a1b9;
+  --fg-on-accent: #ffffff;
+  --fg-on-inverse: #f8fafc;
+  --icon-default: #45556c;
+  --icon-subtle: #62748e;
+  --accent-bg: #eff6ff;
+  --accent-border: #8ec5ff;
+  --accent-solid: #155dfc;
+  --accent-solid-hover: #1447e6;
+  --accent-text: #1447e6;
+  --focus-ring: #155dfc;
+  --overlay-scrim: rgb(2 6 24 / 0.32);
+  --selection-bg: #bedbff;
+  --shadow-color-ring: rgb(2 6 24 / 0.06);
+  --shadow-color-key-raised: rgb(2 6 24 / 0.08);
+  --shadow-color-ambient-raised: rgb(2 6 24 / 0.08);
+  --shadow-color-key-overlay: rgb(2 6 24 / 0.12);
+  --shadow-color-ambient-overlay: rgb(2 6 24 / 0.12);
+  --danger-bg: #ffe2e2;
+  --danger-border: #ffa2a2;
+  --danger-solid: #e7000b;
+  --danger-text: #c10007;
+  --danger-on-solid: #ffffff;
+  --warning-bg: #fef3c6;
+  --warning-border: #ffd230;
+  --warning-solid: #e17100;
+  --warning-text: #7b3306;
+  --warning-on-solid: #020618;
+  --success-bg: #dcfce7;
+  --success-border: #7bf1a8;
+  --success-solid: #008236;
+  --success-text: #008236;
+  --success-on-solid: #ffffff;
+  --info-bg: #dbeafe;
+  --info-border: #8ec5ff;
+  --info-solid: #155dfc;
+  --info-text: #1447e6;
+  --info-on-solid: #ffffff;
+  --chart-1: #00468c;
+  --chart-2: #824700;
+  --chart-3: #007974;
+  --chart-4: #c360bc;
+  --chart-5: #708500;
+
+  /* семантика: отступы */
+  --space-3xs: 2px;
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 40px;
+  --space-3xl: 48px;
+  --space-4xl: 64px;
+  --space-5xl: 96px;
+  --space-inset-card: 16px;
+  --space-inset-page: 24px;
+  --space-inset-control-x: 12px;
+  --space-inset-table-cell-x: 12px;
+  --space-inset-table-cell-y: 2px;
+  --space-stack-field: 12px;
+  --space-stack-section: 24px;
+  --space-inline-control: 8px;
+
+  /* семантика: размеры */
+  --size-control-xs: 24px;
+  --size-control-sm: 28px;
+  --size-control-md: 32px;
+  --size-control-lg: 40px;
+  --size-icon-sm: 14px;
+  --size-icon-md: 16px;
+  --size-icon-lg: 20px;
+  --size-checkbox: 16px;
+  --size-switch-width: 36px;
+  --size-switch-height: 20px;
+  --size-avatar-sm: 20px;
+  --size-avatar-md: 24px;
+  --size-avatar-lg: 32px;
+  --size-row-table: 36px;
+  --size-row-menu-item: 28px;
+  --size-row-sidebar-item: 32px;
+  --size-row-tab: 36px;
+  --size-panel-topbar: 48px;
+  --size-panel-sidebar: 240px;
+  --size-panel-sidebar-collapsed: 48px;
+  --size-panel-inspector: 288px;
+  --size-panel-drawer: 480px;
+  --size-modal-confirm: 400px;
+  --size-modal-form: 560px;
+  --size-modal-wide: 880px;
+  --size-overlay-popover: 240px;
+  --size-overlay-menu-min: 180px;
+  --size-overlay-tooltip-max: 280px;
+  --size-overlay-toast: 360px;
+  --size-content-form-max: 640px;
+  --size-content-max: 1280px;
+
+  /* семантика: форма */
+  --corner-none: 0px;
+  --corner-xs: 2px;
+  --corner-sm: 4px;
+  --corner-md: 6px;
+  --corner-lg: 8px;
+  --corner-full: 9999px;
+
+  /* семантика: границы и фокус */
+  --border-width-default: 1px;
+  --border-width-strong: 2px;
+  --border-width-focus: 2px;
+  --border-offset-focus: 2px;
+
+  /* семантика: глубина */
+  --elevation-none: none;
+  --elevation-ring: 0px 0px 0px 1px rgb(2 6 24 / 0.06);
+  --elevation-raised: 0px 0px 0px 1px rgb(2 6 24 / 0.06), 0px 1px 2px 0px rgb(2 6 24 / 0.08), 0px 4px 8px -2px rgb(2 6 24 / 0.08);
+  --elevation-overlay: 0px 0px 0px 1px rgb(2 6 24 / 0.06), 0px 8px 16px -4px rgb(2 6 24 / 0.12), 0px 16px 32px -8px rgb(2 6 24 / 0.12);
+
+  /* семантика: слои */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-dropdown: 1000;
+  --z-app-bar: 1100;
+  --z-drawer: 1200;
+  --z-modal: 1300;
+  --z-toast: 1400;
+  --z-tooltip: 1500;
+
+  /* семантика: прозрачность */
+  --opacity-disabled: 0.4;
+  --opacity-loading: 0.2;
+  --opacity-scrim: 0.32;
+  --opacity-state-hover: 0.04;
+  --opacity-state-active: 0.08;
+
+  /* семантика: движение */
+  --motion-duration-instant: 0ms;
+  --motion-duration-fast: 100ms;
+  --motion-duration-default: 150ms;
+  --motion-duration-slow: 200ms;
+  --motion-duration-slower: 300ms;
+  --motion-duration-slowest: 400ms;
+  --motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-easing-entrance: cubic-bezier(0, 0, 0.2, 1);
+  --motion-easing-exit: cubic-bezier(0.4, 0, 1, 1);
+  --motion-easing-linear: cubic-bezier(0, 0, 1, 1);
+  --motion-hover: 100ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-press: 100ms cubic-bezier(0, 0, 0.2, 1);
+  --motion-popup-enter: 150ms cubic-bezier(0, 0, 0.2, 1);
+  --motion-popup-exit: 100ms cubic-bezier(0.4, 0, 1, 1);
+  --motion-menu-enter: 150ms cubic-bezier(0, 0, 0.2, 1);
+  --motion-menu-exit: 100ms cubic-bezier(0.4, 0, 1, 1);
+  --motion-modal-enter: 300ms cubic-bezier(0, 0, 0.2, 1);
+  --motion-modal-exit: 200ms cubic-bezier(0.4, 0, 1, 1);
+  --motion-blanket-enter: 300ms cubic-bezier(0, 0, 0.2, 1);
+  --motion-blanket-exit: 200ms cubic-bezier(0.4, 0, 1, 1);
+  --motion-drawer-enter: 300ms cubic-bezier(0, 0, 0.2, 1);
+  --motion-drawer-exit: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-toast-enter: 300ms cubic-bezier(0, 0, 0.2, 1);
+  --motion-toast-exit: 200ms cubic-bezier(0.4, 0, 1, 1);
+  --motion-expand: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* семантика: пространственные величины движения */
+  --motion-translate-sm: 4px;
+  --motion-translate-md: 8px;
+  --motion-scale-in: 0.95;
+  --motion-stagger-step: 20ms;
+
+  /* семантика: брейкпоинты */
+  --bp-tablet: 640px;
+  --bp-desktop: 1024px;
+  --bp-wide: 1440px;
+
+  /* семантика: типографика (составные роли разложены по свойствам) */
+  --type-caption-family: var(--font-family-sans);
+  --type-caption-size: var(--font-size-11);
+  --type-caption-leading: calc(16 / 11);
+  --type-caption-weight: var(--font-weight-regular);
+  --type-caption-tracking: 0.11px;
+  --type-caption-strong-family: var(--font-family-sans);
+  --type-caption-strong-size: var(--font-size-11);
+  --type-caption-strong-leading: calc(16 / 11);
+  --type-caption-strong-weight: var(--font-weight-semibold);
+  --type-caption-strong-tracking: 0.22px;
+  --type-helper-family: var(--font-family-sans);
+  --type-helper-size: var(--font-size-12);
+  --type-helper-leading: calc(16 / 12);
+  --type-helper-weight: var(--font-weight-regular);
+  --type-helper-tracking: 0.12px;
+  --type-label-family: var(--font-family-sans);
+  --type-label-size: var(--font-size-12);
+  --type-label-leading: calc(16 / 12);
+  --type-label-weight: var(--font-weight-medium);
+  --type-label-tracking: 0.12px;
+  --type-code-family: var(--font-family-mono);
+  --type-code-size: var(--font-size-12);
+  --type-code-leading: calc(16 / 12);
+  --type-code-weight: var(--font-weight-regular);
+  --type-code-tracking: 0.0px;
+  --type-body-compact-family: var(--font-family-sans);
+  --type-body-compact-size: var(--font-size-14);
+  --type-body-compact-leading: calc(18 / 14);
+  --type-body-compact-weight: var(--font-weight-regular);
+  --type-body-compact-tracking: 0.0px;
+  --type-body-family: var(--font-family-sans);
+  --type-body-size: var(--font-size-14);
+  --type-body-leading: calc(20 / 14);
+  --type-body-weight: var(--font-weight-regular);
+  --type-body-tracking: 0.0px;
+  --type-body-strong-family: var(--font-family-sans);
+  --type-body-strong-size: var(--font-size-14);
+  --type-body-strong-leading: calc(20 / 14);
+  --type-body-strong-weight: var(--font-weight-semibold);
+  --type-body-strong-tracking: 0.0px;
+  --type-button-family: var(--font-family-sans);
+  --type-button-size: var(--font-size-14);
+  --type-button-leading: calc(20 / 14);
+  --type-button-weight: var(--font-weight-medium);
+  --type-button-tracking: 0.0px;
+  --type-card-title-family: var(--font-family-sans);
+  --type-card-title-size: var(--font-size-14);
+  --type-card-title-leading: calc(20 / 14);
+  --type-card-title-weight: var(--font-weight-semibold);
+  --type-card-title-tracking: 0.0px;
+  --type-section-family: var(--font-family-sans);
+  --type-section-size: var(--font-size-16);
+  --type-section-leading: calc(24 / 16);
+  --type-section-weight: var(--font-weight-semibold);
+  --type-section-tracking: -0.08px;
+  --type-page-title-family: var(--font-family-sans);
+  --type-page-title-size: var(--font-size-20);
+  --type-page-title-leading: calc(28 / 20);
+  --type-page-title-weight: var(--font-weight-semibold);
+  --type-page-title-tracking: -0.2px;
+  --type-page-title-lg-family: var(--font-family-sans);
+  --type-page-title-lg-size: var(--font-size-24);
+  --type-page-title-lg-leading: calc(32 / 24);
+  --type-page-title-lg-weight: var(--font-weight-semibold);
+  --type-page-title-lg-tracking: -0.36px;
+  --type-metric-family: var(--font-family-sans);
+  --type-metric-size: var(--font-size-28);
+  --type-metric-leading: calc(32 / 28);
+  --type-metric-weight: var(--font-weight-semibold);
+  --type-metric-tracking: -0.56px;
+  --type-metric-lg-family: var(--font-family-sans);
+  --type-metric-lg-size: var(--font-size-32);
+  --type-metric-lg-leading: calc(36 / 32);
+  --type-metric-lg-weight: var(--font-weight-semibold);
+  --type-metric-lg-tracking: -0.64px;
+}
+
+/* Тёмная тема. Объявляется на том же элементе, что и светлая (:root),
+   иначе семантические алиасы не пересчитаются: пользовательское свойство
+   наследуется уже вычисленным. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg-canvas: #0f172b;
+    --bg-surface: #1d293d;
+    --bg-surface-raised: #314158;
+    --bg-surface-hover: #314158;
+    --bg-subtle: #020618;
+    --bg-component: #314158;
+    --bg-component-hover: #45556c;
+    --bg-component-active: #62748e;
+    --bg-selected: #162456;
+    --bg-selected-hover: #1c398e;
+    --bg-inverse: #f1f5f9;
+    --border-subtle: #1d293d;
+    --border-default: #314158;
+    --fg-primary: #f1f5f9;
+    --fg-secondary: #cad5e2;
+    --fg-tertiary: #aebccf;
+    --fg-disabled: #7d8fa8;
+    --fg-on-accent: #020618;
+    --fg-on-inverse: #0f172b;
+    --icon-default: #cad5e2;
+    --icon-subtle: #aebccf;
+    --accent-bg: #162456;
+    --accent-border: #193cb8;
+    --accent-solid: #51a2ff;
+    --accent-solid-hover: #8ec5ff;
+    --accent-text: #8ec5ff;
+    --focus-ring: #51a2ff;
+    --overlay-scrim: rgb(2 6 24 / 0.6);
+    --selection-bg: #193cb8;
+    --shadow-color-ring: rgb(255 255 255 / 0.1);
+    --shadow-color-key-raised: rgb(2 6 24 / 0.4);
+    --shadow-color-ambient-raised: rgb(2 6 24 / 0.4);
+    --shadow-color-key-overlay: rgb(2 6 24 / 0.5);
+    --shadow-color-ambient-overlay: rgb(2 6 24 / 0.5);
+    --danger-bg: #460809;
+    --danger-border: #82181a;
+    --danger-solid: #fb2c36;
+    --danger-text: #ffa2a2;
+    --danger-on-solid: #020618;
+    --warning-bg: #461901;
+    --warning-border: #7b3306;
+    --warning-solid: #ffb900;
+    --warning-text: #ffd230;
+    --success-bg: #032e15;
+    --success-border: #0d542b;
+    --success-solid: #00c950;
+    --success-text: #05df72;
+    --success-on-solid: #020618;
+    --info-bg: #162456;
+    --info-border: #193cb8;
+    --info-solid: #51a2ff;
+    --info-text: #8ec5ff;
+    --info-on-solid: #020618;
+    --chart-1: #4699fe;
+    --chart-2: #f68c11;
+    --chart-3: #00d9d1;
+    --chart-4: #bd5ab6;
+    --chart-5: #c3e151;
+    --elevation-ring: 0px 0px 0px 1px rgb(255 255 255 / 0.1);
+    --elevation-raised: 0px 0px 0px 1px rgb(255 255 255 / 0.1), 0px 1px 2px 0px rgb(2 6 24 / 0.4), 0px 4px 8px -2px rgb(2 6 24 / 0.4);
+    --elevation-overlay: 0px 0px 0px 1px rgb(255 255 255 / 0.1), 0px 8px 16px -4px rgb(2 6 24 / 0.5), 0px 16px 32px -8px rgb(2 6 24 / 0.5);
+    --opacity-state-hover: 0.06;
+    --opacity-state-active: 0.12;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-canvas: #0f172b;
+  --bg-surface: #1d293d;
+  --bg-surface-raised: #314158;
+  --bg-surface-hover: #314158;
+  --bg-subtle: #020618;
+  --bg-component: #314158;
+  --bg-component-hover: #45556c;
+  --bg-component-active: #62748e;
+  --bg-selected: #162456;
+  --bg-selected-hover: #1c398e;
+  --bg-inverse: #f1f5f9;
+  --border-subtle: #1d293d;
+  --border-default: #314158;
+  --fg-primary: #f1f5f9;
+  --fg-secondary: #cad5e2;
+  --fg-tertiary: #aebccf;
+  --fg-disabled: #7d8fa8;
+  --fg-on-accent: #020618;
+  --fg-on-inverse: #0f172b;
+  --icon-default: #cad5e2;
+  --icon-subtle: #aebccf;
+  --accent-bg: #162456;
+  --accent-border: #193cb8;
+  --accent-solid: #51a2ff;
+  --accent-solid-hover: #8ec5ff;
+  --accent-text: #8ec5ff;
+  --focus-ring: #51a2ff;
+  --overlay-scrim: rgb(2 6 24 / 0.6);
+  --selection-bg: #193cb8;
+  --shadow-color-ring: rgb(255 255 255 / 0.1);
+  --shadow-color-key-raised: rgb(2 6 24 / 0.4);
+  --shadow-color-ambient-raised: rgb(2 6 24 / 0.4);
+  --shadow-color-key-overlay: rgb(2 6 24 / 0.5);
+  --shadow-color-ambient-overlay: rgb(2 6 24 / 0.5);
+  --danger-bg: #460809;
+  --danger-border: #82181a;
+  --danger-solid: #fb2c36;
+  --danger-text: #ffa2a2;
+  --danger-on-solid: #020618;
+  --warning-bg: #461901;
+  --warning-border: #7b3306;
+  --warning-solid: #ffb900;
+  --warning-text: #ffd230;
+  --success-bg: #032e15;
+  --success-border: #0d542b;
+  --success-solid: #00c950;
+  --success-text: #05df72;
+  --success-on-solid: #020618;
+  --info-bg: #162456;
+  --info-border: #193cb8;
+  --info-solid: #51a2ff;
+  --info-text: #8ec5ff;
+  --info-on-solid: #020618;
+  --chart-1: #4699fe;
+  --chart-2: #f68c11;
+  --chart-3: #00d9d1;
+  --chart-4: #bd5ab6;
+  --chart-5: #c3e151;
+  --elevation-ring: 0px 0px 0px 1px rgb(255 255 255 / 0.1);
+  --elevation-raised: 0px 0px 0px 1px rgb(255 255 255 / 0.1), 0px 1px 2px 0px rgb(2 6 24 / 0.4), 0px 4px 8px -2px rgb(2 6 24 / 0.4);
+  --elevation-overlay: 0px 0px 0px 1px rgb(255 255 255 / 0.1), 0px 8px 16px -4px rgb(2 6 24 / 0.5), 0px 16px 32px -8px rgb(2 6 24 / 0.5);
+  --opacity-state-hover: 0.06;
+  --opacity-state-active: 0.12;
+}
+
+/* Сокращённое движение. Модификатор ортогонален теме и плотности:
+   трогает только токены движения. Согласовано с 08-motion/03-… §5.3. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration-slow: 150ms;
+    --motion-duration-slower: 150ms;
+    --motion-duration-slowest: 150ms;
+    --motion-translate-sm: 0px;
+    --motion-translate-md: 0px;
+    --motion-scale-in: 1;
+    --motion-stagger-step: 0ms;
+    --motion-modal-enter: 150ms cubic-bezier(0, 0, 0.2, 1);
+    --motion-modal-exit: 150ms cubic-bezier(0.4, 0, 1, 1);
+    --motion-blanket-enter: 150ms cubic-bezier(0, 0, 0.2, 1);
+    --motion-blanket-exit: 150ms cubic-bezier(0.4, 0, 1, 1);
+    --motion-drawer-enter: 150ms cubic-bezier(0, 0, 0.2, 1);
+    --motion-drawer-exit: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --motion-toast-enter: 150ms cubic-bezier(0, 0, 0.2, 1);
+    --motion-toast-exit: 150ms cubic-bezier(0.4, 0, 1, 1);
+    --motion-expand: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+:root[data-motion="reduced"] {
+  --motion-duration-slow: 150ms;
+  --motion-duration-slower: 150ms;
+  --motion-duration-slowest: 150ms;
+  --motion-translate-sm: 0px;
+  --motion-translate-md: 0px;
+  --motion-scale-in: 1;
+  --motion-stagger-step: 0ms;
+  --motion-modal-enter: 150ms cubic-bezier(0, 0, 0.2, 1);
+  --motion-modal-exit: 150ms cubic-bezier(0.4, 0, 1, 1);
+  --motion-blanket-enter: 150ms cubic-bezier(0, 0, 0.2, 1);
+  --motion-blanket-exit: 150ms cubic-bezier(0.4, 0, 1, 1);
+  --motion-drawer-enter: 150ms cubic-bezier(0, 0, 0.2, 1);
+  --motion-drawer-exit: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-toast-enter: 150ms cubic-bezier(0, 0, 0.2, 1);
+  --motion-toast-exit: 150ms cubic-bezier(0.4, 0, 1, 1);
+  --motion-expand: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Плотность: compact. Переопределяется ТОЛЬКО семантический слой,
+   поэтому режим можно включить на поддереве, а не только на :root. */
+[data-density="compact"] {
+  --space-2xs: 2px;
+  --space-xs: 6px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 40px;
+  --space-4xl: 48px;
+  --space-5xl: 80px;
+  --space-inset-card: 12px;
+  --space-inset-page: 16px;
+  --space-inset-control-x: 8px;
+  --space-inset-table-cell-x: 8px;
+  --space-stack-field: 8px;
+  --space-stack-section: 16px;
+  --space-inline-control: 6px;
+  --size-control-xs: 20px;
+  --size-control-sm: 24px;
+  --size-control-md: 28px;
+  --size-control-lg: 36px;
+  --size-row-table: 28px;
+  --size-row-menu-item: 24px;
+  --size-row-sidebar-item: 28px;
+  --size-row-tab: 32px;
+  --size-panel-topbar: 40px;
+}
+
+/* Плотность: comfortable. Переопределяется ТОЛЬКО семантический слой,
+   поэтому режим можно включить на поддереве, а не только на :root. */
+[data-density="comfortable"] {
+  --space-3xs: 4px;
+  --space-2xs: 6px;
+  --space-xs: 10px;
+  --space-sm: 16px;
+  --space-md: 20px;
+  --space-lg: 32px;
+  --space-xl: 40px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --space-4xl: 80px;
+  --space-inset-card: 20px;
+  --space-inset-page: 32px;
+  --space-inset-control-x: 16px;
+  --space-inset-table-cell-x: 16px;
+  --space-inset-table-cell-y: 4px;
+  --space-stack-field: 16px;
+  --space-stack-section: 32px;
+  --space-inline-control: 10px;
+  --size-control-xs: 28px;
+  --size-control-sm: 32px;
+  --size-control-md: 40px;
+  --size-control-lg: 48px;
+  --size-row-table: 48px;
+  --size-row-menu-item: 36px;
+  --size-row-sidebar-item: 40px;
+  --size-row-tab: 44px;
+  --size-panel-topbar: 56px;
+}
+

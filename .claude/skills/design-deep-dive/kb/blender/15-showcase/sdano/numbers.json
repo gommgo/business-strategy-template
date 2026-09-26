@@ -1,0 +1,684 @@
+{
+ "subject": "sdano",
+ "lane": "SD",
+ "phase": "1 + 2 (SD, SD2) + ночь (SD3, SD4)",
+ "date": "2026-09-25 … 2026-09-26",
+ "time": {
+  "agent_clock_min": {
+   "phase1": 56,
+   "from_to": "18:30–19:26 MSK",
+   "note": "чтение KIT, выжимок, рецепта и базы ≈ 15 мин; модель, свет, рендеры, страница, листы, документы — остальное"
+  },
+  "machine_s": {
+   "blender_total": 516.6,
+   "blender_runs": {
+    "geomcheck": 7,
+    "study_S1_S4_960x540_32spp": 32,
+    "hero_H1_H2_H3_1600x1000_128spp": 135,
+    "hero2_H1b_H3b_1600x1175_128spp": 93,
+    "objects_1": 56,
+    "objects_2": 81,
+    "objects_3": 41,
+    "objects_4": 44,
+    "study_eq": 28
+   },
+   "browser_shots": 105,
+   "per_frame_s": {
+    "study_960x540_32spp": [
+     4.7,
+     9.7
+    ],
+    "hero_1600x1175_128spp": [
+     43.8,
+     48.7
+    ],
+    "icon_1024_64spp": [
+     19.7,
+     22.1
+    ]
+   },
+   "total_blender_plus_browser": 621.6
+  }
+ },
+ "scene": {
+  "tris": 10936,
+  "objects": 31,
+  "bbox_m": [
+   9.533,
+   6.7,
+   1.6
+  ],
+  "units": "1 м = 60 ед. SVG"
+ },
+ "frames_img_metrics": {
+  "study/S1": {
+   "obj_L_p50": 67.4,
+   "obj_L_p95": 82.8,
+   "obj_L_max": 93.6,
+   "clip_obj_pct": 0.0,
+   "hi_obj_pct": 0.0,
+   "obj_minus_bg_L": -32.6,
+   "bg_vs_page_dE": 0.0,
+   "noise_e3_shared": 64.7,
+   "weight_center": [
+    0.5,
+    0.46
+   ],
+   "weight_on_obj": 0.88,
+   "bg_L_p5": 80.6,
+   "noise_flat_e3": 12.6
+  },
+  "study/S2": {
+   "obj_L_p50": 55.3,
+   "obj_L_p95": 94.5,
+   "obj_L_max": 98.6,
+   "clip_obj_pct": 0.0,
+   "hi_obj_pct": 0.03,
+   "obj_minus_bg_L": -44.7,
+   "bg_vs_page_dE": 0.0,
+   "noise_e3_shared": 65.4,
+   "weight_center": [
+    0.53,
+    0.46
+   ],
+   "weight_on_obj": 0.83,
+   "bg_L_p5": 52.4,
+   "noise_flat_e3": 14.2
+  },
+  "study/S3": {
+   "obj_L_p50": 38.7,
+   "obj_L_p95": 72.6,
+   "obj_L_max": 97.7,
+   "clip_obj_pct": 0.0,
+   "hi_obj_pct": 0.0,
+   "obj_minus_bg_L": -60.9,
+   "bg_vs_page_dE": 0.2,
+   "noise_e3_shared": 50.8,
+   "weight_center": [
+    0.5,
+    0.46
+   ],
+   "weight_on_obj": 0.85,
+   "bg_L_p5": 64.4,
+   "noise_flat_e3": 11.3
+  },
+  "study/S4": {
+   "obj_L_p50": 72.0,
+   "obj_L_p95": 82.7,
+   "obj_L_max": 91.8,
+   "clip_obj_pct": 0.0,
+   "hi_obj_pct": 0.0,
+   "obj_minus_bg_L": -26.6,
+   "bg_vs_page_dE": 0.79,
+   "noise_e3_shared": 62.7,
+   "weight_center": [
+    0.5,
+    0.45
+   ],
+   "weight_on_obj": 0.9,
+   "bg_L_p5": 89.5,
+   "noise_flat_e3": 12.3
+  },
+  "hero/H1": {
+   "obj_L_p50": 61.4,
+   "obj_L_p95": 94.8,
+   "obj_L_max": 98.9,
+   "clip_obj_pct": 0.0,
+   "hi_obj_pct": 0.03,
+   "obj_minus_bg_L": -38.6,
+   "bg_vs_page_dE": 0.0,
+   "noise_e3_shared": 55.9,
+   "weight_center": [
+    0.46,
+    0.47
+   ],
+   "weight_on_obj": 0.86,
+   "bg_L_p5": 51.6,
+   "noise_flat_e3": 10.9
+  },
+  "hero/H2": {
+   "obj_L_p50": 64.7,
+   "obj_L_p95": 95.1,
+   "obj_L_max": 98.9,
+   "clip_obj_pct": 0.0,
+   "hi_obj_pct": 0.04,
+   "obj_minus_bg_L": -35.3,
+   "bg_vs_page_dE": 0.0,
+   "noise_e3_shared": 64.4,
+   "weight_center": [
+    0.45,
+    0.47
+   ],
+   "weight_on_obj": 0.72,
+   "bg_L_p5": 49.6,
+   "noise_flat_e3": 12.2
+  },
+  "hero/H3": {
+   "obj_L_p50": 78.7,
+   "obj_L_p95": 91.7,
+   "obj_L_max": 96.4,
+   "clip_obj_pct": 0.0,
+   "hi_obj_pct": 0.0,
+   "obj_minus_bg_L": -20.9,
+   "bg_vs_page_dE": 0.2,
+   "noise_e3_shared": 54.3,
+   "weight_center": [
+    0.48,
+    0.46
+   ],
+   "weight_on_obj": 0.9,
+   "bg_L_p5": 95.5,
+   "noise_flat_e3": 11.9
+  },
+  "hero2/H1b": {
+   "obj_L_p50": 69.6,
+   "obj_L_p95": 95.5,
+   "obj_L_max": 98.9,
+   "clip_obj_pct": 0.0,
+   "hi_obj_pct": 0.05,
+   "obj_minus_bg_L": -30.4,
+   "bg_vs_page_dE": 0.0,
+   "noise_e3_shared": 56.0,
+   "weight_center": [
+    0.46,
+    0.47
+   ],
+   "weight_on_obj": 0.88,
+   "bg_L_p5": 57.5,
+   "noise_flat_e3": 10.7
+  },
+  "hero2/H3b": {
+   "obj_L_p50": 78.7,
+   "obj_L_p95": 91.7,
+   "obj_L_max": 96.6,
+   "clip_obj_pct": 0.0,
+   "hi_obj_pct": 0.0,
+   "obj_minus_bg_L": -20.9,
+   "bg_vs_page_dE": 0.2,
+   "noise_e3_shared": 53.7,
+   "weight_center": [
+    0.48,
+    0.47
+   ],
+   "weight_on_obj": 0.9,
+   "bg_L_p5": 96.2,
+   "noise_flat_e3": 10.6
+  },
+  "objects4/laser2": {
+   "obj_L_p50": 87.1,
+   "obj_L_p95": 93.8,
+   "obj_L_max": 96.6,
+   "clip_obj_pct": 0.0,
+   "hi_obj_pct": 0.0,
+   "obj_minus_bg_L": -12.2,
+   "bg_vs_page_dE": 0.4,
+   "noise_e3_shared": 24.3,
+   "weight_center": [
+    0.41,
+    0.55
+   ],
+   "weight_on_obj": 0.77,
+   "bg_L_p5": 62.1
+  },
+  "objects4/thermal": {
+   "obj_L_p50": 81.3,
+   "obj_L_p95": 94.0,
+   "obj_L_max": 96.6,
+   "clip_obj_pct": 0.0,
+   "hi_obj_pct": 0.0,
+   "obj_minus_bg_L": -17.0,
+   "bg_vs_page_dE": 1.0,
+   "noise_e3_shared": 29.2,
+   "weight_center": [
+    0.37,
+    0.49
+   ],
+   "weight_on_obj": 0.6,
+   "bg_L_p5": 61.7
+  },
+  "objects2/stamp": {
+   "obj_L_p50": 92.0,
+   "obj_L_p95": 93.0,
+   "obj_L_max": 96.9,
+   "clip_obj_pct": 0.0,
+   "hi_obj_pct": 0.0,
+   "obj_minus_bg_L": -8.0,
+   "bg_vs_page_dE": 0.0,
+   "noise_e3_shared": 13.7,
+   "weight_center": [
+    0.53,
+    0.52
+   ],
+   "weight_on_obj": 0.75,
+   "bg_L_p5": 99.0
+  },
+  "objects2/stamp_black": {
+   "obj_L_p50": 11.7,
+   "obj_L_p95": 17.0,
+   "obj_L_max": 60.7,
+   "clip_obj_pct": 0.0,
+   "hi_obj_pct": 0.0,
+   "obj_minus_bg_L": -88.0,
+   "bg_vs_page_dE": 0.2,
+   "noise_e3_shared": 20.4,
+   "weight_center": [
+    0.5,
+    0.49
+   ],
+   "weight_on_obj": 0.64,
+   "bg_L_p5": 92.3
+  },
+  "study_eq/S1": {
+   "obj_L_p50": 75.7,
+   "obj_L_p95": 91.3,
+   "clip_obj_pct": 0.0,
+   "bg_L_p5": 80.6,
+   "bg_vs_page_dE": 0.0,
+   "weight_on_obj": 0.89
+  },
+  "study_eq/S2": {
+   "obj_L_p50": 55.3,
+   "obj_L_p95": 94.5,
+   "clip_obj_pct": 0.0,
+   "bg_L_p5": 52.4,
+   "bg_vs_page_dE": 0.0,
+   "weight_on_obj": 0.83
+  },
+  "study_eq/S3": {
+   "obj_L_p50": 54.1,
+   "obj_L_p95": 91.7,
+   "clip_obj_pct": 0.0,
+   "bg_L_p5": 64.4,
+   "bg_vs_page_dE": 0.2,
+   "weight_on_obj": 0.89
+  },
+  "study_eq/S4": {
+   "obj_L_p50": 80.8,
+   "obj_L_p95": 91.3,
+   "clip_obj_pct": 0.0,
+   "bg_L_p5": 89.5,
+   "bg_vs_page_dE": 0.79,
+   "weight_on_obj": 0.91
+  }
+ },
+ "note_noise": "noise_e3_shared (img_metrics) на кадре-чертеже меряет чёрные линии среза, а не шум; noise_flat_e3 — по ровным участкам (scripts/onwhite.py), визуально шум не виден",
+ "page_b_draft": {
+  "assets_kb": {
+   "iso-h1b-1200.avif": 19.2,
+   "iso-h1b-1200.webp": 29.9,
+   "iso-h1b-1600.avif": 25.1,
+   "iso-h1b-1600.webp": 41.2,
+   "iso-h1b-800.avif": 13.1,
+   "iso-h1b-800.webp": 19.3
+  },
+  "loaded_img": {
+   "desktop_dpr1": "iso-h1b-800.avif 13.1 KB",
+   "mobile_dpr3": "iso-h1b-1200.avif 19.2 KB"
+  },
+  "page_kb": {
+   "a_desktop": 110.2,
+   "b_desktop": 123.9,
+   "b_grid_desktop": 126.9,
+   "a_mobile": 110.2,
+   "b_mobile": 130.0
+  },
+  "lcp_ms_lab": {
+   "a_desktop": 96,
+   "b_desktop": 100,
+   "a_mobile": 372,
+   "b_mobile": 400
+  },
+  "cls": 0,
+  "js_effects_kb": 0,
+  "webgl": 0,
+  "console_errors": 0
+ },
+ "study_eq_k": {
+  "S1": 1.3,
+  "S2": 1.0,
+  "S3": 1.8,
+  "S4": 1.3
+ },
+ "phase2": {
+  "note": "фаза 2: агент SD (сцена v2, композиция B, телефонный кадр, иконки v2, проходы C) и SD2 (иконки v3, «С/у», штамп-клип, фонарик C, спеки)",
+  "time": {
+   "agent_clock_min": {
+    "SD_phase2": 35,
+    "SD_phase2_from_to": "19:37–20:10",
+    "SD2": 80,
+    "SD2_from_to": "20:15–21:35"
+   },
+   "machine_s": {
+    "SD_phase2": 491,
+    "SD_phase2_runs": {
+     "v2_scene_frame_passes": 135,
+     "v2b": 129,
+     "passconv": 12,
+     "icons2": 169,
+     "shots2_judge2": 46
+    },
+    "SD2": 407,
+    "SD2_runs": {
+     "icons3_blender": 109,
+     "stamp_blender": 137,
+     "stamp_prev_blender": 30,
+     "browser_fx_stamp_shots": 131
+    },
+    "SD2_queue_wait_heavy_s": 1674
+   }
+  },
+  "scene_v2": {
+   "tris": 47972,
+   "objects": 37,
+   "frame": "1800×1905 Cycles 128 + OIDN, 103 с",
+   "passes": "16 спп полный 11,5 с; 64 спп половинный 11,5 с"
+  },
+  "b_assets_kb": {
+   "iso_desk_avif_720_1080_1440_1800": [
+    16.6,
+    24.8,
+    31.7,
+    38.3
+   ],
+   "iso_mob_avif_390_780_1170": [
+    10.7,
+    20.2,
+    29.2
+   ],
+   "icons_avif_128": "0,8–1,2",
+   "icons_avif_256": "1,1–1,9",
+   "icons_edge_dE_to_fff_max": 0.35,
+   "icons_height_pct": {
+    "laser": 56.0,
+    "thermal": 56.0,
+    "moisture": 56.0,
+    "tape": 50.0,
+    "flashlight": 56.0
+   },
+   "stamp": {
+    "frames": 38,
+    "fps": 24,
+    "dur_s": 1.58,
+    "tris": 2060,
+    "render": "800×391 Cycles 32 + OIDN + motion blur, 137 с",
+    "vp9_kb": 53.5,
+    "h264_kb": 55.0,
+    "start_webp_kb": 7.1,
+    "end_webp_kb": 12.0,
+    "paper_far_from_stamp": 255,
+    "vp9_edge_min": 253,
+    "px_per_mm": 3.05
+   }
+  },
+  "c_fonarik_sd2": {
+   "js_br_kb": 5.5,
+   "data_kb": 187.5,
+   "dE_poster_to_frame0": {
+    "mean": 0.27,
+    "p95": 1.09,
+    "p99": 5.5,
+    "max": 28.7
+   },
+   "idle_frames": 0
+  }
+ },
+ "night": {
+  "note": "SD3 (00:06–01:58, затем завис на вызове ffmpeg без -nostdin; остановлен в 05:40) и SD4 (05:34–06:35)",
+  "time": {
+   "agent_clock_min": {
+    "SD3_active": 112,
+    "SD3_from_to": "00:06–01:58 (дальше завис, ход — NOTES «Ход SD3»)",
+    "SD4": 60,
+    "SD4_from_to": "05:34–06:35"
+   },
+   "machine_s": {
+    "SD3": 2803,
+    "SD3_runs": {
+     "gates_A_B_C": 1811,
+     "gates_A": 589,
+     "gates_B": 600,
+     "gates_C": 622,
+     "video_probe_stamp": 750,
+     "fx_shots": 139,
+     "topdown_blender": 14,
+     "stamp_shots": 36,
+     "judge_try": 18,
+     "video_10s": 35
+    },
+    "SD3_queue_wait_gates_A_s": "872–1865 на каждый замер (очередь до самообёртки run_gates.sh 03:35); B 1667, C 1246 одной задачей",
+    "SD4": 753,
+    "SD4_runs": {
+     "gates_C_rerun": 623,
+     "judge_shots_ABC": 40,
+     "fx_probe": 66,
+     "fx_bench2": 10,
+     "gallery_shots": 7,
+     "fx_debug": 3,
+     "bench_check": 4
+    },
+    "SD4_queue_wait_s": {
+     "gates_C": 320,
+     "fx_probe": 921
+    }
+   }
+  },
+  "c_data_kb": {
+   "fx-albedo.webp": 49.8,
+   "fx-nh.webp": 105.7,
+   "fx-ao.webp": 6.7,
+   "fx-td.webp": 9.8,
+   "total": 172.0
+  },
+  "js": {
+   "c_fonarik_raw_kb": 17.1,
+   "c_fonarik_br_kb": 6.05,
+   "inline_script_br_kb": {
+    "a": 0.49,
+    "b": 1.06,
+    "c": 1.06
+   },
+   "effect_libs_kb": {
+    "a": 0,
+    "b": 0,
+    "c": 0
+   },
+   "note": "B/C: встроенный скрипт = липкий призыв + запуск клипа штампа (0,45 КБ); у C ещё модуль fonarik.js (без three)"
+  },
+  "gates": {
+   "run": "run_gates.sh: site_probe ×3 (десктоп; Pixel 7 CPU×4 4G; reduce) + gate_check + motion_check + marketing_audit; всё под slot_run --heavy (тишина по Cycles)",
+   "a-code": {
+    "level": "L0",
+    "when": "01:45–03:56 (SD3)",
+    "lcp_ms": {
+     "desk": 56,
+     "mob": 596,
+     "reduce": 56
+    },
+    "tbt_ms": {
+     "desk": 0,
+     "mob": 3
+    },
+    "transfer_kb": {
+     "desk": 72.0,
+     "mob": 72.0
+    },
+    "cls": 0,
+    "console_errors": 0,
+    "motion_check": {
+     "fail_B": 0,
+     "fail_S": 0,
+     "fail_D": 0,
+     "na": 4
+    },
+    "marketing": {
+     "blockers": 0,
+     "serious": 0,
+     "polish": 45
+    }
+   },
+   "b-blender": {
+    "level": "L0",
+    "when": "04:23–04:34 (SD3)",
+    "lcp_ms": {
+     "desk": 52,
+     "mob": 856,
+     "reduce": 80
+    },
+    "tbt_ms": {
+     "desk": 0,
+     "mob": 33
+    },
+    "transfer_kb": {
+     "desk": 116.4,
+     "mob": 111.7
+    },
+    "cls": 0,
+    "console_errors": 0,
+    "motion_check": {
+     "fail_B": 0,
+     "fail_S": 0,
+     "fail_D": 0,
+     "na": 4
+    },
+    "marketing": {
+     "blockers": 0,
+     "serious": 0,
+     "polish": 39
+    }
+   },
+   "c-hybrid": {
+    "level": "L1",
+    "when": "05:45–05:56 (SD4, спека C: loops_in_view_max 0 → 1)",
+    "lcp_ms": {
+     "desk": 60,
+     "mob": 864,
+     "reduce": 48
+    },
+    "tbt_ms": {
+     "desk": 0,
+     "mob": 42
+    },
+    "transfer_kb": {
+     "desk": 295.4,
+     "mob": 290.6
+    },
+    "dpr_canvas": {
+     "desk": 0.45,
+     "mob": 0.8
+    },
+    "calls_idle": 0,
+    "cls": 0,
+    "console_errors": 0,
+    "motion_check": {
+     "fail_B": 0,
+     "fail_S": 0,
+     "fail_D": 0,
+     "na": 4
+    },
+    "marketing": {
+     "blockers": 0,
+     "serious": 0,
+     "polish": 39
+    },
+    "sd3_run_04_55": {
+     "lcp_ms": {
+      "desk": 56,
+      "mob": 852,
+      "reduce": 48
+     },
+     "motion_check": {
+      "fail_S": 1,
+      "what": "EG-A11Y-17 mob: 1 движение в видимой зоне при бюджете спеки 0 — однократный показ фонаря на телефоне (шаг прокрутки 1, 17,8 % пикселей за 1 с)"
+     },
+     "copy": "99-raw/experiments/SD/gates/c-hybrid_sd3-0455/"
+    },
+    "loadavg_at_probe_start": [
+     21.4,
+     20.31,
+     16.31
+    ],
+    "loadavg_at_motion_start": [
+     10.39,
+     17.54,
+     15.56
+    ]
+   }
+  },
+  "fx_probe_c": {
+   "cmd": "fx_probe.py … --modes desktop,mobile,reduce,uncapped --pointer --bench 120 (SD4-bench, 05:55, в тишине)",
+   "desktop": {
+    "ready_s": 0.15,
+    "idle_draw_frames": 0,
+    "idle_motion_pct": 0.0,
+    "pointer_fps": 60,
+    "pointer_frame_ms_p95": 16.8,
+    "pointer_frames_with_draws": "87 из 97",
+    "dc_per_frame": 1,
+    "scroll_fps": 58.8,
+    "lcp_ms": 80,
+    "tbt_ms": 10,
+    "heap_mb": 10.0,
+    "transfer_kb": 417.6,
+    "canvas": [
+     660,
+     698
+    ]
+   },
+   "mobile": {
+    "ready_s": 0.3,
+    "idle_draw_frames": 0,
+    "scroll_fps": 58.6,
+    "lcp_ms": 136,
+    "tbt_ms": 18,
+    "transfer_kb": 424.9,
+    "canvas": [
+     565,
+     709
+    ],
+    "dpr_cap": 1.5
+   },
+   "reduce": {
+    "contexts": 0,
+    "draws": 0,
+    "transfer_kb": 185.0,
+    "lcp_ms": 80
+   },
+   "uncapped": "ошибка инструмента: Page.screenshot timeout 30 с (без vsync скриншот не дождался кадра) — не замерено",
+   "bench_window": "window.__bench(120) в прогоне fx_probe вернул 0 мс; отдельно (scripts/bench_check.py, SD4 06:28) тот же __bench(120): при плане в кадре 1,45 мс (p50 1,3, p95 1,7), после прокрутки к концу 1,36, снова в кадре 1,37 — причина нуля в сценарии fx_probe, не найдена",
+   "transfer_note": "fx_probe считает всё, что пришло за прогон (в т. ч. клип штампа при прокрутке, 53,5 КБ), site_probe — первый экран"
+  },
+  "fx_bench2_c": {
+   "cmd": "scripts/fx_bench2.py (SD4-bench2, 05:59, в тишине): N = 400 кадров, луч на трещине, полумрак 1",
+   "gpu": "ANGLE (Intel, Mesa Intel Iris Xe Graphics RPL-P), OpenGL ES 3.2 — встроенная графика ноутбука",
+   "desk_dpr1": {
+    "canvas": [
+     660,
+     698
+    ],
+    "ms_frame_sync": 1.31,
+    "ms_frame_throughput": 0.24
+   },
+   "desk_dpr2": {
+    "canvas": [
+     1320,
+     1397
+    ],
+    "ms_frame_sync": 1.84,
+    "ms_frame_throughput": 0.67
+   },
+   "mob_cap1_5_cpu4": {
+    "canvas": [
+     565,
+     709
+    ],
+    "ms_frame_sync": 1.17,
+    "ms_frame_throughput": 0.24
+   },
+   "note": "sync — draw + readPixels 1 px на каждый кадр (задержка с ожиданием GPU); throughput — N draw и один readPixels. Реальный телефон не мерили (EG-LIVE-01 — вручную)"
+  },
+  "judge": {
+   "shot": "scripts/judge_shots.py (SD4-judge, 40 с на A+B+C): десктоп 1440×900 DPR 1; телефон 390×844 DPR 3 (файл 1170×2532); штамп — браузер без GPU-флагов, клип доиграл (t 1,584 с, ended) у B и C",
+   "video": "c-hybrid__fonarik-10s.webm — 10,0 с, 1440×900, 25 к/с, VP9 593 КБ (SD3 01:57, scripts/fx_video.py): все 4 дефекта найдены"
+  }
+ }
+}

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>«Ё» — клавиатура, где у Ё есть место</title>
+<meta name="description" content="Механическая клавиатура 65 %: алюминиевый корпус, латунная плита 408 г, колпачки PBT с русской и английской раскладкой. Ё — слева от единицы, без Fn.">
+<meta name="kb-variant" content="{{VARIANT}}">
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/onest-cyrillic-wght-normal.woff2" crossorigin>
+<link rel="preload" as="image" type="image/avif" href="assets/img/hero_desk.avif" media="(min-width: 701px)" fetchpriority="high">
+<link rel="preload" as="image" type="image/avif" href="assets/img/hero_mob.avif" media="(max-width: 700px)" fetchpriority="high">
+<link rel="stylesheet" href="assets/page.css">
+</head>
+<body data-variant="{{VARIANT}}">
+<a class="skip" href="#type">К разделу «Напечатайте»</a>
+<header class="bar">
+  <div class="bar__in">
+    <a class="logo" href="#top" aria-label="«Ё» — наверх"><span class="logo__key" aria-hidden="true">Ё</span></a>
+    <nav class="nav" aria-label="Разделы">
+      <a href="#type">Набор</a>
+      <a href="#colors">Цвета</a>
+      <a href="#inside">Устройство</a>
+      <a href="#price">Цена</a>
+    </nav>
+    <a class="bar__cta" href="#price">Узнать о&nbsp;старте продаж</a>
+  </div>
+</header>
+
+<main>
+<section class="hero" id="top" aria-labelledby="h1">
+  <picture class="hero__poster">
+    <source media="(max-width: 700px)" type="image/avif" srcset="assets/img/hero_mob.avif">
+    <source media="(max-width: 700px)" type="image/webp" srcset="assets/img/hero_mob.webp">
+    <source type="image/avif" srcset="assets/img/hero_desk.avif">
+    <img src="assets/img/hero_desk.webp" width="1920" height="1200" fetchpriority="high" decoding="async"
+         alt="Клавиатура «Ё» крупно: оранжевая клавиша Ё в левом верхнем углу, справа от неё 1 и 2, ниже Tab и Й">
+  </picture>
+  <div class="hero__text">
+    <h1 id="h1">Клавиатура, где у&nbsp;Ё есть место</h1>
+    <p class="hero__lead">Механическая 65&nbsp;%: алюминиевый корпус, латунный грузик, колпачки PBT с&nbsp;двумя раскладками. Ё&nbsp;— слева от&nbsp;единицы, как на&nbsp;большой клавиатуре, а&nbsp;не&nbsp;на&nbsp;слое Fn.</p>
+    <p class="hero__esc">Esc&nbsp;— это Fn&nbsp;+&nbsp;Ё.</p>
+    <a class="btn btn--light" href="#price">Узнать о&nbsp;старте продаж</a>
+  </div>
+</section>
+
+<section class="type" id="type" aria-labelledby="type-h">
+  <div class="wrap type__head">
+    <h2 id="type-h">Напечатайте что-нибудь</h2>
+    <p class="type__hint type__hint--keys">Нажимайте клавиши на&nbsp;своей клавиатуре&nbsp;— нажатия повторятся здесь. Раскладка&nbsp;— та, что у&nbsp;вас включена.</p>
+    <p class="type__hint type__hint--touch">Касайтесь клавиш на&nbsp;картинке&nbsp;— клавиатура листается вбок. Раскладку переключает кнопка под ней.</p>
+  </div>
+  <div class="wrap">
+    <p class="typed" id="typed" aria-live="off" aria-label="Напечатанный текст"><span class="typed__text" id="typed-text"></span><span class="typed__caret" aria-hidden="true"></span></p>
+    <p class="type__yo" id="yo-note" aria-live="polite"></p>
+  </div>
+  <div class="wrap wrap--wide">
+    <div class="stage stage--type" id="stage-type" data-stage="type" role="group" aria-label="Клавиатура: нажатые клавиши подсвечиваются"
+         style="{{TYPE_BAND}}">
+      <div class="zoom"><div class="frame">
+{{STAGE_TYPE}}
+      </div></div>
+      <i class="snap snap--l" aria-hidden="true"></i><i class="snap snap--r" aria-hidden="true"></i>
+    </div>
+    <div class="tools">
+      <span class="tools__layout" id="layout" aria-live="polite">Раскладка: RU</span>
+      <button class="chipbtn" id="lang" type="button" aria-pressed="false">Касание печатает: RU</button>
+      <button class="chipbtn" id="shift" type="button" aria-pressed="false">Shift</button>
+      <button class="chipbtn" id="half" type="button" aria-controls="stage-type">Правая половина&nbsp;→</button>
+      <button class="chipbtn" id="clear" type="button">Стереть</button>
+    </div>
+  </div>
+</section>
+
+<section class="facts" id="why" aria-label="Чем «Ё» отличается">
+  <div class="wrap facts__grid">
+    <article class="fact">
+      <h3>Ё на&nbsp;своём месте</h3>
+      <p>На&nbsp;компактных клавиатурах Ё прячут за&nbsp;Fn или отдают её угол Esc. Здесь угол&nbsp;— её. Esc&nbsp;— это Fn&nbsp;+&nbsp;Ё, и&nbsp;его можно переназначить.</p>
+    </article>
+    <article class="fact">
+      <h3>Кириллица главная</h3>
+      <p>Русская буква&nbsp;— основная надпись, латиница&nbsp;— рядом. Краска вплавлена в&nbsp;PBT сублимацией&nbsp;— надписи не&nbsp;стираются.</p>
+    </article>
+    <article class="fact">
+      <h3>Цельный алюминий</h3>
+      <p>Корпус фрезерован из&nbsp;алюминия, обработан пескоструем и&nbsp;анодирован, наклон&nbsp;6°. Внизу&nbsp;— латунная плита 408&nbsp;г: клавиатура не&nbsp;ездит по&nbsp;столу.</p>
+    </article>
+  </div>
+</section>
+
+<section class="colors" id="colors" data-cw="snow" aria-labelledby="colors-h">
+  <div class="wrap colors__head">
+    <div>
+      <h2 id="colors-h">Три цвета</h2>
+      <p>Снег, Графит, Лён&nbsp;— примерьте прямо здесь.</p>
+    </div>
+    <div class="chips" role="radiogroup" aria-label="Расцветка">
+      <button type="button" role="radio" aria-checked="true" data-cw="snow"><i class="sw sw--snow" aria-hidden="true"></i>Снег</button>
+      <button type="button" role="radio" aria-checked="false" data-cw="graphite"><i class="sw sw--graphite" aria-hidden="true"></i>Графит</button>
+      <button type="button" role="radio" aria-checked="false" data-cw="linen"><i class="sw sw--linen" aria-hidden="true"></i>Лён</button>
+    </div>
+  </div>
+  <div class="wrap wrap--wide">
+    <div class="stage stage--turn" id="stage-turn" data-stage="turn" tabindex="0" role="img"
+         aria-label="Клавиатура в расцветке «Снег». Потяните или нажмите стрелки, чтобы повернуть.">
+{{STAGE_TURN}}
+    </div>
+    <div class="tools tools--turn">
+      <button class="roundbtn" type="button" data-turn="-1" aria-label="Повернуть влево"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <span class="tools__hint">Потяните, чтобы повернуть</span>
+      <button class="roundbtn" type="button" data-turn="1" aria-label="Повернуть вправо"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+  </div>
+</section>
+
+<section class="inside" id="inside" aria-labelledby="inside-h">
+  <div class="inside__pin">
+    <div class="wrap inside__head">
+      <h2 id="inside-h">Как устроена</h2>
+      <p class="inside__hint">Прокрутите&nbsp;— клавиатура разберётся по&nbsp;слоям.</p>
+    </div>
+    <div class="wrap wrap--wide inside__body">
+      <div class="stage stage--x" id="stage-x" data-stage="x" role="img" aria-label="Клавиатура в разборе: колпачки, свитчи, пластина, плата, латунная плита, корпус">
+{{STAGE_X}}
+      </div>
+      <ol class="layers" id="layers">
+        <li data-layer="keycaps"><b>Колпачки</b> PBT, профиль Cherry</li>
+        <li data-layer="switches"><b>Свитчи</b> механические, посадка MX</li>
+        <li data-layer="plate"><b>Пластина</b> алюминиевая, 1,5&nbsp;мм</li>
+        <li data-layer="pcb"><b>Плата</b></li>
+        <li data-layer="weight"><b>Латунная плита</b> 200&nbsp;×&nbsp;40&nbsp;×&nbsp;6&nbsp;мм, 408&nbsp;г</li>
+        <li data-layer="case"><b>Корпус</b> цельный алюминий, наклон 6°</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section class="price" id="price" aria-labelledby="price-h">
+  <div class="wrap price__grid">
+    <div>
+      <h2 id="price-h">Характеристики</h2>
+      <dl class="specs">
+        <div><dt>Раскладка</dt><dd>65&nbsp;%, 68&nbsp;клавиш; ЙЦУКЕН и&nbsp;QWERTY</dd></div>
+        <div><dt>Колпачки</dt><dd>PBT, профиль Cherry, надписи сублимацией</dd></div>
+        <div><dt>Корпус</dt><dd>алюминий, пескоструй, анодирование; наклон 6°</dd></div>
+        <div><dt>Грузик</dt><dd>латунная плита 200&nbsp;×&nbsp;40&nbsp;×&nbsp;6&nbsp;мм, 408&nbsp;г</dd></div>
+        <div><dt>Размер</dt><dd>328&nbsp;×&nbsp;119&nbsp;мм, высота 17–30&nbsp;мм</dd></div>
+        <div><dt>Подключение</dt><dd>USB-C</dd></div>
+      </dl>
+    </div>
+    <div class="buy">
+      <p class="buy__sum">от&nbsp;14&nbsp;900&nbsp;₽</p>
+      <p class="buy__note">Цена-пример для&nbsp;демо-страницы.</p>
+      <button class="btn" id="notify" type="button" aria-controls="notify-msg" aria-expanded="false">Узнать о&nbsp;старте продаж</button>
+      <p class="buy__msg" id="notify-msg" hidden>Это демонстрационная страница: клавиатура «Ё»&nbsp;— концепт, продаж не&nbsp;будет.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap"><p>«Ё»&nbsp;— демонстрационный концепт. Продукт вымышленный, цена&nbsp;— пример.</p></div>
+</footer>
+<script>window.KB_CFG = {{CFG}};</script>
+<script type="module" src="dist/main.js"></script>
+</body>
+</html>

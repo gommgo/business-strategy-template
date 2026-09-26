@@ -1,0 +1,730 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:app-design:site-research:blocks:0.9",
+  "title": "blocks.yaml v0.9 — каталог блоков сайта: анатомия, слоты, варианты, телефон, разметка, ссылки на правила",
+  "description": "ЗАМЕНЕНО v1: ../10-playbooks-contracts/schemas/blocks.schema.json (J, волна 3, 2026-09-24); эта схема v0.9 остаётся для файлов версии 0.9. Владелец — site-research (04-blocks, агент E, волна 2; v1 — J, волна 3). Id блоков, слотов, ролей — словарь B 02-site-types/vocabulary.yaml (проверка — ../../scripts/site/vocab_lint.py --keys-as-ids blocks=block). Визуальные варианты и эффекты блока — creative (block-treatments.yaml) по id блока; правила текста слотов — text (copy-slots.yaml) по id слота; медиа — ai-media (план ассетов 01/01 §8); 3D — blender (12-recipes). Схема проверяет форму; что слот разрешён блоку и что факт существует — site_validate.py (J) и опыт E/01.",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^x-": {}
+  },
+  "required": [
+    "blocks_version",
+    "checked",
+    "status",
+    "vocabulary",
+    "length_classes",
+    "mobile_behaviors",
+    "blocks"
+  ],
+  "properties": {
+    "blocks_version": {
+      "type": "string",
+      "pattern": "^0\\.9(\\.[0-9]+)?$|^1(\\.[0-9]+)*$",
+      "description": "Версия формата: 0.9 — черновик E к S1; 1 — итог J (волна 3)."
+    },
+    "checked": {
+      "$ref": "#/$defs/date"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "released",
+        "v1"
+      ],
+      "description": "draft — черновик к S1; released — после замечаний сестёр; v1 — J."
+    },
+    "owner": {
+      "type": "string"
+    },
+    "schema": {
+      "type": "string"
+    },
+    "vocabulary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "Путь к vocabulary.yaml от этого файла."
+        },
+        "version": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        },
+        "revision": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        },
+        "checked": {
+          "$ref": "#/$defs/date"
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Главные источники каталога (подробно — 01-blocks-catalog.md, «Источники»)."
+    },
+    "conventions": {
+      "type": "array",
+      "description": "Сквозные правила для всех блоков (конвенции взаимодействия, разметка, телефон) — контракт §6.11, поправки PLAN.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "rule"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "rule": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string",
+            "description": "Метка доказательности: [стандарт], [исследование], [практика] …"
+          },
+          "ref": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "length_classes": {
+      "type": "object",
+      "description": "Классы порядка величины длины текстового слота. Точные длины — text (copy-slots.yaml, length.ru/en).",
+      "propertyNames": {
+        "$ref": "#/$defs/length-class"
+      },
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "mobile_behaviors": {
+      "type": "object",
+      "description": "Структурные приёмы телефона (C 03 §5.2 + E). Визуал — creative.",
+      "propertyNames": {
+        "$ref": "#/$defs/mobile-behavior"
+      },
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "text_slot_defaults": {
+      "type": "object",
+      "description": "Для каждого текстового слота словаря: класс длины и нужен ли факт — ВЫВЕДЕНО скриптом из copy-slots.yaml text (опыт 99-raw/experiments/E/02-…); назначение по умолчанию — def словаря и purpose copy-slots.yaml.",
+      "propertyNames": {
+        "$ref": "#/$defs/id"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "length": {
+            "$ref": "#/$defs/length-class"
+          },
+          "target_words_ru": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "fact": {
+            "$ref": "#/$defs/fact-rule"
+          },
+          "copy": {
+            "type": "string",
+            "description": "Ссылка на правило text: copy-rule:<slot> или путь."
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "blocks": {
+      "type": "object",
+      "description": "Ключ — id блока словаря (пространство block).",
+      "propertyNames": {
+        "$ref": "#/$defs/id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/block"
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "kebab-case латиницей."
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$"
+    },
+    "length-class": {
+      "enum": [
+        "label",
+        "phrase",
+        "sentence",
+        "paragraph",
+        "long"
+      ]
+    },
+    "fact-rule": {
+      "enum": [
+        "always",
+        "if-claim",
+        "never"
+      ],
+      "description": "Как в copy-slots.yaml text: always — в слоте всегда факт; if-claim — если есть утверждение; never — текст без утверждений."
+    },
+    "mobile-behavior": {
+      "enum": [
+        "stack",
+        "accordion",
+        "rail",
+        "hide-decor",
+        "reframe",
+        "toggle",
+        "none"
+      ]
+    },
+    "heading": {
+      "enum": [
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "none"
+      ]
+    },
+    "ref-list": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^x-": {}
+      },
+      "required": [
+        "id",
+        "slot"
+      ],
+      "description": "Элемент анатомии блока. id — локальный в блоке (= site_slot_id copy-deck text и site_slot copy-slots.yaml); slot — id словаря (вид слота — по словарю).",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "slot": {
+          "$ref": "#/$defs/id"
+        },
+        "required": {
+          "enum": [
+            true,
+            false,
+            "if-fact",
+            "if-available",
+            "by-variant"
+          ],
+          "default": false,
+          "description": "true — без слота блок не существует; if-fact — только при факте (иначе слот снимается); if-available — при наличии у заказчика (медиа, канал); by-variant — задаёт вариант."
+        },
+        "min": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "null — без верхней границы."
+        },
+        "heading": {
+          "$ref": "#/$defs/heading"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "Назначение слота в этом блоке (если отличается от словаря)."
+        },
+        "length": {
+          "$ref": "#/$defs/length-class"
+        },
+        "fact": {
+          "$ref": "#/$defs/fact-rule"
+        },
+        "fact_kinds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "Виды фактов facts.schema.yaml text для data-слота или слота с фактом."
+        },
+        "media_role": {
+          "enum": [
+            "informational",
+            "decorative"
+          ],
+          "description": "Роль медиа (ai-media 01/01 §8: role)."
+        },
+        "ratio": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Соотношения по устройствам: {desktop: '16:9', mobile: '4:5'} — ориентир; формат — ai-media."
+        },
+        "authenticity": {
+          "enum": [
+            "real-only",
+            "real-or-generated",
+            "generated-ok",
+            "code"
+          ],
+          "description": "Подлинность медиа (правило I; уместность ИИ — ai-media 12/04): real-only — только реальное с разрешением."
+        },
+        "html": {
+          "type": "string",
+          "description": "Элемент разметки слота: a, button, img, figure, blockquote, cite, time, dl, details …"
+        },
+        "variants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "В каких вариантах блока слот есть (если не во всех)."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^x-": {}
+      },
+      "required": [
+        "id",
+        "min",
+        "slots"
+      ],
+      "description": "Повторяемый набор слотов (карточка, шаг, отзыв, пара «вопрос — ответ»). В page-plan экземпляр — поле group (card-1, q2) текстового слота.",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "min": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "html": {
+          "type": "string",
+          "description": "Элемент экземпляра: li, article, figure, details, tr, div."
+        },
+        "slots": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/slot"
+          }
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^x-": {}
+      },
+      "required": [
+        "id",
+        "name",
+        "when"
+      ],
+      "description": "Структурный вариант: раскладка или состав той же анатомии. Визуальные варианты и эффекты — creative по id блока.",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "when": {
+          "type": "string"
+        },
+        "avoid": {
+          "type": "string"
+        },
+        "default": {
+          "type": "boolean"
+        },
+        "adds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/anatomy-ref"
+          },
+          "description": "id элементов анатомии, которые вариант делает обязательными."
+        },
+        "drops": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/anatomy-ref"
+          }
+        },
+        "first_screen_policy": {
+          "enum": [
+            "offer-cta",
+            "offer-cta-header",
+            "poster"
+          ],
+          "description": "Для hero: какой политике первого экрана (C 03 §2.2) отвечает вариант."
+        },
+        "hallmark": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Архетипы Hallmark (component-cookbook.md): H2, F1, T4 …"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "html": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "element"
+      ],
+      "properties": {
+        "element": {
+          "enum": [
+            "header",
+            "nav",
+            "section",
+            "footer",
+            "aside",
+            "div",
+            "article",
+            "dialog",
+            "form",
+            "main"
+          ]
+        },
+        "landmark": {
+          "enum": [
+            "banner",
+            "navigation",
+            "main",
+            "region",
+            "contentinfo",
+            "complementary",
+            "dialog",
+            "form",
+            "none"
+          ]
+        },
+        "heading": {
+          "$ref": "#/$defs/heading"
+        },
+        "list": {
+          "enum": [
+            "ul",
+            "ol",
+            "dl",
+            "table",
+            "none"
+          ]
+        },
+        "item": {
+          "type": "string"
+        },
+        "form": {
+          "type": "boolean"
+        },
+        "details": {
+          "type": "boolean"
+        },
+        "figure": {
+          "type": "boolean"
+        },
+        "blockquote": {
+          "type": "boolean"
+        },
+        "label": {
+          "type": "string",
+          "description": "Как назвать область: aria-labelledby на заголовок секции, aria-label …"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "mobile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "behavior"
+      ],
+      "properties": {
+        "behavior": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/mobile-behavior"
+          }
+        },
+        "below_60rem": {
+          "type": "string",
+          "description": "Раскладка ниже ~960 px (Hallmark: сетки в колонку, наклоны и обрезки снимаются, липкое отлипает)."
+        },
+        "below_40rem": {
+          "type": "string",
+          "description": "Телефон ниже ~640 px (Hallmark: дисплей на шаг меньше, метки в строку)."
+        },
+        "never_hide": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/anatomy-ref"
+          },
+          "description": "id элементов анатомии, которые на телефоне нельзя убрать (смысл, цены, условия, доказательства, призыв)."
+        },
+        "sticky": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Ссылки на правила владельцев по id блока. site: conversion — F, seo — H, a11y — I (и ux), events — P, legal — I, ia — G, budget — P; соседи и сёстры: ux, creative, text, assets (ai-media), blender.",
+      "properties": {
+        "structure": {
+          "$ref": "#/$defs/ref-list"
+        },
+        "conversion": {
+          "$ref": "#/$defs/ref-list"
+        },
+        "seo": {
+          "$ref": "#/$defs/ref-list"
+        },
+        "a11y": {
+          "$ref": "#/$defs/ref-list"
+        },
+        "events": {
+          "$ref": "#/$defs/ref-list"
+        },
+        "legal": {
+          "$ref": "#/$defs/ref-list"
+        },
+        "ia": {
+          "$ref": "#/$defs/ref-list"
+        },
+        "budget": {
+          "$ref": "#/$defs/ref-list"
+        },
+        "ux": {
+          "$ref": "#/$defs/ref-list"
+        },
+        "creative": {
+          "$ref": "#/$defs/ref-list"
+        },
+        "text": {
+          "$ref": "#/$defs/ref-list"
+        },
+        "assets": {
+          "$ref": "#/$defs/ref-list"
+        },
+        "blender": {
+          "$ref": "#/$defs/ref-list"
+        }
+      }
+    },
+    "block": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^x-": {}
+      },
+      "required": [
+        "family",
+        "name",
+        "status",
+        "purpose",
+        "serves",
+        "html",
+        "slots",
+        "variants",
+        "mobile",
+        "refs"
+      ],
+      "properties": {
+        "family": {
+          "$ref": "#/$defs/id",
+          "description": "block_family словаря."
+        },
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "proposed",
+            "deprecated",
+            "off-by-default",
+            "measurement-only"
+          ],
+          "description": "off-by-default — блок существует, но выключен решением заказчика (capture-popup — решение 15)."
+        },
+        "replaced_by": {
+          "$ref": "#/$defs/id"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "serves": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "Роли (section_role), которые блок реализует."
+        },
+        "flow": {
+          "enum": [
+            "section",
+            "overlay",
+            "chrome",
+            "page"
+          ],
+          "default": "section",
+          "description": "section — секция потока страницы; chrome — шапка и подвал; overlay — вне потока (липкое, баннер, окно, чат); page — вся страница (404, «спасибо», юридический текст)."
+        },
+        "use_when": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "avoid_when": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "page_types": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "Типы страниц, где блок типичен (page_type словаря)."
+        },
+        "requires_facts": {
+          "type": "boolean",
+          "description": "Блок строится только при фактах facts.yaml (нет факта — нет блока)."
+        },
+        "fact_kinds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "html": {
+          "$ref": "#/$defs/html"
+        },
+        "slots": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/slot"
+          }
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/group"
+          }
+        },
+        "variants": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/variant"
+          }
+        },
+        "mobile": {
+          "$ref": "#/$defs/mobile"
+        },
+        "refs": {
+          "$ref": "#/$defs/refs"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Частые ошибки блока, в том числе генераторов и ИИ-агентов."
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Данные о блоке: частота C/01, M, text D; метки."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "anatomy-ref": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(\\.[a-z0-9]+(-[a-z0-9]+)*)?$",
+      "description": "id элемента блока или <группа>.<элемент>"
+    }
+  }
+}

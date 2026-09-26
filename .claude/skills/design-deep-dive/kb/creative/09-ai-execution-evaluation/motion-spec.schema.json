@@ -1,0 +1,746 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:app-design:creative-research:motion-spec:1",
+  "title": "motion-spec v1 — спецификация движения страницы для исполнителя (страница → секции → моменты, раскадровка, видео-референсы)",
+  "description": "Владелец — creative-research, агент I (волна 3). Движение передаётся исполнителю (K3, Claude) таймлайном, а не прилагательными: у каждого момента — класс, функция, триггер, элемент, свойства from → to, длительность (мс, токен или доля базы) или диапазон прокрутки (vh, % прогресса), кривая-токен, стаггер, повтор, прерывание, reduce, телефон, пауза. Числа — из marketing-tokens.json motion.marketing (E); эффекты — effects.yaml (F); секции и слоты — page-plan v1 (site); подача секции — treatment v1 (motion_spec_ref → #/sections/<id>). Проекции: T7 «Moments» и MOTION.md пакета kimi, JSON чисел на секцию для модуля эффекта G — ../../scripts/creative/spec_check.py. Сверка записи со спецификацией — motion_check.py (K). Документ: 09-ai-execution-evaluation/02-motion-spec-storyboard-handoff.md.",
+  "x-version": "1.0",
+  "x-checked": "2026-09-25",
+  "x-status": "draft (волна 3)",
+  "x-owner": "creative-research · 09-ai-execution-evaluation · агент I; правки аудита X — S1 (волна 4, 2026-09-25): block-size для <details> (X-11), станции и at (X-57), компактная запись",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["motion_spec_version", "id", "status", "checked_at", "refs", "level", "page", "sections"],
+  "patternProperties": {"^x-": {}},
+  "properties": {
+    "motion_spec_version": {"const": "1.0"},
+    "id": {"$ref": "#/$defs/id"},
+    "example": {"type": "boolean"},
+    "status": {"enum": ["draft", "proposed", "approved"]},
+    "checked_at": {"type": "string", "format": "date"},
+    "refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["page_plan"],
+      "properties": {
+        "page_plan": {"type": "string", "description": "page-plan v1 (site) — источник id секций, слотов, групп."},
+        "art_direction": {"type": "string"},
+        "tokens": {"type": "string", "description": "marketing-tokens.json проекта (motion.marketing — E)."},
+        "effects": {"type": "string", "description": "06-effects-catalog/effects.yaml (F)."},
+        "copy_deck": {"type": "string", "description": "copy-deck v1 (text) — длина текстов для движения текста."},
+        "block_treatments": {"type": "string"}
+      }
+    },
+    "level": {"$ref": "#/$defs/level"},
+    "executor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "target": {"enum": ["k3", "claude", "any"]},
+        "harness": {"enum": ["kimi-code", "claude-code", "any"]},
+        "video_in": {
+          "type": "boolean",
+          "description": "Видео-референсы доходят до исполнителя только в Kimi Code + модель k3 + провайдер kimi (kimi 07/03 §2.3); иначе — листы кадров и таймлайн текстом."
+        }
+      }
+    },
+    "page": {"$ref": "#/$defs/page"},
+    "sections": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/section"}},
+    "open_questions": {"type": "array", "items": {"type": "string"}},
+    "notes": {"type": "string"}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"},
+    "level": {"enum": ["L0", "L1", "L2"]},
+    "target": {
+      "type": "string",
+      "pattern": "^(page|[a-z0-9]+(-[a-z0-9]+)*(\\.[a-z0-9]+(-[a-z0-9]+)*){0,2})$",
+      "description": "Как в treatment v1: «<секция>», «<секция>.<слот>», «<секция>.<группа>», «<секция>.<группа-N>.<элемент>»; page — вся страница (переход). Id — page-plan v1. Разметка исполнителя — x-dom-contract: data-section, data-slot, data-group, data-fx, data-moment, data-effect; порядок разрешения motion_check: [data-moment] → [data-section] [data-slot|data-group|data-fx] → #секция [data-slot] → selector_hint."
+    },
+    "token-ref": {
+      "type": "string",
+      "pattern": "^motion\\.marketing\\.[a-z0-9-]+\\.[a-z0-9-]+$",
+      "description": "Путь токена marketing-tokens.json, например motion.marketing.duration.reveal."
+    },
+    "duration": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 1,
+      "properties": {
+        "token": {"$ref": "#/$defs/token-ref"},
+        "ms": {"type": "number", "minimum": 0, "maximum": 30000},
+        "share": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 4,
+          "description": "Доля базовой длительности page.base.duration_ms (хореография долями — Bramus [V:QA5f2loqtM4 27:30])."
+        }
+      }
+    },
+    "easing": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 1,
+      "properties": {
+        "token": {"$ref": "#/$defs/token-ref"},
+        "css": {"type": "string", "pattern": "^(linear|steps\\(.+\\)|cubic-bezier\\(.+\\))$"},
+        "none": {"const": true, "description": "Скраб: прогресс = прокрутка, кривой нет."}
+      }
+    },
+    "track": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["property"],
+      "properties": {
+        "property": {
+          "type": "string",
+          "pattern": "^(transform|translate|scale|rotate|opacity|clip-path|mask|filter|color|background-color|stroke-dashoffset|font-variation-settings|currentTime|block-size|uniform:[a-zA-Z0-9_]+|--[a-z0-9-]+|view-transition)$",
+          "description": "Разрешённое свойство. L0 — transform, opacity, color, background-color; L1–L2 — ещё clip-path, mask, filter (blur ≤ 8 px), stroke-dashoffset, @property-переменные, font-variation-settings (E П12). Свойства раскладки (width, height, top, left, margin, padding) — никогда (K3 анимирует раскладку в 13 из 13 работ). Исключение (X-11, S1 2026-09-25): block-size — только ::details-content аккордеона <details> (effect:details-accordion, семейство micro каталога, класс transition) через interpolate-size: allow-keywords, ≤ 300 мс, reduce — мгновенно; без поддержки interpolate-size (Safari, Firefox на 2026-09-24) — мгновенное открытие. Это UI-отклик по клику, не сцена подачи."
+        },
+        "from": {"type": ["string", "number"]},
+        "to": {"type": ["string", "number"]},
+        "keyframes": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["at", "value"],
+            "properties": {"at": {"type": "number", "minimum": 0, "maximum": 1}, "value": {"type": ["string", "number"]}}
+          }
+        },
+        "unit_note": {"type": "string"}
+      },
+      "oneOf": [{"required": ["from", "to"]}, {"required": ["keyframes"]}]
+    },
+    "trigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "enum": ["load", "in-view", "scroll-scrub", "pin-scrub", "hover", "focus", "click", "pointer", "idle-loop", "page-transition", "state"]
+        },
+        "after": {"$ref": "#/$defs/id", "description": "Запуск после окончания другого момента (последовательность)."},
+        "delay_ms": {"type": "number", "minimum": 0, "maximum": 3000},
+        "threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Доля элемента в зоне (E 05-motion/02 §2.3: 0,15–0,25)."
+        },
+        "root_margin": {"type": "string"},
+        "once": {"type": "boolean"},
+        "range": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "end"],
+          "properties": {
+            "start": {
+              "type": "string",
+              "description": "CSS view-timeline или ScrollTrigger: «entry 20%», «top 80%», «contain 0%»."
+            },
+            "end": {"type": "string"}
+          }
+        },
+        "range_vh": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["length"],
+          "properties": {
+            "start": {"type": "number", "description": "Смещение начала от входа секции в vh (0 — верх секции у верха окна)."},
+            "length": {"type": "number", "minimum": 10, "maximum": 600},
+            "length_mobile": {"type": "number", "minimum": 0, "maximum": 400}
+          }
+        },
+        "progress": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "end"],
+          "description": "Доли прогресса сцены 0–1 (сцена задаётся долями, а не временем — E 05-motion/02 §4.1).",
+          "properties": {
+            "start": {"type": "number", "minimum": 0, "maximum": 1},
+            "end": {"type": "number", "minimum": 0, "maximum": 1}
+          }
+        },
+        "state": {
+          "type": "string",
+          "description": "Для type state: какое изменение состояния запускает (вкладка, фильтр, тема)."
+        },
+        "subject": {
+          "$ref": "#/$defs/target",
+          "description": "Чей view() задаёт диапазон scroll-scrub (по умолчанию — сам target). Опыт I/02: диапазон по списку, а линия короче списка → конец линии отстаёт от маркеров до 98 px; subject = сама линия → 0 px."
+        },
+        "axis": {"enum": ["block", "inline"], "default": "block"}
+      }
+    },
+    "moment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class", "purpose", "target", "trigger", "tracks", "reduce"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "class": {
+          "enum": ["one-shot", "scroll-linked", "loop", "pointer", "transition"],
+          "description": "E 05-motion/01 §1.3: от класса зависят 2.2.2, reduce, бюджет внимания."
+        },
+        "purpose": {
+          "enum": ["attention", "guide", "inform", "continuity", "orient", "narrate", "feedback", "personality", "loading"],
+          "description": "Функция движения (Paquet [V:J6aNMFZogyk 04:14]; W1): движение без функции — кандидат на удаление."
+        },
+        "transition_type": {
+          "enum": ["entrance", "exit", "persistent"],
+          "description": "Cassie Evans [V:v5oxrZWAq78 18:41]: entrance — из transform к конечному месту; exit — удалить узел после анимации; persistent — FLIP или View Transitions."
+        },
+        "effect": {"type": "string", "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$"},
+        "target": {"$ref": "#/$defs/target"},
+        "stagger_targets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/target"},
+          "description": "Ещё элементы с теми же дорожками — в порядке стаггера после target (группа первого экрана, карточки)."
+        },
+        "selector_hint": {"type": "string", "description": "Подсказка селектора в разметке исполнителя; источник истины — target."},
+        "trigger": {"$ref": "#/$defs/trigger"},
+        "model": {
+          "enum": ["time", "spring", "scrub"],
+          "default": "time",
+          "description": "time — длительность и кривая; spring — жёсткость и затухание (только геометрия от указателя и жестов, bounce ≤ 0,2); scrub — прогресс = прокрутка (Тактаров [V:Ug_dwJa07Os 27:49])."
+        },
+        "tracks": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/track"}},
+        "duration": {"$ref": "#/$defs/duration"},
+        "easing": {"$ref": "#/$defs/easing"},
+        "spring": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "stiffness": {"type": "number", "minimum": 1},
+            "damping": {"type": "number", "minimum": 1},
+            "mass": {"type": "number", "minimum": 0.1},
+            "bounce": {"type": "number", "minimum": 0, "maximum": 0.2}
+          }
+        },
+        "stagger": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "each": {"$ref": "#/$defs/duration"},
+            "order": {"enum": ["dom", "reverse", "center", "edges"]},
+            "max_items": {"type": "integer", "minimum": 2, "maximum": 12},
+            "total_ms_max": {"type": "number", "maximum": 1200}
+          }
+        },
+        "repeat": {"enum": ["once", "each-entry", "infinite"], "default": "once"},
+        "loop": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "period_ms": {"type": "number", "minimum": 0},
+            "speed_px_s": {"type": "number", "minimum": 0, "maximum": 200},
+            "direction": {"enum": ["normal", "reverse", "alternate"]},
+            "autostop_ms": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 5000,
+              "description": "Остановка за ≤ 5 с (WCAG 2.2.2) — добег цикла, стоп на кадре 0."
+            },
+            "idle_pixels_pct_s_max": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Громкость петли: «дыхание» ≤ 2,5 %/с; > 5 % — громкий слой (E 05-motion/01 §5.4)."
+            }
+          }
+        },
+        "scrub": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "smoothing_s": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Догон 0,5–1 с; > 1 с — сцена отстаёт от пальца."
+            },
+            "snap": {
+              "enum": ["none", "stations"],
+              "default": "none",
+              "description": "Привязка к станциям — частичный перехват: L0–L1 нет; L2 ≤ 0,4 с, задержка ≥ 0,2 с, телефон нет."
+            }
+          }
+        },
+        "interrupt": {
+          "enum": ["jump-to-end", "reverse", "restart", "ignore", "follow-input"],
+          "description": "Что при быстрой прокрутке, повторном триггере или уходе: jump-to-end — доиграть мгновенно (fastScrollEnd); reverse — обратно по той же траектории; follow-input — отклик подхватывает текущую скорость (указатель)."
+        },
+        "exit": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Выход элемента (автомат entering → entered → exiting → exited): без описания исполнитель анимирует только появление.",
+          "properties": {
+            "behavior": {"enum": ["none", "reverse", "fade", "remove-after"]},
+            "duration": {"$ref": "#/$defs/duration"},
+            "easing": {"$ref": "#/$defs/easing"}
+          }
+        },
+        "reduce": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["strategy"],
+          "properties": {
+            "strategy": {"enum": ["final-state", "crossfade", "static-poster", "stations", "stop-loop", "no-motion-needed"]},
+            "describe": {"type": "string", "description": "Что видно в reduce словами (конечное состояние, станции, постер)."}
+          }
+        },
+        "mobile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["strategy"],
+          "properties": {
+            "strategy": {"enum": ["same", "simplified", "static", "stacked", "poster", "hidden", "touch-alternative"]},
+            "describe": {"type": "string"}
+          }
+        },
+        "pause": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "control": {"enum": ["page-toggle", "pause-button", "autostop", "not-parallel-content", "not-needed"]},
+            "offscreen": {"type": "boolean", "description": "Вне экрана стоит (IntersectionObserver)."},
+            "hidden_tab": {"type": "boolean", "description": "В скрытой вкладке стоит (visibilitychange)."}
+          }
+        },
+        "lcp": {
+          "enum": ["is-lcp", "not-lcp"],
+          "description": "is-lcp — элемент — кандидат LCP: без анимации или только transform ≤ 24 px, не из opacity: 0, не маской строк (E 05-motion/02 §10)."
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {"type": ["number", "string", "boolean"]},
+          "description": "Параметры эффекта в пределах limits effects.yaml."
+        },
+        "tunable": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Какие числа вынести в JSON чисел секции (правит Claude, код эффекта K3 не трогает — W3)."
+        },
+        "note": {"type": "string"},
+        "attach": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["to", "point"],
+          "properties": {"to": {"$ref": "#/$defs/target"}, "point": {"enum": ["start", "end", "center"]}},
+          "description": "Элемент едет вместе с точкой другого элемента (грузик на конце линии): исполнитель выбирает механизм, спецификация задаёт видимое. Числа, требующие замера геометрии (var(--line-length)), в tracks не писать при js_kb_br 0."
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"class": {"const": "loop"}}},
+          "then": {"required": ["loop", "pause"], "properties": {"repeat": {"const": "infinite"}}}
+        },
+        {
+          "if": {"properties": {"class": {"const": "scroll-linked"}}},
+          "then": {
+            "properties": {
+              "trigger": {
+                "properties": {"type": {"enum": ["scroll-scrub", "pin-scrub"]}},
+                "anyOf": [{"required": ["range"]}, {"required": ["range_vh"]}, {"required": ["progress"]}]
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties": {"class": {"const": "one-shot"}}},
+          "then": {"required": ["duration"], "properties": {"repeat": {"enum": ["once", "each-entry"]}}}
+        },
+        {"if": {"properties": {"class": {"const": "pointer"}}}, "then": {"required": ["mobile"]}},
+        {"if": {"properties": {"model": {"const": "spring"}}, "required": ["model"]}, "then": {"required": ["spring"]}},
+        {
+          "if": {"properties": {"lcp": {"const": "is-lcp"}}, "required": ["lcp"]},
+          "then": {"properties": {"tracks": {"items": {"properties": {"property": {"enum": ["transform", "translate"]}}}}}}
+        },
+        {
+          "$comment": "X-11 (S1 2026-09-25): block-size разрешён только аккордеону <details> — effect:details-accordion, класс transition.",
+          "if": {
+            "required": ["tracks"],
+            "properties": {"tracks": {"contains": {"required": ["property"], "properties": {"property": {"const": "block-size"}}}}}
+          },
+          "then": {
+            "required": ["effect"],
+            "properties": {"effect": {"const": "effect:details-accordion"}, "class": {"const": "transition"}}
+          }
+        }
+      ]
+    },
+    "station": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "describe"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "at": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Прогресс сцены 0–1. Система отсчёта (как в motion_check.py 0.1.2+; X-57): сцена выше окна (sticky, pin) — contain: 0 — верх секции у верха окна, 1 — низ секции у низа окна; сцена не выше окна — cover: 0 — верх секции у низа окна, 1 — низ секции у верха окна. При шагах разной высоты — anchor, а не at."
+        },
+        "describe": {"type": "string", "description": "Кадр, который можно прочитать и на котором можно остановиться."},
+        "anchor": {
+          "$ref": "#/$defs/target",
+          "description": "Станция = момент, когда якорь (маркер шага, заголовок, кадр) на линии окна anchor_line; надёжнее доли at при разной высоте шагов. Якорь — точка, а не группа: элемент с data-anchor-point (маркер шага) внутри группы; центр шага и центр маркера различаются на полвысоты шага (K/02: −27…−98 px у v1.0)."
+        },
+        "anchor_line": {"enum": ["viewport-center", "viewport-top", "viewport-bottom"], "default": "viewport-center"}
+      },
+      "anyOf": [{"required": ["at"]}, {"required": ["anchor"]}],
+      "description": "Станция скраба — кадр, на котором можно остановиться. Допуск проверки — ±24 px включительно после округления до целого (край цели минус линия окна, tip_offset_px; I shoot_stations.py и K motion_check.py; X-57, S1 2026-09-25)."
+    },
+    "frame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "at", "viewport", "describe"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "at": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "maxProperties": 1,
+          "properties": {
+            "progress": {"type": "number", "minimum": 0, "maximum": 1},
+            "scroll_vh": {"type": "number", "minimum": 0},
+            "time_ms": {"type": "number", "minimum": 0},
+            "station": {"$ref": "#/$defs/id"}
+          }
+        },
+        "viewport": {"enum": ["desktop", "mobile", "reduce", "all"]},
+        "describe": {"type": "string", "description": "Кадр словами: что где видно, какой крупности, что движется."},
+        "visible": {"type": "array", "items": {"$ref": "#/$defs/target"}},
+        "sketch": {"type": "string", "description": "Путь к эскизу (SVG/PNG) кадра."},
+        "sketch_kind": {
+          "enum": ["keyframe", "onion-skin", "contact-sheet", "wireframe"],
+          "description": "onion-skin — «advanced wireframe»: полупрозрачные положения объекта вдоль пути [V:Ulgy6xIrdPg 14:57]."
+        },
+        "check": {"type": "string", "description": "Что должно совпасть на кадре записи (для motion_check K)."}
+      }
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "source", "take", "do_not_take"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "ref": {"type": "string", "pattern": "^ref:[a-z0-9]+(-[a-z0-9]+)*$", "description": "Запись библиотеки B, если есть."},
+        "kind": {
+          "enum": ["video", "frames", "prototype-video"],
+          "description": "video — mp4 для video_in K3; frames — лист 3×3 и кадры с таймкодами для Claude и k3-256k; prototype-video — ролик-прототип (Figma, After Effects, лабораторная страница)."
+        },
+        "file": {"type": "string", "pattern": "^refs/[a-z0-9._-]+$"},
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": {"enum": ["scroll-record", "lab-page", "customer", "prototype", "public-video"]},
+            "url": {"type": "string"},
+            "recorded_at": {"type": "string", "format": "date"},
+            "rights": {"enum": ["internal-only", "customer-owned", "own"], "default": "internal-only"}
+          }
+        },
+        "format": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "codec": {"const": "h264"},
+            "height": {"type": "integer", "maximum": 1080},
+            "duration_s": {"type": "number", "minimum": 1, "maximum": 20},
+            "size_mb": {"type": "number", "maximum": 20},
+            "audio": {"const": false}
+          }
+        },
+        "frames": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sheet": {"type": "string"},
+            "frames_glob": {"type": "string"},
+            "timecodes": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "take": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["what"],
+            "properties": {
+              "from": {"type": "string", "pattern": "^[0-9]{2}:[0-9]{2}(\\.[0-9])?$"},
+              "to": {"type": "string", "pattern": "^[0-9]{2}:[0-9]{2}(\\.[0-9])?$"},
+              "what": {
+                "type": "string",
+                "description": "Объект + свойство + число (B 02-references-moodboards/03 §3.2), не прилагательное."
+              },
+              "maps_to": {"type": "array", "items": {"$ref": "#/$defs/id"}, "description": "id моментов этой спецификации."}
+            }
+          }
+        },
+        "do_not_take": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+      },
+      "allOf": [
+        {"if": {"properties": {"kind": {"const": "video"}}}, "then": {"required": ["file", "format"]}},
+        {"if": {"properties": {"kind": {"const": "frames"}}}, "then": {"required": ["frames"]}}
+      ]
+    },
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "role", "moments", "reduce", "mobile"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id", "description": "id секции page-plan v1."},
+        "block": {"$ref": "#/$defs/id"},
+        "role": {"enum": ["peak", "accent", "support", "calm", "pause", "chrome"]},
+        "level": {"$ref": "#/$defs/level"},
+        "intent": {"type": "string", "description": "Что движение делает в этой секции одной фразой (связь с тезисом страницы)."},
+        "scene": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "pin": {
+              "enum": ["none", "sticky", "pin-transform", "pin-padding"],
+              "description": "sticky или pinType transform — без CLS (E/02: 0 против 1,6–2,0 у pin-padding)."
+            },
+            "length_vh": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 600,
+              "description": "Длина сцены — путь прокрутки в vh, который сцена занимает (для pin/sticky — от закрепления до отпускания, end − start), а не высота секции; предел — токены motion.marketing.scroll.pin-l1-max-vh / pin-l2-max-vh (spec_check MS-13); шаг между станциями ≤ 150vh (X-57)."
+            },
+            "length_vh_mobile": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 400,
+              "description": "То же для телефона (путь прокрутки сцены в vh)."
+            },
+            "stations": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 6,
+              "items": {"$ref": "#/$defs/station"},
+              "description": "2–6 станций; допуск и система отсчёта — $defs.station (X-57)."
+            },
+            "camera": {
+              "enum": ["none", "walkthrough", "fly-through", "locked-iso", "orbit", "track"],
+              "description": "Для видео- и 3D-сцен: характер камеры — спросить заказчика (scroll-world: «Camera style — ALWAYS ask»)."
+            },
+            "dwell": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.6,
+              "description": "linger scroll-world: доля сцены, где кадр почти стоит, пока текст на пике (≤ 0,6)."
+            }
+          }
+        },
+        "moments": {"type": "array", "items": {"$ref": "#/$defs/moment"}},
+        "storyboard": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "frames": {"type": "array", "items": {"$ref": "#/$defs/frame"}},
+            "sheets": {"type": "array", "items": {"type": "string"}},
+            "note": {"type": "string"}
+          }
+        },
+        "references": {"type": "array", "maxItems": 2, "items": {"$ref": "#/$defs/reference"}},
+        "reduce": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["strategy", "describe"],
+          "properties": {
+            "strategy": {"enum": ["final-state", "crossfade", "static-poster", "stations", "no-motion-needed", "custom"]},
+            "describe": {"type": "string"}
+          }
+        },
+        "mobile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["strategy", "describe"],
+          "properties": {
+            "strategy": {"enum": ["same", "simplified", "static", "stacked", "poster", "hidden-decor", "separate-asset"]},
+            "describe": {"type": "string"}
+          }
+        },
+        "budget": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "js_kb_br": {"type": "number", "minimum": 0},
+            "loops_in_view": {"type": "integer", "minimum": 0, "maximum": 3},
+            "long_frames_pct_max": {"type": "number", "minimum": 0, "maximum": 100},
+            "idle_motion_pct_s_max": {"type": "number", "minimum": 0},
+            "cls_scroll_max": {"type": "number", "minimum": 0},
+            "load": {"enum": ["eager", "after-lcp", "on-visible", "on-interaction"]}
+          }
+        },
+        "acceptance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "check"],
+            "properties": {
+              "id": {"$ref": "#/$defs/id"},
+              "check": {"type": "string"},
+              "tool": {"enum": ["scroll_record", "effects_probe", "effect_bench", "motion_check", "page_accept", "eye"]},
+              "at": {"type": "string", "description": "Станция, кадр или режим (desktop, mobile, reduce)."},
+              "threshold": {"type": ["number", "string"]},
+              "gate": {
+                "type": "string",
+                "pattern": "^EG-[A-Z0-9]+-[0-9]+$",
+                "description": "id ворот 09-ai-execution-evaluation/effect-gates.yaml (K), которые проверяют пункт."
+              },
+              "metric": {
+                "type": "string",
+                "pattern": "^[a-z]+\\.[a-z0-9_]+$",
+                "description": "Имя метрики motion_check.py (scroll.cls, rm.idle_first_pct, loops.loops_in_view_max …); с threshold числом — автоматическая проверка, без — «проверить глазами» с кадром."
+              }
+            }
+          },
+          "description": "Проверки записи против замысла (вход motion_check.py K)."
+        },
+        "notes": {"type": "string"},
+        "fallback": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "no_js": {"type": "string"},
+            "unsupported": {
+              "type": "string",
+              "description": "Что видно, если механизм не поддержан (CSS scroll-driven в Firefox — только TP на 2026-09-24): обычно конечное состояние reduce."
+            }
+          },
+          "description": "Состояния без JS и без поддержки механизма — отдельно от reduce."
+        }
+      }
+    },
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["thesis", "lcp", "toggle", "budget"],
+      "properties": {
+        "thesis": {"type": "string", "maxLength": 240},
+        "character": {"type": "array", "maxItems": 3, "items": {"type": "string"}},
+        "base": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {"duration_ms": {"type": "number", "minimum": 100, "maximum": 2000}, "easing": {"$ref": "#/$defs/easing"}},
+          "description": "Базовая длительность и кривая: моменты задают доли (share) — одна переменная меняет темп страницы."
+        },
+        "primitives": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {"enum": ["fade-up", "type-unmask", "sweep", "number-tick", "line-draw", "none"]}
+        },
+        "lcp": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["target", "entrance"],
+          "properties": {
+            "target": {"$ref": "#/$defs/target"},
+            "entrance": {"enum": ["none", "transform-only"]},
+            "note": {"type": "string"}
+          }
+        },
+        "toggle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required"],
+          "properties": {
+            "required": {
+              "type": "boolean",
+              "description": "L2 — всегда; L1 — при петле с page-toggle или ≥ 2 scroll-linked секциях (E 05-motion/01 §4.4)."
+            },
+            "attr": {"const": "data-motion"},
+            "states": {
+              "type": "array",
+              "items": {"enum": ["system", "reduced", "full", "paused"]},
+              "description": "Нет атрибута — как в системе; reduced — reduce-ветка всей страницы; full — полное вопреки ОС; paused — петли стоят."
+            },
+            "placement": {"enum": ["sticky-header", "first-loop", "footer"]},
+            "remember": {"type": "boolean"}
+          },
+          "description": "Переключатель «меньше движения» = единая пауза: кнопка с aria-pressed и именем («Меньше движения», «Пауза анимации»), атрибут data-motion на <html>: нет — как в системе; reduced; full; paused (E 05-motion/01 §4.4, токены D). У G (07-stack/02 §2.1) значение reduce — motion_check принимает оба; предложение G — перейти на reduced."
+        },
+        "scroll": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "smooth": {"type": "boolean"},
+            "lerp": {"type": "number", "minimum": 0.05, "maximum": 1},
+            "tail_ms_max": {"type": "number", "maximum": 1000},
+            "jacking": {
+              "const": "never",
+              "description": "Скорость и направление прокрутки не меняются никогда; pin со скрабом — не перехват."
+            }
+          }
+        },
+        "transitions": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"enum": ["none", "view-transitions", "library"]},
+            "base_ms": {"type": "number", "minimum": 150, "maximum": 600},
+            "names": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name", "role"],
+                "properties": {
+                  "name": {"$ref": "#/$defs/id"},
+                  "role": {
+                    "enum": ["shared", "old-only", "new-only"],
+                    "description": "Имена VT с ролями (Bramus): общий элемент, только уходящий, только новый."
+                  },
+                  "share": {"type": "number", "minimum": 0, "maximum": 2},
+                  "delay_share": {"type": "number", "minimum": 0, "maximum": 1}
+                }
+              }
+            }
+          }
+        },
+        "properties_allowed": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "budget": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "loops_in_view_max": {"type": "integer", "minimum": 0, "maximum": 3},
+            "loops_in_view_max_mobile": {"type": "integer", "minimum": 0, "maximum": 2},
+            "first_screen_scene_ms_max": {"type": "number", "maximum": 1200},
+            "js_kb_br_effects_max": {"type": "number", "minimum": 0},
+            "long_frames_pct_max": {"type": "number", "minimum": 0},
+            "cls_scroll_max": {"type": "number", "minimum": 0}
+          },
+          "description": "Бюджет движения страницы; motion_check применяет его как «строже или равно» ворот уровня effect-gates.yaml (K): мягче ворот — предупреждение."
+        },
+        "never": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Явные запреты исполнителю для движения (генерируются из cliche-registry и art-direction.decisions avoid)."
+        }
+      }
+    }
+  },
+  "x-dom-contract": {
+    "why": "цели target — логические id page-plan; исполнитель переносит их в разметку, motion_check.py (K) и зонд станций находят элемент без угадывания селекторов (предложение K, 2026-09-24 23:50)",
+    "attributes": {
+      "data-section": "<id секции> на корневой элемент секции (или id=\"<id секции>\")",
+      "data-slot": "<id слота> на элемент слота",
+      "data-group": "<группа-N> на экземпляр группы (step-2, row-1)",
+      "data-fx": "<имя> на декоративный элемент подачи (target <секция>.fx-<имя>)",
+      "data-moment": "<id момента> на элемент, который двигает момент, если это не слот целиком",
+      "data-effect": "<id эффекта effects.yaml> — загрузчик модуля эффекта G",
+      "data-anchor-point": "на точку якоря станции внутри группы (маркер шага) — зонд станций берёт её вместо центра группы (K/02; X-57)"
+    },
+    "resolve_order": ["[data-moment=<id момента>]", "[data-section=<s>] [data-slot=<x>] | [data-group=<g>] | [data-fx=<f>]", "#<s> [data-slot=<x>]", "selector_hint"]
+  }
+}

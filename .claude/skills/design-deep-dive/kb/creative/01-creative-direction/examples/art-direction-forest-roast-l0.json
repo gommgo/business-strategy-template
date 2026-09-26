@@ -1,0 +1,201 @@
+{
+  "art_direction_version": 0,
+  "id": "forest-roast-l0",
+  "site": "lesnaya-obzharka",
+  "example": true,
+  "status": "proposed",
+  "approved_by": null,
+  "checked_at": "2026-09-24",
+  "refs": {
+    "meaning": "../../../text/02-strategy-messaging/examples/meaning-lesnaya-obzharka.yaml",
+    "visual_dna": "../../../ai-media/14-recipes/examples/demo-landing/brand/dna-forest-roast.json",
+    "brand": "../../../ai-media/14-recipes/examples/demo-landing/brand/tokens.json"
+  },
+  "inputs": {
+    "site_type": "landing-site",
+    "page_type": "landing-product",
+    "audience": "Варят кофе дома каждое утро и покупают зёрна в супермаркете; вторично — любители свежей обжарки (meaning text, home-brewers)",
+    "job": "Купить банку 250 г или оформить подписку (действие не подтверждено заказчиком)",
+    "awareness": "problem-aware: кофе из супермаркета «никакой»",
+    "traffic": "не задан (демо); допущение — соцсети и поиск, телефон",
+    "proof": ["missing:roast-schedule", "missing:roast-date-label", "missing:recipe-card", "missing:grind-by-method", "missing:price-250g", "missing:subscription-terms"],
+    "brand_status": "draft",
+    "brand_expression_mode": "extend",
+    "must_keep": ["лесной зелёный #1F4D3A", "золото #C9A227 как второй акцент этикетки", "банка «ЛЕСНАЯ ОБЖАРКА» — настоящий товар (рендер E-10)"],
+    "customer_words": ["тёплый, ремесленный, спокойный"],
+    "assets": "рендер банки (blender, свой), кадр утреннего стола у окна (F-04), синемаграф пара 5 с, 3D-иконки фич",
+    "constraints": ["демо ассетов, а не лендинга (решение заказчика п. 13)", "все утверждения — missing до facts.yaml", "без обещаний о здоровье (meaning boundaries)"]
+  },
+  "ambition": {
+    "level": "L0",
+    "source": "claude",
+    "budget_profile": "landing-product@L0",
+    "motion_cap": "subtle",
+    "rationale": "Учебное сравнение уровней (опыт A/01): тот же бренд на L0. Умолчание лендинга — L1 (решение п. 13); L0 выбран для показа сдержанного режима: характер «спокойный», покупка повторная, основной визит — с телефона утром; смелость — в одном кадре, а не в эффектах."
+  },
+  "concept": {
+    "design_read": "Читаю это как: промо кофе в зёрнах для тех, кто варит дома по утрам, язык документальной утренней съёмки и спокойной типографики, тянется к одному большому кадру и настоящему предмету",
+    "mechanism": "Кофе обжаривают раз в неделю малыми партиями и отправляют с помолом и рецептом под способ заваривания (утверждения демо — missing до фактов)",
+    "audience_scene": "Утро буднего дня, кухня, 7:30, телефон на столе рядом с туркой или френч-прессом; свет из окна",
+    "first_screen_proves": "Это настоящая банка настоящего кофе на настоящем утреннем столе — не сток и не «кофейная эстетика»",
+    "thesis": "Тихое утро у окна: одна широкая документальная фотография стола, спокойная типографика и настоящая банка — смелость в кадре, а не в эффектах",
+    "metaphor": "утренний стол у окна",
+    "material": "штукатурка, светлый дуб, лён, крафт",
+    "energy": "still",
+    "rut": "Тёмный hero с латте-артом и паром крупным планом, золотой шрифт с засечками, «кофейные зёрна» по фону, отзывы без авторов",
+    "rut_opposite": "Стерильная белая витрина маркетплейса с пакшотом по центру",
+    "not_this": ["без латте-арта и дымки «как в кино» (IMG-M02)", "без зёрен-паттерна по фону", "без людей: реальных фото команды нет"]
+  },
+  "territories": [
+    {"id": "morning-table", "name": "Утренний стол у окна", "source": "утренний ритуал заваривания дома", "family": "ritual-event", "why": "аудитория варит кофе дома каждое утро; мотив уже снят (F-04)"},
+    {"id": "roast-log", "name": "Журнал обжарки", "source": "записи обжарщика: дата, партия, кривая температуры", "family": "data-notation", "why": "свежесть — главный довод; дата обжарки на крышке делает его проверяемым"},
+    {"id": "kraft-label", "name": "Крафт и этикетка", "source": "крафт-пакеты, штамп даты, этикетка банки", "family": "document-print", "why": "упаковка — то, что человек держит в руках"},
+    {"id": "recipe-card", "name": "Карточка рецепта", "source": "карточка с помолом и пропорциями в коробке", "family": "document-print", "why": "снимает возражение «я не бариста»"},
+    {"id": "green-tin", "name": "Зелёная банка", "source": "сама банка бренда и её цвет", "family": "craft-making", "why": "товар — главный визуал бренда; зелёный цвет — узнаваемость"},
+    {"id": "forest", "name": "Лес", "source": "имя бренда", "family": "nature-material", "literal": true, "why": "буквальное прочтение имени", "rejected_because": "лес может читаться как происхождение кофе — вводит в заблуждение; буквальное прочтение имени"},
+    {"id": "cafe-board", "name": "Меловая доска кофейни", "source": "меню кофеен", "family": "place-architecture", "why": "знакомо аудитории", "rejected_because": "клише категории; противоречит мысли «кофе дома»"}
+  ],
+  "directions": [
+    {
+      "id": "a",
+      "name": "Утренний стол",
+      "recommended": true,
+      "thesis": "Одна широкая документальная фотография утреннего стола у окна, тёплое светлое поле, спокойная типографика и настоящая банка",
+      "territory": "morning-table",
+      "axes": {"paper": "light", "paper_temperature": "warm", "display_style": "grotesque", "accent_hue": "chromatic-other", "macrostructure": "photographic", "imagery": "photo", "energy": "still"},
+      "palette": {"background": "#F4EFE6", "surface": "#FBF8F2", "text": "#1C1B18", "muted": "#5B5750", "accent": "#1F4D3A", "on_accent": "#FFFFFF", "extra": [{"hex": "#C9A227", "role": "золото этикетки: цена и одна деталь", "share_max": 0.03}]},
+      "color_strategy": "restrained",
+      "type": {"display": "Commissioner", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL", "note": "в демо — Inter; Inter как дисплейный — примета (impeccable §4); замена с кириллицей — проверить подмножество"},
+      "signature_move": {"what": "Широкая фотография утреннего стола с банкой в правой трети и ровной штукатуркой слева под заголовок; пар над чашкой — тихий синемаграф 5 с", "where": "section-role:hero", "effects": ["effect:cinemagraph"], "min_level": "L0", "concept_link": "утро дома — там, где этот кофе пьют"},
+      "first_viewport": "Кадр 16:9 на всю ширину: слева заголовок (48/32 px) и кнопка на ровной стене, справа стол с банкой; телефон — свой кадр 4:5, текст сверху",
+      "imagery": "документальная съёмка утра; рендер банки; без людей",
+      "motion": "один синемаграф пара, остановка через 5 с; остальное неподвижно",
+      "risk": "Тёплое светлое поле близко к кластеру «крем + терракота» (ui 11/04 §5); держится на зелёном акценте без терракоты и на фото",
+      "cost": "дёшево: кадры уже есть",
+      "level_fit": ["L0", "L1"]
+    },
+    {
+      "id": "b",
+      "name": "Журнал обжарки",
+      "thesis": "Дата обжарки — главный шрифтовой образ: крупные даты и номера партий, кривая обжарки как тонкая линия через страницу",
+      "territory": "roast-log",
+      "axes": {"paper": "light", "paper_temperature": "neutral", "display_style": "condensed", "accent_hue": "chromatic-other", "macrostructure": "stat-led", "imagery": "typographic", "energy": "measured"},
+      "palette": {"background": "#F4F4F3", "surface": "#FFFFFF", "text": "#141414", "accent": "#1F4D3A", "on_accent": "#FFFFFF"},
+      "color_strategy": "restrained",
+      "type": {"display": "Sofia Sans Condensed", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL", "note": "замена X 2026-09-25: Oswald → Sofia Sans Condensed (cyrillic-display-fonts.yaml: Oswald — avoid, type.today «нельзя»)"},
+      "signature_move": {"what": "Дата ближайшей обжарки крупным узким шрифтом в первом экране, под ней — кривая температуры обжарки тонкой линией", "where": "section-role:hero", "effects": [], "min_level": "L0", "concept_link": "свежесть проверяется датой, а не словом «свежий»"},
+      "first_viewport": "Крупная дата «обжарка — среда» на всю ширину, строка о доставке и кнопка; маленький кадр банки справа",
+      "imagery": "типографика и тонкая график-линия кодом (SVG)",
+      "motion": "без движения",
+      "risk": "Без фактов даты обжарки (missing:roast-schedule) образ пуст; «ряд цифр» — примета K3 stats",
+      "cost": "дёшево: типографика и SVG",
+      "level_fit": ["L0", "L1"]
+    },
+    {
+      "id": "c",
+      "name": "Карточка рецепта",
+      "thesis": "Страница как карточка из коробки: помол и пропорции под турку, френч-пресс и воронку, крупные понятные схемы",
+      "territory": "recipe-card",
+      "axes": {"paper": "light", "paper_temperature": "neutral", "display_style": "rounded", "accent_hue": "chromatic-other", "macrostructure": "narrative-workflow", "imagery": "illustration", "energy": "calm"},
+      "palette": {"background": "#FFFFFF", "surface": "#F4F4F3", "text": "#1C1B18", "accent": "#1F4D3A", "on_accent": "#FFFFFF"},
+      "color_strategy": "restrained",
+      "type": {"display": "Commissioner", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL", "note": "замена X 2026-09-25: Nunito → Commissioner (cyrillic-display-fonts.yaml: Nunito — average, Commissioner — good)"},
+      "signature_move": {"what": "Переключатель способа заваривания меняет схему помола и пропорции на карточке", "where": "section-role:how-it-works", "effects": [], "min_level": "L0", "concept_link": "снимает страх «я не бариста» делом, а не обещанием"},
+      "first_viewport": "Слева заголовок и кнопка, справа карточка рецепта с переключателем «турка · френч-пресс · воронка»",
+      "imagery": "плоские схемы кодом и 3D-иконки способов",
+      "motion": "отклик переключателя",
+      "risk": "Без подтверждения, что карточка есть в коробке (missing:recipe-card), приём превращается в обещание",
+      "cost": "дёшево",
+      "level_fit": ["L0", "L1"]
+    },
+    {
+      "id": "d",
+      "name": "Зелёная банка",
+      "thesis": "Цвет банки становится страницей: глубокий лесной зелёный на всём, банка тон-в-тон, золото — только цена и действие",
+      "territory": "green-tin",
+      "axes": {"paper": "dark", "paper_temperature": "cool", "display_style": "wide", "accent_hue": "warm", "macrostructure": "marquee-hero", "imagery": "3d", "energy": "calm"},
+      "palette": {"background": "#12352A", "surface": "#1F4D3A", "text": "#F1EDE4", "accent": "#C9A227", "on_accent": "#12352A"},
+      "color_strategy": "drenched",
+      "type": {"display": "Unbounded", "text": "Golos Text", "cyrillic_checked": true, "license": "OFL"},
+      "signature_move": {"what": "Банка крупно на поле своего цвета, тон-в-тон; золото этикетки повторяется в цене и кнопке", "where": "section-role:hero", "effects": [], "min_level": "L0", "concept_link": "бренд узнаётся по цвету банки на полке и в ленте"},
+      "first_viewport": "Весь экран лесного зелёного, банка по центру-справа, заголовок широким гротеском слева, кнопка золотом",
+      "imagery": "рендер банки на цветном поле",
+      "motion": "без движения на L0; на L2 — банка поворачивается по прокрутке",
+      "risk": "Сплошной тёмный фон тяжелее для чтения длинных блоков; тон-в-тон требует точного цвета рендера (ΔE ≤ 2, blender 06)",
+      "cost": "средне: точный рендер под цвет поля",
+      "level_fit": ["L1", "L2"]
+    }
+  ],
+  "moodboard": [],
+  "visual_language": {
+    "color_strategy": "restrained",
+    "palette": {"background": "#F4EFE6", "surface": "#FBF8F2", "text": "#1C1B18", "muted": "#5B5750", "accent": "#1F4D3A", "on_accent": "#FFFFFF", "extra": [{"hex": "#C9A227", "role": "золото этикетки", "share_max": 0.03}]},
+    "accent_rule": "лесной зелёный — кнопка и ссылки; золото — одна деталь (цена)",
+    "type": {"display": "Commissioner", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL"},
+    "composition": ["объект в правой трети, текст слева на ровной стене 45 %", "секции без каскада появления"],
+    "surfaces": ["тёплое светлое поле штукатурки — из кадра, а не декоративная «бумага»"],
+    "imagery": {"kinds": ["photo", "3d"], "subject": "утренний стол у окна, банка, чашка, лён, крафт", "source_policy": "рендеры blender и снимки заказчика; генерация по паспорту ai-media после фазы 5", "people_policy": "real-only", "product_policy": "real-photo-only"},
+    "theme": "light"
+  },
+  "motion_system": {
+    "thesis": "Неподвижно, как утро до первой чашки: один тихий синемаграф пара в первом экране, остальное — отклик",
+    "level": "subtle",
+    "entrance_system": "без появления секций",
+    "library": ["css"],
+    "smooth_scroll": false,
+    "page_transitions": "none",
+    "reduce": "синемаграф — постер (кадр 0); 0 байт видео",
+    "by_section": [{"section": "section-role:hero", "motion_level": "subtle", "visual_role": "accent"}]
+  },
+  "effects_by_section": [
+    {"section": "section-role:hero", "level": "L0", "effects": ["effect:cinemagraph"], "purpose": "signature", "why": "пар над чашкой — единственное движение; ≤ 300 КБ, стоп через 5 с"}
+  ],
+  "decisions": [
+    {"id": "d-warm-field", "technique": "cliche:warm-paper", "decision": "twist",
+     "criteria": {"concept": {"result": "pass", "note": "поле — штукатурка стены из кадра"}, "brand": {"result": "pass", "note": "тёплая нейтраль из токенов бренда"}, "execution": {"result": "pass", "note": "контраст текста 15:1"}, "epoch": {"result": "pass", "note": "насыщено с 2025: без терракоты и без антиквы"}, "singularity": {"result": "pass", "note": "единственное тёплое пятно — фон"}},
+     "why": "Тёплое поле оставлено как свойство кадра, но без двух других признаков кластера (антиква, терракота)", "k3_allow": "warm"},
+    {"id": "d-latte-art", "technique": "cliche:latte-art-closeup", "decision": "avoid",
+     "criteria": {"concept": {"result": "fail", "note": "кофейня, а не дом"}, "brand": {"result": "na"}, "execution": {"result": "na"}, "epoch": {"result": "fail", "note": "стоковый приём"}, "singularity": {"result": "na"}},
+     "why": "Паспорт ai-media уже заменяет его на «plain black coffee seen from slightly above»"}
+  ],
+  "exclusions": {
+    "forbidden_hues": [{"from": 270, "to": 320, "reason": "пурпур и неон (IMG-M05); в бренде нет"}],
+    "forbidden_markers": ["IMG-M02", "IMG-M03", "IMG-M05", "IMG-M07", "IMG-M09", "IMG-M10", "IMG-M13", "IMG-M14", "IMG-M21", "IMG-M22"],
+    "lifted_markers": [{"marker": "K3-BG-WARM", "decision_ref": "d-warm-field"}],
+    "k3_allow": ["warm"],
+    "bans": ["латте-арт крупным планом", "зёрна паттерном по фону", "люди в кадре", "обещания о здоровье"]
+  },
+  "budget": {
+    "profile": "landing-product@L0",
+    "spend": [
+      {"what": "hero 16:9 и 4:5 (AVIF)", "kb": 70, "device": "both", "load": "eager"},
+      {"what": "синемаграф пара 720p, 5 с", "kb": 20, "device": "desktop", "load": "eager"}
+    ]
+  },
+  "handoff": {
+    "visual_dna": {
+      "character": {"adjectives": ["тёплый", "ремесленный", "спокойный"], "boldness": "restrained", "one_bold_move": "одна широкая документальная фотография утреннего стола у окна в hero; остальное — типографика, настоящая банка и керамические 3D-иконки"},
+      "palette_forbidden_hues": [{"from": 270, "to": 320, "reason": "пурпур и неон (IMG-M05); в бренде нет"}],
+      "exclusions": {"forbidden_markers": ["IMG-M02", "IMG-M03", "IMG-M05", "IMG-M07", "IMG-M09", "IMG-M10", "IMG-M13", "IMG-M14", "IMG-M21", "IMG-M22"], "replace_with": [{"what": "people", "kind": "object", "replace_with": "no one in the frame"}]},
+      "abstract": {"policy": "code-first"},
+      "video": {"tempo": "still", "camera": "static", "loop": "first_last_same"},
+      "composition": {"subject_region": "right-third", "text_zone_default": {"side": "left", "share": 0.45, "surface": "evenly lit cream plaster wall"}, "negative_space_min": 0.4, "max_elements": 3, "asymmetry": true},
+      "subject_matter": {"domain_props": ["ceramic coffee cup", "green coffee tin", "kraft paper bag", "linen napkin", "pale oak table"], "motifs": ["morning table by a window"], "people_policy": "real-only", "product_policy": "real-photo-only"},
+      "materials": ["glazed off-white ceramic", "pale oak", "washed linen", "kraft paper"]
+    },
+    "blender": {"role_in_story": "банка — настоящий товар в hero и в карточке", "series_style": "документальный предмет на светлом дубе", "page_background": "#F4EFE6", "materials": ["жесть банки в цвете #1F4D3A", "бумажная этикетка"], "light_mood": "мягкий утренний свет из окна справа", "motion": "нет", "budget": "рендер AVIF ≤ 150 КБ"},
+    "kimi": {
+      "design_system_style": "тихое утро у окна: широкая документальная фотография, спокойная типографика, настоящая банка",
+      "direction": {"visual_thesis": "утренний стол у окна — смелость в кадре, а не в эффектах", "paper": "light warm #F4EFE6 (из кадра; --allow warm)", "display_style": "grotesque Commissioner", "accent_rule": "лесной зелёный — кнопка и ссылки; золото — только цена", "imagery": "документальная утренняя съёмка и рендер банки; без людей", "macrostructure": "poster-led"},
+      "motion": {"level": "subtle", "thesis": "один синемаграф пара, стоп через 5 с", "library": "css"},
+      "bans": ["латте-арт", "зёрна паттерном", "люди"],
+      "allow": ["warm"]
+    }
+  },
+  "lifecycle": {
+    "version": "0.1",
+    "history": [{"version": "0.1", "date": "2026-09-24", "change": "учебный вариант L0 к демо ai-media", "by": "Claude (пример A/01)"}],
+    "review_by": "2027-03-24",
+    "on_brand_change": "при утверждении брендбука — пересобрать palette, type и handoff.visual_dna; при смене уровня на L2 — см. art-direction-forest-roast-l2.json"
+  }
+}

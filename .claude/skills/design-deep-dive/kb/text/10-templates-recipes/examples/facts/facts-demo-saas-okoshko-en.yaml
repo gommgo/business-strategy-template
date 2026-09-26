@@ -1,0 +1,263 @@
+# КОПИЯ демо-фактов агента E без изменений данных: 99-raw/experiments/E/facts-demo-saas-okoshko-en.yaml (md5 faa3236958d1…, 2026-09-24) — снимок для примеров 10-templates-recipes/examples (J3).
+# Источник правды — файл E; при его правке пересобрать копию: 99-raw/experiments/J/08-examples/make_ru_from_e3.py --copy-facts.
+# facts-demo-saas-okoshko-en.yaml — ДЕМО-ФАКТЫ агента E: английская адаптация набора «Окошко» для EN-примеров и EN copy deck
+# text-research · волна 2 · агент E · 2026-09-24 · формат: 02-strategy-messaging/facts.schema.yaml (facts_version 1)
+#
+# ДЕМО. Сервис выдуман агентом E; все числа, цены, имена, даты и документы — синтетика (см. facts-demo-saas-okoshko.yaml).
+# Не публиковать. Совпадение названия с настоящими сервисами случайно.
+# Зачем отдельный файл: claims_check.py сравнивает числа по values.what и цитаты по verbatim на языке факта; английский текст
+# против русских фактов даёт ложные COPY-F-NUM-MISMATCH (объект счёта по-русски), «1,380» читается как 1,38, перевод цитаты
+# из translations.en не находится (опыт E/03). Второй язык — отдельный copy deck (PLAN, copy-deck v0: source_lang) и свой
+# facts.yaml с теми же id. Цены — в рублях: сайт российской компании (38-ФЗ ст. 5 ч. 7.1, H).
+
+facts_version: 1
+date: "2026-09-24"
+site: okoshko-demo-en
+lang: en
+jurisdiction: ru
+status: draft
+owner: {role: "founder (demo customer)"}
+collected_by: "агент E (демо-набор, английская адаптация, 2026-09-24)"
+never_claim_defaults: ru-default-1
+
+entities:
+  - {id: product-okoshko, type: product, names: ["Okoshko"]}
+  - {id: platform-rustore, type: platform, names: ["RuStore"]}
+  - {id: city-kazan, type: place, names: ["Kazan"]}
+  - {id: person-ruslan, type: person, names: ["Ruslan"], fact_id: review-ruslan}
+
+facts:
+  - id: price-master
+    kind: price
+    claim_class: [price-discount]
+    verbatim: ["990 ₽ a month for one stylist", "Master plan — 990 ₽ a month"]
+    canonical: "The Master plan of Okoshko costs 990 ₽ a month for one stylist (price list, September 2026)."
+    values: [{value: 990, unit: RUB, what: "Master plan per month", qualifier: "one stylist"}]
+    entities: [product-okoshko]
+    source: {type: customer-document, who: "demo customer", where: "price list 2026", date: "2026-09-01", document: "price-2026-09.pdf (demo)", quote: "Master — 990 RUB per month, 1 stylist", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "demo"}
+    permission: {status: not-required}
+    use: {section_roles: [pricing, hero, faq, final-cta]}
+    lang: en
+
+  - id: price-salon
+    kind: price
+    claim_class: [price-discount]
+    verbatim: ["2,490 ₽ a month for up to 5 stylists", "Salon plan — 2,490 ₽ a month"]
+    canonical: "The Salon plan of Okoshko costs 2,490 ₽ a month for a team of up to 5 stylists (price list, September 2026)."
+    values: [{value: 2490, unit: RUB, what: "Salon plan per month", qualifier: "up to 5 stylists"}, {value: 5, unit: pcs, what: "stylists in the Salon plan", comparator: lte}]
+    entities: [product-okoshko]
+    source: {type: customer-document, who: "demo customer", where: "price list 2026", date: "2026-09-01", document: "price-2026-09.pdf (demo)", quote: "Salon — 2,490 RUB per month, up to 5 stylists", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "demo"}
+    permission: {status: not-required}
+    use: {section_roles: [pricing, faq]}
+    lang: en
+
+  - id: annual-discount
+    kind: offer-terms
+    claim_class: [price-discount, purchase-terms]
+    verbatim: ["Pay for a year, get 2 months free", "About 17% off when you pay for 12 months"]
+    canonical: "If a client pays for any Okoshko plan 12 months in advance, they pay for 10 months (about 17% off); valid from 1 September 2026."
+    values: [{value: 17, unit: "%", what: "discount for annual payment", approx: true, qualifier: "12 months paid in advance"}, {value: 2, unit: months, what: "months free with annual payment"}]
+    entities: [product-okoshko]
+    source: {type: customer-document, who: "demo customer", where: "price list 2026, note 2", date: "2026-09-01", document: "price-2026-09.pdf (demo)", quote: "12 months paid in advance — invoice for 10 months (2 months free, about 17% off)", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "demo"}
+    permission: {status: not-required}
+    use: {section_roles: [pricing, faq], requires_nearby: "condition: 12 months paid in advance"}
+    lang: en
+
+  - id: trial-14-days
+    kind: offer-terms
+    claim_class: [price-discount, purchase-terms]
+    verbatim: ["Free for 14 days, no card required", "14-day free trial"]
+    canonical: "Any Okoshko plan is free for 14 days with no card required; after the trial, booking pauses until a plan is chosen, and data is kept for 90 days."
+    values: [{value: 14, unit: days, what: "free trial", qualifier: "no card required"}, {value: 90, unit: days, what: "data kept after the trial"}]
+    entities: [product-okoshko]
+    source: {type: customer-document, who: "demo customer", where: "offer, section 3.2", date: "2026-09-01", document: "oferta-2026-09.pdf (demo)", quote: "Trial — 14 calendar days, no payment details; after it booking pauses, data kept for 90 days", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "demo"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, pricing, final-cta, faq, lead-form, article-body, about], requires_nearby: "«no card» or what happens after 14 days"}
+    lang: en
+
+  - id: reminders
+    kind: property
+    claim_class: [fact-property]
+    verbatim: ["A Telegram reminder 24 hours and 2 hours before the visit", "Telegram reminders are included in every plan"]
+    canonical: "Okoshko reminds clients of their booking in Telegram 24 hours and 2 hours before the visit; Telegram reminders are included in every plan."
+    values: [{value: 24, unit: hours, what: "first reminder before the visit"}, {value: 2, unit: hours, what: "second reminder before the visit"}]
+    entities: [product-okoshko]
+    source: {type: customer-document, who: "demo customer", where: "feature list", date: "2026-09-01", document: "features-2026-09.pdf (demo)", quote: "Telegram reminders 24 h and 2 h before the visit — in all plans", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "demo"}
+    permission: {status: not-required}
+    use: {any: true}
+    lang: en
+
+  - id: sms-price
+    kind: price
+    claim_class: [price-discount]
+    verbatim: ["SMS reminders cost 4 ₽ per message"]
+    canonical: "Okoshko SMS reminders are billed on top of the plan: 4 ₽ per message (price list, September 2026)."
+    values: [{value: 4, unit: RUB, what: "SMS reminder per message", qualifier: "on top of the plan"}]
+    entities: [product-okoshko]
+    source: {type: customer-document, who: "demo customer", where: "price list 2026", date: "2026-09-01", document: "price-2026-09.pdf (demo)", quote: "SMS — 4 RUB each, on top of the plan", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "demo"}
+    permission: {status: not-required}
+    use: {section_roles: [pricing, faq]}
+    lang: en
+
+  - id: self-booking-link
+    kind: property
+    claim_class: [fact-property]
+    verbatim: ["Clients pick a service, a stylist and an open slot through your link", "Put the booking link in Telegram, VK, maps and on your website"]
+    canonical: "Salon clients book themselves: through an Okoshko link they pick a service, a stylist and an open slot; the link goes into Telegram, VK, maps and the website."
+    entities: [product-okoshko]
+    source: {type: customer-document, who: "demo customer", where: "feature list", date: "2026-09-01", document: "features-2026-09.pdf (demo)", quote: "Booking by link: service → stylist → time; placement — Telegram, VK, maps, website (widget)", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "demo"}
+    permission: {status: not-required}
+    use: {any: true}
+    lang: en
+
+  - id: import-free
+    kind: offer-terms
+    claim_class: [purchase-terms, price-discount]
+    verbatim: ["We move your client list from Excel or Google Sheets for free within 1 business day"]
+    canonical: "Okoshko support moves a client list from an Excel or Google Sheets file for free within 1 business day of receiving the file."
+    values: [{value: 1, unit: days, what: "business day to move the client list", qualifier: "after the file arrives"}, {value: 0, unit: RUB, what: "cost of moving the client list"}]
+    entities: [product-okoshko]
+    source: {type: customer-document, who: "demo customer", where: "support SLA, item 2", date: "2026-09-01", document: "support-sla-2026.pdf (demo)", quote: "Import from xlsx or Google Sheets by support — free, 1 business day", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "demo"}
+    permission: {status: not-required}
+    use: {any: true, requires_nearby: "from Excel or Google Sheets"}
+    lang: en
+
+  - id: salons-count
+    kind: metric
+    claim_class: [fact-number]
+    verbatim: ["1,380 salons and barbershops use Okoshko"]
+    canonical: "As of 1 September 2026, 1,380 salons and barbershops use Okoshko on a paid plan (billing data)."
+    values: [{value: 1380, unit: pcs, what: "salons and barbershops on a paid plan", as_of: "2026-09-01"}]
+    entities: [product-okoshko]
+    source: {type: customer-system, who: "demo customer", where: "billing export", date: "2026-09-01", document: "billing-2026-09-01.csv (demo)", quote: "Active paying accounts: 1380", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "demo"}
+    permission: {status: not-required}
+    use: {any: true}
+    valid: {review_by: "2026-12-01"}
+    lang: en
+
+  - id: rating-rustore
+    kind: rating
+    claim_class: [rating]
+    verbatim: ["Rated 4.7 out of 5 on RuStore, 860 ratings"]
+    canonical: "As of 1 September 2026, the Okoshko app for stylists is rated 4.7 out of 5 on RuStore (860 ratings)."
+    values: [{value: 4.7, unit: stars, scale: 5, count: 860, what: "rating of the app for stylists", as_of: "2026-09-01"}]
+    entities: [product-okoshko, platform-rustore]
+    source: {type: platform, who: "RuStore", where: "app page", date: "2026-09-01", url: "https://www.rustore.ru/catalog/app/<app-id>", derivation: direct}
+    verification: {status: verified, by: "editor (demo)", date: "2026-09-24", method: "demo: dated screenshot evidence/rustore-2026-09-01.png"}
+    permission: {status: not-required, form: platform-terms}
+    use: {section_roles: [hero, proof-stats, testimonials], requires_nearby: "source and date of the platform snapshot"}
+    valid: {from: "2026-09-01", until: "2026-12-01", review_by: "2026-11-01"}
+    lang: en
+
+  - id: case-noshow-kazan
+    kind: case
+    claim_class: [fact-number]
+    verbatim: ["A 4-chair barbershop in Kazan: no-shows down from 14% to 6% in three months"]
+    canonical: "At a 4-chair barbershop in Kazan, the no-show rate fell from 14% to 6% in the three months after Okoshko reminders were switched on (booking log, March to May 2026)."
+    values: [{value: 14, unit: "%", what: "no-show rate before reminders", as_of: "2026-02-28"}, {value: 6, unit: "%", what: "no-show rate after three months", as_of: "2026-05-31"}, {value: 4, unit: pcs, what: "chairs in the barbershop"}]
+    entities: [product-okoshko, city-kazan, person-ruslan]
+    source: {type: customer-system, who: "client via demo customer", where: "Okoshko booking log", date: "2026-06-05", document: "case-kazan-2026.xlsx (demo)", quote: "Barbershop, 4 chairs, Kazan. No-shows: February 14%, May 6%", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "demo"}
+    permission: {status: granted, subject: "Ruslan (barbershop owner)", form: written-email, document: "email of 2026-06-10 (demo)", date: "2026-06-10", shows: [first-name, city, position], pd_consent: true, image_consent: false}
+    related: [noshow-average, review-ruslan]
+    use: {any: true}
+    lang: en
+
+  - id: noshow-average
+    kind: metric
+    claim_class: [fact-number]
+    verbatim: ["On average, no-shows fell by 4 percentage points across 212 salons"]
+    canonical: "Across 212 salons that switched on Okoshko reminders from January to May 2026, the no-show rate after three months fell by 4 percentage points on average (median 3 points; service data)."
+    values: [{value: 4, unit: "п. п.", what: "average drop of the no-show rate, percentage points", qualifier: "212 salons, January to May 2026"}, {value: 3, unit: "п. п.", what: "median drop, percentage points"}, {value: 212, unit: pcs, what: "salons in the sample"}]
+    entities: [product-okoshko]
+    source: {type: customer-system, who: "demo customer (analyst)", where: "booking log export", date: "2026-08-15", document: "noshow-2026-h1.csv (demo)", quote: "n=212; no-show change at 90 days: mean −4.1 p.p., median −3.0 p.p.", derivation: computed, computation: "−4.1 rounded to 4 percentage points"}
+    verification: {status: stated, date: "2026-09-24", method: "demo"}
+    permission: {status: not-required}
+    use: {any: true}
+    lang: en
+
+  - id: review-ruslan
+    kind: testimonial
+    claim_class: [testimonial-quote]
+    verbatim: ["“I used to spend my evenings calling everyone booked for the next day. Now reminders go out on their own, and I only call those who haven't confirmed”"]
+    canonical: "Ruslan (barbershop owner, Kazan): “I used to spend my evenings calling everyone booked for the next day. Now reminders go out on their own, and I only call those who haven't confirmed” (translated from Russian)."
+    entities: [person-ruslan, product-okoshko, city-kazan]
+    source: {type: interview, who: "Ruslan (client)", where: "interview after the case, call recording", date: "2026-06-05", quote: "I used to spend my evenings calling everyone booked for the next day. Now reminders go out on their own, and I only call those who haven't confirmed", derivation: direct}
+    verification: {status: stated, date: "2026-09-24", method: "demo; translated from Russian with the author's approval"}
+    permission: {status: granted, subject: "Ruslan", form: written-email, scope: [site], document: "email of 2026-06-10 (demo)", date: "2026-06-10", shows: [first-name, position, city], pd_consent: true, image_consent: false}
+    attribution: {name: "Ruslan", display: first-name-initial, role: "barbershop owner", city: "Kazan", verified_customer: true, relation: customer}
+    original_ref: "evidence/interviews/2026-06-05-ruslan.txt (demo)"
+    use: {section_roles: [testimonials, case-studies, about, solution], slot_types: [testimonial-quote, testimonial-attribution, body]}
+    lang: en
+
+  - id: support-chat
+    kind: property
+    claim_class: [fact-property, fact-number]
+    verbatim: ["Support chat from 9:00 to 21:00 Moscow time, first reply in 7 minutes on average"]
+    canonical: "Okoshko support answers in chat daily from 9:00 to 21:00 Moscow time; the average first reply time in August 2026 was 7 minutes."
+    values: [{value: 7, unit: minutes, what: "average first reply time", as_of: "2026-08-31"}]
+    entities: [product-okoshko]
+    source: {type: customer-system, who: "demo customer", where: "support report", date: "2026-09-01", document: "support-2026-08.pdf (demo)", quote: "Average FRT for August — 6 min 48 s; hours 9–21 Moscow time", derivation: computed, computation: "6 min 48 s ≈ 7 minutes"}
+    verification: {status: stated, date: "2026-09-24", method: "demo"}
+    permission: {status: not-required}
+    use: {any: true}
+    lang: en
+
+  - id: cancel-refund
+    kind: offer-terms
+    claim_class: [purchase-terms, guarantee]
+    verbatim: ["Switch it off in settings on any day; unused days refunded within 10 days"]
+    canonical: "You can switch off your Okoshko subscription in settings on any day; the unused part of a paid period is refunded within 10 days of your request (offer, item 7.4)."
+    values: [{value: 10, unit: days, what: "days to refund the unused period", qualifier: "after the request"}]
+    entities: [product-okoshko]
+    source: {type: contract, who: "demo customer", where: "offer, item 7.4", date: "2026-09-01", document: "oferta-2026-09.pdf (demo)", quote: "Refund for the unused period — no later than 10 days from the request", derivation: direct}
+    verification: {status: verified, by: "editor (demo)", date: "2026-09-24", method: "demo: checked against the offer, item 7.4"}
+    permission: {status: not-required}
+    use: {any: true}
+    lang: en
+
+missing:
+  - id: legal-details
+    what: "legal details: full company name, OGRN, INN, address (seller information)"
+    kind: company
+    claim_class: [company-details]
+    placeholder: "[PLACEHOLDER: company legal details]"
+    who: "demo customer (accountant)"
+    needed_for: {section_roles: [footer, pricing], slot_types: [footer-legal]}
+    blocking: true
+    fallback: placeholder
+    question: "Send the full legal name, OGRN, INN and registered address as in the state register."
+  - id: client-logos
+    what: "client salon logos with written consent"
+    kind: client
+    claim_class: [client-logo]
+    placeholder: "[PLACEHOLDER: client logos with written consent]"
+    who: "demo customer"
+    needed_for: {section_roles: [proof-logos], slot_types: [logos-caption]}
+    fallback: omit-block
+    question: "Which salons agreed to show their logo? We need consent letters and files from the clients."
+
+never_claim:
+  - id: nc-revenue-growth
+    text: "“we'll double your salon revenue”, “pays for itself in a month” — income promise without research"
+    claim_class: [income-finance, forecast]
+    patterns: ["doubl\\w*\\s+(your\\s+)?(\\w+\\s+)?revenue", "increas\\w*\\s+(your\\s+)?(\\w+\\s+)?revenue", "pays?\\s+for\\s+itself"]
+    lift: never
+    reason: "38-FZ art. 5 part 3 item 2; forecast without basis (B2, H)"
+    source: {who: "агент E (демо)", date: "2026-09-24"}
+  - id: nc-zero-noshow
+    text: "“no more no-shows”, “zero no-shows” — absolute result promise"
+    claim_class: [guarantee, forecast]
+    patterns: ["no\\s+more\\s+no-?shows", "zero\\s+no-?shows"]
+    lift: never
+    reason: "result guarantee (H COPY-L-GUAR-01); the case shows 6%, not zero"
+    source: {who: "агент E (демо)", date: "2026-09-24"}

@@ -1,0 +1,577 @@
+# Диалекты промтов по семействам моделей — машиночитаемая часть 05-prompting/01-vendor-prompt-guides.md §13.
+# Читает прототип ../../scripts/ai-media/prompt_compile.py; правила отображения полей — 03-asset-spec-and-dialects.md §9–§10.
+# Лимиты и параметры — из каталога polza (снимок ниже); остальное — из официальных гайдов вендоров (ссылка source).
+# Статусы: documented — так пишет вендор; untested — наша компиляция, не проверена генерацией (фаза 5).
+version: "0.4"
+checked_at: "2026-09-25"
+changelog:
+  - "0.1 (2026-09-23, D, волна 1): 20 семейств, лимиты = каталог"
+  - "0.2 (2026-09-23, D2, волна 2): defaults.{slop_words, quality_words, comparatives, anti_average, reference_roles, motion_forbid, edit, strict_spelling}; у видео-семейств motion_forbid, multishot, timestamps.template; семейство bria-fibo; раздел channels (routerai, genapi); только добавления — прежние ключи не менялись"
+  - "0.4 (2026-09-25, U, сессия 5): итоги фазы 5 — ab_results (D2-01, D2-02, D2-04…D2-08, D2-11, D2-12; ни одно плечо не заменило умолчание); id Flare в polza с 25.09.2026 — openai/gpt-image-2.5-flare (старый gpt-image-2-5-flare оставлен с пометкой «до 25.09.2026»: на нём задания и паспорта фазы 5, тесты компилятора); пометки D2-06 у defaults.edit.max_changes, D2-08 у video.grok-video, D2-12 у bria-fibo; снимок каталога дня — 2026-09-25_1411 (компилятор по-прежнему берёт последний); только добавления и пометки — ключи и умолчания не менялись"
+  - "0.3 (2026-09-23 18:40, D2b): снимок каталога 17:45; модели google/gemini-omni-1.1-flash (GA, FLF полями frames_via) и grok-imagine-image-2-0/text-to-image; сверка видео с 99-raw/notes/wave2/D2-helper-video.md: звук (audio.by_model, у wan/2.5 и 2.6 не выключается), мульти-шот Kling (max_shots, shot_max_chars, только стартовый кадр), фраза одного плана Wan, таймкоды Seedance 2.5 (unit_s, no_gaps), позиции вендоров о словах качества (quality_vendor), переписчики Vertex и H3, camera_fixed «not guaranteed»; defaults.reference_group (одна фраза на группу референсов одной роли, F2); только добавления и уточнения заметок"
+catalog_snapshot: "99-raw/cache/polza/2026-09-25_1411/api-v1-models.json"   # компилятор берёт последний снимок (как polza.py); закрепить — POLZA_CATALOG=<папка>; задания фазы 5 собраны на 2026-09-23_1745
+catalog_extract: "99-raw/experiments/D/01-catalog-prompt-limits/prompt_limits.json"
+
+defaults:
+  description_language: en          # описание — по-английски (01 §12.7)
+  text_policy: html_overlay          # текст по умолчанию — HTML-слоем (PLAN.md, 01 §12.7)
+  enhancers: off                     # усилители вендоров выключены для скомпилированных промтов (02 §6.3)
+  max_palette_colors: 5              # BFL: 3–5 цветов
+  on_over_limit: fail                # промт длиннее лимита не обрезается (02 §9.2)
+  service_exclusions: [text, watermark, logo, subtitles, music, dialogue]
+  # ---- D2, волна 2 ----
+  slop_words: [luminous, radiant, vibrant, lush, dynamic, glowing, gorgeous, stunning, breathtaking, mesmerizing,
+               masterpiece, 8k, 4k, ultra-detailed, hyperrealistic, hyper-realistic, epic, cinematic, award-winning,
+               trending on artstation, best quality, high quality, ultra hd, octane render, unreal engine, beautiful,
+               amazing, perfect, professional photo]   # Ideogram magic prompt v1, BFL «Filler hurts», MiniMax «abstract words like cinematic»
+  quality_words: [cinematic, 4k, 8k, masterpiece, ultra-detailed, high quality, best quality, hdr, award-winning]   # W3: «слова качества» не работают; для плеча A/B — compile.quality_words
+  quality_words_policy: "не добавлять по умолчанию: против — MiniMax («abstract words like cinematic»), Runway, BFL, скиллы sd25-pe и wan3-pe («Do not automatically add quality packs»); за — Seedance 2.0 (гайд и скилл sd2-pe: «4K HD, rich details» + анти-искажения обязательно), в примерах Kling и Vertex; ByteDance противоречит сам себе → [спорно], плечо A/B — compile.quality_words (W3-13); у семейства — quality_vendor"   # 99-raw/notes/wave2/D2-helper-video.md §7
+  grading_words: [warm]      # Ideogram: «The word "warm"… is BANNED as a grading adjective» — задавать источник света
+  comparatives: [darker, lighter, brighter, dimmer, warmer, cooler, bigger, smaller, larger, more, less, softer, harder,
+                 sharper, stronger, weaker, higher, lower, redder, greener, bluer]   # правка: целевые значения вместо сравнительных [V:8kM5aDD5gLI 25:38]
+  anti_average: "Off-center subject placed on a rule-of-thirds line, gaze turned away from the camera, asymmetric composition with natural imperfections."   # [V:AxV8TR3BdqI 30:46–32:51]; позитивная форма для всех семейств (v0.2; с v0.3 — по частям ниже)
+  anti_average_parts:        # D2b: взгляд — только если в кадре люди; несовершенства — только у фото; «по центру» + это правило — ошибка спецификации
+    base: "Off-center subject placed on a rule-of-thirds line, asymmetric composition"
+    people: "gaze turned away from the camera"
+    photo: "natural imperfections"
+  strict_spelling:
+    sentence: "No misspellings, no extra letters, and no warped glyphs."   # [V:XLHTLJhzDyQ 03:05]
+    positive: "Every letter is spelled exactly as written, crisp and undistorted."
+  reference_roles:           # {ref} — ссылка в синтаксисе семейства; {note} — что взять
+    style: "{ref} is the style reference: match its {note}; the subject and scene come from this prompt."
+    identity: "{ref} shows the subject; use it only to preserve the subject's identity ({note}) and create a completely new shot."   # [V:I9xdmNZxIfA 08:27]
+    subject: "{ref} shows the subject: keep it recognizable ({note})."
+    character: "Keep the character from {ref} identical: face, proportions and clothing ({note})."
+    product: "{ref} is the product: keep its shape, proportions, materials, label and colors exactly as in the image ({note})."
+    composition: "Follow the composition of {ref}: {note}."
+    layout: "Strictly follow the layout of {ref}: {note}."
+    palette: "Take only the color palette from {ref} ({note})."
+    background: "Use {ref} as the background environment ({note})."
+    material: "Apply the material and surface finish from {ref} ({note})."
+    effect: "Apply the visual effect shown in {ref} ({note}) to the new subject."
+    pose: "Take the pose from {ref} ({note})."
+    video_motion: "Reference the motion and camera movement in {ref} ({note})."
+  reference_group:           # D2b по замечанию F2: ≥ 2 референса одной роли — одна фраза, а не повтор на каждый (FLUX 319 слов > 300)
+    style: "{refs} are style references from one shoot: match their {note}; do not copy their scenes or composition; the subject and scene come from this prompt."   # = F-01 A
+    identity: "{refs} show the same subject; use them only to preserve the subject's identity ({note}) and create a completely new shot."
+    subject: "{refs} show the subject from different angles: keep it recognizable ({note})."
+    character: "{refs} show the same character: keep the face, proportions and clothing identical ({note})."
+    product: "{refs} show the same product from different angles: keep its shape, proportions, materials, label and colors exactly as in the images ({note})."
+    default: "{refs}: {note}."
+  motion_forbid:             # D2: запреты движения; sentence — для семейств, где вендоры пишут запреты сами; positive — без отрицаний
+    zoom: {sentence: "No zoom.", positive: "The focal length stays fixed."}
+    spin: {sentence: "No spin.", positive: "The subject keeps its orientation."}
+    reposition_subject: {sentence: "Do not reposition the subject.", positive: "The subject stays in the same place in the frame."}
+    camera_move: {sentence: "Do not move the camera.", positive: "The camera remains completely still."}
+    cuts: {sentence: "No cuts.", positive: "One continuous shot."}
+    shake: {sentence: "No camera shake.", positive: "The image stays perfectly stable."}
+    morph: {sentence: "Do not change the shape of the subject.", positive: "The subject keeps its exact shape and proportions."}
+    new_objects: {sentence: "Do not add new objects.", positive: "Only the elements already in the frame appear."}
+    text: {sentence: "No on-screen text.", positive: "A clean frame without captions."}
+    fast_motion: {sentence: "No fast or sudden movement.", positive: "All movement is slow and gentle."}
+  tempo_words: {slow: "All movement is slow and gentle.", medium: "Movement is steady and natural.", fast: "Movement is quick and energetic."}
+  edit:
+    max_changes: 5           # ≤ 5 изменений за вызов, цепочкой [V:H6ZXujE1qBA 15:16]; «одна правка на вызов» (Gamma, VideoSmile) — [спорно], тест D2; фаза 5 D2-06 (NB2 1K, 1 образец): 10 из 10 одним вызовом = цепочка 5 + 5 (вдвое дешевле, без дрейфа ΔE00 4,69 шага 1) → для NB2 — --opt max_changes=10; умолчание 5 оставлено до повтора (ab_results)
+    keep_position: "Keep its position and size exactly the same."   # формула Jamey [V:2RD3FP5iWJY 36:34]
+    closing: "Change nothing else."
+    suffix: "Maintain the original composition and subject."         # [V:8kM5aDD5gLI 24:36]
+
+# Формы (format):
+#   prose     — связный текст, главное в начале
+#   sections  — проза по разделам с метками («Scene: …»)
+#   json      — JSON визуальных полей спецификации (без служебных)
+#   ir        — «ключ: проза» в snake_case (MiniMax H3)
+#   ideogram_json — JSON по схеме подписей Ideogram 4 (вне polza)
+# Отрицания (negative.object): positive — только позитивные замены; sentence — допускается «No X.»
+
+families:
+
+  nano-banana:
+    class: A                       # thinking-модели Gemini 3 (и Gemini 2.5 Flash Image)
+    source: "01 §2"
+    models:
+      google/gemini-2.5-flash-image:        {max_prompt_chars: 20000, max_refs: 8, price_rub: 2.90}
+      google/gemini-3.1-flash-lite-image:   {max_prompt_chars: 20000, max_refs: 10, price_rub: 2.90, note: "не для мульти-референса"}
+      google/gemini-3.1-flash-image-preview: {max_prompt_chars: 20000, max_refs: 14, price_rub: {1K: 4.80, 2K: 7.20, 4K: 10.80}}
+      google/gemini-3.1-flash-image:        {max_prompt_chars: null, max_refs: null, price_rub: tokens, note: "google-vertex; параметры в каталоге не описаны"}
+      google/gemini-3-pro-image-preview:    {max_prompt_chars: 20000, max_refs: 8, price_rub: {1K: 13.5, 2K: 13.5, 4K: 18}}
+    format: sections
+    alt_formats: [prose, json]
+    status: documented             # проза — официальные гайды; разделы — DevRel Google
+    order: [operation, subject, environment, composition, text_zone, camera, light, palette, materials, style, mood, text, constraints]
+    labels: {subject: "Subject", environment: "Setting", composition: "Composition", camera: "Camera", light: "Lighting", palette: "Colors", style: "Style", text: "Text", constraints: "Constraints"}
+    operation_verbs: {generate: "Create", edit: "Using the provided image, change only"}
+    negative: {field: null, service: sentence, object: positive}
+    language: {description: en, russian_description_ok: true, note: "ru-RU в списке рекомендованных языков Gemini API"}
+    references: {syntax: "Image {n}", roles: true, example: "Use Image 1 for the character's pose, Image 2 for the art style"}
+    text: {quote: "\"", language_tag: true, font: words, position: required, closing: "No other text."}
+    palette: {hex: untested, form: "{name}", shares: words}
+    text_zone: {template: "{subject} positioned in the {region} of the frame. The {side_words} of the frame is a vast, empty {surface}, creating significant negative space for text.", status: documented}
+    edit: {template: "Using the provided image, change only the {target} to {change}. Keep everything else in the image exactly the same, preserving the original style, lighting, and composition."}
+    enhancer: null
+    aspect_ratio_param: aspect_ratio
+
+  gpt-image:
+    class: A
+    source: "01 §4"
+    models:
+      openai/gpt-image-2.5-sunburst: {max_prompt_chars: 20000, max_refs: 16, price_rub: {1K: 4, 2K: 7, 4K: 11}}
+      openai/gpt-image-2.5-flare:    {max_prompt_chars: 20000, max_refs: 16, price_rub: {1K: 4, 2K: 7, 4K: 11}, note: "id с 25.09.2026 (снимок 2026-09-25_1411); параметры и цены — как у прежнего id"}
+      gpt-image-2-5-flare:           {max_prompt_chars: 20000, max_refs: 16, price_rub: {1K: 4, 2K: 7, 4K: 11}, note: "id до 25.09.2026 (без префикса openai/); в снимке 2026-09-25_1411 его нет — для новых заданий openai/gpt-image-2.5-flare"}
+      openai/gpt-5.4-image-2:        {max_prompt_chars: 20000, max_refs: 16, price_rub: {1K: 4, 2K: 7, 4K: 11}, note: "документация polza — 5 000"}
+      openai/gpt-image-1.5:          {max_prompt_chars: null, max_refs: 16, price_rub: {medium: 3, high: 16.5}, note: "закрытие 2026-12-01"}
+      openai/gpt-5-image:            {max_prompt_chars: 4000, max_refs: 5, price_rub: 4.50, mask: "black=change, white=keep", enhancer_param: isEnhance}
+      openai/gpt-5-image-mini:       {max_prompt_chars: 32000, max_refs: 10, price_rub: tokens}
+    format: sections
+    alt_formats: [prose, json]
+    status: documented             # «labeled sections» для сложного; любая форма допустима
+    order: [scene, subject, details, composition, text_zone, camera, light, palette, style, text, constraints]
+    labels: {scene: "Scene", subject: "Subject", details: "Details", composition: "Composition", camera: "Camera", light: "Lighting", palette: "Color palette", style: "Style", text: "Text (EXACT, verbatim)", constraints: "Constraints"}
+    intended_use_line: true        # «include the intended use (ad, UI mock, infographic)»
+    negative: {field: null, service: sentence, object: positive}
+    language: {description: en, russian_description_ok: null}
+    references: {syntax: "Image {n}", roles: true, example: "Image 1: product photo. Image 2: style reference."}
+    text: {quote: "\"", exactly_once: true, spell_unusual: true, closing: "No extra text, no watermarks, no unrelated logos."}
+    palette: {hex: untested, form: "{name} ({hex})", shares: words}
+    text_zone: {template: "Subject {region}, with clean negative space on the {side} ({percent} of the frame) for a headline.", status: documented}
+    edit: {template: "Change only {target} to {change}. Preserve {keep}. Keep all other aspects of the image unchanged."}
+    enhancer: null
+    aspect_ratio_param: aspect_ratio
+
+  flux2:
+    class: B
+    source: "01 §5"
+    models:
+      black-forest-labs/flux.2-pro:  {max_prompt_chars: 5000, max_refs: 8, price_rub: {1K: 5, 2K: 7}}
+      black-forest-labs/flux.2-flex: {max_prompt_chars: 5000, max_refs: 8, price_rub: {1K: 14, 2K: 24}}
+    format: prose
+    alt_formats: [sections, json]
+    status: documented             # JSON: «both formats equally well»; скилл BFL: «Flatten for Execution»
+    order: [subject, action, style, environment, composition, text_zone, light, camera, palette, materials, mood, text]
+    target_words: [30, 80]
+    negative: {field: null, service: positive, object: positive, replacements: {text: "clean unmarked surfaces", watermark: "pristine image", logo: "unbranded", people: "empty, deserted", clutter: "organized, minimal"}}
+    language: {description: en, russian_description_ok: untested, note: "BFL: родной язык «аутентичнее»; данных по FLUX.2 нет"}
+    references: {syntax: "image {n}", roles: true, example: "subject from image 1, style from image 2, background from image 3"}
+    text: {quote: "'", front_load: true, max_words: 4, color_hex: true}
+    palette: {hex: documented, form: "color {hex} ({name})", shares: words, bind_to_object: true, max_colors: 5}
+    text_zone: {template: "{subject} in the {region}; the {side_words} is an empty, uncluttered {surface}, plain and evenly lit.", status: untested}
+    edit: {template: "Change the {target} to {change} while keeping {keep} exactly the same."}
+    enhancer: {vendor: "API BFL: [pro]/[max] апсемплинг по умолчанию (disable_pup=false), [flex] prompt_upsampling=true", polza: null}
+    aspect_ratio_param: aspect_ratio
+
+  seedream:
+    class: B
+    source: "01 §6.1"
+    models:
+      bytedance/seedream-4:          {max_prompt_chars: 5000, max_refs: 10, price_rub: 3, seed: true}
+      bytedance/seedream-4.5:        {max_prompt_chars: 3000, max_refs: 14, price_rub: 5}
+      bytedance/seedream-5-lite:     {max_prompt_chars: 2996, max_refs: 10, price_rub: 4}
+      seedream/5-pro-text-to-image:  {max_prompt_chars: null, max_refs: 10, price_rub: {basic: 5, high: 10}}
+    format: prose
+    alt_formats: [sections]
+    status: documented
+    order: [purpose, subject, action, environment, composition, text_zone, style, light, palette, text, constraints]
+    max_words: 600
+    negative: {field: null, service: sentence, object: positive}
+    language: {description: en, russian_description_ok: null, note: "гайды — EN/ZH"}
+    references: {syntax: "Image {n}", roles: true, example: "replace the character in Image 2 with the character from Image 1, and generate the result in the style of Image 3"}
+    text: {quote: "\"", closing: null}
+    palette: {hex: untested, form: "{name}", shares: words}
+    edit: {template: "{change} to {target}, keeping {keep} unchanged."}
+    series: {phrases_in_polza: false, note: "sequential_image_generation в polza нет"}
+    enhancer: {vendor: "optimize_prompt_options.mode=standard", polza: null}
+    aspect_ratio_param: aspect_ratio
+
+  qwen-image:
+    class: B
+    source: "01 §7.1–7.2"
+    models:
+      qwen/image:     {max_prompt_chars: null, max_refs: 1, price_rub: {"16:9": 2.25, "1:1": 3}}
+      qwen/image-2:   {max_prompt_chars: 5000, max_refs: 3, price_rub: 4}
+      qwen/image-2.1: {max_prompt_chars: 5000, max_refs: 10, price_rub: {1K: 3, 2K: 6}, seed: true, mask: "white=change, black=keep", transparent: true, enhancer_param: enhance_prompt}
+    format: prose
+    alt_formats: []
+    status: documented             # переписчик 2512: «Strictly avoid formal Markdown lists…, numbered items, or headings»
+    order: [subject, environment, composition, text_zone, depth_layers, light, materials, palette, style, text, constraints]
+    negative: {field: null, service: sentence, object: positive}
+    language: {description: en, russian_description_ok: true, note: "LingT2I: 0.78 RU против 0.82 EN; смещение надписей к китайскому"}
+    references: {syntax: "Image {n}", roles: true, note: "Порядок — тот, на который ссылается промпт (каталог)"}
+    text: {quote: "\"", language_tag: true, closing: "No other text appears in the image.", no_text_sentence: "The image contains no recognizable text."}
+    palette: {hex: untested, form: "{name}", shares: words}
+    edit: {template: "Replace {target} with {change}. Keep {keep} unchanged.", inpaint: "Perform inpainting on this image. The original caption is: {caption}", outpaint: "Extend the image beyond its boundaries using outpainting. The original caption is: {caption}"}
+    enhancer: {vendor: "prompt_extend=true (Model Studio)", polza: {param: enhance_prompt, default: false, use_for: [short_prompt, edit]}}
+    aspect_ratio_param: aspect_ratio
+
+  z-image:
+    class: B
+    source: "01 §7.4"
+    models:
+      tongyi-mai/z-image: {max_prompt_chars: 1000, max_refs: 0, price_rub: 1.40}
+    format: prose
+    alt_formats: []
+    status: untested               # официального гайда нет; техотчёт: плотные фактические подписи, PE
+    order: [subject, environment, composition, text_zone, light, palette, style]
+    negative: {field: null, service: positive, object: positive, note: "Turbo: guidance 0 — негатив не работает"}
+    language: {description: en, russian_description_ok: false}
+    references: null
+    text: {quote: "\"", scripts_ok: [Latin], note: "надписи только EN/ZH"}
+    palette: {hex: untested, form: "{name}", shares: words}
+    enhancer: {vendor: "Prompt Enhancer (выровнен при SFT)", polza: null}
+    aspect_ratio_param: aspect_ratio
+
+  grok-image:
+    class: unknown
+    source: "01 §10"
+    models:
+      x-ai/grok-imagine-image: {max_prompt_chars: 5000, max_refs: 1, price_rub: 2.50, note: "базовая январская модель, не Image 2.0"}
+      grok-imagine-image-2-0/text-to-image: {max_prompt_chars: 8000, max_refs: 5, price_rub: 3.00, note: "Grok Image 2.0 (снимок 17:45): правка по images ≤ 5; aspect_ratio auto — только при правке; 1:1, 2:3, 3:2, 16:9, 9:16"}
+    format: prose
+    alt_formats: []
+    status: untested               # гайда по промтам нет
+    order: [subject, environment, composition, text_zone, light, palette, style, text]
+    negative: {field: null, service: positive, object: positive}
+    language: {description: en}
+    references: {syntax: "the provided image", roles: false}
+    text: {quote: "\""}
+    palette: {hex: untested, form: "{name}", shares: words}
+    enhancer: null
+    aspect_ratio_param: aspect_ratio
+
+  veo:
+    class: A                       # LLM-переписчик
+    source: "01 §3"
+    video: true
+    models:
+      google/veo3:      {max_prompt_chars: 60000, max_refs: 2, price_rub: 187.5, api_limit: "1024 токена в Gemini API", doc_limit_polza: 2000}
+      google/veo3_fast: {max_prompt_chars: 60000, max_refs: 3, price_rub: 45, api_limit: "1024 токена в Gemini API", doc_limit_polza: 2000}
+    safe_max_prompt_chars: 2000    # меньшее из документации polza и каталога
+    format: prose
+    alt_formats: [sections]
+    status: documented
+    order: [cinematography, subject, action, environment, style, audio]
+    negative: {field: null, service: sentence, object: positive, vertex_field: "negativePrompt (не в polza): существительные без no"}
+    language: {description: en, polza_param: {enableTranslation: "true"}}
+    references: {first_last: "generationType=FIRST_AND_LAST_FRAMES_2_VIDEO", ingredients: "REFERENCE_2_VIDEO (только veo3_fast, ≤ 3)"}
+    timestamps: {supported: true, syntax: "[00:00-00:02] {beat}"}
+    camera: {one_move: true, static: "The camera remains static.", vocab: "01 §3.2 (Vertex)", vertex_param: "cameraControl: fixed | pan_* | tilt_* | truck_* | pedestal_* | push_in | pull_out (только с image; в polza нет)"}
+    i2v: {motion_only: true, status: "спорно: пример Gemini API пересказывает сцену"}
+    audio: {param: null, note: "звук всегда (Gemini API: «Always on»; Vertex generateAudio по умолчанию true — в polza не выставлен); немое видео — при кодировании (-an)"}
+    enhancer: {vendor: "LLM-переписчик: у veo-3.0 не отключается; Vertex enhancePrompt по умолчанию true («providing a seed won't guarantee consistent results»)", polza: null}
+    quality_vendor: {position: examples, note: "Vertex: «shot on 8K camera», «cinematic film look» в словаре стилей; Veo: «Use descriptive language»"}
+    aspect_ratio_param: aspect_ratio
+
+  omni:
+    class: A
+    source: "01 §3.9"
+    video: true
+    models:
+      gemini-omni-video: {max_prompt_chars: 20000, max_refs: 7, price_rub: {"4s": 35, "6s": 45, "8s": 50, "10s": 60, "4k": 70}, seed: true, note: "preview; снимается 30.09.2026; FLF — только тегами в промте (references.declare)"}
+      google/gemini-omni-1.1-flash: {max_prompt_chars: 20000, max_refs: 7, price_rub: {"4s": 48, "6s": 63, "8s": 79, "10s": 95, "4k,4s": 111, "v2v": 126}, seed: true,
+                                     frames_via: {first: first_frame_url, last: last_frame_url, last_needs_first: true, exclusive_with: [images, videos, audio_ids, character_ids]},
+                                     note: "GA (снимок 17:45): кадры — полями *_url, не images и не тегами; 360p = 720p = 1080p по цене; polza.py поля *_url (кроме mask_url) не загружает — сначала polza.py upload <файл> --live → URL (I2, I-15)"}
+    format: prose
+    alt_formats: [sections]
+    status: documented
+    order: [role_tags, shot_contract, subject, action, environment, camera, style, audio, constraints, role_closing]
+    negative: {field: null, service: sentence, object: sentence, note: "«Do not do X» в тексте — по документации"}
+    language: {description: en}
+    references: {syntax: "<IMAGE_REF_{n}>", first_frame: "<FIRST_FRAME>", last_frame: "<LAST_FRAME>", declare: "[# Sources <FIRST_FRAME>@Image1 <LAST_FRAME>@Image1]", closing_loop: "Use this image as the first frame and the last frame.", status: "теги — только preview gemini-omni-video (через KIE — untested); у GA кадры идут полями frames_via, теги не пишутся"}
+    single_shot_phrase: "In a single continuous shot. No scene cuts."
+    timestamps: {supported: true, syntax: "[{t0}-{t1}s] {beat}"}
+    camera: {one_move: true, static: "The camera stays locked."}
+    audio: {param: null, silence: "No dialogue. No music. No extra sound effects."}
+    enhancer: null
+    aspect_ratio_param: aspect_ratio
+
+  seedance-1-5:
+    class: B
+    source: "01 §6.2"
+    video: true
+    models:
+      bytedance/seedance-1.5-pro: {max_prompt_chars: 2500, max_refs: 2, price_rub: {"480p,4s,no-sound": 5.25}, fixed_lens: true, audio_default: "false"}
+    format: prose
+    alt_formats: []
+    status: documented
+    order: [subject, action, environment, camera, style, audio]
+    negative: {field: null, service: sentence, object: positive}
+    language: {description: en, note: "Chinese and English"}
+    references: {first_last: "images[0..1]"}
+    timestamps: {supported: false, shots: "Shot 1: … Shot 2: Cut to…"}
+    camera: {grammar: "Subject + Shot Size", move_formula: "Starting frame composition + Shot movement + amplitude + Ending frame composition", static_param: {fixed_lens: "true"},
+             static_param_note: "BytePlus camera_fixed: «ModelArk will append the fixed camera instruction to the user's prompt, but the actual result is not guaranteed»; не с референс-картинками — фразу неподвижности писать и словами"}
+    audio: {param: generate_audio, set: "false", vendor_default: "true (API BytePlus; «By default… automatically generates background music»)", polza_default: "false"}
+    enhancer: null
+    aspect_ratio_param: aspect_ratio
+
+  seedance-2:
+    class: B
+    source: "01 §6.3"
+    video: true
+    models:
+      bytedance/seedance-2:      {max_prompt_chars: 20000, doc_limit: 1536, max_refs: 5, max_videos: 1, price_rub_per_s: {480p: 12.825, 720p: 27.675}, audio_default: "true", duration_default_s: 15}
+      bytedance/seedance-2-fast: {max_prompt_chars: 20000, doc_limit: 1536, max_refs: 5, max_videos: 1, price_rub_per_s: {480p: 10.4625, 720p: 22.275}, audio_default: "true"}
+      bytedance/seedance-2-mini: {max_prompt_chars: 20000, max_refs: 9, max_videos: 3, price_rub_per_s: {480p: 2.565, 720p: 5.535}, audio_default: "true"}
+    safe_max_prompt_chars: 1536
+    format: prose
+    alt_formats: [sections]
+    status: documented
+    order: [assets, subject, action, environment, light, camera, style, quality, constraints]
+    negative: {field: null, service: sentence, object: positive, phrases: ["keep it subtitle-free", "do not generate a watermark", "do not generate a logo"]}
+    language: {description: en}
+    references: {syntax: "<Image_{n}>", alt: "@Image {n}", subject_definition: "Define {what} in Image {n} as Subject {k}"}
+    timestamps: {supported: false, shots: "Shot 1 / Shot 2 / Shot 3", note: "гайд: «precise timing… is unstable»; вендорский скилл sd2-pe сам пишет «Time slice storyboard (0–3s, 3–10s)» — [спорно], по умолчанию без секунд"}
+    camera: {one_move: true, prefer: "slow, gentle, continuous small movements", rule: "sd2-pe: «only 1 type of camera movement in the shot of a time slice»"}
+    audio: {param: generate_audio, set: "false", vendor_default: "true"}
+    subtitles_hint: "горизонтальный формат снижает вероятность субтитров"
+    quality_vendor: {position: required, phrase: "4K HD, rich details; faces stay stable and undistorted, no clipping through objects.", note: "sd2-pe: «Mandatory fallback… anti-distortion and high image quality constraints»; гайд [26]: «HD, rich details, cinematic texture, natural colors, soft lighting»; база по умолчанию не добавляет (W3) — [спорно]"}
+    references_rule: "sd2-pe: после каждого @Image N — местоимение или имя: «@Image 1 (Lee) stands up…»"
+    enhancer: {vendor: "скилл sd2-pe (интерактивный, вне API)", polza: null}
+    aspect_ratio_param: aspect_ratio
+
+  seedance-2-5:
+    class: B
+    source: "01 §6.4"
+    video: true
+    models:
+      bytedance/seedance-2-5: {max_prompt_chars: 30000, max_refs: 30, max_videos: 10, price_rub_per_s: {480p: 18.9, 720p: 42.525}, audio_default: "true"}
+    format: sections
+    alt_formats: [prose]
+    status: documented
+    sections: ["Asset Referencing", "One-Sentence Summary", "Detailed Plot", "Additional Notes"]
+    negative: {field: null, service: sentence, object: positive, phrases: ["no subtitles", "no BGM"], repeat_start_end: true}
+    language: {description: en}
+    references: {syntax: "Image {n}", video: "Video {n}", rule: "точный референс — «Strictly refer to …», не пересказывать"}
+    timestamps: {supported: true, syntax: "[{t0}s-{t1}s] {beat}", unit_s: 1, no_gaps: true, note: "sd25-pe: отрезки — «event budgets», без точности 0,5 с; длительность только параметром → этапы без чисел (At the start / Main event / At the end)"}
+    camera: {rare_terms: "[term + descriptive explanation]", formula: "popular camera movement + target subject + starting position or state + direction of movement + arrival position or state (sd25-pe)"}
+    frames_phrases: {first: "Use @Image{n} as the first frame.", last: "Use @Image{n} as the last frame.", keyframes: "Use Images {a} to {b} in order as keyframes.", note: "роли кадров — отдельными предложениями, не ослаблять до «reference» (sd25-pe); в polza images — «референсы», B-6 фазы 0"}
+    text: {cyrillic_hint: "надпись — картинкой-референсом или по буквам"}
+    audio: {param: generate_audio, set: "false", vendor_default: "true", note: "sd25-pe: звук, длительность, соотношение и разрешение в промт не писать — параметры"}
+    quality_vendor: {position: forbidden, note: "sd25-pe: «Do not automatically add quality packs, stability packs… generic negative constraints»; в примере гайда [27] — «High image quality, rich details, stable motion, and smooth visuals.»"}
+    enhancer: {vendor: "скилл sd25-pe (вне API)", polza: null}
+    aspect_ratio_param: aspect_ratio
+
+  wan:
+    class: B
+    source: "01 §7.3"
+    video: true
+    models:
+      wan/2.5:               {max_prompt_chars: 800, negative_field: {name: negative_prompt, max_chars: 500}, max_refs: 1, price_rub: {"720p,5s": 45, "1080p,10s": 150}, seed: true, enhancer_param: enable_prompt_expansion}
+      wan/2.6:               {max_prompt_chars: 5000, max_refs: 1, price_rub: {"720p,5s": 52.5, "1080p,15s": 236.25}, multi_shots_param: true}
+      alibaba/wan-3.0:       {max_prompt_chars: null, max_refs: 1, price_rub_per_s: 23.5984, seed: true, audio_default: "false"}
+      alibaba/wan-3.0-prime: {max_prompt_chars: null, max_refs: 1, price_rub_per_s: 33.03776, seed: true, audio_default: "false"}
+      alibaba/happyhorse-1.0: {max_prompt_chars: null, max_refs: 1, price_rub_per_s: 19.9878448, seed: true, note: "гайда нет; ровно один первый кадр"}
+      alibaba/happyhorse-1.1: {max_prompt_chars: null, max_refs: 1, price_rub_per_s: 15.0793776, seed: true, note: "гайда нет"}
+    format: prose
+    alt_formats: [sections]
+    status: documented
+    order: [subject, environment, action, camera, aesthetic, style, audio]
+    negative: {field: "negative_prompt (только wan/2.5)", field_style: nouns_comma, service: sentence, object: positive, phrases: ["No dialogue.", "No background music."]}
+    language: {description: en, note: "Chinese and English"}
+    references: {syntax: "Image {n}", video: "Video {n}"}
+    timestamps: {supported: true, syntax: "Shot {k} [{t0}–{t1} s] {beat}", single_shot: "Generate single shot.", single_shot_api: "Generate a single-shot video (API Wan 2.7)"}
+    single_shot_phrase: "Generate a single-shot video: one continuous shot, same set and geometry, no cuts."   # D2b: [33] «Generate single shot.», [36] «Generate a single-shot video»
+    camera: {one_move: true, static: "fixed camera", orbit_max_deg: 45}
+    i2v: {motion_only: true, formula: "Motion + Camera movement"}
+    audio: {param: generate_audio, set: "false",
+            by_model: {wan/2.5: "нет параметра — звук всегда", wan/2.6: "нет параметра — звук всегда", alibaba/wan-3.0: "generate_audio (polza false; вендор «Enabled by default»)", alibaba/wan-3.0-prime: "generate_audio (false)", alibaba/happyhorse-1.0: "нет параметра", alibaba/happyhorse-1.1: "нет параметра"},
+            note: "вендор: «Only wan2.2 and wan2.1 series models support silent video generation»; без реплик в промте модель добавляет их сама — «No dialogue.», «No background music.»; немое — -an при кодировании"}
+    multishot_note: "wan/2.6 — параметр multi_shots (по умолчанию false; у вендора shot_type действует только при prompt_extend=true); wan-3.0 — «4~6 seconds per shot» с таймкодами; wan/2.5 — один план"
+    enhancer: {vendor: "prompt_extend=true (Model Studio)", polza: {param: enable_prompt_expansion, default: "false"}}
+    aspect_ratio_param: aspect_ratio
+
+  kling:
+    class: B
+    source: "01 §8"
+    video: true
+    models:
+      kling/v3:   {max_prompt_chars: 2500, max_refs: 2, price_rub_per_s: {"std,no-sound": 10, "pro,no-sound": 12, "4K": 45}, audio_param: sound, audio_default: "false"}
+      kling/v2.6: {max_prompt_chars: null, max_refs: 1, price_rub: {"5s,no-sound": 42, "10s,no-sound": 82.5}, audio_param: sound}
+    format: prose
+    alt_formats: []
+    status: documented
+    order: [subject, action, environment, camera, light, mood]
+    negative: {field: null, service: sentence, object: positive, note: "API 3.0: «The prompt can include positive and negative descriptions»"}
+    language: {description: en, dialogue_note: "реплики не на 5 языках переводятся на английский"}
+    references: {first_last: "images[0..1]", elements: "@Name", multi_shot_frames: "в мульти-шоте — только стартовый кадр (каталог: «Start/end frame (single-shot) или start frame (multi-shot)»)"}
+    timestamps: {supported: true, syntax: "At the {t}th second, {beat}", multishot: "shot {n}, {m}, {words};"}
+    camera: {one_move: true, static: "The camera remains fixed on {target}.", static_target: "motion.camera.target (по умолчанию the subject)"}
+    audio: {param: sound, set: "false", vendor_default: "off (API Kling 3.0 «Default to off»)"}
+    multi_shot_param: {vendor: "multi_shot — «Default to true»; при false мульти-шот-промт не даёт планов", polza: "параметра нет; описание sound: «Обязательно true при multi_shots=true» → у провайдера мульти-шот, вероятно, выключен по умолчанию [вывод, не проверено]"}
+    quality_vendor: {position: examples, note: "в примерах блога: «8K detail, masterpiece cinematography», «cinematic lighting, 4K»; словом — «Instead of a vague word such as magic… swirling blue energy particles»"}
+    enhancer: null
+    aspect_ratio_param: aspect_ratio
+
+  minimax-h3:
+    class: D                       # H3 обучен на IR; H3 Max в polza — вариант fal.ai
+    source: "01 §9"
+    video: true
+    models:
+      minimax/hailuo-3-max: {max_prompt_chars: null, api_limit: 7000, max_refs: 2, price_rub_per_s: 9.43936}
+    format: ir
+    alt_formats: [prose]
+    status: untested               # применяет ли провайдер IR — неизвестно
+    ir_keys: [integrated_multimodal_description, overall_soundscape, non_diegetic_music]
+    fl2va_line: "How the reference pictures align with the target video — Picture 1 (from Shot 1) aligns with the 0.00-second mark of the target video; Picture 2 (from Shot 1) aligns with the {end:.2f}-second mark of the target video."
+    negative: {field: null, service: na, object: positive, music_absent: "N/A"}
+    language: {description: en, text_and_dialogue: original}
+    references: {first_last: "images[0..1]"}
+    timestamps: {supported: true, syntax: "At 00:{t:05.3f}, …"}
+    camera: {form: "The camera {move} with {amplitude} amplitude at {speed} speed toward …", static: "The camera holds a static shot as …", hailuo_commands: "[Pan left] [Push in] [Static shot] …", rule: "«Add amplitude and speed only when they are meaningful; medium amplitude and normal speed are usually omitted»"}
+    audio: {param: null, note: "выход 32 кГц стерео; параметра выключения в API не найдено; тишина — только «N/A» в overall_soundscape по явной просьбе"}
+    enhancer: {vendor: "H3-Context-IR; API H3 Max prompt_expansion_mode по умолчанию balanced (обёртка Runway: «disabled keeps the prompt as written»)", polza: "параметра нет — IR может быть переписан у провайдера [не проверено]"}
+    quality_vendor: {position: forbidden, note: "«Prefer concrete visual and audio details over abstract words like cinematic or beautiful»"}
+    aspect_ratio_param: aspect_ratio
+
+  grok-video:
+    class: unknown
+    source: "01 §10"
+    video: true
+    models:
+      grok-imagine-video-1-5: {max_prompt_chars: 4096, max_refs: 7, price_rub_per_s: {480p: 1.62, 720p: 3.0375}}
+    format: prose
+    alt_formats: []
+    status: untested
+    order: [subject, environment, composition, light, style, action, camera]
+    t2v_note: "t2v = картинка + i2v внутри: описывать и кадр, и движение"
+    negative: {field: null, service: positive, object: positive}
+    language: {description: en}
+    references: {first_frame: "images[0]"}
+    timestamps: {supported: null}
+    camera: {one_move: true, static: "Locked camera. The camera remains still."}
+    audio: {param: null, note: "у xAI звук по умолчанию включён (generate_audio=False — только прямой API); в polza параметра нет → -an"}
+    enhancer: null
+    aspect_ratio_param: aspect_ratio
+
+  # ---- вне polza (для сравнения и прямых API) ----
+
+  ideogram4:
+    class: D
+    source: "01 §11.4"
+    in_polza: false
+    models:
+      ideogram/ideogram-4: {max_prompt_chars: null, max_refs: 0, note: "условный id; открытые веса и API Ideogram"}
+    format: ideogram_json
+    key_order: [high_level_description, style_description, compositional_deconstruction]
+    style_keys: [aesthetics, lighting, photo, art_style, medium, color_palette]
+    limits: {hld_words: 50, palette_max: 16, element_palette_max: 5, bbox_scale: 1000, bbox_order: "y_min,x_min,y_max,x_max"}
+    serialization: {separators: [",", ":"], ensure_ascii: false}
+    negative: {field: negative_prompt, field_style: nouns_comma, object: positive}
+    language: {description: en, text_field: original}
+    text: {field: text, split_long_titles: "\\n"}
+    empty_space_words: "minimal, sparse, empty, negative space, single subject"
+    status: documented
+
+  recraft-v4:
+    class: B
+    source: "01 §11.3"
+    in_polza: false
+    format: prose
+    order_rule: "from global to local"
+    limits: {v4_prompt_chars: 10000, v3_prompt_chars: 1000}
+    palette_param: {name: "controls.colors", item: "{rgb: [r,g,b], weight: 0..1}", max: 10, weight_sum_max: 1}
+    negative: {field: negative_prompt, field_style: nouns_no_no}
+    text: {quote: "\"", v3_cyrillic: "только А В Е К М Н О Р С Т У Х І"}
+    status: documented
+
+  midjourney:
+    class: C
+    source: "01 §11.5"
+    in_polza: false
+    format: prose
+    style: short
+    negative: {field: "--no", field_style: nouns_comma}
+    multiprompt_weights: "только V1–6.1"
+    status: documented
+
+  runway:
+    class: B
+    source: "01 §11.1"
+    in_polza: false
+    video: true
+    format: prose
+    i2v: {motion_only: true, template: "The camera {motion} as the subject {action}. {extra}"}
+    negative: {field: null, object: positive, note: "«Negative phrasing is not supported and may produce… opposite results»"}
+    camera: {static: "Locked camera. The camera remains still.", loop: "The camera must start and end on the exact same frame to create a perfect loop."}
+    status: documented
+
+  # ---- D2, волна 2 ----
+  bria-fibo:
+    class: D                       # обучена только на JSON-подписях ~1 000 слов (arXiv 2511.06876)
+    source: "02 §2; Gen-API bria-fibo (99-raw/cache/gen-api.ru_model_bria-fibo_api_1dd5eda0.md)"
+    in_polza: false
+    models:
+      bria-fibo: {max_prompt_chars: null, max_refs: 1, note: "Gen-API: prompt | structured_prompt, seed, step_num 50, guidance_scale 5, negative_prompt, mask_url, aspect_ratio"}
+    format: fibo_json
+    alt_formats: [prose]
+    key_order: [short_description, objects, background_setting, lighting, aesthetics, photographic_characteristics, style_medium, context, artistic_style]
+    negative: {field: negative_prompt, field_style: nouns_comma, object: positive}
+    language: {description: en}
+    status: untested               # схема — из значения по умолчанию Gen-API; порядок и полнота ключей не сверены с первоисточником Bria
+    phase5: "D2-12 (Gen-API, 25.09.2026): structured_prompt объектом — 3 из 3 отклонено провайдером («параметры сформированы некорректно», 0 ₽); проза ≤ 1 000 символов работает (10 ₽), > 1 000 — 422; FIBO сам разворачивает прозу в свою JSON-схему (4 006 и 4 761 символ против 723 и 683) → через Gen-API писать прозу; JSON строкой (D2-12v2) не прогонялся"
+
+# ---- D2, волна 2: видео-диалекты (дополняют семейства выше; компилятор сливает по имени семейства) ----
+# motion_forbid: sentence — запреты движения предложениями (так пишут вендоры: Seedance «keep it subtitle-free»,
+# Omni «Do not do X», W5 «no zoom, no spin…»); positive — только утвердительно (Runway «Negative phrasing is not supported»).
+# timestamps_template / multishot.template — Python format: {t0}, {t1}, {beat}, {n}, {m} (секунды), {words}, {t0_ord}.
+video:
+  veo:          {motion_forbid: sentence, timestamps_template: "[00:{t0:02.0f}-00:{t1:02.0f}] {beat}", multishot: null}
+  omni:         {motion_forbid: sentence, timestamps_template: "[{t0:g}-{t1:g}s] {beat}", multishot: {template: "[{t0:g}-{t1:g}s] {words}", joiner: " "}}
+  seedance-1-5: {motion_forbid: sentence, timestamps_template: null, multishot: {template: "Shot {n}: {words}", joiner: " ", cut_word: "Cut to"}}
+  seedance-2:   {motion_forbid: sentence, timestamps_template: null, multishot: {template: "Shot {n}: {words}", joiner: " "}}
+  seedance-2-5: {motion_forbid: sentence, timestamps_template: "[{t0:g}s-{t1:g}s] {beat}", multishot: {template: "[{t0:g}s-{t1:g}s] Shot {n}: {words}", joiner: " "}}
+  wan:          {motion_forbid: sentence, timestamps_template: "[{t0:g}-{t1:g}s] {beat}", multishot: {template: "Shot {n} [{t0:g}–{t1:g} s] {words}", joiner: " ", polza_param: multi_shots}}
+  kling:        {motion_forbid: sentence, timestamps_template: "At the {t0_ord} second, {beat}", multishot: {template: "shot {n}, {m:g}, {words};", joiner: " ", max_shots: 6, shot_max_chars: 512, start_frame_only: true,
+                 note: "в polza нет параметра multi_shots (у вендора по умолчанию true, у провайдера — вероятно false: sound «Обязательно true при multi_shots=true») — мульти-шот текстом [не проверено]; для одного плана — «one continuous shot»"}}
+  minimax-h3:   {motion_forbid: positive, timestamps_template: "At 00:{t0:06.3f}, {beat}", multishot: {template: "[Shot {n}] At 00:{t0:06.3f}, the camera cuts to {words}", joiner: " "},
+                 i2va_line: "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced."}
+  grok-video:   {motion_forbid: positive, timestamps_template: null, multishot: null, note: "D2-08 (фаза 5, n = 2): запреты предложениями (--opt forbid_style=sentence: «No zoom. No spin. Do not reposition the subject.») против без запретов — дрейф объекта 8,1 % против 19,1 % ширины; positive против sentence не сравнивались"}
+  runway:       {motion_forbid: positive, timestamps_template: "[00:{t0:02.0f}] {beat}", multishot: null}
+
+# ---- D2, волна 2: каналы вне Media API polza (задания .routerai.json / .genapi.json, 99-raw/phase5/README.md) ----
+channels:
+  routerai:
+    method: POST
+    path: "/api/v1/images"          # синхронно, base64 в data[].b64_json, usage.cost (₽)
+    docs: "99-raw/cache/routerai.ru_docs_guides_overview_multimodal_image-generation_753f42c7.md"
+    catalog: "99-raw/experiments/P/04-ru-aggregators/routerai_models.json (23.09.2026 09:34, supported_parameters)"
+    price_source: "99-raw/experiments/P/05-price-compare/price_table_2026-09-23.md (RouterAI ×1,30 к ЦБ)"
+    input_reference: {type: image_url, image_url: {url: "{src}"}}   # src → data URI при отправке (клиент B2)
+    models:
+      black-forest-labs/flux.2-pro:  {family: flux2, params: [aspect_ratio, output_format, n, input_references, seed], price_rub: 3.28, price_unit: "картинка ≤ 1 Мп", upsampling: "не управляется: disable_pup нет в supported_parameters"}
+      black-forest-labs/flux.2-flex: {family: flux2, params: [aspect_ratio, output_format, n, input_references, seed], price_rub: 6.56, price_unit: "картинка ≤ 1 Мп", upsampling: "не управляется"}
+      openai/gpt-image-2.5-sunburst: {family: gpt-image, params: [aspect_ratio, quality, background, n, input_references, output_compression], price_rub: 1.44, price_unit: "1024² medium, по токенам (P/05)"}
+      openai/gpt-image-2.5-flare:    {family: gpt-image, params: [aspect_ratio, quality, background, n, input_references, output_compression], price_rub: 1.44, price_unit: "1024² medium, по токенам (P/05)"}
+      bytedance-seed/seedream-4.5:   {family: seedream, params: [resolution, aspect_ratio, n, input_references, seed], price_rub: 4.37, price_unit: "картинка"}
+      recraft/recraft-v4.1:          {family: recraft-v4, params: [aspect_ratio, n, input_references], price_rub: 3.82, price_unit: "картинка"}
+      recraft/recraft-v4.1-vector:   {family: recraft-v4, params: [aspect_ratio, output_format, n, input_references], price_rub: 8.74, price_unit: "картинка"}
+  genapi:
+    method: POST
+    path: "/api/v1/networks/{network}"   # ответ {request_id, status: starting}; результат GET /api/v1/request/get/{request_id}
+    docs: "99-raw/cache/gen-api.ru_model_flux-2_api_51030861_r.md; gen-api.ru_docs_v1_generations_getting-the-result_e49ed601.md"
+    price_source: "99-raw/experiments/P/04-ru-aggregators/genapi_prices_2026-09-23.txt"
+    models:
+      flux-2:      {family: flux2, variant: "FLUX.2 [dev] (fal)", params: [prompt, image_urls, guidance_scale, num_inference_steps, width, height, num_images, acceleration, enable_prompt_expansion, enable_safety_checker, seed, output_format, model, translate_input],
+                    fixed: {enable_prompt_expansion: false, translate_input: false, num_images: 1, model: standard, output_format: png}, price_rub: 3.0, price_unit: "Мп (standard, по тексту)", upsampling: "enable_prompt_expansion (по умолчанию false)"}
+      flux-2-pro:  {family: flux2, params: [prompt, image_urls, width, height, enable_safety_checker, seed, output_format, translate_input],
+                    fixed: {translate_input: false, output_format: png}, price_rub: 7.5, price_unit: "Мп", upsampling: "не управляется"}
+      flux-2-flex: {family: flux2, params: [prompt, image_urls, width, height, enable_safety_checker, enable_prompt_expansion, seed, guidance_scale, num_inference_steps, output_format, translate_input],
+                    fixed: {enable_prompt_expansion: false, translate_input: false, output_format: png}, price_rub: 15.0, price_unit: "Мп", upsampling: "enable_prompt_expansion (по умолчанию true — выключать)"}
+      bria-fibo:   {family: bria-fibo, params: [prompt, image_url, structured_prompt, seed, step_num, negative_prompt, guidance_scale, mask_url, model, aspect_ratio],
+                    fixed: {model: generate}, price_rub: 10.0, price_unit: "картинка"}
+      recraft-v4:  {family: recraft-v4, params: [prompt, translate_input, model, pro, aspect_ratio, colors, background_color, is_sync],
+                    fixed: {translate_input: false}, price_rub: null, price_unit: "см. прайс Gen-API", note: "translate_input по умолчанию true — выключать (перевод текста в картинке)"}
+
+# Результаты A/B (02 §9) фазы 5 (25.09.2026). Правило решения — 06-ab-protocol.md §5: плечо заменяет умолчание, только если
+# Δ ≥ 10 п. п. И нижняя граница 95 % ДИ > 0. Судья — google/gemini-3.1-flash-lite вслепую, балл — доля «да» по 10–12 атомарным
+# вопросам брифа (DSG); согласие на повторах 100 % (n = 4). Разбор — 99-raw/phase5/runs/3-prompt-form/README.md, analysis/d2_report.md.
+# Итог: ни одно плечо умолчание не заменило; JSON — спецификация системы (asset-spec → компилятор), не формат промта модели.
+ab_results:
+  - {test: D2-01, family: nano-banana, model: google/gemini-3.1-flash-lite-image, channel: polza, date: "2026-09-25", arms: "json против sections", pairs: 10, delta_pp: 2.8, ci95: [-2.7, 9.1], sign_p: 0.625, scores: "json 98,1 (sd 4,0) / sections 95,3 (sd 6,6) — потолок", dialect_winner: none, decision: "оставить умолчание (sections)", run: "99-raw/phase5/runs/3-prompt-form/analysis/d2_report.md"}
+  - {test: D2-02, family: flux2, model: "flux-2 (Gen-API, FLUX.2 [dev] без переписчика)", channel: genapi, date: "2026-09-25", arms: "json против prose, seed 101/202", pairs: 10, delta_pp: null, ci95: null, dialect_winner: none, decision: "умолчание не меняется; судья D2-03b не прогонялся (решение заказчика 25.09 п. 16) — вывод предварительный, глазом, 1 образец на бриф: JSON развёл «coral» как цвет (абстрактное пятно 2 из 2), проза дала живой коралл (2 из 2) — лечится прозой «a coral-colored abstract shape»; в B5 JSON ослабил «bold condensed» в 1 из 2", run: "99-raw/phase5/runs/3-prompt-form/analysis-D2-02/d2_report.md"}
+  - {test: D2-04, family: z-image, model: tongyi-mai/z-image, channel: polza, date: "2026-09-25", arms: "text_zone_style google / copyspace против base", pairs: "4 + 4", delta_pp: [5.3, 2.2], ci95: [[0.0, 10.6], [-8.3, 10.0]], dialect_winner: none, decision: "оставить умолчание (base); «copy space» дал самую шумную зону (z1: плотность краёв 0,0037 против 0,0005)", run: "99-raw/phase5/runs/3-prompt-form/analysis/d2_report.md"}
+  - {test: D2-05, family: z-image, model: tongyi-mai/z-image, channel: polza, date: "2026-09-25", arms: "negation sentence / none-mention против family", pairs: "3 + 3", delta_pp: [3.7, 0.0], ci95: [[0.0, 11.1], [-11.1, 11.1]], dialect_winner: none, decision: "оставить умолчание; «No people.» у энкодерной Z-Image людей не вызывает — 0 из 3 во всех плечах (H5 не подтверждена)", run: "99-raw/phase5/runs/3-prompt-form/analysis/d2_report.md"}
+  - {test: D2-06, family: nano-banana, model: google/gemini-3.1-flash-image-preview, channel: polza, date: "2026-09-25", arms: "10 правок одним вызовом против цепочки 5 + 5", pairs: 1, delta_pp: null, ci95: null, result: "одним вызовом 10 из 10 (4,8 ₽); цепочка 10 из 10 (9,6 ₽), шаг 1 — 5 из 10, global ΔE00 4,69, LEAK 0,28", dialect_winner: none, decision: "правки — одним вызовом (1 образец): для NB2 --opt max_changes=10; defaults.edit.max_changes = 5 не менялось", run: "99-raw/phase5/runs/3-prompt-form/D2-06-check/D2-06_sheet.jpg"}
+  - {test: D2-07, family: seedance-1-5, model: bytedance/seedance-1.5-pro, channel: polza, date: "2026-09-25", arms: "i2v motion_only / full (пересказ сцены) / одно событие, 480p 4 с", pairs: "2 × 3", delta_pp: null, ci95: null, result: "движение 1,61 / 1,69 / 2,45 («одно событие» +52 %); SSIM кадра 0 к A — 0,814 у всех", dialect_winner: none, decision: "i2v=motion_only остаётся — по краткости (463 против 796 символов), пересказ не уменьшает движение и не перерисовывает кадр", run: "99-raw/phase5/runs/3-prompt-form/video/D2-07/metrics.md"}
+  - {test: D2-08, family: grok-video, model: grok-imagine-video-1-5, channel: polza, date: "2026-09-25", arms: "запреты движения предложениями (forbid_style=sentence) против без запретов, 480p 4 с", pairs: "2 × 2", delta_pp: null, ci95: null, result: "дрейф объекта 8,1 % против 19,1 % ширины (−58 %); площадь ±1,2 % против 0,095–1,05 (без запретов в 1 из 2 продукт почти ушёл из кадра)", dialect_winner: sentence, decision: "запреты движения писать всегда; форма sentence проверена, positive (умолчание семейства) — не сравнивалась", run: "99-raw/phase5/runs/3-prompt-form/README.md"}
+  - {test: D2-11, family: seedance-1-5, model: bytedance/seedance-1.5-pro, channel: polza, date: "2026-09-25", arms: "JSON из тех же предложений против prose, 3 брифа × 2", pairs: "3 × 2", delta_pp: null, ci95: null, result: "движение JSON / проза: пейзаж 2,03 / 1,61, крупная форма 2,22 / 3,15, продукт 1,28 / 1,50; склеек 0 из 12; разброс повторов (1,84 против 4,46) больше разницы плеч; продукт на ключе наезжает (×1,8–2,1) в 3 из 4 при любой форме", dialect_winner: none, decision: "форма видео-промта не важна; умолчание prose", run: "99-raw/phase5/runs/3-prompt-form/video/D2-11/metrics.md"}
+  - {test: D2-12, family: bria-fibo, model: bria-fibo, channel: genapi, date: "2026-09-25", arms: "structured_prompt (JSON-объект) против prose", pairs: 0, delta_pp: null, ci95: null, result: "JSON-плечо 3 из 3 отклонено провайдером (0 ₽); проза ≤ 1 000 символов — 2 картинки по 10 ₽, B1 (1 339 символов) — 422; FIBO вернул свою JSON-схему в 5,5–7 раз длиннее прозы", dialect_winner: prose, decision: "через Gen-API — проза ≤ 1 000 символов; JSON строкой (D2-12v2) не прогонялся (решение заказчика п. 16)", run: "99-raw/phase5/runs/3-prompt-form/README.md"}

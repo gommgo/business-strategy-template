@@ -1,0 +1,59 @@
+{
+ "glb": {
+  "case_reveal": {
+   "raw": {
+    "kb": 104.9,
+    "tris": 3856,
+    "nodes": 6,
+    "materials": [
+     "Case_Plastic"
+    ],
+    "extensionsUsed": [
+     "KHR_materials_clearcoat"
+    ],
+    "instanced_nodes": 0
+   },
+   "web": {
+    "kb": 26.3,
+    "tris": 3764,
+    "nodes": 9,
+    "materials": [
+     "Case_Plastic"
+    ],
+    "extensionsUsed": [
+     "EXT_meshopt_compression",
+     "KHR_materials_clearcoat",
+     "KHR_mesh_quantization"
+    ],
+    "instanced_nodes": 0
+   },
+   "preset": "anim_trs"
+  }
+ },
+ "slots": [
+  "OBCase_Lid",
+  "OBBud_0",
+  "OBBud_1"
+ ],
+ "passport": {
+  "W": 0.0606,
+  "D": 0.0217,
+  "H": 0.0452,
+  "corner": 0.0105,
+  "edge": 0.0085,
+  "power": 2.6,
+  "seam_z": 0.0335,
+  "gap": 0.0003,
+  "body": "#F4F3F0",
+  "bud_r": 0.0085,
+  "stem": [
+   0.003,
+   0.02
+  ],
+  "lift": 0.03,
+  "open_deg": 105,
+  "fps": 30
+ },
+ "sec_total": 0.5,
+ "blender": "5.2.2 LTS"
+}

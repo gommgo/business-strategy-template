@@ -1,0 +1,764 @@
+# meaning.schema.yaml — блок «смысл» (meaning) для site-brief: аудитория и задачи, осведомлённость и искушённость рынка,
+# позиционирование, ценностное предложение, силы выбора, возражения и снятие риска
+# text-research · волна 1 · агент B1 · 2026-09-24 · версия формата 1 (черновик T1 → v1 после волны 1)
+#
+# Что это. JSON Schema (draft 2020-12), записанная в YAML. Экземпляр — блок `meaning:` в site-brief (владелец схемы брифа —
+# site A: будущий `../site/01-foundations/site-brief.schema.json` включает этот блок через `$ref` на `$id` ниже)
+# или отдельный файл `meaning.yaml` проекта, пока site-brief нет. Как заполнять — `01-positioning-value-proposition.md`
+# §5 (процедура «бриф → позиционирование») и `02-awareness-hierarchy-objections.md`.
+#
+# Главный принцип: у каждого утверждения смысла есть основание `basis` — бриф, ответ заказчика, голос клиента (VoC, B2),
+# факт (facts.yaml, B2), публичная страница, исследование, вывод агента или допущение. Допущение не входит в обещание
+# страницы, пока заказчик его не подтвердил (урок «Кварца»: цель «без усталости глаз» попала в Promise задачи и нарушила
+# собственный never_claim — аудит KIMI §2.7).
+#
+# Ссылки на другие форматы (контракт тройки v2 §3 п.10–15):
+#   facts.yaml (B2)          → `fact:<id>` и `missing:<id>` в `proof_ids`; путь к файлу — `proof_ref`;
+#   голос клиента (B2)       → `voc:<id>` (формат записи — B2 `voc.schema.yaml`; до него — kebab-case id);
+#   иерархия сообщений (B1)  → `message_hierarchy_ref` (файлы по `message-hierarchy.schema.yaml`, один на страницу);
+#   профиль голоса (F)       → `voice_ref` (`05-voice-editorial/voice.schema.yaml`, волна 2);
+#   site-brief (site)        → `traffic.ref`, `offer.ref`, `conversion.action_ref` — JSON Pointer внутри site-brief;
+#   словарь                  → awareness, traffic, section_role — временные id `99-raw/notes/temp-vocabulary-v0.yaml`
+#                              до S0 site, затем `../site/02-site-types/vocabulary.yaml`; новые id — в
+#                              `x-vocabulary-proposals` (предложения к временному словарю).
+#
+# Даты — строкой в кавычках «ГГГГ-ММ-ДД» (YAML без кавычек делает объект даты, валидатор его отвергнет).
+# Проверка: `99-raw/tools/venv-B1/bin/python ../../scripts/text/validate_meaning.py` (загрузка, схема,
+# смысловые проверки: один основной сегмент, ссылки внутри блока, допущения в open_questions, доказательства опор).
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "urn:app-design:text-research:meaning:1"
+title: "meaning — смысл страницы или сайта до слов"
+description: >-
+  Что сказать, прежде чем писать: кто клиент и какую работу он поручает продукту, что он уже знает, с чем сравнивает,
+  чем продукт отличается и чем это доказано, какую категорию назвать, какие силы мешают выбору и чем снять риск.
+  Не тексты страницы: формулировки здесь внутренние, тексты пишет copy-deck (E, J) по иерархии сообщений.
+date: "2026-09-24"
+x-version: 1
+x-status: "черновик T1 (ранний выпуск для site-brief), 2026-09-24; v1 — по итогам волны 1"
+x-owner: "text-research · 02-strategy-messaging · B1 (контракт тройки v2 §2: поля «смысл» брифа — text)"
+x-doc: ["02-strategy-messaging/01-positioning-value-proposition.md", "02-strategy-messaging/02-awareness-hierarchy-objections.md"]
+
+type: object
+required: [meaning_version, date, status, audience, awareness, positioning, value_proposition, objections, languages]
+additionalProperties: false
+patternProperties:
+  "^x-": {description: "Расширения проекта; валидатор их не проверяет."}
+properties:
+  meaning_version:
+    const: 1
+    description: "Версия формата (эта схема)."
+  date:
+    $ref: "#/$defs/date"
+    description: "Дата последнего изменения блока."
+  status:
+    enum: [draft, proposed, approved]
+    description: >-
+      draft — агент собрал из брифа и выводов; proposed — показан заказчику вместе с open_questions и блоком «Going with»;
+      approved — заказчик подтвердил или ответил (допущения закрыты).
+  site:
+    $ref: "#/$defs/id"
+    description: "slug проекта: как в site-brief и `project.slug` brief.yaml kimi."
+  offering_summary:
+    type: object
+    additionalProperties: false
+    required: [text, basis]
+    description: "Что продаём, словами брифа: предмет, как устроен, как получают. Одна-три фразы, без оценок."
+    properties:
+      text: {type: string, minLength: 10}
+      kind:
+        enum: [service, saas, physical-product, app, event, course, campaign, other]
+        description: "Вид предложения — влияет на каталог возражений (02 §4)."
+      basis: {$ref: "#/$defs/basis"}
+
+  audience:
+    type: array
+    minItems: 1
+    description: >-
+      Сегменты. Ровно один основной (`primary: true`) — «один читатель» страницы; остальные — для других страниц или
+      вторичных блоков. Платящий и пользующийся — разные сегменты (Strategyzer, ошибка 2), если их работа разная.
+    items: {$ref: "#/$defs/segment"}
+    contains:
+      type: object
+      required: [primary]
+      properties: {primary: {const: true}}
+    minContains: 1
+    maxContains: 1
+
+  awareness:
+    type: object
+    additionalProperties: false
+    required: [level, basis]
+    description: >-
+      Уровень осведомлённости основного трафика по Шварцу (1966) — что посетитель уже знает о своей проблеме, о решениях и
+      о продукте. Меняет тип заголовка, порядок доводов и длину аргумента (02 §1–2). Для отдельных источников — by_source.
+    properties:
+      level: {$ref: "#/$defs/awareness-level"}
+      basis: {$ref: "#/$defs/basis"}
+      confidence: {enum: [low, medium, high], description: "low — вывод по косвенным признакам; проверить опросом «Как вы о нас узнали?» или по запросам."}
+      by_source:
+        type: array
+        description: "Уровень по источникам трафика, если он заметно разный (поиск по проблеме ≠ брендовый запрос)."
+        items:
+          type: object
+          additionalProperties: false
+          required: [source, level]
+          properties:
+            source: {$ref: "#/$defs/traffic-source"}
+            level: {$ref: "#/$defs/awareness-level"}
+            note: {type: string}
+
+  sophistication:
+    type: object
+    additionalProperties: false
+    required: [stage, basis]
+    description: >-
+      Искушённость (зрелость) рынка по Шварцу: сколько похожих обещаний покупатель уже слышал. 1 — первое простое
+      обещание; 2 — усиленное обещание; 3 — новый механизм («как работает»); 4 — усиленный механизм; 5 — рынок не верит
+      обещаниям, работает идентификация. Меняет, на чём строить главное сообщение (02 §1.3).
+    properties:
+      stage: {type: integer, minimum: 1, maximum: 5}
+      claims_heard:
+        type: array
+        items: {type: string}
+        description: "Что уже обещают все в категории (выписка с 3–5 страниц конкурентов): повторять это — медианный текст."
+      basis: {$ref: "#/$defs/basis"}
+
+  traffic:
+    type: object
+    additionalProperties: false
+    description: >-
+      Температура и источники трафика — поле site-brief (владелец site). Здесь — ссылка и временная копия до S0, нужная
+      для вывода осведомлённости и соответствия обещанию источника (message match).
+    properties:
+      ref: {type: string, description: "JSON Pointer в site-brief (например, `/traffic`); после S0 — единственное, что остаётся."}
+      sources:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [source, temperature]
+          properties:
+            source: {$ref: "#/$defs/traffic-source"}
+            temperature: {enum: [cold, warm, hot]}
+            share: {type: number, minimum: 0, maximum: 1, description: "Доля трафика, если известна (0–1)."}
+            device: {enum: [mobile, desktop, mixed], description: "Преобладающее устройство источника (для viewport_primary kimi)."}
+            promise_of_source:
+              type: string
+              description: "Что обещает источник: текст объявления, формулировка запроса, тема письма — заголовок страницы продолжает именно это."
+
+  positioning:
+    $ref: "#/$defs/positioning"
+
+  value_proposition:
+    $ref: "#/$defs/value-proposition"
+
+  offer:
+    type: object
+    additionalProperties: false
+    description: "Что посетитель получает за целевое действие (оффер — поле site-brief; здесь — ссылка и краткий смысл)."
+    properties:
+      ref: {type: string, description: "JSON Pointer в site-brief (например, `/offer`)."}
+      summary: {type: string, description: "Что получит и на каких условиях (цена, срок, формат) — только с fact-ссылками в proof_ids."}
+      proof_ids: {$ref: "#/$defs/proof-ids"}
+      risk_reversal_ids: {type: array, items: {$ref: "#/$defs/id"}}
+
+  conversion:
+    type: object
+    additionalProperties: false
+    description: "Цели страницы: одно главное действие и, если нужно, вторая цель для тех, кто не готов сейчас."
+    properties:
+      action_ref: {type: string, description: "id действия из словаря site (`action`, до S0 — свободный id kebab-case) или JSON Pointer."}
+      secondary_goal:
+        type: string
+        description: "Для зашедших заранее: что они должны запомнить или сделать (сохранить, подписаться) — [V:b2VdPF9svEU 33:37] двойная цель."
+
+  objections:
+    type: array
+    minItems: 1
+    description: "Возражения основного сегмента: словами клиента, тип, сила выбора, ответ по смыслу, доказательство, место."
+    items: {$ref: "#/$defs/objection"}
+
+  risk_reversal:
+    type: array
+    description: "Способы снять риск: только реально действующие условия (fact_id обязателен); формулировку проверяет H."
+    items: {$ref: "#/$defs/risk-reversal"}
+
+  boundaries:
+    type: object
+    additionalProperties: false
+    description: "Границы позиционирования: кому не подходит и чего продукт не обещает. Питает never_claim (B2) и снимает возражение «не для меня» честно."
+    properties:
+      not_for:
+        type: array
+        items: {type: string}
+        description: "Кому продукт не подходит (признаки). Говорится на странице, если это снимает тревогу подходящих."
+      not_promised:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [text]
+          properties:
+            text: {type: string, description: "Чего не обещаем, даже если хочется: «без усталости глаз», «окупится за месяц»."}
+            claim_class: {type: string, description: "Класс утверждения B2 (facts.schema.yaml, `claim-class`: health, income-finance, superlative…)."}
+            why: {type: string}
+
+  message_hierarchy_ref:
+    type: array
+    items: {type: string}
+    description: "Пути к файлам иерархии сообщений (по одному на страницу или шаблон страницы) — message-hierarchy.schema.yaml."
+
+  voice_ref:
+    type: string
+    description: "Путь к профилю голоса (F, voice.schema.yaml). До волны 2 — пусто или строка-описание со словом «черновик»."
+
+  proof_ref:
+    type: string
+    description: "Путь к facts.yaml проекта (B2). В site-brief совпадает с `proof.facts_ref`; поля фактов здесь не дублируются."
+
+  legal_category:
+    type: array
+    minItems: 1
+    uniqueItems: true
+    description: >-
+      Отраслевой режим формулировок для H (claims-rules.yaml): finance — финансы и инвестиции; medical — медицина и
+      медизделия; dietary-supplements — БАДы; alcohol — алкоголь; education — образование; real-estate — недвижимость;
+      other — иная отрасль с особыми требованиями (назвать в legal_note); general — без отраслевого режима (предложение
+      B1: явное «ничего особого» вместо пустого поля).
+    items: {enum: [finance, medical, dietary-supplements, alcohol, education, real-estate, other, general]}
+  legal_note: {type: string}
+
+  languages:
+    type: array
+    minItems: 1
+    description: "Языки. Второй язык — адаптация под свою аудиторию (решение заказчика п. 16), а не дословный перевод."
+    items:
+      type: object
+      additionalProperties: false
+      required: [lang, role]
+      properties:
+        lang: {$ref: "#/$defs/lang"}
+        role: {enum: [primary, adaptation]}
+        audience_note: {type: string, description: "Чем аудитория этого языка отличается: альтернативы, осведомлённость, категория, возражения."}
+
+  open_questions:
+    type: array
+    maxItems: 10
+    description: >-
+      Вопросы к заказчику: не больше 10 в пуле, в одном сообщении — не больше 7 (kimi 07/01 §4.1). У каждого — зачем,
+      варианты, умолчание («если не ответите — …»), какие поля закрывает. Совместимо с `questions[]` brief.yaml kimi.
+    items: {$ref: "#/$defs/question"}
+
+$defs:
+
+  id:
+    type: string
+    pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+    description: "Латиница в kebab-case, уникален внутри блока."
+
+  date:
+    type: string
+    pattern: "^[0-9]{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?$"
+    description: "ISO-дата ГГГГ-ММ-ДД или ГГГГ-ММ (как в facts.schema.yaml B2)."
+
+  lang:
+    type: string
+    pattern: "^[a-z]{2}(-[A-Z]{2})?$"
+
+  proof-ids:
+    type: array
+    uniqueItems: true
+    description: "Ссылки на facts.yaml: `fact:<id>` — факт есть; `missing:<id>` — факта нет, на странице будет [PLACEHOLDER]."
+    items:
+      type: string
+      pattern: "^(fact|missing):[a-z0-9]+(-[a-z0-9]+)*$"
+
+  voc-ids:
+    type: array
+    uniqueItems: true
+    description: "Ссылки на записи голоса клиента (B2): `voc:<id>`."
+    items:
+      type: string
+      pattern: "^voc:[a-z0-9]+(-[a-z0-9]+)*$"
+
+  basis:
+    type: object
+    additionalProperties: false
+    required: [kind]
+    description: >-
+      Основание утверждения. brief — текст брифа; customer — ответ заказчика; voc — голос клиента (ref: voc:<id>); fact —
+      факт (ref: fact:<id>); public-page — страница заказчика или площадки (ref: URL + дата); research — внешний источник;
+      inferred — вывод агента (ref: из чего выведено); assumption — допущение (обязан быть вопрос в open_questions).
+    properties:
+      kind: {enum: [brief, customer, voc, fact, public-page, research, inferred, assumption]}
+      ref: {type: string, description: "Цитата, ссылка, id или «из чего выведено»."}
+      date: {$ref: "#/$defs/date"}
+      question_id: {$ref: "#/$defs/id", description: "Для assumption — id вопроса в open_questions."}
+    allOf:
+      - if: {properties: {kind: {const: assumption}}}
+        then: {required: [question_id]}
+      - if: {properties: {kind: {enum: [voc, fact, public-page, research, inferred]}}}
+        then: {required: [ref]}
+
+  awareness-level:
+    description: "Временные id (temp-vocabulary-v0: awareness); после S0 — vocabulary.yaml site. Определения — 02 §1.1."
+    enum: [unaware, problem-aware, solution-aware, product-aware, most-aware]
+
+  traffic-source:
+    description: >-
+      Временные id (temp-vocabulary-v0: traffic.sources) + предложения B1 (x-vocabulary-proposals): retargeting,
+      maps-local, social-organic, marketplace, messenger, offline.
+    enum: [search-problem, search-category, search-brand, paid-social, paid-search, ai-answer, referral, email, direct,
+           retargeting, maps-local, social-organic, marketplace, messenger, offline]
+
+  section-role:
+    description: "Временные id (temp-vocabulary-v0: section_roles); после page-plan site — section_id."
+    enum: [hero, problem, solution, benefits, how-it-works, product-demo, proof-logos, proof-stats, testimonials,
+           case-studies, awards-press, comparison, pricing, guarantee, objections, faq, about, team, portfolio,
+           integrations, event-program, cta-band, lead-form, final-cta, contacts, footer, article-body, related]
+
+  segment:
+    type: object
+    additionalProperties: false
+    required: [id, name, primary, situation, jobs, pains, gains, basis]
+    properties:
+      id: {$ref: "#/$defs/id"}
+      name: {type: string, description: "Как назвать сегмент внутри команды (не на странице)."}
+      primary: {type: boolean}
+      role:
+        enum: [buyer-user, buyer, user, influencer, approver]
+        description: "Роль в покупке. В B2B покупатель, пользователь и согласующий часто разные люди."
+      characteristics:
+        type: array
+        items: {type: string}
+        description: "Легко опознаваемые признаки, по которым видно, что этому клиенту ценность важна (не демография; Dunford, шаг 7)."
+      situation:
+        type: string
+        description: "Обстоятельства, в которых возникает работа: «когда …» (JTBD — круг обстоятельств, а не портрет)."
+      trigger:
+        type: string
+        description: "Что толкает искать решение сейчас (событие, «последняя капля» — push)."
+      knows:
+        type: string
+        description: "Что уже знает о проблеме, решениях и продукте — основание уровня осведомлённости."
+      jobs:
+        type: array
+        minItems: 1
+        items:
+          type: object
+          additionalProperties: false
+          required: [id, type, statement]
+          properties:
+            id: {$ref: "#/$defs/id"}
+            type: {enum: [functional, social, emotional]}
+            statement: {type: string, description: "«Когда [ситуация], хочу [мотивация], чтобы [результат]»."}
+            priority: {type: integer, minimum: 1, maximum: 3, description: "1 — главная (Strategyzer: держать в фокусе топ-3)."}
+            basis: {$ref: "#/$defs/basis"}
+      pains:
+        type: array
+        minItems: 1
+        items:
+          type: object
+          additionalProperties: false
+          required: [id, text]
+          properties:
+            id: {$ref: "#/$defs/id"}
+            text: {type: string, description: "Плохой исход, риск или препятствие — конкретной ситуацией, не «неудобно»."}
+            severity: {enum: [high, medium, low]}
+            job_ref: {$ref: "#/$defs/id"}
+            voc_ids: {$ref: "#/$defs/voc-ids"}
+            basis: {$ref: "#/$defs/basis"}
+      gains:
+        type: array
+        minItems: 1
+        items:
+          type: object
+          additionalProperties: false
+          required: [id, text]
+          properties:
+            id: {$ref: "#/$defs/id"}
+            text: {type: string, description: "Желаемый результат словами клиента."}
+            measure: {type: string, description: "Как клиент поймёт, что стало лучше, и с чем сравнит («быстрее, чем …» — точка отсчёта)."}
+            job_ref: {$ref: "#/$defs/id"}
+            voc_ids: {$ref: "#/$defs/voc-ids"}
+            basis: {$ref: "#/$defs/basis"}
+      current_alternative_ids:
+        type: array
+        items: {$ref: "#/$defs/id"}
+        description: "Чем обходится сейчас — id из positioning.alternatives."
+      customer_words:
+        $ref: "#/$defs/voc-ids"
+        description: "Слова клиента (VoC B2): как он называет проблему, результат, категорию."
+      basis: {$ref: "#/$defs/basis"}
+
+  positioning:
+    type: object
+    additionalProperties: false
+    required: [alternatives, unique_attributes, value_themes, best_fit, market_category]
+    description: "Позиционирование по Dunford (2019): порядок заполнения — альтернативы → свойства → ценность → кому важно → категория → тренд."
+    properties:
+      alternatives:
+        type: array
+        minItems: 1
+        description: "Что клиент сделал бы без продукта: 2–5 сгруппированных подходов; «ничего не делать» и «вручную / в таблице» — тоже альтернативы."
+        items:
+          type: object
+          additionalProperties: false
+          required: [id, name, kind, basis]
+          properties:
+            id: {$ref: "#/$defs/id"}
+            name: {type: string}
+            kind: {enum: [do-nothing, diy-manual, spreadsheet, hire-someone, competitor-direct, competitor-indirect, substitute]}
+            why_used: {type: string, description: "Чем держит (привычка, цена, «и так работает»)."}
+            limits: {type: string, description: "Где не справляется — отсюда толчок к смене."}
+            mention_on_page:
+              enum: [never, as-approach, by-name-with-fact]
+              default: as-approach
+              description: "Как упоминать на странице: подход без имени (по умолчанию); по имени — только с фактом сравнения (38-ФЗ ст. 5, проверяет H)."
+            basis: {$ref: "#/$defs/basis"}
+      unique_attributes:
+        type: array
+        minItems: 1
+        description: "Что есть у продукта и нет у альтернатив: функции, модель доставки, экспертиза, сервис. Без доказательства — needs-proof, в обещание не идёт."
+        items:
+          type: object
+          additionalProperties: false
+          required: [id, attribute, versus, proof_status]
+          properties:
+            id: {$ref: "#/$defs/id"}
+            attribute: {type: string}
+            versus: {type: array, minItems: 1, items: {$ref: "#/$defs/id"}, description: "id альтернатив, у которых этого нет."}
+            proof_status: {enum: [has-proof, needs-proof]}
+            proof_ids: {$ref: "#/$defs/proof-ids"}
+            basis: {$ref: "#/$defs/basis"}
+          allOf:
+            - if: {properties: {proof_status: {const: has-proof}}}
+              then: {required: [proof_ids], properties: {proof_ids: {minItems: 1}}}
+      value_themes:
+        type: array
+        minItems: 1
+        maxItems: 5
+        description: "Кластеры ценности: свойство → выгода → ценность в терминах клиента (Dunford, шаг 6). 1–3 главных, не больше 5."
+        items:
+          type: object
+          additionalProperties: false
+          required: [id, theme, from_attributes]
+          properties:
+            id: {$ref: "#/$defs/id"}
+            theme: {type: string, description: "Ценность словами клиента: что станет возможным."}
+            from_attributes: {type: array, minItems: 1, items: {$ref: "#/$defs/id"}}
+            chain:
+              type: array
+              description: "Цепочка «свойство → выгода → ценность» по каждому свойству."
+              items:
+                type: object
+                additionalProperties: false
+                required: [attribute_ref, benefit, value]
+                properties:
+                  attribute_ref: {$ref: "#/$defs/id"}
+                  benefit: {type: string}
+                  value: {type: string}
+            customer_measure: {type: string, description: "Как клиент меряет (время, деньги, риск) и относительно какой альтернативы."}
+            pain_refs: {type: array, items: {$ref: "#/$defs/id"}}
+            gain_refs: {type: array, items: {$ref: "#/$defs/id"}}
+            proof_ids: {$ref: "#/$defs/proof-ids"}
+      best_fit:
+        type: object
+        additionalProperties: false
+        required: [segment_ids, why_care]
+        properties:
+          segment_ids: {type: array, minItems: 1, items: {$ref: "#/$defs/id"}}
+          characteristics: {type: array, items: {type: string}}
+          why_care: {type: string, description: "Почему именно им ценность важна сильнее, чем остальным."}
+      market_category:
+        type: object
+        additionalProperties: false
+        required: [name, strategy, basis]
+        properties:
+          name: {type: string, description: "Как назвать категорию словами клиента («CRM для инвестбанков», «бронирование для барберов»)."}
+          strategy:
+            enum: [head-to-head, big-fish-small-pond, new-game]
+            description: "Стиль позиционирования в рынке (Dunford): вся категория; подсегмент большой категории; новая категория. Что это значит для hero — 01 §2.3."
+          parent_category: {type: string, description: "Для big-fish-small-pond — большая категория, в которой берём подсегмент."}
+          subsegment: {type: string, description: "Для big-fish-small-pond — подсегмент с особой неудовлетворённой потребностью."}
+          reference_leader: {type: string, description: "С кем сравнят по умолчанию, услышав категорию (лидер, типичное решение)."}
+          assumptions_true: {type: array, items: {type: string}, description: "Верные допущения, которые категория подскажет сама: их не надо доказывать."}
+          assumptions_false: {type: array, items: {type: string}, description: "Ложные допущения категории: текст обязан их снять рано."}
+          basis: {$ref: "#/$defs/basis"}
+      trends:
+        type: array
+        description: "Необязательно. Тренд, который делает ценность важной сейчас; только при явной связи (Dunford: «boring and profitable» лучше модного)."
+        items:
+          type: object
+          additionalProperties: false
+          required: [trend, link]
+          properties:
+            trend: {type: string}
+            link: {type: string}
+            risk: {type: string}
+      statement:
+        type: object
+        additionalProperties: false
+        required: [text, template]
+        description: "Внутренняя запись позиционирования после работы по компонентам (не способ его найти и не текст страницы)."
+        properties:
+          template: {enum: [moore, dunford-canvas, free]}
+          text: {type: string}
+          internal_only: {const: true, default: true}
+      only_we_can_say:
+        type: array
+        description: "Утверждения, прошедшие проверку «только мы можем это сказать»: конкурент не может сказать то же честно, и у нас есть доказательство."
+        items:
+          type: object
+          additionalProperties: false
+          required: [claim, proof_ids, checked_against]
+          properties:
+            claim: {type: string}
+            proof_ids: {$ref: "#/$defs/proof-ids"}
+            checked_against: {type: array, minItems: 1, items: {$ref: "#/$defs/id"}, description: "id альтернатив, против которых проверено."}
+
+  value-proposition:
+    type: object
+    additionalProperties: false
+    required: [core, forces]
+    description: "Ценностное предложение: карта ценности (Osterwalder) и силы выбора (Moesta)."
+    properties:
+      core:
+        type: object
+        additionalProperties: false
+        required: [text, basis]
+        properties:
+          text:
+            type: string
+            maxLength: 240
+            description: "Одна фраза: кому, какой прогресс, по сравнению с чем. Внутренняя формулировка — источник главного сообщения, не заголовок."
+          basis: {$ref: "#/$defs/basis"}
+      pain_relievers:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [id, text, pain_refs]
+          properties:
+            id: {$ref: "#/$defs/id"}
+            text: {type: string}
+            pain_refs: {type: array, minItems: 1, items: {$ref: "#/$defs/id"}}
+            proof_ids: {$ref: "#/$defs/proof-ids"}
+      gain_creators:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [id, text, gain_refs]
+          properties:
+            id: {$ref: "#/$defs/id"}
+            text: {type: string}
+            gain_refs: {type: array, minItems: 1, items: {$ref: "#/$defs/id"}}
+            proof_ids: {$ref: "#/$defs/proof-ids"}
+      forces:
+        type: object
+        additionalProperties: false
+        required: [push, pull, anxiety, habit]
+        description: >-
+          Силы прогресса (Moesta, Spiek): переход случается, когда толчок ситуации + притяжение нового больше тревоги нового +
+          привычки настоящего. Тревога и привычка — источник возражений (objection_ids).
+        properties:
+          push: {type: array, minItems: 1, items: {$ref: "#/$defs/force-item"}}
+          pull: {type: array, minItems: 1, items: {$ref: "#/$defs/force-item"}}
+          anxiety: {type: array, minItems: 1, items: {$ref: "#/$defs/force-item"}}
+          habit: {type: array, minItems: 1, items: {$ref: "#/$defs/force-item"}}
+      fit_status:
+        enum: [hypothesis, voc-supported, customer-confirmed, tested]
+        description: "hypothesis — вывод агента; voc-supported — подтверждено голосом клиента; customer-confirmed — заказчиком; tested — тестом сообщения или A/B (методика site)."
+
+  force-item:
+    type: object
+    additionalProperties: false
+    required: [text]
+    properties:
+      text: {type: string}
+      voc_ids: {$ref: "#/$defs/voc-ids"}
+      objection_ids: {type: array, items: {$ref: "#/$defs/id"}}
+      basis: {$ref: "#/$defs/basis"}
+
+  objection:
+    type: object
+    additionalProperties: false
+    required: [id, text, type, force, answer, where, status]
+    properties:
+      id: {$ref: "#/$defs/id"}
+      text: {type: string, description: "Словами клиента: «дорого», «а если не приживётся», «у нас особый случай»."}
+      type:
+        enum: [price, risk, time, trust, switching-cost, not-for-me, competitor, status-quo, decision-maker, timing]
+        description: "Семь типов задания + три предложения B1 (status-quo, decision-maker, timing); описания — 02 §4.1."
+      force: {enum: [anxiety, habit], description: "Какая сила выбора стоит за возражением."}
+      segment_ids: {type: array, items: {$ref: "#/$defs/id"}}
+      voc_ids: {$ref: "#/$defs/voc-ids"}
+      severity: {enum: [blocker, major, minor], description: "blocker — без ответа не купят; ответ обязан стоять до главной кнопки."}
+      answer: {type: string, description: "Смысл ответа (не текст страницы): факт, механизм, условие, честное «не подходит, если …»."}
+      answer_kind:
+        enum: [fact, mechanism, condition, risk-reversal, boundary, reframe]
+        description: >-
+          Чем снимается: fact — доказательство; mechanism — объяснение, как устроено; condition — условие договора или
+          оферты; risk-reversal — гарантия, возврат, пробный период; boundary — честное «не подходит, если …» (доказательство
+          не нужно); reframe — смена точки отсчёта («дорого» → цена риска), только вместе с фактом.
+      proof_ids: {$ref: "#/$defs/proof-ids"}
+      risk_reversal_ids: {type: array, items: {$ref: "#/$defs/id"}}
+      where:
+        type: array
+        minItems: 1
+        description: "Где снять: роль секции и, если нужно, тип слота (cta-note у кнопки, faq-a, guarantee-text, pricing-price-note)."
+        items:
+          type: object
+          additionalProperties: false
+          required: [section_role]
+          properties:
+            section_role: {$ref: "#/$defs/section-role"}
+            slot_type: {$ref: "#/$defs/id"}
+      awareness_stage:
+        $ref: "#/$defs/awareness-level"
+        description: "На каком уровне осведомлённости возражение всплывает (цена — ближе к product-aware и most-aware)."
+      status: {enum: [answered, needs-proof, open], description: "needs-proof — ответ есть, доказательства нет (missing:<id>); open — ответа нет, вопрос заказчику."}
+      basis: {$ref: "#/$defs/basis"}
+    allOf:
+      - if:
+          required: [status]
+          properties:
+            status: {const: answered}
+            answer_kind: {not: {const: boundary}}
+        then:
+          anyOf:
+            - {required: [proof_ids], properties: {proof_ids: {minItems: 1}}}
+            - {required: [risk_reversal_ids], properties: {risk_reversal_ids: {minItems: 1}}}
+
+  risk-reversal:
+    type: object
+    additionalProperties: false
+    required: [id, type, summary, fact_id]
+    properties:
+      id: {$ref: "#/$defs/id"}
+      type: {enum: [guarantee, trial, refund, pay-after, free-first-step, fixed-price, cancel-anytime, demo, sample, pilot]}
+      summary: {type: string, description: "Условия по смыслу: срок, что вернут, что нужно сделать. Текст пишет E, формулировку проверяет H."}
+      fact_id:
+        type: string
+        pattern: "^(fact|missing):[a-z0-9]+(-[a-z0-9]+)*$"
+        description: "Условия снятия риска — только из facts.yaml; missing:<id> — условие ещё не подтверждено, в текст не идёт."
+      answers: {type: array, items: {$ref: "#/$defs/id"}, description: "id возражений, которые снимает."}
+
+  question:
+    type: object
+    additionalProperties: false
+    required: [id, q, why, default, affects]
+    properties:
+      id: {$ref: "#/$defs/id"}
+      q: {type: string}
+      why: {type: string, description: "Зачем спрашиваем — одна строка."}
+      options: {type: array, items: {type: string}, description: "2–4 варианта для выбора; для фактов — пусто (свободный ответ)."}
+      default: {type: string, description: "Что будет, если заказчик не ответит («Going with»)."}
+      affects: {type: array, minItems: 1, items: {type: string}, description: "Какие поля закрывает ответ (пути: positioning.alternatives, objections[price]…)."}
+      priority: {type: integer, minimum: 1, maximum: 3, description: "1 — без ответа нельзя писать главное сообщение."}
+      asked: {type: boolean}
+      answer: {type: string}
+      source: {type: string, description: "Кто и где ответил."}
+      date: {$ref: "#/$defs/date"}
+
+# ───────────────────────── Соответствие полям brief.yaml kimi (точка T1) ─────────────────────────
+# Колонки как у site A (`site-brief.kimi-map.tsv`): site_path · kimi_path · rule · note; rule ∈ copy | map | derive |
+# drop | claude_fills. site_path — путь внутри site-brief (блок meaning и соседние поля). kimi `lint_brief` отвергает
+# неизвестные ключи (build_package.py стр. 242–264), поэтому смысл уходит в kimi только проекцией в существующие поля.
+x-kimi-map:
+  - site_path: "meaning.audience[primary] + meaning.awareness.level + meaning.traffic.sources[0]"
+    kimi_path: "product.target_user"
+    rule: derive
+    note: "«<сегмент>: <ситуация>. Знает: <что знает — из awareness>. Приходит: <источник>, <устройство>» — 1–2 фразы (kimi: «кто приходит, что уже знает, с какого устройства и откуда»)."
+  - site_path: "meaning.value_proposition.core.text"
+    kimi_path: "product.goal"
+    rule: derive
+    note: "Обещание одной фразой — только из утверждений с basis ∈ {brief, customer, fact, voc} и без классов из boundaries.not_promised; иначе — бизнес-цель страницы («получать заявки на …»). Урок «Кварца»: цель с обещанием здоровья нарушила never_claim."
+  - site_path: "meaning.positioning.market_category.name + meaning.value_themes[0].theme + meaning.positioning.best_fit"
+    kimi_path: "product.description"
+    rule: derive
+    note: "«X — Y для Z»: X — категория словами клиента, Y — главная ценность, Z — кому важно больше всего."
+  - site_path: "meaning.conversion.action_ref"
+    kimi_path: "product.primary_action"
+    rule: map
+    note: "Глагол + объект из словаря action site; meaning не формулирует текст кнопки."
+  - site_path: "meaning.voice_ref"
+    kimi_path: "design_system.tone_of_voice"
+    rule: derive
+    note: "Одна строка из профиля голоса F (оси + «мы / мы не»). Предложение kimi (контракт §3 п.11): поле-ссылка на профиль."
+  - site_path: "copy-deck: slot cta-label (E, J)"
+    kimi_path: "site.cta.label"
+    rule: drop
+    note: "Текст кнопки — copy-deck, не meaning; основание — meaning.offer.summary и conversion."
+  - site_path: "page-plan: action (site)"
+    kimi_path: "site.cta.target"
+    rule: drop
+    note: "Куда ведёт кнопка — site."
+  - site_path: "message-hierarchy.sections[] (по одному файлу на страницу)"
+    kimi_path: "site.sections[{id, job}]"
+    rule: derive
+    note: "id ← section_role (после page-plan — section_id); job ← «<вопрос посетителя> → <сообщение секции>; доказательства: <fact ids>» строкой в кавычках (запятая в незакавыченном job ломает YAML — kimi 07/01 §5.3); порядок и состав секций — page-plan site."
+  - site_path: "meaning.open_questions[]"
+    kimi_path: "questions[]"
+    rule: map
+    note: "q ← q; asked ← asked; answer ← answer; source ← source; date ← date; why, options, default, affects — в kimi не уходят (у kimi нет полей) или склеиваются в q."
+  - site_path: "meaning.boundaries.not_promised[]"
+    kimi_path: "never_claim[]"
+    rule: derive
+    note: "Через B2: строки переносятся в facts.yaml never_claim и уходят в kimi экспортом фактов (x-kimi-map facts.schema.yaml)."
+  - site_path: "meaning.*.proof_ids"
+    kimi_path: "facts[], missing[]"
+    rule: drop
+    note: "Факты идут в kimi только из facts.yaml (B2), meaning хранит ссылки."
+  - site_path: "meaning.languages[role=primary].lang"
+    kimi_path: "product.locale"
+    rule: copy
+    note: "Второй язык — отдельный пакет или copy deck с source_lang (PLAN, copy-deck v0)."
+  - site_path: "meaning.traffic.sources[max share].device"
+    kimi_path: "product.viewport_primary"
+    rule: derive
+    note: "mobile → 390x844 (kimi 07/01 §2.3: «если приходят из соцсетей и мессенджеров»); desktop → 1440x900."
+  - site_path: "meaning.positioning, meaning.sophistication, meaning.awareness.by_source, meaning.value_proposition.forces"
+    kimi_path: "—"
+    rule: drop
+    note: "K3 тексты не пишет и не правит (copy.md verbatim, kimi 07/01 §2.5): смысл уже воплощён в copy-deck → copy.md. Для справки допустимо в brief.md одной строкой («Why us»)."
+  - site_path: "meaning.legal_category"
+    kimi_path: "—"
+    rule: drop
+    note: "Поля в brief.yaml нет. Предложение kimi — блок приёмки «право» (контракт §8); правила — H, claims-rules.yaml."
+  - site_path: "meaning.objections[]"
+    kimi_path: "—"
+    rule: drop
+    note: "Ответы на возражения — тексты copy-deck (FAQ, гарантия, строка у кнопки); в kimi — через copy.md."
+
+# ───────────────────────── Как блок встаёт в site-brief (предложение site A) ─────────────────────────
+x-site-brief-meaning:
+  include: "site-brief.properties.meaning = {$ref: 'urn:app-design:text-research:meaning:1'} (или относительный путь к этому файлу)"
+  site_owned_fields_referenced: "traffic (источники × температура), offer, conversion.action — живут в site-brief; meaning хранит JSON Pointer и временную копию до S0"
+  proof: "meaning.proof_ref == site-brief.proof.facts_ref (одна ссылка на facts.yaml)"
+  minimum_by_type: >-
+    Минимум заполнения для генерации текстов: audience (1 основной сегмент: situation, 1 job, 1 pain, 1 gain),
+    awareness.level, positioning.alternatives (≥ 1, лучше 2–5), unique_attributes (≥ 1), value_themes (≥ 1),
+    market_category (name, strategy), value_proposition.core и forces, objections (≥ 3 для landing-*, ≥ 1 для
+    site-page), legal_category, languages. Без этого агент пишет «медианный лендинг» (ui 12/02 §3.1).
+  questions: "open_questions → общий журнал вопросов site-brief (у site — свой список; дубли сводит оркестратор)"
+
+x-vocabulary-proposals:
+  # id, которых нет во временном словаре 99-raw/notes/temp-vocabulary-v0.yaml (предложения к словарю; отчёт B1).
+  traffic.sources:
+    - {id: retargeting, name: "Ретаргетинг: вернувшийся после визита", temperature_hint: warm, why: "Copyhackers: ретаргетинг — product-aware или most-aware; нужен короткий аргумент и стимул"}
+    - {id: maps-local, name: "Карты и справочники (Яндекс Карты, 2ГИС)", temperature_hint: hot, why: "Лидогенерация услуг в РФ (приоритет 1): ищут «рядом», сравнивают рейтинг и отзывы"}
+    - {id: social-organic, name: "Соцсети без рекламы: пост, канал, упоминание", temperature_hint: warm, why: "Отличается от paid-social: пришёл за автором или темой, а не по таргету"}
+    - {id: marketplace, name: "Агрегатор услуг или маркетплейс (Профи, Авито Услуги)", temperature_hint: warm, why: "Сравнивает исполнителей в одной выдаче: возражение «конкурент» первым"}
+    - {id: messenger, name: "Мессенджер: пересланная ссылка, чат, канал", temperature_hint: warm, why: "Рекомендация в чате — тёплый, почти всегда телефон"}
+    - {id: offline, name: "Офлайн: QR, печать, мероприятие", temperature_hint: warm, why: "Видел продукт или бренд вживую; обещание источника — на листовке"}
+  awareness: []
+  section_roles: []
+  objection_types:
+    - {id: status-quo, name: "«И так работает», «сделаем сами»", why: "Привычка настоящего (Moesta) — самый частый проигрыш «без решения» (Dunford)"}
+    - {id: decision-maker, name: "«Надо согласовать»", why: "B2B-комитет, семья в B2C: нужен материал для того, кто решает"}
+    - {id: timing, name: "«Не сейчас»", why: "Сезон, бюджетный цикл; снимается второй целью страницы (запомнить, вернуться)"}
+  legal_category:
+    - {id: general, name: "Без отраслевого режима", why: "Явное «ничего особого» вместо пустого поля; H применяет только общие правила 38-ФЗ и ЗоЗПП"}

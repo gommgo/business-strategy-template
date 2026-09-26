@@ -1,0 +1,303 @@
+# ru-okoshko-webinar.yaml — пример copy deck v1.1 (10-templates-recipes, J3, 2026-09-24): страница вебинара (landing-event).
+# Тексты — ai-self J3. Факты — facts/facts-demo-webinar-okoshko.yaml (ДЕМО J3: вебинар, спикер и даты выдуманы; «Окошко» —
+# демо-сервис E; не публиковать). Показывает варианты: три заголовка (один отклонён с причиной), два подзаголовка на разных
+# фактах (variant.fact_ids), две кнопки, два title — для check --all-variants и export-variants (02-examples-ru.md §5).
+copy_deck:
+  version: 1
+  date: '2026-09-24'
+  site: okoshko-demo
+  product_name: Окошко
+  lang: ru
+  voice_ref: ../../05-voice-editorial/examples/voice-grafa-b2b.yaml
+  facts_ref: facts/facts-demo-webinar-okoshko.yaml
+  copy_slots_ref: ../../04-copy-by-block/copy-slots.yaml
+  jurisdiction: ru
+  legal_category: [general]
+  authors: ['J3 (ai-self, 2026-09-24)']
+  notes: >-
+    Мероприятие по E 03 §3.5: в первом экране — тема словами задачи, дата и время с часовым поясом, формат, длительность,
+    кто ведёт; «бесплатно» — с условием в той же строке (H COPY-L-FREE-01); дефицита мест нет (пробел seats-limit —
+    omit-block). voice_ref: профиль F «Графа» (сдержанный B2B, «вы») как ближайший — своего профиля у «Окошка» нет (решение J3).
+  pages:
+  - page_id: webinar-oct15
+    page_type: landing-event
+    status: draft
+    awareness: problem-aware
+    primary_action: Зарегистрироваться на вебинар
+    cta_primary: webinar-oct15/form/cta
+    promise:
+      variants:
+      - {id: a, text: 'Вебинар 15 октября: как перестать обзванивать клиентов по вечерам', status: draft, source: ai-self}
+      chosen: a
+      fact_ids: [webinar-date]
+      claim_flags: [fact-number]
+      basis: 'тема вебинара словами задачи + дата (E 03 §3.5)'
+    meta:
+      title: 'Вебинар «Окошка»: напоминания клиентам — 15 октября, онлайн'
+      description: 'Как настроить онлайн-запись и напоминания в Telegram, чтобы не обзванивать клиентов по вечерам. Ведёт Марина Белова. Участие бесплатное, после регистрации.'
+      og_title: 'Вебинар: как перестать обзванивать клиентов по вечерам'
+      og_description: '15 октября, 19:00 по Москве, онлайн, 60 минут. Участие бесплатное, после регистрации.'
+      fact_ids: [webinar-date, webinar-duration, webinar-free, speaker-marina]
+      variants:
+        title:
+        - {id: a, text: 'Вебинар «Окошка»: напоминания клиентам — 15 октября, онлайн', status: draft, source: ai-self}
+        - {id: b, text: 'Как перестать обзванивать клиентов — вебинар 15 октября, онлайн', status: draft, source: ai-self}
+      test_plan: 'До эфира три недели — поиск не успеет: два title сравнить как тему письма рассылки и заголовок объявления (CTR, до 10 октября 2026 года).'
+      review_by: '2026-10-16'
+      notes: 'Шаблон G landing-event: title «{название} — {дата}, {место или онлайн}», description «{чему посвящено}, {кто выступает}, {как попасть}».'
+    sections:
+    - section_id: hero
+      section_role: hero
+      block: hero
+      message: 'Тема словами задачи, дата и время по Москве, длительность, кто ведёт'
+      question: 'Что это за вебинар и когда?'
+      slots:
+      - slot_id: eyebrow
+        slot_type: eyebrow
+        variants:
+        - {id: a, text: 'Вебинар «Окошка»', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: h1
+        slot_type: headline
+        variants:
+        - {id: a, text: 'Вебинар: как перестать обзванивать клиентов по вечерам', status: draft, source: ai-self}
+        - {id: b, text: 'Напоминания клиентам без вечерних звонков: вебинар «Окошка»', status: draft, source: ai-self}
+        - {id: c, text: 'Уникальный вебинар, который изменит ваш салон навсегда!', status: rejected, source: ai-self,
+           reason: 'наивный вариант: пустой эпитет «уникальный» (голос F, линтер C), обещание результата без факта и восклицание в заголовке'}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        selection: {method: editor, by: 'редактор J3 (демо)', at: '2026-09-24', compared: [a, b], rationale: 'a — задача словами владельца салона; b оставлен для слепого выбора заказчиком'}
+      - slot_id: sub
+        slot_type: subheadline
+        variants:
+        - {id: a, text: '15 октября 2026 года, 19:00 по Москве, онлайн, 60 минут.', status: draft, source: fact}
+        - {id: b, text: '15 октября 2026 года, 19:00 по Москве. Не успеете к началу — пришлём запись, она доступна 7 дней.', status: draft, source: ai-self,
+           fact_ids: [webinar-date, webinar-recording]}
+        chosen: a
+        fact_ids: [webinar-date, webinar-duration]
+        claim_flags: [fact-number]
+        notes: 'Варианты на разных фактах: у b свои fact_ids (v1.1) — запись вместо длительности.'
+      - slot_id: proof
+        slot_type: hero-proof
+        variants:
+        - {id: a, text: 'Ведёт Марина Белова, руководитель поддержки «Окошка»', status: draft, source: fact}
+        chosen: a
+        fact_ids: [speaker-marina]
+        claim_flags: [fact-property]
+      - slot_id: cta
+        slot_type: cta-label
+        variants:
+        - {id: a, text: 'Посмотреть программу', status: draft, source: ai-self}
+        - {id: b, text: 'Зарегистрироваться', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        notes: 'Кнопка первого экрана — ближайшее следствие (программа ниже); регистрация — в форме (E 03 §3.5, [кейс] Wiebe). С 24.09 (аудит X34, правка S1a) E 03 §3.5: главная кнопка — регистрация, «Посмотреть программу» — вторая ссылка; выбор варианта здесь не менялся — пересмотр за J.'
+      - slot_id: cta-note
+        slot_type: cta-note
+        variants:
+        - {id: a, text: 'Участие бесплатное — ссылка придёт на почту после регистрации', status: draft, source: fact}
+        chosen: a
+        fact_ids: [webinar-free]
+        claim_flags: [price-discount]
+    - section_id: program
+      section_role: event-program
+      block: event-program
+      message: 'Три настройки и ответы на вопросы за 60 минут'
+      question: 'Что я вынесу за час?'
+      slots:
+      - slot_id: title
+        slot_type: section-title
+        variants:
+        - {id: a, text: 'Что разберём за 60 минут', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: [webinar-duration]
+        claim_flags: [fact-number]
+      - slot_id: item-1
+        slot_type: list-item
+        group: item-1
+        variants:
+        - {id: a, text: 'Ссылка на запись: клиент сам выбирает мастера и свободное время', status: draft, source: fact}
+        chosen: a
+        fact_ids: [self-booking-link]
+        claim_flags: [fact-property]
+      - slot_id: item-2
+        slot_type: list-item
+        group: item-2
+        variants:
+        - {id: a, text: 'Напоминания в Telegram за 24 часа и за 2 часа до визита', status: draft, source: fact}
+        chosen: a
+        fact_ids: [reminders]
+        claim_flags: [fact-property]
+      - slot_id: item-3
+        slot_type: list-item
+        group: item-3
+        variants:
+        - {id: a, text: 'Как перенести базу клиентов из Excel или Google Таблиц', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: [import-free]
+        claim_flags: []
+      - slot_id: item-4
+        slot_type: list-item
+        group: item-4
+        variants:
+        - {id: a, text: '20 минут — ответы на ваши вопросы', status: draft, source: fact}
+        chosen: a
+        fact_ids: [webinar-duration]
+        claim_flags: [fact-number]
+    - section_id: speaker
+      section_role: team
+      block: team
+      message: 'Ведёт человек из поддержки, который переносит салонам запись'
+      slots:
+      - slot_id: title
+        slot_type: section-title
+        variants:
+        - {id: a, text: 'Кто ведёт', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: name
+        slot_type: card-title
+        variants:
+        - {id: a, text: 'Марина Белова', status: draft, source: fact}
+        chosen: a
+        fact_ids: [speaker-marina]
+        claim_flags: []
+      - slot_id: bio
+        slot_type: card-body
+        variants:
+        - {id: a, text: 'Руководитель поддержки «Окошка». С 2023 года помогает салонам и барбершопам переносить запись в «Окошко».', status: draft, source: fact}
+        chosen: a
+        fact_ids: [speaker-marina]
+        claim_flags: [fact-number]
+    - section_id: review
+      section_role: testimonials
+      block: testimonials
+      message: 'Так это выглядит у клиента: вечерние звонки заменили напоминания'
+      slots:
+      - slot_id: quote
+        slot_type: testimonial-quote
+        group: review-1
+        variants:
+        - {id: a, text: '«Раньше вечером обзванивал всех, кто записан на завтра. Теперь напоминания уходят сами, а я звоню только тем, кто не подтвердил»', status: draft, source: voc}
+        chosen: a
+        fact_ids: [review-ruslan]
+        claim_flags: [testimonial-quote]
+      - slot_id: author
+        slot_type: testimonial-attribution
+        group: review-1
+        variants:
+        - {id: a, text: 'Руслан, владелец барбершопа, Казань', status: draft, source: fact}
+        chosen: a
+        fact_ids: [review-ruslan]
+        claim_flags: []
+    - section_id: form
+      section_role: lead-form
+      block: lead-form
+      message: 'Регистрация по почте: ссылка на эфир и запись'
+      slots:
+      - slot_id: title
+        slot_type: form-title
+        variants:
+        - {id: a, text: 'Регистрация на вебинар 15 октября', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: [webinar-date]
+        claim_flags: [fact-number]
+      - slot_id: lead
+        slot_type: form-lead
+        variants:
+        - {id: a, text: 'Оставьте почту: ссылка на трансляцию придёт в письме за час до начала, запись — всем зарегистрированным.', status: draft, source: fact}
+        chosen: a
+        fact_ids: [webinar-free, webinar-recording]
+        claim_flags: [purchase-terms]
+      - slot_id: cta
+        slot_type: cta-label
+        variants:
+        - {id: a, text: 'Зарегистрироваться', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: consent
+        slot_type: form-consent
+        variants:
+        - {id: a, text: 'Согласен на обработку персональных данных для регистрации на вебинар. Кто оператор и как хранятся данные — в политике обработки персональных данных.', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: success
+        slot_type: form-success
+        variants:
+        - {id: a, text: 'Вы зарегистрированы. Ссылка на трансляцию придёт на почту за час до начала.', status: draft, source: fact}
+        chosen: a
+        fact_ids: [webinar-free]
+        claim_flags: []
+    - section_id: faq
+      section_role: faq
+      block: faq
+      message: 'Запись, цена участия, нужен ли аккаунт'
+      slots:
+      - slot_id: q1
+        slot_type: faq-q
+        group: q1
+        variants:
+        - {id: a, text: 'Будет ли запись?', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: a1
+        slot_type: faq-a
+        group: q1
+        variants:
+        - {id: a, text: 'Да: запись пришлём всем зарегистрированным, она доступна 7 дней.', status: draft, source: fact}
+        chosen: a
+        fact_ids: [webinar-recording]
+        claim_flags: [purchase-terms]
+      - slot_id: q2
+        slot_type: faq-q
+        group: q2
+        variants:
+        - {id: a, text: 'Сколько стоит участие?', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: a2
+        slot_type: faq-a
+        group: q2
+        variants:
+        - {id: a, text: 'Участие бесплатное, нужна регистрация по почте.', status: draft, source: fact}
+        chosen: a
+        fact_ids: [webinar-free]
+        claim_flags: [price-discount]
+      - slot_id: q3
+        slot_type: faq-q
+        group: q3
+        variants:
+        - {id: a, text: 'Нужно ли уже работать в «Окошке»?', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+      - slot_id: a3
+        slot_type: faq-a
+        group: q3
+        variants:
+        - {id: a, text: 'Нет. Если после вебинара захотите попробовать — 14 дней бесплатно, без привязки карты.', status: draft, source: fact}
+        chosen: a
+        fact_ids: [trial-14-days]
+        claim_flags: [price-discount]
+    - section_id: footer
+      section_role: footer
+      block: footer
+      message: 'Кто организатор и оператор данных'
+      slots:
+      - slot_id: legal
+        slot_type: footer-legal
+        variants:
+        - {id: a, text: '[PLACEHOLDER: организатор — юрлицо, ОГРН, адрес; политика обработки ПДн]', status: draft, source: ai-self}
+        chosen: a
+        fact_ids: []
+        missing_ids: [organizer-legal]
+        claim_flags: [company-details]

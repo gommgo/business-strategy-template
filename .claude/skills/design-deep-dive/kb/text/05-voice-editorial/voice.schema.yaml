@@ -1,0 +1,746 @@
+# voice.schema.yaml — профиль голоса бренда (voice.yaml): как бренд звучит в текстах сайта, писем вокруг форм и статей
+# text-research · волна 2 · агент F · 2026-09-24 · версия формата 1
+#
+# Что это. JSON Schema (draft 2020-12), записанная в YAML (формат — как meaning.schema.yaml B1). Экземпляр — файл
+# `voice.yaml` проекта; на него ссылаются `meaning.voice_ref` (B1), `copy_deck.voice_ref` (J), промты генерации (I).
+# Как заполнять — `01-brand-voice.md` §3 (процедура «бриф → голос»); таблица стиля и редполитика — `02-editorial-policy.md`,
+# `redpolicy-template.md`; истории и конкретика — `03-storytelling-and-concreteness.md`.
+#
+# Главные решения формата.
+# 1. Голос выражают, а не придумывают: у голоса есть основание (`derived_from.basis`) — бриф, голос клиента (B2), страницы
+#    бренда и конкурентов, интервью; прилагательные заказчика — сырьё, а не принципы (Ross [V:cqnZtGXGwsw 04:03–06:06]).
+# 2. Принцип без исполнения — ошибка схемы: у каждого принципа ≥ 2 проверяемых правила `execution` и «каким не бывает»
+#    `is_not` (Ross [V:cqnZtGXGwsw 11:11, 14:15]; NN/g anti-tone words).
+# 3. «Мы / мы не» — пары, где «мы не» — соседний перегиб, а не антоним («по делу, но не сухо»; Mailchimp «weird but not
+#    inappropriate»; GOV.UK «brisk, but not terse»). Обещания («мы не гарантируем…») живут в `never_claim` фактов (B2),
+#    здесь — только ссылка `claims_boundaries_ref`.
+# 4. Оси тона NN/g — точка 1–5 на каждой из четырёх; тон меняется по ситуации (`tone_map`), голос — нет.
+# 5. Словарь «не говорим» (`vocabulary.avoid`) записан в формате `words` линтера C (06-anti-slop/02 §2.1: `*` — продолжение
+#    основы, «ё» = [её]); конвертер `99-raw/experiments/F/03-schema-lint/voice_to_lint.py` делает из профиля файл правил
+#    для `copy_lint.py --rules` и профиль с `level_overrides` для `--profiles/--profile` (предложение C: ключ `--voice`).
+# 6. Образцы строк — по `slot_type` временного словаря (длины слотов — E, `copy-slots.yaml`); числа и имена — только
+#    `fact_ids` из facts.yaml (B2); английский — адаптация, а не перевод (решение заказчика п. 16).
+# 7. Проекции: одна строка `projections.tone_of_voice` → `design_system.tone_of_voice` пакета kimi и строка «Voice:» в
+#    copy.md; `projections.brand_voice` → `brand.voice {tone, use, avoid}` (brand.json kimi); `prompt_brief` — короткая
+#    «методичка» для промта генератора (опыт Т—Ж: короткая методичка для авторов, полная редполитика — для редакторов).
+#
+# Даты — строкой в кавычках «ГГГГ-ММ-ДД». Проверка: `99-raw/tools/venv-F/bin/python ../../scripts/text/validate_voice.py`
+# (метасхема, примеры, 18 отрицательных мутаций, смысловые проверки: образцы против обращения, эмодзи, восклицаний и
+# словаря «не говорим»; ссылки fact: на facts.yaml; ≥ 8 типов слотов на язык в примерах базы).
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "urn:app-design:text-research:voice:1"
+title: "voice — профиль голоса бренда для генерации и проверки текстов"
+description: >-
+  Как бренд звучит: зачем он существует и для кого (основание голоса), абзац о голосе, 2–5 принципов с правилами
+  исполнения, пары «мы / мы не», точки на четырёх осях тона, обращение, словарь «говорим / не говорим», эмодзи,
+  восклицания, юмор (где да, где нет), карта тона по ситуациям, табу, образцы строк по типам слотов на русском и
+  английском, проекции в пакет kimi. Не платформа бренда (вне рамок базы) и не правила длины слотов (E).
+date: "2026-09-24"
+x-version: 1
+x-status: "черновик волны 2 (F), 2026-09-24; сверка с E (слоты), I (судья голоса), J (copy deck) — волна 3"
+x-owner: "text-research · 05-voice-editorial · F (контракт тройки v2 §2: бренд — выражение у creative, голос у text)"
+x-doc: ["05-voice-editorial/01-brand-voice.md", "05-voice-editorial/02-editorial-policy.md", "05-voice-editorial/03-storytelling-and-concreteness.md"]
+
+type: object
+required: [voice_version, date, status, voice_id, brand, scope, derived_from, summary, principles, pairs, axes, address,
+           vocabulary, punctuation, humor, samples, projections, languages]
+additionalProperties: false
+patternProperties:
+  "^x-": {description: "Расширения проекта; валидатор их не проверяет."}
+properties:
+  voice_version:
+    const: 1
+    description: "Версия формата (эта схема)."
+  date:
+    $ref: "#/$defs/date"
+    description: "Дата последнего изменения профиля."
+  status:
+    enum: [draft, proposed, approved]
+    description: >-
+      draft — агент вывел из брифа и источников; proposed — показан заказчику с open_questions и строкой «Going with»;
+      approved — заказчик подтвердил, а образцы прошли claims_check.py и copy_lint.py.
+  voice_id:
+    $ref: "#/$defs/id"
+    description: "id профиля (kebab-case): <бренд>[-<суббренд>]. Один бренд — один голос; суббренд — отдельный профиль с тем же ядром."
+
+  brand:
+    type: object
+    additionalProperties: false
+    required: [name, site]
+    properties:
+      name: {type: string, description: "Имя бренда, как на сайте («Отвес», «Кварц»)."}
+      site: {$ref: "#/$defs/id", description: "slug проекта — как в meaning.yaml, facts.yaml и copy deck."}
+      category: {type: string, description: "Категория словами клиента (meaning.positioning.market_category.name, B1)."}
+      meaning_ref: {type: string, description: "Путь к meaning.yaml (B1)."}
+      facts_ref: {type: string, description: "Путь к facts.yaml (B2): числа, имена и цитаты образцов — только оттуда."}
+      voc_ref: {type: string, description: "Путь к voc.yaml (B2): слова клиента для словаря «говорим»."}
+      parent_voice_ref: {type: string, description: "Для суббренда — путь к профилю материнского бренда (ядро голоса общее)."}
+
+  scope:
+    type: object
+    additionalProperties: false
+    required: [genres, surfaces]
+    description: "Где действует голос бренда и где начинается голос продукта (два голоса одной компании — 01 §2)."
+    properties:
+      genres:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items: {$ref: "#/$defs/genre"}
+      surfaces:
+        type: array
+        minItems: 1
+        description: "Поверхности и чей на них голос: бренд (маркетинг), продукт (интерфейс, ux 07/01 §6), нейтрально-юридический (H)."
+        items:
+          type: object
+          additionalProperties: false
+          required: [surface, voice]
+          properties:
+            surface:
+              enum: [marketing-site, blog, lead-emails, marketing-emails, transactional-emails, product-ui, support,
+                     legal, social, ads, offline]
+            voice:
+              enum: [brand, product, neutral-legal]
+              description: "brand — этот профиль целиком; product — профиль голоса продукта (ux 07/01 §6–8); neutral-legal — точность прежде голоса (оферта, согласия, реквизиты — H)."
+            note: {type: string}
+      product_voice_ref:
+        type: string
+        description: "Путь к профилю голоса продукта (интерфейс за входом), если он отдельный. Граница — 01 §2.3."
+
+  derived_from:
+    type: object
+    additionalProperties: false
+    required: [purpose, audience, basis]
+    description: "Из чего выведен голос (Ross: назначение → аудитория, конкуренты, категория → личность → принципы)."
+    properties:
+      purpose:
+        type: string
+        minLength: 20
+        description: "Зачем бренд существует: какую задачу клиента решает — одной-двумя фразами, без миссии и ценностей."
+      audience:
+        type: string
+        minLength: 20
+        description: "Кто читает и в каком состоянии (meaning.audience[primary]; осведомлённость; цена ошибки для читателя)."
+      subject_risk:
+        enum: [low, medium, high]
+        description: "Цена ошибки в предмете (деньги, здоровье, право, дом): тон выводится из предмета и цены ошибки, а не из моды (ux 07/01 §7.2)."
+      brand_familiarity:
+        enum: [unknown, local-known, widely-known]
+        description: "Знакомость бренда аудитории: неформальный стиль повышает доверие у знакомых брендов и снижает у незнакомых (Gretry 2017)."
+      category_norms:
+        type: string
+        description: "Как говорит категория (3–5 страниц конкурентов): что у всех одинаково — медианный голос, от которого отличаемся."
+      differs_from_competitors:
+        type: string
+        description: "Чем голос отличается от конкурентов (Ross: «you don't want anyone reading copy from you and thinking it's from somebody else»)."
+      brief_adjectives:
+        type: array
+        items: {type: string}
+        description: "Прилагательные заказчика из брифа («тёплый, ремесленный, спокойный») — сырьё; в принципы переходят только с исполнением."
+      basis:
+        type: array
+        minItems: 1
+        items: {$ref: "#/$defs/basis"}
+
+  summary:
+    type: string
+    minLength: 80
+    maxLength: 700
+    description: "Абзац о голосе (Ross: большой компании — абзац и советы вместо списка прилагательных). Пишется голосом бренда."
+
+  key_phrase:
+    type: object
+    additionalProperties: false
+    required: [ru]
+    description: "Ключевое слово или оборот бренда (KitKat — «перерыв»), если есть в брифе или истории бренда; не придумывать."
+    properties:
+      ru: {type: string}
+      en: {type: string}
+      rule: {type: string, description: "Где и как часто: «в hero и финальном CTA, не чаще раза на экран»."}
+      basis: {$ref: "#/$defs/basis"}
+
+  principles:
+    type: array
+    minItems: 2
+    maxItems: 5
+    description: "2–5 принципов голоса (NN/g: «Avoid choosing more than a handful»). Каждый — с исполнением и «каким не бывает»."
+    items: {$ref: "#/$defs/principle"}
+
+  pairs:
+    type: array
+    minItems: 2
+    maxItems: 8
+    description: >-
+      Пары «мы / мы не». «Мы не» — соседний перегиб того же качества («по делу, но не сухо»), а не антоним («дружелюбные,
+      но не грубые» — пусто). Обещания и запреты утверждений — в never_claim фактов (claims_boundaries_ref).
+    items: {$ref: "#/$defs/pair"}
+
+  axes:
+    type: object
+    additionalProperties: false
+    required: [formality, humor, respect, enthusiasm]
+    description: >-
+      Точки на четырёх осях тона NN/g (Moran 2016): 1 и 5 — полюса, 3 — середина. Крайние точки для бизнес-текста редки
+      («It would be unusual… at the outermost limits… and still be effective»). Эффект тона на восприятие бренда — 0,3–0,7
+      балла из 5 (NN/g, 100 человек), доверие объясняет 52 % желания рекомендовать.
+    properties:
+      formality: {$ref: "#/$defs/axis", description: "1 — формально, 5 — разговорно (formal ↔ casual)."}
+      humor: {$ref: "#/$defs/axis", description: "1 — серьёзно, 5 — с попыткой юмора (serious ↔ funny)."}
+      respect: {$ref: "#/$defs/axis", description: "1 — почтительно к предмету, 5 — дерзко к предмету, не к читателю (respectful ↔ irreverent)."}
+      enthusiasm: {$ref: "#/$defs/axis", description: "1 — сухо, по фактам, 5 — воодушевлённо (matter-of-fact ↔ enthusiastic)."}
+      extra:
+        type: array
+        maxItems: 3
+        description: "Свои оси, если четырёх мало (например, «сдержанно ↔ дерзко» для кампании L2)."
+        items:
+          type: object
+          additionalProperties: false
+          required: [id, left, right, point]
+          properties:
+            id: {$ref: "#/$defs/id"}
+            left: {type: string}
+            right: {type: string}
+            point: {type: integer, minimum: 1, maximum: 5}
+            note: {type: string}
+
+  tone_words:
+    type: object
+    additionalProperties: false
+    description: "Слова тона из списка NN/g (37, английские id; русские эквиваленты — x-tone-words-ru) или свои с префиксом x-: do — каким звучим, dont — каким нет."
+    properties:
+      do: {type: array, maxItems: 5, uniqueItems: true, items: {$ref: "#/$defs/tone-word"}}
+      dont: {type: array, maxItems: 5, uniqueItems: true, items: {$ref: "#/$defs/tone-word"}}
+
+  address:
+    type: object
+    additionalProperties: false
+    required: [ru_form, capital_vy, self_reference]
+    description: "Обращение и кто говорит. По умолчанию базы — «вы» со строчной (решение заказчика п. 16; ux 07/03 §1.1–1.2)."
+    properties:
+      ru_form:
+        enum: [vy, ty, impersonal]
+        default: vy
+        description: "vy — «вы»; ty — «ты» (только по голосу бренда и предмету с низкой ценой ошибки); impersonal — без обращения (редко: справка, оферта)."
+      capital_vy:
+        type: boolean
+        default: false
+        description: "«Вы» с заглавной — только в личном письме одному адресату; на сайте — false (Контур, Т—Ж)."
+      self_reference:
+        enum: [we, brand-name, founder-i, mixed]
+        description: "Как бренд говорит о себе: «мы»; по имени («Отвес»); «я» основателя (личный бренд, письмо основателя); смешанно (имя в первом упоминании, дальше «мы» — GOV.UK)."
+      en_form:
+        const: you
+        description: "Английский — всегда «you»; формальность передают лексика и синтаксис."
+      exceptions:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [where, form, why]
+          properties:
+            where: {type: string, description: "Слот, секция или канал."}
+            form: {enum: [vy, ty, impersonal]}
+            why: {type: string}
+
+  vocabulary:
+    type: object
+    additionalProperties: false
+    required: [avoid]
+    description: "Словарь «говорим / не говорим». avoid читает линтер C как словарь бренда (формат words)."
+    properties:
+      use:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [term]
+          properties:
+            term: {type: string}
+            why: {type: string}
+            instead_of: {type: string, description: "Какое слово заменяет."}
+            voc_ids: {$ref: "#/$defs/voc-ids"}
+      avoid:
+        type: array
+        minItems: 3
+        items: {$ref: "#/$defs/avoid-term"}
+      use_with_care:
+        type: array
+        description: "Можно при условии (Mailchimp «Words to use carefully»): термин — только с объяснением; категория — в SEO-заголовке."
+        items:
+          type: object
+          additionalProperties: false
+          required: [term, condition]
+          properties:
+            term: {type: string}
+            condition: {type: string}
+      spellings:
+        type: array
+        description: "Единое написание: preferred и варианты, которые линтер отметит (Mailchimp «Standardized spellings»; Контур «Спорные слова»)."
+        items:
+          type: object
+          additionalProperties: false
+          required: [preferred, variants]
+          properties:
+            preferred: {type: string}
+            variants: {type: array, minItems: 1, items: {type: string}}
+            lang: {enum: [ru, en, any], default: any}
+            note: {type: string}
+      category_name:
+        type: object
+        additionalProperties: false
+        properties:
+          ru: {type: string}
+          en: {type: string}
+          voc_ids: {$ref: "#/$defs/voc-ids"}
+
+  punctuation:
+    type: object
+    additionalProperties: false
+    required: [emoji, exclamation]
+    properties:
+      emoji:
+        type: object
+        additionalProperties: false
+        required: [policy]
+        properties:
+          policy: {enum: [never, rare, allowed], description: "never — по умолчанию; rare — только в разрешённых слотах; allowed — по голосу, но не в заголовках, CTA и мета (C: ru-pun-emoji-heading)."}
+          allowed_slot_types: {type: array, items: {$ref: "#/$defs/slot-type"}}
+          max_per_block: {type: integer, minimum: 0, maximum: 3}
+          never_in: {type: array, items: {$ref: "#/$defs/situation"}}
+      exclamation:
+        type: object
+        additionalProperties: false
+        required: [policy]
+        properties:
+          policy: {enum: [never, rare, allowed], description: "Mailchimp: «sparingly, and never more than one at a time… Never… in failure messages»."}
+          max_per_page: {type: integer, minimum: 0}
+          never_in: {type: array, items: {$ref: "#/$defs/situation"}}
+      rhetorical_questions:
+        enum: [never, faq-only, rare]
+        default: faq-only
+        description: "Т—Ж: риторических вопросов нет в заголовках; абзацы из вопросов в начале — запрещены; FAQ — законный вопрос."
+      caps:
+        const: never
+        description: "Капс — решение вёрстки (creative); в copy deck — обычный регистр (C: COPY-M-PUN-09)."
+      dash:
+        const: grammar
+        description: "Тире — по грамматике; плотность пунктуационных тире — порог жанра (C §5.1, H)."
+
+  humor:
+    type: object
+    additionalProperties: false
+    required: [level, never_in]
+    description: >-
+      Юмор снижает доверие к источнику (Eisend 2009, 369 корреляций) и рискован (NN/g: страховка «too chummy» —
+      −0,3 доверия). Нигде нет юмора в цене и условиях, гарантии, праве, согласиях и ответе на жалобу.
+    properties:
+      level: {enum: [none, dry, light, playful]}
+      forms:
+        type: array
+        items: {enum: [understatement, self-irony, irony-about-subject, wordplay, contrast, absurd, pop-culture]}
+      allowed_in: {type: array, items: {$ref: "#/$defs/situation"}}
+      never_in:
+        type: array
+        items: {$ref: "#/$defs/situation"}
+        allOf:
+          - contains: {const: pricing-terms}
+          - contains: {const: guarantee}
+          - contains: {const: legal}
+          - contains: {const: form-consent}
+          - contains: {const: complaint-response}
+      note: {type: string}
+
+  tone_map:
+    type: array
+    description: "Тон по ситуациям: голос постоянен, тон сдвигается (Mailchimp; NN/g; карта интерфейса — ux 07/01 §7)."
+    items:
+      type: object
+      additionalProperties: false
+      required: [situation, rules]
+      properties:
+        situation: {$ref: "#/$defs/situation"}
+        axes_delta:
+          type: object
+          additionalProperties: false
+          properties:
+            formality: {type: integer, minimum: -2, maximum: 2}
+            humor: {type: integer, minimum: -4, maximum: 2}
+            respect: {type: integer, minimum: -2, maximum: 2}
+            enthusiasm: {type: integer, minimum: -2, maximum: 2}
+        rules: {type: array, minItems: 1, items: {type: string}}
+
+  taboos:
+    type: array
+    description: "Темы и приёмы, которых голос не касается (страх как рычаг, шутки о деньгах клиента). Запреты утверждений — never_claim (ссылка ниже)."
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, what, why]
+      properties:
+        id: {$ref: "#/$defs/id"}
+        what: {type: string}
+        why: {type: string}
+        refs: {type: array, items: {type: string}, description: "never_claim:<id>, copy-rule:<id> H или C, ux 07/06 §…"}
+
+  claims_boundaries_ref:
+    type: string
+    description: "Ссылка на never_claim фактов (facts.yaml#never_claim): «мы не обещаем …» живёт там, не здесь (B2)."
+
+  samples:
+    type: array
+    minItems: 1
+    description: >-
+      Образцы строк по slot_type: показывают голос генератору и судье. Для профиля проекта — 8–10 типов слотов на каждый
+      язык; числа и имена — только fact_ids; нет факта — [PLACEHOLDER: …]. Длину слота задаёт E (copy-slots.yaml).
+    items: {$ref: "#/$defs/sample"}
+
+  style_sheet:
+    type: object
+    additionalProperties: false
+    description: "Машиночитаемая часть таблицы стиля редполитики (02 §3): то, что можно проверить автоматически."
+    properties:
+      yo: {enum: [always, when-ambiguous], description: "«ё» сплошь или только при разночтениях и в именах (Контур; Т—Ж)."}
+      numbers: {enum: [digits, words-under-10, words-for-approx], description: "Цифрами (сайт, сканирование), до 10 словами (Контур), словами для приблизительного (Т—Ж)."}
+      currency: {enum: ["₽", "руб.", "рублей"], description: "Одно обозначение валюты на текст (Контур)."}
+      company_names: {enum: [as-they-write, russian-quoted], description: "Чужие компании — как пишут сами (Mailchimp, Контур) или по-русски в кавычках (Т—Ж, медиа)."}
+      product_names:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [name, rule]
+          properties:
+            name: {type: string}
+            rule: {type: string, description: "Кавычки, склонение, первое упоминание полным именем."}
+      terms:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [term, definition]
+          properties:
+            term: {type: string}
+            definition: {type: string}
+            not: {type: array, items: {type: string}, description: "Синонимы, которыми это понятие не называем."}
+
+  lint:
+    type: object
+    additionalProperties: false
+    description: "Как профиль подключается к copy_lint.py (C): базовый профиль жанра и поправки уровней по голосу."
+    properties:
+      base_profile: {$ref: "#/$defs/genre"}
+      level_overrides:
+        type: object
+        description: "Шаблон id правила → уровень (спецификация C §4): эмодзи в прозе разрешены голосом → «ru-pun-emoji-body»: \"off\"."
+        additionalProperties: {enum: [error, warning, info, "off"]}
+      address_rule: {type: boolean, default: true, description: "Сгенерировать правило «обращение не по профилю» (формы «ты» при ru_form: vy и наоборот)."}
+
+  projections:
+    type: object
+    additionalProperties: false
+    required: [tone_of_voice]
+    properties:
+      tone_of_voice:
+        type: string
+        minLength: 20
+        maxLength: 240
+        description: "Одна строка для brief.yaml kimi (design_system.tone_of_voice) и строки «Voice:» copy.md: обращение, 2–3 принципа, чего нет."
+      brand_voice:
+        type: object
+        additionalProperties: false
+        description: "Проекция в brand.json kimi: voice {tone, use[], avoid[]}."
+        properties:
+          tone: {type: string}
+          use: {type: array, items: {type: string}}
+          avoid: {type: array, items: {type: string}}
+      prompt_brief:
+        type: string
+        maxLength: 1400
+        description: "Короткая методичка для промта генератора (≤ 12 строк): принципы с исполнением, «мы / мы не», обращение, запреты. Полный профиль — для проверки."
+
+  languages:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required: [lang, role]
+      properties:
+        lang: {$ref: "#/$defs/lang"}
+        role: {enum: [primary, adaptation]}
+        audience_note: {type: string, description: "Чем аудитория языка отличается (что ей объяснить, что опустить)."}
+        adaptation_rules:
+          type: array
+          items: {type: string}
+          description: "Как голос переносится: что сохраняется (принципы, точки осей), что меняется (идиомы, юмор, длина, реалии)."
+
+  open_questions:
+    type: array
+    maxItems: 7
+    items: {$ref: "#/$defs/question"}
+
+  review:
+    type: object
+    additionalProperties: false
+    properties:
+      method: {enum: [editor, blind-sort, product-reaction, message-test], description: "Как проверили узнаваемость голоса: редактор; слепая сортировка строк; выбор слов тона пользователями (NN/g); тест сообщения."}
+      result: {type: string}
+      by: {type: string}
+      date: {$ref: "#/$defs/date"}
+
+$defs:
+
+  id:
+    type: string
+    pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+
+  date:
+    type: string
+    pattern: "^[0-9]{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?$"
+
+  lang:
+    type: string
+    pattern: "^[a-z]{2}(-[A-Z]{2})?$"
+
+  genre:
+    enum: [landing, site-page, article, meta, geo, email-form]
+
+  slot-type:
+    description: "Временные id (99-raw/notes/temp-vocabulary-v0.yaml, 63 типа) + предложения B2 и J (spec-row, price-old, stat-source, image-caption); E закрепит в copy-slots.yaml."
+    enum: [meta-title, meta-description, og-title, og-description, og-image-alt, eyebrow, headline, subheadline, hero-proof,
+           cta-label, cta-secondary-label, cta-note, section-title, section-lead, body, list-item, card-title, card-body,
+           step-title, step-body, stat-value, stat-label, logos-caption, testimonial-quote, testimonial-attribution,
+           case-title, case-summary, case-result, pricing-plan-name, pricing-plan-summary, pricing-price,
+           pricing-price-note, pricing-feature, badge, guarantee-text, objection-answer, comparison-row, faq-q, faq-a,
+           form-title, form-lead, form-next-steps, form-consent, form-success, nav-label, footer-tagline, footer-legal,
+           article-title, article-lead, article-summary, article-heading, article-paragraph, article-author, geo-answer,
+           definition, email-subject, email-preheader, email-heading, email-body, email-cta-label, email-footer,
+           image-alt, in-image-text, spec-row, price-old, stat-source, image-caption]
+
+  situation:
+    description: "Ситуации карты тона (предложение F; словаря ситуаций у site нет). Интерфейсные ошибки — ux 07/01 §7."
+    enum: [hero, benefits, how-it-works, proof, testimonials, case, pricing, pricing-terms, guarantee, objections, faq,
+           form, form-consent, form-success, lead-email, reminder-email, complaint-response, error, legal, about,
+           careers, article, meta, campaign-slogan, footer]
+
+  tone-word:
+    description: "37 слов тона NN/g (id по-английски, русские эквиваленты — x-tone-words-ru) или своё слово с префиксом x-."
+    anyOf:
+      - enum: [authoritative, caring, cheerful, coarse, conservative, conversational, casual, dry, edgy, enthusiastic,
+               formal, frank, friendly, fun, funny, humorous, informative, irreverent, matter-of-fact, nostalgic,
+               passionate, playful, professional, provocative, quirky, respectful, romantic, sarcastic, serious, smart,
+               snarky, sympathetic, trendy, trustworthy, unapologetic, upbeat, witty]
+      - type: string
+        pattern: "^x-[a-z0-9-]+$"
+
+  voc-ids:
+    type: array
+    uniqueItems: true
+    items: {type: string, pattern: "^voc:[a-z0-9]+(-[a-z0-9]+)*$"}
+
+  basis:
+    type: object
+    additionalProperties: false
+    required: [kind]
+    description: >-
+      Основание: brief — бриф; customer — ответ заказчика; voc — голос клиента (voc:<id>); public-page — страница бренда
+      (URL + дата); competitor-page — страницы конкурентов (что говорят все); interview — интервью с основателем или
+      командой; inferred — вывод агента (из чего); assumption — допущение (нужен вопрос в open_questions).
+    properties:
+      kind: {enum: [brief, customer, voc, public-page, competitor-page, interview, inferred, assumption]}
+      ref: {type: string}
+      date: {$ref: "#/$defs/date"}
+      question_id: {$ref: "#/$defs/id"}
+    allOf:
+      - if: {properties: {kind: {const: assumption}}}
+        then: {required: [question_id]}
+      - if: {properties: {kind: {enum: [voc, public-page, competitor-page, inferred]}}}
+        then: {required: [ref]}
+
+  axis:
+    type: object
+    additionalProperties: false
+    required: [point]
+    properties:
+      point: {type: integer, minimum: 1, maximum: 5}
+      note: {type: string, description: "Что точка значит в словах этого бренда."}
+
+  principle:
+    type: object
+    additionalProperties: false
+    required: [id, name, execution, is_not]
+    properties:
+      id: {$ref: "#/$defs/id"}
+      name:
+        type: string
+        minLength: 4
+        description: "Сам принцип коротко: «Говорим фактами, а не оценками», «Спокойно, даже о деньгах»."
+      why: {type: string, description: "Откуда (назначение, аудитория, голос клиента, отличие от категории)."}
+      execution:
+        type: array
+        minItems: 2
+        description: "Проверяемые правила исполнения: длина фраз, синтаксис, пунктуация, слова, структура (Nike «bold» → «short, sharp statements rather than long, romantic sentences»)."
+        items: {type: string, minLength: 12}
+      is_not:
+        type: string
+        minLength: 10
+        description: "Каким голос на этом принципе не бывает — соседний перегиб с примером."
+      do: {type: array, items: {type: string}}
+      dont: {type: array, items: {type: string}}
+      checked_by:
+        type: array
+        uniqueItems: true
+        items: {enum: [copy_lint, claims_check, judge, human]}
+        description: "Кто ловит нарушение: линтер C, сверка B2/H, ИИ-судья (I), только человек (01 §4)."
+
+  pair:
+    type: object
+    additionalProperties: false
+    required: [we_are, we_are_not]
+    properties:
+      we_are: {type: string}
+      we_are_not: {type: string}
+      why: {type: string}
+      example: {type: string}
+
+  avoid-term:
+    type: object
+    additionalProperties: false
+    required: [term, reason]
+    properties:
+      term:
+        type: string
+        minLength: 2
+        description: "Слово или фраза в формате words линтера: «*» — продолжение основы («уникальн*»), «ё» совпадает с «е»."
+      lang: {enum: [ru, en, any], default: ru}
+      unless: {type: string, description: "Когда можно (GOV.UK «unless…»): «в названии категории», «в отзыве клиента», «рядом с числом из facts.yaml»."}
+      use_instead: {type: string}
+      reason: {type: string}
+      level: {enum: [error, warning, info], default: warning}
+      slot_types: {type: array, items: {$ref: "#/$defs/slot-type"}}
+
+  sample:
+    type: object
+    additionalProperties: false
+    required: [id, slot_type, lang, text, fact_ids]
+    properties:
+      id: {$ref: "#/$defs/id"}
+      slot_type: {$ref: "#/$defs/slot-type"}
+      lang: {$ref: "#/$defs/lang"}
+      text: {type: string, minLength: 1}
+      fact_ids:
+        type: array
+        uniqueItems: true
+        description: "fact:<id> — факт из facts.yaml; missing:<id> — факта нет, в тексте [PLACEHOLDER]; пусто — строка без утверждений."
+        items: {type: string, pattern: "^(fact|missing):[a-z0-9]+(-[a-z0-9]+)*$"}
+      principle_ids: {type: array, items: {$ref: "#/$defs/id"}}
+      situation: {$ref: "#/$defs/situation"}
+      adaptation_of: {$ref: "#/$defs/id", description: "Для английского: id русского образца, который адаптирован (не переведён)."}
+      note: {type: string}
+      lint_allow:
+        type: array
+        description: "Законное исключение из правила линтера с причиной (как lint_allow слота copy deck — C §9 п. 8): ложное срабатывание или норма голоса."
+        items:
+          type: object
+          additionalProperties: false
+          required: [rule, reason]
+          properties:
+            rule: {type: string}
+            reason: {type: string}
+      checks:
+        type: object
+        additionalProperties: false
+        properties:
+          claims_check: {enum: [pass, fail, "n/a"]}
+          copy_lint: {enum: [clean, review, rewrite, fail, overcorrected]}
+          date: {$ref: "#/$defs/date"}
+
+  question:
+    type: object
+    additionalProperties: false
+    required: [id, q, why, default]
+    properties:
+      id: {$ref: "#/$defs/id"}
+      q: {type: string}
+      why: {type: string}
+      options: {type: array, items: {type: string}}
+      default: {type: string, description: "Что будет, если заказчик не ответит («Going with»)."}
+      affects: {type: array, items: {type: string}}
+      answer: {type: string}
+      date: {$ref: "#/$defs/date"}
+
+# ───────────────────────── Проекции и связи ─────────────────────────
+x-meaning-map:
+  meaning.voice_ref: "путь к voice.yaml (эта схема); до профиля — строка-описание со словом «черновик» (B1)"
+  meaning.brand_character: "прилагательные брифа → derived_from.brief_adjectives (сырьё, не принципы)"
+  meaning.positioning.market_category.name: "brand.category и vocabulary.category_name"
+
+x-copy-deck-map:
+  copy_deck.voice_ref: "путь к voice.yaml (J, copy-deck.schema.json)"
+  slot.variants[].text: "проверка голоса: vocabulary.avoid, address, punctuation — copy_lint.py с правилами из профиля; принципы — судья (I)"
+
+x-kimi-map:
+  - {voice_path: "projections.tone_of_voice", kimi_path: "design_system.tone_of_voice", rule: copy, note: "одна строка ≤ 240 знаков; она же строка «Voice:» в copy.md и «Voice» в TASK.md (build_package.py)"}
+  - {voice_path: "projections.brand_voice.tone", kimi_path: "brand.voice.tone", rule: copy, note: "brand.json kimi"}
+  - {voice_path: "projections.brand_voice.use", kimi_path: "brand.voice.use", rule: copy, note: "слова «говорим» — коротко"}
+  - {voice_path: "projections.brand_voice.avoid + vocabulary.avoid[].term", kimi_path: "brand.voice.avoid, design_system.bans", rule: derive, note: "K3 тексты не пишет (copy.md verbatim) — avoid нужен как страховка для alt и подписей ассетов"}
+  - {voice_path: "samples, principles, tone_map", kimi_path: "—", rule: drop, note: "голос уже воплощён в copy.md; K3 его не пересочиняет"}
+
+x-lint-map:
+  vocabulary.avoid: "правило kind: words, id brand-<voice_id>-avoid-<n>, group EXT, уровень level, unless → поле unless (регулярка из слов), slot_types"
+  vocabulary.spellings: "правило words по variants, id brand-<voice_id>-spelling-<n>, warning"
+  address.ru_form: "vy → правило «формы ты» (ты, тебя, тебе, твой… и частые повелительные на -и/-й без -те), warning; ty → правило «формы вы», info"
+  address.capital_vy: "false → «Вы/Ваш» в середине предложения — warning (Контур, Т—Ж)"
+  punctuation.emoji.policy: "never → ru-pun-emoji-body: warning; allowed → ru-pun-emoji-body: off (заголовки и CTA остаются warning)"
+  punctuation.exclamation.policy: "never → правило «!» во всех слотах, warning; rare/allowed — правила C без изменений"
+  lint.level_overrides: "как есть → профиль <base_profile>-<voice_id> в копии profiles.yaml (конвертер F); в C — ключ --voice (предложение)"
+
+x-checks:
+  copy_lint: "словарь «не говорим», единое написание, обращение ты/вы, «Вы» с заглавной, эмодзи, «!», капс, рубленый драматизм, плотность маркеров, сверхкоррекция"
+  claims_check: "числа, имена, цитаты, never_claim в образцах и текстах (голос не меняет факты)"
+  judge: "принципы с исполнением, пары «мы / мы не», точка на осях, узнаваемость голоса (слепая сортировка), медианный текст без позиции (COPY-M-TON-08), уместность юмора"
+  human: "первое утверждение профиля заказчиком, юмор и острота в кампании L2, этические границы, «звучит как мы?»"
+
+x-tone-words-ru:
+  authoritative: "авторитетный"
+  caring: "заботливый"
+  cheerful: "бодрый"
+  coarse: "грубоватый"
+  conservative: "консервативный"
+  conversational: "разговорный"
+  casual: "непринуждённый"
+  dry: "сухой (сдержанная ирония)"
+  edgy: "острый"
+  enthusiastic: "воодушевлённый"
+  formal: "официальный"
+  frank: "прямой"
+  friendly: "дружелюбный"
+  fun: "весёлый"
+  funny: "смешной"
+  humorous: "с юмором"
+  informative: "информативный"
+  irreverent: "непочтительный к предмету"
+  matter-of-fact: "по-деловому сухой"
+  nostalgic: "ностальгический"
+  passionate: "увлечённый"
+  playful: "игривый"
+  professional: "профессиональный"
+  provocative: "провокационный"
+  quirky: "чудаковатый"
+  respectful: "уважительный"
+  romantic: "романтичный"
+  sarcastic: "саркастичный"
+  serious: "серьёзный"
+  smart: "умный"
+  snarky: "язвительный"
+  sympathetic: "сочувствующий"
+  trendy: "модный"
+  trustworthy: "надёжный"
+  unapologetic: "без оправданий"
+  upbeat: "оптимистичный"
+  witty: "остроумный"
+
+x-vocabulary-proposals:
+  situations: "список situation (25 ситуаций карты тона) — предложение F к временному словарю; site ролей тона не задаёт"
+  slot_types: "spec-row, price-old, stat-source (B2), image-caption (J) — приняты в enum как предложения"

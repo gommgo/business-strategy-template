@@ -1,0 +1,488 @@
+{
+ "voters": 1,
+ "pairs": [
+  {
+   "id": "z-hero-ab",
+   "group": "«Звено» · главный кадр",
+   "q": "craft",
+   "a": "A код",
+   "b": "B Blender",
+   "A": 0,
+   "B": 1,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "z-hero-bc",
+   "group": "«Звено» · главный кадр",
+   "q": "craft",
+   "a": "B Blender",
+   "b": "C гибрид",
+   "A": 1,
+   "B": 0,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "z-hero-ac",
+   "group": "«Звено» · главный кадр",
+   "q": "craft",
+   "a": "A код",
+   "b": "C гибрид",
+   "A": 1,
+   "B": 0,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "z-v2-a",
+   "group": "«Звено» · главный кадр",
+   "q": "craft",
+   "a": "v2 база",
+   "b": "A код",
+   "A": 0,
+   "B": 1,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "z-scan-ab",
+   "group": "«Звено» · скан сустава",
+   "q": "craft",
+   "a": "A код",
+   "b": "B Blender",
+   "A": 0,
+   "B": 0,
+   "tie": 1,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "z-inside-ab",
+   "group": "«Звено» · сустав изнутри",
+   "q": "craft",
+   "a": "A код",
+   "b": "B Blender",
+   "A": 1,
+   "B": 0,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "z-exploded-ac",
+   "group": "«Звено» · разборка",
+   "q": "craft",
+   "a": "A код",
+   "b": "C гибрид",
+   "A": 1,
+   "B": 0,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "z-exploded-bc",
+   "group": "«Звено» · разборка",
+   "q": "craft",
+   "a": "B Blender",
+   "b": "C гибрид",
+   "A": 1,
+   "B": 0,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "z-motion-bc",
+   "group": "«Звено» · движение 10 с",
+   "q": "motion",
+   "a": "B Blender",
+   "b": "C гибрид",
+   "A": 0,
+   "B": 0,
+   "tie": 1,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "z-anchor",
+   "group": "«Звено» · первый экран",
+   "q": "concept",
+   "a": "наш лучший",
+   "b": "якорь hubtown",
+   "A": 0,
+   "B": 0,
+   "tie": 1,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "z-anchor-craft",
+   "group": "«Звено» · первый экран",
+   "q": "craft",
+   "a": "наш лучший",
+   "b": "якорь hubtown",
+   "A": 0,
+   "B": 0,
+   "tie": 1,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "k-first-ab",
+   "group": "Клавиатура «Ё» · первый экран",
+   "q": "page",
+   "a": "A код",
+   "b": "B Blender",
+   "A": 0,
+   "B": 0,
+   "tie": 1,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "k-exploded-ac",
+   "group": "Клавиатура «Ё» · разборка",
+   "q": "craft",
+   "a": "A код",
+   "b": "C гибрид",
+   "A": 0,
+   "B": 0,
+   "tie": 1,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "k-typing-bc-desk",
+   "group": "Клавиатура «Ё» · набор",
+   "q": "page",
+   "a": "B Blender",
+   "b": "C гибрид",
+   "A": 1,
+   "B": 0,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "k-typing-bc-mob",
+   "group": "Клавиатура «Ё» · набор на телефоне",
+   "q": "page",
+   "a": "B Blender",
+   "b": "C гибрид",
+   "A": 1,
+   "B": 0,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "k-colors-ac",
+   "group": "Клавиатура «Ё» · расцветка",
+   "q": "craft",
+   "a": "A код",
+   "b": "C гибрид",
+   "A": 0,
+   "B": 0,
+   "tie": 1,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "k-exploded-bc",
+   "group": "Клавиатура «Ё» · разборка",
+   "q": "craft",
+   "a": "B Blender",
+   "b": "C гибрид",
+   "A": 0,
+   "B": 0,
+   "tie": 0,
+   "bad": 0,
+   "n": 0
+  },
+  {
+   "id": "k-typing-ac",
+   "group": "Клавиатура «Ё» · набор 10 с",
+   "q": "motion",
+   "a": "A код",
+   "b": "C гибрид",
+   "A": 0,
+   "B": 1,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "k-typing-bc",
+   "group": "Клавиатура «Ё» · набор 10 с",
+   "q": "motion",
+   "a": "B Blender",
+   "b": "C гибрид",
+   "A": 0,
+   "B": 1,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "k-anchor",
+   "group": "Клавиатура «Ё» · первый экран",
+   "q": "concept",
+   "a": "наш лучший",
+   "b": "якорь Apple AirPods Pro",
+   "A": 0,
+   "B": 0,
+   "tie": 1,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "k-anchor-craft",
+   "group": "Клавиатура «Ё» · первый экран",
+   "q": "craft",
+   "a": "наш лучший",
+   "b": "якорь Apple AirPods Pro",
+   "A": 0,
+   "B": 0,
+   "tie": 1,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "s-first-ab",
+   "group": "«Сдано» · первый экран",
+   "q": "page",
+   "a": "A SVG",
+   "b": "B Blender",
+   "A": 0,
+   "B": 1,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "s-beam-bc",
+   "group": "«Сдано» · план с дефектами",
+   "q": "page",
+   "a": "B Blender",
+   "b": "C фонарик",
+   "A": 1,
+   "B": 0,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "s-mob-ab",
+   "group": "«Сдано» · телефон",
+   "q": "page",
+   "a": "A SVG",
+   "b": "B Blender",
+   "A": 0,
+   "B": 1,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "s-icons-ab",
+   "group": "«Сдано» · блок «что проверяет инженер»",
+   "q": "page",
+   "a": "A SVG",
+   "b": "B Blender",
+   "A": 0,
+   "B": 1,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "s-stamp-ab",
+   "group": "«Сдано» · акт со штампом",
+   "q": "craft",
+   "a": "A SVG",
+   "b": "B Blender",
+   "A": 0,
+   "B": 1,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "v-f000",
+   "group": "Velmora · кадр облёта 1",
+   "q": "craft",
+   "a": "нейросеть",
+   "b": "Blender",
+   "A": 0,
+   "B": 0,
+   "tie": 1,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "v-f030",
+   "group": "Velmora · кадр облёта 2",
+   "q": "craft",
+   "a": "нейросеть",
+   "b": "Blender",
+   "A": 0,
+   "B": 0,
+   "tie": 1,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "v-f060",
+   "group": "Velmora · кадр облёта 3",
+   "q": "craft",
+   "a": "нейросеть",
+   "b": "Blender",
+   "A": 0,
+   "B": 0,
+   "tie": 1,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "v-motion",
+   "group": "Velmora · облёт мышью 10 с",
+   "q": "motion",
+   "a": "нейросеть",
+   "b": "Blender",
+   "A": 0,
+   "B": 0,
+   "tie": 1,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "v-anchor",
+   "group": "Velmora · первый экран",
+   "q": "concept",
+   "a": "наш лучший",
+   "b": "якорь Shopify Editions",
+   "A": 1,
+   "B": 0,
+   "tie": 0,
+   "bad": 0,
+   "n": 1
+  },
+  {
+   "id": "v-anchor-craft",
+   "group": "Velmora · первый экран",
+   "q": "craft",
+   "a": "наш лучший",
+   "b": "якорь Shopify Editions",
+   "A": 0,
+   "B": 0,
+   "tie": 1,
+   "bad": 0,
+   "n": 1
+  }
+ ],
+ "hybrid_vs_code": {
+  "pairs": [
+   "z-hero-ac",
+   "z-exploded-ac",
+   "k-exploded-ac",
+   "k-colors-ac",
+   "k-typing-ac"
+  ],
+  "share": 0.4,
+  "votes": 5,
+  "rule": "по бюджету"
+ },
+ "duel_blender_share": 0.5,
+ "duel_votes": 4,
+ "anchors": [
+  {
+   "id": "z-anchor",
+   "q": "concept",
+   "ours": "наш лучший",
+   "anchor": "якорь hubtown",
+   "win": 0,
+   "tie": 1,
+   "loss": 0,
+   "n": 1
+  },
+  {
+   "id": "z-anchor-craft",
+   "q": "craft",
+   "ours": "наш лучший",
+   "anchor": "якорь hubtown",
+   "win": 0,
+   "tie": 1,
+   "loss": 0,
+   "n": 1
+  },
+  {
+   "id": "k-anchor",
+   "q": "concept",
+   "ours": "наш лучший",
+   "anchor": "якорь Apple AirPods Pro",
+   "win": 0,
+   "tie": 1,
+   "loss": 0,
+   "n": 1
+  },
+  {
+   "id": "k-anchor-craft",
+   "q": "craft",
+   "ours": "наш лучший",
+   "anchor": "якорь Apple AirPods Pro",
+   "win": 0,
+   "tie": 1,
+   "loss": 0,
+   "n": 1
+  },
+  {
+   "id": "v-anchor",
+   "q": "concept",
+   "ours": "наш лучший",
+   "anchor": "якорь Shopify Editions",
+   "win": 1,
+   "tie": 0,
+   "loss": 0,
+   "n": 1
+  },
+  {
+   "id": "v-anchor-craft",
+   "q": "craft",
+   "ours": "наш лучший",
+   "anchor": "якорь Shopify Editions",
+   "win": 0,
+   "tie": 1,
+   "loss": 0,
+   "n": 1
+  }
+ ],
+ "l2_vs_anchors": {
+  "z": {
+   "criteria": {
+    "concept": 0.5,
+    "craft": 0.5
+   },
+   "pass": true
+  },
+  "k": {
+   "criteria": {
+    "concept": 0.5,
+    "craft": 0.5
+   },
+   "pass": true
+  },
+  "v": {
+   "criteria": {
+    "concept": 1.0,
+    "craft": 0.5
+   },
+   "pass": true
+  }
+ }
+}

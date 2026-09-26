@@ -1,0 +1,147 @@
+# Артефакты генерации (группа ART): одна находка = вердикт «текст скопирован из чат-бота или не дописан».
+# Проверяются первыми, во всех ролях и жанрах, в цитатах тоже (mask_quotes: false). Префикс маркеров — COPY-M-ART-.
+# Источники реестра: WP:Signs of AI writing (oldid 1376434705, 2026-09-24) §Markup, §utm_source=; humanizer-ru
+# scripts/lint.py ARTIFACTS (MIT, коммит ff990df, порт из Vladimir-Human/humanizer-ru, MIT); kimi 05/03 §3.9 (сбои K3).
+date: 2026-09-24
+version: 1
+owner: C (волна 1)
+defaults:
+  group: ART
+  lang: any
+  flags: ''
+  count_as_marker: false
+  mask_quotes: false
+  date: 2026-09-24
+  evidence: "[консенсус]: служебные метки не порождает ни человек, ни автозамена"
+rules:
+  - id: art-chatbot-citation
+    marker_id: COPY-M-ART-01
+    level: error
+    pattern: ':contentReference\[oaicite:\d+\](?:\{index=\d+\})?|oai_citation(?::\d+)?|%B%oaicite(?::\d+)?|citeturn\d+[a-z]+\d*|%B%turn\d+(?:search|file|fetch|image|news|video|ref|view)\d+|attributableIndex|\[cite(?:_start|_end)\]|\[cite:\s*\d+(?:,\s*\d+)*\]|\[span_\d+\]|\((?:start|end)_span\)|grok_card|grok_render_citation_card_json|<grok-card%E%|【\d+†[^】]*】|\[(?:attached_file|web):\d+\]|ppl-ai-file-upload|:::writing\{|</?think>|sandbox:/mnt/data/|vertexaisearch\S*grounding-api-redirect'
+    message: "Служебная метка чат-бота (ссылки ChatGPT, Gemini, Grok, DeepSeek, Perplexity, остаток размышлений)."
+    replacement: "удалить метку; если на её месте была ссылка — найти настоящий источник или убрать утверждение"
+    examples: {bad: "Рынок вырос на 12 % :contentReference[oaicite:0]{index=0}.", good: "Рынок вырос на 12 % (Росстат, 2025)."}
+    source: "WP:AISIGNS «Internal formatting and reference markup bugs»; humanizer-ru lint.py ARTIFACTS"
+  - id: art-ai-utm
+    marker_id: COPY-M-ART-02
+    level: error
+    flags: i
+    pattern: 'utm_source=(?:chatgpt\.com|openai|copilot\.com|perplexity(?:\.ai)?|claude(?:\.ai)?|gemini)|referrer=grok\.com'
+    message: "UTM-метка чат-бота в ссылке: ссылку подобрал ИИ (сам текст мог написать и человек)."
+    replacement: "убрать хвост ?utm_source=…; проверить, что источник говорит то, на что ссылаются"
+    examples: {bad: "Подробнее: https://example.org/report?utm_source=chatgpt.com", good: "Подробнее: https://example.org/report"}
+    source: "WP:AISIGNS «utm_source=» («near-definitively proves ChatGPT's involvement… doesn't prove it generated the writing»)"
+  - id: art-assistant-reply-ru
+    marker_id: COPY-M-ART-03
+    level: error
+    lang: ru
+    flags: i
+    pattern: '%B%надеюсь,?\s+(?:было|будет|оказалось|окажется)\s+полезн|%B%надеюсь,?\s+(?:это|эта\s+информация|данная\s+информация|статья|текст|наш\s+опыт|материал|наша\s+подборка)\s+(?:поможет|был[аио]?\s+полезн|будет\s+полезн|окажется\s+полезн)|%B%дайте\s+(?:мне\s+)?знать,?\s+если|%B%буду\s+рад[аы]?\s+помочь|%B%конечно[,!]\s+вот%E%|%B%вот\s+(?:вариант|пример|черновик|версия)\s+(?:текста\s+)?(?:для|лендинга|страницы|описания|поста|статьи)|%B%ниже\s+(?:приведён|приведен|представлен)%W%\s+(?:вариант|текст|черновик)|%B%как\s+(?:языковая\s+модель|ии-ассистент|искусственный\s+интеллект),?\s+я%E%|%B%хотите,?\s+я\s+(?:сделаю|напишу|добавлю|подготовлю|переделаю)|%B%могу\s+также\s+(?:предложить|подготовить|сделать|написать)'
+    message: "Реплика ассистента в тексте для читателя («надеюсь, это поможет», «вот вариант текста», «хотите, я…»)."
+    replacement: "удалить реплику целиком; текст должен начинаться и заканчиваться содержанием"
+    examples: {bad: "Надеюсь, это поможет! Вот вариант текста для лендинга.", good: "Остались вопросы? Напишите нам в чат — ответим за 10 минут."}
+    source: "WP:AISIGNS «Collaborative communication»; ВП:Признаки сгенерированности текста «Имитация диалога»; humanizer-ru паттерн 18"
+  - id: art-assistant-reply-en
+    marker_id: COPY-M-ART-03
+    level: error
+    lang: en
+    flags: i
+    pattern: '\bI hope (?:this|that) helps\b|\blet me know if (?:you|there|this)\b|\b(?:certainly|of course|sure)!\s+here\b|\bhere(?:[''’]s| is) (?:a|an|the|your) (?:draft|revised|rewritten|updated|polished|refined) (?:version|copy|text|draft)\b|\bas an ai(?: language model| assistant)?\b|\bas a large language model\b|\bwould you like me to\b|\bI[''’]d be happy to help\b|\bgreat question\b'
+    message: "Реплика ассистента в тексте для читателя."
+    replacement: "удалить реплику целиком"
+    examples: {bad: "Certainly! Here is a revised version of your landing page copy.", good: "Questions? Our team replies within an hour."}
+    source: "WP:AISIGNS «Collaborative communication»"
+  - id: art-template-slot
+    marker_id: COPY-M-ART-04
+    level: error
+    pattern: '\[(?:Название|Имя|Фамилия|ФИО|Компания|Город|Телефон|Адрес|Дата|Цена|Сумма|Ссылка|Продукт|Бренд|Услуга|Ваш[аеи]?(?:\s[А-Яа-яЁё]+)?|Company|Name|Your\s[A-Za-z]+|City|Phone|Date|Price|Link|URL|Product|Brand|Service|Insert[^\]\n]{0,30})[^\]\n]{0,40}\]|\{\{\s*[A-Za-z_][\w.]*\s*\}\}|\{(?:company|name|first_name|city|product|brand)\}|\((?:вставьте|укажите|добавьте|add|insert|your)\s[^)\n]{0,60}\)|%B%20\d\d-(?:XX|xx)-(?:XX|xx)%E%|INSERT_SOURCE_URL|PASTE_\w+_URL_HERE|%B%URL_HERE%E%|\+7\s?\(?(?:XXX|ХХХ)|%B%(?:[Ll]orem\s+ipsum|dolor\s+sit\s+amet)%E%'
+    message: "Незаполненный шаблон или заглушка ([Название компании], {{name}}, (вставьте ссылку), 2025-XX-XX, lorem ipsum)."
+    replacement: "подставить значение из брифа или facts.yaml; нет значения — [PLACEHOLDER] и строка в missing"
+    examples: {bad: "Звоните: +7 (XXX) 123-45-67, [Название компании] ответит сразу.", good: "Звоните: +7 495 123-45-67, «Лесная обжарка» ответит сразу."}
+    source: "WP:AISIGNS «Phrasal templates and placeholder text»; ux 07/06 §5.1; humanizer-ru lint.py (A placeholder)"
+  - id: art-placeholder-marker
+    marker_id: COPY-M-ART-04
+    level: warning
+    pattern: '\[PLACEHOLDER(?::[^\]\n]{0,80})?\]'
+    message: "Место для факта, которого нет в facts.yaml. В черновике допустимо; к публикации — заполнить или убрать утверждение (--final делает это ошибкой)."
+    replacement: "получить факт у заказчика (proof-intake, B2) или переписать фразу без факта"
+    examples: {bad: "Работаем с [PLACEHOLDER: число клиентов] компаниями.", good: "Работаем с 214 компаниями (fact: clients-2026)."}
+    source: "PLAN.md риск 3; kimi templates/facts.md (Missing); контракт тройки §3 п.10"
+    evidence: "[стандарт базы]"
+  - id: art-pua-chars
+    marker_id: COPY-M-ART-05
+    level: error
+    pattern: '[\ue000-\uf8ff]'
+    message: "Символ из области частного использования Unicode (PUA): ChatGPT оборачивает им метки ссылок."
+    replacement: "удалить символ"
+    examples: {bad: "Рынок вырос\ue200 на 12 %.", good: "Рынок вырос на 12 %."}
+    source: "WP:AISIGNS (citeturn0search0 «surrounded by Unicode points in the Private Use Area»); humanizer-ru lint.py (A PUA-метка)"
+  - id: art-zero-width
+    marker_id: COPY-M-ART-05
+    level: warning
+    pattern: '[\u200b\u200c\u2060\ufeff\u00ad\u200e\u200f\u202a-\u202e]|\u200d(?![\U0001F000-\U0001FAFF\u2600-\u27bf])'
+    message: "Невидимый символ (нулевой ширины, мягкий перенос, метка направления). Его ставят и CMS, и рассылки — это сигнал, не вердикт."
+    replacement: "удалить; мягкие переносы — задача вёрстки (hyphens: auto), не текста"
+    examples: {bad: "Подключение\u200bза 10 минут", good: "Подключение за 10 минут"}
+    source: "humanizer-ru lint.py (класс B, WARN); ux 07/06 §6.5"
+    evidence: "[практика]: бывает от CMS, поэтому warning"
+  - id: art-escape-literals
+    marker_id: COPY-M-ART-06
+    level: error
+    pattern: '\\u[0-9a-fA-F]{4}|&(?:nbsp|amp|quot|laquo|raquo|mdash|ndash|hellip|#\d{2,5});|\$\s?€|€\s?\$|₽\s?₽|\$\$(?=\d)'
+    message: "Литерал экранирования или сбой валюты в видимом тексте (\\u00b0, &nbsp;, «$€4 900»)."
+    replacement: "заменить на символ (°, неразрывный пробел, «—») или исправить валюту"
+    examples: {bad: "Температура 60\\u00b0C, цена $€4,900", good: "Температура 60 °C, цена 4 900 €"}
+    source: "kimi 05-reviews-practice/03-default-look-k3.md §3.9 (контент-баги 3/15 работ K3) [проверено kimi E/03]"
+    evidence: "[проверено] соседом"
+  - id: art-fiction-disclaimer-ru
+    marker_id: COPY-M-ART-07
+    level: error
+    lang: ru
+    flags: i
+    pattern: '%B%(?:вымышленн|фиктивн)%W%\s+(?:бренд|компани|название|телефон|адрес|магазин|кафе|студи|сервис)%W%|%B%(?:демо|демонстрационн%W%)[- ](?:текст|контент|данные)%E%|%B%пример\s+текста%E%|%B%текст[- ]заглушк%W%'
+    message: "Пометка вымысла или демо-контента в тексте страницы."
+    replacement: "подставить реальные данные из брифа и facts.yaml; нет данных — [PLACEHOLDER]"
+    examples: {bad: "«Янтарь» — вымышленный бренд, демо-контент для показа.", good: "«Янтарь» — пекарня на Лиговском, 24."}
+    source: "kimi 05/03 §3.7 (честная пометка вымысла ≥ 3/15 работ витрины K3)"
+  - id: art-fiction-disclaimer-en
+    marker_id: COPY-M-ART-07
+    level: error
+    lang: en
+    flags: i
+    pattern: '\bfictional (?:brand|company|service|business|phone|address|studio)\b|\bfor demonstration (?:purposes )?only\b|\bdemo (?:content|copy|text)\b|\bplaceholder (?:text|copy|content)\b|\bsample (?:copy|text)\b|\b[\w-]+\.example(?:\.com|\.org)?\b|\bexample\.(?:com|org)\b'
+    message: "Пометка вымысла, демо-контента или адрес-пример в тексте страницы."
+    replacement: "подставить реальные данные; нет данных — [PLACEHOLDER]"
+    examples: {bad: "Qingjian Paper Works is a fictional brand. Write to hello@fluid-studio.example", good: "Qingjian Paper Works makes paper in Anhui since 1998."}
+    source: "kimi 05/03 §3.7; ux 07/06 §5.1 (example.com в видимом тексте)"
+  - id: art-knowledge-cutoff-ru
+    marker_id: COPY-M-ART-09
+    level: error
+    lang: ru
+    flags: i
+    pattern: '%B%на\s+момент\s+(?:моего\s+)?последнего\s+обновления|%B%по\s+состоянию\s+на\s+(?:мою|моё)\s+последн%W%|%B%мои\s+(?:данные|знания)\s+(?:ограничены|актуальны)|%B%у\s+меня\s+нет\s+доступа\s+к\s+(?:интернету|актуальн%W%)|%B%на\s+момент\s+моего\s+обучения'
+    message: "Оговорка модели о дате обучения или доступе к данным."
+    replacement: "удалить; факт с датой — из facts.yaml"
+    examples: {bad: "На момент моего последнего обновления тарифы были такими.", good: "Тарифы на 1 сентября 2026 года."}
+    source: "WP:AISIGNS «Knowledge-cutoff disclaimers»; ВП:ИИДИСКЛЕЙМЕР"
+  - id: art-knowledge-cutoff-en
+    marker_id: COPY-M-ART-09
+    level: error
+    lang: en
+    flags: i
+    pattern: '\bas of my (?:last |latest )?(?:knowledge |training )?(?:update|cutoff)\b|\bup to my last training\b|\bI (?:don[''’]t|do not) have (?:real-time|access to real-time|browsing)\b|\bmy knowledge cutoff\b'
+    message: "Оговорка модели о дате обучения."
+    replacement: "удалить; факт с датой — из facts.yaml"
+    examples: {bad: "As of my last knowledge update, the price was $20.", good: "Price as of September 2026: $20."}
+    source: "WP:AISIGNS «Knowledge-cutoff disclaimers»"
+  - id: art-markdown-in-slot
+    marker_id: COPY-M-ART-08
+    level: warning
+    flags: m
+    slot_types: [headline, subheadline, eyebrow, cta-label, cta-secondary-label, cta-note, section-title, card-title, step-title, stat-value, stat-label, badge, pricing-plan-name, pricing-price, meta-title, meta-description, og-title, og-description, og-image-alt, email-subject, email-preheader, email-cta-label, nav-label, image-alt, in-image-text, form-title, testimonial-attribution]
+    pattern: '\*\*[^*\n]+\*\*|__[^_\n]+__|^#{1,6}\s|^\s*[-*+]\s\S'
+    message: "Разметка Markdown внутри текста короткого слота: вёрстка выделений — задача дизайна, не copy deck."
+    replacement: "убрать ** и #; выделение — через иерархию блока"
+    examples: {bad: "**Быстрый** старт за 10 минут", good: "Старт за 10 минут"}
+    source: "WP:AISIGNS «Use of Markdown», «Overuse of boldface»; PLAN.md поправка (выделенное слово в заголовке — ui 11/04 m7)"
+    evidence: "[практика]"

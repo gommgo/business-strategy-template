@@ -1,0 +1,86 @@
+{
+  "spec_version": "0.2",
+  "id": "forest-roast-hero-cinemagraph-steam",
+  "checked_at": "2026-09-24",
+  "brief_language": "ru",
+  "task": "VID-CINEMAGRAPH",
+  "role": {
+    "page_type": "ecommerce",
+    "section": "hero",
+    "slot": "hero-video-layer",
+    "purpose": "steam over the cup as the only motion of the hero; video layer over the M-01 poster",
+    "priority": "above-fold",
+    "series_id": "forest-roast"
+  },
+  "subject": {
+    "summary": "a cup of black coffee on a pale oak table by a window, thin steam rising from the cup"
+  },
+  "composition": {
+    "shot": "medium",
+    "subject_region": "right-third",
+    "angle": "eye-level"
+  },
+  "palette": [
+    {
+      "role": "background",
+      "hex": "#EFE8DC",
+      "name": "cream plaster",
+      "share": 0.4,
+      "applies_to": "plaster wall"
+    }
+  ],
+  "text": {
+    "mode": "none"
+  },
+  "output": {
+    "primary_ratio": "16:9",
+    "resolution": "720p",
+    "format": "mp4",
+    "max_kb": 1500
+  },
+  "references": [
+    {
+      "id": "frame",
+      "src": "../../../../../99-raw/phase5/inputs/M/hero-16x9-stub.png",
+      "role": "first_frame"
+    },
+    {
+      "id": "frame_end",
+      "src": "../../../../../99-raw/phase5/inputs/M/hero-16x9-stub.png",
+      "role": "last_frame"
+    }
+  ],
+  "motion": {
+    "kind": "cinemagraph",
+    "duration_s": 4,
+    "camera": {
+      "move": "static",
+      "target": "the cup"
+    },
+    "background_motion": [
+      {
+        "element": "the steam above the coffee",
+        "motion": "rises in thin wisps, curls slowly and fades above the cup"
+      }
+    ],
+    "still": [
+      "the cup",
+      "the table",
+      "the napkin",
+      "the window light",
+      "the plaster wall"
+    ],
+    "tempo": "slow",
+    "loop": "first_last_same",
+    "start_frame": "../../../../../99-raw/phase5/inputs/M/hero-16x9-stub.png",
+    "end_frame": "../../../../../99-raw/phase5/inputs/M/hero-16x9-stub.png",
+    "cuts": "none",
+    "audio": false,
+    "reference_mode": "frames",
+    "forbid": [
+      "camera_move",
+      "zoom",
+      "new_objects"
+    ]
+  }
+}

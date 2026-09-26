@@ -1,0 +1,95 @@
+{
+ "audit": {
+  "flags": [
+   "raw_sharp_edges: Logo_NOVA"
+  ],
+  "tris": 712,
+  "draw_calls": 1,
+  "dims_m": [
+   0.56,
+   0.054,
+   0.14
+  ],
+  "frame": {
+   "x": [
+    0.05,
+    0.941
+   ],
+   "y": [
+    0.269,
+    0.772
+   ],
+   "area": 0.449
+  },
+  "view": "Khronos PBR Neutral"
+ },
+ "renders": {
+  "logo_blender": {
+   "sec": 3.18,
+   "kb": 978.4,
+   "res": [
+    1280,
+    720
+   ]
+  }
+ },
+ "glb": {
+  "logo": {
+   "raw": {
+    "kb": 29.6,
+    "tris": 712,
+    "nodes": 1,
+    "materials": [
+     "Logo_Ceramic"
+    ],
+    "extensionsUsed": [
+     "KHR_materials_clearcoat"
+    ],
+    "instanced_nodes": 0
+   },
+   "web": {
+    "kb": 7.9,
+    "tris": 712,
+    "nodes": 1,
+    "materials": [
+     "Logo_Ceramic"
+    ],
+    "extensionsUsed": [
+     "EXT_meshopt_compression",
+     "KHR_materials_clearcoat",
+     "KHR_mesh_quantization"
+    ],
+    "instanced_nodes": 0
+   },
+   "preset": "static_hero"
+  }
+ },
+ "points": {
+  "cloud_kb": 234.4,
+  "logo_kb": 234.4
+ },
+ "passport": {
+  "text": "NOVA",
+  "size": 0.2,
+  "extrude": 0.024,
+  "bevel": 0.003,
+  "res_u": 4,
+  "color": "#F2F0EC",
+  "bg": "#E9E7E3",
+  "N": 20000,
+  "seed": 7,
+  "cloud_k": 0.6,
+  "cam": {
+   "az": 18,
+   "el": 10,
+   "lens": 85,
+   "margin": 1.12,
+   "res": [
+    1280,
+    720
+   ]
+  }
+ },
+ "sec_total": 3.7,
+ "blender": "5.2.2 LTS"
+}

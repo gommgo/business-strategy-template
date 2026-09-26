@@ -1,0 +1,91 @@
+{
+ "audit": {
+  "flags": [
+   "raw_sharp_edges: Island"
+  ],
+  "tris": 120,
+  "draw_calls": 1,
+  "dims_m": [
+   1.034,
+   1.053,
+   0.587
+  ],
+  "frame": {
+   "x": [
+    0.07,
+    0.93
+   ],
+   "y": [
+    0.112,
+    0.888
+   ],
+   "area": 0.668
+  },
+  "view": "Khronos PBR Neutral"
+ },
+ "renders": {
+  "iso_blender": {
+   "sec": 2.1,
+   "kb": 641.3,
+   "res": [
+    768,
+    768
+   ]
+  }
+ },
+ "glb": {
+  "island": {
+   "raw": {
+    "kb": 19.1,
+    "tris": 184,
+    "nodes": 4,
+    "materials": [
+     "LowPoly_Palette"
+    ],
+    "extensionsUsed": [
+     "EXT_mesh_gpu_instancing"
+    ],
+    "instanced_nodes": 2
+   },
+   "web": {
+    "kb": 14.5,
+    "tris": 184,
+    "nodes": 4,
+    "materials": [
+     "LowPoly_Palette"
+    ],
+    "extensionsUsed": [
+     "EXT_mesh_gpu_instancing",
+     "EXT_meshopt_compression",
+     "EXT_texture_webp",
+     "KHR_mesh_quantization"
+    ],
+    "instanced_nodes": 2
+   },
+   "preset": "instances"
+  }
+ },
+ "instances": 25,
+ "passport": {
+  "palette": [
+   "#7CB36B",
+   "#5E9451",
+   "#8A6A4F",
+   "#6B5242",
+   "#B9B2A6",
+   "#8F8A82",
+   "#E8D8A8",
+   "#6FA8C9"
+  ],
+  "seed": 7,
+  "dist_min": 0.085,
+  "rock_share": 0.28,
+  "bg": "#E8EEF2",
+  "res": [
+   768,
+   768
+  ]
+ },
+ "sec_total": 2.6,
+ "blender": "5.2.2 LTS"
+}

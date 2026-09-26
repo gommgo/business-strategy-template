@@ -1,0 +1,114 @@
+# cinemagraph.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/01-hero-recipes.md#4; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+recipe_version: 1
+checked_at: '2026-09-25'
+author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
+id: cinemagraph
+title: 'Синемаграф: 720p i2v с одним очагом движения + мастер 2K (maskedmerge)'
+doc: 14-recipes/01-hero-recipes.md#4
+task_codes:
+- VID-CINEMAGRAPH
+slot: hero
+ladder: video
+ai_fit: conditional
+legal_row: 5
+route:
+  source: VID-CINEMAGRAPH
+  steps:
+  - role: движение пара
+    model: bytedance/seedance-1.5-pro
+    params:
+      resolution: 720p
+      duration: '4'
+      generate_audio: 'false'
+      fixed_lens: 'true'
+      aspect_ratio: '16:9'
+    images: '[H, H]'
+    price_rub: 10.5
+    test: M-03
+  - role: резерв резкости
+    model: bytedance/seedance-1.5-pro
+    params:
+      resolution: 1080p
+      duration: '4'
+      generate_audio: 'false'
+      fixed_lens: 'true'
+      aspect_ratio: '16:9'
+    images: '[H, H]'
+    price_rub: 22.5
+    test: M-05
+spec:
+  example: 14-recipes/examples/demo-landing/brand/specs/M-03-cinemagraph-steam.spec.json
+  must:
+  - 'motion.kind: cinemagraph'
+  - один элемент в motion.background_motion
+  - motion.still — всё остальное
+  ancestors:
+  - ../../scripts/ai-media/tests/fixtures/D02/E4.spec.json
+compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+  <тест> --agent <агент> --out 99-raw/phase5/jobs/<файл>.jsonl
+phase5:
+  jobs:
+  - 99-raw/phase5/jobs/M-03-cinemagraph-steam.jsonl
+  - 99-raw/phase5/jobs/M-05-cinemagraph-steam-1080p.json
+  reuse:
+  - M-01
+  - D2-07
+  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
+steps:
+- id: mask
+  cmd: маска зоны движения по естественным краям, растушёвка 1–2 px
+  status: checked
+  evidence: 99-raw/experiments/M/03-cinemagraph/still_mask.png
+- id: merge
+  cmd: ffmpeg -i steam_720p.mp4 -loop 1 -i master.png -loop 1 -i mask.png -filter_complex "[0:v]scale=W:H:flags=lanczos,format=yuv444p[v];[1:v]format=yuv444p[s];[2:v]format=gray[m];[s][v][m]maskedmerge,format=yuv420p"
+    -c:v libx264 -qp 0 mezz.mp4
+  status: checked
+  evidence: 99-raw/experiments/M/03-cinemagraph
+- id: drift
+  cmd: python3 ../../scripts/ai-media/video_loop_check.py drift mezz.mp4 --mask still_mask.png
+  status: checked
+  evidence: 99-raw/experiments/M/03-cinemagraph/results_steam.json
+- id: masked-motion
+  cmd: python3 99-raw/experiments/M/03-cinemagraph/masked_motion.py (keep_in в маске ≥ 0,75)
+  status: checked
+  evidence: 99-raw/experiments/M/03-cinemagraph/results_masked_motion.json
+- id: encode
+  cmd: 'как hero-loop: полные теги BT.709, AV1 CRF по keep_in, H.264, флаги провенанса одной строкой'
+  status: checked
+  evidence: 99-raw/experiments/M/03-cinemagraph/encode.py
+accept:
+  asset_audit:
+    mode: video-loop
+    verdict: мезонин pass; финал needs_human (пульс)
+  thresholds:
+  - video.cinemagraph_drift_max
+  - video.seam_local_max
+  - video.motion_keep_min
+  page_accept:
+    modes:
+    - desktop
+    - mobile
+    checks:
+    - видео только ≥ 700 px
+    - пауза
+    - reduce 0 КБ
+delivery:
+  template: 10-web-integration/pages/00-hero-summary.html
+  formats:
+  - av1 10 бит
+  - h264
+  budget_kb:
+    desktop: 1500
+provenance:
+  dst: trained
+  visible_label: false
+numbers:
+  demo_av1_crf36_kb_5s_1536x864: 18.2
+  demo_h264_crf23_kb: 91.7
+  mezz_seam_local: 1.04
+  keep_in_av1_crf36: 0.84
+  keep_in_av1_crf40: 0.71
+  phase5_status: 'M-03, M-05 и живой синемаграф (MS-02 motion) не запускались — отменено заказчиком 25.09; маска по слову SAM 3.1 — не проверена'
+status:
+  local: checked
+  generation: unchecked

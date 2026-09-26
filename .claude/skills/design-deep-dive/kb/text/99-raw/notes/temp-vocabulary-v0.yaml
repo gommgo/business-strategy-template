@@ -1,0 +1,189 @@
+# Временный словарь text-research v0 — оркестратор волн, 2026-09-24
+#
+# Зачем. Site не запущен (решение заказчика п. 17 в PLAN.md): vocabulary.yaml, crosswalk.tsv и blocks.yaml site в этой
+# сессии не появятся. Чтобы агенты text (C, D, E, G, I, J) не завели разные id для одного и того же, до S0 site все
+# пользуются этими id.
+#
+# Правила.
+# - id латиницей в kebab-case. Новый id агент добавляет у себя (в своём YAML или таблице) с пометкой
+#   «предложение к временному словарю» и строкой в отчёте; этот файл агенты не правят, сводит оркестратор.
+# - slot_type — зона text: E закрепляет список в 04-copy-by-block/copy-slots.yaml (может переименовать или разбить тип —
+#   с таблицей соответствия старый id → новый). J берёт slot_type из copy-slots.yaml.
+# - page_type, section_role, awareness, traffic — зона site (vocabulary.yaml); здесь временные значения. Колонка site_id
+#   пустая до S0; после S0 X и S сводят всё к словарю site.
+# - Источники временного словаря: план text (жанры, copy-deck v0), план site (../site/PLAN.md, волны A, B, E),
+#   ../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md §2.1 (19 слотов ассетов), §3 (типы
+#   страниц), ../kimi-research/07-brief-handoff/templates/brief.yaml и copy.md (site.sections[{id, job}]; заголовок,
+#   лид, тело, подписи кнопок, микрокопи), ../ux/07-ux-writing/06-banned-words-and-patterns.md §7.2 (роли узлов).
+
+date: 2026-09-24
+version: 0
+status: provisional
+owner:
+  slot_type: text (E, copy-slots.yaml)
+  genre: text (PLAN.md, «Жанры — ось базы»)
+  page_type: site (vocabulary.yaml) — временно оркестратор text
+  section_role: site (vocabulary.yaml, blocks.yaml) — временно оркестратор text
+  awareness: site (vocabulary.yaml) — значения предлагает text B1
+  traffic: site (vocabulary.yaml)
+
+genres:  # профили линтера copy_lint.py
+  - {id: landing, name: "Лендинг и его блоки"}
+  - {id: site-page, name: "Страницы многостраничного сайта"}
+  - {id: article, name: "Статьи и SEO-тексты"}
+  - {id: meta, name: "Мета и OG"}
+  - {id: geo, name: "Тексты для ответов нейросетей"}
+  - {id: email-form, name: "Письма и уведомления вокруг форм"}
+
+page_types:
+  # priority — приоритет заказчика (PLAN.md, «Решения заказчика» п. 11): 1 — лидогенерация услуг в РФ, 2 — лендинг SaaS
+  # или продукта, 3 — запуск или кампания L2, 4 — корпоративный многостраничник; 0 — прочие в рамках.
+  - {id: landing-lead-services, name: "Лендинг лидогенерации услуг", genre: landing, priority: 1, ai_media: "3.6", site_id: ""}
+  - {id: landing-saas, name: "Лендинг SaaS или ИИ-продукта", genre: landing, priority: 2, ai_media: "3.1", site_id: ""}
+  - {id: landing-product, name: "Продуктовая страница «как у Apple», промо товара", genre: landing, priority: 2, ai_media: "3.2", site_id: ""}
+  - {id: landing-campaign, name: "Запуск, кампания, D2C (L2, «вау»)", genre: landing, priority: 3, ai_media: "3.4", site_id: ""}
+  - {id: landing-event, name: "Мероприятие, вебинар", genre: landing, priority: 0, ai_media: "", site_id: ""}
+  - {id: landing-course, name: "Курс, онлайн-образование", genre: landing, priority: 0, ai_media: "", site_id: ""}
+  - {id: landing-app, name: "Мобильное приложение", genre: landing, priority: 0, ai_media: "", site_id: ""}
+  - {id: landing-waitlist, name: "Лист ожидания, предзаказ", genre: landing, priority: 0, ai_media: "", site_id: ""}
+  - {id: home-multipage, name: "Главная многостраничного сайта", genre: site-page, priority: 4, ai_media: "3.6", site_id: ""}
+  - {id: service-page, name: "Страница услуги", genre: site-page, priority: 4, ai_media: "3.6", site_id: ""}
+  - {id: about-page, name: "О компании", genre: site-page, priority: 4, ai_media: "", site_id: ""}
+  - {id: case-page, name: "Кейс", genre: site-page, priority: 4, ai_media: "", site_id: ""}
+  - {id: pricing-page, name: "Тарифы, цены", genre: site-page, priority: 4, ai_media: "", site_id: ""}
+  - {id: careers-page, name: "Вакансии", genre: site-page, priority: 0, ai_media: "", site_id: ""}
+  - {id: contacts-page, name: "Контакты", genre: site-page, priority: 4, ai_media: "", site_id: ""}
+  - {id: portfolio-page, name: "Студия, портфолио", genre: site-page, priority: 0, ai_media: "3.5", site_id: ""}
+  - {id: article-page, name: "Статья блога, справочный материал", genre: article, priority: 0, ai_media: "3.7", site_id: ""}
+  - {id: seo-landing-page, name: "SEO-страница услуги или категории (город, отрасль)", genre: article, priority: 1, ai_media: "", site_id: ""}
+  # вне рамок: интернет-магазин целиком (3.3 — только промо товара), вставки в сервисы (3.8 — ux)
+
+section_roles:
+  # роль секции в сюжете страницы; kimi — ближайший job из site.sections; порядок секций задаёт site
+  - {id: hero, name: "Первый экран: оффер", site_id: ""}
+  - {id: problem, name: "Проблема, боль, ситуация клиента", site_id: ""}
+  - {id: solution, name: "Решение, как продукт меняет ситуацию", site_id: ""}
+  - {id: benefits, name: "Выгоды, фичи, преимущества (карточки)", site_id: ""}
+  - {id: how-it-works, name: "Как это работает, шаги, процесс услуги", site_id: ""}
+  - {id: product-demo, name: "Показ продукта: скриншоты, демо, видео", site_id: ""}
+  - {id: proof-logos, name: "Логотипы клиентов, «нам доверяют»", site_id: ""}
+  - {id: proof-stats, name: "Ряд цифр", site_id: ""}
+  - {id: testimonials, name: "Отзывы", site_id: ""}
+  - {id: case-studies, name: "Кейсы, результаты клиентов", site_id: ""}
+  - {id: awards-press, name: "Награды, пресса, сертификаты", site_id: ""}
+  - {id: comparison, name: "Сравнение с альтернативами", site_id: ""}
+  - {id: pricing, name: "Тарифы, цены", site_id: ""}
+  - {id: guarantee, name: "Гарантии, снятие риска", site_id: ""}
+  - {id: objections, name: "Ответы на возражения (не FAQ)", site_id: ""}
+  - {id: faq, name: "Частые вопросы", site_id: ""}
+  - {id: about, name: "О компании, история, основатель", site_id: ""}
+  - {id: team, name: "Команда, эксперты", site_id: ""}
+  - {id: portfolio, name: "Работы, галерея", site_id: ""}
+  - {id: integrations, name: "Интеграции, партнёры", site_id: ""}
+  - {id: event-program, name: "Программа, спикеры, площадка (мероприятие, курс)", site_id: ""}
+  - {id: cta-band, name: "Промежуточный призыв", site_id: ""}
+  - {id: lead-form, name: "Форма заявки, квиз, калькулятор", site_id: ""}
+  - {id: final-cta, name: "Финальный призыв", site_id: ""}
+  - {id: contacts, name: "Контакты, карта, реквизиты", site_id: ""}
+  - {id: footer, name: "Подвал", site_id: ""}
+  - {id: article-body, name: "Тело статьи", site_id: ""}
+  - {id: related, name: "Связанные материалы, перелинковка", site_id: ""}
+
+slot_types:
+  # ux_role — роль узла ux 07/06 §7.2 (для интерфейсных частей и наследования словарей ux); kimi — элемент copy.md
+  # (h — заголовок, lead — лид, body — тело, btn — подпись кнопки, micro — микрокопи); genres — где встречается;
+  # measured — меряет ли D в корпусе (ориентир для thresholds.yaml, D решает сам)
+  # --- мета (жанр meta)
+  - {id: meta-title, name: "<title>", ux_role: "", kimi: "", genres: [meta], measured: true}
+  - {id: meta-description, name: "meta description", ux_role: "", kimi: "", genres: [meta], measured: true}
+  - {id: og-title, name: "og:title", ux_role: "", kimi: "", genres: [meta], measured: true}
+  - {id: og-description, name: "og:description", ux_role: "", kimi: "", genres: [meta], measured: true}
+  - {id: og-image-alt, name: "og:image:alt", ux_role: alt, kimi: "", genres: [meta], measured: false}
+  # --- первый экран
+  - {id: eyebrow, name: "Надзаголовок (над H1 или H2)", ux_role: marketing, kimi: micro, genres: [landing, site-page], measured: true}
+  - {id: headline, name: "Заголовок первого экрана (H1)", ux_role: title, kimi: h, genres: [landing, site-page], measured: true}
+  - {id: subheadline, name: "Подзаголовок, лид первого экрана", ux_role: subtitle, kimi: lead, genres: [landing, site-page], measured: true}
+  - {id: hero-proof, name: "Микродоказательство в первом экране (рейтинг, число, клиент)", ux_role: marketing, kimi: micro, genres: [landing, site-page], measured: true}
+  - {id: cta-label, name: "Подпись главной кнопки", ux_role: action, kimi: btn, genres: [landing, site-page, email-form], measured: true}
+  - {id: cta-secondary-label, name: "Подпись второстепенной кнопки или ссылки", ux_role: link, kimi: btn, genres: [landing, site-page], measured: true}
+  - {id: cta-note, name: "Строка у кнопки: снятие риска, что будет дальше, цена и время", ux_role: hint, kimi: micro, genres: [landing, site-page], measured: true}
+  # --- секции
+  - {id: section-title, name: "Заголовок секции (H2)", ux_role: section-title, kimi: h, genres: [landing, site-page, article], measured: true}
+  - {id: section-lead, name: "Лид секции", ux_role: marketing, kimi: lead, genres: [landing, site-page], measured: true}
+  - {id: body, name: "Проза блока: абзацы «о нас», история, описание услуги", ux_role: marketing, kimi: body, genres: [landing, site-page], measured: true}
+  - {id: list-item, name: "Пункт списка", ux_role: marketing, kimi: body, genres: [landing, site-page, article], measured: true}
+  - {id: card-title, name: "Заголовок карточки (фича, выгода, услуга)", ux_role: section-title, kimi: h, genres: [landing, site-page], measured: true}
+  - {id: card-body, name: "Текст карточки", ux_role: marketing, kimi: body, genres: [landing, site-page], measured: true}
+  - {id: step-title, name: "Заголовок шага «как это работает»", ux_role: section-title, kimi: h, genres: [landing, site-page], measured: true}
+  - {id: step-body, name: "Текст шага", ux_role: marketing, kimi: body, genres: [landing, site-page], measured: true}
+  - {id: stat-value, name: "Число в ряду цифр", ux_role: marketing, kimi: body, genres: [landing, site-page], measured: true}
+  - {id: stat-label, name: "Подпись числа", ux_role: caption, kimi: micro, genres: [landing, site-page], measured: true}
+  - {id: logos-caption, name: "Подпись ряда логотипов («Нам доверяют»)", ux_role: marketing, kimi: micro, genres: [landing, site-page], measured: true}
+  - {id: testimonial-quote, name: "Текст отзыва", ux_role: user-content, kimi: body, genres: [landing, site-page], measured: true}
+  - {id: testimonial-attribution, name: "Подпись отзыва: имя, должность, компания", ux_role: caption, kimi: micro, genres: [landing, site-page], measured: true}
+  - {id: case-title, name: "Заголовок кейса", ux_role: section-title, kimi: h, genres: [landing, site-page], measured: true}
+  - {id: case-summary, name: "Кейс: ситуация, задача, решение", ux_role: marketing, kimi: body, genres: [landing, site-page], measured: true}
+  - {id: case-result, name: "Результат кейса (число из фактов)", ux_role: marketing, kimi: body, genres: [landing, site-page], measured: true}
+  - {id: pricing-plan-name, name: "Название тарифа", ux_role: section-title, kimi: h, genres: [landing, site-page], measured: true}
+  - {id: pricing-plan-summary, name: "Кому подходит тариф, описание", ux_role: marketing, kimi: body, genres: [landing, site-page], measured: true}
+  - {id: pricing-price, name: "Цена", ux_role: marketing, kimi: body, genres: [landing, site-page], measured: true}
+  - {id: pricing-price-note, name: "Условия цены: «от», период, скидка, пробный период", ux_role: hint, kimi: micro, genres: [landing, site-page], measured: true}
+  - {id: pricing-feature, name: "Пункт состава тарифа", ux_role: marketing, kimi: body, genres: [landing, site-page], measured: true}
+  - {id: badge, name: "Бейдж на карточке («Популярный», «Новое»)", ux_role: badge, kimi: micro, genres: [landing, site-page], measured: true}
+  - {id: guarantee-text, name: "Текст гарантии, снятия риска", ux_role: marketing, kimi: body, genres: [landing, site-page], measured: true}
+  - {id: objection-answer, name: "Ответ на возражение вне FAQ", ux_role: marketing, kimi: body, genres: [landing, site-page], measured: false}
+  - {id: comparison-row, name: "Строка сравнения с альтернативой", ux_role: column-header, kimi: body, genres: [landing, site-page], measured: false}
+  - {id: faq-q, name: "Вопрос FAQ", ux_role: section-title, kimi: h, genres: [landing, site-page, article, geo], measured: true}
+  - {id: faq-a, name: "Ответ FAQ", ux_role: help, kimi: body, genres: [landing, site-page, article, geo], measured: true}
+  # --- формы и то, что они порождают на странице (микрокопи полей — ux 07/02 §3)
+  - {id: form-title, name: "Заголовок формы", ux_role: title, kimi: h, genres: [landing, site-page], measured: true}
+  - {id: form-lead, name: "Ценность формы: что получите", ux_role: marketing, kimi: lead, genres: [landing, site-page], measured: true}
+  - {id: form-next-steps, name: "Что будет после отправки", ux_role: hint, kimi: micro, genres: [landing, site-page], measured: true}
+  - {id: form-consent, name: "Строка о персональных данных, согласие", ux_role: checkbox-label, kimi: micro, genres: [landing, site-page, email-form], measured: true}
+  - {id: form-success, name: "Экран или блок «спасибо»", ux_role: inline-message, kimi: micro, genres: [landing, site-page, email-form], measured: false}
+  # --- подвал и навигация
+  - {id: nav-label, name: "Пункт навигации", ux_role: nav, kimi: micro, genres: [site-page, landing], measured: true}
+  - {id: footer-tagline, name: "Строка бренда в подвале", ux_role: marketing, kimi: micro, genres: [landing, site-page], measured: false}
+  - {id: footer-legal, name: "Реквизиты, правовые строки подвала", ux_role: caption, kimi: micro, genres: [landing, site-page], measured: false}
+  # --- статьи и GEO
+  - {id: article-title, name: "Заголовок статьи (H1)", ux_role: title, kimi: h, genres: [article], measured: true}
+  - {id: article-lead, name: "Лид статьи", ux_role: marketing, kimi: lead, genres: [article], measured: true}
+  - {id: article-summary, name: "«Коротко» в начале статьи", ux_role: marketing, kimi: body, genres: [article, geo], measured: true}
+  - {id: article-heading, name: "Подзаголовок статьи (H2, H3)", ux_role: section-title, kimi: h, genres: [article], measured: true}
+  - {id: article-paragraph, name: "Абзац статьи", ux_role: marketing, kimi: body, genres: [article], measured: true}
+  - {id: article-author, name: "Автор, его опыт (E-E-A-T)", ux_role: caption, kimi: micro, genres: [article], measured: false}
+  - {id: geo-answer, name: "Самодостаточный абзац-ответ для цитирования нейросетью", ux_role: marketing, kimi: body, genres: [geo], measured: false}
+  - {id: definition, name: "Определение термина или сущности", ux_role: marketing, kimi: body, genres: [geo, article], measured: false}
+  # --- письма вокруг форм
+  - {id: email-subject, name: "Тема письма", ux_role: email, kimi: "", genres: [email-form], measured: false}
+  - {id: email-preheader, name: "Прехедер", ux_role: email, kimi: "", genres: [email-form], measured: false}
+  - {id: email-heading, name: "Заголовок письма", ux_role: email, kimi: "", genres: [email-form], measured: false}
+  - {id: email-body, name: "Тело письма", ux_role: email, kimi: "", genres: [email-form], measured: false}
+  - {id: email-cta-label, name: "Кнопка в письме", ux_role: action, kimi: "", genres: [email-form], measured: false}
+  - {id: email-footer, name: "Подвал письма: почему пришло, отписка, реквизиты", ux_role: email, kimi: "", genres: [email-form], measured: false}
+  # --- тексты при медиа (правила доставки — ai-media 10/01 §7–8; здесь только тип слота)
+  - {id: image-alt, name: "alt картинки", ux_role: alt, kimi: "", genres: [landing, site-page, article], measured: false}
+  - {id: in-image-text, name: "Строка в картинке (text.mode: in_image, ≤ 3 строк, ≤ 40 знаков — ai-media 05/03 §7)", ux_role: "", kimi: "", genres: [landing], measured: false}
+
+awareness:  # Schwartz; значения предлагает B1, владелец — site
+  - {id: unaware, name: "Не знает о проблеме"}
+  - {id: problem-aware, name: "Знает о проблеме"}
+  - {id: solution-aware, name: "Знает о решениях"}
+  - {id: product-aware, name: "Знает о продукте"}
+  - {id: most-aware, name: "Готов купить"}
+
+traffic:  # температура трафика; владелец — site
+  temperature:
+    - {id: cold, name: "Холодный: не искал, пришёл из рекламы в ленте, с контентной площадки"}
+    - {id: warm, name: "Тёплый: ищет решение задачи, сравнивает"}
+    - {id: hot, name: "Горячий: ищет продукт или бренд, готов действовать"}
+  sources:
+    - {id: search-problem, name: "Поиск по проблеме", temperature_hint: cold}
+    - {id: search-category, name: "Поиск по категории решения или услуге (с городом)", temperature_hint: warm}
+    - {id: search-brand, name: "Брендовый запрос", temperature_hint: hot}
+    - {id: paid-social, name: "Реклама в соцсетях, таргет", temperature_hint: cold}
+    - {id: paid-search, name: "Контекстная реклама", temperature_hint: warm}
+    - {id: ai-answer, name: "Переход из ответа нейросети", temperature_hint: warm}
+    - {id: referral, name: "Рекомендация, партнёр, статья", temperature_hint: warm}
+    - {id: email, name: "Рассылка, письмо", temperature_hint: hot}
+    - {id: direct, name: "Прямой заход", temperature_hint: hot}

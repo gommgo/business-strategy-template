@@ -1,0 +1,718 @@
+# ЗАГЛУШКИ J с id форматов сестёр (text copy-deck, creative treatment) — не тексты и не подача.
+copy_deck_stub:
+  x_stub: 'ЗАГЛУШКА J: формат copy-deck text (../../../../text/10-templates-recipes/copy-deck.schema.json) — только id; тексты
+    пишет text'
+  site: otves-remont-nn
+  page_id: home
+  page_type: landing-lead-services
+  awareness: solution-aware
+  page_plan_ref: plans/home.yaml
+  sections:
+  - section_id: announcement-bar
+    site_section_id: announcement-bar
+    section_role: header
+    block: announcement-bar
+    question: ''
+    slots:
+    - slot_id: text
+      slot_type: announcement
+      site_slot_id: text
+      fact_ids:
+      - fact:promo-october-10
+      missing_ids: []
+      text: '[PLACEHOLDER: announcement — copy-deck text]'
+  - section_id: header
+    site_section_id: header
+    section_role: header
+    block: header
+    question: ''
+    slots:
+    - slot_id: cta-label
+      slot_type: cta-label
+      site_slot_id: cta-label
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: cta-label — copy-deck text]'
+  - section_id: hero
+    site_section_id: hero
+    section_role: hero
+    block: hero-media
+    question: Это ремонт под ключ в моём городе? Сколько стоит и можно ли им доверять?
+    slots:
+    - slot_id: eyebrow
+      slot_type: eyebrow
+      site_slot_id: eyebrow
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: eyebrow — copy-deck text]'
+    - slot_id: headline
+      slot_type: headline
+      site_slot_id: headline
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: headline — copy-deck text]'
+    - slot_id: subheadline
+      slot_type: subheadline
+      site_slot_id: subheadline
+      fact_ids:
+      - fact:price-from-per-m2
+      - fact:estimate-free
+      missing_ids: []
+      text: '[PLACEHOLDER: subheadline — copy-deck text]'
+    - slot_id: hero-proof
+      slot_type: hero-proof
+      site_slot_id: hero-proof
+      fact_ids:
+      - fact:rating-yandex-maps
+      missing_ids: []
+      text: '[PLACEHOLDER: hero-proof — copy-deck text]'
+    - slot_id: cta-label
+      slot_type: cta-label
+      site_slot_id: cta-label
+      fact_ids:
+      - fact:estimate-free
+      missing_ids: []
+      text: '[PLACEHOLDER: cta-label — copy-deck text]'
+    - slot_id: cta-secondary-label
+      slot_type: cta-secondary-label
+      site_slot_id: cta-secondary-label
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: cta-secondary-label — copy-deck text]'
+    - slot_id: cta-note
+      slot_type: cta-note
+      site_slot_id: cta-note
+      fact_ids:
+      - fact:estimate-free
+      missing_ids: []
+      text: '[PLACEHOLDER: cta-note — copy-deck text]'
+    - slot_id: alt
+      slot_type: image-alt
+      site_slot_id: alt
+      fact_ids:
+      - fact:foreman-lapin
+      missing_ids: []
+      text: '[PLACEHOLDER: image-alt — copy-deck text]'
+  - section_id: offer
+    site_section_id: offer
+    section_role: offer
+    block: offer-details
+    question: Что входит в ремонт под ключ за эти деньги — и что нет?
+    slots:
+    - slot_id: title
+      slot_type: section-title
+      site_slot_id: title
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: section-title — copy-deck text]'
+    - slot_id: include-1-text
+      slot_type: list-item
+      site_slot_id: include.text
+      group: include-1
+      fact_ids:
+      - fact:estimate-free
+      missing_ids: []
+      text: '[PLACEHOLDER: list-item — copy-deck text]'
+    - slot_id: include-2-text
+      slot_type: list-item
+      site_slot_id: include.text
+      group: include-2
+      fact_ids:
+      - fact:guarantee-3-years
+      missing_ids: []
+      text: '[PLACEHOLDER: list-item — copy-deck text]'
+    - slot_id: include-3-text
+      slot_type: list-item
+      site_slot_id: include.text
+      group: include-3
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: list-item — copy-deck text]'
+    - slot_id: exclude-1-text
+      slot_type: list-item
+      site_slot_id: exclude.text
+      group: exclude-1
+      fact_ids:
+      - fact:price-from-per-m2
+      missing_ids: []
+      text: '[PLACEHOLDER: list-item — copy-deck text]'
+  - section_id: pricing
+    site_section_id: pricing
+    section_role: pricing
+    block: calculator
+    question: Сколько будет стоить моя квартира?
+    slots:
+    - slot_id: title
+      slot_type: section-title
+      site_slot_id: title
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: section-title — copy-deck text]'
+    - slot_id: lead
+      slot_type: form-lead
+      site_slot_id: lead
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: form-lead — copy-deck text]'
+    - slot_id: result
+      slot_type: result-summary
+      site_slot_id: result
+      fact_ids:
+      - fact:price-from-per-m2
+      - fact:promo-october-10
+      missing_ids: []
+      text: '[PLACEHOLDER: result-summary — copy-deck text]'
+    - slot_id: disclaimer
+      slot_type: disclaimer
+      site_slot_id: disclaimer
+      fact_ids:
+      - fact:price-from-per-m2
+      missing_ids:
+      - missing:payment-stages
+      text: '[PLACEHOLDER: disclaimer — copy-deck text]'
+    - slot_id: cta-label
+      slot_type: cta-label
+      site_slot_id: cta-label
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: cta-label — copy-deck text]'
+  - section_id: guarantee
+    site_section_id: guarantee
+    section_role: guarantee
+    block: guarantee
+    question: Что если после ремонта что-то пойдёт не так?
+    slots:
+    - slot_id: title
+      slot_type: section-title
+      site_slot_id: title
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: section-title — copy-deck text]'
+    - slot_id: text
+      slot_type: guarantee-text
+      site_slot_id: text
+      fact_ids:
+      - fact:guarantee-3-years
+      missing_ids:
+      - missing:estimate-change-policy
+      text: '[PLACEHOLDER: guarantee-text — copy-deck text]'
+  - section_id: lead-form
+    site_section_id: lead-form
+    section_role: lead-form
+    block: lead-form
+    question: Как записаться на замер и что будет дальше?
+    slots:
+    - slot_id: title
+      slot_type: form-title
+      site_slot_id: title
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: form-title — copy-deck text]'
+    - slot_id: lead
+      slot_type: form-lead
+      site_slot_id: lead
+      fact_ids:
+      - fact:estimate-free
+      missing_ids: []
+      text: '[PLACEHOLDER: form-lead — copy-deck text]'
+    - slot_id: cta-label
+      slot_type: cta-label
+      site_slot_id: cta-label
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: cta-label — copy-deck text]'
+    - slot_id: consent
+      slot_type: form-consent
+      site_slot_id: consent
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: form-consent — copy-deck text]'
+    - slot_id: next-steps
+      slot_type: form-next-steps
+      site_slot_id: next-steps
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: form-next-steps — copy-deck text]'
+    - slot_id: success
+      slot_type: form-success
+      site_slot_id: success
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: form-success — copy-deck text]'
+  - section_id: how-it-works
+    site_section_id: how-it-works
+    section_role: how-it-works
+    block: steps
+    question: Как пройдёт ремонт и кто следит, чтобы смета и срок не поплыли?
+    slots:
+    - slot_id: title
+      slot_type: section-title
+      site_slot_id: title
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: section-title — copy-deck text]'
+    - slot_id: step-1-title
+      slot_type: step-title
+      site_slot_id: step.title
+      group: step-1
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: step-title — copy-deck text]'
+    - slot_id: step-1-body
+      slot_type: step-body
+      site_slot_id: step.body
+      group: step-1
+      fact_ids:
+      - fact:estimate-free
+      missing_ids: []
+      text: '[PLACEHOLDER: step-body — copy-deck text]'
+    - slot_id: step-2-title
+      slot_type: step-title
+      site_slot_id: step.title
+      group: step-2
+      fact_ids: []
+      missing_ids:
+      - missing:deadline-terms
+      text: '[PLACEHOLDER: step-title — copy-deck text]'
+    - slot_id: step-2-body
+      slot_type: step-body
+      site_slot_id: step.body
+      group: step-2
+      fact_ids: []
+      missing_ids:
+      - missing:estimate-change-policy
+      text: '[PLACEHOLDER: step-body — copy-deck text]'
+    - slot_id: step-3-title
+      slot_type: step-title
+      site_slot_id: step.title
+      group: step-3
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: step-title — copy-deck text]'
+    - slot_id: step-3-body
+      slot_type: step-body
+      site_slot_id: step.body
+      group: step-3
+      fact_ids:
+      - fact:foreman-lapin
+      missing_ids:
+      - missing:foreman-per-object
+      - missing:photo-report-process
+      text: '[PLACEHOLDER: step-body — copy-deck text]'
+    - slot_id: step-4-title
+      slot_type: step-title
+      site_slot_id: step.title
+      group: step-4
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: step-title — copy-deck text]'
+    - slot_id: step-4-body
+      slot_type: step-body
+      site_slot_id: step.body
+      group: step-4
+      fact_ids:
+      - fact:guarantee-3-years
+      missing_ids: []
+      text: '[PLACEHOLDER: step-body — copy-deck text]'
+  - section_id: case-studies
+    site_section_id: case-studies
+    section_role: case-studies
+    block: case-study
+    question: Вы правда сдаёте в срок, который обещаете?
+    slots:
+    - slot_id: title
+      slot_type: case-title
+      site_slot_id: title
+      fact_ids:
+      - fact:case-two-room-47-days
+      missing_ids: []
+      text: '[PLACEHOLDER: case-title — copy-deck text]'
+    - slot_id: summary
+      slot_type: case-summary
+      site_slot_id: summary
+      fact_ids:
+      - fact:case-two-room-47-days
+      missing_ids:
+      - missing:deadline-terms
+      text: '[PLACEHOLDER: case-summary — copy-deck text]'
+    - slot_id: result
+      slot_type: case-result
+      site_slot_id: result
+      fact_ids:
+      - fact:case-two-room-47-days
+      missing_ids: []
+      text: '[PLACEHOLDER: case-result — copy-deck text]'
+    - slot_id: quote
+      slot_type: testimonial-quote
+      site_slot_id: quote
+      fact_ids:
+      - fact:review-anna-k
+      missing_ids: []
+      text: '[PLACEHOLDER: testimonial-quote — copy-deck text]'
+    - slot_id: attribution
+      slot_type: testimonial-attribution
+      site_slot_id: attribution
+      fact_ids:
+      - fact:review-anna-k
+      missing_ids: []
+      text: '[PLACEHOLDER: testimonial-attribution — copy-deck text]'
+    - slot_id: stat-1-value
+      slot_type: stat-value
+      site_slot_id: stat.value
+      group: stat-1
+      fact_ids:
+      - fact:case-two-room-47-days
+      missing_ids: []
+      text: '[PLACEHOLDER: stat-value — copy-deck text]'
+    - slot_id: stat-1-label
+      slot_type: stat-label
+      site_slot_id: stat.label
+      group: stat-1
+      fact_ids:
+      - fact:case-two-room-47-days
+      missing_ids: []
+      text: '[PLACEHOLDER: stat-label — copy-deck text]'
+  - section_id: testimonials
+    site_section_id: testimonials
+    section_role: testimonials
+    block: review-aggregate
+    question: Что говорят другие клиенты — и где это проверить?
+    slots:
+    - slot_id: title
+      slot_type: section-title
+      site_slot_id: title
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: section-title — copy-deck text]'
+    - slot_id: rating
+      slot_type: stat-value
+      site_slot_id: rating
+      fact_ids:
+      - fact:rating-yandex-maps
+      missing_ids: []
+      text: '[PLACEHOLDER: stat-value — copy-deck text]'
+    - slot_id: rating-label
+      slot_type: stat-label
+      site_slot_id: rating-label
+      fact_ids:
+      - fact:rating-yandex-maps
+      missing_ids: []
+      text: '[PLACEHOLDER: stat-label — copy-deck text]'
+    - slot_id: source
+      slot_type: stat-source
+      site_slot_id: source
+      fact_ids:
+      - fact:rating-yandex-maps
+      missing_ids: []
+      text: '[PLACEHOLDER: stat-source — copy-deck text]'
+  - section_id: team
+    site_section_id: team
+    section_role: team
+    block: team-grid
+    question: Кто будет отвечать за мой ремонт?
+    slots:
+    - slot_id: title
+      slot_type: section-title
+      site_slot_id: title
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: section-title — copy-deck text]'
+    - slot_id: person-1-name
+      slot_type: card-title
+      site_slot_id: person.name
+      group: person-1
+      fact_ids:
+      - fact:foreman-lapin
+      missing_ids: []
+      text: '[PLACEHOLDER: card-title — copy-deck text]'
+    - slot_id: person-1-role
+      slot_type: card-body
+      site_slot_id: person.role
+      group: person-1
+      fact_ids:
+      - fact:foreman-lapin
+      missing_ids:
+      - missing:foreman-per-object
+      text: '[PLACEHOLDER: card-body — copy-deck text]'
+  - section_id: comparison
+    site_section_id: comparison
+    section_role: comparison
+    block: comparison-table
+    question: Почему не нанять бригаду самому — по знакомству дешевле?
+    slots:
+    - slot_id: title
+      slot_type: section-title
+      site_slot_id: title
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: section-title — copy-deck text]'
+    - slot_id: source
+      slot_type: stat-source
+      site_slot_id: source
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: stat-source — copy-deck text]'
+    - slot_id: column-1-name
+      slot_type: card-title
+      site_slot_id: column.name
+      group: column-1
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: card-title — copy-deck text]'
+    - slot_id: column-2-name
+      slot_type: card-title
+      site_slot_id: column.name
+      group: column-2
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: card-title — copy-deck text]'
+    - slot_id: column-3-name
+      slot_type: card-title
+      site_slot_id: column.name
+      group: column-3
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: card-title — copy-deck text]'
+    - slot_id: row-1-row
+      slot_type: comparison-row
+      site_slot_id: row.row
+      group: row-1
+      fact_ids: []
+      missing_ids:
+      - missing:foreman-per-object
+      text: '[PLACEHOLDER: comparison-row — copy-deck text]'
+    - slot_id: row-2-row
+      slot_type: comparison-row
+      site_slot_id: row.row
+      group: row-2
+      fact_ids:
+      - fact:guarantee-3-years
+      missing_ids: []
+      text: '[PLACEHOLDER: comparison-row — copy-deck text]'
+    - slot_id: row-3-row
+      slot_type: comparison-row
+      site_slot_id: row.row
+      group: row-3
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: comparison-row — copy-deck text]'
+  - section_id: faq
+    site_section_id: faq
+    section_role: faq
+    block: faq
+    question: 'Остались частные вопросы: маленький объём, оплата, соседи'
+    slots:
+    - slot_id: title
+      slot_type: section-title
+      site_slot_id: title
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: section-title — copy-deck text]'
+    - slot_id: qa-1-q
+      slot_type: faq-q
+      site_slot_id: qa.q
+      group: qa-1
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: faq-q — copy-deck text]'
+    - slot_id: qa-1-a
+      slot_type: faq-a
+      site_slot_id: qa.a
+      group: qa-1
+      fact_ids: []
+      missing_ids:
+      - missing:estimate-change-policy
+      text: '[PLACEHOLDER: faq-a — copy-deck text]'
+    - slot_id: qa-2-q
+      slot_type: faq-q
+      site_slot_id: qa.q
+      group: qa-2
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: faq-q — copy-deck text]'
+    - slot_id: qa-2-a
+      slot_type: faq-a
+      site_slot_id: qa.a
+      group: qa-2
+      fact_ids: []
+      missing_ids:
+      - missing:payment-stages
+      text: '[PLACEHOLDER: faq-a — copy-deck text]'
+    - slot_id: qa-3-q
+      slot_type: faq-q
+      site_slot_id: qa.q
+      group: qa-3
+      fact_ids: []
+      missing_ids:
+      - missing:min-job-size
+      text: '[PLACEHOLDER: faq-q — copy-deck text]'
+    - slot_id: qa-3-a
+      slot_type: faq-a
+      site_slot_id: qa.a
+      group: qa-3
+      fact_ids: []
+      missing_ids:
+      - missing:min-job-size
+      text: '[PLACEHOLDER: faq-a — copy-deck text]'
+    - slot_id: qa-4-q
+      slot_type: faq-q
+      site_slot_id: qa.q
+      group: qa-4
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: faq-q — copy-deck text]'
+    - slot_id: qa-4-a
+      slot_type: faq-a
+      site_slot_id: qa.a
+      group: qa-4
+      fact_ids:
+      - fact:guarantee-3-years
+      missing_ids: []
+      text: '[PLACEHOLDER: faq-a — copy-deck text]'
+  - section_id: final-cta
+    site_section_id: final-cta
+    section_role: final-cta
+    block: lead-form
+    question: Решение ещё обсуждается дома — что сделать сейчас?
+    slots:
+    - slot_id: title
+      slot_type: form-title
+      site_slot_id: title
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: form-title — copy-deck text]'
+    - slot_id: lead
+      slot_type: form-lead
+      site_slot_id: lead
+      fact_ids:
+      - fact:estimate-free
+      missing_ids: []
+      text: '[PLACEHOLDER: form-lead — copy-deck text]'
+    - slot_id: cta-label
+      slot_type: cta-label
+      site_slot_id: cta-label
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: cta-label — copy-deck text]'
+    - slot_id: consent
+      slot_type: form-consent
+      site_slot_id: consent
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: form-consent — copy-deck text]'
+    - slot_id: next-steps
+      slot_type: form-next-steps
+      site_slot_id: next-steps
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: form-next-steps — copy-deck text]'
+    - slot_id: success
+      slot_type: form-success
+      site_slot_id: success
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: form-success — copy-deck text]'
+    - slot_id: secondary-label
+      slot_type: cta-secondary-label
+      site_slot_id: secondary-label
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: cta-secondary-label — copy-deck text]'
+  - section_id: footer
+    site_section_id: footer
+    section_role: footer
+    block: footer
+    question: ''
+    slots:
+    - slot_id: legal
+      slot_type: footer-legal
+      site_slot_id: legal
+      fact_ids: []
+      missing_ids:
+      - missing:legal-details
+      text: '[PLACEHOLDER: footer-legal — copy-deck text]'
+    - slot_id: contacts
+      slot_type: contact-info
+      site_slot_id: contacts
+      fact_ids:
+      - fact:company-since-2014
+      missing_ids: []
+      text: '[PLACEHOLDER: contact-info — copy-deck text]'
+    - slot_id: privacy-label
+      slot_type: nav-label
+      site_slot_id: privacy-label
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: nav-label — copy-deck text]'
+    - slot_id: consent-label
+      slot_type: nav-label
+      site_slot_id: privacy-label
+      fact_ids: []
+      missing_ids: []
+      text: '[PLACEHOLDER: nav-label — copy-deck text]'
+treatment_stub:
+  x_stub: 'ЗАГЛУШКА J: treatment creative (urn:app-design:creative-research:treatment:0) — в плане home уже стоит treatment из опыта
+    creative A/02; здесь — только список секций для art-direction'
+  page: home
+  level: L1
+  sections:
+  - id: announcement-bar
+    role: header
+    block: announcement-bar
+    treatment_status: нет — ждём creative
+  - id: header
+    role: header
+    block: header
+    treatment_status: нет — ждём creative
+  - id: hero
+    role: hero
+    block: hero-media
+    treatment_status: нет — ждём creative
+  - id: offer
+    role: offer
+    block: offer-details
+    treatment_status: нет — ждём creative
+  - id: pricing
+    role: pricing
+    block: calculator
+    treatment_status: нет — ждём creative
+  - id: guarantee
+    role: guarantee
+    block: guarantee
+    treatment_status: нет — ждём creative
+  - id: lead-form
+    role: lead-form
+    block: lead-form
+    treatment_status: нет — ждём creative
+  - id: how-it-works
+    role: how-it-works
+    block: steps
+    treatment_status: нет — ждём creative
+  - id: case-studies
+    role: case-studies
+    block: case-study
+    treatment_status: нет — ждём creative
+  - id: testimonials
+    role: testimonials
+    block: review-aggregate
+    treatment_status: нет — ждём creative
+  - id: team
+    role: team
+    block: team-grid
+    treatment_status: нет — ждём creative
+  - id: comparison
+    role: comparison
+    block: comparison-table
+    treatment_status: нет — ждём creative
+  - id: faq
+    role: faq
+    block: faq
+    treatment_status: нет — ждём creative
+  - id: final-cta
+    role: final-cta
+    block: lead-form
+    treatment_status: нет — ждём creative
+  - id: footer
+    role: footer
+    block: footer
+    treatment_status: нет — ждём creative

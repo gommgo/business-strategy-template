@@ -1,0 +1,103 @@
+{
+ "spec_version": "0.1",
+ "checked_at": "2026-09-23",
+ "brief_language": "ru",
+ "id": "stand-s09-product-tea-count",
+ "task": "IMG-PRODUCT",
+ "role": {
+  "page_type": "ecommerce",
+  "section": "product",
+  "slot": "product-still",
+  "purpose": "проверка счёта и связей"
+ },
+ "subject": {
+  "summary": "a tea set on a linen tablecloth",
+  "elements": [
+   {
+    "id": "teapot",
+    "what": "clear glass teapot filled with amber tea",
+    "position": "right half"
+   },
+   {
+    "id": "cups",
+    "what": "white matte ceramic cups",
+    "count": 2,
+    "relation": "to the left of the teapot"
+   }
+  ],
+  "environment": "off-white linen tablecloth with soft folds"
+ },
+ "composition": {
+  "shot": "medium",
+  "angle": "45-degree",
+  "subject_region": "center",
+  "focal_point": {
+   "x": 0.55,
+   "y": 0.5
+  }
+ },
+ "camera": {
+  "lens_mm": 50,
+  "depth_of_field": "medium",
+  "capture": "studio product photo"
+ },
+ "light": {
+  "source": "soft window daylight",
+  "direction": "left",
+  "quality": "soft",
+  "interaction": "soft shadows falling to the right"
+ },
+ "palette": [
+  {
+   "role": "background",
+   "hex": "#EDE6DA",
+   "name": "off-white linen",
+   "share": 0.6,
+   "applies_to": "tablecloth"
+  },
+  {
+   "role": "secondary",
+   "hex": "#FAFAF7",
+   "name": "white",
+   "share": 0.15,
+   "applies_to": "cups"
+  },
+  {
+   "role": "accent",
+   "hex": "#C07A2C",
+   "name": "amber",
+   "share": 0.1,
+   "applies_to": "tea"
+  }
+ ],
+ "materials": [
+  "glass",
+  "matte ceramic",
+  "linen"
+ ],
+ "style": {
+  "medium": "photograph",
+  "anchors": [
+   "clean product photography",
+   "true-to-life colors"
+  ]
+ },
+ "exclusions": [
+  {
+   "what": "watermark",
+   "kind": "service"
+  }
+ ],
+ "text": {
+  "mode": "none"
+ },
+ "output": {
+  "primary_ratio": "16:9",
+  "aspect_ratios": [
+   "16:9"
+  ],
+  "resolution": "1K",
+  "format": "webp"
+ },
+ "notes": "копия 99-raw/experiments/D/03-compile-prototype/ab/B4.spec.json (агент D, волна 1)"
+}

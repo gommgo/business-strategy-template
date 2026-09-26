@@ -1,0 +1,51 @@
+{
+ "questions": {
+  "craft": "Какой кадр выглядит дороже, чётче и убедительнее?",
+  "page": "Какой первый экран сильнее как сайт?",
+  "motion": "Где движение лучше?"
+ },
+ "pairs": [
+  {
+   "id": "test-sculpt",
+   "group": "Проба · скульптура",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/t_sculpt.jpg",
+    "v": "тёмная лента"
+   },
+   "b": {
+    "src": "img/t_pearl.jpg",
+    "v": "белая лента"
+   }
+  },
+  {
+   "id": "test-case-island",
+   "group": "Проба · предметы",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/t_case.jpg",
+    "v": "кейс"
+   },
+   "b": {
+    "src": "img/t_island.jpg",
+    "v": "остров"
+   }
+  },
+  {
+   "id": "test-case-sculpt",
+   "group": "Проба · предметы",
+   "kind": "image",
+   "q": "craft",
+   "a": {
+    "src": "img/t_case.jpg",
+    "v": "кейс"
+   },
+   "b": {
+    "src": "img/t_sculpt.jpg",
+    "v": "скульптура"
+   }
+  }
+ ]
+}

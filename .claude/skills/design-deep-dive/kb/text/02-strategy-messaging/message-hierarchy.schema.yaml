@@ -1,0 +1,294 @@
+# message-hierarchy.schema.yaml — иерархия сообщений страницы: главное сообщение, опоры, доказательства, возражения и
+# «сюжет словами» по секциям
+# text-research · волна 1 · агент B1 · 2026-09-24 · версия формата 1 (черновик; v1 — по итогам волны 1)
+#
+# Что это. JSON Schema (draft 2020-12), записанная в YAML. Экземпляр — файл `hierarchy-<страница>.yaml`: одна иерархия
+# на страницу или шаблон страницы и на один уровень осведомлённости трафика (две аудитории с разным уровнем — два файла,
+# связанных `sibling_ids`). Правила — `02-awareness-hierarchy-objections.md` §2–§3.
+#
+# Границы (контракт тройки v2 §2): ПОРЯДОК и набор секций задаёт site (`page-plan`); здесь — какое сообщение несёт
+# секция и какой вопрос посетителя она закрывает («вопрос → доказательство → действие», kimi 03/03 §3.4). До page-plan
+# site секции описываются ролями `section_role` из временного словаря (`99-raw/notes/temp-vocabulary-v0.yaml`), порядок —
+# черновой (`order`), site его переопределит; после page-plan — поле `section_id`.
+#
+# Ссылки: смысл — `meaning_ref` (meaning.schema.yaml); факты — `fact:<id>` / `missing:<id>` (B2 facts.yaml); голос
+# клиента — `voc:<id>` (B2); возражения и ценность — id из meaning (`objection_ids`, `value_theme_refs`).
+# Потребители: E (тексты по слотам), I (цепочка генерации), J (copy-deck: `sections[].message` ← `sections[].message`,
+# `slots[].fact_ids` ← `proof_ids`), kimi (`site.sections[{id, job}]` — проекция, `x-kimi-map`).
+#
+# Даты — строкой в кавычках. Проверка: `../../scripts/text/validate_meaning.py` (схема + смысловые
+# проверки: первая секция — hero, каждая опора стоит хотя бы в одной секции, у опоры есть доказательство или missing,
+# возражения-блокеры из meaning закрыты до финального призыва).
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "urn:app-design:text-research:message-hierarchy:1"
+title: "message-hierarchy — что сообщает страница и в каком порядке доводов"
+description: >-
+  Главное сообщение (одна фраза), 3–5 опор с доказательствами, возражение к каждой опоре и раскладка по секциям:
+  у каждой секции один вопрос посетителя, одно сообщение, доказательства и следующий шаг. Формулировки внутренние —
+  тексты страницы пишет copy-deck.
+date: "2026-09-24"
+x-version: 1
+x-status: "черновик волны 1, 2026-09-24"
+x-owner: "text-research · 02-strategy-messaging · B1"
+x-doc: "02-strategy-messaging/02-awareness-hierarchy-objections.md"
+
+type: object
+required: [hierarchy_version, date, status, page, core_message, first_screen, pillars, sections]
+additionalProperties: false
+patternProperties:
+  "^x-": {description: "Расширения проекта; валидатор их не проверяет."}
+properties:
+  hierarchy_version:
+    const: 1
+  date:
+    $ref: "#/$defs/date"
+  status:
+    enum: [draft, proposed, approved]
+  id:
+    $ref: "#/$defs/id"
+    description: "id иерархии (например, hierarchy-lesnaya-problem-aware)."
+  site:
+    $ref: "#/$defs/id"
+  meaning_ref:
+    type: string
+    description: "Путь к meaning.yaml проекта или JSON Pointer в site-brief (`/meaning`)."
+  lang:
+    type: string
+    pattern: "^[a-z]{2}(-[A-Z]{2})?$"
+  sibling_ids:
+    type: array
+    items: {$ref: "#/$defs/id"}
+    description: "Иерархии той же страницы под другой уровень осведомлённости или сегмент (варианты страницы)."
+
+  page:
+    type: object
+    additionalProperties: false
+    required: [page_type, awareness]
+    properties:
+      page_type:
+        $ref: "#/$defs/page-type"
+      page_id:
+        type: string
+        description: "id страницы из site-map site (когда появится)."
+      segment_ref:
+        $ref: "#/$defs/id"
+        description: "Сегмент из meaning.audience (по умолчанию — основной)."
+      awareness:
+        $ref: "#/$defs/awareness-level"
+        description: "Уровень осведомлённости, под который написана эта иерархия."
+      traffic_sources:
+        type: array
+        items: {$ref: "#/$defs/traffic-source"}
+      sophistication_stage:
+        type: integer
+        minimum: 1
+        maximum: 5
+        description: "Искушённость рынка (Шварц): 1 — простое обещание … 3 — механизм … 5 — идентификация."
+      promise_of_source:
+        type: string
+        description: "Что обещал источник (объявление, запрос, письмо, пост): hero обязан это продолжить (message match)."
+      argument_depth:
+        enum: [short, medium, long]
+        description: >-
+          Сколько доводов нужно, чтобы довести этот трафик до действия (Wiebe: длина = аргумент от уровня
+          осведомлённости). Подсказка для site: число и порядок секций решает page-plan.
+      goal:
+        type: object
+        additionalProperties: false
+        properties:
+          action_ref: {type: string, description: "Главное действие (словарь action site; до S0 — свободный id)."}
+          secondary_goal: {type: string, description: "Для не готовых сейчас: что запомнить или сделать."}
+
+  core_message:
+    type: object
+    additionalProperties: false
+    required: [text, hero_approach, value_theme_refs]
+    description: "Главное сообщение: одна фраза, из которой выводятся hero и все опоры. Не заголовок — источник заголовка."
+    properties:
+      text:
+        type: string
+        minLength: 10
+        maxLength: 200
+      hero_approach:
+        enum: [direct-offer, product-benefit, solution-vs-alternatives, problem-story, identity]
+        description: >-
+          Тип первого экрана по уровню осведомлённости (02 §1.2): direct-offer — most-aware (сделка, цена, условия);
+          product-benefit — product-aware (продукт по имени + превосходство); solution-vs-alternatives — solution-aware
+          (категория и чем лучше привычных подходов); problem-story — problem-aware (узнаваемая ситуация и её цена);
+          identity — unaware (узнавание себя, без цены и названия в заголовке).
+      value_theme_refs:
+        type: array
+        minItems: 1
+        items: {$ref: "#/$defs/id"}
+        description: "id ценностей из meaning.positioning.value_themes."
+      proof_ids: {$ref: "#/$defs/proof-ids"}
+      must_not_say:
+        type: array
+        items: {type: string}
+        description: "Чего главное сообщение не говорит (границы meaning.boundaries.not_promised, чужой уровень осведомлённости)."
+
+  first_screen:
+    type: object
+    additionalProperties: false
+    required: [what, for_whom, outcome, next_step]
+    description: >-
+      Что посетитель должен понять за первый экран (impeccable Persuade: «what this is, why it matters, and what to do
+      within seconds»; Wynter: ясность → релевантность → ценность → отличие). Внутренние ответы, не тексты.
+    properties:
+      what: {type: string, description: "Что это — категория словами клиента."}
+      for_whom: {type: string, description: "Для кого — узнаваемый признак сегмента."}
+      outcome: {type: string, description: "Какой результат или какая перемена."}
+      differentiator: {type: string, description: "Чем отличается от привычной альтернативы (если уровень ≥ solution-aware)."}
+      next_step: {type: string, description: "Что сделать (или куда листать, если политика первого экрана site допускает призыв ниже)."}
+      proof_ids: {$ref: "#/$defs/proof-ids"}
+      message_match:
+        type: string
+        description: "Как hero продолжает обещание источника (не обязательно дословно; Wiebe: дословное совпадение может звучать неловко)."
+
+  pillars:
+    type: array
+    minItems: 3
+    maxItems: 5
+    description: "Опоры: 3–5 утверждений, каждое доказывает главное сообщение с одной стороны; у каждой — доказательство и возражение."
+    items: {$ref: "#/$defs/pillar"}
+
+  sections:
+    type: array
+    minItems: 3
+    description: "Сюжет словами: по секциям — вопрос посетителя, сообщение, доказательства, следующий шаг. Порядок — черновой (site решает)."
+    items: {$ref: "#/$defs/section"}
+
+  proof_order:
+    type: array
+    items:
+      type: string
+      pattern: "^(fact|missing):[a-z0-9]+(-[a-z0-9]+)*$"
+    description: "Порядок появления доказательств на странице (зависит от уровня осведомлённости: 02 §1.4)."
+
+  not_said:
+    type: array
+    items: {type: string}
+    description: "Что страница сознательно НЕ говорит (для другого уровня, сегмента, страницы) — чтобы генератор не дописывал."
+
+$defs:
+
+  id:
+    type: string
+    pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+
+  date:
+    type: string
+    pattern: "^[0-9]{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?$"
+
+  proof-ids:
+    type: array
+    uniqueItems: true
+    items:
+      type: string
+      pattern: "^(fact|missing):[a-z0-9]+(-[a-z0-9]+)*$"
+
+  voc-ids:
+    type: array
+    uniqueItems: true
+    items:
+      type: string
+      pattern: "^voc:[a-z0-9]+(-[a-z0-9]+)*$"
+
+  awareness-level:
+    enum: [unaware, problem-aware, solution-aware, product-aware, most-aware]
+
+  traffic-source:
+    enum: [search-problem, search-category, search-brand, paid-social, paid-search, ai-answer, referral, email, direct,
+           retargeting, maps-local, social-organic, marketplace, messenger, offline]
+
+  page-type:
+    description: "Временные id (temp-vocabulary-v0: page_types); после S0 — vocabulary.yaml site."
+    enum: [landing-lead-services, landing-saas, landing-product, landing-campaign, landing-event, landing-course,
+           landing-app, landing-waitlist, home-multipage, service-page, about-page, case-page, pricing-page, careers-page,
+           contacts-page, portfolio-page, article-page, seo-landing-page]
+
+  section-role:
+    description: "Временные id (temp-vocabulary-v0: section_roles); после page-plan site — section_id."
+    enum: [hero, problem, solution, benefits, how-it-works, product-demo, proof-logos, proof-stats, testimonials,
+           case-studies, awards-press, comparison, pricing, guarantee, objections, faq, about, team, portfolio,
+           integrations, event-program, cta-band, lead-form, final-cta, contacts, footer, article-body, related]
+
+  pillar:
+    type: object
+    additionalProperties: false
+    required: [id, message, proof_status]
+    properties:
+      id: {$ref: "#/$defs/id"}
+      message: {type: string, maxLength: 200, description: "Утверждение опоры одной фразой (внутреннее)."}
+      value_theme_refs:
+        type: array
+        items: {$ref: "#/$defs/id"}
+        description: "Ценности meaning, которые опора доказывает. Обязательны, кроме опоры слоя friction (снятие риска, условия оффера)."
+      layer:
+        enum: [clarity, relevance, value, differentiation, friction]
+        description: "Какой слой сообщения закрывает опора (Laja, Wynter): ясность, релевантность, ценность, отличие, снятие трения."
+      proof_status: {enum: [has-proof, missing]}
+      proof_ids: {$ref: "#/$defs/proof-ids"}
+      objection_ids:
+        type: array
+        items: {$ref: "#/$defs/id"}
+        description: "Возражения из meaning.objections, которые встают против этой опоры."
+      counter: {type: string, description: "Как опора отвечает на своё возражение (смысл)."}
+      voc_ids: {$ref: "#/$defs/voc-ids"}
+    allOf:
+      - if: {properties: {proof_status: {const: has-proof}}}
+        then: {required: [proof_ids], properties: {proof_ids: {minItems: 1}}}
+      - if:
+          not:
+            required: [layer]
+            properties: {layer: {const: friction}}
+        then: {required: [value_theme_refs], properties: {value_theme_refs: {minItems: 1}}}
+
+  section:
+    type: object
+    additionalProperties: false
+    required: [order, section_role, question, message]
+    properties:
+      order: {type: integer, minimum: 1, description: "Черновой порядок; site переопределяет page-plan."}
+      section_id: {type: string, description: "id секции из page-plan site (когда появится)."}
+      section_role: {$ref: "#/$defs/section-role"}
+      question:
+        type: string
+        description: "Вопрос посетителя, который закрывает секция, его словами («А это точно не разобьют?»)."
+      message:
+        type: string
+        maxLength: 240
+        description: "Что секция сообщает — одна мысль (внутренняя формулировка)."
+      carries:
+        type: array
+        items: {type: string, pattern: "^(core|[a-z0-9]+(-[a-z0-9]+)*)$"}
+        description: "Какие опоры (id) или главное сообщение (`core`) несёт секция."
+      proof_ids: {$ref: "#/$defs/proof-ids"}
+      objection_ids: {type: array, items: {$ref: "#/$defs/id"}}
+      next_step:
+        type: string
+        description: "Что дальше: призыв (какой), переход к следующему вопросу, ничего (служебная секция)."
+      awareness_shift:
+        type: object
+        additionalProperties: false
+        properties:
+          from: {$ref: "#/$defs/awareness-level"}
+          to: {$ref: "#/$defs/awareness-level"}
+        description: "С какого уровня на какой секция переводит читателя (problem-aware → solution-aware и т. д.)."
+      notes: {type: string}
+
+# Проекция в brief.yaml kimi и copy-deck (J) — предложение формата.
+x-kimi-map:
+  - site_path: "sections[] (упорядоченные по page-plan)"
+    kimi_path: "site.sections[{id, job}]"
+    rule: derive
+    note: "id ← section_id (до page-plan — section_role; одинаковые роли → суффикс -2); job ← «<question> → <message>; доказательства: <proof_ids без префикса>» строкой в кавычках; других секций нет."
+  - site_path: "core_message.text + first_screen"
+    kimi_path: "product.goal (через meaning.value_proposition.core)"
+    rule: derive
+    note: "Только утверждения с доказательством; без классов meaning.boundaries.not_promised."
+x-copy-deck-map:
+  - {from: "sections[].message", to: "copy_deck.pages[].sections[].message", note: "опора иерархии одной фразой (copy-deck v0, PLAN)"}
+  - {from: "sections[].proof_ids", to: "copy_deck…slots[].fact_ids", note: "без префикса fact:; missing:<id> → [PLACEHOLDER] в тексте"}
+  - {from: "sections[].question", to: "copy_deck…slots[].notes", note: "вопрос посетителя — вход E для заголовка секции (заголовок-ответ или заголовок-вопрос решает E)"}
