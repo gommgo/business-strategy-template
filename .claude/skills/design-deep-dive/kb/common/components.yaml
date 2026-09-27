@@ -22,8 +22,9 @@
 #
 # Кто за что отвечает
 # - Выбор типа и поведение — ux (`behavior`), вид и числа — ui (`visual`), клавиатура и роли — `keyboard`, тексты
-#   компонента — `text`. Здесь — тип, назначение, состояния, части и ссылки; нормы живут у владельцев и здесь не
-#   пересказываются, чтобы правка нормы оставалась правкой одного места.
+#   компонента — `text`, роль текста каждой текстовой части — раздел `text_roles`. Здесь — тип, назначение, состояния,
+#   части и ссылки; нормы живут у владельцев и здесь не пересказываются, чтобы правка нормы оставалась правкой одного
+#   места.
 # - Состояния экрана (загрузка, пусто, ошибка, нет прав …) — другой словарь:
 #   ux/06-feedback-states-motion/01-state-matrix.md §2. У коллекций и плиток ключ `screen_states` ведёт к строке
 #   матрицы «компонент × состояние экрана»; варианты данных такого компонента ДС рисует по ней.
@@ -1521,6 +1522,59 @@ crosswalk:
     multiselect: [Checkbox, Listbox]
     text-input: [TextInput]
     calendar: [DatePicker]
+
+# Роль текста у текстовых частей компонентов. Ключ — тип или часть в записи `<Тип>.<Часть>`, как узел `ui:` в
+# экранах; значение — роли из закрытого списка ролей текста ux (ux/07-ux-writing/06-banned-words-and-patterns.md §7.2)
+# вместе с `body` — связным текстом без своей роли. По роли линтер текстов выбирает правила, поэтому роль части не
+# угадывают по месту. Роль — что текст сообщает, а не состояние: у поля с ошибкой текст несёт роль `error`, а само
+# поле — состояние элемента `invalid`. Где ролей две, первая — имя или главная подпись, вторая — вспомогательный текст;
+# `placeholder` — текст пустого поля. Ячейки таблиц и значения полей — данные, а не текст интерфейса: их правят норма
+# пустого значения (ux/07-ux-writing/01-principles-voice-and-tone.md §11.5) и форматы, а не словарь запретов.
+text_roles:
+  Button: [action]
+  SplitButton.Item: [action]
+  Menu.Item: [action]
+  IconButton: [aria, tooltip]
+  Link: [link]
+  SkipLink: [link]
+  Field.Label: [label]
+  Field.Hint: [hint]
+  Field.Error: [error]
+  TextInput: [placeholder]
+  Textarea: [placeholder]
+  SearchInput: [placeholder]
+  Select: [placeholder]
+  Select.Option: [label]
+  Checkbox: [checkbox-label]
+  RadioGroup.Item: [label]
+  Chip: [label]
+  Switch: [label, setting-description]
+  Tabs.Tab: [tab]
+  SegmentedControl.Item: [tab]
+  Sidebar.Item: [nav]
+  BottomNav.Item: [nav]
+  Breadcrumbs.Item: [nav]
+  Modal.Header: [title]
+  Modal.Body: [body]
+  Drawer.Header: [title]
+  Drawer.Body: [body]
+  ConfirmModal.Header: [confirm-title]
+  ConfirmModal.Body: [confirm-body]
+  Tooltip.Content: [tooltip]
+  Toast: [toast]
+  Banner: [banner]
+  Alert: [inline-message]
+  Progress: [status]
+  Spinner: [status]
+  EmptyState: [empty]
+  Table.Header: [column-header]
+  Card.Header: [section-title]
+  Accordion.Trigger: [section-title]
+  Badge: [badge]
+  Tag: [badge]
+  Image: [alt]
+  Avatar: [alt]
+  Chart: [alt]
 
 # Тип, которого нет в словаре, проект заводит расширением. Расширение живёт в слое дизайна проекта рядом с
 # сопоставлением типов компонентам ДС и действует только в своём проекте.
