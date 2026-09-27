@@ -1,0 +1,1539 @@
+# Словарь компонентов и состояния элемента
+#
+# Закрытый словарь типов компонентов, из которых собираются экраны приложения, и один набор состояний элемента.
+# Файл читают агент скилла — чтобы назвать компонент и понять, что от него ждут, — и скрипт проверки покрытия —
+# чтобы сверить экраны проекта, его дизайн-систему (ДС) и этот словарь.
+#
+# Как работает словарь
+# - Экран (screen), блок (block) и каркас (shell) называют компонент узлом `ui:<Тип>`, часть составного
+#   компонента — `ui:<Тип>.<Часть>`. <Тип> — ключ раздела `types`, <Часть> — значение из его `parts`.
+# - Одна потребность — один тип. Два способа выбрать дату или два вида тоста в одном продукте со временем
+#   расходятся и ломают консистентность, поэтому тип по месту не придумывают
+#   (ux/10-design-systems-consistency/02-consistency-rules.md §3.1). Потребность, которую не закрывает ни один тип,
+#   проект оформляет расширением (раздел `project_extension`).
+# - Имя типа — устойчивое имя из каталогов дизайн-систем, а не придуманное
+#   (ux/10-design-systems-consistency/01-what-to-take-from-which-design-system.md §3.2, §3.4). Где каталог даёт
+#   двусмысленное имя (Toggle, Stepper, Header), выбрано однозначное, а каталожное стоит в `aka`.
+# - ДС проекта сопоставляет каждому типу свой компонент и рисует у него состояния элемента из `states.required`
+#   типа. Тип, который назван в экранах, а в ДС не создан, — дыра покрытия.
+# - Облик — вариант, размер, цвет, отступы, радиусы — в словарь не входит: его решает слой дизайна токенами ДС.
+#   Уровень действия (главное, второстепенное, в меню) — смысл, а не облик; его задают экраны по матрице действий
+#   (ux/04-components-patterns/10-actions-menus-bulk-shortcuts.md §1.1).
+#
+# Кто за что отвечает
+# - Выбор типа и поведение — ux (`behavior`), вид и числа — ui (`visual`), клавиатура и роли — `keyboard`, тексты
+#   компонента — `text`. Здесь — тип, назначение, состояния, части и ссылки; нормы живут у владельцев и здесь не
+#   пересказываются, чтобы правка нормы оставалась правкой одного места.
+# - Состояния экрана (загрузка, пусто, ошибка, нет прав …) — другой словарь:
+#   ux/06-feedback-states-motion/01-state-matrix.md §2. У коллекций и плиток ключ `screen_states` ведёт к строке
+#   матрицы «компонент × состояние экрана»; варианты данных такого компонента ДС рисует по ней.
+# - Чего в словаре нет и где оно живёт — раздел `outside`.
+#
+# Ключи типа
+#   name, group, purpose — имя, группа (`groups`), потребность одной фразой;
+#   behavior, visual — ссылки на нормы ux и ui (пустой список — нормы в базах нет: вид решает слой дизайна,
+#   поведение — владелец продукта);
+#   keyboard, text — клавиатурный контракт и тексты компонента;
+#   states.required — состояния, которые ДС рисует всегда; states.optional — когда продукт использует режим;
+#   parts — части составного компонента для `ui:<Тип>.<Часть>`;
+#   usage — метки грани «Слот» словаря меток токенов (ui/14-recipes/08-tokens-export.md §Шаг 4);
+#   app_css — классы эталонного слоя компонентов ui/14-recipes/examples/app.css;
+#   screen_states — строка матрицы состояний экрана для коллекций и плиток;
+#   aka — имена того же компонента в других системах: помогают сопоставить компонент ДС типу, в экранах не пишутся;
+#   use_instead — частые подмены: в каком случае нужен другой тип.
+#
+# Ссылки — путь от kb/ и раздел: `ux/04-components-patterns/06-input-controls.md §4.2`.
+#
+# Проверка покрытия читает этот файл так:
+# 1. Каждый узел `ui:<Тип>` в деревьях экранов — ключ `types` или тип расширения проекта; `ui:<Тип>.<Часть>` —
+#    часть из `parts` этого типа. Имена из `aka` в экранах не принимаются: для них проверка подсказывает тип.
+# 2. Каждый тип, названный в экранах проекта, сопоставлен компоненту ДС. Один компонент ДС может закрывать
+#    несколько типов (баннер и инлайн-сообщение — варианты одного компонента); два компонента ДС на один тип —
+#    две реализации одной потребности, это дефект.
+# 3. У компонента ДС нарисованы все `states.required` его типа и те `states.optional`, которые продукт объявил в
+#    сопоставлении. Комбинации пар состояний, которые есть у типа, рисуются по
+#    ui/06-components-visual/07-states-matrix.md §10.
+# 4. На поверхности без указателя (`type: mobile`) состояние `hover` не требуется.
+# 5. Значения компонента ДС берутся из токенов ДС: компонент, свойство или значение, которые не подтверждены
+#    источником ДС, не используются (ux/11-ai-generated-ui/03-tools-landscape.md §2.1).
+
+groups:
+  action: Действия
+  input: Ввод и выбор
+  navigation: Навигация
+  overlay: Оверлеи
+  feedback: Обратная связь
+  data: Данные
+  structure: Структура
+
+state_groups:
+  base: Исходное
+  interaction: Взаимодействие
+  choice: Выбор и раскрытие
+  availability: Доступность действия
+  validation: Проверка значения
+  data: Данные и процесс
+  drag: Перетаскивание
+
+# Состояния элемента — отклик одного элемента на человека и данные. Набор один для всех типов; тип берёт из него
+# свои состояния. Ключи состояния: name, group (`state_groups`), means — что значит, applies — где и с какой
+# оговоркой, hook — чем состояние выражено в CSS и ARIA, synonyms — как его называют базы и словарь меток токенов
+# (`usage`), behavior и visual — ссылки на нормы ux и ui. По `synonyms` переводится текст базы и сопоставляются
+# токены ДС.
+element_states:
+  rest:
+    name: Покой
+    group: base
+    means: "Исходный вид элемента, с которым сейчас не взаимодействуют."
+    hook: "—"
+    synonyms: {ux: [default, enabled], ui: [rest, default, enabled], usage: [rest]}
+    behavior:
+      - ux/06-feedback-states-motion/01-state-matrix.md §7.2
+      - ux/04-components-patterns/06-input-controls.md §15.1
+    visual:
+      - ui/06-components-visual/07-states-matrix.md §1
+
+  hover:
+    name: Наведение
+    group: interaction
+    means: "Указатель над элементом."
+    applies: >-
+      Только на устройствах с указателем (`any-hover: hover`). На поверхности без указателя состояние не рисуется,
+      а действие, которое мышью открывается наведением, там видно всегда.
+    hook: ":hover"
+    synonyms: {ux: [hover], ui: [hover], usage: [hover]}
+    behavior:
+      - ux/06-feedback-states-motion/01-state-matrix.md §7.2
+      - ux/09-mobile/02-mobile-navigation-and-actions.md §5.7
+    visual:
+      - ui/06-components-visual/07-states-matrix.md §4.1
+      - ui/06-components-visual/07-states-matrix.md §4.5
+
+  focus-visible:
+    name: Видимый фокус
+    group: interaction
+    means: "Элемент получил фокус, и его показывают кольцом фокуса."
+    applies: >-
+      У каждого фокусируемого элемента. Фокус без видимого кольца (`:focus` после клика по кнопке) своего вида не
+      имеет и отдельным состоянием не считается.
+    hook: ":focus-visible"
+    synonyms: {ux: [focus-visible, focus], ui: [focus-visible, focus], usage: [focus]}
+    behavior:
+      - ux/08-accessibility/02-keyboard-focus-semantics.md §7
+    visual:
+      - ui/06-components-visual/07-states-matrix.md §5
+
+  active:
+    name: Нажатие
+    group: interaction
+    means: "Момент нажатия, пока кнопка мыши или палец не отпущены."
+    applies: "Включённое положение кнопки-переключателя — это `checked`, а не нажатие."
+    hook: ":active"
+    synonyms: {ux: [active, pressed], ui: [active, pressed], usage: [active]}
+    behavior:
+      - ux/06-feedback-states-motion/01-state-matrix.md §7.2
+    visual:
+      - ui/06-components-visual/07-states-matrix.md §4.1
+      - ui/06-components-visual/07-states-matrix.md §9
+
+  selected:
+    name: Выбрано
+    group: choice
+    means: "Устойчивый выбор в наборе: строка, вкладка, пункт, чип, текущий пункт навигации."
+    applies: >-
+      Заметнее наведения и продублировано вторым признаком — галочкой, весом, полосой. Текущая страница в навигации —
+      тоже `selected`.
+    hook: "[aria-selected=true], [aria-current]"
+    synonyms: {ux: [selected], ui: [selected, current], usage: [selected]}
+    behavior:
+      - ux/06-feedback-states-motion/01-state-matrix.md §7.2
+      - ux/08-accessibility/02-keyboard-focus-semantics.md §7.4
+    visual:
+      - ui/06-components-visual/07-states-matrix.md §6
+
+  checked:
+    name: Отмечено
+    group: choice
+    means: "Включённое значение двухпозиционного контрола: чекбокса, радиокнопки, переключателя, кнопки-переключателя."
+    hook: ":checked, [aria-checked=true], [aria-pressed=true]"
+    synonyms: {ux: [checked, selected], ui: [checked, pressed], usage: [selected]}
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §4
+      - ux/04-components-patterns/06-input-controls.md §15.1
+    visual:
+      - ui/06-components-visual/07-states-matrix.md §6
+      - ui/06-components-visual/02-forms-and-inputs.md §7
+
+  indeterminate:
+    name: Частично отмечено
+    group: choice
+    means: "Отмечена часть группы: чекбокс «выбрать всё» в шапке таблицы, узел дерева."
+    applies: "У индикатора прогресса «неопределённый» — вид (объём неизвестен), а не это состояние."
+    hook: ":indeterminate, [aria-checked=mixed]"
+    synonyms: {ux: [mixed, indeterminate], ui: [indeterminate]}
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §4.2
+      - ux/04-components-patterns/10-actions-menus-bulk-shortcuts.md §3.2
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §7.1
+      - ui/06-components-visual/glossary.md §4
+
+  expanded:
+    name: Раскрыто
+    group: choice
+    means: "Триггер открыл свой список, меню, панель или раздел."
+    applies: "Пока триггер и то, что он открыл, видны вместе, триггер подсвечен: иначе непонятно, чьё это меню."
+    hook: "[aria-expanded=true]"
+    synonyms: {ux: [открыто], ui: [expanded]}
+    behavior:
+      - ux/08-accessibility/02-keyboard-focus-semantics.md §8.8
+    visual:
+      - ui/06-components-visual/07-states-matrix.md §6.3
+
+  disabled:
+    name: Недоступно
+    group: availability
+    means: "Действие сейчас недоступно, и рядом объяснено почему."
+    applies: >-
+      Недоступное приглушают с причиной, а скрывают только то, чего у роли нет вовсе. Рисуется своими токенами, а не
+      прозрачностью всего элемента.
+    hook: ":disabled, [aria-disabled=true]"
+    synonyms: {ux: [disabled], ui: [disabled], usage: [disabled]}
+    behavior:
+      - ux/04-components-patterns/10-actions-menus-bulk-shortcuts.md §2.4
+      - ux/08-accessibility/02-keyboard-focus-semantics.md §8.10
+    visual:
+      - ui/06-components-visual/07-states-matrix.md §7
+
+  readonly:
+    name: Только чтение
+    group: availability
+    means: "Значение видно и копируется, но не меняется; элемент фокусируется и читается скринридером."
+    applies: "Не путать с `disabled`: поле только для чтения проходит по контрасту."
+    hook: "[readonly], [aria-readonly=true]"
+    synonyms: {ux: [read-only], ui: [readonly], usage: [readonly]}
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §15.1
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §3.6
+
+  invalid:
+    name: Ошибка значения
+    group: validation
+    means: "Значение не прошло проверку или обязательное не заполнено; нужна реакция человека."
+    applies: >-
+      Граница, иконка и текст ошибки вместе — цвет не единственный признак. Пока поле в фокусе, фокус важнее красной
+      границы. Ошибку загрузки или операции описывает состояние экрана, а не это состояние.
+    hook: "[aria-invalid=true], :user-invalid"
+    synonyms: {ux: [error], ui: [invalid, error], usage: [invalid]}
+    behavior:
+      - ux/04-components-patterns/05-forms-and-validation.md §4
+      - ux/06-feedback-states-motion/01-state-matrix.md §7.2
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §3.4
+      - ui/06-components-visual/07-states-matrix.md §10
+
+  warning:
+    name: Предупреждение
+    group: validation
+    means: "Значение допустимо, но может привести к проблеме."
+    applies: "Не оформляется как ошибка и отличается от обычной подсказки."
+    hook: "—"
+    synonyms: {ux: [warning], ui: [warning]}
+    behavior:
+      - ux/06-feedback-states-motion/01-state-matrix.md §7.2
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §3.1
+
+  valid:
+    name: Значение подтверждено
+    group: validation
+    means: "Проверка прошла, и это стоит показать: имя свободно, пароль достаточно сильный."
+    applies: "Только у полей, где успех несёт информацию; если требование одно — заполненность, успех не показывают."
+    hook: ":user-valid"
+    synonyms: {ux: [успех], ui: [success]}
+    behavior:
+      - ux/04-components-patterns/05-forms-and-validation.md §4.7
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §3.1
+
+  loading:
+    name: Идёт операция
+    group: data
+    means: "Элемент запустил операцию и ждёт её завершения."
+    applies: "Размер элемента не меняется; повторное нажатие не запускает операцию второй раз."
+    hook: "[aria-busy=true]"
+    synonyms: {ux: [loading], ui: [loading, busy], usage: [loading]}
+    behavior:
+      - ux/06-feedback-states-motion/01-state-matrix.md §7.2
+      - ux/04-components-patterns/05-forms-and-validation.md §5.3
+    visual:
+      - ui/06-components-visual/07-states-matrix.md §8
+
+  skeleton:
+    name: Значение загружается
+    group: data
+    means: "Значение элемента ещё не пришло; на его месте скелетон формы значения."
+    applies: >-
+      Отличается от `loading`: там идёт операция, здесь ждут данные. Загрузку коллекции целиком описывает состояние
+      экрана.
+    hook: "[aria-busy=true]"
+    synonyms: {ux: [skeleton], ui: [skeleton]}
+    behavior:
+      - ux/06-feedback-states-motion/01-state-matrix.md §7.2
+      - ux/06-feedback-states-motion/02-system-status-and-waiting.md §3.2
+    visual:
+      - ui/06-components-visual/06-data-display-and-misc.md §3
+
+  dragged:
+    name: Перетаскивается
+    group: drag
+    means: "Элемент взят и перемещается."
+    applies: "У перетаскивания всегда есть альтернатива кнопками."
+    hook: "—"
+    synonyms: {ui: [dragged], usage: [dragging]}
+    behavior:
+      - ux/04-components-patterns/10-actions-menus-bulk-shortcuts.md §5
+    visual:
+      - ui/06-components-visual/07-states-matrix.md §1
+      - ui/06-components-visual/07-states-matrix.md §10
+
+  drop-target:
+    name: Место вставки
+    group: drag
+    means: "Сюда упадёт перетаскиваемый элемент или файл."
+    hook: "—"
+    synonyms: {ui: [drop target]}
+    behavior:
+      - ux/04-components-patterns/10-actions-menus-bulk-shortcuts.md §5.2
+      - ux/04-components-patterns/06-input-controls.md §10.3
+    visual:
+      - ui/06-components-visual/glossary.md §4
+      - ui/06-components-visual/07-states-matrix.md §10
+
+  visited:
+    name: Посещено
+    group: choice
+    means: "Ссылку в тексте уже открывали."
+    applies: "Только у ссылок в содержательном тексте."
+    hook: ":visited"
+    synonyms: {ui: [visited]}
+    behavior: []
+    visual:
+      - ui/06-components-visual/07-states-matrix.md §1
+
+# Слова, которые похожи на состояние элемента, но им не являются.
+not_element_states:
+  - {word: focus, instead: "селектор без своего вида; видимый фокус — `focus-visible`"}
+  - {word: filled, instead: "заполненное поле выглядит как `rest`"}
+  - {word: focus-within, instead: "приём контейнера, например кнопка очистки в поиске, а не состояние"}
+  - {word: open, instead: "появление оверлея; у его триггера — `expanded`"}
+  - {word: current, instead: "текущий пункт навигации — `selected`"}
+  - {word: pressed, instead: "момент нажатия — `active`; включённая кнопка-переключатель — `checked`"}
+  - {word: success, instead: "у поля — `valid`; успех операции — состояние экрана"}
+  - {word: error, instead: "у значения — `invalid`; ошибка загрузки или операции — состояние экрана"}
+  - {word: selected-hover, instead: "комбинация состояний: ui/06-components-visual/07-states-matrix.md §10"}
+  - {word: статус шага, instead: "пройденный и будущий шаг — данные шага; текущий — `selected`, шаг с ошибкой — `invalid`"}
+  - {word: тон статуса, instead: "успех, предупреждение, опасность у бейджа — данные из словаря статусов продукта"}
+
+types:
+
+  # ── Действия ──────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Button:
+    name: Кнопка
+    group: action
+    purpose: "Запустить действие: сохранить, создать, отправить, перейти к следующему шагу."
+    behavior:
+      - ux/04-components-patterns/10-actions-menus-bulk-shortcuts.md §1
+      - ux/03-layout-placement/03-hierarchy-and-attention.md §4
+      - ux/04-components-patterns/05-forms-and-validation.md §5
+      - ux/03-layout-placement/04-placement-conventions-and-redundancy.md §4
+    visual:
+      - ui/06-components-visual/01-buttons-and-actions.md
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §1
+    states:
+      required: [rest, hover, focus-visible, active, disabled, loading]
+      optional: [checked, expanded]
+    usage: [button]
+    app_css: [.btn, .btn--default, .btn--primary, .btn--ghost, .btn--danger]
+    use_instead:
+      - {when: "переход на другой экран или адрес", use: Link, ref: ui/06-components-visual/01-buttons-and-actions.md §2.4}
+      - {when: "переключение вида между немногими вариантами", use: SegmentedControl, ref: ux/04-components-patterns/06-input-controls.md §1.3}
+      - {when: "несколько равноправных действий в одном месте", use: Menu, ref: ux/03-layout-placement/03-hierarchy-and-attention.md §4.4}
+
+  IconButton:
+    name: Иконочная кнопка
+    group: action
+    purpose: "Частое действие без текста на кнопке — в строке таблицы, панели инструментов, шапке; подпись даёт тултип и доступное имя."
+    behavior:
+      - ux/04-components-patterns/01-data-tables.md §8.1
+      - ux/08-accessibility/02-keyboard-focus-semantics.md §3.8
+    visual:
+      - ui/06-components-visual/01-buttons-and-actions.md §4
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §9
+    states:
+      required: [rest, hover, focus-visible, active, disabled]
+      optional: [loading, checked, expanded]
+    usage: [icon-button]
+    app_css: [.btn--icon]
+    use_instead:
+      - {when: "действие, которое не узнают по иконке", use: Button, ref: ui/07-iconography-imagery/01-icons.md §7}
+
+  SplitButton:
+    name: Сплит-кнопка
+    group: action
+    purpose: "Действие по умолчанию и меню его вариантов в одной кнопке."
+    behavior:
+      - ux/04-components-patterns/10-actions-menus-bulk-shortcuts.md §2.5
+    visual:
+      - ui/06-components-visual/01-buttons-and-actions.md §7.1
+      - ui/06-components-visual/01-buttons-and-actions.md §8.2
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    states:
+      required: [rest, hover, focus-visible, active, disabled, expanded]
+      optional: [loading]
+    parts: [Item]
+    usage: [button, menu]
+    use_instead:
+      - {when: "нет сильного действия по умолчанию или экран под тач", use: Menu, ref: ux/04-components-patterns/10-actions-menus-bulk-shortcuts.md §2.5}
+
+  Link:
+    name: Ссылка
+    group: action
+    purpose: "Перейти на другой экран, страницу или адрес."
+    behavior:
+      - ux/08-accessibility/02-keyboard-focus-semantics.md §8.6
+      - ux/02-ia-navigation/02-navigation-patterns.md §3
+    visual:
+      - ui/06-components-visual/01-buttons-and-actions.md §2.4
+      - ui/06-components-visual/07-states-matrix.md §2
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §2
+    states:
+      required: [rest, hover, focus-visible, active]
+      optional: [visited, selected, disabled]
+    use_instead:
+      - {when: "действие без перехода", use: Button, ref: ui/06-components-visual/01-buttons-and-actions.md §2.4}
+
+  Menu:
+    name: Меню действий
+    group: action
+    purpose: "Список команд по кнопке или правому клику — «Ещё» у строки, действия объекта."
+    behavior:
+      - ux/04-components-patterns/10-actions-menus-bulk-shortcuts.md §2
+      - ux/04-components-patterns/07-overlays-modals-drawers-popovers.md §4
+      - ux/08-accessibility/02-keyboard-focus-semantics.md §8.6
+      - ux/08-accessibility/02-keyboard-focus-semantics.md §8.7
+    visual:
+      - ui/06-components-visual/05-feedback-and-overlays.md §6
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §12
+    states:
+      required: [rest, hover, focus-visible, active, disabled, expanded]
+      optional: [checked]
+    parts: [Trigger, Content, Item, Group, Separator]
+    usage: [menu, menu-item]
+    app_css: [.menu]
+    aka: [DropdownMenu, ContextMenu, ActionMenu]
+    use_instead:
+      - {when: "навигация по разделам", use: Sidebar, ref: ux/08-accessibility/02-keyboard-focus-semantics.md §8.6}
+      - {when: "выбор значения поля", use: Select, ref: ux/04-components-patterns/06-input-controls.md §1.3}
+
+  CommandPalette:
+    name: Командная палитра
+    group: action
+    purpose: "Поиск по действиям и переходам с клавиатуры поверх видимой навигации."
+    behavior:
+      - ux/04-components-patterns/02-search-filter-sort.md §5
+      - ux/04-components-patterns/10-actions-menus-bulk-shortcuts.md §4.4
+      - ux/02-ia-navigation/02-navigation-patterns.md §9
+    visual:
+      - ui/06-components-visual/05-feedback-and-overlays.md §9
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    states:
+      required: [rest, hover, focus-visible, disabled]
+      optional: [loading, selected]
+    parts: [Input, List, Item, Group]
+    usage: [overlay, menu-item]
+    aka: [CommandMenu, Command, Spotlight]
+
+  Toolbar:
+    name: Панель инструментов
+    group: action
+    purpose: "Группа связанных контролов одной области: один переход по Tab, стрелки — внутри."
+    behavior:
+      - ux/08-accessibility/02-keyboard-focus-semantics.md §8.1
+    visual:
+      - ui/06-components-visual/04-navigation-and-surfaces.md §8.2
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    states:
+      required: [rest]
+    usage: [toolbar]
+    app_css: [.toolbar]
+    aka: [ActionBar]
+
+  # ── Ввод и выбор ──────────────────────────────────────────────────────────────────────────────────────────────
+
+  Field:
+    name: Поле формы
+    group: input
+    purpose: "Обёртка контрола ввода: подпись, подсказка, текст ошибки, пометка обязательности."
+    behavior:
+      - ux/04-components-patterns/05-forms-and-validation.md §1
+      - ux/04-components-patterns/05-forms-and-validation.md §3
+      - ux/04-components-patterns/05-forms-and-validation.md §4
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §3
+    states:
+      required: [rest, disabled, invalid]
+      optional: [readonly, warning, valid]
+    parts: [Label, Hint, Error]
+    usage: [form-field]
+    app_css: [.field, .label, .hint, .error]
+    aka: [FormField, FormControl, FormItem]
+
+  TextInput:
+    name: Текстовое поле
+    group: input
+    purpose: "Ввести короткое значение, которое человек знает: имя, число, адрес, код."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §2
+      - ux/04-components-patterns/05-forms-and-validation.md §3.5
+      - ux/09-mobile/03-mobile-content-tables-forms-dashboards.md §3.4
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §1
+      - ui/06-components-visual/02-forms-and-inputs.md §3
+    keyboard: ux/04-components-patterns/06-input-controls.md §15.2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §3
+    states:
+      required: [rest, hover, focus-visible, disabled, readonly, invalid]
+      optional: [warning, valid, loading, skeleton]
+    usage: [form-field]
+    app_css: [.input]
+    aka: [Input, TextField]
+    use_instead:
+      - {when: "выбор одного из немногих известных вариантов", use: RadioGroup, ref: ux/04-components-patterns/06-input-controls.md §1.1}
+      - {when: "текст в несколько строк", use: Textarea, ref: ux/04-components-patterns/06-input-controls.md §2.1}
+
+  Textarea:
+    name: Многострочное поле
+    group: input
+    purpose: "Ввести свободный текст в несколько строк: комментарий, описание."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §2.3
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §4.3
+    keyboard: ux/04-components-patterns/06-input-controls.md §15.2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §3
+    states:
+      required: [rest, hover, focus-visible, disabled, readonly, invalid]
+      optional: [warning, valid, loading, skeleton]
+    usage: [form-field]
+    app_css: [.textarea]
+    aka: [TextArea]
+
+  SearchInput:
+    name: Поле поиска
+    group: input
+    purpose: "Найти записи или разделы по запросу — по коллекции или по всему приложению."
+    behavior:
+      - ux/04-components-patterns/02-search-filter-sort.md §2
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §4.4
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §3
+    states:
+      required: [rest, hover, focus-visible, disabled]
+      optional: [loading, expanded]
+    usage: [form-field]
+    screen_states: ux/06-feedback-states-motion/01-state-matrix.md §3.4
+    aka: [Search, SearchField]
+    use_instead:
+      - {when: "замена понятной навигации", use: Sidebar, ref: ux/04-components-patterns/02-search-filter-sort.md §2.1}
+
+  NumberInput:
+    name: Числовое поле со степпером
+    group: input
+    purpose: "Ввести число и менять его малыми шагами около текущего значения."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §3
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §8.5
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    states:
+      required: [rest, hover, focus-visible, disabled, readonly, invalid]
+      optional: [warning, valid]
+    usage: [form-field]
+    aka: [Spinbutton, NumberField]
+    use_instead:
+      - {when: "большой диапазон значений", use: TextInput, ref: ux/04-components-patterns/06-input-controls.md §3}
+
+  Select:
+    name: Селект
+    group: input
+    purpose: "Выбрать одно значение из списка средней длины, когда места мало и важнее видеть выбранное."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §1
+      - ux/04-components-patterns/06-input-controls.md §6
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §4.1
+    keyboard: ux/04-components-patterns/06-input-controls.md §15.2
+    states:
+      required: [rest, hover, focus-visible, disabled, invalid, expanded]
+      optional: [readonly, warning, valid, skeleton]
+    parts: [Option]
+    usage: [select]
+    app_css: [.select, .select-wrap]
+    aka: [Dropdown, Picker, SelectInput]
+    use_instead:
+      - {when: "вариантов немного", use: RadioGroup, ref: ux/04-components-patterns/06-input-controls.md §1.1}
+      - {when: "выбрать несколько значений", use: Listbox, ref: ux/04-components-patterns/06-input-controls.md §6.4}
+      - {when: "длинный справочник или своё значение", use: Combobox, ref: ux/04-components-patterns/06-input-controls.md §6.3}
+      - {when: "команды, а не значение", use: Menu, ref: ux/04-components-patterns/06-input-controls.md §1.3}
+
+  Combobox:
+    name: Комбобокс
+    group: input
+    purpose: "Выбрать значение из длинного списка вводом с подсказками или ввести своё."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §6.3
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §4.2
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    states:
+      required: [rest, hover, focus-visible, disabled, invalid, expanded]
+      optional: [readonly, loading, warning, valid, skeleton]
+    parts: [Option]
+    usage: [select, form-field]
+    aka: [Autocomplete, Autosuggest]
+
+  Listbox:
+    name: Листбокс
+    group: input
+    purpose: "Выбрать одно или несколько значений из видимого списка, когда важен обзор вариантов."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §1.1
+      - ux/04-components-patterns/06-input-controls.md §6
+    visual:
+      - ui/06-components-visual/03-tables-and-lists.md §13
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    states:
+      required: [rest, hover, focus-visible, selected, disabled]
+      optional: [invalid, readonly]
+    parts: [Option, Group]
+    usage: [list-row]
+    aka: [ListBox, SelectList]
+    use_instead:
+      - {when: "места мало и важнее видеть выбранное", use: Select, ref: ux/04-components-patterns/06-input-controls.md §1.2}
+
+  Checkbox:
+    name: Чекбокс
+    group: input
+    purpose: "Включить опцию, которая применяется по кнопке, или отметить несколько из немногих вариантов."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §4
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §7.1
+    keyboard: ux/04-components-patterns/06-input-controls.md §15.2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §3
+    states:
+      required: [rest, hover, focus-visible, active, checked, disabled]
+      optional: [indeterminate, invalid, readonly]
+    usage: [checkbox]
+    app_css: [.check]
+    use_instead:
+      - {when: "варианты исключают друг друга", use: RadioGroup, ref: ux/04-components-patterns/06-input-controls.md §1.3}
+      - {when: "изменение применяется сразу", use: Switch, ref: ux/04-components-patterns/06-input-controls.md §5.2}
+
+  RadioGroup:
+    name: Группа радиокнопок
+    group: input
+    purpose: "Выбрать ровно один из немногих вариантов, которые видны сразу."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §4
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §7.2
+    keyboard: ux/04-components-patterns/06-input-controls.md §15.2
+    states:
+      required: [rest, hover, focus-visible, active, checked, disabled]
+      optional: [invalid, readonly]
+    parts: [Item]
+    usage: [checkbox]
+    aka: [Radio, RadioButtons]
+    use_instead:
+      - {when: "вариантов много", use: Select, ref: ux/04-components-patterns/06-input-controls.md §1.1}
+
+  Switch:
+    name: Переключатель
+    group: input
+    purpose: "Включить или выключить настройку, которая применяется сразу."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §5
+      - ux/04-components-patterns/09-settings-permissions-admin.md §3
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §7.3
+    keyboard: ux/04-components-patterns/06-input-controls.md §15.2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §10
+    states:
+      required: [rest, hover, focus-visible, active, checked, disabled]
+      optional: [loading, readonly]
+    usage: [switch]
+    app_css: [.switch]
+    aka: [Toggle, ToggleSwitch]
+    use_instead:
+      - {when: "форма с кнопкой «Сохранить»", use: Checkbox, ref: ux/04-components-patterns/06-input-controls.md §5.2}
+      - {when: "запуск действия", use: Button, ref: ux/04-components-patterns/06-input-controls.md §1.3}
+      - {when: "два противопоставленных вида", use: SegmentedControl, ref: ux/04-components-patterns/06-input-controls.md §1.3}
+
+  SegmentedControl:
+    name: Сегментированный контрол
+    group: input
+    purpose: "Сразу переключить вид или режим между немногими вариантами."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §7
+    visual:
+      - ui/06-components-visual/04-navigation-and-surfaces.md §3.3
+      - ui/06-components-visual/01-buttons-and-actions.md §7.1
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    states:
+      required: [rest, hover, focus-visible, active, selected]
+      optional: [disabled]
+    parts: [Item]
+    usage: [tabs]
+    aka: [ToggleGroup, ButtonGroup]
+
+  Slider:
+    name: Слайдер
+    group: input
+    purpose: "Задать значение на шкале, когда важно видеть эффект изменения; точное значение — в паре с числовым полем."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §11
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §8.1
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    states:
+      required: [rest, hover, focus-visible, active, disabled]
+      optional: [dragged, readonly]
+    usage: [slider]
+    aka: [Range]
+    use_instead:
+      - {when: "нужно точное значение", use: NumberInput, ref: ux/04-components-patterns/06-input-controls.md §1.3}
+
+  DatePicker:
+    name: Выбор даты
+    group: input
+    purpose: "Ввести дату или диапазон дат текстом, с календарём в помощь."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §9
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §8.2
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    states:
+      required: [rest, hover, focus-visible, disabled, invalid, expanded, selected]
+      optional: [readonly, warning, valid]
+    usage: [form-field, popover]
+    aka: [DateInput, Calendar]
+    use_instead:
+      - {when: "дата рождения и другие даты далеко от текущей", use: TextInput, ref: ux/04-components-patterns/06-input-controls.md §9.1}
+
+  FileUpload:
+    name: Загрузка файлов
+    group: input
+    purpose: "Прикрепить файлы кнопкой и перетаскиванием, видеть прогресс, отменить и удалить."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §10
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §8.3
+    states:
+      required: [rest, hover, focus-visible, disabled, drop-target, invalid, loading]
+      optional: [valid]
+    usage: [form-field]
+    screen_states: ux/06-feedback-states-motion/01-state-matrix.md §3.4
+    aka: [Dropzone, FileUploader]
+
+  TagInput:
+    name: Поле тегов
+    group: input
+    purpose: "Ввести несколько значений; каждое становится тегом."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §8.3
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §8.4
+    keyboard: ux/04-components-patterns/06-input-controls.md §15.2
+    states:
+      required: [rest, hover, focus-visible, disabled, invalid]
+      optional: [readonly, warning, expanded, loading]
+    usage: [form-field, badge]
+    aka: [TokenField, ChipInput]
+
+  ColorPicker:
+    name: Выбор цвета
+    group: input
+    purpose: "Задать цвет из набора образцов или значением."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §12
+    visual:
+      - ui/06-components-visual/02-forms-and-inputs.md §8.6
+    states:
+      required: [rest, hover, focus-visible, disabled]
+      optional: [invalid, readonly, expanded]
+    usage: [form-field]
+    aka: [ColorInput]
+
+  RichTextEditor:
+    name: Редактор форматированного текста
+    group: input
+    purpose: "Написать текст с форматированием: заголовки, списки, ссылки."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §13
+    visual: []
+    states:
+      required: [rest, focus-visible, disabled]
+      optional: [hover, readonly, invalid, loading]
+    parts: [Toolbar, Content]
+    usage: [form-field, toolbar]
+    aka: [WYSIWYG]
+
+  Chip:
+    name: Чип
+    group: input
+    purpose: "Выбрать или снять вариант фильтра и показать применённое условие."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §8.1
+      - ux/04-components-patterns/02-search-filter-sort.md §3.6
+    visual:
+      - ui/06-components-visual/05-feedback-and-overlays.md §1.2
+    states:
+      required: [rest, hover, focus-visible, active, selected]
+      optional: [disabled]
+    usage: [badge]
+    aka: [FilterChip]
+    use_instead:
+      - {when: "завершающее действие шага", use: Button, ref: ux/04-components-patterns/06-input-controls.md §1.3}
+
+  # ── Навигация ─────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Sidebar:
+    name: Боковая навигация
+    group: navigation
+    purpose: "Постоянная навигация по разделам приложения слева, со сворачиванием в узкую полосу иконок."
+    behavior:
+      - ux/02-ia-navigation/02-navigation-patterns.md §1.3
+      - ux/02-ia-navigation/02-navigation-patterns.md §2
+    visual:
+      - ui/06-components-visual/04-navigation-and-surfaces.md §1
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.6
+    text: ux/07-ux-writing/02-microcopy-by-component.md §12
+    states:
+      required: [rest, hover, focus-visible, active, selected]
+      optional: [expanded, disabled]
+    parts: [Group, Item]
+    usage: [sidebar, rail]
+    app_css: [.sidebar, .nav-group, .nav-item]
+    aka: [SideNav, NavigationRail, NavigationDrawer]
+    use_instead:
+      - {when: "телефон и немного главных разделов", use: BottomNav, ref: ux/09-mobile/02-mobile-navigation-and-actions.md §1.2}
+
+  TopBar:
+    name: Верхняя панель
+    group: navigation
+    purpose: "Постоянная полоса приложения сверху: логотип, глобальный поиск, служебные действия, аккаунт."
+    behavior:
+      - ux/02-ia-navigation/02-navigation-patterns.md §1.4
+      - ux/02-ia-navigation/02-navigation-patterns.md §7
+    visual:
+      - ui/06-components-visual/04-navigation-and-surfaces.md §2
+    states:
+      required: [rest]
+    usage: [topbar]
+    app_css: [.topbar, .brand]
+    aka: [Navbar, AppBar, Header]
+
+  BottomNav:
+    name: Нижняя панель вкладок
+    group: navigation
+    purpose: "Переход между немногими главными разделами на телефоне."
+    behavior:
+      - ux/09-mobile/02-mobile-navigation-and-actions.md §1.2
+    visual:
+      - ui/05-layout-grid/05-responsive-and-overlays.md §2.4
+    states:
+      required: [rest, focus-visible, active, selected]
+      optional: [hover, disabled]
+    parts: [Item]
+    aka: [TabBar, NavigationBar]
+    use_instead:
+      - {when: "широкий экран", use: Sidebar, ref: ui/05-layout-grid/05-responsive-and-overlays.md §2.4}
+
+  Breadcrumbs:
+    name: Хлебные крошки
+    group: navigation
+    purpose: "Показать путь по иерархии и дать вернуться на уровень выше."
+    behavior:
+      - ux/02-ia-navigation/02-navigation-patterns.md §4
+    visual:
+      - ui/06-components-visual/04-navigation-and-surfaces.md §4
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    states:
+      required: [rest, hover, focus-visible, selected]
+      optional: [active]
+    parts: [Item]
+    usage: [breadcrumb]
+    app_css: [.crumbs]
+    aka: [Breadcrumb, BreadcrumbTrail]
+
+  Tabs:
+    name: Вкладки
+    group: navigation
+    purpose: "Переключать представления одного объекта или раздела на одном экране."
+    behavior:
+      - ux/02-ia-navigation/02-navigation-patterns.md §5
+      - ux/02-ia-navigation/02-navigation-patterns.md §6
+      - ux/04-components-patterns/04-lists-cards-and-record-view.md §4.3
+    visual:
+      - ui/06-components-visual/04-navigation-and-surfaces.md §3
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §12
+    states:
+      required: [rest, hover, focus-visible, selected]
+      optional: [active, disabled]
+    parts: [List, Tab, Panel]
+    usage: [tabs]
+    app_css: [.tabs, .tab]
+    use_instead:
+      - {when: "разделы приложения, а не представления объекта", use: Sidebar, ref: ux/04-components-patterns/04-lists-cards-and-record-view.md §4.3}
+
+  Pagination:
+    name: Пагинация
+    group: navigation
+    purpose: "Переходить по страницам коллекции и видеть, где находишься."
+    behavior:
+      - ux/04-components-patterns/01-data-tables.md §6
+    visual:
+      - ui/06-components-visual/06-data-display-and-misc.md §5
+      - ui/06-components-visual/03-tables-and-lists.md §14
+    states:
+      required: [rest, hover, focus-visible, active, selected, disabled]
+    usage: [pagination]
+    app_css: [.table-footer]
+    aka: [Pager]
+
+  Steps:
+    name: Индикатор шагов
+    group: navigation
+    purpose: "Показать шаги мастера: пройденные, текущий, будущие."
+    behavior:
+      - ux/05-flows-journeys/02-task-flows-and-wizards.md §3.5
+    visual:
+      - ui/06-components-visual/06-data-display-and-misc.md §6
+    states:
+      required: [rest, selected]
+      optional: [hover, focus-visible, active, disabled, invalid]
+    parts: [Step]
+    aka: [Stepper, ProgressSteps, ProgressTracker]
+
+  SkipLink:
+    name: Ссылка пропуска навигации
+    group: navigation
+    purpose: "Перейти с клавиатуры мимо повторяющейся навигации к основному содержимому."
+    behavior:
+      - ux/08-accessibility/02-keyboard-focus-semantics.md §9.3
+    visual: []
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §9.3
+    states:
+      required: [rest, focus-visible]
+    aka: [SkipNavigation]
+
+  # ── Оверлеи ───────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Modal:
+    name: Модальное окно
+    group: overlay
+    purpose: "Короткая самодостаточная задача, которую человек начал сам и закончит до возврата к экрану."
+    behavior:
+      - ux/04-components-patterns/07-overlays-modals-drawers-popovers.md §1
+      - ux/04-components-patterns/07-overlays-modals-drawers-popovers.md §2
+    visual:
+      - ui/06-components-visual/05-feedback-and-overlays.md §7
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    states:
+      required: [rest]
+    parts: [Header, Body, Footer]
+    usage: [modal, overlay]
+    app_css: [.scrim, .modal, .modal-head, .modal-body, .modal-foot]
+    aka: [Dialog, Popup]
+    use_instead:
+      - {when: "событие системы, а не действие человека", use: Toast, ref: ux/04-components-patterns/07-overlays-modals-drawers-popovers.md §1.2}
+      - {when: "ошибка в форме", use: Field, ref: ux/04-components-patterns/07-overlays-modals-drawers-popovers.md §2.3}
+
+  ConfirmModal:
+    name: Модальное окно подтверждения
+    group: overlay
+    purpose: "Подтвердить редкое необратимое действие; кнопки называют результат."
+    behavior:
+      - ux/04-components-patterns/07-overlays-modals-drawers-popovers.md §6
+      - ux/05-flows-journeys/03-destructive-actions-undo-confirmation.md §4
+    visual:
+      - ui/06-components-visual/05-feedback-and-overlays.md §7.5
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §7
+    states:
+      required: [rest]
+    parts: [Header, Body, Footer]
+    usage: [modal, overlay]
+    aka: [AlertDialog, ConfirmDialog]
+    use_instead:
+      - {when: "частое обратимое действие — отмена вместо подтверждения", use: Toast, ref: ux/05-flows-journeys/03-destructive-actions-undo-confirmation.md §1}
+
+  Drawer:
+    name: Модальная шторка
+    group: overlay
+    purpose: "Второстепенная задача в панели с края экрана при заблокированном фоне; на телефоне — нижняя шторка."
+    behavior:
+      - ux/04-components-patterns/07-overlays-modals-drawers-popovers.md §3
+    visual:
+      - ui/06-components-visual/05-feedback-and-overlays.md §8
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    states:
+      required: [rest]
+    parts: [Header, Body, Footer]
+    usage: [drawer, overlay]
+    aka: [Sheet, BottomSheet, Tray, Flyout]
+
+  Popover:
+    name: Поповер
+    group: overlay
+    purpose: "Небольшое содержимое рядом с элементом — выбор, фильтр, подробности — без обязательных полей."
+    behavior:
+      - ux/04-components-patterns/07-overlays-modals-drawers-popovers.md §4
+    visual:
+      - ui/06-components-visual/05-feedback-and-overlays.md §5
+    states:
+      required: [rest]
+    parts: [Trigger, Content]
+    usage: [popover]
+    aka: [HoverCard]
+    use_instead:
+      - {when: "обязательные поля", use: Modal, ref: ux/04-components-patterns/07-overlays-modals-drawers-popovers.md §4.2}
+
+  Tooltip:
+    name: Тултип
+    group: overlay
+    purpose: "Короткая дополнительная подсказка к интерактивному элементу по наведению и фокусу."
+    behavior:
+      - ux/04-components-patterns/07-overlays-modals-drawers-popovers.md §5
+    visual:
+      - ui/06-components-visual/05-feedback-and-overlays.md §4
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §9
+    states:
+      required: [rest]
+    parts: [Trigger, Content]
+    usage: [tooltip]
+    use_instead:
+      - {when: "ошибка или критичное", use: Alert, ref: ux/04-components-patterns/07-overlays-modals-drawers-popovers.md §5.4}
+      - {when: "экран под тач", use: Popover, ref: ux/04-components-patterns/07-overlays-modals-drawers-popovers.md §5.1}
+
+  # ── Обратная связь ────────────────────────────────────────────────────────────────────────────────────────────
+
+  Toast:
+    name: Тост
+    group: feedback
+    purpose: "Короткое сообщение о результате действия, которого не видно на экране; с действием «Отменить» не исчезает само."
+    behavior:
+      - ux/04-components-patterns/08-notifications-toasts-banners.md §3
+      - ux/06-feedback-states-motion/02-system-status-and-waiting.md §7
+    visual:
+      - ui/06-components-visual/05-feedback-and-overlays.md §3
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §8.1
+    states:
+      required: [rest]
+    usage: [toast]
+    aka: [Snackbar, Toaster]
+    use_instead:
+      - {when: "ошибка или критичное сообщение", use: Alert, ref: ux/04-components-patterns/08-notifications-toasts-banners.md §3.1}
+      - {when: "состояние системы или аккаунта", use: Banner, ref: ux/04-components-patterns/08-notifications-toasts-banners.md §4.1}
+
+  Banner:
+    name: Баннер
+    group: feedback
+    purpose: "Сообщение о состоянии системы или аккаунта вверху области, к которой оно относится; одно на страницу."
+    behavior:
+      - ux/04-components-patterns/08-notifications-toasts-banners.md §4
+    visual:
+      - ui/06-components-visual/05-feedback-and-overlays.md §2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §8.2
+    states:
+      required: [rest]
+    usage: [banner]
+    aka: [SystemBanner]
+
+  Alert:
+    name: Инлайн-сообщение
+    group: feedback
+    purpose: "Сообщение, привязанное к месту экрана: ошибка операции, подсказка до действия; само не исчезает."
+    behavior:
+      - ux/04-components-patterns/08-notifications-toasts-banners.md §5
+    visual:
+      - ui/06-components-visual/05-feedback-and-overlays.md §2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §8
+    states:
+      required: [rest]
+    usage: [banner]
+    aka: [Callout, InlineMessage, InlineNotification, Notification]
+
+  Progress:
+    name: Индикатор прогресса
+    group: feedback
+    purpose: "Показать ход операции известного объёма или заполненность квоты."
+    behavior:
+      - ux/06-feedback-states-motion/02-system-status-and-waiting.md §3.4
+      - ux/06-feedback-states-motion/02-system-status-and-waiting.md §4
+    visual:
+      - ui/06-components-visual/06-data-display-and-misc.md §2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §14
+    states:
+      required: [rest]
+    usage: [progress]
+    aka: [ProgressBar, ProgressCircle, ProgressIndicator, Meter]
+
+  Spinner:
+    name: Спиннер
+    group: feedback
+    purpose: "Показать короткое ожидание неизвестного объёма там, где идёт операция."
+    behavior:
+      - ux/06-feedback-states-motion/02-system-status-and-waiting.md §3.3
+    visual:
+      - ui/06-components-visual/06-data-display-and-misc.md §2.3
+    text: ux/07-ux-writing/02-microcopy-by-component.md §14
+    states:
+      required: [rest]
+    usage: [progress]
+    aka: [Loader]
+    use_instead:
+      - {when: "загрузка содержимого, структура которого известна", use: Skeleton, ref: ux/06-feedback-states-motion/02-system-status-and-waiting.md §3.1}
+
+  Skeleton:
+    name: Скелетон
+    group: feedback
+    purpose: "Заглушка формы содержимого, пока данные загружаются."
+    behavior:
+      - ux/06-feedback-states-motion/02-system-status-and-waiting.md §3.2
+    visual:
+      - ui/06-components-visual/06-data-display-and-misc.md §3
+    states:
+      required: [rest]
+    aka: [SkeletonLoader]
+
+  EmptyState:
+    name: Пустое состояние
+    group: feedback
+    purpose: "Объяснить, почему здесь пусто, и дать следующий шаг — одно действие."
+    behavior:
+      - ux/06-feedback-states-motion/01-state-matrix.md §4
+    visual:
+      - ui/06-components-visual/06-data-display-and-misc.md §4
+    text: ux/07-ux-writing/02-microcopy-by-component.md §5
+    states:
+      required: [rest]
+    usage: [empty-state]
+    app_css: [.empty, .empty-art]
+    aka: [Empty, Blankslate]
+
+  # ── Данные ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Table:
+    name: Таблица
+    group: data
+    purpose: "Найти, сравнить и обработать много однородных записей по колонкам."
+    behavior:
+      - ux/04-components-patterns/01-data-tables.md
+    visual:
+      - ui/06-components-visual/03-tables-and-lists.md
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    text: ux/07-ux-writing/02-microcopy-by-component.md §13
+    states:
+      required: [rest, hover, focus-visible, selected]
+      optional: [active, disabled, expanded, dragged, drop-target]
+    parts: [Header, Row, Cell, Footer]
+    usage: [table, table-header, table-row, table-cell]
+    app_css: [.table-wrap, .num, .mono, .cell-strong, .col-check, .col-actions, .table-footer]
+    screen_states: ux/06-feedback-states-motion/01-state-matrix.md §3.2
+    aka: [DataTable, DataGrid]
+    use_instead:
+      - {when: "разнородные объекты", use: Card, ref: ux/04-components-patterns/04-lists-cards-and-record-view.md §1.3}
+      - {when: "сравнение нескольких вариантов по атрибутам", use: ComparisonTable, ref: ux/04-components-patterns/01-data-tables.md §1.4}
+
+  ComparisonTable:
+    name: Таблица сравнения
+    group: data
+    purpose: "Сравнить несколько вариантов по атрибутам: варианты в колонках, атрибуты в строках."
+    behavior:
+      - ux/04-components-patterns/01-data-tables.md §1.4
+    visual: []
+    states:
+      required: [rest]
+      optional: [hover, focus-visible, selected]
+    parts: [Header, Row, Cell]
+    usage: [table]
+    aka: [ComparisonMatrix]
+
+  List:
+    name: Список
+    group: data
+    purpose: "Найти одну запись среди однородных; запись — строка с главными атрибутами объекта."
+    behavior:
+      - ux/04-components-patterns/04-lists-cards-and-record-view.md §2
+    visual:
+      - ui/06-components-visual/03-tables-and-lists.md §13
+    states:
+      required: [rest, hover, focus-visible, active, selected]
+      optional: [disabled, expanded, dragged, drop-target]
+    parts: [Item]
+    usage: [list-row]
+    screen_states: ux/06-feedback-states-motion/01-state-matrix.md §3.2
+    aka: [ListView]
+    use_instead:
+      - {when: "сравнение по многим атрибутам", use: Table, ref: ux/04-components-patterns/04-lists-cards-and-record-view.md §1.4}
+
+  DescriptionList:
+    name: Список «подпись — значение»
+    group: data
+    purpose: "Показать атрибуты одного объекта парами «подпись — значение», например в боковой колонке экрана объекта."
+    behavior:
+      - ux/04-components-patterns/04-lists-cards-and-record-view.md §4.4
+      - ux/04-components-patterns/04-lists-cards-and-record-view.md §6
+    visual:
+      - ui/06-components-visual/03-tables-and-lists.md §13.3
+    states:
+      required: [rest]
+      optional: [skeleton]
+    parts: [Term, Details]
+    app_css: [.props]
+    aka: [PropertyList, KeyValueList, DefinitionList]
+
+  Card:
+    name: Карточка
+    group: data
+    purpose: "Несколько коротких сведений об одной сущности и переход к ней; разнородные объекты сеткой."
+    behavior:
+      - ux/04-components-patterns/04-lists-cards-and-record-view.md §1
+      - ux/04-components-patterns/04-lists-cards-and-record-view.md §3
+    visual:
+      - ui/06-components-visual/04-navigation-and-surfaces.md §5
+    states:
+      required: [rest]
+      optional: [hover, focus-visible, active, selected, skeleton]
+    parts: [Header, Body, Footer]
+    usage: [card]
+    app_css: [.card]
+    aka: [Tile]
+    use_instead:
+      - {when: "однородные записи и сравнение", use: List, ref: ux/04-components-patterns/04-lists-cards-and-record-view.md §1.2}
+      - {when: "один показатель дашборда", use: KpiTile, ref: ux/04-components-patterns/03-dashboards-and-kpi.md §4}
+
+  KpiTile:
+    name: Плитка показателя
+    group: data
+    purpose: "Один показатель с базой сравнения, направлением «хорошо» и переходом к тому, из чего он сложился."
+    behavior:
+      - ux/04-components-patterns/03-dashboards-and-kpi.md §4
+    visual:
+      - ui/06-components-visual/06-data-display-and-misc.md §7
+    states:
+      required: [rest, skeleton]
+      optional: [hover, focus-visible, active]
+    usage: [card]
+    app_css: [.kpi-grid, .kpi-label, .kpi-value, .kpi-delta]
+    screen_states: ux/06-feedback-states-motion/01-state-matrix.md §3.3
+    aka: [StatCard, MetricCard, KpiCard]
+
+  Chart:
+    name: График
+    group: data
+    purpose: "Показать величины длиной и положением: столбцы, линии, bullet graph."
+    behavior:
+      - ux/04-components-patterns/03-dashboards-and-kpi.md §7
+    visual:
+      - ui/06-components-visual/06-data-display-and-misc.md §8
+      - ui/01-color/02-semantic-roles-and-architecture.md §5
+    states:
+      required: [rest, skeleton]
+      optional: [hover, focus-visible, selected]
+    usage: [chart]
+    app_css: [.chart-grid, .bars, .bar, .legend, .swatch]
+    screen_states: ux/06-feedback-states-motion/01-state-matrix.md §3.3
+    aka: [Sparkline]
+
+  TreeView:
+    name: Дерево
+    group: data
+    purpose: "Показать и выбрать элементы иерархии с раскрытием уровней."
+    behavior:
+      - ux/04-components-patterns/01-data-tables.md §4.5
+    visual:
+      - ui/06-components-visual/06-data-display-and-misc.md §12
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    states:
+      required: [rest, hover, focus-visible, selected, expanded]
+      optional: [active, disabled, checked, indeterminate, dragged, drop-target]
+    parts: [Item]
+    usage: [tree]
+    aka: [Tree]
+
+  Avatar:
+    name: Аватар
+    group: data
+    purpose: "Показать человека или организацию: фото, инициалы, группа."
+    behavior:
+      - ux/04-components-patterns/04-lists-cards-and-record-view.md §6.6
+    visual:
+      - ui/06-components-visual/06-data-display-and-misc.md §1
+    states:
+      required: [rest]
+      optional: [skeleton]
+    usage: [avatar]
+    app_css: [.avatar]
+
+  Badge:
+    name: Бейдж
+    group: data
+    purpose: "Пассивный индикатор у элемента: статус из словаря статусов продукта или счётчик."
+    behavior:
+      - ux/04-components-patterns/04-lists-cards-and-record-view.md §5
+      - ux/04-components-patterns/08-notifications-toasts-banners.md §6.3
+    visual:
+      - ui/06-components-visual/05-feedback-and-overlays.md §1
+    text: ux/07-ux-writing/02-microcopy-by-component.md §11
+    states:
+      required: [rest]
+    usage: [badge]
+    app_css: [.badge, .badge--success, .badge--warning, .badge--danger, .badge--neutral]
+    aka: [StatusBadge, Counter, StatusDot]
+
+  Tag:
+    name: Тег
+    group: data
+    purpose: "Метка объекта, часто со снятием крестиком."
+    behavior:
+      - ux/04-components-patterns/06-input-controls.md §8.2
+    visual:
+      - ui/06-components-visual/05-feedback-and-overlays.md §1
+    states:
+      required: [rest]
+      optional: [hover, focus-visible, active, disabled]
+    usage: [badge]
+    use_instead:
+      - {when: "статус объекта", use: Badge, ref: ux/04-components-patterns/04-lists-cards-and-record-view.md §5}
+      - {when: "условие фильтра", use: Chip, ref: ux/04-components-patterns/02-search-filter-sort.md §3.6}
+
+  Code:
+    name: Код
+    group: data
+    purpose: "Показать код, идентификатор или команду моноширинным текстом — в строке или блоком."
+    behavior:
+      - ux/04-components-patterns/04-lists-cards-and-record-view.md §6.5
+    visual:
+      - ui/06-components-visual/06-data-display-and-misc.md §9
+    states:
+      required: [rest]
+    usage: [code]
+    app_css: [.mono]
+    aka: [CodeBlock, InlineCode]
+
+  Kbd:
+    name: Клавиша
+    group: data
+    purpose: "Показать сочетание клавиш рядом с командой — в меню, тултипе, палитре."
+    behavior:
+      - ux/04-components-patterns/10-actions-menus-bulk-shortcuts.md §4.3
+    visual:
+      - ui/06-components-visual/06-data-display-and-misc.md §9.3
+    states:
+      required: [rest]
+    usage: [code]
+    aka: [Shortcut]
+
+  Image:
+    name: Изображение
+    group: data
+    purpose: "Картинка содержимого — фото, обложка, иллюстрация — с заданной пропорцией и заменой, когда картинки нет."
+    behavior:
+      - ux/06-feedback-states-motion/01-state-matrix.md §6.2
+    visual:
+      - ui/07-iconography-imagery/02-illustration-system-avatars-images.md §4
+      - ui/05-layout-grid/01-grids-breakpoints-containers.md §4.5
+    states:
+      required: [rest]
+      optional: [skeleton]
+    aka: [Media, Picture]
+
+  Carousel:
+    name: Карусель
+    group: data
+    purpose: "Листать однотипные элементы — фото товара, примеры — по одному кнопками «вперёд» и «назад», без автопрокрутки."
+    behavior:
+      - ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+      - ux/08-accessibility/01-wcag22-as-build-rules.md §12.3
+      - ux/12-evaluation-checklists/03-automated-checks.md §3.2
+    visual: []
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    states:
+      required: [rest]
+      optional: [dragged]
+    parts: [Item]
+    aka: [Slideshow, Gallery]
+
+  Rating:
+    name: Рейтинг
+    group: data
+    purpose: "Показать или поставить оценку звёздами."
+    behavior: []
+    visual:
+      - ui/06-components-visual/06-data-display-and-misc.md §10
+    states:
+      required: [rest]
+      optional: [hover, focus-visible, active, disabled, readonly]
+    aka: [Stars]
+
+  # ── Структура ─────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Accordion:
+    name: Аккордеон
+    group: structure
+    purpose: "Раскрыть и свернуть разделы, содержимое которых нужно не сразу; одиночный раздел — дисклоужер."
+    behavior:
+      - ux/02-ia-navigation/02-navigation-patterns.md §6
+      - ux/04-components-patterns/05-forms-and-validation.md §7.1
+      - ux/08-accessibility/02-keyboard-focus-semantics.md §8.5
+    visual:
+      - ui/06-components-visual/04-navigation-and-surfaces.md §6
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.2
+    states:
+      required: [rest, hover, focus-visible, expanded]
+      optional: [disabled]
+    parts: [Item, Trigger, Content]
+    aka: [Collapsible, Collapse, Disclosure, Details, Expandable]
+    use_instead:
+      - {when: "равноправные представления одного объекта", use: Tabs, ref: ux/02-ia-navigation/02-navigation-patterns.md §6}
+
+  Separator:
+    name: Разделитель
+    group: structure
+    purpose: "Отделить группы содержимого линией, когда одного отступа мало."
+    behavior: []
+    visual:
+      - ui/06-components-visual/04-navigation-and-surfaces.md §7
+    states:
+      required: [rest]
+    aka: [Divider, Rule]
+
+  ScrollArea:
+    name: Область прокрутки
+    group: structure
+    purpose: "Прокручиваемый участок внутри блока: широкая таблица, длинный список."
+    behavior:
+      - ux/08-accessibility/02-keyboard-focus-semantics.md §8.11
+    visual:
+      - ui/06-components-visual/03-tables-and-lists.md §9.3
+    keyboard: ux/08-accessibility/02-keyboard-focus-semantics.md §8.11
+    states:
+      required: [rest]
+      optional: [focus-visible]
+    aka: [ScrollView]
+
+# Что похоже на компонент, но в словарь не входит, и где оно живёт.
+outside:
+  - what: "Композиции страницы: каркас приложения, шапка страницы, список объектов, экран объекта, master-detail, настройки, опасная зона, дашборд, мастер, форма и группа полей, панель фильтров, панель массовых действий, лента активности, центр уведомлений"
+    lives: "Экраны: каркас (shell) и блок (block), собранные из типов словаря. Состав композиций задаёт проект: в каталогах дизайн-систем их нет."
+    refs:
+      - ux/13-app-types/04-master-procedure-brief-to-screens.md §18
+      - ui/05-layout-grid/02-app-shells.md
+      - ui/14-recipes/06-app-shell-and-pages.md
+  - what: "Немодальная боковая панель: инспектор, фильтры, правка строки рядом со списком"
+    lives: "Слот `detail` каркаса (shell) с блоком (block); модальная панель — тип Drawer."
+    refs:
+      - ux/04-components-patterns/07-overlays-modals-drawers-popovers.md §3.1
+      - ui/06-components-visual/04-navigation-and-surfaces.md §9
+  - what: "Раскладка: стек, ряд, сетка, слой"
+    lives: "Узлы `layout:` дерева экранов."
+    refs:
+      - docs/projects/_template/screens/README.md
+  - what: "Иконки"
+    lives: "Узлы `icon:` дерева экранов; набор и размеры — ui."
+    refs:
+      - ui/07-iconography-imagery/01-icons.md
+  - what: "Текст: заголовки, абзацы, подписи"
+    lives: "Строки-дети дерева экранов; что текст сообщает — роль текста, каким кеглем набран — стиль текста."
+    refs:
+      - ux/07-ux-writing/06-banned-words-and-patterns.md §7.2
+      - ui/02-typography/02-type-scale.md §3
+  - what: "Облик: вариант, размер, цвет, отступы, радиусы"
+    lives: "Слой дизайна и токены ДС."
+    refs:
+      - ui/09-design-tokens/04-reference-token-schema.md
+  - what: "Состояния экрана: загрузка, пусто, ошибка, нет прав, офлайн, не найдено"
+    lives: "Словарь состояний экрана и поле `states` экрана (screen)."
+    refs:
+      - ux/06-feedback-states-motion/01-state-matrix.md §2
+  - what: "Карточка дашборда"
+    lives: "Тип Card или KpiTile; типы блоков дашборда — блоки (block) экрана."
+    refs:
+      - ux/04-components-patterns/03-dashboards-and-kpi.md §3.3
+  - what: "Блоки каталога сайта и их слоты"
+    lives: "Каталог блоков site; действия и формы в слотах вида `action` собираются из типов словаря — Button, Link, Field, TextInput, Checkbox, Select."
+    refs:
+      - site/04-blocks/blocks.yaml
+      - site/02-site-types/vocabulary.yaml
+  - what: "Виджеты окна бота"
+    lives: "Виджет-язык слоя telegram-bot-flow; облик рисует клиент Telegram, ДС их не создаёт. Соответствие типам — `crosswalk.bot_widgets`."
+    refs:
+      - docs/projects/_template/telegram-bot-flow/README.md
+  - what: "Виджеты системы мобильного приложения: главный экран, экран блокировки, живое событие, плитка"
+    lives: "Kind `widget` слоя mobile."
+    refs:
+      - docs/projects/_template/mobile/README.md
+  - what: "Слайс `shared-ui` карты FSD"
+    lives: "Код, который реализует тип словаря в проекте: слайс ссылается на тип, который реализует, а сам тип в экранах пишется `ui:<Тип>`."
+    refs:
+      - docs/projects/_template/fsd/_template/shared-ui.md
+  - what: "Сторонние и редкие компоненты: карта, чат поддержки, видеоплеер, календарь-планировщик, канбан"
+    lives: "На сайте — фасад стороннего виджета до нажатия; в приложении — расширение словаря проектом. У перетаскивания в канбане — альтернатива кнопками."
+    refs:
+      - site/07-seo-geo-performance-analytics/03-performance-budgets-gates.md §5
+      - ux/08-accessibility/01-wcag22-as-build-rules.md §12.3
+  - what: "Интерфейс ИИ-функции: чат, потоковый ответ, источники"
+    lives: "Композиция из типов словаря (Textarea, Button, List, Alert)."
+    refs:
+      - ux/13-app-types/03-ai-features-ux-playbook.md
+
+# Соответствие для перевода между поверхностями. Проверка покрытия его не использует.
+crosswalk:
+  bot_widgets:
+    button: [Button]
+    url: [Link]
+    select: [RadioGroup, Select]
+    multiselect: [Checkbox, Listbox]
+    text-input: [TextInput]
+    calendar: [DatePicker]
+
+# Тип, которого нет в словаре, проект заводит расширением. Расширение живёт в слое дизайна проекта рядом с
+# сопоставлением типов компонентам ДС и действует только в своём проекте.
+project_extension:
+  fields:
+    id: "Имя типа в PascalCase; не совпадает с ключами `types` и их `aka`."
+    name: "Человекочитаемое имя."
+    purpose: "Потребность, которую не закрывает ни один тип словаря."
+    why_not: "Ближайший тип словаря и почему он не подходит."
+    behavior: "Нормы поведения: ссылка на базу или решение владельца продукта."
+    states: "`required` и `optional` — только из `element_states`."
+    parts: "Части составного компонента, если есть."
+  rules:
+    - "Если подходит тип словаря, берут его: расширение не дублирует потребность (ux/10-design-systems-consistency/02-consistency-rules.md §3.1)."
+    - "Состояния — из общего набора; своё состояние элемента проект не заводит."
+    - "Тип расширения, который понадобился второму проекту, переносят в словарь."
