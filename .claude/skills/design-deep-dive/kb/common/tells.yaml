@@ -1,0 +1,921 @@
+# Реестр примет «дефолтного вида»
+#
+# Примета — признак решения, которое никто не принимал: значение по умолчанию генератора, кита компонентов или жанра.
+# Одна и та же примета записана в нескольких базах под разными именами: капс-надзаголовок — это маркер 30 ui,
+# `cliche:caps-eyebrow` creative, COPY-C-18 text, правило словаря запретов ux и проверка утилиты макета. Здесь видно,
+# что это одна примета, у кого её норма и какими проверками её ловят на разных стадиях работы.
+#
+# Файл читают агент скилла — когда пишет бан-лист для задания, разбирает находки проверок или решает, законен ли
+# приём, — и утилиты проверки, чтобы сводить находки разных инструментов к одной примете и не считать её дважды.
+#
+# Как работает реестр
+# - Норма приметы живёт у владельца домена (раздел `domains`): что считается приметой, чем её мерить, порог, чем
+#   заменить, когда приём законен. Здесь — только кто владелец и где та же примета записана у соседей. Пороги не
+#   пересказываются, чтобы правка нормы оставалась правкой одного места.
+# - Поверхность решает, чья норма действует. Экран приложения — ui; страница сайта — creative (визуал и движение),
+#   site (структура и честность страницы), text (тексты); картинка и видео — ai-media; 3D-ассет — blender. Где у
+#   приметы разные пороги на экране приложения и на странице сайта, `owner` называет место для каждой поверхности.
+# - Одна примета — вопрос «было ли это решением», а не дефект. Вердикт ставит кластер: несколько примет в одной
+#   единице счёта владельца — экране, сцене страницы, ассете, текстовом блоке (`domains[].unit`, `clusters`). Счета
+#   разных доменов не складываются: у каждого своя единица и свой порог. Без всякого кластера блокирует только
+#   примета, которая обманывает посетителя, ломает доступность или действие (серьёзность B у владельца).
+# - Примету снимает только записанное решение: в приложении — бриф и дизайн-система проекта; на странице сайта —
+#   решение арт-дирекции по пяти проверкам (creative/08-uniqueness-anti-slop/01-cliche-policy.md §1, §6). Нормы
+#   соседей на странице сайта — умолчание уровня L0: они действуют, пока арт-дирекция не сняла их решением с проверкой
+#   результата (там же, §4). Снятая примета не снимает кластер: остальные его приметы проверяются как обычно.
+# - Детекторы (внешние анти-слоп-детекторы, баллы детекторов ИИ-текста) и частоты у генераторов — входные данные:
+#   они показывают, куда смотреть, но воротами не становятся без нормы владельца.
+# - Бан-лист дом-стиля Claude для задания исполнителю — claude-design/06-design-process/05-default-look.md: он называет
+#   приметы этого реестра поимённо, с альтернативой значением, и хранит частоты у генераторов.
+# - Новая примета сначала записывается у владельца домена; строка здесь появляется, когда примета есть в двух базах
+#   или у неё есть проверка макета. Реестр пересматривается вместе с реестром клише creative (его `review_by`):
+#   приметы стареют за месяцы, и то, что сегодня советуют как способ отличиться, завтра становится умолчанием.
+#
+# Ключи приметы (`tells`)
+#   id — стабильное имя; где есть запись реестра клише creative, id совпадает с ней (`cliche:<id>`);
+#   name — что видно; surface — где встречается: app (экран приложения), page (страница сайта), asset (картинка,
+#   видео, 3D), text (тексты);
+#   owner — где норма: одно место или по месту на поверхность, если пороги приложения и страницы разные;
+#   also — где та же примета записана у соседей и какими проверками её ловят на других стадиях; норма у них та же;
+#   check — id проверки утилиты макета `scripts/claude-design/mockup_checks.py` (раздел `checks`);
+#   note — как читать примету, если базы называют её по-разному.
+#
+# Ссылки — путь от kb/ и раздел: `ui/11-styles-trends/04-anti-slop-ui.md §2.9`; запись YAML — `файл#id`.
+
+surfaces:
+  app: экран приложения
+  page: страница сайта
+  asset: картинка, видео, 3D-ассет
+  text: тексты страницы и интерфейса
+
+# Домены — у каждого владелец каталога, свои id, своя единица счёта и своё правило вердикта.
+domains:
+  page-visual:
+    name: Визуал и движение страницы сайта
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml
+    ids: "cliche:<id>"
+    unit: сцена страницы (экран, hero-секция) и страница целиком
+    diagnosis: >-
+      Кластер реестра на одной сцене без решения арт-дирекции (`cluster_rule`); на странице — доза насыщенных приёмов
+      по уровню амбиций (creative/08-uniqueness-anti-slop/01-cliche-policy.md §3).
+    lift: "решение арт-дирекции `decisions[]` с `technique: cliche:<id>` (creative/01-creative-direction/02-art-direction-document.md)"
+  app-visual:
+    name: Визуал экрана приложения
+    owner: ui/11-styles-trends/04-anti-slop-ui.md
+    ids: "маркер 1–34 (`m1`…`m34` в скрипте §3)"
+    unit: экран
+    diagnosis: >-
+      Число маркеров на экране одновременно; шаблонный хром считается отдельно
+      (ui/11-styles-trends/04-anti-slop-ui.md §1.3).
+    lift: бриф и дизайн-система проекта — выбранное явно приметой не считается (ui/11-styles-trends/04-anti-slop-ui.md §4.1)
+  page-structure:
+    name: Структура, призывы и честность страницы сайта
+    owner: site/09-ai-generation-evaluation/ai-landing-markers.yaml
+    ids: AIL-<NN>
+    unit: страница
+    diagnosis: серьёзность каждого маркера (B, S, D) без счёта кластера; кандидаты `proposed` в ворота не входят
+    lift: поле `allow` маркера — решение брифа или плана страницы с причиной
+  text-site:
+    name: Тексты сайта
+    owner: text/06-anti-slop/01-text-slop-markers-by-genre.md
+    ids: "COPY-M-<группа>-<nn>; правила лексикона text/06-anti-slop/lexicon/"
+    unit: текстовый блок и плотность маркеров на 100 слов по жанру
+    diagnosis: >-
+      Кластер маркеров разных семей в одном блоке и плотность по порогу жанра
+      (text/06-anti-slop/02-linter-spec-and-profiles.md §5); плотность — порог слоп-прозы, а не детектор ИИ.
+    lift: профиль жанра и решение редактора с причиной
+  text-interface:
+    name: Тексты интерфейса
+    owner: ux/07-ux-writing/06-banned-words-and-patterns.md
+    ids: правила словаря запретов по ролям текста
+    unit: текстовый узел с ролью
+    diagnosis: уровень правила по роли (запрет, предупреждение)
+    lift: не снимается — текст переписывается
+  asset-image:
+    name: Картинки
+    owner: ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.2
+    ids: IMG-M<NN>
+    unit: ассет
+    diagnosis: >-
+      Маркеры, найденные человеком по чек-листу, — на ассете и в ключевом слоте (hero, товар, лицо) по правилу §5.1;
+      метрики изображения дают только подозрение для человека (ai-media/CONTRADICTIONS.md §[X24]).
+    lift: паспорт визуала — `exclusions.forbidden_markers` и решение арт-дирекции для страницы
+  asset-video:
+    name: Видео
+    owner: ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.3
+    ids: VID-M<NN>
+    unit: ролик и петля
+    diagnosis: то же правило, что у картинок (ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.1)
+    lift: паспорт визуала
+  asset-3d:
+    name: 3D-ассеты и сцены
+    owner: blender/11-evaluation-qa/05-master-checklist.md
+    ids: BR-*, MAT-*, CAM-* и другие пункты мастер-чек-листа
+    unit: 3D-ассет и сцена
+    diagnosis: >-
+      Пункты мастер-чек-листа — проверки исполнения; клише 3D как приём страницы — записи реестра клише creative
+      (домен page-visual).
+    lift: решение брифа 3D (BR-02) и арт-дирекции страницы
+  house-style:
+    name: Дом-стиль Claude в макете
+    owner: claude-design/06-design-process/05-default-look.md
+    ids: строки бан-листа §3 и приметы §4
+    unit: макет (артборд, HTML-копия, сборка)
+    diagnosis: >-
+      Бан-лист называет приметы этого реестра и берёт пороги у владельцев; проверка макета — группа C
+      (claude-design/06-design-process/04-checks.md §3).
+    lift: бриф и дизайн-система — ключ `--allow` утилиты только по записанному решению
+
+# Кластеры, которые владельцы определяют поверх нескольких примет. Состав — по id этого реестра. Кластеры реестра клише
+# creative (`ai-saas-2024`, `editorial-luxe-2025`, `web3-3d-2022`, `studio-awwwards-kit`) живут в самом реестре клише.
+clusters:
+  - id: template-chrome
+    name: шаблонный хром
+    owner: ui/11-styles-trends/04-anti-slop-ui.md §2.9
+    unit: экран или макет
+    members: [caps-eyebrow, numbered-labels, meta-dots, near-black-literal, mono-captions, arrow-in-button]
+    rule: ui/11-styles-trends/04-anti-slop-ui.md §1.3 (кластер хрома)
+  - id: cream-serif
+    name: тёплый кремовый, контрастный сериф, терракота
+    owner: ui/11-styles-trends/04-anti-slop-ui.md §4.1 (кластер 1)
+    unit: экран или страница
+    members: [warm-paper, cream-serif-terracotta, overused-display-font, accent-word-headline]
+  - id: dark-acid
+    name: почти чёрный фон и один кислотный акцент
+    owner: ui/11-styles-trends/04-anti-slop-ui.md §4.1 (кластер 2)
+    unit: экран или страница
+    members: [dark-acid-accent, near-black-literal]
+  - id: broadsheet
+    name: газетная вёрстка
+    owner: ui/11-styles-trends/04-anti-slop-ui.md §4.1 (кластер 3)
+    unit: экран или страница
+    members: [broadsheet-hairlines]
+  - id: saas-card-kit
+    name: набор одинаковых карточек
+    owner: ui/11-styles-trends/04-anti-slop-ui.md §4.1 (кластер 4)
+    unit: экран или страница
+    members: [one-radius, same-shadow, three-equal-cards, bento-uniform-tiles, mesh-gradient-bg]
+  - id: template-chrome-page
+    name: шаблонный хром секций страницы (кандидат)
+    owner: site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-52
+    unit: страница
+    members: [caps-eyebrow, pill-announcement-chip, numbered-labels, overused-display-font, accent-word-headline]
+    rule: >-
+      Кандидат `proposed`: порог и серьёзность — после калибровки на макетах; до неё в проверки и ворота не входит.
+
+tells:
+
+  # ── Цвет и фон ──────────────────────────────────────────────────────────────────────────────────────────────────
+
+  - id: purple-neon-band
+    name: пурпур и неон в полосе 270–320° без бренда
+    surface: [app, page, asset]
+    owner:
+      asset: ai-media/06-art-direction-consistency/01-visual-dna-from-ui.md §3 (правило R3)
+      page: creative/08-uniqueness-anti-slop/cliche-registry.yaml#purple-neon-band
+      app: ui/11-styles-trends/04-anti-slop-ui.md §2.1 (маркеры 1, 2)
+    also:
+      - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.2 (IMG-M05)
+      - ai-media/06-art-direction-consistency/visual-dna.schema.json#palette (`forbidden_hues`)
+    note: >-
+      Полосу и исключение для бренда задаёт паспорт визуала; бренд не перекрашивают ради полосы — фирменный акцент в ней
+      остаётся одним предметом с ограниченной долей.
+
+  - id: purple-gradient-hero
+    name: фиолетово-синий градиент hero
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#purple-gradient-hero
+    also:
+      - ui/11-styles-trends/04-anti-slop-ui.md §2.1 (маркеры 1, 3)
+      - ui/11-styles-trends/01-style-dictionary-for-quiz.md §18
+
+  - id: gradient-text
+    name: градиентная заливка заголовка
+    surface: [app, page]
+    owner:
+      page: creative/08-uniqueness-anti-slop/cliche-registry.yaml#gradient-text
+      app: ui/11-styles-trends/04-anti-slop-ui.md §2.1 (маркер 3)
+    also:
+      - claude-design/06-design-process/05-default-look.md §3
+    check: K3-GRADIENT-TEXT
+
+  - id: mesh-gradient-bg
+    name: градиент как декор фона (mesh, шейдерный градиент)
+    surface: [app, page]
+    owner:
+      page: creative/08-uniqueness-anti-slop/cliche-registry.yaml#mesh-gradient-bg
+      app: ui/01-color/06-character-gradients-tools.md §2.1
+    also:
+      - ui/11-styles-trends/04-anti-slop-ui.md §2.1 (маркер 3), §4.4
+      - ux/12-evaluation-checklists/02-master-checklist.md#UX-AIG-06
+    note: >-
+      В приложении градиент законен только в названных местах; на странице сайта градиентный фон — приём при концепции,
+      насыщенный вид — с поворотом.
+
+  - id: aurora-blobs
+    name: аврора и размытые цветные пятна за hero
+    surface: [page, asset]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#aurora-blobs
+    also:
+      - blender/01-web-3d-landscape/01-effects-catalog.md §22 («фиолетовая аврора в тёмном герое»)
+      - ai-media/11-evaluation-qa/03-checklists-by-asset.md §3.2
+      - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-47 (смежно — перехват нажатия декоративным слоем)
+
+  - id: neon-glow
+    name: неоновое свечение и цветные тени
+    surface: [app, page, asset]
+    owner:
+      page: creative/08-uniqueness-anti-slop/cliche-registry.yaml#neon-glow
+      app: ui/11-styles-trends/03-dated-vs-crafted.md §2.3
+    also:
+      - creative/04-visual-language/03-color-surfaces-product.md §4.3 (токен `shadow.cta-glow` — одна кнопка по решению арт-дирекции)
+      - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.2 (IMG-M05)
+      - claude-design/06-design-process/05-default-look.md §3 («светящиеся кнопки»)
+
+  - id: warm-paper
+    name: тёплая тонированная бумага фоном страницы
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#warm-paper
+    also:
+      - ui/11-styles-trends/04-anti-slop-ui.md §4.1 (кластер 1)
+      - claude-design/06-design-process/05-default-look.md §3, §4
+      - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.2 (IMG-M04 — тёплый сдвиг фото, смежно)
+    check: K3-BG-WARM
+    note: Тонированная нейтраль из токенов бренда — решение, а не примета (claude-design/06-design-process/05-default-look.md §5).
+
+  - id: cream-serif-terracotta
+    name: «редакционный люкс» — крем, контрастная антиква, терракота
+    surface: [page, asset]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#cream-serif-terracotta
+    also:
+      - ui/11-styles-trends/04-anti-slop-ui.md §4.1 (кластер 1), §5
+      - claude-design/06-design-process/05-default-look.md §4
+      - ai-media/06-art-direction-consistency/01-visual-dna-from-ui.md §5.1
+    note: Ловится двумя проверками макета — K3-BG-WARM и K3-SERIF-DISPLAY.
+
+  - id: dark-acid-accent
+    name: почти чёрный фон и один кислотный акцент
+    surface: [app, page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#dark-acid-accent
+    also:
+      - ui/11-styles-trends/04-anti-slop-ui.md §4.1 (кластер 2)
+    note: >-
+      Тёмный фон из нейтральной шкалы дизайн-системы в коридоре светлоты ui/01-color/04-dark-theme.md §2.1 — норма тёмной
+      темы; примета — связка фона с одним кислотным акцентом и хромом.
+
+  - id: near-black-literal
+    name: почти-чёрный литерал вместо нейтрали шкалы
+    surface: [app, page]
+    owner: ui/11-styles-trends/04-anti-slop-ui.md §2.9 (маркер 33)
+    also:
+      - ui/01-color/04-dark-theme.md §2.1
+    note: Примета — значение вне шкалы токенов; тот же оттенок из нейтральной шкалы дизайн-системы приметой не является.
+
+  - id: dark-pause-section
+    name: тёмная секция-пауза в светлой странице
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#dark-pause-section
+    also:
+      - creative/04-visual-language/02-composition-rhythm-sections.md §3.2
+      - claude-design/06-design-process/05-default-look.md §3, §5
+    note: Пауза, которая меняет тему сюжета длинной страницы, — ритм, а не примета.
+
+  - id: broadsheet-hairlines
+    name: газетная вёрстка — волосяные линейки, нулевой радиус, плотные колонки
+    surface: [app, page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#broadsheet-hairlines
+    also:
+      - ui/11-styles-trends/04-anti-slop-ui.md §4.1 (кластер 3), §5
+      - claude-design/06-design-process/05-default-look.md §5
+
+  - id: grain-overlay
+    name: зерно на всём
+    surface: [page, asset]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#grain-overlay
+    also:
+      - creative/04-visual-language/03-color-surfaces-product.md §4.2 (слой зерна страницы)
+      - ai-media/06-art-direction-consistency/01-visual-dna-from-ui.md §7.3 (зерно ассета)
+      - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §7.1
+
+  # ── Поверхность, материал, 3D ───────────────────────────────────────────────────────────────────────────────────
+
+  - id: glassmorphism-panels
+    name: стекло на карточках и панелях
+    surface: [app, page]
+    owner:
+      page: creative/06-effects-catalog/effects.yaml#glass-panel
+      app: ui/11-styles-trends/04-anti-slop-ui.md §2.4 (маркер 15)
+    also:
+      - creative/08-uniqueness-anti-slop/cliche-registry.yaml#glassmorphism-panels
+      - creative/04-visual-language/03-color-surfaces-product.md §4.1
+      - claude-design/06-design-process/05-default-look.md §3
+    check: K3-GLASS
+
+  - id: iridescent-holo
+    name: перелив, иридесценция, голографическая плёнка
+    surface: [page, asset]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#iridescent-holo
+    also:
+      - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.2 (IMG-M06)
+      - blender/11-evaluation-qa/05-master-checklist.md §4 (MAT-07)
+      - blender/01-web-3d-landscape/01-effects-catalog.md §22
+    note: >-
+      MAT-07 blender — правило совпадения вида рендера и веба, а не запрет вкуса; уместен ли перелив на странице, решает
+      арт-дирекция по записи реестра клише.
+
+  - id: chrome-liquid-metal
+    name: хром и жидкий металл
+    surface: [page, asset]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#chrome-liquid-metal
+    also:
+      - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.2 (IMG-M06)
+      - blender/01-web-3d-landscape/01-effects-catalog.md §22
+
+  - id: glass-object-pastel
+    name: стеклянный тор, капля или кубик на пастельном градиенте
+    surface: [page, asset]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#glass-object-pastel
+    also:
+      - blender/01-web-3d-landscape/01-effects-catalog.md §22
+      - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.2 (IMG-M06)
+      - ai-media/11-evaluation-qa/03-checklists-by-asset.md §3.2
+
+  - id: particle-swarm
+    name: шар, галактика или логотип из частиц
+    surface: [page, asset]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#particle-swarm
+    also:
+      - blender/01-web-3d-landscape/01-effects-catalog.md §22
+      - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.4
+      - ai-media/11-evaluation-qa/03-checklists-by-asset.md §3.2
+
+  - id: webgl-centerpiece
+    name: WebGL- или canvas-центр без задачи
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#webgl-centerpiece
+    also:
+      - blender/11-evaluation-qa/05-master-checklist.md §1 (BR-02)
+      - blender/01-web-3d-landscape/02-when-3d-budgets-loading.md §7
+      - claude-design/06-design-process/05-default-look.md §3
+
+  - id: glossy-3d-icons
+    name: глянцевые пластиковые 3D-иконки
+    surface: [page, asset]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#glossy-3d-icons
+    also:
+      - blender/01-web-3d-landscape/01-effects-catalog.md §13, §22
+      - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §7.2
+    note: Серия 3D-иконок в собственном стиле держится паспортом 3D-серии (blender/06-materials-lighting-render/02-lighting-camera-composition.md §6).
+
+  - id: floating-orbs
+    name: парящие сферы и размытые кружки без роли
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#floating-orbs
+    also:
+      - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-47 (смежно — перехват нажатия декоративным слоем)
+
+  - id: synthwave-grid
+    name: синтвейв-сетка с неоновым солнцем
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#synthwave-grid
+    also:
+      - claude-design/06-design-process/05-default-look.md §3
+
+  - id: floating-bob-loop
+    name: «парение» — объект бесконечно качается с коротким периодом
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#floating-bob-loop
+    also:
+      - creative/05-motion/01-motion-principles-and-access.md §6.3 (период колебаний)
+      - blender/01-web-3d-landscape/01-effects-catalog.md §22
+
+  # ── Типографика ─────────────────────────────────────────────────────────────────────────────────────────────────
+
+  - id: overused-display-font
+    name: гарнитура по прилагательному брифа или по умолчанию
+    surface: [app, page]
+    owner:
+      page: creative/08-uniqueness-anti-slop/cliche-registry.yaml#overused-display-font
+      app: ui/11-styles-trends/04-anti-slop-ui.md §2.2 (маркер 6)
+    also:
+      - creative/04-visual-language/cyrillic-display-fonts.yaml
+      - ui/02-typography/01-font-selection.md
+      - claude-design/06-design-process/05-default-look.md §3, §4
+    check: K3-SERIF-DISPLAY
+    note: Проверка макета ловит только серифный display и пару «сериф + гротеск по умолчанию»; остальные гарнитуры — глазами по записи.
+
+  - id: accent-word-headline
+    name: выделенное слово в заголовке — курсив, цвет, градиент
+    surface: [app, page]
+    owner:
+      page: creative/08-uniqueness-anti-slop/cliche-registry.yaml#accent-word-headline
+      app: ui/11-styles-trends/04-anti-slop-ui.md §2.2 (маркер 7)
+    also:
+      - claude-design/06-design-process/05-default-look.md §3, §4
+    check: K3-ACCENT-WORD
+
+  - id: caps-share
+    name: мелкий разреженный капс у многих узлов
+    surface: [app, page]
+    owner: ui/11-styles-trends/04-anti-slop-ui.md §2.2 (маркер 8)
+    also:
+      - ui/02-typography/04-weight-hierarchy-color.md §5
+      - claude-design/06-design-process/05-default-look.md §3
+      - creative/08-uniqueness-anti-slop/cliche-registry.yaml#caps-eyebrow
+    check: K3-CAPS
+    note: Где капс законен в интерфейсе — ui/02-typography/04-weight-hierarchy-color.md §5; капс-надзаголовок — отдельная примета `caps-eyebrow`.
+
+  - id: caps-eyebrow
+    name: надзаголовок капсом над заголовками секций
+    surface: [app, page, text]
+    owner: text/09-ai-generation-evaluation/copy-checklist.yaml#COPY-C-18
+    also:
+      - creative/08-uniqueness-anti-slop/cliche-registry.yaml#caps-eyebrow (капс как визуал)
+      - ui/11-styles-trends/04-anti-slop-ui.md §2.9 (маркер 30)
+      - ux/07-ux-writing/06-banned-words-and-patterns.md §5.3
+      - ux/12-evaluation-checklists/02-master-checklist.md#UX-AIG-06
+      - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-52
+      - claude-design/06-design-process/05-default-look.md §3, §4
+    check: K3-EYEBROW
+    note: Частоту и смысл надзаголовка ведёт text, капс как визуал — creative; остальные места берут число у COPY-C-18.
+
+  - id: mono-captions
+    name: моноширинный шрифт у мелких подписей без данных
+    surface: [app, page]
+    owner:
+      page: creative/08-uniqueness-anti-slop/cliche-registry.yaml#mono-captions
+      app: ui/11-styles-trends/04-anti-slop-ui.md §2.9 (маркер 33)
+    also:
+      - claude-design/06-design-process/05-default-look.md §3, §4
+    check: K3-MONO-LABELS
+
+  - id: font-size-count
+    name: шкала кеглей без ролей
+    surface: [app, page]
+    owner: ui/02-typography/02-type-scale.md §4.5
+    also:
+      - ui/11-styles-trends/04-anti-slop-ui.md §2.2 (маркер 9)
+      - ui/02-typography/04-weight-hierarchy-color.md (число весов)
+      - claude-design/06-design-process/05-default-look.md §3
+    note: Считают кегли на экране или странице при одной ширине; роли текста считаются отдельно.
+
+  - id: giant-display-type
+    name: гигантский дисплей, вордмарк в подвале, контурный текст без задачи
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#giant-display-type
+    also:
+      - creative/04-visual-language/01-display-typography.md §2
+      - claude-design/06-design-process/05-default-look.md §3
+
+  # ── Шаблонный хром ──────────────────────────────────────────────────────────────────────────────────────────────
+
+  - id: meta-dots
+    name: мета-строки через «·» и лейблы «СЛОВО / 04»
+    surface: [app, page, text]
+    owner: ui/11-styles-trends/04-anti-slop-ui.md §2.9 (маркер 32)
+    also:
+      - creative/08-uniqueness-anti-slop/cliche-registry.yaml#meta-dots-labels
+      - ux/07-ux-writing/06-banned-words-and-patterns.md §5.3
+      - claude-design/06-design-process/05-default-look.md §3
+    check: K3-META-DOTS
+
+  - id: numbered-labels
+    name: нумерация 01 / 02 / 03 без последовательности
+    surface: [app, page, text]
+    owner: ui/11-styles-trends/04-anti-slop-ui.md §2.9 (маркер 31)
+    also:
+      - creative/08-uniqueness-anti-slop/cliche-registry.yaml#meta-dots-labels
+      - ux/07-ux-writing/06-banned-words-and-patterns.md §5.3
+      - claude-design/06-design-process/05-default-look.md §3, §4
+    check: K3-NUMBERED
+    note: Нумерация настоящей последовательности — шагов, этапов, таймлайна — приметой не является.
+
+  - id: arrow-in-button
+    name: стрелка «→» в тексте кнопки или ссылки
+    surface: [app, page, text]
+    owner: ui/11-styles-trends/04-anti-slop-ui.md §2.9 (маркер 34)
+    also:
+      - ux/07-ux-writing/06-banned-words-and-patterns.md §5.3
+      - text/06-anti-slop/lexicon/ru-punct.yaml#ru-pun-arrow-cta (COPY-M-PUN-07)
+      - creative/08-uniqueness-anti-slop/cliche-registry.yaml#meta-dots-labels
+      - claude-design/06-design-process/05-default-look.md §3
+    check: K3-ARROWS
+    note: >-
+      Стрелка не входит в текст подписи: в текстах её ловят словари ux и text, в макете — проверка по разметке. Иконка
+      рядом с подписью — решение облика; «↗» у ссылки на внешний сайт несёт смысл и приметой не считается
+      (creative/08-uniqueness-anti-slop/01-cliche-policy.md §4.1). Кавычки «» в подписи — не стрелка.
+
+  - id: pill-announcement-chip
+    name: пилюля-анонс над H1 и кнопки-пилюли по умолчанию
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#pill-announcement-chip
+    also:
+      - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-52
+      - claude-design/06-design-process/05-default-look.md §3, §4
+    check: K3-PILL
+    note: Кнопка-пилюля, выбранная шкалой радиусов дизайн-системы, — решение, а не примета.
+
+  - id: emoji-sparkle-ai
+    name: эмодзи вместо иконок и «искра ИИ»
+    surface: [app, page, text]
+    owner:
+      app: ui/07-iconography-imagery/02-illustration-system-avatars-images.md §10
+      page: creative/08-uniqueness-anti-slop/cliche-registry.yaml#emoji-sparkle-ai
+    also:
+      - ui/11-styles-trends/04-anti-slop-ui.md §2.6 (маркер 21)
+      - ux/07-ux-writing/06-banned-words-and-patterns.md §5.3 (эмодзи в подписях, заголовках, статусах)
+      - claude-design/06-design-process/05-default-look.md §3
+    note: Эмодзи в пользовательском содержимом — реакциях, названиях, статусах, которые ставит человек, — законны.
+
+  # ── Композиция и подача ─────────────────────────────────────────────────────────────────────────────────────────
+
+  - id: hero-center-fullscreen
+    name: hero на всю высоту окна, всё по центру, продолжения не видно
+    surface: [page]
+    owner: site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-06
+    also:
+      - creative/04-visual-language/02-composition-rhythm-sections.md §1.2 (когда центр законен)
+      - site/03-page-structure/03-first-screen-and-mobile.md §2 (политика первого экрана)
+      - claude-design/06-design-process/05-default-look.md §3
+    check: K3-HERO-CENTER
+    note: >-
+      Примета — связка высоты без видимого продолжения и центральной оси. Центр сам по себе законен по правилу
+      creative/04-visual-language/02-composition-rhythm-sections.md §1.2, высоту hero задаёт политика первого экрана
+      плана страницы.
+
+  - id: hero-media-veil
+    name: фото или видео на весь hero под тёмной вуалью, текст по центру
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#hero-media-veil
+    also:
+      - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-49
+      - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.2 (IMG-M21, IMG-M22)
+      - claude-design/06-design-process/05-default-look.md §3
+    check: K3-HERO-OVERLAY
+
+  - id: stats-row
+    name: ряд крупных чисел
+    surface: [page]
+    owner: site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-02
+    also:
+      - claude-design/06-design-process/05-default-look.md §3
+    check: K3-STATS-ROW
+    note: Каждое число в ряду сверяется с фактами — примета `invented-numbers`.
+
+  - id: three-equal-cards
+    name: три одинаковые карточки в ряд вместо продукта
+    surface: [app, page]
+    owner: site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-07
+    also:
+      - ui/11-styles-trends/04-anti-slop-ui.md §2.5 (маркер 17)
+      - ux/12-evaluation-checklists/02-master-checklist.md#UX-AIG-06
+      - creative/04-visual-language/02-composition-rhythm-sections.md §1
+      - claude-design/06-design-process/05-default-look.md §3
+    check: K3-THREE-CARDS
+
+  - id: bento-uniform-tiles
+    name: бенто из одинаковых плиток
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#bento-uniform-tiles
+    also:
+      - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-08 (структура)
+      - ui/11-styles-trends/04-anti-slop-ui.md §2.4 (маркер 14)
+
+  - id: dashboard-in-browser-frame
+    name: нарисованная рамка браузера или телефона вокруг выдуманного интерфейса
+    surface: [page]
+    owner: site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-17
+    also:
+      - creative/08-uniqueness-anti-slop/cliche-registry.yaml#dashboard-in-browser-frame (подача продукта)
+      - creative/04-visual-language/03-color-surfaces-product.md §5
+      - ui/07-iconography-imagery/02-illustration-system-avatars-images.md §1.3
+      - claude-design/06-design-process/05-default-look.md §3
+    check: K3-DRAWN-CHROME
+    note: >-
+      Настоящий скриншот продукта в `figure` с простой рамкой — ключевой визуал страницы SaaS; внутри интерфейса
+      приложения экран в экране не показывают.
+
+  - id: logo-orbit-hero
+    name: орбита логотипов или иконок интеграций вокруг центра hero
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#logo-orbit-hero
+    also:
+      - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-06
+      - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-19
+
+  - id: category-rut-imagery
+    name: буквальный образ категории без смысла
+    surface: [page, asset]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#category-rut-imagery
+    also:
+      - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-49
+      - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.2 (IMG-M07, IMG-M08, IMG-M22), §5.4
+      - blender/01-web-3d-landscape/01-effects-catalog.md §22 (глобус с дугами, изометрическая комната)
+
+  - id: one-radius
+    name: один радиус на всех контейнерах
+    surface: [app, page]
+    owner: ui/11-styles-trends/04-anti-slop-ui.md §2.4 (маркер 14)
+    also:
+      - ux/12-evaluation-checklists/02-master-checklist.md#UX-AIG-06
+      - creative/08-uniqueness-anti-slop/cliche-registry.yaml#bento-uniform-tiles
+
+  - id: same-shadow
+    name: одна и та же тень под всем
+    surface: [app, page]
+    owner: ui/11-styles-trends/04-anti-slop-ui.md §2.4 (маркер 13)
+    also:
+      - ux/12-evaluation-checklists/02-master-checklist.md#UX-AIG-06
+
+  - id: shadcn-default
+    name: дефолт библиотеки shadcn — нулевая хрома, радиус 10, почти чёрный primary, однослойная тень
+    surface: [app]
+    owner: ui/CONTRADICTIONS.md §[C24]
+    also:
+      - ui/10-design-systems-atlas/03-choosing-a-base.md §5
+      - ui/11-styles-trends/01-style-dictionary-for-quiz.md §16
+      - ui/12-ai-generated-ui/02-codegen-tools-and-default-look.md §2.1
+    note: Радиус 10 допустим как осознанный выбор со следом этой библиотеки (ui/CONTRADICTIONS.md §[C7]).
+
+  - id: tool-preset-look
+    name: вид пресета инструмента или копипаст-компонента кита
+    surface: [app, page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#tool-preset-look
+    also:
+      - creative/08-uniqueness-anti-slop/01-cliche-policy.md §1.3
+      - creative/07-stack-implementation/01-stack-choice.md §6.4
+      - ux/README.md (реестр противоречий, № 61)
+    note: >-
+      Компонент кита — референс, а не решение: на странице его параметры задаёт арт-дирекция по записи реестра клише,
+      в приложении значения даёт дизайн-система проекта.
+
+  - id: header-height
+    name: высокая шапка
+    surface: [app, page]
+    owner:
+      page: site/03-page-structure/03-first-screen-and-mobile.md §4.2
+      app: ui/CONTRADICTIONS.md §[C3]
+    also:
+      - claude-design/06-design-process/05-default-look.md §3
+
+  - id: off-scale-spacing
+    name: отступы вне шкалы и один отступ везде
+    surface: [app, page]
+    owner: ui/CONTRADICTIONS.md §[C9]
+    also:
+      - ui/09-design-tokens/04-reference-token-schema.md §1.3 (шкала `space.*`)
+      - ui/11-styles-trends/04-anti-slop-ui.md §2.3 (маркеры 10, 11)
+      - claude-design/06-design-process/05-default-look.md §3
+
+  # ── Движение и взаимодействие ───────────────────────────────────────────────────────────────────────────────────
+
+  - id: section-fade-up
+    name: одинаковое появление на каждом блоке
+    surface: [app, page]
+    owner:
+      page: creative/08-uniqueness-anti-slop/cliche-registry.yaml#section-fade-up
+      app: ui/11-styles-trends/04-anti-slop-ui.md §2.8 (маркер 28)
+    also:
+      - creative/05-motion/02-choreography-scroll-transitions.md §2 (система появления)
+      - blender/09-web-runtime/03-scroll-interaction-animation.md §3.1
+      - claude-design/06-design-process/05-default-look.md §3
+
+  - id: hover-lift-all
+    name: "подъём при наведении на всём и `transition: all`"
+    surface: [app, page]
+    owner:
+      page: creative/08-uniqueness-anti-slop/cliche-registry.yaml#hover-lift-all
+      app: ui/11-styles-trends/04-anti-slop-ui.md §2.8 (маркер 29)
+    also:
+      - ui/CONTRADICTIONS.md §[C20]
+      - claude-design/06-design-process/05-default-look.md §3
+
+  - id: layout-property-animation
+    name: анимация свойств раскладки
+    surface: [app, page]
+    owner: creative/01-creative-direction/ambition-levels.yaml#levels
+    also:
+      - ui/08-motion/02-what-to-animate-in-apps.md §4.1
+      - claude-design/06-design-process/05-default-look.md §3
+    note: Какие свойства анимировать на каком уровне амбиций — подсказки движения уровня; в приложении — ui/08-motion/02-what-to-animate-in-apps.md §4.
+
+  - id: marquee-strip
+    name: бегущая строка слов или логотипов
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#marquee-strip
+    also:
+      - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-19 (логотипы — с разрешением)
+      - claude-design/06-design-process/05-default-look.md §3
+    check: K3-MARQUEE
+    note: >-
+      Примета — движущаяся лента. Форма первого экрана `marquee-hero` словаря site («Заявление на весь экран») —
+      макроструктура, а не бегущая строка (site/02-site-types/vocabulary.yaml).
+
+  - id: custom-cursor-follower
+    name: свой курсор и точка-догонялка
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#custom-cursor-follower
+    also:
+      - creative/05-motion/03-micro-motion-and-performance.md §1.3
+      - claude-design/06-design-process/05-default-look.md §3
+
+  - id: circular-rotating-text
+    name: вращающийся круговой текст-бейдж
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#circular-rotating-text
+    also:
+      - claude-design/06-design-process/05-default-look.md §3
+
+  - id: smooth-scroll-default
+    name: плавная прокрутка по умолчанию без сюжета
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#smooth-scroll-default
+    also:
+      - ui/11-styles-trends/03-dated-vs-crafted.md §5.4
+
+  - id: preloader
+    name: прелоадер с процентами и ворота «Enter with sound»
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#preloader
+    also:
+      - blender/01-web-3d-landscape/01-effects-catalog.md §22
+      - ai-media/10-web-integration/02-video-delivery.md
+
+  - id: liquid-hover-distortion
+    name: жидкое искажение картинок при наведении на каждой карточке
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#liquid-hover-distortion
+    also:
+      - blender/01-web-3d-landscape/01-effects-catalog.md §22
+
+  - id: pulsing-cta
+    name: пульсирующий или мигающий призыв
+    surface: [page]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#pulsing-cta
+    also:
+      - creative/05-motion/03-micro-motion-and-performance.md §1.2
+      - blender/07-animation/04-js-vs-blender-vs-prerender.md
+
+  - id: parallax-everything
+    name: параллакс слоёв на каждом экране
+    surface: [app, page]
+    owner:
+      page: creative/08-uniqueness-anti-slop/cliche-registry.yaml#parallax-everything
+      app: ui/08-motion/02-what-to-animate-in-apps.md §7
+    also:
+      - creative/05-motion/02-choreography-scroll-transitions.md
+
+  # ── Изображения и медиа ─────────────────────────────────────────────────────────────────────────────────────────
+
+  - id: eternal-slowmo
+    name: «вечный слоумо» в фоновой петле
+    surface: [page, asset]
+    owner: creative/08-uniqueness-anti-slop/cliche-registry.yaml#eternal-slowmo
+    also:
+      - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.3 (VID-M13, VID-M18)
+
+  - id: people-as-proof
+    name: ИИ-люди и сток в роли клиентов, команды, авторов отзывов
+    surface: [page, asset]
+    owner: site/08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md §2.1
+    also:
+      - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-14
+      - ai-media/12-legal-provenance/04-agent-policy.md
+      - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §1.3, §5.2 (IMG-M11, IMG-M13, IMG-M14, IMG-M20)
+      - ai-media/06-art-direction-consistency/visual-dna.schema.json#subject_matter
+    note: Люди-доказательства — только реальные фото с согласием; ИИ-люди — только декор по решению заказчика.
+
+  - id: text-in-media
+    name: смысловой текст внутри картинки, canvas или видео
+    surface: [app, page, asset]
+    owner: site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-27
+    also:
+      - ui/07-iconography-imagery/02-illustration-system-avatars-images.md §2.11
+      - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.2 (IMG-M12), §5.3 (VID-M11)
+      - text/05-voice-editorial/01-brand-voice.md §8 (формулировка надписи на картинке)
+
+  - id: stock-and-hotlink
+    name: сток, сервисы-заглушки и хотлинк картинок в макете
+    surface: [app, page]
+    owner: claude-design/06-design-process/04-checks.md §3 (группа D)
+    also:
+      - ui/07-iconography-imagery/02-illustration-system-avatars-images.md §2.11, §12.2
+      - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-14
+    check: F-STOCK
+
+  # ── Честность ───────────────────────────────────────────────────────────────────────────────────────────────────
+
+  - id: invented-numbers
+    name: числа-доказательства без факта
+    surface: [app, page, text]
+    owner:
+      page: site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-18
+      app: ux/12-evaluation-checklists/02-master-checklist.md#UX-AIG-02
+    also:
+      - text/02-strategy-messaging/03-proof-and-facts.md (факты и проверка чисел)
+      - claude-design/06-design-process/04-checks.md §3 (группа D)
+    check: F-NUMBERS
+
+  - id: filler-text
+    name: рыба и заглушки — lorem, «John Doe», «Feature 1»
+    surface: [app, page, text]
+    owner:
+      page: site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-09
+      app: ux/12-evaluation-checklists/02-master-checklist.md#UX-AIG-01
+    also:
+      - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-44
+      - ui/11-styles-trends/04-anti-slop-ui.md §2.7 (маркер 24)
+      - ux/07-ux-writing/06-banned-words-and-patterns.md §5
+      - claude-design/06-design-process/04-checks.md §3 (группа D)
+    check: F-FILLER
+
+  - id: unsourced-quotes
+    name: отзывы без источника, одной длины, только пятёрки
+    surface: [page]
+    owner: site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-45
+    also:
+      - site/08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md §3
+      - claude-design/06-design-process/04-checks.md §3 (группа D)
+    check: F-QUOTE
+
+  - id: content-bugs
+    name: литералы экранирования и двойные валюты в тексте макета
+    surface: [app, page]
+    owner: claude-design/06-design-process/05-default-look.md §3
+    also:
+      - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-44
+
+  - id: low-contrast-text
+    name: подписи и текст на тёплом фоне ниже порога контраста
+    surface: [app, page]
+    owner: ui/01-color/03-contrast.md §1.2
+    also:
+      - ui/11-styles-trends/04-anti-slop-ui.md §2.1 (маркеры 2, 5)
+      - claude-design/06-design-process/05-default-look.md §3
+    check: K3-WARM-CONTRAST
+    note: Порог контраста — норма доступности, решением брифа не снимается.
+
+  # ── Тексты на стыке с визуалом ──────────────────────────────────────────────────────────────────────────────────
+
+  - id: em-dash
+    name: длинное тире там, где его пишет модель, а не грамматика
+    surface: [text]
+    owner: text/08-russian-legal-typography/02-typography-for-marketing.md §1.2
+    also:
+      - text/06-anti-slop/01-text-slop-markers-by-genre.md §4.1
+      - claude-design/06-design-process/05-default-look.md §3
+    note: Русское тире — по грамматике; правило «без длинных тире» касается английских строк.
+
+  - id: x-not-y-slogan
+    name: слоганы «не X, а Y» и «не только X, но и Y»
+    surface: [text]
+    owner: text/06-anti-slop/01-text-slop-markers-by-genre.md §3
+    also:
+      - claude-design/06-design-process/05-default-look.md §3, §4
+
+  - id: section-labels
+    name: ярлыки секций вместо утверждений — «Наши преимущества», «Почему мы»
+    surface: [text]
+    owner: text/CONTRADICTIONS.md §[X24]
+    also:
+      - text/06-anti-slop/01-text-slop-markers-by-genre.md §8 (COPY-M-MKT-11)
+      - text/09-ai-generation-evaluation/copy-rubric.yaml
+    note: Подписи навигации и заголовки «Частые вопросы», «Контакты» — конвенции, а не примета.
+
+# Проверки утилиты макета `scripts/claude-design/mockup_checks.py`. `allow` — ключ `--allow`: он снимает находку, когда
+# бриф или арт-дирекция записали решение; те же ключи пишет поле `k3_allow` арт-дирекции creative. Группа: look —
+# приметы вида, honesty — честность содержимого, acceptance — проверки приёмки, которые приметами не являются.
+checks:
+  K3-BG-WARM: {group: look, tell: warm-paper, allow: warm}
+  K3-ACCENT-WORD: {group: look, tell: accent-word-headline, allow: accent-word}
+  K3-SERIF-DISPLAY: {group: look, tell: overused-display-font, allow: serif}
+  K3-EYEBROW: {group: look, tell: caps-eyebrow, allow: eyebrow}
+  K3-CAPS: {group: look, tell: caps-share, allow: caps}
+  K3-PILL: {group: look, tell: pill-announcement-chip, allow: pill}
+  K3-GRADIENT-TEXT: {group: look, tell: gradient-text, allow: gradient}
+  K3-HERO-CENTER: {group: look, tell: hero-center-fullscreen, allow: center-hero}
+  K3-HERO-OVERLAY: {group: look, tell: hero-media-veil, allow: photo-hero}
+  K3-STATS-ROW: {group: look, tell: stats-row, allow: stats}
+  K3-THREE-CARDS: {group: look, tell: three-equal-cards, allow: cards}
+  K3-META-DOTS: {group: look, tell: meta-dots, allow: dots}
+  K3-ARROWS: {group: look, tell: arrow-in-button, allow: arrows}
+  K3-MONO-LABELS: {group: look, tell: mono-captions, allow: mono}
+  K3-NUMBERED: {group: look, tell: numbered-labels, allow: numbered}
+  K3-GLASS: {group: look, tell: glassmorphism-panels, allow: glass}
+  K3-MARQUEE: {group: look, tell: marquee-strip, allow: marquee}
+  K3-DRAWN-CHROME: {group: look, tell: dashboard-in-browser-frame, allow: chrome}
+  K3-WARM-CONTRAST: {group: look, tell: low-contrast-text}
+  F-UNSPLASH: {group: honesty, tell: stock-and-hotlink}
+  F-STOCK: {group: honesty, tell: stock-and-hotlink}
+  F-HOTLINK: {group: honesty, tell: stock-and-hotlink, allow: external}
+  F-NUMBERS: {group: honesty, tell: invented-numbers}
+  F-QUOTE: {group: honesty, tell: unsourced-quotes}
+  F-FILLER: {group: honesty, tell: filler-text}
+  F-CAPTION: {group: honesty, norm: "claude-design/06-design-process/04-checks.md §3 (подписи и alt против списка ассетов)"}
+  F-COPY: {group: honesty, norm: "claude-design/06-design-process/04-checks.md §3 (текст против copy deck)"}
+  M-NAV: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}
+  M-BODY-16: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}
+  M-OVERFLOW: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}
+  M-H1-LINES: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}
+  V-OVERLAP: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}
+  E-LOW-DOM: {group: acceptance, norm: "проверки по разметке неполны: canvas или видео занимают первый экран"}
