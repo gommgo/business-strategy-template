@@ -1,0 +1,186 @@
+# Что читает агент узла (для оценки контекста: tools/budget.py). Путь — от kb/ или от корня репозитория; sections — `*` или
+# регулярные выражения заголовков через ` || `. node `*` — всем узлам. Список — ориентир: агент читает строки узла и по ним — нужные места.
+node	path	sections	note
+*	research/design-build/phase-4/PLAN.md	*	план фазы
+*	research/design-build/phase-4/CHAIN.md	*	передача (растёт по ходу цепочки)
+*	research/design-build/DECISIONS.md	*	Р-решения обязательны
+*	research/design-build/phase-2/SYNTHESIS.md	^9\. Сверка баз	пункты §9
+GL	ux/00-glossary.md	^Ложные друзья	ложные друзья ux
+GL	site/00-glossary/glossary.md	^0\. Ложные друзья	ложные друзья site
+GL	text/00-glossary/glossary.md	^13\. Ложные друзья	ложные друзья text
+GL	creative/00-glossary/glossary.md	^0\. Ложные друзья	ложные друзья creative
+GL	ui/00-glossary/glossary.md	^14\. Несовместимая терминология	несовместимая терминология ui
+GL	ai-media/00-glossary/glossary.md	^12\. Омонимы	омонимы ai-media
+GL	blender/00-glossary/README.md	^Ложные друзья	ложные друзья blender
+GL	research/design-build/phase-2/SYNTHESIS.md	^6\.4\. Разнобой терминов	таблица «ложных друзей»
+GL	research/design-build/phase-2/CHAIN.md	^Общее$	общие наблюдения Ф2
+GL	research/design-build/phase-2/ux/ux-низ.md	^5\. Связи с соседними базами	термины на стыках
+GL	docs/projects/_template/project/README.md	*	термины слоя проекта
+GL	docs/projects/_template/interface/README.md	*	термины слоя проекта
+GL	docs/projects/_template/screens/README.md	*	термины слоя проекта
+GL	docs/projects/_template/mobile/README.md	*	термины слоя проекта
+GL	docs/projects/_template/telegram-bot-flow/README.md	*	термины слоя проекта
+GL	docs/projects/_template/fsd/README.md	*	термины слоя проекта
+TR	site/99-raw/notes/triad-contract-2026-09-24.md	^2\. Владельцы || ^3\. Общие форматы || ^4\. Размер и метод || ^5\. Порядок запуска || ^6\. Сквозные выводы || ^8\. Предложения соседям	контракт тройки §2–§6, §8
+TR	site/99-raw/handoff-to-neighbours.md	*	поправки site
+TR	text/99-raw/handoff-to-neighbours.md	*	поправки text
+TR	creative/99-raw/handoff-to-neighbours.md	^site — || ^text — 	поправки creative сёстрам
+TR	site/99-raw/reports/wave4-X-audit.md	^1\.2\. С соседями || ^1\.3\. С сёстрами || ^2\. Дубли и каноническое место || ^8\. Сверка тройки || ^9\.4\. Что передать	отчёт X site
+TR	site/README.md	^Реестр разрешённых противоречий || ^Свод поправок к соседям || ^Что передано соседям || ^Сёстры и точки синхронизации	реестр и свод site
+TR	text/CONTRADICTIONS.md	^\[X7\] || ^\[X26\] || ^\[X27\] || ^\[X28\] || ^\[X32\] || ^\[X43\] || ^\[X44\] || ^\[X11\] || ^\[X34\]	позиции text по спорам с site
+TR	site/02-site-types/vocabulary.yaml	*	словарь site v1
+TR	site/02-site-types/crosswalk.tsv	*	соответствие словарей (верхняя граница: читать фильтром)
+TR	text/99-raw/notes/temp-vocabulary-v0.yaml	*	временный словарь text
+TR	text/04-copy-by-block/copy-slots.yaml	*	слоты text (верхняя граница: читать частями)
+TR	site/99-raw/prompts/_common.md	^Кто чем владеет	владение site
+TR	creative/99-raw/prompts/_common.md	^Кто чем владеет	владение creative
+TR	site/PLAN.md	^Как всё сочетается	конвейер site
+TR	text/PLAN.md	^Как всё сочетается	конвейер text
+TR	creative/PLAN.md	^Как всё сочетается	конвейер creative
+TR	claude-design/06-design-process/02-input-package.md	*	единый вход холста — куда ушли стыки kimi
+TR	research/design-build/phase-2/SYNTHESIS.md	^2\.2\. Узлы межбазовых связей || ^5\.3\. Владение форматами || ^8\.3\. page-plan	узлы связей, владение
+TR	creative/CONTRADICTIONS.md	^Е\. Сёстры	X-56 и соседи тройки
+GT	site/07-seo-geo-performance-analytics/page-gates.yaml	*	ворота страницы
+GT	site/07-seo-geo-performance-analytics/budgets.yaml	*	бюджеты
+GT	site/07-seo-geo-performance-analytics/03-performance-budgets-gates.md	^Выжимка для агента || ^3\. Профили бюджета || ^4\. Единые ворота || ^6\. Расхождения с воротами соседей	site 07/03
+GT	site/09-ai-generation-evaluation/02-site-checklist.md	^5\. Профиль UX-чек-листа || ^6\. Автопроверки || ^8\. Нормализация	site 09/02 §5, §6, §8
+GT	blender/11-evaluation-qa/05-master-checklist.md	*	WEB-01, WEB-04 и др.
+GT	blender/09-web-runtime/05-performance-a11y-fallbacks.md	^Выжимка для агента || ^1\. Бюджеты || ^7\. Чек-лист	blender 09/05 §1, §7
+GT	blender/01-web-3d-landscape/02-when-3d-budgets-loading.md	^3\. Бюджеты	blender 01/02 §3
+GT	creative/01-creative-direction/ambition-levels.yaml	*	уровни L0–L2
+GT	creative/01-creative-direction/03-ambition-levels.md	^Выжимка для агента || ^4\. Бюджеты || ^7\. Соответствие соседям || ^8\. Поправки к соседям	creative 01/03
+GT	creative/09-ai-execution-evaluation/effect-gates.yaml	*	ворота эффектов
+GT	creative/09-ai-execution-evaluation/03-verification-loop-and-gates.md	^Выжимка для агента || ^3\. Ворота эффектов || ^4\. Профиль `marketing`	creative 09/03
+GT	ai-media/10-web-integration/04-budgets-and-acceptance.md	*	page_accept, бюджеты ai-media
+GT	ai-media/11-evaluation-qa/thresholds.yaml	*	пороги ai-media
+GT	ux/12-evaluation-checklists/03-automated-checks.md	^9\. Производительность || ^10\. Пороги	ux AC-PRF
+GT	blender/README.md	^Реестр противоречий$	R2, R19, R20, T-строки
+GT	creative/CONTRADICTIONS.md	^Б\. Уровни, бюджеты, счёт || ^А\. Движение || ^Д\. Данные || ^Е\. Сёстры	X-17, X-18, X-21, X-45
+GT	creative/99-raw/handoff-to-neighbours.md	^site — || ^ai-media — || ^blender — 	cs-*, ca-*, cb-*
+GT	ai-media/CONTRADICTIONS.md	^Доставка и страница	X17: LCP полноэкранного hero
+GT	claude-design/06-design-process/01-brief-and-questions.md	^6\. Решения до экранов	уровни движения cd ↔ L0–L2 (X-27, X-28, ck-07)
+CM	ux/04-components-patterns/01-data-tables.md	^Выжимка для агента	поведение компонентов ux 04
+CM	ux/04-components-patterns/02-search-filter-sort.md	^Выжимка для агента	поведение компонентов ux 04
+CM	ux/04-components-patterns/03-dashboards-and-kpi.md	^Выжимка для агента	поведение компонентов ux 04
+CM	ux/04-components-patterns/04-lists-cards-and-record-view.md	^Выжимка для агента	поведение компонентов ux 04
+CM	ux/04-components-patterns/05-forms-and-validation.md	^Выжимка для агента	поведение компонентов ux 04
+CM	ux/04-components-patterns/06-input-controls.md	^Выжимка для агента	поведение компонентов ux 04
+CM	ux/04-components-patterns/07-overlays-modals-drawers-popovers.md	^Выжимка для агента	поведение компонентов ux 04
+CM	ux/04-components-patterns/08-notifications-toasts-banners.md	^Выжимка для агента	поведение компонентов ux 04
+CM	ux/04-components-patterns/09-settings-permissions-admin.md	^Выжимка для агента	поведение компонентов ux 04
+CM	ux/04-components-patterns/10-actions-menus-bulk-shortcuts.md	^Выжимка для агента	поведение компонентов ux 04
+CM	ux/06-feedback-states-motion/01-state-matrix.md	^7\. Состояния как свойство компонента || ^8\. Процедура	состояния элемента ux 06/01 §7–8
+CM	ui/06-components-visual/01-buttons-and-actions.md	^Выжимка для агента	визуальные спецификации ui 06
+CM	ui/06-components-visual/02-forms-and-inputs.md	^Выжимка для агента	визуальные спецификации ui 06
+CM	ui/06-components-visual/03-tables-and-lists.md	^Выжимка для агента	визуальные спецификации ui 06
+CM	ui/06-components-visual/04-navigation-and-surfaces.md	^Выжимка для агента	визуальные спецификации ui 06
+CM	ui/06-components-visual/05-feedback-and-overlays.md	^Выжимка для агента	визуальные спецификации ui 06
+CM	ui/06-components-visual/06-data-display-and-misc.md	^Выжимка для агента	визуальные спецификации ui 06
+CM	ui/06-components-visual/07-states-matrix.md	*	матрица «компонент × состояние»
+CM	ui/14-recipes/08-tokens-export.md	^Шаг 4\. Контролируемый словарь	словарь usage 14/08 §4
+CM	ui/14-recipes/examples/app.css	*	классы примеров
+CM	ui/12-ai-generated-ui/04-steering-brief-prompts-pipeline.md	^2\.6\. Рабочий пакет	ui 12/04 §2.6
+CM	ux/99-raw/handoff-to-ui-research.md	*	ожидания ux от ui
+CM	docs/projects/_template/screens/README.md	*	закрытый словарь ui: в screens (Р29)
+CM	research/design-build/phase-2/ux/ux-низ.md	^8\. Вопросы к заказчику	§6.12 п. 25: закрытый словарь ui: (Р29, Р76, Р79)
+ST	ux/06-feedback-states-motion/01-state-matrix.md	^Выжимка для агента || ^2\. Закрытый список состояний || ^3\. Матрица	S01–S22
+ST	ux/03-layout-placement/01-page-anatomy-templates.md	*	11 шаблонов экранов ux 03/01
+ST	ux/13-app-types/04-master-procedure-brief-to-screens.md	^Выжимка для агента || ^1\. Карта процедуры || ^Фаза D	процедура ux 13/04 (§14)
+ST	ui/05-layout-grid/02-app-shells.md	^Выжимка для агента || ^2\. Восемь каркасов || ^3\. Выбор каркаса	8 каркасов ui 05/02
+ST	ui/05-layout-grid/03-page-anatomy.md	^Выжимка для агента	8 типов страниц ui 05/03
+ST	research/design-build/phase-2/ux/ux-низ.md	^3\.1 Контракт S01–S22	таблица сопоставления ux-низ §3.1
+ST	docs/projects/_template/screens/README.md	*	состояния слоя проекта
+ST	docs/projects/_template/mobile/README.md	*	состояния слоя проекта
+ST	docs/projects/_template/telegram-bot-flow/README.md	*	состояния слоя проекта
+NU	ux/03-layout-placement/02-grid-spacing-density.md	*	ux 03/02: шкала 8/4, плотность
+NU	ux/08-accessibility/01-wcag22-as-build-rules.md	^8\. Указатель, жесты, размеры целей || ^12\.4 2\.5\.8	цели нажатия ux 08/01
+NU	ux/06-feedback-states-motion/03-motion-and-microinteractions.md	*	движение ux 06/03
+NU	ui/03-spacing-sizing/01-spacing-scale.md	*	ui 03
+NU	ui/03-spacing-sizing/02-density.md	*	ui 03
+NU	ui/03-spacing-sizing/03-control-and-panel-sizes.md	*	ui 03
+NU	ui/14-recipes/11-presets.md	*	пресеты A–D
+NU	ui/08-motion/01-durations-easings-springs.md	^Выжимка для агента	движение ui 08
+NU	ui/08-motion/02-what-to-animate-in-apps.md	^Выжимка для агента	движение ui 08
+NU	ui/08-motion/03-reduced-motion-and-motion-tokens.md	^Выжимка для агента	движение ui 08
+NU	ui/09-design-tokens/04-reference-token-schema.md	^Выжимка для агента || ^1\.3\. Размерный ряд || ^2\.10\. Движение	токены: шкалы и движение (без листинга)
+NU	ui/05-layout-grid/01-grids-breakpoints-containers.md	^Выжимка для агента	брейкпоинты ui
+NU	creative/05-motion/01-motion-principles-and-access.md	^Выжимка для агента || ^2\. Поправки к правилам соседей || ^3\. WCAG 2\.2 || ^5\. Бюджет внимания	creative 05/01 §2
+NU	ui/CONTRADICTIONS.md	^Отступы, размеры, плотность || ^Компоненты и состояния	C9, C11, C16, C10, C19, C20, C43
+NU	research/design-build/phase-2/SYNTHESIS.md	^6\.12\. Противоречия между документами	п. 24 — ширины
+NU	creative/CONTRADICTIONS.md	^А\. Движение	реестр creative: движение (X-02…X-04, X-12, X-13)
+NU	claude-design/06-design-process/01-brief-and-questions.md	^6\. Решения до экранов	уровни движения cd (наследник норм kimi ck-*)
+TX	ux/07-ux-writing/01-principles-voice-and-tone.md	^Выжимка для агента || ^12\. Длина текстов	ux 07/01 §12 (длины по ролям)
+TX	ux/07-ux-writing/02-microcopy-by-component.md	^Выжимка для агента	ux 07/02
+TX	ux/07-ux-writing/03-russian-interface-text.md	^Выжимка для агента	ux 07/03
+TX	ux/07-ux-writing/06-banned-words-and-patterns.md	*	словарь запретов ux 07/06 (канон, Р49)
+TX	text/06-anti-slop/01-text-slop-markers-by-genre.md	^Выжимка для агента || ^11\. Правила для роли marketing	text 06/01
+TX	text/06-anti-slop/02-linter-spec-and-profiles.md	^Выжимка для агента	линтер text
+TX	text/06-anti-slop/lexicon/marketing-role.yaml	*	поправки роли marketing
+TX	text/05-voice-editorial/01-brand-voice.md	^Выжимка для агента || ^2\. 	голос бренда (05/01 §2)
+TX	text/08-russian-legal-typography/02-typography-for-marketing.md	^Выжимка для агента	типографика, тире
+TX	text/CONTRADICTIONS.md	^Антислоп, тире, типографика || ^\[X2\]	X19–X25
+TX	text/99-raw/reports/wave4-X-audit.md	^6\. Дубли и каноническое место || ^7\. Калибровка утилит	X text §6–7
+TX	text/99-raw/handoff-to-neighbours.md	^ux — || ^ui — 	ux-*, ui-*
+TX	ui/02-typography/06-localization-and-ai-errors.md	^1\. Расширение текста || ^3\. Русские типографские нормы	ui: расширение RU/EN и типографика интерфейса (тире, кавычки) — третья сторона §9 п. 16
+TX	claude-design/06-design-process/05-default-look.md	^Выжимка для агента || ^3\. Единый бан-лист	тире и длина hero — наследник норм kimi (kimi-01, свод-05, X3)
+VI	ui/11-styles-trends/04-anti-slop-ui.md	*	34 маркера ui
+VI	ui/07-iconography-imagery/02-illustration-system-avatars-images.md	^3\. Паспорт системы иллюстраций	паспорт иллюстраций ui 07/02 §3
+VI	ui/12-ai-generated-ui/01-image-models-for-ui.md	^6\. Blender и 3D	черновик паспорта 3D ui 12/01 §6
+VI	creative/08-uniqueness-anti-slop/cliche-registry.yaml	*	53 клише
+VI	creative/08-uniqueness-anti-slop/01-cliche-policy.md	^Выжимка для агента	политика «приём или клише»
+VI	creative/01-creative-direction/01-concept-and-directions.md	^2\. Ворота вопросов || ^6\. Направления	направления creative 01/01
+VI	site/09-ai-generation-evaluation/ai-landing-markers.yaml	*	52 маркера AIL
+VI	text/06-anti-slop/01-text-slop-markers-by-genre.md	^Выжимка для агента	COPY-M
+VI	ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md	^5\. Каталог маркеров	IMG-M, VID-M
+VI	ai-media/06-art-direction-consistency/01-visual-dna-from-ui.md	^2\. Поля паспорта || ^3\. Правила вывода	паспорт визуала ai-media 06/01
+VI	claude-design/05-design-artifacts/01-design-system-and-canvas-in-session.md	^5\. Холст	cd 05/01 §5
+VI	claude-design/06-design-process/01-brief-and-questions.md	^4\. Вопросы заказчику || ^5\. Направления	cd 06/01 §4–5
+VI	claude-design/06-design-process/05-default-look.md	*	бан-лист дефолтного вида
+VI	blender/01-web-3d-landscape/01-effects-catalog.md	^22\. Клише	клише 3D
+VI	blender/06-materials-lighting-render/02-lighting-camera-composition.md	^6\. Паспорт серии	паспорт 3D-серии
+VI	blender/99-raw/handoff-to-neighbours.md	*	паспорт: черновик ui против blender
+VI	research/design-build/phase-2/kimi-mapping.md	^5\. Предложение: новые id	LOOK-*, HON-*
+VI	creative/CONTRADICTIONS.md	^Г\. Клише, уникальность, оценка || ^В\. Концепция и визуальный язык || ^Е\. Сёстры || ^И\. Дополнение	X-29…X-44
+VI	creative/99-raw/handoff-to-neighbours.md	^ui — || ^ai-media — || ^kimi — 	cu-*, ca-*, ck-*
+VI	text/CONTRADICTIONS.md	^\[X22\] || ^\[X24\]	COPY-M не детектор ИИ; ярлыки секций
+JU	text/09-ai-generation-evaluation/03-evaluation.md	^3\. Рубрика COPY-R || ^4\. ИИ-судья	рубрика и судья text
+JU	text/09-ai-generation-evaluation/copy-rubric.yaml	*	copy-rubric
+JU	site/09-ai-generation-evaluation/03-expert-review-and-judge.md	^4\. Рубрика судьи || ^5\. Когда судье можно верить	судья site
+JU	site/09-ai-generation-evaluation/site-rubric.json	*	site-rubric
+JU	creative/09-ai-execution-evaluation/04-effectiveness-rubric.md	^4\. Попарное сравнение || ^7\. VLM-судья	рубрика creative
+JU	creative/09-ai-execution-evaluation/effectiveness.rubric.json	*	effectiveness.rubric
+JU	ui/13-evaluation-checklists/02-rubrics-and-vlm-critic.md	^1\. Рубрика || ^4\. Модель-критик	рубрика ui 13/02
+JU	ai-media/11-evaluation-qa/02-vlm-critic-and-rubrics.md	*	VLM-критик ai-media
+JU	ai-media/11-evaluation-qa/thresholds.yaml	*	группа judge
+JU	blender/11-evaluation-qa/06-wow-pairwise-3d.md	*	попарная оценка blender
+JU	ux/12-evaluation-checklists/01-expert-review-protocols.md	^7\. Адаптация протоколов	протокол для ИИ-агента ux
+JU	ux/12-evaluation-checklists/03-automated-checks.md	^8\. Мультимодальная критика	ux 12/03 §8
+JU	claude-design/06-design-process/04-checks.md	^6\. Рубрика	судья-Opus cd
+JU	claude-design/06-design-process/06-test-stand.md	*	стенд и правило решения
+JU	site/PLAN.md	^Метки доказательности$	легенда меток site
+JU	text/PLAN.md	^Метки доказательности$	легенда меток text
+JU	creative/PLAN.md	^Метки доказательности$	легенда меток creative
+JU	ux/README.md	^Легенда меток	легенда меток ux
+JU	ai-media/PLAN.md	^Метки доказательности$	легенда меток ai-media
+JU	ai-media/README.md	^Уровни доказательности || ^Что ненадёжно$	легенда меток ai-media
+JU	blender/README.md	^Легенда меток || ^Оговорки к числам	легенда меток blender
+JU	ui/README.md	^Уровни доказательности || ^Что ненадёжно	легенда меток ui
+JU	claude-design/PLAN.md	^Метки доказательности$	легенда меток claude-design
+JU	ux/99-raw/reports/wave4-X-audit.md	^2\.2\. Метки	легенда меток ux
+JU	site/99-raw/reports/wave4-X-audit.md	^9\.3\. Что не править	легенда меток site
+JU	claude-design/README.md	^Метки и доверие	оговорки о доверии cd
+CN	ux/99-raw/reports/wave4-X-audit.md	^2\.1\. Одно правило	таблица канонов ux
+CN	site/99-raw/reports/wave4-X-audit.md	^2\. Дубли и каноническое место || ^9\.3\. Что не править	таблица канонов site
+CN	text/99-raw/reports/wave4-X-audit.md	^3\. Пятнадцать вопросов || ^6\. Дубли и каноническое место || ^7\. Калибровка утилит	таблицы канонов text
+CN	creative/99-raw/reports/wave4-X-audit.md	^2\. Дубли и каноническое место || ^9\. Калибровка утилит	таблицы канонов creative
+CN	blender/99-raw/reports/wave4-X-audit.md	^4\. Дубли и рассинхрон	таблица канонов blender
+CN	site/PLAN.md	^Решения заказчика	решения заказчика site
+CN	text/PLAN.md	^Решения заказчика	решения заказчика text
+CN	creative/PLAN.md	^Решения заказчика	решения заказчика creative
+CN	ai-media/PLAN.md	^Решения заказчика	решения заказчика ai-media
+CN	blender/README.md	^Решения заказчика	решения заказчика blender
+CN	creative/99-raw/prompts/_common.md	^Решения заказчика	решения 1–6 creative
+CN	claude-design/PLAN.md	^Решения заказчика	решения cd 6–7 против DECISIONS
+CN	creative/CONTRADICTIONS.md	^Е\. Сёстры	лицензии X-60, X-61
+CN	site/99-raw/prompts/_common.md	^Кто чем владеет	владение темами site (строки owners)
+CN	creative/99-raw/prompts/_common.md	^Кто чем владеет	владение темами creative (строки owners)
