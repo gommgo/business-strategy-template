@@ -62,8 +62,9 @@
 - **клиент-режим:** новая призма «Сайт и как всё выглядит»; клиент пишет черновики того, что знает сам (поля брифа с
   `x-fill: customer`, факты, бренд, свои референсы), а выбор направления и утверждения — «решениями заказчика», которые
   исполнитель дизайна переносит в файлы с отпечатком;
-- **Ф7 — ≈ 125 файлов, ≈ 6,5–7,5 тыс. строк** (25 новых; ≈ 100 правок, из них 29 — описания скиллов); ориентир Ф1 05 §4.4
-  (≈ 35 общих файлов) перекрыт UX-дельтой SaaS (Р150, ≈ 65 файлов T3) и проходом по описаниям.
+- **Ф7 — ≈ 145 файлов, ≈ 6–8 тыс. строк**: 25 новых и ≈ 120 правок, из них 16 — только описание скилла и 11 — одна-две
+  строки прохода по следам прежнего запрета; ориентир Ф1 05 §4.4 (≈ 35 общих файлов) перекрыт UX-дельтой SaaS (Р150,
+  ≈ 65 файлов T3), проходом по описаниям и следам запрета.
 
 ## 1. Решения
 
@@ -758,3 +759,501 @@
   `design-assets` дублирует `design-audit`; (б′) три угла с `promise-product` вместо `design-assets`. → (б′).
 - **Ф7:** `cross-audit/SKILL.md` (≈ 30 строк), `references/angles.md` (≈ 180: 3 карточки по ≈ 45 строк, 3 строки карты,
   правки 6 карточек), `references/output-formats.md` (≈ 5); `service-audit/references/rules.md` (R-COV-002).
+
+### H9. `references/` скилла — принято (фиксация), уточнено: шесть файлов, оглавления, что в `SKILL.md`
+
+- **Решение.** Тексты скилла — `references/` (Р85, Р118); `phases.md` — один файл (Р118: «этапы скилла —
+  `references/phases.md`, каждый этап один раз, с контрактом»), ≈ 600 строк, читается разделами по оглавлению в начале
+  (прецедент чтения разделами — `kb/INDEX.md §1` п. 2). Идентификаторы этапов — латиницей (как фазы
+  `project-deep-dive`: `discovery`, `user`…): по ним пишутся `_phase-jump.md`, сводка и вызов
+  `/design-deep-dive <slug> <surface> <этап>`.
+
+  | файл | оглавление | источник | объём |
+  |---|---|---|---|
+  | `phases.md` | 0 как читать · 1 маршруты (сводная таблица) · 2 сводка этапов для показа · 3 слой страницы: `brief`, `meaning`, `funnel`, `site-map`, `page-plan`, `copy`, `copy-audit`, `design-handoff` + таблица «шаг text → этап» · 4 слой проекта SaaS: этапы `vision` … `fsd` кратко (ведут скиллы слоёв), входы Д1 и Д2, блок PRE · 5 слой дизайна: сайт — `moodboard`, `art-direction`, `asset-plan`, `design-system`, `assets`, `motion`; кабинет — `app-brief`, `style-tiles`, `design-system`, `passport-icons`, `ds-components`; «Порядок ассетов и ДС» (канон VI-60), «Кто строит ДС» · 6 холст: `canvas-input`, `wireframe`, `mockup`, `fix-round`, `checks`, `acceptance` · 7 пакет для кода: `package` · 8 порядок проверок · 9 вход с любого места и «не пропускаются никогда» · 10 перепрыгивание | T1 §3, T3 §3, T2a §3, T2b §3, T4 §3 | ≈ 600 |
+  | `claude-design.md` | 16 разделов T2b 4.3 (роль, артефакты, создание и публикация, синхронизация, правки заказчика, вход холста, задание по этапу, вопросы до макета, HTML-копии и `kit`, раунд, проверки по просьбе, приёмка, показ, запасной путь, версии и дрейф, стоп) | T2b, T2a C4 | ≈ 300–350 |
+  | `workflow-patterns.md` | режимы A (новый файл этапа), B (сырьё: брендбук, сайт заказчика — замер `measure_ui.py`, скриншот — референс, а не источник, готовые тексты — `source: customer`, готовый макет — в план и тексты), C (углубление) · стиль вопросов (опции — anti-patterns, словари, варианты «допущением»; факты — только ответом и материалами) · «допущение»: пометка и снятие · деньги и генерация · точки сохранения (E9) · ссылки в чужие слои — блокер и предложение соседа · удаление с каскадом (страница, поверхность, направление) · смешанный продукт (A5) | T1, T2a, T2b, T4 | ≈ 150–200 |
+  | `draft-stable.md` | статус — поле файла по схеме (таблица «файл · поле · в работе · закрыто · кто закрывает») · скилл не повышает сам · понижение правкой (`text_hash`, отпечаток одобрения) · закрытое не опирается на открытое · что уходит при закрытии (B9, C8) · когда чек-лист нельзя пройти | T1 B3, T2a 4.3, T2b | ≈ 90–120 |
+  | `field-checklists.md` | по файлам: `site-brief`, `meaning`, `hierarchy`, `site-map`, `page-plan`, `copy-deck`, `facts`, `voice`, `voc` · `brand`, ДС (`system.tokens.json`, `DESIGN.md`, `system.yaml`), `app-brief`, `visual-dna`, `art-direction`, `asset-plan`, `motion-spec`, `treatment` · `input/`, вайрфрейм, макет, раунд, `REVIEW.md`, `ARTIFACTS.md` · `ready.yaml`; у каждого — поля для «закрыто», ссылки, anti-patterns, порядок копания | T1 ≈ 60, T2a ≈ 70, T2b ≈ 30, T4 ≈ 20 | ≈ 180 |
+  | `knowledge-base.md` | начни с карты `kb/INDEX.md` · слова (глоссарий, словарь компонентов) · принципы (факты от владельца, модель — Opus, судья — фильтр, числа — из машинных файлов, деньги и ключи — у владельца) · когда звать `design-consultant` · утилиты и окружение (`scripts/README.md`, ≥ 3 ГБ памяти браузерным утилитам) | нынешний `SKILL.md` (Р148) | ≈ 60 |
+
+- **`SKILL.md` исполнителя** (≈ 350–450 строк) — по скелету deep-dive шаблона (Ф1 02 §2.2): шапка (три уровня, пути,
+  каноны форм, что не выдумывает); выбор контекста (проект — пикер по именам; поверхность — только с маршрутом; без
+  поверхности — уровень продукта; нет поверхности или рода — выход с `/project-deep-dive`); точки входа (раздел 4);
+  что делать сразу (маршрут и сводка из `phases.md`, канон слоя, ветки state, первый этап с готовым входом); сводка этапов;
+  этапы — ссылкой на `phases.md`; режимы — `workflow-patterns.md`; стиль вопросов (`AskUserQuestion` ≤ 4 за раунд; бриф и
+  холст — одним сообщением ≤ 7 с умолчаниями и «Going with», cd 06/01 §4); «допущение» и кто утверждает (`CLAUDE.md` §3);
+  холст — `claude-design.md` (читать перед любой публикацией); проверки — порядок D6, агенты `design-judge` и
+  `design-consultant`; утилиты и запасной путь «вручную по форме»; память (ветки `site/`, `design/`, формат
+  `../entrypoint/references/state-model.md`, единый контекст); `draft → stable` — `draft-stable.md`; ссылки в чужие слои;
+  удаление; деньги, ключи, публичные ссылки, коммиты; завершение (затронутое, долг, `/design-audit`, `/cross-audit`,
+  `ready.yaml`); границы.
+- **Почему.** Р118 (этапы — `phases.md`, протокол — `claude-design.md`, имя `workflow-patterns.md` — в том же смысле, что у
+  шаблона); типовые `references/` исполнителей шаблона (Ф1 02 §2.4); Р148 — навигатор (его текст переезжает, а не
+  теряется); каркас H9.
+- **Ф7:** шесть файлов `references/` и `SKILL.md` — зона «тексты скилла» (раздел 4, «Порядок»); сборку `phases.md` ведёт
+  одна зона по разделам 3 спецификаций T1, T2a, T2b, T3, T4.
+
+### H10. Скрипты для Ф8 — изменено: четыре названных скрипта и папка `scripts/project/` для утилит по артефактам проекта
+
+- **Что уже есть.** Ни одного из четырёх скриптов каркаса в `scripts/` нет. Есть строительные блоки: валидаторы схем и
+  ворот (`site_validate.py`, `page_gates.py --resolve|--plan`, `plan_to_assets.py`, `vocab_lint.py`,
+  `claims_check.py`, `copydeck.py`, `copy_lint.py`, `validate_any.py`, `validate_voice.py`, `spec_check.py`,
+  `ad_check.py` — пока только на примерах, `vlm_to_dna.py`, `build_reference_tokens.py`), проверки ассетов
+  (`asset_audit.py`, `provenance_check.py`, `check_icons.py`, `palette.py`, `video_loop_check.py`, `qa_pipeline.py`,
+  `gltf_check.py`) и `kit` (`shot.py`, `diffshots.py`, `export.py`, `marks.js`); `mockup_checks.py` — ещё под Kimi K3
+  (grade §5 п. 6). Скрипт покрытия называет шапка `common/components.yaml`, но его нет (grade §5 п. 7).
+- **Решение — папка `scripts/project/`** (новая, рядом с папками баз, Р87): утилиты, которые знают раскладку
+  `docs/projects/<slug>/` и читают артефакты проекта. Общие движки без знания раскладки (перевод `.dc.html`, кадры, контраст,
+  покрытие по двум спискам) остаются в папках баз. Утилитами `scripts/project/` пользуются и соседние скиллы шаблона
+  (`screen-deep-dive`, `screen-audit`, `project-audit`, `fsd-audit`) — по пути `../design-deep-dive/scripts/project/…`,
+  как все исполнители читают `../entrypoint/references/state-model.md`: одна копия утилиты и одно окружение (Р87, Р90).
+  Пути репозитория — `lib/docpaths.py` (рядом с `lib/kbpaths.py`; корень — по git или `--repo`, чтобы код-репо мог
+  указать соседний чекаут).
+
+  | скрипт | что делает | кто зовёт | тема |
+  |---|---|---|---|
+  | `project/canvas_input.py` | `build <slug> <surface> --stage directions\|wireframe\|mockup\|motion` → `input/` и `INPUT.md` с отпечатками; `check`; генератор `ACCEPTANCE.md` по роду и уровню | этап `canvas-input`, `design-audit` | E1, E2 (T2b) |
+  | `project/ds_coverage.py` | покрытие: типы `ui:` stable-экранов и слотов действий и форм планов → `system.yaml.components` / `extensions` → компоненты артефакта ДС; обязательные и объявленные состояния | этапы `design-system`, `ds-components`, `design-audit` | Р29, CM-04, CM-06 (T2a) |
+  | `project/ready.py` | манифест `design/<surface>/ready.yaml`; `--check` — свежесть | этап `package`, `design-audit` | G1 |
+  | `project/design_audit.py` | структурный прогон правил `design-audit` (`R-SURF` … `R-DEBT`), зовёт валидаторы баз | `design-audit` | H3 |
+  | `project/tree.py`, `states.py`, `screen_map.py`, `demo_data.py`, `contract.py`, `normalize.py` | разбор дерева экранов; наборы состояний по типу; свод `map.md`; демо-набор `example: true`; контракт генерации (10 разделов); нормализаторы перевода форков | `screen-deep-dive`, `screen-audit`, `canvas_input.py` | T3 F6–F9, F13 |
+  | `project/ds_build.py`, `ds_sync.py` | DTCG → `tokens.json` артефакта списками, README из `DESIGN.md`, `system.tokens.css`, передняя часть `DESIGN.md`; обратная синхронизация правок токенов | этап `design-system`, протокол холста | C4, C5 (T2a) |
+  | `claude-design/dc_to_html.py`, `copies_compare.py`, `dc_texts.py`, `literal_tokens.py`; `kit/kit_manifest.py` | статичная копия из `.dc.html`; сверка адаптивной и статичной; обратный разбор текстов; «литерал ∈ токенов»; `kit.json` из `acceptance-widths.yaml` | холст, `design-audit --visual` | E8, E10, Р63, NU-01 (T2b) |
+  | `maint/canon_check.py`, `maint/refcheck.py`, `maint/mapcheck.py` | проверки `canon.tsv` (одно место на норму, пути существуют, id уникальны), ссылок и следов журнала в текстах скилла, карты по канонам — перенос из журнала | обслуживание (H11) | Р136 |
+
+  Доработки существующих утилит (из спецификаций тем, сводно): `copydeck.py` — статус `assumed`, чистка журнала при
+  `approve` (B9), выгрузка `copy.md` и `facts.md` вместо `export-kimi`, обратный разбор; `copy_lint.py` — жанр `interface`
+  с ролью строки и межстрочные анализаторы (TX-04, TX-05, TX-21, TX-42); `ad_check.py FILE`; `spec_check.py` и
+  `plan_to_assets.py` на файлах проекта, `source: render`; `mockup_checks.py` — без K3, входы таблицами или YAML, формы по
+  `lead-forms.yaml`, ширины из файла (VI-02, GT-42, NU-01); `refs_client.py` — экспорт без `author` (Р151);
+  `page_accept.py --budget-profile` (GT-14); `gate_check.py` (GT-04, GT-05). Схемы (Ф8, у владельцев в kb): `app-brief`,
+  `system.yaml`, `brand`, план ассетов (TR-41), блок `themes` и `brand.ref` в `site-brief`, `x-canvas-map` у схем
+  владельцев, правки `art-direction.v1` и `visual-dna`.
+- **До Ф8** каждый этап работает запасным путём: агент собирает файл по форме и таблице правил и пишет в нём «собрано
+  вручную» (T2b E1); `design-audit` проверяет чтением — как все структурные аудиты шаблона (Ф1 02 §2.5).
+- **Почему изменено.** Каркас называл четыре скрипта, T3 передал место своих (разбор дерева, наборы, свод, демо-набор,
+  сборщик контракта, нормализаторы — «H10, T4»), T2b — имя папки сборщика («`scripts/claude-design/`, имя — H10, T4»).
+  Утилиты, которые знают раскладку `docs/projects/`, в папках баз разнесли бы знание о раскладке по восьми местам:
+  смена формы слоя (Ф7) правится в одной папке. Р26 («скрипты-валидаторы в репозитории допустимы, внутри скилла»)
+  соблюдается: папка — внутри скилла.
+- **Ф7:** `scripts/README.md` — раздел «project — утилиты по артефактам проекта» с пометкой «Ф8» у каждой (≈ 15 строк);
+  `SKILL.md` исполнителя — ссылкой. **Ф8:** скрипты, схемы, смоук-тесты `tests/smoke-list.tsv`.
+
+### H11. Обслуживание — принято (фиксация), уточнено: процедура до и после уборки журнала, пакет закрытий Ф7
+
+- **Процедура «позиция закрыта»** (CN-122; прецедент — Р154, закрытие VI-58), до Ф10:
+  1. строка узла `research/design-build/phase-4/nodes/NN-*.tsv`: статус (`закрыто` или `позиция`), `resolution`, `canon`,
+     `copies`, `action`;
+  2. `phase-4/tools/registry.py merge` и `canon` — реестр и `kb/common/canon.tsv` пересобираются; меняются только строки
+     закрытых id (сверка — дифф);
+  3. запись `kb/common/CONTRADICTIONS.md`: из «Открытое» — в раздел темы позицией; позиция — в решённую норму без «Закроет»;
+     у новой нормы — строка с каноном и id;
+  4. `refcheck.py --strict` по правленым md, `mapcheck.py` по `kb/INDEX.md`, если карта называет место;
+  5. строка `DECISIONS.md` с перечнем закрытых id.
+- **Пакет закрытий Ф7** (одним проходом после форм и текстов, раздел 4 «Порядок»): записи, которые закрывает этап скилла
+  или форма слоя, — GT-03 (ветка «после сборки» — G4), TR-22, TR-44, GT-42, NU-37 (вход холста и приёмка — протокол T2b),
+  CM-06, CM-10, CM-12, CM-15 (формы ДС и экранов — T2a, T3), ST-15, ST-16, ST-19, ST-20, ST-23 (часть о `<org>/mobile`
+  остаётся позицией), ST-25, NU-02, NU-03, NU-17, GL-07 и запись «Компонент» (формы T3); GT-13 — из «Открытого» в позицию
+  (G5); новая норма VI-60 (D1, T2a); строка cd 06/06 §8 в `common/judge.md §7` (E5, T2b). ≈ 22 id, ≈ 40–60 строк правки
+  `CONTRADICTIONS.md`.
+- **После уборки журнала (Ф10)** `canon.tsv` — сам источник правды (Р136): норма и её место правятся в `canon.tsv` и записи
+  `CONTRADICTIONS.md` вместе; проверка — `scripts/maint/canon_check.py`, `refcheck.py`, `mapcheck.py` (перенос из журнала
+  — H10; делается до удаления журнала, иначе Р136 остаётся без скрипта); процедура — абзац `kb/common/README.md § Как
+  пользоваться canon.tsv` («Таблица меняется вместе с нормой…» + «проверка — `scripts/maint/`»).
+- **Кто ведёт.** Сопровождающий скилла в репозитории шаблона: правки базы и `canon.tsv` идут в шаблон, форки получают их
+  обновлением папки скилла (H12). В форке позиция базы не закрывается: решение проекта пишется в его слое
+  (`x-gate-exception` плана, решение арт-дирекции, строка `_phase-jump.md`), а норма базы меняется в шаблоне.
+- **Почему.** Р136, Р154, CN-122; T2b и T2a передали закрытия в H11; журнал уходит в Ф10 (Р133, SKILL-MAP §2.6).
+- **Ф7:** пакет закрытий (строки узлов, реестр, `canon.tsv`, `CONTRADICTIONS.md`, `judge.md §7`, `kb/INDEX.md §4–§5` —
+  адреса протокола и этапов); `kb/common/README.md` (≈ 5 строк). **Ф8 или Ф10 (до уборки):** перенос проверок в
+  `scripts/maint/`.
+
+### H12. Зона базы знаний и обновление скилла в форке — новое
+
+- **Вопрос.** Форк создаётся копией шаблона (`docs/getting-started.md § 0`: «Use this template → `<org>/strategy`»), общей
+  истории с шаблоном у него нет. База знаний, утилиты и калибровочный набор (`kb/`, `scripts/`, `assets/` — ≈ 67 МБ) —
+  часть скилла, а не данные проекта. Правка базы в форке расходится с шаблоном и теряется при обновлении; правило, где
+  правится база и как форк получает новую версию, в шаблоне не записано.
+- **Решение.** (а) `kb/`, `scripts/`, `assets/` и тексты скилла — зона шаблона: в форке не правятся (строка `CLAUDE.md`
+  §6); найденная ошибка нормы — задача в шаблон (`CONTRIBUTING.md` уже зовёт issue на «что в каноне/скилле неясно»).
+  Скилл самодостаточен: данных проекта в его папке нет (state — `entrypoint/state/`, отчёт аудита —
+  `design-audit/audit-state/`), поэтому форк обновляет его заменой папки `.claude/skills/design-deep-dive/` из шаблона;
+  окружение машины переустанавливает `scripts/install.sh`. (б) база правится в форке по месту — поправки теряются при
+  обновлении, форки расходятся между собой. → (а).
+- **Почему.** Р6 (база — внутри скилла), Р87 (одна копия утилиты), Р90 (окружение вне репозитория), Р136 (`canon.tsv`
+  ведётся в одном месте).
+- **Ф7:** `CLAUDE.md` §6 (пункт), `docs/getting-started.md` (строка «обновить скилл дизайна — заменить его папку из
+  шаблона и переустановить окружение»), `kb/common/README.md § Что сюда добавляют` (строка «правки базы — в шаблон»).
+
+## 2. Действия сверки
+
+| id | решение | ответ | место в Ф7 |
+|---|---|---|---|
+| GT-03 | G4, G1, G2 | Ветка «после сборки» определена. Пакет для репозитория кода — закрытые файлы по контракту путей и манифест `design/<surface>/ready.yaml` (G1): у сайта планы с `budget_profile` и `x-gate-exception`, `treatment`, `motion-spec`, copy deck, факты, ДС, ассеты с манифестом, адаптивные HTML-копии, `REVIEW.md`; у единицы — пункты `after_build`. Ворота исходов код-репо гоняет утилитами скилла из соседнего чекаута `../strategy` окружением машины (G4): фаза `build` — `page_anatomy.py`, `page_accept.py`, `page_gates.py --profile … --plan … --html …`, `geo_probe.py`, `ia_probe.py`, `run_axe_targets.py`, `claims_check.py` и `lang_check.py` на HTML, `motion_check.py`, у страниц с 3D — `site_probe.py`, `gate_check.py`, `gltf_load_bench.py`, `web_view.py`; фаза `live` — поле p75. В стратегии офлайн — `site_validate.py`, проверки макета cd 06 на HTML-копиях, `asset_audit.py`, `qa_pipeline.py scene\|glb` и валидаторы слоя. Позиция GT-03 закрывается (H11). | `docs/README.md § Что docs отдаёт соседям` (строки `<org>/site`, `<org>/frontend`, абзац «Ворота после сборки»); `_template/design/README.md § Пакет для кода`; форма `_template/design/_template/ready.yaml`; `references/phases.md` — этап `package`; пакет закрытий H11 (строка узла, `canon.tsv`, `common/CONTRADICTIONS.md §3`); Ф8 — пути kb у утилит через `lib/kbpaths.py` и `DDD_HOME` (действие GT-03 Ф8 остаётся) |
+| GT-13 | G5 | Профиля приложения в `budgets.yaml` нет: у поверхностей маршрута SaaS ворота исходов — поле p75 и RUM (AC-PRF-01…03) и лабораторные сценарии реакции AC-PRF-04…06 на собранном приложении (ux 12/03 §9); лабораторных целей LCP, веса и JS нет — их даст пилот SaaS. `ready.yaml.perf` кабинета и `build.perf` входа холста — это же. Строка GT-13 — из «открыто» в «позиция» до пилота SaaS; действие Ф8 «если профиль будет» снимается. | форма `ready.yaml` (`perf`); `_template/design/README.md § Пакет для кода`; пакет закрытий H11 (строка узла GT-13, реестр, `canon.tsv`, `common/CONTRADICTIONS.md` — из «Открытого» в §3); Ф9 — замер на пилоте SaaS |
+| VI-07 | G6 | Бриф для `frontend-design` код-репо — поле `frontend_design` манифеста: род поверхности и уровень амбиций (`level`, `by_page`, `motion_cap`) у страницы; у экрана приложения — поправки ui C25 (`ui/CONTRADICTIONS.md §[C25]`): фон сплошной, градиент в четырёх местах, без оркестрованной загрузки, гарнитура с проверенной кириллицей. Облик — только токены и `DESIGN.md` ДС проекта; скилл не отключается (Р44). | форма `ready.yaml`; `_template/design/README.md § Пакет для кода` (абзац «`frontend-design` в код-репо»); строки `docs/README.md` |
+| CN-122 | H11 | Позиция, закрытая этапом скилла, формой слоя или пилотом: правка строки узла (статус, `resolution`, `canon`, `copies`, `action`) → пересборка реестра и `canon.tsv` скриптом (`registry.py merge`, `canon`), меняются только строки закрытых id → запись `common/CONTRADICTIONS.md` (из «Открытого» в позицию, из позиции — в норму без «Закроет») → `refcheck --strict`, `mapcheck` → строка `DECISIONS.md` (прецедент Р154). В Ф7 — пакет из ≈ 22 id (H11). После Ф10 — прямая правка `canon.tsv` и записи, проверка — `scripts/maint/` (перенос `refcheck`, `mapcheck`, проверок `registry.py canon` из журнала); ведёт сопровождающий скилла в шаблоне. | Ф7 — пакет закрытий H11 (последней зоной, раздел 4 «Порядок»); `kb/common/README.md § Как пользоваться canon.tsv` (процедура и скрипт); Ф8 или Ф10 до уборки журнала — `scripts/maint/canon_check.py`, `refcheck.py`, `mapcheck.py` |
+
+## 3. Контракты этапов
+
+Этапы T4 — выбор маршрута (оркестратор), пакет для кода, аудит слоя и решения заказчика в клиент-режиме; этапы слоя
+страницы, дизайна, холста и SaaS — в разделах 3 спецификаций T1, T2a, T2b и T3. Ниже — сводная таблица маршрутов для
+начала `references/phases.md` (A8, Р118) и контракты этапов T4.
+
+### 3.1. Сводная таблица маршрутов (`references/phases.md § 1`)
+
+Идентификаторы этапов — латиницей: по ним пишутся `_phase-jump.md`, сводка этапов и вызов
+`/design-deep-dive <slug> <surface> <этап>`. Ведёт — скилл-исполнитель; без пометки — `design-deep-dive`. «→» — после
+закрытия выхода, «∥» — параллельно. Порядок — рекомендация: перепрыгивание спрашивается и пишется долгом.
+
+**Лендинг** (`web` · `landing`), пакет — `<org>/site`:
+
+| # | этап | вход готов | закрыто | контракт |
+|---|---|---|---|---|
+| 0 | минимум продукта — ведёт `/project-deep-dive` | — | vision (пять разделов, можно `draft`), одна строка `user.md`, поверхность `web` · `landing` | T3 §3 (этап 1), T1 A2 |
+| 1 | `brief` — бриф и уровень | минимум продукта | бриф `proposed`, «Going with» (закрывается в `funnel`) | T1 §3 этап 1 |
+| 2 | `meaning` — смысл и факты | бриф `draft` | факты `confirmed` или пробел назван; смысл и голос `approved` | T1 этап 2 |
+| 3 | `funnel` — воронка | бриф, факты, смысл | бриф `approved`; получатели заявок — строки `integration.md` | T1 этап 3 |
+| 4 | `page-plan` — план страницы | бриф и смысл `approved` | иерархия и план `approved`, форма страницы выбрана | T1 этап 5 |
+| 5 | `copy` — тексты по слотам | план `approved` | copy deck `assumed` или `checked` | T1 этап 6 |
+| 6 | `copy-audit` — аудит текстов | copy deck | copy deck `approved` | T1 этап 7 |
+| 7 | `design-handoff` — передача в дизайн | закрытые 1–6 партии | отчёт `design-audit` слоя страницы, каркас плана ассетов | T1 этап 8 |
+| 8 | `moodboard` — мудборд и направления | кандидаты — бриф `approved`; направления — план главной `approved` | направления на странице холста «Направления», выбор заказчика | T2a этап 1 |
+| 9 | `art-direction` — арт-дирекция, подача, паспорт | выбор направления, планы `approved` | арт-дирекция и паспорт `approved`, `treatment` в планах | T2a этап 2 |
+| 10 | `asset-plan` — план ассетов и ключевые ассеты | планы, арт-дирекция, паспорт | план утверждён заказчиком (траты), ключевые ассеты приняты | T2a этап 3 |
+| 11 | `design-system` — ДС по ассетам | ключевые ассеты приняты (без генерации — по арт-дирекции) | ДС `approved` («Keep»), опубликована | T2a этап 4 |
+| 12 | `assets` — остальные ассеты ∥ 13 | ДС `approved` | ассеты приняты | T2a этап 5а |
+| 13 | `canvas-input` → `wireframe` | план `approved`, copy deck `assumed` или `checked` | «структура принята» | T2b этапы 1–2 |
+| 14 | `canvas-input` → `mockup` ⇄ `fix-round`, `checks` | copy deck `approved`, ДС, арт-дирекция, ассеты или заглушки | «Keep» по страницам; ≤ 3 раундов на экран | T2b этапы 1, 3–5 |
+| 15 | `motion` — движение, 3D, видео | статичный макет принят | `motion-spec` и `treatment` `approved`, проход движения принят | T2a этап 9 |
+| 16 | `acceptance` — приёмка | макет, проверки последней итерации, адаптивная копия, тексты `approved` | `REVIEW.md`: вердикт и одобрение с отпечатком | T2b этап 6 |
+| 17 | `package` — пакет для кода | приёмка, `/design-audit` без `error` | `ready.yaml` | T4 §3.2 |
+
+**Многостраничник** (`web` · `site`): как лендинг; перед `page-plan` — `site-map` (карта и шаблоны, `build_order`, T1 этап
+4); этапы 4–6, 9 (подача), 10, 13–16 проходятся на каждый шаблон и особую страницу по `build_order`, главная с шапкой и
+подвалом — первой; `moodboard` и арт-дирекция — один раз на сайт (направления — на главной).
+
+**SaaS и кабинет** (`web` · `app`; `admin`, `desktop`, `embed`), пакет — `<org>/frontend`:
+`vision` → `roles` → `surfaces` → `objects` → `capability` (ведёт `/project-deep-dive`) → `scenarios`
+(`/interface-deep-dive`) → **Д1:** `app-brief` → `style-tiles` → `design-system` → `passport-icons` ∥ `interface`
+(`/interface-deep-dive`) → `screens` → `ui-texts` (`/screen-deep-dive`) → **Д2:** `ds-components` → `canvas-input` →
+`wireframe` (тексты `assumed` или `checked`) → `mockup` на утверждённых текстах ⇄ `fix-round`, `checks` → `acceptance` ∥
+`fsd` (`/fsd-deep-dive`) → `package`. Контракты — T3 §3 (этапы 1–10, Д1, Д2, блок PRE), T2a этапы 6, 7, 4, 5б, 8,
+T2b этапы 1–6.
+
+**Смешанный продукт:** у каждой поверхности свой маршрут; бренд, ДС, факты, голос, объекты и действия, бриф на вид
+кабинета и продуктовый паспорт — одни на продукт; ДС строит маршрут, первым дошедший до `design-system`, второй её
+расширяет (A5, T2a).
+
+**Мобильное и бот:** в этой сборке только стыки — токены ДС и голос продукта, роли текстов по полям, словарь состояний; у
+бота — путь к человеку (A6, T3); этапов дизайна нет.
+
+**Вход с любого места:** первый этап с готовым входом; пропуск — `_phase-jump.md` ветки с долгом. Не пропускаются никогда:
+бриф, факты, план страницы, входной контроль, шаги text S1–S11; выбор направления или карточки, ДС до макета, план
+ассетов у страницы с медиа-слотами, «люди-доказательства — только реальные», покрытие компонентов до макета кабинета,
+постер у 3D-слота; «прочитать → слить → опубликовать», факты только из `facts.yaml`, утверждённые тексты к приёмке,
+проверка артефакта только по просьбе, приёмка — заказчиком (A7).
+
+### 3.2. Контракты этапов T4
+
+| этап | вход | выход | проверка | утверждает | нормы |
+|---|---|---|---|---|---|
+| **Маршрут** (`entrypoint`, до этапов) | сырьё или намерение; реестр `surface.md` (`type`, `web-kind`); `index.md`, ветки исполнителей, `_phase-jump.md`; клиентский дом («жду аналитика», решения заказчика) | строка нити: чанк → слой → исполнитель → аргументы (`<slug>`, `[<surface>]`) → режим; «быстрый путь» — пометкой | проект, поверхность и род известны или спрошены (не догадка — `intake.md § 3`); сигнал соответствует роду: слой страницы — только `landing`, `site`, экраны и FSD — не у них; нет поверхности или рода — сначала `/project-deep-dive` | аналитик — маршрут (`AskUserQuestion`) | `entrypoint/references/routing.md`, `intake.md`; A7, A8 |
+| **Пакет для кода** (`package`) | по роду (G2): у сайта — бриф, карта (род `site`), планы, copy deck, факты, голос, ДС, арт-дирекция, `motion-spec`, ассеты с манифестом, адаптивные копии, `REVIEW.md`; у кабинета — экраны, `texts.md`, FSD `stable`, ДС с покрытием, ассеты, копии, `REVIEW.md`; `/design-audit` поверхности без `error` | `design/<surface>/ready.yaml`; предложение коммита (E9) и строка для хаба «готово к сборке: <единицы>» | `ready.py --check` (Ф8; до — по форме): статусы и отпечатки источников совпадают с файлами; правила `R-FRESH`, `R-MAT` `design-audit`; у каждой единицы — `after_build`, `gate_exceptions` и `budget_profile` (сайт) или `perf` (кабинет) | владелец продукта — передача в код (слово на push и слияние — Р106) | G1–G6; `site/07-seo-geo-performance-analytics/page-gates.yaml#phases`; ux 12/03 §9; `ui/CONTRADICTIONS.md §[C25]` |
+| **Аудит слоя** (`/design-audit`) | файлы слоя страницы, дизайна и уровня продукта; для `--visual` — строка просьбы в `ARTIFACTS.md` или разовая просьба, HTML-копии | отчёт в чат и `design-audit/audit-state/<slug>/last-report.md` | правила `R-*` (H3); B/S/D находок ворот — `error` / `warning` / `hint`; находка судьи — не выше `warning` | — (только отчёт); решения по находкам — аналитик | H3; T1 4.3, T2a 4.4, T2b 4.4; `common/judge.md §1` |
+| **Решение заказчика** (клиент-режим) | опубликованный артефакт или файл, по которому решают (ссылка, версия); вопрос призмы «Сайт и как всё выглядит» | строка «Решения заказчика» в клиентском state и `client-handoff/summary.md`: что решено, по какой версии, кто, когда | решение однозначно (вариант — по имени; «принимаю» — к странице или экрану и версии); траты — вместе с владельцем денег | заказчик (владелец продукта) | H6; Р76 п. 5, Р106, Р151, Р159 |
+| **Перенос решения** (исполнитель) | «решение заказчика» из ветки `client` или из сессии | `art-direction.choice` (`chosen_by: customer`), статус плана ассетов, `copydeck.py approve --by customer`, одобрение в `REVIEW.md` с отпечатком, строка просьбы в `ARTIFACTS.md` | версия, по которой решал заказчик, совпадает с текущей; иначе — переспросить | заказчик (решение уже дано); записывает исполнитель | H6; T2b E2, E4 |
+
+**Вход с середины.**
+- **Маршрут.** Сырьё без проекта — вопрос «какой продукт?» или новый проект через `/project-deep-dive`; без поверхности —
+  исполнитель предложит пикер; «просто сайт» — быстрый путь (A7).
+- **Пакет.** Минимум — одна единица, готовая по G1; манифест со статусом `partial` законен, код-репо собирает только
+  готовые единицы. Единица без макета готова только решением заказчика, записанным в `_phase-jump.md` поверхности
+  («макет пропущен: сборка по ДС и плану»), и пометкой `mockup: skipped` в манифесте — код-репо видит это до сборки.
+- **Аудит.** В любой момент; `--visual` без просьбы — только структурный прогон и строка «макет не проверялся: нет
+  просьбы».
+- **Решение заказчика.** Без опубликованного артефакта выбирать не из чего — вопрос уходит аналитику (`**жду
+  аналитика**`); утверждение текстов без текстов — нечего утверждать.
+
+## 4. Формы и раскладка
+
+### 4.1. Дерево (файлы T4; каноны слоёв — T1 4.1, T2a 4.1, T2b 4.1, T3 4.1)
+
+```
+.claude/
+├── settings.json                          + "skillListingBudgetFraction": 0.02 (H2)
+├── agents/                                НОВАЯ папка (H4)
+│   ├── design-judge.md                    tools: Read · model: claude-opus-5-5 · omitClaudeMd: true
+│   └── design-consultant.md               tools: Read, Grep, Glob · model: claude-opus-5-5
+├── rules/forward-only.md                  + абзац «Машинные файлы слоёв» (B9, C8)
+└── skills/
+    ├── design-deep-dive/
+    │   ├── SKILL.md                       исполнитель: уровень продукта, слой страницы, слой дизайна (H1, H2)
+    │   ├── references/                    НОВАЯ (H9): phases.md · claude-design.md · workflow-patterns.md ·
+    │   │                                  draft-stable.md · field-checklists.md · knowledge-base.md
+    │   ├── scripts/project/               Ф8 (H10): canvas_input · ds_coverage · ready · design_audit · tree · states ·
+    │   │                                  screen_map · demo_data · contract · normalize · ds_build · ds_sync
+    │   ├── scripts/README.md              + раздел «project» (пометка «Ф8»)
+    │   └── kb/ · assets/                  в Ф7 — только пакет закрытий H11
+    ├── design-audit/                      НОВЫЙ (H3)
+    │   ├── SKILL.md
+    │   ├── references/rules.md            R-SURF · R-STRUCT · R-REF · R-COV · R-PROJ · R-FRESH · R-MAT · R-SEM · R-DEBT · R-VIS
+    │   └── audit-state/<project-slug>/last-report.md      ← пишет прогон, в git
+    ├── entrypoint/                        SKILL.md · routing.md · state-model.md · intake.md (H5, A7, A8, A9)
+    │   └── state/projects/<project-slug>/
+    │       ├── site/facts.md · voice.md · <surface>/{_phase-jump.md, <kind>/<slug>.md}
+    │       └── design/{_phase-jump.md, brand.md, ds.md, app-brief.md} · <surface>/{_phase-jump.md, art-direction.md, assets.md, motion.md, canvas.md}
+    ├── entrypoint-for-business/references/site-and-look.md   НОВАЯ призма (H6) + правки 8 файлов
+    └── cross-audit/                       SKILL.md · angles.md (+3 угла, правки 6) · output-formats.md (H8)
+
+docs/projects/_template/design/_template/ready.yaml   НОВАЯ форма (G1)
+docs/projects/<slug>/design/<surface>/ready.yaml       данные: производный манифест готовности
+.gitattributes (новый) · .gitignore (G3)
+```
+
+### 4.2. Файлы T4
+
+| файл | что | форма, канон | ведёт | проверяет |
+|---|---|---|---|---|
+| `design-deep-dive/SKILL.md` | исполнитель трёх уровней (H1, H9) | скелет deep-dive шаблона (Ф1 02 §2.2) | сопровождающий скилла | `refcheck` (ссылки, следы журнала) |
+| `references/phases.md` | маршруты и этапы с контрактами (раздел 3; T1, T2a, T2b, T3) | Р118 | то же | `refcheck`; сверка id этапов с `SKILL.md` и `_phase-jump.md` |
+| `references/workflow-patterns.md`, `draft-stable.md`, `field-checklists.md`, `knowledge-base.md` | режимы, статусы, чек-листы, чтение базы (H9) | типовые `references/` шаблона (Ф1 02 §2.4) | то же | `refcheck` |
+| `design-audit/SKILL.md`, `references/rules.md` | аудит двух слоёв (H3) | структурные аудиты шаблона (`mobile-audit`) | то же | прогон на пилоте (Ф9) |
+| `.claude/agents/design-judge.md`, `design-consultant.md` | судья и консультант (H4) | документация Claude Code (раздел «Проверено») | то же | калибровочный набор (`judge.md §6`) — судья; вопросы Ф5 `check/` — консультант (по желанию) |
+| `_template/design/_template/ready.yaml` | форма манифеста (G1) | этот файл, G1 | `design-deep-dive` (этап `package`), скрипт Ф8 | `design-audit` (`R-FRESH`) |
+| `entrypoint-for-business/references/site-and-look.md` | призма «Сайт и как всё выглядит» (H6) | призмы клиентского входа | клиентский оркестратор | — (подложка — `design-deep-dive/references/`) |
+
+**Черновики frontmatter** (длина — счётом, ориентир H2 ≤ 600 знаков):
+
+```yaml
+# .claude/skills/design-deep-dive/SKILL.md — 514 знаков
+name: design-deep-dive
+description: "Проектирование сайта, лендинга и облика продукта по базе знаний скилла: слой страницы `docs/projects/<slug>/site/<surface>/` (бриф, смысл и факты, карта сайта, план страницы, тексты по слотам) и слой дизайна `design/` (бренд, дизайн-система, референсы и направления, ассеты, макет в Claude Design, приёмка, пакет для кода). Звать, когда нужен сайт или лендинг, тексты сайта, стиль или дизайн-система, картинки, 3D или видео, макет, его правки или приёмка; у кабинета SaaS — после сценариев и после готовых экранов."
+
+# .claude/skills/design-audit/SKILL.md — 478 знаков
+name: design-audit
+description: "Узкий аудит слоя страницы и слоя дизайна проекта (`site/<surface>/`, `design/`, факты и голос продукта): схемы и ссылки файлов, покрытие слотов фактами, текстами и ассетами, покрытие компонентов экранов дизайн-системой, свежесть входа холста, копий, приёмки и манифеста; с `--visual` и разрешения заказчика — проверки HTML-копий макета и судья по рубрике. Только отчёт, правки — через `/design-deep-dive`. Звать перед коммитом, после этапа или при подозрении на рассогласование."
+
+# .claude/agents/design-judge.md — 258 знаков
+name: design-judge
+description: "Судья design-deep-dive: оценивает макет, страницу, тексты, ассет или варианты по рубрике владельца в чистом контексте — рубрика, попарное сравнение, свежий аудит макета, выбор из вариантов. Звать из этапов проверки с готовыми входами; решение — за человеком."
+tools: Read
+model: claude-opus-5-5
+omitClaudeMd: true
+
+# .claude/agents/design-consultant.md — 257 знаков
+name: design-consultant
+description: "Консультант по базе знаний design-deep-dive: находит нормы к вопросу этапа через карту kb/INDEX.md и возвращает их с каноническими адресами, позициями и копиями, ничего не правит. Звать, когда вопрос касается нескольких баз или нужен канон спорного правила."
+tools: Read, Grep, Glob
+model: claude-opus-5-5
+```
+
+**Точки входа исполнителя** (`SKILL.md`):
+
+| вызов | поведение |
+|---|---|
+| `/design-deep-dive` | пикер проекта по именам → сводка этапов продукта и поверхностей → первый этап с готовым входом |
+| `/design-deep-dive <slug>` | уровень продукта: факты, голос, бренд, ДС, бриф на вид; сводка по поверхностям |
+| `/design-deep-dive <slug> <surface>` | маршрут поверхности по `type` и `web-kind`: первый этап с готовым входом (A7) |
+| `/design-deep-dive <slug> <surface> <этап>` | этап по id (`brief`, `page-plan`, `mockup` …); перепрыгивание — вопрос и `_phase-jump.md` |
+| `/design-deep-dive <slug> [<surface>] <kind>:<slug>` | запись: `page-plan:home`, `copy-deck:home`, `asset-plan:home`, `motion-spec:home` |
+| `/design-deep-dive <slug> [<surface>] <сырьё>` | режим B: брендбук, сайт заказчика, скриншоты, тексты и макеты заказчика, ссылки |
+
+**Сводка этапов** (формат для `SKILL.md` и `phases.md § 2`; ✅ — закрыт, 🔄 — в работе, ⏳ — не начат):
+
+```
+Клиника удержания · лендинг «Запись» (landing)
+  ✅ brief · ✅ meaning (факты: 12, пробелов 2) · ✅ funnel · 🔄 page-plan (главная ✅, спасибо — черновик) · ⏳ copy …
+  Дизайн: ✅ moodboard · 🔄 art-direction · ⏳ asset-plan · ⏳ design-system
+  Холст: ⏳   Пакет: ⏳
+  Долг: AJTBD и Карта гипотез пропущены — метрика словом заказчика
+```
+
+### 4.3. Сводный список Ф7 по всем темам
+
+Счёт — по спискам разделов 4 спецификаций T1, T2a, T2b, T3 и этого файла; строки — оценка (у T1, T2a, T2b — их, у T3 и
+T4 — T4). Правка «прохода» — одна-две строки по следам прежнего запрета (H7). Итого — **144 файла: 25 новых, 119
+правок, ≈ 6,0–8,0 тыс. строк.**
+
+| зона Ф7 | файлы | новых / правок | строк | темы |
+|---|---|---|---|---|
+| **1. Каноны новых слоёв** | `_template/site/README.md`; `_template/design/README.md`; формы `_template/design/_template/`: `app-brief.yaml`, `system.yaml`, `brand.yaml`, `ARTIFACTS.md`, `REVIEW.md`, `ready.yaml` | 8 / 0 | 885–1 075 | T1, T2a, T2b, T4 |
+| **2. Каноны слоя проекта** | новые: `project/object.md`, `action.md`, `interface/_template/scenario.md`, `screens/_template/map.md`, `texts.md`; правки: `project/` — `README.md`, `vision.md`, `surface.md`, `user.md`, `capability.md`, `boundary.md`; `interface/` — `README.md`, `situation.md`, `zone.md`, `data-items.md`, проход — `block.md`, `ux-substrate.md`; `screens/` — `README.md`, `screen.md`, `block.md`, `shell.md`, `flow.md`; `services/` — `README.md` (§Gate), `architecture.md` (A9) | 5 / 19 | 870–1 270 | T3, T1, T2a, T4 |
+| **3. Стыки FSD, mobile, бот** | `fsd/` — `README.md`, `pages.md`, `shared-ui.md`, `shared-api.md`, `shared-lib.md`, проход — `features.md`; `mobile/` — `README.md`, `shell.md`, `shared-api.md`, проход — `features.md`, `widgets.md`; `telegram-bot-flow/` — `README.md`, `command.md`, `notification.md`, `features/window.md`, `features/use-case.md` | 0 / 16 | 115–200 | T3 |
+| **4. Карты и общие правила** | `CLAUDE.md`, корневой `README.md`, `CONTRIBUTING.md`, `docs/README.md`, `docs/projects/README.md`, `docs/getting-started.md`, `.claude/rules/forward-only.md`, `.claude/settings.json`, `.gitignore`; новый — `.gitattributes` | 1 / 9 | 160–210 | T4 (с T1, T2a, T3) |
+| **5. Тексты скилла** | `design-deep-dive/SKILL.md` (переписывается), `scripts/README.md`; новые `references/`: `phases.md`, `claude-design.md`, `workflow-patterns.md`, `draft-stable.md`, `field-checklists.md`, `knowledge-base.md` | 6 / 2 | 1 680–2 040 | T4, T1, T2a, T2b, T3 |
+| **6. Аудит и агенты** | `design-audit/SKILL.md`, `design-audit/references/rules.md`, `.claude/agents/design-judge.md`, `design-consultant.md` | 4 / 0 | 680–880 | T4 (правила — T1, T2a, T2b, T3) |
+| **7. Соседние исполнители и аудиты** | `project-deep-dive` 5, `project-audit` 2, `interface-deep-dive` 5, `interface-audit` 2, `screen-deep-dive` 8 (+ `assets-policy.md`), `screen-audit` 2, `fsd-deep-dive` 2, `fsd-audit` 1, `mobile-deep-dive` 3 (+ проход `SKILL.md`, `interface-context.md`), `mobile-audit` 1, `telegram-bot-flow-deep-dive` 1, `telegram-bot-flow-audit` 1; проход — `service-deep-dive/references/draft-stable.md`, `domain-deep-dive/SKILL.md`, `references/draft-stable.md` | 0 / 36 | 870–1 360 | T3, T4 |
+| **8. Оркестраторы и `/cross-audit`** | `entrypoint/SKILL.md`, `routing.md`, `state-model.md`, `intake.md`; `entrypoint-for-business/SKILL.md`, `routing-business.md`, `product.md`, `business-language.md`, `intake-business.md`, `escalation.md`, `state-format-business.md`, `anti-patterns-real.md`, новая `site-and-look.md`; `cross-audit/SKILL.md`, `angles.md`, `output-formats.md`; `service-audit/references/rules.md` | 1 / 16 | 570–760 | T4 |
+| **9. Описания скиллов** (Р76 п. 29) | 16 `SKILL.md`, которых нет в других зонах: `ajtbd-audit`, `business-deep-dive`, `hypothesis-map-audit`, `hypothesis-map-deep-dive`, `infrastructure-audit`, `infrastructure-deep-dive`, `job-graph-deep-dive`, `jtbd-interview`, `segment-deep-dive`, `swot-audit`, `swot-deep-dive`, `service-audit`, `service-deep-dive`, `mobile-audit`, `telegram-bot-flow-audit`, `telegram-bot-flow-deep-dive`; у остальных 15 описание правит их зона | 0 / 16 | 65–110 | T4 |
+| **10. База — пакет закрытий** (H11) | `kb/common/CONTRADICTIONS.md`, `kb/common/canon.tsv` (пересборка), `kb/common/judge.md`, `kb/common/README.md`, `kb/INDEX.md`; строки узлов и реестр — в журнале | 0 / 5 | 70–110 | T4, T2a, T2b |
+
+По темам (строки): T1 ≈ 600–700, T2a ≈ 850–950, T2b ≈ 520–600 (их оценки); T3 ≈ 2,2–3,2 тыс. (≈ 65 файлов, оценка T4 по
+спискам T3 4.6); T4 ≈ 2,0–2,6 тыс. (исполнитель, `references/` своей доли, аудит, агенты, призма, общие файлы,
+оркестраторы, `/cross-audit`, описания, пакет закрытий).
+
+**Против Ф1 05 §4.4** (≈ 35 общих файлов): его таблица называет 34 общих файла, 32 из них входят в Ф7 (без
+`docs/projects/infrastructure/placement.md` — где живёт страница, решает хаб, A9 T1, — и `.claude/rules/naming.md` —
+ускоритель `kind:slug` описан общо и новых правил не требует); сверху — UX-дельта SaaS, решённая заказчиком в эту сборку
+(Р150: ≈ 65 файлов T3), проход по описаниям (16) и по следам прежнего запрета (11).
+
+### 4.4. Порядок Ф7
+
+Зона — одна сессия или один агент (`CLAUDE.md` §6: один агент — одна непересекающаяся зона); порядок — по зависимостям
+ссылок: каноны раньше текстов, которые на них ссылаются.
+
+1. **Зоны 1 и 2** (параллельно): формы и каноны — слова и поля, на которые опираются все остальные тексты. Внутри зоны 2
+   сначала `project/`, затем `interface/`, `screens/`.
+2. **Зона 3** — стыки FSD, mobile, бота (ссылаются на экраны и тексты зоны 2).
+3. **Зона 4** — `CLAUDE.md`, карты и правила (роутер ссылается на README слоёв зон 1–2).
+4. **Зона 5** — тексты скилла: `phases.md` собирается из разделов 3 пяти спецификаций, `SKILL.md` — последним в зоне.
+5. **Зона 6** — `design-audit` и агенты (правила ссылаются на формы и этапы).
+6. **Зона 7** — соседние исполнители и аудиты по T3 и проход по следам запрета.
+7. **Зона 8** — оркестраторы и `/cross-audit` (ссылаются на id этапов `phases.md`, на аудит и формы).
+8. **Зона 9** — описания всех 31 скилла одним проходом, с замером суммы (цель — ≤ 18 тыс. знаков; `count` по frontmatter
+   — одна команда Python).
+9. **Зона 10** — пакет закрытий H11 (закрывает позиции «форма слоя» и «этап скилла» — формы уже написаны).
+10. **Проверка Ф7:** `refcheck.py --strict` по новым и правленым текстам скилла и `kb/common/`, `mapcheck.py` по
+    `kb/INDEX.md`; поиск остатков «craft», «wireframe и hi-fi … вручную», «Committed-скрипта»; дифф реестра и `canon.tsv`
+    только по закрытым id; сумма описаний. Узкие аудиты на шаблоне без данных проекта не прогоняются — их первая проверка —
+    пилоты Ф9.
+
+## 5. Строки страницы
+
+**G. Пакет для репозитория кода**
+- G1. Репозиторий кода читает утверждённые файлы стратегии напрямую, копий нет; готовность каждой поверхности сводит
+  файл-манифест, который собирает скрипт: что закрыто, что принято на макете и что проверить после сборки. (а) так —
+  рекомендуем; (б) отдельный пакет-копия — второй источник правды; (в) без манифеста — код сам собирает готовность по
+  десятку форматов.
+- G2. Сайт получает бриф, карту, планы, тексты, факты, голос, дизайн-систему, подачу, движение, ассеты и адаптивные копии
+  макета; кабинет — экраны, тексты интерфейса, FSD, дизайн-систему и копии макета; мобильное и бот — токены и голос; хаб —
+  род поверхности, чтобы знать, какой репозиторий кода поднимать.
+- G3 (нужно ваше слово). Готовые ассеты в пределах бюджета храним в git проекта стратегии: лендинг — ≈ 2–6 МБ, с заменами
+  в истории — ≈ 5–20 МБ; исходники генераций, файлы Blender и кадры проверок — вне git. (а) git — рекомендуем: код
+  появляется позже и читает стратегию рядом, облачная сессия теряет незакоммиченное; (б) Git LFS — настройка сервера и
+  программы у каждого, включая вас; (в) только хранилище claude.ai — код ассеты не прочитает.
+- G4–G6. Скорость и вес собранной страницы проверяет репозиторий кода утилитами этого скилла — одна копия, версия —
+  коммит стратегии. У кабинета до пилота — живые замеры пользователей и отклик на нажатие ≤ 100 мс: лабораторных порогов
+  для экранов в базе нет, их даст пилот. Скилл `frontend-design` в коде получает род поверхности и уровень амбиций, цвета и
+  шрифты — только из дизайн-системы проекта.
+
+**H. Устройство скиллов**
+- H1–H2. Один скилл `design-deep-dive` ведёт факты и голос продукта, страницу и дизайн, один `design-audit` их проверяет;
+  `entrypoint` вызывает скилл сам. Для этого снимаем скрытие, описания всех скиллов сокращаем до ≈ 600 знаков и отдаём
+  списку скиллов 2 % окна вместо 1 %: иначе новый скилл первым теряет описание. (а) один скилл и один аудит — рекомендуем;
+  (б) две пары, для сайта и для дизайна, — против решения «один скилл», передача через оркестратор на каждом шаге.
+- H3–H4. Аудит дизайна проверяет файлы — схемы, ссылки, покрытие текстами, фактами, ассетами и компонентами, свежесть
+  макета и приёмки — и по вашему разрешению сам макет на всех ширинах с судьёй. Агенты на Opus 5.5: судья в чистом
+  контексте (рубрика, попарно, свежий аудит, выбор из вариантов; только читает) и консультант по базе; решает человек.
+- H5–H6. `entrypoint` узнаёт сайт, лендинг, стиль, макет и кабинет и ведёт по роду поверхности; продукт спроектирован,
+  когда у каждой поверхности закрыто то, что читает её код. В клиентском режиме — тема «Сайт и как всё выглядит»: о задаче
+  страницы, фактах и бренде рассказываете вы, референсы листаете вы; выбор варианта и утверждения записываются вашими
+  решениями, в файлы их переносит исполнитель.
+- H7–H8. Правила проекта: облик — только в слое дизайна, тексты сайта и интерфейса — черновик агента «допущением»,
+  утверждаете вы, факты — только с источником. Сквозной аудит получает три проверки: у готовой поверхности есть принятый
+  дизайн; факты не спорят с данными бизнеса; страница не обещает того, чего продукт не делает. (а) шесть проверок —
+  дороже; (б) три из каркаса — одна повторяет аудит дизайна; (б′) три с «обещаниями страницы» — рекомендуем.
+- H9–H12. Этапы — один файл с контрактами, протокол холста — отдельный; утилиты по файлам проекта — одна папка скилла
+  (пишет Ф8); позиции базы, закрытые пилотом, правятся одной процедурой; база знаний правится только в шаблоне, проект
+  обновляет скилл заменой его папки.
+
+**Что меняется в шаблоне и чего это стоит**
+- ≈ 145 файлов, ≈ 6–8 тыс. строк: 25 новых — каноны страницы и дизайна, пять форм кабинета, шесть текстов скилла, аудит,
+  два агента, клиентская тема — и ≈ 120 правок: правила и карты, формы продукта, интерфейса, экранов, FSD, мобильного и
+  бота, соседние скиллы, оркестраторы и сквозной аудит, описания скиллов, база.
+- Ориентир был ≈ 35 общих файлов: 32 из них правятся; сверху — UX-дельта кабинета, которую вы решили делать в этой сборке
+  (≈ 65 файлов), и два прохода по всему шаблону — описания скиллов и следы прежнего запрета «макет собирают вручную».
+- Порядок — десять зон: формы и каноны → стыки → правила и карты → тексты скилла → аудит и агенты → соседние скиллы →
+  оркестраторы → описания → база → проверка. Код (Ф8): сборщик входа холста, покрытие компонентов, манифест, прогон
+  аудита, утилиты экранов; до него этапы работают по формам вручную.
+
+## 6. Для других тем и сборки
+
+- **Стыки.**
+  - **T1.** Заметки фактов и голоса — `projects/<slug>/site/facts.md`, `voice.md` (предложение T1 принято; у продукта без
+    сайта ветка `site/` держит только их). В `_template/site/README.md` — строки «клиентский режим пишет блоки брифа с
+    `x-fill: customer` и свои референсы» (H6) и раздел о языке контракта для `CLAUDE.md` §8 (H7). Строки «не для рода
+    `landing`, `site`» в README `interface`, `screens`, `fsd` — зоны 2 и 3 Ф7.
+  - **T2a.** `_template/design/README.md § Пакет для кода` (≈ 30 строк: манифест, G2, G4, G6) пишет зона 1 по разделу 1
+    этого файла; в форму `ARTIFACTS.md` — столбец «чей аккаунт» (роль владельца артефакта, H6 — открыто до пилота). Угол
+    `design-assets` не берётся: правило 6 T2a 4.4 в `design-audit` его покрывает (H8). Имена заметок уровня продукта
+    (`brand.md`, `ds.md`, `app-brief.md`) и поверхности (`art-direction.md`, `assets.md`, `motion.md`) — как в T2a 4.1.
+  - **T2b.** Агент `design-judge` — четыре вида вызова и форматы ответа (H4); таблица вызовов в
+    `claude-design.md § Проверки по постоянной просьбе` называет агента. `design-audit --visual` не пишет `review/`.
+    Пункты `ACCEPTANCE.md` места «после сборки» идут в `ready.yaml` (`after_build`). Ветка `design/<surface>/canvas.md` —
+    принята.
+  - **T3.** Голос продукта у проекта без сайта — `/design-deep-dive <slug>`; строка в `screen-deep-dive/SKILL.md` —
+    зона 7. Скрипты слоя проекта — `scripts/project/` (H10). `_phase-jump.md` для `interface/<surface>/` и
+    `screens/<surface>/` — в `state-model.md` (H5). `/cross-audit`: `capability-job`, `capability-hypothesis` читают
+    `trace` (H8). Клиентская продуктовая призма — вопросы постуры, объектов и действий (H6).
+  - **Оркестратор.** На страницу — раздел 5; в «Нужно ваше слово» — G3 (без изменений против черновика BLUEPRINT); п. 2
+    «соседние шаблоны кода» дополнить: `<org>/site` и `<org>/frontend` читают `ready.yaml` и запускают ворота утилитами
+    из соседнего чекаута. Настройка `skillListingBudgetFraction` (H2) — структурная, решает оркестратор (Р156). Строки
+    `DECISIONS.md` пакета закрытий H11 — в Ф7.
+- **Открыто.**
+  - Чей аккаунт claude.ai владеет артефактами проекта и как клиент смотрит и правит холст — публичная ссылка с разрешения,
+    общий доступ организации или сессия в аккаунте заказчика (E6 T2b; «на Pro и Max поделиться можно только публичной
+    ссылкой»). Закроет пилот; до него — ссылка с разрешения заказчика и без реальных данных.
+  - Реальный бюджет листинга у пользователей форка: документация не называет единицу пересчёта «1 % окна», в этой сессии —
+    ≈ 31–37 тыс. знаков (вывод). После прохода по описаниям — замер; если описания всё равно пропадают — `skillOverrides:
+    {<редкий скилл>: "name-only"}` в `.claude/settings.json` (например, `jtbd-interview`) — решение Ф7.
+  - `omitClaudeMd` и ограничение `tools` у субагента в облачной сессии и в Claude Desktop клиента — по документации, без
+    прогона; `effort` судьи — наследуется до пилота.
+  - Сценарии AC-PRF-04…06 кабинета — утилиты в скилле нет (тесты код-репо); нужна ли — пилот SaaS.
+  - Единица пакета без макета (`mockup: skipped`) — только решением заказчика; нужна ли на деле — пилоты.
+  - Размер `phases.md` (≈ 600 строк) — если чтение разделами окажется неудобным, делить по слоям, но это пересмотр Р118
+    (решение заказчика) — только его словом.
+  - Код-репо вне этого репозитория: `<org>/site` читает слой страницы и `ready.yaml` вместо FSD, `<org>/frontend` — ДС,
+    `texts.md` и `ready.yaml`, оба гоняют ворота из соседнего чекаута; `<org>/infra` читает `web-kind` — отдельная работа
+    в тех репозиториях после Ф7.
+  - Углы `design-crosssurface` и `vision-brief` для кабинета (проекции брифа на вид сверяет `design-audit`) — после пилотов.
+  - Порог перевода ассетов в Git LFS — при росте папки `design/` форка, отдельным решением.
+- **Не прочитано.**
+  - `entrypoint-for-business/references/` — прочитаны `SKILL.md`, `routing-business.md`, `product.md`,
+    `business-language.md`, `state-format-business.md`, часть `escalation.md` (формат `summary.md`), остальные — поиском
+    по «дизайн, макет, сайт, лендинг»; призмы бизнеса, клиентов, стейкхолдеров и SWOT — не нужны теме.
+  - `cross-audit/references/angles.md` — карта углов, карточки `surface-screen`, `surface-service`, `service-capability`,
+    `service-placement`, `platform-shared`, `surface-capability` и все строки «Применим если»; `findings-format.md`,
+    `output-formats.md` — через Ф1 02 §3.18.
+  - Пары `mobile-*` и `fsd-*` — через карточки Ф1 02 §3.7–§3.10 и счёт описаний; `project-deep-dive/references/` —
+    начало и конец `phases.md`, заголовки остальных.
+  - Спецификации: T1 — целиком; T2a — разделы 1–7 (4.2 — по таблице); T2b — вступление, E1–E10, разделы 3–7; T3 —
+    вступление, A1, A4, A6, D5, F1, F12–F14, разделы 2–7 (F2–F11, F15 — через разделы 2–4 и 6).
+  - База: `common/glossary.md`, `evidence.md`, `tells.yaml`, `acceptance-widths.yaml` — не открывал (опоры T2a, T2b);
+    `budgets.yaml` — шапка и профили; site 07/03 — §3–§4; ux 12/03 — §9; ai-media 10/04 — §1.1; cd 06/02 — §5, cd 06/04 —
+    §6–§9, cd 06/07 — §8.
+  - Документация Claude Code — страницы skills, sub-agents, env-vars, settings-reference, только разделы о листинге,
+    скрытых скиллах, настройках листинга и формате агентов.
+  - Шаблоны кода (`ssr-frontend-template`, `spa-frontend-template`, `mobile-template`) — вне репозитория.
+
+## 7. Запись для CHAIN
+
+```
+## 05. T4 — устройство скиллов, агенты, `entrypoint`, клиент-режим, пакет для кода (27.09, ≈ <мин — по уведомлению> мин, контекст ≈ 420 тыс. токенов)
+- Сделано: `spec/T4-skills.md`, разделы 1–7; решений — принято 19 (A8, G1–G6, H1–H7, H9, H11 и стороны A7, A9, B6 с
+  C3), изменено 2 (H8, H10), новое 1 (H12); действий сверки — 4 из 4 с ответом и местом; сводная таблица маршрутов для
+  `phases.md`, контракты этапов T4 (маршрут, пакет, аудит, решения заказчика и их перенос), вход с середины; дерево файлов
+  T4, черновики frontmatter; сводный список Ф7 всех тем — 144 файла (25 новых, 119 правок), ≈ 6–8 тыс. строк, 10 зон и
+  порядок.
+- Решено: один исполнитель `design-deep-dive` (уровень продукта, слой страницы, слой дизайна) и один `design-audit`;
+  исполнитель открыт, навигатор — `references/knowledge-base.md`, описания скиллов ≤ 600 знаков, в настройках шаблона —
+  `skillListingBudgetFraction: 0.02` (по документации Claude Code новый скилл первым теряет описание); агенты
+  `design-judge` (без `CLAUDE.md`, только чтение, четыре вида вызова) и `design-consultant`, модель `claude-opus-5-5`;
+  пакет — контракт путей и производный манифест `design/<surface>/ready.yaml`, ворота исходов — утилитами из соседнего
+  чекаута; кабинет до пилота — поле p75, RUM и AC-PRF-04…06 (GT-13 → позиция); `/cross-audit` — `surface-design`,
+  `facts-business`, `promise-product` (не `design-assets` — его покрывает `design-audit`); клиентская призма «Сайт и как
+  всё выглядит», решения заказчика переносит исполнитель; `scripts/project/` — утилиты по артефактам проекта для всех
+  скиллов; H12 — база знаний правится только в шаблоне, форк обновляет папку скилла; перенос проверок обслуживания из
+  журнала в `scripts/maint/` до Ф10.
+- Стыки: T1 — заметки фактов и голоса в ветке `site/`, клиентские блоки брифа `x-fill: customer`, язык контракта для §8;
+  T2a — раздел «Пакет для кода» в README дизайна, столбец «чей аккаунт» в `ARTIFACTS.md`; T2b — форматы судьи,
+  `after_build` → манифест; T3 — вызов голоса без сайта, место скриптов, `_phase-jump.md`, `trace` в углах, призма
+  продукта; оркестратор — строки G, H и «Что меняется», G3 — «нужно ваше слово», п. 2 «соседние шаблоны кода» + `ready.yaml`.
+- Открыто: чей аккаунт владеет артефактами claude.ai и как клиент видит холст (пилот); реальный бюджет листинга
+  (замер после Ф7, запасной ход — `skillOverrides`); поведение `omitClaudeMd` и `tools` вне документации; утилита
+  AC-PRF-04…06; единица без макета; размер `phases.md` против Р118; обвязка код-репо вне репозитория; LFS при росте.
+- Не прочитано: остальные призмы клиентского входа; `angles.md` кроме карты и шести карточек; файлы пар `mobile-*`,
+  `fsd-*` (через Ф1 02); T3 F2–F11, F15 — через разделы 2–4; `glossary.md`, `evidence.md`, `tells.yaml`,
+  `acceptance-widths.yaml`; шаблоны кода — вне репозитория.
+```
