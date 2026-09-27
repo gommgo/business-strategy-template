@@ -519,3 +519,311 @@
 - **Где пишется пропуск:** `.claude/skills/entrypoint/state/projects/<slug>/design/_phase-jump.md` (уровень продукта: ДС,
   бренд, бриф на вид) и `…/design/<surface>/_phase-jump.md` (поверхность) по форме `state-model.md § Особый случай:
   _phase-jump.md`; имена веток — T4 (H5). `design-audit` показывает долг подсказкой, закрытый долг удаляется.
+
+## 4. Формы и раскладка
+
+### 4.1. Дерево
+
+```
+docs/projects/_template/design/
+├── README.md                    ← НОВЫЙ канон слоя дизайна
+└── _template/                   ← формы файлов, у которых нет схемы в kb
+    ├── app-brief.yaml           бриф на вид кабинета (на продукт)
+    ├── system.yaml              решения ДС, которые не токены
+    ├── brand.yaml               бренд проекта после чистки
+    └── ARTIFACTS.md             адреса артефактов claude.ai
+
+docs/projects/<slug>/design/                          данные проекта
+├── brand.yaml                   бренд проекта (C1)
+├── system.tokens.json           DTCG — источник правды токенов (Р42)
+├── system.tokens.css            производный: для kit и кода (G2)
+├── DESIGN.md                    проза ДС; передняя часть с токенами — производная
+├── system.yaml                  сопоставление типов, расширения, «роль → стиль», конвенции, статус ДС
+├── app-brief.yaml               есть поверхности маршрута SaaS
+├── visual-dna.json              продуктовый паспорт — есть поверхности маршрута SaaS
+├── ARTIFACTS.md                 артефакт ДС и холсты всех поверхностей, релизы, id загрузок, постоянная просьба
+├── _design-system/project/…     исходники артефакта Design System (tokens.json, README.md — производные)
+├── _assets/                     brand/ (логотип SVG и тёмный вариант) · fonts/ (с лицензиями) · icons/ · illustrations/ · manifest.yaml
+└── <surface>/                   поверхность из реестра surface.md
+    ├── art-direction.json       сайт: art-direction v1 (creative)
+    ├── visual-dna.json          сайт: маркетинговый паспорт
+    ├── assets/
+    │   ├── plans/<page-id>.yaml план ассетов страницы-шаблона (ai-media 01/01 §8)
+    │   ├── manifest.yaml        слот, файл, лицензия, провенанс, sha256 (G3 — T4)
+    │   └── …                    готовые ассеты в бюджетах (G3 — T4)
+    ├── motion/<page-id>.motion-spec.yaml   сайт: после статичного макета
+    ├── canvas/project/…         исходники холста (T2b)
+    ├── input/                   производный вход холста (T2b)
+    └── review/                  последний результат проверок (T2b, Р79)
+
+docs/projects/<slug>/site/<surface>/plans/<page-id>.yaml   ← `page.treatment`, `sections[].treatment`, `refs.treatment`,
+                                                             `refs.asset_plan` пишет этап дизайна; файл — слой страницы (T1)
+
+.claude/skills/entrypoint/state/projects/<slug>/design/   ← ветка исполнителя (имена — T4, H5)
+├── _phase-jump.md · ds.md · brand.md · app-brief.md
+└── <surface>/ _phase-jump.md · art-direction.md · assets.md · motion.md
+```
+
+Пути внутри файлов — от файла: в плане страницы `refs.treatment: ../../../design/<surface>/art-direction.json`,
+`refs.asset_plan: ../../../design/<surface>/assets/plans/<page-id>.yaml`, `page.treatment.tokens_ref:
+../../../design/system.tokens.json`; в паспорте `derived_from_ui.tokens: ../system.tokens.json`; в `app-brief.yaml` —
+`brand.ref: brand.yaml`; в `site-brief.yaml` — `brand.ref: ../../../design/brand.yaml` (Ф8).
+
+### 4.2. Файлы
+
+| файл | форма (канон) | ключевые поля и связи | ведёт | проверяет |
+|---|---|---|---|---|
+| `brand.yaml` | `_template/design/_template/brand.yaml`; Ф8 — схема из `site-brief $defs` | имя, `status`, `guidelines_ref`, логотип (файлы в `_assets/brand/`, «никогда»), роли цвета, шрифты (кириллица, лицензия, замены с причиной), `voice_ref: ../voice.yaml`, источники (строки `material`, замер `measure_ui.py`) | `design-deep-dive`, этапы 1 и 6 | `design-audit` |
+| `system.tokens.json` | DTCG 2025.10; эталон — ui 09/04 §4; расширение — `marketing-tokens.json` | примитивы, семантика, `breakpoint.*`, `size.panel.*`, `space.*`, `type.*`, `motion.*`; режимы тем, плотности, сокращённого движения; `$extensions` — правила применения | этап 4; правки заказчика — C4 | `tz check`, `build_reference_tokens.py` (контраст), `ui_audit.py --tokens` |
+| `DESIGN.md` | ui 12/04 §2.3 (порядок разделов Google Labs) | характер, цвета ролями с контрастом, типографика, раскладка, глубина, формы, компоненты по группам словаря, «можно / нельзя», известные проблемы; голос — `voice_ref` | этап 4 | `design-audit`; по желанию `npx @google/design.md lint` |
+| `system.yaml` | `_template/design/_template/system.yaml`; Ф8 — схема | `status`, `approval`, `components`, `extensions`, `text_styles`, `conventions` | этапы 4 и 8 | скрипт покрытия (Ф8), `design-audit` |
+| `app-brief.yaml` | `_template/design/_template/app-brief.yaml`; Ф8 — схема | общие поля брифов (T1 и T3: `project`, `intake.raw_ref`, `languages`, `constraints`, `themes`, `brand`, `assets_available`, `references`, `questions`); `core` (проекции — `x-fill: projection`; авторское — плотность, темы, характер, запреты); `style_tiles`, `choice`, `moodboard`, `allow`; `surfaces.<surface>` (Д2) | этапы 6, 7, 8 | `design-audit` (проекции = источникам) |
+| `visual-dna.json` | `kb/ai-media/06-art-direction-consistency/visual-dna.schema.json` | сайт — из `handoff.visual_dna` арт-дирекции, потом `derived_from_ui.tokens`; кабинет — `from-tokens`; `illustration` с метафорами (VI-53, Ф8) | этапы 2 и 5б | `vlm_to_dna.py validate` |
+| `art-direction.json` | `kb/creative/09-ai-execution-evaluation/art-direction.v1.schema.json`; документ — creative 01/02 | `inputs`, `ambition` (проекция брифа), `concept`, `territories`, `directions`, `choice`, `moodboard`, `visual_language`, `motion_system`, `effects_by_section`, `decisions`, `exclusions`, `budget`, `handoff`, `lifecycle` (C8) | этапы 1 и 2 | `ad_check.py FILE` (Ф8), `design-audit` |
+| `assets/plans/<page-id>.yaml` | ai-media 01/01 §8; Ф8 — схема (TR-41) | `page`, `brand`, `budgets`, `policy`, `slots[]` (`id` = `<секция>-<id>` плана, `ladder`, `source`, `task_codes` или `recipe:`, `variants`, `delivery`, `alt` — строка copy deck, `ai_fit`, `key`, дорога 3D) | этапы 3 и 5а | `plan_to_assets.py --check`, `asset_audit.py` |
+| `motion/<page-id>.motion-spec.yaml` | `kb/creative/09-ai-execution-evaluation/motion-spec.schema.json` | `page` (тезис, характер, примитивы, `lcp`, переключатель), `sections[]` (id плана, моменты, станции, раскадровка, reduce, телефон, `fallback`, `acceptance`) | этап 9 | `spec_check.py spec` |
+| `treatment` в плане | `kb/creative/09-ai-execution-evaluation/treatment.schema.json` через `page-plan` | `page.treatment` (`art_direction_ref`, `motion_spec_ref`, `motion_level`, `tokens_ref`, пики, акценты, `status`), `sections[].treatment` | этапы 2 и 9 | `spec_check.py plan`, PL-C01 |
+| `ARTIFACTS.md` | `_template/design/_template/ARTIFACTS.md` | таблица артефактов (тип, адрес, релиз типа и версия контракта, последнее чтение), загрузки (id → файл → слот), постоянная просьба (E4 — T2b) | этапы 4 и холста | `design-audit` |
+| исходники `_design-system/project/` | формат типа Design System — ответ инструмента `Artifact` (Р15; cd 05/01 §3.2 — пересказ) | `design-system.json`, `tokens.json` (производный), `README.md` (производный), `components/<Comp>/`, `bundle.css`, `fonts/`, обложка | этапы 4 и 8 | покрытие (Ф8), проверки cd 06/04 по просьбе |
+
+Kind слоя — имена форм и схем: `brand`, `design-system` (токены, `DESIGN.md`, `system.yaml`, артефакт — одна запись),
+`app-brief`, `visual-dna`, `art-direction`, `asset-plan`, `motion-spec`; ускоритель `kind:slug` — `asset-plan:home`,
+`motion-spec:home` (`.claude/rules/naming.md` §3).
+
+Формы файлов без схемы (сокращённо; Ф7 пишет их с комментариями, Ф8 — схемы):
+
+```yaml
+# app-brief.yaml — один на продукт
+app_brief_version: 1
+project: {slug: <slug>, status: draft, approval: {by: <роль>, at: <дата>}}   # общие поля брифов (B5, F11)
+intake: {raw_ref: <строка material>}
+languages: [ru]
+constraints: {jurisdiction: [ru], legal_category: general, accessibility: {target: <цель>, ref: vision#Devices and accessibility}}
+themes: {default: light, dark: {needed: false, why: —}}        # CN-104; то же имя — блок site-brief (Ф8)
+brand: {ref: brand.yaml}
+assets_available: {logo_vector: true, product_ui: false}
+references: []                                                  # принесённые заказчиком
+questions: []                                                   # id, block, q, why, options, default, affects, priority, status
+core:                                                           # Д1 (T3 F11); проекции — x-fill: projection
+  app_type: <тип>                                               # vision Name
+  postures: [{user: <slug>, posture: <постура>}]                # user.md#Постура
+  pointer: {<surface>: both}                                    # surface.type
+  ai_layer: {present: false, where: []}                         # паспорта ai capability
+  mobile_scope: <проекция>                                      # vision Devices and accessibility
+  status_roles: [<object>.<status>]                             # object.md#statuses
+  density: {default: default, switch: false, why: <причина>}    # авторское, подтверждает владелец продукта (NU-12)
+  character: {adjectives: [<3 слова>], temperature: neutral}    # авторское
+  bans: []                                                      # предметно (ui 12/04 §1.4)
+style_tiles: [{id, name, knobs: {accent, neutral, radius, density, font, shadows, theme}, palette, type, shape, depth, icons, motion, contrast_report, risk, refs}]
+choice: {chosen, chosen_by: customer, date, why, merged_from: [], rejected: [{id, why}]}   # ручки после выбора — в DTCG
+moodboard: []                                                   # ≤ 12 (C6)
+allow: {markers: [], why: <причина>}                            # домен app-visual common/tells.yaml
+surfaces:                                                       # Д2 по поверхности (T3 F11)
+  <surface>: {main_screen_type, sections, density_by_area: [], hierarchy_levels: 3, states_visual: [], shell: {sidebar, inspector, content_max}}
+```
+
+```yaml
+# system.yaml — решения ДС, которые не токены
+system_version: 1
+status: draft                                                   # draft · proposed · approved («Keep» заказчика)
+approval: {by: <роль>, at: <дата>}
+components:                                                     # тип → компонент ДС → необязательные состояния (CM-04, CM-10)
+  Button: {component: Button, optional_states: [loading]}
+  Banner: {component: Callout}
+  Alert: {component: Callout, note: "вариант inline"}
+extensions:                                                     # CM-06; поля components.yaml#project_extension
+  - {id: <PascalCase>, name, purpose, why_not, behavior, states: {required: [], optional: []}, parts: [], keyboard: <контракт>, text_roles: {}}
+text_styles: {title: type.page-title, label: type.label, body: type.body}   # роль текста → стиль (TX-41)
+conventions:
+  range_sign: "–"                                               # TX-25
+  thousands_space: "U+00A0"                                     # TX-27
+  empty_state: {align: center}                                  # ST-22
+  icons: {set: <имя>, sizes: [16, 20], stroke: 1.5}             # ui 07/01
+  status_colors: {<object>.<status>: <роль цвета>}              # ux 13/04 §25
+  object_markers: {<object>: {icon: <имя>, color: <роль>}}      # T3 F4
+```
+
+`brand.yaml` — поля объекта `brand` схемы `site-brief` без `expression` (выражение остаётся в брифе сайта) и с
+`voice_ref` вместо `voice`; `ARTIFACTS.md` — таблица «артефакт · тип · адрес · релиз типа и версия контракта · последнее
+чтение», таблица загрузок «id · файл · слот · артефакт» и строка постоянной просьбы (E4).
+
+### 4.3. Статусы
+
+| файл | поле | «в работе» | «закрыто» | кто закрывает |
+|---|---|---|---|---|
+| `brand.yaml` | `status` | `none`, `draft` | `verified` | заказчик (факты бренда) |
+| `system.yaml` (вся ДС) | `status` | `draft`, `proposed` | `approved` + `approval` | заказчик — «Keep» |
+| `app-brief.yaml` | `project.status` | `draft`, `proposed` | `approved` + `project.approval` | владелец продукта |
+| `art-direction.json` | `status` | `draft`, `proposed` | `approved` + `approved_by`, `approved_at` | заказчик |
+| `visual-dna.json` | `status` | `draft` | `approved` + `approved_by` | человек (ai-media 06/01 §6) |
+| план ассетов | `status` (Ф8; до Ф8 — строка журнала вопросов) | `draft` | `approved` | заказчик (траты — с владельцем денег) |
+| ассет | строка манифеста | `draft` | `accepted` | заказчик; мелкие кодовые — в составе ДС |
+| `treatment`, `motion-spec` | `status` | `draft`, `proposed` | `approved` | заказчик |
+
+Код-репо читает только закрытые файлы (как у слоя страницы, T1 B3). Статусов `superseded` и `retired` в проекте нет (C8).
+
+### 4.4. Правила `design-audit` со стороны слоя дизайна (структурная часть — H3, H10; код — Ф8)
+
+1. Утилиты: `ad_check.py FILE` (Ф8), `vlm_to_dna.py validate`, `spec_check.py plan|spec`, `plan_to_assets.py --check`,
+   `tz check` DTCG, `build_reference_tokens.py` (контраст), `check_icons.py`, `asset_audit.py`, `provenance_check.py`,
+   скрипт покрытия (Ф8).
+2. `art-direction.json` и маркетинговый `visual-dna.json` — только у поверхностей рода `landing` и `site`; `app-brief.yaml`
+   и продуктовый `visual-dna.json` — тогда и только тогда, когда у продукта есть поверхность маршрута SaaS — error.
+3. `ambition` арт-дирекции = `site-brief.ambition`; `budget.profile` = `page.budget_profile` плана — error.
+4. Ключ `k3_allow` без решения, `lifted_markers[].decision_ref` на несуществующее решение — warning, error@`approved`.
+5. У сайта: маркетинговый паспорт `approved` раньше первого ключевого ассета с `source: generate`; ключевые ассеты
+   приняты раньше `system.yaml.status: approved` — иначе долг в `_phase-jump.md` — warning.
+6. На каждую страницу с медиа- или 3D-слотами — план ассетов (`refs.asset_plan` ведёт в файл) — error при `approved`
+   плане страницы; слот `real-only` с `source: generate` — error; 3D-слот без постера — error.
+7. `system.tokens.json`: `breakpoint.*` и `size.panel.*` в файле; у сайта — границы 40rem и 60rem; у приложения — три
+   границы — error.
+8. `conventions.range_sign` и `conventions.empty_state.align` заданы — error@`approved`.
+9. Покрытие (Р29): каждый `ui:`-тип stable-экранов — в `components` или `extensions`, компонент есть в артефакте; у
+   расширения — `keyboard` и `text_roles` — error.
+10. `text_styles` покрывает роли строк `texts.md` поверхностей (T3) — warning.
+11. Производные совпадают со сборкой из источника: `system.tokens.css`, передняя часть `DESIGN.md`, `tokens.json` и
+    `README.md` артефакта — error.
+12. Проекции `app-brief.core` совпадают с источниками (vision, `user.md`, `surface.md`, `object.md`) — warning.
+13. Forward-only (C8): `superseded`, `retired`, `supersedes`, `history` больше одной записи, папки `review/iter-*` —
+    warning.
+14. Долг `_phase-jump.md` ветки дизайна — подсказка.
+
+Литерал холста ∈ токенов (Р63), приёмка и входной контроль холста — правила T2b.
+
+### 4.5. Объём Ф7 (часть T2a)
+
+| файл | что | объём |
+|---|---|---|
+| `docs/projects/_template/design/README.md` | новый канон: вопрос слоя; уровни и файлы; облик; ДС (три файла, артефакт, покрытие); направления и арт-дирекция; референсы; ассеты (план, ключевые, решение по ассету); паспорт; движение; статусы и forward-only; производные; связи со слоем страницы, экранами, FSD, mobile; anti-patterns | ≈ 300–350 строк |
+| `_template/design/_template/app-brief.yaml`, `system.yaml`, `brand.yaml`, `ARTIFACTS.md` | формы с комментариями | ≈ 200 строк |
+| `.claude/skills/design-deep-dive/references/phases.md` | этапы 1–9 с контрактами, «Порядок ассетов и ДС», «Кто строит ДС», «Порядок проверок», вход с середины (сборка файла — T4) | ≈ 220 строк из общего файла |
+| `references/field-checklists.md` | чек-листы закрытия файлов слоя дизайна | ≈ 70 строк |
+| `references/claude-design.md` | подраздел «Правки токенов» (файл — T2b) | ≈ 25 строк |
+| узел `phase-4/nodes/08-VI.tsv` → реестр и `kb/common/canon.tsv`; `kb/common/CONTRADICTIONS.md §9`; `kb/INDEX.md §5` | норма VI-60 (D1) | ≈ 10 строк |
+| `_template/project/README.md` | строка о папке `design/` проекта | ≈ 3 строки |
+| `CLAUDE.md` §2, §3, §6, §8; `.claude/rules/forward-only.md`; `docs/projects/README.md`; `docs/README.md` | черновики строк — раздел 1 и 6; правит T4 | — |
+
+Итого по T2a: 5 новых файлов шаблона, доли трёх файлов `references/`, ≈ 4 правки; ≈ 850–950 строк.
+
+**Ф8 от T2a:** схемы `app-brief`, `system.yaml`, `brand` (из `site-brief $defs`) и ссылка `brand.ref` в `site-brief`;
+схема плана ассетов (TR-41) с `key`, дорогой 3D, `status`; `art-direction.v1`: `$defs/reference` + `values`, `source`,
+`captured`, `lifecycle.history` необязательно, `handoff.kimi` — снять; `visual-dna`: ссылка на арт-дирекцию в
+происхождении, поля системы в `illustration` (VI-53); скрипт покрытия (H10); сборщик артефакта ДС (DTCG → `tokens.json`
+списками, README из `DESIGN.md`, `system.tokens.css`, передняя часть `DESIGN.md`); обратная синхронизация токенов (C4);
+`ad_check.py FILE`, `spec_check.py` и `plan_to_assets.py` на файлах проекта, `source: render`; проверка «литерал ∈
+токенов» по `.dc.html`.
+
+**Ф10 от T2a:** копии VI-60 (ai-media 06/01 §1, §3, выжимка п. 1–2; ui 14/01 «Вход»; cd 05/01 §4; cd 06/07 «Как
+пользоваться»); проекции kimi в creative 01/02 §4.3, 09/01 §6, 02/03 §5.1 — на вход холста; cd 06/02 §5 — раскладка
+C2; `common/CONTRADICTIONS.md §5` CM-06 и CM-10 — «Закроет: форма слоя проекта» снять после Ф7.
+
+## 5. Строки страницы
+
+- A5, C1 (развилка C1). Облик мира делается один раз: бренд, дизайн-система, бриф на вид кабинета и паспорт продукта —
+  на весь продукт, у каждого сайта — своя арт-дирекция и свой паспорт; в смешанном продукте систему строит тот маршрут,
+  который первым до неё дошёл, второй её расширяет. (а) так — рекомендуем; (б) всё на поверхность — два брифа и два
+  паспорта одного мира разойдутся.
+- C2 (развилка). Папка `design/`: система продукта в корне (токены DTCG, проза, карта решений), поверхности — в своих
+  папках; вход холста и последние проверки собираются, руками не правятся; история — в git. (а) служебные папки продукта
+  с `_` — рекомендуем; (б) поверхности во вложенной папке — длиннее пути.
+- C3. Облик пишется только в слое дизайна: агент предлагает направления и карточки стиля «допущением», выбирает и
+  утверждает владелец продукта; в экранах, интерфейсе и FSD облика нет.
+- C4. Правку заказчика в редакторе claude.ai скилл забирает и переносит в токены репозитория, затем пересобирает
+  дизайн-систему — иначе следующая сборка стёрла бы правку.
+- C5. Дизайн-система — токены, проза и карта решений: какой компонент закрывает каждый тип экранов, расширения словаря,
+  стиль для каждой роли текста, знак диапазона, вид пустого состояния; покрытие каждого компонента экранов проверяет
+  скрипт (Ф8).
+- C6, C7. Референсы листает заказчик, агент записывает ссылку, роль, «брать / не брать» и значения; у сайта 3–5
+  направлений (4 по умолчанию), у кабинета 2–3 карточки стиля; выбирает заказчик; снятые приметы — только решением
+  арт-дирекции.
+- D1, D2. Ключевые картинки (герой, атмосфера, ключевой кадр 3D) делаются до дизайн-системы, и она берёт у них палитру,
+  свет и материал; остальное — после, по её токенам; генерация — после утверждения плана ассетов заказчиком. Норма
+  записана в этапах скилла, тексты баз выравниваются в Ф10.
+- D4, D6. Движение, живое 3D и видео — после принятого статичного макета, на макете — постер или ключевой кадр;
+  проверки идут одним порядком: скрипты → факты → глаза → судья → свежий аудит → заказчик.
+- C8 (развилка). В файлах дизайна остаются текущая версия и запись выбора, история — в git: (а) рекомендуем; (б) журнал
+  версий в самом файле — против правила «без журналов прошлого».
+
+## 6. Для других тем и сборки
+
+- **Стыки.**
+  - **T1.** SB-A02 проверяет «один референс — одна секция» внутри брифа (`site_validate.py`, `applies_to`), а не «одно
+    место на проект»: решение T1 (`references[]` брифа — только от заказчика) держится как запись его слова, мудборд —
+    решение облика (C6). `brand` брифа → `brand.ref` на `design/brand.yaml`, `brand.expression` остаётся, `direction` не
+    заполняется (C1; Ф8 — вместе с блоком `themes`). `treatment`, `refs.treatment`, `refs.asset_plan`,
+    `page.treatment.tokens_ref` пишет этап 2 слоя дизайна, пути — раздел 4.1; план остаётся `approved` (B10 T1 принят).
+    Направление с альтернативной формой страницы возвращает план на правку макроструктуры (C7) — строка в
+    `_template/site/README.md`. Стиль заголовков секций — `treatment.display_role`.
+  - **T2b.** Вход холста — список раздела 3; ключи `--allow` — объединение `k3_allow` арт-дирекции и
+    `ambition.allow.markers` брифа (кабинет — `app-brief.allow`); «литерал ∈ токенов» (Р63) — приёмка. `review/` без
+    `iter-NN`: `diffshots --prev` берёт метки прошлого коммита; кадры PNG в git — вместе с G3 (T4). `ARTIFACTS.md` — один
+    на продукт (строка просьбы — там). Подраздел «Правки токенов» в `claude-design.md` (C4): после правки ДС копия ДС
+    обновляется в каждом холсте. Этап 9 — задание cd 06/07 §7 и приёмка блока E; движение на макете — после статичной
+    приёмки. Эталонные экраны кабинета (ui 12/04 §2.4, PRE-12) — первые принятые экраны; предлагаю поле `starter` в
+    `system.yaml`. Страница «Направления»: у сайта — артборды направлений, у кабинета — карточки стиля без раскладки.
+    Место `ACCEPTANCE.md` (поверхность или `input/`) — T2b.
+  - **T3.** Бриф на вид — один на продукт (`design/app-brief.yaml`), поля Д2 — `surfaces.<surface>` (C1): поправить
+    формулировку F11 «артефакт слоя дизайна поверхности»; источники полей F11 приняты. Расширения словаря —
+    `system.yaml.extensions` с `keyboard` и `text_roles`. Ключи `responsive` — имена диапазонов, границы — токены
+    `breakpoint.*` (NU-03; у ui имена границ — `tablet`, `desktop`, `wide`): у T3 написано «ключи = имена токенов» —
+    таблица «диапазон ↔ границы» в README screens. `illustration=` у `ui:EmptyState` — метафора из списка паспорта (поля
+    системы в `illustration` — VI-53, Ф8; до Ф8 — `notes` паспорта). Маркеры объектов и цвета статусов —
+    `system.yaml.conventions`. `screens/<surface>/assets/` — сырьё экранов (снимки интерфейса заказчика), не мудборд:
+    строка в README screens.
+  - **T4.** `CLAUDE.md` §2 — строка слоя `…/design/` («как продукт выглядит и движется: бренд, дизайн-система,
+    направления, ассеты, макет»; `/design-deep-dive <slug> [<surface>]`, `/design-audit <slug>`); §3 — строка и абзац
+    C3; §6 — `design/` и `treatment` планов пишет исполнитель слоя дизайна, формы — `_template/design/`; §8 —
+    handoff-идентификаторы: пути токенов DTCG (= имена CSS-переменных), имена компонентов ДС, id типов и расширений,
+    ключи `--allow`, id слотов плана ассетов не переименовываются. `forward-only.md` — абзац B9 + C8. `entrypoint`:
+    сигналы «стиль, дизайн-система, токены, мудборд, референсы, направления, ассеты, иконки, иллюстрации, 3D, видео,
+    анимация, макет» → слой дизайна; ветки state (раздел 4.1); «продукт спроектирован» — с ДС `approved` и принятыми
+    макетами. `/cross-audit` (H8 (б)): `surface-design` — у поверхности маршрута есть закрытые артефакты дизайна;
+    `design-assets` — у медиа- и 3D-слотов утверждённых планов есть строка плана ассетов и принятый ассет или записанная
+    заглушка. `design-audit` — правила раздела 4.4. G2 — `system.tokens.css` коммитится как часть пакета; G3 —
+    `_assets/` и `<surface>/assets/` с манифестом. Клиентский вход (H6): выбор направления или карточки, «Keep» ДС,
+    утверждение плана ассетов (траты) и ключевых ассетов — в бизнес-языке.
+- **Открыто.**
+  - Что ДС берёт у ключевых ассетов (D2) — позиция до пилота сайта: замер палитры кодом есть, правила «ассеты → токены»
+    в базе нет (Р140).
+  - Шкала `breakpoint.*` смешанного продукта (A5) — пилот смешанного продукта.
+  - Правит ли заказчик токены на странице артефакта ДС (C4) — проверка на пилоте.
+  - Соответствие critical, major, minor → B/S/D (D6) — калибровка (Ф9), абзац «Порядок ворот» (Ф10).
+  - Линтер `DESIGN.md` (`npx @google/design.md`) — ставить ли в окружение скилла (Ф8).
+  - Кадры PNG в `review/` — G3 (T4).
+  - Карточки стиля при существующей ДС (A5) — сколько и по каким ручкам — пилот SaaS.
+- **Не прочитано.**
+  - Выжимки Ф2 `phase-2/light/{creative,ai-media,blender,ui}-research.md` — не открывал: нормы брал в базах напрямую, а
+    выжимки уже сведены в реестр Ф4.
+  - ui 05/02, 05/03, 06/07, 07/01, 07/02, 09/03, 14/01–14/05, 14/11 — через карту, реестр и `components.yaml`; ui 09/04 —
+    §1 и заголовки.
+  - creative 01/03, 04/*, 05/01, 08/01 — через `ambition-levels.yaml`, `marketing-tokens.json`, карту и реестр.
+  - ai-media 05 (`asset-spec.schema.json`), 06/02, 11/03, 12/04, 13/03 §7; blender 04/04, 09/05, 12/00, VERDICT §4–§12 — через
+    карту, черновик Ф5 и реестр.
+  - cd 06/03 §2, §4–§8, 06/05, 06/06 — сторона T2b; `entrypoint`, `state-model.md`, `/cross-audit` — сторона T4.
+
+## 7. Запись для CHAIN
+
+```
+## 03. T2a — слой дизайна, ДС, ассеты, порядок (27.09, ≈ <мин — по уведомлению> мин, контекст ≈ 730 тыс. токенов)
+- Сделано: `spec/T2a-design-layer.md`, разделы 1–7; решений — принято 10 (A5, C3–C7, D1, D2, D4, D6), изменено 2 (C1,
+  C2), новых 1 (C8); действий сверки — 18 из 18 с ответом и местом; контракты 9 этапов (сайт — 1, 2, 3, 5а, 9; кабинет —
+  6, 7, 5б, 8; ДС — общий 4), что слой кладёт на вход холста, вход с середины; формы, правила `design-audit`, объём Ф7
+  (5 новых файлов шаблона, ≈ 850–950 строк).
+- Решено: бренд, ДС, бриф на вид кабинета и продуктовый паспорт — на продукт, арт-дирекция и маркетинговый паспорт — на
+  поверхность сайта; ДС — `system.tokens.json` + `DESIGN.md` + `system.yaml`, артефакт — производный, отдельной папки
+  `guidelines/` нет; подпапки продукта с `_`; в смешанном продукте ДС строит первый маршрут, второй расширяет; правка
+  заказчика поднимается в DTCG; ключевые — ассеты, несущие палитру, свет или материал; `motion-spec` — после статичного
+  макета; порядок проверок сведён из cd 06/04, site 09/02, `judge.md` и GT-01; C8 — без журнала версий в файлах; норма
+  порядка — строка VI-60.
+- Стыки: T1 — `brand.ref`, SB-A02 (секции, не файлы), `treatment` и пути `refs` в `design/`, альтернативная форма
+  страницы; T2b — вход холста по разделу 3, `--allow` объединением, `review/` без итераций, `ARTIFACTS.md` на продукт,
+  правки токенов, этап движения, `starter`; T3 — бриф на вид на продукт с `surfaces`, расширения с `keyboard` и
+  `text_roles`, `responsive` ↔ `breakpoint.*`, метафоры иллюстраций, конвенции объектов; T4 — `CLAUDE.md` §2, §3, §6,
+  §8, `forward-only.md`, сигналы `entrypoint`, ветки state, углы `/cross-audit`, правила `design-audit`, G2–G3.
+- Открыто: что ДС берёт у ассетов — позиция до пилота; шкала брейкпоинтов смешанного продукта; правка токенов на
+  странице ДС; critical/major/minor → B/S/D; линтер `DESIGN.md`; кадры `review/` в git; развилки C1, C2, C8 — на
+  странице, вопросов заказчику нет.
+- Не прочитано: выжимки Ф2 `phase-2/light/*` — нормы взяты из баз; ui 05, 06/07, 07, 14/01–14/05, 14/11; creative 01/03,
+  04, 05/01, 08/01; ai-media 05, 06/02, 11/03, 12/04; blender 04/04, 09/05, 12/00, VERDICT §4–§12 — через карту, черновики
+  Ф5 и реестр; cd 06/03, 06/05, 06/06 — сторона T2b; `entrypoint`, `state-model.md`, `/cross-audit` — T4.
+```
