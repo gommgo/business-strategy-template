@@ -561,9 +561,8 @@ VI-56	Ф10	02/03 §2 строка «рунет» — Dprofile «поиск» (§
 VI-56	Ф8	`refs_client.py` — без превью работ Dribbble, Behance, Dprofile, снимки живых сайтов — да
 VI-56	Ф4	решения creative 5, 11, 16, 19, 21 против Р40
 VI-57	Ф10	ai-media 06/01 §5.2 — строка о чужих работах (ca-04)
-VI-58	заказчик	выбор (а), (б) или (в); до ответа действует (а)
-VI-58	Ф8	`refs_client.py` `lib export --format base-safe` — без `author` при (а)
-VI-58	Ф4	вопрос — в пачку заказчику
+VI-58	Ф8	`refs_client.py` `lib export --format base-safe` — без `author`
+VI-58	Ф10	creative 02/02 §6.2 абзац «Автор», CRV-REF-11 и «Открытые вопросы» 02/02, X-59 в `creative/CONTRADICTIONS.md` — по Р151
 VI-59	Ф10	пункт «ждём» handoff ux → ui закрывается ссылкой на ui 11/04 и реестр
 VI-59	Ф4	визуальные рубрики
 JU-01	Ф10	тексты баз о судье — по протоколу (места — JU-25…JU-32)
