@@ -31,12 +31,12 @@ docs/projects/<slug>/
 
 | kind | схема — канон формы (от `kb/`) | ключевые поля и связи | этап |
 |---|---|---|---|
-| `site-brief` | `site/10-playbooks-contracts/schemas/site-brief.schema.json` | `project.slug` — slug проекта; `site_type` ↔ род поверхности; `ambition`; `constraints`; `proof.facts_ref`, `meaning_ref`; журнал вопросов `questions[]` | бриф, воронка |
-| `meaning` | `text/02-strategy-messaging/meaning.schema.yaml` | аудитория, осведомлённость по источникам, позиционирование, ценностное предложение, возражения, границы; основание `basis` у каждого утверждения; `proof_ref` = `proof.facts_ref` брифа | смысл и факты |
-| `hierarchy` | `text/02-strategy-messaging/message-hierarchy.schema.yaml` | главное сообщение, первый экран, опоры, секции, `not_said`; одна на уровень осведомлённости | план страницы |
-| `site-map` | `site/10-playbooks-contracts/schemas/site-map.schema.json` | шаблоны, страницы, коллекции, `chrome`, перелинковка, служебные страницы, `build_order` | карта сайта |
-| `page-plan` | `site/10-playbooks-contracts/schemas/page-plan.schema.json` | `page.id` — id страницы брифа или карты; секции → блоки каталога; слоты → слоты словаря; `fact:<id>`, `event:<id>`, `form.ref`; `budget_profile`, `ambition_level`, `x-gate-exception`; контейнеры подачи `treatment` | план страницы |
-| `copy-deck` | `text/10-templates-recipes/copy-deck.schema.json` | стык с планом (§ Связь copy deck с планом); `facts_ref`, `voice_ref`, `meaning_ref`, `hierarchy_ref`; жанр — по `page_type` | тексты по слотам, аудит текстов |
+| `site-brief` | `site/10-playbooks-contracts/schemas/site-brief.schema.json` | `project.slug` — slug проекта; `site_type` ↔ род поверхности; `ambition`; `constraints`; `proof.facts_ref`, `meaning_ref`; журнал вопросов `questions[]` | `brief`, `funnel` |
+| `meaning` | `text/02-strategy-messaging/meaning.schema.yaml` | аудитория, осведомлённость по источникам, позиционирование, ценностное предложение, возражения, границы; основание `basis` у каждого утверждения; `proof_ref` = `proof.facts_ref` брифа | `meaning` |
+| `hierarchy` | `text/02-strategy-messaging/message-hierarchy.schema.yaml` | главное сообщение, первый экран, опоры, секции, `not_said`; одна на уровень осведомлённости | `page-plan` |
+| `site-map` | `site/10-playbooks-contracts/schemas/site-map.schema.json` | шаблоны, страницы, коллекции, `chrome`, перелинковка, служебные страницы, `build_order` | `site-map` |
+| `page-plan` | `site/10-playbooks-contracts/schemas/page-plan.schema.json` | `page.id` — id страницы брифа или карты; секции → блоки каталога; слоты → слоты словаря; `fact:<id>`, `event:<id>`, `form.ref`; `budget_profile`, `ambition_level`, `x-gate-exception`; контейнеры подачи `treatment` | `page-plan` |
+| `copy-deck` | `text/10-templates-recipes/copy-deck.schema.json` | стык с планом (§ Связь copy deck с планом); `facts_ref`, `voice_ref`, `meaning_ref`, `hierarchy_ref`; жанр — по `page_type` | `copy`, `copy-audit` |
 
 Kind слоя — имена схем, у уровня продукта — `facts`, `voice`, `voc`; ускоритель `kind:slug` — `page-plan:home`,
 `copy-deck:home` (`.claude/rules/naming.md` §3).
@@ -74,7 +74,7 @@ Kind слоя — имена схем, у уровня продукта — `fac
 копируются: бриф — `proof.facts_ref`, план — `refs.facts` и слоты данных `fact:<id>` с `binds`, copy deck —
 `facts_ref`, `fact_ids`, `voice_ref`; тексты интерфейса экранов и бота опираются на тот же голос и те же факты; вход
 холста получает проекцию фактов с разделом «Нельзя утверждать» и проекцию голоса. Ведёт эти файлы исполнитель слоя
-страницы (`/design-deep-dive <slug>`, этап «смысл и факты»), у продукта без сайта — тем же вызовом без поверхности;
+страницы (`/design-deep-dive <slug>`, этап `meaning`), у продукта без сайта — тем же вызовом без поверхности;
 `/project-deep-dive` их читает, его слой — md-файлы корня проекта.
 
 ## Форма и статусы
@@ -132,8 +132,9 @@ Kind слоя — имена схем, у уровня продукта — `fac
   заказчик (запись его слова, `source: customer`); мудборд — арт-дирекция, один референс — одно место (`applies_to`).
 - **Клиентский режим.** В сессии `/entrypoint-for-business` клиент пишет черновик брифа — только блоки с
   `x-fill: customer` (`business`, `traffic`, `offer`, `constraints` — что знает точно, `search`, `languages`,
-  `brand` — исходники, `assets_available`) и ответы журнала `questions[]` при `project.status: draft`, а также свои
-  референсы. Утверждение брифа — решение заказчика; статус в файле ставит исполнитель.
+  `brand` — исходники, `assets_available`) и ответы журнала `questions[]` при `project.status: draft`; свои референсы;
+  черновик фактов с источником «сообщение заказчика» или документом (`confirmed` — после его явного «можно
+  публиковать»). Утверждение брифа и текстов — решения заказчика; статусы в файлах ставит исполнитель.
 
 ## Многостраничник
 
@@ -157,9 +158,9 @@ Kind слоя — имена схем, у уровня продукта — `fac
 
 ## Тексты
 
-Цепочка текстов базы (text 09/02 §1.1) разложена по этапам слоя: разбор брифа — «бриф»; факты и смысл — «смысл и
-факты»; иерархия — «план страницы»; каркас copy deck, тексты секций, мета, OG, FAQ и GEO — «тексты по слотам»;
-проверки, правка, судья, выбор и утверждение — «аудит текстов». Таблица «шаг → этап» — `phases.md` скилла.
+Цепочка текстов базы (text 09/02 §1.1) разложена по этапам слоя: разбор брифа — `brief`; факты и смысл — `meaning`;
+иерархия — `page-plan`; каркас copy deck, тексты секций, мета, OG, FAQ и GEO — `copy`; проверки, правка, судья, выбор
+и утверждение — `copy-audit`. Таблица «шаг → этап» — `phases.md` скилла.
 
 - **Порядок аудита:** факты и право → стиль (линтер жанра) → длины, мета, GEO → судья (сигнал, статус не меняет) →
   человек (text 09/03 §2.1). Правка — ограниченным числом проходов, остаток — человеку (text 09/03 §2.4).
@@ -208,11 +209,12 @@ text 10/01 §8).
 ## Связи с верхними слоями
 
 Минимальный вход слоя — проект с `vision.md` (можно `draft`; у продукта только из сайта и лендинга — разделы `Name`,
-`Problem`, `Users`, `Success`, `Non-goals`), хотя бы одной строкой `user.md` и строкой поверхности `type: web` с
-`web-kind` `landing` или `site`. Без них исполнитель останавливается и называет `/project-deep-dive <slug>`: в
-продуктовый слой он не пишет. Бизнес, AJTBD, SWOT и Карта гипотез — по желанию: слой есть — этап читает его и предлагает
-опереть на него поле; слоя нет — поле закрывает ответ заказчика на вопрос брифа, а пропуск пишется долгом в заметку
-пропусков ветки слоя — `.claude/skills/entrypoint/state/projects/<slug>/site/<surface>/_phase-jump.md` (форма —
+`Problem`, `Users`, `Success`, `Non-goals` и `Assumptions`, если есть допущения), хотя бы одной строкой `user.md` и
+строкой поверхности `type: web` с `web-kind` `landing` или `site`. Без них исполнитель останавливается и называет
+`/project-deep-dive <slug>`: в продуктовый слой он не пишет. Бизнес, AJTBD, SWOT и Карта гипотез — по желанию: слой
+есть — этап читает его и предлагает опереть на него поле; слоя нет — поле закрывает ответ заказчика на вопрос брифа, а
+пропуск пишется долгом в заметку пропусков ветки слоя —
+`.claude/skills/entrypoint/state/projects/<slug>/site/<surface>/_phase-jump.md` (форма —
 `state-model.md § Особый случай: _phase-jump.md`).
 
 Связи смысловые и авторятся здесь, снизу вверх; ссылка вверх — в поле основания: `basis.ref` смысла — путь
@@ -243,6 +245,8 @@ text 10/01 §8).
 Дизайн не ждёт конца слоя: каждая его часть стартует, когда готов её вход. Бриф `approved` — сбор кандидатов в мудборд;
 план `approved` (главная первой) — направления, арт-дирекция, план ассетов, ключевые ассеты; copy deck `draft` или
 `checked` — вайрфрейм на реальных текстах; copy deck `approved` и чистый входной контроль плана — чистовой макет.
+Передача партии страниц по `build_order` — этап `design-handoff`: отчёт `/design-audit` слоя и каркас плана ассетов
+(`plan_to_assets.py --check`); блокирующие пробелы и долг — в сводке этапа.
 
 - Слой дизайна читает папку как есть, копий нет. В план он пишет только подачу: `page.treatment`,
   `sections[].treatment`, `refs.treatment`, `refs.asset_plan`, `page.treatment.tokens_ref`; план остаётся `approved`.
@@ -297,7 +301,7 @@ text 10/01 §8).
   Перепрыгивание спрашивается («почему сейчас?»), ответ и долг — в заметку пропусков.
 - **Готовое от заказчика:** тексты — варианты `source: customer` после плана; готовый сайт или страница —
   `intake.what_ordered` (`redesign`, `new-page`, `section`) и `intake.baseline` (site 10/01 §11.3); чужой прототип —
-  референс, а не источник: структура переносится в план (site 04/03 §5); документы и цифры — сразу в «смысл и факты»
+  референс, а не источник: структура переносится в план (site 04/03 §5); документы и цифры — сразу на этап `meaning`
   после минимального брифа.
 
 ## Как читать папку
@@ -310,9 +314,10 @@ text 10/01 §8).
 ## Язык контракта с `<org>/site`
 
 Структурные идентификаторы, которые читает код сайта, — английские и не переименовываются: id страниц, секций, слотов и
-блоков каталога (`block:<id>`), id фактов (`fact:<id>`) и событий (`event:<id>`), пути текстов `copy:<page>/<section>/<slot>`,
-`site_type`, `page_type`, `section_role`, `slot_kind`, род поверхности `web-kind`. Ключи машинных файлов — ключи схем
-базы. Значения-тексты — формулировки фактов, смысла, текстов страницы, вопросов брифа — по-русски.
+блоков каталога (`block:<id>`), id фактов (`fact:<id>`) и событий (`event:<id>`), пути текстов
+`copy:<page>/<section>/<slot>`, `site_type`, `page_type`, `section_role`, `slot_kind`, род поверхности `web-kind`.
+Ключи машинных файлов — ключи схем базы. Значения-тексты — формулировки фактов, смысла, текстов страницы, вопросов
+брифа — по-русски.
 
 ## Anti-patterns
 

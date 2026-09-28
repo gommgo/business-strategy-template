@@ -38,7 +38,8 @@ fonts:
       replaces: {family: <фирменный шрифт>, why: <причина>}   # только при замене: у фирменного шрифта нет
                                                               # веб-лицензии или кириллицы
 
-voice_ref: ../voice.yaml              # голос бренда — профиль голоса продукта (docs/projects/<slug>/voice.yaml)
+voice_ref: ../voice.yaml              # профиль голоса уровня продукта (docs/projects/<slug>/voice.yaml); где голос
+                                      # бренда, а где голос продукта, говорит его scope
 
-sources: []                           # откуда факты: строки docs/business/material.md, замер measure_ui.py (адрес и дата),
-                                      # слово заказчика (сообщение и дата)
+sources: []                           # откуда факты: строки docs/business/material.md, замер measure_ui.py
+                                      # (адрес и дата), слово заказчика (сообщение и дата)

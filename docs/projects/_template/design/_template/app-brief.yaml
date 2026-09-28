@@ -13,36 +13,37 @@
 #   derive     — вычисляется из других полей.
 # Форма задаёт поля и вопросы, значения даёт их владелец (CLAUDE.md §3). Поля project, intake, languages, constraints,
 # themes, brand, assets_available, references, questions — общие с брифом сайта: те же имена и смысл, что в схеме
-# site-brief (kb/site/10-playbooks-contracts/schemas/site-brief.schema.json, пути kb — от папки скилла
-# design-deep-dive). Пример заполнения ядра — в конце файла, это иллюстрация, а не значения проекта.
+# site-brief (kb/site/10-playbooks-contracts/schemas/site-brief.schema.json; пути kb — от папки скилла
+# design-deep-dive). Пример заполнения ядра в конце файла — иллюстрация, а не значения проекта.
 
 app_brief_version: 1
 
-project:                              # паспорт брифа
+# Паспорт брифа. status: draft — пишется; proposed — показан владельцу продукта с вопросами и «Going with»;
+# approved — утверждён. approval обязателен при approved; имя — только с согласия, иначе роль.
+project:
   slug: <slug>                        # derive — slug проекта
-  status: draft                       # draft — пишется; proposed — показан владельцу с вопросами и «Going with»;
-                                      # approved — утвердил владелец продукта
-  approval: {by: <роль>, date: <дата>}   # кто и когда утвердил; обязательно при approved; имя — только с согласия
+  status: draft
+  approval: {by: <роль>, date: <дата>}
 
 intake:
-  raw_ref: <строка docs/business/material.md>   # откуда пришёл материал заказчика; сам текст в бриф не копируется
+  raw_ref: <строка docs/business/material.md>   # откуда пришёл материал; сам текст в бриф не копируется
 
-languages:                            # customer — языки интерфейса, тот же вид, что у брифа сайта
-  - {lang: ru, role: primary}         # второй язык — role: adaptation
+languages:                            # customer — языки интерфейса; второй язык — role: adaptation
+  - {lang: ru, role: primary}
 
 constraints:
-  jurisdiction: [ru]                  # customer — РФ по умолчанию, ЕС — профиль по запросу; первый элемент — основной,
-                                      # он же jurisdiction фактов
+  jurisdiction: [ru]                  # customer — РФ по умолчанию, ЕС — профиль; первый — основной, он же у фактов
   legal_category: [<категория>]       # customer — general (явное «ничего особого») · finance · medical ·
                                       # dietary-supplements · alcohol · education · real-estate · other
   legal_note: <текст>                 # только при other
-  accessibility: <цель>               # projection — цель доступности из vision («Devices and accessibility»):
-                                      # wcag22-aa · wcag21-aa · not-specified
+  accessibility: <цель>               # projection — vision, «Devices and accessibility»: wcag22-aa · wcag21-aa ·
+                                      # not-specified
 
-themes:                               # customer — решение о темах; то же имя — у брифа сайта
-  default: light                      # светлая — по умолчанию; при двух темах — system (умолчание по системе)
-  dark: {needed: false, why: <причина>}   # тёмная — только с причиной; две темы — переключатель обязателен
-                                          # (ui 11/03 §6.4)
+# customer — решение о темах; то же имя — у брифа сайта. Светлая — по умолчанию; тёмная — только с причиной. Две темы —
+# переключатель обязателен, умолчание — по системе: default: system (ui 11/03 §6.4).
+themes:
+  default: light
+  dark: {needed: false, why: <причина>}
 
 brand: {ref: brand.yaml}              # бренд продукта — design/brand.yaml; поля бренда здесь не повторяются
 
@@ -50,28 +51,26 @@ assets_available:                     # customer — какие настоящи
   logo_vector: false                  # true — логотип в векторе есть
   product_ui: false                   # true — есть снимки действующего продукта (переделка)
 
-references: []                        # customer — референсы, которые принёс заказчик: запись его слова, source: customer;
-                                      # форма записи — как у moodboard ниже
+# customer — референсы, которые принёс заказчик: запись его слова, source: customer; форма записи — как у moodboard.
+references: []
 
-questions: []                         # журнал вопросов брифа — та же форма, что у брифа сайта:
-                                      # {id, block, q, why, options, default, affects, priority, status};
-                                      # status: open · assumed · answered · withdrawn; withdrawn уходят при утверждении
+# Журнал вопросов — та же форма, что у брифа сайта: {id, block, q, why, options, default, affects, priority, status};
+# status: open · assumed · answered · withdrawn. Вопросы withdrawn уходят при утверждении брифа.
+questions: []
 
-core:                                 # ядро — первый вход дизайна кабинета: после сценариев, до экранов
-  app_type: <тип>                     # projection — vision «Name»: admin · client · mixed
-  postures:                           # projection — таблица постур user.md: строка на пользователя, отдельная строка —
-    - {user: <user-slug>, surface: <surface или —>, posture: <постура>}   # где постура на поверхности другая
-  pointer: {<surface>: both}          # projection — type поверхности: both — указатель и касание (web, admin, desktop,
-                                      # embed); touch — только касание
-  ai_layer: {present: false, where: []}   # projection — паспорта ai в capability: где в продукте ИИ-функции
-  mobile_scope: <проекция>            # projection — vision «Devices and accessibility»: сценарии на телефоне или «нет»;
-                                      # паритет по умолчанию
-  status_roles: [<object>.<status>]   # projection — статусы объектов (object.md), которым нужна роль цвета; сами цвета —
-                                      # конвенции ДС (system.yaml, conventions.status_colors)
-  platform_constraints: []            # projection — slug'и строк constraint.md, которые задевают вид: правила
-                                      # платформы, магазина, заказчика
-  density:                            # claude — вывод из типа приложения и постур, один режим на продукт (ux 03/02 §5);
-    default: <режим>                  # подтверждает владелец продукта; compact · default · comfortable
+# Ядро — первый вход дизайна кабинета: после сценариев слоя проекта, до экранов.
+core:
+  app_type: <тип>                     # projection — vision, «Name»: admin · client · mixed
+  postures:                           # projection — таблица постур user.md; surface: — — на всех его поверхностях
+    - {user: <user-slug>, surface: <surface или —>, posture: <постура>}
+  pointer: {<surface>: both}          # projection — type поверхности: both — указатель и касание; touch — только касание
+  ai_layer: {present: false, where: []}   # projection — vision «Name» и паспорта ai возможностей
+  mobile_scope: <проекция>            # projection — vision, «Devices and accessibility»: сценарии на телефоне или «нет»
+  status_roles: [<object>.<status>]   # projection — статусы объектов (object.md), которым нужна роль цвета
+  platform_constraints: []            # projection — slug'и строк constraint.md, которые задевают вид
+  # claude — вывод из типа приложения и постур, один режим на продукт (ux 03/02 §5); подтверждает владелец продукта.
+  density:
+    default: <режим>                  # compact · default · comfortable
     switch: false                     # true — переключатель плотности у пользователя (при суверенных ролях)
     why: <причина>
   character:                          # claude — предлагается карточками стиля, выбирает владелец продукта
@@ -79,8 +78,10 @@ core:                                 # ядро — первый вход ди�
     temperature: <температура>        # температура нейтрали: warm · neutral · cool (ui 14/09, шаг 1)
   bans: []                            # customer, claude — запреты предметно и с проверкой (ui 12/04 §1.4)
 
-style_tiles:                          # claude — карточки стиля без раскладки; сколько и чем различаются — ui 11/02 §2.4:
-  - id: <id>                          # последняя — заведомо смелее; ручки, уже заданные ДС продукта, карточки не варьируют
+# claude — карточки стиля: ручки характера без раскладки; сколько карточек и чем они различаются — ui 11/02 §2.4,
+# последняя — заведомо смелее. Ручки, уже заданные ДС продукта, карточки не варьируют.
+style_tiles:
+  - id: <id>
     name: <имя>
     adjectives: [<три слова>]
     knobs:                            # семь ручек характера (ui 14/09, шаг 2)
@@ -102,17 +103,19 @@ style_tiles:                          # claude — карточки стиля �
     risk: <чем рискуем>
     refs: []                          # референсы карточки — форма записи, как у moodboard
 
-choice:                               # выбор карточки — решение заказчика как владельца облика; поля — как choice
-  chosen: <id карточки>               # арт-дирекции сайта
-  chosen_by: customer                 # customer · default (молчание: статус брифа остаётся proposed, строка «Going with»)
+# Выбор карточки — решение заказчика как владельца облика; поля — как у choice арт-дирекции сайта. Молчание — default:
+# статус брифа остаётся proposed со строкой «Going with». Выбор комбинирует, а не усредняет; после выбора у каждой
+# ручки явное значение — оно живёт в токенах ДС и здесь не повторяется.
+choice:
+  chosen: <id карточки>
+  chosen_by: customer                 # customer · default
   date: <дата>
   why: <почему>
-  merged_from: []                     # что взято из других карточек: выбор комбинирует, а не усредняет
+  merged_from: []                     # что взято из других карточек
   rejected: [{id: <id>, why: <причина>}]
-                                      # после выбора у каждой ручки явное значение — оно живёт в токенах ДС,
-                                      # здесь не повторяется
 
-moodboard:                            # claude — мудборд кабинета; предел числа — как у мудборда арт-дирекции
+# claude — мудборд кабинета; предел числа — как у мудборда арт-дирекции. Картинки с площадок не выкачиваются.
+moodboard:
   - url: <адрес>                      # или ref: ref:<id> — запись библиотеки
     role: <роль>                      # роли — как в $defs/reference брифа сайта
     applies_to: <место>               # одно место: тип экрана или тип словаря ui:<Тип>
@@ -123,18 +126,18 @@ moodboard:                            # claude — мудборд кабинет
     source: claude                    # customer · claude
 
 allow:                                # приметы «дефолтного вида», которые бриф и ДС кабинета снимают осознанно
-  markers: []                         # ключи --allow утилиты макета (kb/common/tells.yaml, checks; домен app-visual)
+  markers: []                         # ключи --allow (kb/common/tells.yaml, checks; домен app-visual)
   why: <причина>
 
-surfaces:                             # второй вход дизайна кабинета: после стабильных экранов, раздел на поверхность
+# Второй вход дизайна кабинета — после стабильных экранов поверхности; раздел на поверхность.
+surfaces:
   <surface>:
     main_screen_type: <тип экрана>    # projection — карта экранов (screens/<surface>/map.md); на первом входе — оценка
     sections: <число разделов>        # projection — корневые зоны ИА
     density_by_area: []               # projection — {area: <таблицы · формы · мастер …>, density: <режим>}
     hierarchy_levels: <число>         # уровни иерархии на экран (ux 13/04 §25)
     states_visual: []                 # projection — состояния экранов, которым нужен визуальный код (наборы states)
-    shell: {sidebar: <…>, inspector: <…>, content_max: <…>}   # projection — основной каркас: сайдбар, инспектор,
-                                                              # ширина контента
+    shell: {sidebar: <…>, inspector: <…>, content_max: <…>}   # projection — основной каркас
 
 # Пример ядра — иллюстрация по разбору брифа ui 14/09 («финтех-админка для операторов, много таблиц, 8 часов в день,
 # корпоративный синий, строгий вид»), не значения проекта:
