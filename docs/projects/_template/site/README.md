@@ -65,7 +65,8 @@ Kind слоя — имена схем, у уровня продукта — `fac
   и `blocking`; непроверенное — `never_claim`. Статус `confirmed` ставит заказчик (text 09/02 §5).
 - **Голос** — `docs/projects/<slug>/voice.yaml` по схеме `text/05-voice-editorial/voice.schema.yaml`. `scope.surfaces`
   профиля говорит, где какой голос: бренд — у сайта и лендинга, продукт — у интерфейса, нейтрально-юридический — у
-  документов; отдельный профиль голоса продукта — `scope.product_voice_ref`. Граница голосов — text 05/01 §2.
+  документов; отдельный профиль голоса продукта — `docs/projects/<slug>/voice.product.yaml` той же схемы, на него
+  ссылается `scope.product_voice_ref`. Граница голосов — text 05/01 §2.
 - **Слова клиента** — `docs/projects/<slug>/voc.yaml` по схеме `text/02-strategy-messaging/voc.schema.yaml`, по
   желанию: цитаты с источником (интервью, отзывы), в том числе из транскриптов `/jtbd-interview`.
 
