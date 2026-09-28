@@ -1,0 +1,113 @@
+source	id	decision	zones	place
+Ф6	GL-03	B1	1, 5a	`_template/site/README.md § Термины`, `§ Файлы слоя`; `references/phases.md` — этап «план страницы»
+Ф6	GL-04	B1	1, 5a	`_template/site/README.md § Термины`; этапы «план» и «тексты»
+Ф6	GL-07	F5	2, 3	новый `_template/interface/_template/scenario.md`; `_template/interface/README.md`; пояснение GL-07 — `_template/screens/{README.md,_template/flow.md}`, `_template/mobile/README.md`
+Ф6	GL-17	C3	1, 4, 5a	`_template/design/README.md § Облик`; строка и абзац `CLAUDE.md` §3 — черновик в C3 (правит T4); `references/phases.md` — принципы этапов
+Ф6	TR-18	B1	1, 5a, 6	`_template/site/README.md § Связь copy deck с планом`; этап «тексты по слотам»; правило `design-audit` (T4); Ф8
+Ф6	TR-21	B2	1, 2, 5a	`_template/project/README.md` (файлы уровня продукта); `_template/site/README.md § Уровень продукта`; этап «смысл и факты»
+Ф6	TR-22	E1	5b	`claude-design.md § Вход холста` (правила и таблица сжато); Ф8 — `x-canvas-map` в `site-brief.schema.json` и `page-plan.schema.json`, сборщик (H10)
+Ф6	TR-30	A2	5a	`references/phases.md` — таблица маршрутов, этапы «воронка» и «план страницы»
+Ф6	TR-35	A2	5a	`references/phases.md` — строки маршрутов «Лендинг», «Многостраничник»; этапы «план», «передача»
+Ф6	TR-41	D2	1, 5a	`references/phases.md` — этап «план ассетов и ключевые ассеты»; `_template/design/README.md § Ассеты`; Ф8 — схема плана (уже в TR-41) с `key`, дорогой 3D, `status`
+Ф6	TR-44	E1	1, 5b	`claude-design.md § Вход холста`, `§ Приёмка`; `_template/design/README.md § Холст`; Ф8 — сборщик, `export-kimi` → выгрузка во вход
+Ф6	TR-45	E2	5b	генератор `ACCEPTANCE.md` (Ф8) по правилу из `claude-design.md § Приёмка`; Ф10 — cd 06/02 §4 A3
+Ф6	TR-46	E1	5b	`claude-design.md § Вход холста`; Ф8 — выгрузка фактов; Ф10 — пример cd 06/02 §3
+Ф6	TR-47	E2	5b	генератор `ACCEPTANCE.md`; `claude-design.md § Приёмка`
+Ф6	TR-50	E1	5b	`claude-design.md § Вход холста`; Ф8 — `x-canvas-map` в `voice.schema.yaml`
+Ф6	GT-01	D6	5a, 5b	`references/phases.md § Порядок проверок`; этапы ссылаются на него; `claude-design.md` (T2b) — тоже ссылкой
+Ф6	GT-03	G4	1, 4, 5a, 10	`docs/README.md § Что docs отдаёт соседям` (строки `<org>/site`, `<org>/frontend`, абзац «Ворота после сборки»); `_template/design/README.md § Пакет для кода`; форма `_template/design/_template/ready.yaml`; `references/phases.md` — этап `package`; пакет закрытий H11 (строка узла, `canon.tsv`, `common/CONTRADICTIONS.md §3`); Ф8 — пути kb у утилит через `lib/kbpaths.py` и `DDD_HOME` (действие GT-03 Ф8 остаётся)
+Ф6	GT-13	G5	1, 10	форма `ready.yaml` (`perf`); `_template/design/README.md § Пакет для кода`; пакет закрытий H11 (строка узла GT-13, реестр, `canon.tsv`, `common/CONTRADICTIONS.md` — из «Открытого» в §3); Ф9 — замер на пилоте SaaS
+Ф6	GT-14	E1	5b	`claude-design.md § Вход холста`, `§ Приёмка`; Ф8 — сборщик зовёт `page_gates.py --resolve`; Ф10 — cd 06/01 §7, 06/02 §4 F2, 06/04 §3 E
+Ф6	GT-23	B5	1, 5a	`_template/site/README.md § Бриф`; этапы «бриф» и «план страницы»
+Ф6	GT-27	E1	5b	`claude-design.md § Вход холста`; Ф8 — сборщик; Ф10 — ключ `maps_to` без Kimi, cd 06/01 §6
+Ф6	GT-41	A2	5a	этапы «план страницы» и «передача»; приёмка — T2b
+Ф6	GT-42	E2	5b	`claude-design.md § Приёмка`; генератор `ACCEPTANCE.md` (Ф8); манифест — T4 (G1)
+Ф6	CM-04	C5	1	форма `_template/design/_template/system.yaml`; `_template/design/README.md § ДС`; Ф8 — скрипт покрытия (H10)
+Ф6	CM-06	C5	1, 10	та же форма; `_template/design/README.md § Расширения словаря`; запись `common/CONTRADICTIONS.md §5` «Расширение словаря проектом» — снять «Закроет» (Ф10)
+Ф6	CM-10	C5	1	`_template/design/README.md § ДС`; форма `system.yaml`; колонка `ui-type` — T3
+Ф6	CM-15	C5	1, 5a	`_template/design/README.md § ДС`; `references/phases.md` — этапы «ДС», «компоненты ДС»; сборка входа — T2b; Ф10 — ux 13/04 §26 строка «Дизайн-система» ссылкой
+Ф6	CM-21	C5	5a	`references/phases.md` — этап «ДС» (вход, вход с середины)
+Ф6	ST-02	F8	2	`_template/screens/README.md` («Состояния экрана», «Что слой отдаёт макету»); сборщик контракта — Ф8 (H10, T4); вход холста — E1 (T2b)
+Ф6	ST-05	E2	5a, 5b	`claude-design.md § Приёмка`; этап «макет» в `phases.md` (состояния — артбордами, позиция до пилота SaaS)
+Ф6	ST-16	F6	2, 7b	`_template/screens/_template/{screen,map}.md`, `_template/screens/README.md`; `screen-deep-dive`; `screen-audit` (кандидаты ux-низ RT-01…08)
+Ф6	ST-17	A4	5a, 7b	раздел 3 этого файла; `references/phases.md` `design-deep-dive` (таблица маршрутов — T4); `screen-deep-dive/SKILL.md` («Сводка состояния»: порядок)
+Ф6	ST-19	A6	3, 7b	`_template/telegram-bot-flow/README.md` («Путь к человеку»); `_template/telegram-bot-flow/_template/{command,notification,features/window,features/use-case}.md`; `telegram-bot-flow-audit/references/rules.md`
+Ф6	ST-20	F11	2, 3	`_template/project/{vision,capability}.md`; `_template/screens/_template/map.md`; `_template/mobile/README.md` (ссылка на норму); поля брифа — T2a
+Ф6	ST-22	C5	1	форма `system.yaml`; `_template/design/README.md § Конвенции ДС`
+Ф6	ST-27	E2	5a, 5b	`claude-design.md § Приёмка` (группа «среда»); `phases.md` — этап «приёмка»
+Ф6	NU-01	E2	5b	`claude-design.md § HTML-копии и kit`, `§ Приёмка`; Ф8 — `kit.json` из файла, утилиты читают файл (NU-01, Ф8)
+Ф6	NU-02	E2	5b	генератор `ACCEPTANCE.md` и `kit.json` (Ф8); `claude-design.md § Приёмка`
+Ф6	NU-03	C5	5a	`references/phases.md` — выход этапа «ДС»; README screens — T3
+Ф6	NU-07	C5	1, 6	`_template/design/README.md § ДС`; правило `design-audit` (раздел 4.4)
+Ф6	NU-08	C5	1, 5a	`_template/design/README.md § ДС`; `references/phases.md` — этап «ДС» сайта
+Ф6	NU-12	F11	2, 5a	форма брифа — T2a (C1); источник — `_template/project/user.md#Постура`; этап Д1 — `references/phases.md` `design-deep-dive`
+Ф6	NU-19	E1	5b	`claude-design.md § Вход холста`; Ф8 — `x-canvas-map` в `treatment`
+Ф6	NU-22	E1	5b	то же
+Ф6	NU-36	E1	5b	`claude-design.md § Вход холста` (блок движения), `§ Приёмка`; Ф10 — cd 06/02 E1, 06/05, 06/07
+Ф6	NU-37	E1	5b	`claude-design.md § Вход холста`; этап 9 T2a ссылается; Ф8 — сборщик
+Ф6	TX-05	B7	1, 5a	`_template/site/README.md § Тексты`; этап «аудит текстов»
+Ф6	TX-12	F9	2	`_template/screens/README.md` («Что слой отдаёт макету»), `_template/screens/_template/block.md` (`volume`); сборщик — Ф8 (T4); вход холста — E1 (T2b)
+Ф6	TX-21	B7	5a	этап «аудит текстов»; вход этапа «макет» (T2a, T2b)
+Ф6	TX-25	C5	1	форма `system.yaml`; `_template/design/README.md § Конвенции ДС`
+Ф6	TX-30	B2	2, 5a	`_template/project/README.md`; этап «смысл и факты»
+Ф6	TX-31	F9	2, 7a	`_template/project/vision.md` (`Voice`); канон профиля — T1; `project-deep-dive/references/{phases,field-checklists}.md`
+Ф6	TX-41	C5	1	форма `system.yaml`; `_template/design/README.md § ДС`
+Ф6	TX-45	D5	2, 3, 4, 7b	новый `_template/screens/_template/texts.md`; `_template/screens/README.md`; `_template/mobile/README.md`, `_template/telegram-bot-flow/README.md` (таблицы «поле → роль»); `screen-deep-dive`, `screen-audit`; `CLAUDE.md` §3 — T4
+Ф6	VI-05	C7	1, 5a	`references/phases.md` — этапы «арт-дирекция, подача и паспорт», «карточки стиля»; `_template/design/README.md § Арт-дирекция`
+Ф6	VI-06	E7	5b	`claude-design.md § Задание`; Ф10 — ui 11/04 §4.3, creative 08/01 §6.2 ссылкой
+Ф6	VI-07	G6	1, 4	форма `ready.yaml`; `_template/design/README.md § Пакет для кода` (абзац «`frontend-design` в код-репо»); строки `docs/README.md`
+Ф6	VI-45	C7	1, 5a	`references/phases.md` — этап «мудборд и направления»; `_template/design/README.md § Направления`
+Ф6	VI-46	C7	1, 5a	`references/phases.md` — этап «карточки стиля»; форма `app-brief.yaml` (`style_tiles`, `choice`)
+Ф6	VI-47	E7	5a, 5b	`claude-design.md § Вопросы до макета`; `phases.md` — этап «вход холста»; бриф сайта — T1 этап 1
+Ф6	VI-48	D2	1, 5a	`references/phases.md` — этапы «арт-дирекция, подача и паспорт», «паспорт и иконки»; `_template/design/README.md § Паспорт визуала`
+Ф6	JU-01	E5	5a, 5b, 6, 10	`claude-design.md § Проверки по просьбе`; `phases.md § Порядок проверок` (D6 T2a); `kb/common/judge.md §7`; агент-судья — T4 (H4)
+Ф6	CN-50	B5	1, 5a	`_template/site/README.md § Бриф`; этап «бриф»
+Ф6	CN-51	B7	5a	`references/phases.md` — таблица «шаг text → этап»
+Ф6	CN-68	E1	1, 5b	`claude-design.md § Вход холста`; `_template/design/README.md § Движение` (T2a)
+Ф6	CN-104	B5	1, 5a	`_template/site/README.md § Бриф`; этап «бриф»; Ф8 — схема, `site_validate.py`, проекция холста
+Ф6	CN-105	E3	5a, 5b	`claude-design.md § Раунд правок`; `phases.md` — этап «раунд правок»
+Ф6	CN-107	B5	1, 5a	`_template/site/README.md § Бриф`; этап «бриф»
+Ф6	CN-112	B5	1, 5a	`_template/site/README.md § Рамки`; этап «бриф»
+Ф6	CN-117	E6	5a, 5b	`claude-design.md § Показ`, `§ Синхронизация`, `§ Запасной путь`; `phases.md` — выход этапов холста и ДС
+Ф6	CN-122	H11	10	Ф7 — пакет закрытий H11 (последней зоной, раздел 4 «Порядок»); `kb/common/README.md § Как пользоваться canon.tsv` (процедура и скрипт); Ф8 или Ф10 до уборки журнала — `scripts/maint/canon_check.py`, `refcheck.py`, `mapcheck.py`
+Ф4	GL-02	F7	2	`_template/screens/README.md` (Naming узлов: «внутренние области блока», id `block-*` прежние), `_template/screens/_template/block.md`
+Ф4	GL-04	F7	2	`_template/screens/README.md`, `_template/screens/_template/shell.md` («слот каркаса»)
+Ф4	GL-07	F5	2, 3	новый `_template/interface/_template/scenario.md`; `_template/interface/README.md`; пояснение GL-07 — `_template/screens/{README.md,_template/flow.md}`, `_template/mobile/README.md`
+Ф4	GL-09	F7	2, 7b	`_template/screens/README.md` («компонент — тип закрытого словаря»), `screen-deep-dive/references/tree-notation.md`
+Ф4	GL-13	F4	2	новые `_template/project/object.md`, `_template/project/action.md`
+Ф4	CM-01	F7	2, 7b	`_template/screens/README.md` (Naming узлов), `screen-deep-dive/references/tree-notation.md` (опции по `purpose` и `group`), `screen-audit/references/rules.md` («`ui:` вне словаря — error»)
+Ф4	CM-05	F7	2, 7b	те же файлы: закрытый словарь `components.yaml` + расширение проекта
+Ф4	CM-07	F7	2, 7b	примеры `_template/screens/_template/{shell,block,screen}.md` (`ui:TopBar`, `ui:SearchInput`); `tree-notation.md` — имя из словаря
+Ф4	CM-08	F7	2	`_template/screens/README.md`: композиции страниц — каркасы и блоки из типов; типы экранов — поле `type`
+Ф4	CM-10	F10	3, 7b	`_template/fsd/_template/shared-ui.md` (колонка `ui-type`), `fsd-audit/SKILL.md` (тип существует)
+Ф4	CM-11	A6	открыто	открыто: у mobile композиции экранов нет; появится — типы словаря, `hover` вне обязательных (правило 4 шапки `components.yaml` уже действует для ДС)
+Ф4	CM-12	F7	2, 7b	`_template/screens/README.md` (атрибуты `level`, `action`, `illustration`; `variant` и `size` у `ui:` сняты, `gap` у `layout:` остаётся), `screen-audit` (атрибут вне списка — warning)
+Ф4	ST-01	F7, A6	2, 3	screens — `_template/screens/{README.md,_template/screen.md}` (ключи — slug словаря, таблица slug ↔ id); mobile — `_template/mobile/README.md` (таблица `states` ↔ S-id, ключи не переименовываются); бот — `_template/telegram-bot-flow/README.md` (соответствие полей окна)
+Ф4	ST-02	F7	2	`_template/screens/_template/screen.md` (`states` по словарю)
+Ф4	ST-03	F7	2, 3	`_template/screens/_template/screen.md` (пример: `not-found` — S23, архив — `archived-deleted` S20); `_template/mobile/README.md` (`not-found` — S23)
+Ф4	ST-04	F7, A6	2, 3	`_template/screens/README.md` (S24 у блока с ответом ИИ); `_template/telegram-bot-flow/README.md` (S24 окна — текст роли `status` и кнопка остановки, ux 13/03 §6)
+Ф4	ST-05	F7	2, 3, 7b	`_template/screens/README.md` (набор по типу и условиям, «не применимо: причина»), `screen-audit` (R-SEM-011 → набор); `_template/mobile/README.md` (`empty` у экрана с коллекцией)
+Ф4	ST-06	F7	2, 3	`_template/screens/README.md`, `_template/mobile/README.md` (правило приоритета)
+Ф4	ST-07	F6, F7	2, 3	`_template/screens/_template/screen.md` (поле `type`); mobile — тип в каноне слоя (README), колонка — по согласию с `<org>/mobile` (открыто)
+Ф4	ST-08	F6	2	`_template/screens/_template/shell.md` (навигация — узел дерева основного каркаса; боковая панель экрана — слот `side` или блок; пример разведён)
+Ф4	ST-09	A6	3	`_template/mobile/README.md` (`root` ↔ ux 02/02 §1.6: `tabs` — 3–5 разделов, `drawer` — 6 и больше, `stack` — хаб)
+Ф4	ST-10	F7	2	`_template/screens/README.md` (набор блока — по его компонентам, `components.yaml#types.*.screen_states`)
+Ф4	ST-12	F7	2	`_template/screens/_template/block.md` (`source: own`, раздел `states`); запрет индикаторов в `tree` (R-SEM-005) остаётся
+Ф4	ST-13	F7	2	`_template/screens/README.md` («пусто только после загрузки» рядом с приоритетом)
+Ф4	ST-14	F7, A6	2, 3	`_template/screens/README.md` (состав дельты `offline`); `_template/mobile/_template/shell.md` (где видны статусы отложенных правок при `full`)
+Ф4	ST-15	F6, F10	2, 3	`_template/screens/_template/screen.md` (`url-state`), `_template/fsd/_template/pages.md` (параметры `path` — из маршрута экрана)
+Ф4	ST-16	F6	2, 7b	`_template/screens/_template/{screen,map}.md`, `_template/screens/README.md`; `screen-deep-dive`; `screen-audit` (кандидаты ux-низ RT-01…08)
+Ф4	ST-19	A6	3, 7b	`_template/telegram-bot-flow/README.md` («Путь к человеку»); `_template/telegram-bot-flow/_template/{command,notification,features/window,features/use-case}.md`; `telegram-bot-flow-audit/references/rules.md`
+Ф4	ST-20	F3, F11	2, 3	`_template/project/capability.md` (`## Урезание`), `_template/mobile/README.md` (ссылка на норму)
+Ф4	ST-21	F7	2	`_template/screens/README.md` (S01 и главная кнопка шапки, ux 06/01 §4.8)
+Ф4	ST-23	F7, A6	2	`_template/screens/_template/shell.md` («Состояния приложения»); mobile — `update-required`, `maintenance` в `screens.states` — с `<org>/mobile` (открыто); бот — ответ на плановые работы — код-репо
+Ф4	ST-24	A6	3, 7b	`_template/telegram-bot-flow/_template/features/window.md` (ключ `empty` у getter'а рядом с `fallback`), `_template/telegram-bot-flow/README.md` («Данные окна»), `telegram-bot-flow-audit/references/rules.md` (R-DATA-002)
+Ф4	ST-25	F10, A6	3	`_template/fsd/_template/shared-api.md`, `_template/mobile/_template/shared-api.md` (минимум сценариев по обязательным состояниям)
+Ф4	NU-02	F7	2, 10	`_template/screens/_template/{flow,screen}.md` (ширины приёмки по `viewport` — `kb/common/acceptance-widths.yaml`)
+Ф4	NU-03	F7	2	`_template/screens/_template/shell.md`, `_template/screens/README.md` (таблица `responsive` ↔ `breakpoint.*`)
+Ф4	NU-17	F7	2	`_template/screens/README.md` («размер намерения = имя токена `space.*` ДС»)
+Ф4	TX-18	D5	2	`_template/screens/_template/texts.md` (`maxlen`)
+Ф4	TX-21	D5	2	`_template/screens/_template/texts.md` (`action`, `object`, `group`; экран — в ключе)
+Ф4	TX-43	A6	3	`_template/telegram-bot-flow/README.md` (роли: `message` — `body`, `fallback` — пусто `empty`, отказ `error`; `errors` — `error`; уведомление — `push`)
+Ф4	TX-45	D5	2, 3, 4, 7b	новый `_template/screens/_template/texts.md`; `_template/screens/README.md`; `_template/mobile/README.md`, `_template/telegram-bot-flow/README.md` (таблицы «поле → роль»); `screen-deep-dive`, `screen-audit`; `CLAUDE.md` §3 — T4
+Ф4	VI-55	D3, F7	2, 6	`_template/screens/README.md` (атрибут `illustration` у `ui:EmptyState` — метафора паспорта иллюстраций); проверка метафоры — `design-audit` (T4)
