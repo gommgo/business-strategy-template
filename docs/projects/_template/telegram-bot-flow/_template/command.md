@@ -36,6 +36,7 @@
 
 - «**/start**» → фича главного меню (`feature:main-menu`), сброс стека ✅
 - «**/start booking_42**» → фича заказа (`feature:booking`) с предвыбранной услугой ✅
+- «**/operator**» → фича передачи человеку (`feature:handoff`) поверх открытого диалога ✅
 - «**Кнопка „Далее“ в окне услуг**» — это виджет окна ❌
 
 ## Колонки
@@ -54,12 +55,16 @@
 |---|---|---|---|---|---|---|---|---|
 | `<slug>` | <имя> | <что происходит> | `/start` | `feature:<slug>` \| `—` | `reset` \| `push` | <что в start-data> \| `—` | [`<who>`] | `draft` \| `stable` |
 
-> Заполняется под проект. Пример: `start-menu` · «Главное меню» · «Вход в
-> бот, сброс открытых диалогов» · `/start` · `feature:main-menu` · `reset` ·
-> `—` · [`client`] · `draft`; `start-booking-deeplink` · «Заказ по ссылке»
+> Заполняется под проект. Пример (иллюстрация формы, не образец ответа):
+> `start-menu` · «Главное меню» · «Вход в бот, сброс открытых диалогов» ·
+> `/start` · `feature:main-menu` · `reset` · `—` · [`client`] · `draft`;
+> `start-booking-deeplink` · «Заказ по ссылке»
 > · «Deep-link из уведомления и QR; в меню не выносится» ·
 > `/start booking_<id>` · `feature:booking` · `reset` · id услуги →
-> `start-data.service_id` · [`client`] · `draft`.
+> `start-data.service_id` · [`client`] · `draft`; команда пути к человеку
+> (канон слоя, раздел «Путь к человеку») — `operator` · «Связаться с
+> человеком» · «Передаёт разговор человеку в любой момент; видна в меню» ·
+> `/operator` · `feature:handoff` · `push` · `—` · [`client`] · `draft`.
 
 ## Anti-patterns
 
