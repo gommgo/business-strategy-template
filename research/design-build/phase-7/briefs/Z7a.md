@@ -72,6 +72,10 @@ wireframe и hi-fi; id новых правил не совпадают с сущ
   отчёт `/project-audit`; `scenario § Проверки`; `zone` критерии 5–8; `situation` критерий 7; `data-items` критерий 6.
 - Голос продукта — `voice.yaml` и `voice.product.yaml` (ведёт `/design-deep-dive`, `project-deep-dive` читает и ссылается
   разделом `Voice` vision).
+- Пакет закрытий базы (зона 10): закрыты и в текстах не помечаются «(позиция)» — GT-03, TR-22, TR-44, GT-42, NU-37,
+  CM-06, CM-10, CM-12, CM-15, ST-15, ST-16, ST-19, ST-20, ST-25, NU-02, NU-03, NU-17, GL-07, GL-09, VI-60; позиции из
+  этого пакета — GT-13 (бюджет экранов кабинета до пилота SaaS) и ST-23 (часть `<org>/mobile`). Статус нормы и её
+  канон — `kb/common/canon.tsv` (колонки `status`, `place`).
 - `refcheck.py` находит файлы корня репозитория: `CLAUDE.md` пиши в обратных кавычках.
 
 ## Отчёт
