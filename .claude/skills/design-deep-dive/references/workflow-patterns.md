@@ -5,7 +5,8 @@
 `docs/projects/<slug>`. Режим выбирается по аргументам вызова и по тому, что принёс человек: новый файл этапа (A),
 сырьё (B), углубление готового (C). Внутри режима работа идёт этапами `phases.md` — контракт «вход → выход → проверка →
 кто утверждает»; поля файлов — `field-checklists.md`, статусы — `draft-stable.md`, холст и артефакты claude.ai —
-`claude-design.md`.
+`claude-design.md`. Каноны слоёв — README в `docs/projects/_template/` (ниже — `design/README.md`, `site/README.md`),
+формы дизайна — `design/_template/` там же.
 
 **Где пишет исполнитель** (`CLAUDE.md` §6): `…/site/<surface>/`; `…/design/`; файлы уровня продукта `…/facts*.yaml`,
 `…/voice*.yaml`, `…/voc.yaml`; подача секций в планах страниц (`treatment`, `refs.treatment`, `refs.asset_plan`).

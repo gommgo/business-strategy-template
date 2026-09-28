@@ -9,8 +9,9 @@
 `checks`, `acceptance` и `motion` — `phases.md`; этот файл говорит, как их выполнять. Читать перед любой публикацией.
 
 Пути: `…` — папка проекта `docs/projects/<slug>`; файлы поверхности названы от `…/design/`: `<surface>/input/`,
-`<surface>/canvas/project/`, `<surface>/canvas/html/`, `<surface>/review/`. Каноны слоёв — `site/README.md` и
-`design/README.md` в `docs/projects/_template/`, формы — там же, в `design/_template/`. Заметка холста —
+`<surface>/canvas/project/`, `<surface>/canvas/html/`, `<surface>/review/`. Каноны слоёв — README в
+`docs/projects/_template/` (`site/README.md`, `design/README.md`, `screens/README.md`; не путать с README баз в `kb/`),
+формы — там же, в `design/_template/`. Заметка холста —
 `../entrypoint/state/projects/<slug>/design/<surface>/canvas.md`: счёт раундов по страницам и экранам, открытый пакет,
 вопросы заказчику в ожидании.
 
