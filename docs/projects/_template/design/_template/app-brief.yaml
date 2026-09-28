@@ -1,0 +1,148 @@
+# app-brief.yaml — бриф на вид кабинета: один на продукт
+#
+# Где лежит: docs/projects/<slug>/design/app-brief.yaml. Файл есть, когда у продукта есть поверхность маршрута
+# кабинета: web рода app, admin, desktop, embed. Бриф собирается в два приёма: ядро (core) — на первом входе дизайна
+# кабинета, после сценариев слоя проекта и до экранов; раздел surfaces.<surface> — на втором входе, после стабильных
+# экранов поверхности. У сайта и лендинга свой бриф (site-brief слоя страницы); бренд, дизайн-система, факты и голос —
+# общие на продукт.
+#
+# Кто заполняет поле (как x-fill брифа сайта):
+#   projection — проекция источника слоя проекта: значение правится в источнике, здесь пересобирается;
+#   customer   — знает только заказчик: спросить; в клиентском режиме — черновик клиента;
+#   claude     — агент предлагает «допущением» и показывает строкой «Going with»; подтверждает владелец продукта;
+#   derive     — вычисляется из других полей.
+# Форма задаёт поля и вопросы, значения даёт их владелец (CLAUDE.md §3). Поля project, intake, languages, constraints,
+# themes, brand, assets_available, references, questions — общие с брифом сайта: те же имена и смысл, что в схеме
+# site-brief (kb/site/10-playbooks-contracts/schemas/site-brief.schema.json, пути kb — от папки скилла
+# design-deep-dive). Пример заполнения ядра — в конце файла, это иллюстрация, а не значения проекта.
+
+app_brief_version: 1
+
+project:                              # паспорт брифа
+  slug: <slug>                        # derive — slug проекта
+  status: draft                       # draft — пишется; proposed — показан владельцу с вопросами и «Going with»;
+                                      # approved — утвердил владелец продукта
+  approval: {by: <роль>, date: <дата>}   # кто и когда утвердил; обязательно при approved; имя — только с согласия
+
+intake:
+  raw_ref: <строка docs/business/material.md>   # откуда пришёл материал заказчика; сам текст в бриф не копируется
+
+languages:                            # customer — языки интерфейса, тот же вид, что у брифа сайта
+  - {lang: ru, role: primary}         # второй язык — role: adaptation
+
+constraints:
+  jurisdiction: [ru]                  # customer — РФ по умолчанию, ЕС — профиль по запросу; первый элемент — основной,
+                                      # он же jurisdiction фактов
+  legal_category: [<категория>]       # customer — general (явное «ничего особого») · finance · medical ·
+                                      # dietary-supplements · alcohol · education · real-estate · other
+  legal_note: <текст>                 # только при other
+  accessibility: <цель>               # projection — цель доступности из vision («Devices and accessibility»):
+                                      # wcag22-aa · wcag21-aa · not-specified
+
+themes:                               # customer — решение о темах; то же имя — у брифа сайта
+  default: light                      # светлая — по умолчанию; при двух темах — system (умолчание по системе)
+  dark: {needed: false, why: <причина>}   # тёмная — только с причиной; две темы — переключатель обязателен
+                                          # (ui 11/03 §6.4)
+
+brand: {ref: brand.yaml}              # бренд продукта — design/brand.yaml; поля бренда здесь не повторяются
+
+assets_available:                     # customer — какие настоящие материалы есть у заказчика
+  logo_vector: false                  # true — логотип в векторе есть
+  product_ui: false                   # true — есть снимки действующего продукта (переделка)
+
+references: []                        # customer — референсы, которые принёс заказчик: запись его слова, source: customer;
+                                      # форма записи — как у moodboard ниже
+
+questions: []                         # журнал вопросов брифа — та же форма, что у брифа сайта:
+                                      # {id, block, q, why, options, default, affects, priority, status};
+                                      # status: open · assumed · answered · withdrawn; withdrawn уходят при утверждении
+
+core:                                 # ядро — первый вход дизайна кабинета: после сценариев, до экранов
+  app_type: <тип>                     # projection — vision «Name»: admin · client · mixed
+  postures:                           # projection — таблица постур user.md: строка на пользователя, отдельная строка —
+    - {user: <user-slug>, surface: <surface или —>, posture: <постура>}   # где постура на поверхности другая
+  pointer: {<surface>: both}          # projection — type поверхности: both — указатель и касание (web, admin, desktop,
+                                      # embed); touch — только касание
+  ai_layer: {present: false, where: []}   # projection — паспорта ai в capability: где в продукте ИИ-функции
+  mobile_scope: <проекция>            # projection — vision «Devices and accessibility»: сценарии на телефоне или «нет»;
+                                      # паритет по умолчанию
+  status_roles: [<object>.<status>]   # projection — статусы объектов (object.md), которым нужна роль цвета; сами цвета —
+                                      # конвенции ДС (system.yaml, conventions.status_colors)
+  platform_constraints: []            # projection — slug'и строк constraint.md, которые задевают вид: правила
+                                      # платформы, магазина, заказчика
+  density:                            # claude — вывод из типа приложения и постур, один режим на продукт (ux 03/02 §5);
+    default: <режим>                  # подтверждает владелец продукта; compact · default · comfortable
+    switch: false                     # true — переключатель плотности у пользователя (при суверенных ролях)
+    why: <причина>
+  character:                          # claude — предлагается карточками стиля, выбирает владелец продукта
+    adjectives: [<три слова>]
+    temperature: <температура>        # температура нейтрали: warm · neutral · cool (ui 14/09, шаг 1)
+  bans: []                            # customer, claude — запреты предметно и с проверкой (ui 12/04 §1.4)
+
+style_tiles:                          # claude — карточки стиля без раскладки; сколько и чем различаются — ui 11/02 §2.4:
+  - id: <id>                          # последняя — заведомо смелее; ручки, уже заданные ДС продукта, карточки не варьируют
+    name: <имя>
+    adjectives: [<три слова>]
+    knobs:                            # семь ручек характера (ui 14/09, шаг 2)
+      accent: <значение>
+      neutral: <значение>
+      radius: <значение>
+      density: <режим>
+      font: <семейство с кириллицей>
+      shadows: <значение>
+      theme: <тема>
+    palette: {}                       # роли цвета со значениями
+    type: {}                          # гарнитуры и шкала кеглей
+    shape: {}                         # радиусы, граница
+    density_sizes: {}                 # размеры плотности: контрол, строка таблицы, отступ карточки, сайдбар
+    depth: <модель глубины словами>
+    icons: {set: <набор>, size: <размер>, stroke: <толщина>}
+    motion: {}                        # длительности
+    contrast_report: {}               # посчитанные пары с пометкой «прошло / не прошло» (build_reference_tokens.py)
+    risk: <чем рискуем>
+    refs: []                          # референсы карточки — форма записи, как у moodboard
+
+choice:                               # выбор карточки — решение заказчика как владельца облика; поля — как choice
+  chosen: <id карточки>               # арт-дирекции сайта
+  chosen_by: customer                 # customer · default (молчание: статус брифа остаётся proposed, строка «Going with»)
+  date: <дата>
+  why: <почему>
+  merged_from: []                     # что взято из других карточек: выбор комбинирует, а не усредняет
+  rejected: [{id: <id>, why: <причина>}]
+                                      # после выбора у каждой ручки явное значение — оно живёт в токенах ДС,
+                                      # здесь не повторяется
+
+moodboard:                            # claude — мудборд кабинета; предел числа — как у мудборда арт-дирекции
+  - url: <адрес>                      # или ref: ref:<id> — запись библиотеки
+    role: <роль>                      # роли — как в $defs/reference брифа сайта
+    applies_to: <место>               # одно место: тип экрана или тип словаря ui:<Тип>
+    take: [<объект + свойство + число>]
+    dont_take: [<что не брать>]       # всегда: логотип, тексты, фото и цвета чужого бренда, приметы бан-листа
+    values: "<measured: значения замера | estimated: оценка по картинке>"
+    captured: <дата и вьюпорт>
+    source: claude                    # customer · claude
+
+allow:                                # приметы «дефолтного вида», которые бриф и ДС кабинета снимают осознанно
+  markers: []                         # ключи --allow утилиты макета (kb/common/tells.yaml, checks; домен app-visual)
+  why: <причина>
+
+surfaces:                             # второй вход дизайна кабинета: после стабильных экранов, раздел на поверхность
+  <surface>:
+    main_screen_type: <тип экрана>    # projection — карта экранов (screens/<surface>/map.md); на первом входе — оценка
+    sections: <число разделов>        # projection — корневые зоны ИА
+    density_by_area: []               # projection — {area: <таблицы · формы · мастер …>, density: <режим>}
+    hierarchy_levels: <число>         # уровни иерархии на экран (ux 13/04 §25)
+    states_visual: []                 # projection — состояния экранов, которым нужен визуальный код (наборы states)
+    shell: {sidebar: <…>, inspector: <…>, content_max: <…>}   # projection — основной каркас: сайдбар, инспектор,
+                                                              # ширина контента
+
+# Пример ядра — иллюстрация по разбору брифа ui 14/09 («финтех-админка для операторов, много таблиц, 8 часов в день,
+# корпоративный синий, строгий вид»), не значения проекта:
+#
+# core:
+#   app_type: admin
+#   postures: [{user: operator, surface: —, posture: sovereign}]
+#   pointer: {backoffice: both}
+#   density: {default: compact, switch: true, why: "оператор 8 часов в таблицах; новичкам — default"}
+#   character: {adjectives: [строгий, плотный, рабочий], temperature: cool}
+#   bans: ["градиенты в фоне и кнопках", "тень у карточек — карточка держится на границе"]

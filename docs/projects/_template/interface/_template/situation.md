@@ -24,6 +24,14 @@
 >   («с чем?»); массивы рефов, **опциональны** (могут быть `—`: например,
 >   открытие экрана без явных входных данных (data-items), или
 >   результат-состояние без именованного датума (data-items)).
+> - `frequency` — **частота шага**: как часто участник (who) его делает;
+>   шкала — та же, что у паспорта возможности. Решает, держать ли действие
+>   шага на виду или убрать в меню (ux 04/10 §1.2).
+> - `refusals` — **отказы шага**: чем шаг может закончиться, кроме успеха, —
+>   ключи состояний экрана из групп «отказ» и «доступ и правила»
+>   (ux 06/01 §2.3–§2.4) или `—`. «Отказов нет» — решение, а не пропуск.
+>   Отказы ситуаций экрана входят в его обязательный набор состояний:
+>   словарь состояний проходит через interface, а не заводится заново.
 >
 > Поля `ux-substrate` и `block` — **зеркала для наглядности**:
 > канонический источник — `ux-substrate.situation` и `block.ux-substrates`.
@@ -33,9 +41,9 @@
 > субстратов (ux-substrate).
 >
 > **Сквозные рёбра (опц., авторски на ситуации):** `jobs` — работы сегмента
-> (`ajtbd/job`), которые шаг обслуживает; `capabilities` — возможности
+> (`ajtbd/job.md`), которые шаг обслуживает; `capabilities` — возможности
 > продукта (`projects/<slug>/capability/<surface>`), которые шаг реализует;
-> `hypotheses` — гипотезы (`hypothesis-map/hypothesis`), которые шаг
+> `hypotheses` — гипотезы (`hypothesis-map/hypothesis.md`), которые шаг
 > проверяет. Прочерк допустим.
 
 ## Критерии situation
@@ -53,17 +61,21 @@
    чтобы <зачем именно так>».
 4. **Способ очищен от инструмента.** `action` фиксирует форму процесса
    («как»), а не инструмент: один способ (action) допускает много средств.
-   Инструмент — это `using-what`, его облик — позже (craft).
+   Инструмент — это `using-what`; его облик в interface не пишется.
 5. **Элементы согласованы (целостность).** Ситуация (situation)
    «собралась», когда связи непротиворечивы: цель (goal) ↔ способ (action)
    — почему этот способ приносит пользу; условие старта (when) ↔ способ
    (action) — контекст сужает выбор; способ (action) ↔ данные (data-items)
    — верно ли выделены объекты; цель (goal) предопределяет набор условий
    старта (when).
-6. **Сквозные рёбра (опц.).** `jobs` (`ajtbd/job`), `capabilities`
-   (`projects/<slug>/capability/<surface>`), `hypotheses` (`hypothesis-map/hypothesis`)
+6. **Сквозные рёбра (опц.).** `jobs` (`ajtbd/job.md`), `capabilities`
+   (`projects/<slug>/capability/<surface>`), `hypotheses` (`hypothesis-map/hypothesis.md`)
    — во что шаг вплетён по потоку ценности; авторски на ситуации, прочерк
    допустим.
+7. **Частота и отказы названы.** У stable-ситуации есть `frequency`; у
+   ситуации, которую разыгрывает экран, — `refusals`: состояния отказа
+   шага (`error-action`, `timeout`, `no-permission`, `locked`,
+   `limit-reached` …) или `—`, если отказов нет.
 
 ## Что situation НЕ
 
@@ -113,14 +125,16 @@
 - `using-what` — бизнес-средство: кандидатное решение, которым достигается цель («чем?»), обобщённый агрегат, не облик · строка · обяз.
 - `ux-substrate` — зеркало субстратов шага (канон — `ux-substrate.situation`) · массив ссылок → `ux-substrate` · обяз.
 - `block` — зеркало блоков шага (канон — `block.ux-substrates`) · массив ссылок → `block` (или `—`) · опц.
-- `jobs` — работы сегмента, которые шаг обслуживает (сквозное ребро, авторски) · массив ссылок → `ajtbd/job` (или `—`) · опц.
+- `jobs` — работы сегмента, которые шаг обслуживает (сквозное ребро, авторски) · массив ссылок → `ajtbd/job.md` (или `—`) · опц.
 - `capabilities` — возможности продукта, которые шаг реализует (сквозное ребро, авторски) · массив ссылок → `projects/<slug>/capability/<surface>` (или `—`) · опц.
-- `hypotheses` — гипотезы, которые шаг проверяет (сквозное ребро, авторски) · массив ссылок → `hypothesis-map/hypothesis` (или `—`) · опц.
+- `hypotheses` — гипотезы, которые шаг проверяет (сквозное ребро, авторски) · массив ссылок → `hypothesis-map/hypothesis.md` (или `—`) · опц.
+- `frequency` — частота шага · `hours-daily | daily | weekly | monthly | rare | once` · обяз. при `stable`
+- `refusals` — отказы шага: ключи состояний экрана групп «отказ» и «доступ и правила» (`error-load`, `error-action`, `partial-failure`, `offline`, `timeout`, `no-permission`, `locked`, `archived-deleted`, `limit-reached`, `read-only`) · массив ключей (или `—` — отказов нет) · обяз. при `stable` у ситуации экрана
 - `status` — зрелость записи · `draft | stable` · обяз.
 
-| slug | name | description | stage | who | when | action | goal | entry-data | exit-data | using-what | ux-substrate | block | jobs | capabilities | hypotheses | status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `<slug>` | <имя> | <что за ситуация> | `<stage>` | `<who>` | <когда роль входит> | <что делает> | <ради чего> | [`<data-items>`, `<data-items>`] \| — | [`<data-items>`] \| — | <бизнес-средство> | [`<ux-substrate>`, `<ux-substrate>`] | [`<block>`] \| — | [`<job>`] \| — | [`<capability>`] \| — | [`<hypothesis>`] \| — | `draft` \| `stable` |
+| slug | name | description | stage | who | when | action | goal | entry-data | exit-data | using-what | ux-substrate | block | jobs | capabilities | hypotheses | frequency | refusals | status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `<slug>` | <имя> | <что за ситуация> | `<stage>` | `<who>` | <когда роль входит> | <что делает> | <ради чего> | [`<data-items>`, `<data-items>`] \| — | [`<data-items>`] \| — | <бизнес-средство> | [`<ux-substrate>`, `<ux-substrate>`] | [`<block>`] \| — | [`<job>`] \| — | [`<capability>`] \| — | [`<hypothesis>`] \| — | `hours-daily` \| `daily` \| `weekly` \| `monthly` \| `rare` \| `once` | [`<state>`] \| — | `draft` \| `stable` |
 
 > Заполняется под проект. Пример: `submit-referral` · «Подача
 > направления» · «Врач отправляет направление в партнёрскую клинику» ·
@@ -128,4 +142,5 @@
 > направление» · «передать пациента на исследование» ·
 > `[\`policy-number\`, \`birth-date\`]` · `[\`referral\`]` · «бланк
 > направления» · `[\`referral-form\`, \`referral-submit\`]` ·
-> `[\`referral-editor\`]` · `—` · `[\`send-referral\`]` · `—` · `draft`.
+> `[\`referral-editor\`]` · `—` · `[\`send-referral\`]` · `—` · `daily` ·
+> `[\`error-action\`, \`no-permission\`]` · `draft`.
