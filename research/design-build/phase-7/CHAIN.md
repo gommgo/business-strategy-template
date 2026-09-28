@@ -311,3 +311,23 @@
   `design-deep-dive/references/workflow-patterns.md § B. Сырьё` — «да, так» заданию на страницу (статус брифа) и
   тексты кабинета (через `/screen-deep-dive`), в `SKILL.md § Клиентский режим` — ссылка на раздел
   `escalation.md § Решения заказчика`.
+
+## 13. Z9 — описания скиллов (28.09, ≈ 20 мин, в уведомлении — 341 тыс. токенов)
+- Сделано: 16 правок, новых нет — строка `description` в `SKILL.md` скиллов `ajtbd-audit`, `business-deep-dive`,
+  `hypothesis-map-audit`, `hypothesis-map-deep-dive`, `infrastructure-audit`, `infrastructure-deep-dive`,
+  `job-graph-deep-dive`, `jtbd-interview`, `segment-deep-dive`, `swot-audit`, `swot-deep-dive`, `service-audit`,
+  `service-deep-dive`, `mobile-audit`, `telegram-bot-flow-audit`, `telegram-bot-flow-deep-dive` (15 593 → 8 914 знаков,
+  510–593 каждое); тело файлов не менялось. Замер 31: сумма 24 164 → 17 485, длиннее 600 — 0, скрытых — 0;
+  `static_check.py` — «чисто». Решение H2 и замер PLAN §2 — с местом (отчёт §2); строк ZONES.tsv у зоны нет.
+- Отступления: среднее 557 у зоны и 564 по всем 31 против «≈ 500» H2 (по образцу принятых зон, среднее 571); узкие
+  прогоны и флаги (`<kind>`, `--research`, `--phase`, scope `service-audit`) — только в «Точках входа» тел; пути state
+  из описаний сняты (8 прежних находок refcheck); `skillOverrides` не записан — предложение в отчёте §6.
+- Стыки: шаг 8 — первые фразы описаний = вопросы роутера `CLAUDE.md` §2, пары для RT (отчёт §4); оркестратор — строка
+  нормы описания в `CONTRIBUTING.md § Стиль` (текст в отчёте §4), решение по `skillOverrides`.
+- Открыто: бюджет листинга на окне 200 тыс. токенов (≈ 12–16 тыс. знаков при 2 %, вывод) меньше описаний шаблона — пилоты
+  по строке Skills `/context`; запасной ход — `name-only` для `jtbd-interview` и двенадцати узких аудитов (−7,4 тыс.);
+  норма описаний и её замер живут в журнале — `CONTRIBUTING.md` и `scripts/maint/` до уборки.
+- Не прочитано: тела 16 `SKILL.md` вне вступления, точек входа, фаз и границ; `references/` — только лучи, новые правила
+  mobile и бота, A9 сервисов; отчёты зон кроме Z4.
+- Решения оркестратора (строка DECISIONS «Ф7, зона 9 принята»): отступления приняты; `skillOverrides` не пишется —
+  сумма 17 485 ≤ 18 000 и листинг сессии показывает все 31 описание; норма описаний — в `CONTRIBUTING.md § Стиль`.
