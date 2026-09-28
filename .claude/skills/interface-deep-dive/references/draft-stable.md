@@ -8,13 +8,13 @@
 
 ### 1. Обязательные слоты заполнены
 
-Опциональные могут быть `—`, остальные — непусты: у ссылки — реф, у свободного текста — фраза. Что обязательно у
-каждого kind — `field-checklists.md`. Особо:
+Опциональные могут быть `—`, остальные — непусты: у ссылки — реф, у свободного текста — фраза. Что обязательно у каждого
+kind — `field-checklists.md`. Особо:
 
 - **situation** — при `stable` названа `frequency`; у ситуации, которую разыгрывает экран поверхности, — `refusals`
   (ключи отказов или `—` «отказов нет»).
-- **scenario** — обязательные поля мета-блока; непусты «Happy path», «Ветвления», «Ошибки», «Конечные состояния» с
-  «что дальше» у каждого исхода, «Что меняется», «Приёмка»; при двух и больше участниках — «Чей ход».
+- **scenario** — обязательные поля мета-блока; непусты «Happy path», «Ветвления», «Ошибки», «Конечные состояния» с «что
+  дальше» у каждого исхода, «Что меняется», «Приёмка»; при двух и больше участниках — «Чей ход».
 - **zone** — `order` и `object` названы (прочерк у них — решение, а не пропуск).
 - **data-items** — `object` назван (прочерк — датум вне модели объектов).
 
@@ -23,8 +23,8 @@
 Каждый slug в ячейке существует как запись соседнего файла **той же поверхности** (`interface/<surface>/`); ссылка в
 сущность другой поверхности недопустима.
 
-- `situation.stage` → `stage.md`; `situation.who` → `who.md`; `situation.entry-data`, `exit-data` →
-  `data-items.md`; `situation.ux-substrate` → `ux-substrate.md` (зеркало); `situation.block` → `block.md` (зеркало);
+- `situation.stage` → `stage.md`; `situation.who` → `who.md`; `situation.entry-data`, `exit-data` → `data-items.md`;
+  `situation.ux-substrate` → `ux-substrate.md` (зеркало); `situation.block` → `block.md` (зеркало);
 - `situation.refusals` → ключи словаря состояний экрана из перечня колонки формы `situation.md`;
 - `block.zone` → `zone.md`; `block.who` → `who.md`; `block.ux-substrates` → `ux-substrate.md`;
   `block.transition-to-block` → `block.md`; `block.transition-from-zone` → `zone.md`;
@@ -44,8 +44,7 @@
 Канонические источники — `ux-substrate.situation` (M:1) и `block.ux-substrates` (M:N). Производные поля ситуации:
 
 - `situation.ux-substrate` — набор всех `ux-substrate.slug`, у которых `ux-substrate.situation` — эта ситуация;
-- `situation.block` — набор всех `block.slug`, у которых `block.ux-substrates` пересекается с
-  `situation.ux-substrate`.
+- `situation.block` — набор всех `block.slug`, у которых `block.ux-substrates` пересекается с `situation.ux-substrate`.
 
 Скилл держит зеркала синхронными автоматически после каждой правки канонических источников.
 
@@ -57,8 +56,8 @@
 ### 5. В заметке нет `**blocker**`-вопросов
 
 Заметка — `../entrypoint/state/projects/<project-slug>/interface/<surface>/<kind>/<slug>.md`. В ней нет секции
-`## Открытые вопросы` или в секции нет вопросов с пометкой `**blocker**`. Не-blocker вопросы при stable допустимы —
-они о том, что хорошо бы узнать, а не о том, что смысл сломан. `## Доменные решения` к stable не относится;
+`## Открытые вопросы` или в секции нет вопросов с пометкой `**blocker**`. Не-blocker вопросы при stable допустимы — они
+о том, что хорошо бы узнать, а не о том, что смысл сломан. `## Доменные решения` к stable не относится;
 `## Что копать дальше` к stable обычно пуст.
 
 ## Алгоритм проверки
