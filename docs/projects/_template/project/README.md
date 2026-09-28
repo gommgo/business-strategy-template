@@ -74,7 +74,7 @@ docs/projects/<slug>/
 |---|---|---|
 | `web` рода `app`; `admin`, `desktop`, `embed` | vision → роли и постуры → поверхности → объекты и действия → возможности → сценарии → interface → экраны → тексты интерфейса → FSD | `/project-deep-dive` → `/interface-deep-dive` → `/screen-deep-dive` → `/fsd-deep-dive` |
 | `web` рода `landing`, `site` | vision (минимум) → пользователь → поверхность с родом → слой страницы | `/project-deep-dive` → `/design-deep-dive` |
-| `mobile`, `bot` | как у приложения до interface включительно, дальше — карта приложения или диалоги бота | … → `/mobile-deep-dive` или `/telegram-bot-flow-deep-dive` |
+| `mobile`, `bot` | как у приложения до interface включительно (сценарии — по желанию), дальше — карта приложения или диалоги бота | … → `/mobile-deep-dive` или `/telegram-bot-flow-deep-dive` |
 
 - **Роли и постуры — до поверхностей.** Поверхности выводятся из ролей, а решение, делить ли админку и клиентскую
   часть, принимается по постурам (ux 13/04 §17).
