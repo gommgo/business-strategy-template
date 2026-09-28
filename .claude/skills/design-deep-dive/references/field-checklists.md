@@ -26,10 +26,10 @@
   `questions`; с `proposed` — ещё `traffic`, `offer`, `proof` (`facts_ref`, `required_kinds` по типу сайта), `pages`,
   `ambition`, `search`, `analytics`, `decision_context` и `meaning_ref`; при `approved` вопросы приоритета 1 —
   `assumed`, `answered` или `withdrawn`. Тема — вопрос журнала с ответом.
-- **Ссылки:** `project.slug` — slug проекта; `site_type` соответствует роду поверхности; `proof.facts_ref: ../../facts.yaml`,
-  `meaning_ref: meaning.yaml`, `brand.ref: ../../design/brand.yaml`; `intake.raw_ref` — строка
-  `docs/business/material.md`; первая `constraints.jurisdiction` — она же `jurisdiction` фактов; каждый получатель
-  заявок — строка `integration.md` с этой поверхностью.
+- **Ссылки:** `project.slug` — slug проекта; `site_type` соответствует роду поверхности;
+  `proof.facts_ref: ../../facts.yaml`, `meaning_ref: meaning.yaml`, `brand.ref: ../../design/brand.yaml`;
+  `intake.raw_ref` — строка `docs/business/material.md`; первая `constraints.jurisdiction` — она же `jurisdiction`
+  фактов; каждый получатель заявок — строка `integration.md` с этой поверхностью.
 - **Anti-patterns:** уровень со `source` не `default` без `note`; секции конверсии выше L0; `site_type` из рамок
   `out-of-scope`; мудборд в `references[]`; поля бренда вместо `brand.ref`; разбор брифа в самом брифе; метрика `kpi`
   без источника-системы; вопросы `withdrawn` в утверждённом брифе.
