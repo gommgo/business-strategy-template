@@ -25,7 +25,7 @@
 | `docs/projects/<slug>/services/<svc>/domains/<ctx>/` (по bounded-context, внутри сервиса-владельца, surface-агностичны) | агрегаты/события/use-case/… | `/domain-deep-dive <slug> <ctx>` | `/service-audit <slug>` + `/cross-audit` |
 | `docs/projects/infrastructure/` (ИТ-периметр бизнеса: сервера · рантаймы · общие ресурсы · джобы · размещение) | server/runtime/shared-platform/job/placement | `/infrastructure-deep-dive` | `/infrastructure-audit` + `/cross-audit` |
 | `docs/projects/<slug>/screens/<surface>/` | `flow` · `screen` · `block` · `shell` + свод карты экранов `map.md` и реестр текстов интерфейса `texts.md` | `/screen-deep-dive <slug> [<surface>]` | `/screen-audit <slug>` |
-| `docs/projects/<slug>/fsd/<surface>/` (фронтовые поверхности: `web` рода `app` · `admin` · `desktop` · `embed`) | `entities` · `features` · `pages` · `widgets` · `app` · `shared-ui` · `shared-api` · `shared-lib` | `/fsd-deep-dive <slug> [<surface>]` | `/fsd-audit <slug>` |
+| `docs/projects/<slug>/fsd/<surface>/` (фронтовые поверхности: `web` рода `app`; `admin`, `desktop`, `embed`) | `entities` · `features` · `pages` · `widgets` · `app` · `shared-ui` · `shared-api` · `shared-lib` | `/fsd-deep-dive <slug> [<surface>]` | `/fsd-audit <slug>` |
 | `docs/projects/<slug>/telegram-bot-flow/<surface>/` (bot-поверхности) | фичи `features/<feature>/` (`dialog` · `window` · `use-case` бота) + сквозные `command` · `notification` | `/telegram-bot-flow-deep-dive <slug> [<surface>]` | `/telegram-bot-flow-audit <slug>` |
 | `docs/projects/<slug>/mobile/<surface>/` (мобильные поверхности) | `entities` · `screens` · `flows` · `features` · `shell` · `entry-points` · `permissions` · `system-actions` · `widgets` · `background-tasks` · `shared-api` · `shared-lib` | `/mobile-deep-dive <slug> [<surface>]` | `/mobile-audit <slug>` + `/cross-audit` |
 | `docs/projects/<slug>/design/` (облик продукта; `design/<surface>/` — поверхность) | `brand` · `design-system` · `app-brief` · `visual-dna` · `art-direction` · подача `treatment` в планах страниц · `asset-plan` · `motion-spec` · холст и приёмка (`canvas` · `review` · `ready`) | `/design-deep-dive <slug> [<surface>]` | `/design-audit <slug>` + `/cross-audit` |
@@ -91,7 +91,7 @@ surface-агностичны, делятся по bounded-context. Межпро�
 | «цифры, отзывы, кейсы, гарантии, документы для сайта; как мы говорим, тон» | уровень продукта — `facts` · `voice` |
 | «стиль, бренд, логотип, дизайн-система, токены, цвета и шрифты, мудборд, референсы, направления, ассеты, картинки, иконки, иллюстрации, 3D, видео, анимация» | `projects/<slug>/design` (продукт или `design/<surface>`) |
 | «макет, холст, вайрфрейм, покажи макет, правки макета, проверь макет, прими макет, промежуточные ширины» (какая поверхность?) | `projects/<slug>/design/<surface>` — этапы холста |
-| «кабинет, личный кабинет, сервис, SaaS, админка, внутренняя система» | маршрут кабинета: `projects/<slug>` (роли, поверхность рода `app` или `admin` …) → `interface` → `screens` → `fsd`; облик — `design` |
+| «кабинет, личный кабинет, сервис, SaaS, админка, внутренняя система» | маршрут кабинета: `projects/<slug>` (роли, поверхность `web` рода `app`; `admin` …) → `interface` → `screens` → `fsd`; облик — `design` |
 | «бизнес-код бэкенда, агрегаты, инварианты» (какой bounded-context?) | `projects/<slug>/services/<svc>/domains/<ctx>` |
 | «архитектура приложения: из каких сервисов состоит, монолит/микросервисы, брокер/очередь, gateway, где какая БД, кто продюсер/консьюмер событий» | `projects/<slug>/services` |
 | «сервера, хостинг, кубер vs compose, где будет жить сервис, общий брокер/traefik на все проекты, учёт VPS» | `projects/infrastructure` |
@@ -173,7 +173,7 @@ surface-агностичны, делятся по bounded-context. Межпро�
 `/interface-deep-dive <slug> [<surface>]`,
 `/screen-deep-dive <slug> [<surface>]`,
 `/fsd-deep-dive <slug> [<surface>]` (только фронтовые поверхности кабинета —
-`type: web` рода `app`, `admin`, `desktop`, `embed`),
+`type: web` рода `app`; `admin`, `desktop`, `embed`),
 `/telegram-bot-flow-deep-dive <slug> [<surface>]` (только поверхности с
 `type: bot` — композиция бота вместо экранов),
 `/mobile-deep-dive <slug> [<surface>]` (только поверхности с `type: mobile`
@@ -207,8 +207,8 @@ surface-агностичны, делятся по bounded-context. Межпро�
 | `type` · `web-kind` | маршрут | исполнители по порядку |
 |---|---|---|
 | `web` · `landing`, `site` | минимум продукта → слой страницы → слой дизайна → пакет для `<org>/site` | `/project-deep-dive <slug>` (минимум) → `/design-deep-dive <slug> <surface>` |
-| `web` · `app`; `admin`, `desktop`, `embed` | продукт → сценарии → interface → экраны → тексты интерфейса → FSD-карта; дизайн входит дважды — после сценариев и после stable-экранов → пакет для `<org>/frontend` | `/project-deep-dive` → `/interface-deep-dive` → `/screen-deep-dive` → `/fsd-deep-dive`; облик — `/design-deep-dive <slug> <surface>` |
-| `mobile` | карта приложения; из дизайна — токены ДС и голос продукта | `/mobile-deep-dive <slug> <surface>` |
+| `web` · `app`; `admin`, `desktop`, `embed` | продукт → сценарии → interface → экраны → тексты интерфейса → FSD-карта; дизайн входит дважды — после сценариев и после stable-экранов; голос продукта — до ДС и текстов интерфейса → пакет для `<org>/frontend` | `/project-deep-dive` → `/interface-deep-dive` → `/screen-deep-dive` → `/fsd-deep-dive`; облик — `/design-deep-dive <slug> <surface>`, голос продукта — `/design-deep-dive <slug>` |
+| `mobile` | поверхность и возможности с урезанием → interface поверхности → карта приложения; из дизайна — токены ДС и голос продукта | `/project-deep-dive <slug>` → `/interface-deep-dive <slug> <surface>` → `/mobile-deep-dive <slug> <surface>` |
 | `bot` | диалоги бота; из дизайна — голос продукта | `/telegram-bot-flow-deep-dive <slug> <surface>` |
 | `api`, `other` | без композиции | — |
 
@@ -221,6 +221,11 @@ surface-агностичны, делятся по bounded-context. Межпро�
 - **Этап выбирает исполнитель.** Оркестратор передаёт проект, поверхность
   и чанк как сырьё; исполнитель находит первый этап с готовым входом и
   показывает сводку этапов (`phases.md § Вход с любого места`).
+- **Аудит в цепочке дизайна.** На этапах `design-handoff`, `ds-components`
+  и `package` исполнитель дизайна просит человека запустить
+  `/design-audit <slug> <surface>` и продолжает по его отчёту
+  (`phases.md § Принципы всех этапов`); оркестратор в эту связку не
+  встаёт.
 - **Облик кабинета.** Сигнал стиля или макета у поверхности маршрута
   кабинета ведёт в `/design-deep-dive <slug> <surface>`; вход выбирает
   исполнитель: бриф на вид, карточки стиля, дизайн-система, паспорт и
@@ -231,9 +236,16 @@ surface-агностичны, делятся по bounded-context. Межпро�
   `§ Второй вход дизайна кабинета`).
 - **Смешанный продукт.** У каждой поверхности свой маршрут; факты, голос,
   бренд, дизайн-система и объекты — одни на продукт.
-- **Мобильное и бот.** Этапов дизайна и холста у них нет: «нарисуйте
-  приложение» ведёт в `/mobile-deep-dive` — экраны и сценарии приложения,
-  облик — токены ДС продукта; аналитику это называется прямо.
+- **Мобильное и бот.** «Нарисуйте приложение» — сначала вопрос: нативное
+  приложение или мобильная версия кабинета? Мобильная версия кабинета —
+  узкий экран той же поверхности `web` рода `app`: её рисует холст кабинета
+  (`/design-deep-dive <slug> <surface>`). Нативное приложение — поверхность
+  `type: mobile`: поверхность и возможности — `/project-deep-dive`, interface
+  поверхности — `/interface-deep-dive`, карта приложения —
+  `/mobile-deep-dive`; этапов дизайна и холста у неё нет, облик — токены ДС
+  продукта. У бота их тоже нет: диалоги ведёт
+  `/telegram-bot-flow-deep-dive`, из дизайна он берёт голос продукта.
+  Аналитику это называется прямо.
 
 ### Быстрый путь и вход с середины
 
@@ -242,7 +254,10 @@ surface-агностичны, делятся по bounded-context. Межпро�
   путём: vision минимума — `Name`, `Problem`, `Users`, `Success`,
   `Non-goals` и `Assumptions`, если допущения есть (можно `draft`), одна
   строка `user.md`, поверхность `web` рода `landing` или `site`; затем
-  `/design-deep-dive <slug> <surface>` с этапа `brief`. В нить оркестратор
+  `/design-deep-dive <slug> <surface>` — исполнитель начнёт с `brief`,
+  первого этапа с готовым входом. Получатели заявок — строки
+  `integration.md` тем же `/project-deep-dive` — нужны к воронке
+  (`funnel`): исполнитель назовёт их блокером. В нить оркестратор
   пишет строку «быстрый путь: верхние слои пропущены»; пропуск каждого
   слоя исполнитель пишет долгом в заметку пропусков своей ветки
   (`state-model.md § Особый случай: _phase-jump.md`). Быстрый путь проходит
@@ -264,7 +279,7 @@ surface-агностичны, делятся по bounded-context. Межпро�
   `ready.yaml` — `ready`). Своего сервиса у такой поверхности может не
   быть: тогда получатели заявок записаны в `integration.md`, а при
   `services/` — решение «своего сервиса нет» в `architecture.md`;
-- `web` рода `app`, `admin`, `desktop`, `embed` — экраны и тексты
+- `web` рода `app`; `admin`, `desktop`, `embed` — экраны и тексты
   интерфейса, FSD-карта, дизайн (ДС с покрытием компонентов, макеты экранов
   приняты, `ready.yaml` — `ready`);
 - `bot` — `telegram-bot-flow/`, `mobile` — `mobile/`;

@@ -74,7 +74,7 @@ docs/projects/<slug>/
 |---|---|---|
 | `web` рода `app`; `admin`, `desktop`, `embed` | vision → роли и постуры → поверхности → объекты и действия → возможности → сценарии → interface → экраны → тексты интерфейса → FSD | `/project-deep-dive` → `/interface-deep-dive` → `/screen-deep-dive` → `/fsd-deep-dive` |
 | `web` рода `landing`, `site` | vision (минимум) → пользователь → поверхность с родом → слой страницы | `/project-deep-dive` → `/design-deep-dive` |
-| `mobile`, `bot` | как у приложения до interface, дальше — карта приложения или диалоги бота | … → `/mobile-deep-dive` или `/telegram-bot-flow-deep-dive` |
+| `mobile`, `bot` | как у приложения до interface включительно, дальше — карта приложения или диалоги бота | … → `/mobile-deep-dive` или `/telegram-bot-flow-deep-dive` |
 
 - **Роли и постуры — до поверхностей.** Поверхности выводятся из ролей, а решение, делить ли админку и клиентскую
   часть, принимается по постурам (ux 13/04 §17).
@@ -210,7 +210,7 @@ H1 = имя файла = kind. Frontmatter не нужен — kind опреде
 `design/<surface>/` обязаны соответствовать поверхности из реестра `surface.md`, и каждая — своему типу и роду:
 
 - `interface/` — у всех поверхностей, кроме `web` рода `landing` и `site`;
-- `screens/` и `fsd/` — у `web` рода `app`, `admin`, `desktop`, `embed`;
+- `screens/` и `fsd/` — у `web` рода `app`; `admin`, `desktop`, `embed`;
 - `site/` — только у `web` рода `landing` и `site`; файл возможностей такой поверхности — по желанию;
 - `telegram-bot-flow/` и `mobile/` — только у `type: bot` и `type: mobile` соответственно;
 - `design/<surface>/` — у `web`, `admin`, `desktop`, `embed`; облик мобильного приложения и бота — токены

@@ -35,7 +35,7 @@
 `<surface>` берётся из реестра-хребта
 `docs/projects/<project-slug>/surface.md` на старте сеанса (см. SKILL.md
 «Выбор поверхности»). Экраны есть у поверхностей маршрута приложения:
-`web` рода `app`, `admin`, `desktop`, `embed`.
+`web` рода `app`; `admin`, `desktop`, `embed`.
 
 ## Маппинг
 

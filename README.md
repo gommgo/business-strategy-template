@@ -90,7 +90,7 @@ M:N (`vision.addresses-problem`). Макет собирает слой диза�
   проблему(ы): vision + user / object / action / capability / boundary /
   surface / integration / constraint / market, факты и голос продукта, плюс
   вложенные `interface/`, `services/`, `screens/` и `fsd/` (кабинет — `web`
-  рода `app`, `admin`, `desktop`, `embed`), `site/` (сайт и лендинг: бриф,
+  рода `app`; `admin`, `desktop`, `embed`), `site/` (сайт и лендинг: бриф,
   смысл, карта, планы и тексты страниц), `telegram-bot-flow/` (bot-поверхности)
   или `mobile/` (мобильные приложения: экраны, push и другие входы, разрешения,
   голос и системные действия, виджеты, фоновая работа) и облик продукта

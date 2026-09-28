@@ -79,7 +79,7 @@ Screens-слой партиционирован по поверхности. П�
 
 1. Прочитать реестр-хребет
    `docs/projects/<project-slug>/surface.md` — список поверхностей.
-   Кандидаты — поверхности маршрута приложения: `web` рода `app`,
+   Кандидаты — поверхности маршрута приложения: `web` рода `app`;
    `admin`, `desktop`, `embed`. У `web` рода `landing` и `site` на месте
    экранов слой страницы (`/design-deep-dive <project-slug> <surface>`),
    для `type: bot` слой — `telegram-bot-flow/<surface>/`

@@ -7,7 +7,7 @@
 слоя**; форма одной папки поверхности (4 файла-формы по kind и формы `map.md`, `texts.md`) лежит рядом в `_template/`.
 Данные каждого проекта живут в `docs/projects/<project-slug>/screens/<surface>/`.
 
-Экраны есть у поверхностей маршрута приложения: `web` рода `app`, `admin`, `desktop`, `embed`. У `type: web` —
+Экраны есть у поверхностей маршрута приложения: `web` рода `app`; `admin`, `desktop`, `embed`. У `type: web` —
 только у рода `app`: у рода `landing` и `site` на месте экранов, интерфейса и FSD-карты стоит слой страницы
 `site/<surface>/` (`../site/README.md`). Поверхность с `type: bot` вместо экранов получает слой диалогов
 `telegram-bot-flow/<surface>/` (`../telegram-bot-flow/README.md`), с `type: mobile` — карту приложения
