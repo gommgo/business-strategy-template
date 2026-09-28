@@ -6,7 +6,7 @@
 `entrypoint-for-business`, `cross-audit`, `service-audit/references/rules.md`) — её файлы не трогай.
 
 ## Зона
-Двадцать две правки в скиллах, которые ведут и проверяют экраны, FSD-карту, мобильное приложение и бота, плюс проход по
+Двадцать три правки в скиллах, которые ведут и проверяют экраны, FSD-карту, мобильное приложение и бота, плюс проход по
 следам прежнего запрета в скиллах сервисов и доменов. Формы уже приняли: нотацию дерева экранов с `ui:` из закрытого
 словаря, ключи и наборы состояний по словарю S01–S24, карту экранов и реестр маршрутов, реестр текстов интерфейса с
 ролями, контракты блоков, доступность и узкий экран (зона 2); стыки FSD, мобильного и бота (зона 3). Исполнители и
@@ -16,7 +16,7 @@
 |---|---|---|
 | `screen-deep-dive` | `SKILL.md`, `references/tree-notation.md`, `field-checklists.md`, `draft-stable.md`, `raw-input.md`, `workflow-patterns.md`, `project-context.md`, `assets-policy.md` | грамматика дерева — T3 §4.3 (совпадает с разделом «Нотация» README screens); `ui:` — тип словаря `kb/common/components.yaml` или расширение проекта; ключи и наборы состояний; `map.md` — свод, не авторится; `texts.md` — реестр текстов и роли; контракты блоков (форма, коллекция, плитка); доступность и узкий экран; «Сводка состояния» — порядок этапов SaaS (ST-17); шаг «Привести к канону» (F13); проход |
 | `screen-audit` | `SKILL.md`, `references/rules.md` | правила по T3 §4.4 (нотация и `ui:`, ключи и наборы состояний вместо R-SEM-011, `source: own`, RT, CP, AX, MB, тексты — ключ в реестре, роль); проход |
-| `fsd-deep-dive` | `SKILL.md`, `references/workflow-patterns.md` | `path` = `route`, `guard` = `access`, колонка `ui-type`, ключи i18n = ключи `texts.md`, сценарии `shared-api` по наборам состояний; «не для рода `landing`, `site`» (B8); тема — из токенов ДС; проход |
+| `fsd-deep-dive` | `SKILL.md`, `references/workflow-patterns.md`, `references/draft-stable.md` (строка о потребителе карты) | `path` = `route`, `guard` = `access`, колонка `ui-type`, ключи i18n = ключи `texts.md`, сценарии `shared-api` по наборам состояний; «не для рода `landing`, `site`» (B8); тема — из токенов ДС; проход |
 | `fsd-audit` | `SKILL.md` | правила по T3 §4.4 (`path` = `route`, `guard` = `access`, `ui-type` из словаря, сценарии `shared-api` покрывают наборы) |
 | `mobile-deep-dive` | `references/field-checklists.md`; проход — `SKILL.md`, `references/interface-context.md` | стыки зоны 3: `states` ↔ S-id, `empty` у экрана с коллекцией, тексты с ролями, токены ДС в `shell`, паритет и урезание |
 | `mobile-audit` | `references/rules.md` | ключи `states` — по таблице соответствия S-id; `empty` у экрана с коллекцией (ST-05) |
@@ -71,6 +71,18 @@ CM-10, CM-12, ST-05, ST-16, ST-19, ST-24, TX-45 (Ф4). Текст действи
 Общий бриф; длины `description` правленых `SKILL.md` ≤ 600 знаков (счёт `python3`); в файлах зоны нет «craft», фразы о
 ручной сборке wireframe и hi-fi и «Committed-скрипта»; грамматика `tree-notation.md` совпадает с README screens; id
 новых правил не совпадают с существующими.
+
+## Уроки принятых зон (CHAIN 01–04)
+- FSD-карту читает только `<org>/frontend` (B8): строки «`<org>/frontend` или `<org>/site`» в `fsd-audit/SKILL.md`,
+  `fsd-deep-dive/SKILL.md` и `references/draft-stable.md` — поправить.
+- Места правил и чек-листов fsd, mobile, бота — отчёт `phase-7/reports/Z3.md` §4 (R-DATA-002 — `empty` и `fallback`
+  раздельно, пример нормы R-DATA-002 описывает `empty`; путь к человеку — README бота § Путь к человеку; строка
+  «Отложенные правки» — `mobile/_template/shell.md § Offline`).
+- Серьёзность правила «экран mobile с коллекцией без `empty`» — реши сам по шкале `mobile-audit` (у веба непокрытое
+  обязательное состояние — warning, у `stable` — error) и опиши в отчёте.
+- Нотация, словарь состояний, реестр текстов, контракты блоков — `screens/README.md` и формы зоны 2 (отчёт Z2 §4);
+  планшетная ширина — ключ `sm` (правило MB-08).
+- `refcheck.py` находит файлы корня репозитория: `CLAUDE.md` пиши в обратных кавычках.
 
 ## Отчёт
 `research/design-build/phase-7/reports/Z7b.md`.

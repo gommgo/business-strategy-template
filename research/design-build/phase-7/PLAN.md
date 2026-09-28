@@ -96,9 +96,10 @@ UX-дельту слоя проекта для SaaS, стыки FSD, мобил�
   `field-checklists.md`, `draft-stable.md`, `workflow-patterns.md` («Привести к канону» — F13); `project-audit` —
   `SKILL.md`, `references/rules.md`; `interface-deep-dive` — `SKILL.md`, `references/field-checklists.md`,
   `draft-stable.md`, `workflow-patterns.md`, `project-context.md`; `interface-audit` — `SKILL.md`, `references/rules.md`.
-- **7b** (22): `screen-deep-dive` — `SKILL.md`, `references/tree-notation.md` (грамматика — T3 §4.3), `field-checklists.md`,
+- **7b** (23): `screen-deep-dive` — `SKILL.md`, `references/tree-notation.md` (грамматика — T3 §4.3), `field-checklists.md`,
   `draft-stable.md`, `raw-input.md`, `workflow-patterns.md`, `project-context.md`, `assets-policy.md`; `screen-audit` —
-  `SKILL.md`, `references/rules.md`; `fsd-deep-dive` — `SKILL.md`, `references/workflow-patterns.md`; `fsd-audit` —
+  `SKILL.md`, `references/rules.md`; `fsd-deep-dive` — `SKILL.md`, `references/workflow-patterns.md`,
+  `references/draft-stable.md` (строка о потребителе карты, Р170); `fsd-audit` —
   `SKILL.md`; `mobile-deep-dive` — `references/field-checklists.md`, проход — `SKILL.md`,
   `references/interface-context.md`; `mobile-audit` — `references/rules.md`; `telegram-bot-flow-deep-dive` —
   `references/field-checklists.md`; `telegram-bot-flow-audit` — `references/rules.md`; проход «Committed» —
@@ -131,7 +132,8 @@ UX-дельту слоя проекта для SaaS, стыки FSD, мобил�
 - Закрываются формой или этапом: GT-03, TR-22, TR-44, GT-42, NU-37, CM-06, CM-10, CM-12, CM-15, ST-15, ST-16, ST-19,
   ST-20, ST-23 (часть `<org>/mobile` — позицией), ST-25, NU-02, NU-03, NU-17, GL-07 и запись «Компонент»; GT-13 — из
   «Открытого» в позицию; новая норма VI-60 (D1, T2a); строка cd 06/06 §8 в `kb/common/judge.md §7` (E5).
-- Файлы: `kb/common/CONTRADICTIONS.md`, `canon.tsv` (пересборка скриптом), `judge.md`, `README.md` («Как пользоваться
+- Файлы: `kb/common/CONTRADICTIONS.md`, `canon.tsv` (пересборка скриптом), `judge.md`, `glossary.md` (пять статей под
+  текущую модель экранов и облика, Р168), `README.md` («Как пользоваться
   `canon.tsv`», «правки базы — в шаблоне», H12), `kb/INDEX.md` §4–§5 (адреса протокола и этапов).
 - Реестр и `canon.tsv` меняются только по закрытым id — сверка диффом. Действия: 6.
 

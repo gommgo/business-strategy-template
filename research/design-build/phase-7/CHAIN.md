@@ -73,3 +73,47 @@
   экранов (зона 10); находки `services/README.md` вне § Gate — ложные срабатывания (пути соседнего репо и папок
   проекта); `project/integration.md` — ссылка `../project-map.md` верна для папки проекта, не правится.
 - Не прочитано: T2b; T4 кроме «Проверено», A9, B6/C3, H7; 05-ST §3; CONTRADICTIONS — только §5–§7; база — адресно.
+
+## 03. Z3 — стыки FSD, мобильного и бота (28.09, ≈ 31 мин, контекст ≈ 200 тыс. токенов по оценке агента; в уведомлении — 575 тыс.)
+- Сделано: 16 правок, новых нет (+448 / −83 строк): `_template/fsd/` — README, `pages`, `shared-ui`, `shared-api`,
+  `shared-lib`, проход `features`; `_template/mobile/` — README, `shell`, `shared-api`, проход `features`, `widgets`;
+  `_template/telegram-bot-flow/` — README, `command`, `notification`, `features/window`, `features/use-case`. Решений 7
+  (A6, B8, D5, F7, F10, F11, H7) и действий 21 из 21 — с местом (отчёт §2).
+- Отступления (решает оркестратор): потребитель FSD-карты — только `<org>/frontend` (B8); `root` — строками таблицы
+  ux 02/02 §1.6 без чисел, порог `escalate` («трёх») — один раз в README бота; ST-14 — строка «Отложенные правки» в
+  § Offline оболочки, а не колонка; S17 у бота — исходом use-case; `error` mobile ↔ `error-load` веба, новые сценарии —
+  ключами словаря; роли полей, которых T3 не называла (mobile — `rationale`, `response`, оверлеи; бот — подписи
+  виджетов через `crosswalk`); `fallback` бота сужен до отказа источника; исход «передано человеку» — словами, без
+  нового ключа; `empty` у экрана mobile с коллекцией — error; объём выше плана.
+- Стыки: Z4 — ключи бота `empty`, `escalate` (README бота § Язык контракта), FSD читает только `<org>/frontend`; Z5a —
+  `fsd/README.md § Связи`, `mobile/README.md § Стык с дизайном`, README бота § Путь к человеку; Z7b — места правил и
+  чек-листов fsd, mobile, бота (отчёт §4); Z10 — места CM-10, ST-19, ST-20, ST-25, GL-07.
+- Открыто: поддержка код-репо (`<org>/<bot>` — `empty`, `escalate`; `<org>/mobile` — тип экрана, ST-23, строка
+  отложенных правок, новые сценарии, копия канона; `<org>/frontend` — `path`/`guard`, `ui-type`, ключи i18n); находки
+  вне зон — `fsd-deep-dive/references/draft-stable.md:46`, `mobile/_template/screens.md:24`.
+- Не прочитано: T2a, T2b; T4 кроме вступления и H7; база — адресно; шаблоны кода — вне репозитория.
+- Решения оркестратора (строка DECISIONS «Ф7, зона 3 принята»): все отступления приняты; серьёзность `empty` у mobile —
+  решает Z7b; `fsd-deep-dive/references/draft-stable.md` — в зону 7b; `mobile/_template/screens.md` — фраза «компонент
+  ДС продукта; его код — в код-репо» внесена при приёмке.
+
+## 04. Z4 — правила и карты: CLAUDE.md, docs/, настройки (28.09, ≈ 31 мин, контекст ≈ 510 тыс. токенов по оценке агента; в уведомлении — 522 тыс.)
+- Сделано: 1 новый (`.gitattributes`, 10 строк) и 9 правок — `CLAUDE.md` (+46), корневой `README.md`, `CONTRIBUTING.md`,
+  `docs/README.md`, `docs/projects/README.md`, `docs/getting-started.md`, `.claude/rules/forward-only.md` (§ Машинные
+  файлы слоёв), `.claude/settings.json` (`skillListingBudgetFraction: 0.02` — подтверждён settings-reference),
+  `.gitignore` (G3); ≈ +176 строк нетто. Решения H7 (по пунктам), B6, C3, H2, G1–G4, G6, H12 и строки §6 T1, T2a, T2b,
+  T3, действий 5 из 5 — с местом (отчёт §2). §1, §4, §5 `CLAUDE.md` — без изменений.
+- Отступления: путь `phases.md` — по H7, файла ждёт зона 5a (одна находка refcheck); маски `facts*.yaml`, `voice*.yaml`
+  и префикс `…/` в §6, «файлы Blender» вместо `.blend`, «собирает скрипт скилла (без него — этап по той же форме)»;
+  ссылка §3 на design § Облик; проход по фактам зон 1–2 сверх H7 (`capability.trace`, FSD → только `<org>/frontend`,
+  перечни kind, `CONTRIBUTING.md` «линтеров нет»); нотация новых строк «Связей» (`.md`, `projects/<slug>/…`); токены
+  соседних репо в переписанных строках G2 нормализованы.
+- Стыки: Z5a — путь `phases.md` фиксирован, перечень утилит `build` — `docs/README.md` «Ворота после сборки», этап
+  `package` ссылается; Z5b/Z5c/Z6 — `CLAUDE.md` §3, §6, §7 и `forward-only.md § Машинные файлы слоёв`, `.gitignore`;
+  Z7/Z8 — вопросы роутера, строки «Связей» для углов `facts-business`, `promise-product`; Z9 — ключ записан,
+  `skillOverrides` нет; Z10 — формулировка H12 в `kb/common/README.md`.
+- Открыто: `paths` правила forward-only не покрывают YAML и JSON слоёв (предложение в отчёте §6); одна копия перечня
+  утилит (docs против `phases.md`); замер бюджета листинга после Z9; 19 ложных находок refcheck в старых строках
+  «Связей».
+- Не прочитано: спецификации — вне разделов брифа; файлы Z3 — только стыки; база — шапка `page-gates.yaml`.
+- Решения оркестратора (строка DECISIONS «Ф7, зона 4 принята»): отступления приняты; `CLAUDE.md` сверен с H7, B6 и C3
+  построчно; `paths` правила forward-only дополнены `docs/projects/**/*.yaml` и `docs/projects/**/*.json` при приёмке.
