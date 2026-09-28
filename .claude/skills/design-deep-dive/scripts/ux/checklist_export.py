@@ -6,12 +6,15 @@
 Поля: id, block, block_title, sub_block, text, severity, severity_label, severity_note, check_method (коды файла),
 check_method_class (visual/dom/script/scenario/human), source_file (полные пути от корня базы; сокращённые пути
 `../09-mobile/04-...` и диапазоны `../04-components-patterns/01–04` раскрыты), source_section, source_raw,
-evidence_level, failure_modes, related_ids.
-Запуск из корня базы: python3 99-raw/tools/checklist_export.py
+evidence_level, failure_modes, related_ids. Шапка YAML несёт хэш источника, а не время запуска: без правки Markdown
+перегенерация даёт тот же файл байт в байт.
+Запуск (из любой папки):
+  python3 checklist_export.py           # записать YAML и напечатать сводку
+  python3 checklist_export.py --check   # YAML совпадает с Markdown байт в байт? Ничего не пишет; код 1 — нет
 """
-import io, os, re, glob, json, datetime, collections
+import io, os, re, glob, json, hashlib, argparse, collections
 
-import sys; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib")); import kbpaths  # перенос: scripts/lib
+import sys; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib")); import kbpaths
 ROOT = str(kbpaths.kb("ux"))
 os.chdir(ROOT)
 MD = "12-evaluation-checklists/02-master-checklist.md"
@@ -28,7 +31,7 @@ def files_in(folder):
 def resolve_token(tok, cur_folder):
     """Возвращает список путей от корня базы для одного токена в бэктиках; [] если это не путь."""
     t = tok.strip("`").strip()
-    if t.startswith("../../ui/"):  # перенос: базы — kb/<база> без -research
+    if t.startswith("../../ui/"):  # ссылка на базу ui — путь от kb/
         return [t.replace("../../", "")]
     if t.startswith("[") or t.startswith("UX-"):
         return []
@@ -62,8 +65,12 @@ def resolve_token(tok, cur_folder):
 def q(s):
     return json.dumps(s, ensure_ascii=False)
 
-def main():
-    lines = io.open(MD, encoding="utf-8").read().split("\n")
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="Экспорт сводного чек-листа ux в YAML")
+    ap.add_argument("--check", action="store_true", help="сравнить YAML с Markdown байт в байт, ничего не писать")
+    a = ap.parse_args(argv)
+    src = io.open(MD, encoding="utf-8").read()
+    lines = src.split("\n")
     meta_line = next((l for l in lines[:12] if "пунктов" in l), "")
     items, blocks = [], collections.OrderedDict()
     block = title = sub = None
@@ -114,8 +121,8 @@ def main():
     unresolved = [(i["id"], f) for i in items for f in i["source_file"] if "?" in f]
     no_src = [i["id"] for i in items if not i["source_file"]]
     out = ["# Машиночитаемая версия 12-evaluation-checklists/02-master-checklist.md.",
-           "# Сгенерировано скриптом 99-raw/tools/checklist_export.py — правки вносить в Markdown и перегенерировать.",
-           f"generated_at: {q(datetime.datetime.now().strftime('%Y-%m-%d %H:%M'))}",
+           "# Сгенерировано скриптом ../../scripts/ux/checklist_export.py — правки вносить в Markdown и перегенерировать.",
+           f"source_sha256_16: {q(hashlib.sha256(src.encode('utf-8')).hexdigest()[:16])}",
            f"source_md: {q(MD)}", f"source_md_meta: {q(meta_line.strip())}", f"items_count: {len(items)}",
            "severity_scale: {B: блокер, S: серьёзно, D: желательно}",
            "severity_note_default: " + q("серьёзность назначена агентом I (волна 3) по свёртке шкалы Нильсена 0–4; для блоков CNS-07…29 и APP — агентом S1 (волна 4); не измерена (см. 02-master-checklist.md, «Открытые вопросы» п.2)"),
@@ -143,7 +150,12 @@ def main():
         out.append(f"    evidence_level: [{', '.join(q(x) for x in i['evidence_level'])}]")
         if i["failure_modes"]: out.append(f"    failure_modes: [{', '.join(i['failure_modes'])}]")
         if i["related_ids"]: out.append(f"    related_ids: [{', '.join(i['related_ids'])}]")
-    io.open(OUT, "w", encoding="utf-8").write("\n".join(out) + "\n")
+    text = "\n".join(out) + "\n"
+    if a.check:
+        same = os.path.isfile(OUT) and io.open(OUT, encoding="utf-8").read() == text
+        print("YAML совпадает с Markdown" if same else "YAML УСТАРЕЛ: перегенерировать (checklist_export.py)")
+        return 0 if same else 1
+    io.open(OUT, "w", encoding="utf-8").write(text)
     ok = ""
     try:
         import yaml
@@ -160,6 +172,7 @@ def main():
     print("по блокам:", dict(by_block))
     if unresolved: print("нераскрытые:", unresolved[:12])
     if no_src: print("без файла-источника:", no_src[:40], "…" if len(no_src) > 40 else "")
+    return 0
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

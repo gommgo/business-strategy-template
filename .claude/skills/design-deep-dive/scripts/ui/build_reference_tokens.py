@@ -1,31 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Генератор эталонной схемы токенов для `09-design-tokens/04-reference-token-schema.md`.
+"""Генератор эталонной схемы токенов ui (`09-design-tokens/04-reference-token-schema.md`).
 
 Один источник истины -> три листинга, которые гарантированно не расходятся:
   * DTCG JSON (Design Tokens Format Module 2025.10),
-  * CSS-переменные (светлая тема, тёмная тема, два режима плотности),
+  * CSS-переменные (светлая тема, тёмная тема, два режима плотности, сокращённое движение),
   * блок `@theme inline` для Tailwind CSS v4 (+ мост совместимости с shadcn/ui).
+Плюс отчёт проверок: контраст семантических пар в обеих темах, коридор APCA отключённого текста, палитра графиков
+при симуляции дальтонизма, арифметика интерлиньяжа, светлота слоёв поверхностей.
 
 Запуск:
-    python3 99-raw/tools/build_reference_tokens.py --out <каталог>
-По умолчанию пишет в текущий каталог: tokens.json, tokens.css, theme.css, report.txt
+    python3 build_reference_tokens.py [--out <каталог>]
+Пишет tokens.json, tokens.css, theme.css, report.txt в каталог --out (по умолчанию `$DDD_HOME/out/ui/reference-tokens`)
+и печатает отчёт; строка «<<<» в отчёте — непройденный порог контраста. `tokens.css` — эталонные токены
+`kb/ui/14-recipes/examples/tokens.css`, по ним `ui_audit.py` проверяет экран, когда токенов ДС проекта нет.
 
-Автор: агент F волны 2 проекта ui-research.
-
-Правка 22.09.2026 (волна 4, агент S) по находкам агента I (`99-raw/reports/wave3-I-report.md` §2 п. 9–10,
-§3.1 п. 13–14; `14-recipes/examples/README.md`):
-  * в рампу neutral добавлены две интерполированные ступени 350 (#aebccf) и 450 (#7d8fa8): рампа slate в зоне
-    300–500 слишком груба для текстовых ролей тёмной темы;
-  * тёмная тема: text.tertiary 400 → 350 (на surface-raised было 3.94:1, стало 5.37:1), text.disabled 500 → 450
-    (APCA Lc 25 → 38 на surface, 31–41 на всех поверхностях), icon.subtle 400 → 350, accent.text и info.text
-    accent-400 → accent-300 (3.93 → 5.71 на surface-raised), danger.text red-400 → red-300 (3.59 → 5.40);
-    ступень red-400 удалена как неиспользуемая;
-  * новая роль color.bg.selected-hover (accent-200 / accent-900) для комбинации selected + hover
-    (`06-components-visual/07-states-matrix.md` §10);
-  * в проверки добавлены пары «текст × bg.surface-raised», «текст × bg.selected-hover», «text.secondary ×
-    bg.selected», информативные пары «text.tertiary × bg.subtle / bg.surface-hover / bg.selected» и коридор
-    APCA 30–60 для text.disabled на четырёх поверхностях. Итог: 289 токенов (104 + 185), непройденных порогов 0.
+Правила применения (`$extensions.org.ui-research.llm`) пишутся на английском: их читают модель и код. `size.control.*` —
+высота видимого контрола; зона нажатия на таче — не меньше 44×44 у каждой цели (правило `size.control.lg`), режимы
+плотности её не уменьшают. Метки `usage` описывают экраны приложения: H1 страницы сайта — роли display базы creative.
 """
 from __future__ import annotations
 
@@ -37,7 +29,8 @@ import sys
 from collections import OrderedDict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: color.py — scripts/lib
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
+import kbpaths  # noqa: E402
 from color import hex2oklch, wcag, apca, composite, sim_cvd, dE_oklab  # noqa: E402
 
 EXT = "org.ui-research.llm"
@@ -50,7 +43,7 @@ PALETTE = OrderedDict([
     ("neutral", OrderedDict([  # slate
         (50, "#f8fafc"), (100, "#f1f5f9"), (200, "#e2e8f0"), (300, "#cad5e2"),
         # 350 и 450 — не Tailwind: интерполированы в OKLCH между соседними ступенями
-        # (350: L 0.79 C 0.031 H 255; 450: L 0.645 C 0.043 H 257.3). Добавлены 22.09.2026 (волна 4, S):
+        # (350: L 0.79 C 0.031 H 255; 450: L 0.645 C 0.043 H 257.3). Зачем они:
         # 400 не проходит 4.5:1 на surface-raised тёмной темы, 500 даёт disabled APCA Lc 25 (< 30).
         (350, "#aebccf"), (400, "#90a1b9"), (450, "#7d8fa8"),
         (500, "#62748e"), (600, "#45556c"), (700, "#314158"), (800, "#1d293d"), (900, "#0f172b"),
@@ -63,7 +56,7 @@ PALETTE = OrderedDict([
     ])),
     # у статусных семейств оставлены только те ступени, на которые реально ссылается
     # семантический слой: полные 11-шаговые рампы нужны лишь нейтрали и акценту
-    ("red", OrderedDict([  # red-400 убран 22.09.2026: danger.text тёмной темы перешёл на red-300
+    ("red", OrderedDict([
         (100, "#ffe2e2"), (300, "#ffa2a2"), (500, "#fb2c36"),
         (600, "#e7000b"), (700, "#c10007"), (900, "#82181a"), (950, "#460809"),
     ])),
@@ -86,8 +79,8 @@ SCALE = [0, 1, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32, 36, 40, 44, 48, 56, 6
 
 FONT_SIZES = [11, 12, 14, 16, 20, 24, 28, 32]
 FONT_WEIGHTS = OrderedDict([("regular", 400), ("medium", 500), ("semibold", 600)])
-# Слой движения целиком взят из набора агента M (08-motion/03-reduced-motion-and-motion-tokens.md
-# §4-§6): 8 примитивов длительности, 5 кривых, 4 пространственные величины, 6 семантических
+# Слой движения — набор 08-motion/03-reduced-motion-and-motion-tokens.md §4-§6, взятый целиком:
+# 8 примитивов длительности, 5 кривых, 4 пространственные величины, 6 семантических
 # длительностей, 4 семантические кривые, 14 составных переходов = 41 токен.
 DURATIONS = [0, 50, 100, 150, 200, 300, 400, 600]
 EASINGS = OrderedDict([
@@ -556,8 +549,10 @@ def build_semantic_layout():
          "service uses 40px instead."),
         ("size.control.lg", 40, "Large control height.",
          ["primary-cta", "search-field", "mobile-control"],
-         "Use for the main call to action, for search fields and for every control on touch "
-         "screens."),
+         "Use for the main call to action and for search fields. On touch screens every target "
+         "MUST have a hit area of at least 44x44px: extend the control with padding or a "
+         "pseudo-element, the visible control may stay smaller. Density modes do not shrink the "
+         "hit area."),
         ("size.icon.sm", 14, "Small icon box.",
          ["icon-in-caption", "icon-in-12px-text"],
          "Use next to 11-12px text. Do NOT go below 14px for a meaningful icon."),
@@ -746,7 +741,7 @@ def build_semantic_layout():
     for path, v, desc, usage, rules in ops:
         add(path, "number", v, desc=desc, usage=usage, rules=rules, css=path.replace(".", "-"))
 
-    # ---- движение: набор агента M (08-motion/03-…md §4-§6), имена и значения согласованы ----
+    # ---- движение: набор 08-motion/03-…md §4-§6, имена и значения согласованы ----
     motion = [
         ("motion.duration.instant", 0, "No animation; lands in the same frame.",
          ["focus", "instant-feedback"],
@@ -904,7 +899,7 @@ TYPE_ROLES = [
      ["page-title", "h1"],
      "Use once per page, in the page header."),
     ("page-title-lg", 24, 32, "semibold", -0.015, "sans", "Large page title.",
-     ["page-title-large", "landing-h1"],
+     ["page-title-large"],
      "Use on overview and dashboard pages that need a stronger opening."),
     ("metric", 28, 32, "semibold", -0.02, "sans", "Metric value on a dashboard tile.",
      ["kpi", "metric", "stat-value"],
@@ -1066,7 +1061,7 @@ def css_value(t, mode=None):
         return ", ".join(f'"{f}"' if " " in f else f for f in raw)
     if t.type in ("fontWeight", "number"):
         # DTCG-тип number безразмерен, но в CSS этим величинам нужна единица
-        # (так же делает агент M в 08-motion/03-…md §6)
+        # (как в 08-motion/03-…md §6)
         css_units = {"motion-translate-sm": "px", "motion-translate-md": "px",
                      "motion-stagger-step": "ms"}
         return "%s%s" % (raw, css_units.get(t.css, ""))
@@ -1385,7 +1380,7 @@ def check():
             walk(m)
     # Полные рампы хранятся целиком, даже если часть ступеней не имеет семантической роли:
     # нейтраль и акцент нужны для вывода новых ролей, шкала длительностей и кривая
-    # `emphasized` взяты из набора агента M как есть (08-motion/03-…md §4).
+    # `emphasized` взяты из набора 08-motion/03-…md §4 как есть.
     FULL_RAMPS = ("primitive.color.neutral.", "primitive.color.accent.",
                   "primitive.duration.", "primitive.easing.emphasized")
     unused = [t.dotted for t in prim if t.dotted not in used
@@ -1427,7 +1422,7 @@ def check():
         ("light", "color.text.primary", "color.bg.selected", 4.5),
         ("light", "color.text.on-inverse", "color.bg.inverse", 4.5),
         ("light", "color.text.primary", "color.bg.subtle", 4.5),
-        # добавлено 22.09.2026 (волна 4): текст на приподнятой поверхности, selected + hover,
+        # текст на приподнятой поверхности, selected + hover,
         # информативные пары (порог 0) для третичного текста на неосновных поверхностях
         ("light", "color.text.primary", "color.bg.surface-raised", 4.5),
         ("light", "color.text.secondary", "color.bg.surface-raised", 4.5),
@@ -1508,7 +1503,7 @@ def check():
                    f"{fh} / {bh}  {w:6.2f} / {a:7.1f}{mark}")
     rep.append(f"  порогов не пройдено: {fails} (ожидаемо 0 при threshold > 0)")
 
-    # добавлено 22.09.2026 (волна 4): отключённый текст проверяется по APCA, а не по WCAG
+    # отключённый текст проверяется по APCA, а не по WCAG
     rep.append("")
     rep.append("ОТКЛЮЧЁННЫЙ ТЕКСТ: APCA |Lc| в коридоре 30–60 на каждой поверхности "
                "(цель 30–45 по 01-color/05 §4.2; ui_audit.py I1c принимает 30–60)")
@@ -1561,8 +1556,9 @@ def check():
 
 # --------------------------------------------------------------------------------------
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default=".")
+    ap = argparse.ArgumentParser(description="Эталонная схема токенов ui: tokens.json, tokens.css, theme.css и отчёт")
+    ap.add_argument("--out", default=str(kbpaths.out("ui", "reference-tokens", create=False)),
+                    help="каталог вывода (по умолчанию $DDD_HOME/out/ui/reference-tokens)")
     args = ap.parse_args()
     build_primitives()
     build_semantic_color()

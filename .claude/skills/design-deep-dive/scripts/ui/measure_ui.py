@@ -5,19 +5,25 @@
 интерлиньяж, веса, трекинг, цвета (текст, фон, границы) в hex и OKLCH, радиусы, тени, толщины границ, отступы
 (padding / margin / gap) с долей кратных 4 и 8, высоты контролов, размеры целей нажатия, каркас страницы
 (сайдбар, шапка, max-width контента, поля), таблицы (высота строки, padding ячейки, кегль), размеры иконок (svg),
-z-index, длительности переходов, кольцо фокуса. Результат: JSON + скриншот.
+z-index, длительности переходов, кольцо фокуса. Результат: JSON + скриншот. Цвета считает `scripts/lib/color.py`.
 
-Написано агентом P волны 2 проекта ui-research. Утилиты цвета берутся из соседнего `color.py`.
+Высоту шапки утилита сверяет с порогом своей поверхности (примета header-height): страница сайта — порог липкой
+шапки site/03-page-structure/03-first-screen-and-mobile.md §4.2 (телефон ≤ 64, десктоп ≤ 80 px; телефон — окно уже
+первого брейкпоинта ДС), экран приложения — высота шапки пресета ui/14-recipes/11-presets.md (A 48, B 64, C 56,
+D 40 px; ui/CONTRADICTIONS.md §[C3]). Числа — `scripts/ui/data/thresholds.yaml#header_height`, общий порог утилит.
 
 Использование:
-    python3 measure_ui.py URL [--viewport 1440x900] [--wait 3000] [--click "СЕЛЕКТОР"] [--scheme light|dark|both]
-                              [--slug ИМЯ] [--scroll] [--full-page] [--exclude "СЕЛ,СЕЛ"] [--focus N]
-                              [--keep-open] [--quiet] [--timeout 60000]
-    python3 measure_ui.py --batch targets.jsonl        # построчно {"slug":…, "url":…, "viewport":…, …}
+    python3 measure_ui.py URL [--viewport 1440x900] [--surface app|page] [--preset A|B|C|D] [--wait 3000]
+                              [--click "СЕЛЕКТОР"] [--scheme light|dark|both] [--slug ИМЯ] [--scroll] [--full-page]
+                              [--exclude "СЕЛ,СЕЛ"] [--focus N] [--quiet] [--timeout 60000]
+    python3 measure_ui.py --batch targets.jsonl        # построчно {"slug":…, "url":…, "viewport":…, "surface":…, …}
     python3 measure_ui.py --summary path/to.json       # напечатать сводку по готовому JSON
+    python3 measure_ui.py --selftest                   # порог шапки по поверхности на синтетике, без браузера
 
 Ключи:
-    --viewport WxH   размер окна, по умолчанию 1440x900 (мобильный профиль: 390x844 — включает тач и DPR 3)
+    --viewport WxH   размер окна, по умолчанию 1440x900 (окно шириной до 500 — мобильный профиль: тач и DPR 2)
+    --surface        поверхность для порога шапки: app — экран приложения (по умолчанию), page — страница сайта
+    --preset         пресет ui 14/11 экрана приложения для порога шапки: A (по умолчанию), B, C, D
     --wait N         ожидание после networkidle, мс (по умолчанию 2500)
     --click SEL      кликнуть по селектору после загрузки (закрыть баннер, открыть демо, переключить вкладку);
                      можно повторять: --click A --click B
@@ -28,7 +34,7 @@ z-index, длительности переходов, кольцо фокуса.
     --focus N        пройти Tab N раз и снять кольцо фокуса (по умолчанию 8; 0 отключает)
     --slug ИМЯ       имя файлов вместо автогенерации из URL
 
-Файлы: `99-raw/cache/measurements/<slug>_<W>x<H>[_dark].json`, `99-raw/cache/screens/<slug>_<W>x<H>[_dark].png`.
+Файлы: `$DDD_HOME/out/ui/measurements/<slug>_<W>x<H>[_dark].json`, `$DDD_HOME/out/ui/screens/<slug>_<W>x<H>[_dark].png`.
 
 Ограничения (важно для выводов): computed styles — это не токены дизайн-системы, а их применение на конкретном
 экране; SPA догружают разметку, поэтому часть значений зависит от момента снятия; кросс-доменные iframe не
@@ -46,13 +52,33 @@ from collections import Counter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))
 import kbpaths  # noqa: E402
+import yaml  # noqa: E402
 ROOT = str(kbpaths.kb("ui"))
 MEAS_DIR = str(kbpaths.out("ui", "measurements"))
 SCREEN_DIR = str(kbpaths.out("ui", "screens"))
 os.makedirs(MEAS_DIR, exist_ok=True)
 os.makedirs(SCREEN_DIR, exist_ok=True)
+THRESHOLDS = kbpaths.data("ui", "thresholds.yaml")
+REFERENCE_TOKENS = kbpaths.kb("ui", "14-recipes", "examples", "tokens.css")
+HEADER_SOURCE = {"page": "site/03-page-structure/03-first-screen-and-mobile.md §4.2",
+                 "app": "ui/CONTRADICTIONS.md §[C3]; ui/14-recipes/11-presets.md"}
+
+
+def first_breakpoint():
+    """Первый брейкпоинт эталонных токенов ui (`--bp-*` в kb/ui/14-recipes/examples/tokens.css)."""
+    with open(REFERENCE_TOKENS, encoding="utf-8") as fh:
+        return min(float(v) for v in re.findall(r"--bp-[a-z-]+:\s*(\d+(?:\.\d+)?)px", fh.read()))
+
+
+def header_limit(surface, preset, vw):
+    """Порог высоты шапки поверхности: (px, адрес нормы). Страница сайта — телефон или десктоп по окну."""
+    with open(THRESHOLDS, encoding="utf-8") as fh:
+        hh = yaml.safe_load(fh)["header_height"]
+    if surface == "page":
+        return hh["page"]["phone" if vw < first_breakpoint() else "desktop"], HEADER_SOURCE["page"]
+    return hh["app"][preset], HEADER_SOURCE["app"]
 
 try:
     from color import hex2oklch, wcag, apca, composite
@@ -995,6 +1021,14 @@ def print_summary(d, fh=sys.stdout):
       % (f["sidebar_w"], (f["sidebar_sel"] or "")[:40], f["header_h"], (f["header_sel"] or "")[:40],
          f["main_w"], f["main_max_width"], f["main_padding_x"],
          d["derived"].get("text_block_width_median"), d["derived"].get("text_block_width_max")))
+    dv = d["derived"]
+    if dv.get("header_limit") is not None:
+        where = ("страница сайта" if d["meta"].get("surface") == "page"
+                 else "экран приложения, пресет %s" % d["meta"].get("preset"))
+        verdict = ("шапка не найдена" if dv.get("header_over") is None
+                   else "выше порога — примета header-height" if dv["header_over"] else "в пороге")
+        w("шапка: %s px, порог %s px (%s; %s) — %s\n"
+          % (f["header_h"], dv["header_limit"], where, dv.get("header_norm"), verdict))
     tb = d["tables"]
     if tb["row_height"]:
         w("таблица: строки %s; padding ячейки x %s y %s; кегль %s\n"
@@ -1031,8 +1065,20 @@ def slugify(url):
     return s or hashlib.md5(url.encode()).hexdigest()[:8]
 
 
+def header_verdict(d, surface="app", preset="A"):
+    """Высота шапки против порога поверхности → d["derived"]: header_limit, header_over, header_norm."""
+    vw = int(str(d["meta"]["viewport"]).lower().split("x")[0])
+    limit, norm = header_limit(surface, preset, vw)
+    h = d["derived"].get("header_h")
+    d["meta"].update(surface=surface, preset=preset if surface == "app" else None)
+    d["derived"].update(header_limit=limit, header_norm=norm,
+                        header_over=(None if h is None else bool(h > limit)))
+    return d
+
+
 def measure(pw, url, viewport="1440x900", scheme="light", wait=2500, clicks=(), slug=None,
-            scroll=False, full_page=False, exclude=(), focus=8, timeout=60000, quiet=False):
+            scroll=False, full_page=False, exclude=(), focus=8, timeout=60000, quiet=False,
+            surface="app", preset="A"):
     vw, vh = (int(x) for x in viewport.lower().split("x"))
     slug = slug or slugify(url)
     mobile = vw <= 500
@@ -1077,7 +1123,7 @@ def measure(pw, url, viewport="1440x900", scheme="light", wait=2500, clicks=(), 
         page.wait_for_timeout(250)
         page.screenshot(path=png_path, full_page=full_page)
         raw = page.evaluate(COLLECT_JS, {"exclude": list(DEFAULT_EXCLUDE) + list(exclude)})
-        d = postprocess(raw, meta)
+        d = header_verdict(postprocess(raw, meta), surface, preset)
         # кольцо фокуса
         focus_data = []
         if focus:
@@ -1137,10 +1183,39 @@ def measure(pw, url, viewport="1440x900", scheme="light", wait=2500, clicks=(), 
     return d, json_path
 
 
+def selftest():
+    """Порог шапки по поверхности на синтетике, без браузера."""
+    ok = True
+
+    def check(name, got, want):
+        nonlocal ok
+        good = got == want
+        ok &= good
+        print("%s %s: %r%s" % ("OK  " if good else "FAIL", name, got, "" if good else " (ожидалось %r)" % (want,)))
+
+    check("первый брейкпоинт эталонных токенов", first_breakpoint(), 640.0)
+    check("страница сайта: телефон 64, десктоп 80",
+          (header_limit("page", "A", 390)[0], header_limit("page", "A", 1440)[0]), (64, 80))
+    check("экран приложения: A 48, B 64, C 56, D 40", [header_limit("app", k, 1440)[0] for k in "ABCD"], [48, 64, 56, 40])
+
+    def synth(h, viewport):
+        return {"meta": {"viewport": viewport}, "derived": {"header_h": h}}
+    d = header_verdict(synth(72, "390x844"), "page")
+    check("шапка 72 на телефоне страницы — выше 64", (d["derived"]["header_limit"], d["derived"]["header_over"]), (64, True))
+    d = header_verdict(synth(72, "1440x900"), "page")
+    check("шапка 72 на десктопе страницы — в пороге 80", d["derived"]["header_over"], False)
+    d = header_verdict(synth(56, "1440x900"), "app", "A")
+    check("шапка 56 у приложения A — выше 48", d["derived"]["header_over"], True)
+    check("шапки нет — вердикта нет", header_verdict(synth(None, "1440x900"))["derived"]["header_over"], None)
+    return 0 if ok else 1
+
+
 def main():
     ap = argparse.ArgumentParser(add_help=False)
     ap.add_argument("url", nargs="?")
     ap.add_argument("--viewport", default="1440x900")
+    ap.add_argument("--surface", default="app", choices=["app", "page"])
+    ap.add_argument("--preset", default="A", choices=["A", "B", "C", "D"])
     ap.add_argument("--wait", type=int, default=2500)
     ap.add_argument("--click", action="append", default=[])
     ap.add_argument("--scheme", default="light", choices=["light", "dark", "both"])
@@ -1153,12 +1228,15 @@ def main():
     ap.add_argument("--quiet", action="store_true")
     ap.add_argument("--batch")
     ap.add_argument("--summary")
+    ap.add_argument("--selftest", action="store_true")
     ap.add_argument("-h", "--help", action="store_true")
     a = ap.parse_args()
 
-    if a.help or (not a.url and not a.batch and not a.summary):
+    if a.help or (not a.url and not a.batch and not a.summary and not a.selftest):
         print(__doc__)
         return
+    if a.selftest:
+        sys.exit(selftest())
 
     if a.summary:
         with open(a.summary, encoding="utf-8") as fh:
@@ -1182,7 +1260,8 @@ def main():
     else:
         jobs.append({"url": a.url, "viewport": a.viewport, "scheme": a.scheme, "wait": a.wait,
                      "click": a.click, "slug": a.slug, "scroll": a.scroll,
-                     "full_page": a.full_page, "exclude": a.exclude, "focus": a.focus})
+                     "full_page": a.full_page, "exclude": a.exclude, "focus": a.focus,
+                     "surface": a.surface, "preset": a.preset})
 
     ok, bad = 0, []
     with sync_playwright() as pw:
@@ -1197,7 +1276,8 @@ def main():
                                    slug=j.get("slug"), scroll=bool(j.get("scroll")),
                                    full_page=bool(j.get("full_page")), exclude=excl,
                                    focus=int(j.get("focus", 8)), timeout=int(j.get("timeout", 60000)),
-                                   quiet=a.quiet)
+                                   quiet=a.quiet, surface=j.get("surface", a.surface),
+                                   preset=j.get("preset", a.preset))
                     if "error" in d:
                         bad.append((j.get("slug") or j["url"], sc, d["error"]))
                     else:

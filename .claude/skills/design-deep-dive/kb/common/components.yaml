@@ -27,7 +27,8 @@
 #   места.
 # - Состояния экрана (загрузка, пусто, ошибка, нет прав …) — другой словарь:
 #   ux/06-feedback-states-motion/01-state-matrix.md §2. У коллекций и плиток ключ `screen_states` ведёт к строке
-#   матрицы «компонент × состояние экрана»; варианты данных такого компонента ДС рисует по ней.
+#   матрицы «компонент × состояние экрана» (06/01 §3.1) — ключу раздела `matrix` производного
+#   ux/06-feedback-states-motion/screen-states.yaml; варианты данных такого компонента ДС рисует по ней.
 # - Чего в словаре нет и где оно живёт — раздел `outside`.
 #
 # Ключи типа
@@ -39,7 +40,7 @@
 #   parts — части составного компонента для `ui:<Тип>.<Часть>`;
 #   usage — метки грани «Слот» словаря меток токенов (ui/14-recipes/08-tokens-export.md §Шаг 4);
 #   app_css — классы эталонного слоя компонентов ui/14-recipes/examples/app.css;
-#   screen_states — строка матрицы состояний экрана для коллекций и плиток;
+#   screen_states — строка матрицы состояний экрана для коллекций и плиток (`файл#ключ` YAML матрицы);
 #   aka — имена того же компонента в других системах: помогают сопоставить компонент ДС типу, в экранах не пишутся;
 #   use_instead — частые подмены: в каком случае нужен другой тип.
 #
@@ -551,7 +552,7 @@ types:
       required: [rest, hover, focus-visible, disabled]
       optional: [loading, expanded]
     usage: [form-field]
-    screen_states: ux/06-feedback-states-motion/01-state-matrix.md §3.4
+    screen_states: ux/06-feedback-states-motion/screen-states.yaml#search
     aka: [Search, SearchField]
     use_instead:
       - {when: "замена понятной навигации", use: Sidebar, ref: ux/04-components-patterns/02-search-filter-sort.md §2.1}
@@ -753,7 +754,7 @@ types:
       required: [rest, hover, focus-visible, disabled, drop-target, invalid, loading]
       optional: [valid]
     usage: [form-field]
-    screen_states: ux/06-feedback-states-motion/01-state-matrix.md §3.4
+    screen_states: ux/06-feedback-states-motion/screen-states.yaml#file
     aka: [Dropzone, FileUploader]
 
   TagInput:
@@ -1164,7 +1165,7 @@ types:
     parts: [Header, Row, Cell, Footer]
     usage: [table, table-header, table-row, table-cell]
     app_css: [.table-wrap, .num, .mono, .cell-strong, .col-check, .col-actions, .table-footer]
-    screen_states: ux/06-feedback-states-motion/01-state-matrix.md §3.2
+    screen_states: ux/06-feedback-states-motion/screen-states.yaml#list-table
     aka: [DataTable, DataGrid]
     use_instead:
       - {when: "разнородные объекты", use: Card, ref: ux/04-components-patterns/04-lists-cards-and-record-view.md §1.3}
@@ -1197,7 +1198,7 @@ types:
       optional: [disabled, expanded, dragged, drop-target]
     parts: [Item]
     usage: [list-row]
-    screen_states: ux/06-feedback-states-motion/01-state-matrix.md §3.2
+    screen_states: ux/06-feedback-states-motion/screen-states.yaml#list-table
     aka: [ListView]
     use_instead:
       - {when: "сравнение по многим атрибутам", use: Table, ref: ux/04-components-patterns/04-lists-cards-and-record-view.md §1.4}
@@ -1251,7 +1252,7 @@ types:
       optional: [hover, focus-visible, active]
     usage: [card]
     app_css: [.kpi-grid, .kpi-label, .kpi-value, .kpi-delta]
-    screen_states: ux/06-feedback-states-motion/01-state-matrix.md §3.3
+    screen_states: ux/06-feedback-states-motion/screen-states.yaml#dashboard-tile
     aka: [StatCard, MetricCard, KpiCard]
 
   Chart:
@@ -1267,8 +1268,8 @@ types:
       required: [rest, skeleton]
       optional: [hover, focus-visible, selected]
     usage: [chart]
-    app_css: [.chart-grid, .bars, .bar, .legend, .swatch]
-    screen_states: ux/06-feedback-states-motion/01-state-matrix.md §3.3
+    app_css: [.chart-grid, .bars, .bar-pair, .bar, .bar--2, .legend, .swatch]
+    screen_states: ux/06-feedback-states-motion/screen-states.yaml#dashboard-tile
     aka: [Sparkline]
 
   TreeView:

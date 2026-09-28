@@ -1,6 +1,6 @@
 # Машиночитаемая версия 12-evaluation-checklists/02-master-checklist.md.
 # Сгенерировано скриптом ../../scripts/ux/checklist_export.py — правки вносить в Markdown и перегенерировать.
-generated_at: "2026-09-22 20:02"
+source_sha256_16: "77bad8ab0088c710"
 source_md: "12-evaluation-checklists/02-master-checklist.md"
 source_md_meta: "Машиночитаемый свод правил базы: **434 пунктов в 20 блоках** (APP — четыре подблока по типу приложения). Каждый пункт имеет идентификатор, формулировку «да/нет», серьёзность,"
 items_count: 434
@@ -420,9 +420,9 @@ items:
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
-    source_file: ["ui-research/09-design-tokens/"]
+    source_file: ["ui/09-design-tokens/"]
     source_section: "там же"
-    source_raw: "там же; `../../ui-research/09-design-tokens/`"
+    source_raw: "там же; `../../ui/09-design-tokens/`"
     evidence_level: []
   - id: UX-BLD-11
     block: BLD
@@ -644,9 +644,9 @@ items:
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
-    source_file: ["08-accessibility/01-wcag22-as-build-rules.md", "ui-research/03-spacing-sizing/"]
+    source_file: ["08-accessibility/01-wcag22-as-build-rules.md", "ui/03-spacing-sizing/"]
     source_section: ""
-    source_raw: "`../08-accessibility/01-...`; `../../ui-research/03-spacing-sizing/`"
+    source_raw: "`../08-accessibility/01-...`; `../../ui/03-spacing-sizing/`"
     evidence_level: []
   - id: UX-A11-15
     block: A11
@@ -1305,9 +1305,9 @@ items:
     check_method: [LNT, IMG]
     check_method_class: [script, visual]
     check_method_main: script
-    source_file: ["03-layout-placement/02-grid-spacing-density.md", "ui-research/03-spacing-sizing/"]
+    source_file: ["03-layout-placement/02-grid-spacing-density.md", "ui/03-spacing-sizing/"]
     source_section: ""
-    source_raw: "`../03-layout-placement/02-grid-spacing-density.md`; `../../ui-research/03-spacing-sizing/`"
+    source_raw: "`../03-layout-placement/02-grid-spacing-density.md`; `../../ui/03-spacing-sizing/`"
     evidence_level: []
   - id: UX-LAY-07
     block: LAY
@@ -3735,9 +3735,9 @@ items:
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
-    source_file: ["ui-research/11-styles-trends/"]
+    source_file: ["ui/11-styles-trends/"]
     source_section: "дефект F13.1"
-    source_raw: "дефект F13.1; `../../ui-research/11-styles-trends/`"
+    source_raw: "дефект F13.1; `../../ui/11-styles-trends/`"
     evidence_level: []
     failure_modes: [F13.1]
   - id: UX-AIG-07
@@ -5951,7 +5951,7 @@ items:
     block: APP
     block_title: "по типу приложения (плейбуки `../13-app-types/`)"
     sub_block: PRC
-    text: "Отправлен бриф на визуальный слой в `../../ui-research/` (токены, плотность, шкала)"
+    text: "Отправлен бриф на визуальный слой в `../../ui/` (токены, плотность, шкала)"
     severity: D
     severity_label: "желательно"
     severity_note: "назначено агентом S1 (волна 4), не измерено"

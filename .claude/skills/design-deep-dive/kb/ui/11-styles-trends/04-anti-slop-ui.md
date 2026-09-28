@@ -258,10 +258,14 @@ and next session it makes them again.» Рабочая схема — замкн
 ## 3. Скрипт проверок
 
 Запускается в консоли на готовой странице. Возвращает объект с флагами; каждый флаг соответствует номеру
-маркера. Значения порогов — из §2 и из медиан практики.
+маркера. Своих порогов и шкал у скрипта нет: их передаёт параметр `P`, который печатает утилита
+`scripts/ui/ui_audit.py` с ключом `--slop-params` (токены ДС проекта — ключом `--tokens`): порог кеглей из
+`scripts/ui/data/thresholds.yaml`, шкала `space.*` и цвета из токенов ДС проекта (без ДС — эталон
+`../14-recipes/examples/tokens.css`), доля шкалы и цель нажатия из пресета утилиты.
 
 ```js
-(() => {
+// const P = { … };  — вывод ui_audit.py --slop-params: fontSizesTellAbove, spaceScale, spaceInScaleMin, targetMin, colors
+((p) => {
   const all = [...document.querySelectorAll('body *')];
   const cs = el => getComputedStyle(el);
   const vis = all.filter(el => {
@@ -281,18 +285,28 @@ and next session it makes them again.» Рабочая схема — замкн
   const shadows = vis.map(el => cs(el).boxShadow).filter(v => v && v !== 'none');
   const shadowTop = Object.entries(shadows.reduce((a, s) => (a[s] = (a[s]||0)+1, a), {}))
                           .sort((a,b) => b[1]-a[1])[0] || ['', 0];
-  // 10, 11: отступы
+  // 10, 11: отступы; 11 — доля значений в шкале space.* ДС
   const pads = vis.flatMap(el => {
     const s = cs(el);
     return [s.paddingTop, s.paddingRight, s.paddingBottom, s.paddingLeft, s.gap, s.rowGap, s.columnGap];
   }).map(parseFloat).filter(v => v > 0 && isFinite(v));
-  const mult4 = pads.filter(v => v % 4 === 0).length / (pads.length || 1);
+  const inScale = pads.filter(v => p.spaceScale.some(s => Math.abs(v - s) < 0.5)).length / (pads.length || 1);
   // 12: цели
   const inter = vis.filter(el => el.matches('a,button,input,select,textarea,[role="button"],[tabindex]:not([tabindex="-1"])'));
   const small = inter.filter(el => {
     const r = el.getBoundingClientRect();
-    return Math.min(r.width, r.height) < 24;
+    return Math.min(r.width, r.height) < p.targetMin;
   });
+  // 33: цвет текста и фона литералом вне токенов ДС («фирменный чёрный» и любой другой)
+  const hex = c => {
+    const m = (c || '').match(/rgba?\(([^)]+)\)/);
+    if (!m) return null;
+    const v = m[1].split(/[,\s/]+/).filter(Boolean).map(Number);
+    if (v.length > 3 && v[3] === 0) return null;
+    return '#' + v.slice(0, 3).map(x => Math.round(x).toString(16).padStart(2, '0')).join('');
+  };
+  const literals = uniq(vis.flatMap(el => [hex(cs(el).color), hex(cs(el).backgroundColor)]))
+    .filter(c => c && !p.colors.includes(c));
   // 8: капс
   const textNodes = vis.filter(el => el.childElementCount === 0 && el.textContent.trim());
   const caps = textNodes.filter(el => cs(el).textTransform === 'uppercase');
@@ -316,8 +330,10 @@ and next session it makes them again.» Рабочая схема — замкн
     m3_gradients: (css.match(/linear-gradient/g) || []).length,
     m8_capsRatio: +(caps.length / (textNodes.length || 1)).toFixed(3),
     m9_fontSizes: sizes.length,
+    m9_tell: sizes.length > p.fontSizesTellAbove,
     m10_spacingValues: uniq(pads).length,
-    m11_multipleOf4: +mult4.toFixed(3),
+    m11_inScale: +inScale.toFixed(3),
+    m11_tell: inScale < p.spaceInScaleMin,
     m12_smallTargets: +(small.length / (inter.length || 1)).toFixed(3),
     m13_dominantShadow: shadowTop[0],
     m13_dominantShadowShare: +(shadowTop[1] / (shadows.length || 1)).toFixed(3),
@@ -329,10 +345,11 @@ and next session it makes them again.» Рабочая схема — замкн
     m24_placeholders: /lorem|ipsum|John Doe|example@example/i.test(document.body.innerText),
     m29_transitionAll: transAll.length,
     m32_middots: (document.body.innerText.match(/ · /g) || []).length,
+    m33_literalColors: literals,
     m34_arrows: [...document.querySelectorAll('button,a')]
                   .filter(el => /→\s*$/.test(el.textContent.trim())).length,
   };
-})();
+})(P);
 ```
 
 **Пороги для интерпретации**
@@ -340,9 +357,9 @@ and next session it makes them again.» Рабочая схема — замкн
 | Поле | Норма | Тревога |
 |---|---|---|
 | `m8_capsRatio` | ≤ 0.02 | > 0.05 |
-| `m9_fontSizes` | 4–7 | ≥ 10 |
+| `m9_fontSizes`, `m9_tell` | `font_sizes.norm` в `thresholds.yaml` | `m9_tell`: больше `font_sizes.tell_above` |
 | `m10_spacingValues` | 6–10 | ≤ 3 или ≥ 20 |
-| `m11_multipleOf4` | ≥ 0.85 | < 0.60 |
+| `m11_inScale`, `m11_tell` | не ниже `spaceInScaleMin` | `m11_tell`: ниже `spaceInScaleMin` |
 | `m12_smallTargets` | < 0.10 | > 0.20 |
 | `m13_dominantShadowShare` | ≤ 0.6 | > 0.6 при 5+ тенях |
 | `m14_radii` | 3–5 | 1 или ≥ 8 |
@@ -351,6 +368,7 @@ and next session it makes them again.» Рабочая схема — замкн
 | `m23_iconStrokes` | 1 значение | ≥ 3 |
 | `m29_transitionAll` | 0 | ≥ 5 |
 | `m32_middots` | ≤ 5 | > 10 |
+| `m33_literalColors` | пусто | любое значение: цвет вне токенов ДС |
 | `m34_arrows` | 0 | ≥ 2 |
 
 Скрипт **не заменяет** проверок контраста и токенов: для них — `../../scripts/lib/color.py`, грепы из

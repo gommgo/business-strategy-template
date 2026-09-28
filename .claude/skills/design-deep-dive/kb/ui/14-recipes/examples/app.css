@@ -386,6 +386,9 @@ tbody tr[aria-selected="true"]:hover { background: var(--bg-selected-hover); }
   gap: var(--space-md);
   margin-top: var(--space-md);
 }
+/* в сетке расстояние между карточками задаёт gap: отступ стопки `.card + .card` сдвинул бы соседей ряда */
+.kpi-grid > .card,
+.chart-grid > .card { margin-top: 0; }
 .kpi-label {
   color: var(--fg-secondary);
   font-size: var(--type-label-size);
@@ -410,7 +413,9 @@ tbody tr[aria-selected="true"]:hover { background: var(--bg-selected-hover); }
 .kpi-delta--down { color: var(--danger-text); }
 
 .bars { display: flex; align-items: flex-end; gap: var(--space-xs); height: var(--space-5xl); }
+.bar-pair { flex: 1; display: flex; align-items: flex-end; gap: var(--space-3xs); height: 100%; }
 .bar { flex: 1; background: var(--chart-1); border-radius: var(--corner-xs); }
+.bar--2 { background: var(--chart-2); }
 .legend { display: flex; flex-wrap: wrap; gap: var(--space-md); margin-top: var(--space-sm); }
 .legend span { display: inline-flex; align-items: center; gap: var(--space-2xs); font-size: var(--type-helper-size); line-height: var(--type-helper-leading); color: var(--fg-secondary); }
 .swatch { width: var(--space-sm); height: var(--space-sm); border-radius: var(--corner-xs); }

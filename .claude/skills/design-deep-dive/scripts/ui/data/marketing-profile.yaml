@@ -1,0 +1,116 @@
+# Профиль marketing проверок ui_audit.py — страница сайта: лендинг, промо, главная
+#
+# Проверки ui_audit.py написаны для экранов приложения. На странице сайта часть их порогов — жанровые решения, а не
+# дефекты: display-кегли 48–160, отступы секций 64–160, hero-CTA 52–64, слои эффектов. Профиль говорит, что делать с
+# каждой такой проверкой на странице; доступность — контраст, фокус, цели нажатия, переполнение, lang — он не смягчает.
+# Профиль один на скилл: его применяет scripts/creative/marketing_audit.py поверх ui_audit.py (функции load_profile и
+# apply_profile); канон профиля и таблица словами — creative/09-ai-execution-evaluation/03-verification-loop-and-gates.md
+# §4. Файл читает только код.
+#
+# Ключи
+#   base — пресет ui_audit.py, поверх которого профиль меняет значения;
+#   preset — значения, которые проверки читают из пресета: шкалы и пороги страницы сайта. Шкалы токенов ДС проекта, если
+#     их передали утилите, заменяют шкалы пресета. Значения шкал — творческая база: токены страницы
+#     creative/04-visual-language/marketing-tokens.json (секции, hero-CTA, радиусы, `motion.marketing`);
+#   glass — лимиты стекла (проверка D3) берутся из записи эффекта, а не пишутся здесь: поле пресета → поле `limits`;
+#   checks — таблица профиля: id проверки ui_audit.py → action, severity, threshold, landing, basis.
+#     action: keep — как в base; retune — порог из preset; recompute — пересчёт по узлам (D3, D4, L4 считает
+#       ui_audit.py при этом пресете, остальные — marketing_audit.py); severity — меняется только серьёзность;
+#       info — не критерий, вердикт «информативно».
+#     severity: B — блокер, S — серьёзно, D — полировка.
+#     threshold — порог словами для отчёта; landing — что на странице сайта даёт срабатывание; basis — адрес нормы.
+
+name: marketing
+title: "маркетинговая страница: лендинг, промо, главная"
+base: consumer
+
+preset:
+  spacing: [0, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32, 40, 48, 56, 64, 72, 80, 96, 112, 120, 128, 144, 160, 192, 200, 240]
+  radius: [0, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32, 40, 48, 9999]
+  heights: [24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64]
+  unique_heights_max: 5
+  font_sizes: [12, 13, 14, 15, 16, 17, 18, 20, 22, 24]   # текстовые роли; display крупнее 24 — отдельные проверки
+  unique_font_sizes_max: 10
+  unique_radius_max: 8
+  shadow_share_max: 0.40
+  unique_text_colors_max: 10
+  unique_bg_colors_max: 14          # ритм фонов секций
+  page_header_max: 140
+  zindex: [-1, 0, 1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 100, 200, 500, 999, 1000, 1100, 1200, 1300, 1400, 1500, 9999]
+  durations: [0, 60, 80, 100, 120, 150, 160, 180, 200, 240, 250, 300, 320, 350, 400, 450, 480, 500, 560, 600, 700, 800,
+              900, 1000, 1200]
+  # Потолок длительностей страницы задаёт уровень амбиций, а проверяет движение motion_check.py: у K2 профиля — только
+  # шкала.
+  duration_max: null
+  duration_max_exception: null
+  # Свечение — только shadow.cta-glow у одной кнопки по решению арт-дирекции
+  # (creative/04-visual-language/03-color-surfaces-product.md §4.3); больше — примета neon-glow.
+  glow_max: 1
+  # Фиолетовая полоса: оттенок OKLCH 270–320° при хроме от 0,06 (ui/11-styles-trends/04-anti-slop-ui.md §2.1, маркеры 1
+  # и 4). Проверка L4 профиля — градиентный текст и hero-градиент первого экрана в этой полосе.
+  purple_band: {hue: [270, 320], chroma_min: 0.06}
+
+glass:
+  effect: glass-panel               # creative/06-effects-catalog/effects.yaml
+  fields:
+    glass_max: panels_per_page_profile_filter
+    glass_view_max: panels_in_view_max
+    glass_view_max_media: panels_in_view_max_over_video_or_webgl
+    glass_blur_max: blur_px_max
+
+checks:
+  A1: {action: recompute, severity: D, threshold: "≥ 90 % значений ≤ 48 px из шкалы; > 48 px — ритм секций (информативно)",
+       landing: "секции 64–160 px и отступы на clamp() дают дробные значения вне шкалы",
+       basis: "creative/09-ai-execution-evaluation/03-verification-loop-and-gates.md §4.2; marketing-tokens.json space.section-*"}
+  A2: {action: recompute, severity: D, threshold: "0 значений ≤ 48 px, кратных 5 и не кратных 4",
+       landing: "fluid-отступы (vw, clamp) дают 45, 75, 115 — это не «шкала десятками»",
+       basis: "creative/04-visual-language/02-composition-rhythm-sections.md (fluid-величины)"}
+  B1: {action: recompute, severity: D, threshold: "≤ 5 уникальных высот контролов",
+       landing: "навигация 40, поле 44–48, hero-CTA 52–64, чипы 32",
+       basis: "creative/09-ai-execution-evaluation/03-verification-loop-and-gates.md §4.2; marketing-tokens.json size.cta-hero-height"}
+  B2: {action: recompute, severity: D, threshold: "высоты из ряда 24…64 (шаг 4)", landing: "hero-CTA 56 вне ряда 24–48",
+       basis: "marketing-tokens.json size.cta-hero-height"}
+  C1: {action: retune, severity: D, threshold: "≤ 8 радиусов", landing: "крупные плашки, медиа 16, карточки 24, пилюли",
+       basis: "marketing-tokens.json radius.*"}
+  C2: {action: retune, severity: D, threshold: "шкала 0–48 + 9999", landing: "то же", basis: "marketing-tokens.json radius.*"}
+  C5: {action: info, severity: D, threshold: "информативно", landing: "круглые аватары, пилюли, крупные скругления плашек",
+       basis: "creative/09-ai-execution-evaluation/03-verification-loop-and-gates.md §4.2"}
+  D3: {action: recompute, severity: D,
+       threshold: "на странице ≤ glass_max, в первом экране ≤ glass_view_max (над видео или WebGL ≤ glass_view_max_media), blur ≤ glass_blur_max",
+       landing: "стеклянные карточки над фото и видео; лимит — бюджет кадра, стиль — примета glassmorphism-panels",
+       basis: "creative/06-effects-catalog/effects.yaml#glass-panel (limits)"}
+  D4: {action: recompute, severity: D, threshold: "≤ glow_max элементов со свечением (нулевое смещение, blur > 8)",
+       landing: "glow-CTA и ореолы", basis: "creative/04-visual-language/03-color-surfaces-product.md §4.3; примета neon-glow"}
+  D5: {action: retune, severity: D, threshold: "≤ 40 % блоков с тенью", landing: "карточки фич с тенью",
+       basis: "creative/09-ai-execution-evaluation/03-verification-loop-and-gates.md §4.2"}
+  E1: {action: severity, severity: D, threshold: "шкала слоёв с −1…5 и 9999", landing: "слои эффектов: фон-canvas −1, оверлеи, курсор 9999",
+       basis: "creative/09-ai-execution-evaluation/03-verification-loop-and-gates.md §4.2"}
+  E2: {action: severity, severity: D, threshold: "> 1500 — информативно", landing: "баннеры cookie и виджеты третьих сторон (2147483647)",
+       basis: "creative/09-ai-execution-evaluation/03-verification-loop-and-gates.md §4.2; сторонние слои страница не выбирает"}
+  H1: {action: recompute, severity: D, threshold: "≤ 10 кеглей текста ≤ 24 px; display > 24 — отдельно (информативно)",
+       landing: "display-роли 48–160 на clamp() дают по кеглю на ширину окна", basis: "creative/04-visual-language/01-display-typography.md"}
+  H2: {action: recompute, severity: D, threshold: "кегли ≤ 24 px из текстовой шкалы 12–24; display — MKT-T1…T5", landing: "display 48–160",
+       basis: "creative/04-visual-language/01-display-typography.md (display-роли, clamp)"}
+  H4: {action: recompute, severity: D, threshold: "0 весов < 400 у текста < 32 px", landing: "светлый display — выбор гарнитуры",
+       basis: "creative/09-ai-execution-evaluation/03-verification-loop-and-gates.md §4.2"}
+  H8: {action: keep, severity: S, threshold: "длина строки абзаца в знаках — как в consumer", landing: "лид в колонке measure-lead",
+       basis: "ux/03-layout-placement/02-grid-spacing-density.md §4 (длина строки в знаках; пиксели — производные)"}
+  H10: {action: recompute, severity: D, threshold: "0 абзацев капсом (> 40 знаков); капс-лейблы и надзаголовки — примета caps-eyebrow",
+        landing: "eyebrow капсом, капс-display", basis: "creative/08-uniqueness-anti-slop/cliche-registry.yaml#caps-eyebrow"}
+  J2: {action: info, severity: D, threshold: "информативно", landing: "полноэкранная колонка-картинка принимается за сайдбар",
+       basis: "эвристика J2 ui_audit.py (x < 8, h > 45 %, 120 < w < 480)"}
+  J6: {action: recompute, severity: D, threshold: "≤ 6 сеток с равными колонками (однотипные плитки — примета bento-uniform-tiles)",
+       landing: "repeat(3, 1fr) фич, бенто — законные архетипы", basis: "creative/08-uniqueness-anti-slop/cliche-registry.yaml#bento-uniform-tiles"}
+  J8: {action: recompute, severity: D, threshold: "шапка ≤ 140 px; header выше 50 % экрана — hero, не шапка",
+       landing: "hero, свёрстанный тегом header", basis: "creative/09-ai-execution-evaluation/03-verification-loop-and-gates.md §4.2"}
+  K2: {action: retune, severity: D, threshold: "длительности из motion.marketing (0–1200 мс); потолок — уровень амбиций (motion_check.py)",
+       landing: "hero-сцены 600–1200 мс", basis: "marketing-tokens.json motion.marketing; creative/01-creative-direction/ambition-levels.yaml"}
+  L4: {action: recompute, severity: D, threshold: "градиентный текст и hero-градиент первого экрана в фиолетовой полосе",
+       landing: "градиентный фон и mesh — приём при концепции", basis: "creative/08-uniqueness-anti-slop/01-cliche-policy.md §4.1"}
+  L5: {action: recompute, severity: D, threshold: "≤ 3 гарнитуры (display + текстовая + моно для данных)", landing: "display + text",
+       basis: "creative/04-visual-language/01-display-typography.md"}
+  M1: {action: severity, severity: D, threshold: "длительности при reduce ≤ обычных",
+       landing: "reduce-ветка лендинга обнуляет появление — это норма (конечные состояния)",
+       basis: "creative/05-motion/01-motion-principles-and-access.md §4; поведение — motion_check.py"}
+  F1: {action: keep, severity: B, threshold: "цели ≥ 24×24 или зазор (WCAG 2.5.8); на тач-прогоне — F3: зона нажатия ≥ 44×44 (серьёзно)",
+       landing: "—", basis: "ux/08-accessibility/01-wcag22-as-build-rules.md §12.4"}

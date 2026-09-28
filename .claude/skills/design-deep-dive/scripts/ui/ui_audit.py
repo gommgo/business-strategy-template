@@ -1,32 +1,36 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Объединённый прогон визуального QA страницы: измерение + сверка с токенами и порогами базы + отчёт.
+"""Визуальный QA экрана или страницы: измерение computed styles, сверка с токенами ДС и порогами базы ui, отчёт.
 
-Написано агентом I волны 3 проекта ui-research. Сводит в один запуск то, что раньше было разнесено:
-  * скрипт computed styles и пороги приёмки  — `04-shape-elevation/03-tools-checks-and-ai-errors.md` §2, §6, §8;
-  * 12 проверок раскладки                    — `05-layout-grid/06-ai-errors-and-checks.md` §3;
-  * 19 проверок типографики                  — `02-typography/06-localization-and-ai-errors.md` §5;
-  * псевдокод проверок состояний             — `06-components-visual/07-states-matrix.md` §12;
-  * нормы практики 24 живых продуктов        — `10-design-systems-atlas/04-live-products-measured.md` §8;
-  * проверки токенов и пять грепов           — `09-design-tokens/05-anti-patterns-and-pipeline.md` §3.
-Расчёты цвета берутся из соседнего `color.py` (WCAG 2, APCA, OKLCH, ΔE, композитинг альфы).
+Проверки собраны из базы ui: пороги приёмки формы и глубины (`04-shape-elevation/03-tools-checks-and-ai-errors.md`
+§2, §6, §8), раскладки (`05-layout-grid/06-ai-errors-and-checks.md` §3), типографики
+(`02-typography/06-localization-and-ai-errors.md` §5), состояний (`06-components-visual/07-states-matrix.md` §12), нормы
+практики (`10-design-systems-atlas/04-live-products-measured.md` §8), токены (`09-design-tokens/05-anti-patterns-and-pipeline.md`
+§3). Расчёты цвета — `scripts/lib/color.py` (WCAG 2, APCA, OKLCH, ΔE, композитинг альфы).
 
 Использование:
     python3 ui_audit.py ПУТЬ_ИЛИ_URL [ключи]
-    python3 ui_audit.py 14-recipes/examples/01-table.html --preset admin --scheme both --reduced-motion --hover --tab 20
-    python3 ui_audit.py --batch список.txt --preset admin --out 99-raw/cache/audit
-    python3 ui_audit.py --selftest        # проверка порогов и парсеров без браузера
+    python3 ui_audit.py экран.html --tokens docs/projects/<slug>/design/system.tokens.json --scheme both --hover --tab 20
+    python3 ui_audit.py экран.html --acceptance --touch      # все ширины приёмки, вылет на 320 и тач-прогон
+    python3 ui_audit.py --batch список.txt --preset admin
+    python3 ui_audit.py --slop-params [--tokens ФАЙЛ]       # параметры скрипта маркеров ui 11/04 §3 (JSON)
+    python3 ui_audit.py --selftest                          # парсеры, пороги и проверки на синтетике, без браузера
 
 Ключи:
-    --preset admin|consumer   набор разрешённых значений и порогов (по умолчанию admin)
-    --tokens ФАЙЛ.json        DTCG-набор токенов: шкалы берутся из него, а не из пресета
-    --viewport WxH            окно, по умолчанию 1440x900 (повторять ключ для нескольких прогонов)
+    --preset admin|consumer   пресет порогов ui 14/11: admin — A (плотная админка), consumer — B (кабинет клиента)
+    --tokens ФАЙЛ             токены ДС проекта: DTCG `system.tokens.json` или CSS `system.tokens.css`. Шкалы
+                              отступов (`space.*`), кеглей, радиусов, высот, слоёв, длительностей и набор цветов берутся
+                              из них. Без ключа у admin — эталонные токены ui (`kb/ui/14-recipes/examples/tokens.css`),
+                              у consumer — шкалы пресета; источник шкал записан в отчёте
+    --viewport WxH            окно прогона (повторять ключ для нескольких); по умолчанию — первая ширина приёмки
+    --acceptance              все ширины приёмки из `kb/common/acceptance-widths.yaml` и прогон вылета на `overflow_only`
     --scheme light|dark|both  цветовая схема (по умолчанию light)
     --reduced-motion          дополнительный прогон с `prefers-reduced-motion: reduce`
     --hover                   прогон hover по выборке интерактивных элементов (до 12 штук)
     --tab N                   пройти Tab N раз и проверить индикатор фокуса (по умолчанию 0, рекомендуется 20)
-    --touch                   дополнительный прогон 390x844 с `pointer: coarse` и порогом целей 44
-    --out КАТАЛОГ             куда писать отчёт (по умолчанию 99-raw/cache/audit)
+    --touch                   прогон с эмуляцией тача (`pointer: coarse`) на самой широкой ширине приёмки уже первого
+                              брейкпоинта ДС: F3 — зона нажатия каждой цели ≥ 44×44
+    --out КАТАЛОГ             куда писать отчёт (по умолчанию $DDD_HOME/out/ui/audit)
     --name ИМЯ                имя файлов отчёта вместо автогенерации
     --strict-border           требовать контраст границы контрола >= 3:1 (WCAG 1.4.11) вместо режима практики
     --max-elements N          предел числа разбираемых узлов (по умолчанию 4000)
@@ -34,12 +38,18 @@
     --fail-on blocker|serious|any   код возврата 1, если есть нарушения такого уровня
     --quiet                   не печатать таблицу в stdout
 
-Каталог проверок: 81 идентификатор в 14 группах (A отступы, B размеры, C форма, D глубина, E слои,
-F цели, G фокус, H типографика, I цвет, J раскладка, K движение, L антислоп, M сокращённое движение,
-S состояния). На одном прогоне срабатывают 55–66: часть зависит от режима.
+Проверки — 14 групп: A отступы, B размеры, C форма, D глубина, E слои, F цели, G фокус, H типографика, I цвет,
+J раскладка, K движение, L приметы вида, M сокращённое движение, S состояния. Визуально скрытое (clip, 1×1, вне предка с
+`overflow: hidden`) в проверки текста и целей не входит. Длина строки абзаца (H8) — в знаках; потолок длительностей (K2)
+— из пресета; соседние карточки ряда выровнены (J9). Находка несёт id приметы реестра `kb/common/tells.yaml`
+(раздел `checks`, ключ `ui_audit:<id проверки>`), отчёт сводит приметы без повторов.
+
+Профиль страницы сайта — `marketing` (`scripts/ui/data/marketing-profile.yaml`): его применяет
+`scripts/creative/marketing_audit.py` через load_profile и apply_profile; числа D3 — лимиты `glass-panel` каталога
+эффектов creative. Общие пороги нескольких утилит — `scripts/ui/data/thresholds.yaml`.
 
 Что на выходе:
-    <out>/<name>.md    таблица «правило | найдено | порог | вердикт | серьёзность» + примеры узлов
+    <out>/<name>.md    таблица «правило | найдено | порог | вердикт | серьёзность» + примеры узлов + приметы
     <out>/<name>.json  те же данные машиночитаемо (для цикла «прогнал -> вернул модели -> правки»)
 
 Ограничения (важно для чтения результата):
@@ -47,12 +57,14 @@ S состояния). На одном прогоне срабатывают 55�
   * скрипт не видит смысл: `bg-subtle` вместо `bg-component` он пропустит (это ловится только ревью);
   * иерархия, осмысленность метрик, «ложное дно» и вкус не проверяются в принципе;
   * кросс-доменные iframe и canvas не разбираются;
-  * контраст текста на градиенте и на картинке считается по цвету ближайшего непрозрачного предка,
-    то есть в этом случае значение недостоверно и помечается как `warn`.
+  * контраст текста на градиенте и на полупрозрачной подложке считается по цвету ближайшего непрозрачного предка —
+    значение недостоверно, вердикт WARN (I1b); текст над картинкой, видео или canvas — WARN «проверить F83» (I1m):
+    контраст по буквам считает `scripts/ai-media/page_accept.py --contrast`.
 """
 from __future__ import annotations
 
 import argparse
+import itertools
 import json
 import math
 import os
@@ -62,12 +74,28 @@ from collections import Counter, defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb("ui"))
-DEFAULT_OUT = str(kbpaths.out("ui", "audit"))
+DEFAULT_OUT = str(kbpaths.out("ui", "audit", create=False))
+THRESHOLDS = kbpaths.data("ui", "thresholds.yaml")
+REFERENCE_TOKENS = kbpaths.kb("ui", "14-recipes", "examples", "tokens.css")
+WIDTHS_FILE = kbpaths.kb(None, "common", "acceptance-widths.yaml")
+TELLS_FILE = kbpaths.kb(None, "common", "tells.yaml")
+EFFECTS_FILE = kbpaths.kb("creative", "06-effects-catalog", "effects.yaml")
+TELL_KEY = "ui_audit:"          # ключ проверки в tells.yaml#checks: ui_audit:<id проверки>
 
+import yaml  # noqa: E402
 from color import hex2oklch, wcag, apca, composite, dE_oklab  # noqa: E402
+
+
+def load_thresholds(path=THRESHOLDS):
+    """Общие пороги проверок (`scripts/ui/data/thresholds.yaml`)."""
+    with open(path, encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+TH = load_thresholds()
 
 # =====================================================================================
 # 1. Пресеты: разрешённые значения и пороги
@@ -76,6 +104,8 @@ from color import hex2oklch, wcag, apca, composite, dE_oklab  # noqa: E402
 PRESET_ADMIN = {
     "name": "admin",
     "title": "плотная админка (база 14 px, контрол 32)",
+    "ds_preset": "A",                 # пресет ui/14-recipes/11-presets.md
+    "reference_tokens": True,         # эталонные токены ui — токены этого пресета
     # шкалы значений
     "spacing": [0, 2, 4, 6, 8, 12, 16, 24, 32, 40, 48, 64, 96],
     "radius": [0, 2, 4, 6, 8, 9999],
@@ -96,7 +126,7 @@ PRESET_ADMIN = {
     "unique_shadow_max": 7,
     "shadow_share_max": 0.15,
     "glass_max": 2,
-    "unique_font_sizes_max": 8,
+    "unique_font_sizes_max": TH["font_sizes"]["norm"][1],
     "unique_font_weights_max": 4,
     "unique_text_colors_max": 9,   # практика: медиана 7.5, потолок 8; полный ролевой набор схемы — 9
     "unique_bg_colors_max": 10,
@@ -109,10 +139,22 @@ PRESET_ADMIN = {
     "sticky_sum_max": 192,
     "page_header_max": 120,
     "body_leading": (1.28, 1.55),
+    # длина строки абзаца в знаках: 45–75, в узкой колонке и на телефоне 40–60, не больше 80
+    # (ux/03-layout-placement/02-grid-spacing-density.md §4); узкое окно — уже первого брейкпоинта ДС
+    "measure_chars": (45, 75),
+    "measure_chars_narrow": (40, 60),
+    "measure_chars_max": 80,
     "target_min": 24,
+    "target_min_touch": 44,           # на таче каждая цель ≥ 44×44 зоной нажатия (ux/08-accessibility/01-… §12.4)
     "target_gap_min": 4,
     "focus_width_min": 2,
     "duration_300_share_max": 0.20,
+    # потолок длительностей пресета; исключение — подложка (скрим) у A, онбординг у B
+    # (ui/14-recipes/11-presets.md, «Потолок движения»; ui/09-design-tokens/04-reference-token-schema.md §2.10)
+    "duration_max": 200,
+    "duration_max_exception": 250,
+    "dark_bg_L": (0.13, 0.22),        # коридор светлоты фона тёмной темы OKLCH (I8, I10)
+    "neutral_C_max": 0.05,            # хрома нейтрали (I7, I10)
     "text_contrast_min": 4.5,
     "large_text_contrast_min": 3.0,
     "border_contrast_min": 3.0,       # при --strict-border
@@ -125,6 +167,10 @@ PRESET_CONSUMER = dict(PRESET_ADMIN)
 PRESET_CONSUMER.update({
     "name": "consumer",
     "title": "клиентский сервис (база 16 px, контрол 40)",
+    "ds_preset": "B",
+    "reference_tokens": False,        # эталонных токенов пресета B нет: шкалы — из пресета или токенов ДС
+    "duration_max": 400,
+    "duration_max_exception": 600,
     "radius": [0, 6, 10, 14, 20, 9999],
     "heights": [24, 32, 36, 40, 44, 48],
     "font_sizes": [12, 14, 16, 18, 20, 24, 32, 40],
@@ -142,8 +188,10 @@ PRESETS = {"admin": PRESET_ADMIN, "consumer": PRESET_CONSUMER}
 SEV_BLOCKER, SEV_SERIOUS, SEV_POLISH = "блокер", "серьёзно", "полировка"
 SEV_ORDER = {SEV_BLOCKER: 0, SEV_SERIOUS: 1, SEV_POLISH: 2}
 
+# Эмодзи — пиктограммы из блоков эмодзи, с необязательным селектором вида U+FE0F. Сам селектор не считается: иначе
+# «©️» и «↔️» — обычные знаки текста — попали бы в счёт (claude-design/06-design-process/05-default-look.md §7).
 EMOJI_RE = re.compile(
-    "[\U0001F300-\U0001FAFF\U00002600-\U000027BF\U0001F1E6-\U0001F1FF⬀-⯿️]"
+    "[\U0001F300-\U0001FAFF\U00002600-\U000027BF\U0001F1E6-\U0001F1FF⬀-⯿]️?"
 )
 TITLE_CASE_RU_RE = re.compile(r"\b[А-ЯЁ][а-яё]+\s+[А-ЯЁ][а-яё]+")
 EN_NUMBER_RE = re.compile(r"\d,\d{3}\b")
@@ -155,7 +203,10 @@ PERCENT_GLUED_RE = re.compile(r"\d%")
 # =====================================================================================
 
 def load_dtcg(path):
-    """Достать из DTCG-файла множества разрешённых значений: отступы, радиусы, высоты, кегли, цвета, z, длительности."""
+    """Достать из DTCG-файла множества разрешённых значений: отступы, радиусы, высоты, кегли, цвета, z, длительности.
+
+    Шкала отступов — только токены `space.*` с их режимами плотности: шкала одна
+    (ui/09-design-tokens/04-reference-token-schema.md §1.3); размерный ряд `primitive.size.*` отступом не считается."""
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
     flat = {}
@@ -183,7 +234,7 @@ def load_dtcg(path):
         return val
 
     out = {"spacing": set(), "radius": set(), "sizes": set(), "font_sizes": set(),
-           "colors": set(), "zindex": set(), "durations": set(), "font_weights": set()}
+           "colors": set(), "zindex": set(), "durations": set(), "font_weights": set(), "breakpoints": set()}
     for path_name, node in flat.items():
         v = resolve(node.get("$value"))
         t = node.get("$type")
@@ -194,7 +245,7 @@ def load_dtcg(path):
                  "color": "color", "z": "number", "motion": "duration"}.get(head)
         if isinstance(v, dict) and "value" in v and "unit" in v:
             px = float(v["value"]) * (16.0 if v["unit"] == "rem" else 1.0)
-            if path_name.startswith("space") or path_name.startswith("primitive.size"):
+            if path_name.startswith("space"):
                 out["spacing"].add(round(px, 2))
             if path_name.startswith("radius"):
                 out["radius"].add(round(px, 2))
@@ -230,7 +281,166 @@ def load_dtcg(path):
             out["zindex"].add(int(v))
         if "font.weight" in path_name and isinstance(v, (int, float)):
             out["font_weights"].add(int(v))
+        if path_name.startswith("breakpoint") and isinstance(v, dict) and "value" in v:
+            out["breakpoints"].add(round(float(v["value"]) * (16.0 if v.get("unit") == "rem" else 1.0), 2))
     return {k: sorted(v) for k, v in out.items()}
+
+
+CSS_VAR_RE = re.compile(r"--([A-Za-z0-9_-]+)\s*:\s*([^;{}]+);")
+TOKEN_SETS = ("spacing", "radius", "sizes", "font_sizes", "colors", "zindex", "durations", "font_weights", "breakpoints")
+
+
+def _hex6(h):
+    h = h.lstrip("#").lower()
+    if len(h) in (3, 4):
+        h = "".join(c * 2 for c in h[:3])
+    return "#" + h[:6]
+
+
+def load_css_tokens(path):
+    """Те же множества, что load_dtcg, из CSS-переменных ДС (`system.tokens.css`, эталон
+    `kb/ui/14-recipes/examples/tokens.css`). Имя переменной — путь токена через дефис; объявления всех блоков (темы,
+    плотности, сокращённое движение) входят в множества, ссылки var() разрешаются по первому объявлению."""
+    with open(path, encoding="utf-8") as f:
+        text = re.sub(r"/\*.*?\*/", "", f.read(), flags=re.S)
+    decls = CSS_VAR_RE.findall(text)
+    first = {}
+    for name, val in decls:
+        first.setdefault(name, val.strip())
+
+    def resolve(v, depth=0):
+        if depth > 8:
+            return v
+        return re.sub(r"var\(--([A-Za-z0-9_-]+)(?:\s*,\s*([^()]*))?\)",
+                      lambda m: resolve(first.get(m.group(1), m.group(2) or ""), depth + 1), v)
+
+    out = {k: set() for k in TOKEN_SETS}
+    for name, raw in decls:
+        v = resolve(raw.strip())
+        for hx in re.findall(r"#[0-9a-fA-F]{3,8}\b", v):
+            if len(hx) in (4, 5, 7, 9):
+                out["colors"].add(_hex6(hx))
+        for m in re.finditer(r"rgba?\(([^)]*)\)", v):
+            p = [x for x in re.split(r"[,\s/]+", m.group(1)) if x]
+            try:
+                out["colors"].add("#%02x%02x%02x" % tuple(int(round(float(x))) for x in p[:3]))
+            except (ValueError, TypeError):
+                pass
+        for num, unit in re.findall(r"(-?\d+(?:\.\d+)?)(ms|s)\b", v):
+            out["durations"].add(float(num) * (1000 if unit == "s" else 1))
+        m = re.fullmatch(r"(-?\d+(?:\.\d+)?)(px|rem)", v)
+        if m:
+            px = round(float(m.group(1)) * (16.0 if m.group(2) == "rem" else 1.0), 2)
+            if name.startswith("space-"):
+                out["spacing"].add(px)
+            if name.startswith(("radius-", "corner-")):
+                out["radius"].add(px)
+            if name.startswith("size-"):
+                out["sizes"].add(px)
+            if "font-size" in name or (name.startswith("type-") and name.endswith("-size")):
+                out["font_sizes"].add(px)
+            if name.startswith(("bp-", "breakpoint-")):
+                out["breakpoints"].add(px)
+        if re.fullmatch(r"-?\d+", v):
+            if name.startswith("z-"):
+                out["zindex"].add(int(v))
+            if "font-weight" in name or (name.startswith("type-") and name.endswith("-weight")):
+                out["font_weights"].add(int(v))
+    return {k: sorted(v) for k, v in out.items()}
+
+
+def load_tokens(path):
+    """Токены ДС: DTCG (.json) или CSS-переменные (.css) → множества значений (TOKEN_SETS)."""
+    ext = os.path.splitext(str(path))[1].lower()
+    if ext == ".json":
+        ts = load_dtcg(path)
+    elif ext == ".css":
+        ts = load_css_tokens(path)
+    else:
+        raise ValueError(f"{path}: токены — DTCG .json или CSS .css")
+    return {k: ts.get(k, []) for k in TOKEN_SETS}
+
+
+def tokens_to_preset(preset, ts):
+    """Шкалы пресета из токенов ДС: отступы (`space.*`), радиусы, кегли, слои, длительности, высоты контролов
+    (размеры 20–64 px). Пустое множество оставляет шкалу пресета."""
+    p = dict(preset)
+    if ts["spacing"]:
+        p["spacing"] = sorted(set(ts["spacing"]) | {0})
+    if ts["radius"]:
+        p["radius"] = sorted(set(ts["radius"]))
+    if ts["font_sizes"]:
+        p["font_sizes"] = sorted(set(ts["font_sizes"]))
+    if ts["zindex"]:
+        p["zindex"] = sorted(set(ts["zindex"]) | {0})
+    if ts["durations"]:
+        p["durations"] = sorted(set(ts["durations"]) | {0})
+    heights = [v for v in ts["sizes"] if 20 <= v <= 64]
+    if heights:
+        p["heights"] = sorted(set(heights))
+    return p
+
+
+def load_widths(path=WIDTHS_FILE):
+    """Ширины приёмки (kb/common/acceptance-widths.yaml): набор от широкой к узкой и ширина проверки вылета."""
+    with open(path, encoding="utf-8") as f:
+        d = yaml.safe_load(f)
+    return {"widths": [int(w) for w in d["widths"]], "overflow_only": d.get("overflow_only")}
+
+
+# Высота окна — параметр прогона, а не норма приёмки: у широких окон 900, у окон уже первого брейкпоинта — 844.
+VIEW_H_WIDE, VIEW_H_NARROW = 900, 844
+
+
+_REF_TOKENS = None
+
+
+def reference_tokens():
+    """Эталонные токены ui (kb/ui/14-recipes/examples/tokens.css), разобранные один раз."""
+    global _REF_TOKENS
+    if _REF_TOKENS is None:
+        _REF_TOKENS = load_css_tokens(REFERENCE_TOKENS)
+    return _REF_TOKENS
+
+
+def first_breakpoint(ts):
+    """Первый брейкпоинт ДС; без брейкпоинтов в токенах — эталонный ui."""
+    return min((ts or {}).get("breakpoints") or reference_tokens()["breakpoints"])
+
+
+def load_tells(path=TELLS_FILE):
+    """id приметы по id проверки: раздел `checks` реестра примет, ключи `ui_audit:<id>`. Нет ключа — нет приметы."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            d = yaml.safe_load(f) or {}
+    except OSError:
+        return {}
+    out = {}
+    for key, v in (d.get("checks") or {}).items():
+        if isinstance(key, str) and key.startswith(TELL_KEY) and isinstance(v, dict) and v.get("tell"):
+            out[key[len(TELL_KEY):]] = v["tell"]
+    return out
+
+
+TELL_OF = None
+
+
+def tell_of(cid):
+    global TELL_OF
+    if TELL_OF is None:
+        TELL_OF = load_tells()
+    return TELL_OF.get(cid)
+
+
+def load_glass_limits(effect="glass-panel", path=EFFECTS_FILE):
+    """Лимиты стекла из каталога эффектов creative (`limits` записи)."""
+    loader = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+    with open(path, encoding="utf-8") as f:
+        d = yaml.load(f, Loader=loader)
+    for e in d.get("effects") or []:
+        if isinstance(e, dict) and e.get("id") == effect:
+            return dict(e.get("limits") or {})
+    raise KeyError(f"{effect}: записи нет в {path}")
 
 
 # =====================================================================================
@@ -286,8 +496,46 @@ COLLECT_JS = r"""
     return (el.tagName.toLowerCase() + id + cls).slice(0, 60);
   };
 
+  // визуально скрытое: clip нулевой площади или clip-path inset ≥ 50 %, бокс 1×1, бокс вне предка с обрезкой переполнения
+  const clipHidden = (cs) => {
+    const m = (cs.clip || '').match(/rect\(([^)]*)\)/);
+    if (m) {
+      const v = m[1].split(/[,\s]+/).filter(Boolean).map(parseFloat);
+      if (v.length === 4 && !v.some(isNaN) && (v[1] - v[3]) * (v[2] - v[0]) <= 1) return true;
+    }
+    return /inset\(\s*(50|100)%/.test(cs.clipPath || '');
+  };
+  const outsideClip = (el, r) => {
+    let p = el.parentElement;
+    while (p && p !== document.body) {
+      const s = getComputedStyle(p);
+      if (s.overflowX !== 'visible' || s.overflowY !== 'visible') {
+        const pr = p.getBoundingClientRect();
+        if (r.right <= pr.left || r.left >= pr.right || r.bottom <= pr.top || r.top >= pr.bottom) return true;
+      }
+      p = p.parentElement;
+    }
+    return false;
+  };
+  // зона нажатия: бокс элемента и абсолютно позиционированные ::before и ::after, если элемент — их контейнер
+  const hitArea = (el, cs, r) => {
+    let w = r.width, h = r.height;
+    if (cs.position === 'static') return { w, h };
+    for (const pe of ['::before', '::after']) {
+      const s = getComputedStyle(el, pe);
+      if (!s || s.content === 'none' || s.content === 'normal' || s.position !== 'absolute') continue;
+      const num = v => (v && v.endsWith('px')) ? parseFloat(v) : null;
+      const t = num(s.top), b = num(s.bottom), l = num(s.left), rt = num(s.right), pw = num(s.width), ph = num(s.height);
+      const ew = (l !== null && rt !== null) ? r.width - l - rt : (pw !== null ? pw : 0);
+      const eh = (t !== null && b !== null) ? r.height - t - b : (ph !== null ? ph : 0);
+      w = Math.max(w, ew); h = Math.max(h, eh);
+    }
+    return { w: Math.round(w * 100) / 100, h: Math.round(h * 100) / 100 };
+  };
+
   const all = Array.from(document.querySelectorAll('body *')).slice(0, MAXN);
   const rows = [];
+  const media = [], texts = [], glass = [];
   let idx = 0;
   for (const el of all) {
     const cs = getComputedStyle(el);
@@ -304,7 +552,16 @@ COLLECT_JS = r"""
     const bg = effBg(el);
     const fg = toHex(cs.color);
     const bc = toHex(cs.borderTopColor);
+    const hid = (ownText || interactive)
+      ? (clipHidden(cs) || (r.width <= 1.5 && r.height <= 1.5) || outsideClip(el, r)) : false;
+    const hit = interactive ? hitArea(el, cs, r) : null;
+    const bgImg = cs.backgroundImage || 'none';
+    if (['img', 'video', 'canvas'].includes(tag) || /url\(/.test(bgImg)) {
+      if (r.width > 40 && r.height > 40) media.push({ el, tag: /url\(/.test(bgImg) && tag !== 'img' ? 'background' : tag, r });
+    }
     el.setAttribute('data-uia', String(idx));
+    if (ownText && !hid) texts.push({ i: idx, el, r });
+    if (cs.backdropFilter && cs.backdropFilter !== 'none') glass.push({ i: idx, el, r });
     rows.push({
       i: idx++, tag, sel: shortSel(el), role,
       x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width * 100) / 100, h: Math.round(r.height * 100) / 100,
@@ -338,7 +595,28 @@ COLLECT_JS = r"""
       par: el.parentElement && el.parentElement.hasAttribute('data-uia') ? Number(el.parentElement.getAttribute('data-uia')) : null,
       svg: tag === 'svg' ? { w: Math.round(r.width), h: Math.round(r.height), sw: cs.strokeWidth, vb: el.getAttribute('viewBox') || '' } : null,
       inline: el.getAttribute('style') || '',
+      hid, hw: hit ? hit.w : null, hh: hit ? hit.h : null,
+      tlen: ['p', 'li', 'dd', 'blockquote'].includes(tag) ? (el.textContent || '').replace(/\s+/g, ' ').trim().length : null,
+      ai: cs.alignItems, as: cs.alignSelf, fd: cs.flexDirection,
+      bgi: /gradient/.test(bgImg) ? bgImg.slice(0, 300) : null,
+      bgclip: cs.backgroundClip === 'text' || cs.webkitBackgroundClip === 'text',
+      onmedia: null, bdmedia: null,
     });
+  }
+
+  // текст над медиа: центр текстового узла внутри картинки, видео, canvas или фона-картинки, которые не лежат в самом узле
+  const byI = new Map(rows.map(x => [x.i, x]));
+  for (const t of texts) {
+    const cx = t.r.left + t.r.width / 2, cy = t.r.top + t.r.height / 2;
+    const m = media.find(m => m.el !== t.el && !t.el.contains(m.el) && !m.el.contains(t.el)
+      && cx >= m.r.left && cx <= m.r.right && cy >= m.r.top && cy <= m.r.bottom);
+    if (m) byI.get(t.i).onmedia = m.tag;
+  }
+  // стекло над видео или WebGL (canvas)
+  for (const g of glass) {
+    const m = media.find(m => (m.tag === 'video' || m.tag === 'canvas') && m.el !== g.el && !g.el.contains(m.el)
+      && g.r.left < m.r.right && g.r.right > m.r.left && g.r.top < m.r.bottom && g.r.bottom > m.r.top);
+    if (m) byI.get(g.i).bdmedia = m.tag;
   }
 
   const html = document.documentElement;
@@ -472,6 +750,39 @@ def okl(h):
         return None
 
 
+TOP_ALIGN = ("normal", "stretch", "start", "flex-start", "self-start")
+
+
+def misaligned_rows(rows, by_i):
+    """Соседи одного ряда сетки или flex-строки со сдвигом по верху. Проверяются дети grid и flex-row контейнеров,
+    выровненные по верху (align-items и align-self — normal, stretch, start); одним рядом считаются соседи, чьи боксы
+    перекрываются по вертикали больше чем наполовину меньшего, а верх расходится больше чем на 1 px, но меньше
+    половины меньшей высоты (дальше — это уже следующий ряд или соседи через строки сетки)."""
+    kids = defaultdict(list)
+    for r in rows:
+        if r["par"] is not None and r["w"] >= 40 and r["h"] >= 20 and r["pos"] not in ("absolute", "fixed") \
+                and not r.get("hid"):
+            kids[r["par"]].append(r)
+    out = []
+    for pi, ks in kids.items():
+        p = by_i.get(pi)
+        if not p or len(ks) < 2:
+            continue
+        disp = p.get("disp") or ""
+        if "grid" not in disp and not ("flex" in disp and (p.get("fd") or "row").startswith("row")):
+            continue
+        top = [k for k in ks if ((k.get("as") or "auto") if (k.get("as") or "auto") != "auto"
+                                 else (p.get("ai") or "normal")) in TOP_ALIGN]
+        for a, b in itertools.combinations(top, 2):
+            mh = min(a["h"], b["h"])
+            overlap = min(a["y"] + a["h"], b["y"] + b["h"]) - max(a["y"], b["y"])
+            dy = abs(a["y"] - b["y"])
+            if overlap > 0.5 * mh and 1 < dy < 0.5 * mh:
+                out.append(f"{p['sel']}: {a['sel']} y={a['y']} и {b['sel']} y={b['y']} (сдвиг {dy} px)")
+                break
+    return out
+
+
 # =====================================================================================
 # 5. Проверки
 # =====================================================================================
@@ -491,7 +802,64 @@ class Report:
             "severity": severity,
             "examples": (examples or [])[:6],
             "note": note,
+            "tell": tell_of(cid),
         })
+
+
+def tells_summary(findings):
+    """Приметы без повторов: одна запись на id приметы — какими проверками и на каких прогонах она найдена
+    (вердикт FAIL или WARN). Одна примета из нескольких проверок и прогонов считается один раз."""
+    out = {}
+    for f in findings:
+        t = f.get("tell")
+        if not t or f["verdict"] == "OK":
+            continue
+        e = out.setdefault(t, {"checks": [], "runs": []})
+        if f["id"] not in e["checks"]:
+            e["checks"].append(f["id"])
+        run = f.get("run")
+        if run and run not in e["runs"]:
+            e["runs"].append(run)
+    return out
+
+
+SEV_BY_CODE = {"B": SEV_BLOCKER, "S": SEV_SERIOUS, "D": SEV_POLISH}
+
+
+def load_profile(name="marketing"):
+    """Профиль проверок из `scripts/ui/data/<name>-profile.yaml` → (пресет, таблица профиля). Пресет — base профиля с
+    его значениями и лимитами стекла из каталога эффектов; таблица — id проверки → action, severity, threshold,
+    landing, basis (серьёзность — строкой отчёта)."""
+    with open(kbpaths.data("ui", f"{name}-profile.yaml"), encoding="utf-8") as f:
+        spec = yaml.safe_load(f)
+    preset = dict(PRESETS[spec["base"]])
+    preset.update(spec.get("preset") or {})
+    preset.update(name=spec.get("name", name), title=spec.get("title", preset["title"]), reference_tokens=False)
+    glass = spec.get("glass")
+    if glass:
+        lim = load_glass_limits(glass["effect"])
+        for key, field in glass["fields"].items():
+            preset[key] = lim[field]
+    table = {cid: dict(row, severity=SEV_BY_CODE[row["severity"]]) for cid, row in (spec.get("checks") or {}).items()}
+    return preset, table
+
+
+def apply_profile(rep, table, base="consumer"):
+    """Общие действия таблицы профиля: keep, retune, severity, info. Пересчёт (recompute) — у кода профиля: D3, D4, L4
+    считает run_checks при пресете профиля, остальные — scripts/creative/marketing_audit.py."""
+    for f in rep.findings:
+        row = table.get(f["id"])
+        f["profile"] = row["action"] if row else "keep"
+        f["base"] = row["basis"] if row else f"как в {base}"
+        if not row:
+            continue
+        if row["action"] in ("retune", "severity"):
+            f["severity"] = row["severity"]
+        elif row["action"] == "info":
+            f["verdict"] = "WARN"
+            f["severity"] = row["severity"]
+            f["threshold"] = "информативно (профиль marketing)"
+    return rep
 
 
 def run_checks(data, preset, opts, ctx):
@@ -499,7 +867,8 @@ def run_checks(data, preset, opts, ctx):
     meta = data["meta"]
     rep = Report(ctx["target"], preset["name"], ctx)
     by_i = {r["i"]: r for r in rows}
-    text_rows = [r for r in rows if r["txt"]]
+    # визуально скрытое (sr-only, 1×1, вне предка с обрезкой) — не текст на экране и не цель нажатия
+    text_rows = [r for r in rows if r["txt"] and not r.get("hid")]
     interactive = [r for r in rows if r["inter"]]
     dark = ctx.get("scheme") == "dark"
 
@@ -669,17 +1038,49 @@ def run_checks(data, preset, opts, ctx):
             len(dirs) if dirs else 0, "≤ 1", len(dirs) <= 1, SEV_POLISH,
             [str(sorted(dirs))] if len(dirs) > 1 else [])
 
-    glass = [r["sel"] for r in rows if r["bd"]]
-    rep.add("D3", "Глубина", "Элементов с backdrop-filter", len(glass), f"≤ {preset['glass_max']}",
-            len(glass) <= preset["glass_max"], SEV_POLISH, glass)
+    glass_rows = [r for r in rows if r["bd"]]
+    glass = [r["sel"] for r in glass_rows]
+    if preset.get("glass_view_max") is not None:
+        # профиль страницы сайта: лимиты стекла — запись glass-panel каталога эффектов creative
+        in_view = [r for r in glass_rows if r["y"] < meta["innerH"] and r["y"] + r["h"] > 0]
+        over_media = [r for r in in_view if r.get("bdmedia")]
+
+        def blur_px(r):
+            m = re.search(r"blur\((-?\d+(?:\.\d+)?)px\)", r["bd"] or "")
+            return float(m.group(1)) if m else 0.0
+        bad_glass = []
+        if len(glass_rows) > preset["glass_max"]:
+            bad_glass.append(f"на странице {len(glass_rows)} > {preset['glass_max']}")
+        if len(in_view) > preset["glass_view_max"]:
+            bad_glass.append(f"в первом экране {len(in_view)} > {preset['glass_view_max']}")
+        if len(over_media) > preset["glass_view_max_media"]:
+            bad_glass.append(f"над видео или WebGL {len(over_media)} > {preset['glass_view_max_media']}")
+        bad_glass += [f"{r['sel']}: blur {blur_px(r):g} px > {preset['glass_blur_max']}" for r in glass_rows
+                      if blur_px(r) > preset["glass_blur_max"]]
+        rep.add("D3", "Глубина", "Стекло: на странице, в первом экране, над видео или WebGL, размытие",
+                f"{len(glass_rows)} (в первом экране {len(in_view)}, над видео или WebGL {len(over_media)})",
+                f"≤ {preset['glass_max']} · ≤ {preset['glass_view_max']} · ≤ {preset['glass_view_max_media']} · "
+                f"blur ≤ {preset['glass_blur_max']}", not bad_glass, SEV_POLISH, bad_glass + glass,
+                note="лимиты — creative/06-effects-catalog/effects.yaml#glass-panel; цена кадра — замером")
+    else:
+        rep.add("D3", "Глубина", "Элементов с backdrop-filter", len(glass), f"≤ {preset['glass_max']}",
+                len(glass) <= preset["glass_max"], SEV_POLISH, glass)
 
     glow = []
     for s in uniq_sh:
         for (ox, oy, blur, spread, inset) in parse_shadows(s):
             if not inset and ox == 0 and oy == 0 and blur > 8:
                 glow.append(s[:70])
-    rep.add("D4", "Глубина", "Свечения (тень с нулевым смещением и blur > 8)", len(glow), "0",
-            not glow, SEV_SERIOUS, glow)
+    if preset.get("glow_max") is not None:
+        # профиль страницы сайта: свечение — только shadow.cta-glow у одной кнопки по решению арт-дирекции
+        glow_el = [r["sel"] for r in rows if r["sh"] and any(
+            not inset and ox == 0 and oy == 0 and blur > 8 for (ox, oy, blur, spread, inset) in parse_shadows(r["sh"]))]
+        rep.add("D4", "Глубина", "Элементов со свечением (нулевое смещение, blur > 8)", len(glow_el),
+                f"≤ {preset['glow_max']}", len(glow_el) <= preset["glow_max"], SEV_POLISH, glow_el,
+                note="больше — примета neon-glow (creative/04-visual-language/03-color-surfaces-product.md §4.3)")
+    else:
+        rep.add("D4", "Глубина", "Свечения (тень с нулевым смещением и blur > 8)", len(glow), "0",
+                not glow, SEV_SERIOUS, glow)
 
     n_blocks = max(len([r for r in rows if r["w"] > 40 and r["h"] > 20]), 1)
     sh_share = len(shadows) / n_blocks
@@ -711,25 +1112,36 @@ def run_checks(data, preset, opts, ctx):
             [", ".join(str(z) for z in big_z)])
 
     # ---------------------------------------------------------------- F. Цели нажатия
-    tmin = ctx.get("target_min", preset["target_min"])
-    targets = [r for r in interactive if r["w"] > 0 and r["h"] > 0]
+    # Цель — зона нажатия: бокс элемента или его абсолютно позиционированный ::before/::after (hw × hh).
+    tmin = preset["target_min"]
+    targets = [r for r in interactive if r["w"] > 0 and r["h"] > 0 and not r.get("hid")]
+    hit_w = lambda r: max(r["w"], r.get("hw") or 0)  # noqa: E731
+    hit_h = lambda r: max(r["h"], r.get("hh") or 0)  # noqa: E731
     # SC 2.5.8, исключение «Inline»: ссылка внутри строки текста размером не нормируется
     inline_links = [r for r in targets if r["tag"] == "a" and (r.get("inflow") or r.get("disp") == "inline")]
     targets_sized = [r for r in targets if r not in inline_links]
-    small = [r for r in targets_sized if min(r["w"], r["h"]) < tmin - 0.5]
+    small = [r for r in targets_sized if min(hit_w(r), hit_h(r)) < tmin - 0.5]
     bad_small = []
     for t in small:
         near = any(gap_between(t, o) < preset["target_gap_min"] for o in targets if o["i"] != t["i"])
         if near:
-            bad_small.append(f"{t['sel']} {t['w']}×{t['h']} «{t['txt'][:20]}»")
+            bad_small.append(f"{t['sel']} {hit_w(t)}×{hit_h(t)} «{t['txt'][:20]}»")
     rep.add("F1", "Цели", f"Цели меньше {tmin}×{tmin} без зазора {preset['target_gap_min']} px",
             len(bad_small), "0", not bad_small, SEV_BLOCKER, bad_small)
     rep.add("F2", "Цели", f"Всего целей меньше {tmin}×{tmin} (включая разнесённые)",
             f"{len(small)} из {len(targets_sized)} (ещё {len(inline_links)} инлайновых ссылок вне нормы)", "информативно",
             True if not small else None, SEV_SERIOUS,
-            [f"{t['sel']} {t['w']}×{t['h']}" for t in small[:6]],
+            [f"{t['sel']} {hit_w(t)}×{hit_h(t)}" for t in small[:6]],
             note="SC 2.5.8 допускает недоразмерную цель, если круги диаметром 24 px вокруг центров "
                  "соседних целей не пересекаются; нарушение этого условия ловит F1")
+    if ctx.get("touch"):
+        tt = preset.get("target_min_touch", 44)
+        under = [r for r in targets_sized if min(hit_w(r), hit_h(r)) < tt - 0.5]
+        rep.add("F3", "Цели", f"На таче зона нажатия каждой цели ≥ {tt}×{tt}", len(under), "0", not under,
+                SEV_SERIOUS, [f"{t['sel']} {hit_w(t)}×{hit_h(t)} «{t['txt'][:20]}»" for t in under],
+                note="видимый контрол может быть меньше: зону добирают padding или ::before; плотность её не "
+                     "уменьшает; ссылка внутри строки текста — исключение 2.5.8 "
+                     "(ux/08-accessibility/01-wcag22-as-build-rules.md §12.4)")
 
     # ---------------------------------------------------------------- G. Фокус
     no_focus = []
@@ -775,10 +1187,32 @@ def run_checks(data, preset, opts, ctx):
     rep.add("H7", "Типографика", f"Интерлиньяж тела в коридоре {lo}–{hi}", len(bad_lead), "0",
             not bad_lead, SEV_POLISH, bad_lead)
 
-    paras = [r for r in text_rows if r["tag"] in ("p", "li", "dd") and len(r["txt"]) > 120]
-    wide_p = [f"{r['sel']} {r['w']}px" for r in paras if r["w"] > preset["para_max_width"]]
-    rep.add("H8", "Типографика", f"Абзацы шире {preset['para_max_width']} px", len(wide_p), "0",
-            not wide_p, SEV_SERIOUS, wide_p)
+    # длина строки абзаца в знаках: знаков в полной строке ≈ длина текста / (строк − 0,5) — последняя строка неполная
+    narrow = meta["innerW"] < (ctx.get("first_bp") or first_breakpoint(None))
+    lo_c, hi_c = preset["measure_chars_narrow"] if narrow else preset["measure_chars"]
+    long_lines = []
+    for r in rows:
+        if r["tag"] not in ("p", "li", "dd", "blockquote") or r.get("hid"):
+            continue
+        n = r.get("tlen")
+        if n is None:
+            # данные без длины текста (синтетика вызывающей утилиты): ширина абзаца против пресета
+            if r["txt"] and len(r["txt"]) >= 120 and r["w"] > preset["para_max_width"]:
+                long_lines.append(f"{r['sel']} {r['w']}px > {preset['para_max_width']}px")
+            continue
+        if n <= 120 or not r["fs"]:
+            continue
+        lh = r["lh"] if isinstance(r["lh"], (int, float)) else 1.2 * r["fs"]
+        lines = round(r["h"] / lh) if lh else 1
+        if lines < 2:
+            continue
+        cpl = n / (lines - 0.5)
+        if cpl > hi_c + 0.5:
+            long_lines.append(f"{r['sel']} ≈ {cpl:.0f} знаков в строке ({lines} строк)")
+    rep.add("H8", "Типографика", f"Длина строки абзаца ≤ {hi_c} знаков" + (" (окно уже первого брейкпоинта)" if narrow else ""),
+            len(long_lines), "0", not long_lines, SEV_SERIOUS, long_lines,
+            note=f"норма {lo_c}–{hi_c} знаков, не больше {preset['measure_chars_max']}; ширину задают в ch "
+                 "(ux/03-layout-placement/02-grid-spacing-density.md §4)")
 
     rep.add("H9", "Типографика", "Атрибут lang на <html>", meta["lang"] or "нет", "задан",
             bool(meta["lang"]), SEV_SERIOUS)
@@ -810,9 +1244,13 @@ def run_checks(data, preset, opts, ctx):
             not straight, SEV_POLISH, straight[:4])
 
     # ---------------------------------------------------------------- I. Цвет и контраст
-    fails, warns, disabled_bad = [], [], []
+    fails, warns, media_warns, disabled_bad = [], [], [], []
     for r in text_rows:
         if not r["col"] or not r["fs"]:
+            continue
+        if r.get("onmedia"):
+            # фон берётся от предка, а под буквами — картинка, видео или canvas: число недостоверно в обе стороны
+            media_warns.append(f"{r['sel']} над {r['onmedia']} «{r['txt'][:24]}»")
             continue
         if r.get("dis"):
             lc = abs(apca(r["col"] if r["cola"] >= 0.999 else composite(r["col"], r["cola"], r["bg"]), r["bg"]))
@@ -835,6 +1273,11 @@ def run_checks(data, preset, opts, ctx):
     if warns:
         rep.add("I1b", "Цвет", "Текст на градиенте или на полупрозрачной подложке (значение недостоверно)",
                 len(warns), "проверить глазами", None, SEV_SERIOUS, warns)
+    if media_warns:
+        rep.add("I1m", "Цвет", "Текст над картинкой, видео или canvas: контраст по фону предка недостоверен",
+                len(media_warns), "проверить F83", None, SEV_SERIOUS, media_warns,
+                note="F83 — худший пиксель под буквами и кадры видео, 4,5 : 1 (крупный 3 : 1): "
+                     "scripts/ai-media/page_accept.py --contrast (ai-media/10-web-integration/03-text-over-media-and-effects.md §1)")
 
     # граница контрола к своему фону
     border_min = preset["border_contrast_min"] if opts.strict_border else preset["border_contrast_practice"]
@@ -873,6 +1316,19 @@ def run_checks(data, preset, opts, ctx):
                 SEV_SERIOUS, [", ".join(stray[:12])],
                 note="полупрозрачные слои (скрим, границы через альфу) исключены: их результат "
                      "вычисляется, а не хранится в наборе")
+        # «фирменный чёрный»: тёмная нейтраль литералом вне токенов. Светлота в коридоре тёмного фона сама не примета —
+        # примета значение вне шкалы ДС (ui/01-color/04-dark-theme.md §2.1)
+        dark_hi = preset.get("dark_bg_L", (0.13, 0.22))[1]
+        near_black = []
+        for c in stray:
+            try:
+                L, C, H = hex2oklch(c)
+            except Exception:
+                continue
+            if L <= dark_hi and C <= preset.get("neutral_C_max", 0.05):
+                near_black.append(c)
+        rep.add("I10", "Цвет", "Тёмная нейтраль литералом вне токенов («фирменный чёрный»)", len(near_black), "0",
+                not near_black, SEV_POLISH, [", ".join(near_black[:12])])
 
     # нейтрали: одно семейство
     # статусные подложки (#dcfce7, #ffe2e2) тоже низкохроматичны, поэтому семейство нейтрали
@@ -884,7 +1340,7 @@ def run_checks(data, preset, opts, ctx):
             L, C, H = hex2oklch(c)
         except Exception:
             continue
-        if C <= 0.05 and 0.02 < L < 0.99:
+        if C <= preset.get("neutral_C_max", 0.05) and 0.02 < L < 0.99:
             hues.append(H); chromas.append(C)
     spread = (max(hues) - min(hues)) if len(hues) > 1 else 0
     tinted = [h for h, c in zip(hues, chromas) if c > 0.002]
@@ -895,9 +1351,10 @@ def run_checks(data, preset, opts, ctx):
 
     if dark:
         bgl = okl(meta_bg_hex(meta, rows))
-        rep.add("I8", "Цвет", "Фон тёмной темы в коридоре OKLCH L 13–22 %",
-                f"{bgl*100:.1f} %" if bgl else "?", "13–22 %",
-                bool(bgl and 0.13 <= bgl <= 0.22), SEV_SERIOUS)
+        dlo, dhi = preset.get("dark_bg_L", (0.13, 0.22))
+        rep.add("I8", "Цвет", f"Фон тёмной темы в коридоре OKLCH L {dlo*100:.0f}–{dhi*100:.0f} %",
+                f"{bgl*100:.1f} %" if bgl else "?", f"{dlo*100:.0f}–{dhi*100:.0f} %",
+                bool(bgl and dlo <= bgl <= dhi), SEV_SERIOUS)
         pure_white = [r["sel"] for r in text_rows if r["col"] and r["col"].lower() == "#ffffff" and (r["fs"] or 0) >= 20]
         rep.add("I9", "Цвет", "Чистый белый текст крупным кеглем в тёмной теме", len(pure_white),
                 "0", not pure_white, SEV_POLISH, pure_white[:5])
@@ -961,6 +1418,11 @@ def run_checks(data, preset, opts, ctx):
     rep.add("J8", "Раскладка", f"Шапка страницы не выше {preset['page_header_max']} px", len(tall),
             "0", not tall, SEV_POLISH, tall)
 
+    mis = misaligned_rows(rows, by_i)
+    rep.add("J9", "Раскладка", "Соседи в ряду сетки или flex-строки выровнены по верху", len(mis), "0", not mis,
+            SEV_SERIOUS, mis, note="сдвиг внутри ряда даёт отступ одного из соседей (например, margin-top правила "
+                                   "стопки `.card + .card` у карточки в сетке), а не решение раскладки")
+
     # ---------------------------------------------------------------- K. Движение
     all_props = [r["tp"] for r in rows if r["tp"] and r["tp"] != "all 0s ease 0s"]
     trans_all = [r["sel"] for r in rows if r["tp"] and "all" in r["tp"].split(",")[0]
@@ -973,8 +1435,16 @@ def run_checks(data, preset, opts, ctx):
         durs.extend([d for d in parse_durations(r["td"]) if d > 0])
     uniq_d = sorted(set(durs))
     off_d = [d for d in uniq_d if not in_scale(d, preset["durations"], tol=1)]
-    rep.add("K2", "Движение", "Длительности вне шкалы", len(off_d), "0", not off_d, SEV_POLISH,
-            [", ".join(f"{d:.0f}ms" for d in off_d)])
+    cap, exc = preset.get("duration_max"), preset.get("duration_max_exception")
+    over = [d for d in uniq_d if cap is not None and d > cap + 0.5 and not (exc is not None and d <= exc + 0.5)]
+    near = [d for d in uniq_d if cap is not None and exc is not None and cap + 0.5 < d <= exc + 0.5]
+    rep.add("K2", "Движение", "Длительности в шкале токенов" + (f" и не длиннее потолка пресета {cap} мс" if cap else ""),
+            len(off_d) + len(over), "0", False if (off_d or over) else (None if near else True), SEV_POLISH,
+            ([f"вне шкалы: {', '.join(f'{d:.0f}ms' for d in off_d)}"] if off_d else [])
+            + ([f"длиннее потолка: {', '.join(f'{d:.0f}ms' for d in over)}"] if over else [])
+            + ([f"до {exc} мс — только исключение пресета: {', '.join(f'{d:.0f}ms' for d in near)}"] if near else []),
+            note=(f"потолок пресета {preset.get('ds_preset', preset['name'])} — {cap} мс, исключение до {exc} мс: подложка "
+                  "у A, онбординг и полноэкранный шаг у B (ui/14-recipes/11-presets.md)") if cap else None)
     share300 = (len([d for d in durs if abs(d - 300) < 1]) / len(durs)) if durs else 0
     rep.add("K3", "Движение", "Доля длительностей 300 ms", f"{share300*100:.1f} %",
             f"≤ {preset['duration_300_share_max']*100:.0f} %",
@@ -1010,10 +1480,32 @@ def run_checks(data, preset, opts, ctx):
     rep.add("L3", "Антислоп", "Литералы цвета в inline-стилях", len(inline_hex), "0",
             not inline_hex, SEV_POLISH, inline_hex[:6])
 
-    grads = [r["sel"] for r in rows if r["bggrad"] and r["w"] > 80 and r["h"] > 40]
-    rep.add("L4", "Антислоп", "Крупные градиентные заливки", len(grads), "информативно", None,
-            SEV_POLISH, grads[:6],
-            note="фиолетово-синий градиент — главный цветовой маркер генерации, см. 01-color/06 §4.2")
+    band = preset.get("purple_band")
+    if band:
+        # профиль страницы сайта: градиентный фон и mesh — приём при концепции; примета — градиентный текст и
+        # hero-градиент первого экрана в фиолетовой полосе (creative/08-uniqueness-anti-slop/01-cliche-policy.md §4.1)
+        def in_band(css):
+            for m in re.finditer(r"rgba?\(([^)]*)\)", css or ""):
+                p = [x for x in re.split(r"[,\s/]+", m.group(1)) if x]
+                try:
+                    L, C, H = hex2oklch("#%02x%02x%02x" % tuple(int(round(float(x))) for x in p[:3]))
+                except Exception:
+                    continue
+                if C >= band["chroma_min"] and band["hue"][0] <= H <= band["hue"][1]:
+                    return True
+            return False
+        grad_text = [r["sel"] for r in rows if r.get("bgclip") and r.get("bgi")]
+        hero = [r["sel"] for r in rows if r.get("bgi") and not r.get("bgclip") and r["y"] < meta["innerH"]
+                and r["w"] >= meta["innerW"] * 0.5 and r["h"] >= meta["innerH"] * 0.25 and in_band(r["bgi"])]
+        rep.add("L4", "Антислоп", "Градиентный текст и фиолетовый hero-градиент первого экрана",
+                len(grad_text) + len(hero), "0 без решения арт-дирекции", True if not (grad_text or hero) else None,
+                SEV_POLISH, ([f"градиентный текст: {', '.join(grad_text[:4])}"] if grad_text else [])
+                + ([f"hero в полосе {band['hue'][0]}–{band['hue'][1]}°: {', '.join(hero[:4])}"] if hero else []))
+    else:
+        grads = [r["sel"] for r in rows if r["bggrad"] and r["w"] > 80 and r["h"] > 40]
+        rep.add("L4", "Антислоп", "Крупные градиентные заливки", len(grads), "информативно", None,
+                SEV_POLISH, grads[:6],
+                note="фиолетово-синий градиент — главный цветовой маркер генерации, см. 01-color/06 §4.2")
 
     fams = sorted({r["ff"] for r in text_rows if r["ff"]})
     rep.add("L5", "Антислоп", "Гарнитур в интерфейсе", len(fams), "≤ 2 (текстовая + моно)",
@@ -1213,13 +1705,15 @@ def merge_reports(reports):
     return out
 
 
-def render_md(target, preset, findings, runs):
+def render_md(target, preset, findings, runs, tokens_note=""):
     fails = [f for f in findings if f["verdict"] == "FAIL"]
     by_sev = Counter(f["severity"] for f in fails)
     lines = []
     lines.append(f"# Визуальный QA: {os.path.basename(target)}")
     lines.append("")
-    lines.append(f"Инструмент: `99-raw/tools/ui_audit.py`. Пресет: **{preset['name']}** ({preset['title']}).")
+    lines.append(f"Инструмент: `scripts/ui/ui_audit.py`. Пресет: **{preset['name']}** ({preset['title']}).")
+    if tokens_note:
+        lines.append(f"Шкалы и значения: {tokens_note}.")
     lines.append(f"Прогоны: {', '.join(runs)}.")
     lines.append("")
     total = len(findings)
@@ -1255,6 +1749,17 @@ def render_md(target, preset, findings, runs):
                 if f["note"]:
                     lines.append(f"  - примечание: {f['note']}")
             lines.append("")
+    tells = tells_summary(findings)
+    if tells:
+        lines.append("## Приметы дефолтного вида")
+        lines.append("")
+        lines.append("Одна строка на примету реестра `kb/common/tells.yaml`, сколько бы проверок и прогонов её ни нашли.")
+        lines.append("")
+        lines.append("| Примета | Проверки | Прогоны |")
+        lines.append("|---|---|---|")
+        for t, e in tells.items():
+            lines.append(f"| {t} | {', '.join(e['checks'])} | {', '.join(e['runs'])} |")
+        lines.append("")
     if fails:
         lines.append("## Что править в первую очередь")
         lines.append("")
@@ -1279,43 +1784,67 @@ def to_url(target):
     return "file://" + os.path.abspath(target)
 
 
+def resolve_tokens(opts):
+    """Токены прогона → (множества значений или None, строка для отчёта). Ключ --tokens — токены ДС проекта; без него
+    у пресета с эталоном (admin) — эталонные токены ui, у прочих — шкалы пресета."""
+    if getattr(opts, "tokens", None):
+        return load_tokens(opts.tokens), f"токены ДС проекта `{opts.tokens}`"
+    if PRESETS[opts.preset].get("reference_tokens"):
+        return load_tokens(REFERENCE_TOKENS), ("эталонные токены ui `kb/ui/14-recipes/examples/tokens.css` "
+                                               "(токены ДС проекта не переданы)")
+    return None, f"шкалы пресета {opts.preset} (токены ДС проекта не переданы, эталонных токенов у пресета нет)"
+
+
+def run_plan(opts, first_bp):
+    """Прогоны: окна, схема, движение, тач. Ширины — из kb/common/acceptance-widths.yaml, если окно не задано ключом."""
+    aw = load_widths()
+    height = lambda w: VIEW_H_WIDE if w >= first_bp else VIEW_H_NARROW  # noqa: E731
+    if opts.viewports:
+        vps = opts.viewports
+    elif opts.acceptance:
+        vps = [(w, height(w)) for w in aw["widths"]]
+    else:
+        vps = [(aw["widths"][0], height(aw["widths"][0]))]
+    schemes = ["light", "dark"] if opts.scheme == "both" else [opts.scheme]
+    base_scheme = opts.scheme if opts.scheme != "both" else "light"
+    combos = [(vp, scheme, "no-preference", False) for vp in vps for scheme in schemes]
+    if opts.reduced_motion:
+        combos.append((vps[0], base_scheme, "reduce", False))
+    if opts.touch:
+        phone = [w for w in aw["widths"] if w < first_bp] or [min(aw["widths"])]
+        combos.append(((max(phone), VIEW_H_NARROW), base_scheme, "no-preference", True))
+    overflow = (aw["overflow_only"], VIEW_H_NARROW) if opts.acceptance and aw.get("overflow_only") else None
+    return combos, overflow
+
+
 def audit(target, opts):
     from playwright.sync_api import sync_playwright
 
-    preset = PRESETS[opts.preset]
-    if opts.tokens_set:
-        ts = opts.tokens_set
-        if ts["spacing"]:
-            preset = dict(preset)
-            preset["spacing"] = sorted(set(ts["spacing"]) | {0})
-        if ts["radius"]:
-            preset["radius"] = sorted(set(ts["radius"]))
-        if ts["font_sizes"]:
-            preset["font_sizes"] = sorted(set(ts["font_sizes"]))
-        if ts["zindex"]:
-            preset["zindex"] = sorted(set(ts["zindex"]) | {0})
-        if ts["durations"]:
-            preset["durations"] = sorted(set(ts["durations"]) | {0})
-        if ts["sizes"]:
-            heights = [v for v in ts["sizes"] if 20 <= v <= 64]
-            if heights:
-                preset["heights"] = sorted(set(heights))
+    ts, tokens_note = resolve_tokens(opts)
+    opts.tokens_set = ts
+    preset = tokens_to_preset(PRESETS[opts.preset], ts) if ts else PRESETS[opts.preset]
+    first_bp = first_breakpoint(ts)
+    combos, overflow = run_plan(opts, first_bp)
 
     url = to_url(target)
     reports, runs, normal_rows, reduced_rows = [], [], None, None
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(args=["--force-color-profile=srgb", "--disable-lcd-text"])
-        combos = []
-        for vp in opts.viewports:
-            for scheme in (["light", "dark"] if opts.scheme == "both" else [opts.scheme]):
-                combos.append((vp, scheme, "no-preference", False))
-        if opts.reduced_motion:
-            combos.append((opts.viewports[0], opts.scheme if opts.scheme != "both" else "light",
-                           "reduce", False))
-        if opts.touch:
-            combos.append(((390, 844), opts.scheme if opts.scheme != "both" else "light",
-                           "no-preference", True))
+        if overflow:
+            # на ширине overflow_only — только горизонтальный вылет (WCAG 1.4.10)
+            w, h = overflow
+            context = browser.new_context(viewport={"width": w, "height": h}, color_scheme="light")
+            page = context.new_page()
+            page.goto(url, wait_until="load", timeout=opts.timeout)
+            page.wait_for_timeout(opts.wait)
+            sw = page.evaluate("() => document.documentElement.scrollWidth")
+            rep = Report(target, preset["name"], {"scheme": "light", "viewport": f"{w}x{h}/overflow"})
+            rep.add("J5", "Раскладка", "Нет горизонтальной прокрутки документа", f"{sw} vs {w}",
+                    "scrollWidth ≤ innerWidth", sw <= w + 1, SEV_BLOCKER)
+            reports.append(rep)
+            runs.append(f"light/{w}x{h}/overflow")
+            context.close()
 
         for (w, h), scheme, motion, touch in combos:
             ctx_kwargs = dict(viewport={"width": w, "height": h}, color_scheme=scheme,
@@ -1328,8 +1857,7 @@ def audit(target, opts):
             data = page.evaluate(COLLECT_JS, {"maxElements": opts.max_elements})
             tag = f"{scheme}/{w}x{h}" + ("/reduced" if motion == "reduce" else "") + ("/touch" if touch else "")
             ctx = {"target": target, "scheme": scheme, "viewport": f"{w}x{h}",
-                   "motion": motion, "touch": touch,
-                   "target_min": 44 if touch else preset["target_min"]}
+                   "motion": motion, "touch": touch, "first_bp": first_bp}
             if motion == "reduce":
                 reduced_rows = data["rows"]
             elif normal_rows is None and scheme == "light":
@@ -1355,14 +1883,15 @@ def audit(target, opts):
         reports.append(extra)
 
     findings = merge_reports(reports)
-    md = render_md(target, preset, findings, runs)
+    md = render_md(target, preset, findings, runs, tokens_note)
     os.makedirs(opts.out, exist_ok=True)
     md_path = os.path.join(opts.out, opts.name + ".md")
     js_path = os.path.join(opts.out, opts.name + ".json")
     with open(md_path, "w", encoding="utf-8") as f:
         f.write(md)
     with open(js_path, "w", encoding="utf-8") as f:
-        json.dump({"target": target, "preset": preset["name"], "runs": runs, "findings": findings},
+        json.dump({"target": target, "preset": preset["name"], "tokens": tokens_note, "runs": runs,
+                   "findings": findings, "tells": tells_summary(findings)},
                   f, ensure_ascii=False, indent=1)
     return md, md_path, js_path, findings
 
@@ -1371,7 +1900,44 @@ def audit(target, opts):
 # 9. Самопроверка без браузера
 # =====================================================================================
 
+def slop_params(ts, preset_name="admin"):
+    """Параметры скрипта маркеров ui/11-styles-trends/04-anti-slop-ui.md §3: порог кеглей — из данных, доля шкалы и цель
+    нажатия — из пресета, шкала отступов и цвета — из токенов (ДС проекта или эталона)."""
+    preset = tokens_to_preset(PRESETS[preset_name], ts) if ts else PRESETS[preset_name]
+    return {"fontSizesTellAbove": TH["font_sizes"]["tell_above"],
+            "spaceScale": [v for v in preset["spacing"] if v],
+            "spaceInScaleMin": preset["spacing_in_scale_min"],
+            "targetMin": preset["target_min"],
+            "colors": list(ts["colors"]) if ts else []}
+
+
+def _row(i, **kw):
+    """Строка COLLECT_JS для синтетики самопроверки."""
+    base = dict(i=i, tag="div", sel=f"div.n{i}", role="", x=0, y=0, w=200, h=40, pt=None, pr=None, pb=None, pl=None,
+                mt=None, mr=None, mb=None, ml=None, rg=None, cg=None, r1=None, r2=None, r3=None, r4=None, bw=None,
+                bwr=None, bwb=None, bwl=None, sh=None, z=None, bd=None, fs=14, lh=20, fw=400, ls=0, ff="Inter",
+                fvn="normal", tt="none", ta="start", col="#0f172b", cola=1, bg="#ffffff", bggrad=False, bgguess=False,
+                bcol=None, bcola=0, ow=0, ost="none", oc=None, pos="static", ov="visible visible", mw=None, gtc=None,
+                tp="all", td="0s", an="none", txt="", inter=False, disp="block", dis=False, inflow=False, par=None,
+                svg=None, inline="", hid=False, hw=None, hh=None, tlen=None, ai="normal", as_="auto", fd="row",
+                bgi=None, bgclip=False, onmedia=None, bdmedia=None)
+    base["as"] = base.pop("as_")
+    base.update(kw)
+    return base
+
+
+def _run(rows, preset, touch=False, text="", ts=None, w=1440, h=900):
+    data = {"rows": rows, "meta": {"lang": "ru", "scrollW": w, "innerW": w, "innerH": h,
+                                   "bodyBg": "rgb(255, 255, 255)", "title": "t", "text": text, "viewportMeta": "",
+                                   "styleSheets": 1}}
+    opts = argparse.Namespace(strict_border=False, tokens_set=ts)
+    ctx = {"target": "synthetic", "scheme": "light", "viewport": f"{w}x{h}", "motion": "no-preference",
+           "touch": touch, "first_bp": 640}
+    return {f["id"]: f for f in run_checks(data, preset, opts, ctx).findings}
+
+
 def selftest():
+    global TELL_OF
     ok = True
 
     def check(name, got, want):
@@ -1396,7 +1962,168 @@ def selftest():
     check("EMOJI_RE находит", bool(EMOJI_RE.search("Готово ✅")), True)
     check("EN_NUMBER_RE находит", bool(EN_NUMBER_RE.search("1,234")), True)
     check("PERCENT_GLUED_RE находит", bool(PERCENT_GLUED_RE.search("12%")), True)
-    print("\nпресеты:", ", ".join(PRESETS))
+
+    # эмодзи: «©» и «↔» — знаки текста, с селектором вида тоже; эмодзи с селектором считается один раз
+    check("эмодзи: «©», «↔», «©️», «↔️» не считаются", EMOJI_RE.findall("© 2026 · A ↔ B · ©️ ↔️"), [])
+    check("эмодзи: 🚀 и ✅️ — два", len(EMOJI_RE.findall("Старт 🚀 готово ✅️")), 2)
+
+    # данные: пороги, ширины приёмки, токены
+    check("порог кеглей из данных", (TH["font_sizes"]["norm"], PRESET_ADMIN["unique_font_sizes_max"]), ([6, 8], 8))
+    aw = load_widths()
+    check("ширины приёмки из файла", (aw["widths"][0], aw["overflow_only"], len(aw["widths"]) >= 2), (1440, 320, True))
+    ref = reference_tokens()
+    check("эталонные токены: шкала space.* с режимами плотности",
+          all(v in ref["spacing"] for v in (2, 4, 6, 8, 10, 12, 16, 24)) and 13 not in ref["spacing"], True)
+    check("эталонные токены: кегли, длительности, цвет, брейкпоинты",
+          (ref["font_sizes"][:2], 150.0 in ref["durations"], "#155dfc" in ref["colors"], ref["breakpoints"][0]),
+          ([11.0, 12.0], True, True, 640.0))
+    plan, overflow = run_plan(argparse.Namespace(viewports=[], acceptance=False, scheme="light", reduced_motion=False,
+                                                 touch=True), 640)
+    check("прогон по умолчанию — первая ширина приёмки, тач — самая широкая уже брейкпоинта",
+          [(c[0], c[3]) for c in plan], [((aw["widths"][0], VIEW_H_WIDE), False), ((390, VIEW_H_NARROW), True)])
+    plan, overflow = run_plan(argparse.Namespace(viewports=[], acceptance=True, scheme="light", reduced_motion=False,
+                                                 touch=False), 640)
+    check("--acceptance: все ширины и вылет на overflow_only", ([c[0][0] for c in plan], overflow[0]),
+          (aw["widths"], aw["overflow_only"]))
+    import tempfile
+    with tempfile.TemporaryDirectory(prefix="ui-audit-") as tmp:
+        dtcg = os.path.join(tmp, "system.tokens.json")
+        with open(dtcg, "w", encoding="utf-8") as f:
+            json.dump({"space": {"$type": "dimension", "sm": {"$value": {"value": 12, "unit": "px"}}},
+                       "primitive": {"size": {"13": {"$type": "dimension", "$value": {"value": 13, "unit": "px"}}}},
+                       "breakpoint": {"$type": "dimension", "tablet": {"$value": {"value": 48, "unit": "rem"}}}}, f)
+        td = load_tokens(dtcg)
+        check("DTCG: отступы — только space.*, брейкпоинт в px", (td["spacing"], td["breakpoints"]), ([12.0], [768.0]))
+        css = os.path.join(tmp, "system.tokens.css")
+        with open(css, "w", encoding="utf-8") as f:
+            f.write(":root{--space-sm: 12px; --radius-md: 6px; --type-body-size: var(--font-size-16);"
+                    " --font-size-16: 1rem; --color-fg: #111; --motion-fast: 120ms ease;}")
+        tc = load_tokens(css)
+        check("CSS: var(), rem, короткий hex, длительность в составном значении",
+              (tc["spacing"], tc["radius"], tc["font_sizes"], tc["colors"], tc["durations"]),
+              ([12.0], [6.0], [16.0], ["#111111"], [120.0]))
+    before = dict(PRESET_ADMIN)
+    tokens_to_preset(PRESET_ADMIN, {**ref, "spacing": [3.0]})
+    check("tokens_to_preset не меняет пресет", PRESET_ADMIN == before, True)
+    A = tokens_to_preset(PRESET_ADMIN, ref)
+
+    # скрытое вне I1 и H; текст над медиа — I1m «проверить F83»
+    rows = [_row(0, tag="span", txt="Пропустить к содержимому", col="#bbbbbb", fs=11, hid=True, w=1, h=1),
+            _row(1, tag="h1", txt="Заголовок над видео", col="#ffffff", fs=32, lh=40, onmedia="video"),
+            _row(2, tag="p", txt="Обычный текст", col="#0f172b")]
+    f = _run(rows, A, ts=ref)
+    check("скрытое: вне I1, текст над видео: вне I1", (f["I1"]["verdict"], f["I1m"]["verdict"], f["I1m"]["found"]),
+          ("OK", "WARN", 1))
+    check("скрытое вне H: кегли считаются без него", f["H1"]["found"], 2)
+
+    # цели: зона нажатия и тач 44
+    rows = [_row(0, tag="button", inter=True, w=32, h=32, txt="Ок"),
+            _row(1, tag="button", inter=True, x=100, w=32, h=32, txt="Да", hw=44, hh=44, pos="relative")]
+    f = _run(rows, A, touch=True)
+    check("F3 на таче: 32 без зоны — находка, 32 с ::before 44 — нет", (f["F3"]["verdict"], f["F3"]["found"]), ("FAIL", 1))
+    check("F3 только на тач-прогоне", "F3" in _run(rows, A), False)
+
+    # длина строки в знаках
+    long_p = _row(0, tag="p", txt="x" * 120, tlen=400, fs=16, lh=24, h=72, w=900)
+    short_p = _row(1, tag="p", txt="x" * 120, tlen=180, fs=16, lh=24, h=72, w=400)
+    f = _run([long_p, short_p], A)
+    check("H8: 400 знаков в 3 строках — ≈160 в строке, 180 в 3 строках — ≈72",
+          (f["H8"]["verdict"], f["H8"]["found"]), ("FAIL", 1))
+    f = _run([dict(short_p, i=0)], A, w=390, h=844)
+    check("H8 в узком окне — порог 60", f["H8"]["verdict"], "FAIL")
+
+    # шкала отступов и значения — из токенов; потолок длительностей пресета
+    f = _run([_row(0, pt=13, pb=13, pl=16, pr=16), _row(1, pt=10, pb=6)], A, ts=ref)
+    check("A1: 13 вне шкалы space.*, 6 и 10 — шаги режимов", (f["A1"]["verdict"], "13" in f["A1"]["examples"][0]),
+          ("FAIL", True))
+    A250 = dict(A, durations=sorted(set(A["durations"]) | {250}))   # шкала ДС с токеном подложки
+    f = _run([_row(0, td="0.15s"), _row(1, td="0.25s")], A250, ts=ref)
+    check("K2: 250 мс у A — исключение подложки (WARN)", f["K2"]["verdict"], "WARN")
+    f = _run([_row(0, td="0.3s")], A, ts=ref)
+    check("K2: 300 мс у A длиннее потолка 200", f["K2"]["verdict"], "FAIL")
+    f = _run([_row(0, td="0.3s")], tokens_to_preset(PRESET_CONSUMER, ref), ts=ref)
+    check("K2: 300 мс у B в пределах потолка 400", f["K2"]["verdict"], "OK")
+    f = _run([_row(0, tag="p", txt="Текст", col="#0b0b0b"), _row(1, tag="p", txt="Ещё", col="#0f172b")], A, ts=ref)
+    check("I6 и I10: литерал #0b0b0b вне токенов ДС", (f["I6"]["found"], f["I10"]["found"]), (1, 1))
+
+    # выравнивание соседних карточек (правило стопки .card + .card в сетке)
+    grid = _row(0, disp="grid", w=1000, h=140, gtc="240px 240px 240px")
+    cards = [_row(1, par=0, x=0, y=100, h=104), _row(2, par=0, x=256, y=116, h=88), _row(3, par=0, x=512, y=116, h=88)]
+    f = _run([grid] + cards, A)
+    check("J9: сдвиг соседа в ряду сетки на 16 px", (f["J9"]["verdict"], "сдвиг 16 px" in f["J9"]["examples"][0]),
+          ("FAIL", True))
+    f = _run([grid] + [dict(c, y=100, h=104) for c in cards], A)
+    check("J9: ровный ряд", f["J9"]["verdict"], "OK")
+    f = _run([dict(grid, disp="flex", ai="center")] + cards, A)
+    check("J9: flex с align-items: center — не проверяется", f["J9"]["verdict"], "OK")
+
+    # id приметы из tells.yaml#checks и сводка без повторов
+    real = load_tells()
+    TELL_OF = {"L1": "emoji-sparkle-ai", "H10": "caps-share"}
+    try:
+        f1 = run_checks({"rows": [_row(0, tag="span", txt="ЗАГОЛОВОК", tt="uppercase")],
+                         "meta": {"lang": "ru", "scrollW": 1440, "innerW": 1440, "innerH": 900, "bodyBg": "",
+                                  "title": "t", "text": "Готово ✅", "viewportMeta": "", "styleSheets": 1}},
+                        A, argparse.Namespace(strict_border=False, tokens_set=None),
+                        {"target": "s", "scheme": "light", "viewport": "1440x900", "first_bp": 640})
+        f2 = Report("s", "admin", {"scheme": "dark", "viewport": "1440x900"})
+        f2.findings = [dict(x) for x in f1.findings]
+        f2.context["scheme"] = "dark"
+        merged = merge_reports([f1, f2])
+        by = {x["id"]: x for x in f1.findings}
+        check("находка несёт id приметы", (by["L1"]["tell"], by["H10"]["tell"], by["A1"]["tell"]),
+              ("emoji-sparkle-ai", "caps-share", None))
+        s = tells_summary(merged)
+        check("сводка примет: одна строка на примету, прогоны вместе",
+              (sorted(s), s["emoji-sparkle-ai"]["runs"]), (["caps-share", "emoji-sparkle-ai"],
+                                                            ["light/1440x900", "dark/1440x900"]))
+    finally:
+        TELL_OF = None
+    check("реестр примет читается (ключей ui_audit: — по данным)", isinstance(real, dict), True)
+    print(f"     ключей {TELL_KEY}<id> в tells.yaml#checks: {len(real)}")
+
+    # профиль marketing — данными; E1, E2 — полировка только в профиле; D3 — лимиты glass-panel; L4 — узкий
+    M, table = load_profile("marketing")
+    check("профиль: пресет и таблица из data/marketing-profile.yaml",
+          (M["name"], M["glass_max"], M["glass_view_max"], M["glass_view_max_media"], M["glass_blur_max"],
+           table["E1"]["severity"]), ("marketing", 6, 2, 1, 24, SEV_POLISH))
+    z_rows = [_row(0, tag="canvas", z=-1, w=1440, h=900), _row(1, z=9999, w=40, h=40)]
+    fc = _run(z_rows, PRESET_CONSUMER)
+    rm = Report("synthetic", "marketing", {"scheme": "light", "viewport": "1440x900"})
+    rm.findings = [dict(x) for x in _run(z_rows, M).values()]
+    apply_profile(rm, table)
+    fm = {x["id"]: x for x in rm.findings}
+    check("E1: consumer — серьёзно, marketing — полировка", (fc["E1"]["severity"], fm["E1"]["severity"]),
+          (SEV_SERIOUS, SEV_POLISH))
+    check("E2: consumer — серьёзно, marketing — полировка", (fc["E2"]["severity"], fm["E2"]["severity"]),
+          (SEV_SERIOUS, SEV_POLISH))
+    glass3 = [_row(i, bd="blur(12px)", y=100 * i, w=300, h=80) for i in range(3)]
+    check("D3 consumer: 3 стекла > 2", _run(glass3, PRESET_CONSUMER)["D3"]["verdict"], "FAIL")
+    check("D3 marketing: 3 в первом экране > 2 (glass-panel)", _run(glass3, M)["D3"]["verdict"], "FAIL")
+    glass2 = [dict(g, y=100 * i + (1000 if i else 0)) for i, g in enumerate(glass3)]
+    check("D3 marketing: 1 в первом экране, 3 на странице — норма", _run(glass2, M)["D3"]["verdict"], "OK")
+    glow = [_row(0, tag="button", sh="rgb(43, 59, 255) 0px 0px 24px 0px"),
+            _row(1, tag="button", sh="rgb(43, 59, 255) 0px 0px 24px 0px")]
+    check("D4 marketing: два свечения > одной кнопки", _run(glow, M)["D4"]["verdict"], "FAIL")
+    hero = [_row(0, y=0, w=1440, h=600, bgi="linear-gradient(135deg, rgb(99, 102, 241) 0%, rgb(139, 92, 246) 100%)"),
+            _row(1, y=0, w=1440, h=600, bgi="linear-gradient(rgb(240, 200, 120), rgb(250, 240, 220))")]
+    f = _run(hero, M)
+    check("L4 marketing: фиолетовый hero — примета, тёплый градиент — приём", (f["L4"]["verdict"], f["L4"]["found"]),
+          ("WARN", 1))
+    f = _run([_row(0, tag="h1", txt="Скорость", bgi="linear-gradient(red, blue)", bgclip=True)], M)
+    check("L4 marketing: градиентный текст", f["L4"]["found"], 1)
+    check("L4 consumer: крупные градиенты — информативно", _run(hero, PRESET_CONSUMER)["L4"]["threshold"],
+          "информативно")
+
+    # синтетика без новых полей (строки вызывающей утилиты) не ломает проверки
+    bare = [{k: v for k, v in _row(0, tag="p", txt="x" * 120, w=900).items()
+             if k not in ("hid", "hw", "hh", "tlen", "ai", "as", "fd", "bgi", "bgclip", "onmedia", "bdmedia")}]
+    check("строки без новых полей: H8 — по ширине в px", _run(bare, PRESET_CONSUMER)["H8"]["verdict"], "FAIL")
+
+    sp = slop_params(ref, "admin")
+    check("параметры скрипта ui 11/04 §3", (sp["fontSizesTellAbove"], sp["spaceInScaleMin"], sp["targetMin"],
+                                             6.0 in sp["spaceScale"], "#155dfc" in sp["colors"]), (9, 0.95, 24, True, True))
+    print("\nпресеты:", ", ".join(PRESETS), "; профиль данными: marketing")
     print("групп проверок:", len(GROUP_ORDER))
     return 0 if ok else 1
 
@@ -1424,23 +2151,29 @@ def main():
     p.add_argument("--timeout", type=int, default=45000)
     p.add_argument("--screenshot", action="store_true")
     p.add_argument("--batch")
+    p.add_argument("--acceptance", action="store_true")
     p.add_argument("--fail-on", default=None, choices=["blocker", "serious", "any"])
     p.add_argument("--quiet", action="store_true")
     p.add_argument("--selftest", action="store_true")
+    p.add_argument("--slop-params", action="store_true")
     p.add_argument("-h", "--help", action="store_true")
     a = p.parse_args()
 
-    if a.help or (not a.target and not a.batch and not a.selftest):
+    if a.help or (not a.target and not a.batch and not a.selftest and not a.slop_params):
         print(__doc__)
         return 0
     if a.selftest:
         return selftest()
+    if a.slop_params:
+        ts, note = resolve_tokens(a)
+        print(json.dumps(slop_params(ts, a.preset), ensure_ascii=False))
+        print(f"шкалы и значения: {note}", file=sys.stderr)
+        return 0
 
     a.viewports = []
-    for v in a.viewport or ["1440x900"]:
+    for v in a.viewport:
         w, h = v.lower().split("x")
         a.viewports.append((int(w), int(h)))
-    a.tokens_set = load_dtcg(a.tokens) if a.tokens else None
     if a.wait is None:
         a.wait = 2000 if (a.target and re.match(r"^https?://", a.target)) else 400
 
