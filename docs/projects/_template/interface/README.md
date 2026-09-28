@@ -7,7 +7,7 @@ UX-слой проекта **партиционируется по поверх�
 
 У `type: web` interface есть только у рода `app`: у рода `landing` и `site` на его месте слой страницы
 `site/<surface>/` (канон — [`../site/README.md`](../site/README.md)), и экранов и FSD-карты у такой поверхности нет. У
-`admin`, `desktop`, `embed`, `mobile` и `bot` interface есть всегда.
+остальных типов поверхности interface есть всегда.
 
 ## Структура
 
