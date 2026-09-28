@@ -110,8 +110,8 @@ _NAMES: dict[str, bool] = {}
 def name_exists(name: str) -> bool:
     """Голое имя файла (без «/») — имя, место даёт контекст: достаточно, чтобы такой файл был в скилле или в docs/."""
     if name not in _NAMES:
-        found = False
-        for base in (SKILL, ROOT / "docs", ROOT / ".claude"):
+        found = (ROOT / name).is_file()  # файлы корня репозитория: `CLAUDE.md`, `CONTRIBUTING.md`
+        for base in () if found else (SKILL, ROOT / "docs", ROOT / ".claude"):
             if any(base.rglob(name)):
                 found = True
                 break
