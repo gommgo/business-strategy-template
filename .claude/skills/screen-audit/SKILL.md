@@ -1,14 +1,15 @@
 ---
 name: screen-audit
-description: "Аудит консистентности экранов проекта в `docs/projects/<project-slug>/screens/<surface>/` (flow · screen · block · shell) — по папке на поверхность из реестра `surface.md`. Ловит битые slug-рефы (внутри screens и в interface той же поверхности), рассинхрон зеркал, нарушения slot-fills и `accepts`, несогласованность `viewport` с flow, пропущенные канон-состояния, anti-patterns (облик, оси контекста, breakpoints, FSD-имена, inline-состояния в блоке), coverage-дыры и выход ссылки за границу поверхности. Только отчёт; правки — через `screen-deep-dive`. Использовать перед коммитом артефактов экранов, по предложению `screen-deep-dive` в конце сессии или при подозрении на рассогласование с interface. Аргументы: `<project-slug>` (без него — пикер по проектам), опционально `<surface>` (без неё — все поверхности), узкий scope — `<kind>` или `<kind>:<slug>`."
+description: "Аудит экранов кабинета в `docs/projects/<slug>/screens/<surface>/` по папке на поверхность: ссылки и зеркала с interface и продуктом, нотация дерева и компоненты из словаря, наборы состояний, карта экранов и маршрутов со сводом `map.md`, контракты блоков, реестр текстов и роли строк, доступность и узкий экран, облик и FSD-имена в артефактах. Только отчёт, правки — через `/screen-deep-dive`. Звать перед коммитом экранов, по предложению `/screen-deep-dive` в конце сессии или при подозрении на рассогласование; без `<project-slug>` — пикер, без `<surface>` — все поверхности."
 ---
 
 # screen-audit
 
-Аудит консистентности 4 артефактных kind экранов **одной поверхности**
-проекта в `docs/projects/<project-slug>/screens/<surface>/` (flow ·
-screen · block · shell). Канон формы —
-`docs/projects/_template/screens/README.md` и 4 файла-формы по kind в подпапке
+Аудит консистентности экранов **одной поверхности** проекта в
+`docs/projects/<project-slug>/screens/<surface>/`: четыре kind (flow ·
+screen · block · shell), свод карты экранов `map.md` и реестр текстов
+интерфейса `texts.md`. Канон формы —
+`docs/projects/_template/screens/README.md` и файлы-формы в подпапке
 `_template/`. Аудит **читает и сообщает**, ничего не правит: каскадные
 правки идут через `screen-deep-dive`.
 
@@ -66,17 +67,28 @@ args задаёт scope:
 ## Что аудит читает
 
 - Рабочая зона:
-  `docs/projects/<project-slug>/screens/<surface>/{flows,screens,blocks,shells}/*/index.md`.
+  `docs/projects/<project-slug>/screens/<surface>/{flows,screens,blocks,shells}/*/index.md`,
+  `map.md` и `texts.md` поверхности.
 - Соседи: `docs/projects/<project-slug>/screens/<surface>/assets/<kind>/<slug>/`
   (для проверки asset-файлов).
-- Зеркала interface **той же поверхности**:
-  `docs/projects/<project-slug>/interface/<surface>/{who,situation,block,ux-substrate,data-items}.md`.
+- Зеркала и ссылки interface **той же поверхности**:
+  `docs/projects/<project-slug>/interface/<surface>/{who,situation,scenario,zone,block,ux-substrate,data-items}.md`.
+- Продуктовый слой того же проекта: `object.md`, `action.md`,
+  `capability/<surface>.md`, разделы `MVP` и `Devices and accessibility`
+  `vision.md`.
 - Реестр-хребет `docs/projects/<project-slug>/surface.md` — перечень
   поверхностей (для R-SURF).
+- Словарь компонентов `../design-deep-dive/kb/common/components.yaml` и
+  расширения словаря проекта — раздел `extensions`
+  `docs/projects/<project-slug>/design/system.yaml`.
 
-Имена `ui:*`, `icon:*` и атрибуты узлов — нотация автора: по какому-либо
-словарю аудит их не сверяет, в дереве проверяются структура и
-anti-patterns (R-SEM).
+Узлы `ui:` сверяются со словарём и расширениями, атрибуты — с закрытым
+списком канона, ключи `states` — со словарём состояний экрана, ключи
+`text:` — с реестром; имена `icon:` сверяет слой дизайна. Разбор дерева,
+наборы состояний и свод `map.md` считают утилиты `tree`, `states`,
+`screen_map` раздела `project` скилла дизайна
+(`../design-deep-dive/scripts/README.md § project`); пока их файлов нет,
+аудит проверяет то же чтением по канону.
 
 **Чего аудит не читает**:
 
@@ -96,9 +108,11 @@ anti-patterns (R-SEM).
 
 1. Определить `<project-slug>` и (опц.) `<surface>` (см. «Выбор проекта
    и поверхности»).
-2. Прочитать канон `docs/projects/_template/screens/README.md` и 4
-   файла-формы `_template/{flow,screen,block,shell}.md` — освежить канон композиции,
-   layout-язык, anti-patterns, форму frontmatter.
+2. Прочитать канон `docs/projects/_template/screens/README.md` и
+   файлы-формы `_template/{flow,screen,block,shell,map,texts}.md` —
+   освежить нотацию дерева, словарь состояний и обязательный набор,
+   контракты блоков, тексты интерфейса, доступность и узкий экран,
+   anti-patterns, форму frontmatter.
 3. Прочитать `references/rules.md` — реестр проверок с тяжестью.
 4. Прочитать реестр `docs/projects/<project-slug>/surface.md`. Сверить
    с подпапками `docs/projects/<project-slug>/screens/`: папка вне
@@ -119,24 +133,35 @@ anti-patterns (R-SEM).
 
 | severity | смысл | пример |
 |---|---|---|
-| `error` | Структурное нарушение, ломает модель | Невалидная ссылка; дубликат `slug`; `slug` папки ≠ `slug` во frontmatter; `screen` ссылается на слот, не объявленный в shell; нарушение `accepts` (`tree` там, где `accepts: block`); рассинхрон зеркал, в том числе `screen.viewport` против участия во `flow.desktop`/`mobile`; `block.interface-block.slug ≠ block.slug`; transition между desktop- и mobile-screen; `status` или `viewport` вне enum; папка поверхности вне реестра `surface.md`; ссылка из папки одной поверхности в сущность другой |
-| `warning` | Семантическое подозрение, рискует смыслом | Облик/оси контекста/breakpoints/FSD-имена в дереве; inline-cтейты в `block.tree`; `screen.situations` не покрывает ситуации, чьи ux-substrates есть на экране; пустой обязательный слот frontmatter; `description` совпадает с `name`; flow с одним screen и в `desktop`, и в `mobile` |
-| `hint` | Coverage / стиль, не ломает | shell без screens; block без потребителей; screen недостижим (не в flow, не entrypoint, не таргет переходов); stable ссылается на draft; короткое `description`; поверхность реестра без папки screens |
+| `error` | Структурное нарушение, ломает модель | Невалидная ссылка, в том числе в продуктовый слой и реестр текстов; дубликат `slug`; `slug` папки ≠ `slug` во frontmatter; дерево не парсится; `ui:` вне словаря и расширений; ключ `states` вне словаря; `screen` ссылается на слот, не объявленный в shell; нарушение `accepts`; рассинхрон зеркал; поле вне перечня; маршрут вне реестра; роль строки ≠ роль части компонента; ошибка тостом; два главных действия на экране; не один `main` у каркаса; папка поверхности вне реестра `surface.md`; ссылка из папки одной поверхности в сущность другой |
+| `warning` | Семантическое подозрение, рискует смыслом | Облик/оси контекста/breakpoints/FSD-имена в дереве; атрибут вне закрытого списка; inline-cтейты в `block.tree`; `screen.situations` не покрывает ситуации экрана; пустой обязательный слот, непокрытый набор состояний, неполный контракт блока, тупик — у черновика; переход без обратного пути; `hidden` без другого пути; частое действие только в меню |
+| `hint` | Coverage / стиль, не ломает | shell без screens; block без потребителей; screen недостижим у черновика; stable ссылается на draft; литерал текста у черновика; строка реестра без ключа; короткое `description`; поверхность реестра без папки screens |
 
 Подробный реестр — `references/rules.md`.
 
 ## Stable как ужесточение
 
-Часть правил повышают severity при `status: stable`:
+Часть правил повышают severity при `status: stable` записи (у `map.md` —
+при stable самого свода):
 
-- пустой обязательный слот frontmatter: `warning` (draft) → `error` (stable);
-- `screen.states` не покрывает 6 канон-состояний: `hint` (draft) → `error` (stable);
-- `block.tree` не содержит узла для объявленного `ux-substrate`:
-  `hint` (draft) → `warning` (stable).
+- пустой обязательный слот frontmatter, непокрытый обязательный набор
+  состояний, неполный контракт формы или коллекции без объёма, тупик,
+  список без состояния в адресе, не один заголовок экрана, master-detail
+  без мобильного потока, основной каркас без состояний приложения:
+  `warning` (draft) → `error` (stable);
+- экран недостижим от стартового экрана роли, литерал текста в дереве:
+  `hint` (draft) → `error` (stable);
+- `block.tree` не содержит узла для объявленного `ux-substrate`,
+  коллекция без способа на узком экране: `hint` (draft) → `warning`
+  (stable);
+- `map.md`: свод расходится с экранами, нет «Перехода», конвенций
+  доступности, строк «Узкого экрана», решения о мобильном — `warning` →
+  `error`; решение без основания — `hint` → `error`.
 
 Это потому, что для stable канон требует одновременно ✅ всех 6 пунктов
-`screen-deep-dive/references/draft-stable.md`. На draft те же дыры —
-ожидаемое незаконченное состояние.
+`../screen-deep-dive/references/draft-stable.md`. На draft те же дыры —
+ожидаемое незаконченное состояние. Точная тяжесть каждого правила — в
+`references/rules.md`.
 
 ## Формат отчёта
 

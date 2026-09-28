@@ -1,6 +1,6 @@
 ---
 name: cross-audit
-description: "Сквозной семантический аудит консистентности между слоями документации роем агентов. Сверяет общие слои (business с реестром проблем и стейкхолдерами, ajtbd, swot, hypothesis-map) с каждым проектом `docs/projects/<slug>/`, а внутри проекта — продукт, interface, композицию поверхностей (screens, telegram-bot-flow, mobile), сервисы и домены; плюс межпроектные стыки `project-map.md` и ИТ-периметр `docs/projects/infrastructure/`. Углы раскрываются в агентов: верхнеуровневые — один раз, пары проект × угол, тройки проект × поверхность × угол; каждый агент сверяет два слоя смыслом, а не slug-валидацией, и ищет тупики вроде «пользователь без UX-покрытия поверхности», «метрика подана как гарантия», «механика ценности без capability», «проект бьёт в несуществующую проблему», «сервис не размещён в периметре». Артефакты не правит: сводный отчёт и решения аналитика по findings. Использовать перед релизом или коммитом правок в нескольких слоях, после крупного апдейта любого слоя и когда deep-dive-скиллы предлагают прогон; аргументы — `<slug>` (один проект), `<lens>` (один угол), `--quick`. Структуру внутри одного слоя проверяют узкие аудиты слоёв."
+description: "Сквозной семантический аудит между слоями роем агентов: общие слои (бизнес с проблемами и стейкхолдерами, AJTBD, SWOT, Карта гипотез) против каждого проекта, внутри проекта — продукт, interface, композиция поверхностей, слой страницы и облик, сервисы и домены; плюс межпроектные стыки и ИТ-периметр. Агент сверяет два слоя смыслом и ищет тупики: метрика как гарантия, страница обещает лишнее, поверхность без принятого макета. Только отчёт и решения аналитика по находкам. Звать перед коммитом правок в нескольких слоях и после крупного обновления слоя; аргументы — проект, угол, `--quick`."
 ---
 
 # cross-audit
@@ -19,12 +19,19 @@ description: "Сквозной семантический аудит конси�
   shared-platform · job · placement); один на бизнес, может отсутствовать,
   пока у бизнеса нет сервисов.
 - `docs/projects/<slug>/` — продукт: `vision.md`, реестр-хребет
-  `surface.md`, корневые kind `user` · `integration` · `boundary` ·
-  `constraint` · `market` и `capability/<surface>.md`.
+  `surface.md`, корневые kind `user` · `object` · `action` ·
+  `integration` · `boundary` · `constraint` · `market`,
+  `capability/<surface>.md` и файлы уровня продукта — факты `facts.yaml` и
+  голос `voice*.yaml`.
 - Внутри проекта, по поверхности: `interface/<surface>/` и композиция —
-  `screens/<surface>/`, для `type: bot` — `telegram-bot-flow/<surface>/`,
-  для `type: mobile` — `mobile/<surface>/`. Любая из этих папок может
-  отсутствовать.
+  `screens/<surface>/`, для `web` рода `landing` и `site` — слой страницы
+  `site/<surface>/` (interface и экранов у него нет), для `type: bot` —
+  `telegram-bot-flow/<surface>/`, для `type: mobile` — `mobile/<surface>/`.
+  Любая из этих папок может отсутствовать.
+- Облик продукта — `design/` (бренд, дизайн-система, бриф на вид кабинета)
+  и `design/<surface>/` у поверхностей маршрута дизайна (`web`, `admin`,
+  `desktop`, `embed`): арт-дирекция, холст, приёмка `REVIEW.md`, манифест
+  готовности `ready.yaml`.
 - Внутри проекта, если есть бэкенд: `services/` (реестры `service.md` ·
   `platform.md`, `architecture.md`, паспорта `services/<svc>/README.md`) и
   домены сервисов `services/<svc>/domains/<ctx>/` — по bounded-context,
@@ -35,13 +42,17 @@ description: "Сквозной семантический аудит конси�
 
 **Поверхность (surface) — ось продукта.** Реестр `surface.md` объявляет
 поверхности, их slug'и партиционируют `capability/<surface>.md`,
-`interface/<surface>/` и композицию. Корневые kind продукта и домены
-кросс-поверхностны. Поэтому угол раскрывается в одну из четырёх единиц:
+`interface/<surface>/`, композицию и `design/<surface>/`; род
+веб-поверхности `web-kind` выбирает композицию — слой страницы у `landing`
+и `site`, interface и экраны у `app`. Корневые kind продукта, файлы уровня
+продукта, облик продукта и домены кросс-поверхностны. Поэтому угол
+раскрывается в одну из четырёх единиц:
 
 - **верхнеуровневый** — один агент на прогон (общие слои, граф стыков,
   периметр, M:N продуктов с проблемами);
 - **пара** `проект × lens` — цель угла корневая (`vision`, `user`,
-  `integration`) или кросс-поверхностная (сервисы);
+  `integration`) или кросс-поверхностная (сервисы, факты продукта, обещания
+  всех страниц);
 - **тройка** `проект × поверхность × lens` — source или destination угла
   лежит в папке поверхности;
 - **один агент на проект по всем поверхностям** — `dataitems-crosssurface`.
@@ -74,10 +85,12 @@ description: "Сквозной семантический аудит конси�
   `business-segment`, `prospective-consistency`, `provenance-upstream`,
   `stakeholder-subject`, `stakeholder-factor`, `stakeholder-strategy`,
   `projectmap-reciprocity`, `service-placement`, `platform-shared`.
-- **Пары `проект × lens`** (7): `goal-vision`, `subject-user` (скоуп — к
+- **Пары `проект × lens`** (9): `goal-vision`, `subject-user` (скоуп — к
   проблемам проекта), `segment-user`, `job-vision`, `segmentproblem-vision`,
-  `integration-crossproject`, `service-capability`.
-- **Тройки `проект × поверхность × lens`** (23): `surface-capability`,
+  `integration-crossproject`, `service-capability`, `facts-business` (факты
+  продукта против бизнеса), `promise-product` (обещания страниц сайта и
+  лендинга против продукта).
+- **Тройки `проект × поверхность × lens`** (24): `surface-capability`,
   `mechanic-capability`, `bet-capability`, `capability-hypothesis`,
   `capability-job`, `user-who`, `capability-situation`, `situation-job`,
   `situation-hypothesis`, `surface-zone`, `surface-screen`,
@@ -85,7 +98,8 @@ description: "Сквозной семантический аудит конси�
   только `type: bot`), `surface-mobile`, `mobile-domain`, `mobile-service`,
   `mobile-web` (четыре последних — только `type: mobile`),
   `capability-domain`, `integration-domain`, `surface-service`,
-  `constraint-surface`, `market-capability`.
+  `constraint-surface`, `market-capability`, `surface-design` (только
+  поверхности маршрута дизайна — `web`, `admin`, `desktop`, `embed`).
 - **Один агент на проект**: `dataitems-crosssurface` — только при ≥2
   поверхностях с `data-items.md`.
 
@@ -95,7 +109,9 @@ description: "Сквозной семантический аудит конси�
    `docs/swot/README.md`, `docs/hypothesis-map/README.md`,
    `docs/projects/README.md`, `docs/projects/_template/project/README.md`,
    `docs/projects/_template/project/{surface,capability,integration}.md`,
-   `docs/projects/project-map.md`, `docs/projects/_template/interface/README.md`
+   `docs/projects/project-map.md`, `docs/projects/_template/interface/README.md`,
+   каноны слоя страницы и слоя дизайна `docs/projects/_template/site/README.md`
+   и `docs/projects/_template/design/README.md`
    и те из `docs/projects/_template/{services,screens,telegram-bot-flow,mobile}/README.md`
    и `docs/projects/infrastructure/README.md`, что существуют.
 2. Прочитать `references/angles.md` — карточки углов.
@@ -103,10 +119,12 @@ description: "Сквозной семантический аудит конси�
    `_template` (канон формы) и `infrastructure/` (периметр бизнеса);
    `project-map.md` — файл, не проект. С аргументом `<slug>` — один проект.
 4. **Перечислить поверхности** каждого проекта по строкам `surface.md`
-   (slug и `type`).
+   (slug, `type` и род `web-kind`).
 5. **Проверить, какие слои есть:** `services/` с доменами,
-   `screens/<surface>/`, `telegram-bot-flow/<surface>/`, `mobile/<surface>/`,
-   `docs/projects/infrastructure/` — каждый может отсутствовать независимо.
+   `screens/<surface>/`, `site/<surface>/`, `telegram-bot-flow/<surface>/`,
+   `mobile/<surface>/`, файлы уровня продукта (`facts.yaml`), `design/` и
+   `design/<surface>/`, `docs/projects/infrastructure/` — каждый может
+   отсутствовать независимо.
 6. **Раскрыть углы** по скоупу (по аргументам или полным прогоном):
    верхнеуровневый — один агент; пара — агент на `(проект × lens)`; тройка —
    агент на `(проект × поверхность × lens)` для каждой поверхности проекта;
@@ -174,7 +192,10 @@ business-problem ↔ продукт — перечисленных пробле�
 - <файлы destination>
 - ветку state этих слоёв в дереве `../entrypoint/state/`, если она есть:
   для пар — `projects/<project-slug>/project/`, для троек —
-  `projects/<project-slug>/{interface,screens,telegram-bot-flow,mobile}/<surface>/`.
+  `projects/<project-slug>/{interface,screens,telegram-bot-flow,mobile}/<surface>/`;
+  у углов слоя страницы и дизайна — `projects/<project-slug>/site/` и
+  `projects/<project-slug>/design/` (заметки пропусков `_phase-jump.md`
+  говорят, что пропущено намеренно и записано долгом).
 
 Что искать:
 <промпт-добавка угла из angles.md>
@@ -191,9 +212,9 @@ findings по приложенной схеме, без текста вокру�
 
 | severity | смысл | пример |
 |---|---|---|
-| `error` | Семантический тупик, ломает целостность | user без покрытия в `interface/<surface>/who.md`; поверхность реестра без возможностей (пустой `capability/<surface>.md`); поверхность без зон; интеграция к соседнему проекту без ребра в `project-map.md`; `integration.sibling-project` на несуществующий проект; `vision.addresses-problem` на несуществующую проблему |
-| `warning` | Подозрительная несостыковка | возможность поверхности «впритык» по ситуациям в её `interface/<surface>/`; возможность в `capability/<surface>.md`, чьи `user` не входят в `surface.user`; ребро `project-map` без опорной integration; constraint не привязан ни к поверхности, ни к её интеграции |
-| `hint` | Гипотеза / возможная новая capability | market показывает gap — у поверхности нет возможности на эту территорию; ситуация поверхности без capability-якоря; один бизнес-датум под разными slug на разных поверхностях; проблема в `business-problem`, которую не закрывает ни один проект |
+| `error` | Семантический тупик, ломает целостность | user без покрытия в `interface/<surface>/who.md`; поверхность реестра без возможностей (пустой `capability/<surface>.md`); поверхность без зон; интеграция к соседнему проекту без ребра в `project-map.md`; `integration.sibling-project` на несуществующий проект; `vision.addresses-problem` на несуществующую проблему; страница обещает то, что продукт намеренно не делает; закрытая композиция поверхности без единого принятого макета |
+| `warning` | Подозрительная несостыковка | возможность поверхности «впритык» по ситуациям в её `interface/<surface>/`; возможность в `capability/<surface>.md`, чьи `user` не входят в `surface.user`; ребро `project-map` без опорной integration; constraint не привязан ни к поверхности, ни к её интеграции; факт страницы старше текущего числа бизнеса о той же величине; лендинг без бэкенда без записанного решения |
+| `hint` | Гипотеза / возможная новая capability | market показывает gap — у поверхности нет возможности на эту территорию; ситуация поверхности без capability-якоря; один бизнес-датум под разными slug на разных поверхностях; проблема в `business-problem`, которую не закрывает ни один проект; награда или сертификат бизнеса, которых нет в фактах страницы |
 
 ## Решения аналитика
 
@@ -232,13 +253,19 @@ findings — решает по смыслу, не строковым совпа�
   аудиты: `/project-audit` (в т.ч. файл `capability/<surface>.md` без
   поверхности в реестре и поверхность без файла возможностей),
   `/interface-audit` и `/screen-audit` (папка поверхности вне реестра,
-  циклы зон, битые внутрислойные slug), `/telegram-bot-flow-audit`,
+  циклы зон, битые внутрислойные slug), `/fsd-audit` (карта слайсов
+  фронтовой поверхности), `/design-audit` (слой страницы и слой дизайна:
+  схемы, покрытие слотов текстами, фактами и ассетами, структура фактов,
+  свежесть входа холста, копий, приёмки и манифеста),
+  `/telegram-bot-flow-audit`,
   `/mobile-audit`, `/service-audit` (дубли, папки вне реестра, парность
   produces/consumes), `/infrastructure-audit` (битые рефы placement).
   Методологию внутри слоя держат `/swot-audit` и `/hypothesis-map-audit` (в
   пределах проблемы) и `/ajtbd-audit` (в пределах сегмента). Cross-audit
   смотрит семантику между слоями: для кого поверхность, что чем покрыто,
-  сходятся ли стороны стыка.
+  сходятся ли стороны стыка, принят ли дизайн у закрытой композиции, не
+  спорят ли факты страницы с бизнесом и не обещает ли страница того, чего
+  продукт не делает.
 - **Поверхностная изоляция.** Агент тройки сопоставляет только в пределах
   своей `<surface>`; кросс-поверхностные вопросы ведут отдельные углы
   (`dataitems-crosssurface`, `mobile-web` и обратные стороны

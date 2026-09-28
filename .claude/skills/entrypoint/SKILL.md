@@ -1,6 +1,6 @@
 ---
 name: entrypoint
-description: "Вход аналитика в стратегию и проектирование «не думая, в какой слой»: разобрать сырьё любого объёма (транскрипт созвона, заметки, ссылки, файлы, сигнал из жизни), обновить картину под новые данные, переименовать, перенести, слить или удалить сущность с каскадом, прогнать нужный аудит или понять «где мы во всём воркфлоу». Оркестратор над всеми слоями `docs/` — бизнес, AJTBD, SWOT, Карта гипотез, продукты (vision и поверхности, интерфейс, экраны, FSD-карта, бот, мобильное приложение, сервисы и домены), ИТ-периметр — и над аудитами: сегментирует сырьё на темы, относит каждый чанк к слою и kind, предлагает маршрут и по подтверждению (AskUserQuestion) запускает скилл-исполнитель; единственный скилл, который активирует другие. Ведёт единый state (срез по слоям и открытые нити), read-only видит state клиента. Режимы: наполнить · актуализировать · рефакторить · чистить · аудитить. Исполнители `*-deep-dive` / `*-audit` можно звать и напрямую — этот скилл их общий фасад."
+description: "Вход аналитика во все слои стратегии и проектирования: принести сырьё любого объёма или намерение, не думая, в какой слой. Оркестратор делит сырьё на темы, относит каждую к слою и поверхности — бизнес, AJTBD, SWOT, Карта гипотез, продукт, interface, экраны, FSD, бот, мобильное приложение, сайт и лендинг, облик, сервисы, ИТ-периметр — и по подтверждению запускает исполнителя; единственный скилл, который зовёт другие. Режимы: наполнить, актуализировать, рефакторить с каскадом, чистить, аудитить; сводка «где мы» по всем слоям и маршрут по роду поверхности. Исполнителей можно звать и напрямую."
 ---
 
 # entrypoint
@@ -19,7 +19,9 @@ description: "Вход аналитика в стратегию и проект�
 | `docs/ajtbd/` (сегменты + граф работ) | `/segment-deep-dive` · `/job-graph-deep-dive` · `/jtbd-interview` |
 | `docs/swot/` (LinkedSWOT) | `/swot-deep-dive` |
 | `docs/hypothesis-map/` (Карта гипотез) | `/hypothesis-map-deep-dive` |
-| `docs/projects/<slug>/` (продукт: vision + хребет `surface` + `capability/<surface>`) | `/project-deep-dive <slug>` |
+| `docs/projects/<slug>/` (продукт: vision, роли, хребет `surface` с родом, объекты и действия, `capability/<surface>`) | `/project-deep-dive <slug>` |
+| `docs/projects/<slug>/` — файлы уровня продукта: факты, голос, слова клиента (`…/facts*.yaml`, `…/voice*.yaml`, `…/voc.yaml`) | `/design-deep-dive <slug>` |
+| `docs/projects/<slug>/site/<surface>/` (слой страницы: `web` рода `landing` · `site`) | `/design-deep-dive <slug> [<surface>]` |
 | `docs/projects/<slug>/interface/<surface>/` | `/interface-deep-dive <slug> [<surface>]` |
 | `docs/projects/<slug>/services/` (сервисная топология) | `/service-deep-dive <slug>` |
 | `docs/projects/<slug>/services/<svc>/domains/<ctx>/` (по bounded-context) | `/domain-deep-dive <slug> <ctx>` |
@@ -28,18 +30,24 @@ description: "Вход аналитика в стратегию и проект�
 | `docs/projects/<slug>/fsd/<surface>/` (фронтовые поверхности, мост к коду фронта) | `/fsd-deep-dive <slug> [<surface>]` |
 | `docs/projects/<slug>/telegram-bot-flow/<surface>/` (bot-поверхности) | `/telegram-bot-flow-deep-dive <slug> [<surface>]` |
 | `docs/projects/<slug>/mobile/<surface>/` (мобильные поверхности, карта приложения и мост к его коду) | `/mobile-deep-dive <slug> [<surface>]` |
+| `docs/projects/<slug>/design/` (облик продукта; `design/<surface>/` — поверхность) | `/design-deep-dive <slug> [<surface>]` |
 | `docs/projects/project-map.md` (межпроектные стыки) | `/project-deep-dive <slug>` (авторская сторона — `integration` инициатора) |
-| аудиты | `/swot-audit` · `/hypothesis-map-audit` · `/ajtbd-audit` · `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>` · `/fsd-audit <slug>` · `/telegram-bot-flow-audit <slug>` · `/mobile-audit <slug>` · `/service-audit <slug>` · `/infrastructure-audit` · `/cross-audit` |
+| аудиты | `/swot-audit` · `/hypothesis-map-audit` · `/ajtbd-audit` · `/project-audit <slug>` · `/interface-audit <slug>` · `/screen-audit <slug>` · `/fsd-audit <slug>` · `/telegram-bot-flow-audit <slug>` · `/mobile-audit <slug>` · `/design-audit <slug>` · `/service-audit <slug>` · `/infrastructure-audit` · `/cross-audit` |
 
 Поверхность (`surface`) — ось продукта: реестр-хребет `surface.md`
 партиционирует возможности (`capability/<surface>`), интерфейс
-(`interface/<surface>/`) и композицию — экраны (`screens/<surface>/`) либо
+(`interface/<surface>/`) и композицию — экраны (`screens/<surface>/`), слой
+страницы (`site/<surface>/` у `web` рода `landing` и `site`) либо
 диалоги бота (`telegram-bot-flow/<surface>/` при `type: bot`), либо карту
 мобильного приложения (`mobile/<surface>/` при `type: mobile`) — по своим
-slug'ам; фронтовые поверхности несут ещё FSD-карту (`fsd/<surface>/`). Скиллы
-`interface`/`screen`/`fsd`/`telegram-bot-flow`/`mobile` берут поверхность
-**вторым аргументом** `[<surface>]` — без него предлагают пикер поверхностей
-по `surface.name`.
+slug'ам; фронтовые поверхности кабинета несут ещё FSD-карту
+(`fsd/<surface>/`), поверхности маршрута дизайна — облик
+(`design/<surface>/`). Маршрут поверхности выбирают её `type` и род
+`web-kind` (`references/routing.md`, «Маршрут по роду поверхности»). Скиллы
+`interface`/`screen`/`fsd`/`telegram-bot-flow`/`mobile`/`design` берут поверхность
+**вторым аргументом** `[<surface>]` — без него `interface` … `mobile`
+предлагают пикер поверхностей по `surface.name`, а `design-deep-dive` ведёт
+уровень продукта: факты, голос, бренд, дизайн-систему, бриф на вид.
 
 Полная таблица «сигнал → слой → kind → исполнитель → режим» —
 `references/routing.md`.
@@ -111,7 +119,10 @@ state (`references/state-model.md`) + быстрый проход по `docs/`.
 1. Прочитать `state/index.md` (если есть) — срез по слоям/проектам.
 2. Для слоёв, по которым индекс устарел или пуст, — короткий проход по
    `docs/` (счётчики draft/stable, текущая фаза по дереву каждого слоя,
-   как это делает соответствующий исполнитель).
+   как это делает соответствующий исполнитель). У слоя страницы и дизайна
+   «закрыто» — статус в самом машинном файле, этапы считаются по статусам
+   файлов, как в сводке исполнителя
+   (`.claude/skills/design-deep-dive/references/phases.md § Сводка этапов`).
 3. Собрать открытые нити (`state/threads/`) и `**жду аналитика**` из
    клиентского state.
 4. Вывести срез:
@@ -124,11 +135,14 @@ state (`references/state-model.md`) + быстрый проход по `docs/`.
    swot              факторы по 4 проблемам · 1 проблема без ставок
    hypothesis-map    метрики по 3 проблемам · 1 цель без метрики
    Клиника удержания (clinic)   фаза surface · vision stable, lifecycle: mvp
-     поверхности                web, bot (реестр surface)
+     поверхности                web, bot, promo (реестр surface; promo — лендинг)
      capability                 web: 3 stable · bot: 1 draft
      interface[web]             who/situation заполнены · zone — пусто
      interface[bot]             —
      screens                    —
+     сайт[promo]                бриф ✓ · факты: 12 ✓, 2 пробела · планы 1/2 · тексты: черновик
+     дизайн                     ДС: утверждена · холст[promo]: макет принят 0/2 · готово к сборке: нет
+     долг                       сайт[promo]: Карта гипотез пропущена — метрика словом заказчика
      межпроектные стыки         loyalty-sync → web-store (project-map)
    Интейк-форма (intake)        фаза discovery · vision draft
    Открытые нити: 1 (разбор транскрипта 2026-06-06)
@@ -136,9 +150,11 @@ state (`references/state-model.md`) + быстрый проход по `docs/`.
    ```
 
    Поверхность (`surface`) идёт **перед** возможностями: реестр-хребет
-   называет поверхности, а `capability`/`interface`/`screens` даются по
-   поверхности. Межпроектные стыки — отдельной строкой (сводятся в
-   `project-map`).
+   называет поверхности, а `capability`/`interface`/`screens`, слой
+   страницы и холст даются по поверхности; уровень продукта в дизайне
+   (факты, голос, бренд, ДС) — строкой «дизайн». Долг заметок пропусков —
+   отдельной строкой: он не блокирует, но должен быть виден. Межпроектные
+   стыки — отдельной строкой (сводятся в `project-map`).
 
    Проекты в сводке и пикерах называются **по-человечески** (имя из
    `vision`); slug — деталь в скобках, аналитик его не вводит (см.
@@ -181,9 +197,12 @@ state (`references/state-model.md`) + быстрый проход по `docs/`.
    слоёв — первым аргументом `<project-slug>`; для `interface`/`screens`/
    `fsd`/`telegram-bot-flow`/`mobile` — вторым аргументом `[<surface>]`, без
    него исполнитель сам предложит пикер поверхностей по `surface.name`;
-   для `services` — без доп. аргументов или `<service-slug>`; для
+   для слоя страницы и дизайна — `<project-slug>` первым, `[<surface>]`
+   вторым, без поверхности — уровень продукта (факты, голос, бренд, ДС,
+   бриф на вид); для `services` — без доп. аргументов или `<service-slug>`; для
    `domains` — `<ctx>` (сервис выводится); для `infrastructure` — без
-   аргументов; сырьё передаёт чанком).
+   аргументов; сырьё передаёт чанком). Этап оркестратор не выбирает: первый
+   этап с готовым входом находит исполнитель.
 3. Исполнитель ведёт свой слой по своим фазам и пишет per-kind заметку в
    **свою ветку** общего дерева (`state/<слой>/...`) — оркестратор её не
    дублирует.
@@ -210,6 +229,7 @@ anti-patterns, draft→stable, каскады внутри слоя) — у ис
 └── projects/<slug>/                                ← проектные исполнители
     ├── project/ (vision + плоские kind + capability/<surface>/)
     ├── interface/<surface>/ · screens/<surface>/ · fsd/<surface>/ · telegram-bot-flow/<surface>/ · mobile/<surface>/ ← по поверхности
+    ├── site/ · design/                             ← design-deep-dive: слой страницы с фактами и голосом продукта; слой дизайна
     ├── services/                                   ← service-deep-dive (топология)
     └── domains/<context>/                          ← по bounded-context (ключ — контекст, не сервис)
 ```
@@ -262,8 +282,9 @@ anti-patterns, draft→stable, каскады внутри слоя) — у ис
 1. Перечислить, какие слои/сущности затронуты (через каких исполнителей).
 2. Перечислить открытые нити и нерешённые `**blocker**`/`**жду
    аналитика**`.
-3. Назвать логичный следующий шаг по срезу. Продукт спроектирован (его
-   слои до кода — stable, аудиты чистые) — следующий шаг флоу уже вне этого
+3. Назвать логичный следующий шаг по срезу. Продукт спроектирован — у
+   каждой поверхности закрыто то, что читает её код-репо, по роду
+   поверхности, и аудиты чистые — следующий шаг флоу уже вне этого
    репо: хаб `<org>/infra`, где `/init-project` читает strategy и поднимает
    инфру (`references/routing.md` § «Продукт спроектирован»).
 4. Через `AskUserQuestion` предложить: продолжить нить / войти в
@@ -271,7 +292,8 @@ anti-patterns, draft→stable, каскады внутри слоя) — у ис
    `/hypothesis-map-audit`, `/ajtbd-audit`, `/project-audit <slug>`,
    `/interface-audit <slug>`, `/screen-audit <slug>`, `/fsd-audit <slug>`,
    `/telegram-bot-flow-audit <slug>`, `/mobile-audit <slug>`,
-   `/service-audit <slug>`, `/infrastructure-audit`, `/cross-audit`).
+   `/design-audit <slug>`, `/service-audit <slug>`, `/infrastructure-audit`,
+   `/cross-audit`).
 
 ## Границы
 

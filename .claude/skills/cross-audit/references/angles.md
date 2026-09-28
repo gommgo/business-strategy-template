@@ -8,11 +8,20 @@
 `<slug>` = `<project-slug>`, `<surface>` = slug поверхности из реестра
 `docs/projects/<slug>/surface.md`; оба подставляются на спавне. Пути с
 `<surface>` ведут в папку поверхности (`capability/<surface>.md`,
-`interface/<surface>/…`, `screens/<surface>/…`,
-`telegram-bot-flow/<surface>/…`, `mobile/<surface>/…`). Корневые kind
-продукта (`vision`, `user`, `integration`, `boundary`, `constraint`,
-`market`) и домены `services/<svc>/domains/<ctx>/` (по bounded-context,
+`interface/<surface>/…`, `screens/<surface>/…`, `site/<surface>/…`,
+`telegram-bot-flow/<surface>/…`, `mobile/<surface>/…`,
+`design/<surface>/…`). Корневые kind
+продукта (`vision`, `user`, `object`, `action`, `integration`, `boundary`,
+`constraint`, `market`), файлы уровня продукта (факты `facts.yaml`, голос
+`voice*.yaml`), облик продукта `design/` и домены
+`services/<svc>/domains/<ctx>/` (по bounded-context,
 внутри сервиса-владельца из `services/service.md`) кросс-поверхностны.
+
+Род веб-поверхности (колонка `web-kind` реестра) выбирает её композицию: у
+`web` рода `landing` и `site` — слой страницы `site/<surface>/` (папок
+`interface/`, `screens/`, `fsd/` у неё нет), у `web` рода `app` и у
+`admin`, `desktop`, `embed` — interface и экраны. Углы `surface-*` читают
+тип и род вместе.
 
 Карточка угла:
 
@@ -53,11 +62,13 @@
 | `segmentproblem-vision` | `docs/ajtbd/segment-problem.md` | `docs/projects/<slug>/vision.md` (Problem) | проект | трение клиента отражено в vision.Problem продукта? |
 | `integration-crossproject` | `docs/projects/<slug>/integration.md` (`target: sibling-project` + `## Функции`) | `docs/projects/project-map.md` + `<sibling>/` (integration + обслуживающие use-case) + наш клиент `_shared/` + use-case `functions` | проект | стык согласован в обе стороны (integration ↔ project-map ↔ клиент+функции ↔ обслуживающий use-case соседа); наш `out` имеет callee у соседа? |
 | `service-capability` | `docs/projects/<slug>/services/service.md` + паспорта | `docs/projects/<slug>/capability/*.md` (все поверхности) | проект | каждый бизнес-сервис (`api`/`worker`) несёт хотя бы одну capability через свои контексты? сервис без продуктового якоря (для технических `gateway` — пометка, не finding)? |
+| `facts-business` | `docs/projects/<slug>/facts.yaml` | `docs/business/` (profile, offering, current-metric, competitor, material) + `docs/projects/<slug>/market.md` | проект | факты страницы не спорят с тем, что бизнес записал о себе: числа, условия оффера, источники? |
+| `promise-product` | `docs/projects/<slug>/site/<surface>/` поверхностей `web` рода `landing`, `site` (смысл, бриф, утверждённые тексты) | `docs/projects/<slug>/`: `vision.md`, `capability/<surface>.md` всех поверхностей, `boundary.md`, `user.md`, `market.md` | проект | страница обещает то, что продукт делает, и не подаёт цель гарантией? |
 | `surface-capability` | `docs/projects/<slug>/surface.md` (строка `<surface>`) | `docs/projects/<slug>/capability/<surface>.md` | проект×поверхность | у поверхности есть возможности? возможности — тем user, кого поверхность обслуживает? |
 | `mechanic-capability` | `docs/ajtbd/job-graph.md` (`value-mechanics`) | `docs/projects/<slug>/capability/<surface>.md` | проект×поверхность | механика ценности из графа реализована capability поверхности? механика без capability? |
 | `bet-capability` | `docs/swot/bet.md`, `goal.md` (по проблемам проекта) | `docs/projects/<slug>/capability/<surface>.md` | проект×поверхность | ставка/цель реализуется хотя бы одной capability поверхности? |
-| `capability-hypothesis` | `docs/projects/<slug>/capability/<surface>.md` (`hypotheses`) | `docs/hypothesis-map/hypothesis.md` (по проблемам проекта) | проект×поверхность | ребро capability→гипотеза резолвится? гипотеза проблемы без реализующей capability? |
-| `capability-job` | `docs/projects/<slug>/capability/<surface>.md` (`jobs`) | `docs/ajtbd/job.md` | проект×поверхность | ребро capability→работа резолвится? Big/Core Job без прямо целящей capability? |
+| `capability-hypothesis` | `docs/projects/<slug>/capability/<surface>.md` (`trace`: `hypothesis:<slug>`) | `docs/hypothesis-map/hypothesis.md` (по проблемам проекта) | проект×поверхность | ребро capability→гипотеза резолвится? гипотеза проблемы без реализующей capability? |
+| `capability-job` | `docs/projects/<slug>/capability/<surface>.md` (`trace`: `job:<slug>`) | `docs/ajtbd/job.md` | проект×поверхность | ребро capability→работа резолвится? Big/Core Job без прямо целящей capability? |
 | `user-who` | `docs/projects/<slug>/user.md` | `docs/projects/<slug>/interface/<surface>/who.md` | проект×поверхность | who поверхности сводимо к user? user поверхности несёт хотя бы одно who? |
 | `surface-zone` | `docs/projects/<slug>/surface.md` (строка `<surface>`) | `docs/projects/<slug>/interface/<surface>/zone.md` | проект×поверхность | зоны поверхности образуют целостный UX для её user? |
 | `capability-situation` | `docs/projects/<slug>/capability/<surface>.md` | `docs/projects/<slug>/interface/<surface>/situation.md` | проект×поверхность | каждая capability поверхности реализуется ≥1 ситуацией той же поверхности? ситуация без capability-якоря? |
@@ -75,7 +86,8 @@
 | `surface-mobile` | `docs/projects/<slug>/surface.md` (строка `<surface>`, `type: mobile`) + `interface/<surface>/` + `capability/<surface>.md` | `docs/projects/<slug>/mobile/<surface>/` (если есть) | проект×поверхность | UX мобильной поверхности доведён до карты приложения (экраны, фичи, входы, системные действия, виджеты, фон)? слой стоит на месте `screens/` и `fsd/`? ценность «вне приложения» из capability получила воплощение? |
 | `mobile-domain` | `docs/projects/<slug>/mobile/<surface>/` (`entities.source`/`domain-ref`/поля, `event:<ctx>.<Event>` в `entry-points.trigger` · `widgets.refresh` · `background-tasks.when`, описания фич) | `docs/projects/<slug>/services/*/domains/` (агрегаты, events + Payload; если есть) | проект×поверхность | сущности карты опираются на агрегаты и не расходятся с ними по полям? события-триггеры существуют? бизнес-правило не утекло в приложение? события для людей дошли до push/виджета? |
 | `mobile-service` | `docs/projects/<slug>/mobile/<surface>/shared-api.md` (ресурсы, владелец, операции) + push-входы с `trigger: event:<ctx>.<Event>` | `docs/projects/<slug>/services/service.md` (колонка `surfaces`) + паспорта сервисов-владельцев (`Exposes`, `Messaging`, `Workers`) + `integration.md` проекта | проект×поверхность | владелец каждого ресурса существует и обслуживает поверхность? событие-триггер push публикуется в `Messaging`, и есть кому отправить уведомление (воркер + провайдер доставки в `integration`)? |
-| `mobile-web` | `docs/projects/<slug>/mobile/<surface>/entry-points.md` (`kind: deep-link`, `pattern`, `target`) | web-поверхности того же проекта: `fsd/<web-surface>/pages.md` (`path`) и/или `screens/<web-surface>/` (`screen.route`) | проект×поверхность | пути ссылок в приложение совпадают с путями web-поверхности (одна ссылка открывается и в вебе, и в приложении)? целевые экран и страница — об одном? |
+| `mobile-web` | `docs/projects/<slug>/mobile/<surface>/entry-points.md` (`kind: deep-link`, `pattern`, `target`) | web-поверхности того же проекта: `fsd/<web-surface>/pages.md` (`path`) и/или `screens/<web-surface>/` (`screen.route`); у рода `site` — `site/<web-surface>/site-map.yaml` (`pages[].url`, `collections[].url_pattern`) | проект×поверхность | пути ссылок в приложение совпадают с путями web-поверхности (одна ссылка открывается и в вебе, и в приложении)? целевые экран и страница — об одном? |
+| `surface-design` | `docs/projects/<slug>/surface.md` (строка `<surface>`) + композиция `site/<surface>/` или `screens/<surface>/` | `docs/projects/<slug>/design/` (статус ДС) + `design/<surface>/` (приёмка `REVIEW.md`, `ready.yaml`) | проект×поверхность | у закрытой композиции есть принятый макет с совпавшим отпечатком? облик не спорит с назначением поверхности? |
 | `dataitems-crosssurface` | `docs/projects/<slug>/interface/*/data-items.md` (все поверхности) | (тот же набор) | проект (все поверхности) | один бизнес-датум на разных поверхностях под разными slug / с противоречивыми описаниями? (консистентность словаря) |
 
 ## factor-business
@@ -598,7 +610,9 @@ capability/<surface>.md и interface/<surface>/situation.md. Capability —
 
 **Source:** `docs/projects/<slug>/capability/<surface>.md`.
 **Destination:** `docs/projects/<slug>/services/*/domains/` (если есть;
-surface-агностичны).
+surface-агностичны); для поверхности без своего сервиса —
+`services/service.md` (колонка `surfaces`) и
+`services/architecture.md § Decisions`.
 **Скоуп:** по проекту × поверхность.
 **Применим если:** у проекта есть `services/` с доменами; у проекта
 есть поверхность `<surface>` с файлом возможностей.
@@ -607,6 +621,12 @@ surface-агностичны).
 
 - `error`: capability `stable` этой поверхности, под которую в доменах сервисов
   проекта нет бизнес-домена / агрегата. Capability не существует в коде.
+  Исключение — поверхность `web` рода `landing` или `site` без своего
+  сервиса (её нет ни в одной колонке `surfaces` реестра, а решение «у
+  поверхности `<surface>` своего сервиса нет» записано в
+  `architecture.md § Decisions`): её возможность домена не требует —
+  ценность дают страница и внешняя система, куда уходят заявки (пометить без
+  finding).
 - `warning`: бизнес-домен в `services/*/domains/` проекта, у которого не находится
   capability-якорь ни на одной поверхности. Технический домен (auth,
   logging) — норма; бизнес-домен (referrals, billing) без якоря — пробел.
@@ -629,7 +649,11 @@ Source — capability/<surface>.md (умения поверхности <surface
 может нести capability и этой поверхности, и других.
 
 Технические домены (auth, audit, logging) могут не иметь capability-якоря
-— отметь, не помечай ошибкой. В finding указывай project и surface.
+— отметь, не помечай ошибкой. Поверхность web рода landing или site без
+своего сервиса (нет в колонках surfaces, решение «своего сервиса нет» —
+в architecture.md § Decisions): её capability домена не требует — ценность
+дают страница и внешняя система; верни пустой список с пометкой. В finding
+указывай project и surface.
 ```
 
 ## surface-zone
@@ -638,7 +662,10 @@ Source — capability/<surface>.md (умения поверхности <surface
 **Destination:** `docs/projects/<slug>/interface/<surface>/zone.md`.
 **Скоуп:** по проекту × поверхность.
 **Применим если:** у проекта есть поверхность `<surface>` с папкой
-интерфейса (`interface/<surface>/`).
+интерфейса (`interface/<surface>/`). У `web` рода `landing` и `site`
+interface нет — композиция у них слой страницы, её сверяет
+`surface-design`; такая единица пропускается с пометкой (папка
+`interface/<surface>/` у них — структурная находка `/project-audit`).
 
 **Что искать:**
 
@@ -674,7 +701,10 @@ description явно относящаяся к другой поверхност
 **Скоуп:** по проекту × поверхность.
 **Применим если:** у проекта есть поверхность `<surface>` и папка
 `screens/<surface>/` (у поверхностей с `type: bot` и `type: mobile`
-композицию сверяют `surface-botflow` и `surface-mobile`).
+композицию сверяют `surface-botflow` и `surface-mobile`). У `web` рода
+`landing` и `site` экранов нет — композиция у них слой страницы
+`site/<surface>/`, её сверяет `surface-design`; такая единица пропускается с
+пометкой.
 
 **Что искать:**
 
@@ -816,7 +846,9 @@ warning. Обратная сторона: события домена, по см
 колонка `surface` содержит `<surface>`; их `## Функции`).
 **Destination:** `docs/projects/<slug>/services/*/domains/` (если есть;
 surface-агностичны): use-case `## Dependencies` колонки `integration` +
-`functions`; клиенты `_shared/integrations/<integration>/` (`## Functions`).
+`functions`; клиенты `_shared/integrations/<integration>/` (`## Functions`);
+для поверхностей без своего сервиса — `services/service.md` (колонка
+`surfaces`) и `services/architecture.md § Decisions`.
 **Скоуп:** по проекту × поверхность.
 **Применим если:** у проекта есть `services/` с доменами; у проекта
 есть поверхность `<surface>`.
@@ -843,6 +875,12 @@ surface-агностичны): use-case `## Dependencies` колонки `integr
   use-case (нет use-case с подходящим `Actor`, принимающего этот вызов).
 - `warning`: порт use-case с непустым `integration`, чья запись в
   integration.md не несёт ни одну поверхность в `surface` (рассинхрон).
+- Без находки — интеграция, которая обслуживает только поверхности без
+  своего сервиса (`web` рода `landing` или `site`: её нет ни в одной
+  колонке `surfaces` реестра, решение «у поверхности `<surface>` своего
+  сервиса нет» записано в `architecture.md § Decisions`). Заявки такой
+  поверхности уходят во внешнюю систему напрямую, поэтому клиента
+  `_shared/integrations/<integration>/` и use-case она не требует.
 
 **Промпт-добавка:**
 
@@ -864,7 +902,11 @@ Source — integration.md проекта <slug> (## Провайдеры + ## Ф
 
 Внутренняя инфра (integration = `—`, functions = `—`) — норма, не флаг.
 Транспорт (HTTP/endpoint) держит клиент _shared/, не use-case — если
-сигнатура протекла в use-case.Steps, это warning. В finding указывай
+сигнатура протекла в use-case.Steps, это warning. Интеграция, которая
+обслуживает только поверхности без своего сервиса (web рода landing или
+site, нет в колонках surfaces, решение «своего сервиса нет» — в
+architecture.md § Decisions), клиента _shared/ и use-case не требует:
+заявки уходят во внешнюю систему напрямую — не флаг. В finding указывай
 project и surface.
 ```
 
@@ -1115,8 +1157,8 @@ strategic-stance — куда властное лицо хочет/не хоче
 
 ## capability-hypothesis
 
-**Source:** `docs/projects/<slug>/capability/<surface>.md` (поле
-`hypotheses`).
+**Source:** `docs/projects/<slug>/capability/<surface>.md` (колонка
+`trace`, элементы `hypothesis:<slug>`).
 **Destination:** `docs/hypothesis-map/hypothesis.md` (по проблемам, которые
 закрывает проект).
 **Скоуп:** по проекту × поверхность.
@@ -1124,54 +1166,60 @@ strategic-stance — куда властное лицо хочет/не хоче
 `addresses-problem` и есть поверхность `<surface>` с файлом возможностей.
 
 **Что искать:**
-- `error`: `capability.hypotheses` (в `capability/<surface>.md`) ссылается
-  на гипотезу, которой нет в `docs/hypothesis-map/` (ребро бьёт в
-  несуществующую сущность).
+- `error`: элемент `hypothesis:<slug>` в `capability.trace` (в
+  `capability/<surface>.md`) ссылается на гипотезу, которой нет в
+  `docs/hypothesis-map/` (ребро бьёт в несуществующую сущность).
 - `hint`: гипотеза проблемы, которую закрывает проект, не реализуемая ни
   одной capability ни на одной поверхности продукта (стратегия без
   продуктового воплощения — возможно, её несёт соседний проект).
 
 **Промпт-добавка:**
 ```
-capability.hypotheses (поле в capability/<surface>.md — возможностях
-поверхности <surface> проекта <slug>) — авторское ребро продукт →
-hypothesis-map: возможность реализует гипотезу. Скоупь гипотезы к проблемам
-проекта (колонка `business-problem`).
+capability.trace (колонка в capability/<surface>.md — возможностях
+поверхности <surface> проекта <slug>) — авторское ребро продукт → вверх;
+элементы hypothesis:<slug> — ребро в hypothesis-map: возможность реализует
+гипотезу (элементы job:<slug> — угол capability-job). Скоупь гипотезы к
+проблемам проекта (колонка `business-problem`).
 
-Прямая сторона: каждый ref hypotheses этой поверхности резолвится в
-реальную hypothesis? Нет — error. Обратная: гипотеза проблемы проекта без
-реализующей capability на этой поверхности — hint (может нести другая
-поверхность того же проекта или соседний проект; не флагай агрессивно).
+Прямая сторона: каждый hypothesis:<slug> из trace этой поверхности
+резолвится в реальную hypothesis? Нет — error. Обратная: гипотеза
+проблемы проекта без реализующей capability на этой поверхности — hint
+(может нести другая поверхность того же проекта или соседний проект; не
+флагай агрессивно).
 Связь семантическая. В finding указывай project и surface.
 ```
 
 ## capability-job
 
-**Source:** `docs/projects/<slug>/capability/<surface>.md` (поле `jobs`).
+**Source:** `docs/projects/<slug>/capability/<surface>.md` (колонка
+`trace`, элементы `job:<slug>`).
 **Destination:** `docs/ajtbd/job.md`.
 **Скоуп:** по проекту × поверхность.
 **Применим если:** оба слоя существуют; у проекта есть поверхность
 `<surface>` с файлом возможностей.
 
 **Что искать:**
-- `error`: `capability.jobs` (в `capability/<surface>.md`) ссылается на
-  работу, которой нет в `docs/ajtbd/job.md`.
+- `error`: элемент `job:<slug>` в `capability.trace` (в
+  `capability/<surface>.md`) ссылается на работу, которой нет в
+  `docs/ajtbd/job.md`.
 - `hint`: Core/Big Job обслуживаемого сегмента без capability ни на одной
-  поверхности, прямо в неё целящей (`capability.jobs`) — дополняет
-  `mechanic-capability` (там через механики ценности, здесь — прямое ребро).
+  поверхности, прямо в неё целящей (`job:<slug>` в `capability.trace`) —
+  дополняет `mechanic-capability` (там через механики ценности, здесь —
+  прямое ребро).
 
 **Промпт-добавка:**
 ```
-capability.jobs (поле в capability/<surface>.md — возможностях поверхности
-<surface> проекта <slug>) — прямое авторское ребро продукт → ajtbd:
-возможность целит в работу сегмента (в дополнение к выводимому через
-job-graph.value-mechanics).
+capability.trace (колонка в capability/<surface>.md — возможностях
+поверхности <surface> проекта <slug>) — авторское ребро продукт → вверх;
+элементы job:<slug> — прямое ребро в ajtbd: возможность целит в работу
+сегмента (в дополнение к выводимому через job-graph.value-mechanics;
+элементы hypothesis:<slug> — угол capability-hypothesis).
 
-Прямая сторона: каждый ref jobs этой поверхности резолвится в реальный
-job? Нет — error. Обратная: Big/Core Job обслуживаемого сегмента без
-прямо целящей capability на этой поверхности — hint (может нести другая
-поверхность; не флагай агрессивно). Связь семантическая. В finding указывай
-project и surface.
+Прямая сторона: каждый job:<slug> из trace этой поверхности резолвится в
+реальный job? Нет — error. Обратная: Big/Core Job обслуживаемого
+сегмента без прямо целящей capability на этой поверхности — hint (может
+нести другая поверхность; не флагай агрессивно). Связь семантическая. В
+finding указывай project и surface.
 ```
 
 ## situation-job
@@ -1232,7 +1280,9 @@ UX-шаг проверяет/обслуживает гипотезу. Пряма
 Структурную часть хребта (файл `capability/<surface>.md` без поверхности в
 реестре; поверхность реестра без файла возможностей) уже ловит
 `/project-audit`. Здесь — **семантика**: для кого поверхность объявлена и
-кому её возможности на деле ценны.
+кому её возможности на деле ценны. У `web` рода `landing` и `site` файл
+возможностей по желанию — ценность такой поверхности дают страница и
+оффер; файла нет — единица без находки.
 
 **Что искать:**
 - `error`: поверхность реестра `stable`, чей файл `capability/<surface>.md`
@@ -1259,7 +1309,9 @@ capability/<surface>.md (возможности этой поверхности,
 surface.user поверхности — warning (умение «не тем», кого поверхность
 обслуживает). User из surface.user без единой ценной ему возможности —
 hint. Связь семантическая (user сопоставляй по смыслу, не только по slug).
-В finding указывай project и surface.
+У поверхности web рода landing или site файл возможностей по желанию: нет
+файла — верни пустой список с пометкой. В finding указывай project и
+surface.
 ```
 
 ## integration-crossproject
@@ -1412,9 +1464,12 @@ surface-локален: один датум на разных поверхнос
 
 ## surface-service
 
-**Source:** `docs/projects/<slug>/surface.md` (строка `<surface>`).
+**Source:** `docs/projects/<slug>/surface.md` (строка `<surface>`: `type`,
+`web-kind`).
 **Destination:** `docs/projects/<slug>/services/service.md` (колонка
-`surfaces`) + паспорта `services/<svc>/README.md` (`Exposes`).
+`surfaces`) + паспорта `services/<svc>/README.md` (`Exposes`); для
+поверхности без своего сервиса — `services/architecture.md § Decisions` и
+`docs/projects/<slug>/integration.md` (колонка `surface`).
 **Скоуп:** по проекту × поверхность.
 **Применим если:** у проекта есть `services/service.md`.
 
@@ -1426,6 +1481,15 @@ surface-локален: один датум на разных поверхнос
   Исключение — мобильная поверхность, у которой все сущности карты
   `mobile/<surface>/entities.md` имеют `source: local` и `shared-api.md`
   пуст: приложение без бэкенда сервис не требует (пометить без finding).
+  Исключение — поверхность `web` рода `landing` или `site`: лендинг и сайт
+  живут без бэкенда, если получатели их заявок и событий — строки
+  `integration.md` с этой поверхностью в колонке `surface`, а в
+  `architecture.md § Decisions` записано решение «у поверхности `<surface>`
+  своего сервиса нет» (пометить без finding).
+- `warning`: поверхность `web` рода `landing` или `site` без сервиса, у
+  которой решение не записано или получателей заявок в `integration.md` нет, —
+  «лендинг без бэкенда без записанного решения». Это не `error`: своего
+  бэкенда у лендинга может и не быть, но решение принимает архитектор.
 - `error`: bot-поверхность (`type: bot`), у которой нет ровно одного
   сервиса `type: bot` (ноль или два).
 - `warning`: сервис экспонирует поверхность, которой нет в реестре, или
@@ -1440,7 +1504,12 @@ destination — services/service.md (колонка surfaces) и Exposes пас�
 Поверхность реальна, только если её кто-то обслуживает: найди сервисы с
 <surface> в surfaces и функции Exposes с audience surface:<surface>.
 Сопоставь смыслом: тот ли это сервис, который должен нести эту поверхность?
-В finding указывай project и surface.
+Поверхность web рода landing или site без сервиса — не error: без находки,
+если получатели её заявок — строки integration.md с этой поверхностью в
+surface и в architecture.md § Decisions записано «у поверхности <surface>
+своего сервиса нет»; не хватает решения или получателей — warning
+«лендинг без бэкенда без записанного решения». В finding указывай project
+и surface.
 ```
 
 ## service-capability
@@ -1672,10 +1741,12 @@ mobile-domain. В finding указывай project и surface.
 **Source:** `docs/projects/<slug>/mobile/<surface>/entry-points.md` (строки
 `kind: deep-link`: `pattern`, `target`) + `screens.md` целевых экранов.
 **Destination:** web-поверхности того же проекта: `fsd/<web-surface>/pages.md`
-(`path`) и/или `screens/<web-surface>/` (`screen.route`).
+(`path`) и/или `screens/<web-surface>/` (`screen.route`); у веб-поверхности
+рода `site` адреса берутся из карты сайта `site/<web-surface>/site-map.yaml`
+(`pages[].url`, `collections[].url_pattern`).
 **Скоуп:** по проекту × поверхность (`type: mobile`).
 **Применим если:** у проекта есть мобильная поверхность с deep link'ами и
-хотя бы одна web-поверхность с `fsd/` или `screens/`.
+хотя бы одна web-поверхность с `fsd/`, `screens/` или картой сайта.
 
 Одна ссылка должна открываться и в вебе, и в приложении: путь — общий
 идентификатор места продукта на двух поверхностях.
@@ -1697,7 +1768,9 @@ mobile-domain. В finding указывай project и surface.
 Source — deep-link-входы mobile/<surface>/entry-points.md проекта <slug>
 (pattern, target) + назначение целевых экранов из screens.md; destination —
 web-поверхности того же проекта: fsd/<web-surface>/pages.md (path) и
-screens/<web-surface>/ (screen.route). Это намеренно кросс-поверхностный
+screens/<web-surface>/ (screen.route), у веб-поверхности рода site — карта
+сайта site/<web-surface>/site-map.yaml (pages[].url,
+collections[].url_pattern). Это намеренно кросс-поверхностный
 угол: сопоставляй пути и смысл «экран приложения ↔ web-страница».
 
 Путь deep link без web-страницы — warning; совпавший путь при разном
@@ -1769,4 +1842,187 @@ destination — infrastructure/shared-platform.md и placement.md. Сверь
 цепочку «потребность проекта → общий ресурс бизнеса → размещение» в обе
 стороны: каждая потребность закрыта, каждый общий ресурс кому-то нужен и
 где-то живёт, технологии совпадают.
+```
+
+## surface-design
+
+**Source:** `docs/projects/<slug>/surface.md` (строка `<surface>`: `type`,
+`web-kind`, `user`, `status`) + композиция поверхности: у `web` рода
+`landing` и `site` — слой страницы (планы `site/<surface>/plans/`, тексты
+`site/<surface>/copy/`, у рода `site` — карта `site/<surface>/site-map.yaml`),
+у `web` рода `app` и у `admin`, `desktop`, `embed` — экраны
+`screens/<surface>/` (статусы экранов, свод `map.md`).
+**Destination:** `docs/projects/<slug>/design/` (статус ДС — карта решений
+`system.yaml`; бриф на вид кабинета `app-brief.yaml`) +
+`docs/projects/<slug>/design/<surface>/` (таблица «Приёмка»
+`…/design/<surface>/review/REVIEW.md`, манифест `ready.yaml`; у сайта —
+арт-дирекция `design/<surface>/art-direction.json`).
+**Скоуп:** по проекту × поверхность.
+**Применим если:** у поверхности маршрут дизайна (`type` — `web`, `admin`,
+`desktop` или `embed`) и есть папка композиции (`site/<surface>/` или
+`screens/<surface>/`). У `mobile`, `bot`, `api` и `other` своего макета
+нет — облик мобильного приложения и бота — токены ДС и голос продукта;
+единица пропускается с этой пометкой.
+
+Макет страницы или экрана принят, когда в таблице «Приёмка» `REVIEW.md` у
+него вердикт `accepted` или `accepted_with_notes`, а отпечаток одобрения
+совпадает с текущими исходниками холста и входа, — тот же признак читают
+`/design-audit` и репозиторий кода. Композиция закрыта: у сайта — планы
+страниц `approved` (у рода `site` — всех страниц карты), у кабинета —
+экраны `stable`. Форму, производные и свежесть файлов дизайна держит
+`/design-audit`; здесь — ребро «закрытая композиция → принятый дизайн» и
+смысл облика против назначения поверхности.
+
+**Что искать:**
+
+- `error`: папка `design/<surface>/` заведена, композиция закрыта, а
+  принятого макета нет ни одного — дизайн начат и брошен (по образцу
+  `surface-screen`).
+- `warning`: закрытая страница или экран без принятого макета — одобрения
+  нет или его отпечаток не совпадает с текущими исходниками.
+- `warning`: облик поверхности противоречит её назначению по смыслу — бриф
+  на вид кабинета или арт-дирекция сайта написаны для другой аудитории, чем
+  `surface.user` (иллюстрация: рабочий кабинет бухгалтера с плотными
+  таблицами описан как «праздничный, для подростков»).
+- `hint`: строка приёмки страницы или экрана, которых больше нет в
+  композиции (страницу убрали из карты или брифа, экран удалён).
+
+**Промпт-добавка:**
+
+```
+Source — строка <surface> реестра surface.md проекта <slug> (type,
+web-kind, user, status) и композиция поверхности: у web рода landing и
+site — слой страницы site/<surface>/ (планы plans/, тексты copy/, у рода
+site — карта site-map.yaml), у web рода app и у admin, desktop, embed —
+экраны screens/<surface>/ (статусы экранов, свод map.md). Destination —
+design/ проекта (system.yaml — статус ДС, app-brief.yaml — бриф на вид
+кабинета) и design/<surface>/ (review/REVIEW.md — таблица «Приёмка»,
+ready.yaml; у сайта — art-direction.json).
+
+Макет страницы или экрана принят, если в «Приёмке» вердикт accepted или
+accepted_with_notes и отпечаток одобрения совпадает с текущими
+исходниками холста и входа. Композиция закрыта: у сайта — планы страниц
+approved (у рода site — все страницы карты), у кабинета — экраны stable.
+
+design/<surface>/ заведена, композиция закрыта, а принятого макета нет ни
+одного — error. Закрытая страница или экран без принятого макета или с
+несовпавшим отпечатком — warning. Облик (бриф на вид, арт-дирекция) по
+смыслу для другой аудитории, чем surface.user, — warning. Строка приёмки
+страницы или экрана, которых нет в композиции, — hint. Схемы, покрытие
+слотов, производные и свежесть файлов дизайна не проверяй — это
+/design-audit. В finding указывай project и surface.
+```
+
+## facts-business
+
+**Source:** `docs/projects/<slug>/facts.yaml` — факты продукта (второй язык
+— `docs/projects/<slug>/facts.<lang>.yaml` с теми же id).
+**Destination:** `docs/business/` (`profile.md`, `offering.md`,
+`current-metric.md`, `competitor.md`, `material.md`) +
+`docs/projects/<slug>/market.md`.
+**Скоуп:** по проекту: факты — файл уровня продукта, один на все
+поверхности.
+**Применим если:** у проекта есть `facts.yaml`. Слоя бизнеса нет — единица
+пропускается с пометкой: у продукта, начатого «просто сайтом», факты с
+источником «сообщение заказчика» законны, и сверять их не с чем.
+
+Факт — то, что страница утверждает от имени заказчика: его число, условие и
+основание не должны спорить с тем, что бизнес записал о себе. Структуру
+фактов — источник у каждого факта, схему, сроки, разрешения — проверяет
+`/design-audit` (`claims_check.py lint-facts`); здесь — смысл факта против
+бизнеса.
+
+**Что искать:**
+
+- `error`: факт по смыслу противоречит бизнесу — число расходится с
+  `current-metric` той же величины, даты и охвата; условия оффера (цена,
+  срок, что входит, гарантия) — с `offering`; сравнение с конкурентами — с
+  `competitor` и `market.md`.
+- `error`: источник факта — документ из `material.md` — не существует или о
+  факте не говорит.
+- `warning`: факт старше записи `current-metric` о той же величине — на
+  странице прошлое число, в бизнесе уже свежее.
+- `hint`: в бизнесе есть доказательство — награда, клиенты, сертификат,
+  рейтинг, — которого нет в фактах.
+
+**Промпт-добавка:**
+
+```
+Source — facts.yaml проекта <slug> (и facts.<lang>.yaml, если есть):
+факты с числом, условием, основанием и источником (source: type,
+document, date). Destination — docs/business/ (profile, offering,
+current-metric, competitor, material) и market.md проекта.
+
+Для каждого факта найди, что бизнес записал о той же величине, условии
+или признании. Число против current-metric той же величины, даты и
+охвата, условие оффера против offering, сравнение с конкурентами против
+competitor и market — противоречие по смыслу — error. Документ-источник
+ведёт в запись material.md, которой нет, или материал о факте не говорит
+— error. Факт старше записи current-metric о той же величине — warning.
+Доказательство в бизнесе (награда, клиенты, сертификат, рейтинг), которого
+нет в фактах, — hint. Факт со слов заказчика без записи в бизнесе — не
+находка: сверяй то, что есть с обеих сторон. Схему, наличие источника,
+сроки и разрешения не проверяй — это /design-audit. В finding указывай
+project.
+```
+
+## promise-product
+
+**Source:** слой страницы поверхностей `web` рода `landing` и `site`:
+смысл `site/<surface>/meaning.yaml` (ценностное предложение,
+позиционирование, аудитория, границы), бриф `site/<surface>/site-brief.yaml`
+(`offer`, `business.kpi`), утверждённые тексты страниц
+`site/<surface>/copy/<page-id>.yaml` (заголовки, выгоды, обещания).
+**Destination:** `docs/projects/<slug>/vision.md` (`Problem`, `Success`,
+`Non-goals`, `Positioning`), `docs/projects/<slug>/capability/<surface>.md`
+всех поверхностей, `boundary.md`, `user.md`, `market.md` проекта.
+**Скоуп:** по проекту: обещания всех страниц продукта сверяются с одним
+продуктом.
+**Применим если:** у проекта есть поверхность `web` рода `landing` или
+`site` со смыслом или планами страниц.
+
+Продающий текст живёт только в текстах страницы, и он же — главный риск
+маркетинговой копии: страница может пообещать то, чего продукт не делает.
+`/project-audit` смотрит внутрь продукта, `/design-audit` — форму файлов
+слоя страницы; обещание страницы против продукта сверяет этот угол.
+
+**Что искать:**
+
+- `error`: страница обещает то, что продукт намеренно не делает (`boundary`,
+  vision `Non-goals`), или подаёт цель как гарантию результата — та же
+  рамка, что у `goal-vision`: метрика — совместная цель, а не обещание.
+- `warning`: выгода или обещание страницы без возможности ни на одной
+  поверхности продукта. У продукта только из сайтов и лендингов файлов
+  возможностей может не быть — тогда выгоды сверяются с vision (`Problem`,
+  `Success`) и границами, а находки «без возможности» нет.
+- `warning`: аудитория смысла (основной сегмент `meaning.audience`) не
+  сходится с `user` продукта.
+- `hint`: сильная боль пользователя (`user.pains`, vision `Problem`) без
+  секции или сообщения страницы.
+- `hint`: отличие из `market` не отражено в позиционировании.
+
+**Промпт-добавка:**
+
+```
+Source — слой страницы поверхностей web рода landing и site проекта
+<slug>: meaning.yaml (value_proposition, positioning, audience,
+boundaries), site-brief.yaml (offer, business.kpi), утверждённые тексты
+страниц copy/<page-id>.yaml (заголовки, выгоды, обещания; черновые
+варианты не сверяются). Destination — vision.md (Problem, Success,
+Non-goals, Positioning), capability/<surface>.md всех поверхностей,
+boundary.md, user.md, market.md.
+
+Для каждого обещания страницы найди, что продукт делает на деле.
+Обещание того, что продукт намеренно не делает (boundary, Non-goals), —
+error. Цель или выгода, поданная как гарантия результата (иллюстрация:
+«гарантируем рост заявок вдвое»), — error: метрика — совместная цель, не
+обещание. Выгода без возможности ни на одной поверхности — warning; у
+продукта без файлов возможностей (только сайт или лендинг) выгоды сверяй
+с vision и boundary, находку «без возможности» не ставь. Аудитория смысла
+не сходится с user продукта — warning. Сильная боль user или
+vision.Problem без секции или сообщения страницы — hint; отличие из
+market не отражено в позиционировании — hint. Факты против бизнеса —
+угол facts-business, форма текстов и покрытие слотов — /design-audit. В
+finding указывай project, а поверхность страницы — в evidence и
+source-refs.
 ```

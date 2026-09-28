@@ -33,29 +33,55 @@ Forward-only: закрытое **удаляется**, история живёт
 ├── hypothesis-map/<kind>/<slug>.md  ← hypothesis-map-deep-dive  (goal · metric · subject · hypothesis · task)
 ├── infrastructure/          ← infrastructure-deep-dive (ИТ-периметр бизнеса: server · runtime · shared-platform · job · placement)
 └── projects/<project-slug>/ ← проектные исполнители (изоляция по продукту)
-    ├── project/             ← project-deep-dive    (vision.md, <kind>/<slug>.md для surface · user · integration · boundary · constraint · market)
+    ├── project/             ← project-deep-dive    (vision.md, <kind>/<slug>.md для surface · user · object · action · integration · boundary · constraint · market; _phase-jump.md)
     │   └── capability/<surface>/<slug>.md          возможности по поверхности
-    ├── interface/<surface>/<kind>/<slug>.md   ← interface-deep-dive
+    ├── interface/<surface>/<kind>/<slug>.md   ← interface-deep-dive (kind: who · stage · situation · scenario · zone · block · ux-substrate · data-items; _phase-jump.md)
     ├── services/<kind>/<slug>.md              ← service-deep-dive (kind: service · platform · architecture)
     ├── domains/<context>/...                  ← domain-deep-dive (по bounded-context; ключ — контекст, не сервис)
-    ├── screens/<surface>/<kind>/<slug>.md     ← screen-deep-dive
+    ├── screens/<surface>/<kind>/<slug>.md     ← screen-deep-dive (_phase-jump.md)
     ├── fsd/<surface>/<kind>/<slug>.md         ← fsd-deep-dive (по фронтовой поверхности)
     ├── telegram-bot-flow/<surface>/...        ← telegram-bot-flow-deep-dive (по bot-поверхности)
-    └── mobile/<surface>/<kind>/<slug>.md      ← mobile-deep-dive (по мобильной поверхности; рамка приложения — `_frame.md`)
+    ├── mobile/<surface>/<kind>/<slug>.md      ← mobile-deep-dive (по мобильной поверхности; рамка приложения — `_frame.md`)
+    ├── site/                                  ← design-deep-dive: слой страницы; факты и голос продукта
+    │   ├── facts.md · voice.md                  уровень продукта; у продукта без сайта ветка держит только их
+    │   └── <surface>/
+    │       ├── _phase-jump.md                   заметка пропусков: этапы слоя страницы и верхние слои
+    │       ├── <kind>.md                        файл-одиночка: site-brief · meaning · site-map
+    │       └── <kind>/<id>.md                   файл на страницу: hierarchy · page-plan · copy-deck
+    └── design/                                ← design-deep-dive: слой дизайна
+        ├── _phase-jump.md                       заметка пропусков уровня продукта: бренд, ДС, бриф на вид, продуктовый паспорт
+        ├── brand.md · ds.md · app-brief.md
+        └── <surface>/
+            ├── _phase-jump.md                   заметка пропусков: этапы дизайна и холста поверхности
+            └── art-direction.md · assets.md · motion.md · canvas.md
 ```
 
 Поверхность (`surface`) — ось продукта. Реестр-хребет `surface.md`
 объявляет поверхности, а их slug'и партиционируют ветки `state/`:
 возможности (`project/capability/<surface>/`), интерфейс
-(`interface/<surface>/`) и композиция — экраны (`screens/<surface>/`),
-диалоги бота (`telegram-bot-flow/<surface>/`) либо карта мобильного
-приложения (`mobile/<surface>/`) — разнесены по поверхности. `vision` и кросс-поверхностные kind (`surface`-реестр · `user`
-· `integration` · `boundary` · `constraint` · `market`) лежат плоско в
-`project/`. Домены (ветка `domains/<context>/`) surface-агностичны — делятся по
+(`interface/<surface>/`), композиция — экраны (`screens/<surface>/`), слой
+страницы (`site/<surface>/`), диалоги бота (`telegram-bot-flow/<surface>/`)
+либо карта мобильного приложения (`mobile/<surface>/`) — и облик
+поверхности (`design/<surface>/`) разнесены по поверхности. `vision` и кросс-поверхностные kind (`surface`-реестр · `user`
+· `object` · `action` · `integration` · `boundary` · `constraint` · `market`) лежат плоско в
+`project/`: атрибуты и представления живут в заметке объекта, постура — в
+заметке пользователя, паспорт и урезание — в заметке возможности. Домены
+(ветка `domains/<context>/`) surface-агностичны — делятся по
 bounded-context. Межпроектные стыки (`projects/project-map.md`) — авторская
 сторона у `integration` инициатора (`target: sibling-project`); отдельной
 state-ветки `project-map` не держим — заметки идут в ветку `project/`
 инициатора.
+
+Слои страницы и дизайна ведёт один исполнитель — `design-deep-dive`, и
+ветки у него две. `site/` держит слой страницы поверхности `web` рода
+`landing` или `site` и заметки фактов и голоса продукта: их формат родился
+в слое страницы, поэтому у продукта без сайта ветка `site/` держит только
+эти две заметки. `design/` держит облик продукта (бренд, ДС, бриф на вид
+кабинета) и папки поверхностей маршрута дизайна. Заметка холста
+`design/<surface>/canvas.md` — счёт раундов правок по страницам и экранам,
+открытый пакет правок и вопросы заказчику в ожидании. Отчёт `/design-audit`
+живёт вне дерева, рядом со своим скиллом, как у узких аудитов:
+`.claude/skills/design-audit/audit-state/<project-slug>/last-report.md`.
 
 Оркестратор владеет **только** `index.md` + `threads/` — это срез и
 маршрут. Детальную per-kind проработку держат **исполнители** в своих
@@ -90,18 +116,24 @@ Singleton-карта «где мы». По каждому слою (и кажд�
 
 ## projects/clinic
 - фаза: `surface` · vision stable · lifecycle: `mvp`
-- поверхности: `web`, `bot` (реестр surface.md)
+- поверхности: `web`, `bot`, `promo` (реестр surface.md; `promo` — `web` рода `landing`)
 - capability: `web` 3 stable · `bot` 1 draft
 - interface[`web`]: who/situation заполнены, zone пусто
 - interface[`bot`]: —
 - screens: —
+- сайт[`promo`]: бриф ✓ · факты: 12 ✓, 2 пробела · планы 1/2 · тексты: черновик
+- дизайн: ДС утверждена · холст[`promo`]: макет принят 0/2 · готово к сборке: нет
+- долг заметок пропусков: сайт[`promo`] — Карта гипотез пропущена, метрика словом заказчика
 - межпроектные стыки: `loyalty-sync` → `web-store` (project-map)
 - детально: `projects/clinic/`
 ```
 
 Срез проекта несёт **поверхностное измерение**: счётчики возможностей,
-интерфейса и экранов даются **по поверхности** (`capability`/`interface`/
-`screens` партиционированы по slug'ам реестра `surface.md`). Межпроектные
+интерфейса, экранов, слоя страницы и холста даются **по поверхности**
+(`capability`/`interface`/`screens`/`site`/`design` партиционированы по
+slug'ам реестра `surface.md`). Уровень продукта в дизайне (факты, голос,
+бренд, ДС) — одной строкой на продукт; долг заметок пропусков — отдельной
+строкой: он не блокирует, но аналитик должен его видеть. Межпроектные
 стыки (что течёт в соседний продукт) — отдельной строкой со ссылкой на
 `projects/project-map.md`.
 
@@ -174,7 +206,10 @@ ref: docs/swot/bet.md#online-booking-push
 ```
 
 Frontmatter: `kind` (имя слоевого kind), `slug` (= slug в таблице
-артефакта), `ref` (путь к строке артефакта).
+артефакта), `ref` (путь к строке артефакта). У заметок веток `site/` и
+`design/` строки таблицы нет — артефакт там машинный файл: `ref` — путь к
+файлу, `slug` — id страницы у файла на страницу, slug поверхности у
+файла-одиночки поверхности и slug проекта у заметки уровня продукта.
 
 ### Секции (все опциональны)
 
@@ -196,9 +231,52 @@ Frontmatter: `kind` (имя слоевого kind), `slug` (= slug в табли
 
 ### Особый случай: `_phase-jump.md`
 
-`<слой>/<phase>/_phase-jump.md` фиксирует решение перепрыгнуть фазу (напр.
-`swot/bet/_phase-jump.md` — «начали со ставки, факторы до-насытим позже»)
-как доменное решение. Не блокер.
+Заметка пропусков — единственный способ пропустить фазу или этап: решение
+перепрыгнуть записывается доменным решением с долгом, а не держится в
+памяти сессии. Форма — та же заметка:
+
+- **`## Доменные решения`** — что пропущено и почему: строка на пропуск с id
+  фазы или этапа, как его называют `references/phases.md` исполнителя (у
+  слоёв страницы и дизайна — этапы скилла `design-deep-dive`), и ответом на
+  вопрос «почему сейчас?»; по id сводки находят долг;
+- **`## Что копать дальше`** — долг: что закрыть и чьё слово или какой этап
+  его снимет.
+
+Frontmatter — `kind: phase-jump` и `ref` — папка слоя, чьи этапы пропущены;
+`slug` не нужен: заметка одна на ветку. Долг не блокер: работа идёт, но
+«закрыто» требует того, что пропущено. Его показывают сводки исполнителей,
+«где мы» оркестратора и `/design-audit` (подсказкой); закрытый долг
+удаляется, пустая заметка — тоже.
+
+Заметку пишет исполнитель слоя — в свою ветку:
+
+| заметка (от корня дерева) | что пропущено |
+|---|---|
+| `<слой>/<kind>/_phase-jump.md` у верхних слоёв и периметра | фаза слоя (иллюстрация: ставка SWOT заведена до факторов — «начали со ставки, факторы до-насытим позже») |
+| `projects/<slug>/project/_phase-jump.md` | фазы продуктового слоя — от `discovery` до `cohesion` |
+| `projects/<slug>/interface/<surface>/_phase-jump.md` | этапы interface поверхности |
+| `projects/<slug>/screens/<surface>/_phase-jump.md` | этапы экранов и текстов интерфейса |
+| `projects/<slug>/site/<surface>/_phase-jump.md` | этапы слоя страницы; верхние слои у сайта — бизнес, AJTBD, SWOT, Карта гипотез |
+| `projects/<slug>/design/_phase-jump.md` | этапы уровня продукта в дизайне: бренд, ДС, бриф на вид, продуктовый паспорт |
+| `projects/<slug>/design/<surface>/_phase-jump.md` | этапы дизайна и холста поверхности; единица без макета — только решением заказчика «макет пропущен: сборка по ДС и плану» |
+
+Пример — иллюстрация формы, а не данные проекта:
+
+```markdown
+---
+kind: phase-jump
+ref: docs/projects/<slug>/site/<surface>/
+---
+
+## Доменные решения
+- `page-plan` до `funnel` — материал уже есть: заказчик принёс
+  утверждённую структуру главной; бриф утвердим на `funnel`.
+- Карта гипотез пропущена — метрику воронки назвал заказчик (заявки в CRM).
+
+## Что копать дальше
+- `funnel` — утвердить бриф и сверить с ним план главной.
+- Сверить метрику воронки с Картой гипотез, когда она появится.
+```
 
 ---
 

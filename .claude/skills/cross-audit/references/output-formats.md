@@ -17,7 +17,7 @@ severity; верхнеуровневые — первой группой «Об�
 === /cross-audit ===
 Слои: business (+ стейкхолдеры), ajtbd, swot, hypothesis-map, project-map, infrastructure (общие) + проекты: referral-network (поверхности: web-partner, tg-bot), loyalty-app (поверхности: mobile)
 Проектов: 2 · агентов: 15 верхнеуровневых + referral-network (7 пар + 15 и 18 троек по web-partner и tg-bot + 1 dataitems) + loyalty-app (6 пар + 13 троек по mobile) = 75
-Пропущено: surface-screen у web-partner (нет screens/web-partner/); capability-domain, integration-domain, surface-service, service-capability, mobile-domain, mobile-service у loyalty-app (нет services/)
+Пропущено: surface-screen, surface-design у web-partner (нет screens/web-partner/, design/web-partner/); surface-design у tg-bot и mobile (у бота и мобильного своего макета нет); facts-business, promise-product у обоих проектов (нет facts.yaml и слоя страницы); capability-domain, integration-domain, surface-service, service-capability, mobile-domain, mobile-service у loyalty-app (нет services/)
 Время: <duration>
 
 — Общие слои —
@@ -118,8 +118,8 @@ pair-lens-runs: 13        # сумма по всем (проект × пара-l
 triple-lens-runs: 46      # сумма по всем (проект × поверхность × тройка-lens)
 dataitems-runs: 1         # один на мультиповерхностный проект
 per-project-layers:
-  referral-network: { project: yes, interface: yes, domain: yes, screen: no, botflow: yes, mobile: no }
-  loyalty-app:      { project: yes, interface: yes, domain: no,  screen: no, botflow: no,  mobile: yes }
+  referral-network: { project: yes, interface: yes, domain: yes, screen: no, botflow: yes, mobile: no,  site: no, design: no }
+  loyalty-app:      { project: yes, interface: yes, domain: no,  screen: no, botflow: no,  mobile: yes, site: no, design: no }
 findings: { error: X, warning: Y, hint: Z }
 verdicts: { accepted: A, needs-fix: B, false-positive: C, deferred: D }
 ---

@@ -16,16 +16,19 @@
 | `docs/ajtbd/` (живые интервью) | сырьё-кандидаты | `/jtbd-interview` (опц., тяжёлый, по явному запросу) | — |
 | `docs/swot/` | `factor` · `bet` | `/swot-deep-dive` | `/swot-audit` |
 | `docs/hypothesis-map/` | `goal` · `metric` · `subject` · `hypothesis` · `task` | `/hypothesis-map-deep-dive` | `/hypothesis-map-audit` |
-| `docs/projects/<slug>/` (vision + хребет + кросс-поверхностные kind) | `vision` · `surface` · `user` · `integration` · `boundary` · `constraint` · `market` | `/project-deep-dive <slug>` | `/project-audit <slug>` |
+| `docs/projects/<slug>/` (vision + хребет + кросс-поверхностные kind) | `vision` · `surface` · `user` · `object` · `action` · `integration` · `boundary` · `constraint` · `market` | `/project-deep-dive <slug>` | `/project-audit <slug>` |
 | `docs/projects/<slug>/capability/<surface>.md` (возможности по поверхности) | `capability` (по файлу на поверхность) | `/project-deep-dive <slug>` | `/project-audit <slug>` |
-| `docs/projects/<slug>/interface/<surface>/` | `who` · `stage` · `situation` · `zone` · `block` · `ux-substrate` · `data-items` | `/interface-deep-dive <slug> [<surface>]` | `/interface-audit <slug>` |
+| `docs/projects/<slug>/` — файлы уровня продукта | `facts` · `voice` · `voc` | `/design-deep-dive <slug>` | `/design-audit <slug>` + `/cross-audit` |
+| `docs/projects/<slug>/site/<surface>/` (слой страницы: `web` рода `landing` · `site`) | `site-brief` · `meaning` · `hierarchy` · `site-map` · `page-plan` · `copy-deck` | `/design-deep-dive <slug> [<surface>]` | `/design-audit <slug>` |
+| `docs/projects/<slug>/interface/<surface>/` | `who` · `stage` · `situation` · `scenario` · `zone` · `block` · `ux-substrate` · `data-items` | `/interface-deep-dive <slug> [<surface>]` | `/interface-audit <slug>` |
 | `docs/projects/<slug>/services/` (топология: реестр сервисов + паспорта + платформа + architecture) | сервисы/паспорта/брокер/ресурсы | `/service-deep-dive <slug>` | `/service-audit <slug>` + `/cross-audit` |
 | `docs/projects/<slug>/services/<svc>/domains/<ctx>/` (по bounded-context, внутри сервиса-владельца, surface-агностичны) | агрегаты/события/use-case/… | `/domain-deep-dive <slug> <ctx>` | `/service-audit <slug>` + `/cross-audit` |
 | `docs/projects/infrastructure/` (ИТ-периметр бизнеса: сервера · рантаймы · общие ресурсы · джобы · размещение) | server/runtime/shared-platform/job/placement | `/infrastructure-deep-dive` | `/infrastructure-audit` + `/cross-audit` |
-| `docs/projects/<slug>/screens/<surface>/` | `flow` · `screen` · `block` · `shell` | `/screen-deep-dive <slug> [<surface>]` | `/screen-audit <slug>` |
-| `docs/projects/<slug>/fsd/<surface>/` (фронтовые поверхности) | `entities` · `features` · `pages` · `widgets` · `app` · `shared-ui` · `shared-api` · `shared-lib` | `/fsd-deep-dive <slug> [<surface>]` | `/fsd-audit <slug>` |
+| `docs/projects/<slug>/screens/<surface>/` | `flow` · `screen` · `block` · `shell` + свод карты экранов `map.md` и реестр текстов интерфейса `texts.md` | `/screen-deep-dive <slug> [<surface>]` | `/screen-audit <slug>` |
+| `docs/projects/<slug>/fsd/<surface>/` (фронтовые поверхности: `web` рода `app` · `admin` · `desktop` · `embed`) | `entities` · `features` · `pages` · `widgets` · `app` · `shared-ui` · `shared-api` · `shared-lib` | `/fsd-deep-dive <slug> [<surface>]` | `/fsd-audit <slug>` |
 | `docs/projects/<slug>/telegram-bot-flow/<surface>/` (bot-поверхности) | фичи `features/<feature>/` (`dialog` · `window` · `use-case` бота) + сквозные `command` · `notification` | `/telegram-bot-flow-deep-dive <slug> [<surface>]` | `/telegram-bot-flow-audit <slug>` |
 | `docs/projects/<slug>/mobile/<surface>/` (мобильные поверхности) | `entities` · `screens` · `flows` · `features` · `shell` · `entry-points` · `permissions` · `system-actions` · `widgets` · `background-tasks` · `shared-api` · `shared-lib` | `/mobile-deep-dive <slug> [<surface>]` | `/mobile-audit <slug>` + `/cross-audit` |
+| `docs/projects/<slug>/design/` (облик продукта; `design/<surface>/` — поверхность) | `brand` · `design-system` · `app-brief` · `visual-dna` · `art-direction` · подача `treatment` в планах страниц · `asset-plan` · `motion-spec` · холст и приёмка (`canvas` · `review` · `ready`) | `/design-deep-dive <slug> [<surface>]` | `/design-audit <slug>` + `/cross-audit` |
 | `docs/projects/project-map.md` (межпроектные стыки) | `project-map` (singleton-граф рёбер) | `/project-deep-dive <slug>` (авторская сторона ребра — `integration` инициатора) | `/cross-audit` |
 | сквозная консистентность | — | — | `/cross-audit` |
 
@@ -34,13 +37,19 @@
 вопросом). Поверхность (`surface`) — ось продукта: реестр-хребет
 `surface.md` объявляет поверхности, а их slug'и партиционируют возможности
 (`capability/<surface>.md`), интерфейс (`interface/<surface>/`) и
-композицию — экраны (`screens/<surface>/`) либо диалоги бота
+композицию — экраны (`screens/<surface>/`), слой страницы
+(`site/<surface>/` при `type: web` рода `landing` или `site` — на месте
+интерфейса, экранов и FSD-карты) либо диалоги бота
 (`telegram-bot-flow/<surface>/` при `type: bot`), либо карту мобильного
-приложения (`mobile/<surface>/` при `type: mobile`); фронтовые поверхности несут
-ещё FSD-карту (`fsd/<surface>/`). Скиллы
-`interface`/`screen`/`fsd`/`telegram-bot-flow`/`mobile` берут поверхность
+приложения (`mobile/<surface>/` при `type: mobile`); фронтовые поверхности
+кабинета несут ещё FSD-карту (`fsd/<surface>/`), поверхности маршрута
+дизайна (`web`, `admin`, `desktop`, `embed`) — папку облика
+`design/<surface>/`. Скиллы
+`interface`/`screen`/`fsd`/`telegram-bot-flow`/`mobile`/`design` берут поверхность
 **вторым аргументом** `[<surface>]`; без него — пикер поверхностей по
-`surface.name` (после пикера проекта). Домены (`services/<svc>/domains/<ctx>/`) —
+`surface.name` (после пикера проекта), а `/design-deep-dive <slug>` без
+поверхности открывает уровень продукта: факты, голос, бренд, дизайн-систему,
+бриф на вид кабинета. Домены (`services/<svc>/domains/<ctx>/`) —
 surface-агностичны, делятся по bounded-context. Межпроектные стыки сводит
 `docs/projects/project-map.md` — авторская сторона каждого ребра живёт в
 `integration` проекта-инициатора (`target: sibling-project`).
@@ -68,15 +77,21 @@ surface-агностичны, делятся по bounded-context. Межпро�
 | «как проверим ставку — эксперимент/замер» | `hypothesis-map` / `task` |
 | «зачем продукт и для кого, что НЕ делаем» | `projects/<slug>` / `vision` (`addresses-problem`) |
 | «через какие поверхности продукт встречает пользователя (web, бот, API …)» | `projects/<slug>` / `surface` (реестр-хребет) |
-| «кто пользователь продукта» | `projects/<slug>` / `user` |
+| «кто пользователь продукта; сколько времени он проводит в продукте, основная ли это работа» | `projects/<slug>` / `user` (с постурой) |
+| «с какими вещами работает пользователь, как он их называет, что с ними делает» | `projects/<slug>` / `object` · `action` |
 | «что продукт умеет на этой поверхности (бизнес-возможность)» | `projects/<slug>` / `capability` (файл `capability/<surface>.md` — на какой поверхности?) |
 | «где торчит наружу / с чем интегрируется внешняя система / какие правила-SLA / аналоги» | `projects/<slug>` / `surface` · `integration` · `constraint` · `market` |
 | «продукт обменивается с **соседним продуктом** того же бизнеса» | `projects/<slug>` / `integration` (`target: sibling-project`, `sibling-project: <slug-соседа>`) → ребро в `projects/project-map` |
-| «как пользователь взаимодействует, ситуации, зоны, блоки» (на какой поверхности?) | `projects/<slug>/interface/<surface>` / `who` · `situation` · `zone` · `block` · … |
-| «как это выглядит, экраны, композиция» (на какой поверхности?) | `projects/<slug>/screens/<surface>` / `flow` · `screen` · `block` · `shell` |
+| «как пользователь взаимодействует: сценарий задачи, ситуации, разделы навигации, блоки» (на какой поверхности?) | `projects/<slug>/interface/<surface>` / `scenario` · `who` · `situation` · `zone` · `block` · … |
+| «из каких экранов и что на экране: композиция, переходы, состояния, подписи кнопок и сообщения кабинета» (на какой поверхности?) | `projects/<slug>/screens/<surface>` / `flow` · `screen` · `block` · `shell` · `map.md` · `texts.md` |
 | «как фронт нарезан по слоям FSD: страницы, фичи, сущности, виджеты» (какая фронтовая поверхность?) | `projects/<slug>/fsd/<surface>` / `entities` · `features` · `pages` · `widgets` · `app` · `shared-ui` · `shared-api` · `shared-lib` |
 | «как бот ведёт диалог: окна, кнопки, команды, уведомления, оркестрация действий» (какая bot-поверхность?) | `projects/<slug>/telegram-bot-flow/<surface>` / фичи `features/<feature>/` (`dialog` · `window` · `use-case` бота) + `command` · `notification` |
 | «мобильное приложение: экраны и переходы, push и напоминания, ссылки в приложение, разрешения, голосовая команда, виджет, что делает в фоне, работа без сети» (какая мобильная поверхность?) | `projects/<slug>/mobile/<surface>` / `screens` · `flows` · `features` · `shell` · `entry-points` · `permissions` · `system-actions` · `widgets` · `background-tasks` · `entities` · `shared-api` · `shared-lib` |
+| «сайт, лендинг, посадочная, страница, промо, тексты для сайта, воронка, заявки с сайта, карта сайта, редизайн сайта» (какая поверхность?) | `projects/<slug>/site/<surface>` — поверхность `web` рода `landing` или `site` |
+| «цифры, отзывы, кейсы, гарантии, документы для сайта; как мы говорим, тон» | уровень продукта — `facts` · `voice` |
+| «стиль, бренд, логотип, дизайн-система, цвета и шрифты, мудборд, референсы, направления, картинки, иконки, иллюстрации, 3D, видео, анимация» | `projects/<slug>/design` (продукт или `design/<surface>`) |
+| «макет, холст, вайрфрейм, покажи макет, правки макета, проверь макет, прими макет, промежуточные ширины» (какая поверхность?) | `projects/<slug>/design/<surface>` — этапы холста |
+| «кабинет, личный кабинет, сервис, SaaS, админка, внутренняя система» | маршрут кабинета: `projects/<slug>` (роли, поверхность рода `app` или `admin` …) → `interface` → `screens` → `fsd`; облик — `design` |
 | «бизнес-код бэкенда, агрегаты, инварианты» (какой bounded-context?) | `projects/<slug>/services/<svc>/domains/<ctx>` |
 | «архитектура приложения: из каких сервисов состоит, монолит/микросервисы, брокер/очередь, gateway, где какая БД, кто продюсер/консьюмер событий» | `projects/<slug>/services` |
 | «сервера, хостинг, кубер vs compose, где будет жить сервис, общий брокер/traefik на все проекты, учёт VPS» | `projects/infrastructure` |
@@ -94,6 +109,17 @@ surface-агностичны, делятся по bounded-context. Межпро�
   **внутрь** заказчика: человек-решатель в политике проекта, не рыночное
   лицо. Сигнал «человек, влияющий на судьбу проекта внутри заказчика» →
   `stakeholder`; один человек обеими линзами — `manifests-as`.
+- **облик ≠ композиция**: цвет, шрифт, стиль, картинки → `design`; что на
+  экране и где → `screens`, у сайта и лендинга — слой страницы (план
+  страницы). Подача секций в плане страницы — облик, её пишет слой дизайна.
+- **текст страницы ≠ текст интерфейса ≠ факт**: продающий текст сайта →
+  тексты страницы (copy deck слоя страницы); подписи кнопок и сообщения
+  кабинета → реестр `screens/<surface>/texts.md`; число, цена, срок, отзыв →
+  `facts` (только с источником).
+- **сайт ≠ кабинет**: посадочная под рекламу внутри сайта — страница сайта,
+  а не поверхность; отдельная поверхность рода `landing` — только со своим
+  «где», шапкой и воронкой; кабинет за входом на сайте — отдельная
+  поверхность рода `app` со своим маршрутом.
 
 ## Режим → как маршрутизировать
 
@@ -101,7 +127,7 @@ surface-агностичны, делятся по bounded-context. Межпро�
 |---|---|---|
 | `наполнить` | «вот сырьё / заведём новое / тут пусто» | делегировать `*-deep-dive` (режим A «новая сущность» или B «сырьё») |
 | `актуализировать` | «появились новые данные / сверим с тем, что было» | делегировать `*-deep-dive` (режим B/C на существующих записях) |
-| `рефакторить` | «переименовать / перенести / слить slug» | делегировать `*-deep-dive` его процедурой каскад-правки (исполнитель показывает каскад внутри слоя); сквозные ссылки между слоями ловит `/cross-audit` |
+| `рефакторить` | «переименовать / перенести / слить slug» | делегировать `*-deep-dive` его процедурой каскад-правки (исполнитель показывает каскад внутри слоя); сквозные ссылки между слоями ловит `/cross-audit`; идентификаторы, которые читают код-репо (`CLAUDE.md` §8: id страниц, секций, слотов и фактов, пути токенов, имена компонентов ДС), переименовываются только так — с ценой для кода в плане каскада |
 | `чистить` | «удалить сущность» | делегировать `*-deep-dive` его процедурой удаления (каскад ссылок + подтверждение) |
 | `аудитить` | «проверь / перед коммитом / что-то рассинхронилось» | запустить нужный аудит-рой (ниже) |
 
@@ -119,6 +145,8 @@ surface-агностичны, делятся по bounded-context. Межпро�
 | консистентность FSD-карты проекта (фронтовые поверхности) | `/fsd-audit <slug>` |
 | консистентность telegram-bot-flow проекта (bot-поверхности) | `/telegram-bot-flow-audit <slug>` |
 | консистентность карты мобильного приложения (мобильные поверхности) | `/mobile-audit <slug>` |
+| слой страницы и слой дизайна проекта — файлы и схемы, покрытие, свежесть входа холста и приёмки | `/design-audit <slug>` |
+| макет по HTML-копиям и судья — по разрешению заказчика | `/design-audit <slug> --visual` |
 | консистентность сервисной топологии проекта (реестры, паспорта, домены-владельцы) | `/service-audit <slug>` |
 | структура ИТ-периметра бизнеса (размещение, рефы, сироты) | `/infrastructure-audit` |
 | **сквозная** консистентность между всеми слоями и проектами | `/cross-audit` |
@@ -132,46 +160,127 @@ surface-агностичны, делятся по bounded-context. Межпро�
 Один чанк может тянуть в несколько слоёв (типичное «хотим, чтобы клиенты
 возвращались» — это и `goal`, и косвенно `segment`/`subject`). Не дробить
 насильно: вести в **первичный** слой через его исполнителя; смежные связи
-(`subject.segments`, `hypothesis.jobs`, `capability.jobs` и т.п.) исполнитель
+(`subject.segments`, `hypothesis.jobs`, `capability.trace` и т.п.) исполнитель
 заводит **авторски снизу-вверх** на своей стороне. Оркестратор лишь следит,
 чтобы смежный слой не потерялся — фиксирует его открытой нитью.
 
-## Выбор поверхности (interface / screens / fsd / telegram-bot-flow / mobile / capability)
+## Выбор поверхности (interface / screens / fsd / telegram-bot-flow / mobile / site / design / capability)
 
-Слои `interface`, `screens`, `fsd`, `telegram-bot-flow` и `mobile`
+Слои `interface`, `screens`, `fsd`, `telegram-bot-flow`, `mobile`, слой
+страницы `site` и облик поверхности `design/<surface>/`
 партиционированы по поверхности — путь делегирования несёт **и проект, и
 поверхность**:
 `/interface-deep-dive <slug> [<surface>]`,
 `/screen-deep-dive <slug> [<surface>]`,
-`/fsd-deep-dive <slug> [<surface>]` (только фронтовые поверхности — `type: web` /
-`admin` / `desktop` / `embed`),
+`/fsd-deep-dive <slug> [<surface>]` (только фронтовые поверхности кабинета —
+`type: web` рода `app`, `admin`, `desktop`, `embed`),
 `/telegram-bot-flow-deep-dive <slug> [<surface>]` (только поверхности с
 `type: bot` — композиция бота вместо экранов),
 `/mobile-deep-dive <slug> [<surface>]` (только поверхности с `type: mobile`
-— карта приложения вместо экранов и FSD-карты). Возможности (`capability`)
+— карта приложения вместо экранов и FSD-карты),
+`/design-deep-dive <slug> [<surface>]` (слой страницы — у `web` рода
+`landing` и `site`; облик поверхности — у `web`, `admin`, `desktop`,
+`embed`; без поверхности — уровень продукта). Возможности (`capability`)
 тоже живут по поверхности (`capability/<surface>.md`), но входом остаётся
 `/project-deep-dive <slug>` — там поверхность выбирается внутри.
 
 Оркестратор определяет поверхность так же, как проект: из сырья (явно
 названа web / бот / API) или вопросом. Если поверхность неясна —
 передать без второго аргумента, исполнитель сам предложит пикер
-поверхностей по `surface.name` (после пикера проекта). Поверхность, которой
+поверхностей по `surface.name` (после пикера проекта); `/design-deep-dive`
+без поверхности уходит на уровень продукта, поэтому страницу, макет и облик
+поверхности ему передают с поверхностью. Поверхность, которой
 нет в реестре `surface.md`, сперва заводится через `/project-deep-dive
 <slug>` (kind `surface`) — каталоги `interface/<surface>/`,
 `screens/<surface>/`, `fsd/<surface>/`, `telegram-bot-flow/<surface>/`,
-`mobile/<surface>/`, `capability/<surface>.md` руками не создаём, их
+`mobile/<surface>/`, `site/<surface>/`, `design/<surface>/`,
+`capability/<surface>.md` руками не создаём, их
 заводят их скиллы при первом заходе.
+
+### Маршрут по роду поверхности
+
+Маршрут поверхности задают её `type` и род `web-kind` в реестре
+`surface.md`; этапы маршрутов и их порядок — одна таблица,
+`.claude/skills/design-deep-dive/references/phases.md § Маршруты`. Здесь —
+кого оркестратор зовёт:
+
+| `type` · `web-kind` | маршрут | исполнители по порядку |
+|---|---|---|
+| `web` · `landing`, `site` | минимум продукта → слой страницы → слой дизайна → пакет для `<org>/site` | `/project-deep-dive <slug>` (минимум) → `/design-deep-dive <slug> <surface>` |
+| `web` · `app`; `admin`, `desktop`, `embed` | продукт → сценарии → interface → экраны → тексты интерфейса → FSD-карта; дизайн входит дважды — после сценариев и после stable-экранов → пакет для `<org>/frontend` | `/project-deep-dive` → `/interface-deep-dive` → `/screen-deep-dive` → `/fsd-deep-dive`; облик — `/design-deep-dive <slug> <surface>` |
+| `mobile` | карта приложения; из дизайна — токены ДС и голос продукта | `/mobile-deep-dive <slug> <surface>` |
+| `bot` | диалоги бота; из дизайна — голос продукта | `/telegram-bot-flow-deep-dive <slug> <surface>` |
+| `api`, `other` | без композиции | — |
+
+- **Сигнал сверяется с родом.** Слой страницы — только у `landing` и
+  `site`; interface, экраны и FSD-карта — не у них; облик поверхности —
+  только у `web`, `admin`, `desktop`, `embed`. Нет поверхности в реестре или
+  у `web` не назван род — сначала `/project-deep-dive <slug>` (фаза
+  `surface`): без рода нет маршрута, а исполнитель дизайна в продуктовый
+  слой не пишет.
+- **Этап выбирает исполнитель.** Оркестратор передаёт проект, поверхность
+  и чанк как сырьё; исполнитель находит первый этап с готовым входом и
+  показывает сводку этапов (`phases.md § Вход с любого места`).
+- **Облик кабинета.** Сигнал стиля или макета у поверхности маршрута
+  кабинета ведёт в `/design-deep-dive <slug> <surface>`; вход выбирает
+  исполнитель: бриф на вид, карточки стиля, дизайн-система, паспорт и
+  иконки — первый вход (после сценариев хабов), компоненты ДС, иллюстрации
+  и макет экранов — второй (после stable-экранов и свода `map.md`). Вход не
+  готов — исполнитель называет первый незакрытый этап слоя проекта и его
+  исполнителя (`phases.md § Первый вход дизайна кабинета`,
+  `§ Второй вход дизайна кабинета`).
+- **Смешанный продукт.** У каждой поверхности свой маршрут; факты, голос,
+  бренд, дизайн-система и объекты — одни на продукт.
+- **Мобильное и бот.** Этапов дизайна и холста у них нет: «нарисуйте
+  приложение» ведёт в `/mobile-deep-dive` — экраны и сценарии приложения,
+  облик — токены ДС продукта; аналитику это называется прямо.
+
+### Быстрый путь и вход с середины
+
+- **«Просто сайт».** Проекта или поверхности нет —
+  `/project-deep-dive --new` (или `/project-deep-dive <slug>`) минимальным
+  путём: vision минимума — `Name`, `Problem`, `Users`, `Success`,
+  `Non-goals` и `Assumptions`, если допущения есть (можно `draft`), одна
+  строка `user.md`, поверхность `web` рода `landing` или `site`; затем
+  `/design-deep-dive <slug> <surface>` с этапа
+  `brief`. В нить
+  оркестратор пишет строку «быстрый путь: верхние слои пропущены»; пропуск
+  каждого слоя исполнитель пишет долгом в заметку пропусков своей ветки
+  (`state-model.md § Особый случай: _phase-jump.md`). Быстрый путь проходит
+  ворота минимально, а не обходит их: что не пропускается никогда —
+  `phases.md § Вход с любого места`.
+- **Вход с середины.** Готовые брендбук, тексты, макет заказчика или
+  действующий сайт — сырьё для исполнителя (его режим B): оркестратор этап
+  не выбирает и не пропускает, вопрос «почему сейчас?» и долг при
+  перепрыгивании — у исполнителя (`phases.md § Перепрыгивание`).
 
 ## Продукт спроектирован → следующий шаг флоу
 
-Проектирование продукта здесь закончено, когда слои, которые читают код-репо
-(`services/` с доменами, FSD-карта, `telegram-bot-flow/`, `mobile/` — по типам
-поверхностей), и ИТ-периметр доведены до `stable`, а узкие аудиты и
-`/cross-audit` чистые. Дальше маршрут уходит из этого репо в операционный
+Проектирование продукта здесь закончено, когда у каждой поверхности закрыто
+то, что читает её код-репо:
+
+- `web` рода `landing` и `site` — слой страницы (бриф, у сайта — карта,
+  планы и тексты утверждены, факты подтверждены или пробел назван) и дизайн
+  (ДС утверждена, макеты страниц приняты с совпавшим отпечатком,
+  `ready.yaml` — `ready`). Своего сервиса у такой поверхности может не
+  быть: тогда получатели заявок записаны в `integration.md`, а при
+  `services/` — решение «своего сервиса нет» в `architecture.md`;
+- `web` рода `app`, `admin`, `desktop`, `embed` — экраны и тексты
+  интерфейса, FSD-карта, дизайн (ДС с покрытием компонентов, макеты экранов
+  приняты, `ready.yaml` — `ready`);
+- `bot` — `telegram-bot-flow/`, `mobile` — `mobile/`;
+- сервисы с доменами — если у продукта есть бэкенд; ИТ-периметр — если есть
+  сервисы.
+
+Узкие аудиты тронутых слоёв, включая `/design-audit`, и `/cross-audit`
+чистые. Дальше маршрут уходит из этого репо в операционный
 хаб `<org>/infra` (sibling-checkout `../infra`): там `/init-project` читает
 strategy и поднимает инфру, сквозная задача ведётся программой в
 `.claude/plans/` инфры, а агенты из хаба расходятся по сиблингам и работают обвязкой того
-репо. Оркестратор называет этот шаг аналитику, но сам в другие репо не
+репо. По роду поверхности хаб выбирает, какой код поднять: `<org>/site` у
+`landing` и `site`, `<org>/frontend` у кабинета; что из поверхности готово к
+сборке, говорит её манифест `ready.yaml`. Оркестратор называет этот шаг
+аналитику, но сам в другие репо не
 переходит. Изменение дизайна по ходу возвращается сюда тем же входом
 `/entrypoint`.
 
@@ -182,3 +291,7 @@ strategy и поднимает инфру, сквозная задача вед�
 - Не правит артефакты напрямую — только через исполнителя.
 - Не зовёт `/jtbd-interview` без явного запроса (тяжёлый опциональный
   процесс).
+- Не публикует и не правит артефакты claude.ai — это протокол исполнителя
+  дизайна (`.claude/skills/design-deep-dive/references/claude-design.md`).
+- Не запускает генерацию картинок, видео и 3D: траты идут после утверждения
+  плана ассетов заказчиком, внутри этапов исполнителя дизайна.
