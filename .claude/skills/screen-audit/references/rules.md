@@ -78,12 +78,30 @@ accessibility` `vision.md`. Проверки — чтением по форме.
 
 - **severity**: `hint` (coverage).
 - **scope**: `surface.md` ↔ подпапки `screens/`.
-- **проверка**: для каждой строки реестра `surface.md` существует папка
-  `screens/<slug>/`. Отсутствие — не ошибка модели, а непокрытая
+- **проверка**: для каждой строки реестра `surface.md` маршрута
+  приложения (`web` рода `app`, `admin`, `desktop`, `embed`) существует
+  папка `screens/<slug>/`. Отсутствие — не ошибка модели, а непокрытая
   поверхность (экраны ещё не синтезировали).
 - **рекомендация**: «Поверхность объявлена в `surface.md`, но её экраны
   ещё не начаты — завести через `/screen-deep-dive <project-slug>
   <slug>`, либо это сознательно отложено».
+
+### R-SURF-003 «папка экранов у поверхности не маршрута приложения»
+
+- **severity**: `error`.
+- **scope**: подпапки `docs/projects/<project-slug>/screens/` ↔ `type` и
+  `web-kind` строк `surface.md`.
+- **проверка**: папка `screens/<X>/` есть только у поверхности `web`
+  рода `app`, `admin`, `desktop` или `embed`. У `web` рода `landing` и
+  `site` на месте экранов слой страницы `site/<X>/`, у `mobile` — слой
+  `mobile/<X>/`, у `bot` — `telegram-bot-flow/<X>/`; у `web` без рода
+  маршрута нет.
+- **норма**: канон слоя (вступление, «Anti-patterns»); колонка
+  `web-kind` — `docs/projects/_template/project/surface.md`.
+- **рекомендация**: «Род или тип поверхности — через
+  `/project-deep-dive <project-slug>`; смысл и тексты страницы — в слой
+  страницы (`/design-deep-dive <project-slug> <X>`); папку экранов — удалить
+  каскадом по подтверждению».
 
 ---
 

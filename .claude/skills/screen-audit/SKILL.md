@@ -59,6 +59,8 @@ args задаёт scope:
 | `/screen-audit <project-slug> <surface>` | полный прогон всех 4 kind одной поверхности |
 | `/screen-audit <project-slug> <surface> <kind>` | прогон одного kind поверхности + перекрёстные ссылки внутри неё |
 | `/screen-audit <project-slug> <surface> <kind>:<slug>` | одна запись + 1-shell соседи по ссылкам внутри поверхности |
+| `/screen-audit <project-slug> <surface> map` | свод и решения `map.md` против экранов |
+| `/screen-audit <project-slug> <surface> texts` | реестр `texts.md` против ключей деревьев |
 
 `kind` ∈ {`flow`, `screen`, `block`, `shell`}.
 `<kind>` и `<kind>:<slug>` требуют заданной `<surface>` (kind живёт в
@@ -189,6 +191,14 @@ args задаёт scope:
   Что делать: пересинхронизировать через /screen-deep-dive <project-slug> web-clinic block:studies-list
   (скилл переспросит источник правды).
 
+[error] web-clinic / block:studies-list → R-STRUCT-021: `ui:Search` вне словаря — это имя из `aka` типа `SearchInput`.
+  Что делать: заменить на ui:SearchInput через /screen-deep-dive <project-slug> web-clinic block:studies-list.
+
+[warning] web-clinic / screen:studies-workspace → R-SEM-011: набор состояний не покрыт — нет `empty-filtered`
+  (в блоке studies-list есть поиск).
+  Что делать: дописать дельту или «не применимо: причина» через
+  /screen-deep-dive <project-slug> web-clinic screen:studies-workspace.
+
 [warning] web-clinic / block:studies-list → tree содержит `ui:Skeleton` (inline-state в block).
   Что делать: перенести в screen.states через /screen-deep-dive <project-slug> web-clinic screen:<потребитель>.
 
@@ -196,8 +206,10 @@ args задаёт scope:
   Что делать: завести screen с shell=auth-shell или удалить shell через
   /screen-deep-dive <project-slug> web-admin (каскадно).
 
-Сводка: 4 error / 1 warning / 1 hint.
+Сводка: 5 error / 2 warning / 1 hint.
 ```
+
+Пример — иллюстрация формы отчёта, а не данные проекта.
 
 Группировка — по поверхности, внутри — по сущности; в пределах сущности
 — `error → warning → hint`.
@@ -254,6 +266,9 @@ totals: { error: X, warning: Y, hint: Z }
 - ...
 
 ### Правила coverage (R-COV-*)
+- ...
+
+### Карта, контракты, тексты, доступность, узкий экран (R-RT-*, R-CP-*, R-TX-*, R-AX-*, R-MB-*)
 - ...
 
 ## Поверхность <surface-2>
