@@ -72,6 +72,34 @@
 Вывод для плана: все зоны кода идут в облаке; Blender, замеры 3D на видеокарте, модели Hugging Face и OCR, Brave, свежие
 каталоги генерации — только на машине заказчика (шаг МЗ, вопрос заказчику 2).
 
+## 3a. Проверено делом: окружение локальное — машина заказчика (29.09)
+
+Вся Ф8 идёт на этой машине (Р187). Проверка — локальной сессией перед Ф8; репозиторий не менялся (смоук следов не
+оставил).
+
+- **Python.** Системный — 3.13.5 (pyyaml есть — журнальные утилиты идут на `python3`). `$DDD_HOME` —
+  `~/.cache/design-deep-dive`, живёт между сессиями; venv — Python 3.13.5 (Playwright 1.63.0, numpy 2.5.3, jsonschema
+  4.26.0, PyYAML 6.0.3 — `venv-freeze.txt`).
+- **Смоук** — 90 с: PASS 207, FAIL 0, XFAIL 8 (cairosvg — 2; снимки каталогов ai-media — 5; `provenance_check` без
+  c2patool и exiftool — 1), XPASS 1 — самопроверка `refs_client` (Brave есть).
+- **Браузер.** Playwright 1.63.0 и его Chromium 1243 (153.0) в `~/.cache/ms-playwright`, `PLAYWRIGHT_BROWSERS_PATH` не
+  задан; запуск и кириллица на странице проверены. Обход под браузеры образа (`playwright==1.56.0`) здесь не нужен.
+- **Инструменты.** Есть: Blender 5.2.2 LTS (`~/.local/bin/blender`), ffmpeg и ffprobe (`/usr/bin`), Brave
+  (`brave-browser`), Node 24.21 и npm (nvm), uv, `systemd-inhibit`, `gio` (корзина). Нет: exiftool, c2patool (их ставит
+  `install.sh`), `/usr/bin/time`, `xxd`.
+- **Сеть** (29.09): открыты PyPI, реестр npm, huggingface.co, cdn.jsdelivr.net, download.blender.org, polza.ai,
+  search.brave.com; cdn.playwright.dev отвечает (400 на корень — не 403, как в облаке).
+- **Железо.** 20 потоков, 15 ГБ памяти (при проверке свободно ≈ 6 ГБ), 448 ГБ диска свободно; видеокарта — встроенная
+  Intel Iris Xe (Raptor Lake-P, `/dev/dri` есть), NVIDIA нет.
+- **Claude Code** 2.1.284 — `omitClaudeMd` агента-судьи действует (с 2.1.271).
+- **Старые `bin/` и `models/`** для `install.sh --from` и `--models-from` — в замороженном источнике
+  `~/Документы/app-design/`: `blender-research/99-raw/tools/bin`, `ai-media-research/99-raw/tools/bin`,
+  `ai-media-research/99-raw/tools/models`, `ai-media-research/03-image-models/models`,
+  `ai-media-research/04-video-models/models`.
+
+Вывод: все зоны кода и шаг МЗ идут здесь. Два агента с браузером и смоук одновременно — держать ≥ 2 ГБ свободной
+памяти (`kit --min-free-gb 2`); мало — полный смоук после агентов, а не параллельно.
+
 ## 4. Спорные места — решает оркестратор (до брифа названной зоны)
 
 1. **Где живут новые схемы форм продукта `brand`, `system`, `app-brief`** (C5). T4 H10 говорит «у владельцев в kb», T2a
@@ -130,7 +158,7 @@
 
 ## 6. До шага 1
 
-- Ответы заказчика — `PLAN.md` §10; решения по §4 этих заметок — строками DECISIONS.
+- Ответы заказчика на `PLAN.md` §10 — Р187; решения по §4 этих заметок — Р183.
 - Общий бриф кода `briefs/COMMON.md`: окружение шага 0, пути, контракты, тесты, отчёт (форма отчёта Ф7 + разделы
   «Тесты и прогоны», «Строки смоука»).
 - Брифы C1 и C2 — к первой паре; брифы C3–C17 — перед своими парами, с уроками `CHAIN.md` Ф8.
