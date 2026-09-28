@@ -3,9 +3,12 @@
 
 Утилиты скилла находят базу, соседние утилиты, данные, выходы, блокировки, бинарники и ключи через этот модуль, а не
 через пути, зашитые в код. Корень скилла вычисляется от этого файла (`scripts/lib/kbpaths.py` → два уровня вверх),
-поэтому скилл работает в любом клоне шаблона. Окружение (venv, npm, бинарники, модели, браузеры, выходы, блокировки)
-живёт вне репозитория: `$DDD_HOME`, иначе `$XDG_CACHE_HOME/design-deep-dive`, иначе `~/.cache/design-deep-dive` —
-одно на машину для всех клонов.
+поэтому скилл работает в любом клоне шаблона и из соседнего чекаута: репозиторий кода запускает
+`../strategy/.claude/skills/design-deep-dive/scripts/…` со своей рабочей папкой, и пути ведут в чекаут стратегии.
+`repo()` — репозиторий, в котором лежит скилл; файлы проектов `docs/projects/<slug>/` утилиты находят через соседний
+модуль `docpaths` (корень данных — ключ `--repo`, переменная DDD_REPO или этот репозиторий). Окружение (venv, npm,
+бинарники, модели, браузеры, выходы, блокировки) живёт вне репозитория: `$DDD_HOME`, иначе
+`$XDG_CACHE_HOME/design-deep-dive`, иначе `~/.cache/design-deep-dive` — одно на машину для всех клонов.
 
 Подключение в утилите `scripts/<домен>/<утилита>.py`:
 
@@ -17,7 +20,9 @@
     kbpaths.out("creative", "audit")                            # каталог выходов (создаётся)
     with kbpaths.lock("browser"): ...                           # общая блокировка браузера, с ожиданием
 
-Диагностика: `python3 kbpaths.py` — где что лежит; `python3 kbpaths.py --selftest` — самопроверка без сети.
+Диагностика: `python3 kbpaths.py` — где что лежит; `python3 kbpaths.py --bins` — внешние программы (путь, переменная
+окружения, версия); `python3 kbpaths.py --selftest` — самопроверка без сети, с запуском из соседнего чекаута во
+временной папке.
 """
 import contextlib
 import fcntl
@@ -34,8 +39,7 @@ KB = SKILL / "kb"
 ASSETS = SKILL / "assets"
 
 BASES = ("ux", "ui", "site", "text", "creative", "ai-media", "blender", "claude-design")
-DOMAINS = BASES + ("lib", "maint", "tests")            # папки scripts/
-OLD_SUFFIX = "-research"                                # имена баз в источнике: <база>-research
+DOMAINS = BASES + ("lib", "maint", "tests", "project")  # папки scripts/; project — утилиты по файлам docs/projects/
 
 ENV_HOME = "DDD_HOME"
 ENV_BIN = {                                             # переопределение пути к бинарнику (иначе $DDD_HOME/bin, затем PATH)
@@ -53,19 +57,16 @@ ENV_BIN = {                                             # переопредел
 # ------------------------------------------------------------------ имена
 
 def base_name(name):
-    """Имя базы в раскладке скилла: «site-research» → «site»; неизвестное имя — ValueError."""
+    """Имя базы (`kb/<база>/`); неизвестное имя — ValueError."""
     n = str(name).strip().strip("/")
-    if n.endswith(OLD_SUFFIX):
-        n = n[: -len(OLD_SUFFIX)]
     if n not in BASES:
         raise ValueError(f"неизвестная база: {name!r} (есть: {', '.join(BASES)})")
     return n
 
 
 def domain_name(name):
+    """Имя папки утилит (`scripts/<домен>/`); неизвестное имя — ValueError."""
     n = str(name).strip().strip("/")
-    if n.endswith(OLD_SUFFIX):
-        n = n[: -len(OLD_SUFFIX)]
     if n not in DOMAINS:
         raise ValueError(f"неизвестный домен scripts/: {name!r} (есть: {', '.join(DOMAINS)})")
     return n
@@ -79,12 +80,13 @@ def skill(*parts):
 
 
 def repo(*parts):
-    """Корень репозитория шаблона: skill → skills → .claude → корень."""
+    """Корень репозитория, в котором лежит скилл: skill → skills → .claude → корень. Канон форм проекта
+    (`docs/projects/_template/`) берут отсюда; корень данных проектов для утилит — `docpaths.root()`."""
     return SKILL.parents[2].joinpath(*parts)
 
 
 def kb(base=None, *parts):
-    """База знаний: kb() — `kb/`, kb("site", "04-blocks", "blocks.yaml") — файл базы. Принимает и «site-research»."""
+    """База знаний: kb() — `kb/`, kb("site", "04-blocks", "blocks.yaml") — файл базы."""
     if base is None:
         return KB.joinpath(*parts)
     return KB.joinpath(base_name(base), *parts)
@@ -169,7 +171,7 @@ def browsers():
 
 
 def out(domain, *parts, create=True):
-    """Каталог выходов утилиты: `$DDD_HOME/out/<домен>/…` (создаётся). Вместо `<база>/99-raw/cache/…` источника."""
+    """Каталог выходов утилиты: `$DDD_HOME/out/<домен>/…` (создаётся)."""
     return _dir(home("out", domain_name(domain), *parts), create)
 
 
@@ -185,9 +187,8 @@ def locks_dir(create=True):
 
 
 def lock_path(name="browser", domain=None):
-    """Файл блокировки. Общая (вместо `app-design/.locks/<name>.lock`): lock_path("browser") →
-    `$DDD_HOME/locks/browser.lock`. Своя у домена (вместо `<база>/99-raw/tools/.locks/<name>.lock`):
-    lock_path("browser", "site") → `$DDD_HOME/locks/site/browser.lock` — имя файла то же, что в источнике."""
+    """Файл блокировки. Общая на машину: lock_path("browser") → `$DDD_HOME/locks/browser.lock`. Своя у домена:
+    lock_path("browser", "site") → `$DDD_HOME/locks/site/browser.lock`."""
     d = locks_dir()
     if domain is not None:
         d = _dir(d / domain_name(domain), True)
@@ -219,21 +220,41 @@ def lock(name="browser", domain=None, timeout=900.0, poll=0.5):
 
 # ------------------------------------------------------------------ бинарники, Node, Playwright, ключи
 
-def which(name, env=None, names=()):
-    """Путь к бинарнику: переменная окружения (env или DDD_<ИМЯ> из ENV_BIN) → `$DDD_HOME/bin/<имя>` или
-    `$DDD_HOME/bin/<имя>/<имя>` → `$DDD_HOME/node/node_modules/.bin/<имя>` → PATH. Не найден — возвращает имя как есть:
-    ошибка проявится при вызове, а импорт и --help утилиты работают без бинарника."""
+def find(name, env=None, names=(), dirs=()):
+    """Путь к бинарнику или None: переменная окружения (env или DDD_<ИМЯ> из ENV_BIN) → `$DDD_HOME/bin/<имя>`,
+    `$DDD_HOME/bin/<имя>/<имя>` или `$DDD_HOME/bin/<папка>/<имя>` для папок dirs → `$DDD_HOME/node/node_modules/.bin/<имя>`
+    → PATH; names — другие имена того же бинарника."""
     var = env or ENV_BIN.get(name)
     if var and os.environ.get(var):
         return os.environ[var]
     for n in (name,) + tuple(names):
-        for cand in (bin_dir(n), bin_dir(n, n), node_modules(".bin", n)):
+        cands = [bin_dir(n), bin_dir(n, n)] + [bin_dir(d, n) for d in dirs] + [node_modules(".bin", n)]
+        for cand in cands:
             if cand.is_file() and os.access(cand, os.X_OK):
                 return str(cand)
         p = shutil.which(n)
         if p:
             return p
-    return name
+    return None
+
+
+def which(name, env=None, names=(), dirs=()):
+    """Путь к бинарнику, как `find()`. Не найден — возвращает имя как есть: ошибка проявится при вызове, а импорт и
+    --help утилиты работают без бинарника."""
+    return find(name, env, names, dirs) or name
+
+
+BIN_LOOKUP = {                                          # как искать внешние программы: find() и отчёт --bins
+    "blender": {},
+    "node": {},
+    "npx": {},
+    "npm": {},
+    "ffmpeg": {},
+    "ffprobe": {"dirs": ("ffmpeg",)},                   # статическая сборка install.sh --ffmpeg: $DDD_HOME/bin/ffmpeg/
+    "brave": {"names": ("brave-browser", "brave-browser-stable")},
+}
+BIN_VERSION = {"blender": "--version", "node": "--version", "npm": "--version", "ffmpeg": "-version",
+               "ffprobe": "-version", "brave": "--version"}
 
 
 def blender():
@@ -253,11 +274,11 @@ def ffmpeg():
 
 
 def ffprobe():
-    return which("ffprobe")
+    return which("ffprobe", **BIN_LOOKUP["ffprobe"])
 
 
 def brave():
-    return which("brave", names=("brave-browser", "brave-browser-stable"))
+    return which("brave", **BIN_LOOKUP["brave"])
 
 
 def node_env(env=None):
@@ -283,7 +304,7 @@ def playwright_env(env=None):
 
 
 def key(name, required=False):
-    """Ключ API — только из переменной окружения владельца (в репозитории ключей нет, Р53)."""
+    """Ключ API — только из переменной окружения владельца (в репозитории ключей нет)."""
     v = os.environ.get(name)
     if required and not v:
         raise SystemExit(f"нет ключа: задайте переменную окружения {name}")
@@ -291,9 +312,15 @@ def key(name, required=False):
 
 
 def _init_env():
+    """Окружение процесса утилиты: браузеры Playwright из `$DDD_HOME/browsers`, если их ставил install.sh; статическая
+    сборка ffmpeg из `$DDD_HOME/bin/ffmpeg/` — первой в PATH (утилиты и их подпроцессы зовут ffmpeg и ffprobe по имени)."""
     b = browsers()
     if "PLAYWRIGHT_BROWSERS_PATH" not in os.environ and b.is_dir():
         os.environ["PLAYWRIGHT_BROWSERS_PATH"] = str(b)
+    ff = bin_dir("ffmpeg")
+    path = os.environ.get("PATH", "")
+    if ff.is_dir() and str(ff) not in path.split(os.pathsep):
+        os.environ["PATH"] = os.pathsep.join([str(ff), path]) if path else str(ff)
 
 
 _init_env()
@@ -308,8 +335,68 @@ def describe():
     for b in BASES:
         rows.append((f"kb/{b}", kb(b)))
     for n in ("blender", "node", "npx", "ffmpeg", "ffprobe", "brave"):
-        rows.append((n, which(n) if n != "brave" else brave()))
+        rows.append((n, find(n, **BIN_LOOKUP[n]) or "— не найден"))
     return rows
+
+
+def bins(version=True):
+    """Внешние программы: [(имя, переменная окружения, путь или None, первая строка версии или None)]."""
+    import subprocess
+    rows = []
+    for n, how in BIN_LOOKUP.items():
+        p = find(n, **how)
+        v = None
+        if p and version and n in BIN_VERSION:
+            try:
+                r = subprocess.run([p, BIN_VERSION[n]], capture_output=True, text=True, timeout=30)
+                v = next((ln.strip() for ln in (r.stdout or r.stderr).splitlines() if ln.strip()), None)
+            except (OSError, subprocess.SubprocessError):
+                v = None
+        rows.append((n, ENV_BIN.get(n, "-"), p, v))
+    return rows
+
+
+SIBLING_UTILITY = ("site", "page_gates.py", "--resolve", "landing-lead-services@L1")   # утилита базы и её вызов
+SIBLING_KB = ("site", "07-seo-geo-performance-analytics", "budgets.yaml")               # файл базы, который она читает
+
+
+def _sibling_check(check):
+    """Соседний чекаут: копия скилла в `<tmp>/strategy/.claude/skills/design-deep-dive/` (lib, одна утилита базы и файл
+    базы, который она читает), рабочая папка `<tmp>/site/`, запуск по пути `../strategy/…` — пути ведут в копию."""
+    import importlib.util
+    import subprocess
+    import tempfile
+    rel = Path("..", "strategy", ".claude", "skills", "design-deep-dive")
+    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+    with tempfile.TemporaryDirectory(prefix="ddd-sibling-") as td:
+        t = Path(td).resolve()
+        copy = t / "strategy" / ".claude" / "skills" / "design-deep-dive"
+        shutil.copytree(LIB, copy / "scripts" / "lib", ignore=shutil.ignore_patterns("__pycache__"))
+        cwd = t / "site"
+        cwd.mkdir()
+        r = subprocess.run([sys.executable, str(rel / "scripts" / "lib" / "kbpaths.py")], cwd=cwd, env=env,
+                           capture_output=True, text=True, timeout=120)
+        got = dict(ln.split(None, 1) for ln in r.stdout.splitlines() if len(ln.split(None, 1)) == 2)
+        check("соседний чекаут: kbpaths.py из ../strategy/… — skill, kb и repo в копии, не в рабочей папке",
+              r.returncode == 0 and got.get("skill") == str(copy) and got.get("kb") == str(copy / "kb")
+              and got.get("repo") == str(t / "strategy"))
+        util = SCRIPTS / SIBLING_UTILITY[0] / SIBLING_UTILITY[1]
+        src = kb(*SIBLING_KB)
+        if not (util.is_file() and src.is_file()) or importlib.util.find_spec("yaml") is None:
+            print("SKIP соседний чекаут: нет утилиты базы, её файла или PyYAML у этого Python")
+            return
+        (copy / "scripts" / SIBLING_UTILITY[0]).mkdir(parents=True)
+        shutil.copy2(util, copy / "scripts" / SIBLING_UTILITY[0] / SIBLING_UTILITY[1])
+        dst = copy / "kb" / Path(*SIBLING_KB)
+        dst.parent.mkdir(parents=True)
+        shutil.copy2(src, dst)
+        cmd = [sys.executable, str(rel / "scripts" / SIBLING_UTILITY[0] / SIBLING_UTILITY[1]), *SIBLING_UTILITY[2:]]
+        r = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, text=True, timeout=120)
+        check(f"соседний чекаут: {SIBLING_UTILITY[1]} {' '.join(SIBLING_UTILITY[2:])} читает базу копии",
+              r.returncode == 0 and r.stdout.strip())
+        dst.unlink()
+        r = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, text=True, timeout=120)
+        check("соседний чекаут: без файла базы в копии утилита падает — чужая база не подхватывается", r.returncode != 0)
 
 
 def _selftest():
@@ -322,31 +409,48 @@ def _selftest():
         print(("OK   " if cond else "FAIL ") + msg)
 
     check("корень скилла от файла: scripts/lib → skill", LIB.name == "lib" and SCRIPTS.name == "scripts")
-    check("kb('site-research') == kb('site')", kb("site-research") == kb("site") == KB / "site")
+    check("kb('site') — kb/site", kb("site") == KB / "site")
     try:
-        kb("kimi")
+        kb("no-such-base")
         check("неизвестная база — ValueError", False)
     except ValueError:
         check("неизвестная база — ValueError", True)
     check("scripts('ai-media', 'x.py')", scripts("ai-media", "x.py") == SCRIPTS / "ai-media" / "x.py")
     check("data('blender')", data("blender") == SCRIPTS / "blender" / "data")
+    check("домен project: scripts('project')", scripts("project") == SCRIPTS / "project")
+    check("repo() — репозиторий скилла: .claude/skills/<скилл> внутри", SKILL == repo(".claude", "skills", SKILL.name))
     with tempfile.TemporaryDirectory() as td:
         old = os.environ.get(ENV_HOME)
+        old_path = os.environ.get("PATH", "")
         os.environ[ENV_HOME] = td
         try:
             check("DDD_HOME переопределяет home()", home() == Path(td))
             check("out() создаёт каталог", out("ui", "audit").is_dir())
+            check("out('project') создаёт каталог", out("project", "canvas").is_dir())
             check("cache() создаёт каталог", cache("ai-media", "polza").is_dir())
             check("lock_path общая", lock_path() == str(Path(td) / "locks" / "browser.lock"))
-            check("lock_path домена (имя файла как в источнике)",
-                  lock_path("browser", "site") == str(Path(td) / "locks" / "site" / "browser.lock"))
+            check("lock_path домена", lock_path("browser", "site") == str(Path(td) / "locks" / "site" / "browser.lock"))
             with lock("browser", timeout=5) as p:
                 check("lock() берёт блокировку", os.path.exists(p))
             os.environ["DDD_BLENDER"] = "/nonexistent/blender"
             check("DDD_BLENDER переопределяет поиск", blender() == "/nonexistent/blender")
             del os.environ["DDD_BLENDER"]
             check("не найденный бинарник — имя как есть", which("ddd-no-such-binary") == "ddd-no-such-binary")
+            check("не найденный бинарник — find() даёт None", find("ddd-no-such-binary") is None)
+            ffdir = bin_dir("ffmpeg")
+            ffdir.mkdir(parents=True)
+            for n in ("ffmpeg", "ffprobe"):
+                (ffdir / n).write_text("#!/bin/sh\n")
+                (ffdir / n).chmod(0o755)
+            saved = {v: os.environ.pop(v) for v in ("DDD_FFMPEG", "DDD_FFPROBE") if v in os.environ}
+            check("статическая сборка: ffmpeg() и ffprobe() находят $DDD_HOME/bin/ffmpeg/",
+                  ffmpeg() == str(ffdir / "ffmpeg") and ffprobe() == str(ffdir / "ffprobe"))
+            _init_env()
+            check("статическая сборка: $DDD_HOME/bin/ffmpeg первой в PATH (ffprobe по имени)",
+                  shutil.which("ffprobe") == str(ffdir / "ffprobe"))
+            os.environ.update(saved)
         finally:
+            os.environ["PATH"] = old_path
             if old is None:
                 os.environ.pop(ENV_HOME, None)
             else:
@@ -356,6 +460,7 @@ def _selftest():
     use("ui")
     check("use('ui') добавляет scripts/ui в sys.path", str(SCRIPTS / "ui") in sys.path)
     sys.path[:] = before
+    _sibling_check(check)
     print("kbpaths selftest:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 
@@ -365,6 +470,10 @@ if __name__ == "__main__":
         sys.exit(_selftest())
     if any(a in ("-h", "--help") for a in sys.argv[1:]):
         print(__doc__)
+        sys.exit(0)
+    if "--bins" in sys.argv[1:]:
+        for n, var, p, v in bins():
+            print(f"{n}\t{var}\t{p or ''}\t{v or ''}")
         sys.exit(0)
     for k, v in describe():
         print(f"{k:<16} {v}")

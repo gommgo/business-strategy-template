@@ -1,0 +1,4 @@
+path	kind	smoke	xfail
+scripts/ui/build_reference_tokens.py	utility	help; run: --out brt	
+scripts/ui/measure_ui.py	utility	help	
+scripts/ui/ui_audit.py	utility	help; run: --selftest	

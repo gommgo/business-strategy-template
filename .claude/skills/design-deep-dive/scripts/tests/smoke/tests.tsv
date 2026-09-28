@@ -1,0 +1,3 @@
+path	kind	smoke	xfail
+scripts/tests/smoke.py	test	help; run: --validate	
+scripts/tests/fixture_project.py	utility	help; run: --selftest	

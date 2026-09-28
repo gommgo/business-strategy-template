@@ -1,6 +1,6 @@
-# Python-зависимости утилит design-deep-dive (Python 3.10–3.13; проверено на 3.13).
-# Версии — как в общем окружении ~/.cache/design-deep-dive/venv (26.09.2026) и в окружениях утилит базы, на которых
-# утилиты проверялись. Ставит scripts/install.sh по группам (# [группа]); вручную — всё сразу:
+# Python-зависимости утилит design-deep-dive: Python 3.12–3.13 (проверено на 3.13; numpy, scipy, networkx и tifffile
+# закреплены версиями, которым нужен Python ≥ 3.12). Версии закреплены — на них утилиты проверены.
+# Ставит scripts/install.sh по группам (# [группа]); вручную — всё сразу:
 #   "$DDD_HOME/venv/bin/pip" install -r scripts/requirements.txt
 # Группа core нужна всем утилитам; остальные — по задаче (install.sh --groups core,net,svg или --groups all).
 
@@ -66,7 +66,7 @@ protobuf==7.36.2
 flatbuffers==25.12.19
 six==1.17.0
 
-# [media] обработка картинок моделями (удаление фона rembg: u2netp, isnet — Р71); модели — install.sh --models
+# [media] обработка картинок моделями (удаление фона rembg: u2netp, isnet); модели — install.sh --models
 rembg==2.0.85
 pymatting==1.1.16
 numba==0.67.0

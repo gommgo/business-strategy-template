@@ -1,0 +1,7 @@
+path	kind	smoke	xfail
+scripts/maint/calibrate.py	maint	help	
+scripts/maint/calibration.json	data	data	
+scripts/maint/check_links.py	maint	help; run: --selftest	
+scripts/maint/count_tokens.py	maint	help	
+scripts/maint/layers.py	maint	import-only	
+scripts/maint/orch_check.py	maint	import-only	

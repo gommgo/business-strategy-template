@@ -1,0 +1,5 @@
+path	kind	smoke	xfail
+scripts/install.sh	maint	compile; run: --dry-run	
+scripts/package.json	data	data	
+scripts/requirements.txt	data	data	
+scripts/README.md	data	data	

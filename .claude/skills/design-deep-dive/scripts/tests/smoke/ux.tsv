@@ -1,0 +1,2 @@
+path	kind	smoke	xfail
+scripts/ux/checklist_export.py	utility	import-only	

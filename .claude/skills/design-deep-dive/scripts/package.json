@@ -1,7 +1,10 @@
 {
   "name": "design-deep-dive-tools",
   "private": true,
-  "description": "npm-зависимости утилит и эталонного кода скилла design-deep-dive. Ставит scripts/install.sh в $DDD_HOME/node (вне репозитория); версии — как в окружениях базы на 26.09.2026.",
+  "description": "npm-зависимости утилит и эталонного кода скилла design-deep-dive. Ставит scripts/install.sh в $DDD_HOME/node (вне репозитория); версии закреплены — на них проверены утилиты и эталоны.",
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  },
   "dependencies": {
     "@gltf-transform/cli": "4.5.0",
     "draco3dgltf": "1.5.7",

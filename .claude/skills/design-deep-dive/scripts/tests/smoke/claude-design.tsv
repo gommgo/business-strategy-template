@@ -1,0 +1,15 @@
+path	kind	smoke	xfail
+scripts/claude-design/kit/canvas.html	kit	data	
+scripts/claude-design/kit/diffshots.py	kit	help	
+scripts/claude-design/kit/example/booking.html	kit	data	
+scripts/claude-design/kit/example/canvas.json	kit	data	
+scripts/claude-design/kit/example/landing.html	kit	data	
+scripts/claude-design/kit/example/site.css	kit	data	
+scripts/claude-design/kit/example/tokens.css	kit	data	
+scripts/claude-design/kit/export.py	kit	help	
+scripts/claude-design/kit/marks.js	kit	compile	
+scripts/claude-design/kit/shot.py	kit	help	
+scripts/claude-design/lang_check.py	utility	import-only; run: {skill}/scripts/claude-design/kit/example	
+scripts/claude-design/mockup_checks.py	utility	help; run: selftest	
+scripts/claude-design/shot_v3.py	utility	help	
+scripts/claude-design/stand_page.py	utility	help; run: selftest	

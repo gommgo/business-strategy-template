@@ -1,0 +1,19 @@
+path	kind	smoke	xfail
+kb/blender/09-web-runtime/examples/camera-path-scroll/build_scene.py	ref	compile	
+kb/blender/09-web-runtime/examples/hero-lazy/make_poster.py	ref	compile	
+kb/blender/09-web-runtime/examples/r3f-hero/build.sh	ref	compile	
+kb/blender/12-recipes/examples/01-hero-product/build.py	ref	compile	
+kb/blender/12-recipes/examples/01-hero-product/make_poster.py	ref	compile	
+kb/blender/12-recipes/examples/02-icon-series/build.py	ref	compile	
+kb/blender/12-recipes/examples/02-icon-series/post.py	ref	compile	
+kb/blender/12-recipes/examples/03-device-mockup/build.py	ref	compile	
+kb/blender/12-recipes/examples/04-abstract-sculpture/build.py	ref	compile	
+kb/blender/12-recipes/examples/05-scroll-showcase/build.py	ref	compile	
+kb/blender/12-recipes/examples/06-logo-3d-particles/build.py	ref	compile	
+kb/blender/12-recipes/examples/07-lowpoly-diorama/build.py	ref	compile	
+kb/blender/12-recipes/examples/08-sequence-video-alpha/build.py	ref	compile	
+kb/blender/12-recipes/examples/08-sequence-video-alpha/post.py	ref	compile	
+kb/blender/12-recipes/examples/09-glass-product/build.py	ref	compile	
+kb/blender/12-recipes/examples/10-instance-field/build.py	ref	compile	
+kb/blender/12-recipes/examples/12-model-viewer-ar/build.py	ref	compile	
+kb/blender/15-showcase/_shared/code3d/build.sh	ref	compile	
