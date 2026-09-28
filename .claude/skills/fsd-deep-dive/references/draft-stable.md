@@ -16,7 +16,16 @@
    - `widgets.block` (если не `—`) → блок
      `screens/<surface>/blocks/<slug>/`;
    - `entities.source` → агрегат/сущность в `services/<svc>/domains/<ctx>/`
-     или запись в `interface/<surface>/data-items.md`.
+     или запись в `interface/<surface>/data-items.md`;
+   - `pages.path` совпадает с маршрутом (`route`) экрана `pages.screen` и
+     его параметрами, `pages.guard` — с его доступом (`access`; роли —
+     `who` экрана при `access: roles`);
+   - `shared-ui.ui-type` — ключ раздела `types` словаря компонентов или
+     id расширения проекта (имя из `aka` не принимается);
+   - сценарии `shared-api` покрывают обязательные наборы состояний
+     экранов поверхности (канон экранов, «Обязательный набор»);
+   - локали `shared-lib` — колонки языков реестра текстов
+     `screens/<surface>/texts.md` (`text` и `text-<locale>`).
 
 3. **Внутрислойная согласованность**:
    - `features.entities`, `pages.{widgets,features,entities}`,
@@ -43,5 +52,5 @@
 ```
 
 И не промоушить, пока не закрыта: stable-записи читает `/scaffold`
-фронт-форка поверхности (`<org>/frontend` или `<org>/site`), поэтому
-незрелый stable материализуется в код.
+фронт-форка `<org>/frontend`, поэтому незрелый stable материализуется в
+код.

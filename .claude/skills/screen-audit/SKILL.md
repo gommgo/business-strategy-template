@@ -118,8 +118,9 @@ args задаёт scope:
 3. Прочитать `references/rules.md` — реестр проверок с тяжестью.
 4. Прочитать реестр `docs/projects/<project-slug>/surface.md`. Сверить
    с подпапками `docs/projects/<project-slug>/screens/`: папка вне
-   реестра — error (R-SURF-001), поверхность реестра без папки screens —
-   hint (R-SURF-002).
+   реестра — error (R-SURF-001), поверхность маршрута приложения без
+   папки screens — hint (R-SURF-002), папка у сайта, лендинга, бота или
+   мобильного приложения — error (R-SURF-003).
 5. Для каждой папки поверхности из scope (одна заданная `<surface>` или
    все) прочитать её рабочую зону
    `docs/projects/<project-slug>/screens/<surface>/` (или подмножество
