@@ -41,11 +41,14 @@ stakeholder · stakeholder-map
 ИСХОД проблемы (по результату стратегии):
   • task — закрывает проблему без продукта (процесс, партнёрство, цена, операционное действие)
   • ПРОДУКТ (опционально, под ставку/гипотезу) — docs/projects/<slug>/
-        vision + user / capability / boundary / surface / integration / constraint / market
-        ├─ interface/          (UX: who / situation / zone)
+        vision + user / object / action / capability / boundary / surface / integration / constraint / market
+        + факты и голос продукта (facts.yaml · voice*.yaml)
+        ├─ interface/          (UX: who / situation / scenario / zone — кроме сайта и лендинга)
         ├─ services/           (сервисы: реестр + паспорта + домены внутри)
-        ├─ screens/            (flow / screen / block / shell)  →  wireframe → hi-fi вручную
-        ├─ fsd/                (карта слайсов фронтовой поверхности)  →  код-репо читают
+        ├─ screens/            (карта экранов / flow / screen / block / shell / тексты интерфейса — кабинет)  →  макет — design/
+        ├─ fsd/                (карта слайсов фронтовой поверхности кабинета)  →  код-репо читают
+        ├─ site/               (бриф / смысл / карта / планы / тексты по слотам — сайт и лендинг)  →  макет — design/, код-репо читают
+        ├─ design/             (облик: бренд / дизайн-система / ассеты / макет в Claude Design / приёмка)  →  код-репо читают
         ├─ telegram-bot-flow/  (фичи: dialog / window / use-case + сквозные command / notification — bot-поверхности)  →  код-репо читают
         └─ mobile/             (экраны / сценарии / фичи / входы / разрешения / системные действия / виджеты / фон — мобильные поверхности)  →  код-репо читают
 ```
@@ -56,8 +59,8 @@ stakeholder · stakeholder-map
 питают и стратегию, и — если дело дошло до продукта — его возможности. Исход
 проблемы может остаться **задачей** (`task` в Карте гипотез); продуктовый слой
 заводится, только когда ставка/гипотеза требуют его. Связь «проблема ↔ продукт» —
-M:N (`vision.addresses-problem`). Превращение `screens/` в макет — ручная работа
-автора, не отдельный артефакт.
+M:N (`vision.addresses-problem`). Макет собирает слой дизайна (`design/`) по слою
+страницы или экранам; облик продукта живёт только в нём.
 
 > **Юридическая рамка:** гарантируем доставку по scope (продукт или задача); метрики
 > (Карта гипотез) — совместный с бизнесом **best-effort таргет**, не гарантия исхода.
@@ -84,12 +87,15 @@ M:N (`vision.addresses-problem`). Превращение `screens/` в маке�
   best-effort таргет, не гарантия. Терминал стратегии — **задача** (`task`):
   она может закрыть проблему сама либо развернуться в продукт.
 - **projects/`<slug>`** (опционально) — когда исход стратегии — продукт под
-  проблему(ы): vision + user / capability / boundary / surface / integration /
-  constraint / market, плюс вложенные `interface/`, `services/`, `screens/`
-  и `fsd/` (web-поверхности), `telegram-bot-flow/` (bot-поверхности) или
-  `mobile/` (мобильные приложения: экраны, push и другие входы, разрешения,
-  голос и системные действия, виджеты, фоновая работа). Если проблему
-  закрывает задача (`task`), продуктовый слой не заводится.
+  проблему(ы): vision + user / object / action / capability / boundary /
+  surface / integration / constraint / market, факты и голос продукта, плюс
+  вложенные `interface/`, `services/`, `screens/` и `fsd/` (кабинет — `web`
+  рода `app`, `admin`, `desktop`, `embed`), `site/` (сайт и лендинг: бриф,
+  смысл, карта, планы и тексты страниц), `telegram-bot-flow/` (bot-поверхности)
+  или `mobile/` (мобильные приложения: экраны, push и другие входы, разрешения,
+  голос и системные действия, виджеты, фоновая работа) и облик продукта
+  `design/` (бренд, дизайн-система, ассеты, макет). Если проблему закрывает
+  задача (`task`), продуктовый слой не заводится.
 
 Каждый слой ведёт свой deep-dive-скилл через `AskUserQuestion`, пишет state в
 свою ветку единого дерева оркестратора (`.claude/skills/entrypoint/state/`;
@@ -105,7 +111,7 @@ sibling-checkout'ами:
 
 | Шаблон → форк | Роль |
 |---|---|
-| `business-strategy-template` → `<org>/strategy` | **этот**: бизнес, AJTBD, SWOT, Карта гипотез, продукты (vision/surface, interface, screens, fsd, telegram-bot-flow, mobile, services + domains), ИТ-периметр |
+| `business-strategy-template` → `<org>/strategy` | **этот**: бизнес, AJTBD, SWOT, Карта гипотез, продукты (vision/surface, interface, screens, fsd, telegram-bot-flow, mobile, services + domains, страницы сайта и лендинга, облик продукта), ИТ-периметр |
 | [`project-infra-template-compose`](https://git.stit.tech/stit-core/project-infra-template-compose) → `<org>/infra` | runtime проекта (docker-compose на VPS) и операционный хаб: общий план, рассылка агентов по сиблингам, выкатка тегов |
 | [`go-backend-template`](https://git.stit.tech/stit-core/go-backend-template) → `<org>/backend` | Go-сервис |
 | [`spa-frontend-template`](https://git.stit.tech/stit-core/spa-frontend-template) → `<org>/frontend` | React SPA (кабинет, всё за логином) |
@@ -128,11 +134,11 @@ sibling-checkout'ами:
 | Соседний репо | Читает из этого репо |
 |---|---|
 | `<org>/backend` | `projects/<slug>/services/<svc>/domains/<ctx>/` + паспорт сервиса (scaffold доменов в Go по сервису) |
-| `<org>/frontend` | `projects/<slug>/fsd/<surface>/` (карта слайсов → scaffold) + `{interface,screens}/` и домены (контекст) |
-| `<org>/site` | `projects/<slug>/fsd/<surface>/` (карта слайсов → страницы и коллекции) + `{interface,screens}/` (контекст) |
-| `<org>/<bot>` | `projects/<slug>/telegram-bot-flow/<surface>/` (диалоги бота → код) |
-| `<org>/mobile` | `projects/<slug>/mobile/<surface>/` (карта приложения → scaffold в `shared/` · `androidApp/` · `iosApp/`) + `interface/` и домены (контекст) |
-| `<org>/infra` | скиллы хаба — `projects/<slug>/{vision,surface}.md` (`/init-project`, `/stack-deep-dive`, `/de-template`); `services/`, паспорта и `projects/infrastructure/` — контекст при планировании (`/plan`) |
+| `<org>/frontend` | `projects/<slug>/fsd/<surface>/` (карта слайсов → scaffold) + `screens/<surface>/` (карта маршрутов, тексты интерфейса) + `design/` (дизайн-система, копии принятых экранов, манифест готовности `ready.yaml`) + `interface/` и домены (контекст) |
+| `<org>/site` | `projects/<slug>/site/<surface>/` (бриф, карта, планы, тексты по слотам → страницы и коллекции) + факты и голос продукта + `design/` (дизайн-система, арт-дирекция, движение, ассеты, адаптивные копии макета, манифест готовности `ready.yaml`) |
+| `<org>/<bot>` | `projects/<slug>/telegram-bot-flow/<surface>/` (диалоги бота → код) + голос продукта |
+| `<org>/mobile` | `projects/<slug>/mobile/<surface>/` (карта приложения → scaffold в `{shared,androidApp,iosApp}/`) + `interface/` и домены (контекст) + токены дизайн-системы (тема) и голос продукта |
+| `<org>/infra` | скиллы хаба — `projects/<slug>/{vision,surface}.md` (`/init-project`, `/stack-deep-dive`, `/de-template`; род веб-поверхности `web-kind` — какой код-репо поднимать); `services/`, паспорта, `projects/infrastructure/` и манифесты готовности `ready.yaml` — контекст при планировании (`/plan`) |
 
 Полный контракт — [`docs/README.md`](docs/README.md), раздел «Что docs отдаёт соседям».
 Канон карты экосистемы и флоу —
@@ -163,7 +169,7 @@ sibling-checkout'ами:
 
 ```
 business (профиль + реестр проблем + стейкхолдеры) → ajtbd (спрос по работам) → swot (ставки)
-  → hypothesis-map (цель · метрика · task) → [опц.] projects/<slug> (продукт → interface / services / screens / fsd / telegram-bot-flow / mobile) + infrastructure (ИТ-периметр бизнеса)
+  → hypothesis-map (цель · метрика · task) → [опц.] projects/<slug> (продукт → interface / services / screens / fsd / site / design / telegram-bot-flow / mobile) + infrastructure (ИТ-периметр бизнеса)
 ```
 
 Под оркестратором — рой исполнителей, прямой вызов которых тоже допустим:
@@ -174,7 +180,7 @@ business (профиль + реестр проблем + стейкхолдер�
 | `ajtbd` | `/segment-deep-dive` · `/job-graph-deep-dive` · `/jtbd-interview` | `/ajtbd-audit` |
 | `swot` | `/swot-deep-dive` | `/swot-audit` |
 | `hypothesis-map` | `/hypothesis-map-deep-dive` | `/hypothesis-map-audit` |
-| `projects/<slug>` (опц.) | `/project-deep-dive` · `/interface-deep-dive` · `/service-deep-dive` · `/domain-deep-dive` · `/screen-deep-dive` · `/fsd-deep-dive` · `/telegram-bot-flow-deep-dive` · `/mobile-deep-dive` | `/project-audit` · `/interface-audit` · `/service-audit` · `/screen-audit` · `/fsd-audit` · `/telegram-bot-flow-audit` · `/mobile-audit` |
+| `projects/<slug>` (опц.) | `/project-deep-dive` · `/interface-deep-dive` · `/service-deep-dive` · `/domain-deep-dive` · `/screen-deep-dive` · `/fsd-deep-dive` · `/design-deep-dive` · `/telegram-bot-flow-deep-dive` · `/mobile-deep-dive` | `/project-audit` · `/interface-audit` · `/service-audit` · `/screen-audit` · `/fsd-audit` · `/design-audit` · `/telegram-bot-flow-audit` · `/mobile-audit` |
 | `projects/infrastructure` | `/infrastructure-deep-dive` | `/infrastructure-audit` |
 
 Сквозную семантику всех слоёв ловит рой `/cross-audit`. Когда дозревший продукт
@@ -193,7 +199,7 @@ business (профиль + реестр проблем + стейкхолдер�
   в папках проектов.
 - **Связи семантические**, не slug-валидируемые; рассинхрон ловит `/cross-audit`.
 - **Сквозные рёбра — снизу-вверх**: проектная/UX-сущность ссылается на глобальную
-  (`situation.jobs`, `capability.jobs`, `user.segments`, `subject.segments`),
+  (`situation.jobs`, `capability.trace`, `user.segments`, `subject.segments`),
   обратную сторону сводит `/cross-audit`.
 - **AJTBD питает соседей**: трение сегмента доказывает проблему бизнеса, механики
   графа работ — кандидаты в возможности продукта.
@@ -204,7 +210,8 @@ business (профиль + реестр проблем + стейкхолдер�
   через провенанс `from-project`.
 - **Метрика — best-effort таргет, не гарантия.**
 - **Экспертиза священна** — доменные и продуктовые формулировки дают бизнес,
-  аналитик и архитектор, не голова агента; облик (craft) в артефакты не пишется.
+  аналитик и архитектор, не голова агента; облик — только в слое дизайна,
+  утверждает владелец продукта.
 - **Коммит / push — гейт человека.**
 
 Структура каталогов и каноны слоёв — [`docs/README.md`](docs/README.md) и

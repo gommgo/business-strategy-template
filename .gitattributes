@@ -1,0 +1,10 @@
+# Бинарные ассеты (готовые ассеты слоя дизайна, эталоны скилла): без текстовых диффов и перевода строк
+*.avif binary
+*.webp binary
+*.png binary
+*.jpg binary
+*.glb binary
+*.mp4 binary
+*.webm binary
+*.woff2 binary
+*.hdr binary

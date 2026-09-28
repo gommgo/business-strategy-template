@@ -46,6 +46,8 @@ source of truth; когда дело дошло до продукта, их чи
    ├─ /domain-deep-dive <slug> <ctx> (DDD внутри сервиса)
    ├─ /screen-deep-dive <slug> [<surface>]     → /screen-audit <slug>
    ├─ /fsd-deep-dive <slug> [<surface>] (фронтовые поверхности) → /fsd-audit <slug>
+   ├─ /design-deep-dive <slug> [<surface>] (факты и голос продукта, слой страницы
+   │  сайта и лендинга, облик и макет) → /design-audit <slug>
    ├─ /telegram-bot-flow-deep-dive <slug> [<surface>] (bot-поверхности — вместо
    │  screen) → /telegram-bot-flow-audit <slug>
    └─ /mobile-deep-dive <slug> [<surface>] (мобильные поверхности — вместо
@@ -127,20 +129,22 @@ source of truth; когда дело дошло до продукта, их чи
 закрывает задача `task` Карты гипотез). Несколько продуктов под одним бизнесом, у
 каждого своя папка. Все скиллы слоёв принимают `<project-slug>` первым аргументом
 (без него — пикер по именам проектов, исключая `_template`); interface, screen,
-fsd, telegram-bot-flow и mobile берут вторым аргументом поверхность (без неё —
-пикер по именам из `surface.md`).
+fsd, design, telegram-bot-flow и mobile берут вторым аргументом поверхность (без
+неё — пикер по именам из `surface.md`; `/design-deep-dive` без поверхности ведёт
+уровень продукта).
 
 - **`/project-deep-dive <slug>`** (аналитик) — vision (+ `addresses-problem`
-  M:N к проблемам) + реестр-хребет `surface.md` + кросс-поверхностные kind
-  (user / integration / boundary / constraint / market) + возможности по
-  поверхности `capability/<surface>.md`. Поверхность — ось: её slug'и
+  M:N к проблемам) + реестр-хребет `surface.md` (тип и род поверхности) +
+  кросс-поверхностные kind (user / object / action / integration / boundary /
+  constraint / market) + возможности по поверхности
+  `capability/<surface>.md`. Поверхность — ось: её slug'и
   партиционируют capability / interface / screens. Новый проект заводит сам
   скилл (копирует форму из `_template/project/`). В клиент-режиме продукт
   заказчик описывает сам через единый вход **`/entrypoint-for-business`**.
 - **`/project-audit <slug>`** — узкий аудит внутри продуктового слоя.
 - **`/interface-deep-dive <slug> [<surface>]`** → **`/interface-audit <slug>`**
-  — UX-слой по поверхности (who / stage / situation / zone / block /
-  ux-substrate / data-items в `interface/<surface>/`).
+  — UX-слой по поверхности (who / stage / situation / scenario / zone / block /
+  ux-substrate / data-items в `interface/<surface>/`; у сайта и лендинга его нет).
 - **`/service-deep-dive <slug>`** → **`/service-audit <slug>`** — сервисная
   топология бэкенда: реестр сервисов (`service.md`), паспорта (Exposes /
   Dependencies / Resources / Messaging), платформенные ресурсы
@@ -159,12 +163,26 @@ fsd, telegram-bot-flow и mobile берут вторым аргументом п
   сертификаты), размещение юнитов (`placement.md`). По нему
   `<org>/infra` понимает, что билдить и где располагать.
 - **`/screen-deep-dive <slug> [<surface>]`** → **`/screen-audit <slug>`** —
-  композиция экранов по поверхности (flow / screen / block / shell в
-  `screens/<surface>/`) в нотации семантического дерева; wireframe и hi-fi по
-  ней автор макета собирает вручную.
+  композиция экранов по поверхности (flow / screen / block / shell, карта
+  экранов `map.md` и тексты интерфейса `texts.md` в `screens/<surface>/`) в
+  нотации семантического дерева; макет по ней собирает слой дизайна
+  (`design/`).
 - **`/fsd-deep-dive <slug> [<surface>]`** → **`/fsd-audit <slug>`** — FSD-карта
-  фронтовой поверхности (`fsd/<surface>/`): слайсы из ситуаций, экранов и доменов —
-  мост к коду `<org>/frontend` и `<org>/site`.
+  фронтовой поверхности кабинета (`fsd/<surface>/`): слайсы из ситуаций, экранов
+  и доменов — мост к коду `<org>/frontend`.
+- **`/design-deep-dive <slug> [<surface>]`** (аналитик) — факты и
+  голос продукта в корне проекта (вызов без поверхности — и у продукта без
+  сайта), слой страницы сайта и лендинга (`site/<surface>/` у `web` рода
+  `landing` и `site` — вместо interface, screens и FSD: бриф, смысл, карта,
+  планы, тексты по слотам) и облик продукта (`design/`: бренд, дизайн-система,
+  направления, ассеты, макет в Claude Design, приёмка, манифест готовности для
+  код-репо). Тексты и облик агент предлагает «допущением», утверждает владелец
+  продукта; картинки, видео и 3D генерируются только после утверждения плана
+  ассетов. Закрытое читают `<org>/site` и `<org>/frontend`.
+- **`/design-audit <slug>`** — проверка слоя страницы, слоя дизайна и файлов
+  уровня продукта: схемы, ссылки, покрытие текстами, фактами, ассетами и
+  компонентами дизайн-системы, свежесть производных и приёмки; макет на всех
+  ширинах — только по просьбе заказчика. Только отчёт.
 - **`/telegram-bot-flow-deep-dive <slug> [<surface>]`** →
   **`/telegram-bot-flow-audit <slug>`** — диалоги телеграм-бота по
   bot-поверхности (вместо screens): фичи `features/<feature>/` (dialog /
@@ -187,8 +205,16 @@ fsd, telegram-bot-flow и mobile берут вторым аргументом п
 Каждый deep-dive ведёт сессию через `AskUserQuestion`, пишет память в свою
 ветку единого дерева оркестратора (`.claude/skills/entrypoint/state/`;
 клиент-режим — `.claude/skills/entrypoint-for-business/state/`), не
-выдумывает домен/craft, не повышает `draft → stable` без явного
-подтверждения.
+выдумывает домен (облик предлагает только слой дизайна — «допущением»), не
+повышает `draft → stable` без явного подтверждения.
+
+**Окружение скилла дизайна.** Утилиты скилла дизайна ставит
+`.claude/skills/design-deep-dive/scripts/install.sh` вне репозитория, в
+`~/.cache/design-deep-dive/` — одно окружение на машину; ключи генерации
+картинок, видео и 3D — у владельца денег. База знаний, утилиты и калибровочный
+набор скилла — часть шаблона: в форке их не правят (ошибку нормы — задачей в
+шаблон), а скилл обновляют заменой его папки `.claude/skills/design-deep-dive/`
+из шаблона и переустановкой окружения.
 
 ## 5. Сквозной аудит — `/cross-audit`
 
@@ -220,7 +246,7 @@ stable-артефакты как upstream (`docs/README.md`). Изменение
 - **Артефакт не `stable`** → доведи через соответствующий deep-dive того же слоя.
 - **Подозрение на рассинхрон внутри слоя** → узкий аудит
   (`/project-audit`, `/interface-audit`, `/screen-audit`, `/fsd-audit`,
-  `/telegram-bot-flow-audit`, `/mobile-audit`, `/service-audit`,
+  `/design-audit`, `/telegram-bot-flow-audit`, `/mobile-audit`, `/service-audit`,
   `/infrastructure-audit`,
   `/swot-audit`, `/hypothesis-map-audit`, `/ajtbd-audit`).
 - **Подозрение на разрыв между слоями** → `/cross-audit`.
