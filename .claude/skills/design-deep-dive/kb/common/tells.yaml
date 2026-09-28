@@ -882,9 +882,13 @@ tells:
       - text/09-ai-generation-evaluation/copy-rubric.yaml
     note: Подписи навигации и заголовки «Частые вопросы», «Контакты» — конвенции, а не примета.
 
-# Проверки утилиты макета `scripts/claude-design/mockup_checks.py`. `allow` — ключ `--allow`: он снимает находку, когда
-# бриф или арт-дирекция записали решение; те же ключи пишет поле `k3_allow` арт-дирекции creative. Группа: look —
-# приметы вида, honesty — честность содержимого, acceptance — проверки приёмки, которые приметами не являются.
+# Проверки утилит, которые находят приметы: ключ без префикса — проверка утилиты макета
+# `scripts/claude-design/mockup_checks.py`; ключ `ui_audit:<id>` — проверка `scripts/ui/ui_audit.py` (её же находки
+# приносит `marketing_audit.py`). Находка утилиты несёт `tell` своей строки. `allow` — ключ `--allow`: он снимает
+# находку, когда бриф или арт-дирекция записали решение; те же ключи пишет поле `k3_allow` арт-дирекции creative.
+# Группа: look — приметы вида, honesty — честность содержимого, acceptance — проверки приёмки, которые приметами не
+# являются. У проверки `ui_audit` L4 строки нет: она находит разные приметы по профилю (декоративный градиент экрана,
+# градиентный текст и фиолетовый герой страницы).
 checks:
   K3-BG-WARM: {group: look, tell: warm-paper, allow: warm}
   K3-ACCENT-WORD: {group: look, tell: accent-word-headline, allow: accent-word}
@@ -919,3 +923,12 @@ checks:
   M-H1-LINES: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}
   V-OVERLAP: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}
   E-LOW-DOM: {group: acceptance, norm: "проверки по разметке неполны: canvas или видео занимают первый экран"}
+  ui_audit:A1: {group: look, tell: off-scale-spacing}
+  ui_audit:H1: {group: look, tell: font-size-count}
+  ui_audit:H10: {group: look, tell: caps-share}
+  ui_audit:D3: {group: look, tell: glassmorphism-panels}
+  ui_audit:D4: {group: look, tell: neon-glow}
+  ui_audit:I1: {group: look, tell: low-contrast-text}
+  ui_audit:I10: {group: look, tell: near-black-literal}
+  ui_audit:K1: {group: look, tell: hover-lift-all}
+  ui_audit:L1: {group: look, tell: emoji-sparkle-ai}

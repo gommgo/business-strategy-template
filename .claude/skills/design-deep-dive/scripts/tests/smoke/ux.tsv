@@ -1,2 +1,3 @@
 path	kind	smoke	xfail
-scripts/ux/checklist_export.py	utility	import-only	
+scripts/ux/checklist_export.py	utility	help; run: --check	
+scripts/ux/states_export.py	utility	help; run: --selftest; run: --check	
