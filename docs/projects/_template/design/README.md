@@ -85,7 +85,7 @@ docs/projects/<slug>/design/
 | подача `treatment` | в плане страницы слоя страницы | `creative/09-ai-execution-evaluation/treatment.schema.json` через `page-plan` | `art-direction`, `motion` |
 | `asset-plan` | `…/design/<surface>/assets/plans/<page-id>.yaml` | ai-media 01/01 §8 | `asset-plan`, `assets` |
 | `motion-spec` | `…/design/<surface>/motion/<page-id>.motion-spec.yaml` | `creative/09-ai-execution-evaluation/motion-spec.schema.json` | `motion` |
-| `canvas` | `…/design/<surface>/canvas/`, `…/design/<surface>/input/` | протокол холста скилла | этапы холста |
+| `canvas` | `…/design/<surface>/canvas/`, `…/design/<surface>/input/` | протокол холста [`claude-design.md`](../../../../.claude/skills/design-deep-dive/references/claude-design.md) | этапы холста |
 | `review` | `…/design/<surface>/review/` | [`_template/REVIEW.md`](_template/REVIEW.md) | этапы холста, `acceptance` |
 | `ready` | `…/design/<surface>/ready.yaml` | [`_template/ready.yaml`](_template/ready.yaml) | `package` |
 | — | `…/design/ARTIFACTS.md` | [`_template/ARTIFACTS.md`](_template/ARTIFACTS.md) | `design-system`, этапы холста |
@@ -321,8 +321,8 @@ deck (`copydeck.py export-assets`). План пишется до ДС и у ст
 Макет рисует Claude Design: холст — артефакт типа Design на поверхность, ДС — артефакт типа Design System на продукт.
 Исходники обоих — в репозитории, claude.ai — живой редактор и канал показа; артефакты публикуются приватно по ходу
 работы, публичная ссылка — только с разрешения заказчика и без реальных данных клиентов. Публикация («прочитать →
-слить → опубликовать»), задания по этапам и стоп — протокол холста скилла; правила формата типов отдаёт инструмент
-`Artifact`.
+слить → опубликовать»), задания по этапам и стоп — протокол холста скилла
+`.claude/skills/design-deep-dive/references/claude-design.md`; правила формата типов отдаёт инструмент `Artifact`.
 
 - **Вход** — `…/design/<surface>/input/`: производный, собирается под этап (`directions`, `wireframe`, `mockup`,
   `motion`) из закрытых источников и руками не правится; прошлые входы — в git. В нём только проекции и манифест —
