@@ -229,3 +229,26 @@
   `glossary.md`; базы — адресно (refcheck).
 - Решения оркестратора (строка DECISIONS «Ф7, зона 6 принята»): отступления приняты; агенты прочитаны — судья только
   `Read`, без `CLAUDE.md` (`omitClaudeMd` — Claude Code ≥ 2.1.271), консультант — `Read`, `Grep`, `Glob`.
+
+## 10. Z7a — соседние исполнители и аудиты: продукт и interface (28.09, ≈ 45 мин, в уведомлении — 750 тыс. токенов)
+- Сделано: 14 правок, новых нет (+2 969 / −2 467 строк против `323fad4`; 4 045 строк, все файлы под ширину 120):
+  `project-deep-dive` — SKILL (570 знаков), `phases.md` (девять фаз, `objects` — четвёртая), `field-checklists.md`,
+  `draft-stable.md`, `workflow-patterns.md` («Привести к канону»); `project-audit` — SKILL (538), `rules.md` (R-VS,
+  R-RL, R-GL, R-CAP, R-MX, R-STRUCT-009/010); `interface-deep-dive` — SKILL (554), `field-checklists.md` (scenario,
+  ИА-поля, частота и отказы, `data-items.object`), `draft-stable.md`, `workflow-patterns.md` («Привести к канону»),
+  `project-context.md`; `interface-audit` — SKILL (587), `rules.md` (R-SC, R-IA, R-CAP, R-SURF-003, R-STRUCT-009/010,
+  R-SEM-006). Решения A1, A2, B8, F1–F6, F9 (TX-31), F12, F13, F14, H2, H7 и действие TX-31 — с местом (отчёт §2).
+- Отступления (решает оркестратор): id правил — сквозные по категориям, соответствие кандидатам — отчёт §3 п. 1;
+  сверх кандидатов R-VS-007, R-VS-008, R-GL-006, R-STRUCT-009/010 (`/project-audit`); тяжести, не названные T3, — по
+  ux-верх; покрытие вниз — только при начатом interface; R-STRUCT-010 пересекается с `design-audit` R-SURF-004/005;
+  «пустое — не прочерк» против «новые колонки — `—`» T3 §4.5; `slug` в interface выводится из имени; R-SEM-006 читает
+  `situations` экранов.
+- Стыки: Z7b — образец «Привести к канону» (разделы обоих `workflow-patterns.md`, шаг 4 запуска), прочерк-решения экрана,
+  поле `situations`; Z8 — kind `object`, `action`, `scenario` и `_phase-jump.md` в `state-model.md`, `trace` в углах
+  `capability-job`, `capability-hypothesis` и в `routing.md`; Z9 — 2 249 знаков на четыре описания.
+- Открыто: пересечение R-STRUCT-010; вид действия в матрице — чтением; пороги ИА — адресом; пустая ячейка в таблицах
+  «Форма ячеек» (зона 2); пикеры без исключения `infrastructure` во всех скиллах, кроме дизайна.
+- Не прочитано: T2a, T2b; T4 вне вступления, H2, H7; T3 §5–§7; база — адресно; файлы Z7b, Z8 — поиском.
+- Решения оркестратора (строка DECISIONS «Ф7, зона 7a принята»): отступления приняты; R-STRUCT-010 оставлен целиком;
+  проверяющий агент (≈ 15 мин, `reports/Z7a-verify.md`): потерь без замены 0, шесть мест — пять правок внесены при
+  приёмке, пункт `draft → stable` interface сведён с `draft-stable.md` намеренно.
