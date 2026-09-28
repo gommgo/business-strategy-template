@@ -33,11 +33,11 @@ screen · block · shell), свод карты экранов `map.md` и рее
 |---|---|
 | `/screen-audit <project-slug> <surface> …` | взять `<project-slug>` и `<surface>` |
 | `/screen-audit <project-slug> …` (без surface) | проект задан; **все** папки поверхностей проекта |
-| `/screen-audit …` (без slug) | `AskUserQuestion`-пикер **по именам** проектов (исключая `_template`); затем все поверхности |
+| `/screen-audit …` (без slug) | `AskUserQuestion`-пикер **по именам** проектов (исключая `_template` и `infrastructure`); затем все поверхности |
 
 1. Если первый аргумент совпадает с именем подпапки `docs/projects/`
-   (кроме `_template`) — это `<project-slug>`. Иначе — пикер **по
-   именам** проектов (исключить `_template`). Если проектов нет —
+   (кроме `_template` и `infrastructure`) — это `<project-slug>`. Иначе — пикер **по
+   именам** проектов (исключить `_template` и `infrastructure`). Если проектов нет —
    сказать «нечего аудитить», выйти.
 2. Прочитать реестр `docs/projects/<project-slug>/surface.md`. Если
    следующий аргумент совпадает со `slug` строки реестра — это

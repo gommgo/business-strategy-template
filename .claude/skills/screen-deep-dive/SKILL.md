@@ -42,7 +42,7 @@ Screens-слой **партиционирован по поверхности**:
 | вызов | проект |
 |---|---|
 | `/screen-deep-dive <project-slug> [<surface>] …` | взять `<project-slug>` |
-| `/screen-deep-dive …` (без slug) | `AskUserQuestion`-пикер **по именам** проектов (исключая `_template`) |
+| `/screen-deep-dive …` (без slug) | `AskUserQuestion`-пикер **по именам** проектов (исключая `_template` и `infrastructure`) |
 
 Поскольку точки входа допускают `<kind>:<slug>` (например,
 `screen-deep-dive my-app web login`), `<project-slug>` отделяется от
@@ -50,10 +50,10 @@ Screens-слой **партиционирован по поверхности**:
 `docs/projects/`:
 
 1. Если первый аргумент совпадает с именем подпапки `docs/projects/`
-   (кроме `_template`) — это `<project-slug>`; остаток args идёт на
+   (кроме `_template` и `infrastructure`) — это `<project-slug>`; остаток args идёт на
    выбор поверхности и точку входа.
 2. Иначе — пикер **по именам** проектов (подпапки `docs/projects/`,
-   исключить `_template`; опции — имена из `vision`, slug — деталь).
+   исключить `_template` и `infrastructure`; опции — имена из `vision`, slug — деталь).
    Если проектов нет — сказать «сначала заведи проект через
    `/project-deep-dive`», выйти.
 3. После того как проект определён — определить поверхность (см.

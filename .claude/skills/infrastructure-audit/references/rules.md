@@ -16,7 +16,7 @@
   `jobs/<slug>.md`;
 - `placement.md` — размещение юнитов (`unit → runtime`).
 
-Read-only контекст резолва (исключая `_template`):
+Read-only контекст резолва (исключая `_template` и `infrastructure`):
 
 - `docs/projects/<project>/services/service.md` — сервисы-юниты;
 - `docs/projects/<project>/services/platform.md` — проектные ресурсы

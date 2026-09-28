@@ -136,7 +136,7 @@ baseline целевой метрики (metric.current) должен брать�
 ## addresses-problem-bizproblem
 
 **Source:** `docs/projects/*/vision.md` (поле `addresses-problem` каждого
-проекта, кроме `_template`).
+проекта, кроме `_template` и `infrastructure`).
 **Destination:** `docs/business/business-problem.md` (таблица проблем).
 **Скоуп:** один раз, **над всеми проектами** (M:N, обе стороны).
 **Применим если:** есть хотя бы один проект и непустой `business/business-problem.md`.

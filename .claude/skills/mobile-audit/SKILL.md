@@ -27,9 +27,9 @@ description: "Аудит карты мобильного приложения в
 |---|---|
 | `/mobile-audit <project-slug> <surface> …` | взять `<project-slug>` и `<surface>` |
 | `/mobile-audit <project-slug> …` (без surface) | проект задан; **все** мобильные поверхности проекта |
-| `/mobile-audit …` (без slug) | `AskUserQuestion`-пикер **по именам** проектов (исключая `_template`); затем все мобильные поверхности |
+| `/mobile-audit …` (без slug) | `AskUserQuestion`-пикер **по именам** проектов (исключая `_template` и `infrastructure`); затем все мобильные поверхности |
 
-1. Первый аргумент — подпапка `docs/projects/` (кроме `_template`) →
+1. Первый аргумент — подпапка `docs/projects/` (кроме `_template` и `infrastructure`) →
    `<project-slug>`; иначе пикер по именам проектов. Проектов нет — «нечего
    аудитить», выйти.
 2. Прочитать `surface.md`. Следующий аргумент — slug строки реестра → одна

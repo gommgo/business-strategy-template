@@ -41,11 +41,11 @@ H2-секциями `## <uc-slug>`) и `assets/`. **Изоляция двуху�
 |---|---|
 | `/telegram-bot-flow-audit <project-slug> <surface> …` | взять `<project-slug>` и `<surface>` |
 | `/telegram-bot-flow-audit <project-slug> …` (без surface) | проект задан; **все** bot-поверхности проекта |
-| `/telegram-bot-flow-audit …` (без slug) | `AskUserQuestion`-пикер **по именам** проектов (исключая `_template`); затем все bot-поверхности |
+| `/telegram-bot-flow-audit …` (без slug) | `AskUserQuestion`-пикер **по именам** проектов (исключая `_template` и `infrastructure`); затем все bot-поверхности |
 
 1. Если первый аргумент совпадает с именем подпапки `docs/projects/`
-   (кроме `_template`) — это `<project-slug>`. Иначе — пикер **по
-   именам** проектов (исключить `_template`). Если проектов нет —
+   (кроме `_template` и `infrastructure`) — это `<project-slug>`. Иначе — пикер **по
+   именам** проектов (исключить `_template` и `infrastructure`). Если проектов нет —
    сказать «нечего аудитить», выйти.
 2. Прочитать реестр `docs/projects/<project-slug>/surface.md`. Если
    следующий аргумент совпадает со `slug` строки реестра — это

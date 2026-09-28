@@ -81,7 +81,7 @@ helm, compose-файлы) — забота того репо, не этого с
    `shared-platform.md`, `placement.md`.
 4. Собрать **межпроектный контекст** (read-only):
    - реестры сервисов всех проектов — `docs/projects/*/services/service.md`
-     (исключая `_template`) — юниты для размещения;
+     (исключая `_template` и `infrastructure`) — юниты для размещения;
    - платформенные потребности — `docs/projects/*/services/platform.md`:
      строки `provided-by: shared:<slug>` (потребители общих ресурсов) и
      `provided-by: own` (ресурсы, требующие собственного placement);

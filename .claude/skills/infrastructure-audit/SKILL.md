@@ -24,7 +24,7 @@ description: "Узкий аудит ИТ-периметра бизнеса в `d
 Слой **один на бизнес** — аргументов у скилла нет, один прогон = весь
 периметр. Слой межпроектный, поэтому аудит read-only заглядывает в
 реестры всех проектов (`docs/projects/*/services/service.md` +
-`platform.md`, исключая `_template`) — но **только** чтобы резолвить
+`platform.md`, исключая `_template` и `infrastructure`) — но **только** чтобы резолвить
 `placement.unit` и потребности `provided-by: shared:<slug>` и считать
 coverage. Семантическую сверку проектных слоёв между собой ведёт
 `/cross-audit` (углы `service-placement` · `platform-shared`), не этот

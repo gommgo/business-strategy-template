@@ -42,7 +42,7 @@ state оркестратора (`../entrypoint/state/projects/<project-slug>/fsd
 Алгоритм определения при запуске:
 
 1. **Проект.** Если первый аргумент совпадает с именем подпапки
-   `docs/projects/` (кроме `_template`) — это `<project-slug>`. Иначе —
+   `docs/projects/` (кроме `_template` и `infrastructure`) — это `<project-slug>`. Иначе —
    пикер по именам проектов. Если проектов нет — «сначала заведи проект
    через `/project-deep-dive`», выйти.
 2. **Поверхность.** Прочитать реестр

@@ -73,7 +73,7 @@
 `shared-platform.md` (`type`, `technology`, `description` бизнес-смыслом).
 
 **Intake потребностей (обязательный шаг фазы):** просканировать
-`docs/projects/*/services/platform.md` (исключая `_template`) на
+`docs/projects/*/services/platform.md` (исключая `_template` и `infrastructure`) на
 `provided-by: shared:<slug>`:
 - у каждой потребности должна быть запись `shared-platform.md` с тем же
   `slug` — нет записи → завести (через `AskUserQuestion`, технологию и

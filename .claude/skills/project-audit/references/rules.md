@@ -370,7 +370,7 @@
 **Где:** `integration.md` + листинг `docs/projects/`.
 
 **Обнаружение:** при `target: sibling-project` значение `sibling-project` не совпадает ни с одной папкой
-`docs/projects/<slug>/` (кроме `_template`) — `error`, стык ведёт в пустоту; совпадает с текущим проектом — `warning`:
+`docs/projects/<slug>/` (кроме `_template` и `infrastructure`) — `error`, стык ведёт в пустоту; совпадает с текущим проектом — `warning`:
 это внутренний обмен, а не межпроектный стык.
 
 **Рекомендация:** «поправить slug соседнего проекта или сменить `target` на `external` через

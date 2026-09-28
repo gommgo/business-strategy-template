@@ -66,8 +66,8 @@ preconditions и business rules — его экспертиза (`CLAUDE.md` §3
 - `<project-slug>` передан первым аргументом
   (`/domain-deep-dive <slug> …`) — берём его.
 - Аргумент отсутствует — `AskUserQuestion`-пикер **по именам** проектов
-  (подпапки `docs/projects/` **кроме `_template`** — это образец формы, не
-  проект). Одна опция на проект (имя из `vision`, slug — деталь) + Other.
+  (подпапки `docs/projects/` **кроме `_template` и `infrastructure`** — это образец формы и ИТ-периметр,
+  не проекты). Одна опция на проект (имя из `vision`, slug — деталь) + Other.
   Без выбора проекта сессия не идёт.
 
 Дальше в этом файле `<P>` = `docs/projects/<project-slug>` для краткости:
