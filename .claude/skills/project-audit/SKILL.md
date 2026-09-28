@@ -127,8 +127,8 @@ vision, slug — деталью). Один прогон — один проек�
 ```markdown
 ---
 project: <project-slug>
-ran-on: <scope: all | kind | kind:slug | capability:<surface>>
-files-read: <9 корневых + M файлов возможностей; соседи: …>
+ran-on: <all | kind | kind:slug | capability:surface>
+files-read: <9 корневых + M файлов возможностей + соседи по правилам>
 records-checked: N
 vision-set: <full | minimum>
 totals: { error: X, warning: Y, hint: Z }
