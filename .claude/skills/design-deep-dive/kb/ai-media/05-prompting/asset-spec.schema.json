@@ -30,9 +30,10 @@
       "additionalProperties": false,
       "required": ["section", "slot", "purpose"],
       "properties": {
-        "page_type": {"enum": ["landing", "product", "marketing", "ecommerce", "saas", "portfolio", "blog", "other"]},
-        "section": {"type": "string", "description": "hero, features, empty-state, onboarding, pricing, testimonials, footer, og, 404 …"},
-        "slot": {"type": "string", "description": "Имя слота в плане ассетов страницы (hero-bg, feature-3-illustration …)."},
+        "page_type": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "description": "page_type словаря site v1 (../../site/02-site-types/vocabulary.yaml) — тот же, что в плане страницы и плане ассетов (page.page_type); класс спецификации — page_class."},
+        "page_class": {"enum": ["landing", "product", "marketing", "ecommerce", "saas", "portfolio", "blog", "other"], "description": "Проекция page_type по строкам «role.page_type» ../../site/02-site-types/crosswalk.tsv — слово контекста промта; руками не выбирается (plan_to_assets.py --spec-role)."},
+        "section": {"type": "string", "description": "id секции плана страницы (slots[].section плана ассетов): hero, features, pricing, testimonials, footer …; meta — слоты уровня страницы (OG, фавиконы)."},
+        "slot": {"type": "string", "description": "id строки плана ассетов страницы (<секция>-<id> слота плана страницы: hero-visual, features-card-3-illustration …)."},
         "purpose": {"type": "string", "description": "Зачем ассет на странице, одной фразой. В промт не идёт."},
         "priority": {"enum": ["lcp", "above-fold", "below-fold", "decorative"]},
         "series_id": {"type": "string", "description": "Id серии: ассеты одной серии разделяют style и palette дословно."}

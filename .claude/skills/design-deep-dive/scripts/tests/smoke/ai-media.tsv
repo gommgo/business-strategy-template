@@ -2,7 +2,7 @@ path	kind	smoke	xfail
 scripts/ai-media/README.md	data	data	
 scripts/ai-media/alpha_check.py	utility	help	
 scripts/ai-media/asset_audit.py	utility	help	
-scripts/ai-media/asset_inventory.py	utility	help	
+scripts/ai-media/asset_inventory.py	utility	help; run: --selftest	
 scripts/ai-media/avif_pick.sh	utility	compile	
 scripts/ai-media/channel_diff.py	step	compile	
 scripts/ai-media/check_icons.py	module	help	help: нужны cairosvg (cairocffi, cffi, системная libcairo), svgelements, scikit-image — ставит install.sh (группа svg)

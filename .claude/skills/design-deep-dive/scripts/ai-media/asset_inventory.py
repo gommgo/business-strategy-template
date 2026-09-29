@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""asset_inventory.py — инвентарь визуальных ассетов живой страницы (агент A, волна 1 ai-media-research, 2026-09-23).
+"""asset_inventory.py — инвентарь визуальных ассетов живой страницы.
 
 Что собирает (Playwright + Chromium, один браузер на прогон):
   * <img> и <picture>: currentSrc, srcset (число кандидатов, w/x), sizes, <source> с type/media (арт-дирекшн),
@@ -20,25 +20,34 @@
     1 с на первом экране), вес до прокрутки и после прокрутки, meta og:image (скачивается: байты, формат, размеры),
     фавиконы, preload картинок;
   * эвристика слота: hero (первый экран, ≥ 15 % площади вьюпорта) / logo-wall / avatar / icon / nav / footer /
-    content-large / content-small — для ручной проверки по контактному листу.
+    content-large / content-small — для ручной проверки по контактному листу;
+  * библиотеки по рантайму: GSAP и ScrollTrigger — по window.gsapVersions, свойству _gsap у элементов и .pin-spacer
+    (бандл глобал window.gsap не ставит; метод — kb/creative/03-live-sites-measured/01-effects-sites-measured.md
+    §1.1), three.js, Lottie, Rive, Webflow, Framer, Next, Nuxt, Shopify.
+
+Автоматизация не маскируется: UA — как есть (десктоп — строка Playwright с HeadlessChrome, телефон — дескриптор
+Pixel 7 с HeadlessChrome), признак автоматизации Blink не выключается, navigator.webdriver не трогается; UA и
+navigator.webdriver страницы пишутся в инвентарь. Вход, капча и антибот — отсев страницы, не обход.
 
 Использование:
   python3 asset_inventory.py URL OUT_DIR [--mobile] [--reduced-motion] [--quick] [--throttle] [--wait 6000]
                              [--timeout 90] [--steps N] [--wait-until load|domcontentloaded|commit] [--keep-shots]
                              [--dpr 1] [--no-og]
+  python3 asset_inventory.py --selftest      локальная страница file:// в Chromium Playwright: UA, webdriver, признаки
+                                             GSAP, телефон; без сети
   --quick        без прокрутки (только первый экран): для парных прогонов reduce / обычный;
-  --mobile       дескриптор Playwright "Pixel 7" (412×839 CSS, DPR 2.625, UA Android);
+  --mobile       дескриптор Playwright "Pixel 7" (412×839 CSS, DPR 2.625, UA Android с HeadlessChrome);
   --throttle     CPU×4 + 150 мс RTT + 1,6 Мбит/с (как пресет Lighthouse; как site_probe.py).
 Результат: OUT_DIR/inv[_mobile][_rm][_quick].json (полный инвентарь), sheet[...].jpg (контактный лист JPEG),
 краткая сводка в stdout (JSON). Отдельные скриншоты удаляются (флаг --keep-shots оставляет).
-Ограничения: headless Chromium 153 (Chrome for Testing): H.264/AV1/VP9 играет, HEVC — нет; куки-баннеры не
-закрываются; сайты с защитой от ботов могут отдать заглушку (смотри title и контактный лист).
+Ограничения: headless Chromium Playwright: H.264/AV1/VP9 играет, HEVC — нет; куки-баннеры не закрываются; сайты с
+защитой от ботов могут отдать заглушку (смотри title и контактный лист).
 """
 import io, json, os, re, sys, time
 from urllib.parse import urlparse
 
 GPU_ARGS = ["--use-gl=angle", "--use-angle=gl", "--ignore-gpu-blocklist", "--enable-gpu",
-            "--disable-blink-features=AutomationControlled", "--autoplay-policy=no-user-gesture-required"]
+            "--autoplay-policy=no-user-gesture-required"]
 
 INIT = r"""(() => {
   if (window.__inv) return;
@@ -146,8 +155,13 @@ DOM = r"""(() => {
     .slice(0, 30).map(l => ({rel: l.getAttribute('rel'), as: l.getAttribute('as'), href: abs(l.getAttribute('href') || ''), imagesrcset: !!l.getAttribute('imagesrcset'), fetchpriority: l.getAttribute('fetchpriority'), media: l.getAttribute('media'), type: l.getAttribute('type')}));
   const P = window.__inv || {};
   R.lcp = (P.lcp || []).slice(-6); R.cls = +(P.cls || 0).toFixed(3); R.tbt_ms = Math.round(P.lt || 0); R.ctx_created = P.ctx || []; R.playing_events = P.playing || 0;
+  // GSAP — по рантайму: бандл глобал window.gsap не ставит; признаки — gsapVersions, _gsap у элементов, .pin-spacer
+  const gv = Array.isArray(window.gsapVersions) ? window.gsapVersions.slice(0, 4).map(String) : [];
+  let gt = 0; try { for (const el of document.querySelectorAll('body *')) { if (el._gsap) gt++; if (gt >= 500) break; } } catch (e) {}
+  const pins = document.querySelectorAll('.pin-spacer').length;
   R.libs = {lottie: !!(window.lottie || window.bodymovin), dotlottie: !!(window.DotLottie || customElements.get('dotlottie-player') || customElements.get('dotlottie-wc')),
-    three: window.__THREE__ || null, gsap: !!window.gsap, webflow: !!window.Webflow, framer: !!document.querySelector('[data-framer-hydrate-v2],#__framer-badge-container,[data-framer-name]'),
+    three: window.__THREE__ || null, gsap: !!(window.gsap || gv.length || gt || pins), gsap_versions: gv, gsap_targets: gt, pin_spacers: pins,
+    scrolltrigger: !!(window.ScrollTrigger || pins), webflow: !!window.Webflow, framer: !!document.querySelector('[data-framer-hydrate-v2],#__framer-badge-container,[data-framer-name]'),
     next: !!(window.__NEXT_DATA__ || self.__next_f), nuxt: !!(window.__NUXT__), rive: !!(window.rive || customElements.get('rive-canvas')), shopify: !!window.Shopify};
   return R; })()"""
 
@@ -328,8 +342,71 @@ def norm_url(u):
     return (u or "").split("#")[0]
 
 
+def mobile_device(pw):
+    """Дескриптор Playwright «Pixel 7»: размер, DPR, касание; в UA — HeadlessChrome, как у самого браузера."""
+    dev = dict(pw.devices["Pixel 7"])
+    dev["user_agent"] = dev["user_agent"].replace("Chrome/", "HeadlessChrome/")
+    return dev
+
+
+SELFTEST_HTML = """<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>asset_inventory selftest</title>
+<style>body{margin:0;font:16px sans-serif} .hero{height:480px;background:linear-gradient(90deg,#123,#456)}</style></head>
+<body><header><svg width="32" height="32" aria-label="logo"><rect width="32" height="32"/></svg></header>
+<section class="hero"><h1>Проверка инвентаря</h1><div class="pin-spacer"><div id="pinned">закреплённый блок</div></div></section>
+<script>window.gsapVersions = ["3.12.5"]; document.getElementById("pinned")._gsap = {id: 1};</script>
+</body></html>"""
+
+
+def selftest():
+    """Локальная страница file:// в Chromium Playwright, без сети: UA как есть, navigator.webdriver, признаки GSAP по
+    рантайму (gsapVersions, _gsap, .pin-spacer), телефонный дескриптор с HeadlessChrome; в коде нет маскировки."""
+    import subprocess
+    import tempfile
+    here = os.path.dirname(os.path.abspath(__file__))
+    sys.path.insert(0, os.path.join(here, "..", "lib"))
+    import kbpaths
+    ok = True
+
+    def check(msg, cond):
+        nonlocal ok
+        ok = ok and bool(cond)
+        print(("OK   " if cond else "FAIL ") + msg)
+    src = open(os.path.abspath(__file__), encoding="utf-8").read().split("\ndef selftest")[0]
+    check("в коде нет --disable-blink-features и подмены UA на строку без Headless",
+          "--disable-blink-" not in src and "user_agent=" not in src and "AppleWebKit" not in src)
+    with tempfile.TemporaryDirectory() as td:
+        page = os.path.join(td, "page.html")
+        with open(page, "w", encoding="utf-8") as f:
+            f.write(SELFTEST_HTML)
+        url = "file://" + page
+        env = kbpaths.playwright_env()
+        with kbpaths.lock("browser"):
+            for mode, extra in (("desktop", []), ("mobile", ["--mobile"])):
+                out = os.path.join(td, mode)
+                r = subprocess.run([sys.executable, os.path.abspath(__file__), url, out, "--quick", "--wait", "300", "--no-og"]
+                                   + extra, capture_output=True, text=True, timeout=180, env=env)
+                name = "inv_mobile_quick.json" if extra else "inv_quick.json"
+                inv = json.load(open(os.path.join(out, name), encoding="utf-8")) if os.path.exists(os.path.join(out, name)) else {}
+                check(f"{mode}: прогон на file:// — код 0 и инвентарь ({r.returncode})", r.returncode == 0 and inv)
+                ua = inv.get("ua") or ""
+                tok = next((t for t in ua.split() if t.startswith("HeadlessChrome/")), "нет HeadlessChrome")
+                check(f"{mode}: UA как есть — {tok}", "HeadlessChrome/" in ua)
+                check(f"{mode}: navigator.webdriver = true — автоматизация видна сайту", inv.get("webdriver") is True)
+                libs = (inv.get("dom") or {}).get("libs") or {}
+                if mode == "desktop":
+                    check("GSAP по рантайму: gsapVersions, _gsap, .pin-spacer без window.gsap",
+                          libs.get("gsap") is True and libs.get("gsap_versions") == ["3.12.5"] and libs.get("gsap_targets", 0) >= 1
+                          and libs.get("pin_spacers") == 1 and libs.get("scrolltrigger") is True)
+                else:
+                    check("телефон: Pixel 7 — Android и ширина 412", "Android" in ua and inv.get("viewport") == [412, 839])
+    print("asset_inventory selftest:", "OK" if ok else "FAIL")
+    return 0 if ok else 1
+
+
 def main():
     a = sys.argv[1:]
+    if a and a[0] == "--selftest":
+        sys.exit(selftest())
     if len(a) < 2 or a[0] in ("-h", "--help"):
         print(__doc__); sys.exit(0)
     url, out = a[0], os.path.abspath(a[1])
@@ -340,18 +417,16 @@ def main():
     from playwright.sync_api import sync_playwright
     net, logs, creq = {}, [], {}
     accept_img = {"v": None}
-    st = {"url": url, "mode": suffix.strip("_") or "desktop", "date": time.strftime("%Y-%m-%d %H:%M"), "tool": "asset_inventory.py 2026-09-23"}
+    st = {"url": url, "mode": suffix.strip("_") or "desktop", "date": time.strftime("%Y-%m-%d %H:%M"), "tool": "asset_inventory.py"}
     shots = []
     with sync_playwright() as pw:
         b = pw.chromium.launch(headless=True, args=GPU_ARGS)
         st["browser"] = b.version
-        major = b.version.split(".")[0]
         if mobile:
-            dev = dict(pw.devices["Pixel 7"])
+            dev = mobile_device(pw)
             ctx = b.new_context(**dev, reduced_motion="reduce" if rm else "no-preference", locale="en-US")
         else:
-            ua = f"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{major}.0.0.0 Safari/537.36"
-            ctx = b.new_context(viewport={"width": 1440, "height": 900}, device_scale_factor=float(opt(a, "--dpr", 1)), user_agent=ua,
+            ctx = b.new_context(viewport={"width": 1440, "height": 900}, device_scale_factor=float(opt(a, "--dpr", 1)),
                                 reduced_motion="reduce" if rm else "no-preference", locale="en-US")
         ctx.add_init_script(INIT)
         p = ctx.new_page()
@@ -464,6 +539,10 @@ def main():
         st["load_event_sec"] = round(time.time() - t0, 2)
         p.wait_for_timeout(wait)
         st["final_url"] = p.url
+        try:     # как страница видит клиента: UA и navigator.webdriver — без подмены
+            st["ua"], st["webdriver"] = p.evaluate("() => [navigator.userAgent, navigator.webdriver]")
+        except Exception:
+            st["ua"] = st["webdriver"] = None
         try:
             st["nav"] = p.evaluate("""(() => { const n = performance.getEntriesByType('navigation')[0]; if (!n) return null;
               return {ttfb: Math.round(n.responseStart), dcl: Math.round(n.domContentLoadedEventEnd), load: Math.round(n.loadEventEnd), html_kb: Math.round(n.transferSize / 1024)}; })()""")

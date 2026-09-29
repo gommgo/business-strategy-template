@@ -1,22 +1,20 @@
-# asset-plan.yaml — КАРКАС из home.yaml (plan_to_assets.py, site-research J). Формат — ai-media 01/01 §8.
-# TODO-поля заполняют Claude (subject, goal) и ai-media (size, formats, max_kb, маршрут задачи); бюджеты — профиль P.
+# План ассетов страницы home — каркас из home.yaml (plan_to_assets.py). Формат — ai-media 01/01 §8, схема —
+# kb/ai-media/05-prompting/asset-plan.schema.json. Заглушки TODO, предмет, варианты, вес, фокус и дорогу 3D
+# дописывает агент; тексты ассетов — copydeck.py export-assets; генерация — после status: approved и approval.
 plan_version: 1
 checked: '2026-09-24'
+status: draft
+example: true
+refs:
+  page_plan: plans/home.yaml
 page:
   id: home
-  page_type: corporate
+  page_type: landing-lead-services
+  media_class: corporate
   locale: ru-RU
-  audience: Заявки на бесплатный замер от владельцев квартир 40–80 м² под полный ремонт в Нижнем Новгороде
-  x_site:
-    page_plan: otves-remont-nn/home
-    page_type: landing-lead-services
-    mapping: crosswalk §8 (broader)
-brand:
-  palette_tokens: TODO art-direction creative
-  style_passport: TODO
-  photo_language: TODO
-  forbidden_markers: []
+  goal: Заявки на бесплатный замер от владельцев квартир 40–80 м² под полный ремонт в Нижнем Новгороде
 budgets:
+  profile: landing-lead-services@L1
   first_screen_kb:
     mobile: 1500
     desktop: 2500
@@ -26,128 +24,123 @@ budgets:
     basis: S-creative-C1; ai-media лидеры SaaS сессия 7,1 МБ
 policy:
   no_ai_subjects:
-  - hero-visual
+  - logos
   - real_people_or_work
   disclosure: per-slot
 slots:
 - id: header-logo
   section: header
+  slot: brand-logo
   role: informational
-  goal: 'TODO Claude: что показать за 3 секунды'
+  goal: 'TODO: что ассет показывает за 3 секунды'
   ladder: svg
   source: real
   task_codes: []
-  subject: TODO Claude и ai-media (паспорт визуала, art-direction)
-  must_include: []
-  must_avoid: []
   variants:
   - id: default
     ratio: TODO
-    size: TODO ai-media
-    formats: TODO ai-media
-    max_kb: TODO ai-media
+    size: TODO
+    formats: TODO
+    max_kb: TODO
   motion:
     type: none
   delivery:
     lcp_candidate: false
     loading: lazy
-  alt: 'TODO: id текстового слота image-alt'
-  ai_fit: conditional
-  note: 'ждём материалы заказчика (source: customer-tbd в плане)'
+  ai_fit: forbidden
+  note: 'ждём материалы заказчика (source: customer-tbd в плане страницы)'
 - id: hero-visual
   section: hero
+  slot: hero-visual
   role: informational
   goal: 'прораб Сергей Лапин на объекте: «за ремонт отвечает один человек»'
+  key: true
   ladder: image
   source: real
   task_codes:
   - IMG-EDIT
-  subject: TODO Claude и ai-media (паспорт визуала, art-direction)
-  must_include: []
-  must_avoid: []
   variants:
   - id: desktop
     ratio: '1:1'
-    size: TODO ai-media
-    formats: TODO ai-media
-    max_kb: TODO ai-media
+    size: TODO
+    formats: TODO
+    max_kb: TODO
     text_zone:
       side: none
   - id: mobile
     ratio: '4:5'
-    size: TODO ai-media
-    formats: TODO ai-media
-    max_kb: TODO ai-media
+    size: TODO
+    formats: TODO
+    max_kb: TODO
   motion:
     type: none
   delivery:
     lcp_candidate: true
     loading: eager
     fetchpriority: high
-  alt: текст — copy-deck text, слот hero.alt
+  alt_ref: hero.alt
   ai_fit: forbidden
-  note: 'подлинность real-only: люди, работы, товар, скриншоты — только настоящие (I 08/02 §1.2)'
+  note: 'подлинность real-only: люди-доказательства, товар «как есть», чужие знаки — только настоящие (ai-media 12/04 §2,
+    site 08/02 §2.1)'
 - id: case-studies-photo
   section: case-studies
+  slot: photo
   role: informational
   goal: квартира после ремонта
   ladder: image
   source: real
   task_codes: []
-  subject: TODO Claude и ai-media (паспорт визуала, art-direction)
-  must_include: []
-  must_avoid: []
   variants:
   - id: desktop
     ratio: '4:3'
-    size: TODO ai-media
-    formats: TODO ai-media
-    max_kb: TODO ai-media
+    size: TODO
+    formats: TODO
+    max_kb: TODO
   - id: mobile
     ratio: '4:5'
-    size: TODO ai-media
-    formats: TODO ai-media
-    max_kb: TODO ai-media
+    size: TODO
+    formats: TODO
+    max_kb: TODO
   motion:
     type: none
   delivery:
     lcp_candidate: false
     loading: lazy
-  alt: decorative (alt="")
+  alt_ref: decorative
   ai_fit: forbidden
-  note: 'ждём материалы заказчика (source: customer-tbd в плане); подлинность real-only: люди, работы, товар, скриншоты —
-    только настоящие (I 08/02 §1.2)'
+  note: 'ждём материалы заказчика (source: customer-tbd в плане страницы); подлинность real-only: люди-доказательства, товар
+    «как есть», чужие знаки — только настоящие (ai-media 12/04 §2, site 08/02 §2.1)'
 - id: team-person-1-photo
   section: team
+  slot: photo
   role: informational
-  goal: 'TODO Claude: что показать за 3 секунды'
+  goal: 'TODO: что ассет показывает за 3 секунды'
   ladder: image
   source: real
   task_codes: []
-  subject: TODO Claude и ai-media (паспорт визуала, art-direction)
-  must_include: []
-  must_avoid: []
   variants:
   - id: desktop
     ratio: '4:5'
-    size: TODO ai-media
-    formats: TODO ai-media
-    max_kb: TODO ai-media
+    size: TODO
+    formats: TODO
+    max_kb: TODO
   - id: mobile
     ratio: '4:5'
-    size: TODO ai-media
-    formats: TODO ai-media
-    max_kb: TODO ai-media
+    size: TODO
+    formats: TODO
+    max_kb: TODO
   motion:
     type: none
   delivery:
     lcp_candidate: false
     loading: lazy
-  alt: текст — copy-deck text, слот team.person-1-name
+  alt_ref: team.person-1-name
   ai_fit: forbidden
-  note: 'подлинность real-only: люди, работы, товар, скриншоты — только настоящие (I 08/02 §1.2)'
+  note: 'подлинность real-only: люди-доказательства, товар «как есть», чужие знаки — только настоящие (ai-media 12/04 §2,
+    site 08/02 §2.1)'
 - id: og-image
   section: meta
+  slot: og-image
   role: informational
   goal: превью ссылки для мессенджеров (рекомендации)
   ladder: image
@@ -161,4 +154,5 @@ slots:
   delivery:
     lcp_candidate: false
     loading: lazy
+  alt_ref: meta.og-image-alt
   ai_fit: allowed

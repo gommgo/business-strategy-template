@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:app-design:ai-media:asset-plan:1",
+  "title": "asset-plan v1 — план ассетов страницы-шаблона: слот → решение «код / генерация / Blender», варианты, доставка, утверждение",
+  "description": "Формат плана ассетов — канон ../01-web-assets-landscape/01-asset-slots-by-page-type.md §8, второго формата нет. Файл проекта — docs/projects/<slug>/design/<surface>/assets/plans/<page-id>.yaml, один на страницу-шаблон; план страницы ссылается на него refs.asset_plan. Каркас из медиа- и 3D-слотов плана страницы и проверка — ../../../scripts/site/plan_to_assets.py (--check, check <slug>). Id — словарь site (../../site/02-site-types/vocabulary.yaml): page.page_type — тип страницы, slots[].slot — вид слота, slots[].section — id секции плана страницы; класс анатомии ai-media page.media_class — проекция page_type по строкам §8 ../../site/02-site-types/crosswalk.tsv. План пишется до ДС и у страниц без генерации: кодовые и реальные слоты тоже. Генерация картинок, видео и 3D — только после утверждения плана заказчиком: status approved и approval.",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {"^x-": {}},
+  "required": ["plan_version", "status", "page", "slots"],
+  "properties": {
+    "plan_version": {"enum": [1, "1"], "description": "Версия формата плана ассетов."},
+    "checked": {"$ref": "#/$defs/date", "description": "Дата сверки норм плана (бюджеты, размеры, форматы) — у каркаса дата сверки плана страницы."},
+    "status": {"enum": ["draft", "approved"], "description": "draft — план пишется; approved — утвердил заказчик (траты — вместе с владельцем денег): генерация разрешена только по утверждённому плану."},
+    "approval": {"$ref": "#/$defs/approval", "description": "Кто и когда утвердил план; обязательно при approved."},
+    "example": {"type": "boolean", "description": "true — учебный пример формата (вымышленные данные)."},
+    "refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {"^x-": {}},
+      "description": "Пути от этого файла.",
+      "properties": {
+        "page_plan": {"type": "string", "description": "План страницы (site/<surface>/plans/<page-id>.yaml): слоты, подлинность, постеры 3D."},
+        "copy_deck": {"type": "string", "description": "Copy deck страницы: alt, подписи и текст в кадре — строки copy deck (copydeck.py export-assets)."},
+        "art_direction": {"type": "string", "description": "Арт-дирекция поверхности: язык картинок выбранного направления."},
+        "visual_dna": {"type": "string", "description": "Маркетинговый паспорт визуала поверхности: палитра, свет, камера, сюжеты, запреты."},
+        "manifest": {"type": "string", "description": "Манифест готовых ассетов поверхности (assets/manifest.yaml): файл, лицензия, происхождение, статус."}
+      }
+    },
+    "page": {"$ref": "#/$defs/page"},
+    "brand": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {"^x-": {}},
+      "description": "Язык изображений страницы: до ДС — из паспорта визуала и арт-дирекции, после ДС — палитра по токенам.",
+      "properties": {
+        "palette_tokens": {"type": ["object", "string"], "additionalProperties": {"type": "string"}, "description": "Роли цвета → hex или путь к токенам; ориентир палитры картинок."},
+        "style_passport": {"type": "string", "description": "Паспорт визуала (путь или id)."},
+        "photo_language": {"type": "string", "description": "Язык фотографии словами (плёнка, объектив, свет, материалы)."},
+        "forbidden_markers": {"type": "array", "items": {"type": "string"}, "description": "Маркеры слопа из каталога ../01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5 (IMG-M…)."}
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {"^x-": {}},
+      "description": "Бюджеты веса страницы — профиль плана страницы (page.budget_profile → site budgets.yaml), не нормы ai-media; ворота веса и скорости — после сборки.",
+      "properties": {
+        "profile": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*@L[0-2]$", "description": "Профиль <page_type>@L<n> плана страницы."},
+        "first_screen_kb": {"$ref": "#/$defs/device-kb"},
+        "session_kb": {"$ref": "#/$defs/device-kb"},
+        "session_video_kb": {"$ref": "#/$defs/device-kb"}
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {"^x-": {}},
+      "description": "Правила генерации страницы: что не генерируется и как раскрывается ИИ (03-ai-fit-trust-and-slop.md §1, §3).",
+      "properties": {
+        "no_ai_subjects": {"type": "array", "items": {"type": "string"}, "description": "Что на странице только настоящее: люди-доказательства, отзывы, команда, логотипы, товар «как есть», скриншоты."},
+        "disclosure": {"type": "string", "description": "Раскрытие ИИ: per-slot — у каждого слота по решению, иначе правило страницы."},
+        "note": {"type": "string"}
+      }
+    },
+    "slots": {
+      "type": "array",
+      "description": "Строка на медиа- или 3D-слот плана страницы и на медиа-слот уровня страницы (og-image, favicon); порядок — как в плане.",
+      "items": {"$ref": "#/$defs/slot"}
+    }
+  },
+  "allOf": [
+    {
+      "if": {"required": ["status"], "properties": {"status": {"const": "approved"}}},
+      "then": {
+        "required": ["approval"],
+        "properties": {
+          "slots": {"items": {
+            "if": {"required": ["ladder"], "properties": {"ladder": {"const": "3d"}}},
+            "then": {"required": ["three_d"], "properties": {"three_d": {"required": ["road"]}}}
+          }}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"},
+    "date": {"type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?$", "description": "ISO-дата ГГГГ-ММ-ДД или ГГГГ-ММ строкой."},
+    "todo": {"type": "string", "pattern": "^TODO", "description": "Заглушка каркаса: поле дописывает агент; в утверждённом плане заглушек нет (plan_to_assets.py --check)."},
+    "kb": {"type": ["number", "null"], "minimum": 0},
+    "device-kb": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "desktop": {"$ref": "#/$defs/kb"},
+        "mobile": {"$ref": "#/$defs/kb"},
+        "basis": {"type": "string", "description": "Откуда число (профиль budgets.yaml)."}
+      }
+    },
+    "text-ref": {"type": "string", "pattern": "^([a-z0-9]+(-[a-z0-9]+)*\\.[a-z0-9]+(-[a-z0-9]+)*|decorative)$", "description": "<секция>.<слот> — текстовый слот плана страницы; decorative — alt=\"\"."},
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["by", "date"],
+      "description": "Запись утверждения — текущее состояние файла.",
+      "properties": {
+        "by": {"type": "string", "minLength": 1, "description": "Роль у заказчика; имя — только с его согласия."},
+        "date": {"$ref": "#/$defs/date"},
+        "note": {"type": "string", "description": "Что утверждено вместе с планом: траты и лимит с владельцем денег, ключевые ассеты."}
+      }
+    },
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {"^x-": {}},
+      "required": ["id", "page_type"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id", "description": "= page.id плана страницы = имя файла плана ассетов."},
+        "page_type": {"$ref": "#/$defs/id", "description": "page_type словаря site v1 — тот же, что в плане страницы."},
+        "media_class": {"enum": ["saas-landing", "product", "ecom-home", "ecom-pdp", "campaign", "studio", "corporate", "blog", "web-app-inserts"], "description": "Класс анатомии и бюджетов ai-media (01-asset-slots-by-page-type.md §3) — проекция page_type по строке §8 crosswalk.tsv; руками не выбирается."},
+        "template": {"type": "boolean", "description": "true — план шаблона коллекции (как в плане страницы)."},
+        "locale": {"type": "string", "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"},
+        "goal": {"type": "string", "description": "Цель страницы — из плана страницы."},
+        "audience": {"type": "string", "description": "Для кого страница, словами смысла страницы."}
+      }
+    },
+    "slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {"^x-": {}},
+      "required": ["id", "section", "slot", "role", "ladder", "source", "variants", "ai_fit"],
+      "allOf": [
+        {"if": {"required": ["slot"], "properties": {"slot": {"enum": ["model-3d", "scene-3d"]}}}, "then": {"required": ["poster"]}}
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/id", "description": "<секция>-<id> слота плана страницы; у слота уровня страницы — его id в page_slots. = asset_ref строк copy deck; идентификатор, который читает код, не переименовывается."},
+        "section": {"$ref": "#/$defs/id", "description": "id секции плана страницы (sections[].id); meta — слоты уровня страницы."},
+        "slot": {"$ref": "#/$defs/id", "description": "Вид слота словаря site (пространство slot, kind media или 3d): hero-visual, background, photo, screenshot, illustration, logo, og-image, favicon, model-3d, scene-3d …"},
+        "role": {"enum": ["informational", "decorative"], "description": "= media_role слота плана страницы: на информационную картинку смотрят, декоративную пропускают."},
+        "goal": {"type": "string", "description": "Что ассет показывает за 3 секунды."},
+        "key": {"type": "boolean", "description": "Ключевой ассет: визуал первого экрана, атмосфера, ключевой кадр Blender (постер 3D-слота, key visual кампании). Делается до ДС, ДС берёт у принятого палитру, свет и материал (references/phases.md § Порядок ассетов и ДС)."},
+        "ladder": {"enum": ["text", "svg", "css", "shader", "image", "video", "3d"], "description": "Ступень лестницы дешевизны (01/01 §1): первая, которая решает задачу слота."},
+        "source": {"enum": ["generate", "edit-real", "real", "code", "template", "render"], "description": "Откуда файл: generate — генерация моделью; edit-real — правка настоящего снимка; real — материал заказчика; code — страница рисует сама (SVG, CSS, шейдер, three.js); template — HTML-шаблон с текстом → рендер в картинку (OG, инфографика); render — свой рендер сцены Blender или кода: кадр, секвенция, постер."},
+        "task_codes": {"type": "array", "items": {"type": "string", "pattern": "^[A-Z0-9]+(-[A-Z0-9]+)*$"}, "description": "Коды задач ../13-routing-matrix/routing.yaml (IMG-HERO-PHOTO …) — маршрут генерации и правки; у real и code — пусто."},
+        "recipe": {"type": "string", "pattern": "^recipe:[a-z0-9]+(-[a-z0-9]+)*$", "description": "Рецепт blender 12-recipes (blender 12/00 §1) — вместо кодов задач у рендера и 3D."},
+        "three_d": {"$ref": "#/$defs/three-d"},
+        "poster": {"$ref": "#/$defs/id", "description": "id строки этого плана с постером 3D- или видео-слота: запасной вариант и кандидат LCP."},
+        "poster_for": {"$ref": "#/$defs/id", "description": "Эта строка — постер для 3D- или видео-слота с этим id."},
+        "subject": {"type": "string", "description": "Предмет кадра словами паспорта визуала: что, где, свет, материалы."},
+        "must_include": {"type": "array", "items": {"type": "string"}},
+        "must_avoid": {"type": "array", "items": {"type": "string"}, "description": "Чего нет в кадре: маркеры слопа IMG-M…, лица, текст в картинке."},
+        "series": {"type": "object", "description": "Серия ассетов одного стиля: count, reference, same[] (ai-media 06/02)."},
+        "frames": {"type": "array", "items": {"type": "string"}, "description": "Кадры набора (галерея товара): белый фон, деталь, в сцене …"},
+        "variants": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/variant"}},
+        "motion": {"$ref": "#/$defs/motion"},
+        "delivery": {"$ref": "#/$defs/delivery"},
+        "alt": {"type": "string", "description": "alt — строка copy deck (copydeck.py export-assets по asset_ref = id слота); пусто — декоративная картинка."},
+        "alt_ref": {"$ref": "#/$defs/text-ref", "description": "Текстовый слот image-alt плана страницы: <секция>.<слот>; decorative — alt=\"\"."},
+        "caption": {"type": "string", "description": "Подпись — строка copy deck."},
+        "caption_ref": {"$ref": "#/$defs/text-ref", "description": "Текстовый слот image-caption плана страницы."},
+        "text": {"type": "object", "description": "Текст в кадре или в шаблоне: строки copy deck (export-assets: mode, strings, fallback) или поля шаблона OG."},
+        "acceptance": {"type": "object", "description": "Приёмка ассета (ai-media 11/03): пороги и проверки по типу."},
+        "ai_fit": {"enum": ["allowed", "conditional", "forbidden"], "description": "Уместность ИИ (03-ai-fit-trust-and-slop.md §1): forbidden — люди-доказательства, отзывы, команда, товар «как есть», чужие знаки, скриншоты (подлинность real-only плана страницы)."},
+        "note": {"type": "string"}
+      }
+    },
+    "three-d": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {"^x-": {}},
+      "description": "Решение по 3D-слоту — ../../blender/15-showcase/VERDICT.md §3; 3D — только Blender и код.",
+      "properties": {
+        "road": {"enum": ["code", "blender-frame", "blender-sequence", "hybrid"], "description": "code — страница рисует 3D кодом (ввод, свет, правило, параметрическая модель); blender-frame — неподвижный кадр Cycles (постер, станции, стоп-кадр); blender-sequence — предрендер секвенции Cycles на Canvas 2D (сюжет по прокрутке без ввода); hybrid — живое кодом на модели и материале Blender."},
+        "why": {"type": "string", "description": "Строка VERDICT §3, по которой выбрана дорога; развилка «кадр Blender / гибрид» — вывод одного голосующего, метка «один судья»."},
+        "cta_before_3d": {"type": "boolean", "description": "Призыв и форма работают до загрузки 3D (slot-3d плана страницы)."}
+      }
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {"^x-": {}},
+      "required": ["id"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$", "description": "desktop, mobile, card, og, set …"},
+        "ratio": {"anyOf": [{"type": "string", "pattern": "^[0-9]+(\\.[0-9]+)?:[0-9]+(\\.[0-9]+)?$"}, {"$ref": "#/$defs/todo"}]},
+        "size": {"anyOf": [{"type": "array", "items": {"type": "integer", "minimum": 1}, "minItems": 2, "maxItems": 2}, {"$ref": "#/$defs/todo"}], "description": "[ширина, высота] мастера, px."},
+        "formats": {"anyOf": [{"type": "array", "items": {"type": "string", "pattern": "^[a-z0-9]+$"}, "minItems": 1}, {"$ref": "#/$defs/todo"}]},
+        "format": {"type": "string", "pattern": "^[a-z0-9]+$"},
+        "max_kb": {"anyOf": [{"type": "number", "minimum": 0}, {"$ref": "#/$defs/todo"}], "description": "Бюджет файла, КБ (ai-media 10/04 §1.1)."},
+        "poster_max_kb": {"type": "number", "minimum": 0},
+        "text_zone": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "side": {"enum": ["left", "right", "top", "bottom", "center", "none"]},
+            "share": {"type": "number", "minimum": 0, "maximum": 1},
+            "purpose": {"type": "string"}
+          }
+        },
+        "focal": {"anyOf": [{"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 2, "maxItems": 2}, {"type": "string", "pattern": "^[0-9]{1,3}% [0-9]{1,3}%$"}], "description": "Точка фокуса: доли [x, y] или «x% y%»."},
+        "safe_area": {"type": "array", "items": {"type": "integer", "minimum": 1}, "minItems": 2, "maxItems": 2},
+        "height_css_px": {"type": "number", "minimum": 0},
+        "color": {"type": "string"},
+        "files": {"type": "array", "items": {"type": "string"}},
+        "tile": {"type": "boolean"},
+        "codec": {"type": "string"},
+        "duration_s": {"type": "number", "minimum": 0},
+        "frame_count": {"type": "integer", "minimum": 1, "description": "Кадров секвенции."},
+        "note": {"type": "string"}
+      }
+    },
+    "motion": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {"^x-": {}},
+      "required": ["type"],
+      "properties": {
+        "type": {"enum": ["none", "loop", "video-controls", "shader", "scroll"], "description": "Вид ассета в движении — как motion медиа-слота плана страницы; параметры движения страницы — подача и спецификация движения."},
+        "duration": {"type": ["string", "number"]},
+        "duration_s": {"type": "number", "minimum": 0},
+        "reduced_motion": {"type": "string", "description": "Что при prefers-reduced-motion: static_frame, poster …"},
+        "pause_button": {"type": "boolean"},
+        "pause_offscreen": {"type": "boolean"},
+        "seam_ratio_max": {"type": "number", "minimum": 0},
+        "preload": {"type": "string"},
+        "tempo": {"type": "string"}
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {"^x-": {}},
+      "properties": {
+        "lcp_candidate": {"type": "boolean"},
+        "loading": {"enum": ["eager", "lazy"]},
+        "fetchpriority": {"enum": ["high", "low", "auto"]},
+        "load": {"enum": ["eager", "after-lcp", "on-visible", "on-interaction"], "description": "Когда грузится 3D или виджет — load слота плана страницы (у 3D по умолчанию on-interaction, у первого экрана after-lcp пишется явно)."},
+        "srcset": {"type": "array", "items": {"type": "integer", "minimum": 1}},
+        "sizes": {"type": "string"},
+        "preload": {"type": ["boolean", "string"]},
+        "fallback_image": {"type": "boolean"},
+        "decoding": {"enum": ["async", "sync", "auto"]}
+      }
+    }
+  },
+  "x-canvas-map": {
+    "source": "asset-plan",
+    "stages": ["wireframe", "mockup"],
+    "files": {
+      "pages/<page-id>/assets.md": {
+        "слот": {"rule": "copy", "from": ["/slots/*/id", "/slots/*/section", "/slots/*/slot"], "note": "id строки = <секция>-<id> слота плана страницы; секция и вид слота словаря site"},
+        "роль": {"rule": "copy", "from": ["/slots/*/role"]},
+        "подпись": {"rule": "derive", "from": ["/slots/*/caption", "/slots/*/caption_ref"], "note": "подпись — строка copy deck в статусе этапа (copydeck.py export-assets по asset_ref = id строки)"},
+        "alt": {"rule": "derive", "from": ["/slots/*/alt", "/slots/*/alt_ref"], "note": "alt — строка copy deck в статусе этапа; decorative — alt=\"\""},
+        "фокус": {"rule": "copy", "from": ["/slots/*/variants/*/focal"], "stages": ["mockup"]},
+        "варианты": {"rule": "derive", "from": ["/slots/*/variants", "/slots/*/poster", "/slots/*/poster_for"], "note": "варианты кадра: id, соотношение, размер, зона текста; постер 3D- и видео-слота — его строка"},
+        "источник и лицензия": {"rule": "derive", "from": ["/slots/*/source", "/slots/*/ai_fit", "/slots/*/note"], "note": "источник слота и пометка ИИ; лицензия и происхождение — строка манифеста ассетов поверхности"},
+        "файл": {"rule": "derive", "from": ["/slots/*/id"], "note": "файл — строка манифеста assets/manifest.yaml по слоту; файла нет — заглушка placeholder и TODO"},
+        "id загрузки": {"rule": "derive", "from": ["/slots/*/id"], "stages": ["mockup"], "note": "id загрузки холста — таблица «Загрузки» ARTIFACTS.md по файлу слота"}
+      },
+      "brief.yaml": {
+        "decisions.assets_mode": {"rule": "derive", "from": ["/slots/*/source", "/slots/*/ladder"], "stages": ["mockup"], "note": "provided — все источники real; generated — генерация, правка и рендер; typographic — только текст и код; mixed — прочее (cd 06/01 §6)"},
+        "decisions.three_d": {"rule": "derive", "from": ["/slots/*/three_d"], "stages": ["mockup"], "note": "дорога 3D-слотов и постеры; режим 3D по уровню — карта ambition-levels"}
+      }
+    },
+    "drop": [
+      {"from": ["/plan_version", "/checked", "/status", "/approval", "/example", "/refs"], "note": "служебные поля и утверждение; статус, путь и отпечаток — в INPUT.md"},
+      {"from": ["/page"], "note": "страница и её тип — карта плана страницы"},
+      {"from": ["/brand", "/policy"], "note": "язык изображений и правила генерации — задание генерации, не холст"},
+      {"from": ["/budgets"], "note": "бюджеты веса — ворота после сборки; build.perf — профиль плана страницы"},
+      {"from": ["/slots/*/goal", "/slots/*/subject", "/slots/*/must_include", "/slots/*/must_avoid", "/slots/*/series", "/slots/*/frames", "/slots/*/task_codes", "/slots/*/recipe", "/slots/*/text", "/slots/*/acceptance"], "note": "задание генерации и приёмки ассета; на холст идёт готовый файл"},
+      {"from": ["/slots/*/key"], "note": "ключевой ли ассет — порядок ассетов и ДС, не холст"},
+      {"from": ["/slots/*/motion", "/slots/*/delivery"], "note": "вид движения и доставка ассета — спецификация движения и код"}
+    ]
+  }
+}

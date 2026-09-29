@@ -46,7 +46,7 @@ ffmpeg 7.1.5.
 | `ab_plan.py` | Размер выборки и длительность A/B, проверка SRM | P, 2 |
 | `checklist_export.py` | `../../kb/site/09-ai-generation-evaluation/site-checklist.yaml` из Markdown чек-листа | K, 3 |
 | `site_validate.py` | Схемы и перекрёстные ссылки: блоки плана есть в `blocks.yaml`, слоты разрешены блоку, id фактов есть в брифе, действия и события — в словарях, у страниц карты есть планы | J, 3 |
-| `plan_to_assets.py` | Каркас плана ассетов ai-media (`../../kb/ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md` §8) из медиа-слотов `page-plan` | J, 3 |
+| `plan_to_assets.py` | План ассетов страницы: каркас из медиа- и 3D-слотов плана страницы и проверка по схеме `../../kb/ai-media/05-prompting/asset-plan.schema.json` (формат — `../../kb/ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md` §8) — раздел ниже | J, 3 |
 | `check_links.py` | Ссылки `→ §`, `../../kb/site/99-raw/`, `[S<n>]`, `[V:<id>]`, README папок, разделы формата, метки опытов — копия версии text, адаптированная оркестратором перед аудитом (не копия kimi, как планировалось); раздел ниже | оркестратор; правки X2, S1 — 4 |
 | `sources_collect.py` | `90-sources/sources.tsv` и автоблок `90-sources/README.md` из разделов «Источники» и шапок дайджестов (копия версии text) | S1, 4 (v1.1 — S1b) |
 
@@ -372,11 +372,26 @@ python без них утилита перезапускается Python окр
 - Схемы v0 и v0.9 (`kb/site/01-foundations/site-brief.schema.json`, `kb/site/04-blocks/page-plan.schema.json`,
   `kb/site/04-blocks/blocks.schema.json`, `kb/site/06-multipage-ia/site-map.schema.json`) утилиты скилла не читают.
 
-## `plan_to_assets.py` — каркас плана ассетов из плана страницы
+## `plan_to_assets.py` — план ассетов страницы: каркас и проверка
+
+План ассетов — файл `docs/projects/<slug>/design/<surface>/assets/plans/<page-id>.yaml` в формате ai-media 01/01 §8, схема —
+`../../kb/ai-media/05-prompting/asset-plan.schema.json`; канон слоя — `docs/projects/_template/design/README.md § Ассеты`.
+Id — словарь site: `page.page_type`, `slots[].slot`, `slots[].section` — id секции плана страницы; класс ai-media
+`page.media_class` — проекция по строке §8 `../../kb/site/02-site-types/crosswalk.tsv`. Утверждает заказчик до генерации:
+`status: approved` и `approval`.
 
 | Запуск | Что делает |
 |---|---|
-| `python3 plan_to_assets.py PLAN [--out F] [--check]` | каркас плана ассетов ai-media (01/01 §8) из медиа- и 3D-слотов; `--check` — поля и перечисления §8 |
+| `plan_to_assets.py PAGE_PLAN [--out F]` | каркас из файла плана страницы: строка на медиа- и 3D-слот (`<секция>-<id>`), `source` (постер 3D-слота — `render`), `key` у визуала и фона первого экрана и постера 3D, `alt_ref`, `three_d`, бюджеты профиля; размер, форматы, вес, предмет и дорога 3D — заглушки `TODO` |
+| `plan_to_assets.py --check FILE … [--plan PAGE_PLAN] [--json]` | проверка плана ассетов — находки контракта `../project/findings.py`: форма по схеме и id словаря (R-STRUCT-005), поля утверждённого плана (R-MAT-002), покрытие слотов плана страницы, подлинность и постеры (R-COV-004), ссылки (R-REF-001) |
+| `plan_to_assets.py build <slug> [<surface>] [--page ID] [--out DIR] [--write]` | каркасы страниц поверхности со слоем страницы: в `$DDD_HOME/out/site/plan_to_assets/<slug>/` или `--out`; `--write` — в проект, только на пустое место |
+| `plan_to_assets.py check <slug> [<surface>] [--json]` | планы ассетов проекта: всё из `--check`, план ассетов у страницы с медиа- и 3D-слотами, `refs.asset_plan` плана страницы, утверждённое на неутверждённом (R-MAT-001) |
+| `plan_to_assets.py --spec-role FILE SLOT` | блок `role` спецификации ассета (`asset-spec.schema.json`): `page_type` словаря и проекция `page_class` |
+| `plan_to_assets.py --types [new\|all]` | каркас на каждый тип страницы словаря (new — типы v1) из плана-образца и его проверка |
+| `plan_to_assets.py --selftest` | примеры баз (пересборка байт в байт), посеянные дефекты, 3D, типы страниц, фикстура `asset-plan` сборщика `../tests/fixture_project.py` |
+
+Корень данных — `--repo`, переменная `DDD_REPO` или репозиторий скилла; код выхода 0 — нет `error`, 1 — есть, 2 — вызов или
+окружение.
 
 ## `build_profile.py` — маркетинговый профиль UX-чек-листа
 

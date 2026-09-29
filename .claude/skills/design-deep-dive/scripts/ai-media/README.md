@@ -72,27 +72,29 @@ Python 3.13, только стандартная библиотека. Пров�
 `polza_catalog.py price bytedance/seedance-2 resolution=480p duration=5` (цена с формулой);
 `polza_catalog.py check qwen/image-2.1 background=transparent output_format=jpeg` (ошибки до отправки).
 
-## Инвентарь визуальных ассетов сайта — `asset_inventory.py` (агент A, волна 1, 2026-09-23)
+## Инвентарь визуальных ассетов сайта — `asset_inventory.py`
 
-Системный Python 3.13 + Playwright/Chromium + Pillow (venv не нужен). Проверена на linear.app, stripe.com, notion.com и
-apple.com (десктоп), затем на 52 URL десктоп, 10 — телефон, 16 пар reduce (`99-raw/experiments/A/01-site-inventory/`).
+Python окружения скилла (`$DDD_HOME/venv`) + Playwright/Chromium + Pillow. Автоматизацию не маскирует: UA как есть
+(десктоп — строка Playwright с `HeadlessChrome`, телефон — дескриптор Pixel 7 с `HeadlessChrome`), признак автоматизации
+Blink не выключается, `navigator.webdriver` не трогается; вход, капча и антибот — отсев страницы, а не обход.
 
 | Что | Как |
 |---|---|
 | Запуск | `python3 asset_inventory.py URL OUT_DIR [--mobile] [--reduced-motion] [--quick] [--throttle] [--wait 6000] [--timeout 90] [--steps N] [--wait-until load\|domcontentloaded\|commit] [--dpr 1] [--no-og] [--keep-shots]` |
-| Сценарий | десктоп 1440×900 DPR 1 (UA без «Headless») или `--mobile` = Pixel 7 (412×839, DPR 2,625); `load` → ожидание → 2 кадра (движение в покое) → прокрутка колесом с кадрами → наверх → DOM-инвентарь; `--quick` — без прокрутки |
-| Результат | `OUT_DIR/inv[_mobile][_thr][_rm][_quick].json`, контактный лист `sheet[…].jpg` (JPEG, 4 кадра), JSON-сводка в stdout |
+| Самопроверка | `python3 asset_inventory.py --selftest` — локальная страница `file://`, без сети: UA и `navigator.webdriver` страницы, признаки GSAP, телефон |
+| Сценарий | десктоп 1440×900 DPR 1 или `--mobile` = Pixel 7 (412×839, DPR 2,625); `load` → ожидание → 2 кадра (движение в покое) → прокрутка колесом с кадрами → наверх → DOM-инвентарь; `--quick` — без прокрутки |
+| Результат | `<OUT_DIR>/inv<суффикс>.json` — суффикс по ключам: `_mobile`, `_thr`, `_rm`, `_quick` (в инвентаре `ua` и `webdriver` — как страница видит клиента), контактный лист `sheet<суффикс>.jpg` (JPEG, 4 кадра), JSON-сводка в stdout |
 | Картинки | `<img>`/`<picture>`: currentSrc, `srcset` (число, w/x), `sizes`, `<source type/media>` (арт-дирекшн), `loading`, `fetchpriority`, `decoding`, `alt` (нет/пустой/текст), естественный и отрисованный размер, переотдача, первый экран, слот |
 | CSS | `background-image`/`mask-image` элементов и `::before/::after` (url и крупные градиенты) |
 | Видео | источники и `type`, `poster`, `autoplay muted loop playsinline preload controls`, играет ли, длительность, размер кадра, кнопка паузы рядом (эвристика по доступному имени) |
 | SVG, Lottie, canvas | inline SVG (иконка / логотип / иллюстрация, байты разметки), Lottie (lottie-web, `lottie-player`, dotLottie, JSON), Rive, canvas с типом контекста (WebGL/WebGPU/2D), iframe-видео |
+| Библиотеки | по рантайму: GSAP и ScrollTrigger — `window.gsapVersions`, свойство `_gsap` у элементов, `.pin-spacer` (бандл глобал `window.gsap` не ставит; метод — `../../kb/creative/03-live-sites-measured/01-effects-sites-measured.md` §1.1), поля `gsap_versions`, `gsap_targets`, `pin_spacers`; three.js, Lottie, Rive, Webflow, Framer, Next, Nuxt, Shopify |
 | Сеть | байты «на проводе» — максимум из Playwright и **CDP Network** (Range-запросы видео, HLS/DASH/CMAF, `blob:`); формат по сигнатуре; размеры файла (Pillow); вес до и после прокрутки |
 | Метрики | LCP **до прокрутки** с элементом и ассетом (`lazy`, `fetchpriority`), CLS, TBT (long tasks), движение в покое, og:image (скачивается), фавиконы, preload |
 
-Сводные скрипты (квартили, `sites.csv`, слоты, LCP по типу hero, телефон, reduce) — в `99-raw/experiments/A/01-site-inventory/`
-и `03-lcp-by-hero/`; разбор hero-видео (ffprobe, GOP, шов петли `seam_ratio`) — `99-raw/experiments/A/02-hero-video-loops/probe_loops.py`;
-метрики маркеров картинок — `image_metrics.py`. Ограничения: HEVC в этом Chromium не
-играет; куки-баннеры не закрываются; антибот отдаёт заглушку (смотреть `title` и контактный лист); один браузер за раз.
+Разбор hero-видео (шов петли `seam_ratio`) — `video_loop_check.py`, метрики маркеров картинок — `image_metrics.py`.
+Ограничения: HEVC в этом Chromium не играет; куки-баннеры не закрываются; антибот отдаёт заглушку (смотреть `title` и
+контактный лист); один браузер за раз.
 
 ## Стенд моделей — `stand_run.py` (агент E, волна 2, 23.09.2026; строку внёс оркестратор)
 
@@ -104,7 +106,6 @@ apple.com (десктоп), затем на 52 URL десктоп, 10 — тел
 ## Будут добавлены агентами
 
 - ~~`polza.py`, `polza_catalog.py` (агент B)~~ — готово, раздел «polza» выше.
-- ~~Инвентаризация визуальных ассетов живого сайта (агент A, волна 1)~~ — готово, раздел `asset_inventory.py` выше.
 - Компилятор промтов из спецификации ассета (агенты D и D2), `asset_audit.py` и VLM-критик (агент K, волна 3).
 - Транскрипция на GPU-сервере (`asr_feed.py`, `asr_server.py`, `whisper2md.py`) — копируются из блендер-ресёрча
   **только после сигнала**, что его конвейер устаканился (решение заказчика 23.09.2026).
