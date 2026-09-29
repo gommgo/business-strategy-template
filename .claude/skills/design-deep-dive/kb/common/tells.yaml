@@ -884,11 +884,12 @@ tells:
 
 # Проверки утилит, которые находят приметы: ключ без префикса — проверка утилиты макета
 # `scripts/claude-design/mockup_checks.py`; ключ `ui_audit:<id>` — проверка `scripts/ui/ui_audit.py` (её же находки
-# приносит `marketing_audit.py`). Находка утилиты несёт `tell` своей строки. `allow` — ключ `--allow`: он снимает
-# находку, когда бриф или арт-дирекция записали решение; те же ключи пишет поле `k3_allow` арт-дирекции creative.
-# Группа: look — приметы вида, honesty — честность содержимого, acceptance — проверки приёмки, которые приметами не
-# являются. У проверки `ui_audit` L4 строки нет: она находит разные приметы по профилю (декоративный градиент экрана,
-# градиентный текст и фиолетовый герой страницы).
+# приносит `marketing_audit.py`); ключ `marketing_audit:<id>` — своя проверка подачи `scripts/creative/marketing_audit.py`
+# (у её проверок `cliche:<id>` примета — запись реестра с тем же id, строк здесь нет). Находка утилиты несёт `tell`
+# своей строки. `allow` — ключ `--allow`: он снимает находку, когда бриф или арт-дирекция записали решение; те же ключи
+# пишет поле `k3_allow` арт-дирекции creative. Группа: look — приметы вида, honesty — честность содержимого,
+# acceptance — проверки приёмки, которые приметами не являются. У проверки `ui_audit` L4 строки нет: она находит разные
+# приметы по профилю (декоративный градиент экрана, градиентный текст и фиолетовый герой страницы).
 checks:
   K3-BG-WARM: {group: look, tell: warm-paper, allow: warm}
   K3-ACCENT-WORD: {group: look, tell: accent-word-headline, allow: accent-word}
@@ -932,3 +933,6 @@ checks:
   ui_audit:I10: {group: look, tell: near-black-literal}
   ui_audit:K1: {group: look, tell: hover-lift-all}
   ui_audit:L1: {group: look, tell: emoji-sparkle-ai}
+  marketing_audit:MKT-C2: {group: look, tell: purple-neon-band}
+  marketing_audit:MKT-M1: {group: look, tell: section-fade-up}
+  marketing_audit:MKT-M2: {group: look, tell: layout-property-animation}
