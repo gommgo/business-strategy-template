@@ -189,7 +189,7 @@ layers:
                   verdict: clean
                   checked_at: '2026-09-29'
                   text_hash: 6f5286fbe668
-                  tool: copy_lint 0.9.3
+                  tool: copy_lint 1.0.0
                 claims:
                   errors: 0
                   warnings: 0
@@ -225,7 +225,7 @@ layers:
                   verdict: clean
                   checked_at: '2026-09-29'
                   text_hash: 6150706adcf0
-                  tool: copy_lint 0.9.3
+                  tool: copy_lint 1.0.0
                 claims:
                   errors: 0
                   warnings: 0
@@ -256,7 +256,7 @@ layers:
                   verdict: clean
                   checked_at: '2026-09-29'
                   text_hash: 8429b4394138
-                  tool: copy_lint 0.9.3
+                  tool: copy_lint 1.0.0
                 claims:
                   errors: 0
                   warnings: 0
@@ -287,7 +287,7 @@ layers:
                   verdict: clean
                   checked_at: '2026-09-29'
                   text_hash: 024fbcf8175a
-                  tool: copy_lint 0.9.3
+                  tool: copy_lint 1.0.0
                 claims:
                   errors: 0
                   warnings: 0
@@ -322,7 +322,7 @@ layers:
                   verdict: clean
                   checked_at: '2026-09-29'
                   text_hash: 3e7daa5642ed
-                  tool: copy_lint 0.9.3
+                  tool: copy_lint 1.0.0
                 claims:
                   errors: 0
                   warnings: 0
