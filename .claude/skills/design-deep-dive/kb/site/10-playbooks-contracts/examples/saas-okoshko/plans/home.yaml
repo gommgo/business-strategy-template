@@ -178,7 +178,7 @@ page:
     load_after_consent: true
     notes: trial-start и sign-up-complete — события продукта на /signup (P); на лендинге — cta-click с параметром места
   treatment:
-    art_direction_ref: ../../../creative-research/01-creative-direction/examples/art-direction-okoshko.json#/directions/0
+    art_direction_ref: ../../../../../creative/01-creative-direction/examples/art-direction-okoshko.json#/directions/0
     motion_level: expressive
     motion_system:
       thesis: 'Пустые окна расписания заполняются записями: одна закреплённая сцена показывает день салона в продукте.'

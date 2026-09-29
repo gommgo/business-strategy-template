@@ -141,8 +141,7 @@ ambition:
   source: default
   note: 'корпоративный сайт: главная и хабы L1, внутренние L0 (решение 20)'
 brand:
-  name: Отвес
-  status: none
+  ref: brand.yaml
 assets_available:
   real_photos: few
   photo_subjects:

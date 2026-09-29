@@ -367,7 +367,7 @@ namespaces:
       - {id: headline, kind: text, name: "Заголовок первого экрана (H1)", def: "Главное обещание страницы"}
       - {id: subheadline, kind: text, name: "Подзаголовок, лид первого экрана", def: "Раскрывает обещание: для кого, как, за счёт чего"}
       - {id: hero-proof, kind: text, name: "Микродоказательство первого экрана", def: "Рейтинг, число, клиент рядом с призывом — из фактов"}
-      - {id: promise, kind: text, name: "Обещание (смысловой слот)", def: "Суть обещания страницы (product.goal kimi); на странице обычно воплощается headline"}
+      - {id: promise, kind: text, name: "Обещание (смысловой слот)", def: "Суть обещания страницы (product.goal брифа холста); на странице обычно воплощается headline"}
       - {id: announcement, kind: text, name: "Строка объявления", def: "Текст строки над навигацией"}
       - {id: cta-label, kind: text, name: "Подпись главной кнопки", def: "Называет результат действия"}
       - {id: cta-secondary-label, kind: text, name: "Подпись второстепенной кнопки или ссылки", def: "Второй путь: цены, демо, подробнее"}
@@ -434,6 +434,7 @@ namespaces:
       - {id: geo-answer, kind: text, name: "Абзац-ответ", def: "Самодостаточный ответ для цитирования нейросетью"}
       - {id: definition, kind: text, name: "Определение", def: "Определение термина или сущности"}
       # --- text: письма вокруг форм (механика — F, тексты — text)
+      - {id: email-sender-name, kind: text, scope: page, name: "Имя отправителя", def: "Бренд или человек из бренда; без темы, призыва, имени получателя и эмодзи (text 04/04 §3.3)"}
       - {id: email-subject, kind: text, scope: page, name: "Тема письма", def: "Письмо после формы"}
       - {id: email-preheader, kind: text, scope: page, name: "Прехедер", def: "Строка после темы"}
       - {id: email-heading, kind: text, scope: page, name: "Заголовок письма", def: "Первая строка письма"}
@@ -487,13 +488,13 @@ namespaces:
       # --- treatment (значения — creative)
       - {id: visual-role, kind: treatment, name: "Визуальная роль секции", def: "Место секции в ритме «спокойно ↔ эффектно»; значения — creative"}
       - {id: effect-ref, kind: treatment, name: "Ссылка на эффект", def: "effect:<id> из effects.yaml creative"}
-      - {id: motion-level, kind: treatment, name: "Уровень движения секции", def: "Значения — creative (соответствие kimi none, subtle, expressive, cinematic)"}
+      - {id: motion-level, kind: treatment, name: "Уровень движения секции", def: "Значения — creative (уровни движения холста none, subtle, expressive, cinematic)"}
 
   # ---------------------------------------------------------------------------------------------------------------
   macrostructure:
     name: "Макроструктура (форма страницы)"
     owner: "site: id — B, свод, «когда брать» и семейства — C (`03-page-structure/01-narratives-and-section-order.md` §4, 12:40); подача формы — creative"
-    fields: "source — откуда форма; layout_family — семейство C: grid (сетка), document (документ), poster (плакат), flow (поток формы, новое у C); проекция в kimi direction.macrostructure: grid → grid-led, document → document-led, poster → poster-led, flow → document-led (или flow-led — предложение kimi)"
+    fields: "source — откуда форма; layout_family — семейство C: grid (сетка), document (документ), poster (плакат), flow (поток формы, новое у C); проекция в direction.macrostructure брифа холста: grid → grid-led, document → document-led, poster → poster-led, flow → document-led"
     values:
       - {id: bento-grid, layout_family: grid, name: "Бенто-сетка", def: "Модули разного размера: функции, цитаты, цифры, картинки в одной сетке", source: "hallmark:01"}
       - {id: long-document, layout_family: document, name: "Длинный документ", def: "Страница как письмо или эссе: проза со встроенными заголовками", source: "hallmark:02"}
@@ -663,8 +664,8 @@ namespaces:
       - {id: page-plan, order: 5, name: "Планы страниц", def: "page-plan на каждую страницу и шаблон: цель, трафик, форма, секции, слоты, события", artifact: "plans/*.yaml", check: "SITE-PRE-11…24; site_validate.py plan"}
       - {id: sister-sync, order: 6, name: "Синхронизация с сёстрами", def: "copy-deck (text), art-direction и treatment (creative), план ассетов (ai-media), 3D (blender)", artifact: "copy-deck, treatment, asset-plan, рецепты 3D", check: "SITE-PRE-25; plan_to_assets.py"}
       - {id: plan-check, order: 7, name: "Проверка до сборки", def: "Входной контракт SITE-PRE: незакрытый блокер — не собирать", artifact: "отчёт site_validate.py + SITE-PRE", check: "SITE-PRE-01…26"}
-      - {id: package, order: 8, name: "Пакет исполнителя", def: "Проекция в brief.yaml kimi, TASK, DESIGN, ACCEPTANCE с блоками приёмки site", artifact: "brief.yaml, пакет kimi", check: "SITE-PRE-26; build_package.py questions/build/check"}
-      - {id: build-loop, order: 9, name: "Сборка и цикл", def: "Сборка K3 и цикл арт-директора (kimi 08-director-loop-qa)", artifact: "src/, кадры, журнал итераций", check: "k3_checks.py, снимки shot.py"}
+      - {id: package, order: 8, name: "Вход холста", def: "Проекция брифа, планов, текстов и фактов во вход холста по x-canvas-map; критерии приёмки с блоками приёмки site", artifact: "design/<surface>/input/", check: "SITE-PRE-26; проверка входа холста"}
+      - {id: build-loop, order: 9, name: "Макет и правки", def: "Макет в холсте Claude Design по входу холста и раунды правок", artifact: "исходники холста, HTML-копии, паспорта итераций", check: "mockup_checks.py, кадры shot.py"}
       - {id: gates, order: 10, name: "Ворота и чек-лист", def: "Ворота страницы (page-gates.yaml) и чек-лист сайта SITE-*", artifact: "отчёт page_gates.py, чек-лист", check: "page_gates.py, site-checklist.yaml"}
       - {id: fix, order: 11, name: "Правки", def: "Один дефект — одна правка; полный повтор автопроверок после правки", artifact: "журнал правок", check: "DEF-46; повтор page_gates.py"}
       - {id: acceptance, order: 12, name: "Приёмка", def: "Приёмка заказчиком: блокирующие пробелы закрыты, заглушек нет", artifact: "акт приёмки", check: "DEF-48; COPY-C-04"}

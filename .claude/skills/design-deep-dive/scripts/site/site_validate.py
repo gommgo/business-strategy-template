@@ -1,30 +1,36 @@
 #!/usr/bin/env python3
-"""site_validate.py — схемы и перекрёстные ссылки контрактов сайта (site-research, агент J, волна 3, 2026-09-24).
+"""site_validate.py — схемы и перекрёстные ссылки контрактов сайта: бриф, план страницы, карта сайта, каталог блоков, формы.
 
-Что проверяет (коды — в выводе и в 10-playbooks-contracts/01-procedure-brief-to-pages.md §10):
-  brief  (site-brief v0/v1)  SB-S01 схема; SB-F01…F04 facts.yaml; SB-P01…P03 обязательные и желательные виды фактов;
-         SB-R01…R04 ссылки fact:/missing:, срок стимула; SB-M00…M05 смысл text; SB-Q01…Q02 журнал вопросов; SB-T01…T03 трафик
-         и страницы; SB-D01…D02 умолчания заказчика; SB-A01…A03 подача (C1) и решение 20; SB-L01…L03 правовой опросник (I).
-         SB-* перенесены из 99-raw/experiments/A/01-schema-validate/validate.py (A, волна 1).
-  plan   (page-plan 0.9/1)   PL-S01 схема; PL-V01 id словаря; PL-B01…B03 блок и вариант; PL-A01…A05 слоты и анатомия (группа.элемент,
-         экземпляр группа-N); PL-F01…F07 факты: есть, вид, допуск (I 02 §1.2), use.page_types, срок valid.until, «популярный»,
-         минимумы доказательств (F 02 §1.6); PL-H01 один H1; PL-R01 ссылки «секция.слот»; PL-L01 длина; PL-N01 id секций из роли
-         или блока; PL-N02 навигация = карта; PL-O01…O02 overlays и политики брифа; PL-E01…E02 события events.yaml и цели;
-         PL-P01…P03 профиль бюджета и уровень; PL-G01…G04 право (согласие ПД в ru, req:, оператор, cookie); PL-C01 подача
-         (plan_cross creative); PL-K01…K03 бриф ↔ план; PL-W01 виджеты фасадом; PL-X01 x-gate-exception; PL-D01 3D;
-         PL-T01…T02 формы lead-forms.yaml; PL-SEO01 разметка по head-kit. Основа — 99-raw/experiments/E/01-validate/validate.py.
-  map    (site-map 0/1)      SM-S01 схема; SM-01…SM-18 перекрёстные ссылки карты (G2); SM-19 входящие ссылки (граф);
-         SM-20 крошки по глубине; SM-21 уровень шаблона ≤ сайта; SM-22 у шаблона есть план; SM-23 «спасибо» у страниц с формой.
-  blocks (blocks.yaml)       BL-* — перенос проверок каталога E/01.
+Формат — v1, схемы kb/site/10-playbooks-contracts/schemas/: файл другой версии — ошибка схемы (SB-S01, PL-S01, SM-S01).
+Коды — в выводе и в kb/site/10-playbooks-contracts/01-procedure-brief-to-pages.md §12:
+  brief  (site-brief)  SB-S01 схема; SB-F01…F04 facts.yaml; SB-P01…P03 обязательные и желательные виды фактов;
+         SB-R01…R04 ссылки fact:/missing:, срок стимула; SB-M00…M05 смысл text; SB-Q01…Q02 журнал вопросов; SB-T01…T03
+         трафик и страницы; SB-D01…D03 умолчания заказчика; SB-A01…A03 подача и правило лидогенерации услуг (поля
+         levels[id=L0].appropriate_for.lead_services файла ambition-levels.yaml); SB-L01…L03 правовой опросник;
+         SB-B01…B02 бренд продукта по ссылке brand.ref: файл есть и проходит схему kb/common/brand.schema.yaml;
+         SB-C01…C03 темы: при двух темах — переключатель и умолчание по системе (ui 11/03 §6.4).
+  plan   (page-plan)   PL-S01 схема; PL-V01 id словаря; PL-B01…B03 блок и вариант; PL-A01…A05 слоты и анатомия
+         (группа.элемент, экземпляр группа-N); PL-F00…F07 факты: есть, вид, допуск, use.page_types, срок valid.until,
+         «популярный», минимумы доказательств; PL-H01 один H1; PL-R01 ссылки «секция.слот»; PL-L01 длина; PL-N01 id секций
+         из роли или блока; PL-N02 навигация = карта; PL-O01…O02 overlays и политики брифа; PL-E01…E02 события events.yaml
+         и цели; PL-P01…P03 профиль бюджета и уровень (умолчания по типу — ambition-levels.yaml#defaults_by_page_type);
+         PL-G01…G04 право (согласие ПД в ru, req:, оператор, cookie); PL-C01 подача — находки spec_check.py plan
+         (creative, владелец норм подачи); PL-C02 переходы страниц по уровню (x-effect-levels подсхемы treatment,
+         library_level_min каталога эффектов); PL-K01…K03 бриф ↔ план; PL-W01 виджеты фасадом; PL-X01 x-gate-exception;
+         PL-D01 3D: постер, призыв до 3D; PL-D02 recipe: — рецепт blender 12-recipes есть; PL-D03 загрузка 3D по месту
+         секции (ниже первого экрана — on-interaction); PL-T01…T02 формы lead-forms.yaml; PL-SEO01 разметка по head-kit.
+  map    (site-map)    SM-S01 схема; SM-01…SM-18 перекрёстные ссылки карты; SM-19 входящие ссылки (граф); SM-20 крошки по
+         глубине; SM-21 уровень шаблона ≤ сайта; SM-22 у шаблона есть план; SM-23 «спасибо» у страниц с формой.
+  blocks (blocks.yaml)       BL-* — каталог блоков.
   forms  (lead-forms.yaml)   LF-01…LF-06 — наборы, действия, блоки, события, поля.
-  project DIR                бриф + facts + site-map + plans/*.yaml одного проекта со всеми связями.
+  project DIR                бриф + facts + site-map + plans/*.yaml одной папки со всеми связями (PJ-*).
 
 Запуск:
-  python3 99-raw/tools/site_validate.py PATH [PATH…] [--today ГГГГ-ММ-ДД] [--json OUT] [--quiet]
-  python3 99-raw/tools/site_validate.py --all          # все контракты базы: каталог, формы, бриф A, планы E, карты G, примеры J
-  python3 99-raw/tools/site_validate.py --selftest     # пример J проходит, отрицательные случаи падают каждый по своей причине
-Схемы нужны jsonschema + referencing: без них в системном python утилита перезапускается в 99-raw/tools/venv-J|venv-A|venv-E.
-Код выхода: 1 — есть error. Уровни: error (блокер SITE-PRE), warning, info, ok.
+  python3 scripts/site/site_validate.py PATH [PATH…] [--today ГГГГ-ММ-ДД] [--json OUT] [--quiet]
+  python3 scripts/site/site_validate.py --all          # каталог блоков, наборы форм, примеры 10-playbooks-contracts/examples
+  python3 scripts/site/site_validate.py --selftest     # пример lead-services-otves проходит, посеянные дефекты — каждый своим кодом
+Схемам нужны jsonschema + referencing: без них в системном python утилита перезапускается Python окружения скилла.
+Код выхода: 1 — есть error; 2 — не названы пути. Уровни: error (блокер SITE-PRE), warning, info, ok.
 """
 import copy
 import datetime as dt
@@ -36,7 +42,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(HERE.parent / "lib"))
 import kbpaths  # noqa: E402
 ROOT = kbpaths.kb("site")
 APP = ROOT.parent
@@ -51,7 +57,7 @@ def _reexec():
         pass
     if os.environ.get('SITE_VALIDATE_NOVENV'):
         return
-    for py in (Path(kbpaths.python()),):  # перенос: venv-J/A/E → Python окружения скилла
+    for py in (Path(kbpaths.python()),):
         if py.exists():
             os.environ['SITE_VALIDATE_NOVENV'] = '1'
             os.execv(str(py), [str(py)] + sys.argv)
@@ -77,16 +83,16 @@ P = {
     'headkit': ROOT / '07-seo-geo-performance-analytics' / 'head-kit.yaml',
     'legal': ROOT / '08-legal-trust-a11y' / 'legal-requirements.yaml',
     'levels': kbpaths.kb('creative') / '01-creative-direction' / 'ambition-levels.yaml',
+    'effects': kbpaths.kb('creative') / '06-effects-catalog' / 'effects.yaml',
     'facts_schema': kbpaths.kb('text') / '02-strategy-messaging' / 'facts.schema.yaml',
     'meaning_schema': kbpaths.kb('text') / '02-strategy-messaging' / 'meaning.schema.yaml',
-    'treatment': kbpaths.kb('creative') / '09-ai-execution-evaluation' / 'treatment.schema.json',  # v1 (creative I, 2026-09-25); v0 — 01-creative-direction/drafts-for-site/treatment.v0.schema.json
+    'treatment': kbpaths.kb('creative') / '09-ai-execution-evaluation' / 'treatment.schema.json',  # подсхема treatment плана
+    'brand_schema': kbpaths.kb() / 'common' / 'brand.schema.yaml',
+    'recipes': kbpaths.kb('blender') / '12-recipes',
 }
 SCHEMA = {
-    ('brief', '0'): ROOT / '01-foundations' / 'site-brief.schema.json',
     ('brief', '1'): ROOT / '10-playbooks-contracts' / 'schemas' / 'site-brief.schema.json',
-    ('plan', '0.9'): ROOT / '04-blocks' / 'page-plan.schema.json',
     ('plan', '1'): ROOT / '10-playbooks-contracts' / 'schemas' / 'page-plan.schema.json',
-    ('map', '0'): ROOT / '06-multipage-ia' / 'site-map.schema.json',
     ('map', '1'): ROOT / '10-playbooks-contracts' / 'schemas' / 'site-map.schema.json',
     ('blocks', '1'): ROOT / '10-playbooks-contracts' / 'schemas' / 'blocks.schema.json',
 }
@@ -160,20 +166,36 @@ class Ctx:
         lg = load_yaml(P['legal']) if P['legal'].exists() else {}
         self.req_ids = {r['id'] for r in lg.get('requirements') or []}
         lv = load_yaml(P['levels']) if P['levels'].exists() else {}
-        self.caps = lv.get('section_caps') or {}
-        self.dist = {l['id']: l.get('section_distribution') or {} for l in lv.get('levels') or []}
+        # умолчания уровня по типу страницы — одна таблица creative; типы со статусом proposed — её раздел proposed
         self.level_defaults = {}
-        for L, arr in (lv.get('defaults_by_page_type') or {}).items():
-            if L in LEVEL and isinstance(arr, list):
-                for pt in arr:
-                    self.level_defaults[pt] = L
+        dpt = lv.get('defaults_by_page_type') or {}
+        for table in (dpt, dpt.get('proposed') or {}):
+            for L, arr in table.items():
+                if L in LEVEL and isinstance(arr, list):
+                    for pt in arr:
+                        self.level_defaults.setdefault(pt, L)
+        # правило лидогенерации услуг: тип страницы, порог доли горячего трафика с телефонов, полосы цены, уровни
+        l0 = next((l for l in lv.get('levels') or [] if l.get('id') == 'L0'), {})
+        self.lead_rule = (l0.get('appropriate_for') or {}).get('lead_services') or {}
+        # нижний уровень эффекта — x-effect-levels подсхемы treatment; библиотеки переходов страниц — limits каталога
+        tr = load_any(P['treatment']) if P['treatment'].exists() else {}
+        self.effect_min = {}
+        for key, L in (('level_min_L1', 'L1'), ('level_min_L2', 'L2')):
+            for ref in (tr.get('x-effect-levels') or {}).get(key) or []:
+                self.effect_min[ref] = L
+        eff = load_yaml(P['effects']) if P['effects'].exists() else {}
+        pte = next((e for e in eff.get('effects') or [] if e.get('id') == 'page-transition'), {})
+        self.transition_library_min = (pte.get('limits') or {}).get('library_level_min')
+        self.recipes = ({p.stem for p in P['recipes'].glob('[0-9][0-9]-*.md') if not p.stem.startswith('00-')}
+                        if P['recipes'].is_dir() else set())
+        self._sc, self._sc_error, self.sc_ctx = None, None, None
         fs = load_yaml(P['facts_schema']) if P['facts_schema'].exists() else {}
         self.fact_kinds = set(((fs.get('$defs') or {}).get('kind') or {}).get('enum') or []) or set((fs.get('x-kinds') or {}).keys())
         self.validators = {}
         self.registry = None
         if Draft202012Validator is not None:
             res = []
-            for key in ('facts_schema', 'meaning_schema', 'treatment'):
+            for key in ('facts_schema', 'meaning_schema', 'treatment', 'brand_schema'):
                 if P[key].exists():
                     d = load_any(P[key])
                     res.append((d['$id'], Resource.from_contents(d, default_specification=DRAFT202012)))
@@ -195,6 +217,18 @@ class Ctx:
 
     def vok(self, ns, val):
         return val is not None and str(val) in self.vids.get(ns, set())
+
+    def spec_check(self):
+        """Модуль spec_check.py creative (проверка подачи плана) и его контекст; None — модуль не загрузился."""
+        if self._sc is None and self._sc_error is None:
+            try:
+                kbpaths.use('creative')
+                import spec_check
+                self.sc_ctx = spec_check.Ctx()
+                self._sc = spec_check
+            except Exception as ex:  # noqa: BLE001 — причину покажет находка PL-C01
+                self._sc_error = f'{type(ex).__name__}: {ex}'
+        return self._sc
 
 
 def schema_check(ctx, kind, version, doc, where, code):
@@ -249,8 +283,11 @@ def load_facts(path):
 def check_brief(path, ctx, facts_override=None):
     w0 = rel(path)
     b = load_yaml(path)
-    ver = str(b.get('version', 0))
-    schema_check(ctx, 'brief', '1' if ver == '1' else '0', b, w0, 'SB-S01')
+    ver = str(b.get('version', ''))
+    if ver != '1':
+        R.add('error', 'SB-S01', w0, f'version {ver or "—"}: формат брифа — v1 (10-playbooks-contracts/schemas/site-brief.schema.json)')
+        return b, None, None, None
+    schema_check(ctx, 'brief', ver, b, w0, 'SB-S01')
     bdir = Path(path).resolve().parent
     slug = (b.get('project') or {}).get('slug')
     proof = b.get('proof') or {}
@@ -386,13 +423,49 @@ def check_brief(path, ctx, facts_override=None):
     for k, pl in places.items():
         if len(pl) > 1:
             R.add('error', 'SB-A02', w0, f'референс {k} применён к {sorted(pl)} — один референс, одно место (C1)')
-    if b.get('primary_page_type') == 'landing-lead-services' and amb.get('source', 'default') == 'default':
+    lead = ctx.lead_rule
+    if lead.get('page_type') and b.get('primary_page_type') == lead['page_type'] and amb.get('source', 'default') == 'default':
         hot_mob = sum((s.get('share') or 0) for s in srcs if s.get('temperature') == 'hot' and s.get('device') == 'mobile')
         band = (b.get('decision_context') or {}).get('price_band')
-        if hot_mob >= 0.5 and band in ('low', 'mid') and lvl != 'L0':
-            R.add('warning', 'SB-A03', w0, f'решение 20: горячий мобильный трафик {hot_mob:.0%} и price_band {band} → умолчание L0, а не {lvl}')
+        smin, bands = lead.get('hot_mobile_share_min'), lead.get('price_bands') or []
+        rule = 'правило лидогенерации услуг (ambition-levels.yaml, levels[L0].appropriate_for.lead_services)'
         if not any(s.get('share') for s in srcs):
-            R.add('info', 'SB-A03', w0, 'решение 20: долей трафика нет — уровень L1 и вопрос в журнал брифа')
+            R.add('info', 'SB-A03', w0, f'{rule}: долей трафика нет — уровень {lead.get("no_data")} и вопрос в журнал брифа')
+        elif smin is not None and hot_mob >= smin and band in bands:
+            if lvl != 'L0':
+                R.add('warning', 'SB-A03', w0, f'{rule}: горячий мобильный трафик {hot_mob:.0%} ≥ {smin:.0%} и price_band {band} → '
+                                                f'умолчание L0, а не {lvl}')
+        elif smin is not None and lvl == 'L0' and lead.get('otherwise') and lead['otherwise'] != 'L0':
+            R.add('warning', 'SB-A03', w0, f'{rule}: горячий мобильный трафик {hot_mob:.0%} (порог {smin:.0%}), price_band {band} '
+                                            f'(полосы {bands}) → умолчание {lead["otherwise"]}, а не L0')
+    # бренд продукта — ссылкой на файл бренда слоя дизайна
+    brand = b.get('brand') or {}
+    if brand.get('ref'):
+        bp = (bdir / brand['ref']).resolve()
+        if not bp.is_file():
+            R.add('error', 'SB-B01', w0, f'brand.ref не найден: {brand["ref"]} (бренд продукта — ../../design/brand.yaml от брифа)')
+        elif ctx.registry is not None and P['brand_schema'].exists():
+            try:
+                v = Draft202012Validator(load_any(P['brand_schema']), registry=ctx.registry)
+                for e in sorted(v.iter_errors(load_yaml(bp)), key=lambda e: list(e.absolute_path))[:10]:
+                    R.add('error', 'SB-B02', w0, f'{brand["ref"]} не проходит схему brand: /{"/".join(map(str, e.absolute_path))}: {e.message[:200]}')
+            except Exception as ex:  # noqa: BLE001 — битый YAML бренда или сменившаяся схема
+                R.add('error', 'SB-B02', w0, f'{brand["ref"]}: схема brand не применена — {ex}')
+    # темы: светлая по умолчанию; две темы — переключатель на странице и умолчание по системе (ui 11/03 §6.4)
+    th = b.get('themes') or {}
+    if th:
+        two = bool((th.get('dark') or {}).get('needed'))
+        dflt = th.get('default', 'light')
+        if two and th.get('switcher') is not True:
+            R.add('error', 'SB-C01', w0, 'две темы — переключатель темы на странице обязателен: themes.switcher: true (ui 11/03 §6.4)')
+        if not two and dflt in ('dark', 'system'):
+            R.add('error', 'SB-C02', w0, f'themes.default {dflt} без второй темы: тёмная — themes.dark.needed с причиной; '
+                                         'по системе — только при двух темах')
+        if two and dflt != 'system':
+            R.add('warning', 'SB-C03', w0, f'две темы, умолчание {dflt}: по умолчанию — по системе (system); {dflt} — только по '
+                                           'отраслевой причине в themes.dark.why (ui 11/03 §6.4)')
+        if not two and th.get('switcher'):
+            R.add('warning', 'SB-C03', w0, 'переключатель темы без второй темы')
     li = (b.get('constraints') or {}).get('legal_intake') or {}
     jur = (b.get('constraints') or {}).get('jurisdiction') or ['ru']
     if li:
@@ -405,8 +478,8 @@ def check_brief(path, ctx, facts_override=None):
         abroad = [t['service'] for t in li.get('third_party') or [] if t.get('location') == 'abroad']
         if abroad and 'ru' in jur:
             R.add('info', 'SB-L03', w0, f'сервисы за рубежом {abroad}: трансграничная передача (req:LR-RU-08) — page.legal.cross_border планов')
-    elif str(b.get('version')) == '1' and (b.get('project') or {}).get('status') in ('proposed', 'approved'):
-        R.add('warning', 'SB-L03', w0, 'нет constraints.legal_intake: вопросы I 01 §6 шаг 1 не заданы')
+    elif (b.get('project') or {}).get('status') in ('proposed', 'approved'):
+        R.add('warning', 'SB-L03', w0, 'нет constraints.legal_intake: вопросы правового опросника (site 08/01 §6, шаг 1) не заданы')
     if pol.get('capture_popup') in ('engaged', 'on'):
         paid = [s['source'] for s in srcs if s.get('source') in ('paid-search', 'paid-social', 'paid-display', 'retargeting')]
         if paid:
@@ -524,14 +597,17 @@ def check_forms(ctx, path=P['forms']):
 
 # ─────────────────────────────────────────── план страницы ───────────────────────────────────────────
 def plan_version(p):
-    v = str(p.get('page_plan_version', '0.9'))
-    return '1' if v.startswith('1') else '0.9'
+    v = str(p.get('page_plan_version', ''))
+    return '1' if v in ('1', '1.0') else v
 
 
 def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
     w0 = rel(path)
     p = load_yaml(path)
     ver = plan_version(p)
+    if ver != '1':
+        R.add('error', 'PL-S01', w0, f'page_plan_version {ver or "—"}: формат плана — v1 (10-playbooks-contracts/schemas/page-plan.schema.json)')
+        return p
     schema_check(ctx, 'plan', ver, p, w0, 'PL-S01')
     base = Path(path).resolve().parent
     refs = p.get('refs') or {}
@@ -583,7 +659,8 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
             R.add('warning', 'PL-P01', w0 + ':page', f'budget_profile {bp} ≠ ambition_level {lvl}')
     dflt = ctx.level_defaults.get(pt)
     if dflt and lvl and LEVEL[lvl] > LEVEL[dflt]:
-        R.add('info', 'PL-P02', w0 + ':page', f'уровень {lvl} выше умолчания {dflt} для {pt} — нужна причина в брифе (решение 20)')
+        R.add('info', 'PL-P02', w0 + ':page', f'уровень {lvl} выше умолчания {dflt} для {pt} (ambition-levels.yaml#defaults_by_page_type) '
+                                              '— нужна причина в брифе')
     if brief is not None:
         blvl = (brief.get('ambition') or {}).get('level')
         if blvl and lvl and LEVEL[lvl] > LEVEL[blvl]:
@@ -612,10 +689,10 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
     sec_ids, sec_slot_ids = set(), {}
     nflow = 0
     has_pd_form = False
-    peaks, ref_use = [], defaultdict(list)
-    conv_roles = set(ctx.caps.get('conversion_roles_max_L0') or ['lead-form', 'pricing'])
-    conv_blocks = set(ctx.caps.get('conversion_blocks_max_L0') or [])
     used_events = set()
+    # первый экран — первая секция потока и секции из first_screen.must_show («секция.слот»)
+    first_screen = {str(r).partition('.')[0] for r in (pg.get('first_screen') or {}).get('must_show') or []}
+    first_screen |= set([s.get('id') for s in (p.get('sections') or []) if s.get('role') not in CHROME_ROLES][:1])
     for s in p.get('sections') or []:
         sid = s.get('id')
         w = f'{w0}#{sid}'
@@ -630,7 +707,7 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
             nflow += 1
         stem = re.sub(r'-(\d+|[a-z]+)$', '', str(sid))
         if not (str(sid) in (role, bid) or str(sid).startswith(f'{role}-') or str(sid).startswith(f'{bid}-')):
-            R.add('error' if ver == '1' else 'info', 'PL-N01', w, f'id секции «{sid}» не из роли ({role}) или блока ({bid}) — SITE-PRE-15')
+            R.add('error', 'PL-N01', w, f'id секции «{sid}» не из роли ({role}) или блока ({bid}) — SITE-PRE-15')
         if bid not in ctx.B:
             R.add('error', 'PL-B01', w, f'блока {bid} нет в blocks.yaml')
             continue
@@ -758,7 +835,21 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
                 if sl.get('poster') not in ids:
                     R.add('error', 'PL-D01', w, f'{lid}: poster → {sl.get("poster")} нет в секции')
                 if sl.get('cta_before_3d') is False:
-                    R.add('error', 'PL-D01', w, f'{lid}: призыв ждёт 3D (поправка PLAN №22: CTA и форма — до загрузки 3D)')
+                    R.add('error', 'PL-D01', w, f'{lid}: призыв ждёт 3D (CTA и форма работают до загрузки 3D)')
+                rec = sl.get('recipe')
+                if rec and ctx.recipes and rec.partition(':')[2] not in ctx.recipes:
+                    R.add('error', 'PL-D02', w, f'{lid}: {rec} — такого рецепта нет в blender 12-recipes')
+                load = sl.get('load')
+                if sid not in first_screen:
+                    if load == 'on-visible':
+                        R.add('warning', 'PL-D03', w, f'{lid}: 3D ниже первого экрана по видимости — риск длинных кадров прокрутки '
+                                                      '(ворота EG-PERF-01); по умолчанию — on-interaction')
+                    elif load == 'after-lcp':
+                        R.add('warning', 'PL-D03', w, f'{lid}: 3D ниже первого экрана грузится сразу после LCP — по намерению: '
+                                                      'on-interaction (blender 12/15)')
+                elif load is None:
+                    R.add('info', 'PL-D03', w, f'{lid}: 3D первого экрана без load — умолчание on-interaction; после LCP и load — '
+                                               'after-lcp')
         mn = PROOF_MIN.get(bid)
         if mn and facts is not None and nfacts < mn:
             R.add('warning', 'PL-F07', w, f'блок {bid}: допущенных фактов {nfacts} < минимума {mn} (F 02 §1.6) — снять блок или сменить вариант')
@@ -777,7 +868,7 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
                 R.add('error', 'PL-F05', w, f"expires.fact {exp['fact']} без valid.until")
             elif str(f['valid']['until']) < ctx.today.isoformat()[:len(str(f['valid']['until']))]:
                 R.add('error', 'PL-F05', w, f"срок {f['valid']['until']} прошёл — секция должна быть снята ({exp.get('then')})")
-        if bid in ('promo-offer', 'announcement-bar') and facts is not None and not exp and ver == '1':
+        if bid in ('promo-offer', 'announcement-bar') and facts is not None and not exp:
             R.add('warning', 'PL-F05', w, f'{bid} без expires (факт со сроком акции: после срока — скрыть; F 02 §4.3)')
         for e in s.get('events') or []:
             if e.get('target') not in ids and e.get('target') != sid:
@@ -786,34 +877,7 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
                 vcheck('action', e['action'], w + '.events')
             if e.get('event'):
                 used_events.add(e['event'])
-        # подача (creative plan_cross)
-        t = s.get('treatment') or {}
-        if t:
-            tl = t.get('level')
-            if tl and lvl and LEVEL[tl] > LEVEL[lvl]:
-                R.add('error', 'PL-C01', w, f'уровень секции {tl} выше уровня страницы {lvl}')
-            conv = role in conv_roles or bid in conv_blocks or any((a[1].get('form') or a[1].get('slot') == 'form') for a in ids.values() if a[0] == 'action')
-            if conv and tl and tl != 'L0':
-                R.add('error', 'PL-C01', w, f'секция конверсии ({role}, {bid}) — только L0, а не {tl}')
-            if conv and any(e.get('purpose') == 'signature' for e in t.get('effects') or []):
-                R.add('error', 'PL-C01', w, 'фирменный эффект в секции конверсии')
-            if role in CHROME_ROLES and t.get('visual_role') not in (None, 'chrome'):
-                R.add('warning', 'PL-C01', w, f'служебная роль {role} с visual_role {t.get("visual_role")}')
-            if t.get('visual_role') == 'peak':
-                peaks.append(sid)
-            for r in t.get('refs') or []:
-                ref_use[r].append(sid)
-    d = ctx.dist.get(lvl) or {}
-    if lvl and d.get('peaks_max') is not None and len(peaks) > d['peaks_max']:
-        R.add('error', 'PL-C01', w0, f'пиков {len(peaks)} > {d["peaks_max"]} для {lvl}')
-    ptr = pg.get('treatment') or {}
-    if ptr.get('peaks') is not None and set(ptr['peaks']) != set(peaks):
-        R.add('error', 'PL-C01', w0, f'page.treatment.peaks {ptr["peaks"]} ≠ секции-пики {peaks}')
-    if (ptr.get('motion_system') or {}).get('smooth_scroll') and lvl != 'L2':
-        R.add('error', 'PL-C01', w0, f'плавная прокрутка на уровне {lvl} (только L2)')
-    for r, where in ref_use.items():
-        if len(where) > 1:
-            R.add('error', 'PL-C01', w0, f'референс {r} в {len(where)} секциях {where}')
+    check_treatment(path, p, ctx, w0)
     if h1 != 1:
         R.add('error', 'PL-H01', w0, f'H1 на странице: {h1} (нужен ровно 1)')
     ln = pg.get('length') or {}
@@ -850,7 +914,7 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
     for g in goals:
         if g not in macro_by_action:
             R.add('warning', 'PL-E02', w0, f'цель {g}: нет события-действия в events.yaml')
-        elif used_events and not ({f'event:{x}' for x in macro_by_action[g]} & used_events) and ver == '1':
+        elif used_events and not ({f'event:{x}' for x in macro_by_action[g]} & used_events):
             R.add('warning', 'PL-E02', w0, f'цель {g}: в плане нет события {sorted(macro_by_action[g])}')
     # право
     legal = pg.get('legal') or {}
@@ -909,6 +973,45 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
     return p
 
 
+def check_treatment(path, p, ctx, w0):
+    """Подача плана — владелец норм creative. PL-C01: находки `spec_check.py plan` (уровень секции, конверсия, пики,
+    акценты, фирменные приёмы, референсы, петли, плавная прокрутка); форму плана с подсхемой treatment проверяет PL-S01.
+    PL-C02: уровни эффектов секций и переходов страниц — x-effect-levels подсхемы treatment, библиотеки переходов —
+    library_level_min эффекта page-transition каталога (нативный кросс-документный переход — с L1)."""
+    pg = p.get('page') or {}
+    lvl = pg.get('ambition_level')
+    ptr = pg.get('treatment') or {}
+    secs = [s for s in p.get('sections') or [] if s.get('treatment')]
+    if not (ptr or secs):
+        return
+    sc = ctx.spec_check()
+    if sc is None:
+        R.add('warning', 'PL-C01', w0, f'подача не проверена: spec_check.py не загрузился ({ctx._sc_error})')
+    else:
+        rep = sc.Report()
+        try:
+            sc.cmd_plan(ctx.sc_ctx, rep, str(path))
+        except Exception as ex:  # noqa: BLE001 — падение соседней утилиты не останавливает проверку плана
+            R.add('warning', 'PL-C01', w0, f'подача не проверена: spec_check.py plan — {type(ex).__name__}: {ex}')
+        else:
+            for sev, code, where, msg in rep.items:
+                if code in ('TR-S', 'TR-11'):   # схема плана — PL-S01; уровень эффекта — PL-C02 по x-effect-levels
+                    continue
+                R.add(sev, 'PL-C01', w0 + (':page' if where in ('page', '') else f'#{where}'), f'{code}: {msg}')
+    for s in secs:
+        t = s['treatment'] if isinstance(s['treatment'], dict) else {}
+        tl = t.get('level') or lvl
+        for e in t.get('effects') or []:
+            need = ctx.effect_min.get(e.get('ref')) if isinstance(e, dict) else None
+            if need and tl in LEVEL and LEVEL[tl] < LEVEL[need]:
+                R.add('error', 'PL-C02', f"{w0}#{s.get('id')}", f"{e.get('ref')} — с уровня {need}, секция {tl} (x-effect-levels treatment)")
+    mode = (ptr.get('motion_system') or {}).get('page_transitions') if isinstance(ptr, dict) else None
+    need = {'view-transitions': ctx.effect_min.get('effect:page-transition'),
+            'library': ctx.transition_library_min, 'custom': ctx.transition_library_min}.get(mode)
+    if need in LEVEL and lvl in LEVEL and LEVEL[lvl] < LEVEL[need]:
+        R.add('error', 'PL-C02', w0 + ':page', f'переходы страниц {mode} — с уровня {need}, страница {lvl} (effects.yaml#page-transition)')
+
+
 def form_collects_pd(ctx, fm):
     ref = fm.get('ref') or ''
     sid = ref.partition('#')[2]
@@ -940,8 +1043,11 @@ def check_form_slot(ctx, where, sl, fm, pg):
 def check_map(path, ctx, brief=None, plans=None):
     w0 = rel(path)
     m = load_yaml(path)
-    ver = '1' if str(m.get('site_map_version', '0')).startswith('1') else '0'
-    schema_check(ctx, 'map', ver, m, w0, 'SM-S01')
+    ver = str(m.get('site_map_version', ''))
+    if ver not in ('1', '1.0'):
+        R.add('error', 'SM-S01', w0, f'site_map_version {ver or "—"}: формат карты — v1 (10-playbooks-contracts/schemas/site-map.schema.json)')
+        return m
+    schema_check(ctx, 'map', '1', m, w0, 'SM-S01')
     pages = {p['id']: p for p in m.get('pages') or []}
     tmpl = {t['id']: t for t in m.get('templates') or []}
     colls = {c['id']: c for c in m.get('collections') or []}
@@ -1103,8 +1209,8 @@ def check_map(path, ctx, brief=None, plans=None):
         dflt = ctx.level_defaults.get(t.get('page_type'))
         if t.get('level') and dflt and LEVEL[t['level']] > LEVEL[dflt] and not t.get('level_why'):
             R.add('warning', 'SM-21', f'{w0}:templates.{tid}', f"уровень {t['level']} выше умолчания {dflt} без level_why")
-        if ver == '1' and not t.get('level'):
-            R.add('warning', 'SM-21', f'{w0}:templates.{tid}', 'нет templates[].level (v1)')
+        if not t.get('level'):
+            R.add('warning', 'SM-21', f'{w0}:templates.{tid}', 'нет templates[].level')
     # планы шаблонов
     if plans is not None:
         for tid, t in tmpl.items():
@@ -1221,12 +1327,10 @@ def run_path(path, ctx):
 
 
 def all_paths():
-    out = [P['blocks'], P['forms'], ROOT / '01-foundations' / 'site-brief.example.yaml']
-    out += sorted((ROOT / '04-blocks' / 'examples').glob('page-plan-*.yaml'))
-    out += sorted((ROOT / '06-multipage-ia' / 'examples').glob('site-map-*.yaml'))
+    out = [P['blocks'], P['forms']]
     ex = ROOT / '10-playbooks-contracts' / 'examples'
     if ex.exists():
-        out += sorted(x for x in ex.iterdir() if x.is_dir())
+        out += sorted(x for x in ex.iterdir() if x.is_dir() and not x.name.startswith('.'))
     return out
 
 
@@ -1247,6 +1351,24 @@ def selftest(ctx):
         print('   ', i)
     ok &= not base_err
     plan_name = 'plans/home.yaml'
+
+    def sec(p, sid):
+        return next(s for s in p['sections'] if s['id'] == sid)
+
+    def add_3d(p, sid, **slot):
+        sec(p, sid).setdefault('slots', {})['3d'] = [dict({'id': 'model', 'slot': 'model-3d', 'poster': 'visual'}, **slot)]
+
+    def add_effect(p, sid, ref, transitions=None):
+        sec(p, sid).setdefault('treatment', {}).setdefault('effects', []).append({'ref': ref})
+        if transitions:
+            p['page']['treatment']['motion_system']['page_transitions'] = transitions
+
+    def lead_traffic(b):
+        b['decision_context']['price_band'] = 'mid'
+        share = {'paid-search': 0.4, 'maps-local': 0.35}
+        for s in b['traffic']['sources']:
+            s['share'] = share.get(s['source'], s['share'])
+
     cases = [
         ('N1 блок вне каталога', 'PL-B01', plan_name, lambda p: p['sections'][2].__setitem__('block', 'hero-magic')),
         ('N2 факт вне инвентаря', 'PL-F01', plan_name, lambda p: next(s for s in p['sections'] if s['slots'].get('data'))['slots']['data'][0].__setitem__('fact', 'fact:invented-10000-clients')),
@@ -1258,17 +1380,28 @@ def selftest(ctx):
         ('N8 уровень страницы выше сайта', 'PL-P03', plan_name, lambda p: (p['page'].__setitem__('ambition_level', 'L2'), p['page'].__setitem__('budget_profile', p['page']['page_type'] + '@L2'))),
         ('N9 профиль бюджета не по формату', 'PL-P01', plan_name, lambda p: p['page'].__setitem__('budget_profile', 'lead-L1')),
         ('N10 набор формы не существует', 'PL-T01', plan_name, lambda p: [a['form'].__setitem__('ref', 'lead-forms.yaml#mega-quiz') for s in p['sections'] for a in s['slots'].get('action') or [] if a.get('form')]),
-        ('N11 x-gate-exception без ворот', 'PL-X01', plan_name, lambda p: p['page'].__setitem__('x-gate-exception', [{'id': 'SG-PERF-99', 'why': 'проверка самопроверки', 'who': 'J'}])),
-        ('N12 бриф: прелоадер вне L2', 'SB-D02', 'site-brief.yaml', lambda b: (b['policies'].__setitem__('preloader', 'on'), b['policies'].__setitem__('rationale', 'самопроверка J'))),
+        ('N11 x-gate-exception без ворот', 'PL-X01', plan_name, lambda p: p['page'].__setitem__('x-gate-exception', [{'id': 'SG-PERF-99', 'why': 'проверка самопроверки', 'who': 'самопроверка'}])),
+        ('N12 бриф: прелоадер вне L2', 'SB-D02', 'site-brief.yaml', lambda b: (b['policies'].__setitem__('preloader', 'on'), b['policies'].__setitem__('rationale', 'самопроверка'))),
         ('N13 бриф: заявки за рубежом при ru', 'SB-L01', 'site-brief.yaml', lambda b: b['constraints'].setdefault('legal_intake', {}).__setitem__('leads_storage', 'abroad')),
         ('N14 бриф: референс в двух местах', 'SB-A02', 'site-brief.yaml', lambda b: b.__setitem__('references', [{'url': 'https://example.org', 'role': 'composition', 'take': ['сетка 12'], 'dont_take': ['цвета'], 'applies_to': 'section-role:hero'}, {'url': 'https://example.org', 'role': 'typography', 'take': ['кегли'], 'dont_take': ['тексты'], 'applies_to': 'section-role:faq'}])),
         ('N15 схема: чужой ключ в плане', 'PL-S01', plan_name, lambda p: p['page'].__setitem__('design_system', {'style': 'x'})),
         ('N16 метка «популярный» без факта', 'PL-F06', None, None),
+        ('N17 бриф: две темы без переключателя', 'SB-C01', 'site-brief.yaml', lambda b: b.__setitem__('themes', {'default': 'system', 'dark': {'needed': True, 'why': 'вечерний трафик'}})),
+        ('N18 бриф: brand.ref в пустоту', 'SB-B01', 'site-brief.yaml', lambda b: b.__setitem__('brand', {'ref': '../../design/brand.yaml'})),
+        ('N19 бренд не проходит схему brand', 'SB-B02', 'brand.yaml', lambda d: d.pop('status')),
+        ('N20 план: recipe: несуществующего рецепта', 'PL-D02', plan_name, lambda p: add_3d(p, 'hero', recipe='recipe:99-no-such-recipe', load='after-lcp')),
+        ('N21 план: 3D ниже первого экрана по видимости', ('warning', 'PL-D03'), plan_name, lambda p: add_3d(p, 'how-it-works', recipe='recipe:01-hero-product', load='on-visible')),
+        ('N22 план: секция L2 на странице L1 — spec_check.py plan', 'PL-C01', plan_name, lambda p: sec(p, 'hero')['treatment'].__setitem__('level', 'L2')),
+        ('N23 план: эффект L2 в секции L1', 'PL-C02', plan_name, lambda p: add_effect(p, 'how-it-works', 'effect:smooth-scroll')),
+        ('N24 план: переходы страниц библиотекой на L1', 'PL-C02', plan_name, lambda p: p['page']['treatment']['motion_system'].__setitem__('page_transitions', 'library')),
+        ('N25 план: L1 с page-transition проходит', ('clean', 'page-transition'), plan_name, lambda p: add_effect(p, 'how-it-works', 'effect:page-transition', 'view-transitions')),
+        ('N26 бриф: правило лидогенерации — L0 по данным уровней', ('warning', 'SB-A03'), 'site-brief.yaml', lead_traffic),
     ]
-    for name, code, fname, fn in cases:
+    for name, want, fname, fn in cases:
         if fname is None:
             print(f'{name}: пропущен (нет тарифов в примере лидогенерации; покрыт примером SaaS)')
             continue
+        level, code = want if isinstance(want, tuple) else ('error', want)
         dst = Path(tempfile.mkdtemp(dir=ex.parent, prefix='.selftest-'))   # та же глубина — относительные пути примера работают
         shutil.copytree(ex, dst, dirs_exist_ok=True)
         f = dst / fname
@@ -1277,9 +1410,19 @@ def selftest(ctx):
         f.write_text(yaml.safe_dump(doc, allow_unicode=True, sort_keys=False), encoding='utf-8')
         R.items.clear()
         check_project(dst, ctx)
-        hit = [i for i in R.items if i[0] == 'error' and i[1] == code]
-        print(f"{name}: {'OK' if hit else 'FAIL'} ({code}; ошибок {len([i for i in R.items if i[0] == 'error'])})")
-        ok &= bool(hit)
+        errs = [i for i in R.items if i[0] == 'error']
+        if level == 'clean':          # code — подстрока: ни одной ошибки о ней
+            good = not [i for i in errs if code in i[3]]
+        else:
+            good = bool([i for i in R.items if i[0] == level and i[1] == code])
+        if name.startswith('N26'):    # порог доли — поле ambition-levels.yaml: выше порог — правила нет
+            rule, ctx.lead_rule = ctx.lead_rule, dict(ctx.lead_rule, hot_mobile_share_min=0.99)
+            R.items.clear()
+            check_project(dst, ctx)
+            ctx.lead_rule = rule
+            good = good and not [i for i in R.items if i[1] == 'SB-A03' and i[0] == 'warning']
+        print(f"{name}: {'OK' if good else 'FAIL'} ({level} {code}; ошибок {len(errs)})")
+        ok &= good
         shutil.rmtree(dst, ignore_errors=True)
     print('SELFTEST', 'OK' if ok else 'FAIL')
     return 0 if ok else 1
@@ -1287,6 +1430,9 @@ def selftest(ctx):
 
 def main():
     args = sys.argv[1:]
+    if '--help' in args or '-h' in args:
+        print(__doc__)
+        sys.exit(0)
     today = dt.date.today()
     if '--today' in args:
         i = args.index('--today')

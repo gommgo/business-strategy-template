@@ -1,0 +1,5 @@
+# Бренд продукта примера «Сталькон» — иллюстрация формы kb/common/brand.schema.yaml, данные вымышлены.
+# Бриф примера ссылается на этот файл полем brand.ref; в проекте бренд лежит в design/brand.yaml.
+example: true
+name: Сталькон
+status: none

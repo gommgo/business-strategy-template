@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""build_profile.py — маркетинговый профиль UX-чек-листа для сайта (агент K3, волна 3 site-research, 2026-09-24).
+"""build_profile.py — маркетинговый профиль UX-чек-листа для страниц сайта: решение по каждому пункту UX-* сводного чек-листа ux.
 
-Читает все 434 пункта `../ux/12-evaluation-checklists/master-checklist.yaml` и пишет
-`09-ai-generation-evaluation/ux-marketing-profile.tsv` с колонками (строго):
+Читает пункты kb/ux/12-evaluation-checklists/master-checklist.yaml и пишет
+kb/site/09-ai-generation-evaluation/ux-marketing-profile.tsv с колонками (строго):
     ux_id  block  ux_text_short  site_action  site_replacement  reason  source
 site_action:
     keep      — действует на сайте как есть (та же проверка; серьёзность может сдвинуться на ступень по маршруту
@@ -10,16 +10,23 @@ site_action:
     modify    — действует с поправкой (порог, серьёзность, условие или объём); site_replacement — пункт с поправкой;
     off       — в профиле site не проверяется: объекта на сайте нет (таблицы данных, настройки, админка, ИИ-функции,
                 деструктив) или правило — визуальный слой creative; причина — в reason;
-    replaced  — заменён пунктом SITE-* (или CRV-*, COPY-* — зоны сестёр) с нормой сайта; site_replacement обязателен.
-Решения — по блокам (BLOCK_DEFAULT) с точечными исключениями (DECISIONS). Источники решений — таблица поправок
-PLAN №1–26 (строки, где исполнитель профиля — K: №1, 3, 4, 5, 6, 7, 10, 11, 13, 15), аудит UX §4 п.1–17 и §7 п.3.
+    replaced  — заменён пунктом SITE-* (или CRV-*, COPY-* — нормы creative и text) с нормой сайта; замена обязательна.
+Решения — по блокам (BLOCK_DEFAULT) с точечными исключениями (DECISIONS); основание решения — колонка source (пути —
+от kb/site/). Рядом — наследование для автопроверок AC-* ux (ac-profile.tsv) и сводка в $DDD_HOME/out/site/build_profile/.
 
-Запуск (из корня базы или откуда угодно — пути от файла):
-    python3 99-raw/experiments/K/02-ux-profile/build_profile.py            # записать TSV, ac-profile.tsv, summary.md
-    python3 99-raw/experiments/K/02-ux-profile/build_profile.py --check    # TSV совпадает с решениями? (код 1 — нет)
-Проверки: 434 строки; действие из четырёх; у replaced непустая замена; каждый SITE-* есть в site-checklist.yaml,
-COPY-* — в copy-checklist.yaml или copy-rubric.yaml text, CRV-* — в ambition-levels.yaml creative; решения только для
-существующих id; пункты аудита UX §4 и §7 п.3 не оставлены keep.
+Сверка с версией чек-листа ux: решения сверены с версией CHECKLIST_REVIEWED (поле source_sha256_16 файла чек-листа).
+Новая версия чек-листа — отказ записи и находка --check со списком новых, снятых и изменённых пунктов (сравнение с
+профилем на диске): пункт без точечного решения получает умолчание блока, изменённый пункт с точечным решением —
+на пересмотр; после сверки версия записывается в CHECKLIST_REVIEWED, профиль пересобирается.
+
+Запуск (от корня скилла):
+    python3 scripts/site/build_profile.py              # записать профиль, ac-profile.tsv и сводку
+    python3 scripts/site/build_profile.py --check      # профиль совпадает с решениями и версией чек-листа? (код 1 — нет)
+    python3 scripts/site/build_profile.py --selftest   # сверка версии, замены, ссылки источников — на подложенных данных
+Проверки: строк — столько, сколько пунктов в чек-листе (items_count); действие из четырёх; у replaced непустая замена;
+каждый SITE-* есть в site-checklist.yaml, COPY-* — в copy-checklist.yaml или copy-rubric.yaml text, CRV-* — в
+определениях creative (ambition-levels.yaml и чек-листы разделов); путь в source ведёт в существующий файл или папку;
+решения только для существующих id; пункты, которые аудит UX назвал спорными для лендинга, не оставлены keep.
 Только стандартная библиотека + PyYAML.
 """
 import argparse
@@ -32,21 +39,26 @@ import sys
 import yaml
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))
 import kbpaths  # noqa: E402
-ROOT = str(kbpaths.kb('site'))                                               # перенос: kb/site
-APP = str(kbpaths.kb())                                                      # перенос: kb/ (базы без -research)
+ROOT = str(kbpaths.kb('site'))
+APP = str(kbpaths.kb())
 UX_YAML = os.path.join(APP, 'ux', '12-evaluation-checklists', 'master-checklist.yaml')
 UX_AC_MD = os.path.join(APP, 'ux', '12-evaluation-checklists', '03-automated-checks.md')
 SITE_YAML = os.path.join(ROOT, '09-ai-generation-evaluation', 'site-checklist.yaml')
 COPY_YAMLS = [os.path.join(APP, 'text', '09-ai-generation-evaluation', f) for f in ('copy-checklist.yaml', 'copy-rubric.yaml')]
 CRV_YAML = os.path.join(APP, 'creative', '01-creative-direction', 'ambition-levels.yaml')
+CRV_DIR = os.path.join(APP, 'creative')
 OUT_TSV = os.path.join(ROOT, '09-ai-generation-evaluation', 'ux-marketing-profile.tsv')
 OUT_AC = str(kbpaths.kb('site', '99-raw', 'experiments', 'K', '02-ux-profile', 'ac-profile.tsv'))
-OUT_SUM = str(kbpaths.out('site', 'build_profile') / 'summary.md')
 ACTIONS = ('keep', 'modify', 'off', 'replaced')
 COLS = ('ux_id', 'block', 'ux_text_short', 'site_action', 'site_replacement', 'reason', 'source')
 ID_RX = re.compile(r'\b(?:SITE-[A-Z0-9]{2,5}-\d{2}|COPY-[A-Z]-\d{2}|CRV-[A-Z]+-\d{2})\b')
+CRV_DEF_RX = re.compile(r'^\s*(?:-\s+(?:id:\s*)?|id:\s*)(CRV-[A-Z]+-\d{2})\b', re.M)   # определение: «- CRV-…» или «id: CRV-…»
+PATH_RX = re.compile(r'^[\w.-]*/[\w./-]*$|^[\w./-]+\.(?:md|yaml|yml|json|tsv|csv|py)$')    # путь-основание в колонке source
+
+# Версия чек-листа ux (source_sha256_16 master-checklist.yaml), с которой сверены решения профиля.
+CHECKLIST_REVIEWED = '77bad8ab0088c710'
 
 # Пункты, которые аудит UX (§4 п.1–17, §7 п.3) называет ложными блокерами или спорными для лендинга: keep запрещён.
 AUDIT_FLAGGED = ('UX-FBK-14', 'UX-FBK-15', 'UX-LAY-02', 'UX-LAY-16', 'UX-LAY-03', 'UX-LAY-09', 'UX-LAY-13', 'UX-NAV-12',
@@ -93,22 +105,22 @@ UX-PRE-09|replaced|SITE-PRE-15, SITE-PRE-18|компоненты сайта — 
 UX-PRE-10|replaced|SITE-PRE-05|вместо набора данных с крайними случаями — инвентарь фактов (источник, дата, разрешение); длины текстов — text|PLAN №10, №26; 01-foundations/03-site-brief.md §3
 UX-PRE-11|replaced|COPY-C-05|словарь и запреты текста — линтер text в профиле жанра|контракт v2 §2 (тексты — text)
 UX-PRE-12|modify|SITE-PRE-11, SITE-PRE-25|эталон подачи — референсы и treatment creative; описание взаимодействий — page-plan (секции, действия, события)|PLAN №10; ../creative/01-creative-direction/02-art-direction-document.md
-UX-PRE-13|modify|SITE-OUT-08|запреты сайта — маркеры AIL с полем allow (законный приём разрешает бриф), а не безусловный бан-лист|аудит KIMI §4 п.1–2, п.4; 09-ai-generation-evaluation/ai-landing-markers.yaml
+UX-PRE-13|modify|SITE-OUT-08|запреты сайта — маркеры AIL с полем allow (законный приём разрешает бриф), а не безусловный бан-лист|09-ai-generation-evaluation/ai-landing-markers.yaml
 UX-PRE-14|off||таблиц данных у посадочной нет; сравнение ≤ 5 вариантов — SITE-BLK-10|PLAN №10
 UX-PRE-15|replaced|SITE-PRE-20, SITE-FRM-02|контракт поля — набор формы lead-forms.yaml (form.ref): поля, why, autocomplete, проверка, успех|05-conversion-funnels/lead-forms.yaml; 05-conversion-funnels/01-cta-and-lead-capture.md §3
 UX-PRE-16|replaced|SITE-PRF-05|вместо шаблона плитки KPI — число-доказательство: подпись, источник, дата, округление вниз|04-blocks/01-blocks-catalog.md §4.2
 UX-PRE-17|off||изменяющих необратимых действий у посетителя нет; отправка формы — SITE-FRM-01|PLAN №10
 UX-PRE-18|keep|SITE-A11Y-08, SITE-A11Y-11|целевой уровень WCAG 2.2 AA, видимый фокус и цели касания объявляются в TASK так же|08-legal-trust-a11y/03-a11y-marketing-pages.md §8
-UX-BLD-01|keep||сборка без ошибок — общее условие приёмки|../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md G1
+UX-BLD-01|keep||сборка без ошибок — общее условие приёмки|../claude-design/06-design-process/04-checks.md §3
 UX-BLD-02|modify|SITE-GEO-01|мало «рендерит непустое»: H1, смысл, цены и CTA — в HTML сервера без JS|07-seo-geo-performance-analytics/head-kit.yaml hk-access-ssr
-UX-BLD-04|modify|SITE-OUT-13|у многостраничника маршруты = страницы site-map (ia_probe); у посадочной — одна страница|06-multipage-ia/01-sitemaps-templates-content-model.md; 99-raw/tools/ia_probe.py
-UX-BLD-05|keep|SITE-OUT-13|битых ссылок меню и подвала нет; href="#" у призыва — маркер AIL-44|99-raw/tools/ia_probe.py; 09-ai-generation-evaluation/ai-landing-markers.yaml
+UX-BLD-04|modify|SITE-OUT-13|у многостраничника маршруты = страницы site-map (ia_probe); у посадочной — одна страница|06-multipage-ia/01-sitemaps-templates-content-model.md; ../../scripts/site/ia_probe.py
+UX-BLD-05|keep|SITE-OUT-13|битых ссылок меню и подвала нет; href="#" у призыва — маркер AIL-44|../../scripts/site/ia_probe.py; 09-ai-generation-evaluation/ai-landing-markers.yaml
 UX-BLD-06|modify|SITE-NAV-15|индексируемая страница — не сирота; посадочная под рекламу законно вне меню|06-multipage-ia/02-navigation-linking-i18n.md §3.5
 UX-BLD-07|keep|SITE-PRE-10|страниц вне site-map нет (выдуманные страницы — дефект сборки)|06-multipage-ia/01-sitemaps-templates-content-model.md
 UX-BLD-08|keep|SITE-FRM-01, SITE-BLK-14, SITE-CTA-13|каждая кнопка и ссылка что-то делает: форма отправляется, призыв нажимается, кнопки — button и a href|05-conversion-funnels/01-cta-and-lead-capture.md §9
 UX-BLD-09|modify|SITE-BLK-01|секции — из каталога blocks.yaml в объявленном варианте; визуальные компоненты — система creative|04-blocks/01-blocks-catalog.md §1.1
 UX-BLD-10|off||шкала токенов — визуальный слой creative (marketing-tokens.json), не пункт site|../creative/04-visual-language/marketing-tokens.json; контракт v2 §2
-UX-BLD-11|keep|SITE-OUT-07|правка не выходит за область; после правки — полный прогон, регресс — откат|../kimi-research/08-director-loop-qa/02-checks-k3.md §8
+UX-BLD-11|keep|SITE-OUT-07|правка не выходит за область; после правки — полный прогон, регресс — откат|../claude-design/06-design-process/03-edit-loop-and-stop.md §4
 UX-BLD-12|modify|SITE-CTA-01, SITE-FRM-11|тупик сайта — страница без целевого действия и «спасибо» без следующего шага; одноэкранная арт-страница без ссылок вне шапки — не дефект|05-conversion-funnels/01-cta-and-lead-capture.md §10; 05-conversion-funnels/03-multi-page-funnels.md
 UX-A11-01|modify|SITE-A11Y-04|B — для H1, лида, призыва и строки согласия (и на медиа по F83), прочий текст — S; тема обычно одна|08-legal-trust-a11y/03-a11y-marketing-pages.md §4, §8
 UX-A11-02|modify|SITE-A11Y-09|S; B — для логотипов клиентов и схем; декоративные — alt=""|08-legal-trust-a11y/03-a11y-marketing-pages.md §8
@@ -123,10 +135,10 @@ UX-A11-10|keep|SITE-A11Y-12|Tab проходит шапку, призыв, фо�
 UX-A11-11|keep|SITE-A11Y-12, SITE-BLK-04|порядок фокуса = визуальному, без CSS order|04-blocks/blocks.yaml conventions.dom-order
 UX-A11-12|modify|SITE-A11Y-11|на сайте — B: баннер cookie, липкая шапка, липкий призыв и чат есть почти всегда|08-legal-trust-a11y/03-a11y-marketing-pages.md §8
 UX-A11-13|keep||не только цветом (ошибки формы, тарифы, «популярный»)|../ux/08-accessibility/01-wcag22-as-build-rules.md
-UX-A11-14|keep|SITE-A11Y-08|24×24 (2.5.8, AA); главные призывы и поля на телефоне — 44×44 (AAA, рекомендация)|04-blocks/blocks.yaml conventions.target-size
+UX-A11-14|keep|SITE-A11Y-08|цель ≥ 24×24 или зазор везде (2.5.8, AA); на таче каждая цель ≥ 44×44 зоной нажатия, видимый контрол может быть меньше; исключения 2.5.8 — ссылка в абзаце|../ux/08-accessibility/01-wcag22-as-build-rules.md §12.4
 UX-A11-15|keep|SITE-NAV-05|подменю по клику и Enter, не только по наведению; слайдер «до/после» — с кнопками|06-multipage-ia/02-navigation-linking-i18n.md §1.3
 UX-A11-16|keep|SITE-A11Y-14|успех и ошибка формы, выбор в баннере — объявляются|08-legal-trust-a11y/03-a11y-marketing-pages.md §5
-UX-A11-17|keep|SITE-A11Y-18, SITE-MOB-01|зум 200 %: кегли на clamp с max ≤ 2,5 × min; 320 px без горизонтальной прокрутки|99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md п.9
+UX-A11-17|keep|SITE-A11Y-18, SITE-MOB-01|зум 200 %: кегли на clamp с max ≤ 2,5 × min; 320 px без горизонтальной прокрутки|../creative/04-visual-language/01-display-typography.md §2.2
 UX-A11-18|keep|SITE-FRM-06|введённое сохраняется при ошибке; «повторите почту» запрещено|05-conversion-funnels/lead-forms.yaml forbidden
 UX-A11-19|keep||видимая подпись входит в доступное имя (2.5.3)|../ux/08-accessibility/01-wcag22-as-build-rules.md
 UX-A11-20|keep|SITE-CTA-03|ссылки и призывы называют результат, не «Подробнее»|05-conversion-funnels/01-cta-and-lead-capture.md §1.3
@@ -163,7 +175,7 @@ UX-LAY-01|modify|SITE-STR-06, SITE-STR-08|точка входа первого �
 UX-LAY-02|replaced|SITE-CTA-02, SITE-CTA-04|одно целевое действие, его повтор в местах решения — норма (медиана 4 призыва); второй путь — иным стилем|PLAN №1; аудит UX §4 п.2
 UX-LAY-03|replaced|SITE-BLK-03, SITE-NAV-20|H1 живёт в hero; путь назад — логотип и шапка; крошки — на многостраничнике с третьего уровня|PLAN №4; аудит UX §4 п.3
 UX-LAY-04|modify|SITE-STR-06|squint — по первому экрану и по секции: одна точка входа на экран, а не на страницу|03-page-structure/03-first-screen-and-mobile.md §1.3
-UX-LAY-05|keep||иерархия в оттенках серого; для призыва работает контраст, а не цвет|91-videos/digests/w87hTii1Dao.md
+UX-LAY-05|keep||иерархия в оттенках серого; для призыва работает контраст, а не цвет|../ux/03-layout-placement/03-hierarchy-and-attention.md §10.2
 UX-LAY-06|off||ритм и отступы секций — «этажи» creative; шкала — marketing-tokens|../creative/04-visual-language/02-composition-rhythm-sections.md §3.1
 UX-LAY-07|off||рамки и разделители — визуальный слой creative|контракт v2 §2
 UX-LAY-08|keep||45–75 знаков — для текста тела; display-заголовки — роли creative|../creative/04-visual-language/01-display-typography.md
@@ -210,16 +222,16 @@ UX-DAT-24|modify|SITE-FRM-13|услуга и тариф называются о�
 UX-OVL-01|keep|SITE-FRM-03|контейнер по критериям: форма в окне ≤ 4 полей, баннер cookie — немодальный|05-conversion-funnels/lead-forms.yaml defaults.modal_max_fields
 UX-OVL-02|replaced|SITE-CTA-07, SITE-CTA-08, SITE-LEGAL-06, SITE-A11Y-14|обязательный баннер cookie — законное исключение (немодальный, равные кнопки, не закрывает фокус); окно захвата и чат сами не открываются|PLAN №6; аудит UX §4 п.10
 UX-OVL-04|keep|SITE-FRM-03|окно формы не прокручивается|05-conversion-funnels/lead-forms.yaml defaults.modal_max_fields
-UX-OVL-06|keep|SITE-FRM-05|Esc и видимая кнопка закрывают окно, фокус возвращается|05-conversion-funnels/lead-forms.yaml; 91-videos/digests/hPS7LUW7SlA.md
+UX-OVL-06|keep|SITE-FRM-05|Esc и видимая кнопка закрывают окно, фокус возвращается|05-conversion-funnels/lead-forms.yaml
 UX-OVL-09|keep|SITE-CTA-09|в окне ≤ 2 действий; отказ нейтральной подписью|08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md §4
 UX-OVL-12|modify|SITE-MOB-04, SITE-CTA-08|типичный сбой сайта — баннер cookie, окно и чат одновременно над призывом; баннер обязателен, остальное — по нажатию|03-page-structure/03-first-screen-and-mobile.md §1.4
 UX-OVL-13|keep|SITE-FRM-06|ошибка отправки — у формы, не тостом и не alert()|05-conversion-funnels/01-cta-and-lead-capture.md §9
 UX-OVL-14|off||тостов у сайта нет; всплывающие «Мария купила» — запрет (SITE-PRF-16)|08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md §4
 UX-OVL-15|off||тостов у сайта нет|PLAN №10
-UX-OVL-16|modify|SITE-CTA-08, SITE-CTA-13|на сайте перекрывают не тосты, а плавающие мессенджеры, чат и баннер: призыв нажимается (elementFromPoint)|99-raw/notes/wave2/H-notes.md «Для K»
+UX-OVL-16|modify|SITE-CTA-08, SITE-CTA-13|на сайте перекрывают не тосты, а плавающие мессенджеры, чат и баннер: призыв нажимается (elementFromPoint)|05-conversion-funnels/01-cta-and-lead-capture.md §2
 UX-OVL-17|keep|SITE-FRM-11|успех — одним состоянием («спасибо»), не alert() и страницей сразу|05-conversion-funnels/01-cta-and-lead-capture.md §10
 UX-OVL-18|modify|SITE-LEGAL-06|баннер cookie закрывается только выбором; полоса акции — закрываемая|08-legal-trust-a11y/legal-requirements.yaml LR-RU-10, LR-EU-02
-UX-FLW-01|modify|SITE-FRM-01, SITE-TRK-01|сценарий сайта — «визит → призыв → форма → спасибо» на своём стенде; на чужих сайтах формы не отправлять|99-raw/tools/README.md «Правила»
+UX-FLW-01|modify|SITE-FRM-01, SITE-TRK-01|сценарий сайта — «визит → призыв → форма → спасибо» на своём стенде; на чужих сайтах формы не отправлять|09-ai-generation-evaluation/02-site-checklist.md §1.3
 UX-FLW-02|modify|SITE-FRM-09|«Назад» — в шагах квиза; «Назад» браузера закрывает окно формы и меню телефона|05-conversion-funnels/01-cta-and-lead-capture.md §5.3
 UX-FLW-05|modify|SITE-FRM-09|у квиза — честный прогресс и понятно, что осталось|05-conversion-funnels/01-cta-and-lead-capture.md §5.3
 UX-FLW-08|keep|SITE-FRM-05|ничего не спрашивается дважды (3.3.7): «повторите почту» — запрет|05-conversion-funnels/lead-forms.yaml forbidden
@@ -249,8 +261,8 @@ UX-FBK-10|modify|SITE-A11Y-01|движение и автообновление �
 UX-FBK-11|modify|SITE-A11Y-03|выразительное движение законно (creative); обязательно — смысл без анимации на месте (reduce)|../creative/01-creative-direction/ambition-levels.yaml CRV-AL-01
 UX-FBK-12|off||длительности и кривые — движение creative; «чем чаще видят, тем короче» для разового визита не работает|аудит UX §4 п.1
 UX-FBK-13|replaced|SITE-A11Y-03, CRV-AL-01|под reduce — конечные состояния, 0 байт видео, WebGL в покое (строже ux)|../creative/01-creative-direction/ambition-levels.yaml CRV-AL-01
-UX-FBK-14|replaced|SITE-A11Y-01, CRV-AL-02, CRV-AL-10|появление при прокрутке и hover — подача creative; site держит паузу для движения > 5 с и стоящие вне экрана циклы|PLAN №11; аудит UX §4 п.1
-UX-FBK-15|replaced|SITE-A11Y-02, SITE-A11Y-01, SITE-BLK-07, CRV-AL-03|блокер — вспышки > 3/с и автозвук > 3 с; немое видео и карусели — с паузой и не для главного сообщения|PLAN №11; аудит UX §4 п.1, п.14
+UX-FBK-14|replaced|SITE-A11Y-01, CRV-MO-04, CRV-MO-06, CRV-AL-02, CRV-AL-10|появление — одноразовое, системой по ролям (CRV-MO-04); бесконечные фоны и пульсации — в бюджете движения уровня (CRV-MO-06); site держит паузу для движения > 5 с и стоящие вне экрана циклы|../creative/05-motion/01-motion-principles-and-access.md §2; PLAN №11; аудит UX §4 п.1
+UX-FBK-15|replaced|SITE-A11Y-02, SITE-A11Y-01, SITE-BLK-07, CRV-AL-03, CRV-MO-06|блокер — вспышки > 3/с и автозвук > 3 с; немое автовидео и карусели — непрерывное движение в бюджете уровня (CRV-MO-06), с паузой и не для главного сообщения|../creative/05-motion/01-motion-principles-and-access.md §2; PLAN №11; аудит UX §4 п.1, п.14
 UX-FBK-16|off||ИИ-функций с потоком вывода у маркетинговой страницы нет|PLAN №10
 UX-ETH-01|modify|SITE-LEGAL-06|симметрия «дать / не дать» — баннер cookie и согласия: ЕС — B, РФ — S (позиция I)|08-legal-trust-a11y/legal-requirements.yaml LR-EU-02, LR-RU-10
 UX-ETH-02|modify||на сайте — отказ от рассылки и отзыв согласия в один шаг; отмена подписки — в продукте (ux)|05-conversion-funnels/03-multi-page-funnels.md
@@ -275,10 +287,10 @@ UX-AIG-06|modify|SITE-BLK-08|структурная часть — три оди
 UX-AIG-07|keep|SITE-BLK-12|содержимое вкладок, аккордеонов и FAQ — в HTML; кнопка без содержимого — блокер|04-blocks/blocks.yaml
 UX-AIG-08|keep|SITE-GEO-01, CRV-AL-05|страница не пуста без JS и без WebGL|07-seo-geo-performance-analytics/head-kit.yaml hk-access-ssr
 UX-AIG-09|keep|SITE-PERF-11|картинки с размерами не ломают раскладку|07-seo-geo-performance-analytics/page-gates.yaml SG-PERF-14
-UX-AIG-10|keep|SITE-MOB-01|без горизонтальной прокрутки на 360|../kimi-research/08-director-loop-qa/02-checks-k3.md §2
+UX-AIG-10|keep|SITE-MOB-01|без горизонтальной прокрутки на 360|../claude-design/06-design-process/04-checks.md §3
 UX-AIG-11|modify|SITE-TRK-03|между страницами сайта переживают метки источника и выбор (тариф), а не состояние приложения|05-conversion-funnels/03-multi-page-funnels.md §2.2
 UX-AIG-12|modify|SITE-OUT-01|варианты сборки отбираются воротами страницы; три провала подряд — пересмотр входного контракта|09-ai-generation-evaluation/02-site-checklist.md §1.4
-UX-AIG-13|replaced|SITE-OUT-07|после каждой правки — полный прогон автопроверок, регресс — откат|../kimi-research/08-director-loop-qa/02-checks-k3.md §8
+UX-AIG-13|replaced|SITE-OUT-07|после каждой правки — полный прогон автопроверок, регресс — откат|../claude-design/06-design-process/03-edit-loop-and-stop.md §4
 UX-AIG-14|keep|SITE-OUT-09|находка = что, где, правило, доказательство, серьёзность, правка|09-ai-generation-evaluation/03-expert-review-and-judge.md
 UX-TXT-01|replaced|SITE-CTA-03, COPY-R-09|подпись призыва называет результат; формулировку проверяет text|05-conversion-funnels/01-cta-and-lead-capture.md §1.3
 UX-TXT-02|keep|SITE-FRM-13|одно имя действия|05-conversion-funnels/03-multi-page-funnels.md §2
@@ -301,9 +313,9 @@ UX-TXT-20|modify|SITE-CTA-09|на сайте — S: отказ в окне не 
 UX-TXT-21|replaced|SITE-OUT-03, SITE-PRF-01, COPY-C-04|заглушки — блокер выдачи; числа — только с fact:|PLAN №7
 UX-TXT-22|keep|SITE-FRM-06|сообщения об ошибке формы — по рубрике NN/g|../ux/05-flows-journeys/04-errors-and-recovery.md §8
 UX-TXT-23|modify|SITE-STR-16|банановый тест — конвенции взаимодействия (логотип, шапка, кнопка, форма) узнаются без слов|контракт v2 §6 п.11
-UX-MOB-01|keep|SITE-MOB-01|без горизонтальной прокрутки на 390 и 360 (320 — зум 400 %)|../kimi-research/08-director-loop-qa/02-checks-k3.md §2
+UX-MOB-01|keep|SITE-MOB-01|без горизонтальной прокрутки на 390 и 360 (320 — зум 400 %)|../claude-design/06-design-process/04-checks.md §3
 UX-MOB-02|keep|SITE-A11Y-07|зум не запрещён|08-legal-trust-a11y/03-a11y-marketing-pages.md §8
-UX-MOB-03|keep|SITE-A11Y-08|44 — главные призывы и поля, 24 — прочие|04-blocks/blocks.yaml conventions.target-size
+UX-MOB-03|keep|SITE-A11Y-08|на таче каждая цель ≥ 44×44 зоной нажатия (видимый контрол может быть меньше); с мышью — ≥ 24×24 или зазор|../ux/08-accessibility/01-wcag22-as-build-rules.md §12.4
 UX-MOB-04|modify|SITE-CTA-06|главное действие — липкий призыв снизу (≤ 72 px + safe area), меню — сверху; у ux позиция [спорно]|05-conversion-funnels/01-cta-and-lead-capture.md §2
 UX-MOB-05|off||деструктивных целей у сайта нет|PLAN №10
 UX-MOB-06|replaced|SITE-NAV-06, SITE-MOB-02|нижняя панель вкладок — не для сайта: кнопка «Меню» и липкий призыв|PLAN №3
@@ -313,7 +325,7 @@ UX-MOB-09|off||списков с деталями у посадочной нет
 UX-MOB-10|keep|SITE-BLK-07|свайп карусели и слайдера — с кнопками|04-blocks/01-blocks-catalog.md §3.1
 UX-MOB-11|replaced|SITE-MOB-07, SITE-CTA-06|hero — svh или проценты, 100vh и 100dvh для hero нет; липкое — с safe area|03-page-structure/03-first-screen-and-mobile.md §2.4
 UX-MOB-12|keep|SITE-CTA-06|липкий призыв скрыт при клавиатуре; поле и ошибка видны|05-conversion-funnels/01-cta-and-lead-capture.md §2
-UX-MOB-13|keep|SITE-MOB-03|кегль полей ≥ 16 px|../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md D2
+UX-MOB-13|keep|SITE-MOB-03|кегль полей ≥ 16 px|../ux/09-mobile/03-mobile-content-tables-forms-dashboards.md §3.4
 UX-MOB-14|keep|SITE-FRM-04|type=tel, inputmode, autocomplete|05-conversion-funnels/lead-forms.yaml defaults
 UX-MOB-15|keep||ошибки полей видны при открытой клавиатуре|../ux/09-mobile/03-mobile-content-tables-forms-dashboards.md §3
 UX-MOB-16|replaced|SITE-MOB-12|тарифы и сравнение на телефоне: две колонки и переключатель, рядом ≤ 2|04-blocks/01-blocks-catalog.md §6.3
@@ -339,7 +351,7 @@ UX-CNS-21|keep|SITE-MOB-10|перестроение на границах 60/40 
 UX-CNS-22|keep|SITE-STR-16|логотип слева, навигация сверху, формы предсказуемы|контракт v2 §6 п.11
 UX-CNS-23|modify|SITE-STR-16|конвенции взаимодействия — как в ux; уникальность — в сюжете и подаче (creative), различия ради выразительности законны в подаче|PLAN №8; аудит UX §4 п.12
 UX-CNS-25|modify|SITE-CTA-02, SITE-BLK-05|повтор призыва — норма; повтор секции с тем же содержимым — дефект|PLAN №1
-UX-CNS-26|replaced|SITE-OUT-07|полный прогон после каждой правки|../kimi-research/08-director-loop-qa/02-checks-k3.md §8
+UX-CNS-26|replaced|SITE-OUT-07|полный прогон после каждой правки|../claude-design/06-design-process/03-edit-loop-and-stop.md §4
 UX-CNS-27|modify|SITE-OUT-01, SITE-OUT-07|дрейф ловят ворота и полный прогон на каждой итерации|07-seo-geo-performance-analytics/page-gates.yaml
 UX-CNS-29|keep|SITE-OUT-09|прохождение ворот ≠ качество: экспертный проход и рубрика|09-ai-generation-evaluation/03-expert-review-and-judge.md
 UX-CLI-02|replaced|SITE-NAV-06|навигация видима на десктопе, иконки с подписями|06-multipage-ia/02-navigation-linking-i18n.md §1.3
@@ -357,12 +369,12 @@ UX-PRC-01|replaced|SITE-PRE-01|бриф approved с подписью; допущ
 UX-PRC-07|replaced|SITE-PRE-10, SITE-PRE-11|карта сайта и планы страниц; у страницы одно целевое действие|06-multipage-ia/01-sitemaps-templates-content-model.md
 UX-PRC-09|modify|SITE-PRE-15|инвентарь блоков — blocks.yaml; контейнер действия — слот action|04-blocks/01-blocks-catalog.md
 UX-PRC-11|modify|SITE-A11Y-12, SITE-BLK-02|лендмарки, порядок Tab и мобильная трансформация — в плане и блоках|04-blocks/blocks.yaml conventions.landmarks
-UX-PRC-12|replaced|SITE-PRE-25|бриф подачи — treatment creative по уровню амбиций|../creative/01-creative-direction/drafts-for-site/treatment.v0.schema.json
-UX-PRC-13|replaced|SITE-PRE-26|пакет исполнителя собран проекцией из брифа и планов, не написан заново|99-raw/tools/site_brief_to_kimi.py
+UX-PRC-12|replaced|SITE-PRE-25|бриф подачи — treatment creative по уровню амбиций|../creative/09-ai-execution-evaluation/treatment.schema.json
+UX-PRC-13|replaced|SITE-PRE-26|вход холста собран проекцией из брифа и планов (x-canvas-map), а не написан заново|../../references/claude-design.md §6
 UX-PRC-14|keep||журнал решений «проблема → влияние → альтернатива» (x-gate-exception, decisions)|10-playbooks-contracts/01-procedure-brief-to-pages.md
 UX-PRC-15|modify|SITE-OUT-01, SITE-OUT-08, SITE-STR-02|автопроверки плана и страницы, маркеры; форма страницы не повторяет прошлую страницу проекта|09-ai-generation-evaluation/ai-landing-markers.yaml
 UX-OUT-01|keep|SITE-GEO-01|сборка проходит; главная страница непуста и без JS|07-seo-geo-performance-analytics/head-kit.yaml hk-access-ssr
-UX-OUT-02|keep|SITE-OUT-06|ограничения проверены своими инструментами, а не заявлены|../kimi-research/08-director-loop-qa/02-checks-k3.md §1
+UX-OUT-02|keep|SITE-OUT-06|ограничения проверены своими инструментами, а не заявлены|../claude-design/06-design-process/04-checks.md §2
 UX-OUT-03|modify|SITE-A11Y-16|axe: десктоп и телефон × первый визит (баннер) и после выбора; тема обычно одна|08-legal-trust-a11y/03-a11y-marketing-pages.md §8
 UX-OUT-04|modify|SITE-OUT-01|ворота доступности сайта — SG-A11Y (B: контраст, имена, label, viewport; S: target-size, alt, frame-title, lang), а не «0 Serious»|07-seo-geo-performance-analytics/page-gates.yaml SG-A11Y-01, SG-A11Y-02
 UX-OUT-05|modify|SITE-FRM-01, SITE-TRK-01|сценарий сайта — «визит → форма → спасибо» и цель по успеху сервера|05-conversion-funnels/01-cta-and-lead-capture.md §9.3
@@ -371,9 +383,9 @@ UX-OUT-07|modify|SITE-A11Y-12, SITE-A11Y-16|ручные проходы: кла�
 UX-OUT-08|keep|SITE-A11Y-11, SITE-FRM-05, SITE-FRM-07, SITE-NAV-09|2.4.11, 2.5.7, 3.2.6, 3.3.7, 3.3.8 проверяются руками|../ux/08-accessibility/04-inclusive-design-and-testing.md §5.3
 UX-OUT-09|replaced|SITE-PERF-01, SITE-PERF-03, SITE-PERF-04|CWV — цели профиля типа и уровня; поле p75 — в живой фазе (SG-PERF-07)|PLAN №17
 UX-OUT-10|modify|SITE-OUT-01|варианты — отбором по воротам страницы|09-ai-generation-evaluation/02-site-checklist.md §1.4
-UX-OUT-11|replaced|SITE-OUT-10|судья по site-rubric.json: 3 прогона для сортировки, 11 для решения, оба порядка|09-ai-generation-evaluation/03-expert-review-and-judge.md
+UX-OUT-11|replaced|SITE-OUT-10|судья по site-rubric.json: 3 прогона — находки и второе мнение, 5 — сортировка трёх и более вариантов, оба порядка; вердикт не решает — решает человек|../common/judge.md §5; 09-ai-generation-evaluation/03-expert-review-and-judge.md
 UX-OUT-12|keep|SITE-OUT-09|ноль находок — неудачный прогон|../ux/12-evaluation-checklists/01-expert-review-protocols.md §10.1
-UX-OUT-13|modify|SITE-OUT-12|решения вкуса, фактов, прав и тона — заказчику одним блоком; уместность — экспертный проход и рубрика|../kimi-research/08-director-loop-qa/02-checks-k3.md §7
+UX-OUT-13|modify|SITE-OUT-12|решения вкуса, фактов, прав и тона — заказчику одним блоком; уместность — экспертный проход и рубрика|../claude-design/06-design-process/04-checks.md §8
 UX-OUT-14|keep||конфликты правил записаны|../ux/12-evaluation-checklists/01-expert-review-protocols.md §10.3
 """
 
@@ -407,12 +419,27 @@ def known_ids():
     for p in COPY_YAMLS:
         t = io.open(p, encoding='utf-8').read()
         copy |= set(re.findall(r'\bCOPY-[A-Z]-\d{2}\b', t))
-    crv = set(re.findall(r'\bCRV-AL-\d{2}\b', io.open(CRV_YAML, encoding='utf-8').read()))
+    crv = set(CRV_DEF_RX.findall(io.open(CRV_YAML, encoding='utf-8').read()))
+    for dirpath, dirs, files in os.walk(CRV_DIR):   # чек-листы разделов creative: строки «- CRV-XX-NN …»
+        dirs[:] = [d for d in dirs if d != '99-raw']
+        for f in files:
+            if f.endswith('.md'):
+                crv |= set(CRV_DEF_RX.findall(io.open(os.path.join(dirpath, f), encoding='utf-8').read()))
     return site, copy, crv
 
 
-def build():
-    ux = yaml.safe_load(io.open(UX_YAML, encoding='utf-8'))
+def source_paths(source):
+    """Пути-основания колонки source: первое слово каждой части «;», похожее на путь (от kb/site/)."""
+    out = []
+    for part in source.split(';'):
+        word = part.strip().split(' ')[0] if part.strip() else ''
+        if word and PATH_RX.match(word):
+            out.append(word)
+    return out
+
+
+def build(ux=None):
+    ux = ux if ux is not None else yaml.safe_load(io.open(UX_YAML, encoding='utf-8'))
     items = ux['items']
     dec, problems = parse_decisions()
     ux_ids = {i['id'] for i in items}
@@ -429,18 +456,21 @@ def build():
     return rows, problems, ux
 
 
-def validate(rows, problems):
+def validate(rows, problems, ux, known=None):
     errors = list(problems)
-    site, copy, crv = known_ids()
-    if len(rows) != 434:
-        errors.append(f'строк {len(rows)} вместо 434')
+    site, copy_ids, crv = known if known is not None else known_ids()
+    want = ux.get('items_count')
+    if want is not None and len(rows) != want:
+        errors.append(f'строк {len(rows)}, а в чек-листе ux items_count {want}')
+    if len(rows) != len(ux.get('items') or []):
+        errors.append(f"строк {len(rows)}, пунктов в чек-листе ux {len(ux.get('items') or [])}")
     for r in rows:
         if r['site_action'] not in ACTIONS:
             errors.append(f"{r['ux_id']}: действие {r['site_action']!r}")
         if r['site_action'] == 'replaced' and not r['site_replacement']:
             errors.append(f"{r['ux_id']}: replaced без замены")
         for x in ID_RX.findall(r['site_replacement']):
-            ok = (x in site) if x.startswith('SITE-') else (x in copy) if x.startswith('COPY-') else (x in crv)
+            ok = (x in site) if x.startswith('SITE-') else (x in copy_ids) if x.startswith('COPY-') else (x in crv)
             if not ok:
                 errors.append(f"{r['ux_id']}: {x} нет в каталоге владельца")
         rest = ID_RX.sub('', r['site_replacement']).replace(',', '').strip()
@@ -449,11 +479,46 @@ def validate(rows, problems):
         for c in COLS:
             if '\t' in r[c] or '\n' in r[c]:
                 errors.append(f"{r['ux_id']}: табуляция или перевод строки в {c}")
+        for pth in source_paths(r['source']):
+            if not os.path.exists(os.path.normpath(os.path.join(ROOT, pth))):
+                errors.append(f"{r['ux_id']}: основание {pth} не найдено (путь — от kb/site/)")
     by = {r['ux_id']: r for r in rows}
     for uid in AUDIT_FLAGGED:
         if by.get(uid, {}).get('site_action') == 'keep':
             errors.append(f'{uid}: назван аудитом UX, но оставлен keep')
     return errors
+
+
+def reconcile(rows, old_tsv, version, reviewed=None):
+    """Сверка с версией чек-листа ux → (строки отчёта, сверено ли). Новые, снятые и изменённые пункты — против профиля
+    на диске (колонки block и ux_text_short)."""
+    reviewed = CHECKLIST_REVIEWED if reviewed is None else reviewed
+    if version == reviewed:
+        return [], True
+    old = {}
+    for line in (old_tsv or '').splitlines()[1:]:
+        cells = line.split('\t')
+        if len(cells) == len(COLS):
+            old[cells[0]] = dict(zip(COLS, cells))
+    new = {r['ux_id']: r for r in rows}
+    out = [f'чек-лист ux: решения профиля сверены с версией {reviewed or "—"}, в базе — версия {version or "—"}']
+    added = [u for u in new if u not in old]
+    removed = [u for u in old if u not in new]
+    changed = [u for u in new if u in old and (old[u]['block'], old[u]['ux_text_short']) != (new[u]['block'], new[u]['ux_text_short'])]
+    for u in added:
+        r = new[u]
+        how = 'точечное решение' if r['_explicit'] else f"умолчание блока {r['block']}: {r['site_action']}"
+        out.append(f'  новый пункт {u} — {how}; подтвердить или записать точечное решение')
+    for u in removed:
+        out.append(f'  снятый пункт {u} — строка уходит из профиля')
+    for u in changed:
+        r = new[u]
+        what = 'точечное решение — пересмотреть' if r['_explicit'] else f"умолчание блока {r['block']} — подтвердить"
+        out.append(f"  изменён пункт {u}: «{old[u]['ux_text_short']}» → «{r['ux_text_short']}» ({what})")
+    if not (added or removed or changed):
+        out.append('  пункты профиля не изменились (правка — вне пунктов или дальше первых 100 знаков формулировки): сверить')
+    out.append(f'  после сверки — CHECKLIST_REVIEWED = {version!r} в scripts/site/build_profile.py и пересборка профиля')
+    return out, False
 
 
 def render_tsv(rows):
@@ -507,30 +572,90 @@ def summary_md(rows, n_ac):
     return '\n'.join(t) + '\n'
 
 
+def selftest():
+    """Сверка версии чек-листа, число строк, замены и основания — на чек-листе базы и подложенных строках; без записи."""
+    import copy
+    ok = True
+
+    def check(name, cond):
+        nonlocal ok
+        ok &= bool(cond)
+        print(('PASS ' if cond else 'FAIL ') + name)
+
+    ux = yaml.safe_load(io.open(UX_YAML, encoding='utf-8'))
+    rows, problems, _ = build(ux)
+    errors = validate(rows, problems, ux)
+    check(f'чек-лист базы: строк {len(rows)}, ошибок {len(errors)}' + (f' (первая: {errors[0]})' if errors else ''),
+          not errors and len(rows) == len(ux['items']))
+    tsv = render_tsv(rows)
+    notes, same = reconcile(rows, tsv, 'v1', reviewed='v1')
+    check('та же версия чек-листа — сверено', same and not notes)
+    notes, same = reconcile(rows, tsv, 'v2', reviewed='v1')
+    check('новая версия без изменений пунктов — версию записать после сверки', not same and any('не изменились' in n for n in notes))
+    ux2 = copy.deepcopy(ux)
+    items = ux2['items']
+    next(i for i in items if i['id'] == 'UX-FBK-14')['text'] = 'Нет появления при прокрутке — изменённая формулировка пункта'
+    gone = items.pop(next(k for k, i in enumerate(items) if i['id'] == 'UX-OUT-14'))
+    items.append(dict(gone, id='UX-OUT-99', text='Новый пункт ворот выдачи'))
+    rows2, problems2, _ = build(ux2)
+    text = '\n'.join(reconcile(rows2, tsv, 'v2', reviewed='v1')[0])
+    check('новый пункт — умолчание блока, подтвердить', 'новый пункт UX-OUT-99 — умолчание блока OUT: keep' in text)
+    check('изменённый пункт с точечным решением — пересмотреть', 'изменён пункт UX-FBK-14' in text and 'пересмотреть' in text)
+    check('снятый пункт назван', 'снятый пункт UX-OUT-14' in text)
+    check('решение для снятого пункта — ошибка', any('UX-OUT-14' in p for p in problems2))
+    check('число строк — из items_count чек-листа', any('items_count' in e for e in validate(rows2, [], dict(ux2, items_count=len(items) + 1))))
+    known = ({'SITE-OUT-10'}, {'COPY-C-05'}, {'CRV-MO-04'})
+    fake = [dict(rows[0], ux_id='UX-T-01', site_action='replaced', site_replacement='', source='PLAN №1'),
+            dict(rows[0], ux_id='UX-T-02', site_action='replaced', site_replacement='CRV-MO-99', source='PLAN №1'),
+            dict(rows[0], ux_id='UX-T-03', site_action='keep', site_replacement='', source='99-raw/tools/nope.py'),
+            dict(rows[0], ux_id='UX-T-04', site_action='modify', site_replacement='CRV-MO-04',
+                 source='../../scripts/site/ia_probe.py; PLAN №3')]
+    errs = validate(fake, [], {'items': fake}, known=known)
+    check('replaced без замены — ошибка', any(e.startswith('UX-T-01: replaced без замены') for e in errs))
+    check('CRV-* вне определений creative — ошибка', any(e.startswith('UX-T-02: CRV-MO-99') for e in errs))
+    check('основание в пустоту — ошибка', any(e.startswith('UX-T-03') and 'nope.py' in e for e in errs))
+    check('основание — утилита скилла от kb/site/ — проходит', not any(e.startswith('UX-T-04') for e in errs))
+    crv = known_ids()[2]
+    check(f'определения CRV creative: {len(crv)} id, среди них CRV-MO-04, CRV-MO-06', {'CRV-AL-01', 'CRV-MO-04', 'CRV-MO-06'} <= crv)
+    print('SELFTEST', 'OK' if ok else 'FAIL')
+    return 0 if ok else 1
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
-    ap.add_argument('--check', action='store_true')
+    ap.add_argument('--check', action='store_true',
+                    help='сверить профиль на диске с решениями и версией чек-листа ux; ничего не пишет (код 1 — расходится)')
+    ap.add_argument('--selftest', action='store_true', help='самопроверка без записи')
     a = ap.parse_args(argv)
-    rows, problems, _ = build()
-    errors = validate(rows, problems)
+    if a.selftest:
+        return selftest()
+    rows, problems, ux = build()
+    errors = validate(rows, problems, ux)
+    old = io.open(OUT_TSV, encoding='utf-8').read() if os.path.exists(OUT_TSV) else ''
+    notes, reviewed = reconcile(rows, old, str(ux.get('source_sha256_16') or ''))
     tsv = render_tsv(rows)
-    ac, n_ac = ac_profile(rows)
-    summ = summary_md(rows, n_ac)
     if a.check:
-        same = os.path.exists(OUT_TSV) and io.open(OUT_TSV, encoding='utf-8').read() == tsv
-        print('TSV совпадает с решениями' if same else 'TSV УСТАРЕЛ: перегенерировать')
+        same = old == tsv
+        print('TSV совпадает с решениями' if same else 'TSV УСТАРЕЛ: пересобрать (build_profile.py без ключей)')
+        for line in notes:
+            print(line)
         for e in errors:
             print('ОШИБКА', e)
-        return 0 if same and not errors else 1
+        return 0 if same and reviewed and not errors else 1
+    for line in notes:
+        print(line)
     for e in errors:
         print('ОШИБКА', e)
-    if errors:
+    if errors or not reviewed:
         return 1
+    ac, n_ac = ac_profile(rows)
+    summ = summary_md(rows, n_ac)
+    out_sum = kbpaths.out('site', 'build_profile') / 'summary.md'
     io.open(OUT_TSV, 'w', encoding='utf-8').write(tsv)
     io.open(OUT_AC, 'w', encoding='utf-8').write(ac)
-    io.open(OUT_SUM, 'w', encoding='utf-8').write(summ)
+    out_sum.write_text(summ, encoding='utf-8')
     print(summ)
-    print(f'записано: {os.path.relpath(OUT_TSV, ROOT)} ({len(rows)} строк), {os.path.relpath(OUT_AC, ROOT)}, {os.path.relpath(OUT_SUM, ROOT)}')
+    print(f'записано: {os.path.relpath(OUT_TSV, ROOT)} ({len(rows)} строк), {os.path.relpath(OUT_AC, ROOT)}, {out_sum}')
     return 0
 
 

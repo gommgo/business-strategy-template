@@ -190,7 +190,7 @@ page:
     load_after_consent: true
     notes: id событий — P (events.yaml); вариант hero — параметр события
   treatment:
-    art_direction_ref: ../../../creative-research/01-creative-direction/examples/art-direction-otves.json#/directions/0
+    art_direction_ref: ../../../../../creative/01-creative-direction/examples/art-direction-otves.json#/directions/0
     motion_level: expressive
     motion_system:
       thesis: 'Всё движение — вертикаль: линия-отвес опускается по этапам работы от замера до сдачи; остальное неподвижно и точно.'

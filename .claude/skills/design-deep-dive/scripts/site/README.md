@@ -46,7 +46,6 @@ ffmpeg 7.1.5.
 | `ab_plan.py` | Размер выборки и длительность A/B, проверка SRM | P, 2 |
 | `checklist_export.py` | `../../kb/site/09-ai-generation-evaluation/site-checklist.yaml` из Markdown чек-листа | K, 3 |
 | `site_validate.py` | Схемы и перекрёстные ссылки: блоки плана есть в `blocks.yaml`, слоты разрешены блоку, id фактов есть в брифе, действия и события — в словарях, у страниц карты есть планы | J, 3 |
-| `site_brief_to_kimi.py` | Проекция `site-brief` + `page-plan` в `brief.yaml` kimi (проверка — `build_package.py check`, выход только в `../../kb/site/99-raw/experiments/`) | J, 3 |
 | `plan_to_assets.py` | Каркас плана ассетов ai-media (`../../kb/ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md` §8) из медиа-слотов `page-plan` | J, 3 |
 | `check_links.py` | Ссылки `→ §`, `../../kb/site/99-raw/`, `[S<n>]`, `[V:<id>]`, README папок, разделы формата, метки опытов — копия версии text, адаптированная оркестратором перед аудитом (не копия kimi, как планировалось); раздел ниже | оркестратор; правки X2, S1 — 4 |
 | `sources_collect.py` | `90-sources/sources.tsv` и автоблок `90-sources/README.md` из разделов «Источники» и шапок дайджестов (копия версии text) | S1, 4 (v1.1 — S1b) |
@@ -85,32 +84,35 @@ ffmpeg 7.1.5.
 Путь по умолчанию в коде — папка задач сессии 1; сессия 2 (24–25.09) задаёт
 `CTX_WATCH_TASKS=/tmp/claude-1000/<проект>/<id сессии>/tasks` (журнал оркестратора, 2026-09-24).
 
-## `vocab_lint.py` — идентификаторы вне словаря (агент B, волна 1, 24.09.2026)
+## `vocab_lint.py` — идентификаторы вне словаря и таблица соответствий
 
-Проверяет YAML, JSON и Markdown на id, которых нет в `../../kb/site/02-site-types/vocabulary.yaml` (14 пространств: `site_type`,
-`page_type`, `section_role`, `block_family`, `block`, `slot_kind`, `slot`, `macrostructure`, `action`, `awareness`,
-`traffic_temperature`, `traffic_source`, `jurisdiction`, `ambition_level`). Только стандартная библиотека и PyYAML; сеть и
-браузер не нужны.
+Проверяет YAML, JSON и Markdown на id, которых нет в `kb/site/02-site-types/vocabulary.yaml` (пространства `site_type`,
+`page_type`, `section_role`, `block_family`, `block`, `slot_kind`, `slot`, `macrostructure`, `first_screen_policy`,
+`action`, `awareness`, `traffic_temperature`, `traffic_source`, `jurisdiction`, `ambition_level`, `conversion_channel`,
+`procedure_step`), и таблицу соответствий словарей `kb/site/02-site-types/crosswalk.tsv`. Только стандартная библиотека и
+PyYAML; сеть и браузер не нужны.
 
-- Запуск: `python3 vocab_lint.py ../../kb/site/04-blocks/blocks.yaml 04-blocks/examples/page-plan-*.yaml` · `--selftest`.
+- Запуск: `python3 scripts/site/vocab_lint.py kb/site/04-blocks/blocks.yaml kb/site/10-playbooks-contracts/examples/*/plans/*.yaml`
+  · `--check-crosswalk` · `--selftest`.
 - Что ловит: (1) значения ключей из карты по умолчанию (`page_type`, `site_type`, `role`/`section_role`/`serves`, `block`,
   `family`, `slot`, `slot_kind`, `macrostructure`, `action`/`primary_action`/`secondary_actions`, `awareness`,
   `temperature`, `traffic_source(s)`, `jurisdiction`, `ambition_level`) на любой глубине, строка или список; (2) ссылки с
   префиксом в любой строке и в Markdown (`block:`, `slot:`, `section-role:`, `page-type:`, `site-type:`, `action:`,
   `macrostructure:` …; чужие `effect:`, `fact:`, `task:`, `recipe:`, `copy-rule:` пропускаются); (3) ключи-id
   (`--keys-as-ids blocks=block`); (4) статусы: `deprecated` и `out-of-scope` — предупреждение (с заменой), `measurement-only`
-  — ошибка (кроме `--allow-measurement`), `proposed` — сведение (`--show-info`).
+  — ошибка (кроме `--allow-measurement`), `proposed` — сведение (`--show-info`); (5) `--check-crosswalk` — таблица
+  соответствий: колонки строго по формату, `relation` из перечня `equal` · `narrower` · `broader` · `related` · `none`,
+  `our_id` — id словаря своего пространства, у `none` — пустой `our_id` и причина в `note`; `deprecated` и повтор строки —
+  предупреждение. Новый id — сначала словарь, затем строка таблицы; другой файл таблицы — `--crosswalk`.
 - Карта: `--map KEY=NAMESPACE` (много раз); ключ с точкой — суффикс пути (`--map site.sections.id=section_role`);
-  `--no-default-map` — для чужих форматов, где `role`, `family`, `id` значат другое (опыт B/03: без этого 31–34 ложные
-  ошибки на файлах соседей).
-- Подсказки: ближайший id при опечатке (`difflib`, порог 0,75); с `--crosswalk ../../kb/site/02-site-types/crosswalk.tsv` — наш id для
-  чужого термина (приоритет equal → narrower → related → broader; `--source-base` ограничивает базу); `--stats` — сводка
-  mapped / none / absent.
+  `--no-default-map` — для чужих форматов, где `role`, `family`, `id` значат другое.
+- Подсказки: ближайший id при опечатке (`difflib`, порог 0,75); с `--crosswalk kb/site/02-site-types/crosswalk.tsv` — наш id
+  для чужого термина (приоритет equal → narrower → related → broader; `--source-base` ограничивает базу); `--stats` —
+  сводка mapped / none / absent.
 - Выход: `путь:строка: уровень пространство 'id' — сообщение`, сводка; код 1 при ошибках. Номера строк — из узлов PyYAML
   (JSON разбирается тем же парсером).
-- Проверено: `--selftest` 9/9 PASS (опыт `99-raw/experiments/B/04-selftest/`); прогон по плану ассетов ai-media и брифам
-  kimi — `99-raw/experiments/B/03-lint-foreign/`. Ограничения: не проверяет, что слот разрешён блоку и что факт существует
-  (это `site_validate.py`, J); ключи-свободные строки соседей (`primary_action` kimi) без проекции всегда дают ошибку.
+- Ограничения: не проверяет, что слот разрешён блоку и что факт существует (это `site_validate.py`); строки чужих
+  форматов без карты дают ложные ошибки — для них `--no-default-map`.
 
 ## `page_anatomy.py` — анатомия живой страницы (агент M, волна 1, 2026-09-24)
 
@@ -338,27 +340,66 @@ SG-A11Y-01 — контраст по классам узлов (профиль I
 совпадает с Markdown, код 1 — нет) · `--selftest` (16 проверок разбора) · `--md FILE --out FILE`. Только стандартная
 библиотека (PyYAML — если есть — для проверки валидности).
 
-## `site_validate.py`, `site_brief_to_kimi.py`, `plan_to_assets.py` — контракты v1 (агент J, волна 3, 2026-09-24)
+## `site_validate.py` — схемы и перекрёстные ссылки контрактов сайта
 
-Python 3.13 + PyYAML; схемы — jsonschema + referencing (нет в системном python — `site_validate.py` сам перезапускается в
-`venv-J` | `venv-A` | `venv-E`). Сеть и браузер не нужны. Kimi не запускается.
+Проверяет бриф (`site-brief`), план страницы (`page-plan`), карту сайта (`site-map`), каталог блоков и наборы форм по схемам
+v1 `kb/site/10-playbooks-contracts/schemas/` и связи между ними; файл другой версии — ошибка схемы. Коды находок —
+`kb/site/10-playbooks-contracts/01-procedure-brief-to-pages.md` §12. Нужны PyYAML, jsonschema и referencing: в системном
+python без них утилита перезапускается Python окружения скилла. Сеть и браузер не нужны.
 
 | Запуск | Что делает |
 |---|---|
-| `python3 site_validate.py PATH… [--today ГГГГ-ММ-ДД] [--json OUT] [--quiet]` | тип файла по ключам: бриф (SB-*), план (PL-*), карта (SM-*), каталог (BL-*), формы (LF-*); папка — проект (бриф + `facts.yaml` + `site-map.yaml` + `plans/*.yaml`, PJ-*); схема по полю версии (v0/v0.9 владельцев или v1 `../../kb/site/10-playbooks-contracts/schemas/`); код 1 при error |
-| `python3 site_validate.py --all` | все контракты базы: `blocks.yaml`, `lead-forms.yaml`, бриф A, планы E, карты G, примеры J |
-| `python3 site_validate.py --selftest` | пример `lead-services-otves` проходит, 15 отрицательных случаев падают своим кодом |
-| `python3 99-raw/tools/site_brief_to_kimi.py --brief B --plan P --out DIR [--sitemap M] [--fills F] [--copy-deck C] [--check]` | `brief.yaml` kimi (только ключи шаблона), `acceptance-site.md` (блоки I–L), `projection.tsv`; `--check` — `build_package.py questions/build/check` в DIR (выход — только в `../../kb/site/99-raw/experiments/`) |
+| `python3 scripts/site/site_validate.py PATH… [--today ГГГГ-ММ-ДД] [--json OUT] [--quiet]` | тип файла по ключам: бриф (SB-*), план (PL-*), карта (SM-*), каталог (BL-*), формы (LF-*); папка поверхности — бриф, факты, карта и планы `plans/<page-id>.yaml` (PJ-*); код 1 при error |
+| `python3 scripts/site/site_validate.py --all` | каталог блоков, наборы форм и примеры `kb/site/10-playbooks-contracts/examples/` |
+| `python3 scripts/site/site_validate.py --selftest` | пример `lead-services-otves` проходит; посеянные дефекты падают каждый своим кодом |
+
+- **Бриф.** Бренд продукта — ссылкой `brand.ref` на `docs/projects/<slug>/design/brand.yaml` (путь от брифа): файла
+  нет — SB-B01, файл не проходит схему `kb/common/brand.schema.yaml` — SB-B02. Темы `themes`: две темы без переключателя
+  (`switcher: true`) — SB-C01; тёмная или «по системе» без второй темы — SB-C02; при двух темах умолчание не по системе —
+  SB-C03 (ui 11/03 §6.4).
+  Правило лидогенерации услуг (SB-A03) — поля `levels[id=L0].appropriate_for.lead_services` файла
+  `kb/creative/01-creative-direction/ambition-levels.yaml`: тип страницы, порог доли горячего трафика с телефонов, полосы
+  цены, уровень без данных о трафике и уровень, когда порог не достигнут.
+- **План.** Умолчания уровня по типу страницы (PL-P02) — `defaults_by_page_type` того же файла вместе с разделом
+  `proposed`. Подача (PL-C01) — находки `scripts/creative/spec_check.py plan` (нормы подачи ведёт creative): уровень
+  секции, конверсия, пики, акценты, фирменные приёмы, референсы, петли, плавная прокрутка; проверяется, когда в плане
+  заполнены контейнеры `treatment`. Уровни эффектов секций и переходов страниц (PL-C02) — `x-effect-levels` подсхемы
+  `treatment` и `limits.library_level_min` эффекта `page-transition` (`kb/creative/06-effects-catalog/effects.yaml`):
+  нативный кросс-документный переход — с L1, библиотеки и JS-переходы — L2. 3D-слот: рецепт `recipe:<id>` есть в
+  `kb/blender/12-recipes/` (PL-D02); ниже первого экрана загрузка по намерению `on-interaction`, `on-visible` — риск длинных
+  кадров прокрутки (EG-PERF-01), `after-lcp` — предупреждение (PL-D03).
+- **Ограничения:** длины текстов — text; порядок ролей из осведомлённости — человек и судья.
+- Схемы v0 и v0.9 (`kb/site/01-foundations/site-brief.schema.json`, `kb/site/04-blocks/page-plan.schema.json`,
+  `kb/site/04-blocks/blocks.schema.json`, `kb/site/06-multipage-ia/site-map.schema.json`) утилиты скилла не читают.
+
+## `plan_to_assets.py` — каркас плана ассетов из плана страницы
+
+| Запуск | Что делает |
+|---|---|
 | `python3 plan_to_assets.py PLAN [--out F] [--check]` | каркас плана ассетов ai-media (01/01 §8) из медиа- и 3D-слотов; `--check` — поля и перечисления §8 |
 
-- Перенесено: SB-* — `99-raw/experiments/A/01-schema-validate/validate.py` (A); проверки плана и каталога — `99-raw/experiments/E/01-validate/validate.py`
-  (E); проекция — `99-raw/experiments/A/02-kimi-projection/project.py` (A). Добавлено: 23 проверки карты G (включая граф входящих
-  ссылок и крошки по глубине), право I (согласие ПД в ru, `req:`, оператор, cookie), события P, профиль бюджета и уровни (решение 20),
-  `x-gate-exception`, `plan_cross` creative, `expires`, «популярный», минимумы доказательств F, id секций из роли или блока (K).
-- Проверено (опыт J/04): `--all` — error 0 (warning 12 объяснены в README опыта); `--selftest` — OK; проекции трёх примеров — `build_package.py`
-  0 ошибок (J/03); каркасы плана ассетов — 0 ошибок полей §8.
-- Ограничения: длины текстов не проверяются (text); порядок ролей из осведомлённости — человек и судья; `claude_fills` в проекции — из
-  `--fills` (по умолчанию помеченная заглушка A/02); A3 и NAV_RULE kimi не заменяются — строки в `decisions.extra`.
+## `build_profile.py` — маркетинговый профиль UX-чек-листа
+
+Решение по каждому пункту `UX-*` сводного чек-листа ux для страниц сайта — `keep`, `modify`, `off` или `replaced` с
+заменой `SITE-*`, `CRV-*`, `COPY-*`, причиной и основанием: `kb/site/09-ai-generation-evaluation/ux-marketing-profile.tsv`;
+рядом — наследование автопроверок `AC-*` (`kb/site/99-raw/experiments/K/02-ux-profile/ac-profile.tsv`) и сводка в
+`$DDD_HOME/out/site/build_profile/`. Решения — по блокам с точечными исключениями в коде утилиты: профиль — производный
+файл, правится решением в утилите и пересборкой. Только стандартная библиотека и PyYAML.
+
+| Запуск | Что делает |
+|---|---|
+| `python3 scripts/site/build_profile.py` | пересобрать профиль, `ac-profile.tsv` и сводку |
+| `python3 scripts/site/build_profile.py --check` | профиль на диске совпадает с решениями, версия чек-листа ux сверена; ничего не пишет; код 1 — нет |
+| `python3 scripts/site/build_profile.py --selftest` | сверка версии, число строк, замены и основания — на подложенных данных |
+
+- **Сверка с версией чек-листа ux.** Решения сверены с версией `CHECKLIST_REVIEWED` (поле `source_sha256_16`
+  `kb/ux/12-evaluation-checklists/master-checklist.yaml`). Новая версия — запись и `--check` отказывают со списком новых,
+  снятых и изменённых пунктов против профиля на диске: новый пункт без точечного решения получает умолчание блока,
+  изменённый пункт с точечным решением — на пересмотр. После сверки версия записывается в `CHECKLIST_REVIEWED`, профиль
+  пересобирается отдельным коммитом.
+- **Проверки строк:** число строк — `items_count` чек-листа; у `replaced` есть замена; `SITE-*` — в `site-checklist.yaml`,
+  `COPY-*` — в чек-листе или рубрике text, `CRV-*` — в определениях creative; путь-основание в колонке `source` (от
+  `kb/site/`) ведёт в существующий файл или папку; пункты, которые аудит UX назвал спорными для лендинга, — не `keep`.
 
 ## `sources_collect.py` — сводная библиография (агент S1, волна 4, 2026-09-25; v1.1 — продолжатель S1b)
 

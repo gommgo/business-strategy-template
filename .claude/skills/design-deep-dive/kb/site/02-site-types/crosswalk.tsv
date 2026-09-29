@@ -193,6 +193,7 @@ text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	emai
 text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	email-body	slot	email-body	equal	id взят как есть
 text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	email-cta-label	slot	email-cta-label	equal	id взят как есть
 text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	email-footer	slot	email-footer	equal	id взят как есть
+text-research	../text/04-copy-by-block/04-form-emails-notifications.md	§3.3 «Имя отправителя» (предложение к словарю)	proposal	email-sender-name	slot	email-sender-name	equal	id взят как есть; правила имени отправителя — text 04/04 §3.3
 text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	image-alt	slot	image-alt	equal	id взят как есть
 text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	in-image-text	slot	in-image-text	equal	id взят как есть
 text-research	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	stat-source	slot	stat-source	equal	предложение E text (proposal) — принято, status: proposed

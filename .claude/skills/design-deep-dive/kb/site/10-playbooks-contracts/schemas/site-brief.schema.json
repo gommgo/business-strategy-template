@@ -2,12 +2,364 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:app-design:site-research:site-brief:1",
   "title": "site-brief v1 — бриф сайта (лендинг или многостраничный сайт)",
-  "description": "Единый бриф сайта для тройки site · text · creative и проекции в brief.yaml kimi. Владелец схемы — site (01-foundations/03-site-brief.md). Блок meaning — схема text ($ref), proof — ссылка на facts.yaml text, ambition/references/brand — поля creative. Пустое поле — решение, отданное модели: минимум по типу сайта задан условиями allOf ниже. Идентификаторы site_type, page_type, action, traffic_source, jurisdiction — словарь v1 (02-site-types/vocabulary.yaml v1 released, 2026-09-24): site_type, page_type, action, traffic_source, jurisdiction, conversion_channel. v1 (J, волна 3): поля подачи creative C1 (ambition.*, brand.expression, references[].applies_to/captured/take/dont_take), политика окна захвата engaged (F), обещание срока ответа (F), правовой опросник constraints.legal_intake (I 01 §6 шаг 1), исходные данные редизайна intake.baseline (V, W: «новый сайт — с проверкой»), новые page_type G. Журнал — 10-playbooks-contracts/README.md.",
+  "description": "Единый бриф сайта (лендинг или многостраничный сайт) для тройки site · text · creative; бриф холста — его проекция по ключу x-canvas-map. Владелец схемы — site (01-foundations/03-site-brief.md). Блок meaning — схема text ($ref), proof — ссылка на facts.yaml text, ambition, references и выражение бренда — поля creative; бренд продукта — ссылкой brand.ref на файл бренда слоя дизайна (kb/common/brand.schema.yaml); тема — блок themes. Пустое поле — решение, отданное модели: минимум по типу сайта задан условиями allOf ниже. Идентификаторы site_type, page_type, action, traffic_source, jurisdiction, conversion_channel — словарь 02-site-types/vocabulary.yaml.",
   "x-version": 1,
   "x-checked": "2026-09-24",
   "x-owner": "site-research · v0 — агент A (01-foundations, волна 1); v1 — агент J (10-playbooks-contracts/schemas, волна 3)",
   "x-doc": "01-foundations/03-site-brief.md",
-  "x-kimi-projection": "01-foundations/site-brief.kimi-map.tsv (колонки site_path, kimi_path, rule, note; rule ∈ copy | map | derive | drop | claude_fills)",
+  "x-canvas-map": {
+    "source": "site-brief",
+    "stages": [
+      "directions",
+      "wireframe",
+      "mockup",
+      "motion"
+    ],
+    "files": {
+      "brief.yaml": {
+        "project.slug": {
+          "rule": "copy",
+          "from": [
+            "/project/slug"
+          ],
+          "note": "slug проекта; поверхность и её род — строка реестра surface.md, этап — параметр сборщика"
+        },
+        "product.name": {
+          "rule": "copy",
+          "from": [
+            "/business/name"
+          ]
+        },
+        "product.description": {
+          "rule": "derive",
+          "from": [
+            "/business/what"
+          ],
+          "note": "строка «что продаём» — когда смысла нет; основное правило «X — Y для Z» — карта meaning"
+        },
+        "product.goal": {
+          "rule": "derive",
+          "from": [
+            "/business/goal/primary",
+            "/business/goal/note"
+          ],
+          "note": "бизнес-цель словами заказчика — когда в смысле нет ядра ценностного предложения с основанием; основное правило — карта meaning"
+        },
+        "product.target_user": {
+          "rule": "derive",
+          "from": [
+            "/traffic/sources/*/source",
+            "/traffic/sources/*/temperature"
+          ],
+          "note": "главный источник трафика брифа и его температура — к двум фразам карты meaning (сегмент, ситуация, осведомлённость)"
+        },
+        "product.pages": {
+          "rule": "map",
+          "from": [
+            "/pages/mode",
+            "/pages/list/*/id",
+            "/pages/list/*/page_type",
+            "/pages/list/*/priority",
+            "site-map#/build_order"
+          ],
+          "note": "порядок передачи — главная первой; у рода site — build_order карты сайта"
+        },
+        "product.locale": {
+          "rule": "copy",
+          "from": [
+            "/languages/*/lang",
+            "/languages/*/role"
+          ],
+          "note": "язык с ролью primary; второй язык — свой copy deck и свой вход"
+        },
+        "product.viewport_primary": {
+          "rule": "derive",
+          "from": [
+            "/traffic/sources/*/device",
+            "/traffic/sources/*/share"
+          ],
+          "note": "устройство источника с наибольшей долей: mobile → 390x844, иначе 1440x900"
+        },
+        "decisions.mobile": {
+          "rule": "derive",
+          "from": [
+            "/traffic/sources/*/device",
+            "/traffic/sources/*/share"
+          ],
+          "note": "доля телефона в трафике → responsive · mobile-first · mobile-cut-pass (cd 06/01 §6); видео в первом экране, cinematic и больше двух колонок — по планам и подаче; переопределение — «Условия холста»"
+        },
+        "decisions.motion.level": {
+          "rule": "derive",
+          "from": [
+            "/ambition/level",
+            "/ambition/by_page",
+            "/ambition/by_section_role",
+            "/ambition/motion_cap",
+            "ambition-levels#/levels/*/maps_to/claude_design/motion_level",
+            "ambition-levels#/motion_caps"
+          ],
+          "note": "уровень страницы (by_page, иначе level) → maps_to.claude_design.motion_level уровня; сверху — motion_cap брифа; уровень секции — by_section_role; на статичном макете движения нет",
+          "stages": [
+            "motion"
+          ]
+        },
+        "design_system.knobs.theme": {
+          "rule": "derive",
+          "from": [
+            "/themes/default",
+            "/themes/dark/needed",
+            "/themes/switcher"
+          ],
+          "note": "одна тема — её имя; две — светлая и тёмная, умолчание по системе и переключатель на макете; артборды тёмной темы — на тех же ширинах",
+          "stages": [
+            "directions",
+            "mockup"
+          ]
+        },
+        "design_system.allow": {
+          "rule": "derive",
+          "from": [
+            "/ambition/allow/markers",
+            "art-direction#/decisions/*/k3_allow",
+            "art-direction#/exclusions/k3_allow"
+          ],
+          "note": "ключи --allow: приметы, которые заказал бриф, и ключи решений арт-дирекции (kb/common/tells.yaml#checks)"
+        },
+        "design_system.bans": {
+          "rule": "derive",
+          "from": [
+            "/ambition/forbid/cliches",
+            "/ambition/forbid/effects",
+            "art-direction#/exclusions/bans"
+          ],
+          "note": "клише и эффекты, которые запретил заказчик, — в бан-лист холста вместе с исключениями арт-дирекции"
+        },
+        "brand.logo": {
+          "rule": "derive",
+          "from": [
+            "/brand/ref",
+            "brand#/logo/files"
+          ],
+          "note": "SVG-логотип бренда продукта по ссылке brand.ref; цвета и шрифты бренда уже в ДС",
+          "stages": [
+            "directions",
+            "mockup"
+          ]
+        },
+        "brand.never": {
+          "rule": "derive",
+          "from": [
+            "/brand/ref",
+            "brand#/logo/never"
+          ],
+          "note": "«никогда» бренда продукта по ссылке brand.ref",
+          "stages": [
+            "directions",
+            "mockup"
+          ]
+        },
+        "build.stack": {
+          "rule": "copy",
+          "from": [
+            "/constraints/stack",
+            "/constraints/cms"
+          ],
+          "note": "стек и CMS заказчика — контекст для кода `<org>/site`",
+          "stages": [
+            "mockup"
+          ]
+        },
+        "questions[]": {
+          "rule": "map",
+          "from": [
+            "/questions/*/q",
+            "/questions/*/answer",
+            "/questions/*/default",
+            "/questions/*/status",
+            "/questions/*/asked",
+            "/questions/*/source",
+            "/questions/*/date"
+          ],
+          "note": "вопросы со статусом answered (ответ) и assumed (умолчание с пометкой «допущение»); open и withdrawn не идут"
+        }
+      },
+      "ACCEPTANCE.md": {
+        "доступность": {
+          "rule": "copy",
+          "from": [
+            "/constraints/accessibility"
+          ],
+          "note": "целевой уровень WCAG брифа — критерий приёмки группы доступности"
+        }
+      }
+    },
+    "drop": [
+      {
+        "from": [
+          "/version",
+          "/checked",
+          "/project/status",
+          "/project/prepared_by",
+          "/project/approval"
+        ],
+        "note": "служебные поля; статус, утверждение и отпечаток брифа — строка источника в INPUT.md"
+      },
+      {
+        "from": [
+          "/intake"
+        ],
+        "note": "разбор заказа и исходные данные редизайна исполнителю не нужны"
+      },
+      {
+        "from": [
+          "/site_type",
+          "/primary_page_type"
+        ],
+        "note": "род поверхности — строка реестра surface.md; тип страницы доходит через план (page.page_type)"
+      },
+      {
+        "from": [
+          "/business/legal_name",
+          "/business/kind",
+          "/business/kpi",
+          "/business/geography",
+          "/decision_context"
+        ],
+        "note": "сведения о бизнесе, метрики и контекст решения — основание смысла, фактов и уровня; исполнителю — тексты и факты"
+      },
+      {
+        "from": [
+          "/conversion"
+        ],
+        "note": "действие, цель призыва и формы доходят через план: page.primary_action, cta_target, слоты действия с form.ref; обещание срока ответа — факт"
+      },
+      {
+        "from": [
+          "/traffic/sources/*/promise_of_source",
+          "/traffic/sources/*/entry_page",
+          "/traffic/sources/*/campaign",
+          "/traffic/sources/*/geo",
+          "/traffic/sources/*/in_app_browser",
+          "/traffic/note"
+        ],
+        "note": "детали трафика — основание осведомлённости, message match и плана; исполнителю — устройство и главный источник"
+      },
+      {
+        "from": [
+          "/offer"
+        ],
+        "note": "оффер воплощён в текстах copy deck; цены и условия — facts.md"
+      },
+      {
+        "from": [
+          "/meaning",
+          "/meaning_ref"
+        ],
+        "note": "тело смысла воплощено в текстах; описание, цель и аудиторию продукта проецирует и карта meaning"
+      },
+      {
+        "from": [
+          "/proof"
+        ],
+        "note": "доказательства — facts.md по карте facts; сбор доказательств исполнителю не нужен"
+      },
+      {
+        "from": [
+          "/constraints/jurisdiction",
+          "/constraints/legal_category",
+          "/constraints/legal_note",
+          "/constraints/legal_intake"
+        ],
+        "note": "юрисдикция и право доходят через план (page.jurisdiction, page.legal); отрасль — правила текстов"
+      },
+      {
+        "from": [
+          "/constraints/hosting",
+          "/constraints/integrations",
+          "/constraints/deadline",
+          "/constraints/budget"
+        ],
+        "note": "условия проекта — не вход холста; код-репо читает бриф сам"
+      },
+      {
+        "from": [
+          "/policies"
+        ],
+        "note": "политики окон, чата, прелоадера и cookie доходят через overlays плана (сверка PL-O02); обоснования исполнителю не нужны"
+      },
+      {
+        "from": [
+          "/analytics",
+          "/search"
+        ],
+        "note": "аналитика и поиск — код сайта, на артборд не идут"
+      },
+      {
+        "from": [
+          "/languages/*/scope",
+          "/languages/*/note"
+        ],
+        "note": "охват второго языка — карта сайта и свой copy deck"
+      },
+      {
+        "from": [
+          "/pages/list/*/purpose",
+          "/pages/list/*/main_sources",
+          "/pages/list/*/action",
+          "/pages/list/*/note",
+          "/pages/exclude",
+          "/pages/note"
+        ],
+        "note": "назначение, источники и действие страниц — основание планов; исполнителю — планы"
+      },
+      {
+        "from": [
+          "/ambition/source",
+          "/ambition/note",
+          "/ambition/allow/effects",
+          "/ambition/allow/why",
+          "/ambition/forbid/words",
+          "/ambition/forbid/why"
+        ],
+        "note": "откуда уровень и причины — решение брифа; эффекты выбраны в подаче и спецификации движения; слова-запреты — правила текстов, исполнитель тексты не пишет"
+      },
+      {
+        "from": [
+          "/themes/dark/why"
+        ],
+        "note": "причина второй темы — решение брифа"
+      },
+      {
+        "from": [
+          "/brand/expression"
+        ],
+        "note": "выражение бренда воплощено в направлениях и исключениях арт-дирекции"
+      },
+      {
+        "from": [
+          "/references"
+        ],
+        "note": "референсы заказчика доходят через мудборд арт-дирекции: направление берёт их со своими «брать» и «не брать»"
+      },
+      {
+        "from": [
+          "/assets_available"
+        ],
+        "note": "наличие материалов — вход плана ассетов; исполнителю — план ассетов и загрузки"
+      },
+      {
+        "from": [
+          "/questions/*/id",
+          "/questions/*/block",
+          "/questions/*/why",
+          "/questions/*/options",
+          "/questions/*/affects",
+          "/questions/*/priority"
+        ],
+        "note": "служебные поля журнала вопросов; исполнителю — вопрос, ответ и откуда он"
+      }
+    ]
+  },
   "x-fill-legend": {
     "customer": "знает только заказчик: спросить (факты — свободным ответом)",
     "claude": "Claude выводит сам из брифа и материалов и показывает в блоке «Going with»",
@@ -31,13 +383,13 @@
   "additionalProperties": false,
   "patternProperties": {
     "^x-": {
-      "description": "Расширения проекта; валидатор их не проверяет, в kimi не уходят."
+      "description": "Расширения проекта; валидатор их не проверяет, во вход холста они не идут."
     }
   },
   "properties": {
     "version": {
       "const": 1,
-      "description": "Версия формата site-brief (эта схема — v1; файлы v0 проверяются схемой 01-foundations).",
+      "description": "Версия формата site-brief.",
       "x-owner": "site"
     },
     "checked": {
@@ -139,12 +491,12 @@
         "slug",
         "status"
       ],
-      "description": "Паспорт брифа. Пути project.slug и project.status совпадают с brief.yaml kimi.",
+      "description": "Паспорт брифа.",
       "x-owner": "site",
       "properties": {
         "slug": {
           "$ref": "#/$defs/id",
-          "description": "Имя проекта латиницей: как в facts.yaml (site), meaning (site) и project.slug kimi.",
+          "description": "Имя проекта латиницей — slug проекта: как в facts.yaml (site) и meaning (site).",
           "x-fill": "claude"
         },
         "status": {
@@ -153,7 +505,7 @@
             "proposed",
             "approved"
           ],
-          "description": "draft — черновик Claude; proposed — показан заказчику с вопросами и «Going with»; approved — заказчик подтвердил (в kimi: proposed → draft).",
+          "description": "draft — черновик Claude; proposed — показан заказчику с вопросами и «Going with»; approved — заказчик подтвердил.",
           "x-fill": "claude"
         },
         "prepared_by": {
@@ -210,7 +562,7 @@
         "name": {
           "type": "string",
           "minLength": 1,
-          "description": "Название бренда или компании, как на сайте (→ product.name kimi)."
+          "description": "Название бренда или компании, как на сайте (→ product.name брифа холста)."
         },
         "legal_name": {
           "type": "string",
@@ -257,7 +609,7 @@
             },
             "note": {
               "type": "string",
-              "description": "Бизнес-цель словами заказчика (→ product.goal kimi, если нет обещания в meaning)."
+              "description": "Бизнес-цель словами заказчика (→ product.goal брифа холста, если в смысле нет ядра ценностного предложения)."
             }
           }
         },
@@ -423,7 +775,7 @@
             "kind",
             "value"
           ],
-          "description": "Куда ведёт главный призыв (→ site.cta.target kimi).",
+          "description": "Куда ведёт главный призыв (→ site.cta.target брифа холста через page.cta_target плана).",
           "properties": {
             "kind": {
               "enum": [
@@ -540,7 +892,7 @@
                   "desktop",
                   "mixed"
                 ],
-                "description": "Преобладающее устройство источника (→ product.viewport_primary kimi)."
+                "description": "Преобладающее устройство источника (→ product.viewport_primary брифа холста)."
               },
               "promise_of_source": {
                 "type": "string",
@@ -828,7 +1180,7 @@
         },
         "stack": {
           "type": "string",
-          "description": "Стек, если задан заказчиком (→ build.stack kimi)."
+          "description": "Стек, если задан заказчиком (→ build.stack брифа холста)."
         },
         "hosting": {
           "type": "string",
@@ -1407,7 +1759,7 @@
             "expressive",
             "cinematic"
           ],
-          "description": "Потолок движения kimi поверх уровня (аудитория 45+, B2G, вестибулярная чувствительность, слово заказчика)."
+          "description": "Потолок движения холста (decisions.motion.level) поверх уровня: аудитория 45+, B2G, вестибулярная чувствительность, слово заказчика."
         },
         "allow": {
           "type": "object",
@@ -1438,7 +1790,7 @@
                   "caps"
                 ]
               },
-              "description": "Ключи --allow k3_checks.py 1.0 (kimi-research/99-raw/tools/k3_checks.py ALLOW_KEYS, 2026-09-24): приметы, которые заказчик заказал сам."
+              "description": "Ключи --allow проверок макета (kb/common/tells.yaml, раздел checks, поле allow): приметы, которые заказчик заказал сам."
             },
             "effects": {
               "type": "array",
@@ -1546,50 +1898,83 @@
         }
       ]
     },
-    "brand": {
+    "themes": {
       "type": "object",
-      "description": "Бренд: логотип, цвета ролями, шрифты с кириллицей, голос — структура brief.yaml kimi `brand` (templates/brand.json; путь совпадает). Выражение бренда на сайте — creative; очистка и проверка — Claude (kimi 07/03 §4).",
-      "x-owner": "customer (исходники) · creative (выражение)",
+      "additionalProperties": false,
+      "description": "Темы сайта: светлая — по умолчанию; тёмная — решение брифа с причиной; при двух темах переключатель на странице обязателен, умолчание — по системе (prefers-color-scheme), отраслевые исключения — ui 11/03 §6.4. Та же форма — у брифа на вид кабинета (app-brief).",
+      "x-owner": "site (решение брифа); правила — ui 11/03 §6.4",
       "x-fill": "customer",
       "properties": {
-        "name": {
-          "type": "string"
-        },
-        "status": {
+        "default": {
           "enum": [
-            "none",
-            "draft",
-            "verified"
+            "light",
+            "dark",
+            "system"
+          ],
+          "default": "light",
+          "description": "Тема при первом входе: light или dark — одна тема или отраслевая причина (финансы, медицина, длинный текст — светлая; инструмент разработчика, мониторинг — тёмная); system — по настройке устройства, при двух темах."
+        },
+        "dark": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "needed": {
+              "type": "boolean",
+              "default": false,
+              "description": "Нужна ли тёмная тема — вторая тема сайта."
+            },
+            "why": {
+              "type": "string",
+              "minLength": 3,
+              "description": "Причина второй темы: отрасль, аудитория, слово заказчика."
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "required": [
+                  "needed"
+                ],
+                "properties": {
+                  "needed": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "why"
+                ]
+              }
+            }
           ]
         },
-        "guidelines_ref": {
+        "switcher": {
+          "type": "boolean",
+          "description": "Переключатель темы на странице; при двух темах — true (сверяет site_validate.py, SB-C01)."
+        }
+      }
+    },
+    "brand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ],
+      "description": "Бренд продукта — ссылкой на файл бренда слоя дизайна (форма — kb/common/brand.schema.yaml, urn:app-design:common:brand:1): логотип, цвета ролями, шрифты с кириллицей, «никогда», голос ссылкой; поля бренда здесь не повторяются. В брифе — выражение бренда на этом сайте.",
+      "x-owner": "site (ссылка) · creative (выражение); бренд продукта — слой дизайна",
+      "x-fill": "customer",
+      "properties": {
+        "ref": {
           "type": "string",
-          "description": "Путь к брендбуку или гайду."
-        },
-        "logo": {
-          "type": "object"
-        },
-        "colors": {
-          "type": "object"
-        },
-        "fonts": {
-          "type": "object"
-        },
-        "voice": {
-          "type": "object",
-          "description": "Голос бренда — профиль голоса text (voice_ref) после волны 2."
-        },
-        "sources": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "minLength": 1,
+          "description": "Путь к бренду продукта от брифа: ../../design/brand.yaml."
         },
         "expression": {
           "type": "object",
           "additionalProperties": false,
           "x-owner": "creative",
-          "description": "Выражение бренда на сайте (creative C1): что обязательно, что свободно, чего избегать, насколько строго; выбранное направление art-direction.",
+          "description": "Выражение бренда на этом сайте (creative): что обязательно, что свободно, чего избегать, насколько строго; своё у каждого мира.",
           "properties": {
             "mode": {
               "enum": [
@@ -1666,7 +2051,8 @@
                 "date": {
                   "$ref": "#/$defs/date"
                 }
-              }
+              },
+              "description": "Не заполняется: выбор направления живёт в арт-дирекции (art-direction.choice)."
             }
           }
         }
@@ -1674,7 +2060,7 @@
     },
     "references": {
       "type": "array",
-      "description": "Референсы: id библиотеки creative (`ref:<id>`) или URL с ролью; файлы и замеры для kimi готовит Claude.",
+      "description": "Референсы, которые принёс заказчик на брифе: запись его слова (source: customer), `ref:<id>` библиотеки creative или URL с ролью; мудборд — арт-дирекция; один референс — одно место (applies_to).",
       "x-owner": "creative",
       "x-fill": "sister:creative",
       "items": {
@@ -1727,7 +2113,7 @@
     },
     "questions": {
       "type": "array",
-      "description": "Единый журнал вопросов брифа (ответ на вопрос 4 text B1): вопросы всех блоков, допущения (status: assumed) и ответы. Путь совпадает с questions[] kimi; лишние ключи проекция отбрасывает.",
+      "description": "Единый журнал вопросов брифа: вопросы всех блоков, допущения (status: assumed) и ответы. Во вход холста идут answered и assumed; withdrawn уходят при утверждении брифа.",
       "x-owner": "site",
       "x-fill": "claude",
       "items": {
@@ -2627,16 +3013,42 @@
             "minLength": 3
           }
         },
+        "values": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "description": "Значения референса текстом: measured — замер живого сайта (shot.py + measure_ui.py), estimated — оценка по картинке.",
+          "properties": {
+            "measured": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 3
+              }
+            },
+            "estimated": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 3
+              }
+            }
+          }
+        },
         "source": {
           "enum": [
             "customer",
             "claude",
             "creative-library"
-          ]
+          ],
+          "description": "Кто принёс: customer — заказчик, claude — Claude, creative-library — библиотека creative."
         },
         "captured": {
           "type": "string",
-          "description": "Для url: дата и вьюпорт снятия («2026-09-24 1440x900»)."
+          "description": "Дата снятия и вьюпорт: «2026-09-24 1440x900».",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}( [0-9]{2,4}x[0-9]{2,4})?$"
         },
         "note": {
           "type": "string"
@@ -2677,6 +3089,7 @@
             "languages",
             "pages",
             "ambition",
+            "themes",
             "brand",
             "references",
             "assets_available"
@@ -2754,6 +3167,5 @@
         "layout"
       ]
     }
-  },
-  "x-supersedes": "01-foundations/site-brief.schema.json (v0) — остаётся для файлов с version: 0"
+  }
 }

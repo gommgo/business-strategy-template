@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""vocab_lint.py — проверка YAML, JSON и Markdown на идентификаторы вне словаря site-research (агент B, волна 1, 2026-09-24).
+"""vocab_lint.py — идентификаторы вне словаря site в YAML, JSON и Markdown; проверка таблицы соответствий словарей.
 
-Словарь: 02-site-types/vocabulary.yaml (пространства имён site_type, page_type, section_role, block_family, block,
-slot_kind, slot, macrostructure, action, awareness, traffic_temperature, traffic_source, jurisdiction, ambition_level).
+Словарь: kb/site/02-site-types/vocabulary.yaml (пространства имён site_type, page_type, section_role, block_family,
+block, slot_kind, slot, macrostructure, first_screen_policy, action, awareness, traffic_temperature, traffic_source,
+jurisdiction, ambition_level, conversion_channel, procedure_step).
 
 Что проверяет:
   1. значения ключей из карты «ключ → пространство» (по умолчанию — ключи blocks.yaml, page-plan, site-map, site-brief,
@@ -12,14 +13,18 @@ slot_kind, slot, macrostructure, action, awareness, traffic_temperature, traffic
      пропускаются: их словари ведут владельцы);
   3. ключи-идентификаторы (--keys-as-ids blocks=block: дочерние ключи словаря blocks — id блоков);
   4. статусы: deprecated — предупреждение с заменой; out-of-scope — предупреждение; measurement-only — ошибка (кроме
-     --allow-measurement); proposed — сведение.
+     --allow-measurement); proposed — сведение;
+  5. --check-crosswalk — таблица соответствий kb/site/02-site-types/crosswalk.tsv (другой файл — --crosswalk): колонки
+     строго по формату, отношение relation из перечня equal · narrower · broader · related · none, наш id our_id есть в
+     словаре своего пространства, у none — our_id пуст и причина в note; deprecated и повтор строки — предупреждение.
 Выход: строки «путь:строка: уровень пространство 'id' — сообщение»; сводка; код 1 при ошибках, 0 — без ошибок.
 Подсказки: ближайший id (опечатка) и, с --crosswalk, строка таблицы соответствия (чужой термин → наш id).
 
-Примеры:
-  python3 99-raw/tools/vocab_lint.py 04-blocks/blocks.yaml 04-blocks/examples/page-plan-*.yaml
-  python3 99-raw/tools/vocab_lint.py plan.yaml --map section=section_role --crosswalk 02-site-types/crosswalk.tsv --stats
-  python3 99-raw/tools/vocab_lint.py --selftest
+Примеры (от корня скилла):
+  python3 scripts/site/vocab_lint.py kb/site/04-blocks/blocks.yaml kb/site/10-playbooks-contracts/examples/*/plans/*.yaml
+  python3 scripts/site/vocab_lint.py plan.yaml --map section=section_role --crosswalk kb/site/02-site-types/crosswalk.tsv --stats
+  python3 scripts/site/vocab_lint.py --check-crosswalk
+  python3 scripts/site/vocab_lint.py --selftest
 """
 import argparse
 import csv
@@ -34,10 +39,14 @@ from pathlib import Path
 import yaml
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(HERE.parent / "lib"))
 import kbpaths  # noqa: E402
 ROOT = kbpaths.kb("site")
 DEFAULT_VOCAB = ROOT / "02-site-types" / "vocabulary.yaml"
+DEFAULT_CROSSWALK = ROOT / "02-site-types" / "crosswalk.tsv"
+CROSSWALK_COLS = ("source_base", "source_file", "source_section", "source_vocab", "source_term", "namespace", "our_id",
+                  "relation", "note")
+RELATIONS = ("equal", "narrower", "broader", "related", "none")
 
 DEFAULT_MAP = {
     "site_type": "site_type", "site_types": "site_type",
@@ -51,8 +60,8 @@ DEFAULT_MAP = {
     "temperature": "traffic_temperature", "traffic_temperature": "traffic_temperature",
     "traffic_source": "traffic_source", "traffic_sources": "traffic_source",
     "jurisdiction": "jurisdiction", "ambition_level": "ambition_level", "ambition": "ambition_level",
-    # None — ключ не несёт id словаря site (правка оркестратора 24.09.2026 по замечанию creative C1: роль референса
-    # references[].role — rhythm, composition, color … — не section_role)
+    # None — ключ не несёт id словаря site: роль референса references[].role (rhythm, composition, color …) —
+    # не section_role
     "references.role": None,
     # поля site-brief, одноимённые ключам плана, но не id словаря: роль в аудитории и языке, раздел брифа у вопроса
     "audience.role": None, "languages.role": None, "questions.block": None, "versions.role": None,
@@ -204,6 +213,56 @@ class Linter:
             self.findings.append(Finding(str(path), getattr(getattr(exc, "problem_mark", None), "line", -1) + 1,
                                          "error", "-", "-", f"не разбирается как YAML или JSON: {exc}".splitlines()[0]))
 
+    def lint_crosswalk(self, path):
+        """Таблица соответствий: колонки строго, relation из перечня, our_id — id словаря своего пространства; у none
+        our_id пуст, причина — в note. Чужой термин без нашего id — только строкой none."""
+        p = str(path)
+        with open(path, encoding="utf-8", newline="") as fh:
+            rows = list(csv.reader(fh, delimiter="\t"))
+        if not rows or tuple(c.strip() for c in rows[0]) != CROSSWALK_COLS:
+            self.findings.append(Finding(p, 1, "error", "-", "-", f"колонки {rows[0] if rows else []} — нужны строго: "
+                                                                   f"{', '.join(CROSSWALK_COLS)}"))
+            return
+        seen = {}
+        for n, row in enumerate(rows[1:], 2):
+            if not any(c.strip() for c in row):
+                continue
+            if len(row) != len(CROSSWALK_COLS):
+                self.findings.append(Finding(p, n, "error", "-", "-", f"полей {len(row)} вместо {len(CROSSWALK_COLS)}"))
+                continue
+            r = dict(zip(CROSSWALK_COLS, (c.strip() for c in row)))
+            ns, oid, rel, term = r["namespace"], r["our_id"], r["relation"], r["source_term"]
+            self.checked["crosswalk"] += 1
+            key = (r["source_base"], r["source_file"], r["source_vocab"], term, ns, oid)
+            if key in seen:
+                self.findings.append(Finding(p, n, "warn", ns or "-", term or "-", f"повтор строки {seen[key]}"))
+            seen.setdefault(key, n)
+            if not term:
+                self.findings.append(Finding(p, n, "error", ns or "-", "-", "пустой source_term"))
+            if rel not in RELATIONS:
+                self.findings.append(Finding(p, n, "error", ns or "-", oid or term or "-",
+                                             f"relation {rel!r} не из перечня: {', '.join(RELATIONS)}"))
+                continue
+            if rel == "none":
+                if oid:
+                    self.findings.append(Finding(p, n, "error", ns or "-", oid, "relation none — our_id пуст"))
+                if not r["note"]:
+                    self.findings.append(Finding(p, n, "warn", ns or "-", term, "relation none без причины в note"))
+                continue
+            if ns not in self.v.ids:
+                self.findings.append(Finding(p, n, "error", ns or "-", oid or "-", "неизвестное пространство словаря"))
+                continue
+            if not oid:
+                self.findings.append(Finding(p, n, "error", ns, term, f"relation {rel} без our_id"))
+                continue
+            if oid not in self.v.ids[ns]:
+                near = difflib.get_close_matches(oid, sorted(self.v.ids[ns]), n=1, cutoff=0.75)
+                self.findings.append(Finding(p, n, "error", ns, oid, "нет в словаре" + (f"; возможно, {near[0]}" if near else "")))
+                continue
+            if self.v.status.get((ns, oid)) == "deprecated":
+                rep = self.v.replaced.get((ns, oid))
+                self.findings.append(Finding(p, n, "warn", ns, oid, f"deprecated — замените на {rep}" if rep else "deprecated"))
+
 
 def build_keymap(args):
     km = {} if args.no_default_map else dict(DEFAULT_MAP)
@@ -296,6 +355,31 @@ def selftest():
         good = kind == "mapped" and "landing-saas (equal)" in h
         ok &= good
         print(("PASS " if good else "FAIL ") + "подсказка crosswalk: equal раньше broader")
+        # таблица соответствий: колонки, relation из перечня, наш id в словаре, у none — пустой our_id и причина
+        rows = [("saas-landing", "page_type", "landing-saas", "equal", ""),      # 2 — чисто
+                ("hero-big", "block", "hero-medai", "equal", ""),               # 3 — нет в словаре
+                ("faq-page", "section_role", "faq", "same", ""),                # 4 — relation не из перечня
+                ("shop", "page_type", "landing-saas", "none", "вне рамок"),     # 5 — none с our_id
+                ("thing", "mystery", "thing", "equal", ""),                     # 6 — неизвестное пространство
+                ("price", "slot", "", "none", ""),                              # 7 — none без причины: warn
+                ("saas-landing", "page_type", "landing-saas", "equal", ""),     # 8 — повтор строки 2: warn
+                ("old", "block", "hero-old", "equal", "")]                      # 9 — deprecated: warn
+        (td / "cw-check.tsv").write_text("\t".join(CROSSWALK_COLS) + "\n" + "".join(
+            f"x\tf\ts\tv\t{t}\t{ns}\t{oid}\t{rel}\t{note}\n" for t, ns, oid, rel, note in rows), encoding="utf-8")
+        lin = Linter(voc, {})
+        lin.lint_crosswalk(td / "cw-check.tsv")
+        errs = sorted(f.line for f in lin.findings if f.level == "error")
+        warns = sorted(f.line for f in lin.findings if f.level == "warn")
+        good = (errs == [3, 4, 5, 6] and warns == [7, 8, 9]
+                and any("возможно, hero-media" in f.msg for f in lin.findings if f.line == 3))
+        ok &= good
+        print(("PASS " if good else "FAIL ") + f"таблица соответствий: ошибки в строках {errs}, предупреждения {warns}")
+        (td / "cw-head.tsv").write_text("source\tterm\n", encoding="utf-8")
+        lin = Linter(voc, {})
+        lin.lint_crosswalk(td / "cw-head.tsv")
+        good = [f.line for f in lin.findings if f.level == "error"] == [1]
+        ok &= good
+        print(("PASS " if good else "FAIL ") + "таблица соответствий: колонки не по формату — ошибка")
     # проверка на настоящем словаре: все id проходят свои же шаблоны
     real = Vocab.load(DEFAULT_VOCAB)
     pat = re.compile(real.data["id_pattern"])
@@ -305,6 +389,13 @@ def selftest():
     ok &= good
     print(("PASS " if good else "FAIL ") + f"настоящий словарь: {sum(len(s) for s in real.ids.values())} id, "
           f"шаблон id нарушен у {len(bad)}")
+    lin = Linter(real, {})
+    lin.lint_crosswalk(DEFAULT_CROSSWALK)
+    errs = [f for f in lin.findings if f.level == "error"]
+    good = not errs and lin.checked["crosswalk"] > 0
+    ok &= good
+    print(("PASS " if good else "FAIL ") + f"настоящая таблица соответствий: строк {lin.checked['crosswalk']}, ошибок {len(errs)}"
+          + (f" (первая: {errs[0]})" if errs else ""))
     print("SELFTEST", "OK" if ok else "FAILED")
     return 0 if ok else 1
 
@@ -320,19 +411,23 @@ def main():
     ap.add_argument("--crosswalk", help="crosswalk.tsv: подсказать наш id для чужого термина")
     ap.add_argument("--source-base", action="append", help="брать подсказки только из строк этой базы (source_base)")
     ap.add_argument("--stats", action="store_true", help="сводка по crosswalk для неизвестных id")
+    ap.add_argument("--check-crosswalk", action="store_true",
+                    help="проверить таблицу соответствий (файл — --crosswalk, по умолчанию 02-site-types/crosswalk.tsv)")
     ap.add_argument("--show-info", action="store_true", help="показывать proposed")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
     if a.selftest:
         sys.exit(selftest())
-    if not a.files:
-        ap.error("нужны файлы или --selftest")
+    if not a.files and not a.check_crosswalk:
+        ap.error("нужны файлы, --check-crosswalk или --selftest")
     kai = {}
     for pair in a.keys_as_ids or []:
         k, _, ns = pair.partition("=")
         kai[k.strip()] = ns.strip()
     cw = Crosswalk(a.crosswalk, set(a.source_base) if a.source_base else None)
     lin = run(a.files, Vocab.load(a.vocab), build_keymap(a), kai, a.allow_measurement, cw)
+    if a.check_crosswalk:
+        lin.lint_crosswalk(a.crosswalk or DEFAULT_CROSSWALK)
     sys.exit(report(lin, quiet_info=not a.show_info, stats=a.stats))
 
 

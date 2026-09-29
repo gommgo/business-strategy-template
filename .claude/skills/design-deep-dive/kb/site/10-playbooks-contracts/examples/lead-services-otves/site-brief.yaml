@@ -420,7 +420,7 @@ meaning:
       claim_class: superlative
       why: нет независимого рейтинга
   message_hierarchy_ref:
-  - ../../text-research/02-strategy-messaging/examples/hierarchy-otves-product-aware.yaml
+  - ../../../../text/02-strategy-messaging/examples/hierarchy-otves-product-aware.yaml
   voice_ref: 'черновик: спокойно и по делу, на «вы», без восклицаний; профиль голоса — text F (волна 2)'
   proof_ref: ../../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml
   languages:
@@ -549,9 +549,12 @@ ambition:
   - role: pricing
     level: L0
     why: калькулятор и цена — L0
+themes:
+  default: light
+  dark:
+    needed: false
 brand:
-  name: Отвес
-  status: none
+  ref: brand.yaml
 references: []
 assets_available:
   real_photos: few

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:app-design:site-research:site-map:1",
   "title": "site-map v1 — карта многостраничного сайта: страницы, шаблоны, общая шапка и подвал, перелинковка, языки, модель контента, порядок сборки",
-  "description": "Владелец — site-research (06-multipage-ia, агент G, волна 2; v1 — J, волна 3). Контракт тройки §3 п.2. Строится из site-brief (pages.mode: by-type — карта по умолчанию для site_type из 06-multipage-ia/01 §2; listed — список брифа) и порождает page-plan на каждый шаблон или уникальную страницу (04-blocks/page-plan.schema.json: page.id = pages[].id, page.template = templates[].instances == 'collection'). Общие шапка и подвал живут здесь один раз (chrome); page-plan только выбирает вариант (navigation.header/footer). Пакет исполнителя kimi — один на шаблон (templates[].package), первый пакет строит главную и общие компоненты. Id — словарь B (02-site-types/vocabulary.yaml); новые id — пометка «(новый id)» в описании страницы и заметка «## Для J». Проверки: форма — эта схема; id — vocab_lint.py; связи (шаблон есть, родитель есть, пункты меню ведут на страницы карты, у формы есть thank-you) — site_validate.py (J).",
+  "description": "Карта многостраничного сайта (владелец — site, 06-multipage-ia). Строится из site-brief (pages.mode: by-type — карта по умолчанию для site_type из 06-multipage-ia/01 §2; listed — список брифа) и порождает план страницы на каждый шаблон или уникальную страницу (page-plan.schema.json: page.id = pages[].id, page.template = templates[].instances == 'collection'). Общие шапка и подвал живут здесь один раз (chrome); план только выбирает вариант (navigation.header/footer). Порядок передачи в дизайн и сборку — build_order и templates[].package: первой — главная с общими шапкой и подвалом. Id — словарь 02-site-types/vocabulary.yaml. Проверки: форма — эта схема; id — vocab_lint.py; связи (шаблон есть, родитель есть, пункты меню ведут на страницы карты, у формы есть «спасибо») — site_validate.py.",
   "x-version": 1,
   "x-checked": "2026-09-24",
   "x-owner": "site-research · 06-multipage-ia · G (v0, волна 2); J (v1, волна 3)",
@@ -38,7 +38,7 @@
         "1",
         "1.0"
       ],
-      "description": "1 — J, волна 3 (v0 — G, волна 2)."
+      "description": "Версия формата карты сайта."
     },
     "checked": {
       "$ref": "#/$defs/date"
@@ -458,7 +458,7 @@
             "required": [
               "order"
             ],
-            "description": "Пакет исполнителя (kimi 07-brief-handoff): один на шаблон. order — порядок сборки; builds_chrome — пакет, который собирает общую шапку, подвал и DESIGN.md (главная).",
+            "description": "Место шаблона в передаче в дизайн и сборку: order — порядок; builds_chrome — страница, на которой проектируются общие шапка и подвал (главная).",
             "properties": {
               "order": {
                 "type": "integer",
@@ -1356,6 +1356,5 @@
       ],
       "description": "Структурные архетипы шапки G (06-02 §1.2): minimal-cta — логотип + призыв + контакт (лендинг, промо, landing-minimal); bar-links — 3–7 ссылок без подменю; bar-dropdowns — пункты с одноуровневыми списками ≤ 8; two-tier — утилитарная полоса (телефон, город, адрес, язык, вход) над основной (услуги РФ, корпоративный); mega-menu — панели с группами и описаниями (≥ 2 пунктов по ≥ 10 страниц); search-led — поле поиска на виду + меню (сотни страниц: сеть клиник, каталог программ, база знаний); editorial-masthead — название по центру, только редакционный жанр и с явной ссылкой «Главная». Подача (Hallmark N1b, N5, N6, N9, N11, N12, N13) — creative."
     }
-  },
-  "x-supersedes": "06-multipage-ia/site-map.schema.json (v0) — для файлов site_map_version 0"
+  }
 }

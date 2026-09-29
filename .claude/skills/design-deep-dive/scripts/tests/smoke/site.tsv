@@ -1,7 +1,7 @@
 path	kind	smoke	xfail
 scripts/site/README.md	data	data	
 scripts/site/ab_plan.py	utility	help; run: --selftest	
-scripts/site/build_profile.py	step	run: --check	
+scripts/site/build_profile.py	step	help; run: --check; run: --selftest	
 scripts/site/checklist_export.py	utility	help	
 scripts/site/geo_probe.py	utility	help; run: --selftest	
 scripts/site/ia_probe.py	utility	help; run: --selftest	
@@ -9,5 +9,5 @@ scripts/site/page_anatomy.py	utility	help
 scripts/site/page_gates.py	utility	help; run: --selftest	
 scripts/site/plan_to_assets.py	utility	help	
 scripts/site/run_axe_targets.py	step	compile	
-scripts/site/site_validate.py	utility	run: --selftest	
-scripts/site/vocab_lint.py	utility	help; run: --selftest	
+scripts/site/site_validate.py	utility	help; run: --selftest; run: --all --quiet	
+scripts/site/vocab_lint.py	utility	help; run: --selftest; run: --check-crosswalk	

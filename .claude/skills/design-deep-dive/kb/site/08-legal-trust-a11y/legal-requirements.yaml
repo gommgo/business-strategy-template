@@ -7,7 +7,7 @@
 #   id           LR-<JUR>-<NN>
 #   jurisdiction ru | eu (id словаря B; kz, by, us, other — не покрыты)
 #   element      form | consent | cookie-banner | footer | pricing | reviews | ads | policy-page | offer-page | analytics |
-#                chat-widget | newsletter
+#                chat-widget | newsletter | vacancy
 #   requirement  что должно быть на странице (действие для генератора)
 #   norm         закон, статья, редакция (дата); для разъяснений надзора — в regulator_position
 #   source_url   первоисточник (официальный текст или справочная система с датой редакции)
@@ -472,6 +472,87 @@ requirements:
     refs: ["ux:05-01"]
     sanction: "законопроект о штрафах — статус не проверен"
     doc: "01 §2.3"
+    checked: 2026-09-24
+
+  # ───────────────────────────── РФ: обязательные оговорки и образы врачей в рекламе (38-ФЗ) ─────────────────────────────
+  - id: LR-RU-25
+    jurisdiction: ru
+    element: ads
+    requirement: >-
+      Обязательные предупреждения — заметного размера: медицинские услуги и изделия — предупреждение о противопоказаниях
+      и необходимости ознакомиться с инструкцией или получить консультацию специалистов не меньше 5 % площади рекламы;
+      БАД — «не является лекарственным средством» не меньше 10 % площади; потребительский кредит (заём, ипотека) —
+      «Оценивайте свои финансовые возможности и риски» и «Изучите все условия кредита (займа)» по 5 % площади, при
+      ставке — диапазоны полной стоимости кредита (займа) до ставки и шрифтом не меньше. Текст предупреждения — правила
+      text, размер и место на странице — вёрстка и подача.
+    norm: "38-ФЗ ст. 24 ч. 7; ст. 25 ч. 1.1; ст. 28 ч. 2.1, 3, 3.1 (ред. 479-ФЗ от 26.12.2024); закон в ред. от 04.08.2026"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_58968/"
+    regulator_position: "Московское УФАС, 2024: реклама БАД без «не является лекарственным средством» — нарушение ст. 25 ч. 1.1; Татарстанское УФАС, РВ-08/516 от 23.01.2026 — предупреждения рекламы кредита (text 08/01 §6)"
+    severity: blocker
+    label: стандарт
+    check: "IMG/HUM: доля площади предупреждения в рекламном блоке — медицина ≥ 5 %, БАД ≥ 10 %, предупреждения кредита ≥ 5 %; ПСК — до ставки и кеглем не меньше; текст — claims_check.py"
+    applies_when: "brief.constraints.legal_category ∈ {medical, dietary-supplements}; на странице ставка или условия потребительского кредита, займа, ипотеки"
+    refs: [slot:disclaimer, slot:cta-note, copy-rule:COPY-L-MED-01, copy-rule:COPY-L-BAD-01, copy-rule:COPY-L-FIN-02, copy-rule:COPY-L-FIN-03]
+    sanction: "КоАП 14.3 ч. 1 — 100–500 тыс. ₽"
+    doc: "text 08/01 §6"
+    checked: 2026-09-24
+
+  - id: LR-RU-26
+    jurisdiction: ru
+    element: ads
+    requirement: >-
+      Образы медицинских работников и рекомендации врачей — только в рекламе медицинских услуг и средств личной
+      гигиены; на страницах других товаров и услуг — без фото, видео и цитат людей в образе врача и без лечебных свойств
+      («лечит», «избавит от бессонницы»); рекомендация — сведения, требующие подтверждения.
+    norm: "38-ФЗ ст. 5 ч. 5 п. 4, 6; ч. 3 п. 10 (закон в ред. от 04.08.2026)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_58968/"
+    regulator_position: null
+    severity: blocker
+    label: стандарт
+    check: "IMG/HUM: на странице вне медицинских услуг и средств гигиены нет людей в образе врача (фото, видео, отзыв «врача»); текст — claims_check.py"
+    applies_when: "товары и услуги вне медицины (brief.constraints.legal_category ≠ medical), в том числе БАД; средства личной гигиены — исключение"
+    refs: [block:hero-media, block:testimonial-cards, block:team-grid, block:founder-note, copy-rule:COPY-L-MED-04, copy-rule:COPY-L-HEALTH-01]
+    sanction: "КоАП 14.3 ч. 1 — 100–500 тыс. ₽"
+    doc: "text 08/01 §6"
+    checked: 2026-09-24
+
+  # ───────────────────────────── РФ: продажа на сайте — сведения о продавце из фактов ─────────────────────────────
+  - id: LR-RU-27
+    jurisdiction: ru
+    element: offer-page
+    requirement: >-
+      На странице с оплатой, заказом, предоплатой, бронью или предзаказом сведения о продавце — наименование, ОГРН или
+      ИНН, адрес — только из фактов (fact:company-details); факта нет — заглушка «[PLACEHOLDER: реквизиты]» и пробел
+      missing с blocking: true — страница не публикуется до ответа.
+    norm: "ЗоЗПП ст. 9 п. 1, ст. 26.1 п. 2 (ред. от 28.12.2025); 38-ФЗ ст. 8 (ред. 302-ФЗ от 10.07.2023)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_305/2f56a12846dc7c6a671bc74151ecf9f9beca03b0/ ; https://www.consultant.ru/document/cons_doc_LAW_305/1525b1a2f037db240c8e6a749619f86e53857f13/"
+    regulator_position: null
+    severity: blocker
+    label: стандарт
+    check: "DOC: слот данных реквизитов страницы с оплатой связан с fact:company-details или пробелом missing с blocking (site_validate.py PL-F*); DOM: наименование и ОГРН у кнопки заказа или в подвале"
+    applies_when: "оплата, заказ, предоплата, бронь или предзаказ на странице"
+    refs: [block:footer, block:pricing-single, block:offer-details, slot:footer-legal, "fact:company-details", copy-rule:COPY-L-DIST-01]
+    sanction: "как LR-RU-14, LR-RU-20"
+    doc: "01 §2.1–2.2; text 04/02 §10"
+    checked: 2026-09-24
+
+  # ───────────────────────────── РФ: вакансии (565-ФЗ) ─────────────────────────────
+  - id: LR-RU-28
+    jurisdiction: ru
+    element: vacancy
+    requirement: >-
+      Требования вакансии — к делу: опыт, навыки, допуски. Пол, возраст, место жительства, семейное положение и другие
+      обстоятельства, не связанные с деловыми качествами, в тексте вакансии запрещены.
+    norm: "565-ФЗ «О занятости населения в Российской Федерации» ст. 53 ч. 3 (ред. от 28.11.2025)"
+    source_url: "https://www.consultant.ru/document/cons_doc_LAW_464093/151df305f73e727be3bf36a447c90c7c84f22219/"
+    regulator_position: null
+    severity: blocker
+    label: стандарт
+    check: "HUM: текст вакансии без требований к полу, возрасту, месту жительства, семейному положению; утилиты дискриминацию видят только правилом text"
+    applies_when: "страница вакансий (page-type:careers-page) и тексты вакансий на других страницах"
+    refs: [page-type:careers-page, copy-rule:COPY-L-JOB-01]
+    sanction: "КоАП [не проверено — статья и размер не сверены]"
+    doc: "text 04/03 §4.7"
     checked: 2026-09-24
 
   # ───────────────────────────── ЕС (профиль eu) ─────────────────────────────

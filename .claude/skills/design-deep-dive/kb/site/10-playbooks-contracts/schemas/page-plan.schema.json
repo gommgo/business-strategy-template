@@ -2,7 +2,363 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:app-design:site-research:page-plan:1",
   "title": "page-plan v1 — план одной страницы или шаблона: цель, трафик, форма, секции, слоты, события, подача",
-  "description": "Владелец — site-research (04-blocks, агент E, волна 2; v1 — J, волна 3). Контракт тройки §3 п.3. Id — словарь B (02-site-types/vocabulary.yaml), блоки и элементы анатомии — 04-blocks/blocks.yaml. Потребители: text (copy-deck: section.id → section_id и site_section_id, role → section_role, block → block, текстовый слот id → slot_id, slot → slot_type, anatomy → site_slot_id, group → group; факты — data[].binds), creative (treatment{} — подсхема creative, пока пустой контейнер), ai-media (media[] → план ассетов 01/01 §8), blender (3d[] → рецепты 12-recipes), kimi (sections[].id и job → site.sections[{id, job}]; first_screen_policy → A3; macrostructure_family → direction.macrostructure). Проверки: форма — эта схема; id — vocab_lint.py; связи (блок есть, слот разрешён блоку, факт есть и разрешён слоту) — 99-raw/experiments/E/01-… (plan_check.py), итог — site_validate.py (J). v1 (J): подсхема treatment creative двумя $ref (C1), архетип шапки — $ref на site-map (G), page.legal по I, x-gate-exception (P), load виджетов (P), form.ref на набор lead-forms.yaml (F), события — id events.yaml (P), срок блока по факту (F), id секции — из роли или блока (B, K SITE-PRE-15), адресация групп «группа.элемент» и экземпляров «группа-N» (E).",
+  "description": "План страницы или шаблона коллекции (владелец — site: 04-blocks, 10-playbooks-contracts). Id — словарь 02-site-types/vocabulary.yaml, блоки и элементы анатомии — 04-blocks/blocks.yaml. Потребители: text (copy deck: section.id → section_id и site_section_id, role → section_role, block → block, текстовый слот id → slot_id, slot → slot_type, anatomy → site_slot_id, group → group; факты — data[].binds), creative (treatment — подсхема creative), ai-media (media[] → план ассетов 01/01 §8), blender (3d[] → рецепты 12-recipes), вход холста (проекция по ключу x-canvas-map: секции, первый экран, навигация, формы, право; статичная часть treatment — по карте treatment). Проверки: форма — эта схема; id — vocab_lint.py; связи (блок есть, слот разрешён блоку, факт есть и разрешён слоту) и подача (spec_check.py plan creative) — site_validate.py.",
+  "x-canvas-map": {
+    "source": "page-plan",
+    "stages": [
+      "directions",
+      "wireframe",
+      "mockup"
+    ],
+    "files": {
+      "brief.yaml": {
+        "product.primary_action": {
+          "rule": "copy",
+          "from": [
+            "/page/primary_action"
+          ],
+          "note": "главное действие главной страницы (у рода site — первой в build_order); A2 приёмки"
+        },
+        "site.cta.target": {
+          "rule": "copy",
+          "from": [
+            "/page/cta_target"
+          ],
+          "note": "куда ведёт главный призыв главной страницы; подпись кнопки — выбранный вариант copy deck"
+        },
+        "build.perf": {
+          "rule": "derive",
+          "from": [
+            "/page/budget_profile",
+            "/page/x-gate-exception"
+          ],
+          "note": "профиль бюджета главной страницы → page_gates.py --resolve и исключения ворот с причиной и автором; вес и скорость меряются после сборки",
+          "stages": [
+            "mockup"
+          ]
+        }
+      },
+      "pages/<page-id>/page.yaml": {
+        "page.id": {
+          "rule": "copy",
+          "from": [
+            "/page/id"
+          ],
+          "note": "id страницы = id брифа или карты = page_id copy deck",
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "page.page_type": {
+          "rule": "copy",
+          "from": [
+            "/page/page_type"
+          ],
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "page.template": {
+          "rule": "copy",
+          "from": [
+            "/page/template",
+            "/page/template_id"
+          ],
+          "note": "шаблон коллекции рисуется с образцом записи; id шаблона карты сайта",
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "page.url": {
+          "rule": "copy",
+          "from": [
+            "/page/url"
+          ],
+          "note": "адрес страницы — ссылки прототипа",
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "page.lang": {
+          "rule": "copy",
+          "from": [
+            "/page/lang",
+            "/page/locale"
+          ],
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "page.primary_action": {
+          "rule": "copy",
+          "from": [
+            "/page/primary_action",
+            "/page/secondary_actions"
+          ],
+          "note": "одно главное действие страницы и второй путь иным стилем",
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "page.cta_target": {
+          "rule": "copy",
+          "from": [
+            "/page/cta_target"
+          ],
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "page.macrostructure": {
+          "rule": "copy",
+          "from": [
+            "/page/macrostructure",
+            "/page/macrostructure_family"
+          ],
+          "note": "форма страницы и её семейство — id словаря site",
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "page.ambition_level": {
+          "rule": "copy",
+          "from": [
+            "/page/ambition_level"
+          ],
+          "note": "уровень страницы — не выше уровня сайта; секции конверсии — L0",
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "first_screen.policy": {
+          "rule": "copy",
+          "from": [
+            "/page/first_screen_policy"
+          ],
+          "note": "A3 приёмки",
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "first_screen.must_show": {
+          "rule": "copy",
+          "from": [
+            "/page/first_screen/must_show"
+          ],
+          "note": "что обязано быть в первом экране — ссылки «секция.слот»",
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "first_screen.core_words_max": {
+          "rule": "copy",
+          "from": [
+            "/page/first_screen/core_words_max"
+          ],
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "sections[]": {
+          "rule": "map",
+          "from": [
+            "/sections/*/id",
+            "/sections/*/role",
+            "/sections/*/block",
+            "/sections/*/variant",
+            "/sections/*/question",
+            "/sections/*/job",
+            "/sections/*/next_step",
+            "/sections/*/anchor",
+            "/sections/*/condition",
+            "/sections/*/mobile"
+          ],
+          "note": "секции по порядку: id = id плана, роль, блок и вариант; работа — «вопрос → сообщение; доказательства: fact_ids»; следующий шаг, якорь, условие показа, поведение на телефоне",
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "sections[].slots": {
+          "rule": "copy",
+          "from": [
+            "/sections/*/slots"
+          ],
+          "note": "слоты секции: текстовые (слот словаря, заголовок, длина), медиа (роль, пропорции, зона текста, кандидат LCP), данные (fact: и пробелы), действия (действие, стиль, форма), 3D (рецепт, постер, загрузка); тексты — copy.md",
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "navigation": {
+          "rule": "copy",
+          "from": [
+            "/page/navigation",
+            "site-map#/chrome"
+          ],
+          "note": "шапка и подвал страницы; у рода site — chrome карты сайта: архетип шапки вместо общей строки",
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "overlays": {
+          "rule": "copy",
+          "from": [
+            "/overlays"
+          ],
+          "note": "липкий призыв, баннер cookie — по юрисдикции, чат и окно захвата — только при политике брифа",
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "forms[]": {
+          "rule": "derive",
+          "from": [
+            "/sections/*/slots/action/*/form",
+            "/overlays/*/slots/action/*/form",
+            "lead-forms#/form_sets"
+          ],
+          "note": "форма — набор lead-forms.yaml по form.ref: поля, запреты, success.must_show; блок K приёмки",
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "legal": {
+          "rule": "copy",
+          "from": [
+            "/page/legal",
+            "/page/jurisdiction"
+          ],
+          "note": "согласия, баннер cookie, маркировка рекламы, реквизиты — блок J приёмки",
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "seo.h1": {
+          "rule": "copy",
+          "from": [
+            "/page/seo/h1"
+          ],
+          "note": "H1 страницы — I1 приёмки",
+          "stages": [
+            "wireframe",
+            "mockup"
+          ]
+        },
+        "build.perf": {
+          "rule": "derive",
+          "from": [
+            "/page/budget_profile",
+            "/page/x-gate-exception"
+          ],
+          "note": "профиль бюджета этой страницы и исключения ворот",
+          "stages": [
+            "mockup"
+          ]
+        }
+      }
+    },
+    "drop": [
+      {
+        "from": [
+          "/page_plan_version",
+          "/checked",
+          "/status",
+          "/example",
+          "/site",
+          "/refs"
+        ],
+        "note": "служебные поля и пути к соседним файлам; статус и отпечаток плана — строка источника в INPUT.md"
+      },
+      {
+        "from": [
+          "/page/segment",
+          "/page/goal",
+          "/page/secondary_goal",
+          "/page/awareness",
+          "/page/awareness_basis",
+          "/page/traffic"
+        ],
+        "note": "цель, сегмент, осведомлённость и трафик страницы — основание порядка секций и текстов; исполнителю — секции и тексты"
+      },
+      {
+        "from": [
+          "/page/macrostructure_alternatives"
+        ],
+        "note": "другие формы страницы — вход страницы «Направления» через арт-дирекцию; на вайрфрейм и макет идёт выбранная"
+      },
+      {
+        "from": [
+          "/page/first_screen/message_match",
+          "/page/first_screen/variant_map"
+        ],
+        "note": "подмена первого экрана по источнику трафика — код сайта; на макете — вариант по умолчанию"
+      },
+      {
+        "from": [
+          "/page/length"
+        ],
+        "note": "число секций задано списком sections"
+      },
+      {
+        "from": [
+          "/page/seo/indexable",
+          "/page/seo/canonical",
+          "/page/seo/structured_data",
+          "/page/seo/ssr_required",
+          "/page/seo/notes",
+          "/page/seo/sitemap",
+          "/page/seo/hreflang",
+          "/page/analytics",
+          "/page_slots"
+        ],
+        "note": "SEO, аналитика и мета страницы (title, description, OG, письма после формы) — пакет кода, на артборд не идут"
+      },
+      {
+        "from": [
+          "/page/notes",
+          "/sections/*/notes",
+          "/open_questions"
+        ],
+        "note": "заметки и открытые вопросы плана — работа слоя страницы"
+      },
+      {
+        "from": [
+          "/sections/*/objections",
+          "/sections/*/carries"
+        ],
+        "note": "возражения и опоры иерархии воплощены в текстах copy deck"
+      },
+      {
+        "from": [
+          "/sections/*/events"
+        ],
+        "note": "события аналитики — код сайта, на макете не рисуются"
+      },
+      {
+        "from": [
+          "/sections/*/expires"
+        ],
+        "note": "срок показа секции по факту — код сайта; на макете секция показана"
+      }
+    ]
+  },
   "type": "object",
   "additionalProperties": false,
   "patternProperties": {
@@ -24,7 +380,7 @@
         "1",
         "1.0"
       ],
-      "description": "1 — итог J (волна 3). Файлы 0.9 проверяются схемой 04-blocks."
+      "description": "Версия формата плана страницы."
     },
     "checked": {
       "$ref": "#/$defs/date",
@@ -437,7 +793,7 @@
             "poster",
             "flow"
           ],
-          "description": "layout_family макроструктуры (C 01 §4.1); проекция в kimi: flow → document-led."
+          "description": "layout_family макроструктуры (site 03/01 §4.1)."
         },
         "macrostructure_alternatives": {
           "type": "array",
@@ -452,7 +808,7 @@
             "offer-cta-header",
             "poster"
           ],
-          "description": "C 03 §2.2; источник строки A3 в ACCEPTANCE.md kimi."
+          "description": "Политика первого экрана (site 03/03 §2.2); строка A3 критериев приёмки входа холста."
         },
         "first_screen": {
           "type": "object",
@@ -871,7 +1227,7 @@
       "properties": {
         "id": {
           "$ref": "#/$defs/id",
-          "description": "Уникален на странице; = site.sections[].id kimi = section_id copy-deck = section в плане ассетов. v1: id — из роли или блока (hero, pricing, faq, final-cta, case-studies-2, testimonials-reviews), без самодельных слов (B, K SITE-PRE-15)."
+          "description": "Уникален на странице; = id секции во входе холста (pages/<page-id>/page.yaml) = section_id copy deck = section в плане ассетов. Id — из роли или блока (hero, pricing, faq, final-cta, case-studies-2, testimonials-reviews), без самодельных слов (SITE-PRE-15)."
         },
         "role": {
           "$ref": "#/$defs/id",
@@ -883,7 +1239,7 @@
         },
         "job": {
           "type": "string",
-          "description": "Работа секции одной фразой → site.sections[].job kimi."
+          "description": "Работа секции одной фразой → работа секции во входе холста."
         },
         "block": {
           "$ref": "#/$defs/id",
@@ -1266,7 +1622,8 @@
             "on-visible",
             "on-interaction"
           ],
-          "default": "after-lcp"
+          "default": "on-interaction",
+          "description": "Когда грузится 3D. Первый экран — after-lcp: после LCP и события load, до того — постер. Ниже первого экрана — on-interaction (умолчание): по намерению — первое нажатие, касание, клик или остановка ≥ 2,5 с на разделе, до того — кадр Blender или постер. on-visible — загрузка по видимости даёт длинные кадры прокрутки: только с пометкой риска (ворота EG-PERF-01 creative). Норма — blender 12/15."
         },
         "cta_before_3d": {
           "type": "boolean",
@@ -1545,6 +1902,5 @@
   },
   "x-version": 1,
   "x-checked": "2026-09-24",
-  "x-owner": "site-research · v0.9 — агент E (04-blocks, волна 2); v1 — агент J (10-playbooks-contracts/schemas, волна 3)",
-  "x-supersedes": "04-blocks/page-plan.schema.json (v0.9) — для файлов page_plan_version 0.9"
+  "x-owner": "site-research · v0.9 — агент E (04-blocks, волна 2); v1 — агент J (10-playbooks-contracts/schemas, волна 3)"
 }
