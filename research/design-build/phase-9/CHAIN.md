@@ -43,3 +43,24 @@
 - База ДФ9 для статической проверки — `7e6d57e` (main на старте разгрузки).
 - Общее для зон: поправки к общему брифу кода — `briefs/COMMON-DF9.md`; приёмка плана — `tools/df9_check.py`
   (`coverage` — все находки OE ровно по разу, классы, зоны и причины; `masks` — пересечения масок файлов внутри пар).
+
+## 01. D6b — приёмка ассетов (29.09, ≈ 29 мин, в уведомлении — 447 тыс. токенов)
+- Сделано: правлены `scripts/ai-media/asset_audit.py` (+134/−40), `check_icons.py` (+74/−15), `palette.py` (+68/−4),
+  `tests/test_asset_audit.py` (+152/−4); снятых файлов нет. OE3-05 — ключ набора `audit --icon-set` и `check_icons.py
+  --set` (умолчание lucide), поле `levels`: шапка и штрих Lucide — fail только у Lucide, у другого набора — warn с
+  советом; цвет — fail всегда. OE3-06 — `QA-PROV-VISIBLE-MARK` warn с листом углов и пунктом «человеку». OE3-16 —
+  `palette.py IMG… [--k] [--json]`, модуль тот же. OE3-17 (часть) — сняты `EXP / "L"`, `ab_analyze`, псевдонимы папок
+  опытов. OE3-21 — нет модели, пакета или программы окружения: одна строка «поставьте `scripts/install.sh …`» (ocr,
+  svg, `--bin`, `--ffmpeg`) в `errors` и в «Окружение» `audit.md`, поле `env`.
+- Тесты: selftest 90/90 (76 + 14), с `--ocr` 92/92; калибровочный набор 17-f04, 19-e08 — warn без `needs_human` от
+  метки; смоук `--only scripts/ai-media` — PASS 54, FAIL 0, XFAIL 2 (прежние), XPASS 6; `--validate`, `--uncovered` —
+  чисто.
+- Отступления: строки окружения шире брифа (svg, `ssimulacra2` и декодеры, ffmpeg); `--master` без `ssimulacra2` или
+  мастера — строка в `errors` вместо тихого пропуска; `header_check` — `width` не хвост `stroke-width`; `palette()` —
+  цветов меньше k без падения; `env` — новое поле `asset-audit/1`. Решение оркестратора — все приняты (Р221).
+- Стыки: `--icon-set НАБОР` = `conventions.icons.set`; JSON `check_icons` — плюс `set`, `levels`; JSON `palette` —
+  `{k, images, all}`; D6a — смоук `palette` (import-only → help), `check_icons` help без xfail, README ai-media; D8, D9 —
+  «Для текстов» отчёта.
+- Открыто: эталон и штрих параметром, метка в углу до info — Ф10; `QA-COLOR-WARM` без `--dna` и различение годного и
+  брака — замер Ф9; входы тестов из `99-raw` (3 пропуска) — Ф10; чек-лист окружения — Ш0.
+- Не прочитано: подкоманды судьи и режимы cutout, edit, texture, video `asset_audit.py` — вне мест правки; проза kb.
