@@ -36,7 +36,8 @@
   inventory INPUT [--format …] [--json OUT] [--md OUT]  — без фактов: утверждения по классам и видимый ли источник на
           странице (метрика «доля утверждений с видимым источником»); exit 0
   lint-facts FACTS [--today …] [--final] — проверка самого инвентаря (вывод без основания, истёкшие, без разрешений,
-          id мест use по словарю site, демо-данные); exit 0/2/1
+          id мест use по словарю site, демо-данные); разрешение pending и демо-данные — warning, с --final (ворота
+          публикации) — error; exit 0/2/1
   rules-schema — JSON Schema формата claims-rules.yaml
   --selftest — офлайн-тесты извлечения, сопоставления, правил, калибровок и ложных срабатываний; exit 0/1
 
@@ -2500,6 +2501,9 @@ def cmd_lint_facts(a):
             add(F, 'error' if a.final else 'warning', 'COPY-F-EXAMPLE', u, f['id'], None, f"fact:{f['id']} — демо-данные (example: true)",
                 'До публикации замените настоящим фактом с источником.', [f['id']])
         for lvl, rule, msg, fix in publishable_issues(f, facts, today):
+            if rule == 'COPY-F-PERMISSION' and msg == f"fact:{f['id']}: разрешение pending" and not a.final:
+                # разрешение запрошено — обычное состояние сбора фактов; ворота публикации — --final
+                lvl, fix = 'warning', 'Разрешение запрошено: до публикации нужен ответ granted (ворота — lint-facts --final); до ответа на странице — [PLACEHOLDER].'
             add(F, lvl, rule, u, f['id'], ','.join(f.get('claim_class') or []), msg, fix, [f['id']])
         if f.get('kind') in ('testimonial', 'person', 'client', 'partner', 'case', 'expert-quote') and (f.get('permission') or {}).get('status') == 'not-required':
             add(F, 'error', 'COPY-F-PERMISSION', u, f['id'], f.get('kind'), f"fact:{f['id']}: вид {f.get('kind')} требует разрешения третьего лица, а стоит not-required", 'Укажите разрешение субъекта (permission.subject, form, document).')
@@ -3060,6 +3064,17 @@ def cmd_selftest(_a=None):
     check('HTML: title, description, h1, p, blockquote; без script', [u['slot_type'] for u in us] == ['meta-title', 'meta-description', 'headline', 'body', 'testimonial-quote'], [(u['slot_type'], u['text']) for u in us])
     check('словарь site: id мест use (lint-facts) — типы страниц, роли, слоты вида text', {'faq-page', 'case-page'} <= load_vocab().get('page_types', set())
           and 'offer' in load_vocab().get('section_roles', set()) and 'disclaimer' in load_vocab().get('slot_types', set()))
+    lf = {}
+    with tempfile.TemporaryDirectory() as td:
+        fp, jp = os.path.join(td, 'facts.yaml'), os.path.join(td, 'lint-facts.json')
+        with open(fp, 'w', encoding='utf-8') as fo:
+            yaml.safe_dump(facts.data, fo, allow_unicode=True, sort_keys=False)
+        for final in (False, True):
+            cmd_lint_facts(argparse.Namespace(input=fp, schema=SCHEMA_PATH, today='2026-09-24', final=final, json=jp, quiet=True))
+            with open(jp, encoding='utf-8') as fi:
+                lf[final] = {(x['rule'], x['level']) for x in json.load(fi)['findings'] if x['unit'] == 'fact:review-pending'}
+    check('lint-facts: разрешение pending — warning до --final, с --final — error',
+          lf[False] == {('COPY-F-PERMISSION', 'warning')} and lf[True] == {('COPY-F-PERMISSION', 'error')}, lf)
     _selftest_calibration(check, facts, schema)
     # --- внешние правила
     with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False, encoding='utf-8') as t:
@@ -3108,7 +3123,8 @@ def main(argv=None):
         p.add_argument('--legal-category', help='отрасль через запятую: finance, medical, dietary-supplements, alcohol, education, real-estate, other, general')
         p.add_argument('--legal-only', action='store_true', help='в отчёт — только находки правил права (claims-rules.yaml, --rules)')
     if cmd in ('check', 'lint-facts'):
-        p.add_argument('--final', action='store_true', help='ворота публикации: демо-данные (example: true) — error')
+        p.add_argument('--final', action='store_true', help='ворота публикации: демо-данные (example: true) — error; '
+                                                            'у lint-facts ещё разрешение pending — error')
     a = p.parse_args(argv)
     try:
         if cmd == 'check':

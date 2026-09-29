@@ -3,12 +3,12 @@
   "$id": "urn:app-design:text-research:copy-deck:1",
   "title": "copy-deck — тексты страниц по секциям и слотам с вариантами, фактами, флагами и статусами",
   "description": "Формат copy deck: тексты одной страницы (или шаблона страницы) по секциям и слотам с вариантами, фактами, флагами и статусами. Экземпляр — YAML или JSON с корнем copy_deck; в проекте — docs/projects/<slug>/site/<surface>/copy/<page-id>.yaml. Поля и статусы v0 не удаляются и не переименовываются (x-v0-fields): creative привязывает движение текста к слотам. Стык с планом страницы — x-site-map; выгрузка во вход холста — x-canvas-map. Структурные требования — здесь; требования статусов, словаря, фактов и правил текста — в x-status-rules и в ../../scripts/text/copydeck.py validate. Описание — 10-templates-recipes/README.md.",
-  "date": "2026-09-29",
+  "date": "2026-09-30",
   "x-version": 1,
   "x-status": "v1.2: совместима с v1 — поля и статусы v0 на месте, новые значения и поля необязательны; процесс — 01-copy-deck-workflow.md, примеры — examples/ (02, 03)",
   "x-owner": "text-research · 10-templates-recipes · J (контракт тройки v2 §3 п.8)",
   "x-doc": ["10-templates-recipes/README.md", "../../scripts/text/README.md#copydeck"],
-  "x-tool": "../../scripts/text/copydeck.py (skeleton, validate, claims, lint, check, approve, export, import-copy, export-assets, export-variants, apply-selection, verify-page, upgrade, before-after, --selftest)",
+  "x-tool": "../../scripts/text/copydeck.py (skeleton, validate, claims, lint, check, approve, export, import-copy, export-assets, export-variants, apply-selection, before-after, --selftest)",
 
   "type": "object",
   "required": ["copy_deck"],
@@ -105,7 +105,7 @@
     },
     "lint-allow": {
       "type": "array",
-      "description": "Видимые исключения линтера (C, спецификация §9 п.8): находка правила уходит в notes с причиной. Артефакты (ART) и данные (CNT) не подавляются; находки страницы — только lint_allow страницы. Находки сверки (COPY-F-…, право COPY-L-…) и формата (COPY-D-…) lint_allow не снимает: ложную находку сверки лечат правкой текста или facts.yaml (I3, опыт I/04: «ипотека» → COPY-F-CLASS).",
+      "description": "Видимые исключения линтера (C, спецификация §9 п.8): находка правила уходит в notes с причиной. Артефакты (ART) и данные (CNT) не подавляются; находки страницы — только lint_allow страницы. Находки сверки (COPY-F-…, право COPY-L-…) и формата (COPY-D-…) lint_allow не снимает: у эвристик сверки COPY-F-CLASS и COPY-F-NUM — свой обход claims_allow, остальную ложную находку сверки лечат правкой текста или facts.yaml.",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -113,6 +113,20 @@
         "properties": {
           "rule": {"type": "string", "minLength": 2, "description": "id правила или шаблон fnmatch (ru-lex-empty-adj-*)."},
           "reason": {"type": "string", "minLength": 3, "description": "Почему законно: слоган из брифа, термин отрасли, «платформа» как категория."}
+        }
+      }
+    },
+    "claims-allow": {
+      "type": "array",
+      "description": "Обход эвристик сверки с фактами — решение человека с записанной причиной: находка правила не считается в error сверки и записях claims, а copydeck.py claims, check, approve и validate --final перечисляют обход отдельным списком. Обходятся только COPY-F-CLASS (маркер класса утверждения без факта: «Зарплата и кадры» — название услуги) и COPY-F-NUM (число без факта и число, не совпавшее с фактом: COPY-F-NUM, COPY-F-NUM-MISMATCH). Право (COPY-L-…), never_claim, «утверждение шире факта» и остальная сверка не обходятся. Запись без reason или by, с другим правилом или с fact:<id>, которого нет в facts.yaml, — не обход: находка остаётся, validate — warning COPY-D-CLAIMS-ALLOW.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "patternProperties": {"^x-": {}},
+        "properties": {
+          "rule": {"type": "string", "description": "COPY-F-CLASS или COPY-F-NUM."},
+          "reason": {"type": "string", "description": "Почему находка ложная. У числа — fact:<id> факта, на котором оно стоит («fact:company-since-2014 — 12 лет = 2026 − 2014»), или почему это не утверждение (номер шага, артикул)."},
+          "by": {"type": "string", "description": "Кто решил: заказчик или аналитик (роль или имя), а не агент."}
         }
       }
     },
@@ -254,6 +268,7 @@
         "group": {"$ref": "#/$defs/local-id", "description": "Экземпляр повторяемого набора = group плана «группа-N»: карточка, шаг, пара «вопрос — ответ», отзыв с подписью, число с подписью (card-1, qa-2)."},
         "asset_ref": {"type": "string", "description": "Ассет, к которому относится текст (image-alt, image-caption, in-image-text): id слота плана ассетов ai-media (hero, og)."},
         "in_image": {"$ref": "#/$defs/in-image"},
+        "claims_allow": {"$ref": "#/$defs/claims-allow", "description": "Обходы эвристик сверки для текста этого слота (все его варианты)."},
         "variants": true, "chosen": true, "selection": true, "fact_ids": true, "missing_ids": true,
         "claim_flags": true, "lint": true, "claims": true, "lint_allow": true, "edit_log": true, "notes": true
       }
@@ -380,6 +395,7 @@
         "article": {"$ref": "#/$defs/article"},
         "og_template": {"$ref": "#/$defs/og-template"},
         "lint_allow": {"$ref": "#/$defs/lint-allow", "description": "Исключения для находок страницы (анализаторы ритма, плотности): законные формы — письмо, манифест."},
+        "claims_allow": {"$ref": "#/$defs/claims-allow", "description": "Обходы эвристик сверки для всех текстов страницы: слоты, обещание, мета, OG-шаблон («Зарплата и кадры» — название услуги в нескольких местах)."},
         "notes": {"type": "string"},
         "sections": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/section"}}
       }
@@ -479,13 +495,13 @@
       {"from": ["/copy_deck/version", "/copy_deck/date", "/copy_deck/site", "/copy_deck/authors", "/copy_deck/notes", "/copy_deck/pages/*/status", "/copy_deck/pages/*/approval", "/copy_deck/pages/*/reason", "/copy_deck/pages/*/notes"], "note": "служебные поля и подпись: статус, путь и отпечаток (text_hash) — в INPUT.md"},
       {"from": ["/copy_deck/product_name", "/copy_deck/lang", "/copy_deck/source_lang", "/copy_deck/source_ref", "/copy_deck/adaptation"], "note": "имя продукта и язык — в брифе холста из site-brief (product.name, product.locale); второй язык — свой copy deck и своя выгрузка"},
       {"from": ["/copy_deck/voice_ref", "/copy_deck/facts_ref", "/copy_deck/meaning_ref", "/copy_deck/copy_slots_ref", "/copy_deck/page_plan_ref", "/copy_deck/pages/*/hierarchy_ref"], "note": "ссылки на источники: голос, факты, смысл и план идут во вход своими картами"},
-      {"from": ["/copy_deck/jurisdiction", "/copy_deck/legal_category", "/copy_deck/pages/*/lint_allow"], "note": "режим сверки фактов и права и исключения линтера — входы проверок текста, исполнителю не нужны"},
+      {"from": ["/copy_deck/jurisdiction", "/copy_deck/legal_category", "/copy_deck/pages/*/lint_allow", "/copy_deck/pages/*/claims_allow"], "note": "режим сверки фактов и права, исключения линтера и обходы сверки — входы проверок текста, исполнителю не нужны"},
       {"from": ["/copy_deck/pages/*/page_type", "/copy_deck/pages/*/site_page_id", "/copy_deck/pages/*/genre", "/copy_deck/pages/*/awareness"], "note": "тип страницы, жанр и осведомлённость — план и бриф, во вход идут их картами"},
       {"from": ["/copy_deck/pages/*/promise", "/copy_deck/pages/*/primary_action"], "note": "обещание первого экрана — текст слота, на который указывает promise.from, он уже в copy.md; product.goal брифа холста — из смысла, главное действие — из плана"},
       {"from": ["/copy_deck/pages/*/meta", "/copy_deck/pages/*/og_template", "/copy_deck/pages/*/article"], "note": "мета, OG и бриф статьи на артборд не идут — их берёт код сайта; текст картинки OG — шаблон ai-media"},
       {"from": ["/copy_deck/pages/*/sections/*/block", "/copy_deck/pages/*/sections/*/section_role", "/copy_deck/pages/*/sections/*/site_section_id", "/copy_deck/pages/*/sections/*/genre", "/copy_deck/pages/*/sections/*/slots/*/site_slot_id", "/copy_deck/pages/*/sections/*/slots/*/group", "/copy_deck/pages/*/sections/*/slots/*/in_image"], "note": "роль, блок, анатомия и экземпляр набора — план страницы (page.yaml входа); строка в картинке — спецификация ассета (copydeck.py export-assets)"},
       {"from": ["/copy_deck/pages/*/sections/*/question", "/copy_deck/pages/*/sections/*/message", "/copy_deck/pages/*/sections/*/carries", "/copy_deck/pages/*/sections/*/notes"], "note": "смысл секции воплощён в тексте; работа секции для брифа — из плана и иерархии"},
-      {"from": ["/copy_deck/pages/*/sections/*/slots/*/selection", "/copy_deck/pages/*/sections/*/slots/*/fact_ids", "/copy_deck/pages/*/sections/*/slots/*/missing_ids", "/copy_deck/pages/*/sections/*/slots/*/claim_flags", "/copy_deck/pages/*/sections/*/slots/*/lint", "/copy_deck/pages/*/sections/*/slots/*/claims", "/copy_deck/pages/*/sections/*/slots/*/lint_allow", "/copy_deck/pages/*/sections/*/slots/*/edit_log", "/copy_deck/pages/*/sections/*/slots/*/notes"], "note": "как текст получен и проверен (выбор, факты, флаги, проверки, журнал правки) — запись copy deck; исполнитель получает текст и его статус, факты — выгрузкой facts.md"}
+      {"from": ["/copy_deck/pages/*/sections/*/slots/*/selection", "/copy_deck/pages/*/sections/*/slots/*/fact_ids", "/copy_deck/pages/*/sections/*/slots/*/missing_ids", "/copy_deck/pages/*/sections/*/slots/*/claim_flags", "/copy_deck/pages/*/sections/*/slots/*/lint", "/copy_deck/pages/*/sections/*/slots/*/claims", "/copy_deck/pages/*/sections/*/slots/*/lint_allow", "/copy_deck/pages/*/sections/*/slots/*/claims_allow", "/copy_deck/pages/*/sections/*/slots/*/edit_log", "/copy_deck/pages/*/sections/*/slots/*/notes"], "note": "как текст получен и проверен (выбор, факты, флаги, проверки, журнал правки) — запись copy deck; исполнитель получает текст и его статус, факты — выгрузкой facts.md"}
     ],
     "copy_md": {
       "file": "pages/<page-id>/copy.md — тексты одной страницы; выгрузка — copydeck.py export, приём правок заказчика с холста — copydeck.py import-copy, разбор исходников холста в тот же формат — scripts/claude-design/dc_texts.py",

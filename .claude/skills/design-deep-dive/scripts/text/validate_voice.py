@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
-"""validate_voice.py — проверка voice.schema.yaml и профилей голоса бренда (voice.yaml) и продукта (voice.product.yaml):
-схема, смысловые проверки, отрицательные мутации.
+"""validate_voice.py — проверка профилей голоса бренда (voice.yaml) и продукта (voice.product.yaml) по
+voice.schema.yaml: схема и смысловые проверки.
 
 Запуск (Python окружения скилла, нужны jsonschema и PyYAML):
-    python3 scripts/text/validate_voice.py [voice.yaml …]
-Без аргументов — три примера базы 05-voice-editorial/examples/voice-*.yaml (для них ≥ 8 типов слотов на язык) и
-профиль голоса продукта, собранный в памяти из первого примера.
+    python3 scripts/text/validate_voice.py voice.yaml […]   профили проекта — печатаются только их находки
+    python3 scripts/text/validate_voice.py                  схема и три примера базы 05-voice-editorial/examples/voice-*.yaml
+                                                           (для них ≥ 8 типов слотов на язык)
+    python3 scripts/text/validate_voice.py --selftest       то же и отрицательные мутации: профиль бренда из первого
+                                                           примера и голос продукта, собранный из него в памяти
 
 Проверки:
   1. метасхема Draft 2020-12; поле date; enum slot-type входит в слоты вида text словаря site
-     (kb/site/02-site-types/vocabulary.yaml); слот словаря, которого нет в enum, — справка, не ошибка;
+     (kb/site/02-site-types/vocabulary.yaml); слот словаря, которого нет в enum, — справка, не ошибка (строки схемы —
+     без файлов и в самопроверке; с файлами проекта схема проверяется молча, сбой — ошибка запуска);
   2. каждый профиль валиден по схеме;
   3. смысловые (схема их не видит): образцы против обращения («ты» при ru_form: vy; «Вы» в середине фразы), эмодзи,
      восклицаний, словаря «не говорим»; ссылки fact:/missing: разрешаются в facts_ref; adaptation_of указывает на
@@ -19,7 +22,8 @@
      service-error, destructive-action, money, security; образцы — по роли строки интерфейса (role), не по slot_type;
      «!» нет в success-routine и destructive-action; карта тона без service-error, destructive-action или money и
      ситуации только сайта в ней — предупреждения. У профиля бренда образец только с role — предупреждение;
-  5. отрицательные мутации (профиль бренда и голос продукта): каждая обязана дать ошибку схемы или смысловую ошибку.
+  5. отрицательные мутации (только --selftest; профиль бренда и голос продукта): каждая обязана дать ошибку схемы или
+     смысловую ошибку.
 Выход: 0 — всё прошло; 1 — есть ошибки. Итог печатается и пишется в $DDD_HOME/out/text/validate_voice.last-run.txt.
 """
 import copy
@@ -283,6 +287,8 @@ def main(argv=None) -> int:
     if any(a in ("-h", "--help") for a in argv):
         print(__doc__.strip())
         return 0
+    selftest = "--selftest" in argv
+    files = [] if selftest else [Path(a) for a in argv]   # файлы проекта — только их находки
     out = []
     ok = True
 
@@ -292,19 +298,20 @@ def main(argv=None) -> int:
 
     schema = load(SCHEMA)
     jsonschema.Draft202012Validator.check_schema(schema)
-    say(f"метасхема: OK ({SCHEMA.relative_to(ROOT)}, date {schema.get('date')})")
-    slots = ((load(VOCAB).get("namespaces") or {}).get("slot") or {}).get("values") or []
-    vocab = {s["id"] for s in slots if isinstance(s, dict) and s.get("kind") == "text"}
-    enum = set(schema["$defs"]["slot-type"]["enum"])
-    if enum - vocab:
-        ok = False
-        say(f"FAIL enum slot-type вне словаря site (слоты вида text): {sorted(enum - vocab)}")
-    else:
-        say(f"enum slot-type ({len(enum)}) — слоты вида text словаря site ({len(vocab)}): OK")
-    if vocab - enum:
-        say(f"справка: слоты вида text словаря site без образцов голоса в enum — {', '.join(sorted(vocab - enum))}")
+    if not files:
+        say(f"метасхема: OK ({SCHEMA.relative_to(ROOT)}, date {schema.get('date')})")
+        slots = ((load(VOCAB).get("namespaces") or {}).get("slot") or {}).get("values") or []
+        vocab = {s["id"] for s in slots if isinstance(s, dict) and s.get("kind") == "text"}
+        enum = set(schema["$defs"]["slot-type"]["enum"])
+        if enum - vocab:
+            ok = False
+            say(f"FAIL enum slot-type вне словаря site (слоты вида text): {sorted(enum - vocab)}")
+        else:
+            say(f"enum slot-type ({len(enum)}) — слоты вида text словаря site ({len(vocab)}): OK")
+        if vocab - enum:
+            say(f"справка: слоты вида text словаря site без образцов голоса в enum — {', '.join(sorted(vocab - enum))}")
     validator = jsonschema.Draft202012Validator(schema)
-    paths = [Path(a) for a in argv] or EXAMPLES
+    paths = files or EXAMPLES
     for p in paths:
         v = load(p)
         errs = sorted(validator.iter_errors(v), key=lambda e: list(e.path))
@@ -323,7 +330,17 @@ def main(argv=None) -> int:
             say(f"   смысл: {e}")
         for w in swarn:
             say(f"   предупреждение: {w}")
-    # мутации — на первом примере
+    if selftest:
+        ok &= mutations(validator, say)
+    say("validate_voice: " + ("OK" if ok else "FAIL"))
+    (kbpaths.out("text") / "validate_voice.last-run.txt").write_text("\n".join(out) + "\n", encoding="utf-8")
+    return 0 if ok else 1
+
+
+def mutations(validator, say) -> bool:
+    """Самопроверка: отрицательные мутации профиля бренда (первый пример базы) и голоса продукта, собранного из него в
+    памяти, — каждая обязана дать ошибку; чистый голос продукта проходит."""
+    ok = True
     base_path = EXAMPLES[0]
     base_voice = load(base_path)
     caught = 0
@@ -367,9 +384,7 @@ def main(argv=None) -> int:
     say(f"  {'пойман ' if wok else 'ПРОПУЩЕН'} голос продукта: карта тона без money и с ситуацией сайта — предупреждения")
     say(f"мутаций голоса продукта поймано: {pcaught} из {len(PRODUCT_MUTATIONS) + 1}")
     ok &= pcaught == len(PRODUCT_MUTATIONS) + 1
-    say("validate_voice: " + ("OK" if ok else "FAIL"))
-    (kbpaths.out("text") / "validate_voice.last-run.txt").write_text("\n".join(out) + "\n", encoding="utf-8")
-    return 0 if ok else 1
+    return ok
 
 
 if __name__ == "__main__":
