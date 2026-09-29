@@ -168,12 +168,20 @@ FSD-карта, слой страницы сайта и лендинга, диа
 (`../strategy/.claude/skills/design-deep-dive/scripts/…`) в окружении машины
 `~/.cache/design-deep-dive/`, которое ставит `scripts/install.sh` скилла: одна копия
 утилит и порогов, версия — коммит стратегии; результаты остаются в код-репо. Фаза
-`build` — собранная страница: `page_anatomy.py` → `page_accept.py` → `page_gates.py` с
-профилем бюджета плана и его исключениями `x-gate-exception`; `geo_probe.py`,
-`ia_probe.py` (многостраничник), `run_axe_targets.py`, `claims_check.py` и
-`lang_check.py` на собранном HTML, `motion_check.py`; у страниц с 3D — `site_probe.py`,
-`gate_check.py`, `gltf_load_bench.py`, `web_view.py`; визуальный аудит —
-`marketing_audit.py` или `ui_audit.py`; пункты `after_build` манифеста `ready.yaml`.
+`build` — собранная страница, замеры сводятся к одному вердикту:
+`page_anatomy.py URL OUT --inp` (и `--mobile`),
+`page_accept.py PAGE --out DIR --budget-profile P` (и `--mobile --throttle`),
+`motion_check.py PAGE --level L --page-type T --out DIR`; у страниц с 3D —
+`site_probe.py URL OUT --quick` и тот же прогон с `--no-3d`, затем `gate_check.py`
+по каждому прогону с `--baseline` прогона без 3D; вердикт —
+`page_gates.py --profile P --anatomy … --accept … --motion … --gate3d … --json`
+(`P` — `budget_profile` плана, исключения — его `x-gate-exception`; отчёты
+`geo_probe.py`, `ia_probe.py` у многостраничника и `run_axe_targets.py` — ключами
+`--geo`, `--ia`, `--axe`): поля `verdict`, `B`, `S`, код 1 — есть B, блокирует только
+он. Кроме ворот — `claims_check.py` и `lang_check.py` на собранном HTML, визуальный
+аудит `marketing_audit.py` или `ui_audit.py`, у 3D — `gltf_load_bench.py`,
+`web_view.py`. Пункты `after_build` манифеста `ready.yaml` — команды этой цепочки;
+поля отчётов звеньев — `scripts/README.md` скилла, раздел «Ворота после сборки».
 Фаза `live` — поле живой страницы (`page-gates.yaml#phases`). У кабинета лабораторных
 порогов для экранов в базе нет: поле p75, RUM и сценарии реакции на собранном
 приложении (канон дизайна, раздел «Пакет для кода»). В CI код-репо стратегия

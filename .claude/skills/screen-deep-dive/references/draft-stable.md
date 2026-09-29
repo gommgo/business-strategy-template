@@ -169,10 +169,13 @@ hint, но не блокирует stable.
    если есть.
 3. Прочитать соседей (см. `field-checklists.md`).
 4. Прогнать пункты 1, 2, 3, 5, 6 (проверяемые по форме). Разбор дерева,
-   набор состояний и свод `map.md` считают утилиты `tree`, `states`,
-   `screen_map` раздела `project` скилла дизайна
-   (`../design-deep-dive/scripts/README.md § project`); пока их файлов
-   нет — скилл проверяет то же чтением по форме.
+   набор состояний и свод `map.md` считают утилиты раздела `project`
+   скилла дизайна (`../design-deep-dive/scripts/README.md § project`):
+   `tree`, `states` и `screen_map` —
+   `check <project-slug> <surface>`, строки находок с правилом
+   `/screen-audit`, код 1 — есть `error`; реестр текстов —
+   `copy_lint.py texts.md` (0 error — строки могут быть `checked`). Когда
+   окружения нет — скилл проверяет то же чтением по форме.
 5. Если все 5 ✅ — раунд `AskUserQuestion` по тест-критерию
    (пункт 4).
 6. Если и пункт 4 ✅ — раунд `AskUserQuestion`: «Готов к stable,

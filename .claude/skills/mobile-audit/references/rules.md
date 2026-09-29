@@ -127,9 +127,11 @@
   offline, permission-denied, not-found, update-required, maintenance}`;
   `widgets.states` ⊆ `{placeholder, populated, empty, signed-out, stale}`.
   Ключи — контракт с `<org>/mobile` и не переименовываются; каждому
-  соответствуют состояния словаря экрана (S01–S24) по таблице раздела
-  «Состояния экрана и словарь» канона — через неё читаются правила
-  набора (R-INV-001, R-INV-013, R-INV-014).
+  соответствуют состояния словаря экрана (S01–S24; словарь — производный
+  YAML
+  `../design-deep-dive/kb/ux/06-feedback-states-motion/screen-states.yaml`)
+  по таблице раздела «Состояния экрана и словарь» канона — через неё
+  читаются правила набора (R-INV-001, R-INV-013, R-INV-014).
 - **норма**: `docs/projects/_template/mobile/README.md`, разделы «Язык
   контракта», «Состояния экрана и словарь».
 

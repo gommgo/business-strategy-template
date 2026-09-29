@@ -25,7 +25,8 @@
   `site_type`, `business` (`name`, `what`, `goal`), `conversion.action`, `constraints.jurisdiction`, `languages`,
   `questions`; с `proposed` — ещё `traffic`, `offer`, `proof` (`facts_ref`, `required_kinds` по типу сайта), `pages`,
   `ambition`, `search`, `analytics`, `decision_context` и `meaning_ref`; при `approved` вопросы приоритета 1 —
-  `assumed`, `answered` или `withdrawn`. Тема — вопрос журнала с ответом.
+  `assumed`, `answered` или `withdrawn`. Тема — блок `themes`: `default`, `dark` (`needed` и `why`), `switcher` — при
+  двух темах.
 - **Ссылки:** `project.slug` — slug проекта; `site_type` соответствует роду поверхности;
   `proof.facts_ref: ../../facts.yaml`, `meaning_ref: meaning.yaml`, `brand.ref: ../../design/brand.yaml`;
   `intake.raw_ref` — строка `docs/business/material.md`, если материал заведён; первая `constraints.jurisdiction` — она
@@ -114,8 +115,8 @@
   `jurisdiction` — как в брифе.
 - **Anti-patterns:** тексты без плана; число или отзыв текстом без `fact_ids`; `approved` от агента; юридический
   документ, написанный агентом; правка утверждённого текста без снятия статуса.
-- **Порядок:** каркас по плану → тексты секций → мета, OG, FAQ → строки ассетов → проверки → выбор вслепую →
-  утверждение.
+- **Порядок:** каркас по плану (`copydeck.py skeleton`) → тексты секций → мета, OG, FAQ → строки ассетов → проверки
+  (`copydeck.py check`) → выбор вслепую → утверждение.
 
 ### `facts` — `…/facts.yaml`
 
@@ -181,17 +182,17 @@
 `docs/projects/_template/design/_template/system.yaml`.
 
 - **Закрыто:** `status: approved` и `approval` в карте решений — «Keep» заказчика до экранов; статус карты — статус всей
-  ДС.
+  ДС; `ds_build check <slug>` без ошибок — формат DTCG и производные равны сборке.
 - **Токены DTCG:** примитивы и семантика по схеме ui 09/04; режимы тем, плотности, сокращённого движения;
   `breakpoint.*` рядом с `size.panel.*`; одна шкала `space.*`; у сайта — расширение страниц; правила применения — в
   `$extensions`. Пути токенов — они же имена CSS-переменных: код их читает, они не переименовываются.
 - **Проза:** разделы — ui 12/04 §2.3; роли цвета с частотой и контрастом, правила с именами токенов, иконография,
   доступность, известные проблемы (слабые пары контраста), источник; голос — проекцией профиля; передняя часть с
-  токенами — производная.
+  токенами — производная (`ds_build build`; в ней `x-narrow` — основной кегль узкой ширины).
 - **Карта решений:** `components` — ключ на каждый тип экранов (у сайта — типы слотов действия и форм), один компонент
   на тип; `extensions` — с `keyboard` и `text_roles`; `text_styles` — роли ux 07/06 §7.2 и `body`; `conventions` — знак
   диапазона, пробел в разрядах, пустое состояние, иконки, цвета статусов, маркеры объектов; `starter` — после первой
-  приёмки кабинета.
+  приёмки кабинета. Покрытие типов — `ds_coverage check <slug> [<surface>]`.
 - **Anti-patterns:** литерал вне токенов; правка артефакта ДС без подъёма в токены; два компонента на один тип; тип «по
   месту» вместо словаря или расширения; обязательные состояния, скопированные из словаря; производные, правленые руками.
 - **Порядок:** токены (база → ручки или палитра → режимы → брейкпоинты) → контраст → проза → карта решений → артефакт →
@@ -215,11 +216,14 @@
 
 Схема — `kb/ai-media/06-art-direction-consistency/visual-dna.schema.json`.
 
-- **Закрыто:** `status: approved` и `approved_by` — человек. Нужны `dna_version`, `id`, `checked_at`, `status`,
-  `character`, `palette`, `grade`, `light`, `camera`, `composition`, `subject_matter`, `style_blocks`, `exclusions`,
-  `acceptance`.
-- **Ссылки:** сайт — из паспорта в `handoff` арт-дирекции, после ДС — `derived_from_ui.tokens: ../system.tokens.json`;
-  продукт — из токенов (`vlm_to_dna.py from-tokens`); метафоры пустых состояний экранов — из раздела иллюстраций.
+- **Закрыто:** `status: approved` и `approved_by` — человек; `vlm_to_dna.py validate` без ошибок. Нужны `dna_version`,
+  `id`, `checked_at`, `status`, `character`, `palette`, `grade`, `light`, `camera`, `composition`, `subject_matter`,
+  `style_blocks`, `exclusions`, `acceptance`; у продуктового паспорта — раздел `illustration`: места `places`, формат
+  `format`, перекраска `recolor`, список метафор `metaphors`; у 3D-иконок — паспорт серии `icon3d.series_passport`.
+- **Ссылки:** сайт — из паспорта в `handoff` арт-дирекции (путь к ней — `provenance.art_direction`), после ДС —
+  `derived_from_ui.tokens: ../system.tokens.json`; продукт — из токенов (`vlm_to_dna.py from-tokens`), разбор эталонов —
+  пакетом сессии Opus (`vlm_to_dna.py build` → агент `design-judge` → `vlm_to_dna.py parse`); метафоры пустых состояний
+  экранов — id списка `illustration.metaphors`.
 - **Anti-patterns:** один средний паспорт на два мира; палитра со слов модели, а не замером; утверждённый паспорт,
   правленый молча; статус `retired` в проекте.
 - **Порядок:** характер → палитра и цветокоррекция → свет и камера → композиция и сюжеты → блоки стиля → запреты →
@@ -242,12 +246,16 @@
 
 ### `asset-plan` — `…/design/<surface>/assets/plans/<page-id>.yaml`
 
-Формат — ai-media 01/01 §8; каркас — `plan_to_assets.py`.
+Схема — `kb/ai-media/05-prompting/asset-plan.schema.json` (формат — ai-media 01/01 §8); каркас —
+`plan_to_assets.py build <slug> <surface> --write`.
 
-- **Закрыто:** `status: approved` и `approval` — заказчик, до генерации; `plan_to_assets.py --check` без ошибок.
-- **Поля:** `plan_version`, `checked`, `page`, `brand`, `budgets`, `policy`, `slots[]`: `id` (`<секция>-<id>` плана),
-  `section`, `role`, `goal`, `ladder`, `source`, `task_codes` или `recipe:`, `variants` (соотношение, размер, форматы,
-  вес, фокус), `delivery`, `alt` из copy deck, `acceptance`, `ai_fit`; ключевой ассет и дорога 3D — в `note`.
+- **Закрыто:** `status: approved` и `approval` — заказчик, до генерации; `plan_to_assets.py check <slug> <surface>` без
+  ошибок.
+- **Поля:** `plan_version`, `checked`, `status`, `approval`, `page` (`page_type` — id словаря site, `media_class` —
+  проекция), `brand`, `budgets`, `policy`, `slots[]`: `id` (`<секция>-<id>` плана), `section`, `slot`, `role`, `goal`,
+  `key` — ключевой ассет, `ladder`, `source` (`generate` · `edit-real` · `real` · `code` · `template` · `render`),
+  `task_codes` или `recipe:`, `three_d.road` — дорога 3D, `variants` (соотношение, размер, форматы, вес, фокус),
+  `delivery`, `alt_ref` и `caption_ref` — текстовые слоты плана страницы, `acceptance`, `ai_fit`.
 - **Ссылки:** `refs.asset_plan` плана ведёт сюда; готовые файлы — строки `…/design/<surface>/assets/manifest.yaml`;
   загрузки холста — `ARTIFACTS.md`.
 - **Anti-patterns:** генерация до утверждения; `generate` у людей-доказательств, товара «как есть» и чужих знаков;
@@ -288,9 +296,9 @@
 
 Раскладка — `claude-design.md § Вход холста`.
 
-- **Закрыто:** своего статуса нет — вход производный; проверка входа — 0 ошибок. Манифест называет этап, источники с
-  путём, статусом и отпечатком, что заполнил агент («Going with»), пробелы и итог проверки; вход собран утилитой или
-  помечен «собран без утилиты».
+- **Закрыто:** своего статуса нет — вход производный; проверка входа `canvas_input check` — 0 `error`. Манифест
+  называет этап, источники с путём, статусом и отпечатком, что заполнил агент («Going with»), пробелы и итог проверки;
+  вход собран `canvas_input build` или, когда окружения нет, помечен «собран без утилиты».
 - **Состав:** бриф холста, факты с разделом «Нельзя утверждать», референсы исполнителю, критерии приёмки; у сайта — на
   страницу структура, тексты, ассеты, блок движения; у кабинета — контракт генерации, тексты, демо-набор, ассеты.
 - **Anti-patterns:** копии токенов, прозы ДС, арт-дирекции или плана во входе; вход, правленый руками; тексты не того
@@ -325,8 +333,8 @@
 
 Форма — `docs/projects/_template/design/_template/REVIEW.md`.
 
-- **Закрыто:** у страницы или экрана вердикт `accepted` или `accepted_with_notes` и одобрение заказчика с отпечатком,
-  совпадающим с исходниками холста и входа.
+- **Закрыто:** у страницы или экрана вердикт `accepted` или `accepted_with_notes` и одобрение заказчика с отпечатком
+  артбордов единицы и входа, совпадающим с текущим (`ready show <slug> <surface>`).
 - **Поля:** передняя часть — `stage`, `model`, `artifacts`, `synced` (с `lifted`), `checks`, `items`, `decision`,
   `reason`, `hashes`; таблица «Приёмка»; таблица «Пункты ACCEPTANCE».
 - **Anti-patterns:** вердикт руками; журнал итераций; кадры PNG в git; одобрение без отпечатка; S без записи.
@@ -349,8 +357,9 @@
 
 Форма — `docs/projects/_template/design/_template/ready.yaml`.
 
-- **Закрыто:** своего статуса нет — манифест производный; его `status` (`ready`, `partial`, `not-ready`) выводится из
-  единиц, а единица `ready: true` — только по правилу готовности формы.
+- **Закрыто:** своего статуса нет — манифест производный: собирает `ready build <slug> <surface>`, свежесть —
+  `ready check` (R-FRESH-006); его `status` (`ready`, `partial`, `not-ready`) выводится из единиц, а единица
+  `ready: true` — только по правилу готовности формы.
 - **Поля:** `surface`, `type`, `web_kind`, `consumer`, `status`, `sources` (путь, статус, `sha256`), `units` (`id`,
   `ready`, `composition`, `texts`, `mockup`, `budget_profile`, `gate_exceptions`, `after_build`, `open`), `perf`,
   `frontend_design`, `blockers`.
