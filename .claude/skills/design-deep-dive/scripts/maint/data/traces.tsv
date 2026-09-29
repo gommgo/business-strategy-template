@@ -1,0 +1,16 @@
+# Следы, которых нет в текстах скилла, и адреса, которые не бывают местом нормы. Читают scripts/maint/refcheck.py
+# (forward-only: находки «СЛЕД», код 1 при --strict), mapcheck.py и canon_check.py (not-norm: адрес карты или место
+# нормы в материале к разбору, в журнале ресерча базы или в журнале сборки — ошибка).
+# Колонки через табуляцию: kind (forward-only | not-norm), label — имя следа в выводе, pattern — регулярное выражение
+# Python (forward-only ищется в строке текста, not-norm — в пути адреса), example — строка, которую шаблон находит
+# (по ней самопроверки утилит сверяют шаблон). Строка с «#» в начале — комментарий.
+kind	label	pattern	example
+forward-only	Р-номер	(?<![\w-])Р\d{1,3}(?!\d)	Р12
+forward-only	журнал	research/design-build|design-build/|\bphase-\d\b|DECISIONS\.md|SYNTHESIS|CHAIN\.md	research/design-build/x
+forward-only	фаза сборки	(?<![\w-])Ф(?:[0-9]|10)(?![\w-])	Ф8
+forward-only	дата	\b\d{1,2}\.\d{2}\.20\d{2}\b|\b\d{1,2} (?:января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)(?: 20\d{2})?\b	29.09.2026
+forward-only	сравнение с прошлым	(?i)(?<![\w-])(теперь|больше не|по-прежнему|как и раньше|прежн\w+|раньше было|было\s*/\s*стало|устаревш\w+ верси\w+)(?![\w-])	теперь
+forward-only	снятый генератор	(?i)\bkimi\b|\bK2\.5\b	kimi
+not-norm	материал к разбору	99-raw/	text/99-raw/notes/x.md
+not-norm	журнал ресерча базы	^[a-z-]+/PLAN\.md$	site/PLAN.md
+not-norm	журнал сборки	^research/	research/x/y.md

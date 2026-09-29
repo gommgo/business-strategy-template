@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Калибровка оценки токенов под Opus 5.5 через `claude -p` (API-ключ не нужен).
+"""Калибровка оценки токенов баз знаний (`kb/<база>/`) под Claude Opus 5.5 через `claude -p` Claude Code (API-ключ не
+нужен, сессия Claude Code — да).
 
-Точные входные токены образца = usage(прогон с текстом на stdin) − usage(пустой прогон).
-По выборке тематических файлов каждого вида (prose/data/code) подгоняется
-tokens = a·кириллица + b·прочие символы (МНК без свободного члена); результат —
-calibration.json рядом со скриптом, его читает count_tokens.py.
-Каждый образец — один вызов Opus 5.5: ~1K токенов обвязки + сам текст.
+Точные входные токены образца = usage(прогон с текстом на stdin) − usage(пустой прогон). По выборке тематических файлов
+каждого вида (prose, data, code; выборка — по доле кириллицы) подгоняется tokens = a · кириллица + b · прочие символы
+(МНК без свободного члена); результат — `calibration.json` рядом со скриптом, его читают `count_tokens.py` и
+`layers.py`. Каждый образец — один вызов модели: ≈ 1 тыс. токенов обвязки + сам текст, поэтому калибровку запускают
+осознанно (после крупной правки базы), а не в проверках.
 
-  python3 calibrate.py                  # 12 prose + 6 data + 6 code
-  python3 calibrate.py --prose 20 --seed 3
+  python3 .claude/skills/design-deep-dive/scripts/maint/calibrate.py                  # 12 prose + 6 data + 6 code
+  python3 .claude/skills/design-deep-dive/scripts/maint/calibrate.py --prose 20 --seed 3
 """
 import argparse
 import json
@@ -92,15 +93,15 @@ def loo(samples, fallback_a=None):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--prose", type=int, default=12)
-    parser.add_argument("--data", type=int, default=6)
-    parser.add_argument("--code", type=int, default=6)
-    parser.add_argument("--min-chars", type=int, default=3000)
-    parser.add_argument("--max-chars", type=int, default=30000)
-    parser.add_argument("--seed", type=int, default=7)
-    parser.add_argument("--workers", type=int, default=4)
-    parser.add_argument("--out", type=Path, default=HERE / "calibration.json")
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--prose", type=int, default=12, help="образцов прозы (.md, .txt)")
+    parser.add_argument("--data", type=int, default=6, help="образцов данных (.json, .yaml, .tsv …)")
+    parser.add_argument("--code", type=int, default=6, help="образцов кода")
+    parser.add_argument("--min-chars", type=int, default=3000, help="файл-образец не короче, знаков")
+    parser.add_argument("--max-chars", type=int, default=30000, help="файл-образец не длиннее, знаков")
+    parser.add_argument("--seed", type=int, default=7, help="зерно выборки")
+    parser.add_argument("--workers", type=int, default=4, help="параллельных вызовов модели")
+    parser.add_argument("--out", type=Path, default=HERE / "calibration.json", help="куда писать коэффициенты")
     args = parser.parse_args()
 
     rng = random.Random(args.seed)

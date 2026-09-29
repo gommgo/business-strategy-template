@@ -1,0 +1,117 @@
+# Проверка синхронности скилла — scripts/maint/sync_check.py: производные файлы против генераторов, сборки на
+# фикстурах, управляемые копии текстов против канона, описания скиллов шаблона. Новый генератор с --check или новая
+# управляемая копия — строка здесь, код утилиты не меняется.
+today: "2026-09-29"   # дата сборок на фикстурах (ready build, canvas_input build): сроки фактов в проверке входа
+
+# Генераторы и сборки. run — вызов утилиты от корня скилла (Python окружения, рабочая папка — временная); steps —
+# несколько вызовов подряд. Подстановки: {root} — корень собранной фикстуры (fixture), {slug} — её проект, {out} —
+# временная папка проверки, {today} — дата выше. ok — коды выхода, которые проверка принимает (по умолчанию 0);
+# derived — файл, который сверяется (для вывода); xfail — известная причина расхождения: падение — XFAIL, прохождение
+# — XPASS (причину снимают вместе со строкой xfail).
+generators:
+  - id: ux-screen-states
+    what: словарь и матрица состояний экрана из ux 06/01
+    derived: kb/ux/06-feedback-states-motion/screen-states.yaml
+    run: scripts/ux/states_export.py --check
+  - id: ux-master-checklist
+    what: мастер-чек-лист ux из ux 12/01
+    derived: kb/ux/12-evaluation-checklists/master-checklist.yaml
+    run: scripts/ux/checklist_export.py --check
+  - id: site-profile
+    what: профиль маркетинговой страницы site (ux-marketing-profile.tsv, ac-profile.tsv)
+    derived: kb/site/09-ai-generation-evaluation/ux-marketing-profile.tsv
+    run: scripts/site/build_profile.py --check
+  - id: site-checklist
+    what: сводный чек-лист сайта из site 09/02
+    derived: kb/site/09-ai-generation-evaluation/site-checklist.yaml
+    run: scripts/site/checklist_export.py --check
+    xfail: >-
+      генератор пишет шапку «Сгенерировано 99-raw/tools/checklist_export.py» и помечает «?» пути источников, которых
+      нет в скилле (99-raw/experiments, 99-raw/notes, соседняя база вне скилла), а производный YAML собран с путём
+      генератора в скилле и без пометок; правка генератора и пересборка YAML — владелец site
+  - id: site-crosswalk
+    what: таблица соответствия словарей против словаря site
+    derived: kb/site/02-site-types/crosswalk.tsv
+    run: scripts/site/vocab_lint.py --check-crosswalk
+  - id: text-ux-dict
+    what: словарь ux 07/06 для линтера текстов
+    derived: kb/text/06-anti-slop/lexicon/ux-07-06.yaml
+    run: scripts/text/ux_dict_to_yaml.py --check
+  - id: text-before-after
+    what: why пар «до и после», выводимый из rule_ref
+    derived: kb/text/10-templates-recipes/before-after.tsv
+    run: scripts/text/copydeck.py before-after --check
+  - id: creative-levels
+    what: x-effect-levels и условия L0, L1 подачи против каталога эффектов
+    derived: kb/creative/09-ai-execution-evaluation/treatment.schema.json
+    run: scripts/creative/spec_check.py levels --check
+  - id: canvas-maps
+    what: карты x-canvas-map у схем-владельцев — форма и покрытие полей
+    run: scripts/creative/spec_check.py canvas-map
+  - id: ds-derived
+    what: производные ДС на фикстуре cabinet-ds (system.tokens.css, передняя часть DESIGN.md, tokens.json)
+    fixture: cabinet-ds
+    run: scripts/project/ds_build.py check {slug} --repo {root}
+  - id: screen-map
+    what: генерируемые разделы map.md на фикстуре cabinet
+    fixture: cabinet
+    run: scripts/project/screen_map.py check {slug} office --repo {root}
+  - id: ready-landing
+    what: манифест готовности лендинга — сборка и проверка на фикстуре package-landing
+    fixture: package-landing
+    steps:
+      - scripts/project/ready.py build {slug} promo --repo {root} --today {today}
+      - scripts/project/ready.py check {slug} promo --repo {root}
+  - id: ready-cabinet
+    what: манифест готовности кабинета — сборка и проверка на фикстуре package-cabinet
+    fixture: package-cabinet
+    steps:
+      - scripts/project/ready.py build {slug} office --repo {root} --today {today}
+      - scripts/project/ready.py check {slug} office --repo {root}
+  - id: canvas-input-landing
+    what: вход холста лендинга всех этапов — поле карты без обработчика останавливает сборку кодом 2
+    fixture: input-landing
+    ok: [0, 1]
+    steps:
+      - scripts/project/canvas_input.py build {slug} promo --stage directions --repo {root} --out {out}/directions --today {today}
+      - scripts/project/canvas_input.py build {slug} promo --stage wireframe --repo {root} --out {out}/wireframe --today {today}
+      - scripts/project/canvas_input.py build {slug} promo --stage mockup --repo {root} --out {out}/mockup --today {today}
+      - scripts/project/canvas_input.py build {slug} promo --stage motion --repo {root} --out {out}/motion --today {today}
+  - id: canvas-input-site
+    what: вход холста многостраничника всех этапов
+    fixture: input-site
+    ok: [0, 1]
+    steps:
+      - scripts/project/canvas_input.py build {slug} corp --stage directions --repo {root} --out {out}/directions --today {today}
+      - scripts/project/canvas_input.py build {slug} corp --stage wireframe --repo {root} --out {out}/wireframe --today {today}
+      - scripts/project/canvas_input.py build {slug} corp --stage mockup --repo {root} --out {out}/mockup --today {today}
+      - scripts/project/canvas_input.py build {slug} corp --stage motion --repo {root} --out {out}/motion --today {today}
+  - id: canvas-input-cabinet
+    what: вход холста кабинета этапов directions, wireframe, mockup (у кабинета этапа движения нет)
+    fixture: input-cabinet
+    ok: [0, 1]
+    steps:
+      - scripts/project/canvas_input.py build {slug} office --stage directions --repo {root} --out {out}/directions --today {today}
+      - scripts/project/canvas_input.py build {slug} office --stage wireframe --repo {root} --out {out}/wireframe --today {today}
+      - scripts/project/canvas_input.py build {slug} office --stage mockup --repo {root} --out {out}/mockup --today {today}
+  - id: fixtures
+    what: фикстуры с собранными файлами против их рецептов (scripts/maint/data/fixtures.yaml)
+    run: scripts/maint/fixture_gen.py build --all --check
+
+# Управляемые копии текста: блок кода копии совпадает с блоком канона байт в байт; при расхождении прав канон, а
+# правится копия. Пути — от корня репозитория; section — заголовок раздела (по имени), block — номер блока кода в нём.
+copies:
+  - id: tree-grammar
+    what: грамматика нотации дерева экрана
+    canon: docs/projects/_template/screens/README.md
+    canon_section: Нотация дерева
+    copy: .claude/skills/screen-deep-dive/references/tree-notation.md
+    copy_section: Грамматика
+    block: 1
+
+# Описания скиллов шаблона (поле description передней части SKILL.md): каждое и сумма — в пределах; скилл не скрыт от
+# модели (disable-model-invocation). Путь — шаблон от корня репозитория.
+descriptions:
+  skills: .claude/skills/*/SKILL.md
+  max: 600
+  total_max: 18000

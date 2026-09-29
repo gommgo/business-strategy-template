@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Объём тематического контента в ресерчах app-design: файлы, символы, токены.
+"""Объём тематического контента баз знаний скилла (`kb/<база>/`): файлы, символы, оценка токенов.
 
-Тематическое — всё внутри <ресерч>/, кроме служебных 90-sources, 91-videos, 99-raw.
-Корневые README.md / PLAN.md / CONTRADICTIONS.md идут отдельной строкой «(root)».
+Тематическое — всё внутри папки базы, кроме служебных `90-sources`, `91-videos`, `99-raw`; корневые `README.md`,
+`PLAN.md`, `CONTRADICTIONS.md` идут отдельной колонкой «root tok». Собранный или минифицированный код (строка длиннее
+5000 знаков, `dist/`, `node_modules/`, `.min.`) считается отдельно — «бандлы».
 
-Токены оцениваются моделью  tokens = a * кириллица + b * прочие символы,
-где a и b измерены на Opus 5.5 скриптом calibrate.py (пишет calibration.json).
-Без калибровки печатаются только символы.
+Токены оцениваются моделью  tokens = a · кириллица + b · прочие символы; коэффициенты по видам файлов (prose, data,
+code) измеряет `calibrate.py` и пишет в `calibration.json` рядом. Без калибровки печатаются только символы.
 
-  python3 count_tokens.py                  # сводка по ресерчам
-  python3 count_tokens.py --by-folder      # плюс разбивка по тематическим папкам
-  python3 count_tokens.py --csv out.csv    # все строки в CSV
+  python3 .claude/skills/design-deep-dive/scripts/maint/count_tokens.py                  # сводка по базам
+  python3 .claude/skills/design-deep-dive/scripts/maint/count_tokens.py --by-folder      # плюс разбивка по папкам
+  python3 .claude/skills/design-deep-dive/scripts/maint/count_tokens.py --csv out.csv    # все строки в CSV
 """
 import argparse
 import csv
@@ -19,8 +19,8 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-import sys; sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib")); import kbpaths  # перенос: scripts/lib
-ROOT = kbpaths.kb()  # перенос: kb/ — базы без суффикса -research
+import sys; sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib")); import kbpaths
+ROOT = kbpaths.kb()
 HERE = Path(__file__).resolve().parent
 SERVICE = {"90-sources", "91-videos", "99-raw"}
 ROOT_DOCS = {"README.md", "PLAN.md", "CONTRADICTIONS.md"}
@@ -59,11 +59,11 @@ def is_bundle(path, text):
 
 
 def research_dirs(root=ROOT):
-    return sorted(p for p in root.iterdir() if p.is_dir() and p.name in kbpaths.BASES)  # перенос: kb/<база>
+    return sorted(p for p in root.iterdir() if p.is_dir() and p.name in kbpaths.BASES)  # папки баз kb/<база>
 
 
 def thematic_files(research):
-    """(section, path) для всех не-служебных файлов ресерча."""
+    """(section, path) для всех не-служебных файлов базы."""
     for child in sorted(research.iterdir()):
         if child.name in SERVICE:
             continue
@@ -144,11 +144,12 @@ def summarize(rows, keys):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--root", type=Path, default=ROOT)
-    parser.add_argument("--calibration", type=Path, default=HERE / "calibration.json")
-    parser.add_argument("--by-folder", action="store_true")
-    parser.add_argument("--csv", type=Path)
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--root", type=Path, default=ROOT, help="папка баз (по умолчанию kb/ скилла)")
+    parser.add_argument("--calibration", type=Path, default=HERE / "calibration.json",
+                        help="коэффициенты калибровки (по умолчанию calibration.json рядом)")
+    parser.add_argument("--by-folder", action="store_true", help="разбивка по тематическим папкам")
+    parser.add_argument("--csv", type=Path, help="все строки в CSV")
     args = parser.parse_args()
 
     cal = load_calibration(args.calibration)
@@ -162,7 +163,7 @@ def main():
     if has_tokens:
         print(f"Модель: {cal['model']}; коэффициенты (токенов на символ):",
               ", ".join(f"{k}: кир {v['a']:.3f} / проч {v['b']:.3f}" for k, v in cal["kinds"].items()))
-    header = (f"{'ресерч':<20}{'тем.файлов':>11}{'символов':>11}{'кирил%':>8}"
+    header = (f"{'база':<20}{'тем.файлов':>11}{'символов':>11}{'кирил%':>8}"
               f"{'tok prose':>11}{'tok data':>10}{'tok code':>10}{'tok итого':>11}"
               f"{'root tok':>10}{'бандлы симв':>12}{'бинарн.':>9}{'бин МБ':>8}{'служ. МБ':>10}")
     print(header)
@@ -209,7 +210,7 @@ def main():
     if args.csv:
         with args.csv.open("w", newline="") as fh:
             writer = csv.writer(fh)
-            writer.writerow(["research", "section", "kind", "files", "bytes", "chars", "cyr", "lines", "tokens_est"])
+            writer.writerow(["base", "section", "kind", "files", "bytes", "chars", "cyr", "lines", "tokens_est"])
             for (research, section, kind), row in sorted(rows.items()):
                 tokens = row["tokens"]
                 writer.writerow([research, section, kind, row["files"], row["bytes"], row["chars"], row["cyr"],

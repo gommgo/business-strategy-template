@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Сколько весят уже готовые «сжатые слои» ресерчей (в токенах Opus 5.5 по calibration.json).
+"""Сколько весят «сжатые слои» баз знаний скилла (`kb/<база>/`) — в токенах по коэффициентам `calibration.json`.
 
-Слои: README тематических папок; разделы «Выжимка для агента», «Чек-лист», «Частые ошибки»
-внутри md-файлов; плюс наличие 99-raw/skills-map.md. Раздел = от заголовка до следующего
-заголовка того же или более высокого уровня.
+Слои: README тематических папок; разделы «Выжимка для агента», «Чек-лист», «Частые ошибки» внутри md-файлов; плюс
+наличие `99-raw/skills-map.md`. Раздел — от заголовка до следующего заголовка того же или более высокого уровня.
+Файлы базы — те же, что у `count_tokens.py` (тематические папки без служебных).
 
-  python3 layers.py
+  python3 .claude/skills/design-deep-dive/scripts/maint/layers.py
 """
+import argparse
 import json
 import re
 from collections import defaultdict
@@ -33,6 +34,7 @@ def sections(text, pattern):
 
 
 def main():
+    argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter).parse_args()
     cal = json.loads((HERE / "calibration.json").read_text())["kinds"]["prose"]
 
     def tokens(text):
@@ -46,7 +48,7 @@ def main():
                 f"{row['checklist']:>6.0f} /{row['checklist_tok'] / 1000:>6.0f}K"
                 f"{row['mistakes']:>5.0f} /{row['mistakes_tok'] / 1000:>6.0f}K")
 
-    print(f"{'ресерч':<19}{'md':>5}{'md tok':>9}{'README папок':>14}{'Выжимки':>15}{'Чек-листы':>15}"
+    print(f"{'база':<19}{'md':>5}{'md tok':>9}{'README папок':>14}{'Выжимки':>15}{'Чек-листы':>15}"
           f"{'Ошибки':>14}  skills-map")
     totals = defaultdict(float)
     for research in research_dirs():
@@ -71,7 +73,7 @@ def main():
         for key, value in row.items():
             totals[key] += value
     print(f"{'ИТОГО':<19}{cells(totals)}")
-    print("(формат: число файлов / ~токенов Opus 5.5; md tok — все тематические .md целиком)")
+    print("(формат: число файлов / ~токенов по calibration.json; md tok — все тематические .md целиком)")
 
 
 if __name__ == "__main__":

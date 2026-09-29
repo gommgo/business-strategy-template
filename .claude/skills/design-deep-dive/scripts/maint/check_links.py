@@ -1,59 +1,58 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Проверка перекрёстных ссылок, меток и структуры базы site-research.
+"""Проверка перекрёстных ссылок, меток и структуры одной базы знаний `kb/<база>/`: то, чего не делает `refcheck.py`, —
+источники `[S…]`, ролики `[V:…]` с таймкодами, README папок против диска, метки опытов, разделы по номерам папок.
 
-Копия `../text-research/99-raw/tools/check_links.py` (агент X2 волны 4 text-research, 24.09.2026; md5 исходника
-016af5c0d3e15c2bd1967a5a36ea42f6; та — адаптация `../ai-media-research/99-raw/tools/check_links.py`, а та — ui-research, агент Q),
-адаптированная оркестратором волн site (сессия 2) 24.09.2026 перед аудитом волны 4. Почему не копия kimi, как в `PLAN.md`
-(«Новые утилиты агентов»): у kimi нет проверок путей опытов в `[проверено: …]`, «нет дайджеста, есть транскрипт» и README
-против диска (довод X2 text); версия text — самая свежая в тройке и с самопроверкой. Что изменено под эту базу: соседи —
-ux, ui, ai-media, blender, kimi, text, creative (сестра text распознаётся только как «text-research» или «text 03…» —
-слово text в базе ещё и `slot_kind`); буквы агентов site A, B, M(2), C, V, E, F(2), G(2), H(2), P, I, W(2), J, K(2, 3) →
-папки 01–10 и 91 (W2 — отдельный дайджестер, не продолжатель W); «schemas/» — среди локальных подпапок; самопроверка —
-на мини-базе `site-research`. Остальное — как у text. Тонкую настройку под находки делает аудитор волны 4 (журнал правок).
-
-Обходит все `.md` в папках 00–10, 90, 91 и в корне (`README.md`, `PLAN.md`, `CONTRADICTIONS.md`; транскрипты
-`91-videos/transcripts/` не разбираются); по умолчанию ещё `99-raw/tools/README.md` — только для проверок (а) и (ж).
+База — папка `kb/<база>/` скилла (ux, ui, site, text, creative, ai-media, blender, claude-design); соседние базы —
+папки рядом. Обходит `.md` тематических папок `NN-…` (кроме `99-raw/`), файлы `NN-….md` корня базы и корневые
+`README.md`, `PLAN.md`, `CONTRADICTIONS.md` (транскрипты `91-videos/transcripts/` не разбираются); по умолчанию ещё
+`99-raw/tools/README.md` и `99-raw/phase5/*.md`, если есть, — только для проверок (а) и (ж).
 Проверки:
 
   (а) относительные ссылки на файлы и папки — `../02-strategy-messaging/03-proof-and-facts.md`, `06/02`,
       `99-raw/experiments/C/04-overcorrection/run.py`, `[текст](путь)` — существует ли цель. Многоточие `…`/`...`
       в конце — префикс, `*` — глоб; диапазоны `01–04`, `01…05` — существуют ли оба конца. Путь от корня базы внутри
       подпапки принимается (сводка INFO); `experiments/…`, `tools/…`, `notes/…`, `reports/…`, `prompts/…`, `cache/…`
-      ищутся и от `99-raw/`. Пути в соседние базы (`../../ux-research/…`) проверяются в соседней базе (только
-      чтение); записанные от корня этой базы (`../ux-research/` в подпапке) — INFO. Голое имя `NN-*.md` ищется в папке
-      предыдущего пути той же строки, в соседней базе, названной на строке, и по всей базе.
+      ищутся и от `99-raw/`. Пути в соседние базы (`../../ux/…`) проверяются в соседней базе (только чтение);
+      записанные от корня этой базы (`../ux/` в подпапке) — INFO. Прежнее имя папки базы `<база>-research/` ведёт в
+      папку базы (сводка INFO по файлу); путь в базу, которой в скилле нет, — WARN. Утилита по имени файла (`foo.py`)
+      ищется в `scripts/` скилла, в `99-raw/` этой и соседних баз. Голое имя `NN-*.md` ищется в папке предыдущего пути
+      той же строки, в соседней базе, названной на строке, и по всей базе.
   (б) ссылки на разделы `§N.M` — есть ли в целевом файле заголовок `## N.` / `### N.M`. Цель — ближайший путь на той
       же строке (или на предыдущей, если строка — продолжение абзаца): `` `../папка/файл.md` ``, `` `NN/NN` `` и
       NN/NN без бэктиков, `` `папка/NN` ``, `` `NN-…` ``, `` `NN` `` (файл NN папки предыдущего пути на строке или
-      своей папки; после буквы агента — папка агента: «E `01` §2» = `04/01`), «ux 07/06», «kimi `05`», «файл NN»,
-      «там же», `PLAN.md`. Форма «→ §N» — тот же файл. Ссылки на внешние документы (законы «ст. 5», WCAG, условия
-      вендоров), на источники «[S1 §14]» и на отчёты и заметки агентов («отчёт A §4», «V §4») не проверяются (INFO).
-      Если цель не найдена и выбрана по умолчанию (свой файл) — WARN, если раздел есть в соседнем файле — WARN с
-      подсказкой, иначе ERROR.
+      своей папки; у базы site после буквы автора раздела — его папка: «E `01` §2» = `04/01`), «ux 07/06»,
+      «cd 06/04», «файл NN», «там же», `PLAN.md`. Форма «→ §N» — тот же файл. Ссылки на внешние документы (законы
+      «ст. 5», WCAG, условия вендоров), на источники «[S1 §14]» и на отчёты и заметки («отчёт A §4», «V §4») не
+      проверяются (INFO). Если цель не найдена и выбрана по умолчанию (свой файл) — WARN, если раздел есть в
+      соседнем файле — WARN с подсказкой, иначе ERROR.
   (в) ссылки `[S<n>]` — определён ли номер в разделе «Источники» того же файла; если нет — в другом файле той же
       папки или базы; какие номера определены, но не используются (для README и дайджестов не считается).
-  (г) ссылки `[V:<id> mm:ss]` (и несколько в одних скобках через `;`) — категории: дайджест этой базы; только
-      транскрипт этой базы (не битая, INFO); дайджест или транскрипт соседней базы (INFO); только строка каталога или
-      списки поиска V (WARN); ничего (ERROR); таймкод больше длительности ролика по `catalog.tsv` — ERROR.
+  (г) ссылки `[V:<id> mm:ss]` (и несколько в одних скобках через `;`) — id ролика из 11 символов, таймкод по форме
+      (минуты и секунды меньше 60) — иначе ERROR. Если у базы или соседей есть папка роликов `91-videos/`: дайджест
+      этой базы; только транскрипт этой базы (не битая, INFO); дайджест или транскрипт соседней базы (INFO); только
+      строка каталога или списки поиска (WARN); ничего (ERROR); таймкод больше длительности ролика по `catalog.tsv` —
+      ERROR. Роликов в скилле нет ни у одной базы — ссылка сверяется только по форме (сводка INFO).
   (д) README папок: все ли файлы и подпапки упомянуты в `README.md`; все ли упомянутые в README файлы этой папки
       (`NN-….md`, `*.yaml`, `*.json`, `*.tsv`, `*.html`) есть на диске; заявленное в таблице README число строк.
   (е) обязательные разделы содержательного файла («Выжимка для агента», «Частые ошибки», «Чек-лист», «Открытые
-      вопросы», «Источники»); у дайджестов `91-videos/digests/` — свой набор (`99-raw/prompts/_common-W-digests.md`,
-      «Методики и формулы» — «если показаны», его отсутствие — INFO).
-  (ж) метки `[проверено: …]`: пути `99-raw/experiments/…` и сокращения `<агент>/<NN>` (`H/02`, `C/01–05`, «kimi E/03»
-      — опыт соседней базы) ведут на существующую папку или файл опыта; голые `[проверено]` без пути опыта на той же
-      строке — сводка INFO по файлу (метка по `PLAN.md` требует ссылки на опыт).
+      вопросы», «Источники»); у дайджестов `91-videos/digests/` — свой набор («Процесс или методика» — «если
+      показаны», его отсутствие — INFO).
+  (ж) метки `[проверено: …]`: пути `99-raw/experiments/…` и сокращения `<опыт>/<NN>` (`H/02`, `C/01–05`,
+      «ai-media E/03» — опыт соседней базы) ведут на существующую папку или файл опыта; голые `[проверено]` без пути
+      опыта на той же строке — сводка INFO по файлу.
 
-Использование:
-    python3 99-raw/tools/check_links.py                 # отчёт в stdout
-    python3 99-raw/tools/check_links.py --out ФАЙЛ      # отчёт в файл (сводка по категориям + находки)
-    python3 99-raw/tools/check_links.py --root ПУТЬ     # другая папка базы (по умолчанию — родитель 99-raw/)
-    python3 99-raw/tools/check_links.py --only а,б      # только перечисленные проверки (буквы а–ж)
-    python3 99-raw/tools/check_links.py --json ФАЙЛ     # дополнительно сохранить находки в JSON
-    python3 99-raw/tools/check_links.py --no-raw        # без файла 99-raw/tools/README.md
-    python3 99-raw/tools/check_links.py --quiet-info    # не печатать строки INFO (счётчики остаются)
-    python3 99-raw/tools/check_links.py --selftest      # офлайн-тест на временной мини-базе
+Использование (пути — через `scripts/lib/kbpaths.py`, рабочая папка любая):
+    python3 .claude/skills/design-deep-dive/scripts/maint/check_links.py --base site     # отчёт по базе в stdout
+    python3 .claude/skills/design-deep-dive/scripts/maint/check_links.py --all           # все базы: сводки
+    python3 …/check_links.py                 # база рабочей папки (запуск из kb/<база>/…), иначе все базы
+    python3 …/check_links.py --root ПУТЬ     # другая папка базы (имя папки — имя базы для соседей)
+    python3 …/check_links.py --out ФАЙЛ      # отчёт в файл (сводка по категориям + находки), в stdout — сводка
+    python3 …/check_links.py --only а,б      # только перечисленные проверки (буквы а–ж)
+    python3 …/check_links.py --json ФАЙЛ     # дополнительно сохранить находки в JSON
+    python3 …/check_links.py --no-raw        # без файлов 99-raw/tools/README.md и 99-raw/phase5/*.md
+    python3 …/check_links.py --quiet-info    # не печатать строки INFO (счётчики остаются)
+    python3 …/check_links.py --selftest      # офлайн-тест на временной мини-раскладке kb/<база>/
 
 Уровни: ERROR (битая ссылка, неопределённый источник), WARN (вероятная проблема, нужен человек; нет обязательного
 раздела), INFO (сведения). Код возврата 1, если есть находки уровня ERROR.
@@ -67,22 +66,25 @@ import sys
 from collections import defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))
 import kbpaths  # noqa: E402
-DEFAULT_ROOT = str(kbpaths.kb("site"))
 
-CONTENT_DIRS_RE = re.compile(r"^(0\d|10|90|91)-")
+CONTENT_DIRS_RE = re.compile(r"^(?!99-)\d\d-")          # тематические папки базы; 99-raw — материал к разбору
+ROOT_MD_RE = re.compile(r"^\d\d-.*\.md$")                # тематический файл в корне базы (ux `00-glossary.md`)
 ROOT_FILES = ["README.md", "PLAN.md", "CONTRADICTIONS.md"]
 SKIP_DIR_NAMES = {"__pycache__", ".git", "transcripts", "node_modules", "assets"}
-NEIGHBORS = ("ux-research", "ui-research", "ai-media-research", "blender-research", "kimi-research",
-             "text-research", "creative-research")
-NEIGHBOR_SHORT = {"ui": "ui-research", "ux": "ux-research", "blender": "blender-research",
-                  "ai-media": "ai-media-research", "kimi": "kimi-research", "text": "text-research",
-                  "creative": "creative-research"}
-# короткое имя соседа в тексте: «ux 07/06», «kimi `05/03`», «ai-media 05/03 §7»; не «kimi-research/…»; сестра text — только
-# «text-research» или «text 03…» / «text `03`», а в метке опыта — «text A/01» (S1, волна 4: правило X §9.3 п. 6)
-NB = r"(ui|ux|blender|ai-media|kimi|text(?=-research|\s+`?\d\d|\s+[A-Z]\d?/\d\d)|creative)"
-NB_WORD_RE = re.compile(r"(?<![\w.-])" + NB + r"(?:-research)?(?![\w-]|\.\w)")
+# Соседние базы — папки kb/<база>/ рядом с проверяемой. Короткое имя в тексте: «ux 07/06», «ai-media 05/03 §7»,
+# «cd 06/04»; слово text в базе ещё и `slot_kind`, site — часть имён, поэтому text, site и cd распознаются только перед
+# номером папки или опыта («text 03…», «site `05`», «text A/01») или с суффиксом прежнего имени папки `-research`.
+SHORT_NAMES = {"ux": "ux", "ui": "ui", "site": "site", "text": "text", "creative": "creative", "ai-media": "ai-media",
+               "blender": "blender", "claude-design": "claude-design", "cd": "claude-design"}
+GUARDED_NAMES = {"text", "site", "cd"}
+# Путь в соседнюю базу: первый сегмент после «../» — имя папки базы или прежнее имя `<имя>-research`
+NB_SEG_RE = re.compile(r"^(?:\.\./)*([a-z][a-z-]*?)(-research)?(?=/|$)")
+NEIGHBORS = ()          # папки соседних баз — configure()
+NEIGHBOR_SHORT = {}     # короткое имя в тексте → папка соседа — configure()
+NB = ""                 # регулярка короткого имени соседа — configure()
+NB_WORD_RE = None
 PATH_EXTS = (".md", ".py", ".sh", ".css", ".html", ".json", ".txt", ".js", ".png", ".jsonl", ".yml", ".yaml",
              ".jpg", ".avif", ".webp", ".mp4", ".webm", ".svg", ".cube", ".csv", ".tsv", ".onnx")
 LOCAL_SUBDIRS = ("digests/", "transcripts/", "examples/", "tools/", "cache/", "notes/", "reports/", "prompts/",
@@ -100,16 +102,18 @@ EXTERNAL_DOC_MARKERS = ("Module", "WCAG", "Understanding", "ISO ", "RFC", "SC ",
                         "Search Quality", "ЗоЗПП", "КоАП", "ГОСТ", "Пленум", "постановлени",
                         "приказ", "Директив", "Directive", "UCPD", "FTC", "GDPR", "DSA", "контракт", "контракта")
 AGENT_TOKEN = r"(?:A|B|M2?|C|E|F2?|G2?|H2?|P|I|V|W2?|J|K[23]?|X2?|S[12]?)"
-# буква агента → папка его итоговых файлов (форма «E `01` §2», «B1 `02` §4», «G 03 §5»)
-AGENT_FOLDER = {"A": "01", "B": "02", "M": "02", "M2": "02", "C": "03", "E": "04", "F": "05", "F2": "05",
-                "G": "06", "G2": "06", "H": "07", "H2": "07", "P": "07", "I": "08", "K": "09", "K2": "09", "K3": "09",
-                "J": "10", "V": "91", "W": "91", "W2": "91"}
-# пути, которые создаются при исполнении и в базе не хранятся (в site-research таких нет)
+# буква автора раздела → папка его файлов (форма «E `01` §2», «B1 `02` §4», «G 03 §5»); такие ссылки пишет база site
+AGENT_FOLDERS = {"site": {"A": "01", "B": "02", "M": "02", "M2": "02", "C": "03", "E": "04", "F": "05", "F2": "05",
+                          "G": "06", "G2": "06", "H": "07", "H2": "07", "P": "07", "I": "08", "K": "09", "K2": "09",
+                          "K3": "09", "J": "10", "V": "91", "W": "91", "W2": "91"}}
+AGENT_FOLDER = {}       # у проверяемой базы — configure()
+# пути, которые создаются при исполнении и в базе не хранятся
 RUNTIME_PATHS = ()
-# просмотренные агентом X2 не-ссылки: (файл, токен)
+# просмотренные не-ссылки: (файл, токен)
 KNOWN_NON_LINKS = set()
-# файлы, которым разделы формата содержательного файла не нужны: анкета, шаблон, план, промты
-FORMAT_EXEMPT = ()  # у site все содержательные .md папок 01–10 — по формату (README и дайджесты проверяются своими правилами)
+# файлы, которым разделы формата содержательного файла не нужны: анкета, шаблон, план, промты (README и дайджесты
+# проверяются своими правилами)
+FORMAT_EXEMPT = ()
 RANGE_SEG_RE = re.compile(r"^(?P<p1>(?:[A-Za-z][A-Za-z_]*\d?-|[A-Za-z_]+)?)(?P<a>\d+)(?:…|\.\.\.|–|\.\.)(?P<p2>[A-Za-z][A-Za-z_]*\d?-|[A-Za-z_]+)?(?P<b>\d+)(?P<post>[^/…]*)$")
 
 REQUIRED_DEFAULT = [
@@ -119,8 +123,7 @@ REQUIRED_DEFAULT = [
     ("Открытые вопросы", ("открытые вопросы",)),
     ("Источники", ("источники",)),
 ]
-# X2 site (волна 4): формат дайджеста site — `99-raw/prompts/_common-W-digests.md` («Формат дайджеста»); у text свой набор
-# («Примеры из ролика», «Что проверить в живой фазе» отдельным разделом) — у site живая фаза — пункт раздела «Что это значит»
+# формат дайджеста ролика `91-videos/digests/<id>.md`; живая фаза — пункт раздела «Что это значит»
 REQUIRED_DIGEST = [
     ("Выжимка для агента", ("выжимка",)),
     ("Числа и эксперименты", ("числа",)),
@@ -155,8 +158,26 @@ PLACEHOLDER_RE = re.compile(r"wave[NX]\b|<[^>]*>|\{\{|\bNN\b|\bNN-|-0N-|\b0N\b|/
 README_ROW_RE = re.compile(r"^\|\s*`([^`]+\.md)`\s*\|.*\|\s*(\d+)\s*\|\s*$")
 VERIFIED_RE = re.compile(r"\[(проверено|стенд)([^\]\n]*)\]")
 # внутри метки [проверено: …] буква опыта — любая заглавная латинская с необязательной цифрой (A, B1, E3, опыты соседей)
-EXP_SHORT_RE = re.compile(r"(?<![\w/.-])(?:" + NB + r"\s+)?([A-Z]\d?)/(\d\d)(?:[–-](\d\d))?([a-z]?)(?![\w])")
-EXP_PATH_RE = re.compile(r"(?:(?:\.\./)+(" + "|".join(re.escape(x) for x in NEIGHBORS) + r")/)?99-raw/experiments/([\w-]+)/([\w.…-]+)")
+EXP_SHORT_RE = None     # configure()
+EXP_PATH_RE = None      # configure()
+
+
+def configure(base):
+    """Соседи проверяемой базы: все базы `kb/`, кроме неё (base — имя папки базы или None — все базы)."""
+    global NEIGHBORS, NEIGHBOR_SHORT, NB, NB_WORD_RE, EXP_SHORT_RE, EXP_PATH_RE, AGENT_FOLDER
+    NEIGHBOR_SHORT = {k: v for k, v in SHORT_NAMES.items() if v != base}
+    NEIGHBORS = tuple(dict.fromkeys(NEIGHBOR_SHORT.values()))
+    alts = [re.escape(k) + (r"(?=-research|\s+`?\d\d|\s+[A-Z]\d?/\d\d)" if k in GUARDED_NAMES else "")
+            for k in sorted(NEIGHBOR_SHORT, key=len, reverse=True)]
+    NB = "(" + "|".join(alts) + ")"
+    NB_WORD_RE = re.compile(r"(?<![\w.-])" + NB + r"(?:-research)?(?![\w-]|\.\w)")
+    EXP_SHORT_RE = re.compile(r"(?<![\w/.-])(?:" + NB + r"\s+)?([A-Z]\d?)/(\d\d)(?:[–-](\d\d))?([a-z]?)(?![\w])")
+    EXP_PATH_RE = re.compile(r"(?:(?:\.\./)+(" + "|".join(re.escape(x) for x in NEIGHBORS) + r")(?:-research)?/)?"
+                             r"99-raw/experiments/([\w-]+)/([\w.…-]+)")
+    AGENT_FOLDER = AGENT_FOLDERS.get(base, {})
+
+
+configure(None)
 
 
 class Report:
@@ -205,7 +226,7 @@ def collect_files(root, with_raw):
                 for fn in sorted(filenames):
                     if fn.endswith(".md"):
                         files.append(os.path.join(dirpath, fn))
-        elif os.path.isfile(full) and name in ROOT_FILES:
+        elif os.path.isfile(full) and (name in ROOT_FILES or ROOT_MD_RE.match(name)):
             files.append(full)
     if with_raw:
         for p in [os.path.join(root, "99-raw", "tools", "README.md")] + sorted(
@@ -291,15 +312,35 @@ def clean_path_token(tok):
     return tok
 
 
+def neighbor_split(tok):
+    """Путь в соседнюю базу → (папка соседа, хвост пути) или (None, None). Первый сегмент после «../» — имя папки
+    соседа (`../../ux/07-…`) или прежнее имя `<имя>-research`: у базы скилла оно ведёт в её папку, у базы, которой в
+    скилле нет, — в папку, которой нет на диске."""
+    m = NB_SEG_RE.match(tok)
+    if not m:
+        return None, None
+    name, legacy = m.group(1), m.group(2)
+    if legacy:
+        folder = name if name in kbpaths.BASES else name + legacy
+    elif name in NEIGHBORS:
+        folder = name
+    else:
+        return None, None
+    return folder, tok[m.end():].lstrip("/")
+
+
 def neighbor_of(tok):
-    for nb in NEIGHBORS:
-        if nb + "/" in tok or tok.endswith(nb):
-            return nb
-    return None
+    return neighbor_split(tok)[0]
+
+
+def legacy_name(tok):
+    """Путь записан прежним именем папки базы скилла (`ux-research/…` → `ux/…`)."""
+    m = NB_SEG_RE.match(tok)
+    return bool(m and m.group(2) and m.group(1) in kbpaths.BASES)
 
 
 def neighbor_on_line(text):
-    """Соседняя база, названная на строке обычным текстом («ui-research, `11-…`», «blender `05`»)."""
+    """Соседняя база, названная на строке обычным текстом («ui 11/…», «ui-research, `11-…`», «blender `05`»)."""
     m = None
     for m in NB_WORD_RE.finditer(text):
         pass
@@ -320,9 +361,8 @@ def path_candidates(root, filedir, tok, line_dirs=(), line_neighbor=None):
         cands.append(("root", os.path.normpath(os.path.join(root, tok))))  # `../папка/…` записано от корня базы
     for d in line_dirs:
         cands.append(("line-folder", os.path.normpath(os.path.join(d, tok))))
-    nb = neighbor_of(tok)
+    nb, tail = neighbor_split(tok)
     if nb:
-        tail = tok.split(nb, 1)[1].lstrip("/")
         cands.append(("neighbor", os.path.normpath(os.path.join(root, "..", nb, tail))))
     elif line_neighbor and not tok.startswith("../"):
         cands.append(("line-neighbor", os.path.normpath(os.path.join(root, "..", line_neighbor, tok))))
@@ -432,8 +472,9 @@ def check_paths(root, relpath, lines, infence, rep, top_dirs, tools_names, basen
     seen = set()
     root_relative = []
     neighbor_rootrel = []
+    legacy = []  # пути в соседние базы по прежнему имени папки
     prev_dirs, prev_nb = [], None
-    open_tail = None  # код в бэктиках, начатый на прошлой строке и не закрытый («`../ux-research/06-…/` + перенос)
+    open_tail = None  # код в бэктиках, начатый на прошлой строке и не закрытый («`../ux/06-…/` + перенос)
     for i, ln in enumerate(lines):
         toks = []
         for m in MD_LINK_RE.finditer(ln):
@@ -483,9 +524,9 @@ def check_paths(root, relpath, lines, infence, rep, top_dirs, tools_names, basen
                     if hits or nb_hits:
                         pass
                     elif re.search(r"99-raw/tools|python3 |venv", ln):
-                        rep.add("а", "WARN", relpath, i + 1, "утилита `%s` не найдена ни в 99-raw/, ни в соседних базах" % tok)
+                        rep.add("а", "WARN", relpath, i + 1, "утилита `%s` не найдена ни в scripts/ скилла, ни в 99-raw/ этой и соседних баз" % tok)
                     else:
-                        rep.add("а", "INFO", relpath, i + 1, "`%s`: нет в 99-raw/ и соседних базах — вероятно, файл внешнего репозитория" % tok)
+                        rep.add("а", "INFO", relpath, i + 1, "`%s`: нет в scripts/ скилла и в 99-raw/ этой и соседних баз — вероятно, файл внешнего репозитория" % tok)
                 continue
             if not looks_like_repo_path(tok, top_dirs):
                 continue
@@ -495,7 +536,7 @@ def check_paths(root, relpath, lines, infence, rep, top_dirs, tools_names, basen
                 rep.add("а", "INFO", relpath, i + 1, "`%s`: шаблон пути, не проверяется" % tok)
                 continue
             if any(tok.rstrip("/").endswith(rp) or tok.startswith(rp) for rp in RUNTIME_PATHS):
-                rep.add("а", "INFO", relpath, i + 1, "`%s`: создаётся при исполнении (фаза 5), в базе не хранится" % tok)
+                rep.add("а", "INFO", relpath, i + 1, "`%s`: создаётся при исполнении, в базе не хранится" % tok)
                 continue
             # `NN/NN` — папка и файл по номерам
             sm = re.match(r"^(\d\d)/(\d\d)$", tok)
@@ -520,7 +561,7 @@ def check_paths(root, relpath, lines, infence, rep, top_dirs, tools_names, basen
                 folder = None
                 if neighbor_of(tok):
                     nb = neighbor_of(tok)
-                    tail = fm.group(2).split(nb, 1)[1].lstrip("/")
+                    tail = neighbor_split(fm.group(2))[1] if neighbor_of(fm.group(2)) else ""
                     folder = find_folder(os.path.normpath(os.path.join(root, "..", nb)), root, "", tail) if tail else None
                 else:
                     folder = find_folder(root, filedir, fm.group(1), fm.group(2))
@@ -571,6 +612,8 @@ def check_paths(root, relpath, lines, infence, rep, top_dirs, tools_names, basen
                 rep.cat("а", {"dir": "путь от файла — есть", "root": "путь от корня базы — есть", "raw": "путь от 99-raw — есть",
                               "parent": "путь от родительской папки — есть", "line-folder": "по папке пути на строке — есть",
                               "neighbor": "соседняя база — есть", "line-neighbor": "соседняя база по имени на строке — есть"}.get(how, how))
+                if how == "neighbor" and legacy_name(tok):
+                    legacy.append(tok)
             if not ok:
                 base = os.path.basename(tok.rstrip("/"))
                 nb = neighbor_of(tok)
@@ -582,8 +625,8 @@ def check_paths(root, relpath, lines, infence, rep, top_dirs, tools_names, basen
                 if nb:
                     nb_exists = os.path.isdir(os.path.join(root, "..", nb))
                     rep.add("а", "ERROR" if nb_exists else "WARN", relpath, i + 1,
-                            "`%s`: цель в соседней базе %s не найдена%s" % (tok, nb, "" if nb_exists else " (базы нет на диске)"))
-                    rep.cat("а", "битая в соседней базе" if nb_exists else "соседней базы нет")
+                            "`%s`: цель в соседней базе %s не найдена%s" % (tok, nb, "" if nb_exists else " (такой базы в скилле нет)"))
+                    rep.cat("а", "битая в соседней базе" if nb_exists else "базы нет в скилле")
                 elif glob_hits:
                     rep.cat("а", "не рядом, найдено в другой папке (INFO)")
                     rep.add("а", "INFO", relpath, i + 1, "`%s`: рядом с файлом нет, найдено в `%s`" % (tok, rel(root, os.path.dirname(glob_hits[0]))))
@@ -616,6 +659,10 @@ def check_paths(root, relpath, lines, infence, rep, top_dirs, tools_names, basen
     if neighbor_rootrel:
         uniq = sorted(set(neighbor_rootrel))
         rep.add("а", "INFO", relpath, 0, "%d путей в соседние базы записаны от корня этой базы (`%s`); от файла — `../%s`" % (len(neighbor_rootrel), uniq[0], uniq[0]))
+    if legacy:
+        uniq = sorted(set(legacy))
+        rep.cat("а", "путь в соседнюю базу по прежнему имени папки (INFO)", len(legacy))
+        rep.add("а", "INFO", relpath, 0, "%d путей в соседние базы записаны прежним именем папки `<база>-research/` (например `%s`); папка базы — `kb/<база>/`" % (len(legacy), uniq[0]))
 
 
 # ----------------------------------------------------------------------------------------------------- (б)
@@ -650,7 +697,7 @@ def target_from_context(root, relpath, filedir, text, last_target, basename_inde
             continue
         if re.match(r"^\d\d$", tok):
             nbm = re.search(r"(?<![\w-])" + NB + r"(?:-research)?\s*$", pre)
-            agm = re.search(r"(?:^|[\s(\[;,])(" + AGENT_TOKEN + r")\s*\(?\s*$", pre)  # X2 site: и «G (`02`»
+            agm = re.search(r"(?:^|[\s(\[;,])(" + AGENT_TOKEN + r")\s*\(?\s*$", pre)  # и «G (`02`»
             if nbm:
                 consider(pos, "FOLDER", "neighbor-folder")
             elif agm and agent_folder(root, agm.group(1)):
@@ -703,7 +750,7 @@ def target_from_context(root, relpath, filedir, text, last_target, basename_inde
                 how_f = "folder-nn"
             nb = neighbor_of(tok) or (neighbor_on_line(pre) if not tok.startswith("../") else None)
             if t is None and nb:
-                tail = fm.group(2).split(nb, 1)[1].lstrip("/") if nb in fm.group(2) else fm.group(2)
+                tail = neighbor_split(fm.group(2))[1] if neighbor_of(fm.group(2)) else fm.group(2)
                 nroot = os.path.normpath(os.path.join(root, "..", nb))
                 folder = find_folder(nroot, nroot, "", tail) if tail else None
                 t = find_nn_file(folder, fm.group(3)) if folder else None
@@ -775,8 +822,8 @@ def target_from_context(root, relpath, filedir, text, last_target, basename_inde
     am = re.search(r"(?:(?:отч[её]т[а-я]*|агент[а-я]*|заметк[а-я]*|помощник[а-я]*)\s+|[(\[;,]\s*|^|\s)(?:" + AGENT_TOKEN + r"(?:-plan|-notes|-helper[\w-]*)?|S\d+)\s*\(?\s*$", text)
     if am and (best is None or am.end() > best[0]):
         best = (am.end(), "EXTERNAL", "agent-report")
-    # X2 site (волна 4): аудиты соседей — `99-raw/notes/audit-2026-09-24/<UX|UI|MEDIA|KIMI|BLENDER>-report.md` (заметки, не файлы базы)
-    am2 = re.search(r"(?:отч[её]т[а-я]*|контракт[а-я]*(?:\s+тройки)?(?:\s+v\d)?|[\w-]+-report`?|report|аудит[а-я]*\s+(?:UX|UI|MEDIA|KIMI|BLENDER))\s*\(?\s*$", text)
+    # аудиты соседей («аудит UX §2.1») — заметки `99-raw/notes/…/<СОСЕД>-report.md`, не файлы базы
+    am2 = re.search(r"(?:отч[её]т[а-я]*|контракт[а-я]*(?:\s+тройки)?(?:\s+v\d)?|[\w-]+-report`?|report|аудит[а-я]*\s+[A-Z][A-Z-]+)\s*\(?\s*$", text)
     if am2 and (best is None or am2.end() > best[0]):
         best = (am2.end(), "EXTERNAL", "report-or-contract")
     sm2 = re.search(r"спецификаци[а-я]*\s+линтера\s*$", text)
@@ -895,7 +942,7 @@ def check_sections(root, relpath, lines, infence, rep, index_cache, folder_files
                 continue
             from_prev = False
             this_after = re.match(r"^(?:\s*[–-]\s*§?\d+(?:\.\d+)*[a-z]?)?(?:\s*(?:,|и)\s*§\s?\d+(?:\.\d+)*[a-z]?(?:\s*[–-]\s*§?\d+(?:\.\d+)*)?)*\s+(?:этого|этом|настоящего)\s+файл", ln[m.end():])
-            if this_after:  # X2 site: «поправки — §1.2 и §2.6 этого файла»
+            if this_after:  # «поправки — §1.2 и §2.6 этого файла»
                 target, how = this_abs, "this-file-after"
             elif re.search(r"→\s*$", ctx):
                 head = ctx.rstrip("→ \t").rstrip()
@@ -904,7 +951,7 @@ def check_sections(root, relpath, lines, infence, rep, index_cache, folder_files
                 else:
                     target, how = this_abs, "arrow-same-file"
             elif not before.strip() and not is_row and i > 0 and re.search(r"→\s*$", lines[i - 1]):
-                target, how = this_abs, "arrow-same-file-prev-line"  # X2 site: «… →» + перенос + «§6 [практика]» — свой файл
+                target, how = this_abs, "arrow-same-file-prev-line"  # «… →» + перенос + «§6 [практика]» — свой файл
             elif CHAIN_RE.search(ctx) and line_target is not None:
                 target, how = line_target, "chain"
             elif re.match(r"^\s*спецификаци[а-я]*\s+линтера", ln[m.end():]):  # «(типы §3.4 спецификации линтера»
@@ -1133,7 +1180,7 @@ def load_catalog(root):
 
 
 def load_v_search(root):
-    """Ролики, найденные агентом V вне каталога (`99-raw/experiments/V/01-catalog-build/seen.tsv`): id → длительность
+    """Ролики, найденные поиском вне каталога (`99-raw/experiments/V/01-catalog-build/seen.tsv`): id → длительность
     (длительности в списке нет — пустая строка)."""
     found = {}
     for p in glob.glob(os.path.join(root, "99-raw", "experiments", "V", "*", "seen.tsv")):
@@ -1168,14 +1215,21 @@ def tc_seconds(tc):
     return s
 
 
-def check_video_refs(root, relpath, lines, infence, rep, digests, transcripts, catalog, v_search, nb_videos, nb_durs):
+def tc_valid(tc):
+    """Таймкод по форме: минуты и секунды (и минуты часового таймкода) меньше 60."""
+    return all(int(p) < 60 for p in tc.split(":")[1:])
+
+
+def check_video_refs(root, relpath, lines, infence, rep, digests, transcripts, catalog, v_search, nb_videos, nb_durs,
+                     have_videos=True):
     no_tc = 0
+    outside = 0
     for i, ln in enumerate(lines):
         for m in V_REF_RE.finditer(ln):
             for body in re.split(r"[;,]\s*V:", m.group(1)):
                 idm = V_ID_RE.match(body)
                 if not idm:
-                    if not body.strip() or re.search(r"<|…|\bid\b|мм:сс", body):  # X2 site: пустое «[V:]» — формат
+                    if not body.strip() or re.search(r"<|…|\bid\b|мм:сс", body):  # пустое «[V:]» — формат
                         continue  # шаблон записи в описании формата
                     rep.tick("г")
                     rep.cat("г", "не похоже на id")
@@ -1183,7 +1237,15 @@ def check_video_refs(root, relpath, lines, infence, rep, digests, transcripts, c
                     continue
                 vid = idm.group(1)
                 rep.tick("г")
-                if vid in digests:
+                rest = body[idm.end():]
+                tcs = TIMECODE_RE.findall(rest)
+                for tc in tcs:
+                    if not tc_valid(tc):
+                        rep.cat("г", "таймкод не по форме (битая)")
+                        rep.add("г", "ERROR", relpath, i + 1, "[V:%s %s]: таймкод не по форме — минуты и секунды меньше 60" % (vid, tc))
+                if not have_videos:
+                    outside += 1
+                elif vid in digests:
                     rep.cat("г", "дайджест этой базы")
                 elif vid in transcripts:
                     rep.cat("г", "нет дайджеста, есть транскрипт (не битая)")
@@ -1196,13 +1258,11 @@ def check_video_refs(root, relpath, lines, infence, rep, digests, transcripts, c
                     rep.cat("г", "только строка каталога")
                     rep.add("г", "WARN", relpath, i + 1, "[V:%s]: дайджеста и транскрипта нет, только строка каталога" % vid)
                 elif vid in v_search:
-                    rep.cat("г", "только списки поиска V")
-                    rep.add("г", "WARN", relpath, i + 1, "[V:%s]: ролик вне каталога (списки поиска V), нет ни дайджеста, ни транскрипта" % vid)
+                    rep.cat("г", "только списки поиска")
+                    rep.add("г", "WARN", relpath, i + 1, "[V:%s]: ролик вне каталога (списки поиска), нет ни дайджеста, ни транскрипта" % vid)
                 else:
                     rep.cat("г", "нет ничего (битая)")
                     rep.add("г", "ERROR", relpath, i + 1, "[V:%s]: нет ни дайджеста, ни транскрипта, ни строки каталога — ни здесь, ни у соседей" % vid)
-                rest = body[idm.end():]
-                tcs = TIMECODE_RE.findall(rest)
                 if not tcs:
                     no_tc += 1
                 dur = catalog.get(vid) or v_search.get(vid) or nb_durs.get(vid)
@@ -1212,6 +1272,9 @@ def check_video_refs(root, relpath, lines, infence, rep, digests, transcripts, c
                         if tc_seconds(tc) > dmax + 1:
                             rep.cat("г", "таймкод больше длительности")
                             rep.add("г", "ERROR", relpath, i + 1, "[V:%s %s]: таймкод больше длительности ролика %s" % (vid, tc, dur))
+    if outside:
+        rep.cat("г", "роликов в скилле нет — сверена форма (INFO)", outside)
+        rep.add("г", "INFO", relpath, 0, "%d ссылок [V:…]: дайджестов, транскриптов и каталога роликов в скилле нет — сверены id и таймкоды по форме" % outside)
     if no_tc:
         rep.add("г", "INFO", relpath, 0, "%d ссылок [V:…] без таймкода" % no_tc)
         rep.cat("г", "без таймкода", no_tc)
@@ -1363,10 +1426,10 @@ def check_verified_labels(root, relpath, lines, rep, exp_agents):
             kind, body = m.group(1), m.group(2)
             rep.tick("ж")
             refs = []
-            for pm in EXP_PATH_RE.finditer(body):  # X2 site: путь с префиксом `../../<база>/` — опыт соседа
+            for pm in EXP_PATH_RE.finditer(body):  # путь с префиксом `../../<база>/` — опыт соседа
                 nbk = [k for k, v in NEIGHBOR_SHORT.items() if v == pm.group(1)][0] if pm.group(1) else None
                 refs.append((nbk, pm.group(2), pm.group(3), None, "", "path"))
-            chain_nb = None  # X2 site: «[проверено: ai-media J/04, J/06]» — префикс базы действует на перечень через «,» или «и»
+            chain_nb = None  # «[проверено: ai-media J/04, J/06]» — префикс базы действует на перечень через «,» или «и»
             for sm in EXP_SHORT_RE.finditer(body):
                 nb, agent, nn, nn2, part = sm.group(1), sm.group(2), sm.group(3), sm.group(4), sm.group(5)
                 if not nb and chain_nb and re.match(r"^\s*(?:,|и)\s*$", body[chain_nb[1]: sm.start()]):
@@ -1379,8 +1442,8 @@ def check_verified_labels(root, relpath, lines, rep, exp_agents):
             for tok in re.findall(r"(?:\d\d-[a-z][\w-]*|99-raw)/[\w./…-]+", body):
                 if tok.startswith("99-raw/experiments/"):
                     continue
-                if re.search(r"(?:\.\./)+(?:%s)/%s" % ("|".join(re.escape(x) for x in NEIGHBORS), re.escape(tok)), body):
-                    continue  # X2 site: путь внутри соседней базы (`../../text-research/09-…`) — не файл этой базы
+                if re.search(r"(?:\.\./)+(?:%s)(?:-research)?/%s" % ("|".join(re.escape(x) for x in NEIGHBORS), re.escape(tok)), body):
+                    continue  # путь внутри соседней базы (`../../text/09-…`) — не файл этой базы
                 tok = clean_path_token(tok)
                 cand = os.path.join(root, tok.replace("…", "*"))
                 rep.cat("ж", "путь к файлу базы")
@@ -1436,20 +1499,26 @@ TITLES = {
 
 
 def run_checks(root, only=(), with_raw=True):
+    """Проверки одной базы: root — папка базы; её имя (`kb/<база>/`) задаёт соседей."""
     def want(ch):
         return not only or ch in only
 
+    base = os.path.basename(os.path.normpath(root))
+    configure(base if base in kbpaths.BASES else None)
     rep = Report()
     files = collect_files(root, with_raw)
     top_dirs = {d for d in os.listdir(root) if os.path.isdir(os.path.join(root, d))}
     tools_dir = os.path.join(root, "99-raw", "tools")
     tools_names = set(os.listdir(tools_dir)) if os.path.isdir(tools_dir) else set()
+    tools_names |= {p.name for p in kbpaths.scripts().rglob("*") if p.is_file() and "__pycache__" not in p.parts}
     digests = {os.path.splitext(os.path.basename(p))[0] for p in glob.glob(os.path.join(root, "91-videos", "digests", "*.md"))
                if not os.path.basename(p).startswith("_index")}  # id YouTube может начинаться с «_» (`_jwKQ6ZCeAI`)
     transcripts = {os.path.splitext(os.path.basename(p))[0] for p in glob.glob(os.path.join(root, "91-videos", "transcripts", "*.md"))}
     catalog = load_catalog(root)
     v_search = load_v_search(root)
     nb_videos, nb_durs = load_neighbor_videos(root)
+    # роликов в скилле может не быть ни у одной базы — тогда [V:…] сверяются только по форме
+    have_videos = bool(digests or transcripts or catalog or v_search or nb_videos or nb_durs)
     exp_dir = os.path.join(root, "99-raw", "experiments")
     exp_agents = {d for d in os.listdir(exp_dir) if os.path.isdir(os.path.join(exp_dir, d))} if os.path.isdir(exp_dir) else set()
     basename_index = defaultdict(list)
@@ -1481,7 +1550,8 @@ def run_checks(root, only=(), with_raw=True):
         if want("в") and not raw:
             check_source_refs(root, relpath, lines, infence, rep, per_file, per_folder, where_defined)
         if want("г") and not raw:
-            check_video_refs(root, relpath, lines, infence, rep, digests, transcripts, catalog, v_search, nb_videos, nb_durs)
+            check_video_refs(root, relpath, lines, infence, rep, digests, transcripts, catalog, v_search, nb_videos, nb_durs,
+                             have_videos)
         if want("е") and not raw:
             check_required_sections(root, relpath, lines, heads, rep)
         if want("ж"):
@@ -1535,69 +1605,81 @@ def render(rep, files, root, only=(), quiet_info=False):
 
 # ----------------------------------------------------------------------------------------------------- selftest
 def selftest():
-    """Мини-база во временной папке: по одному хорошему и одному битому случаю на каждую проверку."""
+    """Мини-раскладка `kb/<база>/` во временной папке: по хорошему и битому случаю на каждую проверку."""
+    import shutil
     import tempfile
     tmp = tempfile.mkdtemp(prefix="check_links_selftest_")
-    root = os.path.join(tmp, "site-research")
+    kb = os.path.join(tmp, "kb")
+    root = os.path.join(kb, "site")
 
     def w(path, text):
-        full = os.path.join(tmp, path)
+        full = os.path.join(kb, path)
         os.makedirs(os.path.dirname(full), exist_ok=True)
         with open(full, "w", encoding="utf-8") as fh:
             fh.write(text)
 
     std = ("## Частые ошибки\n\n- нет\n\n## Чек-лист\n\n- да\n\n## Открытые вопросы и противоречия\n\n- нет\n\n"
            "## Источники\n\n- [S1] Автор, 2024.\n")
-    w("site-research/01-aaa/README.md", "# 01\n\n| Файл | О чём | Строк |\n|---|---|---|\n| `01-x.md` | тест | 3 |\n\n"
+    w("site/01-aaa/README.md", "# 01\n\n| Файл | О чём | Строк |\n|---|---|---|\n| `01-x.md` | тест | 3 |\n\n"
       "Ещё `02-y.md` и `05-gone.md`.\n")
-    w("site-research/01-aaa/01-x.md",
+    w("site/01-aaa/01-x.md",
       "# X\n\nВолна 1 · A\n\n## Выжимка для агента\n\n1. Правило → §1.2\n2. Правило → §7\n\n## 1. Раздел\n\n### 1.2 Под\n\n"
       "См. `../02-bbb/01-z.md` §2 и `../02-bbb/09-nope.md`; также 02/01 §2, 02/01 §5.\n"
-      "Сосед: `../ux-research/07-ux-writing/06-banned.md` §5 и `../ux-research/07-ux-writing/99-none.md`.\n"
+      "Сосед: `../../ux/07-ux-writing/06-banned.md` §5 и `../../ux/07-ux-writing/99-none.md`.\n"
+      "Прежнее имя папки: `../../ux-research/07-ux-writing/06-banned.md`; базы нет: `../../old-research/01-a/01-b.md`.\n"
       "Кратко: ux 07/06 §5.\n"
+      "Утилиты: `states_export.py`, запуск `python3 nosuch_tool.py`.\n"
       "Источник [S1] и [S9].\n"
-      "Ролики: [V:_EEEEEEEEEE 00:10], [V:AAAAAAAAAAA 01:00], [V:BBBBBBBBBBB 02:00], [V:CCCCCCCCCCC], [V:DDDDDDDDDDD 03:00], [V:AAAAAAAAAAA 99:00].\n"
-      "Опыты: [проверено: 99-raw/experiments/Z/01-ok], [проверено: Z/02], [проверено: Z/01–03], [проверено kimi Q/01],"
+      "Ролики: [V:_EEEEEEEEEE 00:10], [V:AAAAAAAAAAA 01:00], [V:BBBBBBBBBBB 02:00], [V:CCCCCCCCCCC], [V:DDDDDDDDDDD 03:00], [V:AAAAAAAAAAA 99:00], [V:AAAAAAAAAAA 07:75].\n"
+      "Опыты: [проверено: 99-raw/experiments/Z/01-ok], [проверено: Z/02], [проверено: Z/01–03], [проверено ai-media Q/01],"
       " [проверено: Z3/01].\nГолая метка [проверено].\n"
-      # X2 site (волна 4): случаи правок утилиты
       "Аудит соседа: см. аудит MEDIA §4.10.\n"
-      "Агент и скобка: B (`01` §2).\n"
+      "Автор и скобка: B (`01` §2).\n"
       "Формат: `[V:]` — пустое.\n"
-      "Опыт соседа путём: [проверено: ../../kimi-research/99-raw/experiments/Q/01-ok], "
-      "[проверено: ../../kimi-research/99-raw/experiments/Q/09-none].\n"
-      "Цепочка соседа: [проверено: kimi Q/01, Z/07].\n"
-      "Опыт сестры text (S1): [проверено: text A/01], [проверено: text I/03].\n"
+      "Опыт соседа путём: [проверено: ../../ai-media/99-raw/experiments/Q/01-ok], "
+      "[проверено: ../../ai-media/99-raw/experiments/Q/09-none].\n"
+      "Цепочка соседа: [проверено: ai-media Q/01, Z/07].\n"
+      "Опыт базы text: [проверено: text A/01], [проверено: text I/03].\n"
       "Свой файл после: `../02-bbb/01-z.md` §2; поправки — §1.2 этого файла.\n"
       "Цель раньше: `../02-bbb/01-z.md` §2.\nПравило без пути, стрелка в конце →\n  §1 `[практика]`.\n\n" + std)
-    w("site-research/01-aaa/02-y.md", "# Y\n\n## Выжимка для агента\n\n- нет\n\n" + std)
-    w("site-research/01-aaa/03-unlisted.md", "# U\n\n## Выжимка для агента\n\n- нет\n\n" + std)
-    w("site-research/02-bbb/README.md", "# 02\n\n`01-z.md`\n")
-    w("site-research/02-bbb/01-z.md", "# Z\n\n## Выжимка для агента\n\n- нет\n\n## 2. Раздел\n\n- текст\n\n" + std)
-    w("site-research/91-videos/catalog.tsv", "id\tduration\nAAAAAAAAAAA\t10:00\nBBBBBBBBBBB\t05:00\n")
-    w("site-research/91-videos/README.md", "# 91\n\n`catalog.tsv`, `digests/`\n")
-    w("site-research/91-videos/digests/AAAAAAAAAAA.md", "# A\n\n## Выжимка для агента\n\n## Числа и эксперименты\n\n"
+    w("site/01-aaa/02-y.md", "# Y\n\n## Выжимка для агента\n\n- нет\n\n" + std)
+    w("site/01-aaa/03-unlisted.md", "# U\n\n## Выжимка для агента\n\n- нет\n\n" + std)
+    w("site/02-bbb/README.md", "# 02\n\n`01-z.md`\n")
+    w("site/02-bbb/01-z.md", "# Z\n\n## Выжимка для агента\n\n- нет\n\n## 2. Раздел\n\n- текст\n\n" + std)
+    w("site/11-ccc/README.md", "# 11\n\n`01-w.md`\n")
+    w("site/11-ccc/01-w.md", "# W\n\n## Выжимка для агента\n\n- нет\n\nСсылка `../02-bbb/08-gone.md`.\n\n" + std)
+    w("site/91-videos/catalog.tsv", "id\tduration\nAAAAAAAAAAA\t10:00\nBBBBBBBBBBB\t05:00\n")
+    w("site/91-videos/README.md", "# 91\n\n`catalog.tsv`, `digests/`\n")
+    w("site/91-videos/digests/AAAAAAAAAAA.md", "# A\n\n## Выжимка для агента\n\n## Числа и эксперименты\n\n"
       "## Антипаттерны («как не надо»)\n\n## Что это значит для ИИ-агента\n\n## Что устарело или спорно\n\n"
       "## Комментарии зрителей\n\n## Куда это относится в базе\n")
-    w("site-research/91-videos/digests/_EEEEEEEEEE.md", "# E\n\n## Выжимка для агента\n\n## Что это значит для ИИ-агента\n")
-    w("site-research/91-videos/digests/_index-W1.md", "# индекс\n`AAAAAAAAAAA`, `_EEEEEEEEEE`\n")
-    w("site-research/91-videos/transcripts/BBBBBBBBBBB.md", "# B\n")
-    w("site-research/99-raw/experiments/Z/01-ok/README.md", "# ok\n")
-    w("site-research/99-raw/experiments/Z/03-ok/README.md", "# ok\n")
-    w("ux-research/07-ux-writing/06-banned.md", "# ux\n\n## 5. Раздел\n")
-    w("ux-research/91-videos/digests/DDDDDDDDDDD.md", "# D\n")
-    w("kimi-research/99-raw/experiments/Q/01-ok/README.md", "# ok\n")
-    w("kimi-research/99-raw/experiments/Z/07-ok/README.md", "# ok\n")
-    w("text-research/99-raw/experiments/A/01-ok/README.md", "# ok\n")  # S1: опыт сестры text
-    w("site-research/99-raw/experiments/A/02-x/README.md", "# x\n")  # S1: у site тоже есть опыты A — старая версия искала A/01 здесь
+    w("site/91-videos/digests/_EEEEEEEEEE.md", "# E\n\n## Выжимка для агента\n\n## Что это значит для ИИ-агента\n")
+    w("site/91-videos/digests/_index-W1.md", "# индекс\n`AAAAAAAAAAA`, `_EEEEEEEEEE`\n")
+    w("site/91-videos/transcripts/BBBBBBBBBBB.md", "# B\n")
+    w("site/99-raw/experiments/Z/01-ok/README.md", "# ok\n")
+    w("site/99-raw/experiments/Z/03-ok/README.md", "# ok\n")
+    w("site/99-raw/experiments/A/02-x/README.md", "# x\n")  # у site тоже есть опыт A: «text A/01» ищется у text
+    w("ux/07-ux-writing/06-banned.md", "# ux\n\n## 5. Раздел\n")
+    w("ux/91-videos/digests/DDDDDDDDDDD.md", "# D\n")
+    w("ai-media/99-raw/experiments/Q/01-ok/README.md", "# ok\n")
+    w("ai-media/99-raw/experiments/Z/07-ok/README.md", "# ok\n")
+    w("text/99-raw/experiments/A/01-ok/README.md", "# ok\n")
     rep, files = run_checks(root, with_raw=False)
     msgs = [(c, l, m) for (c, l, _p, _n, m) in rep.items]
+    # база без папок роликов у себя и у соседей: ссылки [V:…] сверяются по форме
+    kb2 = os.path.join(tmp, "kb2")
+    os.makedirs(os.path.join(kb2, "text", "01-aaa"))
+    with open(os.path.join(kb2, "text", "01-aaa", "01-a.md"), "w", encoding="utf-8") as fh:
+        fh.write("# A\n\nРолики: [V:AAAAAAAAAAA 01:00], [V:BBBBBBBBBBB 1:12:61].\n")
+    rep2, _ = run_checks(os.path.join(kb2, "text"), only={"г"})
+    msgs2 = [(c, l, m) for (c, l, _p, _n, m) in rep2.items]
 
     if os.environ.get("CHECK_LINKS_DEBUG"):
-        for c, l, m in msgs:
+        for c, l, m in msgs + msgs2:
             print("DEBUG", c, l, m)
 
-    def has(check, level, needle):
-        return any(c == check and l == level and needle in m for c, l, m in msgs)
+    def has(check, level, needle, where=None):
+        return any(c == check and l == level and needle in m for c, l, m in (where or msgs))
 
     def lacks(check, needle):
         return not any(c == check and needle in m and l in ("ERROR", "WARN") for c, l, m in msgs)
@@ -1605,13 +1687,18 @@ def selftest():
     cases = [
         ("а: битый путь — ERROR", has("а", "ERROR", "09-nope.md")),
         ("а: живой путь — без находки", lacks("а", "01-z.md")),
-        ("а: битая ссылка в соседнюю базу — ERROR", has("а", "ERROR", "99-none.md")),
+        ("а: битая ссылка в соседнюю базу kb/ux — ERROR", has("а", "ERROR", "99-none.md")),
         ("а: живая ссылка в соседнюю базу — без находки", lacks("а", "06-banned.md")),
+        ("а: прежнее имя папки базы — ведёт в kb/ux, сводка INFO", has("а", "INFO", "прежним именем папки")),
+        ("а: база вне скилла — WARN", has("а", "WARN", "такой базы в скилле нет")),
+        ("а: папка 11-… обходится", has("а", "ERROR", "08-gone.md")),
+        ("а: утилита скилла по имени — без находки", lacks("а", "states_export.py")),
+        ("а: утилиты нет нигде — WARN", has("а", "WARN", "nosuch_tool.py")),
         ("б: → §1.2 есть — без находки", lacks("б", "§1.2")),
         ("б: → §7 нет в своём файле — находка", has("б", "ERROR", "§7") or has("б", "WARN", "§7")),
         ("б: 02/01 §5 нет — ERROR", has("б", "ERROR", "§5 → `02-bbb/01-z.md`")),
         ("б: 02/01 §2 есть — без находки", lacks("б", "§2 → `02-bbb/01-z.md`")),
-        ("б: ux 07/06 §5 есть у соседа — без находки", lacks("б", "§5 → `../ux-research")),
+        ("б: ux 07/06 §5 есть у соседа — без находки", lacks("б", "§5 → `../ux")),
         ("в: [S9] не определён — ERROR", has("в", "ERROR", "[S9]")),
         ("в: [S1] определён — без находки", lacks("в", "[S1] не определён")),
         ("г: дайджест есть — без находки", lacks("г", "[V:AAAAAAAAAAA]")),
@@ -1620,66 +1707,102 @@ def selftest():
         ("г: ничего нет — ERROR", has("г", "ERROR", "[V:CCCCCCCCCCC]")),
         ("г: дайджест соседа — INFO", has("г", "INFO", "[V:DDDDDDDDDDD]: дайджест в соседней базе")),
         ("г: таймкод больше длительности — ERROR", has("г", "ERROR", "[V:AAAAAAAAAAA 99:00]")),
+        ("г: таймкод не по форме — ERROR", has("г", "ERROR", "[V:AAAAAAAAAAA 07:75]: таймкод не по форме")),
+        ("г: роликов нет нигде — сверка формы, сводка INFO", has("г", "INFO", "сверены id и таймкоды", msgs2)
+         and not has("г", "ERROR", "нет ни дайджеста", msgs2)),
+        ("г: роликов нет — таймкод не по форме — ERROR", has("г", "ERROR", "1:12:61", msgs2)),
         ("д: файл не в README — ERROR", has("д", "ERROR", "03-unlisted.md")),
         ("д: README называет несуществующий — ERROR", has("д", "ERROR", "05-gone.md")),
         ("д: число строк в таблице README — INFO", has("д", "INFO", "заявлено 3 строк")),
         ("ж: полный путь опыта — без находки", lacks("ж", "01-ok")),
         ("ж: сокращение без опыта — ERROR", has("ж", "ERROR", "Z/02")),
         ("ж: диапазон Z/01–03 — концы есть, без находки", lacks("ж", "Z/03")),
-        ("ж: опыт соседа kimi Q/01 — без находки", lacks("ж", "Q/01")),
+        ("ж: опыт соседа ai-media Q/01 — без находки", lacks("ж", "Q/01")),
         ("ж: продолжатель Z3/01 → Z/01 — INFO", has("ж", "INFO", "сокращение продолжателя")),
         ("ж: голая метка — INFO", has("ж", "INFO", "голых меток")),
         ("е: у 02-z нет «Выжимки»? есть — без WARN", lacks("е", "02-bbb/01-z.md")),
-        # X2 site (волна 4)
         ("б: «аудит MEDIA §4.10» — внешнее, без находки", lacks("б", "§4.10")),
-        ("б: «B (`01` §2)» — папка агента, без находки", not any(c == "б" and "§2 →" in m and "01-aaa" in m for c, l, m in msgs)),
+        ("б: «B (`01` §2)» — папка автора раздела, без находки", not any(c == "б" and "§2 →" in m and "01-aaa" in m for c, l, m in msgs)),
         ("б: «§1.2 этого файла» — свой файл, без находки", lacks("б", "§1.2 → `02-bbb")),
         ("б: «→» в конце строки + «§1» в начале следующей — свой файл", lacks("б", "§1 → `02-bbb")),
         ("г: пустое [V:] — без находки", lacks("г", "[V:]")),
-        ("е: дайджест в формате W site — без WARN", not any(c == "е" and l == "WARN" and _p.endswith("AAAAAAAAAAA.md") for (c, l, _p, _n, m) in rep.items)),
+        ("е: дайджест в формате — без WARN", not any(c == "е" and l == "WARN" and _p.endswith("AAAAAAAAAAA.md") for (c, l, _p, _n, m) in rep.items)),
         ("е: дайджест без «Числа» и «Антипаттерны» — WARN", has("е", "WARN", "«Числа и эксперименты»")),
-        ("ж: путь опыта соседа `../../kimi-research/…` есть — без находки", lacks("ж", "Q/01-ok")),
-        ("ж: путь опыта соседа нет — ERROR в соседней базе", has("ж", "ERROR", "../kimi-research/99-raw/experiments/Q/")),
-        ("ж: цепочка «kimi Q/01, Z/07» — сосед наследуется, без находки", lacks("ж", "Z/07")),
-        # S1 (волна 4): метка опыта сестры «text A/01» (правило X §9.3 п. 6)
-        ("ж: «text A/01» — опыт сестры text, без находки", lacks("ж", "A/01")),
-        ("ж: «text I/03» нет у text — ERROR в базе text", has("ж", "ERROR", "../text-research/99-raw/experiments/I/")),
+        ("ж: путь опыта соседа `../../ai-media/…` есть — без находки", lacks("ж", "Q/01-ok")),
+        ("ж: путь опыта соседа нет — ERROR в соседней базе", has("ж", "ERROR", "../ai-media/99-raw/experiments/Q/")),
+        ("ж: цепочка «ai-media Q/01, Z/07» — сосед наследуется, без находки", lacks("ж", "Z/07")),
+        ("ж: «text A/01» — опыт базы text, без находки", lacks("ж", "A/01")),
+        ("ж: «text I/03» нет у text — ERROR в базе text", has("ж", "ERROR", "../text/99-raw/experiments/I/")),
     ]
     ok = 0
     for name, res in cases:
         print("%s  %s" % ("OK  " if res else "FAIL", name))
         ok += bool(res)
-    import shutil
     shutil.rmtree(tmp, ignore_errors=True)
     print("selftest: %d из %d OK" % (ok, len(cases)))
     return 0 if ok == len(cases) else 1
 
 
-def main():
-    ap = argparse.ArgumentParser(description="Проверка перекрёстных ссылок, меток и структуры базы site-research")
-    ap.add_argument("--root", default=DEFAULT_ROOT)
+def base_of_cwd():
+    """База `kb/<база>/`, внутри которой рабочая папка, или None."""
+    kb = os.path.realpath(str(kbpaths.kb()))
+    cwd = os.path.realpath(os.getcwd())
+    if cwd == kb or not cwd.startswith(kb + os.sep):
+        return None
+    name = os.path.relpath(cwd, kb).split(os.sep)[0]
+    return name if name in kbpaths.BASES else None
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0], epilog=__doc__.split("\n", 2)[2],
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--base", choices=kbpaths.BASES, help="база kb/<база>/ (по умолчанию — база рабочей папки, иначе все)")
+    ap.add_argument("--all", action="store_true", help="все базы kb/ по очереди: в stdout — сводки")
+    ap.add_argument("--root", help="другая папка базы (имя папки — имя базы для соседей)")
     ap.add_argument("--only", default="", help="буквы проверок через запятую, например а,б,ж")
     ap.add_argument("--json", default="", help="сохранить находки в JSON")
     ap.add_argument("--out", default="", help="записать отчёт в файл (иначе stdout)")
-    ap.add_argument("--no-raw", action="store_true", help="не проверять 99-raw/tools/README.md")
+    ap.add_argument("--no-raw", action="store_true", help="не проверять 99-raw/tools/README.md и 99-raw/phase5/*.md")
     ap.add_argument("--quiet-info", action="store_true", help="не печатать строки INFO")
-    ap.add_argument("--selftest", action="store_true", help="офлайн-тест на временной мини-базе")
-    args = ap.parse_args()
+    ap.add_argument("--selftest", action="store_true", help="офлайн-тест на временной мини-раскладке kb/<база>/")
+    args = ap.parse_args(argv)
     if args.selftest:
         return selftest()
-    root = os.path.abspath(args.root)
+    if args.root:
+        roots = [os.path.abspath(args.root)]
+    elif args.base:
+        roots = [str(kbpaths.kb(args.base))]
+    elif not args.all and base_of_cwd():
+        roots = [str(kbpaths.kb(base_of_cwd()))]
+    else:
+        roots = [str(kbpaths.kb(b)) for b in kbpaths.BASES]
+    many = len(roots) > 1
     only = set(x.strip() for x in args.only.split(",") if x.strip())
-    rep, files = run_checks(root, only, not args.no_raw)
-    text, total_err = render(rep, files, root, only, args.quiet_info)
+    texts, found, total_err = [], [], 0
+    for root in roots:
+        if not os.path.isdir(root):
+            print("нет папки базы: %s" % root, file=sys.stderr)
+            return 2
+        rep, files = run_checks(root, only, not args.no_raw)
+        text, err = render(rep, files, root, only, args.quiet_info)
+        total_err += err
+        texts.append(text)
+        found += [{"base": os.path.basename(root), "check": c, "level": l, "path": p, "line": n, "message": m}
+                  for (c, l, p, n, m) in rep.items]
+        if args.out or many:
+            print(text.split("\n\n=")[0])
+            if many:
+                print()
+        else:
+            sys.stdout.write(text)
     if args.out:
         with open(args.out, "w", encoding="utf-8") as fh:
-            fh.write(text)
-        print(text.split("\n\n=")[0])
-    else:
-        sys.stdout.write(text)
+            fh.write("\n".join(texts))
     if args.json:
         with open(args.json, "w", encoding="utf-8") as fh:
-            json.dump([{"check": c, "level": l, "path": p, "line": n, "message": m} for (c, l, p, n, m) in rep.items], fh, ensure_ascii=False, indent=1)
+            json.dump(found, fh, ensure_ascii=False, indent=1)
+    if many:
+        print("ВСЕГО по %d базам: ERROR %d" % (len(roots), total_err))
     return 1 if total_err else 0
 
 

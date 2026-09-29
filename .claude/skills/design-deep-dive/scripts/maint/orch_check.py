@@ -1,28 +1,27 @@
 #!/usr/bin/env python3
-"""Приёмочная проверка файлов site-research (оркестратор волн site, 24.09.2026; основа — orch_check.py оркестратора
-волн text-research: списки папок, меток и утилит — site, добавлена проверка относительных ссылок `../`).
+"""Приёмочная проверка файлов базы site (`kb/site/`) по формату базы: разделы, метки, штампы, машинные файлы, ссылки.
 
 Использование:
-    python3 99-raw/tools/orch_check.py [ПАПКА ...] [--selftest-tools] [--md]
-    ПАПКА — путь от корня базы (например 03-page-structure) или 'all' (все тематические папки 00–10, 91-videos).
+    python3 .claude/skills/design-deep-dive/scripts/maint/orch_check.py [ПАПКА ...] [--selftest-tools]
+    ПАПКА — путь от корня базы (например 03-page-structure) или all (все тематические папки 00–10, 90-sources,
+    91-videos; без папок — тоже все).
 
 Что проверяет:
-- содержательные .md (кроме README): число строк; обязательные разделы формата (`_common.md`, «Формат итоговых
-  файлов»): «Выжимка для агента», «Частые ошибки», «Чек-лист», «Открытые вопросы», «Источники»; строка метаданных под
-  заголовком; остаток пометки `<!-- ЧЕРНОВИК`; метки доказательности (известные и неизвестные); штампы, которых
-  база не должна допускать в своём тексте (`_common.md`, «Стиль»);
+- содержательные .md (кроме README): число строк; обязательные разделы формата базы: «Выжимка для агента», «Частые
+  ошибки», «Чек-лист», «Открытые вопросы», «Источники»; строка метаданных под заголовком; остаток пометки
+  `<!-- ЧЕРНОВИК`; метки доказательности (известные и неизвестные); штампы, которых база не допускает в своём тексте;
 - .yaml/.yml — загрузка `yaml.safe_load` и наличие поля `date` на верхнем уровне (или в первом словаре);
 - .json — загрузка `json.load`; для `*.schema.json` — наличие `$schema`;
 - README в каждой папке с файлами;
 - относительные ссылки на файлы в .md (`../…` и пути от корня базы в обратных кавычках) — существуют ли;
-- с `--selftest-tools` — `python3 <утилита> --selftest` для утилит агентов в `99-raw/tools/` (vocab_lint.py,
-  page_anatomy.py и утилиты волн 2–3), если файл есть.
+- с `--selftest-tools` — `--selftest` утилит базы в `scripts/site/` (vocab_lint.py, page_anatomy.py, site_validate.py и
+  другие из списка TOOLS), если файл есть.
 Коды выхода: 0 — замечаний уровня error нет; 1 — есть error.
 """
-import json, os, re, subprocess, sys
+import argparse, json, os, re, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb("site"))
 FOLDERS = ["00-glossary", "01-foundations", "02-site-types", "03-page-structure", "04-blocks", "05-conversion-funnels",
@@ -38,7 +37,7 @@ LABELS = ["исследование", "консенсус", "стандарт", 
 STAMPS = [r"в современном мире", r"важно отметить", r"играет ключевую роль", r"не только\s[^.]{0,60}?,\s*но и",
           r"(?<![А-Яа-яЁё])является(?![А-Яа-яЁё])", r"(?<![А-Яа-яЁё])данн(ый|ая|ое|ого|ой|ому|ую)(?![А-Яа-яЁё])"]  # «данные» (data) не штамп
 TOOLS = ["vocab_lint.py", "page_anatomy.py", "ia_probe.py", "geo_probe.py", "page_gates.py", "ab_plan.py",
-         "checklist_export.py", "site_validate.py", "site_brief_to_kimi.py", "plan_to_assets.py"]
+         "checklist_export.py", "site_validate.py", "plan_to_assets.py"]
 
 
 def rel(p):
@@ -72,7 +71,7 @@ def check_md(path, out):
             issues.append(("info", f"длинный файл: {n} строк"))
     found = re.findall(r"\[(" + "|".join(re.escape(l) for l in LABELS) + r")(?=[\]:;,\s])", text)
     unknown = set()
-    text_nocode = re.sub(r"`[^`\n]*`", "``", text)  # скобки внутри кода (`Content-Usage: [путь] …`) — не метки (оркестратор, сессия 2)
+    text_nocode = re.sub(r"`[^`\n]*`", "``", text)  # скобки внутри кода (`Content-Usage: [путь] …`) — не метки
     for m in re.finditer(r"\[([а-яё][а-яё \-]{2,30})\]", text_nocode):
         lab = m.group(1).strip()
         if lab not in LABELS and not lab.startswith("V:") and len(lab.split()) <= 3 and len(lab) >= 4 \
@@ -171,12 +170,16 @@ def selftest_tools(out):
 
 
 def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    folders = FOLDERS if (not args or "all" in args) else args
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0], epilog=__doc__.split("\n", 2)[2],
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("folders", nargs="*", help="папки от корня базы или all")
+    ap.add_argument("--selftest-tools", action="store_true", help="ещё --selftest утилит базы в scripts/site/")
+    a = ap.parse_args()
+    folders = FOLDERS if (not a.folders or "all" in a.folders) else a.folders
     out = []
     for f in folders:
         walk(f, out)
-    if "--selftest-tools" in sys.argv:
+    if a.selftest_tools:
         selftest_tools(out)
     errors = 0
     for r in out:
