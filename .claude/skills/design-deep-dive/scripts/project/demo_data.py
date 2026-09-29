@@ -44,7 +44,7 @@ anchor=None)` → документ, `dumps(doc)` → текст JSON, `gaps(Laye
 
 Правила находок (`.claude/skills/design-audit/references/rules.md`):
   R-MAT-011   пункт PRE-14 не заполнен: у коллекции нет collection.volume или он не {typical, max} целыми
-              числами (typical ≤ max) — набор берёт объёмы ux 13/04 §12                               error
+              числами (typical ≤ max) — набор берёт объёмы ux 13/04 §12; доклад, закрывает аналитик     warning
   R-DEBT-002  заглушки набора: у объекта поверхности пусто examples, нет атрибутов; у text нет length, у enum —
               values; тип атрибута вне перечня; ref в объект, которого нет; коллекция без объекта глоссария  hint
 Код выхода: 0 — нет error, 1 — есть error, 2 — ошибка вызова или окружения.
@@ -674,12 +674,12 @@ def gaps(lay, trees=None):
         fix = (f"/screen-deep-dive {lay.slug} {lay.surface} {c.kind}:{rec.slug} — объём коллекции даёт аналитик")
         ref = f"{rec.slug}#/collection/volume" if c.kind == "block" else f"{rec.slug}#{c.pointer}"
         if c.problem:
-            rep.add("R-MAT-011", "error", surface=lay.surface, kind=c.kind, ref=ref, path=lay.rel(rec.path),
+            rep.add("R-MAT-011", "warning", surface=lay.surface, kind=c.kind, ref=ref, path=lay.rel(rec.path),
                     message=f"PRE-14: collection.volume {where} не по форме: {c.problem}", fix=fix)
         elif c.volume is None:
             what = "нет collection.volume {typical, max}" if c.has_contract else \
                 "нет контракта collection с объёмом {typical, max}"
-            rep.add("R-MAT-011", "error", surface=lay.surface, kind=c.kind, ref=ref, path=lay.rel(rec.path),
+            rep.add("R-MAT-011", "warning", surface=lay.surface, kind=c.kind, ref=ref, path=lay.rel(rec.path),
                     message=f"PRE-14: у коллекции {where} {what} — демо-набор берёт {fb['typical']} и {fb['max']} "
                             "записей (ux 13/04 §12)", fix=fix)
         if c.obj is None:
@@ -896,7 +896,7 @@ def _selftest():
             items = gaps(lay2)
             vol = [f for f in items if f.rule == "R-MAT-011"]
             ex = [f for f in items if f.rule == "R-DEBT-002" and "examples" in f.ref]
-            check("снятый volume — R-MAT-011 error с путём блока", len(vol) == 1 and vol[0].severity == "error" and
+            check("снятый volume — R-MAT-011 warning с путём блока", len(vol) == 1 and vol[0].severity == "warning" and
                   vol[0].path.endswith("screens/office/blocks/requests-list/index.md"))
             check("пустые examples — R-DEBT-002 с путём object.md", len(ex) == 1 and ex[0].path.endswith("object.md"))
             doc2 = build(lay2)
@@ -908,7 +908,7 @@ def _selftest():
                   doc2["objects"]["request"]["records"][0]["number"].startswith("Номер заявки"[:3]))
             r = subprocess.run([sys.executable, str(script), "check", fx.slug, "office", "--repo", str(root)],
                                cwd=td, capture_output=True, text=True)
-            check("check с пробелом объёма — код 1", r.returncode == 1 and "R-MAT-011" in r.stdout)
+            check("check с пробелом объёма — доклад, код 0", r.returncode == 0 and "R-MAT-011" in r.stdout)
     print("demo_data selftest:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 

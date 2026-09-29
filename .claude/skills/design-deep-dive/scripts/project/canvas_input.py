@@ -2602,18 +2602,30 @@ def _row(ctx, sid, path, fp=None):
     return {"id": sid, "path": ctx.rel(path), "fingerprint": fp or sha_path(path)}
 
 
+# Поля записи решения (статус, утверждение, история, заготовка) в отпечаток единицы не входят: утверждение ДС, бренда
+# или арт-дирекции после приёмки макета одобрение не снимает, снимает смена значений.
+DECISION_FIELDS = {"system": {"starter", "status", "approval"}, "brand": {"status", "approval"},
+                   "art-direction": {"status", "approved_by", "approved_at", "checked_at", "lifecycle"}}
+
+
+def _doc_row(ctx, sid, path):
+    """Строка источника по содержанию документа без полей записи решения; файл не разбирается — sha256 файла."""
+    data, _err = load_doc(path)
+    fp = sha_text(json.dumps({k: v for k, v in data.items() if k not in DECISION_FIELDS[sid]}, ensure_ascii=False,
+                             sort_keys=True, default=str)) if isinstance(data, dict) else None
+    return _row(ctx, sid, path, fp)
+
+
 def _product_rows(ctx):
-    """Уровень продукта: токены ДС (первый файл ds_token_files) и карта решений system.yaml без поля starter."""
+    """Уровень продукта: токены ДС (первый файл ds_token_files) и карта решений system.yaml без полей записи
+    решения."""
     rows = []
     tok = next(((k, p) for k, p in ds_token_files(ctx) if p.is_file()), None)
     if tok is not None:
         rows.append(_row(ctx, tok[0], tok[1]))
     sysp = ctx.dprod("system")
     if sysp.is_file():
-        data, _err = load_doc(sysp)
-        fp = sha_text(json.dumps({k: v for k, v in data.items() if k != "starter"}, ensure_ascii=False, sort_keys=True,
-                                 default=str)) if isinstance(data, dict) else None
-        rows.append(_row(ctx, "system", sysp, fp))
+        rows.append(_doc_row(ctx, "system", sysp))
     return rows
 
 
@@ -2657,9 +2669,9 @@ def _page_rows(ctx, unit):
     bref = rel_ref(bp, get(brief, "brand", "ref")) if isinstance(brief, dict) else None
     brand = bref if bref is not None and bref.is_file() else ctx.dprod("brand")
     if brand.is_file():
-        rows.append(_row(ctx, "brand", brand))
+        rows.append(_doc_row(ctx, "brand", brand))
     if ctx.dsurf("art-direction").is_file():
-        rows.append(_row(ctx, "art-direction", ctx.dsurf("art-direction")))
+        rows.append(_doc_row(ctx, "art-direction", ctx.dsurf("art-direction")))
     return rows
 
 
@@ -2687,8 +2699,9 @@ def _screen_rows(ctx, unit):
 def unit_sources(slug, surface, unit, repo=None):
     """Источники единицы — страницы сайта или экрана кабинета — для отпечатка одобрения: строки {id, path,
     fingerprint} по id и пути (путь — от корня данных; отпечаток — sha256 файла, text_hash текстов страницы, sha256
-    записи факта или строки texts.md, «—» — названного источника нет на месте); единицы нет — None. ARTIFACTS.md,
-    REVIEW.md, вход, файлы базы, review/ и копии холста в источники не входят."""
+    записи факта или строки texts.md, у system.yaml, бренда и арт-дирекции — содержание без полей статуса и
+    утверждения, «—» — названного источника нет на месте); единицы нет — None. ARTIFACTS.md, REVIEW.md, вход, файлы
+    базы, review/ и копии холста в источники не входят."""
     root = docpaths.root(repo)
     surf = docpaths.surface(slug, surface, root)
     ctx = Ctx(slug, surf, root, "mockup", None)
@@ -3180,6 +3193,13 @@ def selftest():
         at = art.read_text(encoding="utf-8")
         art.write_text(at.replace("| 2026-09-29 | аналитик |", "| 2026-10-02 | аналитик |"), encoding="utf-8")
         build(fx, "promo", "wireframe")
+        for r in rows:                                      # утверждение ДС и бренда после приёмки макета
+            if r["id"] in ("system", "brand"):
+                pth = fx.root / r["path"]
+                doc = yaml_mod().safe_load(pth.read_text(encoding="utf-8"))
+                doc["status"] = "approved" if r["id"] == "system" else "verified"
+                doc["approval"] = {"by": "заказчик", "at": "2026-10-02"}
+                pth.write_text(yaml_mod().safe_dump(doc, allow_unicode=True, sort_keys=False), encoding="utf-8")
         same = unit_fingerprint(fx.slug, "promo", "spasibo", fx.root)
         dk = docpaths.site(fx.slug, "promo", "copy", "spasibo.yaml", repo=fx.root)
         dd = yaml_mod().safe_load(dk.read_text(encoding="utf-8"))
@@ -3189,8 +3209,8 @@ def selftest():
         cd.chosen_variant(sl)["text"] = cd.chosen_variant(sl)["text"] + " — правка"
         dk.write_text(yaml_mod().safe_dump(dd, allow_unicode=True, sort_keys=False), encoding="utf-8")
         check("источники страницы: план, тексты copy deck, план ассетов, бренд, system.yaml — строки {id, path, "
-              "fingerprint}; соседняя страница, дата в ARTIFACTS.md и пересборка входа — тот же отпечаток, свой "
-              "текст — другой",
+              "fingerprint}; соседняя страница, дата в ARTIFACTS.md, пересборка входа, утверждение ДС и бренда — тот "
+              "же отпечаток, свой текст — другой",
               rows and {"page-plan", "copy-deck", "asset-plan", "brand", "system"} <= {r["id"] for r in rows}
               and all(set(r) == {"id", "path", "fingerprint"} for r in rows) and at.count("2026-09-29 | аналитик") == 2
               and fp0.startswith("sha256:") and same == fp0
