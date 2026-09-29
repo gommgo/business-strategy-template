@@ -32,7 +32,11 @@ counts, notes, reading, visual. Код 2 в called: у text/copydeck.py и text/
 Тяжесть — по правилу реестра: где правило зависит от этапа, этап выводится из статусов файлов (вход холста страницы
 или поверхности, закрытый copy deck, закрытая арт-дирекция, вердикт REVIEW.md); у находки валидатора — его уровень
 (error → error, warning → warning, сведения не переносятся), кроме правил с тяжестью по закрытию файла (R-REF-006 из
-ad_check: warning, error у закрытой арт-дирекции); шкала ворот и приёмки B/S/D → error/warning/hint. Ошибки
+ad_check: warning, error у закрытой арт-дирекции) и по просьбе заказчика (R-FRESH-005 статичных копий и kit.json:
+error — при строке «Проверки макета: разрешены» в ARTIFACTS.md, без неё — warning); шкала ворот и приёмки B/S/D →
+error/warning/hint. «Страница передана в дизайн» (R-COV-002) — она в партии действующего входа холста (поле units
+INPUT.md или папка pages/<id>/) или у неё строка «Приёмка» в REVIEW.md. Одобрение единицы (R-MAT-004, R-FRESH-005
+адаптивной копии) сверяется с отпечатком `ready`: артборды и источники единицы. Ошибки
 публикуемости фактов из claims_check.py lint-facts (разрешение, срок, проверка) в R-STRUCT-003 не идут: их сверяет
 R-COV-003 там, где факт стоит (план, copy deck). Совет находки называет этап: у site_validate — по коду (SB-* — brief,
 SM-* — site-map, PL-* — page-plan), факты и голос — meaning, copy deck — copy. Правило, которое утилита не проверила
@@ -102,7 +106,8 @@ READING = {
     "R-REF-005": "id блоков, слотов, событий и форм сверяют site_validate.py и vocab_lint.py; poster 3D-слота — "
                  "чтением плана",
     "R-REF-006": "site-brief.ambition.allow.markers — слово заказчика в журнале вопросов брифа: чтением",
-    "R-COV-008": "получатели брифа сверяются со строками integration.md по имени; сомнительное сопоставление — чтением",
+    "R-COV-008": "получатели брифа (analytics.crm, constraints.integrations) сверяются со строками integration.md по "
+                 "любому слову; сомнительное сопоставление — чтением",
     "R-COV-009": "мастер-файлы и исходники генераций вне git — `git ls-files` по папкам дизайна; бюджет типа — "
                  "asset_audit.py",
     "R-PROJ-001": "app_type, ai_layer, mobile_scope, constraints.accessibility, раздел surfaces.<surface> — чтением "
@@ -382,10 +387,25 @@ class Audit:
             self._stage[s] = mod("ds_coverage").input_stage(self.slug, s, self.root)
         return self._stage[s]
 
+    def input_units(self, s):
+        """Партия действующего входа холста — поле units передней части INPUT.md; входа или поля нет — []."""
+        p = self.dsurf(s, "input") / "INPUT.md"
+        if not p.is_file():
+            return []
+        try:
+            fm = mod("canvas_input").read_manifest(p)[0]
+        except Exception:                                   # noqa: BLE001 — манифест входа сверяет его проверка
+            return []
+        return [str(u) for u in listify(get(fm, "units"))]
+
     def page_has_input(self, s, pid):
-        inp = self.dsurf(s, "input")
-        return (inp / "pages" / pid).is_dir() or (self.input_stage(s) is not None and not (inp / "pages").is_dir()
-                                                  and self.reg[s].page)
+        """Страница передана в дизайн — причина: она в партии действующего входа холста (units INPUT.md или папка
+        pages/<id>/) или у неё строка «Приёмка» в REVIEW.md; не передана — None."""
+        if (self.dsurf(s, "input") / "pages" / pid).is_dir() or pid in self.input_units(s):
+            return "в партии входа холста"
+        if pid in self.review(s)[1]:
+            return "строка «Приёмка» в REVIEW.md"
+        return None
 
     def review(self, s):
         """(паспорт REVIEW.md, строки «Приёмка» {единица: {...}}, строки «Пункты ACCEPTANCE»)."""
@@ -412,6 +432,19 @@ class Audit:
 
     def verdicts(self, s):
         return {u: r.get("вердикт") for u, r in self.review(s)[1].items()}
+
+    def item_unit(self, s, it, rows):
+        """Единица строки «Пункты ACCEPTANCE» REVIEW.md: колонка «страница или экран»; пусто — у пункта ST-<экран>-…
+        экран из id; иначе None — пункт всей поверхности."""
+        if it.get("страница или экран"):
+            return it["страница или экран"]
+        i = str(it.get("id") or "")
+        if not i.startswith("ST-") or i == "ST-DYN":
+            return None
+        d = docpaths.layer(self.slug, "screens", s, self.root) / "screens"
+        known = set(rows) | ({p.name for p in d.iterdir() if p.is_dir()} if d.is_dir() else set())
+        hit = [x for x in known if i.startswith(f"ST-{x}-")]
+        return max(hit, key=len) if hit else None
 
     def facts(self):
         """(данные facts.yaml или {}, факты по id, id пробелов)."""
@@ -1427,7 +1460,7 @@ class Audit:
             handed = self.page_has_input(s, pid)
             closed = bool(page and page.get("status") == "approved")
             sev = "error" if handed or closed else "warning"
-            why = "страница передана в дизайн (есть её вход холста)" if handed else \
+            why = f"страница передана в дизайн: {handed}" if handed else \
                 ("copy deck закрыт" if closed else "до передачи в дизайн")
             path = dp or self.site(s, "copy", f"{pid}.yaml")
             fix = self.dd(s, f"copy — copy deck {pid}")
@@ -1465,13 +1498,13 @@ class Audit:
                      self.dd(what="design-system — text_styles"))
 
     def cov_receivers(self, s):
+        """R-COV-008: получатели заявок брифа — analytics.crm и constraints.integrations (каналы конверсии — не
+        получатели) — против строк integration.md с поверхностью: совпадение по любому слову получателя от трёх
+        букв в slug, имени или описании строки."""
         b = self.brief(s)
-        recv = [str(x) for x in listify(get(b, "conversion", "channels"))]
-        crm = get(b, "analytics", "crm")
-        recv += [str(x) for x in listify(crm)] if crm else []
-        recv += [str(x) for x in listify(get(b, "constraints", "integrations"))]
-        recv = [x for x in recv if x.strip()]
-        if not recv:
+        crm = [str(x) for x in listify(get(b, "analytics", "crm")) if str(x).strip()]
+        integ = [str(x) for x in listify(get(b, "constraints", "integrations")) if str(x).strip()]
+        if not crm and not integ:
             return
         rows = []
         md_path = docpaths.project(self.slug, "integration.md", repo=self.root)
@@ -1481,9 +1514,10 @@ class Audit:
             for r in t.rows if t else []:
                 if s in L.refs(r.get("surface")) or L.cell(r.get("surface")) == s:
                     rows.append(" ".join(str(r.get(c) or "") for c in ("slug", "name", "description")).lower())
-        miss = [x for x in recv if not any(re.split(r"[\s—(]", x.lower())[0] in r for r in rows)]
+        miss = [x for x in crm + integ if not any(w in r for w in re.findall(r"[^\W_]{3,}", x.lower()) for r in rows)]
         if miss:
-            self.add("R-COV-008", "warning", s, "site-brief", "site-brief#/conversion", self.site(s, "brief"),
+            ref = "site-brief#/constraints/integrations" if set(miss) & set(integ) else "site-brief#/analytics/crm"
+            self.add("R-COV-008", "warning", s, "site-brief", ref, self.site(s, "brief"),
                      f"получатели брифа без строки integration.md с поверхностью {s}: {', '.join(miss)}",
                      f"/project-deep-dive {self.slug} — строка интеграции с поверхностью {s}")
 
@@ -1703,7 +1737,16 @@ class Audit:
             sev = "error" if f.rule == "R-MAT-003" and accepted else f.severity
             self.add(f.rule, sev, f.surface, f.kind, f.ref, f.path, f.message, f.fix)
 
+    def checks_permitted(self):
+        """Постоянная просьба заказчика о проверках макета: строка «Проверки макета: разрешены» в ARTIFACTS.md."""
+        p = self.dprod("artifacts")
+        text = p.read_text(encoding="utf-8") if p.is_file() else ""
+        return bool(re.search(r"^Проверки макета:\s*разрешен", text, re.M | re.I))
+
     def fresh_copies(self, s):
+        """R-FRESH-005 статичных копий и kit.json: их читают кадры и скрипты проверок макета — error при постоянной
+        просьбе о проверках, без неё — warning (доклад)."""
+        strict = self.checks_permitted()
         for name, args in (("claude-design/dc_to_html.py", ["check", self.slug, s, "--repo", self.root, "--json"]),
                            ("claude-design/kit/kit_manifest.py", ["check", self.slug, s, "--repo", self.root,
                                                                   "--json"])):
@@ -1712,9 +1755,17 @@ class Audit:
                 self.notes.append(f"{name} check {s}: не отработал ({last_line(r.err) or r.rc})")
                 continue
             try:
-                self.rep.extend(F.parse_lines(r.out))
+                items = F.parse_lines(r.out)
             except ValueError as e:
                 self.notes.append(f"{name} check {s}: вывод не по контракту находок ({e})")
+                continue
+            for f in items:
+                if f.rule == "R-FRESH-005" and f.severity == "error" and not strict:
+                    self.add(f.rule, "warning", f.surface, f.kind, f.ref, f.path, f.message + " (доклад: строки "
+                             "«Проверки макета: разрешены» в ARTIFACTS.md нет — копии читают проверки по просьбе)",
+                             f.fix)
+                else:
+                    self.add(f.rule, f.severity, f.surface, f.kind, f.ref, f.path, f.message, f.fix)
 
     def fresh_adaptive(self, s):
         html = self.dsurf(s, "canvas-html")
@@ -1727,12 +1778,12 @@ class Audit:
             copy = html / f"{unit}.html"
             if not copy.is_file() or row.get("вердикт") not in ACCEPTED:
                 continue
-            now = b.fingerprint(row.get("artboards") or [])
+            now = b.fingerprint(unit, row.get("artboards") or [])
             if now != row.get("отпечаток"):
                 self.add("R-FRESH-005", "warning", s, "copy", f"{unit}.html", copy,
-                         f"адаптивная копия {unit}.html построена по артбордам, отпечаток которых в REVIEW.md не "
-                         "совпал с текущим — копию пересобрать по текущим артбордам",
-                         self.dd(s, "холст — адаптивная копия"))
+                         f"адаптивная копия {unit}.html построена по одобренному макету, а отпечаток одобрения "
+                         "(артборды и источники единицы) в REVIEW.md не совпал с текущим — копию пересобрать по "
+                         "текущим артбордам и текстам", self.dd(s, "холст — адаптивная копия"))
 
     # ================================================================ R-MAT
     def r_mat(self):
@@ -1839,13 +1890,15 @@ class Audit:
         plans = self.plans(s) if self.reg[s].page else {}
         exc = {str(e.get("id")) for _pid, (_p, plan) in plans.items()
                for e in listify(get(plan, "page", "x-gate-exception")) if isinstance(e, dict)}
-        failed = [(it.get("id"), it.get("итог") or "") for it in items]
-        open_b = [i for i, res in failed if acc.get(i) == "B" and res.startswith("не пройдено")]
-        open_s = [i for i, res in failed if acc.get(i) == "S" and res.startswith("не пройдено") and i not in exc]
+        failed = [(it.get("id"), self.item_unit(s, it, rows)) for it in items
+                  if (it.get("итог") or "").startswith("не пройдено")]
         for unit, row in rows.items():
             v = row.get("вердикт")
             if v not in ACCEPTED:
                 continue
+            # непройденный пункт с единицей держит только её, без единицы — все принятые единицы
+            open_b = [i for i, u in failed if acc.get(i) == "B" and u in (None, unit)]
+            open_s = [i for i, u in failed if acc.get(i) == "S" and i not in exc and u in (None, unit)]
             fix = self.dd(s, "acceptance")
             if not row.get("одобрил") or row.get("одобрил") in ("—", "-") or not row.get("дата") or \
                     row.get("дата") in ("—", "-"):
@@ -1858,11 +1911,12 @@ class Audit:
                 self.add("R-MAT-005", "error", s, "review", f"{s}#Приёмка/{unit}", rv,
                          f"{unit}: вердикт accepted при непройденных пунктах S: {', '.join(open_s)} "
                          "(accepted_with_notes — с записью каждого S)", fix)
-            now = b.fingerprint(row.get("artboards") or [])
+            now = b.fingerprint(unit, row.get("artboards") or [])
             if now != row.get("отпечаток"):
                 self.add("R-MAT-004", "warning", s, "review", f"{s}#Приёмка/{unit}", rv,
-                         f"одобрение {unit} снято: отпечаток артбордов и входа в REVIEW.md не совпал с текущим"
-                         + ("" if now else " (артборда или входа нет)"), fix)
+                         f"одобрение {unit} снято: отпечаток артбордов и источников единицы в REVIEW.md не совпал с "
+                         "текущим" + ("" if now else " (артборда или единицы нет)")
+                         + f" — текущий: ready show {self.slug} {s}", fix)
         inp = self.dsurf(s, "input") / "INPUT.md"
         if inp.is_file() and fm.get("stage"):
             ifm, _body, _src = mod("canvas_input").read_manifest(inp)
@@ -1890,8 +1944,7 @@ class Audit:
             if miss:
                 self.add("R-MAT-006", "warning", None, "artifacts", f"ARTIFACTS#Артефакты/{a}", p,
                          f"артефакт {a}: нет полей {', '.join(miss)}", self.dd(what="холст — ARTIFACTS.md"))
-        text = p.read_text(encoding="utf-8")
-        permitted = bool(re.search(r"^Проверки макета:\s*разрешен", text, re.M | re.I))
+        permitted = self.checks_permitted()
         for s in self.scope:
             rd = self.dsurf(s.slug, "review")
             results = [x for x in rd.iterdir() if x.is_file() and x.name != "REVIEW.md"] if rd.is_dir() else []
@@ -2136,9 +2189,7 @@ class Audit:
 
     # ================================================================ R-VIS — перечень макетного прогона
     def visual_list(self):
-        p = self.dprod("artifacts")
-        text = p.read_text(encoding="utf-8") if p.is_file() else ""
-        permitted = bool(re.search(r"^Проверки макета:\s*разрешен", text, re.M | re.I))
+        permitted = self.checks_permitted()
         out = []
         for s in self.scope:
             if not s.design:
@@ -2525,6 +2576,118 @@ def _selftest():
         check("вердикт accepted без одобрения и с чужим отпечатком → R-MAT-005 error, R-MAT-004 warning; «открыто» — "
               "R-DEBT-002 hint", {("R-MAT-005", "error"), ("R-MAT-004", "warning"), ("R-DEBT-002", "hint")} <= got)
         (rv / "REVIEW.md").unlink()
+
+        # одобрение по единице: отпечаток ready — артборды и источники единицы
+        def ci(*a):
+            return subprocess.run([sys.executable, str(HERE / "canvas_input.py"), "build", slug, "promo", *a, "--repo",
+                                   str(root), "--today", today.isoformat()], capture_output=True, text=True)
+
+        def found():
+            return [(f.rule, f.severity, f.ref, f.message)
+                    for f in Audit(slug, root, today=today, run_tools=False).run().rep.items]
+
+        ci("--stage", "wireframe")
+        cp = docpaths.design(slug, "canvas-project", surface="promo", repo=root)
+        ch = docpaths.design(slug, "canvas-html", surface="promo", repo=root)
+        cp.mkdir(parents=True)
+        ch.mkdir(parents=True)
+        boards = {"home": "Home.dc.html", "spasibo": "Spasibo.dc.html"}
+        (cp / boards["home"]).write_text("<section id='hero'>Главная</section>\n", encoding="utf-8")
+        (cp / boards["spasibo"]).write_text("<section id='confirmation'>Заявка на замер принята</section>\n",
+                                            encoding="utf-8")
+        (ch / "spasibo.html").write_text("<!doctype html><title>Адаптивная копия spasibo</title>\n", encoding="utf-8")
+        b = mod("ready").Build(slug, docpaths.surface(slug, "promo", root), root, today)
+        accept = ("# REVIEW\n\nИллюстрация самопроверки.\n\n## Приёмка\n\n"
+                  "| страница или экран | артборды | вердикт | одобрил | дата | отпечаток | открыто |\n"
+                  "|---|---|---|---|---|---|---|\n"
+                  + "".join(f"| `{u}` | `{a}` | `accepted` | владелец продукта | 2026-09-29 | "
+                            f"{b.fingerprint(u, [a])} | — |\n" for u, a in boards.items()))
+        (rv / "REVIEW.md").write_text(accept, encoding="utf-8")
+        art.write_text(at.replace("| 2026-09-29 | аналитик |", "| 2026-10-02 | аналитик |"), encoding="utf-8")
+        ci("--stage", "wireframe")
+        got0 = found()
+        dk = docpaths.site(slug, "promo", "copy", "spasibo.yaml", repo=root)
+        dkt = dk.read_text(encoding="utf-8")
+        dk.write_text(dkt.replace("text: 'Вызвать замерщика'", "text: 'Позвать замерщика'", 1), encoding="utf-8")
+        got1 = found()
+        dk.write_text(dkt, encoding="utf-8")
+        hb = (cp / boards["home"]).read_text(encoding="utf-8")
+        (cp / boards["home"]).write_text(hb.replace("Главная", "Главная страница"), encoding="utf-8")
+        got2 = found()
+        (cp / boards["home"]).write_text(hb, encoding="utf-8")
+        check("одобрение по единице: дата в ARTIFACTS.md и пересборка входа — без R-MAT-004 и R-FRESH-005; правка "
+              "своего текста (spasibo) — R-MAT-004 и R-FRESH-005 адаптивной копии только у spasibo; правка артборда "
+              "home — R-MAT-004 только у home",
+              not any(r in ("R-MAT-004", "R-FRESH-005") for r, *_ in got0)
+              and {(r, ref) for r, _s, ref, _m in got1 if r in ("R-MAT-004", "R-FRESH-005")}
+              == {("R-MAT-004", "promo#Приёмка/spasibo"), ("R-FRESH-005", "spasibo.html")}
+              and {(r, ref) for r, _s, ref, _m in got2 if r in ("R-MAT-004", "R-FRESH-005")}
+              == {("R-MAT-004", "promo#Приёмка/home")})
+        acc_md = ("\n## Пункты ACCEPTANCE\n\n| id | страница или экран | где | итог | доказательство |\n"
+                  "|---|---|---|---|---|\n")
+        (rv / "REVIEW.md").write_text(accept + acc_md + "| `B1` | `home` | макет | не пройдено | кадр 390 |\n",
+                                      encoding="utf-8")
+        one_unit = {ref for r, _s, ref, _m in found() if r == "R-MAT-005"}
+        (rv / "REVIEW.md").write_text(accept + acc_md + "| `B1` | — | макет | не пройдено | кадр 390 |\n",
+                                      encoding="utf-8")
+        all_units = {ref for r, _s, ref, _m in found() if r == "R-MAT-005"}
+        check("R-MAT-005 по единице: непройденный B с единицей (home) держит только её, без единицы — все принятые",
+              one_unit == {"promo#Приёмка/home"} and all_units == {"promo#Приёмка/home", "promo#Приёмка/spasibo"})
+
+        def copies():
+            aa = Audit(slug, root, today=today)
+            with tempfile.TemporaryDirectory(prefix="ddd-audit-copies-") as td:
+                aa.tools = Tools(td)
+                aa.fresh_copies("promo")
+            return {f.severity for f in aa.rep.items if f.rule == "R-FRESH-005"}
+
+        asked = copies()
+        art.write_text(at.replace("Проверки макета: разрешены", "Проверки макета: —"), encoding="utf-8")
+        not_asked = copies()
+        art.write_text(at, encoding="utf-8")
+        check("R-FRESH-005 статичных копий (dc_to_html check): со строкой «Проверки макета: разрешены» — error, "
+              "без неё — warning (доклад)", asked == {"error"} and not_asked == {"warning"})
+        # R-COV-002: «передана в дизайн» — в партии действующего входа (units, pages/<id>/) или строка «Приёмка»
+        (rv / "REVIEW.md").unlink()
+        shutil.rmtree(cp.parent)
+        hp = docpaths.site(slug, "promo", "plans", "home.yaml", repo=root)
+        hpt = hp.read_text(encoding="utf-8")
+        hp.write_text(hpt.replace("\nstatus: proposed\n", "\nstatus: approved\n", 1), encoding="utf-8")
+        dk.write_text(dkt.replace("text: 'Политика обработки персональных данных'", "text: ''", 1), encoding="utf-8")
+
+        def cov2():
+            return {f.ref.split("#")[0]: (f.severity, f.message) for f in Audit(slug, root, today=today,
+                                                                                 run_tools=False).run().rep.items
+                    if f.rule == "R-COV-002"}
+
+        ci("--stage", "wireframe", "--page", "home")
+        a1 = cov2()
+        (rv / "REVIEW.md").write_text(accept, encoding="utf-8")
+        a2 = cov2()
+        (rv / "REVIEW.md").unlink()
+        ci("--stage", "motion", "--page", "spasibo")
+        a3 = cov2()
+        hp.write_text(hpt, encoding="utf-8")
+        dk.write_text(dkt, encoding="utf-8")
+        shutil.rmtree(docpaths.design(slug, "input", surface="promo", repo=root))
+        sev = {k: {u: v[0] for u, v in a.items()} for k, a in (("a1", a1), ("a2", a2), ("a3", a3))}
+        check("R-COV-002: страница партии входа (--page home) — error, вне партии (spasibo) — warning; строка "
+              "«Приёмка» spasibo — error; вход без папок pages/ (motion --page spasibo) — error только у страницы из "
+              "units",
+              sev["a1"] == {"home": "error", "spasibo": "warning"} and sev["a2"].get("spasibo") == "error"
+              and "строка «Приёмка»" in a2["spasibo"][1] and sev["a3"] == {"home": "warning", "spasibo": "error"}
+              and "в партии входа холста" in a3["spasibo"][1])
+        ip = pj / "integration.md"
+        ip.write_text("# integration\n\nИллюстрация самопроверки.\n\n| slug | name | description | surface |\n"
+                      "|---|---|---|---|\n| `amocrm` | amoCRM | Заявки с сайта — в CRM менеджера | [`promo`] |\n",
+                      encoding="utf-8")
+        r8 = [(f.severity, f.ref, f.message) for f in Audit(slug, root, today=today, run_tools=False).run().rep.items
+              if f.rule == "R-COV-008"]
+        ip.unlink()
+        check("R-COV-008: получатели — CRM и интеграции брифа (каналы конверсии form, phone — нет), совпадение по "
+              "любому слову: «CRM — не задана (q-crm)» — строка amoCRM; без строки — только телефония",
+              len(r8) == 1 and r8[0][:2] == ("warning", "site-brief#/constraints/integrations")
+              and r8[0][2].endswith("с поверхностью promo: телефония — номер компании"))
         note = root.joinpath(*STATE, slug, "site", "promo", "spasibo.md")
         note.parent.mkdir(parents=True)
         note.write_text("---\nkind: page-plan\nslug: spasibo\nref: docs/projects/otves-remont-nn/site/promo/plans/"

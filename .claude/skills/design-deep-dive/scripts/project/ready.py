@@ -12,8 +12,8 @@
     ready check <slug> [<surface>] [--repo DIR] [--today …] [--json]
         свежесть: файл равен сборке по текущим источникам (R-FRESH-006); без <surface> — все поверхности с ready.yaml
     ready show  <slug> <surface> [--repo DIR] [--today …] [--json]
-        единицы: статусы, вердикт REVIEW.md, отпечаток одобрения из REVIEW.md и текущий — его пишет в REVIEW.md этап
-        acceptance
+        единицы: статусы, вердикт REVIEW.md, отпечаток одобрения из REVIEW.md и текущий — по артбордам строки «Приёмка»
+        и источникам единицы; текущий этап acceptance пишет в колонку «отпечаток» REVIEW.md
     ready --selftest                  фикстуры package-landing, input-landing и package-cabinet, без сети
 
 Поверхности — с маршрутом дизайна и холстом: web рода landing, site или app; admin, desktop, embed.
@@ -39,10 +39,12 @@
     after_build                       пункты input/ACCEPTANCE.md с местом «после сборки» (ST-<экран>-… — только у
                                       своего экрана)
     open                              заглушки [PLACEHOLDER] выбранных текстов и демо-факты (example: true), которые
-                                      страница называет
-    ready                             композиция и тексты закрыты, макет принят (или пропущен решением), факты
-                                      публикуемы или пробел назван, ДС утверждена; у кабинета ещё покрытие ДС без
-                                      пробелов (ds_coverage) и FSD-карта stable
+                                      страница называет; затем строки «решение заказчика: …» — ДС не утверждена, у
+                                      кабинета ещё покрытие ДС типов своего экрана не полное (ds_coverage) и FSD-карта
+                                      не stable: готовность они не держат, решает заказчик
+    ready                             композиция закрыта (план approved, экран stable), тексты approved, факты
+                                      публикуемы или пробел назван, макет принят с совпавшим отпечатком (или пропущен
+                                      решением заказчика)
   факты единицы сайта — ссылки fact: и missing: слотов данных плана и fact_ids выбранных текстов copy deck: демо-факт —
   строка open (пробел назван), missing: со строкой пробела в facts.yaml — названный пробел; готовность единицы они не
   держат, публикацию сайта с демо-фактом держит copydeck.py validate --final; в blockers («факты: …») — факт, которого
@@ -55,9 +57,12 @@
   status, blockers                    ready — готовы все единицы, partial — часть, not-ready — ни одной; blockers —
                                       строка на причину, по которой единица или поверхность не готова
 
-Отпечаток одобрения единицы — `dc_to_html.fingerprint` её артбордов (колонка «артборды» таблицы «Приёмка»,
-`canvas/project/<Имя>.dc.html`) вместе с `input/INPUT.md`: sha256 по строкам «имя:sha256», отсортированным по имени.
-Правка артборда единицы или пересборка входа снимает одобрение; правка артборда другой единицы — нет.
+Отпечаток одобрения единицы — sha256 двух строк: «артборды:<`dc_to_html.fingerprint` её артбордов>» (колонка
+«артборды» таблицы «Приёмка», `canvas/project/<Имя>.dc.html`) и «источники:<`canvas_input.unit_fingerprint`>» —
+источники единицы: у страницы план, её тексты в copy deck, план ассетов и файлы слотов, спецификация движения, записи
+фактов, бренд и арт-дирекция; у экрана файл экрана, его блоки и каркас, его строки texts.md, бриф на вид; у обеих
+токены ДС и system.yaml. Правка артборда или источника единицы снимает одобрение; пересборка входа (вход motion тоже),
+дата в ARTIFACTS.md, поля записи решения (статус, утверждение, starter) и правка соседней единицы — нет.
 
 Проверка (check): манифест на диске против сборки в памяти по тем же источникам; ключ `example` (пометка иллюстрации
 у фикстур) не сравнивается. Находка — строка контракта `findings.py`: R-FRESH-006, error, kind ready. Файла нет —
@@ -95,6 +100,7 @@ ACCEPTED = ("accepted", "accepted_with_notes")
 TEXT_ORDER = ("draft", "assumed", "checked", "approved")
 STATE = (".claude", "skills", "entrypoint", "state", "projects")
 SKIP_LINE = re.compile(r"макет\s+пропущен", re.I)
+DECIDE = "решение заказчика: "                          # строка open: готовность не держит, решает заказчик
 FORM_KEYS = ("surface", "type", "web_kind", "consumer", "status", "sources", "units", "perf", "frontend_design",
              "blockers")
 UNIT_KEYS = ("id", "ready", "composition", "texts", "mockup", "budget_profile", "gate_exceptions", "after_build",
@@ -213,6 +219,7 @@ class Build:
         self.today = today or dt.date.today()
         self.blockers = []
         self._facts = None
+        self._src = {}
 
     # пути
     def prel(self, p):
@@ -248,16 +255,21 @@ class Build:
                          "open": L.cell(r.get("открыто"))}
         return out
 
-    def fingerprint(self, artboards):
-        """Отпечаток одобрения единицы: артборды и input/INPUT.md; нет артборда или входа — None."""
+    def fingerprint(self, unit, artboards):
+        """Отпечаток одобрения единицы: sha256 строк «артборды:<отпечаток её артбордов>» и «источники:<отпечаток
+        источников единицы>»; нет артборда или единицы — None."""
         if not artboards:
             return None
         proj = self.dsurf("canvas-project")
         paths = [proj / a for a in artboards]
-        inp = self.dsurf("input") / "INPUT.md"
-        if not inp.is_file() or any(not p.is_file() for p in paths):
+        if any(not p.is_file() for p in paths):
             return None
-        return mod("dc_to_html").fingerprint(paths + [inp])
+        if unit not in self._src:
+            self._src[unit] = mod("canvas_input").unit_fingerprint(self.slug, self.surface, unit, self.repo)
+        if self._src[unit] is None:
+            return None
+        lines = (f"артборды:{mod('dc_to_html').fingerprint(paths)}", f"источники:{self._src[unit]}")
+        return "sha256:" + hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()
 
     def jump_note(self):
         return docpaths.root(self.repo).joinpath(*STATE, self.slug, "design", self.surface, "_phase-jump.md")
@@ -300,12 +312,12 @@ class Build:
             return "blocked", "вердикт blocked — есть непройденный пункт B"
         if verdict == "none":
             return "none", f"вердикт REVIEW.md «{row['verdict']}» вне формы"
-        now = self.fingerprint(row["artboards"])
+        now = self.fingerprint(unit, row["artboards"])
         if now is None:
             return "none", ("одобрение не проверить: нет артбордов "
-                            + (", ".join(row["artboards"]) or "в колонке «артборды»") + " или input/INPUT.md")
+                            + (", ".join(row["artboards"]) or "в колонке «артборды»") + " или источников единицы")
         if now != row["fingerprint"]:
-            return "none", "одобрение снято: отпечаток артбордов и входа не совпал с REVIEW.md"
+            return "none", "одобрение снято: отпечаток артбордов и источников единицы не совпал с REVIEW.md"
         return verdict, None
 
     # факты
@@ -441,14 +453,18 @@ class Build:
             if bad:
                 why.append("факты: " + ", ".join(bad[:4]) + (f" и ещё {len(bad) - 4}" if len(bad) > 4 else ""))
             opened += [f"демо-факт: {x}" for x in sorted(set(demo))]
-            if ds != "approved":
-                why.append(f"ДС не утверждена (system.yaml {ds or 'нет'})")
+            decide = [] if ds == "approved" else [f"ДС не утверждена (system.yaml {ds or 'нет'})"]
             exc = [str(e.get("id")) for e in get(plan, "page", "x-gate-exception", default=[]) or []
                    if isinstance(e, dict) and e.get("id")]
             out.append(({"id": pid, "ready": not why, "composition": comp, "texts": texts, "mockup": verdict,
                          "budget_profile": dash(get(plan, "page", "budget_profile")), "gate_exceptions": exc,
-                         "after_build": list(after), "open": sorted(set(opened))}, why))
+                         "after_build": list(after), "open": self.open_list(opened, decide)}, why))
         return out, brief
+
+    @staticmethod
+    def open_list(opened, decide):
+        """Строки open единицы: заглушки и демо-факты по алфавиту, затем решения заказчика (ДС, покрытие, FSD)."""
+        return sorted(set(opened)) + [DECIDE + d for d in decide]
 
     # кабинет
     def app(self):
@@ -461,12 +477,11 @@ class Build:
         rev = self.review()
         after = self.after_build()
         ds = self.ds_status
-        cov_bad = []
+        cov, cov_err = None, None
         try:
             cov = mod("ds_coverage").coverage(self.slug, self.repo, self.surface)
-            cov_bad = [f for f in cov.rep.items if f.rule == "R-COV-005" and f.severity in ("error", "warning")]
-        except Exception as e:                              # noqa: BLE001 — покрытие не посчитать — не готово
-            cov_bad = [str(e)]
+        except Exception as e:                              # noqa: BLE001 — покрытие не посчитать — решение заказчика
+            cov_err = (str(e).splitlines() or [type(e).__name__])[0][:120]
         fsd = self.fsd_status()
         ids = sorted(trees.screens)
         out = []
@@ -493,18 +508,53 @@ class Build:
             verdict, mwhy = self.mockup(slug, rev, ids)
             if mwhy:
                 why.append(mwhy)
-            if ds != "approved":
-                why.append(f"ДС не утверждена (system.yaml {ds or 'нет'})")
-            if cov_bad:
-                why.append(f"покрытие ДС не полное (ds_coverage: {len(cov_bad)})")
+            decide = [] if ds == "approved" else [f"ДС не утверждена (system.yaml {ds or 'нет'})"]
+            if cov_err:
+                decide.append(f"покрытие ДС не посчитано ({cov_err})")
+            elif cov is not None:
+                bad = self.cov_of(cov, slug)
+                if bad:
+                    decide.append(f"покрытие ДС типов экрана не полное (ds_coverage: {len(bad)} — "
+                                  f"{', '.join(sorted({t for _f, ts in bad for t in ts}))})")
             if fsd != "stable":
-                why.append("FSD-карты нет" if fsd == "none" else f"FSD-карта {fsd}")
+                decide.append("FSD-карты нет" if fsd == "none" else f"FSD-карта {fsd}")
             ab = [a for a in after if not (a.startswith("ST-") and a != "ST-DYN"
                                            and not a.startswith(f"ST-{slug}-"))]
             out.append(({"id": slug, "ready": not why, "composition": comp, "texts": texts, "mockup": verdict,
                          "budget_profile": "—", "gate_exceptions": [], "after_build": ab,
-                         "open": sorted(set(opened))}, why))
+                         "open": self.open_list(opened, decide)}, why))
         return out, lay
+
+    def cov_of(self, cov, screen):
+        """Находки покрытия ДС (R-COV-005, error и warning) о типах экрана: [(находка, [типы])]. Тип находки — по ref:
+        ключ карты решений (или его тип словаря по aka), расширение, компонент артефакта; карты решений нет — все типы
+        экрана. Экран вне сверки покрытия (не stable) — []."""
+        types = {t for t, u in (cov.uses.get(self.surface) or {}).items() if screen in u.where}
+        if not types:
+            return []
+        by_comp = {}
+        for r in cov.rows:
+            if r.component:
+                by_comp.setdefault(r.component, set()).add(r.use.type)
+        by_ext = {i: eid for eid, (i, _e) in cov.system.extensions.items()}
+        out = []
+        for f in cov.rep.items:
+            if f.rule != "R-COV-005" or f.severity not in ("error", "warning"):
+                continue
+            m = re.match(r"^system#/components/([^/]+)", f.ref)
+            e = re.match(r"^system#/extensions/(\d+)", f.ref)
+            c = re.match(r"^artifact#components/(.+)$", f.ref)
+            if m:
+                hit = {m.group(1), cov.comps.type_of(m.group(1))} & types
+            elif e:
+                hit = {by_ext.get(int(e.group(1)))} & types
+            elif c:
+                hit = by_comp.get(c.group(1), set()) & types
+            else:
+                hit = set(types)
+            if hit:
+                out.append((f, sorted(hit)))
+        return out
 
     def fsd_status(self):
         d = docpaths.layer(self.slug, "fsd", self.surface, self.repo)
@@ -745,14 +795,15 @@ def check_surface(slug, surf, repo=None, today=None):
 
 
 def show_units(slug, surf, repo=None, today=None):
-    """Единицы с отпечатками одобрения: [{id, composition, texts, verdict, artboards, review, current, match}]."""
+    """Единицы с отпечатками одобрения (артборды строки «Приёмка» и источники единицы): [{id, composition, texts,
+    verdict, artboards, review, current, match}]."""
     b = Build(slug, surf, repo, today)
     rev = b.review()
     data = b.run().data
     out = []
     for u in data["units"]:
         row = rev.get(u["id"]) or {}
-        cur = b.fingerprint(row.get("artboards") or [])
+        cur = b.fingerprint(u["id"], row.get("artboards") or [])
         out.append({"id": u["id"], "composition": u["composition"], "texts": u["texts"],
                     "verdict": row.get("verdict") or "—", "artboards": row.get("artboards") or [],
                     "review": row.get("fingerprint") or "—", "current": cur or "—",
@@ -800,8 +851,9 @@ def main(argv=None):
                     mark = "совпал" if r["match"] else ("нет одобрения" if r["review"] == "—" else "не совпал")
                     print(f"{r['id']:<22} {r['composition']:<9} тексты {r['texts']:<9} макет {r['mockup']:<20} "
                           f"{mark}")
-                    print(f"{'':<22} артборды: {', '.join(r['artboards']) or '—'}")
-                    print(f"{'':<22} отпечаток сейчас: {r['current']}")
+                    boards = ", ".join(r["artboards"]) or "— (колонка «артборды» строки «Приёмка»)"
+                    print(f"{'':<22} артборды: {boards}")
+                    print(f"{'':<22} отпечаток одобрения сейчас: {r['current']}")
             return F.EXIT_OK
         data = build(call.slug, call.surf, call.repo, today)
         text = render(call.slug, data)
@@ -822,6 +874,13 @@ def main(argv=None):
                 print(f"  блокер: {b}")
             if len(data["blockers"]) > 12:
                 print(f"  … и ещё {len(data['blockers']) - 12}")
+            decide = {}
+            for u in data["units"]:
+                for o in u["open"]:
+                    if o.startswith(DECIDE):
+                        decide.setdefault(o[len(DECIDE):], []).append(u["id"])
+            for what, ids in decide.items():
+                print(f"  {DECIDE}{what} — {', '.join(ids)}")
         return F.EXIT_OK
     except (F.ToolError, docpaths.DocPathError, OSError) as e:
         print(f"{TOOL}: {e}", file=sys.stderr)
@@ -903,16 +962,21 @@ def _selftest():
               and any(p == "/status" and s == "error" for p, _m, s in errs)
               and any(p == "/units/0/mockup" and s == "error" for p, _m, s in errs)
               and any(p == "/units/0/extra" and s == "warning" for p, _m, s in errs))
-        # одобрение с отпечатком по артбордам единицы и входу (вход собирается и с ошибкой проверки: главная в работе)
-        subprocess.run([sys.executable, str(HERE / "canvas_input.py"), "build", slug, "promo", "--stage", "wireframe",
-                        "--repo", str(root), "--today", "2026-09-29"], capture_output=True, text=True, cwd=cwd)
+        # одобрение с отпечатком по артбордам и источникам единицы (вход собирается и с ошибкой проверки: главная в
+        # работе)
+        def ci(stage):
+            return subprocess.run([sys.executable, str(HERE / "canvas_input.py"), "build", slug, "promo", "--stage",
+                                   stage, "--repo", str(root), "--today", "2026-09-29"], capture_output=True, text=True,
+                                  cwd=cwd)
+
+        ci("wireframe")
         proj = docpaths.design(slug, "canvas-project", surface="promo", repo=root)
         proj.mkdir(parents=True, exist_ok=True)
         (proj / "Spasibo.dc.html").write_text("<section id='confirmation'>Заявка на замер принята</section>\n",
                                               encoding="utf-8")
         (proj / "Home.dc.html").write_text("<section id='hero'>Главная</section>\n", encoding="utf-8")
         b = Build(slug, surf, root, today)
-        fp_sp, fp_home = b.fingerprint(["Spasibo.dc.html"]), b.fingerprint(["Home.dc.html"])
+        fp_sp, fp_home = b.fingerprint("spasibo", ["Spasibo.dc.html"]), b.fingerprint("home", ["Home.dc.html"])
         rv = docpaths.design(slug, "review", surface="promo", repo=root)
         rv.mkdir(parents=True, exist_ok=True)
         (rv / "REVIEW.md").write_text(
@@ -924,8 +988,44 @@ def _selftest():
             f"| `home` | `Home.dc.html` | `accepted` | владелец продукта | 2026-09-29 | {fp_home} | — |\n",
             encoding="utf-8")
         units = {u["id"]: u for u in build(slug, surf, root, today)["units"]}
-        check("вердикт REVIEW.md с совпавшим отпечатком артбордов и входа → mockup accepted_with_notes",
-              units["spasibo"]["mockup"] == "accepted_with_notes" and units["home"]["mockup"] == "accepted")
+        check("вердикт REVIEW.md с совпавшим отпечатком артбордов и источников единицы → mockup accepted_with_notes; "
+              "отпечаток — sha256, у единиц разный",
+              units["spasibo"]["mockup"] == "accepted_with_notes" and units["home"]["mockup"] == "accepted"
+              and str(fp_sp).startswith("sha256:") and fp_sp != fp_home)
+        art = docpaths.design(slug, "artifacts", repo=root)
+        at = art.read_text(encoding="utf-8")
+        art.write_text(at.replace("| 2026-09-29 | аналитик |", "| 2026-10-02 | аналитик |"), encoding="utf-8")
+        re_wire = ci("wireframe")
+        sysp = docpaths.design(slug, "system", repo=root)
+        st = sysp.read_text(encoding="utf-8")
+        sysp.write_text(st.replace("status: approved", "status: proposed", 1).replace("starter: []",
+                                                                                     "starter: [spasibo]"),
+                        encoding="utf-8")
+        d = build(slug, surf, root, today)
+        units = {u["id"]: u for u in d["units"]}
+        check("дата «последнего чтения» в ARTIFACTS.md, пересборка входа, starter и статус system.yaml — одобрение то "
+              "же; ДС не утверждена — строка open «решение заказчика», не блокер",
+              at.count("| 2026-09-29 | аналитик |") == 2 and re_wire.returncode in (0, 1)
+              and "starter: [spasibo]" in sysp.read_text(encoding="utf-8")
+              and units["spasibo"]["mockup"] == "accepted_with_notes" and units["home"]["mockup"] == "accepted"
+              and f"{DECIDE}ДС не утверждена (system.yaml proposed)" in units["spasibo"]["open"]
+              and not any("ДС" in x for x in d["blockers"]))
+        mo = ci("motion")
+        inp = docpaths.design(slug, "input", surface="promo", repo=root) / "INPUT.md"
+        units = {u["id"]: u for u in build(slug, surf, root, today)["units"]}
+        check("вход motion заменяет вход макета — одобрение то же",
+              mo.returncode in (0, 1) and "stage: motion" in inp.read_text(encoding="utf-8")
+              and units["spasibo"]["mockup"] == "accepted_with_notes" and units["home"]["mockup"] == "accepted")
+        dk = docpaths.site(slug, "promo", "copy", "spasibo.yaml", repo=root)
+        dtext = dk.read_text(encoding="utf-8")
+        dk.write_text(dtext.replace("text: 'Вызвать замерщика'", "text: 'Позвать замерщика'", 1), encoding="utf-8")
+        d = build(slug, surf, root, today)
+        units = {u["id"]: u for u in d["units"]}
+        check("правка своего текста в copy deck снимает одобрение единицы (spasibo — mockup none, блокер); правка "
+              "copy deck соседней страницы одобрение home не снимает",
+              "Позвать замерщика" in dk.read_text(encoding="utf-8") and units["spasibo"]["mockup"] == "none"
+              and units["home"]["mockup"] == "accepted" and any("spasibo: одобрение снято" in x for x in d["blockers"]))
+        dk.write_text(dtext, encoding="utf-8")
         (proj / "Spasibo.dc.html").write_text("<section id='confirmation'>Заявка принята</section>\n",
                                               encoding="utf-8")
         d = build(slug, surf, root, today)
@@ -935,7 +1035,8 @@ def _selftest():
               and any("spasibo: одобрение снято" in x for x in d["blockers"]))
         rows = show_units(slug, surf, root, today)
         check("show: у единицы — отпечаток из REVIEW.md и текущий, совпадение",
-              {r["id"]: r["match"] for r in rows} == {"home": True, "spasibo": False})
+              {r["id"]: r["match"] for r in rows} == {"home": True, "spasibo": False}
+              and next(r["current"] for r in rows if r["id"] == "home") == fp_home)
         note = docpaths.root(root).joinpath(*STATE, slug, "design", "promo", "_phase-jump.md")
         note.parent.mkdir(parents=True, exist_ok=True)
         (rv / "REVIEW.md").unlink()
@@ -976,9 +1077,11 @@ def _selftest():
         check("кабинет: frontend_design — поправки ui C25, уровней нет",
               data["frontend_design"]["app_screens"].startswith("ui/CONTRADICTIONS.md §[C25]")
               and data["frontend_design"]["ambition"] == "—")
-        check("кабинет: тексты утверждены — у единиц approved; блокер FSD-карты",
+        check("кабинет: тексты утверждены — у единиц approved; FSD-карты нет — строка open «решение заказчика» у "
+              "каждой единицы, не блокер",
               {u["texts"] for u in data["units"]} == {"approved"}
-              and any("FSD-карты нет" in b for b in data["blockers"]))
+              and all(f"{DECIDE}FSD-карты нет" in u["open"] for u in data["units"])
+              and not any("FSD" in b for b in data["blockers"]))
         dest = docpaths.design(slug, "ready", surface="office", repo=root)
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(render(slug, data), encoding="utf-8")
@@ -992,6 +1095,43 @@ def _selftest():
         check("кабинет: тексты единицы — наименьший статус её строк texts.md (подпись поля бланка checked → "
               "request-new checked, прочие approved)",
               low.get("request-new") == "checked" and {v for u, v in low.items() if u != "request-new"} == {"approved"})
+        # готовность — гейты 2–4 и закрытая композиция: ДС, покрытие ДС типов экрана и FSD-карта — решения заказчика
+        sysp = docpaths.design(slug, "system", repo=root)
+        st = sysp.read_text(encoding="utf-8")
+        sysp.write_text(st.replace("  KpiTile: {component: KpiTile}\n",
+                                   "  KpiTile: {component: KpiTile, optional_states: [bogus]}\n"), encoding="utf-8")
+        proj = docpaths.design(slug, "canvas-project", surface="office", repo=root)
+        proj.mkdir(parents=True, exist_ok=True)
+        (proj / "PlanDashboard.dc.html").write_text("<main data-screen='plan-dashboard'>План</main>\n",
+                                                    encoding="utf-8")
+        fp = Build(slug, surf, root, today).fingerprint("plan-dashboard", ["PlanDashboard.dc.html"])
+        rv = docpaths.design(slug, "review", surface="office", repo=root)
+        rv.mkdir(parents=True, exist_ok=True)
+        (rv / "REVIEW.md").write_text(
+            "# REVIEW\n\nИллюстрация самопроверки.\n\n## Приёмка\n\n"
+            "| страница или экран | артборды | вердикт | одобрил | дата | отпечаток | открыто |\n"
+            "|---|---|---|---|---|---|---|\n"
+            f"| `plan-dashboard` | `PlanDashboard.dc.html` | `accepted` | владелец продукта | 2026-09-29 | {fp} "
+            "| — |\n", encoding="utf-8")
+        sysp.write_text(sysp.read_text(encoding="utf-8").replace("status: approved", "status: proposed", 1)
+                        + "starter: [plan-dashboard]\n", encoding="utf-8")
+        d = build(slug, surf, root, today)
+        units = {u["id"]: u for u in d["units"]}
+        pd = units["plan-dashboard"]
+        cov_lines = {u: [o for o in x["open"] if o.startswith(f"{DECIDE}покрытие ДС")] for u, x in units.items()}
+        check("кабинет: FSD-карты нет, ДС не утверждена, у KpiTile optional_states вне словаря — plan-dashboard готова "
+              "(макет принят, отпечаток совпал после starter и статуса ДС), решения заказчика — строки open; "
+              "покрытие — только у экрана с KpiTile; блокеров о ДС, покрытии и FSD нет; статус partial",
+              pd["ready"] and pd["mockup"] == "accepted" and d["status"] == "partial"
+              and f"{DECIDE}FSD-карты нет" in pd["open"]
+              and f"{DECIDE}ДС не утверждена (system.yaml proposed)" in pd["open"]
+              and len(cov_lines["plan-dashboard"]) == 1 and "KpiTile" in cov_lines["plan-dashboard"][0]
+              and not any(v for u, v in cov_lines.items() if u != "plan-dashboard")
+              and not any(w in x for x in d["blockers"] for w in ("ДС", "FSD", "покрытие")))
+        r = subprocess.run([sys.executable, me, "build", slug, "office", "--repo", str(root), "--today", "2026-09-29"],
+                           capture_output=True, text=True)
+        check("build: решения заказчика — строками «решение заказчика: …» с единицами",
+              r.returncode == 0 and f"{DECIDE}FSD-карты нет — not-found, plan-dashboard" in r.stdout)
     print("ready selftest:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 
