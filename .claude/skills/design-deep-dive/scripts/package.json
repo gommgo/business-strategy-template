@@ -25,15 +25,7 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "@react-three/fiber": "9.8.0",
-    "@react-three/drei": "10.7.8",
-    "@react-three/postprocessing": "3.1.2",
-    "@pmndrs/vanilla": "1.25.0",
-    "@paper-design/shaders": "0.0.81",
-    "gsap": "3.15.0",
-    "lenis": "1.3.26",
-    "maath": "0.10.8",
-    "three-custom-shader-material": "6.4.0",
-    "troika-three-text": "0.52.5"
+    "@react-three/drei": "10.7.8"
   },
   "x-ddd-used-by": {
     "@gltf-transform/cli, gltf-validator, gltfpack, meshoptimizer, draco3dgltf": "blender: gltf_check.py (+ validate.mjs, install.sh копирует его в $DDD_HOME/node), rk.py, d1exp.py, presets.py (npx gltf-transform)",
@@ -42,7 +34,6 @@
     "web-vitals": "site: page_anatomy.py (web-vitals.attribution.iife.js)",
     "axe-core": "site: run_axe_targets.py (axe.min.js)",
     "esbuild, three, postprocessing, n8ao": "blender: 15-showcase/_shared/code3d/build.sh (эталонный код kb)",
-    "react, react-dom, @react-three/fiber, @react-three/drei, esbuild, three": "blender: 09-web-runtime/examples/r3f-hero/build.sh (эталонный код kb)",
-    "@react-three/postprocessing, @pmndrs/vanilla, @paper-design/shaders, gsap, lenis, maath, three-custom-shader-material, troika-three-text": "blender: песочница испытания 15-showcase (npm-trial) — исходники рецептов 13–17 в kb/blender/99-raw/experiments"
+    "react, react-dom, @react-three/fiber, @react-three/drei, esbuild, three": "blender: 09-web-runtime/examples/r3f-hero/build.sh (эталонный код kb)"
   }
 }

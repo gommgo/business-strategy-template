@@ -15,7 +15,8 @@
   rows = gate_check("probe_quick.json", mode="desktop", reduced=False)   # [(проверка, значение, порог, прошла ли)] — ворота 3D
   rep = evaluate("probe_quick.json", "desktop", baseline="probe_no3d.json", profile="landing-product@L1")   # полный отчёт
 
-Код выхода: 0 — провалов B и S ворот 3D нет, 1 — есть (зеркала на код не влияют), 2 — ошибка вызова.
+Код выхода: 1 — провалена строка B ворот 3D (summary.blocked), 0 — провалов B нет, 2 — ошибка вызова. Провал S (вызовы,
+DPR, первый кадр, вклад в TBT) и зеркала D код не меняют: они в отчёте — S исправить или записать исключением плана.
 Код репозитория запускает утилиту соседним чекаутом: ../strategy/.claude/skills/design-deep-dive/scripts/blender/gate_check.py.
 """
 import json
@@ -149,6 +150,11 @@ def gate_check(probe_path, mode="mobile", reduced=False, baseline=None):
     return [(r["check"], r["value"], r["limit"], r["status"] != "FAIL") for r in rep["rows"] if not r.get("mirror")]
 
 
+def exit_code(rep):
+    """Код выхода по отчёту evaluate(): 1 — провалена строка B ворот 3D, иначе 0 (S и зеркала D — только в отчёте)."""
+    return 1 if rep["summary"]["blocked"] else 0
+
+
 def selftest():
     """Без браузера: отчёты зонда из словарей, пороги из YAML (в том числе правленая копия), зеркала с профилем site."""
     import copy
@@ -186,6 +192,13 @@ def selftest():
                                         "mobile", reduced=True)["rows"]}
     check("reduce: 3 вызова и 0,2 % в покое → B", rr["reduce_dc"]["status"] == "FAIL" and rr["reduce_idle"]["status"] == "FAIL"
           and "kb3d" not in rr)
+    p3 = copy.deepcopy(probe)
+    p3["idle"]["dc_median"] = 75
+    p3["vitals_pre_scroll"]["first_draw_ms"] = 2600
+    rep3 = evaluate(p3, "desktop", baseline=base)
+    check("только S (75 вызовов > 60, первый кадр 2 600 > 2 000) → в отчёте S 2, не блокировано, код 0",
+          rep3["summary"]["S"] == 2 and rep3["summary"]["B"] == 0 and not rep3["summary"]["blocked"] and exit_code(rep3) == 0)
+    check("провал B (LCP-элемент canvas, 3D-ассеты сверх предела) → код 1", exit_code(evaluate(p2, "desktop")) == 1)
     legacy = gate_check(probe, "desktop", baseline=base)
     check("gate_check(): кортежи (проверка, значение, порог, прошла ли) — только ворота 3D", legacy and all(len(t) == 4 for t in legacy)
           and not any("страницы" in t[0] for t in legacy))
@@ -198,6 +211,14 @@ def selftest():
             yaml.safe_dump(d2, f, allow_unicode=True)
         r3 = {r["key"]: r for r in evaluate(probe, "desktop", gates=pth)["rows"]}
         check("порог читается из YAML, а не из кода (правленая копия: 900 → FAIL)", r3["kb3d"]["limit"] == 900 and r3["kb3d"]["status"] == "FAIL")
+        import subprocess
+        rc = {}
+        for name, pr in (("only_s", p3), ("b", p2)):
+            pp = os.path.join(td, name + ".json")
+            with open(pp, "w", encoding="utf-8") as f:
+                json.dump(pr, f)
+            rc[name] = subprocess.run([sys.executable, os.path.abspath(__file__), pp, "desktop"], capture_output=True).returncode
+        check("вызов из командной строки: только S — код 0, провал B — код 1", rc == {"only_s": 0, "b": 1})
     src = open(os.path.abspath(__file__), encoding="utf-8").read().split("\ndef selftest")[0]
     check("в коде нет чисел порогов ворот 3D", "LIMITS" not in src and "820" not in src and "1536" not in src and "3072" not in src)
     print("gate_check selftest:", "OK" if ok else "FAIL")
@@ -225,8 +246,8 @@ def main():
         for r in rep["rows"]:
             print(f"{r['status']:4} {r['severity']} {r['id']:10} {r['check']}: {r['value']} (порог {r['limit']})"
                   + (f" — {r['note']}" if r.get("note") else ""))
-        print("итог:", rep["summary"])
-    sys.exit(1 if any(r["status"] == "FAIL" and r["severity"] in ("B", "S") and not r.get("mirror") for r in rep["rows"]) else 0)
+        print("итог:", rep["summary"], "— код 1 только при провале B; S — исправить или записать исключением плана")
+    sys.exit(exit_code(rep))
 
 
 if __name__ == "__main__":

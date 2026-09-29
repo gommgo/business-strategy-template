@@ -69,8 +69,9 @@ say()  { printf '%s\n' "$*"; }
 step() { printf '\n== %s\n' "$*"; }
 run()  { if [ "$DRY" = 1 ]; then printf '  (план) %s\n' "$*"; else printf '  + %s\n' "$*"; "$@"; fi; }
 sha()  { sha256sum "$1" 2>/dev/null | cut -d' ' -f1; }
-ERR=0
+ERR=0; WARN=0
 fail() { printf '  ОШИБКА: %s\n' "$*" >&2; ERR=1; }
+warn() { printf '  ПРЕДУПРЕЖДЕНИЕ: %s\n' "$*" >&2; WARN=1; }   # установку не останавливает
 py_ver() { "$1" -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null || true; }
 py_ok()  { "$1" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 12) else 1)' 2>/dev/null; }
 pick_python() {  # явный --python или PYTHON; иначе python3.13, python3.12, python3 не ниже 3.12
@@ -209,6 +210,31 @@ if [ -x "$PY" ] && "$PY" -c 'import playwright' >/dev/null 2>&1; then
 fi
 
 # ------------------------------------------------------------------ npm
+npm_plan() {  # --dry-run и --check: что npm install поменяет в прямых зависимостях $NODE_HOME против scripts/package.json
+  "$PYU" - "$SCRIPTS/package.json" "$NODE_HOME" <<'PYEOF' || say "  план npm не посчитан ($PYU)"
+import json, os, sys
+want = json.load(open(sys.argv[1], encoding="utf-8")).get("dependencies", {})
+home = sys.argv[2]
+try:
+    had = json.load(open(os.path.join(home, "package.json"), encoding="utf-8")).get("dependencies", {})
+except (OSError, ValueError):
+    had = {}
+def version(name):
+    try:
+        return json.load(open(os.path.join(home, "node_modules", name, "package.json"), encoding="utf-8")).get("version")
+    except (OSError, ValueError):
+        return None
+miss = [f"{n} {version(n)} → {v}" if version(n) else f"{n}@{v} (нет)" for n, v in want.items() if version(n) != v]
+gone = sorted(set(had) - set(want))
+print(f"  пакетов в scripts/package.json: {len(want)}")
+if miss:
+    print("  не хватает или другая версия: " + ", ".join(miss))
+if gone:
+    print("  уходят из package.json (npm снимет те, что не нужны другим пакетам): " + ", ".join(gone))
+if not miss and not gone:
+    print("  пакеты уже стоят — npm install сверит дерево")
+PYEOF
+}
 if [ "$DO_NPM" = 1 ]; then
   step "npm: зависимости утилит в $NODE_HOME"
   NODE="${DDD_NODE:-$(command -v node || true)}"; NPM="${DDD_NPM:-$(command -v npm || true)}"
@@ -221,18 +247,24 @@ if [ "$DO_NPM" = 1 ]; then
     if [ "$want" = "$have" ] && [ -d "$NODE_HOME/node_modules" ]; then
       say "  node_modules соответствует scripts/package.json"
     else
+      if [ "$DRY" = 1 ]; then npm_plan; fi
       run cp "$SCRIPTS/package.json" "$NODE_HOME/package.json"
       run "$NPM" install --prefix "$NODE_HOME" --no-audit --no-fund
       if [ "$DRY" = 0 ]; then printf '%s\n' "$want" > "$NODE_HOME/.package.sha256"; fi
     fi
-    # esbuild (эталонные сборки blender): скрипт установки разрешён полем allowScripts в package.json (npm ≥ 12 без
-    # разрешения его пропускает); на дереве, поставленном без разрешения, его запускает npm rebuild
+    # esbuild нужен только эталонным 3D-сборкам базы (сборки и постеры примеров kb/blender), утилитам скилла — нет:
+    # его сбой — предупреждение, установка идёт дальше. Скрипт установки esbuild разрешён полем allowScripts в
+    # package.json (npm ≥ 12 без разрешения его пропускает); на дереве, поставленном без разрешения, его запускает
+    # npm rebuild
     ESB="$NODE_HOME/node_modules/esbuild/bin/esbuild"
-    if [ -f "$ESB" ] && [ "$(head -c 2 "$ESB")" = '#!' ]; then run "$NPM" rebuild esbuild --prefix "$NODE_HOME"; fi
+    ESB_WHY="эталонные 3D-сборки базы (примеры kb/blender) без него не соберутся, утилитам скилла он не нужен"
+    if [ -f "$ESB" ] && [ "$(head -c 2 "$ESB")" = '#!' ]; then
+      if ! run "$NPM" rebuild esbuild --prefix "$NODE_HOME"; then warn "npm rebuild esbuild не прошёл — $ESB_WHY"; fi
+    fi
     if [ -x "$NODE_HOME/node_modules/.bin/esbuild" ]; then
       if v="$("$NODE_HOME/node_modules/.bin/esbuild" --version 2>/dev/null)"; then say "  esbuild $v";
-      else fail "esbuild не запускается — $NPM rebuild esbuild --prefix $NODE_HOME"; fi
-    elif [ "$DRY" = 0 ]; then fail "нет esbuild в $NODE_HOME/node_modules — $NPM install --prefix $NODE_HOME"; fi
+      else warn "esbuild не запускается — $ESB_WHY: $NPM rebuild esbuild --prefix $NODE_HOME"; fi
+    elif [ "$DRY" = 0 ]; then warn "нет esbuild в $NODE_HOME/node_modules — $ESB_WHY: $NPM install --prefix $NODE_HOME"; fi
     # validate.mjs (gltf_check.py) ищет gltf-validator рядом с собой: копия в $DDD_HOME/node, не симлинк (ESM идёт по realpath)
     if cmp -s "$SCRIPTS/blender/node/validate.mjs" "$NODE_HOME/validate.mjs"; then say "  validate.mjs на месте";
     else run cp "$SCRIPTS/blender/node/validate.mjs" "$NODE_HOME/validate.mjs"; fi
@@ -436,4 +468,4 @@ for b in flock bwrap systemd-run lzip uvx; do
   if [ -n "$p" ]; then say "  есть $b: $p"; else say "  нет  $b ($why)"; fi
 done
 say ""
-[ "$ERR" = 0 ] && say "готово$([ "$DRY" = 1 ] && echo ' (--dry-run: ничего не менялось)')" || { say "есть ошибки (выше)"; exit 1; }
+[ "$ERR" = 0 ] && say "готово$([ "$DRY" = 1 ] && echo ' (--dry-run: ничего не менялось)')$([ "$WARN" = 1 ] && echo '; есть предупреждения (выше)')" || { say "есть ошибки (выше)"; exit 1; }

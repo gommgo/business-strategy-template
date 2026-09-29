@@ -1408,7 +1408,7 @@ def check_required_sections(root, relpath, lines, heads, rep):
     optional = [x for x in missing if label == "дайджест" and x in OPTIONAL_DIGEST]
     missing = [x for x in missing if x not in optional]
     if missing:
-        level = "WARN"  # как у orch_check.py: отсутствие раздела — замечание, не битая ссылка
+        level = "WARN"  # отсутствие раздела — замечание, не битая ссылка
         rep.add("е", level, relpath, 0, "%s: нет разделов %s" % (label, ", ".join("«%s»" % x for x in missing)))
     if optional:
         rep.add("е", "INFO", relpath, 0, "%s: нет необязательного раздела %s («если показан»)" % (label, ", ".join("«%s»" % x for x in optional)))

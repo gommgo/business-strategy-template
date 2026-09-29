@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
-"""qa_pipeline.py (агент J, волна 3) — сводный конвейер проверок: сцена → GLB → страница; JSON с порогами и вердиктом.
-Тонкая обёртка над готовыми утилитами (ничего не считает сам):
-  scene: scene_check.py (J = C1/10 + C1/16 + D1) и preflight() агента E (08-export-gltf/04 §5) — в одном фоновом Blender;
-  glb:   gltf_check.py (валидатор Khronos) → glb_lint() агента E (§6) → gltf_web_inspect.py → [gltf_diff.py] → [gltf_load_bench.py];
-  page:  site_probe.py (A) → gate_check() из 99-raw/tools/gate_check.py (F1 09-web-runtime/05 §7.2, модуль — U) + статическая проверка import map (F1, F2).
+"""qa_pipeline.py — сводный конвейер проверок 3D: сцена → GLB → страница; JSON с порогами и вердиктом.
+Тонкая обёртка над утилитами этой папки (ничего не считает сам):
+  scene: scene_check.py и preflight() из preflight_block.py (kb/blender 08-export-gltf/04 §5) — в одном фоновом Blender;
+  glb:   коллизии имён узлов после санитизации three → gltf_check.py (валидатор Khronos) → glb_lint() из glb_lint_block.py
+         (08/04 §6) → gltf_web_inspect.py → [gltf_diff.py по копии .blend только с ASSET_*] → [gltf_load_bench.py];
+  page:  site_probe.py → ворота 3D gate_check.evaluate() (пороги — kb/blender/09-web-runtime/page-3d-gates.yaml, описание —
+         09/05 §7.2) + статическая проверка import map (одна версия three; min-ядро с jsDelivr — с переназначением three.core.js).
 
   python3 qa_pipeline.py scene A.blend [B.blend …] [--passport P.json | --passports MAP.json] [--out r.json]
   python3 qa_pipeline.py glb M.glb [--blend S.blend --diff [--tone neutral] [--engine cycles]] [--bench] [--max-tris N] [--max-kb N] [--out r.json]
   python3 qa_pipeline.py page URL|DIR [--mobile] [--reduced] [--wait 16000] [--out r.json]
+  python3 qa_pipeline.py --selftest      # без Blender и браузера: вердикт page по тяжести строк ворот 3D
 
 MAP.json для пакета: {"<имя файла без .blend>": {паспорт}, …}. Вердикт каждой стадии и общий: fail (есть ERROR) → review
-(есть WARN) → pass. Код выхода: 0 pass, 1 review, 2 fail, 3 ошибка запуска. Пороги gltf_diff — E/02; ворота страницы — F1.
+(есть WARN) → pass. У page тяжесть строки ворот 3D решает уровень: провал B — ERROR (fail), провал S — WARN (review:
+исправить или записать исключением плана), зеркала метрик страницы D — INFO; все строки — в поле gates, итог — gate_summary.
+Вердикт собранной страницы по профилю бюджета ставит site/page_gates.py. Код выхода: 0 pass, 1 review, 2 fail, 3 ошибка
+запуска. Временные папки удаляются (--keep — оставить). Пороги gltf_diff — kb/blender 11-evaluation-qa/03 §2.2.
 """
 import json, os, re, shutil, struct, subprocess, sys, tempfile, time
 
@@ -23,7 +29,8 @@ SERVE_BR = TOOLS  # перенос: serve_br — scripts/blender
 RANK = {"pass": 0, "review": 1, "fail": 2}
 
 sys.path.insert(0, TOOLS)
-from gate_check import gate_check  # агент U, волна 4: общий модуль вместо своей копии (X §12) — .bin в 3D-ассетах, TBT/KTX2 R20
+from gate_check import evaluate, gate_check  # noqa: F401 — gate_check: кортежи ворот 3D для кода, который берёт их отсюда
+GATE_LEVEL = {"B": "ERROR", "S": "WARN", "D": "INFO"}   # тяжесть строки ворот 3D → уровень находки: fail только у B
 
 RUNNER = r'''
 import bpy, io, json, sys, traceback
@@ -142,7 +149,7 @@ print("ASSET_ONLY removed", n, "kept", len(keep))
 
 def asset_only_blend(blend, tmp):
     """Копия .blend без подложки (циклорама, пол, фон вне ASSET_*): gltf_diff рендерит ВСЮ видимую геометрию источника,
-    а в GLB — только ассет; без копии IoU 0,002 на кружке C1/12 (J/03)."""
+    а в GLB — только ассет; без копии сравнение ложно «сломано» (kb/blender 11-evaluation-qa/03 §2.2)."""
     runner, out = os.path.join(tmp, "asset_only.py"), os.path.join(tmp, "asset_only.blend")
     open(runner, "w").write(ASSET_ONLY)
     subprocess.run([sys.executable, os.path.join(TOOLS, "blender_run.py"), runner, "--", os.path.abspath(blend), out],
@@ -150,7 +157,7 @@ def asset_only_blend(blend, tmp):
     return out if os.path.exists(out) else os.path.abspath(blend)
 
 
-GLB_SANITIZE = re.compile(r"[\[\].:/]")           # агент U, волна 4: NAME_COLLISION (X §12)
+GLB_SANITIZE = re.compile(r"[\[\].:/]")           # символы, которые three удаляет из имени узла (NAME_COLLISION)
 
 
 def glb_three_name(name):
@@ -166,7 +173,7 @@ def glb_json(path):
 
 
 def glb_name_collisions(glb):
-    """Узлы .glb, чьи имена после санитизации three (01 §8.2, I/03) совпадают — ERROR, критично для интерактива
+    """Узлы .glb, чьи имена после санитизации three (02-blender-workflow/01 §8.2) совпадают — ERROR, критично для интерактива
     (getObjectByName найдёт не тот узел). Возвращает [(имя1, имя2, санитизированное), …]."""
     seen, dups = {}, []
     for node in glb_json(glb).get("nodes", []):
@@ -185,7 +192,7 @@ def run_glb(glb, a):
     glb = os.path.abspath(glb)
     tmp = tempfile.mkdtemp(prefix="qa_glb_")
     iss, rep = [], {"file_kb": round(os.path.getsize(glb) / 1024, 1)}
-    # 0. коллизии имён узлов после санитизации three (02-blender-workflow/01 §8.2, I/03) — критично для интерактива
+    # 0. коллизии имён узлов после санитизации three (02-blender-workflow/01 §8.2) — критично для интерактива
     dups = glb_name_collisions(glb)
     if dups:
         rep["name_collisions"] = dups
@@ -205,14 +212,14 @@ def run_glb(glb, a):
             iss.append(issue("WARN" if "сжат" in h or "> 5 МБ" in h else "INFO", "hint", h, "gltf_check"))
     except (ValueError, KeyError):
         iss.append(issue("ERROR", "gltf_check_failed", (r.stdout + r.stderr)[-400:], "gltf_check"))
-    # 2. glb_lint (E, 08/04 §6)
+    # 2. glb_lint (08-export-gltf/04 §6)
     sys.path.insert(0, E26)
     from glb_lint_block import glb_lint
     lint = glb_lint(glb)
     rep["glb_lint"] = lint
     for w in lint.get("warnings", []):
         iss.append(issue("WARN", "glb_lint", w, "glb_lint"))
-    # бюджет из паспорта / таблицы F1 09/05 §1.1 (hero: телефон 50 тыс. треуг. и 820 КБ, десктоп 100 тыс. и 1536 КБ)
+    # бюджет из паспорта / таблицы 09/05 §1.1 (hero: телефон 50 тыс. треуг. и 820 КБ, десктоп 100 тыс. и 1536 КБ)
     if opt(a, "--max-tris") and (lint.get("triangles") or 0) > int(opt(a, "--max-tris")):
         iss.append(issue("ERROR", "over_budget_tris", f'{lint.get("triangles")} > {opt(a, "--max-tris")} треугольников', "budget"))
     if opt(a, "--max-kb") and rep["file_kb"] > float(opt(a, "--max-kb")):
@@ -247,7 +254,7 @@ def run_glb(glb, a):
             rep["diff"] = dict(m, sheet=os.path.join(dd, "diff_sheet.png"))
             de, iou = m["de2000_mean"], m["iou"]
             if de > 6 or iou < 0.95:
-                iss.append(issue("ERROR", "diff_broken", f"ΔE {de}, IoU {iou} (поломка: ΔE > 6 или IoU < 0,95, E/02)", "gltf_diff"))
+                iss.append(issue("ERROR", "diff_broken", f"ΔE {de}, IoU {iou} (поломка: ΔE > 6 или IoU < 0,95, 11/03 §2.2)", "gltf_diff"))
             elif de > 3.5 or iou < 0.99:
                 iss.append(issue("WARN", "diff_drift", f"ΔE {de}, IoU {iou} (норма ΔE ≤ 3,5 и IoU ≥ 0,99)", "gltf_diff"))
         else:
@@ -265,7 +272,7 @@ def run_glb(glb, a):
 
 # ------------------------------------------------------------------------------------------------ page
 def importmap_check(html_path):
-    """Статика (F1 09/01, F2): import map — одна версия three для ядра и addons, без *.min.js ядра с jsDelivr."""
+    """Статика (09-web-runtime/01 §1.2): import map — одна версия three для ядра и addons, без *.min.js ядра с jsDelivr."""
     iss = []
     src = open(html_path, encoding="utf-8").read()
     m = re.search(r'<script type="importmap">(.*?)</script>', src, re.S)
@@ -282,7 +289,7 @@ def importmap_check(html_path):
     remap = any(k.endswith("three.core.js") and v.endswith("three.core.min.js") for k, v in imports.items())
     if core.endswith(".min.js") and "jsdelivr" in core and not remap:
         iss.append(issue("WARN", "importmap_min_core", "three.module.min.js с jsDelivr без переназначения three.core.js → "
-                         "three.core.min.js тянет неминифицированное ядро 204 КБ br (F1 09/01 §1.2)", "static"))
+                         "three.core.min.js тянет неминифицированное ядро 204 КБ br (09/01 §1.2)", "static"))
     return iss
 
 
@@ -294,8 +301,8 @@ def run_page(target, a):
         page = "index.html" if os.path.isdir(target) else os.path.basename(target)
         if os.path.exists(os.path.join(src_root, page)):
             iss += importmap_check(os.path.join(src_root, page))
-        # агент U, волна 4 (по замечанию S1): раздаём из временной копии — serve_br.precompress() иначе пишет
-        # file.br рядом с демо прямо в базе (09-web-runtime/examples/…), качество проверки от этого не зависит
+        # раздаём из временной копии: serve_br.precompress() пишет file.br рядом со страницей, а страница может
+        # лежать в базе (09-web-runtime/examples/…); на проверку копия не влияет
         root = os.path.join(tmp, "site")
         shutil.copytree(os.path.abspath(src_root), root)
         sys.path.insert(0, SERVE_BR)
@@ -321,22 +328,75 @@ def run_page(target, a):
     if not os.path.exists(pp):
         iss.append(issue("ERROR", "probe_failed", (r.stdout + r.stderr)[-500:], "site_probe"))
         return {"verdict": "fail", "issues": iss, "url": url, "tmp": tmp}
-    rows = gate_check(pp, "mobile" if mobile else "desktop", reduced)
-    for name, val, lim, ok in rows:
-        if not ok:
-            iss.append(issue("ERROR", "gate:" + name, f"{val} при пороге {lim}", "gate_check"))
+    return page_report(pp, mobile, reduced, iss, url, tmp)
+
+
+def page_report(pp, mobile, reduced, iss, url, tmp):
+    """Результат page по отчёту зонда pp: строки ворот 3D с тяжестью (B — ERROR, S — WARN, D — INFO) к находкам iss."""
+    rep = evaluate(pp, "mobile" if mobile else "desktop", reduced)
+    for r in rep["rows"]:
+        if r["status"] == "FAIL":
+            iss.append(issue(GATE_LEVEL.get(r["severity"], "INFO"), "gate:" + r["check"],
+                             f"{r['value']} при пороге {r['limit']} ({r['id']}, {r['severity']})", "gate_check"))
     txt = open(pp, encoding="utf-8").read()
     if "Multiple instances of Three.js" in txt:
         iss.append(issue("WARN", "three_multiple_instances", "в консоли «Multiple instances of Three.js»", "site_probe"))
-    st = json.load(open(pp))
+    st = json.loads(txt)
     timing = st.get("page_timing") or st.get("timing") or {}
     return {"verdict": verdict_of(iss), "url": url, "mode": ("mobile" if mobile else "desktop") + ("+reduce" if reduced else ""),
-            "gates": [{"check": n, "value": v, "limit": l, "ok": o} for n, v, l, o in rows],
-            "codes": sorted({i["code"] for i in iss}), "issues": iss, "probe": pp, "timing": timing, "tmp": tmp}
+            "gates": [{"id": r["id"], "check": r["check"], "value": r["value"], "limit": r["limit"], "severity": r["severity"],
+                       "status": r["status"], "ok": r["status"] != "FAIL", **({"mirror": r["mirror"]} if r.get("mirror") else {})}
+                      for r in rep["rows"]],
+            "gate_summary": rep["summary"],
+            "codes": sorted({i["code"] for i in iss if i["level"] != "INFO"}), "issues": iss, "probe": pp, "timing": timing,
+            "tmp": tmp}
+
+
+def selftest():
+    """Без Blender и браузера: вердикт page по тяжести строк ворот 3D на отчётах зонда из словарей."""
+    ok = True
+
+    def check(msg, cond):
+        nonlocal ok
+        ok = ok and bool(cond)
+        print(("OK   " if cond else "FAIL ") + msg)
+    base = {"vitals_pre_scroll": {"lcp": {"tag": "IMG", "t": 900}, "cls": 0.02, "tbt_ms": 120, "first_draw_ms": 1500},
+            "network": {"transfer_kb": 2900.0, "by_category": {"model3d": {"n": 1, "transfer_kb": 700.0}}},
+            "idle": {"dc_median": 12}, "detected": {"canvases": [{"w": 960, "css": [640, 480], "vis": True}]}, "console_errors": 0}
+    only_s = json.loads(json.dumps(base))
+    only_s["idle"]["dc_median"] = 75
+    only_s["vitals_pre_scroll"]["first_draw_ms"] = 2600
+    with_b = json.loads(json.dumps(only_s))
+    with_b["vitals_pre_scroll"]["lcp"]["tag"] = "CANVAS"
+    with tempfile.TemporaryDirectory() as td:
+        res = {}
+        for name, probe in (("clean", base), ("only_s", only_s), ("with_b", with_b)):
+            pp = os.path.join(td, name + ".json")
+            with open(pp, "w", encoding="utf-8") as f:
+                json.dump(probe, f)
+            res[name] = page_report(pp, False, False, [], "selftest", td)
+    check("ворота 3D пройдены → pass, код 0", res["clean"]["verdict"] == "pass" and RANK["pass"] == 0)
+    s = res["only_s"]
+    check("только S (вызовы 75 > 60, первый кадр 2 600 > 2 000) → review, код 1, находки WARN; B 0, S 2",
+          s["verdict"] == "review" and RANK["review"] == 1 and {i["level"] for i in s["issues"]} == {"WARN"}
+          and s["gate_summary"]["B"] == 0 and s["gate_summary"]["S"] == 2)
+    b = res["with_b"]
+    check("провал B (LCP-элемент canvas) → fail, код 2; S остаются в отчёте предупреждениями",
+          b["verdict"] == "fail" and RANK["fail"] == 2 and sum(i["level"] == "ERROR" for i in b["issues"]) == 1
+          and sum(i["level"] == "WARN" for i in b["issues"]) == 2 and b["gate_summary"]["blocked"])
+    g = {x["id"] + ":" + x["check"]: x for x in s["gates"]}
+    check("поле gates — все строки ворот с id, тяжестью и статусом; зеркала D без профиля — SKIP",
+          all({"id", "severity", "status", "ok"} <= set(x) for x in s["gates"])
+          and any(x.get("mirror") and x["severity"] == "D" and x["status"] == "SKIP" for x in s["gates"])
+          and any(x["severity"] == "S" and x["status"] == "FAIL" and not x["ok"] for x in g.values()))
+    print("qa_pipeline selftest:", "OK" if ok else "FAIL")
+    return 0 if ok else 1
 
 
 def main():
     a = sys.argv[1:]
+    if a and a[0] == "--selftest":
+        sys.exit(selftest())
     if not a or a[0] in ("-h", "--help") or a[0] not in ("scene", "glb", "page"):
         print(__doc__); sys.exit(3)
     t0 = time.time()

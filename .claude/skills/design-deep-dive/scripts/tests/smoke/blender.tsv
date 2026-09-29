@@ -24,9 +24,7 @@ scripts/blender/node/validate.mjs	utility	compile
 scripts/blender/passport_asserts.py	module	compile	
 scripts/blender/preflight_block.py	module	compile	
 scripts/blender/presets.py	module	compile	
-scripts/blender/qa_pipeline.py	utility	help rc=3	
-scripts/blender/regression/make_manifest.py	maint	compile	
-scripts/blender/regression/run_set.py	maint	compile	
+scripts/blender/qa_pipeline.py	utility	help rc=3; run: --selftest	
 scripts/blender/render_views.py	utility	compile	
 scripts/blender/rk.py	module	compile	
 scripts/blender/run_doc_blocks.py	utility	import-only	
@@ -40,8 +38,4 @@ scripts/blender/slot_run.py	utility	import-only
 scripts/blender/test_agent_helpers.py	test	compile	
 scripts/blender/test_bpyx.py	test	compile	
 scripts/blender/three_probe.py	utility	import-only	
-scripts/blender/vote/build_pairs.py	utility	import-only	
-scripts/blender/vote/index.html	data	data	
-scripts/blender/vote/tally.py	utility	import-only	
-scripts/blender/vote/vote_server.py	utility	import-only	
 scripts/blender/web_view.py	utility	help; run: --selftest	
