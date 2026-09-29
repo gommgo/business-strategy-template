@@ -1305,7 +1305,7 @@
       },
       "video": {
        "type": "object",
-       "description": "→ visual-dna video (tempo still | slow | medium, camera, loop)."
+       "description": "→ visual-dna video (tempo still | slow | medium | fast, camera, loop)."
       },
       "composition": {
        "type": "object",
