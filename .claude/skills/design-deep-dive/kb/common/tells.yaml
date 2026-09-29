@@ -457,6 +457,7 @@ tells:
       - ui/11-styles-trends/04-anti-slop-ui.md §2.2 (маркер 9)
       - ui/02-typography/04-weight-hierarchy-color.md (число весов)
       - claude-design/06-design-process/05-default-look.md §3
+    check: LOOK-TYPE-SCALE
     note: Считают кегли на экране или странице при одной ширине; роли текста считаются отдельно.
 
   - id: giant-display-type
@@ -580,6 +581,7 @@ tells:
     also:
       - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-08 (структура)
       - ui/11-styles-trends/04-anti-slop-ui.md §2.4 (маркер 14)
+    check: LOOK-BENTO
 
   - id: dashboard-in-browser-frame
     name: нарисованная рамка браузера или телефона вокруг выдуманного интерфейса
@@ -602,6 +604,7 @@ tells:
     also:
       - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-06
       - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-19
+    check: LOOK-ORBIT
 
   - id: category-rut-imagery
     name: буквальный образ категории без смысла
@@ -657,6 +660,7 @@ tells:
       app: ui/CONTRADICTIONS.md §[C3]
     also:
       - claude-design/06-design-process/05-default-look.md §3
+    check: LOOK-HEADER
 
   - id: off-scale-spacing
     name: отступы вне шкалы и один отступ везде
@@ -924,6 +928,12 @@ checks:
   M-H1-LINES: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}
   V-OVERLAP: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}
   E-LOW-DOM: {group: acceptance, norm: "проверки по разметке неполны: canvas или видео занимают первый экран"}
+  LOOK-TYPE-SCALE: {group: look, tell: font-size-count}
+  LOOK-HEADER: {group: look, tell: header-height}
+  LOOK-BENTO: {group: look, tell: bento-uniform-tiles, allow: cards}
+  LOOK-ORBIT: {group: look, tell: logo-orbit-hero, allow: center-hero}
+  FORM-FIELDS: {group: acceptance, norm: "site/05-conversion-funnels/lead-forms.yaml (form_sets — поля, подписи, обязательность; блок K приёмки)"}
+  FORM-FORBIDDEN: {group: acceptance, norm: "site/05-conversion-funnels/lead-forms.yaml#forbidden и defaults.consent (блоки J, K приёмки)"}
   ui_audit:A1: {group: look, tell: off-scale-spacing}
   ui_audit:H1: {group: look, tell: font-size-count}
   ui_audit:H10: {group: look, tell: caps-share}
