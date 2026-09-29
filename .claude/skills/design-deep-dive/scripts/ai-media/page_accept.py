@@ -11,8 +11,9 @@
     пиксель), доля площади медиа, которую закрывает постер (poster или картинка поверх видео и холста 3D);
   • видео: autoplay/muted/loop/playsinline/poster/preload, играет ли, длительность, видимая кнопка паузы с именем;
   • 2.2.2 поведением: первый экран на 6-й секунде после load (движение или видео) и петли всей страницы — каждая найденная
-    петля ставится в экран и через 6 с проверяется, движется ли она; без механизма паузы — провал. С --first-screen-only —
-    только первый экран, отчёт помечает это (петли ниже — motion_check.py);
+    петля ставится в экран и через 6 с проверяется, движется ли она; без механизма паузы (подписи — page_gates.PAUSE_LABELS,
+    общие с motion_check.py) — провал. С --first-screen-only — только первый экран, отчёт помечает это (петли ниже —
+    motion_check.py);
   • prefers-reduced-motion: второй прогон с reduce записью всей страницы — байты видео (нужно 0), движение первого экрана и
     каждой паузы прокрутки, % пикселей за 1 с в двух парах кадров подряд — непрерывное движение есть в обеих, разовое
     появление или подмена постера — в одной (порог — ворота эффектов creative EG-A11Y-06);
@@ -20,7 +21,7 @@
     маска букв — их разница, контраст цвета текста к каждому пикселю фона под буквами (худший, p1, p5); у видео-фона — по
     кадрам 0, 25, 50, 75 % длительности, итог — худший кадр;
   • фавиконы и og:image (есть ли, размеры в разметке); --acceptance — картинки и горизонтальный вылет на ширинах приёмки
-    (kb/common/acceptance-widths.yaml).
+    (kb/common/acceptance-widths.yaml; вылет больше limits.overflow_px строки SG-MOB-01 — WARN; с --dark — тёмная тема).
 Пороги: с --budget-profile <page_type>@L<n> — профиль site (page_gates.py): вес первого экрана выше профиля — WARN; LCP
 выше цели — WARN, выше «плохо» — FAIL; CLS так же. Без профиля вес не сравнивается, а LCP и CLS — только по порогам, общим
 для всех уровней. Условия лаборатории (телефон — дескриптор Pixel 7, CPU ×4, сеть; десктоп — окно и DPR) — budgets.yaml
@@ -52,6 +53,7 @@ MIME = {'.avif': 'image/avif', '.webp': 'image/webp', '.jxl': 'image/jxl', '.web
         '.html': 'text/html; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg', '.ico': 'image/x-icon',
         '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.woff2': 'font/woff2'}
 MOTION_PX = 12   # изменённый пиксель — разница > 12/255 хотя бы в одном канале (метод motion_check.py и F effect_bench)
+OVERSERVE_MAX = 2.0   # переотдача картинки первого экрана (естественная ширина / CSS-ширина × DPR) выше — WARN; строки ворот нет
 
 
 # ---------------------------------------------------------------- сервер для локальных файлов
@@ -215,7 +217,7 @@ MEDIA = r"""() => { const vh = innerHeight, vw = innerWidth, sel = window.__paSe
 PAUSE = r"""() => [...document.querySelectorAll('button, [role=button], [role=switch], input[type=checkbox], [aria-pressed], [data-motion-toggle], [data-motion-set]')]
   .some(b => { const s = getComputedStyle(b); if (b.hidden || s.display === 'none' || s.visibility === 'hidden') return false;
     return b.hasAttribute('data-motion-toggle') || b.hasAttribute('data-motion-set')
-      || /пауз|останов|стоп|stop|pause|запуст|воспроизв|play|движени|motion|анимац|вращени|rotat/i.test((b.getAttribute('aria-label') || '') + ' ' + (b.textContent || '')); })"""
+      || __PAUSE_RE__.test((b.getAttribute('aria-label') || '') + ' ' + (b.textContent || '')); })""".replace('__PAUSE_RE__', PG.pause_label_re_js())
 
 # Петли в видимой зоне: бесконечные анимации (CSS и WAAPI), играющие видео, холсты WebGL с вызовами отрисовки с прошлого
 # вызова (первый вызов в позиции только отмечает счётчики).
@@ -517,20 +519,22 @@ def run_once(p, url, a, reduce, cond, rm_limit, moving_min):
 
 def acceptance_run(p, url, a):
     """Ширины приёмки (kb/common/acceptance-widths.yaml): переотдача картинок, картинки без размеров, горизонтальный вылет;
-    на ширине overflow_only — только вылет. Высота окна — окно десктопа лаборатории (параметр прогона, не норма)."""
+    на ширине overflow_only — только вылет. Высота окна и DPR — окно десктопа лаборатории (параметр прогона, не норма);
+    с --dark — тёмная тема на тех же ширинах."""
     widths, over_only = acceptance_widths()
     out = []
     b = p.chromium.launch(channel='chromium', headless=True)
     try:
         for w in widths + ([over_only] if over_only else []):
-            ctx = b.new_context(viewport={'width': w, 'height': a.height}, device_scale_factor=a.dpr)
+            ctx = b.new_context(viewport={'width': w, 'height': a.height}, device_scale_factor=a.dpr,
+                                color_scheme='dark' if a.dark else 'light')
             page = ctx.new_page()
             page.goto(url, wait_until='load', timeout=120000)
             page.wait_for_timeout(800)
             d = page.evaluate(DOM)
             row = {'width': w, 'overflow_px': d['overflow_px']}
             if w != over_only:
-                row['over'] = [f"{i['src']} ×{i['over']}" for i in d['imgs'] if i['above'] and i['over'] and i['over'] > 2.0]
+                row['over'] = [f"{i['src']} ×{i['over']}" for i in d['imgs'] if i['above'] and i['over'] and i['over'] > OVERSERVE_MAX]
                 row['no_wh'] = [i['src'] for i in d['imgs'] if not i['wh']][:6]
             out.append(row)
             ctx.close()
@@ -572,7 +576,7 @@ def verdict(no, rm, th, acc_rows=None):
     for im in no['dom']['imgs']:
         if im['alt'] is None: fail.append(f"нет alt: {im['src']}")
         if not im['wh']: warn.append(f"нет width/height: {im['src']}")
-        if im['above'] and im['over'] and im['over'] > 2.0: warn.append(f"переотдача ×{im['over']}: {im['src']}")
+        if im['above'] and im['over'] and im['over'] > OVERSERVE_MAX: warn.append(f"переотдача ×{im['over']}: {im['src']}")
     for v in no['dom']['vids']:
         if v['above'] and (v['autoplay'] or v['playing']):
             if not (v['muted'] and v['playsinline']): fail.append(f"видео без muted/playsinline: {v['src']}")
@@ -595,9 +599,10 @@ def verdict(no, rm, th, acc_rows=None):
             ok.append(f"reduce: движение ≤ {mt.get('threshold_pct_s')} %/с ({mt.get('scope')})")
     for c_ in no.get('contrast', []):
         (ok if c_['pass_f83'] else fail).append(f"F83 «{c_['text'][:28]}»: худший {c_['f83_min']} (нужно {c_['need']})")
+    ov_max = PG.gate_limit('SG-MOB-01', 'overflow_px') if acc_rows else None   # вылет — число строки ворот страницы
     for row in acc_rows or []:
-        if (row.get('overflow_px') or 0) > 2:
-            warn.append(f"ширина {row['width']}: горизонтальный вылет {row['overflow_px']} px")
+        if (row.get('overflow_px') or 0) > ov_max:
+            warn.append(f"ширина {row['width']}: горизонтальный вылет {row['overflow_px']} px > {ov_max} (SG-MOB-01)")
         warn += [f"ширина {row['width']}: переотдача {x}" for x in row.get('over') or []]
     if not any('icon' in x for x in no['dom']['icons']): warn.append('нет <link rel=icon>')
     return {'pass': not fail, 'fail': fail, 'warn': warn, 'ok': ok}
@@ -653,18 +658,20 @@ SELFTEST_HTML = """<!doctype html><html lang="ru"><head><meta charset="utf-8"><m
 <style>body{margin:0;font:18px/1.5 sans-serif} header{padding:24px} h1{margin:0 0 12px;font-size:40px}
 .hero{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:0 24px} .hero img,.hero video{width:100%;height:auto;display:block}
 main{padding:24px} .spacer{height:1400px;background:linear-gradient(#fff,#eef)} .loop{width:260px;height:260px;background:#c33;animation:spin 2s linear infinite}
+.wide{width:340px;height:8px;background:#ccd}
 @keyframes spin{to{transform:rotate(360deg)}}</style></head><body>
 <header><h1>Проверка приёмки</h1><p>Картинка героя с размерами и приоритетом, видео с гладким постером, петля ниже первого экрана.</p></header>
 <section class="hero"><img src="hero.png" width="600" height="400" alt="Картинка героя" fetchpriority="high">
 <video poster="poster.png" width="600" height="400" muted playsinline></video></section>
-<main><div class="spacer"></div><div class="loop" aria-hidden="true"></div><p>Петля без кнопки паузы и без ветки reduce.</p></main>
+<main><div class="wide"></div><div class="spacer"></div><div class="loop" aria-hidden="true"></div><p>Петля без кнопки паузы и без ветки reduce.</p></main>
 </body></html>"""
 
 
 def selftest():
     """Локальная страница в Chromium Playwright без сети: окно первого экрана и условия — из budgets.yaml, пороги — профиль
     site; честный UA; постер видео (энтропия); петля ниже первого экрана без паузы — провал 2.2.2 по всей странице; reduce
-    записью всей страницы — порог ворот эффектов EG-A11Y-06; в коде нет маскировки автоматизации."""
+    записью всей страницы — порог ворот эффектов EG-A11Y-06; ширины приёмки и вылет по строке SG-MOB-01; в коде нет
+    маскировки автоматизации."""
     import subprocess
     import tempfile
     ok = True
@@ -698,6 +705,12 @@ def selftest():
     check('CLS 0,3 и LCP 4 500 → FAIL (плохо)', not v2['pass'] and len(v2['fail']) == 2)
     v3 = verdict(dict(no, weight_measured=False), None, th1)
     check('прогон с --throttle: вес не сравнивается', not any('первый экран' in x for x in v3['warn']))
+    ov = PG.gate_limit('SG-MOB-01', 'overflow_px')
+    v4 = verdict(no, None, th1, [{'width': 360, 'overflow_px': ov, 'over': [], 'no_wh': []}, {'width': 320, 'overflow_px': ov + 1}])
+    check(f'ширины приёмки: вылет {ov} px — норма, {ov + 1} px — WARN (limits.overflow_px строки SG-MOB-01)',
+          [x for x in v4['warn'] if 'вылет' in x] == [f'ширина 320: горизонтальный вылет {ov + 1} px > {ov} (SG-MOB-01)'])
+    check('подписи механизма паузы — page_gates.PAUSE_LABELS: выражение подставлено в PAUSE',
+          PG.pause_label_re_js() in PAUSE and '__PAUSE_RE__' not in PAUSE)
     with tempfile.TemporaryDirectory() as td:
         pg = os.path.join(td, 'site', 'page')
         os.makedirs(pg)
@@ -711,8 +724,9 @@ def selftest():
         Image.fromarray(rnd).save(os.path.join(pg, 'hero.png'))              # шум — высокая энтропия
         out = os.path.join(td, 'out')
         r = subprocess.run([sys.executable, os.path.abspath(__file__), os.path.join(pg, 'index.html'), '--out', out, '--root',
-                            os.path.join(td, 'site'), '--budget-profile', 'thank-you-page@L0', '--wait', '1500', '--loops', '1'],
-                           capture_output=True, text=True, timeout=240, env=kbpaths.playwright_env())
+                            os.path.join(td, 'site'), '--budget-profile', 'thank-you-page@L0', '--wait', '1500', '--loops', '1',
+                            '--acceptance'],
+                           capture_output=True, text=True, timeout=300, env=kbpaths.playwright_env())
         js = [f for f in os.listdir(out) if f.startswith('accept_') and f.endswith('.json')] if os.path.isdir(out) else []
         rep = json.load(open(os.path.join(out, js[0]), encoding='utf-8')) if js else {}
         check(f'прогон на локальной странице: отчёт есть, код 1 (петля без паузы) ({r.returncode}) {r.stderr[-200:] if not js else ""}',
@@ -736,6 +750,16 @@ def selftest():
                   mt.get('threshold_pct_s') == float(effect_gate('EG-A11Y-06')['threshold']) and mt.get('scope') == 'page' and mt.get('fail'))
             check('вес первого экрана сравнён с профилем thank-you-page@L0 (1 200 КБ десктоп)',
                   rep['thresholds']['first_screen_kb'] == 1200 and any('первый экран' in x for x in rep['verdict']['ok']))
+            widths, over_only = acceptance_widths()
+            acc = rep.get('acceptance') or []
+            check('--acceptance: строка на каждую ширину acceptance-widths.yaml (width, overflow_px, over[], no_wh[]), на '
+                  'overflow_only — только вылет', [x['width'] for x in acc] == widths + [over_only]
+                  and all(set(x) == {'width', 'overflow_px', 'over', 'no_wh'} for x in acc[:-1]) and set(acc[-1]) == {'width', 'overflow_px'})
+            byw = {x['width']: x['overflow_px'] for x in acc}
+            check(f'--acceptance: блок 340 px вылетает только на узких ширинах (390 — {byw.get(390)}, 360 — {byw.get(360)}, '
+                  f'{over_only} — {byw.get(over_only)} px) → WARN по SG-MOB-01',
+                  byw.get(390) == 0 and byw.get(360, 0) > ov and byw.get(over_only, 0) > ov
+                  and any(x.startswith('ширина 360: горизонтальный вылет') for x in rep['verdict']['warn']))
     print('page_accept selftest:', 'OK' if ok else 'FAIL')
     return 0 if ok else 1
 

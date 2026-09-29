@@ -88,6 +88,7 @@ SITE = kbpaths.kb("site")
 VOCAB = SITE / "02-site-types" / "vocabulary.yaml"
 CROSSWALK = SITE / "02-site-types" / "crosswalk.tsv"
 BUDGETS = SITE / "07-seo-geo-performance-analytics" / "budgets.yaml"
+LEVELS = kbpaths.kb("creative", "01-creative-direction", "ambition-levels.yaml")   # умолчания уровня по типу страницы
 PAGE_PLAN_SCHEMA = SITE / "10-playbooks-contracts" / "schemas" / "page-plan.schema.json"
 EXAMPLES = SITE / "10-playbooks-contracts" / "examples"
 BASE_PLAN = EXAMPLES / "saas-okoshko" / "plans" / "home.yaml"
@@ -154,6 +155,7 @@ class Kb:
         self.load_3d = pp["load"].get("default", "on-interaction")
         self.cta_before_3d = pp["cta_before_3d"].get("default", True)
         self.budgets = load_yaml(BUDGETS) if BUDGETS.is_file() else {}
+        self.levels = load_yaml(LEVELS) if LEVELS.is_file() else {}
 
     def media_class(self, page_type):
         """Класс ai-media по строке §8 crosswalk.tsv → (класс, отношение) или (None, None)."""
@@ -168,8 +170,10 @@ class Kb:
         return None if v is None else v.get("status", "active")
 
     def level_of(self, page_type):
-        lv = ((self.budgets.get("page_type_levels") or {}).get("default") or {})
-        return next((k for k, types in lv.items() if page_type in (types or [])), None)
+        """Уровень по умолчанию типа страницы — таблица creative ambition-levels.yaml#defaults_by_page_type (разделы
+        L0–L2; типы раздела proposed умолчания не имеют)."""
+        dpt = (self.levels or {}).get("defaults_by_page_type") or {}
+        return next((lv for lv in ("L0", "L1", "L2") if page_type in (dpt.get(lv) or [])), None)
 
 
 _KB = None
@@ -993,6 +997,11 @@ def _selftest():
     check("10 типов v1: каркас без ошибок", all(r["error"] == 0 for r in rows))
     rows = types_run(K, "all")
     check(f"все типы в рамках ({len(rows)}): проекция и каркас без ошибок", rows and all(r["error"] == 0 and r["media_class"] for r in rows))
+    ptl = K.budgets.get("page_type_levels") or {}
+    check("уровень по умолчанию — таблица creative (faq L0, landing-product L1, landing-campaign L2, proposed — нет); "
+          "в budgets.yaml — ссылка без копии",
+          (K.level_of("faq-page"), K.level_of("landing-product"), K.level_of("landing-campaign"), K.level_of("event-program-page"))
+          == ("L0", "L1", "L2", None) and "default" not in ptl and str(ptl.get("ref", "")).endswith("ambition-levels.yaml#defaults_by_page_type"))
     # спецификация ассета: page_type словаря и проекция page_class
     role = spec_role(K, base, "hero-visual")
     check("--spec-role: page_type словаря, page_class проекции, role по схеме asset-spec",

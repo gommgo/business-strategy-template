@@ -34,7 +34,8 @@ ambition-levels.yaml` (`defaults_by_page_type`, `levels[L0].appropriate_for.lead
 Код выхода: 1 — есть B; 0 — нет B; 2 — ошибка вызова. Замер без троттлинга сети помечается `lab-unthrottled`.
 
 Модуль для утилит замера (kbpaths.use("site"); import page_gates): resolve_profile(), profile_value(), conditions(),
-cdp_network(), mobile_device(), heavy_lock() — условия замера и тишина машины из budgets.yaml, одно место на все ворота.
+cdp_network(), mobile_device(), heavy_lock() — условия замера и тишина машины из budgets.yaml, одно место на все ворота;
+PAUSE_LABELS и pause_label_re_js() — подписи механизма паузы движения.
 """
 import argparse
 import contextlib
@@ -100,6 +101,15 @@ FAKE_ACTIVITY_RX = re.compile(r'только что (?:купил|записал
                               r'сейчас смотр\w+ \d+|just (?:purchased|bought|signed up)|\d+ people are (?:viewing|looking)|someone in [A-Z]\w+ (?:just|recently)', re.I)
 COUNTDOWN_RX = re.compile(r'(?:setDate\s*\(\s*\w+\.getDate\(\)\s*\+|getDate\(\)\s*\+\s*\d|countdown|обратн\w+ отсч)', re.I)
 PROMO_RX = re.compile(r'акци|скидк|sale|offer ends|до конца', re.I)
+# Подписи механизма паузы движения (кнопка, переключатель, выбор) — основы слов: по ним page_accept.py и motion_check.py
+# узнают паузу для WCAG 2.2.2 (кнопка «Вращение» эталона blender — тоже пауза)
+PAUSE_LABELS = ('пауз', 'останов', 'стоп', 'выключ', 'запуст', 'воспроизв', 'движени', 'анимац', 'вращени',
+                'pause', 'stop', 'play', 'resume', 'motion', 'animation', 'rotat')
+
+
+def pause_label_re_js():
+    """Литерал регулярного выражения JS по PAUSE_LABELS (без учёта регистра) для кода страницы."""
+    return '/(' + '|'.join(re.escape(x) for x in PAUSE_LABELS) + ')/i'
 
 
 def load_yaml(path):
@@ -1508,11 +1518,14 @@ def selftest(gates_path=None):
 
 def selftest_sources(check, budgets, gates, prof, clean):
     """Самопроверка сводки соседей, правила лидогенерации из данных, лимитов строк и условий замера."""
+    global AMBITION
     levels = load_levels()
-    # таблица умолчаний и правило лидогенерации — из ambition-levels.yaml, копия в budgets.yaml совпадает
-    dpt = {k: v for k, v in ((levels or {}).get('defaults_by_page_type') or {}).items() if k in LEVELS}
-    check('budgets.yaml page_type_levels.default совпадает с ambition-levels.yaml#defaults_by_page_type',
-          {k: sorted(v) for k, v in (budgets.get('page_type_levels') or {}).get('default', {}).items()} == {k: sorted(v) for k, v in dpt.items()})
+    # таблица умолчаний и правило лидогенерации — из ambition-levels.yaml; в budgets.yaml — ссылка на таблицу, без копии
+    ptl = budgets.get('page_type_levels') or {}
+    rfile, _, rkey = str(ptl.get('ref') or '').partition('#')
+    check('budgets.yaml page_type_levels.ref ведёт в ambition-levels.yaml#defaults_by_page_type, копии таблицы нет',
+          os.path.normpath(os.path.join(DIR07, rfile)) == os.path.normpath(AMBITION) and rkey in (levels or {})
+          and 'default' not in ptl and any(level_defaults(levels)))
     rule = lead_rule(levels)
     check('правило лидогенерации — поля ambition-levels.yaml (доля, полосы цены, otherwise, no_data)',
           all(k in rule for k in ('page_type', 'hot_mobile_share_min', 'price_bands', 'otherwise', 'no_data')))
@@ -1526,7 +1539,6 @@ def selftest_sources(check, budgets, gates, prof, clean):
           resolve_profile('landing-lead-services', budgets, None, 0.7, 'mid', lv2)['level'] == rule['otherwise'])
     pr = [pt for pt, (lv, part) in level_defaults(levels).items() if part == 'proposed']
     check('тип раздела proposed разрешается с пометкой', bool(pr) and any('proposed' in x for x in resolve_profile(pr[0], budgets, levels=levels)['log']))
-    global AMBITION
     keep, AMBITION = AMBITION, os.path.join(DIR07, 'нет-такого-файла.yaml')
     try:
         p0 = resolve_profile('landing-lead-services@L1', budgets)
@@ -1555,6 +1567,11 @@ def selftest_sources(check, budgets, gates, prof, clean):
     check('тишина: тяжёлый замок, затем браузер, затем домены; удержанное обёрткой не берётся',
           lock_plan(('ai-media',), holds='', budgets=budgets) == [(c['lock'], None), ('browser', None), ('browser', 'ai-media')]
           and lock_plan((), holds=f"{c['lock']},browser", budgets=budgets) == [])
+    js = pause_label_re_js()
+    rx = re.compile(js[1:-2], re.I)
+    check('подписи паузы: одно выражение JS из PAUSE_LABELS — «Вращение», «Пауза», «Stop animation» да, «Купить» нет',
+          js.startswith('/(') and js.endswith(')/i') and all(rx.search(x) for x in ('Вращение', 'Пауза', 'Stop animation'))
+          and not rx.search('Купить'))
     # page_accept (контракт accept_<режим>.json)
     base_np = {'lcp': {'t': 900, 'tag': 'IMG', 'lazy': False, 'fp': 'high', 'size': 90000}, 'cls': 0.01, 'console': [],
                'first_screen_total_kb': 900.0, 'weight_measured': True, 'dom': {'imgs': [{'src': 'a/hero.avif', 'wh': True, 'above': True}]},

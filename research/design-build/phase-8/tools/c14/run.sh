@@ -3,9 +3,10 @@ set -u
 S=/home/mm/git/stit-core/business-strategy-template/.claude/skills/design-deep-dive
 PY=$HOME/.cache/design-deep-dive/venv/bin/python
 PAGE=$S/kb/blender/12-recipes/examples/01-hero-product
-O=/home/mm/.cache/tmp/claude-1000/-home-mm-git-stit-core-business-strategy-template/9704e581-2959-4b4d-8243-494959f577e7/scratchpad/chain/out
+SP=${C14_SP:-/home/mm/.cache/tmp/claude-1000/-home-mm-git-stit-core-business-strategy-template/b46ce4ca-e779-476f-a684-3ac3106d7ccb/scratchpad/c14}
+O=$SP/chain/out
 rm -rf $O; mkdir -p $O
-cd /tmp
+mkdir -p $SP/cwd; cd $SP/cwd
 $PY -m http.server 18765 --bind 127.0.0.1 --directory $PAGE >/dev/null 2>&1 &
 SRV=$!
 sleep 1

@@ -191,7 +191,8 @@ creative — `rhythm`, `composition` …; замечание creative в точ�
 приёмки — `page_accept.py --mobile --throttle`. Ограничения: сторонние КБ первого экрана — верхняя оценка (КБ домена за
 сессию); INP-сценарий после загрузки занижен; классы узлов контраста и распознавание призыва — эвристики, ключевой провал
 подтверждать кадром. Модуль для утилит замера: `resolve_profile()`, `profile_value()`, `conditions()`, `cdp_network()`,
-`mobile_device()`, `heavy_lock()` — одно место условий лаборатории и тишины машины.
+`mobile_device()`, `heavy_lock()` — одно место условий лаборатории и тишины машины; `PAUSE_LABELS` и `pause_label_re_js()` —
+подписи механизма паузы движения для `page_accept.py` и `motion_check.py`.
 
 ## `ab_plan.py` — план и проверка A/B (агент P, волна 2, 2026-09-24)
 
@@ -366,7 +367,7 @@ Id — словарь site: `page.page_type`, `slots[].slot`, `slots[].section` 
 | `plan_to_assets.py build <slug> [<surface>] [--page ID] [--out DIR] [--write]` | каркасы страниц поверхности со слоем страницы: в `$DDD_HOME/out/site/plan_to_assets/<slug>/` или `--out`; `--write` — в проект, только на пустое место |
 | `plan_to_assets.py check <slug> [<surface>] [--json]` | планы ассетов проекта: всё из `--check`, план ассетов у страницы с медиа- и 3D-слотами, `refs.asset_plan` плана страницы, утверждённое на неутверждённом (R-MAT-001) |
 | `plan_to_assets.py --spec-role FILE SLOT` | блок `role` спецификации ассета (`asset-spec.schema.json`): `page_type` словаря и проекция `page_class` |
-| `plan_to_assets.py --types [new\|all]` | каркас на каждый тип страницы словаря (new — типы v1) из плана-образца и его проверка |
+| `plan_to_assets.py --types [new\|all]` | каркас на каждый тип страницы словаря (new — типы v1) из плана-образца и его проверка; уровень страницы — умолчание типа по таблице `../../kb/creative/01-creative-direction/ambition-levels.yaml#defaults_by_page_type` (у типов раздела `proposed` — уровень плана-образца) |
 | `plan_to_assets.py --selftest` | примеры баз (пересборка байт в байт), посеянные дефекты, 3D, типы страниц, фикстура `asset-plan` сборщика `../tests/fixture_project.py` |
 
 Корень данных — `--repo`, переменная `DDD_REPO` или репозиторий скилла; код выхода 0 — нет `error`, 1 — есть, 2 — вызов или

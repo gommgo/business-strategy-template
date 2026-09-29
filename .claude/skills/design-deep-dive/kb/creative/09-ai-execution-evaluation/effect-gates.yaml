@@ -196,17 +196,16 @@ gates:
     site: "часть SG-WEIGHT-03 (JS первого экрана — все источники)"
     fix: "загрузчик [data-effect] с динамическим импортом за 200 px до экрана (G/03); тяжёлое — только в init() через прокладку"
   - id: EG-WEIGHT-02
-    name: "JS и wasm подачи: wasm-рантаймы 2D (dotLottie, Rive) за сессию, КБ"
+    name: "JS и wasm 3D (three, OGL, pixi, Spline, Unicorn, декодеры) за сессию, КБ"
     group: weight
     modes: [desk, mob]
-    metric: net.wasm_presentation_kb
+    metric: net.js_3d_session_kb
     op: "<="
-    threshold_ref: budgets.effects.wasm_presentation_kb_br
+    threshold_ref: budgets.effects.js_3d_kb_br
     severity: S
-    where: net.wasm_presentation
-    source: "A budgets.effects.wasm_presentation_kb_br — числа нет (null): порог даст пилот с Lottie или Rive; веса рантаймов — 07-stack-implementation/stack.yaml (dotLottie ≈ 379 КБ br, Rive 272–613); JS их загрузчиков — в EG-WEIGHT-01, wasm и JS 3D — EG-WEIGHT-11"
-    label: "[открыто: число — пилот]"
-    site: "слой budgets.yaml layers.wasm_first_screen_kb (отдельно от JS первого экрана); с публичного CDN — EG-WEIGHT-10"
+    source: "A budgets.effects.js_3d_kb_br (L0 0, L1 200/300, L2 250/350); blender A/03 (three core 109, R3F + drei + post 345 КБ br); wasm декодеров 3D (Draco, Basis, meshopt) — здесь же; wasm-рантаймы подачи 2D — EG-WEIGHT-11"
+    label: "[данные] [спорно] у blender"
+    site: "SG-WEIGHT-08: доля 3D — ворота blender, не страницы"
   - id: EG-WEIGHT-03
     name: "Число WebGL-контекстов"
     group: weight
@@ -299,16 +298,17 @@ gates:
     label: "[практика] G 07/02"
     site: "дополняет SG-WEIGHT-05/06 (сторонние домены и байты) и SG-LEGAL-07"
   - id: EG-WEIGHT-11
-    name: "JS и wasm 3D (three, OGL, pixi, Spline, Unicorn, декодеры) за сессию, КБ"
+    name: "wasm-рантаймы подачи 2D (dotLottie, Rive) за сессию, КБ"
     group: weight
     modes: [desk, mob]
-    metric: net.js_3d_session_kb
+    metric: net.wasm_presentation_kb
     op: "<="
-    threshold_ref: budgets.effects.js_3d_kb_br
+    threshold_ref: budgets.effects.wasm_presentation_kb_br
     severity: S
-    source: "A budgets.effects.js_3d_kb_br (L0 0, L1 200/300, L2 250/350); blender A/03 (three core 109, R3F + drei + post 345 КБ br); wasm декодеров 3D (Draco, Basis, meshopt) — здесь же"
-    label: "[данные] [спорно] у blender"
-    site: "SG-WEIGHT-08: доля 3D — ворота blender, не страницы"
+    where: net.wasm_presentation
+    source: "A budgets.effects.wasm_presentation_kb_br — числа нет (null): порог даст пилот с Lottie или Rive; веса рантаймов — 07-stack-implementation/stack.yaml (dotLottie ≈ 379 КБ br, Rive 272–613); JS их загрузчиков — в EG-WEIGHT-01, JS и wasm 3D — EG-WEIGHT-02"
+    label: "[открыто: число — пилот]"
+    site: "слой budgets.yaml layers.wasm_first_screen_kb (отдельно от JS первого экрана); с публичного CDN — EG-WEIGHT-10"
 
   # ------------------------------------------------------------------ A11Y — движение и доступность (WCAG 2.2.2, 2.3.1, 2.3.3)
   - id: EG-A11Y-01
@@ -429,8 +429,9 @@ gates:
     metric: derived.effects_libs_loaded
     op: "empty"
     severity: D
+    limits: {exempt_js_kb_br_max: 3}   # файл JS не больше — переключатель или загрузчик, не библиотека эффектов
     where: derived.effects_libs_loaded
-    source: "ворота G (2); G/03 (reduce — GSAP и шейдер не грузятся, ≈ 2 КБ br JS); E/02 (статический импорт — 115–133 КБ и в reduce). Исключения (v0.2): файл ≤ 3 КБ br (переключатель, загрузчик — F2 motion.js 1,1 КБ обязан грузиться и в reduce) и script[data-motion-toggle]; список — derived.effects_libs_exempt. Библиотека распознаётся по имени и по содержимому (__THREE__, GreenSock, pin-spacer, lenis-smooth, bodymovin…)"
+    source: "ворота G (2); G/03 (reduce — GSAP и шейдер не грузятся, ≈ 2 КБ br JS); E/02 (статический импорт — 115–133 КБ и в reduce). Исключения (v0.2): файл ≤ limits.exempt_js_kb_br_max КБ br (переключатель, загрузчик — F2 motion.js 1,1 КБ обязан грузиться и в reduce) и script[data-motion-toggle]; список — derived.effects_libs_exempt. Библиотека распознаётся по имени и по содержимому (__THREE__, GreenSock, pin-spacer, lenis-smooth, bodymovin…)"
     label: "[проверено: G/03]"
     site: "—"
   - id: EG-A11Y-12

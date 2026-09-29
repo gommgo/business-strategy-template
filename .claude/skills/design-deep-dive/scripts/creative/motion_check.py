@@ -26,8 +26,9 @@ Playwright (Chromium), ffmpeg, numpy, Pillow, PyYAML. VLM движения не 
 (budgets.yaml через page_gates.py; с --page-type — профиль <page_type>@<уровень> с исключениями, иначе уровень), метка
 <device> — устройство режима; `effects.yaml#<id>.<путь>` — запись каталога эффектов. Метрики страницы (LCP, TBT, вес,
 шрифты) в воротах эффектов — зеркало D: вердикт им ставят ворота страницы site.
-Отчёт: слой подачи по режимам (JS эффектов, JS 3D, wasm подачи, видео первого экрана) против одного порога уровня
-(EG-WEIGHT-01), картинка первого экрана — ссылкой на бюджет ассета ai-media.
+Отчёт: слой подачи по режимам (JS эффектов, JS и wasm 3D — EG-WEIGHT-02, wasm-рантаймы подачи 2D — EG-WEIGHT-11, видео
+первого экрана) против одного порога уровня (EG-WEIGHT-01), картинка первого экрана — ссылкой на бюджет ассета ai-media.
+Подписи механизма паузы (кнопка, переключатель, выбор) — список page_gates.PAUSE_LABELS, общий с page_accept.py.
 
 Использование:
   motion_check.py ЦЕЛЬ --level L0|L1|L2 [--page-type landing-saas] [--out DIR] [--modes desk,mob,rm,nojs,nogl]
@@ -97,7 +98,6 @@ WASM_3D_RE = THREE_D_RE + r"|draco|basis|meshopt|ktx"   # wasm 3D-рантайм
 # кода, который их зовёт (загрузчик с путём «lenis.min.js» библиотекой не считается)
 SNIFF_3D = re.compile(rb"__THREE__|@splinetool|UnicornStudio|BABYLON\.Engine|pixi\.js - v|PIXI\.Application|@react-three/fiber")
 SNIFF_FX = re.compile(rb"GreenSock|pin-spacer|lenis-smooth|data-lenis-prevent|bodymovin|@rive-app|rive\.wasm|has-scroll-smooth|@barba/core|anime\.js v")
-SMALL_JS_KB = 3.0   # EG-A11Y-11: переключатель и загрузчик (G/03 ≈ 2 КБ br) — не «библиотека эффектов» в reduce
 MOTION_VALUES = ("reduced", "full", "paused")   # значения data-motion на корне (creative 05-motion/01 §4.4)
 for _e, _t in {".woff2": "font/woff2", ".avif": "image/avif", ".webm": "video/webm", ".mp4": "video/mp4", ".mjs": "text/javascript",
                ".js": "text/javascript", ".json": "application/json", ".webp": "image/webp", ".svg": "image/svg+xml", ".glb": "model/gltf-binary",
@@ -261,7 +261,7 @@ PAGE_JS = r"""
     area: Math.round(r.width * r.height), op: Math.round(effOp(h1) * 100) / 100, first: r.top + scrollY < IH}; }
   const cta = Array.from(document.querySelectorAll('a, button')).filter(el => { const r = el.getBoundingClientRect(); const t = (el.innerText || '').trim();
       return t.length >= 2 && r.top + scrollY < IH && r.width >= 40 && r.height >= 20 && effOp(el) > 0.5 && getComputedStyle(el).visibility !== 'hidden'; }).length;
-  const ctrlRe = /(пауз|останов|стоп|выключ|движени|анимац|вращени|pause|stop|play|resume|motion|animation|rotat)/i; const txt = (el) => (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
+  const ctrlRe = __PAUSE_RE__; const txt = (el) => (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
   const cssPath = (el) => { const esc = (s) => (window.CSS && CSS.escape) ? CSS.escape(s) : s; const parts = []; let n = el;
     while (n && n.nodeType === 1 && n !== document.documentElement) {
       if (n.id && document.querySelectorAll('#' + esc(n.id)).length === 1) { parts.unshift('#' + esc(n.id)); return parts.join(' > '); }
@@ -321,7 +321,7 @@ PAGE_JS = r"""
   return {textAll, hiddenAll, textBelow, hiddenBelow, hidEx, h1: h1i, cta, pause, toggle, libs, vids, canv, glCtx: M.gl ? M.gl.ctx : 0, glCalls: M.gl ? M.gl.calls : 0,
           scrollW: html.scrollWidth, innerW: IW, title: document.title, motion_ctrl: mctrl, toggle_scripts: toggleScripts};
 }
-"""
+""".replace("__PAUSE_RE__", PG.pause_label_re_js())   # подписи механизма паузы — page_gates.PAUSE_LABELS
 
 MARQUEE_JS = r"""
 async () => { const IW = innerWidth, IH = innerHeight; const cands = [];
@@ -1971,9 +1971,10 @@ def spec_rows(spec_res, mode):
 # 7. Отчёт
 # =====================================================================================================================
 def presentation_layer(results, level, levels, gates_doc):
-    """Слой подачи по режимам (десктоп, телефон, reduce): JS эффектов и движения в первом экране и за сессию, JS 3D, wasm
-    подачи, видео первого экрана. Порог один — EG-WEIGHT-01 уровня (reduce — с порогом десктопа); вес страницы целиком —
-    ворота страницы site. Картинка первого экрана — бюджет ассета ai-media, здесь ссылкой."""
+    """Слой подачи по режимам (десктоп, телефон, reduce): JS эффектов и движения в первом экране и за сессию, JS и wasm 3D
+    (EG-WEIGHT-02), wasm-рантаймы подачи 2D (EG-WEIGHT-11), видео первого экрана. Порог один — EG-WEIGHT-01 уровня (reduce —
+    с порогом десктопа); вес страницы целиком — ворота страницы site. Картинка первого экрана — бюджет ассета ai-media,
+    здесь ссылкой."""
     row = next((g for g in (gates_doc or {}).get("gates") or [] if g.get("id") == "EG-WEIGHT-01"), None)
     out = {"modes": {}, "threshold_row": "EG-WEIGHT-01" if row else None}
     for mode in ("desk", "mob", "rm"):
@@ -2029,7 +2030,7 @@ def render(target, level, results, rows, srows, gates_doc, pres=None):
             L.append(f"| {s['section']}:{s['station']} | {m} | {dash(s['tip_offset_px'])} | {dash(s.get('tip_moment'))} | {dash(s['filled'])} / {dash(s['filled_expected'])} |")
     if pres and pres.get("modes"):
         L += ["", "## Слой подачи по режимам (порог — EG-WEIGHT-01 уровня; вес страницы — ворота site)", "",
-              "| Режим | JS эффектов, первый экран, КБ | JS эффектов, сессия | JS 3D, сессия | wasm подачи | видео первого экрана | порог JS эффектов |",
+              "| Режим | JS эффектов, первый экран, КБ | JS эффектов, сессия | JS и wasm 3D, сессия (EG-WEIGHT-02) | wasm-рантаймы подачи (EG-WEIGHT-11) | видео первого экрана | порог JS эффектов |",
               "|---|---|---|---|---|---|---|"]
         for m, x in pres["modes"].items():
             L.append(f"| {m} ({x['device']}) | {x['js_effects_first_kb']} | {x['js_effects_session_kb']} | {x['js_3d_session_kb']} | "
@@ -2207,6 +2208,7 @@ def selftest():
     sm = net.summary()
     check("сеть: CDN найден, js эффектов 25,4 КБ, видео первого экрана 488,3 КБ", (len(sm["cdn"]), sm["js_effects_first_kb"], sm["video_first_kb"]), (1, 25.4, 488.3))
     # ссылки порогов: уровень, профиль site, каталог эффектов; поле без числа — N/A
+    import copy
     import yaml as _y
     gdoc = _y.safe_load(open(GATES_DEFAULT, encoding="utf-8"))
     use_gate_limits(gdoc)
@@ -2219,9 +2221,30 @@ def selftest():
     check("EG-A11Y-17 → motion_hints L1: десктоп 2, телефон 1",
           (threshold_for(G["EG-A11Y-17"], "L1", "desktop", levels), threshold_for(G["EG-A11Y-17"], "L1", "mobile", levels)), (2, 1))
     check("EG-WEIGHT-04 → budgets.effects.video_first_screen_kb L2 десктоп 2 500", threshold_for(G["EG-WEIGHT-04"], "L2", "desktop", levels), 2500)
-    check("EG-WEIGHT-02 → wasm подачи: поле есть, числа нет → N/A",
-          (resolve_ref(G["EG-WEIGHT-02"]["threshold_ref"], "L1", "mobile", levels), evaluate_gates({"gates": [G["EG-WEIGHT-02"]]},
+    check("EG-WEIGHT-02 → JS и wasm 3D: budgets.effects.js_3d_kb_br L1 телефон 200, десктоп 300; 320 КБ на десктопе → FAIL",
+          (threshold_for(G["EG-WEIGHT-02"], "L1", "mobile", levels), threshold_for(G["EG-WEIGHT-02"], "L1", "desktop", levels),
+           evaluate_gates({"gates": [G["EG-WEIGHT-02"]]}, {"desk": {"net": {"js_3d_session_kb": 320.0}}}, "L1", levels)[0]["verdict"]),
+          (200, 300, "FAIL"))
+    check("EG-WEIGHT-11 → wasm-рантаймы подачи: поле есть, числа нет → N/A",
+          (resolve_ref(G["EG-WEIGHT-11"]["threshold_ref"], "L1", "mobile", levels), evaluate_gates({"gates": [G["EG-WEIGHT-11"]]},
            {"desk": {"net": {"wasm_presentation_kb": 400.0}}}, "L1", levels)[0]["verdict"]), ((True, None), "N/A"))
+    n3 = Net()
+    n3.req = {"1": {"url": "https://x.test/draco_decoder.wasm", "type": "Other", "mime": "application/wasm", "by": {"first": 2048}, "chunks": 2048},
+              "2": {"url": "https://x.test/rive.wasm", "type": "Other", "mime": "application/wasm", "by": {"session": 4096}, "chunks": 4096}}
+    s3 = n3.summary()
+    check("wasm: декодер 3D (draco) — в метрику EG-WEIGHT-02, рантайм подачи (rive.wasm) — в метрику EG-WEIGHT-11",
+          (s3["js_3d_session_kb"], s3["wasm_presentation_kb"]), (2.0, 4.0))
+    g11 = copy.deepcopy(gdoc)
+    next(x for x in g11["gates"] if x["id"] == "EG-A11Y-11")["limits"]["exempt_js_kb_br_max"] = 1
+    use_gate_limits(g11)
+    try:
+        dr1 = derive({"net": {"effects_js": ["motion.js 1.1", "gsap.min.js 27.3"]}}, "rm")["derived"]["effects_libs_loaded"]
+    finally:
+        use_gate_limits(gdoc)
+    check("EG-A11Y-11: предел маленького JS — limits строки (1 КБ в копии → motion.js 1,1 КБ — библиотека)",
+          dr1, ["motion.js 1.1", "gsap.min.js 27.3"])
+    check("подписи механизма паузы — page_gates.PAUSE_LABELS: выражение подставлено в PAGE_JS",
+          (PG.pause_label_re_js() in PAGE_JS, "__PAUSE_RE__" in PAGE_JS), (True, False))
     # NU-31: атрибут data-motion — только reduced | full | paused
     tt_ok2 = {"control": True, "option": "Меньше", "before": {"pct_1s": 3.9}, "after": {"pct_1s": 0.0, "webgl_calls": 0, "infinite": 0, "videos_playing": 0}}
     check("переключатель: data-motion=reduced → работает; data-motion=reduce → вне контракта",
@@ -2370,9 +2393,10 @@ def derive(r, mode):
     d["focus_invisible"] = kb.get("invisible")
     d["focus_no_ring"] = kb.get("no_ring_guess")
     net = r.get("net") or {}
-    # переключатель и загрузчик обязаны грузиться и в reduce — JS ≤ 3 КБ br и script[data-motion-toggle] не
-    # «библиотека эффектов» (EG-A11Y-11); список исключённых — effects_libs_exempt
+    # переключатель и загрузчик обязаны грузиться и в reduce — JS не больше limits.exempt_js_kb_br_max строки
+    # EG-A11Y-11 и script[data-motion-toggle] не «библиотека эффектов»; список исключённых — effects_libs_exempt
     tscripts = set((pe.get("toggle_scripts") or []) + (pf.get("toggle_scripts") or []))
+    small_kb = float(LIM("EG-A11Y-11", "exempt_js_kb_br_max"))
     libs, exempt = [], []
     for x in net.get("effects_js") or []:
         nm, _, kb = str(x).rpartition(" ")
@@ -2380,7 +2404,7 @@ def derive(r, mode):
             kbv = float(kb)
         except ValueError:
             nm, kbv = str(x), None
-        (exempt if ((kbv is not None and kbv <= SMALL_JS_KB) or nm in tscripts) else libs).append(x)
+        (exempt if ((kbv is not None and kbv <= small_kb) or nm in tscripts) else libs).append(x)
     d["effects_libs_loaded"] = libs
     d["effects_libs_exempt"] = exempt
     # тест переключателя (desk — «Меньше» стоит; rm — «Полное» движется)
