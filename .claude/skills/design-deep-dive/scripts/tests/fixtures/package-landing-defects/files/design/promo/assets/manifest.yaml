@@ -1,0 +1,13 @@
+# Манифест ассетов поверхности promo — иллюстрация фикстуры package-landing-defects: посеянный дефект R-MAT-008 —
+# файл сгенерированного логотипа лежит, а план ассетов страницы spasibo ещё draft (генерация — только после
+# status: approved и approval плана).
+example: true
+assets:
+  - slot: header-logo
+    file: logo.svg
+    role: informational
+    license: права у заказчика по договору (демо)
+    origin: генерация по плану ассетов spasibo; исходник — у дизайнера (демо)
+    ai: true
+    sha256: e9e6237e1b1a7c9d88fac3ed78d7ebb84bff7e45496995256b1ce7cc7fbc40b3
+    status: draft

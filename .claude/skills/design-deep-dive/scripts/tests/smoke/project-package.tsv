@@ -1,1 +1,3 @@
 path	kind	smoke	xfail
+scripts/project/ready.py	utility	help; run: --selftest	
+scripts/project/design_audit.py	utility	help; run: --selftest	

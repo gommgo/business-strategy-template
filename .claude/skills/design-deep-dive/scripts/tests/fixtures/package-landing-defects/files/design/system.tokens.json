@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
+  "$description": "Иллюстрация: токены ДС лендинга «Отвес» фикстуры package-landing-defects — посеянный дефект: алиас color.text.default ведёт в несуществующий токен primitive.color.neutral.950 (R-STRUCT-006).",
+  "example": true,
+  "primitive": {
+    "color": {
+      "$type": "color",
+      "neutral": {
+        "0": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "hex": "#ffffff"
+          }
+        },
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0588,
+              0.0902,
+              0.1647
+            ],
+            "hex": "#0f172a"
+          }
+        }
+      }
+    }
+  },
+  "color": {
+    "$type": "color",
+    "bg": {
+      "canvas": {
+        "$value": "{primitive.color.neutral.0}"
+      }
+    },
+    "text": {
+      "default": {
+        "$value": "{primitive.color.neutral.950}"
+      }
+    }
+  },
+  "space": {
+    "$type": "dimension",
+    "4": {
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      }
+    },
+    "8": {
+      "$value": {
+        "value": 32,
+        "unit": "px"
+      }
+    }
+  },
+  "breakpoint": {
+    "$type": "dimension",
+    "md": {
+      "$value": {
+        "value": 40,
+        "unit": "rem"
+      }
+    },
+    "lg": {
+      "$value": {
+        "value": 60,
+        "unit": "rem"
+      }
+    }
+  },
+  "size": {
+    "$type": "dimension",
+    "panel": {
+      "sidebar": {
+        "$value": {
+          "value": 16,
+          "unit": "rem"
+        }
+      }
+    }
+  }
+}

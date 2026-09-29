@@ -1,0 +1,51 @@
+# ready.yaml — готовность поверхности promo к сборке для репозитория кода.
+# Производный файл: собирает `scripts/project/ready.py build otves-remont-nn promo` из файлов стратегии; руками не правится.
+# Форма — docs/projects/_template/design/_template/ready.yaml.
+
+example: true   # пометка иллюстрации фикстуры: манифест собран на чистой основе package-landing
+surface: promo
+type: web
+web_kind: landing
+consumer: <org>/site
+status: not-ready
+
+sources:
+  - {path: design/brand.yaml, status: none, sha256: c5f1c1f718ff90d66caf785c5d75fdb671ba3baa4345a2f0da3117463053e633}
+  - {path: design/promo/art-direction.json, status: proposed, sha256: 6b5e670fa0f77d21498aaae8f1bf55348155e554cef9ae50dac090de90ae5245}
+  - {path: design/promo/motion/home.motion-spec.yaml, status: proposed, sha256: e5482fb41559a60870e3a300abca7fbf45d191057b68463a683371cee15e8033}
+  - {path: design/system.yaml, status: approved, sha256: c414ca2e032febbd863cba39ec74aa6cbc4e6601e702fa8fca70037fca899091}
+  - {path: facts.yaml, status: draft, sha256: 83043b89823c201309b5e3a8f6883e32c4816a24624d7d3f701913fdd2a1a610}
+  - {path: site/promo/copy/spasibo.yaml, status: draft, sha256: 0ac5e73838831ccbda68fa349f2a946ce3d73aab2078bb5e6397214e4955060d}
+  - {path: site/promo/plans/home.yaml, status: proposed, sha256: 5584feff2c6b6716f4c364ef46e8373eb4039bffe91064efb2f46f95b1651943}
+  - {path: site/promo/plans/spasibo.yaml, status: approved, sha256: 44b0cfe94c6a1200e64b7bee9e08367b663b21e196203b75d723443100aabb8e}
+  - {path: site/promo/site-brief.yaml, status: proposed, sha256: 087ff8becac7fd526d830ac0c7d7cc81b26a5f8e02a8a441a74b45e50c2082af}
+  - {path: voice.yaml, status: draft, sha256: b5da5e0a52608d3c9ccf51e506f61cd8a3b20b13419d3e25b2e597a95b3eb029}
+
+units:
+  - id: home
+    ready: false
+    composition: proposed
+    texts: none
+    mockup: none
+    budget_profile: landing-lead-services@L1
+    gate_exceptions: []
+    after_build: []
+    open: ['демо-факт: case-two-room-47-days', 'демо-факт: company-since-2014', 'демо-факт: estimate-free', 'демо-факт: foreman-lapin', 'демо-факт: guarantee-3-years', 'демо-факт: price-from-per-m2', 'демо-факт: promo-october-10', 'демо-факт: rating-yandex-maps', 'демо-факт: review-anna-k']
+  - id: spasibo
+    ready: false
+    composition: approved
+    texts: draft
+    mockup: none
+    budget_profile: thank-you-page@L0
+    gate_exceptions: []
+    after_build: []
+    open: ['демо-факт: company-since-2014']
+
+perf: plans
+frontend_design: {surface: landing, ambition: L1, motion_cap: expressive, app_screens: —}
+blockers:
+  - 'home: план proposed'
+  - 'home: текстов нет'
+  - 'home: макета нет: строки в REVIEW.md и решения «макет пропущен» нет'
+  - 'spasibo: тексты draft'
+  - 'spasibo: макета нет: строки в REVIEW.md и решения «макет пропущен» нет'

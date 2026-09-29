@@ -1,0 +1,140 @@
+# Бриф холста — office (web рода app), этап mockup: проекция брифа на вид и слоя проекта; блок app — ссылки на разделы contract.md.
+# Производный файл: собирает canvas_input; руками не правится.
+example: true
+project:
+  slug: otves-office
+  surface: office
+  type: web
+  web_kind: app
+  stage: mockup
+product:
+  name: Отвес
+  target_user: manager (sovereign), surveyor (mixed)
+  screens:
+  - not-found
+  - plan-dashboard
+  - request-card
+  - request-new
+  - requests-list
+  locale: ru
+  platforms:
+  - web
+  viewport_primary: 1440x900
+design_system:
+  artifact:
+    url: https://claude.ai/artifact/demo-otves-office-design-system
+    release: демо · 1
+  tokens:
+    css: docs/projects/otves-office/design/system.tokens.css
+    rule: значения на артборде — литералы токенов ДС; имена — CSS-переменные system.tokens.css (путь токена через
+      дефис)
+  knobs:
+    theme:
+      themes:
+      - light
+      - dark
+      default: light
+      switcher: true
+  density:
+    default: compact
+    switch: false
+    why: менеджер весь день в таблице заявок; замерщику хватает compact на карточке
+  bans:
+  - tell: accent-word-headline
+    what: выделенное слово в заголовке — курсив, цвет, градиент
+    allow_key: accent-word
+  - tell: overused-display-font
+    what: гарнитура по прилагательному брифа или по умолчанию
+    allow_key: serif
+  - tell: caps-eyebrow
+    what: надзаголовок капсом над заголовками секций
+    allow_key: eyebrow
+  - tell: caps-share
+    what: мелкий разреженный капс у многих узлов
+    allow_key: caps
+  - tell: gradient-text
+    what: градиентная заливка заголовка
+    allow_key: gradient
+  - tell: three-equal-cards
+    what: три одинаковые карточки в ряд вместо продукта
+    allow_key: cards
+  - tell: meta-dots
+    what: мета-строки через «·» и лейблы «СЛОВО / 04»
+    allow_key: dots
+  - tell: arrow-in-button
+    what: стрелка «→» в тексте кнопки или ссылки
+    allow_key: arrows
+  - tell: mono-captions
+    what: моноширинный шрифт у мелких подписей без данных
+    allow_key: mono
+  - tell: numbered-labels
+    what: нумерация 01 / 02 / 03 без последовательности
+    allow_key: numbered
+  - tell: glassmorphism-panels
+    what: стекло на карточках и панелях
+    allow_key: glass
+  - tell: low-contrast-text
+    what: подписи и текст на тёплом фоне ниже порога контраста
+  - tell: stock-and-hotlink
+    what: сток, сервисы-заглушки и хотлинк картинок в макете
+  - tell: invented-numbers
+    what: числа-доказательства без факта
+  - tell: filler-text
+    what: рыба и заглушки — lorem, «John Doe», «Feature 1»
+  - tell: font-size-count
+    what: шкала кеглей без ролей
+  - tell: header-height
+    what: высокая шапка
+  - tell: off-scale-spacing
+    what: отступы вне шкалы и один отступ везде
+  - tell: neon-glow
+    what: неоновое свечение и цветные тени
+  - tell: near-black-literal
+    what: почти-чёрный литерал вместо нейтрали шкалы
+  - tell: hover-lift-all
+    what: 'подъём при наведении на всём и `transition: all`'
+  - tell: emoji-sparkle-ai
+    what: эмодзи вместо иконок и «искра ИИ»
+  - tell: purple-neon-band
+    what: пурпур и неон в полосе 270–320° без бренда
+  - tell: section-fade-up
+    what: одинаковое появление на каждом блоке
+  - tell: layout-property-animation
+    what: анимация свойств раскладки
+  - what: градиенты в фоне и кнопках
+    from: app-brief
+  - what: тень у карточек на странице — карточка держится на границе
+    from: app-brief
+app:
+  roles: contract.md § Контекст продукта
+  objects: contract.md § Объектная модель
+  screens: contract.md § Карта экранов
+  shell:
+    sidebar: 240
+    inspector: false
+    content_max: 1280
+  fixtures_source: demo-data.json
+  states: contract.md § Обязательные состояния
+decisions:
+  mobile: responsive
+  mobile_scope: отметка проведённого замера с телефона — карточка заявки
+  variants: 1
+  iterations_max: 3
+  form: прототип
+  prototype_paths: список заявок → карточка заявки → назначить замер
+build:
+  viewports:
+    artboards:
+    - 1440
+    - 390
+    widths:
+    - 1440
+    - 1280
+    - 1024
+    - 768
+    - 390
+    - 360
+    overflow_only: 320
+  perf:
+    field: p75 и живые замеры (RUM)
+    lab: лабораторных порогов у экранов нет

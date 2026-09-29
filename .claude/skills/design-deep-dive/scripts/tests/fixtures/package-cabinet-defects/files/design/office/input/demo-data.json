@@ -1,0 +1,1896 @@
+{
+ "example": true,
+ "demo_data_version": 1,
+ "note": "демо-набор — пример для макета, а не данные продукта: макет на нём допустим, публикация — нет",
+ "project": "otves-office",
+ "surface": "office",
+ "seed": "otves-office",
+ "anchor": "2026-10-01",
+ "window": 50,
+ "sources": [
+  "docs/projects/otves-office/object.md",
+  "docs/projects/otves-office/interface/office/data-items.md",
+  "docs/projects/otves-office/screens/office/blocks/requests-list/index.md",
+  "docs/projects/otves-office/screens/office/texts.md"
+ ],
+ "norms": "scripts/project/data/demo.yaml",
+ "objects": {
+  "request": {
+   "example": true,
+   "name": "Заявка на замер",
+   "description": "Просьба клиента приехать и снять размеры квартиры до сметы",
+   "aliases": [
+    "лид",
+    "обращение"
+   ],
+   "statuses": [
+    {
+     "slug": "new",
+     "name": "новая"
+    },
+    {
+     "slug": "scheduled",
+     "name": "замер назначен"
+    },
+    {
+     "slug": "measured",
+     "name": "замер проведён"
+    },
+    {
+     "slug": "declined",
+     "name": "отказ"
+    }
+   ],
+   "examples": [
+    "З-0412 — Сормово, двухкомнатная",
+    "З-0415 — Верхние Печёры, санузел"
+   ],
+   "attributes": [
+    {
+     "slug": "number",
+     "name": "Номер заявки",
+     "rank": 1,
+     "type": "text",
+     "required": true,
+     "length": [
+      6,
+      6,
+      8
+     ],
+     "values": null
+    },
+    {
+     "slug": "client",
+     "name": "Клиент",
+     "rank": 2,
+     "type": "text",
+     "required": true,
+     "length": [
+      2,
+      18,
+      60
+     ],
+     "values": null
+    },
+    {
+     "slug": "address",
+     "name": "Адрес объекта",
+     "rank": 3,
+     "type": "text",
+     "required": true,
+     "length": [
+      10,
+      40,
+      120
+     ],
+     "values": null
+    },
+    {
+     "slug": "phone",
+     "name": "Телефон",
+     "rank": 4,
+     "type": "text",
+     "required": true,
+     "length": [
+      11,
+      16,
+      18
+     ],
+     "values": null
+    },
+    {
+     "slug": "visit-date",
+     "name": "Дата замера",
+     "rank": 5,
+     "type": "datetime",
+     "required": false,
+     "length": null,
+     "values": null
+    },
+    {
+     "slug": "status",
+     "name": "Статус",
+     "rank": 6,
+     "type": "enum",
+     "required": true,
+     "length": null,
+     "values": [
+      "новая",
+      "замер назначен",
+      "замер проведён",
+      "отказ"
+     ]
+    },
+    {
+     "slug": "surveyor",
+     "name": "Замерщик",
+     "rank": 7,
+     "type": "text",
+     "required": false,
+     "length": [
+      5,
+      16,
+      40
+     ],
+     "values": null
+    },
+    {
+     "slug": "budget",
+     "name": "Бюджет ремонта",
+     "rank": 8,
+     "type": "money",
+     "required": false,
+     "length": null,
+     "values": null
+    },
+    {
+     "slug": "urgent",
+     "name": "Срочно",
+     "rank": 9,
+     "type": "bool",
+     "required": false,
+     "length": null,
+     "values": null
+    },
+    {
+     "slug": "rooms",
+     "name": "Помещения",
+     "rank": 10,
+     "type": "enum[]",
+     "required": false,
+     "length": null,
+     "values": [
+      "кухня",
+      "санузел",
+      "комната",
+      "коридор"
+     ]
+    },
+    {
+     "slug": "photo",
+     "name": "Фото объекта",
+     "rank": 11,
+     "type": "file",
+     "required": false,
+     "length": null,
+     "values": null
+    }
+   ],
+   "records": [
+    {
+     "example": true,
+     "_id": "request-1",
+     "number": "З-0412",
+     "client": "Клиент 1 Верхние Печёры санузел",
+     "address": "Адрес объекта 1 сметы Сормово двухкомнатная Верхние Печёры санузел",
+     "phone": "+7 966 464-30-21",
+     "visit-date": "2027-01-24T16:30:00+03:00",
+     "status": "отказ",
+     "surveyor": "Замерщик 1",
+     "budget": 6026,
+     "urgent": null,
+     "rooms": [
+      "комната"
+     ],
+     "photo": "фото-объекта-1.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-2",
+     "number": "З-0415",
+     "client": "Клиент 2 Печёры санузел",
+     "address": "Адрес объекта 2",
+     "phone": "+7 965 545-75-79",
+     "visit-date": null,
+     "status": "отказ",
+     "surveyor": "Замерщик 2 снять размеры",
+     "budget": 9635,
+     "urgent": true,
+     "rooms": null,
+     "photo": "фото-объекта-2.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-3",
+     "number": "З-9318",
+     "client": "Клиент 3",
+     "address": "Адрес объекта 3 двухкомнатная Верхние Печёры",
+     "phone": "+7 925 617-94-20",
+     "visit-date": "2027-06-30T16:30:00+03:00",
+     "status": "отказ",
+     "surveyor": null,
+     "budget": 8175,
+     "urgent": false,
+     "rooms": [
+      "кухня",
+      "санузел"
+     ],
+     "photo": null
+    },
+    {
+     "example": true,
+     "_id": "request-4",
+     "number": "З-8850",
+     "client": "Клиент 4 Сормово",
+     "address": "Адрес объекта 4 двухкомнатная Верхние Печёры санузел Просьба клиента приехать",
+     "phone": "+7 999 123-84-53",
+     "visit-date": "2025-12-17T16:00:00+03:00",
+     "status": "замер назначен",
+     "surveyor": "Замерщик 4",
+     "budget": 9019,
+     "urgent": null,
+     "rooms": [
+      "кухня"
+     ],
+     "photo": "фото-объекта-4.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-5",
+     "number": "З-6679",
+     "client": "Клиент 5 сметы Сормово двухкомнатная",
+     "address": "Адрес объекта 5 двухкомнатная Верхние Печёры санузел",
+     "phone": "+7 900 297-76-26",
+     "visit-date": "2026-02-27T10:00:00+03:00",
+     "status": "новая",
+     "surveyor": "Замерщик 5 сметы Сормово",
+     "budget": 13079,
+     "urgent": null,
+     "rooms": [
+      "санузел"
+     ],
+     "photo": null
+    },
+    {
+     "example": true,
+     "_id": "request-6",
+     "number": "З-8958",
+     "client": "Клиент 6 Просьба клиента приехать снять размеры квартиры",
+     "address": "Адрес объекта 6 санузел Просьба клиента",
+     "phone": "+7 952 799-55-28",
+     "visit-date": "2026-06-28T13:30:00+03:00",
+     "status": "новая",
+     "surveyor": "Замерщик 6",
+     "budget": 11308,
+     "urgent": false,
+     "rooms": [
+      "кухня",
+      "санузел",
+      "комната"
+     ],
+     "photo": "фото-объекта-6.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-7",
+     "number": "З-2800",
+     "client": "Клиент 7",
+     "address": "Адрес объекта 7 Просьба клиента",
+     "phone": "+7 988 082-35-44",
+     "visit-date": "2026-12-10T16:00:00+03:00",
+     "status": "новая",
+     "surveyor": "Замерщик 7 квартиры",
+     "budget": null,
+     "urgent": null,
+     "rooms": [
+      "комната"
+     ],
+     "photo": "фото-объекта-7.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-8",
+     "number": "З-0815",
+     "client": "Клиент 8 снять",
+     "address": "Адрес объекта 8 сметы Сормово двухкомнатная Верхние Печёры",
+     "phone": "+7 970 278-46-52",
+     "visit-date": "2026-12-17T16:30:00+03:00",
+     "status": "замер проведён",
+     "surveyor": "Замерщик 8",
+     "budget": 14652,
+     "urgent": true,
+     "rooms": [
+      "санузел",
+      "комната",
+      "коридор"
+     ],
+     "photo": "фото-объекта-8.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-9",
+     "number": "З-1888",
+     "client": "Клиент 9 Сормово",
+     "address": "Адрес объекта 9",
+     "phone": "+7 912 053-88-81",
+     "visit-date": null,
+     "status": "новая",
+     "surveyor": "Замерщик 9 Просьба",
+     "budget": 12123,
+     "urgent": null,
+     "rooms": [
+      "коридор"
+     ],
+     "photo": "фото-объекта-9.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-10",
+     "number": "З-6936",
+     "client": "Клиент 10 санузел",
+     "address": "Адрес объекта 10 Печёры санузел Просьба",
+     "phone": "+7 961 483-53-00",
+     "visit-date": "2026-11-17T13:30:00+03:00",
+     "status": "замер проведён",
+     "surveyor": "Замерщик 10 приехать снять",
+     "budget": 13378,
+     "urgent": false,
+     "rooms": [
+      "санузел",
+      "комната"
+     ],
+     "photo": "фото-объекта-10.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-11",
+     "number": "З-3951",
+     "client": "Клиент 11",
+     "address": "Адрес объекта 11 двухкомнатная",
+     "phone": "+7 965 079-01-22",
+     "visit-date": null,
+     "status": "замер назначен",
+     "surveyor": "Замерщик 11",
+     "budget": 7800,
+     "urgent": false,
+     "rooms": [
+      "санузел",
+      "комната",
+      "коридор"
+     ],
+     "photo": "фото-объекта-11.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-12",
+     "number": "З-8379",
+     "client": "Клиент 12",
+     "address": "Адрес объекта 12 приехать снять размеры квартиры сметы",
+     "phone": "+7 910 879-96-73",
+     "visit-date": "2026-01-13T13:00:00+03:00",
+     "status": "замер проведён",
+     "surveyor": "Замерщик 12 Печёры санузел",
+     "budget": 11253,
+     "urgent": false,
+     "rooms": [
+      "кухня",
+      "комната",
+      "коридор"
+     ],
+     "photo": null
+    },
+    {
+     "example": true,
+     "_id": "request-13",
+     "number": "З-4988",
+     "client": "Клиент 13",
+     "address": "Адрес объекта 13 клиента приехать снять размеры",
+     "phone": "+7 963 415-21-86",
+     "visit-date": "2025-10-29T11:00:00+03:00",
+     "status": "новая",
+     "surveyor": "Замерщик 13",
+     "budget": 13627,
+     "urgent": false,
+     "rooms": [
+      "санузел",
+      "комната"
+     ],
+     "photo": "фото-объекта-13.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-14",
+     "number": "З-4383",
+     "client": "Клиент 14 двухкомнатная",
+     "address": "Адрес объекта 14 Печёры санузел Просьба клиента приехать снять размеры квартиры сметы Сормово",
+     "phone": "+7 978 808-55-77",
+     "visit-date": "2027-08-31T17:00:00+03:00",
+     "status": "отказ",
+     "surveyor": "Замерщик 14 снять",
+     "budget": 14709,
+     "urgent": null,
+     "rooms": [
+      "комната"
+     ],
+     "photo": "фото-объекта-14.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-15",
+     "number": "З-2465",
+     "client": "Клиент 15 квартиры",
+     "address": "Адрес объекта 15 квартиры сметы Сормово",
+     "phone": "+7 962 323-59-59",
+     "visit-date": "2026-06-14T12:00:00+03:00",
+     "status": "новая",
+     "surveyor": null,
+     "budget": 10494,
+     "urgent": true,
+     "rooms": [
+      "санузел",
+      "коридор"
+     ],
+     "photo": "фото-объекта-15.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-16",
+     "number": "З-4208",
+     "client": "Клиент 16",
+     "address": "Адрес объекта 16 двухкомнатная Верхние Печёры санузел Просьба клиента приехать снять размеры",
+     "phone": "+7 912 724-74-47",
+     "visit-date": "2026-01-10T09:00:00+03:00",
+     "status": "новая",
+     "surveyor": null,
+     "budget": 8909,
+     "urgent": true,
+     "rooms": null,
+     "photo": "фото-объекта-16.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-17",
+     "number": "З-8040",
+     "client": "Клиент 17 клиента приехать снять",
+     "address": "Адрес объекта 17 размеры",
+     "phone": "+7 982 387-41-75",
+     "visit-date": "2026-05-31T10:00:00+03:00",
+     "status": "замер проведён",
+     "surveyor": "Замерщик 17",
+     "budget": 9488,
+     "urgent": true,
+     "rooms": [
+      "санузел",
+      "коридор"
+     ],
+     "photo": "фото-объекта-17.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-18",
+     "number": "З-3412",
+     "client": "Клиент 18 сметы Сормово",
+     "address": "Адрес объекта 18",
+     "phone": "+7 927 980-69-60",
+     "visit-date": null,
+     "status": "замер назначен",
+     "surveyor": "Замерщик 18",
+     "budget": 7974,
+     "urgent": true,
+     "rooms": [
+      "комната"
+     ],
+     "photo": "фото-объекта-18.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-19",
+     "number": "З-9609",
+     "client": "Клиент 19",
+     "address": "Адрес объекта 19 санузел Просьба клиента приехать снять размеры",
+     "phone": "+7 999 300-83-71",
+     "visit-date": null,
+     "status": "замер проведён",
+     "surveyor": "Замерщик 19",
+     "budget": 6696,
+     "urgent": null,
+     "rooms": [
+      "коридор"
+     ],
+     "photo": "фото-объекта-19.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-20",
+     "number": "З-9457",
+     "client": "Клиент 20 санузел Просьба клиента",
+     "address": "Адрес объекта 20 Просьба",
+     "phone": "+7 973 992-16-15",
+     "visit-date": "2027-01-17T09:30:00+03:00",
+     "status": "замер проведён",
+     "surveyor": "Замерщик 20",
+     "budget": 7505,
+     "urgent": false,
+     "rooms": [
+      "санузел",
+      "комната"
+     ],
+     "photo": "фото-объекта-20.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-21",
+     "number": "З-5267",
+     "client": "Клиент 21 Просьба клиента приехать",
+     "address": "Адрес объекта 21 снять размеры квартиры сметы Сормово двухкомнатная Верхние Печёры",
+     "phone": "+7 904 405-73-96",
+     "visit-date": null,
+     "status": "новая",
+     "surveyor": "Замерщик 21 санузел Просьба",
+     "budget": 10045,
+     "urgent": false,
+     "rooms": [
+      "кухня",
+      "коридор"
+     ],
+     "photo": "фото-объекта-21.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-22",
+     "number": "З-6300",
+     "client": "Клиент 22 Просьба",
+     "address": "Адрес объекта 22 санузел Просьба клиента приехать",
+     "phone": "+7 938 624-16-16",
+     "visit-date": "2026-12-16T18:00:00+03:00",
+     "status": "замер назначен",
+     "surveyor": "Замерщик 22",
+     "budget": 9939,
+     "urgent": true,
+     "rooms": [
+      "санузел"
+     ],
+     "photo": "фото-объекта-22.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-23",
+     "number": "З-6455",
+     "client": "Клиент 23 Сормово",
+     "address": "Адрес объекта 23 Просьба клиента",
+     "phone": "+7 936 518-41-90",
+     "visit-date": "2026-11-01T17:30:00+03:00",
+     "status": "новая",
+     "surveyor": "Замерщик 23 размеры",
+     "budget": 7309,
+     "urgent": false,
+     "rooms": [
+      "санузел",
+      "коридор"
+     ],
+     "photo": "фото-объекта-23.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-24",
+     "number": "З-8185",
+     "client": "Клиент 24 Сормово",
+     "address": "Адрес объекта 24 Просьба клиента приехать снять",
+     "phone": "+7 956 010-49-00",
+     "visit-date": "2025-10-30T15:00:00+03:00",
+     "status": "новая",
+     "surveyor": "Замерщик 24",
+     "budget": 8772,
+     "urgent": false,
+     "rooms": [
+      "комната",
+      "коридор"
+     ],
+     "photo": "фото-объекта-24.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-25",
+     "number": "З-9771",
+     "client": "Клиент 25 Верхние Печёры санузел",
+     "address": "Адрес объекта 25 размеры квартиры сметы Сормово",
+     "phone": "+7 958 666-77-88",
+     "visit-date": "2026-06-06T17:30:00+03:00",
+     "status": "замер назначен",
+     "surveyor": "Замерщик 25",
+     "budget": 8520,
+     "urgent": true,
+     "rooms": [
+      "коридор"
+     ],
+     "photo": "фото-объекта-25.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-26",
+     "number": "З-3753",
+     "client": "Клиент 26",
+     "address": "Адрес объекта 26 Печёры санузел Просьба клиента",
+     "phone": "+7 921 765-84-07",
+     "visit-date": "2026-12-14T16:30:00+03:00",
+     "status": "замер проведён",
+     "surveyor": "Замерщик 26",
+     "budget": null,
+     "urgent": false,
+     "rooms": [
+      "кухня"
+     ],
+     "photo": "фото-объекта-26.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-27",
+     "number": "З-2967",
+     "client": "Клиент 27 снять размеры квартиры сметы Сормово",
+     "address": "Адрес объекта 27 санузел Просьба клиента приехать снять размеры квартиры сметы Сормово",
+     "phone": "+7 979 450-33-93",
+     "visit-date": "2026-01-14T13:00:00+03:00",
+     "status": "отказ",
+     "surveyor": "Замерщик 27 размеры",
+     "budget": 12750,
+     "urgent": true,
+     "rooms": [
+      "санузел",
+      "комната"
+     ],
+     "photo": "фото-объекта-27.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-28",
+     "number": "З-2684",
+     "client": "Клиент 28 санузел Просьба",
+     "address": "Адрес объекта 28 Печёры санузел Просьба клиента приехать",
+     "phone": "+7 997 763-06-93",
+     "visit-date": "2027-07-06T18:00:00+03:00",
+     "status": "замер проведён",
+     "surveyor": "Замерщик 28",
+     "budget": 13570,
+     "urgent": false,
+     "rooms": [
+      "санузел",
+      "комната",
+      "коридор"
+     ],
+     "photo": "фото-объекта-28.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-29",
+     "number": "З-2539",
+     "client": "Клиент 29",
+     "address": "Адрес объекта 29 клиента приехать снять размеры квартиры сметы",
+     "phone": "+7 919 114-48-21",
+     "visit-date": "2026-11-25T17:00:00+03:00",
+     "status": "замер проведён",
+     "surveyor": null,
+     "budget": null,
+     "urgent": null,
+     "rooms": [
+      "кухня",
+      "комната"
+     ],
+     "photo": "фото-объекта-29.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-30",
+     "number": "З-0210",
+     "client": "Клиент 30 Печёры санузел",
+     "address": "Адрес объекта 30 снять размеры квартиры сметы Сормово",
+     "phone": "+7 970 207-04-23",
+     "visit-date": "2027-03-18T11:30:00+03:00",
+     "status": "новая",
+     "surveyor": "Замерщик 30 Просьба",
+     "budget": 9903,
+     "urgent": true,
+     "rooms": [
+      "кухня",
+      "комната"
+     ],
+     "photo": "фото-объекта-30.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-31",
+     "number": "З-3552",
+     "client": "Клиент 31 двухкомнатная",
+     "address": "Адрес объекта 31 размеры квартиры сметы",
+     "phone": "+7 928 469-01-59",
+     "visit-date": "2026-11-22T12:30:00+03:00",
+     "status": "замер назначен",
+     "surveyor": "Замерщик 31",
+     "budget": 11625,
+     "urgent": null,
+     "rooms": [
+      "санузел",
+      "коридор"
+     ],
+     "photo": "фото-объекта-31.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-32",
+     "number": "З-0070",
+     "client": "Клиент 32",
+     "address": "Адрес объекта 32 приехать снять размеры квартиры",
+     "phone": "+7 956 885-34-33",
+     "visit-date": "2027-09-23T14:00:00+03:00",
+     "status": "новая",
+     "surveyor": null,
+     "budget": 8235,
+     "urgent": false,
+     "rooms": [
+      "комната",
+      "коридор"
+     ],
+     "photo": null
+    },
+    {
+     "example": true,
+     "_id": "request-33",
+     "number": "З-3303",
+     "client": "Клиент 33 Сормово",
+     "address": "Адрес объекта 33 двухкомнатная Верхние Печёры санузел Просьба",
+     "phone": "+7 961 402-24-55",
+     "visit-date": "2026-03-20T11:30:00+03:00",
+     "status": "замер проведён",
+     "surveyor": "Замерщик 33 санузел",
+     "budget": 5326,
+     "urgent": false,
+     "rooms": [
+      "санузел",
+      "комната",
+      "коридор"
+     ],
+     "photo": "фото-объекта-33.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-34",
+     "number": "З-9005",
+     "client": "Клиент 34 приехать снять",
+     "address": "Адрес объекта 34 Печёры санузел Просьба клиента приехать",
+     "phone": "+7 956 027-09-41",
+     "visit-date": "2026-11-08T10:00:00+03:00",
+     "status": "новая",
+     "surveyor": "Замерщик 34",
+     "budget": 7070,
+     "urgent": true,
+     "rooms": [
+      "кухня",
+      "комната"
+     ],
+     "photo": "фото-объекта-34.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-35",
+     "number": "З-6472",
+     "client": "Клиент 35 Сормово",
+     "address": "Адрес объекта 35 Сормово двухкомнатная Верхние Печёры санузел",
+     "phone": "+7 945 133-61-28",
+     "visit-date": "2027-07-31T17:30:00+03:00",
+     "status": "замер проведён",
+     "surveyor": "Замерщик 35 размеры",
+     "budget": 9591,
+     "urgent": false,
+     "rooms": [
+      "санузел",
+      "комната",
+      "коридор"
+     ],
+     "photo": "фото-объекта-35.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-36",
+     "number": "З-9299",
+     "client": "Клиент 36 приехать",
+     "address": "Адрес объекта 36 Печёры санузел Просьба клиента",
+     "phone": "+7 967 013-69-45",
+     "visit-date": "2026-08-17T14:00:00+03:00",
+     "status": "новая",
+     "surveyor": "Замерщик 36",
+     "budget": 5690,
+     "urgent": null,
+     "rooms": [
+      "кухня"
+     ],
+     "photo": "фото-объекта-36.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-37",
+     "number": "З-5938",
+     "client": "Клиент 37 квартиры сметы Сормово",
+     "address": "Адрес объекта 37 санузел Просьба",
+     "phone": "+7 985 883-40-96",
+     "visit-date": null,
+     "status": "замер проведён",
+     "surveyor": "Замерщик 37 размеры",
+     "budget": 13659,
+     "urgent": false,
+     "rooms": [
+      "кухня",
+      "коридор"
+     ],
+     "photo": null
+    },
+    {
+     "example": true,
+     "_id": "request-38",
+     "number": "З-8151",
+     "client": "Клиент 38 Верхние Печёры санузел Просьба",
+     "address": "Адрес объекта 38 приехать снять размеры квартиры сметы",
+     "phone": "+7 903 345-45-56",
+     "visit-date": "2026-08-20T14:30:00+03:00",
+     "status": "новая",
+     "surveyor": "Замерщик 38 квартиры сметы",
+     "budget": null,
+     "urgent": false,
+     "rooms": [
+      "кухня",
+      "комната"
+     ],
+     "photo": "фото-объекта-38.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-39",
+     "number": "З-4416",
+     "client": "Клиент 39",
+     "address": "Адрес объекта 39 приехать снять размеры квартиры сметы Сормово",
+     "phone": "+7 911 405-14-80",
+     "visit-date": "2026-06-03T10:00:00+03:00",
+     "status": "замер проведён",
+     "surveyor": "Замерщик 39 Просьба клиента",
+     "budget": 11718,
+     "urgent": true,
+     "rooms": [
+      "кухня",
+      "комната"
+     ],
+     "photo": null
+    },
+    {
+     "example": true,
+     "_id": "request-40",
+     "number": "З-0317",
+     "client": "Клиент 40 приехать снять размеры квартиры",
+     "address": "Адрес объекта 40 размеры квартиры сметы Сормово двухкомнатная Верхние Печёры санузел Просьба",
+     "phone": "+7 979 295-09-07",
+     "visit-date": "2026-02-17T09:30:00+03:00",
+     "status": "замер назначен",
+     "surveyor": "Замерщик 40 Печёры санузел",
+     "budget": 6038,
+     "urgent": false,
+     "rooms": [
+      "санузел",
+      "комната"
+     ],
+     "photo": "фото-объекта-40.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-41",
+     "number": "З-0334",
+     "client": "Клиент 41 Просьба клиента приехать снять",
+     "address": "Адрес объекта 41 размеры квартиры сметы Сормово двухкомнатная Верхние",
+     "phone": "+7 905 403-74-20",
+     "visit-date": "2027-04-04T16:30:00+03:00",
+     "status": "новая",
+     "surveyor": "Замерщик 41",
+     "budget": null,
+     "urgent": false,
+     "rooms": [
+      "кухня",
+      "коридор"
+     ],
+     "photo": "фото-объекта-41.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-42",
+     "number": "З-6392",
+     "client": "Клиент 42 приехать снять размеры",
+     "address": "Адрес объекта 42 Печёры санузел Просьба клиента приехать снять размеры квартиры сметы",
+     "phone": "+7 995 631-69-16",
+     "visit-date": "2026-01-14T10:30:00+03:00",
+     "status": "замер проведён",
+     "surveyor": "Замерщик 42",
+     "budget": 10910,
+     "urgent": null,
+     "rooms": [
+      "комната"
+     ],
+     "photo": "фото-объекта-42.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-43",
+     "number": "З-9904",
+     "client": "Клиент 43 приехать снять размеры квартиры",
+     "address": "Адрес объекта 43",
+     "phone": "+7 988 605-39-29",
+     "visit-date": "2026-12-21T15:00:00+03:00",
+     "status": "замер проведён",
+     "surveyor": "Замерщик 43 Сормово",
+     "budget": 10778,
+     "urgent": false,
+     "rooms": [
+      "санузел",
+      "комната"
+     ],
+     "photo": null
+    },
+    {
+     "example": true,
+     "_id": "request-44",
+     "number": "З-7643",
+     "client": "Клиент 44",
+     "address": "Адрес объекта 44 Сормово двухкомнатная Верхние Печёры санузел Просьба клиента",
+     "phone": "+7 968 335-81-24",
+     "visit-date": "2025-12-09T17:30:00+03:00",
+     "status": "новая",
+     "surveyor": "Замерщик 44 размеры",
+     "budget": null,
+     "urgent": false,
+     "rooms": [
+      "коридор"
+     ],
+     "photo": null
+    },
+    {
+     "example": true,
+     "_id": "request-45",
+     "number": "З-0238",
+     "client": "Клиент 45 размеры квартиры",
+     "address": "Адрес объекта 45 санузел Просьба клиента приехать снять размеры квартиры сметы",
+     "phone": "+7 960 490-09-37",
+     "visit-date": "2027-09-28T15:30:00+03:00",
+     "status": "отказ",
+     "surveyor": "Замерщик 45",
+     "budget": 10187,
+     "urgent": null,
+     "rooms": null,
+     "photo": "фото-объекта-45.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-46",
+     "number": "З-9462",
+     "client": "Клиент 46",
+     "address": "Адрес объекта 46 Просьба клиента приехать",
+     "phone": "+7 921 869-88-43",
+     "visit-date": "2027-02-06T12:00:00+03:00",
+     "status": "замер назначен",
+     "surveyor": "Замерщик 46",
+     "budget": 6891,
+     "urgent": null,
+     "rooms": [
+      "кухня",
+      "санузел"
+     ],
+     "photo": "фото-объекта-46.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-47",
+     "number": "З-9410",
+     "client": "Клиент 47 приехать",
+     "address": "Адрес объекта 47 приехать снять размеры квартиры сметы Сормово двухкомнатная Верхние",
+     "phone": "+7 906 571-48-79",
+     "visit-date": null,
+     "status": "отказ",
+     "surveyor": "Замерщик 47 Верхние",
+     "budget": 13097,
+     "urgent": true,
+     "rooms": [
+      "кухня",
+      "санузел",
+      "комната"
+     ],
+     "photo": "фото-объекта-47.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-48",
+     "number": "З-5451",
+     "client": "Клиент 48 приехать снять",
+     "address": "Адрес объекта 48 клиента приехать снять размеры квартиры сметы Сормово",
+     "phone": "+7 963 246-25-23",
+     "visit-date": "2026-08-13T14:30:00+03:00",
+     "status": "новая",
+     "surveyor": "Замерщик 48",
+     "budget": 13668,
+     "urgent": false,
+     "rooms": [
+      "санузел",
+      "комната"
+     ],
+     "photo": "фото-объекта-48.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-49",
+     "number": "З-5112",
+     "client": "Клиент 49 квартиры сметы",
+     "address": "Адрес объекта 49 санузел Просьба",
+     "phone": "+7 968 305-62-66",
+     "visit-date": "2026-07-24T10:30:00+03:00",
+     "status": "отказ",
+     "surveyor": "Замерщик 49 Верхние",
+     "budget": 9913,
+     "urgent": false,
+     "rooms": [
+      "коридор"
+     ],
+     "photo": "фото-объекта-49.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-50",
+     "number": "З-0851",
+     "client": "Клиент 50",
+     "address": "Адрес объекта 50 размеры квартиры сметы Сормово двухкомнатная Верхние",
+     "phone": "+7 944 339-65-37",
+     "visit-date": "2026-09-08T18:00:00+03:00",
+     "status": "отказ",
+     "surveyor": "Замерщик 50 санузел",
+     "budget": 7012,
+     "urgent": false,
+     "rooms": [
+      "кухня",
+      "санузел",
+      "коридор"
+     ],
+     "photo": "фото-объекта-50.jpg"
+    }
+   ],
+   "edge_cases": [
+    {
+     "example": true,
+     "_id": "request-longest",
+     "_case": "longest",
+     "_decide": "самое длинное значение: порог обрезки и механизм «показать больше»",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Длина строки»; ux/13-app-types/04-master-procedure-brief-to-screens.md §12",
+     "number": "З-732690",
+     "client": "Клиент 1 Верхние Печёры санузел Просьба клиента приехать сня",
+     "address": "Адрес объекта 1 сметы Сормово двухкомнатная Верхние Печёры санузел Просьба клиента приехать снять размеры квартиры сметы",
+     "phone": "+7 966 464-30-21",
+     "visit-date": "2027-01-24T16:30:00+03:00",
+     "status": "отказ",
+     "surveyor": "Замерщик 1 клиента приехать снять размер",
+     "budget": 6026,
+     "urgent": null,
+     "rooms": [
+      "комната"
+     ],
+     "photo": "фото-объекта-1.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-shortest",
+     "_case": "shortest",
+     "_decide": "самое короткое значение: колонка и карточка не разваливаются",
+     "_source": "ux/13-app-types/04-master-procedure-brief-to-screens.md §12",
+     "number": "З-4040",
+     "client": "Кл",
+     "address": "Адрес об 1",
+     "phone": "+7 966 464-30-21",
+     "visit-date": "2027-01-24T16:30:00+03:00",
+     "status": "отказ",
+     "surveyor": "Зам 1",
+     "budget": 6026,
+     "urgent": null,
+     "rooms": [
+      "комната"
+     ],
+     "photo": "фото-объекта-1.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-exotic",
+     "_case": "exotic",
+     "_decide": "одна буква, апостроф, дефис, диакритика, не-латиница: не ломать валидацию и вёрстку",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Экзотические имена и адреса»",
+     "number": "Ё. Д’Арк",
+     "client": "Ё. Д’Арк-Ли Ümit Nguyễn 李",
+     "address": "Ё. Д’Арк-Ли Ümit Nguyễn 李",
+     "phone": "+7 966 464-30-21",
+     "visit-date": "2027-01-24T16:30:00+03:00",
+     "status": "отказ",
+     "surveyor": "Ё. Д’Арк-Ли Ümit Nguyễn 李",
+     "budget": 6026,
+     "urgent": null,
+     "rooms": [
+      "комната"
+     ],
+     "photo": "фото-объекта-1.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-missing",
+     "_case": "missing",
+     "_decide": "поля нет в записи: явный текст «не указан», не пустая ячейка",
+     "_source": "ux/13-app-types/04-master-procedure-brief-to-screens.md §12 «отсутствующее поле»",
+     "number": "З-0412",
+     "client": "Клиент 1 Верхние Печёры санузел",
+     "address": "Адрес объекта 1 сметы Сормово двухкомнатная Верхние Печёры санузел",
+     "phone": "+7 966 464-30-21",
+     "status": "отказ"
+    },
+    {
+     "example": true,
+     "_id": "request-null",
+     "_case": "null",
+     "_decide": "значение null: явный текст «не указан», не пустая ячейка",
+     "_source": "ux/13-app-types/04-master-procedure-brief-to-screens.md §12 «null»",
+     "number": "З-0412",
+     "client": "Клиент 1 Верхние Печёры санузел",
+     "address": "Адрес объекта 1 сметы Сормово двухкомнатная Верхние Печёры санузел",
+     "phone": "+7 966 464-30-21",
+     "visit-date": null,
+     "status": "отказ",
+     "surveyor": null,
+     "budget": null,
+     "urgent": null,
+     "rooms": null,
+     "photo": null
+    },
+    {
+     "example": true,
+     "_id": "request-zero",
+     "_case": "zero",
+     "_decide": "«0» и «нет данных» — разные вещи: ноль показан нулём",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Ноль»",
+     "number": "З-0412",
+     "client": "Клиент 1 Верхние Печёры санузел",
+     "address": "Адрес объекта 1 сметы Сормово двухкомнатная Верхние Печёры санузел",
+     "phone": "+7 966 464-30-21",
+     "visit-date": "2027-01-24T16:30:00+03:00",
+     "status": "отказ",
+     "surveyor": "Замерщик 1",
+     "budget": 0,
+     "urgent": null,
+     "rooms": [
+      "комната"
+     ],
+     "photo": "фото-объекта-1.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-negative",
+     "_case": "negative",
+     "_decide": "знак, цвет, выравнивание; ширина колонки не ломается — если значение бывает отрицательным",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Отрицательное»",
+     "number": "З-0412",
+     "client": "Клиент 1 Верхние Печёры санузел",
+     "address": "Адрес объекта 1 сметы Сормово двухкомнатная Верхние Печёры санузел",
+     "phone": "+7 966 464-30-21",
+     "visit-date": "2027-01-24T16:30:00+03:00",
+     "status": "отказ",
+     "surveyor": "Замерщик 1",
+     "budget": -9332,
+     "urgent": null,
+     "rooms": [
+      "комната"
+     ],
+     "photo": "фото-объекта-1.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-large",
+     "_case": "large",
+     "_decide": "разрядность, сокращение, табличные цифры",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Очень большое число»",
+     "number": "З-0412",
+     "client": "Клиент 1 Верхние Печёры санузел",
+     "address": "Адрес объекта 1 сметы Сормово двухкомнатная Верхние Печёры санузел",
+     "phone": "+7 966 464-30-21",
+     "visit-date": "2027-01-24T16:30:00+03:00",
+     "status": "отказ",
+     "surveyor": "Замерщик 1",
+     "budget": 1234567890,
+     "urgent": null,
+     "rooms": [
+      "комната"
+     ],
+     "photo": "фото-объекта-1.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-date-past",
+     "_case": "date-past",
+     "_decide": "очень старая дата: абсолютная дата вместе с относительной",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Даты»",
+     "number": "З-0412",
+     "client": "Клиент 1 Верхние Печёры санузел",
+     "address": "Адрес объекта 1 сметы Сормово двухкомнатная Верхние Печёры санузел",
+     "phone": "+7 966 464-30-21",
+     "visit-date": "2016-10-03T12:00:00+03:00",
+     "status": "отказ",
+     "surveyor": "Замерщик 1",
+     "budget": 6026,
+     "urgent": null,
+     "rooms": [
+      "комната"
+     ],
+     "photo": "фото-объекта-1.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-date-future",
+     "_case": "date-future",
+     "_decide": "будущая дата: не «через −3 дня»",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Даты»",
+     "number": "З-0412",
+     "client": "Клиент 1 Верхние Печёры санузел",
+     "address": "Адрес объекта 1 сметы Сормово двухкомнатная Верхние Печёры санузел",
+     "phone": "+7 966 464-30-21",
+     "visit-date": "2026-11-15T14:00:00+03:00",
+     "status": "отказ",
+     "surveyor": "Замерщик 1",
+     "budget": 6026,
+     "urgent": null,
+     "rooms": [
+      "комната"
+     ],
+     "photo": "фото-объекта-1.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-date-today",
+     "_case": "date-today",
+     "_decide": "дата «сегодня»: относительное время и абсолютное вместе",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Даты»",
+     "number": "З-0412",
+     "client": "Клиент 1 Верхние Печёры санузел",
+     "address": "Адрес объекта 1 сметы Сормово двухкомнатная Верхние Печёры санузел",
+     "phone": "+7 966 464-30-21",
+     "visit-date": "2026-10-01T18:30:00+03:00",
+     "status": "отказ",
+     "surveyor": "Замерщик 1",
+     "budget": 6026,
+     "urgent": null,
+     "rooms": [
+      "комната"
+     ],
+     "photo": "фото-объекта-1.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-timezone",
+     "_case": "timezone",
+     "_decide": "объект из другого пояса: пояс показан явно или время приведено к поясу пользователя",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Часовые пояса»",
+     "number": "З-0412",
+     "client": "Клиент 1 Верхние Печёры санузел",
+     "address": "Адрес объекта 1 сметы Сормово двухкомнатная Верхние Печёры санузел",
+     "phone": "+7 966 464-30-21",
+     "visit-date": "2026-10-01T01:30:00+10:00",
+     "status": "отказ",
+     "surveyor": "Замерщик 1",
+     "budget": 6026,
+     "urgent": null,
+     "rooms": [
+      "комната"
+     ],
+     "photo": "фото-объекта-1.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-duplicate",
+     "_case": "duplicate",
+     "_decide": "два объекта с одним названием: различитель в списке — дата, автор, идентификатор",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Дубликаты»",
+     "_twin": "request-1",
+     "number": "З-0412",
+     "client": "Клиент 2 Печёры санузел",
+     "address": "Адрес объекта 2",
+     "phone": "+7 965 545-75-79",
+     "visit-date": null,
+     "status": "отказ",
+     "surveyor": "Замерщик 2 снять размеры",
+     "budget": 9635,
+     "urgent": true,
+     "rooms": null,
+     "photo": "фото-объекта-2.jpg"
+    },
+    {
+     "example": true,
+     "_id": "request-no-file",
+     "_case": "no-file",
+     "_decide": "файла нет: плейсхолдер или перестроение блока — решает дизайнер",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Отсутствующее изображение»",
+     "number": "З-0412",
+     "client": "Клиент 1 Верхние Печёры санузел",
+     "address": "Адрес объекта 1 сметы Сормово двухкомнатная Верхние Печёры санузел",
+     "phone": "+7 966 464-30-21",
+     "visit-date": "2027-01-24T16:30:00+03:00",
+     "status": "отказ",
+     "surveyor": "Замерщик 1",
+     "budget": 6026,
+     "urgent": null,
+     "rooms": [
+      "комната"
+     ],
+     "photo": null
+    }
+   ],
+   "not_applicable": [
+    {
+     "case": "no-relations",
+     "why": "нет связей — атрибутов ref:<object>"
+    },
+    {
+     "case": "many-relations",
+     "why": "нет атрибутов ref:<object>[]"
+    }
+   ]
+  },
+  "plan": {
+   "example": true,
+   "name": "План замеров",
+   "description": "Сколько замеров студия берётся провести за месяц",
+   "aliases": [],
+   "statuses": [],
+   "examples": [
+    "план на сентябрь — 40 замеров",
+    "план на октябрь — 45"
+   ],
+   "attributes": [
+    {
+     "slug": "month",
+     "name": "Месяц",
+     "rank": 1,
+     "type": "date",
+     "required": true,
+     "length": null,
+     "values": null
+    },
+    {
+     "slug": "target",
+     "name": "План",
+     "rank": 2,
+     "type": "number",
+     "required": true,
+     "length": null,
+     "values": null
+    },
+    {
+     "slug": "done",
+     "name": "Проведено",
+     "rank": 3,
+     "type": "number",
+     "required": true,
+     "length": null,
+     "values": null
+    },
+    {
+     "slug": "requests",
+     "name": "Заявки месяца",
+     "rank": 4,
+     "type": "ref:request[]",
+     "required": false,
+     "length": null,
+     "values": null
+    }
+   ],
+   "records": [
+    {
+     "example": true,
+     "_id": "plan-1",
+     "month": "2027-08-02",
+     "target": 39,
+     "done": 57,
+     "requests": [
+      "request-14",
+      "request-31",
+      "request-35"
+     ]
+    },
+    {
+     "example": true,
+     "_id": "plan-2",
+     "month": "2027-03-23",
+     "target": 29,
+     "done": 25,
+     "requests": [
+      "request-10",
+      "request-35",
+      "request-49"
+     ]
+    }
+   ],
+   "edge_cases": [
+    {
+     "example": true,
+     "_id": "plan-missing",
+     "_case": "missing",
+     "_decide": "поля нет в записи: явный текст «не указан», не пустая ячейка",
+     "_source": "ux/13-app-types/04-master-procedure-brief-to-screens.md §12 «отсутствующее поле»",
+     "month": "2027-08-02",
+     "target": 39,
+     "done": 57
+    },
+    {
+     "example": true,
+     "_id": "plan-null",
+     "_case": "null",
+     "_decide": "значение null: явный текст «не указан», не пустая ячейка",
+     "_source": "ux/13-app-types/04-master-procedure-brief-to-screens.md §12 «null»",
+     "month": "2027-08-02",
+     "target": 39,
+     "done": 57,
+     "requests": null
+    },
+    {
+     "example": true,
+     "_id": "plan-zero",
+     "_case": "zero",
+     "_decide": "«0» и «нет данных» — разные вещи: ноль показан нулём",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Ноль»",
+     "month": "2027-08-02",
+     "target": 0,
+     "done": 0,
+     "requests": [
+      "request-14",
+      "request-31",
+      "request-35"
+     ]
+    },
+    {
+     "example": true,
+     "_id": "plan-negative",
+     "_case": "negative",
+     "_decide": "знак, цвет, выравнивание; ширина колонки не ломается — если значение бывает отрицательным",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Отрицательное»",
+     "month": "2027-08-02",
+     "target": -35,
+     "done": -36,
+     "requests": [
+      "request-14",
+      "request-31",
+      "request-35"
+     ]
+    },
+    {
+     "example": true,
+     "_id": "plan-large",
+     "_case": "large",
+     "_decide": "разрядность, сокращение, табличные цифры",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Очень большое число»",
+     "month": "2027-08-02",
+     "target": 1234567890,
+     "done": 1234567890,
+     "requests": [
+      "request-14",
+      "request-31",
+      "request-35"
+     ]
+    },
+    {
+     "example": true,
+     "_id": "plan-date-past",
+     "_case": "date-past",
+     "_decide": "очень старая дата: абсолютная дата вместе с относительной",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Даты»",
+     "month": "2016-10-03",
+     "target": 39,
+     "done": 57,
+     "requests": [
+      "request-14",
+      "request-31",
+      "request-35"
+     ]
+    },
+    {
+     "example": true,
+     "_id": "plan-date-future",
+     "_case": "date-future",
+     "_decide": "будущая дата: не «через −3 дня»",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Даты»",
+     "month": "2026-11-15",
+     "target": 39,
+     "done": 57,
+     "requests": [
+      "request-14",
+      "request-31",
+      "request-35"
+     ]
+    },
+    {
+     "example": true,
+     "_id": "plan-date-today",
+     "_case": "date-today",
+     "_decide": "дата «сегодня»: относительное время и абсолютное вместе",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Даты»",
+     "month": "2026-10-01",
+     "target": 39,
+     "done": 57,
+     "requests": [
+      "request-14",
+      "request-31",
+      "request-35"
+     ]
+    },
+    {
+     "example": true,
+     "_id": "plan-no-relations",
+     "_case": "no-relations",
+     "_decide": "связи нет: явный текст «не указан», не пустая ячейка",
+     "_source": "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Отсутствующая связь»; ux/13-app-types/04-master-procedure-brief-to-screens.md §12",
+     "month": "2027-08-02",
+     "target": 39,
+     "done": 57,
+     "requests": []
+    },
+    {
+     "example": true,
+     "_id": "plan-many-relations",
+     "_case": "many-relations",
+     "_decide": "много связей: счётчик и путь ко всем, а не полный список",
+     "_source": "ux/13-app-types/04-master-procedure-brief-to-screens.md §12 «объект с 50 связями»",
+     "month": "2027-08-02",
+     "target": 39,
+     "done": 57,
+     "requests": [
+      "request-1",
+      "request-2",
+      "request-3",
+      "request-4",
+      "request-5",
+      "request-6",
+      "request-7",
+      "request-8",
+      "request-9",
+      "request-10",
+      "request-11",
+      "request-12",
+      "request-13",
+      "request-14",
+      "request-15",
+      "request-16",
+      "request-17",
+      "request-18",
+      "request-19",
+      "request-20",
+      "request-21",
+      "request-22",
+      "request-23",
+      "request-24",
+      "request-25",
+      "request-26",
+      "request-27",
+      "request-28",
+      "request-29",
+      "request-30",
+      "request-31",
+      "request-32",
+      "request-33",
+      "request-34",
+      "request-35",
+      "request-36",
+      "request-37",
+      "request-38",
+      "request-39",
+      "request-40",
+      "request-41",
+      "request-42",
+      "request-43",
+      "request-44",
+      "request-45",
+      "request-46",
+      "request-47",
+      "request-48",
+      "request-49",
+      "request-50"
+     ]
+    }
+   ],
+   "not_applicable": [
+    {
+     "case": "longest",
+     "why": "нет атрибутов text без образца по имени"
+    },
+    {
+     "case": "shortest",
+     "why": "нет атрибутов text без образца по имени"
+    },
+    {
+     "case": "exotic",
+     "why": "нет атрибутов text без образца по имени"
+    },
+    {
+     "case": "timezone",
+     "why": "нет атрибутов datetime"
+    },
+    {
+     "case": "duplicate",
+     "why": "нет узнающего атрибута text рангов 1–3"
+    },
+    {
+     "case": "no-file",
+     "why": "нет атрибутов file"
+    }
+   ]
+  }
+ },
+ "collections": {
+  "requests-list": {
+   "example": true,
+   "kind": "block",
+   "object": "request",
+   "item": "request",
+   "screens": [
+    "requests-list"
+   ],
+   "volume": {
+    "typical": 60,
+    "max": 3000
+   },
+   "counts_from": "collection.volume",
+   "sets": {
+    "empty": {
+     "example": true,
+     "count": 0,
+     "states": [
+      "empty-first-run",
+      "empty-filtered"
+     ],
+     "records": []
+    },
+    "few": {
+     "example": true,
+     "count": 1,
+     "states": [
+      "partial-few"
+     ],
+     "records": [
+      "request-1"
+     ]
+    },
+    "typical": {
+     "example": true,
+     "count": 60,
+     "states": [],
+     "records": [
+      "request-1",
+      "request-2",
+      "request-3",
+      "request-4",
+      "request-5",
+      "request-6",
+      "request-7",
+      "request-8",
+      "request-9",
+      "request-10",
+      "request-11",
+      "request-12",
+      "request-13",
+      "request-14",
+      "request-15",
+      "request-16",
+      "request-17",
+      "request-18",
+      "request-19",
+      "request-20",
+      "request-21",
+      "request-22",
+      "request-23",
+      "request-24",
+      "request-25",
+      "request-26",
+      "request-27",
+      "request-28",
+      "request-29",
+      "request-30",
+      "request-31",
+      "request-32",
+      "request-33",
+      "request-34",
+      "request-35",
+      "request-36",
+      "request-37",
+      "request-38",
+      "request-39",
+      "request-40",
+      "request-41",
+      "request-42",
+      "request-43",
+      "request-44",
+      "request-45",
+      "request-46",
+      "request-47",
+      "request-48",
+      "request-49",
+      "request-50"
+     ]
+    },
+    "max": {
+     "example": true,
+     "count": 3000,
+     "states": [
+      "overflow-many"
+     ],
+     "records": [
+      "request-1",
+      "request-2",
+      "request-3",
+      "request-4",
+      "request-5",
+      "request-6",
+      "request-7",
+      "request-8",
+      "request-9",
+      "request-10",
+      "request-11",
+      "request-12",
+      "request-13",
+      "request-14",
+      "request-15",
+      "request-16",
+      "request-17",
+      "request-18",
+      "request-19",
+      "request-20",
+      "request-21",
+      "request-22",
+      "request-23",
+      "request-24",
+      "request-25",
+      "request-26",
+      "request-27",
+      "request-28",
+      "request-29",
+      "request-30",
+      "request-31",
+      "request-32",
+      "request-33",
+      "request-34",
+      "request-35",
+      "request-36",
+      "request-37",
+      "request-38",
+      "request-39",
+      "request-40",
+      "request-41",
+      "request-42",
+      "request-43",
+      "request-44",
+      "request-45",
+      "request-46",
+      "request-47",
+      "request-48",
+      "request-49",
+      "request-50"
+     ]
+    }
+   }
+  }
+ },
+ "localization": [
+  {
+   "role": "action",
+   "key": "requests.list.reset-filters.action",
+   "column": "text",
+   "text": "Сбросить фильтры",
+   "length": 16,
+   "maxlen": 24
+  },
+  {
+   "role": "banner",
+   "key": "requests.card.offline.banner",
+   "column": "text",
+   "text": "Нет связи: заявка показана из памяти, отметка замера уйдёт, когда связь вернётся",
+   "length": 80,
+   "maxlen": 120
+  },
+  {
+   "role": "body",
+   "key": "requests.card.not-found.body",
+   "column": "text",
+   "text": "Проверьте номер в адресе: такой заявки нет или её убрали из списка",
+   "length": 66,
+   "maxlen": 120
+  },
+  {
+   "role": "column-header",
+   "key": "requests.list.visit-date.column-header",
+   "column": "text",
+   "text": "Дата замера",
+   "length": 11,
+   "maxlen": 16
+  },
+  {
+   "role": "confirm-title",
+   "key": "app.shell.session-expiry.confirm-title",
+   "column": "text",
+   "text": "Продлить сеанс?",
+   "length": 15,
+   "maxlen": 40
+  },
+  {
+   "role": "empty",
+   "key": "requests.list.empty-first-run.empty",
+   "column": "text",
+   "text": "Здесь появятся заявки с сайта и из звонков — первую можно создать кнопкой «Создать заявку» над списком",
+   "length": 102,
+   "maxlen": 140
+  },
+  {
+   "role": "error",
+   "key": "requests.new.phone.error",
+   "column": "text",
+   "text": "Укажите телефон целиком, с кодом города",
+   "length": 39,
+   "maxlen": 60
+  },
+  {
+   "role": "inline-message",
+   "key": "requests.card.error-action.inline-message",
+   "column": "text",
+   "text": "Не сохранилось — выбранное осталось в карточке, можно повторить",
+   "length": 63,
+   "maxlen": 100
+  },
+  {
+   "role": "label",
+   "key": "requests.new.address.label",
+   "column": "text",
+   "text": "Адрес объекта",
+   "length": 13,
+   "maxlen": 24
+  },
+  {
+   "role": "link",
+   "key": "requests.card.back-to-list.link",
+   "column": "text",
+   "text": "К списку заявок",
+   "length": 15,
+   "maxlen": 24
+  },
+  {
+   "role": "placeholder",
+   "key": "requests.list.search.placeholder",
+   "column": "text",
+   "text": "Номер, клиент или адрес",
+   "length": 23,
+   "maxlen": 40
+  },
+  {
+   "role": "status",
+   "key": "requests.new.saving.status",
+   "column": "text",
+   "text": "Сохраняем заявку",
+   "length": 16,
+   "maxlen": 32
+  },
+  {
+   "role": "title",
+   "key": "requests.new.no-permission.title",
+   "column": "text",
+   "text": "Нет доступа к созданию заявок",
+   "length": 29,
+   "maxlen": 40
+  }
+ ],
+ "gaps": []
+}

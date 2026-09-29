@@ -1,0 +1,9 @@
+# Фикстура package-defects — иллюстрация: вход проверки сценария «пакет» — два демо-проекта с посеянными дефектами:
+# лендинг otves-remont-nn (фикстура package-landing-defects) и кабинет otves-office (package-cabinet-defects). Ключ
+# дефектов — шапки манифестов этих фикстур; design_audit check по каждому проекту находит свои. Формат — докстринг
+# fixture_project.py.
+example: true
+description: 'два проекта с посеянными дефектами: лендинг и кабинет'
+project: otves-remont-nn
+extends: [package-landing-defects, package-cabinet-defects]
+layers: []
