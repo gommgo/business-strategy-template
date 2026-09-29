@@ -1,0 +1,88 @@
+# Ф8 — ключ проверки по сценариям (шаг 11)
+
+Пишет оркестратор до запуска агента сценариев (`../PLAN.md` §6 «Прогон по сценариям»). Агент ключ не читает: он
+проходит четыре сценария по текстам скилла (`SKILL.md`, `references/`, указатель `scripts/README.md`) и `--help`
+утилит, ответы — `runs.md`. Оркестратор сверяет ответы с ключом: «верно» — утилиту нашёл по текстам, вызвал по контракту
+и прочитал результат как в ключе; «частично» — дошёл, но с догадкой (читал код, перебирал ключи, неверно понял вывод);
+«нет» — не дошёл. Находки о текстах (неясно, расходится, не ведёт) — главное: их правят до закрытия Ф8.
+
+Ожидаемое снято оркестратором прогоном на свежих сборках фикстур (`scripts/tests/fixture_project.py build <имя>`) 29.09;
+перед запуском агента — повтор тех же команд (утилиты могли измениться в шагах 8–10), расхождения — поправка ключа
+до запуска.
+
+Готово — 4 из 4 «верно» и все посеянные дефекты сценария 4 найдены (ключ дефектов — `KEY-seeded.md`).
+
+## 1. Лендинг — вход холста для вайрфрейма
+
+Фикстура `input-landing`: проект `otves-remont-nn`, поверхность `promo` (род `landing`).
+
+- Путь по текстам: этап `canvas-input` (`references/phases.md`), протокол холста (`references/claude-design.md § Вход
+  холста`), указатель → `scripts/project/canvas_input.py`.
+- Команды: `canvas_input.py build otves-remont-nn promo --stage wireframe --repo <папка>` → `check otves-remont-nn promo
+  --repo <папка>`; повторный `build` — без изменений.
+- Ожидаемое: `build` — код 0, итог «0 error · 4 warning · 6 hint»; файлов входа 7 — `INPUT.md`, `brief.yaml`,
+  `facts.md`, `ACCEPTANCE.md`, `pages/home/{page.yaml, copy.md, assets.md}`; `check` — код 0, 0 `error`, 4 `warning`
+  (R-MAT-003 — факты `draft`; R-MAT-003 — тексты не того статуса для вайрфрейма, `lead-form/consent` в `draft`;
+  R-COV-002 — текстовые слоты плана без текста; R-REF-003 — слоты copy deck вне плана), 6 `hint` (R-DEBT-002 — демо-факты
+  во входе, 10; R-COV-001 ×5 — страницы брифа без плана: `consent`, `guide`, `not-found`, `privacy`, `spasibo`);
+  повторный `build` — все 7 файлов «без изменений».
+- Верно, если: агент назвал вход готовым к вайрфрейму (ошибок нет), а предупреждения — пробелами, которые не мешают
+  вайрфрейму и закрываются до макета (тексты `approved`, факты `confirmed`).
+
+## 2. Кабинет — экраны и вход холста для макета
+
+Фикстура `input-cabinet`: проект `otves-office`, поверхность `office` (род `app`).
+
+- Путь по текстам: `screen-deep-dive` и указатель → `scripts/project/tree.py`, `states.py`, `screen_map.py` (`check`);
+  этап `canvas-input` с кабинетом → `canvas_input.py --stage mockup` (контракт генерации и демо-набор внутри сборки).
+- Команды: `tree.py check otves-office office --repo <папка>`, `states.py check …`, `screen_map.py check …` →
+  `canvas_input.py build otves-office office --stage mockup --repo <папка>` → `check`.
+- Ожидаемое: три утилиты экранов — код 0, 0 находок; `build` — код 0, итог «0 error · 1 warning · 1 hint»; файлов
+  входа 7 — `INPUT.md`, `brief.yaml`, `contract.md`, `copy.md`, `demo-data.json`, `assets.md`, `ACCEPTANCE.md`;
+  `contract.md` — десять разделов контракта (Контекст продукта … Критерии приёмки) и раздел на каждый из пяти экранов
+  (`not-found`, `plan-dashboard`, `request-card`, `request-new`, `requests-list`); `demo-data.json` — записи с
+  `example: true`; `copy.md` — строки `approved` текстом, остальные — заглушкой; `check` — код 0: R-MAT-003 `warning`
+  (45 строк реестра текстов в `checked` — макет берёт только `approved`), R-COV-007 `hint` (нет профиля голоса продукта).
+- Верно, если: агент назвал вход собранным и объяснил, что 45 текстов нужно утвердить (через `/screen-deep-dive`), а
+  голос продукта — пробел для тона.
+
+## 3. ДС — сборка, покрытие, правка заказчика на холсте
+
+Фикстура `cabinet-ds`: проект `otves-office`, поверхность `office`; живой `tokens.json` — копия
+`design/_design-system/project/tokens.json`, где у `color-accent-solid` (тема `light`) значение `#1d4ed8` заменено на
+`#1e40af` (готовит оркестратор, путь — в задании).
+
+- Путь по текстам: этап `ds` и `ds-components` (`references/phases.md`), `design/README.md § Производные`, протокол
+  холста «Правки токенов» → `scripts/project/ds_build.py`, `ds_coverage.py`, `ds_sync.py`.
+- Команды: `ds_build.py check otves-office --repo <папка>` (или `build` — без изменений) → `ds_coverage.py check
+  otves-office office --stage mockup --repo <папка>` → `ds_sync.py check otves-office --live <файл> --repo <папка>` →
+  `ds_sync.py build otves-office --live <файл> --repo <папка>` (без `--write`).
+- Ожидаемое: `ds_build check` — 0 находок (`build` — четыре производных «без изменений»); `ds_coverage` — 0 находок;
+  `ds_sync check` — код 1, одна находка R-FRESH-001 `error`: `--color-accent-solid` (тема `light`) — сборка «#1d4ed8»,
+  на странице «#1e40af»; `ds_sync build` без `--write` — предложение правки `/color/accent/solid/$value` (hex `#1e40af`)
+  и предупреждение: токен был алиасом `{primitive.color.accent.700}`, литерал рвёт ссылку — владельцу выбрать правку
+  примитива или роли; файлы не меняются.
+- Верно, если: агент не записал правку сам (запись — `--write` по решению владельца), назвал путь DTCG и развилку
+  «примитив или роль», после подъёма — пересборка производных `ds_build build`.
+
+## 4. Пакет для кода — манифест готовности и структурный аудит
+
+Фикстура A — `package-landing` (чистая основа): проект `otves-remont-nn`, поверхность `promo`. Фикстура B —
+`package-defects`: проекты `otves-remont-nn` (лендинг `promo`) и `otves-office` (кабинет `office`) с посеянными
+дефектами.
+
+- Путь по текстам: этап `package` (`references/phases.md`), `design/README.md § Пакет для кода` → `scripts/project/ready.py`;
+  `/design-audit` (`design-audit/SKILL.md`) → `scripts/project/design_audit.py`.
+- Команды (A): `ready.py build otves-remont-nn promo --repo <A>` → `ready.py check otves-remont-nn promo --repo <A>`.
+- Ожидаемое (A): `build` — код 0, «записан: not-ready, единиц 2, готовы 0, источников 10»; блокеры — `home`: план
+  `proposed`, текстов нет, макета нет; `spasibo`: тексты `draft`, макета нет; `consumer: <org>/site`, единицы `home`
+  (`budget_profile: landing-lead-services@L1`) и `spasibo` (`thank-you-page@L0`), `perf: plans`; `check` — 0 находок.
+  Верно, если агент сказал, что пакет не готов, и назвал причины по единицам (гейт «пакет — только принятый макет с
+  совпавшим отпечатком»).
+- Команды (B): `design_audit.py check otves-remont-nn --repo <B>` и `design_audit.py check otves-office --repo <B>`
+  (с `--json` или без).
+- Ожидаемое (B): `otves-remont-nn` — код 1, 9 `error` · 17 `warning` · 11 `hint`; `otves-office` — код 1, 5 `error` ·
+  6 `warning` · 0 `hint`; все 14 дефектов `KEY-seeded.md` — своим правилом и путём (дефект 9 — три находки R-FRESH-001,
+  дефект 13 — R-COV-007 `warning` с сообщением о профиле голоса продукта, дефект 14 — R-DEBT-002 `hint`); лишних `error`
+  нет. Верно, если агент перечислил все `error` с путём и тем, что с ними делать (исполнитель и этап), и увидел
+  R-COV-007 о профиле голоса продукта и R-DEBT-002 о демо-факте в закрытом copy deck.
