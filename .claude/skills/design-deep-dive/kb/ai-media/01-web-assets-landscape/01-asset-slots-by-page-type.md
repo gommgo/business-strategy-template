@@ -451,12 +451,14 @@ Q1 лидеров — «хорошо», медиана — «допустимо�
 ```yaml
 # asset-plan.yaml — шаблон · агент A, волна 1 · 2026-09-23 · [проверено: yaml.safe_load; генерацией не проверено]
 plan_version: 1
+status: draft                    # draft — план пишется; approved — утвердил заказчик, генерация — только по утверждённому
 checked: 2026-09-23              # дата проверки норм плана (бюджеты, размеры, форматы)
 page:
   id: landing-main
-  page_type: saas-landing        # saas-landing | product | ecom-home | ecom-pdp | campaign | studio | corporate | blog | web-app-inserts
+  page_type: landing-saas        # id словаря site — тот же, что в плане страницы
+  media_class: saas-landing      # класс этого раздела — проекция page_type по crosswalk.tsv
   locale: ru-RU
-  audience: "малый бизнес в России"
+  goal: "за 3 секунды показать продукт в деле"   # цель страницы — из плана страницы
 brand:                           # → D, F
   palette_tokens: {bg: "#0E0F12", surface: "#17191E", fg: "#F2F3F5", accent: "#4F7CFF"}
   style_passport: brand/style-passport.md
