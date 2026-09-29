@@ -86,6 +86,8 @@ ZONE_GLOBS = {
             f"{SK}/kb/site/07-seo-geo-performance-analytics/budgets.yaml",
             f"{SK}/kb/site/07-seo-geo-performance-analytics/page-gates.yaml",
             f"{SK}/kb/creative/09-ai-execution-evaluation/effect-gates.yaml", f"{SK}/kb/blender/09-web-runtime/*.yaml",
+            f"{SK}/kb/blender/09-web-runtime/README.md", f"{SK}/kb/creative/01-creative-direction/ambition-levels.yaml",
+            f"{SK}/scripts/site/plan_to_assets.py",
             f"{SK}/scripts/site/README.md", f"{SK}/scripts/ai-media/README.md", f"{SK}/scripts/creative/README.md",
             f"{SK}/scripts/blender/README.md", f"{SK}/scripts/tests/smoke/site.tsv", f"{SK}/scripts/tests/smoke/ai-media.tsv",
             f"{SK}/scripts/tests/smoke/creative.tsv", f"{SK}/scripts/tests/smoke/blender.tsv"],
