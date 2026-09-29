@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Тесты asset_audit.py без сети и платных вызовов: пороги, сверка строк, проверки картинок на синтетике, пакет судьи на
-заглушках ответов (пары, рубрика, калибровочный набор, страница голосования), доверие по порогам группы judge.
+заглушках ответов (пары, рубрика, калибровочный набор, страница голосования), доверие по порогам группы judge; набор
+иконок (шапка Lucide — брак только у Lucide), строки окружения вместо трассировки, командная строка palette.py.
 Запуск: python3 scripts/ai-media/tests/test_asset_audit.py [--ocr] [--keep] [-v]
   --ocr  — ещё и OCR кириллицы (под блокировкой heavy; ≈ 10 с);  --keep — не удалять временную папку.
 Входы, которых нет в скилле (фото и ролики журнала опытов, exiftool), — пропуск с пометкой, не провал."""
@@ -557,7 +558,7 @@ def t_stand_page(tmp):
 
 
 def t_provenance(tmp):
-    """Провенанс через provenance_check.py (+ --corners): надпись в углу → QA-PROV-VISIBLE-MARK (needs_human)."""
+    """Провенанс через provenance_check.py (+ --corners): надпись в углу → QA-PROV-VISIBLE-MARK (warn) и лист углов для глаза."""
     if not (aa.TOOLS / "provenance_check.py").exists():
         check("provenance: нет provenance_check.py — пропуск", True)
         return
@@ -577,7 +578,11 @@ def t_provenance(tmp):
     A = {Path(x["file"]).name: x for x in s["assets"]}
     pm = A["p_marked.png"]["checks"].get("provenance") or {}
     check("provenance: надпись в углу → QA-PROV-VISIBLE-MARK + лист углов",
-          "QA-PROV-VISIBLE-MARK" in codes(A["p_marked.png"], ("needs_human",)) and (tmp / "o_prov" / "p_marked_corners.jpg").exists(), pm)
+          "QA-PROV-VISIBLE-MARK" in codes(A["p_marked.png"]) and (tmp / "o_prov" / "p_marked_corners.jpg").exists(), pm)
+    vm = [d for d in A["p_marked.png"]["defects"] if d["code"] == "QA-PROV-VISIBLE-MARK"]
+    check("provenance: метка в углу — warn с листом углов, не needs_human; лист — в списке «человеку»",
+          vm and all(d["level"] == "warn" and "corners" in str(d.get("evidence")) for d in vm)
+          and any("QA-PROV-VISIBLE-MARK" in (h.get("codes") or []) for h in A["p_marked.png"]["human"]), vm)
     check("provenance: чистый кадр без подозрения на метку", "QA-PROV-VISIBLE-MARK" not in codes(A["p_clean.png"]),
           (A["p_clean.png"]["checks"].get("provenance") or {}).get("visible_suspect"))
     # ворота 12-legal-provenance/04 §5 п. 8: файл ИИ-ассета (есть паспорт) для страницы без машиночитаемой метки →
@@ -599,6 +604,148 @@ def t_provenance(tmp):
     marks_st = ((A["p_web_st.png"]["checks"].get("provenance") or {}).get("summary") or {}).get("marks")
     check("provenance: ИИ-файл для страницы без метки → QA-PROV-NO-MARK; после stamp — нет",
           "QA-PROV-NO-MARK" in codes(A["p_web.png"], ("warn",)) and "QA-PROV-NO-MARK" not in codes(A["p_web_st.png"]), marks_st)
+
+
+# Heroicons v2, outline «home» (MIT): набор со штрихом 1,5, без width и height в шапке, round — у контура, не у корня
+HEROICONS_HOME = ('<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">'
+                  '<path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 '
+                  '9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 '
+                  '1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>')
+
+
+def svg_ready() -> bool:
+    """Пакеты группы svg в Python окружения скилла (им check_icons рисует иконку)."""
+    import subprocess
+    r = subprocess.run([str(aa.VENV_G), "-c", "import cairosvg, svgelements, skimage, scipy"], capture_output=True, text=True)
+    return r.returncode == 0
+
+
+def t_icon_set(tmp):
+    """Шапка и штрих Lucide — брак только у набора Lucide; у другого набора — предупреждение с советом; цвет — брак всегда."""
+    if not svg_ready():
+        check("icon-set: нет пакетов группы svg (install.sh --groups svg) — пропуск", True)
+        return
+    d = tmp / "icon_set"
+    d.mkdir()
+    (d / "home.svg").write_text(HEROICONS_HOME, encoding="utf-8")
+    (d / "home_red.svg").write_text(HEROICONS_HOME.replace('stroke="currentColor"', 'stroke="#e11d48"'), encoding="utf-8")
+    s = audit([d / "home.svg"], tmp / "o_set_lucide")
+    A = s["assets"][0]
+    check("icon-set: Heroicons «home» при наборе Lucide (по умолчанию) — QA-SVG-HEADER fail, как было",
+          A["verdict"] == "fail" and "QA-SVG-HEADER" in codes(A, ("fail",)), codes(A, ("fail",)))
+    s = audit([d / "home.svg", d / "home_red.svg"], tmp / "o_set_hero", icon_set="heroicons")
+    A = {Path(x["file"]).name: x for x in s["assets"]}
+    h = A["home.svg"]
+    hd = [x for x in h["defects"] if x["code"] == "QA-SVG-HEADER"]
+    check("icon-set: Heroicons «home» при наборе heroicons — warn, не fail; уровень — из levels check_icons",
+          h["verdict"] == "warn" and "QA-SVG-HEADER" in codes(h, ("warn",)) and not codes(h, ("fail",))
+          and (h["checks"].get("icon") or {}).get("levels", {}).get("шапка") == "warn", (h["verdict"], codes(h)))
+    check("icon-set: находка шапки у другого набора — с правилом Lucide и советом сверить со спецификацией набора",
+          hd and "stroke-width 2" in hd[0]["msg"] and "сверить" in hd[0]["msg"] and "heroicons" in hd[0]["msg"],
+          [x["msg"] for x in hd])
+    check("icon-set: жёсткий цвет — брак у любого набора (QA-SVG-COLOR fail при heroicons)",
+          "QA-SVG-COLOR" in codes(A["home_red.svg"], ("fail",)), codes(A["home_red.svg"]))
+    ref = kbpaths.data("ai-media", "lucide-ref", "search.svg")
+    if ref.exists():
+        s = audit([ref], tmp / "o_set_ref")
+        check("icon-set: иконка Lucide при наборе Lucide — без флагов шапки", "QA-SVG-HEADER" not in codes(s["assets"][0]),
+              codes(s["assets"][0]))
+
+
+def t_env(tmp):
+    """Нет моделей, пакета или бинарника — одна строка с командой установки вместо трассировки."""
+    import os
+    import subprocess
+    calm_photo((320, 200)).save(tmp / "env.png")
+    saved = aa.OCR_MODELS
+    aa.OCR_MODELS = tmp / "no-models"
+    try:
+        res = aa.run_ocr([tmp / "env.png"], "ru")
+        s = audit([tmp / "env.png"], tmp / "o_env_ocr", ocr="on")
+    finally:
+        aa.OCR_MODELS = saved
+    err = res[0].get("error", "")
+    check("env: нет моделей OCR — одна строка «поставьте scripts/install.sh --groups ocr --models», без запуска OCR",
+          res[0].get("env") and "\n" not in err and "eslav_PP-OCRv5_rec_mobile.onnx" in err
+          and "`scripts/install.sh --groups ocr --models`" in err, err)
+    A = s["assets"][0]
+    check("env: OCR не запущен — строка в errors (needs_human) и в «Окружение» сводки и audit.md",
+          A["verdict"] == "needs_human" and len(A["errors"]) == 1 and A["errors"][0].startswith("OCR не запущен: нет моделей OCR")
+          and s.get("env") == A.get("env") and "--groups ocr --models" in (tmp / "o_env_ocr" / "audit.md").read_text(encoding="utf-8"),
+          (A["errors"], s.get("env")))
+    # нет пакета группы svg: заглушка cairosvg в PYTHONPATH обработчика check_icons → код 2 и одна строка
+    stub = tmp / "stub_nocairo"
+    stub.mkdir()
+    (stub / "cairosvg.py").write_text("raise ImportError('заглушка теста', name='cairosvg')\n", encoding="utf-8")
+    (tmp / "env_icon").mkdir()
+    (tmp / "env_icon" / "home.svg").write_text(HEROICONS_HOME, encoding="utf-8")
+    old = os.environ.get("PYTHONPATH")
+    os.environ["PYTHONPATH"] = str(stub) + (os.pathsep + old if old else "")
+    try:
+        r = subprocess.run([str(aa.VENV_G), str(aa.TOOLS / "check_icons.py"), str(tmp / "env_icon")], capture_output=True, text=True)
+        s = audit([tmp / "env_icon" / "home.svg"], tmp / "o_env_svg")
+    finally:
+        if old is None:
+            os.environ.pop("PYTHONPATH", None)
+        else:
+            os.environ["PYTHONPATH"] = old
+    lines = [x for x in r.stderr.splitlines() if x.strip()]
+    check("env: check_icons без cairosvg — код 2, одна строка «поставьте scripts/install.sh --groups svg»",
+          r.returncode == 2 and len(lines) == 1 and "`scripts/install.sh --groups svg`" in lines[0], (r.returncode, lines))
+    A = s["assets"][0]
+    check("env: asset_audit — check_icons не запущен, одна строка с командой установки",
+          any(e.startswith("check_icons не запущен: нет пакета cairosvg") and "--groups svg" in e for e in A["errors"])
+          and any("--groups svg" in h for h in s.get("env", [])), (A["errors"], s.get("env")))
+    # нет c2patool: провенанс неполон — строка в «Окружение», вердикт не меняется
+    old = os.environ.get("C2PATOOL")
+    os.environ["C2PATOOL"] = str(tmp / "no-c2patool")
+    try:
+        a = aa.build_parser().parse_args(["audit", str(tmp / "env.png"), "--out", str(tmp / "o_env_prov"), "--ocr", "off"])
+        s = aa.audit_paths(a)
+    finally:
+        if old is None:
+            os.environ.pop("C2PATOOL", None)
+        else:
+            os.environ["C2PATOOL"] = old
+    A = s["assets"][0]
+    check("env: нет c2patool — «c2patool не найден — поставьте scripts/install.sh --bin» в «Окружение», errors и вердикт без неё",
+          any(h.startswith("c2patool не найден") and h.endswith("`scripts/install.sh --bin`") for h in s.get("env", []))
+          and not any("c2patool" in e for e in A["errors"]), (s.get("env"), A["errors"], A["verdict"]))
+
+
+def t_palette_cli(tmp):
+    """palette.py из командной строки: картинки → палитра JSON (--k, --json), справка, ошибка входа — код 2."""
+    import subprocess
+    import numpy as np
+    from PIL import Image
+    img = np.zeros((100, 200, 3), np.uint8)
+    img[:, :140] = (200, 60, 40)
+    img[:, 140:] = (30, 90, 160)
+    Image.fromarray(img).save(tmp / "two.png")
+    tool = str(aa.TOOLS / "palette.py")
+    r = subprocess.run([sys.executable, tool, str(tmp / "two.png"), "--k", "2", "--json"], capture_output=True, text=True)
+    try:
+        pal = json.loads(r.stdout)["images"][0]["palette"]
+    except (json.JSONDecodeError, KeyError, IndexError):
+        pal = []
+
+    def near(hx, rgb):
+        return all(abs(int(hx[1 + 2 * i:3 + 2 * i], 16) - v) <= 1 for i, v in enumerate(rgb))
+    check("palette.py --k 2 --json: два цвета с долями 0,7 и 0,3, hex и OKLCH",
+          r.returncode == 0 and len(pal) == 2 and near(pal[0]["hex"], (200, 60, 40)) and abs(pal[0]["share"] - 0.7) < 0.02
+          and near(pal[1]["hex"], (30, 90, 160)) and len(pal[0]["oklch"]) == 3, (r.returncode, pal, r.stderr[-200:]))
+    r = subprocess.run([sys.executable, tool, str(tmp / "two.png"), str(tmp / "two.png"), "--json"], capture_output=True, text=True)
+    try:
+        P = json.loads(r.stdout)
+    except json.JSONDecodeError:
+        P = {}
+    check("palette.py: цветов меньше k — палитра короче, без падения; у двух картинок — общая палитра all",
+          r.returncode == 0 and len(P.get("images", [{}])[0].get("palette", [])) == 2 and "all" in P, (r.returncode, r.stderr[-200:]))
+    r = subprocess.run([sys.executable, tool, "--help"], capture_output=True, text=True)
+    r2 = subprocess.run([sys.executable, tool, str(tmp / "нет.png")], capture_output=True, text=True)
+    check("palette.py --help — справка; нет картинки — код 2 и одна строка",
+          r.returncode == 0 and "--k" in r.stdout and r2.returncode == 2 and len(r2.stderr.strip().splitlines()) == 1,
+          (r.returncode, r2.returncode, r2.stderr))
 
 
 def t_ocr(tmp):
@@ -627,7 +774,8 @@ def run(keep=False, ocr=False, verbose=False):
         for t in (t_thresholds, t_text, lambda: t_image_cutout_texture(tmp), lambda: t_edit(tmp), lambda: t_video(tmp),
                   lambda: t_svg_series(tmp), lambda: t_judge_package(tmp), lambda: t_judge_rubric(tmp),
                   lambda: t_judge_trust(tmp), lambda: t_judge_calibration(tmp), lambda: t_stand_page(tmp),
-                  lambda: t_provenance(tmp)) + ((lambda: t_ocr(tmp),) if ocr else ()):
+                  lambda: t_provenance(tmp), lambda: t_icon_set(tmp), lambda: t_env(tmp),
+                  lambda: t_palette_cli(tmp)) + ((lambda: t_ocr(tmp),) if ocr else ()):
             try:
                 t()
             except Exception as e:  # noqa: BLE001

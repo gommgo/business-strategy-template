@@ -1,9 +1,19 @@
 #!/usr/bin/env python3
-"""F/05 palette.py — палитра (k-means в OKLab с долями), ΔE к эталону, перенос цвета (Reinhard, MKL) и экспорт 3D LUT (.cube).
-Python 3.13, numpy, Pillow. [проверено: 99-raw/experiments/F/05-color]
-  palette(img, k=6) -> [(hex, share)]            — доминирующие цвета по площади
+"""palette.py — палитра картинки (k-means в OKLab с долями), ΔE к эталону, перенос цвета (Reinhard, MKL) и экспорт 3D LUT
+(.cube). Python окружения скилла: numpy, Pillow.
+
+Командная строка — замер палитры ассетов (этап design-system: палитра ключевых ассетов кодом, не со слов модели):
+  palette.py IMG… [--k 6] [--json]
+    на картинку — доминирующие цвета по площади: hex, доля, OKLCH (L, C, h°) и нейтрали — средние a, b OKLab пикселей с
+    хромой < 0,03 (b > 0 — тёплые, b < 0 — холодные) и медиана хромы; у двух картинок и больше — ещё общая палитра всех
+    (all); без --json — таблица. Картинка не читается — одна строка ошибки и код 2.
+
+Модуль (импорт из соседних утилит):
+  load(path, w=800) -> float RGB 0…1             — картинка, уменьшенная до стороны w
+  palette(img, k=6) -> [(hex, share, oklab)]      — доминирующие цвета по площади; цветов меньше k — палитра короче
   adherence(pal, ref_pal) -> ΔE OKLab             — средняя по площади дистанция цветов картинки до ближайшего цвета эталона
   transfer_reinhard(src, ref, strength) / transfer_mkl(src, ref, strength) — глобальный перенос в OKLab
+  grade_params, grade_match, parametric_grade     — грейд без содержания и параметрический грейд паспорта
   write_cube(fn, func, n=33)                      — LUT: func применяется к решётке sRGB, порядок R быстрее всего (Adobe .cube 1.0)"""
 import numpy as np
 from PIL import Image
@@ -20,7 +30,11 @@ def palette(img, k=6, iters=20, seed=0):
     X = to_oklab(img.reshape(-1, 3)); rng = np.random.default_rng(seed); X = X[rng.choice(len(X), min(20000, len(X)), replace=False)]
     C = X[[rng.integers(len(X))]]
     for _ in range(k - 1):                                          # k-means++
-        d = ((X[:, None] - C[None]) ** 2).sum(-1).min(1); C = np.vstack([C, X[rng.choice(len(X), p=d / d.sum())]])
+        d = ((X[:, None] - C[None]) ** 2).sum(-1).min(1)
+        if not d.sum() > 0:                                         # цветов меньше k: центров столько, сколько цветов
+            break
+        C = np.vstack([C, X[rng.choice(len(X), p=d / d.sum())]])
+    k = len(C)
     for _ in range(iters):
         lab_ = ((X[:, None] - C[None]) ** 2).sum(-1).argmin(1)
         C = np.array([X[lab_ == j].mean(0) if (lab_ == j).any() else C[j] for j in range(k)])
@@ -68,3 +82,53 @@ def parametric_grade(img, wb_ab=(0.0, 0.008), chroma=0.9, black=0.03, white=0.98
     C = np.hypot(X[:, 1], X[:, 2]); w = np.clip(1 - C / neutral_c, 0, 1)[:, None]
     ab = X[:, 1:] * chroma + w * np.array(wb_ab)
     return from_oklab(np.column_stack([L2, ab])).reshape(img.shape)
+
+def oklch(lab):
+    """OKLab → [L, C, h°]."""
+    L, a, b = (float(v) for v in lab)
+    return [round(L, 4), round(float(np.hypot(a, b)), 4), round(float(np.degrees(np.arctan2(b, a)) % 360), 1)]
+
+def measure(img, k=6, neutral_c=0.03):
+    """Замер командной строки: палитра (hex, доля, OKLCH) и нейтрали (средние a, b OKLab пикселей с хромой < neutral_c)."""
+    X = to_oklab(img.reshape(-1, 3)); C = np.hypot(X[:, 1], X[:, 2]); n = C < neutral_c
+    return {"palette": [{"hex": h, "share": round(s, 4), "oklch": oklch(c)} for h, s, c in palette(img, k)],
+            "neutral": {"share": round(float(n.mean()), 4), "a": round(float(X[n, 1].mean()), 4) if n.any() else None,
+                        "b": round(float(X[n, 2].mean()), 4) if n.any() else None, "chroma_median": round(float(np.median(C)), 4)}}
+
+def to_text(rec, title):
+    lines = [f"{title}", "  hex       доля    L       C       h°"]
+    lines += [f"  {c['hex']}  {c['share']:.3f}  {c['oklch'][0]:.3f}  {c['oklch'][1]:.4f}  {c['oklch'][2]:.1f}" for c in rec["palette"]]
+    nt = rec["neutral"]
+    ab = f"a {nt['a']:+.4f}, b {nt['b']:+.4f}" if nt["a"] is not None else "нейтралей нет"
+    lines.append(f"  нейтрали (хрома < 0,03): доля {nt['share']:.3f}, {ab}; медиана хромы {nt['chroma_median']:.4f}")
+    return "\n".join(lines)
+
+def main(argv=None):
+    import argparse, json, sys
+    ap = argparse.ArgumentParser(prog="palette.py", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("images", nargs="+", metavar="IMG", help="картинки (ключевые ассеты)")
+    ap.add_argument("--k", type=int, default=6, help="число цветов палитры (по умолчанию 6)")
+    ap.add_argument("--json", action="store_true", help="JSON в stdout: {k, images: [{file, palette, neutral}], all}")
+    a = ap.parse_args(argv)
+    if a.k < 1:
+        ap.error("--k — не меньше 1")
+    out, imgs = {"k": a.k, "images": []}, []
+    for p in a.images:
+        try:
+            img = load(p)
+        except (OSError, ValueError) as e:
+            print(f"palette.py: картинка не читается: {p} ({type(e).__name__}: {e})", file=sys.stderr)
+            return 2
+        imgs.append(img)
+        out["images"].append({"file": p, **measure(img, a.k)})
+    if len(imgs) > 1:   # общая палитра: пиксели всех картинок вместе (каждая уменьшена до стороны 800)
+        out["all"] = measure(np.concatenate([i.reshape(-1, 3) for i in imgs])[None], a.k)
+    if a.json:
+        print(json.dumps(out, ensure_ascii=False, indent=1))
+    else:
+        print("\n\n".join([to_text(r, r["file"]) for r in out["images"]] + ([to_text(out["all"], "все картинки")] if "all" in out else [])))
+    return 0
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(main())

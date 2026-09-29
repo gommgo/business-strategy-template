@@ -8,7 +8,9 @@ video_loop_check.py (петли), check_icons.py (иконки), mp_client.py (�
 палитра, приёмка, запреты), паспорта генераций polza.py и mp_client.py, провенанс (provenance_check.py, exiftool,
 c2patool), OCR кириллицы (RapidOCR + PP-OCRv5 eslav). Пороги — kb/ai-media/11-evaluation-qa/thresholds.yaml (у каждого —
 источник). Вход — файл, список или папка с паспортами. Выход — JSON-вердикт с кодами дефектов (asset-audit/1),
-Markdown-сводка и контактный лист для человека.
+Markdown-сводка и контактный лист для человека. Нет пакета, модели или программы окружения — проверка не запускается: в
+`errors` ассета и в строках «Окружение» сводки — одна строка с командой установки (`scripts/install.sh --groups ocr
+--models`, `--groups svg`, `--bin`, `--ffmpeg`).
 
 Режимы (--mode; auto — по паспорту, коду задачи, альфе и расширению):
   image       фото, иллюстрация, фон, 3D-объект: размеры, цвет-слоп, композиция, зона текста, палитра, текст (OCR), провенанс
@@ -20,13 +22,14 @@ Markdown-сводка и контактный лист для человека.
   video-loop  шов на мезонине, живость (+ --control), склейки, угасание, пинг-понг, камера, звук, мерцание яркости,
               синемаграф (--mask → drift)
   video-alpha хромакей-исходник (chroma) или файл с альфой (pix_fmt)
-  svg-icon    линейная иконка (check_icons, пороги Lucide) или цветной SVG (фон, корень, <image>, <text>, подпись Recraft)
+  svg-icon    линейная иконка (check_icons, пороги Lucide; шапка и штрих Lucide — брак только у набора Lucide, у другого
+              набора — предупреждение: --icon-set) или цветной SVG (фон, корень, <image>, <text>, подпись Recraft)
   og          OG-картинка 1200×630: размер, вес, текст (OCR), поля, + всё из image
 
 Команды:
   audit PATH… [--mode M] [--out DIR] [--dna DNA.json] [--spec SPEC.json] [--expect "строка"]… [--orig O] [--mask M]
         [--control C] [--ref-alpha GT] [--text-zone x0,y0,x1,y1] [--slot hero|section|product|icon|og] [--stage web]
-        [--mobile] [--strict]
+        [--mobile] [--icon-set НАБОР] [--strict]
   ocr IMG… [--lang ru|en] [--expect …]      OCR под блокировкой heavy + сверка со строками
   thresholds [--check]                       пороги с источниками; --check — у каждого есть source
   judge-jobs (--items F | --from-stand-page DIR | --calibration [--pairs ID,…]) [--rubric R] [--mode M] [--runs 3]
@@ -68,15 +71,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))  # scrip
 import kbpaths  # noqa: E402
 ROOT = kbpaths.kb("ai-media")
 TOOLS = kbpaths.scripts("ai-media")
-EXP = ROOT / "99-raw" / "experiments"
 LOCKS = Path(kbpaths.lock_path("heavy", "ai-media")).parent  # $DDD_HOME/locks/ai-media/{heavy,browser,blender}.lock
 THRESHOLDS = ROOT / "11-evaluation-qa" / "thresholds.yaml"
 RUBRICS = ROOT / "11-evaluation-qa" / "rubrics"
 VENV_K = Path(kbpaths.python())  # Python окружения скилла: rapidocr для OCR
 VENV_G = Path(kbpaths.python())  # Python окружения скилла: cairosvg, svgelements
 OCR_MODELS = kbpaths.models("ocr")
-A04 = F02 = F04 = F05 = F06 = G_EXP = TOOLS  # модули проверок — рядом, в scripts/ai-media
 LUCIDE_REF = kbpaths.data("ai-media", "lucide-ref")
+ICON_SET = "lucide"             # набор иконок по умолчанию (--icon-set; у продукта — conventions.icons.set карты решений)
+INSTALL = "scripts/install.sh"  # установка окружения скилла (путь от корня скилла)
 EXIFTOOL = Path(kbpaths.which("exiftool"))
 C2PATOOL = Path(kbpaths.which("c2patool"))
 IMG_EXT = (".png", ".jpg", ".jpeg", ".webp", ".avif", ".gif", ".bmp", ".tif", ".tiff")
@@ -89,7 +92,7 @@ sys.path.insert(0, str(TOOLS))
 
 
 def _load(name: str, path: Path):
-    """Импорт модуля по пути (утилиты соседей и скрипты опытов, которые можно импортировать без побочных эффектов)."""
+    """Импорт модуля по пути (утилиты-соседи из scripts/ai-media импортируются без побочных эффектов)."""
     key = f"_aa_{name}"
     if key in sys.modules:
         return sys.modules[key]
@@ -108,9 +111,9 @@ def mod(name: str):
     paths = {"edit_check": TOOLS / "edit_check.py", "alpha_check": TOOLS / "alpha_check.py",
              "tile_check": TOOLS / "tile_check.py", "video_loop_check": TOOLS / "video_loop_check.py",
              "stand_run": TOOLS / "stand_run.py", "vlm_to_dna": TOOLS / "vlm_to_dna.py", "mp_client": TOOLS / "mp_client.py",
-             "ab_analyze": TOOLS / "ab_analyze.py", "image_metrics": A04 / "image_metrics.py",
-             "composition_metrics": F04 / "composition_metrics.py", "text_zone": F02 / "text_zone.py",
-             "series_metrics": F06 / "series_metrics.py", "split_grid": F06 / "split_grid.py"}
+             "image_metrics": TOOLS / "image_metrics.py",
+             "composition_metrics": TOOLS / "composition_metrics.py", "text_zone": TOOLS / "text_zone.py",
+             "series_metrics": TOOLS / "series_metrics.py", "split_grid": TOOLS / "split_grid.py"}
     return _load(name, paths[name])
 
 
@@ -170,6 +173,17 @@ def free_gb() -> float | None:
     except OSError:
         return None
     return None
+
+
+def env_hint(what: str, flags: str) -> str:
+    """Одна строка о недостающем окружении: чего нет и какой командой поставить (вместо трассировки)."""
+    return f"{what} — поставьте `{INSTALL} {flags}`"
+
+
+def last_line(text: str, n: int = 300) -> str:
+    """Последняя непустая строка вывода (у трассировки — строка исключения)."""
+    lines = [ln.strip() for ln in (text or "").splitlines() if ln.strip()]
+    return (lines[-1] if lines else "")[:n]
 
 
 def _ancestor_holds_lock(lock_name: str) -> bool:
@@ -282,6 +296,7 @@ class Report:
         self.defects: list[dict] = []
         self.human: list[dict] = []
         self.errors: list[str] = []
+        self.env: set[str] = set()      # чего нет в окружении: одна строка с командой установки на недостающее
         self.meta: dict = {}
         self.markers: set[str] = set()
 
@@ -312,6 +327,13 @@ class Report:
     def ask_human(self, item: str, why: str, codes: list[str] | None = None):
         self.human.append({"item": item, "why": why, **({"codes": codes} if codes else {})})
 
+    def no_env(self, hint: str, check: str | None = None):
+        """Нет окружения: hint — одна строка «чего нет — поставьте `scripts/install.sh …`». С именем проверки строка идёт и в
+        errors: проверка не запущена, вердикт — не ниже needs_human; без имени — только в env (сведения неполны)."""
+        self.env.add(hint)
+        if check:
+            self.errors.append(f"{check} не запущен: {hint}")
+
     def verdict(self) -> str:
         lv = max([self.LEVELS[d["level"]] for d in self.defects] + [0])
         if self.errors and lv < 2:
@@ -324,7 +346,8 @@ class Report:
                 "mode": self.mode, **self.meta, "verdict": v,
                 "summary": {k: sum(1 for d in self.defects if d["level"] == k) for k in ("fail", "needs_human", "warn", "info")},
                 "markers": sorted(self.markers), "defects": self.defects, "human": self.human, "checks": self.checks,
-                "errors": self.errors, "thresholds": {"file": self.th.doc.get("_path"), "sha": self.th.doc.get("_sha")}}
+                "errors": self.errors, **({"env": sorted(self.env)} if self.env else {}),
+                "thresholds": {"file": self.th.doc.get("_path"), "sha": self.th.doc.get("_sha")}}
 
 
 # ================================================================ OCR (RapidOCR + PP-OCRv5, Python окружения скилла)
@@ -341,6 +364,7 @@ OCR_SETS = {
 }
 OCR_SNIFF_REC = "en_PP-OCRv5_rec_mobile.onnx"   # второй распознаватель по тем же рамкам строк — «латинский нюх»
 OCR_DET_LIMIT = (1600, "max")
+OCR_INSTALL = "--groups ocr --models"
 
 
 def _ocr_model_path(name: str) -> str:
@@ -348,6 +372,15 @@ def _ocr_model_path(name: str) -> str:
         import rapidocr
         return str(Path(rapidocr.__file__).parent / "models" / name[1:])
     return str(OCR_MODELS / name)
+
+
+def ocr_missing(lang: str = "ru") -> str | None:
+    """Модели набора lang, которых нет в $DDD_HOME/models/ocr, — строка с командой установки, иначе None. Модели из колеса
+    rapidocr («@») проверяет обработчик: они приходят с пакетом."""
+    det, rec = OCR_SETS[lang]
+    names = [det, rec] + ([OCR_SNIFF_REC] if lang.startswith("ru") else [])
+    miss = [n for n in dict.fromkeys(names) if not n.startswith("@") and not (OCR_MODELS / n).is_file()]
+    return env_hint(f"нет моделей OCR ({', '.join(miss)})", OCR_INSTALL) if miss else None
 
 
 def ocr_lines(boxes, txts, scores, y_overlap=0.5):
@@ -453,6 +486,9 @@ def run_ocr(paths: list, lang: str = "ru", text_score: float = 0.3, timeout: int
     """OCR отдельным процессом Python окружения скилла под heavy.lock (одна загрузка моделей на пачку картинок)."""
     if not VENV_K.exists():
         return [{"file": str(p), "error": "нет Python окружения скилла с rapidocr — scripts/install.sh"} for p in paths]
+    miss = ocr_missing(lang)
+    if miss:   # до запуска: нет моделей — одна строка с командой установки, обработчик не стартует
+        return [{"file": str(p), "error": miss, "env": True} for p in paths]
     fg = free_gb()
     if fg is not None and fg < 1.0:
         return [{"file": str(p), "error": f"мало памяти ({fg:.1f} ГБ available) — OCR не запущен"} for p in paths]
@@ -462,7 +498,7 @@ def run_ocr(paths: list, lang: str = "ru", text_score: float = 0.3, timeout: int
     try:
         return json.loads(r.stdout)
     except json.JSONDecodeError:
-        return [{"file": str(p), "error": f"OCR упал: {(r.stderr or r.stdout)[-400:]}"} for p in paths]
+        return [{"file": str(p), "error": f"OCR упал: {last_line(r.stderr or r.stdout) or f'код {r.returncode}'}"} for p in paths]
 
 
 # ================================================================ сверка текста (кириллица): классы ошибок, GNED
@@ -1054,8 +1090,7 @@ def check_palette(R: Report, path: Path, dna: dict | None, spec: dict | None):
 
 def provenance(path: Path, out_dir: Path | None = None) -> dict:
     lp = TOOLS / "provenance_check.py"
-    alt = sorted((EXP / "L").glob("*/provenance_check.py")) if (EXP / "L").exists() else []
-    tool = lp if lp.exists() else (alt[0] if alt else None)
+    tool = lp if lp.exists() else None
     if tool:   # `provenance_check.py scan PATH --json F` (C2PA, IPTC/XMP, AIGC, подпись Recraft, маркеры)
         try:   # + `--corners` (ворота L 04 §5 п. 7): эвристика видимой метки в углах и лист углов для глаза / VLM
             sheet = None
@@ -1072,10 +1107,13 @@ def provenance(path: Path, out_dir: Path | None = None) -> dict:
                     shutil.copyfile(cs, sheet)
             f = (d.get("files") or [{}])[0]
             s = f.get("summary") or {}
+            # бинарники, которых provenance_check не нашёл: метки C2PA и XMP не прочитаны — сведения неполны
+            missing = [b for b, part in (("c2patool", "c2pa"), ("exiftool", "exif"))
+                       if "не найден" in str((f.get(part) or {}).get("error") or "")]
             return {"tool": f"{rel(tool)} {d.get('version', '')}".strip(), "c2pa_present": (f.get("c2pa") or {}).get("present"),
                     "c2pa": f.get("c2pa"), "digital_source_type": (f.get("exif") or {}).get("digital_source_type"),
                     "markers": f.get("bytes_markers"), "summary": s, "visible_suspect": s.get("visible_suspect") or [],
-                    "corners_sheet": rel(sheet) if sheet else None}
+                    "corners_sheet": rel(sheet) if sheet else None, **({"missing": missing} if missing else {})}
         except Exception as e:  # noqa: BLE001
             return {"tool": rel(tool), "error": str(e)[:200]}
     out: dict = {"tool": "exiftool + c2patool (сырые факты; юридическая оценка — L)"}
@@ -1137,11 +1175,18 @@ def audit_image(R: Report, path: Path, facts, a, ctx):
 def check_ssimulacra(R: Report, path: Path, master: Path, slot: str | None):
     """Производная для страницы против мастера: SSIMULACRA2 (H 08/04 §1.2: ≥ 80 hero, ≥ 70 прочее)."""
     s2 = kbpaths.bin_dir("libjxl", "tools", "ssimulacra2")
-    if not s2.exists() or not master.exists():
+    if not master.exists():
+        R.errors.append(f"SSIMULACRA2 не запущен: нет мастера {master}")
         return
+    ext = path.suffix.lower()
+    dec_bin = {".avif": kbpaths.bin_dir("libavif", "avifdec"), ".webp": kbpaths.bin_dir("libwebp", "dwebp"),
+               ".jxl": kbpaths.bin_dir("libjxl", "tools", "djxl")}.get(ext)
+    for b in (s2, dec_bin):
+        if b is not None and not b.exists():
+            R.no_env(env_hint(f"{b.name} не найден", "--bin"), "SSIMULACRA2")
+            return
     with tempfile.TemporaryDirectory() as td:
         dec = Path(td) / "dec.png"
-        ext = path.suffix.lower()
         if ext == ".avif":
             subprocess.run([str(kbpaths.bin_dir() / "libavif/avifdec"), str(path), str(dec)], capture_output=True)
         elif ext == ".webp":
@@ -1615,35 +1660,52 @@ def audit_svg(R: Report, path: Path, facts, a, ctx):
         R.defect("QA-SVG-HEAVY", "warn", f"{kb:.1f} КБ > {lim} КБ — svgo (−57…−65 % у Recraft) или растр AVIF", metric="file.bytes",
                  value=round(kb, 1), threshold=lim)
     if si["style"] == "line":
-        check_icons(R, path)
+        check_icons(R, path, getattr(a, "icon_set", None) or ICON_SET)
     R.ask_human("Узнаётся ли метафора иконки за 5 секунд без подписи?", "новые метафоры узнаются 2 из 5 (G/01); геометрию код "
                 "проверяет, смысл — человек или VLM с контролем (G-06)")
     return R
 
 
-def check_icons(R: Report, path: Path):
-    """check_icons.py (пороги по Lucide 1.47) — в Python окружения скилла; иконка копируется во временную папку."""
+def is_lucide(icon_set: str | None) -> bool:
+    """Набор Lucide (lucide, Lucide, lucide-static …): шапка и штрих Lucide для него — правило набора, а не совет."""
+    return str(icon_set or ICON_SET).strip().lower().startswith("lucide")
+
+
+def check_icons(R: Report, path: Path, icon_set: str = ICON_SET):
+    """check_icons.py (пороги по Lucide 1.47) — в Python окружения скилла; иконка копируется во временную папку. Уровень
+    флага — поле levels ответа: жёсткий цвет — брак у любого набора; шапка и штрих Lucide (24×24, stroke 2, round) — брак
+    только у набора Lucide, у другого набора — предупреждение с советом; остальные флаги — предупреждения."""
     if not VENV_G.exists():
         R.errors.append("нет Python окружения скилла — check_icons не запущен")
         return
     with tempfile.TemporaryDirectory() as td:
         shutil.copy(path, Path(td) / path.name)
         out = Path(td) / "r.json"
-        r = subprocess.run([str(VENV_G), str(G_EXP / "check_icons.py"), td, "--ref", str(LUCIDE_REF), "--json", str(out)],
-                           capture_output=True, text=True, timeout=300)
+        r = subprocess.run([str(VENV_G), str(TOOLS / "check_icons.py"), td, "--ref", str(LUCIDE_REF), "--set", icon_set,
+                            "--json", str(out)], capture_output=True, text=True, timeout=300)
         if not out.exists():
-            R.errors.append(f"check_icons: {(r.stderr or r.stdout)[-300:]}")
+            line = last_line(r.stderr or r.stdout) or f"код {r.returncode}"
+            if r.returncode == 2 and INSTALL in line:   # нет пакетов группы svg — одна строка с командой установки
+                R.no_env(line.removeprefix("check_icons.py: "), "check_icons")
+            else:
+                R.errors.append(f"check_icons: {line}")
             return
         res = json.loads(out.read_text(encoding="utf-8")).get(path.stem, {})
     R.checks["icon"] = res
+    levels = res.get("levels") or {}
     for f in res.get("flags", []):
-        code, lvl = {"шапка": ("QA-SVG-HEADER", "fail"), "цвет": ("QA-SVG-COLOR", "fail")}.get(f.split()[0], (None, None))
-        if code is None:
-            code = {"поле<1": "QA-SVG-MARGIN", "зазор": "QA-SVG-GAP", "узко": "QA-SVG-NARROW", "вес": "QA-SVG-WEIGHT",
-                    "центр": "QA-SVG-CENTER", "сетка": "QA-SVG-GRID"}.get(f.split()[0], "QA-SVG-FLAG")
-            lvl = "warn"
-        R.defect(code, lvl, f"check_icons: {f} (пороги по Lucide 1.47, G/01)", metric="icon.flags", value=f,
-                 th_key="svg.check_icons_flags")
+        key = f.split()[0]
+        code = {"шапка": "QA-SVG-HEADER", "цвет": "QA-SVG-COLOR", "поле<1": "QA-SVG-MARGIN", "зазор": "QA-SVG-GAP",
+                "узко": "QA-SVG-NARROW", "вес": "QA-SVG-WEIGHT", "центр": "QA-SVG-CENTER", "сетка": "QA-SVG-GRID"}.get(key, "QA-SVG-FLAG")
+        lvl = levels.get(key) or ("fail" if key == "цвет" or (key == "шапка" and is_lucide(icon_set)) else "warn")
+        msg = f"check_icons: {f} (пороги по Lucide 1.47, G/01)"
+        if key == "шапка":
+            msg = (f"check_icons: шапка не по спецификации Lucide ({', '.join(res.get('header_bad') or [])}; правило — "
+                   "viewBox 0 0 24 24, 24×24, fill none, stroke currentColor, stroke-width 2, round cap/join)")
+            if lvl != "fail":
+                msg += (f" — у набора «{icon_set}» это предупреждение: сверить шапку и штрих со спецификацией набора, "
+                        "иконки под Lucide не подгонять")
+        R.defect(code, lvl, msg, metric="icon.flags", value=f, th_key="svg.check_icons_flags")
 
 
 def audit_og(R: Report, path: Path, facts, a, ctx):
@@ -1678,7 +1740,10 @@ def apply_text(reports: list[Report], ocr_res: dict, a):
         if o is None:
             continue
         if "error" in o:
-            R.errors.append(f"OCR: {o['error']}")
+            if o.get("env"):
+                R.no_env(o["error"], "OCR")
+            else:
+                R.errors.append(f"OCR: {o['error']}")
             continue
         lines = o.get("lines", [])
         R.checks["ocr"] = {"lines": [{k: L.get(k) for k in ("text", "score_min", "score_line", "h_px", "box", "text_en")} for L in lines],
@@ -1949,7 +2014,13 @@ def audit_paths(a) -> dict:
             MODES[mode](R, path, facts, a, ctx)
         except Exception as e:  # noqa: BLE001
             import traceback
-            R.errors.append(f"{type(e).__name__}: {e}"[:300])
+            prog = Path(str(getattr(e, "filename", "") or "")).name if isinstance(e, FileNotFoundError) else ""
+            if prog in ("ffmpeg", "ffprobe"):   # нет программы окружения — одна строка с командой установки
+                R.no_env(env_hint(f"{prog} не найден", "--ffmpeg"), f"режим {mode}")
+            elif prog and str(e.filename).startswith(str(kbpaths.bin_dir())):
+                R.no_env(env_hint(f"{prog} не найден", "--bin"), f"режим {mode}")
+            else:
+                R.errors.append(f"{type(e).__name__}: {e}"[:300])
             if getattr(a, "debug", False):
                 traceback.print_exc()
         exp = list(getattr(a, "expect", None) or [])
@@ -1973,16 +2044,24 @@ def audit_paths(a) -> dict:
             try:
                 P = provenance(R.path, out_dir)
                 R.checks["provenance"] = P
-                if P.get("visible_suspect"):   # эвристика L: ≈ половина надписей в углах, ≈ 1 ложное из 10 фото → только человек
-                    R.defect("QA-PROV-VISIBLE-MARK", "needs_human",
-                             f"подозрение на видимую метку в углу ({', '.join(P['visible_suspect'][:4])}) — смотреть "
-                             f"{P.get('corners_sheet') or 'лист углов'}; метку вендора не вырезать кропом без решения заказчика "
-                             "(12-legal-provenance/04 §5 п. 7)", evidence=P.get("corners_sheet"))
+                for b in P.get("missing") or []:   # метки не прочитаны целиком — сведения, вердикт не меняют
+                    what = {"c2patool": "C2PA", "exiftool": "XMP и EXIF"}.get(b, b)
+                    R.no_env(env_hint(f"{b} не найден (провенанс: метки {what} не прочитаны)", "--bin"))
+                if P.get("visible_suspect"):   # эвристика углов шумная (срабатывает и на фото без метки) → предупреждение с листом углов
+                    sheet = P.get("corners_sheet") or "лист углов"
+                    R.defect("QA-PROV-VISIBLE-MARK", "warn",
+                             f"подозрение на видимую метку в углу ({', '.join(P['visible_suspect'][:4])}) — посмотреть {sheet}; "
+                             "метку вендора не вырезать кропом без решения заказчика (12-legal-provenance/04 §5 п. 7)",
+                             evidence=P.get("corners_sheet"))
+                    R.ask_human(f"Лист углов {sheet}: есть ли видимая метка вендора (водяной знак, логотип, надпись «AI»)?",
+                                "эвристика углов даёт ложные срабатывания — решает глаз (12-legal-provenance/04 §5 п. 7)",
+                                ["QA-PROV-VISIBLE-MARK"])
                 marks = (P.get("summary") or {}).get("marks")
                 if R.meta.get("stage") == "web" and R.meta.get("generation") and marks is not None and not marks:
                     # ворота L 04 §5 п. 8: у производной ИИ-ассета для страницы — машиночитаемая метка (C2PA теряется при любом кодировании)
                     R.defect("QA-PROV-NO-MARK", "warn", "в файле для страницы нет машиночитаемой метки ИИ (C2PA / XMP DigitalSourceType / "
-                             "AIGC) — `provenance_check.py stamp IN OUT --dst trained|composite` (12-legal-provenance/02 §5, 04 §5 п. 8)")
+                             "AIGC) — `provenance_check.py stamp IN OUT --dst trained|composite` (12-legal-provenance/02 §5, 04 §5 п. 8)"
+                             + (f"; метки прочитаны не целиком: нет {', '.join(P['missing'])}" if P.get("missing") else ""))
             except Exception as e:  # noqa: BLE001
                 R.checks["provenance"] = {"error": str(e)[:200]}
         finish(R, R.meta.get("slot"))
@@ -1994,9 +2073,11 @@ def audit_paths(a) -> dict:
         imgs = [R.path for R in reports if R.path.suffix.lower() in IMG_EXT]
         if imgs:
             series = audit_series(imgs, th, a, out_dir, dna)
+    env = sorted(set().union(*(R.env for R in reports)))
     summary = {"schema": SCHEMA, "tool": f"asset_audit.py {VERSION}", "checked_at": now_iso(), "out": rel(out_dir),
                "thresholds": {"file": th_doc.get("_path"), "sha": th_doc.get("_sha")}, "n": len(results),
                "verdicts": {v: sum(1 for r in results if r["verdict"] == v) for v in ("pass", "warn", "needs_human", "fail")},
+               **({"env": env} if env else {}),
                "assets": results, "series": series, "index_sheet": index_sheet(reports, out_dir / "index_sheet.jpg")}
     (out_dir / "audit.json").write_text(jdump(summary), encoding="utf-8")
     (out_dir / "audit.md").write_text(audit_md(summary), encoding="utf-8")
@@ -2005,8 +2086,10 @@ def audit_paths(a) -> dict:
 
 def audit_md(s: dict) -> str:
     L = [f"# Приёмка ассетов — {s['checked_at']}", "", f"Пороги: `{s['thresholds']['file']}` ({s['thresholds']['sha']}); итог: "
-         + ", ".join(f"{k} {v}" for k, v in s["verdicts"].items()), "",
-         "| Файл | Режим | Вердикт | Дефекты (не info) | Человеку |", "|---|---|---|---|---|"]
+         + ", ".join(f"{k} {v}" for k, v in s["verdicts"].items()), ""]
+    if s.get("env"):
+        L += ["Окружение неполное — проверки без него не запущены или сведения неполны:"] + [f"- {h}" for h in s["env"]] + [""]
+    L += ["| Файл | Режим | Вердикт | Дефекты (не info) | Человеку |", "|---|---|---|---|---|"]
     for r in s["assets"]:
         codes = ", ".join(sorted({d["code"] for d in r["defects"] if d["level"] != "info"})) or "—"
         L.append(f"| `{Path(r['file']).name}` | {r['mode']} | **{r['verdict']}** | {codes} | {len(r['human'])} |")
@@ -3097,7 +3180,15 @@ def cmd_calibrate(a):
 
 def cmd_ocr_worker(a):
     lim = a.det_limit.split(":")
-    print(json.dumps(ocr_worker(a.paths, a.lang, a.text_score, not a.no_relines, (int(lim[0]), lim[1])), ensure_ascii=False))
+    try:   # ошибки картинок ocr_worker ловит сам; наружу выходят только пакет и загрузка моделей — это окружение
+        res = ocr_worker(a.paths, a.lang, a.text_score, not a.no_relines, (int(lim[0]), lim[1]))
+    except ImportError as e:
+        hint = env_hint(f"нет пакета {e.name or 'rapidocr'} (группа ocr)", OCR_INSTALL)
+        res = [{"file": p, "lang": a.lang, "error": hint, "env": True} for p in a.paths]
+    except Exception as e:  # noqa: BLE001
+        hint = env_hint(f"модели OCR не загрузились ({type(e).__name__}: {last_line(str(e), 200)})", OCR_INSTALL)
+        res = [{"file": p, "lang": a.lang, "error": hint, "env": True} for p in a.paths]
+    print(json.dumps(res, ensure_ascii=False))
     return 0
 
 
@@ -3157,6 +3248,9 @@ def build_parser():
     u.add_argument("--spec", help="спецификация ассета (05-prompting/asset-spec.schema.json): зона текста, палитра, строки")
     u.add_argument("--task", help="код задачи (IMG-HERO-PHOTO …), если нет паспорта")
     u.add_argument("--slot", choices=["hero", "section", "product", "icon", "og", "texture"])
+    u.add_argument("--icon-set", default=ICON_SET, metavar="НАБОР",
+                   help="набор иконок продукта (conventions.icons.set карты решений), по умолчанию lucide: шапка и штрих Lucide "
+                        "(24×24, stroke 2, round) — брак только у набора Lucide, у другого набора — предупреждение")
     u.add_argument("--stage", default="master", choices=["master", "web"], help="web — файл на страницу: бюджеты веса")
     u.add_argument("--mobile", action="store_true",
                    help="телефонный кадр слота: бюджет <слот>_mobile_kb (hero ≤ 80 КБ), без проверки размера мастера hero")

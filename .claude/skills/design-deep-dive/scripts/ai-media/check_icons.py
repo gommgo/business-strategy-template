@@ -1,19 +1,31 @@
-"""G · проверка SVG-иконки по нормам ui-research 07/01 и спецификации Lucide (кодом, без глаз).
-venv: 99-raw/tools/venv-G (svgelements 1.9.6, cairosvg 2.9.1, numpy, scipy).
-python check_icons.py DIR [--ref DIR_LUCIDE] [--json out.json] [--md out.md]
+"""check_icons.py — проверка линейных SVG-иконок кодом, без глаз: нормы ui 07/01 и спецификация Lucide.
+
+  python check_icons.py DIR [--ref DIR_LUCIDE] [--set lucide|НАБОР] [--json out.json] [--md out.md] [--title T]
+
+Python окружения скилла, группа svg (svgelements, cairosvg — ему нужна системная libcairo2; numpy, scipy, scikit-image):
+`scripts/install.sh --groups svg`; без пакетов — одна строка с этой командой и код 2.
 Пороги откалиброваны на 20 иконках Lucide 1.47 + circle/square (вес 0,75–1,5, пик размытия 0,58–0,87, доля узлов
 на целой сетке 23–100 %, смещение центра масс до 3,1 px у download): флаг ставится только за пределами этого коридора.
 Проверки: шапка (viewBox 0 0 24 24, width/height 24, fill none, stroke currentColor, stroke-width 2, round cap/join),
 нет жёстких цветов, поле ≥ 1 px (по растру 10×), доля узлов на целой сетке, центры дуг на сетке, число сегментов,
 минимальный зазор между раздельными элементами (≥ 2 px), «узкие» участки фона < 2 px (приём Lucide с кругом ⌀2),
 покрытие (вес) против эталонных circle/square Lucide, пик размытия (плотность), смещение центра масс,
-IoU с одноимённой иконкой Lucide."""
+IoU с одноимённой иконкой Lucide.
+Набор (--set, по умолчанию lucide; у продукта — conventions.icons.set карты решений) задаёт уровень флага — поле levels
+записи JSON: жёсткий цвет — брак (fail) у любого набора: перекраска через currentColor не работает; шапка и штрих Lucide
+(24×24, stroke 2, round) — брак только у набора Lucide, у другого набора — предупреждение (warn): сверить шапку и штрих
+со спецификацией набора, иконки под Lucide не подгонять; остальные флаги — предупреждения."""
 import argparse, io, json, math, os, re, sys
-import numpy as np
-from PIL import Image
-import cairosvg
-from scipy import ndimage
-from svgelements import SVG, Shape, Path, Move, Close, Arc, Line, CubicBezier, QuadraticBezier, Circle, Ellipse, Rect
+try:
+    import numpy as np
+    from PIL import Image
+    import cairosvg
+    from scipy import ndimage
+    from skimage.morphology import convex_hull_image  # noqa: F401 — narrow_background
+    from svgelements import SVG, Shape, Path, Move, Close, Arc, Line, CubicBezier, QuadraticBezier, Circle, Ellipse, Rect
+    DEPS_ERROR = None
+except (ImportError, OSError) as e:   # OSError — cairocffi не нашёл системную libcairo2
+    DEPS_ERROR = e
 
 S_HI = 240  # 10× для геометрических замеров
 HEADER_RULES = {
@@ -21,6 +33,26 @@ HEADER_RULES = {
     'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round'}
 COLOR_RE = re.compile(r'#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(|\b(?:black|white|red|blue|green|gray|grey)\b')
 SHAPE_TAGS = ('path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'ellipse')
+LUCIDE = 'lucide'
+HARD_FLAGS = {'цвет'}         # брак у любого набора
+LUCIDE_FLAGS = {'шапка'}      # шапка и штрих Lucide — брак только у набора Lucide
+
+def is_lucide(icon_set):
+    """Набор Lucide (lucide, Lucide, lucide-static …): шапка и штрих Lucide для него — правило набора, а не совет."""
+    return str(icon_set or LUCIDE).strip().lower().startswith(LUCIDE)
+
+def flag_levels(flags, icon_set=LUCIDE):
+    """Уровень каждого флага по набору: {первое слово флага: fail | warn}."""
+    lucide = is_lucide(icon_set)
+    keys = [f.split()[0] for f in flags]
+    return {k: 'fail' if k in HARD_FLAGS or (lucide and k in LUCIDE_FLAGS) else 'warn' for k in keys}
+
+def deps_hint(e):
+    """Одна строка вместо трассировки: чего нет в окружении и чем поставить."""
+    if isinstance(e, ImportError):
+        return (f'нет пакета {e.name or "группы svg"} (группа svg: svgelements, cairosvg, scikit-image) — поставьте '
+                '`scripts/install.sh --groups svg`')
+    return 'нет системной libcairo2 для cairosvg — поставьте её пакетом ОС и `scripts/install.sh --groups svg`'
 
 def render_alpha(svg_text, size):
     png = cairosvg.svg2png(bytestring=svg_text.encode(), output_width=size, output_height=size)
@@ -38,7 +70,7 @@ def header_check(svg_text):
     head = re.search(r'<svg\b([^>]*)>', svg_text).group(1)
     bad = []
     for k, v in HEADER_RULES.items():
-        mm = re.search(r'\b' + re.escape(k) + r'="([^"]*)"', head)
+        mm = re.search(r'(?<![\w:-])' + re.escape(k) + r'="([^"]*)"', head)   # width — не хвост stroke-width
         if not mm or mm.group(1).strip() != v:
             bad.append(f'{k}={mm.group(1) if mm else "нет"}')
     body = svg_text[svg_text.find('>') + 1:]
@@ -155,7 +187,9 @@ def raster_metrics(svg_text):
 def iou(a, b):
     return round(float((a & b).sum()) / max(float((a | b).sum()), 1), 3)
 
-def check_dir(d, ref=None):
+def check_dir(d, ref=None, icon_set=LUCIDE):
+    if DEPS_ERROR is not None:
+        raise ImportError(deps_hint(DEPS_ERROR))
     ref_cover = None
     if ref:
         rc = raster_metrics(open(os.path.join(ref, 'circle.svg')).read())
@@ -190,22 +224,47 @@ def check_dir(d, ref=None):
         if r['centroid_off'] > 1.6: flags.append(f"центр {r['centroid_off']}")
         if g['grid_int_pct'] < 30: flags.append(f"сетка {g['grid_int_pct']}%")
         rec['flags'] = flags
+        rec['set'] = icon_set
+        rec['levels'] = flag_levels(flags, icon_set)
         out[name] = rec
     return out
+
+def flags_md(r):
+    """Флаги для таблицы: брак помечен, шапка другого набора — предупреждение с советом."""
+    lv = r.get('levels') or {}
+    out = []
+    for f in r['flags']:
+        k = f.split()[0]
+        if lv.get(k) == 'fail':
+            f += ' (брак)'
+        elif k in LUCIDE_FLAGS:
+            f += f" (правило Lucide; у набора «{r.get('set')}» — предупреждение: сверить со спецификацией набора)"
+        out.append(f)
+    return ', '.join(out) or 'ок'
 
 def to_md(res, title):
     cols = ['bytes', 'elements', 'segments', 'grid_int_pct', 'margin_px', 'min_gap_px', 'narrow_bg_px2', 'cover24',
             'weight_vs_circle_square', 'blur_peak', 'centroid_off', 'iou_vs_lucide', 'flags']
     lines = [f'### {title}', '', '| иконка | ' + ' | '.join(cols) + ' |', '|' + '---|' * (len(cols) + 1)]
     for n, r in res.items():
-        lines.append(f'| {n} | ' + ' | '.join(str(r.get(c, '')) if c != 'flags' else (', '.join(r['flags']) or 'ок') for c in cols) + ' |')
+        lines.append(f'| {n} | ' + ' | '.join(str(r.get(c, '')) if c != 'flags' else flags_md(r) for c in cols) + ' |')
     return '\n'.join(lines) + '\n'
 
 if __name__ == '__main__':
-    ap = argparse.ArgumentParser()
-    ap.add_argument('dir'); ap.add_argument('--ref'); ap.add_argument('--json'); ap.add_argument('--md'); ap.add_argument('--title', default='')
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('dir', help='папка с SVG-иконками')
+    ap.add_argument('--ref', help='эталоны Lucide (circle.svg, square.svg и одноимённые иконки): вес и IoU')
+    ap.add_argument('--set', default=LUCIDE, metavar='НАБОР',
+                    help='набор иконок продукта (conventions.icons.set), по умолчанию lucide: шапка и штрих Lucide — брак '
+                         'только у набора Lucide')
+    ap.add_argument('--json', help='записи по иконкам: замеры, flags, levels')
+    ap.add_argument('--md', help='таблица Markdown в файл (в stdout она печатается всегда)')
+    ap.add_argument('--title', default='', help='заголовок таблицы (по умолчанию — папка)')
     a = ap.parse_args()
-    res = check_dir(a.dir, a.ref)
+    if DEPS_ERROR is not None:   # одна строка вместо трассировки, код 2 — окружение
+        print(f'check_icons.py: {deps_hint(DEPS_ERROR)}', file=sys.stderr)
+        sys.exit(2)
+    res = check_dir(a.dir, a.ref, a.set)
     if a.json:
         json.dump(res, open(a.json, 'w'), ensure_ascii=False, indent=1)
     md = to_md(res, a.title or a.dir)
