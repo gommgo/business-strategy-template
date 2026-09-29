@@ -123,6 +123,7 @@ rules:
     marker_id: COPY-M-STR-10
     level: warning
     count_as_marker: false
+    per_sections: 3           # число владельца COPY-C-18: надзаголовок не чаще одного на N секций с заголовком (H1, H2)
     message: "Надзаголовок чаще, чем у каждой третьей секции."
     replacement: "оставить надзаголовок только там, где он несёт информацию (категория, дата, этап); остальные удалить"
     source: "PLAN.md поправка к ux 07/06 §5.3 и AC-TXT-13; taste EYEBROW RESTRAINT (≤ 1 на 3 секции); ui 11/04 маркер 30; kimi 05/03 (эйбрау над H2 ≈ 12/15 работ K3)"
@@ -144,3 +145,132 @@ rules:
     replacement: "в copy deck — fact_ids на запись facts.yaml; нет записи — [PLACEHOLDER] и строка в missing"
     source: "PLAN.md риск 3 и поправка к ux 07/06 §5.2 / AC-TXT-02; kimi facts.md (never_claim); эталон провала «Кварц» (kimi F/03)"
     evidence: "[практика]; проверка — claims_check.py (B2), линтер только сигналит"
+  - id: an-cards-uniform
+    marker_id: ""
+    level: info
+    count_as_marker: false
+    message: "Карточки секции одной длины: тексты написаны по шаблону, а не по содержанию каждой карточки."
+    replacement: "длина карточки — по её факту: одну раскрыть подробностями из facts.yaml, другую сократить до сути"
+    examples: {bad: "три card-body по 12 слов", good: "card-body на 6, 14 и 9 слов по содержанию"}
+    source: "copy-checklist.yaml#COPY-C-18 (карточки секции разной длины по содержанию); 03-corpus-measured/02-measurements.md §9 (δ Клиффа −0,76 у карточек одной длины, RU ai-self)"
+    evidence: "[проверено: D/03]"
+    threshold_ref: "profiles.yaml#defaults.analyzers.cards_uniform"
+  - id: an-address-mix
+    marker_id: ""
+    level: warning
+    count_as_marker: false
+    message: "В одном тексте «ты» и «вы»: обращение одно на продукт (у голоса бренда — address.ru_form)."
+    replacement: "привести к форме голоса: по умолчанию «вы» со строчной"
+    examples: {bad: "Оставьте заявку. Ты получишь смету завтра.", good: "Оставьте заявку. Вы получите смету завтра."}
+    source: "ux 07/03 §1.1 (выбор «ты» или «вы» единый по продукту); ux 07/06 §7.3 «Смешение «ты» и «вы»»; voice.schema.yaml#address"
+    evidence: "[консенсус]"
+  # Межстрочные проверки ux 07/06 §7.3 — жанр interface: вход — реестр текстов texts.md (роль, maxlen, действие,
+  # объект, группа строки); словарь действий action.md и глоссарий объектов object.md проекта.
+  - id: an-ui-action-name
+    marker_id: ux:07-06#7.3
+    group: UX
+    level: warning
+    count_as_marker: false
+    message: "Имя действия по потоку: строка действия не называет его глаголом словаря (verb, past) — у потока два имени."
+    replacement: "один корень на весь поток: кнопка «Опубликовать» → «Опубликовать статью?» → «Опубликовано»"
+    source: "ux 07/06 §7.3 «Имя действия по потоку»; ux 07/01 §10.3; action.md (verb, past)"
+    evidence: "[система]"
+  - id: an-ui-action-synonym
+    marker_id: ux:07-06#7.3
+    group: UX
+    level: error
+    count_as_marker: false
+    message: "Запрещённый синоним действия (action.md, banned): продукт называет действие другим словом."
+    replacement: "глагол действия из словаря (verb) или его прошедшее время (past)"
+    source: "ux 07/06 §7.3 «Имя действия по потоку»; action.md (banned); ux 13/04 §6"
+    evidence: "[система]"
+  - id: an-ui-object-alias
+    marker_id: ux:07-06#7.3
+    group: UX
+    level: error
+    count_as_marker: false
+    message: "Синоним объекта (object.md, aliases): одно понятие — одно слово."
+    replacement: "имя объекта из глоссария (name)"
+    source: "ux 07/06 §7.3 «Синонимы объекта»; ux 07/01 §10.1; object.md (aliases)"
+    evidence: "[консенсус]"
+  - id: an-ui-group-form
+    marker_id: ux:07-06#7.3
+    group: UX
+    level: warning
+    count_as_marker: false
+    message: "Строки одной группы (меню, статусы объекта) в разных грамматических формах: отвечают на разные вопросы."
+    replacement: "одна форма на группу: пункты меню — существительные, статусы — один вопрос («какая?» или «что?»)"
+    source: "ux 07/06 §7.3 «Согласованность меню», «Согласованность статусов»; ux 07/01 §10.5"
+    evidence: "[практика]"
+  - id: an-ui-duplicate
+    marker_id: ux:07-06#7.3
+    group: UX
+    level: warning
+    count_as_marker: false
+    message: "Один текст дважды на экране: показатель или блок повторён (F8.1, F8.2)."
+    replacement: "одно место на экран; вторая строка — другой смысл или убрать"
+    source: "ux 07/06 §7.3 «Дубли текста на экране»; ux 11/01 F8.1, F8.2"
+    evidence: "[исследование]"
+  - id: an-ui-maxlen
+    marker_id: ux:07-06#7.3
+    group: UX
+    level: error
+    count_as_marker: false
+    message: "Строка длиннее своего maxlen: не помещается в компонент."
+    replacement: "сократить до предела; предел — из ширины компонента дизайн-системы (ux 07/05 §4.6)"
+    source: "ux 07/06 §7.3 «Длина по роли»; ux 07/05 §4.6; texts.md (maxlen)"
+    evidence: "[стандарт]"
+  - id: an-ui-role-length
+    marker_id: ux:07-06#7.3
+    group: UX
+    level: warning
+    count_as_marker: false
+    message: "Строка длиннее ориентира своей роли (ux 07/01 §12): слов, предложений или знаков больше верхней границы."
+    replacement: "сократить; длина в словах — сигнал, ворота — maxlen строки"
+    source: "ux 07/01 §12; ux-07-06.yaml#role_lengths"
+    evidence: "[консенсус]"
+  - id: an-ui-formats
+    marker_id: ux:07-06#7.3
+    group: UX
+    level: warning
+    count_as_marker: false
+    message: "Формат чисел и диапазонов: число литералом вместо данных, разные знаки диапазона или пробелы разрядов в одном продукте."
+    replacement: "число — подстановкой ICU из данных; один знак диапазона на продукт (по умолчанию «–»), разряды — U+00A0"
+    source: "ux 07/06 §7.3 «Формат дат и чисел»; ux 11/01 F8.3; text 08/02 §1.3 (один знак диапазона); ux 07/03 §6.6"
+    evidence: "[консенсус]"
+  - id: an-ui-icu
+    marker_id: ux:07-06#7.3
+    group: UX
+    level: error
+    count_as_marker: false
+    message: "Строка ICU не по форме: нет ветки other, «=1» вместо one, у русского plural нет one, few, many или скобки не закрыты."
+    replacement: "{count, plural, one {…} few {…} many {…} other {…}}; «=0» — отдельное сообщение для нуля"
+    source: "ux 07/06 §7.3 «Плюрализация»; ux 07/05 §4.4"
+    evidence: "[стандарт]"
+  - id: an-ui-yo-mix
+    marker_id: ux:07-06#7.3
+    group: UX
+    level: warning
+    count_as_marker: false
+    message: "Одно слово написано и через «ё», и через «е»."
+    replacement: "одно написание на продукт (ux 07/03 §6.5)"
+    source: "ux 07/06 §7.3 «Смешение «ё» и «е»»; ux 07/03 §6.5"
+    evidence: "[практика]"
+  - id: an-ui-us-uk
+    marker_id: ux:07-06#7.3
+    group: UX
+    level: warning
+    count_as_marker: false
+    message: "US и UK орфография вместе (color и colour, organize и organise)."
+    replacement: "одна орфография на продукт"
+    source: "ux 07/06 §7.3 «Смешение US/UK орфографии»; ux 07/04 §5"
+    evidence: "[практика]"
+  - id: an-reading-level
+    marker_id: ux:07-06#7.3
+    group: UX
+    level: info
+    count_as_marker: false
+    message: "Уровень чтения развёрнутого текста: слова длинные — в среднем больше порога слогов; индекс Оборневой — в метриках."
+    replacement: "короткие слова и предложения; сигнал, а не ворота и не цель правки"
+    source: "ux 07/01 §3.3 (≤ 2,5 слога в слове; индекс Оборневой для развёрнутых текстов); ux 07/03 §11.1; константа 206,835"
+    evidence: "[исследование]"

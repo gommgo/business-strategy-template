@@ -1,0 +1,19 @@
+# Фикстура cabinet-texts — иллюстрация для самопроверки copy_lint.py в жанре interface: реестр texts.md кабинета
+# фикстуры cabinet, приведённый к межстрочным проверкам ux 07/06 §7.3. Поток действия create называет действие одним
+# корнем («Создать заявку» — «Создаём заявку» — «Заявку не удалось создать», ux 07/01 §10.3), заголовок экрана без прав —
+# не длиннее четырёх слов (ux 07/01 §12); добавлены строки с подстановками ICU (plural с ветками one, few, many, other)
+# и диапазоном «–» между подстановками. Линтер на реестре — 0 находок; фикстура с посеянными дефектами —
+# cabinet-texts-defects. Продукт (object.md, action.md) — из cabinet.
+example: true
+description: реестр текстов кабинета по межстрочным проверкам ux 07/06 §7.3 — чистый вход линтера в жанре interface
+project: otves-office
+extends: [cabinet]
+layers:
+  - replace:
+      screens/office/texts.md:
+        - {find: "| Сохраняем заявку |", to: "| Создаём заявку |"}
+        - {find: "| Заявка не сохранилась — всё введённое на месте, можно повторить |",
+           to: "| Заявку не удалось создать — всё введённое на месте, можно повторить |"}
+        - {find: "| Нет доступа к созданию заявок |", to: "| Создание заявок недоступно |"}
+        - {find: "| `system.not-found.to-requests.link` | `link` | К заявкам | 24 | — | — | — | путь со служебного экрана | `checked` |\n",
+           to: "| `system.not-found.to-requests.link` | `link` | К заявкам | 24 | — | — | — | путь со служебного экрана | `checked` |\n| `requests.list.found.status` | `status` | {count, plural, one {Найдена # заявка} few {Найдены # заявки} many {Найдено # заявок} other {Найдено # заявки}} | 24 | — | `request` | — | подстановка count — число заявок в выдаче | `checked` |\n| `requests.card.visit-window.hint` | `hint` | Замерщик приедет с {from}–{to} | 60 | — | `request` | — | подстановки from и to — время окна замера | `checked` |\n| `plan.dashboard.period.caption` | `caption` | План на {from}–{to} | 40 | — | `plan` | — | подстановки from и to — даты периода плана | `checked` |\n"}

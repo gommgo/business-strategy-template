@@ -244,7 +244,7 @@ items:
     level: signal
     stage: draft-to-checked
     method: lint
-    tool: "copy_lint.py: an-number-without-fact, an-eyebrow-rate, an-dash-density, metrics.middots; разброс длины карточек — вручную или copy_metrics.py (D) до анализатора C (предложение an-cards-uniform: CV карточек секции < 0,25)"
+    tool: "copy_lint.py: an-number-without-fact, an-eyebrow-rate (N — поле per_sections записи анализатора), an-dash-density, an-cards-uniform (CV длин карточек секции < 0,25), metrics.middots"
     pass_when: "каждая примета в пределах лидеров жанра и языка (thresholds.yaml D; надзаголовок — не чаще 1 на 3 секции)"
     on_fail: "это не детектор ИИ, а дефекты: одинаковые карточки — общие выгоды (переписать по фактам секции), числа без факта — выдумка (COPY-C-01), надзаголовок над каждой секцией — шум; править дефект, а не «человечность»"
     genres: [landing, site-page]

@@ -74,6 +74,7 @@ rules:
   - id: en-mkt-headline-that
     marker_id: COPY-M-MKT-04
     level: warning
+    requires_no_fact: true               # «The lamp that adjusts its own light» with fact_ids is a factual clause
     slot_types: [headline, subheadline, section-title, card-title, meta-title, og-title, email-subject]
     pattern: '^(?:the|a|an|your)?\s?[a-z][\w-]*(?:\s[\w-]+){0,4}\s+(?:that|which|who)\s+(?:works|gets|understands|grows|scales|thinks|helps|puts|makes|lets|actually|finally|just)\b'
     message: "Template headline «The X that actually works»."
@@ -125,12 +126,13 @@ rules:
     evidence: "[практика]"
   - id: en-mkt-label-headings
     marker_id: COPY-M-MKT-11
-    level: info
+    level: warning
     genres: [landing]
     slot_types: [section-title]
-    pattern: '^\s*(?:our\s+(?:services|features|benefits|team|clients|values|story|mission)|why\s+(?:choose\s+)?us\??|features|benefits|about\s+us|testimonials|what\s+our\s+(?:clients|customers)\s+say|faq|frequently\s+asked\s+questions)\s*$'
+    pattern: '^\s*(?:our\s+(?:services|features|benefits|team|clients|values|story|mission)|why\s+(?:choose\s+)?us\??|features|benefits|about\s+us|testimonials|what\s+our\s+(?:clients|customers)\s+say)\s*$'
     message: "Label heading on a landing section: says where you are, not what you claim."
     replacement: "a claim heading; labels are fine in site navigation"
+    note: "conventions «FAQ», «Frequently asked questions», «Contact us» are outside the pattern (CONTRADICTIONS X24)"
     examples: {bad: "Why Choose Us?", good: "Every job signed off with a 40-point checklist"}
     source: "PLAN.md (inverted outline test for landings); taste §9.F (plain functional labels acceptable for quotes/blog)"
     evidence: "[практика]"
@@ -153,4 +155,14 @@ rules:
     replacement: "open with the offer or a fact; in a welcome email it is fine"
     examples: {bad: "Welcome to our website!", good: "Dental clinic on Pine St., painless treatment since 2009"}
     source: "Hallmark banned openers (welcome variants); ux 07/06 §3.2"
+    evidence: "[практика]"
+  - id: en-mkt-story-cliches
+    marker_id: COPY-M-MKT-13
+    level: warning
+    unless: '\d'
+    pattern: '\b(?:(?:home|house|kitchen|wedding|garden|car|job|life)\s+of\s+(?:their|your|his|her|our)\s+dreams|of\s+(?:their|your|his|her|our)\s+dreams|(?:couldn[''’]t|could\s+not)\s+be\s+happier|rock[- ]solid|complete\s+transparency|total\s+peace\s+of\s+mind)\b'
+    message: "Stock phrases of brand and customer stories («the home of their dreams», «couldn't be happier», «rock-solid», «complete transparency»)."
+    replacement: "the scene or the fact: what changed for this customer, when, and by how much"
+    examples: {bad: "They got the kitchen of their dreams and couldn't be happier.", good: "They cook for six now: the new kitchen fits a 90 cm stove."}
+    source: "05-voice-editorial/03-storytelling-and-concreteness.md (EN tells of a marketing story, before / after table)"
     evidence: "[практика]"

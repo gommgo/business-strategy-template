@@ -56,6 +56,7 @@ rules:
     examples: {bad: "Отвес", good: "Отвес — ремонт квартир в Нижнем Новгороде"}
     source: "Google «Influencing your title links» (descriptive and concise; главная — место для «additional information about your site»); Яндекс «Как правильно написать title» («Следите, чтобы заголовок был информативным»)"
     evidence: "[документация]"
+    note: "законный случай — известный бренд, которого ищут по имени («Сбер», «Лента»): lint_allow страницы copy deck с причиной ({rule: meta-title-too-short, reason: …})"
 
   - id: meta-title-keyword-repeat
     level: error
@@ -81,8 +82,9 @@ rules:
 
   - id: meta-clickbait
     level: error
-    slot_types: [meta-title, og-title, article-title, meta-description, og-description]
-    slot_levels: {meta-description: warning, og-description: warning}
+    genres: [meta, landing, site-page, article, geo, email-form]
+    slot_types: [meta-title, og-title, article-title, meta-description, og-description, article-heading, article-lead, email-subject, email-preheader, email-heading]
+    slot_levels: {meta-description: warning, og-description: warning, article-heading: warning, article-lead: warning, email-preheader: warning, email-heading: warning}
     count_as_marker: true
     pattern: '%B%(?:вас\s+удивит|удивит\s+(?:вас|всех|каждого)|шок%E%(?!-)|шокирующ%W%|вы\s+не\s+поверите|не\s+поверите|раскрыл[аи]?\s+(?:все\s+)?(?:тайн%W%|секрет%W%)|все\s+тайны|(?:никто|никому)\s+не\s+(?:говорит|рассказывает|расскажет)|врачи\s+(?:скрывают|в\s+шоке|молчат)|один\s+простой\s+(?:трюк|способ|секрет)|это\s+изменит\s+(?:всё|все|вашу\s+жизнь)|спас(?:ут|ёт|ет)\s+[^.!?\n]{0,30}\s+от\s+краха|то,\s+что\s+произошло\s+(?:дальше|потом)|you\s+won.?t\s+believe|shocking|mind[- ]blowing|this\s+one\s+(?:simple\s+)?trick|doctors\s+hate|what\s+happens\s+next|will\s+blow\s+your\s+mind|nobody\s+(?:is\s+)?talking\s+about|jaw[- ]dropping)|\A\s*названы\s|\A\s*стало\s+известно'
     message: "Кликбейт: заголовок обещает сенсацию, которой нет в тексте. Google просит title без преувеличений и шока, Яндекс — «Избегайте кликбейта»; асессоры Google ставят таким страницам Low."
@@ -90,7 +92,7 @@ rules:
     examples: {bad: "Вы не поверите, сколько стоит ремонт квартиры", good: "Сколько стоит ремонт двушки в 2026 году: смета 54 м² по статьям"}
     source: "Google «Creating helpful, reliable, people-first content» (обновлено 2025-12-10): «Does the main heading or page title avoid exaggerating or being shocking in nature?»; Google SQRG 11.09.2025: «Exaggerated or shocking titles are evidence of Low quality»; Яндекс, блог Вебмастера 2024-03-22 («Избегайте кликбейта»); Ильяхов, «Боеспособный заголовок», 2017 [V:y0iIV5meaB4 31:52] — обманутое ожидание; список фраз — W2 (кандидаты в маркеры C)"
     evidence: "[документация] + [практика]"
-    note: "предложение C: новый маркер COPY-M-… «кликбейт» (article, meta, email-form)"
+    note: "одно правило кликбейта на мету, статью и письма: заголовки статьи, лид, тема и прехедер письма — там же, где title (маркер каталога C — строка «кликбейт» в 06-anti-slop/01)"
 
   - id: meta-title-boilerplate-tail
     level: warning
@@ -253,8 +255,9 @@ limits:                                    # ориентиры для гене�
 templates:                                 # шаблон — порядок смысловых частей, не текст; примеры — ai-self, факты «Отвеса» демо (B2)
   landing-lead-services:
     title: "{услуга} {где} — {отличие-факт} | {бренд}"
-    description: "{что делаете и где}: {факт-1: цена от / срок / гарантия}. {снятие риска: замер, смета}."
-    example_ru: {title: "Ремонт квартир под ключ в Нижнем Новгороде — гарантия 3 года | Отвес", description: "Ремонт квартир под ключ в Нижнем Новгороде: от 9 800 ₽/м² без материалов, гарантия 3 года по договору. Замер и смета — бесплатно в черте города."}
+    description: "{факт-1: цена от / срок / гарантия} — {что делаете}. {снятие риска: замер, смета}."
+    example_ru: {title: "Ремонт квартир под ключ в Нижнем Новгороде — гарантия 3 года | Отвес", description: "От 9 800 ₽/м² без материалов и гарантия 3 года по договору — ремонт квартир под ключ. Замер и смета — бесплатно в черте города."}
+    note: "description не начинается с тех же слов, что title: поисковик показывает их рядом, повтор съедает строку описания (meta-x-desc-equals-title)"
     facts: [price-from-per-m2, guarantee-3-years, estimate-free]
   service-page:
     title: "{услуга} {где} | {бренд}"

@@ -2,6 +2,8 @@
 # ui 02/06 §3; маркетинговая типографика, решение по тире и автоматический типограф — агент H (волна 2,
 # 08-russian-legal-typography/typography-rules.yaml подключается через profiles.yaml → external_rules).
 # Тире НЕ запрещается и НЕ подменяется дефисом: плотность пунктуационных тире в прозе — анализатор an-dash-density.
+# Правила заголовков и подписей выбирают место по типу слота сайта и по роли строки (appliesTo) — так они работают и
+# в жанре interface, где у строки роль ux 07/06 §7.2, а типа слота нет (ux 07/03 §6.9–§6.10).
 date: 2026-09-24
 version: 1
 owner: C (волна 1)
@@ -17,7 +19,8 @@ rules:
     marker_id: COPY-M-PUN-02
     level: warning
     count_as_marker: false
-    pattern: '(?<=[А-Яа-яЁё»")\d])\s-\s(?=[А-Яа-яЁё«"(\d])'
+    pattern: '(?<=[А-Яа-яЁё»")])\s-\s(?=[А-Яа-яЁё«"(\d])|(?<=\d)\s-\s(?=[А-Яа-яЁё«"(])'
+    note: "«10 - 15» — диапазон, а не тире: его ловит typo-range-hyphen (H), правка — «10–15» без пробелов"
     message: "Дефис вместо тире. Для русского это ошибка набора; так пишут и «очеловеченные» тексты (humanizer-ru требует «-» вместо «—»)."
     replacement: "поставить тире «—» с пробелами (или перестроить фразу, если тире лишнее); решение по набору — H"
     examples: {bad: "Анамнез - это разговор с пациентом.", good: "Анамнез — это разговор с пациентом."}
@@ -47,6 +50,9 @@ rules:
     marker_id: COPY-M-PUN-05
     level: warning
     lang: any
+    genres: [landing, site-page, article, meta, geo, email-form, interface]
+    levels: {interface: error}          # ux 07/06 §5.3: эмодзи в подписи элемента и заголовке — запрет
+    appliesTo: [title, subtitle, section-title, action, link, nav, tab, label, checkbox-label, status, badge, toast, column-header, confirm-title]
     slot_types: [headline, subheadline, section-title, card-title, step-title, eyebrow, cta-label, cta-secondary-label, email-cta-label, meta-title, meta-description, og-title, og-description, email-subject, pricing-plan-name, form-title, article-title, article-heading, badge, faq-q]
     pattern: '[\U0001F300-\U0001FAFF☀-➿⭐⭕‼⁉]'
     message: "Эмодзи в заголовке, кнопке или мета: декор вместо смысла."
@@ -71,6 +77,8 @@ rules:
     level: warning
     count_as_marker: false
     mask_quotes: false
+    genres: [landing, site-page, article, meta, geo, email-form, interface]
+    levels: {interface: error}          # ux 07/06 §9 п. 18: прямые кавычки в интерфейсе запрещены
     pattern: '"[^"\n]{1,200}"'
     message: "Прямые кавычки «лапки» в русском тексте."
     replacement: "«ёлочки», внутри — „лапки“; автотипограф — H"
@@ -104,8 +112,11 @@ rules:
     level: error
     lang: any
     mask_quotes: false
+    genres: [landing, site-page, article, meta, geo, email-form, interface]
     slot_types: [cta-label, cta-secondary-label, email-cta-label, nav-label]
-    pattern: '[→←⇒➔➜↗›]\s*$|^\s*[→←⇒➔➜↗]'
+    appliesTo: [action, link, nav]
+    pattern: '[→←⇒➔➜›]\s*$|^\s*[→←⇒➔➜]'
+    note: "«↗» у ссылки на внешний сайт — знак внешней ссылки, не стрелка в тексте (ui 11/04 §2.9)"
     message: "Стрелка — часть текста кнопки или ссылки. Иконку решает подача (creative), не copy deck."
     replacement: "убрать стрелку из текста"
     examples: {bad: "Начать →", good: "Начать"}
@@ -126,6 +137,9 @@ rules:
     level: info
     lang: any
     count_as_marker: false
+    genres: [landing, site-page, article, meta, geo, email-form, interface]
+    levels: {interface: error}          # ux 07/06 §9 п. 20: капс в интерфейсе запрещён
+    appliesTo: [title, subtitle, section-title, action, link, nav, tab, label, status, badge, caption, column-header]
     slot_types: [eyebrow, headline, subheadline, section-title, cta-label, cta-secondary-label, badge, card-title, stat-label, step-title]
     pattern: '%B%[А-ЯЁA-Z]{3,}(?:\s+[А-ЯЁA-Z]{2,})+%E%'
     message: "Капс набран буквами. В copy deck пишите обычным регистром: капс — это стиль (text-transform), его решает подача."
@@ -136,6 +150,9 @@ rules:
   - id: ru-pun-title-case
     marker_id: COPY-M-PUN-09
     level: warning
+    genres: [landing, site-page, article, meta, geo, email-form, interface]
+    levels: {interface: error}          # ux 07/06 §9 п. 20: Title Case в интерфейсе запрещён
+    appliesTo: [title, subtitle, section-title, action, link, nav, tab, label, status, badge, column-header, confirm-title]
     slot_types: [headline, subheadline, section-title, card-title, step-title, article-title, article-heading, case-title, form-title, meta-title, og-title, pricing-plan-name, email-subject, faq-q]
     pattern: '^(?:[А-ЯЁ][а-яё]*[\s,]+){2,}[А-ЯЁ][а-яё]+[.!?]?$'
     message: "Каждое слово заголовка с заглавной (английская привычка Title Case)."
@@ -147,6 +164,8 @@ rules:
     marker_id: COPY-M-PUN-10
     level: warning
     lang: any
+    genres: [landing, site-page, article, meta, geo, email-form, interface]
+    appliesTo: [title, subtitle, section-title, action, link, nav, tab, label, status, badge, column-header, confirm-title]
     slot_types: [headline, subheadline, section-title, card-title, eyebrow, cta-label, cta-secondary-label, meta-title, meta-description, og-title, og-description, article-title, article-heading, badge, form-title]
     pattern: '!'
     message: "Восклицательный знак в заголовке, кнопке или мета."

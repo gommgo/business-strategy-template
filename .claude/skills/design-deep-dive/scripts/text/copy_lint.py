@@ -1,37 +1,53 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""copy_lint.py — линтер маркетинговых текстов RU/EN по жанрам.
+"""copy_lint.py — линтер текстов RU/EN по жанру и роли строки: маркетинговые тексты сайта и тексты интерфейса.
 
-text-research · волна 1 · агент C · 2026-09-24. Спецификация: 06-anti-slop/02-linter-spec-and-profiles.md.
+Спецификация — kb/text/06-anti-slop/02-linter-spec-and-profiles.md; словарь запретов интерфейса — ux 07/06 (производный
+06-anti-slop/lexicon/ux-07-06.yaml собирает ux_dict_to_yaml.py).
 
-Что делает. Находит маркеры нейрослопа и ошибки жанра по правилам 06-anti-slop/lexicon/*.yaml (включая словари,
-унаследованные из ../ux-research/07-ux-writing/06-banned-words-and-patterns.md через конвертер ux_dict_to_yaml.py),
-профилю жанра 06-anti-slop/profiles.yaml и порогам 03-corpus-measured/thresholds.yaml (пока их нет — стартовые
-значения профиля с provisional: true). Считает метрики на 100 слов: маркеры, тире, «не X, а Y», вопросы, тройки,
+Что делает. Находит маркеры нейрослопа и ошибки жанра по правилам 06-anti-slop/lexicon/*.yaml и внешним файлам
+(G — мета и GEO, H — право и набор; profiles.yaml → external_rules), профилю жанра 06-anti-slop/profiles.yaml и порогам
+03-corpus-measured/thresholds.yaml. Считает метрики на 100 слов: маркеры, тире, «не X, а Y», вопросы, тройки,
 восклицания, конкретика; ритм предложений и абзацев; ищет следы сверхкоррекции («текст хуманайзера»).
 
-Вход: .txt, .md, .html/.htm, copy deck .yaml/.yml (формат copy-deck v0 из PLAN.md или список {slot_type, text});
-«-» — stdin. slot_type — из 99-raw/notes/temp-vocabulary-v0.yaml (временный словарь оркестратора).
+Жанры: landing, site-page, article, meta, geo, email-form — тексты сайта; interface — тексты продукта за входом
+(кабинет, приложение, бот, письма, СМС, push). В interface правила ux действуют с уровнями канона 07/06, из text —
+артефакты, данные и набор; поправки сайта (overrides с полем genres) к нему не относятся; межстрочные проверки ux
+07/06 §7.3 — анализаторы над реестром текстов: имя действия по потоку (action.md), синонимы объекта (object.md,
+aliases), формы меню и статусов, дубли на экране, maxlen и длина по роли (ux 07/01 §12), форматы чисел и диапазонов,
+ICU, «ты» и «вы», «ё» и «е», US и UK, уровень чтения ролей body, help, email.
 
-Запуск:
-  python3 99-raw/tools/copy_lint.py page.md --genre landing            # отчёт для человека
-  python3 99-raw/tools/copy_lint.py page.md --genre article --json     # JSON: находки и метрики
-  python3 99-raw/tools/copy_lint.py deck.yaml --md                     # Markdown-отчёт по copy deck
-  python3 99-raw/tools/copy_lint.py text.txt --metrics-only --json     # только метрики (для замеров D)
-  python3 99-raw/tools/copy_lint.py --selftest                         # самопроверка кода и всех словарей
+Вход: .txt, .md, .html/.htm; copy deck .yaml/.yml (copy_deck.pages[].sections[].slots[] или короткая форма
+slots: [{slot_type | role | component, text}]); реестр текстов интерфейса texts.md (таблица key, role, text, maxlen,
+action, object, group, context, status; жанр — interface); «-» — stdin. Тип слота — id слота вида text словаря site
+(kb/site/02-site-types/vocabulary.yaml); роль ux, жанры и lint_as типа — 04-copy-by-block/copy-slots.yaml; жанр
+страницы copy deck — page_type.genre словаря. Роль строки — ключ --role, поле role (реестр, короткая форма copy deck) или
+роль части компонента (--component, поле component; kb/common/components.yaml#text_roles); закрытый список — ux 07/06
+§7.2 и body (раздел roles производного словаря ux) и внутренняя meta. Неизвестная роль, тип слота или часть
+компонента, роль строки не из ролей части — ошибка вызова.
 
-Коды выхода: 0 — нет находок уровня error; 2 — есть error (ворота не пройдены); 1 — ошибка запуска или входа.
-Зависимости: Python 3.10+, PyYAML. Морфология pymorphy3 — опционально (запуск интерпретатором 99-raw/tools/venv-C);
-без неё работают регулярные приближения с уровнем не выше warning.
+Запуск (из папки скилла):
+  scripts/text/copy_lint.py page.md --genre landing              # отчёт для человека (аудит страницы — сигнал)
+  scripts/text/copy_lint.py deck.yaml --json                     # copy deck: выбранные варианты; --all-variants — все
+  scripts/text/copy_lint.py docs/projects/<slug>/screens/<surface>/texts.md     # реестр текстов, жанр interface
+  scripts/text/copy_lint.py - --genre interface --role action    # одна строка интерфейса со stdin
+  scripts/text/copy_lint.py text.txt --metrics-only --json       # только метрики (замеры корпуса)
+  scripts/text/copy_lint.py --selftest                           # словари, сводка уровней по жанрам, калибровки
 
-Как модуль (для copy_metrics.py агента D):
+Коды выхода: 0 — нет находок уровня error; 2 — есть error (ворота не пройдены); 1 — ошибка вызова, входа или словаря.
+Интерпретатор — $DDD_HOME/venv/bin/python (PyYAML, морфология pymorphy3); без pymorphy3 работают регулярные
+приближения с уровнем не выше warning, а проверка форм групп строк интерфейса пропускается с заметкой.
+
+Как модуль:
   from copy_lint import lint_text, text_metrics
   report = lint_text("Текст…", genre="landing", lang="auto")   # dict как в JSON-выводе (один результат)
+  report = lint_text("Сохранить", genre="interface", role="action")
   m = text_metrics("Текст…", lang="ru")                         # dict метрик без правил профиля
 """
 from __future__ import annotations
 
 import argparse
+import copy
 import fnmatch
 import json
 import math
@@ -41,29 +57,40 @@ from dataclasses import dataclass, field
 from html.parser import HTMLParser
 from pathlib import Path
 
-VERSION = "0.9.3"
-DATE = "2026-09-24"
+VERSION = "1.0.0"
+DATE = "2026-09-29"
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(HERE.parent / "lib"))
 import kbpaths  # noqa: E402
-ROOT = kbpaths.kb("text")  # перенос: kb/text
+ROOT = kbpaths.kb("text")
 LEXICON_DIR = ROOT / "06-anti-slop" / "lexicon"
 PROFILES_PATH = ROOT / "06-anti-slop" / "profiles.yaml"
-VOCAB_PATH = ROOT / "99-raw" / "notes" / "temp-vocabulary-v0.yaml"
+VOCAB_PATH = kbpaths.kb("site", "02-site-types", "vocabulary.yaml")
+COPY_SLOTS_PATH = ROOT / "04-copy-by-block" / "copy-slots.yaml"
+UX_DICT_PATH = LEXICON_DIR / "ux-07-06.yaml"
+TELLS_PATH = kbpaths.kb(None, "common", "tells.yaml")
+TELL_KEY = "copy_lint:"             # ключ проверки в tells.yaml#checks: copy_lint:<id правила или анализатора>
 THRESHOLDS_PATH = ROOT / "03-corpus-measured" / "thresholds.yaml"
 
 try:
     import yaml  # PyYAML
 except ImportError:  # pragma: no cover
-    sys.stderr.write("copy_lint: нужен PyYAML (python3 -c 'import yaml'); в venv-C он есть.\n")
+    sys.stderr.write("copy_lint: нужен PyYAML — запускайте интерпретатором $DDD_HOME/venv/bin/python.\n")
     sys.exit(1)
 
 LEVELS = ("error", "warning", "info", "off")
 LEVEL_RANK = {"off": 0, "info": 1, "warning": 2, "error": 3}
 GROUPS = ("ART", "CNT", "LEX", "SYN", "PUN", "STR", "TON", "MKT", "UX", "EXT")
-GENRES = ("landing", "site-page", "article", "meta", "geo", "email-form")
+SITE_GENRES = ("landing", "site-page", "article", "meta", "geo", "email-form")
+GENRES = SITE_GENRES + ("interface",)
 STYLE_GROUPS = {"LEX", "SYN", "TON", "MKT", "STR", "PUN"}  # в цитатах и коде не срабатывают
+INTERNAL_ROLES = ("meta",)          # роль парсера: мета и OG страницы
+INTERNAL_SLOTS = ("hr",)            # псевдослот парсера: разделитель «---» в Markdown
+
+
+class UsageError(ValueError):
+    """Ошибка вызова: неизвестная роль, тип слота или часть компонента; роль строки не из ролей части — код 1."""
 
 # --- токенизация -------------------------------------------------------------------------------------------------
 LETTER = "A-Za-zА-Яа-яЁё"
@@ -139,8 +166,10 @@ def masked_spans(text: str) -> list[tuple[int, int]]:
     return [(m.start(), m.end()) for m in QUOTE_RE.finditer(text)]
 
 
-def overlaps(a: tuple[int, int], spans: list[tuple[int, int]]) -> bool:
-    return any(a[0] < e and s < a[1] for s, e in spans)
+def inside(a: tuple[int, int], spans: list[tuple[int, int]]) -> bool:
+    """Совпадение целиком внутри цитаты: чужие слова в кавычках не правятся, а длинное совпадение, задевшее кавычки
+    («не только «экономит», но и…»), остаётся находкой."""
+    return any(s <= a[0] and a[1] <= e for s, e in spans)
 
 
 def detect_lang(text: str) -> str:
@@ -218,10 +247,15 @@ class Rule:
     requires_no_fact: bool = False  # срабатывает, только если у слота нет fact_ids
     scope: str = "unit"            # unit — min_count в пределах блока; doc — по всему документу
     priority: int = 50             # при совпадении места у двух правил остаётся более приоритетное
+    per_sections: int = 0          # анализатор надзаголовков: не чаще одного на N секций с заголовком
     origin: str = ""
     note: str = ""
     regex: re.Pattern | None = None
     unless_re: re.Pattern | None = None
+    genre_variants: dict = field(default_factory=dict)   # жанр → правило с поправками overrides этого жанра
+
+    def for_genre(self, genre: str) -> "Rule":
+        return self.genre_variants.get(genre, self)
 
     def compile(self) -> None:
         if self.kind in ("analyzer", "manual"):
@@ -238,7 +272,7 @@ class Rule:
             self.mask_quotes = self.group in STYLE_GROUPS
 
 
-RULE_FIELDS = set(Rule.__dataclass_fields__) - {"regex", "unless_re", "origin"}
+RULE_FIELDS = set(Rule.__dataclass_fields__) - {"regex", "unless_re", "origin", "genre_variants"}
 
 
 def load_yaml(path: Path):
@@ -271,17 +305,29 @@ def load_rule_file(path: Path) -> tuple[list[Rule], list[dict], dict]:
 
 
 def apply_overrides(rules: list[Rule], overrides: list[dict], origin: str) -> None:
+    """Поправка к чужому правилу действует в жанрах своего поля genres (без поля — в жанрах сайта): у правила появляется
+    вариант для каждого такого жанра, в остальных жанрах — правило как есть. Поле requires_no_fact видно и у самого
+    правила: его читает copydeck.py, чтобы снять находку при fact_ids слота; у строки без фактов оно ничего не меняет."""
     by_id = {r.id: r for r in rules}
     for ov in overrides:
         target = ov.get("target", "")
+        genres = [g for g in (ov.get("genres") or SITE_GENRES) if g in GENRES]
         hits = [r for rid, r in by_id.items() if fnmatch.fnmatch(rid, target)]
         for r in hits:
-            for k, v in (ov.get("set") or {}).items():
-                if k in RULE_FIELDS:
-                    setattr(r, k, v)
-            if ov.get("note"):
-                r.note = (r.note + " " if r.note else "") + f"[{origin}] {ov['note']}"
-            r.compile()
+            for g in genres:
+                v = r.genre_variants.get(g)
+                if v is None:
+                    v = copy.copy(r)
+                    v.genre_variants = {}
+                    r.genre_variants[g] = v
+                for k, val in (ov.get("set") or {}).items():
+                    if k in RULE_FIELDS:
+                        setattr(v, k, val)
+                if ov.get("note"):
+                    v.note = (v.note + " " if v.note else "") + f"[{origin}] {ov['note']}"
+                v.compile()
+            if (ov.get("set") or {}).get("requires_no_fact"):
+                r.requires_no_fact = True
 
 
 def load_rules(extra: list[str] | None = None, profiles: dict | None = None, log: list | None = None) -> list[Rule]:
@@ -301,8 +347,8 @@ def load_rules(extra: list[str] | None = None, profiles: dict | None = None, log
                 log.append(f"внешний файл правил не найден, пропущен: {f.relative_to(ROOT) if f.is_relative_to(ROOT) else f}")
             continue
         is_ext = f not in files
-        # Правка оркестратора 2026-09-24 (0.9.3): ошибка во внешнем файле правил (G, H, …) пропускает только этот файл
-        # и выводится заметкой; ошибка в собственных словарях 06-anti-slop/lexicon/ по-прежнему останавливает линтер.
+        # Ошибка во внешнем файле правил (G, H, …) пропускает только этот файл и выводится заметкой; ошибка в
+        # собственных словарях 06-anti-slop/lexicon/ останавливает линтер.
         try:
             rs, ovs, data = load_rule_file(f)
             dup = [r.id for r in rs if r.id in seen]
@@ -329,14 +375,109 @@ def load_rules(extra: list[str] | None = None, profiles: dict | None = None, log
 
 
 # --- словарь слотов и профили ---------------------------------------------------------------------------------------
+_VOCAB: dict = {}
+
+
+def _mtime(p: Path) -> float:
+    try:
+        return p.stat().st_mtime
+    except OSError:
+        return 0.0
+
+
 def load_vocab(path: Path | None = None) -> dict:
+    """Словарь site v1: слоты вида text — типы слотов; типы страниц — жанр text (page_type.genre). Роль ux, жанры и
+    lint_as типа слота — 04-copy-by-block/copy-slots.yaml: у слота без своих правил роль и жанры — у типа lint_as.
+    Результат запоминается по времени изменения обоих файлов (API линтера зовут на каждый слот)."""
     p = path or VOCAB_PATH
+    key = (str(p), _mtime(p), _mtime(COPY_SLOTS_PATH))
+    if key in _VOCAB:
+        return _VOCAB[key]
+    out: dict = {"slot_types": {}, "page_types": {}, "path": str(p)}
     if not p.exists():
-        return {"slot_types": {}, "page_types": {}}
-    data = load_yaml(p) or {}
-    slots = {s["id"]: s for s in data.get("slot_types", []) or []}
-    pages = {s["id"]: s for s in data.get("page_types", []) or []}
-    return {"slot_types": slots, "page_types": pages, "path": str(p)}
+        out["missing"] = True
+        return out
+    ns = (load_yaml(p) or {}).get("namespaces") or {}
+    for x in (ns.get("slot") or {}).get("values") or []:
+        if isinstance(x, dict) and x.get("kind") == "text" and x.get("id"):
+            out["slot_types"][x["id"]] = {"id": x["id"]}
+    for x in (ns.get("page_type") or {}).get("values") or []:
+        if isinstance(x, dict) and x.get("id"):
+            out["page_types"][x["id"]] = {"id": x["id"], "genre": x.get("genre") or ""}
+    specs = {}
+    if COPY_SLOTS_PATH.exists():
+        specs = {s["id"]: s for s in (load_yaml(COPY_SLOTS_PATH) or {}).get("slot_types") or []
+                 if isinstance(s, dict) and s.get("id")}
+    for sid, st in out["slot_types"].items():
+        sp = specs.get(sid) or {}
+        st["lint_as"] = sp.get("lint_as") or ""
+        base = (specs.get(st["lint_as"]) or {}) if st["lint_as"] else {}
+        st["ux_role"] = sp.get("ux_role") or base.get("ux_role") or ""
+        st["genres"] = list(sp.get("genres") or base.get("genres") or [])
+    _VOCAB[key] = out
+    return out
+
+
+_ROLES: dict = {}
+
+
+def closed_roles() -> list[str]:
+    """Закрытый список ролей текста: ux 07/06 §7.2 и body — раздел roles производного ux-07-06.yaml — и внутренняя meta."""
+    key = _mtime(UX_DICT_PATH)
+    if key not in _ROLES:
+        roles = list((load_yaml(UX_DICT_PATH) or {}).get("roles") or []) if UX_DICT_PATH.exists() else []
+        if not roles:
+            raise UsageError(f"в {UX_DICT_PATH.name} нет раздела roles: пересоберите словарь — "
+                             "scripts/text/ux_dict_to_yaml.py")
+        _ROLES.clear()
+        _ROLES[key] = roles + [r for r in INTERNAL_ROLES if r not in roles]
+    return _ROLES[key]
+
+
+def check_role(role: str, where: str = "") -> str:
+    if role not in closed_roles():
+        raise UsageError(f"роль «{role}»{' (' + where + ')' if where else ''} не из закрытого списка ux 07/06 §7.2 и "
+                         f"body; допустимо: {', '.join(r for r in closed_roles() if r not in INTERNAL_ROLES)}")
+    return role
+
+
+_LAYER = None
+
+
+def _layer():
+    """Модуль разбора файлов проекта scripts/project/layer.py: реестр texts.md, таблицы продукта, словарь компонентов."""
+    global _LAYER
+    if _LAYER is None:
+        kbpaths.use("project")
+        import layer  # noqa: WPS433
+        _LAYER = layer
+    return _LAYER
+
+
+def component_roles(name: str) -> list[str]:
+    """Роли текста части компонента — kb/common/components.yaml#text_roles: «Field.Error» → [error], «Button» → [action]."""
+    key = name[3:] if name.startswith("ui:") else name
+    t, _, part = key.partition(".")
+    roles = _layer().components().roles(t, part or None)
+    if not roles:
+        raise UsageError(f"компонент «{name}»: у части нет роли текста в kb/common/components.yaml#text_roles")
+    return roles
+
+
+def resolve_role(role: str = "", component: str = "", where: str = "") -> str:
+    """Роль строки: явная (ключ --role, поле role) или роль части компонента; явная роль — из ролей части."""
+    if component:
+        croles = component_roles(component)
+        if role:
+            check_role(role, where)
+            if role not in croles:
+                raise UsageError(f"роль «{role}»{' (' + where + ')' if where else ''} ≠ роль части «{component}»: "
+                                 f"{', '.join(croles)}")
+            return role
+        if len(croles) > 1:
+            raise UsageError(f"у части «{component}» роли {', '.join(croles)}: задайте роль строки (--role, поле role)")
+        return croles[0]
+    return check_role(role, where) if role else ""
 
 
 def load_profiles(path: Path | None = None) -> dict:
@@ -357,8 +498,8 @@ def merge_dict(a: dict, b: dict) -> dict:
 
 
 def resolve_profile(profiles: dict, name: str, thresholds_path: Path | None, lang: str = "") -> tuple[dict, dict]:
-    """Профиль = defaults ⊕ profiles[name] ⊕ thresholds.yaml (D) для этого жанра ⊕ analyzers_by_lang[lang] (D2, если
-    язык известен). Возвращает (профиль, источник порогов)."""
+    """Профиль = defaults ⊕ profiles[name] ⊕ thresholds.yaml (замер корпуса) для этого жанра ⊕ analyzers_by_lang[lang]
+    (если язык известен). Возвращает (профиль, источник порогов)."""
     base = profiles.get("defaults", {}) or {}
     prof = merge_dict(base, (profiles.get("profiles", {}) or {}).get(name, {}) or {})
     prof.setdefault("genre", name)
@@ -369,8 +510,8 @@ def resolve_profile(profiles: dict, name: str, thresholds_path: Path | None, lan
             th = load_yaml(tp) or {}
             g = (th.get("genres", {}) or {}).get(prof["genre"], {}) or {}
             an = g.get("analyzers") or g.get("linter") or {}
-            # 0.9.3 (оркестратор, 2026-09-24): пороги по языку D2 поверх общих — русское тире норма, английское примета
-            # ИИ; объединённый порог давал warning тире 23 % лидеров RU против 8 % по своему (03-corpus-measured/03 §3).
+            # пороги по языку поверх общих: русское тире — норма, английское — примета ИИ; объединённый порог давал
+            # warning тире 23 % лидеров RU против 8 % по своему (03-corpus-measured/03 §3)
             by_lang = ((g.get("analyzers_by_lang") or {}).get(lang) or {}) if lang else {}
             if an or by_lang:
                 prof["analyzers"] = merge_dict(prof.get("analyzers", {}), an)
@@ -401,6 +542,13 @@ class Unit:
     genre: str = ""
     lang: str = ""
     allow: list = field(default_factory=list)   # [(шаблон id правила, причина)] — lint_allow слота copy deck
+    lint_type: str = ""            # тип слота для правил: lint_as слота без своих правил (copy-slots.yaml)
+    key: str = ""                  # строка реестра texts.md: ключ, предел, действие, объект, группа, статус
+    maxlen: str = ""
+    action: str = ""
+    object: str = ""
+    group: str = ""
+    status: str = ""
 
 
 @dataclass
@@ -411,13 +559,28 @@ class Document:
     source_text: str = ""
     genre_hint: str = ""
     notes: list = field(default_factory=list)
+    registry: dict | None = None   # реестр текстов: объекты и действия продукта для межстрочных проверок
+
+
+def ltype(u: Unit) -> str:
+    """Тип слота, по которому строку выбирают правила и анализаторы."""
+    return u.lint_type or u.slot_type
 
 
 def role_for(slot_type: str, vocab: dict, fallback: str = "marketing") -> str:
+    """Роль ux типа слота; тип не из словаря site — ошибка вызова (псевдослот парсера hr — роль fallback)."""
+    if slot_type in INTERNAL_SLOTS:
+        return fallback
     st = vocab["slot_types"].get(slot_type)
-    if st is not None:
-        return st.get("ux_role") or ("meta" if slot_type.startswith(("meta-", "og-")) else fallback)
-    return fallback
+    if st is None:
+        if vocab.get("missing"):
+            raise UsageError(f"словарь site не найден: {vocab.get('path')}")
+        raise UsageError(f"тип слота «{slot_type}» не из словаря site (слоты вида text: {vocab.get('path')})")
+    return st.get("ux_role") or ("meta" if slot_type.startswith(("meta-", "og-")) else fallback)
+
+
+def lint_type_of(slot_type: str, vocab: dict) -> str:
+    return ((vocab["slot_types"].get(slot_type) or {}).get("lint_as") or "") if slot_type else ""
 
 
 def md_slot(level: int, genre: str) -> str:
@@ -631,21 +794,29 @@ def parse_html(text: str, genre: str, vocab: dict, path: str) -> list[Unit]:
     return units
 
 
-def parse_copy_deck(data, vocab: dict, path: str, chosen_only: bool) -> tuple[list[Unit], str]:
+def parse_allow(raw) -> list:
+    out = []
+    for a in (raw if isinstance(raw, list) else ([raw] if raw else [])):
+        if isinstance(a, dict) and a.get("rule"):
+            out.append((str(a["rule"]), str(a.get("reason", ""))))
+        elif isinstance(a, str):
+            out.append((a, ""))
+    return out
+
+
+def parse_copy_deck(data, vocab: dict, path: str, all_variants: bool = False) -> tuple[list[Unit], str]:
+    """Copy deck → блоки. По умолчанию — выбранный вариант слота (без выбора — все живые); --all-variants — все живые
+    варианты; отклонённые (status: rejected) не проверяются. Мета страницы несёт meta.fact_ids и lint_allow страницы.
+    Короткая форма slots: [{slot_type | role | component, text}] — строки интерфейса мобильного приложения и бота."""
     units: list[Unit] = []
     genre_hint = ""
 
-    def parse_allow(raw) -> list:
-        out = []
-        for a in (raw if isinstance(raw, list) else ([raw] if raw else [])):
-            if isinstance(a, dict) and a.get("rule"):
-                out.append((str(a["rule"]), str(a.get("reason", ""))))
-            elif isinstance(a, str):
-                out.append((a, ""))
-        return out
-
     def add_slot(slot: dict, page_id="", section_id="", genre=""):
-        st = slot.get("slot_type") or "body"
+        where = slot.get("slot_id") or slot.get("key") or slot.get("slot_type") or ""
+        role = resolve_role(str(slot.get("role") or ""), str(slot.get("component") or ""), where)
+        st = str(slot.get("slot_type") or ("" if role else "body"))
+        role = role or role_for(st, vocab)
+        lt = lint_type_of(st, vocab)
         facts = slot.get("fact_ids")
         facts = list(facts) if isinstance(facts, list) else (None if facts is None else [facts])
         allow = parse_allow(slot.get("lint_allow"))
@@ -653,30 +824,39 @@ def parse_copy_deck(data, vocab: dict, path: str, chosen_only: bool) -> tuple[li
         if isinstance(variants, list) and variants:
             chosen = slot.get("chosen")
             for v in variants:
-                if chosen_only and chosen and v.get("id") != chosen:
+                if not isinstance(v, dict) or v.get("status") == "rejected":
+                    continue
+                if not all_variants and chosen and v.get("id") != chosen:
                     continue
                 txt = v.get("text") or ""
                 if not str(txt).strip():
                     continue
-                units.append(Unit(str(txt), st, role_for(st, vocab), page_id, section_id, slot.get("slot_id", ""),
-                                  str(v.get("id", "")), facts if facts is not None else [], path=path, genre=genre,
-                                  allow=allow))
+                vf = v.get("fact_ids")
+                vf = list(vf) if isinstance(vf, list) else None
+                units.append(Unit(str(txt), st, role, page_id, section_id, slot.get("slot_id", ""),
+                                  str(v.get("id", "")), vf if vf is not None else (facts if facts is not None else []),
+                                  path=path, genre=genre, allow=allow, lint_type=lt, key=str(slot.get("key") or "")))
         elif slot.get("text"):
-            units.append(Unit(str(slot["text"]), st, role_for(st, vocab), page_id, section_id, slot.get("slot_id", ""),
-                              "", facts if facts is not None else [], path=path, genre=genre, allow=allow))
+            units.append(Unit(str(slot["text"]), st, role, page_id, section_id, slot.get("slot_id", ""),
+                              "", facts if facts is not None else [], path=path, genre=genre, allow=allow, lint_type=lt,
+                              key=str(slot.get("key") or "")))
 
     root = data.get("copy_deck", data) if isinstance(data, dict) else data
     if isinstance(root, dict) and "pages" in root:
         for page in root.get("pages") or []:
+            if page.get("status") == "rejected":
+                continue
             pt = page.get("page_type", "")
             genre = (vocab["page_types"].get(pt) or {}).get("genre", "") or page.get("genre", "")
             genre_hint = genre_hint or genre
             meta = page.get("meta") or {}
+            mfacts = [str(x) for x in meta.get("fact_ids") or []] if isinstance(meta.get("fact_ids"), list) else []
+            pallow = parse_allow(page.get("lint_allow"))
             for k, st in (("title", "meta-title"), ("description", "meta-description"), ("og_title", "og-title"),
                           ("og_description", "og-description")):
                 if meta.get(k):
                     units.append(Unit(str(meta[k]), st, role_for(st, vocab, "meta"), page.get("page_id", ""), "meta",
-                                      st, "", [], path=path, genre="meta"))
+                                      st, "", list(mfacts), path=path, genre="meta", allow=pallow))
             for sec in page.get("sections") or []:
                 for slot in sec.get("slots") or []:
                     add_slot(slot, page.get("page_id", ""), sec.get("section_id", ""), genre)
@@ -690,8 +870,84 @@ def parse_copy_deck(data, vocab: dict, path: str, chosen_only: bool) -> tuple[li
     return units, genre_hint
 
 
-def read_document(path: str, genre: str, vocab: dict, chosen_only: bool = False, slot_type: str = "",
-                  fmt: str = "") -> Document:
+def is_registry(path: str, text: str, fmt: str = "") -> bool:
+    """Реестр текстов интерфейса: формат texts или файл texts.md с таблицей key · role · text."""
+    if fmt == "texts":
+        return True
+    return (not fmt or fmt in ("md", "markdown")) and Path(path).name == "texts.md" and \
+        bool(re.search(r"^\|\s*key\s*\|\s*role\s*\|\s*text\s*\|", text, re.M))
+
+
+def product_tables(registry_path: str, objects_path: str = "", actions_path: str = "") -> dict:
+    """Глоссарий объектов (object.md: name, aliases, statuses) и словарь действий (action.md: verb, past, banned,
+    objects) проекта. Без явных путей — файлы продукта рядом с реестром: docs/projects/<slug>/screens/<surface>/texts.md
+    → docs/projects/<slug>/object.md, action.md."""
+    L = _layer()
+    rp = Path(registry_path)
+    project = rp.resolve().parents[2] if len(rp.resolve().parents) > 2 and rp.resolve().parents[1].name == "screens" else None
+    op = Path(objects_path) if objects_path else (project / "object.md" if project else None)
+    ap = Path(actions_path) if actions_path else (project / "action.md" if project else None)
+    out = {"objects": {}, "actions": {}, "objects_path": str(op) if op and op.is_file() else "",
+           "actions_path": str(ap) if ap and ap.is_file() else ""}
+
+    def words(cell):
+        v = L.cell(cell) or ""
+        return [x.strip().strip("«»\"") for x in re.split(r"[,;/]", v) if x.strip().strip("«»\"")]
+    if op and op.is_file():
+        tb = L.Md(op).table(("slug", "name"))
+        for r in tb.rows if tb else []:
+            slug = L.cell(r.get("slug"))
+            if slug and not L.is_empty(slug):
+                out["objects"][slug] = {"name": L.cell(r.get("name")) or "", "aliases": words(r.get("aliases")),
+                                        "line": r.line}
+    if ap and ap.is_file():
+        tb = L.Md(ap).table(("slug", "verb"))
+        for r in tb.rows if tb else []:
+            slug = L.cell(r.get("slug"))
+            if slug and not L.is_empty(slug):
+                out["actions"][slug] = {"verb": L.cell(r.get("verb")) or "", "past": L.cell(r.get("past")) or "",
+                                        "banned": words(r.get("banned")), "objects": L.refs(r.get("objects")),
+                                        "line": r.line}
+    return out
+
+
+def parse_registry(path: str, text: str) -> tuple[list[Unit], list[str]]:
+    """Реестр texts.md → блоки со строками интерфейса: текст, роль (закрытый список), ключ, maxlen, действие, объект,
+    группа, статус; место находки — строка файла. Роль вне списка — ошибка вызова."""
+    L = _layer()
+    reg = L.Texts(path)
+    if reg.table is None:
+        raise UsageError(f"{path}: нет таблицы реестра с колонками key, role, text")
+    lines = text.split("\n")
+    offs, pos = [], 0
+    for ln in lines:
+        offs.append(pos)
+        pos += len(ln) + 1
+    bad, units, notes = [], [], []
+    for key, row in reg.rows.items():
+        if not row.role or row.role not in closed_roles():
+            bad.append(f"{key} (строка {row.line}): «{row.role or '—'}»")
+            continue
+        body = row.text.strip()
+        if body.startswith(("«", "\"")) and body.endswith(("»", "\"")) and len(body) > 1:
+            body = body[1:-1]
+        if not body or L.is_empty(body):
+            continue
+        raw = lines[row.line - 1] if 0 < row.line <= len(lines) else ""
+        at = raw.find(body)
+        u = Unit(body, "", row.role, slot_id=key, path=path, genre="interface",
+                 src_offset=(offs[row.line - 1] + at) if at >= 0 else None, key=key, maxlen=row.maxlen or "",
+                 action=row.action or "", object=row.object or "", group=row.group or "", status=row.status or "")
+        units.append(u)
+    if bad:
+        raise UsageError(f"{path}: роль строки не из закрытого списка ux 07/06 §7.2 и body — " + "; ".join(bad[:6]))
+    for d in reg.duplicates:
+        notes.append(f"ключ {d.key} повторён (строка {d.line}) — проверена первая строка")
+    return units, notes
+
+
+def read_document(path: str, genre: str, vocab: dict, all_variants: bool = False, slot_type: str = "",
+                  fmt: str = "", role: str = "", component: str = "", objects: str = "", actions: str = "") -> Document:
     if path == "-":
         text = sys.stdin.read()
         ext = fmt or "md"
@@ -701,9 +957,20 @@ def read_document(path: str, genre: str, vocab: dict, chosen_only: bool = False,
         ext = fmt or p.suffix.lower().lstrip(".")
     text = text.lstrip("\ufeff") if text.startswith("\ufeff") else text
     doc = Document(path, ext, [], text)
+    if path != "-" and is_registry(path, text, fmt):
+        if role or component or slot_type:
+            raise UsageError("у реестра texts.md роль — колонка role: ключи --role, --component и --slot-type к нему не "
+                             "применяются")
+        doc.units, doc.notes = parse_registry(path, text)
+        doc.fmt, doc.genre_hint = "texts", "interface"
+        doc.registry = product_tables(path, objects, actions)
+        for k, what in (("objects_path", "глоссарий объектов object.md"), ("actions_path", "словарь действий action.md")):
+            if not doc.registry[k]:
+                doc.notes.append(f"{what} не найден — проверки, которые его читают, пропущены")
+        return doc
     if ext in ("yaml", "yml"):
         data = yaml.safe_load(text)
-        units, ghint = parse_copy_deck(data, vocab, path, chosen_only)
+        units, ghint = parse_copy_deck(data, vocab, path, all_variants)
         doc.units, doc.genre_hint = units, ghint
         doc.source_text = ""
     elif ext in ("html", "htm"):
@@ -712,10 +979,22 @@ def read_document(path: str, genre: str, vocab: dict, chosen_only: bool = False,
     else:
         doc.units = parse_markdown(text, genre or "landing", vocab, path)
         doc.fmt = "md" if ext in ("md", "markdown") else "txt"
+    urole = resolve_role(role, component, "--role" if role else "")
+    if genre == "interface" and not urole and not slot_type and ext not in ("yaml", "yml"):
+        urole = "body"
+        doc.notes.append("жанр interface без роли (--role, --component): строки проверены как body")
     if slot_type:
+        srole = role_for(slot_type, vocab)
         for u in doc.units:
-            u.slot_type = slot_type
-            u.role = role_for(slot_type, vocab)
+            u.slot_type, u.role, u.lint_type = slot_type, srole, lint_type_of(slot_type, vocab)
+    if urole:
+        for u in doc.units:
+            u.role = urole
+            if not slot_type:
+                u.slot_type, u.lint_type = "", ""
+    else:
+        for u in doc.units:
+            u.lint_type = u.lint_type or lint_type_of(u.slot_type, vocab)
     return doc
 
 
@@ -741,6 +1020,7 @@ class Finding:
     slot: dict = field(default_factory=dict)
     count_as_marker: bool = False
     note: str = ""
+    tell: str = ""                 # id приметы реестра kb/common/tells.yaml (раздел checks)
 
     def as_dict(self) -> dict:
         d = {"id": self.id, "marker_id": self.marker_id, "level": self.level, "group": self.group,
@@ -751,13 +1031,29 @@ class Finding:
              "evidence": self.evidence, "slot": self.slot, "counts_as_marker": self.count_as_marker}
         if self.note:
             d["note"] = self.note
+        if self.tell:
+            d["tell"] = self.tell
         return d
+
+
+_TELLS: dict = {}
+
+
+def tells_of_checks() -> dict:
+    """id приметы по id правила или анализатора: ключи copy_lint:<id> раздела checks реестра примет."""
+    key = _mtime(TELLS_PATH)
+    if key not in _TELLS:
+        d = (load_yaml(TELLS_PATH) or {}) if TELLS_PATH.exists() else {}
+        _TELLS.clear()
+        _TELLS[key] = {k[len(TELL_KEY):]: v.get("tell") for k, v in (d.get("checks") or {}).items()
+                       if isinstance(k, str) and k.startswith(TELL_KEY) and isinstance(v, dict) and v.get("tell")}
+    return _TELLS[key]
 
 
 def effective_level(rule: Rule, genre: str, unit: Unit, profile: dict) -> str:
     lvl = rule.levels.get(genre, rule.level) if rule.levels else rule.level
-    if rule.slot_levels and unit.slot_type in rule.slot_levels:
-        lvl = rule.slot_levels[unit.slot_type]
+    if rule.slot_levels and ltype(unit) in rule.slot_levels:
+        lvl = rule.slot_levels[ltype(unit)]
     ov = (profile.get("level_overrides") or {})
     for pat, v in ov.items():
         if fnmatch.fnmatch(rule.id, pat):
@@ -775,22 +1071,28 @@ def effective_level(rule: Rule, genre: str, unit: Unit, profile: dict) -> str:
 
 
 def rule_applies(rule: Rule, unit: Unit, genre: str, lang: str) -> bool:
+    """Место правила: у слота сайта — тип слота (slot_types), у строки без типа (реестр интерфейса, --role) — роль
+    (appliesTo); правило только с типами слотов строку без типа не проверяет."""
     if rule.kind in ("analyzer", "manual"):
         return False
     if rule.lang not in ("any", lang):
         return False
     if rule.genres and genre not in rule.genres:
         return False
-    if rule.appliesTo and unit.role not in rule.appliesTo:
+    st = ltype(unit)
+    if rule.slot_types and st:
+        if not any(fnmatch.fnmatch(st, s) for s in rule.slot_types):
+            return False
+    elif rule.slot_types and not rule.appliesTo:
+        return False
+    elif rule.appliesTo and unit.role not in rule.appliesTo:
         return False
     if rule.excludes and unit.role in rule.excludes:
         return False
     # отзыв и цитата клиента (роль user-content) стилистически не правятся: только артефакты (ART) и данные (CNT)
     if unit.role == "user-content" and rule.group in STYLE_GROUPS and "user-content" not in (rule.appliesTo or []):
         return False
-    if rule.slot_types and not any(fnmatch.fnmatch(unit.slot_type, s) for s in rule.slot_types):
-        return False
-    if rule.exclude_slot_types and any(fnmatch.fnmatch(unit.slot_type, s) for s in rule.exclude_slot_types):
+    if rule.exclude_slot_types and st and any(fnmatch.fnmatch(st, s) for s in rule.exclude_slot_types):
         return False
     return True
 
@@ -808,7 +1110,9 @@ def context_of(text: str, s: int, e: int, width: int = 40) -> str:
 
 def slot_info(u: Unit) -> dict:
     d = {"slot_type": u.slot_type, "role": u.role}
-    for k in ("page_id", "section_id", "slot_id", "variant"):
+    if u.lint_type and u.lint_type != u.slot_type:
+        d["lint_as"] = u.lint_type
+    for k in ("page_id", "section_id", "slot_id", "variant", "key"):
         v = getattr(u, k)
         if v:
             d[k] = v
@@ -833,9 +1137,11 @@ def run_rules(doc: Document, rules: list[Rule], genre: str, lang: str, profile: 
         ulang = u.lang or lang
         ugenre = u.genre or genre
         masks = masked_spans(u.text)
-        for r in rules:
-            if skip_ids and r.id in skip_ids:
+        icu = icu_spans(u.text) if ugenre == "interface" else []
+        for r0 in rules:
+            if skip_ids and r0.id in skip_ids:
                 continue
+            r = r0.for_genre(ugenre)
             if not rule_applies(r, u, ugenre, ulang):
                 continue
             lvl = effective_level(r, ugenre, u, profile)
@@ -847,8 +1153,10 @@ def run_rules(doc: Document, rules: list[Rule], genre: str, lang: str, profile: 
             for m in r.regex.finditer(u.text):
                 if m.end() == m.start():
                     continue
-                if r.mask_quotes and overlaps((m.start(), m.end()), masks):
+                if r.mask_quotes and inside((m.start(), m.end()), masks):
                     continue
+                if icu and r.group == "ART" and inside((m.start(), m.end()), icu):
+                    continue          # подстановка ICU {name} в строке интерфейса — синтаксис, а не шаблон-заглушка
                 if r.unless_re is not None:
                     ss, se = sentence_of(u.text, m.start())
                     if r.unless_re.search(u.text[ss:se]):
@@ -984,6 +1292,11 @@ FACT_CLAIM_RE = re.compile(
     r"сотрудник\w*|специалист\w*|партн[её]р\w*|брендов|магазин\w*|город\w*|стран\w*|лет|года?|customers|clients|users|"
     r"companies|projects|teams|years|reviews|brands|countries)" + E_MACRO +
     r"|" + B_MACRO + r"(?:более|свыше|больше|около|почти|over|more\sthan|nearly|almost)\s\d[\d  ]*" +
+    r"|" + B_MACRO + r"(?:в\s)?(?:два|две|три|четыре|пять|шесть|семь|восемь|девять|десять|полтора)\s+раз[а]?" + E_MACRO +
+    r"|" + B_MACRO + r"(?:вдвое|втрое|вчетверо|впятеро|вдесятеро|двукратн\w*|тр[её]хкратн\w*|многократн\w*)" + E_MACRO +
+    r"|" + B_MACRO + r"(?:десятк\w*|сотн\w*|тысяч\w*|миллион\w*)\s+(?:довольн\w*\s+)?(?:клиент\w*|покупател\w*|"
+    r"пользовател\w*|компани\w*|проект\w*|заказ\w*|отзыв\w*)" + E_MACRO +
+    r"|\b(?:twice|three\s+times|(?:two|three|ten)fold|thousands\s+of\s+(?:customers|users|clients|companies))\b" +
     r")", re.I)
 EYEBROW_SLOTS = {"eyebrow"}
 HEADING_SLOTS = {"headline", "section-title", "article-title", "article-heading", "case-title", "form-title"}
@@ -1048,7 +1361,8 @@ def get_morph(mode: str):
         except Exception:
             _MORPH = False
             if mode == "on":
-                raise SystemExit("copy_lint: --morph on, но pymorphy3 не найден (запусти интерпретатором venv-C)")
+                raise SystemExit("copy_lint: --morph on, но pymorphy3 не найден (запустите интерпретатором "
+                                 "$DDD_HOME/venv/bin/python)")
     return _MORPH or None
 
 
@@ -1067,6 +1381,7 @@ def morph_findings(doc: Document, rules: list[Rule], genre: str, profile: dict, 
         r = rb.get(rid)
         if r is None:
             return
+        r = r.for_genre(u.genre or genre)
         lvl = effective_level(r, u.genre or genre, u, profile)
         if lvl == "off" or not rule_applies(r, u, u.genre or genre, "ru"):
             return
@@ -1095,7 +1410,7 @@ def morph_findings(doc: Document, rules: list[Rule], genre: str, profile: dict, 
                 if t[0] == "," and i + 1 < len(toks) and best(toks[i + 1]).tag.POS == "GRND":
                     rest = toks[i + 2:]
                     if not any(best(x).tag.POS == "VERB" for x in rest if x[0] not in ",.!?;:—–"):
-                        if not overlaps((t[1], se), masks):
+                        if not inside((t[1], se), masks):
                             emit("ru-syn-gerund-tail", ui, u, t[1], se)
                         break
             # цепочка: ≥ 3 существительных в родительном подряд после вершины
@@ -1111,10 +1426,10 @@ def morph_findings(doc: Document, rules: list[Rule], genre: str, profile: dict, 
                     start = t[1] if run == 1 else start
                     end = t[2]
                 else:
-                    if run >= 3 and not overlaps((start, end), masks):
+                    if run >= 3 and not inside((start, end), masks):
                         emit("ru-syn-genitive-chain", ui, u, start, end)
                     run, start = 0, None
-            if run >= 3 and not overlaps((start, end), masks):
+            if run >= 3 and not inside((start, end), masks):
                 emit("ru-syn-genitive-chain", ui, u, start, end)
             # пассив: краткое страдательное причастие (кроме коротких статусов), возвратный глагол канцелярита,
             # «нами»
@@ -1127,7 +1442,7 @@ def morph_findings(doc: Document, rules: list[Rule], genre: str, profile: dict, 
                 p = best(t)
                 if (p.tag.POS == "PRTS" and "pssv" in p.tag and len(words) > 2) or \
                         (p.tag.POS == "VERB" and p.normal_form in REFLEXIVE_CANC):
-                    if not overlaps((t[1], t[2]), masks):
+                    if not inside((t[1], t[2]), masks):
                         emit("ru-syn-passive", ui, u, t[1], t[2])
                     break
     return out
@@ -1381,15 +1696,519 @@ def an_level(cfg: dict, default: str = "warning") -> str:
     return lv if lv in LEVELS else default
 
 
+# --- межстрочные проверки интерфейса (ux 07/06 §7.3) и общие для жанров ---------------------------------------------
+LETTERS_RE = re.compile(r"[А-Яа-яЁёA-Za-z]+")
+VERB_SUFFIXES = ("ировать", "овывать", "ывать", "ивать", "евать", "овать", "ать", "ять", "еть", "ить", "уть", "ыть",
+                 "оть", "ти", "ть", "чь")
+NOUN_ENDINGS = "(?:а|я|у|ю|о|е|и|ы|ь|й|ом|ем|ой|ей|ов|ев|ам|ям|ах|ях|ами|ями)?"
+# роли строк с содержанием: одинаковый текст двух таких строк на экране — дубль (F8.1, F8.2); кнопки, ссылки, подписи
+# полей и колонок законно повторяются
+CONTENT_ROLES = {"title", "subtitle", "section-title", "body", "help", "empty", "banner", "inline-message", "hint",
+                 "caption", "tooltip", "setting-description", "confirm-body", "toast", "error"}
+YO_AMBIGUOUS = {"все", "узнаем", "совершенный", "совершенная", "совершенное", "совершенные", "осел", "небо"}
+US_UK = [("color", "colour"), ("behavior", "behaviour"), ("favorite", "favourite"), ("center", "centre"),
+         ("organiz", "organis"), ("customiz", "customis"), ("optimiz", "optimis"), ("authoriz", "authoris"),
+         ("analyz", "analys"), ("canceled", "cancelled"), ("canceling", "cancelling"), ("catalog", "catalogue"),
+         ("gray", "grey"), ("license", "licence"), ("dialog", "dialogue"), ("fulfill", "fulfil")]
+
+
+def yo(s: str) -> str:
+    return s.lower().replace("ё", "е")
+
+
+def match_brace(text: str, i: int) -> int:
+    depth = 0
+    for j in range(i, len(text)):
+        if text[j] == "{":
+            depth += 1
+        elif text[j] == "}":
+            depth -= 1
+            if depth == 0:
+                return j
+    return -1
+
+
+ICU_KEY_RE = re.compile(r"\s*(?:offset:\s*\d+\s*)?(=\d+|zero|one|two|few|many|other)\s*\{")
+
+
+def icu_branches(rest: str) -> dict | None:
+    out, i = {}, 0
+    while i < len(rest):
+        if not rest[i:].strip():
+            break
+        m = ICU_KEY_RE.match(rest, i)
+        if not m:
+            return None
+        j = match_brace(rest, m.end() - 1)
+        if j < 0:
+            return None
+        out[m.group(1)] = rest[m.end():j]
+        i = j + 1
+    return out
+
+
+def icu_scan(text: str, lang: str = "ru") -> tuple[str, list, list]:
+    """Строка ICU (ux 07/05 §4.4) → (текст без подстановок: у plural и select — самая длинная ветка, «#» снят;
+    проблемы [(уровень, что)]; границы аргументов верхнего уровня)."""
+    plain, issues, spans, i = [], [], [], 0
+    while i < len(text):
+        ch = text[i]
+        if ch == "{":
+            j = match_brace(text, i)
+            if j < 0:
+                issues.append(("error", "скобка «{» не закрыта"))
+                plain.append(text[i:])
+                break
+            spans.append((i, j + 1))
+            parts = [x.strip() for x in text[i + 1:j].split(",", 2)]
+            name, typ = parts[0], (parts[1] if len(parts) > 1 else "")
+            if typ in ("plural", "select", "selectordinal"):
+                br = icu_branches(parts[2] if len(parts) > 2 else "")
+                if br is None:
+                    issues.append(("error", f"{{{name}, {typ}}}: ветки не разбираются"))
+                    br = {}
+                elif "other" not in br:
+                    issues.append(("error", f"{{{name}, {typ}}}: нет ветки other"))
+                if typ == "plural":
+                    if "=1" in br and "one" not in br:
+                        issues.append(("warning", f"{{{name}, plural}}: «=1» вместо one — one в русском значит 1, 21, 31…"))
+                    miss = [k for k in ("one", "few", "many") if k not in br] if lang == "ru" else []
+                    if miss and br:
+                        issues.append(("warning", f"{{{name}, plural}}: у русского нет веток {', '.join(miss)}"))
+                subs = [icu_scan(m, lang) for m in br.values()]
+                for s in subs:
+                    issues.extend(s[1])
+                plain.append(max((s[0] for s in subs), key=len, default="").replace("#", ""))
+            elif not re.fullmatch(r"[A-Za-z_][\w.]*", name or ""):
+                issues.append(("error", f"«{{{text[i + 1:j]}}}» — не аргумент ICU"))
+            i = j + 1
+        elif ch == "}":
+            issues.append(("error", "лишняя «}»"))
+            i += 1
+        else:
+            plain.append(ch)
+            i += 1
+    return "".join(plain), issues, spans
+
+
+def icu_spans(text: str) -> list[tuple[int, int]]:
+    return icu_scan(text)[2] if "{" in text else []
+
+
+def root_of(word: str) -> str:
+    """Основа глагола без окончания инфинитива и частицы -ся: «создать» → «созд», «записаться» → «запис»."""
+    w = yo(word)
+    if w.endswith(("ся", "сь")) and len(w) > 6:
+        w = w[:-2]
+    for suf in VERB_SUFFIXES:
+        if w.endswith(suf) and len(w) - len(suf) >= 4:
+            return w[:-len(suf)]
+    return w[:max(4, len(w) - 2)]
+
+
+def action_roots(verb: str, past: str) -> set:
+    """Корни имени действия: основа глагола кнопки (verb) и общее начало verb и past («отметить» — «отмечен»)."""
+    vw = LETTERS_RE.findall(verb or "")
+    if not vw:
+        return set()
+    v0 = yo(vw[0])
+    roots = {root_of(v0)}
+    best = ""
+    for pw in LETTERS_RE.findall(past or ""):
+        cp = ""
+        for a, b in zip(v0, yo(pw)):
+            if a != b:
+                break
+            cp += a
+        best = cp if len(cp) > len(best) else best
+    if len(best) >= 4:
+        roots.add(best)
+    return {r for r in roots if len(r) >= 3}
+
+
+def word_with_root(text: str, roots, longer: bool = False) -> str:
+    """Слово текста с одним из корней; longer — слово длиннее корня («перед» ≠ «передать»)."""
+    for w in LETTERS_RE.findall(text):
+        lw = yo(w)
+        for r in roots:
+            if lw.startswith(r) and (len(lw) > len(r) if longer else True):
+                return w
+    return ""
+
+
+def alias_re(alias: str):
+    """Синоним объекта с падежными окончаниями: «лид» — «лида», «лидов», но не «лидер»."""
+    parts = []
+    for w in LETTERS_RE.findall(alias):
+        lw = yo(w)
+        stem = lw[:-1] if len(lw) >= 5 and lw[-1] in "аяоеиыьйую" else lw
+        parts.append(re.escape(stem) + NOUN_ENDINGS)
+    if not parts:
+        return None
+    return re.compile(r"(?<![а-яa-z])" + r"\s+".join(parts) + r"(?![а-яa-z])")
+
+
+def phrase_form(text: str, morph) -> str:
+    """Какой вопрос строка группы закрывает: «действие» (инфинитив, повелительное), «признак» (краткое причастие или
+    прилагательное, строка из одних прилагательных — «какая?»), «предмет» (именная группа — «что?»)."""
+    ws = [w for w in LETTERS_RE.findall(icu_scan(text)[0]) if CYR_RE.search(w)]
+    if not ws or morph is None:
+        return ""
+    ps = [morph.parse(w)[0] for w in ws]
+    p0 = ps[0]
+    if p0.tag.POS == "INFN" or (p0.tag.POS == "VERB" and "impr" in p0.tag):
+        return "действие"
+    if any(p.tag.POS in ("PRTS", "ADJS") for p in ps):
+        return "признак"
+    content = [p for p in ps if p.tag.POS in ("NOUN", "ADJF", "PRTF")]
+    if content and all(p.tag.POS in ("ADJF", "PRTF") for p in content):
+        return "признак"
+    return "предмет" if p0.tag.POS in ("NOUN", "ADJF", "PRTF", "NPRO", "NUMR") else ""
+
+
+TY_RE = re.compile(r"(?<![А-Яа-яЁё])(?:ты|тебя|тебе|тобой|тобою|тво[йяеёи]|твоего|твоей|твоему|твоим|твоих|твою|"
+                   r"твоими)(?![А-Яа-яЁё])", re.I)
+VY_RE = re.compile(r"(?<![А-Яа-яЁё])(?:вы|вас|вам|вами|ваш|ваша|ваше|ваши|вашего|вашей|вашему|вашим|ваших|вашу|"
+                   r"вашими)(?![А-Яа-яЁё])", re.I)
+TY_VERB_RE = re.compile(r"(?<![А-Яа-яЁё])[А-Яа-яЁё]{2,}(?:ешь|ишь|ёшь|ешься|ишься|ёшься)(?![А-Яа-яЁё])", re.I)
+VY_VERB_RE = re.compile(r"(?<![А-Яа-яЁё])[А-Яа-яЁё]{2,}(?:ете|ите|ёте|етесь|итесь|ётесь|йте|ьте|йтесь|ьтесь)"
+                        r"(?![А-Яа-яЁё])", re.I)
+
+
+def address_hits(text: str, morph) -> tuple[list, list]:
+    """Приметы обращения на «ты» и на «вы»: местоимения, личные формы и повелительное наклонение."""
+    t = norm_spaces(text)
+    ty = [m.group(0) for m in TY_RE.finditer(t)] + [m.group(0) for m in TY_VERB_RE.finditer(t)
+                                                   if yo(m.group(0)) not in NOT_VERB_RU]
+    vy = [m.group(0) for m in VY_RE.finditer(t)] + [m.group(0) for m in VY_VERB_RE.finditer(t)
+                                                   if yo(m.group(0)) not in NOT_VERB_RU]
+    if morph is not None:
+        for w in re.findall(r"[А-Яа-яЁё]{3,}", t):
+            p = morph.parse(w.lower())[0]
+            if p.tag.POS == "VERB" and "impr" in p.tag and p.score >= 0.5:
+                (ty if "sing" in p.tag else vy).append(w)
+    return ty, vy
+
+
+def address_mix(doc: Document, rb: dict, cfg: dict, morph, form: str = "") -> list:
+    """«Ты» и «вы» в одном тексте: находка — на строках меньшинства (или не той формы, что у голоса продукта)."""
+    per = []
+    for ui, u in enumerate(doc.units):
+        if u.role == "user-content" or (u.lang and u.lang != "ru"):
+            continue
+        ty, vy = address_hits(u.text, morph)
+        if ty or vy:
+            per.append((ui, u, ty, vy))
+    n_ty = sum(1 for x in per if x[2])
+    n_vy = sum(1 for x in per if x[3])
+    want = {"ty": "ty", "vy": "vy"}.get(form, "")
+    if not want:
+        if not (n_ty and n_vy):
+            return []
+        want = "vy" if n_vy >= n_ty else "ty"
+    out = []
+    for ui, u, ty, vy in per:
+        bad = ty if want == "vy" else vy
+        if bad:
+            f = mk_analyzer_finding(rb.get("an-address-mix"), "an-address-mix", an_level(cfg), "«Ты» и «вы» в одном тексте.",
+                                    doc_unit=ui, fragment=bad[0], slot=slot_info(u),
+                                    extra=f"Форма текста — «{'вы' if want == 'vy' else 'ты'}»: здесь «{bad[0]}».")
+            out.append(f)
+    return out
+
+
+def role_lengths() -> dict:
+    return ((load_yaml(UX_DICT_PATH) or {}).get("role_lengths") or {}) if UX_DICT_PATH.exists() else {}
+
+
+def syllables(word: str) -> int:
+    if CYR_RE.search(word):
+        return len(re.findall(r"[аеёиоуыэюяАЕЁИОУЫЭЮЯ]", word))
+    return max(1, len(re.findall(r"[aeiouy]+", word.lower())))
+
+
+def _ui_finding(rb, rid, level, message, ui, u, doc, fragment="", extra="", start=-1, end=-1) -> Finding:
+    f = mk_analyzer_finding(rb.get(rid), rid, level, message, doc_unit=ui, fragment=fragment, slot=slot_info(u),
+                            extra=extra)
+    f.start, f.end = start, end
+    if u.src_offset is not None and doc.source_text:
+        f.line, f.col = line_col(doc.source_text, u.src_offset + max(0, start))
+    return f
+
+
+def run_ui_analyzers(doc: Document, rules: list[Rule], profile: dict, morph, lang: str) -> tuple[list, dict]:
+    """Межстрочные проверки ux 07/06 §7.3 для строк интерфейса: имя действия по потоку и синонимы действия (action.md),
+    синонимы объекта (object.md, aliases), формы групп, дубли на экране, maxlen, длина по роли (ux 07/01 §12),
+    форматы чисел и диапазонов, ICU, «ё» и «е», US и UK, уровень чтения. Заголовок против содержимого и стили пары
+    «согласие / отказ» — судья и проверка макета."""
+    an = profile.get("analyzers") or {}
+    rb = {r.id: r for r in rules}
+    out: list = []
+    metrics: dict = {}
+    reg = doc.registry or {}
+    units = [(ui, u) for ui, u in enumerate(doc.units) if u.role != "user-content" and not ltype(u)]
+    notes = []
+
+    # имя действия по потоку и запрещённые синонимы действия
+    cfg = an.get("ui_action_name") or {}
+    acts = reg.get("actions") or {}
+    if cfg.get("enabled") and acts:
+        roots = {slug: action_roots(a["verb"], a["past"]) for slug, a in acts.items()}
+        banned = {slug: [(b, {root_of(LETTERS_RE.findall(b)[0])}) for b in a["banned"] if LETTERS_RE.findall(b)]
+                  for slug, a in acts.items()}
+        for ui, u in units:
+            plain = icu_scan(u.text, lang)[0]
+            if u.action and u.action in acts:
+                hit = next(((b, w) for b, rs in banned[u.action] for w in [word_with_root(plain, rs, True)] if w), None)
+                if hit:
+                    out.append(_ui_finding(rb, "an-ui-action-synonym", cfg.get("level_banned", "error"),
+                                           "Запрещённый синоним действия.", ui, u, doc, hit[1],
+                                           f"Действие `{u.action}` — «{acts[u.action]['verb']}» / «{acts[u.action]['past']}»; "
+                                           f"«{hit[1]}» — в списке запрещённых («{hit[0]}»)."))
+                elif roots[u.action] and not word_with_root(plain, roots[u.action]):
+                    out.append(_ui_finding(rb, "an-ui-action-name", an_level(cfg), "Имя действия по потоку.", ui, u, doc,
+                                           "", f"Строка действия `{u.action}` не называет его глаголом словаря: "
+                                               f"«{acts[u.action]['verb']}» / «{acts[u.action]['past']}» — у потока "
+                                               f"второе имя («{plain[:60]}»)."))
+            elif u.object:
+                for slug, a in acts.items():
+                    if u.object not in a["objects"]:
+                        continue
+                    hit = next(((b, w) for b, rs in banned[slug] for w in [word_with_root(plain, rs, True)] if w), None)
+                    if hit:
+                        out.append(_ui_finding(rb, "an-ui-action-synonym", cfg.get("level_banned", "error"),
+                                               "Запрещённый синоним действия.", ui, u, doc, hit[1],
+                                               f"Объект `{u.object}`: действие `{slug}` — «{a['verb']}»; «{hit[1]}» — "
+                                               f"в списке запрещённых («{hit[0]}»)."))
+                        break
+    elif cfg.get("enabled"):
+        notes.append("имя действия по потоку: словаря действий action.md нет — проверка пропущена")
+
+    # синонимы объекта
+    cfg = an.get("ui_object_alias") or {}
+    objs = reg.get("objects") or {}
+    if cfg.get("enabled") and objs:
+        pats = []
+        for slug, o in objs.items():
+            for al in o["aliases"]:
+                if yo(al) != yo(o["name"]):
+                    rx = alias_re(al)
+                    if rx is not None:
+                        pats.append((slug, o["name"], al, rx))
+        for ui, u in units:
+            low = yo(u.text)
+            for slug, name, al, rx in pats:
+                m = rx.search(low)
+                if m:
+                    out.append(_ui_finding(rb, "an-ui-object-alias", an_level(cfg, "error"), "Синоним объекта.", ui, u,
+                                           doc, u.text[m.start():m.end()],
+                                           f"«{u.text[m.start():m.end()]}» — синоним объекта `{slug}` («{name}», "
+                                           f"aliases: {al}).", m.start(), m.end()))
+    elif cfg.get("enabled"):
+        notes.append("синонимы объекта: глоссария object.md нет — проверка пропущена")
+
+    # формы строк одной группы (меню, статусы объекта)
+    cfg = an.get("ui_group_form") or {}
+    if cfg.get("enabled"):
+        groups: dict = {}
+        for ui, u in units:
+            if u.group:
+                groups.setdefault(u.group, []).append((ui, u))
+        if groups and morph is None:
+            notes.append("формы групп строк — с морфологией pymorphy3: без неё проверка пропущена")
+        for g, items in groups.items() if morph is not None else []:
+            forms = [(ui, u, phrase_form(u.text, morph)) for ui, u in items]
+            kinds = [k for _, _, k in forms if k]
+            if len(set(kinds)) < 2:
+                continue
+            major = max(set(kinds), key=kinds.count)
+            for ui, u, k in forms:
+                if k and k != major:
+                    out.append(_ui_finding(rb, "an-ui-group-form", an_level(cfg), "Строки группы в разных формах.", ui,
+                                           u, doc, u.text[:40], f"Группа «{g}»: у большинства строк — {major}, здесь — {k}."))
+
+    # дубли на экране
+    cfg = an.get("ui_duplicate") or {}
+    if cfg.get("enabled"):
+        seen: dict = {}
+        for ui, u in units:
+            if not u.key or u.role not in CONTENT_ROLES:
+                continue
+            screen = ".".join(u.key.split(".")[:2])
+            k = (screen, re.sub(r"\s+", " ", yo(u.text)).strip())
+            if k in seen:
+                out.append(_ui_finding(rb, "an-ui-duplicate", an_level(cfg), "Один текст дважды на экране.", ui, u, doc,
+                                       u.text[:40], f"Экран `{screen}`: «{u.text[:50]}» — и в `{seen[k]}`."))
+            else:
+                seen[k] = u.key
+
+    # maxlen строки (ворота) и длина по роли ux 07/01 §12 (сигнал)
+    cfg_m, cfg_r = an.get("ui_maxlen") or {}, an.get("ui_role_length") or {}
+    rl = role_lengths()
+    sent = rl.get("sentence") or {}
+    for ui, u in units:
+        plain = icu_scan(u.text, lang)[0].strip()
+        if cfg_m.get("enabled") and re.fullmatch(r"\d+", (u.maxlen or "").strip()):
+            mx = int(u.maxlen)
+            if len(plain) > mx:
+                out.append(_ui_finding(rb, "an-ui-maxlen", an_level(cfg_m, "error"), "Строка длиннее maxlen.", ui, u, doc,
+                                       plain[:40], f"{len(plain)} знаков > maxlen {mx} (без подстановок ICU)."))
+        if not cfg_r.get("enabled") or not rl:
+            continue
+        paras = [p for p in re.split(r"\n\s*\n|\n", plain) if p.strip()] or [plain]
+        n_words = max((len(words_of(p)) for p in paras), default=0)
+        n_sent = len(split_sentences(plain))
+        alts = (rl.get("roles") or {}).get(u.role) or []
+        problems = []
+        for alt in alts:
+            bad = []
+            if alt.get("words_max") and n_words > alt["words_max"]:
+                bad.append(f"{n_words} слов > {alt['words_max']}")
+            if alt.get("sentences_max") and n_sent > alt["sentences_max"]:
+                bad.append(f"{n_sent} предложений > {alt['sentences_max']}")
+            if alt.get("chars_max") and len(plain) > alt["chars_max"]:
+                bad.append(f"{len(plain)} знаков > {alt['chars_max']}")
+            if not bad:
+                problems = []
+                break
+            problems.append(f"{alt.get('element')}: " + ", ".join(bad))
+        if alts and problems:
+            out.append(_ui_finding(rb, "an-ui-role-length", an_level(cfg_r), "Строка длиннее ориентира роли.", ui, u,
+                                   doc, plain[:40], f"Роль `{u.role}` — {'; '.join(problems)} (ux 07/01 §12)."))
+        if sent:
+            lim = sent.get("explanatory_words_max") if u.role in (sent.get("explanatory_roles") or []) else \
+                sent.get("words_max")
+            longest = max((len(words_of(plain[s:e])) for s, e in split_sentences(plain)), default=0)
+            if lim and longest > lim:
+                out.append(_ui_finding(rb, "an-ui-role-length", an_level(cfg_r), "Предложение длиннее ориентира.", ui, u,
+                                       doc, plain[:40], f"{longest} слов в предложении > {lim} (ux 07/01 §12)."))
+
+    # форматы: число литералом, знак диапазона, пробел разрядов
+    cfg = an.get("ui_formats") or {}
+    if cfg.get("enabled"):
+        signs: dict = {}
+        seps: dict = {}
+        for ui, u in units:
+            spans = icu_spans(u.text)
+            outside = "".join(ch if not any(s <= k < e for s, e in spans) else " " for k, ch in enumerate(u.text))
+            m = re.search(r"\d", outside)
+            if m:
+                out.append(_ui_finding(rb, "an-ui-formats", an_level(cfg), "Число литералом.", ui, u, doc,
+                                       outside[max(0, m.start() - 8):m.start() + 8].strip(),
+                                       "Число, дата, сумма — из данных продукта: подстановка ICU и формат Intl "
+                                       "(ux 07/05 §4.4, §5).", m.start(), m.end()))
+            for rm in re.finditer(r"(?:(?<=\d)|(?<=\}))(\s*)([-‐‑–—])(\s*)(?=\d|\{)", u.text):
+                sign, spaced = rm.group(2), bool(rm.group(1) or rm.group(3))
+                if sign in "-‐‑" or spaced:
+                    out.append(_ui_finding(rb, "an-ui-formats", an_level(cfg), "Знак диапазона.", ui, u, doc,
+                                           u.text[max(0, rm.start() - 6):rm.end() + 6],
+                                           "Диапазон — тире без пробелов: «–» (U+2013) или знак дизайн-системы "
+                                           "продукта (text 08/02 §1.3).", rm.start(), rm.end()))
+                else:
+                    signs.setdefault(sign, []).append((ui, u, rm))
+            for nm in re.finditer(r"\d{1,3}(?:([    ])\d{3})+(?!\d)", u.text):
+                seps.setdefault(nm.group(1), []).append((ui, u, nm))
+        if len(signs) > 1:
+            major = max(signs, key=lambda s: len(signs[s]))
+            for s, items in signs.items():
+                if s == major:
+                    continue
+                for ui, u, rm in items:
+                    out.append(_ui_finding(rb, "an-ui-formats", an_level(cfg), "Смешение знака диапазона.", ui, u, doc,
+                                           u.text[max(0, rm.start() - 6):rm.end() + 6],
+                                           f"В продукте знак диапазона «{major}» ({len(signs[major])} строк), здесь "
+                                           f"«{s}»: знак один на продукт.", rm.start(), rm.end()))
+        for sp, items in seps.items():
+            if sp == " " or len(seps) > 1 and sp != max(seps, key=lambda x: len(seps[x])):
+                for ui, u, nm in items:
+                    out.append(_ui_finding(rb, "an-ui-formats", an_level(cfg), "Пробел в разрядах.", ui, u, doc,
+                                           nm.group(0), "Пробел разряда — неразрывный U+00A0 (U+202F — решение ДС), "
+                                                        "один на продукт.", nm.start(), nm.end()))
+
+    # ICU
+    cfg = an.get("ui_icu") or {}
+    if cfg.get("enabled"):
+        for ui, u in units:
+            if "{" not in u.text and "}" not in u.text:
+                continue
+            for lvl, what in icu_scan(u.text, u.lang or lang)[1]:
+                level = an_level(cfg, "error") if lvl == "error" else "warning"
+                out.append(_ui_finding(rb, "an-ui-icu", level, "Строка ICU не по форме.", ui, u, doc, u.text[:40],
+                                       what + " (ux 07/05 §4.4)."))
+
+    # «ё» и «е» в одном слове
+    cfg = an.get("yo_mix") or {}
+    if cfg.get("enabled"):
+        with_yo = {}
+        for ui, u in units:
+            for w in LETTERS_RE.findall(u.text):
+                if "ё" in w.lower():
+                    with_yo.setdefault(yo(w), w)
+        for ui, u in units:
+            for w in LETTERS_RE.findall(u.text):
+                lw = w.lower()
+                if "ё" not in lw and lw in with_yo and lw not in YO_AMBIGUOUS:
+                    out.append(_ui_finding(rb, "an-ui-yo-mix", an_level(cfg), "«Ё» и «е» в одном слове.", ui, u, doc, w,
+                                           f"«{w}» — в других строках «{with_yo[lw]}»."))
+                    break
+
+    # US и UK
+    cfg = an.get("us_uk") or {}
+    if cfg.get("enabled"):
+        found = {"us": [], "uk": []}
+        for ui, u in units:
+            low = u.text.lower()
+            for us, uk in US_UK:
+                if re.search(r"\b" + uk, low):
+                    found["uk"].append((ui, u, uk))
+                elif re.search(r"\b" + us, low):
+                    found["us"].append((ui, u, us))
+        if found["us"] and found["uk"]:
+            minor = "uk" if len(found["us"]) >= len(found["uk"]) else "us"
+            for ui, u, w in found[minor]:
+                out.append(_ui_finding(rb, "an-ui-us-uk", an_level(cfg), "US и UK орфография вместе.", ui, u, doc, w,
+                                       f"Орфография продукта — {'US' if minor == 'uk' else 'UK'}: здесь «{w}…»."))
+
+    # уровень чтения развёрнутых текстов: роли прозы (body, help, email)
+    cfg = an.get("reading_level") or {}
+    if cfg.get("enabled"):
+        prose_roles = set(profile.get("prose_roles") or [])
+        rows = []
+        for ui, u in units:
+            if u.role not in prose_roles:
+                continue
+            plain = icu_scan(u.text, lang)[0]
+            ws = words_of(plain)
+            if len(ws) < int(cfg.get("min_words", 30)):
+                continue
+            sents = max(1, len(split_sentences(plain)))
+            w_syl = sum(syllables(w) for w in ws) / len(ws)
+            k_obo = round(206.835 - 60.1 * w_syl - 1.3 * (len(ws) / sents), 1)
+            rows.append({"key": u.key or u.slot_id, "words": len(ws), "syllables_per_word": round(w_syl, 2),
+                         "words_per_sentence": round(len(ws) / sents, 1), "oborneva": k_obo})
+            if w_syl > float(cfg.get("syllables_max", 2.5)):
+                out.append(_ui_finding(rb, "an-reading-level", an_level(cfg, "info"), "Длинные слова.", ui, u, doc,
+                                       plain[:40], f"{w_syl:.2f} слога на слово > {cfg.get('syllables_max', 2.5)}; "
+                                                   f"индекс Оборневой {k_obo} — сигнал, не ворота."))
+        if rows:
+            metrics["reading"] = rows
+    if notes:
+        metrics["ui_notes"] = notes
+    return out, metrics
+
+
 def run_analyzers(doc: Document, rules: list[Rule], genre: str, lang: str, profile: dict, morph,
                   marker_findings: list[Finding]) -> tuple[list[Finding], dict]:
     an = profile.get("analyzers") or {}
     rb = {r.id: r for r in rules}
     out: list[Finding] = []
     prose_types = set(profile.get("prose_slot_types") or ["body", "article-paragraph", "geo-answer", "email-body"])
-    # подписи в 1–3 слова не проза, даже если слот размечен как body (опыт C/02: вкладки и статусы веб-приложения)
-    prose_units = [(i, u) for i, u in enumerate(doc.units) if u.slot_type in prose_types and (u.genre or genre) == genre
-                   and len(words_of(u.text)) >= 4]
+    prose_roles = set(profile.get("prose_roles") or [])
+    # подписи в 1–3 слова не проза, даже если слот размечен как body (опыт C/02: вкладки и статусы веб-приложения);
+    # у строки без типа слота (жанр interface) проза — по роли (body, help, email)
+    prose_units = [(i, u) for i, u in enumerate(doc.units) if (ltype(u) in prose_types if ltype(u) else
+                                                              u.role in prose_roles)
+                   and (u.genre or genre) == genre and len(words_of(u.text)) >= 4]
     all_text = "\n\n".join(u.text for u in doc.units)
     prose_paras: list[str] = []
     for _, u in prose_units:
@@ -1470,6 +2289,7 @@ def run_analyzers(doc: Document, rules: list[Rule], genre: str, lang: str, profi
                                                extra=f"{m_prose['concreteness_per_100w']} конкретных единиц на 100 слов (порог {mn}, provisional)."))
         # повтор глагола в соседних предложениях
         cfg = an.get("verb_repeat") or {}
+        cwords = [yo(c) for c in profile.get("customer_words") or [] if str(c).strip()]
         if cfg.get("enabled", True) and lang == "ru":
             for ui, u in prose_units:
                 sents = [u.text[s:e] for s, e in split_sentences(u.text)]
@@ -1484,6 +2304,10 @@ def run_analyzers(doc: Document, rules: list[Rule], genre: str, lang: str, profi
                         wa = {w.lower() for w in re.findall(r"\b[a-z]{4,}(?:s|ed|es)\b", a, re.I)}
                         wb = {w.lower() for w in re.findall(r"\b[a-z]{4,}(?:s|ed|es)\b", b, re.I)}
                         common = {w for w in wa & wb if w not in ("this", "these", "those", "does", "goes", "uses")}
+                    if common and cwords:
+                        # повтор слова клиента — приём, а не тик: глагол из фразы клиента (voc, customer_words)
+                        pair = yo(a + " " + b)
+                        common = {c for c in common if not any(p in pair and yo(c)[:4] in p for p in cwords)}
                     if common:
                         out.append(mk_analyzer_finding(rb.get("an-verb-repeat"), "an-verb-repeat",
                                                        an_level(cfg, "info"), "Повтор глагола в соседних предложениях.",
@@ -1529,7 +2353,7 @@ def run_analyzers(doc: Document, rules: list[Rule], genre: str, lang: str, profi
             continue
         val = m_all[mkey]
         if key == "questions":
-            faq_q = sum(1 for u in doc.units if u.slot_type in ("faq-q", "email-subject")
+            faq_q = sum(1 for u in doc.units if ltype(u) in ("faq-q", "email-subject")
                         and u.text.rstrip().endswith("?"))
             val = round(100.0 * max(0, m_all["questions"] - faq_q) / nw_all, 3)
         thr = cfg.get("warn_per_100w")
@@ -1539,25 +2363,26 @@ def run_analyzers(doc: Document, rules: list[Rule], genre: str, lang: str, profi
             out.append(mk_analyzer_finding(rb.get(rid), rid, an_level(cfg, "info"), f"Частота {name} выше порога жанра.",
                                            extra=f"{val} на 100 слов (порог {thr}, provisional)."))
 
-    # надзаголовки: не чаще чем у каждой третьей секции
+    # надзаголовки: не чаще одного на N секций с заголовком (H1, H2); N — поле per_sections записи an-eyebrow-rate
     cfg = an.get("eyebrow_rate") or {}
-    if cfg.get("enabled", True):
-        eyebrows = [u for u in doc.units if u.slot_type in EYEBROW_SLOTS]
-        heads = [u for u in doc.units if u.slot_type in ("headline", "section-title")]
+    per = (rb.get("an-eyebrow-rate").per_sections if rb.get("an-eyebrow-rate") else 0) or 0
+    if cfg.get("enabled", True) and per:
+        eyebrows = [u for u in doc.units if ltype(u) in EYEBROW_SLOTS]
+        heads = [u for u in doc.units if ltype(u) in ("headline", "section-title")]
         if eyebrows and heads:
-            limit = math.ceil(len(heads) / 3)
+            limit = math.ceil(len(heads) / per)
             if len(eyebrows) > limit:
                 out.append(mk_analyzer_finding(rb.get("an-eyebrow-rate"), "an-eyebrow-rate", an_level(cfg),
-                                               "Надзаголовков больше, чем у каждой третьей секции.",
+                                               f"Надзаголовков больше, чем один на {per} секции с заголовком.",
                                                extra=f"{len(eyebrows)} надзаголовков на {len(heads)} заголовков (лимит {limit})."))
-        metrics["eyebrows"] = {"count": len(eyebrows), "headings": len(heads)}
+        metrics["eyebrows"] = {"count": len(eyebrows), "headings": len(heads), "per_sections": per}
 
     # все списки по три пункта
     cfg = an.get("lists_of_three") or {}
     if cfg.get("enabled", True):
         sizes, run = [], 0
         for u in doc.units:
-            if u.slot_type == "list-item":
+            if ltype(u) == "list-item":
                 run += 1
             else:
                 if run:
@@ -1570,7 +2395,7 @@ def run_analyzers(doc: Document, rules: list[Rule], genre: str, lang: str, profi
             out.append(mk_analyzer_finding(rb.get("an-lists-of-three"), "an-lists-of-three", an_level(cfg, "info"),
                                            "Все списки ровно по три пункта.", extra=f"Списков: {len(sizes)}."))
 
-    # числа без факта: сигнал для claims_check.py (B2)
+    # числа без факта: сигнал для claims_check.py
     cfg = an.get("numbers_without_fact") or {}
     if cfg.get("enabled", True):
         for ui, u in enumerate(doc.units):
@@ -1588,12 +2413,37 @@ def run_analyzers(doc: Document, rules: list[Rule], genre: str, lang: str, profi
                 f = mk_analyzer_finding(rb.get("an-number-without-fact"), "an-number-without-fact", lvl,
                                         "Число или соцдоказательство без ссылки на факт.", doc_unit=ui,
                                         fragment=mh.group(0), slot=slot_info(u),
-                                        extra="Сверить с facts.yaml: 99-raw/tools/claims_check.py (B2).")
+                                        extra="Сверить с facts.yaml: scripts/text/claims_check.py.")
                 f.start, f.end = mh.start(), mh.end()
                 f.context = context_of(u.text, mh.start(), mh.end())
                 if u.src_offset is not None and doc.source_text:
                     f.line, f.col = line_col(doc.source_text, u.src_offset + mh.start())
                 out.append(f)
+
+    # карточки секции одной длины (COPY-C-18): разброс длин тел карточек секции ниже порога
+    cfg = an.get("cards_uniform") or {}
+    if cfg.get("enabled", True):
+        by_sec: dict = {}
+        for ui, u in enumerate(doc.units):
+            if ltype(u) == "card-body" and (u.genre or genre) == genre:
+                by_sec.setdefault((u.page_id, u.section_id), []).append((ui, u))
+        for (pid, sid), items in by_sec.items():
+            if not sid or len(items) < int(cfg.get("min_cards", 3)):
+                continue
+            lens = [len(words_of(u.text)) for _, u in items]
+            mean = sum(lens) / len(lens)
+            cv = (sum((x - mean) ** 2 for x in lens) / len(lens)) ** 0.5 / mean if mean else 1.0
+            if cv < float(cfg.get("cv_min", 0.25)):
+                out.append(mk_analyzer_finding(rb.get("an-cards-uniform"), "an-cards-uniform", an_level(cfg, "info"),
+                                               "Карточки секции одной длины.", doc_unit=items[0][0],
+                                               slot=slot_info(items[0][1]),
+                                               extra=f"Секция {sid}: {len(lens)} карточек по {', '.join(map(str, lens))} "
+                                                     f"слов, разброс {cv:.0%} (порог {float(cfg.get('cv_min', 0.25)):.0%})."))
+
+    # «ты» и «вы» в одном тексте: обращение одно на продукт
+    cfg = an.get("address_mix") or {}
+    if cfg.get("enabled", True):
+        out.extend(address_mix(doc, rb, cfg, morph, profile.get("address_form") or ""))
     return out, metrics
 
 
@@ -1623,14 +2473,24 @@ def verdict_of(findings: list[Finding], metrics: dict) -> str:
 
 def lint_document(doc: Document, rules: list[Rule], profiles: dict, genre: str, lang: str, profile_name: str,
                   thresholds_path: Path | None, morph_mode: str = "auto", final: bool = False,
-                  metrics_only: bool = False, include_units: bool = False, log: list | None = None) -> dict:
+                  metrics_only: bool = False, include_units: bool = False, log: list | None = None,
+                  page_audit: bool = False, voice: dict | None = None) -> dict:
+    """Проверка документа. page_audit — текст целой страницы без copy deck: пороги замера сняты по слотам, поэтому
+    находки анализаторов — не выше warning, а вердикт «переписать» — сигнал «проверить» (ворота — copy deck).
+    voice — профиль голоса: словарь «не говорим» и написания (правила), обращение («ты» или «вы»)."""
     g = genre or doc.genre_hint or "landing"
     if g not in GENRES:
-        raise SystemExit(f"copy_lint: неизвестный жанр {g}; допустимо: {', '.join(GENRES)}")
+        raise UsageError(f"неизвестный жанр {g}; допустимо: {', '.join(GENRES)}")
     prof_name = profile_name or g
     if lang in ("", "auto"):
         lang = detect_lang(" ".join(u.text for u in doc.units))
     profile, th_src = resolve_profile(profiles, prof_name, thresholds_path, lang)
+    if voice:
+        rules = rules + voice.get("rules", [])
+        if voice.get("address_form"):
+            profile = merge_dict(profile, {"address_form": voice["address_form"]})
+        if voice.get("customer_words"):
+            profile = merge_dict(profile, {"customer_words": voice["customer_words"]})
     for u in doc.units:
         if len(words_of(u.text)) >= 3:
             ul = detect_lang(u.text)
@@ -1658,25 +2518,41 @@ def lint_document(doc: Document, rules: list[Rule], profiles: dict, genre: str, 
         return False
     rule_findings = [f for f in rule_findings if not allowed(f)]
     an_findings, metrics = run_analyzers(doc, rules, g, lang, profile, morph, rule_findings)
+    if g == "interface":
+        ui_findings, ui_metrics = run_ui_analyzers(doc, rules, profile, morph, lang)
+        an_findings += ui_findings
+        metrics.update(ui_metrics)
     an_findings = [f for f in an_findings if not allowed(f)]
+    if page_audit:
+        for f in an_findings:
+            if f.level == "error":
+                f.level = "warning"
+                f.note = (f.note + " " if f.note else "") + "(аудит страницы: сигнал)"
     findings = rule_findings + an_findings
     # порядок отчёта = порядок проверок (спецификация §7): артефакты → выдуманные данные → словари ux и внешние →
     # лексика и синтаксис → структура → анализаторы → сверхкоррекция
     order = {"ART": 0, "CNT": 1, "UX": 2, "EXT": 2, "LEX": 3, "SYN": 3, "PUN": 3, "MKT": 3, "TON": 3, "STR": 4}
 
     def check_order(f: Finding) -> int:
-        if f.id == "an-overcorrection":
+        if f.id in ("an-overcorrection", "an-reading-level"):
             return 6
         if f.id.startswith("an-") and f.group != "CNT":
             return 5
         return order.get(f.group, 5)
     findings.sort(key=lambda f: (check_order(f), -LEVEL_RANK.get(f.level, 0), f.unit, f.start))
+    tells = tells_of_checks()
+    for f in findings:
+        f.tell = tells.get(f.id, "")
     counts = {lv: sum(1 for f in findings if f.level == lv) for lv in ("error", "warning", "info")}
+    verdict = verdict_of(findings, metrics)
+    if page_audit and verdict == "rewrite":
+        verdict = "review"
     res = {"input": {"path": doc.path, "format": doc.fmt, "units": len(doc.units), "lang": lang, "genre": g,
                      "profile": prof_name, "morphology": bool(morph)},
            "thresholds": th_src,
-           "summary": {**counts, "verdict": verdict_of(findings, metrics), "severity": severity_of(findings),
-                       "gate": "fail" if counts["error"] else "pass", "suppressed": len(suppressed)},
+           "summary": {**counts, "verdict": verdict, "severity": severity_of(findings),
+                       "gate": "fail" if counts["error"] else "pass", "suppressed": len(suppressed),
+                       "mode": "page-audit" if page_audit else ("registry" if doc.registry is not None else "slots")},
            "metrics": metrics}
     if not metrics_only:
         res["findings"] = [f.as_dict() for f in findings]
@@ -1686,9 +2562,13 @@ def lint_document(doc: Document, rules: list[Rule], profiles: dict, genre: str, 
     missing = [n.split(": ", 1)[1] for n in (log or []) if n.startswith("внешний файл правил не найден")]
     notes = list(doc.notes) + [n for n in (log or []) if not n.startswith("внешний файл правил не найден")]
     if missing:
-        notes.append("внешние правила (G, H — волна 2) пока не подключены: " + ", ".join(missing))
+        notes.append("внешние файлы правил не найдены: " + ", ".join(missing))
     if not genre and not doc.genre_hint:
         notes.append("жанр не задан (--genre): применён landing")
+    if page_audit:
+        notes.append("аудит страницы без copy deck — сигнал, а не приговор: пороги замера сняты по слотам, находки "
+                     "анализаторов не выше warning; ворота — copy deck (copydeck.py check)")
+    notes.extend(metrics.pop("ui_notes", []))
     if suppressed:
         notes.append("подавлено lint_allow: " + "; ".join(suppressed))
     if notes:
@@ -1696,21 +2576,92 @@ def lint_document(doc: Document, rules: list[Rule], profiles: dict, genre: str, 
     return res
 
 
+def load_voice(path: str = "", customer_words_path: str = "") -> dict:
+    """Профиль голоса (voice.yaml): vocabulary.avoid — словарь бренда «не говорим» (правила words, входят в плотность
+    маркеров), vocabulary.spellings — единое написание, address.ru_form — обращение для проверки «ты» и «вы». Слова
+    клиента — customer_words из voc.yaml или meaning.yaml: повтор такого слова в соседних предложениях — приём, а не тик."""
+    out: dict = {"rules": [], "address_form": "", "customer_words": []}
+    if path:
+        d = load_yaml(Path(path)) or {}
+        name = Path(path).name
+        voc = d.get("vocabulary") or {}
+        for n, a in enumerate(voc.get("avoid") or [], 1):
+            term = str((a or {}).get("term") or "").strip()
+            if len(term) < 2:
+                continue
+            r = Rule(id=f"voice-avoid-{n:02d}", level=a.get("level") if a.get("level") in LEVELS else "warning",
+                     message=f"Словарь бренда «не говорим»: «{term}»" + (f" — {a['reason']}" if a.get("reason") else ""),
+                     source=f"{name}#vocabulary.avoid", group="EXT", lang=a.get("lang") or "ru", kind="words",
+                     words=[term], replacement=str(a.get("use_instead") or ""), mask_quotes=True, priority=55,
+                     slot_types=list(a.get("slot_types") or []), count_as_marker=True,
+                     note=f"можно: {a['unless']}" if a.get("unless") else "")
+            r.origin = name
+            r.compile()
+            out["rules"].append(r)
+        for n, s in enumerate(voc.get("spellings") or [], 1):
+            variants = sorted({str(v) for v in (s or {}).get("variants") or [] if str(v).strip()}, key=len, reverse=True)
+            if not variants or not (s or {}).get("preferred"):
+                continue
+            pat = "(?<![" + WORDCH + "])(?:" + "|".join(re.escape(v) for v in variants) + ")(?![" + WORDCH + "])"
+            r = Rule(id=f"voice-spelling-{n:02d}", level="warning", message=f"Единое написание: «{s['preferred']}»",
+                     source=f"{name}#vocabulary.spellings", group="EXT", lang=s.get("lang") or "any", pattern=pat,
+                     flags="", replacement=str(s["preferred"]), mask_quotes=True, count_as_marker=False, priority=55,
+                     note=str(s.get("note") or ""))
+            r.origin = name
+            r.compile()
+            out["rules"].append(r)
+        out["address_form"] = {"vy": "vy", "ty": "ty"}.get(str((d.get("address") or {}).get("ru_form") or ""), "")
+    if customer_words_path:
+        found: list = []
+
+        def walk(o):
+            if isinstance(o, dict):
+                for k, v in o.items():
+                    if k == "customer_words" and isinstance(v, list):
+                        found.extend(str(x) for x in v if str(x).strip())
+                    else:
+                        walk(v)
+            elif isinstance(o, list):
+                for x in o:
+                    walk(x)
+        walk(load_yaml(Path(customer_words_path)) or {})
+        out["customer_words"] = found
+    return out
+
+
+def text_document(text: str, genre: str, vocab: dict, slot_type: str = "", role: str = "", component: str = "",
+                  fmt: str = "md", path: str = "<text>") -> Document:
+    """Текст → документ: блоки Markdown или HTML; slot_type — тип слота для всех блоков, role и component — роль
+    строки интерфейса (в жанре interface без роли — body)."""
+    doc = Document(path, fmt, [], text)
+    if fmt in ("html", "htm"):
+        doc.units, doc.source_text = parse_html(text, genre, vocab, path), ""
+    else:
+        doc.units = parse_markdown(text, genre, vocab, path)
+    urole = resolve_role(role, component, "role") or ("body" if genre == "interface" and not slot_type else "")
+    if slot_type:
+        srole = role_for(slot_type, vocab)
+        for u in doc.units:
+            u.slot_type, u.role, u.lint_type = slot_type, srole, lint_type_of(slot_type, vocab)
+    for u in doc.units:
+        if urole:
+            u.role = urole
+            if not slot_type:
+                u.slot_type, u.lint_type = "", ""
+        else:
+            u.lint_type = u.lint_type or lint_type_of(u.slot_type, vocab)
+    return doc
+
+
 def lint_text(text: str, genre: str = "landing", lang: str = "auto", slot_type: str = "", profile: str = "",
-              fmt: str = "md", metrics_only: bool = False) -> dict:
-    """API для других утилит: текст → результат линтера (dict как один элемент results в JSON)."""
+              fmt: str = "md", metrics_only: bool = False, role: str = "", component: str = "") -> dict:
+    """API для других утилит: текст → результат линтера (dict как один элемент results в JSON). slot_type — id слота
+    вида text словаря site; role, component — роль строки интерфейса (жанр interface). Неизвестные — UsageError."""
     vocab = load_vocab()
     profiles = load_profiles()
     log: list = []
     rules = load_rules(profiles=profiles, log=log)
-    doc = Document("<text>", fmt, [], text)
-    if fmt in ("html", "htm"):
-        doc.units, doc.source_text = parse_html(text, genre, vocab, "<text>"), ""
-    else:
-        doc.units = parse_markdown(text, genre, vocab, "<text>")
-    if slot_type:
-        for u in doc.units:
-            u.slot_type, u.role = slot_type, role_for(slot_type, vocab)
+    doc = text_document(text, genre, vocab, slot_type, role, component, fmt)
     return lint_document(doc, rules, profiles, genre, lang, profile, None, metrics_only=metrics_only, log=log)
 
 
@@ -1806,8 +2757,33 @@ SELFTEST_CASES = [
 ]
 
 
+def levels_summary(rules: list[Rule], profiles: dict, genre: str) -> dict:
+    """Сколько правил жанра на каком уровне — с поправками жанра, уровнями профиля и группами (правила с шаблоном)."""
+    prof, _ = resolve_profile(profiles, genre, None)
+    counts = {lv: 0 for lv in LEVELS}
+    probe = Unit("", "", "")
+    for r0 in rules:
+        if r0.kind in ("analyzer", "manual"):
+            continue
+        r = r0.for_genre(genre)
+        if r.genres and genre not in r.genres:
+            continue
+        counts[effective_level(r, genre, probe, prof)] += 1
+    return counts
+
+
 def selftest() -> int:
     ok = True
+    fails: list = []
+    n_checks = 0
+
+    def check(name: str, cond, detail="") -> None:
+        nonlocal ok, n_checks
+        n_checks += 1
+        if not cond:
+            ok = False
+            fails.append(f"FAIL {name}" + (f" — {detail}" if detail else ""))
+
     profiles = load_profiles()
     log: list = []
     try:
@@ -1817,8 +2793,19 @@ def selftest() -> int:
         return 1
     vocab = load_vocab()
     ids = {r.id for r in rules}
-    print(f"словари: {len(rules)} правил из {len({r.origin for r in rules})} файлов; словарь слотов: "
-          f"{len(vocab['slot_types'])} типов")
+    rb = {r.id: r for r in rules}
+    print(f"словари: {len(rules)} правил из {len({r.origin for r in rules})} файлов; словарь site: "
+          f"{len(vocab['slot_types'])} слотов вида text, {len(vocab['page_types'])} типов страниц; ролей текста: "
+          f"{len(closed_roles())}")
+    # 0. сводка правил по уровням для жанра: уровни в файлах — у правил, счёт для жанра — здесь
+    print("сводка правил с шаблоном по уровням для жанра (error · warning · info · off):")
+    summ = {}
+    for g in GENRES:
+        summ[g] = levels_summary(rules, profiles, g)
+        print(f"  {g:10s} " + " · ".join(f"{summ[g][lv]}" for lv in LEVELS))
+    check("сводка: в interface правила ux с уровнями канона — error больше, чем на landing",
+          summ["interface"]["error"] > 0 and rb["ux-5-2-02"].for_genre("interface").level == "error" and
+          rb["ux-5-2-02"].for_genre("landing").level == "info")
     # 1. каждое правило с примерами: «плохо» срабатывает, «хорошо» — нет
     bad_fail, good_fail, checked = [], [], 0
     for r in rules:
@@ -1829,7 +2816,7 @@ def selftest() -> int:
         def hits_in(txt: str) -> int:
             n = 0
             for m in r.regex.finditer(txt):
-                if r.mask_quotes and overlaps((m.start(), m.end()), masked_spans(txt)):
+                if r.mask_quotes and inside((m.start(), m.end()), masked_spans(txt)):
                     continue
                 if r.unless_re is not None:
                     ss, se = sentence_of(txt, m.start())
@@ -1846,92 +2833,310 @@ def selftest() -> int:
             if hits_in(good) >= need:
                 good_fail.append(r.id)
     print(f"примеры правил: проверено {checked}; «плохо» не пойман: {len(bad_fail)}; «хорошо» пойман: {len(good_fail)}")
-    if bad_fail:
-        print("  не ловят свой плохой пример:", ", ".join(bad_fail[:40]))
-        ok = False
-    if good_fail:
-        print("  ловят свой хороший пример:", ", ".join(good_fail[:40]))
-        ok = False
+    check("примеры правил: «плохо» ловится", not bad_fail, ", ".join(bad_fail[:40]))
+    check("примеры правил: «хорошо» не ловится", not good_fail, ", ".join(good_fail[:40]))
+
+    def lt(text, genre="landing", role="", slot_type="", component="", fmt="md", page_audit=False, voice=None,
+           morph="auto"):
+        doc = text_document(text, genre, vocab, slot_type, role, component, fmt)
+        return lint_document(doc, rules, profiles, genre, "auto", "", None, morph, page_audit=page_audit, voice=voice)
+
+    def deck(data, genre="", all_variants=False, voice=None):
+        units, gh = parse_copy_deck(data, vocab, "<deck>", all_variants)
+        return lint_document(Document("<deck>", "yaml", units, "", gh), rules, profiles, genre, "auto", "", None,
+                             voice=voice)
+
+    def found(res, rid, level=None):
+        return [f for f in res.get("findings", []) if fnmatch.fnmatch(f["id"], rid) and (level is None or
+                                                                                          f["level"] == level)]
+
+    def raises(fn) -> bool:
+        try:
+            fn()
+        except UsageError:
+            return True
+        return False
     # 2. сценарии
     for text, genre, rid, expect in SELFTEST_CASES:
         if rid not in ids:
-            print(f"FAIL сценарий: правила {rid} нет в словарях")
-            ok = False
+            check(f"сценарий {rid}: правило есть в словарях", False)
             continue
-        res = lint_text(text, genre=genre)
-        got = any(f["id"] == rid for f in res["findings"])
-        if got != expect:
-            ok = False
-            print(f"FAIL {rid}: ожидалось {'срабатывание' if expect else 'тишина'} на «{text[:60]}»")
+        check(f"сценарий {rid}: {'срабатывание' if expect else 'тишина'} на «{text[:50]}»",
+              bool(found(lt(text, genre), rid)) == expect)
     # 3. анализаторы
     mono = " ".join(["Это длинное предложение содержит ровно двенадцать слов, и следующее будет таким же."] * 12)
-    if not any(f["id"] == "an-rhythm-monotone" for f in lint_text(mono, genre="article")["findings"]):
-        print("FAIL an-rhythm-monotone не сработал на монотонном тексте")
-        ok = False
+    check("an-rhythm-monotone на монотонном тексте", found(lt(mono, "article"), "an-rhythm-monotone"))
     rag = ("Мы открылись весной. Честно. Без пафоса. Кофе варим сами, зерно берём у знакомых обжарщиков.\n\n"
            "Утро. Очередь. Кто-то спешит на работу, кто-то нет. Короче, всем хватает.\n\n"
            "Десерты? Печём ночью. Сами. Вот так.\n\n"
            "Цены обычные. Ну правда обычные. Капучино двести двадцать, раф двести шестьдесят.\n\n"
            "Заходите. Или не заходите. Решать вам.")
-    r = lint_text(rag, genre="article")
-    if not any(f["id"] == "an-overcorrection" for f in r["findings"]):
-        print("FAIL an-overcorrection не сработал на нарочито рваном тексте; сигналы:",
-              r["metrics"].get("overcorrection_signals"))
-        ok = False
+    r = lt(rag, "article")
+    check("an-overcorrection на нарочито рваном тексте", found(r, "an-overcorrection"),
+          str(r["metrics"].get("overcorrection_signals")))
     m = text_metrics("Москва — столица. Сроки — 3–5 дней. Мы работаем — и это главное — без выходных.", "ru")
-    if m["dash_count"] != 4:
-        print(f"FAIL dash_count: ожидалось 4 (без диапазона 3–5), получено {m['dash_count']}")
-        ok = False
-    if (m["dash_obligatory"], m["dash_punct"]) != (2, 2):
-        print(f"FAIL классификация тире: ожидалось 2 обязательных и 2 пунктуационных, получено "
-              f"{m['dash_obligatory']} и {m['dash_punct']}")
-        ok = False
+    check("тире: 4 без диапазона 3–5", m["dash_count"] == 4, str(m["dash_count"]))
+    check("тире: 2 обязательных и 2 пунктуационных", (m["dash_obligatory"], m["dash_punct"]) == (2, 2))
     m3 = text_metrics("Мастер ответил:\n— Приедем завтра к девяти.", "ru")
-    if (m3["dash_obligatory"], m3["dash_punct"]) != (1, 0):
-        print(f"FAIL тире прямой речи в начале строки: {m3['dash_obligatory']} и {m3['dash_punct']}")
-        ok = False
+    check("тире прямой речи в начале строки — обязательное", (m3["dash_obligatory"], m3["dash_punct"]) == (1, 0))
     m2 = text_metrics("Смета и выезд замерщика — бесплатно. Отправляем в день обжарки — без месяцев на складе.", "ru")
-    if (m2["dash_obligatory"], m2["dash_punct"]) != (1, 1):
-        print(f"FAIL тире «поле — значение» / «пояснение после глагола»: {m2['dash_obligatory']} и {m2['dash_punct']}")
-        ok = False
-    # 4. copy deck
-    deck = {"copy_deck": {"version": 0, "pages": [{"page_id": "home", "page_type": "landing-saas", "sections": [
+    check("тире «поле — значение» и «пояснение после глагола»", (m2["dash_obligatory"], m2["dash_punct"]) == (1, 1))
+    # 4. copy deck: число без факта, стрелка, отзыв, lint_allow
+    d1 = {"copy_deck": {"version": 0, "pages": [{"page_id": "home", "page_type": "landing-saas", "sections": [
         {"section_id": "hero", "slots": [
             {"slot_id": "h1", "slot_type": "headline", "variants": [{"id": "a", "text": "Более 10 000 клиентов"}],
              "chosen": "a", "fact_ids": []},
             {"slot_id": "cta", "slot_type": "cta-label", "variants": [{"id": "a", "text": "Начать →"}], "chosen": "a"}]}]}]}}
-    units, gh = parse_copy_deck(deck, vocab, "<deck>", False)
-    doc = Document("<deck>", "yaml", units, "", gh)
-    res = lint_document(doc, rules, profiles, "", "auto", "", None)
-    fid = {f["id"] for f in res["findings"]}
-    if "an-number-without-fact" not in fid:
-        print("FAIL copy deck: число без факта не отмечено")
-        ok = False
-    if not any(i.startswith("ux-") and "arrow" in i or i == "ru-pun-arrow-cta" for i in fid):
-        print("FAIL copy deck: стрелка в подписи кнопки не отмечена; нашлось:", sorted(fid))
-        ok = False
-    # отзыв клиента: стиль не проверяется, артефакты — проверяются
-    deck3 = {"slots": [{"slot_type": "testimonial-quote",
-                        "text": "Команда профессионалов, всё сделали качественно. Надеюсь, это поможет!"}]}
-    units3, gh3 = parse_copy_deck(deck3, vocab, "<deck3>", False)
-    res3 = lint_document(Document("<deck3>", "yaml", units3, "", gh3), rules, profiles, "landing", "auto", "", None)
-    groups3 = {f["group"] for f in res3["findings"]}
-    if groups3 & STYLE_GROUPS or "ART" not in groups3:
-        print("FAIL отзыв (user-content): ожидались только артефакты, нашлось:", sorted((f["id"], f["group"])
-                                                                                        for f in res3["findings"]))
-        ok = False
-    # lint_allow: стилистическое правило подавляется с причиной, данные (CNT) — нет
-    deck2 = {"slots": [{"slot_type": "headline", "text": "Не только кофе, но и десерты: 4,9 из 5 на Картах",
-                        "lint_allow": [{"rule": "ru-syn-not-only-but-also", "reason": "слоган бренда из брифа"},
-                                       {"rule": "an-number-without-fact", "reason": "попытка подавить данные"}],
-                        "fact_ids": []}]}
-    units2, gh2 = parse_copy_deck(deck2, vocab, "<deck2>", False)
-    res2 = lint_document(Document("<deck2>", "yaml", units2, "", gh2), rules, profiles, "landing", "auto", "", None)
-    fid2 = {f["id"] for f in res2["findings"]}
-    if "ru-syn-not-only-but-also" in fid2 or res2["summary"].get("suppressed") != 1 or "an-number-without-fact" not in fid2:
-        print("FAIL lint_allow: ожидалось подавить ru-syn-not-only-but-also и оставить an-number-without-fact;",
-              sorted(fid2), res2["summary"])
-        ok = False
+    r = deck(d1)
+    check("copy deck: число без факта отмечено", found(r, "an-number-without-fact"))
+    check("copy deck: стрелка в подписи кнопки — error", found(r, "ru-pun-arrow-cta", "error"))
+    r3 = deck({"slots": [{"slot_type": "testimonial-quote",
+                          "text": "Команда профессионалов, всё сделали качественно. Надеюсь, это поможет!"}]}, "landing")
+    groups3 = {f["group"] for f in r3["findings"]}
+    check("отзыв (user-content): только артефакты", not (groups3 & STYLE_GROUPS) and "ART" in groups3, str(groups3))
+    r2 = deck({"slots": [{"slot_type": "headline", "text": "Не только кофе, но и десерты: 4,9 из 5 на Картах",
+                          "lint_allow": [{"rule": "ru-syn-not-only-but-also", "reason": "слоган бренда из брифа"},
+                                         {"rule": "an-number-without-fact", "reason": "попытка подавить данные"}],
+                          "fact_ids": []}]}, "landing")
+    check("lint_allow: стиль подавлен, данные — нет", not found(r2, "ru-syn-not-only-but-also") and
+          r2["summary"].get("suppressed") == 1 and found(r2, "an-number-without-fact"))
+    # 5. роль — вход: неизвестная роль, тип слота, часть компонента — ошибка вызова
+    check("неизвестная роль — ошибка вызова", raises(lambda: lt("x", "interface", role="button")))
+    check("неизвестный тип слота — ошибка вызова", raises(lambda: lt("x", slot_type="hero-title")))
+    check("неизвестная часть компонента — ошибка вызова", raises(lambda: lt("x", "interface", component="Field.Caption")))
+    check("роль строки не из ролей части — ошибка вызова", raises(lambda: lt("x", "interface", "title", component="Button")))
+    check("часть с двумя ролями без --role — ошибка вызова", raises(lambda: lt("x", "interface", component="IconButton")))
+    check("роль в короткой форме copy deck вне списка — ошибка вызова",
+          raises(lambda: deck({"slots": [{"role": "cta", "text": "Сохранить"}]}, "interface")))
+    r = lt("Неверный формат телефона", "interface", component="Field.Error")
+    check("роль части компонента: Field.Error → error; «Неверный» — запрет ux 07/06 §3.3",
+          found(r, "ux-3-3-05", "error") and found(r, "ux-3-3-05")[0]["slot"]["role"] == "error")
+    # 6. жанр interface: уровни ux 07/06 без поправок сайта
+    check("«Нам доверяют»: interface — error", found(lt("Нам доверяют", "interface", "title"), "ux-5-2-02", "error"))
+    rl = deck({"slots": [{"slot_type": "logos-caption", "text": "Нам доверяют"}]}, "landing")
+    check("«Нам доверяют»: landing — не выше info", rl["findings"] and all(f["level"] == "info" for f in rl["findings"]),
+          str([(f["id"], f["level"]) for f in rl["findings"]]))
+    check("«10 000+ пользователей»: interface — error", found(lt("10 000+ пользователей", "interface", "title"),
+                                                             "ux-5-2-01", "error"))
+    rs = deck({"slots": [{"slot_type": "hero-proof", "text": "10 000+ пользователей", "fact_ids": ["users-count"]}]},
+              "landing")
+    check("«10 000+ пользователей» на сайте с fact_ids — без находки ux-5-2", not found(rs, "ux-5-2-*"))
+    check("«Подробнее» в ссылке интерфейса — error", found(lt("Подробнее", "interface", "link"), "ux-3-2-07", "error"))
+    rp = deck({"slots": [{"slot_type": "cta-label", "text": "Подробнее"},
+                         {"slot_type": "cta-secondary-label", "text": "Подробнее"}]}, "landing")
+    lv = sorted((f["id"], f["level"]) for f in rp["findings"])
+    check("«Подробнее» на лендинге — warning (слабая кнопка), не error правила ux",
+          lv == [("ru-mkt-weak-cta", "warning")] * 2 and rb["ux-3-2-07"].for_genre("landing").level == "warning",
+          str(lv))
+    check("«Каталог» в навигации многостраничника — конвенция, в интерфейсе — warning",
+          not found(deck({"slots": [{"slot_type": "nav-label", "text": "Каталог"}]}, "site-page"), "ux-3-2-01") and
+          found(lt("Каталог", "interface", "nav"), "ux-3-2-01", "warning"))
+    check("правил ux-6-5-07…09 нет — пробелы ведут правила набора H", not ({"ux-6-5-07", "ux-6-5-08", "ux-6-5-09"} & ids))
+    check("двойной пробел: interface — error (typo-double-space)",
+          found(lt("Нет  связи", "interface", "banner"), "typo-double-space", "error"))
+    check("Title Case в заголовке интерфейса — error", found(lt("Мои Заявки И Замеры", "interface", "title"),
+                                                            "ru-pun-title-case", "error"))
+    check("эмодзи в кнопке интерфейса — error", found(lt("Создать 🚀", "interface", "action"), "ru-pun-emoji-heading",
+                                                     "error"))
+    check("прямые кавычки в интерфейсе — error", found(lt('Проект "Альфа" создан', "interface", "toast"),
+                                                      "ru-pun-straight-quotes", "error"))
+    check("подстановка ICU {name} в строке интерфейса — не шаблон-заглушка",
+          not found(lt("{name} пригласил вас в проект", "interface", "body"), "art-template-slot"))
+    # 7. реестр texts.md на фикстурах: чистый — 0 находок, с посеянными дефектами — ровно четыре
+    kbpaths.use("tests")
+    import fixture_project  # noqa: WPS433
+    for name, want in (("cabinet-texts", []),
+                       ("cabinet-texts-defects", [("an-ui-action-name", "warning"), ("an-ui-action-synonym", "error"),
+                                                  ("an-ui-formats", "warning"), ("an-ui-object-alias", "error")])):
+        with fixture_project.built(name) as fx:
+            reg = fx.project / "screens" / "office" / "texts.md"
+            doc = read_document(str(reg), "", vocab)
+            res = lint_document(doc, rules, profiles, "", "auto", "", None)
+        got = sorted((f["id"], f["level"]) for f in res["findings"])
+        check(f"реестр {name}: жанр interface, находки {want or 'нет'}", res["input"]["genre"] == "interface" and
+              got == sorted(want), str(got))
+        if name == "cabinet-texts-defects":
+            f0 = found(res, "an-ui-object-alias")
+            check("находка реестра: строка файла и ключ строки", f0 and f0[0]["position"]["line"] == 22 and
+                  f0[0]["slot"].get("key") == "requests.list.empty-first-run.empty", str(f0[:1]))
+    # 8. межстрочные анализаторы на строках интерфейса
+    items = [
+        {"key": "requests.list.status-new.badge", "role": "badge", "text": "Новая", "group": "статусы"},
+        {"key": "requests.list.status-set.badge", "role": "badge", "text": "Замер назначен", "group": "статусы"},
+        {"key": "requests.list.status-no.badge", "role": "badge", "text": "Отказ", "group": "статусы"},
+        {"key": "requests.list.title.title", "role": "title", "text": "Заявки на замер"},
+        {"key": "requests.list.heading.section-title", "role": "section-title", "text": "Заявки на замер"},
+        {"key": "requests.list.long.action", "role": "action", "text": "Сохранить все изменения заявки", "maxlen": "12"},
+        {"key": "requests.list.count.status", "role": "status", "text": "{n, plural, =1 {# заявка} other {# заявок}}"},
+        {"key": "requests.list.open.status", "role": "status", "text": "{n, select, one {Открыта}}"},
+        {"key": "requests.list.saved.toast", "role": "toast", "text": "Введённое сохранено"},
+        {"key": "requests.card.saved.toast", "role": "toast", "text": "Введенное сохранено"},
+        {"key": "requests.card.en1.label", "role": "label", "text": "Color"},
+        {"key": "requests.card.en2.label", "role": "label", "text": "Favourite"},
+        {"key": "requests.card.en3.label", "role": "label", "text": "Organize"},
+        {"key": "requests.card.price.hint", "role": "hint", "text": "Смета от 9800 рублей"},
+        {"key": "requests.card.window.hint", "role": "hint", "text": "Окно {from} - {to}"},
+    ]
+    units = []
+    for it in items:
+        u = Unit(it["text"], "", it["role"], slot_id=it["key"], genre="interface", key=it["key"],
+                 maxlen=it.get("maxlen", ""), group=it.get("group", ""))
+        units.append(u)
+    rdoc = Document("<registry>", "texts", units, "", "interface", registry={"objects": {}, "actions": {}})
+    rr = lint_document(rdoc, rules, profiles, "", "ru", "", None)
+    morph_ok = rr["input"]["morphology"]
+    if morph_ok:
+        fg = found(rr, "an-ui-group-form")
+        check("формы группы статусов: «Отказ» — не «какая?»", len(fg) == 1 and fg[0]["slot"]["key"].endswith("status-no.badge"),
+              str([f["slot"].get("key") for f in fg]))
+    fd = found(rr, "an-ui-duplicate")
+    check("дубль на экране: одинаковые заголовок и заголовок секции", len(fd) == 1, str(len(fd)))
+    check("maxlen: строка длиннее предела — error", found(rr, "an-ui-maxlen", "error"))
+    check("длина по роли: кнопка длиннее 3 слов — warning", any(f["slot"].get("key", "").endswith("long.action")
+                                                               for f in found(rr, "an-ui-role-length", "warning")))
+    icu = [f["message"] for f in found(rr, "an-ui-icu")]
+    check("ICU: «=1» вместо one, нет веток few и many — warning; нет other — error",
+          any("=1" in x for x in icu) and any("few" in x for x in icu) and found(rr, "an-ui-icu", "error"), str(icu))
+    check("«ё» и «е» в одном слове — warning", found(rr, "an-ui-yo-mix", "warning"))
+    check("US и UK орфография вместе — warning", found(rr, "an-ui-us-uk", "warning"))
+    fmt_ = [f["message"] for f in found(rr, "an-ui-formats")]
+    check("форматы: число литералом и диапазон с дефисом", any("Число, дата, сумма" in x for x in fmt_) and
+          any("Диапазон — тире без пробелов" in x for x in fmt_), str(fmt_))
+    long_body = ("Документы подтверждения принадлежности объекта недвижимости предоставляются собственником "
+                 "исключительно одновременно с доверенностями представителей, уполномоченных распоряжаться "
+                 "принадлежащим имуществом, включая дополнительные согласования управляющей организации, "
+                 "администрации муниципального образования, регистрационной палаты, нотариальной конторы. "
+                 "Дополнительные экземпляры предоставляются заявителем самостоятельно.")
+    rb_ = lt(long_body, "interface", "body")
+    check("уровень чтения: роль body — метрика и сигнал о длинных словах", rb_["metrics"].get("reading") and
+          found(rb_, "an-reading-level", "info"))
+    check("уровень чтения: подпись поля не проверяется", not lt(long_body, "interface", "label")["metrics"].get("reading"))
+    # 9. «ты» и «вы»
+    check("«ты» и «вы» в одном тексте — an-address-mix",
+          found(lt("Оставьте заявку.\n\nТы получишь смету завтра.", "landing"), "an-address-mix"))
+    check("голос на «ты»: строка на «вы» — находка", found(lt("Оставьте заявку.", "landing",
+                                                              voice={"address_form": "ty"}), "an-address-mix"))
+    # 10. калибровки линтера (text X §7: К1–К16, К28)
+    check("К1: «10 - 15 дней» — диапазон (typo-range-hyphen), не дефис вместо тире",
+          not found(lt("Сдача через 10 - 15 дней.", "landing", slot_type="body"), "ru-pun-hyphen-as-dash") and
+          found(lt("Сдача через 10 - 15 дней.", "landing", slot_type="body"), "typo-range-hyphen") and
+          found(lt("Анамнез - это разговор с пациентом.", "landing", slot_type="body"), "ru-pun-hyphen-as-dash"))
+    check("К3: сообщение ru-mkt-superlatives ссылается на COPY-L-SUP-01", "COPY-L-SUP-01" in rb["ru-mkt-superlatives"].message
+          and "38-ФЗ" not in rb["ru-mkt-superlatives"].message)
+    check("К4: «По статистике, 78 %» — размытая атрибуция, в geo — error",
+          found(lt("По статистике, 78 % клиентов возвращаются.", "geo", slot_type="geo-answer"),
+                "ru-lex-vague-attribution", "error"))
+    dense = ("В современном мире уникальный комплексный подход обеспечивает эффективное решение ключевых задач. "
+             "Наша команда профессионалов предлагает инновационные решения и индивидуальный подход. "
+             "Мы гарантируем высокое качество и надёжность, открываем новые горизонты и выводим бизнес на новый "
+             "уровень. Уникальный опыт и мощные инструменты позволяют достигать впечатляющих результатов. "
+             "Комплексное решение для вашего бизнеса — это наш приоритет и наша миссия.")
+    full, page = lt(dense, "landing"), lt(dense, "landing", page_audit=True)
+    check("К5: аудит страницы без copy deck — анализаторы не выше warning, вердикт — сигнал",
+          found(full, "an-marker-density", "error") and not found(page, "an-*", "error") and
+          page["summary"]["mode"] == "page-audit" and page["summary"]["verdict"] != "rewrite",
+          f"{full['summary']} / {page['summary']}")
+    check("К6: «Подробнее» на лендинге — не error", not found(rp, "ux-3-2-07", "error"))
+    tag = deck({"slots": [{"slot_type": "footer-tagline", "text": "Быстро. Просто. Надёжно."}]}, "landing")
+    check("К7: рубленый драматизм в слогане (footer-tagline) — сигнал", found(tag, "ru-syn-chopped", "info") and
+          not found(tag, "ru-syn-chopped", "warning"))
+    rep_text = ("Прораб каждый вечер присылал фото с объекта, чтобы хозяин видел работу. Мастер тоже присылал фото "
+                "плитки, когда заканчивал стену в ванной.")
+    vr = lt(rep_text, "landing", slot_type="body", voice={"customer_words": ["каждый вечер присылал фото"]})
+    check("К7: повтор слова клиента (customer_words) — не находка", not found(vr, "an-verb-repeat"))
+    check("К8: длинное совпадение с кавычками внутри — находка; фраза целиком в кавычках — нет",
+          found(lt("Сервис не только «экономит» время, но и снижает затраты.", "landing", slot_type="body"),
+                "ru-syn-not-only-but-also") and
+          not found(lt("Клиент написал: «Сервис не только экономит время, но и снижает затраты».", "landing",
+                       slot_type="body"), "ru-syn-not-only-but-also"))
+    check("К8: кликбейт в заголовке статьи и теме письма",
+          found(deck({"slots": [{"slot_type": "article-heading", "text": "Вы не поверите, сколько стоит ремонт"}]},
+                     "article"), "meta-clickbait", "warning") and
+          found(deck({"slots": [{"slot_type": "email-subject", "text": "Вы не поверите, что внутри"}]}, "email-form"),
+                "meta-clickbait", "error"))
+    dm = {"copy_deck": {"pages": [{"page_id": "home", "page_type": "landing-lead-services",
+                                   "meta": {"title": "Ремонт квартир от 9 800 ₽/м² — гарантия 3 года",
+                                            "fact_ids": ["price-from-per-m2", "guarantee-3-years"]},
+                                   "sections": []}]}}
+    check("К9: meta.fact_ids снимают число без факта в мета", not found(deck(dm), "an-number-without-fact"))
+    dv = {"slots": [{"slot_type": "headline", "chosen": "a", "variants": [
+        {"id": "a", "text": "Ремонт квартир с 2014 года"},
+        {"id": "b", "text": "В современном мире ремонт — это стресс"},
+        {"id": "c", "status": "rejected", "text": "Откройте для себя ремонт нового поколения"}]}]}
+    check("К10: по умолчанию — выбранный вариант; --all-variants — живые, без rejected",
+          not found(deck(dv, "landing"), "ru-lex-intro-cliche") and
+          found(deck(dv, "landing", all_variants=True), "ru-lex-intro-cliche") and
+          not found(deck(dv, "landing", all_variants=True), "ru-mkt-banned-openers"))
+    check("К11: «X, который Y» с fact_ids — без находки",
+          not found(deck({"slots": [{"slot_type": "headline", "text": "Лампа, которая сама подбирает свет",
+                                     "fact_ids": ["auto-light"]}]}, "landing"), "ru-mkt-headline-which") and
+          found(deck({"slots": [{"slot_type": "headline", "text": "Сервис, который понимает ваш бизнес"}]}, "landing"),
+                "ru-mkt-headline-which"))
+    stuffing = ("Ремонт квартир в Нижнем Новгороде — наша работа. Мы делаем ремонт квартир любой сложности, "
+                "ремонт квартир под ключ и косметический ремонт квартир.")
+    check("К12: набивка ключа на лендинге — сигнал, в статье — warning",
+          found(lt(stuffing, "landing", slot_type="body"), "geo-keyword-stuffing", "info") and
+          found(lt(stuffing, "article", slot_type="article-paragraph"), "geo-keyword-stuffing", "warning"))
+    labels = deck({"slots": [{"slot_type": "section-title", "text": x} for x in
+                             ("Наши преимущества", "Частые вопросы", "Вопросы и ответы", "Контакты")]}, "landing")
+    got_l = [f["fragment"] for f in found(labels, "ru-mkt-label-headings", "warning")]
+    check("К13: ярлык секции — warning; «Частые вопросы», «Вопросы и ответы», «Контакты» — конвенции",
+          got_l == ["Наши преимущества"], str(got_l))
+    vf = kbpaths.kb("text", "05-voice-editorial", "examples", "voice-otves-warm.yaml")
+    voice = load_voice(str(vf))
+    rv = lt("Команда профессионалов делает ремонт в кратчайшие сроки.", "landing", slot_type="body", voice=voice)
+    check("К14: словарь бренда «не говорим» (--voice) — находки, в плотности маркеров",
+          len(found(rv, "voice-avoid-*")) >= 2 and all(f["counts_as_marker"] for f in found(rv, "voice-avoid-*")))
+    check("К14: EN-приметы истории", found(lt("They got the kitchen of their dreams and couldn't be happier.", "landing",
+                                             slot_type="body"), "en-mkt-story-cliches"))
+    check("К14: аббревиатура после двоеточия и «since 2014» — без находок ux",
+          not found(lt("Оплата: СБП", "interface", "label"), "ux-6-4-11") and
+          not found(lt("Open since 2014", "interface", "label"), "ux-4-2-07"))
+    dc = {"copy_deck": {"pages": [{"page_id": "home", "page_type": "landing-saas", "sections": [
+        {"section_id": "features", "slots": [{"slot_id": f"c{i}", "slot_type": "card-body", "text": txt} for i, txt in
+                                             enumerate(["Счёт уходит клиенту сразу после визита мастера.",
+                                                        "Мастер видит запись и адрес клиента в телефоне.",
+                                                        "Отчёт по выручке собирается каждый вечер сам."])]}]}]}}
+    fc = found(deck(dc), "an-cards-uniform", "info")
+    check("К15: карточки секции одной длины — сигнал an-cards-uniform с приметой реестра (tells.yaml#checks)",
+          fc and fc[0].get("tell") == "uniform-card-copy", str(fc[:1]))
+    check("К15: утверждение со счётом словами — число без факта",
+          found(lt("Мы работаем в два раза быстрее конкурентов.", "landing"), "an-number-without-fact"))
+    check("К16: строчная после двоеточия и грамматическое тире в прозе — без находок ux",
+          not found(lt("Ремонт в Сормове: ремонт под ключ", "landing", slot_type="headline"), "ux-6-4-11") and
+          not found(deck({"slots": [{"slot_type": "guarantee-text", "text": "Смета — бесплатно."}]}, "landing"),
+                    "ux-5-3-03"))
+    ma = {"copy_deck": {"pages": [{"page_id": "home", "page_type": "home-multipage", "meta": {"title": "Сбер"},
+                                   "lint_allow": [{"rule": "meta-title-too-short", "reason": "известный бренд"}],
+                                   "sections": []}]}}
+    rma = deck(ma)
+    check("К28: короткий title известного бренда — lint_allow страницы", not found(rma, "meta-title-too-short") and
+          rma["summary"]["suppressed"] == 1)
+    tpl = ((load_yaml(ROOT / "07-seo-geo-copy" / "meta-rules.yaml") or {}).get("templates") or {}) \
+        .get("landing-lead-services", {}).get("example_ru") or {}
+    check("К28: description шаблона landing-lead-services не начинается с тех же 42 знаков, что title",
+          tpl.get("title") and tpl.get("description") and tpl["title"][:42] != tpl["description"][:42])
+    # 11. надзаголовки, стрелка, разряды
+    per = rb["an-eyebrow-rate"].per_sections
+    eb = {"copy_deck": {"pages": [{"page_id": "p", "page_type": "landing-saas", "sections": [
+        {"section_id": f"s{i}", "slots": [{"slot_type": "eyebrow", "text": f"Этап {i}"},
+                                          {"slot_type": "section-title", "text": f"Раздел {i}"}]} for i in range(3)]}]}}
+    feb = found(deck(eb), "an-eyebrow-rate")
+    check("TR-14: число надзаголовков — per_sections записи an-eyebrow-rate (3)", per == 3 and feb and
+          "лимит 1" in feb[0]["message"], str(feb[:1]))
+    check("VI-29: «↗» у ссылки на внешний сайт — не ошибка; «→» в кнопке — error",
+          not found(deck({"slots": [{"slot_type": "cta-secondary-label", "text": "Документация ↗"}]}, "landing"),
+                    "ru-pun-arrow-cta") and found(deck({"slots": [{"slot_type": "cta-label", "text": "Начать →"}]},
+                                                       "landing"), "ru-pun-arrow-cta", "error"))
+    check("TX-27: разряды с U+00A0 и U+202F — без находок набора",
+          not found(lt("Цена 25 000 ₽ и 30 000 ₽", "landing", slot_type="body"), "typo-thousands"))
+    check("TX-12, TX-15: поправки ux-5-2-*, ux-3-2-0[14] — только в жанрах сайта",
+          all(set(rb[i].genre_variants) <= set(SITE_GENRES) and rb[i].genre_variants for i in
+              ("ux-5-2-01", "ux-5-2-02", "ux-3-2-01", "ux-3-2-04")) and not rb["ux-5-2-01"].for_genre("interface")
+          is not rb["ux-5-2-01"])
+    for line in fails:
+        print(line)
+    print(f"проверок: {n_checks}, провалов: {len(fails)}")
     print("self-test:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 
@@ -1947,29 +3152,40 @@ class _ArgParser(argparse.ArgumentParser):
 
 
 def main(argv=None) -> int:
-    ap = _ArgParser(description="Линтер маркетинговых текстов RU/EN по жанрам (text-research).")
-    ap.add_argument("paths", nargs="*", help="файлы .txt .md .html .yaml; «-» — stdin")
-    ap.add_argument("--genre", choices=GENRES, help="жанр: landing, site-page, article, meta, geo, email-form")
+    ap = _ArgParser(description="Линтер текстов RU/EN по жанру и роли строки: маркетинговые тексты сайта (жанры сайта) и "
+                                "тексты интерфейса (жанр interface, реестр texts.md). Коды: 0 — нет error, 2 — есть error, "
+                                "1 — ошибка вызова (неизвестная роль, тип слота, часть компонента, жанр).")
+    ap.add_argument("paths", nargs="*", help="файлы .txt .md .html .yaml, реестр texts.md; «-» — stdin")
+    ap.add_argument("--genre", choices=GENRES, help="жанр: " + ", ".join(GENRES) + "; у copy deck — page_type.genre словаря "
+                                                    "site, у реестра texts.md — interface")
     ap.add_argument("--lang", default="auto", choices=("auto", "ru", "en"))
     ap.add_argument("--profile", default="", help="имя профиля из profiles.yaml (по умолчанию = жанр)")
-    ap.add_argument("--slot-type", default="", help="slot_type для всего текста (из временного словаря)")
-    ap.add_argument("--format", default="", help="формат входа, если расширение не подходит: md|txt|html|yaml")
+    ap.add_argument("--slot-type", default="", help="тип слота для всего текста: id слота вида text словаря site")
+    ap.add_argument("--role", default="", help="роль строки интерфейса: ux 07/06 §7.2 или body (жанр interface)")
+    ap.add_argument("--component", default="", help="часть компонента: роль — из kb/common/components.yaml#text_roles "
+                                                     "(Field.Error → error)")
+    ap.add_argument("--format", default="", help="формат входа, если расширение не подходит: md|txt|html|yaml|texts")
+    ap.add_argument("--objects", default="", help="глоссарий объектов object.md (по умолчанию — рядом с реестром)")
+    ap.add_argument("--actions", default="", help="словарь действий action.md (по умолчанию — рядом с реестром)")
+    ap.add_argument("--voice", default="", help="профиль голоса voice.yaml: словарь «не говорим», написания, обращение")
+    ap.add_argument("--customer-words", default="", help="voc.yaml или meaning.yaml: слова клиента (customer_words)")
     ap.add_argument("--json", action="store_true", help="вывод JSON")
     ap.add_argument("--md", action="store_true", help="вывод Markdown")
     ap.add_argument("--metrics-only", action="store_true", help="только метрики (для замеров корпуса)")
     ap.add_argument("--units", action="store_true", help="добавить в JSON разбор на блоки")
-    ap.add_argument("--rules", action="append", default=[], help="доп. файл или папка YAML-правил (G, H и др.)")
+    ap.add_argument("--rules", action="append", default=[], help="доп. файл или папка YAML-правил")
     ap.add_argument("--profiles", default="", help="путь к profiles.yaml")
     ap.add_argument("--thresholds", default="", help="путь к thresholds.yaml (по умолчанию 03-corpus-measured/)")
-    ap.add_argument("--vocab", default="", help="путь к словарю слотов")
+    ap.add_argument("--vocab", default="", help="путь к словарю site (по умолчанию kb/site/02-site-types/vocabulary.yaml)")
     ap.add_argument("--final", action="store_true", help="финальная проверка: [PLACEHOLDER] — error")
-    ap.add_argument("--chosen-only", action="store_true", help="в copy deck проверять только выбранный вариант")
+    ap.add_argument("--all-variants", action="store_true", help="в copy deck — все живые варианты слота (без rejected)")
+    ap.add_argument("--chosen-only", action="store_true", help="в copy deck — только выбранный вариант (так по умолчанию)")
     ap.add_argument("--morph", default="auto", choices=("auto", "on", "off"), help="морфология pymorphy3")
     ap.add_argument("--selftest", action="store_true")
     ap.add_argument("--version", action="store_true")
     a = ap.parse_args(argv)
     if a.version:
-        print(f"copy_lint {VERSION} ({DATE})")
+        print(f"copy_lint {VERSION}")
         return 0
     if a.selftest:
         return selftest()
@@ -1981,12 +3197,16 @@ def main(argv=None) -> int:
         profiles = load_profiles(Path(a.profiles) if a.profiles else None)
         log: list = []
         rules = load_rules(a.rules, profiles, log)
+        voice = load_voice(a.voice, a.customer_words) if (a.voice or a.customer_words) else None
         results = []
         for p in a.paths:
-            doc = read_document(p, a.genre or "", vocab, a.chosen_only, a.slot_type, a.format)
+            doc = read_document(p, a.genre or "", vocab, a.all_variants, a.slot_type, a.format, a.role, a.component,
+                                a.objects, a.actions)
+            page_audit = doc.fmt in ("md", "txt", "html", "htm") and not (a.slot_type or a.role or a.component) \
+                and (a.genre or "landing") not in ("interface", "meta")
             res = lint_document(doc, rules, profiles, a.genre or "", a.lang, a.profile,
                                 Path(a.thresholds) if a.thresholds else None, a.morph, a.final, a.metrics_only,
-                                a.units, log)
+                                a.units, log, page_audit=page_audit, voice=voice)
             results.append(res)
     except (OSError, ValueError, yaml.YAMLError, re.error) as exc:
         sys.stderr.write(f"copy_lint: {exc}\n")

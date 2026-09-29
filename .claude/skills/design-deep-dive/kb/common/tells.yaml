@@ -886,11 +886,20 @@ tells:
       - text/09-ai-generation-evaluation/copy-rubric.yaml
     note: Подписи навигации и заголовки «Частые вопросы», «Контакты» — конвенции, а не примета.
 
+  - id: uniform-card-copy
+    name: тексты карточек секции одной длины — написаны по шаблону, а не по содержанию карточки
+    surface: [text]
+    owner: text/09-ai-generation-evaluation/copy-checklist.yaml#COPY-C-18
+    also:
+      - text/06-anti-slop/lexicon/analyzers.yaml#an-cards-uniform
+      - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-07 (три одинаковые карточки в ряд — раскладка)
+    note: Сигнал, а не ворота. Три карточки в ряд — решение подачи; одинаковая длина их текстов — примета шаблона в тексте.
+
 # Проверки утилит, которые находят приметы: ключ без префикса — проверка утилиты макета
 # `scripts/claude-design/mockup_checks.py`; ключ `ui_audit:<id>` — проверка `scripts/ui/ui_audit.py` (её же находки
 # приносит `marketing_audit.py`); ключ `marketing_audit:<id>` — своя проверка подачи `scripts/creative/marketing_audit.py`
-# (у её проверок `cliche:<id>` примета — запись реестра с тем же id, строк здесь нет). Находка утилиты несёт `tell`
-# своей строки. `allow` — ключ `--allow`: он снимает находку, когда бриф или арт-дирекция записали решение; те же ключи
+# (у её проверок `cliche:<id>` примета — запись реестра с тем же id, строк здесь нет); ключ `copy_lint:<id>` —
+# анализатор линтера текстов `scripts/text/copy_lint.py`. Находка утилиты несёт `tell` своей строки. `allow` — ключ `--allow`: он снимает находку, когда бриф или арт-дирекция записали решение; те же ключи
 # пишет поле `k3_allow` арт-дирекции creative. Группа: look — приметы вида, honesty — честность содержимого,
 # acceptance — проверки приёмки, которые приметами не являются. У проверки `ui_audit` L4 строки нет: она находит разные
 # приметы по профилю (декоративный градиент экрана, градиентный текст и фиолетовый герой страницы).
@@ -946,3 +955,4 @@ checks:
   marketing_audit:MKT-C2: {group: look, tell: purple-neon-band}
   marketing_audit:MKT-M1: {group: look, tell: section-fade-up}
   marketing_audit:MKT-M2: {group: look, tell: layout-property-animation}
+  copy_lint:an-cards-uniform: {group: look, tell: uniform-card-copy}

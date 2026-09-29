@@ -10,13 +10,14 @@
 # 4 EN, повтор 5 текстов I/01) — 99-raw/experiments/I/.
 
 rubric: copy-rubric
-version: "1.1"
+version: "1.2"
 date: "2026-09-24"
 owner: text-research/I
 status: draft-phase-1      # draft-phase-1 → calibrated (после LT-04) → stable
 changelog:
   - {version: "1", date: "2026-09-24", what: "12 критериев; 4 вопроса с cap_if_no у критериев судьи; формула judge_scoring (опыт I/01)"}
   - {version: "1.1", date: "2026-09-24", what: "правила чтения read у 8 вопросов (01-q2, 01-q3, 02-q4, 04-q1, 06-q2, 08-q2, 08-q4, 09-q2): в повторе I/03 тот же оценщик совпал с собой в 0,90 ответов и 0,74 баллов критериев, расхождения — в этих вопросах; текст вопросов не менялся, калибровка — заново (DR-5)"}
+  - {version: "1.2", date: "2026-09-29", what: "правило чтения read у 07-q2: конвенции навигации «Частые вопросы», «Вопросы и ответы», «Контакты» — не ярлыки (X24); текст вопроса не менялся"}
 language: ru               # описания по-русски; вопросы судье — RU и EN
 
 scale:
@@ -351,7 +352,7 @@ criteria:
       trust: pre-filter
       questions:
         - {id: q1, cap_if_no: 3, ru: "По одним заголовкам секций можно пересказать предложение и доводы?", en: "Can you retell the offer and its arguments from the section titles alone?"}
-        - {id: q2, cap_if_no: 2, ru: "Не меньше трёх четвертей заголовков — утверждения или вопросы клиента, а не ярлыки («Наши преимущества», «Почему мы»)?", en: "Are at least three quarters of the titles claims or customer questions, not labels ('Our advantages', 'Why us')?"}
+        - {id: q2, cap_if_no: 2, ru: "Не меньше трёх четвертей заголовков — утверждения или вопросы клиента, а не ярлыки («Наши преимущества», «Почему мы»)?", en: "Are at least three quarters of the titles claims or customer questions, not labels ('Our advantages', 'Why us')?", read: "конвенции навигации и якорей — не ярлыки: заголовки «Частые вопросы» (или «Вопросы и ответы») и «Контакты» в счёт не входят, их секции из доли исключаются; ярлыки — «Наши преимущества», «Почему мы», «Почему выбирают нас», «Отзывы клиентов», «Наши услуги», «Возможности» (CONTRADICTIONS X24)"}
         - {id: q3, cap_if_no: 4, ru: "Порядок заголовков совпадает с sections[].question иерархии?", en: "Does the order of titles follow sections[].question in the hierarchy?"}
         - {id: q4, cap_if_no: 4, ru: "Заголовок последней секции перед формой называет следующий шаг или его результат?", en: "Does the last section title before the form name the next step or its result?"}
     anchors:

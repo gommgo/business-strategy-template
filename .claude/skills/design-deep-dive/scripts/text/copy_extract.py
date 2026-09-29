@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """copy_extract.py — страница (URL или сохранённый HTML) → структурированный текст по слотам (JSON).
 
-text-research · волна 1 · агент D · 2026-09-24. Метод — 03-corpus-measured/01-corpus-method.md §4.
+Метод — kb/text/03-corpus-measured/01-corpus-method.md §4.
 
 Два шага.
   1) Браузер (Playwright/Chromium, одна страница за раз): загрузка, медленная прокрутка до конца и назад, затем в
@@ -10,12 +10,16 @@ text-research · волна 1 · агент D · 2026-09-24. Метод — 03-c
      (header/nav/main/article/aside/footer/form), ссылка или кнопка, координаты в документе, кегль, насыщенность,
      text-transform, трекинг, фон и скругление (кнопка), верхнеуровневая секция. Пропускаются script/style/svg/iframe,
      скрытое (checkVisibility), клоны каруселей, aria-hidden, фиксированные слои не у верха (cookie, чаты, модалки,
-     бейдж хостинга Kimi). Cookie-баннеры НЕ нажимаются. Мета, OG, JSON-LD — отдельно.
+     бейджи хостинга). Cookie-баннеры НЕ нажимаются. Мета, OG, JSON-LD — отдельно. Автоматизация не маскируется: окно
+     1440×900 без подмены user agent и без --disable-blink-features=AutomationControlled; вход, капча и антибот — отсев
+     (page.blocked), а не обход.
   2) Классификация в Python (перезапускается офлайн по сохранённым блокам, --reclassify): hero (надзаголовок, H1,
-     подзаголовок, кнопки, микродоказательство), секции по заголовкам H2 (или визуальным заголовкам, если тегов мало),
-     роль секции по словарю, слоты из временного словаря 99-raw/notes/temp-vocabulary-v0.yaml (headline,
-     section-title, card-title, card-body, list-item, testimonial-quote, faq-q, faq-a, pricing-*, stat-*, cta-label,
-     form-*, nav-label, article-*…), отзывы, FAQ.
+     подзаголовок, кнопки, микродоказательство; меню и ряды ссылок первого экрана — навигация, а не кнопки), секции по
+     заголовкам H2 (или визуальным заголовкам, если тегов мало), роль секции по заголовку и содержимому, слоты
+     (headline, section-title, card-title, card-body, list-item, testimonial-quote, faq-q, faq-a, pricing-*, stat-*,
+     cta-label, form-*, nav-label, article-*…), отзывы, FAQ. Id слотов и ролей секций — словаря site
+     (kb/site/02-site-types/vocabulary.yaml), кроме внутренних меток разбора (INTERNAL_SLOTS, INTERNAL_ROLES);
+     stats.vocab_unknown называет id вне словаря.
 
 Выход JSON: tool, version, date, page{url, final_url, status, title, html_lang, blocked, insecure, fetched_at,
 viewport, hash}, lang, meta{title, description, og_title, og_description, og_image_alt, og_site_name, canonical,
@@ -23,14 +27,14 @@ twitter_title, twitter_description}, hero{eyebrow, headline, subheadline, cta[],
 level, eyebrow, role_guess, texts[], ctas[]}], testimonials[{quote, attribution}], faq[{q, a}], jsonld[{type, text}],
 units[{slot_type, text, section, role, tag, y, above_fold}], stats{…}. Рядом (с --save-blocks) — *.blocks.json.
 
-Запуск:
-  python3 99-raw/tools/copy_extract.py URL [-o out.json] [--genre landing|site-page|article] [--lang ru|en]
+Запуск (из папки скилла):
+  scripts/text/copy_extract.py URL [-o out.json] [--genre landing|site-page|article] [--lang ru|en]
           [--md out.md] [--shot shot.jpg] [--save-blocks] [--lock] [--insecure] [--wait 1200] [--timeout 45]
-  python3 99-raw/tools/copy_extract.py --html saved.html [--base-url URL] -o out.json
-  python3 99-raw/tools/copy_extract.py --reclassify out.blocks.json -o out.json [--genre …]
-  python3 99-raw/tools/copy_extract.py --batch targets.tsv --outdir DIR [--skip-existing] [--lock]
+  scripts/text/copy_extract.py --html saved.html [--base-url URL] -o out.json
+  scripts/text/copy_extract.py --reclassify out.blocks.json -o out.json [--genre …]
+  scripts/text/copy_extract.py --batch targets.tsv --outdir DIR [--skip-existing] [--lock]
           (TSV с колонками id, url, genre, lang[, page_type]; строки с # пропускаются)
-  python3 99-raw/tools/copy_extract.py --selftest
+  scripts/text/copy_extract.py --selftest
 
 --lock — браузер только под двумя блокировками: общая $DDD_HOME/locks/browser.lock, затем своя
 $DDD_HOME/locks/text/browser.lock (ожидание до 900 с); перед страницей проверяется MemAvailable (< 2 ГБ — ожидание).
@@ -49,18 +53,19 @@ import sys
 import time
 from pathlib import Path
 
-VERSION = "0.3.0"
-DATE = "2026-09-24"
+VERSION = "0.4.0"
+DATE = "2026-09-29"
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(HERE.parent / "lib"))
 import kbpaths  # noqa: E402
-ROOT = kbpaths.kb("text")
-VOCAB_PATH = ROOT / "99-raw" / "notes" / "temp-vocabulary-v0.yaml"
+VOCAB_PATH = kbpaths.kb("site", "02-site-types", "vocabulary.yaml")
 GLOBAL_LOCK = Path(kbpaths.lock_path("browser"))
 LOCAL_LOCK = Path(kbpaths.lock_path("browser", "text"))
-UA_TMPL = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{major}.0.0.0 "
-           "Safari/537.36")
 VW, VH = 1440, 900
+# внутренние метки разбора — не id словаря site: подписи полей формы (микрокопи ux 07/02, не меряются), номера шагов и
+# звёзды рейтинга; навигация, строка меню первого экрана, декор, цитата в статье
+INTERNAL_SLOTS = {"form-field", "number-label"}
+INTERNAL_ROLES = {"nav", "menu", "decor", "quote"}
 
 # ---------------------------------------------------------------------------------------------------------------------
 # 1. Сбор блоков в странице
@@ -73,7 +78,7 @@ BLOCKS_JS = r"""
   const BLOCKY = new Set(['block','flex','grid','list-item','table','table-cell','table-row','table-caption','flow-root',
                           'inline-table']);
   const BOXY = new Set(['inline-block','inline-flex','inline-grid']);
-  const JUNK = /(^|[\s_-])(cookie|cookies|onetrust|cookiebot|usercentrics|didomi|trustarc|gdpr|cc-banner|cc-window|jivo|jdiv|livechat|chat-widget|b24-widget|bx-livechat|tawk|crisp-client|drift-|intercom-|carrotquest|kimi-badge|sdk-seed|tilda-cookie|t-cookie|wm-ipp|wm-toolbar|donato|wb-autocomplete)/i;
+  const JUNK = /(^|[\s_-])(cookie|cookies|onetrust|cookiebot|usercentrics|didomi|trustarc|gdpr|cc-banner|cc-window|jivo|jdiv|livechat|chat-widget|b24-widget|bx-livechat|tawk|crisp-client|drift-|intercom-|carrotquest|sdk-seed|tilda-cookie|t-cookie|wm-ipp|wm-toolbar|donato|wb-autocomplete)/i;
   const CLONE = /(slick-cloned|swiper-slide-duplicate|splide__slide--clone|glide__slide--clone|owl-item cloned|marquee-clone|is-clone)/i;
   const csCache = new Map();
   const cs = el => { let v = csCache.get(el); if (!v) { v = getComputedStyle(el); csCache.set(el, v); } return v; };
@@ -103,7 +108,7 @@ BLOCKS_JS = r"""
       const modal = el.getAttribute('role') === 'dialog' || el.getAttribute('aria-modal') === 'true' ||
                     /(modal|popup|pop-up|overlay|dialog|lightbox|cookie|consent|banner-bottom|chat)/i.test(c);
       if (modal) return true;                                  // модалки, попапы, cookie
-      if (r.top > 120 && r.height < 0.45 * VH) return true;    // нижние полосы, чаты, бейджи (Kimi)
+      if (r.top > 120 && r.height < 0.45 * VH) return true;    // нижние полосы, чаты, бейджи хостинга
     }
     return false;
   }
@@ -240,7 +245,7 @@ def _mem_available_gb() -> float:
 
 
 class Locks:
-    """Две блокировки браузера: общая (все базы тройки), затем своя (text-research)."""
+    """Две блокировки браузера: общая на машину ($DDD_HOME/locks/browser.lock), затем своя (домен text)."""
 
     def __init__(self, enabled: bool, wait: int = 900):
         self.enabled, self.wait, self.fds = enabled, wait, []
@@ -296,15 +301,14 @@ def browse(url: str | None, html_path: str | None, lang_hint: str, wait_ms: int,
     from playwright.sync_api import sync_playwright
     res = {"status": None, "insecure": False, "errors": []}
     with sync_playwright() as pw:
-        b = pw.chromium.launch(headless=True, args=["--disable-blink-features=AutomationControlled",
-                                                    "--autoplay-policy=no-user-gesture-required"])
-        major = b.version.split(".")[0]
+        # автоматизация не маскируется: user agent браузера как есть, без выключения AutomationControlled
+        b = pw.chromium.launch(headless=True, args=["--autoplay-policy=no-user-gesture-required"])
         res["browser"] = b.version
         locale = "ru-RU" if lang_hint == "ru" else ("en-US" if lang_hint == "en" else "ru-RU")
         attempts = [insecure] if insecure else [False, True]
         data = None
         for ins in attempts:
-            ctx = b.new_context(viewport={"width": VW, "height": VH}, user_agent=UA_TMPL.format(major=major),
+            ctx = b.new_context(viewport={"width": VW, "height": VH},
                                 locale=locale, ignore_https_errors=ins, reduced_motion="reduce",
                                 extra_http_headers={"Accept-Language": "ru-RU,ru;q=0.9,en;q=0.7" if locale == "ru-RU"
                                                     else "en-US,en;q=0.9"})
@@ -612,7 +616,7 @@ def classify(raw: dict, genre: str = "landing", lang_hint: str = "") -> dict:
             add(b, "nav-label", -1, "header")
             continue
         if PHONE_RX.match(b["t"].strip()) or (HOURS_ADDR_RX.search(b["t"]) and n <= 12 and not b.get("lvl")):
-            add(b, "contact", -1, "contact")          # телефон, почта — не подпись кнопки
+            add(b, "contact-info", -1, "contacts")    # телефон, почта, адрес — не подпись кнопки
             continue
         if re.fullmatch(r"\d{1,2}[.)]?", b["t"].strip()):
             add(b, "number-label", -1, "decor")      # номера шагов, звёзды рейтинга — не текст
@@ -739,14 +743,8 @@ def classify(raw: dict, genre: str = "landing", lang_hint: str = "") -> dict:
     # ограничим hero первым экраном (для страниц без H2 весь текст иначе ушёл бы в hero)
     hero_part = [b for b in hb if b["y"] < fold]
     rest = [b for b in hb if b["y"] >= fold]
-    hero_has_btn = any(b.get("btn") for b in hero_part)
-    # ряд из ≥ 3 коротких ссылок на одной высоте — меню, а не кнопки
-    from collections import Counter as _C
-    linkish = [b for b in hero_part if nwords(b["t"]) <= 4 and (b.get("a") or b.get("cur") or b.get("btn"))]
-    rows_y = _C(round(b["y"] / 6) for b in linkish)
-    for b in linkish:
-        if rows_y[round(b["y"] / 6)] >= 3:
-            b["_menu"] = True
+    mark_menus(hero_part)
+    hero_has_btn = any(b.get("btn") and not b.get("_menu") for b in hero_part)
     sub_done = False
     sub_open = True          # подзаголовок — первый текст после заголовка, не дальше 320 px и до карточек
     card_mode = False
@@ -986,6 +984,50 @@ def classify(raw: dict, genre: str = "landing", lang_hint: str = "") -> dict:
     return res
 
 
+def mark_menus(blocks: list[dict]) -> None:
+    """Меню и ряды ссылок первого экрана — навигация, а не кнопки: ряд из ≥ 3 коротких ссылок на одной высоте, повтор
+    одной подписи ссылки у плиток («Подробнее» ×4) и плитки-ссылки, когда простых коротких ссылок ≥ 6. Кнопка с фоном
+    остаётся кнопкой, если её подпись не повторяется."""
+    from collections import Counter
+    linkish = [b for b in blocks if nwords(b["t"]) <= 4 and (b.get("a") or b.get("cur") or b.get("btn"))
+               and not b.get("form")]
+    plain = [b for b in linkish if not (b.get("btn") and b.get("bg"))]
+    rows_y = Counter(round(b["y"] / 6) for b in linkish)
+    texts = Counter(b["t"].strip().lower() for b in linkish)
+    many = len(plain) >= 6
+    for b in linkish:
+        repeated = texts[b["t"].strip().lower()] >= 2 and (LINK_RX.match(b["t"]) or not b.get("btn"))
+        if rows_y[round(b["y"] / 6)] >= 3 or repeated or (many and b in plain):
+            b["_menu"] = True
+
+
+def vocab_ids() -> tuple[set, set]:
+    """Id слотов вида text и ролей секций словаря site."""
+    import yaml
+    ns = (yaml.safe_load(VOCAB_PATH.read_text(encoding="utf-8")) or {}).get("namespaces") or {}
+    slots = {x["id"] for x in (ns.get("slot") or {}).get("values") or [] if x.get("kind") == "text"}
+    roles = {x["id"] for x in (ns.get("section_role") or {}).get("values") or []}
+    return slots, roles
+
+
+def vocab_unknown(res: dict) -> list[str]:
+    """Id слотов и ролей секций в результате, которых нет в словаре site и нет среди внутренних меток разбора."""
+    try:
+        slots, roles = vocab_ids()
+    except (OSError, ValueError):
+        return ["словарь site не прочитан"]
+    out = set()
+    for u in res.get("units") or []:
+        if u.get("slot_type") not in slots and u.get("slot_type") not in INTERNAL_SLOTS:
+            out.add("slot:" + str(u.get("slot_type")))
+        if u.get("role") and u["role"] not in roles and u["role"] not in INTERNAL_ROLES:
+            out.add("section-role:" + str(u["role"]))
+    for s in res.get("sections") or []:
+        if s.get("role_guess") and s["role_guess"] not in roles and s["role_guess"] not in INTERNAL_ROLES:
+            out.add("section-role:" + str(s["role_guess"]))
+    return sorted(out)
+
+
 def classify_form_block(b: dict, add, si: int):
     n = nwords(b["t"])
     if CONSENT_RX.search(b["t"]) and n >= 4:
@@ -1180,7 +1222,7 @@ def finish(raw, genre, lang, meta, hero, sections, units, testimonials, faq, bf)
     counts: dict = {}
     for u in units:
         counts[u["slot_type"]] = counts.get(u["slot_type"], 0) + 1
-    return {
+    res = {
         "tool": "copy_extract.py", "version": VERSION, "date": DATE,
         "page": {"url": raw.get("req_url") or raw.get("url", ""), "final_url": raw.get("url", ""),
                  "status": raw.get("status"), "title": title, "html_lang": raw.get("html_lang", ""),
@@ -1193,10 +1235,12 @@ def finish(raw, genre, lang, meta, hero, sections, units, testimonials, faq, bf)
         "stats": {"words": words, "units": len(units), "sections": len(sections), "slot_counts": counts,
                   "errors": raw.get("errors", [])},
     }
+    res["stats"]["vocab_unknown"] = vocab_unknown(res)
+    return res
 
 
 def to_markdown(res: dict) -> str:
-    """Читаемый вид для ручной проверки и для A: слот в квадратных скобках, секции заголовками."""
+    """Читаемый вид для ручной проверки: слот в квадратных скобках, секции заголовками."""
     L = [f"# {res['meta'].get('title','')}", "", f"URL: {res['page']['url']}  ", f"Снято: {res['page'].get('fetched_at','')} "
          f"· copy_extract {res['version']} · язык {res['lang']} · жанр {res['page'].get('genre')} · слов {res['stats']['words']}", ""]
     m = res["meta"]
@@ -1220,7 +1264,7 @@ def to_markdown(res: dict) -> str:
 
 
 def to_plain(res: dict) -> str:
-    """Сплошной текст страницы без навигации и подвала (для формул читаемости у A)."""
+    """Сплошной текст страницы без навигации и подвала (для формул читаемости)."""
     keep = [u["text"] for u in res["units"] if u["section"] >= 0 and u["slot_type"] not in ("nav-label", "form-field")]
     return "\n\n".join(keep) + "\n"
 
@@ -1346,7 +1390,35 @@ def selftest() -> int:
     ares = classify(art_raw, "article", "")
     aslots = [u["slot_type"] for u in ares["units"]]
     ok = ok and aslots == ["article-title", "article-lead", "article-heading", "article-paragraph"]
-    print("selftest:", "OK" if ok else "FAIL", slots if not ok else "", aslots if not ok else "")
+    # меню и ряды ссылок первого экрана — навигация: плитки с «Подробнее» и ряд ссылок меню не становятся кнопками
+    menu_raw = {"vh": 900, "doc_h": 2000, "title": "Банк", "meta": {}, "blocks": [
+        {"i": 0, "t": "Кредиты и вклады для бизнеса", "tag": "h1", "lvl": 1, "y": 150, "h": 60, "fs": 48, "fw": 700},
+        {"i": 1, "t": "Открыть счёт", "tag": "a", "lvl": 0, "btn": True, "bg": True, "a": True, "y": 240, "h": 48, "fs": 16, "fw": 600},
+        {"i": 2, "t": "Кредиты", "tag": "a", "lvl": 0, "a": True, "y": 320, "h": 20, "fs": 15, "fw": 400},
+        {"i": 3, "t": "Вклады", "tag": "a", "lvl": 0, "a": True, "y": 320, "h": 20, "fs": 15, "fw": 400},
+        {"i": 4, "t": "Карты", "tag": "a", "lvl": 0, "a": True, "y": 320, "h": 20, "fs": 15, "fw": 400},
+        {"i": 5, "t": "Подробнее", "tag": "a", "lvl": 0, "a": True, "y": 420, "h": 20, "fs": 14, "fw": 400},
+        {"i": 6, "t": "Подробнее", "tag": "a", "lvl": 0, "a": True, "y": 470, "h": 20, "fs": 14, "fw": 400},
+        {"i": 7, "t": "Ставка по вкладу для бизнеса на срок от месяца", "tag": "p", "lvl": 0, "y": 500, "h": 20, "fs": 16, "fw": 400},
+    ]}
+    mres = classify(menu_raw, "landing", "ru")
+    ctas = [c["text"] for c in mres["hero"]["cta"]]
+    menu_ok = ctas == ["Открыть счёт"] and sum(1 for u in mres["units"] if u["slot_type"] == "nav-label") == 5
+    ok = ok and menu_ok
+    # id слотов и ролей — словаря site или внутренние метки разбора; в коде — те же
+    src = Path(__file__).read_text(encoding="utf-8")
+    lits = set(re.findall(r'add\(b, "([a-z-]+)"', src)) | set(re.findall(r'slot_type="([a-z-]+)"', src)) | \
+        set(re.findall(r'"(?:how-it-works|pricing|case-studies|faq)": "([a-z-]+)"', src))
+    try:
+        vslots, vroles = vocab_ids()
+    except (OSError, ValueError):
+        vslots, vroles = set(), set()
+    code_roles = {r for r, _ in ROLE_RX} | set(re.findall(r'add\(b, "[a-z-]+", -?\d+, "([a-z-]+)"\)', src))
+    bad_ids = sorted((lits - vslots - INTERNAL_SLOTS) | (code_roles - vroles - INTERNAL_ROLES))
+    vocab_ok = bool(vslots) and not bad_ids and not res["stats"]["vocab_unknown"] and not ares["stats"]["vocab_unknown"]
+    ok = ok and vocab_ok
+    print("selftest:", "OK" if ok else "FAIL", slots if not ok else "", aslots if not ok else "",
+          "" if menu_ok else f"меню первого экрана: кнопки {ctas}", "" if vocab_ok else f"id вне словаря site: {bad_ids}")
     return 0 if ok else 1
 
 

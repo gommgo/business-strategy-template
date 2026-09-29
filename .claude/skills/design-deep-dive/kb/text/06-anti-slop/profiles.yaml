@@ -1,14 +1,19 @@
 # Профили жанров линтера copy_lint.py: какие группы правил включены, потолки уровней, анализаторы и их пороги.
-# ВСЕ числа порогов — стартовые (provisional: true): источники — гайд заказчика §D (ритм), humanizer-ru scripts/lint.py
-# (ритм, абзацы, списки), impeccable (тире ≥ 8 и ≥ 1 на 500 знаков), taste (надзаголовки ≤ 1 на 3 секции), опыты C
-# (99-raw/experiments/C/). Итоговые пороги по жанрам ставит агент D в 03-corpus-measured/thresholds.yaml; copy_lint.py
-# читает оттуда genres.<жанр>.analyzers и сливает поверх этих значений (формат — 02-linter-spec-and-profiles.md §6).
+# Числа порогов — стартовые (provisional: true): источники — гайд заказчика §D (ритм), humanizer-ru scripts/lint.py
+# (ритм, абзацы, списки), impeccable (тире ≥ 8 и ≥ 1 на 500 знаков), taste (надзаголовки ≤ 1 на 3 секции). Пороги
+# жанров сайта по замеру корпуса — 03-corpus-measured/thresholds.yaml: copy_lint.py читает оттуда
+# genres.<жанр>.analyzers и сливает поверх этих значений (формат — 02-linter-spec-and-profiles.md §6).
+# Жанр interface — тексты продукта за входом (кабинет, приложение, бот, письма, СМС, push): строки с ролью ux 07/06
+# §7.2 (реестр texts.md, ключ --role, поле role, роль части компонента); правила ux — с уровнями канона, из text —
+# артефакты, данные и набор; длины по ролям — ux-07-06.yaml#role_lengths (ux 07/01 §12); межстрочные проверки
+# ux 07/06 §7.3 — анализаторы ui_* над реестром.
 date: 2026-09-24
 version: 1
 owner: C (волна 1)
 provisional: true
 thresholds_ref: 03-corpus-measured/thresholds.yaml
-vocabulary_ref: 99-raw/notes/temp-vocabulary-v0.yaml
+vocabulary_ref: ../site/02-site-types/vocabulary.yaml   # id типов страниц (жанр) и слотов
+slot_rules_ref: 04-copy-by-block/copy-slots.yaml          # роль ux и жанры типа слота, lint_as
 lexicon_dir: 06-anti-slop/lexicon
 # Внешние файлы правил других агентов (формат правила — как в lexicon/*.yaml). Отсутствующие пропускаются с заметкой.
 external_rules:
@@ -32,6 +37,7 @@ defaults:
   # слоты с прозой: на них считаются ритм, абзацы, тире, конкретика и сверхкоррекция
   prose_slot_types: [body, section-lead, article-paragraph, article-lead, article-summary, geo-answer, definition, faq-a,
                      email-body, case-summary, guarantee-text, objection-answer, pricing-plan-summary]
+  prose_roles: []           # роли строк с прозой (жанр interface): там, где у строки нет типа слота
   level_overrides: {}
   analyzers:
     marker_density: {enabled: true, min_words: 40, min_count: 2, warn_per_100w: 1.5, error_per_100w: 4.0, allow_error: true, level: warning, provisional: true}
@@ -50,6 +56,20 @@ defaults:
     eyebrow_rate: {enabled: true, level: warning}
     lists_of_three: {enabled: true, min_lists: 2, level: info}
     numbers_without_fact: {enabled: true, level_known_empty: warning, level_unknown: info, check_quotes: false}
+    cards_uniform: {enabled: true, min_cards: 3, cv_min: 0.25, level: info, provisional: true}   # COPY-C-18
+    address_mix: {enabled: true, level: warning}          # «ты» и «вы» в одном тексте (ux 07/03 §1.1)
+    # межстрочные проверки ux 07/06 §7.3 — жанр interface (реестр текстов, роль строки)
+    ui_action_name: {enabled: false, level: warning, level_banned: error}
+    ui_object_alias: {enabled: false, level: error}
+    ui_group_form: {enabled: false, level: warning}
+    ui_duplicate: {enabled: false, level: warning}
+    ui_maxlen: {enabled: false, level: error}
+    ui_role_length: {enabled: false, level: warning}
+    ui_formats: {enabled: false, level: warning}
+    ui_icu: {enabled: false, level: error}
+    yo_mix: {enabled: false, level: warning}
+    us_uk: {enabled: false, level: warning}
+    reading_level: {enabled: false, level: info, min_words: 30, syllables_max: 2.5}
 
 profiles:
   landing:
@@ -59,7 +79,6 @@ profiles:
       STR: {enabled: true, max_level: warning}
     level_overrides:
       ru-syn-sales-question: info
-      ru-syn-chopped: warning
     analyzers:
       lists_of_three: {enabled: false}          # три карточки фич — норма раскладки (PLAN.md, «Жанры»)
       questions: {warn_per_100w: 1.5}
@@ -130,3 +149,43 @@ profiles:
       concreteness: {min_words: 40, min_per_100w: 1.0}
       lists_of_three: {enabled: false}
       eyebrow_rate: {enabled: false}
+  interface:
+    genre: interface
+    description: "Тексты интерфейса: кабинет, приложение, бот, транзакционные письма, СМС, push — строки с ролью ux 07/06 §7.2; правила ux с уровнями канона без поправок сайта"
+    groups:                                   # лексика, синтаксис, тон, маркетинг и структура сайта — не для строк продукта:
+      LEX: {enabled: false}                   # их нормы у интерфейса — словарь ux 07/06 по ролям
+      SYN: {enabled: false}
+      TON: {enabled: false}
+      MKT: {enabled: false}
+      STR: {enabled: false}
+    prose_roles: [body, help, email]          # проза интерфейса: тире, уровень чтения
+    level_overrides:
+      typo-double-space: error                # строки пробелов ux 07/06 §6.5 — правила набора H, в интерфейсе — запрет
+      typo-space-before-punct: error
+      typo-no-space-after-punct: error
+      "COPY-L-*": "off"                       # право рекламы — страницы сайта и claims_check.py
+    analyzers:
+      marker_density: {enabled: false}        # плотность маркеров — примета слоп-прозы сайта
+      rhythm: {enabled: false}                # ux 07/06 §6.2: однотипные строки одной длины — достоинство интерфейса
+      paragraph_uniformity: {enabled: false}
+      concreteness: {enabled: false}          # числа в строке — из данных продукта (анализатор форматов)
+      verb_repeat: {enabled: false}
+      not_x_but_y: {enabled: false}
+      questions: {enabled: false}             # вопрос — законная форма заголовка подтверждения
+      triads: {enabled: false}
+      exclamations: {enabled: false}
+      eyebrow_rate: {enabled: false}
+      lists_of_three: {enabled: false}
+      numbers_without_fact: {enabled: false}
+      cards_uniform: {enabled: false}
+      ui_action_name: {enabled: true}
+      ui_object_alias: {enabled: true}
+      ui_group_form: {enabled: true}
+      ui_duplicate: {enabled: true}
+      ui_maxlen: {enabled: true}
+      ui_role_length: {enabled: true}
+      ui_formats: {enabled: true}
+      ui_icu: {enabled: true}
+      yo_mix: {enabled: true}
+      us_uk: {enabled: true}
+      reading_level: {enabled: true}

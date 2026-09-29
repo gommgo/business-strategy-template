@@ -1,17 +1,19 @@
-# copy-slots.yaml — правила текста по типам слотов (text-research, 04-copy-by-block, агент E, волна 2, 2026-09-24).
-# СОБИРАЕТСЯ СКРИПТОМ: python3 99-raw/experiments/E/02-copy-slots/build_copy_slots.py --lengths final
-# Руками не править — правки в 99-raw/experiments/E/02-copy-slots/src-*.yaml и crosswalk.yaml, затем пересборка.
-# Читают: J (copydeck.py validate: length.{ru,en}.{words,chars}.{min,max}, fact_required, section_roles, genre),
-# I (промты по слотам), F (образцы строк по slot_type), G (мета и FAQ — ссылкой), creative (длины строк в макете).
-# Длины — D thresholds.yaml v2 (03-corpus-measured/thresholds.yaml → genres.<жанр>.slots, 03-thresholds-by-genre.md §4; лидеры, выборка «marketing» = лендинги + страницы сайта; сообщение оркестратора 2026-09-24).
+# copy-slots.yaml — правила текста по типам слотов: назначение, роли секций, длины RU и EN, структура, формулы,
+# запреты, роль ux и жанры для линтера, нужен ли факт, юридические правила, примеры «плохо / хорошо». Файл — источник
+# правды и правится руками; id типа слота — id слота вида text словаря site (../site/02-site-types/vocabulary.yaml).
+# Читают: copydeck.py validate (length.{ru,en}.{words,chars}.{min,max}, fact_required, section_roles, genre),
+# copy_lint.py (ux_role, genres, lint_as), промты по слотам, образцы строк голоса, длины строк в макете (creative).
+# Слот site без своих правил держит lint_as — тип, правилами которого его проверяет линтер, и rules_owner — владельца
+# правил; длины таких слотов даст замер пилотов.
+# Длины — замер корпуса: 03-corpus-measured/thresholds.yaml → genres.<жанр>.slots (03-thresholds-by-genre.md §4;
+# лидеры, выборка «marketing» = лендинги + страницы сайта).
 
 copy_slots_version: 1
 date: '2026-09-24'
 status: draft
 owner: text-research · 04-copy-by-block · E (волна 2)
-description: "Правила текста по типам слотов (slot_type): назначение, роли секций, длины RU и EN по замеру D, структура, формулы A, запреты, профиль линтера C, нужен ли факт B2, юридические правила H, примеры «плохо / хорошо» (ai-self, проверены claims_check.py и copy_lint.py). Ключ — slot_type; site_slot — id слота site после S1."
+description: "Правила текста по типам слотов (slot_type): назначение, роли секций, длины RU и EN по замеру D, структура, формулы A, запреты, профиль линтера C, нужен ли факт B2, юридические правила H, примеры «плохо / хорошо» (ai-self, проверены claims_check.py и copy_lint.py). Ключ — slot_type: id слота вида text словаря site."
 doc: "04-copy-by-block/01-hero-and-cta.md, 02-section-blocks.md, 03-page-types.md, 04-form-emails-notifications.md"
-build: "python3 99-raw/experiments/E/02-copy-slots/build_copy_slots.py --lengths final"
 lengths_source: "D thresholds.yaml v2 (03-corpus-measured/thresholds.yaml → genres.<жанр>.slots, 03-thresholds-by-genre.md §4; лидеры, выборка «marketing» = лендинги + страницы сайта; сообщение оркестратора 2026-09-24)"
 length_rule: "min = floor(p10 лидеров), target = round(p50), max = ceil(p90); RU — в знаках (primary: chars), EN — в словах; hard_* — грубый выход D (error_low/high); provisional — n < 12 страниц лидеров или лидеры + средний рынок; длина — сигнал (warning/info), не ворота: вне диапазона на 10 страницах лидеров 52 % — ошибки разметки, 47 % — законные формы (опыт E/01)"
 fact_required_values:
@@ -19,7 +21,7 @@ fact_required_values:
   if-claim: "факт нужен, если в тексте число, имя, дата, цитата, рейтинг, цена, гарантия, превосходная степень"
   never: "текст без утверждений (кнопка-навигация, пункт меню)"
 examples_rule: "RU и EN, метка ai-self; факты — 02-strategy-messaging/examples/facts-*.yaml (otves, kvarts) и 99-raw/experiments/E/facts-demo-saas-okoshko.yaml (okoshko, ДЕМО); проверка — 99-raw/experiments/E/02-copy-slots/test_examples.py (claims_check.py → copy_lint.py)"
-vocabulary: "99-raw/notes/temp-vocabulary-v0.yaml (63 slot_type) + предложения E (proposal: true)"
+vocabulary: "../site/02-site-types/vocabulary.yaml (слоты вида text; id типа слота = id слота site)"
 renames: {}
 proposals: [promise, stat-source, price-old, spec-row, image-caption, announcement]
 composites:
@@ -39,10 +41,9 @@ composites:
     check: "сумма слов слотов первой секции; превышение — warning (длинный подзаголовок сокращает остальное)"
 slot_types:
 - id: eyebrow
-  site_slot: ''
   name: Надзаголовок (над H1 или H2)
   purpose: "Бирка над заголовком: категория, сегмент, место и дата события, имя бренда для product-aware — снимает подробности с основной строки заголовка."
-  section_roles: [hero, benefits, how-it-works, case-studies, pricing, event-program, faq]
+  section_roles: [hero, benefits, how-it-works, case-studies, pricing, event-program, faq, audience, story]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
@@ -106,10 +107,9 @@ slot_types:
   - taste SKILL.md (EYEBROW RESTRAINT)
   date: '2026-09-24'
 - id: headline
-  site_slot: ''
   name: Заголовок первого экрана (H1)
   purpose: "Что это и чем ценно для этого посетителя; тип задаёт уровень осведомлённости (hero_approach B1): сделка, продукт с превосходством, решение против альтернатив, узнаваемая ситуация, идентичность."
-  section_roles: [hero]
+  section_roles: [hero, story, not-found]
   genres: [landing, site-page]
   genre: landing
   ux_role: title
@@ -194,7 +194,6 @@ slot_types:
   - "[V:F_urkVueszI 07:07]"
   date: '2026-09-24'
 - id: subheadline
-  site_slot: ''
   name: "Подзаголовок, лид первого экрана"
   purpose: "Второй слой первого экрана: механизм или результат и чем это подтверждено; раскрывает заголовок, а не повторяет его."
   section_roles: [hero]
@@ -275,10 +274,9 @@ slot_types:
   - "[V:F_urkVueszI 07:07]"
   date: '2026-09-24'
 - id: hero-proof
-  site_slot: ''
   name: Микродоказательство в первом экране
   purpose: "Одна строка доказательства рядом с кнопкой или заголовком: рейтинг площадки с датой, счётчик с объектом счёта и датой, гарантия по договору, узнаваемый клиент с разрешением."
-  section_roles: [hero]
+  section_roles: [hero, cross-sell]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
@@ -346,10 +344,9 @@ slot_types:
   - taste SKILL.md
   date: '2026-09-24'
 - id: cta-label
-  site_slot: ''
   name: Подпись главной кнопки
   purpose: "Называет, что случится сразу после нажатия, или повторяет ценность заголовка; одна задача — получить нажатие."
-  section_roles: [hero, cta-band, final-cta, pricing, lead-form]
+  section_roles: [hero, cta-band, final-cta, pricing, lead-form, audience, story, services, offer, promo, not-found]
   genres: [landing, site-page, email-form]
   genre: landing
   ux_role: action
@@ -416,10 +413,9 @@ slot_types:
   - 06-anti-slop/01 §8 (COPY-M-MKT-07)
   date: '2026-09-24'
 - id: cta-secondary-label
-  site_slot: ''
   name: Подпись второстепенной кнопки или ссылки
   purpose: "Путь для не готового действовать: посмотреть пример, цены, программу, переслать смету — вторая цель страницы (B1 goal.secondary_goal)."
-  section_roles: [hero, pricing, final-cta, case-studies]
+  section_roles: [hero, pricing, final-cta, case-studies, story, confirmation]
   genres: [landing, site-page]
   genre: landing
   ux_role: link
@@ -477,10 +473,9 @@ slot_types:
   - 03-corpus-measured/02 §7
   date: '2026-09-24'
 - id: cta-note
-  site_slot: ''
   name: "Строка у кнопки: снятие риска, что будет дальше, цена и время"
   purpose: "Отвечает на страх «закрытой двери»: что будет после нажатия, сколько стоит, что не обязывает; снимает блокер до главного призыва."
-  section_roles: [hero, cta-band, final-cta, pricing, lead-form]
+  section_roles: [hero, cta-band, final-cta, pricing, lead-form, offer]
   genres: [landing, site-page]
   genre: landing
   ux_role: hint
@@ -539,7 +534,6 @@ slot_types:
   - ux 06/04 §8.1
   date: '2026-09-24'
 - id: promise
-  site_slot: ''
   name: Обещание первого экрана (product.goal kimi)
   purpose: "Одна фраза главного обещания для исполнителя (K3 ставит её в первый экран); сверяется с фактами как текст страницы."
   proposal: true
@@ -590,10 +584,9 @@ slot_types:
   - ../kimi-research/07-brief-handoff/templates/TASK.md
   date: '2026-09-24'
 - id: section-title
-  site_slot: ''
   name: Заголовок секции (H2)
   purpose: "Ответ на вопрос посетителя, который закрывает секция (sections[].question иерархии B1); заголовки секций вместе пересказывают страницу."
-  section_roles: [problem, solution, benefits, how-it-works, case-studies, testimonials, proof-stats, comparison, pricing, guarantee, objections, faq, about, team, final-cta]
+  section_roles: [problem, solution, benefits, how-it-works, case-studies, testimonials, proof-stats, comparison, pricing, guarantee, objections, faq, about, team, final-cta, specs, audience, story, services, offer, promo, awards-press, cross-sell, related, seo-text]
   genres: [landing, site-page, article]
   genre: landing
   ux_role: section-title
@@ -658,10 +651,9 @@ slot_types:
   - 03-corpus-measured/03 §4
   date: '2026-09-24'
 - id: section-lead
-  site_slot: ''
   name: Лид секции
   purpose: "1–2 предложения под заголовком секции: сообщение секции (message иерархии) с фактом; дальше — карточки, шаги или тело."
-  section_roles: [problem, solution, benefits, how-it-works, case-studies, pricing, guarantee, about, integrations]
+  section_roles: [problem, solution, benefits, how-it-works, case-studies, pricing, guarantee, about, integrations, audience, story, services, offer, promo, cross-sell]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
@@ -722,10 +714,9 @@ slot_types:
   - 03-corpus-measured/03 §4
   date: '2026-09-24'
 - id: body
-  site_slot: ''
   name: "Проза блока: абзацы «о нас», история, описание услуги"
   purpose: "Абзац, который объясняет механизм, историю или условия так, чтобы посетитель сам сделал вывод («не выводы, а то, из чего их делают»)."
-  section_roles: [about, solution, how-it-works, problem, team, guarantee]
+  section_roles: [about, solution, how-it-works, problem, team, guarantee, story, offer, seo-text, not-found]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
@@ -778,10 +769,9 @@ slot_types:
   - 06-anti-slop/01 §13
   date: '2026-09-24'
 - id: list-item
-  site_slot: ''
   name: Пункт списка
   purpose: "Состав услуги или тарифа, что входит, для кого, условия — по одной мысли на пункт."
-  section_roles: [benefits, pricing, how-it-works, about, event-program]
+  section_roles: [benefits, pricing, how-it-works, about, event-program, story, seo-text]
   genres: [landing, site-page, article]
   genre: landing
   ux_role: marketing
@@ -842,7 +832,6 @@ slot_types:
   - 08-russian-legal-typography/01 §4.2
   date: '2026-09-24'
 - id: card-title
-  site_slot: ''
   name: "Заголовок карточки (фича, выгода, услуга)"
   purpose: "Короткое обещание или название возможности; первая фраза карточки объясняет его механизмом."
   section_roles: [benefits, solution, how-it-works, pricing, team, portfolio, integrations]
@@ -905,7 +894,6 @@ slot_types:
   - 03-corpus-measured/03 §4
   date: '2026-09-24'
 - id: card-body
-  site_slot: ''
   name: Текст карточки
   purpose: "Механизм или факт, который объясняет заголовок карточки, и что это меняет для клиента."
   section_roles: [benefits, solution, how-it-works, team, integrations, portfolio]
@@ -984,7 +972,6 @@ slot_types:
   - 99-raw/experiments/E/01-slot-lengths
   date: '2026-09-24'
 - id: step-title
-  site_slot: ''
   name: Заголовок шага «как это работает»
   purpose: "Название шага с точки зрения клиента: что происходит и кто действует."
   section_roles: [how-it-works]
@@ -1032,7 +1019,6 @@ slot_types:
   - 02-strategy-messaging/02 §2.4 (how-it-works)
   date: '2026-09-24'
 - id: step-body
-  site_slot: ''
   name: Текст шага
   purpose: "Что происходит на шаге, сколько длится, что получает клиент и что его защищает."
   section_roles: [how-it-works]
@@ -1079,7 +1065,6 @@ slot_types:
   - "06-anti-slop/01 §11 (легко, быстро)"
   date: '2026-09-24'
 - id: stat-value
-  site_slot: ''
   name: Число в ряду цифр
   purpose: "Значение с единицей; объект счёта — в подписи (stat-label), источник и дата — в stat-source."
   section_roles: [proof-stats, hero, about, case-studies]
@@ -1144,7 +1129,6 @@ slot_types:
   - Hallmark component-cookbook T4
   date: '2026-09-24'
 - id: stat-label
-  site_slot: ''
   name: Подпись числа
   purpose: "Объект счёта, период или дата; при нехватке места — источник выносится в stat-source."
   section_roles: [proof-stats, hero, about, case-studies]
@@ -1219,7 +1203,6 @@ slot_types:
   - 99-raw/experiments/E/01-slot-lengths
   date: '2026-09-24'
 - id: logos-caption
-  site_slot: ''
   name: Подпись ряда логотипов («Нам доверяют»)
   purpose: "Называет связь компаний с продуктом (клиенты по договору, интеграции, партнёры) — ряд логотипов без подписи читается как «нам доверяют все»."
   section_roles: [proof-logos, integrations, hero]
@@ -1271,7 +1254,6 @@ slot_types:
   sources: [02-strategy-messaging/03 §1.5, PLAN «Поправки к правилам соседей» (ux 07/06 §5.2), Hallmark component-cookbook T2]
   date: '2026-09-24'
 - id: testimonial-quote
-  site_slot: ''
   name: Текст отзыва
   purpose: "Слова клиента о его ситуации и результате — дословно из facts.yaml (verbatim), с разрешением автора."
   section_roles: [testimonials, case-studies, hero]
@@ -1346,7 +1328,6 @@ slot_types:
   - 03-corpus-measured/03 §4
   date: '2026-09-24'
 - id: testimonial-attribution
-  site_slot: ''
   name: "Подпись отзыва: имя, должность, компания"
   purpose: "Кто сказал и в какой ситуации — ровно в объёме разрешения (permission.shows); связь с компанией раскрыта рядом."
   section_roles: [testimonials, case-studies, hero]
@@ -1410,7 +1391,6 @@ slot_types:
   sources: [02-strategy-messaging/03 §5.3, Hallmark copy.md (stock placeholder names)]
   date: '2026-09-24'
 - id: case-title
-  site_slot: ''
   name: Заголовок кейса
   purpose: "Ситуация клиента и результат числом — так, чтобы похожий клиент узнал себя."
   section_roles: [case-studies]
@@ -1462,7 +1442,6 @@ slot_types:
   - 02-strategy-messaging/03 §1.1 (case)
   date: '2026-09-24'
 - id: case-summary
-  site_slot: ''
   name: "Кейс: ситуация, задача, решение"
   purpose: "2–4 предложения: что было, какая задача, что сделали; результат — в case-result."
   section_roles: [case-studies]
@@ -1509,7 +1488,6 @@ slot_types:
   - 02-strategy-messaging/03 §5.4
   date: '2026-09-24'
 - id: case-result
-  site_slot: ''
   name: Результат кейса (число из фактов)
   purpose: "Результат клиента числом с базой и сроком — и рядом обычный результат (B2 §5.4)."
   section_roles: [case-studies, hero]
@@ -1555,7 +1533,6 @@ slot_types:
   - 08-russian-legal-typography/01 §7
   date: '2026-09-24'
 - id: pricing-plan-name
-  site_slot: ''
   name: Название тарифа
   purpose: "Имя тарифа говорит, для кого он или какого объёма: «Мастер», «Салон», «Сеть» — а не ступени «Базовый / Стандарт / Премиум»."
   section_roles: [pricing]
@@ -1617,7 +1594,6 @@ slot_types:
   sources: [03-corpus-measured/02 §2.1, ux 06/04 §8.2]
   date: '2026-09-24'
 - id: pricing-plan-summary
-  site_slot: ''
   name: "Кому подходит тариф, описание"
   purpose: "Для кого тариф и чем он отличается от соседнего — одной фразой, из которой посетитель выбирает сам."
   section_roles: [pricing]
@@ -1679,10 +1655,9 @@ slot_types:
   sources: [ux 06/04 §8.2, 06-anti-slop/01 §8]
   date: '2026-09-24'
 - id: pricing-price
-  site_slot: ''
   name: Цена
   purpose: "Сколько стоит — в рублях, с единицей и периодом; «от» — с составом рядом."
-  section_roles: [pricing, hero]
+  section_roles: [pricing, hero, offer, promo]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
@@ -1748,10 +1723,9 @@ slot_types:
   - ux 06/04 §8.1 п. 13
   date: '2026-09-24'
 - id: pricing-price-note
-  site_slot: ''
   name: "Условия цены: «от», период, скидка, пробный период"
   purpose: "Условия, без которых цена или скидка вводят в заблуждение: что входит, от чего зависит итог, срок и условия акции, что после пробного периода."
-  section_roles: [pricing, hero, final-cta]
+  section_roles: [pricing, hero, final-cta, services, offer, promo]
   genres: [landing, site-page]
   genre: landing
   ux_role: hint
@@ -1814,7 +1788,6 @@ slot_types:
   sources: [08-russian-legal-typography/01 §4.1–4.3, ux 06/04 §8.1, 99-raw/experiments/E/01-slot-lengths]
   date: '2026-09-24'
 - id: pricing-feature
-  site_slot: ''
   name: Пункт состава тарифа
   purpose: "Что входит в тариф и что стоит отдельно — одинаковым набором строк у всех тарифов."
   section_roles: [pricing]
@@ -1876,10 +1849,9 @@ slot_types:
   sources: [ux 06/04 §8.2, ux 07/01 §5.4]
   date: '2026-09-24'
 - id: badge
-  site_slot: ''
   name: "Бейдж на карточке («Популярный», «Новое»)"
   purpose: "Метка с проверяемым основанием: условие скидки, новизна с датой, доля выбора по данным."
-  section_roles: [pricing, benefits, portfolio]
+  section_roles: [pricing, benefits, portfolio, offer]
   genres: [landing, site-page]
   genre: landing
   ux_role: badge
@@ -1929,10 +1901,9 @@ slot_types:
   - "08-russian-legal-typography/01 §3.1, §4.1"
   date: '2026-09-24'
 - id: guarantee-text
-  site_slot: ''
   name: "Текст гарантии, снятия риска"
   purpose: "На что гарантия, какой срок, что будет, если…, и где это записано — снимает тревогу условием, а не словом «гарантируем»."
-  section_roles: [guarantee, pricing, final-cta, faq]
+  section_roles: [guarantee, pricing, final-cta, faq, offer]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
@@ -1977,7 +1948,6 @@ slot_types:
   sources: [08-russian-legal-typography/01 §5, 02-strategy-messaging/02 §4.4]
   date: '2026-09-24'
 - id: objection-answer
-  site_slot: ''
   name: Ответ на возражение вне FAQ
   purpose: "Снимает блокер до главного призыва: возражение словами клиента → ответ фактом → граница «не подходит, если…»."
   section_roles: [objections, how-it-works, pricing, guarantee, hero]
@@ -2027,7 +1997,6 @@ slot_types:
   - "[V:xQV7HVyAJjc 11:38]"
   date: '2026-09-24'
 - id: comparison-row
-  site_slot: ''
   name: Строка сравнения с альтернативой
   purpose: "Сравнение по подходам (сделать самому, частник, таблица, другой класс решения) по одному критерию — без имён конкурентов, с «когда подходит»."
   section_roles: [comparison]
@@ -2077,7 +2046,6 @@ slot_types:
   - 07-seo-geo-copy/geo-checklist.yaml COPY-GEO-15
   date: '2026-09-24'
 - id: faq-q
-  site_slot: ''
   name: Вопрос FAQ
   purpose: "Вопрос, который клиенты задают до покупки, их словами (voc.yaml, отдел продаж, поиск) — по одному предмету."
   section_roles: [faq]
@@ -2139,7 +2107,6 @@ slot_types:
   sources: [06-anti-slop/01 §8 (COPY-M-MKT-06), 02-strategy-messaging/04 (голос клиента), 07-seo-geo-copy/geo-checklist.yaml COPY-GEO-14]
   date: '2026-09-24'
 - id: faq-a
-  site_slot: ''
   name: Ответ FAQ
   purpose: "Ответ первой фразой (да / нет / число / условие), затем подробность и факт; самодостаточен для выдачи и нейросетей."
   section_roles: [faq]
@@ -2203,7 +2170,6 @@ slot_types:
   sources: [07-seo-geo-copy/geo-checklist.yaml COPY-GEO-14, 02-strategy-messaging/03 §4.2, 03-corpus-measured/03 §4]
   date: '2026-09-24'
 - id: form-title
-  site_slot: ''
   name: Заголовок формы
   purpose: "Что человек получит, отправив форму, — продолжение главной кнопки, а не название процедуры."
   section_roles: [lead-form, final-cta, hero]
@@ -2251,7 +2217,6 @@ slot_types:
   - "[V:F_urkVueszI 14:17] одна задача на элемент"
   date: '2026-09-24'
 - id: form-lead
-  site_slot: ''
   name: "Ценность формы: что получите"
   purpose: "Одна-две фразы: что будет результатом, сколько стоит и сколько займёт; для лид-магнита — объём, состав, автор."
   section_roles: [lead-form, final-cta]
@@ -2304,10 +2269,9 @@ slot_types:
   sources: [ux 05/01 §7.5, 91-videos/digests/gMzwsAWipNo.md, 08-russian-legal-typography/01 §4.1]
   date: '2026-09-24'
 - id: form-next-steps
-  site_slot: ''
   name: Что будет после отправки
   purpose: "Кто, когда и каким каналом ответит, что подготовить — снимает страх «закрытой двери» у формы."
-  section_roles: [lead-form, final-cta]
+  section_roles: [lead-form, final-cta, confirmation]
   genres: [landing, site-page, email-form]
   genre: landing
   ux_role: hint
@@ -2351,7 +2315,6 @@ slot_types:
   sources: [ux 05/01 §7.5, 02-strategy-messaging/02 §4.3 (закрытая дверь)]
   date: '2026-09-24'
 - id: form-consent
-  site_slot: ''
   name: "Строка о персональных данных, согласие"
   purpose: "Отдельное конкретное согласие на обработку ПДн для ответа на заявку и отдельная необязательная галочка на рекламные письма."
   section_roles: [lead-form, final-cta, footer]
@@ -2407,10 +2370,9 @@ slot_types:
   sources: [08-russian-legal-typography/01 §8.1–8.2, ux 06/04 §8.1, ../ux/07-ux-writing/02-microcopy-by-component.md §3]
   date: '2026-09-24'
 - id: form-success
-  site_slot: ''
   name: Экран или блок «спасибо»
   purpose: "Подтверждает, что заявка принята, говорит, что будет дальше, и даёт вторую цель: что можно сделать сейчас."
-  section_roles: [lead-form]
+  section_roles: [lead-form, confirmation]
   genres: [landing, site-page, email-form]
   genre: landing
   ux_role: inline-message
@@ -2455,7 +2417,6 @@ slot_types:
   sources: [02-strategy-messaging/02 §1.6 (вторая цель), ux 07/02 §8.3, 04-copy-by-block/04 §2]
   date: '2026-09-24'
 - id: nav-label
-  site_slot: ''
   name: Пункт навигации
   purpose: "Называет раздел так, как его ищут: конвенции «Услуги», «Цены», «О компании», «Контакты» на многостраничнике."
   section_roles: [footer]
@@ -2505,7 +2466,6 @@ slot_types:
   sources: [PLAN «Поправки к правилам соседей» (ux 07/06 §3.2), ux 07/02 §12, 06-anti-slop/01 §11]
   date: '2026-09-24'
 - id: footer-tagline
-  site_slot: ''
   name: Строка бренда в подвале
   purpose: "Одна строка о том, что делает компания и для кого, — последняя формулировка категории на странице."
   section_roles: [footer]
@@ -2551,10 +2511,9 @@ slot_types:
   sources: [01-foundations/formulas.yaml (category-statement), 06-anti-slop/01 §8]
   date: '2026-09-24'
 - id: footer-legal
-  site_slot: ''
   name: "Реквизиты, правовые строки подвала"
   purpose: "Сведения о продавце и документы: наименование, ОГРН или ИНН, адрес, оферта, политика ПДн; пометка рекламы и отраслевые оговорки — где требуются."
-  section_roles: [footer, contacts]
+  section_roles: [footer, contacts, legal]
   genres: [landing, site-page]
   genre: landing
   ux_role: caption
@@ -2595,7 +2554,6 @@ slot_types:
   - "02-strategy-messaging/examples/facts-service-renovation.yaml (missing legal-details)"
   date: '2026-09-24'
 - id: meta-title
-  site_slot: ''
   name: "<title>"
   purpose: "Название страницы в выдаче и вкладке: что на странице и чья она; ключевая фраза — в первых 55 знаках."
   rules_owner: "G — 07-seo-geo-copy/meta-rules.yaml (limits.meta-title, правила meta-title-*), 02-seo-pages-articles-meta.md"
@@ -2641,7 +2599,6 @@ slot_types:
   sources: [07-seo-geo-copy/meta-rules.yaml, 03-corpus-measured/03 §5]
   date: '2026-09-24'
 - id: meta-description
-  site_slot: ''
   name: meta description
   purpose: "Сниппет: что получит человек на странице, с фактом; главное — в первых 120 знаках."
   rules_owner: "G — meta-rules.yaml (limits.meta-description, meta-desc-*)"
@@ -2687,7 +2644,6 @@ slot_types:
   sources: [07-seo-geo-copy/meta-rules.yaml, 03-corpus-measured/03 §5]
   date: '2026-09-24'
 - id: og-title
-  site_slot: ''
   name: "og:title"
   purpose: "Заголовок превью ссылки в мессенджерах и соцсетях: как title, но без бренда или короче; не кликбейт."
   rules_owner: "G — meta-rules.yaml (limits.og-title); превью — ai-media 10/01 §7"
@@ -2742,7 +2698,6 @@ slot_types:
   sources: [07-seo-geo-copy/meta-rules.yaml, 03-corpus-measured/03 §5]
   date: '2026-09-24'
 - id: og-description
-  site_slot: ''
   name: "og:description"
   purpose: "Одно предложение превью: что получит человек, открыв ссылку."
   rules_owner: G — meta-rules.yaml (limits.og-description)
@@ -2798,7 +2753,6 @@ slot_types:
   sources: [07-seo-geo-copy/meta-rules.yaml, 08-russian-legal-typography (отчёт H §4 G)]
   date: '2026-09-24'
 - id: og-image-alt
-  site_slot: ''
   name: "og:image:alt"
   purpose: "Что на картинке превью ссылки — для читалок и сервисов без картинок."
   rules_owner: "ai-media — ../ai-media/10-web-integration/01-images-delivery.md §7–8; G — meta-rules.yaml limits.og-image-alt"
@@ -2844,11 +2798,10 @@ slot_types:
   - "../ai-media/10-web-integration/01-images-delivery.md §7–8"
   date: '2026-09-24'
 - id: article-title
-  site_slot: ''
   name: Заголовок статьи (H1)
   purpose: Кто читатель и какую пользу получит; не сильнее содержания.
   rules_owner: "G — 07-seo-geo-copy/02-seo-pages-articles-meta.md; кликбейт — meta-clickbait (G)"
-  section_roles: [article-body]
+  section_roles: [article-body, legal]
   genres: [article]
   genre: article
   ux_role: title
@@ -2910,7 +2863,6 @@ slot_types:
   - 03-corpus-measured/03 §4
   date: '2026-09-24'
 - id: article-lead
-  site_slot: ''
   name: Лид статьи
   purpose: "Кому статья и что он узнает; ответ на главный вопрос — первыми фразами."
   rules_owner: "G — 07-seo-geo-copy/02, 03"
@@ -2974,7 +2926,6 @@ slot_types:
   - 07-seo-geo-copy/02
   date: '2026-09-24'
 - id: article-summary
-  site_slot: ''
   name: «Коротко» в начале статьи
   purpose: "Ответ на вопрос статьи в 40–80 словах с 2–3 фактами — для читателя и для ответов нейросетей."
   rules_owner: "G — geo-checklist.yaml (COPY-GEO-08…10, «коротко» 40–80 слов), 03-geo-copy.md §3"
@@ -3021,7 +2972,6 @@ slot_types:
   sources: [07-seo-geo-copy/geo-checklist.yaml, 07-seo-geo-copy/03-geo-copy.md §3]
   date: '2026-09-24'
 - id: article-heading
-  site_slot: ''
   name: "Подзаголовок статьи (H2, H3)"
   purpose: "Вопрос или тезис раздела — так, как его ищут; разделы по смыслу, не по чанкам для ИИ."
   rules_owner: "G — 07-seo-geo-copy/02, 03 (COPY-GEO-09, -10)"
@@ -3085,7 +3035,6 @@ slot_types:
   - "[V:i4jDc58ofH4]"
   date: '2026-09-24'
 - id: article-paragraph
-  site_slot: ''
   name: Абзац статьи
   purpose: "Одна мысль с фактом или примером из опыта; абзац понятен без соседних."
   rules_owner: G — 07-seo-geo-copy/02; ритм и маркеры — C (профиль article)
@@ -3147,11 +3096,10 @@ slot_types:
   sources: [03-corpus-measured/02 §3, 07-seo-geo-copy/02]
   date: '2026-09-24'
 - id: article-author
-  site_slot: ''
   name: "Автор, его опыт (E-E-A-T)"
   purpose: "Кто пишет и почему ему можно верить: должность, опыт в годах и объектах — только из фактов."
   rules_owner: "G — 07-seo-geo-copy/03 §3.5 (COPY-GEO-05, -19)"
-  section_roles: [article-body]
+  section_roles: [article-body, story]
   genres: [article]
   genre: article
   ux_role: caption
@@ -3195,11 +3143,10 @@ slot_types:
   sources: [07-seo-geo-copy/03-geo-copy.md §3.5, 08-russian-legal-typography/01 §7]
   date: '2026-09-24'
 - id: geo-answer
-  site_slot: ''
   name: Самодостаточный абзац-ответ для цитирования нейросетью
   purpose: "Ответ на один вопрос, понятный без окружения: сущность названа, факт с датой и источником."
   rules_owner: "G — 07-seo-geo-copy/geo-checklist.yaml, geo-rules.yaml, 03-geo-copy.md"
-  section_roles: [faq, about, article-body, pricing]
+  section_roles: [faq, about, article-body, pricing, story, seo-text]
   genres: [geo]
   genre: geo
   ux_role: marketing
@@ -3245,11 +3192,10 @@ slot_types:
   sources: [07-seo-geo-copy/geo-checklist.yaml, 07-seo-geo-copy/03-geo-copy.md §3]
   date: '2026-09-24'
 - id: definition
-  site_slot: ''
   name: Определение термина или сущности
   purpose: "«X — это Y, который Z» одной-двумя фразами: для глоссария, FAQ и ответов нейросетей."
   rules_owner: "G — geo-rules.yaml (geo-definition-form), 03-geo-copy.md §3.6"
-  section_roles: [faq, article-body, about]
+  section_roles: [faq, article-body, about, story, seo-text]
   genres: [geo, article]
   genre: geo
   ux_role: marketing
@@ -3293,7 +3239,6 @@ slot_types:
   sources: [07-seo-geo-copy/geo-rules.yaml, 07-seo-geo-copy/03-geo-copy.md §3.6]
   date: '2026-09-24'
 - id: email-subject
-  site_slot: ''
   name: Тема письма
   purpose: "Одна задача — чтобы письмо открыли и узнали: суть в первых двух словах, обещание темы выполняется в первой строке."
   genres: [email-form]
@@ -3343,7 +3288,6 @@ slot_types:
   - "[V:F_urkVueszI 17:24–22:34]"
   date: '2026-09-24'
 - id: email-preheader
-  site_slot: ''
   name: Прехедер
   purpose: "Строка после темы в списке писем: продолжает тему следующим важным фактом, а не повторяет её."
   genres: [email-form]
@@ -3391,7 +3335,6 @@ slot_types:
   - "[V:F_urkVueszI 17:24]"
   date: '2026-09-24'
 - id: email-heading
-  site_slot: ''
   name: Заголовок письма
   purpose: "Первая строка тела: статус события или вопрос, ради которого письмо; выполняет обещание темы."
   genres: [email-form]
@@ -3435,7 +3378,6 @@ slot_types:
   sources: [ux 07/02 §16.1]
   date: '2026-09-24'
 - id: email-body
-  site_slot: ''
   name: Тело письма
   purpose: "Что произошло, что будет дальше и что сделать сейчас; одно действие — одна кнопка."
   genres: [email-form]
@@ -3487,7 +3429,6 @@ slot_types:
   - 04-copy-by-block/04
   date: '2026-09-24'
 - id: email-cta-label
-  site_slot: ''
   name: Кнопка в письме
   purpose: "Одно действие письма, названное результатом: «Подтвердить адрес», «Посмотреть программу»."
   genres: [email-form]
@@ -3549,7 +3490,6 @@ slot_types:
   - "[V:F_urkVueszI 07:07]"
   date: '2026-09-24'
 - id: email-footer
-  site_slot: ''
   name: "Подвал письма: почему пришло, отписка, реквизиты"
   purpose: "Почему человек получил письмо, как отписаться одним действием, кто отправитель (реквизиты)."
   genres: [email-form]
@@ -3596,11 +3536,10 @@ slot_types:
   - "ux 06/04 §3.8, §8.1"
   date: '2026-09-24'
 - id: image-alt
-  site_slot: ''
   name: alt картинки
   purpose: "Что изображено и зачем картинка на странице — для читалок и поиска; правила доставки — ai-media."
   rules_owner: "ai-media — ../ai-media/10-web-integration/01-images-delivery.md §8"
-  section_roles: [hero, case-studies, team, portfolio, product-demo]
+  section_roles: [hero, case-studies, team, portfolio, product-demo, story]
   genres: [landing, site-page, article]
   genre: landing
   ux_role: alt
@@ -3643,7 +3582,6 @@ slot_types:
   - "../ai-media/10-web-integration/01-images-delivery.md §8"
   date: '2026-09-24'
 - id: in-image-text
-  site_slot: ''
   name: Строка в картинке
   purpose: "Короткая надпись, запечённая в картинку (OG-шаблон, баннер): ≤ 3 строк, ≤ 40 знаков; факты — как в тексте страницы."
   rules_owner: "ai-media — ../ai-media/05-prompting/03-asset-spec-and-dialects.md §7"
@@ -3692,7 +3630,6 @@ slot_types:
   - "../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md §2.1"
   date: '2026-09-24'
 - id: stat-source
-  site_slot: ''
   name: "Источник и дата числа, рейтинга, подборки отзывов"
   purpose: "Короткая строка «кто посчитал и когда» рядом с числом: делает доказательство проверяемым (на живых лендингах источник виден у 25 % доказательных утверждений — B2/04)."
   proposal: true
@@ -3755,13 +3692,12 @@ slot_types:
   - "02-strategy-messaging/facts.schema.yaml (x-vocabulary-proposals)"
   date: '2026-09-24'
 - id: price-old
-  site_slot: ''
   name: Прежняя (зачёркнутая) цена
   purpose: "Цена, по которой товар или услугу реально продавали в указанный период; без такого факта слот не заполняется."
   proposal: true
   proposal_note: "предложение B2, принято E: зачёркнутая «старая» цена — отдельный слот, чтобы use.not_in: [price-old] и правило H COPY-L-PRICE-04 работали"
   lint_as: pricing-price
-  section_roles: [pricing, hero]
+  section_roles: [pricing, hero, offer, promo]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
@@ -3809,7 +3745,6 @@ slot_types:
   - "02-strategy-messaging/examples/facts-kvarts.yaml (price-after-preorder, not_in)"
   date: '2026-09-24'
 - id: spec-row
-  site_slot: ''
   name: "Строка характеристик: параметр — значение"
   purpose: "Измеримое свойство товара или сервиса в табличной форме — для продуктовой страницы и сравнения тарифов."
   proposal: true
@@ -3861,13 +3796,12 @@ slot_types:
   - 99-raw/experiments/E/01-slot-lengths
   date: '2026-09-24'
 - id: image-caption
-  site_slot: ''
   name: Подпись к изображению
   purpose: "Что на фото или скриншоте, где и когда, какая задача клиента — видимая подпись, в отличие от alt."
   proposal: true
   proposal_note: "предложение E (вслед за J: asset_ref image-caption в схеме copy-deck v1): подпись к фото работы, объекта, скриншоту; alt — отдельный слот"
   lint_as: stat-label
-  section_roles: [portfolio, case-studies, product-demo, team]
+  section_roles: [portfolio, case-studies, product-demo, team, story, seo-text]
   genres: [landing, site-page, article]
   genre: landing
   ux_role: caption
@@ -3913,7 +3847,6 @@ slot_types:
   - Hallmark component-cookbook H6
   date: '2026-09-24'
 - id: announcement
-  site_slot: ''
   name: Строка объявления над навигацией
   purpose: "Короткое объявление на всех страницах: акция с датой окончания, событие, важное изменение условий."
   proposal: true
@@ -3964,8 +3897,148 @@ slot_types:
   - "08-russian-legal-typography/01 §4.3, §8.3"
   - ux 06/04 §8.1
   date: '2026-09-24'
+- id: disclaimer
+  name: Юридическая оговорка
+  purpose: "Предупреждение или оговорка у утверждения (противопоказания, «не оферта», условия)"
+  section_roles: [case-studies, pricing, services, offer, comparison, promo, lead-form]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: caption
+  lint_as: footer-legal
+  rules_owner: "H — 08-russian-legal-typography (оговорки у утверждений: claims-rules.yaml, 01-advertising-law-claims.md)"
+  fact_required: if-claim
+  sources:
+  - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
+  - "../site/04-blocks/blocks.yaml#text_slot_defaults (класс факта)"
+- id: ad-marking
+  name: Маркировка рекламы
+  purpose: "«Реклама», рекламодатель, токен erid у рекламного блока (38-ФЗ ст. 18.1 — I)"
+  section_roles: [proof-logos, integrations, promo, related]
+  genres: [landing, site-page, email-form]
+  genre: landing
+  ux_role: caption
+  lint_as: footer-legal
+  rules_owner: "H — 08-russian-legal-typography (маркировка рекламы, 38-ФЗ ст. 18.1; строки права — site legal-requirements.yaml)"
+  fact_required: always
+  sources:
+  - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
+  - "../site/04-blocks/blocks.yaml#text_slot_defaults (класс факта)"
+- id: cookie-text
+  name: Текст баннера cookie
+  purpose: "Что за cookie и зачем; кнопки выбора (право — I)"
+  section_roles: [utility]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: checkbox-label
+  lint_as: form-consent
+  rules_owner: "H — 08-russian-legal-typography (текст согласия; право — site legal-requirements.yaml)"
+  fact_required: never
+  sources:
+  - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
+  - "../site/04-blocks/blocks.yaml#text_slot_defaults (класс факта)"
+- id: article-date
+  name: Дата статьи
+  purpose: "Дата публикации и обновления"
+  section_roles: [article-body, legal]
+  genres: [article]
+  genre: article
+  ux_role: caption
+  lint_as: article-author
+  rules_owner: "G — 07-seo-geo-copy/03-geo-copy.md (дата публикации и обновления статьи)"
+  fact_required: always
+  sources:
+  - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
+  - "../site/04-blocks/blocks.yaml#text_slot_defaults (класс факта)"
+- id: article-sources
+  name: Источники статьи
+  purpose: "Список источников и ссылок"
+  section_roles: [article-body]
+  genres: [article]
+  genre: article
+  ux_role: marketing
+  lint_as: list-item
+  rules_owner: "G — 07-seo-geo-copy/03-geo-copy.md (источники статьи)"
+  fact_required: always
+  sources:
+  - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
+  - "../site/04-blocks/blocks.yaml#text_slot_defaults (класс факта)"
+- id: event-meta
+  name: Дата, время, место события
+  purpose: "Строка «когда, где, формат» мероприятия или старта курса"
+  section_roles: [event-program]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: hint
+  lint_as: cta-note
+  rules_owner: "E — 04-copy-by-block (строка «когда, где, формат» события)"
+  fact_required: always
+  sources:
+  - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
+  - "../site/04-blocks/blocks.yaml#text_slot_defaults (класс факта)"
+- id: quiz-question
+  name: Вопрос квиза
+  purpose: "Вопрос шага квиза"
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: section-title
+  lint_as: faq-q
+  rules_owner: "E — 04-copy-by-block (квиз)"
+  fact_required: never
+  sources:
+  - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
+  - "../site/04-blocks/blocks.yaml#text_slot_defaults (класс факта)"
+- id: quiz-option
+  name: Вариант ответа квиза
+  purpose: "Подпись варианта ответа"
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: marketing
+  lint_as: list-item
+  rules_owner: "E — 04-copy-by-block (квиз)"
+  fact_required: never
+  sources:
+  - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
+  - "../site/04-blocks/blocks.yaml#text_slot_defaults (класс факта)"
+- id: result-summary
+  name: Итог квиза или калькулятора
+  purpose: "Результат расчёта или подбора и что дальше"
+  section_roles: [hero, product-demo, lead-form, pricing, confirmation]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: inline-message
+  lint_as: form-success
+  rules_owner: "E — 04-copy-by-block/04-form-emails-notifications.md (итог квиза или калькулятора)"
+  fact_required: if-claim
+  sources:
+  - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
+  - "../site/04-blocks/blocks.yaml#text_slot_defaults (класс факта)"
+- id: contact-info
+  name: Контакты текстом
+  purpose: "Адрес, часы работы, телефон как текст"
+  section_roles: [lead-form, final-cta, contacts, event-program, footer, utility]
+  genres: [landing, site-page]
+  genre: landing
+  ux_role: caption
+  lint_as: footer-legal
+  rules_owner: "E — 04-copy-by-block (контакты текстом); набор телефона и адреса — typography-rules.yaml"
+  fact_required: always
+  sources:
+  - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
+  - "../site/04-blocks/blocks.yaml#text_slot_defaults (класс факта)"
+- id: email-sender-name
+  name: Имя отправителя
+  purpose: "Бренд или человек из бренда; без темы, призыва, имени получателя и эмодзи (text 04/04 §3.3)"
+  genres: [email-form]
+  genre: email-form
+  ux_role: email
+  lint_as: email-subject
+  rules_owner: "E — 04-copy-by-block/04-form-emails-notifications.md §3.3 (имя отправителя)"
+  fact_required: never
+  sources:
+  - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
+  - "../site/04-blocks/blocks.yaml#text_slot_defaults (класс факта)"
 crosswalk:
-  note: "Соответствие slot_type → слоты ассетов ai-media, элементы copy.md kimi, архетипы секций Hallmark. site_slot (id слота blocks.yaml site) — заполнить после S1."
+  note: "Соответствие slot_type → слоты ассетов ai-media, элементы copy.md kimi, архетипы секций Hallmark."
   ai_media_asset_slots:
     source: "../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md §2.1 (19 слотов ассетов)"
     map:

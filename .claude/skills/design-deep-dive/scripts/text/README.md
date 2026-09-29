@@ -70,10 +70,9 @@ Xe без CUDA; Python 3.13, Node 24.21 (`node` из PATH или DDD_NODE), Play
 
 | Утилита | Назначение | Агент · волна |
 |---|---|---|
-| `copy_lint.py` | линтер маркетинговых текстов: правила RU/EN из `../../kb/text/06-anti-slop/lexicon/` с наследованием `ux 07/06`, профили жанров (`landing`, `site-page`, `article`, `meta`, `geo`, `email-form`), роли слотов, анализаторы ритма, повторов, конкретики и плотностей по `../../kb/text/03-corpus-measured/thresholds.yaml`; JSON и Markdown; `--selftest` | C · 1 (пороги — D; правила мета — G; набор — H) |
-| конвертер словарей ux → YAML (имя выбирает C) | таблицы `ux 07/06` §1–§6 → `06-anti-slop/lexicon/*.yaml` с `source` | C · 1 |
-| `copy_extract.py` | страница → структурированный текст: секции, hero, CTA, отзывы, FAQ, мета, OG, текст JSON-LD | D · 1 |
-| `copy_metrics.py` | метрики корпуса (длины, ритм, конкретика, плотности, повторы, читаемость) → `measurements.tsv`; функции для линтера и оценки | D · 1 |
+| `copy_lint.py` | линтер текстов по жанру и роли строки: жанры сайта и `interface` (реестр `texts.md`, роль — вход), правила из `../../kb/text/06-anti-slop/lexicon/` со словарём ux 07/06, профили, межстрочные проверки ux 07/06 §7.3; JSON и Markdown; `--selftest` | раздел ниже |
+| `ux_dict_to_yaml.py` | ux 07/06 §1–§6 и ux 07/01 §12 → производный `../../kb/text/06-anti-slop/lexicon/ux-07-06.yaml`; `--check`, `--selftest` | раздел ниже |
+| `copy_extract.py` | страница → структурированный текст по слотам: секции, hero, CTA, отзывы, FAQ, мета, OG, текст JSON-LD | раздел ниже |
 | `claims_check.py` | сверка copy deck, `pages/<page-id>/copy.md` входа холста или страницы с `facts.yaml`: числа (и словами), имена, даты, цитаты, логотипы, рейтинги, цены, гарантии, `never_claim`, места `use`, демо-данные, `[PLACEHOLDER]`; правовые правила из `../../kb/text/08-russian-legal-typography/claims-rules.yaml` | раздел ниже |
 | `copydeck.py` | каркас из плана страницы, `validate`, `claims`, `lint`, `check`, выбор вариантов, `approve`, выгрузка `pages/<page-id>/copy.md` и `<вход>/facts.md` во вход холста, приём правок текста с холста, `verify-page` | раздел ниже |
 | `before_after_build.py` (адаптация) | `../../kb/text/10-templates-recipes/before-after.tsv` из таблиц «было / стало» базы | J · 3 |
@@ -127,66 +126,87 @@ Xe без CUDA; Python 3.13, Node 24.21 (`node` из PATH или DDD_NODE), Play
 не служебные заметки); `inventory` на Markdown переоценивает число утверждений (цены опций, нумерация) и плохо видит
 источники в картинках и сносках — для корпуса нужен разбор DOM (`copy_extract.py`).
 
-## `copy_lint.py` и `ux_dict_to_yaml.py` — линтер маркетинговых текстов RU/EN (C, волна 1, 2026-09-24)
+## `copy_lint.py` и `ux_dict_to_yaml.py` — линтер текстов по жанру и роли строки
 
-**0.9.3 — правка оркестратора (2026-09-24, 10:25).** Загрузчик правил: ошибка во внешнем файле (G, H и последующие —
-`profiles.yaml` → `external_rules`, `--rules`) больше не роняет линтер целиком: файл пропускается, в `notes` результата и
-в stderr — «ошибка во внешнем файле правил, файл пропущен: <путь>: <причина>»; повтор id во внешнем файле — так же.
-Ошибка в собственных словарях `../../kb/text/06-anti-slop/lexicon/` по-прежнему останавливает запуск. Правила и метрики не менялись:
-результаты 0.9.2 и 0.9.3 на одних и тех же файлах правил совпадают. Проверено: `--selftest` OK; сломанный YAML и файл с
-повтором id — пропуск с заметкой, находки остальных правил на месте. Причина — 10:05 `--selftest` падал из-за ошибки YAML
-в `../../kb/text/07-seo-geo-copy/geo-rules.yaml` (отчёт H §3).
+Исполнимая реализация формата ux 07/06 §7 с жанровыми профилями. Спецификация —
+`../../kb/text/06-anti-slop/02-linter-spec-and-profiles.md`, каталог маркеров —
+`../../kb/text/06-anti-slop/01-text-slop-markers-by-genre.md`, правила — `../../kb/text/06-anti-slop/lexicon/*.yaml` (свои
+словари и производный словарь ux `ux-07-06.yaml`), профили жанров — `../../kb/text/06-anti-slop/profiles.yaml`, пороги жанров
+сайта по замеру корпуса — `../../kb/text/03-corpus-measured/thresholds.yaml` (подхватываются сами), внешние правила мета,
+GEO, права и набора — `profiles.yaml → external_rules`. Id типов слотов и страниц — словарь site
+`../../kb/site/02-site-types/vocabulary.yaml`; роль ux, жанры и `lint_as` типа слота —
+`../../kb/text/04-copy-by-block/copy-slots.yaml` (слот без своих правил проверяется правилами типа `lint_as`).
 
-**0.9.3, вторая правка оркестратора (2026-09-24, 10:50).** Пороги по языку: `resolve_profile` сливает поверх общих
-`genres.<жанр>.analyzers` блок `genres.<жанр>.analyzers_by_lang.<ru|en>` из `../../kb/text/03-corpus-measured/thresholds.yaml` (D2);
-язык документа определяется до выбора профиля; в JSON-результате `thresholds.by_lang` показывает, какой язык применён.
-Причина — D2 (`03-corpus-measured/03` §3): объединённый порог тире давал warning 23 % лидеров RU против 8 % по своему.
-Проверено: `--selftest` OK; на 118 лендингах корпуса (Markdown страниц) доля `an-dash-density` (уровень info в профиле
-C) — ИИ K3 29 %, sulat 56 %, лидеры RU и EN 0 % — и с языковыми порогами, и без них (на Markdown-версиях страниц
-разница не проявилась; D2 мерил по слотам JSON — `99-raw/experiments/D/03-measure/validation_by_lang.tsv`).
+**Жанры.** Шесть жанров сайта — `landing`, `site-page`, `article`, `meta`, `geo`, `email-form`; жанр copy deck — `genre`
+типа страницы в словаре site. `interface` — тексты продукта за входом: кабинет, приложение, бот, транзакционные письма,
+СМС, push. В нём правила ux 07/06 действуют с уровнями канона: поправки сайта — `overrides` с полем `genres` в
+`../../kb/text/06-anti-slop/lexicon/marketing-role.yaml` (без поля — жанры сайта); из словарей text — артефакты, данные и
+набор (пробелы у знаков препинания — error), право рекламы выключено; проза — роли `body`, `help`, `email`.
 
+**Роль строки — вход.** Ключ `--role`, поле `role` строки реестра и короткой формы copy deck, роль части компонента
+(`--component`, поле `component`; `../../kb/common/components.yaml#text_roles`: «Field.Error» → `error`). Закрытый список —
+ux 07/06 §7.2 и `body` (раздел `roles` производного словаря) и внутренняя `meta` мета-полей. Неизвестная роль, тип слота или
+часть компонента, роль не из ролей части — ошибка вызова (код 1); в жанре `interface` строка без роли — `body`.
 
-Исполнимая реализация формата ux 07/06 §7 с жанровыми профилями. Спецификация — `../../kb/text/06-anti-slop/02-linter-spec-and-profiles.md`,
-каталог маркеров — `../../kb/text/06-anti-slop/01-text-slop-markers-by-genre.md`, правила — `06-anti-slop/lexicon/*.yaml` (336: 177
-своих + 159 из ux 07/06), профили — `../../kb/text/06-anti-slop/profiles.yaml`, пороги D — `../../kb/text/03-corpus-measured/thresholds.yaml`
-(подхватываются сами), типы слотов — `../../kb/text/99-raw/notes/temp-vocabulary-v0.yaml`. Версия 0.9.3 (0.9.2 C + две правки оркестратора — выше).
+**Реестр текстов интерфейса** `docs/projects/<slug>/screens/<surface>/texts.md` (форма —
+`../../../../../docs/projects/_template/screens/_template/texts.md`) — вход целиком, жанр `interface`, место находки — строка
+файла. Межстрочные проверки ux 07/06 §7.3:
 
-**Зависимости.** Python 3.10+ и PyYAML — хватает системного `python3`. Морфология (pymorphy3) — по желанию: запуск
-интерпретатором `99-raw/tools/venv-C/bin/python` (uv 0.11.19, Python 3.12.13, 23 МБ). Лицензии venv-C: pymorphy3 2.0.6 —
-MIT; pymorphy3-dicts-ru 2.4.417150.4580142 — код MIT, словарные данные OpenCorpora (лицензия данных не проверена: сайт
-недоступен 2026-09-24); dawg2-python 0.9.0, PyYAML 6.0.3, setuptools 84.0.0 — MIT.
+| Проверка | Что сверяет | Уровень |
+|---|---|---|
+| имя действия по потоку (`an-ui-action-name`, `an-ui-action-synonym`) | строка с `action` называет действие корнем `verb` или `past` словаря `action.md`; синоним из `banned` — в строке действия и в строке объекта действия | warning; синоним — error |
+| синонимы объекта (`an-ui-object-alias`) | слова из `aliases` глоссария `object.md` с падежными окончаниями, во всех строках | error |
+| формы группы (`an-ui-group-form`) | строки одного `group` (меню, статусы объекта) закрывают один вопрос: «что?», «какая?» или действие; нужна морфология | warning |
+| дубли на экране (`an-ui-duplicate`) | одинаковый текст двух строк с содержанием на одном экране (ключ `раздел.экран`) | warning |
+| `maxlen` (`an-ui-maxlen`) | знаков без подстановок ICU больше предела строки | error |
+| длина по роли (`an-ui-role-length`) | слова, предложения и знаки по роли — `ux-07-06.yaml#role_lengths` (ux 07/01 §12); предложение ≤ 15 слов, в пояснениях ≤ 20 | warning |
+| форматы (`an-ui-formats`) | число литералом вместо подстановки; диапазон — тире без пробелов, один знак на продукт; пробел разрядов — неразрывный, один на продукт | warning |
+| ICU (`an-ui-icu`) | скобки, ветка `other`; `=1` вместо `one`, у русского plural — `one`, `few`, `many` | error; ветки — warning |
+| «ё» и «е» (`an-ui-yo-mix`), US и UK (`an-ui-us-uk`) | одно слово в двух написаниях | warning |
+| уровень чтения (`an-reading-level`) | роли `body`, `help`, `email` от 30 слов: слогов в слове больше 2,5; индекс Оборневой (206,835) — в метриках | info |
+
+`object.md` и `action.md` ищутся в папке проекта реестра (`--objects`, `--actions` — другие пути); нет файла — проверка
+пропускается с заметкой. Заголовок против содержимого и стили пары «согласие / отказ» — судья и проверка макета.
 
 | Команда | Что делает |
 |---|---|
-| `python3 copy_lint.py page.md --genre landing` | отчёт для терминала; жанры: `landing`, `site-page`, `article`, `meta`, `geo`, `email-form` |
-| `… deck.yaml --json` | copy deck v0 (`copy_deck.pages[].sections[].slots[]` со `slot_type`, `variants[].text`, `fact_ids`, `lint_allow`) или список `slots: [{slot_type, text}]`; жанр — из `page_type` |
+| `copy_lint.py page.md --genre landing` | отчёт для терминала. Текст целой страницы без copy deck — аудит страницы: пороги замера сняты по слотам, поэтому находки анализаторов не выше warning и вердикт «переписать» — сигнал «проверить»; ворота — copy deck (`summary.mode: page-audit`) |
+| `… deck.yaml --json` | copy deck (`copy_deck.pages[].sections[].slots[]`: `slot_type`, `variants[].text`, `fact_ids`, `lint_allow`) или короткая форма `slots: [{slot_type \| role \| component, text}]`; проверяется выбранный вариант (без выбора — все живые), `--all-variants` — все живые, `status: rejected` — никогда; мета — с `meta.fact_ids` и `lint_allow` страницы |
+| `… docs/projects/<slug>/screens/<surface>/texts.md` | реестр текстов интерфейса: жанр `interface`, межстрочные проверки |
+| `echo "Сохранить" \| … - --genre interface --role action` | одна строка интерфейса; `--component Field.Error` — роль части компонента |
 | `… page.html --genre site-page --md` | HTML: title, мета, OG, заголовки, абзацы, кнопки, отзывы, alt; отчёт Markdown-таблицей |
-| `cat t.txt \| … - --genre article --metrics-only --json` | только метрики (замеры корпуса D); несколько файлов — через пробел |
+| `cat t.txt \| … - --genre article --metrics-only --json` | только метрики |
 | `… deck.yaml --final` | перед публикацией: `[PLACEHOLDER]` — error |
+| `… deck.yaml --voice voice.yaml --customer-words voc.yaml` | профиль голоса: словарь «не говорим» (`voice-avoid-NN`, входит в плотность маркеров), единые написания (`voice-spelling-NN`), обращение для проверки «ты» и «вы»; слова клиента (`customer_words` голоса клиента проекта `docs/projects/<slug>/voc.yaml` или смысла страницы) — их повтор не находка |
 | `… page.md --rules extra.yaml --profiles my.yaml --profile landing-brand --thresholds th.yaml` | внешние правила, свой профиль, свои пороги |
-| `99-raw/tools/venv-C/bin/python copy_lint.py … [--morph on\|off]` | с морфологией: деепричастные хвосты, родительные, пассив, повтор глагола, деление тире точнее |
-| `python3 copy_lint.py --selftest` | загрузка всех словарей, «плохо / хорошо» 160 правил, сценарии, анализаторы, тире, copy deck, отзывы, `lint_allow` |
-| `python3 ux_dict_to_yaml.py [--check]` | ux 07/06 §1–§6 → `../../kb/text/06-anti-slop/lexicon/ux-07-06.yaml`; `--check` — код 3, если ux изменился |
+| `… --morph on\|off` | морфология pymorphy3 (по умолчанию — если установлена): деепричастные хвосты, родительные, пассив, повтор глагола, деление тире, формы групп строк |
+| `copy_lint.py --selftest` | словари и пары «плохо / хорошо», сводка правил по уровням для каждого жанра, жанр `interface` и роли, реестр на фикстурах `cabinet-texts` (0 находок) и `cabinet-texts-defects` (четыре посеянных дефекта), межстрочные анализаторы, калибровки К1–К16 и К28 базы |
+| `ux_dict_to_yaml.py [--check \| --selftest]` | собрать производный словарь; `--check` — сверка байт в байт без записи (код 3 — устарел); `--selftest` — разбор, роли, длины, переносимость шаблонов на кириллице в Python и Node |
 
-**Выход.** JSON `{"tool","version","date","results":[{input, thresholds, summary, metrics, findings, notes?}]}`:
-находка — `id`, `marker_id` (`COPY-M-…`), `level`, `group`, `message`, `fragment`, `context`, `position`, `replacement`,
-`example`, `source`, `evidence`, `slot`; `summary.verdict` — `clean`, `review`, `rewrite`, `fail`, `overcorrected`.
-Коды выхода: 0 — нет error, 2 — есть error, 1 — ошибка запуска, ключей или входа. API для других утилит:
-`from copy_lint import lint_text, text_metrics, dash_classes` (после `sys.path.insert(0, "99-raw/tools")`). Интерфейс
-меняется только добавлением ключей; журнал изменений для D — `99-raw/notes/wave1/C-notes.md`, разделы «Для D».
+**Производный словарь ux** `../../kb/text/06-anti-slop/lexicon/ux-07-06.yaml` собирает `ux_dict_to_yaml.py` из ux 07/06 и
+ux 07/01 §12 — руками не правится. В нём: закрытый список ролей (`roles`), правила таблиц §1–§6 (`rules`: уровень, роли,
+исключения; шаблоны переносимы между Python и ECMAScript с флагом `u` — `\w`, `\b`, `\d` раскрыты в классы с кириллицей,
+«Ё» в классах, флаг `i` снят у классов из заглавных; ячейка с оговоркой, которую шаблон канона не выражает, — шаблон или
+роли с оговоркой и `note`), строки §6.5 о пробелах — ссылкой на правила набора H (`delegated`), длины по ролям
+(`role_lengths`). После правки канона: `ux_dict_to_yaml.py` → `--check` → `copy_lint.py --selftest`.
 
-**Проверено** (`99-raw/experiments/C/`): 01 — сценарии humanizer-ru: 107 из 122 явлений до доводки против 66 у его
-`lint.py`, на 12 чистых текстах 1 находка против 9 ERROR (грамматические тире), цитаты не задеты; словари ux через
-конвертер ловятся в 60 из 74 строк, ложных на 27 «после» — 0; 02 — 21 фрагмент: «наивные» ИИ-тексты 6,7–10,5 маркера
-на 100 слов, человеческие колонки 0–1,5; 03 — pymorphy3: полнота 1,0 против 0,57–0,75 у регулярок, 0,5 с на 10 000
-слов; 04 — сверхкоррекция: 5 из 5 пойманы, 0 из 8 ложных; 05 — деление тире: 0,960 без морфологии, 0,976 с ней (124
-тире).
+**Выход.** JSON `{"tool", "version", "date", "results": [{input, thresholds, summary, metrics, findings, notes?}]}`:
+находка — `id`, `marker_id`, `level`, `group`, `message`, `fragment`, `context`, `position` (`line`, `col` — у Markdown,
+текста и реестра), `replacement`, `example`, `source`, `evidence`, `slot` (`slot_type`, `role`, `lint_as`, `key`, место в copy
+deck); `summary.verdict` — `clean`, `review`, `rewrite`, `fail`, `overcorrected`; `summary.mode` — `slots`, `registry`,
+`page-audit`. Коды выхода: 0 — нет error, 2 — есть error, 1 — ошибка вызова, входа или словаря. API:
+`kbpaths.use("text"); from copy_lint import lint_text, text_metrics, dash_classes` — `lint_text(text, genre, lang,
+slot_type, profile, fmt, metrics_only, role, component)`. Интерфейс меняется только добавлением ключей.
 
-**Ограничения.** Нет синтаксического разбора: висячие деепричастия (точность ≤ 0,8), длинное подлежащее и
-прилагательное-сказуемое в делении тире; имена собственные — по заглавной букве; разбор HTML упрощён (для корпуса лучше
-`copy_extract.py` D → Markdown или copy deck); английская морфология не подключена; пороги стартовые до замера D; правила
-ux написаны для ECMAScript — в JS `\w` не видит кириллицу, линтер на Python это обходит, JS-реализации нужны макросы
-(спецификация §2.2). Смысл, правдивость, тон и структуру страницы линтер не проверяет (спецификация §12).
+**Интерпретатор** — `$DDD_HOME/venv/bin/python` (PyYAML, pymorphy3; лицензии: pymorphy3 — MIT, словари pymorphy3-dicts-ru
+— код MIT, данные OpenCorpora). Без pymorphy3 работают регулярные приближения не выше warning, проверка форм групп строк
+пропускается с заметкой.
+
+**Ограничения.** Нет синтаксического разбора: висячие деепричастия, длинное подлежащее и прилагательное-сказуемое в
+делении тире; имена собственные — по заглавной букве; разбор HTML упрощён (страница по слотам — `copy_extract.py`); корень
+действия — по началу слова, чередования основы («отметить» — «отмечен») ловятся общим началом `verb` и `past`; уровни
+«Подробнее» и ярлыков на сайте, длины слотов `lint_as` — до калибровки на пилотах. Смысл, правдивость, тон и структуру
+страницы линтер не проверяет (спецификация §12).
 
 ## `claims_check.py` — правовой модуль
 
@@ -234,45 +254,35 @@ claims-rules.yaml, нейтральные фразы без error и warning п�
 учтено только там, где оно вписано в регулярку; размер оговорки (5–10 % площади) и шрифт не проверяются — это вёрстка
 (site, creative); судебная и ФАС-практика меняется — у каждого правила `law[].checked`.
 
-## `copy_extract.py` и `copy_metrics.py` — текст страницы по слотам и его метрики (D, волна 1, 2026-09-24)
+## `copy_extract.py` — текст страницы по слотам
 
-Метод — `../../kb/text/03-corpus-measured/01-corpus-method.md` §4–5, числа корпуса — `02-measurements.md`, пороги —
-`thresholds.yaml`. Зависимости: Python 3.10+, Playwright + Chromium (только для снятия страниц), PyYAML; метрики
-считаются кодом линтера C (`copy_lint.py` 0.9.2) и `claims_check.py inventory` (B2) — их версии пишутся в шапку
-`measurements.tsv`.
+Метод — `../../kb/text/03-corpus-measured/01-corpus-method.md` §4, числа корпуса — `../../kb/text/03-corpus-measured/02-measurements.md`.
+Зависимости: Playwright и Chromium (только для снятия страниц), PyYAML; метрики одного текста — `copy_lint.py
+--metrics-only` (API `text_metrics`).
 
 | Команда | Что делает |
 |---|---|
-| `python3 copy_extract.py URL -o out.json --md out.md --txt out.txt --shot s.jpg --save-blocks --lock [--genre landing\|site-page\|article] [--lang ru\|en]` | страница → JSON: `page` (URL, итоговый URL, HTTP, дата, хэш текста, отсев), `meta` (title, description, og:*, twitter:*, canonical), `hero` (надзаголовок, заголовок, H1-тег, подзаголовок, кнопки, микродоказательство), `sections[]` (заголовок, уровень, роль из 23 ролей временного словаря), `units[]` (`slot_type`, текст, секция, в первом экране ли), `testimonials`, `faq` (и из JSON-LD), `jsonld`; `--lock` — две блокировки браузера (общая и своя) и ожидание `MemAvailable` ≥ 2 ГБ |
+| `copy_extract.py URL -o out.json --md out.md --txt out.txt --shot s.jpg --save-blocks --lock [--genre landing\|site-page\|article] [--lang ru\|en]` | страница → JSON: `page` (URL, итоговый URL, HTTP, дата, хэш текста, отсев), `meta` (title, description, og:*, twitter:*, canonical), `hero` (надзаголовок, заголовок, H1-тег, подзаголовок, кнопки, микродоказательство), `sections[]` (заголовок, уровень, роль секции), `units[]` (`slot_type`, текст, секция, в первом экране ли), `testimonials`, `faq` (и из JSON-LD), `jsonld`, `stats` (`vocab_unknown` — id вне словаря site); `--lock` — две блокировки браузера (общая и своя) и ожидание `MemAvailable` ≥ 2 ГБ |
 | `… --batch targets.tsv --outdir DIR --lock --shots [--skip-existing]` | партия (`id, url, genre, lang, page_type`), браузер открывается и закрывается на каждую страницу |
 | `… --html saved.html` / `file://` URL | сохранённая страница через тот же браузер |
 | `… --reclassify out.blocks.json -o out.json` | перерасчёт классификации без браузера по сохранённым блокам |
-| `python3 copy_extract.py --selftest` | классификация лендинга и статьи на синтетике |
-| `python3 99-raw/tools/copy_metrics.py --dir PAGES [*.json] --corpus 03-corpus-measured/corpus.tsv --out measurements.tsv --instances slot_instances.tsv` | метрики по областям `page`, `prose`, `meta`, `hero`, `cta`, `structure`, `claims`, `slot:<тип>` → длинный TSV |
-| `… --slots-md text.md --genre landing -o page.json` | Markdown «`[slot_type] текст`» или `copy.md` kimi «`[ключ]: текст`» → JSON извлечения (свои тексты, copy deck) |
-| `python3 99-raw/tools/copy_metrics.py --selftest` | читаемость, повторы, форма CTA, разбор Markdown и copy.md, метрики страницы |
+| `copy_extract.py --selftest` | классификация лендинга, статьи и первого экрана с меню и плитками; id слотов и ролей в коде и в выходе — из словаря site |
 
-API (для C, I): `from copy_metrics import readability, repeat_density, cta_form, page_metrics, slots_md_to_extraction`;
-`from copy_extract import classify, to_markdown, to_plain`.
+**Чужие сайты.** Автоматизация не маскируется: окно 1440×900, user agent браузера как есть (`HeadlessChrome`), без
+`--disable-blink-features=AutomationControlled`; вход, капча и антибот — отсев (`page.blocked`), а не обход
+(`../../kb/creative/02-references-moodboards/02-refs-client-and-library.md` §8). Cookie-баннеры не нажимаются.
 
-**Проверено** (`99-raw/experiments/D/`): 01 — корпус (партии, отсев, `corpus.tsv`); 02 — ai-self (18 текстов, промты);
-03 — замер всего корпуса, пороги и их проверка на группах; 04 — ручная проверка извлечения (заголовок первого экрана,
-подзаголовок, кнопка и 12 случайных единиц на страницу; итоги — `judgments.tsv` и `01-corpus-method.md` §4.4).
+**Первый экран.** Меню и ряды ссылок — навигация (`nav-label`), а не кнопки: ряд из трёх и больше коротких ссылок на одной
+высоте, повтор одной подписи ссылки у плиток («Подробнее»), плитки-ссылки, когда простых коротких ссылок шесть и больше.
+Кнопка с фоном остаётся кнопкой, если её подпись не повторяется.
+
+**Id.** Слоты и роли секций — словаря site; внутренние метки разбора — `form-field` (подписи полей формы, микрокопи ux
+07/02), `number-label` (номера шагов, звёзды), роли `nav`, `menu`, `decor`, `quote`.
 
 **Ограничения.** Классификация — эвристики по кеглю, тегам и ориентирам; хуже всего на конструкторах со «всё в
-div» (Тильда-подобные шаблоны), боковых меню в первом экране, калькуляторах и слайдерах во весь экран; cookie-баннеры
-не нажимаются; сайты за антиботом отсеиваются (`page.blocked`); статья без тега H1 теряет заголовок. Метрики без
-морфологии (pymorphy3) — так линтер работает по умолчанию; с venv-C плотность маркеров RU выше в среднем на 0,25–0,35
-на 100 слов. Точность извлечения (опыт D/04, 25 страниц): заголовок первого экрана 80 %, подзаголовок 84 %, главная
-кнопка 82 %, тип слота случайной единицы 75 %.
-
-**Изменения (продолжатель D2, 2026-09-24).** `copy_metrics.py` 0.3.0 → **0.3.1**: метрики считаются правилами из
-словарей C (`06-anti-slop/lexicon/*.yaml`) и `profiles.yaml` **без внешних файлов** `profiles.external_rules` (мета и
-GEO — G, право и типографика — H). Причина: внешние правила в плотность маркеров не входят (`count_as_marker: false`),
-а их файлы пишутся параллельно — 24.09 в 10:06 недописанный `../../kb/text/07-seo-geo-copy/geo-rules.yaml` ронял `copy_lint.load_rules`
-и весь замер. С внешними правилами: `COPY_METRICS_EXTERNAL=1 python3 99-raw/tools/copy_metrics.py …` (штамп в шапке
-`measurements.tsv` говорит, какой режим). Новая функция `lint_markdown(text, genre, lang="auto")` — как
-`copy_lint.lint_text`, но тем же набором правил. `copy_lint.py` не менялся.
+div» (Тильда-подобные шаблоны), боковых меню в первом экране, калькуляторах и слайдерах во весь экран; статья без тега H1
+теряет заголовок. Точность извлечения по ручной проверке 25 страниц (`01-corpus-method.md` §4.4): заголовок первого
+экрана 80 %, подзаголовок 84 %, главная кнопка 82 %, тип слота случайной единицы 75 %.
 
 ## `copydeck.py` — copy deck: каркас, проверки, статусы, выгрузка во вход холста
 
