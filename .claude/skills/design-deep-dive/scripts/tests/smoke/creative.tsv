@@ -1,7 +1,6 @@
 path	kind	smoke	xfail
 scripts/creative/README.md	data	data	
 scripts/creative/ad_check.py	utility	help; run: --selftest; run: {skill}/kb/creative/01-creative-direction/examples/art-direction-kvarts.json	
-scripts/creative/idle_probe.py	step	import-only	
 scripts/creative/marketing_audit.py	utility	help; run: --selftest	
 scripts/creative/motion_check.py	utility	help; run: --selftest	
 scripts/creative/recipe_check.py	step	help; run: {skill}/kb/creative/10-recipes/recipes/01-lead-services-l0.recipe.yaml	

@@ -4,8 +4,8 @@
 
 1. Схема — kb/creative/09-ai-execution-evaluation/art-direction.v1.schema.json (JSON Schema 2020-12).
 2. Паспорт визуала — handoff.visual_dna.* против подсхем ai-media 06-art-direction-consistency/visual-dna.schema.json.
-3. Правила, которые схема выразить не может: каждые два направления различаются ≥ 2 осями из 4; тёплая бумага или
-   антиква — не больше чем у одного направления без требования бренда; территории — ≥ 3 семейства, буквальное прочтение ≤ 1;
+3. Правила, которые схема выразить не может: тёплая бумага или антиква — не больше чем у одного направления без
+   требования бренда; буквальное прочтение территории ≤ 1;
    ссылки на направления, территории и решения (choice.chosen, merged_from, rejected, lifted_markers[].decision_ref)
    существуют; макроструктура — id словаря site; контраст палитр (WCAG 2); уровень ↔ эффекты (level_min каталога
    эффектов) ↔ движение (потолок уровня — ambition-levels.yaml#levels.maps_to.claude_design) ↔ плавная прокрутка
@@ -16,6 +16,9 @@
 
   python3 ad_check.py [ФАЙЛ …] [--json]    код выхода: 0 — ошибок нет; 1 — есть; 2 — файла нет или он не JSON
   python3 ad_check.py --selftest           примеры базы без ошибок, посеянные ошибки ловятся
+Предупреждения, а не ошибки (законно при строгом бренде или референсе заказчика; основание — поля inputs
+brand_expression_mode и references_given, решает заказчик): направлений меньше трёх (схема — от 1 до 5), пара
+направлений различается меньше чем по двум осям из 4, территории — меньше трёх материальных семейств.
 Ключ k3_allow без решения и lifted_markers на несуществующее решение — предупреждение, у документа approved — ошибка.
 """
 import argparse
@@ -145,19 +148,30 @@ def cross(ctx, ad):
     approved = ad.get('status') == 'approved'
     dirs = {d['id']: d for d in ad['directions']}
     ids = list(dirs)
+    # число направлений, различие пар и семейства территорий — нормы creative 01/01 §4.1, §6: при строгом бренде или
+    # референсе заказчика меньший набор законен, поэтому это предупреждение с основанием, а решает заказчик
+    inp = ad.get('inputs') or {}
+    basis = ('строгий бренд' if inp.get('brand_expression_mode') == 'strict' else
+             'референс заказчика' if inp.get('references_given') else None)
+    soft = (f'основание — {basis}, решает заказчик' if basis else
+            'законно при строгом бренде (inputs.brand_expression_mode: strict) или референсе заказчика (inputs.references_given)')
+    if len(ids) < 3:
+        W.append(f'направлений {len(ids)} — меньше трёх (creative 01/01 §6.3): {soft}')
     for i in range(len(ids)):
         for j in range(i + 1, len(ids)):
             a, b = dirs[ids[i]]['axes'], dirs[ids[j]]['axes']
             diff = [k for k in CORE if a.get(k) != b.get(k)]
             if len(diff) < 2:
-                E.append(f'направления {ids[i]} и {ids[j]} различаются только по {diff or "ни одной оси"} (нужно ≥ 2 из {CORE})')
+                W.append(f'направления {ids[i]} и {ids[j]} различаются только по {diff or "ни одной оси"} '
+                         f'(норма — ≥ 2 из {CORE}, creative 01/01 §6.2): {soft}')
     brand_words = ' '.join(ad['inputs'].get('must_keep', [])).lower()
     warm_serif = [d['id'] for d in ad['directions'] if d['axes'].get('paper_temperature') == 'warm' or d['axes']['display_style'] == 'serif']
     if len(warm_serif) > 1 and not any(w in brand_words for w in ('антиква', 'serif', 'тёпл', 'крем')):
         E.append(f'тёплая бумага или антиква у {len(warm_serif)} направлений {warm_serif} (≤ 1 без требования бренда, creative 01/01 §6)')
     terr = {t['id']: t for t in ad['territories']}
-    if len({t['family'] for t in ad['territories']}) < 3:
-        E.append('территории из < 3 материальных семейств')
+    fams = {t['family'] for t in ad['territories']}
+    if len(fams) < 3:
+        W.append(f'материальных семейств у территорий {len(fams)} — меньше трёх (creative 01/01 §4.1): {soft}')
     if sum(1 for t in ad['territories'] if t.get('literal')) > 1:
         E.append('буквальных прочтений > 1')
     macro = ctx.vocab.get('macrostructure', set())
@@ -299,9 +313,18 @@ def selftest(ctx):
         d = copy.deepcopy(base)
         mut(d)
         r = check(ctx, d)
-        expect(f'ловит: {name}', r[part])
+        if part == 'warnings':       # доклад, а не стоп: предупреждение и ни одной ошибки
+            expect(f'предупреждает: {name}', r['warnings'] and r['ok'])
+        else:
+            expect(f'ловит: {name}', r[part])
+
+    def one_direction(d, mode):
+        d['directions'] = d['directions'][:1]
+        d['choice'].update({'merged_from': [], 'rejected': []})
+        d['inputs']['brand_expression_mode'] = mode
+        d['inputs'].pop('references_given', None)
     neg('направления различаются меньше чем по двум осям',
-        lambda d: d['directions'][1]['axes'].update({k: d['directions'][0]['axes'][k] for k in ('paper', 'display_style', 'macrostructure')}), 'rules')
+        lambda d: d['directions'][1]['axes'].update({k: d['directions'][0]['axes'][k] for k in ('paper', 'display_style', 'macrostructure')}), 'warnings')
     neg('два направления с антиквой', lambda d: d['directions'][3]['axes'].update({'display_style': 'serif'}), 'rules')
     neg('use при проваленной проверке', lambda d: d['decisions'][1]['criteria']['epoch'].update({'result': 'fail'}), 'schema')
     neg('approved без подписи', lambda d: d.update({'approved_by': None}), 'schema')
@@ -314,7 +337,12 @@ def selftest(ctx):
     neg('choice.chosen — несуществующее направление', lambda d: d['choice'].update({'chosen': 'z'}), 'rules')
     neg('merged_from — несуществующее направление', lambda d: d['choice'].update({'merged_from': ['q']}), 'rules')
     neg('3D-сцена на L1', lambda d: d['effects_by_section'].append({'section': 'hero', 'level': 'L1', 'effects': ['effect:3d-scene']}), 'rules')
-    neg('два направления вместо 3–5', lambda d: d.update({'directions': d['directions'][:2]}), 'schema')
+    neg('два направления вместо 3–5', lambda d: (d.update({'directions': d['directions'][:2]}),
+                                                 d['choice'].update({'rejected': []})), 'warnings')
+    neg('шесть направлений — больше пяти', lambda d: d['directions'].extend(
+        dict(copy.deepcopy(d['directions'][1]), id=f'x{i}') for i in range(2)), 'schema')
+    neg('территории из одного материального семейства',
+        lambda d: [t.update({'family': 'document-print'}) for t in d['territories']], 'warnings')
     neg('профиль бюджета не по типу и уровню', lambda d: d['ambition'].update({'budget_profile': 'landing-saas@L1'}), 'rules')
     neg('тезис длиннее 240', lambda d: d['concept'].update({'thesis': 'очень ' * 60}), 'schema')
     neg('движение выше потолка уровня', lambda d: d['motion_system'].update({'level': 'cinematic'}), 'rules')
@@ -324,6 +352,16 @@ def selftest(ctx):
     neg('lifted_markers на несуществующее решение (approved — ошибка)',
         lambda d: d['exclusions'].update({'lifted_markers': [{'marker': 'IMG-M05', 'decision_ref': 'no-such-decision'}]}), 'rules')
     neg('референс со значениями без measured и estimated', lambda d: d['moodboard'][0].update({'values': {}}), 'schema')
+    d = copy.deepcopy(base)
+    one_direction(d, 'strict')
+    r = check(ctx, d)
+    expect('одно направление при строгом бренде: схема проходит, предупреждение называет основание, 0 ошибок',
+           r['ok'] and any('меньше трёх' in m and 'строгий бренд' in m for m in r['warnings']))
+    d = copy.deepcopy(base)
+    one_direction(d, 'open')
+    r = check(ctx, d)
+    expect('одно направление без основания: предупреждение с условием, 0 ошибок',
+           r['ok'] and any('меньше трёх' in m and 'законно при строгом бренде' in m for m in r['warnings']))
     d = copy.deepcopy(base)
     d['moodboard'][0].update({'values': {'measured': ['H1 — 72 px на 1440, трекинг −2 %']}, 'source': 'customer', 'captured': '2026-09-24 1440x900'})
     expect('референс со значениями, источником и датой снятия проходит схему', check(ctx, d)['ok'])

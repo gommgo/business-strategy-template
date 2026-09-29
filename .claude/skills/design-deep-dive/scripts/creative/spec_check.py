@@ -24,6 +24,10 @@ refs.page_plan (пути от файла), если их не назвали к�
                                                  файлов — все файлы kb с этим ключом)
   --levels FILE                                  файл уровней той же формы, что ambition-levels.yaml
   --selftest                                     самопроверка на файлах базы, фикстуре проекта и подброшенных ошибках
+Тяжесть находок plan: error — схема плана (TR-S), ссылка в пустоту (TR-09, TR-10, TR-13, TR-15), уровень эффекта
+(TR-11), петля под переключатель страницы, которого нет (TR-16); нормы облика — уровень секции и блока, конверсия — L0,
+пики, акценты и фирменные приёмы по уровню, списки page.treatment против секций, один референс — одна секция, петли,
+плавная прокрутка, пределы параметров эффекта — warning: облик выбирает заказчик, находка — доклад с нормой в сообщении.
 Коды выхода: 0 — нет error; 1 — есть error; 2 — сбой запуска. Overlay treatment (формат примеров базы):
   {overlay_version: "1.0", plan: <путь к page-plan site>, page: {treatment страницы}, sections: {<id секции>: {treatment}}}
 """
@@ -369,15 +373,15 @@ def cmd_plan(ctx, R, plan_path, overlay_path=None, out=None, spec=None):
         tl = t.get('level') or lvl
         bl = ctx.block_eff(s.get('block'))
         if tl and lvl and LV[tl] > LV[lvl]:
-            R.add('error', 'TR-01', w, f'уровень секции {tl} выше уровня страницы {lvl}')
+            R.add('warning', 'TR-01', w, f'уровень секции {tl} выше уровня страницы {lvl}')
         conv = is_conv(ctx, s)
         if conv and tl and tl != 'L0':
-            R.add('error', 'TR-02', w, f'секция конверсии ({s.get("role")}, {s.get("block")}) — только L0')
+            R.add('warning', 'TR-02', w, f'секция конверсии ({s.get("role")}, {s.get("block")}) — только L0')
         effs = t.get('effects') or []
         if conv and any(e.get('purpose') == 'signature' for e in effs):
-            R.add('error', 'TR-03', w, 'фирменный эффект в секции конверсии')
+            R.add('warning', 'TR-03', w, 'фирменный эффект в секции конверсии')
         if bl is not None and tl and LV[tl] > LV[bl.get('level_max', 'L2')]:
-            R.add('error', 'TR-23', w, f'уровень {tl} выше level_max блока {s.get("block")} ({bl.get("level_max")})')
+            R.add('warning', 'TR-23', w, f'уровень {tl} выше level_max блока {s.get("block")} ({bl.get("level_max")})')
         vr = t.get('visual_role')
         if s.get('role') in CHROME_ROLES and vr not in (None, 'chrome'):
             R.add('warning', 'TR-22', w, f'служебная роль {s.get("role")} с visual_role {vr}')
@@ -414,7 +418,7 @@ def cmd_plan(ctx, R, plan_path, overlay_path=None, out=None, spec=None):
                     if lv is None or not isinstance(val, (int, float)):
                         continue
                     if lk == f'{k}_max' and val > lv or lk == f'{k}_min' and val < lv:
-                        R.add('error', 'TR-27', we, f'params.{k}={val} вне limits {lk}={lv}')
+                        R.add('warning', 'TR-27', we, f'params.{k}={val} вне limits {lk}={lv}')
         tok = (t.get('background') or {}).get('token')
         if tok and tok not in ctx.all_tokens:
             R.add('warning', 'TR-28', w, f'background.token {tok} нет в marketing-tokens.json')
@@ -437,7 +441,7 @@ def cmd_plan(ctx, R, plan_path, overlay_path=None, out=None, spec=None):
             R.add('warning', 'TR-26', w, 'reduce custom без note')
         lmax = ctx.loops_max(tl) if tl else None
         if lmax is not None and (t.get('loops') or 0) > lmax:
-            R.add('error', 'TR-21', w, f'петель {t["loops"]} > {lmax} для {tl} (ambition-levels.yaml continuous_motions_in_view_max)')
+            R.add('warning', 'TR-21', w, f'петель {t["loops"]} > {lmax} для {tl} (ambition-levels.yaml continuous_motions_in_view_max)')
         msr = t.get('motion_spec_ref')
         if msr and spec is not None and '#/sections/' in msr and msr.split('#/sections/')[1] not in spec_ids:
             R.add('error', 'TR-15', w, f'motion_spec_ref → секции {msr.split("#/sections/")[1]} нет в motion-spec')
@@ -446,36 +450,35 @@ def cmd_plan(ctx, R, plan_path, overlay_path=None, out=None, spec=None):
     if lvl:
         lo, hi = ctx.peaks(lvl)
         if not lo <= len(peaks) <= (hi if hi is not None else len(peaks)):
-            R.add('error', 'TR-04', 'page', f'пиков {len(peaks)} {peaks}, норма {lo}–{hi} для {lvl}')
+            R.add('warning', 'TR-04', 'page', f'пиков {len(peaks)} {peaks}, норма {lo}–{hi} для {lvl}')
         amax, where = ctx.accents_max(lvl), ctx.accent_sections(lvl)
         if amax is not None and len(accents) > amax:
-            R.add('error', 'TR-05', 'page', f'акцентов {len(accents)} {accents} > {amax} для {lvl}')
+            R.add('warning', 'TR-05', 'page', f'акцентов {len(accents)} {accents} > {amax} для {lvl}')
         smax = ctx.signature_max(lvl)
         if smax is not None and len(sigs) > smax:
-            R.add('error', 'TR-06', 'page', f'секций с signature {len(sigs)} {sigs} > {smax} для {lvl}')
+            R.add('warning', 'TR-06', 'page', f'секций с signature {len(sigs)} {sigs} > {smax} для {lvl}')
         if where and any(a not in where for a in accents):
-            R.add('error', 'TR-05', 'page', f'на {lvl} акцент — только {", ".join(where)}: {accents}')
+            R.add('warning', 'TR-05', 'page', f'на {lvl} акцент — только {", ".join(where)}: {accents}')
     if pt.get('peaks') is not None and set(pt['peaks']) != set(peaks):
-        R.add('error', 'TR-07', 'page', f'page.treatment.peaks {pt["peaks"]} ≠ секции-пики {peaks}')
+        R.add('warning', 'TR-07', 'page', f'page.treatment.peaks {pt["peaks"]} ≠ секции-пики {peaks}')
     if pt.get('accents') is not None and set(pt['accents']) != set(accents):
-        R.add('error', 'TR-08', 'page', f'page.treatment.accents {pt["accents"]} ≠ секции-акценты {accents}')
+        R.add('warning', 'TR-08', 'page', f'page.treatment.accents {pt["accents"]} ≠ секции-акценты {accents}')
     if pt.get('signature_sections') is not None and set(pt['signature_sections']) != set(sigs):
-        R.add('error', 'TR-08', 'page', f'signature_sections {pt["signature_sections"]} ≠ {sigs}')
+        R.add('warning', 'TR-08', 'page', f'signature_sections {pt["signature_sections"]} ≠ {sigs}')
     if ms.get('smooth_scroll') and lvl != 'L2':
-        R.add('error', 'TR-25', 'page', f'плавная прокрутка на {lvl} (только L2)')
+        R.add('warning', 'TR-25', 'page', f'плавная прокрутка на {lvl} (только L2)')
     calm = ctx.calm_between_peaks(lvl) if lvl else 0
     for i in range(1, len(roles_seq)):
         if roles_seq[i][1] == 'peak' and roles_seq[i - 1][1] == 'peak':
-            sev = 'warning' if calm else 'error'
-            R.add(sev, 'TR-19', f'{roles_seq[i - 1][0]}+{roles_seq[i][0]}', 'два пика подряд (где пиков несколько — только одна сквозная сцена)')
+            R.add('warning', 'TR-19', f'{roles_seq[i - 1][0]}+{roles_seq[i][0]}', 'два пика подряд (где пиков несколько — только одна сквозная сцена)')
     if calm:
         idx = [i for i, (_, r) in enumerate(roles_seq) if r == 'peak']
         for a, b in zip(idx, idx[1:]):
             if not any(r in ('calm', 'pause') for _, r in roles_seq[a + 1:b]):
-                R.add('error', 'TR-20', f'{roles_seq[a][0]}…{roles_seq[b][0]}', 'между пиками нет calm или pause')
+                R.add('warning', 'TR-20', f'{roles_seq[a][0]}…{roles_seq[b][0]}', 'между пиками нет calm или pause')
     for r, where in used_refs.items():
         if len(where) > 1:
-            R.add('error', 'TR-14', 'page', f'референс {r} в {len(where)} секциях {where}')
+            R.add('warning', 'TR-14', 'page', f'референс {r} в {len(where)} секциях {where}')
     if out:
         with open(out, 'w', encoding='utf-8') as f:
             yaml.safe_dump(plan, f, allow_unicode=True, sort_keys=False, width=140)
@@ -1120,7 +1123,8 @@ def selftest(ctx):
         c2 = Ctx(levels_copy(tmp, lambda L: L['L1']['section_distribution'].update(peaks_max=0)))
         R = Report()
         cmd_plan(c2, R, plan, ov, spec=load(sp))
-        expect('копия уровней: пиков L1 ≤ 0 → TR-04', 'TR-04' in codes(R))
+        expect('копия уровней: пиков L1 ≤ 0 → TR-04 warning (норма облика — доклад)',
+               'TR-04' in codes(R, 'warning') and 'TR-04' not in codes(R))
         c3 = Ctx(levels_copy(tmp, lambda L: L['L1']['motion_hints'].update(properties_allowed=['opacity', 'color'])))
         R = Report()
         cmd_spec(c3, R, sp, plan, ov)
@@ -1136,7 +1140,27 @@ def selftest(ctx):
         R0, R1 = Report(), Report()
         cmd_plan(ctx, R0, p2)
         cmd_plan(c4, R1, p2)
-        expect('копия уровней: петель L1 ≤ 0 → TR-21 (с файлом базы — нет)', 'TR-21' in codes(R1) and 'TR-21' not in codes(R0))
+        expect('копия уровней: петель L1 ≤ 0 → TR-21 warning (с файлом базы — нет)',
+               'TR-21' in codes(R1, 'warning') and 'TR-21' not in codes(R1) | codes(R0, 'warning'))
+        # тяжесть: нормы облика — warning, схема плана и уровень эффекта — error
+        pl = merge_overlay(load(plan), load(ov), Report())
+        secs = {s_['id']: s_ for s_ in pl['sections']}
+        secs['hero']['treatment']['level'] = 'L2'
+        p3 = os.path.join(tmp, 'plan-norms.yaml')
+        with open(p3, 'w', encoding='utf-8') as f:
+            yaml.safe_dump(pl, f, allow_unicode=True, sort_keys=False)
+        R = Report()
+        cmd_plan(ctx, R, p3, spec=load(sp))
+        expect('норма облика — доклад: секция L2 на странице L1 → TR-01 warning, 0 error',
+               'TR-01' in codes(R, 'warning') and not codes(R))
+        secs['how-it-works']['treatment']['effects'].append({'ref': 'effect:smooth-scroll'})
+        pl['page']['design_system'] = {'style': 'x'}
+        with open(p3, 'w', encoding='utf-8') as f:
+            yaml.safe_dump(pl, f, allow_unicode=True, sort_keys=False)
+        R = Report()
+        cmd_plan(ctx, R, p3, spec=load(sp))
+        expect('уровень эффекта и схема плана — error: эффект L2 в секции L1 → TR-11, чужой ключ → TR-S',
+               {'TR-11', 'TR-S'} <= codes(R))
     # файлы проекта: план с подачей и спецификация движения находят друг друга по ссылкам
     try:
         kbpaths.use('tests')

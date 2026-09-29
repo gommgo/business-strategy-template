@@ -14,7 +14,8 @@
      разные фоны или высота > 2,2 экрана), Tilda `.t-rec`, приклейка «только заголовок» к следующей полосе и мелких полос к
      предыдущей, шапка и подвал отдельно; для секции — позиция, высота, заголовки, слова, призывы, поля форм, медиа,
      повторяющиеся карточки, числа, цены, цитаты, время, шаги, карта, слайдер, аккордеон; класс — роль (`section_role`) и
-     блок (`block`) по черновику словаря B v0-draft1 с баллами top-3 и признаками (пересчёт без замера: --reclassify);
+     блок (`block`) по словарю site (02-site-types/vocabulary.yaml) с баллами top-3 и признаками (пересчёт без замера:
+     --reclassify);
   4. призывы (CTA): текст, сила (primary: заявка, запись, купить…; secondary: подробнее…), вид (заливка, контур, ссылка),
      место (шапка, первый экран, секция, липкий, подвал), цель (tel, mailto, мессенджер, якорь, попап, внешняя, внутренняя,
      кнопка формы), повторы;
@@ -41,7 +42,7 @@
 --no-lock — обёртка их уже держит; не дольше 5 мин на страницу). Код репозитория — соседним чекаутом
 ../strategy/.claude/skills/design-deep-dive/scripts/site/page_anatomy.py:
   page_anatomy.py URL OUT_DIR [--mobile] [--inp] [--quick] [--no-cmp-close] [--label PAGE_TYPE]
-          [--id ID] [--market ru|intl] [--industry X] [--net auto|ru-direct|vpn-lt|unknown] [--site-type X]
+          [--id ID] [--market ru|intl] [--industry X] [--net [auto|ru-direct|vpn-lt|unknown]] [--site-type X]
           [--text-id X] [--template X] [--site-id X] [--timeout 60] [--wait МС] [--cpu N] [--crux] [--no-lock]
   page_anatomy.py --batch pages.tsv --out DIR [--devices desktop,mobile] [--inp] [--only a,b]
           [--skip-done]                      # замки тишины — на каждую страницу × устройство, free ≥ 3 ГБ
@@ -49,11 +50,14 @@
   page_anatomy.py --csv DIR --pages pages.tsv > pages.csv
   page_anatomy.py --net-of HOST [HOST…]   # страна и организация IP сервера (IP не печатается)
   page_anatomy.py --selftest          # локальная тестовая страница во временной папке, без сети
+Сеть — только ключом --net: без него замер к сторонним сервисам не обращается (поле net: unknown); --net или --net auto —
+страна и организация сервера (ipinfo.io, IP не сохраняется) и проверка раздельной маршрутизации VPN (yandex.ru и
+ipinfo.io до и после замера); --net <метка> — своя метка сети и та же проверка маршрута.
 Выход: OUT_DIR/anatomy_<desktop|mobile>.json, sheet_<устройство>.jpg (контактный лист секций с подписями),
 cmp_<устройство>.jpg (кадр с cookie-баннером, если найден), краткая сводка в stdout.
-Ограничения: лаборатория ≠ поле; одна сеть (раздельная маршрутизация VPN, поле net); Chromium headless; эмуляция
+Ограничения: лаборатория ≠ поле; одна сеть (поле net — метка или проверка с --net); Chromium headless; эмуляция
 телефона; антибот (страница-заглушка помечается blocked); INP — только сценарий из 4 взаимодействий после загрузки;
-классификатор секций — эвристики, точность — опыт M/04.
+классификатор секций — эвристики: роль и блок — кандидаты top-3 с баллами.
 """
 import argparse, contextlib, csv, fcntl, http.server, io, json, os, re, socket, socketserver, statistics, subprocess, sys
 import threading, time, urllib.parse, urllib.request
@@ -1138,6 +1142,11 @@ def net_of(host):
     return res
 
 
+def net_probe(a):
+    """Ходит ли замер в сеть за страной сервера и маршрутом: только с ключом --net и не в самопроверке."""
+    return a.net is not None and not a.selftest
+
+
 def route_probe():
     """Маршрут: разные ли адреса видят yandex.ru и ipinfo.io (раздельная маршрутизация VPN) и страна выхода.
     Возвращает только булево и страну; адреса машины не сохраняются и не печатаются."""
@@ -1231,13 +1240,16 @@ def run_page(a):
     st = {'tool': TOOL, 'date': time.strftime('%Y-%m-%d %H:%M'), 'url': a.url, 'id': a.id, 'device': device, 'market': market,
           'locale': locale, 'accept_language': al, 'timezone': tz, 'cpu_throttle': cpu, 'page_type': a.label, 'site_type': a.site_type,
           'industry': a.industry, 'text_id': a.text_id, 'template': a.template, 'site_id': a.site_id, 'source': a.source, 'log': []}
-    if (a.net or 'auto') == 'auto' and not a.selftest:
+    probe = net_probe(a)       # сеть — только ключом --net; без него сторонние сервисы не запрашиваются
+    if probe and a.net == 'auto':
         ni = net_of(host0)
         st.update({'net': ni.get('net'), 'net_basis': ni.get('basis'), 'server_country': ni.get('country'), 'server_org': ni.get('org')})
     else:
-        st['net'] = 'local' if a.selftest else a.net
+        st['net'] = 'local' if a.selftest else (a.net or 'unknown')
+        if not probe and not a.selftest:
+            st['net_basis'] = 'без --net'
     creq, phase, logs = {}, {'v': 'load'}, st['log']
-    st['route_before'] = route_probe() if not a.selftest else None
+    st['route_before'] = route_probe() if probe else None
     T0 = time.monotonic()
     with sync_playwright() as pw:
         try:
@@ -1537,7 +1549,7 @@ def run_page(a):
         except Exception:
             pass
         b.close()
-    if not a.selftest:
+    if probe:
         st['route_after'] = route_probe()
         st['route_ok'] = all((r or {}).get('split') is True and (r or {}).get('exit_country') == 'LT' for r in (st['route_before'], st['route_after']))
     st['dom'] = dom
@@ -2544,6 +2556,9 @@ def selftest(a):
     hr = rv.get('h1_paint') or {}
     ck('показ H1 во времени: H1 из opacity 0 — первый кадр невидим, виден позже', hr.get('first_op') == 0 and hr.get('t_visible') is not None
        and hr['t_visible'] > hr.get('t_first', 0), hr)
+    nets = {k: net_probe(argparse.Namespace(net=v, selftest=False)) for k, v in (('без ключа', None), ('auto', 'auto'), ('метка', 'vpn-lt'))}
+    ck('сеть — только ключом --net: без ключа замер не ходит в ipinfo.io и yandex.ru', nets == {'без ключа': False, 'auto': True, 'метка': True}
+       and all(d.get('net') == 'local' and d.get('route_before') is None for d in (*results.values(), rv)), nets)
     ok = sum(1 for c in checks if c[1])
     rep = [f'# Самопроверка page_anatomy.py', '', 'Страница: временная папка (локальный сервер, «Метрика» подменена без сети).',
            f'Итог: {ok} из {len(checks)} проверок прошли.', '', '| Проверка | Итог | Получено |', '|---|---|---|']
@@ -2558,7 +2573,10 @@ def main():
     ap.add_argument('url', nargs='?'); ap.add_argument('out', nargs='?')
     ap.add_argument('--mobile', action='store_true'); ap.add_argument('--inp', action='store_true'); ap.add_argument('--quick', action='store_true')
     ap.add_argument('--no-cmp-close', action='store_true'); ap.add_argument('--label'); ap.add_argument('--id'); ap.add_argument('--market')
-    ap.add_argument('--industry'); ap.add_argument('--net', default='auto'); ap.add_argument('--site-type'); ap.add_argument('--text-id')
+    ap.add_argument('--industry'); ap.add_argument('--site-type'); ap.add_argument('--text-id')
+    ap.add_argument('--net', nargs='?', const='auto', default=None,
+                    help='сеть: без ключа не проверяется; auto (или без значения) — страна и организация сервера (ipinfo.io) и '
+                         'проверка раздельной маршрутизации VPN; ru-direct | vpn-lt | unknown — своя метка и проверка маршрута')
     ap.add_argument('--template'); ap.add_argument('--site-id'); ap.add_argument('--source'); ap.add_argument('--timeout', type=int, default=60)
     ap.add_argument('--wait', type=int, default=None, help='окно первого экрана после load, мс (по умолчанию — budgets.yaml)')
     ap.add_argument('--cpu', type=int, default=None); ap.add_argument('--crux', action='store_true')

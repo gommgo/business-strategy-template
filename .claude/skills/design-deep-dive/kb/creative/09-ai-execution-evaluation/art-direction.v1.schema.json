@@ -735,9 +735,9 @@
   },
   "directions": {
    "type": "array",
-   "minItems": 3,
+   "minItems": 1,
    "maxItems": 5,
-   "description": "3–5 направлений: каждые два различаются минимум по двум осям (paper, display_style, accent_hue, macrostructure); тёплая бумага или антиква — не больше чем у одного, если не бренд (creative 01/01 §6). Одно направление может быть canon — категорийный стандарт, сыгранный честно.",
+   "description": "3–5 направлений: каждые два различаются минимум по двум осям (paper, display_style, accent_hue, macrostructure); тёплая бумага или антиква — не больше чем у одного, если не бренд (creative 01/01 §6). Меньше трёх или пара, различная меньше чем по двум осям, — предупреждение ad_check.py: законно при строгом бренде (inputs.brand_expression_mode: strict) или референсе заказчика (inputs.references_given), решает заказчик. Одно направление может быть canon — категорийный стандарт, сыгранный честно.",
    "items": {
     "$ref": "#/$defs/direction"
    }
