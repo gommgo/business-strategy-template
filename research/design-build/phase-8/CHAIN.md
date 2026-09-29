@@ -185,3 +185,25 @@
 - Не прочитано: см. отчёт C7 §8.
 - Решения оркестратора (строка DECISIONS «Ф8, зона 7 принята»): отступления приняты; в `app-brief` (схема и форма) —
   `themes.switcher` и форма референса как у брифа сайта.
+
+## 08. C8 — text: copy deck, факты, смысл, голос (29.09, ≈ 103 мин, в уведомлении — 490 тыс. токенов)
+- Сделано: правки `scripts/text/` — `copydeck.py` (4 559 строк, +1 605/−778), `claims_check.py` (3 132, +693/−352),
+  `validate_meaning.py`, `validate_voice.py`, `make_skeleton.py`, `chain_inputs.py`, `run_checks.py`,
+  `validate_facts.py`, `validate_any.py`, `check_intake.py`, своя часть README, `smoke/text.tsv`; kb: 6 схем text,
+  `claims-rules.yaml` (68 правил, COPY-L-FCST-01, COPY-L-JOB-01), `before-after.tsv` (`why` у 112 строк), 8 примеров copy
+  deck, 8 наборов фактов text и site (демо-факты «Сталькона» переписаны связно). 28 действий — отчёт C8 §2.
+- Тесты: смоук text PASS 24; самопроверки `copydeck` 147, `claims_check` 128 (калибровки К17–К27), `validate_meaning`
+  21 (К30), `validate_voice` 22 + 7 мутаций, `make_skeleton` 9, `chain_inputs` 13; `run_checks` — 0 ошибок на 8 примерах
+  по 6 шагам; три примера site v1 — каркас из плана → `validate` 0, `approve` чистит журнал, выгрузка `copy.md` и
+  `facts.md` по протоколу, приём правленого `copy.md` — вариант `source: customer`; `canvas-map` по 5 схемам — 0.
+- Отступления: демо-факты — ошибка с `--final`, без него — info; COPY-D-STAGE — ошибка на макете, раньше — warning;
+  `approve` требует прохождения `validate`; тексты агента в примерах — `assumed` (юридические — `draft`); метки волн и
+  агентов в справке сняты; К28 — у C15.
+- Стыки: контракт `copy.md` (синтаксис и пример — отчёт C8 §4; читают C10, C11); API выгрузки и приёма (`export_canvas`,
+  `export_copy_md`, `export_facts_md`, `import-copy`) — C11, C10; `req:LR-RU-28`, `email-sender-name` — C7; тексты шаблона
+  и протокола о статусе `assumed` и воротах этапов — C17; временный словарь в `copy_lint`, `copy_extract` — C15.
+- Открыто: остаток README text (94 битых пути, 21 след журнала — чужие разделы) — C15 (свой раздел) и Ф10; правила длины
+  слота `email-sender-name` — Ф10 или пилот.
+- Не прочитано: см. отчёт C8 §8.
+- Решения оркестратора (строка DECISIONS «Ф8, зона 8 принята»): отступления приняты; `validate_voice.py --help` —
+  справка вместо трассировки (правка при приёмке), строка смоука — `help; run:`.
