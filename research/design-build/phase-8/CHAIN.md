@@ -39,3 +39,45 @@
   XPASS 3 (`check_icons.py`, `svg_sheet.py` — cairosvg есть; `refs_client` — Brave есть), ≈ 95 с.
 
 ----
+
+## 01. C1 — основа: пути, окружение, смоук, фикстуры (29.09, ≈ 55 мин, в уведомлении — 592 тыс. токенов)
+- Сделано: новые — `scripts/lib/docpaths.py` (661), `scripts/tests/fixture_project.py` (439), фикстура
+  `scripts/tests/fixtures/minimal/` (манифест + 3 своих файла), 18 списков `scripts/tests/smoke/*.tsv`; правлены —
+  `kbpaths.py` (+140/−31), `install.sh` (+258/−67), `smoke.py` (+110/−9), `requirements.txt`, `package.json`. Действия:
+  H10-docpaths, GT-03 и T4-G4 (соседний чекаут — в `kbpaths --selftest`), ENV-5 и H10-smoke (списки `smoke/`, дубль —
+  код 2, `--validate`, `--uncovered`), ENV-6 (сборщик фикстур), ENV-1 (Python ≥ 3.12), ENV-2 (`--playwright-match`),
+  ENV-3 (`--ffmpeg`, PATH в `kbpaths`), ENV-7 (все 21 адрес рабочие, «вручную» нет), BL-5 (`--from` несколькими папками,
+  поиск по имени), BL-6 (`--bins`), CN-115 (справка Blender Lab), T2a-designmd (линтеров нет), DEC-kimi (0).
+- Тесты: смоук зоны 0 FAIL; самопроверки `kbpaths` 24, `docpaths` 32, `fixture_project` 20; `install.sh --dry-run`,
+  `--check` — 0; `--from` по старым папкам — 15 из 15 бинарников и 7 из 7 моделей (установка во временный `DDD_HOME` —
+  22 «ok»).
+- Отступления: снят суффикс `-research` в `kbpaths`; статический ffmpeg через PATH процесса; ffmpeg — сборки Martin Riedl
+  7.1.1; Blender Lab — справкой; манифест фикстуры шире брифа (`extends`, `replace`, `drop`); `capability` — слой
+  `docpaths`; `allowScripts` для esbuild.
+- Стыки: `docpaths` (`parser`/`parse`, `Call`, пути слоёв, `Surface.route`/`layers`, `rel` для `path` находок, `status`),
+  `DDD_REPO` читает только `docpaths`; манифест и `built()` сборщика; списки `smoke/` по зонам; ffmpeg по имени после
+  `import kbpaths` — отчёт C1 §4.
+- Открыто: установка `--all --from` — МЗ (команда — отчёт §4); указатель `scripts/README.md` — C17.
+- Не прочитано: README scripts вне lib и project; брифы C3–C16 — поиском; код утилит других папок — поиском вызовов.
+- Решения оркестратора (строка DECISIONS «Ф8, зона 1 принята»): отступления приняты; `smoke-list.tsv` снят из git.
+
+## 02. C2 — ui, ux и проверки экрана (29.09, ≈ 48 мин, в уведомлении — 676 тыс. токенов)
+- Сделано: новые `scripts/ux/states_export.py` (414), `scripts/ui/data/thresholds.yaml` (28), `marketing-profile.yaml`
+  (116), производный `kb/ux/06-feedback-states-motion/screen-states.yaml` (316); правки `ui_audit.py` (+828/−95: скрытое
+  вне I1, H, F; I1m «проверить F83»; F3 тач 44 зоной; H8 в знаках; K2 потолок пресета; I10; J9 выравнивание; D3/D4/L4
+  профиля; токены ДС JSON или CSS; ширины из `acceptance-widths.yaml`, `--acceptance`; id приметы из `tells.yaml#checks`;
+  `--slop-params`), `measure_ui.py` (порог шапки по поверхности, `--selftest`), `build_reference_tokens.py`,
+  `checklist_export.py` (`--check`, хэш вместо времени); kb: ux 06/01 (S23, S24), `master-checklist.yaml`, ui 11/04 §3,
+  пример дашборда и `app.css`, `components.yaml`. 25 действий.
+- Тесты: смоук ui и ux — 0 FAIL; `ui_audit --selftest` 54 OK, `measure_ui` 7/7, `states_export` 17/17; `--check` обоих
+  генераторов — 0; дашборд: прежняя вёрстка — J9 FAIL (сдвиг 16 px ×2), после правки — 0 FAIL.
+- Отступления: ключи `ui_audit:<id>` в `tells.yaml#checks`; D4 — `glow_max 1` в данных; профиль — API для
+  `marketing_audit`; consumer без `--tokens` — шкалы пресета; F1 24 везде + F3 44 на таче; `generated_at` →
+  `source_sha256_16`.
+- Стыки: C3 — форма `screen-states.yaml`, `screen_states` → файл#ключ; C4 — `load_profile`/`apply_profile`, свой D4
+  снять, новые id и поля строк; C10 — `thresholds.yaml` (`font_sizes`, `header_height`); C7 — UX-PRC-12 в профиле site.
+- Открыто: «S01–S22» сжатого слоя; S23 в строке `route` §3.1; creative 09/03 §4.2 (D3, D4, F1, H8, K2); README и `audit/`
+  примеров ui; шапка CSS эталонных токенов; m29 скрипта §3 — Ф10.
+- Не прочитано: ux 12/02, `effects.yaml`, ui 09/04, creative 09/03 — только нужные места.
+- Решения оркестратора (строка DECISIONS «Ф8, зона 2 принята»): отступления приняты; строки `ui_audit:*` (9) внесены в
+  `tells.yaml#checks`; строки смоука C2 — в `smoke/ui.tsv`, `smoke/ux.tsv`; профиль site пересобран отдельным коммитом.
