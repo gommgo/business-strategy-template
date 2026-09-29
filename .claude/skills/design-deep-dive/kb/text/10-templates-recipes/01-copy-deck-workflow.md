@@ -55,7 +55,7 @@ Copy deck — единственное место текста страницы.
     на ассет); `export-assets` отдаёт их в план ассетов ai-media, в `copy.md` строки в картинке не идут (норма ai-media —
     `../../ai-media/05-prompting/03-asset-spec-and-dialects.md` §7) все → §8
 23. **Собранную страницу сверяют с copy deck**: доля блоков не из `copy.md` > 10 % или число вне `facts.md ∪ copy.md` —
-    стоп (образец — `k3_checks.py` F-COPY, F-NUMBERS); команды `verify-page` пока нет. `[не проверено]` {landing, site-page} → §9
+    стоп (образец — `k3_checks.py` HON-COPY, HON-NUMBERS); команды `verify-page` пока нет. `[не проверено]` {landing, site-page} → §9
 24. **Перед публикацией** — `validate --final` (0 заглушек, страница `approved`, мета заполнена), флаги права высокого
     риска прочитаны юристом (COPY-C-34), ключевые слоты — в макете на 1440 и 390 px (COPY-C-33). все → §3
 
@@ -249,7 +249,7 @@ template_text {kicker, title}}`. Правила текста: строка в к
 3. Сопоставление: блок страницы ↔ выбранный текст слота по нормализованной строке (пробелы, NBSP, типографика) и
    подстроке; слот не найден — «потерян»; блок без слота — «добавлен исполнителем».
 4. Ворота (образец — `../kimi-research/99-raw/tools/k3_checks.py`, только чтение): доля блоков не из `copy.md` > 10 % —
-   error (F-COPY); число на странице вне `facts.md ∪ copy.md` — error (F-NUMBERS); мета страницы ≠ `## head` — warning;
+   error (HON-COPY); число на странице вне `facts.md ∪ copy.md` — error (HON-NUMBERS); мета страницы ≠ `## head` — warning;
    обещание не в первом экране — warning (ACCEPTANCE A3 kimi).
 5. Выход — `--json` в формате `copydeck.py` (находки `COPY-D-VERIFY-…` по путям слотов) → вход COPY-C-33 и живого
    теста J-1 (≥ 95 % блоков из `copy.md`).
@@ -339,7 +339,7 @@ python3 $T export-assets $O/d.approved.yaml --page $P -o $O/assets-plan.yaml    
 - [S6] G (волна 2), `07-seo-geo-copy/meta-rules.yaml` (лимиты, шаблоны, `checks_outside_linter`), 07/02 §4.3 (варианты title).
 - [S7] H (волна 2), `08-russian-legal-typography/claims-rules.yaml` (66 правил), 01 §6 и §8 (оговорки, продавец).
 - [S8] kimi, `../kimi-research/07-brief-handoff/templates/` (`copy.md`, `facts.md`, `brief.yaml`, `build_package.py`),
-  `../kimi-research/99-raw/tools/k3_checks.py` (F-COPY, F-NUMBERS) — только чтение.
+  `../kimi-research/99-raw/tools/k3_checks.py` (HON-COPY, HON-NUMBERS) — только чтение.
 - [S9] ai-media, `../ai-media/05-prompting/03-asset-spec-and-dialects.md` §7, `10-web-integration/01-images-delivery.md` §7–8,
   `01-web-assets-landscape/01-asset-slots-by-page-type.md` §8.
 - [S10] D (волна 1), `copy_extract.py` — текст страницы по блокам (основа `verify-page`).

@@ -197,7 +197,7 @@ tells:
       app: ui/11-styles-trends/04-anti-slop-ui.md §2.1 (маркер 3)
     also:
       - claude-design/06-design-process/05-default-look.md §3
-    check: K3-GRADIENT-TEXT
+    check: LOOK-GRADIENT-TEXT
 
   - id: mesh-gradient-bg
     name: градиент как декор фона (mesh, шейдерный градиент)
@@ -240,7 +240,7 @@ tells:
       - ui/11-styles-trends/04-anti-slop-ui.md §4.1 (кластер 1)
       - claude-design/06-design-process/05-default-look.md §3, §4
       - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.2 (IMG-M04 — тёплый сдвиг фото, смежно)
-    check: K3-BG-WARM
+    check: LOOK-BG-WARM
     note: Тонированная нейтраль из токенов бренда — решение, а не примета (claude-design/06-design-process/05-default-look.md §5).
 
   - id: cream-serif-terracotta
@@ -251,7 +251,7 @@ tells:
       - ui/11-styles-trends/04-anti-slop-ui.md §4.1 (кластер 1), §5
       - claude-design/06-design-process/05-default-look.md §4
       - ai-media/06-art-direction-consistency/01-visual-dna-from-ui.md §5.1
-    note: Ловится двумя проверками макета — K3-BG-WARM и K3-SERIF-DISPLAY.
+    note: Ловится двумя проверками макета — LOOK-BG-WARM и LOOK-SERIF-DISPLAY.
 
   - id: dark-acid-accent
     name: почти чёрный фон и один кислотный акцент
@@ -309,7 +309,7 @@ tells:
       - creative/08-uniqueness-anti-slop/cliche-registry.yaml#glassmorphism-panels
       - creative/04-visual-language/03-color-surfaces-product.md §4.1
       - claude-design/06-design-process/05-default-look.md §3
-    check: K3-GLASS
+    check: LOOK-GLASS
 
   - id: iridescent-holo
     name: перелив, иридесценция, голографическая плёнка
@@ -401,7 +401,7 @@ tells:
       - creative/04-visual-language/cyrillic-display-fonts.yaml
       - ui/02-typography/01-font-selection.md
       - claude-design/06-design-process/05-default-look.md §3, §4
-    check: K3-SERIF-DISPLAY
+    check: LOOK-SERIF-DISPLAY
     note: Проверка макета ловит только серифный display и пару «сериф + гротеск по умолчанию»; остальные гарнитуры — глазами по записи.
 
   - id: accent-word-headline
@@ -412,7 +412,7 @@ tells:
       app: ui/11-styles-trends/04-anti-slop-ui.md §2.2 (маркер 7)
     also:
       - claude-design/06-design-process/05-default-look.md §3, §4
-    check: K3-ACCENT-WORD
+    check: LOOK-ACCENT-WORD
 
   - id: caps-share
     name: мелкий разреженный капс у многих узлов
@@ -422,7 +422,7 @@ tells:
       - ui/02-typography/04-weight-hierarchy-color.md §5
       - claude-design/06-design-process/05-default-look.md §3
       - creative/08-uniqueness-anti-slop/cliche-registry.yaml#caps-eyebrow
-    check: K3-CAPS
+    check: LOOK-CAPS
     note: Где капс законен в интерфейсе — ui/02-typography/04-weight-hierarchy-color.md §5; капс-надзаголовок — отдельная примета `caps-eyebrow`.
 
   - id: caps-eyebrow
@@ -436,7 +436,7 @@ tells:
       - ux/12-evaluation-checklists/02-master-checklist.md#UX-AIG-06
       - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-52
       - claude-design/06-design-process/05-default-look.md §3, §4
-    check: K3-EYEBROW
+    check: LOOK-EYEBROW
     note: Частоту и смысл надзаголовка ведёт text, капс как визуал — creative; остальные места берут число у COPY-C-18.
 
   - id: mono-captions
@@ -447,7 +447,7 @@ tells:
       app: ui/11-styles-trends/04-anti-slop-ui.md §2.9 (маркер 33)
     also:
       - claude-design/06-design-process/05-default-look.md §3, §4
-    check: K3-MONO-LABELS
+    check: LOOK-MONO-LABELS
 
   - id: font-size-count
     name: шкала кеглей без ролей
@@ -478,7 +478,7 @@ tells:
       - creative/08-uniqueness-anti-slop/cliche-registry.yaml#meta-dots-labels
       - ux/07-ux-writing/06-banned-words-and-patterns.md §5.3
       - claude-design/06-design-process/05-default-look.md §3
-    check: K3-META-DOTS
+    check: LOOK-META-DOTS
 
   - id: numbered-labels
     name: нумерация 01 / 02 / 03 без последовательности
@@ -488,7 +488,7 @@ tells:
       - creative/08-uniqueness-anti-slop/cliche-registry.yaml#meta-dots-labels
       - ux/07-ux-writing/06-banned-words-and-patterns.md §5.3
       - claude-design/06-design-process/05-default-look.md §3, §4
-    check: K3-NUMBERED
+    check: LOOK-NUMBERED
     note: Нумерация настоящей последовательности — шагов, этапов, таймлайна — приметой не является.
 
   - id: arrow-in-button
@@ -500,7 +500,7 @@ tells:
       - text/06-anti-slop/lexicon/ru-punct.yaml#ru-pun-arrow-cta (COPY-M-PUN-07)
       - creative/08-uniqueness-anti-slop/cliche-registry.yaml#meta-dots-labels
       - claude-design/06-design-process/05-default-look.md §3
-    check: K3-ARROWS
+    check: LOOK-ARROWS
     note: >-
       Стрелка не входит в текст подписи: в текстах её ловят словари ux и text, в макете — проверка по разметке. Иконка
       рядом с подписью — решение облика; «↗» у ссылки на внешний сайт несёт смысл и приметой не считается
@@ -513,7 +513,7 @@ tells:
     also:
       - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-52
       - claude-design/06-design-process/05-default-look.md §3, §4
-    check: K3-PILL
+    check: LOOK-PILL
     note: Кнопка-пилюля, выбранная шкалой радиусов дизайн-системы, — решение, а не примета.
 
   - id: emoji-sparkle-ai
@@ -538,7 +538,7 @@ tells:
       - creative/04-visual-language/02-composition-rhythm-sections.md §1.2 (когда центр законен)
       - site/03-page-structure/03-first-screen-and-mobile.md §2 (политика первого экрана)
       - claude-design/06-design-process/05-default-look.md §3
-    check: K3-HERO-CENTER
+    check: LOOK-HERO-CENTER
     note: >-
       Примета — связка высоты без видимого продолжения и центральной оси. Центр сам по себе законен по правилу
       creative/04-visual-language/02-composition-rhythm-sections.md §1.2, высоту hero задаёт политика первого экрана
@@ -552,7 +552,7 @@ tells:
       - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-49
       - ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5.2 (IMG-M21, IMG-M22)
       - claude-design/06-design-process/05-default-look.md §3
-    check: K3-HERO-OVERLAY
+    check: LOOK-HERO-OVERLAY
 
   - id: stats-row
     name: ряд крупных чисел
@@ -560,7 +560,7 @@ tells:
     owner: site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-02
     also:
       - claude-design/06-design-process/05-default-look.md §3
-    check: K3-STATS-ROW
+    check: LOOK-STATS-ROW
     note: Каждое число в ряду сверяется с фактами — примета `invented-numbers`.
 
   - id: three-equal-cards
@@ -572,7 +572,7 @@ tells:
       - ux/12-evaluation-checklists/02-master-checklist.md#UX-AIG-06
       - creative/04-visual-language/02-composition-rhythm-sections.md §1
       - claude-design/06-design-process/05-default-look.md §3
-    check: K3-THREE-CARDS
+    check: LOOK-THREE-CARDS
 
   - id: bento-uniform-tiles
     name: бенто из одинаковых плиток
@@ -592,7 +592,7 @@ tells:
       - creative/04-visual-language/03-color-surfaces-product.md §5
       - ui/07-iconography-imagery/02-illustration-system-avatars-images.md §1.3
       - claude-design/06-design-process/05-default-look.md §3
-    check: K3-DRAWN-CHROME
+    check: LOOK-DRAWN-CHROME
     note: >-
       Настоящий скриншот продукта в `figure` с простой рамкой — ключевой визуал страницы SaaS; внутри интерфейса
       приложения экран в экране не показывают.
@@ -710,7 +710,7 @@ tells:
     also:
       - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-19 (логотипы — с разрешением)
       - claude-design/06-design-process/05-default-look.md §3
-    check: K3-MARQUEE
+    check: LOOK-MARQUEE
     note: >-
       Примета — движущаяся лента. Форма первого экрана `marquee-hero` словаря site («Заявление на весь экран») —
       макроструктура, а не бегущая строка (site/02-site-types/vocabulary.yaml).
@@ -805,7 +805,7 @@ tells:
     also:
       - ui/07-iconography-imagery/02-illustration-system-avatars-images.md §2.11, §12.2
       - site/09-ai-generation-evaluation/ai-landing-markers.yaml#AIL-14
-    check: F-STOCK
+    check: HON-STOCK
 
   # ── Честность ───────────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -818,7 +818,7 @@ tells:
     also:
       - text/02-strategy-messaging/03-proof-and-facts.md (факты и проверка чисел)
       - claude-design/06-design-process/04-checks.md §3 (группа D)
-    check: F-NUMBERS
+    check: HON-NUMBERS
 
   - id: filler-text
     name: рыба и заглушки — lorem, «John Doe», «Feature 1»
@@ -831,7 +831,7 @@ tells:
       - ui/11-styles-trends/04-anti-slop-ui.md §2.7 (маркер 24)
       - ux/07-ux-writing/06-banned-words-and-patterns.md §5
       - claude-design/06-design-process/04-checks.md §3 (группа D)
-    check: F-FILLER
+    check: HON-FILLER
 
   - id: unsourced-quotes
     name: отзывы без источника, одной длины, только пятёрки
@@ -840,7 +840,7 @@ tells:
     also:
       - site/08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md §3
       - claude-design/06-design-process/04-checks.md §3 (группа D)
-    check: F-QUOTE
+    check: HON-QUOTE
 
   - id: content-bugs
     name: литералы экранирования и двойные валюты в тексте макета
@@ -856,7 +856,7 @@ tells:
     also:
       - ui/11-styles-trends/04-anti-slop-ui.md §2.1 (маркеры 2, 5)
       - claude-design/06-design-process/05-default-look.md §3
-    check: K3-WARM-CONTRAST
+    check: LOOK-WARM-CONTRAST
     note: Порог контраста — норма доступности, решением брифа не снимается.
 
   # ── Тексты на стыке с визуалом ──────────────────────────────────────────────────────────────────────────────────
@@ -904,33 +904,33 @@ tells:
 # acceptance — проверки приёмки, которые приметами не являются. У проверки `ui_audit` L4 строки нет: она находит разные
 # приметы по профилю (декоративный градиент экрана, градиентный текст и фиолетовый герой страницы).
 checks:
-  K3-BG-WARM: {group: look, tell: warm-paper, allow: warm}
-  K3-ACCENT-WORD: {group: look, tell: accent-word-headline, allow: accent-word}
-  K3-SERIF-DISPLAY: {group: look, tell: overused-display-font, allow: serif}
-  K3-EYEBROW: {group: look, tell: caps-eyebrow, allow: eyebrow}
-  K3-CAPS: {group: look, tell: caps-share, allow: caps}
-  K3-PILL: {group: look, tell: pill-announcement-chip, allow: pill}
-  K3-GRADIENT-TEXT: {group: look, tell: gradient-text, allow: gradient}
-  K3-HERO-CENTER: {group: look, tell: hero-center-fullscreen, allow: center-hero}
-  K3-HERO-OVERLAY: {group: look, tell: hero-media-veil, allow: photo-hero}
-  K3-STATS-ROW: {group: look, tell: stats-row, allow: stats}
-  K3-THREE-CARDS: {group: look, tell: three-equal-cards, allow: cards}
-  K3-META-DOTS: {group: look, tell: meta-dots, allow: dots}
-  K3-ARROWS: {group: look, tell: arrow-in-button, allow: arrows}
-  K3-MONO-LABELS: {group: look, tell: mono-captions, allow: mono}
-  K3-NUMBERED: {group: look, tell: numbered-labels, allow: numbered}
-  K3-GLASS: {group: look, tell: glassmorphism-panels, allow: glass}
-  K3-MARQUEE: {group: look, tell: marquee-strip, allow: marquee}
-  K3-DRAWN-CHROME: {group: look, tell: dashboard-in-browser-frame, allow: chrome}
-  K3-WARM-CONTRAST: {group: look, tell: low-contrast-text}
-  F-UNSPLASH: {group: honesty, tell: stock-and-hotlink}
-  F-STOCK: {group: honesty, tell: stock-and-hotlink}
-  F-HOTLINK: {group: honesty, tell: stock-and-hotlink, allow: external}
-  F-NUMBERS: {group: honesty, tell: invented-numbers}
-  F-QUOTE: {group: honesty, tell: unsourced-quotes}
-  F-FILLER: {group: honesty, tell: filler-text}
-  F-CAPTION: {group: honesty, norm: "claude-design/06-design-process/04-checks.md §3 (подписи и alt против списка ассетов)"}
-  F-COPY: {group: honesty, norm: "claude-design/06-design-process/04-checks.md §3 (текст против copy deck)"}
+  LOOK-BG-WARM: {group: look, tell: warm-paper, allow: warm}
+  LOOK-ACCENT-WORD: {group: look, tell: accent-word-headline, allow: accent-word}
+  LOOK-SERIF-DISPLAY: {group: look, tell: overused-display-font, allow: serif}
+  LOOK-EYEBROW: {group: look, tell: caps-eyebrow, allow: eyebrow}
+  LOOK-CAPS: {group: look, tell: caps-share, allow: caps}
+  LOOK-PILL: {group: look, tell: pill-announcement-chip, allow: pill}
+  LOOK-GRADIENT-TEXT: {group: look, tell: gradient-text, allow: gradient}
+  LOOK-HERO-CENTER: {group: look, tell: hero-center-fullscreen, allow: center-hero}
+  LOOK-HERO-OVERLAY: {group: look, tell: hero-media-veil, allow: photo-hero}
+  LOOK-STATS-ROW: {group: look, tell: stats-row, allow: stats}
+  LOOK-THREE-CARDS: {group: look, tell: three-equal-cards, allow: cards}
+  LOOK-META-DOTS: {group: look, tell: meta-dots, allow: dots}
+  LOOK-ARROWS: {group: look, tell: arrow-in-button, allow: arrows}
+  LOOK-MONO-LABELS: {group: look, tell: mono-captions, allow: mono}
+  LOOK-NUMBERED: {group: look, tell: numbered-labels, allow: numbered}
+  LOOK-GLASS: {group: look, tell: glassmorphism-panels, allow: glass}
+  LOOK-MARQUEE: {group: look, tell: marquee-strip, allow: marquee}
+  LOOK-DRAWN-CHROME: {group: look, tell: dashboard-in-browser-frame, allow: chrome}
+  LOOK-WARM-CONTRAST: {group: look, tell: low-contrast-text}
+  HON-UNSPLASH: {group: honesty, tell: stock-and-hotlink}
+  HON-STOCK: {group: honesty, tell: stock-and-hotlink}
+  HON-HOTLINK: {group: honesty, tell: stock-and-hotlink, allow: external}
+  HON-NUMBERS: {group: honesty, tell: invented-numbers}
+  HON-QUOTE: {group: honesty, tell: unsourced-quotes}
+  HON-FILLER: {group: honesty, tell: filler-text}
+  HON-CAPTION: {group: honesty, norm: "claude-design/06-design-process/04-checks.md §3 (подписи и alt против списка ассетов)"}
+  HON-COPY: {group: honesty, norm: "claude-design/06-design-process/04-checks.md §3 (текст против copy deck)"}
   M-NAV: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}
   M-BODY-16: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}
   M-OVERFLOW: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}

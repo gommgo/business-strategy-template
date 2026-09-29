@@ -2525,7 +2525,7 @@ def _selftest():
             "domains": {"page-look": {"unit": "страница", "count": 1, "tells": ["caps-eyebrow"]},
                         "honesty": {"unit": "страница", "count": 1, "tells": ["stock-and-hotlink"]}},
             "clusters": []}, "findings": [
-            {"id": "F-STOCK", "tell": "stock-and-hotlink", "severity": "critical", "view": "1440", "message": "сток",
+            {"id": "HON-STOCK", "tell": "stock-and-hotlink", "severity": "critical", "view": "1440", "message": "сток",
              "fix": "реальное фото", "allowed": False},
             {"id": "LOOK-EYEBROW", "tell": "caps-eyebrow", "severity": "major", "view": "390", "message": "капс",
              "fix": "", "allowed": False},

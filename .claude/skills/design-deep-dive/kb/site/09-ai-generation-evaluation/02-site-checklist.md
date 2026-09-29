@@ -448,7 +448,7 @@ SG-WEIGHT — `page-gates.yaml`; автопроверка — `page_gates.py`. �
 |---|---|---|---|---|
 | SITE-OUT-01 | Ворота `page-gates.yaml` по профилю пройдены: 0 провалов B; каждый S исправлен или записан в `x-gate-exception` плана | B | SCR, LNT | `../07-seo-geo-performance-analytics/page-gates.yaml`; `../../../scripts/site/page_gates.py` |
 | SITE-OUT-02 | Все пункты B этого чек-листа пройдены на 1440×900, 390×844 и 360×800 | B | SCR, HUM | §1.4; `../../kimi-research/08-director-loop-qa/02-checks-k3.md` §2 B |
-| SITE-OUT-03 | Нет заглушек: `[PLACEHOLDER]`, lorem, «Feature 1», «John Doe», «fictional brand»; пробелы `missing` закрыты или блоки сняты | B | DOM, LNT | COPY-C-04; `../../kimi-research/08-director-loop-qa/02-checks-k3.md` §2 D (F-FILLER); AIL-09, AIL-44; DEF-48 |
+| SITE-OUT-03 | Нет заглушек: `[PLACEHOLDER]`, lorem, «Feature 1», «John Doe», «fictional brand»; пробелы `missing` закрыты или блоки сняты | B | DOM, LNT | COPY-C-04; `../../kimi-research/08-director-loop-qa/02-checks-k3.md` §2 D (HON-FILLER); AIL-09, AIL-44; DEF-48 |
 | SITE-OUT-04 | Тексты страницы совпадают с copy-deck, прошедшим сверку с фактами и линтер | B | LNT | COPY-C-01, COPY-C-05; `../../text/09-ai-generation-evaluation/03-evaluation.md` §2 |
 | SITE-OUT-05 | В консоли нет ошибок; битых картинок и ресурсов нет | S | SCR | SG-CONTENT-04; `../../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md` G1 |
 | SITE-OUT-06 | Проверки выполнены своими инструментами и кадрами, а не по самоотчёту исполнителя | B | HUM | `../../kimi-research/08-director-loop-qa/02-checks-k3.md` §1; DEF-45 |

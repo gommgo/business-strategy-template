@@ -288,7 +288,7 @@ frontend-design v1 (2025-11-20) советовал «gradient meshes, noise text
 | бенто и нарисованный хром | site: структура (AIL-08, AIL-17) | визуал плиток и подача продукта: `bento-uniform-tiles`, `dashboard-in-browser-frame` |
 | тире, словарь штампов, текст надзаголовка | text: COPY-C-18, `copy_lint` | визуал капса: `caps-eyebrow` |
 | маркеры ассета (IMG-M*, VID-M*) | ai-media | страничный уровень: как ассет стоит на странице (`hero-media-veil`, `eternal-slowmo`) |
-| K3-HERO-OVERLAY, K3-MARQUEE | визуальные приметы — creative (AIL crosswalk) | `hero-media-veil`, `marquee-strip` |
+| LOOK-HERO-OVERLAY, LOOK-MARQUEE | визуальные приметы — creative (AIL crosswalk) | `hero-media-veil`, `marquee-strip` |
 
 ## 5. Приёмы из вопроса 11: сводная таблица
 

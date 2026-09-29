@@ -68,11 +68,11 @@ crosswalk_external:
   - {ext: "гейт Hallmark 44 (hero в 1280×800 без прокрутки)", ail: [AIL-06]}
   - {ext: "гейт Hallmark 47 (Re-drawn chrome)", ail: [AIL-17]}
   - {ext: "гейты Hallmark 49 (двухстрочный кликабельный текст) и 56 (липкий под липкой шапкой)", ail: [], owner: "creative (визуальные); телефон — SITE-MOB-05"}
-  - {ext: "K3-STATS-ROW (kimi k3_checks, major, --allow)", ail: [AIL-02]}
-  - {ext: "K3-THREE-CARDS (kimi k3_checks, major, --allow)", ail: [AIL-07]}
-  - {ext: "K3-HERO-CENTER (kimi k3_checks, major, --allow)", ail: [AIL-06]}
-  - {ext: "K3-HERO-OVERLAY, K3-MARQUEE (kimi k3_checks)", ail: [], owner: "creative (визуальные приметы)"}
-  - {ext: "F-NUMBERS, F-QUOTE, F-FILLER (kimi 08/02 §2 D, critical)", ail: [AIL-18, AIL-45, AIL-09]}
+  - {ext: "LOOK-STATS-ROW (kimi k3_checks, major, --allow)", ail: [AIL-02]}
+  - {ext: "LOOK-THREE-CARDS (kimi k3_checks, major, --allow)", ail: [AIL-07]}
+  - {ext: "LOOK-HERO-CENTER (kimi k3_checks, major, --allow)", ail: [AIL-06]}
+  - {ext: "LOOK-HERO-OVERLAY, LOOK-MARQUEE (kimi k3_checks)", ail: [], owner: "creative (визуальные приметы)"}
+  - {ext: "HON-NUMBERS, HON-QUOTE, HON-FILLER (kimi 08/02 §2 D, critical)", ail: [AIL-18, AIL-45, AIL-09]}
   - {ext: "UX F12.1 (фейковые метрики и люди), F12.3 (выдуманные функции)", ail: [AIL-18, AIL-19, AIL-14, AIL-40]}
   - {ext: "UX-AIG-01, AC-TXT-02 (с поправкой PLAN №7 — проверка по связке с фактом)", ail: [AIL-18, AIL-19]}
   - {ext: "COPY-C-18 (приметы ИИ в тексте — text)", ail: [], owner: "text"}
@@ -119,7 +119,7 @@ markers:
     defects: [DEF-02]
     sources:
       - "../03-page-structure/01-narratives-and-section-order.md §3.4 [проверено: C/01 — переход stats → benefits 5 раз на 6 ИИ-страницах 2026]"
-      - "K3-STATS-ROW (../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 C, major, --allow)"
+      - "LOOK-STATS-ROW (../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 C, major, --allow)"
       - "../../text/09-ai-generation-evaluation/03-evaluation.md (числа без факта: 1,49 у ИИ-страниц против 0,45 на 100 слов)"
     evidence: ["[проверено]", "[данные]"]
     checked: "2026-09-24"
@@ -189,7 +189,7 @@ markers:
     detect:
       method: [SCR, IMG]
       how: "высота коробки hero / высота окна ≥ 0,95 на 1440×900 и 390×844; край следующей секции не виден; 3–4 элемента hero выровнены по центру общего контейнера; на 1280×800 H1 или призыв ниже сгиба (гейт 44)"
-      auto: "частично: page_anatomy.py (first_screen, doc_h_vh); центр — K3-HERO-CENTER у kimi"
+      auto: "частично: page_anatomy.py (first_screen, doc_h_vh); центр — LOOK-HERO-CENTER у kimi"
     threshold: "hero ≥ 95 % высоты окна без видимого края следующей секции, стрелки или подписи продолжения"
     severity: S
     allow: "first_screen_policy: poster (L2-кампания, портфолио, бренд-событие) с призывом в шапке и видимым признаком продолжения"
@@ -211,7 +211,7 @@ markers:
     detect:
       method: [DOM, IMG, JDG]
       how: "секция из 3–6 соседних узлов одной структуры (иконка или SVG + h3 + p); коэффициент вариации длины текстов карточек < 0,2; у SaaS или приложения нет кадра настоящего интерфейса"
-      auto: "частично: K3-THREE-CARDS (kimi); вариация длины — скриптом по HTML (опыт K/02)"
+      auto: "частично: LOOK-THREE-CARDS (kimi); вариация длины — скриптом по HTML (опыт K/02)"
     threshold: "CV длины текстов карточек < 0,2 и у продукта нет block:product-showcase, block:feature-alternating или block:feature-tabs"
     severity: S
     allow: "карточки разного содержания (функция, число, цитата) или три реальных тарифа или услуги со своими фактами"
@@ -221,7 +221,7 @@ markers:
     sources:
       - "../../ui/12-ai-generated-ui/02-codegen-tools-and-default-look.md §2.1 (центроид — три одинаковые карточки в ряд), §5 (Lovable: 3-колоночные сетки у 8 из 10)"
       - "../../text/09-ai-generation-evaluation/03-evaluation.md (карточки одной длины: CV 0,18 у ИИ против 0,40)"
-      - "K3-THREE-CARDS (../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 C)"
+      - "LOOK-THREE-CARDS (../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 C)"
       - "../04-blocks/01-blocks-catalog.md §5.1"
     evidence: ["[данные]", "[практика]"]
     checked: "2026-09-24"
@@ -264,7 +264,7 @@ markers:
       - "Durable, «Service Business Website Builder Made with AI» (2026): ИИ-каркас включает «testimonial examples» — 01-generators-and-ai-landing-markers.md §1 [мнение вендора]"
       - "Framer Help, «How to build a website from scratch with Framer Agents» (2026): пример промта просит отзывы для вымышленной кофейни [документация]"
       - "COPY-C-04 (../../text/09-ai-generation-evaluation/copy-checklist.yaml)"
-      - "../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 D (F-FILLER, critical)"
+      - "../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 D (HON-FILLER, critical)"
     evidence: ["[данные]", "[документация]", "[мнение вендора]"]
     checked: "2026-09-24"
   - id: AIL-10
@@ -445,7 +445,7 @@ markers:
     defects: [DEF-06]
     sources:
       - "../../ux/11-ai-generated-ui/01-failure-modes-catalog.md F12.1 (фейковые метрики: «10k+», «Trusted by»)"
-      - "../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 D (F-NUMBERS, critical)"
+      - "../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 D (HON-NUMBERS, critical)"
       - "../../text/09-ai-generation-evaluation/03-evaluation.md (числа без факта: 1,49 у ИИ-страниц против 0,45 на 100 слов)"
       - "поправка PLAN №7; COPY-C-01"
     evidence: ["[данные]", "[консенсус]"]
@@ -984,7 +984,7 @@ markers:
       - "Durable (2026): каркас сайта включает «testimonial examples» — 01-generators-and-ai-landing-markers.md §1 [мнение вендора]"
       - "../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md §3 (LR-RU-12, LR-RU-22)"
       - "../../text/09-ai-generation-evaluation/03-evaluation.md (демо K3 с выдуманными отзывами получило 5,0 из 5 по рубрике текста)"
-      - "../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 D (F-QUOTE, critical)"
+      - "../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 D (HON-QUOTE, critical)"
     evidence: ["[практика]", "[мнение вендора]", "[данные]"]
     checked: "2026-09-24"
   - id: AIL-46

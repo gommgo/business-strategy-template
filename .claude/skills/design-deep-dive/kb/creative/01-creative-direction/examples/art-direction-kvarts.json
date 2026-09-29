@@ -185,7 +185,7 @@
      "criteria": {"concept": {"result": "pass", "note": "предмет предзаказа можно рассмотреть"}, "brand": {"result": "pass", "note": "GLB дизайнера"}, "execution": {"result": "pass", "note": "постер из того же GLB, загрузка по взаимодействию, ≤ 0,8 МБ телефон"}, "epoch": {"result": "pass"}, "singularity": {"result": "pass", "note": "один 3D на странице"}},
      "why": "Доказывает форму товара, которого ещё нет в продаже", "where": "object3d"},
     {"id": "d-mono-captions", "technique": "cliche:mono-captions (template chrome)", "decision": "avoid",
-     "criteria": {"concept": {"result": "na"}, "brand": {"result": "fail", "note": "в бренде моно нет"}, "execution": {"result": "na"}, "epoch": {"result": "fail", "note": "шаблонный хром ui 11/04 кластер 5; K3-MONO-LABELS"}, "singularity": {"result": "na"}},
+     "criteria": {"concept": {"result": "na"}, "brand": {"result": "fail", "note": "в бренде моно нет"}, "execution": {"result": "na"}, "epoch": {"result": "fail", "note": "шаблонный хром ui 11/04 кластер 5; LOOK-MONO-LABELS"}, "singularity": {"result": "na"}},
      "why": "Выноски паспорта — текстовым шрифтом, а не моноширинным"}
   ],
   "exclusions": {

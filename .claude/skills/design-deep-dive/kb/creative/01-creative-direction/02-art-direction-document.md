@@ -199,7 +199,7 @@
 | `avoid` оттенка | `exclusions.forbidden_hues` (+ `except_share_max`, если в полосе бренд) | `visual-dna palette.forbidden_hues` | `ad_check`: акцент в полосе — предупреждение |
 | `avoid` паттерна | `exclusions.bans` — предметно («рамки браузера и телефона», а не «без ИИ-вида») | kimi `design_system.bans`, Do's and Don'ts `DESIGN.md`; `visual-dna exclusions.banned_words` | K (волна 3) |
 | `use`/`twist` приметы K3 | `decisions[].k3_allow` и `exclusions.k3_allow` | `k3_checks.py --allow`; бриф site `ambition.allow.markers` (C1) | `ad_check`: `--allow` без решения — предупреждение |
-| снятие умолчания L0 соседа | `exclusions.lifted_markers[] {marker, decision_ref}` (пример: `K3-BG-WARM` ← `d-warm-field`) | ai-media, blender, ui — только для этого сайта | ссылка на `decisions[].id` |
+| снятие умолчания L0 соседа | `exclusions.lifted_markers[] {marker, decision_ref}` (пример: `LOOK-BG-WARM` ← `d-warm-field`) | ai-media, blender, ui — только для этого сайта | ссылка на `decisions[].id` |
 | `use` эффекта | `effects_by_section`, `treatment.effects` секции | F (`effects.yaml`), E (motion-spec), I | `ad_check`, `c1_check`: эффект ≤ уровня секции |
 
 ### 5.4. Правила

@@ -168,7 +168,7 @@ entries:
     replace_with: "сплошной фон из бренда; тонированная нейтраль + одна фотография или кадр продукта"
     cluster: [ai-saas-2024]
     k3_allow: gradient
-    neighbors: ["Hallmark anti-patterns: The purple-gradient hero", "ui 11/01 §18", "k3_checks K3-GRADIENT-TEXT (gradient)"]
+    neighbors: ["Hallmark anti-patterns: The purple-gradient hero", "ui 11/01 §18", "k3_checks LOOK-GRADIENT-TEXT (gradient)"]
     evidence: ["[консенсус]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -181,7 +181,7 @@ entries:
     signals:
       eye: "переливающийся заголовок в hero"
       metric: "computed `-webkit-background-clip: text` + градиент у узла ≥ 32 px (DOM)"
-      detector: "impeccable gradient-text; Hallmark gate 2; k3_checks K3-GRADIENT-TEXT; ui 11/04 m3"
+      detector: "impeccable gradient-text; Hallmark gate 2; k3_checks LOOK-GRADIENT-TEXT; ui 11/04 m3"
     detect: {method: [DOM, DET], auto: "да: impeccable, k3_checks"}
     threshold: "≥ 1 заголовок с градиентной заливкой без решения"
     first_seen: "2016–2018 (приём CSS `background-clip: text`, промо Apple, Stripe) [практика]"
@@ -255,14 +255,14 @@ entries:
     review_by: "2027-03-24"
 
   - id: warm-paper
-    aliases: ["тёплая бумага", "крем фоном", "кремовый фон", "K3-BG-WARM"]
+    aliases: ["тёплая бумага", "крем фоном", "кремовый фон", "LOOK-BG-WARM"]
     name_ru: "тёплая бумага (крем) фоном страницы"
     family: color
     sign: "фон страницы или секций — тонированный тёплый off-white около #F4F1EA (#f4f4ec, #f5f1e8, #efe9d9, #faf5eb) или коричнево-чёрный"
     signals:
       eye: "страница «на бумаге»: кремовое поле, тёплые нейтрали"
-      metric: "фон OKLCH H 45–115°, C 0,006–0,08, L ≥ 0,88 (или ≤ 0,30) на > 50 % первого экрана (k3_checks K3-BG-WARM)"
-      detector: "k3_checks K3-BG-WARM (warm); impeccable cream-palette (ложное на тонированной бумаге бренда — kimi D/02); taste premium-consumer палитра; higgsfield «беж/крем + латунь/глина/бордо»"
+      metric: "фон OKLCH H 45–115°, C 0,006–0,08, L ≥ 0,88 (или ≤ 0,30) на > 50 % первого экрана (k3_checks LOOK-BG-WARM)"
+      detector: "k3_checks LOOK-BG-WARM (warm); impeccable cream-palette (ложное на тонированной бумаге бренда — kimi D/02); taste premium-consumer палитра; higgsfield «беж/крем + латунь/глина/бордо»"
     detect: {method: [DOM, DET, MET], auto: "да: k3_checks, impeccable"}
     threshold: "тёплый фон без токена бренда или без решения art-direction"
     first_seen: "2024 (эстетика Anthropic и редакционных SaaS) [практика]"
@@ -276,7 +276,7 @@ entries:
     replace_with: "нейтраль бренда; белый или холодная нейтраль C ≤ 0,02; тёплое — только в фотографии"
     cluster: [editorial-luxe-2025]
     k3_allow: warm
-    neighbors: ["k3_checks K3-BG-WARM", "impeccable cream-palette", "taste v2 premium-consumer #f5f1ea #efeae0 …", "ui 11/04 §4.1 кластер 1", "kimi 05/03 §3.1 (Kilo: K3 5/9 против Fable 1/9)"]
+    neighbors: ["k3_checks LOOK-BG-WARM", "impeccable cream-palette", "taste v2 premium-consumer #f5f1ea #efeae0 …", "ui 11/04 §4.1 кластер 1", "kimi 05/03 §3.1 (Kilo: K3 5/9 против Fable 1/9)"]
     evidence: ["[консенсус]", "[данные: kimi 05/03 §2]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -289,7 +289,7 @@ entries:
     signals:
       eye: "«журнал о ремесле»: крем, антиква, тёплый акцент — вне зависимости от предмета"
       metric: "warm-paper + антиква в h1/h2 + акцент H 30–70° C > 0,08 (DOM)"
-      detector: "k3_checks K3-BG-WARM + K3-SERIF-DISPLAY; impeccable cream-palette + overused-font + italic-serif-display; taste v2 палитра premium-consumer"
+      detector: "k3_checks LOOK-BG-WARM + LOOK-SERIF-DISPLAY; impeccable cream-palette + overused-font + italic-serif-display; taste v2 палитра premium-consumer"
     detect: {method: [DOM, DET, IMG], auto: "да по частям; кластер не собирает ни один детектор (kimi D/02: кремовую секцию с антиквой и терракотой не поймал никто)"}
     threshold: "3 признака вместе (фон, антиква, тёплый акцент) без бренда"
     first_seen: "2024 (визуальный язык Anthropic и ИИ-редакционных сайтов) [практика]"
@@ -336,14 +336,14 @@ entries:
     review_by: "2027-03-24"
 
   - id: caps-eyebrow
-    aliases: ["эйбрау", "надзаголовок капсом", "kicker", "K3-EYEBROW", "K3-CAPS"]
+    aliases: ["эйбрау", "надзаголовок капсом", "kicker", "LOOK-EYEBROW", "LOOK-CAPS"]
     name_ru: "капс-надзаголовок над каждым заголовком (визуал)"
     family: chrome
     sign: "мелкий разреженный капс (≤ 14 px, трекинг ≥ 0,08 em) над H1 и каждым H2: «OUR SERVICES», «01 · THE TOUR»; иногда пилюлей"
     signals:
       eye: "у каждой секции «бирка» капсом"
       metric: "доля заголовков с uppercase-узлом < 14 px перед ними > 1/3 (k3_checks) или > 30 % (ui 11/04 m30); доля капс-узлов > 0,02 (m8)"
-      detector: "impeccable kicker-above-heading, hero-eyebrow-chip, wide-tracking, all-caps-body; k3_checks K3-EYEBROW, K3-CAPS; Hallmark gate 54 (tag-left/header-right — провал всегда)"
+      detector: "impeccable kicker-above-heading, hero-eyebrow-chip, wide-tracking, all-caps-body; k3_checks LOOK-EYEBROW, LOOK-CAPS; Hallmark gate 54 (tag-left/header-right — провал всегда)"
     detect: {method: [DOM, DET], auto: "да"}
     threshold: "надзаголовок над > 1/3 заголовков страницы (≤ ceil(N/3) по taste и higgsfield)"
     first_seen: "2019–2020 (SaaS-лендинги, Tailwind UI) [практика]"
@@ -357,20 +357,20 @@ entries:
     replace_with: "иерархия размером и весом заголовка; без надзаголовка (impeccable: «ban, not a default»; Hallmark: default OFF)"
     cluster: [editorial-luxe-2025]
     k3_allow: eyebrow
-    neighbors: ["ui 11/04 m8, m30", "k3_checks K3-EYEBROW (eyebrow), K3-CAPS (caps)", "impeccable kicker-above-heading, hero-eyebrow-chip", "Hallmark: Eyebrow on every section; gate 54", "taste v2 ≤ 1 на 3 секции; higgsfield ≤ ceil(N/3)", "text: COPY-C-18 (текст надзаголовка)", "site AIL-05 (категория в H1 или надзаголовке)"]
+    neighbors: ["ui 11/04 m8, m30", "k3_checks LOOK-EYEBROW (eyebrow), LOOK-CAPS (caps)", "impeccable kicker-above-heading, hero-eyebrow-chip", "Hallmark: Eyebrow on every section; gate 54", "taste v2 ≤ 1 на 3 секции; higgsfield ≤ ceil(N/3)", "text: COPY-C-18 (текст надзаголовка)", "site AIL-05 (категория в H1 или надзаголовке)"]
     evidence: ["[консенсус]", "[данные: kimi 05/03 §2 — капс-лейблы 14/15, доля узлов медиана 0,17 при пороге 0,02]", "[проверено: H/01 — impeccable kicker-above-heading и hero-eyebrow-chip: K3 4/7, сайты C 0/16]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
   - id: mono-captions
-    aliases: ["моно-подписи", "K3-MONO-LABELS"]
+    aliases: ["моно-подписи", "LOOK-MONO-LABELS"]
     name_ru: "моноширинный шрифт для мелких подписей без данных"
     family: type
     sign: "Space Mono, JetBrains Mono, Geist Mono в подписях, лейблах, меню — не для кода и чисел"
     signals:
       eye: "«технические» подписи у нетехнического продукта"
       metric: "font-family *mono* у узлов < 14 px без цифр и кода (DOM)"
-      detector: "ui 11/04 m33; k3_checks K3-MONO-LABELS (mono); impeccable overused-font (частично)"
+      detector: "ui 11/04 m33; k3_checks LOOK-MONO-LABELS (mono); impeccable overused-font (частично)"
     detect: {method: [DOM, DET], auto: "да"}
     threshold: "≥ 3 узлов моно без данных"
     first_seen: "2021 (dev-tools, крипто) [практика]"
@@ -384,20 +384,20 @@ entries:
     replace_with: "основная гарнитура, вторичный цвет; моно — для данных (ui 11/03 §5.2 п.7)"
     cluster: [editorial-luxe-2025]
     k3_allow: mono
-    neighbors: ["ui 11/04 m33", "k3_checks K3-MONO-LABELS", "kimi 05/03 §3.2"]
+    neighbors: ["ui 11/04 m33", "k3_checks LOOK-MONO-LABELS", "kimi 05/03 §3.2"]
     evidence: ["[консенсус]", "[данные: kimi 05/03]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
   - id: meta-dots-labels
-    aliases: ["A · B · C", "WORD — fragment", "K3-META-DOTS", "K3-NUMBERED", "K3-ARROWS", "нумерация 01/02/03", "стрелка в кнопке"]
+    aliases: ["A · B · C", "WORD — fragment", "LOOK-META-DOTS", "LOOK-NUMBERED", "LOOK-ARROWS", "нумерация 01/02/03", "стрелка в кнопке"]
     name_ru: "шаблонный хром: мета-строки через «·», лейблы «WORD / 04», декоративные 01/02/03, стрелки в кнопках"
     family: chrome
     sign: "«Design · 12 min · 2026», «OBJECT STUDY / 04», «ROOM 02 // GALLERY», крупные 01 02 03 у независимых блоков, «Начать →»"
     signals:
       eye: "служебные строки и номера без смысла"
       metric: "«·» в служебных строках > 5 узлов; `→ ↗` внутри button и a > 0; номера у непоследовательных блоков (DOM)"
-      detector: "ui 11/04 m31, m32, m34; k3_checks K3-META-DOTS (dots), K3-NUMBERED (numbered), K3-ARROWS (arrows); impeccable numbered-section-labels"
+      detector: "ui 11/04 m31, m32, m34; k3_checks LOOK-META-DOTS (dots), LOOK-NUMBERED (numbered), LOOK-ARROWS (arrows); impeccable numbered-section-labels"
     detect: {method: [DOM, DET], auto: "да"}
     threshold: "≥ 2 из четырёх признаков на странице"
     first_seen: "2021 [практика]"
@@ -411,20 +411,20 @@ entries:
     replace_with: "подписи с ролями; иконка-шеврон отдельным элементом или ничего (ui 11/04 §2.9)"
     cluster: [editorial-luxe-2025]
     k3_allow: dots
-    neighbors: ["ui 11/04 m31, m32, m34", "k3_checks K3-META-DOTS, K3-NUMBERED, K3-ARROWS", "text: тире и «·» в тексте — COPY (copy_lint)"]
+    neighbors: ["ui 11/04 m31, m32, m34", "k3_checks LOOK-META-DOTS, LOOK-NUMBERED, LOOK-ARROWS", "text: тире и «·» в тексте — COPY (copy_lint)"]
     evidence: ["[консенсус]", "[данные: kimi 05/03]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
   - id: pill-announcement-chip
-    aliases: ["пилюля-анонс", "K3-PILL", "hero eyebrow chip"]
+    aliases: ["пилюля-анонс", "LOOK-PILL", "hero eyebrow chip"]
     name_ru: "пилюля-анонс над H1 («New · Introducing X →»)"
     family: chrome
     sign: "скруглённая плашка над заголовком hero с «New», версией или ссылкой на анонс"
     signals:
       eye: "SaaS-hero 2023–2025"
       metric: "элемент border-radius ≥ 50 % высоты, высота ≤ 36 px, над H1 в первом экране (DOM)"
-      detector: "impeccable hero-eyebrow-chip; k3_checks K3-PILL (pill)"
+      detector: "impeccable hero-eyebrow-chip; k3_checks LOOK-PILL (pill)"
     detect: {method: [DOM, DET], auto: "да"}
     threshold: "пилюля над H1 без реального анонса"
     first_seen: "2021 (Tailwind UI, Vercel-подобные hero) [практика]"
@@ -438,20 +438,20 @@ entries:
     replace_with: "без плашки; новость — отдельным блоком или в шапке"
     cluster: [ai-saas-2024]
     k3_allow: pill
-    neighbors: ["impeccable hero-eyebrow-chip (K3 5/13)", "k3_checks K3-PILL", "kimi 05/03 §3.3"]
+    neighbors: ["impeccable hero-eyebrow-chip (K3 5/13)", "k3_checks LOOK-PILL", "kimi 05/03 §3.3"]
     evidence: ["[данные: kimi 05/03]", "[практика]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
   - id: accent-word-headline
-    aliases: ["выделенное слово", "курсивное слово в заголовке", "K3-ACCENT-WORD"]
+    aliases: ["выделенное слово", "курсивное слово в заголовке", "LOOK-ACCENT-WORD"]
     name_ru: "выделенное слово в заголовке (курсив, цвет, градиент)"
     family: type
     sign: "одно слово H1–H2 выделено курсивом антиквы, цветом акцента, градиентом или другим шрифтом: «Build the *future* of work»"
     signals:
       eye: "в каждом заголовке одно «особенное» слово"
       metric: "em, i, span с иным color/font-style/font-family внутри h1–h2 (DOM)"
-      detector: "ui 11/04 m7; k3_checks K3-ACCENT-WORD (accent-word); impeccable italic-serif-display; Gesso multicolor-heading (только латиница, ≥ 3 слов, цвет через класс во встроенном <style> — русский заголовок не ловит, kimi G/02 W03); Hallmark gate 38a"
+      detector: "ui 11/04 m7; k3_checks LOOK-ACCENT-WORD (accent-word); impeccable italic-serif-display; Gesso multicolor-heading (только латиница, ≥ 3 слов, цвет через класс во встроенном <style> — русский заголовок не ловит, kimi G/02 W03); Hallmark gate 38a"
     detect: {method: [DOM, DET], auto: "да: k3_checks; частично: Gesso, impeccable"}
     threshold: "≥ 1 заголовок с выделенным словом без решения; ≥ 2 — всегда"
     first_seen: "2021–2022 [практика]"
@@ -465,7 +465,7 @@ entries:
     replace_with: "иерархия размером, весом, расположением"
     cluster: [editorial-luxe-2025, ai-saas-2024]
     k3_allow: accent-word
-    neighbors: ["ui 11/04 m7", "k3_checks K3-ACCENT-WORD", "Hallmark: Italic headers; gate 38a", "impeccable italic-serif-display", "Gesso multicolor-heading"]
+    neighbors: ["ui 11/04 m7", "k3_checks LOOK-ACCENT-WORD", "Hallmark: Italic headers; gate 38a", "impeccable italic-serif-display", "Gesso multicolor-heading"]
     evidence: ["[консенсус]", "[данные: kimi 05/03 §3.2]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -634,14 +634,14 @@ entries:
     review_by: "2027-03-24"
 
   - id: glassmorphism-panels
-    aliases: ["стекло", "glassmorphism", "матовое стекло", "K3-GLASS"]
+    aliases: ["стекло", "glassmorphism", "матовое стекло", "LOOK-GLASS"]
     name_ru: "стекло (backdrop-filter) на карточках и панелях"
     family: surface
     sign: "полупрозрачные панели с размытием подложки, светлой обводкой — на карточках сетки, поверх градиента"
     signals:
       eye: "стекло поверх пустого градиента"
       metric: "элементов с backdrop-filter > 2 на экране (ui 11/04 m15) или стекло поверх фона без деталей (DOM)"
-      detector: "ui 11/04 m15; ui_audit D3; k3_checks K3-GLASS (glass); Hallmark: Glassmorphism without purpose"
+      detector: "ui 11/04 m15; ui_audit D3; k3_checks LOOK-GLASS (glass); Hallmark: Glassmorphism without purpose"
     detect: {method: [DOM, DET], auto: "да"}
     threshold: "> 2 стеклянных элементов на экран или стекло над одноцветным фоном"
     first_seen: "2020-12 — термин glassmorphism (Malewicz; ui 11/01 §6) [консенсус]"
@@ -655,7 +655,7 @@ entries:
     replace_with: "сплошные поверхности; глубина светлотой"
     cluster: [ai-saas-2024]
     k3_allow: glass
-    neighbors: ["ui 11/04 m15; ui 11/01 §6; ui_audit D3 (лимит стекла — бюджет производительности, не стиль: поправка PLAN)", "Hallmark: Glassmorphism without purpose", "k3_checks K3-GLASS"]
+    neighbors: ["ui 11/04 m15; ui 11/01 §6; ui_audit D3 (лимит стекла — бюджет производительности, не стиль: поправка PLAN)", "Hallmark: Glassmorphism without purpose", "k3_checks LOOK-GLASS"]
     evidence: ["[консенсус]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -932,14 +932,14 @@ entries:
     review_by: "2027-03-24"
 
   - id: marquee-strip
-    aliases: ["бегущая строка", "марки́за", "marquee", "K3-MARQUEE", "бегущая лента логотипов"]
+    aliases: ["бегущая строка", "марки́за", "marquee", "LOOK-MARQUEE", "бегущая лента логотипов"]
     name_ru: "бегущая строка слов или логотипов"
     family: motion
     sign: "бесконечная горизонтальная лента слов (часто капсом, крупно) или логотипов клиентов"
     signals:
       eye: "лента едет под hero или между секциями"
       metric: "сдвиг широкой дорожки между замерами (effects_probe.py marquee, C; speed_px_s) — скорость выше нормы лидеров E (`../05-motion/01-motion-principles-and-access.md`, выжимка; у K3 — в разы быстрее); бесконечная анимация без кнопки паузы"
-      detector: "impeccable marquee; k3_checks K3-MARQUEE (marquee, minor); Hallmark Marquee Hero (макроструктура) и Ft8 (без паузы — против gate 18)"
+      detector: "impeccable marquee; k3_checks LOOK-MARQUEE (marquee, minor); Hallmark Marquee Hero (макроструктура) и Ft8 (без паузы — против gate 18)"
     detect: {method: [DOM, REC, DET], auto: "да: C, impeccable, k3_checks"}
     threshold: "лента без паузы дольше 5 с рядом с текстом — B (WCAG 2.2.2); лента-декор слов без смысла — D"
     first_seen: "2020-03-31 — урок Codrops «CSS-only marquee» [данные: H/02]"
@@ -953,7 +953,7 @@ entries:
     replace_with: "статичная сетка логотипов; одна строка текста"
     cluster: [studio-awwwards-kit]
     k3_allow: marquee
-    neighbors: ["k3_checks K3-MARQUEE (creative — владелец визуальной приметы: AIL crosswalk)", "impeccable marquee", "kimi 05/03 бан-лист «no marquee»", "site AIL-19 (логотипы — с разрешением)", "ai-media 10/04 page_accept (движение на 6-й секунде без паузы — FAIL)", "[V:ufHQG7fDLQc 15:19] (basement: крупные слова под углом — «not that readable»)"]
+    neighbors: ["k3_checks LOOK-MARQUEE (creative — владелец визуальной приметы: AIL crosswalk)", "impeccable marquee", "kimi 05/03 бан-лист «no marquee»", "site AIL-19 (логотипы — с разрешением)", "ai-media 10/04 page_accept (движение на 6-й секунде без паузы — FAIL)", "[V:ufHQG7fDLQc 15:19] (basement: крупные слова под углом — «not that readable»)"]
     evidence: ["[данные: C, H/02]", "[стандарт: WCAG 2.2.2]", "[мнение: V:ufHQG7fDLQc 15:19]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -1095,14 +1095,14 @@ entries:
 
   # ---------------------------------------------------------------- подача продукта, образ, раскладка, мета
   - id: dashboard-in-browser-frame
-    aliases: ["дашборд в рамке браузера", "нарисованная рамка", "K3-DRAWN-CHROME"]
+    aliases: ["дашборд в рамке браузера", "нарисованная рамка", "LOOK-DRAWN-CHROME"]
     name_ru: "нарисованная рамка браузера или телефона вокруг дашборда в hero"
     family: product
     sign: "HTML/CSS-окно с тремя точками-светофором и адресной строкой вокруг выдуманного дашборда; CSS-телефон с вырезом"
     signals:
       eye: "«скриншот» продукта в фальшивом окне"
       metric: "три круглых элемента 8–14 px в ряд в верхнем углу блока + псевдоадресная строка (AIL-17 how)"
-      detector: "site AIL-17 (владелец структуры); Hallmark gate 47; k3_checks K3-DRAWN-CHROME (chrome)"
+      detector: "site AIL-17 (владелец структуры); Hallmark gate 47; k3_checks LOOK-DRAWN-CHROME (chrome)"
     detect: {method: [DOM, IMG, DET], auto: "да: k3_checks; AIL — нет"}
     threshold: "любая нарисованная рамка вокруг выдуманного интерфейса (AIL-17)"
     first_seen: "2018 [практика]"
@@ -1122,14 +1122,14 @@ entries:
     review_by: "2027-03-24"
 
   - id: hero-media-veil
-    aliases: ["фото-hero под вуалью", "видео под затемнением", "K3-HERO-OVERLAY", "stock-interior-under-overlay", "стоковый интерьер под вуалью"]
+    aliases: ["фото-hero под вуалью", "видео под затемнением", "LOOK-HERO-OVERLAY", "stock-interior-under-overlay", "стоковый интерьер под вуалью"]
     name_ru: "фото или видео на весь hero под тёмной вуалью, белый текст по центру"
     family: imagery
     sign: "полноэкранный кадр (часто сток или ИИ-интерьер) под полупрозрачной чёрной плёнкой 40–60 %, центрированный белый заголовок и две кнопки"
     signals:
       eye: "«отель, агентство, застройщик» по умолчанию"
-      metric: "медиа ≥ 90 % первого экрана + слой rgba(0,0,0,.3–.7) + текст по центру (k3_checks K3-HERO-OVERLAY)"
-      detector: "k3_checks K3-HERO-OVERLAY (photo-hero, major); ai-media IMG-M21, M22 (содержание кадра)"
+      metric: "медиа ≥ 90 % первого экрана + слой rgba(0,0,0,.3–.7) + текст по центру (k3_checks LOOK-HERO-OVERLAY)"
+      detector: "k3_checks LOOK-HERO-OVERLAY (photo-hero, major); ai-media IMG-M21, M22 (содержание кадра)"
     detect: {method: [DOM, IMG, DET], auto: "да: k3_checks"}
     threshold: "вуаль + центр + кадр без предмета продукта"
     first_seen: "2013–2014 (полноэкранные фото-hero, Bootstrap-темы) [практика]"
@@ -1143,7 +1143,7 @@ entries:
     replace_with: "композиция «текст ↔ медиа» D 04/02; настоящий кадр предмета"
     cluster: []
     k3_allow: photo-hero
-    neighbors: ["k3_checks K3-HERO-OVERLAY (creative — владелец визуальной приметы: AIL crosswalk)", "ai-media 06/03 (зона текста, F83)", "site AIL-49 (картинка без смысла над заголовком)", "A: решение «Отвес» — avoid (stock-interior-under-overlay)"]
+    neighbors: ["k3_checks LOOK-HERO-OVERLAY (creative — владелец визуальной приметы: AIL crosswalk)", "ai-media 06/03 (зона текста, F83)", "site AIL-49 (картинка без смысла над заголовком)", "A: решение «Отвес» — avoid (stock-interior-under-overlay)"]
     evidence: ["[практика]", "[данные: kimi 05/03]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -1264,7 +1264,7 @@ entries:
     signals:
       eye: "«экосистема» кольцами"
       metric: "≥ 6 иконок на окружностях с бесконечной rotate (DOM)"
-      detector: "внешние детекторы — нет; центр — AIL-06, K3-HERO-CENTER"
+      detector: "внешние детекторы — нет; центр — AIL-06, LOOK-HERO-CENTER"
     detect: {method: [IMG, DOM], auto: "нет"}
     threshold: "орбита в первом экране без реальных интеграций"
     first_seen: "2023 [практика]"

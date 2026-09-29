@@ -173,7 +173,7 @@
      "criteria": {"concept": {"result": "pass", "note": "отвес = один ответственный держит вертикаль ремонта"}, "brand": {"result": "pass", "note": "имя бренда"}, "execution": {"result": "pass", "note": "SVG-линия + CSS scroll-driven, фолбэк — статичная линия"}, "epoch": {"result": "na"}, "singularity": {"result": "pass", "note": "единственный приём"}},
      "why": "Буквальное прочтение допускается одним кандидатом; поворот — линия несёт факты этапов, а не украшает"},
     {"id": "d-stock-interior", "technique": "cliche:stock-interior-under-overlay", "decision": "avoid",
-     "criteria": {"concept": {"result": "fail", "note": "чужой интерьер"}, "brand": {"result": "na"}, "execution": {"result": "fail", "note": "фото под вуалью — K3-HERO-OVERLAY; тяжёлый первый экран"}, "epoch": {"result": "fail"}, "singularity": {"result": "na"}},
+     "criteria": {"concept": {"result": "fail", "note": "чужой интерьер"}, "brand": {"result": "na"}, "execution": {"result": "fail", "note": "фото под вуалью — LOOK-HERO-OVERLAY; тяжёлый первый экран"}, "epoch": {"result": "fail"}, "singularity": {"result": "na"}},
      "why": "Первый экран держится на прораба и фактах"}
   ],
   "exclusions": {

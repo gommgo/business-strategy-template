@@ -201,7 +201,7 @@ Durable кладёт «testimonial examples» в каркас и оставля�
 
 Сверка с внешними наборами (поле `crosswalk_external` YAML): гейты Hallmark 6 и 44 → AIL-06; 8 → AIL-01, AIL-03; 32 → AIL-03,
 AIL-08; 42 → AIL-11; 43 → AIL-21; 47 → AIL-17; гейты 49 и 56 — визуальные, у creative; приметы `k3_checks` kimi
-(K3-HERO-CENTER, K3-STATS-ROW, K3-THREE-CARDS, K3-MARQUEE) у нас — маркеры S с `allow`, а не запреты: бан-лист kimi
+(LOOK-HERO-CENTER, LOOK-STATS-ROW, LOOK-THREE-CARDS, LOOK-MARQUEE) у нас — маркеры S с `allow`, а не запреты: бан-лист kimi
 запрещал законные архетипы (аудит KIMI §4 п.1–2, п.4). Поправка к `../../kimi-research/08-director-loop-qa/02-checks-k3.md`
 §2 C для сайта: разрешение приметы K3 — не флаг запуска `--allow`, а записанная в брифе или плане причина, потому что пилюля
 над H1, ряд цифр, три карточки и центрированный hero законны только при реальных фактах и выбранной форме страницы.

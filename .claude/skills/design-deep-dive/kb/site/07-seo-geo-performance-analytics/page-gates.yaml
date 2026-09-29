@@ -596,7 +596,7 @@ gates:
     phase: build
     method: {tool: html, field: "текст и ссылки сохранённого HTML (page_gates.py --html)"}
     threshold: {B: "любая заглушка в видимом тексте | призыв с href=\"#\" без обработчика формы"}
-    owner: "K; text COPY-C-04; kimi F-FILLER"
+    owner: "K; text COPY-C-04; kimi HON-FILLER"
     status: v1
   - id: SG-CONTENT-06
     name: "Автоматические маркеры «ИИ-лендинга» (ai-landing-markers.yaml, способ DOM/SCR): нет маркеров серьёзности B"

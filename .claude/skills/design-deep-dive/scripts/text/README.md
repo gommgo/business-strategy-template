@@ -57,7 +57,7 @@ Xe без CUDA; Python 3.13, Node 24.21 (`node` из PATH или DDD_NODE), Play
 | Что | Где | Кому | Зачем |
 |---|---|---|---|
 | `before_after_build.py` | `../ux-research/99-raw/tools/` | J | сборка `before-after.tsv` (колонки `before, after, rule_ref, lang, why`); пути жёстко на `07-ux-writing/` — адаптировать, добавить `genre` |
-| `k3_checks.py` (F-NUMBERS, F-COPY, F-QUOTE, F-FILLER) | `../kimi-research/99-raw/tools/` | B2, J | идеи и код извлечения чисел и цитат для `claims_check.py`; проверка текста собранной страницы против `copy.md` |
+| `k3_checks.py` (HON-NUMBERS, HON-COPY, HON-QUOTE, HON-FILLER) | `../kimi-research/99-raw/tools/` | B2, J | идеи и код извлечения чисел и цитат для `claims_check.py`; проверка текста собранной страницы против `copy.md` |
 | `build_package.py check` | `../kimi-research/07-brief-handoff/templates/` | J | проверка экспорта copy deck в формат пакета kimi (без запуска Kimi) |
 | `asset_inventory.py` | `../ai-media-research/99-raw/tools/` | D | идеи разбора DOM и первого экрана для `copy_extract.py` |
 | `stand_run.py page` / `tally`; страница вариантов G/05 | `../ai-media-research/99-raw/tools/`; `../kimi-research/99-raw/experiments/G/05-variants-page/` | I | слепой попарный выбор текстов заказчиком в живой фазе (Брэдли — Терри, Уилсон) |

@@ -1257,11 +1257,11 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
         ev = {'page_bg': hexs(v['page_bg']), 'page_bg_oklch': oklch(v['page_bg']), 'warm_share_of_page': round(share, 2),
               'warm_sections': [{'el': s['el'], 'bg': hexs(s['bg']), 'oklch': oklch(s['bg'])} for s in warm_secs[:6]]}
         if page_w or share >= 0.25:
-            add(F, 'K3-BG-WARM', 'major', v['viewport'],
+            add(F, 'LOOK-BG-WARM', 'major', v['viewport'],
                 f"тёплый тонированный фон ({'страница ' + hexs(v['page_bg']) if page_w else 'секции'}; доля {share:.0%})",
                 ev, 'фон страницы и секций — нейтраль из токенов ДС (без крема, беж и коричнево-чёрного)', allowed)
         elif warm_secs:
-            add(F, 'K3-BG-WARM', 'minor', v['viewport'], f'тёплая тонированная секция ({len(warm_secs)} шт., доля {share:.0%})',
+            add(F, 'LOOK-BG-WARM', 'minor', v['viewport'], f'тёплая тонированная секция ({len(warm_secs)} шт., доля {share:.0%})',
                 ev, 'фон секции — поверхность из токенов ДС', allowed)
 
     # ---------- заголовки: акцентное слово, антиква, надзаголовки, пилюля, градиент
@@ -1271,13 +1271,13 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
     acc_h2 = [h for h in heads if h['tag'] != 'h1' and h['accent']]
     if acc_h1:
         a = acc_h1[0]['accent']
-        add(F, 'K3-ACCENT-WORD', 'major', desk['viewport'],
+        add(F, 'LOOK-ACCENT-WORD', 'major', desk['viewport'],
             f"в h1 выделено слово «{a['text']}» ({', '.join(a['reasons'])})",
             {'h1': acc_h1[0]['text'], 'accent': a, 'h2_with_accent': len(acc_h2)},
             f"H1 {acc_h1[0]['el']}: «{a['text']}» — как весь заголовок (та же гарнитура, начертание, цвет); иерархия — "
             'кеглем, насыщенностью и местом', allowed)
     elif len(acc_h2) >= 2:
-        add(F, 'K3-ACCENT-WORD', 'minor', desk['viewport'], f'выделенное слово в {len(acc_h2)} подзаголовках',
+        add(F, 'LOOK-ACCENT-WORD', 'minor', desk['viewport'], f'выделенное слово в {len(acc_h2)} подзаголовках',
             {'examples': [h['accent'] for h in acc_h2[:3]]}, 'снять выделенные слова в заголовках секций', allowed)
     serif_heads = [h for h in heads if family_kind(h['ff']) == 'serif']
     h2s = [h for h in heads if h['tag'] == 'h2']
@@ -1289,7 +1289,7 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
         disp = family_first((h1s or serif_heads)[0]['ff']) if (h1s or serif_heads) else ''
         pair = body_fam in SANS_DEFAULTS
         italic = any(h['style'] == 'italic' for h in serif_heads if h['tag'] == 'h1')
-        add(F, 'K3-SERIF-DISPLAY', 'major', desk['viewport'],
+        add(F, 'LOOK-SERIF-DISPLAY', 'major', desk['viewport'],
             f"антиква в заголовках: {disp or '?'}" + (f" + {body_fam} в тексте (пара «антиква + дефолтный гротеск»)" if pair else '')
             + (' курсивом' if italic else ''),
             {'display': disp, 'body': body_fam, 'serif_headings': len(serif_heads), 'headings': len(heads)},
@@ -1299,24 +1299,24 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
     eyebrowed = [h for h in heads12 if h['eyebrow']]
     limit = math.ceil(len(heads12) / per) if per and heads12 else None
     if eyebrowed and limit is not None and len(eyebrowed) > limit:
-        add(F, 'K3-EYEBROW', 'major', desk['viewport'],
+        add(F, 'LOOK-EYEBROW', 'major', desk['viewport'],
             f'капс-надзаголовки над {len(eyebrowed)} из {len(heads12)} заголовков H1, H2 (> ceil({len(heads12)}/{per}) '
             f'= {limit}; число — COPY-C-18)',
             {'examples': [h['eyebrow'] for h in eyebrowed[:4]], 'per_sections': per, 'limit': limit},
             f'надзаголовок — не чаще одного на {per} секции с заголовком, обычным регистром', allowed)
     elif eyebrowed:
-        add(F, 'K3-EYEBROW', 'info', desk['viewport'],
+        add(F, 'LOOK-EYEBROW', 'info', desk['viewport'],
             f'капс-надзаголовков {len(eyebrowed)} из {len(heads12)} заголовков H1, H2'
             + (f' (в пределах ceil(N/{per}))' if per else ' (порог COPY-C-18 не найден у владельца)'),
             {'examples': [h['eyebrow'] for h in eyebrowed[:3]], 'per_sections': per})
     pills = [h['pill'] for h in h1s if h['pill']]
     if pills:
-        add(F, 'K3-PILL', 'minor', desk['viewport'], f"пилюля над h1: «{pills[0]['text']}»", {'pill': pills[0]},
+        add(F, 'LOOK-PILL', 'minor', desk['viewport'], f"пилюля над h1: «{pills[0]['text']}»", {'pill': pills[0]},
             'снять пилюлю над H1', allowed)
     grad = desk['grad_text']
     if grad:
         in_head = any(h['grad'] or (h['accent'] and 'gradient' in h['accent']['reasons']) for h in heads)
-        add(F, 'K3-GRADIENT-TEXT', 'major' if in_head else 'minor', desk['viewport'],
+        add(F, 'LOOK-GRADIENT-TEXT', 'major' if in_head else 'minor', desk['viewport'],
             f'градиентный текст: {len(grad)} эл.', {'examples': grad[:3]},
             'снять background-clip: text с градиентом; цвет текста — сплошной токен', allowed)
 
@@ -1328,14 +1328,14 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
         centered = hero['h1_align'] == 'center' or (abs(hero['h1_cx'] - 0.5) < 0.05 and hero['h1_w'] < 0.9 and hero['hero_align'] == 'center')
         cont = hero.get('cue') or (hero.get('next_top') is not None and hero['next_top'] < vh - 1)
         if hero['h'] >= share * vh and centered and not cont:
-            add(F, 'K3-HERO-CENTER', 'major', desk['viewport'],
+            add(F, 'LOOK-HERO-CENTER', 'major', desk['viewport'],
                 f"hero {hero['h']:.0f} px при окне {vh} (≥ {share:.0%}, AIL-06), всё по центру, продолжения не видно",
                 {'hero': hero['el'], 'h': round(hero['h']), 'vh': vh, 'h1_align': hero['h1_align'],
                  'next_top': hero.get('next_top'), 'cue': hero.get('cue')},
                 f"hero {hero['el']}: высота по политике первого экрана плана, край следующей секции виден в окне "
                 f"{desk['viewport']}; центр — не больше четырёх элементов", allowed)
     if hero and (hero['media'] or hero['bg_url']) and (hero['overlays'] or any(b['veil_in_same'] for b in hero['bg_url'])):
-        add(F, 'K3-HERO-OVERLAY', 'major', desk['viewport'], 'фото или видео на весь hero под тёмной вуалью',
+        add(F, 'LOOK-HERO-OVERLAY', 'major', desk['viewport'], 'фото или видео на весь hero под тёмной вуалью',
             {'media': hero['media'][:2] + hero['bg_url'][:2], 'overlays': hero['overlays'][:2]},
             'снять вуаль: ассет героя из списка ассетов в естественном контрасте или сплошная поверхность', allowed)
 
@@ -1343,7 +1343,7 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
     rows = desk['rows']
     stats = [r for r in rows if r['nums'] >= 3 and not r['in_chrome'] and not sequence(r['num_texts'])]
     if stats:
-        add(F, 'K3-STATS-ROW', 'major', desk['viewport'], f"ряд крупных чисел: {', '.join(stats[0]['num_texts'][:5])}",
+        add(F, 'LOOK-STATS-ROW', 'major', desk['viewport'], f"ряд крупных чисел: {', '.join(stats[0]['num_texts'][:5])}",
             {'rows': [{'el': r['el'], 'numbers': r['num_texts']} for r in stats[:3]]},
             'снять ряд чисел, если каждое число не из фактов и бриф его не заказывал', allowed)
     cv_max = cards_cv_max()
@@ -1351,7 +1351,7 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
              r['min_w'] >= 0.2 and r['min_h'] >= 120 and r['content'] and not r['in_chrome'] and
              (cv_max is None or r.get('cv', 0) < cv_max)]
     if cards:
-        add(F, 'K3-THREE-CARDS', 'major', desk['viewport'],
+        add(F, 'LOOK-THREE-CARDS', 'major', desk['viewport'],
             f'три одинаковые карточки в ряд: {len(cards)} ряд(а)' + (f', вариация длины текстов < {cv_max:g} (AIL-07)'
                                                                    if cv_max else ''),
             {'rows': [{'el': c['el'], 'cv': c.get('cv')} for c in cards[:3]]},
@@ -1379,39 +1379,39 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
     n_leaves = max(1, len(leaves))
     caps = [l for l in leaves if l['tt'] == 'uppercase' and re.search(r'[A-Za-zА-Яа-яЁё]{2,}', l['text'])]
     if len(caps) / n_leaves > 0.02 and len(caps) >= 3:
-        add(F, 'K3-CAPS', 'minor', desk['viewport'], f'капс у {len(caps)} из {n_leaves} текстовых узлов ({len(caps) / n_leaves:.1%} > 2 %, m8)',
+        add(F, 'LOOK-CAPS', 'minor', desk['viewport'], f'капс у {len(caps)} из {n_leaves} текстовых узлов ({len(caps) / n_leaves:.1%} > 2 %, m8)',
             {'examples': [l['text'][:30] for l in caps[:5]]}, 'обычный регистр; капс — не больше одной малой роли', allowed)
     dots = [l for l in leaves if re.search(r'[·•]', l['text']) and len(l['text']) <= 90]
     if len(dots) > 5:
-        add(F, 'K3-META-DOTS', 'minor', desk['viewport'], f'мета-строки через «·»: {len(dots)} (> 5, m32)',
+        add(F, 'LOOK-META-DOTS', 'minor', desk['viewport'], f'мета-строки через «·»: {len(dots)} (> 5, m32)',
             {'examples': [l['text'][:50] for l in dots[:4]]}, 'подписи с ролями вместо строк «A · B · C», разделять '
             'пространством', allowed)
     arrows = [l for l in leaves if l['in_btn'] and (re.search(r'[→⟶➝➜⇢↘]', l['text'])
                                                     or ('↗' in l['text'] and not l.get('ext')))]
     if arrows:
-        add(F, 'K3-ARROWS', 'minor', desk['viewport'], f'стрелки в подписях кнопок и ссылок: {len(arrows)} (m34)',
+        add(F, 'LOOK-ARROWS', 'minor', desk['viewport'], f'стрелки в подписях кнопок и ссылок: {len(arrows)} (m34)',
             {'examples': [l['text'][:30] for l in arrows[:4]]}, 'стрелку — из текста подписи; иконка рядом — решение '
             'облика («↗» у ссылки на внешний сайт законна)', allowed)
     mono = [l for l in leaves if l['fs'] < 14 and family_kind(l['ff']) == 'mono' and not re.search(r'\d', l['text'])]
     if len(mono) >= 3:
-        add(F, 'K3-MONO-LABELS', 'minor', desk['viewport'], f'моноширинные подписи без данных: {len(mono)} (m33)',
+        add(F, 'LOOK-MONO-LABELS', 'minor', desk['viewport'], f'моноширинные подписи без данных: {len(mono)} (m33)',
             {'examples': [l['text'][:30] for l in mono[:4]]}, 'малые подписи — гарнитурой текста; моно — только код и '
             'данные', allowed)
     numbered = [l for l in leaves if re.match(r'^\s*0[1-9](?:\b|[.·/—-])', l['text']) and len(l['text']) <= 24]
     if len(numbered) >= 3:
-        add(F, 'K3-NUMBERED', 'minor', desk['viewport'], f'нумерация 01/02/03: {len(numbered)} (m31 — только для настоящей последовательности)',
+        add(F, 'LOOK-NUMBERED', 'minor', desk['viewport'], f'нумерация 01/02/03: {len(numbered)} (m31 — только для настоящей последовательности)',
             {'examples': [l['text'] for l in numbered[:4]]}, 'снять 01/02/03, если содержимое — не последовательность',
             allowed)
     if len(desk['glass']) > 2:
-        add(F, 'K3-GLASS', 'minor', desk['viewport'], f"стекло (backdrop-filter): {len(desk['glass'])} эл. (> 2, m15)",
+        add(F, 'LOOK-GLASS', 'minor', desk['viewport'], f"стекло (backdrop-filter): {len(desk['glass'])} эл. (> 2, m15)",
             {'examples': desk['glass'][:4]}, 'размытие фона — не больше одного слоя оверлея; поверхности сплошные', allowed)
     elif desk['glass']:
-        add(F, 'K3-GLASS', 'info', desk['viewport'], f"стекло: {len(desk['glass'])} эл.", {'examples': desk['glass'][:2]})
+        add(F, 'LOOK-GLASS', 'info', desk['viewport'], f"стекло: {len(desk['glass'])} эл.", {'examples': desk['glass'][:2]})
     if desk['marquee']:
-        add(F, 'K3-MARQUEE', 'minor', desk['viewport'], f"бегущая строка: {len(desk['marquee'])}", {'examples': desk['marquee'][:3]},
+        add(F, 'LOOK-MARQUEE', 'minor', desk['viewport'], f"бегущая строка: {len(desk['marquee'])}", {'examples': desk['marquee'][:3]},
             'снять бегущую строку или сделать статичной; если остаётся — кнопка паузы (WCAG 2.2.2)', allowed)
     if desk['drawn_dots']:
-        add(F, 'K3-DRAWN-CHROME', 'minor', desk['viewport'], f"нарисованный браузерный хром (три точки): {len(desk['drawn_dots'])}",
+        add(F, 'LOOK-DRAWN-CHROME', 'minor', desk['viewport'], f"нарисованный браузерный хром (три точки): {len(desk['drawn_dots'])}",
             {'examples': desk['drawn_dots'][:3]}, 'снять нарисованные рамки браузера и телефона; только настоящий кадр '
             'из ассетов', allowed)
 
@@ -1450,7 +1450,7 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
         for b in bad:
             uniq_bad.setdefault((b['el'], b['text'], b['ratio']), b)
         bad = sorted(uniq_bad.values(), key=lambda x: x['ratio'])
-        add(F, 'K3-WARM-CONTRAST', 'major', bad[0]['view'],
+        add(F, 'LOOK-WARM-CONTRAST', 'major', bad[0]['view'],
             f"текст тёплой палитры ниже порога: {len(bad)} узл., худший {bad[0]['ratio']}:1 ({bad[0]['fg']} на {bad[0]['bg']})",
             {'worst': bad[:6]}, f"поднять контраст {bad[0]['el']} до ≥ {bad[0]['need']}:1 более тёмным токеном текста")
 
@@ -1482,16 +1482,16 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
     other = [s for s in uniq.values() if s['kind'] != 'unsplash']
     if unsplash:
         ids = sorted({re.sub(r'^.*?(photo-[0-9]+-[0-9a-f]+).*$', r'\1', s['url']) for s in unsplash})
-        add(F, 'F-UNSPLASH', 'critical', 'all', f'фото Unsplash по памяти (хотлинк): {len(unsplash)} адрес(ов)',
+        add(F, 'HON-UNSPLASH', 'critical', 'all', f'фото Unsplash по памяти (хотлинк): {len(unsplash)} адрес(ов)',
             {'ids': ids[:10], 'where': [s['el'] for s in unsplash[:6]]},
             'снять адреса Unsplash: только файлы из списка ассетов с подписями оттуда; пустой слот — заглушка «placeholder»')
     if other:
-        add(F, 'F-STOCK', 'critical', 'all', f"стоковые и заглушечные сервисы: {', '.join(sorted({s['kind'] for s in other}))}",
+        add(F, 'HON-STOCK', 'critical', 'all', f"стоковые и заглушечные сервисы: {', '.join(sorted({s['kind'] for s in other}))}",
             {'urls': [s['url'] for s in other[:8]], 'where': [s['el'] for s in other[:6]]},
             'снять хотлинк стока и сервисов-заглушек: файлы из ассетов или локальная заглушка')
     hot_u = sorted({h['url'] for h in hot})
     if hot_u:
-        add(F, 'F-HOTLINK', 'major', 'all', f'внешние картинки (не сток): {len(hot_u)}', {'urls': hot_u[:8]},
+        add(F, 'HON-HOTLINK', 'major', 'all', f'внешние картинки (не сток): {len(hot_u)}', {'urls': hot_u[:8]},
             'утверждённые ассеты — локальными файлами (загрузки холста), без внешних адресов картинок', allowed)
 
     # ---------- подписи и alt против списка ассетов
@@ -1509,20 +1509,20 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
                 continue
             row = assets.get(c['file']) or next((r for k, r in assets.items() if c['file'].startswith(k) or k.startswith(c['file'])), None)
             if not row:
-                add(F, 'F-CAPTION', 'major', desk['viewport'], f"картинки «{c['file']}» нет в списке ассетов",
+                add(F, 'HON-CAPTION', 'major', desk['viewport'], f"картинки «{c['file']}» нет в списке ассетов",
                     {'img': c}, f"картинка {c['el']}: только файлы из списка ассетов")
                 continue
             if c['caption'] is not None and row['caption'] and norm_text(c['caption']) != norm_text(row['caption']):
-                add(F, 'F-CAPTION', 'critical', desk['viewport'], f"подпись не из списка ассетов: «{c['caption'][:60]}»",
+                add(F, 'HON-CAPTION', 'critical', desk['viewport'], f"подпись не из списка ассетов: «{c['caption'][:60]}»",
                     {'expected': row['caption'], 'found': c['caption'], 'file': row['file']},
                     f"подпись к {row['file']} — дословно «{row['caption']}» (список ассетов)")
             if c['alt'] is not None and row['alt'] and norm_text(c['alt']) != norm_text(row['alt']):
-                add(F, 'F-CAPTION', 'major', desk['viewport'], f"alt не из списка ассетов: «{(c['alt'] or '')[:60]}»",
+                add(F, 'HON-CAPTION', 'major', desk['viewport'], f"alt не из списка ассетов: «{(c['alt'] or '')[:60]}»",
                     {'expected': row['alt'], 'found': c['alt'], 'file': row['file']},
                     f"alt у {row['file']} — дословно «{row['alt']}» (список ассетов)")
     elif caps_all:
         sus = [c for c in caps_all if c['caption'] and re.search(r'\b(1[89]|20)\d{2}\b|[A-ZА-Я][a-zа-я]+,\s*[A-ZА-Я]', c['caption'])]
-        add(F, 'F-CAPTION', 'info', desk['viewport'], f'подписей и alt без списка ассетов для сверки: {len(caps_all)}'
+        add(F, 'HON-CAPTION', 'info', desk['viewport'], f'подписей и alt без списка ассетов для сверки: {len(caps_all)}'
             + (f'; с местом или датой (проверить глазами): {len(sus)}' if sus else ''), {'captions': caps_all[:8]})
 
     # ---------- числа против фактов и текстов: значение, единица и объект; строка факта без источника не легализует
@@ -1533,7 +1533,7 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
                 continue                           # заглушка; номер пункта или шага — не утверждение
             for c in number_claims(l['text']):
                 if re.fullmatch(r'0\d', c['raw'].strip()):
-                    continue                       # 01/02/03 — нумерация (K3-NUMBERED), не факт
+                    continue                       # 01/02/03 — нумерация (LOOK-NUMBERED), не факт
                 key = (c['value'], c['unit'], c['raw'])
                 if key in seen_nums:
                     continue
@@ -1545,19 +1545,19 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
         unknown = [n for n in page_nums if not claim_known(dict(n, objs=set(n['objs'])), known)]
         nosrc = (facts or {}).get('no_source') or []
         if unknown:
-            add(F, 'F-NUMBERS', 'critical', desk['viewport'],
+            add(F, 'HON-NUMBERS', 'critical', desk['viewport'],
                 f'чисел нет в фактах и текстах (значение, единица, объект): {len(unknown)}'
                 + (f'; строк фактов без источника: {len(nosrc)}' if nosrc else ''),
                 {'numbers': unknown[:12], 'facts_without_source': nosrc[:12]},
                 'каждое число — из фактов с источником (та же единица, тот же объект); выдуманное — [PLACEHOLDER: что] и '
                 'строка «Нет»: ' + ', '.join(n['raw'] for n in unknown[:6]))
         elif nosrc:
-            add(F, 'F-NUMBERS', 'info', desk['viewport'], f'строк фактов без источника: {len(nosrc)} (число они не легализуют)',
+            add(F, 'HON-NUMBERS', 'info', desk['viewport'], f'строк фактов без источника: {len(nosrc)} (число они не легализуют)',
                 {'facts_without_source': nosrc[:12]})
     elif page_nums:
         big = [n for n in page_nums if not re.fullmatch(r'\d', n['raw'])]
         if big:
-            add(F, 'F-NUMBERS', 'info', desk['viewport'], f'чисел на странице (нет фактов для сверки): {len(big)}',
+            add(F, 'HON-NUMBERS', 'info', desk['viewport'], f'чисел на странице (нет фактов для сверки): {len(big)}',
                 {'numbers': big[:12]})
 
     # ---------- текст против copy deck, заглушки, отзывы
@@ -1566,7 +1566,7 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
         cand = [b for b in desk['blocks'] if len(b['text'].split()) >= 3 and '[PLACEHOLDER' not in b['text'].upper()]
         miss = [b for b in cand if norm_text(b['text']) not in cn]
         if cand and len(miss) / len(cand) > 0.10:
-            add(F, 'F-COPY', 'major', desk['viewport'],
+            add(F, 'HON-COPY', 'major', desk['viewport'],
                 f'текст не из copy deck: {len(miss)} из {len(cand)} блоков ({len(miss) / len(cand):.0%} > 10 %)',
                 {'examples': [{'el': b['el'], 'text': b['text'][:90]} for b in miss[:10]]},
                 'тексты — дословно из copy.md входа: не переписывать, не сокращать, не дописывать; пробел — '
@@ -1577,7 +1577,7 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
         for m in re.finditer(rx, alltext, re.I):
             filler.append(m.group(0))
     if filler:
-        add(F, 'F-FILLER', 'critical', desk['viewport'], f"текст-заглушка: {', '.join(sorted(set(filler))[:6])}",
+        add(F, 'HON-FILLER', 'critical', desk['viewport'], f"текст-заглушка: {', '.join(sorted(set(filler))[:6])}",
             {'hits': sorted(set(filler))[:10]}, 'заменить «рыбу» текстом copy deck или [PLACEHOLDER: что]')
     quotes = [b for b in desk['blocks'] if b['quote'] and len(b['text'].split()) >= 5]
     if quotes:
@@ -1585,11 +1585,11 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
             src = norm_text(copy_text or '')
             unsourced = [q for q in quotes if norm_text(q['text']) not in src]
             if unsourced:
-                add(F, 'F-QUOTE', 'critical', desk['viewport'], f'отзыв или цитата без источника: {len(unsourced)}',
+                add(F, 'HON-QUOTE', 'critical', desk['viewport'], f'отзыв или цитата без источника: {len(unsourced)}',
                     {'examples': [q['text'][:90] for q in unsourced[:4]]},
                     'снять отзывы, которых нет в copy deck и фактах')
         else:
-            add(F, 'F-QUOTE', 'info', desk['viewport'], f'отзывы и цитаты — проверить источник: {len(quotes)}',
+            add(F, 'HON-QUOTE', 'info', desk['viewport'], f'отзывы и цитаты — проверить источник: {len(quotes)}',
                 {'examples': [q['text'][:90] for q in quotes[:4]]})
 
     # ---------- формы по lead-forms.yaml
@@ -1980,7 +1980,7 @@ def cmd_selftest(_a):
 
     # реестр примет, ширины и пороги владельцев
     reg = registry()
-    check('реестр: K3-EYEBROW → примета caps-eyebrow', reg['checks'].get('K3-EYEBROW', {}).get('tell') == 'caps-eyebrow')
+    check('реестр: LOOK-EYEBROW → примета caps-eyebrow', reg['checks'].get('LOOK-EYEBROW', {}).get('tell') == 'caps-eyebrow')
     check('ключи --allow — из реестра', {'warm', 'eyebrow', 'cards', 'arrows', 'external'} <= allow_keys(), sorted(allow_keys()))
     aw = acceptance_widths()
     check('ширины приёмки из файла: артборды 1440 и 390, вылет 320', (aw['artboards'], aw['overflow_only']) == ([1440, 390], 320), aw)
@@ -2038,36 +2038,36 @@ def cmd_selftest(_a):
               'eyebrow': {'text': 'НАДЗАГОЛОВОК'} if e else None, 'pill': None} for t, e in
              [('h1', True), ('h2', False), ('h2', True), ('h2', False), ('h2', False), ('h2', False)]]
     F = analyze('http://x/', [_view(headings=heads)], None, None, None, None, set(), [], opts)
-    check('надзаголовки 2 из 6 при ceil(6/3) = 2 — не примета', 'K3-EYEBROW' not in ids(F, ('major',)), F)
+    check('надзаголовки 2 из 6 при ceil(6/3) = 2 — не примета', 'LOOK-EYEBROW' not in ids(F, ('major',)), F)
     heads[3]['eyebrow'] = {'text': 'ЕЩЁ'}
     F = analyze('http://x/', [_view(headings=heads)], None, None, None, None, set(), [], opts)
     check('надзаголовки 3 из 6 — major, примета caps-eyebrow',
-          any(f['id'] == 'K3-EYEBROW' and f['severity'] == 'major' and f['tell'] == 'caps-eyebrow' for f in F), F)
+          any(f['id'] == 'LOOK-EYEBROW' and f['severity'] == 'major' and f['tell'] == 'caps-eyebrow' for f in F), F)
     F = analyze('http://x/', [_view(headings=heads)], None, None, None, None, {'eyebrow'}, [], opts)
-    check('--allow eyebrow снимает примету до info', all(f['severity'] == 'info' for f in F if f['id'] == 'K3-EYEBROW'))
+    check('--allow eyebrow снимает примету до info', all(f['severity'] == 'info' for f in F if f['id'] == 'LOOK-EYEBROW'))
     arrows = [_leaf('Записаться →', in_btn=True), _leaf('«Отвес»', in_btn=True), _leaf('Мы на Яндекс Картах ↗', in_btn=True, ext=True)]
     F = analyze('http://x/', [_view(leaves=arrows)], None, None, None, None, set(), [], opts)
-    ar = [f for f in F if f['id'] == 'K3-ARROWS']
+    ar = [f for f in F if f['id'] == 'LOOK-ARROWS']
     check('стрелки: «→» — примета, «»» и «↗» у внешней ссылки — нет', len(ar) == 1 and ar[0]['evidence']['examples'] == ['Записаться →'], ar)
     row = {'el': 'div.cards', 'n': 3, 'top': 800, 'w_ratio': 1.0, 'h_ratio': 1.0, 'min_w': 0.3, 'min_h': 200, 'same': True,
            'content': True, 'nums': 0, 'num_texts': [], 'in_chrome': False}
     steps = dict(row, n=3, nums=3, num_texts=['1', '2', '3'], cv=0.5)
     F = analyze('http://x/', [_view(rows=[steps])], None, None, None, None, set(), [], opts)
-    check('номера шагов 1, 2, 3 — не ряд чисел', 'K3-STATS-ROW' not in ids(F))
+    check('номера шагов 1, 2, 3 — не ряд чисел', 'LOOK-STATS-ROW' not in ids(F))
     F = analyze('http://x/', [_view(rows=[dict(steps, num_texts=['1 146', '4,8', '12 лет'])])], None, None, None, None, set(), [], opts)
-    check('ряд 1 146, 4,8, 12 лет — ряд чисел', 'K3-STATS-ROW' in ids(F))
+    check('ряд 1 146, 4,8, 12 лет — ряд чисел', 'LOOK-STATS-ROW' in ids(F))
     F = analyze('http://x/', [_view(rows=[dict(row, cv=0.1)])], None, None, None, None, set(), [], opts)
-    check('три карточки одной длины (CV 0.1) — примета', 'K3-THREE-CARDS' in ids(F))
+    check('три карточки одной длины (CV 0.1) — примета', 'LOOK-THREE-CARDS' in ids(F))
     F = analyze('http://x/', [_view(rows=[dict(row, cv=0.45)])], None, None, None, None, set(), [], opts)
-    check('три карточки разного содержания (CV 0.45) — не примета', 'K3-THREE-CARDS' not in ids(F))
+    check('три карточки разного содержания (CV 0.45) — не примета', 'LOOK-THREE-CARDS' not in ids(F))
     hero = {'el': 'section', 'h': 880, 'w': 1440, 'top': 0, 'h1_align': 'center', 'hero_align': 'center', 'h1_cx': 0.5, 'h1_w': 0.5,
             'min_height': '100vh', 'h1_lines': 2, 'media': [], 'bg_url': [], 'overlays': [], 'next_top': 900, 'cue': False}
     F = analyze('http://x/', [_view(hero=hero)], None, None, None, None, set(), [], opts)
-    check('hero 98 % по центру без продолжения — примета AIL-06', 'K3-HERO-CENTER' in ids(F))
+    check('hero 98 % по центру без продолжения — примета AIL-06', 'LOOK-HERO-CENTER' in ids(F))
     F = analyze('http://x/', [_view(hero=dict(hero, next_top=860))], None, None, None, None, set(), [], opts)
-    check('край следующей секции виден — не примета', 'K3-HERO-CENTER' not in ids(F))
+    check('край следующей секции виден — не примета', 'LOOK-HERO-CENTER' not in ids(F))
     F = analyze('http://x/', [_view(hero=dict(hero, h=820))], None, None, None, None, set(), [], opts)
-    check('hero 91 % окна (< 95 %) — не примета', 'K3-HERO-CENTER' not in ids(F))
+    check('hero 91 % окна (< 95 %) — не примета', 'LOOK-HERO-CENTER' not in ids(F))
     bento = {'el': 'div.grid', 'n': 6, 'one_radius': True, 'radius': '20px', 'one_padding': True, 'same': True, 'sizes': 2, 'rows': 2,
              'in_chrome': False}
     orbit = {'el': 'div.orbit', 'icons': 8, 'radius': 220, 'ring_cv': 0.04, 'top': 200}
@@ -2088,8 +2088,8 @@ def cmd_selftest(_a):
               _leaf('Звоните: +7 (831) 555-12-34')]
     facts = {'known': number_claims('Гарантия 3 года на работы; телефон +7 (831) 555-12-34'), 'no_source': [], 'rows': 2}
     F = analyze('http://x/', [_view(leaves=leaves)], None, facts, None, None, set(), [], opts)
-    nf = next((f for f in F if f['id'] == 'F-NUMBERS'), None)
-    check('F-NUMBERS: «3 дня» и «500 проектов» — выдумки, гарантия и телефон — факты, номер шага «2» — не число',
+    nf = next((f for f in F if f['id'] == 'HON-NUMBERS'), None)
+    check('HON-NUMBERS: «3 дня» и «500 проектов» — выдумки, гарантия и телефон — факты, номер шага «2» — не число',
           nf and sorted(n['raw'] for n in nf['evidence']['numbers']) == ['3', '500'], nf and nf['evidence'])
     check('находка честности несёт примету invented-numbers', nf and nf['tell'] == 'invented-numbers' and nf['group'] == 'honesty')
     form = {'el': 'form', 'in_dialog': False, 'text': 'Имя Телефон Нажимая кнопку, вы соглашаетесь с политикой',
@@ -2122,13 +2122,13 @@ def cmd_selftest(_a):
         check('статичная копия — окно своей рамки', (static_frame(cp), static_frame(__file__)) == (1440, None))
 
     # сводка: примета один раз, домены не складываются
-    F = [{'id': 'F-UNSPLASH', 'tell': 'stock-and-hotlink', 'group': 'honesty', 'severity': 'critical'},
-         {'id': 'F-STOCK', 'tell': 'stock-and-hotlink', 'group': 'honesty', 'severity': 'critical'},
-         {'id': 'K3-BG-WARM', 'tell': 'warm-paper', 'group': 'look', 'severity': 'major'},
-         {'id': 'K3-EYEBROW', 'tell': 'caps-eyebrow', 'group': 'look', 'severity': 'major'},
-         {'id': 'K3-META-DOTS', 'tell': 'meta-dots', 'group': 'look', 'severity': 'minor'},
-         {'id': 'K3-ARROWS', 'tell': 'arrow-in-button', 'group': 'look', 'severity': 'minor'},
-         {'id': 'K3-NUMBERED', 'tell': 'numbered-labels', 'group': 'look', 'severity': 'minor'}]
+    F = [{'id': 'HON-UNSPLASH', 'tell': 'stock-and-hotlink', 'group': 'honesty', 'severity': 'critical'},
+         {'id': 'HON-STOCK', 'tell': 'stock-and-hotlink', 'group': 'honesty', 'severity': 'critical'},
+         {'id': 'LOOK-BG-WARM', 'tell': 'warm-paper', 'group': 'look', 'severity': 'major'},
+         {'id': 'LOOK-EYEBROW', 'tell': 'caps-eyebrow', 'group': 'look', 'severity': 'major'},
+         {'id': 'LOOK-META-DOTS', 'tell': 'meta-dots', 'group': 'look', 'severity': 'minor'},
+         {'id': 'LOOK-ARROWS', 'tell': 'arrow-in-button', 'group': 'look', 'severity': 'minor'},
+         {'id': 'LOOK-NUMBERED', 'tell': 'numbered-labels', 'group': 'look', 'severity': 'minor'}]
     sm = summarize(F, set(), 'page')
     check('сводка: две проверки стока — одна примета', [t['tell'] for t in sm['tells']].count('stock-and-hotlink') == 1)
     check('сводка: тёплая бумага — домен page-visual', sm['domains'].get('page-visual', {}).get('tells') == ['warm-paper'], sm['domains'])

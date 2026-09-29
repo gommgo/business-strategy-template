@@ -161,7 +161,7 @@
   "exclusions": {
     "forbidden_hues": [{"from": 270, "to": 320, "reason": "пурпур и неон (IMG-M05); в бренде нет"}],
     "forbidden_markers": ["IMG-M02", "IMG-M03", "IMG-M05", "IMG-M07", "IMG-M09", "IMG-M10", "IMG-M13", "IMG-M14", "IMG-M21", "IMG-M22"],
-    "lifted_markers": [{"marker": "K3-BG-WARM", "decision_ref": "d-warm-field"}],
+    "lifted_markers": [{"marker": "LOOK-BG-WARM", "decision_ref": "d-warm-field"}],
     "k3_allow": ["warm"],
     "bans": ["латте-арт крупным планом", "зёрна паттерном по фону", "люди в кадре", "обещания о здоровье"]
   },

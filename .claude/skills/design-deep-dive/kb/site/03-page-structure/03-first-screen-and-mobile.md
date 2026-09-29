@@ -172,7 +172,7 @@ fold»), 12 Letter («No buttons in the fold»), 07 Manifesto (кнопка «fa
 
 | Норма | Что говорит | Основание | Где права |
 |---|---|---|---|
-| kimi | «hero height <= 80vh at 1440x900 so the next section starts in the first screen» (`08-director-loop-qa/02-checks-k3.md:183`, правка приметы K3-HERO-CENTER) | борьба с «hero 100vh, всё по центру» | `offer-cta`: следующая секция видна |
+| kimi | «hero height <= 80vh at 1440x900 so the next section starts in the first screen» (`08-director-loop-qa/02-checks-k3.md:183`, правка приметы LOOK-HERO-CENTER) | борьба с «hero 100vh, всё по центру» | `offer-cta`: следующая секция видна |
 | Hallmark | 70–90 % высоты первого экрана, `min-height: clamp(60vh, 75dvh, 88dvh)`; «Fit the fold»: на 13″ (~800 px) надзаголовок, заголовок, лид и призыв видны без прокрутки; `100vh/100dvh` — примета ИИ (гейт 6) [S6] | вкус и антишаблон | `offer-cta`, но `dvh` внутри — см. ниже |
 | Emil Kowalski | `.hero { min-height: 100svh }`; «`dvh` resizes as the URL bar collapses… causes layout shifts on marketing content mid-scroll. `svh` is stable» [S7] | поведение мобильных браузеров | `poster` на телефоне |
 
