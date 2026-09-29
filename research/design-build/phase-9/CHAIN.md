@@ -130,3 +130,49 @@
 - Не прочитано: правила `design_audit` вне мест правки.
 
 - Пара 2 закрыта: полный смоук — PASS 306, FAIL 0, XFAIL 2, XPASS 7 (строкой меньше — снятый `shot_v3.py`).
+
+## 05. D4 — сайт и подача (30.09, ≈ 32 мин, в уведомлении — 472 тыс. токенов)
+- Сделано: правлены `scripts/site/site_validate.py` (+79/−32), `page_anatomy.py` (+27/−9), `README.md` (+194/−476,
+  о текущем), `scripts/creative/spec_check.py` (+44/−20), `ad_check.py` (+46/−8), `README.md` (+10/−10), схема
+  `art-direction.v1.schema.json` (+2/−2), `smoke/creative.tsv` (−1); снят `scripts/creative/idle_probe.py` (−61).
+  OE2-01 — PJ-03 служебной страницы — `warning`; OE2-08 — SB-D02, SB-A02 `warning`, сообщения без номеров решений и
+  букв агентов; OE2-16, OV-6 — `EXAMPLES_TODAY`: самопроверка и `--all` на дате примеров; OE2-15 — нормы облика
+  `spec_check plan` `warning`, TR-S, TR-11, ссылки, TR-16 — `error`; OE2-14 — три нормы `ad_check` предупреждением с
+  основанием; OE2-18 — сеть `page_anatomy` только с `--net`; OE2-07 — README site о текущем.
+- Тесты: `site_validate --selftest` OK и с `--today 2026-11-02`; `--all --quiet` 0 `error`; `input-landing` — 7 → 3
+  `error`; самопроверки `spec_check`, `ad_check`, `design_audit` — OK; `page_anatomy` 33/33 без сети; смоук
+  `scripts/site` PASS 28, `scripts/creative` PASS 21; `sync_check all` — 0; `fixture_gen --all --check` — 5 из 5.
+- Отступления: самопроверка не слушает `--today`; `error` у битых ссылок подачи и TR-16; сообщения чищены шире пяти
+  кодов; основание в предупреждениях `ad_check`; `--net` с необязательным значением. Решение оркестратора — всё принято
+  (Р225).
+- Стыки: D8, D9 — «Для текстов» отчёта (`phases.md`, `_template/design/README.md`, `rules.md` R-STRUCT-002/-004,
+  указатель — снятый `idle_probe`, `page_anatomy --net`); ключ — 4B без изменений от D4.
+- Открыто: число направлений при строгом бренде, `territories.minItems`, PJ-03 `search-results-page` и
+  `html-sitemap-page` — замер Ф9; `idle_probe` и тяжести в прозе kb, TR-07/08, исследовательские ключи — Ф10.
+- Не прочитано: `page_anatomy.py` вне мест правки, `page_gates`, `geo_probe`, `ia_probe` целиком.
+
+## 06. D3 — тексты страницы (30.09, ≈ 44 мин, в уведомлении — 675 тыс. токенов)
+- Сделано: правлены `scripts/text/copydeck.py` (+270/−279), `claims_check.py` (+18/−2), `chain_inputs.py` (+66/−558),
+  `validate_voice.py` (+38/−23), README text (448 → 57 строк, о текущем), схема copy deck (`claims_allow`), строка S3
+  text 09/02 §1.1, `smoke/text.tsv`; сняты `copy_extract.py`, `check_intake.py`, `make_skeleton.py`, подкоманды
+  `verify-page`, `upgrade`, ветки v0, семь подкоманд `chain_inputs`. OE2-02 — пустая мета `warning` до `--final`;
+  OE2-04 — `claims_allow` `{rule, reason, by}` для `COPY-F-CLASS` и семейства `COPY-F-NUM`, `fact:<id>` сверяется;
+  OE2-22 — `meaning-claims` без возражений и страхов, `pending` — `warning` до `--final`; OE2-19 — мутации голоса только
+  в самопроверке; OE2-21 — сообщения без «Кварца» и «п. 16»; OE2-09 — строка S3; OE2-07 — README text.
+- Тесты: самопроверки `copydeck` 153, `claims_check` 129, `chain_inputs` 13/13, `validate_voice` — OK; смоук
+  `scripts/text` — PASS 21; `fixture_gen --all --check` — 5 из 5; `sync_check all` — 0; эталон смысла 8 · 53 · 78 →
+  4 · 32 · 57.
+- Отступления: `COPY-F-NUM` покрывает `NUM-MISMATCH`; сверка `fact:<id>`; мягкая схема записи; нет `meta` — `warning`
+  до `--final`. Решение оркестратора — всё принято (Р226).
+- Стыки: шаг Р — TR-04, TR-54, CN-95; D8, D9 — «Для текстов» отчёта; таблица §1.1 text 09/02 — D8 (Р226).
+- Открыто: `claims_check` на собранной странице не знает `claims_allow` — Ф9 или Ф10; упоминания снятого в `kb/` (21
+  файл) — список Ф10.
+- Не прочитано: `copydeck.py` и `claims_check.py` вне мест правки.
+
+## Шаг Р — реестр норм (30.09, оркестратор)
+- `tools/step_r.py --apply`: TR-04 и CN-95 — копии без `copy_extract.py`; TR-54 — копия `make_skeleton.py` →
+  `copydeck.py`, сторона без `make_skeleton.py` (путь стоял и в `sides` — сверх плана). `registry.py check` — 0,
+  `merge` — 521 строка, `canon` — 517 норм (3 строки изменились), `canon_check` — 0 / 0, `mapcheck` — «НЕ НОРМА» 0,
+  «ПРОВЕРИТЬ» 14.
+
+- Пара 3 закрыта: полный смоук — PASS 299, FAIL 0, XFAIL 2, XPASS 7 (минус 7 строк снятых утилит: text 6, creative 1).

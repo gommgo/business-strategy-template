@@ -419,7 +419,11 @@
   `.claude/skills/design-deep-dive/references/field-checklists.md`,
   `.claude/skills/design-deep-dive/references/knowledge-base.md`,
   `docs/projects/_template/site/README.md`,
-  `.claude/skills/design-deep-dive/kb/INDEX.md`
+  `.claude/skills/design-deep-dive/kb/INDEX.md`,
+  `.claude/skills/design-deep-dive/kb/text/09-ai-generation-evaluation/02-generation-pipeline.md`
+- **Строки kb сверх плана (Р226):** в `kb/text/09-ai-generation-evaluation/02-generation-pipeline.md` — только таблица
+  §1.1 и абзац после неё: ячейки S1, S4, S5, S6, S9 и команды сборки ведут к снятым `check_intake.py`, `make_skeleton.py`
+  и подкомандам `chain_inputs` — пилот идёт по этой таблице (`phases.md` §3); остальная проза файла — Ф10.
 - **Находки:** OE2-06, OE2-20, OE3-14, OE3-18, OE4-09, OE4-10, OE5-01, OE5-06, OE5-07, OE5-08, OE5-14, OE5-15, OE5-16,
   OE5-17, OE5-20, OE5-24, OE5-25, OV-5; разделы «Для текстов» зон D1–D7 о своих файлах.
 - **Что делает:** `phases.md` § Принципы всех этапов — единственное место правила «жёстко — пять гейтов, остальное —
