@@ -399,3 +399,30 @@
   не запускать до правки в Ф10.
 - Замер 3D на видеокарте — `web_view.py`, `gltf_load_bench.py` на эталоне (числа — Р208). Урок: `web_view.py` пишет в
   `web_stats.json` абсолютные пути модели и кадров — перед записью в пример базы путь делать относительным.
+
+## 17. C17 — тексты под утилиты (29.09, ≈ 53 мин, в уведомлении — 946 тыс. токенов)
+- Сделано: 28 правленых файлов (+943/−535), новых нет, кроме отчёта. Указатель `scripts/README.md`: окружение
+  (`install.sh` и ключи), `lib` (`kbpaths`, `docpaths`), строки правленых утилит по текущей справке, новые утилиты
+  `claude-design/`, § Ворота после сборки (кто кого зовёт, поля JSON — GT-43), § project в колонках указателя с
+  вызовом, выводом и кодами (F7-Z5c-2), § tests, § maint; находки refcheck 0 (F7-Z5c-1). Тексты `design-deep-dive`
+  (SKILL, phases, claude-design, field-checklists, draft-stable, workflow-patterns, knowledge-base), `design-audit`
+  (SKILL, rules — покрытие реестра утилитой), `screen-deep-dive`, `screen-audit` (ST-01, ST-05, ST-26), `mobile-audit`,
+  каноны `_template/` (design, screens, map, texts, site, mobile, форма `ready.yaml`), `kb/INDEX.md` §5, `docs/README.md`
+  (цепочка ворот), `docs/getting-started.md`. Правило «проверки — сигнализация, а не цель» — канон в `phases.md
+  § Принципы всех этапов`, ссылки из SKILL, workflow-patterns, design-audit. F7-Z5b-2 — ключи карт на месте, правка не
+  нужна. BL-7 — указатель.
+- Тесты: refcheck по 27 md — 0 находок на тронутых строках (указатель 0/0); `smoke --uncovered` 0, `--validate` 0;
+  `sync_check descriptions` OK (17 485), `copies` OK; `mapcheck INDEX.md` — как до правки; `design_audit --selftest` OK;
+  команды из текстов прогнаны на фикстурах `input-landing`, `input-cabinet`, `package-landing`, `package-defects`.
+- Отступления: снято исключение «макет на неутверждённых текстах» (гейт Р203 и R-MAT-012 утилиты); `package` с аудитом
+  без `error` — не менял (развилка); ключи `mockup_checks` — в протоколе, не в `phases.md`; цепочка ворот полностью — в
+  указателе и `docs/README.md`, в остальных — ссылки; строки неправленых утилит указателя — как были.
+- Стыки: шаг 11 — путь агента «SKILL → указатель § project → строка «Проверка» этапа → `--help`»; оркестратору —
+  `run_checks.py --help` падает трассировкой, `VISUAL` R-VIS-005 без слова «пакет», остаток `scripts/text/last-run.txt`.
+- Открыто: развилки §3 п. 1–2; тексты `kb/` под утилиты — Ф10 (перечень — отчёт §8); README доменов site и text — Ф10.
+- Не прочитано: in-drafts (правило); тексты `kb/` — только места ссылок; код — справка и места стыков.
+- Решения оркестратора (строка DECISIONS «Ф8, зона 17 принята»): исключение «макет на неутверждённых текстах» снято —
+  (а), по гейту Р203; условие `package` — отчёт `/design-audit`, его `error` — доклад и решение заказчика с записью,
+  жёстко — только принятый макет с совпавшим отпечатком (правка при приёмке в `phases.md`, `design/README.md`,
+  `design-audit/SKILL.md`); заголовок R-STRUCT-008 — «файл дизайна не по форме»; `run_checks.py --help` и описание
+  R-VIS-005 в `design_audit.py` — поправлены при приёмке.

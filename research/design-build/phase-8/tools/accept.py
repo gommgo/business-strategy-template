@@ -96,6 +96,10 @@ ZONE_GLOBS = {
             f"{SK}/kb/text/07-seo-geo-copy/*", f"{SK}/kb/text/08-russian-legal-typography/typography-rules.yaml",
             f"{SK}/kb/text/09-ai-generation-evaluation/*", f"{SK}/kb/common/tells.yaml", f"{SK}/scripts/tests/smoke/text.tsv"],
     "C16": [f"{SK}/scripts/maint/*", f"{SK}/kb/common/README.md", f"{SK}/scripts/tests/smoke/maint.tsv"],
+    "C17": [f"{SK}/scripts/README.md", f"{SK}/SKILL.md", f"{SK}/references/*", f"{SK}/kb/INDEX.md",
+            ".claude/skills/design-audit/*", ".claude/skills/screen-deep-dive/*", ".claude/skills/screen-audit/*",
+            ".claude/skills/mobile-audit/references/rules.md", "docs/projects/_template/*", "docs/README.md",
+            "docs/getting-started.md"],
 }
 ALWAYS = ["research/design-build/phase-8/reports/*"]
 IGNORE = ["research/design-build/phase-4/inputs/in-drafts/*", "research/design-build/phase-8/briefs/*",
