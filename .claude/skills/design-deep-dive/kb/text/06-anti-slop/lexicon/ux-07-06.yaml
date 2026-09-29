@@ -1,29 +1,61 @@
-# СГЕНЕРИРОВАНО 99-raw/tools/ux_dict_to_yaml.py — руками не править.
-# Источник: ../ux/07-ux-writing/06-banned-words-and-patterns.md (sha256 ee35b9a3e32a1fdd…).
-# Правила ux для интерфейсных ролей (appliesTo/excludes по §7.2); для роли marketing и «для сайта» —
-# поправки в marketing-role.yaml (overrides). Группа UX: находка, перекрытая своим правилом, скрывается.
-date: '2026-09-24'
+# Собирает scripts/text/ux_dict_to_yaml.py — руками не править.
+# Источники: ../ux/07-ux-writing/06-banned-words-and-patterns.md (sha256 ee35b9a3e32a1fdd…) — правила;
+#            ../ux/07-ux-writing/01-principles-voice-and-tone.md §12 (sha256 876099d3e38f73e7…) — длины.
+# Правила ux по ролям §7.2 (appliesTo, excludes); в жанрах сайта — поправки marketing-role.yaml (overrides с
+# полем genres). Группа UX: находка, перекрытая своим правилом того же места, скрывается.
 version: 1
-owner: C (волна 1), конвертер
-inherits: ux 07/06 §1–§6
+owner: ux 07/06 (канон), конвертер scripts/text/ux_dict_to_yaml.py
+inherits: ux 07/06 §1–§6, ux 07/01 §12
 source_file: ../ux/07-ux-writing/06-banned-words-and-patterns.md
 source_sha256_16: ee35b9a3e32a1fdd
-source_date: '2026-09-22'
+lengths_source_file: ../ux/07-ux-writing/01-principles-voice-and-tone.md
+lengths_source_sha256_16: 876099d3e38f73e7
+roles:
+- title
+- subtitle
+- section-title
+- label
+- checkbox-label
+- placeholder
+- hint
+- caption
+- action
+- link
+- nav
+- tab
+- column-header
+- status
+- badge
+- toast
+- banner
+- inline-message
+- error
+- empty
+- confirm-title
+- confirm-body
+- tooltip
+- setting-description
+- email
+- push
+- aria
+- alt
+- marketing
+- help
+- user-content
+- body
 rules:
 - id: ux-1-01
   marker_id: ux:07-06#1
   level: error
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])мощн\w*
+  pattern: (?<![А-Яа-яЁё])мощн[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §1: «мощный, мощнейший» — назвать, что делает функция'
   replacement: назвать, что делает функция
   source: ux 07/06 §1 (стр. 40)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: &id001
+  appliesTo:
   - label
   - action
   - error
@@ -41,15 +73,21 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])бесшовн\w*
+  pattern: (?<![А-Яа-яЁё])бесшовн[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §1: «бесшовный, бесшовно» — убрать или «без перехода», «в одном окне»'
   replacement: убрать или «без перехода», «в одном окне»
   source: ux 07/06 §1 (стр. 41)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id001
+  appliesTo:
+  - label
+  - action
+  - error
+  - status
+  - hint
+  - empty
+  - confirm-title
+  - confirm-body
   excludes:
   - marketing
   - help
@@ -59,16 +97,22 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])интуитивн\w*
+  pattern: (?<![А-Яа-яЁё])интуитивн[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §1: «интуитивный, интуитивно понятный» — убрать (`../01-foundations/02-myths-and-misapplied-laws.md`:
     «интуитивно понятный» — миф)'
   replacement: 'убрать (`../01-foundations/02-myths-and-misapplied-laws.md`: «интуитивно понятный» — миф)'
   source: ux 07/06 §1 (стр. 42)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id001
+  appliesTo:
+  - label
+  - action
+  - error
+  - status
+  - hint
+  - empty
+  - confirm-title
+  - confirm-body
   excludes:
   - marketing
   - help
@@ -78,15 +122,21 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])уникальн\w*
+  pattern: (?<![А-Яа-яЁё])уникальн[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §1: «уникальный» — назвать отличие конкретно'
   replacement: назвать отличие конкретно
   source: ux 07/06 §1 (стр. 43)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id001
+  appliesTo:
+  - label
+  - action
+  - error
+  - status
+  - hint
+  - empty
+  - confirm-title
+  - confirm-body
   excludes:
   - marketing
   - help
@@ -96,15 +146,21 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])(инновационн|передов|революционн)\w*
+  pattern: (?<![А-Яа-яЁё])(инновационн|передов|революционн)[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §1: «инновационный, передовой, революционный» — убрать'
   replacement: убрать
   source: ux 07/06 §1 (стр. 44)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id001
+  appliesTo:
+  - label
+  - action
+  - error
+  - status
+  - hint
+  - empty
+  - confirm-title
+  - confirm-body
   excludes:
   - marketing
   - help
@@ -114,15 +170,21 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])(ключев|важнейш|решающ)\w*
+  pattern: (?<![А-Яа-яЁё])(ключев|важнейш|решающ)[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §1: «ключевой, важнейший, решающий» — убрать или назвать роль'
   replacement: убрать или назвать роль
   source: ux 07/06 §1 (стр. 45)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id001
+  appliesTo:
+  - label
+  - action
+  - error
+  - status
+  - hint
+  - empty
+  - confirm-title
+  - confirm-body
   excludes:
   - marketing
   - help
@@ -132,15 +194,21 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])(комплексн|всесторонн|многогранн)\w*
+  pattern: (?<![А-Яа-яЁё])(комплексн|всесторонн|многогранн)[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §1: «комплексный, всесторонний, многогранный» — перечислить, что входит'
   replacement: перечислить, что входит
   source: ux 07/06 §1 (стр. 46)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id001
+  appliesTo:
+  - label
+  - action
+  - error
+  - status
+  - hint
+  - empty
+  - confirm-title
+  - confirm-body
   excludes:
   - marketing
   - help
@@ -150,15 +218,21 @@ rules:
   level: warning
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])(эффективн|оптимальн)\w*
+  pattern: (?<![А-Яа-яЁё])(эффективн|оптимальн)[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §1: «эффективный, оптимальный» — число или критерий'
   replacement: число или критерий
   source: ux 07/06 §1 (стр. 47)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id001
+  appliesTo:
+  - label
+  - action
+  - error
+  - status
+  - hint
+  - empty
+  - confirm-title
+  - confirm-body
   excludes:
   - marketing
   - help
@@ -174,10 +248,16 @@ rules:
     [V:vxGrL3YSBvw 26:32]'
   replacement: убрать; «making things easy is not the same as making things seem easy» [V:vxGrL3YSBvw 26:32]
   source: ux 07/06 §1 (стр. 48)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id001
+  appliesTo:
+  - label
+  - action
+  - error
+  - status
+  - hint
+  - empty
+  - confirm-title
+  - confirm-body
   excludes:
   - marketing
   - help
@@ -187,15 +267,21 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])(наслаждайт|откройте для себя|погрузит)\w*
+  pattern: (?<![А-Яа-яЁё])(наслаждайт|откройте для себя|погрузит)[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §1: «наслаждайтесь, откройте для себя, погрузитесь» — убрать'
   replacement: убрать
   source: ux 07/06 §1 (стр. 49)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id001
+  appliesTo:
+  - label
+  - action
+  - error
+  - status
+  - hint
+  - empty
+  - confirm-title
+  - confirm-body
   excludes:
   - marketing
   - help
@@ -210,10 +296,16 @@ rules:
   message: 'ux 07/06 §1: «решение (как замена названию функции)» — назвать функцию'
   replacement: назвать функцию
   source: ux 07/06 §1 (стр. 50)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id001
+  appliesTo:
+  - label
+  - action
+  - error
+  - status
+  - hint
+  - empty
+  - confirm-title
+  - confirm-body
   excludes:
   - marketing
   - help
@@ -223,15 +315,21 @@ rules:
   level: warning
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])(экосистем|платформ)\w*
+  pattern: (?<![А-Яа-яЁё])(экосистем|платформ)[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §1: «экосистема, платформа (о себе)» — назвать продукт'
   replacement: назвать продукт
   source: ux 07/06 §1 (стр. 51)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id001
+  appliesTo:
+  - label
+  - action
+  - error
+  - status
+  - hint
+  - empty
+  - confirm-title
+  - confirm-body
   excludes:
   - marketing
   - help
@@ -241,15 +339,21 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (ваш\w* надёжн|всё, что вам нужно)
+  pattern: (ваш[A-Za-zА-Яа-яЁё0-9_]* надёжн|всё, что вам нужно)
   flags: i
   message: 'ux 07/06 §1: «ваш надёжный помощник, всё, что нужно» — убрать'
   replacement: убрать
   source: ux 07/06 §1 (стр. 52)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id001
+  appliesTo:
+  - label
+  - action
+  - error
+  - status
+  - hint
+  - empty
+  - confirm-title
+  - confirm-body
   excludes:
   - marketing
   - help
@@ -264,9 +368,7 @@ rules:
   message: 'ux 07/06 §1: «! в конце маркетинговой фразы» — убрать'
   replacement: убрать
   source: ux 07/06 §1 (стр. 53)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   appliesTo:
   - title
   - error
@@ -286,9 +388,7 @@ rules:
   message: 'ux 07/06 §2.1: «является, являются» — тире, глагол или ничего: «Поле является обязательным» → «Обязательное поле»'
   replacement: 'тире, глагол или ничего: «Поле является обязательным» → «Обязательное поле»'
   source: ux 07/06 §2.1 (стр. 70)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -298,14 +398,12 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: представля\w* собой
+  pattern: представля[A-Za-zА-Яа-яЁё0-9_]* собой
   flags: i
   message: 'ux 07/06 §2.1: «представляет собой» — тире или «это»'
   replacement: тире или «это»
   source: ux 07/06 §2.1 (стр. 71)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -315,14 +413,12 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])осуществ\w*
+  pattern: (?<![А-Яа-яЁё])осуществ[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §2.1: «осуществить, осуществление, осуществляется» — конкретный глагол: «осуществить сохранение» → «сохранить»'
   replacement: 'конкретный глагол: «осуществить сохранение» → «сохранить»'
   source: ux 07/06 §2.1 (стр. 72)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -332,18 +428,17 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])производ[иия]\w*
+  pattern: (?<![А-Яа-яЁё])производ(?:ить|ит|ят|ится|ятся|ил|ила|или|ило|имый|имая|имое|имые)(?![А-Яа-яЁё])
   flags: i
   message: 'ux 07/06 §2.1: «производить, производится (о действии)» — конкретный глагол'
   replacement: конкретный глагол
   source: ux 07/06 §2.1 (стр. 73)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
   - user-content
+  note: 'оговорка ячейки канона: «о действии» — формы глагола «производить»: «производитель», «производительность» — не канцелярит'
 - id: ux-2-1-05
   marker_id: ux:07-06#2.1
   level: error
@@ -354,9 +449,7 @@ rules:
   message: 'ux 07/06 §2.1: «выполнить действие, произвести операцию» — назвать действие'
   replacement: назвать действие
   source: ux 07/06 §2.1 (стр. 74)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -366,14 +459,12 @@ rules:
   level: warning
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])(обеспечива|позволя|способству)\w*
+  pattern: (?<![А-Яа-яЁё])(обеспечива|позволя|способству)[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §2.1: «обеспечивает, позволяет, способствует» — конкретный глагол: «позволяет сохранить» → «сохраняет»'
   replacement: 'конкретный глагол: «позволяет сохранить» → «сохраняет»'
   source: ux 07/06 §2.1 (стр. 75)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -383,14 +474,12 @@ rules:
   level: warning
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])реализ\w*
+  pattern: (?<![А-Яа-яЁё])реализ[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §2.1: «реализовать, реализация» — «сделать», «настроить»'
   replacement: «сделать», «настроить»
   source: ux 07/06 §2.1 (стр. 76)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -400,14 +489,12 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: име[еюя]\w* возможност
+  pattern: име[еюя][A-Za-zА-Яа-яЁё0-9_]* возможност
   flags: i
   message: 'ux 07/06 §2.1: «имеет возможность, имеется возможность» — глагол'
   replacement: глагол
   source: ux 07/06 §2.1 (стр. 77)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -422,9 +509,7 @@ rules:
   message: 'ux 07/06 §2.1: «в случае необходимости» — «при необходимости» или убрать'
   replacement: «при необходимости» или убрать
   source: ux 07/06 §2.1 (стр. 78)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -439,9 +524,7 @@ rules:
   message: 'ux 07/06 §2.1: «с целью, в целях» — «чтобы»'
   replacement: «чтобы»
   source: ux 07/06 §2.1 (стр. 79)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -456,9 +539,7 @@ rules:
   message: 'ux 07/06 §2.1: «в связи с тем что, ввиду того что» — «потому что»'
   replacement: «потому что»
   source: ux 07/06 §2.1 (стр. 80)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -473,9 +554,7 @@ rules:
   message: 'ux 07/06 §2.1: «на данный момент, в настоящее время» — «сейчас» или убрать'
   replacement: «сейчас» или убрать
   source: ux 07/06 §2.1 (стр. 81)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -490,9 +569,7 @@ rules:
   message: 'ux 07/06 §2.1: «в дальнейшем, впоследствии» — «потом», «позже»'
   replacement: «потом», «позже»
   source: ux 07/06 §2.1 (стр. 82)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -507,9 +584,7 @@ rules:
   message: 'ux 07/06 §2.2: «данный, данная, данное, данные (как указательное)» — «этот» или убрать: «данная операция» → «операция»'
   replacement: '«этот» или убрать: «данная операция» → «операция»'
   source: ux 07/06 §2.2 (стр. 88)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -519,14 +594,12 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (выше|ниже)(указанн|следующ|перечисленн)\w*
+  pattern: (выше|ниже)(указанн|следующ|перечисленн)[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §2.2: «вышеуказанный, нижеследующий, вышеперечисленный» — убрать; в интерфейсе ещё и directional language'
   replacement: убрать; в интерфейсе ещё и directional language
   source: ux 07/06 §2.2 (стр. 89)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -536,14 +609,12 @@ rules:
   level: warning
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])соответствующ\w*
+  pattern: (?<![А-Яа-яЁё])соответствующ[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §2.2: «соответствующий» — назвать, какой именно'
   replacement: назвать, какой именно
   source: ux 07/06 §2.2 (стр. 90)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -553,14 +624,12 @@ rules:
   level: warning
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])определённ\w*
+  pattern: (?<![А-Яа-яЁё])определённ[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §2.2: «определённый (в значении «некоторый»)» — убрать или назвать'
   replacement: убрать или назвать
   source: ux 07/06 §2.2 (стр. 91)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -570,15 +639,13 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: будет (выполнен|произведен|осуществлен)\w*
+  pattern: будет (выполнен|произведен|осуществлен)[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §2.3: «будет выполнено, будет произведено, будет осуществлено» — «выполним», «сделаем»'
   replacement: «выполним», «сделаем»
   source: ux 07/06 §2.3 (стр. 101)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: &id002
+  appliesTo:
   - body
   - hint
   - empty
@@ -586,27 +653,26 @@ rules:
   - marketing
   - help
   - user-content
-  note: роль «body» отсутствует в закрытом списке §7.2 ux 07/06 — в copy_lint не срабатывает, пока роль не уточнит ux
 - id: ux-2-3-02
   marker_id: ux:07-06#2.3
   level: warning
   lang: ru
   group: UX
-  pattern: будет (отправлен|создан|удален|удалён)\w*
+  pattern: будет (отправлен|создан|удален|удалён)[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §2.3: «будет отправлено, будет создано (о действии системы)» — «отправим», «создадим» — или безлично
     «Отправлено»'
   replacement: «отправим», «создадим» — или безлично «Отправлено»
   source: ux 07/06 §2.3 (стр. 102)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id002
+  appliesTo:
+  - body
+  - hint
+  - empty
   excludes:
   - marketing
   - help
   - user-content
-  note: роль «body» отсутствует в закрытом списке §7.2 ux 07/06 — в copy_lint не срабатывает, пока роль не уточнит ux
 - id: ux-2-3-03
   marker_id: ux:07-06#2.3
   level: warning
@@ -617,47 +683,45 @@ rules:
   message: 'ux 07/06 §2.3: «взимается, начисляется, списывается (без субъекта)» — назвать, кто взимает'
   replacement: назвать, кто взимает
   source: ux 07/06 §2.3 (стр. 103)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id002
+  appliesTo:
+  - body
+  - hint
+  - empty
   excludes:
   - marketing
   - help
   - user-content
-  note: роль «body» отсутствует в закрытом списке §7.2 ux 07/06 — в copy_lint не срабатывает, пока роль не уточнит ux
 - id: ux-2-3-04
   marker_id: ux:07-06#2.3
   level: warning
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])\w+ируется(?![А-Яа-яЁё])
+  pattern: (?<![А-Яа-яЁё])[A-Za-zА-Яа-яЁё0-9_]+ируется(?![А-Яа-яЁё])
   flags: i
   message: 'ux 07/06 §2.3: «активируется, настраивается (о действии системы)» — «активируем», «настроим»'
   replacement: «активируем», «настроим»
   source: ux 07/06 §2.3 (стр. 104)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id002
+  appliesTo:
+  - body
+  - hint
+  - empty
   excludes:
   - marketing
   - help
   - user-content
-  note: роль «body» отсутствует в закрытом списке §7.2 ux 07/06 — в copy_lint не срабатывает, пока роль не уточнит ux
 - id: ux-2-4-01
   marker_id: ux:07-06#2.4
   level: warning
   lang: ru
   group: UX
-  pattern: (\w+(ния|ции|ости|ения|ования|ства|ента|ора|а|я)\s+){3,}
+  pattern: ([A-Za-zА-Яа-яЁё0-9_]+(ния|ции|ости|ения|ования|ства|ента|ора|а|я)\s+){3,}
   flags: i
   message: 'ux 07/06 §2.4: «цепочка родительных падежей (3+ существительных)» — «Отчёт о движении средств» — разбить цепочку'
   replacement: «Отчёт о движении средств» — разбить цепочку
   source: ux 07/06 §2.4 (стр. 119)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -667,14 +731,12 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])успешн\w*
+  pattern: (?<![А-Яа-яЁё])успешн[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §3.1: «успешно» — убрать: «Платёж отправлен»'
   replacement: 'убрать: «Платёж отправлен»'
   source: ux 07/06 §3.1 (стр. 133)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -684,14 +746,12 @@ rules:
   level: warning
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])автоматическ\w*
+  pattern: (?<![А-Яа-яЁё])автоматическ[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §3.1: «автоматически» — убрать'
   replacement: убрать
   source: ux 07/06 §3.1 (стр. 134)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -706,9 +766,7 @@ rules:
   message: 'ux 07/06 §3.1: «вручную» — убрать'
   replacement: убрать
   source: ux 07/06 §3.1 (стр. 135)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -718,14 +776,12 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])(не)?корректн\w*
+  pattern: (?<![А-Яа-яЁё])(не)?корректн[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §3.1: «корректно, некорректно» — назвать требование'
   replacement: назвать требование
   source: ux 07/06 §3.1 (стр. 136)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -740,9 +796,7 @@ rules:
   message: 'ux 07/06 §3.2: «Каталог (как название)» — назвать содержимое: «Обои»'
   replacement: 'назвать содержимое: «Обои»'
   source: ux 07/06 §3.2 (стр. 145)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   appliesTo:
   - title
   - nav
@@ -760,13 +814,18 @@ rules:
   message: 'ux 07/06 §3.2: «Список (как название)» — назвать содержимое'
   replacement: назвать содержимое
   source: ux 07/06 §3.2 (стр. 146)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
+  appliesTo:
+  - title
+  - subtitle
+  - section-title
+  - nav
+  - tab
   excludes:
   - marketing
   - help
   - user-content
+  note: 'оговорка ячейки канона: «как название» — роли названий'
 - id: ux-3-2-03
   marker_id: ux:07-06#3.2
   level: error
@@ -777,13 +836,18 @@ rules:
   message: 'ux 07/06 §3.2: «Перечень (как название)» — назвать содержимое'
   replacement: назвать содержимое
   source: ux 07/06 §3.2 (стр. 147)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
+  appliesTo:
+  - title
+  - subtitle
+  - section-title
+  - nav
+  - tab
   excludes:
   - marketing
   - help
   - user-content
+  note: 'оговорка ячейки канона: «как название» — роли названий'
 - id: ux-3-2-04
   marker_id: ux:07-06#3.2
   level: warning
@@ -794,13 +858,17 @@ rules:
   message: 'ux 07/06 §3.2: «Продукция, Продукты, Услуги, Решения (как раздел)» — перечислить'
   replacement: перечислить
   source: ux 07/06 §3.2 (стр. 148)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
+  appliesTo:
+  - title
+  - section-title
+  - nav
+  - tab
   excludes:
   - marketing
   - help
   - user-content
+  note: 'оговорка ячейки канона: «как раздел» — роли названий'
 - id: ux-3-2-05
   marker_id: ux:07-06#3.2
   level: warning
@@ -811,9 +879,7 @@ rules:
   message: 'ux 07/06 §3.2: «Дополнительно, Прочее, Разное, Другое» — переклассифицировать'
   replacement: переклассифицировать
   source: ux 07/06 §3.2 (стр. 149)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -828,9 +894,7 @@ rules:
   message: 'ux 07/06 §3.2: «Информация о …, Данные о …» — убрать обёртку: «Информация о тарифе» → «Тариф»'
   replacement: 'убрать обёртку: «Информация о тарифе» → «Тариф»'
   source: ux 07/06 §3.2 (стр. 150)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -845,9 +909,7 @@ rules:
   message: 'ux 07/06 §3.2: «Подробнее (как единственный текст ссылки)» — назвать, что откроется'
   replacement: назвать, что откроется
   source: ux 07/06 §3.2 (стр. 151)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   appliesTo:
   - link
   excludes:
@@ -864,9 +926,7 @@ rules:
   message: 'ux 07/06 §3.2: «Основной, Главный (в подписи)» — убрать'
   replacement: убрать
   source: ux 07/06 §3.2 (стр. 152)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -881,9 +941,7 @@ rules:
   message: 'ux 07/06 §3.2: «Уважаемые …, Здравствуйте (в интерфейсе)» — убрать'
   replacement: убрать
   source: ux 07/06 §3.2 (стр. 153)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - email
   - help
@@ -899,9 +957,7 @@ rules:
   message: 'ux 07/06 §3.3: «Что-то пошло не так» — назвать, что именно не удалось, и что делать'
   replacement: назвать, что именно не удалось, и что делать
   source: ux 07/06 §3.3 (стр. 163)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -916,9 +972,7 @@ rules:
   message: 'ux 07/06 §3.3: «Произошла ошибка, Неизвестная ошибка, Системная ошибка» — назвать, что остановилось'
   replacement: назвать, что остановилось
   source: ux 07/06 §3.3 (стр. 164)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -928,14 +982,12 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: ^Ошибка\s*[№#]?\s*\d+
+  pattern: ^Ошибка\s*[№#]?\s*[0-9]+
   flags: i
   message: 'ux 07/06 §3.3: «Ошибка <код> как единственный текст» — человеческое сообщение; код второстепенно'
   replacement: человеческое сообщение; код второстепенно
   source: ux 07/06 §3.3 (стр. 165)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -950,9 +1002,7 @@ rules:
   message: 'ux 07/06 §3.3: «Ой, Упс, Ойой» — убрать'
   replacement: убрать
   source: ux 07/06 §3.3 (стр. 166)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -962,14 +1012,12 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])(неверн|неправильн)\w*
+  pattern: (?<![А-Яа-яЁё])(неверн|неправильн)[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §3.3: «Неверно, неверный, неправильно» — сказать, что нужно: «Формат: дд.мм.гггг»'
   replacement: 'сказать, что нужно: «Формат: дд.мм.гггг»'
   source: ux 07/06 §3.3 (стр. 167)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -979,14 +1027,12 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (?<![А-Яа-яЁё])недопустим\w*
+  pattern: (?<![А-Яа-яЁё])недопустим[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §3.3: «Недопустимо, недопустимый» — то же'
   replacement: то же
   source: ux 07/06 §3.3 (стр. 168)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -996,14 +1042,12 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: (запрещен|не разрешен)\w*
+  pattern: (запрещен|не разрешен)[A-Za-zА-Яа-яЁё0-9_]*
   flags: i
   message: 'ux 07/06 §3.3: «Запрещено, не разрешено» — сказать, что разрешено'
   replacement: сказать, что разрешено
   source: ux 07/06 §3.3 (стр. 169)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1018,9 +1062,7 @@ rules:
   message: 'ux 07/06 §3.3: «Вы не заполнили, вы ошиблись, вы забыли» — безлично или инструкция'
   replacement: безлично или инструкция
   source: ux 07/06 §3.3 (стр. 170)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1035,9 +1077,7 @@ rules:
   message: 'ux 07/06 §3.3: «Обратитесь к администратору (без идентификатора и контакта)» — добавить, к кому и с чем'
   replacement: добавить, к кому и с чем
   source: ux 07/06 §3.3 (стр. 171)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1052,9 +1092,7 @@ rules:
   message: 'ux 07/06 §3.3: «Пожалуйста, попробуйте позже (без срока и без причины)» — назвать причину и срок'
   replacement: назвать причину и срок
   source: ux 07/06 §3.3 (стр. 172)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1069,9 +1107,7 @@ rules:
   message: 'ux 07/06 §3.3: «Проверьте правильность заполнения» — назвать конкретное поле и требование'
   replacement: назвать конкретное поле и требование
   source: ux 07/06 §3.3 (стр. 173)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1086,9 +1122,7 @@ rules:
   message: 'ux 07/06 §3.3: «Приносим извинения за доставленные неудобства» — сказать, что случилось и что делается'
   replacement: сказать, что случилось и что делается
   source: ux 07/06 §3.3 (стр. 174)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1103,9 +1137,7 @@ rules:
   message: 'ux 07/06 §3.3: «Доступ запрещён» — «Нет доступа к разделу «…»»'
   replacement: «Нет доступа к разделу «…»»
   source: ux 07/06 §3.3 (стр. 175)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1121,9 +1153,7 @@ rules:
     + действие'
   replacement: заголовок + что появится + действие
   source: ux 07/06 §3.3 (стр. 176)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1138,9 +1168,7 @@ rules:
   message: 'ux 07/06 §3.4: «Вы уверены» — «Удалить проект «Альфа»?»'
   replacement: «Удалить проект «Альфа»?»
   source: ux 07/06 §3.4 (стр. 182)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1155,9 +1183,7 @@ rules:
   message: 'ux 07/06 §3.4: «Вы действительно хотите» — то же'
   replacement: то же
   source: ux 07/06 §3.4 (стр. 183)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1172,9 +1198,7 @@ rules:
   message: 'ux 07/06 §3.4: «Хотите ли вы» — «Получить чек?»'
   replacement: «Получить чек?»
   source: ux 07/06 §3.4 (стр. 184)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1189,9 +1213,7 @@ rules:
   message: 'ux 07/06 §3.4: «Подтвердите действие» — назвать действие'
   replacement: назвать действие
   source: ux 07/06 §3.4 (стр. 185)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1206,9 +1228,7 @@ rules:
   message: 'ux 07/06 §3.4: «Нажмите здесь, нажмите сюда» — назвать действие'
   replacement: назвать действие
   source: ux 07/06 §3.4 (стр. 186)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1223,9 +1243,7 @@ rules:
   message: 'ux 07/06 §3.4: «Введите / Укажите / Заполните в подписи поля» — существительное: «Фамилия»'
   replacement: 'существительное: «Фамилия»'
   source: ux 07/06 §3.4 (стр. 187)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   appliesTo:
   - label
   - placeholder
@@ -1243,9 +1261,7 @@ rules:
   message: 'ux 07/06 §3.4: «по данной операции, для данного действия» — убрать'
   replacement: убрать
   source: ux 07/06 §3.4 (стр. 188)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1260,10 +1276,8 @@ rules:
   message: 'ux 07/06 §3.5: ««Нет, я не хочу …»»'
   replacement: ''
   source: ux 07/06 §3.5 (стр. 200)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: &id003
+  appliesTo:
   - action
   - link
   - checkbox-label
@@ -1282,10 +1296,14 @@ rules:
   message: 'ux 07/06 §3.5: ««Нет, спасибо, мне не нужн…»»'
   replacement: ''
   source: ux 07/06 §3.5 (стр. 201)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id003
+  appliesTo:
+  - action
+  - link
+  - checkbox-label
+  - label
+  - confirm-title
+  - confirm-body
   excludes:
   - user-content
 - id: ux-3-5-03
@@ -1298,10 +1316,14 @@ rules:
   message: 'ux 07/06 §3.5: ««Я не хочу экономить / защищать / быть в курсе»»'
   replacement: ''
   source: ux 07/06 §3.5 (стр. 202)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id003
+  appliesTo:
+  - action
+  - link
+  - checkbox-label
+  - label
+  - confirm-title
+  - confirm-body
   excludes:
   - user-content
 - id: ux-3-5-04
@@ -1314,10 +1336,14 @@ rules:
   message: 'ux 07/06 §3.5: ««Мне это неинтересно» как подпись кнопки отказа»'
   replacement: ''
   source: ux 07/06 §3.5 (стр. 203)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id003
+  appliesTo:
+  - action
+  - link
+  - checkbox-label
+  - label
+  - confirm-title
+  - confirm-body
   excludes:
   - user-content
 - id: ux-3-5-05
@@ -1330,10 +1356,14 @@ rules:
   message: 'ux 07/06 §3.5: ««Продолжить без защиты / без скидки / без выгоды»»'
   replacement: ''
   source: ux 07/06 §3.5 (стр. 204)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id003
+  appliesTo:
+  - action
+  - link
+  - checkbox-label
+  - label
+  - confirm-title
+  - confirm-body
   excludes:
   - user-content
 - id: ux-3-6-01
@@ -1346,10 +1376,8 @@ rules:
   message: 'ux 07/06 §3.6: «Два отрицания в одной подписи» — «Получать письма» (галочка = согласие)'
   replacement: «Получать письма» (галочка = согласие)
   source: ux 07/06 §3.6 (стр. 218)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: &id004
+  appliesTo:
   - action
   - link
   - checkbox-label
@@ -1369,9 +1397,7 @@ rules:
   message: 'ux 07/06 §3.6: «Отрицание в подписи чекбокса» — «Показывать подсказки» (галочка = включено)'
   replacement: «Показывать подсказки» (галочка = включено)
   source: ux 07/06 §3.6 (стр. 219)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   appliesTo:
   - checkbox-label
   excludes:
@@ -1381,15 +1407,19 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: не \w+ ничего,? кроме
+  pattern: не [A-Za-zА-Яа-яЁё0-9_]+ ничего,? кроме
   flags: i
   message: 'ux 07/06 §3.6: «Отрицание с исключением» — переписать утвердительно'
   replacement: переписать утвердительно
   source: ux 07/06 §3.6 (стр. 220)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id004
+  appliesTo:
+  - action
+  - link
+  - checkbox-label
+  - label
+  - confirm-title
+  - confirm-body
   excludes:
   - user-content
 - id: ux-3-6-04
@@ -1397,15 +1427,19 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: ^(Отказаться|Не сохранять|Не применять)\b.*\?$
+  pattern: ^(Отказаться|Не сохранять|Не применять)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_])).*\?$
   flags: i
   message: 'ux 07/06 §3.6: «Вопрос в отрицательной форме» — «Отменить изменения?» с кнопками-глаголами'
   replacement: «Отменить изменения?» с кнопками-глаголами
   source: ux 07/06 §3.6 (стр. 221)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-  appliesTo: *id004
+  appliesTo:
+  - action
+  - link
+  - checkbox-label
+  - label
+  - confirm-title
+  - confirm-body
   excludes:
   - user-content
 - id: ux-3-7-01
@@ -1418,9 +1452,7 @@ rules:
   message: 'ux 07/06 §3.7: «справа, слева, сверху, снизу, выше, ниже (как указание на элемент)» — назвать элемент по имени'
   replacement: назвать элемент по имени
   source: ux 07/06 §3.7 (стр. 231)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1430,14 +1462,13 @@ rules:
   level: error
   lang: en
   group: UX
-  pattern: \b(oops|uh[- ]?oh|whoops|yikes)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(oops|uh[-
+    ]?oh|whoops|yikes)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.1: «Oops, Uh-oh, Whoops, Yikes» — убрать'
   replacement: убрать
   source: ux 07/06 §4.1 (стр. 244)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1452,9 +1483,7 @@ rules:
   message: 'ux 07/06 §4.1: «Something went wrong» — назвать, что не удалось, и что делать'
   replacement: назвать, что не удалось, и что делать
   source: ux 07/06 §4.1 (стр. 245)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1464,14 +1493,13 @@ rules:
   level: error
   lang: en
   group: UX
-  pattern: \b(an error occurred|unknown error|unexpected error)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(an error
+    occurred|unknown error|unexpected error)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.1: «An error occurred, Unknown error, Unexpected error» — назвать, что остановилось'
   replacement: назвать, что остановилось
   source: ux 07/06 §4.1 (стр. 246)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1481,14 +1509,12 @@ rules:
   level: error
   lang: en
   group: UX
-  pattern: ^Error\s*\d+
+  pattern: ^Error\s*[0-9]+
   flags: i
   message: 'ux 07/06 §4.1: «Error \d+ как единственный текст» — человеческое сообщение'
   replacement: человеческое сообщение
   source: ux 07/06 §4.1 (стр. 247)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1498,14 +1524,12 @@ rules:
   level: error
   lang: en
   group: UX
-  pattern: \b(invalid|illegal|incorrect)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(invalid|illegal|incorrect)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.1: «Invalid, illegal, incorrect» — сказать, что нужно'
   replacement: сказать, что нужно
   source: ux 07/06 §4.1 (стр. 248)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1515,14 +1539,13 @@ rules:
   level: error
   lang: en
   group: UX
-  pattern: \bare you sure\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))are you
+    sure(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.1: «Are you sure» — вопрос с объектом'
   replacement: вопрос с объектом
   source: ux 07/06 §4.1 (стр. 249)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1537,9 +1560,7 @@ rules:
   message: 'ux 07/06 §4.1: «Click here, Here, Read more, Learn more (как весь текст ссылки)» — назвать назначение'
   replacement: назвать назначение
   source: ux 07/06 §4.1 (стр. 250)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   appliesTo:
   - link
   excludes:
@@ -1556,9 +1577,7 @@ rules:
   message: 'ux 07/06 §4.1: «Submit» — назвать результат'
   replacement: назвать результат
   source: ux 07/06 §4.1 (стр. 251)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   appliesTo:
   - action
   excludes:
@@ -1575,9 +1594,7 @@ rules:
   message: 'ux 07/06 §4.1: «OK, Ok, Okay (как подтверждение действия)» — «Close», «Got it», глагол'
   replacement: «Close», «Got it», глагол
   source: ux 07/06 §4.1 (стр. 252)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   appliesTo:
   - action
   excludes:
@@ -1589,14 +1606,12 @@ rules:
   level: warning
   lang: en
   group: UX
-  pattern: \bplease\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))please(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.1: «Please (более одного раза на экран)» — оставить один раз или убрать'
   replacement: оставить один раз или убрать
   source: ux 07/06 §4.1 (стр. 253)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1608,14 +1623,12 @@ rules:
   level: warning
   lang: en
   group: UX
-  pattern: \b(simply|just|easily|quickly)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(simply|just|easily|quickly)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.1: «Simply, Just, Easily, Quickly» — убрать'
   replacement: убрать
   source: ux 07/06 §4.1 (стр. 254)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1625,14 +1638,13 @@ rules:
   level: error
   lang: en
   group: UX
-  pattern: \b(powerful|seamless|intuitive|robust|cutting[- ]edge|best[- ]in[- ]class)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(powerful|seamless|intuitive|robust|cutting[-
+    ]edge|best[- ]in[- ]class)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.1: «Powerful, Seamless, Intuitive, Robust, Cutting-edge, Best-in-class» — назвать, что делает'
   replacement: назвать, что делает
   source: ux 07/06 §4.1 (стр. 255)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1642,14 +1654,13 @@ rules:
   level: error
   lang: en
   group: UX
-  pattern: \b(unleash|unlock the power|supercharge|revolutioniz|delight your)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(unleash|unlock
+    the power|supercharge|revolutioniz|delight your)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.1: «Unleash, Unlock the power, Supercharge, Revolutionize, Delight» — убрать'
   replacement: убрать
   source: ux 07/06 §4.1 (стр. 256)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1664,9 +1675,7 @@ rules:
   message: 'ux 07/06 §4.1: «We''re sorry for any inconvenience» — сказать, что случилось и что делается'
   replacement: сказать, что случилось и что делается
   source: ux 07/06 §4.1 (стр. 257)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1676,14 +1685,12 @@ rules:
   level: warning
   lang: en
   group: UX
-  pattern: \bunfortunately\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))unfortunately(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.1: «Unfortunately» — сразу к сути'
   replacement: сразу к сути
   source: ux 07/06 §4.1 (стр. 258)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1693,14 +1700,13 @@ rules:
   level: warning
   lang: en
   group: UX
-  pattern: \b(above|below|to the (right|left)|on the (right|left))\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(above|below|to
+    the (right|left)|on the (right|left))(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.1: «Above, below, to the right, to the left» — назвать элемент'
   replacement: назвать элемент
   source: ux 07/06 §4.1 (стр. 259)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1710,14 +1716,12 @@ rules:
   level: error
   lang: en
   group: UX
-  pattern: \b(he/she|s/he|\(s\)he|his/her)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(he/she|s/he|\(s\)he|his/her)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.1: «he/she, s/he, (s)he» — «you», множественное, роль, единичное «they»'
   replacement: «you», множественное, роль, единичное «they»
   source: ux 07/06 §4.1 (стр. 260)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1727,14 +1731,13 @@ rules:
   level: error
   lang: en
   group: UX
-  pattern: \b(master[- /]slave|whitelist|blacklist)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(master[-
+    /]slave|whitelist|blacklist)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.1: «master/slave, whitelist, blacklist» — primary/subordinate, allowlist, blocklist'
   replacement: primary/subordinate, allowlist, blocklist
   source: ux 07/06 §4.1 (стр. 261)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1744,14 +1747,13 @@ rules:
   level: error
   lang: en
   group: UX
-  pattern: \b(suffering from|stricken with|wheelchair[- ]bound)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(suffering
+    from|stricken with|wheelchair[- ]bound)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.1: «Suffering from, stricken with, wheelchair-bound» — фокус на людях'
   replacement: фокус на людях
   source: ux 07/06 §4.1 (стр. 262)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1761,14 +1763,12 @@ rules:
   level: warning
   lang: en
   group: UX
-  pattern: \byou can\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))you can(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.1: «You can (разрешительная конструкция в инструкции)» — начать с глагола'
   replacement: начать с глагола
   source: ux 07/06 §4.1 (стр. 263)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1778,34 +1778,30 @@ rules:
   level: warning
   lang: en
   group: UX
-  pattern: \bthere (is|are|were)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))there (is|are|were)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.1: «There is, There are» — переписать'
   replacement: переписать
   source: ux 07/06 §4.1 (стр. 264)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   appliesTo:
   - body
   excludes:
   - marketing
   - help
   - user-content
-  note: роль «body» отсутствует в закрытом списке §7.2 ux 07/06 — в copy_lint не срабатывает, пока роль не уточнит ux
 - id: ux-4-2-01
   marker_id: ux:07-06#4.2
   level: warning
   lang: en
   group: UX
-  pattern: \b(utilize|utilise|make use of)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(utilize|utilise|make
+    use of)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.2: «utilize, make use of» — use'
   replacement: use
   source: ux 07/06 §4.2 (стр. 272)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1815,14 +1811,12 @@ rules:
   level: warning
   lang: en
   group: UX
-  pattern: \b(eliminate)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(eliminate)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.2: «extract, take away, eliminate (в значении «убрать»)» — remove'
   replacement: remove
   source: ux 07/06 §4.2 (стр. 273)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1832,14 +1826,13 @@ rules:
   level: warning
   lang: en
   group: UX
-  pattern: \b(inform you|let you know)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(inform
+    you|let you know)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.2: «inform, let know» — tell'
   replacement: tell
   source: ux 07/06 §4.2 (стр. 274)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1849,14 +1842,13 @@ rules:
   level: warning
   lang: en
   group: UX
-  pattern: \b(in order to|as a means to)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(in order
+    to|as a means to)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.2: «in order to, as a means to» — to'
   replacement: to
   source: ux 07/06 §4.2 (стр. 275)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1866,14 +1858,12 @@ rules:
   level: warning
   lang: en
   group: UX
-  pattern: \bin addition\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))in addition(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.2: «in addition» — also'
   replacement: also
   source: ux 07/06 §4.2 (стр. 276)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1888,9 +1878,7 @@ rules:
   message: 'ux 07/06 §4.2: «establish connectivity» — connect'
   replacement: connect
   source: ux 07/06 §4.2 (стр. 277)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1900,31 +1888,28 @@ rules:
   level: warning
   lang: en
   group: UX
-  pattern: \bsince\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))since(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(?!\s+[0-9])
   flags: i
   message: 'ux 07/06 §4.2: «since (в причинном значении)» — because'
   replacement: because
   source: ux 07/06 §4.2 (стр. 278)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
   - user-content
+  note: 'оговорка ячейки канона: «в причинном значении»: «since 2014» — время, а не причина'
 - id: ux-4-2-08
   marker_id: ux:07-06#4.2
   level: warning
   lang: en
   group: UX
-  pattern: \bmust\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))must(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.2: «must» — need'
   replacement: need
   source: ux 07/06 §4.2 (стр. 279)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1934,14 +1919,12 @@ rules:
   level: warning
   lang: en
   group: UX
-  pattern: \b(very|quite|really|extremely)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(very|quite|really|extremely)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §4.2: «very, quite, really, extremely» — убрать'
   replacement: убрать
   source: ux 07/06 §4.2 (стр. 280)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -1951,14 +1934,13 @@ rules:
   level: error
   lang: any
   group: UX
-  pattern: \b(lorem|ipsum|dolor sit amet)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(lorem|ipsum|dolor
+    sit amet)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §5.1: «lorem ipsum и производные»'
   replacement: ''
   source: ux 07/06 §5.1 (стр. 306)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-1-02
@@ -1966,14 +1948,12 @@ rules:
   level: error
   lang: any
   group: UX
-  pattern: \b(feature|item|column|card|section|option|tab)\s*\d+\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(feature|item|column|card|section|option|tab)\s*[0-9]+(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §5.1: «Feature 1, Item 1, Column 1, Card 1, Section 1»'
   replacement: ''
   source: ux 07/06 §5.1 (стр. 307)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-1-03
@@ -1986,9 +1966,7 @@ rules:
   message: 'ux 07/06 §5.1: «Заголовок, Подзаголовок, Название, Текст, Описание (как значение)»'
   replacement: ''
   source: ux 07/06 §5.1 (стр. 308)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-1-04
@@ -2001,9 +1979,7 @@ rules:
   message: 'ux 07/06 §5.1: «Title, Subtitle, Heading, Your text here, Placeholder text»'
   replacement: ''
   source: ux 07/06 §5.1 (стр. 309)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-1-05
@@ -2011,14 +1987,12 @@ rules:
   level: error
   lang: any
   group: UX
-  pattern: \b(TODO|FIXME|XXX|TBD)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(TODO|FIXME|XXX|TBD)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §5.1: «TODO, FIXME, XXX, TBD»'
   replacement: ''
   source: ux 07/06 §5.1 (стр. 310)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-1-06
@@ -2026,14 +2000,13 @@ rules:
   level: error
   lang: any
   group: UX
-  pattern: \b(coming soon)\b|^Скоро$
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(coming
+    soon)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))|^Скоро$
   flags: i
   message: 'ux 07/06 §5.1: «Coming soon, Скоро»'
   replacement: ''
   source: ux 07/06 §5.1 (стр. 311)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-1-07
@@ -2041,14 +2014,12 @@ rules:
   level: error
   lang: any
   group: UX
-  pattern: ^(sample|demo|test)( \w+)?$
+  pattern: ^(sample|demo|test)( [A-Za-zА-Яа-яЁё0-9_]+)?$
   flags: i
   message: 'ux 07/06 §5.1: «Sample, Demo, Test (как значение данных)»'
   replacement: ''
   source: ux 07/06 §5.1 (стр. 312)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-1-08
@@ -2056,14 +2027,13 @@ rules:
   level: error
   lang: any
   group: UX
-  pattern: \b(john doe|jane doe)\b|Иван Иванов(ич)?
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(john doe|jane
+    doe)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))|Иван Иванов(ич)?
   flags: i
   message: 'ux 07/06 §5.1: «John Doe, Jane Doe, Иван Иванов (как данные в макете)»'
   replacement: ''
   source: ux 07/06 §5.1 (стр. 313)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-1-09
@@ -2076,9 +2046,7 @@ rules:
   message: 'ux 07/06 §5.1: «example.com в видимом тексте, не в примере формата»'
   replacement: ''
   source: ux 07/06 §5.1 (стр. 314)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - placeholder
   - user-content
@@ -2087,14 +2055,13 @@ rules:
   level: error
   lang: any
   group: UX
-  pattern: \b(asdf|qwerty|test test)\b
+  pattern: (?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))(asdf|qwerty|test
+    test)(?:(?<=[A-Za-zА-Яа-яЁё0-9_])(?![A-Za-zА-Яа-яЁё0-9_])|(?<![A-Za-zА-Яа-яЁё0-9_])(?=[A-Za-zА-Яа-яЁё0-9_]))
   flags: i
   message: 'ux 07/06 §5.1: «Lorem-подобные наборы: «asdf», «qwerty», «test test»»'
   replacement: ''
   source: ux 07/06 §5.1 (стр. 315)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-2-01
@@ -2102,14 +2069,12 @@ rules:
   level: error
   lang: any
   group: UX
-  pattern: \d[\d\s,.]*\s*(\+|тыс\.?\+|k\+|M\+)\s*(пользовател|клиент|компан|users|customers|companies)
+  pattern: '[0-9][0-9\s,.]*\s*(\+|тыс\.?\+|k\+|M\+)\s*(пользовател|клиент|компан|users|customers|companies)'
   flags: i
   message: 'ux 07/06 §5.2: ««10 000+ пользователей», «1M+ users»»'
   replacement: ''
   source: ux 07/06 §5.2 (стр. 324)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-2-02
@@ -2117,14 +2082,12 @@ rules:
   level: error
   lang: any
   group: UX
-  pattern: (нам доверяют|trusted by|used by \d)
+  pattern: (нам доверяют|trusted by|used by [0-9])
   flags: i
   message: 'ux 07/06 §5.2: ««Нам доверяют», «Trusted by»»'
   replacement: ''
   source: ux 07/06 §5.2 (стр. 325)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-2-03
@@ -2132,14 +2095,12 @@ rules:
   level: error
   lang: any
   group: UX
-  pattern: более \d[\d\s]* (компани|организац|клиент)
+  pattern: более [0-9][0-9\s]* (компани|организац|клиент)
   flags: i
   message: 'ux 07/06 §5.2: ««Более N компаний уже»»'
   replacement: ''
   source: ux 07/06 §5.2 (стр. 326)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-2-04
@@ -2147,14 +2108,12 @@ rules:
   level: error
   lang: any
   group: UX
-  pattern: (добро пожаловать,\s*\{?\w|welcome back,\s*\{?\w)
+  pattern: (добро пожаловать,\s*\{?[A-Za-zА-Яа-яЁё0-9_]|welcome back,\s*\{?[A-Za-zА-Яа-яЁё0-9_])
   flags: i
   message: 'ux 07/06 §5.2: ««Добро пожаловать, {Имя}» / «Welcome back, {Name}»»'
   replacement: ''
   source: ux 07/06 §5.2 (стр. 327)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-2-05
@@ -2162,14 +2121,12 @@ rules:
   level: error
   lang: any
   group: UX
-  pattern: \d[,.]\d\s*(из|out of)\s*5
+  pattern: '[0-9][,.][0-9]\s*(из|out of)\s*5'
   flags: i
   message: 'ux 07/06 §5.2: «Рейтинг «4,9 из 5» без источника»'
   replacement: ''
   source: ux 07/06 §5.2 (стр. 328)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-2-06
@@ -2177,14 +2134,12 @@ rules:
   level: warning
   lang: any
   group: UX
-  pattern: (осталось (всего )?\d|only \d+ left|\d+ in stock)
+  pattern: (осталось (всего )?[0-9]|only [0-9]+ left|[0-9]+ in stock)
   flags: i
   message: 'ux 07/06 §5.2: ««Осталось N мест», «Only N left» без подтверждённого источника»'
   replacement: ''
   source: ux 07/06 §5.2 (стр. 329)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-2-07
@@ -2192,14 +2147,12 @@ rules:
   level: error
   lang: any
   group: UX
-  pattern: (сейчас (смотрят|просматривают)|\d+ people (are )?viewing)
+  pattern: (сейчас (смотрят|просматривают)|[0-9]+ people (are )?viewing)
   flags: i
   message: 'ux 07/06 §5.2: ««Сейчас смотрят N человек»»'
   replacement: ''
   source: ux 07/06 §5.2 (стр. 330)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-3-01
@@ -2212,9 +2165,7 @@ rules:
   message: 'ux 07/06 §5.3: «Стрелка «→» в конце подписи кнопки или ссылки»'
   replacement: ''
   source: ux 07/06 §5.3 (стр. 344)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   appliesTo:
   - action
   - link
@@ -2230,9 +2181,7 @@ rules:
   message: 'ux 07/06 §5.3: «Мета-строка через middle dot»'
   replacement: ''
   source: ux 07/06 §5.3 (стр. 345)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-3-03
@@ -2240,14 +2189,12 @@ rules:
   level: warning
   lang: any
   group: UX
-  pattern: ^[A-ZА-Я]{2,}\s—\s
+  pattern: ^[A-ZА-ЯЁ]{2,}\s—\s
   flags: ''
   message: 'ux 07/06 §5.3: ««WORD — fragment» как заголовок»'
   replacement: ''
   source: ux 07/06 §5.3 (стр. 346)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - user-content
 - id: ux-5-3-04
@@ -2255,14 +2202,12 @@ rules:
   level: warning
   lang: any
   group: UX
-  pattern: ^0\d$
+  pattern: ^0[0-9]$
   flags: i
   message: 'ux 07/06 §5.3: «Нумерация 01/02/03 у неупорядоченного содержимого»'
   replacement: ''
   source: ux 07/06 §5.3 (стр. 347)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   appliesTo:
   - label
   excludes:
@@ -2277,9 +2222,7 @@ rules:
   message: 'ux 07/06 §6.4: «Не только … но и»'
   replacement: ''
   source: ux 07/06 §6.4 (стр. 416)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -2294,9 +2237,7 @@ rules:
   message: 'ux 07/06 §6.4: «Это не просто … это»'
   replacement: ''
   source: ux 07/06 §6.4 (стр. 417)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -2311,9 +2252,7 @@ rules:
   message: 'ux 07/06 §6.4: «Важно отметить, стоит отметить, следует подчеркнуть, необходимо учитывать»'
   replacement: ''
   source: ux 07/06 §6.4 (стр. 418)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -2328,9 +2267,7 @@ rules:
   message: 'ux 07/06 §6.4: «Таким образом, подводя итог, в заключение, резюмируя»'
   replacement: ''
   source: ux 07/06 §6.4 (стр. 419)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -2345,9 +2282,7 @@ rules:
   message: 'ux 07/06 §6.4: «В современном мире, на сегодняшний день, в наше время»'
   replacement: ''
   source: ux 07/06 §6.4 (стр. 420)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -2362,9 +2297,7 @@ rules:
   message: 'ux 07/06 §6.4: «Играет ключевую роль, имеет огромное значение, трудно переоценить»'
   replacement: ''
   source: ux 07/06 §6.4 (стр. 421)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -2379,9 +2312,7 @@ rules:
   message: 'ux 07/06 §6.4: «По мнению экспертов, исследования показывают, принято считать»'
   replacement: ''
   source: ux 07/06 §6.4 (стр. 422)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -2396,9 +2327,7 @@ rules:
   message: 'ux 07/06 §6.4: «Давайте разберёмся, погрузимся в»'
   replacement: ''
   source: ux 07/06 §6.4 (стр. 423)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -2413,9 +2342,7 @@ rules:
   message: 'ux 07/06 §6.4: «И это нормально, вы не одиноки»'
   replacement: ''
   source: ux 07/06 §6.4 (стр. 424)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -2425,14 +2352,12 @@ rules:
   level: warning
   lang: ru
   group: UX
-  pattern: \w+(ая|яя|ав|ив|ув)(?![А-Яа-яЁё])\s*,
+  pattern: '[A-Za-zА-Яа-яЁё0-9_]+(ая|яя|ав|ив|ув)(?![А-Яа-яЁё])\s*,'
   flags: i
   message: 'ux 07/06 §6.4: «Деепричастный оборот в микрокопи»'
   replacement: ''
   source: ux 07/06 §6.4 (стр. 425)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
@@ -2442,18 +2367,17 @@ rules:
   level: error
   lang: ru
   group: UX
-  pattern: :\s+[А-ЯЁ]
+  pattern: :\s+[А-ЯЁ](?![А-ЯЁ])
   flags: ''
   message: 'ux 07/06 §6.4: «Заглавная буква после двоеточия»'
   replacement: ''
   source: ux 07/06 §6.4 (стр. 426)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   excludes:
   - marketing
   - help
   - user-content
+  note: 'оговорка ячейки канона: «кроме аббревиатур»: «Оплата: СБП» — не заглавная буква после двоеточия'
 - id: ux-6-4-12
   marker_id: ux:07-06#6.4
   level: error
@@ -2464,16 +2388,13 @@ rules:
   message: 'ux 07/06 §6.4: «Математические знаки в прозе (=, >, <) вместо слов»'
   replacement: ''
   source: ux 07/06 §6.4 (стр. 427)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
   appliesTo:
   - body
   excludes:
   - marketing
   - help
   - user-content
-  note: роль «body» отсутствует в закрытом списке §7.2 ux 07/06 — в copy_lint не срабатывает, пока роль не уточнит ux
 - id: ux-6-5-01
   marker_id: COPY-M-ART-05
   level: error
@@ -2484,22 +2405,18 @@ rules:
   message: 'ux 07/06 §6.5: «oaicite»'
   replacement: ''
   source: ux 07/06 §6.5 (стр. 435)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
 - id: ux-6-5-02
   marker_id: COPY-M-ART-05
   level: error
   lang: any
   group: UX
-  pattern: turn\d+(search|view|image)
+  pattern: turn[0-9]+(search|view|image)
   flags: i
   message: 'ux 07/06 §6.5: «turn0search, turn1view и подобные»'
   replacement: ''
   source: ux 07/06 §6.5 (стр. 436)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
 - id: ux-6-5-03
   marker_id: COPY-M-ART-05
   level: error
@@ -2510,22 +2427,18 @@ rules:
   message: 'ux 07/06 §6.5: «utm_source=chatgpt.com и другие utm от ИИ-сервисов»'
   replacement: ''
   source: ux 07/06 §6.5 (стр. 437)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
 - id: ux-6-5-04
   marker_id: COPY-M-ART-05
   level: error
   lang: any
   group: UX
-  pattern: \[cite:\s*\d+\]
+  pattern: \[cite:\s*[0-9]+\]
   flags: i
   message: 'ux 07/06 §6.5: «[cite: N]»'
   replacement: ''
   source: ux 07/06 §6.5 (стр. 438)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
 - id: ux-6-5-05
   marker_id: COPY-M-ART-05
   level: error
@@ -2536,9 +2449,7 @@ rules:
   message: 'ux 07/06 §6.5: «Ссылки-сноски вида 【…】»'
   replacement: ''
   source: ux 07/06 §6.5 (стр. 439)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
 - id: ux-6-5-06
   marker_id: COPY-M-ART-05
   level: error
@@ -2549,51 +2460,7 @@ rules:
   message: 'ux 07/06 §6.5: «Невидимые символы (zero-width space, soft hyphen, BOM, RTL-марки)»'
   replacement: ''
   source: ux 07/06 §6.5 (стр. 440)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
   count_as_marker: false
-  date: '2026-09-22'
-- id: ux-6-5-07
-  marker_id: COPY-M-ART-05
-  level: warning
-  lang: any
-  group: UX
-  pattern: '  +'
-  flags: i
-  message: 'ux 07/06 §6.5: «Двойные пробелы»'
-  replacement: ''
-  source: ux 07/06 §6.5 (стр. 441)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
-  count_as_marker: false
-  date: '2026-09-22'
-  note: типографика — H; в прозе сайта ложные срабатывания на URL и сокращениях
-- id: ux-6-5-08
-  marker_id: COPY-M-ART-05
-  level: warning
-  lang: any
-  group: UX
-  pattern: \s+[,.;:!?]
-  flags: i
-  message: 'ux 07/06 §6.5: «Пробел перед знаком препинания»'
-  replacement: ''
-  source: ux 07/06 §6.5 (стр. 442)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
-  count_as_marker: false
-  date: '2026-09-22'
-  note: типографика — H; в прозе сайта ложные срабатывания на URL и сокращениях
-- id: ux-6-5-09
-  marker_id: COPY-M-ART-05
-  level: warning
-  lang: any
-  group: UX
-  pattern: '[,.;:!?][А-Яа-яA-Za-z]'
-  flags: i
-  message: 'ux 07/06 §6.5: «Отсутствие пробела после знака препинания»'
-  replacement: ''
-  source: ux 07/06 §6.5 (стр. 443)
-  evidence: '[практика] ux-research (волна 3, агент G, 2026-09-22)'
-  count_as_marker: false
-  date: '2026-09-22'
-  note: типографика — H; в прозе сайта ложные срабатывания на URL и сокращениях
 - id: ux-3-5-06
   marker_id: ux:07-06#3.5
   level: error
@@ -2605,7 +2472,6 @@ rules:
   replacement: ''
   source: ux 07/06 §3.5 (стр. 205)
   count_as_marker: false
-  date: '2026-09-22'
 - id: ux-3-5-07
   marker_id: ux:07-06#3.5
   level: error
@@ -2617,7 +2483,6 @@ rules:
   replacement: ''
   source: ux 07/06 §3.5 (стр. 206)
   count_as_marker: false
-  date: '2026-09-22'
 - id: ux-3-5-08
   marker_id: ux:07-06#3.5
   level: error
@@ -2628,7 +2493,6 @@ rules:
   replacement: ''
   source: ux 07/06 §3.5 (стр. 207)
   count_as_marker: false
-  date: '2026-09-22'
 - id: ux-3-6-05
   marker_id: ux:07-06#3.6
   level: error
@@ -2639,7 +2503,6 @@ rules:
   replacement: отмечать то, что нужно
   source: ux 07/06 §3.6 (стр. 222)
   count_as_marker: false
-  date: '2026-09-22'
 - id: ux-5-2-08
   marker_id: ux:07-06#5.2
   level: error
@@ -2651,7 +2514,6 @@ rules:
   replacement: ''
   source: ux 07/06 §5.2 (стр. 331)
   count_as_marker: false
-  date: '2026-09-22'
 - id: ux-5-3-05
   marker_id: ux:07-06#5.3
   level: error
@@ -2663,7 +2525,6 @@ rules:
   replacement: ''
   source: ux 07/06 §5.3 (стр. 343)
   count_as_marker: false
-  date: '2026-09-22'
 - id: ux-5-3-06
   marker_id: ux:07-06#5.3
   level: error
@@ -2675,4 +2536,140 @@ rules:
   replacement: ''
   source: ux 07/06 §5.3 (стр. 348)
   count_as_marker: false
-  date: '2026-09-22'
+delegated:
+- section: '6.5'
+  row: Двойные пробелы
+  to: typo-double-space
+  source: ux 07/06 §6.5 (стр. 441)
+- section: '6.5'
+  row: Пробел перед знаком препинания
+  to: typo-space-before-punct
+  source: ux 07/06 §6.5 (стр. 442)
+- section: '6.5'
+  row: Отсутствие пробела после знака препинания
+  to: typo-no-space-after-punct
+  source: ux 07/06 §6.5 (стр. 443)
+role_lengths:
+  section: ux 07/01 §12. Длина текстов по компонентам
+  sentence:
+    words_max: 15
+    explanatory_words_max: 20
+    explanatory_roles:
+    - body
+    - help
+    - email
+    - hint
+    - empty
+    - banner
+    - confirm-body
+    - tooltip
+    - setting-description
+    - inline-message
+    source: ux 07/01 §12 (стр. 770)
+  roles:
+    action:
+    - element: Кнопка
+      words_max: 3
+      lines_max: 1
+      source: ux 07/01 §12 (стр. 747)
+    link:
+    - element: Ссылка
+      words_max: 3
+      source: ux 07/01 §12 (стр. 748)
+    label:
+    - element: Подпись поля
+      words_max: 3
+      source: ux 07/01 §12 (стр. 749)
+    hint:
+    - element: Подсказка под полем
+      sentences_max: 1
+      source: ux 07/01 §12 (стр. 750)
+    placeholder:
+    - element: Плейсхолдер
+      words_max: 4
+      source: ux 07/01 §12 (стр. 751)
+    title:
+    - element: Заголовок экрана
+      words_max: 4
+      source: ux 07/01 §12 (стр. 752)
+    section-title:
+    - element: Заголовок секции
+      words_max: 5
+      source: ux 07/01 §12 (стр. 753)
+    tab:
+    - element: Вкладка
+      words_max: 2
+      source: ux 07/01 §12 (стр. 754)
+    nav:
+    - element: Пункт меню
+      words_max: 2
+      source: ux 07/01 §12 (стр. 755)
+    column-header:
+    - element: Заголовок колонки таблицы
+      words_max: 3
+      source: ux 07/01 §12 (стр. 756)
+    status:
+    - element: Статус, бейдж
+      words_max: 2
+      source: ux 07/01 §12 (стр. 757)
+    badge:
+    - element: Статус, бейдж
+      words_max: 2
+      source: ux 07/01 §12 (стр. 757)
+    confirm-title:
+    - element: Заголовок подтверждения
+      words_max: 6
+      source: ux 07/01 §12 (стр. 758)
+    confirm-body:
+    - element: Тело подтверждения
+      sentences_max: 1
+      lines_max: 1
+      source: ux 07/01 §12 (стр. 759)
+    error:
+    - element: Сообщение об ошибке поля
+      sentences_max: 1
+      source: ux 07/01 §12 (стр. 760)
+    toast:
+    - element: Тост
+      words_max: 10
+      lines_max: 1
+      source: ux 07/01 §12 (стр. 761)
+    banner:
+    - element: Баннер
+      sentences_max: 3
+      source: ux 07/01 §12 (стр. 762)
+    empty:
+    - element: Заголовок пустого состояния
+      words_max: 6
+      source: ux 07/01 §12 (стр. 763)
+    - element: Пояснение пустого состояния
+      sentences_max: 2
+      source: ux 07/01 §12 (стр. 764)
+    tooltip:
+    - element: Тултип
+      sentences_max: 2
+      source: ux 07/01 §12 (стр. 765)
+    setting-description:
+    - element: Описание настройки
+      sentences_max: 2
+      source: ux 07/01 §12 (стр. 766)
+    push:
+    - element: Push
+      lines_max: 2
+      source: ux 07/01 §12 (стр. 768)
+    body:
+    - element: Абзац развёрнутого текста
+      words_max: 50
+      source: ux 07/01 §12 (стр. 769)
+    help:
+    - element: Абзац развёрнутого текста
+      words_max: 50
+      source: ux 07/01 §12 (стр. 769)
+    email:
+    - element: Абзац развёрнутого текста
+      words_max: 50
+      source: ux 07/01 §12 (стр. 769)
+  skipped:
+  - element: Тема письма
+    why: 'у темы письма нет своей роли в §7.2: предел относится к части роли email'
+    source: ux 07/01 §12 (стр. 767)
