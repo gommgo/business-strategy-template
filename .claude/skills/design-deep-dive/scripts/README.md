@@ -87,6 +87,10 @@
 
 Данные кода: `text/README.md`.
 
+Коды выхода проверок текста: у `claims_check.py`, `copy_lint.py`, `copydeck.py`, `run_checks.py` 0 — `error` нет, 2 —
+есть `error`, 1 — ошибка вызова или входа; у `validate_*.py` 1 — есть ошибки. У утилит `project/` порядок обратный:
+1 — есть `error`, 2 — сбой вызова (§ project).
+
 ## creative — подача и движение
 
 Подробный README домена — `creative/README.md` (из базы).

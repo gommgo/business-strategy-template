@@ -465,7 +465,9 @@
 
 - **Проверка.** Вход этапа `mockup` берёт только утверждённые тексты — copy deck `approved` у сайта, строки `texts.md`
   `approved` у кабинета; вход `wireframe` — `assumed` · `checked` · `approved`; факты — подтверждённые, пробел — видимая
-  заглушка. `error` — при вердикте `accepted` или `accepted_with_notes`. `canvas_input check` (у кабинета — ещё
+  заглушка. На входе `mockup` текст не `approved` — у сайта и у кабинета — проверка входа называет R-MAT-012 `error`
+  (гейт «чистовой макет — только на утверждённых текстах»); R-MAT-003 — вайрфрейм, отчёт `contract.py check` и паспорт
+  без входа. `error` — при вердикте `accepted` или `accepted_with_notes`. `canvas_input check` (у кабинета — ещё
   `contract.py check`) — вызовом `design_audit`; без окружения — чтением манифеста входа и статусов источников.
 - **Норма.** `../design-deep-dive/references/claude-design.md § Вход холста` («Статусы по этапу»).
 
