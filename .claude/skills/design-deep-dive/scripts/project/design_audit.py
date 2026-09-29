@@ -98,7 +98,7 @@ READING = {
                     "ad_check.py",
     "R-STRUCT-005": "файлы ассетов — asset_audit.py, check_icons.py, provenance_check.py по типу файла: в структурный "
                     "прогон не входят (нужны модели и бинарники окружения); план ассетов проверяет plan_to_assets.py",
-    "R-STRUCT-006": "контраст пар (build_reference_tokens.py) и строка слабой пары в «известных проблемах» прозы "
+    "R-STRUCT-006": "контраст пар токенов проекта (lib/color.py contrast) и строка слабой пары в «известных проблемах» прозы "
                     "DESIGN.md — чтением; формат DTCG, ссылки и режимы проверяет ds_build",
     "R-STRUCT-007": "значения границ: у сайта — blocks.yaml#conventions.breakpoints, у приложения — ui 09/04 §1.3, у "
                     "смешанного продукта — одна шкала с именами по смыслу; наличие breakpoint.* и size.panel.* "
