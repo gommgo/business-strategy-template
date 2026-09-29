@@ -100,3 +100,24 @@
 - Не прочитано: `effect-gates.yaml`, `motion_check.py`, `ui_audit.py` — только места стыков; creative 01/03 — частично.
 - Решения оркестратора (строка DECISIONS «Ф8, зона 4 принята»): отступления приняты; строки `marketing_audit:*` (3)
   внесены в `tells.yaml#checks`; `ambition-levels.yaml` вписан в файлы C14 для снятия зеркала вместе с `threshold_ref`.
+
+## 04. C3 — project: экраны (29.09, ≈ 61 мин, в уведомлении — 787 тыс. токенов)
+- Сделано: новые `scripts/project/findings.py` (247), `layer.py` (783), `tree.py` (1 341), `states.py` (696),
+  `screen_map.py` (979), `normalize.py` (942), `data/screens.yaml` (19); фикстуры `scripts/tests/fixtures/cabinet` (27
+  файлов, проект `otves-office`, поверхность `office`), `cabinet-defects` (14 дефектов правками `replace`),
+  `cabinet-freeform` (вольная запись); `smoke/project-screens.tsv` (+7). 13 действий — отчёт C3 §2.
+- Тесты: смоук project PASS 13; самопроверки findings 14, layer 9, tree 27, states 21, screen_map 17, normalize 12;
+  чистый слой — 0 находок, `build` байт в байт, пустой дифф нормализатора; дефекты — 14 из 14 по одной находке
+  (12 `error`, 2 `warning`; плюс 7 подсказок R-TX-006 от ушедших ключей); вольная форма — после `--write` 0 `error`.
+- Отступления: второй общий модуль `layer.py`; правила сверх брифа (R-STRUCT, R-TX); `offline` и `stale` — чтением (в
+  «Решениях» `map.md` нет машинного поля); `no-permission` из строки маршрута — только при `access: roles`; присутствие
+  строк свода — R-RT-008; правила выводимых колонок свода — в справке и `data/screens.yaml`; `kind` находки — открытое
+  слово-slug; R-SEM-015 механически — две проверки из пяти; R-TX-004 — одна находка на ключ.
+- Стыки: контракт находок — `findings.py` (форма и пример — отчёт C3 §4); вызов `check`/`show`/`build`; Python-API
+  `layer`, `tree` (`ui_types` — C5), `states` (`dump` — C6, C11), `screen_map` (`derive`, `render` — C11); фикстура
+  `cabinet` — база C5, C6, C11, C13 (токены `space.md`, `space.sm`); тексты под утилиты — C17.
+- Открыто: машинное поле решений поверхности (`offline`, `stale`) — Ф9 или Ф10; строгая достижимость по навигации;
+  зеркала и перечни `screen-audit` — кандидаты в утилиты после пилота.
+- Не прочитано: in-drafts (правило); каноны FSD, бота, mobile вне состояний; нормы отдельных типов словаря.
+- Решения оркестратора (строка DECISIONS «Ф8, зона 3 принята»): отступления приняты; прогон оркестратора на
+  фикстурах совпал с ключом брифа.
