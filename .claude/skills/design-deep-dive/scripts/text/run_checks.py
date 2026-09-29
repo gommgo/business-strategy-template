@@ -29,6 +29,9 @@ def counts(js, key='summary'):
 
 
 def main(argv):
+    if argv[:1] in (['-h'], ['--help']):
+        print(__doc__)
+        return 0
     md_out = None
     if '--md' in argv:
         i = argv.index('--md'); md_out = argv[i + 1]; argv = argv[:i] + argv[i + 2:]

@@ -7,7 +7,7 @@ scripts/text/copy_extract.py	utility	help; run: --selftest
 scripts/text/copy_lint.py	utility	help; run: --selftest	
 scripts/text/copydeck.py	utility	help; run: --selftest; run: before-after --check	
 scripts/text/make_skeleton.py	step	help; run: --selftest	
-scripts/text/run_checks.py	step	run: 	
+scripts/text/run_checks.py	step	help; run: 	
 scripts/text/ux_dict_to_yaml.py	utility	help; run: --check; run: --selftest	
 scripts/text/validate_any.py	step	import-only; run: {skill}/kb/text/02-strategy-messaging/examples/meaning-otves.yaml {skill}/kb/text/02-strategy-messaging/examples/hierarchy-otves-product-aware.yaml	
 scripts/text/validate_facts.py	step	run: 	

@@ -172,7 +172,7 @@
   `size.panel.*`; значения границ — чтением токенов.
 - **Норма.** Развал каркаса — ui 05/02 §7 (канон); `docs/projects/_template/design/README.md § ДС`.
 
-### R-STRUCT-008 «формы без схемы» · `error` / `warning`
+### R-STRUCT-008 «файл дизайна не по форме» · `error` / `warning`
 
 - **Проверка.** `…/design/app-brief.yaml`, `…/design/system.yaml`, `…/design/brand.yaml`, `…/design/ARTIFACTS.md`,
   `…/design/<surface>/review/REVIEW.md` и `…/design/<surface>/ready.yaml` держат ключи, перечни и таблицы своих форм.
