@@ -1,6 +1,6 @@
 """Тесты bpyx.py для Blender 5.2.x. Запуск (фон, --factory-startup):
 
-    python3 99-raw/tools/blender_run.py 03-bpy-api/snippets/test_bpyx.py [-- OUT_DIR]
+    python3 scripts/blender/blender_run.py scripts/blender/test_bpyx.py [-- OUT_DIR]
 
 Код выхода 0 — все тесты зелёные, 1 — есть провалы. OUT_DIR (необязательно) — куда писать test_results.json и
 временные файлы рендера/экспорта (по умолчанию — временный каталог, удаляется).

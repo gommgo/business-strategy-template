@@ -1,9 +1,8 @@
-"""Тесты agent_scene.py и hygiene.py для Blender 5.2.x (агент U, волна 4 — перенос рекомендации X §12 из
-99-raw/experiments/I/01-own-collection-vs-wipe и I/02-file-hygiene; оригиналы там не менялись, тесты — новые).
+"""Тесты agent_scene.py и hygiene.py для Blender 5.2.x.
 
 Запуск (фон, --factory-startup):
 
-    python3 99-raw/tools/blender_run.py 03-bpy-api/snippets/test_agent_helpers.py [-- OUT_DIR]
+    python3 scripts/blender/blender_run.py scripts/blender/test_agent_helpers.py [-- OUT_DIR]
 
 Код выхода 0 — все тесты зелёные, 1 — есть провалы. OUT_DIR (необязательно) — куда писать test_results.json.
 Проверяет: begin()/finish() не трогают чужие объекты/материалы/настройки сцены «человека» и не плодят дублей при

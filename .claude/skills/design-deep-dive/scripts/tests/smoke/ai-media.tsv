@@ -12,7 +12,7 @@ scripts/ai-media/edit_check.py	utility	help; run: selftest
 scripts/ai-media/image_metrics.py	module	import-only	
 scripts/ai-media/layout_check.py	step	import-only	
 scripts/ai-media/loop_rife_bridge.py	step	compile	
-scripts/ai-media/mp_client.py	utility	help; run: selftest	run: оценки цен требуют снимков каталогов routerai, genapi, polza — install.sh --catalogs
+scripts/ai-media/mp_client.py	utility	help; run: selftest	run: оценки цен сверяются с числами снимков каталогов routerai, genapi, polza на дату самопроверки — без снимков (install.sh --catalogs) данных нет, со свежими снимками цены расходятся
 scripts/ai-media/page_accept.py	utility	help; run: --selftest	
 scripts/ai-media/palette.py	module	import-only	
 scripts/ai-media/polza.py	utility	help	
