@@ -42,14 +42,16 @@
   этап `canvas-input` с кабинетом → `canvas_input.py --stage mockup` (контракт генерации и демо-набор внутри сборки).
 - Команды: `tree.py check otves-office office --repo <папка>`, `states.py check …`, `screen_map.py check …` →
   `canvas_input.py build otves-office office --stage mockup --repo <папка>` → `check`.
-- Ожидаемое: три утилиты экранов — код 0, 0 находок; `build` — код 0, итог «0 error · 1 warning · 1 hint»; файлов
-  входа 7 — `INPUT.md`, `brief.yaml`, `contract.md`, `copy.md`, `demo-data.json`, `assets.md`, `ACCEPTANCE.md`;
+- Ожидаемое: три утилиты экранов — код 0, 0 находок; `build` — код 1, итог «1 error · 1 warning · 0 hint» (вход
+  записан, этап не публикуется); файлов входа 7 — `INPUT.md`, `brief.yaml`, `contract.md`, `copy.md`, `demo-data.json`,
+  `assets.md`, `ACCEPTANCE.md`;
   `contract.md` — десять разделов контракта (Контекст продукта … Критерии приёмки) и раздел на каждый из пяти экранов
   (`not-found`, `plan-dashboard`, `request-card`, `request-new`, `requests-list`); `demo-data.json` — записи с
-  `example: true`; `copy.md` — строки `approved` текстом, остальные — заглушкой; `check` — код 0: R-MAT-003 `warning`
-  (45 строк реестра текстов в `checked` — макет берёт только `approved`), R-COV-007 `hint` (нет профиля голоса продукта).
-- Верно, если: агент назвал вход собранным и объяснил, что 45 текстов нужно утвердить (через `/screen-deep-dive`), а
-  голос продукта — пробел для тона.
+  `example: true`; `copy.md` — строки `approved` текстом, остальные — заглушкой; `check` — код 1: R-MAT-012 `error`
+  («проверка входа: этап mockup берёт только approved: строк не того статуса 45») — гейт «чистовой макет — только на
+  утверждённых текстах», R-COV-007 `warning` (`voice.yaml`: нет профиля голоса с каналом `product-ui`).
+- Верно, если: агент назвал вход собранным, но не готовым к макету: 45 текстов утверждает владелец продукта через
+  `/screen-deep-dive … texts`, до этого — вайрфрейм на `checked`; голос продукта — пробел для тона.
 
 ## 3. ДС — сборка, покрытие, правка заказчика на холсте
 
@@ -62,11 +64,13 @@
 - Команды: `ds_build.py check otves-office --repo <папка>` (или `build` — без изменений) → `ds_coverage.py check
   otves-office office --stage mockup --repo <папка>` → `ds_sync.py check otves-office --live <файл> --repo <папка>` →
   `ds_sync.py build otves-office --live <файл> --repo <папка>` (без `--write`).
-- Ожидаемое: `ds_build check` — 0 находок (`build` — четыре производных «без изменений»); `ds_coverage` — 0 находок;
-  `ds_sync check` — код 1, одна находка R-FRESH-001 `error`: `--color-accent-solid` (тема `light`) — сборка «#1d4ed8»,
-  на странице «#1e40af»; `ds_sync build` без `--write` — предложение правки `/color/accent/solid/$value` (hex `#1e40af`)
-  и предупреждение: токен был алиасом `{primitive.color.accent.700}`, литерал рвёт ссылку — владельцу выбрать правку
-  примитива или роли; файлы не меняются.
+- Ожидаемое: `ds_build check` — 0 находок (`build` — четыре производных «без изменений»); `ds_coverage` — 0 находок
+  (`show` — таблица с заголовком: поверхность, тип, ключ, компонент, итог, где стоит); `ds_sync check` — код 1, одна
+  находка R-FRESH-001 `error` — правка заказчика на странице, не поднятая в токены: `--color-accent-solid` (тема
+  `light`) — сборка «#1d4ed8», на странице «#1e40af»; совет называет две дороги (роль — `--write`, примитив
+  `primitive.color.accent.700` — руками в `system.tokens.json`) и хвост: контраст пар, `ds_build build`, публикация ДС;
+  `ds_sync build` без `--write` — предложение правки `/color/accent/solid/$value` (hex `#1e40af`) и те же две дороги с
+  соседом по алиасу `color.accent.text`; файлы не меняются.
 - Верно, если: агент не записал правку сам (запись — `--write` по решению владельца), назвал путь DTCG и развилку
   «примитив или роль», после подъёма — пересборка производных `ds_build build`.
 
@@ -86,8 +90,19 @@
   совпавшим отпечатком»).
 - Команды (B): `design_audit.py check otves-remont-nn --repo <B>` и `design_audit.py check otves-office --repo <B>`
   (с `--json` или без).
-- Ожидаемое (B): `otves-remont-nn` — код 1, 9 `error` · 17 `warning` · 11 `hint`; `otves-office` — код 1, 5 `error` ·
-  6 `warning` · 0 `hint`; все 14 дефектов `KEY-seeded.md` — своим правилом и путём (дефект 9 — три находки R-FRESH-001,
+- Ожидаемое (B): `otves-remont-nn` — код 1, 9 `error` · 18 `warning` · 11 `hint` (среди `warning` — R-STRUCT-003
+  COPY-D-RULES-REF: `copy_slots_ref` copy deck `spasibo` не разрешается, правила — из базы); `otves-office` — код 1,
+  5 `error` · 5 `warning` · 0 `hint` (тексты основы пакета утверждены — R-MAT-003 нет); все 14 дефектов `KEY-seeded.md` — своим правилом и путём (дефект 9 — три находки R-FRESH-001,
   дефект 13 — R-COV-007 `warning` с сообщением о профиле голоса продукта, дефект 14 — R-DEBT-002 `hint`); лишних `error`
   нет. Верно, если агент перечислил все `error` с путём и тем, что с ними делать (исполнитель и этап), и увидел
   R-COV-007 о профиле голоса продукта и R-DEBT-002 о демо-факте в закрытом copy deck.
+
+## Правки ключа после прогона агента (29.09, третья локальная сессия)
+
+Пакет правок FX (`../reports/FX.md`, строка DECISIONS шага 11) поменял вывод утилит — ключ выше приведён к нему, прогон
+`../tools/ct_prepare.sh <папка> key` после правок совпал: сценарий 1 — тот же счёт (0 · 4 · 6), у сообщений хвост «и ещё
+N», совет R-COV-002 при готовом copy deck — дописать слоты по каркасу во временном файле, итог входа — «вход без ошибок:
+этап можно публиковать, когда готов его вход по phases.md»; сценарий 2 — гейт текстов у кабинета (R-MAT-012 `error`,
+код 1) и R-COV-007 `warning`; сценарий 3 — две дороги правки алиаса и заголовок `ds_coverage show`; сценарий 4 — совет
+R-FRESH-006 «на этапе package, после отчёта /design-audit», ключ `ready` сводки — статус манифеста, счёт B —
+`otves-remont-nn` 9 · 18 · 11, `otves-office` 5 · 5 · 0; 14 посевов — те же правила и пути, лишних `error` нет.
