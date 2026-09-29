@@ -311,7 +311,8 @@ layers:
                     by: владелец продукта (демо)
                     at: '2026-09-29'
                 chosen: a
-                fact_ids: []
+                fact_ids:
+                - company-since-2014
                 claim_flags: []
                 lint:
                   profile: site-page
@@ -326,8 +327,9 @@ layers:
                 claims:
                   errors: 0
                   warnings: 0
-                  info: 0
-                  rules: []
+                  info: 1
+                  rules:
+                  - COPY-F-EXAMPLE
                   checked_at: '2026-09-29'
                   text_hash: 3e7daa5642ed
                   tool: claims_check

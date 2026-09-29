@@ -409,7 +409,12 @@ assets:
     meta = [("      description: 'Заявка на замер принята. Студия ремонта «Отвес», Нижний Новгород.'\n",
              "      description: 'Заявка на замер принята. Ремонтируем квартиры в Нижнем Новгороде с 2014 года.'\n"),
             ("      og_description: 'Прораб позвонит и договорится о дне замера.'\n      fact_ids: []\n",
-             "      og_description: 'Прораб позвонит и договорится о дне замера.'\n      fact_ids: [company-since-2014]\n")]
+             "      og_description: 'Прораб позвонит и договорится о дне замера.'\n      fact_ids: [company-since-2014]\n"),
+            # footer-legal: факт обязателен (copy-slots.yaml) — закрытый подвал опирается на факт о компании
+            ("        - {id: a, text: 'Студия ремонта «Отвес», Нижний Новгород', status: assumed, source: ai-self}\n"
+             "        chosen: a\n        fact_ids: []\n",
+             "        - {id: a, text: 'Студия ремонта «Отвес», Нижний Новгород', status: assumed, source: ai-self}\n"
+             "        chosen: a\n        fact_ids: [company-since-2014]\n")]
     seeded = deck.replace(privacy, "").replace(nexts, extra)
     for find, to in meta:
         if seeded.count(find) != 1:
