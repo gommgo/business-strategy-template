@@ -1,1 +1,2 @@
 path	kind	smoke	xfail
+scripts/project/canvas_input.py	utility	help; run: --selftest	

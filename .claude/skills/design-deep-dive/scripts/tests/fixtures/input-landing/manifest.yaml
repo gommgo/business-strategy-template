@@ -1,0 +1,55 @@
+# Фикстура input-landing — иллюстрация для самопроверки scripts/project/canvas_input.py и прогонов входа холста
+# лендинга: демо-проект фикстуры asset-plan (лендинг promo вымышленной студии «Отвес»: бриф, план главной, факты, голос,
+# план ассетов главной) и остальные источники входа из примеров баз — смысл и иерархии text, copy deck text (страница
+# примера переименована в home), бренд примера site, арт-дирекция и спецификация движения creative, артефакт ДС примера
+# claude-design. Свои файлы — ARTIFACTS.md и карта решений ДС. План главной утверждён; copy deck — черновик агента
+# (assumed), его секции и слоты переименованы под id плана главной там, где у примера есть тот же слот; остальные слоты
+# плана без текста — стык даёт предупреждения. Вход wireframe собирается без ошибок, вход mockup упирается в статусы
+# текстов. Формат манифеста — докстринг fixture_project.py.
+example: true
+description: лендинг promo для входа холста — бриф, план, смысл, иерархии, copy deck, план ассетов, арт-дирекция, движение, ДС
+project: otves-remont-nn
+extends: [asset-plan]
+layers:
+  - kb:
+      site/promo/meaning.yaml: text/02-strategy-messaging/examples/meaning-otves.yaml
+      site/promo/hierarchy/home-product-aware.yaml: text/02-strategy-messaging/examples/hierarchy-otves-product-aware.yaml
+      site/promo/hierarchy/home-problem-aware.yaml: text/02-strategy-messaging/examples/hierarchy-otves-problem-aware.yaml
+      site/promo/copy/home.yaml: text/10-templates-recipes/examples/ru-otves-lead.yaml
+      design/brand.yaml: site/10-playbooks-contracts/examples/lead-services-otves/brand.yaml
+      design/promo/art-direction.json: creative/01-creative-direction/examples/art-direction-otves.json
+      design/promo/motion/home.motion-spec.yaml: creative/09-ai-execution-evaluation/examples/otves-home.motion-spec.yaml
+      design/_design-system/project: claude-design/05-design-artifacts/example/design-system/project
+  - files: files
+  - replace:
+      site/promo/site-brief.yaml:
+        - {find: "brand:\n  ref: brand.yaml\n", to: "brand:\n  ref: ../../design/brand.yaml\n"}
+      site/promo/plans/home.yaml:
+        - {find: "\nstatus: proposed\n", to: "\nstatus: approved\n"}
+        - {find: "  copy_deck: 'copy-deck: ждём text (заглушка — ../stubs-sisters.yaml)'", to: "  copy_deck: ../copy/home.yaml"}
+      site/promo/copy/home.yaml:
+        - {find: "page_id: otves-product-aware", to: "page_id: home"}
+        - {find: "otves-product-aware/", to: "home/", count: 2}
+        - {find: "    cta_primary: home/hero/cta\n", to: "    cta_primary: home/hero/cta-label\n"}
+        - {find: "      from: home/hero/h1\n", to: "      from: home/hero/headline\n"}
+        - {find: "    - section_id: review\n", to: "    - section_id: testimonials\n"}
+        - {find: "    - section_id: case\n", to: "    - section_id: case-studies\n"}
+        - {find: "    - section_id: form\n", to: "    - section_id: lead-form\n"}
+        - {find: "    - section_id: final\n", to: "    - section_id: final-cta\n"}
+        - {find: "      - slot_id: h1\n", to: "      - slot_id: headline\n"}
+        - {find: "      - slot_id: sub\n", to: "      - slot_id: subheadline\n"}
+        - {find: "      - slot_id: proof\n", to: "      - slot_id: hero-proof\n"}
+        - {find: "        notes: requires_nearby факта (B2)\n      - slot_id: cta\n",
+           to: "        notes: requires_nearby факта (B2)\n      - slot_id: cta-label\n"}
+        - {find: "        notes: срок и предмет скидки в той же строке (H PROMO-01)\n      - slot_id: cta\n",
+           to: "        notes: срок и предмет скидки в той же строке (H PROMO-01)\n      - slot_id: cta-label\n"}
+        - {find: "      - slot_id: cta\n", to: "      - slot_id: cta-label\n"}
+        - {find: "      - slot_id: button\n", to: "      - slot_id: cta-label\n"}
+        - {find: "      - slot_id: h2\n", to: "      - slot_id: title\n", count: 4}
+        - {find: "      - slot_id: q1\n", to: "      - slot_id: qa-1-q\n"}
+        - {find: "      - slot_id: a1\n", to: "      - slot_id: qa-1-a\n"}
+        - {find: "      - slot_id: q3\n", to: "      - slot_id: qa-3-q\n"}
+        - {find: "      - slot_id: a3\n", to: "      - slot_id: qa-3-a\n"}
+      design/promo/motion/home.motion-spec.yaml:
+        - {find: "  page_plan: ../../../site/10-playbooks-contracts/examples/lead-services-otves/plans/home.yaml",
+           to: "  page_plan: ../../../site/promo/plans/home.yaml"}
