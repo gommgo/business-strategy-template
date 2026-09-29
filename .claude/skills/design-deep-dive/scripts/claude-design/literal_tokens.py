@@ -6,12 +6,14 @@
 (`references/claude-design.md § Приёмка`, пункт C2; правило R-VIS-004 `design-audit`). Утилита читает исходники
 холста без браузера:
   - литералы — инлайн-стили и `<style>` артборда, цветовые атрибуты SVG (`fill`, `stroke`, `stop-color`, `color`),
-    умолчания и образцы цветовых твиков `data-props`; дырки `{{…}}` получают значения `renderVals()` на умолчаниях
-    твиков (как в статичной копии, `dc_to_html.py`); рамка артборда (ширина и высота корня) не литерал облика;
+    умолчания цветовых твиков `data-props`; дырки `{{…}}` получают значения `renderVals()` на умолчаниях твиков (как в
+    статичной копии, `dc_to_html.py`). Образцы твика (`options`) — варианты на выбор заказчика, а не облик артборда:
+    не сверяются;
   - семейства: цвет; кегль, интерлиньяж, насыщенность, гарнитура, разрядка; отступы (padding, margin, gap); радиусы;
-    толщина границы; размеры (width, height, min-, max-: сверка с размерами и отступами ДС); тени; длительности;
-    относительные единицы (%, em, ch, vw, fr) и ключевые слова (auto, none, inherit, transparent, currentColor) —
-    не литералы облика;
+    толщина границы; тени; длительности. Размеры элементов (width, height, min-, max-) и рамка артборда — раскладка, а
+    не облик: не сверяются (раскладку артборда заказчик правит как есть, `references/claude-design.md § Правки
+    заказчика`); относительные единицы (%, em, ch, vw, fr) и ключевые слова (auto, none, inherit, transparent,
+    currentColor) — не литералы облика;
   - значения ДС — из токенов: `system.tokens.css` (сборка `ds_build.py`), DTCG `system.tokens.json` (через сборку CSS
     `ds_build`), `tokens.json` артефакта Design System (списки по семействам, значения по темам); семейство токена —
     по имени (`space`, `radius`, `size`, `font-size`/`fs-`, `leading`/`lh-`, `weight`/`fw-`, `family`/`font-`,
@@ -29,7 +31,8 @@
       исходники design/<surface>/canvas/project/ против токенов продукта (system.tokens.css, иначе system.tokens.json,
       иначе tokens.json артефакта; плюс копия ДС, установленная в холст, `canvas/project/ds/*/tokens.json`); адаптивные
       копии design/<surface>/canvas/html/<page-id>.html — значения облика только через var(--…) из system.tokens.css.
-      Тяжесть — warning, у принятого макета (--accepted) — error. Ничего не пишет.
+      Тяжесть — warning и у принятого макета: литерал вне токенов — пункт C2 приёмки (S), его исправляют или
+      принимают с записью; --accepted (макет принят) ведёт совет к записи в REVIEW.md. Ничего не пишет.
   literal_tokens.py scan <файл.dc.html | папка project> … --tokens ФАЙЛ [--tokens ФАЙЛ …] [--all-stages] [--json]
       то же вне проекта (пример базы, снимок живой версии).
   literal_tokens.py tokens ФАЙЛ … [--json]      значения токенов по семействам, темы и брейкпоинты — для разбора
@@ -60,10 +63,11 @@ import findings as FND  # noqa: E402
 
 RULE = "R-VIS-004"
 FAMILIES = ("color", "font-size", "line-height", "weight", "family", "letter-spacing", "spacing", "radius", "border",
-            "size", "shadow", "duration")
+            "shadow", "duration")
 FAMILY_RU = {"color": "цвет", "font-size": "кегль", "line-height": "интерлиньяж", "weight": "насыщенность",
              "family": "гарнитура", "letter-spacing": "разрядка", "spacing": "отступ", "radius": "радиус",
-             "border": "толщина границы", "size": "размер", "shadow": "тень", "duration": "длительность"}
+             "border": "толщина границы", "shadow": "тень", "duration": "длительность"}
+SIZE_PROPS = ("width", "height", "min-width", "min-height", "max-width", "max-height", "inline-size", "block-size")
 # семейство токена по имени: первое совпадение по порядку (кегль раньше размера, толщина границы раньше цвета)
 TOKEN_CATS = (
     ("breakpoint", re.compile(r"(^|-)(bp|breakpoint)(-|$)")),
@@ -80,7 +84,6 @@ TOKEN_CATS = (
     ("spacing", re.compile(r"space|spacing|gap|gutter|inset|padding|margin")),
     ("size", re.compile(r"size|control|height|width|(^|-)(max|min)(-|$)|panel|row")),
 )
-SIZE_OK = ("size", "spacing")                          # размер элемента берёт значения размеров и шкалы отступов
 KEYWORDS = {"auto", "none", "inherit", "initial", "unset", "revert", "transparent", "currentcolor", "normal", "0",
             "0px", "100%", "fit-content", "min-content", "max-content"}
 NAMED = {"white": "#ffffff", "black": "#000000", "red": "#ff0000", "green": "#008000", "blue": "#0000ff",
@@ -238,8 +241,6 @@ class TokenSet:
             return bool(self.numbers.get("weight"))
         if fam == "line-height":
             return bool(self.numbers.get("line-height") or self.lengths.get("line-height"))
-        if fam == "size":
-            return any(self.lengths.get(c) for c in SIZE_OK)
         return bool(self.lengths.get(fam))
 
 
@@ -504,8 +505,8 @@ def literals_of(prop, value, line, where="style"):
     elif base in ("padding", "margin") or prop in ("gap", "row-gap", "column-gap", "grid-gap", "grid-row-gap",
                                                      "grid-column-gap"):
         lens(v, "spacing")
-    elif prop in ("width", "height", "min-width", "min-height", "max-width", "max-height", "inline-size", "block-size"):
-        lens(v, "size")
+    elif prop in SIZE_PROPS:
+        pass                                           # размер элемента — раскладка артборда, не облик: не сверяется
     elif prop == "font-size":
         lens(v, "font-size")
     elif prop == "line-height":
@@ -561,8 +562,6 @@ def in_tokens(lit, ts):
         return lit.key in ts.numbers.get("weight", {}), True
     if f == "line-height":
         return (lit.key in ts.numbers.get("line-height", {}) or lit.key in ts.lengths.get("line-height", {})), True
-    if f == "size":
-        return any(lit.key in ts.lengths.get(c, {}) for c in SIZE_OK), True
     return lit.key in ts.lengths.get(f, {}), True
 
 
@@ -576,10 +575,7 @@ def nearest(lit, ts):
             best = min(ts.colors, key=lambda c: sum((x - y) ** 2 for x, y in zip(a, oklab(c[:7]))))
             return f"{', '.join(ts.colors[best][:2])} {best}"
         pool = {}
-        if lit.family == "size":
-            for c in SIZE_OK:
-                pool.update(ts.lengths.get(c, {}))
-        elif lit.family in ("weight",):
+        if lit.family in ("weight",):
             pool = ts.numbers.get("weight", {})
         elif lit.family == "line-height":
             pool = dict(ts.numbers.get("line-height", {}))
@@ -636,11 +632,10 @@ def artboard_literals(ab, vals, props):
         for name, spec in ab.props_spec.items():
             if name.startswith("$") or not isinstance(spec, dict) or spec.get("editor") != "color":
                 continue
-            for i, v in enumerate([spec.get("default")] + list(spec.get("options") or [])):
-                c = norm_color(str(v)) if v is not None else None
-                if c:
-                    lits.append(Literal("color", str(v), c, line, f"твик {name}" + (" (умолчание)" if i == 0 else ""),
-                                        "tweak"))
+            v = spec.get("default")                    # образцы твика (options) — выбор заказчика, не облик артборда
+            c = norm_color(str(v)) if v is not None else None
+            if c:
+                lits.append(Literal("color", str(v), c, line, f"твик {name} (умолчание)", "tweak"))
     return lits
 
 
@@ -709,6 +704,9 @@ def message(g):
 
 FIX = ("литерал → значение токена ДС: разовая правка — ближайший токен, системная — токен или ручка DTCG; решает "
        "заказчик как владелец облика (references/claude-design.md § Правки токенов)")
+FIX_ACCEPTED = ("макет принят: литерал вне токенов — пункт C2 приёмки (S): правка (разовая — ближайший токен, системная — "
+                "токен или ручка DTCG) или запись исключения в REVIEW.md — кто принял и почему; решает заказчик как "
+                "владелец облика")
 
 
 def scan_boards(files, ts, canvas=None, all_stages=False):
@@ -778,7 +776,8 @@ def project_tokens(call):
 
 def cmd_check(call):
     rep = FND.Report()
-    sev = "error" if call.args.accepted else "warning"
+    sev = "warning"
+    fix = FIX_ACCEPTED if call.args.accepted else FIX
     src = docpaths.design(call.slug, "canvas-project", surface=call.surface, repo=call.repo)
     html_dir = docpaths.design(call.slug, "canvas-html", surface=call.surface, repo=call.repo)
     tok_files = project_tokens(call)
@@ -800,7 +799,7 @@ def cmd_check(call):
         rel = docpaths.rel(ab.path, call.repo)
         for g in groups:
             rep.add(RULE, sev, surface=call.surface, kind="artboard", ref=f"{ab.name}#{g.family}:{g.raw}", path=rel,
-                    message=message(g), fix=FIX)
+                    message=message(g), fix=fix)
         for fam in skipped:
             rep.add(RULE, "hint", surface=call.surface, kind="artboard", ref=f"{ab.name}#{fam}", path=rel,
                     message=f"{FAMILY_RU[fam]}: в ДС нет токенов этого семейства — литералы не сверялись",
@@ -890,6 +889,9 @@ def selftest():
     check("padding: 0 120px → один отступ", [(x.family, x.key) for x in literals_of("padding", "0 120px", 1)],
           [("spacing", 120.0)])
     check("проценты и ch — не литералы", literals_of("max-width", "34ch", 1) + literals_of("width", "95%", 1), [])
+    check("размеры элементов (width, min-height, max-width) — раскладка, не литералы облика",
+          literals_of("width", "440px", 1) + literals_of("min-height", "72px", 1) + literals_of("max-width", "720px", 1),
+          [])
     ex = DC.EXAMPLE
     art = ex / "design-system" / "project" / "tokens.json"
     ts = load_tokens([art])
@@ -908,7 +910,9 @@ def selftest():
                                                                       "Main.dc.html"])
     main = {(g.family, g.raw) for g in res["Main.dc.html"][1]}
     check("Main: отступ 120px вне шкалы", ("spacing", "120px") in main, True)
-    check("Main: образец твика #0B6E4F вне палитры", ("color", "#0B6E4F") in main, True)
+    check("Main: образцы твика accent (#0B6E4F, #0E7490) не сверяются",
+          {("color", "#0B6E4F"), ("color", "#0E7490")} & main, set())
+    check("Main: размеры 440px и 720px не сверяются", any(f == "size" for f, _ in main), False)
     check("Main: цвета фона и текста из токенов", any(f == "color" and r in ("#EEF2F6", "#11151C") for f, r in main), False)
     check("Main: радиусы твика 6 и 12 — токены", any(f == "radius" for f, _ in main), False)
     bk = {(g.family, g.raw) for g in res["Booking.dc.html"][1]}
@@ -951,8 +955,10 @@ def selftest():
         check("фикстура canvas: все находки — R-VIS-004", {f.rule for f in items}, {RULE})
         r2 = subprocess.run([sys.executable, __file__, "check"] + argv + ["--json", "--accepted"], capture_output=True,
                             text=True)
-        check("--accepted: литералы — error, код 1", (r2.returncode, any(f.severity == "error" for f in
-                                                                           FND.parse_lines(r2.stdout))), (1, True))
+        acc = FND.parse_lines(r2.stdout)
+        check("--accepted: литералы — warning, код 0; совет — пункт C2 с записью в REVIEW.md",
+              (r2.returncode, {f.severity for f in acc} <= {"warning", "hint"},
+               any("C2" in f.fix and "REVIEW.md" in f.fix for f in acc)), (0, True, True))
     print("selftest:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 
@@ -977,7 +983,8 @@ def main(argv=None):
             return cmd_scan(a) if argv[0] == "scan" else cmd_tokens(a)
         ap = docpaths.parser("literal_tokens.py", __doc__, commands=("check",), surface="required",
                              accept=lambda s: s.design)
-        ap.add_argument("--accepted", action="store_true", help="макет принят: литерал вне токенов — error")
+        ap.add_argument("--accepted", action="store_true",
+                        help="макет принят: литерал вне токенов — пункт C2 приёмки, совет — правка или запись в REVIEW.md")
         ap.add_argument("--all-stages", action="store_true", help="сверять и «Направления», и «Вайрфрейм»")
         call = docpaths.parse(ap, argv)
         if call.selftest:

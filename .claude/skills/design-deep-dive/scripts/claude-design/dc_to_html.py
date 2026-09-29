@@ -306,7 +306,7 @@ def render_values(boards, tweaks=None):
     if todo:
         node = node_bin()
         if not node:
-            raise ToolError("нужен Node для renderVals() артбордов (install.sh ставит Node; путь — kbpaths.py --bins)")
+            raise ToolError("нужен Node для renderVals() артбордов (системный Node; путь — kbpaths.py --bins)")
         try:
             r = subprocess.run([node, "-e", NODE_HARNESS], input=json.dumps({"jobs": todo}), capture_output=True,
                                text=True, timeout=TIMEOUT_NODE, env=kbpaths.node_env())

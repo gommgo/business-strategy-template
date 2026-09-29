@@ -18,7 +18,10 @@
 
 Какие статичные копии к какой адаптивной: ключ --pairs (`home=Main.html,Landing-Phone.html`), иначе — по текстам: к
 адаптивной копии идут статичные копии артбордов страниц макета (canvas.json), половина различных текстов которых есть в
-ней; копии «Направлений» и «Вайрфрейма» в пары не идут.
+ней; копии «Направлений» и «Вайрфрейма» в пары не идут. Артборды страницы «Состояния» тоже вне автоматических пар:
+состояние экрана (пусто, ошибка, нет доступа) делит с экраном каркас и заголовок, а адаптивная копия показывает одно
+состояние, и пара по текстам была бы ложной; такой артборд сверяется только ключом --pairs, а `check` без ключа
+называет его заметкой.
 
 Команды (файлы проекта — через lib/docpaths.py):
   copies_compare.py check <slug> <surface> [--pairs PAGE=A.html,B.html …] [--tol PX] [--no-geometry] [--repo DIR] [--json]
@@ -57,6 +60,7 @@ VIEW_H_WIDE, VIEW_H_NARROW, NARROW_BELOW = 900, 844, 640
 MIN_FREE_GB = 2.0
 OVERLAP = 0.5
 MAX_GEOM = 12
+STATES_RX = re.compile(r"состояни|\bstates?\b", re.I)   # страница холста «Состояния» (кабинет) по id и имени
 
 COLLECT_JS = r"""
 () => {
@@ -218,17 +222,25 @@ def static_info(path):
 
 
 def static_stages(canvas_dir, statics):
-    """Этап страницы холста у артборда каждой статичной копии (canvas.json): directions · wireframe · mockup."""
+    """Этап страницы холста у артборда каждой статичной копии (canvas.json): directions · wireframe · mockup; артборд
+    страницы «Состояния» — states."""
     canvas = DC.load_canvas(canvas_dir) if canvas_dir and Path(canvas_dir).is_dir() else None
     out = {}
     for s in statics:
         src, _w = static_info(s)
-        out[Path(s).name] = DC.stage_of((canvas or {}).get("boards", {}).get(src), canvas) if canvas else "mockup"
+        board = (canvas or {}).get("boards", {}).get(src)
+        stage = DC.stage_of(board, canvas) if canvas else "mockup"
+        if stage == "mockup" and board:
+            pid = str(board.get("page") or "")
+            if STATES_RX.search(f"{pid} {canvas['pages'].get(pid, '')}"):
+                stage = "states"
+        out[Path(s).name] = stage
     return out
 
 
 def infer_pairs(statics, adaptives, stages=None):
-    """Адаптивная копия ← статичные копии артбордов макета, половина различных текстов которых есть в ней."""
+    """Адаптивная копия ← статичные копии артбордов макета, половина различных текстов которых есть в ней; артборды
+    «Направлений», «Вайрфрейма» и «Состояний» в пары не идут."""
     at = {a: set(dom_texts(a)) for a in adaptives}
     pairs = {a: [] for a in adaptives}
     for s in statics:
@@ -311,8 +323,16 @@ def cmd_check(call):
                     raise ToolError(f"нет копии: {docpaths.rel(p, call.repo)}")
     else:
         canvas_dir = docpaths.design(call.slug, "canvas-project", surface=call.surface, repo=call.repo)
-        pairs = infer_pairs(statics, adaptives, static_stages(canvas_dir, statics))
+        stages = static_stages(canvas_dir, statics)
+        pairs = infer_pairs(statics, adaptives, stages)
     rep = FND.Report()
+    states = [] if a.pairs else sorted(n for n, st in stages.items() if st == "states")
+    if states:
+        rep.add(RULE, "hint", surface=call.surface, kind="copy", ref="states",
+                path=docpaths.rel(html_dir, call.repo),
+                message=f"артборды страницы «Состояния» в автоматические пары не идут ({len(states)}: "
+                        + ", ".join(states[:6]) + (" …" if len(states) > 6 else "") + ")",
+                fix="сверка состояния с адаптивной копией — ключ --pairs <страница>=<артборд>.html")
     for ad, sts in pairs.items():
         rep.extend(compare(ad, sts, a.tol, not a.no_geometry, call.surface,
                            rel=lambda p: docpaths.rel(p, call.repo)).items)
@@ -380,6 +400,16 @@ def selftest(browser=False):
         pairs = infer_pairs(statics, [adapt], static_stages(src, statics))
         check("пары по текстам: home ← Main и Landing-Phone (макет), не «Направления» и «Вайрфрейм»",
               sorted(p.name for p in pairs.get(adapt, [])), ["Landing-Phone.html", "Main.html"])
+        cj = json.loads((src / "canvas.json").read_text(encoding="utf-8"))
+        cj["pages"].append({"id": "states", "name": "4 · Состояния"})
+        cj["boards"]["Landing-Phone.dc.html"]["page"] = "states"
+        (td / "states").mkdir()
+        (td / "states" / "canvas.json").write_text(json.dumps(cj, ensure_ascii=False), encoding="utf-8")
+        st = static_stages(td / "states", statics)
+        check("артборд страницы «Состояния» — этап states", st.get("Landing-Phone.html"), "states")
+        pairs = infer_pairs(statics, [adapt], st)
+        check("«Состояния» — вне автоматических пар: home ← только Main",
+              sorted(p.name for p in pairs.get(adapt, [])), ["Main.html"])
         rep = compare(adapt, [td / "Main.html"], geometry_on=False)
         check("без браузера: копия против себя — 0 находок", rep.items, [])
         adapt.write_text(adapt.read_text(encoding="utf-8").replace("Что делаем", "Чем занимаемся"), encoding="utf-8")

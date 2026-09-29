@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """kit/export.py — экспорт холста без интерфейса Claude Design: PDF по артбордам, PNG 2×, standalone.html, zip.
 
-Агент D базы claude-design-research, 2026-09-25, v1. Использует сервер, блокировку и проверку памяти из shot.py (тот же каталог).
+Использует сервер, блокировку и проверку памяти из shot.py (тот же каталог).
 
 Использование:
   python3 export.py <pdf|png2x|standalone|zip|all> <папка проекта> <outdir> [--manifest canvas.json] [--only landing.html]

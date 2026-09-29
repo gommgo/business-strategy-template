@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """kit/diffshots.py — «изменилось только то, что просили»: сравнение двух снимков shot.py по меткам #N.
 
-Агент D базы claude-design-research, 2026-09-25, v2. Браузер не нужен: читает marks.json и кадры без меток двух папок.
+Браузер не нужен: читает marks.json и кадры без меток двух папок.
 
 Использование:
   python3 diffshots.py <папка до> <папка после> [--expect 16,22,38 | --expect all] [--tolerance 0.01] [--strict]

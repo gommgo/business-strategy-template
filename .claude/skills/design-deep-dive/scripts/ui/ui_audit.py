@@ -21,7 +21,8 @@
     --tokens ФАЙЛ             токены ДС проекта: DTCG `system.tokens.json` или CSS `system.tokens.css`. Шкалы
                               отступов (`space.*`), кеглей, радиусов, высот, слоёв, длительностей и набор цветов берутся
                               из них. Без ключа у admin — эталонные токены ui (`kb/ui/14-recipes/examples/tokens.css`),
-                              у consumer — шкалы пресета; источник шкал записан в отчёте
+                              у consumer — шкалы пресета; источник шкал записан в отчёте. Отступ со шкалы токенов
+                              прогона — не находка A2 («кратные 5 и не кратные 4»)
     --viewport WxH            окно прогона (повторять ключ для нескольких); по умолчанию — первая ширина приёмки
     --acceptance              все ширины приёмки из `kb/common/acceptance-widths.yaml` и прогон вылета на `overflow_only`
     --scheme light|dark|both  цветовая схема (по умолчанию light)
@@ -888,9 +889,12 @@ def run_checks(data, preset, opts, ctx):
             share >= preset["spacing_in_scale_min"], SEV_SERIOUS,
             [f"вне шкалы: {', '.join(str(v) for v in bad[:12])}"] if bad else [])
 
-    five = sorted({v for v in sp_vals if abs(v % 5) < 0.01 and abs(v % 4) > 0.01})
+    # значение со шкалы отступов токенов прогона (ДС проекта или эталон пресета) — решение ДС, а не «шкала десятками»
+    ds_spacing = (getattr(opts, "tokens_set", None) or {}).get("spacing") or []
+    five = sorted({v for v in sp_vals if abs(v % 5) < 0.01 and abs(v % 4) > 0.01 and not in_scale(v, ds_spacing)})
     rep.add("A2", "Отступы", "Значения, кратные 5 и не кратные 4 («шкала десятками»)",
-            len(five), "0", not five, SEV_SERIOUS, [str(v) for v in five[:8]])
+            len(five), "0", not five, SEV_SERIOUS, [str(v) for v in five[:8]],
+            note="значения со шкалы отступов токенов — не находка" if ds_spacing else None)
 
     gaps = sorted({r["rg"] for r in rows if r["rg"]} | {r["cg"] for r in rows if r["cg"]})
     rep.add("A3", "Отступы", "Уникальных значений gap", len(gaps), f"≤ {preset['unique_gap_max']}",
@@ -2036,6 +2040,13 @@ def selftest():
     f = _run([_row(0, pt=13, pb=13, pl=16, pr=16), _row(1, pt=10, pb=6)], A, ts=ref)
     check("A1: 13 вне шкалы space.*, 6 и 10 — шаги режимов", (f["A1"]["verdict"], "13" in f["A1"]["examples"][0]),
           ("FAIL", True))
+    f = _run([_row(0, pt=10, pb=30)], A)
+    check("A2 без токенов: 10 и 30 — «шкала десятками»", (f["A2"]["verdict"], f["A2"]["found"]), ("FAIL", 2))
+    f = _run([_row(0, pt=10, pb=30)], A, ts=ref)
+    check("A2 с токенами: 10 со шкалы space.* — не находка, 30 вне шкалы — находка",
+          (f["A2"]["verdict"], f["A2"]["found"], f["A2"]["examples"]), ("FAIL", 1, ["30"]))
+    f = _run([_row(0, pt=10, pb=10)], A, ts={**ref, "spacing": [4.0, 8.0, 10.0]})
+    check("A2: значение шкалы токенов ДС (--tokens) — OK", f["A2"]["verdict"], "OK")
     A250 = dict(A, durations=sorted(set(A["durations"]) | {250}))   # шкала ДС с токеном подложки
     f = _run([_row(0, td="0.15s"), _row(1, td="0.25s")], A250, ts=ref)
     check("K2: 250 мс у A — исключение подложки (WARN)", f["K2"]["verdict"], "WARN")

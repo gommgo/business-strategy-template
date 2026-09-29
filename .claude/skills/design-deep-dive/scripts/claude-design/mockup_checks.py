@@ -9,15 +9,16 @@
 Подкоманды:
   page <url|file.html|dir> [--views 1440x900,390x844 | --acceptance] [--surface page|app] [--preset A|B|C|D]
        [--tokens ТОКЕНЫ_ДС] [--facts facts.md|facts.yaml] [--copy copy.md|copy-deck.yaml [--page ID]]
-       [--assets assets.md|план.yaml] [--forms ID|план.yaml …] [--src DIR] [--allow warm,serif,…]
-       [--ignore-selector CSS] [--block-external | --allow-external] [--shots DIR] [--json OUT.json] [--md OUT.md]
-       [--min-free-gb 2]
-       exit 0 — нет critical и major, 2 — есть, 1 — ошибка, 3 — мало свободной памяти (браузер не запускался)
+       [--demo demo-data.json] [--assets assets.md|план.yaml] [--forms ID|план.yaml …] [--src DIR]
+       [--allow warm,serif,…] [--ignore-selector CSS] [--block-external | --allow-external] [--shots DIR]
+       [--json OUT.json] [--md OUT.md] [--min-free-gb 2]
+       exit 0 — нет critical и кластера примет, 2 — есть, 1 — ошибка, 3 — мало свободной памяти (браузер не
+       запускался)
   resize <url|file> [--desktop 1440x900] [--mobile 390x844] [--wait-ms 1000] [--shots DIR]
        ресайз без перезагрузки: широкий → узкий → широкий (пункт H5 приёмки): вылет, навигация, медиа первого экрана
        за --wait-ms, кадр после возврата совпадает с исходным (--max-diff — порог cd 06/04 §3 B); exit 0 pass / 2 fail
-  selftest  офлайн-проверки: цвет, контраст, числа с единицей и объектом, факты и копия таблицами и YAML, формы,
-       пороги владельцев, id примет, сводка по доменам
+  selftest  офлайн-проверки: цвет, контраст, числа с единицей и объектом, факты и копия таблицами и YAML, демо-набор,
+       формы, пороги владельцев, id примет, поверхность примет, вердикт кластера, токены ДС, сводка по доменам
 
 Ширины. Без --views окна — основные артборды `kb/common/acceptance-widths.yaml` (`artboards`), --acceptance — все
 ширины приёмки и отдельный прогон вылета на `overflow_only`. Высота окна — параметр прогона: 900 у широких окон, 844 у
@@ -28,7 +29,16 @@ tokens.json артефакта), без них — эталонные токен
 приметы вида, honesty — честность, acceptance — проверки приёмки), id приметы `tell` и ключ `--allow`. Находка несёт
 `tell` и `group` своей строки; сводка называет примету один раз, сколько бы проверок её ни нашли, и считает приметы
 по доменам реестра в единице домена-владельца (экран, страница, сцена), не складывая домены (`domains`, `clusters`
-реестра и кластеры реестра клише creative); вердикт кластера — по порогу владельца домена.
+реестра и кластеры реестра клише creative).
+  Поверхность: примета срабатывает только на поверхности своей записи реестра (`surface`: страничные приметы — ряд
+  чисел, hero, пилюля, тёплая бумага, отзывы — на экране приложения не ищутся); проверка без приметы — везде.
+  Вердикт (шапка реестра): одиночная примета вида — вопрос заказчику «было ли это решением», minor; примета в
+  сложившемся кластере — major. Кластер складывается в единице прогона (страница или экран): кластер реестра — от
+  порога владельца (шаблонный хром — ui 11/04 §1.3), без числа у владельца — от двух примет («несколько примет»
+  шапки реестра), кандидат `proposed` в вердикт не входит; на странице — кластер реестра клише creative по
+  `cluster_rule`; на экране приложения — ещё число маркеров домена app-visual (ui 11/04 §1.3). Приметы вида без ключа
+  `--allow` (контраст тёплой палитры, шкала кеглей, высота шапки) — нормы с уровнем своей проверки. Код 2 — critical
+  или сложившийся кластер.
   Приметы вида: тёплая тонированная бумага, выделенное слово заголовка, антиква в заголовках, капс-надзаголовки (частота
   — число владельца COPY-C-18: не чаще одного на N секций с заголовком H1, H2), доля капса, пилюля над H1, градиентный
   текст, hero на высоту окна по центру без продолжения (порог высоты — AIL-06 site), фото-hero под вуалью, ряд крупных
@@ -43,11 +53,16 @@ tokens.json артефакта), без них — эталонные токен
   Формы — по `kb/site/05-conversion-funnels/lead-forms.yaml`: запреты раздела `forbidden`, которые видны в DOM, у любой
   формы; с --forms — поля и видимые подписи против набора формы плана.
   Приёмка: навигация, тело 16 px и вылет на телефоне, строки H1, наложение текста, слепая зона разметки (canvas и видео).
+  Навигация на телефоне — major, как пункт D2 приёмки (S): страница без меню по плану (посадочная, одноэкранная) —
+  законна, такую находку отбрасывают с причиной.
 Входы. Факты — facts.md входа холста (таблица «Факты»: id · дословно · источник · где можно) или facts.yaml продукта;
-тексты — copy.md входа или copy deck (YAML: выбранные варианты страницы --page); ассеты — assets.md входа (колонки
-«Файл», «Подпись», «Alt») или YAML плана ассетов (записи с file и caption или alt); формы — id наборов lead-forms.yaml
-или YAML плана страницы (`form.ref: lead-forms.yaml#<id>`). `--allow` снимает примету, если бриф или арт-дирекция
-записали решение; ключи — `allow` реестра примет.
+тексты — copy.md входа (строки слотов страницы или таблица «ключ · роль · текст …» кабинета; `{имя}` в тексте —
+подстановка, её значение любое) или copy deck (YAML: выбранные варианты страницы --page); демо-набор кабинета —
+demo-data.json входа (--demo): тексты и числа записей, даты и телефоны, объёмы коллекций — не выдумка; ассеты —
+assets.md входа (колонки «Файл», «Подпись», «Alt») или YAML плана ассетов (записи с file и caption или alt); формы —
+id наборов lead-forms.yaml или YAML плана страницы (`form.ref: lead-forms.yaml#<id>`). Токены ДС (--tokens) — первый
+брейкпоинт, гарнитуры и цвета: антиква в заголовках и тёплый фон, которые называет ДС, — решение, а не примета.
+`--allow` снимает примету, если бриф или арт-дирекция записали решение; ключи — `allow` реестра примет.
 Приватность: статический обход только внутри указанной папки; `/`, домашняя папка и её служебные подпапки отклоняются.
 Для локальных целей внешние запросы по умолчанию блокируются (детерминизм, ничего не уходит в сеть).
 """
@@ -71,6 +86,7 @@ LEAD_FORMS = kbpaths.kb('site', '05-conversion-funnels', 'lead-forms.yaml')
 COPY_CHECKLIST = kbpaths.kb('text', '09-ai-generation-evaluation', 'copy-checklist.yaml')
 ANALYZERS = kbpaths.kb('text', '06-anti-slop', 'lexicon', 'analyzers.yaml')
 CLICHE = kbpaths.kb('creative', '08-uniqueness-anti-slop', 'cliche-registry.yaml')
+UI_ANTISLOP = kbpaths.kb('ui', '11-styles-trends', '04-anti-slop-ui.md')   # §1.3: диагноз по числу маркеров и хрома
 # Высота окна — параметр прогона, а не норма приёмки: широкие окна 900, окна уже первого брейкпоинта 844 (окна первого
 # экрана site 1440×900 и 390×844).
 VIEW_H_WIDE, VIEW_H_NARROW = 900, 844
@@ -118,6 +134,23 @@ def first_breakpoint(tokens=None):
             return min(bps)
     with open(REF_TOKENS, encoding='utf-8') as f:
         return min(float(v) for v in re.findall(r'--bp-[a-z-]+:\s*(\d+(?:\.\d+)?)px', f.read()))
+
+
+def ds_look(tokens):
+    """Гарнитуры и цвета токенов ДС (--tokens) → {'families': {первая гарнитура}, 'colors': [(r, g, b)]}; без токенов —
+    None. Облик, который называет ДС, — решение, а не примета."""
+    if not tokens:
+        return None
+    kbpaths.use('claude-design')
+    import literal_tokens
+    ts = literal_tokens.load_tokens([tokens])
+    return {'families': set(ts.families),
+            'colors': [tuple(int(c[i:i + 2], 16) for i in (1, 3, 5)) for c in ts.colors if len(c) == 7]}
+
+
+def ds_color(rgb, ds):
+    """Цвет отрисовки — значение токена ДС (допуск 2 на канал — округление перевода цвета в sRGB)."""
+    return bool(ds) and any(max(abs(a - b) for a, b in zip(rgb[:3], c)) <= 2 for c in ds['colors'])
 
 
 def header_limit(surface, preset, vw, first_bp):
@@ -180,6 +213,36 @@ def orbit_min_icons():
     """Орбита — от N иконок на окружностях (метрика записи реестра клише logo-orbit-hero)."""
     v = num_in(((cliche_entry('logo-orbit-hero').get('signals') or {}).get('metric')), r'≥\s*(\d+)\s*икон')
     return int(v) if v else None
+
+
+NUM_WORDS = {'два': 2, 'две': 2, 'три': 3, 'четыре': 4, 'пять': 5, 'шесть': 6}
+
+
+def _count(word):
+    w = str(word or '').strip('*').lower()
+    return int(w) if w.isdigit() else NUM_WORDS.get(w)
+
+
+@lru_cache(maxsize=None)
+def ui_diagnosis():
+    """Диагноз ui 11/04 §1.3: markers — с какого числа маркеров на экране интерфейс «усреднён», chrome — с какого
+    числа приёмов шаблонного хрома; числа нет у владельца — None."""
+    try:
+        text = open(UI_ANTISLOP, encoding='utf-8').read()
+    except OSError:
+        return {'markers': None, 'chrome': None}
+    sec = re.search(r'^###\s*1\.3\..*?(?=^###\s)', text, re.S | re.M)
+    body = sec.group(0) if sec else ''
+    m = re.search(r'\|\s*\*\*(\S+)\s+и\s+больше\*\*\s*\|', body)
+    c = re.search(r'\((\S+)\s+и\s+больше\s+«хрома»\)', body)
+    return {'markers': _count(m.group(1)) if m else None, 'chrome': _count(c.group(1)) if c else None}
+
+
+@lru_cache(maxsize=None)
+def cliche_cluster_min():
+    """Кластер реестра клише creative на одной сцене — от N записей одного кластера (`cluster_rule`)."""
+    m = re.search(r'(\S+)\s+и\s+больше\s+записей\s+одного\s+кластера', str(_yaml(CLICHE).get('cluster_rule') or ''))
+    return _count(m.group(1)) if m else None
 
 
 @lru_cache(maxsize=None)
@@ -407,6 +470,33 @@ def claim_known(c, known):
     return False
 
 
+SUBST_RX = re.compile(r'\{[^{}]{1,40}\}')
+LETTERS_RX = re.compile(r'[a-zа-яё]+')
+
+
+def copy_matcher(copy_text, demo=None):
+    """Текст блока → из copy deck ли он: дословно внутри текстов (кавычки, тире и пробелы нормализуются); строка с
+    подстановкой `{имя}` — шаблон, значение подстановки любое. С демо-набором — ещё тексты его записей, а блок, собранный
+    из полей записи (строка таблицы, карточка), проходит, если каждое его слово есть в текстах copy deck и демо-набора
+    (блок без слов — число, дата, телефон — сверяет HON-NUMBERS)."""
+    pool = copy_text + ('\n' + '\n'.join(demo['texts']) if demo else '')
+    cn = norm_text(pool)
+    tmpl = []
+    for line in pool.splitlines():
+        if SUBST_RX.search(line):
+            parts = SUBST_RX.split(norm_text(line))
+            if LETTERS_RX.search(''.join(parts)):
+                tmpl.append(re.compile('.+?'.join(re.escape(p) for p in parts)))
+    vocab = set(LETTERS_RX.findall(cn)) if demo else None
+
+    def known(text):
+        t = norm_text(text)
+        if t in cn or any(rx.fullmatch(t) for rx in tmpl):
+            return True
+        return vocab is not None and all(w in vocab for w in LETTERS_RX.findall(t))
+    return known
+
+
 def _cells(line):
     return [x.strip() for x in line.strip().strip('|').split('|')]
 
@@ -473,8 +563,8 @@ def load_facts(path):
 
 
 def load_copy(path, page=None):
-    """Тексты copy deck: copy.md входа (строки слотов) или copy deck YAML/JSON (выбранные варианты страницы --page;
-    без --page — все страницы)."""
+    """Тексты copy deck: copy.md входа (строки слотов страницы; у кабинета — таблица «ключ · роль · текст …», колонка
+    «текст») или copy deck YAML/JSON (выбранные варианты страницы --page; без --page — все страницы)."""
     if not path:
         return None
     try:
@@ -482,13 +572,24 @@ def load_copy(path, page=None):
     except OSError as e:
         raise SystemExit(f'не читается {path}: {e}')
     if not path.lower().endswith(('.yaml', '.yml', '.json')):
-        out = []
+        out, header = [], None
         for line in raw.splitlines():
-            m = re.match(r'^\[[^\]]*\](?:\s+[a-z]+)?:\s?(.*)$', line.strip())
+            st = line.strip()
+            if st.startswith('|'):
+                cells = _cells(st)
+                if header is None:
+                    header = [c.lower() for c in cells]             # первая строка таблицы — шапка
+                elif not all(re.fullmatch(r':?-{3,}:?', c) for c in cells if c):
+                    col = next((i for i, h in enumerate(header) if h in ('текст', 'text')), None)
+                    if col is not None and col < len(cells) and cells[col]:
+                        out.append(cells[col])
+                continue
+            header = None
+            m = re.match(r'^\[[^\]]*\](?:\s+[a-z]+)?:\s?(.*)$', st)
             if m:
                 out.append(m.group(1))
             elif line.startswith('  ') and out:
-                out[-1] += '\n' + line.strip()
+                out[-1] += '\n' + st
         return '\n'.join(out) if out else md_plain(raw)
     import yaml
     d = yaml.safe_load(raw) or {}
@@ -504,6 +605,63 @@ def load_copy(path, page=None):
                 if ch and ch.get('text'):
                     out.append(str(ch['text']))
     return '\n'.join(out)
+
+
+ISO_DATE_RX = re.compile(r'^(\d{4})-(\d{2})-(\d{2})(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$')
+
+
+def _num_value(x):
+    return ('%f' % float(x)).rstrip('0').rstrip('.')
+
+
+def load_demo(path):
+    """Демо-набор кабинета (demo-data.json входа холста) → {'texts': [строки], 'values': {значения}}: макет кабинета
+    рисует записи демо-набора, и их тексты и числа — не выдумка. Тексты — строки записей, названия статусов объектов,
+    строки локализации; значения — числа записей (без единицы: единицу и формат задаёт вёрстка), числа внутри строк,
+    телефоны, даты ISO (дата целиком, день, месяц, год), объёмы коллекций и размеры наборов."""
+    if not path:
+        return None
+    try:
+        d = json.load(open(path, encoding='utf-8'))
+    except (OSError, json.JSONDecodeError) as e:
+        raise SystemExit(f'не читается демо-набор {path}: {e}')
+    texts, values = [], set()
+
+    def scalar(v):
+        if isinstance(v, bool) or v is None:
+            return
+        if isinstance(v, (int, float)):
+            values.add(_num_value(v))
+        elif isinstance(v, str) and v.strip():
+            s = v.strip()
+            m = ISO_DATE_RX.match(s)
+            if m:
+                y, mo, dd = m.groups()
+                values.update({f'date:{dd}.{mo}.{y[-2:]}', str(int(dd)), str(int(mo)), y})
+                return
+            texts.append(s)
+            values.update(c['value'] for c in number_claims(s))
+        elif isinstance(v, list):
+            for x in v:
+                scalar(x)
+        elif isinstance(v, dict):
+            for k, x in v.items():
+                if not str(k).startswith('_') and k != 'example':
+                    scalar(x)
+
+    for obj in (d.get('objects') or {}).values():
+        if not isinstance(obj, dict):
+            continue
+        for rec in obj.get('records') or []:
+            scalar(rec)
+        texts += [str(s['name']) for s in obj.get('statuses') or [] if isinstance(s, dict) and s.get('name')]
+    for col in (d.get('collections') or {}).values():
+        if not isinstance(col, dict):
+            continue
+        scalar(list((col.get('volume') or {}).values()))
+        scalar([s.get('count') for s in (col.get('sets') or {}).values() if isinstance(s, dict)])
+    texts += [str(x['text']) for x in d.get('localization') or [] if isinstance(x, dict) and x.get('text')]
+    return {'texts': texts, 'values': values}
 
 
 def parse_assets_readme(path):
@@ -1240,19 +1398,25 @@ def check_forms(F, desk, form_sets, allowed):
 
 
 def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts):
-    """opts: surface (page | app), preset (A–D), first_bp, form_sets. Кадр с overflow_only — только вылет."""
+    """opts: surface (page | app), preset (A–D), first_bp, form_sets; ds — гарнитуры и цвета токенов ДС (ds_look),
+    demo — демо-набор кабинета (load_demo). Кадр с overflow_only — только вылет. Находки — после фильтра поверхности и
+    вердикта кластера (verdict)."""
     F = []
     over = [v for v in views if v.get('overflow_only')]
     views = [v for v in views if not v.get('overflow_only')]
     desk = next((v for v in views if view_w(v) >= opts['first_bp']), views[0])
     target_host = urlparse(url).netloc
+    ds = opts.get('ds')
 
-    # ---------- тёплая бумага: фон страницы и секций
+    # ---------- тёплая бумага: фон страницы и секций; тёплая нейтраль из токенов ДС — решение, не примета
     for v in views[:1] if len(views) else []:
         page_w = warm_class(v['page_bg'])
+        page_ds = bool(page_w) and ds_color(v['page_bg'], ds)
+        page_w = page_w and not page_ds
         secs = v['sections']
         total_h = max(1, v['page_h'])
-        warm_secs = [s for s in secs if warm_class(s['bg'])]
+        warm_all = [s for s in secs if warm_class(s['bg'])]
+        warm_secs = [s for s in warm_all if not ds_color(s['bg'], ds)]
         share = min(1.0, sum(s['h'] for s in warm_secs) / total_h)
         ev = {'page_bg': hexs(v['page_bg']), 'page_bg_oklch': oklch(v['page_bg']), 'warm_share_of_page': round(share, 2),
               'warm_sections': [{'el': s['el'], 'bg': hexs(s['bg']), 'oklch': oklch(s['bg'])} for s in warm_secs[:6]]}
@@ -1263,6 +1427,10 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
         elif warm_secs:
             add(F, 'LOOK-BG-WARM', 'minor', v['viewport'], f'тёплая тонированная секция ({len(warm_secs)} шт., доля {share:.0%})',
                 ev, 'фон секции — поверхность из токенов ДС', allowed)
+        elif page_ds or warm_all:
+            ds_bg = sorted(({hexs(v['page_bg'])} if page_ds else set()) | {hexs(s['bg']) for s in warm_all})
+            add(F, 'LOOK-BG-WARM', 'info', v['viewport'],
+                f"тёплый фон — значения токенов ДС ({', '.join(ds_bg[:4])}): решение ДС, не примета", {'ds_colors': ds_bg})
 
     # ---------- заголовки: акцентное слово, антиква, надзаголовки, пилюля, градиент
     heads = desk['headings']
@@ -1279,14 +1447,17 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
     elif len(acc_h2) >= 2:
         add(F, 'LOOK-ACCENT-WORD', 'minor', desk['viewport'], f'выделенное слово в {len(acc_h2)} подзаголовках',
             {'examples': [h['accent'] for h in acc_h2[:3]]}, 'снять выделенные слова в заголовках секций', allowed)
-    serif_heads = [h for h in heads if family_kind(h['ff']) == 'serif']
+    # антиква, которую называют токены ДС (--tokens), — решение ДС, не примета
+    ds_fam = (ds or {}).get('families') or set()
+    serif_all = [h for h in heads if family_kind(h['ff']) == 'serif']
+    serif_heads = [h for h in serif_all if family_first(h['ff']) not in ds_fam]
     h2s = [h for h in heads if h['tag'] == 'h2']
-    serif_h1 = any(family_kind(h['ff']) == 'serif' for h in h1s)
-    serif_h2 = h2s and sum(family_kind(h['ff']) == 'serif' for h in h2s) / len(h2s) >= 0.5
+    serif_h1 = any(h in serif_heads for h in h1s)
+    serif_h2 = h2s and sum(h in serif_heads for h in h2s) / len(h2s) >= 0.5
     body_leaves = [l for l in desk['leaves'] if l['tag'] in ('p', 'li') and len(l['text'].split()) >= 6]
     body_fam = statistics.mode([family_first(l['ff']) for l in body_leaves]) if body_leaves else ''
     if serif_h1 or serif_h2:
-        disp = family_first((h1s or serif_heads)[0]['ff']) if (h1s or serif_heads) else ''
+        disp = family_first(([h for h in h1s if h in serif_heads] or serif_heads)[0]['ff'])
         pair = body_fam in SANS_DEFAULTS
         italic = any(h['style'] == 'italic' for h in serif_heads if h['tag'] == 'h1')
         add(F, 'LOOK-SERIF-DISPLAY', 'major', desk['viewport'],
@@ -1294,6 +1465,10 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
             + (' курсивом' if italic else ''),
             {'display': disp, 'body': body_fam, 'serif_headings': len(serif_heads), 'headings': len(heads)},
             'гарнитуры — только из ДС; антиква в заголовках — только если её называет ДС', allowed)
+    elif len(serif_heads) < len(serif_all):
+        fams = sorted({family_first(h['ff']) for h in serif_all if h not in serif_heads})
+        add(F, 'LOOK-SERIF-DISPLAY', 'info', desk['viewport'],
+            f"антиква в заголовках — гарнитура токенов ДС ({', '.join(fams)}): решение ДС, не примета", {'ds_families': fams})
     per = eyebrow_per_sections()
     heads12 = [h for h in heads if h['tag'] in ('h1', 'h2')]
     eyebrowed = [h for h in heads12 if h['eyebrow']]
@@ -1540,17 +1715,21 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
                 seen_nums.add(key)
                 page_nums.append(dict(c, objs=sorted(c['objs']), el=l['el'], context=l['text'][:80]))
     copy_claims = number_claims(copy_text) if copy_text is not None else None
-    if facts is not None or copy_claims is not None:
+    demo = opts.get('demo')
+    if facts is not None or copy_claims is not None or demo is not None:
         known = (facts or {}).get('known', []) + (copy_claims or [])
-        unknown = [n for n in page_nums if not claim_known(dict(n, objs=set(n['objs'])), known)]
+        demo_values = (demo or {}).get('values') or set()      # число записи демо-набора — с любой единицей и объектом
+        unknown = [n for n in page_nums if not claim_known(dict(n, objs=set(n['objs'])), known)
+                   and n['value'] not in demo_values]
         nosrc = (facts or {}).get('no_source') or []
         if unknown:
             add(F, 'HON-NUMBERS', 'critical', desk['viewport'],
-                f'чисел нет в фактах и текстах (значение, единица, объект): {len(unknown)}'
-                + (f'; строк фактов без источника: {len(nosrc)}' if nosrc else ''),
+                f"чисел нет в фактах и текстах{' и демо-наборе' if demo is not None else ''} (значение, единица, "
+                f'объект): {len(unknown)}' + (f'; строк фактов без источника: {len(nosrc)}' if nosrc else ''),
                 {'numbers': unknown[:12], 'facts_without_source': nosrc[:12]},
-                'каждое число — из фактов с источником (та же единица, тот же объект); выдуманное — [PLACEHOLDER: что] и '
-                'строка «Нет»: ' + ', '.join(n['raw'] for n in unknown[:6]))
+                'каждое число — из фактов с источником (та же единица, тот же объект)'
+                + (' или из записей демо-набора' if demo is not None else '')
+                + '; выдуманное — [PLACEHOLDER: что] и строка «Нет»: ' + ', '.join(n['raw'] for n in unknown[:6]))
         elif nosrc:
             add(F, 'HON-NUMBERS', 'info', desk['viewport'], f'строк фактов без источника: {len(nosrc)} (число они не легализуют)',
                 {'facts_without_source': nosrc[:12]})
@@ -1562,12 +1741,13 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
 
     # ---------- текст против copy deck, заглушки, отзывы
     if copy_text is not None:
-        cn = norm_text(copy_text)
+        from_copy = copy_matcher(copy_text, demo)
         cand = [b for b in desk['blocks'] if len(b['text'].split()) >= 3 and '[PLACEHOLDER' not in b['text'].upper()]
-        miss = [b for b in cand if norm_text(b['text']) not in cn]
+        miss = [b for b in cand if not from_copy(b['text'])]
         if cand and len(miss) / len(cand) > 0.10:
             add(F, 'HON-COPY', 'major', desk['viewport'],
-                f'текст не из copy deck: {len(miss)} из {len(cand)} блоков ({len(miss) / len(cand):.0%} > 10 %)',
+                f"текст не из copy deck{' и демо-набора' if demo is not None else ''}: {len(miss)} из {len(cand)} блоков "
+                f'({len(miss) / len(cand):.0%} > 10 %)',
                 {'examples': [{'el': b['el'], 'text': b['text'][:90]} for b in miss[:10]]},
                 'тексты — дословно из copy.md входа: не переписывать, не сокращать, не дописывать; пробел — '
                 '[PLACEHOLDER: что]')
@@ -1609,9 +1789,10 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
             continue
         nav_ok = any(n['links'] >= 2 for n in v['nav']['navs']) or any(t['top'] < v['vh'] * 0.3 for t in v['nav']['toggles'])
         if not nav_ok:
-            add(F, 'M-NAV', 'critical', v['viewport'], 'навигация не видна (нет кнопки меню и нет ≥ 2 ссылок в nav или header)',
+            add(F, 'M-NAV', 'major', v['viewport'], 'навигация не видна (нет кнопки меню и нет ≥ 2 ссылок в nav или header)',
                 {'navs': v['nav']['navs'][:3], 'toggles': v['nav']['toggles'][:3]},
-                f"на {v['viewport']}: кнопка меню в шапке (≥ 44 × 44 px), открывающая разделы, или видимые ссылки")
+                f"на {v['viewport']}: кнопка меню в шапке (≥ 44 × 44 px), открывающая разделы, или видимые ссылки; "
+                'страница без меню по плану (посадочная, одноэкранная) — законна: находку отбросить с причиной')
         paras = [l for l in v['leaves'] if l['tag'] in ('p', 'li', 'dd', 'blockquote') and len(l['text'].split()) >= 8]
         if paras:
             small = [l for l in paras if l['fs'] < 16]
@@ -1652,7 +1833,7 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
          'declared_in_source': dict(sorted(((static or {}).get('declared_fonts') or {}).items(), key=lambda x: -x[1])[:10])})
     if blocked:
         add(F, 'I-BLOCKED', 'info', 'all', f'внешних запросов заблокировано: {len(blocked)}', {'urls': blocked[:10]})
-    return F
+    return verdict(F, opts['surface'])
 
 
 def domain_of(tell_id, surface):
@@ -1684,10 +1865,80 @@ def ui_markers(tell_id):
     return out
 
 
+def on_surface(f, surface):
+    """Примета срабатывает только на поверхности своей записи реестра (`surface`); проверка без приметы — везде."""
+    t = registry()['tells'].get(f.get('tell') or '') or {}
+    return not t.get('surface') or surface in t['surface']
+
+
+def off_surface(surface):
+    """Проверки утилиты, чья примета на этой поверхности не ищется (поле отчёта off_surface)."""
+    return sorted(k for k, v in registry()['checks'].items() if ':' not in k and not on_surface(v, surface))
+
+
+def clusters_of(hit, surface):
+    """Кластеры с приметами прогона (hit — приметы находок не info): [{id, name, unit, members_hit, members, min,
+    formed, rule}]. Кластер реестра примет — от порога владельца (шаблонный хром — ui 11/04 §1.3), без числа у
+    владельца — от двух («несколько примет» шапки реестра); кандидат `proposed` в вердикт не входит (min — None). На
+    странице — кластеры реестра клише creative (`cluster_rule`); на экране приложения — маркеры домена app-visual
+    (ui 11/04 §1.3)."""
+    reg = registry()
+    diag = ui_diagnosis()
+    out = []
+
+    def row(cid, name, unit, mem, members, n, rule):
+        out.append({'id': cid, 'name': name, 'unit': unit, 'members_hit': mem, 'members': members, 'min': n,
+                    'formed': bool(n) and len(mem) >= n, 'rule': rule})
+
+    for c in reg['clusters']:
+        mem = [m for m in c.get('members') or [] if m in hit]
+        if mem:
+            n = None if 'proposed' in str(c.get('rule') or '') else (diag['chrome'] if c['id'] == 'template-chrome' else 2)
+            row(c['id'], c.get('name'), c.get('unit'), mem, len(c.get('members') or []), n, c.get('rule') or c.get('owner'))
+    if surface == 'page':
+        for c in _yaml(CLICHE).get('clusters') or []:
+            mem = [m for m in c.get('members') or [] if m in hit]
+            if mem:
+                row(f"cliche:{c['id']}", c.get('name_ru'), 'сцена страницы', mem, len(c.get('members') or []),
+                    cliche_cluster_min(), 'creative/08-uniqueness-anti-slop/cliche-registry.yaml#cluster_rule')
+    if surface == 'app':
+        dom = [t for t in reg['tells'] if domain_of(t, 'app') == 'app-visual']
+        mem = sorted(t for t in hit if t in dom)
+        if mem:
+            row('domain:app-visual', 'маркеры экрана приложения', 'экран', mem, len(dom), diag['markers'],
+                'ui/11-styles-trends/04-anti-slop-ui.md §1.3')
+    return out
+
+
+def verdict(F, surface):
+    """Находки прогона → находки на поверхности с вердиктом шапки реестра: примета вида с ключом --allow — minor
+    (одиночная: вопрос заказчику, было ли это решением) или major (член сложившегося кластера); примета без ключа
+    (контраст, шкала кеглей, шапка) — уровень своей проверки."""
+    F = [f for f in F if on_surface(f, surface)]
+    hit = {f['tell'] for f in F if f.get('tell') and f['severity'] != 'info'}
+    formed = {}
+    for c in clusters_of(hit, surface):
+        if c['formed']:
+            for t in c['members_hit']:
+                formed.setdefault(t, c)
+    checks = registry()['checks']
+    for f in F:
+        if f.get('group') != 'look' or f['severity'] not in ('major', 'minor') or not checks.get(f['id'], {}).get('allow'):
+            continue
+        c = formed.get(f['tell'])
+        if c:
+            f['severity'], f['cluster'] = 'major', c['id']
+            f['message'] += f" — кластер {c['id']} ({len(c['members_hit'])} примет: {', '.join(c['members_hit'][:6])})"
+        else:
+            f['severity'] = 'minor'
+            f['message'] += ' — одиночная примета: вопрос заказчику, было ли это решением'
+    return F
+
+
 def summarize(F, allowed, surface='page'):
     """Сводка без дублей: примета — один раз, сколько бы проверок её ни нашли; счёт — по доменам реестра в единице
     домена (страница или экран одного прогона), домены не складываются; кластеры реестра и реестра клише — членами,
-    вердикт по порогу владельца (правило кластера названо)."""
+    порогом владельца и признаком «сложился» (clusters_of); clusters_formed — сложившиеся кластеры (код 2)."""
     reg = registry()
     counts = {s_: 0 for s_ in SEV_ORDER}
     for f in F:
@@ -1715,19 +1966,7 @@ def summarize(F, allowed, surface='page'):
         dom['count'] = len(dom['tells'])
         if did == 'app-visual':
             dom['ui_markers'] = sorted(set().union(*(ui_markers(t) for t in dom['tells'])))
-    clusters = []
-    for c in reg['clusters']:
-        mem = [m for m in c.get('members') or [] if m in hit]
-        if mem:
-            clusters.append({'id': c['id'], 'name': c.get('name'), 'unit': c.get('unit'), 'members_hit': mem,
-                             'members': len(c.get('members') or []), 'rule': c.get('rule') or c.get('owner')})
-    if surface == 'page':
-        for c in _yaml(CLICHE).get('clusters') or []:
-            mem = [m for m in c.get('members') or [] if m in hit]
-            if mem:
-                clusters.append({'id': f"cliche:{c['id']}", 'name': c.get('name_ru'), 'unit': 'сцена страницы',
-                                 'members_hit': mem, 'members': len(c.get('members') or []),
-                                 'rule': 'creative/08-uniqueness-anti-slop/cliche-registry.yaml#cluster_rule'})
+    clusters = clusters_of(set(hit), surface)
     groups = {}
     for f in F:
         if f['severity'] in ('critical', 'major') and f.get('group'):
@@ -1735,19 +1974,27 @@ def summarize(F, allowed, surface='page'):
             if f['id'] not in groups[f['group']]:
                 groups[f['group']].append(f['id'])
     return {'counts': counts, 'tells': tells, 'domains': domains, 'clusters': clusters,
+            'clusters_formed': [c['id'] for c in clusters if c['formed']],
             'groups': {g: sorted(v) for g, v in sorted(groups.items())},
             'acceptance_hint': {g: not groups.get(g) for g in ('look', 'honesty', 'acceptance')},
             'allowed_by_brief': sorted(allowed)}
 
 
+def exit_code(summary):
+    """Код прогона: 2 — есть critical или сложился кластер примет, иначе 0."""
+    return 2 if summary['counts']['critical'] or summary['clusters_formed'] else 0
+
+
 def to_md(res):
     s = res['summary']
     doms = '; '.join(f"{d} ({v.get('unit') or '—'}): {', '.join(v['tells'])}" for d, v in s['domains'].items()) or '—'
-    cl = '; '.join(f"{c['id']} {len(c['members_hit'])} из {c['members']}" for c in s['clusters']) or '—'
+    cl = '; '.join(f"{c['id']} {len(c['members_hit'])} из {c['members']}"
+                   + (f" (порог {c['min']}{' — сложился' if c['formed'] else ''})" if c.get('min') else ' (вне вердикта)')
+                   for c in s['clusters']) or '—'
     L = [f"# mockup_checks · {res['target']} · {res['created']}", '',
          f"Итог: critical {s['counts']['critical']} · major {s['counts']['major']} · minor {s['counts']['minor']} · "
          f"info {s['counts']['info']}. Приметы по доменам (единица домена; домены не складываются): {doms}. "
-         f"Кластеры (члены; вердикт — правило владельца): {cl}.", '',
+         f"Кластеры (члены; порог — владелец; одиночная примета — вопрос заказчику): {cl}.", '',
          '| Проверка | Примета | Тяжесть | Вид | Найдено | Правка |', '|---|---|---|---|---|---|']
     for f in sorted(res['findings'], key=lambda x: (SEV_ORDER[x['severity']], x['id'])):
         if f['severity'] == 'info':
@@ -1795,21 +2042,24 @@ def cmd_page(a):
     static = scan_sources(src) if src else None
     facts = load_facts(a.facts)
     copy_text = load_copy(a.copy, a.page)
+    demo = load_demo(a.demo)
     assets = parse_assets_readme(a.assets)
     form_sets = load_form_sets(a.forms)
     t0 = time.time()
     url, views, blocked = collect(a.target, specs + ([over] if over else []), a.ignore_selector, block, a.shots)
     if over:
         views[-1]['overflow_only'] = True
-    opts = {'surface': a.surface, 'preset': a.preset, 'first_bp': first_bp, 'form_sets': form_sets}
+    opts = {'surface': a.surface, 'preset': a.preset, 'first_bp': first_bp, 'form_sets': form_sets,
+            'ds': ds_look(a.tokens), 'demo': demo}
     F = analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts)
     res = {'tool': 'mockup_checks.py', 'version': VERSION, 'target': a.target, 'url': url, 'static_frame': frame,
            'created': datetime.now(timezone.utc).isoformat(timespec='seconds'), 'seconds': round(time.time() - t0, 1),
            'surface': a.surface, 'first_breakpoint': first_bp,
            'views': [v['viewport'] for v in views],
            'widths': '--views' if a.views else ('рамка статичной копии' if frame else 'kb/common/acceptance-widths.yaml'),
-           'inputs': {'facts': a.facts, 'copy': a.copy, 'assets': a.assets, 'forms': form_sets, 'tokens': a.tokens,
-                      'src': (static or {}).get('root'), 'block_external': block},
+           'off_surface': off_surface(a.surface),
+           'inputs': {'facts': a.facts, 'copy': a.copy, 'demo': a.demo, 'assets': a.assets, 'forms': form_sets,
+                      'tokens': a.tokens, 'src': (static or {}).get('root'), 'block_external': block},
            'static': {k: v for k, v in (static or {}).items() if k != 'stock_hits'} if static else None,
            'shots': [v.get('shot') for v in views if v.get('shot')],
            'summary': summarize(F, allowed, a.surface),
@@ -1822,10 +2072,10 @@ def cmd_page(a):
         open(a.md, 'w', encoding='utf-8').write(to_md(res))
     s = res['summary']
     print(json.dumps({'target': a.target, 'seconds': res['seconds'], 'summary': {k: s[k] for k in ('counts', 'groups',
-                      'acceptance_hint')}, 'tells': [t['tell'] for t in s['tells']],
+                      'clusters_formed', 'acceptance_hint')}, 'tells': [t['tell'] for t in s['tells']],
                       'top': [f"{f['severity']} {f['id']}: {f['message']}" for f in res['findings'] if f['severity'] != 'info'][:14]},
                      ensure_ascii=False, indent=1))
-    return 2 if (s['counts']['critical'] or s['counts']['major']) else 0
+    return exit_code(s)
 
 
 # ---------------------------------------------------------------- ресайз без перезагрузки (пункт H5 приёмки)
@@ -2022,6 +2272,16 @@ def cmd_selftest(_a):
                                                '[text]: Первая строка\n  Вторая строка\n')
         check('copy.md: строки слотов и продолжения', load_copy(cmd) == 'Ремонт под ключ с 2014 года\nПервая строка\nВторая строка',
               load_copy(cmd))
+        tp = os.path.join(td, 'copy-app.md')
+        open(tp, 'w', encoding='utf-8').write('# Тексты интерфейса\n\n| ключ | роль | текст | maxlen | статус |\n'
+                                              '|---|---|---|---|---|\n'
+                                              '| `a.list.empty` | empty | По запросу «{query}» заявок нет | 80 | approved |\n'
+                                              '| `a.list.create` | action | Создать заявку | 24 | approved |\n')
+        check('copy.md кабинета: таблица — тексты колонки «текст»',
+              load_copy(tp) == 'По запросу «{query}» заявок нет\nСоздать заявку', load_copy(tp))
+        mt = copy_matcher(load_copy(tp))
+        check('подстановка {query} — шаблон: «По запросу «кухня» заявок нет» из copy deck, «Заявок нет вообще» — нет',
+              mt('По запросу «кухня» заявок нет') and not mt('Заявок нет вообще'))
         deck = str(kbpaths.kb('text', '10-templates-recipes', 'examples', 'ru-otves-lead.yaml'))
         check('copy deck YAML: выбранные тексты страницы', 'Позвать замерщика' in (load_copy(deck, 'otves-product-aware') or ''))
         ay = os.path.join(td, 'plan.yaml')
@@ -2041,8 +2301,9 @@ def cmd_selftest(_a):
     check('надзаголовки 2 из 6 при ceil(6/3) = 2 — не примета', 'LOOK-EYEBROW' not in ids(F, ('major',)), F)
     heads[3]['eyebrow'] = {'text': 'ЕЩЁ'}
     F = analyze('http://x/', [_view(headings=heads)], None, None, None, None, set(), [], opts)
-    check('надзаголовки 3 из 6 — major, примета caps-eyebrow',
-          any(f['id'] == 'LOOK-EYEBROW' and f['severity'] == 'major' and f['tell'] == 'caps-eyebrow' for f in F), F)
+    check('надзаголовки 3 из 6 — примета caps-eyebrow; одиночная — minor, вопрос заказчику',
+          any(f['id'] == 'LOOK-EYEBROW' and f['severity'] == 'minor' and f['tell'] == 'caps-eyebrow'
+              and 'вопрос заказчику' in f['message'] for f in F), F)
     F = analyze('http://x/', [_view(headings=heads)], None, None, None, None, {'eyebrow'}, [], opts)
     check('--allow eyebrow снимает примету до info', all(f['severity'] == 'info' for f in F if f['id'] == 'LOOK-EYEBROW'))
     arrows = [_leaf('Записаться →', in_btn=True), _leaf('«Отвес»', in_btn=True), _leaf('Мы на Яндекс Картах ↗', in_btn=True, ext=True)]
@@ -2058,6 +2319,18 @@ def cmd_selftest(_a):
     check('ряд 1 146, 4,8, 12 лет — ряд чисел', 'LOOK-STATS-ROW' in ids(F))
     F = analyze('http://x/', [_view(rows=[dict(row, cv=0.1)])], None, None, None, None, set(), [], opts)
     check('три карточки одной длины (CV 0.1) — примета', 'LOOK-THREE-CARDS' in ids(F))
+    check('одиночная LOOK-THREE-CARDS — minor, код 0',
+          ([f['severity'] for f in F if f['id'] == 'LOOK-THREE-CARDS'], exit_code(summarize(F, set(), 'page'))) == (['minor'], 0),
+          [(f['id'], f['severity']) for f in F])
+    tiles = dict(row, n=4, nums=4, num_texts=['12', '4', '3', '87 %'], cv=0.5)
+    F = analyze('http://x/', [_view(rows=[tiles])], None, None, None, None, set(), [], dict(opts, surface='app', preset='C'))
+    check('кабинет: ряд плиток «12 · 4 · 3 · 87 %» — без LOOK-STATS-ROW (примета страницы сайта)',
+          'LOOK-STATS-ROW' not in ids(F), ids(F))
+    F = analyze('http://x/', [_view(rows=[tiles])], None, None, None, None, set(), [], opts)
+    check('тот же ряд на странице сайта — LOOK-STATS-ROW', 'LOOK-STATS-ROW' in ids(F), ids(F))
+    check('вне поверхности app — ряд чисел, hero, пилюля, тёплая бумага, отзывы; у страницы — ничего',
+          {'LOOK-STATS-ROW', 'LOOK-HERO-CENTER', 'LOOK-PILL', 'LOOK-BG-WARM', 'HON-QUOTE'} <= set(off_surface('app'))
+          and off_surface('page') == [], off_surface('app'))
     F = analyze('http://x/', [_view(rows=[dict(row, cv=0.45)])], None, None, None, None, set(), [], opts)
     check('три карточки разного содержания (CV 0.45) — не примета', 'LOOK-THREE-CARDS' not in ids(F))
     hero = {'el': 'section', 'h': 880, 'w': 1440, 'top': 0, 'h1_align': 'center', 'hero_align': 'center', 'h1_cx': 0.5, 'h1_w': 0.5,
@@ -2077,6 +2350,45 @@ def cmd_selftest(_a):
           or {f['id'] for f in F} >= {'LOOK-BENTO', 'LOOK-ORBIT'}, [(f['id'], f['tell']) for f in F])
     F = analyze('http://x/', [_view(bento=[dict(bento, n=4)], orbit=[dict(orbit, icons=4)])], None, None, None, None, set(), [], opts)
     check('4 плитки и 4 иконки — ниже порогов владельца', not {'LOOK-BENTO', 'LOOK-ORBIT'} & set(ids(F)))
+
+    # вердикт кластера: пороги владельцев, одиночная примета — вопрос, кластер — major и код 2
+    check('пороги кластеров у владельцев: ui 11/04 §1.3 — маркеров 4, хрома 3; реестр клише — 3',
+          (ui_diagnosis(), cliche_cluster_min()) == ({'markers': 4, 'chrome': 3}, 3), (ui_diagnosis(), cliche_cluster_min()))
+    F = analyze('http://x/', [_view(rows=[dict(row, cv=0.1)], bento=[bento])], None, None, None, None, set(), [], opts)
+    kit = sorted((f['id'], f['severity'], f.get('cluster')) for f in F if f['id'] in ('LOOK-THREE-CARDS', 'LOOK-BENTO'))
+    check('три карточки и бенто — кластер saas-card-kit: обе major, код 2',
+          (kit, exit_code(summarize(F, set(), 'page'))) == ([('LOOK-BENTO', 'major', 'saas-card-kit'),
+                                                             ('LOOK-THREE-CARDS', 'major', 'saas-card-kit')], 2), kit)
+    chrome_leaves = [_leaf('Записаться →', in_btn=True), _leaf('01 Замер'), _leaf('02 Смета'), _leaf('03 Ремонт')]
+    F = analyze('http://x/', [_view(headings=heads, leaves=chrome_leaves)], None, None, None, None, set(), [], opts)
+    ch = sorted((f['id'], f['severity']) for f in F if f.get('cluster') == 'template-chrome')
+    check('надзаголовки, стрелка и нумерация — кластер шаблонного хрома (3 из порога 3): major, код 2',
+          (ch, exit_code(summarize(F, set(), 'page'))) == ([('LOOK-ARROWS', 'major'), ('LOOK-EYEBROW', 'major'),
+                                                           ('LOOK-NUMBERED', 'major')], 2), ch)
+    F = analyze('http://x/', [_view(headings=heads, leaves=chrome_leaves)], None, None, None, None, {'eyebrow'}, [], opts)
+    check('снятая ключом примета в кластер не входит: хром 2 из 3 — minor, код 0',
+          (sorted((f['id'], f['severity']) for f in F if f['id'] in ('LOOK-ARROWS', 'LOOK-NUMBERED')),
+           exit_code(summarize(F, {'eyebrow'}, 'page'))) == ([('LOOK-ARROWS', 'minor'), ('LOOK-NUMBERED', 'minor')], 0),
+          [(f['id'], f['severity']) for f in F])
+
+    # токены ДС: антиква и тёплый фон, которые называет ДС, — решение, а не примета
+    serif = [dict(heads[1], tag='h1', el='h1', ff='"Playfair Display", Georgia, serif', fs=56, eyebrow=None)]
+    cream = _view(headings=serif, page_bg=[0xF4, 0xF1, 0xEA])
+    F = analyze('http://x/', [cream], None, None, None, None, set(), [], opts)
+    cs = sorted((f['id'], f['severity'], f.get('cluster')) for f in F if f['id'] in ('LOOK-SERIF-DISPLAY', 'LOOK-BG-WARM'))
+    check('антиква и тёплая бумага без токенов ДС — кластер cream-serif: обе major',
+          cs == [('LOOK-BG-WARM', 'major', 'cream-serif'), ('LOOK-SERIF-DISPLAY', 'major', 'cream-serif')], cs)
+    ds_cream = {'families': {'playfair display'}, 'colors': [(0xF4, 0xF1, 0xEA)]}
+    F = analyze('http://x/', [cream], None, None, None, None, set(), [], dict(opts, ds=ds_cream))
+    check('антиква и тёплый фон — значения токенов ДС: LOOK-SERIF-DISPLAY и LOOK-BG-WARM молчат (info), код 0',
+          ({(f['id'], f['severity']) for f in F if f['id'] in ('LOOK-SERIF-DISPLAY', 'LOOK-BG-WARM')},
+           exit_code(summarize(F, set(), 'page'))) == ({('LOOK-SERIF-DISPLAY', 'info'), ('LOOK-BG-WARM', 'info')}, 0),
+          [(f['id'], f['severity']) for f in F])
+    check('цвет токена — с допуском округления 2 на канал', ds_color((0xF5, 0xF0, 0xEA), ds_cream)
+          and not ds_color((0xF8, 0xF1, 0xEA), ds_cream))
+    dl = ds_look(str(kbpaths.kb('claude-design', '05-design-artifacts', 'example', 'design-system', 'project', 'tokens.json')))
+    check('--tokens: гарнитуры и цвета артефакта ДС', {'golos text', 'unbounded'} <= dl['families'] and (12, 15, 20) in dl['colors'],
+          dl['families'])
     many = [_leaf('т', fs=f) for f in (12, 13, 14, 15, 16, 18, 20, 24, 28, 32, 40)]
     F = analyze('http://x/', [_view(leaves=many, header={'el': 'header', 'h': 96})], None, None, None, None, set(), [], opts)
     check('11 кеглей (> 9) — шкала без ролей; шапка 96 > 80 на десктопе страницы',
@@ -2092,6 +2404,40 @@ def cmd_selftest(_a):
     check('HON-NUMBERS: «3 дня» и «500 проектов» — выдумки, гарантия и телефон — факты, номер шага «2» — не число',
           nf and sorted(n['raw'] for n in nf['evidence']['numbers']) == ['3', '500'], nf and nf['evidence'])
     check('находка честности несёт примету invented-numbers', nf and nf['tell'] == 'invented-numbers' and nf['group'] == 'honesty')
+
+    # кабинет: табличный copy.md входа и демо-набор (--demo) — запись демо-набора на экране не выдумка
+    fxin = kbpaths.scripts('tests', 'fixtures', 'package-cabinet-defects', 'files', 'design', 'office', 'input')
+    app_copy = load_copy(str(fxin / 'copy.md'))
+    demo = load_demo(str(fxin / 'demo-data.json'))
+    rec = next(r for o in json.load(open(fxin / 'demo-data.json', encoding='utf-8'))['objects'].values()
+               for r in o.get('records') or [])
+    shown = []
+    for k, v in rec.items():
+        if k.startswith('_') or isinstance(v, bool) or v is None:
+            continue
+        if isinstance(v, (int, float)):
+            shown.append(f'{v:,}'.replace(',', ' ') + ' ₽')
+        elif isinstance(v, list):
+            shown.append(', '.join(str(x) for x in v))
+        else:
+            dm = ISO_DATE_RX.match(str(v))
+            shown.append(f'{dm.group(3)}.{dm.group(2)}.{dm.group(1)}' if dm else str(v))
+    cells = [_leaf(t, tag='td') for t in shown]
+    blocks = [{'el': 'td', 'tag': 'td', 'text': t, 'quote': False} for t in shown] + \
+             [{'el': 'li', 'tag': 'li', 'text': ' · '.join(shown), 'quote': False}]
+    app = dict(opts, surface='app', preset='C')
+    F = analyze('http://x/', [_view(leaves=cells, blocks=blocks)], None, None, app_copy, None, set(), [], app)
+    check('кабинет без --demo: числа и тексты записи — HON-NUMBERS и HON-COPY', {'HON-NUMBERS', 'HON-COPY'} <= set(ids(F)),
+          ids(F))
+    F = analyze('http://x/', [_view(leaves=cells, blocks=blocks)], None, None, app_copy, None, set(), [], dict(app, demo=demo))
+    check('copy.md кабинета с --demo: числа и записи демо-набора — без HON-NUMBERS и HON-COPY',
+          not {'HON-NUMBERS', 'HON-COPY'} & set(ids(F)), [(f['id'], f['message']) for f in F if f['id'].startswith('HON')])
+    fake = next(n for n in range(987654, 999999) if str(n) not in demo['values'])
+    F = analyze('http://x/', [_view(leaves=cells + [_leaf(f'Экономия {fake:,} ₽ в год'.replace(',', ' '))], blocks=blocks)],
+                None, None, app_copy, None, set(), [], dict(app, demo=demo))
+    nf = next((f for f in F if f['id'] == 'HON-NUMBERS'), None)
+    check('с --demo число вне демо-набора — HON-NUMBERS', nf and [n['value'] for n in nf['evidence']['numbers']] == [str(fake)],
+          nf and nf['evidence'])
     form = {'el': 'form', 'in_dialog': False, 'text': 'Имя Телефон Нажимая кнопку, вы соглашаетесь с политикой',
             'submit': {'text': 'Отправить', 'disabled': True},
             'fields': [_field('Имя', name='name'), _field('Телефон', 'tel', required=True), _field('', 'email', placeholder='Почта'),
@@ -2114,6 +2460,11 @@ def cmd_selftest(_a):
     ov = _view(390, 844, scroll_w=412, overflow_only=True)
     F = analyze('http://x/', [_view(), ov], None, None, None, None, set(), [], opts)
     check('кадр вылета: только M-OVERFLOW', ids(F, ('critical',)) == ['M-OVERFLOW'], ids(F))
+    F = analyze('http://x/', [_view(), _view(390, 844, nav={'navs': [], 'toggles': []})], None, None, None, None, set(), [],
+                opts)
+    check('M-NAV на посадочной без меню — major, как пункт D2 приёмки (S); код 0',
+          ([f['severity'] for f in F if f['id'] == 'M-NAV'], exit_code(summarize(F, set(), 'page'))) == (['major'], 0),
+          [(f['id'], f['severity']) for f in F])
 
     with tempfile.TemporaryDirectory() as td:
         cp = os.path.join(td, 'Main.html')
@@ -2134,10 +2485,14 @@ def cmd_selftest(_a):
     check('сводка: тёплая бумага — домен page-visual', sm['domains'].get('page-visual', {}).get('tells') == ['warm-paper'], sm['domains'])
     check('сводка: у доменов свой счёт, общего нет', 'total' not in sm and all('count' in d for d in sm['domains'].values()))
     chrome = next((c for c in sm['clusters'] if c['id'] == 'template-chrome'), None)
-    check('сводка: кластер шаблонного хрома — 4 члена из 6 с правилом владельца',
-          chrome and len(chrome['members_hit']) == 4 and chrome['members'] == 6 and chrome['rule'], chrome)
+    check('сводка: кластер шаблонного хрома — 4 члена из 6 с правилом владельца, порог 3 — сложился',
+          chrome and len(chrome['members_hit']) == 4 and chrome['members'] == 6 and chrome['rule'] and chrome['min'] == 3
+          and chrome['formed'] and 'template-chrome' in sm['clusters_formed'], chrome)
     sa = summarize(F, set(), 'app')
     check('сводка кабинета: маркеры ui 11/04 домена app-visual', 'ui_markers' in sa['domains'].get('app-visual', {}), sa['domains'])
+    dom = next((c for c in sa['clusters'] if c['id'] == 'domain:app-visual'), None)
+    check('сводка кабинета: маркеров app-visual 3 при пороге владельца 4 — кластер не сложился',
+          dom and len(dom['members_hit']) == 3 and dom['min'] == 4 and not dom['formed'], dom)
     check('подсказка приёмки по группам реестра', sm['acceptance_hint'] == {'look': False, 'honesty': False, 'acceptance': True},
           sm['acceptance_hint'])
     miss = sorted({f['id'] for f in F} - set(reg['checks']))
@@ -2155,10 +2510,12 @@ def main():
     p.add_argument('--acceptance', action='store_true', help='все ширины приёмки и прогон вылета на overflow_only')
     p.add_argument('--surface', choices=('page', 'app'), default='page', help='страница сайта или экран приложения')
     p.add_argument('--preset', choices=('A', 'B', 'C', 'D'), default='A', help='пресет экрана приложения (порог шапки)')
-    p.add_argument('--tokens', help='токены ДС (CSS, DTCG или tokens.json артефакта): первый брейкпоинт')
+    p.add_argument('--tokens', help='токены ДС (CSS, DTCG или tokens.json артефакта): первый брейкпоинт; антиква и '
+                                    'тёплый фон из токенов — решение ДС, не примета')
     p.add_argument('--facts', help='facts.md входа холста или facts.yaml продукта')
-    p.add_argument('--copy', help='copy.md входа холста или copy deck (YAML, JSON)')
+    p.add_argument('--copy', help='copy.md входа холста (строки слотов или таблица кабинета) или copy deck (YAML, JSON)')
     p.add_argument('--page', help='id страницы copy deck (с --copy YAML)')
+    p.add_argument('--demo', help='demo-data.json входа холста кабинета: тексты и числа записей — не выдумка')
     p.add_argument('--assets', '--assets-readme', dest='assets', help='assets.md входа холста или YAML плана ассетов')
     p.add_argument('--forms', action='append', help='id набора lead-forms.yaml или YAML плана страницы; повтором')
     p.add_argument('--src', help='папка исходников для статического обхода (сток, шрифты)')
