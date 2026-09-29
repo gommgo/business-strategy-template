@@ -198,13 +198,6 @@
       "video": {"tempo": "still"},
       "composition": {"subject_region": "right-third", "text_zone_default": {"side": "left", "share": 0.45, "surface": "evenly lit freshly painted wall"}, "negative_space_min": 0.35, "max_elements": 3, "asymmetry": true},
       "subject_matter": {"domain_props": ["plumb bob on a string", "spirit level", "freshly painted wall", "contract on a clipboard"], "motifs": ["one foreman on site"], "people_policy": "real-only", "product_policy": "real-photo-only"}
-    },
-    "kimi": {
-      "design_system_style": "ремонт по вертикали: одна линия-отвес через этапы и настоящий прораб",
-      "direction": {"visual_thesis": "один человек держит вертикаль ремонта", "paper": "light neutral #F5F5F2", "display_style": "grotesque Onest", "accent_rule": "красный — главная кнопка и грузик линии", "imagery": "фото прораба и объектов заказчика; без стока и ИИ-людей", "macrostructure": "document-led"},
-      "motion": {"level": "expressive", "thesis": "линия-отвес опускается по этапам", "library": "css"},
-      "bans": ["стоковые интерьеры", "таймер", "фото под вуалью"],
-      "allow": []
     }
   },
   "lifecycle": {

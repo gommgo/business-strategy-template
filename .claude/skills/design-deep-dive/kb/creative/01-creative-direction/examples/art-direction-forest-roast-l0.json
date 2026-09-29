@@ -183,14 +183,7 @@
       "subject_matter": {"domain_props": ["ceramic coffee cup", "green coffee tin", "kraft paper bag", "linen napkin", "pale oak table"], "motifs": ["morning table by a window"], "people_policy": "real-only", "product_policy": "real-photo-only"},
       "materials": ["glazed off-white ceramic", "pale oak", "washed linen", "kraft paper"]
     },
-    "blender": {"role_in_story": "банка — настоящий товар в hero и в карточке", "series_style": "документальный предмет на светлом дубе", "page_background": "#F4EFE6", "materials": ["жесть банки в цвете #1F4D3A", "бумажная этикетка"], "light_mood": "мягкий утренний свет из окна справа", "motion": "нет", "budget": "рендер AVIF ≤ 150 КБ"},
-    "kimi": {
-      "design_system_style": "тихое утро у окна: широкая документальная фотография, спокойная типографика, настоящая банка",
-      "direction": {"visual_thesis": "утренний стол у окна — смелость в кадре, а не в эффектах", "paper": "light warm #F4EFE6 (из кадра; --allow warm)", "display_style": "grotesque Commissioner", "accent_rule": "лесной зелёный — кнопка и ссылки; золото — только цена", "imagery": "документальная утренняя съёмка и рендер банки; без людей", "macrostructure": "poster-led"},
-      "motion": {"level": "subtle", "thesis": "один синемаграф пара, стоп через 5 с", "library": "css"},
-      "bans": ["латте-арт", "зёрна паттерном", "люди"],
-      "allow": ["warm"]
-    }
+    "blender": {"role_in_story": "банка — настоящий товар в hero и в карточке", "series_style": "документальный предмет на светлом дубе", "page_background": "#F4EFE6", "materials": ["жесть банки в цвете #1F4D3A", "бумажная этикетка"], "light_mood": "мягкий утренний свет из окна справа", "motion": "нет", "budget": "рендер AVIF ≤ 150 КБ"}
   },
   "lifecycle": {
     "version": "0.1",

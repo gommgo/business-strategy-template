@@ -2,11 +2,49 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:app-design:creative-research:motion-spec:1",
   "title": "motion-spec v1 — спецификация движения страницы для исполнителя (страница → секции → моменты, раскадровка, видео-референсы)",
-  "description": "Владелец — creative-research, агент I (волна 3). Движение передаётся исполнителю (K3, Claude) таймлайном, а не прилагательными: у каждого момента — класс, функция, триггер, элемент, свойства from → to, длительность (мс, токен или доля базы) или диапазон прокрутки (vh, % прогресса), кривая-токен, стаггер, повтор, прерывание, reduce, телефон, пауза. Числа — из marketing-tokens.json motion.marketing (E); эффекты — effects.yaml (F); секции и слоты — page-plan v1 (site); подача секции — treatment v1 (motion_spec_ref → #/sections/<id>). Проекции: T7 «Moments» и MOTION.md пакета kimi, JSON чисел на секцию для модуля эффекта G — ../../scripts/creative/spec_check.py. Сверка записи со спецификацией — motion_check.py (K). Документ: 09-ai-execution-evaluation/02-motion-spec-storyboard-handoff.md.",
+  "description": "Владелец — creative. Движение передаётся исполнителю таймлайном, а не прилагательными: у каждого момента — класс, функция, триггер, элемент, свойства from → to, длительность (мс, токен или доля базы) или диапазон прокрутки (vh, % прогресса), кривая-токен, стаггер, повтор, прерывание, reduce, телефон, пауза. Числа — из marketing-tokens.json motion.marketing (E); эффекты — effects.yaml (F); секции и слоты — page-plan v1 (site); подача секции — treatment v1 (motion_spec_ref → #/sections/<id>); свойства — не шире уровня страницы (01-creative-direction/ambition-levels.yaml#levels.motion_hints.properties_allowed). Проекция во вход холста — x-canvas-map; строки моментов, блок движения и JSON чисел на секцию для модуля эффекта — ../../scripts/creative/spec_check.py moments, motion-md, values. Сверка записи со спецификацией — motion_check.py. Документ: 09-ai-execution-evaluation/02-motion-spec-storyboard-handoff.md.",
   "x-version": "1.0",
-  "x-checked": "2026-09-25",
-  "x-status": "draft (волна 3)",
-  "x-owner": "creative-research · 09-ai-execution-evaluation · агент I; правки аудита X — S1 (волна 4, 2026-09-25): block-size для <details> (X-11), станции и at (X-57), компактная запись",
+  "x-checked": "2026-09-29",
+  "x-status": "draft",
+  "x-owner": "creative · 09-ai-execution-evaluation",
+  "x-canvas-map": {
+    "source": "motion-spec",
+    "stages": ["motion"],
+    "files": {
+      "brief.yaml": {
+        "decisions.motion.thesis": {"rule": "copy", "from": ["/page/thesis"], "note": "тезис движения страницы"},
+        "decisions.motion.moments": {"rule": "derive", "from": ["/sections/*/moments"], "note": "строки моментов: триггер → элемент → свойства, время или диапазон, кривая, стаггер, сокращённое движение, телефон, пауза (spec_check.py moments)"}
+      },
+      "pages/<page-id>/motion.md": {
+        "тезис": {"rule": "copy", "from": ["/page/thesis"]},
+        "характер": {"rule": "copy", "from": ["/page/character"]},
+        "база": {"rule": "copy", "from": ["/page/base"], "note": "базовая длительность и кривая; доли моментов — от неё"},
+        "примитивы": {"rule": "copy", "from": ["/page/primitives"]},
+        "LCP": {"rule": "copy", "from": ["/page/lcp"], "note": "кандидат LCP: без анимации или только transform"},
+        "переключатель движения": {"rule": "copy", "from": ["/page/toggle"]},
+        "прокрутка": {"rule": "copy", "from": ["/page/scroll"]},
+        "переходы страниц": {"rule": "copy", "from": ["/page/transitions"]},
+        "свойства": {"rule": "derive", "from": ["/page/properties_allowed", "ambition-levels#/levels/*/motion_hints/properties_allowed"], "note": "свойства спецификации, не шире уровня страницы (spec_check.py spec)"},
+        "бюджет движения": {"rule": "copy", "from": ["/page/budget"], "note": "петли в зоне видимости, сцена первого экрана, JS эффектов — строже ворот уровня или равно"},
+        "никогда": {"rule": "copy", "from": ["/page/never"]},
+        "секции": {"rule": "copy", "from": ["/sections/*/id", "/sections/*/block", "/sections/*/role", "/sections/*/level", "/sections/*/intent"], "note": "заголовок раздела секции: id плана, блок, роль в ритме, уровень, что делает движение"},
+        "моменты": {"rule": "derive", "from": ["/sections/*/moments"], "note": "таблица моментов секции (spec_check.py motion-md): класс, триггер → элемент → свойство, время или диапазон, кривая, сокращённое движение, телефон; числа — токены motion.marketing"},
+        "станции": {"rule": "copy", "from": ["/sections/*/scene"], "note": "закрепление, длина сцены, станции, камера"},
+        "раскадровка": {"rule": "copy", "from": ["/sections/*/storyboard"], "note": "кадры словами; эскизы и листы — ссылками"},
+        "сокращённое движение": {"rule": "copy", "from": ["/sections/*/reduce"]},
+        "телефон": {"rule": "copy", "from": ["/sections/*/mobile"]},
+        "fallback": {"rule": "copy", "from": ["/sections/*/fallback"]},
+        "видео-референсы": {"rule": "derive", "from": ["/sections/*/references"], "note": "лист кадров, кадры с таймкодами, отрезки «что взять» (объект, свойство, число) и «чего не брать»; ролик не передаётся — файлы в design/<surface>/motion/, во входе ссылки"}
+      }
+    },
+    "drop": [
+      {"from": ["/motion_spec_version", "/id", "/example", "/status", "/checked_at", "/refs"], "note": "служебные поля; статус, путь и отпечаток — в INPUT.md"},
+      {"from": ["/level"], "note": "уровень движения — decisions.motion.level из брифа через ambition-levels.yaml"},
+      {"from": ["/executor"], "note": "ролик во вход холста не передаётся: видео-референс — листом и кадрами"},
+      {"from": ["/sections/*/budget", "/sections/*/acceptance"], "note": "бюджет и проверки секции — ворота после сборки (motion_check.py); критерии холста — ACCEPTANCE.md"},
+      {"from": ["/sections/*/notes", "/open_questions", "/notes"], "note": "вопросы и заметки — владельцу спецификации, не исполнителю"}
+    ]
+  },
   "type": "object",
   "additionalProperties": false,
   "required": ["motion_spec_version", "id", "status", "checked_at", "refs", "level", "page", "sections"],
@@ -35,11 +73,11 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "target": {"enum": ["k3", "claude", "any"]},
-        "harness": {"enum": ["kimi-code", "claude-code", "any"]},
+        "target": {"enum": ["claude", "any"], "description": "Кто исполняет движение: модель сессии Claude (холст Claude Design, код) или любой исполнитель."},
+        "harness": {"enum": ["claude-code", "any"]},
         "video_in": {
           "type": "boolean",
-          "description": "Видео-референсы доходят до исполнителя только в Kimi Code + модель k3 + провайдер kimi (kimi 07/03 §2.3); иначе — листы кадров и таймлайн текстом."
+          "description": "true — исполнитель принимает ролик файлом. Во вход холста ролик не передаётся: видео-референс — лист кадров, кадры с таймкодами и таймлайн моментов, файлы — в design/<surface>/motion/."
         }
       }
     },
@@ -96,7 +134,7 @@
         "property": {
           "type": "string",
           "pattern": "^(transform|translate|scale|rotate|opacity|clip-path|mask|filter|color|background-color|stroke-dashoffset|font-variation-settings|currentTime|block-size|uniform:[a-zA-Z0-9_]+|--[a-z0-9-]+|view-transition)$",
-          "description": "Разрешённое свойство. L0 — transform, opacity, color, background-color; L1–L2 — ещё clip-path, mask, filter (blur ≤ 8 px), stroke-dashoffset, @property-переменные, font-variation-settings (E П12). Свойства раскладки (width, height, top, left, margin, padding) — никогда (K3 анимирует раскладку в 13 из 13 работ). Исключение (X-11, S1 2026-09-25): block-size — только ::details-content аккордеона <details> (effect:details-accordion, семейство micro каталога, класс transition) через interpolate-size: allow-keywords, ≤ 300 мс, reduce — мгновенно; без поддержки interpolate-size (Safari, Firefox на 2026-09-24) — мгновенное открытие. Это UI-отклик по клику, не сцена подачи."
+          "description": "Разрешённое свойство; набор по уровню страницы — 01-creative-direction/ambition-levels.yaml#levels.motion_hints.properties_allowed и blur_max_px (сверяет spec_check.py). Свойства раскладки (width, height, top, left, margin, padding) — никогда: генераторы анимируют раскладку по умолчанию. Исключение — ambition-levels.yaml property_exceptions: block-size — только ::details-content аккордеона <details> (effect:details-accordion, семейство micro каталога, класс transition) через interpolate-size: allow-keywords, ≤ 300 мс, reduce — мгновенно; без поддержки interpolate-size (Safari, Firefox на 2026-09-24) — мгновенное открытие. Это UI-отклик по клику, не сцена подачи."
         },
         "from": {"type": ["string", "number"]},
         "to": {"type": ["string", "number"]},
@@ -322,7 +360,7 @@
         "tunable": {
           "type": "array",
           "items": {"type": "string"},
-          "description": "Какие числа вынести в JSON чисел секции (правит Claude, код эффекта K3 не трогает — W3)."
+          "description": "Какие числа вынести в JSON чисел секции (spec_check.py values): модуль эффекта читает их, а не держит в коде."
         },
         "note": {"type": "string"},
         "attach": {
@@ -360,7 +398,7 @@
           "then": {"properties": {"tracks": {"items": {"properties": {"property": {"enum": ["transform", "translate"]}}}}}}
         },
         {
-          "$comment": "X-11 (S1 2026-09-25): block-size разрешён только аккордеону <details> — effect:details-accordion, класс transition.",
+          "$comment": "block-size — только аккордеону <details>: effect:details-accordion, класс transition (ambition-levels.yaml property_exceptions).",
           "if": {
             "required": ["tracks"],
             "properties": {"tracks": {"contains": {"required": ["property"], "properties": {"property": {"const": "block-size"}}}}}
@@ -432,7 +470,7 @@
         "ref": {"type": "string", "pattern": "^ref:[a-z0-9]+(-[a-z0-9]+)*$", "description": "Запись библиотеки B, если есть."},
         "kind": {
           "enum": ["video", "frames", "prototype-video"],
-          "description": "video — mp4 для video_in K3; frames — лист 3×3 и кадры с таймкодами для Claude и k3-256k; prototype-video — ролик-прототип (Figma, After Effects, лабораторная страница)."
+          "description": "video — ролик mp4 (лежит в design/<surface>/motion/, исполнителю не передаётся); frames — лист 3×3 и кадры с таймкодами: так видео-референс доходит до исполнителя; prototype-video — ролик-прототип (Figma, After Effects, лабораторная страница)."
         },
         "file": {"type": "string", "pattern": "^refs/[a-z0-9._-]+$"},
         "source": {
@@ -708,7 +746,7 @@
             }
           }
         },
-        "properties_allowed": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "properties_allowed": {"type": "array", "uniqueItems": true, "items": {"type": "string"}, "description": "Свойства, которые анимирует страница: не шире properties_allowed уровня (01-creative-direction/ambition-levels.yaml#levels.motion_hints); сверяет spec_check.py spec."},
         "budget": {
           "type": "object",
           "additionalProperties": false,
@@ -731,7 +769,7 @@
     }
   },
   "x-dom-contract": {
-    "why": "цели target — логические id page-plan; исполнитель переносит их в разметку, motion_check.py (K) и зонд станций находят элемент без угадывания селекторов (предложение K, 2026-09-24 23:50)",
+    "why": "цели target — логические id page-plan; исполнитель переносит их в разметку, motion_check.py и зонд станций находят элемент без угадывания селекторов",
     "attributes": {
       "data-section": "<id секции> на корневой элемент секции (или id=\"<id секции>\")",
       "data-slot": "<id слота> на элемент слота",

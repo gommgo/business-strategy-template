@@ -2,37 +2,55 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:app-design:creative-research:treatment:1",
   "title": "treatment v1 — подача секции page-plan (корень) и страницы ($defs/page)",
-  "description": "Подсхема контейнера treatment{} плана страницы site (page-plan v1: sections[].treatment и page.treatment). Владелец — creative-research, агент I (волна 3); v0 — A (01-creative-direction/drafts-for-site/treatment.v0.schema.json, ранний выпуск C1). v1 совместима с известными документами v0: 69 treatment (27 в примерах site v1, 42 в опыте A/02) валидны по v1 (проверено: 99-raw/experiments/I/01-schemas); новые условия (peak → signature-эффект, text-over → text_contrast, видео и прелоадер → flash_check, cinematic → ролик или 3D) — ужесточения, которые v0 описывала словами. Числа и списки уровней — ambition-levels.yaml (A) и effects.yaml (F, level_min); движение по времени и прокрутке — motion-spec (09-ai-execution-evaluation/motion-spec.schema.json), здесь только ссылка. Правила, которые схема не видит (секция ≤ уровня страницы, секции конверсии — L0, счёт пиков, акцентов и фирменных приёмов, id секций и слотов, эффект есть в каталоге, один референс — одна секция, poster ≤ 12 знаков), проверяет ../../scripts/creative/spec_check.py (у site — site_validate.py PL-C01, у K — ворота эффектов). Документ: 09-ai-execution-evaluation/01-presentation-spec-and-block-treatments.md.",
+  "description": "Подсхема контейнера treatment{} плана страницы site (page-plan v1: sections[].treatment и page.treatment); владелец — creative. Числа и списки уровней — 01-creative-direction/ambition-levels.yaml и 06-effects-catalog/effects.yaml (level_min); движение по времени и прокрутке — motion-spec (09-ai-execution-evaluation/motion-spec.schema.json), здесь только ссылка. Правила, которые схема не видит (секция ≤ уровня страницы, секции конверсии — L0, счёт пиков, акцентов, секций с фирменным приёмом и петель по уровню, id секций и слотов, эффект есть в каталоге, один референс — одна секция, poster ≤ 12 знаков), проверяет ../../scripts/creative/spec_check.py plan (site_validate.py зовёт его на плане). Проекция во вход холста — x-canvas-map. Документ: 09-ai-execution-evaluation/01-presentation-spec-and-block-treatments.md.",
   "x-version": "1.0",
-  "x-checked": "2026-09-25",
-  "x-status": "принята site (волна 3; подключена 2026-09-25 00:36: $ref на urn:app-design:creative-research:treatment:1 в ../site/10-playbooks-contracts/schemas/page-plan.schema.json и путь в ../../scripts/site/site_validate.py; ../site/99-raw/handoff-to-neighbours.md C2 — закрыто; правка статуса — S1b 2026-09-25)",
-  "x-owner": "creative-research · 09-ai-execution-evaluation · агент I",
-  "x-changes-from-v0": [
-    "display_role: + display-poster, display-quote (D 04-visual-language/01 §2)",
-    "reduce.strategy: + stations (E 05-motion/01 §4.2); reduce.stations — число станций",
-    "mobile.strategy: + stacked; mobile.note при simplified и separate-asset — предупреждение скрипта (объявить деградацию — higgsfield wow-catalog)",
-    "loop_control: + page-toggle (единая пауза страницы = переключатель «меньше движения», E 05-motion/01 §4.4)",
-    "effect-use: + class, impl, params, moments; trigger + pointer; target — id v1 (секция.слот, секция.группа, секция.группа.элемент)",
-    "background.kind: + sequence",
-    "новые поля секции: flash_check (E 05-motion/01 §3.4), storyboard_ref, lcp_note",
-    "условия: уровни эффектов по effects.yaml level_min; cinematic — только с роликом, секвенцией или 3D; peak — есть signature-эффект; text-over — text_contrast; видео и прелоадер — flash_check",
-    "$defs/page: + motion_spec_ref, accents, signature_sections, motion_system.primitives, motion_system.character, library — enum или stack:<id>"
-  ],
+  "x-checked": "2026-09-29",
+  "x-status": "принята site: page-plan.schema.json ссылается на urn:app-design:creative-research:treatment:1",
+  "x-owner": "creative · 09-ai-execution-evaluation",
   "x-site-slots": {
     "visual-role": "visual_role",
     "effect-ref": "effects[].ref (effect:<id> из 06-effects-catalog/effects.yaml)",
     "motion-level": "motion_level"
   },
-  "x-kimi-projection": {
-    "$defs/page.motion_level и max(motion_level секций)": "brief.yaml decisions.motion.level",
-    "$defs/page.motion_system.thesis": "decisions.motion.thesis",
-    "$defs/page.motion_system.library": "decisions.motion.library, build.allowed_packages (версии — stack.yaml G)",
-    "motion_spec_ref → motion-spec moments": "decisions.motion.moments (строки T7) и MOTION.md пакета (spec_check.py moments / motion-md)",
-    "reduce, mobile": "TASK.md «Motion», ACCEPTANCE E-блок",
-    "background.kind shader | webgl-3d | sequence": "decisions.three_d.mode, allowed_packages"
+  "x-canvas-map": {
+    "source": "page-plan",
+    "base": {"#": "/sections/*/treatment", "#/$defs/page": "/page/treatment"},
+    "stages": ["mockup", "motion"],
+    "files": {
+      "pages/<page-id>/page.yaml": {
+        "sections[].treatment.level": {"rule": "copy", "from": ["/sections/*/treatment/level"], "stages": ["mockup"], "note": "уровень секции; секции конверсии — L0"},
+        "sections[].treatment.visual_role": {"rule": "copy", "from": ["/sections/*/treatment/visual_role"], "stages": ["mockup"], "note": "роль в ритме страницы — сила подачи секции"},
+        "sections[].treatment.display_role": {"rule": "map", "from": ["/sections/*/treatment/display_role"], "stages": ["mockup"], "values": {"display-s": "type.display-s", "display-m": "type.display-m", "display-l": "type.display-l", "display-xl": "type.display-xl", "display-poster": "type.display-poster", "display-quote": "type.display-quote", "none": "none"}, "note": "роль дисплея → токен type.display-* расширения marketing-tokens.json; кегль на артборде — литерал токена ДС, чисел во входе нет"},
+        "sections[].treatment.background": {"rule": "copy", "from": ["/sections/*/treatment/background"], "stages": ["mockup"], "note": "фон секции; фон-эффект на макете — неподвижный кадр, движение — этап motion"},
+        "sections[].treatment.composition": {"rule": "copy", "from": ["/sections/*/treatment/composition"], "stages": ["mockup"], "note": "композиция поверх структурного варианта блока"},
+        "sections[].treatment.visual_variant": {"rule": "derive", "from": ["/sections/*/treatment/visual_variant", "block-treatments#/blocks/*/visual_variants"], "stages": ["mockup"], "note": "id визуального варианта блока и его описание из block-treatments.yaml"},
+        "sections[].treatment.mobile": {"rule": "copy", "from": ["/sections/*/treatment/mobile"], "stages": ["mockup"], "note": "стратегия телефона: артборд 390 рисуется по ней — стопка станций, постер, скрытый декор"},
+        "sections[].treatment.lcp_note": {"rule": "copy", "from": ["/sections/*/treatment/lcp_note"], "stages": ["mockup"], "note": "кандидат LCP первого экрана — текст или постер, а не холст 3D"},
+        "treatment.theme": {"rule": "copy", "from": ["/page/treatment/theme"], "stages": ["mockup"], "note": "тема страницы"}
+      },
+      "pages/<page-id>/motion.md": {
+        "эффекты": {"rule": "copy", "from": ["/sections/*/treatment/effects"], "stages": ["motion"], "note": "эффекты секции по каталогу: id, цель, назначение, класс, параметры в пределах limits effects.yaml"},
+        "уровень движения": {"rule": "copy", "from": ["/sections/*/treatment/motion_level"], "stages": ["motion"], "note": "уровень движения секции, не выше decisions.motion.level страницы"},
+        "петли": {"rule": "copy", "from": ["/sections/*/treatment/loops", "/sections/*/treatment/loop_control"], "stages": ["motion"], "note": "сколько петель видно в секции и как выполнена пауза (WCAG 2.2.2)"},
+        "раскадровка": {"rule": "copy", "from": ["/sections/*/treatment/storyboard_ref"], "stages": ["motion"], "note": "ссылка на раскадровку в design/<surface>/motion/; файл во вход не копируется"},
+        "стек": {"rule": "copy", "from": ["/page/treatment/motion_system/library"], "stages": ["motion"], "note": "библиотеки страницы (stack:<id> — версии и веса в stack.yaml); не шире стека уровня"},
+        "система появления": {"rule": "copy", "from": ["/page/treatment/motion_system/entrance_system"], "stages": ["motion"], "note": "что появляется, в каком порядке и чем различается"}
+      }
+    },
+    "drop": [
+      {"from": ["/sections/*/treatment/reduce"], "note": "сокращённое движение — из спецификации движения (sections[].reduce); станции сверяет spec_check.py"},
+      {"from": ["/sections/*/treatment/refs"], "note": "референсы исполнителю — refs.md из мудборда арт-дирекции"},
+      {"from": ["/sections/*/treatment/motion_spec_ref", "/page/treatment/motion_spec_ref"], "note": "блок движения собирается из самой спецификации движения"},
+      {"from": ["/sections/*/treatment/flash_check"], "note": "проверка вспышек — приёмка ассета и ворота после сборки"},
+      {"from": ["/sections/*/treatment/budget", "/page/treatment/budget_overrides"], "note": "доля бюджета секции и исключения — ворота после сборки"},
+      {"from": ["/sections/*/treatment/status", "/sections/*/treatment/notes", "/page/treatment/status", "/page/treatment/notes"], "note": "статус подачи — в манифесте INPUT.md"},
+      {"from": ["/page/treatment/art_direction_ref", "/page/treatment/tokens_ref"], "note": "направление — по карте арт-дирекции; токены — ДС проекта как есть"},
+      {"from": ["/page/treatment/motion_level", "/page/treatment/motion_system/thesis", "/page/treatment/motion_system/character", "/page/treatment/motion_system/primitives", "/page/treatment/motion_system/smooth_scroll", "/page/treatment/motion_system/page_transitions", "/page/treatment/motion_system/reduce_toggle"], "note": "уровень движения — decisions.motion.level; тезис, характер, примитивы, прокрутка, переходы и переключатель — из спецификации движения (сверяет spec_check.py)"},
+      {"from": ["/page/treatment/peaks", "/page/treatment/accents", "/page/treatment/signature_sections"], "note": "сводка ритма — производная visual_role и эффектов секций; сверяет spec_check.py"}
+    ]
   },
   "x-effect-levels": {
-    "source": "06-effects-catalog/effects.yaml v0.3 (2026-09-25; пересобрано S1 командой spec_check.py levels: page-transition — L1 по решению X-21, + card-flip-3d, lottie-illustration-loop, rive-state-interaction F2), поле level_min; при правке каталога списки ниже пересобирает spec_check.py levels",
+    "source": "06-effects-catalog/effects.yaml, поле level_min; списки ниже и перечни условий L0 и L1 собирает spec_check.py levels, сверяет spec_check.py levels --check",
     "level_min_L1": ["effect:split-text-reveal", "effect:text-scramble", "effect:kinetic-headline", "effect:text-path", "effect:scroll-text-highlight", "effect:marquee-text", "effect:scroll-reveal-system", "effect:parallax-layers", "effect:svg-line-draw", "effect:pin-scrub-story", "effect:scroll-mask-expand", "effect:view-transition", "effect:page-transition", "effect:cursor-accent", "effect:magnetic-cta", "effect:tilt-card", "effect:hover-distort-dom", "effect:shader-bg", "effect:aurora-css", "effect:holo-shader-bg", "effect:glass-panel", "effect:glow-accent", "effect:text-mask-media", "effect:video-loop-hero", "effect:alpha-video-object", "effect:3d-object", "effect:webgl-image-distortion", "effect:depth-parallax-25d", "effect:card-flip-3d", "effect:lottie-illustration-loop", "effect:rive-state-interaction"],
     "level_min_L2": ["effect:variable-font-pointer", "effect:horizontal-scroll", "effect:smooth-scroll", "effect:custom-cursor", "effect:video-scrub", "effect:image-sequence", "effect:3d-scene", "effect:particles-webgl", "effect:preloader"]
   },
@@ -49,7 +67,7 @@
     "visual_role": {"$ref": "#/$defs/visual-role"},
     "motion_level": {
       "$ref": "#/$defs/motion-level",
-      "description": "Уровень движения секции в шкале kimi. По умолчанию — $defs/page.motion_level; секция может быть ниже страницы (calm — none)."
+      "description": "Уровень движения секции (шкала — $defs/motion-level). По умолчанию — $defs/page.motion_level; секция может быть ниже страницы (calm — none)."
     },
     "effects": {
       "type": "array",
@@ -71,7 +89,7 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 5,
-      "description": "Сколько непрерывных движений (объектов-петель) одновременно видно в секции. Потолок в видимой зоне: L0 ≤ 1, L1 ≤ 2, L2 ≤ 3 (E 05-motion/01 §5.2), на телефоне на 1 меньше."
+      "description": "Сколько непрерывных движений (объектов-петель) одновременно видно в секции. Потолок в зоне видимости — 01-creative-direction/ambition-levels.yaml#levels.motion_hints.continuous_motions_in_view_max (десктоп и телефон); сверяет spec_check.py."
     },
     "loop_control": {
       "enum": ["pause-button", "stops-within-5s", "not-parallel-content", "page-toggle"],
@@ -106,36 +124,29 @@
   },
   "allOf": [
     {
-      "$comment": "L0: движение — отклик и одно появление; без WebGL, автозапуска видео и эффектов с level_min L1/L2; не больше одной петли; без пиков.",
+      "$comment": "L0: движение — отклик и одно появление; без WebGL, автозапуска видео и эффектов с level_min L1/L2; без пиков.",
       "if": {"required": ["level"], "properties": {"level": {"const": "L0"}}},
       "then": {
         "properties": {
           "motion_level": {"enum": ["none", "subtle"]},
           "visual_role": {"not": {"const": "peak"}},
-          "loops": {"maximum": 1},
           "background": {"properties": {"kind": {"not": {"enum": ["shader", "webgl-3d", "video-loop", "sequence"]}}}},
           "effects": {"items": {"properties": {"ref": {"not": {"enum": ["effect:split-text-reveal", "effect:text-scramble", "effect:kinetic-headline", "effect:text-path", "effect:scroll-text-highlight", "effect:marquee-text", "effect:scroll-reveal-system", "effect:parallax-layers", "effect:svg-line-draw", "effect:pin-scrub-story", "effect:scroll-mask-expand", "effect:view-transition", "effect:page-transition", "effect:cursor-accent", "effect:magnetic-cta", "effect:tilt-card", "effect:hover-distort-dom", "effect:shader-bg", "effect:aurora-css", "effect:holo-shader-bg", "effect:glass-panel", "effect:glow-accent", "effect:text-mask-media", "effect:video-loop-hero", "effect:alpha-video-object", "effect:3d-object", "effect:webgl-image-distortion", "effect:depth-parallax-25d", "effect:card-flip-3d", "effect:lottie-illustration-loop", "effect:rive-state-interaction", "effect:variable-font-pointer", "effect:horizontal-scroll", "effect:smooth-scroll", "effect:custom-cursor", "effect:video-scrub", "effect:image-sequence", "effect:3d-scene", "effect:particles-webgl", "effect:preloader"]}}}}}
         }
       }
     },
     {
-      "$comment": "L1: движение не выше expressive; не больше двух петель; без эффектов с level_min L2.",
+      "$comment": "L1: движение не выше expressive; без эффектов с level_min L2.",
       "if": {"required": ["level"], "properties": {"level": {"const": "L1"}}},
       "then": {
         "properties": {
           "motion_level": {"enum": ["none", "subtle", "expressive"]},
-          "loops": {"maximum": 2},
           "effects": {"items": {"properties": {"ref": {"not": {"enum": ["effect:variable-font-pointer", "effect:horizontal-scroll", "effect:smooth-scroll", "effect:custom-cursor", "effect:video-scrub", "effect:image-sequence", "effect:3d-scene", "effect:particles-webgl", "effect:preloader"]}}}}}
         }
       }
     },
     {
-      "$comment": "L2: не больше трёх петель одновременно в секции.",
-      "if": {"required": ["level"], "properties": {"level": {"const": "L2"}}},
-      "then": {"properties": {"loops": {"maximum": 3}}}
-    },
-    {
-      "$comment": "cinematic — только на готовых роликах, секвенциях или рендере/3D (kimi 07/01 §6.2; ambition-levels.yaml L2 maps_to.kimi).",
+      "$comment": "cinematic — только на готовых роликах, секвенциях или рендере/3D (01-creative-direction/ambition-levels.yaml#levels.maps_to.claude_design).",
       "if": {"required": ["motion_level"], "properties": {"motion_level": {"const": "cinematic"}}},
       "then": {
         "anyOf": [
@@ -208,11 +219,11 @@
     },
     "motion-level": {
       "enum": ["none", "subtle", "expressive", "cinematic"],
-      "description": "Шкала движения kimi (07-brief-handoff/01 §6.2). Проекция уровня страницы (E П11, A maps_to.kimi): L0 → subtle (секции — none|subtle), L1 → expressive, L2 → cinematic только с роликами, секвенцией или рендером, иначе expressive."
+      "description": "Шкала уровня движения: none — только отклик; subtle — тезис и до трёх моментов; expressive — моменты при прокрутке; cinematic — только на готовых роликах, секвенции или рендере. Уровень страницы переводит в неё 01-creative-direction/ambition-levels.yaml#levels.maps_to.claude_design.motion_level."
     },
     "visual-role": {
       "enum": ["peak", "accent", "support", "calm", "pause", "chrome"],
-      "description": "Место секции в ритме (E 05-motion/02 §1.2): peak — главный приём сцены (pin-скраб, 3D, горизонталь, видео-скраб, секвенция); accent — один приём малой силы без закрепления и скраба; support — системное появление; calm — только отклик (чтение, доказательства, форма, цены); pause — смена темпа без плотного текста; chrome — шапка, подвал, баннеры. Счёт по уровню (E §5.5): пиков 0 / ≤ 2 / 2–4, акцентов ≤ 1 / ≤ 3 / ≤ 4; секций с signature-эффектом ≤ 1 / ≤ 2 / ≤ 4."
+      "description": "Место секции в ритме (E 05-motion/02 §1.2): peak — главный приём сцены (pin-скраб, 3D, горизонталь, видео-скраб, секвенция); accent — один приём малой силы без закрепления и скраба; support — системное появление; calm — только отклик (чтение, доказательства, форма, цены); pause — смена темпа без плотного текста; chrome — шапка, подвал, баннеры. Счёт по уровню — 01-creative-direction/ambition-levels.yaml: пики и акценты — section_distribution, секции с signature-эффектом — signature_moves_max; сверяет spec_check.py."
     },
     "target": {
       "type": "string",
@@ -334,7 +345,7 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "thesis": {"type": "string", "maxLength": 240, "description": "Тезис движения одной фразой (→ decisions.motion.thesis kimi)."},
+            "thesis": {"type": "string", "maxLength": 240, "description": "Тезис движения одной фразой."},
             "character": {
               "type": "array", "uniqueItems": true, "maxItems": 3,
               "items": {"enum": ["energetic", "friendly", "bold", "playful", "balanced", "measured", "calm", "subtle", "soft", "stable", "precise", "heavy"]},
@@ -362,8 +373,8 @@
         "theme": {"enum": ["light", "dark", "mixed"]},
         "tokens_ref": {"type": "string"},
         "peaks": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}, "description": "id секций-пиков — = множеству секций с visual_role peak (site_validate PL-C01)."},
-        "accents": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}, "description": "id секций-акцентов — сверка spec_check.py (E §5.5: ≤ 1 / ≤ 3 / ≤ 4)."},
-        "signature_sections": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}, "description": "Секции с signature-эффектом (A: «секции с фирменным приёмом» ≤ 1 / ≤ 2 / ≤ 4)."},
+        "accents": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}, "description": "id секций-акцентов — сверка spec_check.py; предел — section_distribution.accents_max уровня."},
+        "signature_sections": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}, "description": "Секции с signature-эффектом; предел — signature_moves_max уровня (сверка spec_check.py)."},
         "budget_overrides": {
           "type": "array",
           "items": {

@@ -1,21 +1,33 @@
 #!/usr/bin/env python3
-"""spec_check.py — проверки и проекции подачи для исполнителя (creative-research · агент I · волна 3 · 2026-09-24).
+"""spec_check.py — проверки и проекции подачи: treatment плана страницы, спецификация движения, варианты подачи блоков,
+проекция во вход холста.
 
-Нужен Python с jsonschema ≥ 4.18 и pyyaml: 99-raw/tools/venv-I/bin/python (uv venv; только чтение чужих файлов).
+Числа уровней (пики, акценты, секции с фирменным приёмом, петли в зоне видимости, свойства движения, blur) — из
+kb/creative/01-creative-direction/ambition-levels.yaml (--levels — другой файл той же формы); пределы времени и смещения
+первого экрана — токены motion.marketing (04-visual-language/marketing-tokens.json). Работает на примерах базы и на файлах
+проекта: путь — аргументом; план находит спецификацию движения по page.treatment.motion_spec_ref, спецификация — план по
+refs.page_plan (пути от файла), если их не назвали ключом.
 
 Команды:
   blocks [--yaml F]                              block-treatments.yaml ↔ blocks.yaml site, effects.yaml, cliche-registry.yaml
-  plan PLAN.yaml [--overlay T.yaml] [--out M.yaml] treatment v1 секций и страницы: схема page-plan v1 с treatment v1 + правила
-  spec SPEC.yaml [--plan PLAN.yaml] [--overlay T.yaml]  motion-spec: схема + id, эффекты, токены, классы, пределы, LCP
-  moments SPEC.yaml [--section ID]               строки «Moments» шаблона T7 kimi (brief.yaml decisions.motion.moments)
-  motion-md SPEC.yaml [--out MOTION.md]          MOTION.md пакета kimi: таймлайн по секциям, раскадровка, reduce, телефон, пауза
-  values SPEC.yaml --out DIR                     JSON чисел на секцию для модуля эффекта (правит Claude, код эффекта K3 не трогает)
-  levels                                         списки effect:<id> по level_min из effects.yaml (для x-effect-levels схемы)
-  --selftest                                     самопроверка на файлах базы и подброшенных ошибках
+  plan PLAN.yaml [--overlay T.yaml] [--out M.yaml] [--spec SPEC.yaml]
+                                                 treatment секций и страницы: схема page-plan с treatment v1 + правила уровня
+  spec SPEC.yaml [--plan PLAN.yaml] [--overlay T.yaml]
+                                                 motion-spec: схема + id, эффекты, токены, классы, пределы, свойства, LCP
+  moments SPEC.yaml [--section ID]               строки моментов для брифа холста (decisions.motion.moments)
+  motion-md SPEC.yaml [--out MOTION.md]          блок движения motion.md входа холста: таймлайн по секциям, раскадровка,
+                                                 сокращённое движение, телефон, пауза
+  values SPEC.yaml --out DIR                     JSON чисел на секцию для модуля эффекта (код модуля читает числа, а не держит их)
+  levels [--check]                               списки effect:<id> по level_min из effects.yaml; --check — сверка с
+                                                 x-effect-levels и условиями L0, L1 treatment.schema.json
+  canvas-map [ФАЙЛ …]                            форма ключа x-canvas-map и покрытие полей источника правилами (без
+                                                 файлов — все файлы kb с этим ключом)
+  --levels FILE                                  файл уровней той же формы, что ambition-levels.yaml
+  --selftest                                     самопроверка на файлах базы, фикстуре проекта и подброшенных ошибках
 Коды выхода: 0 — нет error; 1 — есть error; 2 — сбой запуска. Overlay treatment (формат примеров базы):
   {overlay_version: "1.0", plan: <путь к page-plan site>, page: {treatment страницы}, sections: {<id секции>: {treatment}}}
 """
-import argparse, copy, json, os, re, sys
+import argparse, copy, glob, json, os, re, sys
 
 try:
     import yaml
@@ -23,7 +35,7 @@ try:
     from referencing import Registry, Resource
     from referencing.jsonschema import DRAFT202012
 except ImportError as e:  # pragma: no cover
-    sys.stderr.write(f'нужны pyyaml и jsonschema ≥ 4.18 ({e}); запуск: 99-raw/tools/venv-I/bin/python\n')
+    sys.stderr.write(f'нужны pyyaml и jsonschema ≥ 4.18 ({e}); запуск — Python окружения скилла ($DDD_HOME/venv, scripts/install.sh)\n')
     sys.exit(2)
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib
@@ -43,15 +55,15 @@ P = {
     'm_schema': os.path.join(ROOT, '09-ai-execution-evaluation', 'motion-spec.schema.json'),
     'bt': os.path.join(ROOT, '09-ai-execution-evaluation', 'block-treatments.yaml'),
     'gates': os.path.join(ROOT, '09-ai-execution-evaluation', 'effect-gates.yaml'),
+    'ad_schema': os.path.join(ROOT, '09-ai-execution-evaluation', 'art-direction.v1.schema.json'),
 }
 LV = {'L0': 0, 'L1': 1, 'L2': 2}
-PEAKS = {'L0': (0, 0), 'L1': (0, 2), 'L2': (2, 4)}          # E 05-motion/01 §5.5; A section_distribution
-ACCENTS_MAX = {'L0': 1, 'L1': 3, 'L2': 4}                  # E §5.5 [гипотеза]
-SIGNATURE_MAX = {'L0': 1, 'L1': 2, 'L2': 4}                # A signature_moves_max / «секции с фирменным приёмом»
-LOOPS_MAX = {'L0': 1, 'L1': 2, 'L2': 3}                    # E §5.2
-PROPS_L0 = {'transform', 'translate', 'scale', 'rotate', 'opacity', 'color', 'background-color'}
 CHROME_ROLES = {'header', 'footer', 'utility', 'legal'}
 ROLES = ['peak', 'accent', 'support', 'calm', 'pause', 'chrome']
+STAGES = ('directions', 'wireframe', 'mockup', 'motion')                      # этапы входа холста
+RULES = ('copy', 'map', 'derive', 'drop', 'claude_fills')                      # правила проекции x-canvas-map
+POINTER = re.compile(r'^(?:[a-z][a-z0-9-]*#)?(?:/[^/]*)*$')                     # [<документ>#]<JSON Pointer>; * — любой элемент
+CANVAS_TOP = {'source', 'stages', 'files', 'drop', 'base'}
 
 
 def load(p):
@@ -77,12 +89,15 @@ class Report:
 
 # ── справочники ────────────────────────────────────────────────────────────────────────────────────────────
 class Ctx:
-    def __init__(self):
+    def __init__(self, levels_path=None):
         self.effects = {e['id']: e for e in load(P['effects'])['effects']}
         self.blocks = load(P['blocks'])['blocks']
         reg = load(P['cliche'])
         self.cliches = {e['id'] for e in reg['entries']} | set((reg.get('id_aliases') or {}).keys())
-        lv = load(P['levels'])
+        self.levels_path = levels_path or P['levels']
+        lv = load(self.levels_path)
+        self.lv = {L['id']: L for L in lv['levels']}
+        self.prop_exc = {k: set(v or []) for k, v in (lv.get('property_exceptions') or {}).items()}
         caps = lv.get('section_caps') or {}
         self.conv_roles = set(caps.get('conversion_roles_max_L0') or [])
         self.conv_blocks = set(caps.get('conversion_blocks_max_L0') or [])
@@ -106,6 +121,51 @@ class Ctx:
                 if not k.startswith('$'):
                     self._flat(v, f'{path}.{k}')
 
+    # ── уровни: ambition-levels.yaml ────────────────────────────────────────────────────────────────────────
+    def dist(self, lvl):
+        return self.lv[lvl].get('section_distribution') or {}
+
+    def peaks(self, lvl):
+        d = self.dist(lvl)
+        return d.get('peaks_min', 0), d.get('peaks_max')
+
+    def accents_max(self, lvl):
+        return self.dist(lvl).get('accents_max')
+
+    def accent_sections(self, lvl):
+        return self.dist(lvl).get('accent_sections')
+
+    def signature_max(self, lvl):
+        return self.lv[lvl].get('signature_moves_max')
+
+    def calm_between_peaks(self, lvl):
+        return self.dist(lvl).get('calm_between_peaks_min') or 0
+
+    def hints(self, lvl):
+        return self.lv[lvl].get('motion_hints') or {}
+
+    def loops_max(self, lvl, device='desktop'):
+        v = self.hints(lvl).get('continuous_motions_in_view_max')
+        return v.get(device) if isinstance(v, dict) else v
+
+    def props(self, lvl):
+        return set(self.hints(lvl).get('properties_allowed') or [])
+
+    def blur_max(self, lvl):
+        return self.hints(lvl).get('blur_max_px')
+
+    def forbids(self, lvl, item):
+        return any(f.get('id') == item for f in self.lv[lvl].get('forbidden') or [])
+
+    @staticmethod
+    def prop_in(prop, allowed):
+        return (prop in allowed or ('--*' in allowed and prop.startswith('--'))
+                or ('uniform:*' in allowed and prop.startswith('uniform:')))
+
+    def prop_ok(self, lvl, prop, effect=None):
+        """Свойство разрешено уровнем или его исключением (property_exceptions: свойство → эффекты)."""
+        return self.prop_in(prop, self.props(lvl)) or (effect is not None and effect in self.prop_exc.get(prop, ()))
+
     def token_ms(self, ref):
         v = self.tokens.get(ref)
         if isinstance(v, dict) and 'value' in v:
@@ -113,6 +173,10 @@ class Ctx:
         if isinstance(v, (int, float)):
             return float(v)
         return None
+
+    def token_num(self, ref, default=None):
+        v = self.token_ms(ref)
+        return default if v is None else v
 
     def scale_ms(self):
         out = set()
@@ -156,9 +220,6 @@ def registry(t_schema):
         d = load(P[key])
         res.append((d['$id'], Resource.from_contents(d, default_specification=DRAFT202012)))
     res.append((t_schema['$id'], Resource.from_contents(t_schema, default_specification=DRAFT202012)))
-    alias = copy.deepcopy(t_schema)
-    alias['$id'] = 'urn:app-design:creative-research:treatment:0'       # как будто site переключил $ref на v1
-    res.append((alias['$id'], Resource.from_contents(alias, default_specification=DRAFT202012)))
     return Registry().with_resources(res)
 
 
@@ -264,16 +325,33 @@ def is_conv(ctx, s):
     return role in ctx.conv_roles or bid in ctx.conv_blocks or any(a.get('form') or a.get('slot') == 'form' for a in acts)
 
 
+def ref_file(base_file, ref):
+    """Путь из ссылки файла (часть до «#»), от папки этого файла; нет файла — None."""
+    if not ref or not isinstance(ref, str):
+        return None
+    p = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(base_file)), ref.split('#', 1)[0]))
+    return p if os.path.isfile(p) else None
+
+
 def cmd_plan(ctx, R, plan_path, overlay_path=None, out=None, spec=None):
     plan = load(plan_path)
     if overlay_path:
         ov = load(overlay_path)
         plan = merge_overlay(plan, ov, R)
+    if spec is None:
+        ref = ((plan.get('page') or {}).get('treatment') or {}).get('motion_spec_ref')
+        sp = ref_file(overlay_path or plan_path, ref)
+        if sp:
+            spec = load(sp)
+            R.add('info', 'TR-00', 'page', f'спецификация движения — {os.path.relpath(sp)} (page.treatment.motion_spec_ref)')
     t_schema = load(P['t_schema'])
     reg = registry(t_schema)
     v = Draft202012Validator(load(P['pp_schema']), registry=reg)
     for e in sorted(v.iter_errors(plan), key=lambda x: list(x.path)):
         R.add('error', 'TR-S', '/'.join(str(p) for p in e.path), e.message[:220])
+    if not isinstance(plan.get('sections'), list) or not all(isinstance(s, dict) for s in plan['sections']):
+        R.add('error', 'TR-S', 'sections', 'не план страницы: sections — список секций (overlay подачи — ключом --overlay)')
+        return plan
     pg = plan.get('page') or {}
     lvl = pg.get('ambition_level')
     pt = pg.get('treatment') or {}
@@ -357,23 +435,26 @@ def cmd_plan(ctx, R, plan_path, overlay_path=None, out=None, spec=None):
             R.add('warning', 'TR-17', w, 'mobile simplified/separate-asset без note: объявите, что меняется')
         if (t.get('reduce') or {}).get('strategy') == 'custom' and not (t.get('reduce') or {}).get('note'):
             R.add('warning', 'TR-26', w, 'reduce custom без note')
-        if tl and (t.get('loops') or 0) > LOOPS_MAX[tl]:
-            R.add('error', 'TR-21', w, f'петель {t["loops"]} > {LOOPS_MAX[tl]} для {tl}')
+        lmax = ctx.loops_max(tl) if tl else None
+        if lmax is not None and (t.get('loops') or 0) > lmax:
+            R.add('error', 'TR-21', w, f'петель {t["loops"]} > {lmax} для {tl} (ambition-levels.yaml continuous_motions_in_view_max)')
         msr = t.get('motion_spec_ref')
         if msr and spec is not None and '#/sections/' in msr and msr.split('#/sections/')[1] not in spec_ids:
             R.add('error', 'TR-15', w, f'motion_spec_ref → секции {msr.split("#/sections/")[1]} нет в motion-spec')
         if spec is not None and vr in ('peak', 'accent') and sid not in spec_ids:
             R.add('warning', 'TR-15', w, f'{vr} без раздела в motion-spec')
     if lvl:
-        lo, hi = PEAKS[lvl]
-        if not lo <= len(peaks) <= hi:
+        lo, hi = ctx.peaks(lvl)
+        if not lo <= len(peaks) <= (hi if hi is not None else len(peaks)):
             R.add('error', 'TR-04', 'page', f'пиков {len(peaks)} {peaks}, норма {lo}–{hi} для {lvl}')
-        if len(accents) > ACCENTS_MAX[lvl]:
-            R.add('error', 'TR-05', 'page', f'акцентов {len(accents)} {accents} > {ACCENTS_MAX[lvl]} для {lvl}')
-        if len(sigs) > SIGNATURE_MAX[lvl]:
-            R.add('error', 'TR-06', 'page', f'секций с signature {len(sigs)} {sigs} > {SIGNATURE_MAX[lvl]} для {lvl}')
-        if lvl == 'L0' and accents and any(a != 'hero' for a in accents):
-            R.add('error', 'TR-05', 'page', f'на L0 акцент — только hero: {accents}')
+        amax, where = ctx.accents_max(lvl), ctx.accent_sections(lvl)
+        if amax is not None and len(accents) > amax:
+            R.add('error', 'TR-05', 'page', f'акцентов {len(accents)} {accents} > {amax} для {lvl}')
+        smax = ctx.signature_max(lvl)
+        if smax is not None and len(sigs) > smax:
+            R.add('error', 'TR-06', 'page', f'секций с signature {len(sigs)} {sigs} > {smax} для {lvl}')
+        if where and any(a not in where for a in accents):
+            R.add('error', 'TR-05', 'page', f'на {lvl} акцент — только {", ".join(where)}: {accents}')
     if pt.get('peaks') is not None and set(pt['peaks']) != set(peaks):
         R.add('error', 'TR-07', 'page', f'page.treatment.peaks {pt["peaks"]} ≠ секции-пики {peaks}')
     if pt.get('accents') is not None and set(pt['accents']) != set(accents):
@@ -382,11 +463,12 @@ def cmd_plan(ctx, R, plan_path, overlay_path=None, out=None, spec=None):
         R.add('error', 'TR-08', 'page', f'signature_sections {pt["signature_sections"]} ≠ {sigs}')
     if ms.get('smooth_scroll') and lvl != 'L2':
         R.add('error', 'TR-25', 'page', f'плавная прокрутка на {lvl} (только L2)')
+    calm = ctx.calm_between_peaks(lvl) if lvl else 0
     for i in range(1, len(roles_seq)):
         if roles_seq[i][1] == 'peak' and roles_seq[i - 1][1] == 'peak':
-            sev = 'error' if lvl != 'L2' else 'warning'
-            R.add(sev, 'TR-19', f'{roles_seq[i - 1][0]}+{roles_seq[i][0]}', 'два пика подряд (L2 — только одна сквозная сцена)')
-    if lvl == 'L2':
+            sev = 'warning' if calm else 'error'
+            R.add(sev, 'TR-19', f'{roles_seq[i - 1][0]}+{roles_seq[i][0]}', 'два пика подряд (где пиков несколько — только одна сквозная сцена)')
+    if calm:
         idx = [i for i, (_, r) in enumerate(roles_seq) if r == 'peak']
         for a, b in zip(idx, idx[1:]):
             if not any(r in ('calm', 'pause') for _, r in roles_seq[a + 1:b]):
@@ -436,6 +518,17 @@ def cmd_spec(ctx, R, spec_path, plan_path=None, overlay_path=None):
     page = spec['page']
     base = (page.get('base') or {}).get('duration_ms')
     plan = None
+    if not plan_path and not overlay_path:
+        plan_path = ref_file(spec_path, (spec.get('refs') or {}).get('page_plan'))
+        if plan_path:
+            R.add('info', 'MS-00', 'refs', f'план страницы — {os.path.relpath(plan_path)} (refs.page_plan)')
+    page_props = page.get('properties_allowed') or []
+    wide = [p for p in page_props if not ctx.prop_in(p, ctx.props(lvl)) and p not in ctx.prop_exc]
+    if wide:
+        R.add('error', 'MS-23', 'page.properties_allowed', f'шире уровня {lvl}: {wide} (ambition-levels.yaml motion_hints.properties_allowed)')
+    shift_max = ctx.token_ms('motion.marketing.distance.shift-hero')
+    scene_max = ctx.token_ms('motion.marketing.duration.hero-scene-max')
+    group_max = ctx.token_ms('motion.marketing.stagger.group-total-max')
     if plan_path:
         plan = load(plan_path)
         if overlay_path:
@@ -465,8 +558,8 @@ def cmd_spec(ctx, R, spec_path, plan_path=None, overlay_path=None):
         L = scene.get('length_vh')
         if L is not None:
             cap = ctx.token_ms('motion.marketing.scroll.pin-l1-max-vh') if slvl == 'L1' else ctx.token_ms('motion.marketing.scroll.pin-l2-max-vh')
-            if slvl == 'L0' and scene.get('pin') not in (None, 'none', 'sticky'):
-                R.add('error', 'MS-13', w, 'закрепление со скрабом на L0 (только sticky)')
+            if ctx.forbids(slvl, 'pin-scrub') and scene.get('pin') not in (None, 'none', 'sticky'):
+                R.add('error', 'MS-13', w, f'закрепление со скрабом запрещено уровнем {slvl} (только sticky)')
             elif cap and scene.get('pin') not in (None, 'none') and L > cap:
                 R.add('error', 'MS-13', w, f'длина сцены {L}vh > {cap:g}vh для {slvl}')
             nst = len(scene.get('stations') or [])
@@ -492,7 +585,7 @@ def cmd_spec(ctx, R, spec_path, plan_path=None, overlay_path=None):
                     R.add('error', 'MS-04', wm, f'{m["effect"]} нет в effects.yaml')
                 else:
                     kind = (ce.get('motion') or {}).get('kind')
-                    kinds = kind if isinstance(kind, list) else [kind]   # S1b 2026-09-25 (X-64): motion.kind — строка или список классов
+                    kinds = kind if isinstance(kind, list) else [kind]   # motion.kind каталога — строка или список классов
                     if kind and m['class'] not in kinds and 'static' not in kinds:
                         R.add('warning', 'MS-05', wm, f'class {m["class"]} ≠ motion.kind {kind}')
                     if LV[ce['level_min']] > LV[slvl]:
@@ -510,24 +603,27 @@ def cmd_spec(ctx, R, spec_path, plan_path=None, overlay_path=None):
                 R.add('warning', 'MS-07', wm, f'{d_ms:g} мс вне шкалы motion.marketing (CRV-MO-14): возьмите токен или долю базы')
             for tk in m['tracks']:
                 prop = tk['property']
-                if slvl == 'L0' and prop not in PROPS_L0:
-                    R.add('error', 'MS-08', wm, f'свойство {prop} на L0 (только transform, opacity, цвет — E П12)')
-                if prop == 'filter':
+                if not ctx.prop_ok(slvl, prop, m.get('effect')):
+                    R.add('error', 'MS-08', wm, f'свойство {prop} не разрешено уровнем {slvl} (ambition-levels.yaml motion_hints.properties_allowed)')
+                elif page_props and not ctx.prop_in(prop, set(page_props)) and m.get('effect') not in ctx.prop_exc.get(prop, ()):
+                    R.add('error', 'MS-24', wm, f'свойство {prop} вне page.properties_allowed {page_props}')
+                bmax = ctx.blur_max(slvl)
+                if prop == 'filter' and bmax is not None:
                     for b in re.findall(r'blur\((\d+(?:\.\d+)?)px\)', f'{tk.get("from", "")} {tk.get("to", "")}'):
-                        if float(b) > 8:
-                            R.add('error', 'MS-08', wm, f'blur {b}px > 8 px (E П12)')
+                        if float(b) > bmax:
+                            R.add('error', 'MS-08', wm, f'blur {b}px > {bmax:g} px для {slvl} (ambition-levels.yaml motion_hints.blur_max_px)')
                 if prop == 'opacity' and str(tk.get('from')) in ('0', '0.0') and m['class'] == 'one-shot' and sid == first_flow:
-                    R.add('warning', 'MS-19', wm, 'появление из opacity 0 в первом экране: возьмите .01 (кандидат LCP сохраняется — E 02 §10)')
+                    R.add('warning', 'MS-19', wm, 'появление из opacity 0 в первом экране: возьмите .01 (кандидат LCP сохраняется — creative 05-motion/02 §10)')
             is_lcp = m.get('lcp') == 'is-lcp' or m['target'] == page['lcp']['target']
             if is_lcp:
                 if page['lcp']['entrance'] == 'none':
                     R.add('error', 'MS-09', wm, f'элемент LCP {page["lcp"]["target"]} анимируется, а page.lcp.entrance = none')
                 for tk in m['tracks']:
                     if tk['property'] not in ('transform', 'translate'):
-                        R.add('error', 'MS-09', wm, f'LCP-элемент: свойство {tk["property"]} (только transform ≤ 24 px)')
+                        R.add('error', 'MS-09', wm, f'LCP-элемент: свойство {tk["property"]} (только transform)')
                     px = px_of(ctx, tk.get('from'))
-                    if px is not None and px > 24:
-                        R.add('error', 'MS-09', wm, f'LCP-элемент: сдвиг {px:g} px > 24')
+                    if px is not None and shift_max is not None and px > shift_max:
+                        R.add('error', 'MS-09', wm, f'LCP-элемент: сдвиг {px:g} px > {shift_max:g} (токен distance.shift-hero)')
             if m['class'] == 'one-shot' and m['trigger']['type'] == 'load' and sid == first_flow:
                 st = m.get('stagger') or {}
                 each = dur_ms(ctx, st.get('each'), base) or 0
@@ -538,30 +634,31 @@ def cmd_spec(ctx, R, spec_path, plan_path=None, overlay_path=None):
             if st.get('each'):
                 each = dur_ms(ctx, st['each'], base) or 0
                 if not 40 <= each <= 80:
-                    R.add('warning', 'MS-11', wm, f'стаггер {each:g} мс вне 40–80 (E 01 §7.4)')
-                if st.get('max_items') and each * (st['max_items'] - 1) > 600:
-                    R.add('error', 'MS-11', wm, f'сумма стаггера {each * (st["max_items"] - 1):g} мс > 600')
+                    R.add('warning', 'MS-11', wm, f'стаггер {each:g} мс вне 40–80 (creative 05-motion/01 §7.4)')
+                if st.get('max_items') and group_max is not None and each * (st['max_items'] - 1) > group_max:
+                    R.add('error', 'MS-11', wm, f'сумма стаггера {each * (st["max_items"] - 1):g} мс > {group_max:g} (токен stagger.group-total-max)')
             if m['class'] == 'loop':
                 loops += 1
                 per = (m.get('loop') or {}).get('period_ms')
                 if per and 2500 <= per <= 6000:
                     fam = (ctx.effects.get((m.get('effect') or ':').split(':', 1)[1]) or {}).get('family')
                     sev = 'error' if fam in ('background', '3d', 'video') else 'warning'
-                    R.add(sev, 'MS-15', wm, f'период петли {per:g} мс в полосе 2,5–6 с (вестибулярный риск, E 01 §6.3)')
+                    R.add(sev, 'MS-15', wm, f'период петли {per:g} мс в полосе 2,5–6 с (вестибулярный риск, creative 05-motion/01 §6.3)')
                 if (m.get('pause') or {}).get('control') == 'page-toggle' and not page['toggle'].get('required'):
                     R.add('error', 'MS-14', wm, 'пауза page-toggle, а page.toggle.required = false')
             if m.get('scrub', {}).get('snap') == 'stations' and slvl != 'L2':
                 R.add('error', 'MS-13', wm, 'привязка к станциям (snap) — только L2')
-        if sid == first_flow and t_end > 1200:
-            R.add('error', 'MS-10', w, f'сцена первого экрана {t_end:g} мс > 1 200')
-        if loops > LOOPS_MAX.get(slvl, 3):
-            R.add('error', 'MS-14', w, f'петель {loops} > {LOOPS_MAX[slvl]} для {slvl}')
+        if sid == first_flow and scene_max is not None and t_end > scene_max:
+            R.add('error', 'MS-10', w, f'сцена первого экрана {t_end:g} мс > {scene_max:g} (токен duration.hero-scene-max)')
+        lmax = ctx.loops_max(slvl)
+        if lmax is not None and loops > lmax:
+            R.add('error', 'MS-14', w, f'петель {loops} > {lmax} для {slvl} (ambition-levels.yaml continuous_motions_in_view_max)')
         gids = set()
         if os.path.exists(P['gates']):
             gids = {g.get('id') for g in (load(P['gates']).get('gates') or [])}
         for ac in sec.get('acceptance') or []:
             if ac.get('gate') and gids and ac['gate'] not in gids:
-                R.add('warning', 'MS-22', f'{sid}.{ac["id"]}', f'ворот {ac["gate"]} нет в effect-gates.yaml (K)')
+                R.add('warning', 'MS-22', f'{sid}.{ac["id"]}', f'ворот {ac["gate"]} нет в effect-gates.yaml')
         for ef in sorted(tr_effs - used_effs):
             R.add('warning', 'MS-21', w, f'эффект treatment {ef} не описан ни одним моментом')
     if plan:
@@ -742,23 +839,255 @@ def cmd_values(ctx, spec, out):
     return files
 
 
-def cmd_levels(ctx):
+def effect_levels(ctx):
     out = {'L1': [], 'L2': []}
     for eid, e in ctx.effects.items():
         if e['level_min'] in out:
             out[e['level_min']].append(f'effect:{eid}')
-    print(json.dumps(out, ensure_ascii=False))
+    return out
+
+
+def cmd_levels(ctx, R=None):
+    """Списки effect:<id> по level_min; с R — сверка x-effect-levels и условий L0, L1 treatment.schema.json с каталогом."""
+    out = effect_levels(ctx)
+    if R is None:
+        print(json.dumps(out, ensure_ascii=False))
+        return out
+    t = load(P['t_schema'])
+    xl = t.get('x-effect-levels') or {}
+    for lvl in ('L1', 'L2'):
+        have = xl.get(f'level_min_{lvl}') or []
+        if have != out[lvl]:
+            R.add('error', 'LV-01', f'x-effect-levels.level_min_{lvl}',
+                  f'не как в effects.yaml: лишние {sorted(set(have) - set(out[lvl]))}, нет {sorted(set(out[lvl]) - set(have))}')
+    cond = {}
+    for c in t.get('allOf') or []:
+        lv_ = (((c.get('if') or {}).get('properties') or {}).get('level') or {}).get('const')
+        eff = (((((c.get('then') or {}).get('properties') or {}).get('effects') or {}).get('items') or {}).get('properties') or {}).get('ref')
+        if lv_ and eff:
+            cond[lv_] = (eff.get('not') or {}).get('enum')
+    for lvl, want in (('L0', out['L1'] + out['L2']), ('L1', out['L2'])):
+        if cond.get(lvl) != want:
+            R.add('error', 'LV-02', f'allOf {lvl}', 'перечень запрещённых эффектов не как в effects.yaml (пересоберите: spec_check.py levels)')
+    return out
+
+
+# ── проекция во вход холста: форма x-canvas-map и покрытие полей ─────────────────────────────────────────────
+def canvas_files():
+    """Файлы kb с ключом x-canvas-map: схемы (*.schema.json, *.schema.yaml) и файл уровней."""
+    out = []
+    for f in sorted(glob.glob(os.path.join(APP, '**', '*'), recursive=True)):
+        if '/99-raw/' in f or not os.path.isfile(f):
+            continue
+        if not (f.endswith(('.schema.json', '.schema.yaml', '.schema.yml')) or os.path.abspath(f) == os.path.abspath(P['levels'])):
+            continue
+        with open(f, encoding='utf-8') as fh:
+            if 'x-canvas-map' in fh.read():
+                out.append(f)
+    return out
+
+
+def split_ptr(ptr):
+    return [x.replace('~1', '/').replace('~0', '~') for x in ptr.split('/')[1:]] if ptr else []
+
+
+def ptr_match(q, p):
+    """Указатель правила q покрывает путь p: q — префикс p; «*» с любой стороны совпадает с элементом списка."""
+    return len(q) <= len(p) and all(a == b or a == '*' or b == '*' for a, b in zip(q, p))
+
+
+def schema_paths(doc, roots):
+    """Все пути полей схемы от корней roots {указатель схемы: префикс в источнике}; листья — отдельным списком."""
+    nodes, leaves = [], []
+
+    def deref(n, seen=0):
+        while isinstance(n, dict) and isinstance(n.get('$ref'), str) and n['$ref'].startswith('#/') and seen < 20:
+            cur = doc
+            for part in split_ptr(n['$ref'][1:]):
+                cur = cur.get(part, {}) if isinstance(cur, dict) else {}
+            n, seen = cur, seen + 1
+        return n if isinstance(n, dict) else {}
+
+    def walk(n, path, depth=0):
+        n = deref(n)
+        nodes.append(path)
+        props = n.get('properties')
+        if isinstance(props, dict) and props and depth < 30:
+            for k, sub in props.items():
+                walk(sub, path + [k], depth + 1)
+            return
+        it = n.get('items')
+        if isinstance(it, dict):
+            itd = deref(it)
+            if isinstance(itd.get('properties'), dict) and itd['properties']:
+                walk(itd, path + ['*'], depth + 1)
+                return
+        leaves.append(path)
+    for sch, prefix in roots.items():
+        node = doc if sch in ('#', '') else deref({'$ref': sch})
+        walk(node, split_ptr(prefix))
+    return nodes, leaves
+
+
+def data_paths(doc):
+    nodes, leaves = [], []
+
+    def walk(x, path):
+        nodes.append(path)
+        if isinstance(x, dict) and x:
+            for k, v in x.items():
+                if not path and str(k).startswith('x-'):
+                    continue
+                walk(v, path + [str(k)])
+            return
+        if isinstance(x, list) and x and all(isinstance(i, dict) for i in x):
+            for i in x:
+                walk(i, path + ['*'])
+            return
+        leaves.append(path)
+    walk(doc, [])
+    return nodes, leaves
+
+
+def own_pointers(m):
+    """Указатели карты на свой документ-источник (без префикса <документ>#) — из правил файлов и drop; base — корни
+    подсхемы внутри чужого документа: поддерево целиком покрыто картой подсхемы (для покрытия карт того же source)."""
+    out = [split_ptr(v) for v in (m.get('base') or {}).values() if isinstance(v, str) and v]
+    for fields in (m.get('files') or {}).values():
+        for r in (fields or {}).values() if isinstance(fields, dict) else []:
+            out += [split_ptr(q) for q in (r.get('from') or []) if isinstance(r, dict) and isinstance(q, str) and '#' not in q]
+    for dr in m.get('drop') or []:
+        out += [split_ptr(q) for q in (dr.get('from') or []) if isinstance(dr, dict) and isinstance(q, str) and '#' not in q]
+    return out
+
+
+def canvas_check(path, m, R, doc=None, shared=()):
+    """Форма x-canvas-map и покрытие: у каждого поля источника есть правило (сам указатель или предок). shared —
+    указатели других карт того же source: подсхема чужого документа (treatment в page-plan) покрывает свои поля сама."""
+    w = os.path.relpath(path, APP) if path else 'x-canvas-map'
+    if not isinstance(m, dict):
+        R.add('error', 'CM-01', w, 'x-canvas-map — не объект')
+        return
+    if not isinstance(m.get('source'), str) or not m.get('source'):
+        R.add('error', 'CM-01', w, 'нет source — id документа-источника')
+    stages = m.get('stages')
+    if not isinstance(stages, list) or not stages or any(x not in STAGES for x in stages):
+        R.add('error', 'CM-01', w, f'stages — непустой список из {STAGES}')
+        stages = list(STAGES)
+    files = m.get('files')
+    if not isinstance(files, dict) or not files:
+        R.add('error', 'CM-01', w, 'files — объект «файл входа → поле холста → правило»')
+        files = {}
+    own = []
+
+    def take(ptrs, where):
+        if not isinstance(ptrs, list):
+            R.add('error', 'CM-02', where, 'from — список указателей')
+            return
+        for q in ptrs:
+            if not isinstance(q, str) or not POINTER.match(q):
+                R.add('error', 'CM-02', where, f'указатель {q!r} — не [<документ>#]<JSON Pointer>')
+            elif '#' not in q:
+                own.append((split_ptr(q), where, q))
+    for fname, fields in files.items():
+        if not isinstance(fields, dict) or not fields:
+            R.add('error', 'CM-01', f'{w}:{fname}', 'у файла входа нет полей')
+            continue
+        for fld, r in fields.items():
+            wf = f'{w}:{fname}:{fld}'
+            if not isinstance(r, dict):
+                R.add('error', 'CM-02', wf, 'правило — объект {rule, from, note}')
+                continue
+            extra = set(r) - {'rule', 'from', 'note', 'stages', 'values'}
+            if extra:
+                R.add('error', 'CM-02', wf, f'лишние ключи правила: {sorted(extra)}')
+            if r.get('rule') not in RULES:
+                R.add('error', 'CM-02', wf, f'rule {r.get("rule")!r} — не из {RULES}')
+            take(r.get('from'), wf)
+            if r.get('rule') == 'claude_fills' and r.get('from'):
+                R.add('error', 'CM-02', wf, 'claude_fills — у поля нет источника: from пустой')
+            if r.get('rule') != 'claude_fills' and not r.get('from'):
+                R.add('error', 'CM-02', wf, 'from пустой: источник поля не назван')
+            if r.get('rule') in ('map', 'derive', 'drop', 'claude_fills') and not r.get('note'):
+                R.add('error', 'CM-02', wf, f'правило {r.get("rule")} без note')
+            if r.get('stages') is not None and (not isinstance(r['stages'], list) or any(x not in stages for x in r['stages'])):
+                R.add('error', 'CM-02', wf, f'stages правила — подмножество stages файла {stages}')
+            if 'values' in r and (r.get('rule') != 'map' or not isinstance(r['values'], dict)):
+                R.add('error', 'CM-02', wf, 'values — словарь перевода только у map')
+    for i, dr in enumerate(m.get('drop') or []):
+        wd = f'{w}:drop[{i}]'
+        if not isinstance(dr, dict) or not dr.get('note'):
+            R.add('error', 'CM-02', wd, 'drop — {from, note}: причина обязательна')
+            continue
+        take(dr.get('from'), wd)
+    base = m.get('base') or {'#': ''}
+    if doc is None:
+        return
+    if isinstance(doc.get('properties'), dict):
+        nodes, leaves = schema_paths(doc, base)
+    else:
+        nodes, leaves = data_paths(doc)
+    for q, where, raw in own:
+        if not any(ptr_match(q, n) and len(q) == len(n) for n in nodes):
+            R.add('error', 'CM-03', where, f'указатель {raw} не находит поля источника')
+    cover = [q for q, _, _ in own] + list(shared)
+    miss = ['/' + '/'.join(p) for p in leaves if not any(ptr_match(q, p) for q in cover)]
+    for p in sorted(set(miss)):
+        R.add('error', 'CM-04', w, f'поле источника без правила: {p}')
+
+
+def cmd_canvas_map(R, files=None):
+    every = {f: load(f) for f in canvas_files()}
+    files = files or list(every)
+    for f in files:
+        doc = every.get(f) or load(f)
+        if 'x-canvas-map' not in doc:
+            R.add('error', 'CM-01', os.path.relpath(f, APP), 'нет ключа x-canvas-map')
+            continue
+        src = (doc['x-canvas-map'] or {}).get('source')
+        shared = [q for g, d in every.items() if g != f and isinstance(d.get('x-canvas-map'), dict)
+                  and d['x-canvas-map'].get('source') == src for q in own_pointers(d['x-canvas-map'])]
+        canvas_check(f, doc['x-canvas-map'], R, doc, shared)
+        R.add('info', 'CM-00', os.path.relpath(f, APP), f'правил: {sum(len(v) for v in (doc["x-canvas-map"].get("files") or {}).values())}, drop: {len(doc["x-canvas-map"].get("drop") or [])}')
+    return R
 
 
 # ── самопроверка ───────────────────────────────────────────────────────────────────────────────────────────
+EX = os.path.join(ROOT, '09-ai-execution-evaluation', 'examples')
+
+
+def example(name):
+    """План site, overlay и спецификация примера базы по имени (otves, okoshko, stalkon)."""
+    ov = os.path.join(EX, f'{name}-home.treatment.yaml')
+    plan = os.path.normpath(os.path.join(EX, load(ov)['plan']))
+    return plan, ov, os.path.join(EX, f'{name}-home.motion-spec.yaml')
+
+
+def codes(R, sev='error'):
+    return {i[1] for i in R.items if i[0] == sev}
+
+
+def levels_copy(tmp, mutate):
+    lv = load(P['levels'])
+    mutate({L['id']: L for L in lv['levels']})
+    p = os.path.join(tmp, 'ambition-levels.yaml')
+    with open(p, 'w', encoding='utf-8') as f:
+        yaml.safe_dump(lv, f, allow_unicode=True, sort_keys=False)
+    return p
+
+
 def selftest(ctx):
+    import tempfile
     ok = True
+
+    def expect(name, cond):
+        nonlocal ok
+        ok &= bool(cond)
+        print(f'{"OK  " if cond else "FAIL"} {name}')
     for key in ('t_schema', 'm_schema'):
         Draft202012Validator.check_schema(load(P[key]))
     R = cmd_blocks(ctx, Report())
-    e = [i for i in R.items if i[0] == 'error']
-    print(f'blocks: error {len(e)}')
-    ok &= not e
+    expect('blocks: 0 error', not codes(R))
     tv = Draft202012Validator(load(P['t_schema']))
     bad = [({'level': 'L0', 'effects': [{'ref': 'effect:pin-scrub-story'}], 'reduce': {'strategy': 'final-state'}, 'mobile': {'strategy': 'static'}}, 'L0 + pin'),
            ({'visual_role': 'peak', 'effects': [{'ref': 'effect:sticky-stack', 'purpose': 'support'}], 'reduce': {'strategy': 'final-state'}, 'mobile': {'strategy': 'same'}}, 'peak без signature'),
@@ -766,15 +1095,93 @@ def selftest(ctx):
            ({'background': {'kind': 'video-loop'}, 'mobile': {'strategy': 'poster'}}, 'видео без flash_check'),
            ({'motion_level': 'cinematic', 'reduce': {'strategy': 'final-state'}}, 'cinematic без ролика')]
     for doc, name in bad:
-        caught = bool(list(tv.iter_errors(doc)))
-        print(f'treatment «{name}»: {"поймано" if caught else "ПРОПУЩЕНО"}')
-        ok &= caught
+        expect(f'treatment «{name}»: схема ловит', list(tv.iter_errors(doc)))
     mom = Draft202012Validator({'$ref': '#/$defs/moment', '$defs': load(P['m_schema'])['$defs']})
     m_bad = {'id': 'x', 'class': 'one-shot', 'purpose': 'guide', 'target': 'hero.headline', 'lcp': 'is-lcp', 'trigger': {'type': 'load'},
              'tracks': [{'property': 'opacity', 'from': 0, 'to': 1}], 'duration': {'ms': 600}, 'reduce': {'strategy': 'final-state'}}
-    caught = bool(list(mom.iter_errors(m_bad)))
-    print(f'motion-spec «LCP из opacity»: {"поймано" if caught else "ПРОПУЩЕНО"}')
-    ok &= caught
+    expect('motion-spec «LCP из opacity»: схема ловит', list(mom.iter_errors(m_bad)))
+    for name in ('otves', 'okoshko', 'stalkon'):
+        plan, ov, sp = example(name)
+        Rp, Rs = Report(), Report()
+        cmd_plan(ctx, Rp, plan, ov, spec=load(sp))
+        cmd_spec(ctx, Rs, sp, plan, ov)
+        expect(f'пример {name}: plan и spec — 0 error', not codes(Rp) and not codes(Rs))
+    R = Report()
+    cmd_levels(ctx, R)
+    expect('levels --check: x-effect-levels и условия L0, L1 — как в effects.yaml', not codes(R))
+    for ref in ('motion.marketing.distance.shift-hero', 'motion.marketing.duration.hero-scene-max', 'motion.marketing.stagger.group-total-max'):
+        expect(f'токен {ref} есть', ctx.token_ms(ref) is not None)
+    mq = (ctx.effects.get('marquee-logos') or {}).get('limits') or {}
+    tok = load(P['tokens'])['motion']['marketing']['loop']['marquee-speed']['$value']
+    expect('токен loop.marquee-speed в пределах marquee-logos.limits', mq.get('speed_px_s_min', 0) <= tok <= mq.get('speed_px_s_max', 0))
+    # числа уровней — из файла уровней: копия с другим значением меняет вердикт
+    plan, ov, sp = example('otves')
+    with tempfile.TemporaryDirectory() as tmp:
+        c2 = Ctx(levels_copy(tmp, lambda L: L['L1']['section_distribution'].update(peaks_max=0)))
+        R = Report()
+        cmd_plan(c2, R, plan, ov, spec=load(sp))
+        expect('копия уровней: пиков L1 ≤ 0 → TR-04', 'TR-04' in codes(R))
+        c3 = Ctx(levels_copy(tmp, lambda L: L['L1']['motion_hints'].update(properties_allowed=['opacity', 'color'])))
+        R = Report()
+        cmd_spec(c3, R, sp, plan, ov)
+        expect('копия уровней: без transform у L1 → MS-08 и MS-23', {'MS-08', 'MS-23'} <= codes(R))
+        c4 = Ctx(levels_copy(tmp, lambda L: L['L1']['motion_hints'].update(continuous_motions_in_view_max={'mobile': 0, 'desktop': 0})))
+        pl = load(plan)
+        for s_ in pl['sections']:
+            if s_['id'] == 'hero':
+                s_.setdefault('treatment', {}).update(loops=1, loop_control='stops-within-5s')
+        p2 = os.path.join(tmp, 'plan.yaml')
+        with open(p2, 'w', encoding='utf-8') as f:
+            yaml.safe_dump(pl, f, allow_unicode=True, sort_keys=False)
+        R0, R1 = Report(), Report()
+        cmd_plan(ctx, R0, p2)
+        cmd_plan(c4, R1, p2)
+        expect('копия уровней: петель L1 ≤ 0 → TR-21 (с файлом базы — нет)', 'TR-21' in codes(R1) and 'TR-21' not in codes(R0))
+    # файлы проекта: план с подачей и спецификация движения находят друг друга по ссылкам
+    try:
+        kbpaths.use('tests')
+        import docpaths
+        import fixture_project
+        with fixture_project.built('minimal') as fx:
+            pp = docpaths.site(fx.slug, 'promo', 'plans', 'home.yaml', repo=fx.root)
+            mp = docpaths.design(fx.slug, 'motion', surface='promo', repo=fx.root) / 'home.motion-spec.yaml'
+            merged = merge_overlay(load(str(pp)), load(ov), Report())
+            merged['page']['treatment']['motion_spec_ref'] = os.path.relpath(mp, pp.parent)
+            for s_ in merged['sections']:
+                t_ = s_.get('treatment') or {}
+                if t_.get('motion_spec_ref'):
+                    t_['motion_spec_ref'] = os.path.relpath(mp, pp.parent) + '#/sections/' + t_['motion_spec_ref'].split('#/sections/')[-1]
+            with open(pp, 'w', encoding='utf-8') as f:
+                yaml.safe_dump(merged, f, allow_unicode=True, sort_keys=False)
+            spec_doc = load(sp)
+            spec_doc['refs']['page_plan'] = os.path.relpath(pp, mp.parent)
+            mp.parent.mkdir(parents=True, exist_ok=True)
+            with open(mp, 'w', encoding='utf-8') as f:
+                yaml.safe_dump(spec_doc, f, allow_unicode=True, sort_keys=False)
+            Rp, Rs = Report(), Report()
+            cmd_plan(ctx, Rp, str(pp))
+            cmd_spec(ctx, Rs, str(mp))
+            expect('файлы проекта: plan находит спецификацию по motion_spec_ref, 0 error',
+                   not codes(Rp) and any(i[1] == 'TR-00' and 'motion_spec_ref' in i[3] for i in Rp.items))
+            expect('файлы проекта: spec находит план по refs.page_plan, 0 error',
+                   not codes(Rs) and any(i[1] == 'MS-00' for i in Rs.items))
+    except ImportError as e:  # pragma: no cover
+        expect(f'фикстура проекта: {e}', False)
+    # x-canvas-map: форма и покрытие у схем зоны; подброшенные ошибки ловятся
+    mine = [P['t_schema'], P['m_schema'], P['ad_schema'], P['levels']]
+    R = cmd_canvas_map(Report(), mine)
+    expect('x-canvas-map treatment, motion-spec, art-direction.v1, ambition-levels: 0 error', not codes(R))
+    t = load(P['t_schema'])
+    m = copy.deepcopy(t['x-canvas-map'])
+    del m['files']['pages/<page-id>/page.yaml']['sections[].treatment.composition']
+    R = Report()
+    canvas_check(P['t_schema'], m, R, t)
+    expect('x-canvas-map: поле без правила (composition) → CM-04', any(i[1] == 'CM-04' and 'composition' in i[3] for i in R.items))
+    m = copy.deepcopy(t['x-canvas-map'])
+    m['files']['pages/<page-id>/page.yaml']['treatment.theme'] = {'rule': 'paste', 'from': ['/page/treatment/them']}
+    R = Report()
+    canvas_check(P['t_schema'], m, R, t)
+    expect('x-canvas-map: неизвестное правило и указатель в пустоту → CM-02, CM-03', {'CM-02', 'CM-03'} <= codes(R))
     print('selftest:', 'OK' if ok else 'FAIL')
     return 0 if ok else 1
 
@@ -782,6 +1189,7 @@ def selftest(ctx):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--selftest', action='store_true')
+    ap.add_argument('--levels', help='файл уровней той же формы, что ambition-levels.yaml')
     sub = ap.add_subparsers(dest='cmd')
     b = sub.add_parser('blocks'); b.add_argument('--yaml')
     p = sub.add_parser('plan'); p.add_argument('plan'); p.add_argument('--overlay'); p.add_argument('--out'); p.add_argument('--spec')
@@ -789,9 +1197,12 @@ def main():
     m = sub.add_parser('moments'); m.add_argument('spec'); m.add_argument('--section')
     md = sub.add_parser('motion-md'); md.add_argument('spec'); md.add_argument('--out')
     v = sub.add_parser('values'); v.add_argument('spec'); v.add_argument('--out', required=True)
-    sub.add_parser('levels')
+    lv = sub.add_parser('levels'); lv.add_argument('--check', action='store_true')
+    cm = sub.add_parser('canvas-map'); cm.add_argument('files', nargs='*')
     a = ap.parse_args()
-    ctx = Ctx()
+    if a.levels and not os.path.isfile(a.levels):
+        ap.error(f'нет файла уровней {a.levels}')
+    ctx = Ctx(a.levels)
     if a.selftest:
         return selftest(ctx)
     if a.cmd == 'blocks':
@@ -815,8 +1226,14 @@ def main():
         cmd_values(ctx, load(a.spec), a.out)
         return 0
     if a.cmd == 'levels':
+        if a.check:
+            R = Report()
+            cmd_levels(ctx, R)
+            return R.dump('x-effect-levels')
         cmd_levels(ctx)
         return 0
+    if a.cmd == 'canvas-map':
+        return cmd_canvas_map(Report(), [os.path.abspath(f) for f in a.files] or None).dump('x-canvas-map')
     ap.print_help()
     return 2
 

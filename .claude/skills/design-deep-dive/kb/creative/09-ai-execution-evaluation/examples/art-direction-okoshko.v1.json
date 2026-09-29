@@ -499,8 +499,7 @@
    "рамки браузера и телефона",
    "счётчики от нуля",
    "барбер-столб, усы, ножницы"
-  ],
-  "executor_block": "08-uniqueness-anti-slop/01-cliche-policy.md §6.2 + k3_allow: stats"
+  ]
  },
  "budget": {
   "profile": "landing-saas@L1",
@@ -581,30 +580,6 @@
     "people_policy": "none",
     "product_policy": "real-photo-only"
    }
-  },
-  "kimi": {
-   "design_system_style": "журнал записи, который ведёт себя сам: сетка дня и одна красная пометка",
-   "direction": {
-    "visual_thesis": "продукт показан за работой: окна заполняются",
-    "paper": "light neutral #F7F8F6",
-    "display_style": "grotesque Onest",
-    "accent_rule": "красный #C2401F — главная кнопка и пометки в интерфейсе",
-    "imagery": "только настоящие скриншоты без рамок",
-    "macrostructure": "document-led"
-   },
-   "motion": {
-    "level": "expressive",
-    "thesis": "двигается только расписание",
-    "library": "gsap@3 + ScrollTrigger"
-   },
-   "bans": [
-    "рамки устройств",
-    "счётчики",
-    "выдуманный интерфейс"
-   ],
-   "allow": [
-    "stats"
-   ]
   }
  },
  "lifecycle": {

@@ -4,11 +4,10 @@
   "site": "kvarts-preorder",
   "example": true,
   "status": "approved",
-  "approved_by": "заказчик (вымышленный: ответ 3 = A в kimi F/03)",
+  "approved_by": "заказчик (вымышленный пример)",
   "approved_at": "2026-09-24",
   "checked_at": "2026-09-24",
   "refs": {
-    "brief": "../../../kimi-research/99-raw/experiments/F/03-package-from-description/landing-kvarts/brief.yaml",
     "facts": "../../../text/02-strategy-messaging/examples/facts-kvarts.yaml",
     "visual_dna": "(не собран: ai-media собирает паспорт по handoff.visual_dna)"
   },
@@ -232,20 +231,11 @@
       "light_mood": "ровный дневной свет около 5000 K, мягкая контактная тень",
       "motion": "вращение пальцем (model-viewer), без автоповорота",
       "budget": "GLB ≤ 0,8 МБ телефон / 1,5 МБ десктоп, ≤ 50 тыс. треугольников (blender 01/02 §3.1)"
-    },
-    "kimi": {
-      "design_system_style": "инженерный паспорт предмета — строгая сетка, крупный левый заголовок, характеристики таблицей",
-      "direction": {"visual_thesis": "инженерный паспорт вещи, которая управляет светом", "paper": "light cool #F5F7FA", "display_style": "wide grotesque Unbounded, без курсива", "accent_rule": "ультрамарин только на главной кнопке, ссылках и активных состояниях", "imagery": "фото прототипа и 3D-лампа; без людей и стока", "macrostructure": "document-led"},
-      "motion": {"level": "expressive", "thesis": "движется только свет: страница книги теплеет по прокрутке в how", "library": "css + @google/model-viewer@4"},
-      "bans": ["бежевый и кремовый фон", "зачёркнутая старая цена", "счётчик и таймер", "моноширинные подписи"],
-      "allow": [],
-      "design_md_overview": "Кварц — лампа, которая сама подбирает свет для чтения. Страница — паспорт изделия: светлое холодное поле, сетка 12 колонок, Unbounded в заголовках, ультрамарин только на действии. Один приём: в секции «Как работает» страница книги теплеет от 5000 K к 2700 K по мере прокрутки."
     }
   },
   "lifecycle": {
     "version": "1.0",
     "history": [
-      {"version": "0.1", "date": "2026-09-24", "change": "4 направления показаны заказчику", "by": "Claude (пример A/01)"},
       {"version": "1.0", "date": "2026-09-24", "change": "выбрано A с приёмом из B", "by": "заказчик (вымышленный)"}
     ],
     "review_by": "2027-03-24",

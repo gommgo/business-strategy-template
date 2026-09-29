@@ -1,11 +1,11 @@
 {
   "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
-  "$description": "creative-research marketing tokens (wave 1, agent D, 2026-09-24): display type on clamp(), section rhythm, hero sizes, marketing radius roles, surfaces (glass, grain, scrim), seam gradients, hero CTA. Extends ../../ui/09-design-tokens/04-reference-token-schema.md (DTCG 2025.10, org.ui-research.llm); does NOT replace ui tokens for service screens and does NOT touch ui type.page-title-lg (landing-h1). Fluid values: DTCG dimension has only px/rem, so $value holds the size at 1440 px and $extensions.org.creative-research.fluid holds min, max, viewport range and the compiled clamp(). Brand values (font families, colors) are defaults to be overridden by art-direction.tokens_extension. Motion tokens: group motion.marketing is reserved for agent E (wave 2).",
+  "$description": "creative marketing tokens: display type on clamp(), section rhythm, hero sizes, marketing radius roles, surfaces (glass, grain, scrim), seam gradients, hero CTA. Extends ../../ui/09-design-tokens/04-reference-token-schema.md (DTCG 2025.10, org.ui-research.llm); does NOT replace ui tokens for service screens and does NOT touch ui type.page-title-lg (landing-h1). Fluid values: DTCG dimension has only px/rem, so $value holds the size at 1440 px and $extensions.org.creative-research.fluid holds min, max, viewport range and the compiled clamp(). Brand values (font families, colors) are defaults to be overridden by art-direction.tokens_extension. Motion tokens: group motion.marketing.",
   "$extensions": {
     "org.creative-research.meta": {
       "version": "0.1",
       "checked_at": "2026-09-24",
-      "owner": "creative-research · 04-visual-language · D (wave 1); E adds motion.marketing (wave 2)",
+      "owner": "creative · 04-visual-language",
       "fluid_range_px": [360, 1440],
       "wcag_1_4_4_rule": "every fluid text size has max <= 2.5 x min (Barvian 2023; verified by zoom emulation 99-raw/experiments/D/01-clamp-display/zoom_chromium.json)",
       "docs": ["01-display-typography.md", "02-composition-rhythm-sections.md", "03-color-surfaces-product.md"]
@@ -212,7 +212,7 @@
   },
   "motion": {
     "marketing": {
-      "$description": "Marketing motion tokens (wave 2, agent E, 2026-09-24): durations by presentation role, stagger, easings, distances, scales, scroll scene lengths, loop speeds, attention budget. Interface feedback of controls stays on ui-research 08-motion tokens; these tokens drive presentation (scenes, reveals, loops, scroll). Every token carries its prefers-reduced-motion value in $extensions.org.creative-research.reduce (resolver modifier 'motion: reduced', ui 08/03 §5.3). CSS: --mm-* in marketing-tokens.css.",
+      "$description": "Marketing motion tokens: durations by presentation role, stagger, easings, distances, scales, scroll scene lengths, loop speeds and loop loudness; the attention budget by ambition level lives in ../01-creative-direction/ambition-levels.yaml#levels.motion_hints. Interface feedback of controls stays on ui-research 08-motion tokens; these tokens drive presentation (scenes, reveals, loops, scroll). Every token carries its prefers-reduced-motion value in $extensions.org.creative-research.reduce (resolver modifier 'motion: reduced', ui 08/03 §5.3). CSS: --mm-* in marketing-tokens.css.",
       "$extensions": {"org.creative-research.meta": {"owner": "E", "status": "draft", "version": "0.1", "checked_at": "2026-09-24",
         "docs": ["../05-motion/01-motion-principles-and-access.md §7", "../05-motion/02-choreography-scroll-transitions.md", "../05-motion/03-micro-motion-and-performance.md"],
         "reduce_rule": "reduce, not remove: spatial values -> 0 or 1, stagger -> 0, reveal and scene durations -> crossfade 180 ms or instant, loops paused, scroll-linked -> stations or final state"}},
@@ -233,7 +233,7 @@
         "crossfade-reduce": {"$value": {"value": 180, "unit": "ms"}, "$description": "Opacity-only crossfade used instead of spatial motion under reduce (<= 200 ms)."},
         "loop-autostop": {"$value": {"value": 4000, "unit": "ms"}, "$description": "A loop without a pause button stops after this plus the end of its cycle (WCAG 2.2.2 stops-within-5s)."},
         "settle-max": {"$value": {"value": 1000, "unit": "ms"}, "$description": "Max scroll settle tail per wheel step with smooth scrolling (C measured 800-1400 ms on Lenis sites)."},
-        "breathe-period": {"$value": {"value": 12000, "unit": "ms"}, "$description": "Period of a breathing background or floating object; never 2500-6000 ms (0.17-0.4 Hz, Diels 2013; Apple HIG 0.2 Hz); minimum 10000 ms for objects > 10 % of the viewport.", "$extensions": {"org.creative-research.reduce": {"value": 0, "unit": "ms"}}},
+        "breathe-period": {"$value": {"value": 12000, "unit": "ms"}, "$description": "Default period of a breathing background or floating object. The forbidden band, the minimum period and what counts as a large object are gate thresholds: ../09-ai-execution-evaluation/effect-gates.yaml#EG-A11Y-18.", "$extensions": {"org.creative-research.reduce": {"value": 0, "unit": "ms"}}},
         "vt-timeout-chrome": {"$value": {"value": 4000, "unit": "ms"}, "$description": "Reference only: Chrome skips a cross-document View Transition if navigation takes longer (TimeoutError)."}
       },
       "stagger": {
@@ -275,14 +275,11 @@
         "lenis-lerp": {"$value": 0.15, "$description": "Lenis lerp for L2 smooth scrolling. Measured wheel-step tail (motion_check.py 0.1.3, desktop Chromium 153, S1 2026-09-25): 0.10 -> 1.28 s, 0.12 -> 1.09-1.13 s (fails the 1.0 s gate), 0.15 -> 0.90 s, 0.20 -> 0.72 s; the 99 % formula (0.6 s at 0.12) underestimates. Lenis disables itself under reduce (respectReducedMotion)."}
       },
       "loop": {
-        "marquee-speed": {"$type": "number", "$value": 40, "$description": "Marquee speed in px/s (leaders 30-60; K3 155-164). Period = track width / speed.", "$extensions": {"org.creative-research.reduce": 0}},
+        "marquee-speed": {"$type": "number", "$value": 40, "$description": "Default marquee speed in px/s, within the effect limits (../06-effects-catalog/effects.yaml#marquee-logos: speed_px_s_min..speed_px_s_max). Period = track width / speed.", "$extensions": {"org.creative-research.reduce": 0, "org.creative-research.limits": "../06-effects-catalog/effects.yaml#marquee-logos.limits"}},
         "float-amplitude-pct": {"$type": "number", "$value": 3, "$description": "Floating or breathing amplitude, % of object height (2-4).", "$extensions": {"org.creative-research.reduce": 0}}
       },
       "budget": {
         "$type": "number",
-        "loops-l0": {"$value": 1, "$description": "Continuous motions (loop objects) visible at once on L0; never under readable text."},
-        "loops-l1": {"$value": 2, "$description": "Same for L1; phone: one less, minimum 1."},
-        "loops-l2": {"$value": 3, "$description": "Same for L2; phone: one less."},
         "breathe-pixels-pct-max": {"$value": 2.5, "$description": "Share of viewport pixels changing per second of idle for a breathing layer allowed under display text (C: 0.4-2.4 %)."},
         "loud-pixels-pct": {"$value": 5, "$description": "Above this a loop is loud: first screen of L2 only, pause visible, no text without scrim (C: Squarespace 9.5 %)."}
       }

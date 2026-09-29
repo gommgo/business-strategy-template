@@ -1,21 +1,22 @@
 # stack.yaml — каталог стека подачи: платформа браузера, библиотеки, рантаймы, фреймворки, платформы заказчика.
-# Владелец: creative-research, агент G (волна 2). Читают: I (treatment → стек исполнителя), J (рецепты), K (ворота: вес слоя
-# «подача»), kimi (предложения `build.stack`), site (стык с constraints.cms). Текст правил — 01-stack-choice.md, код — 02.
+# Владелец: creative. Читают: подача (treatment → стек исполнителя), рецепты, ворота эффектов (вес слоя «подача»), вход холста
+# (build.stack), site (стык с constraints.cms). Текст правил — 01-stack-choice.md, код — 02. Проверка — ../../../scripts/creative/validate_stack.py.
 # Скоропортящееся: перепроверка раз в квартал и перед сборкой (`npm view <пакет> version dist-tags`, BCD) — поле checked_at.
 
 version: 0.1
 checked_at: 2026-09-24
-status: draft            # draft → v1 после волны 3 (I, K сверяют)
+status: draft
 measure:
-  size_br: "esbuild 0.25.12, ESM, minify, production, brotli q11 (как blender A/03); сценарий «типовая инициализация»; wasm — отдельно; 99-raw/experiments/G/01-lib-cost/sizes.json"
+  size_br: "минимальный бандл: esbuild 0.25.12, ESM, minify, production, brotli q11 (как blender A/03); число — сценарий «типовая инициализация», словарь — ключ сцены: {<сцена>: КБ}; wasm — отдельно; 99-raw/experiments/G/01-lib-cost/sizes.json"
+  size_net_kb: "вес по сети на странице (CDP, как ворота): {<сцена или способ загрузки>: КБ}; источник — refs записи"
   init_tbt_ms: "Chromium 153.0.8010.12 headless, CPU ×4, холодный кэш, 5 прогонов: медиана и [мин, макс]; TBT до «готово» + 3 с; load average 6,8–10,3 — сравнивать порядок, не единицы мс; results.jsonl, summary.md"
   support: "@mdn/browser-compat-data 8.1.3 (2026-09-24T13:25Z) и web-features 3.39.0; текущие: Chrome 154, Edge 153, Firefox 156, Safari 27; 99-raw/experiments/G/00-registry/support.json"
   alive: "npm registry (дата релиза последней версии, стабильных релизов за 365 дней) и GitHub API (звёзды, pushed_at), 2026-09-24"
-budget_ref: "../01-creative-direction/ambition-levels.yaml#levels[*].budgets.effects.js_presentation_kb_br (L0 20, L1 100, L2 150/200 КБ br)"
+budget_ref: "../01-creative-direction/ambition-levels.yaml#levels[*].budgets.effects.js_presentation_kb_br (по уровню)"
 vocab:
   kind: {platform: "возможность браузера, 0 КБ", library: "npm-библиотека движения/прокрутки/переходов", runtime: "рантайм графики или анимации (WebGL, wasm)", framework: "сборка и рендеринг страниц", avoid: "не брать в новый код"}
   status: {default: "умолчание для своих уровней", conditional: "по условию из when", legacy-only: "только на существующем сайте", avoid: "не использовать"}
-  effect_ids: "временные id treatment.v0 (x-effect-ids-v0) с префиксом effect:; каталог — F (06-effects-catalog/effects.yaml)"
+  effect_ids: "id каталога эффектов 06-effects-catalog/effects.yaml с префиксом effect:"
 
 entries:
 
@@ -510,7 +511,8 @@ entries:
     version: "0.186.1"
     released: 2026-09-24
     license: MIT
-    size_br: {cube: 107.7, "gltf+decoders (blender A/03)": 158}
+    size_br: {cube: 107.7, gltf-decoders: 158, webgpu: 171, webgpu-tsl: 193}   # cube — G/01; остальное — blender A/03
+    size_net_kb: {bundler-own-domain: 174, importmap-jsdelivr-min-remap: 243, importmap-jsdelivr-min: 401}   # JS первого 3D-кадра, Pixel 7 + CPU ×4, 1,6 Мбит/с — blender 09/01 §1.1
     init_tbt_ms: {median: 49, range: [40, 108], scenario: "куб, 1 кадр"}
     support: {webgl2: "high 2024-03-20", webgpu: "не Baseline: Chrome 144 (BCD api.GPU), Safari 26, Firefox 141 частично"}
     use_for: [effect:3d-object, effect:3d-scene, effect:holo-shader-bg]
@@ -520,7 +522,7 @@ entries:
     alternatives: [ogl, paper-shaders, model-viewer]
     risks: ["ломает API почти каждый релиз — Migration Guide", "ради одного шейдера — избыточно"]
     alive: {last_release: 2026-09-24, releases_12m: 12, stars: 115840, pushed: 2026-09-24}
-    refs: ["../../blender/01-web-3d-landscape/03-runtime-landscape.md", "G/01"]
+    refs: ["../../blender/01-web-3d-landscape/03-runtime-landscape.md", "../../blender/09-web-runtime/01-threejs-core.md §1.1–1.2", "../../blender/13-tools-atlas/02-web-runtime-libraries.md §1", "G/01"]
 
   - id: react-three-fiber
     name: "React Three Fiber 9 + drei 10"
@@ -528,7 +530,7 @@ entries:
     package: "@react-three/fiber"
     version: "9.8.0 (blender, 2026-09-22)"
     license: MIT
-    size_br: {"R3F+drei (blender A/03)": 286}
+    size_br: {r3f-scene: 249, r3f-drei: 286, r3f-drei-post: 345, r3f-webgpu: 400}   # blender A/03, A/08
     init_tbt_ms: null
     support: {react: ">=19 <19.4"}
     use_for: [effect:3d-scene, effect:3d-object]
@@ -538,7 +540,7 @@ entries:
     alternatives: [three]
     risks: ["+≈ 140 КБ br к three (blender)"]
     alive: {source: "blender 01/03 §1"}
-    refs: ["../../blender/01-web-3d-landscape/03-runtime-landscape.md §3"]
+    refs: ["../../blender/01-web-3d-landscape/03-runtime-landscape.md §3", "../../blender/13-tools-atlas/02-web-runtime-libraries.md §1"]
 
   - id: model-viewer
     name: "<model-viewer> 4 (витрина товара, AR)"
@@ -547,7 +549,8 @@ entries:
     version: "4.3.1"
     released: 2026-06-04
     license: Apache-2.0
-    size_br: 240          # blender A/03
+    size_br: {npm-bundle: 240}          # blender A/03
+    size_net_kb: {jsdelivr-min: 282}    # dist/model-viewer.min.js по сети — blender 13/02 §1
     init_tbt_ms: null
     support: {webgl: true}
     use_for: [effect:3d-object]
@@ -557,7 +560,7 @@ entries:
     alternatives: [three]
     risks: ["peer three ^0.183 — не смешивать с three 0.186 в одном бандле (blender)"]
     alive: {last_release: 2026-06-04, releases_12m: 3}
-    refs: ["../../blender/01-web-3d-landscape/03-runtime-landscape.md §6"]
+    refs: ["../../blender/01-web-3d-landscape/03-runtime-landscape.md §6", "../../blender/13-tools-atlas/02-web-runtime-libraries.md §1"]
 
   - id: ogl
     name: "OGL — минимальный WebGL"
@@ -585,7 +588,8 @@ entries:
     version: "0.0.81"
     released: 2026-09-17
     license: Apache-2.0
-    size_br: 5.9
+    size_br: {mesh-gradient-minimal: 5.9}   # минимальный импорт ShaderMount — G/01
+    size_net_kb: {jsdelivr-page: 119}      # страница с пакетом через jsDelivr — blender 09/04 §2.4, 13/02
     init_tbt_ms: {median: 0, range: [0, 38]}
     support: {webgl2: true}
     use_for: [effect:shader-bg, effect:mesh-gradient-css]
@@ -595,7 +599,7 @@ entries:
     alternatives: [ogl, shader-code, css-registered-properties]
     risks: ["версия 0.0.x — API может меняться", "пресеты узнаваемы — клише (H)"]
     alive: {last_release: 2026-09-17, releases_12m: 27, stars: 3478, pushed: 2026-09-17}
-    refs: ["01-stack-choice.md §6.1", "G/01, G/03"]
+    refs: ["01-stack-choice.md §6.1", "../../blender/09-web-runtime/04-shaders-effects-catalog-impl.md §2.4", "../../blender/13-tools-atlas/02-web-runtime-libraries.md §1", "G/01, G/03"]
 
   - id: pixi
     name: "PixiJS 8 (2D WebGL/WebGPU-движок)"
@@ -723,11 +727,11 @@ entries:
     use_for: []
     levels: [L0, L1, L2]
     status: default
-    when: "лендинг и небольшие сайты; пакет kimi по умолчанию"
+    when: "лендинг и небольшие сайты; стек кода по умолчанию"
     alternatives: [astro]
     risks: []
     alive: {last_release: 2026-09-24, releases_12m: 53}
-    refs: ["01-stack-choice.md §8", "kimi 07/02 §8.1"]
+    refs: ["01-stack-choice.md §8"]
 
   - id: astro
     name: "Astro 7 (SSG/SSR, острова)"
@@ -824,6 +828,6 @@ platforms:
     limits: ["импорт npm через ESM-CDN и тарифы — не проверено (вторичные источники)"]
     checked_at: 2026-09-24
     refs: ["01-stack-choice.md §10", "S21"]
-  - {id: custom, custom_code: "по стеку проекта", build: true, native_motion: null, libraries: "npm", levels: {L0: "да", L1: "да", L2: "да"}, limits: ["стек заказчика — constraints.stack → build.stack kimi"], checked_at: 2026-09-24, refs: ["01-stack-choice.md §8, §10"]}
+  - {id: custom, custom_code: "по стеку проекта", build: true, native_motion: null, libraries: "npm", levels: {L0: "да", L1: "да", L2: "да"}, limits: ["стек заказчика — constraints.stack → build.stack брифа холста"], checked_at: 2026-09-24, refs: ["01-stack-choice.md §8, §10"]}
   - {id: static, custom_code: "HTML + CSS + модули JS", build: true, native_motion: null, libraries: "npm, самохостинг wasm", levels: {L0: "да", L1: "да", L2: "да"}, limits: [], checked_at: 2026-09-24, refs: ["01-stack-choice.md §8"]}
   - {id: none, custom_code: "выбираем сами: лендинг — static (Vite 8), многостраничник — Astro 7", build: true, native_motion: null, libraries: "npm", levels: {L0: "да", L1: "да", L2: "да"}, limits: [], checked_at: 2026-09-24, refs: ["01-stack-choice.md §8, §10"]}

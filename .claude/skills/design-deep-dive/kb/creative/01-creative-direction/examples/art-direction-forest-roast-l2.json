@@ -660,30 +660,6 @@
       "light_mood": "мягкий утренний свет справа, 4800 K",
       "motion": "секвенция скрабится прокруткой; банка поворачивается на 120° и открывает крышку",
       "budget": "секвенция ≤ 3,5 МБ десктоп / 1,5 МБ телефон; GLB ≤ 0,6 МБ"
-    },
-    "kimi": {
-      "design_system_style": "одно утро по минутам: сюжет прокрутки из пяти глав одной съёмки",
-      "direction": {
-        "visual_thesis": "прокрутка — это время утра",
-        "paper": "light warm #F4EFE6 → финал лесной зелёный",
-        "display_style": "grotesque Commissioner",
-        "accent_rule": "зелёный растёт по сюжету; золото — цена",
-        "imagery": "секвенция одной съёмки и GLB банки; без людей",
-        "macrostructure": "poster-led"
-      },
-      "motion": {
-        "level": "cinematic",
-        "thesis": "скраб секвенции по главам; банка к финалу",
-        "library": "gsap@3 + ScrollTrigger + lenis@1"
-      },
-      "bans": [
-        "прелоадер",
-        "дымка",
-        "латте-арт"
-      ],
-      "allow": [
-        "warm"
-      ]
     }
   },
   "lifecycle": {

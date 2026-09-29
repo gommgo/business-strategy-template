@@ -272,7 +272,7 @@ blocks:
   stat-strip:
     family: proof
     visual_variants:
-      - {id: numbers-row-quiet, structural: [row], display_role: [display-m, display-l], note: "без счётчиков по умолчанию: ряд цифр — примета K3 (stats); число — факт"}
+      - {id: numbers-row-quiet, structural: [row], display_role: [display-m, display-l], note: "без счётчиков по умолчанию: ряд цифр — примета stats-row (ключ --allow stats); число — факт"}
       - {id: number-with-quote, structural: [stat-with-quote], display_role: [display-l, display-quote]}
     a11y: ["counter-up — один раз, ≤ 1 500 мс, при reduce — финальное число"]
   testimonial-cards:
@@ -702,7 +702,7 @@ blocks:
     family: footer
     visual_variants:
       - {id: minimal-quiet, structural: [minimal, site, newsletter-first]}
-      - {id: statement-wordmark, structural: [statement], levels: [L1], note: "крупный SVG-логотип или фраза-финал; гигантский вордмарк в подвале без концепции — примета K3 (2 из 15, kimi 05/03)"}
+      - {id: statement-wordmark, structural: [statement], levels: [L1], note: "крупный SVG-логотип или фраза-финал; гигантский вордмарк в подвале без концепции — примета генератора (cliche:giant-display-type)"}
   cookie-banner:
     family: utility
     visual_variants:

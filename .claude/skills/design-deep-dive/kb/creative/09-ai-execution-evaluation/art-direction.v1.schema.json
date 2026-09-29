@@ -1,11 +1,305 @@
 {
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "urn:app-design:creative-research:art-direction:1",
- "title": "art-direction v1 — v0 (A) + эмоциональная цель, money idea, мотив, характер и примитивы движения, прототип главного эффекта, вариативность, блок исполнителя",
- "description": "Формат №5 контракта тройки v2 (§3 п.5), владелец — creative-research. Один документ на сайт (или на мир сайта: маркетинг и продукт — два документа). Питает паспорт визуала ai-media (visual-dna.schema.json) через блок handoff.visual_dna, спецификации blender (handoff.blender), пакет kimi (handoff.kimi) и treatment секций page-plan (effects_by_section, motion_system). Процедура заполнения — 01-concept-and-directions.md; поля и соответствия — 02-art-direction-document.md; уровни — ambition-levels.yaml. v0 — агент A (волна 1); v1 — агент I (волна 3). Правила, которые JSON Schema выразить не может (различие направлений по осям, критерии приёмов, соответствие уровню), проверяет ../../scripts/creative/ad_check.py.",
- "x-version": 0,
- "x-checked": "2026-09-24",
- "x-owner": "creative-research · 01-creative-direction · A (v0), I (v1)",
+ "title": "art-direction v1 — документ арт-дирекции поверхности сайта: концепция, территории, направления и выбор, мудборд, визуальный язык, движение, решения о приёмах, запреты, бюджет, проекции соседям, прототип главного эффекта, вариативность",
+ "description": "Документ арт-дирекции поверхности сайта (docs/projects/<slug>/design/<surface>/art-direction.json); владелец формата — creative. Один документ на поверхность сайта (мир сайта: маркетинг и продукт — два документа). Питает паспорт визуала ai-media (visual-dna.schema.json) через handoff.visual_dna, бриф 3D blender (handoff.blender) и подачу секций плана страницы (effects_by_section, motion_system); во вход холста — по x-canvas-map. Процедура заполнения — ../01-creative-direction/01-concept-and-directions.md; поля и соответствия — ../01-creative-direction/02-art-direction-document.md; уровни — ../01-creative-direction/ambition-levels.yaml. Правила, которые JSON Schema выразить не может (различие направлений по осям, ссылки на направления, территории и решения, соответствие уровню, ключи --allow), проверяет ../../scripts/creative/ad_check.py ФАЙЛ.",
+ "x-version": "1.0",
+ "x-checked": "2026-09-29",
+ "x-owner": "creative · 09-ai-execution-evaluation",
+ "x-canvas-map": {
+  "source": "art-direction",
+  "stages": [
+   "directions",
+   "wireframe",
+   "mockup"
+  ],
+  "files": {
+   "brief.yaml": {
+    "directions[]": {
+     "rule": "map",
+     "from": [
+      "/directions"
+     ],
+     "stages": [
+      "directions"
+     ],
+     "note": "направления до выбора — артборд на направление: имя, тезис, оси (бумага, стиль заголовков, тон акцента, макроструктура, язык картинок), палитра, шрифты, главный приём, первый экран, риск и цена, рекомендация; референсы направления — роль, брать, не брать, значения"
+    },
+    "direction.name": {
+     "rule": "map",
+     "from": [
+      "/choice/chosen",
+      "/directions/*/name"
+     ],
+     "stages": [
+      "wireframe",
+      "mockup"
+     ],
+     "note": "имя выбранного направления (choice.chosen)"
+    },
+    "direction.macrostructure": {
+     "rule": "map",
+     "from": [
+      "/choice/chosen",
+      "/directions/*/axes/macrostructure"
+     ],
+     "stages": [
+      "wireframe",
+      "mockup"
+     ],
+     "note": "макроструктура выбранного направления — id словаря site"
+    },
+    "direction.visual_thesis": {
+     "rule": "map",
+     "from": [
+      "/choice/chosen",
+      "/directions/*/thesis"
+     ],
+     "stages": [
+      "mockup"
+     ],
+     "note": "тезис выбранного направления"
+    },
+    "direction.paper": {
+     "rule": "map",
+     "from": [
+      "/choice/chosen",
+      "/directions/*/axes/paper",
+      "/directions/*/axes/paper_temperature"
+     ],
+     "stages": [
+      "mockup"
+     ],
+     "note": "светлота и тонировка бумаги выбранного направления; цвет — токен ДС"
+    },
+    "direction.display_style": {
+     "rule": "map",
+     "from": [
+      "/choice/chosen",
+      "/directions/*/axes/display_style"
+     ],
+     "stages": [
+      "mockup"
+     ],
+     "note": "стиль заголовков выбранного направления; гарнитура — токен ДС"
+    },
+    "direction.accent_rule": {
+     "rule": "map",
+     "from": [
+      "/visual_language/accent_rule",
+      "/choice/chosen",
+      "/directions/*/axes/accent_hue"
+     ],
+     "stages": [
+      "mockup"
+     ],
+     "note": "где живёт акцент и его тон"
+    },
+    "direction.imagery": {
+     "rule": "map",
+     "from": [
+      "/visual_language/imagery",
+      "/choice/chosen",
+      "/directions/*/imagery",
+      "/directions/*/axes/imagery"
+     ],
+     "stages": [
+      "mockup"
+     ],
+     "note": "язык картинок: что настоящее, что генерируется, что кодом"
+    },
+    "references[]": {
+     "rule": "derive",
+     "from": [
+      "/moodboard"
+     ],
+     "stages": [
+      "mockup"
+     ],
+     "note": "3–5 записей мудборда по ролям: композиция, типографика, блок-решение, 0–1 движение (cd 06/02 §3)"
+    },
+    "design_system.bans": {
+     "rule": "derive",
+     "from": [
+      "/exclusions/bans",
+      "/exclusions/forbidden_hues",
+      "/exclusions/forbidden_markers",
+      "/exclusions/lifted_markers"
+     ],
+     "note": "бан-лист холста: приметы блока cd 06/05 §6 без снятых ключами --allow и решениями (lifted_markers), плюс запреты проекта и приметы прошлой итерации (отчёт проверок → kb/common/tells.yaml#checks)"
+    },
+    "design_system.allow": {
+     "rule": "derive",
+     "from": [
+      "/decisions/*/k3_allow",
+      "/exclusions/k3_allow",
+      "site-brief#/ambition/allow/markers"
+     ],
+     "note": "ключи --allow: ключи решений арт-дирекции и примет, заказанных брифом"
+    }
+   },
+   "refs.md": {
+    "ссылка": {
+     "rule": "copy",
+     "from": [
+      "/moodboard/*/url",
+      "/moodboard/*/ref"
+     ],
+     "stages": [
+      "mockup"
+     ],
+     "note": "адрес или запись библиотеки ref:<id>; картинки площадок не выкачиваются"
+    },
+    "где": {
+     "rule": "copy",
+     "from": [
+      "/moodboard/*/applies_to"
+     ],
+     "stages": [
+      "mockup"
+     ]
+    },
+    "роль": {
+     "rule": "copy",
+     "from": [
+      "/moodboard/*/role"
+     ],
+     "stages": [
+      "mockup"
+     ]
+    },
+    "брать": {
+     "rule": "copy",
+     "from": [
+      "/moodboard/*/take"
+     ],
+     "stages": [
+      "mockup"
+     ]
+    },
+    "не брать": {
+     "rule": "copy",
+     "from": [
+      "/moodboard/*/dont_take"
+     ],
+     "stages": [
+      "mockup"
+     ]
+    },
+    "значения": {
+     "rule": "copy",
+     "from": [
+      "/moodboard/*/values"
+     ],
+     "stages": [
+      "mockup"
+     ],
+     "note": "measured или estimated с пометкой"
+    },
+    "снято": {
+     "rule": "copy",
+     "from": [
+      "/moodboard/*/captured"
+     ],
+     "stages": [
+      "mockup"
+     ]
+    }
+   }
+  },
+  "drop": [
+   {
+    "from": [
+     "/art_direction_version",
+     "/id",
+     "/site",
+     "/example",
+     "/status",
+     "/approved_by",
+     "/approved_at",
+     "/checked_at",
+     "/refs"
+    ],
+    "note": "служебные поля и подпись; статус, путь и отпечаток — в INPUT.md"
+   },
+   {
+    "from": [
+     "/inputs",
+     "/ambition"
+    ],
+    "note": "проекции брифа: бриф идёт во вход по своей карте, уровень — через ambition-levels.yaml"
+   },
+   {
+    "from": [
+     "/concept",
+     "/territories"
+    ],
+    "note": "концепция и территории воплощены в направлениях"
+   },
+   {
+    "from": [
+     "/choice/chosen_by",
+     "/choice/date",
+     "/choice/why",
+     "/choice/merged_from",
+     "/choice/rejected"
+    ],
+    "note": "выбор доходит до исполнителя выбранным направлением"
+   },
+   {
+    "from": [
+     "/visual_language/color_strategy",
+     "/visual_language/palette",
+     "/visual_language/type",
+     "/visual_language/composition",
+     "/visual_language/surfaces",
+     "/visual_language/theme",
+     "/visual_language/d_refs",
+     "/tokens_extension"
+    ],
+    "note": "цвета, шрифты и поверхности — в ДС: исполнитель берёт токены, а не числа; композиция секций — подача плана"
+   },
+   {
+    "from": [
+     "/motion_system",
+     "/effects_by_section",
+     "/prototype"
+    ],
+    "note": "движение — спецификация движения на этапе motion; эффекты секций — подача плана; прототип главного эффекта на макет не идёт"
+   },
+   {
+    "from": [
+     "/decisions/*/id",
+     "/decisions/*/technique",
+     "/decisions/*/decision",
+     "/decisions/*/criteria",
+     "/decisions/*/why",
+     "/decisions/*/where"
+    ],
+    "note": "решения о приёмах — основание ключей --allow и снятых примет"
+   },
+   {
+    "from": [
+     "/budget"
+    ],
+    "note": "бюджет эффектов — ворота после сборки; профиль страницы — план (build.perf)"
+   },
+   {
+    "from": [
+     "/handoff"
+    ],
+    "note": "паспорт визуала и бриф 3D — свои этапы, не вход холста"
+   },
+   {
+    "from": [
+     "/lifecycle",
+     "/notes",
+     "/variation"
+    ],
+    "note": "служебные поля и журнал вариативности между проектами"
+   }
+  ]
+ },
  "type": "object",
  "additionalProperties": false,
  "patternProperties": {
@@ -103,7 +397,7 @@
     },
     "brand": {
      "type": "string",
-     "description": "brand.json kimi или брендбук."
+     "description": "Бренд продукта (design/brand.yaml) или брендбук заказчика."
     }
    }
   },
@@ -314,7 +608,7 @@
      "type": "string",
      "minLength": 15,
      "maxLength": 240,
-     "description": "Тезис подачи одной фразой: настроение, материал, энергия (OpenAI visual thesis; kimi direction.visual_thesis)."
+     "description": "Тезис подачи одной фразой: настроение, материал, энергия (→ direction.visual_thesis брифа холста)."
     },
     "metaphor": {
      "type": "string",
@@ -443,7 +737,7 @@
    "type": "array",
    "minItems": 3,
    "maxItems": 5,
-   "description": "3–5 направлений: каждые два различаются минимум по двум осям (paper, display_style, accent_hue, macrostructure); тёплая бумага или антиква — не больше чем у одного, если не бренд (kimi 03/04 T2a). Одно направление может быть canon — категорийный стандарт, сыгранный честно.",
+   "description": "3–5 направлений: каждые два различаются минимум по двум осям (paper, display_style, accent_hue, macrostructure); тёплая бумага или антиква — не больше чем у одного, если не бренд (creative 01/01 §6). Одно направление может быть canon — категорийный стандарт, сыгранный честно.",
    "items": {
     "$ref": "#/$defs/direction"
    }
@@ -531,7 +825,7 @@
     },
     "accent_rule": {
      "type": "string",
-     "description": "Где живёт акцент (→ direction.accent_rule kimi)."
+     "description": "Где живёт акцент (→ direction.accent_rule брифа холста)."
     },
     "type": {
      "$ref": "#/$defs/type"
@@ -768,7 +1062,7 @@
   },
   "effects_by_section": {
    "type": "array",
-   "description": "Эффекты по секциям (id effects.yaml F; до волны 2 — временные id treatment.v0 x-effect-ids-v0).",
+   "description": "Эффекты по секциям — id каталога 06-effects-catalog/effects.yaml.",
    "items": {
     "type": "object",
     "additionalProperties": false,
@@ -804,7 +1098,7 @@
   },
   "decisions": {
    "type": "array",
-   "description": "Решения о приёмах и клише по пяти критериям H (концепция, бренд, исполнение, эпоха, единственность). Реестр и критерии — 08-uniqueness-anti-slop (H, волна 2); здесь — принятые решения с обоснованием.",
+   "description": "Решения о приёмах и клише по пяти проверкам (концепция, бренд, исполнение, эпоха, единственность). Реестр и критерии — 08-uniqueness-anti-slop; здесь — принятые решения с обоснованием.",
    "items": {
     "$ref": "#/$defs/decision"
    }
@@ -899,18 +1193,14 @@
        "caps"
       ]
      },
-     "description": "Ключи --allow k3_checks.py 1.0: приметы, заказанные брифом или решением."
+     "description": "Ключи --allow утилиты макета (kb/common/tells.yaml, раздел checks, поле allow): приметы, снятые решением (decisions[].k3_allow); сверяет ad_check.py."
     },
     "bans": {
      "type": "array",
      "items": {
       "type": "string"
      },
-     "description": "Конкретные запреты для исполнителя (→ design_system.bans kimi)."
-    },
-    "executor_block": {
-     "type": "string",
-     "description": "Блок «чего не ставить» для K3 (H 08/01 §6.2) — путь или текст."
+     "description": "Конкретные запреты для исполнителя (→ design_system.bans брифа холста)."
     }
    }
   },
@@ -1062,75 +1352,6 @@
       }
      }
     },
-    "kimi": {
-     "type": "object",
-     "additionalProperties": false,
-     "description": "→ brief.yaml и DESIGN.md пакета kimi.",
-     "properties": {
-      "design_system_style": {
-       "type": "string"
-      },
-      "direction": {
-       "type": "object",
-       "additionalProperties": false,
-       "properties": {
-        "visual_thesis": {
-         "type": "string"
-        },
-        "paper": {
-         "type": "string"
-        },
-        "display_style": {
-         "type": "string"
-        },
-        "accent_rule": {
-         "type": "string"
-        },
-        "imagery": {
-         "type": "string"
-        },
-        "macrostructure": {
-         "enum": [
-          "grid-led",
-          "document-led",
-          "poster-led"
-         ]
-        }
-       }
-      },
-      "motion": {
-       "type": "object",
-       "additionalProperties": false,
-       "properties": {
-        "level": {
-         "$ref": "#/$defs/motion-level"
-        },
-        "thesis": {
-         "type": "string"
-        },
-        "library": {
-         "type": "string"
-        }
-       }
-      },
-      "bans": {
-       "type": "array",
-       "items": {
-        "type": "string"
-       }
-      },
-      "allow": {
-       "type": "array",
-       "items": {
-        "type": "string"
-       }
-      },
-      "design_md_overview": {
-       "type": "string",
-       "description": "Абзац Overview DESIGN.md (характер продукта и главный приём)."
-      }
-     }
-    },
     "generated": {
      "type": "object",
      "properties": {
@@ -1148,8 +1369,7 @@
    "type": "object",
    "additionalProperties": false,
    "required": [
-    "version",
-    "history"
+    "version"
    ],
    "properties": {
     "version": {
@@ -1182,7 +1402,8 @@
         "type": "string"
        }
       }
-     }
+     },
+     "description": "Одна запись — текущая версия; прежние версии — в git."
     },
     "review_by": {
      "$ref": "#/$defs/date",
@@ -1229,7 +1450,7 @@
      "type": "string"
     }
    },
-   "description": "Прототип главного эффекта до утверждения направления [V:7nEvk6nFeS4 05:20]; запись — видео-референс для K3."
+   "description": "Прототип главного эффекта до утверждения направления [V:7nEvk6nFeS4 05:20]; запись — видео-референс для этапа движения."
   },
   "variation": {
    "type": "object",
@@ -1463,7 +1684,7 @@
     "accent_hue",
     "macrostructure"
    ],
-   "description": "Оси различия направлений (kimi 07/01 §2.4, 03/04 T2a; оси тем Hallmark).",
+   "description": "Оси различия направлений (creative 01/01 §6; cd 06/01 §5; оси тем Hallmark).",
    "properties": {
     "paper": {
      "enum": [
@@ -1479,7 +1700,7 @@
       "neutral",
       "cool"
      ],
-     "description": "Тонировка бумаги; warm — примета K3, нужна причина."
+     "description": "Тонировка бумаги; warm — примета warm-paper (kb/common/tells.yaml), нужна причина."
     },
     "display_style": {
      "enum": [
@@ -1675,7 +1896,8 @@
    "properties": {
     "ref": {
      "type": "string",
-     "pattern": "^ref:[a-z0-9]+(-[a-z0-9]+)*$"
+     "pattern": "^ref:[a-z0-9]+(-[a-z0-9]+)*$",
+     "description": "id записи библиотеки референсов заказчика."
     },
     "url": {
      "type": "string"
@@ -1697,21 +1919,64 @@
      ]
     },
     "applies_to": {
-     "type": "string"
+     "type": "string",
+     "pattern": "^(page|section-role:[a-z0-9]+(-[a-z0-9]+)*|block:[a-z0-9]+(-[a-z0-9]+)*)$",
+     "description": "Где применяется: page, section-role:<id> или block:<id>; один референс — одно место."
     },
     "take": {
      "type": "array",
      "minItems": 1,
      "items": {
-      "type": "string"
-     }
+      "type": "string",
+      "minLength": 3
+     },
+     "description": "Что взять: объект, свойство и число (creative 02/03 §3.2)."
     },
     "dont_take": {
      "type": "array",
      "minItems": 1,
      "items": {
-      "type": "string"
+      "type": "string",
+      "minLength": 3
+     },
+     "description": "Чего не брать: логотип, тексты, фото и цвета чужого бренда, приметы бан-листа."
+    },
+    "values": {
+     "type": "object",
+     "additionalProperties": false,
+     "minProperties": 1,
+     "description": "Значения референса текстом «объект — свойство — число»: measured — замер живого сайта (shot.py и measure_ui.py), estimated — оценка по картинке с пометкой (creative 02/03 §3.3).",
+     "properties": {
+      "measured": {
+       "type": "array",
+       "minItems": 1,
+       "items": {
+        "type": "string",
+        "minLength": 3
+       }
+      },
+      "estimated": {
+       "type": "array",
+       "minItems": 1,
+       "items": {
+        "type": "string",
+        "minLength": 3
+       }
+      }
      }
+    },
+    "source": {
+     "enum": [
+      "customer",
+      "claude",
+      "creative-library"
+     ],
+     "description": "Кто принёс: заказчик, агент или запись библиотеки референсов заказчика."
+    },
+    "captured": {
+     "type": "string",
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}( [0-9]{2,4}x[0-9]{2,4})?$",
+     "description": "Когда и на каком вьюпорте сняты значения: «2026-09-24 1440x900»; у ref: — дата записи библиотеки."
     },
     "note": {
      "type": "string"
@@ -1734,7 +1999,7 @@
     },
     "technique": {
      "type": "string",
-     "description": "Приём или клише: effect:<id>, cliche:<id> реестра H (волна 2) или слово до реестра."
+     "description": "Приём или клише: effect:<id> каталога эффектов, cliche:<id> реестра клише (08-uniqueness-anti-slop/cliche-registry.yaml) или слово."
     },
     "decision": {
      "enum": [
@@ -1782,7 +2047,7 @@
     },
     "k3_allow": {
      "type": "string",
-     "description": "Ключ --allow, если решение снимает примету K3."
+     "description": "Ключ --allow утилиты макета (kb/common/tells.yaml, раздел checks, поле allow), если решение снимает примету."
     }
    },
    "allOf": [
@@ -1873,12 +2138,5 @@
     }
    }
   }
- },
- "x-generated": {
-  "by": "99-raw/experiments/I/03-art-direction-v1/build_ad_v1.py",
-  "from": "urn:app-design:creative-research:art-direction:0",
-  "at": "2026-09-25",
-  "doc": "09-ai-execution-evaluation/01-presentation-spec-and-block-treatments.md §5",
-  "owner_note": "владелец формата — A; перенос в 01-creative-direction — синтез S"
  }
 }
