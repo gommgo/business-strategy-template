@@ -8,15 +8,15 @@ built_by: canvas_input
 check:
   error: 0
   warning: 1
-  hint: 1
+  hint: 0
 files:
   ACCEPTANCE.md: sha256:3cb7fdb35e707e9971a2d240e86c9f8c8be64259e13ce787b26e4d79ea962533
   assets.md: sha256:a639c884bedb7f5b4700e4bd3596e31300b46c0c2907362cd7c79aaf88149206
   brief.yaml: sha256:6659a76e2ccea880fd0ba1139e3605b9060c4176e22ba2d473bec147744e78c7
-  contract.md: sha256:b5a064700c865a12ff2cd6bdfd53f09a4a2fe2b850a2ce2df5beefc4a1756c60
-  copy.md: sha256:b10d40aaaec3dfee88a7d464ea17183f74f415a7a919caede5c4642e0f82e9c3
+  contract.md: sha256:252acc176ad7ee4459cedae6478aa5e4c31836ab2c892ed937140d7a37af239a
+  copy.md: sha256:456134aab65cafd47882c90ebe6414b6e9284975c2257a982e503b0a4e5f637c
   demo-data.json: sha256:0ed1f8ddd7d77b02b3cbeb13d767e8dfa6f0f322c0deff152a703371e4efac7d
-manifest: sha256:fc2ce11efe42855d8cf59315d601b203d773bc2376eb2ecaa1d7cd92713e1996
+manifest: sha256:1e19b3ba229f787be56967ffece98073d9e85deecbaea2fce2e70239637f2be0
 ---
 # Вход холста — `office` (web · app), этап `mockup`
 
@@ -52,7 +52,7 @@ manifest: sha256:fc2ce11efe42855d8cf59315d601b203d773bc2376eb2ecaa1d7cd92713e199
 | screens | `docs/projects/otves-office/screens/office/screens/request-new/index.md` | stable | `sha256:c99e1440804db1cc7d3e3272fc4abab4faed4b933e8e03c061d41b1c1ea45fa4` |
 | screens | `docs/projects/otves-office/screens/office/screens/requests-list/index.md` | stable | `sha256:e6f15f6453e73c56d0843e7c89352a76d21aea8ce610b2655c80e0f021a60565` |
 | screens | `docs/projects/otves-office/screens/office/shells/app-shell/index.md` | stable | `sha256:4622bacd05f72bdd7dbd3fb25207665be6624136e070e76c77afb74157b77225` |
-| screens | `docs/projects/otves-office/screens/office/texts.md` | — | `sha256:0873ae4d8cbfcc6cbd659d5ba0194e37fa5252a52a03b5b328224585cac2d2ef` |
+| screens | `docs/projects/otves-office/screens/office/texts.md` | — | `sha256:3d3c2bd1084e1cfa0faa333734834fdb497e558ced21b457e43b66859e0d3ef2` |
 | user | `docs/projects/otves-office/user.md` | — | `sha256:f6a3d8a78c812a87cb1f62e4673ec8329d5cee88c9a0a5ec97aefc1827958e84` |
 | vision | `docs/projects/otves-office/vision.md` | draft | `sha256:fe81774f1e9ad71dfff632bd52ef7afab2f2b37a1cf93d00e0b42c56ee930a5d` |
 | acceptance-widths | `kb/common/acceptance-widths.yaml` | база | `sha256:263392cb17282ca981621f7599c20c341b759ad311163d7bf6beb6e18a348156` |
@@ -80,17 +80,15 @@ manifest: sha256:fc2ce11efe42855d8cf59315d601b203d773bc2376eb2ecaa1d7cd92713e199
 
 ## Пробелы
 
-- голоса поверхности нет: строки тона во входе нет — тексты во входе уже в голосе, исполнитель их не пишет
-- строк texts.md не того статуса — 45: на артборде [PLACEHOLDER: текст на утверждении]
+- голоса поверхности нет: строки тона во входе нет; тексты во входе — из texts.md, сверка с голосом — после профиля голоса (этап meaning)
 - ассетов поверхности нет (манифеста design/<surface>/assets/manifest.yaml нет): иллюстраций мест во входе нет — пустое состояние без иллюстрации или заглушка
 
 ## Итог проверки
 
-0 error · 1 warning · 1 hint — этап можно публиковать.
+0 error · 1 warning · 0 hint — вход без ошибок: этап можно публиковать, когда готов его вход по phases.md (принятый вайрфрейм или его пропуск, ДС в холсте).
 
 Блок PRE ux 12/02 §2: без незаполненных пунктов.
 
 | тяжесть | правило | где | что |
 |---|---|---|---|
-| warning | R-MAT-003 | texts texts | этап mockup берёт только approved: строк не того статуса 45 (`checked` — 45) — app.shell.help.link, app.shell.service-unavailable.banner, app.shell.maintenance.banner, app.shell.session-expiry.confirm-title, app.shell.session-expiry.action … (+40) |
-| hint | R-COV-007 | voice voice | нет профиля голоса с каналом product-ui — design_system.tone_of_voice во входе пуст |
+| warning | R-COV-007 | voice voice | нет профиля голоса с каналом product-ui — design_system.tone_of_voice во входе пуст |

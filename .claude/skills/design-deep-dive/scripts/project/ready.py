@@ -43,6 +43,11 @@
     ready                             композиция и тексты закрыты, макет принят (или пропущен решением), факты
                                       публикуемы или пробел назван, ДС утверждена; у кабинета ещё покрытие ДС без
                                       пробелов (ds_coverage) и FSD-карта stable
+  факты единицы сайта — ссылки fact: и missing: слотов данных плана и fact_ids выбранных текстов copy deck: демо-факт —
+  строка open (пробел назван), missing: со строкой пробела в facts.yaml — названный пробел; готовность единицы они не
+  держат, публикацию сайта с демо-фактом держит copydeck.py validate --final; в blockers («факты: …») — факт, которого
+  нет в facts.yaml, missing: без строки пробела и факт, который claims_check не допускает к публикации (разрешение,
+  срок, проверка)
   perf                                сайт — plans; кабинет — {field: p75, rum: true, lab: [AC-PRF-04, AC-PRF-05,
                                       AC-PRF-06]}
   frontend_design                     сайт — род, уровень и потолок движения брифа (потолок без поля брифа — уровень
@@ -723,7 +728,8 @@ def check_surface(slug, surf, repo=None, today=None):
         return []
     rep = F.Report()
     kw = dict(surface=surf.slug, kind=KIND, ref=surf.slug, path=docpaths.rel(p, r),
-              fix=f"ready build {slug} {surf.slug} — после /design-audit без error (этап package)")
+              fix=f"ready build {slug} {surf.slug} — на этапе package, после отчёта /design-audit (его error закрывает "
+                  "или принимает заказчик)")
     try:
         old = yaml_mod().safe_load(p.read_text(encoding="utf-8"))
     except Exception as e:                                  # noqa: BLE001
@@ -885,6 +891,9 @@ def _selftest():
         check("правка источника без build → R-FRESH-006 error с путём манифеста и источником в сообщении",
               len(items) == 1 and items[0].rule == RULE and items[0].severity == "error"
               and items[0].path == docpaths.rel(path, root) and "site/promo/plans/spasibo.yaml" in items[0].message)
+        check("совет R-FRESH-006: пересборка на этапе package после отчёта аудита, его error — решение заказчика",
+              items and "на этапе package" in items[0].fix and "принимает заказчик" in items[0].fix
+              and "без error" not in items[0].fix)
         plan.write_text(ptext, encoding="utf-8")
         bad = dict(data, status="done", units=[dict(data["units"][0], mockup="ok", extra=1)])
         bad.pop("blockers")
@@ -967,13 +976,22 @@ def _selftest():
         check("кабинет: frontend_design — поправки ui C25, уровней нет",
               data["frontend_design"]["app_screens"].startswith("ui/CONTRADICTIONS.md §[C25]")
               and data["frontend_design"]["ambition"] == "—")
-        check("кабинет: тексты — наименьший статус строк texts.md экрана; блокер FSD-карты",
-              {u["texts"] for u in data["units"]} == {"checked"}
+        check("кабинет: тексты утверждены — у единиц approved; блокер FSD-карты",
+              {u["texts"] for u in data["units"]} == {"approved"}
               and any("FSD-карты нет" in b for b in data["blockers"]))
         dest = docpaths.design(slug, "ready", surface="office", repo=root)
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(render(slug, data), encoding="utf-8")
         check("кабинет: check сразу после записи — 0", not check_surface(slug, surf, root, today))
+        tp = docpaths.project(slug, "screens", "office", "texts.md", repo=root)
+        lines = tp.read_text(encoding="utf-8").splitlines(keepends=True)
+        k = next(i for i, x in enumerate(lines) if x.startswith("| `requests.new.client.label` |"))
+        lines[k] = lines[k].replace("| `approved` |", "| `checked` |")
+        tp.write_text("".join(lines), encoding="utf-8")
+        low = {u["id"]: u["texts"] for u in build(slug, surf, root, today)["units"]}
+        check("кабинет: тексты единицы — наименьший статус её строк texts.md (подпись поля бланка checked → "
+              "request-new checked, прочие approved)",
+              low.get("request-new") == "checked" and {v for u, v in low.items() if u != "request-new"} == {"approved"})
     print("ready selftest:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 

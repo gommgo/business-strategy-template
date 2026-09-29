@@ -1,12 +1,15 @@
 # Фикстура package-cabinet — иллюстрация для самопроверок scripts/project/ready.py и design_audit.py: кабинет office
-# фикстуры input-cabinet (экраны, демо-набор, утверждённая часть текстов, ДС, ARTIFACTS.md). Своя правка одна: у бренда
-# снята ссылка voice_ref на профиль голоса, которого в проекте нет (voice_ref необязателен по схеме бренда).
-# design_audit check — 0 error; ready build → check — 0. Формат манифеста — докстринг fixture_project.py.
+# фикстуры input-cabinet (экраны, демо-набор, ДС, ARTIFACTS.md) — основа пакета на утверждённых текстах: все строки
+# texts.md поверхности office — approved, вход mockup проходит гейт текстов. Ещё одна своя правка: у бренда снята ссылка
+# voice_ref на профиль голоса, которого в проекте нет (voice_ref необязателен по схеме бренда). design_audit check —
+# 0 error; ready build → check — 0. Формат манифеста — докстринг fixture_project.py.
 example: true
-description: кабинет office целиком — экраны, демо-набор, тексты, ДС; бренд без ссылки на голос, которого нет
+description: кабинет office целиком — экраны, демо-набор, утверждённые тексты, ДС; бренд без ссылки на голос, которого нет
 project: otves-office
 extends: [input-cabinet]
 layers:
   - replace:
+      screens/office/texts.md:
+        - {find: "| `checked` |\n", to: "| `approved` |\n", count: 45}
       design/brand.yaml:
         - {find: "voice_ref: ../voice.yaml\n", to: ""}

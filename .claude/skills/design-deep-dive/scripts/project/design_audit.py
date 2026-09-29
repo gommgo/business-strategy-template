@@ -23,12 +23,20 @@
 surface, kind, ref, path, message, fix). Полный результат всегда пишется в папку выхода (по умолчанию
 $DDD_HOME/out/project/design_audit/<slug>/): findings.jsonl и summary.json — счёт, какие утилиты запускались и с каким
 итогом, этап поверхностей, правила чтением (id, что прочитать), перечень R-VIS с --visual-list, заметки.
+Ключи summary.json: tool, project, surface, root, today, utilities, called (утилита → итоги вызовов, «код N» — код
+выхода), surfaces (surface, type, web_kind, route, input_stage — этап действующего входа холста, accepted — единицы с
+принятым макетом, ready — статус манифеста готовности ready.yaml: ready · partial · not-ready, null — манифеста нет),
+counts, notes, reading, visual. Код 2 в called: у text/copydeck.py и text/claims_check.py — «есть error» (их находки —
+в отчёте по правилам или отброшены по реестру), у утилит project/ — сбой вызова или окружения.
 
 Тяжесть — по правилу реестра: где правило зависит от этапа, этап выводится из статусов файлов (вход холста страницы
 или поверхности, закрытый copy deck, закрытая арт-дирекция, вердикт REVIEW.md); у находки валидатора — его уровень
 (error → error, warning → warning, сведения не переносятся), кроме правил с тяжестью по закрытию файла (R-REF-006 из
-ad_check: warning, error у закрытой арт-дирекции); шкала ворот и приёмки B/S/D → error/warning/hint. Правило, которое
-утилита не проверила (свежесть производных при битых токенах), — заметка сводки, а не находка.
+ad_check: warning, error у закрытой арт-дирекции); шкала ворот и приёмки B/S/D → error/warning/hint. Ошибки
+публикуемости фактов из claims_check.py lint-facts (разрешение, срок, проверка) в R-STRUCT-003 не идут: их сверяет
+R-COV-003 там, где факт стоит (план, copy deck). Совет находки называет этап: у site_validate — по коду (SB-* — brief,
+SM-* — site-map, PL-* — page-plan), факты и голос — meaning, copy deck — copy. Правило, которое утилита не проверила
+(свежесть производных при битых токенах), — заметка сводки, а не находка.
 Окружение не установлено (нет PyYAML или jsonschema в Python окружения) — валидаторы не запускаются, в сводке —
 «утилиты не запускались», их правила уходят в чтение.
 
@@ -186,6 +194,12 @@ def listify(v):
     if v is None:
         return []
     return v if isinstance(v, list) else [v]
+
+
+def listed(items, n=6, sep=", "):
+    """Список для сообщения: первые n и хвост «и ещё N» — один вид у всех находок."""
+    items = [str(x) for x in items]
+    return sep.join(items[:n]) + (f" и ещё {len(items) - n}" if len(items) > n else "")
 
 
 def rules_catalog():
@@ -604,6 +618,14 @@ class Audit:
                 return rule
         return "R-STRUCT-002"
 
+    # код site_validate → этап, где правится файл: бриф, карта сайта, план страницы
+    SV_STAGE = (("SB-", "brief"), ("PJ-", "brief"), ("SM-", "site-map"), ("PL-", "page-plan"))
+
+    def sv_stage(self, code, kind, page):
+        stage = next((st for pre, st in self.SV_STAGE if str(code or "").startswith(pre)), None) or \
+            {"site-brief": "brief", "site-map": "site-map", "page-plan": "page-plan"}.get(kind)
+        return f"page-plan:{page}" if stage == "page-plan" and kind == "page-plan" else stage or ""
+
     @staticmethod
     def where_path(where, base):
         """Поле where валидатора → (путь, место): путь — от base (site_validate пишет пути от kb/site), место — после
@@ -632,7 +654,8 @@ class Audit:
             kind = "site-brief" if p.name == "site-brief.yaml" else "site-map" if p.name == "site-map.yaml" else \
                 "page-plan" if p.parent.name == "plans" else "surface"
             ref = (p.stem if kind == "page-plan" else kind if kind != "surface" else s) + (f"#{spot}" if spot else "")
-            self.add(rule, lvl, s, kind, ref, p, f"{x.get('code')}: {x.get('msg')}", self.dd(s))
+            self.add(rule, lvl, s, kind, ref, p, f"{x.get('code')}: {x.get('msg')}",
+                     self.dd(s, self.sv_stage(x.get("code"), kind, p.stem)))
 
     def proof_refs_ok(self, s):
         """proof.facts_ref брифа и proof_ref смысла ведут в файлы (тогда их неравенство — отдельная находка SB-M03)."""
@@ -666,9 +689,11 @@ class Audit:
                 continue
             p = Path(m.group(1))
             p = p if p.is_absolute() else (self.tools.tmp / p).resolve()
-            self.add("R-STRUCT-002", m.group(3), s, "page-plan" if p.parent.name == "plans" else "site-brief",
-                     f"{p.stem}#стр. {m.group(2)}", p, f"vocab_lint: {m.group(4)} «{m.group(5)}» — {m.group(6)}",
-                     self.dd(s))
+            kind = "page-plan" if p.parent.name == "plans" else "site-map" if p.name == "site-map.yaml" else \
+                "site-brief"
+            self.add("R-STRUCT-002", m.group(3), s, kind, f"{p.stem}#стр. {m.group(2)}", p,
+                     f"vocab_lint: {m.group(4)} «{m.group(5)}» — {m.group(6)}",
+                     self.dd(s, self.sv_stage("", kind, p.stem)))
 
     def budgets(self, s):
         seen = {}
@@ -848,7 +873,8 @@ class Audit:
         s = vd.parent.name if vd.parent.name != "design" else None
         msgs = [x.strip() for x in (r.out + "\n" + r.err).splitlines() if x.strip() and not x.startswith("OK")]
         self.add("R-STRUCT-004", "error", s, "visual-dna", "visual-dna", vd,
-                 "vlm_to_dna validate: " + ("; ".join(msgs[-4:])[:300] or f"код {r.rc}"), self.dd(s))
+                 "vlm_to_dna validate: " + ("; ".join(msgs[-4:])[:300] or f"код {r.rc}"),
+                 self.dd(s, "art-direction" if s else "passport-icons"))
 
     def design_files(self, s):
         ad = self.dsurf(s, "art-direction")
@@ -912,9 +938,10 @@ class Audit:
             if not p.is_file():
                 continue
             data = self.load(p)
+            stage = {"brand": "brand", "system": "design-system", "app-brief": "app-brief"}[kind]
             if data is None:
                 self.add("R-STRUCT-008", "error", None, "design-system" if kind == "system" else kind, kind, p,
-                         f"{p.name} не разбирается: {self.docs[str(p)][1]}", self.dd())
+                         f"{p.name} не разбирается: {self.docs[str(p)][1]}", self.dd(what=stage))
                 continue
             try:
                 reg = reg or C.registry()
@@ -924,7 +951,7 @@ class Audit:
                 continue
             for ptr, msg in errs[:12]:
                 self.add("R-STRUCT-008", "error", None, "design-system" if kind == "system" else kind,
-                         f"{kind}#{ptr}", p, f"форма {p.name}: {msg}", self.dd())
+                         f"{kind}#{ptr}", p, f"форма {p.name}: {msg}", self.dd(what=stage))
         self.form_artifacts()
         for s in self.scope:
             rv = self.dsurf(s.slug, "review") / "REVIEW.md"
@@ -1406,8 +1433,8 @@ class Audit:
             fix = self.dd(s, f"copy — copy deck {pid}")
             if len(miss) > 10:
                 self.add("R-COV-002", sev, s, "copy-deck", pid, path,
-                         f"{len(miss)} текстовых слотов утверждённого плана {pid} без текста ({why}): "
-                         + ", ".join(f"{a}/{b}" for a, b in miss[:8]) + " …", fix)
+                         f"текстовые слоты утверждённого плана {pid} без текста в copy deck ({why}) — {len(miss)}: "
+                         + listed((f"{a}/{b}" for a, b in miss), 8), fix)
                 continue
             for a, b in miss:
                 self.add("R-COV-002", sev, s, "copy-deck", f"{pid}#/{a}/{b}", path,
@@ -1634,7 +1661,7 @@ class Audit:
                     diff.append(f"platform_constraints — {c} нет в constraint.md")
         if diff:
             self.add("R-PROJ-001", "warning", None, "app-brief", "app-brief#/core", abp,
-                     "ядро брифа на вид отстало от источников: " + "; ".join(diff[:6]),
+                     "ядро брифа на вид отстало от источников: " + listed(diff, 6, "; "),
                      "проекцию — этап app-brief: " + self.dd(what="app-brief") + "; источник — его исполнитель")
 
     # ================================================================ R-FRESH
@@ -1870,7 +1897,7 @@ class Audit:
             results = [x for x in rd.iterdir() if x.is_file() and x.name != "REVIEW.md"] if rd.is_dir() else []
             if results and not permitted:
                 self.add("R-MAT-006", "error", s.slug, "review", f"{s.slug}#review", rd,
-                         f"в review/ есть результаты проверок артефакта ({', '.join(x.name for x in results[:4])}), а "
+                         f"в review/ есть результаты проверок артефакта ({listed((x.name for x in results), 4)}), а "
                          "строки «Проверки макета» в ARTIFACTS.md нет — снимается только подтверждённой человеком "
                          "разовой просьбой заказчика", self.dd(s.slug, "checks"))
 
@@ -1951,7 +1978,7 @@ class Audit:
                 if st in ("approved", "confirmed", "verified", "stable"):
                     n = len(re.findall(r"\*\*blocker\*\*", text))
                     self.add("R-MAT-009", "error", None, "state", note.stem, note,
-                             f"{n} строк(и) **blocker** в заметке у закрытого файла {self.rel(target)} ({st})",
+                             f"строки **blocker** в заметке у закрытого файла {self.rel(target)} ({st}) — {n}",
                              "закрыть вопрос словом владельца или вернуть файл в работу — " + self.dd())
 
     def mat_first_input(self):
@@ -1974,9 +2001,12 @@ class Audit:
             if st not in (None, "stable"):
                 open_.append(f"{self.prel(p)} — {st}")
         if open_:
+            hubs = "; ".join(f"/interface-deep-dive {self.slug} {s.slug}" for s in self.surfaces if s.app)
             self.add("R-MAT-010", "warning", None, "app-brief", "app-brief", ab,
-                     "бриф на вид закрыт, а источники первого входа не stable: " + "; ".join(open_[:6]),
-                     "поле ядра без источника — вопрос questions[] со статусом assumed и долг в заметке пропусков")
+                     "бриф на вид закрыт, а источники первого входа не stable: " + listed(open_, 6, "; "),
+                     f"источник закрывает слой проекта — /project-deep-dive {self.slug} (vision, user, surface, "
+                     f"object, action, capability), сценарии хабов — {hubs}; поле ядра без источника — вопрос "
+                     "questions[] со статусом assumed и долг в заметке пропусков: " + self.dd(what="app-brief"))
         _ = L
 
     def mat_second_input(self, s):
@@ -1993,7 +2023,7 @@ class Audit:
         if bad:
             self.add("R-MAT-011", "error", s.slug, "map", "map", lay.map_path,
                      f"вход холста кабинета собран при своде map.md с расхождениями (screen_map check: {len(bad)} — "
-                     + "; ".join(f"{f.rule} {f.message[:60]}" for f in bad[:3]) + ")",
+                     + listed((f"{f.rule} {f.message[:60]}" for f in bad), 3, "; ") + ")",
                      f"свод и экраны — /screen-deep-dive {self.slug} {s.slug}; затем пересборка входа")
 
     # ================================================================ R-SEM
@@ -2021,7 +2051,7 @@ class Audit:
                 why.append("поле supersedes")
             hist = get(data, "lifecycle", "history")
             if isinstance(hist, list) and len(hist) > 1:
-                why.append(f"lifecycle.history — {len(hist)} записей (остаётся текущая)")
+                why.append(f"lifecycle.history, записей — {len(hist)} (остаётся текущая)")
             if why:
                 kind = "design-system" if f.name == "system.yaml" else f.stem.split(".")[0]
                 self.add("R-SEM-002", "warning", s, kind,
@@ -2086,7 +2116,7 @@ class Audit:
                              "copydeck.py validate --final", self.dd(s, "copy — факты заказчика"))
                 if holes:
                     self.add("R-DEBT-002", "hint", s, "copy-deck", f"{pid}#/placeholders", p,
-                             f"заглушки [PLACEHOLDER] в copy deck {pid}: {', '.join(holes[:8])}",
+                             f"заглушки [PLACEHOLDER] в copy deck {pid}: {listed(holes, 8)}",
                              self.dd(s, "copy — факты заказчика"))
 
     def debt_review(self, s):
@@ -2101,8 +2131,8 @@ class Audit:
         data = self.load(rd)
         units = [u for u in listify(get(data, "units")) if isinstance(u, dict) and u.get("open")]
         if units:
-            self.add("R-DEBT-002", "hint", s, "ready", s, rd, "open манифеста готовности: " + "; ".join(
-                f"{u.get('id')} — {len(listify(u.get('open')))}" for u in units[:6]), self.dd(s, "package"))
+            self.add("R-DEBT-002", "hint", s, "ready", s, rd, "open манифеста готовности: " + listed(
+                (f"{u.get('id')} — {len(listify(u.get('open')))}" for u in units), 6, "; "), self.dd(s, "package"))
 
     # ================================================================ R-VIS — перечень макетного прогона
     def visual_list(self):
@@ -2131,8 +2161,17 @@ class Audit:
             verdicts = self.verdicts(s.slug) if s.design else {}
             out.append({"surface": s.slug, "type": s.type, "web_kind": s.web_kind, "route": s.route,
                         "input_stage": inp, "accepted": sorted(u for u, v in verdicts.items() if v in ACCEPTED),
-                        "ready": self.dsurf(s.slug, "ready").is_file() if s.design else False})
+                        "ready": self.ready_status(s.slug) if s.design else None})
         return out
+
+    def ready_status(self, s):
+        """Статус манифеста готовности поверхности: ready · partial · not-ready; «—» — статуса в файле нет; None —
+        манифеста нет."""
+        rd = self.dsurf(s, "ready")
+        if not rd.is_file():
+            return None
+        st = get(self.load(rd), "status")
+        return str(st) if st not in (None, "") else "—"
 
     def reading(self):
         cat = rules_catalog()
@@ -2376,11 +2415,12 @@ def _selftest():
                   summ.get("utilities") == "запускались" and summ.get("called")
                   and any(x["rule"] == "R-SEM-001" for x in summ.get("reading") or []))
     with fixture_project.built("package-defects") as fx:
-        found, notes = {}, {}
+        found, notes, surfs = {}, {}, {}
         for slug in ("otves-remont-nn", "otves-office"):
             res = audit(slug, fx.root, today=today, visual_list=True)
             found[slug] = [F.Finding.from_dict(d) for d in res["findings"]]
             notes[slug] = res["notes"]
+            surfs[slug] = {x["surface"]: x for x in res["surfaces"]}
         seeded = set(SEEDED)
         hit = {(s, r, p) for s, r, p in seeded if any(f.rule == r and f.path == p for f in found[s])}
         miss = sorted(seeded - hit)
@@ -2407,6 +2447,16 @@ def _selftest():
               and sev.get(("R-DEBT-002", SEEDED[13][2])) == "hint")
         check("--visual-list: перечень R-VIS по поверхностям дизайна",
               res["visual"] and all(len(v["rules"]) == 5 for v in res["visual"]))
+        check("сводка: ready — статус манифеста готовности (promo — not-ready), манифеста нет — null (office)",
+              surfs["otves-remont-nn"]["promo"]["ready"] == "not-ready"
+              and surfs["otves-office"]["office"]["ready"] is None)
+        pl = next((f for f in found["otves-remont-nn"] if f.rule == "R-COV-003" and f.path == SEEDED[6][2]), None)
+        sb = [f for f in found["otves-remont-nn"] if f.message.startswith("SB-")]
+        m010 = next((f for f in found["otves-office"] if f.rule == "R-MAT-010"), None)
+        check("советы с этапом: PL-* — page-plan страницы, SB-* — brief, R-MAT-010 — слой проекта и этап app-brief",
+              pl is not None and pl.fix.endswith("— page-plan:spasibo") and sb
+              and all(f.fix.endswith("— brief") for f in sb) and m010 is not None
+              and "/project-deep-dive otves-office" in m010.fix and m010.fix.endswith("— app-brief"))
     # сценарии правил на копии чистого лендинга, без валидаторов
     with fixture_project.built("package-landing") as fx:
         root, slug = fx.root, fx.slug

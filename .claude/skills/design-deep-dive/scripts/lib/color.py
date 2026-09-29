@@ -1,23 +1,30 @@
 #!/usr/bin/env python3
-"""Расчёты цвета для интерфейсов без внешних зависимостей (написано агентом A волны 1, проверено по калькулятору APCA).
+"""color — расчёты цвета для интерфейсов без внешних зависимостей: OKLCH, контраст WCAG 2 и APCA, цвет глазами людей с
+нарушением цветового зрения, ΔE в OKLab, наложение с альфой.
 
-Функции (импорт: `from color import *` при `sys.path.insert(0, ".../99-raw/tools")`):
+Функции:
     hex2rgb, hex2oklch(hex) -> (L 0..1, C, H°), oklch2hex(L, C, H), in_gamut, max_chroma(L, H), relL,
     wcag(fg, bg) -> отношение контраста WCAG 2, apca(fg, bg) -> Lc (APCA 0.1.9, знак = полярность),
     sim_cvd(hex, 'protan'|'deutan'|'tritan'), dE_oklab(a, b), composite(fg, alpha, bg).
 
-Командная строка:
-    python3 color.py contrast "#1f2937" "#ffffff"      -> {"wcag": …, "apca_Lc": …}
-    python3 color.py oklch "#2563eb"                     -> L, C, H
-    python3 color.py hex 0.62 0.19 260                   -> hex (с отображением в гамут sRGB)
-    python3 color.py maxchroma 0.62 260                  -> максимальная хрома для L и H в sRGB
-    python3 color.py cvd "#e5484d" deutan                -> цвет глазами дейтеранопа
-    python3 color.py de "#e5484d" "#30a46c"              -> ΔE в OKLab
-    python3 color.py composite "#000000" 0.08 "#ffffff"  -> результат наложения с альфой
-    python3 color.py selftest                            -> контрольные точки
+Подключение в утилите `scripts/<домен>/<утилита>.py` — модуль лежит в `scripts/lib/` рядом с kbpaths:
 
-Контрольные точки: apca(#000,#fff)=106.0, apca(#fff,#000)=-107.9, apca(#888,#fff)=63.1, wcag(#000,#fff)=21.0,
-wcag(#767676,#fff)=4.54. Подробности алгоритмов: 01-color/01-color-models-and-scales.md и 03-contrast.md.
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
+    from color import wcag, apca, hex2oklch
+
+Командная строка (путь — от папки скилла):
+    python3 scripts/lib/color.py contrast "#1f2937" "#ffffff"      -> {"wcag": …, "apca_Lc": …}
+    python3 scripts/lib/color.py oklch "#2563eb"                     -> L, C, H
+    python3 scripts/lib/color.py hex 0.62 0.19 260                   -> hex (с отображением в гамут sRGB)
+    python3 scripts/lib/color.py maxchroma 0.62 260                  -> максимальная хрома для L и H в sRGB
+    python3 scripts/lib/color.py cvd "#e5484d" deutan                -> цвет глазами дейтеранопа
+    python3 scripts/lib/color.py de "#e5484d" "#30a46c"              -> ΔE в OKLab
+    python3 scripts/lib/color.py composite "#000000" 0.08 "#ffffff"  -> результат наложения с альфой
+    python3 scripts/lib/color.py selftest                            -> контрольные точки
+
+Контрольные точки сверены с калькулятором APCA: apca(#000,#fff)=106.0, apca(#fff,#000)=-107.9, apca(#888,#fff)=63.1,
+wcag(#000,#fff)=21.0, wcag(#767676,#fff)=4.54. Алгоритмы — kb/ui/01-color/01-color-models-and-scales.md и
+kb/ui/01-color/03-contrast.md.
 """
 import math, sys
 

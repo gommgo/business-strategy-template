@@ -243,8 +243,6 @@
 
 Источник: `docs/projects/otves-office/screens/office/texts.md` · `docs/projects/otves-office/object.md` § Объекты: name, aliases · `docs/projects/otves-office/action.md` § verb, past, banned · `kb/ux/07-ux-writing/06-banned-words-and-patterns.md`
 
-Пробел: строки не того статуса (`checked` — 45): на артборде — заглушка [PLACEHOLDER: текст на утверждении]; ключи — `app.shell.help.link`, `app.shell.service-unavailable.banner`, `app.shell.maintenance.banner`, `app.shell.session-expiry.confirm-title`, `app.shell.session-expiry.action`, `app.shell.connection-lost.banner`, `requests.list.search.placeholder`, `requests.list.status-filter.placeholder`, `requests.list.create.action`, `requests.list.empty-first-run.empty`, `requests.list.empty-filtered.empty`, `requests.list.reset-filters.action`, `requests.list.error-load.inline-message`, `requests.list.retry.action`, `requests.list.no-permission.title`, `requests.list.no-permission.body`, `requests.card.title.title`, `requests.card.schedule.action`, `requests.card.complete.action`, `requests.card.error-load.inline-message`, `requests.card.retry.action`, `requests.card.error-action.inline-message`, `requests.card.no-permission.title`, `requests.card.no-permission.body`, `requests.card.not-found.title`, `requests.card.not-found.body`, `requests.card.back-to-list.link`, `requests.card.offline.banner`, `requests.new.saving.status`, `requests.new.error-action.inline-message`, `requests.new.no-permission.title`, `requests.new.no-permission.body`, `requests.new.client.error`, `requests.new.phone.error`, `requests.new.address.error`, `requests.new.cancel.action`, `requests.new.create.action`, `plan.dashboard.empty-first-run.empty`, `plan.dashboard.no-permission.title`, `plan.dashboard.no-permission.body`, `plan.dashboard.plan-tile.empty`, `plan.dashboard.plan-tile-error.inline-message`, `system.not-found.title.title`, `system.not-found.body.body`, `system.not-found.to-requests.link`
-
 Глоссарий — объекты называются своим именем, синонимы не говорим:
 
 - `request` — Заявка на замер: Просьба клиента приехать и снять размеры квартиры до сметы. Не говорим: лид, обращение.
@@ -264,14 +262,59 @@
 
 | ключ | роль | текст | maxlen | статус |
 |---|---|---|---|---|
+| `app.shell.help.link` | `link` | Помощь | 16 | `approved` |
+| `app.shell.service-unavailable.banner` | `banner` | Кабинет временно недоступен. Заявки не пропадут — попробуйте позже | 120 | `approved` |
+| `app.shell.maintenance.banner` | `banner` | {date} ночью кабинет будет недоступен — плановые работы | 120 | `approved` |
+| `app.shell.session-expiry.confirm-title` | `confirm-title` | Продлить сеанс? | 40 | `approved` |
+| `app.shell.session-expiry.action` | `action` | Продлить | 20 | `approved` |
+| `app.shell.connection-lost.banner` | `banner` | Нет связи. Введённое сохранится и уйдёт, когда связь вернётся | 120 | `approved` |
+| `requests.list.search.placeholder` | `placeholder` | Номер, клиент или адрес | 40 | `approved` |
+| `requests.list.status-filter.placeholder` | `placeholder` | Все статусы | 24 | `approved` |
+| `requests.list.create.action` | `action` | Создать заявку | 24 | `approved` |
 | `requests.list.number.column-header` | `column-header` | Номер | 16 | `approved` |
 | `requests.list.client.column-header` | `column-header` | Клиент | 16 | `approved` |
 | `requests.list.address.column-header` | `column-header` | Адрес | 16 | `approved` |
 | `requests.list.visit-date.column-header` | `column-header` | Дата замера | 16 | `approved` |
 | `requests.list.status.column-header` | `column-header` | Статус | 16 | `approved` |
+| `requests.list.empty-first-run.empty` | `empty` | Здесь появятся заявки с сайта и из звонков — первую можно создать кнопкой «Создать заявку» над списком | 140 | `approved` |
+| `requests.list.empty-filtered.empty` | `empty` | По запросу «{query}» заявок нет | 80 | `approved` |
+| `requests.list.reset-filters.action` | `action` | Сбросить фильтры | 24 | `approved` |
+| `requests.list.error-load.inline-message` | `inline-message` | Список заявок не загрузился: нет ответа сервера | 100 | `approved` |
+| `requests.list.retry.action` | `action` | Повторить | 16 | `approved` |
+| `requests.list.no-permission.title` | `title` | Нет доступа к заявкам | 40 | `approved` |
+| `requests.list.no-permission.body` | `body` | Доступ к заявкам выдаёт руководитель студии | 120 | `approved` |
+| `requests.card.title.title` | `title` | Заявка {number} | 32 | `approved` |
+| `requests.card.schedule.action` | `action` | Назначить замер | 24 | `approved` |
+| `requests.card.complete.action` | `action` | Отметить замер | 24 | `approved` |
+| `requests.card.error-load.inline-message` | `inline-message` | Заявка не загрузилась: нет ответа сервера | 100 | `approved` |
+| `requests.card.retry.action` | `action` | Повторить | 16 | `approved` |
+| `requests.card.error-action.inline-message` | `inline-message` | Не сохранилось — выбранное осталось в карточке, можно повторить | 100 | `approved` |
+| `requests.card.no-permission.title` | `title` | Нет доступа к заявке | 40 | `approved` |
+| `requests.card.no-permission.body` | `body` | Заявка есть, но открыть её может руководитель студии | 120 | `approved` |
+| `requests.card.not-found.title` | `title` | Заявки нет | 40 | `approved` |
+| `requests.card.not-found.body` | `body` | Проверьте номер в адресе: такой заявки нет или её убрали из списка | 120 | `approved` |
+| `requests.card.back-to-list.link` | `link` | К списку заявок | 24 | `approved` |
+| `requests.card.offline.banner` | `banner` | Нет связи: заявка показана из памяти, отметка замера уйдёт, когда связь вернётся | 120 | `approved` |
+| `requests.new.saving.status` | `status` | Сохраняем заявку | 32 | `approved` |
+| `requests.new.error-action.inline-message` | `inline-message` | Заявка не сохранилась — всё введённое на месте, можно повторить | 100 | `approved` |
+| `requests.new.no-permission.title` | `title` | Нет доступа к созданию заявок | 40 | `approved` |
+| `requests.new.no-permission.body` | `body` | Заявки создаёт менеджер по замерам | 120 | `approved` |
 | `requests.new.client.label` | `label` | Клиент | 24 | `approved` |
+| `requests.new.client.error` | `error` | Укажите имя или фамилию клиента | 60 | `approved` |
 | `requests.new.phone.label` | `label` | Телефон | 24 | `approved` |
+| `requests.new.phone.error` | `error` | Укажите телефон целиком, с кодом города | 60 | `approved` |
 | `requests.new.address.label` | `label` | Адрес объекта | 24 | `approved` |
+| `requests.new.address.error` | `error` | Укажите улицу и дом | 60 | `approved` |
+| `requests.new.cancel.action` | `action` | Отмена | 16 | `approved` |
+| `requests.new.create.action` | `action` | Создать заявку | 24 | `approved` |
+| `plan.dashboard.empty-first-run.empty` | `empty` | Плана на этот месяц ещё нет — его ставит руководитель студии | 120 | `approved` |
+| `plan.dashboard.no-permission.title` | `title` | Нет доступа к плану | 40 | `approved` |
+| `plan.dashboard.no-permission.body` | `body` | План замеров видит менеджер по замерам | 120 | `approved` |
+| `plan.dashboard.plan-tile.empty` | `empty` | Замеров в этом месяце ещё не было | 60 | `approved` |
+| `plan.dashboard.plan-tile-error.inline-message` | `inline-message` | План не загрузился | 60 | `approved` |
+| `system.not-found.title.title` | `title` | Такой страницы нет | 40 | `approved` |
+| `system.not-found.body.body` | `body` | Адрес устарел или в нём опечатка | 120 | `approved` |
+| `system.not-found.to-requests.link` | `link` | К заявкам | 24 | `approved` |
 
 ## Запреты
 
@@ -387,7 +430,7 @@
 - Переходы: → `requests-list` (ссылка «К заявкам»; сохраняется: —; назад: назад в браузере)
 - Ситуации: —; сценарии: —
 - Данные: —
-- Тексты — 3 ключа, строки — в разделе «Тексты»: `system.not-found.title.title`, `system.not-found.body.body`, `system.not-found.to-requests.link`; не этого этапа или нет строки: `system.not-found.title.title`, `system.not-found.body.body`, `system.not-found.to-requests.link`
+- Тексты — 3 ключа, строки — в разделе «Тексты»: `system.not-found.title.title`, `system.not-found.body.body`, `system.not-found.to-requests.link`
 
 ### Обязательные состояния
 
@@ -412,7 +455,7 @@
 - Переходы: → `requests-list` (переход по плитке плана; сохраняется: —; назад: назад)
 - Ситуации: `check-plan`; сценарии: —
 - Данные: `plan` → `objects.plan.records` (`plan-1` …), крайние случаи — `objects.plan.edge_cases`
-- Тексты — 5 ключей, строки — в разделе «Тексты»: `plan.dashboard.empty-first-run.empty`, `plan.dashboard.no-permission.title`, `plan.dashboard.no-permission.body`, `plan.dashboard.plan-tile-error.inline-message`, `plan.dashboard.plan-tile.empty`; не этого этапа или нет строки: `plan.dashboard.empty-first-run.empty`, `plan.dashboard.no-permission.title`, `plan.dashboard.no-permission.body`, `plan.dashboard.plan-tile-error.inline-message`, `plan.dashboard.plan-tile.empty`
+- Тексты — 5 ключей, строки — в разделе «Тексты»: `plan.dashboard.empty-first-run.empty`, `plan.dashboard.no-permission.title`, `plan.dashboard.no-permission.body`, `plan.dashboard.plan-tile-error.inline-message`, `plan.dashboard.plan-tile.empty`
 
 ### Обязательные состояния
 
@@ -444,7 +487,7 @@
 - Переходы: → `requests-list` (назад к списку; сохраняется: фильтры, сортировка, страница; назад: выбор строки в списке)
 - Ситуации: `schedule-visit`, `mark-measured`; сценарии: `schedule-visit`
 - Данные: `request` → `objects.request.records` (`request-1` …), крайние случаи — `objects.request.edge_cases`
-- Тексты — 12 ключей, строки — в разделе «Тексты»: `requests.card.error-load.inline-message`, `requests.card.retry.action`, `requests.card.error-action.inline-message`, `requests.card.no-permission.title`, `requests.card.no-permission.body`, `requests.card.not-found.title`, `requests.card.not-found.body`, `requests.card.back-to-list.link`, `requests.card.offline.banner`, `requests.card.title.title`, `requests.card.schedule.action`, `requests.card.complete.action`; не этого этапа или нет строки: `requests.card.error-load.inline-message`, `requests.card.retry.action`, `requests.card.error-action.inline-message`, `requests.card.no-permission.title`, `requests.card.no-permission.body`, `requests.card.not-found.title`, `requests.card.not-found.body`, `requests.card.back-to-list.link`, `requests.card.offline.banner`, `requests.card.title.title`, `requests.card.schedule.action`, `requests.card.complete.action`
+- Тексты — 12 ключей, строки — в разделе «Тексты»: `requests.card.error-load.inline-message`, `requests.card.retry.action`, `requests.card.error-action.inline-message`, `requests.card.no-permission.title`, `requests.card.no-permission.body`, `requests.card.not-found.title`, `requests.card.not-found.body`, `requests.card.back-to-list.link`, `requests.card.offline.banner`, `requests.card.title.title`, `requests.card.schedule.action`, `requests.card.complete.action`
 
 ### Обязательные состояния
 
@@ -472,7 +515,7 @@
 - Переходы: → `request-card` (`create` — «Создать»; сохраняется: —; назад: назад к списку заявок); → `requests-list` (отмена; сохраняется: фильтры, сортировка, страница; назад: кнопка «Создать заявку»)
 - Ситуации: `create-request`; сценарии: —
 - Данные: `request` → `objects.request.records` (`request-1` …), крайние случаи — `objects.request.edge_cases`
-- Тексты — 12 ключей, строки — в разделе «Тексты»: `requests.new.saving.status`, `requests.new.error-action.inline-message`, `requests.new.no-permission.title`, `requests.new.no-permission.body`, `requests.new.client.label`, `requests.new.client.error`, `requests.new.phone.label`, `requests.new.phone.error`, `requests.new.address.label`, `requests.new.address.error`, `requests.new.cancel.action`, `requests.new.create.action`; не этого этапа или нет строки: `requests.new.saving.status`, `requests.new.error-action.inline-message`, `requests.new.no-permission.title`, `requests.new.no-permission.body`, `requests.new.client.error`, `requests.new.phone.error`, `requests.new.address.error`, `requests.new.cancel.action`, `requests.new.create.action`
+- Тексты — 12 ключей, строки — в разделе «Тексты»: `requests.new.saving.status`, `requests.new.error-action.inline-message`, `requests.new.no-permission.title`, `requests.new.no-permission.body`, `requests.new.client.label`, `requests.new.client.error`, `requests.new.phone.label`, `requests.new.phone.error`, `requests.new.address.label`, `requests.new.address.error`, `requests.new.cancel.action`, `requests.new.create.action`
 
 ### Обязательные состояния
 
@@ -501,7 +544,7 @@
 - Переходы: → `request-card` (выбор строки; сохраняется: фильтры, сортировка, страница; назад: назад, крошки); → `request-new` (`create` — «Создать»; сохраняется: —; назад: отмена возвращает сюда)
 - Ситуации: `find-request`, `create-request`; сценарии: `schedule-visit`
 - Данные: коллекция `requests-list` → `demo-data.json` `collections.requests-list` (empty 0 · few 1 · typical 60 · max 3 000); `request` → `objects.request.records` (`request-1` …), крайние случаи — `objects.request.edge_cases`
-- Тексты — 15 ключей, строки — в разделе «Тексты»: `requests.list.empty-first-run.empty`, `requests.list.empty-filtered.empty`, `requests.list.reset-filters.action`, `requests.list.error-load.inline-message`, `requests.list.retry.action`, `requests.list.no-permission.title`, `requests.list.no-permission.body`, `requests.list.search.placeholder`, `requests.list.status-filter.placeholder`, `requests.list.create.action`, `requests.list.number.column-header`, `requests.list.client.column-header`, `requests.list.address.column-header`, `requests.list.visit-date.column-header`, `requests.list.status.column-header`; не этого этапа или нет строки: `requests.list.empty-first-run.empty`, `requests.list.empty-filtered.empty`, `requests.list.reset-filters.action`, `requests.list.error-load.inline-message`, `requests.list.retry.action`, `requests.list.no-permission.title`, `requests.list.no-permission.body`, `requests.list.search.placeholder`, `requests.list.status-filter.placeholder`, `requests.list.create.action`
+- Тексты — 15 ключей, строки — в разделе «Тексты»: `requests.list.empty-first-run.empty`, `requests.list.empty-filtered.empty`, `requests.list.reset-filters.action`, `requests.list.error-load.inline-message`, `requests.list.retry.action`, `requests.list.no-permission.title`, `requests.list.no-permission.body`, `requests.list.search.placeholder`, `requests.list.status-filter.placeholder`, `requests.list.create.action`, `requests.list.number.column-header`, `requests.list.client.column-header`, `requests.list.address.column-header`, `requests.list.visit-date.column-header`, `requests.list.status.column-header`
 
 ### Обязательные состояния
 

@@ -18,7 +18,9 @@
         ли, не пробел ли, не истекли ли, публикуемы ли, демо-данные), [PLACEHOLDER], обещание и ядро первого экрана
         (секция hero, без неё — первая после шапки), строки в картинках, второй язык; правила copy-slots.yaml,
         voice.yaml, meta-rules.yaml, claims-rules.yaml: есть — проверка работает, нет — предупреждение
-        «правила не загружены»; --final — ворота публикации: страница approved, 0 [PLACEHOLDER], 0 демо-фактов, мета
+        «правила не загружены»; copy_slots_ref, который не разрешается от папки copy deck, — предупреждение
+        COPY-D-RULES-REF и правила copy-slots.yaml базы; --final — ворота публикации: страница approved,
+        0 [PLACEHOLDER], 0 демо-фактов, мета
   claims DECK [--facts F] [--today …] [--strict] [--all-variants] [--final]
         claims_check.py (факты и право) процессом на плоской копии: обещание, мета, OG-шаблон — тоже текст страницы
   lint DECK [--final] [--all-variants] [--no-page-pass]
@@ -1558,13 +1560,17 @@ def _validate_facts(deck, ctx, rep, sev, refs_and_publish=True):
 def _validate_wave2(deck, ctx, rep):
     """Файлы правил текста: есть — проверка работает; нет — предупреждение «правила не загружены», без падения."""
     T = 'validate'
-    # --- copy-slots.yaml
-    if ctx.copy_slots_path:
-        cs_path = ctx.copy_slots_path
-    elif deck.get('copy_slots_ref'):
-        cs_path = rel_to(ctx.deck_path, deck['copy_slots_ref']) if ctx.deck_path else deck['copy_slots_ref']
-    else:
-        cs_path = COPY_SLOTS_PATH
+    # --- copy-slots.yaml: по copy_slots_ref copy deck, иначе файл базы (ctx.copy_slots_path — его замена в --selftest);
+    # ссылка в пустоту — предупреждение, правила — из базы: длины слотов и обязательность фактов проверяются всё равно
+    cs_path = ctx.copy_slots_path or COPY_SLOTS_PATH
+    cs_ref = deck.get('copy_slots_ref')
+    if cs_ref:
+        ref_path = rel_to(ctx.deck_path, cs_ref) if ctx.deck_path else cs_ref
+        if ref_path and os.path.exists(ref_path):
+            cs_path = ref_path
+        else:
+            rep.add(T, 'warning', 'COPY-D-RULES-REF', '—', f'copy_slots_ref не разрешается: {cs_ref}; правила — из базы',
+                    'Путь — от папки copy deck: поправьте ссылку или уберите её (без неё правила — copy-slots.yaml базы text).')
     if cs_path and os.path.exists(cs_path):
         try:
             specs, renames, notes = load_copy_slots(cs_path)
@@ -4047,6 +4053,15 @@ def selftest():
         errs = [f for f in rep.findings if f['level'] == 'error']
         check('validate: чистый deck — 0 error', not errs, [(f['rule'], f['where'], f['message']) for f in errs][:4])
         check('validate: файлы правил текста нет → warning, не падение', any(f['rule'] == 'COPY-D-RULES-MISSING' and 'copy-slots' in f['message'] for f in rep.findings))
+        d = _st_deck(); d['copy_deck']['copy_slots_ref'] = '../../04-copy-by-block/copy-slots.yaml'
+        r = validate(d, Ctx(os.path.join(td, 'deck.yaml'), facts, '2026-09-24', meta_rules_path=os.path.join(td, 'нет-meta.yaml')))
+        check('validate: copy_slots_ref не разрешается → warning COPY-D-RULES-REF, правила — copy-slots.yaml базы',
+              any(f['rule'] == 'COPY-D-RULES-REF' and f['level'] == 'warning' and 'copy_slots_ref не разрешается' in f['message'] for f in r.findings)
+              and not any(f['rule'] == 'COPY-D-RULES-MISSING' and 'copy-slots' in f['message'] for f in r.findings)
+              and r.tools.get('validate', {}).get('copy_slots') == os.path.relpath(COPY_SLOTS_PATH, ROOT))
+        r = validate(d, ctx)
+        check('validate: ссылка не разрешается и файла нет в базе → COPY-D-RULES-REF и «правила не загружены»',
+              {'COPY-D-RULES-REF', 'COPY-D-RULES-MISSING'} <= {f['rule'] for f in r.findings})
 
         def rules_of(d, **kw):
             r = validate(d, kw.pop('ctx', ctx), **kw)

@@ -46,7 +46,8 @@ DIR/contract.md и печатает путь. В репозиторий прое
               map.md, object.md, action.md; у vision нет Problem или Users; у пользователя поверхности нет строки
               постуры; у экрана нет главной задачи; раздел «Переход» пуст; обязательное состояние экрана не покрыто;
               коллекция без объёма (demo_data)                                                        error
-  R-MAT-003   этап mockup: строки texts.md не approved — одна находка на реестр                   warning
+  R-MAT-003   этап mockup: строки texts.md не approved — одна находка на реестр (отчёт контракта; во входе
+              холста canvas_input поднимает её в R-MAT-012 error — гейт макета на утверждённых текстах)  warning
   R-COV-005   этап mockup: нет карты решений design/system.yaml — типам экранов не сопоставить компоненты  error
   R-DEBT-002  заглушки демо-набора (demo_data)                                                      hint
 Код выхода: 0 — нет error, 1 — есть error, 2 — ошибка вызова или окружения.
@@ -777,7 +778,7 @@ def sec_texts(c, part):
         if c.stage == "mockup":
             c.finding("R-MAT-003", "warning", "texts", "texts", lay.texts_path,
                       f"этап mockup берёт только approved: строк не того статуса {len(bad)} ({detail}) — "
-                      + ", ".join(r.key for r in bad[:5]) + (f" … (+{len(bad) - 5})" if len(bad) > 5 else ""),
+                      + ", ".join(r.key for r in bad[:5]) + (f" и ещё {len(bad) - 5}" if len(bad) > 5 else ""),
                       c.fix_screens("texts") + " — утверждает владелец продукта")
     banned_words = []
     for k, t, ph in part.entries:
@@ -1161,6 +1162,9 @@ def _selftest():
         check_("mockup: R-MAT-003 warning (одна на реестр) и R-COV-005 error без карты решений ДС",
                ("R-MAT-003", "warning") in rules and ("R-COV-005", "error") in rules and
                len([f for f in mock.findings if f.rule == "R-MAT-003"]) == 1)
+        m3 = next((f for f in mock.findings if f.rule == "R-MAT-003"), None)
+        check_("R-MAT-003: 45 строк не того статуса — пять ключей и хвост «и ещё 40»",
+               m3 is not None and "строк не того статуса 45" in m3.message and m3.message.endswith(" и ещё 40"))
         d = con.as_dict()
         check_("JSON: разделы с источниками, экраны с наборами", len(d["sections"]) == 10 and
                all(s["sources"] for s in d["sections"]) and all(p["states"] for p in d["screens"]))

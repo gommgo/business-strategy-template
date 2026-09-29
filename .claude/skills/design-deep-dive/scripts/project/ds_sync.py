@@ -12,9 +12,11 @@
     `$description`; образец стиля — `$extensions["org.design-deep-dive.artifact"].sample`;
   - новое или удалённое имя, значение, которое не переводится в тип токена, — вопрос заказчику: роль и назначение или
     отказ; сами они в DTCG не пишутся.
-Токен, который был алиасом, получает литерал — ссылка на примитив рвётся; предложение называет прежний алиас и соседей
-на нём, чтобы владелец выбрал правку примитива вместо роли. После подъёма — контраст пар и пересборка производных
-(`ds_build build`).
+Правка токена-алиаса — развилка для владельца, предложение называет обе дороги и соседей на том же примитиве: роль —
+`build --write` пишет литерал в её путь (ссылка на примитив рвётся); примитив — значение пути `primitive.…` в
+`system.tokens.json` правится руками (команды у этой дороги нет), за ним меняются все роли-ссылки. После любой дороги —
+пересчёт контраста пар (`build_reference_tokens.py` или `lib/color.py`), пересборка производных (`ds_build build`) и
+публикация ДС.
 
 Нет токенов DTCG (артефакт пришёл без исходников) — `build` восстанавливает их из живого tokens.json: путь — имя по
 дефисам, первый сегмент — группа семейства (`color-bg` → `color.bg`, `space-4` → `space.4`, `radius-sm` → `radius.sm`,
@@ -29,7 +31,9 @@
     ds_sync show  <slug> [--live FILE] [--repo DIR] [--json]               соответствие «имя ДС → путь DTCG»
     ds_sync --selftest                                                    без сети: сверка, правки, круг на примере cd
 
-Правило `check`: R-FRESH-001 (живой tokens.json артефакта ≠ сборка из токенов) — error на каждое расхождение.
+Правило `check`: R-FRESH-001 — правка заказчика на странице артефакта, не поднятая в токены (живой tokens.json ≠
+сборка из токенов), error на каждое расхождение; расхождение, где новее токены (примитив правлен руками, ДС ещё не
+опубликована), сходится публикацией ДС.
 Код выхода: 0 — расхождений нет (у build — предложение готово), 1 — есть расхождения, 2 — ошибка вызова или окружения.
 """
 from __future__ import annotations
@@ -302,6 +306,7 @@ class Change:
     pointer: str | None = None                             # место правки в JSON токенов
     value: object = None                                   # значение DTCG для записи; None — вопрос заказчику
     note: str = ""
+    alias: str | None = None                               # путь примитива, если значение было алиасом: вторая дорога
 
 
 def compare(live_doc, built_doc, toks):
@@ -377,10 +382,18 @@ def _value_change(e, t, path, theme, old, new, toks):
     if m:
         peers = [".".join(x.path) for x in toks.list if x is not t and B.in_artifact(x) and
                  _slot_value(x, theme) == current]
-        ch.note = f"был алиас {current}: литерал рвёт ссылку"
-        if peers:
-            ch.note += f"; на него же ссылаются {', '.join(peers[:6])} — если правка у всех, правьте примитив"
+        ch.alias = m.group(1)
+        ch.note = _roads(current, path, ch.alias, peers)
     return ch
+
+
+def _roads(current, path, prim, peers=()):
+    """Две дороги правки алиаса: литерал в путь роли или значение примитива руками — за ним все ссылки."""
+    peers = list(peers)
+    who = f": на него же ссылаются {', '.join(peers[:6])}" + (f" и ещё {len(peers) - 6}" if len(peers) > 6 else "") \
+        if peers else ""
+    return (f"был алиас {current} — две дороги: роль — литерал в {path} (--write, ссылка на примитив рвётся); "
+            f"примитив — правка пути {prim} в system.tokens.json руками, меняет все ссылки на него{who}")
 
 
 def _slot_value(t, theme):
@@ -401,7 +414,8 @@ def _style_change(e, t, path, fld, old, new):
     if ch.value is None:
         ch.note = f"значение «{new}» не переводится в {sub} — вопрос заказчику"
     elif isinstance(cur, str) and B.ALIAS.match(cur):
-        ch.note = f"было {cur}: литерал рвёт ссылку"
+        ch.alias = B.ALIAS.match(cur).group(1)
+        ch.note = _roads(cur, f"{path} ({fld})", ch.alias)
     return ch
 
 
@@ -652,15 +666,27 @@ def _describe(ch):
     return f"{ch.kind}: сборка «{ch.old}» → на странице «{ch.new}»"
 
 
+def after_lift(slug):
+    """Общий хвост обеих дорог — протокол «Правки токенов»: контраст пар, производные, публикация."""
+    return (f"пересчёт контраста пар (build_reference_tokens.py или lib/color.py), ds_build build {slug}, публикация "
+            "ДС")
+
+
 def to_findings(prj, changes):
     rep = F.Report()
+    write = f"ds_sync build {prj.slug} --live FILE --write"
     for ch in changes:
         e = ch.entry
         ref = "artifact#" + (f"{e.family}/{e.name}" if e else ch.kind)
-        fix = (f"поднять в {ch.path}: ds_sync build {prj.slug} --live FILE --write, затем ds_build build {prj.slug}"
-               if ch.value is not None else (ch.note or "вопрос заказчику"))
+        if ch.value is None:
+            fix = ch.note or "вопрос заказчику"
+        elif ch.alias:
+            fix = (f"роль: {write} (литерал в {ch.path}); примитив: правка пути {ch.alias} в system.tokens.json "
+                   f"руками (меняет все ссылки на него); затем {after_lift(prj.slug)}")
+        else:
+            fix = f"поднять в {ch.path}: {write}; затем {after_lift(prj.slug)}"
         rep.add("R-FRESH-001", "error", surface=None, kind=KIND, ref=ref, path=prj.rel(prj.tokens_path),
-                message="живой tokens.json артефакта расходится со сборкой: " + _describe(ch)
+                message="правка заказчика на странице артефакта не поднята в токены: " + _describe(ch)
                         + (f" — {ch.note}" if ch.note and ch.value is not None else ""), fix=fix)
     return rep.items
 
@@ -700,7 +726,7 @@ def run_build(prj, live_path, write=False, out=None, as_json=False, stream=None)
             print(json.dumps({"mode": "restore", "mapping": mapping, "questions": questions,
                               "written": str(wrote) if wrote else None}, ensure_ascii=False, indent=1), file=stream)
         else:
-            print(f"токенов DTCG нет — восстановление из живого tokens.json ({len(mapping)} имён):", file=stream)
+            print(f"токенов DTCG нет — восстановление из живого tokens.json (имён — {len(mapping)}):", file=stream)
             for m in mapping:
                 print(f"  {m['name']:<28} {m['family']:<14} → {m['path']}", file=stream)
             for q in questions:
@@ -738,7 +764,7 @@ def run_build(prj, live_path, write=False, out=None, as_json=False, stream=None)
         for c in questions:
             print(f"вопрос  {_describe(c)}" + (f" — {c.note}" if c.note else ""), file=stream)
         if done:
-            print(f"записано: {wrote}; дальше — контраст пар и ds_build build {prj.slug}" if wrote else
+            print(f"записано: {wrote}; дальше — {after_lift(prj.slug)}" if wrote else
                   "без записи: --write — по месту, --out DIR — в копию", file=stream)
     return F.EXIT_OK
 
@@ -910,13 +936,23 @@ def _selftest():
                    len(items) == 6 and all(f.rule == "R-FRESH-001" and f.severity == "error" for f in items)
                    and "--color-accent-solid" in msgs and "[dark]" in msgs and ".body" in msgs and "space-3xl" in msgs
                    and "size-control-lg" in msgs)
+            acc = next((f for f in items if "--color-accent-solid" in f.message and "[light]" in f.message), None)
+            check_("алиас роли: сообщение — правка заказчика, не поднятая в токены, с обеими дорогами; совет — роль "
+                   "(--write), примитив (руками) и хвост: контраст пар, ds_build build, публикация ДС",
+                   acc is not None and acc.message.startswith("правка заказчика на странице артефакта не поднята в "
+                                                              "токены: ") and "две дороги" in acc.message
+                   and "роль: ds_sync build" in acc.fix and "примитив: правка пути primitive." in acc.fix
+                   and all(x in acc.fix for x in ("контраста пар", "ds_build build", "публикация ДС")))
             before = prj.tokens_path.read_text(encoding="utf-8")
             buf = __import__("io").StringIO()
             run_build(prj, live_p, stream=buf)
-            check_("build без --write — только предложение, токены не тронуты",
+            check_("build без --write — только предложение с обеими дорогами у алиаса, токены не тронуты",
                    prj.tokens_path.read_text(encoding="utf-8") == before and "правка" in buf.getvalue()
-                   and "вопрос" in buf.getvalue())
-            run_build(prj, live_p, write=True, stream=__import__("io").StringIO())
+                   and "вопрос" in buf.getvalue() and "две дороги" in buf.getvalue())
+            buf = __import__("io").StringIO()
+            run_build(prj, live_p, write=True, stream=buf)
+            check_("build --write: дальше — контраст пар, ds_build build, публикация ДС",
+                   "дальше — пересчёт контраста пар" in buf.getvalue() and "публикация ДС" in buf.getvalue())
             after = prj.tokens_path.read_text(encoding="utf-8")
             changed = [ln for ln in after.splitlines() if ln not in before.splitlines()]
             check_(f"build --write: правится только поднятое ({len(changed)} строк), алиас роли → литерал",

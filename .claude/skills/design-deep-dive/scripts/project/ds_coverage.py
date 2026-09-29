@@ -19,7 +19,9 @@ id `extensions` карты решений `design/system.yaml`; его комп�
 брифа на вид) `hover` не требуется. Карточка компонента — в группе словаря (`@dsCard group` = `components.yaml#groups`).
 
     ds_coverage check <slug> [<surface>] [--repo DIR] [--stage ds-components|mockup] [--json]   находки
-    ds_coverage show  <slug> [<surface>] [--repo DIR] [--json]    таблица покрытия: тип, где стоит, ключ, компонент
+    ds_coverage show  <slug> [<surface>] [--repo DIR] [--json]    таблица покрытия со строкой заголовка:
+        поверхность, тип, ключ (components · extensions), компонент, итог (ok · нет в артефакте · нет: состояния ·
+        нет ключа), где стоит (экраны или страницы)
     ds_coverage --selftest                                         фикстуры cabinet-ds, minimal и схемы форм, без сети
 Без <surface> — все поверхности кабинета и сайта проекта. Из Python: `coverage(...)` → строки покрытия,
 `form_errors(kind, data)` → ошибки формы уровня продукта по схеме `kb/common/<kind>.schema.yaml` (brand · system ·
@@ -369,7 +371,7 @@ class Coverage:
             if not self.system.exists:
                 listed = ", ".join(sorted(uses))
                 self.add(self.severity(surface), "system", sysp, f"нет карты решений design/system.yaml: "
-                         f"{len(uses)} типов без компонента ДС ({listed})", surface,
+                         f"типы без компонента ДС — {len(uses)} ({listed})", surface,
                          f"карта решений — этап design-system / ds-components: /design-deep-dive {self.slug}")
                 continue
             for t in sorted(uses):
@@ -535,12 +537,15 @@ def show(cov, as_json=False, out=None):
         print(json.dumps({"project": cov.slug, "rows": rows, "uncovered": uncovered}, ensure_ascii=False, indent=1),
               file=out)
         return
+    line = "{:<12} {:<16} {:<11} {:<16} {:<16} {}"
+    print(line.format("поверхность", "тип", "ключ", "компонент", "итог", "где стоит"), file=out)
     for r in rows:
         mark = "ok" if r["artifact"] and not r["missing"] else ("нет в артефакте" if not r["artifact"] else
                                                                   "нет: " + ", ".join(r["missing"]))
-        print(f"{r['surface']:<10} {r['type']:<16} {r['key'] or '—':<11} {r['component'] or '—':<16} {mark}", file=out)
+        print(line.format(r["surface"], r["type"], r["key"] or "—", r["component"] or "—", mark,
+                          ", ".join(r["where"])), file=out)
     for u in uncovered:
-        print(f"{u['surface']:<10} {u['type']:<16} {'—':<11} {'—':<16} нет ключа ({', '.join(u['where'])})", file=out)
+        print(line.format(u["surface"], u["type"], "—", "—", "нет ключа", ", ".join(u["where"])), file=out)
 
 
 # ------------------------------------------------------------------ вызов
@@ -665,6 +670,13 @@ def _selftest():
         check_("одна карточка Callout закрывает Alert и Banner; AddressMap — через extensions",
                {r.use.type for r in cov.rows if r.component == "Callout"} == {"Alert", "Banner"}
                and any(r.key == "extensions" and r.use.type == "AddressMap" for r in cov.rows))
+        buf = __import__("io").StringIO()
+        show(cov, out=buf)
+        lines = buf.getvalue().splitlines()
+        table = next((x for x in lines if x.split()[1:2] == ["Table"]), "")
+        check_("show: строка заголовка с колонками справки, у строки типа — экраны, где он стоит",
+               lines and lines[0].split() == ["поверхность", "тип", "ключ", "компонент", "итог", "где", "стоит"]
+               and len(lines) == 19 and table.split()[-2:] == ["ok", "requests-list"])
         with tempfile.TemporaryDirectory(prefix="ddd-cov-cwd-") as cwd:
             r = subprocess.run([sys.executable, str(Path(__file__).resolve()), "check", slug, "--repo", str(root),
                                 "--json"], cwd=cwd, capture_output=True, text=True)
@@ -736,7 +748,7 @@ def _selftest():
         sysp.unlink()
         items = coverage(slug, root).rep.items
         check_("нет system.yaml → одна находка на поверхность со списком типов",
-               len(items) == 1 and "18 типов" in items[0].message)
+               len(items) == 1 and "типы без компонента ДС — 18" in items[0].message)
     # 8. сайт: типы слотов действий и форм планов
     with fixture_project.built("minimal") as fx:
         cov = coverage(fx.slug, fx.root, surface="promo")
