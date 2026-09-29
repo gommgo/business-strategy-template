@@ -11,7 +11,7 @@ status: not-ready
 
 sources:
   - {path: design/brand.yaml, status: none, sha256: c5f1c1f718ff90d66caf785c5d75fdb671ba3baa4345a2f0da3117463053e633}
-  - {path: design/promo/art-direction.json, status: proposed, sha256: 6b5e670fa0f77d21498aaae8f1bf55348155e554cef9ae50dac090de90ae5245}
+  - {path: design/promo/art-direction.json, status: proposed, sha256: 974ba01d631e84bb61e305705524a9466d7cc8435414f338751b9d497f9cefd8}
   - {path: design/promo/motion/home.motion-spec.yaml, status: proposed, sha256: e5482fb41559a60870e3a300abca7fbf45d191057b68463a683371cee15e8033}
   - {path: design/system.yaml, status: approved, sha256: c414ca2e032febbd863cba39ec74aa6cbc4e6601e702fa8fca70037fca899091}
   - {path: facts.yaml, status: draft, sha256: 83043b89823c201309b5e3a8f6883e32c4816a24624d7d3f701913fdd2a1a610}
