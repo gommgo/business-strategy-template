@@ -2475,6 +2475,9 @@ def cmd_build(call, maps, today):
         stage = (read_manifest(inp / INPUT)[0] or {}).get("stage")
     if stage not in STAGES:
         raise F.ToolError(f"нужен --stage: {' · '.join(STAGES)} (входа с этапом ещё нет)")
+    if stage == "motion" and call.surf.app:
+        raise F.ToolError("у кабинета этапа движения нет: отклик компонентов — токены движения ДС "
+                          "(docs/projects/_template/design/README.md § Движение)")
     ctx = assemble(call.slug, call.surf, call.repo, stage, maps, today)
     items = ctx.rep.items
     if ctx.blocked:
