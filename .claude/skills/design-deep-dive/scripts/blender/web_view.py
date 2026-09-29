@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Проверка 3D в браузере: GLB в three.js или готовая страница — через headless Chromium на реальной видеокарте.
 
+САМОПРОВЕРКА
+    python3 web_view.py --selftest     # режим страницы на локальной папке: GSAP по рантайму
+
 РЕЖИМ МОДЕЛИ
     python3 web_view.py model.glb OUT_DIR [--three 0.186.0] [--views 4|turntable:8] [--size 1200x800]
         [--tone agx|neutral|aces|none] [--exposure 1.0] [--env room|none|file.hdr] [--bg #RRGGBB|transparent]
-        [--anim] [--frames 120] [--gpu gl|vulkan|swiftshader]
+        [--anim] [--frames 120] [--gpu gl|vulkan|swiftshader] [--no-lock]
     Грузит модель через GLTFLoader (+ DRACOLoader, KTX2Loader, MeshoptDecoder с jsDelivr той же версии three),
     кадрирует по Box3, снимает ракурсы (та же конвенция, что render_views.py: азимут 0 — вид спереди; Blender −Y
     становится +Z в glTF), собирает stats.json: время загрузки, ревизия three, строка GPU, draw calls и
@@ -28,18 +31,28 @@
     То же, что режим страницы, плюс: журнал сети (вес по категориям: 3D-модели .glb/.gltf/.bin/.drc,
     текстуры .ktx2/.basis/.hdr/.exr, картинки, видео, JS, WASM, шрифты; топ-20 самых тяжёлых ответов),
     определение движков и библиотек (window.__THREE__ → ревизия three.js, BABYLON, PlayCanvas, Spline, model-viewer,
-    Needle Engine, GSAP, Lenis, Unicorn Studio, Webflow, Framer), LCP/CLS/долгие задачи через PerformanceObserver.
-    --throttle: CPU ×4 и сеть «медленный 4G» (150 мс RTT, 1,6 Мбит/с) через CDP — ориентир для мобильного
-    первого экрана. Сайт открывается как есть: куки-баннеры и заглушки видны на скриншотах.
+    Needle Engine, Lenis, Unicorn Studio, Webflow, Framer; GSAP и ScrollTrigger — по рантайму: window.gsapVersions,
+    свойство _gsap у элементов, .pin-spacer — бандл глобал gsap не ставит), LCP/CLS/долгие задачи через PerformanceObserver.
+    --throttle: CPU и сеть телефона лаборатории (budgets.yaml site conditions.lab_mobile: CPU ×4, 150 мс RTT, 1,6 Мбит/с)
+    через CDP — ориентир для мобильного первого экрана. Сайт открывается как есть: куки-баннеры и заглушки видны на
+    скриншотах.
+
+Замер кадров — на тихой машине: утилита берёт общий тяжёлый замок и замок браузера (page_gates.heavy_lock; --no-lock —
+обёртка их уже держит). Код репозитория запускает утилиту соседним чекаутом
+../strategy/.claude/skills/design-deep-dive/scripts/blender/web_view.py.
 
 GPU: по умолчанию --use-angle=gl (Intel Iris Xe через Mesa). swiftshader — программный, для сравнения.
 Время кадра в режиме модели — CPU-время render() + gl.finish(); ANGLE в headless может не ждать GPU, поэтому
 это ориентир для сравнения вариантов между собой, а не бенчмарк устройства. FPS в режиме страницы — по
 requestAnimationFrame (упирается в 60 при vsync).
 """
-import functools, http.server, json, os, shutil, socketserver, sys, tempfile, threading, time
+import contextlib, functools, http.server, json, os, shutil, socketserver, sys, tempfile, threading, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+import kbpaths  # noqa: E402
+kbpaths.use("site")
+import page_gates as PG  # noqa: E402  условия замера и тишина машины (budgets.yaml site)
 
 GPU_ARGS = {
     "gl": ["--use-gl=angle", "--use-angle=gl", "--ignore-gpu-blocklist", "--enable-gpu"],
@@ -154,8 +167,12 @@ DETECT = r"""(() => { const r = {};
   if (window.pc && window.pc.version) r.playcanvas = window.pc.version;
   if (customElements.get('model-viewer')) r.model_viewer = true;
   if (customElements.get('needle-engine')) r.needle = true;
-  if (window.gsap) r.gsap = window.gsap.version || true;
-  if (window.ScrollTrigger) r.scrolltrigger = true;
+  // GSAP — по рантайму: бандл глобал window.gsap не ставит; признаки — gsapVersions, _gsap у элементов, .pin-spacer
+  const gv = Array.isArray(window.gsapVersions) ? window.gsapVersions.slice(0, 4).map(String) : [];
+  let gt = 0; try { for (const el of document.querySelectorAll('body *')) { if (el._gsap) gt++; if (gt >= 500) break; } } catch (e) {}
+  const pins = document.querySelectorAll('.pin-spacer').length;
+  if (window.gsap || gv.length || gt || pins) { r.gsap = (window.gsap && window.gsap.version) || gv[0] || true; r.gsap_targets = gt; r.pin_spacers = pins; }
+  if (window.ScrollTrigger || pins) r.scrolltrigger = true;
   if (window.lenis || document.documentElement.classList.contains('lenis')) r.lenis = true;
   if (window.UnicornStudio) r.unicorn_studio = true;
   if (window.Webflow) r.webflow = true;
@@ -258,8 +275,9 @@ def model_mode(a):
     httpd, port = serve(tmp)
     stats = {"model": model, "file_kb": round(os.path.getsize(model) / 1024, 1), "config": cfg}
     shots = []
+    lock = contextlib.nullcontext() if "--no-lock" in a else PG.heavy_lock(domains=("blender",))
     try:
-        with sync_playwright() as pw:
+        with lock, sync_playwright() as pw:
             b = pw.chromium.launch(headless=True, args=GPU_ARGS[opt(a, "--gpu", "gl")])
             p = b.new_page(viewport={"width": w, "height": h})
             logs = []
@@ -314,8 +332,9 @@ def page_mode(a):
     httpd, port = (None, None) if url_mode else serve(os.path.dirname(target))
     stats = {"target": target, "viewport": [w, h], "mobile": mobile, "throttle": "--throttle" in a, "shots": []}
     net = []
+    lock = contextlib.nullcontext() if "--no-lock" in a else PG.heavy_lock(domains=("blender",))
     try:
-        with sync_playwright() as pw:
+        with lock, sync_playwright() as pw:
             b = pw.chromium.launch(headless=True, args=GPU_ARGS[opt(a, "--gpu", "gl")])
             ctx = b.new_context(viewport={"width": w, "height": h}, device_scale_factor=3 if mobile else 1,
                                 is_mobile=mobile, has_touch=mobile)
@@ -343,9 +362,9 @@ def page_mode(a):
             if "--throttle" in a:
                 cdp = ctx.new_cdp_session(p)
                 cdp.send("Network.enable")
-                cdp.send("Network.emulateNetworkConditions", {"offline": False, "latency": 150,
-                         "downloadThroughput": 1.6 * 1024 * 1024 / 8, "uploadThroughput": 750 * 1024 / 8})
-                cdp.send("Emulation.setCPUThrottlingRate", {"rate": 4})
+                cond = PG.conditions()
+                cdp.send("Network.emulateNetworkConditions", PG.cdp_network(cond))
+                cdp.send("Emulation.setCPUThrottlingRate", {"rate": cond["mobile"]["cpu_slowdown"]})
             t0 = time.time()
             dest = target if url_mode else f"http://127.0.0.1:{port}/{os.path.basename(target)}"
             try:
@@ -414,8 +433,42 @@ def page_mode(a):
     print(json.dumps(short, ensure_ascii=False, indent=1))
 
 
+SELFTEST_HTML = """<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>web_view selftest</title></head><body>
+<h1>Проверка страницы</h1><div class="pin-spacer"><div id="pinned">закреплённый блок</div></div><div style="height:1200px"></div>
+<script>window.gsapVersions = ["3.12.5"]; document.getElementById("pinned")._gsap = {id: 1}; window.__ready = true;</script></body></html>"""
+
+
+def selftest():
+    """Режим страницы на локальной папке: GSAP и ScrollTrigger — по рантайму (gsapVersions, _gsap, .pin-spacer без
+    window.gsap); отчёт page_stats.json."""
+    import subprocess
+    ok = True
+
+    def check(msg, cond):
+        nonlocal ok
+        ok = ok and bool(cond)
+        print(("OK   " if cond else "FAIL ") + msg)
+    with tempfile.TemporaryDirectory() as td:
+        page = os.path.join(td, "index.html")
+        with open(page, "w", encoding="utf-8") as f:
+            f.write(SELFTEST_HTML)
+        out = os.path.join(td, "out")
+        r = subprocess.run([sys.executable, os.path.abspath(__file__), "--page", page, out, "--scroll", "0", "--wait", "800", "--frames", "10",
+                            "--gpu", "swiftshader"], capture_output=True, text=True, timeout=240, env=kbpaths.playwright_env())
+        fp = os.path.join(out, "page_stats.json")
+        st = json.load(open(fp, encoding="utf-8")) if os.path.exists(fp) else {}
+        check(f"режим страницы: отчёт page_stats.json (код {r.returncode}) {r.stderr[-200:] if not st else ''}", bool(st))
+        det = st.get("detected") or {}
+        check("GSAP по рантайму: gsapVersions, _gsap, .pin-spacer без window.gsap",
+              det.get("gsap") == "3.12.5" and det.get("gsap_targets", 0) >= 1 and det.get("pin_spacers") == 1 and det.get("scrolltrigger"))
+    print("web_view selftest:", "OK" if ok else "FAIL")
+    return 0 if ok else 1
+
+
 def main():
     a = sys.argv[1:]
+    if a and a[0] == "--selftest":
+        sys.exit(selftest())
     if not a or a[0] in ("-h", "--help"):
         print(__doc__); sys.exit(0)
     if "--page" in a or "--url" in a:

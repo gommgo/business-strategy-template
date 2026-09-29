@@ -1,66 +1,232 @@
 #!/usr/bin/env python3
-"""gate_check.py — общий модуль ворот качества страницы с 3D по отчёту site_probe.py (агент U, волна 4 — перенос
-рекомендации X §12: один модуль вместо кода F1 `09-web-runtime/05-performance-a11y-fallbacks.md` §7.2 и копии K
-`99-raw/experiments/K/02-hero-page/gates.py`; импортируется `qa_pipeline.py page` вместо собственной копии).
+"""gate_check.py — ворота страницы с 3D по отчёту зонда site_probe.py (probe*.json).
 
-  from gate_check import gate_check
-  rows = gate_check("probe_quick.json", mode="desktop", reduced=False)   # [(проверка, значение, порог, прошла ли), …]
-  python3 gate_check.py probe_quick.json [mobile|desktop] [--reduced]    # CLI для разовой проверки
+Пороги и серьёзность — kb/blender/09-web-runtime/page-3d-gates.yaml (одно место чисел ворот 3D; описание — 09/05 §7.2).
+Ворота 3D владеют долей и поведением 3D: LCP-элемент не canvas (B), 3D-ассеты (B), вызовы отрисовки и DPR холста (S), первый
+кадр 3D (S), ошибки консоли (B), reduce — 0 вызовов и движение в покое (B), вклад 3D в TBT (S) — разность TBT страницы с
+прогоном «постер без 3D» (site_probe.py --no-3d, ключ --baseline). Метрики страницы целиком — LCP, CLS, TBT и вес — в отчёте
+зеркалом (D) строки-владельца page-gates.yaml: с --profile <page_type>@L<n> — против порога профиля страницы (page_gates.py),
+без профиля — только значение. Вердикт страницы ставит page_gates.py (--gate3d FILE): провал ворот 3D там — SG-WEIGHT-08 (D).
 
-Правки волны 4 (U, по решению аудита X §12):
-  - «3D-ассеты, КБ» (`kb3d`) теперь считает и категорию site_probe.py "bin", не только "model3d"+"texture3d":
-    glTF-буферы .bin, отданные отдельно от .glb, site_probe.py относит к "model3d" только если путь запроса
-    содержит models/meshes/geometr/gltf/glb/3d — иначе они попадают в общую "bin" (там же .dat/.raw/.bytes/.gz/.br)
-    и раньше не входили в бюджет 3D (находка K/04: страница частиц — 412 КБ .bin вне подсчёта при 805 КБ страницы).
-  - TBT (десктоп) — решение R20 аудита X: без компрессированных 3D-текстур (KTX2 и т. п., категория "texture3d")
-    порог остаётся 150 мс; если на странице были запросы категории "texture3d" (транскодер KTX2 разжимал текстуры
-    на CPU) — порог мягче, 200 мс (эталон hero-lazy: 172 мс проходит только с этой поправкой; F1 `09/05 §7.2`,
-    J/03, K/02). Телефон — 300 мс при CPU×4, без изменений.
+  gate_check.py probe_quick.json [mobile|desktop] [--reduced] [--baseline probe_no3d.json] [--profile landing-product@L1]
+      [--gates FILE] [--json]
+  gate_check.py --selftest
+  from gate_check import gate_check, evaluate
+  rows = gate_check("probe_quick.json", mode="desktop", reduced=False)   # [(проверка, значение, порог, прошла ли)] — ворота 3D
+  rep = evaluate("probe_quick.json", "desktop", baseline="probe_no3d.json", profile="landing-product@L1")   # полный отчёт
+
+Код выхода: 0 — провалов B и S ворот 3D нет, 1 — есть (зеркала на код не влияют), 2 — ошибка вызова.
+Код репозитория запускает утилиту соседним чекаутом: ../strategy/.claude/skills/design-deep-dive/scripts/blender/gate_check.py.
 """
 import json
+import os
 import sys
 
-LIMITS = {"mobile": dict(lcp=2500, tbt=300, kb=3072, kb3d=820, dc=30, dpr=1.5),
-          "desktop": dict(lcp=1000, tbt=150, kb=7168, kb3d=1536, dc=60, dpr=2.0)}
-TBT_DESKTOP_KTX2 = 200        # R20: десктоп с транскодером KTX2 — мягче порог, чем базовые 150 мс
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib
+import kbpaths  # noqa: E402
+
+GATES = str(kbpaths.kb("blender", "09-web-runtime", "page-3d-gates.yaml"))
+MODES = ("mobile", "desktop")
 
 
-def gate_check(probe_path, mode="mobile", reduced=False):
-    """Список (проверка, значение, порог, прошла ли) по probe*.json из site_probe.py."""
-    st = json.load(open(probe_path)); lim = LIMITS[mode]
-    v = st.get("vitals_pre_scroll") or {}; lcp = v.get("lcp") or {}; net = st.get("network") or {}
-    cat = net.get("by_category") or {}; idle = st.get("idle") or {}
-    kb3d = sum((cat.get(k) or {}).get("transfer_kb", 0) for k in ("model3d", "texture3d", "bin"))
-    canv = [c for c in (st.get("detected") or {}).get("canvases", []) if c.get("vis") and c.get("css", [0])[0]]
-    dpr = max((c["w"] / c["css"][0] for c in canv), default=0)
-    rows = [("LCP-элемент не canvas", lcp.get("tag"), "не CANVAS", lcp.get("tag") not in (None, "CANVAS")),
-            ("LCP, мс", lcp.get("t"), lim["lcp"], (lcp.get("t") or 1e9) <= lim["lcp"]),
-            ("CLS", v.get("cls"), 0.1, (v.get("cls") or 0) <= 0.1),
-            ("ошибки консоли", st.get("console_errors"), 0, st.get("console_errors") == 0)]
-    if reduced:
-        rows.append(("reduce: вызовов в покое", idle.get("dc_median"), 0, idle.get("dc_median") == 0))
-        rows.append(("reduce: движение в покое, %", st.get("idle_motion_pct"), 0.05, (st.get("idle_motion_pct") or 0) <= 0.05))
-    else:
-        ktx2 = (cat.get("texture3d") or {}).get("n", 0) > 0
-        tbt_limit = TBT_DESKTOP_KTX2 if (mode == "desktop" and ktx2) else lim["tbt"]
-        rows += [("TBT, мс", v.get("tbt_ms"), tbt_limit, (v.get("tbt_ms") or 0) <= tbt_limit),
-                 ("передано, КБ", net.get("transfer_kb"), lim["kb"], (net.get("transfer_kb") or 0) <= lim["kb"]),
-                 ("3D-ассеты, КБ", round(kb3d, 1), lim["kb3d"], kb3d <= lim["kb3d"]),
-                 ("вызовов в кадре", idle.get("dc_median"), lim["dc"], (idle.get("dc_median") or 0) <= lim["dc"]),
-                 ("DPR canvas", round(dpr, 2), lim["dpr"], dpr <= lim["dpr"] + 0.01)]
-    return rows
+def load_gates(path=None):
+    import yaml
+    with open(path or GATES, encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def _load(p):
+    if isinstance(p, dict):
+        return p
+    with open(p, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _dig(d, path):
+    cur = d
+    for k in path.split("."):
+        cur = cur.get(k) if isinstance(cur, dict) else None
+        if cur is None:
+            return None
+    return cur
+
+
+def _limit(g, mode, ktx2=False):
+    lim = g.get("limit")
+    if ktx2 and isinstance(g.get("limit_ktx2"), dict) and mode in g["limit_ktx2"]:
+        return g["limit_ktx2"][mode]
+    return lim.get(mode) if isinstance(lim, dict) else lim
+
+
+def measure(st, key, base=None):
+    """Значение проверки по отчёту зонда: key — ключ строки page-3d-gates.yaml."""
+    v = st.get("vitals_pre_scroll") or {}
+    net = st.get("network") or {}
+    cat = net.get("by_category") or {}
+    idle = st.get("idle") or {}
+    if key == "lcp_not_canvas":
+        return (v.get("lcp") or {}).get("tag")
+    if key == "kb3d":
+        return round(sum((cat.get(k) or {}).get("transfer_kb", 0) for k in ("model3d", "texture3d", "bin")), 1)
+    if key in ("dc", "reduce_dc"):
+        return idle.get("dc_median")
+    if key == "dpr":
+        canv = [c for c in (st.get("detected") or {}).get("canvases", []) if c.get("vis") and c.get("css", [0])[0]]
+        return round(max((c["w"] / c["css"][0] for c in canv), default=0), 2)
+    if key == "first_frame":
+        return v.get("first_draw_ms")
+    if key == "reduce_idle":
+        return st.get("idle_motion_pct")
+    if key == "console":
+        return st.get("console_errors")
+    if key == "tbt3d":
+        if base is None or v.get("tbt_ms") is None:
+            return None
+        return max(0, v["tbt_ms"] - ((base.get("vitals_pre_scroll") or {}).get("tbt_ms") or 0))
+    raise KeyError(key)
+
+
+def _profile(profile):
+    """Профиль страницы site (page_gates.py) и пороги строк-владельцев page-gates.yaml; нет профиля — (None, None)."""
+    if not profile:
+        return None, None
+    kbpaths.use("site")
+    import page_gates as PG
+    return PG.resolve_profile(profile), PG
+
+
+def evaluate(probe, mode="mobile", reduced=False, baseline=None, profile=None, gates=None):
+    """Полный отчёт ворот 3D: строки ворот (id, key, check, value, limit, severity, status) и зеркала метрик страницы
+    (mirror — id строки-владельца page-gates.yaml, severity D)."""
+    st, doc = _load(probe), (gates if isinstance(gates, dict) else load_gates(gates))
+    base = _load(baseline) if baseline else None
+    cat = (st.get("network") or {}).get("by_category") or {}
+    ktx2 = (cat.get("texture3d") or {}).get("n", 0) > 0
+    rows = []
+    for g in doc.get("gates") or []:
+        if bool(g.get("reduced")) != bool(reduced) and g["key"] not in ("lcp_not_canvas", "console"):
+            continue
+        val = measure(st, g["key"], base)
+        lim = _limit(g, mode, ktx2 and g["key"] == "tbt3d")
+        if g["key"] == "lcp_not_canvas":
+            ok, lim = (val != "CANVAS"), "не CANVAS"
+            status = "SKIP" if val is None else ("PASS" if ok else "FAIL")
+        elif val is None:
+            status = "SKIP"
+        elif g["key"] == "dpr":
+            status = "PASS" if val <= lim + 0.01 else "FAIL"
+        else:
+            status = "PASS" if val <= lim else "FAIL"
+        note = ""
+        if g["key"] == "tbt3d" and base is None:
+            note = "нужен прогон «постер без 3D»: site_probe.py … --no-3d и ключ --baseline"
+        elif g["key"] == "tbt3d" and ktx2 and mode == "desktop":
+            note = "десктоп с 3D-текстурами (транскодер KTX2) — limit_ktx2"
+        rows.append({"id": g["id"], "key": g["key"], "check": g["check"], "value": val, "limit": lim, "severity": g["severity"],
+                     "status": status, "note": note or g.get("note", "")})
+    prof, PG = _profile(profile)
+    for m in doc.get("mirrors") or []:
+        owner = m["owner"][mode] if isinstance(m["owner"], dict) else m["owner"]
+        val = _dig(st, m["field"])
+        lim = None
+        if PG is not None:
+            lim = PG.owner_threshold(prof, owner, mode)          # threshold.S строки-владельца page-gates.yaml по профилю
+        status = "SKIP" if (val is None or lim is None) else ("PASS" if val <= lim else "FAIL")
+        rows.append({"id": owner, "key": m["key"], "check": m["check"], "value": val, "limit": lim,
+                     "severity": "D", "status": status, "mirror": owner,
+                     "note": "зеркало: вердикт — ворота страницы (page_gates.py)" + ("" if prof else "; без --profile порога нет")})
+    owned = [r for r in rows if not r.get("mirror")]
+    summary = {k: sum(1 for r in rows if r["status"] == "FAIL" and r["severity"] == k) for k in ("B", "S", "D")}
+    summary["blocked"] = any(r["status"] == "FAIL" and r["severity"] == "B" for r in owned)
+    return {"tool": "gate_check.py", "probe": probe if isinstance(probe, str) else None, "mode": mode, "reduced": bool(reduced),
+            "baseline": baseline if isinstance(baseline, str) else None, "profile": (prof or {}).get("id"),
+            "gates": gates if isinstance(gates, str) else GATES, "rows": rows, "summary": summary}
+
+
+def gate_check(probe_path, mode="mobile", reduced=False, baseline=None):
+    """Список (проверка, значение, порог, прошла ли) — строки ворот 3D без зеркал; SKIP считается прошедшей."""
+    rep = evaluate(probe_path, mode, reduced, baseline)
+    return [(r["check"], r["value"], r["limit"], r["status"] != "FAIL") for r in rep["rows"] if not r.get("mirror")]
+
+
+def selftest():
+    """Без браузера: отчёты зонда из словарей, пороги из YAML (в том числе правленая копия), зеркала с профилем site."""
+    import copy
+    import tempfile
+    ok = True
+
+    def check(msg, cond):
+        nonlocal ok
+        ok = ok and bool(cond)
+        print(("OK   " if cond else "FAIL ") + msg)
+    doc = load_gates()
+    probe = {"vitals_pre_scroll": {"lcp": {"tag": "IMG", "t": 900}, "cls": 0.02, "tbt_ms": 420, "first_draw_ms": 1500},
+             "network": {"transfer_kb": 2900.0, "by_category": {"model3d": {"n": 1, "transfer_kb": 700.0}, "texture3d": {"n": 2, "transfer_kb": 300.0}}},
+             "idle": {"dc_median": 12}, "detected": {"canvases": [{"w": 960, "css": [640, 480], "vis": True}]}, "console_errors": 0}
+    base = {"vitals_pre_scroll": {"tbt_ms": 230}}
+    rep = evaluate(probe, "desktop", baseline=base, profile="landing-product@L1")
+    by = {r["key"]: r for r in rep["rows"]}
+    check("пороги из page-3d-gates.yaml: 3D-ассеты десктопа 1 536, вызовов 60", by["kb3d"]["limit"] == 1536 and by["dc"]["limit"] == 60)
+    check("вклад 3D = 420 − 230 = 190 мс; с 3D-текстурами десктоп — предел 200 → PASS", by["tbt3d"]["value"] == 190 and by["tbt3d"]["limit"] == 200
+          and by["tbt3d"]["status"] == "PASS")
+    check("TBT страницы 420 — зеркало D строки SG-PERF-05 против профиля (L1 десктоп 200) → FAIL D",
+          by["tbt"]["mirror"] == "SG-PERF-05" and by["tbt"]["limit"] == 200 and by["tbt"]["status"] == "FAIL" and by["tbt"]["severity"] == "D")
+    check("LCP страницы — зеркало SG-PERF-02, вес — зеркало SG-WEIGHT-02; ворота 3D не блокированы",
+          by["lcp"]["mirror"] == "SG-PERF-02" and by["transfer"]["mirror"] == "SG-WEIGHT-02" and not rep["summary"]["blocked"])
+    check("DPR 1,5 ≤ 2 десктопа; первый кадр 1 500 ≤ 2 000", by["dpr"]["status"] == "PASS" and by["first_frame"]["status"] == "PASS")
+    p2 = copy.deepcopy(probe)
+    p2["vitals_pre_scroll"]["lcp"]["tag"] = "CANVAS"
+    p2["network"]["by_category"]["model3d"]["transfer_kb"] = 1500.0
+    r2 = {r["key"]: r for r in evaluate(p2, "desktop")["rows"]}
+    check("LCP-элемент canvas → B; 3D-ассеты 1 800 > 1 536 → B", r2["lcp_not_canvas"]["status"] == "FAIL" and r2["kb3d"]["status"] == "FAIL"
+          and r2["kb3d"]["severity"] == "B")
+    check("без прогона без 3D вклад 3D не считается (SKIP с подсказкой)", r2["tbt3d"]["status"] == "SKIP" and "--no-3d" in r2["tbt3d"]["note"])
+    check("без --profile зеркало без порога (SKIP)", r2["lcp"]["status"] == "SKIP" and r2["lcp"]["limit"] is None)
+    rr = {r["key"]: r for r in evaluate({"idle": {"dc_median": 3}, "idle_motion_pct": 0.2, "console_errors": 0, "vitals_pre_scroll": {"lcp": {"tag": "IMG"}}},
+                                        "mobile", reduced=True)["rows"]}
+    check("reduce: 3 вызова и 0,2 % в покое → B", rr["reduce_dc"]["status"] == "FAIL" and rr["reduce_idle"]["status"] == "FAIL"
+          and "kb3d" not in rr)
+    legacy = gate_check(probe, "desktop", baseline=base)
+    check("gate_check(): кортежи (проверка, значение, порог, прошла ли) — только ворота 3D", legacy and all(len(t) == 4 for t in legacy)
+          and not any("страницы" in t[0] for t in legacy))
+    with tempfile.TemporaryDirectory() as td:
+        d2 = copy.deepcopy(doc)
+        next(g for g in d2["gates"] if g["key"] == "kb3d")["limit"]["desktop"] = 900
+        import yaml
+        pth = os.path.join(td, "gates.yaml")
+        with open(pth, "w", encoding="utf-8") as f:
+            yaml.safe_dump(d2, f, allow_unicode=True)
+        r3 = {r["key"]: r for r in evaluate(probe, "desktop", gates=pth)["rows"]}
+        check("порог читается из YAML, а не из кода (правленая копия: 900 → FAIL)", r3["kb3d"]["limit"] == 900 and r3["kb3d"]["status"] == "FAIL")
+    src = open(os.path.abspath(__file__), encoding="utf-8").read().split("\ndef selftest")[0]
+    check("в коде нет чисел порогов ворот 3D", "LIMITS" not in src and "820" not in src and "1536" not in src and "3072" not in src)
+    print("gate_check selftest:", "OK" if ok else "FAIL")
+    return 0 if ok else 1
 
 
 def main():
     a = sys.argv[1:]
     if not a or a[0] in ("-h", "--help"):
         print(__doc__); sys.exit(0)
-    mode = a[1] if len(a) > 1 and a[1] in LIMITS else "mobile"
-    reduced = "--reduced" in a
-    rows = gate_check(a[0], mode, reduced)
-    for name, val, limit, ok in rows:
-        print("OK  " if ok else "FAIL", name, val, limit)
-    sys.exit(0 if all(r[3] for r in rows) else 1)
+    if a[0] == "--selftest":
+        sys.exit(selftest())
+
+    def opt(name):
+        return a[a.index(name) + 1] if name in a and a.index(name) + 1 < len(a) else None
+    mode = a[1] if len(a) > 1 and a[1] in MODES else "mobile"
+    try:
+        rep = evaluate(a[0], mode, "--reduced" in a, opt("--baseline"), opt("--profile"), opt("--gates"))
+    except (OSError, ValueError, KeyError) as e:
+        print(f"gate_check.py: {e}", file=sys.stderr)
+        sys.exit(2)
+    if "--json" in a:
+        print(json.dumps(rep, ensure_ascii=False, indent=1))
+    else:
+        for r in rep["rows"]:
+            print(f"{r['status']:4} {r['severity']} {r['id']:10} {r['check']}: {r['value']} (порог {r['limit']})"
+                  + (f" — {r['note']}" if r.get("note") else ""))
+        print("итог:", rep["summary"])
+    sys.exit(1 if any(r["status"] == "FAIL" and r["severity"] in ("B", "S") and not r.get("mirror") for r in rep["rows"]) else 0)
 
 
 if __name__ == "__main__":

@@ -2,63 +2,58 @@
 # -*- coding: utf-8 -*-
 """motion_check.py — цикл проверки сборки: запись → кадры → метрики → сверка с motion-spec → ворота эффектов → отчёт.
 
-creative-research, волна 3, агент K, 2026-09-24. Playwright 1.63 (Chromium 153), ffmpeg 7.1, numpy, Pillow, PyYAML.
-VLM движения не видит: скриншот — конечное состояние. Здесь движение проверяется поведением страницы во времени.
+Playwright (Chromium), ffmpeg, numpy, Pillow, PyYAML. VLM движения не видит: скриншот — конечное состояние. Здесь движение
+проверяется поведением страницы во времени. Код репозитория запускает утилиту соседним чекаутом:
+../strategy/.claude/skills/design-deep-dive/scripts/creative/motion_check.py.
 
-Режимы (каждый — отдельный браузер под двумя блокировками, партия ≤ 5 мин; анализ видео — после снятия блокировок):
-  desk  Chromium 1440×900, DPR 1, запись 960×600: сеть по фазам (первый экран = load + --wait, сессия = после прокрутки),
-        LCP (элемент, H1 выпал из LCP — метод E/01), CLS загрузки и прокрутки, TBT, LoAF и rAF при прокрутке, хвост
-        прокрутки, перехват прокрутки (путь колеса), движение на 6-й секунде, петли в видимой зоне по паузам, петли под
-        читаемым текстом, бегущая строка (px/с), колебания 2,5–6 с, петли через 6 с после показа, кнопка паузы (нажать →
-        стоит ли), WebGL (контексты, вызовы отрисовки в покое), CDN, Tab-проход (кольцо, фокус на экране и видим),
-        вспышки WCAG 2.3.1 покадрово 25 к/с, «вау»-переходы, контактные листы.
-  mob   Pixel 7 (412×839, DPR 2,625, тач) + CPU ×4 (CDP): то же без Tab; ширина документа.
+Режимы (каждый — отдельный браузер на тихой машине, партия ≤ 5 мин; анализ видео — после снятия замков):
+  desk  Chromium 1440×900, DPR 1, запись 960×600: сеть по фазам (первый экран = load + окно первого экрана budgets.yaml site,
+        сессия = после прокрутки), LCP (элемент, H1 выпал из LCP — метод E/01), CLS загрузки и прокрутки, TBT, LoAF и rAF при
+        прокрутке, хвост прокрутки, перехват прокрутки (путь колеса), движение на 6-й секунде, прелоадер или входной экран
+        (заставка на весь экран в первые секунды: «Пропустить», длительность), петли в видимой зоне по паузам, петли под
+        читаемым текстом, бегущая строка (px/с), колебания крупных и мелких объектов, петли через 6 с после показа, кнопка
+        паузы (нажать → стоит ли), переключатель «меньше движения» (атрибут data-motion: reduced | full | paused), WebGL
+        (контексты, вызовы отрисовки в покое), CDN, Tab-проход (кольцо, фокус на экране и видим), вспышки WCAG 2.3.1 покадрово
+        25 к/с, «вау»-переходы, контактные листы.
+  mob   телефон (дескриптор и CPU — budgets.yaml conditions.lab_mobile; UA — HeadlessChrome): то же без Tab; ширина документа.
   rm    desk с prefers-reduced-motion: reduce: байты видео, движение первого экрана и по всей записи, бесконечные анимации,
-        вызовы WebGL в покое, скрытое до прокрутки, загружены ли библиотеки эффектов (G).
+        вызовы WebGL в покое, скрытое до прокрутки, загружены ли библиотеки эффектов.
   nojs  JavaScript выключен: H1, текст и призыв видны, кадр не пуст.
   nogl  --disable-webgl --disable-webgl2: первый экран не пуст, H1 виден, ошибки консоли.
 
+Пороги ворот (effect-gates.yaml): число строки, поле limits строки или threshold_ref — ссылка на данные владельца величины:
+путь в уровне ambition-levels.yaml (budgets.effects.*, motion_hints.*), `profile.<путь>` — профиль страницы site
+(budgets.yaml через page_gates.py; с --page-type — профиль <page_type>@<уровень> с исключениями, иначе уровень), метка
+<device> — устройство режима; `effects.yaml#<id>.<путь>` — запись каталога эффектов. Метрики страницы (LCP, TBT, вес,
+шрифты) в воротах эффектов — зеркало D: вердикт им ставят ворота страницы site.
+Отчёт: слой подачи по режимам (JS эффектов, JS 3D, wasm подачи, видео первого экрана) против одного порога уровня
+(EG-WEIGHT-01), картинка первого экрана — ссылкой на бюджет ассета ai-media.
+
 Использование:
-  python3 99-raw/tools/motion_check.py ЦЕЛЬ --level L0|L1|L2 [--out DIR] [--modes desk,mob,rm,nojs,nogl] [--spec motion-spec.yaml]
-          [--gates 09-ai-execution-evaluation/effect-gates.yaml] [--steps 12] [--dwell 1.4] [--wait 5500] [--no-lock]
-          [--keep-video] [--no-video] [--page-type landing-saas] [--effects-js REGEX] [--f83 "h1" ".lead"]
-  python3 99-raw/tools/motion_check.py report --in DIR [--level L1] [--gates FILE]   # пересчёт ворот по сохранённому JSON
-  python3 99-raw/tools/motion_check.py --selftest                                     # без браузера
-ЦЕЛЬ — URL или локальный файл/папка (раздаётся встроенным сервером с Range; вес текста — brotli q11 по файлу, как G и F).
-Выход DIR: results.json (все метрики по режимам), gates.md (ворота: правило → найдено → порог → где), gates.json,
-fix.txt (блок для промта правки, ui 12/04 §3.6), spec.md (сверка с motion-spec, если --spec), sheet_<режим>_NN.jpg.
+  motion_check.py ЦЕЛЬ --level L0|L1|L2 [--page-type landing-saas] [--out DIR] [--modes desk,mob,rm,nojs,nogl]
+          [--spec motion-spec.yaml] [--gates effect-gates.yaml] [--steps 12] [--dwell 1.8] [--wait МС] [--no-lock]
+          [--keep-video] [--no-video] [--effects-js REGEX] [--f83 "h1" ".lead"] [--contrast SEL …] [--root DIR]
+  motion_check.py report --in DIR [--level L1] [--gates FILE]   # пересчёт ворот по сохранённому results.json
+  motion_check.py --selftest                                     # без браузера
+ЦЕЛЬ — URL или локальный файл/папка (раздаётся встроенным сервером с Range; вес текста — brotli q11 по файлу).
+--wait — окно первого экрана после load, мс (по умолчанию — budgets.yaml conditions.first_screen.window_after_load_s).
+Выход DIR (по умолчанию $DDD_HOME/out/creative/motion/<цель>): results.json (все метрики по режимам), gates.md (ворота:
+правило → найдено → порог → где; слой подачи), gates.json (строки ворот, слой подачи), fix.txt (блок для промта правки),
+spec.md (сверка с motion-spec, если --spec), sheet_<режим>_NN.jpg.
 Код выхода: 0 — нет FAIL уровня B; 1 — есть B (или --fail-on serious и есть S); 2 — ошибка запуска.
 
-Контракт DOM для целей motion-spec (предложение I): секция — data-section="<id>" или id="<id>", слот — data-slot, экземпляр
-группы — data-group, элемент момента — data-moment="<id момента>"; иначе selector_hint.
+Контракт DOM для целей motion-spec: секция — data-section="<id>" или id="<id>", слот — data-slot, экземпляр группы —
+data-group, элемент момента — data-moment="<id момента>"; иначе selector_hint.
+Станции скраба: край цели минус линия окна, округление до целого (половина — от нуля), допуск ±tolerance_px включительно
+(motion-spec.schema.json $defs.station).
 Ограничения: headless (rAF ≤ 60 кадров/с, эмуляция ≠ телефон), колесо мыши, а не тач; INP не мерится (сценарий site);
 скринкаст Playwright ≤ 25 к/с — вспышки чаще 12 Гц не видны; GSAP без глобала не виден в getAnimations (длительность
-моментов меряется выборкой стилей цели); WebKit не поддержан в v0.1.
-
-0.1.2 (продолжатель K2, 2026-09-25; ключи и формат вывода прежние, добавлены новые):
-  - пауза записи — два снимка: счётчик WebGL сбрасывается на +0,5 с, снимок на +1,2 с (кадры, нарисованные во время прокрутки
-    и хвоста сглаживания скраба, больше не «петля в покое» — EG-A11Y-09/16/17; ошибка найдена J на L2 «Звено»);
-  - станции: цель-группа (несколько экземпляров) — экземпляр внутри группы якоря или ближайший к линии; скрытая цель — «скрыт»;
-    canvas, video и fixed/sticky-слой ≥ 50 % окна — кадр станции без геометрии; трек цвета/opacity — счёт «изменено ↔ прошли
-    линию»; край — по треку (scale — край напротив transform-origin; маленькая цель ≤ 24 px — центр); станции долей at;
-    в reduce — проверка конечного состояния (final-state);
-  - EG-A11Y-11: JS ≤ 3 КБ br и script[data-motion-toggle] — исключения (переключатель и загрузчик обязаны грузиться и в reduce);
-  - детектор паузы и переключателя видит радиогруппу и select «Движение», [data-motion-toggle], [data-motion-set];
-    тест переключателя: desk — нажать «Меньше» → ≤ 0,3 %/с, 0 вызовов WebGL, 0 бесконечных, видео стоит (EG-A11Y-24);
-    rm — нажать «Полное» → движение есть (EG-A11Y-25);
-  - JS эффектов и 3D — ещё и по содержимому файла (__THREE__, GreenSock, pin-spacer, lenis-smooth, bodymovin, @rive-app…);
-  - CLS: атрибуция сдвигов (узел, откуда → куда), сумма загрузки и прокрутки, наибольшее окно сессии (EG-PERF-11);
-  - сверка с motion-spec: моменты на uniform/canvas и не замеченный скраб — N/A вместо ложного PASS; --version.
-0.1.3 (K2, 2026-09-25, после K/02): --contrast SEL … — худший контраст текста над живым фоном (метод F2 F/14 contrast.py: текст
-  прозрачен, 4 кадра по времени + 5 положений указателя, перцентиль яркости под строками; EG-A11Y-27); --f83 исправлен (page_accept
-  получает адрес своего сервера — у лаборатории F находились стили; ключ no_preference; EG-A11Y-26 автоматом); петля под текстом не
-  считается, если у текста скрим (фон с альфой ≥ 0,6 или backdrop-filter); станции — сводка tip_offset_px/filled (derived.stations).
+моментов меряется выборкой стилей цели); WebKit не поддержан.
 """
 from __future__ import annotations
 
 import argparse
 import base64
-import fcntl
 import functools
 import http.server
 import io
@@ -68,7 +63,6 @@ import mimetypes
 import os
 import re
 import shutil
-import signal
 import socketserver
 import statistics
 import subprocess
@@ -82,11 +76,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
 import kbpaths  # noqa: E402
+kbpaths.use("site")
+import page_gates as PG  # noqa: E402  профиль страницы, условия замера, тишина машины
 ROOT = str(kbpaths.kb("creative"))
 GATES_DEFAULT = os.path.join(ROOT, "09-ai-execution-evaluation", "effect-gates.yaml")
 LEVELS_YAML = os.path.join(ROOT, "01-creative-direction", "ambition-levels.yaml")
-LOCKS = [kbpaths.lock_path("browser"), kbpaths.lock_path("browser", "creative")]
-VERSION = "motion_check.py 0.1.3 (2026-09-25)"
+EFFECTS_YAML = os.path.join(ROOT, "06-effects-catalog", "effects.yaml")
+AI_THRESHOLDS = str(kbpaths.kb("ai-media", "11-evaluation-qa", "thresholds.yaml"))
+VERSION = "motion_check.py 0.2"
 GPU_ARGS = ["--use-gl=angle", "--use-angle=gl", "--ignore-gpu-blocklist", "--enable-gpu"]
 NOGL_ARGS = ["--disable-webgl", "--disable-webgl2"]
 TEXT_EXT = {".html", ".htm", ".css", ".js", ".mjs", ".json", ".svg", ".txt", ".vtt", ".glsl", ".xml", ".map"}
@@ -95,18 +92,20 @@ CDN_HOSTS = ("cdn.jsdelivr.net", "unpkg.com", "cdnjs.cloudflare.com", "esm.sh", 
 EFFECT_JS_RE = (r"gsap|greensock|ScrollTrigger|SplitText|ScrollSmoother|lenis|locomotive|motion(\.|-|/)|framer|three|\bogl\b|pixi|"
                 r"lottie|rive|spline|unicorn|barba|swup|theatre|curtains|anime(js)?|split-?type|splitting|/effects?/|/fx/|effect[-_]")
 THREE_D_RE = r"three|\bogl\b|pixi|babylon|spline|unicorn|playcanvas|@react-three|drei|model-viewer"
-# 0.1.2: библиотеки по содержимому файла (бандл с «немым» именем — scene.js с three у J) — строки из кода самих библиотек,
-# а не из кода, который их зовёт (загрузчик с путём «lenis.min.js» библиотекой не считается)
+WASM_3D_RE = THREE_D_RE + r"|draco|basis|meshopt|ktx"   # wasm 3D-рантаймов и декодеров; прочий wasm — рантаймы подачи (dotLottie, Rive)
+# библиотеки по содержимому файла (бандл с «немым» именем — scene.js с three) — строки из кода самих библиотек, а не из
+# кода, который их зовёт (загрузчик с путём «lenis.min.js» библиотекой не считается)
 SNIFF_3D = re.compile(rb"__THREE__|@splinetool|UnicornStudio|BABYLON\.Engine|pixi\.js - v|PIXI\.Application|@react-three/fiber")
 SNIFF_FX = re.compile(rb"GreenSock|pin-spacer|lenis-smooth|data-lenis-prevent|bodymovin|@rive-app|rive\.wasm|has-scroll-smooth|@barba/core|anime\.js v")
 SMALL_JS_KB = 3.0   # EG-A11Y-11: переключатель и загрузчик (G/03 ≈ 2 КБ br) — не «библиотека эффектов» в reduce
+MOTION_VALUES = ("reduced", "full", "paused")   # значения data-motion на корне (creative 05-motion/01 §4.4)
 for _e, _t in {".woff2": "font/woff2", ".avif": "image/avif", ".webm": "video/webm", ".mp4": "video/mp4", ".mjs": "text/javascript",
                ".js": "text/javascript", ".json": "application/json", ".webp": "image/webp", ".svg": "image/svg+xml", ".glb": "model/gltf-binary",
                ".wasm": "application/wasm", ".lottie": "application/zip", ".riv": "application/octet-stream"}.items():
     mimetypes.add_type(_t, _e)
 
 try:
-    import scroll_record as SR   # C, волна 1: read_frames, diff_regions, find_flash, sheet (файл не меняется)
+    import scroll_record as SR   # read_frames, diff_regions, find_flash, sheet
 except Exception:  # pragma: no cover
     SR = None
 
@@ -146,6 +145,24 @@ INIT = r"""
   const h1s = () => { const h = document.querySelector('h1'); if (!h) return; let o = 1, n = h; while (n && n.nodeType === 1) { o *= parseFloat(getComputedStyle(n).opacity); n = n.parentElement; }
     const r = h.getBoundingClientRect(); M.h1op.push({t: Math.round(performance.now()), o: Math.round(o * 1000) / 1000, top: Math.round(r.top), h: Math.round(r.height)}); };
   document.addEventListener('DOMContentLoaded', () => { let k = 0; const f = () => { h1s(); if (++k < 60) requestAnimationFrame(f); }; requestAnimationFrame(f); });
+  // прелоадер или входной экран: слой position: fixed на ≥ 90 % окна в первые 8 с после DOMContentLoaded (не баннер
+  // cookie); время показа и видимая «Пропустить» внутри слоя
+  M.intro = null;
+  const introEl = () => { try { const IW = innerWidth, IH = innerHeight; let el = document.elementFromPoint(IW / 2, IH / 2);
+      while (el && el !== document.body && el !== document.documentElement) { const cs = getComputedStyle(el);
+        if (cs.position === 'fixed') { const r = el.getBoundingClientRect();
+          if (r.width >= 0.9 * IW && r.height >= 0.9 * IH && parseFloat(cs.opacity) >= 0.5 && cs.visibility !== 'hidden'
+              && !/cookie|куки|consent|соглас/i.test(el.innerText || '')) return el; }
+        el = el.parentElement; } } catch (e) {} return null; };
+  document.addEventListener('DOMContentLoaded', () => { const t0 = performance.now(); const f = () => { const el = introEl();
+      const t = Math.round(performance.now());
+      if (el) { const s = selOf(el); if (!M.intro) M.intro = {sel: s, t_first: t, t_last: t, skip: false, skip_t: null};
+        if (M.intro.sel === s) { M.intro.t_last = t;
+          if (!M.intro.skip) { const b = [...el.querySelectorAll('button, a, [role=button]')].find(x => { const r = x.getBoundingClientRect();
+              const cs = getComputedStyle(x); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && parseFloat(cs.opacity) > 0.5
+                && /пропуст|skip|далее|войти|enter/i.test((x.innerText || x.getAttribute('aria-label') || '').trim()); });
+            if (b) { M.intro.skip = true; M.intro.skip_t = t; } } } }
+      if (performance.now() - t0 < 8000) requestAnimationFrame(f); }; requestAnimationFrame(f); });
   window.addEventListener('error', e => M.err.push(String(e.message || e).slice(0, 140)));
   // выборка стилей целей моментов (сверка с motion-spec): M.watch(key, selector, ms)
   M.watch = (key, sel, ms) => { const el = document.querySelector(sel); if (!el) { M.samp[key] = {missing: true}; return false; }
@@ -181,7 +198,7 @@ SNAP_JS = r"""
       if (inside || (vov >= 0.6 && gap <= 40)) { m = o; break; } }
     if (m) { const [ox, oy, ow, oh] = m.r; const nx = Math.min(ox, x), ny = Math.min(oy, y); m.r = [nx, ny, Math.max(ox + ow, x + w) - nx, Math.max(oy + oh, y + h) - ny]; m.parts.push(l.sel); m.els.push(l.el); }
     else objs.push({r: [x, y, w, h], parts: [l.sel], k: l.k, els: [l.el]}); }
-  // 0.1.3: текст на скриме (свой фон с альфой ≥ 0,6 или backdrop-filter у текста или предка, не содержащего петлю) — петля его не
+  // текст на скриме (свой фон с альфой ≥ 0,6 или backdrop-filter у текста или предка, не содержащего петлю) — петля его не
   // «читает» (E 05/01 §5.3: лид под заголовком — на скриме)
   const scrimmed = (el, loopEls) => { let n = el;
     for (let d = 0; n && n !== document.body && d < 8; d++, n = n.parentElement) {
@@ -205,10 +222,10 @@ SNAP_JS = r"""
 }
 """
 
-# 0.1.2: сброс счётчиков WebGL перед окном покоя — кадры, нарисованные при прокрутке и в хвосте сглаживания скраба, не петля
+# сброс счётчиков WebGL перед окном покоя — кадры, нарисованные при прокрутке и в хвосте сглаживания скраба, не петля
 PRIME_JS = "() => { const M = window.__mc || {}; (M.gl && M.gl.canv || []).forEach(c => { c.__mcPrev = c.__mcCalls || 0; }); return true; }"
 
-# 0.1.2: замер движения для теста переключателя: 'prime' — отметка; иначе — вызовы WebGL с отметки, бесконечные, видео, атрибут
+# замер движения для теста переключателя: 'prime' — отметка; иначе — вызовы WebGL с отметки, бесконечные, видео, атрибут
 MEASURE_JS = r"""
 (a) => { const M = window.__mc || {}; const now = performance.now();
   if (a === 'prime') { (M.gl && M.gl.canv || []).forEach(c => { c.__mcT = c.__mcCalls || 0; }); window.__mcTT = now; return null; }
@@ -220,7 +237,7 @@ MEASURE_JS = r"""
           motion_attr: document.documentElement.getAttribute('data-motion'), lab}; }
 """
 
-# 0.1.2: нажать элемент по пути (radio, button, switch, checkbox) или выбрать значение select
+# нажать элемент по пути (radio, button, switch, checkbox) или выбрать значение select
 CLICK_JS = r"""
 (o) => { let el = null; try { el = document.querySelector(o.path); } catch (e) {} if (!el) return false;
   if (o.kind === 'select') { el.value = o.value; el.dispatchEvent(new Event('input', {bubbles: true})); el.dispatchEvent(new Event('change', {bubbles: true})); return true; }
@@ -244,7 +261,7 @@ PAGE_JS = r"""
     area: Math.round(r.width * r.height), op: Math.round(effOp(h1) * 100) / 100, first: r.top + scrollY < IH}; }
   const cta = Array.from(document.querySelectorAll('a, button')).filter(el => { const r = el.getBoundingClientRect(); const t = (el.innerText || '').trim();
       return t.length >= 2 && r.top + scrollY < IH && r.width >= 40 && r.height >= 20 && effOp(el) > 0.5 && getComputedStyle(el).visibility !== 'hidden'; }).length;
-  const ctrlRe = /(пауз|останов|стоп|выключ|движени|анимац|pause|stop|play|resume|motion|animation)/i; const txt = (el) => (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
+  const ctrlRe = /(пауз|останов|стоп|выключ|движени|анимац|вращени|pause|stop|play|resume|motion|animation|rotat)/i; const txt = (el) => (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
   const cssPath = (el) => { const esc = (s) => (window.CSS && CSS.escape) ? CSS.escape(s) : s; const parts = []; let n = el;
     while (n && n.nodeType === 1 && n !== document.documentElement) {
       if (n.id && document.querySelectorAll('#' + esc(n.id)).length === 1) { parts.unshift('#' + esc(n.id)); return parts.join(' > '); }
@@ -260,7 +277,7 @@ PAGE_JS = r"""
   const pause = Array.from(document.querySelectorAll('button, [role=button], [role=switch], input[type=checkbox], [aria-pressed], [data-motion-toggle]')).filter(el => {
       if (!shownOrLabel(el)) return false;
       return el.hasAttribute('data-motion-toggle') || ctrlRe.test(labText(el)); }).map(el => ({sel: sel(el), ...box(el), kind: 'button', path: cssPath(el)}));
-  // 0.1.2: переключатель «Движение» — радиогруппа, select или кнопки [data-motion-set]; варианты «меньше» / «полное» / «как в системе»
+  // переключатель «Движение» — радиогруппа, select или кнопки [data-motion-set]; варианты «меньше» / «полное» / «как в системе»
   // (кириллица и \b в JS без флага u не дружат — границы слов только у латиницы)
   const RED = /(меньш|пауз|останов|стоп|выкл|без движ|reduc|less|\boff\b|pause|stop|\bnone\b|minimal)/i,
         FULL = /(полн|больш|вкл|full|more|\bon\b|\ball\b|max)/i, SYS = /(систем|system|auto|авто|умолч|default)/i;
@@ -275,16 +292,19 @@ PAGE_JS = r"""
     const ctx = [g && g.querySelector('legend') ? txt(g.querySelector('legend')) : '', g ? (g.getAttribute('aria-label') || '') : '', G.name].join(' ');
     if (!ctrlRe.test(ctx) && !G.els.some(e => e.hasAttribute('data-motion-set'))) continue;
     const opts = G.els.filter(shownOrLabel).map(el => ({el, lab: labText(el) + ' ' + (el.value || '') + ' ' + (el.getAttribute('data-motion-set') || '')}));
-    const pick = (re) => { const o = opts.find(x => re.test(x.lab)); return o ? opt(o.el, 'radio', labText(o.el), o.el.value) : null; };
-    const red = pick(RED); if (!red) continue;
-    mctrl = {kind: 'radio', reduce: red, full: pick(FULL), system: pick(SYS), group: ctx.trim().slice(0, 40)}; break; }
+    // вариант с data-motion-set узнаётся по значению контракта (reduced | full; «как в системе» — пусто или system), без
+    // него — по подписи
+    const pick = (re, v) => { const o = opts.find(x => x.el.hasAttribute('data-motion-set') ? v.includes((x.el.getAttribute('data-motion-set') || '').trim()) : re.test(x.lab));
+      return o ? opt(o.el, 'radio', labText(o.el), o.el.value) : null; };
+    const red = pick(RED, ['reduced']); if (!red) continue;
+    mctrl = {kind: 'radio', reduce: red, full: pick(FULL, ['full']), system: pick(SYS, ['', 'system']), group: ctx.trim().slice(0, 40)}; break; }
   if (!mctrl) for (const s of document.querySelectorAll('select')) { if (!shownOrLabel(s) || !ctrlRe.test(labText(s) + ' ' + (s.name || ''))) continue;
     const os = Array.from(s.options).map(o => ({o, lab: (o.text || '') + ' ' + (o.value || '')}));
     const pick = (re) => { const x = os.find(y => re.test(y.lab)); return x ? opt(s, 'select', x.o.text, x.o.value) : null; };
     const red = pick(RED); if (!red) continue; mctrl = {kind: 'select', reduce: red, full: pick(FULL), system: pick(SYS), group: labText(s).trim().slice(0, 40)}; break; }
   if (!mctrl) { const sets = Array.from(document.querySelectorAll('[data-motion-set]')).filter(shownC);
-    const pick = (re) => { const b = sets.find(x => re.test(x.getAttribute('data-motion-set') + ' ' + labText(x))); return b ? opt(b, 'button', labText(b), b.getAttribute('data-motion-set')) : null; };
-    const red = pick(RED); if (red) mctrl = {kind: 'button-set', reduce: red, full: pick(FULL), system: pick(SYS), group: ''}; }
+    const pick = (v) => { const b = sets.find(x => v.includes((x.getAttribute('data-motion-set') || '').trim())); return b ? opt(b, 'button', labText(b), b.getAttribute('data-motion-set')) : null; };
+    const red = pick(['reduced']); if (red) mctrl = {kind: 'button-set', reduce: red, full: pick(['full']), system: pick(['', 'system']), group: ''}; }
   if (!mctrl) { const b = pause.find(p => { let el = null; try { el = document.querySelector(p.path); } catch (e) {} return el && (el.hasAttribute('data-motion-toggle') || RED.test(labText(el)) || /движени|motion/i.test(labText(el))); });
     if (b) mctrl = {kind: 'button', reduce: {path: b.path, label: uw(labText(document.querySelector(b.path))).slice(0, 40), value: '', kind: 'button'}, full: null, system: null, group: ''}; }
   if (mctrl && mctrl.kind !== 'button' && !pause.some(p => p.path === mctrl.reduce.path)) { let el = null; try { el = document.querySelector(mctrl.reduce.path); } catch (e) {}
@@ -320,7 +340,7 @@ FOCUS_JS = r"""
 () => { let el = document.activeElement; if (!el || el === document.body) return null; const M = window.__mc || {}; const sel = M.selOf || (e => e.tagName);
   const opOf = (x) => { let o = 1, n = x; while (n && n.nodeType === 1) { o *= parseFloat(getComputedStyle(n).opacity); n = n.parentElement; } return o; };
   let r = el.getBoundingClientRect(); let o = opOf(el); let via = null;
-  // 0.1.2: скрытый radio/checkbox с видимой подписью (кольцо — на label через :focus-visible + label, F2 motion-toggle) — судим по подписи
+  // скрытый radio/checkbox с видимой подписью (кольцо — на label через :focus-visible + label, F2 motion-toggle) — судим по подписи
   if ((o < 0.1 || (r.width <= 2 && r.height <= 2)) && el.labels && el.labels.length) {
     const lb = Array.from(el.labels).find(l => { const rr = l.getBoundingClientRect(); return rr.width > 2 && rr.height > 2 && opOf(l) >= 0.1; });
     if (lb) { via = sel(el); el = lb; r = lb.getBoundingClientRect(); o = opOf(lb); } }
@@ -439,40 +459,26 @@ def br_size(path):
 
 
 class Locks:
+    """Тихая машина на время режима (budgets.yaml conditions.quiet): общий тяжёлый замок, замок браузера и замок creative
+    (page_gates.heavy_lock; удержанное обёрткой slot_run.py или flock повторно не берётся), затем — свободная память."""
     def __init__(self, enabled=True, timeout=900):
-        self.enabled, self.fds, self.timeout = enabled, [], timeout
+        self.enabled, self.timeout, self._cm = enabled, timeout, None
 
     def __enter__(self):
         if not self.enabled:
             return self
-        for p in LOCKS:
-            os.makedirs(os.path.dirname(p), exist_ok=True)
-            fd = open(p, "a")
-
-            def _alarm(signum, frame, p=p):
-                raise TimeoutError(f"блокировка {p} занята дольше {self.timeout} с")
-            old = signal.signal(signal.SIGALRM, _alarm)
-            signal.alarm(self.timeout)
-            t0 = time.time()
-            try:
-                fcntl.flock(fd, fcntl.LOCK_EX)
-            finally:
-                signal.alarm(0)
-                signal.signal(signal.SIGALRM, old)
-            if time.time() - t0 > 5:
-                log(f"  блокировка {p}: ждали {time.time() - t0:.0f} с")
-            self.fds.append(fd)
+        t0 = time.time()
+        self._cm = PG.heavy_lock(domains=("creative",), timeout=self.timeout)
+        self._cm.__enter__()
+        if time.time() - t0 > 5:
+            log(f"  замки тишины: ждали {time.time() - t0:.0f} с")
         wait_memory()
         return self
 
     def __exit__(self, *a):
-        for fd in reversed(self.fds):
-            try:
-                fcntl.flock(fd, fcntl.LOCK_UN)
-                fd.close()
-            except Exception:
-                pass
-        self.fds = []
+        if self._cm is not None:
+            self._cm.__exit__(*a)
+            self._cm = None
 
 
 def mem_available_gb():
@@ -512,7 +518,7 @@ class Net:
         self._remote_sniffs = 0
 
     def sniff(self, rid, r):
-        """0.1.2: библиотека по содержимому файла: локальный — с диска; удалённый — тело ответа по CDP (≤ 30 файлов ≥ 20 КБ).
+        """Библиотека по содержимому файла: локальный — с диска; удалённый — тело ответа по CDP (≤ 30 файлов ≥ 20 КБ).
         Возвращает множество {'fx', '3d'}. Сигнатуры — строки из кода самих библиотек (SNIFF_FX, SNIFF_3D)."""
         key = r["url"]
         if key in self._sniff:
@@ -620,8 +626,10 @@ class Net:
     def summary(self):
         out = {"first_kb": 0.0, "session_kb": 0.0, "first_by": {}, "session_by": {}, "requests": len(self.req), "cdn": [], "hosts": {},
                "js_effects_first_kb": 0.0, "js_effects_session_kb": 0.0, "js_3d_first_kb": 0.0, "js_3d_session_kb": 0.0, "effects_js": [],
-               "video_first_kb": 0.0, "video_session_kb": 0.0, "font_kb": 0.0, "js_first_kb": 0.0, "failed": 0, "sniffed": []}
+               "video_first_kb": 0.0, "video_session_kb": 0.0, "font_kb": 0.0, "js_first_kb": 0.0, "failed": 0, "sniffed": [],
+               "wasm_presentation_kb": 0.0, "wasm_presentation": []}
         three_re = re.compile(THREE_D_RE, re.I)
+        wasm3d_re = re.compile(WASM_3D_RE, re.I)
         for rid, r in list(self.req.items()):   # список: getResponseBody может принести события сети во время обхода
             if r["url"].startswith("data:"):
                 continue
@@ -653,8 +661,11 @@ class Net:
                 if is_3d:
                     out["js_3d_first_kb"] += first
                     out["js_3d_session_kb"] += tot
-            if c == "wasm" and three_re.search(r["url"]):
+            if c == "wasm" and wasm3d_re.search(r["url"]):
                 out["js_3d_session_kb"] += tot
+            elif c == "wasm":
+                out["wasm_presentation_kb"] += tot
+                out["wasm_presentation"].append(f"{r['url'].split('/')[-1][:50]} {tot:.1f}")
             if c == "video":
                 out["video_first_kb"] += first
                 out["video_session_kb"] += tot
@@ -745,8 +756,7 @@ def run_mode(pw, mode, url, a, net_ctx, tmpdir, spec_ms):
     if record:
         kw["record_video_dir"] = vdir
     if mode == "mob":
-        dev = dict(pw.devices["Pixel 7"])
-        dev["user_agent"] = dev["user_agent"].replace("Chrome/", "HeadlessChrome/")
+        dev = PG.mobile_device(pw)                     # дескриптор budgets.yaml, UA — HeadlessChrome
         if record:
             kw["record_video_size"] = {"width": dev["viewport"]["width"], "height": dev["viewport"]["height"]}
         ctx = b.new_context(**dev, **kw)
@@ -771,7 +781,7 @@ def run_mode(pw, mode, url, a, net_ctx, tmpdir, spec_ms):
     net.attach(cdp)
     if mode == "mob":
         try:
-            cdp.send("Emulation.setCPUThrottlingRate", {"rate": 4})
+            cdp.send("Emulation.setCPUThrottlingRate", {"rate": PG.conditions()["mobile"]["cpu_slowdown"]})
         except Exception as e:
             res["log"].append(f"cpu: {e}")
     T0 = time.time()
@@ -797,8 +807,8 @@ def run_mode(pw, mode, url, a, net_ctx, tmpdir, spec_ms):
         ctx.close()
         b.close()
         return res
-    page.wait_for_timeout(max(0, a.wait - 900))
-    # синхровспышка для видео
+    page.wait_for_timeout(max(0, a.wait - 400))
+    # синхровспышка для видео (внутри окна первого экрана)
     try:
         page.evaluate("""(() => { const d = document.createElement('div'); d.id = '__mc_flash';
           d.style.cssText = 'position:fixed;inset:0;background:#ff00ff;z-index:2147483647;pointer-events:none';
@@ -808,12 +818,12 @@ def run_mode(pw, mode, url, a, net_ctx, tmpdir, spec_ms):
         page.evaluate("(() => { const d = document.getElementById('__mc_flash'); if (d) d.remove(); })()")
     except Exception as e:
         res["log"].append(f"flash: {e}")
-    net.phase = "idle"          # первый экран = load + ≈ 5 с (A, site: load + 4–6 с без действий)
+    net.phase = "idle"          # первый экран = load + окно budgets.yaml (conditions.first_screen)
     page.wait_for_timeout(500)
     # движение на 6-й секунде после load (2.2.2) и в покое
     t_idle = rel()
     try:
-        page.evaluate(PRIME_JS)          # 0.1.2: вызовы WebGL первого снимка — только за эту секунду покоя
+        page.evaluate(PRIME_JS)          # вызовы WebGL первого снимка — только за эту секунду покоя
         s1 = page.screenshot(type="png")
         page.wait_for_timeout(1000)
         s2 = page.screenshot(type="png")
@@ -828,8 +838,9 @@ def run_mode(pw, mode, url, a, net_ctx, tmpdir, spec_ms):
         res["marquee"] = page.evaluate(MARQUEE_JS)
     except Exception:
         res["marquee"] = []
-    mc = page.evaluate("() => { const M = window.__mc || {}; return {lcp: M.lcp || [], cls: M.cls || [], lt: M.lt || [], fcp: M.fcp || null, h1op: (M.h1op || []).slice(0, 12), err: M.err || [], gl: M.gl ? {ctx: M.gl.ctx, calls: M.gl.calls} : null}; }")
+    mc = page.evaluate("() => { const M = window.__mc || {}; return {lcp: M.lcp || [], cls: M.cls || [], lt: M.lt || [], fcp: M.fcp || null, h1op: (M.h1op || []).slice(0, 12), err: M.err || [], gl: M.gl ? {ctx: M.gl.ctx, calls: M.gl.calls} : null, intro: M.intro || null}; }")
     res["vitals"] = vitals(mc, res["page_first"])
+    res["intro"] = mc.get("intro")
     net_first = net.summary()
     # выборка моментов motion-spec: load — уже прошли; in-view — ниже, при прокрутке
     # --- прокрутка
@@ -842,8 +853,8 @@ def run_mode(pw, mode, url, a, net_ctx, tmpdir, spec_ms):
     steps = max(3, min(a.steps, math.ceil(max(total, 1) / delta) + 1)) if total > H * 0.3 else 3
     page.mouse.move(W / 2, H / 2)
     windows, wheel, snaps = [], [], []
-    # 0.1.2: два снимка в паузе — сброс счётчика WebGL на +0,5 с (после хвоста сглаживания скраба), снимок на +1,2 с
-    # (при --dwell 1,8; при меньшей паузе — пропорционально); петля WebGL — только если вызовы выросли между ними (J, «Звено»)
+    # два снимка в паузе — сброс счётчика WebGL на +0,5 с (после хвоста сглаживания скраба), снимок на +1,2 с
+    # (при --dwell 1,8; при меньшей паузе — пропорционально); петля WebGL — только если вызовы выросли между ними («Звено»)
     t_prime = min(0.5, 0.28 * a.dwell)
     t_snap = max(t_prime + 0.35, min(1.2, 0.67 * a.dwell))
 
@@ -901,7 +912,7 @@ def run_mode(pw, mode, url, a, net_ctx, tmpdir, spec_ms):
     page.evaluate("() => { const M = window.__mc; if (M) M.rafOn = false; }")
     mc2 = page.evaluate("() => { const M = window.__mc || {}; return {cls: M.cls || [], loaf: M.loaf || [], raf: M.raf || [], tScroll: M.tScroll || 0, now: performance.now(), lt: M.lt || [], err: M.err || [], gl: M.gl ? {ctx: M.gl.ctx, calls: M.gl.calls} : null}; }")
     res["scroll"] = scroll_metrics(mc2, wheel)
-    res["cls"] = cls_block(mc2.get("cls") or [])      # 0.1.2: сумма, окно сессии, атрибуция (F2 cls_sources.py)
+    res["cls"] = cls_block(mc2.get("cls") or [])      # сумма, окно сессии, атрибуция (метод cls_sources.py лаборатории F)
     res["windows"] = windows
     res["wheel"] = wheel
     res["snaps"] = [{k: v for k, v in s_.items() if k != "loopsAll"} for s_ in snaps]
@@ -915,14 +926,14 @@ def run_mode(pw, mode, url, a, net_ctx, tmpdir, spec_ms):
     if a.spec_doc and mode in ("desk", "mob", "rm"):
         res["stations"] = station_probe(page, a.spec_doc, mode, a.out)
     if getattr(a, "contrast", None) and mode in ("desk", "mob"):
-        try:                               # 0.1.3: контраст над живым фоном (EG-A11Y-27)
+        try:                               # контраст над живым фоном (EG-A11Y-27)
             res["contrast_live"] = contrast_live(page, a.contrast, mode)
         except Exception as e:
             res["contrast_live"] = [{"error": str(e)[:160]}]
     # Tab-проход и пауза — только десктоп
     if mode == "desk":
         res["keyboard"] = tab_walk(page, 25)
-        res["toggle_test"] = toggle_test(page, res["page_end"], mode, a.out)   # 0.1.2: «Меньше» → стоит ли (EG-A11Y-24)
+        res["toggle_test"] = toggle_test(page, res["page_end"], mode, a.out)   # «Меньше» → стоит ли (EG-A11Y-24)
         res["pause_test"] = pause_test(page, res["page_end"])
         if res["page_end"]["libs"].get("fxDestroy"):
             try:
@@ -935,7 +946,7 @@ def run_mode(pw, mode, url, a, net_ctx, tmpdir, spec_ms):
     res["errors"] = errors[:8]
     res["gl"] = mc2.get("gl")
     if mode == "rm":
-        # 0.1.2: выбор посетителя сильнее ОС — «Полное» в reduce включает движение (EG-A11Y-25); после сводки сети, чтобы
+        # выбор посетителя сильнее ОС — «Полное» в reduce включает движение (EG-A11Y-25); после сводки сети, чтобы
         # библиотеки, загруженные по выбору «Полное», не попали в ворота reduce (EG-A11Y-05, EG-A11Y-11)
         res["toggle_test"] = toggle_test(page, res["page_end"], mode, a.out)
     video = page.video if record else None
@@ -1016,7 +1027,7 @@ def scroll_metrics(mc, wheel):
 
 
 def cls_block(entries):
-    """0.1.2: CLS загрузки и прокрутки (сдвиги без недавнего ввода), наибольшее окно сессии как у web-vitals (разрыв < 1 с,
+    """CLS загрузки и прокрутки (сдвиги без недавнего ввода), наибольшее окно сессии как у web-vitals (разрыв < 1 с,
     окно ≤ 5 с) и атрибуция по узлам (метод F2 cls_sources.py): вклад сдвига делится поровну между его источниками,
     пример — прямоугольник «откуда → куда» [x, y, w, h]."""
     es = sorted((e for e in (entries or []) if isinstance(e, dict) and isinstance(e.get("v"), (int, float))), key=lambda e: e.get("t") or 0)
@@ -1049,18 +1060,25 @@ def cls_block(entries):
 
 
 def loop_metrics(snaps, marquee, H, W):
+    """Петли по паузам: число в зоне, под текстом, колебания (EG-A11Y-18: крупный объект — меньшая сторона ≥ доли
+    large_min_side_share меньшей стороны окна, период ≥ period_min_s; мелкий — ≥ small_period_min_s; быстрее полосы band_s
+    — пульсация, не колебание), пульсация призыва, бегущая строка."""
     loops_max = max((s.get("loops") or 0) for s in snaps) if snaps else 0
     under = sorted({u for s in snaps for u in (s.get("under") or [])})
+    band, pmin, psmall, share = (LIM("EG-A11Y-18", k) for k in ("band_s", "period_min_s", "small_period_min_s", "large_min_side_share"))
     osc, pulse = [], []
     for s in snaps:
         for l in s.get("loopsAll") or []:
             if l.get("k") != "anim" or not l.get("vis"):
                 continue
             props = [re.sub(r"[^a-z]", "", p.lower()) for p in (l.get("props") or [])]
-            period = (l.get("dur") or 0) * (2 if (l.get("dir") or "").startswith("alternate") else 1)
-            big = min(l.get("w") or 0, l.get("h") or 0) >= 0.25 * min(W, H)
-            if big and any(p in ("transform", "translate", "rotate", "scale") for p in props) and 2500 <= period <= 6000:
-                osc.append(f"{l['sel']} период {period / 1000:.1f} с")
+            period = (l.get("dur") or 0) * (2 if (l.get("dir") or "").startswith("alternate") else 1) / 1000
+            big = min(l.get("w") or 0, l.get("h") or 0) >= share * min(W, H)
+            moving = any(p in ("transform", "translate", "rotate", "scale") for p in props)
+            if moving and big and band[0] <= period < pmin:
+                osc.append(f"{l['sel']} крупный, период {period:.1f} с < {pmin} с" + (f" (полоса {band[0]}–{band[1]} с)" if period <= band[1] else ""))
+            elif moving and not big and band[0] <= period < psmall:
+                osc.append(f"{l['sel']} мелкий, период {period:.1f} с < {psmall} с")
             if l.get("cta") and any(p in ("transform", "scale", "boxshadow", "opacity") for p in props):
                 pulse.append(f"{l['sel']} {l.get('name', '')}")
     return {"loops_in_view_max": loops_max, "under_text": under[:6], "oscillation": sorted(set(osc))[:6], "pulsing_cta": sorted(set(pulse))[:4],
@@ -1131,7 +1149,7 @@ def pause_test(page, pg):
         page.evaluate("() => window.scrollTo(0, 0)")
         page.wait_for_timeout(400)
         before = page.evaluate("() => document.getAnimations().filter(a => a.playState === 'running' && a.effect && a.effect.getTiming().iterations === Infinity).length")
-        if p0.get("path"):     # 0.1.2: по пути элемента (радиогруппа «Движение», select, кнопка)
+        if p0.get("path"):     # по пути элемента (радиогруппа «Движение», select, кнопка)
             ok = page.evaluate(CLICK_JS, {"path": p0["path"], "kind": p0.get("kind", "button"), "value": p0.get("value", "")})
         else:
             ok = page.evaluate("""(sel) => { const M = window.__mc || {}; const el = [...document.querySelectorAll('button, [role=button], [role=switch], input[type=checkbox], [aria-pressed]')]
@@ -1149,7 +1167,7 @@ def pause_test(page, pg):
 
 
 def motion_sample(page):
-    """0.1.2: движение первого экрана за 1 с — % пикселей (как F effect_bench idle_motion_pct_s: порог 12/255 по каналу),
+    """Движение первого экрана за 1 с — % пикселей (как F effect_bench idle_motion_pct_s: порог 12/255 по каналу),
     вызовы WebGL за эту секунду, бегущие бесконечные анимации, играющие видео, html[data-motion], LAB.info лаборатории F."""
     page.evaluate(MEASURE_JS, "prime")
     s1 = page.screenshot(type="png")
@@ -1161,7 +1179,7 @@ def motion_sample(page):
 
 
 def toggle_test(page, pg, mode, out_dir=None):
-    """0.1.2: переключатель «меньше движения» поведением (CRV-AL-12, E 05/01 §4.4). desk: нажать «Меньше» → первый экран
+    """Переключатель «меньше движения» поведением (CRV-AL-12, E 05/01 §4.4). desk: нажать «Меньше» → первый экран
     ≤ 0,3 %/с, 0 вызовов WebGL, 0 бесконечных анимаций, видео стоит (эталон F2/12: 3,94 → 0 %/с). rm: нажать «Полное» →
     движение есть (выбор посетителя сильнее ОС). Затем вернуть исходное состояние («как в системе» или повторное нажатие)."""
     ctrl = (pg or {}).get("motion_ctrl") or {}
@@ -1190,7 +1208,7 @@ def toggle_test(page, pg, mode, out_dir=None):
     return out
 
 
-# 0.1.3: контраст текста над живым фоном — метод F2 99-raw/experiments/F/14-holo-look/contrast.py: текст выбранных элементов
+# контраст текста над живым фоном — метод лаборатории F (F/14 contrast.py): текст выбранных элементов
 # прозрачен, фон снимается в нескольких кадрах (время и положения указателя), под рамкой строк (Range) — перцентиль яркости
 CONTRAST_PREP_JS = r"""
 (sels) => { const cv = document.createElement('canvas'); cv.width = cv.height = 1; const cx = cv.getContext('2d', {willReadFrequently: true});
@@ -1210,7 +1228,7 @@ CONTRAST_PREP_JS = r"""
 
 
 def contrast_eval(Ls, items, scale):
-    """0.1.3: худший контраст по кадрам. Ls — массивы относительной яркости кадров (текст прозрачен); под рамкой строк — 95-й
+    """Худший контраст по кадрам. Ls — массивы относительной яркости кадров (текст прозрачен); под рамкой строк — 95-й
     перцентиль яркости фона для светлого текста (самая светлая точка) или 5-й для тёмного; цвет текста с альфой смешивается с фоном.
     Порог — 4,5:1, крупный текст (≥ 24 px или ≥ 18,66 px жирный) — 3:1 (WCAG 1.4.3). Градиентный текст — N/A (F83 по буквам)."""
     import numpy as np
@@ -1248,7 +1266,7 @@ def contrast_eval(Ls, items, scale):
 
 
 def contrast_live(page, sels, mode):
-    """0.1.3 (F2 п. 3): худший контраст текста над живым фоном первого экрана: 4 кадра через 0,45 с (видео, шейдер, петли) и на
+    """Худший контраст текста над живым фоном первого экрана: 4 кадра через 0,45 с (видео, шейдер, петли) и на
     десктопе ещё 5 положений указателя по диагонали (фон, который следует за мышью); рамка — границы строк (Range), а не блока."""
     import numpy as np
     from PIL import Image
@@ -1297,7 +1315,7 @@ def sample_moments(page, moments, mode):
             rec["missing"] = True
             out.append(rec)
             continue
-        try:   # 0.1.2: canvas/video — выборка стилей их содержимого не видит
+        try:   # canvas/video — выборка стилей их содержимого не видит
             rec["tag"] = page.evaluate("(s) => { const e = document.querySelector(s); return e ? e.tagName : null; }", sel)
         except Exception:
             rec["tag"] = None
@@ -1382,7 +1400,7 @@ GEO_PROPS = ("transform", "translate", "scale", "rotate", "clip-path", "clip", "
 
 
 def station_targets(sec):
-    """0.1.2: цели scroll-linked моментов секции для зонда станций: селекторы по контракту, геометрия (transform и раскладка)
+    """Цели scroll-linked моментов секции для зонда станций: селекторы по контракту, геометрия (transform и раскладка)
     или состояние (первый трек не из геометрии с from: цвет, opacity), трек scale, стратегия reduce."""
     out = []
     for m in sec.get("moments", []) or []:
@@ -1402,8 +1420,8 @@ def station_targets(sec):
 
 def station_probe(page, spec, mode, out_dir):
     """Станции motion-spec v1 (scene.stations[]): anchor — «якорь на линии окна» (anchor_line), at — доля сцены; замер целей
-    scroll-linked моментов секции и кадр станции. Допуск по умолчанию ±24 px (опыт I/02 различил v1.0 и v1.1) или threshold
-    проверки со словом «станц»/station. 0.1.2: группы целей, скрытые цели, холст и fixed-слой — кадр, трек состояния, край по
+    scroll-linked моментов секции и кадр станции. Допуск по умолчанию ±24 px (motion-spec.schema.json $defs.station) или threshold
+    проверки со словом «станц»/station. Группы целей, скрытые цели, холст и fixed-слой — кадр, трек состояния, край по
     треку, станции долей at."""
     rows = []
     for sec in (spec or {}).get("sections", []) or []:
@@ -1662,12 +1680,70 @@ def dig(d, path):
     return cur
 
 
-def threshold_for(g, level, device, levels):
+_PROFILES, _EFFECTS, _GL = {}, None, {}
+
+
+def page_profile(level, page_type=None):
+    """Профиль страницы site для ссылок «profile.*»: <page_type>@<уровень> с исключениями overrides (page_gates.py), без
+    типа — числа уровня budgets.yaml."""
+    key = (level, page_type)
+    if key not in _PROFILES:
+        prof = None
+        if page_type:
+            try:
+                prof = PG.resolve_profile(f"{page_type}@{level}")
+            except ValueError as e:
+                log(f"  профиль {page_type}@{level}: {e} — берутся числа уровня")
+        if prof is None:
+            lv = PG.load_budgets()["levels"][level]
+            prof = {"id": f"@{level}", "level": level, "outcome": lv["outcome"], "weight": lv["weight"]}
+        _PROFILES[key] = prof
+    return _PROFILES[key]
+
+
+def effects_catalog():
+    global _EFFECTS
+    if _EFFECTS is None:
+        import yaml
+        d = yaml.safe_load(open(EFFECTS_YAML, encoding="utf-8"))
+        _EFFECTS = {e["id"]: e for e in d.get("effects") or [] if isinstance(e, dict) and e.get("id")}
+    return _EFFECTS
+
+
+def resolve_ref(ref, level, device, levels, page_type=None):
+    """threshold_ref → (найдено ли поле, число или None): путь в уровне ambition-levels.yaml; «profile.<путь>» — профиль
+    страницы site; «effects.yaml#<id>.<путь>» — запись каталога эффектов. <device> — устройство режима; узел {mobile,
+    desktop} — значение устройства, узел {goal, poor} — goal. Поле есть, а числа нет (null) — (True, None): порог открыт."""
+    ref = str(ref).replace("<device>", device)
+    if ref.startswith("profile."):
+        node, path = page_profile(level, page_type), ref[len("profile."):]
+    elif ref.startswith("effects.yaml#"):
+        eid, _, path = ref[len("effects.yaml#"):].partition(".")
+        node = effects_catalog().get(eid)
+        if node is None:
+            return False, None
+    else:
+        node, path = levels.get(level) or {}, ref
+    cur = node
+    for k in path.split("."):
+        if isinstance(cur, dict) and k in cur:
+            cur = cur[k]
+        elif isinstance(cur, list) and k.isdigit() and int(k) < len(cur):
+            cur = cur[int(k)]
+        else:
+            return False, None
+    if isinstance(cur, dict) and device in cur:
+        cur = cur[device]
+    elif isinstance(cur, dict) and "all" in cur:
+        cur = cur["all"]
+    if isinstance(cur, dict) and "goal" in cur:
+        cur = cur["goal"]
+    return True, (cur if isinstance(cur, (int, float)) and not isinstance(cur, bool) else None)
+
+
+def threshold_for(g, level, device, levels, page_type=None):
     if g.get("threshold_ref"):
-        L = levels.get(level) or {}
-        v = dig(L, g["threshold_ref"])
-        if isinstance(v, dict):
-            v = v.get(device, v.get("all"))
+        _, v = resolve_ref(g["threshold_ref"], level, device, levels, page_type)
         if v is None:
             return None
         return v * float(g.get("scale", 1))
@@ -1678,6 +1754,25 @@ def threshold_for(g, level, device, levels):
             v = v.get(device, v.get("all"))
         return v
     return thr
+
+
+def use_gate_limits(gates_doc):
+    """Поля limits и число threshold строк ворот — для производных метрик (derive), которые считают по ним находки."""
+    _GL.clear()
+    for g in (gates_doc or {}).get("gates") or []:
+        if isinstance(g, dict) and g.get("id"):
+            _GL[g["id"]] = dict(g.get("limits") or {}, threshold=g.get("threshold"))
+
+
+def LIM(gid, key):
+    """Число строки ворот: limits.<key> или threshold (key='threshold'); нет строки или поля — ошибка с адресом."""
+    if not _GL:
+        import yaml
+        use_gate_limits(yaml.safe_load(open(GATES_DEFAULT, encoding="utf-8")))
+    v = (_GL.get(gid) or {}).get(key)
+    if v is None:
+        raise KeyError(f"нет {'threshold' if key == 'threshold' else 'limits.' + key} у строки {gid} (effect-gates.yaml)")
+    return v
 
 
 def sev_for(g, level):
@@ -1720,7 +1815,7 @@ def compare_op(val, op, thr):
 DEVICE = {"desk": "desktop", "rm": "desktop", "nojs": "desktop", "nogl": "desktop", "mob": "mobile"}
 
 
-def evaluate_gates(gates_doc, results, level, levels, spec=None):
+def evaluate_gates(gates_doc, results, level, levels, spec=None, page_type=None):
     rows = []
     for g in gates_doc.get("gates", []):
         if g.get("auto") is False:
@@ -1741,7 +1836,7 @@ def evaluate_gates(gates_doc, results, level, levels, spec=None):
                 val_cmp = len(val)
             else:
                 val_cmp = val
-            thr = threshold_for(g, level, dev, levels)
+            thr = threshold_for(g, level, dev, levels, page_type)
             if spec and g.get("spec_override"):
                 sv = dig(spec, g["spec_override"])
                 if isinstance(sv, (int, float)) and (thr is None or sv < thr):
@@ -1758,16 +1853,22 @@ def evaluate_gates(gates_doc, results, level, levels, spec=None):
                 w = dig(r, g["where"])
                 where = (", ".join(str(x) for x in w[:4]) if isinstance(w, list) else str(w))[:160] if w not in (None, [], "") else ""
             rows.append({"id": g["id"], "name": g.get("name"), "mode": mode, "found": val if not isinstance(val, list) else (f"{len(val)}: " + ", ".join(str(x) for x in val[:3])),
-                         "threshold": ({"empty": "пусто", "false": "нет", "true": "да"}.get(g.get("op")) or (f"{g.get('op', '<=')} {thr}" if thr is not None else g.get("threshold_text", "—"))),
+                         "threshold": ({"empty": "пусто", "false": "нет", "true": "да"}.get(g.get("op")) or (f"{g.get('op', '<=')} {thr}" if thr is not None else
+                                       ("числа нет — " + (g.get("label") or "открыто") if g.get("threshold_ref") else g.get("threshold_text", "—")))),
                          "verdict": "PASS" if ok is True else ("FAIL" if ok is False else "N/A"), "severity": sev_for(g, level), "where": where,
                          "site": g.get("site", ""), "label": g.get("label", "")})
     return rows
 
 
+def round_half_away(x):
+    """Целое по схеме станции: половина — от нуля (−24,5 → −25, −24,2 → −24)."""
+    return int(math.copysign(math.floor(abs(x) + 0.5), x))
+
+
 def station_rows(st_res, mode):
-    """Строки сверки станций. Геометрия — |край цели − линия окна| ≤ допуска; 0.1.2: состояние — «изменено» = «прошли линию»
+    """Строки сверки станций. Геометрия — |край цели − линия окна| после округления ≤ допуска; состояние — «изменено» = «прошли линию»
     у всех экземпляров; кадр (холст, видео, fixed-слой) и скрытая цель — без вердикта; reduce — конечное состояние (final-state:
-    все экземпляры изменены, scale ≈ 1), иначе кадры для глаза. Старые results.json (без kind) считаются как в 0.1.1."""
+    все экземпляры изменены, scale ≈ 1), иначе кадры для глаза. Цель без поля kind — геометрия."""
     rows = []
     for r in st_res or []:
         name = f"{r.get('section')}:{r.get('station')}"
@@ -1790,8 +1891,8 @@ def station_rows(st_res, mode):
         state = [t for t in tg if not t.get("hidden") and t.get("mismatch") is not None]
         frames = [t for t in tg if t.get("kind") == "frame"]
         hidden = [t for t in tg if t.get("hidden")]
-        # Math.round(-0,4) в JS = -0 → Playwright отдаёт float -0.0: формат только через int (сбой 0.1.2 на K/02, исправлен)
-        parts = [f"{t['moment']}: край{('-' + t['edge']) if t.get('edge') else ''} {int(round(off(t))):+d} px" for t in geo]
+        # край минус линия окна — целое, округление половины от нуля (motion-spec.schema.json $defs.station); -0.0 из JS → 0
+        parts = [f"{t['moment']}: край{('-' + t['edge']) if t.get('edge') else ''} {round_half_away(off(t)):+d} px" for t in geo]
         parts += [f"{t['moment']}: изменено {t['changed']} из {t.get('n_visible', t.get('n'))}, прошли линию {t['passed']}" for t in state]
         parts += [f"{t['moment']}: {t.get('tag') or 'слой'} — кадр" for t in frames]
         parts += [f"{t['moment']}: скрыт" for t in hidden]
@@ -1804,7 +1905,7 @@ def station_rows(st_res, mode):
             ok = (not bad) if (fin_state or fin_geo) else None
             note = "reduce: конечное состояние (всё изменено, scale ≈ 1)" if ok is not None else "reduce: станции — кадры для глаза"
         else:
-            bad = [t for t in geo if abs(off(t)) > tol] + [t for t in state if t.get("mismatch")]
+            bad = [t for t in geo if abs(round_half_away(off(t))) > tol] + [t for t in state if t.get("mismatch")]
             ok = (not bad) if (geo or state) else None
             if ok is None and frames:
                 note = "холст, видео или fixed-слой — сверить кадр станции глазами или судьёй по раскадровке"
@@ -1827,7 +1928,7 @@ def spec_rows(spec_res, mode):
         dur = r.get("duration_ms")
         notes = []
         ok = True
-        # 0.1.2: uniform шейдера, содержимое canvas/video и custom properties выборка стилей не видит — не PASS, а N/A (J, «Звено»)
+        # uniform шейдера, содержимое canvas/video и custom properties выборка стилей не видит — не PASS, а N/A («Звено»)
         props = [str(p) for p in (r.get("spec_props") or []) if p]
         seen = [p for p in props if p.split(":")[0].split("-")[0] in ("opacity", "transform", "translate", "scale", "rotate", "clip", "filter")]
         blind = str(r.get("tag") or "").upper() in ("CANVAS", "VIDEO") or bool(props and not seen)
@@ -1869,7 +1970,36 @@ def spec_rows(spec_res, mode):
 # =====================================================================================================================
 # 7. Отчёт
 # =====================================================================================================================
-def render(target, level, results, rows, srows, gates_doc):
+def presentation_layer(results, level, levels, gates_doc):
+    """Слой подачи по режимам (десктоп, телефон, reduce): JS эффектов и движения в первом экране и за сессию, JS 3D, wasm
+    подачи, видео первого экрана. Порог один — EG-WEIGHT-01 уровня (reduce — с порогом десктопа); вес страницы целиком —
+    ворота страницы site. Картинка первого экрана — бюджет ассета ai-media, здесь ссылкой."""
+    row = next((g for g in (gates_doc or {}).get("gates") or [] if g.get("id") == "EG-WEIGHT-01"), None)
+    out = {"modes": {}, "threshold_row": "EG-WEIGHT-01" if row else None}
+    for mode in ("desk", "mob", "rm"):
+        r = results.get(mode)
+        if not isinstance(r, dict) or r.get("error"):
+            continue
+        net, dev = r.get("net") or {}, DEVICE[mode]
+        fo = net.get("first_only") or {}
+        thr = threshold_for(row, level, dev, levels) if row else None
+        js = fo.get("js_effects_first_kb")
+        out["modes"][mode] = {"device": dev, "js_effects_first_kb": js, "js_effects_session_kb": net.get("js_effects_session_kb"),
+                              "js_3d_session_kb": net.get("js_3d_session_kb"), "wasm_presentation_kb": net.get("wasm_presentation_kb"),
+                              "video_first_kb": fo.get("video_first_kb"), "threshold_js_effects_kb": thr,
+                              "over": (js > thr) if (js is not None and thr is not None) else None}
+    try:
+        import yaml
+        img = ((yaml.safe_load(open(AI_THRESHOLDS, encoding="utf-8")).get("thresholds") or {}).get("budget") or {}).get("image") or {}
+        out["hero_image"] = {"ref": "ai-media/11-evaluation-qa/thresholds.yaml#thresholds.budget.image",
+                             "hero_kb": (img.get("hero_kb") or {}).get("value"), "hero_mobile_kb": (img.get("hero_mobile_kb") or {}).get("value"),
+                             "check": "asset_audit.py audit --stage web --slot hero [--mobile]"}
+    except Exception as e:  # noqa: BLE001
+        out["hero_image"] = {"error": str(e)[:120]}
+    return out
+
+
+def render(target, level, results, rows, srows, gates_doc, pres=None):
     fails = [r for r in rows if r["verdict"] == "FAIL"]
     by = {s: len([r for r in fails if r["severity"] == s]) for s in ("B", "S", "D")}
     L = [f"# Ворота эффектов: {target}", "",
@@ -1892,11 +2022,22 @@ def render(target, level, results, rows, srows, gates_doc):
         for r in srows:
             L.append(f"| {r['moment']} | {r['mode']} | {r['found']} | {r['spec']} | {r['verdict']} | `{r['where']}` | {r.get('note', '')} |")
     st_sum = [(m, s) for m in ("desk", "mob", "rm") if isinstance(results.get(m), dict) for s in ((results[m].get("derived") or {}).get("stations") or [])]
-    if st_sum:   # 0.1.2: метрика зонда станций в терминах I (shoot_stations.py)
+    if st_sum:   # метрика зонда станций: tip_offset_px, filled
         dash = lambda v: "—" if v is None else v
         L += ["", "## Станции (метрика зонда I: tip_offset_px, filled)", "", "| Станция | Режим | tip_offset_px | Цель | filled / ожидалось |", "|---|---|---|---|---|"]
         for m, s in st_sum:
             L.append(f"| {s['section']}:{s['station']} | {m} | {dash(s['tip_offset_px'])} | {dash(s.get('tip_moment'))} | {dash(s['filled'])} / {dash(s['filled_expected'])} |")
+    if pres and pres.get("modes"):
+        L += ["", "## Слой подачи по режимам (порог — EG-WEIGHT-01 уровня; вес страницы — ворота site)", "",
+              "| Режим | JS эффектов, первый экран, КБ | JS эффектов, сессия | JS 3D, сессия | wasm подачи | видео первого экрана | порог JS эффектов |",
+              "|---|---|---|---|---|---|---|"]
+        for m, x in pres["modes"].items():
+            L.append(f"| {m} ({x['device']}) | {x['js_effects_first_kb']} | {x['js_effects_session_kb']} | {x['js_3d_session_kb']} | "
+                     f"{x['wasm_presentation_kb']} | {x['video_first_kb']} | {x['threshold_js_effects_kb']}{' — выше' if x.get('over') else ''} |")
+        hi = pres.get("hero_image") or {}
+        if hi.get("ref"):
+            L += ["", f"Картинка первого экрана — бюджет ассета ai-media `{hi['ref']}`: десктоп {hi.get('hero_kb')} КБ, телефон "
+                  f"{hi.get('hero_mobile_kb')} КБ; проверка — `{hi.get('check')}`."]
     sheets = [s for k, v in results.items() if isinstance(v, dict) for s in ((v.get("video") or {}).get("sheets") or [])]
     if sheets:
         L += ["", "## Кадры", ""] + [f"- `{s}`" for s in sheets]
@@ -1923,7 +2064,7 @@ SELFTEST_GATES = """
 version: "test"
 gates:
   - {id: T-01, name: "LoAF", modes: [desk, mob], metric: scroll.loaf_pct, op: "<=", threshold: {all: {desktop: 2, mobile: 10}}, severity: S}
-  - {id: T-02, name: "первый экран", modes: [mob], metric: net.first_mb, op: "<=", threshold_ref: budgets.page.first_screen_mb, severity: D}
+  - {id: T-02, name: "первый экран", modes: [mob], metric: net.first_kb, op: "<=", threshold_ref: "profile.weight.first_screen_kb.<device>", severity: D}
   - {id: T-03, name: "видео в reduce", modes: [rm], metric: net.video_session_kb, op: "<=", threshold: 0, severity: S}
   - {id: T-04, name: "петли", modes: [desk], metric: loops.loops_in_view_max, op: "<=", threshold: {L0: 1, L1: 2, L2: 3}, severity: S}
   - {id: T-05, name: "вручную", auto: false, severity: S, method: "глазами"}
@@ -1945,13 +2086,15 @@ def selftest():
     levels, _doc = load_levels()
     check("ambition-levels.yaml: L0, L1, L2", sorted(levels), ["L0", "L1", "L2"])
     gd = yaml.safe_load(SELFTEST_GATES)
-    res = {"desk": {"scroll": {"loaf_pct": 3.1}, "loops": {"loops_in_view_max": 2, "under_text": []}, "net": {"first_mb": 1.0}},
-           "mob": {"scroll": {"loaf_pct": 8.0}, "net": {"first_mb": 2.2}},
+    res = {"desk": {"scroll": {"loaf_pct": 3.1}, "loops": {"loops_in_view_max": 2, "under_text": []}, "net": {"first_kb": 1000.0}},
+           "mob": {"scroll": {"loaf_pct": 8.0}, "net": {"first_kb": 2200.0}},
            "rm": {"net": {"video_session_kb": 350.0}}}
     rows = {(r["id"], r["mode"]): r for r in evaluate_gates(gd, res, "L1", levels)}
     check("T-01 desk 3,1 > 2 → FAIL", rows[("T-01", "desk")]["verdict"], "FAIL")
     check("T-01 mob 8 ≤ 10 → PASS", rows[("T-01", "mob")]["verdict"], "PASS")
-    check("T-02 порог из ambition-levels L1 mobile 2.0 → FAIL 2,2", (rows[("T-02", "mob")]["verdict"], rows[("T-02", "mob")]["threshold"]), ("FAIL", "<= 2.0"))
+    check("T-02 порог — профиль site L1, телефон 2 000 КБ → FAIL 2 200", (rows[("T-02", "mob")]["verdict"], rows[("T-02", "mob")]["threshold"]), ("FAIL", "<= 2000.0"))
+    rows_lead = {(r["id"], r["mode"]): r for r in evaluate_gates(gd, res, "L1", levels, page_type="landing-lead-services")}
+    check("T-02 с --page-type landing-lead-services: исключение профиля, телефон 1 500", rows_lead[("T-02", "mob")]["threshold"], "<= 1500.0")
     check("T-03 reduce видео 350 КБ → FAIL", rows[("T-03", "rm")]["verdict"], "FAIL")
     check("T-04 петли 2 ≤ 2 (L1) → PASS", rows[("T-04", "desk")]["verdict"], "PASS")
     check("T-05 вручную", rows[("T-05", "—")]["verdict"], "MANUAL")
@@ -1968,25 +2111,28 @@ def selftest():
     check("сверка с motion-spec: 544 против 560 → PASS", sr[0]["verdict"], "PASS")
     st = station_rows([{"section": "hiw", "station": "s2", "anchor": "hiw.step-2", "tolerance_px": 24, "found": True, "shot": "x.jpg",
                         "targets": [{"moment": "m-line", "found": True, "edge_bottom_offset": -97}]}], "desk")
-    check("станция: край −97 px при допуске ±24 → FAIL (I/02 v1.0)", st[0]["verdict"], "FAIL")
-    # 0.1.2: станции — группа целей, состояние, скрытая цель, кадр холста, reduce
+    check("станция: край −97 px при допуске ±24 → FAIL", st[0]["verdict"], "FAIL")
+    edge = lambda v: station_rows([{"section": "hiw", "station": "s2", "anchor": "hiw.step-2", "tolerance_px": 24, "found": True, "shot": "x.jpg",  # noqa: E731
+                                    "targets": [{"moment": "m-line", "found": True, "edge_offset": v, "edge_bottom_offset": v}]}], "desk")[0]["verdict"]
+    check("станция по схеме: −24,2 → −24 PASS; −24,5 → −25 FAIL; 24,49 → 24 PASS", (edge(-24.2), edge(-24.5), edge(24.49)), ("PASS", "FAIL", "PASS"))
+    # станции — группа целей, состояние, скрытая цель, кадр холста, reduce
     base = {"section": "hiw", "station": "s2", "anchor": "hiw.step-2", "place": "anchor", "tolerance_px": 24, "found": True, "shot": "x.jpg"}
     line0 = {"moment": "line", "found": True, "kind": "geometry", "edge": "bottom", "edge_offset": 0, "edge_bottom_offset": 0, "reduce": "final-state"}
     mark_ok = {"moment": "marker", "found": True, "kind": "state", "changed": 2, "passed": 2, "mismatch": 0, "n_visible": 4, "n": 4, "reduce": "final-state"}
     st2 = station_rows([{**base, "targets": [line0, mark_ok, {"moment": "bob", "found": True, "hidden": True, "n": 1}]}], "desk")
-    check("станция 0.1.2: линия 0 px, маркеры 2 = 2, грузик скрыт → PASS (I/02 v1.1)", st2[0]["verdict"], "PASS")
+    check("станция: линия 0 px, маркеры 2 = 2, грузик скрыт → PASS (I/02 v1.1)", st2[0]["verdict"], "PASS")
     st2b = station_rows([{**base, "targets": [{**line0, "edge_offset": -0.0, "edge_bottom_offset": -0.0}]}], "desk")
     check("станция: край −0.0 (float из JS) не ломает формат → PASS", st2b[0]["verdict"], "PASS")
     st3 = station_rows([{**base, "targets": [{**line0, "edge_offset": -28}, mark_ok]}], "desk")
-    check("станция 0.1.2: конец линии −28 px → FAIL (I/02 v1.0 s2)", st3[0]["verdict"], "FAIL")
+    check("станция: конец линии −28 px → FAIL (I/02 v1.0 s2)", st3[0]["verdict"], "FAIL")
     st4 = station_rows([{**base, "targets": [{**mark_ok, "passed": 3, "mismatch": 1}]}], "desk")
-    check("станция 0.1.2: маркер залит не там, где линия → FAIL", st4[0]["verdict"], "FAIL")
+    check("станция: маркер залит не там, где линия → FAIL", st4[0]["verdict"], "FAIL")
     st5 = station_rows([{**base, "place": "at", "anchor": "at 0.5", "targets": [{"moment": "scene", "found": True, "kind": "frame", "tag": "canvas", "n": 1}]}], "desk")
-    check("станция 0.1.2: fixed-холст — кадр, без вердикта (J, «Звено»)", (st5[0]["verdict"], "кадр" in st5[0]["found"]), ("N/A", True))
+    check("станция: fixed-холст — кадр, без вердикта («Звено»)", (st5[0]["verdict"], "кадр" in st5[0]["found"]), ("N/A", True))
     st6 = station_rows([{**base, "targets": [{**line0, "scale_y": 1.0, "scale_x": 1.0}, {**mark_ok, "changed": 4, "passed": 2, "mismatch": 2}]}], "rm")
-    check("станция 0.1.2 reduce: линия целиком, 4 из 4 залиты → PASS", st6[0]["verdict"], "PASS")
+    check("станция reduce: линия целиком, 4 из 4 залиты → PASS", st6[0]["verdict"], "PASS")
     st7 = station_rows([{**base, "targets": [{**mark_ok, "changed": 1}]}], "rm")
-    check("станция 0.1.2 reduce: залит 1 из 4 → FAIL", st7[0]["verdict"], "FAIL")
+    check("станция reduce: залит 1 из 4 → FAIL", st7[0]["verdict"], "FAIL")
     sec = {"moments": [{"id": "line", "class": "scroll-linked", "target": "hiw.fx-line", "reduce": {"strategy": "final-state"},
                         "tracks": [{"property": "transform", "from": "scaleY(0)", "to": "scaleY(1)"}]},
                        {"id": "mark", "class": "scroll-linked", "target": "hiw.fx-mark", "tracks": [{"property": "background-color", "from": "transparent", "to": "var(--a)"}]},
@@ -1995,12 +2141,12 @@ def selftest():
           [(t["geo"], t["scale"], bool(t["state"])) for t in station_targets(sec)], [(True, True, False), (False, False, True), (False, False, False)])
     sr2 = spec_rows([{"id": "wake", "sel": "canvas.stage", "tag": "CANVAS", "class": "one-shot", "trigger": "load", "spec_ms": 1200.0,
                       "spec_props": ["uniform:uWake"], "sampled": True, "moved": False, "duration_ms": 0}], "desk")
-    check("сверка 0.1.2: uniform на canvas → N/A, не PASS (J, «Звено»)", sr2[0]["verdict"], "N/A")
+    check("сверка: uniform на canvas → N/A, не PASS («Звено»)", sr2[0]["verdict"], "N/A")
     sr3 = spec_rows([{"id": "line", "sel": ".l", "tag": "DIV", "class": "scroll-linked", "trigger": "scroll-scrub", "spec_ms": None,
                       "spec_props": ["transform"], "sampled": True, "moved": False, "duration_ms": 0}], "desk")
-    check("сверка 0.1.2: скраб не замечен при прокрутке → N/A", sr3[0]["verdict"], "N/A")
+    check("сверка: скраб не замечен при прокрутке → N/A", sr3[0]["verdict"], "N/A")
     dr = derive({"net": {"effects_js": ["motion.js 1.1", "gsap.min.js 27.3", "fx-toggle.js 4.2"]}, "page_end": {"toggle_scripts": ["fx-toggle.js"]}}, "rm")
-    check("EG-A11Y-11: 1,1 КБ и script[data-motion-toggle] — исключения, GSAP — нет (J, «Звено»)",
+    check("EG-A11Y-11: 1,1 КБ и script[data-motion-toggle] — исключения, GSAP — нет («Звено»)",
           (dr["derived"]["effects_libs_loaded"], len(dr["derived"]["effects_libs_exempt"])), (["gsap.min.js 27.3"], 2))
     tt_ok = {"control": True, "option": "Меньше", "before": {"pct_1s": 3.94}, "after": {"pct_1s": 0.0, "webgl_calls": 0, "infinite": 0, "videos_playing": 0}}
     check("переключатель: 3,94 → 0 %/с, 0 WebGL → работает (эталон F2/12)", derive({"toggle_test": tt_ok}, "desk")["derived"]["toggle_works"], True)
@@ -2013,7 +2159,7 @@ def selftest():
                     {"t": 600, "v": 0.04, "ph": "load", "src": ["p.lead"]}, {"t": 9000, "v": 0.2, "ph": "scroll", "mv": [{"n": "section.pin"}]}])
     check("CLS: окна 0,09 и 0,2 → наибольшее 0,2; сумма 0,29; первый источник section.pin",
           (cb["window_max"], cb["total"], cb["top_sources"][0].split(" ")[0]), (0.2, 0.29, "section.pin"))
-    # 0.1.3: контраст над живым фоном на синтетике: белый текст над тёмным фоном с ярким пятном в одном кадре → худший кадр
+    # контраст над живым фоном на синтетике: белый текст над тёмным фоном с ярким пятном в одном кадре → худший кадр
     L_dark = np.full((100, 200), 0.02)
     L_blob = L_dark.copy()
     L_blob[40:60, 40:120] = 0.8
@@ -2038,7 +2184,7 @@ def selftest():
         n2.req = {"a": {"url": "http://127.0.0.1:1/scene.js", "type": "Script", "mime": "text/javascript", "by": {"first": 60}, "chunks": 60},
                   "b": {"url": "http://127.0.0.1:1/loader.js", "type": "Script", "mime": "text/javascript", "by": {"first": 80}, "chunks": 80}}
         s2 = n2.summary()
-        check("JS по содержимому: scene.js с __THREE__ → 3D; загрузчик с путём «lenis» — не библиотека (J, «Звено»)",
+        check("JS по содержимому: scene.js с __THREE__ → 3D; загрузчик с путём «lenis» — не библиотека («Звено»)",
               (s2["js_3d_session_kb"] > 0, any("loader.js" in x for x in s2["effects_js"]), s2["sniffed"][:1]), (True, False, ["scene.js: 3d"]))
     finally:
         shutil.rmtree(tmp2, ignore_errors=True)
@@ -2060,6 +2206,47 @@ def selftest():
                "2": {"url": "https://x.test/v.mp4", "type": "Media", "mime": "video/mp4", "by": {"first": 500000, "session": 300000}, "chunks": 800000}}
     sm = net.summary()
     check("сеть: CDN найден, js эффектов 25,4 КБ, видео первого экрана 488,3 КБ", (len(sm["cdn"]), sm["js_effects_first_kb"], sm["video_first_kb"]), (1, 25.4, 488.3))
+    # ссылки порогов: уровень, профиль site, каталог эффектов; поле без числа — N/A
+    import yaml as _y
+    gdoc = _y.safe_load(open(GATES_DEFAULT, encoding="utf-8"))
+    use_gate_limits(gdoc)
+    G = {g["id"]: g for g in gdoc["gates"]}
+    check("EG-PERF-06 → профиль site: LCP L1 телефон 2 500, L0 десктоп 2 000",
+          (threshold_for(G["EG-PERF-06"], "L1", "mobile", levels), threshold_for(G["EG-PERF-06"], "L0", "desktop", levels)), (2500, 2000))
+    check("EG-WEIGHT-08 → профиль landing-lead-services@L1 телефон 1 500 (исключение)",
+          threshold_for(G["EG-WEIGHT-08"], "L1", "mobile", levels, "landing-lead-services"), 1500)
+    check("EG-A11Y-19 → effects.yaml marquee-logos 60 px/с", threshold_for(G["EG-A11Y-19"], "L1", "desktop", levels), 60)
+    check("EG-A11Y-17 → motion_hints L1: десктоп 2, телефон 1",
+          (threshold_for(G["EG-A11Y-17"], "L1", "desktop", levels), threshold_for(G["EG-A11Y-17"], "L1", "mobile", levels)), (2, 1))
+    check("EG-WEIGHT-04 → budgets.effects.video_first_screen_kb L2 десктоп 2 500", threshold_for(G["EG-WEIGHT-04"], "L2", "desktop", levels), 2500)
+    check("EG-WEIGHT-02 → wasm подачи: поле есть, числа нет → N/A",
+          (resolve_ref(G["EG-WEIGHT-02"]["threshold_ref"], "L1", "mobile", levels), evaluate_gates({"gates": [G["EG-WEIGHT-02"]]},
+           {"desk": {"net": {"wasm_presentation_kb": 400.0}}}, "L1", levels)[0]["verdict"]), ((True, None), "N/A"))
+    # NU-31: атрибут data-motion — только reduced | full | paused
+    tt_ok2 = {"control": True, "option": "Меньше", "before": {"pct_1s": 3.9}, "after": {"pct_1s": 0.0, "webgl_calls": 0, "infinite": 0, "videos_playing": 0}}
+    check("переключатель: data-motion=reduced → работает; data-motion=reduce → вне контракта",
+          (derive({"toggle_test": {**tt_ok2, "after": {**tt_ok2["after"], "motion_attr": "reduced"}}}, "desk")["derived"]["toggle_works"],
+           derive({"toggle_test": {**tt_ok2, "after": {**tt_ok2["after"], "motion_attr": "reduce"}}}, "desk")["derived"]["toggle_works"]), (True, False))
+    # EG-A11Y-18: полоса и минимум периода — поля строки
+    snap = lambda w, h, dur, dr="alternate": {"loops": 1, "loopsAll": [{"k": "anim", "vis": True, "sel": f"div.o{w}-{dur}", "w": w, "h": h, "dur": dur,  # noqa: E731
+                                                                         "dir": dr, "props": ["transform"]}]}
+    osc = loop_metrics([snap(500, 500, 4000), snap(120, 120, 2000), snap(500, 500, 6000), snap(120, 120, 4000, "normal")], [], 900, 1440)["oscillation"]
+    check("колебания (поля EG-A11Y-18): крупный 8 с, мелкий 4 с и мелкий 4 с без alternate — находки, крупный 12 с — нет",
+          (any("div.o500-4000" in x for x in osc), any("div.o120-2000" in x for x in osc), any("div.o500-6000" in x for x in osc),
+           any("div.o120-4000" in x for x in osc)), (True, True, False, True))
+    # EG-A11Y-28: заставка дольше 3 с и без «Пропустить»
+    di = derive({"intro": {"sel": "div.loader", "t_first": 120, "t_last": 4300, "skip": False, "skip_t": None}}, "desk")["derived"]
+    check("прелоадер 4,2 с без «Пропустить» → две находки", len(di["intro_fail"]), 2)
+    di = derive({"intro": {"sel": "div.loader", "t_first": 120, "t_last": 2100, "skip": True, "skip_t": 400}}, "desk")["derived"]
+    check("прелоадер 2 с, «Пропустить» с 0,3 с → чисто", di["intro_fail"], [])
+    # слой подачи по режимам: порог один — EG-WEIGHT-01 уровня
+    pres = presentation_layer({"desk": {"net": {"first_only": {"js_effects_first_kb": 120.0, "video_first_kb": 0.0}, "js_3d_session_kb": 0.0}},
+                               "mob": {"net": {"first_only": {"js_effects_first_kb": 40.0}}}, "rm": {"net": {"first_only": {"js_effects_first_kb": 3.0}}}},
+                              "L1", levels, gdoc)
+    check("слой подачи: десктоп 120 > 100 (L1), телефон 40 ≤ 100, reduce — порог десктопа; бюджет картинки героя — ссылкой",
+          (pres["modes"]["desk"]["over"], pres["modes"]["mob"]["over"], pres["modes"]["rm"]["threshold_js_effects_kb"],
+           (pres.get("hero_image") or {}).get("hero_mobile_kb")), (True, False, 100, 80))
+    check("окно первого экрана по умолчанию — budgets.yaml (5 000 мс)", PG.window_ms(), 5000)
     gpath = GATES_DEFAULT
     if os.path.exists(gpath):
         g = yaml.safe_load(open(gpath, encoding="utf-8"))
@@ -2069,8 +2256,8 @@ def selftest():
         check("effect-gates.yaml: у автоматических есть metric", bad, [])
         for lv in ("L0", "L1", "L2"):
             miss = [x["id"] for x in g["gates"] if x.get("threshold_ref") and (not x.get("levels") or lv in x["levels"])
-                    and any(threshold_for(x, lv, dv, levels) is None for dv in ("desktop", "mobile"))]
-            check(f"effect-gates.yaml: threshold_ref разрешается для {lv}", miss, [])
+                    and not all(resolve_ref(x["threshold_ref"], lv, dv, levels)[0] for dv in ("desktop", "mobile"))]
+            check(f"effect-gates.yaml: threshold_ref разрешается для {lv} (поле есть у владельца)", miss, [])
     print(f"\n{VERSION}")
     return 0 if ok else 1
 
@@ -2083,6 +2270,7 @@ def run(a):
     import yaml
     gates_doc = yaml.safe_load(open(a.gates, encoding="utf-8")) if os.path.exists(a.gates) else {"gates": []}
     gates_doc["_path"] = a.gates
+    use_gate_limits(gates_doc)
     levels, _ = load_levels()
     spec = load_spec(a.spec)
     a.spec_doc = spec
@@ -2101,7 +2289,7 @@ def run(a):
         local_base = f"http://127.0.0.1:{srv.server_address[1]}"
         url = f"{local_base}/{os.path.relpath(p, local_root)}"
     results = {"_meta": {"tool": VERSION, "target": target, "url": url, "level": a.level, "date": time.strftime("%Y-%m-%d %H:%M"),
-                         "load_avg": os.getloadavg()[0], "modes": a.modes, "page_type": a.page_type}}
+                         "load_avg": os.getloadavg()[0], "modes": a.modes, "page_type": a.page_type, "window_after_load_ms": a.wait}}
     tmp = tempfile.mkdtemp(prefix="motion_check_")
     from playwright.sync_api import sync_playwright
     try:
@@ -2125,8 +2313,8 @@ def run(a):
             results[mode] = derive(r, mode)
             log(f"  [{mode}] {r['seconds_browser']} с браузера")
         if a.f83:
-            # 0.1.3: page_accept получает адрес НАШЕГО сервера (корень по ссылкам ../, как у страницы), а не файл: сам он раздаёт
-            # папку страницы, и у лаборатории F ../_shared/lab.css не находится — F83 мерился на странице без стилей (K/02)
+            # page_accept получает адрес нашего сервера (корень раздачи — по ссылкам ../ или --root), а не файл: так стили
+            # из соседних папок (../_shared/…) находятся
             results["_f83"] = f83_run(url, a)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
@@ -2162,10 +2350,11 @@ def derive(r, mode):
     has_ctrl = bool((r.get("page_end") or {}).get("pause")) or bool((r.get("page_end") or {}).get("toggle"))
     d["loops_without_pause"] = d["loops_moving_after_6s"] if not has_ctrl else []
     d["pause_control"] = has_ctrl
-    d["pause_works"] = None if not pt.get("control") else ((pt.get("infinite_after") or 0) == 0 and (pt.get("videos_playing_after") or 0) == 0 and (pt.get("pct_after") or 0) < 0.5)
+    moving_min = LIM("EG-A11Y-01", "moving_pct_min")          # «движется»: доля пикселей за 1 с (строка ворот 2.2.2)
+    d["pause_works"] = None if not pt.get("control") else ((pt.get("infinite_after") or 0) == 0 and (pt.get("videos_playing_after") or 0) == 0 and (pt.get("pct_after") or 0) < moving_min)
     idle = r.get("idle_6s") or {}
     snapf = r.get("snap_first") or {}
-    moving6 = (idle.get("pct") or 0) >= 0.5 or any(l.get("k") == "video" and l.get("vis") for l in (snapf.get("loopsAll") or []))
+    moving6 = (idle.get("pct") or 0) >= moving_min or any(l.get("k") == "video" and l.get("vis") for l in (snapf.get("loopsAll") or []))
     d["moving_6s_without_pause"] = bool(moving6 and not has_ctrl)
     d["idle_first_pct_1s"] = idle.get("pct")
     d["continuous_windows"] = v.get("continuous_windows")
@@ -2181,7 +2370,7 @@ def derive(r, mode):
     d["focus_invisible"] = kb.get("invisible")
     d["focus_no_ring"] = kb.get("no_ring_guess")
     net = r.get("net") or {}
-    # 0.1.2 (J, «Звено»): переключатель и загрузчик обязаны грузиться и в reduce — JS ≤ 3 КБ br и script[data-motion-toggle] не
+    # переключатель и загрузчик обязаны грузиться и в reduce — JS ≤ 3 КБ br и script[data-motion-toggle] не
     # «библиотека эффектов» (EG-A11Y-11); список исключённых — effects_libs_exempt
     tscripts = set((pe.get("toggle_scripts") or []) + (pf.get("toggle_scripts") or []))
     libs, exempt = [], []
@@ -2194,20 +2383,24 @@ def derive(r, mode):
         (exempt if ((kbv is not None and kbv <= SMALL_JS_KB) or nm in tscripts) else libs).append(x)
     d["effects_libs_loaded"] = libs
     d["effects_libs_exempt"] = exempt
-    # 0.1.2: тест переключателя (desk — «Меньше» стоит; rm — «Полное» движется)
+    # тест переключателя (desk — «Меньше» стоит; rm — «Полное» движется)
     tt = r.get("toggle_test") or {}
     aft, bef = tt.get("after") or {}, tt.get("before") or {}
     key = "toggle_full_in_reduce" if mode == "rm" else "toggle_works"
     if tt.get("control") and aft:
-        moving_after = ((aft.get("pct_1s") or 0) > 0.3 or (aft.get("webgl_calls") or 0) > 0 or (aft.get("infinite") or 0) > 0
+        still = LIM("EG-A11Y-06", "threshold")                  # «стоит»: не больше порога reduce первого экрана
+        moving_after = ((aft.get("pct_1s") or 0) > still or (aft.get("webgl_calls") or 0) > 0 or (aft.get("infinite") or 0) > 0
                         or (aft.get("videos_playing") or 0) > 0)
-        d[key] = bool(moving_after) if mode == "rm" else (not moving_after)
+        attr = aft.get("motion_attr")
+        attr_ok = attr is None or attr in MOTION_VALUES          # атрибут на корне — только reduced | full | paused
+        d[key] = (bool(moving_after) if mode == "rm" else (not moving_after)) and attr_ok
         d["toggle_summary"] = (f"«{tt.get('option')}»: до {bef.get('pct_1s')} %/с → после {aft.get('pct_1s')} %/с; WebGL {aft.get('webgl_calls')}; "
-                               f"бесконечных {aft.get('infinite')}; видео {aft.get('videos_playing')}; data-motion={aft.get('motion_attr')}")
+                               f"бесконечных {aft.get('infinite')}; видео {aft.get('videos_playing')}; data-motion={attr}"
+                               + ("" if attr_ok else f" — вне контракта ({' | '.join(MOTION_VALUES)})"))
     else:
         d[key] = None
         d["toggle_summary"] = None
-    # 0.1.2: сводка станций в терминах зонда I (shoot_stations.py; просьба I): tip_offset_px — край цели со scale-треком (линия)
+    # сводка станций: tip_offset_px — край цели со scale-треком (линия)
     # или первой геометрической цели от линии окна; filled / filled_expected — «изменено» / «прошли линию» у цели-состояния
     sts = []
     for s in r.get("stations") or []:
@@ -2218,11 +2411,11 @@ def derive(r, mode):
         tip = next((t for t in geo if t.get("scale_y") is not None), geo[0] if geo else None)
         stt = next((t for t in tg if t.get("mismatch") is not None), None)
         tv = None if tip is None else (tip["edge_offset"] if tip.get("edge_offset") is not None else tip["edge_bottom_offset"])
-        sts.append({"section": s.get("section"), "station": s.get("station"), "tip_offset_px": None if tv is None else int(round(tv)),
+        sts.append({"section": s.get("section"), "station": s.get("station"), "tip_offset_px": None if tv is None else round_half_away(tv),
                     "tip_moment": tip.get("moment") if tip else None, "filled": stt.get("changed") if stt else None,
                     "filled_expected": (stt.get("n_visible") if mode == "rm" else stt.get("passed")) if stt else None})
     d["stations"] = sts
-    # 0.1.3: контраст над живым фоном (EG-A11Y-27): None — не мерили или ошибка; [] — все выше порога
+    # контраст над живым фоном (EG-A11Y-27): None — не мерили или ошибка; [] — все выше порога
     cl = r.get("contrast_live")
     if isinstance(cl, list) and cl and not any(x.get("error") for x in cl):
         d["contrast_live_fail"] = [f"{x['sel']} {x['ratio_min']}:1 < {x['threshold']}" for x in cl
@@ -2231,7 +2424,19 @@ def derive(r, mode):
     else:
         d["contrast_live_fail"] = None
         d["contrast_live_min"] = None
-    d["scroll_jacking"] = bool((r.get("scroll") or {}).get("dist_ratio_min") is not None and ((r["scroll"]["dist_ratio_min"] < 0.5) or (r["scroll"].get("dist_ratio_max") or 1) > 1.6))
+    jr_min, jr_max = LIM("EG-A11Y-21", "ratio_min"), LIM("EG-A11Y-21", "ratio_max")
+    d["scroll_jacking"] = bool((r.get("scroll") or {}).get("dist_ratio_min") is not None and ((r["scroll"]["dist_ratio_min"] < jr_min) or (r["scroll"].get("dist_ratio_max") or 1) > jr_max))
+    # прелоадер или входной экран (EG-A11Y-28): дольше intro_max_ms или без видимой «Пропустить» к skip_visible_by_ms
+    it = r.get("intro")
+    if isinstance(it, dict) and it.get("t_first") is not None:
+        dur, fails = (it.get("t_last") or it["t_first"]) - it["t_first"], []
+        if dur > LIM("EG-A11Y-28", "intro_max_ms"):
+            fails.append(f"{it.get('sel')}: заставка {dur} мс > {LIM('EG-A11Y-28', 'intro_max_ms')}")
+        if not it.get("skip") or (it.get("skip_t") or 0) - it["t_first"] > LIM("EG-A11Y-28", "skip_visible_by_ms"):
+            fails.append(f"{it.get('sel')}: нет видимой «Пропустить» в первые {LIM('EG-A11Y-28', 'skip_visible_by_ms')} мс")
+        d["intro_fail"], d["intro_ms"] = fails, dur
+    else:
+        d["intro_fail"], d["intro_ms"] = [], None
     d["h_overflow_px"] = max(0, (pe.get("scrollW") or 0) - (pe.get("innerW") or 0))
     d["toggle"] = bool(pe.get("toggle"))
     d["heavy_3d_first_kb"] = (net.get("first_only") or {}).get("js_3d_first_kb")
@@ -2250,7 +2455,7 @@ def cross_derive(results):
         d = r.setdefault("derived", {})
         d["cta_lost"] = bool((pf.get("cta") or 0) > 0 and (pg.get("cta") or 0) == 0) if pf else None
         d["h1_lost"] = bool(pf.get("h1") and (pf["h1"].get("op") or 0) >= 0.9 and not d.get("h1_visible")) if pf else None
-    # 0.1.3: F83 по буквам (page_accept.py, --f83) → ворота EG-A11Y-26 в режиме desk; None — не запускали или нет данных
+    # F83 по буквам (page_accept.py, --f83) → ворота EG-A11Y-26 в режиме desk; None — не запускали или нет данных
     f83 = results.get("_f83") or {}
     if isinstance(base, dict) and not base.get("error") and base:
         dd = base.setdefault("derived", {})
@@ -2261,34 +2466,38 @@ def cross_derive(results):
 
 
 def f83_run(target, a):
-    """Контраст на медиа по F83 — делегируется page_accept.py (ai-media); общая блокировка снаружи, нашу он берёт сам."""
+    """Контраст на медиа по F83 — делегируется page_accept.py (ai-media): только первый экран, без reduce; замки тишины он
+    берёт сам (удержанные обёрткой — нет)."""
     out = os.path.join(a.out, "f83")
-    cmd = ["flock", "-w", "900", LOCKS[0], sys.executable, str(kbpaths.scripts("ai-media", "page_accept.py")), target, "--out", out, "--no-rm", "--contrast", *a.f83]
+    cmd = [sys.executable, str(kbpaths.scripts("ai-media", "page_accept.py")), target, "--out", out, "--no-rm", "--first-screen-only",
+           "--contrast", *a.f83]
     try:
         p = subprocess.run(cmd, capture_output=True, text=True, timeout=400)
         js = sorted(f for f in os.listdir(out) if f.startswith("accept_") and f.endswith(".json")) if os.path.isdir(out) else []
         data = json.load(open(os.path.join(out, js[0]), encoding="utf-8")) if js else {}
-        # 0.1.3: page_accept пишет no_preference.contrast (в 0.1.x искался ключ normal → null)
-        c = (data.get("no_preference") or data.get("normal") or data).get("contrast") if isinstance(data, dict) else None
+        c = (data.get("no_preference") or {}).get("contrast") if isinstance(data, dict) else None
         return {"code": p.returncode, "contrast": c, "verdict": data.get("verdict") if isinstance(data, dict) else None, "stderr": p.stderr[-300:]}
     except Exception as e:
         return {"error": str(e)[:200]}
 
 
 def finish(results, a, gates_doc, levels, spec):
-    rows = evaluate_gates(gates_doc, {k: v for k, v in results.items() if not k.startswith("_")}, a.level, levels, spec=(spec or {}).get("page") if spec else None)
+    rows = evaluate_gates(gates_doc, {k: v for k, v in results.items() if not k.startswith("_")}, a.level, levels,
+                          spec=(spec or {}).get("page") if spec else None, page_type=getattr(a, "page_type", None))
+    pres = presentation_layer(results, a.level, levels, gates_doc)
     srows = []
     for mode in ("desk", "mob", "rm"):
         if isinstance(results.get(mode), dict) and results[mode].get("spec") and mode != "mob":
             srows += spec_rows(results[mode]["spec"], mode)
         if isinstance(results.get(mode), dict) and results[mode].get("stations"):
             srows += station_rows(results[mode]["stations"], mode)
-    md = render(results["_meta"]["target"], a.level, results, rows, srows, gates_doc)
+    md = render(results["_meta"]["target"], a.level, results, rows, srows, gates_doc, pres)
     open(os.path.join(a.out, "gates.md"), "w", encoding="utf-8").write(md)
     open(os.path.join(a.out, "fix.txt"), "w", encoding="utf-8").write(fix_text(results["_meta"]["target"], rows, srows))
     stations = {m: (results[m].get("derived") or {}).get("stations") for m in ("desk", "mob", "rm")
                 if isinstance(results.get(m), dict) and (results[m].get("derived") or {}).get("stations")}
-    json.dump({"rows": rows, "spec": srows, "level": a.level, "gates_version": gates_doc.get("version"), "tool": VERSION, "stations": stations},
+    json.dump({"rows": rows, "spec": srows, "level": a.level, "page_type": getattr(a, "page_type", None), "gates_version": gates_doc.get("version"),
+               "tool": VERSION, "stations": stations, "presentation": pres},
               open(os.path.join(a.out, "gates.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1, default=str)
     fails = [r for r in rows if r["verdict"] == "FAIL"]
     summ = {"target": results["_meta"]["target"], "level": a.level, "fail_B": len([r for r in fails if r["severity"] == "B"]),
@@ -2314,10 +2523,12 @@ def main():
         import yaml
         results = json.load(open(os.path.join(a.inp, "results.json"), encoding="utf-8"))
         a.level = a.level or results["_meta"]["level"]
+        a.page_type = results["_meta"].get("page_type")
         a.out = a.inp
         a.spec_doc = None
         gd = yaml.safe_load(open(a.gates, encoding="utf-8"))
         gd["_path"] = a.gates
+        use_gate_limits(gd)
         levels, _ = load_levels()
         for k, v in list(results.items()):
             if not k.startswith("_") and isinstance(v, dict):
@@ -2333,7 +2544,7 @@ def main():
     p.add_argument("--gates", default=GATES_DEFAULT)
     p.add_argument("--steps", type=int, default=12)
     p.add_argument("--dwell", type=float, default=1.8)
-    p.add_argument("--wait", type=int, default=5500)
+    p.add_argument("--wait", type=int, help="окно первого экрана после load, мс (по умолчанию — budgets.yaml site)")
     p.add_argument("--timeout", type=int, default=90)
     p.add_argument("--budget", type=int, default=240, help="секунд на режим (≤ 300: партия под блокировкой)")
     p.add_argument("--locale", default="ru-RU")
@@ -2341,11 +2552,11 @@ def main():
     p.add_argument("--keep-video", action="store_true")
     p.add_argument("--keep-shots", action="store_true")
     p.add_argument("--no-video", action="store_true")
-    p.add_argument("--page-type")
+    p.add_argument("--page-type", help="тип страницы: зеркала страницы (profile.*) — профиль <тип>@<уровень> с исключениями")
     p.add_argument("--root", help="корень раздачи локальной страницы (по умолчанию — по ссылкам ../ в HTML)")
     p.add_argument("--effects-js", default=EFFECT_JS_RE)
     p.add_argument("--f83", nargs="*")
-    p.add_argument("--contrast", nargs="*", help="0.1.3: худший контраст текста над живым фоном (селекторы; без значений — h1)")
+    p.add_argument("--contrast", nargs="*", help="худший контраст текста над живым фоном (селекторы; без значений — h1)")
     p.add_argument("--fail-on", default="blocker", choices=["blocker", "serious"])
     p.add_argument("--selftest", action="store_true")
     p.add_argument("--version", action="store_true")
@@ -2366,6 +2577,7 @@ def main():
     if bad:
         raise SystemExit(f"неизвестные режимы: {bad}")
     a.budget = min(a.budget, 300)
+    a.wait = a.wait if a.wait is not None else PG.window_ms()
     slug = re.sub(r"[^A-Za-z0-9._-]+", "_", re.sub(r"^https?://", "", a.target).strip("/"))[:60] or "page"
     a.out = os.path.abspath(a.out or os.path.join(str(kbpaths.out("creative", "motion")), slug))
     try:

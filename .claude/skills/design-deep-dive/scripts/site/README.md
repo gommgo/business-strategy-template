@@ -20,7 +20,7 @@ ffmpeg 7.1.5.
 |---|---|---|---|
 | `fetch.py` | `../kimi-research/99-raw/tools/` (23.09 19:29; исходно ai-media) | Страница → Markdown в `99-raw/cache/`, PDF — через `pdftotext`; печатает путь | `python3 99-raw/tools/fetch.py "URL"` |
 | `render_fetch.py` | там же (23.09 19:29) | То же через headless-браузер: SPA, документация на JS | `python3 99-raw/tools/render_fetch.py "URL" --scroll [--html]` |
-| `site_probe.py` | там же (23.09 19:29; исходно blender, агент A) | Замер живого сайта: байты по категориям, LCP с элементом, TBT, WebGL, прокрутка, `--mobile`, `--throttle`, `--reduced-motion` | `python3 ../blender/site_probe.py https://site out/ [--mobile] [--throttle]` |
+| `site_probe.py` | `../blender/` | Замер страницы с 3D: байты по категориям, LCP с элементом, TBT, WebGL, прокрутка, `--mobile`, `--throttle`, `--reduced-motion`, `--no-3d` (прогон «постер без 3D» для вклада 3D); ворота — `gate_check.py` | `../blender/site_probe.py https://site out/ [--mobile] [--throttle] [--no-3d]` |
 | `measure_ui.py` | там же (23.09 19:29; исходно ui-research) | `getComputedStyle` видимых элементов: кегли, цвета, отступы, каркас; скриншоты; здесь — для структурных признаков (смена фона секций) | `python3 ../ui/measure_ui.py URL [--viewport 390x844] [--full-page]` |
 | `ui_audit.py` | там же (23.09 19:29; исходно ui-research) | Визуальный QA по порогам ui-research. **На лендинге даёт ложные находки** (J2 «сайдбар», J8 `<header>` ≤ 120 px, H1–H2 кегли, A1 шкала до 96, B2 высоты кнопок, L5 гарнитуры — аудит UI §4.3, аудит KIMI §4 п.14): здесь только сырой замер; маркетинговый визуальный профиль — creative | `python3 ../ui/ui_audit.py URL --preset consumer --viewport 1440x900` · `--selftest` |
 | `color.py` | там же (23.09 19:29; исходно ui-research) | WCAG 2 и APCA, hex ↔ OKLCH, ΔE, композитинг альфы; импортируется `measure_ui.py` и `ui_audit.py` | `python3 ../lib/color.py selftest` |
@@ -29,7 +29,7 @@ ffmpeg 7.1.5.
 | `yt_transcript.py` | там же (23.09 19:29) | Поиск по YouTube без API (`--search "запрос" -n 20`) — для V; старый способ субтитров не использовать (есть `yt_dl.py`) | `python3 99-raw/tools/yt_transcript.py --search "запрос" -n 20` |
 | `transcribe_local.py` | `../blender-research/99-raw/tools/` (23.09 02:35) | Локальное распознавание речи роликов без субтитров: Qwen3-ASR-1.7B Q8_0 через `llama-mtmd-cli` на CPU (около 0,43 реального времени: час речи — около 26 минут), нарезка по паузам на куски около 4 минут, докачка после обрыва; промежуточное — `99-raw/youtube/audio/<id>/`. Запускать по одному ролику, при `free -g` ≥ 3 ГБ | `python3 99-raw/tools/transcribe_local.py URL` |
 | `asset_inventory.py` | `../ai-media-research/99-raw/tools/` (23.09 10:53; агент A ai-media) | Инвентарь визуальных ассетов живой страницы (картинки, CSS-фоны, видео, SVG, Lottie, canvas; сеть через CDP; LCP до прокрутки, CLS, TBT, og:image, фавиконы); десктоп 1440×900 или Pixel 7. Ограничения: cookie-баннеры не закрывает, антибот, один браузер за раз. Основа `page_anatomy.py` | `python3 ../ai-media/asset_inventory.py URL OUT_DIR [--mobile] [--quick] [--throttle]` |
-| `page_accept.py` | `../ai-media-research/99-raw/tools/` (23.09 20:58; агент J ai-media) | Приёмка страницы: байты первого экрана (CDP), LCP, CLS, TBT, `alt`/`width`/`height`, атрибуты видео, пауза движения, reduce, контраст F83; сама берёт блокировку `99-raw/tools/.locks/browser.lock` (ждёт до 900 с). **Порог первого экрана 2500 КБ здесь не норма** — бюджеты по профилям задаёт P (таблица «Поправки» в `PLAN.md`, строка 17). INP не меряет, Safari нет | `python3 ../ai-media/page_accept.py PAGE.html\|URL --out DIR [--mobile] [--throttle] [--budget-first-kb N]` |
+| `page_accept.py` | `../ai-media/` | Приёмка страницы: вес первого экрана (CDP), LCP, CLS, TBT, `alt`/`width`/`height`, постер видео, движение на 6-й секунде и петли всей страницы, reduce записью всей страницы, контраст F83; пороги — профиль `--budget-profile` из `budgets.yaml` (вес — WARN), замки тишины берёт сама. INP не меряет, Safari нет | `../ai-media/page_accept.py PAGE.html\|URL --out DIR --budget-profile <page_type>@L<n> [--mobile] [--throttle]` |
 
 ## Будут добавлены агентами
 
@@ -42,7 +42,7 @@ ffmpeg 7.1.5.
 | `vocab_lint.py` | Идентификаторы в YAML и JSON — только из `../../kb/site/02-site-types/vocabulary.yaml` | B, 1 |
 | `ia_probe.py` | Структура многостраничника: `robots.txt`, `sitemap.xml`, типы URL, глубина, шапка и подвал, крошки, `hreflang`, 404 (≤ 1 запроса в секунду, ≤ 200 адресов из sitemap) | G, 2 |
 | `geo_probe.py` | Доступность для ИИ: правила `robots.txt` для ботов из `crawlers.yaml`, `llms.txt`, доля смыслового текста без JS, JSON-LD, `robots` и `X-Robots-Tag`, canonical, OG | H, 2 |
-| `page_gates.py` | Единые ворота страницы по профилю из `budgets.yaml` и `page-gates.yaml` поверх `page_accept.py`, `site_probe.py`, `page_anatomy.py` (v0 — P; v1 со строками SEO, GEO, A11Y, LEGAL — K) | P, 2; K, 3 |
+| `page_gates.py` | Ворота собранной страницы по профилю из `budgets.yaml` и `page-gates.yaml` поверх `page_anatomy.py`, `page_accept.py`, `motion_check.py`, `gate_check.py`, `geo_probe.py`, `ia_probe.py`, axe — раздел ниже | P, 2; K, 3 |
 | `ab_plan.py` | Размер выборки и длительность A/B, проверка SRM | P, 2 |
 | `checklist_export.py` | `../../kb/site/09-ai-generation-evaluation/site-checklist.yaml` из Markdown чек-листа | K, 3 |
 | `site_validate.py` | Схемы и перекрёстные ссылки: блоки плана есть в `blocks.yaml`, слоты разрешены блоку, id фактов есть в брифе, действия и события — в словарях, у страниц карты есть планы | J, 3 |
@@ -58,9 +58,10 @@ ffmpeg 7.1.5.
 
 - Python-пакеты — только в venv внутри `99-raw/tools/` (`uv venv 99-raw/tools/venv-<буква>`); npm — в `99-raw/tools/node`
   или в папке опыта; `sudo` запрещён; глобально ничего не ставить.
-- Браузер — один за раз на агента и через блокировку:
-  `flock -w 900 $DDD_HOME/locks/site/browser.lock <команда>` (`page_accept.py`
-  берёт её сам); перед тяжёлым прогоном `free -g` ≥ 3 ГБ; фоновых процессов не оставлять.
+- Браузер — один за раз и через блокировку: утилиты замера времени (`page_anatomy.py`, `page_accept.py`, `motion_check.py`,
+  `site_probe.py`, `web_view.py`) берут замки тишины сами (общий тяжёлый, браузера, домена — `page_gates.heavy_lock`),
+  остальные — `flock -w 900 $DDD_HOME/locks/browser.lock <команда>`; перед тяжёлым прогоном `free -g` ≥ 3 ГБ; фоновых
+  процессов не оставлять.
 - Клоны репозиториев — `99-raw/cache/repos/<org>__<repo>/` (`git clone --depth 1`); клоны kimi в
   `../kimi-research/99-raw/cache/repos/` — только читать.
 - Ключи и токены не заводить и не печатать; PageSpeed Insights API — без ключа; платных вызовов нет; Kimi не запускать.
@@ -114,55 +115,39 @@ PyYAML; сеть и браузер не нужны.
 - Ограничения: не проверяет, что слот разрешён блоку и что факт существует (это `site_validate.py`); строки чужих
   форматов без карты дают ложные ошибки — для них `--no-default-map`.
 
-## `page_anatomy.py` — анатомия живой страницы (агент M, волна 1, 2026-09-24)
+## `page_anatomy.py` — анатомия собранной или живой страницы
 
-Структура и техника живой посадочной страницы или страницы сайта за один прогон «страница × устройство»: секции с ролью
-(`section_role`) и блоком (`block`) по черновику словаря B, призывы, формы и согласия, шапка и подвал, заголовки, мета,
-Open Graph, JSON-LD, платформа, сторонние домены по категориям, cookie-баннер и трекинг до выбора, LCP, CLS, TBT, FCP, TTFB,
-лабораторный INP по сценарию, текст без JS, контактный лист секций. Основа — функции `asset_inventory.py` (сеть CDP,
-наблюдатели LCP/CLS/долгих задач), `page_accept.py` (локальный сервер, блокировка), `measure_ui.py` (исключения
-виджетов и баннеров), `site_probe.py`; чужие файлы не менялись. Зависимости: Python 3.13, Playwright 1.63 (Chromium 153,
-`channel=chromium`), Pillow; web-vitals 6.2.2 — `99-raw/tools/node/node_modules/web-vitals` (`npm install --prefix
-99-raw/tools/node web-vitals@6.2.2`).
+Структура и техника страницы за один прогон «страница × устройство»: секции с ролью (`section_role`) и блоком (`block`) по
+словарю site, призывы, формы и согласия, шапка и подвал, заголовки, мета, Open Graph, JSON-LD, платформа, сторонние домены по
+категориям, cookie-баннер и трекинг до выбора, LCP, CLS, TBT, FCP, TTFB, показ H1 во времени (`h1_paint`), лабораторный INP
+по сценарию, текст без JS, контактный лист секций. Первое звено ворот после сборки: `anatomy_<устройство>.json` читает
+`page_gates.py --anatomy`. Условия лаборатории — `budgets.yaml` `conditions` (через `page_gates.py`): окно первого экрана
+(load + `window_after_load_s`), телефон — дескриптор Pixel 7 и CPU ×4, десктоп 1440×900; UA — как у браузера
+(HeadlessChrome), признак автоматизации не выключается — сайт видит, что его меряет утилита. web-vitals — из npm-зависимостей
+окружения (`$DDD_HOME/node`, ставит `install.sh`).
 
 | Запуск | Что делает |
 |---|---|
-| `flock -w 900 …/.locks/browser.lock flock -w 900 99-raw/tools/.locks/browser.lock python3 page_anatomy.py URL OUT [--mobile] [--inp] [--label PAGE_TYPE] [--id ID] [--market ru\|intl]` | одна страница; `--quick` — без прокрутки и листа; `--no-cmp-close` — баннер не трогать; `--timeout` (с), `--wait` (мс), `--cpu N` (по умолчанию ×1 десктоп, ×4 телефон); `--crux` — PSI (ключ только из `PSI_API_KEY`) |
-| `python3 page_anatomy.py --batch pages.tsv --out DIR [--devices desktop,mobile] [--inp] [--only a,b] [--skip-done]` | партия: сама берёт обе блокировки на каждую страницу × устройство (не дольше `--page-timeout` 270 с), ждёт `MemAvailable` ≥ 3 ГБ, журнал `DIR/batch.log` |
-| `--reclassify DIR` · `--csv DIR --pages pages.tsv > pages.csv` · `--net-of HOST…` · `--crux-batch pages.tsv --out DIR` · `--selftest` | пересчёт классов без браузера; сводная таблица; страна и AS сервера (IP не печатается); поле CrUX; самопроверка на `99-raw/experiments/M/00-selftest/` |
+| `page_anatomy.py URL OUT [--mobile] [--inp] [--label PAGE_TYPE] [--id ID] [--market ru\|intl]` | одна страница; сама берёт замки тишины (общий тяжёлый, браузера, site — `page_gates.heavy_lock`), `--no-lock` — обёртка их уже держит; `--quick` — без прокрутки и листа; `--no-cmp-close` — баннер не трогать; `--timeout` (с), `--wait` (мс, по умолчанию — окно `budgets.yaml`), `--cpu N`; `--crux` — PSI (ключ только из `PSI_API_KEY`) |
+| `page_anatomy.py --batch pages.tsv --out DIR [--devices desktop,mobile] [--inp] [--only a,b] [--skip-done]` | партия: замки тишины на каждую страницу × устройство (не дольше `--page-timeout` 270 с), ждёт `MemAvailable` ≥ 3 ГБ, журнал `<DIR>/batch.log` |
+| `--reclassify DIR` · `--csv DIR --pages pages.tsv > pages.csv` · `--net-of HOST…` · `--crux-batch pages.tsv --out DIR` · `--selftest` | пересчёт классов без браузера; сводная таблица; страна и AS сервера (IP не печатается); поле CrUX; самопроверка — тестовые страницы во временной папке, без сети (32 проверки, в том числе честный UA и показ H1 из прозрачности) |
 
 Выход: `OUT/anatomy_<desktop|mobile>.json` (поля `dom` — сырые признаки; `classes` — роли и блоки с top-3 и причинами;
-`summary` — строка CSV; `network`, `cmp`, `inp`, `nojs`, `first_screen`), `sheet_<устройство>.jpg` (контактный лист с
-границами и подписями секций), `cmp_<устройство>.jpg` (кадр с баннером). Правила замера: рекламу не кликать, формы не
-отправлять и ничего не вводить (для INP — только фокус), на баннере — «Отклонить», если есть; **«Принять» утилита не нажимает**.
+`summary` — строка CSV; `network`, `cmp`, `inp`, `nojs`, `first_screen`, `h1_paint` — `first_op`, `t_first`, `t_visible`,
+`t_opaque`, `in_first_screen`; `ua`, `webdriver`), `sheet_<устройство>.jpg` (контактный лист с границами и подписями секций),
+`cmp_<устройство>.jpg` (кадр с баннером). Правила замера: рекламу не кликать, формы не отправлять и ничего не вводить (для
+INP — только фокус), на баннере — «Отклонить», если есть; **«Принять» утилита не нажимает**.
 
-**Версия 1.1 (продолжатель M2, 2026-09-24): правка только Python-классификатора** (`99-raw/experiments/M/04-classifier-accuracy/patch_classifier.py`;
-JS-разбор и сырые признаки те же, страницы пересчитаны `--reclassify` без перемера): роли ред. 2 словаря `services`,
-`seo-text`, `cross-sell`, `header` (полосы меню над hero); главный заголовок 5 баллов, подзаголовки и заголовки карточек 2;
-суженные общие слова; смысл заголовка сильнее ценовых признаков; фоллбэк `benefits` с низкой уверенностью. По выборке M/03
-(десктоп): `other` 29 % → 14 % секций, уверенных (`conf` ≥ 0,5) 51 % → 62 %.
+**Точность классификатора** (опыт M/04, ручная разметка): границы секций верны у 84–85 % сегментов; роль верна у **62 %**
+секций отложенной выборки, блок — у 36 %; при `conf` ≥ 0,5 роль верна в 86–92 %. Надёжны `hero`, `footer`, `faq`,
+`pricing`, `testimonials`; размыты `benefits`, `related`, `seo-text`, `guarantee`, `contacts`. Для частот и
+последовательностей брать роли с `conf` ≥ 0,5, остальные — подсказка.
 
-**Точность классификатора** (опыт M/04, ручная разметка одним агентом): границы секций верны у 84–85 % сегментов; роль
-верна у **62 %** секций отложенной выборки (46 сегментов, 4 страницы; v1 — 51 %), блок — у 36 %; при `conf` ≥ 0,5 роль верна
-в 86–92 %. Надёжны `hero`, `footer`, `faq`, `pricing`, `testimonials`; размыты `benefits`, `related`, `seo-text`,
-`guarantee`, `contacts`. Для частот и последовательностей брать роли с `conf` ≥ 0,5, остальные — подсказка.
-
-**Скрипты выборки M/03** (`99-raw/experiments/M/03-sample/`): `make_csv.py` — `../../kb/site/02-site-types/pages.csv` (строки
-`build_csv` + колонки `measured_at, net_period, attempt, valid, speed_valid, exclude, note, seg_flag`); `analyze.py
-[--module …]` — `analysis.md`, все сводки файла 03; `rerun.py` — перемер недостающих прогонов с блокирующим `flock -w 900`
-на обе блокировки; `summarize.py` — ранняя сводка M. **`dual_lock` исправлен** (M2, 16:55): раньше он опрашивал
-блокировку раз в 2 с и в очереди агентов с блокирующим `flock -w` голодал (партия и самопроверка уходили по тайм-ауту
-900 с); теперь ждёт в очереди ядра (`fcntl.flock` с тайм-аутом через `SIGALRM`) — как `flock -w`.
-
-Ограничения: лаборатория ≠ поле (сеть без замедления, телефон — эмуляция с CPU×4); одна сеть с раздельной маршрутизацией
-(поле `net` — по стране сервера; anycast-CDN — `unknown`); проба маршрута через эхо-сервисы ненадёжна (не отвечала при
-нормальной загрузке) — в годности строки не участвует; PSI API без ключа — квота 0 (2026-09-24); INP — ≤ 4 взаимодействия
-после загрузки (занижает INP во время загрузки); антибот и заглушки — `blocked`; сегментация срывается, когда подвал или
-общая обёртка проглатывают страницу (`seg_flag=fail`); слайды hero на y = 0 и группы FAQ дают лишние секции; «умная» шапка,
-появляющаяся при прокрутке вверх, не ловится; уведомления о cookie без платформы согласия иногда не распознаются (Мегаплан);
-страницы шире экрана телефона расширяют область Chrome — пороги от ширины устройства, клики на таких страницах могут не
-проходить (баннер тогда скрывается CSS); сертификат НУЦ Минцифры (Russian Trusted CA) Chromium не принимает —
-`ERR_CERT_AUTHORITY_INVALID`. Проверено: самопроверка 28/28 (десктоп и телефон), пилот 4 страницы, выборка 72 страницы.
+Ограничения: лаборатория ≠ поле (сеть без замедления, телефон — эмуляция с CPU ×4); проба маршрута через эхо-сервисы
+ненадёжна; PSI API без ключа — квота 0; INP — ≤ 4 взаимодействия после загрузки (занижает INP во время загрузки); антибот и
+заглушки — `blocked`; сегментация срывается, когда подвал или общая обёртка проглатывают страницу (`seg_flag=fail`); слайды
+hero на y = 0 и группы FAQ дают лишние секции; «умная» шапка, появляющаяся при прокрутке вверх, не ловится; страницы шире
+экрана телефона расширяют область Chrome; сертификат НУЦ Минцифры (Russian Trusted CA) Chromium не принимает.
 
 **Правка оркестратора волн site в `vocab_lint.py` (24.09.2026 15:25).** В карту ключей добавлены пути без id словаря
 (значение `None` — ключ пропускается, строка только сканируется на префиксные ссылки): `references.role` (роль референса у
@@ -170,23 +155,43 @@ creative — `rhythm`, `composition` …; замечание creative в точ�
 (поля `site-brief`, давшие 13 ложных ошибок на `01-foundations/site-brief.example.yaml`). Самопроверка — OK; пример брифа —
 0 ошибок; `../../kb/site/04-blocks/` — без изменений (1 ошибка `block:service-area` — новый id для J); файлы C1 creative — 0 ошибок. 15:33 — добавлен `versions.role` (роль языковой версии в `site-map` G — ложная ошибка на примерах G).
 
-## `page_gates.py` — единые ворота страницы по профилю (агент P, волна 2, 2026-09-24; v1 — K)
+## `page_gates.py` — ворота собранной страницы по профилю
 
-Сводит готовые замеры страницы в вердикт по `../../kb/site/07-seo-geo-performance-analytics/page-gates.yaml` с порогами профиля
-`<page_type>@L<n>` из `budgets.yaml`. Браузер не запускает: читает `anatomy_<device>.json` (`page_anatomy.py`) и, если есть,
-`accept_*.json` (`page_accept.py`: LCP с троттлингом, lazy/fetchpriority, пауза, reduce, F83). Python 3.13 + PyYAML.
+Вердикт `accepted` / `accepted_with_notes` / `blocked` по `../../kb/site/07-seo-geo-performance-analytics/page-gates.yaml` с порогами
+профиля `<page_type>@L<n>` из `budgets.yaml`; умолчание уровня по типу страницы и правило лидогенерации услуг (доля горячего
+мобильного трафика и полосы цены) — поля `../../kb/creative/01-creative-direction/ambition-levels.yaml`. Браузер не запускает:
+сводит JSON утилит ворот после сборки. Метрику страницы воротами ставит только он; те же метрики, измеренные соседями
+(`motion_check.py`, зонд 3D), идут в отчёт зеркалом D и на вердикт не влияют; ворота эффектов и 3D — слоями отчёта
+(`layers`). Числа строк без профиля — поле `limits` строки `page-gates.yaml`. Код-репо запускает утилиту соседним чекаутом
+`../strategy/…/scripts/site/page_gates.py`; цепочка фазы `build`: `page_anatomy.py` →
+`page_accept.py --budget-profile …` → `page_gates.py --profile … --anatomy … --accept …` (+ `--motion`, `--gate3d`, `--geo`,
+`--ia`, `--axe`, `--plan`, `--html`).
 
 | Запуск | Что делает |
 |---|---|
-| `python3 page_gates.py --profile landing-lead-services@L1 --anatomy DIR [--accept DIR] [--jurisdiction ru\|eu\|none] [--json]` | вердикт `accepted` / `accepted_with_notes` / `blocked`, строки PASS/FAIL/SKIP с порогом и серьёзностью; код 1 при B |
-| `python3 page_gates.py --resolve landing-lead-services [--site-level L1] [--hot-mobile-share 0.6 --price-band mid]` | профиль по сетке решения 20 с исключениями и журналом решений |
-| `python3 page_gates.py --selftest` | 15 проверок: YAML ворот, разрешение профиля, B против S, право ru/eu |
+| `page_gates.py --profile landing-lead-services@L1 --anatomy DIR [--accept DIR] [--motion DIR] [--gate3d FILE …] [--jurisdiction ru\|eu\|none] [--json]` | вердикт, строки PASS/FAIL/SKIP с порогом, серьёзностью и источником; код 1 при B, 2 — ошибка вызова |
+| `page_gates.py --resolve landing-lead-services [--site-level L1] [--hot-mobile-share 0.6 --price-band mid]` | профиль (JSON: `id`, `level`, `page_type`, `outcome`, `weight`, `all_levels`, `log`) — его читает сборщик входа холста |
+| `page_gates.py --conditions` | условия замера `budgets.yaml` для утилит: окно первого экрана, телефон, десктоп, замок тишины |
+| `page_gates.py --selftest` | 105 проверок: строки и `limits` ворот, профиль и правило лидогенерации из данных, контракты JSON соседей, зеркала |
 
-Автоматические строки: SG-PERF-01…06, 09; SG-WEIGHT-01…07; SG-SEO-02, 03; SG-GEO-01; SG-LEGAL-01…05, 07. Остальные — SKIP
-(человек, axe, K, соседние утилиты). Замер без троттлинга сети (как у M) для SG-PERF-01 помечается `lab-unthrottled` —
-диагностика, не приёмка; для приёмки — `page_accept.py --mobile --throttle`. Ограничения: сторонние КБ первого экрана —
-верхняя оценка (КБ домена за сессию); INP-сценарий после загрузки занижен. Проверено: самопроверка 15/15; опыт
-`99-raw/experiments/P/02-page-gates-m10/` (10 страниц M × 2 профиля).
+| Флаг | Что читает | Какие ворота |
+|---|---|---|
+| `--anatomy DIR` | `anatomy_<устройство>.json` `page_anatomy.py` | SG-PERF-01…06 (LCP-элемент, H1 в LCP с признаком показа H1), 09; SG-WEIGHT-01…07, 09 (видео — только D); SG-SEO-02, 03; SG-GEO-01; SG-MOB-01, 02; SG-CONTENT-07; SG-LEGAL-01…05, 07 |
+| `--accept DIR` | `accept_<режим>.json` `page_accept.py`: поля `device`, `throttle`, `no_preference` (`lcp`, `first_screen_total_kb`, `weight_measured`, `dom.imgs`, `media_first`, `motion_6s`, `loops`, `console`), `reduce` (`media_kb`, `motion.fail`) | SG-PERF-01/02 (LCP с троттлингом), SG-PERF-06 (lazy, fetchpriority), SG-PERF-14, SG-PERF-16 (энтропия и площадь постера), SG-WEIGHT-01 без анатомии (прогон без замедления), SG-A11Y-03, SG-A11Y-07, SG-CONTENT-04 |
+| `--motion DIR` | `<DIR>/results.json` (`<режим>.derived`, `vitals`, `cls`, `net`) и `<DIR>/gates.json` (`rows`) `motion_check.py` | SG-A11Y-03 (петли всей страницы), SG-A11Y-04 (вспышки), SG-A11Y-07 (EG-A11Y-05…07); зеркала LCP, TBT, CLS, веса и шрифтов; слой эффектов |
+| `--gate3d FILE …` | JSON `gate_check.py --json` (`rows`: `id`, `check`, `value`, `limit`, `severity`, `status`, `mirror`) | SG-WEIGHT-08 (D), SG-CONTENT-04 (зонд), зеркала LCP, CLS, TBT и веса; слой 3D |
+| `--geo FILE` | JSON `geo_probe.py` (флаги `head-kit.yaml checks`) | SG-SEO-01…05, SG-GEO-01…02 (строка `device: raw`) |
+| `--ia FILE` | `<id>/ia.json` `ia_probe.py` | SG-SEO-01 (мягкая 404), SG-SEO-06, SG-SEO-08, SG-NAV-01, SG-NAV-02 |
+| `--axe FILE` | узлы с адресами `run_axe_targets.py` или `axe.run` | SG-A11Y-01 (контраст ключевых узлов — B, прочих — S; без адресов — S, которое исключение не снимает), SG-A11Y-02 |
+| `--plan FILE` | page-plan: `first_screen_policy`, `seo.indexable`, `seo.structured_data`, `x-gate-exception[{id, why, who, until}]` | SG-CONTENT-07; условия SEO; исключения (S снимается до `until`, B — никогда) |
+| `--html FILE`, `--css FILE …` | сохранённый HTML и CSS | SG-CONTENT-05, SG-CONTENT-06, признаки невидимого H1 (SG-PERF-06), SG-A11Y-08 (clamp кеглей) |
+| `--ai-bots-policy`, `--ads-google` | условия брифа для флагов ботов | закрытые ИИ-боты при `deny-all` — не дефект; AdsBot — B только для посадочной под Google Ads |
+
+Замер без троттлинга сети (анатомия телефона) для SG-PERF-01 помечается `lab-unthrottled` — диагностика, не приёмка; для
+приёмки — `page_accept.py --mobile --throttle`. Ограничения: сторонние КБ первого экрана — верхняя оценка (КБ домена за
+сессию); INP-сценарий после загрузки занижен; классы узлов контраста и распознавание призыва — эвристики, ключевой провал
+подтверждать кадром. Модуль для утилит замера: `resolve_profile()`, `profile_value()`, `conditions()`, `cdp_network()`,
+`mobile_device()`, `heavy_lock()` — одно место условий лаборатории и тишины машины.
 
 ## `ab_plan.py` — план и проверка A/B (агент P, волна 2, 2026-09-24)
 
@@ -204,7 +209,7 @@ creative — `rhythm`, `composition` …; замечание creative в точ�
 - Ограничения: доли (конверсии), не средние выручки; последовательные always-valid методы не реализованы; биномиальная
   выборка в самопроверке — нормальное приближение.
 
-## `ia_probe.py` — структура многостраничника по HTTP (агент G, волна 2, 2026-09-24; раздел — продолжатель G2)
+## `ia_probe.py` — структура многостраничника по HTTP
 
 Меряет устройство сайта целиком, без браузера: robots.txt → sitemap.xml (индексы, gzip, `hreflang` и `lastmod` в sitemap,
 относительные `<loc>`) → адреса (шаблоны путей, тип раздела по сегменту — русский транслит и английский, глубина, языковые
@@ -212,7 +217,9 @@ creative — `rhythm`, `composition` …; замечание creative в точ�
 уровня, подменю, признаки мега-меню, поиск, телефон, вход, переключатель языка, кнопки), подвал (ссылки, группы,
 юридические ссылки, реквизиты, соцсети, «Карта сайта»), крошки (HTML и BreadcrumbList в JSON-LD, microdata, RDFa),
 `hreflang` в `<head>`, canonical, title, H1, контекстные ссылки и блоки «читайте также» → ответ на несуществующий адрес
-(честная 404, мягкая 404, редирект на главную). Python 3.13, только стандартная библиотека.
+(честная 404, мягкая 404, редирект на главную). Python 3.13, только стандартная библиотека. Код-репо запускает утилиту
+соседним чекаутом (`../strategy/…/scripts/site/ia_probe.py`); выход без `--out` —
+`$DDD_HOME/out/site/ia_probe/`; `<id>/ia.json` читает `page_gates.py --ia`.
 
 | Запуск | Что делает |
 |---|---|
@@ -256,7 +263,7 @@ creative — `rhythm`, `composition` …; замечание creative в точ�
   содержимого серий не проверяет. Годится как автопроверка собранного сайта (ссылки навигации в исходном HTML, код 404,
   sitemap с абсолютными каноническими URL, крошки по глубине) — предложение K и J.
 
-## `geo_probe.py` — доступность страницы для поисковых и ИИ-ботов (агент H, волна 2, 2026-09-24; раздел — продолжатель H2)
+## `geo_probe.py` — доступность страницы для поисковых и ИИ-ботов
 
 Что видит бот без исполнения JS: для каждого бота из `../../kb/site/07-seo-geo-performance-analytics/crawlers.yaml` — разрешён ли URL в
 robots.txt (RFC 9309 + особенности платформ: цепочки групп «YandexBot → Yandex → *», «Applebot → Googlebot → *»,
@@ -267,7 +274,9 @@ Cloudflare Managed в robots.txt; `/llms.txt` и `/llms-full.txt` (Markdown по
 OG, Twitter); текст без JS (определения как у M `nojs_compare`: слова вне `script, style, noscript, template, svg, iframe,
 object, head, canvas`), H1, цены, призывы, признаки SPA и платформы; JSON-LD (разбор, `@type` с `@graph`, базовые
 обязательные свойства по документации Google, `sameAs`, `@id`) и микроразметка. Python 3.13 + requests 2.32 + PyYAML 6.0;
-для `--render` — Playwright 1.63 + Chromium.
+для `--render` — Playwright 1.63 + Chromium. Код-репо запускает утилиту соседним чекаутом
+(`../strategy/…/scripts/site/geo_probe.py`); выход партии без `--out` —
+`$DDD_HOME/out/site/geo_probe/`; JSON читает `page_gates.py --geo`.
 
 | Запуск | Что делает |
 |---|---|
@@ -298,37 +307,7 @@ SG-GEO-01…02 в `page-gates.yaml`): `page-status-<код>`, `antibot-challenge
 отзывы, FAQPage, `llms.txt` против HTML-заглушки); опыты `99-raw/experiments/H/01-geo-probe-corpus-d/` (116 страниц корпуса
 text D) и `H/02-geo-probe-sample-m/` (52 посадочные M; пересчёт X2 на итоговой выборке — 70, ответили 69) — без браузера.
 
-## `page_gates.py` v1–v1.2 и `checklist_export.py` (агент K, волна 3, 2026-09-24; v1.2 — продолжатели K3, K4)
-
-**`page_gates.py` v1** — продолжение раздела P выше (v0 сохранён в `99-raw/experiments/K/03-gates-v1/page_gates.v0.py`).
-Ворота — `../../kb/site/07-seo-geo-performance-analytics/page-gates.yaml` v1 (60 строк: PERF 15, WEIGHT 8, SEO 8, GEO 2, A11Y 7, LEGAL 9,
-CONTENT 7, NAV 2, MOB 2; у каждой строки `site_checklist` — пункты SITE-* сводного чек-листа; `scope: site` у строк уровня
-сайта). Браузер не запускает; новые входы (все необязательные):
-
-| Флаг | Что читает | Какие ворота |
-|---|---|---|
-| `--geo FILE` | JSON `geo_probe.py` (флаги `head-kit.yaml checks`, серьёзность берётся из head-kit 1.0) | SG-SEO-01…05, SG-GEO-01…02 (строка `device: raw`) |
-| `--ia FILE` | `ia.json` `ia_probe.py` | SG-SEO-01 (мягкая 404), SG-SEO-06 (sitemap), SG-SEO-08 (hreflang), SG-NAV-01 (меню в HTML), SG-NAV-02 (крошки) |
-| `--axe FILE` | JSON axe: счётчики (`run_axe.py` опыта I/02), `axe.run` или узлы с адресами (`run_axe_targets.py` опыта K/03 — флаги `in_h1`, `action`, `in_form`, `cookie`, `first_screen`, `in_header`, `in_footer`, `text`) | SG-A11Y-01 (B: link-name, button-name, label, meta-viewport, color-contrast ключевого узла — H1, лид первого экрана, призыв, согласие и баннер cookie; S: контраст прочих узлов; без адресов узлов — S, которое `x-gate-exception` не снимает), SG-A11Y-02 (S: target-size, image-alt, frame-title, html-has-lang, html-lang-valid) |
-| `--plan FILE` | page-plan: `first_screen_policy`, `seo.indexable`, `seo.structured_data`, `x-gate-exception[{id, why, who, until}]` | SG-CONTENT-07; условия SEO; исключения (S снимается до `until`, B — никогда) |
-| `--html FILE` | сохранённый HTML страницы | SG-CONTENT-05 (заглушки, `href="#"` у призыва — B), SG-CONTENT-06 (маркеры AIL-13, 16, 20, 46) |
-| `--ai-bots-policy`, `--ads-google` | условия брифа для флагов ботов | закрытые ИИ-боты при `deny-all` — не дефект; AdsBot — B только для посадочной под Google Ads |
-| `--css FILE …` (v1.1, K2) | файлы CSS страницы (если стили внешние; `<style>` и `style=` берутся из `--html`) | SG-A11Y-08: `font-size: clamp(min, …, max)` — S при max / min > 2,5 (WCAG 1.4.4; `var()` не раскрывается) |
-
-Из анатомии v1 добавились SG-MOB-01 (переполнение телефона — B), SG-MOB-02 (меню телефона — S, подтверждать кадром),
-SG-CONTENT-07 (призыв в первом экране по политике плана), SG-CONTENT-04 (консоль из `accept_*.json`). **v1.1 (K2, 18:20):** SG-WEIGHT-09 — видео первого экрана без действия отдельной цифрой (`first_screen.by_type_kb.media`: S, если одно видео больше бюджета первого экрана профиля; D, если видео есть) и SG-A11Y-08 — по замечаниям creative (`99-raw/notes/sync/creative-wave1-for-site-2026-09-24/`); всего 62 строки. Код приведён к
-строкам H2: SG-GEO-01 — H1 только после JS B, CTA и цены после JS S, доля текста без JS < 0,5 S, < 0,8 D; SG-SEO-02 — нет
-`lang` D; SG-SEO-03 — нет H1 S, больше одного D. `--json` добавляет к каждой строке `site_checklist` и `scope`.
-**v1.2 (K3 — код, K4 — строки `page-gates.yaml` v1.2; калибровка опыта K/03 на 8 страницах):** SG-PERF-03 — CLS окна сессии
-web-vitals после прокрутки (`fin.wv_cls`) вместо суммы всех сдвигов; SG-GEO-01 — «H1 только после JS» B только без H1 в сыром
-HTML (иначе текст сверяется буквами, расхождение — D); SG-MOB-01 — B при `layout_zoomed`, скрытое переполнение — D; SG-LEGAL-01
-для ЕС — S, если до выбора загружены только библиотеки без событий и cookie трекинга; SG-LEGAL-04 для ЕС — S (LR-EU-06);
-SG-A11Y-01 — контраст по классам узлов (профиль I `08/03` §8); SG-PERF-06 — «H1 первого экрана выпал из LCP» (появление из
-`opacity: 0`, маской строк, скрытием скриптом — creative E/01): S при признаке у H1 или 4 ближайших предков в `--html`/`--css`
-(стиль, классы `opacity-0`, `invisible`, правило CSS или `@keyframes` из `opacity: 0`, SplitText с маской), D без признака и при
-`opacity` 0 < x < 0,1 или `clip-path` (время LCP раньше видимости). Самопроверка: `python3 page_gates.py --selftest`
-— **64/64** (15 проверок v0 + 23 v1 + 5 v1.1 + 8 v1.2 K3 + 13 v1.2 K4, в том числе ссылки `site_checklist` на существующие
-пункты `site-checklist.yaml`). Опыт — `../../kb/site/99-raw/experiments/K/03-gates-v1/` (README: прогоны 1–3, 32 → 25 → 23 строки B).
+## `checklist_export.py` — чек-лист site в YAML
 
 **`checklist_export.py`** — `../../kb/site/09-ai-generation-evaluation/site-checklist.yaml` из `02-site-checklist.md` (образец —
 `../ux/checklist_export.py`). Разбирает строки `| SITE-<БЛОК>-<NN> | … | B|S|D | способы | источник |`

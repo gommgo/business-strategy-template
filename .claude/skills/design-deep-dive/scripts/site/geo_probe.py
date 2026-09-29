@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""geo_probe.py — доступность страницы для поисковых и ИИ-ботов (site-research, агент H, волна 2, 2026-09-24).
+"""geo_probe.py — доступность страницы для поисковых и ИИ-ботов: robots, коды, head, текст без JS, JSON-LD, SSR.
 
 Что меряет (по умолчанию — только HTTP, без браузера):
   1. robots.txt: код ответа, размер, BOM, группы, Sitemap, Crawl-delay, Clean-param/Host (Яндекс), Content-Signal
@@ -18,15 +18,16 @@
   8. --ua-probe: запросы с UA ботов (Googlebot, YandexBot, OAI-SearchBot, PerplexityBot, ClaudeBot, GPTBot) — код и
      объём против браузерного UA. Только сигнал: WAF законно режет поддельный UA с чужого IP.
 
-Запуск:
-  python3 99-raw/tools/geo_probe.py URL [--out DIR] [--id ID] [--render] [--ua-probe] [--crawlers PATH]
-  python3 99-raw/tools/geo_probe.py --batch pages.tsv --out DIR [--render] [--ua-probe] [--only a,b] [--skip-done]
+Запуск (код-репо — соседним чекаутом ../strategy/.claude/skills/design-deep-dive/scripts/site/geo_probe.py; JSON читает
+page_gates.py --geo):
+  geo_probe.py URL [--out DIR] [--id ID] [--render] [--ua-probe] [--crawlers PATH]
+  geo_probe.py --batch pages.tsv [--out DIR] [--render] [--ua-probe] [--only a,b] [--skip-done]   # DIR — $DDD_HOME/out/site/geo_probe
       pages.tsv: колонки id и url (заголовок обязателен; остальные колонки — в поле meta), строки с # пропускаются
       --insecure-retry — при ошибке TLS-цепочки (например, сертификат НУЦ Минцифры «Russian Trusted Sub CA») прочитать
       страницу без проверки и пометить tls_untrusted (только чтение; данные никуда не отправляются)
-  python3 99-raw/tools/geo_probe.py --summary DIR > summary.tsv
-  python3 99-raw/tools/geo_probe.py --revalidate DIR      # пересчитать проверки JSON-LD и robots по сохранённым данным
-  python3 99-raw/tools/geo_probe.py --selftest
+  geo_probe.py --summary DIR > summary.tsv
+  geo_probe.py --revalidate DIR      # пересчитать проверки JSON-LD и robots по сохранённым данным
+  geo_probe.py --selftest
 
 Правила: ≤ 1 запроса в секунду на хост; формы не отправляет, ничего не вводит, по рекламе не ходит; браузер — только
 с --render и только под блокировками $DDD_HOME/locks/browser.lock и $DDD_HOME/locks/site/browser.lock.
@@ -42,11 +43,11 @@ import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb('site'))
 CRAWLERS = os.path.join(ROOT, '07-seo-geo-performance-analytics', 'crawlers.yaml')
 LOCKS = [kbpaths.lock_path('browser'), kbpaths.lock_path('browser', 'site')]
-VERSION = '0.9 (2026-09-24)'
+VERSION = '0.9'
 
 UA_BROWSER = ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
               'Chrome/140.0.0.0 Safari/537.36')
-# Строки UA ботов — из документации владельцев (crawlers.yaml, проверено 2026-09-24). Для --ua-probe.
+# Строки UA ботов — из документации владельцев (crawlers.yaml). Для --ua-probe.
 UA_BOTS = {
     'Googlebot': 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) '
                  'Chrome/140.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
@@ -1086,7 +1087,7 @@ def main():
     INSECURE_RETRY = '--insecure-retry' in a
     if '--batch' in a:
         only = set(opt('--only').split(',')) if opt('--only') else None
-        batch(opt('--batch'), opt('--out', 'geo_probe_out'), '--render' in a, '--ua-probe' in a, only, '--skip-done' in a, crawlers)
+        batch(opt('--batch'), opt('--out', str(kbpaths.out('site', 'geo_probe'))), '--render' in a, '--ua-probe' in a, only, '--skip-done' in a, crawlers)
         return
     url = a[0]
     o = probe(url, opt('--id'), '--render' in a, '--ua-probe' in a, crawlers)

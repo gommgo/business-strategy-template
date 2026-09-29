@@ -11,7 +11,7 @@ scripts/blender/d1exp.py	module	compile
 scripts/blender/d1lib.py	module	compile	
 scripts/blender/d2lib.py	module	compile	
 scripts/blender/fx_probe.py	utility	help	
-scripts/blender/gate_check.py	utility	help	
+scripts/blender/gate_check.py	utility	help; run: --selftest	
 scripts/blender/glb_lint_block.py	module	import-only	
 scripts/blender/gltf_check.py	utility	help	
 scripts/blender/gltf_diff.py	utility	help	
@@ -35,7 +35,7 @@ scripts/blender/scene_audit.py	module	compile
 scripts/blender/scene_check.py	utility	compile	
 scripts/blender/serve_br.py	module	import-only	
 scripts/blender/sheet.py	utility	import-only	
-scripts/blender/site_probe.py	utility	help	
+scripts/blender/site_probe.py	utility	help; run: --selftest	
 scripts/blender/slot_run.py	utility	import-only	
 scripts/blender/test_agent_helpers.py	test	compile	
 scripts/blender/test_bpyx.py	test	compile	
@@ -44,4 +44,4 @@ scripts/blender/vote/build_pairs.py	utility	import-only
 scripts/blender/vote/index.html	data	data	
 scripts/blender/vote/tally.py	utility	import-only	
 scripts/blender/vote/vote_server.py	utility	import-only	
-scripts/blender/web_view.py	utility	help	
+scripts/blender/web_view.py	utility	help; run: --selftest	

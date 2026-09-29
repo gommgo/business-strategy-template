@@ -1,17 +1,23 @@
 #!/usr/bin/env python3
-"""K/03 — axe-core 4.13 с адресами узлов: какие элементы проваливают color-contrast и прочие правила SG-A11Y-01
-(агент K3, 2026-09-24). Основа — `99-raw/experiments/I/02-axe/run_axe.py` (агент I; axe-core берётся из его node_modules,
-только чтение). Отличия: для каждого узла — селектор, тег, текст, в H1 ли, действие ли (a, button), в форме ли, в подвале
-ли, в первом экране ли, кегль — чтобы отличить «H1, лид, призыв, согласие» (профиль I: B) от прочего текста (S).
-Без кликов и ввода; баннер cookie не трогается (состояние «первый визит»); десктоп 1440×900.
-Запуск одной страницы (под двумя блокировками снаружи): python3 run_axe_targets.py ID URL MARKET OUTDIR
+"""run_axe_targets.py — axe-core с адресами узлов: какие элементы проваливают color-contrast и прочие правила SG-A11Y-01.
+
+Для каждого узла — селектор, тег, текст, в H1 ли, действие ли (a, button), в форме ли, в подвале ли, в первом экране ли,
+кегль — чтобы page_gates.py (--axe) отличил «H1, лид, призыв, согласие» (B) от прочего текста (S). axe-core — из
+npm-зависимостей окружения скилла ($DDD_HOME/node, ставит install.sh). Без кликов и ввода; баннер cookie не трогается
+(состояние «первый визит»); десктоп 1440×900.
+Запуск одной страницы (замок браузера — снаружи; код-репо — соседним чекаутом
+../strategy/.claude/skills/design-deep-dive/scripts/site/run_axe_targets.py): run_axe_targets.py ID URL MARKET OUTDIR
 """
 import json
 import os
 import sys
 import time
 
-from playwright.sync_api import sync_playwright
+if len(sys.argv) < 5 or sys.argv[1] in ('-h', '--help'):
+    print(__doc__)
+    sys.exit(0 if len(sys.argv) > 1 and sys.argv[1] in ('-h', '--help') else 2)
+
+from playwright.sync_api import sync_playwright  # noqa: E402
 
 pid, url, market, outdir = sys.argv[1:5]
 HERE = os.path.dirname(os.path.abspath(__file__))

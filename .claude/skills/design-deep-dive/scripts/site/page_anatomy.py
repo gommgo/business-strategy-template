@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""page_anatomy.py — анатомия живой посадочной страницы или страницы сайта (агент M, волна 1 site-research, 2026-09-24).
+"""page_anatomy.py — анатомия живой посадочной страницы или страницы сайта: структура, призывы, формы, согласия, скорость, вес.
 
 Что меряет (Playwright + Chromium 153, один браузер на прогон, одна страница × одно устройство):
-  1. загрузка: десктоп 1440×900 DPR 1 или --mobile (дескриптор Playwright «Pixel 7», CPU×4 по умолчанию); load → простой
-     (--wait) → снимок первого экрана → cookie-баннер → попапы → прокрутка колесом до конца → возврат наверх → разбор DOM;
+  1. загрузка: десктоп 1440×900 DPR 1 или --mobile (дескриптор и CPU — budgets.yaml site conditions.lab_mobile: Pixel 7,
+     CPU ×4; UA — HeadlessChrome, автоматизация не маскируется); load → окно первого экрана (conditions.first_screen, --wait)
+     → снимок первого экрана → cookie-баннер → попапы → прокрутка колесом до конца → возврат наверх → разбор DOM;
   2. cookie-баннер: известные платформы согласия (OneTrust, Cookiebot, Didomi, Usercentrics, Klaro, CookieYes, iubenda,
      Quantcast, TrustArc, Osano, Complianz, баннер Tilda и др.) и текстовые эвристики RU/EN; запись: есть ли «Отклонить» на
      первом слое, равны ли кнопки, модальность, доля экрана, запросы аналитики и cookie ДО выбора; действие: «Отклонить»
@@ -28,25 +29,26 @@
      категориям (аналитика, тег-менеджер, пиксели, чаты, колл-трекинг, запись и квизы, капча, CMP, шрифты, видео, карты…);
      запросы трекинга до выбора в баннере; имена cookie (без значений) до и после выбора;
   9. скорость: LCP (элемент, время, до прокрутки), CLS (до прокрутки и за сессию), TBT (до прокрутки), FCP и TTFB
-     (web-vitals); --inp — лабораторный INP по сценарию: меню → CTA-якорь → раскрыть FAQ → фокус в поле формы без ввода
-     (web-vitals onINP, attribution, reportAllChanges, durationThreshold 16 + свой наблюдатель Event Timing);
-     --crux — поле CrUX через PageSpeed Insights API (ключ только из окружения PSI_API_KEY, не печатается; без ключа
-     квота API = 0 на 2026-09-24 — пишется ответ сервера);
+     (web-vitals); показ H1 во времени (h1_paint: прозрачность в первом кадре, когда H1 стал виден и непрозрачен — признак
+     SG-PERF-06 для страниц, где HTML признаков не несёт); --inp — лабораторный INP по сценарию: меню → CTA-якорь →
+     раскрыть FAQ → фокус в поле формы без ввода (web-vitals onINP, attribution, reportAllChanges, durationThreshold 16 +
+     свой наблюдатель Event Timing); --crux — поле CrUX через PageSpeed Insights API (ключ только из окружения PSI_API_KEY,
+     не печатается; без ключа квота API = 0 — пишется ответ сервера);
  10. текст без JS: тело ответа главного документа (что сервер отдал браузеру) против отрисованного DOM — доля слов, h1,
      текст главного CTA, цены, заголовки секций, title и description, JSON-LD.
 
-Запуск (браузер — под двумя блокировками, не дольше 5 мин на страницу; см. 99-raw/tools/README.md):
-  flock -w 900 $DDD_HOME/locks/browser.lock \
-  flock -w 900 $DDD_HOME/locks/site/browser.lock \
-  python3 99-raw/tools/page_anatomy.py URL OUT_DIR [--mobile] [--inp] [--quick] [--no-cmp-close] [--label PAGE_TYPE]
+Запуск (замер — на тихой машине: утилита берёт общий тяжёлый замок, замок браузера и замок site — page_gates.heavy_lock;
+--no-lock — обёртка их уже держит; не дольше 5 мин на страницу). Код репозитория — соседним чекаутом
+../strategy/.claude/skills/design-deep-dive/scripts/site/page_anatomy.py:
+  page_anatomy.py URL OUT_DIR [--mobile] [--inp] [--quick] [--no-cmp-close] [--label PAGE_TYPE]
           [--id ID] [--market ru|intl] [--industry X] [--net auto|ru-direct|vpn-lt|unknown] [--site-type X]
-          [--text-id X] [--template X] [--site-id X] [--timeout 60] [--wait 5000] [--cpu N] [--crux]
-  python3 99-raw/tools/page_anatomy.py --batch pages.tsv --out DIR [--devices desktop,mobile] [--inp] [--only a,b]
-          [--skip-done]                      # сам берёт обе блокировки на каждую страницу × устройство, free ≥ 3 ГБ
-  python3 99-raw/tools/page_anatomy.py --reclassify DIR   # пересчитать классы секций в готовых JSON без браузера
-  python3 99-raw/tools/page_anatomy.py --csv DIR --pages pages.tsv > pages.csv
-  python3 99-raw/tools/page_anatomy.py --net-of HOST [HOST…]   # страна и организация IP сервера (IP не печатается)
-  python3 99-raw/tools/page_anatomy.py --selftest          # локальная тестовая страница 99-raw/experiments/M/00-selftest/
+          [--text-id X] [--template X] [--site-id X] [--timeout 60] [--wait МС] [--cpu N] [--crux] [--no-lock]
+  page_anatomy.py --batch pages.tsv --out DIR [--devices desktop,mobile] [--inp] [--only a,b]
+          [--skip-done]                      # замки тишины — на каждую страницу × устройство, free ≥ 3 ГБ
+  page_anatomy.py --reclassify DIR   # пересчитать классы секций в готовых JSON без браузера
+  page_anatomy.py --csv DIR --pages pages.tsv > pages.csv
+  page_anatomy.py --net-of HOST [HOST…]   # страна и организация IP сервера (IP не печатается)
+  page_anatomy.py --selftest          # локальная тестовая страница во временной папке, без сети
 Выход: OUT_DIR/anatomy_<desktop|mobile>.json, sheet_<устройство>.jpg (контактный лист секций с подписями),
 cmp_<устройство>.jpg (кадр с cookie-баннером, если найден), краткая сводка в stdout.
 Ограничения: лаборатория ≠ поле; одна сеть (раздельная маршрутизация VPN, поле net); Chromium headless; эмуляция
@@ -62,14 +64,13 @@ sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/l
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb('site'))
 WV_IIFE = str(kbpaths.node_modules('web-vitals', 'dist', 'web-vitals.attribution.iife.js'))
-LOCK_SITE = kbpaths.lock_path('browser', 'site')
-LOCK_GLOBAL = kbpaths.lock_path('browser')
-SELFTEST_DIR = os.path.join(ROOT, '99-raw', 'experiments', 'M', '00-selftest')
-TOOL = 'page_anatomy.py 2026-09-24 v1.1 (M2: классификатор ред. 2)'
+kbpaths.use('site')
+import page_gates as PG  # noqa: E402  условия замера, окно первого экрана, тишина машины (budgets.yaml)
+TOOL = 'page_anatomy.py 1.2'
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
 
-GPU_ARGS = ["--use-gl=angle", "--use-angle=gl", "--ignore-gpu-blocklist", "--enable-gpu",
-            "--disable-blink-features=AutomationControlled", "--autoplay-policy=no-user-gesture-required"]
+# автоматизация не маскируется: без --disable-blink-features и подмены UA (navigator.webdriver виден сайту)
+GPU_ARGS = ["--use-gl=angle", "--use-angle=gl", "--ignore-gpu-blocklist", "--enable-gpu", "--autoplay-policy=no-user-gesture-required"]
 
 # ------------------------------------------------------------------------------------------------ словари признаков
 # Призывы: сила primary — глагол целевого действия; secondary — переход «узнать больше». Регэкспы — для JS (флаг i).
@@ -154,8 +155,8 @@ ROLE_KW = {
               r"реквизиты", r"ИНН|ОГРН"),
 }
 
-# M2 (2026-09-24, опыт M/04): поправки словаря ролей к vocabulary.yaml ред. 2 — сужены общие слова, добавлены роли
-# services, cross-sell, final-cta (заголовок у конца страницы); подробности — 99-raw/experiments/M/04-classifier-accuracy/
+# словарь ролей по vocabulary.yaml: общие слова сужены, роли services, cross-sell, final-cta (заголовок у конца страницы)
+# — по опыту точности классификатора (site 09-ai-generation-evaluation/02-site-checklist.md §6)
 ROLE_KW.update({
     'team': (r"наша команда|команда (\w+ )?(специалистов|экспертов|профессионалов|врачей|преподавателей|мастеров)|о команде|"
              r"наши (специалисты|врачи|мастера|преподаватели|клинеры|эксперты|сотрудники|тренеры)|специалисты (клиники|центра|компании)|"
@@ -395,7 +396,24 @@ INIT_JS = r"""(() => {
     .observe({type: 'event', durationThreshold: 16, buffered: true}); } catch (e) {}
   try { new PerformanceObserver(l => { for (const e of l.getEntries()) P.fi = {name: e.name, dur: Math.round(e.duration), st: Math.round(e.startTime)}; })
     .observe({type: 'first-input', buffered: true}); } catch (e) {}
+  // показ H1 во времени: прозрачность (произведение по предкам) и видимость каждый кадр от DOMContentLoaded до полной
+  // непрозрачности или 15 с; «виден» — прозрачность не ниже __NZ__ (SG-PERF-06 limits.opacity_near_zero)
+  const h1s = () => { const h = document.querySelector('h1'); if (!h) return false; let o = 1, n = h, hid = false;
+    while (n && n.nodeType === 1) { const cs = getComputedStyle(n); o *= parseFloat(cs.opacity); if (cs.visibility === 'hidden' || cs.display === 'none') hid = true; n = n.parentElement; }
+    const r = h.getBoundingClientRect(), t = Math.round(performance.now());
+    if (!P.h1) P.h1 = {first_op: Math.round(o * 1000) / 1000, first_hidden: hid, t_first: t, in_first_screen: r.top + scrollY < innerHeight,
+                       t_visible: null, t_opaque: null, samples: 0};
+    P.h1.samples++;
+    if (P.h1.t_visible === null && !hid && o >= __NZ__) P.h1.t_visible = t;
+    if (P.h1.t_opaque === null && !hid && o >= 0.99) P.h1.t_opaque = t;
+    return P.h1.t_opaque !== null; };
+  const tick = () => { if (!h1s() && performance.now() < 15000) requestAnimationFrame(tick); };
+  document.addEventListener('DOMContentLoaded', () => requestAnimationFrame(tick));
 })();"""
+
+
+def init_js():
+    return INIT_JS.replace('__NZ__', repr(float(PG.gate_limit('SG-PERF-06', 'opacity_near_zero'))))
 
 WV_START_JS = r""";(function(){ if (window.top !== window) return; const P = window.__pa; if (!P) return;
   try { const W = window.__paWV;
@@ -1227,14 +1245,14 @@ def run_page(a):
         except Exception:
             b = pw.chromium.launch(headless=True, args=GPU_ARGS)
         st['browser'] = b.version
-        major = b.version.split('.')[0]
         common = dict(locale=locale, timezone_id=tz, extra_http_headers={'Accept-Language': al}, color_scheme='light', reduced_motion='no-preference')
+        cond = PG.conditions()
         if mobile:
-            ctx = b.new_context(**dict(pw.devices['Pixel 7']), **common)
+            ctx = b.new_context(**PG.mobile_device(pw, cond), **common)       # UA — HeadlessChrome, как у самого браузера
         else:
-            ua = f'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{major}.0.0.0 Safari/537.36'
-            ctx = b.new_context(viewport={'width': 1440, 'height': 900}, device_scale_factor=1, user_agent=ua, **common)
-        ctx.add_init_script(INIT_JS)
+            ctx = b.new_context(viewport={'width': cond['desktop']['width'], 'height': cond['desktop']['height']},
+                                device_scale_factor=cond['desktop']['dpr'], **common)
+        ctx.add_init_script(init_js())
         wv = wv_script()
         if wv:
             ctx.add_init_script(wv)
@@ -1316,6 +1334,10 @@ def run_page(a):
         st['server_header'] = (hdrs.get('server') or '')[:40]
         p.wait_for_timeout(a.wait)
         st['final_url'] = p.url
+        try:   # как страница видит клиента: UA и navigator.webdriver — без подмены
+            st['ua'], st['webdriver'] = p.evaluate("() => [navigator.userAgent, navigator.webdriver]")
+        except Exception:
+            st['ua'] = st['webdriver'] = None
         try:
             title = p.title(); snip = p.evaluate("(document.body && document.body.innerText || '').slice(0, 800)")
         except Exception:
@@ -1336,6 +1358,10 @@ def run_page(a):
               cls: +(P.cls || 0).toFixed(4), cls_n: P.clsN || 0, lt: (P.lt || []).slice(0, 600), fcp: P.fcp || null, ttfb: P.ttfb || null, wv_lcp: P.wv_lcp || null}; })()""")
         except Exception as ex:
             st['pre'] = {'error': str(ex)[:100]}
+        try:
+            st['h1_paint'] = p.evaluate("(() => (window.__pa || {}).h1 || null)()")
+        except Exception:
+            st['h1_paint'] = None
         shots = {}
         try:
             shots['first'] = p.screenshot(type='jpeg', quality=70)
@@ -1500,6 +1526,10 @@ def run_page(a):
               wv_err: P.wv_err || null, wv_inp: P.inp || null}; })()""")
         except Exception as ex:
             st['fin'] = {'error': str(ex)[:100]}
+        try:
+            st['h1_paint'] = p.evaluate("(() => (window.__pa || {}).h1 || null)()")
+        except Exception:
+            pass
         st['cookies_after'] = _cookie_names(ctx)
         st['t_total_s'] = round(time.monotonic() - T0, 1)
         try:
@@ -1649,7 +1679,7 @@ def net_summary(creq, page_url, t_action, action):
 
 
 # ------------------------------------------------------------------------------------------------ классификатор секций
-VOCAB = 'B vocabulary.yaml v0 draft rev. 2 (02-site-types/vocabulary.yaml, 2026-09-24): section_role, block; нераспознанное — other; классификатор v1.1 (M2)'
+VOCAB = 'словарь site 02-site-types/vocabulary.yaml: section_role, block; нераспознанное — other; классификатор секций 1.1'
 _RK = {r: (re.compile(h, re.I) if h else None, re.compile(t, re.I) if t else None) for r, (h, t) in ROLE_KW.items()}
 ROLE_CLS = {
     'hero': r'hero|first-?screen|firstscreen|intro\b|main-?screen|jumbotron|masthead|promo-?block|t-cover|cover\b|banner-?main|top-?block|offer-?block',
@@ -1671,7 +1701,7 @@ def classify_sections(d):
     secs = dom.get('sections') or []
     H = dom.get('doc_h') or 0
     ptype = d.get('page_type') or ''
-    # M2: полосы меню и объявлений над hero — часть шапки
+    # полосы меню и объявлений над hero — часть шапки
     hdr = dom.get('header') or {}
     hdr_bottom = (hdr.get('y', 0) + hdr.get('h', 0)) if hdr else 0
     header_dup = set()
@@ -1770,7 +1800,7 @@ def classify_sections(d):
             add('pricing', 3, 'карточки с ценой')
         if s.get('table_rows', 0) >= 3 and s.get('prices', 0) >= 3:
             add('pricing', 3, 'таблица цен')
-        # M2: карточки услуг со ссылками «подробнее» или ценами «от» — services (ред. 2 словаря)
+        # карточки услуг со ссылками «подробнее» или ценами «от» — services (ред. 2 словаря)
         if (rp.get('n', 0) >= 3 and rp.get('head', 0) >= 0.6 and rp.get('words', 99) <= 60 and rp.get('quote', 0) < 0.5 and not per_month
                 and (s.get('links', 0) + s.get('ctas', 0) >= rp['n'] - 1 or re.search(r'\bот\s?\d|from \$', text))
                 and (ptype in SERVICE_TYPES or re.search(r'\bот\s?\d|from \$', text))):
@@ -1806,7 +1836,7 @@ def classify_sections(d):
             add('benefits', 2.5, 'карточки с иконкой и заголовком')
         if s.get('icons', 0) >= 3:
             add('benefits', 0.8, 'иконки')
-        # M2: функция крупно со скриншотом (и цитатой клиента рядом) — не отзывы
+        # функция крупно со скриншотом (и цитатой клиента рядом) — не отзывы
         if s.get('imgs_big', 0) >= 1 and s.get('media_pct', 0) >= 40 and s.get('quotes', 0) <= 1 and rp.get('n', 0) < 2 and 0 < s.get('words', 0) <= 120 and i != first_i:
             if 'testimonials' in sc:
                 sc['testimonials'] *= 0.5
@@ -1831,14 +1861,14 @@ def classify_sections(d):
                 add('cross-sell', 3, 'бейджи магазинов не в конце')
             else:
                 add('final-cta' if i == last_i else 'cta-band', 1.5, 'бейджи магазинов')
-        # M2: текст внизу посадочной (не статьи) — seo-text (ред. 2 словаря)
+        # текст внизу посадочной (не статьи) — seo-text (ред. 2 словаря)
         if (pos >= 0.55 and s.get('words', 0) >= 60 and not lead and not quiz_ifr and s.get('prices', 0) == 0 and s.get('media_pct', 0) <= 30
                 and s.get('ctas', 0) <= 1 and s.get('accordion', 0) < 2 and not s.get('is_footer') and ptype not in ARTICLE_TYPES
                 and (rp.get('n', 0) < 3 or (rp.get('words', 0) >= 12 and rp.get('img', 0) < 0.3 and rp.get('head', 0) < 0.3))):
             add('seo-text', 3.5 + (2 if s.get('words', 0) >= 150 else 0), 'текст внизу страницы')
         if 'article-body' in sc and ptype not in ARTICLE_TYPES and pos >= 0.5:
             sc['seo-text'] = sc.get('seo-text', 0) + sc.pop('article-body'); why.setdefault('seo-text', []).append('длинный текст на посадочной')
-        # M2: смысл заголовка сильнее ценовых признаков
+        # смысл заголовка сильнее ценовых признаков
         if (head_hit - {'pricing', 'hero'}) and 'pricing' not in head_hit and 'pricing' in sc:
             sc['pricing'] *= 0.5
         if 'final-cta' in head_hit and pos < 0.7 and i != last_i:
@@ -1849,7 +1879,7 @@ def classify_sections(d):
             sc['contacts'] *= 0.5
         if i == first_i and s.get('first_screen') and (s.get('h1') or s.get('h_vh', 0) >= 0.3):
             sc['hero'] = max(sc.get('hero', 0), max(sc.values()) + 1); why.setdefault('hero', []).append('первый экран — hero')
-        # M2: фоллбэк — секция с заголовком и карточками или визуалом без совпадений → benefits (низкая уверенность)
+        # фоллбэк — секция с заголовком и карточками или визуалом без совпадений → benefits (низкая уверенность)
         if (not sc or max(sc.values()) < 3) and i != first_i and not s.get('is_footer') and hs and s.get('words', 0) >= 10 and 'seo-text' not in sc and (
                 (rp.get('n', 0) >= 2 and (rp.get('head', 0) >= 0.5 or rp.get('img', 0) >= 0.5)) or s.get('icons', 0) >= 3 or s.get('imgs_big', 0) >= 1):
             add('benefits', 3, 'по умолчанию: заголовок + карточки или визуал')
@@ -2176,7 +2206,7 @@ def draw_sheet(ims, d, path):
 
 # ------------------------------------------------------------------------------------------------ PSI / CrUX
 def psi(url, strategy='mobile'):
-    """PageSpeed Insights API v5. Ключ — только из окружения PSI_API_KEY (не печатается). Без ключа на 2026-09-24 квота = 0."""
+    """PageSpeed Insights API v5. Ключ — только из окружения PSI_API_KEY (не печатается). Без ключа квота API = 0."""
     key = os.environ.get('PSI_API_KEY')
     q = {'url': url, 'strategy': strategy, 'category': 'performance'}
     if key:
@@ -2213,53 +2243,6 @@ def psi(url, strategy='mobile'):
 
 
 # ------------------------------------------------------------------------------------------------ блокировки, пакет
-def _flock_wait(f, timeout):
-    """Блокирующее ожидание `fcntl.flock` с тайм-аутом, как `flock -w`: процесс стоит в очереди ядра наравне с другими
-    ждущими. Прежний опрос раз в 2 с проигрывал агентам с блокирующим `flock -w` и уходил по тайм-ауту (M2, 2026-09-24)."""
-    import signal, threading
-    if threading.current_thread() is not threading.main_thread():     # сигнал тайм-аута — только в главном потоке
-        t0 = time.time()
-        while True:
-            try:
-                fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB); return True
-            except BlockingIOError:
-                if time.time() - t0 > timeout:
-                    return False
-                time.sleep(0.2)
-
-    def _alarm(signum, frame):
-        raise TimeoutError
-    old = signal.signal(signal.SIGALRM, _alarm)
-    signal.alarm(max(1, int(timeout)))
-    try:
-        fcntl.flock(f, fcntl.LOCK_EX)
-        return True
-    except TimeoutError:
-        return False
-    finally:
-        signal.alarm(0); signal.signal(signal.SIGALRM, old)
-
-
-@contextlib.contextmanager
-def dual_lock(timeout=900):
-    """Общая блокировка тройки, затем своя блокировка site — как `flock -w 900 A flock -w 900 B` (блокирующее ожидание)."""
-    fs = []
-    try:
-        for path in (LOCK_GLOBAL, LOCK_SITE):
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            f = open(path, 'a')
-            if not _flock_wait(f, timeout):
-                f.close(); raise SystemExit(f'блокировка занята > {timeout} с: {path}')
-            fs.append(f)
-        yield
-    finally:
-        for f in reversed(fs):
-            try:
-                fcntl.flock(f, fcntl.LOCK_UN); f.close()
-            except Exception:
-                pass
-
-
 def read_pages(path):
     rows = []
     with open(path, encoding='utf-8') as fh:
@@ -2292,7 +2275,7 @@ def run_batch(a):
             if (mem or 99) < 3:
                 open(logp, 'a').write(f"{time.strftime('%H:%M:%S')}\t{row['id']}\t{dev}\tSKIP mem {mem:.1f} GB\n"); continue
             cmd = [sys.executable, os.path.abspath(__file__), row['url'], outdir, '--id', row['id'], '--net', row.get('net') or 'auto',
-                   '--wait', str(a.wait), '--timeout', str(a.timeout)]
+                   '--wait', str(a.wait), '--timeout', str(a.timeout), '--no-lock']   # замки тишины держит пакетный прогон
             for k, opt_ in (('page_type', '--label'), ('market', '--market'), ('industry', '--industry'), ('site_type', '--site-type'),
                             ('text_id', '--text-id'), ('template', '--template'), ('site_id', '--site-id'), ('source', '--source')):
                 if row.get(k):
@@ -2302,7 +2285,7 @@ def run_batch(a):
             if a.inp:
                 cmd.append('--inp')
             t0 = time.time(); rc = None; tail = ''
-            with dual_lock(900):
+            with PG.heavy_lock(domains=('site',)):
                 tl = time.time()
                 pr = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
                 try:
@@ -2490,28 +2473,41 @@ def _serve(root):
     return srv
 
 
+REVEAL_HTML = """<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>H1 появляется</title>
+<style>body{margin:0;font:18px sans-serif} h1{font-size:48px;margin:40px;animation:rv 1.2s .4s both} @keyframes rv{from{opacity:0}to{opacity:1}}</style>
+</head><body><h1>Заголовок появляется из прозрачности</h1><p style="margin:40px">Текст первого экрана.</p></body></html>"""
+
+
 def selftest(a):
+    """Тестовая страница во временной папке (локальный сервер, «Метрика» подменена без сети): классы секций, призывы, формы,
+    согласия, баннер cookie, текст без JS, INP, LCP; UA как есть (HeadlessChrome) и navigator.webdriver; показ H1 во
+    времени — на странице, где H1 появляется из прозрачности."""
+    import tempfile
     from PIL import Image, ImageDraw
-    os.makedirs(SELFTEST_DIR, exist_ok=True)
-    open(os.path.join(SELFTEST_DIR, 'index.html'), 'w', encoding='utf-8').write(SELFTEST_HTML)
-    im = Image.new('RGB', (1200, 800), (180, 200, 220)); ImageDraw.Draw(im).rectangle([100, 100, 1100, 700], outline=(255, 255, 255), width=20)
-    im.save(os.path.join(SELFTEST_DIR, 'hero.png'))
-    Image.new('RGB', (128, 128), (200, 150, 120)).save(os.path.join(SELFTEST_DIR, 'ava.png'))
-    Image.new('RGB', (1200, 630), (29, 43, 68)).save(os.path.join(SELFTEST_DIR, 'og.png'))
-    open(os.path.join(SELFTEST_DIR, 'favicon.svg'), 'w').write('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect width="16" height="16" fill="#1d2b44"/></svg>')
-    open(os.path.join(SELFTEST_DIR, 'policy.html'), 'w', encoding='utf-8').write('<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Политика</title></head><body><h1>Политика</h1></body></html>')
-    srv = _serve(SELFTEST_DIR)
-    url = f'http://127.0.0.1:{srv.server_address[1]}/index.html'
-    results = {}
-    try:
-        with dual_lock(900):
-            for dev in ('desktop', 'mobile'):
-                ns = argparse.Namespace(url=url, out=os.path.join(SELFTEST_DIR, 'out'), mobile=(dev == 'mobile'), inp=True, quick=False, no_cmp_close=False,
-                                        label='landing-lead-services', id='selftest', market='ru', industry='окна', net='local', site_type='landing-site',
-                                        text_id=None, template='landing', site_id=None, source='selftest', timeout=30, wait=2500, cpu=None, selftest=True)
-                results[dev] = run_page(ns)
-    finally:
-        srv.shutdown(); srv.server_close()
+    with tempfile.TemporaryDirectory(prefix='page-anatomy-selftest-') as sd:
+        open(os.path.join(sd, 'index.html'), 'w', encoding='utf-8').write(SELFTEST_HTML)
+        open(os.path.join(sd, 'reveal.html'), 'w', encoding='utf-8').write(REVEAL_HTML)
+        im = Image.new('RGB', (1200, 800), (180, 200, 220)); ImageDraw.Draw(im).rectangle([100, 100, 1100, 700], outline=(255, 255, 255), width=20)
+        im.save(os.path.join(sd, 'hero.png'))
+        Image.new('RGB', (128, 128), (200, 150, 120)).save(os.path.join(sd, 'ava.png'))
+        Image.new('RGB', (1200, 630), (29, 43, 68)).save(os.path.join(sd, 'og.png'))
+        open(os.path.join(sd, 'favicon.svg'), 'w').write('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect width="16" height="16" fill="#1d2b44"/></svg>')
+        open(os.path.join(sd, 'policy.html'), 'w', encoding='utf-8').write('<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Политика</title></head><body><h1>Политика</h1></body></html>')
+        srv = _serve(sd)
+        base = f'http://127.0.0.1:{srv.server_address[1]}'
+        results = {}
+        common = dict(no_cmp_close=False, label='landing-lead-services', id='selftest', market='ru', industry='окна', net='local',
+                      site_type='landing-site', text_id=None, template='landing', site_id=None, source='selftest', timeout=30, cpu=None, selftest=True)
+        try:
+            with PG.heavy_lock(domains=('site',)):
+                for dev in ('desktop', 'mobile'):
+                    ns = argparse.Namespace(url=base + '/index.html', out=os.path.join(sd, 'out'), mobile=(dev == 'mobile'), inp=True, quick=False,
+                                            wait=2500, **common)
+                    results[dev] = run_page(ns)
+                rv = run_page(argparse.Namespace(url=base + '/reveal.html', out=os.path.join(sd, 'out-reveal'), mobile=False, inp=False,
+                                                 quick=True, wait=2500, **common))
+        finally:
+            srv.shutdown(); srv.server_close()
     checks = []
 
     def ck(name, cond, got):
@@ -2540,11 +2536,18 @@ def selftest(a):
     dm = (results.get('mobile') or {}).get('summary') or {}
     ck('mobile: липкий CTA внизу', dm.get('sticky_cta'), dm.get('sticky_cta_texts'))
     ck('mobile: кнопка меню', dm.get('burger'), dm.get('burger'))
+    for dev, d in results.items():
+        ck(f"{dev}: UA как есть — HeadlessChrome, navigator.webdriver виден", 'HeadlessChrome/' in (d.get('ua') or '') and d.get('webdriver') is True,
+           ((d.get('ua') or '')[-40:], d.get('webdriver')))
+    hp = (results.get('desktop') or {}).get('h1_paint') or {}
+    ck('desktop: показ H1 — виден с первого кадра (статичный H1)', hp.get('first_op') == 1 and hp.get('t_visible') is not None, hp)
+    hr = rv.get('h1_paint') or {}
+    ck('показ H1 во времени: H1 из opacity 0 — первый кадр невидим, виден позже', hr.get('first_op') == 0 and hr.get('t_visible') is not None
+       and hr['t_visible'] > hr.get('t_first', 0), hr)
     ok = sum(1 for c in checks if c[1])
-    rep = [f'# Самопроверка page_anatomy.py — {time.strftime("%Y-%m-%d %H:%M")}', '', f'Страница: `99-raw/experiments/M/00-selftest/index.html` (локальный сервер, «Метрика» подменена без сети).',
+    rep = [f'# Самопроверка page_anatomy.py', '', 'Страница: временная папка (локальный сервер, «Метрика» подменена без сети).',
            f'Итог: {ok} из {len(checks)} проверок прошли.', '', '| Проверка | Итог | Получено |', '|---|---|---|']
     rep += [f'| {n} | {"OK" if c else "FAIL"} | `{json.dumps(g, ensure_ascii=False)[:160]}` |' for n, c, g in checks]
-    open(os.path.join(SELFTEST_DIR, 'selftest_result.md'), 'w', encoding='utf-8').write('\n'.join(rep) + '\n')
     print('\n'.join(rep))
     return 0 if ok == len(checks) else 1
 
@@ -2557,7 +2560,9 @@ def main():
     ap.add_argument('--no-cmp-close', action='store_true'); ap.add_argument('--label'); ap.add_argument('--id'); ap.add_argument('--market')
     ap.add_argument('--industry'); ap.add_argument('--net', default='auto'); ap.add_argument('--site-type'); ap.add_argument('--text-id')
     ap.add_argument('--template'); ap.add_argument('--site-id'); ap.add_argument('--source'); ap.add_argument('--timeout', type=int, default=60)
-    ap.add_argument('--wait', type=int, default=5000); ap.add_argument('--cpu', type=int, default=None); ap.add_argument('--crux', action='store_true')
+    ap.add_argument('--wait', type=int, default=None, help='окно первого экрана после load, мс (по умолчанию — budgets.yaml)')
+    ap.add_argument('--cpu', type=int, default=None); ap.add_argument('--crux', action='store_true')
+    ap.add_argument('--no-lock', action='store_true', help='не брать замки тишины (обёртка их уже держит)')
     ap.add_argument('--selftest', action='store_true'); ap.add_argument('--batch'); ap.add_argument('--devices', default='desktop,mobile')
     ap.add_argument('--only'); ap.add_argument('--skip-done', action='store_true'); ap.add_argument('--page-timeout', type=int, default=270)
     ap.add_argument('--reclassify'); ap.add_argument('--csv'); ap.add_argument('--pages'); ap.add_argument('--net-of', nargs='*')
@@ -2565,6 +2570,8 @@ def main():
     a = ap.parse_args()
     if a.out_opt:
         a.out = a.out_opt
+    if a.wait is None:
+        a.wait = PG.window_ms()
     if a.selftest and not a.url:
         sys.exit(selftest(a))
     if a.net_of:
@@ -2590,7 +2597,8 @@ def main():
     if not a.url or not a.out:
         print(__doc__); sys.exit(2)
     a.selftest = False
-    d = run_page(a)
+    with (contextlib.nullcontext() if a.no_lock else PG.heavy_lock(domains=('site',))):
+        d = run_page(a)
     if a.crux:
         cj = psi(a.url, 'mobile' if a.mobile else 'desktop')
         json.dump(cj, open(os.path.join(a.out, f"crux_{'mobile' if a.mobile else 'desktop'}.json"), 'w'), ensure_ascii=False, indent=1)

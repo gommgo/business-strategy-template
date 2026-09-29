@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""scroll_record.py — запись прокрутки страницы и движение в паузах (creative-research, волна 1, агент C, 2026-09-24).
+"""scroll_record.py — запись прокрутки страницы и движение в паузах; модуль motion_check.py (read_frames, diff_regions, find_flash, sheet).
 
 Сценарий (Playwright + Chromium, запись record_video_dir):
   load → --wait мс → синхровспышка (полноэкранный пурпурный слой 400 мс — по нему видео сопоставляется со временем
@@ -18,13 +18,13 @@
   python3 scroll_record.py URL OUT_DIR [--mobile] [--reduced-motion] [--steps 12] [--dwell 1.5] [--wait 6000]
                            [--locale en-US] [--timeout 150] [--keep-video] [--tmpdir DIR]
 Выход: OUT_DIR/record[_mobile][_rm].json, OUT_DIR/sheet[_mobile][_rm]_NN.jpg; одна строка JSON-сводки в stdout.
-Браузер — только под двумя блокировками (см. effects_probe.py). UA не подделывается (как в effects_probe.py).
-Проверено: 99-raw/experiments/C/05-scroll-record/ (статичная страница → 0 %, лабораторная — движение по секциям).
+Браузер — один за раз, под замком браузера снаружи; UA не подделывается. На статичной странице движение 0 %, на
+лабораторной — по секциям.
 """
 import argparse, glob, io, json, math, os, shutil, subprocess, sys, tempfile, time
 
-VERSION = "scroll_record.py 1.0 (2026-09-24)"
-# как в effects_probe.py (с 17:10 24.09 — и WebGPU; до этого записи шли без WebGPU-флагов)
+VERSION = "scroll_record.py 1.0"
+# WebGL через ANGLE на видеокарте и WebGPU
 GPU_ARGS = ["--use-gl=angle", "--use-angle=gl", "--ignore-gpu-blocklist", "--enable-gpu", "--enable-unsafe-webgpu", "--enable-features=Vulkan"]
 FPS = 4          # кадров в секунду для анализа
 AW = 320         # ширина кадра анализа

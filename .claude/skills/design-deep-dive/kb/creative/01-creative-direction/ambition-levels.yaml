@@ -11,9 +11,9 @@
 #   вход холста        — уровень движения, стек и режим 3D исполнителя (levels[].maps_to.claude_design; правило — x-canvas-map).
 #
 # Два слоя бюджета:
-#   budgets.effects — сколько добавляет подача (JS движения и эффектов, 3D, wasm, видео, GPU): владелец — creative;
-#   budgets.page    — потолки страницы целиком; профиль страницы ведёт site (page_ref → ../site/07-seo-geo-performance-
-#                     analytics/budgets.yaml), здесь — его зеркало для threshold_ref ворот эффектов.
+#   budgets.effects — сколько добавляет подача (JS движения и эффектов, 3D, wasm, видео, GPU, FPS прокрутки): владелец — creative;
+#   budgets.page_ref — профиль страницы целиком (исходы, вес, шрифты) ведёт site: ../site/07-seo-geo-performance-analytics/
+#                     budgets.yaml; ворота эффектов берут его числа по threshold_ref «profile.*» зеркалом D.
 # Величина, у которой владелец — другая база, стоит ссылкой: 3D героя и первого экрана — ворота blender (three_d_ref),
 # картинка первого экрана — бюджет ассета ai-media (hero_image_ref).
 # Единицы: вес — байты «на проводе» (как считают ai-media 01/02, blender 01/04, site M: CDP / responseBodySize);
@@ -127,16 +127,7 @@ levels:
         video_autoplay_kb: {mobile: 300, desktop: 300, source: "видео за сессию без действия: только тихий синемаграф (quiet-loop); ai-media 14 демо «Лесная обжарка»: синемаграф пара 18,5 КБ в первом экране 84,8 КБ; сюжетное видео — по клику", label: "[проверено] у ai-media + [гипотеза]"}
         video_first_screen_kb: {mobile: 300, desktop: 300, source: "видео первого экрана без действия: только тихий синемаграф ≤ 300 КБ (allowed.quiet-loop)", label: "[проверено] у ai-media + [гипотеза]"}
         hero_image_ref: "ai-media/11-evaluation-qa/thresholds.yaml#thresholds.budget.image"   # бюджет ассета: картинка первого экрана, десктоп и телефон
-        fonts_kb: {mobile: 150, desktop: 150, source: "зеркало профиля site (budgets.yaml levels.L0.weight.fonts_kb) для threshold_ref ворот EG-WEIGHT-07; Web Almanac 2025 Page Weight: медиана шрифтов на главных страницах 122 КБ моб. / 139 КБ деск.", label: "[данные]"}
       page_ref: "site/07-seo-geo-performance-analytics/budgets.yaml#levels.L0"
-      page:                         # зеркало профиля site для threshold_ref ворот эффектов (EG-PERF-05, -06, EG-WEIGHT-08, -09)
-        first_screen_mb: {mobile: 1.5, desktop: 2.5, source: "ai-media:01-02#4.3 (≤ 2,5 МБ десктоп = Q1 лидеров, ≤ 1,5 МБ телефон); A/03: посадочные рынка (site M) телефон Q1 1,0 / медиана 2,0 МБ", label: "[данные] [спорно]"}
-        session_mb: {mobile: 3, desktop: 5, source: "A/03: лидогенерация рынка сессия телефон медиана 3,5 МБ, десктоп 3,5 МБ; blender:01-02#3.1 страница ≤ 3/7 МБ", label: "[данные] [гипотеза]"}
-        lcp_s_field_p75: {mobile: 2.5, desktop: 2.5, source: "web.dev/articles/vitals (обновлено 2024-10-31): хорошо ≤ 2,5 с на p75", label: "[документация]"}
-        inp_ms_field_p75: {mobile: 200, desktop: 200, source: "web.dev/articles/vitals: хорошо ≤ 200 мс", label: "[документация]"}
-        cls_field_p75: {mobile: 0.1, desktop: 0.1, source: "web.dev/articles/vitals: хорошо ≤ 0,1", label: "[документация]"}
-        lcp_s_lab: {mobile: 2.5, desktop: 2.0, source: "A/03: лидогенерация рынка лаборатория телефон CPU×4 медиана 2,3 с, десктоп 2,5 с; blender 09/05 §7.2 WEB-01 (1,0 с десктоп — блокер у blender, у нас не принят)", label: "[гипотеза]"}
-        tbt_ms_lab: {mobile: 200, desktop: 150, source: "blender:01-02#2.2 и #3.1 (web.dev: TBT < 200 мс на средней мобильной технике; десктоп 150); A/03: рынок телефон медиана 344 мс, Q1 135 мс", label: "[документация] + [данные]"}
     appropriate_for:
       lead_services:               # правило лидогенерации услуг — L0 вместо умолчания типа (читают page_gates.py и site_validate.py)
         page_type: landing-lead-services
@@ -212,19 +203,9 @@ levels:
         video_first_screen_kb: {mobile: 600, desktop: 1500, source: "видео первого экрана без действия — петля hero: ai-media:01-02#4.3 (петля 6–10 с, 1080p ≈ 150–200 КБ/с; 720p на телефоне)", label: "[данные]"}
         video_autoplay_session_mb: {mobile: 2, desktop: 5, source: "ai-media:01-02#4.3 (видео за сессию без явного действия пользователя)", label: "[данные] + [практика]"}
         hero_image_ref: "ai-media/11-evaluation-qa/thresholds.yaml#thresholds.budget.image"   # бюджет ассета: картинка первого экрана, десктоп и телефон
-        fonts_kb: {mobile: 250, desktop: 250, source: "зеркало профиля site (budgets.yaml levels.L1.weight.fonts_kb) для threshold_ref ворот EG-WEIGHT-07; ai-media 01/02 §4.1: лидеры медиана 190 КБ, Q3 328 КБ", label: "[данные] [гипотеза]"}
         draw_calls_max: {mobile: 30, desktop: 60, measure: "кадр в покое", source: "blender:01-02#3.1; blender 11/05 §11 (WEB-05)", label: "[спорно] у blender"}
-        scroll_fps_min: &l1-scroll-fps {mobile: 30, desktop: 50, source: "blender 01/04: наградные 3D FPS прокрутки Q1 55,6, медиана 59,8 (десктоп); телефон — эмуляция", label: "[гипотеза]"}
+        scroll_fps_min: {mobile: 30, desktop: 50, source: "blender 01/04: наградные 3D FPS прокрутки Q1 55,6, медиана 59,8 (десктоп); телефон — эмуляция", label: "[гипотеза]"}
       page_ref: "site/07-seo-geo-performance-analytics/budgets.yaml#levels.L1"
-      page:                         # зеркало профиля site для threshold_ref ворот эффектов (EG-PERF-04…06, EG-WEIGHT-08, -09)
-        first_screen_mb: {mobile: 2.0, desktop: 3.5, source: "A/03: SaaS-лидеры десктоп медиана 3,4 МБ (Q1 2,3); посадочные рынка телефон медиана 2,0 МБ; Web Almanac 2025 рис. 14.56: доля хорошего LCP главных 65 % при 1–2 МБ против 59 % при 2–3 МБ (моб.)", label: "[данные] [гипотеза]"}
-        session_mb: {mobile: 5, desktop: 10, source: "A/03: SaaS-лидеры сессия медиана 7,1 МБ (Q1 2,8); посадочные рынка SaaS телефон медиана 4,8 МБ", label: "[данные] [гипотеза]"}
-        lcp_s_field_p75: {mobile: 2.5, desktop: 2.5, source: "web.dev/articles/vitals", label: "[документация]"}
-        inp_ms_field_p75: {mobile: 200, desktop: 200, source: "web.dev/articles/vitals", label: "[документация]"}
-        cls_field_p75: {mobile: 0.1, desktop: 0.1, source: "web.dev/articles/vitals", label: "[документация]"}
-        lcp_s_lab: {mobile: 2.5, desktop: 2.5, source: "A/03: SaaS рынка телефон CPU×4 медиана 2,5 с", label: "[гипотеза]"}
-        tbt_ms_lab: {mobile: 300, desktop: 200, source: "blender:01-02#3.1 (TBT от 3D ≤ 300/150); A/03: SaaS рынка телефон медиана 520 мс — L1 строже рынка", label: "[гипотеза]"}
-        scroll_fps_min: *l1-scroll-fps   # величина слоя подачи (budgets.effects); путь страницы читает EG-PERF-04
     appropriate_for:
       conditions:
         - "умолчание для лендингов (решение заказчика п. 13); лидогенерация услуг — L1 с L0-блоками конверсии (правило levels[L0].appropriate_for.lead_services), вес первого экрана телефона — overrides профиля site"
@@ -289,20 +270,10 @@ levels:
         three_d_session_mb: {mobile: 3, desktop: 8, source: "blender:01-02#7 (история на прокрутке 5–15 МБ прогрессивно; мир 5–20 МБ); blender 08/03 §6.5 (3D всей страницы ≤ 8–10 МБ десктоп, [мнение])", label: "[спорно]"}
         video_first_screen_kb: {mobile: 1000, desktop: 2500, source: "видео первого экрана без действия: петля hero или сюжет на постере; эффектные страницы C — у 15 из 49 больше 5 МБ видео до прокрутки", label: "[гипотеза]"}
         video_autoplay_session_mb: {mobile: 4, desktop: 10, source: "ai-media:01-02#4.3 (5/2 МБ для обычной страницы) × 2 для видео-сюжета; тяжелее — только после явного действия", label: "[гипотеза]"}
-        fonts_kb: {mobile: 300, desktop: 300, source: "зеркало профиля site (budgets.yaml levels.L2.weight.fonts_kb) для threshold_ref ворот EG-WEIGHT-07; ai-media 01/02 §4.1: Q3 лидеров 328 КБ", label: "[данные] [гипотеза]"}
         draw_calls_max: {mobile: 30, desktop: 60, measure: "кадр в покое", source: "blender 11/05 §11 (WEB-05)", label: "[спорно] у blender"}
         draw_calls_scroll_max: {mobile: 50, desktop: 100, measure: "кадр при прокрутке, сцена-«мир»", source: "blender:01-02#3.1 (≤ 100 для «мира»); blender 11/05 §11", label: "[спорно] у blender"}
-        scroll_fps_min: &l2-scroll-fps {mobile: 30, desktop: 50, source: "blender 01/04 (десктоп Q1 55,6)", label: "[гипотеза]"}
+        scroll_fps_min: {mobile: 30, desktop: 50, source: "blender 01/04 (десктоп Q1 55,6)", label: "[гипотеза]"}
       page_ref: "site/07-seo-geo-performance-analytics/budgets.yaml#levels.L2"
-      page:                         # зеркало профиля site для threshold_ref ворот эффектов (EG-PERF-04…06, EG-WEIGHT-08, -09)
-        first_screen_mb: {mobile: 2.5, desktop: 4.0, source: "ai-media:01-02#4.1: Awwwards SOTD до прокрутки медиана 3,8 МБ (A/03: Q1 3,2); blender 01/02 §4.1 — «вау» после LCP", label: "[данные] [спорно]"}
-        session_mb: {mobile: 8, desktop: 15, source: "blender:01-02#3.1 (страница 3/7 МБ) × 2–3 для кампании (у blender ×3–5); A/03: Awwwards сессия медиана 20,9 МБ, наградные 3D медиана 12,6 МБ (blender называет медиану антиориентиром); Almanac 2025 рис. 14.54: ≥ 5 МБ — CWV проходят 30 % моб. / 38 % деск.", label: "[спорно]"}
-        lcp_s_field_p75: {mobile: 2.5, desktop: 2.5, source: "web.dev/articles/vitals — одинаково на всех уровнях: «вау» после LCP", label: "[документация]"}
-        inp_ms_field_p75: {mobile: 200, desktop: 200, source: "web.dev/articles/vitals", label: "[документация]"}
-        cls_field_p75: {mobile: 0.1, desktop: 0.1, source: "web.dev/articles/vitals", label: "[документация]"}
-        lcp_s_lab: {mobile: 3.0, desktop: 2.5, source: "A/03: Awwwards лаборатория десктоп медиана 4,1 с — L2 строже медианы жанра; телефон — после постера", label: "[гипотеза]"}
-        tbt_ms_lab: {mobile: 600, desktop: 300, source: "blender:01-02#8 (TBT страницы CPU×4 ≤ 600 мс, вклад 3D ≤ 300); вне сцены", label: "[спорно] у blender"}
-        scroll_fps_min: *l2-scroll-fps   # величина слоя подачи (budgets.effects); путь страницы читает EG-PERF-04
     appropriate_for:
       site_types: [campaign-site, portfolio-site]
       conditions:
@@ -422,7 +393,7 @@ x-canvas-map:
       note: "нормы проверок подачи (spec_check.py, marketing_audit.py); приёмы уже выбраны в подаче и спецификации движения"
     - from: ["/levels/*/motion_hints/hero_entrance_ms", "/levels/*/motion_hints/hero_scene_ms", "/levels/*/motion_hints/scroll_driven_sections_max", "/levels/*/motion_hints/scroll_scene_length_vh", "/levels/*/motion_hints/label"]
       note: "числа движения исполнителю дают моменты спецификации движения и токены motion.marketing"
-    - from: ["/levels/*/budgets/page", "/levels/*/budgets/page_ref"]
+    - from: ["/levels/*/budgets/page_ref"]
       note: "профиль страницы — site budgets.yaml через page_gates.py --resolve (правило брифа или плана)"
     - from: ["/levels/*/appropriate_for", "/levels/*/avoid_for"]
       note: "выбор уровня — до входа холста, в брифе"

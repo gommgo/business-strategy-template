@@ -1,31 +1,43 @@
 #!/usr/bin/env python3
-"""site_probe.py — замер живого 3D-сайта (агент A, волна 1). Дополняет 99-raw/tools/web_view.py --url.
+"""site_probe.py — замер страницы с 3D (живой сайт или собранная страница): сеть, контексты, вызовы отрисовки, кадры, LCP, TBT.
 
-Отличия от web_view.py (найдены на пилоте lusion.co 22.09.2026):
-  * вес сети — по фактически переданным байтам (Playwright request.sizes().responseBodySize), а не по
-    content-length: у сжатых на лету ответов (br/zstd, HTTP/2) content-length нет, web_view.py пишет 0;
-  * категория файла — по расширению, content-type, пути и сигнатуре первых байт (glTF, KTX2, Draco, Basis, EXR,
-    HDR, PLY, WASM, OGG…): собственные бинарные форматы студий (.buf, .bin без расширения) иначе уходят в other;
-  * контексты: перехват getContext (webgl/webgl2/webgpu/2d), transferControlToOffscreen (рендер в воркере —
-    draw calls главного потока тогда 0), navigator.gpu.requestAdapter;
-  * draw calls: WebGL/WebGL2 (как в web_view.py) + WebGPU (GPURenderPassEncoder.draw*);
-  * время до первого 3D-кадра (первый кадр rAF с ≥1 draw call) и таймлайн draw calls по секундам;
-  * прокрутка колесом мыши (mouse.wheel) — работает и на сайтах с виртуальной прокруткой (Lenis, свой скролл,
-    body высотой в экран), где window.scrollTo ничего не двигает;
+Что меряет:
+  * вес сети — по фактически переданным байтам (Playwright request.sizes().responseBodySize), а не по content-length: у
+    сжатых на лету ответов (br/zstd, HTTP/2) content-length нет;
+  * категория файла — по расширению, content-type, пути и сигнатуре первых байт (glTF, KTX2, Draco, Basis, EXR, HDR, PLY,
+    WASM, OGG…): собственные бинарные форматы студий (.buf, .bin без расширения) иначе уходят в other;
+  * контексты: перехват getContext (webgl/webgl2/webgpu/2d), transferControlToOffscreen (рендер в воркере — вызовы
+    отрисовки главного потока тогда 0), navigator.gpu.requestAdapter;
+  * вызовы отрисовки: WebGL/WebGL2 + WebGPU (GPURenderPassEncoder.draw*); время до первого 3D-кадра (первый кадр rAF с
+    ≥ 1 вызовом) и таймлайн вызовов по секундам;
+  * прокрутка колесом мыши (mouse.wheel) — работает и на сайтах с виртуальной прокруткой (Lenis, свой скролл);
   * LCP с элементом (тег, url), TBT до прокрутки и во время неё отдельно;
-  * библиотеки: глобальные объекты, DOM, баннеры в консоли (Babylon, PlayCanvas, Pixi), сигнатуры в тексте JS;
-  * WebGPU включён флагами (--enable-unsafe-webgpu --enable-features=Vulkan): без них requestAdapter() в
-    headless возвращает null и WebGPU-сайты уходят в запасной путь;
-  * --mobile: дескриптор Playwright "Pixel 7" (UA Android Chrome, 412×915, DPR 2.625, touch);
-  * --reduced-motion: контекст с prefers-reduced-motion: reduce (проверка, уважает ли сайт настройку).
+  * библиотеки: глобальные объекты, DOM, баннеры в консоли (Babylon, PlayCanvas, Pixi), сигнатуры в тексте JS; GSAP и
+    ScrollTrigger — по рантайму (window.gsapVersions, свойство _gsap у элементов, .pin-spacer): бандл глобал gsap не ставит;
+  * --no-3d — прогон «постер без 3D» для вклада 3D в TBT (gate_check.py --baseline): WebGL и WebGPU недоступны странице,
+    3D-ассеты и декодеры (glTF, KTX2, Draco, Basis, HDR…) не грузятся; JS 3D-библиотеки, которую страница грузит без проверки
+    возможностей, остаётся в обоих прогонах — ключ --block ШАБЛОН (регулярное выражение по URL, повтором) снимает и его;
+  * WebGPU включён флагами (--enable-unsafe-webgpu --enable-features=Vulkan): без них requestAdapter() в headless
+    возвращает null;
+  * --mobile: дескриптор телефона и CPU — budgets.yaml site conditions.lab_mobile (Pixel 7, CPU ×4), UA — HeadlessChrome;
+    --throttle — сеть того же условия (1,6 Мбит/с, RTT 150 мс); --reduced-motion: контекст с prefers-reduced-motion: reduce.
+Замер времени — на тихой машине: зонд берёт общий тяжёлый замок и замок браузера (page_gates.heavy_lock; --no-lock — обёртка
+их уже держит). Автоматизация не маскируется.
 
-Использование:
-  python3 site_probe.py URL OUT_DIR [--mobile] [--throttle] [--wait 8000] [--steps 24] [--reduced-motion]
-                        [--gpu gl|vulkan|swiftshader] [--no-webgpu] [--click SELECTOR [--click-timeout 30]]
-                        [--click-xy 0.5,0.5 [--click-delay 8000]] [--wait-until load|domcontentloaded|commit] [--timeout 180]
-Результат: OUT_DIR/probe[_mobile][_rm].json, network[_mobile].json, shot_*.png, sheet*.png; краткая сводка в stdout.
+Использование (код-репо — соседним чекаутом ../strategy/.claude/skills/design-deep-dive/scripts/blender/site_probe.py):
+  site_probe.py --selftest            # локальная страница: GSAP по рантайму, WebGL, прогон --no-3d
+  site_probe.py URL OUT_DIR [--mobile] [--throttle] [--wait 8000] [--steps 24] [--reduced-motion] [--quick]
+                [--no-3d [--block ШАБЛОН …]] [--gpu gl|vulkan|swiftshader] [--no-webgpu] [--click SELECTOR [--click-timeout 30]]
+                [--click-xy 0.5,0.5 [--click-delay 8000]] [--wait-until load|domcontentloaded|commit] [--timeout 180] [--no-lock]
+Результат: OUT_DIR/probe[_mobile][_thr][_rm][_no3d][_quick].json, network[…].json, shot_*.png, sheet*.png; краткая сводка
+в stdout. Ворота 3D по отчёту — gate_check.py.
 """
-import json, os, re, sys, time
+import contextlib, json, os, re, sys, time
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib
+import kbpaths  # noqa: E402
+kbpaths.use("site")
+import page_gates as PG  # noqa: E402  условия замера и тишина машины (budgets.yaml site)
 
 GPU_ARGS = {
     "gl": ["--use-gl=angle", "--use-angle=gl", "--ignore-gpu-blocklist", "--enable-gpu"],
@@ -33,6 +45,13 @@ GPU_ARGS = {
     "swiftshader": ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
 }
 WEBGPU_ARGS = ["--enable-unsafe-webgpu", "--enable-features=Vulkan"]
+# «постер без 3D»: WebGL и WebGPU странице недоступны (страница уходит в запасной путь — постер), 3D-ассеты не грузятся
+NO3D_INIT = r"""(() => { const gc = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = function (type, ...a) { if (/webgl|webgpu/i.test(String(type))) return null; return gc.call(this, type, ...a); };
+  try { if (HTMLCanvasElement.prototype.transferControlToOffscreen) HTMLCanvasElement.prototype.transferControlToOffscreen = undefined; } catch (e) {}
+  try { Object.defineProperty(navigator, 'gpu', {get: () => undefined}); } catch (e) {} })();"""
+NO3D_URL = (r"\.(glb|gltf|drc|ktx2|ktx|basis|hdr|exr|splat|ksplat|spz|sog|ply|usdz|splinecode|vrm|fbx|obj|buf)(\?|$)|"
+            r"draco_(decoder|wasm)|basis_transcoder|meshopt_decoder|/(models?|meshes|geometr|gltf|glb|3d)/")
 
 INIT = r"""(() => {
   if (window.__probe) return;
@@ -79,8 +98,12 @@ DETECT = r"""(() => { const r = {};
   if (customElements.get('model-viewer')) r.model_viewer = true;
   if (customElements.get('needle-engine')) r.needle = true;
   if (customElements.get('spline-viewer') || document.querySelector('spline-viewer')) r.spline_viewer = true;
-  if (window.gsap) r.gsap = window.gsap.version || true;
-  if (window.ScrollTrigger) r.scrolltrigger = true;
+  // GSAP — по рантайму: бандл глобал window.gsap не ставит; признаки — gsapVersions, _gsap у элементов, .pin-spacer
+  const gv = Array.isArray(window.gsapVersions) ? window.gsapVersions.slice(0, 4).map(String) : [];
+  let gt = 0; try { for (const el of document.querySelectorAll('body *')) { if (el._gsap) gt++; if (gt >= 500) break; } } catch (e) {}
+  const pins = document.querySelectorAll('.pin-spacer').length;
+  if (window.gsap || gv.length || gt || pins) { r.gsap = (window.gsap && window.gsap.version) || gv[0] || true; r.gsap_targets = gt; r.pin_spacers = pins; }
+  if (window.ScrollTrigger || pins) r.scrolltrigger = true;
   if (window.lenis || document.documentElement.classList.contains('lenis') || document.querySelector('.lenis')) r.lenis = true;
   if (window.UnicornStudio) r.unicorn_studio = true;
   if (window.Webflow) r.webflow = true;
@@ -223,30 +246,113 @@ def frame_diff(a_path, b_path, thr=8):
         return None
 
 
+SELFTEST_HTML = """<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>site_probe selftest</title>
+<style>body{margin:0;font:16px sans-serif} canvas{display:block}</style></head><body>
+<h1>Проверка зонда</h1><canvas id="c" width="400" height="300"></canvas>
+<div class="pin-spacer"><div id="pinned">закреплённый блок</div></div>
+<script>window.gsapVersions = ["3.12.5"]; document.getElementById("pinned")._gsap = {id: 1};
+fetch("model.glb").then(r => r.arrayBuffer()).catch(() => {});
+const gl = document.getElementById("c").getContext("webgl");
+if (gl) { const f = () => { gl.clearColor(0.2, 0.3, 0.4, 1); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.POINTS, 0, 1); requestAnimationFrame(f); };
+  requestAnimationFrame(f); }</script></body></html>"""
+
+
+def selftest():
+    """Локальная страница через свой HTTP-сервер: GSAP по рантайму (gsapVersions, _gsap, .pin-spacer без window.gsap),
+    контекст WebGL и вызовы отрисовки; прогон --no-3d — WebGL недоступен, 3D-ассет не грузится, файл отчёта _no3d."""
+    import functools
+    import http.server
+    import socketserver
+    import subprocess
+    import tempfile
+    import threading
+    ok = True
+
+    def check(msg, cond):
+        nonlocal ok
+        ok = ok and bool(cond)
+        print(("OK   " if cond else "FAIL ") + msg)
+    src = open(os.path.abspath(__file__), encoding="utf-8").read().split("\ndef selftest")[0]
+    check("в коде нет --disable-blink-features и своей строки UA", "--disable-blink-" not in src and "user_agent=" not in src)
+    with tempfile.TemporaryDirectory() as td:
+        with open(os.path.join(td, "index.html"), "w", encoding="utf-8") as f:
+            f.write(SELFTEST_HTML)
+        with open(os.path.join(td, "model.glb"), "wb") as f:
+            f.write(b"glTF" + bytes(20000))
+        class Quiet(http.server.SimpleHTTPRequestHandler):
+            def log_message(self, *x):
+                pass
+        h = functools.partial(Quiet, directory=td)
+        srv = socketserver.ThreadingTCPServer(("127.0.0.1", 0), h)
+        srv.daemon_threads = True
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        url = f"http://127.0.0.1:{srv.server_address[1]}/index.html"
+        try:
+            for extra, name in (([], "probe_quick.json"), (["--no-3d"], "probe_no3d_quick.json")):
+                out = os.path.join(td, "out")
+                r = subprocess.run([sys.executable, os.path.abspath(__file__), url, out, "--quick", "--wait", "600", "--gpu", "swiftshader",
+                                    "--no-webgpu", *extra], capture_output=True, text=True, timeout=240, env=kbpaths.playwright_env())
+                fp = os.path.join(out, name)
+                st = json.load(open(fp, encoding="utf-8")) if os.path.exists(fp) else {}
+                check(f"прогон {' '.join(extra) or 'с 3D'}: отчёт {name} (код {r.returncode}) {r.stderr[-200:] if not st else ''}", bool(st))
+                if not st:
+                    continue
+                det = st.get("detected") or {}
+                cat = (st.get("network") or {}).get("by_category") or {}
+                ctx = [c.get("type") for c in det.get("ctx_created") or []]
+                if not extra:
+                    check("GSAP по рантайму: gsapVersions, _gsap и .pin-spacer без window.gsap",
+                          det.get("gsap") == "3.12.5" and det.get("gsap_targets", 0) >= 1 and det.get("pin_spacers") == 1 and det.get("scrolltrigger"))
+                    check("с 3D: контекст webgl и вызовы отрисовки, 3D-ассет загружен",
+                          "webgl" in ctx and (st.get("idle") or {}).get("frames_with_draws", 0) > 0 and "model3d" in cat)
+                else:
+                    check("--no-3d: WebGL недоступен, 3D-ассет не загружен (запрос прерван)",
+                          "webgl" not in ctx and "model3d" not in cat and (st.get("no_3d") or {}).get("aborted", 0) >= 1)
+        finally:
+            srv.shutdown()
+    print("site_probe selftest:", "OK" if ok else "FAIL")
+    return 0 if ok else 1
+
+
 def main():
     a = sys.argv[1:]
+    if a and a[0] == "--selftest":
+        sys.exit(selftest())
     if len(a) < 2 or a[0] in ("-h", "--help"):
         print(__doc__); sys.exit(0)
     url, out = a[0], os.path.abspath(a[1])
     os.makedirs(out, exist_ok=True)
-    mobile, throttle, rm = "--mobile" in a, "--throttle" in a, "--reduced-motion" in a
+    mobile, throttle, rm, no3d = "--mobile" in a, "--throttle" in a, "--reduced-motion" in a, "--no-3d" in a
+    blocks = [a[i + 1] for i, x in enumerate(a) if x == "--block" and i + 1 < len(a)]
     wait = int(opt(a, "--wait", 8000)); steps = int(opt(a, "--steps", 24)); click = opt(a, "--click")
     nav_timeout = int(opt(a, "--timeout", 180)) * 1000
-    suffix = ("_mobile" if mobile else "") + ("_thr" if throttle else "") + ("_rm" if rm else "") + ("_quick" if "--quick" in a and not rm else "")
+    suffix = ("_mobile" if mobile else "") + ("_thr" if throttle else "") + ("_rm" if rm else "") + ("_no3d" if no3d else "") \
+        + ("_quick" if "--quick" in a and not rm else "")
     args = GPU_ARGS[opt(a, "--gpu", "gl")] + ([] if "--no-webgpu" in a else WEBGPU_ARGS)
+    cond = PG.conditions()
     from playwright.sync_api import sync_playwright
     net, logs, sigs_found, js_seen = {}, [], {}, 0
     st = {"url": url, "mobile": mobile, "throttle": throttle, "reduced_motion": rm, "date": time.strftime("%Y-%m-%d %H:%M"),
           "chromium_args": args}
-    with sync_playwright() as pw:
+    if no3d:
+        st["no_3d"] = {"webgl": "недоступен", "blocked_pattern": NO3D_URL + "".join("|" + x for x in blocks), "aborted": 0}
+    lock = contextlib.nullcontext() if "--no-lock" in a else PG.heavy_lock(domains=("blender",))
+    with lock, sync_playwright() as pw:
         b = pw.chromium.launch(headless=True, args=args)
         st["browser"] = b.version
         if mobile:
-            dev = dict(pw.devices["Pixel 7"])
+            dev = PG.mobile_device(pw, cond)            # дескриптор budgets.yaml, UA — HeadlessChrome
             ctx = b.new_context(**dev, reduced_motion="reduce" if rm else "no-preference", locale="en-US")
         else:
-            ctx = b.new_context(viewport={"width": 1440, "height": 900}, device_scale_factor=1,
-                                reduced_motion="reduce" if rm else "no-preference", locale="en-US")
+            ctx = b.new_context(viewport={"width": cond["desktop"]["width"], "height": cond["desktop"]["height"]},
+                                device_scale_factor=cond["desktop"]["dpr"], reduced_motion="reduce" if rm else "no-preference", locale="en-US")
+        if no3d:
+            ctx.add_init_script(NO3D_INIT)
+
+            def _abort(route):
+                st["no_3d"]["aborted"] += 1
+                route.abort()
+            ctx.route(re.compile(st["no_3d"]["blocked_pattern"], re.I), _abort)
         ctx.add_init_script(INIT)
         p = ctx.new_page()
         W, H = p.viewport_size["width"], p.viewport_size["height"]
@@ -303,9 +409,8 @@ def main():
         if throttle:
             cdp = ctx.new_cdp_session(p)
             cdp.send("Network.enable")
-            cdp.send("Network.emulateNetworkConditions", {"offline": False, "latency": 150,
-                     "downloadThroughput": 1.6 * 1024 * 1024 / 8, "uploadThroughput": 750 * 1024 / 8})
-            cdp.send("Emulation.setCPUThrottlingRate", {"rate": 4})
+            cdp.send("Network.emulateNetworkConditions", PG.cdp_network(cond))
+            cdp.send("Emulation.setCPUThrottlingRate", {"rate": cond["mobile"]["cpu_slowdown"]})
         t0 = time.time()
         try:
             p.goto(url, wait_until=opt(a, "--wait-until", "load"), timeout=nav_timeout)

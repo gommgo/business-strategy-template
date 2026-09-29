@@ -1,36 +1,43 @@
 #!/usr/bin/env python3
-"""page_gates.py — единые ворота страницы по профилю бюджета (P v0, волна 2; K v1, волна 3; site-research, 2026-09-24).
+"""page_gates.py — ворота собранной страницы: вердикт PASS / S / B по `page-gates.yaml` с порогами профиля бюджета.
 
-Сводит готовые замеры страницы в вердикт PASS / S / B по `07-seo-geo-performance-analytics/page-gates.yaml` с порогами
-профиля `<page_type>@L<n>` из `budgets.yaml`. Браузер не запускает: берёт JSON утилит
-  page_anatomy.py  → anatomy_desktop.json, anatomy_mobile.json  (LCP, CLS, TBT, INP-сценарий, вес, сторонние, текст без JS,
-                     мета, формы и согласия, баннер cookie, призывы первого экрана, переполнение и меню телефона)
-  page_accept.py   → accept_*.json (LCP с троттлингом телефона, lazy/fetchpriority LCP, пауза, reduce, консоль)
-  geo_probe.py     → <id>.json (флаги head-kit.yaml checks: коды, robots, боты, SSR, canonical, JSON-LD, OG) — v1
-  ia_probe.py      → ia.json (мягкая 404 на шаблонах, меню в HTML, sitemap, hreflang, крошки; scope: site) — v1
-  axe-core         → JSON с violations (формат run_axe.py опыта I/02 или axe.run) — v1
-  page-plan.yaml   → first_screen_policy, seo.indexable, x-gate-exception[{id, why, who, until}] — v1
-  сохранённый HTML → заглушки и автоматические маркеры «ИИ-лендинга» (SG-CONTENT-05, 06) — v1
-  CSS (--css) и <style> → clamp() кеглей ≤ 2,5 × (SG-A11Y-08); видео первого экрана отдельно (SG-WEIGHT-09) — v1.1 (K2)
-v1.2 (K3, калибровка опыта K/03 на 8 страницах): SG-PERF-03 — CLS окна сессии web-vitals вместо суммы сдвигов; SG-GEO-01 —
-«H1 только после JS» B только при отсутствии H1 в сыром HTML; SG-MOB-01 — B при расширенной области телефона, скрытое
-переполнение — D; SG-LEGAL-01 (ЕС) — S, если до выбора загружены только библиотеки без событий и cookie; SG-LEGAL-04 — ЕС S.
-v1.2 (K4, строки page-gates.yaml v1.2): SG-A11Y-01 — color-contrast B только у ключевых узлов (H1, лид первого экрана, призыв,
-согласие и баннер cookie — профиль I 08/03 §8; нужен axe с адресами узлов, формат run_axe_targets.py опыта K/03), прочие узлы — S,
-без адресов узлов — S, которое исключение не снимает; SG-PERF-06 — H1 первого экрана выпал из LCP (появление из opacity: 0,
-маской строк, скрытием скриптом — creative E/01, Chromium 153): S при признаке в HTML или CSS, D без признака; H1 из
-opacity ≈ 0,001–0,09 или clip-path — D (время LCP раньше видимости).
-Строки ворот без данных помечаются SKIP (их проверяет человек, судья или соседняя утилита).
+Профиль `<page_type>@L<n>` — `07-seo-geo-performance-analytics/budgets.yaml` (исходы и вес уровня, исключения типа
+`overrides`); умолчание уровня по типу страницы и правило лидогенерации услуг — `creative/01-creative-direction/
+ambition-levels.yaml` (`defaults_by_page_type`, `levels[L0].appropriate_for.lead_services`). Браузер утилита не запускает,
+она сводит JSON других утилит ворот. Метрику страницы воротами ставит только она; те же метрики, измеренные соседями,
+идут в отчёт зеркалом (серьёзность D) и на вердикт не влияют; ворота эффектов и 3D — отдельными слоями отчёта.
+  page_anatomy.py  → anatomy_desktop.json, anatomy_mobile.json (--anatomy DIR): LCP, CLS, TBT, INP-сценарий, вес, сторонние,
+                     текст без JS, мета, формы и согласия, баннер cookie, призывы первого экрана, телефон, показ H1 во времени
+  page_accept.py   → accept_<режим>.json (--accept DIR): LCP с троттлингом телефона, lazy и fetchpriority LCP-картинки,
+                     постер видео первого экрана, размеры картинок, движение на 6-й секунде и петли всей страницы, reduce,
+                     консоль
+  motion_check.py  → results.json и gates.json (--motion DIR): петли всей страницы (2.2.2), вспышки (2.3.1), reduce записью
+                     всей страницы; ворота эффектов — слоем; LCP, TBT, CLS и вес — зеркалом
+  gate_check.py    → JSON ключа --json (--gate3d FILE …): ворота 3D — слоем, их провал — SG-WEIGHT-08 (D), ошибки консоли —
+                     SG-CONTENT-04; LCP, CLS, TBT и вес страницы — зеркалом
+  geo_probe.py     → <id>.json (--geo): флаги head-kit.yaml — коды, robots, боты, SSR, canonical, JSON-LD, OG
+  ia_probe.py      → ia.json (--ia): мягкая 404 на шаблонах, меню в HTML, sitemap, hreflang, крошки (строки scope: site)
+  axe-core         → JSON с violations (--axe): формат run_axe_targets.py (адреса узлов) или axe.run
+  page-plan.yaml   → first_screen_policy, seo.indexable, x-gate-exception[{id, why, who, until}] (--plan)
+  HTML и CSS       → заглушки и маркеры «ИИ-лендинга», признаки невидимого H1, clamp() кеглей (--html, --css)
+Числа строк без профиля (доля текста без JS, вылет телефона, clamp, энтропия постера) — поле `limits` строки page-gates.yaml.
+Строки без данных — SKIP: их проверяет человек, судья или соседняя утилита.
 
-Запуск:
-  python3 99-raw/tools/page_gates.py --profile landing-lead-services@L1 --anatomy DIR [--accept DIR] [--geo FILE]
-         [--ia FILE] [--axe FILE] [--plan FILE] [--html FILE] [--css FILE …] [--jurisdiction ru|eu|none] [--ai-bots-policy allow-all]
-         [--ads-google] [--site-level L1] [--hot-mobile-share 0.6 --price-band mid] [--json]
-  python3 99-raw/tools/page_gates.py --resolve landing-lead-services@L1        # показать профиль
-  python3 99-raw/tools/page_gates.py --selftest [--gates FILE]
-Код выхода: 1 — есть B; 0 — нет B. Замер без троттлинга сети (как у M) помечается `lab-unthrottled`.
+Код репозитория запускает утилиту соседним чекаутом: ../strategy/.claude/skills/design-deep-dive/scripts/site/page_gates.py.
+  page_gates.py --profile landing-lead-services@L1 --anatomy DIR [--accept DIR] [--motion DIR] [--gate3d FILE …]
+      [--geo FILE] [--ia FILE] [--axe FILE] [--plan FILE] [--html FILE] [--css FILE …] [--jurisdiction ru|eu|none]
+      [--ai-bots-policy allow-all] [--ads-google] [--site-level L1] [--hot-mobile-share 0.6 --price-band mid] [--json]
+  page_gates.py --resolve landing-lead-services@L1 [--site-level L1]   # профиль (JSON): id, level, page_type, outcome,
+                                                                        # weight, all_levels, log
+  page_gates.py --conditions        # условия замера budgets.yaml: окно первого экрана, телефон, десктоп, замок тишины
+  page_gates.py --selftest [--gates FILE]
+Код выхода: 1 — есть B; 0 — нет B; 2 — ошибка вызова. Замер без троттлинга сети помечается `lab-unthrottled`.
+
+Модуль для утилит замера (kbpaths.use("site"); import page_gates): resolve_profile(), profile_value(), conditions(),
+cdp_network(), mobile_device(), heavy_lock() — условия замера и тишина машины из budgets.yaml, одно место на все ворота.
 """
 import argparse
+import contextlib
 import copy
 import datetime
 import glob
@@ -46,7 +53,10 @@ sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/l
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb('site'))
 DIR07 = os.path.join(ROOT, '07-seo-geo-performance-analytics')
+BUDGETS = os.path.join(DIR07, 'budgets.yaml')
+GATES = os.path.join(DIR07, 'page-gates.yaml')
 CHECKLIST = os.path.join(ROOT, '09-ai-generation-evaluation', 'site-checklist.yaml')
+AMBITION = str(kbpaths.kb('creative', '01-creative-direction', 'ambition-levels.yaml'))
 LEVELS = ('L0', 'L1', 'L2')
 FOREIGN_VENDORS = {'ga4', 'gtm', 'meta-pixel', 'youtube', 'google-fonts', 'recaptcha', 'google-ads', 'google-maps',
                    'microsoft-ads', 'hotjar', 'intercom', 'onetrust'}   # SG-LEGAL-07 (I): зарубежные сервисы
@@ -82,7 +92,7 @@ HK_DEFAULT = {  # запасная копия head-kit.yaml 1.0 checks (флаг
 AI_SURFACE_BLOCKS = ('blocked-yandex-additional', 'blocked-openai-oai-searchbot', 'blocked-perplexity-perplexitybot',
                      'blocked-anthropic-claude-searchbot', 'blocked-microsoft-bingbot')
 AXE_B = {'color-contrast', 'link-name', 'button-name', 'label', 'meta-viewport'}            # SG-A11Y-01 (I 08/03 §8)
-AXE_KEY = ('h1', 'cta', 'consent', 'lead')   # v1.2 (K4): классы узлов color-contrast, провал которых — B (профиль I 08/03 §8)
+AXE_KEY = ('h1', 'cta', 'consent', 'lead')   # классы узлов color-contrast, провал которых — B (профиль I 08/03 §8)
 AXE_S = {'target-size', 'image-alt', 'frame-title', 'html-has-lang', 'html-lang-valid'}     # SG-A11Y-02
 PLACEHOLDER_RX = re.compile(r'lorem ipsum|\[placeholder\]|\bfeature [1-6]\b|\bjohn doe\b|\bjane doe\b|\bfictional (?:brand|company|demo)|'
                             r'\bdemo content\b|@example\.(?:com|org)|\bexample\.com\b|заглушк[аи] отзыв|\bтекст заглушк|вымышленн(?:ый|ая) (?:бренд|компани)', re.I)
@@ -98,6 +108,31 @@ def load_yaml(path):
         return yaml.safe_load(f)
 
 
+_LIMITS = {}
+
+
+def use_gates(path=None):
+    """Строки ворот для вердикта: page-gates.yaml или черновик (--gates). Поле `limits` строки — числа проверок, которые
+    не берутся из профиля (доля текста без JS, вылет телефона, clamp, энтропия и площадь постера, прозрачность H1)."""
+    doc = load_yaml(path or GATES)
+    rows = [x for x in doc.get('gates') or [] if isinstance(x, dict) and x.get('id')]
+    _LIMITS.clear()
+    _LIMITS.update({x['id']: x.get('limits') or {} for x in rows})
+    _LIMITS['_threshold'] = {x['id']: (x.get('threshold') or {}).get('S') for x in rows if isinstance(x.get('threshold'), dict)}
+    _LIMITS['_path'] = path or GATES
+    return doc
+
+
+def gate_limit(gid, key):
+    """Число из поля limits строки ворот; нет — ошибка с адресом (порога в коде нет)."""
+    if not _LIMITS:
+        use_gates()
+    v = (_LIMITS.get(gid) or {}).get(key)
+    if v is None:
+        raise KeyError(f'нет limits.{key} у строки {gid} ({_LIMITS.get("_path")})')
+    return v
+
+
 def deep_merge(base, over):
     out = copy.deepcopy(base)
     for k, v in (over or {}).items():
@@ -105,24 +140,74 @@ def deep_merge(base, over):
     return out
 
 
-def resolve_profile(profile_id, budgets, site_level=None, hot_mobile_share=None, price_band=None):
-    """<page_type>@L<n> → профиль (outcome, weight, all_levels) + журнал решений."""
+def load_budgets():
+    return load_yaml(BUDGETS)
+
+
+def load_levels():
+    """Уровни creative: таблица умолчаний по типу страницы и правило лидогенерации услуг. Нет файла — None (профиль с
+    уровнем в id разрешается и без него)."""
+    try:
+        return load_yaml(AMBITION)
+    except FileNotFoundError:
+        return None
+
+
+def level_defaults(levels):
+    """Тип страницы → (уровень по умолчанию, раздел): таблица `defaults_by_page_type` и её раздел `proposed`."""
+    out = {}
+    dpt = (levels or {}).get('defaults_by_page_type') or {}
+    for part, table in (('active', dpt), ('proposed', dpt.get('proposed') or {})):
+        for lv, pts in table.items():
+            if lv in LEVELS and isinstance(pts, list):
+                for pt in pts:
+                    out.setdefault(pt, (lv, part))
+    return out
+
+
+def lead_rule(levels):
+    """Правило лидогенерации услуг — поля `levels[id=L0].appropriate_for.lead_services`."""
+    for row in (levels or {}).get('levels') or []:
+        if isinstance(row, dict) and row.get('id') == 'L0':
+            return ((row.get('appropriate_for') or {}).get('lead_services')) or {}
+    return {}
+
+
+def resolve_profile(profile_id, budgets=None, site_level=None, hot_mobile_share=None, price_band=None, levels=None):
+    """<page_type>@L<n> → профиль (outcome, weight, all_levels) + журнал решений. Без уровня в id — умолчание типа и
+    правило лидогенерации из ambition-levels.yaml; уровень страницы не выше уровня сайта; исключения типа — overrides."""
+    budgets = budgets if budgets is not None else load_budgets()
+    levels = levels if levels is not None else load_levels()
     log = []
     if '@' in profile_id:
         page_type, level = profile_id.split('@', 1)
     else:
         page_type, level = profile_id, None
-    defaults = budgets['page_type_levels']['default']
-    known = {pt: lv for lv, pts in defaults.items() for pt in pts}
-    if page_type not in known:
-        raise ValueError(f'page_type {page_type!r} нет в budgets.yaml page_type_levels (словарь B)')
+    known = level_defaults(levels)
+    if levels is None:
+        if level is None:
+            raise ValueError('уровня в профиле нет, а таблицы умолчаний (creative ambition-levels.yaml) нет рядом')
+        log.append('тип страницы не сверен: нет creative ambition-levels.yaml')
+    elif page_type not in known:
+        raise ValueError(f'page_type {page_type!r} нет в таблице умолчаний ambition-levels.yaml#defaults_by_page_type')
+    elif known[page_type][1] == 'proposed':
+        log.append(f'тип {page_type} — proposed (таблица creative, раздел proposed)')
     if level is None:
-        level = known[page_type]
-        log.append(f'уровень по умолчанию для {page_type}: {level} (PLAN решение 20)')
-        if page_type == 'landing-lead-services' and hot_mobile_share is not None and hot_mobile_share >= 0.5 \
-                and price_band in ('low', 'mid'):
-            level = 'L0'
-            log.append('горячий трафик с телефонов ≥ 50 % и price_band low/mid → L0 (решение 20)')
+        level = known[page_type][0]
+        log.append(f'уровень по умолчанию для {page_type}: {level} (ambition-levels.yaml#defaults_by_page_type)')
+        rule = lead_rule(levels)
+        if rule and page_type == rule.get('page_type'):
+            share_min, bands = rule.get('hot_mobile_share_min'), rule.get('price_bands') or []
+            if hot_mobile_share is None or price_band is None:
+                level = rule.get('no_data') or level
+                log.append(f'лидогенерация услуг: данных о трафике или цене нет → {level} и вопрос в бриф')
+            elif share_min is not None and hot_mobile_share >= share_min and price_band in bands:
+                level = 'L0'
+                log.append(f'горячий трафик с телефонов {hot_mobile_share:.0%} ≥ {share_min:.0%} и price_band {price_band} '
+                           f'→ L0 (правило лидогенерации услуг)')
+            else:
+                level = rule.get('otherwise') or level
+                log.append(f'правило лидогенерации услуг не выполнено → {level}')
     if level not in LEVELS:
         raise ValueError(f'уровень {level!r} не из {LEVELS}')
     if site_level and LEVELS.index(level) > LEVELS.index(site_level):
@@ -137,6 +222,95 @@ def resolve_profile(profile_id, budgets, site_level=None, hot_mobile_share=None,
     prof['all_levels'] = budgets.get('all_levels', {})
     prof.update({'id': key, 'page_type': page_type, 'level': level, 'log': log})
     return prof
+
+
+def profile_value(prof, path, device=None, key='goal'):
+    """Порог профиля по пути через точку ('outcome.lcp_ms_lab.<device>.goal', 'weight.first_screen_kb'): метка <device>
+    заменяется устройством; узел {mobile, desktop} — значением устройства; узел {goal, poor} — ключом key (goal)."""
+    cur = prof
+    for part in path.replace('<device>', device or '').split('.'):
+        if not part:
+            continue
+        cur = cur.get(part) if isinstance(cur, dict) else None
+        if cur is None:
+            return None
+    if isinstance(cur, dict) and device in cur:
+        cur = cur[device]
+    if isinstance(cur, dict):
+        cur = cur.get(key, cur.get('max'))
+    return cur if isinstance(cur, (int, float)) and not isinstance(cur, bool) else None
+
+
+# ---------------------------------------------------------------- условия замера (budgets.yaml conditions)
+def conditions(budgets=None):
+    """Условия лаборатории для утилит замера: окно первого экрана, телефон (дескриптор, CPU, сеть), десктоп (окно, DPR),
+    замок тишины. Одно место — budgets.yaml conditions."""
+    c = (budgets if budgets is not None else load_budgets()).get('conditions') or {}
+    mob, desk = c.get('lab_mobile') or {}, c.get('lab_desktop') or {}
+    net = mob.get('network') or {}
+    vp = desk.get('viewport') or {}
+    return {'window_after_load_s': (c.get('first_screen') or {}).get('window_after_load_s'),
+            'mobile': {'descriptor': mob.get('descriptor'), 'cpu_slowdown': mob.get('cpu_slowdown'),
+                       'down_kbps': net.get('down_kbps'), 'up_kbps': net.get('up_kbps'), 'rtt_ms': net.get('rtt_ms')},
+            'desktop': {'width': vp.get('width'), 'height': vp.get('height'), 'dpr': vp.get('dpr'),
+                        'cpu_slowdown': desk.get('cpu_slowdown')},
+            'lock': (c.get('quiet') or {}).get('lock')}
+
+
+def window_ms(budgets=None):
+    """Окно первого экрана после load, мс (conditions.first_screen.window_after_load_s)."""
+    return int(round(float(conditions(budgets)['window_after_load_s']) * 1000))
+
+
+def cdp_network(cond=None):
+    """Параметры CDP Network.emulateNetworkConditions телефона из conditions.lab_mobile.network (кбит/с → байт/с)."""
+    m = (cond or conditions())['mobile']
+    return {'offline': False, 'latency': m['rtt_ms'], 'downloadThroughput': m['down_kbps'] * 1000 / 8,
+            'uploadThroughput': m['up_kbps'] * 1000 / 8}
+
+
+def mobile_device(pw, cond=None):
+    """Дескриптор телефона Playwright (conditions.lab_mobile.descriptor): размер, DPR, касание; в UA — HeadlessChrome, как
+    у самого браузера. Автоматизацию утилиты не маскируют (без подмены UA и без --disable-blink-features)."""
+    dev = dict(pw.devices[(cond or conditions())['mobile']['descriptor']])
+    dev['user_agent'] = dev['user_agent'].replace('Chrome/', 'HeadlessChrome/')
+    return dev
+
+
+def _ancestor_flock(path):
+    """Держит ли замок процесс-предок через flock(1) (`flock … <замок> python3 утилита.py`): повторная блокировка того же
+    файла из дочернего процесса ждала бы родителя до таймаута. Только Linux (/proc); ошибка — False."""
+    name = os.path.basename(path)
+    try:
+        pid = os.getppid()
+        for _ in range(16):
+            if pid <= 1:
+                break
+            with open(f'/proc/{pid}/cmdline', 'rb') as fh:
+                args = [x.decode('utf-8', 'replace') for x in fh.read().split(b'\0') if x]
+            if args and os.path.basename(args[0]) == 'flock' and any(x.endswith(name) for x in args[1:]):
+                return True
+            with open(f'/proc/{pid}/stat', encoding='utf-8', errors='replace') as fh:
+                pid = int(fh.read().rsplit(')', 1)[1].split()[1])
+    except (OSError, ValueError, IndexError):
+        return False
+    return False
+
+
+@contextlib.contextmanager
+def heavy_lock(domains=(), timeout=900.0, budgets=None):
+    """Тихая машина для замера времени (conditions.quiet): общий тяжёлый замок (тот же, что slot_run.py --heavy), затем
+    общий замок браузера, затем замки браузера доменов — порядок slot_run. Замок, который уже держит обёртка (slot_run.py
+    передаёт SLOT_RUN_HOLDS, flock — процесс-предок), повторно не берётся. Отдаёт список взятых замков."""
+    taken = []
+    with contextlib.ExitStack() as st:
+        for name, dom in lock_plan(domains, budgets=budgets):
+            path = kbpaths.lock_path(name, dom)
+            if _ancestor_flock(path):
+                continue
+            st.enter_context(kbpaths.lock(name, dom, timeout=timeout))
+            taken.append(path)
+        yield taken
 
 
 def dev_val(node, device, key='goal'):
@@ -170,14 +344,53 @@ def load_anatomy(dirpath):
 
 
 def load_accept(dirpath):
+    """accept_<режим>.json page_accept.py → {(устройство, троттлинг): отчёт}. Устройство и троттлинг — поля `device` и
+    `throttle` отчёта; у отчёта без них — по имени режима (mobile…, …_thr…). Прогоны с кликом (…_click) и тёмной темой
+    (…_dark) — не основной замер: в сводку не идут."""
     out = {}
-    for fp in glob.glob(os.path.join(dirpath or '', 'accept_*.json')):
+    for fp in sorted(glob.glob(os.path.join(dirpath or '', 'accept_*.json'))):
         with open(fp, encoding='utf-8') as f:
             d = json.load(f)
-        mode = os.path.basename(fp)[7:-5]          # accept_<mode>.json
-        dev = 'mobile' if 'mobile' in mode else 'desktop'
-        thr = 'throttle' in mode
+        mode = str(d.get('mode') or os.path.basename(fp)[7:-5])          # accept_<mode>.json
+        if '_click' in mode or '_dark' in mode:
+            continue
+        dev = d.get('device') or ('mobile' if 'mobile' in mode else 'desktop')
+        thr = d.get('throttle') if isinstance(d.get('throttle'), bool) else '_thr' in mode
         out[(dev, thr)] = d
+    return out
+
+
+def accept_main(acc):
+    """Основной прогон отчёта page_accept (без reduce): раздел no_preference."""
+    return (acc or {}).get('no_preference') or {}
+
+
+def load_motion(path):
+    """Отчёт motion_check.py: папка --out (results.json и gates.json) → {'results', 'gates', 'level'}; нет — None."""
+    if not path:
+        return None
+    d = path if os.path.isdir(path) else os.path.dirname(path)
+    res, gts = os.path.join(d, 'results.json'), os.path.join(d, 'gates.json')
+    if not os.path.exists(res):
+        return None
+    with open(res, encoding='utf-8') as f:
+        results = json.load(f)
+    gates = {}
+    if os.path.exists(gts):
+        with open(gts, encoding='utf-8') as f:
+            gates = json.load(f)
+    return {'results': results, 'gates': gates, 'level': gates.get('level') or (results.get('_meta') or {}).get('level'),
+            'path': d}
+
+
+def load_gate3d(paths):
+    """JSON gate_check.py --json (файл на прогон: телефон, десктоп, reduce) → список отчётов."""
+    out = []
+    for p in paths or []:
+        with open(p, encoding='utf-8') as f:
+            d = json.load(f)
+        d['_path'] = p
+        out.append(d)
     return out
 
 
@@ -202,26 +415,70 @@ def load_headkit(path):
 
 
 class Gate:
-    def __init__(self, gid, device, status, value, threshold, severity, note=''):
+    """Строка вердикта. source — утилита-источник замера; mirror — метрика страницы, измеренная соседом: серьёзность не
+    выше D, на вердикт не влияет."""
+    def __init__(self, gid, device, status, value, threshold, severity, note='', source=None, mirror=False):
         self.__dict__.update(id=gid, device=device, status=status, value=value, threshold=threshold, severity=severity,
-                             note=note)
+                             note=note, source=source, mirror=mirror)
 
 
-def cmp_outcome(gid, dev, value, node, note=''):
+def cmp_outcome(gid, dev, value, node, note='', source=None):
     goal, poor = dev_val(node, dev, 'goal'), dev_val(node, dev, 'poor')
     if value is None:
-        return Gate(gid, dev, 'SKIP', None, f'S>{goal} B>{poor}', '-', note or 'нет данных')
+        return Gate(gid, dev, 'SKIP', None, f'S>{goal} B>{poor}', '-', note or 'нет данных', source)
     if poor is not None and value > poor:
-        return Gate(gid, dev, 'FAIL', value, poor, 'B', note)
+        return Gate(gid, dev, 'FAIL', value, poor, 'B', note, source)
     if goal is not None and value > goal:
-        return Gate(gid, dev, 'FAIL', value, goal, 'S', note)
-    return Gate(gid, dev, 'PASS', value, goal, '-', note)
+        return Gate(gid, dev, 'FAIL', value, goal, 'S', note, source)
+    return Gate(gid, dev, 'PASS', value, goal, '-', note, source)
 
 
-def cmp_weight(gid, dev, value, limit, note=''):
+def cmp_weight(gid, dev, value, limit, note='', source=None):
     if value is None or limit is None:
-        return Gate(gid, dev, 'SKIP', value, limit, '-', note or 'нет данных')
-    return Gate(gid, dev, 'FAIL' if value > limit else 'PASS', round(value, 1), limit, 'S' if value > limit else '-', note)
+        return Gate(gid, dev, 'SKIP', value, limit, '-', note or 'нет данных', source)
+    return Gate(gid, dev, 'FAIL' if value > limit else 'PASS', round(value, 1), limit, 'S' if value > limit else '-', note,
+                source)
+
+
+def mirror_gate(gid, dev, value, limit, source, note=''):
+    """Метрика страницы, которую измерил сосед: сравнение с тем же порогом профиля, серьёзность — D (зеркало), вердикт
+    ставит строка-владелец по своему методу."""
+    note = f'зеркало: {source}' + (f'; {note}' if note else '')
+    if value is None or limit is None:
+        return Gate(gid, dev, 'SKIP', value, limit, '-', note, source, mirror=True)
+    bad = value > limit
+    return Gate(gid, dev, 'FAIL' if bad else 'PASS', round(value, 3) if isinstance(value, float) else value, limit,
+                'D' if bad else '-', note, source, mirror=True)
+
+
+def accept_weight(acc):
+    """Вес первого экрана из прогона page_accept без замедления сети: (КБ, источник) или (None, None)."""
+    a = accept_main(acc)
+    if not a or a.get('weight_measured') is False or a.get('first_screen_total_kb') is None:
+        return None, None
+    return a['first_screen_total_kb'], 'page_accept'
+
+
+def lcp_element_gate(dev, tag, has_lcp, acc, h1item):
+    """SG-PERF-06: LCP есть и не canvas; LCP-картинка без lazy (B) и с fetchpriority=high (S — page_accept); H1 не
+    выпадает из LCP (признаки в HTML, CSS и показе H1)."""
+    if not has_lcp:
+        return Gate('SG-PERF-06', dev, 'FAIL', 'нет LCP', 'LCP есть', 'B')
+    if tag == 'CANVAS':
+        return Gate('SG-PERF-06', dev, 'FAIL', tag, 'не canvas', 'B')
+    lcp = g(acc, 'lcp') or {}
+    rsev, rwhat = h1item
+    if lcp.get('lazy'):
+        return Gate('SG-PERF-06', dev, 'FAIL', 'lazy', 'LCP-картинка без lazy', 'B', source='page_accept')
+    if rwhat:
+        # H1 первого кадра невидим → в Chromium выпадает из LCP (creative E/01; поле CrUX — Chrome)
+        return Gate('SG-PERF-06', dev, 'FAIL', rwhat[:90], 'H1 без opacity 0, маски строк, скрытия скриптом', rsev,
+                    'creative E/01 (Chromium 153): честно — только transform; opacity ≥ 0,01 и clip-path — LCP раньше показа')
+    if (lcp.get('tag') or '').upper() == 'IMG' and lcp.get('fp') != 'high':
+        return Gate('SG-PERF-06', dev, 'FAIL', 'без fetchpriority=high', 'LCP-картинка с fetchpriority=high', 'S',
+                    source='page_accept')
+    return Gate('SG-PERF-06', dev, 'PASS', tag or '?', 'H1/картинка/постер', '-',
+                'lazy/fetchpriority — только из page_accept' if not acc else '')
 
 
 def worst(items):
@@ -239,7 +496,7 @@ SCRIPT_URL = re.compile(r'\.js(?:\.gz)?(?:$|\?)|/gtm\.js|/gtag/js|/libs/|/tag\.j
 
 
 def tracking_evidence(d):
-    """v1.2 (K3): чем подтверждён трекинг до выбора — запросы, отправляющие данные (не загрузка скрипта), и cookie трекинга."""
+    """Чем подтверждён трекинг до выбора — запросы, отправляющие данные (не загрузка скрипта), и cookie трекинга."""
     reqs = g(d, 'network', 'tracking_requests', default=[]) or []
     sent = sorted({r.get('vendor') or '?' for r in reqs if r.get('phase') in ('load', 'scroll', 'pre')
                    and not SCRIPT_URL.search(r.get('u') or '')})
@@ -256,8 +513,8 @@ def letters(t):
 
 
 def h1_nojs_item(d, s):
-    """v1.2 (K3): «H1 только после JS» — B, только если H1 нет в сыром HTML. Если H1 в HTML есть, а сравнение текста упало
-    (innerText склеивает слова на скрытых <br> — опыт K/03: ru-matemarketing, телефон), текст сверяется без пробелов и регистра."""
+    """«H1 только после JS» — B, только если H1 нет в сыром HTML. Если H1 в HTML есть, а сравнение текста упало (innerText
+    склеивает слова на скрытых <br> — опыт K/03: ru-matemarketing, телефон), текст сверяется без пробелов и регистра."""
     if s.get('nojs_h1') or (s.get('h1_n') or 0) < 1:
         return ('-', '')
     nj = d.get('nojs') or {}
@@ -272,7 +529,7 @@ def h1_nojs_item(d, s):
     return ('D', 'h1 в HTML есть, текст отличается от видимого')
 
 
-# ---------------------------------------------------------------- v1.2 (K4): H1 и LCP (creative E/01), контраст по узлам
+# ---------------------------------------------------------------- H1 и LCP (creative E/01), контраст по узлам
 VOID_TAGS = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
 OPACITY_RX = re.compile(r'opacity\s*:\s*([\d.]+)', re.I)
 ZERO_OPACITY_RX = re.compile(r'(?:^|[;{\s])opacity\s*:\s*0(?:\.0+)?\s*(?:;|}|$|!)', re.I)
@@ -323,10 +580,12 @@ def hidden_selectors(css):
     return out
 
 
-def h1_reveal_evidence(raw, css=''):
+def h1_reveal_evidence(raw, css='', near_zero=None):
     """Признаки «H1 первого кадра невидим» в сыром HTML и CSS (creative E/01): hidden — opacity 0 (стиль, класс opacity-0,
     правило CSS, анимация из 0), visibility: hidden, класс invisible у H1 или 4 ближайших предков, скрипт разбивки с маской
-    строк; near_zero — opacity 0 < x < 0,1 (Framer appear 0.001) или clip-path — H1 остаётся кандидатом, но LCP раньше показа."""
+    строк; near_zero — opacity 0 < x < near_zero (SG-PERF-06 limits.opacity_near_zero; Framer appear 0.001) или clip-path —
+    H1 остаётся кандидатом, но LCP раньше показа."""
+    near_zero = near_zero if near_zero is not None else gate_limit('SG-PERF-06', 'opacity_near_zero')
     res = {'hidden': [], 'near_zero': []}
     if not raw and not css:
         return res
@@ -350,7 +609,7 @@ def h1_reveal_evidence(raw, css=''):
                     v = None
                 if v == 0:
                     res['hidden'].append(f'{who}: style opacity 0')
-                elif v is not None and v < 0.1:
+                elif v is not None and v < near_zero:
                     res['near_zero'].append(f'{who}: style opacity {m.group(1)}' + (' (Framer appear)' if a.get('data-framer-appear-id') else ''))
             if re.search(r'visibility\s*:\s*hidden', st, re.I):
                 res['hidden'].append(f'{who}: visibility hidden')
@@ -368,10 +627,29 @@ def h1_reveal_evidence(raw, css=''):
     return res
 
 
-def lcp_h1_item(d, rv):
-    """SG-PERF-06 (v1.2, K4): H1 первого экрана не стал кандидатом LCP, а LCP — другой текст (лид, H2): S при признаке
-    невидимого первого кадра в HTML или CSS, D без признака (лид может быть больше H1 по площади); H1 — кандидат, но
-    проявляется из opacity ≈ 0 или clip-path — D (время LCP раньше видимости; допустимо при раскрытии ≤ 800 мс)."""
+def h1_runtime(d, near_zero):
+    """Показ H1 во времени (page_anatomy.py, поле h1_paint): признак для страниц, где HTML и CSS признаков не несут
+    (скрытие скриптом в SPA). → (hidden, near_zero) — строка признака или None."""
+    hp = d.get('h1_paint') or {}
+    op = hp.get('first_op')
+    if not isinstance(op, (int, float)) or hp.get('in_first_screen') is False:
+        return None, None
+    seen = f", виден с {hp['t_visible']} мс" if hp.get('t_visible') is not None else ', до конца замера не виден'
+    if op <= 0 or hp.get('first_hidden'):
+        return f'показ H1: первый кадр невидим (opacity {op}{seen})', None
+    if op < near_zero:
+        return None, f'показ H1: первый кадр opacity {op}{seen}'
+    return None, None
+
+
+def lcp_h1_item(d, rv, near_zero=None):
+    """SG-PERF-06: H1 первого экрана не стал кандидатом LCP, а LCP — другой текст (лид, H2): S при признаке невидимого
+    первого кадра в HTML, CSS или в показе H1 во времени (page_anatomy), D без признака (лид может быть больше H1 по площади);
+    H1 — кандидат, но проявляется из opacity ≈ 0 или clip-path — D (время LCP раньше видимости; допустимо при раскрытии
+    ≤ 800 мс)."""
+    near_zero = near_zero if near_zero is not None else gate_limit('SG-PERF-06', 'opacity_near_zero')
+    rt_hidden, rt_near = h1_runtime(d, near_zero)
+    rv = {'hidden': rv['hidden'] + ([rt_hidden] if rt_hidden else []), 'near_zero': rv['near_zero'] + ([rt_near] if rt_near else [])}
     h = g(d, 'dom', 'headings', default={}) or {}
     lcps = (g(d, 'pre', 'lcp', default=[]) or []) + (g(d, 'fin', 'lcp', default=[]) or [])
     if not lcps or not h.get('h1_first_screen'):
@@ -390,14 +668,14 @@ def lcp_h1_item(d, rv):
         what = f"LCP — {final.get('tag')} «{(final.get('text') or '')[:24]}», H1 не кандидат"
         if rv['hidden']:
             return ('S', what + '; ' + rv['hidden'][0])
-        return ('D', what + '; признаков в HTML нет — проверить появление H1 (или лид больше H1)')
+        return ('D', what + '; признаков в HTML и показе H1 нет — проверить появление H1 (или лид больше H1)')
     if cand and rv['near_zero']:
         return ('D', 'H1 проявляется: ' + rv['near_zero'][0] + ' — время LCP раньше видимости')
     return ('-', '')
 
 
 def cta_texts(anatomy):
-    """Тексты призывов (кнопки filled и outline) из анатомии — для класса узла cta (как axe_classify.py опыта K/03)."""
+    """Тексты призывов (кнопки filled и outline) из анатомии — для класса узла cta."""
     out = set()
     for d in (anatomy or {}).values():
         for c in g(d, 'dom', 'ctas', default=[]) or []:
@@ -413,7 +691,7 @@ def norm_label(t):
 
 
 def axe_node_class(n, ctas):
-    """Класс узла color-contrast (формат run_axe_targets.py K/03: in_h1, cookie, in_form, action, first_screen, in_header,
+    """Класс узла color-contrast (формат run_axe_targets.py: in_h1, cookie, in_form, action, first_screen, in_header,
     in_footer, text); узел axe.run без флагов — по тегу из html (<h1 → h1), иначе unknown."""
     if not isinstance(n, dict):
         return 'unknown'
@@ -442,26 +720,27 @@ def plan_info(plan):
 
 
 def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, axe=None, plan=None, html_text=None,
-             headkit=None, ai_bots_policy='allow-all', ads_google=False, css_text=None):
+             headkit=None, ai_bots_policy='allow-all', ads_google=False, css_text=None, motion=None, gate3d=None):
     accept = accept or {}
     headkit = headkit or dict(HK_DEFAULT)
     pi = plan_info(plan)
     R = []
     oc, wt, al = prof['outcome'], prof['weight'], prof['all_levels']
     cta_fs = {}
-    rv = h1_reveal_evidence(html_text, css_text) if (html_text or css_text) else {'hidden': [], 'near_zero': []}
+    nz = gate_limit('SG-PERF-06', 'opacity_near_zero')
+    rv = h1_reveal_evidence(html_text, css_text, nz) if (html_text or css_text) else {'hidden': [], 'near_zero': []}
     for dev, d in anatomy.items():
         s = d.get('summary') or {}
         # SG-PERF-01/02: LCP — сначала page_accept с троттлингом (телефон), иначе анатомия как диагностика
-        acc = accept.get((dev, dev == 'mobile'))
-        if acc and g(acc, 'lcp', 't') is not None:
+        acc = accept_main(accept.get((dev, dev == 'mobile')))
+        if g(acc, 'lcp', 't') is not None:
             R.append(cmp_outcome('SG-PERF-01' if dev == 'mobile' else 'SG-PERF-02', dev, g(acc, 'lcp', 't'),
-                                 oc['lcp_ms_lab'], 'page_accept' + (' --throttle' if dev == 'mobile' else '')))
+                                 oc['lcp_ms_lab'], 'page_accept' + (' --throttle' if dev == 'mobile' else ''), source='page_accept'))
         else:
             R.append(cmp_outcome('SG-PERF-01' if dev == 'mobile' else 'SG-PERF-02', dev, s.get('lcp_ms'), oc['lcp_ms_lab'],
                                  'lab-unthrottled: диагностика, не приёмка' if dev == 'mobile' else 'anatomy, без троттлинга'))
-        # SG-PERF-03 (v1.2, K3): CLS — окно сессии web-vitals (fin.wv_cls), а не сумма всех сдвигов (summary.cls_session):
-        # сумма завышала CLS прокрутки (опыт K/03: ru-azbukaokon телефон — сумма 0,42, web-vitals 0,15)
+        # SG-PERF-03: CLS — окно сессии web-vitals (fin.wv_cls), а не сумма всех сдвигов (summary.cls_session): сумма
+        # завышает CLS прокрутки (опыт K/03: ru-azbukaokon телефон — сумма 0,42, web-vitals 0,15)
         wv_cls = g(d, 'fin', 'wv_cls')
         if isinstance(wv_cls, (int, float)):
             R.append(cmp_outcome('SG-PERF-03', dev, wv_cls, oc['cls_lab'], 'web-vitals CLS (окно сессии)'))
@@ -474,23 +753,7 @@ def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, a
         # SG-PERF-06: LCP-элемент
         lcp_list = g(d, 'fin', 'lcp', default=[]) or g(d, 'pre', 'lcp', default=[]) or []
         last = lcp_list[-1] if lcp_list else {}
-        tag = (last.get('tag') or '').upper()
-        if not lcp_list:
-            R.append(Gate('SG-PERF-06', dev, 'FAIL', 'нет LCP', 'LCP есть', 'B'))
-        elif tag == 'CANVAS':
-            R.append(Gate('SG-PERF-06', dev, 'FAIL', tag, 'не canvas', 'B'))
-        else:
-            lazy = g(acc or {}, 'lcp', 'lazy')
-            rsev, rwhat = lcp_h1_item(d, rv)
-            if lazy:
-                R.append(Gate('SG-PERF-06', dev, 'FAIL', 'lazy', 'LCP-картинка без lazy', 'B'))
-            elif rwhat:
-                # v1.2 (K4): H1 первого кадра невидим → в Chromium выпадает из LCP (creative E/01; поле CrUX — Chrome)
-                R.append(Gate('SG-PERF-06', dev, 'FAIL', rwhat[:90], 'H1 без opacity 0, маски строк, скрытия скриптом', rsev,
-                              'creative E/01 (Chromium 153): честно — только transform; opacity ≥ 0,01 и clip-path — LCP раньше показа'))
-            else:
-                R.append(Gate('SG-PERF-06', dev, 'PASS', tag or '?', 'H1/картинка/постер', '-',
-                              'lazy/fetchpriority — только из page_accept' if not acc else ''))
+        R.append(lcp_element_gate(dev, (last.get('tag') or '').upper(), bool(lcp_list), acc, lcp_h1_item(d, rv, nz)))
         # SG-PERF-09: тяжёлые виджеты до ввода
         fs_t = g(d, 'first_screen', 't', default=None)
         tp = g(d, 'network', 'third_party', default=[]) or []
@@ -498,8 +761,11 @@ def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, a
                    and (fs_t is None or (t.get('first_t') or 0) <= fs_t)]
         R.append(Gate('SG-PERF-09', dev, 'FAIL' if widgets else 'PASS', ','.join(widgets) or '—', 'по видимости/нажатию',
                       'S' if widgets else '-'))
-        # WEIGHT
-        R.append(cmp_weight('SG-WEIGHT-01', dev, s.get('first_screen_kb'), dev_val(wt['first_screen_kb'], dev)))
+        # WEIGHT: вес — анатомия (без замедления сети); нет её числа — прогон page_accept без --throttle
+        fs_kb, fs_src = s.get('first_screen_kb'), None
+        if fs_kb is None:
+            fs_kb, fs_src = accept_weight(accept.get((dev, False)))
+        R.append(cmp_weight('SG-WEIGHT-01', dev, fs_kb, dev_val(wt['first_screen_kb'], dev), source=fs_src))
         R.append(cmp_weight('SG-WEIGHT-02', dev, s.get('session_kb'), dev_val(wt['session_kb'], dev)))
         R.append(cmp_weight('SG-WEIGHT-03', dev, g(d, 'first_screen', 'by_type_kb', 'script'), dev_val(wt['js_first_screen_kb'], dev)))
         R.append(cmp_weight('SG-WEIGHT-04', dev, g(d, 'network', 'by_type_kb', 'font'), dev_val(wt['fonts_kb'], dev)))
@@ -509,17 +775,16 @@ def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, a
         R.append(cmp_weight('SG-WEIGHT-06', dev, sum(t.get('kb') or 0 for t in before), wt['third_party_first_screen_kb']['max'],
                             'КБ домена за сессию — верхняя оценка'))
         R.append(cmp_weight('SG-WEIGHT-07', dev, g(d, 'nav', 'html_kb'), al.get('html_transfer_kb', {}).get('goal'), 'HTML по сети'))
-        # SG-WEIGHT-09 (K2, v1.1): видео первого экрана без действия — отдельной цифрой (замечание creative 2026-09-24, п.3)
+        # SG-WEIGHT-09: видео первого экрана без действия — отдельной цифрой, только D (порог по уровню — EG-WEIGHT-04 ворот
+        # эффектов, вес первого экрана целиком — SG-WEIGHT-01)
         vid = g(d, 'first_screen', 'by_type_kb', 'media') or 0
-        fs_lim = dev_val(wt['first_screen_kb'], dev)
         if not vid:
             R.append(Gate('SG-WEIGHT-09', dev, 'PASS', 0, 'видео отдельно', '-', 'видео в окне первого экрана нет'))
-        elif fs_lim is not None and vid > fs_lim:
-            R.append(Gate('SG-WEIGHT-09', dev, 'FAIL', round(vid, 1), fs_lim, 'S', 'одно видео больше бюджета первого экрана профиля'))
         else:
             R.append(Gate('SG-WEIGHT-09', dev, 'FAIL', round(vid, 1), 'видео отдельно', 'D',
-                          'есть видео без действия: постер, reduce = 0 байт, вертикальный файл телефону (SITE-PERF-13)'))
-        # SG-SEO-02 (строка H2 v1): noindex при индексируемой — B; нет title или canonical — S; нет lang — D
+                          'есть видео без действия: постер, reduce = 0 байт, вертикальный файл телефону (SITE-PERF-13); '
+                          'порог по уровню — EG-WEIGHT-04'))
+        # SG-SEO-02: noindex при индексируемой — B; нет title или canonical — S; нет lang — D
         if s.get('noindex'):
             R.append(Gate('SG-SEO-02', dev, 'FAIL' if pi['indexable'] else 'PASS', 'noindex', 'по seo.indexable',
                           'B' if pi['indexable'] else '-', 'индексируемая по плану' if pi['indexable'] else 'noindex по плану'))
@@ -528,14 +793,14 @@ def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, a
                                ('S', 'canonical') if not s.get('canonical') else ('-', ''),
                                ('D', 'lang') if not s.get('lang') else ('-', '')])
             R.append(Gate('SG-SEO-02', dev, 'FAIL' if what else 'PASS', ','.join(what) or 'ok', 'title, canonical (S); lang (D)', sev))
-        # SG-SEO-03 (строка H2 v1): нет H1 — S; больше одного — D
+        # SG-SEO-03: нет H1 — S; больше одного — D
         h1 = s.get('h1_n')
         if h1 is None:
             R.append(Gate('SG-SEO-03', dev, 'SKIP', None, 'ровно 1', '-'))
         else:
             R.append(Gate('SG-SEO-03', dev, 'PASS' if h1 == 1 else 'FAIL', h1, 'нет H1 — S; > 1 — D',
                           '-' if h1 == 1 else ('S' if h1 == 0 else 'D')))
-        # SG-GEO-01 (строка H2 v1): H1 только после JS — B; CTA или цены после JS — S; доля < 0,5 — S; < 0,8 — D
+        # SG-GEO-01: H1 только после JS — B; CTA или цены после JS — S; доля текста без JS ниже limits — S или D
         if s.get('nojs_h1') is None:
             R.append(Gate('SG-GEO-01', dev, 'SKIP', None, 'H1, CTA, цены в HTML', '-'))
         else:
@@ -543,26 +808,28 @@ def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, a
             items = [h1_nojs_item(d, s), ('S', 'cta-js-only') if not s.get('nojs_cta') else ('-', '')]
             if s.get('nojs_prices') is False:
                 items.append(('S', 'prices-js-only'))
+            r_s, r_d = gate_limit('SG-GEO-01', 'nojs_ratio_s'), gate_limit('SG-GEO-01', 'nojs_ratio_d')
             if ratio is not None:
-                items.append(('S', f'ratio {ratio:.2f} < 0,5') if ratio < 0.5 else (('D', f'ratio {ratio:.2f} < 0,8') if ratio < 0.8 else ('-', '')))
+                items.append(('S', f'ratio {ratio:.2f} < {r_s}') if ratio < r_s else (('D', f'ratio {ratio:.2f} < {r_d}') if ratio < r_d else ('-', '')))
             sev, what = worst(items)
             R.append(Gate('SG-GEO-01', dev, 'FAIL' if what else 'PASS', ','.join(what) or (f'ratio {ratio}' if ratio is not None else 'ok'),
-                          'H1 — B; CTA, цены, < 0,5 — S; < 0,8 — D', sev, f"цены: {s.get('nojs_prices')}"))
-        # SG-MOB-01, 02 (K v1)
+                          f'H1 — B; CTA, цены, < {r_s} — S; < {r_d} — D', sev, f"цены: {s.get('nojs_prices')}"))
+        # SG-MOB-01, 02
         if dev == 'mobile':
             ov = s.get('overflow_x_px')
             zoomed = s.get('layout_zoomed')
+            ov_max = gate_limit('SG-MOB-01', 'overflow_px')
             if ov is None and zoomed is None:
                 R.append(Gate('SG-MOB-01', dev, 'SKIP', None, 'нет переполнения', '-'))
-            elif zoomed or ((ov or 0) > 2 and zoomed is None):
+            elif zoomed or ((ov or 0) > ov_max and zoomed is None):
                 R.append(Gate('SG-MOB-01', dev, 'FAIL', f'{ov} px, zoomed={zoomed}', 'область телефона не расширена', 'B'))
-            elif (ov or 0) > 2:
-                # v1.2 (K3): scrollWidth больше экрана, но область не расширена — переполнение скрыто overflow-x (опыт K/03:
+            elif (ov or 0) > ov_max:
+                # scrollWidth больше экрана, но область не расширена — переполнение скрыто overflow-x (опыт K/03:
                 # en-headspace — дорожка карусели 1 307 px под html,body{overflow-x:hidden}); прокрутки у человека нет
                 R.append(Gate('SG-MOB-01', dev, 'FAIL', f'{ov} px, zoomed=False', 'область телефона не расширена', 'D',
                               'переполнение скрыто overflow-x — проверить свайпом на iOS'))
             else:
-                R.append(Gate('SG-MOB-01', dev, 'PASS', f'{ov} px, zoomed={zoomed}', '≤ 2 px', '-'))
+                R.append(Gate('SG-MOB-01', dev, 'PASS', f'{ov} px, zoomed={zoomed}', f'≤ {ov_max} px', '-'))
             if s.get('burger') is None and s.get('header_nav_links') is None:
                 R.append(Gate('SG-MOB-02', dev, 'SKIP', None, 'меню или ≥ 2 ссылки', '-'))
             else:
@@ -577,7 +844,7 @@ def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, a
         if tb:
             sent, cookies = tracking_evidence(d)
             if jurisdiction == 'eu' and not sent and not cookies and g(d, 'network', 'tracking_requests') is not None:
-                # v1.2 (K3): до выбора только загрузка библиотек (gtm.js, SDK) без отправки событий и без cookie трекинга —
+                # до выбора только загрузка библиотек (gtm.js, SDK) без отправки событий и без cookie трекинга —
                 # S [спорно]: передача IP поставщику, не хранение на устройстве (опыт K/03: en-headspace)
                 R.append(Gate('SG-LEGAL-01', dev, 'FAIL', tb, 'после согласия', 'S',
                               'до выбора загружены только библиотеки: событий и cookie трекинга нет [спорно]; грузить после согласия'))
@@ -598,7 +865,7 @@ def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, a
                 R.append(Gate('SG-LEGAL-03', dev, 'FAIL' if bad else 'PASS', ','.join(bad) or 'ok', 'отдельное согласие без checked',
                               'B' if bad else '-', '152-ФЗ в ред. 156-ФЗ, с 01.09.2025'))
             pol = s.get('policy_link_in_form')
-            # v1.2 (K3): РФ — B (LR-RU-05, 152-ФЗ ст. 18.1); ЕС — S (LR-EU-06: уведомление при сборе, serious)
+            # РФ — B (LR-RU-05, 152-ФЗ ст. 18.1); ЕС — S (LR-EU-06: уведомление при сборе, serious)
             R.append(Gate('SG-LEGAL-04', dev, 'FAIL' if pol is False else 'PASS', pol, 'ссылка на политику в форме',
                           ('B' if jurisdiction == 'ru' else 'S') if pol is False else '-',
                           'ЕС: LR-EU-06 (serious)' if pol is False and jurisdiction != 'ru' else ''))
@@ -609,7 +876,7 @@ def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, a
             foreign = sorted({v for t in tp for v in (t.get('vendors') or [])} & FOREIGN_VENDORS)
             R.append(Gate('SG-LEGAL-07', dev, 'FAIL' if foreign else 'PASS', ','.join(foreign) or '—', 'нет или уведомление РКН',
                           'S' if foreign else '-'))
-    # SG-CONTENT-07 (K v1): призыв в первом экране по политике плана
+    # SG-CONTENT-07: призыв в первом экране по политике плана
     if cta_fs:
         pol = pi['policy'] or 'offer-cta'
         zero = [dev for dev, n in cta_fs.items() if n is not None and n == 0]
@@ -622,11 +889,34 @@ def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, a
             sev = 'B' if len(zero) == len(known_n) and len(known_n) == 2 else ('S' if zero else '-')
             R.append(Gate('SG-CONTENT-07', 'page', 'FAIL' if zero else 'PASS', str(cta_fs), f'{pol}: ≥ 1 на каждом устройстве', sev,
                           'распознавание призыва — эвристика M; провал подтверждать кадром' + ('' if pi['policy'] else '; политика не задана — offer-cta')))
-    # SG-CONTENT-04: консоль (page_accept)
-    cons = [m for acc in accept.values() for m in (acc.get('console') or []) if str(m).startswith('error')]
-    if accept:
-        R.append(Gate('SG-CONTENT-04', 'page', 'FAIL' if cons else 'PASS', len(cons), '0 ошибок консоли', 'S' if cons else '-',
-                      '; '.join(str(c)[:60] for c in cons[:2])))
+    # устройства без анатомии: LCP и LCP-элемент — по page_accept, вес — его прогон без замедления сети
+    for dev in sorted({k[0] for k in accept} - set(anatomy)):
+        acc = accept_main(accept.get((dev, dev == 'mobile')) or accept.get((dev, dev != 'mobile')))
+        lcp = g(acc, 'lcp') or {}
+        gid = 'SG-PERF-01' if dev == 'mobile' else 'SG-PERF-02'
+        R.append(cmp_outcome(gid, dev, lcp.get('t'), oc['lcp_ms_lab'], 'page_accept', source='page_accept'))
+        if acc:
+            R.append(lcp_element_gate(dev, (lcp.get('tag') or '').upper(), bool(lcp), acc, ('-', '')))
+        kb, src = accept_weight(accept.get((dev, False)))
+        R.append(cmp_weight('SG-WEIGHT-01', dev, kb, dev_val(wt['first_screen_kb'], dev), source=src))
+    # SG-PERF-14, SG-PERF-16: размеры картинок и постер видео первого экрана (page_accept)
+    R.extend(eval_media(accept))
+    # SG-A11Y-03, -04, -07: движение и reduce — методы page_accept и motion_check
+    R.extend(eval_motion_a11y(accept, motion))
+    # SG-CONTENT-04: консоль (page_accept; зонд 3D site_probe.py — строка WEB-07 отчёта gate_check.py)
+    cons = [m for acc in accept.values() for m in (accept_main(acc).get('console') or []) if str(m).startswith(('error', 'pageerror'))]
+    probe_err = sum(int(r.get('value') or 0) for rep in gate3d or [] for r in rep.get('rows') or []
+                    if r.get('id') == 'WEB-07' and isinstance(r.get('value'), (int, float)))
+    if accept or gate3d:
+        n = len(cons) + probe_err
+        src = '+'.join(x for x, on in (('page_accept', bool(accept)), ('site_probe', bool(gate3d))) if on)
+        R.append(Gate('SG-CONTENT-04', 'page', 'FAIL' if n else 'PASS', n, '0 ошибок консоли', 'S' if n else '-',
+                      '; '.join(str(c)[:60] for c in cons[:2]) + (f'; зонд 3D: {probe_err}' if probe_err else ''), src))
+    # SG-WEIGHT-08: ворота 3D — у владельца ассета, страница за чужие байты не блокируется (D)
+    if gate3d:
+        R.append(eval_weight08(gate3d))
+    # метрики страницы, измеренные соседями, — зеркалом (D)
+    R.extend(neighbour_mirrors(prof, motion, gate3d))
     # geo_probe (сырой HTML и robots): флаги → ворота с серьёзностью head-kit
     if geo is not None:
         R.extend(eval_geo(geo, headkit, pi, ai_bots_policy, ads_google))
@@ -639,6 +929,186 @@ def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, a
     elif css_text:
         R.append(eval_clamp('', css_text))
     return apply_exceptions(R, pi['exceptions'])
+
+
+def eval_media(accept):
+    """SG-PERF-14 (картинки первого экрана с размерами) и SG-PERF-16 (видео первого экрана и LCP: LCP — не VIDEO, у видео
+    есть poster, энтропия постера и площадь постера против видео и холста — limits строки) по отчёту page_accept."""
+    out = []
+    for dev in sorted({k[0] for k in accept}):
+        a = accept_main(accept.get((dev, dev == 'mobile')) or accept.get((dev, dev != 'mobile')))
+        if not a:
+            continue
+        noimg = [i for i in (g(a, 'dom', 'imgs') or []) if i.get('above') and not i.get('wh')]
+        out.append(Gate('SG-PERF-14', dev, 'FAIL' if noimg else 'PASS', ', '.join(str(i.get('src')) for i in noimg[:3]) or '—',
+                        'картинки первого экрана с width/height', 'S' if noimg else '-', source='page_accept'))
+        media = a.get('media_first')
+        if media is None:
+            continue
+        bpp_min, area_min = gate_limit('SG-PERF-16', 'poster_bpp_min'), gate_limit('SG-PERF-16', 'poster_area_min')
+        items = []
+        if ((a.get('lcp') or {}).get('tag') or '').upper() == 'VIDEO':
+            items.append('LCP первого экрана — VIDEO')
+        for m in media:
+            if m.get('kind') == 'video' and not m.get('poster'):
+                items.append(f"видео {m.get('src') or m.get('sel')}: нет poster")
+            elif m.get('kind') == 'video' and m.get('poster_bpp') is not None and m['poster_bpp'] < bpp_min:
+                items.append(f"постер {m.get('poster_src') or ''} {m['poster_bpp']:.3f} бит/пикс < {bpp_min}")
+            if m.get('cover_share') is not None and m['cover_share'] < area_min:
+                items.append(f"{'видео' if m.get('kind') == 'video' else 'холст'} {m.get('sel')}: постер {m['cover_share']:.2f} "
+                             f"его площади < {area_min}")
+        if media or items:
+            out.append(Gate('SG-PERF-16', dev, 'FAIL' if items else 'PASS', '; '.join(items)[:170] or f'медиа первого экрана: {len(media)}',
+                            f'LCP не VIDEO; poster ≥ {bpp_min} бит/пикс; постер ≥ {area_min} площади видео и холста',
+                            'S' if items else '-', 'энтропия — байты постера × 8 / видимая площадь (порог Chromium)', 'page_accept'))
+    return out
+
+
+MODE_DEV = (('desk', 'desktop'), ('mob', 'mobile'))
+
+
+def motion_verdicts(motion):
+    """gates.json motion_check → {(id, режим): строка}."""
+    return {(r.get('id'), r.get('mode')): r for r in ((motion or {}).get('gates') or {}).get('rows') or []}
+
+
+def eval_motion_a11y(accept, motion):
+    """SG-A11Y-03 (2.2.2, B): первый экран на 6-й секунде и петли всей страницы — page_accept и motion_check; SG-A11Y-04
+    (2.3.1, B): вспышки покадрово — motion_check, сомнительное — глазами; SG-A11Y-07 (reduce, S): видео, движение
+    первого экрана и пауз записи всей страницы — page_accept и motion_check (порог — creative EG-A11Y-06)."""
+    out = []
+    res = (motion or {}).get('results') or {}
+    mv = motion_verdicts(motion)
+    for mode, dev in MODE_DEV:
+        md = (res.get(mode) or {}).get('derived') or {}
+        a = accept_main(accept.get((dev, False)) or accept.get((dev, True)))
+        items, src, whole = [], [], False
+        if a:
+            src.append('page_accept')
+            m6 = a.get('motion_6s') or {}
+            if m6.get('moving') and not m6.get('pause_control'):
+                items.append(f"первый экран движется на 6-й с без паузы ({m6.get('pct')} %, видео {m6.get('videos_playing')})")
+            lp = a.get('loops') or {}
+            whole = whole or lp.get('scope') == 'page'
+            if lp.get('without_pause'):
+                items.append('петли без паузы: ' + ', '.join(str(x) for x in lp['without_pause'][:3]))
+        if md:
+            src.append('motion_check')
+            whole = True
+            if md.get('moving_6s_without_pause'):
+                items.append('первый экран на 6-й с без паузы (motion_check)')
+            if md.get('loops_without_pause'):
+                items.append('петли без паузы (motion_check): ' + ', '.join(str(x) for x in md['loops_without_pause'][:3]))
+        if not src:
+            continue
+        out.append(Gate('SG-A11Y-03', dev, 'FAIL' if items else 'PASS', '; '.join(items)[:170] or 'движения > 5 с без паузы нет',
+                        'пауза с именем или стоп ≤ 5 с', 'B' if items else '-',
+                        '' if whole else 'только первый экран: петли ниже — motion_check или page_accept без --first-screen-only',
+                        '+'.join(src)))
+    for mode, dev in MODE_DEV:
+        md = (res.get(mode) or {}).get('derived') or {}
+        if not md:
+            continue
+        ff = md.get('flash_fail')
+        if ff is None:
+            out.append(Gate('SG-A11Y-04', dev, 'SKIP', None, '≤ 3 вспышек/с', '-', 'запись не разобрана — проверить глазами',
+                            'motion_check'))
+        else:
+            out.append(Gate('SG-A11Y-04', dev, 'FAIL' if ff else 'PASS', f"доля поля {md.get('flash_area_frac')}", '≤ 3 вспышек/с',
+                            'B' if ff else '-', 'сомнительное (глитч ИИ-видео, заставка) — глазами', 'motion_check'))
+    items, src = [], []
+    for (dev, thr), acc in sorted(accept.items()):
+        rm = (acc or {}).get('reduce') or {}
+        if not rm:
+            continue
+        src.append('page_accept')
+        if (rm.get('media_kb') or 0) > 0:
+            items.append(f"{dev}: видео в reduce {rm['media_kb']} КБ")
+        items += [f'{dev}: {x}' for x in ((rm.get('motion') or {}).get('fail') or [])]
+    for gid in ('EG-A11Y-05', 'EG-A11Y-06', 'EG-A11Y-07'):
+        r = mv.get((gid, 'rm'))
+        if r:
+            src.append('motion_check')
+            if r.get('verdict') == 'FAIL':
+                items.append(f"{gid}: {r.get('found')} (порог {r.get('threshold')})")
+    if src:
+        out.append(Gate('SG-A11Y-07', 'page', 'FAIL' if items else 'PASS', '; '.join(items)[:170] or 'reduce чистый',
+                        '0 байт видео; движение ≤ порога creative EG-A11Y-06 на записи всей страницы', 'S' if items else '-',
+                        '', '+'.join(sorted(set(src)))))
+    return out
+
+
+def eval_weight08(gate3d):
+    """SG-WEIGHT-08 (D): провал ворот 3D (доля 3D, вызовы, reduce) — исправляет владелец ассета; страница блокируется
+    только исходами SG-PERF."""
+    bad = [f"{r.get('id')} {r.get('check')}: {r.get('value')} > {r.get('limit')}" for rep in gate3d for r in rep.get('rows') or []
+           if not r.get('mirror') and r.get('status') == 'FAIL' and r.get('severity') in ('B', 'S')]
+    return Gate('SG-WEIGHT-08', 'page', 'FAIL' if bad else 'PASS', '; '.join(bad)[:170] or 'ворота 3D пройдены',
+                'ворота 3D — у владельца ассета', 'D' if bad else '-', 'страница блокируется только исходами SG-PERF', 'gate_check')
+
+
+MIRROR_MOTION = (   # метрика results.json motion_check → строка-владелец
+    ('vitals.lcp_ms', {'desktop': 'SG-PERF-02', 'mobile': 'SG-PERF-01'}, 'без замедления сети'),
+    ('vitals.tbt_ms', 'SG-PERF-05', 'TBT после FCP'),
+    ('cls.window_max', 'SG-PERF-03', 'наибольшее окно сессии'),
+    ('net.first_kb', 'SG-WEIGHT-01', 'окно первого экрана'),
+    ('net.session_kb', 'SG-WEIGHT-02', 'сессия после прокрутки'),
+    ('net.font_kb', 'SG-WEIGHT-04', 'шрифты за сессию'),
+)
+
+
+def owner_threshold(prof, gid, dev):
+    """Порог строки-владельца (threshold.S вида «profile.<путь>» в page-gates.yaml) для зеркала."""
+    if not _LIMITS:
+        use_gates()
+    ref = str((_LIMITS.get('_threshold') or {}).get(gid) or '')
+    return profile_value(prof, ref[len('profile.'):], dev) if ref.startswith('profile.') else None
+
+
+def dig(d, path):
+    cur = d
+    for k in path.split('.'):
+        cur = cur.get(k) if isinstance(cur, dict) else None
+        if cur is None:
+            return None
+    return cur
+
+
+def neighbour_mirrors(prof, motion, gate3d):
+    """Зеркала: LCP, TBT, CLS и вес страницы, измеренные motion_check и зондом 3D, — против того же профиля, D."""
+    out = []
+    res = (motion or {}).get('results') or {}
+    for mode, dev in MODE_DEV:
+        r = res.get(mode)
+        if not isinstance(r, dict) or r.get('error'):
+            continue
+        for path, gid, note in MIRROR_MOTION:
+            gid = gid[dev] if isinstance(gid, dict) else gid
+            out.append(mirror_gate(gid, dev, dig(r, path), owner_threshold(prof, gid, dev), 'motion_check', note))
+    for rep in gate3d or []:
+        dev = 'mobile' if rep.get('mode') == 'mobile' else 'desktop'
+        for row in rep.get('rows') or []:
+            gid = row.get('mirror')
+            if gid and isinstance(row.get('value'), (int, float)):
+                out.append(mirror_gate(gid, dev, row['value'], owner_threshold(prof, gid, dev), 'site_probe',
+                                       f"{row.get('check')}{' (reduce)' if rep.get('reduced') else ''}"))
+    return out
+
+
+def layers(motion, gate3d):
+    """Слои отчёта: ворота эффектов (motion_check) и ворота 3D (gate_check) — итог по серьёзности."""
+    out = {}
+    if motion:
+        rows = (motion.get('gates') or {}).get('rows') or []
+        fails = [r for r in rows if r.get('verdict') == 'FAIL']
+        out['effects'] = {'tool': 'motion_check.py', 'level': motion.get('level'), 'path': motion.get('path'),
+                          **{k: sum(1 for r in fails if r.get('severity') == k) for k in ('B', 'S', 'D')},
+                          'na': sum(1 for r in rows if r.get('verdict') == 'N/A'),
+                          'fails': [f"{r.get('id')} {r.get('mode')} {r.get('severity')}" for r in fails][:16]}
+    if gate3d:
+        out['three_d'] = [{'probe': rep.get('probe'), 'mode': rep.get('mode'), 'reduced': rep.get('reduced'),
+                           **(rep.get('summary') or {})} for rep in gate3d]
+    return out
 
 
 def eval_geo(geo, headkit, pi, ai_bots_policy='allow-all', ads_google=False):
@@ -693,13 +1163,13 @@ def eval_ia(ia):
                         'ia_probe без JS; если браузер меню видит — меню собирает скрипт'))
     ci, bl = s.get('crumbs_inner_pct'), s.get('breadcrumb_ld_pct')
     if ci is not None and bl is not None:
-        bad = abs((ci or 0) - (bl or 0)) > 50
+        bad = abs((ci or 0) - (bl or 0)) > gate_limit('SG-NAV-02', 'crumbs_vs_markup_pct')
         out.append(Gate('SG-NAV-02', 'site', 'FAIL' if bad else 'PASS', f'крошки {ci} %, разметка {bl} %', 'разметка = видимому', 'D' if bad else '-'))
     return out
 
 
 def eval_axe(axe, ctas=None):
-    """SG-A11Y-01, 02. v1.2 (K4): color-contrast — B только у ключевых узлов (H1, лид первого экрана, призыв, согласие и
+    """SG-A11Y-01, 02. color-contrast — B только у ключевых узлов (H1, лид первого экрана, призыв, согласие и
     баннер cookie; профиль I 08/03 §8), прочие узлы — S; без адресов узлов (счётчики I/02) — S, которое исключение не снимает:
     сначала проверить ключевые элементы (axe с адресами узлов, page_accept.py --contrast <селекторы> или кадр)."""
     v = (axe.get('axe') or axe).get('violations') or []
@@ -774,21 +1244,22 @@ CLAMP_RX = re.compile(r'font(?:-size)?\s*:[^;{}]*?clamp\(\s*([\d.]+)(px|rem|em)\
 
 
 def eval_clamp(css_or_html, extra_css=''):
-    """SG-A11Y-08 (K2, v1.1): кегли на clamp() — максимум ≤ 2,5 × минимума, иначе при зуме 200 % текст не растёт
-    вдвое (WCAG 1.4.4; замечание creative 2026-09-24, п.9). Читает <style>, атрибуты style и файлы --css; var() не раскрывает."""
+    """SG-A11Y-08: кегли на clamp() — максимум не больше limits.clamp_ratio_max × минимума, иначе при зуме 200 % текст не
+    растёт вдвое (WCAG 1.4.4). Читает <style>, атрибуты style и файлы --css; var() не раскрывает."""
     text = (css_or_html or '') + '\n' + (extra_css or '')
     px = {'px': 1.0, 'rem': 16.0, 'em': 16.0}
+    kmax = gate_limit('SG-A11Y-08', 'clamp_ratio_max')
     found, bad = 0, []
     for m in CLAMP_RX.finditer(text):
         lo, hi = float(m.group(1)) * px[m.group(2).lower()], float(m.group(3)) * px[m.group(4).lower()]
         if lo <= 0:
             continue
         found += 1
-        if hi / lo > 2.5:
+        if hi / lo > kmax:
             bad.append(f'{m.group(1)}{m.group(2)}→{m.group(3)}{m.group(4)} (×{hi / lo:.1f})')
     if not found:
-        return Gate('SG-A11Y-08', 'css', 'SKIP', 0, 'max ≤ 2,5 × min', '-', 'clamp() кеглей не найден; внешние CSS — передать --css')
-    return Gate('SG-A11Y-08', 'css', 'FAIL' if bad else 'PASS', '; '.join(bad[:3]) or f'{found} clamp', 'max ≤ 2,5 × min',
+        return Gate('SG-A11Y-08', 'css', 'SKIP', 0, f'max ≤ {kmax} × min', '-', 'clamp() кеглей не найден; внешние CSS — передать --css')
+    return Gate('SG-A11Y-08', 'css', 'FAIL' if bad else 'PASS', '; '.join(bad[:3]) or f'{found} clamp', f'max ≤ {kmax} × min',
                 'S' if bad else '-', 'var() не раскрывается — проверить вычисленный кегль при зуме 200 %')
 
 
@@ -803,7 +1274,7 @@ def apply_exceptions(results, exceptions):
         if r.severity == 'B':
             r.note = (r.note + '; ' if r.note else '') + 'исключение для B не действует'
         elif getattr(r, 'no_exception', False):
-            # v1.2 (K4): S, которое снимается только проверкой (контраст без адресов узлов), а не записью в плане
+            # S, которое снимается только проверкой (контраст без адресов узлов), а не записью в плане
             r.note = (r.note + '; ' if r.note else '') + 'исключение не действует: сначала проверить ключевые узлы'
         elif until and until < today:
             r.note = (r.note + '; ' if r.note else '') + f'исключение просрочено ({until})'
@@ -827,18 +1298,31 @@ def gate_meta(gates_yaml):
         return {}
 
 
-def print_table(prof, results):
+def print_table(prof, results, lay=None):
     print(f"профиль {prof['id']} (уровень {prof['level']})" + ('; ' + '; '.join(prof['log']) if prof['log'] else ''))
     for r in results:
-        print(f"{r.status:4} {r.severity}  {r.id:13} {r.device:7}  значение {str(r.value)[:40]:>14}  порог {str(r.threshold)[:34]:>10}  {r.note}")
+        print(f"{r.status:4} {r.severity}  {r.id:13} {r.device:7}  значение {str(r.value)[:40]:>14}  порог {str(r.threshold)[:34]:>10}  "
+              f"{r.note}" + (f' [{r.source}]' if r.source and not r.mirror else ''))
+    for k, v in (lay or {}).items():
+        items = v if isinstance(v, list) else [v]
+        for x in items:
+            print(f"слой {k}: " + ', '.join(f'{a}={b}' for a, b in x.items() if a not in ('fails', 'path', 'probe')) +
+                  (f"; провалы: {', '.join(x.get('fails') or [])}" if x.get('fails') else ''))
     v, nb, ns = verdict(results)
     print(f'вердикт: {v} (B: {nb}, S: {ns})')
 
 
+def lock_plan(domains=(), holds=None, budgets=None):
+    """Порядок замков тихой машины: тяжёлый, общий браузера, браузера доменов; без тех, что держит обёртка."""
+    held = {x.strip() for x in (holds if holds is not None else os.environ.get('SLOT_RUN_HOLDS', '')).split(',') if x.strip()}
+    plan = [(conditions(budgets)['lock'], None), ('browser', None)] + [('browser', d) for d in domains]
+    return [(n, d) for n, d in plan if not (d is None and n in held)]
+
+
 # ---------------------------------------------------------------- самопроверка
 def selftest(gates_path=None):
-    budgets = load_yaml(os.path.join(DIR07, 'budgets.yaml'))
-    gates = load_yaml(gates_path or os.path.join(DIR07, 'page-gates.yaml'))
+    budgets = load_budgets()
+    gates = use_gates(gates_path)
     ok = True
     checks = []
 
@@ -946,16 +1430,17 @@ def selftest(gates_path=None):
     f5['desktop']['summary']['cta_first_screen'] = 0
     check('offer-cta и 0 призывов на обоих устройствах → B', {r.id: r for r in evaluate(prof, f5)}['SG-CONTENT-07'].severity == 'B')
     check('poster → PASS первого экрана', {r.id: r for r in evaluate(prof, f5, plan={'page': {'first_screen_policy': 'poster'}})}['SG-CONTENT-07'].status == 'PASS')
-    # v1.1 (K2): видео первого экрана отдельно; clamp кеглей (замечания creative 2026-09-24)
+    # видео первого экрана отдельно; clamp кеглей
     f6 = copy.deepcopy(f2)
     f6['mobile']['first_screen']['by_type_kb']['media'] = 2000
-    check('видео первого экрана 2 000 > бюджета 1 500 → S (SG-WEIGHT-09)', {r.id: r for r in evaluate(prof, f6)}['SG-WEIGHT-09'].severity == 'S')
+    check('видео первого экрана 2 000 > бюджета 1 500 → только D (SG-WEIGHT-09; S — у SG-WEIGHT-01 и EG-WEIGHT-04)',
+          {r.id: r for r in evaluate(prof, f6)}['SG-WEIGHT-09'].severity == 'D')
     f6['mobile']['first_screen']['by_type_kb']['media'] = 300
     check('видео первого экрана 300 КБ → D отдельной цифрой', {r.id: r for r in evaluate(prof, f6)}['SG-WEIGHT-09'].severity == 'D')
     check('clamp 40px→160px (×4) → S (SG-A11Y-08)', eval_clamp('<style>h1{font-size:clamp(40px, 8vw, 160px)}</style>').severity == 'S')
     check('clamp 2rem→4rem (×2) → PASS', eval_clamp('<p style="font-size: clamp(2rem, 1rem + 3vw, 4rem)">x</p>').status == 'PASS')
     check('clamp не найден → SKIP', eval_clamp('<p>x</p>').status == 'SKIP')
-    # v1.2 (K3): калибровка опыта K/03 — ложные B из прогона на 8 страницах
+    # калибровка опыта K/03 — ложные B из прогона на 8 страницах
     f7 = copy.deepcopy(f2)
     f7['mobile']['summary'].update({'cls_session': 0.42})
     f7['mobile']['fin']['wv_cls'] = 0.15
@@ -980,7 +1465,7 @@ def selftest(gates_path=None):
     f9['mobile']['network']['tracking_requests'].append({'u': 'https://region1.google-analytics.com/g/collect', 'vendor': 'ga4', 'phase': 'load'})
     check('ЕС: событие GA4 до выбора → B', {r.id: r for r in evaluate(prof, f9, jurisdiction='eu')}['SG-LEGAL-01'].severity == 'B')
     check('РФ: нет ссылки на политику в форме → B', {r.id: r for r in evaluate(prof, f9, jurisdiction='ru')}['SG-LEGAL-04'].severity == 'B')
-    # v1.2 (K4): контраст по классам узлов (профиль I 08/03 §8; опыт K/03 axe_classes.tsv) и H1 в LCP (creative E/01)
+    # контраст по классам узлов (профиль I 08/03 §8; опыт K/03) и H1 в LCP (creative E/01)
     def node(**k):
         base = {'in_h1': False, 'action': False, 'in_form': False, 'cookie': False, 'first_screen': False,
                 'in_header': False, 'in_footer': False, 'text': 'x'}
@@ -1014,21 +1499,173 @@ def selftest(gates_path=None):
     check('анимация из @keyframes opacity 0 и html.js .h1{opacity:0} — признак',
           bool(h1_reveal_evidence('<style>@keyframes r{from{opacity:0}} .rv{animation:.7s both r}</style><div class="rv"><h1>x</h1></div>')['hidden'])
           and bool(h1_reveal_evidence('<h1 class="h1">x</h1>', 'html.js .h1{opacity:0}')['hidden']))
+    selftest_sources(check, budgets, gates, prof, f2)
     for st, name in checks:
         print(st, name)
     print(f"итог: {sum(c[0] == 'PASS' for c in checks)}/{len(checks)} PASS")
     return 0 if ok else 1
 
 
+def selftest_sources(check, budgets, gates, prof, clean):
+    """Самопроверка сводки соседей, правила лидогенерации из данных, лимитов строк и условий замера."""
+    levels = load_levels()
+    # таблица умолчаний и правило лидогенерации — из ambition-levels.yaml, копия в budgets.yaml совпадает
+    dpt = {k: v for k, v in ((levels or {}).get('defaults_by_page_type') or {}).items() if k in LEVELS}
+    check('budgets.yaml page_type_levels.default совпадает с ambition-levels.yaml#defaults_by_page_type',
+          {k: sorted(v) for k, v in (budgets.get('page_type_levels') or {}).get('default', {}).items()} == {k: sorted(v) for k, v in dpt.items()})
+    rule = lead_rule(levels)
+    check('правило лидогенерации — поля ambition-levels.yaml (доля, полосы цены, otherwise, no_data)',
+          all(k in rule for k in ('page_type', 'hot_mobile_share_min', 'price_bands', 'otherwise', 'no_data')))
+    share = rule.get('hot_mobile_share_min')
+    check('доля = порогу и полоса из данных → L0', resolve_profile('landing-lead-services', budgets, None, share, rule['price_bands'][0], levels)['level'] == 'L0')
+    check('полоса вне списка → otherwise', resolve_profile('landing-lead-services', budgets, None, 0.9, 'premium', levels)['level'] == rule['otherwise'])
+    check('данных о трафике нет → no_data', resolve_profile('landing-lead-services', budgets, None, None, None, levels)['level'] == rule['no_data'])
+    lv2 = copy.deepcopy(levels)
+    lead_rule(lv2)['hot_mobile_share_min'] = 0.99
+    check('порог доли читается из данных, а не из кода (0,99 → 0,7 не проходит)',
+          resolve_profile('landing-lead-services', budgets, None, 0.7, 'mid', lv2)['level'] == rule['otherwise'])
+    pr = [pt for pt, (lv, part) in level_defaults(levels).items() if part == 'proposed']
+    check('тип раздела proposed разрешается с пометкой', bool(pr) and any('proposed' in x for x in resolve_profile(pr[0], budgets, levels=levels)['log']))
+    global AMBITION
+    keep, AMBITION = AMBITION, os.path.join(DIR07, 'нет-такого-файла.yaml')
+    try:
+        p0 = resolve_profile('landing-lead-services@L1', budgets)
+        check('без таблицы creative рядом: профиль с уровнем разрешается (соседний чекаут с одной базой site)',
+              p0['level'] == 'L1' and any('не сверен' in x for x in p0['log']))
+        try:
+            resolve_profile('service-page', budgets)
+            check('без таблицы creative: профиль без уровня — ошибка', False)
+        except ValueError:
+            check('без таблицы creative: профиль без уровня — ошибка', True)
+    finally:
+        AMBITION = keep
+    # лимиты строк и условия замера
+    for gid, key in (('SG-PERF-06', 'opacity_near_zero'), ('SG-PERF-16', 'poster_bpp_min'), ('SG-PERF-16', 'poster_area_min'),
+                     ('SG-GEO-01', 'nojs_ratio_s'), ('SG-GEO-01', 'nojs_ratio_d'), ('SG-MOB-01', 'overflow_px'),
+                     ('SG-NAV-02', 'crumbs_vs_markup_pct'), ('SG-A11Y-08', 'clamp_ratio_max')):
+        try:
+            gate_limit(gid, key)
+            check(f'{gid}: limits.{key} есть', True)
+        except KeyError:
+            check(f'{gid}: limits.{key} есть', False)
+    c = conditions(budgets)
+    check('условия замера: окно первого экрана 5 с, телефон — дескриптор и CPU, сеть кбит/с → байт/с',
+          window_ms(budgets) == 5000 and c['mobile']['descriptor'] == 'Pixel 7' and c['mobile']['cpu_slowdown'] == 4
+          and cdp_network(c)['downloadThroughput'] == c['mobile']['down_kbps'] * 125 and c['desktop']['width'] == 1440)
+    check('тишина: тяжёлый замок, затем браузер, затем домены; удержанное обёрткой не берётся',
+          lock_plan(('ai-media',), holds='', budgets=budgets) == [(c['lock'], None), ('browser', None), ('browser', 'ai-media')]
+          and lock_plan((), holds=f"{c['lock']},browser", budgets=budgets) == [])
+    # page_accept (контракт accept_<режим>.json)
+    base_np = {'lcp': {'t': 900, 'tag': 'IMG', 'lazy': False, 'fp': 'high', 'size': 90000}, 'cls': 0.01, 'console': [],
+               'first_screen_total_kb': 900.0, 'weight_measured': True, 'dom': {'imgs': [{'src': 'a/hero.avif', 'wh': True, 'above': True}]},
+               'media_first': [], 'motion_6s': {'moving': False, 'pause_control': False, 'pct': 0.0, 'videos_playing': 0},
+               'loops': {'scope': 'page', 'without_pause': []}}
+    acc = {('mobile', True): {'device': 'mobile', 'throttle': True, 'mode': 'mobile_thr', 'no_preference': copy.deepcopy(base_np),
+                              'reduce': {'media_kb': 0, 'motion': {'fail': []}}}}
+    r0 = {r.id: r for r in evaluate(prof, clean, accept=acc)}
+    check('page_accept: LCP телефона — из прогона --throttle, чисто → PASS', r0['SG-PERF-01'].status == 'PASS' and r0['SG-PERF-01'].source == 'page_accept')
+    a1 = copy.deepcopy(acc)
+    np1 = a1[('mobile', True)]['no_preference']
+    np1['lcp'].update({'t': 3000, 'lazy': True})
+    np1['dom']['imgs'].append({'src': 'a/card.png', 'wh': False, 'above': True})
+    np1['media_first'] = [{'kind': 'video', 'sel': 'video.hero', 'src': 'hero.mp4', 'poster': True, 'poster_bpp': 0.02, 'cover_share': 1.0},
+                          {'kind': 'canvas', 'sel': 'canvas.stage', 'cover_share': 0.98}]
+    np1['motion_6s'] = {'moving': True, 'pause_control': False, 'pct': 2.1, 'videos_playing': 1}
+    np1['loops'] = {'scope': 'first_screen', 'without_pause': []}
+    a1[('mobile', True)]['reduce'] = {'media_kb': 120.0, 'motion': {'fail': ['пауза 3: 0,9 %/с > 0,3']}}
+    r1 = {r.id: r for r in evaluate(prof, clean, accept=a1)}
+    check('LCP 3 000 мс > цели 2 500 телефона → S', r1['SG-PERF-01'].severity == 'S')
+    check('LCP-картинка с lazy → B (SG-PERF-06)', r1['SG-PERF-06'].severity == 'B')
+    check('картинка первого экрана без размеров → S (SG-PERF-14)', r1['SG-PERF-14'].severity == 'S')
+    check('постер 0,02 бит/пикс и постер холста 0,98 площади → S (SG-PERF-16: энтропия и площадь)',
+          r1['SG-PERF-16'].severity == 'S' and 'бит/пикс' in str(r1['SG-PERF-16'].value) and 'площади' in str(r1['SG-PERF-16'].value))
+    check('движение на 6-й секунде без паузы → B (SG-A11Y-03), пометка «только первый экран»',
+          r1['SG-A11Y-03'].severity == 'B' and 'только первый экран' in r1['SG-A11Y-03'].note)
+    check('reduce: видео 120 КБ и движение паузы → S (SG-A11Y-07)', r1['SG-A11Y-07'].severity == 'S')
+    a2 = copy.deepcopy(acc)
+    a2[('mobile', True)]['no_preference']['lcp'].update({'tag': 'VIDEO', 'fp': ''})
+    a2[('mobile', True)]['no_preference']['media_first'] = [{'kind': 'video', 'sel': 'video.hero', 'poster': False}]
+    r2 = {r.id: r for r in evaluate(prof, clean, accept=a2)}
+    check('LCP — VIDEO и видео без poster → S (SG-PERF-16)', r2['SG-PERF-16'].severity == 'S' and 'VIDEO' in str(r2['SG-PERF-16'].value))
+    a3 = copy.deepcopy(acc)
+    a3[('mobile', True)]['no_preference']['lcp']['fp'] = ''
+    check('LCP-картинка без fetchpriority=high → S', {r.id: r for r in evaluate(prof, clean, accept=a3)}['SG-PERF-06'].severity == 'S')
+    a4 = {('desktop', False): {'device': 'desktop', 'throttle': False, 'mode': '1440x900', 'no_preference': copy.deepcopy(base_np)}}
+    a4[('desktop', False)]['no_preference']['first_screen_total_kb'] = 4000.0
+    r4 = [r for r in evaluate(prof, {}, accept=a4) if r.id == 'SG-WEIGHT-01' and r.device == 'desktop']
+    check('без анатомии вес — прогон page_accept без замедления: 4 000 > 2 500 → S', r4 and r4[0].severity == 'S' and r4[0].source == 'page_accept')
+    a4[('desktop', False)]['no_preference']['weight_measured'] = False
+    r4 = [r for r in evaluate(prof, {}, accept=a4) if r.id == 'SG-WEIGHT-01' and r.device == 'desktop']
+    check('вес из прогона с замедлением сети не сравнивается → SKIP', r4 and r4[0].status == 'SKIP')
+    lk = {('mobile', True), ('mobile', False)}
+    check('load_accept: устройство и троттлинг — поля отчёта или имя режима', lk == set(_selftest_accept_dir(load_accept)))
+    # motion_check (results.json + gates.json)
+    mot = {'results': {'desk': {'vitals': {'lcp_ms': 3100, 'tbt_ms': 90}, 'cls': {'window_max': 0.02}, 'net': {'first_kb': 1200.0, 'session_kb': 2000.0, 'font_kb': 90.0},
+                                'derived': {'moving_6s_without_pause': False, 'loops_without_pause': ['div.marquee'], 'flash_fail': True, 'flash_area_frac': 0.4}},
+                       'mob': {'vitals': {'lcp_ms': 1200}, 'derived': {'moving_6s_without_pause': False, 'loops_without_pause': [], 'flash_fail': False}}},
+           'gates': {'level': 'L1', 'rows': [{'id': 'EG-A11Y-06', 'mode': 'rm', 'verdict': 'FAIL', 'severity': 'S', 'found': 0.8, 'threshold': '<= 0.3'},
+                                             {'id': 'EG-A11Y-04', 'mode': 'desk', 'verdict': 'FAIL', 'severity': 'B'},
+                                             {'id': 'EG-PERF-06', 'mode': 'desk', 'verdict': 'FAIL', 'severity': 'D'}]}, 'level': 'L1'}
+    rm_ = evaluate(prof, clean, motion=mot)
+    byd = {(r.id, r.device, r.mirror): r for r in rm_}
+    check('motion_check: петля без паузы → B (SG-A11Y-03, вся страница)', byd[('SG-A11Y-03', 'desktop', False)].severity == 'B'
+          and not byd[('SG-A11Y-03', 'desktop', False)].note)
+    check('motion_check: вспышки → B (SG-A11Y-04); телефон без вспышек → PASS', byd[('SG-A11Y-04', 'desktop', False)].severity == 'B'
+          and byd[('SG-A11Y-04', 'mobile', False)].status == 'PASS')
+    check('motion_check: reduce EG-A11Y-06 → S (SG-A11Y-07)', byd[('SG-A11Y-07', 'page', False)].severity == 'S')
+    mir = byd[('SG-PERF-02', 'desktop', True)]
+    check('зеркало: LCP десктопа motion_check 3 100 > 2 500 → D, на вердикт не влияет', mir.severity == 'D' and mir.status == 'FAIL'
+          and verdict([mir])[0] == 'accepted')
+    lay = layers(mot, None)
+    check('слой эффектов: B 1, S 1, D 1', (lay['effects']['B'], lay['effects']['S'], lay['effects']['D']) == (1, 1, 1))
+    # gate_check (ворота 3D)
+    g3 = [{'mode': 'desktop', 'reduced': False, 'probe': 'probe_quick.json', 'summary': {'B': 1, 'S': 0, 'D': 1},
+           'rows': [{'id': 'WEB-04', 'check': '3D-ассеты, КБ', 'value': 1700, 'limit': 1536, 'severity': 'B', 'status': 'FAIL'},
+                    {'id': 'WEB-07', 'check': 'ошибки консоли', 'value': 2, 'limit': 0, 'severity': 'B', 'status': 'FAIL'},
+                    {'id': 'WEB-01', 'check': 'LCP страницы, мс', 'value': 3000, 'severity': 'D', 'status': 'FAIL', 'mirror': 'SG-PERF-02'}]}]
+    r3 = evaluate(prof, clean, gate3d=g3)
+    by3 = {(r.id, r.mirror): r for r in r3}
+    check('ворота 3D: доля 3D провалена → SG-WEIGHT-08 D; страница не блокируется', by3[('SG-WEIGHT-08', False)].severity == 'D'
+          and verdict([by3[('SG-WEIGHT-08', False)]])[0] == 'accepted')
+    check('зонд 3D: 2 ошибки консоли → SG-CONTENT-04 S', by3[('SG-CONTENT-04', False)].severity == 'S')
+    check('зонд 3D: LCP страницы — зеркало D строки SG-PERF-02', by3[('SG-PERF-02', True)].severity == 'D')
+    # показ H1 во времени (page_anatomy h1_paint) — признак без HTML
+    f12 = copy.deepcopy(clean)
+    f12['mobile']['dom'] = {'headings': {'h1_first_screen': True, 'h1': ['A Good Clean, Naturally']}}
+    f12['mobile']['fin'] = {'lcp': [{'tag': 'P', 'text': 'Sparkling clean homes are our specialty', 'size': 52966, 'url': ''}]}
+    f12['mobile']['h1_paint'] = {'first_op': 0.0, 't_visible': 820, 'in_first_screen': True}
+    check('H1 не кандидат LCP, в HTML признаков нет, показ H1: первый кадр невидим → S',
+          {r.id: r for r in evaluate(prof, f12, html_text='<h1>A Good Clean, Naturally</h1>')}['SG-PERF-06'].severity == 'S')
+    f12['mobile']['fin'] = {'lcp': [{'tag': 'H1', 'text': 'A Good Clean, Naturally', 'size': 90000, 'url': ''}]}
+    f12['mobile']['h1_paint'] = {'first_op': 0.001, 't_visible': 700, 'in_first_screen': True}
+    check('H1 — LCP, показ H1: первый кадр opacity 0,001 → D', {r.id: r for r in evaluate(prof, f12)}['SG-PERF-06'].severity == 'D')
+
+
+def _selftest_accept_dir(loader):
+    """Два отчёта page_accept во временной папке: новый (поля device, throttle) и по имени режима."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        with open(os.path.join(td, 'accept_mobile_thr.json'), 'w', encoding='utf-8') as f:
+            json.dump({'device': 'mobile', 'throttle': True, 'no_preference': {}}, f)
+        with open(os.path.join(td, 'accept_mobile.json'), 'w', encoding='utf-8') as f:
+            json.dump({'mode': 'mobile', 'no_preference': {}}, f)
+        with open(os.path.join(td, 'accept_1440x900_click.json'), 'w', encoding='utf-8') as f:
+            json.dump({'mode': '1440x900_click', 'no_preference': {}}, f)
+        return loader(td)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
-    ap.add_argument('--profile')
-    ap.add_argument('--resolve')
-    ap.add_argument('--anatomy')
-    ap.add_argument('--accept')
+    ap.add_argument('--profile', help='профиль бюджета <page_type>@L<n> (page-plan page.budget_profile)')
+    ap.add_argument('--resolve', help='показать профиль (JSON: id, level, page_type, outcome, weight, all_levels, log)')
+    ap.add_argument('--conditions', action='store_true', help='условия замера budgets.yaml (JSON)')
+    ap.add_argument('--anatomy', help='папка anatomy_<устройство>.json page_anatomy.py')
+    ap.add_argument('--accept', help='папка accept_<режим>.json page_accept.py')
+    ap.add_argument('--motion', help='папка --out motion_check.py (results.json, gates.json)')
+    ap.add_argument('--gate3d', nargs='*', help='JSON gate_check.py --json (файл на прогон зонда 3D)')
     ap.add_argument('--geo', help='JSON geo_probe.py (файл или папка с одним JSON)')
     ap.add_argument('--ia', help='ia.json ia_probe.py (строки scope: site)')
-    ap.add_argument('--axe', help='JSON axe (run_axe.py опыта I/02 или результат axe.run)')
+    ap.add_argument('--axe', help='JSON axe (run_axe_targets.py — адреса узлов — или результат axe.run)')
     ap.add_argument('--plan', help='page-plan.yaml (first_screen_policy, seo.indexable, x-gate-exception)')
     ap.add_argument('--html', help='сохранённый HTML страницы (заглушки и автоматические маркеры)')
     ap.add_argument('--css', nargs='*', help='файлы CSS страницы для SG-A11Y-08 (clamp кеглей), если стили внешние')
@@ -1044,23 +1681,33 @@ def main(argv=None):
     a = ap.parse_args(argv)
     if a.selftest:
         return selftest(a.gates)
-    budgets = load_yaml(os.path.join(DIR07, 'budgets.yaml'))
-    if a.resolve:
-        p = resolve_profile(a.resolve, budgets, a.site_level, a.hot_mobile_share, a.price_band)
-        print(json.dumps(p, ensure_ascii=False, indent=1))
+    budgets = load_budgets()
+    if a.conditions:
+        print(json.dumps(conditions(budgets), ensure_ascii=False, indent=1))
         return 0
-    if not a.profile or not (a.anatomy or a.geo or a.ia or a.axe or a.html or a.css):
-        ap.print_help()
+    try:
+        if a.resolve:
+            p = resolve_profile(a.resolve, budgets, a.site_level, a.hot_mobile_share, a.price_band)
+            print(json.dumps(p, ensure_ascii=False, indent=1))
+            return 0
+        if not a.profile or not (a.anatomy or a.accept or a.motion or a.gate3d or a.geo or a.ia or a.axe or a.html or a.css):
+            ap.print_help()
+            return 2
+        prof = resolve_profile(a.profile, budgets, a.site_level, a.hot_mobile_share, a.price_band)
+    except ValueError as e:
+        print(f'page_gates.py: {e}', file=sys.stderr)
         return 2
-    prof = resolve_profile(a.profile, budgets, a.site_level, a.hot_mobile_share, a.price_band)
+    use_gates(a.gates)
     plan = load_yaml(a.plan) if a.plan else None
     raw = open(a.html, encoding='utf-8', errors='replace').read() if a.html else None
     css = '\n'.join(open(f, encoding='utf-8', errors='replace').read() for f in (a.css or []))
+    motion, gate3d = load_motion(a.motion), load_gate3d(a.gate3d)
     res = evaluate(prof, load_anatomy(a.anatomy) if a.anatomy else {}, load_accept(a.accept) if a.accept else {}, a.jurisdiction,
                    geo=load_json(a.geo), ia=load_json(a.ia), axe=load_json(a.axe), plan=plan, html_text=raw,
                    headkit=load_headkit(os.path.join(DIR07, 'head-kit.yaml')), ai_bots_policy=a.ai_bots_policy,
-                   ads_google=a.ads_google, css_text=css or None)
-    meta = gate_meta(a.gates or os.path.join(DIR07, 'page-gates.yaml'))
+                   ads_google=a.ads_google, css_text=css or None, motion=motion, gate3d=gate3d)
+    meta = gate_meta(a.gates or GATES)
+    lay = layers(motion, gate3d)
     if a.json:
         v, nb, ns = verdict(res)
         rows = []
@@ -1068,10 +1715,12 @@ def main(argv=None):
             d = dict(r.__dict__)
             d.update(meta.get(r.id, {}))
             rows.append(d)
+        src = {k: bool(x) for k, x in (('anatomy', a.anatomy), ('accept', a.accept), ('motion', motion), ('gate3d', gate3d),
+                                       ('geo', a.geo), ('ia', a.ia), ('axe', a.axe), ('plan', a.plan), ('html', a.html))}
         print(json.dumps({'profile': prof['id'], 'level': prof['level'], 'log': prof['log'], 'verdict': v, 'B': nb, 'S': ns,
-                          'gates': rows}, ensure_ascii=False, indent=1, default=str))
+                          'gates': rows, 'layers': lay, 'sources': src}, ensure_ascii=False, indent=1, default=str))
     else:
-        print_table(prof, res)
+        print_table(prof, res, lay)
     return 1 if verdict(res)[0] == 'blocked' else 0
 
 

@@ -24,9 +24,10 @@ phases:
   live: "живая страница (поле CrUX или RUM, аналитика) — с 4-й недели трафика"
 methods:
   anatomy: "../../scripts/site/page_anatomy.py URL OUT [--mobile] --inp → anatomy_<device>.json (поле JSON в `field`)"
-  accept: "../../scripts/ai-media/page_accept.py PAGE --out DIR [--mobile] --throttle [--contrast …] → accept_<mode>.json"
-  probe: "../../scripts/blender/site_probe.py (страницы с 3D; ворота доли 3D — blender)"
-  gates: "../../scripts/site/page_gates.py — сводит JSON по профилю budgets.yaml и выдаёт PASS / S / B"
+  accept: "../../scripts/ai-media/page_accept.py PAGE --out DIR --budget-profile <page_type>@L<n> [--mobile --throttle] [--contrast …] → accept_<mode>.json"
+  motion: "../../scripts/creative/motion_check.py PAGE --level L<n> --page-type <page_type> --out DIR → results.json, gates.json (петли всей страницы, вспышки, reduce записью; ворота эффектов)"
+  probe: "../../scripts/blender/site_probe.py URL OUT (страницы с 3D) → gate_check.py --json (ворота 3D blender; метрики страницы — зеркало)"
+  gates: "../../scripts/site/page_gates.py — сводит JSON по профилю budgets.yaml и выдаёт PASS / S / B; метрики страницы, измеренные соседями (motion, probe), — зеркалом D"
   geo: "../../scripts/site/geo_probe.py (H)"
   axe: "axe-core (I; сырой сигнал)"
   plan: "проверка page-plan и site-brief (site_validate.py, J); page_gates.py --plan читает first_screen_policy, seo.indexable, x-gate-exception"
@@ -45,7 +46,7 @@ gates:
     threshold: {S: "profile.outcome.lcp_ms_lab.mobile.goal", B: "profile.outcome.lcp_ms_lab.mobile.poor"}
     owner: "07/03 §2.1"
     status: v1
-    maps_to: ["page_accept: LCP при --throttle > 2 500 мс = FAIL", "kimi ACCEPTANCE F2 (LCP ≤ build.perf.lcp_s_mobile)", "blender WEB-01 (≤ 2 500 телефон)", "ux AC-PRF-01"]
+    maps_to: ["page_accept --budget-profile: LCP при --throttle > цели профиля = WARN, > плохо = FAIL", "kimi ACCEPTANCE F2 (LCP ≤ build.perf.lcp_s_mobile)", "blender gate_check: LCP страницы — зеркало D", "ux AC-PRF-01"]
   - id: SG-PERF-02
     name: "LCP десктопа в лаборатории"
     site_checklist: [SITE-PERF-02]
@@ -54,7 +55,7 @@ gates:
     threshold: {S: "profile.outcome.lcp_ms_lab.desktop.goal", B: "profile.outcome.lcp_ms_lab.desktop.poor"}
     owner: "07/03 §2.1"
     status: v1
-    maps_to: ["blender WEB-01 (≤ 1 000 мс десктоп — блокер у blender; у site — цель 2 000–2 500 мс)"]
+    maps_to: ["blender WEB-01: блокер ворот 3D — только LCP-элемент canvas; LCP страницы в отчёте gate_check.py — зеркало D этой строки; 1 000 мс — цель эталона blender, не порог страницы"]
   - id: SG-PERF-03
     name: "CLS в лаборатории (загрузка и прокрутка всей страницы)"
     site_checklist: [SITE-PERF-03]
@@ -64,7 +65,7 @@ gates:
     owner: "07/03 §2.3"
     status: v1
     note: "v1.2 (K3): сумма сдвигов завышала CLS прокрутки (K/03: ru-azbukaokon телефон — 0,42 против 0,15 по web-vitals). Мерить прокруткой, а не только после загрузки: закрепление pin ScrollTrigger через position: fixed даёт CLS при прокрутке 1,6–2,0, position: sticky и pinType: 'transform' — 0, anticipatePin не помогает; колесо не считается «недавним вводом»; CLS «после загрузки» (page_accept, Lighthouse) этого не видит (creative E/02, 2026-09-24)"
-    maps_to: ["page_accept: CLS > 0,1 = FAIL (у site 0,1 — S, 0,25 — B)", "blender WEB-02", "ux AC-PRF-03"]
+    maps_to: ["page_accept: CLS > цели профиля = WARN, > плохо = FAIL (как S и B здесь)", "blender WEB-02: CLS страницы в gate_check.py — зеркало D", "ux AC-PRF-03"]
   - id: SG-PERF-04
     name: "INP по сценарию (меню, CTA, аккордеон, фокус в поле + нажатие во время загрузки)"
     site_checklist: [SITE-PERF-04]
@@ -92,17 +93,19 @@ gates:
     threshold: {B: "LCP нет | LCP — canvas | LCP-картинка с loading=lazy", S: "нет fetchpriority=high у LCP-картинки | LCP-ресурс не находим в HTML (data-src, JS, CSS-фон без preload) | H1 первого экрана выпал из LCP: не кандидат, итоговый LCP — другой текст (лид, H2), и в HTML или CSS есть признак невидимого первого кадра (opacity: 0, маска строк, скрытие скриптом)", D: "H1 первого экрана не кандидат LCP, итоговый LCP — текст, признаков в HTML нет (проверить появление H1; лид может быть больше H1 по площади) | H1 — кандидат, но проявляется из opacity 0 < x < 0,1 или clip-path: время LCP раньше видимости (допустимо при раскрытии ≤ 800 мс)"}
     owner: "07/03 §2.1; ai-media 10/01 §4"
     status: v1
+    limits: {opacity_near_zero: 0.1}   # H1 из opacity 0 < x < 0,1 — «почти невидим»: кандидат LCP, но время LCP раньше показа
     note: "v1.2 (K4) по creative E/01 (Chromium 153, 9 вариантов): H1 из opacity: 0, за маской строк (SplitText mask: lines) или скрытый скриптом кандидатом LCP не становится — LCP уходит на лид в 5 раз меньше, поле CrUX (его собирает Chrome) получает время мелкого элемента; WebKit считает H1 по моменту показа; честно — только transform. K/03: Framer (appear, opacity 0.001) — D на обоих устройствах; Lovable, телефон — D (LCP — H2, признаков нет); Durable — H1 в обёртке opacity-0, но итоговый LCP — картинка: метрику не искажает, PASS"
     maps_to: ["page_accept: LCP нет = FAIL, lazy = FAIL, без fetchpriority = WARN", "blender WEB-01 (не canvas)", "kimi F3 (постер = LCP)"]
   - id: SG-PERF-16
-    name: "Видео первого экрана и LCP: LCP-элемент hero — не VIDEO без постера; постер ≥ 0,05 бит на отображаемый пиксель"
+    name: "Видео первого экрана и LCP: LCP-элемент hero — не VIDEO без постера; постер ≥ 0,05 бит на отображаемый пиксель и не меньше видео"
     site_checklist: [SITE-PERF-13, SITE-PERF-05]
     phase: build
-    method: {tool: "accept + html", field: "lcp.tag (VIDEO — LCP стал кадр ролика); у <video> первого экрана — атрибут poster; байты постера × 8 / видимая площадь в пикселях (энтропия Chromium)"}
-    threshold: {S: "LCP первого экрана — VIDEO | у видео первого экрана нет poster | постер < 0,05 бит на отображаемый пиксель (гладкий градиент: Chromium не считает его LCP, LCP ждёт загрузку ролика)"}
+    method: {tool: "accept + html", field: "lcp.tag (VIDEO — LCP стал кадр ролика); media_first[] page_accept: у <video> первого экрана — атрибут poster, байты постера × 8 / видимая площадь в CSS px (энтропия Chromium), cover_share — площадь постера (poster у видео, картинка поверх видео или холста 3D) к площади медиа"}
+    threshold: {S: "LCP первого экрана — VIDEO | у видео первого экрана нет poster | постер < limits.poster_bpp_min бит на отображаемый пиксель (гладкий градиент: Chromium не считает его LCP, LCP ждёт загрузку ролика) | площадь постера меньше площади видео или холста, который его сменяет (cover_share < limits.poster_area_min): LCP уходит к кадру ролика"}
+    limits: {poster_bpp_min: 0.05, poster_area_min: 1.0}
     owner: "07/03 §2.1; creative 06-effects-catalog/02 §3.2; ai-media 10-web-integration/01 §4.2"
     status: v1
-    note: "v1.3 (S1, волна 4, 2026-09-25; аудит X С-27): creative F — постер AVIF 2 334 Б 1280×720 (0,020 бит/px) — LCP = VIDEO; ai-media J/01 — 0,024–0,038 бит/px не кандидат, 0,0505 — кандидат [проверено: creative F/05] [проверено: ai-media J/01]. Постер ≥ 0,05 бит/px или LCP — H1 (видео не больше текста по площади). Автопроверки в page_gates.py v1.2 нет — предложение K"
+    note: "creative F — постер AVIF 2 334 Б 1280×720 (0,020 бит/px) — LCP = VIDEO; ai-media J/01 — 0,024–0,038 бит/px не кандидат, 0,0505 — кандидат [проверено: creative F/05] [проверено: ai-media J/01]; blender VD3 (T26): постер на строку меньше видео — LCP 4 656 мс (VIDEO), на 1 px шире — 596 мс [проверено]. Постер ≥ 0,05 бит/px и не меньше видео — или LCP — H1 (видео не больше текста по площади). Автопроверка — page_gates.py по отчёту page_accept.py"
     maps_to: ["kimi F3 (постер = LCP)"]
   - id: SG-PERF-07
     name: "Поле p75 (живая страница): LCP, INP, CLS по телефону и десктопу"
@@ -185,11 +188,11 @@ gates:
     name: "Первый экран (load + 4–6 с без действий, с видео)"
     site_checklist: [SITE-PERF-12, SITE-PERF-13]
     phase: build
-    method: {tool: "anatomy | accept", field: "first_screen.kb | first_kb"}
+    method: {tool: "anatomy | accept", field: "first_screen.kb (page_anatomy) | no_preference.first_screen_total_kb (page_accept без --throttle: вес — прогон без замедления сети, budgets.yaml conditions.lab_weight)"}
     threshold: {S: "profile.weight.first_screen_kb.<device>"}
     owner: "07/03 §3"
     status: v1
-    maps_to: ["page_accept: > 2 500/1 500 КБ = FAIL (у site — S по профилю)", "kimi F2 first_screen_kb_mobile 1 500", "ai-media 01/01 §7"]
+    maps_to: ["page_accept --budget-profile: выше профиля = WARN (как S здесь)", "motion_check EG-WEIGHT-08 — зеркало D", "kimi F2 first_screen_kb_mobile 1 500", "ai-media 01/01 §7"]
   - id: SG-WEIGHT-02
     name: "Сессия без кликов (прокрутка до конца)"
     site_checklist: [SITE-PERF-12]
@@ -198,7 +201,7 @@ gates:
     threshold: {S: "profile.weight.session_kb.<device>"}
     owner: "07/03 §3"
     status: v1
-    maps_to: ["blender WEB-04 (≤ 3/7 МБ — блокер у blender; у site — S по профилю, доля 3D — у blender)"]
+    maps_to: ["blender gate_check: вес страницы — зеркало D, блокер ворот 3D — доля 3D (WEB-04, SG-WEIGHT-08)", "motion_check EG-WEIGHT-09 — зеркало D"]
   - id: SG-WEIGHT-03
     name: "JS первого экрана (все источники)"
     site_checklist: [SITE-PERF-12]
@@ -243,7 +246,7 @@ gates:
     name: "Доля 3D и видео — ворота соседей, не страницы"
     site_checklist: [SITE-PERF-16]
     phase: build
-    method: {tool: "probe (blender), accept (ai-media)"}
+    method: {tool: "probe (blender) через gate_check.py --json, accept (ai-media)", field: "строки ворот 3D без зеркала (WEB-01, -03…-07, -10) со статусом FAIL"}
     threshold: {D: "нарушение WEB-04/WEB-06 blender или норм ai-media — исправляет владелец ассета; страница блокируется только исходами SG-PERF"}
     owner: "07/03 §6; контракт v2 §2 (иерархия ворот)"
     status: v1
@@ -252,10 +255,11 @@ gates:
     site_checklist: [SITE-PERF-13, SITE-A11Y-03]
     phase: build
     method: {tool: anatomy, field: "first_screen.by_type_kb.media (тип Media CDP в окне первого экрана)"}
-    threshold: {S: "одно видео > profile.weight.first_screen_kb.<device>", D: "видео > 0 КБ — показать отдельно; постер, reduce = 0 байт, вертикальный файл телефону — SITE-PERF-13"}
+    threshold: {D: "видео > 0 КБ — показать отдельно; постер, reduce = 0 байт, вертикальный файл телефону — SITE-PERF-13. Порог видео по уровню — ворота эффектов EG-WEIGHT-04 (S), вес первого экрана вместе с видео — SG-WEIGHT-01 (S)"}
     owner: "K2 v1.1 по замечанию creative (99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md п.3: > 5 МБ видео до прокрутки у 15 из 49 эффектных страниц)"
     status: v1
     note: "видео уже входит в SG-WEIGHT-01; строка делает его видимым отдельно (у creative — колонки kb_first_nv, video_kb_first, video_kb_total)"
+    maps_to: ["creative EG-WEIGHT-04 (видео первого экрана по уровню, S)"]
 
   # ------------------------------------------------------------ SEO — строки H (по head-kit.yaml; уточнил продолжатель H2, 2026-09-24)
   - id: SG-SEO-01
@@ -304,6 +308,7 @@ gates:
     threshold: {B: "оболочка SPA (csr-shell) или < 50 слов в сыром HTML | H1 только после JS — в сыром HTML нет H1 (nojs.h1_raw_n = 0) | скрытый текст для роботов | инструкции моделям в тексте или коде", S: "главный CTA только после JS | цены только после JS | доля слов без JS < 0,5 | меню или телефон только из скрипта", D: "доля слов без JS < 0,8 | H1 в сыром HTML есть, но текст отличается от видимого"}
     owner: "H head-kit.yaml (hk-access-ssr, hk-access-links, hk-access-hidden-text, hk-access-no-ai-instructions); 07/02 §3"
     status: v1
+    limits: {nojs_ratio_s: 0.5, nojs_ratio_d: 0.8}   # доля слов без JS: ниже первой — S, ниже второй — D
     note: "v1.2 (K3): B за H1 — только когда H1 нет в сыром HTML; если H1 есть, а сравнение текста упало (innerText склеивает слова на скрытых <br> — K/03: ru-matemarketing, телефон, был ложный B), текст сверяется буквами без пробелов и регистра, расхождение — D. Код и строка совпадают: CTA и цены после JS — S, доля < 0,8 — D"
     maps_to: ["blender 01/02 §6.1 (ИИ-краулеры JS не исполняют)", "text geo-rules.yaml geo-model-instruction"]
   - id: SG-GEO-02
@@ -339,17 +344,17 @@ gates:
     name: "Движение, которое стартует само (в том числе при прокрутке в видимую область), длится дольше 5 с и идёт параллельно контенту, — видимая кнопка паузы с именем или остановка ≤ 5 с (WCAG 2.2.2: три условия сразу)"
     site_checklist: [SITE-A11Y-01]
     phase: build
-    method: {tool: accept, field: "движение первого экрана на 6-й с после load и видимая кнопка паузы с именем; treatment.loops и loop_control (pause-button | stops-within-5s | not-parallel-content)"}
+    method: {tool: "motion + accept", field: "motion_check: derived.moving_6s_without_pause и derived.loops_without_pause (петли всей страницы: каждая петля — в экран, через 6 с движется ли, есть ли механизм паузы); page_accept: motion_6s (первый экран на 6-й с после load) и loops (петли всей страницы; с --first-screen-only — пометка «только первый экран»); treatment.loops и loop_control (pause-button | stops-within-5s | not-parallel-content)"}
     threshold: {B: "подтверждённое движение без паузы"}
     owner: "I 08/03 (gate-a11y-motion-pause); creative — движение"
     status: v1
-    note: "v1.2 (K4, пакет creative волны 2 п. 4): разовое появление ≤ 5 с и движение, которое ведёт прокрутка человека (скраб, pin, параллакс), под 2.2.2 не попадают — это 2.3.3 AAA и reduce (SG-A11Y-07); петля, стартующая при появлении, — попадает. page_accept видит только первый экран на 6-й с: петли ниже — прокруткой или вручную. Разбор — creative 05-motion/01 §3.2, I 08/03 §2.1"
-    maps_to: ["page_accept: петля > 5 с без паузы = FAIL", "blender WEB-06", "ux UX-FBK-14/15 (блокер только 2.2.2 и 2.3.1 — PLAN поправка 11)"]
+    note: "разовое появление ≤ 5 с и движение, которое ведёт прокрутка человека (скраб, pin, параллакс), под 2.2.2 не попадают — это 2.3.3 AAA и reduce (SG-A11Y-07); петля, стартующая при появлении, — попадает. Петли ниже первого экрана проверяются прокруткой: каждая — в экран и через 6 с. Разбор — creative 05-motion/01 §3.2, I 08/03 §2.1"
+    maps_to: ["page_accept: петля > 5 с без паузы = FAIL", "creative EG-A11Y-01, EG-A11Y-02 (B)", "blender WEB-06", "ux UX-FBK-14/15 (блокер только 2.2.2 и 2.3.1 — PLAN поправка 11)"]
   - id: SG-A11Y-04
     name: "Не больше 3 вспышек в секунду (WCAG 2.3.1), покадрово для ИИ-видео"
     site_checklist: [SITE-A11Y-02]
     phase: build
-    method: {tool: human}
+    method: {tool: "motion + human", field: "motion_check: derived.flash_fail по записи 25 к/с (> 3 общих или красных за 1 с на ≥ 25 % поля 341 × 256 CSS px — creative EG-A11Y-04); сомнительное (глитч ИИ-видео, заставка, вспышки чаще 12 Гц — их запись не различает) — глазами"}
     threshold: {B: "> 3 вспышек/с"}
     owner: "I 08/03 (gate-a11y-flash)"
     status: v1
@@ -374,12 +379,12 @@ gates:
     name: "prefers-reduced-motion: нет автодвижения и загрузки фоновых видео"
     site_checklist: [SITE-A11Y-03, SITE-PERF-13]
     phase: build
-    method: {tool: accept, field: "режим reduce: media_kb, движение в покое"}
-    threshold: {S: "media_kb > 0 | движение ≥ 0,3 % пикселей в секунду на записи всей страницы (creative 05-motion/01 §4.5); до поддержки утилитой — ≥ 0,5 % за 1 с на первом экране как грубый фильтр"}
+    method: {tool: "accept + motion", field: "page_accept reduce: media_kb, motion (первый экран и паузы прокрутки всей страницы, порог — creative EG-A11Y-06); motion_check режим rm: EG-A11Y-05…07"}
+    threshold: {S: "media_kb > 0 | движение первого экрана или паузы на записи всей страницы выше порога creative EG-A11Y-06 (0,3 % пикселей в секунду; creative 05-motion/01 §4.5)"}
     owner: "I 08/03 (gate-a11y-reduce); creative CRV-AL"
     status: v1
-    note: "v1.2 (K4, пакет creative волны 2 п. 3): page_accept проверяет первый экран; reduce проверять парой прогонов всей страницы — критерии creative 05-motion/01 §4.5 (движение первого экрана ≤ 0,3 % пикселей в секунду, ни одной паузы с непрерывным движением на записи, 0 запросов видео, 0 кадров WebGL в покое, контент и CTA видимы); порог creative 0,3 %/с строже порога строки 0,5 % — расхождение передано X; решено v1.3 (аудит X С-15): порог и метод — creative, 0,5 % — до перенастройки page_accept.py. Начальное состояние появления ставит класс от JS (html.js .reveal), а не голый CSS opacity: 0 — без JS контент видим"
-    maps_to: ["page_accept: reduce media > 0 = FAIL", "blender WEB-06"]
+    note: "reduce проверяется записью всей страницы, а не первым экраном: page_accept.py в режиме reduce — 0 байт видео за прокрутку, движение первого экрана и каждой паузы ≤ порога EG-A11Y-06; motion_check.py — EG-A11Y-05…10 (0 запросов видео, ни одной паузы с непрерывным движением, 0 кадров WebGL в покое, контент и CTA видимы). Начальное состояние появления ставит класс от JS (html.js .reveal), а не голый CSS opacity: 0 — без JS контент видим"
+    maps_to: ["page_accept: reduce media > 0 или движение выше порога EG-A11Y-06 = FAIL", "creative EG-A11Y-05…10", "blender WEB-06 (≤ 0,05 % в покое — строже для 3D)"]
   - id: SG-A11Y-08
     name: "Кегли на clamp(): максимум ≤ 2,5 × минимума — текст вдвое растёт при зуме 200 % (WCAG 1.4.4)"
     site_checklist: [SITE-A11Y-18]
@@ -388,6 +393,7 @@ gates:
     threshold: {S: "max / min > 2,5"}
     owner: "K2 v1.1 по замечанию creative (99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md п.9); I 08/03"
     status: v1
+    limits: {clamp_ratio_max: 2.5}
     note: "визуальный масштаб шрифтов — creative; здесь только отношение, ломающее 1.4.4"
 
   # ------------------------------------------------------------ LEGAL — строки I (req: — 08-legal-trust-a11y/legal-requirements.yaml; не юридическое заключение)
@@ -559,6 +565,7 @@ gates:
     threshold: {D: "разметка без видимых крошек или наоборот | крошки на посадочной"}
     owner: "G 06/02 §2.1; H head-kit.yaml (hk-site-breadcrumbs); K v1"
     status: v1
+    limits: {crumbs_vs_markup_pct: 50}   # расхождение долей страниц с видимыми крошками и с разметкой, п.п.
 
   # ------------------------------------------------------------ MOB — телефон (K по kimi 08/02 и замеру M)
   - id: SG-MOB-01
@@ -569,6 +576,7 @@ gates:
     threshold: {B: "layout_zoomed — страница шире экрана, человек прокручивает вбок (или overflow_x_px > 2 при неизвестном layout_zoomed)", D: "overflow_x_px > 2 без расширения области: переполнение скрыто overflow-x (проверить свайпом на iOS)"}
     owner: "K; kimi 08-director-loop-qa/02 §2 B; ux UX-MOB-01"
     status: v1
+    limits: {overflow_px: 2}   # ширина прокрутки минус ширина экрана
     note: "v1.2 (K3): K/03 — en-headspace: дорожка карусели 1 307 px под html, body {overflow-x: hidden}, область не расширена → D (был ложный B); ru-azbukaokon: область 457 > 412 px → B верно"
     maps_to: ["kimi ACCEPTANCE D1", "M: 4 из 51 страницы"]
   - id: SG-MOB-02

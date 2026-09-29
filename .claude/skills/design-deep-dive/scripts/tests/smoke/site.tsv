@@ -5,9 +5,9 @@ scripts/site/build_profile.py	step	help; run: --check; run: --selftest
 scripts/site/checklist_export.py	utility	help	
 scripts/site/geo_probe.py	utility	help; run: --selftest	
 scripts/site/ia_probe.py	utility	help; run: --selftest	
-scripts/site/page_anatomy.py	utility	help	
+scripts/site/page_anatomy.py	utility	help; run: --selftest	
 scripts/site/page_gates.py	utility	help; run: --selftest	
 scripts/site/plan_to_assets.py	utility	help; run: --selftest; run: --check {skill}/kb/site/10-playbooks-contracts/examples/corporate-b2b-stalkon/asset-plan.home.yaml {skill}/kb/site/10-playbooks-contracts/examples/lead-services-otves/asset-plan.home.yaml {skill}/kb/site/10-playbooks-contracts/examples/saas-okoshko/asset-plan.home.yaml; run: --types new	
-scripts/site/run_axe_targets.py	step	compile	
+scripts/site/run_axe_targets.py	step	compile; help	
 scripts/site/site_validate.py	utility	help; run: --selftest; run: --all --quiet	
 scripts/site/vocab_lint.py	utility	help; run: --selftest; run: --check-crosswalk	

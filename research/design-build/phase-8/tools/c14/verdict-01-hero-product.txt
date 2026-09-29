@@ -1,0 +1,82 @@
+профиль landing-product@L1 (уровень L1)
+PASS -  SG-PERF-02    desktop  значение             68  порог       2500  page_accept [page_accept]
+PASS -  SG-PERF-03    desktop  значение              0  порог        0.1  web-vitals CLS (окно сессии)
+PASS -  SG-PERF-04    desktop  значение             16  порог        200  сценарий после загрузки — занижает
+PASS -  SG-PERF-05    desktop  значение            138  порог        200  TBT до прокрутки
+PASS -  SG-PERF-06    desktop  значение            IMG  порог H1/картинка/постер  
+PASS -  SG-PERF-09    desktop  значение              —  порог по видимости/нажатию  
+PASS -  SG-WEIGHT-01  desktop  значение          831.4  порог       3500  
+PASS -  SG-WEIGHT-02  desktop  значение          831.4  порог      10000  
+FAIL S  SG-WEIGHT-03  desktop  значение          808.2  порог        450  
+SKIP -  SG-WEIGHT-04  desktop  значение           None  порог        250  нет данных
+PASS -  SG-WEIGHT-05  desktop  значение              0  порог          2  сторонние eTLD+1 в окне первого экрана
+PASS -  SG-WEIGHT-06  desktop  значение              0  порог        300  КБ домена за сессию — верхняя оценка
+PASS -  SG-WEIGHT-07  desktop  значение              4  порог        150  HTML по сети
+PASS -  SG-WEIGHT-09  desktop  значение              0  порог видео отдельно  видео в окне первого экрана нет
+FAIL S  SG-SEO-02     desktop  значение      canonical  порог title, canonical (S); lang (D)  
+PASS -  SG-SEO-03     desktop  значение              1  порог нет H1 — S; > 1 — D  
+PASS -  SG-GEO-01     desktop  значение      ratio 1.0  порог H1 — B; CTA, цены, < 0.5 — S; < 0.  цены: None
+PASS -  SG-LEGAL-01   desktop  значение              —  порог после согласия  
+FAIL B  SG-LEGAL-05   desktop  значение           None  порог ОГРН/ОГРНИП в подвале  B2C; реквизиты могут стоять на странице контактов — подтвердить
+PASS -  SG-LEGAL-07   desktop  значение              —  порог нет или уведомление РКН  
+PASS -  SG-PERF-01    mobile   значение            412  порог       2500  page_accept --throttle [page_accept]
+PASS -  SG-PERF-03    mobile   значение              0  порог        0.1  web-vitals CLS (окно сессии)
+PASS -  SG-PERF-04    mobile   значение             24  порог        200  сценарий после загрузки — занижает
+PASS -  SG-PERF-05    mobile   значение            172  порог        300  TBT до прокрутки
+PASS -  SG-PERF-06    mobile   значение            IMG  порог H1/картинка/постер  
+PASS -  SG-PERF-09    mobile   значение              —  порог по видимости/нажатию  
+PASS -  SG-WEIGHT-01  mobile   значение          831.4  порог       2000  
+PASS -  SG-WEIGHT-02  mobile   значение          831.4  порог       5000  
+FAIL S  SG-WEIGHT-03  mobile   значение          808.2  порог        450  
+SKIP -  SG-WEIGHT-04  mobile   значение           None  порог        250  нет данных
+PASS -  SG-WEIGHT-05  mobile   значение              0  порог          2  сторонние eTLD+1 в окне первого экрана
+PASS -  SG-WEIGHT-06  mobile   значение              0  порог        300  КБ домена за сессию — верхняя оценка
+PASS -  SG-WEIGHT-07  mobile   значение              4  порог        150  HTML по сети
+PASS -  SG-WEIGHT-09  mobile   значение              0  порог видео отдельно  видео в окне первого экрана нет
+FAIL S  SG-SEO-02     mobile   значение      canonical  порог title, canonical (S); lang (D)  
+PASS -  SG-SEO-03     mobile   значение              1  порог нет H1 — S; > 1 — D  
+PASS -  SG-GEO-01     mobile   значение      ratio 1.0  порог H1 — B; CTA, цены, < 0.5 — S; < 0.  цены: None
+PASS -  SG-MOB-01     mobile   значение 0 px, zoomed=False  порог     ≤ 2 px  
+FAIL S  SG-MOB-02     mobile   значение burger=False links=None  порог меню или ≥ 2 ссылки  подтвердить кадром; не для одноэкранной арт-страницы
+PASS -  SG-LEGAL-01   mobile   значение              —  порог после согласия  
+FAIL B  SG-LEGAL-05   mobile   значение           None  порог ОГРН/ОГРНИП в подвале  B2C; реквизиты могут стоять на странице контактов — подтвердить
+PASS -  SG-LEGAL-07   mobile   значение              —  порог нет или уведомление РКН  
+PASS -  SG-CONTENT-07 page     значение {'desktop': 1, 'mobile': 1}  порог offer-cta: ≥ 1 на каждом устройств  распознавание призыва — эвристика M; провал подтверждать кадром; политика не задана — offer-cta
+PASS -  SG-PERF-14    desktop  значение              —  порог картинки первого экрана с width/he   [page_accept]
+PASS -  SG-PERF-16    desktop  значение медиа первого экрана: 1  порог LCP не VIDEO; poster ≥ 0.05 бит/пи  энтропия — байты постера × 8 / видимая площадь (порог Chromium) [page_accept]
+PASS -  SG-PERF-14    mobile   значение              —  порог картинки первого экрана с width/he   [page_accept]
+PASS -  SG-PERF-16    mobile   значение медиа первого экрана: 1  порог LCP не VIDEO; poster ≥ 0.05 бит/пи  энтропия — байты постера × 8 / видимая площадь (порог Chromium) [page_accept]
+PASS -  SG-A11Y-03    desktop  значение движения > 5 с без паузы нет  порог пауза с именем или стоп ≤ 5 с   [page_accept+motion_check]
+PASS -  SG-A11Y-03    mobile   значение движения > 5 с без паузы нет  порог пауза с именем или стоп ≤ 5 с   [page_accept+motion_check]
+PASS -  SG-A11Y-04    desktop  значение  доля поля 0.0  порог ≤ 3 вспышек/с  сомнительное (глитч ИИ-видео, заставка) — глазами [motion_check]
+PASS -  SG-A11Y-04    mobile   значение  доля поля 0.0  порог ≤ 3 вспышек/с  сомнительное (глитч ИИ-видео, заставка) — глазами [motion_check]
+PASS -  SG-A11Y-07    page     значение  reduce чистый  порог 0 байт видео; движение ≤ порога cr   [motion_check+page_accept]
+FAIL S  SG-CONTENT-04 page     значение              2  порог 0 ошибок консоли  error: Failed to load resource: the server responded with a ; error: Failed to load resource: the server responded with a  [page_accept+site_probe]
+FAIL D  SG-WEIGHT-08  page     значение WEB-10 первый кадр 3D, мс (первый кадр r  порог ворота 3D — у владельца ассета  страница блокируется только исходами SG-PERF [gate_check]
+PASS -  SG-PERF-02    desktop  значение             40  порог       2500  зеркало: motion_check; без замедления сети
+PASS -  SG-PERF-05    desktop  значение             61  порог        200  зеркало: motion_check; TBT после FCP
+PASS -  SG-PERF-03    desktop  значение            0.0  порог        0.1  зеркало: motion_check; наибольшее окно сессии
+PASS -  SG-WEIGHT-01  desktop  значение          194.9  порог       3500  зеркало: motion_check; окно первого экрана
+PASS -  SG-WEIGHT-02  desktop  значение          194.9  порог      10000  зеркало: motion_check; сессия после прокрутки
+PASS -  SG-WEIGHT-04  desktop  значение            0.0  порог        250  зеркало: motion_check; шрифты за сессию
+PASS -  SG-PERF-01    mobile   значение             60  порог       2500  зеркало: motion_check; без замедления сети
+PASS -  SG-PERF-05    mobile   значение            154  порог        300  зеркало: motion_check; TBT после FCP
+PASS -  SG-PERF-03    mobile   значение            0.0  порог        0.1  зеркало: motion_check; наибольшее окно сессии
+PASS -  SG-WEIGHT-01  mobile   значение          194.9  порог       2000  зеркало: motion_check; окно первого экрана
+PASS -  SG-WEIGHT-02  mobile   значение          194.9  порог       5000  зеркало: motion_check; сессия после прокрутки
+PASS -  SG-WEIGHT-04  mobile   значение            0.0  порог        250  зеркало: motion_check; шрифты за сессию
+PASS -  SG-PERF-02    desktop  значение             84  порог       2500  зеркало: site_probe; LCP страницы, мс
+PASS -  SG-PERF-03    desktop  значение              0  порог        0.1  зеркало: site_probe; CLS страницы до прокрутки
+PASS -  SG-PERF-05    desktop  значение            132  порог        200  зеркало: site_probe; TBT страницы до прокрутки, мс
+PASS -  SG-WEIGHT-02  desktop  значение          829.2  порог      10000  зеркало: site_probe; передано за прогон зонда, КБ
+PASS -  SG-PERF-01    mobile   значение            432  порог       2500  зеркало: site_probe; LCP страницы, мс
+PASS -  SG-PERF-03    mobile   значение              0  порог        0.1  зеркало: site_probe; CLS страницы до прокрутки
+PASS -  SG-PERF-05    mobile   значение            211  порог        300  зеркало: site_probe; TBT страницы до прокрутки, мс
+PASS -  SG-WEIGHT-02  mobile   значение          829.2  порог       5000  зеркало: site_probe; передано за прогон зонда, КБ
+PASS -  SG-CONTENT-05 html     значение              —  порог нет заглушек  
+PASS -  SG-CONTENT-06 html     значение              —  порог нет автоматических маркеров B  маркеры S снимаются разрешением брифа (allow)
+PASS -  SG-A11Y-08    css      значение        1 clamp  порог max ≤ 2.5 × min  var() не раскрывается — проверить вычисленный кегль при зуме 200 %
+слой effects: tool=motion_check.py, level=L1, B=0, S=4, D=1, na=7; провалы: EG-WEIGHT-01 desk S, EG-WEIGHT-01 mob S, EG-WEIGHT-03 desk S, EG-WEIGHT-03 mob S, EG-A11Y-11 rm D
+слой three_d: mode=desktop, reduced=False, B=0, S=0, D=0, blocked=False
+слой three_d: mode=mobile, reduced=False, B=0, S=1, D=0, blocked=False
+вердикт: blocked (B: 2, S: 6)

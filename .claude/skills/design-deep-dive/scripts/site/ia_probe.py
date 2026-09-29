@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ia_probe.py — структура многостраничного сайта по HTTP (агент G, волна 2 site-research, 2026-09-24).
+"""ia_probe.py — структура многостраничного сайта по HTTP: robots, sitemap, шаблоны URL, шапка и подвал, крошки, hreflang, 404.
 
 Что меряет (один сайт или партия):
   robots.txt (статус, строки Sitemap, группы, Disallow для *, Crawl-delay) →
@@ -11,19 +11,19 @@
   контекстные ссылки и блоки «читайте также» →
   ответ на несуществующий адрес (код 404, «мягкая» 404, редирект на главную).
 
-Вежливость (условие задания G): ≤ 1 запроса в секунду на хост (каждый редирект — отдельный запрос с паузой);
+Вежливость: ≤ 1 запроса в секунду на хост (каждый редирект — отдельный запрос с паузой);
 ≤ 200 запросов на сайт (robots + sitemap + страницы + проба 404); страницы — только адреса из sitemap.xml и корень;
 по ссылкам не ходим; robots.txt соблюдается (RFC 9309: 4xx — ограничений нет; 5xx или недоступен — страницы не
 запрашиваем); Crawl-delay > 1 с — соблюдается (до 10 с); антибот-заглушка (Cloudflare, DDoS-Guard, Qrator) —
 отметка blocked и остановка без обхода. Браузер не нужен: только стандартная библиотека Python 3.
 
-Запуск:
-  python3 99-raw/tools/ia_probe.py https://example.ru --out 99-raw/experiments/G/01-ia-probe/out [--sample 14]
-  python3 99-raw/tools/ia_probe.py --batch sites.tsv --out DIR [--skip-done]   # TSV: id, url, site_type, market, note
-  python3 99-raw/tools/ia_probe.py --summary DIR > summary.tsv                   # сводная таблица по ia.json
-  python3 99-raw/tools/ia_probe.py --selftest                                     # локальный сервер с фикстурами
+Запуск (код-репо — соседним чекаутом ../strategy/.claude/skills/design-deep-dive/scripts/site/ia_probe.py):
+  ia_probe.py https://example.ru [--out DIR] [--sample 14]    # по умолчанию DIR — $DDD_HOME/out/site/ia_probe
+  ia_probe.py --batch sites.tsv --out DIR [--skip-done]        # TSV: id, url, site_type, market, note
+  ia_probe.py --summary DIR > summary.tsv                      # сводная таблица по ia.json
+  ia_probe.py --selftest                                       # локальный сервер с фикстурами
 
-Выход: DIR/<id>/ia.json (всё), DIR/<id>/ia.md (коротко). Ограничения — раздел ia_probe в 99-raw/tools/README.md.
+Выход: DIR/<id>/ia.json (всё), DIR/<id>/ia.md (коротко); ia.json читает page_gates.py --ia (строки scope: site).
 """
 
 import argparse

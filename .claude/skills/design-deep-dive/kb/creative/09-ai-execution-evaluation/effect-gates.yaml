@@ -11,20 +11,25 @@
 # Автопроверка: ../../scripts/creative/motion_check.py ЦЕЛЬ --level L0|L1|L2 → results.json → gates.md (правило → найдено → порог → где).
 # Поле metric — путь в results.json[<режим>]; modes — режимы motion_check (desk 1440×900 · mob Pixel 7 + CPU×4 · rm reduce ·
 # nojs · nogl); op — <=, >=, ==, empty (список пуст), false (ложь); threshold — число, {L0|L1|L2|all: число | {desktop, mobile}};
-# threshold_ref — путь в levels[<уровень>] файла 01-creative-direction/ambition-levels.yaml (единый источник бюджетов), scale —
-# множитель к нему; levels — к каким уровням строка относится; auto: false — проверка вручную или другим инструментом.
+# threshold_ref — ссылка на число владельца величины: путь в levels[<уровень>] файла 01-creative-direction/ambition-levels.yaml
+# (budgets.effects.*, motion_hints.*); «profile.<путь>» — профиль страницы site (../site/07-seo-geo-performance-analytics/
+# budgets.yaml через page_gates.py: с --page-type — <тип>@<уровень> с исключениями, иначе уровень), метка <device> — устройство
+# режима; «effects.yaml#<id>.<путь>» — запись каталога 06-effects-catalog/effects.yaml. Поле есть, числа нет (null) — N/A,
+# порог открыт. scale — множитель к числу ссылки; limits — числа строки, по которым motion_check считает находку (полоса,
+# минимум периода, доля окна); levels — к каким уровням строка относится; auto: false — проверка вручную или другим
+# инструментом.
 # Серьёзность — как у site: B блокер (страница не принимается), S серьёзно (исправить или x-gate-exception {id, why, who, until}
 # в page-plan), D желательно. Пороги с меткой [гипотеза] — кандидаты по данным C, E, F, G; калибровка — живая фаза.
 version: "0.2"
 status: draft
 checked_at: "2026-09-25"
 owner: "creative-research · 09-ai-execution-evaluation · K (волна 3); v0.2 — продолжатель K2"
-tool: "../../scripts/creative/motion_check.py 0.1.3; статические визуальные проверки — ../../scripts/creative/marketing_audit.py 0.1.1 (профиль marketing)"
+tool: "../../scripts/creative/motion_check.py 0.2; статические визуальные проверки — ../../scripts/creative/marketing_audit.py (профиль marketing)"
 changes:
   - "0.2 (2026-09-25, K2): + EG-PERF-11 (CLS окна сессии с атрибуцией узлов, зеркало SG-PERF-03), EG-A11Y-24 (переключатель «Меньше» работает — нажатие), EG-A11Y-25 («Полное» в reduce включает движение), EG-A11Y-26 (F83 по буквам автоматом при --f83, B), EG-A11Y-27 (контраст над живым фоном, --contrast, S); EG-A11Y-11 — исключения (JS ≤ 3 КБ br, script[data-motion-toggle]); пороги и id прежних строк не менялись. Ложные S motion_check 0.1 (петля в покое из кадров прокрутки, станции холста, радиогруппа не видна) исправлены в 0.1.2."
   - "0.1 (2026-09-24, K): 50 строк, 42 автоматические."
   - "правки аудита без смены версии (2026-09-25, S1b по X-10): EG-PERF-03 fix — lerp ≥ 0,15 (замер S1: 0,12 даёт 1 094–1 125 мс — провал этих же ворот); ссылка blender — 09-web-runtime/05 (путь 09-perf-access-seo не существует); tool — marketing_audit.py 0.1.1. Пороги, id и серьёзность не менялись."
-levels_source: "01-creative-direction/ambition-levels.yaml v0.2 (budgets.effects — наш профиль эффектов; budgets.page — предложение site P, принято как goal)"
+levels_source: "01-creative-direction/ambition-levels.yaml (budgets.effects — слой подачи по уровню, motion_hints — бюджет внимания); профиль страницы — ../site/07-seo-geo-performance-analytics/budgets.yaml (threshold_ref profile.*, зеркала D)"
 site_gates: "../site/07-seo-geo-performance-analytics/page-gates.yaml v1.2 (62 строки; page_gates.py v1.2)"
 neighbours:
   ai_media: "../../scripts/ai-media/page_accept.py (копия ai-media J): вес первого экрана, LCP, CLS, TBT, пауза видео на 6-й с, reduce 0 байт видео и < 0,5 % движения, F83 по буквам и кадрам видео"
@@ -91,9 +96,9 @@ gates:
     levels: [L1, L2]
     metric: scroll.fps
     op: ">="
-    threshold_ref: budgets.page.scroll_fps_min
+    threshold_ref: budgets.effects.scroll_fps_min
     severity: D
-    source: "A ambition-levels.yaml budgets.page.scroll_fps_min (30 / 50); F 03-effects-lab-method: в лаборатории все эффекты дают 60 — не критерий"
+    source: "A ambition-levels.yaml budgets.effects.scroll_fps_min (30 / 50) — величина слоя подачи; F 03-effects-lab-method: в лаборатории все эффекты дают 60 — не критерий"
     label: "[гипотеза] [проверено: F — не различает]"
     site: "—"
   - id: EG-PERF-05
@@ -102,9 +107,9 @@ gates:
     modes: [desk, mob]
     metric: vitals.tbt_ms
     op: "<="
-    threshold_ref: budgets.page.tbt_ms_lab
+    threshold_ref: profile.outcome.tbt_ms_lab.<device>.goal
     severity: D
-    source: "A budgets.page.tbt_ms_lab; blender 01/02 §8"
+    source: "профиль страницы site budgets.yaml outcome.tbt_ms_lab (цель); blender 01/02 §8"
     label: "[документация] + [данные]"
     site: "= SG-PERF-05 (владелец site; у site — S)"
   - id: EG-PERF-06
@@ -113,10 +118,9 @@ gates:
     modes: [desk, mob]
     metric: vitals.lcp_ms
     op: "<="
-    threshold_ref: budgets.page.lcp_s_lab
-    scale: 1000
+    threshold_ref: profile.outcome.lcp_ms_lab.<device>.goal
     severity: D
-    source: "A budgets.page.lcp_s_lab; сеть не замедляется — порог site (1,6 Мбит/с, RTT 150) строже"
+    source: "профиль страницы site budgets.yaml outcome.lcp_ms_lab (цель, мс); сеть не замедляется — методика site (1,6 Мбит/с, RTT 150) строже"
     label: "[гипотеза]"
     site: "= SG-PERF-01/02 (владелец site, методика page_accept --throttle)"
   - id: EG-PERF-07
@@ -192,16 +196,17 @@ gates:
     site: "часть SG-WEIGHT-03 (JS первого экрана — все источники)"
     fix: "загрузчик [data-effect] с динамическим импортом за 200 px до экрана (G/03); тяжёлое — только в init() через прокладку"
   - id: EG-WEIGHT-02
-    name: "JS и wasm 3D (three, OGL, pixi, Spline, Unicorn) за сессию, КБ"
+    name: "JS и wasm подачи: wasm-рантаймы 2D (dotLottie, Rive) за сессию, КБ"
     group: weight
     modes: [desk, mob]
-    metric: net.js_3d_session_kb
+    metric: net.wasm_presentation_kb
     op: "<="
-    threshold_ref: budgets.effects.js_3d_kb_br
+    threshold_ref: budgets.effects.wasm_presentation_kb_br
     severity: S
-    source: "A budgets.effects.js_3d_kb_br (L0 0, L1 200/300, L2 250/350); blender A/03 (three core 109, R3F + drei + post 345 КБ br)"
-    label: "[данные] [спорно] у blender"
-    site: "SG-WEIGHT-08: доля 3D — ворота blender, не страницы"
+    where: net.wasm_presentation
+    source: "A budgets.effects.wasm_presentation_kb_br — числа нет (null): порог даст пилот с Lottie или Rive; веса рантаймов — 07-stack-implementation/stack.yaml (dotLottie ≈ 379 КБ br, Rive 272–613); JS их загрузчиков — в EG-WEIGHT-01, wasm и JS 3D — EG-WEIGHT-11"
+    label: "[открыто: число — пилот]"
+    site: "слой budgets.yaml layers.wasm_first_screen_kb (отдельно от JS первого экрана); с публичного CDN — EG-WEIGHT-10"
   - id: EG-WEIGHT-03
     name: "Число WebGL-контекстов"
     group: weight
@@ -219,9 +224,9 @@ gates:
     modes: [desk, mob]
     metric: net.video_first_kb
     op: "<="
-    threshold: {L0: {desktop: 300, mobile: 300}, L1: {desktop: 1500, mobile: 600}, L2: {desktop: 2500, mobile: 1000}}
+    threshold_ref: budgets.effects.video_first_screen_kb
     severity: S
-    source: "A budgets.effects: L0 video_autoplay_kb 300 (только синемаграф), L1 video_hero_loop_kb 600/1500; L2 — предложение K (C: 15 из 49 эффектных страниц > 5 МБ видео до прокрутки)"
+    source: "A budgets.effects.video_first_screen_kb (L0 300 — только синемаграф, L1 600/1500 — петля hero, L2 1000/2500 — C: 15 из 49 эффектных страниц > 5 МБ видео до прокрутки)"
     label: "[данные: ai-media 01/02 §4.3] + [гипотеза K для L2]"
     site: "SG-WEIGHT-09 показывает отдельно (D; S — одно видео больше всего первого экрана)"
     fix: "постер + видео 720p на телефоне, preload=metadata, запуск по видимости; сюжетное видео — по клику"
@@ -255,31 +260,31 @@ gates:
     modes: [desk, mob]
     metric: net.font_kb
     op: "<="
-    threshold_ref: budgets.effects.fonts_kb
+    threshold_ref: profile.weight.fonts_kb.<device>
     severity: D
-    source: "A budgets.effects.fonts_kb (150 / 250 / 300); Web Almanac 2025"
+    source: "профиль страницы site budgets.yaml weight.fonts_kb (150 / 250 / 300; у article-page — исключение); Web Almanac 2025"
     label: "[данные]"
     site: "= SG-WEIGHT-04 (владелец site)"
   - id: EG-WEIGHT-08
-    name: "Первый экран, МБ (зеркало)"
+    name: "Первый экран, КБ (зеркало)"
     group: weight
     modes: [desk, mob]
-    metric: net.first_mb
+    metric: net.first_kb
     op: "<="
-    threshold_ref: budgets.page.first_screen_mb
+    threshold_ref: profile.weight.first_screen_kb.<device>
     severity: D
-    source: "A budgets.page.first_screen_mb; окно motion_check — load + ≈ 5 с"
+    source: "профиль страницы site budgets.yaml weight.first_screen_kb (с --page-type — с исключениями overrides); окно motion_check — load + окно первого экрана budgets.yaml conditions.first_screen"
     label: "[данные] [спорно]"
     site: "= SG-WEIGHT-01 (владелец site, S по профилю)"
   - id: EG-WEIGHT-09
-    name: "Сессия без кликов, МБ (зеркало)"
+    name: "Сессия без кликов, КБ (зеркало)"
     group: weight
     modes: [desk, mob]
-    metric: net.session_mb
+    metric: net.session_kb
     op: "<="
-    threshold_ref: budgets.page.session_mb
+    threshold_ref: profile.weight.session_kb.<device>
     severity: D
-    source: "A budgets.page.session_mb"
+    source: "профиль страницы site budgets.yaml weight.session_kb"
     label: "[данные] [гипотеза]"
     site: "= SG-WEIGHT-02 (владелец site)"
   - id: EG-WEIGHT-10
@@ -293,6 +298,17 @@ gates:
     source: "ворота G (3): самохостинг библиотек и wasm (setWasmUrl); CDN — лишнее соединение, приватность и отказ при блокировке домена"
     label: "[практика] G 07/02"
     site: "дополняет SG-WEIGHT-05/06 (сторонние домены и байты) и SG-LEGAL-07"
+  - id: EG-WEIGHT-11
+    name: "JS и wasm 3D (three, OGL, pixi, Spline, Unicorn, декодеры) за сессию, КБ"
+    group: weight
+    modes: [desk, mob]
+    metric: net.js_3d_session_kb
+    op: "<="
+    threshold_ref: budgets.effects.js_3d_kb_br
+    severity: S
+    source: "A budgets.effects.js_3d_kb_br (L0 0, L1 200/300, L2 250/350); blender A/03 (three core 109, R3F + drei + post 345 КБ br); wasm декодеров 3D (Draco, Basis, meshopt) — здесь же"
+    label: "[данные] [спорно] у blender"
+    site: "SG-WEIGHT-08: доля 3D — ворота blender, не страницы"
 
   # ------------------------------------------------------------------ A11Y — движение и доступность (WCAG 2.2.2, 2.3.1, 2.3.3)
   - id: EG-A11Y-01
@@ -301,6 +317,7 @@ gates:
     modes: [desk, mob]
     metric: derived.moving_6s_without_pause
     op: "false"
+    limits: {moving_pct_min: 0.5}   # «движется»: ≥ 0,5 % пикселей за 1 с (канал > 12/255) или играет видео; так же считает page_accept.py
     severity: B
     source: "WCAG 2.2 SC 2.2.2 (A); E 05-motion/01 §3.3; page_accept.py (движение ≥ 0,5 % пикселей или видео играет на 6-й с)"
     label: "[стандарт] [проверено] у ai-media"
@@ -501,21 +518,22 @@ gates:
     modes: [desk, mob]
     metric: loops.loops_in_view_max
     op: "<="
-    threshold: {L0: {desktop: 1, mobile: 1}, L1: {desktop: 2, mobile: 1}, L2: {desktop: 3, mobile: 2}}
+    threshold_ref: motion_hints.continuous_motions_in_view_max
     severity: S
     spec_override: budget.loops_in_view_max
-    source: "E 05-motion/01 §5.2 (L0 ≤ 1, L1 ≤ 2, L2 ≤ 3; телефон на 1 меньше, минимум 1); A motion_hints"
+    source: "A ambition-levels.yaml motion_hints.continuous_motions_in_view_max (L0 ≤ 1, L1 ≤ 2, L2 ≤ 3; телефон на 1 меньше, минимум 1); E 05-motion/01 §5.2"
     label: "[гипотеза] A, согласовано с практикой C"
     site: "—"
   - id: EG-A11Y-18
-    name: "Колебание крупного объекта (≥ 25 % меньшей стороны экрана) с периодом 2,5–6 с"
+    name: "Колебание объекта с периодом короче нормы: крупного — короче 10 с (полоса 2,5–6 с запрещена), мелкого — короче 6 с"
     group: a11y
     modes: [desk, mob]
     metric: loops.oscillation
     op: "empty"
+    limits: {band_s: [2.5, 6], period_min_s: 10, small_period_min_s: 6, large_min_side_share: 0.25}   # крупный — меньшая сторона ≥ 25 % меньшей стороны окна; период короче band_s[0] — пульсация (EG-A11Y-20, -22)
     severity: S
     where: loops.oscillation
-    source: "E 05-motion/01 §6.3 (период ≥ 10 с или шум; 2,5–6 с — около 0,2 Гц — не делать)"
+    source: "E 05-motion/01 §6.3 (крупный объект и фон — период ≥ 10 с или шум; 2,5–6 с — около 0,2 Гц — не делать; мелкий — ≥ 6 с); мера «крупного» — одна, поле large_min_side_share; токен motion.marketing.loop.breathe-period — значение по умолчанию в пределах нормы"
     label: "[исследование] + [гипотеза: период]"
     site: "—"
   - id: EG-A11Y-19
@@ -524,10 +542,10 @@ gates:
     modes: [desk]
     metric: loops.marquee_speed_max
     op: "<="
-    threshold: 60
+    threshold_ref: effects.yaml#marquee-logos.limits.speed_px_s_max
     severity: D
     where: loops.marquee
-    source: "E 05-motion/01 §7.1 (30–60 px/с); токен motion.marketing.loop.marquee-speed 40"
+    source: "каталог эффектов effects.yaml marquee-logos.limits (30–60 px/с); E 05-motion/01 §7.1; токен motion.marketing.loop.marquee-speed 40 — в пределах limits"
     label: "[мнение] + [данные: C]"
     site: "—"
   - id: EG-A11Y-20
@@ -547,6 +565,7 @@ gates:
     modes: [desk, mob]
     metric: derived.scroll_jacking
     op: "false"
+    limits: {ratio_min: 0.5, ratio_max: 1.6}   # путь колеса к ожидаемому
     severity: S
     source: "E 05-motion/02 (скорость и направление не меняются никогда; pin со скрабом — не перехват); motion-spec page.scroll.jacking: never; A L0–L1 forbidden scroll-jacking"
     label: "[исследование: NN/g] [практика]"
@@ -595,6 +614,19 @@ gates:
     label: "[проверено: F2/14, K2 K/02]"
     site: "дополняет SG-A11Y-01"
     fix: "скрим под текстом (фон с альфой ≥ 0,6 или затемнение медиа под колонкой), светлая точка фона не под строками, «дыхание» ≤ 2,5 %"
+  - id: EG-A11Y-28
+    name: "Прелоадер или входной экран: нет видимой «Пропустить» с первой секунды или заставка дольше 3 с"
+    group: a11y
+    modes: [desk, mob]
+    metric: derived.intro_fail
+    op: "empty"
+    limits: {intro_max_ms: 3000, skip_visible_by_ms: 1000}
+    severity: S
+    where: derived.intro_fail
+    source: "creative 05-motion/02 §9 (прелоадер — только L2-кампания по решению: «Пропустить» видна сразу, ≤ 3 с, нет при повторном визите и в reduce, H1, CTA и LCP-элемент — в HTML под заставкой); CRV-AL-12; токен motion.marketing.duration.intro-max 3000. Детектор — слой position: fixed на ≥ 90 % окна в первые 8 с после DOMContentLoaded (баннер cookie — не заставка)"
+    label: "[практика] + [гипотеза: детектор]"
+    site: "—; на L0–L1 прелоадер запрещён уровнем (ambition-levels.yaml forbidden: preloader)"
+    fix: "видимая кнопка «Пропустить» с первого кадра, заставка ≤ 3 с, при повторном визите и в reduce — без заставки"
 
   # ------------------------------------------------------------------ FALLBACK — без JS, без WebGL
   - id: EG-FB-01

@@ -12,7 +12,7 @@ ffmpeg 7.1.5, Pillow 11.3 с AVIF/WebP, Playwright + Chromium, uv, pandoc 3.1, y
 | `render_fetch.py` | То же через headless-браузер: SPA-документация, блоги на JS, арены | `python3 99-raw/tools/render_fetch.py "URL" --scroll [--html]` |
 | `yt_transcript.py` | Поиск по YouTube без API, метаданные, субтитры с таймкодом раз в минуту → `91-videos/transcripts/<id>.md` | `--search "запрос" -n 20`, `--info URL`, `URL --comments 40` |
 | `vtt2md.py` | Собирает транскрипты из уже скачанных `.vtt` и `.info.json` без обращения к YouTube | `python3 99-raw/tools/vtt2md.py ids.txt` |
-| `site_probe.py` (агент A блендер-ресёрча) | Замер живого сайта: переданные байты по категориям и сигнатурам, LCP с элементом, TBT, контексты WebGL/WebGPU, прокрутка колесом, `--mobile` (Pixel 7), `--throttle`, `--reduced-motion` | `python3 ../blender/site_probe.py https://site out/ [--mobile] [--throttle] [--reduced-motion]` |
+| `site_probe.py` (`../blender/`) | Замер страницы с 3D: переданные байты по категориям и сигнатурам, LCP с элементом, TBT, контексты WebGL/WebGPU, прокрутка колесом, `--mobile` (Pixel 7), `--throttle`, `--reduced-motion`, `--no-3d`; ворота — `gate_check.py` | `../blender/site_probe.py https://site out/ [--mobile] [--throttle] [--reduced-motion]` |
 
 ## Субтитры YouTube без HTTP 429 (способ агента V, опыт `99-raw/experiments/V/01-video-catalog/`, 23.09.2026)
 
@@ -317,22 +317,25 @@ Python окружения скилла (`numpy`, `scipy`, `Pillow`, `PyYAML`, `r
 Моделей утилита не вызывает: оценку делает сессия Opus по пакету, код готовит пакет и разбирает ответы. OCR и тяжёлые шаги —
 под блокировкой heavy; при < 1 ГБ свободной памяти OCR не запускается (ошибка в отчёте, вердикт needs_human). Блокировку
 утилита берёт сама и внешним `flock` не оборачивается: если замок уже держит процесс-предок `flock`, повторно не берёт;
-`page_accept.py` с `browser.lock` — то же правило.
+`page_accept.py` с замками тишины — то же правило.
 
-## Приёмка страницы с ИИ-ассетами — `page_accept.py` (агент J, волна 3, 23.09.2026)
+## Приёмка страницы с ассетами — `page_accept.py`
 
-Системный Python 3.13 + Playwright 1.63 (Chromium 153 CfT, `channel="chromium"`) + numpy, Pillow, scipy. Браузерную блокировку
-(`.locks/browser.lock`) берёт сама (ждёт до 900 с); локальный HTML раздаёт встроенным HTTP-сервером (Range для видео) и
-закрывает его. Проверена на 9 тестовых страницах `../../kb/ai-media/10-web-integration/pages/` (27 прогонов, `99-raw/experiments/J/06-pages-measure`).
+Playwright (Chromium, `channel="chromium"`) + numpy, Pillow, scipy, PyYAML. Второе звено ворот после сборки: отчёт
+`accept_<режим>.json` читает `page_gates.py --accept`. Код-репо запускает утилиту соседним чекаутом
+`../strategy/…/scripts/ai-media/page_accept.py`; её же зовёт `motion_check.py --f83`.
+Замки тишины (общий тяжёлый, браузера, ai-media — `page_gates.heavy_lock`) берёт сама; замок, который держит обёртка
+(`slot_run.py`, `flock`), повторно не берёт; `--no-lock` — не брать вовсе. Локальный HTML раздаёт встроенным HTTP-сервером
+(Range для видео) от корня `--root` или по ссылкам `../` страницы и закрывает его.
 
 | Что | Как |
 |---|---|
-| Запуск | `python3 page_accept.py PAGE.html\|URL --out DIR [--mobile] [--throttle] [--no-rm] [--dark] [--click SEL …] [--contrast SEL …] [--budget-first-kb N] [--wait 4000]` |
-| Режимы | десктоп 1440×900 DPR 1 или Pixel 7; второй прогон с `prefers-reduced-motion: reduce` (если нет `--no-rm`); `--throttle` — CPU×4 + 1,6 Мбит/с (CDP, на запрос) |
-| Меряет | байты первого экрана по CDP (`loadingFinished`), LCP (элемент, файл, время, lazy, `fetchpriority`), CLS, TBT, `alt`/`width`/`height`, переотдача, атрибуты видео, пауза (поведенчески: движение на 6-й секунде + видимая кнопка с именем), reduce (0 байт видео, движение < 0,5 %), F83 по буквам (два снимка: с текстом и `color: transparent`), для видео — по кадрам 0/25/50/75 % |
-| Выход | `accept_<режим>.json` (вердикт `pass/fail/warn/ok`, запросы, LCP-кандидаты, контраст по кадрам), `shot_<режим>.jpg`, `shot_rm_<режим>.jpg`; код выхода 0 (PASS) / 1 (FAIL) |
-| Ограничения | лаборатория ≠ поле (CrUX не подключён); троттлинг DevTools не создаёт конкуренции; клик до LCP останавливает LCP; INP не меряется; Safari — нет |
-| Сводка по многим страницам | `99-raw/experiments/J/06-pages-measure/run_all.py` + `summarize.py` → `summary.md` |
+| Запуск | `page_accept.py PAGE.html\|URL --out DIR [--budget-profile <page_type>@L<n>] [--mobile] [--throttle] [--no-rm] [--root DIR] [--dark] [--click SEL …] [--contrast SEL …] [--wait МС] [--first-screen-only] [--loops 3] [--acceptance] [--no-lock]` · `--selftest` |
+| Условия | `budgets.yaml` site `conditions`: окно первого экрана (load + `window_after_load_s`; `--wait` — своё), десктоп — окно и DPR `lab_desktop`, телефон — дескриптор и CPU `lab_mobile` (UA — HeadlessChrome), `--throttle` — сеть и CPU `lab_mobile`; с `--throttle` вес не сравнивается — вес меряет прогон без замедления (`lab_weight`) |
+| Пороги | с `--budget-profile` — профиль site (`page_gates.py`): вес первого экрана выше профиля — WARN, LCP выше цели — WARN, выше «плохо» — FAIL, CLS так же; без профиля вес не сравнивается, LCP и CLS — по порогам, общим для всех уровней; reduce — порог ворот эффектов EG-A11Y-06 (`effect-gates.yaml`), «движется на 6-й секунде» — `limits.moving_pct_min` EG-A11Y-01 |
+| Меряет | вес первого экрана по CDP, LCP (элемент, файл, время, lazy, `fetchpriority`), CLS, TBT, `alt`/`width`/`height`, переотдача, атрибуты видео; медиа первого экрана (`media_first`: видео и холсты, постер, бит на пиксель постера, доля площади под постером — SG-PERF-16); 2.2.2 — первый экран на 6-й секунде (`motion_6s`) и петли всей страницы (`loops`: каждая найденная петля — в экран и через 6 с; `--first-screen-only` — пометка «только первый экран»); reduce записью всей страницы (`reduce.media_kb`, `reduce.motion`: первый экран и паузы прокрутки, % пикселей за 1 с); F83 по буквам (два снимка: с текстом и `color: transparent`), для видео — по кадрам 0/25/50/75 %; `--acceptance` — картинки и вылет на ширинах приёмки `kb/common/acceptance-widths.yaml` |
+| Выход | `accept_<режим>.json` (`device`, `throttle`, `profile`, `thresholds`, `window_after_load_s`, `no_preference`, `reduce`, `acceptance`, вердикт `pass`, `fail`, `warn`, `ok`), `shot_<режим>.jpg`, `shot_rm_<режим>.jpg`; код выхода 0 — FAIL нет, 1 — есть, 2 — ошибка вызова |
+| Ограничения | лаборатория ≠ поле (CrUX не подключён); троттлинг DevTools не создаёт конкуренции; клик до LCP останавливает LCP; INP не меряется; Safari — нет; петли — анимации, видео и холсты WebGL, которые видит браузер (петля на canvas 2D без WebGL не видна) |
 
 ## Ссылки, метки и структура базы — `check_links.py` (агент X, волна 4, 24.09.2026)
 

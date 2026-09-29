@@ -34,25 +34,38 @@ conditions:
   lab_mobile:
     tool: "page_accept.py --mobile --throttle (или Lighthouse mobile)"
     device: "Pixel 7 эмуляция 412×839, DPR 2,625"
+    descriptor: "Pixel 7"   # дескриптор Playwright; UA — как у самого браузера (HeadlessChrome), автоматизация не маскируется
     cpu_slowdown: 4
-    network: {down_kbps: 1600, rtt_ms: 150}
+    network: {down_kbps: 1600, up_kbps: 750, rtt_ms: 150}
     runs: 3
     statistic: median
-    note: "условия близки к Lighthouse mobile; без замедления сети (как замер M) — только для диагностики"
+    note: "условия близки к Lighthouse mobile; без замедления сети (как замер M) — только для диагностики исходов"
   lab_desktop:
     tool: "page_accept.py (десктоп)"
     device: "1440×900, DPR 1"
+    viewport: {width: 1440, height: 900, dpr: 1}
     cpu_slowdown: 1
     network: none
     runs: 3
     statistic: median
+  lab_weight:
+    what: "вес страницы (первый экран, сессия, слои веса) — отдельный прогон без замедления сети: при замедлении в окно первого экрана приходит меньше байт и вес занижен; CPU телефона — как в lab_mobile (замер M)"
+    network: none
+    tools: "page_anatomy.py, page_accept.py без --throttle, motion_check.py; page_accept.py --throttle вес не сравнивает"
+  first_screen:
+    window_after_load_s: 5
+    what: "окно первого экрана: всё, что пришло по сети за load + window_after_load_s без прокрутки и кликов; видео, стартующее само, входит. Одно число для page_anatomy.py, page_accept.py и motion_check.py; окно замера жанра creative C (load + 8 с) — описание рынка, с числами ворот не сравнивается"
+  quiet:
+    what: "TBT, LCP и мс кадра — только на тихой машине: утилиты замера времени (page_accept.py, motion_check.py, site_probe.py, web_view.py) сначала берут общий тяжёлый замок (тот же, что slot_run.py --heavy), потом замок браузера; пара «с 3D / без 3D» и пара с эталоном — подряд в одном прогоне"
+    lock: render
+    basis: "blender испытание 15-showcase (T23): под нагрузкой соседних прогонов TBT 634–827 мс против 76–137 мс в тишине"
   inp_scenario:
     what: "лабораторный INP по сценарию (как page_anatomy.py --inp): меню, CTA, аккордеон, фокус в поле; + одно нажатие во время загрузки (DCL + 500 мс)"
     note: "сценарий после загрузки занижает INP: M — 0 из 111 прогонов > 200 мс при TBT телефона > 200 мс у 55 %"
 
 # ---------------------------------------------------------------- слои веса (называть слой всегда)
 layers:
-  first_screen_kb: "передано по сети за load + 4–6 с без прокрутки и кликов, включая видео, стартующее само (ai-media 10/04 §1.2; M first_screen_kb)"
+  first_screen_kb: "передано по сети за окно первого экрана (conditions.first_screen: load + window_after_load_s) без прокрутки и кликов, включая видео, стартующее само (ai-media 10/04 §1.2; M first_screen_kb)"
   session_kb: "передано за программную прокрутку до конца страницы без кликов (M session_kb)"
   js_first_screen_kb: "JS (все источники), переданный в слое first_screen"
   third_party_first_screen_kb: "сторонние домены (eTLD+1 ≠ сайта) в слое first_screen"
@@ -138,13 +151,14 @@ all_levels:
 
 # ---------------------------------------------------------------- сетка «тип страницы → уровень» (PLAN решение 20)
 page_type_levels:
-  default:
+  ref: "../../creative/01-creative-direction/ambition-levels.yaml#defaults_by_page_type"   # одна таблица умолчаний; page_gates.py и site_validate.py читают её
+  default:   # копия таблицы creative для plan_to_assets.py (level_of); совпадение с ней сверяет page_gates.py --selftest
     L0: [service-page, seo-landing-page, pricing-page, comparison-page, alternatives-page, faq-page, contacts-page, form-page, thank-you-page, legal-page, article-page, blog-index-page, careers-page, case-list-page, not-found-page, specialist-page, location-page, documents-page, search-results-page]
     L1: [landing-lead-services, landing-saas, landing-app, landing-product, landing-event, landing-course, landing-waitlist, landing-lead-magnet, home-multipage, services-index-page, feature-page, use-case-page, about-page, case-page, reviews-page, team-page, program-catalog-page]
     L2: [landing-campaign, portfolio-page]
   rules:
     - "уровень страницы не выше уровня сайта в брифе (site-brief.ambition.level)"
-    - "landing-lead-services: L0 по умолчанию, если доля горячего трафика с телефонов ≥ 50 % и decision_context.price_band ∈ {low, mid} (решение 20)"
+    - "landing-lead-services: L0 по умолчанию по правилу лидогенерации услуг — доля горячего трафика с телефонов и decision_context.price_band (поля ambition-levels.yaml levels[L0].appropriate_for.lead_services; решение 20)"
     - "секции lead-form и pricing — эффекты L0 при любом уровне страницы (creative CRV-AL; решение 20)"
     - "отклонение от умолчания — только с причиной: site-brief.ambition.source ≠ default + note"
     - "specialist-page, location-page, documents-page, search-results-page — L0, program-catalog-page — L1 (5 активных типов словаря v1; S1 2026-09-25 по предложению J и G; 5 типов proposed — после решения владельца)"
@@ -169,7 +183,7 @@ overrides:
 
 # ---------------------------------------------------------------- как разрешать профиль
 resolve:
-  - "1. Разобрать budget_profile '<page_type>@L<n>'; если его нет — уровень из page_type_levels.default и правил."
+  - "1. Разобрать budget_profile '<page_type>@L<n>'; если уровня нет — умолчание типа из ambition-levels.yaml#defaults_by_page_type и правило лидогенерации услуг (levels[L0].appropriate_for.lead_services)."
   - "2. Взять levels[L<n>] (outcome, weight) + all_levels."
   - "3. Наложить overrides['<page_type>@L<n>'] (поле за полем)."
   - "4. Проверить: L<n> ≤ уровня сайта; для lead-services — правило горячего мобильного трафика."
@@ -195,5 +209,5 @@ market_reference:
   WA2025_js_mobile_percentiles_kb: {p25: 270, p50: 646, p75: 1233, p90: 1910}
   WA2025_cwv_pass_home_mobile_by_weight: {"<=1MB": 0.57, "1-2MB": 0.52, "2-3MB": 0.45, "3-4MB": 0.38, "4-5MB": 0.34, ">=5MB": 0.30}
   WA2025_lcp_p75_home_mobile_by_weight_s: {"<=1MB": 2.6, "1-2MB": 3.0, "2-3MB": 3.2, "3-4MB": 3.4, "4-5MB": 3.6, ">=5MB": 3.8}
-  creative_C_L2_desktop_first_screen_mb_no_video: {range: "8,2–9,4", n: "3 из 4 L2-страниц C", status: "предварительно (C1 creative 2026-09-24 16:22, 99-raw/notes/sync/C1-creative-2026-09-24/README.md п. 3)", note: "жанр наградных сайтов, не норма: цель L2 (4,0 МБ десктоп) остаётся; превышение — S и x-gate-exception с причиной и автором (аудит X В-09, решение S2)"}
+  creative_C_L2_desktop_first_screen_mb_no_video: {median: 5.6, q1: 2.5, q3: 9.1, n: 19, source: "creative 03-live-sites-measured/01-effects-sites-measured.md §12; creative CONTRADICTIONS X-17", note: "жанр наградных сайтов, не норма: цель L2 (4,0 МБ десктоп) — между Q1 и медианой жанра; превышение — S и x-gate-exception с причиной кампании и автором; LCP, INP, CLS исключением не снимаются; видео первого экрана — отдельной цифрой (SG-WEIGHT-09)"}
   creative_C_first_screen_video_max_mb: {value: 140.6, note: "видео первого экрана без действия пользователя у эффектных сайтов C — считать отдельной цифрой (SG-WEIGHT-09)"}
