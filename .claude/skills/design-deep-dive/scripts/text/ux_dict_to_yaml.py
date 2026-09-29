@@ -572,7 +572,7 @@ def selftest(src: Path, lengths_src: Path) -> int:
         check(f"проба {rid}: «{probe}» — {'находка' if want else 'тишина'}", r is not None and got == want)
     node = kbpaths.find("node")
     if not node:
-        print("SKIP сверка шаблонов в JS: node не найден (install.sh ставит Node; в окружении без него — только Python)")
+        print("SKIP сверка шаблонов в JS: node не найден (системный Node; путь — kbpaths.py --bins); без него — только Python")
     else:
         try:
             res = subprocess.run([node, "-e", JS_PROBE], input=json.dumps(items, ensure_ascii=False), text=True,

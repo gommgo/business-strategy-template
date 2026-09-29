@@ -1321,9 +1321,15 @@ BUNDLE_RX = re.compile(r'оферт|рассылк|реклам|маркетин
 BY_BUTTON_RX = re.compile(r'нажима\w+\s+(?:на\s+)?кнопк\w*[^.]{0,80}соглаша', re.I)
 
 
-def check_forms(F, desk, form_sets, allowed):
-    """Формы по lead-forms.yaml: запреты `forbidden`, видимые в DOM, — у любой формы; поля и подписи — против наборов
-    --forms (форма страницы ↔ набор по наибольшему совпадению полей)."""
+# Запреты формы заявки сайта: согласие на обработку ПД и обязательный комментарий первичной заявки. У экрана
+# приложения формы служебные (заявка менеджера, настройки) — эти запреты к ним не относятся.
+LEAD_ONLY = {'prechecked-consent', 'no-separate-consent', 'consent-by-button', 'bundled-consent', 'required-comment'}
+
+
+def check_forms(F, desk, form_sets, allowed, surface='page'):
+    """Формы по lead-forms.yaml: запреты `forbidden`, видимые в DOM, — у любой формы, запреты формы заявки (LEAD_ONLY) —
+    только у страницы сайта; поля и подписи — против наборов --forms (форма страницы ↔ набор по наибольшему совпадению
+    полей)."""
     lf = lead_forms()
     lib, forb = lf['fields'], lf['forbidden']
     modal_max = (lf['defaults'] or {}).get('modal_max_fields')
@@ -1358,6 +1364,8 @@ def check_forms(F, desk, form_sets, allowed):
         if fm['in_dialog'] and modal_max and len(people) > modal_max:
             bad.append(('modal-long-form', 'major', f'форма в окне из {len(people)} полей (> {modal_max})'))
         for fid, sev, msg in bad:
+            if surface != 'page' and fid in LEAD_ONLY:
+                continue
             rule = (forb.get(fid) or {}).get('rule') or ''
             add(F, 'FORM-FORBIDDEN', sev, view, f"форма {fm['el']}: {msg}",
                 {'form': fm['el'], 'forbidden': fid, 'rule': rule}, 'снять запрещённый приём формы (lead-forms.yaml, '
@@ -1773,7 +1781,7 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
                 {'examples': [q['text'][:90] for q in quotes[:4]]})
 
     # ---------- формы по lead-forms.yaml
-    check_forms(F, desk, opts.get('form_sets'), allowed)
+    check_forms(F, desk, opts.get('form_sets'), allowed, opts.get('surface', 'page'))
 
     # ---------- наложение текста
     ov = [dict(o, view=v['viewport']) for v in views for o in v.get('text_overlaps', [])]
@@ -2446,6 +2454,10 @@ def cmd_selftest(_a):
     fb = sorted(f['evidence'].get('forbidden') for f in F if f['id'] == 'FORM-FORBIDDEN')
     check('запреты форм: согласие кнопкой, неактивная кнопка, обязательный комментарий',
           fb == ['consent-by-button', 'disabled-submit', 'required-comment'], fb)
+    Fa = analyze('http://x/', [_view(forms=[form])], None, None, None, None, set(), [], dict(opts, surface='app', preset='C'))
+    fa = sorted(f['evidence'].get('forbidden') for f in Fa if f['id'] == 'FORM-FORBIDDEN')
+    check('служебная форма экрана приложения: без запретов формы заявки, неактивная кнопка — находка',
+          fa == ['disabled-submit'], fa)
     ff = next((f for f in F if f['id'] == 'FORM-FIELDS'), None)
     check('поля против набора callback: нет preferred-time, лишние email и task, у почты нет подписи',
           ff and ff['evidence']['missing'] == ['preferred-time'] and sorted(ff['evidence']['extra']) == ['email', 'task']
