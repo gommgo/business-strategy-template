@@ -1,0 +1,195 @@
+# system.schema.yaml — схема карты решений дизайн-системы `docs/projects/<slug>/design/system.yaml`
+#
+# JSON Schema (draft 2020-12), записанная в YAML. Экземпляр — один файл на продукт: решения дизайн-системы (ДС), которые
+# не токены. Поля — форма `docs/projects/_template/design/_template/system.yaml` (канон — `docs/projects/_template/design/
+# README.md`, разделы «ДС», «Покрытие компонентов», «Расширения словаря», «Конвенции ДС»).
+#
+# Схема проверяет форму. Сверку со словарём — тип компонента есть в `types` словаря `kb/common/components.yaml` или в
+# расширениях, состояния — из `element_states`, роли текста — из закрытого списка, компонент есть в артефакте ДС и
+# нарисовал нужные состояния — ведёт утилита покрытия `scripts/project/ds_coverage.py`: словарь живёт в одном месте, и
+# схема его не копирует.
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "urn:app-design:common:system:1"
+title: "system — карта решений дизайн-системы продукта"
+description: >-
+  Статус всей ДС и «Keep» заказчика, сопоставление «тип словаря → компонент ДС → используемые необязательные
+  состояния», расширения словаря проекта с клавиатурным контрактом и ролями текста частей, стиль на каждую роль
+  текста, конвенции продукта, эталонные экраны кабинета.
+x-form: "docs/projects/_template/design/_template/system.yaml"
+
+type: object
+required: [system_version, status]
+additionalProperties: false
+patternProperties:
+  "^x-": {description: "Расширения проекта; утилиты их не проверяют."}
+properties:
+  example:
+    type: boolean
+    description: "true — иллюстрация (пример базы, фикстура утилит), не данные проекта."
+  system_version:
+    const: 1
+    description: "Версия формы карты решений."
+  status:
+    enum: [draft, proposed, approved]
+    description: "Статус всей ДС: approved — «Keep» заказчика до экранов."
+  approval:
+    type: object
+    additionalProperties: false
+    required: [by, date]
+    description: "Кто и когда сказал «Keep»; обязательно при approved."
+    properties:
+      by: {type: string, minLength: 1, description: "Роль у заказчика; имя — только с его согласия."}
+      date: {$ref: "#/$defs/date"}
+  components:
+    type: object
+    description: >-
+      Тип словаря → компонент ДС. Ключ — тип, названный в стабильных экранах (`ui:<Тип>`), у сайта — типы слотов
+      действия и форм планов. Один компонент ДС законно закрывает несколько типов; два компонента на один тип — дефект.
+      Обязательные состояния типа сюда не копируются: они читаются из словаря.
+    propertyNames: {$ref: "#/$defs/type-name"}
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      required: [component]
+      properties:
+        component:
+          type: string
+          pattern: "^[A-Za-z][A-Za-z0-9-]*$"
+          description: "Имя компонента ДС — папка components/<Имя>/ артефакта Design System."
+        optional_states:
+          type: array
+          uniqueItems: true
+          items: {$ref: "#/$defs/state"}
+          description: "Необязательные состояния типа (states.optional словаря), которые продукт использует."
+        note:
+          type: string
+          description: "Когда какой вариант компонента."
+  extensions:
+    type: array
+    description: "Расширения словаря проекта: тип, которого в словаре нет; поля — components.yaml#project_extension и ещё keyboard и text_roles."
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, name, purpose, why_not, behavior, states, keyboard, text_roles]
+      properties:
+        id:
+          $ref: "#/$defs/type-name"
+          description: "Имя типа в PascalCase; не совпадает с ключами types словаря и их aka."
+        name: {type: string, minLength: 1}
+        purpose: {type: string, minLength: 3, description: "Потребность, которую не закрывает ни один тип словаря."}
+        why_not: {type: string, minLength: 3, description: "Ближайший тип словаря и почему он не подходит."}
+        behavior: {type: string, minLength: 3, description: "Нормы поведения — адрес базы или решение владельца продукта."}
+        states:
+          type: object
+          additionalProperties: false
+          required: [required]
+          description: "Только из element_states словаря; своего состояния проект не заводит."
+          properties:
+            required: {type: array, uniqueItems: true, minItems: 1, items: {$ref: "#/$defs/state"}}
+            optional: {type: array, uniqueItems: true, items: {$ref: "#/$defs/state"}}
+        parts:
+          type: array
+          uniqueItems: true
+          items: {$ref: "#/$defs/type-name"}
+          description: "Части составного компонента, если есть."
+        keyboard:
+          type: string
+          minLength: 3
+          description: "Клавиатурный контракт: клавиши, порядок фокуса, роль ARIA; без него тип не принимается."
+        text_roles:
+          type: object
+          description: "Роль текста каждой текстовой части: {<ИмяТипа>.<Часть>: [<роль>]}; нет текстовых частей — {}."
+          propertyNames: {pattern: "^[A-Z][A-Za-z0-9]*(\\.[A-Z][A-Za-z0-9]*)?$"}
+          additionalProperties:
+            type: array
+            minItems: 1
+            items: {$ref: "#/$defs/role"}
+  text_styles:
+    type: object
+    description: >-
+      Роль текста → стиль текста ДС: роли — закрытый список ux 07/06 §7.2 и body, стили — токены type.*. Стиль заголовка
+      секции сайта задаёт подача секции (treatment.display_role) — в таблицу он не входит.
+    propertyNames: {$ref: "#/$defs/role"}
+    additionalProperties:
+      type: string
+      pattern: "^type\\.[A-Za-z0-9][A-Za-z0-9-]*(\\.[A-Za-z0-9][A-Za-z0-9-]*)*$"
+  conventions:
+    type: object
+    additionalProperties: false
+    description: "Одно решение на продукт — для сайта, кабинета и писем."
+    properties:
+      range_sign:
+        enum: ["–", "—"]
+        description: "Знак диапазона: «–» по умолчанию, «—» — вариант (text 08/02 §1.3)."
+      thousands_space:
+        enum: ["U+00A0", "U+202F"]
+        description: "Пробел в разрядах (ux 07/03 §6.6); U+202F — только решением ДС с проверкой глифа."
+      empty_state:
+        type: object
+        additionalProperties: false
+        required: [align]
+        properties:
+          align:
+            enum: [center, start]
+            description: "Выравнивание пустого состояния: center — по умолчанию, start — вариант (ui 06/06 §4)."
+      icons:
+        type: object
+        additionalProperties: false
+        description: "Набор иконок (ui 07/01); файлы — design/_assets/icons/."
+        properties:
+          set: {type: string, minLength: 1}
+          sizes: {type: array, uniqueItems: true, items: {type: number, exclusiveMinimum: 0}}
+          stroke: {type: number, exclusiveMinimum: 0}
+      status_colors:
+        type: object
+        description: "Статус объекта (object.md) → роль цвета токенов."
+        propertyNames: {pattern: "^[a-z0-9]+(-[a-z0-9]+)*\\.[a-z0-9]+(-[a-z0-9]+)*$"}
+        additionalProperties: {type: string, minLength: 1}
+      object_markers:
+        type: object
+        description: "Маркеры объектов в интерфейсе: иконка и роль цвета."
+        propertyNames: {$ref: "#/$defs/slug"}
+        additionalProperties:
+          type: object
+          additionalProperties: false
+          properties:
+            icon: {type: string, minLength: 1}
+            color: {type: string, minLength: 1}
+  starter:
+    type: array
+    description: "Эталонные экраны кабинета — первые принятые экраны макета; идут в раздел «Примеры» контракта генерации экранов."
+    items:
+      type: object
+      additionalProperties: false
+      required: [surface, screen]
+      properties:
+        surface: {$ref: "#/$defs/slug"}
+        screen: {$ref: "#/$defs/slug"}
+allOf:
+  - if: {properties: {status: {const: approved}}, required: [status]}
+    then:
+      required: [approval, conventions]
+      properties:
+        conventions: {required: [range_sign, empty_state]}
+
+$defs:
+  date:
+    type: string
+    pattern: "^[0-9]{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?$"
+    description: "ISO-дата ГГГГ-ММ-ДД или ГГГГ-ММ строкой."
+  slug:
+    type: string
+    pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+  type-name:
+    type: string
+    pattern: "^[A-Z][A-Za-z0-9]*$"
+    description: "Тип компонента в PascalCase — ключ types словаря или id расширения."
+  state:
+    type: string
+    pattern: "^[a-z]+(-[a-z]+)*$"
+    description: "Состояние элемента — ключ element_states словаря компонентов."
+  role:
+    type: string
+    pattern: "^[a-z]+(-[a-z]+)*$"
+    description: "Роль текста — закрытый список ux 07/06 §7.2 и body."

@@ -1,0 +1,122 @@
+# brand.schema.yaml — схема бренда продукта `docs/projects/<slug>/design/brand.yaml`
+#
+# JSON Schema (draft 2020-12), записанная в YAML. Экземпляр — один файл на продукт: его читают бриф сайта и бриф на вид
+# кабинета (`brand.ref`), дизайн-система и вход холста. Поля — форма `docs/projects/_template/design/_template/brand.yaml`
+# (канон — `docs/projects/_template/design/README.md`): бренд после чистки без выражения бренда — выражение своё у
+# каждого мира и живёт в брифе сайта (`brand.expression` схемы site-brief); голос — ссылкой `voice_ref` на профиль голоса
+# продукта. Роли цвета и пары контраста — cd 06/02 §2; чистка фактов бренда — cd 06/02 §3.
+#
+# Факты бренда — логотип, фирменные цвета и шрифты, брендбук — материалы заказчика: схема проверяет форму, а не
+# происхождение значений.
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "urn:app-design:common:brand:1"
+title: "brand — бренд продукта после чистки"
+description: >-
+  Имя, статус и подтверждение, брендбук, SVG-логотип с запретами, фирменные цвета ролями и запретные оттенки, шрифты с
+  проверенной кириллицей, лицензией и заменой с причиной, ссылка на профиль голоса, источники фактов. Нет бренда —
+  status: none, остальные поля пустые.
+x-form: "docs/projects/_template/design/_template/brand.yaml"
+
+type: object
+required: [name, status]
+additionalProperties: false
+patternProperties:
+  "^x-": {description: "Расширения проекта; утилиты их не проверяют."}
+properties:
+  example:
+    type: boolean
+    description: "true — иллюстрация (пример базы, фикстура утилит), не данные проекта."
+  name:
+    type: string
+    minLength: 1
+    description: "Имя бренда."
+  status:
+    enum: [none, draft, verified]
+    description: "none — бренда нет; draft — собран, заказчик не подтвердил; verified — заказчик подтвердил факты бренда."
+  approval:
+    $ref: "#/$defs/approval"
+    description: "Кто и когда подтвердил факты бренда; обязательно при status: verified."
+  guidelines_ref:
+    type: string
+    description: "Брендбук: строка docs/business/material.md или файл в design/_assets/brand/."
+  logo:
+    type: object
+    additionalProperties: false
+    properties:
+      files:
+        type: object
+        additionalProperties: false
+        description: "Только SVG; файлы — design/_assets/brand/, строки — манифест design/_assets/."
+        properties:
+          primary: {$ref: "#/$defs/svg"}
+          on_dark: {$ref: "#/$defs/svg", description: "Версия для тёмного фона."}
+      never:
+        type: array
+        items: {type: string, minLength: 1}
+        description: >-
+          «Никогда»: перерисовывать, перекрашивать, растягивать, добавлять эффекты, ставить на пёстрое фото без подложки —
+          и правила брендбука.
+  colors:
+    type: object
+    additionalProperties: false
+    properties:
+      roles:
+        type: object
+        description: "Фирменные цвета, сведённые к ролям (cd 06/02 §2); цвет без роли в систему не идёт."
+        propertyNames:
+          enum: [background, surface, text, muted, border, accent, accent_hover, on_accent, focus]
+        additionalProperties: {type: string, minLength: 1, description: "Значение цвета CSS (#rrggbb, rgb(), oklch())."}
+      avoid:
+        type: array
+        items: {type: string, minLength: 1}
+        description: "Оттенки, которые запрещает бренд (брендбук или слово заказчика), с причиной."
+  fonts:
+    type: object
+    additionalProperties: false
+    properties:
+      families:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [role, family]
+          properties:
+            role: {enum: [heading, body, accent]}
+            family: {type: string, minLength: 1}
+            cyrillic: {type: boolean, description: "true — кириллица есть и проверена отрисовкой."}
+            license: {type: string, description: "Веб-лицензия; файлы — design/_assets/fonts/ вместе с лицензией."}
+            replaces:
+              type: object
+              additionalProperties: false
+              required: [family, why]
+              description: "Только при замене: у фирменного шрифта нет веб-лицензии или кириллицы."
+              properties:
+                family: {type: string, minLength: 1}
+                why: {type: string, minLength: 3}
+  voice_ref:
+    type: string
+    description: "Профиль голоса уровня продукта — путь от файла бренда (../voice.yaml)."
+  sources:
+    type: array
+    items: {type: string, minLength: 1}
+    description: "Откуда факты: строки docs/business/material.md, замер measure_ui.py (адрес и дата), слово заказчика."
+allOf:
+  - if: {properties: {status: {const: verified}}, required: [status]}
+    then: {required: [approval]}
+
+$defs:
+  approval:
+    type: object
+    additionalProperties: false
+    required: [by, date]
+    properties:
+      by: {type: string, minLength: 1, description: "Роль у заказчика; имя — только с его согласия."}
+      date: {$ref: "#/$defs/date"}
+  date:
+    type: string
+    pattern: "^[0-9]{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?$"
+    description: "ISO-дата ГГГГ-ММ-ДД или ГГГГ-ММ строкой."
+  svg:
+    type: string
+    pattern: "\\.svg$"

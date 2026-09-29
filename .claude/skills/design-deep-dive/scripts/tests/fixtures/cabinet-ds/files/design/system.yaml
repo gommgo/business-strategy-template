@@ -1,0 +1,64 @@
+# Иллюстрация: карта решений ДС демо-кабинета «Отвес» (фикстура cabinet-ds) — для самопроверок утилит скилла, не данные
+# проекта. Форма — docs/projects/_template/design/_template/system.yaml.
+example: true
+system_version: 1
+status: approved
+approval: {by: владелец продукта (демо), date: "2026-09-29"}
+
+components:
+  Alert: {component: Callout, note: "вариант inline — сообщение в блоке"}
+  Banner: {component: Callout, note: "вариант banner — на всю ширину каркаса"}
+  Button: {component: Button}
+  DescriptionList: {component: DescriptionList, optional_states: [skeleton]}
+  EmptyState: {component: EmptyState}
+  Field: {component: Field}
+  KpiTile: {component: KpiTile}
+  Link: {component: Link}
+  Pagination: {component: Pagination}
+  Progress: {component: Progress}
+  SearchInput: {component: SearchInput}
+  Select: {component: Select}
+  Sidebar: {component: Sidebar}
+  Skeleton: {component: Skeleton}
+  Table: {component: Table}
+  TextInput: {component: TextInput}
+  TopBar: {component: TopBar}
+
+extensions:
+  - id: AddressMap
+    name: Карта адреса
+    purpose: "Показать объект заявки на карте города, чтобы замерщик спланировал выезд"
+    why_not: "Image не интерактивна; сторонний виджет карты — расширение проекта (components.yaml, outside)"
+    behavior: "Решение владельца продукта (демо): карта только показывает адрес, правка адреса — в форме заявки"
+    states: {required: [rest, focus-visible], optional: []}
+    parts: [Pin]
+    keyboard: "Tab — фокус на карту (роль region с подписью); стрелки — сдвиг карты; Enter на метке — адрес в карточке"
+    text_roles: {AddressMap.Pin: [label]}
+
+text_styles:
+  action: type.body-strong
+  banner: type.body
+  body: type.body
+  column-header: type.label
+  confirm-title: type.title
+  empty: type.body
+  error: type.caption
+  inline-message: type.body
+  label: type.label
+  link: type.body
+  placeholder: type.body
+  status: type.caption
+  title: type.title
+
+conventions:
+  range_sign: "–"
+  thousands_space: "U+00A0"
+  empty_state: {align: center}
+  icons: {set: lucide, sizes: [16, 20], stroke: 1.5}
+  status_colors:
+    request.new: color.status.info
+    request.scheduled: color.status.warning
+    request.measured: color.status.success
+    request.declined: color.status.danger
+  object_markers:
+    request: {icon: clipboard-list, color: color.status.info}

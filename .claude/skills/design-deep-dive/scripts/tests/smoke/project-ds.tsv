@@ -1,1 +1,4 @@
 path	kind	smoke	xfail
+scripts/project/ds_build.py	utility	help; run: --selftest	
+scripts/project/ds_sync.py	utility	help; run: --selftest	
+scripts/project/ds_coverage.py	utility	help; run: --selftest	

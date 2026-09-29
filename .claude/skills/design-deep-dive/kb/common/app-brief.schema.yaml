@@ -1,0 +1,339 @@
+# app-brief.schema.yaml — схема брифа на вид кабинета `docs/projects/<slug>/design/app-brief.yaml`
+#
+# JSON Schema (draft 2020-12), записанная в YAML. Экземпляр — один файл на продукт, когда у продукта есть поверхность
+# маршрута кабинета (web рода app, admin, desktop, embed). Поля — форма `docs/projects/_template/design/_template/
+# app-brief.yaml` (канон — `docs/projects/_template/design/README.md`): ядро `core` — первый вход дизайна кабинета,
+# раздел `surfaces.<surface>` — второй вход, после стабильных экранов поверхности.
+#
+# Поля project, intake, languages, constraints, themes, brand, assets_available, references, questions — общие с брифом
+# сайта (схема `kb/site/10-playbooks-contracts/schemas/site-brief.schema.json`): те же имена и смысл. Отраслевой режим
+# и роль референса — ссылками на схемы-владельцы (meaning, site-brief), поэтому валидатору нужны и они. Проекции ядра
+# (x-fill: projection) сверяет с источниками аудит слоя; схема проверяет форму.
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "urn:app-design:common:app-brief:1"
+title: "app-brief — бриф на вид кабинета, один на продукт"
+description: >-
+  Паспорт брифа, общие с брифом сайта поля, ядро (проекции слоя проекта и авторские решения: плотность, характер,
+  запреты), карточки стиля и выбор заказчика, мудборд, снятые приметы, раздел на каждую поверхность кабинета.
+x-form: "docs/projects/_template/design/_template/app-brief.yaml"
+x-fill-legend:
+  projection: "проекция источника слоя проекта: значение правится в источнике, здесь пересобирается"
+  customer: "знает только заказчик: спросить; в клиентском режиме — черновик клиента"
+  claude: "агент предлагает «допущением» и показывает строкой «Going with»; подтверждает владелец продукта"
+  derive: "вычисляется из других полей"
+
+type: object
+required: [app_brief_version, project]
+additionalProperties: false
+patternProperties:
+  "^x-": {description: "Расширения проекта; утилиты их не проверяют."}
+properties:
+  example:
+    type: boolean
+    description: "true — иллюстрация (пример базы, фикстура утилит), не данные проекта."
+  app_brief_version:
+    const: 1
+    description: "Версия формы брифа на вид."
+  project:
+    type: object
+    additionalProperties: false
+    required: [slug, status]
+    description: "Паспорт брифа: draft — пишется; proposed — показан владельцу продукта; approved — утверждён."
+    properties:
+      slug: {$ref: "#/$defs/slug", x-fill: derive}
+      status: {enum: [draft, proposed, approved]}
+      approval: {$ref: "#/$defs/approval", description: "Обязательно при approved; имя — только с согласия, иначе роль."}
+  intake:
+    type: object
+    additionalProperties: false
+    properties:
+      raw_ref: {type: string, description: "Строка docs/business/material.md, откуда пришёл материал; текст не копируется."}
+  languages:
+    type: array
+    minItems: 1
+    x-fill: customer
+    description: "Языки интерфейса; второй язык — role: adaptation."
+    items:
+      type: object
+      additionalProperties: false
+      required: [lang, role]
+      properties:
+        lang: {type: string, pattern: "^[a-z]{2}(-[A-Z]{2})?$"}
+        role: {enum: [primary, adaptation]}
+  constraints:
+    type: object
+    additionalProperties: false
+    properties:
+      jurisdiction:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items: {enum: [ru, eu, kz, by, us, other]}
+        x-fill: customer
+        description: "РФ по умолчанию, ЕС — профиль; первый — основной, он же у фактов."
+      legal_category:
+        $ref: "urn:app-design:text-research:meaning:1#/properties/legal_category"
+        x-fill: customer
+      legal_note: {type: string, description: "Только при other."}
+      accessibility:
+        enum: [wcag22-aa, wcag21-aa, not-specified]
+        x-fill: projection
+        description: "Проекция vision, «Devices and accessibility»."
+  themes:
+    type: object
+    additionalProperties: false
+    x-fill: customer
+    description: "Светлая — по умолчанию; тёмная — только с причиной; две темы — переключатель, умолчание по системе (system)."
+    properties:
+      default: {enum: [light, dark, system]}
+      dark:
+        type: object
+        additionalProperties: false
+        properties:
+          needed: {type: boolean}
+          why: {type: string}
+  brand:
+    type: object
+    additionalProperties: false
+    required: [ref]
+    description: "Бренд продукта — design/brand.yaml; поля бренда здесь не повторяются."
+    properties:
+      ref: {type: string, minLength: 1}
+  assets_available:
+    type: object
+    additionalProperties: false
+    x-fill: customer
+    properties:
+      logo_vector: {type: boolean, description: "Логотип в векторе есть."}
+      product_ui: {type: boolean, description: "Есть снимки действующего продукта (переделка)."}
+  references:
+    type: array
+    x-fill: customer
+    description: "Референсы, которые принёс заказчик: запись его слова, source: customer; форма — как у moodboard."
+    items: {$ref: "#/$defs/reference"}
+  questions:
+    type: array
+    description: "Журнал вопросов — форма брифа сайта; withdrawn уходят при утверждении брифа."
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, block, q, default, affects]
+      properties:
+        id: {$ref: "#/$defs/slug"}
+        block: {type: string, minLength: 1, description: "Раздел брифа на вид, к которому вопрос относится."}
+        q: {type: string, minLength: 5}
+        why: {type: string}
+        options: {type: array, items: {type: string}}
+        default: {type: string, description: "Что будет без ответа (строка «Going with»)."}
+        affects: {type: array, minItems: 1, items: {type: string}}
+        priority: {type: integer, minimum: 1, maximum: 3}
+        status: {enum: [open, assumed, answered, withdrawn]}
+        answer: {type: string}
+        source: {type: string}
+        date: {$ref: "#/$defs/date"}
+  core:
+    type: object
+    additionalProperties: false
+    description: "Ядро — первый вход дизайна кабинета: после сценариев слоя проекта, до экранов."
+    properties:
+      app_type:
+        enum: [admin, client, mixed]
+        x-fill: projection
+        description: "Проекция vision, «Name»."
+      postures:
+        type: array
+        x-fill: projection
+        description: "Проекция таблицы постур user.md; surface «—» — на всех поверхностях пользователя."
+        items:
+          type: object
+          additionalProperties: false
+          required: [user, posture]
+          properties:
+            user: {$ref: "#/$defs/slug"}
+            surface: {type: string, pattern: "^([a-z0-9]+(-[a-z0-9]+)*|—)$"}
+            posture: {enum: [sovereign, transient, auxiliary, mixed]}
+      pointer:
+        type: object
+        x-fill: projection
+        description: "Проекция type поверхности: both — указатель и касание; touch — только касание."
+        propertyNames: {$ref: "#/$defs/slug"}
+        additionalProperties: {enum: [both, touch]}
+      ai_layer:
+        type: object
+        additionalProperties: false
+        x-fill: projection
+        properties:
+          present: {type: boolean}
+          where: {type: array, items: {type: string}}
+      mobile_scope:
+        type: string
+        x-fill: projection
+        description: "Проекция vision, «Devices and accessibility»: сценарии на телефоне или «нет»."
+      status_roles:
+        type: array
+        x-fill: projection
+        items: {type: string, pattern: "^[a-z0-9]+(-[a-z0-9]+)*\\.[a-z0-9]+(-[a-z0-9]+)*$"}
+        description: "Статусы объектов (object.md), которым нужна роль цвета."
+      platform_constraints:
+        type: array
+        x-fill: projection
+        items: {$ref: "#/$defs/slug"}
+        description: "Slug'и строк constraint.md, которые задевают вид."
+      density:
+        type: object
+        additionalProperties: false
+        x-fill: claude
+        description: "Один режим на продукт (ux 03/02 §5); подтверждает владелец продукта."
+        properties:
+          default: {enum: [compact, default, comfortable]}
+          switch: {type: boolean, description: "Переключатель плотности у пользователя (при суверенных ролях)."}
+          why: {type: string}
+      character:
+        type: object
+        additionalProperties: false
+        x-fill: claude
+        properties:
+          adjectives: {type: array, items: {type: string, minLength: 1}}
+          temperature: {enum: [warm, neutral, cool], description: "Температура нейтрали (ui 14/09, шаг 1)."}
+      bans:
+        type: array
+        items: {type: string, minLength: 1}
+        description: "Запреты предметно и с проверкой (ui 12/04 §1.4)."
+  style_tiles:
+    type: array
+    x-fill: claude
+    description: "Карточки стиля: ручки характера без раскладки (ui 11/02 §2.4); ручки, заданные ДС продукта, не варьируют."
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, knobs]
+      properties:
+        id: {$ref: "#/$defs/slug"}
+        name: {type: string}
+        adjectives: {type: array, items: {type: string}}
+        knobs:
+          type: object
+          additionalProperties: false
+          description: "Семь ручек характера (ui 14/09, шаг 2)."
+          properties:
+            accent: {type: string}
+            neutral: {type: string}
+            radius: {type: [string, number]}
+            density: {enum: [compact, default, comfortable]}
+            font: {type: string}
+            shadows: {type: string}
+            theme: {type: string}
+        palette: {type: object}
+        type: {type: object}
+        shape: {type: object}
+        density_sizes: {type: object}
+        depth: {type: string}
+        icons:
+          type: object
+          additionalProperties: false
+          properties:
+            set: {type: string}
+            size: {type: [string, number]}
+            stroke: {type: [string, number]}
+        motion: {type: object}
+        contrast_report: {type: object, description: "Посчитанные пары «прошло / не прошло» (build_reference_tokens.py)."}
+        risk: {type: string}
+        refs: {type: array, items: {$ref: "#/$defs/reference"}}
+  choice:
+    type: object
+    additionalProperties: false
+    required: [chosen, chosen_by]
+    description: "Выбор карточки — решение заказчика; после выбора ручки живут в токенах ДС."
+    properties:
+      chosen: {$ref: "#/$defs/slug"}
+      chosen_by: {enum: [customer, default]}
+      date: {$ref: "#/$defs/date"}
+      why: {type: string}
+      merged_from: {type: array, items: {type: string}}
+      rejected:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [id, why]
+          properties:
+            id: {$ref: "#/$defs/slug"}
+            why: {type: string, minLength: 3}
+  moodboard:
+    type: array
+    x-fill: claude
+    description: "Мудборд кабинета; предел числа — как у мудборда арт-дирекции; картинки с площадок не выкачиваются."
+    items: {$ref: "#/$defs/reference"}
+  allow:
+    type: object
+    additionalProperties: false
+    description: "Приметы «дефолтного вида», которые бриф и ДС кабинета снимают осознанно."
+    properties:
+      markers: {type: array, uniqueItems: true, items: {type: string, minLength: 1}, description: "Ключи --allow (common/tells.yaml, домен app-visual)."}
+      why: {type: string}
+  surfaces:
+    type: object
+    description: "Второй вход дизайна кабинета — раздел на поверхность, после её стабильных экранов."
+    propertyNames: {$ref: "#/$defs/slug"}
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      properties:
+        main_screen_type: {type: string, x-fill: projection, description: "Проекция карты экранов (map.md)."}
+        sections: {type: [integer, string], x-fill: projection, description: "Число корневых зон ИА."}
+        density_by_area:
+          type: array
+          x-fill: projection
+          items:
+            type: object
+            additionalProperties: false
+            required: [area, density]
+            properties:
+              area: {type: string, minLength: 1}
+              density: {enum: [compact, default, comfortable]}
+        hierarchy_levels: {type: [integer, string], description: "Уровни иерархии на экран (ux 13/04 §25)."}
+        states_visual: {type: array, items: {type: string}, x-fill: projection}
+        shell:
+          type: object
+          additionalProperties: false
+          x-fill: projection
+          properties:
+            sidebar: {type: [string, number, boolean]}
+            inspector: {type: [string, number, boolean]}
+            content_max: {type: [string, number]}
+allOf:
+  - if: {properties: {project: {properties: {status: {const: approved}}, required: [status]}}, required: [project]}
+    then: {properties: {project: {required: [approval]}}}
+
+$defs:
+  slug:
+    type: string
+    pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+  date:
+    type: string
+    pattern: "^[0-9]{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?$"
+    description: "ISO-дата ГГГГ-ММ-ДД или ГГГГ-ММ строкой."
+  approval:
+    type: object
+    additionalProperties: false
+    required: [by, date]
+    properties:
+      by: {type: string, minLength: 1}
+      date: {$ref: "#/$defs/date"}
+  reference:
+    type: object
+    additionalProperties: false
+    required: [role, take, dont_take]
+    anyOf: [{required: [url]}, {required: [ref]}]
+    description: "Запись референса: место применения — тип экрана или тип словаря ui:<Тип>, одно на запись."
+    properties:
+      url: {type: string, minLength: 1}
+      ref: {type: string, pattern: "^ref:[a-z0-9]+(-[a-z0-9]+)*$", description: "Запись библиотеки референсов creative."}
+      role: {$ref: "urn:app-design:site-research:site-brief:1#/$defs/reference/properties/role"}
+      applies_to: {type: string, minLength: 1}
+      take: {type: array, minItems: 1, items: {type: string, minLength: 3}, description: "Объект + свойство + число."}
+      dont_take: {type: array, minItems: 1, items: {type: string, minLength: 3}}
+      values: {type: string, description: "measured: значения замера | estimated: оценка по картинке."}
+      captured: {type: string, description: "Дата и вьюпорт снятия."}
+      source: {enum: [customer, claude]}
