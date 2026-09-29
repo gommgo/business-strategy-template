@@ -11,8 +11,8 @@
     пиксель), доля площади медиа, которую закрывает постер (poster или картинка поверх видео и холста 3D);
   • видео: autoplay/muted/loop/playsinline/poster/preload, играет ли, длительность, видимая кнопка паузы с именем;
   • 2.2.2 поведением: первый экран на 6-й секунде после load (движение или видео) и петли всей страницы — каждая найденная
-    петля ставится в экран и через 6 с проверяется, движется ли она; без механизма паузы (подписи — page_gates.PAUSE_LABELS,
-    общие с motion_check.py) — провал. С --first-screen-only — только первый экран, отчёт помечает это (петли ниже —
+    петля ставится в экран и через 6 с проверяется, движется ли она; без механизма паузы (подписи — общий список
+    page_gates.PAUSE_LABELS) — провал. С --first-screen-only — только первый экран, отчёт помечает это (петли ниже —
     motion_check.py);
   • prefers-reduced-motion: второй прогон с reduce записью всей страницы — байты видео (нужно 0), движение первого экрана и
     каждой паузы прокрутки, % пикселей за 1 с в двух парах кадров подряд — непрерывное движение есть в обеих, разовое
@@ -21,7 +21,9 @@
     маска букв — их разница, контраст цвета текста к каждому пикселю фона под буквами (худший, p1, p5); у видео-фона — по
     кадрам 0, 25, 50, 75 % длительности, итог — худший кадр;
   • фавиконы и og:image (есть ли, размеры в разметке); --acceptance — картинки и горизонтальный вылет на ширинах приёмки
-    (kb/common/acceptance-widths.yaml; вылет больше limits.overflow_px строки SG-MOB-01 — WARN; с --dark — тёмная тема).
+    (kb/common/acceptance-widths.yaml; ширины не больше окна телефона лаборатории — с DPR и касанием его дескриптора, шире —
+    с DPR десктопа, явный --dpr задаёт DPR на всех ширинах; вылет больше limits.overflow_px строки SG-MOB-01 — WARN; с
+    --dark — тёмная тема).
 Пороги: с --budget-profile <page_type>@L<n> — профиль site (page_gates.py): вес первого экрана выше профиля — WARN; LCP
 выше цели — WARN, выше «плохо» — FAIL; CLS так же. Без профиля вес не сравнивается, а LCP и CLS — только по порогам, общим
 для всех уровней. Условия лаборатории (телефон — дескриптор Pixel 7, CPU ×4, сеть; десктоп — окно и DPR) — budgets.yaml
@@ -517,22 +519,39 @@ def run_once(p, url, a, reduce, cond, rm_limit, moving_min):
     return res, browser
 
 
-def acceptance_run(p, url, a):
+def acceptance_context(w, a, phone):
+    """Окно ширины приёмки: ширина не больше окна телефона лаборатории — телефон (DPR, касание, UA и высота окна
+    дескриптора conditions.lab_mobile), шире — окно десктопа лаборатории (высота и DPR прогона); явный --dpr — DPR на всех
+    ширинах; с --dark — тёмная тема."""
+    if w <= phone['viewport']['width']:
+        kw = dict(phone, viewport={'width': w, 'height': phone['viewport']['height']})
+    else:
+        kw = {'viewport': {'width': w, 'height': a.height}, 'device_scale_factor': a.dpr}
+    if getattr(a, 'dpr_set', False):
+        kw['device_scale_factor'] = a.dpr
+    kw['color_scheme'] = 'dark' if a.dark else 'light'
+    return kw
+
+
+def acceptance_run(p, url, a, cond):
     """Ширины приёмки (kb/common/acceptance-widths.yaml): переотдача картинок, картинки без размеров, горизонтальный вылет;
-    на ширине overflow_only — только вылет. Высота окна и DPR — окно десктопа лаборатории (параметр прогона, не норма);
-    с --dark — тёмная тема на тех же ширинах."""
+    на ширине overflow_only — только вылет. Окно ширины — acceptance_context (узкие ширины — телефон лаборатории). Вылет —
+    ширина документа минус ширина приёмки: телефон расширяет область раскладки под широкое содержимое, и innerWidth
+    вылета не показывает."""
     widths, over_only = acceptance_widths()
+    phone = PG.mobile_device(p, cond)
     out = []
     b = p.chromium.launch(channel='chromium', headless=True)
     try:
         for w in widths + ([over_only] if over_only else []):
-            ctx = b.new_context(viewport={'width': w, 'height': a.height}, device_scale_factor=a.dpr,
-                                color_scheme='dark' if a.dark else 'light')
+            kw = acceptance_context(w, a, phone)
+            ctx = b.new_context(**kw)
             page = ctx.new_page()
             page.goto(url, wait_until='load', timeout=120000)
             page.wait_for_timeout(800)
             d = page.evaluate(DOM)
-            row = {'width': w, 'overflow_px': d['overflow_px']}
+            row = {'width': w, 'device': 'mobile' if kw.get('is_mobile') else 'desktop', 'dpr': d['dpr'],
+                   'overflow_px': max(0, d['overflow_px'] + d['vw'] - w)}
             if w != over_only:
                 row['over'] = [f"{i['src']} ×{i['over']}" for i in d['imgs'] if i['above'] and i['over'] and i['over'] > OVERSERVE_MAX]
                 row['no_wh'] = [i['src'] for i in d['imgs'] if not i['wh']][:6]
@@ -614,6 +633,7 @@ def run(a):
     a.wait = a.wait if a.wait is not None else PG.window_ms(budgets)
     a.width = a.width or cond['desktop']['width']
     a.height = a.height or cond['desktop']['height']
+    a.dpr_set = a.dpr is not None                    # явный --dpr — DPR и на всех ширинах приёмки
     a.dpr = a.dpr or cond['desktop']['dpr']
     device = 'mobile' if a.mobile else 'desktop'
     th = thresholds(a, budgets, device)
@@ -635,7 +655,7 @@ def run(a):
         p = st.enter_context(sync_playwright())
         no, browser = run_once(p, url, a, False, cond, rm_limit, moving_min)
         rm = None if a.no_rm else run_once(p, url, a, True, cond, rm_limit, moving_min)[0]
-        acc_rows = acceptance_run(p, url, a) if a.acceptance else None
+        acc_rows = acceptance_run(p, url, a, cond) if a.acceptance else None
     for r, nm in ((no, 'shot'), (rm, 'shot_rm')):
         if r:
             Image.open(io.BytesIO(r.pop('screenshot'))).convert('RGB').save(os.path.join(a.out, f'{nm}_{tag}.jpg'), quality=82)
@@ -711,6 +731,19 @@ def selftest():
           [x for x in v4['warn'] if 'вылет' in x] == [f'ширина 320: горизонтальный вылет {ov + 1} px > {ov} (SG-MOB-01)'])
     check('подписи механизма паузы — page_gates.PAUSE_LABELS: выражение подставлено в PAUSE',
           PG.pause_label_re_js() in PAUSE and '__PAUSE_RE__' not in PAUSE)
+    from types import SimpleNamespace
+    ph = {'viewport': {'width': 412, 'height': 839}, 'device_scale_factor': 2.625, 'is_mobile': True, 'has_touch': True,
+          'user_agent': 'x HeadlessChrome/1'}
+    a0 = SimpleNamespace(height=900, dpr=1, dpr_set=False, dark=False)
+    k412, k413 = acceptance_context(412, a0, ph), acceptance_context(413, a0, ph)
+    check('ширины приёмки: до окна телефона (412) — телефон (DPR, касание, высота окна), шире — окно десктопа (DPR прогона)',
+          (k412['viewport'], k412['device_scale_factor'], k412['is_mobile'], k412['has_touch'])
+          == ({'width': 412, 'height': 839}, 2.625, True, True)
+          and (k413['viewport'], k413['device_scale_factor'], k413.get('is_mobile')) == ({'width': 413, 'height': 900}, 1, None))
+    a2 = SimpleNamespace(height=900, dpr=2.0, dpr_set=True, dark=True)
+    check('явный --dpr — DPR на всех ширинах приёмки; --dark — тёмная тема',
+          [acceptance_context(w, a2, ph)['device_scale_factor'] for w in (360, 1440)] == [2.0, 2.0]
+          and acceptance_context(360, a2, ph)['color_scheme'] == 'dark')
     with tempfile.TemporaryDirectory() as td:
         pg = os.path.join(td, 'site', 'page')
         os.makedirs(pg)
@@ -752,9 +785,23 @@ def selftest():
                   rep['thresholds']['first_screen_kb'] == 1200 and any('первый экран' in x for x in rep['verdict']['ok']))
             widths, over_only = acceptance_widths()
             acc = rep.get('acceptance') or []
-            check('--acceptance: строка на каждую ширину acceptance-widths.yaml (width, overflow_px, over[], no_wh[]), на '
-                  'overflow_only — только вылет', [x['width'] for x in acc] == widths + [over_only]
-                  and all(set(x) == {'width', 'overflow_px', 'over', 'no_wh'} for x in acc[:-1]) and set(acc[-1]) == {'width', 'overflow_px'})
+            check('--acceptance: строка на каждую ширину acceptance-widths.yaml (width, device, dpr, overflow_px, over[], '
+                  'no_wh[]), на overflow_only — без картинок', [x['width'] for x in acc] == widths + [over_only]
+                  and all(set(x) == {'width', 'device', 'dpr', 'overflow_px', 'over', 'no_wh'} for x in acc[:-1])
+                  and set(acc[-1]) == {'width', 'device', 'dpr', 'overflow_px'})
+            from playwright.sync_api import sync_playwright
+            with sync_playwright() as p:
+                phone = PG.mobile_device(p)
+            narrow = [x for x in acc if x['width'] <= phone['viewport']['width']]
+            wide = [x for x in acc if x['width'] > phone['viewport']['width']]
+            byd = {x['width']: (x['device'], x['dpr']) for x in acc}
+            ddpr = PG.conditions()['desktop']['dpr']
+            check(f"--acceptance: узкие ширины — телефон лаборатории (DPR {phone['device_scale_factor']}), шире — десктоп "
+                  f"(DPR {ddpr}): {byd}",
+                  narrow and wide and all(x['device'] == 'mobile' and x['dpr'] == phone['device_scale_factor'] for x in narrow)
+                  and all(x['device'] == 'desktop' and x['dpr'] == ddpr for x in wide))
+            check('--acceptance: картинка героя 600 px в колонке ≈ 150 px — на телефонных ширинах без переотдачи (при DPR 1 '
+                  'было бы ×4)', all(not x.get('over') for x in narrow if 'over' in x))
             byw = {x['width']: x['overflow_px'] for x in acc}
             check(f'--acceptance: блок 340 px вылетает только на узких ширинах (390 — {byw.get(390)}, 360 — {byw.get(360)}, '
                   f'{over_only} — {byw.get(over_only)} px) → WARN по SG-MOB-01',
@@ -773,7 +820,8 @@ def parser():
     ap.add_argument('--root', help='корень раздачи локальной страницы (по умолчанию — по ссылкам ../ в HTML)')
     ap.add_argument('--contrast', nargs='*', default=[])
     ap.add_argument('--click', nargs='*', default=[], help='селекторы, по которым кликнуть после load (состояние)')
-    ap.add_argument('--width', type=int); ap.add_argument('--height', type=int); ap.add_argument('--dpr', type=float)
+    ap.add_argument('--width', type=int); ap.add_argument('--height', type=int)
+    ap.add_argument('--dpr', type=float, help='DPR окна десктопа (по умолчанию — budgets.yaml); заданный явно — DPR и на всех ширинах приёмки')
     ap.add_argument('--wait', type=int, help='окно первого экрана после load, мс (по умолчанию — budgets.yaml conditions.first_screen)')
     ap.add_argument('--first-screen-only', action='store_true', help='2.2.2 и reduce — только первый экран (отчёт помечает)')
     ap.add_argument('--loops', type=int, default=3, help='сколько найденных петель проверить через 6 с после показа')

@@ -101,8 +101,8 @@ FAKE_ACTIVITY_RX = re.compile(r'только что (?:купил|записал
                               r'сейчас смотр\w+ \d+|just (?:purchased|bought|signed up)|\d+ people are (?:viewing|looking)|someone in [A-Z]\w+ (?:just|recently)', re.I)
 COUNTDOWN_RX = re.compile(r'(?:setDate\s*\(\s*\w+\.getDate\(\)\s*\+|getDate\(\)\s*\+\s*\d|countdown|обратн\w+ отсч)', re.I)
 PROMO_RX = re.compile(r'акци|скидк|sale|offer ends|до конца', re.I)
-# Подписи механизма паузы движения (кнопка, переключатель, выбор) — основы слов: по ним page_accept.py и motion_check.py
-# узнают паузу для WCAG 2.2.2 (кнопка «Вращение» эталона blender — тоже пауза)
+# Подписи механизма паузы движения (кнопка, переключатель, выбор) — основы слов: по ним page_accept.py, motion_check.py и
+# marketing_audit.py узнают паузу для WCAG 2.2.2 (кнопка «Вращение» эталона blender — тоже пауза)
 PAUSE_LABELS = ('пауз', 'останов', 'стоп', 'выключ', 'запуст', 'воспроизв', 'движени', 'анимац', 'вращени',
                 'pause', 'stop', 'play', 'resume', 'motion', 'animation', 'rotat')
 

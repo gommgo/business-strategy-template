@@ -79,6 +79,8 @@ kbpaths.use("ui")  # ui_audit.py — scripts/ui, color.py — scripts/lib
 import ui_audit as U  # noqa: E402
 from color import hex2oklch  # noqa: E402
 import yaml  # noqa: E402
+kbpaths.use("site")
+import page_gates as PG  # noqa: E402  подписи механизма паузы — общий список ворот страницы
 
 SEV_B, SEV_S, SEV_D = U.SEV_BLOCKER, U.SEV_SERIOUS, U.SEV_POLISH
 BSD = {SEV_B: "B", SEV_S: "S", SEV_D: "D"}
@@ -263,8 +265,8 @@ EXTRA_JS = r"""
   out.anims = anims; out.animTotal = animTotal;
 
   // --- элементы управления движением, видео, курсор, плавная прокрутка, pin
-  const ctrlRe = /(пауз|останов|стоп|выключ|движени|анимац|pause|stop|play|resume|motion|animation)/i;
-  out.pause = Array.from(document.querySelectorAll('button, [role=button], [role=switch], input[type=checkbox], [aria-pressed]')).filter(vis).map(el => {
+  const ctrlRe = __PAUSE_RE__;
+  out.pause =Array.from(document.querySelectorAll('button, [role=button], [role=switch], input[type=checkbox], [aria-pressed]')).filter(vis).map(el => {
       const lb = el.getAttribute('aria-labelledby'); const labs = el.labels ? Array.from(el.labels).map(l => txt(l)).join(' ') : '';
       const wrap = el.closest('label') ? txt(el.closest('label')) : '';
       const name = [el.getAttribute('aria-label') || '', txt(el), el.title || '', labs, wrap,
@@ -348,7 +350,7 @@ EXTRA_JS = r"""
   out.cliche = {headings: heads.length, headings12: heads12.length, eyebrows, eyeEx, mono, accent, splitH, gradText, blobs, glassFirst, bento, pill, grads};
   return out;
 }
-"""
+""".replace("__PAUSE_RE__", PG.pause_label_re_js())   # подписи механизма паузы — page_gates.PAUSE_LABELS
 
 NARROW_JS = "() => ({scrollW: document.documentElement.scrollWidth, innerW: innerWidth, bodyW: document.body ? document.body.scrollWidth : 0})"
 
@@ -1116,6 +1118,8 @@ def selftest():
     check("rgb_css_to_hex", rgb_css_to_hex("rgba(43, 59, 255, 0.35)"), ("#2b3bff", 0.35))
     fonts = load_font_metrics()
     check("cyrillic-display-fonts.yaml читается (≥ 10 гарнитур)", len(fonts) >= 10, True)
+    check("подписи механизма паузы — page_gates.PAUSE_LABELS: выражение подставлено в EXTRA_JS",
+          (PG.pause_label_re_js() in EXTRA_JS, "__PAUSE_RE__" in EXTRA_JS), (True, False))
     # синтетический лендинг: display 96/64/48, секции 120/160, CTA 56, glow, z-index 9999, колонка-картинка 400×900
     rows = [
         _row(0, tag="header", y=0, w=1440, h=72, pt=16, pb=16, pl=48, pr=48),

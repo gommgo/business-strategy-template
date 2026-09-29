@@ -192,7 +192,7 @@ creative — `rhythm`, `composition` …; замечание creative в точ�
 сессию); INP-сценарий после загрузки занижен; классы узлов контраста и распознавание призыва — эвристики, ключевой провал
 подтверждать кадром. Модуль для утилит замера: `resolve_profile()`, `profile_value()`, `conditions()`, `cdp_network()`,
 `mobile_device()`, `heavy_lock()` — одно место условий лаборатории и тишины машины; `PAUSE_LABELS` и `pause_label_re_js()` —
-подписи механизма паузы движения для `page_accept.py` и `motion_check.py`.
+подписи механизма паузы движения для `page_accept.py`, `motion_check.py` и `marketing_audit.py`.
 
 ## `ab_plan.py` — план и проверка A/B (агент P, волна 2, 2026-09-24)
 

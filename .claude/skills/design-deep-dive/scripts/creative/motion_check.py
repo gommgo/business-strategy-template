@@ -28,7 +28,7 @@ Playwright (Chromium), ffmpeg, numpy, Pillow, PyYAML. VLM движения не 
 шрифты) в воротах эффектов — зеркало D: вердикт им ставят ворота страницы site.
 Отчёт: слой подачи по режимам (JS эффектов, JS и wasm 3D — EG-WEIGHT-02, wasm-рантаймы подачи 2D — EG-WEIGHT-11, видео
 первого экрана) против одного порога уровня (EG-WEIGHT-01), картинка первого экрана — ссылкой на бюджет ассета ai-media.
-Подписи механизма паузы (кнопка, переключатель, выбор) — список page_gates.PAUSE_LABELS, общий с page_accept.py.
+Подписи механизма паузы (кнопка, переключатель, выбор) — общий список page_gates.PAUSE_LABELS.
 
 Использование:
   motion_check.py ЦЕЛЬ --level L0|L1|L2 [--page-type landing-saas] [--out DIR] [--modes desk,mob,rm,nojs,nogl]
