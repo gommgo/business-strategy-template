@@ -176,3 +176,40 @@
   «ПРОВЕРИТЬ» 14.
 
 - Пара 3 закрыта: полный смоук — PASS 299, FAIL 0, XFAIL 2, XPASS 7 (минус 7 строк снятых утилит: text 6, creative 1).
+
+## 07. D7 — 3D, окружение и обслуживание (30.09, ≈ 24 мин, в уведомлении — 433 тыс. токенов)
+- Сделано: правлены `scripts/blender/gate_check.py` (+24/−3), `qa_pipeline.py` (+85/−25), README blender (174 → 98 строк),
+  `scripts/install.sh` (+39/−7), `package.json` (+2/−11), `check_links.py` (комментарий), `.gitignore` скилла (−5),
+  `smoke/blender.tsv`, `smoke/maint.tsv`, строки kb `judge.md` §7 (1) и `kb/blender/README.md` (54, 61); сняты
+  `scripts/blender/vote/` (4), `regression/` (2), `maint/orch_check.py`, `calibrate.py`, `calibration.json`,
+  `count_tokens.py`, `layers.py` (−1 905 строк). OE3-07 — `gate_check` код 1 только при B, `qa_pipeline page` — B fail,
+  S review, D сведения; OE3-11, OE3-12 — страница пар 3D — общая `stand_run.py page`, маршрут без регрессии; OE4-16 —
+  esbuild предупреждением, без 8 пакетов песочницы; OE4-18 — пять утилит `maint/` сняты; OE3-04, OV-7 — README blender.
+- Тесты: самопроверки `gate_check` 15/15, `qa_pipeline` 4/4 (новая), `check_links` 47/47, `refcheck` 12; смоук
+  `scripts/blender` PASS 44, `scripts/maint` PASS 19, `scripts/install.sh` PASS 2; `kb.tsv` PASS 18; `sync_check all` — 0;
+  `install.sh --dry-run` — план npm без 8 пакетов.
+- Отступления: новая самопроверка `qa_pipeline`; поля `gates`, `gate_summary`; план npm в `--dry-run`/`--check`; стр. 61
+  — «у page fail — только B»; справка `qa_pipeline` шире места правки. Решение оркестратора — всё принято (Р228).
+- Стыки: код `gate_check` — 1 только при `summary.blocked`; D8, D9 — «Для текстов» отчёта (указатель, `kb/INDEX.md`
+  стр. 248, `phases.md` 3D); оркестратору — переустановка npm и `install.sh --check`.
+- Открыто: упоминания снятого в прозе kb (≈ 15 файлов), эталоны `hero-lazy` и `camera-path-scroll` без постера (B по
+  консоли), справка прочих утилит blender — Ф10; review только по S на страницах с 3D — замер Ф9.
+- Не прочитано: `site_probe.py`, `web_view.py` и прочие утилиты blender вне докстрингов.
+
+## 08. D6a — генерация (30.09, ≈ 32 мин, в уведомлении — 510 тыс. токенов)
+- Сделано: правлены `scripts/ai-media/routing_check.py` (+68/−77), `prompt_compile.py` (+82/−64), `stand_run.py`
+  (+134/−29), тесты компилятора, README ai-media (351 → 130 строк), `smoke/ai-media.tsv`; строки kb — README ai-media,
+  шпаргалка 14/00, рецепт hero 14/01, карта 14/04; сняты `vm_sheet.py`, `validate_recipes.py`. OE3-01, OE3-15, OV-4 —
+  `routing_check` по последним снимкам, сигнал, перед платным вызовом — `estimate` и «да» заказчика; OE3-02, OE3-23 —
+  снимок только где нужен, `jobs` — одно задание; OE3-10 — `stand_run collect` от корня выходов, `page` из выхода
+  `polza.py`; OE3-04, OV-7 — README о текущем; OE3-17 — снятия.
+- Тесты: компилятор 102/102 и 15/15, `stand_run selftest` 15/15; смоук `scripts/ai-media` — PASS 54, FAIL 0, XFAIL 2;
+  `routing_check` — код 0 (было 137 ошибок); `jobs` — 1 задание, 4 ₽.
+- Отступления: `page` — и папка без паспортов; пары между всеми вариантами; `phase5_test` снят из обязательных полей;
+  рецепт hero от готового паспорта. Решение оркестратора — всё принято (Р229); задание без `agent` — как есть, замер Ф9.
+- Стыки: D8 — `kb/INDEX.md` 223–224, `phases.md` (`asset-plan`, `assets`); D9 — указатель (строки `routing_check`,
+  `prompt_compile`, `stand_run`, снятые утилиты), `claude-design.md` — страница вариантов из папки снимков.
+- Открыто: утилиты обслуживания матрицы маршрутов и сценариев (OE3-17) — Ф10; упоминания снятого в прозе kb — Ф10.
+- Не прочитано: `prompt_compile.py` вне мест правки.
+
+- Пара 4 закрыта: npm переустановлен по новому `package.json` (`install.sh`, затем `--check` — 0, «node_modules соответствует»); полный смоук — PASS 289, FAIL 0, XFAIL 2, XPASS 5.
