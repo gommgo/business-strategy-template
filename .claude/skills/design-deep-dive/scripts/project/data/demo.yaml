@@ -1,0 +1,122 @@
+# Нормы и параметры демо-набора (scripts/project/demo_data.py). Нормы — с адресом источника в базе (пути source — от
+# kb/): число и правило — у владельца нормы, правка здесь — только вслед за нормой. Параметры генерации (опорная дата,
+# пояса, масштабы, пробы) — не нормы: набор — пример для макета, а не данные продукта.
+window:
+  value: 50
+  source: "ux/04-components-patterns/01-data-tables.md §2.1"
+  note: "больше 50 записей — пагинация или «показать ещё» и общее число: набор хранит первые 50 записей и count"
+few:
+  value: 1
+  source: "ux/13-app-types/04-master-procedure-brief-to-screens.md §12; ux/06-feedback-states-motion/01-state-matrix.md §6.1"
+  note: "«мало» — одна запись: худший случай раскладки, рассчитанной на много (partial-few)"
+fallback:
+  value: {typical: 20, max: 5000}
+  source: "ux/13-app-types/04-master-procedure-brief-to-screens.md §12"
+  note: "объёмы коллекции без collection.volume — «20 записей», «5000 записей»; объём даёт аналитик"
+relations_many:
+  value: 50
+  source: "ux/13-app-types/04-master-procedure-brief-to-screens.md §12"
+  note: "«объект с 50 связями» — у атрибута ref:<object>[]"
+large_number:
+  value: 1234567890
+  source: "ux/06-feedback-states-motion/01-state-matrix.md §6.2"
+  note: "«очень большое число»: миллионы и миллиарды"
+exotic:
+  value: "Ё. Д’Арк-Ли Ümit Nguyễn 李"
+  source: "ux/06-feedback-states-motion/01-state-matrix.md §6.2; ux/13-app-types/04-master-procedure-brief-to-screens.md §12"
+  note: "проба глифов, а не имя: одна буква, апостроф, дефис, диакритика, не-латиница, иероглиф"
+dates:
+  source: "ux/06-feedback-states-motion/01-state-matrix.md §6.2"
+  anchor: "2026-10-01"          # «сегодня» набора: от неё считаются прошлое и будущее; ключ --anchor
+  spread_days: 365              # даты записей — в пределах года от опорной
+  past_days: 3650               # очень старая дата
+  future_days: 45               # будущая дата
+  tz: "+03:00"                  # пояс записей
+  tz_other: "+10:00"            # объект создан в другом поясе
+  tz_other_time: "01:30"        # время той записи: в поясе записей это ещё вчерашний день
+params:
+  optional_empty: 0.2           # доля пустых необязательных атрибутов рангов ниже третьего
+  text_length: [1, 12, 40]      # длины text, если у атрибута нет length: мин / тип / макс
+  number_scale: 100             # масштаб number и money, если в examples объекта нет чисел
+  money_scale: 10000
+  bool_true: 0.3                # доля true у bool
+  many_max: 3                   # сколько значений у enum[] и ref:<object>[] в обычной записи
+# Текст по имени атрибута (поиск без учёта регистра): вместо слов — образец, «#» — цифра.
+patterns:
+  - {match: "телефон|phone", value: "+7 9## ###-##-##"}
+  - {match: "e-?mail|почт", value: "demo-###@example.com"}
+  - {match: "сайт|ссылк|url", value: "https://example.com/####"}
+files:
+  default: pdf
+  by_name:
+    - {match: "фото|изображ|картин|аватар|обложк|photo|image", ext: jpg}
+# Крайние случаи значений — записи рядом с набором. decide — решение, которое проверяет макет (колонка «Решение»
+# источника); applies — к каким атрибутам класс относится.
+cases:
+  - id: longest
+    applies: text
+    source: "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Длина строки»; ux/13-app-types/04-master-procedure-brief-to-screens.md §12"
+    decide: "самое длинное значение: порог обрезки и механизм «показать больше»"
+  - id: shortest
+    applies: text
+    source: "ux/13-app-types/04-master-procedure-brief-to-screens.md §12"
+    decide: "самое короткое значение: колонка и карточка не разваливаются"
+  - id: exotic
+    applies: text
+    source: "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Экзотические имена и адреса»"
+    decide: "одна буква, апостроф, дефис, диакритика, не-латиница: не ломать валидацию и вёрстку"
+  - id: missing
+    applies: optional
+    source: "ux/13-app-types/04-master-procedure-brief-to-screens.md §12 «отсутствующее поле»"
+    decide: "поля нет в записи: явный текст «не указан», не пустая ячейка"
+  - id: "null"
+    applies: optional
+    source: "ux/13-app-types/04-master-procedure-brief-to-screens.md §12 «null»"
+    decide: "значение null: явный текст «не указан», не пустая ячейка"
+  - id: zero
+    applies: number
+    source: "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Ноль»"
+    decide: "«0» и «нет данных» — разные вещи: ноль показан нулём"
+  - id: negative
+    applies: number
+    source: "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Отрицательное»"
+    decide: "знак, цвет, выравнивание; ширина колонки не ломается — если значение бывает отрицательным"
+  - id: large
+    applies: number
+    source: "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Очень большое число»"
+    decide: "разрядность, сокращение, табличные цифры"
+  - id: date-past
+    applies: date
+    source: "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Даты»"
+    decide: "очень старая дата: абсолютная дата вместе с относительной"
+  - id: date-future
+    applies: date
+    source: "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Даты»"
+    decide: "будущая дата: не «через −3 дня»"
+  - id: date-today
+    applies: date
+    source: "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Даты»"
+    decide: "дата «сегодня»: относительное время и абсолютное вместе"
+  - id: timezone
+    applies: datetime
+    source: "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Часовые пояса»"
+    decide: "объект из другого пояса: пояс показан явно или время приведено к поясу пользователя"
+  - id: no-relations
+    applies: ref
+    source: "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Отсутствующая связь»; ux/13-app-types/04-master-procedure-brief-to-screens.md §12"
+    decide: "связи нет: явный текст «не указан», не пустая ячейка"
+  - id: many-relations
+    applies: ref-many
+    source: "ux/13-app-types/04-master-procedure-brief-to-screens.md §12 «объект с 50 связями»"
+    decide: "много связей: счётчик и путь ко всем, а не полный список"
+  - id: duplicate
+    applies: ident
+    source: "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Дубликаты»"
+    decide: "два объекта с одним названием: различитель в списке — дата, автор, идентификатор"
+  - id: no-file
+    applies: file
+    source: "ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Отсутствующее изображение»"
+    decide: "файла нет: плейсхолдер или перестроение блока — решает дизайнер"
+localization:
+  source: "ux/13-app-types/04-master-procedure-brief-to-screens.md §12; ux/06-feedback-states-motion/01-state-matrix.md §6.2 «Локализация»"
+  decide: "самая длинная строка роли на каждом языке реестра: подпись переносится, фиксированные ширины не ломаются"

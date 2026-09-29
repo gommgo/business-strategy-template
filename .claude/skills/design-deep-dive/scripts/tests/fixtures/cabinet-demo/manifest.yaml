@@ -1,0 +1,24 @@
+# Фикстура cabinet-demo — иллюстрация для самопроверок scripts/project/demo_data.py и contract.py: чистый кабинет
+# фикстуры cabinet и то, чего демо-набору и контракту генерации в нём не хватает, — атрибуты остальных типов глоссария
+# (деньги, флаг, перечень с несколькими значениями, файл, связь ref:<object>[] для крайнего случая «50 связей») и
+# утверждённая часть реестра текстов (колонки списка и подписи полей бланка — вход этапа mockup берёт только их).
+# Экраны не меняются: tree, states и screen_map по-прежнему чистые. Формат манифеста — докстринг fixture_project.py.
+example: true
+description: кабинет для демо-набора и контракта генерации — атрибуты всех типов, часть текстов утверждена
+project: otves-office
+extends: [cabinet]
+layers:
+  - replace:
+      object.md:
+        - find: "| `request` | `surveyor` | Замерщик | 7 | `text` | `false` | 5 / 16 / 40 | `—` |\n"
+          to: "| `request` | `surveyor` | Замерщик | 7 | `text` | `false` | 5 / 16 / 40 | `—` |\n\
+            | `request` | `budget` | Бюджет ремонта | 8 | `money` | `false` | `—` | `—` |\n\
+            | `request` | `urgent` | Срочно | 9 | `bool` | `false` | `—` | `—` |\n\
+            | `request` | `rooms` | Помещения | 10 | `enum[]` | `false` | `—` | кухня, санузел, комната, коридор |\n\
+            | `request` | `photo` | Фото объекта | 11 | `file` | `false` | `—` | `—` |\n"
+        - find: "| `plan` | `done` | Проведено | 3 | `number` | `true` | `—` | `—` |"
+          to: "| `plan` | `done` | Проведено | 3 | `number` | `true` | `—` | `—` |\n\
+            | `plan` | `requests` | Заявки месяца | 4 | `ref:request[]` | `false` | `—` | `—` |"
+      screens/office/texts.md:
+        - {find: "| колонки списка заявок | — | `checked` |", to: "| колонки списка заявок | — | `approved` |", count: 5}
+        - {find: "| поля бланка заявки | — | `checked` |", to: "| поля бланка заявки | — | `approved` |", count: 3}

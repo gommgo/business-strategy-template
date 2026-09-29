@@ -1,1 +1,4 @@
 path	kind	smoke	xfail
+scripts/project/demo_data.py	utility	help; run: --selftest	
+scripts/project/contract.py	utility	help; run: --selftest	
+scripts/project/data/demo.yaml	data	data	
