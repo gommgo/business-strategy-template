@@ -93,6 +93,7 @@ properties:
         properties:
           needed: {type: boolean}
           why: {type: string}
+      switcher: {type: boolean, description: "Переключатель тем в интерфейсе; при двух темах обязателен."}
   brand:
     type: object
     additionalProperties: false
@@ -334,6 +335,13 @@ $defs:
       applies_to: {type: string, minLength: 1}
       take: {type: array, minItems: 1, items: {type: string, minLength: 3}, description: "Объект + свойство + число."}
       dont_take: {type: array, minItems: 1, items: {type: string, minLength: 3}}
-      values: {type: string, description: "measured: значения замера | estimated: оценка по картинке."}
-      captured: {type: string, description: "Дата и вьюпорт снятия."}
-      source: {enum: [customer, claude]}
+      values:
+        type: object
+        additionalProperties: false
+        minProperties: 1
+        description: "Значения референса: measured — замер по живому интерфейсу, estimated — оценка по картинке."
+        properties:
+          measured: {type: array, minItems: 1, items: {type: string, minLength: 3}}
+          estimated: {type: array, minItems: 1, items: {type: string, minLength: 3}}
+      captured: {type: string, pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}( [0-9]{2,4}x[0-9]{2,4})?$", description: "Дата и вьюпорт снятия."}
+      source: {enum: [customer, claude, creative-library]}

@@ -44,6 +44,7 @@ constraints:
 themes:
   default: light
   dark: {needed: false, why: <причина>}
+  switcher: false                     # true — переключатель тем; при двух темах обязателен
 
 brand: {ref: brand.yaml}              # бренд продукта — design/brand.yaml; поля бренда здесь не повторяются
 
@@ -121,9 +122,9 @@ moodboard:
     applies_to: <место>               # одно место: тип экрана или тип словаря ui:<Тип>
     take: [<объект + свойство + число>]
     dont_take: [<что не брать>]       # всегда: логотип, тексты, фото и цвета чужого бренда, приметы бан-листа
-    values: "<measured: значения замера | estimated: оценка по картинке>"
-    captured: <дата и вьюпорт>
-    source: claude                    # customer · claude
+    values: {measured: [<замер по живому интерфейсу>], estimated: [<оценка по картинке>]}
+    # captured: ГГГГ-ММ-ДД ШxВ         # дата и вьюпорт снятия — у записи с measured
+    source: claude                    # customer · claude · creative-library
 
 allow:                                # приметы «дефолтного вида», которые бриф и ДС кабинета снимают осознанно
   markers: []                         # ключи --allow (kb/common/tells.yaml, checks; домен app-visual)
