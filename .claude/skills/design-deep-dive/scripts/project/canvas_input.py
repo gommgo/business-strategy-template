@@ -5,17 +5,25 @@
 исполнитель читает файлы входа и источники, которые уже есть в нужной форме, по путям манифеста; копий источников во
 входе нет. Руками вход не правится: изменился источник — вход пересобирается.
 
-    canvas_input build <slug> <surface> --stage directions|wireframe|mockup|motion [--repo DIR] [--out DIR] [--json]
-                       [--today ГГГГ-ММ-ДД] [--schema ФАЙЛ …]
-    canvas_input check <slug> [<surface>] [--repo DIR] [--stage …] [--json] [--today …] [--schema ФАЙЛ …]
+    canvas_input build <slug> <surface> --stage directions|wireframe|mockup|motion [--page ID[,ID…] | --screen SLUG[,…]]
+                       [--repo DIR] [--out DIR] [--json] [--today ГГГГ-ММ-ДД] [--schema ФАЙЛ …]
+    canvas_input check <slug> [<surface>] [--page … | --screen …] [--repo DIR] [--stage …] [--json] [--today …]
+                       [--schema ФАЙЛ …]
     canvas_input --selftest
 
-build пишет вход этапа в `design/<surface>/input/`: файлы, которых у этапа нет, удаляются (прошлые входы — в git);
-без `--stage` — этап действующего входа; `--out DIR` пишет в DIR, а не в репозиторий. check ничего не пишет: свежесть
-действующего входа против источников, ручные правки, критерии по роду и проверку входа до публикации по текущим
-источникам; без <surface> — все поверхности с папкой дизайна, у которых есть вход; `--stage` — проверка входа этого
-этапа, даже если входа ещё нет. `--today` — дата сборки для сроков фактов (по умолчанию сегодня). `--schema` — схема с
-ключом x-canvas-map вместо файла базы с тем же именем: так проверяют правку карты до записи в базу.
+Партия входа — единицы, которые холст рисует сейчас: страницы сайта (`--page`, id страницы плана) или экраны кабинета
+(`--screen`, slug экрана); без ключа — все единицы поверхности, у этапа directions — первая страница партии. Во входе —
+только единицы партии: папки `pages/<id>/`, разделы экранов contract.md, строки copy.md и записи demo-data.json экранов
+партии, пункты ACCEPTANCE.md по ним; список партии — поле `units` передней части INPUT.md, остальные единицы — строка
+пробелов «вне партии: …» (у экрана не stable — со статусом); находки единиц вне партии во вход не идут.
+
+build пишет вход этапа в `design/<surface>/input/`: файлы, которых у этапа и партии нет, удаляются (прошлые входы — в
+git); без `--stage` — этап действующего входа; `--out DIR` пишет в DIR, а не в репозиторий. check ничего не пишет:
+свежесть действующего входа против источников, ручные правки, критерии по роду и проверку входа до публикации по текущим
+источникам; без ключа партии — партия из `units` действующего входа (входа нет — все единицы); без <surface> — все
+поверхности с папкой дизайна, у которых есть вход; `--stage` — проверка входа этого этапа, даже если входа ещё нет.
+`--today` — дата сборки для сроков фактов (по умолчанию сегодня). `--schema` — схема с ключом x-canvas-map вместо файла
+базы с тем же именем: так проверяют правку карты до записи в базу.
 
 Раскладка входа (сайт — web рода landing или site; кабинет — web рода app, admin, desktop, embed):
   INPUT.md        манифест: в передней части — этап, итог проверки, отпечатки файлов входа и тела манифеста; в теле —
@@ -35,8 +43,9 @@ build пишет вход этапа в `design/<surface>/input/`: файлы, �
 которое задают несколько карт, собирается одним обработчиком: основное правило — у владельца смысла, остальные —
 запасные по note карты; поле с claude_fills — строка «Going with» манифеста. Перед сборкой — форма и покрытие карт по
 схемам (`spec_check.canvas_check`): поле схемы без правила — ошибка базы, код 2. Заполненное поле документа-источника
-покрыто указателем from или drop своих карт (или `<id>#…` чужой карты); поле без правила — находка R-FRESH-003 с именем
-поля и схемы, и build вход не пишет. Поля без карт — правила сборщика: project.{surface, web_kind, stage},
+покрыто указателем from или drop своих карт (или `<id>#…` чужой карты); ключ `x-*` на любом уровне документа —
+расширение проекта, а не поле; поле без правила — находка R-FRESH-003 warning с именем поля и схемы: во вход оно не
+идёт, вход собирается. Поля без карт — правила сборщика: project.{surface, web_kind, stage},
 design_system.{artifact, tokens}, decisions.{variants, iterations_max, form} («Условия холста» ARTIFACTS.md),
 build.viewports (acceptance-widths.yaml); у кабинета бриф холста — проекция app-brief.yaml (карты у брифа на вид нет).
 
@@ -48,22 +57,29 @@ build.viewports (acceptance-widths.yaml); у кабинета бриф холс�
   design/<s>/motion/<page-id>.motion-spec.yaml или motion_spec_ref подачи · asset-plan
   design/<s>/assets/plans/<page-id>.yaml или refs.asset_plan плана · brand
   design/brand.yaml или brand.ref брифа · system, tokens-css, app-brief, artifacts (ARTIFACTS.md) — design/ продукта ·
-  asset-manifest design/<s>/assets/manifest.yaml · review design/<s>/review/REVIEW.md и checks.json; база —
-  ambition-levels, block-treatments, lead-forms, acceptance-widths, budgets (через page_gates.py --resolve), tells.
+  asset-manifest design/<s>/assets/manifest.yaml · review design/<s>/review/REVIEW.md; база — ambition-levels,
+  block-treatments, lead-forms, acceptance-widths, budgets (через page_gates.py --resolve), tells.
 
+Проверка входа до публикации — итог в манифесте: error держат гейт «чистовой макет — только на утверждённых текстах и
+подтверждённых фактах» у единиц партии и целостность входа, и этап с error не публикуется; остальное — warning с тем же
+правилом и советом: доклад заказчику, решает он.
 Находки (контракт `scripts/project/findings.py`; правила `.claude/skills/design-audit/references/rules.md`):
+  R-MAT-012   error    на макете у единиц партии — тексты не approved (copy deck сайта; строки texts.md экранов партии —
+                       находка R-MAT-003 contract.py становится этой), текстовые слоты плана без текста, copy deck
+                       страницы нет; факты не confirmed, факт без источника, фактов нет; целостность — токенов ДС нет,
+                       источник не разбирается, нет брифа или ни одного плана, остаток шаблона во входе
+  R-MAT-012   warning  план страницы не утверждён; арт-дирекции нет, она не утверждена или направление не выбрано; ДС не
+                       утверждена или не опубликована; плана ассетов нет или он не утверждён, файла ассета нет или у
+                       него нет лицензии; у референса нет роли, «брать», «не брать» или значений; набора формы нет в
+                       lead-forms.yaml; профиль бюджета не резолвится; у движения — статичный макет не принят, нет
+                       спецификации, ошибки spec_check.py spec, кадров видео-референса нет на месте
   R-FRESH-002 warning  вход устарел: отпечаток или статус источника не равен манифесту, источник пропал или появился;
                        сборка по текущей базе даёт другой файл; вход с пометкой «собран без утилиты» не равен сборке
   R-FRESH-003 error    вход правлен руками: файл не равен своему отпечатку в манифесте, лишний или пропавший файл, вход
-                       без манифеста утилиты и без пометки; поле источника без правила x-canvas-map
+                       без манифеста утилиты и без пометки
+  R-FRESH-003 warning  поле источника без правила x-canvas-map — во вход не идёт
   R-FRESH-004 error    критерии приёмки не по роду: у сайта нет групп A–H и блоков I–L или места проверки у пункта, у
                        кабинета нет состояний, доступности и узкого экрана или есть A3
-  R-MAT-012   error    проверка входа до публикации (итог — в манифесте, этап с ошибкой не публикуется): план страницы
-                       не утверждён; на макете — тексты не approved (copy deck сайта; строки texts.md кабинета — находка
-                       R-MAT-003 contract.py становится этой), факты не confirmed, факт без источника, арт-дирекция,
-                       план ассетов или ДС не утверждены, ДС не опубликована, файла ассета нет или у него нет лицензии;
-                       у референса нет роли, «брать», «не брать» или значений; остатки шаблона; у движения — статичный
-                       макет не принят, нет спецификации, ошибки spec_check.py spec, кадров видео-референса нет на месте
   R-MAT-003   warning  на вайрфрейме тексты copy deck и факты не того статуса
   R-COV-007   warning  нет профиля голоса с каналом поверхности или строки тона в нём — строки тона во входе нет; путь —
                        профиль без строки тона, иначе voice.yaml (как у design_audit)
@@ -73,10 +89,22 @@ build.viewports (acceptance-widths.yaml); у кабинета бриф холс�
   R-REF-003   warning  секция или слот copy deck вне плана страницы
   R-REF-008   warning  у файла ассета нет id загрузки в «Загрузках» ARTIFACTS.md
   R-DEBT-002  hint     демо-факты, заглушки фактов и ассетов
-  кабинет: находки contract.py (R-MAT-011 — пункты PRE, R-COV-005, R-DEBT-002; его R-MAT-003 о строках texts.md на
-  макете — R-MAT-012) и перед макетом ds_coverage (R-COV-005) и ds_build (R-STRUCT-006, R-FRESH-001); без ДС — пробел
+  кабинет: находки contract.py по экранам партии (R-MAT-011 warning — пункты PRE, R-COV-005, R-DEBT-002; его R-MAT-003
+  о строках texts.md на макете — R-MAT-012 error), перед макетом ds_coverage (R-COV-005: тип без ключа или компонента —
+  error, не нарисованное состояние — warning) и ds_build (R-STRUCT-006; R-FRESH-001 — warning); без ДС — пробел
   манифеста.
 Списки в сообщениях и пробелах — первые позиции и хвост «и ещё N».
+
+Источники единицы — основа отпечатка одобрения (`unit_sources`, `unit_fingerprint`): страница — план, тексты этой
+страницы в copy deck (text_hash), план ассетов и файлы её слотов по манифесту ассетов, спецификация движения, записи
+фактов из слотов данных плана и fact_ids текстов; экран — файл экрана, блоки его состава и каркас, строки texts.md,
+которые они называют (ключ, текст, статус). У обеих — токены ДС (system.tokens.css, иначе system.tokens.json, иначе
+tokens.json артефакта ДС) и system.yaml без starter; у страницы — ещё бренд и арт-дирекция поверхности, у экрана — бриф
+на вид. ARTIFACTS.md, REVIEW.md, вход, файлы базы, review/ и копии холста в источники единицы не входят.
+Из Python: `assemble(slug, surf, repo, stage, maps, today=None, units=None)` → сборка в памяти (`files`, `rep`, `units`,
+`outside`); `check_surface(…, units=None)` → (находки, сборка); `unit_sources(slug, surface, unit, repo=None)` → строки
+{id, path, fingerprint} или None; `unit_fingerprint(slug, surface, unit, repo=None)` → "sha256:…" по отсортированным
+строкам «id · путь: отпечаток» или None, если единицы нет.
 Код выхода: 0 — нет error; 1 — есть error; 2 — ошибка вызова, окружения или карт базы.
 """
 from __future__ import annotations
@@ -353,11 +381,11 @@ class Maps:
 
 
 def filled_leaves(x, path=()):
-    """Пути заполненных полей данных: словари — по ключам (x-* верхнего уровня — расширения, не поля), списки
-    словарей — элементом «*», пустые значения не считаются."""
+    """Пути заполненных полей данных: словари — по ключам (ключ x-* на любом уровне — расширение проекта, не поле),
+    списки словарей — элементом «*», пустые значения не считаются."""
     if isinstance(x, dict):
         for k, v in x.items():
-            if not path and str(k).startswith("x-"):
+            if str(k).startswith("x-"):
                 continue
             yield from filled_leaves(v, path + (str(k),))
         return
@@ -396,9 +424,9 @@ class Src:
 
 
 class Ctx:
-    """Сборка входа одной поверхности на одном этапе: источники, карты, файлы, находки, пробелы."""
+    """Сборка входа одной поверхности на одном этапе: источники, карты, файлы, находки, пробелы, партия единиц."""
 
-    def __init__(self, slug, surf, repo, stage, maps, today=None):
+    def __init__(self, slug, surf, repo, stage, maps, today=None, units=None, strict=False):
         self.slug, self.surf, self.repo, self.stage, self.maps = slug, surf, Path(repo), stage, maps
         self.surface = surf.slug
         self.route = "app" if surf.app else surf.web_kind
@@ -408,7 +436,11 @@ class Ctx:
         self.rep = F.Report()
         self.gaps = []
         self.going = []
-        self.blocked = False                                # поле источника без правила: build не пишет вход
+        self.want = list(units) if units is not None else None   # партия по запросу; None — все единицы
+        self.strict = strict                                # партия из ключа вызова: чужой id — ошибка вызова
+        self.units = []                                     # единицы входа (партия) — поле units манифеста
+        self.outside = []                                   # единицы поверхности вне партии
+        self.flag = "--screen" if surf.app else "--page"
         self.input_dir = docpaths.design(slug, "input", surface=surf.slug, repo=repo)
         self._kb = {}
 
@@ -427,6 +459,34 @@ class Ctx:
     def gap(self, text):
         if text not in self.gaps:
             self.gaps.append(text)
+
+    def pick(self, ids, notes=None, first=False):
+        """Партия из единиц поверхности (ids — в порядке входа): без запроса — все, first — только первая единица
+        партии (этап directions); id вне единиц — ошибка вызова (ключ) или пробел (партия действующего входа).
+        Единицы вне партии — строка пробелов «вне партии» (notes — пометка единицы, у экрана — статус)."""
+        notes = notes or {}
+        if self.want is None:
+            batch = list(ids)
+        else:
+            lost = [u for u in self.want if u not in ids]
+            if lost and self.strict:
+                what = "экранов" if self.surf.app else "страниц с планом"
+                raise F.ToolError(f"{self.flag}: {', '.join(lost)} — нет среди {what} поверхности {self.surface}; "
+                                  "есть: " + (", ".join(ids) or "—"))
+            if lost:
+                self.gap(f"единиц партии входа нет среди единиц поверхности: {', '.join(lost)} — вход устарел")
+            batch = [u for u in ids if u in self.want]
+        self.units = batch[:1] if first else batch
+        self.outside = [u for u in ids if u not in self.units]
+        if self.outside:
+            word = "экранов" if self.surf.app else "страниц"
+            self.gap("вне партии: " + ", ".join(f"{u} ({notes[u]})" if notes.get(u) else u for u in self.outside)
+                     + f" — во входе этих {word} нет; их вход — build {self.flag} <id>")
+        return self.units
+
+    def batch_arg(self):
+        """Ключ партии для строки вызова: пусто, когда во входе все единицы."""
+        return f" {self.flag} {','.join(self.units)}" if self.outside else ""
 
     def site(self, *parts):
         return docpaths.site(self.slug, self.surface, *parts, repo=self.repo)
@@ -455,13 +515,14 @@ class Ctx:
                 self.add("R-MAT-012", "error", doc_id, doc_id, p, f"проверка входа: источник не разбирается — "
                          f"{s.error}", "исправить файл источника его исполнителем")
         self.sources[key] = s
-        if cover and kind == "project" and isinstance(s.data, (dict, list)) and doc_id in self.maps.by_source:
+        if cover and kind == "project" and isinstance(s.data, (dict, list)) and self.maps is not None \
+                and doc_id in self.maps.by_source:
             for ptr in uncovered(self.maps, doc_id, s.data):
-                self.blocked = True
-                self.add("R-FRESH-003", "error", doc_id, f"{doc_id}#{ptr}", p,
-                         f"поле источника без правила x-canvas-map: {ptr} "
+                self.add("R-FRESH-003", "warning", doc_id, f"{doc_id}#{ptr}", p,
+                         f"поле источника без правила x-canvas-map: {ptr} — во вход не идёт "
                          f"(карты {doc_id} — {self.maps.schema_of(doc_id)})",
-                         "правило проекции или drop с причиной — у владельца схемы; поле вне схемы — убрать из файла")
+                         "поле вне схемы — в расширение x-… или убрать из файла; поле схемы без правила — правило "
+                         "проекции или drop с причиной у владельца схемы")
         return s
 
     def kb(self, doc_id):
@@ -501,13 +562,15 @@ class Ctx:
         return rows
 
 
-def deck_text_hash(data):
+def deck_text_hash(data, page=None):
     """text_hash copy deck: выбранные тексты, их статусы, тип слота и ссылка на ассет — то, что уходит во вход; записи
-    проверок и заметки отпечаток не меняют."""
+    проверок и заметки отпечаток не меняют. page — только страница с этим page_id (источник единицы)."""
     cd = mod("copydeck")
     deck = cd.deck_root(data)
     parts = [str(deck.get("lang") or "")]
     for p in cd.pages_of(deck):
+        if page is not None and str(p.get("page_id")) != page:
+            continue
         parts.append(f"P {p.get('page_id')} {p.get('status') or 'draft'} {p.get('cta_primary') or ''}")
         for s in cd.sections_of(p):
             for sl in cd.slots_of(s):
@@ -521,9 +584,9 @@ def deck_text_hash(data):
 # ------------------------------------------------------------------ общее: ARTIFACTS.md, голос, бан-лист
 
 def artifacts(ctx):
-    """ARTIFACTS.md продукта: артефакты, загрузки, условия холста поверхности, строка просьбы о проверке."""
+    """ARTIFACTS.md продукта: артефакты, загрузки, условия холста поверхности."""
     s = ctx.load("artifacts", ctx.dprod("artifacts"))
-    out = {"design_system": None, "canvas": None, "uploads": {}, "conditions": None, "checks": None}
+    out = {"design_system": None, "canvas": None, "uploads": {}, "conditions": None}
     if s is None:
         return out
     L = mod("layer")
@@ -548,8 +611,6 @@ def artifacts(ctx):
             out["conditions"] = {k: L.cell(r.get(c)) for k, c in (
                 ("form", "форма результата"), ("paths", "пути прототипа"), ("variants", "вариантов"),
                 ("rounds", "раундов на экран"), ("mobile", "мобильный режим"))}
-    m = re.search(r"^Проверки макета: разрешены — (?!<)(.+)$", md.text, re.M)
-    out["checks"] = m.group(1).strip() if m else None
     return out
 
 
@@ -601,8 +662,8 @@ def voice_projection(ctx, product):
 
 
 def ban_list(ctx, allowed, project_bans, surface_kind):
-    """Бан-лист холста: приметы проверок макета (tells.yaml#checks: look, honesty) поверхности без ключей --allow,
-    запреты проекта и приметы, найденные прошлой итерацией (review/checks.json)."""
+    """Бан-лист холста: приметы проверок макета (tells.yaml#checks: look, honesty) поверхности без ключей --allow и
+    запреты проекта."""
     tl = ctx.kb("tells")
     tells = {t.get("id"): t for t in tl.get("tells") or [] if isinstance(t, dict)}
     out, seen = [], set()
@@ -619,15 +680,7 @@ def ban_list(ctx, allowed, project_bans, surface_kind):
         if c.get("allow"):
             row["allow_key"] = c["allow"]
         out.append(row)
-    out += project_bans
-    chk = ctx.load("review-checks", ctx.dsurf("review") / "checks.json")
-    for f in (get(chk.data, "findings", default=[]) or []) if chk and isinstance(chk.data, dict) else []:
-        tid = f.get("tell") if isinstance(f, dict) else None
-        if tid and tid not in seen and not f.get("allowed"):
-            seen.add(tid)
-            out.append({"tell": tid, "what": one_line((tells.get(tid) or {}).get("name") or f.get("message")),
-                        "from": "прошлая итерация (review/checks.json)"})
-    return out
+    return out + project_bans
 
 
 def review_accepted(ctx):
@@ -654,14 +707,13 @@ def acceptance_widths(ctx):
 
 def ds_tokens(ctx):
     """Токены ДС продукта для ширин и тем: CSS → DTCG → tokens.json артефакта; нет — None."""
-    for key, path in (("tokens-css", ctx.dprod("tokens-css")), ("tokens", ctx.dprod("tokens")),
-                      ("ds-artifact-tokens", ctx.dprod("ds-project") / "tokens.json")):
-        if Path(path).is_file():
+    for key, path in ds_token_files(ctx):
+        if path.is_file():
             try:
                 ts = mod("literal_tokens").load_tokens([path])
             except Exception:                               # noqa: BLE001 — битые токены проверяет ds_build
                 continue
-            ctx.load(key if key != "ds-artifact-tokens" else "ds-project", path, cover=False)
+            ctx.load(key, path, cover=False)
             return ts
     return None
 
@@ -700,19 +752,28 @@ class Page:
         return [s for s in self.plan.get("sections") or [] if isinstance(s, dict) and s.get("id")]
 
 
-def site_pages(ctx, brief):
-    """Страницы входа: у лендинга — список брифа (страница основного типа первой), у рода site — build_order карты;
-    страница без плана во вход не идёт, план вне списка — последним."""
+def plan_files(ctx, report=True):
+    """{page.id: файл плана} папки планов поверхности; план без page.id или битый — находка (report)."""
     plans = {}
     pdir = ctx.site("plans")
     for f in sorted(pdir.glob("*.yaml")) if pdir.is_dir() else []:
         data, err = load_doc(f)
         pid = get(data, "page", "id") if isinstance(data, dict) else None
         if not pid:
-            ctx.add("R-MAT-012", "error", "page-plan", f.stem, f, "проверка входа: план не разбирается или у него нет "
-                    "page.id" + (f" — {err}" if err else ""), f"/design-deep-dive {ctx.slug} {ctx.surface} — page-plan")
+            if report:
+                ctx.add("R-MAT-012", "error", "page-plan", f.stem, f, "проверка входа: план не разбирается или у него "
+                        "нет page.id" + (f" — {err}" if err else ""),
+                        f"/design-deep-dive {ctx.slug} {ctx.surface} — page-plan")
             continue
         plans.setdefault(str(pid), f)
+    return plans
+
+
+def site_pages(ctx, brief):
+    """Страницы партии входа: у лендинга — порядок списка брифа (страница основного типа первой), у рода site —
+    build_order карты; страница без плана во вход не идёт, план вне списка — последним; этап directions — первая
+    страница партии."""
+    plans = plan_files(ctx)
     order = []
     if ctx.route == "site":
         sm = ctx.load("site-map", ctx.site("site-map"))
@@ -739,14 +800,15 @@ def site_pages(ctx, brief):
             ctx.add("R-COV-001", "hint", "page-plan", pid, ctx.site("plans"), f"страница `{pid}` без плана — во вход "
                     "холста не идёт", f"/design-deep-dive {ctx.slug} {ctx.surface} — page-plan")
     ids = [pid for pid in order if pid in plans]
-    for pid in plans:
-        if pid not in ids:
-            ids.append(pid)
-            if order:
-                ctx.add("R-COV-001", "hint", "page-plan", pid, plans[pid], f"план страницы `{pid}` вне "
-                        + ("карты сайта" if ctx.route == "site" else "списка страниц брифа") + " — во входе последним")
+    tail = [pid for pid in plans if pid not in ids]
+    ids += tail
+    batch = ctx.pick(ids, first=ctx.stage == "directions")
+    for pid in tail:
+        if order and pid in batch:
+            ctx.add("R-COV-001", "hint", "page-plan", pid, plans[pid], f"план страницы `{pid}` вне "
+                    + ("карты сайта" if ctx.route == "site" else "списка страниц брифа") + " — во входе последним")
     out = []
-    for pid in ids:
+    for pid in batch:
         s = ctx.load("page-plan", plans[pid], page=pid)
         out.append(Page(pid, s.data if isinstance(s.data, dict) else {}, s))
     return out
@@ -824,7 +886,7 @@ def page_perf(ctx, brief, pg):
         return {"exceptions": exc} if exc else None
     res = resolve_profile(ctx, prof, get(brief, "ambition", "level"))
     if res is None:
-        ctx.add("R-MAT-012", "error", "page-plan", f"{pg.id}#/page/budget_profile", pg.src.path,
+        ctx.add("R-MAT-012", "warning", "page-plan", f"{pg.id}#/page/budget_profile", pg.src.path,
                 f"проверка входа: профиль бюджета {prof} не резолвится (page_gates.py --resolve)",
                 f"/design-deep-dive {ctx.slug} {ctx.surface} — page-plan: budget_profile")
         return None
@@ -976,7 +1038,7 @@ def site_brief(ctx, B):
             return [sc.moment_line(sctx, m, sec, base) for sec in main.spec.get("sections") or []
                     for m in sec.get("moments") or []]
         except (KeyError, TypeError) as e:
-            ctx.add("R-MAT-012", "error", "motion-spec", f"{main.id}#/sections", main.spec_src.path,
+            ctx.add("R-MAT-012", "warning", "motion-spec", f"{main.id}#/sections", main.spec_src.path,
                     f"проверка входа: моменты спецификации движения не читаются ({e})", "spec_check.py spec — "
                     "поправить спецификацию")
             return None
@@ -1230,7 +1292,7 @@ def forms(ctx, pg):
                     if form.get(k) is not None})
         fs = sets.get(fid)
         if fs is None:
-            ctx.add("R-MAT-012", "error", "page-plan", f"{pg.id}#{where}", pg.src.path,
+            ctx.add("R-MAT-012", "warning", "page-plan", f"{pg.id}#{where}", pg.src.path,
                     f"проверка входа: форма {where} — набора {ref or '—'} нет в lead-forms.yaml",
                     f"/design-deep-dive {ctx.slug} {ctx.surface} — page-plan")
         else:
@@ -1338,6 +1400,13 @@ def asset_manifest(ctx):
     return {str(r.get("slot")): r for r in rows if isinstance(r, dict) and r.get("slot")}
 
 
+def asset_file(ctx, f):
+    """Файл ассета строки манифеста: от папки ассетов поверхности, от корня данных или от design/ продукта; нет —
+    None."""
+    return next((Path(x) for x in (ctx.dsurf("assets") / str(f), ctx.repo / str(f), ctx.dprod(str(f)))
+                 if Path(x).is_file()), None)
+
+
 def assets_md(ctx, B, pg):
     """pages/<page-id>/assets.md: строка на слот плана ассетов — файл, слот, роль, подпись и alt из copy deck в статусе
     этапа, фокус, варианты, источник и лицензия, id загрузки; пустой слот — заглушка placeholder и TODO."""
@@ -1358,14 +1427,14 @@ def assets_md(ctx, B, pg):
                  if isinstance(x, dict)]
         if media:
             ctx.gap(f"`{pg.id}`: плана ассетов нет — медиа-слоты на артборде заглушкой placeholder: {len(media)}")
-            ctx.add("R-MAT-012" if mockup else "R-COV-004", "error" if mockup else "warning", "asset-plan", pg.id,
+            ctx.add("R-MAT-012" if mockup else "R-COV-004", "warning", "asset-plan", pg.id,
                     ctx.dsurf("asset-plans", f"{pg.id}.yaml"), ("проверка входа: " if mockup else "") +
                     f"медиа-слоты страницы без плана ассетов — {len(media)}",
                     f"plan_to_assets.py build {ctx.slug} {ctx.surface} --write — каркас плана ассетов")
         slots = [{"id": f"{sid}-{x.get('id')}", "section": sid, "slot": x.get("slot"), "role": x.get("media_role"),
                   "source": x.get("source")} for sid, x in media]
     elif mockup and docpaths.status(pg.assets_src.path) != "approved":
-        ctx.add("R-MAT-012", "error", "asset-plan", pg.id, pg.assets_src.path, "проверка входа: план ассетов не "
+        ctx.add("R-MAT-012", "warning", "asset-plan", pg.id, pg.assets_src.path, "проверка входа: план ассетов не "
                 f"утверждён ({docpaths.status(pg.assets_src.path) or 'нет статуса'}) — макет берёт утверждённый план",
                 "утверждение плана ассетов — словом заказчика (status: approved, approval)")
     for sl in slots:
@@ -1398,13 +1467,12 @@ def assets_md(ctx, B, pg):
                          if x)
         if not f:
             placeholders.append(sid)
-        elif mockup and not any(Path(x).is_file() for x in (ctx.dsurf("assets") / str(f), ctx.repo / str(f),
-                                                            ctx.dprod(str(f)))):
-            ctx.add("R-MAT-012", "error", "asset-manifest", sid, ctx.dsurf("assets") / "manifest.yaml",
+        elif mockup and asset_file(ctx, f) is None:
+            ctx.add("R-MAT-012", "warning", "asset-manifest", sid, ctx.dsurf("assets") / "manifest.yaml",
                     f"проверка входа: файла ассета {f} нет — строка манифеста без файла",
                     "положить файл или убрать строку")
         elif mockup and not m.get("license"):
-            ctx.add("R-MAT-012", "error", "asset-manifest", sid, ctx.dsurf("assets") / "manifest.yaml",
+            ctx.add("R-MAT-012", "warning", "asset-manifest", sid, ctx.dsurf("assets") / "manifest.yaml",
                     f"проверка входа: у файла ассета {f} нет лицензии в манифесте",
                     "строка манифеста ассетов: лицензия")
         up = uploads.get(str(f)) or uploads.get(f"design/{ctx.surface}/assets/{f}") if f else None
@@ -1485,7 +1553,7 @@ def refs_md(ctx, B):
         miss = [k for k, key in (("роль", "role"), ("брать", "take"), ("не брать", "dont_take"), ("значения", "values"))
                 if not r.get(key)]
         if miss:
-            ctx.add("R-MAT-012", "error", "art-direction", f"art-direction#/moodboard/{mb.index(r)}",
+            ctx.add("R-MAT-012", "warning", "art-direction", f"art-direction#/moodboard/{mb.index(r)}",
                     src.path if src else ctx.dsurf("art-direction"), f"проверка входа: у референса {i} нет: "
                     f"{', '.join(miss)}", "запись мудборда по форме $defs/reference — этап art-direction")
         vals = r.get("values") if isinstance(r.get("values"), dict) else {}
@@ -1578,7 +1646,7 @@ def motion_md(ctx, B, pg):
                         lines += [f"    - брать: {fmt(t)}" for t in rf.get("take") or []]
                         lines += [f"    - не брать: {fmt(t)}" for t in rf.get("do_not_take") or []]
                         if fp and not (ctx.dsurf("motion") / fp).exists():
-                            ctx.add("R-MAT-012", "error", "motion-spec", f"{pg.id}#{s['id']}", pg.spec_src.path,
+                            ctx.add("R-MAT-012", "warning", "motion-spec", f"{pg.id}#{s['id']}", pg.spec_src.path,
                                     f"проверка входа: кадров видео-референса {fp} нет в design/{ctx.surface}/motion/",
                                     "лист кадров и кадры с таймкодами — этап motion")
                 else:
@@ -1628,8 +1696,9 @@ def common_items(ctx, A):
              "var(--…)", "S", "скрипт", "макет", "mockup", "cd 06/02 §2; literal_tokens.py"),
         Item("C3", "Кегли — по шкале ДС; заголовок не длиннее 2 строк на 1440 и 4 строк на 390", "S", "скрипт", "макет",
              "mockup", "cd 06/02 §4 (C3)"),
-        Item("C4", "Ни одной приметы бан-листа brief.yaml#design_system.bans; приметы design_system.allow — только "
-             "заказанные", "S", "скрипт, глаза", "макет", "mockup", "brief.yaml; kb/common/tells.yaml"),
+        Item("C4", "Нет кластера примет бан-листа brief.yaml#design_system.bans (одиночная примета — вопрос "
+             "заказчику); приметы design_system.allow — только заказанные", "S", "скрипт, глаза", "макет", "mockup",
+             "brief.yaml; kb/common/tells.yaml"),
         Item("D2", "На 390 навигация видна (меню ≥ 44×44 или две видимые ссылки), тело ≥ 16 px, основные цели касания "
              "≥ 44 px, никакие — меньше 24 px", "S", "скрипт", "макет", "mockup", "cd 06/04 §3"),
         Item("D3", "Ничего мельче 12 px; один h1; lang = язык страницы", "D", "скрипт", "макет", "mockup",
@@ -1638,10 +1707,10 @@ def common_items(ctx, A):
              + (f"; цель доступности — {A['a11y']}" if A.get("a11y") else ""), "S", "скрипт", "макет", "mockup",
              "ux 08/01; " + ("site-brief constraints.accessibility" if ctx.route != "app" else
                              "app-brief constraints")),
-        Item("G1", "Публикация принята инструментом; консоль HTML-копий без ошибок", "B", "протокол", "макет",
+        Item("G1", "Публикация принята инструментом; консоль HTML-копий без ошибок", "S", "протокол", "макет",
              "wireframe", "claude-design.md § Создание и публикация"),
         Item("G2", "Изменены только свои файлы; правки заказчика слиты по «прочитать → слить → опубликовать», чужие "
-             "ключи и маркеры сохранены", "B", "протокол", "макет", "wireframe", "claude-design.md § Синхронизация"),
+             "ключи и маркеры сохранены", "S", "протокол", "макет", "wireframe", "claude-design.md § Синхронизация"),
         Item("V1", f"Темы ДС ({th}) — на всех ширинах приёмки, на адаптивной копии", "S", "скрипт", "макет", "mockup",
              "acceptance-widths.yaml#themes; ux 06/01 §7.3"),
         Item("V2", "Сокращённое движение: конечные состояния, невидимого текста 0 (ui_audit.py --reduced-motion)", "S",
@@ -1687,14 +1756,14 @@ def site_items(ctx, A, pages, brief):
     prof = prof or "—"
     modes = get(level_row(ctx, lvl), "maps_to", "claude_design", "three_d_mode", default=[]) or []
     return [
-        Item("A1", "Секции каждой страницы — id и порядок плана (sections[] в page.yaml), других секций нет", "B",
+        Item("A1", "Секции каждой страницы — id и порядок плана (sections[] в page.yaml), других секций нет", "S",
              "скрипт, глаза", "макет", "wireframe", "site/<s>/plans/*.yaml"),
         Item("A2", f"Одно главное действие на страницу — page.primary_action плана ({'; '.join(mains)}); подпись "
              "главной кнопки — утверждённый литерал copy deck; у страницы мероприятия главное действие — регистрация",
-             "B",
+             "S",
              "глаза", "макет", "wireframe", "планы; copy deck; text 04/03 §3.5"),
         Item("A3", f"Первый экран на окнах 1440×900 и 390×844 — по политике плана: {a3}"
-             + ("; отдельный кадр первого визита с баннером cookie" if cookie else ""), "B", "скрипт, глаза", "макет",
+             + ("; отдельный кадр первого визита с баннером cookie" if cookie else ""), "S", "скрипт, глаза", "макет",
              "wireframe", "site 03/03 §2; first_screen_policy планов"),
         Item("B1", "Весь видимый текст — из copy.md дословно, без «рыбы»; пропуск — [PLACEHOLDER: что] из раздела "
              "«Нет» facts.md", "B", "скрипт", "макет", "wireframe", "cd 06/04 §3; copy.md"),
@@ -1705,12 +1774,12 @@ def site_items(ctx, A, pages, brief):
     ] + [x for x in common_items(ctx, A) if x.id.startswith("C")] + [
         Item("D1", f"Горизонтальный вылет 0 на ширинах {', '.join(map(str, A['widths']))} и на {A['overflow']} "
              f"(только вылет); артборды {', '.join(map(str, A['artboards']))}, остальные ширины — адаптивная копия "
-             "после «Keep»", "B", "скрипт", "макет", "wireframe", "kb/common/acceptance-widths.yaml"),
+             "после «Keep»", "S", "скрипт", "макет", "wireframe", "kb/common/acceptance-widths.yaml"),
     ] + [x for x in common_items(ctx, A) if x.id in ("D2", "D3", "D4")] + [
         Item("E1", f"Анимируются только свойства спецификации движения, не шире уровня {lvl}: "
              f"{', '.join(hints.get('properties_allowed') or []) or '—'}; без transition: all и анимации свойств "
              "раскладки", "S", "скрипт", "макет", "motion", "motion.md; ambition-levels.yaml#levels.motion_hints"),
-        Item("E2", "При prefers-reduced-motion — конечные состояния, невидимого текста 0", "B", "скрипт", "макет",
+        Item("E2", "При prefers-reduced-motion — конечные состояния, невидимого текста 0", "S", "скрипт", "макет",
              "motion", "motion.md (сокращённое движение)"),
         Item("E3", "Моменты — как в motion.md и decisions.motion; петель в зоне видимости не больше "
              f"{fmt(hints.get('continuous_motions_in_view_max')) or '—'}, под читаемым текстом — "
@@ -1735,7 +1804,7 @@ def site_items(ctx, A, pages, brief):
              "mockup", "cd 06/02 §4 (H4)"),
         Item("H5", "Ресайз 1440 → 390 → 1440 без перезагрузки на адаптивной копии; медиа первого экрана ≤ 1 с", "S",
              "скрипт", "макет", "mockup", "mockup_checks.py resize"),
-        Item("I1", f"Ровно один H1 — слот seo.h1 плана ({'; '.join(h1s)})", "B", "скрипт", "макет", "wireframe",
+        Item("I1", f"Ровно один H1 — слот seo.h1 плана ({'; '.join(h1s)})", "S", "скрипт", "макет", "wireframe",
              "page.yaml seo.h1; site 09/01 §6.2"),
         Item("I2", "title, description, canonical на себя и lang заданы и уникальны", "S", "скрипт", "после сборки",
              "—", "head-kit.yaml; geo_probe.py"),
@@ -1746,14 +1815,14 @@ def site_items(ctx, A, pages, brief):
         Item("I5", "robots — по seo.indexable плана", "S", "скрипт", "после сборки", "—", "seo.indexable планов"),
         Item("I6", "og:image — абсолютный адрес", "D", "скрипт", "после сборки", "—", "head-kit.yaml"),
         Item("J1", f"Согласие на ПД — отдельный неотмеченный чекбокс у каждой формы (legal.pd_consent: "
-             f"{legal.get('pd_consent') or '—'})", "B", "скрипт", "макет", "wireframe",
+             f"{legal.get('pd_consent') or '—'})", "S", "скрипт", "макет", "wireframe",
              "legal-requirements.yaml; план"),
-        Item("J2", f"Ссылка на политику ПД ({legal.get('privacy_policy') or '—'}) — у каждой формы и в подвале", "B",
+        Item("J2", f"Ссылка на политику ПД ({legal.get('privacy_policy') or '—'}) — у каждой формы и в подвале", "S",
              "скрипт", "макет", "wireframe", "legal-requirements.yaml; план"),
         Item("J3", "Реквизиты продавца в подвале — только из «Фактов» facts.md", "B", "скрипт", "макет", "wireframe",
              "facts.md; legal.requisites плана"),
         Item("J4", f"Баннер cookie ({legal.get('cookie_banner') or '—'}, {legal.get('cookie_mode') or '—'}): «Принять» "
-             "и «Отклонить» равного вида", "B", "глаза", "макет", "wireframe",
+             "и «Отклонить» равного вида", "S", "глаза", "макет", "wireframe",
              "legal-requirements.yaml; overlays плана"),
         Item("J4b", "Счётчики и пиксели загружаются только после выбора в баннере cookie", "B", "скрипт",
              "после сборки", "—", "page_gates.py (SG-LEGAL)"),
@@ -1763,10 +1832,10 @@ def site_items(ctx, A, pages, brief):
              "lead-forms.yaml#defaults.consent"),
         Item("K1", "Настоящий <form> с type=submit и отправкой на сервер", "B", "скрипт", "после сборки", "—",
              "lead-forms.yaml"),
-        Item("K2", f"Поля и видимые подписи — набор lead-forms.yaml ({forms_line})", "B", "скрипт", "макет",
+        Item("K2", f"Поля и видимые подписи — набор lead-forms.yaml ({forms_line})", "S", "скрипт", "макет",
              "wireframe", "page.yaml forms[]; mockup_checks.py FORM-FIELDS"),
         Item("K3", "Запретов lead-forms.yaml#forbidden нет: предотметка, «нажимая кнопку», disabled submit и другие",
-             "B", "скрипт", "макет", "wireframe", "page.yaml forms[].forbidden; FORM-FORBIDDEN"),
+             "S", "скрипт", "макет", "wireframe", "page.yaml forms[].forbidden; FORM-FORBIDDEN"),
         Item("K4", "«Спасибо» — по success.must_show набора: экран пути прототипа", "S", "глаза", "макет", "wireframe",
              "page.yaml forms[].set.success_must_show"),
         Item("K5", "Антиспам — honeypot и time-trap без видимой капчи", "S", "скрипт", "после сборки", "—",
@@ -1784,21 +1853,21 @@ def site_items(ctx, A, pages, brief):
 
 def app_items(ctx, A, con, lay):
     items = [
-        Item("A1", "Экраны и маршруты — карта экранов (contract.md § Карта экранов); ссылок вне списка 0", "B",
+        Item("A1", "Экраны и маршруты — карта экранов (contract.md § Карта экранов); ссылок вне списка 0", "S",
              "скрипт", "макет", "wireframe", "ux 13/04 §29; map.md"),
-        Item("A2", "На экране одно ключевое действие — key-action экрана", "B", "глаза", "макет", "wireframe",
+        Item("A2", "На экране одно ключевое действие — key-action экрана", "S", "глаза", "макет", "wireframe",
              "экраны; contract.md"),
-        Item("B1", "Тексты — литералы copy.md (строки texts.md); строка на утверждении — заглушка", "B", "скрипт",
+        Item("B1", "Тексты — литералы copy.md (строки texts.md); строка на утверждении — заглушка", "B", "глаза",
              "макет", "wireframe", "copy.md; texts.md"),
-        Item("B2", "Числа, имена, даты и записи — только из демо-набора demo-data.json", "B", "скрипт", "макет",
+        Item("B2", "Числа, имена, даты и записи — только из демо-набора demo-data.json", "B", "глаза", "макет",
              "wireframe", "demo-data.json"),
         Item("B3", "Картинки и иллюстрации — только загрузки из assets.md", "B", "скрипт", "макет", "mockup",
              "assets.md"),
     ] + [x for x in common_items(ctx, A) if x.id.startswith("C")] + [
-        Item("C5", "Компоненты — только из карты решений system.yaml (components, extensions)", "B", "скрипт", "макет",
+        Item("C5", "Компоненты — только из карты решений system.yaml (components, extensions)", "S", "скрипт", "макет",
              "mockup", "system.yaml; ds_coverage"),
         Item("D1", f"Кадры — по классу экрана: viewport экрана → by_viewport, первый брейкпоинт ДС {A['first_bp']} px "
-             f"({A['bp_source']}); вылет 0 на ширинах класса (таблица ниже)", "B", "скрипт", "макет", "wireframe",
+             f"({A['bp_source']}); вылет 0 на ширинах класса (таблица ниже)", "S", "скрипт", "макет", "wireframe",
              "kb/common/acceptance-widths.yaml#by_viewport"),
     ] + [x for x in common_items(ctx, A) if x.id in ("D2", "D3", "D4")] + [
         Item("E1", "Отклик компонентов — токены движения ДС; без transition: all и анимации свойств раскладки; "
@@ -1835,12 +1904,15 @@ def app_items(ctx, A, con, lay):
 
 def acceptance_md(ctx, items, A, extra=()):
     kind = {"landing": "лендинг", "site": "многостраничник", "app": "кабинет"}.get(ctx.route, ctx.route)
+    unit = "экраны" if ctx.route == "app" else "страницы"
     out = [f"# Критерии приёмки — {ctx.surface} ({kind}), этап {ctx.stage}", "",
-           "Производный файл: собирает `canvas_input` вместе со входом по роду поверхности и уровню; руками не "
-           "правится. Серьёзность: B — блокирует приёмку (critical), S — исправить или записать (major), D — по "
-           "месту (minor). Где: «макет» — проверяется на холсте и копиях, «после сборки» — в репозитории кода, пункт "
-           "уходит в манифест готовности. Этап — с какого этапа холста пункт проверяется. Итог и одобрение — "
-           "`review/REVIEW.md`.", "",
+           "Производный файл: собирает `canvas_input` вместе со входом по роду поверхности, уровню и партии входа; "
+           "руками не правится. Серьёзность: B — блокирует приёмку (critical): честность макета — тексты, числа, "
+           "факты и картинки только из входа — и пункты места «после сборки»; S — исправить или принять с записью "
+           "заказчика (major); D — по месту (minor). Где: «макет» — проверяется на холсте и копиях, «после сборки» — "
+           "в репозитории кода, пункт уходит в манифест готовности. Этап — с какого этапа холста пункт проверяется. "
+           "Итог и одобрение — `review/REVIEW.md`.", "",
+           f"Партия входа ({unit}): {', '.join(ctx.units) or '—'}.", "",
            f"Уровень: {A['level']} · темы: {', '.join(A['themes'])} · ширины: {', '.join(map(str, A['widths']))}, "
            f"вылет — {A['overflow']} · артборды: {', '.join(map(str, A['artboards']))}", ""]
     groups = {}
@@ -1853,7 +1925,8 @@ def acceptance_md(ctx, items, A, extra=()):
         out += ["| " + " | ".join((it.id, cell(it.question), it.severity, it.method, it.where, it.stage,
                                    cell(it.source))) + " |" for it in its]
         if g == "S" and not any(it.id.startswith("ST-") and it.id != "ST-DYN" for it in its):
-            out += ["", "Экранов с набором состояний во входе нет — пункты состояний появятся со стабильными экранами."]
+            out += ["", "Экранов с набором состояний во входе нет — пункты состояний приходят с контрактом экранов "
+                        "партии (вайрфрейм и макет)."]
         if g == "D" and extra:
             out += [""] + list(extra)
         out.append("")
@@ -1946,19 +2019,31 @@ def ds_block(ctx, art, stage):
     return out
 
 
+def ds_token_files(ctx):
+    """Файлы токенов ДС продукта по порядку: system.tokens.css, system.tokens.json (DTCG), tokens.json артефакта ДС."""
+    return [(k, Path(p)) for k, p in (("tokens-css", ctx.dprod("tokens-css")), ("tokens", ctx.dprod("tokens")),
+                                      ("ds-project", ctx.dprod("ds-project") / "tokens.json"))]
+
+
 def ds_gate(ctx, art, route_word):
+    """ДС на макете: токенов нет — error (облик рисовать не из чего); ДС не утверждена или не опубликована — warning."""
     sysp = ctx.dprod("system")
     st = docpaths.status(sysp) if sysp.is_file() else None
     ctx.load("system", sysp, cover=False)
+    if not any(p.is_file() for _k, p in ds_token_files(ctx)):
+        ctx.add("R-MAT-012", "error", "design-system", "tokens", ctx.dprod("tokens"), "проверка входа: токенов ДС нет "
+                "(system.tokens.css, system.tokens.json, tokens.json артефакта ДС) — облик макета рисовать не из чего",
+                f"токены ДС — этап design-system: /design-deep-dive {ctx.slug}")
+        ctx.gap(f"токенов ДС нет: облика во входе нет — макет {route_word}а ждёт ДС")
     if st != "approved":
-        ctx.add("R-MAT-012", "error", "design-system", "system", sysp, "проверка входа: ДС не утверждена "
+        ctx.add("R-MAT-012", "warning", "design-system", "system", sysp, "проверка входа: ДС не утверждена "
                 f"({st or 'нет design/system.yaml'}) — макет рисуется из утверждённой ДС",
                 f"«Keep» ДС заказчиком — этап design-system: /design-deep-dive {ctx.slug}")
-        ctx.gap("ДС не утверждена или её нет: облика во входе нет — макет ждёт ДС")
+        ctx.gap("ДС не утверждена или карты решений нет: облик макета — из неутверждённой ДС, решение — за заказчиком")
     ds = art.get("design_system")
     if not (ds and ds.get("address")):
-        ctx.add("R-MAT-012", "error", "artifacts", "design-system", ctx.dprod("artifacts"), "проверка входа: артефакт "
-                "ДС не опубликован — нет адреса строки design-system в ARTIFACTS.md", "публикация ДС — "
+        ctx.add("R-MAT-012", "warning", "artifacts", "design-system", ctx.dprod("artifacts"), "проверка входа: "
+                "артефакт ДС не опубликован — нет адреса строки design-system в ARTIFACTS.md", "публикация ДС — "
                 "claude-design.md § Создание и публикация")
 
 
@@ -1969,13 +2054,16 @@ def assemble_site(ctx):
     if bs is None:
         ctx.add("R-MAT-012", "error", "site-brief", "site-brief", ctx.site("brief"), "проверка входа: нет брифа сайта",
                 f"/design-deep-dive {ctx.slug} {ctx.surface} — этап brief")
-    pages = site_pages(ctx, brief)
-    main = pages[0] if pages else None
-    if main is None:
+    work = site_pages(ctx, brief)
+    main = work[0] if work else None
+    if main is None and ctx.outside:
+        ctx.add("R-MAT-012", "error", "page-plan", "plans", ctx.site("plans"), "проверка входа: страниц партии нет "
+                "среди страниц с планом — секций, слотов и политики первого экрана во входе нет",
+                f"canvas_input build {ctx.slug} {ctx.surface} --stage {stage} --page <id> — вход по страницам с планом")
+    elif main is None:
         ctx.add("R-MAT-012", "error", "page-plan", "plans", ctx.site("plans"), "проверка входа: нет ни одного плана "
                 "страницы — секций, слотов и политики первого экрана нет",
                 f"/design-deep-dive {ctx.slug} {ctx.surface} — page-plan")
-    work = ([main] if main else []) if stage == "directions" else pages
     for pg in work:
         if stage in ("directions", "wireframe", "mockup"):
             attach_deck(ctx, pg)
@@ -1984,7 +2072,7 @@ def assemble_site(ctx):
         if stage == "motion":
             attach_spec(ctx, pg)
         if stage in ("wireframe", "mockup") and docpaths.status(pg.src.path) != "approved":
-            ctx.add("R-MAT-012", "error", "page-plan", pg.id, pg.src.path, f"проверка входа: план страницы `{pg.id}` "
+            ctx.add("R-MAT-012", "warning", "page-plan", pg.id, pg.src.path, f"проверка входа: план страницы `{pg.id}` "
                     f"не утверждён ({docpaths.status(pg.src.path) or 'нет статуса'}) — вход {stage} собирается на "
                     "утверждённом плане", "утверждение плана словом заказчика — этап page-plan")
     active = lambda src: any(r.source == src for rs in ctx.maps.rules(BRIEF, stage).values() for r in rs)  # noqa: E731
@@ -2030,12 +2118,12 @@ def assemble_site(ctx):
     if stage == "mockup":
         ds_gate(ctx, art, "сайт")
         if ad_s is None:
-            ctx.add("R-MAT-012", "error", "art-direction", "art-direction", ctx.dsurf("art-direction"),
+            ctx.add("R-MAT-012", "warning", "art-direction", "art-direction", ctx.dsurf("art-direction"),
                     "проверка входа: арт-дирекции нет — направления, референсов и подачи во входе нет",
                     f"/design-deep-dive {ctx.slug} {ctx.surface} — этап art-direction")
         elif ad.get("status") != "approved" or not get(ad, "choice", "chosen"):
-            ctx.add("R-MAT-012", "error", "art-direction", "art-direction", ad_s.path, "проверка входа: арт-дирекция "
-                    f"не утверждена или направление не выбрано ({ad.get('status') or '—'}, choice.chosen: "
+            ctx.add("R-MAT-012", "warning", "art-direction", "art-direction", ad_s.path, "проверка входа: "
+                    f"арт-дирекция не утверждена или направление не выбрано ({ad.get('status') or '—'}, choice.chosen: "
                     f"{get(ad, 'choice', 'chosen') or '—'})", "выбор направления и утверждение — словом заказчика")
     for pg in work:
         base = f"pages/{pg.id}/"
@@ -2053,7 +2141,7 @@ def assemble_site(ctx):
                 ctx.gap(f"`{pg.id}`: спецификации движения нет — страница на этапе motion без движения")
                 continue
             if pg.id not in B.setdefault("accepted", review_accepted(ctx)):
-                ctx.add("R-MAT-012", "error", "review", pg.id, ctx.dsurf("review") / "REVIEW.md", f"проверка входа: "
+                ctx.add("R-MAT-012", "warning", "review", pg.id, ctx.dsurf("review") / "REVIEW.md", f"проверка входа: "
                         f"статичный макет страницы `{pg.id}` не принят — движение идёт поверх принятого макета "
                         "(REVIEW.md, «Приёмка»: accepted или accepted_with_notes)", "приёмка статичного макета — "
                         "этап acceptance, затем движение")
@@ -2061,20 +2149,21 @@ def assemble_site(ctx):
             mod("spec_check").cmd_spec(B["spec_ctx"](), rep, str(pg.spec_src.path), str(pg.src.path))
             for sev, code, where, msg in rep.items:
                 if sev == "error":
-                    ctx.add("R-MAT-012", "error", "motion-spec", f"{pg.id}#{where}", pg.spec_src.path,
+                    ctx.add("R-MAT-012", "warning", "motion-spec", f"{pg.id}#{where}", pg.spec_src.path,
                             f"проверка входа: spec_check.py spec — {code} {where}: {msg}", "спецификация движения — "
                             "этап motion")
             ctx.files[base + "motion.md"] = motion_md(ctx, B, pg)
     if stage == "motion" and not any(pg.spec is not None for pg in work):
-        ctx.add("R-MAT-012", "error", "motion-spec", "motion", ctx.dsurf("motion"), "проверка входа: ни у одной "
-                "страницы нет спецификации движения", f"/design-deep-dive {ctx.slug} {ctx.surface} — этап motion")
+        ctx.add("R-MAT-012", "warning", "motion-spec", "motion", ctx.dsurf("motion"), "проверка входа: ни у одной "
+                "страницы партии нет спецификации движения",
+                f"/design-deep-dive {ctx.slug} {ctx.surface} — этап motion")
     if ctx.maps.rules("facts.md", stage):
         ctx.files["facts.md"] = facts_md(ctx, B)
     if ctx.maps.rules("refs.md", stage):
         ctx.files["refs.md"] = refs_md(ctx, B)
     A = acc_context(ctx, brief.get("themes"), get(brief, "constraints", "accessibility"),
                     get(brief, "ambition", "level"))
-    ctx.files[ACCEPT] = acceptance_md(ctx, site_items(ctx, A, pages, brief), A)
+    ctx.files[ACCEPT] = acceptance_md(ctx, site_items(ctx, A, work, brief), A)
 
 
 def acc_context(ctx, themes, a11y, level):
@@ -2112,11 +2201,12 @@ def app_sources(ctx, con, doc):
         ctx.load(doc_id, ctx.repo / p, cover=False)
 
 
-def app_copy_md(ctx, lay, stage):
+def app_copy_md(ctx, lay, stage, keys=None):
+    """copy.md кабинета: строки texts.md — у партии только ключи её экранов (keys), без партии — весь реестр."""
     C = mod("contract")
-    ok, bad = C.text_rows(lay, stage)
+    ok, bad = C.text_rows(lay, stage, keys)
     allowed = C.STAGE_STATUSES[stage]
-    rows = list(lay.texts.rows.values()) if lay.texts.exists else []
+    rows = [r for r in lay.texts.rows.values() if keys is None or r.key in keys] if lay.texts.exists else []
     out = [f"# Тексты интерфейса — {ctx.surface}, этап {ctx.stage}",
            f"# Строки реестра texts.md: этап берёт {' · '.join(allowed)}; строка другого статуса — заглушка "
            f"{C.TEXT_PLACEHOLDER}. Тексты — дословно, maxlen — предел длины.", "",
@@ -2161,7 +2251,7 @@ def app_brief(ctx, lay, ab, art, cond, tone, brand, cond_mobile=None):
     langs = [x for x in ab.get("languages") or [] if isinstance(x, dict)]
     allowed = set(get(ab, "allow", "markers", default=[]) or [])
     ptr = get(core, "pointer", ctx.surface)
-    screens = sorted(s for s, r in lay.screens.items() if r.stable)
+    screens = list(ctx.units)
     users = [f"{x.get('user')} ({x.get('posture')})" for x in core.get("postures") or []
              if isinstance(x, dict) and x.get("user") and x.get("surface") in (None, "—", ctx.surface)] or \
         sorted({u for s in lay.screens.values() for u in (s.fm.get("who") or []) if isinstance(u, str)})
@@ -2219,6 +2309,8 @@ def assemble_app(ctx):
     Lm, C, D = mod("layer"), mod("contract"), mod("demo_data")
     lay = Lm.Layer(ctx.slug, ctx.surface, ctx.repo)
     cstage = "mockup" if stage == "motion" else stage
+    ctx.pick(sorted(lay.screens), {s: r.status or "без статуса" for s, r in lay.screens.items() if not r.stable})
+    part = ctx.units if ctx.outside else None               # часть экранов — контракт по ним; все — весь реестр
     ab_s = ctx.load("app-brief", ctx.dprod("app-brief"), cover=False)
     ab = ab_s.data if ab_s is not None and isinstance(ab_s.data, dict) else {}
     if ab_s is None:
@@ -2229,14 +2321,13 @@ def assemble_app(ctx):
     tone = voice_projection(ctx, product=True)
     con = None
     if stage != "directions":
-        doc = D.build(lay)
-        con = C.build(lay, cstage, demo=doc, demo_ref="demo-data.json")
+        con = C.build(lay, cstage, demo=D.build(lay), demo_ref="demo-data.json", screens=part)
         ctx.files["contract.md"] = con.render()
-        ctx.files["demo-data.json"] = D.dumps(doc)
-        ctx.files["copy.md"] = app_copy_md(ctx, lay, cstage)
-        app_sources(ctx, con, doc)
-        # гейт «чистовой макет — только на утверждённых текстах»: строки texts.md не approved на макете — ошибка
-        # проверки входа, как тексты copy deck у сайта; сам contract.py check держит свой R-MAT-003 warning
+        ctx.files["demo-data.json"] = D.dumps(con.demo)
+        ctx.files["copy.md"] = app_copy_md(ctx, lay, cstage, con.keys)
+        app_sources(ctx, con, con.demo)
+        # гейт «чистовой макет — только на утверждённых текстах»: строки texts.md экранов партии не approved на макете
+        # — ошибка проверки входа, как тексты copy deck у сайта; сам contract.py check держит свой R-MAT-003 warning
         ctx.rep.extend([replace(f, rule="R-MAT-012", severity="error", message="проверка входа: " + f.message)
                         if cstage == "mockup" and f.rule == "R-MAT-003" and f.kind == "texts" else f
                         for f in con.findings])
@@ -2244,9 +2335,12 @@ def assemble_app(ctx):
         ctx.__dict__["pre"] = pre
         if stage in ("mockup", "motion"):
             ctx.files["assets.md"] = app_assets_md(ctx, {"art": art})
-            ctx.rep.extend(mod("ds_coverage").coverage(ctx.slug, ctx.repo, ctx.surface, "mockup").rep.items)
+            ctx.rep.extend(mod("ds_coverage").coverage(ctx.slug, ctx.repo, ctx.surface, "mockup", screens=part)
+                           .rep.items)
             DB = mod("ds_build")
-            ctx.rep.extend(DB.check(DB.Project.of(ctx.slug, ctx.repo)))
+            # свежесть производных ДС на входе — доклад: гейт макета — токены ДС (ds_gate), а не их сборка
+            ctx.rep.extend([replace(f, severity="warning") if f.rule == "R-FRESH-001" and f.severity == "error" else f
+                            for f in DB.check(DB.Project.of(ctx.slug, ctx.repo))])
             ds_gate(ctx, art, "кабинет")
     if not any(ctx.dprod(k).is_file() for k in DS_FILES):
         ctx.gap("ДС нет (токенов, прозы и карты решений в design/ нет): облика во входе нет — макет ждёт ДС "
@@ -2265,8 +2359,8 @@ def assemble_app(ctx):
     cls = km.classes(A["widths"], A["first_bp"], A["overflow"])
     rows = ["Кадры по классу экрана (`viewport` экрана → `by_viewport`):", "", "| экран | класс | ширины |",
             "|---|---|---|"]
-    for slug, r in sorted(lay.screens.items()):
-        vp = str(r.fm.get("viewport") or "any").strip()
+    for slug in ctx.units:
+        vp = str(lay.screens[slug].fm.get("viewport") or "any").strip()
         rows.append(f"| `{slug}` | {vp} | {', '.join(map(str, cls.get(vp, cls['any'])))} |")
     ctx.files[ACCEPT] = acceptance_md(ctx, app_items(ctx, A, con, lay), A, rows)
 
@@ -2299,9 +2393,11 @@ def render_manifest(ctx):
     kind = ctx.surf.type + (f" · {ctx.surf.web_kind}" if ctx.surf.web_kind else "")
     body = [f"# Вход холста — `{ctx.surface}` ({kind}), этап `{ctx.stage}`", "",
             f"Производный файл: вход собирает `scripts/project/canvas_input.py build {ctx.slug} {ctx.surface} --stage "
-            f"{ctx.stage}` из источников ниже; руками вход не правится — изменился источник, вход пересобирается. "
-            "Исполнитель читает файлы этой папки и источники из таблицы по их путям: копий источников во входе нет.",
-            "",
+            f"{ctx.stage}{ctx.batch_arg()}` из источников ниже; руками вход не правится — изменился источник, вход "
+            "пересобирается. Исполнитель читает файлы этой папки и источники из таблицы по их путям: копий источников "
+            "во входе нет.", "",
+            f"Партия входа: {', '.join(ctx.units) or '—'}" + (" (все единицы поверхности)." if not ctx.outside else
+                                                            " — остальные единицы в «Пробелах»."), "",
             "## Источники", "", "| документ | путь | статус | отпечаток |", "|---|---|---|---|"]
     for r in ctx.manifest_sources():
         body.append(f"| {r['id']} | `{r['path']}` | {r['status']} | `{r['fingerprint']}` |")
@@ -2314,19 +2410,22 @@ def render_manifest(ctx):
     verdict = "этап не публикуется, пока ошибки не закрыты" if c["error"] else \
         "вход без ошибок: этап можно публиковать, когда готов его вход по phases.md" + \
         (" (принятый вайрфрейм или его пропуск, ДС в холсте)" if ctx.stage == "mockup" else "")
+    if c["warning"]:
+        verdict += "; предупреждения — доклад заказчику, решает он"
     body += ["", "## Итог проверки", "", f"{c['error']} error · {c['warning']} warning · {c['hint']} hint — {verdict}."]
     if ctx.route == "app" and "pre" in ctx.__dict__:
         pre = ctx.__dict__["pre"]
         body += ["", "Блок PRE ux 12/02 §2: " + ("без незаполненных пунктов." if not pre else
-                                               f"незаполненных пунктов {len(pre)} — стоп и возврат в слой проекта: "
+                                               f"незаполненных пунктов {len(pre)} — доклад заказчику, пункт закрывает "
+                                               "исполнитель слоя проекта: "
                                                + listed((one_line(f.message) for f in pre), 8, "; "))]
     if items:
         body += ["", "| тяжесть | правило | где | что |", "|---|---|---|---|"]
         body += [f"| {f.severity} | {f.rule} | {cell(f.kind + ' ' + f.ref)} | {cell(f.message)} |" for f in items]
     text = "\n".join(body).rstrip() + "\n"
-    fm = {"stage": ctx.stage, "project": ctx.slug, "surface": ctx.surface, "route": ctx.route, "built_by": TOOL,
-          "check": dict(c), "files": {n: sha_text(t) for n, t in sorted(ctx.files.items()) if n != INPUT},
-          "manifest": sha_text(text)}
+    fm = {"stage": ctx.stage, "project": ctx.slug, "surface": ctx.surface, "route": ctx.route,
+          "units": list(ctx.units), "built_by": TOOL, "check": dict(c),
+          "files": {n: sha_text(t) for n, t in sorted(ctx.files.items()) if n != INPUT}, "manifest": sha_text(text)}
     return "---\n" + ydump(fm) + "---\n" + text
 
 
@@ -2348,9 +2447,11 @@ def read_manifest(path):
     return (fm if isinstance(fm, dict) else None), body, rows
 
 
-def assemble(slug, surf, repo, stage, maps, today=None):
-    """Вход поверхности на этапе в памяти: ctx.files (с INPUT.md), ctx.rep — проверка входа, ctx.blocked."""
-    ctx = Ctx(slug, surf, repo, stage, maps, today)
+def assemble(slug, surf, repo, stage, maps, today=None, units=None, strict=False):
+    """Вход поверхности на этапе в памяти: ctx.files (с INPUT.md), ctx.rep — проверка входа, ctx.units — партия,
+    ctx.outside — единицы вне партии. units — id страниц или экранов партии (None — все единицы); strict — id вне
+    единиц поверхности — ошибка вызова, иначе пробел манифеста."""
+    ctx = Ctx(slug, surf, repo, stage, maps, today, units, strict)
     if surf.app:
         assemble_app(ctx)
     else:
@@ -2370,7 +2471,7 @@ def freshness(ctx, fm, body, rows, inp, marked=False):
     «собран без утилиты» не равен сборке — устарел (пересобрать); без пометки и без отпечатков — правлен руками."""
     rep = F.Report()
     kw = dict(surface=ctx.surface, kind="input")
-    fix = f"canvas_input build {ctx.slug} {ctx.surface} --stage {ctx.stage}"
+    fix = f"canvas_input build {ctx.slug} {ctx.surface} --stage {ctx.stage}{ctx.batch_arg()}"
     files = fm.get("files") if isinstance(fm.get("files"), dict) else {}
     manual = fm.get("built_by") != TOOL
     disk = {p.relative_to(inp).as_posix(): p for p in sorted(inp.rglob("*")) if p.is_file()}
@@ -2435,7 +2536,9 @@ def freshness(ctx, fm, body, rows, inp, marked=False):
     return rep.items
 
 
-def check_surface(slug, surf, repo, stage, maps, today=None):
+def check_surface(slug, surf, repo, stage, maps, today=None, units=None, strict=False):
+    """Проверка входа поверхности: (находки, сборка). units — партия (None — `units` действующего входа, входа нет —
+    все единицы)."""
     inp = docpaths.design(slug, "input", surface=surf.slug, repo=repo)
     rep = F.Report()
     fm = body = None
@@ -2459,7 +2562,10 @@ def check_surface(slug, surf, repo, stage, maps, today=None):
     st = stage or (fm or {}).get("stage")
     if st not in STAGES:
         return rep.items, None
-    ctx = assemble(slug, surf, repo, st, maps, today)
+    if units is None and isinstance((fm or {}).get("units"), list):
+        units = [str(u) for u in fm["units"]]
+        strict = False
+    ctx = assemble(slug, surf, repo, st, maps, today, units, strict)
     rep.extend(ctx.rep.items)
     if fm is not None and st == fm.get("stage"):
         rep.extend(freshness(ctx, fm, body, rows, inp, marked))
@@ -2469,11 +2575,136 @@ def check_surface(slug, surf, repo, stage, maps, today=None):
         for msg in miss:
             rep.add("R-FRESH-004", "error", surface=surf.slug, kind="acceptance", ref=ACCEPT,
                     path=docpaths.rel(acc, repo), message=f"критерии приёмки не по роду: {msg}",
-                    fix=f"canvas_input build {slug} {surf.slug} --stage {st}")
+                    fix=f"canvas_input build {slug} {surf.slug} --stage {st}{ctx.batch_arg()}")
     elif fm is not None:
         rep.add("R-FRESH-002", "hint", surface=surf.slug, kind="input", ref=INPUT, path=docpaths.rel(inp / INPUT, repo),
                 message=f"вход собран под этап {fm.get('stage')}; проверка входа — по этапу {st}")
     return rep.items, ctx
+
+
+# ------------------------------------------------------------------ источники единицы
+
+FACT_REF = re.compile(r"\bfact:([a-z0-9][a-z0-9-]*)")
+
+
+def _values(x):
+    """(ключ, значение) вложенных словарей и списков — в глубину."""
+    if isinstance(x, dict):
+        for k, v in x.items():
+            yield k, v
+            yield from _values(v)
+    elif isinstance(x, list):
+        for v in x:
+            yield from _values(v)
+
+
+def _row(ctx, sid, path, fp=None):
+    return {"id": sid, "path": ctx.rel(path), "fingerprint": fp or sha_path(path)}
+
+
+def _product_rows(ctx):
+    """Уровень продукта: токены ДС (первый файл ds_token_files) и карта решений system.yaml без поля starter."""
+    rows = []
+    tok = next(((k, p) for k, p in ds_token_files(ctx) if p.is_file()), None)
+    if tok is not None:
+        rows.append(_row(ctx, tok[0], tok[1]))
+    sysp = ctx.dprod("system")
+    if sysp.is_file():
+        data, _err = load_doc(sysp)
+        fp = sha_text(json.dumps({k: v for k, v in data.items() if k != "starter"}, ensure_ascii=False, sort_keys=True,
+                                 default=str)) if isinstance(data, dict) else None
+        rows.append(_row(ctx, "system", sysp, fp))
+    return rows
+
+
+def _page_rows(ctx, unit):
+    """Страница: план, её тексты в copy deck, план ассетов и файлы слотов, спецификация движения, записи фактов, бренд
+    и арт-дирекция поверхности; плана страницы нет — None."""
+    plans = plan_files(ctx, report=False)
+    if unit not in plans:
+        return None
+    s = ctx.load("page-plan", plans[unit], page=unit)
+    pg = Page(unit, s.data if isinstance(s.data, dict) else {}, s)
+    rows = [_row(ctx, "page-plan", pg.src.path)]
+    attach_deck(ctx, pg)
+    attach_assets(ctx, pg)
+    attach_spec(ctx, pg)
+    if pg.deck_page is not None:
+        rows.append(_row(ctx, "copy-deck", pg.deck_src.path, deck_text_hash(pg.deck_src.data, page=unit)))
+    if pg.assets_src is not None:
+        rows.append(_row(ctx, "asset-plan", pg.assets_src.path))
+        man = asset_manifest(ctx)
+        for sl in get(pg.assets, "slots", default=[]) or []:
+            f = (man.get(str(sl.get("id"))) or {}).get("file") if isinstance(sl, dict) else None
+            if f:
+                p = asset_file(ctx, f)
+                rows.append(_row(ctx, f"asset · {sl.get('id')}", p or ctx.dsurf("assets") / str(f),
+                                 None if p is not None else "—"))
+    if pg.spec_src is not None:
+        rows.append(_row(ctx, "motion-spec", pg.spec_src.path))
+    ids = {m.group(1) for _k, v in _values(pg.plan) if isinstance(v, str) for m in FACT_REF.finditer(v)}
+    ids |= {str(x) for k, v in _values(pg.deck_page or {}) if k == "fact_ids" and isinstance(v, list) for x in v}
+    fpath = docpaths.facts(ctx.slug, repo=ctx.repo)
+    if ids and fpath.is_file():
+        data, _err = load_doc(fpath)
+        recs = {str(f.get("id")): f for f in get(data, "facts", default=[]) or [] if isinstance(f, dict)}
+        for fid in sorted(ids):
+            rec = recs.get(fid)
+            rows.append(_row(ctx, f"fact · {fid}", fpath, sha_text(json.dumps(rec, ensure_ascii=False, sort_keys=True,
+                                                                               default=str)) if rec else "—"))
+    bp = ctx.site("brief")
+    brief = load_doc(bp)[0] if bp.is_file() else None
+    bref = rel_ref(bp, get(brief, "brand", "ref")) if isinstance(brief, dict) else None
+    brand = bref if bref is not None and bref.is_file() else ctx.dprod("brand")
+    if brand.is_file():
+        rows.append(_row(ctx, "brand", brand))
+    if ctx.dsurf("art-direction").is_file():
+        rows.append(_row(ctx, "art-direction", ctx.dsurf("art-direction")))
+    return rows
+
+
+def _screen_rows(ctx, unit):
+    """Экран: файл экрана, блоки состава и каркас по дереву, строки texts.md, которые они называют (ключ, текст,
+    статус), бриф на вид; экрана нет — None."""
+    Lm, T, C = mod("layer"), mod("tree"), mod("contract")
+    lay = Lm.Layer(ctx.slug, ctx.surface, ctx.repo)
+    if unit not in lay.screens:
+        return None
+    scope = C.batch_scope(lay, T.parse_layer(lay), [unit])
+    rows = [_row(ctx, "screen", lay.screens[unit].path)]
+    rows += [_row(ctx, f"block · {b}", lay.blocks[b].path) for b in scope["blocks"] if b in lay.blocks]
+    rows += [_row(ctx, f"shell · {x}", lay.shells[x].path) for x in scope["shells"] if x in lay.shells]
+    texts = lay.texts.rows if lay.texts.exists else {}
+    for k in scope["keys"]:
+        r = texts.get(k)
+        rows.append({"id": f"text · {k}", "path": ctx.rel(lay.texts_path),
+                     "fingerprint": sha_text(f"{k}\t{r.text}\t{r.status}") if r is not None else "—"})
+    if ctx.dprod("app-brief").is_file():
+        rows.append(_row(ctx, "app-brief", ctx.dprod("app-brief")))
+    return rows
+
+
+def unit_sources(slug, surface, unit, repo=None):
+    """Источники единицы — страницы сайта или экрана кабинета — для отпечатка одобрения: строки {id, path,
+    fingerprint} по id и пути (путь — от корня данных; отпечаток — sha256 файла, text_hash текстов страницы, sha256
+    записи факта или строки texts.md, «—» — названного источника нет на месте); единицы нет — None. ARTIFACTS.md,
+    REVIEW.md, вход, файлы базы, review/ и копии холста в источники не входят."""
+    root = docpaths.root(repo)
+    surf = docpaths.surface(slug, surface, root)
+    ctx = Ctx(slug, surf, root, "mockup", None)
+    rows = _screen_rows(ctx, str(unit)) if surf.app else _page_rows(ctx, str(unit)) if surf.page else None
+    if rows is None:
+        return None
+    return sorted(rows + _product_rows(ctx), key=lambda r: (r["id"], r["path"]))
+
+
+def unit_fingerprint(slug, surface, unit, repo=None):
+    """Отпечаток источников единицы: "sha256:…" по отсортированным строкам «id · путь: отпечаток»; единицы нет —
+    None."""
+    rows = unit_sources(slug, surface, unit, repo)
+    if rows is None:
+        return None
+    return sha_text("\n".join(sorted(f"{r['id']} · {r['path']}: {r['fingerprint']}" for r in rows)))
 
 
 def write_input(files, dest, prune):
@@ -2507,32 +2738,49 @@ def cmd_build(call, maps, today):
     if stage == "motion" and call.surf.app:
         raise F.ToolError("у кабинета этапа движения нет: отклик компонентов — токены движения ДС "
                           "(docs/projects/_template/design/README.md § Движение)")
-    ctx = assemble(call.slug, call.surf, call.repo, stage, maps, today)
+    units = batch_of(call)
+    ctx = assemble(call.slug, call.surf, call.repo, stage, maps, today, units, strict=units is not None)
     items = ctx.rep.items
-    if ctx.blocked:
-        F.print_findings(items, as_json=call.json, title=None if call.json else
-                         "вход не собран: поле источника без правила x-canvas-map")
-        return F.EXIT_FINDINGS
     dest = call.out if call.out is not None else inp
     done = write_input(ctx.files, dest, prune=call.out is None)
     if call.json:
         F.print_findings(items, as_json=True)
     else:
-        print(f"вход холста {call.slug}/{call.surface}, этап {stage} → {docpaths.rel(dest, call.repo)}")
+        print(f"вход холста {call.slug}/{call.surface}, этап {stage}, партия {', '.join(ctx.units) or '—'} → "
+              f"{docpaths.rel(dest, call.repo)}")
         for name, how in done:
             print(f"  {how:<14} {name}")
         F.print_findings(items, title="проверка входа:")
     return F.exit_code(items)
 
 
+def batch_of(call):
+    """Партия из ключа вызова: --page у сайта, --screen у кабинета; ключа нет — None."""
+    page, screen = call.args.page, call.args.screen
+    if page is None and screen is None:
+        return None
+    s = call.surf
+    if page is not None and screen is not None:
+        raise F.ToolError("партия — один ключ: --page у сайта или --screen у кабинета")
+    if s is None:
+        raise F.ToolError("партия входа — у одной поверхности: <команда> <slug> <surface> --page … | --screen …")
+    if screen is not None and not s.app or page is not None and not s.page:
+        raise F.ToolError(f"поверхность {s.slug}: партия — " + ("--screen SLUG[,…]" if s.app else "--page ID[,…]"))
+    ids = [x.strip() for x in (page if page is not None else screen).split(",") if x.strip()]
+    if not ids:
+        raise F.ToolError("партия пуста: " + ("--screen SLUG[,…]" if s.app else "--page ID[,…]"))
+    return ids
+
+
 def cmd_check(call, maps, today):
     surfs = [call.surf] if call.surf else [s for s in call.surfaces if s.page or s.app]
+    units = batch_of(call)
     items = []
     for s in surfs:
         if call.surf is None and call.stage is None and \
                 not (docpaths.design(call.slug, "input", surface=s.slug, repo=call.repo) / INPUT).exists():
             continue
-        found, _ctx = check_surface(call.slug, s, call.repo, call.stage, maps, today)
+        found, _ctx = check_surface(call.slug, s, call.repo, call.stage, maps, today, units, strict=units is not None)
         items += found
     F.print_findings(items, as_json=call.json)
     return F.exit_code(items)
@@ -2552,6 +2800,8 @@ def main(argv=None):
     ap.add_argument("--today", metavar="ГГГГ-ММ-ДД", help="дата сборки для сроков фактов (по умолчанию сегодня)")
     ap.add_argument("--schema", action="append", metavar="ФАЙЛ",
                     help="схема с x-canvas-map вместо файла базы с тем же именем (повтором — несколько)")
+    ap.add_argument("--page", metavar="ID[,ID…]", help="партия входа сайта — id страниц (планов); без ключа — все")
+    ap.add_argument("--screen", metavar="SLUG[,…]", help="партия входа кабинета — slug экранов; без ключа — все")
     call = docpaths.parse(ap, argv)
     today = call.args.today
     if today and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", today):
@@ -2605,11 +2855,14 @@ def selftest():
     def surf_of(fx, name):
         return docpaths.surface(fx.slug, name, fx.root)
 
-    def build(fx, surface, stage, prune=True):
-        ctx = assemble(fx.slug, surf_of(fx, surface), fx.root, stage, maps, "2026-09-29")
-        if not ctx.blocked:
-            write_input(ctx.files, ctx.input_dir, prune)
+    def build(fx, surface, stage, prune=True, units=None):
+        ctx = assemble(fx.slug, surf_of(fx, surface), fx.root, stage, maps, "2026-09-29", units, units is not None)
+        write_input(ctx.files, ctx.input_dir, prune)
         return ctx
+
+    def cli(*args):
+        return subprocess.run([sys.executable, str(Path(__file__).resolve()), *map(str, args)], capture_output=True,
+                              text=True)
 
     with FP.built("input-landing") as fx:
         inp = docpaths.design(fx.slug, "input", surface="promo", repo=fx.root)
@@ -2628,8 +2881,12 @@ def selftest():
               and any(r["fingerprint"].startswith("sha256:") for r in rows))
         items, _c = check_surface(fx.slug, surf_of(fx, "promo"), fx.root, None, maps, "2026-09-29")
         check(f"лендинг, wireframe: check — 0 error ({F.summary(items)})", not rules_of(items, "error"))
-        check("итог INPUT.md без ошибок — о входе: этап можно публиковать, когда готов его вход по phases.md",
-              "— вход без ошибок: этап можно публиковать, когда готов его вход по phases.md." in ctx.files[INPUT])
+        check("итог INPUT.md без ошибок — о входе: этап можно публиковать, когда готов его вход по phases.md; "
+              "предупреждения — доклад заказчику",
+              "— вход без ошибок: этап можно публиковать, когда готов его вход по phases.md; предупреждения — доклад "
+              "заказчику, решает он." in ctx.files[INPUT])
+        check("лендинг без ключа: партия — все страницы с планом, units в манифесте, строки «вне партии» нет",
+              fm.get("units") == ["home"] and "вне партии" not in ctx.files[INPUT] and ctx.outside == [])
         demo = next((f for f in items if f.rule == "R-DEBT-002" and f.kind == "facts"), None)
         m = re.search(r"демо-факты во входе: (\d+) \((.*)\) —", demo.message) if demo else None
         n = int(m.group(1)) if m else 0
@@ -2706,6 +2963,22 @@ def selftest():
         check("mockup при copy deck не approved — R-MAT-012 error о статусе текстов",
               any(f.rule == "R-MAT-012" and f.severity == "error" and "тексты не того статуса" in f.message
                   for f in m.rep.items))
+        errs = [f for f in m.rep.items if f.severity == "error"]
+        soft = {f.kind for f in m.rep.items if f.rule == "R-MAT-012" and f.severity == "warning"}
+        check(f"mockup: error — только гейт 2 (тексты и факты: {len(errs)}), план ассетов и арт-дирекция — R-MAT-012 "
+              "warning с тем же советом",
+              errs and {f.kind for f in errs} == {"copy-deck", "facts"} and {"asset-plan", "art-direction"} <= soft
+              and all(f.message.startswith("проверка входа: ") and f.fix for f in m.rep.items
+                      if f.rule == "R-MAT-012"))
+        acc = parse_acceptance(m.files[ACCEPT])[0]
+        sev = {r.get("id"): r.get("серьёзность") for r in acc}
+        b_mock = {r.get("id") for r in acc if r.get("серьёзность") == "B" and r.get("где") == "макет"}
+        b_after = {r.get("id") for r in acc if r.get("серьёзность") == "B" and r.get("где") == "после сборки"}
+        check(f"ACCEPTANCE.md: B на макете — только честность ({', '.join(sorted(b_mock))}), B после сборки — "
+              f"{', '.join(sorted(b_after))}; A1, A3, D1, G1, K2 — S; C4 — кластер примет",
+              b_mock == {"B1", "B2", "B3", "J3"} and b_after and all(sev.get(i) == "S" for i in
+                                                                    ("A1", "A3", "D1", "G1", "K2"))
+              and "кластера примет" in next(r for r in acc if r.get("id") == "C4")["вопрос (да = норма)"])
         check("mockup: refs.md и подача в page.yaml", "refs.md" in m.files
               and "treatment" in (yaml_mod().safe_load(m.files["pages/home/page.yaml"])["sections"][2]))
         deck = docpaths.site(fx.slug, "promo", "copy", "home.yaml", repo=fx.root)
@@ -2737,12 +3010,35 @@ def selftest():
         cov = next((f for f in nd.rep.items if f.rule == "R-COV-002" and f.ref == "home"), None)
         check("copy deck страницы нет — R-COV-002 с советом «каркас из плана — copydeck.py skeleton»",
               cov is not None and cov.fix.endswith("этап copy (каркас из плана — copydeck.py skeleton)"))
-        # поле источника без правила
+        # расширения x-* на любом уровне — не поля; поле источника без правила — warning, вход собирается
+        dt = deck.read_text(encoding="utf-8")
+        dd = yaml_mod().safe_load(dt)
+        dpage = cd.pages_of(cd.deck_root(dd))[0]
+        dpage["x-reviewed-by"] = "редактор (заметка проекта)"
+        cd.slots_of(cd.sections_of(dpage)[0])[0]["x-note"] = {"who": "аналитик", "text": "заметка к слоту"}
+        deck.write_text(yaml_mod().safe_dump(dd, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        x = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, "2026-09-29")
+        check("x-* у страницы и во вложенном слоте copy deck — расширения, не поля: R-FRESH-003 нет",
+              "R-FRESH-003" not in rules_of(x.rep.items))
+        deck.write_text(dt, encoding="utf-8")
+        chk = docpaths.design(fx.slug, "review", surface="promo", repo=fx.root) / "checks.json"
+        chk.parent.mkdir(parents=True, exist_ok=True)
+        chk.write_text(json.dumps({"example": True, "findings": [{"tell": "LOOK-THREE-CARDS"}]}), encoding="utf-8")
+        x = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, "2026-09-29")
+        check("review/checks.json — не источник входа и не бан-лист",
+              not any("checks.json" in str(s.path) for s in x.sources.values())
+              and "прошлая итерация" not in x.files[BRIEF])
+        chk.unlink()
         bf = docpaths.site(fx.slug, "promo", "brief", repo=fx.root)
         bf.write_text(bf.read_text(encoding="utf-8") + "extra_note: поле вне схемы\n", encoding="utf-8")
         x = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, "2026-09-29")
-        check("поле источника без правила x-canvas-map — R-FRESH-003 с именем поля, вход не пишется",
-              x.blocked and any(f.rule == "R-FRESH-003" and "/extra_note" in f.message for f in x.rep.items))
+        un = [f for f in x.rep.items if f.rule == "R-FRESH-003"]
+        check("поле источника без правила x-canvas-map — R-FRESH-003 warning с именем поля и советом «x-… или убрать»",
+              len(un) == 1 and un[0].severity == "warning" and "/extra_note" in un[0].message
+              and "x-…" in un[0].fix)
+        r = cli("build", fx.slug, "promo", "--stage", "wireframe", "--repo", fx.root, "--today", "2026-09-29")
+        check(f"build с непокрытым полем — вход записан, код 0 (код {r.returncode})",
+              r.returncode == 0 and "/extra_note" in (inp / INPUT).read_text(encoding="utf-8"))
     with FP.built("input-site") as fx:
         ctx = assemble(fx.slug, surf_of(fx, "corp"), fx.root, "wireframe", maps, "2026-09-29")
         pages = [n.split("/")[1] for n in ctx.files if n.endswith("/page.yaml")]
@@ -2752,6 +3048,33 @@ def selftest():
               any(f.rule == "R-COV-001" and f.ref == "consent" for f in ctx.rep.items))
         check("многостраничник: у каждой страницы page.yaml, copy.md, assets.md",
               all(f"pages/{p}/{n}" in ctx.files for p in pages for n in ("page.yaml", "copy.md", "assets.md")))
+        # партия входа: страницы вне партии — строка пробелов, их файлов и находок во входе нет
+        build(fx, "corp", "wireframe")
+        inp = docpaths.design(fx.slug, "input", surface="corp", repo=fx.root)
+        part = build(fx, "corp", "wireframe", units=["about", "home"])
+        fm, _b, _r = read_manifest(inp / INPUT)
+        on_disk = sorted(p.name for p in (inp / "pages").iterdir())
+        gap = next((g for g in part.gaps if g.startswith("вне партии: ")), "")
+        check(f"--page home,about: units по порядку входа, build снял папки страниц вне партии ({', '.join(on_disk)})",
+              fm.get("units") == ["home", "about"] and on_disk == ["about", "home"] and
+              all(p in gap for p in pages if p not in ("home", "about")) and len(part.outside) == len(pages) - 2)
+        foreign = [f for f in part.rep.items if f.ref.split("#")[0] in part.outside]
+        check("находок страниц вне партии во входе нет", not foreign)
+        items, cc = check_surface(fx.slug, surf_of(fx, "corp"), fx.root, None, maps, "2026-09-29")
+        check(f"check без ключа — партия из units входа, вход свежий ({F.summary(items)})",
+              cc.units == ["home", "about"] and not rules_of(items) & {"R-FRESH-002", "R-FRESH-003"})
+        mk = assemble(fx.slug, surf_of(fx, "corp"), fx.root, "mockup", maps, "2026-09-29", ["home"], True)
+        errs = [f for f in mk.rep.items if f.severity == "error"]
+        check(f"--page home, mockup: error — тексты home, факты и токенов ДС нет ({len(errs)}); план ассетов, "
+              "арт-дирекция и ДС — warning",
+              {(f.kind, f.ref) for f in errs} == {("copy-deck", "home"), ("facts", "facts"),
+                                                   ("design-system", "tokens")}
+              and {"asset-plan", "art-direction", "design-system", "artifacts"} <=
+              {f.kind for f in mk.rep.items if f.rule == "R-MAT-012" and f.severity == "warning"})
+        r1 = cli("check", fx.slug, "corp", "--page", "nope", "--repo", fx.root)
+        r2 = cli("check", fx.slug, "corp", "--screen", "home", "--repo", fx.root)
+        check("--page без такой страницы и --screen у сайта — код 2", r1.returncode == 2 and r2.returncode == 2
+              and "nope" in r1.stderr)
     with FP.built("input-cabinet") as fx:
         ctx = build(fx, "office", "mockup")
         want = {"INPUT.md", "brief.yaml", "ACCEPTANCE.md", "contract.md", "copy.md", "demo-data.json", "assets.md"}
@@ -2785,6 +3108,37 @@ def selftest():
         acc = ctx.files[ACCEPT]
         check("ACCEPTANCE.md кабинета: состояния по набору, класс экрана по by_viewport, нет A3",
               acceptance_kind("app", acc) == [] and "| ST-" in acc and "by_viewport" in acc and "| A3 |" not in acc)
+        arows = {r.get("id"): r for r in parse_acceptance(acc)[0]}
+        check("ACCEPTANCE.md кабинета: B1, B2 — «глаза», A1, C5, D1 — S",
+              all(arows[i]["способ"] == "глаза" and arows[i]["серьёзность"] == "B" for i in ("B1", "B2"))
+              and all(arows[i]["серьёзность"] == "S" for i in ("A1", "C5", "D1")))
+        # партия экранов: разделы, строки текстов, демо-набор и гейт текстов — только экрана партии
+        T = mod("tree")
+        keys = C.batch_scope(lay, T.parse_layer(lay), ["plan-dashboard"])["keys"]
+        _ok, bad_pd = C.text_rows(lay, "mockup", keys)
+        pd = assemble(fx.slug, surf_of(fx, "office"), fx.root, "mockup", maps, "2026-09-29", ["plan-dashboard"], True)
+        gate = [f for f in pd.rep.items if f.rule == "R-MAT-012" and f.kind == "texts"]
+        demo = json.loads(pd.files["demo-data.json"])
+        sts = {r.get("id") for r in parse_acceptance(pd.files[ACCEPT])[0] if str(r.get("id")).startswith("ST-")}
+        check(f"--screen plan-dashboard, mockup: тот же гейт у одного экрана — строк не того статуса {len(bad_pd)} из "
+              f"{len(bad_rows)}; раздел одного экрана, строки copy.md — ключи экрана, демо-набор без чужих коллекций",
+              len(gate) == 1 and f"строк не того статуса {len(bad_pd)} " in gate[0].message
+              and 0 < len(bad_pd) < len(bad_rows) and pd.files["contract.md"].count("\n## Экран `") == 1
+              and sum(1 for x in pd.files["copy.md"].splitlines() if x.startswith("| `")) == len(keys)
+              and "requests-list" not in demo["collections"] and "plan" in demo["objects"]
+              and sts and all(s == "ST-DYN" or s.startswith("ST-plan-dashboard-") for s in sts)
+              and pd.units == ["plan-dashboard"] and "вне партии: not-found, request-card" in pd.files[INPUT])
+        scr = lay.screens["requests-list"].path
+        scr.write_text(scr.read_text(encoding="utf-8").replace("status: stable", "status: draft", 1), encoding="utf-8")
+        full = assemble(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, "2026-09-29")
+        second = [f for f in full.rep.items if f.rule == "R-MAT-011" and f.message.startswith("второй вход")]
+        part = assemble(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, "2026-09-29", ["plan-dashboard"],
+                        True)
+        check("экран draft в партии — R-MAT-011 warning (PRE — доклад), без error; вне партии — строка пробелов со "
+              "статусом, без находки",
+              second and all(f.severity == "warning" for f in second) and not rules_of(full.rep.items, "error")
+              and not any(f.rule == "R-MAT-011" for f in part.rep.items)
+              and "requests-list (draft)" in part.files[INPUT] and "доклад заказчику" in full.files[INPUT])
     with FP.built("package-cabinet") as fx:
         ctx = build(fx, "office", "mockup")
         items, _c = check_surface(fx.slug, surf_of(fx, "office"), fx.root, None, maps, "2026-09-29")
@@ -2792,7 +3146,56 @@ def selftest():
               not rules_of(items, "error"))
         check("итог INPUT.md макета без ошибок — вход по phases.md: принятый вайрфрейм или его пропуск, ДС в холсте",
               "вход без ошибок: этап можно публиковать, когда готов его вход по phases.md (принятый вайрфрейм или его "
-              "пропуск, ДС в холсте)." in ctx.files[INPUT])
+              "пропуск, ДС в холсте)" in ctx.files[INPUT])
+        # источники экрана: чужой экран и чужая строка текстов отпечаток не меняют, своя строка — меняет
+        lay = mod("layer").Layer(fx.slug, "office", fx.root)
+        fp0 = unit_fingerprint(fx.slug, "office", "plan-dashboard", fx.root)
+        rows = unit_sources(fx.slug, "office", "plan-dashboard", fx.root)
+        ids = {r["id"] for r in rows}
+        own = [r["id"][len("text · "):] for r in rows if r["id"].startswith("text · ")]
+        other = next(k for k in lay.texts.rows if k not in own)
+        scr = lay.screens["requests-list"].path
+        scr.write_text(scr.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+        tp = lay.texts_path
+        tt = tp.read_text(encoding="utf-8")
+        line = next(x for x in tt.splitlines() if x.startswith(f"| `{other}` |"))
+        tp.write_text(tt.replace(line, line.replace("| `approved` |", "| `checked` |")), encoding="utf-8")
+        same = unit_fingerprint(fx.slug, "office", "plan-dashboard", fx.root)
+        tt = tp.read_text(encoding="utf-8")
+        line = next(x for x in tt.splitlines() if x.startswith(f"| `{own[0]}` |"))
+        tp.write_text(tt.replace(line, line.replace("| `approved` |", "| `checked` |")), encoding="utf-8")
+        check("источники экрана: файл экрана, блоки, каркас, строки texts.md, токены, system.yaml, бриф на вид; "
+              "правка чужого экрана и чужой строки — тот же отпечаток, своей строки — другой",
+              {"screen", "tokens-css", "system", "app-brief"} <= ids and any(i.startswith("block · ") for i in ids)
+              and any(i.startswith("shell · ") for i in ids) and own and same == fp0
+              and unit_fingerprint(fx.slug, "office", "plan-dashboard", fx.root) not in (fp0, None)
+              and unit_fingerprint(fx.slug, "office", "nope", fx.root) is None)
+    with FP.built("package-landing") as fx:
+        # источники страницы: соседняя страница, дата в ARTIFACTS.md и пересборка входа отпечаток не меняют
+        rows = unit_sources(fx.slug, "promo", "spasibo", fx.root)
+        fp0 = unit_fingerprint(fx.slug, "promo", "spasibo", fx.root)
+        home = docpaths.site(fx.slug, "promo", "plans", "home.yaml", repo=fx.root)
+        home.write_text(home.read_text(encoding="utf-8") + "# правка соседней страницы\n", encoding="utf-8")
+        art = docpaths.design(fx.slug, "artifacts", repo=fx.root)
+        at = art.read_text(encoding="utf-8")
+        art.write_text(at.replace("| 2026-09-29 | аналитик |", "| 2026-10-02 | аналитик |"), encoding="utf-8")
+        build(fx, "promo", "wireframe")
+        same = unit_fingerprint(fx.slug, "promo", "spasibo", fx.root)
+        dk = docpaths.site(fx.slug, "promo", "copy", "spasibo.yaml", repo=fx.root)
+        dd = yaml_mod().safe_load(dk.read_text(encoding="utf-8"))
+        cd = mod("copydeck")
+        sl = next(x for p in cd.pages_of(cd.deck_root(dd)) for s in cd.sections_of(p) for x in cd.slots_of(s)
+                  if cd.chosen_variant(x) and cd.chosen_variant(x).get("text"))
+        cd.chosen_variant(sl)["text"] = cd.chosen_variant(sl)["text"] + " — правка"
+        dk.write_text(yaml_mod().safe_dump(dd, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        check("источники страницы: план, тексты copy deck, план ассетов, бренд, system.yaml — строки {id, path, "
+              "fingerprint}; соседняя страница, дата в ARTIFACTS.md и пересборка входа — тот же отпечаток, свой "
+              "текст — другой",
+              rows and {"page-plan", "copy-deck", "asset-plan", "brand", "system"} <= {r["id"] for r in rows}
+              and all(set(r) == {"id", "path", "fingerprint"} for r in rows) and at.count("2026-09-29 | аналитик") == 2
+              and fp0.startswith("sha256:") and same == fp0
+              and unit_fingerprint(fx.slug, "promo", "spasibo", fx.root) not in (fp0, None)
+              and unit_sources(fx.slug, "promo", "nope", fx.root) is None)
     with FP.built("cabinet-demo") as fx:
         ctx = assemble(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, "2026-09-29")
         check("кабинет без ДС — пробел в INPUT.md", "ДС нет" in ctx.files[INPUT])

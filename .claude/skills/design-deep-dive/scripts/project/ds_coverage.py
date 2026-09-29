@@ -23,16 +23,19 @@ id `extensions` карты решений `design/system.yaml`; его комп�
         поверхность, тип, ключ (components · extensions), компонент, итог (ok · нет в артефакте · нет: состояния ·
         нет ключа), где стоит (экраны или страницы)
     ds_coverage --selftest                                         фикстуры cabinet-ds, minimal и схемы форм, без сети
-Без <surface> — все поверхности кабинета и сайта проекта. Из Python: `coverage(...)` → строки покрытия,
-`form_errors(kind, data)` → ошибки формы уровня продукта по схеме `kb/common/<kind>.schema.yaml` (brand · system ·
-app-brief).
+Без <surface> — все поверхности кабинета и сайта проекта. Из Python: `coverage(slug, repo, surface, stage, screens)` →
+строки покрытия (screens — партия экранов кабинета: типы только этих stable-экранов), `form_errors(kind, data)` →
+ошибки формы уровня продукта по схеме `kb/common/<kind>.schema.yaml` (brand · system · app-brief).
 
 Правило R-COV-005 (`.claude/skills/design-audit/references/rules.md`), тяжесть:
-  error    у поверхности есть вход холста этапа mockup (`design/<surface>/input/INPUT.md`, поле stage) или вызов
-           `--stage mockup`; расширение без keyboard или text_roles, id расширения совпал с типом словаря или его aka;
-           два компонента на один тип
-  warning  до макета (этап ds-components впереди): тип без ключа, компонента нет в артефакте, не нарисовано состояние;
-           ключ components вне словаря, optional_states не из states.optional типа
+  error    только у поверхности кабинета на макете — у неё вход холста этапа mockup (`design/<surface>/input/INPUT.md`,
+           поле stage) или вызов `--stage mockup`: тип без ключа components или extensions, компонента нет в
+           артефакте; форма карты решений — два компонента на один тип; расширение без keyboard или text_roles, id
+           расширения совпал с типом словаря или его aka, не в PascalCase, состояния вне словаря, роли text_roles вне
+           списка (форма и расширения — уровень продукта: error, когда кабинет продукта на макете)
+  warning  те же находки до макета кабинета (этап ds-components впереди) и у сайта и лендинга на любом этапе; не
+           нарисовано состояние — на любом этапе; ключ components вне словаря, optional_states не из states.optional
+           типа
   hint     карточка компонента не в группе словаря
 Код выхода: 0 — нет error, 1 — есть error, 2 — ошибка вызова или окружения.
 """
@@ -233,8 +236,9 @@ def touch_only(slug, surf, repo):
     return isinstance(ptr, dict) and ptr.get(surf.slug) == "touch"
 
 
-def cabinet_uses(slug, surf, repo):
-    """{тип: Use} — типы `ui:` stable-экранов поверхности кабинета с экранами, где они стоят."""
+def cabinet_uses(slug, surf, repo, screens=None):
+    """{тип: Use} — типы `ui:` stable-экранов поверхности кабинета с экранами, где они стоят; screens — только эти
+    экраны (партия входа холста)."""
     kbpaths.use("project")
     import tree as T
     lay = L.Layer(slug, surf.slug, repo)
@@ -242,7 +246,7 @@ def cabinet_uses(slug, surf, repo):
     out = {}
     touch = touch_only(slug, surf, repo)
     for screen, p in trees.screens.items():
-        if not p.record.stable:
+        if not p.record.stable or screens is not None and screen not in screens:
             continue
         types = {n.ui_type for n in T.screen_nodes(trees, screen) if n.ui_type}
         shell = trees.shells.get(str(p.record.fm.get("shell") or ""))
@@ -324,7 +328,7 @@ class Row:
 
 
 class Coverage:
-    def __init__(self, slug, repo, surfaces, stage=None):
+    def __init__(self, slug, repo, surfaces, stage=None, screens=None):
         self.slug, self.repo, self.stage = slug, repo, stage
         self.surfaces = surfaces
         self.comps = L.components()
@@ -337,7 +341,7 @@ class Coverage:
         self.rows = []
         self.uses = {}
         for s in surfaces:
-            u = cabinet_uses(slug, s, repo) if s.app else site_uses(slug, s, repo) if s.page else {}
+            u = cabinet_uses(slug, s, repo, screens) if s.app else site_uses(slug, s, repo) if s.page else {}
             if u:
                 self.uses[s.slug] = u
         self._cards = {}
@@ -350,10 +354,23 @@ class Coverage:
             self._cards[name] = load_card(self.art_dir, name)
         return self._cards[name]
 
+    def gate(self, surface):
+        """Покрытие держит макет только у кабинета: поверхность кабинета с входом mockup или вызов --stage mockup."""
+        s = next((x for x in self.surfaces if x.slug == surface), None)
+        return s is not None and s.app and (self.stage == "mockup"
+                                            or input_stage(self.slug, surface, self.repo) == "mockup")
+
     def severity(self, surface):
-        if self.stage == "mockup" or (surface and input_stage(self.slug, surface, self.repo) == "mockup"):
+        """Тип без ключа или компонента: error — у кабинета на макете, иначе warning (у сайта — всегда)."""
+        return "error" if self.gate(surface) else "warning"
+
+    def form_severity(self):
+        """Форма карты решений и расширения — уровень продукта: error, когда кабинет продукта на макете (его вход mockup
+        или вызов --stage mockup с кабинетом в проверке), иначе warning — одна тяжесть при любом охвате вызова."""
+        if self.stage == "mockup" and any(s.app for s in self.surfaces):
             return "error"
-        return "warning"
+        return "error" if any(s.app and input_stage(self.slug, s.slug, self.repo) == "mockup"
+                              for s in docpaths.surfaces(self.slug, self.repo)) else "warning"
 
     def add(self, sev, ref, path, message, surface=None, fix=""):
         self.rep.add(RULE, sev, surface=surface, kind=KIND, ref=ref, path=self.rel(path), message=message, fix=fix)
@@ -383,8 +400,9 @@ class Coverage:
     def map_checks(self):
         sysp = self.system.path
         types = self.comps.types
+        fsev = self.form_severity()
         for t, line in self.system.duplicates:
-            self.add("error", f"system#/components/{t}", sysp, f"`{t}` — ключ components дважды (строка {line}): "
+            self.add(fsev, f"system#/components/{t}", sysp, f"`{t}` — ключ components дважды (строка {line}): "
                      "два компонента ДС на один тип — две реализации одной потребности", fix="оставить один компонент")
         exts = self.system.extensions
         for t, spec in self.system.components.items():
@@ -392,7 +410,7 @@ class Coverage:
             if not isinstance(spec, dict) or not isinstance(spec.get("component"), str) or \
                     L.PLACEHOLDER.match(spec.get("component") or ""):
                 kind = "списком" if isinstance(spec, dict) and isinstance(spec.get("component"), list) else "не задан"
-                sev = "error" if kind == "списком" else "warning"
+                sev = fsev if kind == "списком" else "warning"
                 self.add(sev, ref, sysp, f"`{t}` — компонент ДС {kind}" + (": два компонента на один тип — дефект"
                                                                           if kind == "списком" else ""))
                 continue
@@ -403,7 +421,7 @@ class Coverage:
                          fix="ключ — тип kb/common/components.yaml" + (f" ({aka})" if aka else "") +
                          " или id расширения")
             if t in exts and spec["component"] != t:
-                self.add("error", ref, sysp, f"`{t}` — и расширение, и ключ components с компонентом "
+                self.add(fsev, ref, sysp, f"`{t}` — и расширение, и ключ components с компонентом "
                          f"{spec['component']}: два компонента на один тип")
             opt = spec.get("optional_states") or []
             tstates = (types.get(t) or {}).get("states") or (exts.get(t, (0, {}))[1].get("states") or {})
@@ -422,27 +440,27 @@ class Coverage:
         for eid, (i, e) in exts.items():
             ref = f"system#/extensions/{i}"
             if eid in types or self.comps.type_of(eid):
-                self.add("error", ref + "/id", sysp, f"расширение `{eid}` совпало с типом словаря "
+                self.add(fsev, ref + "/id", sysp, f"расширение `{eid}` совпало с типом словаря "
                          f"{eid if eid in types else self.comps.type_of(eid)}: подходит тип словаря — берут его",
                          fix="ui: экрана — тип словаря; расширение снять")
             elif not PASCAL.match(eid):
-                self.add("error", ref + "/id", sysp, f"расширение `{eid}` — id не в PascalCase")
+                self.add(fsev, ref + "/id", sysp, f"расширение `{eid}` — id не в PascalCase")
             st = e.get("states") if isinstance(e.get("states"), dict) else {}
             for k in ("required", "optional"):
                 bad = [x for x in st.get(k) or [] if x not in self.element_states]
                 if bad:
-                    self.add("error", ref + f"/states/{k}", sysp, f"расширение `{eid}` — states.{k}: "
+                    self.add(fsev, ref + f"/states/{k}", sysp, f"расширение `{eid}` — states.{k}: "
                              f"{', '.join(bad)} — не состояния элемента словаря; своё состояние проект не заводит")
             if not st.get("required"):
                 self.add("warning", ref + "/states/required", sysp, f"расширение `{eid}` — нет states.required")
             kb = e.get("keyboard")
             if not isinstance(kb, str) or not kb.strip() or L.PLACEHOLDER.match(kb.strip()):
-                self.add("error", ref + "/keyboard", sysp,
+                self.add(fsev, ref + "/keyboard", sysp,
                          f"расширение `{eid}` без клавиатурного контракта (keyboard): без него тип не принимается",
                          fix="keyboard — клавиши, порядок фокуса, роль ARIA")
             tr = e.get("text_roles")
             if not isinstance(tr, dict):
-                self.add("error", ref + "/text_roles", sysp, f"расширение `{eid}` без text_roles: не работает проверка "
+                self.add(fsev, ref + "/text_roles", sysp, f"расширение `{eid}` без text_roles: не работает проверка "
                          "«роль ключа текста = роль части»", fix="text_roles: {<Тип>.<Часть>: [<роль>]}; без текстовых "
                                                                 "частей — {}")
                 continue
@@ -450,11 +468,11 @@ class Coverage:
             for k, rl in tr.items():
                 head, _, part = str(k).partition(".")
                 if head != eid or (part and part not in parts):
-                    self.add("error", ref + f"/text_roles/{k}", sysp, f"расширение `{eid}` — text_roles: ключ `{k}` — "
+                    self.add(fsev, ref + f"/text_roles/{k}", sysp, f"расширение `{eid}` — text_roles: ключ `{k}` — "
                              f"не тип и не его часть (parts: {', '.join(parts) or '—'})")
                 bad = [r for r in (rl if isinstance(rl, list) else [rl]) if r not in roles]
                 if bad:
-                    self.add("error", ref + f"/text_roles/{k}", sysp, f"расширение `{eid}` — text_roles `{k}`: роли "
+                    self.add(fsev, ref + f"/text_roles/{k}", sysp, f"расширение `{eid}` — text_roles `{k}`: роли "
                              f"{', '.join(map(str, bad))} вне закрытого списка ux 07/06 §7.2 и body")
 
     # -- тип на поверхности
@@ -506,7 +524,8 @@ class Coverage:
             opt = [x for x in row.missing if x not in req]
             parts = ([f"обязательные типа {t}: {', '.join(req)}"] if req else []) + \
                     ([f"объявленные в optional_states: {', '.join(opt)}"] if opt else [])
-            self.add(sev, f"artifact#components/{row.component}", card.folder / "preview.html",
+            # не нарисованное в превью состояние — доклад на любом этапе: макет держат тип без ключа или компонента
+            self.add("warning", f"artifact#components/{row.component}", card.folder / "preview.html",
                      f"`ui:{t}` → компонент {row.component}: в превью не нарисованы состояния — {'; '.join(parts)} "
                      f"(образец состояния — атрибут data-state); {where}", u.surface,
                      f"превью состояний компонента — этап ds-components: /design-deep-dive {self.slug}")
@@ -519,11 +538,11 @@ class Coverage:
                          u.surface, f'@dsCard group="{want}"')
 
 
-def coverage(slug, repo=None, surface=None, stage=None):
-    """Покрытие ДС продукта: объект Coverage после сверки (`rows`, `rep.items`)."""
+def coverage(slug, repo=None, surface=None, stage=None, screens=None):
+    """Покрытие ДС продукта: объект Coverage после сверки (`rows`, `rep.items`); screens — партия экранов кабинета."""
     r = docpaths.root(repo)
     surfs = [s for s in docpaths.surfaces(slug, r) if (s.app or s.page) and (surface is None or s.slug == surface)]
-    return Coverage(slug, r, surfs, stage).run()
+    return Coverage(slug, r, surfs, stage, screens).run()
 
 
 def show(cov, as_json=False, out=None):
@@ -685,9 +704,9 @@ def _selftest():
         sysp = docpaths.design(slug, "system", repo=root)
         base = sysp.read_text(encoding="utf-8")
 
-        def with_system(text):
+        def with_system(text, stage=None):
             sysp.write_text(text, encoding="utf-8")
-            return coverage(slug, root).rep.items
+            return coverage(slug, root, stage=stage).rep.items
 
         # 3. снятое сопоставление типа
         items = with_system(base.replace("  Pagination: {component: Pagination}\n", ""))
@@ -703,6 +722,12 @@ def _selftest():
         shutil.rmtree(inp)
         got = [f for f in coverage(slug, root, stage="mockup").rep.items if "Pagination" in f.message]
         check_("--stage mockup → error", got and got[0].severity == "error")
+        pd = [f for f in coverage(slug, root, "office", "mockup", ["plan-dashboard"]).rep.items
+              if "Pagination" in f.message]
+        rl = [f for f in coverage(slug, root, "office", "mockup", ["requests-list"]).rep.items
+              if "Pagination" in f.message]
+        check_("партия экранов: тип чужого экрана находки не даёт, своего — error на макете",
+               not pd and rl and rl[0].severity == "error")
         # 4. компонент без обязательного состояния
         sysp.write_text(base, encoding="utf-8")
         prev = docpaths.design(slug, "ds-project", repo=root) / "components" / "Button" / "preview.html"
@@ -710,7 +735,10 @@ def _selftest():
         prev.write_text("\n".join(ln for ln in ptext.splitlines() if 'data-state="loading"' not in ln) + "\n",
                         encoding="utf-8")
         got = [f for f in coverage(slug, root).rep.items if f.rule == RULE and "loading" in f.message]
-        check_("компонент Button без состояния loading → находка", len(got) == 1 and "Button" in got[0].message)
+        mk = [f for f in coverage(slug, root, stage="mockup").rep.items if f.rule == RULE and "loading" in f.message]
+        check_("компонент Button без состояния loading → находка warning и на макете (не нарисованное состояние — "
+               "доклад)", len(got) == 1 and "Button" in got[0].message and len(mk) == 1
+               and {got[0].severity, mk[0].severity} == {"warning"})
         prev.write_text(ptext, encoding="utf-8")
         # 5. указатель touch: hover не требуется
         ab = docpaths.design(slug, "app-brief", repo=root)
@@ -725,15 +753,19 @@ def _selftest():
                [f for f in coverage(slug, root).rep.items if "hover" in f.message])
         prev.write_text(ptext, encoding="utf-8")
         # 6. расширение без keyboard, без text_roles; два компонента на тип; ключ из aka
-        items = with_system(base.replace('    keyboard: "Tab', '    x-keyboard: "Tab', 1))
-        check_("расширение без keyboard → R-COV-005 error",
-               [f for f in items if f.severity == "error" and "keyboard" in f.message])
-        items = with_system(base.replace("    text_roles: {AddressMap.Pin: [label]}\n", ""))
-        check_("расширение без text_roles → R-COV-005 error",
+        nokb = base.replace('    keyboard: "Tab', '    x-keyboard: "Tab', 1)
+        items, early = with_system(nokb, "mockup"), with_system(nokb)
+        check_("расширение без keyboard → R-COV-005 error на макете кабинета, до макета — warning",
+               [f for f in items if f.severity == "error" and "keyboard" in f.message]
+               and [f for f in early if f.severity == "warning" and "keyboard" in f.message]
+               and not [f for f in early if f.severity == "error"])
+        items = with_system(base.replace("    text_roles: {AddressMap.Pin: [label]}\n", ""), "mockup")
+        check_("расширение без text_roles → R-COV-005 error на макете кабинета",
                [f for f in items if f.severity == "error" and "text_roles" in f.message])
         items = with_system(base.replace("  Button: {component: Button}\n",
-                                         "  Button: {component: Button}\n  Button: {component: ActionButton}\n"))
-        check_("два компонента на один тип (ключ дважды) → error",
+                                         "  Button: {component: Button}\n  Button: {component: ActionButton}\n"),
+                            "mockup")
+        check_("два компонента на один тип (ключ дважды) → error на макете кабинета",
                [f for f in items if f.severity == "error" and "дважды" in f.message])
         items = with_system(base.replace("  TopBar: {component: TopBar}\n", "  Navbar: {component: TopBar}\n"))
         check_("ключ Navbar (aka) → предупреждение с типом TopBar и непокрытый TopBar с подсказкой",
@@ -758,6 +790,8 @@ def _selftest():
         items = cov.rep.items
         check_("сайт без карты решений: находка со списком типов страниц",
                len(items) == 1 and "Checkbox" in items[0].message and items[0].surface == "promo")
+        mk = coverage(fx.slug, fx.root, surface="promo", stage="mockup").rep.items
+        check_("сайт: R-COV-005 — warning и на макете", mk and all(f.severity == "warning" for f in mk))
     print("ds_coverage selftest:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 

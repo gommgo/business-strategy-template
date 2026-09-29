@@ -30,6 +30,12 @@ README.md`, «Что слой отдаёт макету»; раскладка в
 Тексты по этапу (`--stage`, по умолчанию wireframe): wireframe — строки assumed, checked, approved; mockup — только
 approved, остальные — пробел, на артборде — заглушка.
 
+Партия экранов (Python: `build(…, screens=[slug …])`; её задаёт вход холста `canvas_input --screen`): разделы экранов —
+только экранов партии, раздел «Тексты» и находка о статусе строк — только ключи, которые называют экраны партии, блоки
+их состава и каркасы; демо-набор — коллекции экранов партии, их объекты и объекты экранов с целями ссылок; пробелы и
+находки демо-набора — только их. Десять разделов шаблона — вся поверхность. Экран вне партии, в том числе не stable,
+находок не даёт: вход называет его строкой пробелов. Без партии — все экраны и весь реестр текстов.
+
     contract build <slug> <surface> [--repo DIR] [--stage wireframe|mockup] [--out DIR] [--json]
     contract check <slug> [<surface>] [--repo DIR] [--stage wireframe|mockup] [--json]
     contract --selftest
@@ -37,15 +43,16 @@ approved, остальные — пробел, на артборде — заг�
 `build` печатает contract.md (`--json` — структуру: разделы, источники, пробелы, наборы экранов); `--out DIR` пишет
 DIR/contract.md и печатает путь. В репозиторий проекта утилита не пишет: вход холста собирает `canvas_input`. `check` —
 пробелы источников находками (модуль findings) вместе с пробелами демо-набора, ничего не пишет; без <surface> — все
-поверхности кабинета. Из Python: `build(Layer, stage, demo=None)` → Contract (`sections`, `screens`, `findings`,
-`render()`, `as_dict()`), `render(Layer, stage)`, `text_rows(Layer, stage)` → (строки этапа, строки не того статуса),
-`check(Layer, stage)` → находки.
+поверхности кабинета. Из Python: `build(Layer, stage, demo=None, screens=None)` → Contract (`sections`, `screens`,
+`findings`, `demo` — демо-набор партии, `keys` — ключи текстов партии или None, `units`, `outside`, `render()`,
+`as_dict()`), `render(Layer, stage)`, `text_rows(Layer, stage, keys=None)` → (строки этапа, строки не того статуса),
+`batch_scope(Layer, trees, screens)` → состав партии, `check(Layer, stage)` → находки.
 
 Правила находок (`.claude/skills/design-audit/references/rules.md`):
-  R-MAT-011   пункт блока PRE ux 12/02 §2 не заполнен: экран не stable (вход — на stable-экранах); нет texts.md,
-              map.md, object.md, action.md; у vision нет Problem или Users; у пользователя поверхности нет строки
-              постуры; у экрана нет главной задачи; раздел «Переход» пуст; обязательное состояние экрана не покрыто;
-              коллекция без объёма (demo_data)                                                        error
+  R-MAT-011   пункт блока PRE ux 12/02 §2 не заполнен: экран партии не stable (вход — на stable-экранах); нет
+              texts.md, map.md, object.md, action.md; у vision нет Problem или Users; у пользователя поверхности нет
+              строки постуры; у экрана нет главной задачи; раздел «Переход» пуст; обязательное состояние экрана не
+              покрыто; коллекция без объёма (demo_data) — доклад заказчику, пункт закрывает слой проекта  warning
   R-MAT-003   этап mockup: строки texts.md не approved — одна находка на реестр (отчёт контракта; во входе
               холста canvas_input поднимает её в R-MAT-012 error — гейт макета на утверждённых текстах)  warning
   R-COV-005   этап mockup: нет карты решений design/system.yaml — типам экранов не сопоставить компоненты  error
@@ -57,7 +64,7 @@ from __future__ import annotations
 import json
 import re
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -188,6 +195,10 @@ class Contract:
     sections: list = field(default_factory=list)
     screens: list = field(default_factory=list)
     findings: list = field(default_factory=list)
+    demo: dict = field(default_factory=dict)            # демо-набор партии (без партии — весь)
+    keys: list | None = None                            # ключи texts.md экранов партии; None — весь реестр
+    units: list = field(default_factory=list)           # экраны партии
+    outside: list = field(default_factory=list)         # экраны вне партии: [(slug, статус)]
 
     def render(self):
         out = [f"# Контракт генерации экранов — `{self.surface}`", "",
@@ -195,7 +206,11 @@ class Contract:
                f"строки {', '.join(f'`{s}`' for s in STAGE_STATUSES[self.stage])} реестра.", "",
                "Контракт производный: его собирает `scripts/project/contract.py` из файлов слоя проекта, руками он не "
                "правится — правка идёт в источник раздела, вход собирается заново. Десять разделов — шаблон ux 11/04 "
-               f"§7.3; за ними — раздел на каждый экран поверхности. Данные — `{self.demo_ref}` рядом.", ""]
+               f"§7.3; за ними — раздел на каждый экран {'партии' if self.outside else 'поверхности'}. Данные — "
+               f"`{self.demo_ref}` рядом.", ""]
+        if self.outside:
+            out += [f"Экраны партии: {_codes(self.units)}; вне партии — {_codes([s for s, _st in self.outside])}: их "
+                    "разделов, строк текстов и записей демо-набора в контракте нет.", ""]
         for title, sources, gaps, lines in [(s.title, s.sources, s.gaps, s.lines) for s in self.sections] + \
                 [(f"Экран `{p.slug}` — {p.name}", p.sources, p.gaps, p.lines) for p in self.screens]:
             out += [f"## {title}", "", _sources_line(sources), ""]
@@ -210,7 +225,8 @@ class Contract:
         def srcs(lst):
             return [{"path": s.path, "part": s.part} for s in lst]
         return {"project": self.project, "surface": self.surface, "stage": self.stage,
-                "texts_statuses": list(STAGE_STATUSES[self.stage]), "demo": self.demo_ref,
+                "texts_statuses": list(STAGE_STATUSES[self.stage]), "demo": self.demo_ref, "units": self.units,
+                "outside": [{"slug": s, "status": st} for s, st in self.outside],
                 "sections": [{"title": s.title, "sources": srcs(s.sources), "gaps": s.gaps} for s in self.sections],
                 "screens": [{"slug": p.slug, "name": p.name, "status": p.status, "sources": srcs(p.sources),
                              "states": p.states, "own": p.own, "manual": p.manual, "gaps": p.gaps}
@@ -306,11 +322,72 @@ def scenarios(lay):
     return out
 
 
-def text_rows(lay, stage):
-    """Строки реестра texts.md: (статус этапа, не того статуса) — в порядке реестра."""
+def text_rows(lay, stage, keys=None):
+    """Строки реестра texts.md: (статус этапа, не того статуса) — в порядке реестра; keys — только эти ключи (ключи
+    экранов партии), None — весь реестр."""
     allowed = STAGE_STATUSES[stage]
     rows = list(lay.texts.rows.values()) if lay.texts.exists else []
+    if keys is not None:
+        keys = set(keys)
+        rows = [r for r in rows if r.key in keys]
     return [r for r in rows if r.status in allowed], [r for r in rows if r.status not in allowed]
+
+
+def batch_scope(lay, trees, screens):
+    """Состав экранов партии: {screens, blocks — блоки состава с вложенными, shells — каркасы экранов, keys — ключи
+    texts.md, которые называют экраны, их блоки и каркасы (порядок — первое упоминание), objects — объекты глоссария
+    экранов (поле object и датумы деревьев)}."""
+    blocks, shells, parsed = [], [], []
+    for s in screens:
+        p = trees.screens[s]
+        parsed.append(p)
+        blocks += [b for b in T.composition(trees, s)["blocks"] if b not in blocks]
+        sh = str(p.record.fm.get("shell") or "").strip()
+        if sh in trees.shells and sh not in shells:
+            shells.append(sh)
+    parsed += [trees.blocks[b] for b in blocks if b in trees.blocks] + [trees.shells[x] for x in shells]
+    mine = {id(x) for x in parsed}
+    keys = list(dict.fromkeys(u.key for u in T.text_uses(trees, lay.components) if id(u.parsed) in mine))
+    objs = [L.cell(str(trees.screens[s].record.fm.get("object") or "")) for s in screens]
+    objs = list(dict.fromkeys([o for o in objs if o] + D.items_of(lay, parsed)))
+    return {"screens": list(screens), "blocks": blocks, "shells": shells, "keys": keys, "objects": objs}
+
+
+def _in_scope(ref, scope, objs):
+    """Находка демо-набора — о коллекции экрана или блока партии либо об объекте её набора."""
+    head, _, tail = str(ref).partition("#")
+    if head == "object":
+        return re.split(r"[/.]", tail, maxsplit=1)[0] in objs
+    return head in scope["screens"] or head in scope["blocks"]
+
+
+def demo_part(doc, lay, trees, scope):
+    """Демо-набор партии: коллекции её экранов, объекты экранов и коллекций с целями ссылок (ref:<объект>), пробелы и
+    источники только их; окно, нормы и локализация — как у набора поверхности."""
+    colls = {cid: c for cid, c in doc["collections"].items() if set(c.get("screens") or []) & set(scope["screens"])}
+    queue = [o for o in list(scope["objects"]) + [c.get("object") for c in colls.values()] if o in doc["objects"]]
+    objs = []
+    while queue:
+        o = queue.pop(0)
+        if o in objs:
+            continue
+        objs.append(o)
+        for a in doc["objects"][o].get("attributes") or []:
+            t = str(a.get("type") or "")
+            if t.startswith("ref:"):
+                queue.append(t[4:].removesuffix("[]").strip())
+        queue = [x for x in queue if x in doc["objects"]]
+    kept = {lay.rel(trees.blocks[c].record.path) if c in trees.blocks else
+            lay.rel(trees.screens[c.split("#", 1)[0]].record.path) for c in colls}
+    dropped = {lay.rel(trees.blocks[c].record.path) if c in trees.blocks else
+               lay.rel(trees.screens[c.split("#", 1)[0]].record.path) for c in doc["collections"] if c not in colls}
+    out = dict(doc)
+    out["objects"] = {o: v for o, v in doc["objects"].items() if o in objs}
+    out["collections"] = colls
+    out["sources"] = [s for s in doc["sources"] if s not in dropped - kept]
+    out["gaps"] = [{"rule": f.rule, "severity": f.severity, "path": f.path, "message": f.message}
+                   for f in D.gaps(lay, trees) if _in_scope(f.ref, scope, objs)]
+    return out
 
 
 def _dict(value):
@@ -355,9 +432,9 @@ def _paragraphs(body):
 
 
 class Ctx:
-    """Всё, что читает сборка контракта одной поверхности, и пробелы с находками."""
+    """Всё, что читает сборка контракта одной поверхности, и пробелы с находками; screens — партия экранов."""
 
-    def __init__(self, lay, stage, demo=None, demo_ref=DEMO_FILE):
+    def __init__(self, lay, stage, demo=None, demo_ref=DEMO_FILE, screens=None):
         if stage not in STAGES:
             raise ValueError(f"этап: {' · '.join(STAGES)}, не {stage!r}")
         self.lay, self.stage, self.demo_ref = lay, stage, demo_ref
@@ -365,7 +442,17 @@ class Ctx:
         self.parts = template()
         self.dict = S.dictionary()
         self.derived = M.derive(lay, self.trees)
-        self.demo = demo if demo is not None else D.build(lay, trees=self.trees)
+        want = set(screens) if screens is not None else None
+        lost = sorted(want - set(self.trees.screens)) if want is not None else []
+        if lost:
+            raise F.ToolError(f"экранов {', '.join(lost)} нет на поверхности {lay.surface}")
+        self.units = [s for s in sorted(self.trees.screens) if want is None or s in want]
+        self.outside = [(s, lay.screens[s].status or "без статуса") for s in sorted(self.trees.screens)
+                        if s not in self.units]
+        self.scope = batch_scope(lay, self.trees, self.units) if want is not None else None
+        self.keys = self.scope["keys"] if self.scope is not None else None
+        demo = demo if demo is not None else D.build(lay, trees=self.trees)
+        self.demo = demo_part(demo, lay, self.trees, self.scope) if self.scope is not None else demo
         self.objs = D.objects(lay)
         self.sets = {s: S.screen_set(lay, s, self.trees) for s in self.trees.screens}
         self.own = {b: S.block_set(lay, b, self.trees) for b in self.trees.blocks if T.is_own(self.trees, b)}
@@ -392,9 +479,10 @@ class Ctx:
                      message=message, fix=fix)
 
     def pre(self, where, pre, text, kind, ref, path, fix):
-        """Пробел второго входа (пункт блока PRE или stable-экраны): строка «Пробел» раздела и находка R-MAT-011."""
+        """Пробел второго входа (пункт блока PRE или stable-экраны): строка «Пробел» раздела и находка R-MAT-011 —
+        доклад заказчику (warning), пункт закрывает исполнитель слоя проекта."""
         where.gaps.append(f"{pre} — {text}")
-        self.finding("R-MAT-011", "error", kind, ref, path, f"{pre}: {text}", fix)
+        self.finding("R-MAT-011", "warning", kind, ref, path, f"{pre}: {text}", fix)
 
     def fix_project(self, what=""):
         return f"/project-deep-dive {self.lay.slug}" + (f" {what}" if what else "")
@@ -753,7 +841,7 @@ def sec_data(c, part):
 def sec_texts(c, part):
     s = Section(part.short)
     lay = c.lay
-    ok, bad = text_rows(lay, c.stage)
+    ok, bad = text_rows(lay, c.stage, c.keys)
     if lay.texts.exists:
         s.sources.append(c.src(lay.texts_path))
     else:
@@ -1021,19 +1109,24 @@ def screen_part(c, slug):
 
 # ------------------------------------------------------------------ сборка и проверка
 
-def build(lay, stage="wireframe", demo=None, demo_ref=DEMO_FILE):
-    """Контракт поверхности → Contract (разделы шаблона по порядку и раздел на экран)."""
-    c = Ctx(lay, stage, demo, demo_ref)
+def build(lay, stage="wireframe", demo=None, demo_ref=DEMO_FILE, screens=None):
+    """Контракт поверхности → Contract (разделы шаблона по порядку и раздел на экран); screens — партия экранов:
+    разделы, строки текстов, демо-набор и находки — только её."""
+    c = Ctx(lay, stage, demo, demo_ref, screens)
     kind = lay.surf.type + (f" рода {lay.surf.web_kind}" if lay.surf.web_kind else "")
-    con = Contract(project=lay.slug, surface=lay.surface, kind=kind, stage=stage, demo_ref=demo_ref)
+    con = Contract(project=lay.slug, surface=lay.surface, kind=kind, stage=stage, demo_ref=demo_ref, demo=c.demo,
+                   keys=c.keys, units=list(c.units), outside=list(c.outside))
     for part in c.parts:
         fn = BUILDERS.get(part.short)
         if fn is None:
             raise F.ToolError(f"раздел шаблона §7.3 «{part.short}» без сборщика — разделы: {', '.join(BUILDERS)}")
         con.sections.append(fn(c, part))
-    con.screens = [screen_part(c, slug) for slug in sorted(c.trees.screens)]
+    con.screens = [screen_part(c, slug) for slug in c.units]
     items = F.Report()
-    items.extend(D.gaps(lay, c.trees))
+    # пункт PRE-14 демо-набора (объём коллекции) — тоже пункт блока PRE: доклад, как остальные
+    items.extend(replace(f, severity="warning") if f.rule == "R-MAT-011" and f.severity == "error" else f
+                 for f in D.gaps(lay, c.trees)
+                 if c.scope is None or _in_scope(f.ref, c.scope, set(c.demo["objects"])))
     items.extend(c.rep.items)
     con.findings = items.items
     return con
@@ -1207,10 +1300,27 @@ def _selftest():
                                      if not x.startswith("| `surveyor` | `—`")) + "\n", encoding="utf-8")
             items = check(L.Layer(fx.slug, "office", root))
             got = {f.message.split(":")[0] for f in items if f.rule == "R-MAT-011"}
-            check_("пробелы PRE: экран draft, состояние не покрыто, постура, объём коллекции — R-MAT-011 error",
+            check_("пробелы PRE: экран draft, состояние не покрыто, постура, объём коллекции — R-MAT-011 warning "
+                   "(доклад), код 0",
                    {"второй вход", "PRE-08", "PRE-01, PRE-04", "PRE-14"} <= got and all(
-                       f.severity == "error" for f in items if f.rule == "R-MAT-011"))
+                       f.severity == "warning" for f in items if f.rule == "R-MAT-011")
+                   and F.exit_code(items) == F.EXIT_OK)
             check_("у находки — путь файла проекта", all(f.path.startswith("docs/projects/") for f in items))
+            # партия экранов: экран вне партии (draft requests-list) находок не даёт, объём его коллекции — тоже
+            part = build(L.Layer(fx.slug, "office", root), "mockup", screens=["plan-dashboard"])
+            keys = set(part.keys or [])
+            texts = [line for line in part.sections[6].lines if line.startswith("| `")]
+            check_("партия plan-dashboard: раздел одного экрана, вне партии — экраны со статусом, без их находок",
+                   [p.slug for p in part.screens] == ["plan-dashboard"] and part.units == ["plan-dashboard"]
+                   and ("requests-list", "draft") in part.outside
+                   and not [f for f in part.findings if f.rule == "R-MAT-011"
+                            and f.ref.split("#")[0] in ("requests-list", "request-card")]
+                   and "Экраны партии: `plan-dashboard`; вне партии —" in part.render())
+            check_("партия: тексты и находка о статусе — только ключи экранов партии, демо-набор — без чужих коллекций",
+                   keys and all(line.split("`")[1] in keys for line in texts)
+                   and "requests-list" not in part.demo["collections"] and part.demo["objects"]
+                   and all(g["path"] != "docs/projects/otves-office/screens/office/blocks/requests-list/index.md"
+                           for g in part.demo["gaps"]))
     print("contract selftest:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 

@@ -4,23 +4,31 @@ stage: mockup
 project: otves-office
 surface: office
 route: app
+units:
+- not-found
+- plan-dashboard
+- request-card
+- request-new
+- requests-list
 built_by: canvas_input
 check:
   error: 0
   warning: 1
   hint: 0
 files:
-  ACCEPTANCE.md: sha256:3cb7fdb35e707e9971a2d240e86c9f8c8be64259e13ce787b26e4d79ea962533
+  ACCEPTANCE.md: sha256:d73155ee57f8ce8035d2a64c35cd04c9d3ae7897c828e6fd34d9cb2227925c1c
   assets.md: sha256:a639c884bedb7f5b4700e4bd3596e31300b46c0c2907362cd7c79aaf88149206
   brief.yaml: sha256:6659a76e2ccea880fd0ba1139e3605b9060c4176e22ba2d473bec147744e78c7
   contract.md: sha256:252acc176ad7ee4459cedae6478aa5e4c31836ab2c892ed937140d7a37af239a
   copy.md: sha256:456134aab65cafd47882c90ebe6414b6e9284975c2257a982e503b0a4e5f637c
   demo-data.json: sha256:0ed1f8ddd7d77b02b3cbeb13d767e8dfa6f0f322c0deff152a703371e4efac7d
-manifest: sha256:1e19b3ba229f787be56967ffece98073d9e85deecbaea2fce2e70239637f2be0
+manifest: sha256:ef6adc2d51ff46f1fde4e7ab87c969a953331803931485d72ddf8f5c77f7cae9
 ---
 # Вход холста — `office` (web · app), этап `mockup`
 
 Производный файл: вход собирает `scripts/project/canvas_input.py build otves-office office --stage mockup` из источников ниже; руками вход не правится — изменился источник, вход пересобирается. Исполнитель читает файлы этой папки и источники из таблицы по их путям: копий источников во входе нет.
+
+Партия входа: not-found, plan-dashboard, request-card, request-new, requests-list (все единицы поверхности).
 
 ## Источники
 
@@ -85,7 +93,7 @@ manifest: sha256:1e19b3ba229f787be56967ffece98073d9e85deecbaea2fce2e70239637f2be
 
 ## Итог проверки
 
-0 error · 1 warning · 0 hint — вход без ошибок: этап можно публиковать, когда готов его вход по phases.md (принятый вайрфрейм или его пропуск, ДС в холсте).
+0 error · 1 warning · 0 hint — вход без ошибок: этап можно публиковать, когда готов его вход по phases.md (принятый вайрфрейм или его пропуск, ДС в холсте); предупреждения — доклад заказчику, решает он.
 
 Блок PRE ux 12/02 §2: без незаполненных пунктов.
 
