@@ -1,0 +1,19 @@
+# Нормы, которые читают утилиты слоя экранов (scripts/project/screen_map.py). Число и правило — у владельца нормы по
+# адресу source; правка здесь — только вслед за нормой.
+nav_levels_max:
+  value: 2
+  source: "ux/13-app-types/04-master-procedure-brief-to-screens.md §16"
+  note: "видимых уровней пунктов в боковой панели — не больше; уровень 1 — корневые зоны с order, 2 — их дочерние"
+same_type_min_screens:
+  value: 4
+  source: "docs/projects/_template/screens/README.md, раздел «Экран: тип, карта и маршрут»"
+  note: "при стольких экранах и больше типы экранов не все одинаковы (ux 13/04 §14, проверка на шаблонность)"
+density:
+  source: "ux/13-app-types/04-master-procedure-brief-to-screens.md §25; форма screens/_template/map.md, раздел «Свод»"
+  note: >-
+    плотность строки «Карты экранов» — из постуры пользователей экрана (user.md, «Постура»: самая высокая) и типа
+    экрана: таблицы плотнее, формы — средне, мастер — просторнее; без постуры — по типу
+  words: {high: высокая, medium: средняя, low: низкая}
+  cap: {edit: medium, settings: medium, auth: medium, wizard: low}
+  by_type: {list: high, master-detail: high, dashboard: medium, object: medium, canvas: medium, edit: medium,
+            settings: medium, auth: medium, wizard: low, service: medium}

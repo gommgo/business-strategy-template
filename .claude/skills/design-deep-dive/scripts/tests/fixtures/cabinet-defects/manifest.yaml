@@ -1,0 +1,56 @@
+# Фикстура cabinet-defects — иллюстрация для самопроверок утилит scripts/project/: чистый кабинет фикстуры cabinet и
+# четырнадцать посеянных дефектов, по одному на находку (правило и тяжесть — в комментарии правки). Свод map.md
+# поправлен вслед за экранами везде, кроме дефекта R-RT-008, — так каждый дефект даёт ровно одну находку error или
+# warning; подсказки R-TX-006 (строки реестра, чьи ключи ушли из деревьев) — следствие, не дефект.
+example: true
+description: кабинет с посеянными дефектами — по одной находке tree, states и screen_map на дефект
+project: otves-office
+extends: [cabinet]
+layers:
+  - replace:
+      # R-STRUCT-021 error: имя из aka вместо типа словаря — находка называет TopBar
+      screens/office/shells/app-shell/index.md:
+        - {find: "      - ui:TopBar:", to: "      - ui:Navbar:"}
+      # R-STRUCT-021 error: части Caption нет в parts типа Field; R-SEM-014 warning: level вне списка
+      screens/office/blocks/request-form/index.md:
+        - {find: "ui:Field.Label:\n                - text:requests.new.client.label",
+           to: "ui:Field.Caption:\n                - text:requests.new.client.label"}
+        - {find: "ui:Button level=tertiary:", to: "ui:Button level=accent:"}
+      # R-STRUCT-020 error: голова узла с пробелами внутри; R-SEM-014 warning: gap числом
+      screens/office/blocks/requests-list/index.md:
+        - {find: "ui:Button level=primary action=create:", to: "ui:Button level = primary action=create:"}
+        - {find: "layout:row justify=between align=center gap=md:", to: "layout:row justify=between align=center gap=16:"}
+      # R-TX-001 error: ключ text: без строки texts.md
+      screens/office/blocks/request-details/index.md:
+        - {find: "text:requests.card.schedule.action", to: "text:requests.card.schedule-visit.action"}
+      # R-TX-003 error: литерал текста в дереве stable-экрана
+      screens/office/screens/not-found/index.md:
+        - {find: "        - text:system.not-found.body.body", to: "        - 'Такой страницы нет или адрес устарел'"}
+      # R-SEM-011 error: stable-экран с коллекцией и фильтром без empty-filtered; для R-COV-003 — без перехода в карточку
+      screens/office/screens/requests-list/index.md:
+        - {find: "  empty-filtered:\n    main:\n      - ui:EmptyState:\n          - text:requests.list.empty-filtered.empty\n          - ui:Button level=secondary:\n              - text:requests.list.reset-filters.action\n",
+           to: ""}
+        - {find: "  - {to: request-card, trigger: 'выбор строки', keeps: 'фильтры, сортировка, страница', back: 'назад, крошки'}\n",
+           to: ""}
+      # R-SEM-011 error: stable-экран с params без not-found; R-STRUCT-022 error: ключ states вне словаря (loading)
+      screens/office/screens/request-card/index.md:
+        - {find: "  not-found:\n    main:\n      - layout:stack align=center gap=md:\n          - text:requests.card.not-found.title\n          - text:requests.card.not-found.body\n          - ui:Link:\n              - text:requests.card.back-to-list.link\n",
+           to: ""}
+        - {find: "  success: 'не применимо: результат виден сменой статуса заявки'\n",
+           to: "  success: 'не применимо: результат виден сменой статуса заявки'\n  loading:\n    main:\n      - ui:Spinner\n"}
+      # R-RT-001 error: два экрана с одним маршрутом на одном вьюпорте; для R-COV-003 — без перехода в карточку
+      screens/office/screens/request-new/index.md:
+        - {find: "route: /requests/new", to: "route: /requests"}
+        - {find: "  - {to: request-card, trigger: create, keeps: '—', back: 'назад к списку заявок'}\n", to: ""}
+      # R-RT-002 error: stable-экран без исходящих переходов и без действий «что дальше»
+      screens/office/screens/plan-dashboard/index.md:
+        - {find: "transitions-to-screen:\n  - {to: requests-list, trigger: 'переход по плитке плана', keeps: '—', back: 'назад'}\n",
+           to: ""}
+      # свод вслед за экранами (маршрут request-new, пункты входа) и R-RT-008 error: key-action requests-list в своде
+      # расходится с экраном; R-COV-003 error: карточка request-card недостижима — переходов в неё нет, её зона вне
+      # навигации
+      screens/office/map.md:
+        - {find: "| `requests-list` | `list` | `request` | `` [`manager`, `surveyor`] `` | `schedule-visit` | `create` | высокая | [старт, навигация, `not-found`, `plan-dashboard`, `request-card`, `request-new`] | — |",
+           to: "| `requests-list` | `list` | `request` | `` [`manager`, `surveyor`] `` | `schedule-visit` | `schedule` | высокая | [старт, навигация, `not-found`, `request-card`, `request-new`] | — |"}
+        - {find: "[`request-new`, `requests-list`, письмо о назначенном замере]", to: "[письмо о назначенном замере]"}
+        - {find: "| `/requests/new` | `request-new` |", to: "| `/requests` | `request-new` |"}

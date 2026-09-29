@@ -1,1 +1,8 @@
 path	kind	smoke	xfail
+scripts/project/findings.py	module	help; run: --selftest	
+scripts/project/layer.py	module	help; run: --selftest	
+scripts/project/tree.py	utility	help; run: --selftest	
+scripts/project/states.py	utility	help; run: --selftest	
+scripts/project/screen_map.py	utility	help; run: --selftest	
+scripts/project/normalize.py	utility	help; run: --selftest	
+scripts/project/data/screens.yaml	data	data	

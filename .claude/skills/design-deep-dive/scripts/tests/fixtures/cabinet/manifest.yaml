@@ -1,0 +1,11 @@
+# Фикстура cabinet — иллюстрация для самопроверок утилит scripts/project/: демо-кабинет вымышленной студии ремонта
+# «Отвес» (Нижний Новгород) — менеджер и замерщик ведут заявки на бесплатный замер. Продукт, interface и экраны
+# поверхности office (web рода app) — свои файлы фикстуры: примеров кабинета в базах нет. Слой чистый: утилиты tree,
+# states и screen_map находят 0 error и 0 warning, screen_map build и normalize ничего не меняют. Слои поверх него —
+# фикстуры cabinet-defects (посеянные дефекты) и cabinet-freeform (вольная запись для нормализатора). Формат
+# манифеста — докстринг fixture_project.py.
+example: true
+description: демо-кабинет web рода app — продукт, interface и экраны поверхности office; чистый слой
+project: otves-office
+layers:
+  - files: files
