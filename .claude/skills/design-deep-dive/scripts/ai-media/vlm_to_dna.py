@@ -1,71 +1,71 @@
 #!/usr/bin/env python3
-"""vlm_to_dna.py — паспорт визуала бренда (visual DNA): VLM-бриф сетки бренд-картинок → черновик паспорта,
+"""vlm_to_dna.py — паспорт визуала бренда (visual DNA): разбор сетки бренд-картинок сессией Opus → черновик паспорта,
 проверка по схеме и смыслу, сверка прогонов, грейд .cube, вывод из токенов UI, спецификация ассета.
 
-Агент F (продолжатель F2), волна 2, 23.09.2026. Python 3.13 + numpy + Pillow (системные); jsonschema — если есть
-(`99-raw/tools/venv-D2/bin/python`), иначе встроенный валидатор подмножества JSON Schema 2020-12.
-Платных вызовов нет: `build` только пишет задание `.polza-chat.json` (исполняет клиент каналов в фазе 5),
-`parse` работает с сохранённым ответом. [проверено: 99-raw/experiments/F/07-dna, selftest]
-
-Схема паспорта — 06-art-direction-consistency/visual-dna.schema.json; описание полей и правил вывода —
-06-art-direction-consistency/01-visual-dna-from-ui.md. Цвет и грейд — 99-raw/experiments/F/05-color/palette.py.
+Разбор сетки делает отдельная сессия Opus — агент design-judge по пакету той же формы, что пакет судьи
+(asset_audit.py judge-jobs): код собирает пакет и разбирает ответ, моделей сам не вызывает. Схема паспорта —
+kb/ai-media/06-art-direction-consistency/visual-dna.schema.json; поля и правила вывода — 06-art-direction-consistency/
+01-visual-dna-from-ui.md; паспорт утверждает человек. Схему проверяет jsonschema, без него — встроенный валидатор
+подмножества JSON Schema 2020-12.
 
 Команды:
-  grid IMG... --out GRID.jpg [--cell 640 --cols 3]      сетка бренд-картинок для VLM (белые желоба 10 px)
-  build GRID --out JOB.polza-chat.json [--model M] [--variant N] [--tag T]
-                                                        задание F-05: VLM описывает сетку → JSON брифа
-  parse RESPONSE.json --out DNA.json [--grid GRID] [--id ID] [--brand B]
-                                                        ответ VLM (chat completion или голый JSON) → черновик
-                                                        паспорта; с --grid — палитра, баланс белого и хрома,
-                                                        снятые локально, и критерий F-05 «≥ 3 из 5 hex в ΔE ≤ 0,05»
-  validate DNA.json...                                  схема + смысловой линт (запрещённые оттенки, слова, роли)
-  compare A.json B.json                                 два прогона VLM: совпадение grade и light, ΔE палитр
+  grid IMG... --out GRID.jpg [--cell 640 --cols 3]      сетка бренд-картинок (белые желоба 10 px)
+  build GRID [--out DIR] [--name N] [--runs 2]          пакет для сессии Opus: сетка → JSON-бриф (характер, палитра, грейд,
+                                                        свет, камера, композиция, реквизит, блок стиля, запреты,
+                                                        канарейки); прогоны — отдельные задания
+  parse PACKAGE|ANSWER --out DNA.json [--grid GRID] [--id ID] [--brand B] [--art-direction AD.json]
+                                                        ответ сессии (answers/<id>.md пакета, текст с ```json или голый
+                                                        JSON) → черновик паспорта; по сетке — палитра, баланс белого и
+                                                        хрома, снятые локально, критерий «≥ 3 из 5 hex в ΔE ≤ 0,05» и
+                                                        «придуманные» цвета; два ответа и больше — сверка прогонов
+  validate DNA.json...                                  схема + смысловой линт (запрещённые оттенки, слова, роли, паспорт
+                                                        3D-серии, метафоры иллюстраций)
+  compare A.json B.json                                 два прогона разбора: совпадение grade и light, ΔE палитр
   lut DNA.json --out FILE.cube [--size 33]              параметрический грейд паспорта → 3D LUT (.cube)
   from-tokens TOKENS.json --out DNA.json [--adjectives a,b,c] [--id ID]
-                                                        скелет паспорта из токенов DTCG (ui-research 09/04)
+                                                        скелет паспорта из токенов DTCG (ui 09/04)
   to-spec DNA.json --kind photo|illustration|icon3d --task CODE --subject TEXT [--slot hero]
           [--ratio 16:9] [--no-text-zone] [--ref-class CLASS] [--out SPEC.json]
-                                                        спецификация ассета v0.2 (05-prompting) из паспорта
-  selftest                                              самопроверка на заглушках ответа VLM
+                                                        спецификация ассета (05-prompting) из паспорта
+  selftest                                              самопроверка на синтетике и заглушках ответа
 """
-import argparse, copy, datetime as dt, json, math, os, re, subprocess, sys
+import argparse, copy, datetime as dt, hashlib, io, json, math, os, re, shutil, subprocess, sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))  # перенос: scripts/lib (kbpaths, color)
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))  # scripts/lib: kbpaths, color
 import kbpaths  # noqa: E402
 ROOT = kbpaths.kb("ai-media")
 TOOLS = kbpaths.scripts("ai-media")
 SCHEMA_PATH = ROOT / "06-art-direction-consistency" / "visual-dna.schema.json"
 SPEC_SCHEMA_PATH = ROOT / "05-prompting" / "asset-spec.schema.json"
 EXAMPLES = ROOT / "06-art-direction-consistency" / "examples"
-F05 = TOOLS  # перенос: palette.py — scripts/ai-media
-F05_JOB = kbpaths.out("ai-media", "phase5", "jobs") / "F-05-vlm-brand-brief.polza-chat.json"
-sys.path.insert(0, str(F05))
+JUDGE_AGENT = kbpaths.repo(".claude", "agents", "design-judge.md")
+JUDGE_PROTOCOL = ".claude/skills/design-deep-dive/kb/common/judge.md"
+SERIES_PASSPORT = "blender/06-materials-lighting-render/02-lighting-camera-composition.md §6"
 sys.path.insert(0, str(TOOLS))
 
-# ---------------------------------------------------------------- запрос VLM (как задание F-05, дословно)
-VLM_MODEL = "google/gemini-3-flash-preview"
-VLM_SYSTEM = ("You are an expert brand visual analyst and image generation brief writer. You receive one image containing "
-              "a grid of brand photographs. Describe only what is visible; use numbers where asked; do not flatter; do not "
-              "invent brand names.")
-VLM_USER = ("Return ONLY a JSON object (no prose) with these keys: character: {adjectives: [3 words]}; palette: [5 items {hex, "
-            "name, role: background|dominant|secondary|accent|shadow, share: 0-1 of image area}] (shares sum <= 1); grade: "
-            "{white_balance: warm|neutral|cool, contrast: low|medium|high, saturation: muted|natural|vivid, black_point: "
-            "crushed|neutral|lifted, grain: none|fine|visible}; light: {direction, quality: soft|hard|mixed, time_of_day, "
-            "color_temp_K: integer}; camera: {lens_mm: integer, height: ground|eye-level|high, depth_of_field: "
-            "shallow|medium|deep}; composition: {subject_region, horizon_position: top-third|middle|bottom-third, "
-            "negative_space: low|medium|high, crop_style}; subject_matter: {domain_props: [up to 8 concrete objects], motifs: "
-            "[up to 4], people_policy: none|background|primary}; style_block_photo: one paragraph of at most 60 words in English "
-            "that would make a text-to-image model reproduce this photographic style for NEW subjects (visible features only, "
-            "no adjectives like stunning/cinematic/vibrant); exclusions: [up to 6 visible features that would break this "
-            "style]; canaries: [5 short test subjects of different classes (object, interior, nature, abstract, product) to "
-            "check the style on a new model].")
-# цены polza 2026-09-23 (api-v1-models.json): вход и картинка 29,498 ₽/M токенов, выход 176,988 ₽/M
-PRICE_NOTE = ("polza 2026-09-23 api-v1-models.json: google/gemini-3-flash-preview prompt 29,498 ₽/M, image_input 29,498 ₽/M, "
-              "completion 176,988 ₽/M; оценка: вход ≈ 1,7 тыс. токенов (картинка ≈ 3 плитки × 258) + выход ≈ 4 тыс. с "
-              "размышлением ≈ 0,05 + 0,71 ≈ 0,8 ₽")
+# ---------------------------------------------------------------- рубрика разбора сетки (задание сессии, текст запроса)
+GRID_SYSTEM = ("You are an expert brand visual analyst and image generation brief writer. You receive one image containing "
+               "a grid of brand photographs. Describe only what is visible; use numbers where asked; do not flatter; do not "
+               "invent brand names.")
+GRID_REQUEST = ("Return one JSON object with these keys: character: {adjectives: [3 words]}; palette: [5 items {hex, "
+                "name, role: background|dominant|secondary|accent|shadow, share: 0-1 of image area}] (shares sum <= 1); grade: "
+                "{white_balance: warm|neutral|cool, contrast: low|medium|high, saturation: muted|natural|vivid, black_point: "
+                "crushed|neutral|lifted, grain: none|fine|visible}; light: {direction, quality: soft|hard|mixed, time_of_day, "
+                "color_temp_K: integer}; camera: {lens_mm: integer, height: ground|eye-level|high, depth_of_field: "
+                "shallow|medium|deep}; composition: {subject_region, horizon_position: top-third|middle|bottom-third, "
+                "negative_space: low|medium|high, crop_style}; subject_matter: {domain_props: [up to 8 concrete objects], motifs: "
+                "[up to 4], people_policy: none|background|primary}; style_block_photo: one paragraph of at most 60 words in English "
+                "that would make a text-to-image model reproduce this photographic style for NEW subjects (visible features only, "
+                "no adjectives like stunning/cinematic/vibrant); exclusions: [up to 6 visible features that would break this "
+                "style]; canaries: [5 short test subjects of different classes (object, interior, nature, abstract, product) to "
+                "check the style on a new model].")
+GRID_RULES = ["- Только видимое на сетке: hex — цвета, которые занимают площадь картинок, доли — от площади; числа цвета код "
+              "сверит с пикселями сетки, придуманный цвет будет помечен.",
+              "- В блоке стиля нет оценочных слов (stunning, cinematic, vibrant …) и «no X»: признаки — позитивом.",
+              "- Решение — не твоё: паспорт утверждает человек."]
 
-# ---------------------------------------------------------------- VLM-категории → числа паспорта [мнение F2; калибровать в F-05]
+# ---------------------------------------------------------------- категории брифа → числа паспорта [позиция; утверждает человек глазом]
 WB = {"warm": (0.002, 0.010), "neutral": (0.0, 0.0), "cool": (-0.001, -0.006)}
 WB_TARGET_B = {"warm": (0.010, 0.006), "neutral": (0.0, 0.004), "cool": (-0.004, 0.004)}
 SAT = {"muted": 0.80, "natural": 0.92, "vivid": 1.0}
@@ -76,7 +76,7 @@ NEG = {"low": 0.15, "medium": 0.30, "high": 0.45}
 DEFAULT_BANNED = ["stunning", "vibrant", "luminous", "radiant", "breathtaking", "gorgeous", "mesmerizing", "cinematic", "epic",
                   "dramatic", "masterpiece", "8k", "hyper-detailed", "hyperrealistic", "award-winning", "golden hour", "hdr"]
 DEFAULT_MARKERS = ["IMG-M02", "IMG-M03", "IMG-M05", "IMG-M07", "IMG-M09", "IMG-M10", "IMG-M13", "IMG-M14", "IMG-M21", "IMG-M22"]
-ACCEPTANCE_DEFAULT = {  # F/02, F/03, F/04, F/06 — фото одной съёмки
+ACCEPTANCE_DEFAULT = {  # пороги фото одной съёмки (ai-media 06/02–06/04)
     "palette_dE_max": 0.02, "series_hue_spread_max_deg": 10, "series_pal_dE_mean_max": 0.045, "series_pal_dE_break": 0.06,
     "series_sd_L_max": 0.04, "phash_min": 10, "text_contrast_min": 4.5, "text_zone_percentile": 99.9, "zone_edge_max": 0.06,
     "centroid_x_min": 0.62, "colorfulness_max_rel": 1.2, "hdr_index_max_delta": 0.1, "markers_max": 1}
@@ -276,6 +276,17 @@ def lint(dna, dna_path=None):
                      "на котором собран) и подавайте 1–3 одного класса на вызов")
     if dna.get("icon3d") and not pal.get("env_color"):
         warns.append("icon3d без palette.env_color: фон и рефлексы 3D не привязаны к цвету секции страницы (ореол при вырезе)")
+    if dna.get("icon3d") and not dna["icon3d"].get("series_passport"):
+        warns.append(f"icon3d без series_passport: камера, свет, поля кадра и контактная тень серии — паспорт 3D-серии "
+                     f"({SERIES_PASSPORT}); паспорт визуала держит материал и долю акцента")
+    ill = dna.get("illustration") or {}
+    ids = [m.get("id") for m in ill.get("metaphors") or []]
+    dup = sorted({i for i in ids if ids.count(i) > 1})
+    if dup:
+        errs.append(f"illustration.metaphors: id повторяются {dup} — экран называет метафору по id")
+    if any(x.get("place") == "empty-state" for x in ill.get("places") or []) and not ids:
+        warns.append("illustration: пустые состояния без списка метафор — экраны кабинета называют метафору "
+                     "(`illustration=` у ui:EmptyState) из этого списка")
     if dna_path:
         for r in refs:
             if not re.match(r"^[a-z]+://", r["src"]) and not (Path(dna_path).parent / r["src"]).exists():
@@ -348,9 +359,9 @@ def measure_image(path, k=6):
             "_pix": X[np.random.default_rng(0).choice(len(X), min(40000, len(X)), replace=False)]}
 
 
-# ---------------------------------------------------------------- разбор ответа VLM
+# ---------------------------------------------------------------- разбор ответа сессии
 def extract_json(obj):
-    """Ответ chat completion, текст с ```json или голый JSON → dict ответа VLM."""
+    """Ответ сессии (текст с ```json), голый JSON или сохранённый chat completion → dict брифа."""
     if isinstance(obj, dict) and "choices" in obj:
         content = obj["choices"][0]["message"]["content"]
         if isinstance(content, list):
@@ -385,12 +396,12 @@ def extract_json(obj):
     raise ValueError("JSON-объект в ответе не закрыт")
 
 
-VLM_KEYS = ["character", "palette", "grade", "light", "camera", "composition", "subject_matter", "style_block_photo",
-            "exclusions", "canaries"]
+BRIEF_KEYS = ["character", "palette", "grade", "light", "camera", "composition", "subject_matter", "style_block_photo",
+              "exclusions", "canaries"]
 
 
 def vlm_problems(v):
-    p = [f"нет ключа {k}" for k in VLM_KEYS if k not in v]
+    p = [f"нет ключа {k}" for k in BRIEF_KEYS if k not in v]
     pal = v.get("palette", [])
     if not isinstance(pal, list) or not pal:
         p.append("palette пуст")
@@ -432,7 +443,7 @@ def map_region(txt):
     return "full-frame"
 
 
-def vlm_to_dna(v, dna_id, brand=None, measured=None, model=VLM_MODEL):
+def vlm_to_dna(v, dna_id, brand=None, measured=None, model=None, runs=1, art_direction=None):
     g, li, cam, comp, sm = v["grade"], v.get("light", {}), v.get("camera", {}), v.get("composition", {}), v.get("subject_matter", {})
     sat, con = g.get("saturation"), g.get("contrast")
     boldness = "bold" if sat == "vivid" or con == "high" else "restrained" if sat == "muted" or con == "low" else "balanced"
@@ -451,7 +462,7 @@ def vlm_to_dna(v, dna_id, brand=None, measured=None, model=VLM_MODEL):
         tb, tol = measured["neutral_ab"][1], 0.006
     region = map_region(comp.get("subject_region"))
     dna = {
-        "dna_version": "0.1", "id": dna_id, "brand": brand or "черновик VLM", "checked_at": today(), "status": "draft",
+        "dna_version": "0.1", "id": dna_id, "brand": brand or "черновик разбора сетки", "checked_at": today(), "status": "draft",
         "approved_by": None,
         "character": {"adjectives": (list(v.get("character", {}).get("adjectives", [])) + ["?", "?", "?"])[:3], "boldness": boldness},
         "palette": {"image_palette": image_palette,
@@ -459,7 +470,7 @@ def vlm_to_dna(v, dna_id, brand=None, measured=None, model=VLM_MODEL):
                     "neutral_wb": {"target_b": round(tb, 4), "tol": tol}},
         "grade": {"wb_ab": list(WB[g["white_balance"]]), "chroma": SAT[sat], "black": BLACK[g["black_point"]], "white": 0.975,
                   "contrast": CON[con], "grain_pct": GRAIN[g["grain"]], "lut": {"size": 33, "file": None},
-                  "applies_to": ["photo", "video"], "note": "числа — из категорий VLM по таблице vlm_to_dna.py; утвердить глазом"},
+                  "applies_to": ["photo", "video"], "note": "числа — из категорий брифа по таблице vlm_to_dna.py; утвердить глазом"},
         "light": {"direction": map_direction(li.get("direction")), "detail": str(li.get("direction", "")),
                   "quality": li.get("quality") if li.get("quality") in ("soft", "hard", "mixed") else "soft",
                   "time_of_day": str(li.get("time_of_day", ""))},
@@ -481,7 +492,8 @@ def vlm_to_dna(v, dna_id, brand=None, measured=None, model=VLM_MODEL):
         "post": {"grain_pct": GRAIN[g["grain"]], "scrim": {"max_alpha": 0.55, "shape": "gradient", "percentile": 99.9},
                  "focal_required": True},
         "acceptance": dict(ACCEPTANCE_DEFAULT),
-        "provenance": {"created_by": "vlm", "vlm_model": model, "runs": 1, "vlm_raw": v},
+        "provenance": {"created_by": "vlm", "vlm_model": model, "runs": runs, "vlm_raw": v,
+                       **({"art_direction": art_direction} if art_direction else {})},
     }
     ct = li.get("color_temp_K")
     if isinstance(ct, (int, float)) and 2000 <= ct <= 12000:
@@ -497,7 +509,7 @@ def vlm_to_dna(v, dna_id, brand=None, measured=None, model=VLM_MODEL):
 
 
 def palette_check(dna_or_vlm_palette, measured, thr=0.05):
-    """Критерий F-05: сколько hex VLM лежат в ΔE OKLab ≤ thr от ближайшего цвета палитры, снятой локально."""
+    """Сколько hex брифа лежат в ΔE OKLab ≤ thr от ближайшего цвета палитры, снятой с пикселей локально, и покрытие цвета."""
     import numpy as np
     labs = [tuple(float(x) for x in c) for c in measured["_lab"]]
     pix = measured.get("_pix")
@@ -679,7 +691,8 @@ def from_tokens(tokens, dna_id="from-tokens", adjectives=None, tokens_path=None)
     ill = {"medium": "flat-illustration", "line_px": 1.5, "display_px": 160, "radius_px": radius,
            "perspective": "three-quarter" if has_raised else "flat-front", "fills": "flat",
            "shadows": "soft" if has_raised else "none", "background": "transparent", "accents_per_image": 2, "detail_min_px": 4,
-           "saturation_offset": "на 1–2 шага ниже UI", "dark_theme": "two-files"}
+           "saturation_offset": "на 1–2 шага ниже UI", "dark_theme": "two-files", "format": "svg",
+           "recolor": {"neutrals": "css-variables", "accents": "fixed"}}
     rules.append(f"R7 иллюстрации: радиус {radius:g} px = radius.md, линия 1,5 = штрих иконок, детали ≥ 4 px")
     rules.append("R8 абстрактный фон — кодом (CSS/SVG/WebGL), не генерацией")
     acc_name = name_for(accent)
@@ -702,9 +715,8 @@ def from_tokens(tokens, dna_id="from-tokens", adjectives=None, tokens_path=None)
                         "master_ratio": "16:9", "phone_frame": "separate-master"},
         "subject_matter": {"domain_props": ["?", "?", "?"], "people_policy": "real-only", "product_policy": "real-photo-only"},
         "illustration": ill,
-        "icon3d": {"material": f"matte ceramic in {name_for(n200)} with one {acc_name} part", "camera": "3/4 view from 30 degrees above, 50mm",
-                   "key_light": "soft key from the upper left at 45 degrees, fill 20 percent", "fill_pct": 20,
-                   "contact_shadow_alpha_max": 0.15, "margin_pct": 8, "accent_share_max": 0.15},
+        "icon3d": {"material": f"matte ceramic in {name_for(n200)} with one {acc_name} part", "camera": "3/4 view from 25 degrees above, 85mm",
+                   "accent_share_max": 0.15, "series_passport": SERIES_PASSPORT},
         "abstract": {"policy": "code-first"},
         "canaries": ["object: ?", "interior: ?", "nature: ?", "product-like: ?", "abstract: ?"],
         "style_blocks": {
@@ -712,9 +724,9 @@ def from_tokens(tokens, dna_id="from-tokens", adjectives=None, tokens_path=None)
                              f"{name_for(n200)} {n200} and {name_for(surface)} with {acc_name} {accent} as the only accent, "
                              f"1.5 px lines in {name_for(text)} {text}, smooth flat colour only, one light from the upper left, "
                              f"plain flat {name_for(surface)} {surface} background, generous empty space."),
-            "icon3d": (f"Single object as a matte ceramic figure in {name_for(n200)} with one {acc_name} part; 3/4 view from 30 "
-                       f"degrees above, 50mm; soft key light from the upper left, gentle fill; soft contact shadow; plain light "
-                       f"background; clean text-free surfaces.")},
+            "icon3d": (f"Single object as a matte ceramic figure in {name_for(n200)} with one {acc_name} part; 3/4 view from 25 "
+                       f"degrees above, 85mm; soft key light from the upper left, gentle fill and rim; soft contact shadow; plain "
+                       f"light background; clean text-free surfaces.")},
         "exclusions": {"forbidden_markers": list(DEFAULT_MARKERS), "banned_words": list(DEFAULT_BANNED), "replace_with": [
             {"what": "people", "kind": "object", "replace_with": "no one in the frame"},
             {"what": "readable text", "kind": "artifact", "replace_with": "clean unmarked surfaces"}]},
@@ -722,7 +734,8 @@ def from_tokens(tokens, dna_id="from-tokens", adjectives=None, tokens_path=None)
                  "focal_required": True},
         "acceptance": dict(ACCEPTANCE_DEFAULT),
         "provenance": {"created_by": "script", "runs": 0, "notes": "vlm_to_dna.py from-tokens; фото-стиль (style_blocks.photo), "
-                       "сюжеты и canaries заполняет человек или VLM по брендовым фото"},
+                       "сюжеты и canaries заполняет человек или разбор сетки брендовых фото (vlm_to_dna.py build); места "
+                       "иллюстраций и список метафор — владелец продукта"},
     }
     return dna
 
@@ -788,7 +801,7 @@ def to_spec(dna, kind, task, subject, slot="hero", ratio=None, text_zone=True, r
         c["subject_region"] = "center"
         c["angle"] = "high-angle"
         ic = dna.get("icon3d", {})
-        spec["light"] = {"direction": "left", "quality": "soft", "source": ic.get("key_light", "soft key from the upper left")}
+        spec["light"] = {"direction": "left", "quality": "soft", "source": "soft key light from the upper left, gentle fill and rim"}
         mat = ic.get("material", "")
         spec["style"] = {"medium": next((m for w, m in MEDIUM_3D if w in mat.lower()), "3d-render")}
         ents = pal.get("illustration_palette") or pal["image_palette"]
@@ -837,39 +850,125 @@ def cmd_grid(a):
     print(json.dumps({"grid": a.out, "size": size}, ensure_ascii=False))
 
 
-def build_job(grid, out, model=VLM_MODEL, variant=1, tag="F-05-vlm-brand-brief"):
-    rel = os.path.relpath(Path(grid).resolve(), Path(out).resolve().parent)
-    return {"channel": "polza-chat", "method": "POST", "path": "/api/v1/chat/completions",
-            "body": {"model": model, "temperature": 0.2, "response_format": {"type": "json_object"},
-                     "messages": [{"role": "system", "content": VLM_SYSTEM},
-                                  {"role": "user", "content": [{"type": "text", "text": VLM_USER},
-                                                               {"type": "image_url", "image_url": {"url": rel}}]}]},
-            "tag": tag, "agent": "F", "variant": variant, "max_rub": 3, "price_rub": 0.8, "price_source": PRICE_NOTE,
-            "docs": "99-raw/cache/polza/2026-09-23/docs-repo/gaidy/chat-completions.mdx; gaidy/media-input.mdx (§2 base64)",
-            "notes": "Паспорт визуала собирает машина по сетке бренд-картинок, утверждает человек [V:I9xdmNZxIfA 24:48]. "
-                     "Локальный путь в image_url клиент кодирует в data:image/jpeg;base64. Разбор: vlm_to_dna.py parse.",
-            "meta": {"test": tag.split("-vlm")[0] if tag.startswith("F-05") else tag, "judge": "metric+human", "repeat": 2}}
+def judge_model():
+    """Модель сессии — из описания агента design-judge (frontmatter `model:`): запись в паспорт, а не выбор кода."""
+    try:
+        txt = JUDGE_AGENT.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    m = re.match(r"---\n(.*?)\n---", txt, re.S)
+    mm = re.search(r"^model:\s*(\S+)", m.group(1), re.M) if m else None
+    return mm.group(1).strip("'\"") if mm else None
+
+
+def grid_prompt(pkg, frame):
+    """Задание одной сессии: сетка бренда → JSON-бриф по рубрике GRID_REQUEST."""
+    L = ["# Задание · рубрика · сетка бренда → бриф паспорта визуала", "",
+         f"Ты — агент `design-judge`; протокол — `{JUDGE_PROTOCOL}` (путь от корня репозитория), §1–§3. Открывай только "
+         "файлы, названные в этом задании.", "", "## Задача", "",
+         "Описать видимые приметы изображений бренда на сетке — основа паспорта визуала (ai-media 06/01): цвет, грейд, свет, "
+         "камера, композиция, реквизит, блок стиля, запреты и канарейки.", "", "## Кадры", "",
+         f"- Сетка: `{Path(pkg) / frame['frame']}` — {frame['w']}×{frame['h']}, {frame['format']}; белые желоба между картинками",
+         "", "## Рубрика", "", GRID_SYSTEM, "", GRID_REQUEST, "", "## Ответ", "",
+         "Первая строка — «рубрика · сетка бренда · входы, чего не хватило». Затем один блок ```json — объект с ключами "
+         "рубрики выше.", "", *GRID_RULES]
+    return "\n".join(L) + "\n"
+
+
+def build_package(grid, out_root=None, name=None, runs=2, force=False):
+    """Пакет той же формы, что пакет судьи (judge-package/1): сетка — PNG под нейтральным именем, задание на прогон,
+    README; ключ с исходником сетки — рядом с папкой пакета. Прогоны — разные сессии: сверка — compare."""
+    from PIL import Image
+    grid = Path(grid).resolve()
+    if runs < 1:
+        raise ValueError("--runs — не меньше 1")
+    name = name or f"brand-grid-{hashlib.sha256(grid.read_bytes()).hexdigest()[:8]}"
+    out_root = Path(out_root).resolve() if out_root else kbpaths.out("ai-media", "dna")
+    pkg = out_root / name
+    if pkg.exists():
+        if any((pkg / "answers").glob("*")) and not force:
+            raise ValueError(f"в пакете {pkg} уже есть ответы — другое имя (--name) или --force")
+        shutil.rmtree(pkg)
+    for d in ("frames", "jobs", "answers"):
+        (pkg / d).mkdir(parents=True)
+    im = Image.open(grid).convert("RGB")
+    buf = io.BytesIO()
+    im.save(buf, "PNG", optimize=True)
+    png = buf.getvalue()
+    frame = {"frame": f"frames/{hashlib.sha256(png).hexdigest()[:16]}.png", "w": im.width, "h": im.height, "format": "PNG"}
+    (pkg / frame["frame"]).write_bytes(png)
+    jobs, key_jobs = [], {}
+    for run in range(1, runs + 1):
+        jid = f"j{run:03d}"
+        (pkg / "jobs" / f"{jid}.md").write_text(grid_prompt(pkg, frame), encoding="utf-8")
+        jobs.append({"id": jid, "kind": "рубрика", "prompt": f"jobs/{jid}.md", "frames": [frame["frame"]], "answer": f"answers/{jid}.md"})
+        key_jobs[jid] = {"mode": "brand-grid", "run": run}
+    session = {"agent": "design-judge", "model": judge_model()}
+    created = dt.datetime.now().astimezone().isoformat(timespec="seconds")
+    manifest = {"schema": "judge-package/1", "package": name, "created": created, "tool": "vlm_to_dna.py build",
+                "mode": "brand-grid", "kind": "рубрика", "runs": runs, "orders": 1,
+                "rubric": {"id": "brand-grid", "sha256": hashlib.sha256((GRID_SYSTEM + GRID_REQUEST).encode()).hexdigest()[:16]},
+                "response_schema": None, "session": session, "jobs": jobs, "warnings": []}
+    dump_json(manifest, pkg / "manifest.json")
+    (pkg / "README.md").write_text(
+        f"# Пакет разбора сетки бренда · {name}\n\nЗадания для отдельных сессий Opus — агента `design-judge`: сетка бренд-картинок "
+        f"→ JSON-бриф паспорта визуала. Состав: кадр — 1, прогонов — {runs}; заданий — {runs}.\n\n"
+        "1. Каждое задание `jobs/<id>.md` — отдельный вызов инструмента `Agent` с `subagent_type: design-judge`; текст задания —\n"
+        "   промт вызова целиком. Модель в вызове не передают — её задаёт описание агента.\n"
+        "2. Ответ агента целиком — в `answers/<id>.md` (тот же id); прогоны не видят друг друга.\n"
+        "3. Ответы собраны — `vlm_to_dna.py parse <папка пакета> --out dna.json`: черновик паспорта, сверка палитры с пикселями\n"
+        "   сетки и прогонов между собой; паспорт утверждает человек.\n", encoding="utf-8")
+    key_path = out_root / f"{name}.key.json"
+    dump_json({"schema": "judge-key/1", "package": name, "package_dir": str(pkg), "created": created, "mode": "brand-grid",
+               "runs": runs, "grid": str(grid), "session": session, "jobs": key_jobs}, key_path)
+    return {"package": str(pkg), "key": str(key_path), "jobs": runs, "frame": frame["frame"]}
 
 
 def cmd_build(a):
-    job = build_job(a.grid, a.out, a.model, a.variant, a.tag)
-    dump_json(job, a.out)
-    print(json.dumps({"job": a.out, "model": a.model, "image": job["body"]["messages"][1]["content"][1]["image_url"]["url"]}, ensure_ascii=False))
+    try:
+        r = build_package(a.grid, a.out, a.name, a.runs, a.force)
+    except ValueError as e:
+        print(f"vlm_to_dna.py build: {e}", file=sys.stderr)
+        sys.exit(2)
+    print(json.dumps(r, ensure_ascii=False, indent=1))
 
 
-def parse_response(resp_obj, dna_id, brand=None, grid=None, model=VLM_MODEL):
+def read_answers(src):
+    """Папка пакета (answers/*) или файл ответа → ([(имя, ответ)], ключ пакета | None). Ответ — текст сессии с блоком
+    ```json, голый JSON или сохранённый chat completion."""
+    P = Path(src)
+    if P.is_dir():
+        kp = P.with_name(P.name + ".key.json")
+        K = load_json(kp) if kp.exists() else None
+        out = []
+        for f in sorted((P / "answers").glob("*")):
+            if f.suffix in (".md", ".txt", ".json"):
+                txt = f.read_text(encoding="utf-8")
+                try:
+                    out.append((f.name, json.loads(txt) if f.suffix == ".json" else txt))
+                except json.JSONDecodeError:
+                    out.append((f.name, txt))
+        return out, K
+    txt = P.read_text(encoding="utf-8")
+    try:
+        return [(P.name, json.loads(txt))], None
+    except json.JSONDecodeError:
+        return [(P.name, txt)], None
+
+
+def parse_response(resp_obj, dna_id, brand=None, grid=None, model=None, runs=1, art_direction=None, measured=None):
     v = extract_json(resp_obj)
     probs = vlm_problems(v)
     if any(p.startswith("нет ключа") or p.startswith("grade.") or p == "palette пуст" for p in probs):
-        return None, {"vlm_problems": probs}
-    measured = measure_image(grid) if grid else None
-    dna = vlm_to_dna(v, dna_id, brand, measured, model)
-    report = {"vlm_problems": probs}
+        return None, {"brief_problems": probs}
+    measured = measured or (measure_image(grid) if grid else None)
+    dna = vlm_to_dna(v, dna_id, brand, measured, model, runs, art_direction)
+    report = {"brief_problems": probs}
     if measured:
         rows = palette_check(v["palette"], measured)
         report["palette_check"] = rows
-        report["f05_palette_criterion"] = f"{sum(r['ok'] for r in rows)} из {len(rows)} hex в ΔE ≤ 0,05 (успех — ≥ 3 из 5)"
-        report["f05_palette_pass"] = sum(r["ok"] for r in rows) >= 3
+        report["palette_criterion"] = f"{sum(r['ok'] for r in rows)} из {len(rows)} hex в ΔE ≤ 0,05 (успех — ≥ 3 из 5)"
+        report["palette_pass"] = sum(r["ok"] for r in rows) >= 3
         report["invented_colours"] = [r["hex"] for r in rows if r.get("invented")]
     errs, eng = schema_errors(dna)
     lerrs, lwarns = lint(dna)
@@ -877,10 +976,40 @@ def parse_response(resp_obj, dna_id, brand=None, grid=None, model=VLM_MODEL):
     return dna, report
 
 
+def parse_answers(src, dna_id=None, brand=None, grid=None, art_direction=None):
+    """Ответы пакета или файла → черновик паспорта из первого годного ответа; сетка — из ключа пакета, если не задана;
+    два ответа и больше — сверка прогонов (compare) с первым. → (паспорт | None, отчёт)."""
+    answers, K = read_answers(src)
+    if not answers:
+        return None, {"error": f"нет ответов в {src}"}
+    grid = grid or (K or {}).get("grid")
+    model = ((K or {}).get("session") or {}).get("model")
+    dna_id = dna_id or re.sub(r"[^a-z0-9-]+", "-", Path(src).stem.lower()).strip("-")[:60] or "brand-grid-draft"
+    measured = measure_image(grid) if grid and Path(grid).exists() else None
+    drafts, reports = [], {}
+    for name, obj in answers:
+        try:
+            d, r = parse_response(obj, dna_id, brand, None, model, 1, art_direction, measured)
+        except ValueError as e:
+            d, r = None, {"error": str(e)}
+        reports[name] = r
+        if d is not None:
+            drafts.append((name, d))
+    if not drafts:
+        return None, {"answers": reports}
+    name0, dna = drafts[0]
+    dna["provenance"]["runs"] = len(drafts)
+    rep = dict(reports[name0])
+    rep["answers"] = len(answers)
+    rep["valid_answers"] = len(drafts)
+    if len(drafts) > 1:
+        rep["runs_compare"] = {n: compare(dna, d) for n, d in drafts[1:]}
+    rep["schema_errors"], rep["validator"] = schema_errors(dna)
+    return dna, rep
+
+
 def cmd_parse(a):
-    resp = load_json(a.response)
-    dna_id = a.id or re.sub(r"[^a-z0-9-]+", "-", Path(a.response).stem.lower()).strip("-")[:60] or "vlm-draft"
-    dna, rep = parse_response(resp, dna_id, a.brand, a.grid, a.model)
+    dna, rep = parse_answers(a.response, a.id, a.brand, a.grid, a.art_direction)
     if dna is None:
         print(json.dumps(rep, ensure_ascii=False, indent=1))
         sys.exit(2)
@@ -935,13 +1064,8 @@ def cmd_to_spec(a):
 
 
 # ---------------------------------------------------------------- самопроверка
-STUB_GOOD = {  # правдоподобный ответ VLM по сетке autumn: цвета близко к снятым локально
+STUB_BRIEF = {  # заглушка ответа сессии: поля брифа без палитры; палитру самопроверка берёт с пикселей сетки
     "character": {"adjectives": ["calm", "natural", "seasonal"]},
-    "palette": [{"hex": "#7A6A33", "name": "olive ochre", "role": "dominant", "share": 0.3},
-                {"hex": "#5E4E22", "name": "dark ochre grass", "role": "secondary", "share": 0.25},
-                {"hex": "#9C8A50", "name": "dry khaki", "role": "secondary", "share": 0.15},
-                {"hex": "#2A2210", "name": "umber shadow", "role": "shadow", "share": 0.12},
-                {"hex": "#9FC9EA", "name": "pale sky", "role": "background", "share": 0.06}],
     "grade": {"white_balance": "warm", "contrast": "medium", "saturation": "natural", "black_point": "neutral", "grain": "fine"},
     "light": {"direction": "late-morning sun from the upper left", "quality": "soft", "time_of_day": "late morning", "color_temp_K": 5200},
     "camera": {"lens_mm": 35, "height": "eye-level", "depth_of_field": "deep"},
@@ -955,14 +1079,34 @@ STUB_GOOD = {  # правдоподобный ответ VLM по сетке aut
     "exclusions": ["golden-hour glow", "shallow depth of field", "saturated orange cast", "people posing", "fog or mist", "lens flare"],
     "canaries": ["a ceramic mug on a garden table", "a small cafe interior at noon", "a riverside path with one oak",
                  "soft abstract shapes of leaves", "a folded paper map on a bench"]}
-STUB_BAD = copy.deepcopy(STUB_GOOD)  # «идеализированные» насыщенные цвета — как часто пишет VLM
-STUB_BAD["palette"] = [{"hex": "#E8A33D", "name": "golden yellow", "role": "dominant", "share": 0.3},
-                       {"hex": "#C4452B", "name": "rust red", "role": "accent", "share": 0.1},
-                       {"hex": "#4F7A2E", "name": "grass green", "role": "secondary", "share": 0.3},
-                       {"hex": "#87CEEB", "name": "sky blue", "role": "background", "share": 0.2},
-                       {"hex": "#3B2A1A", "name": "bark brown", "role": "shadow", "share": 0.1}]
-STUB_BAD["grade"]["saturation"] = "vivid"
-STUB_BAD["style_block_photo"] = "A stunning cinematic autumn park, vibrant golden foliage, dramatic light."
+STUB_BAD_PALETTE = [{"hex": "#E8A33D", "name": "golden yellow", "role": "dominant", "share": 0.3},  # «идеализированные» цвета
+                    {"hex": "#C4452B", "name": "rust red", "role": "accent", "share": 0.1},
+                    {"hex": "#4F7A2E", "name": "grass green", "role": "secondary", "share": 0.3},
+                    {"hex": "#87CEEB", "name": "sky blue", "role": "background", "share": 0.2},
+                    {"hex": "#3B2A1A", "name": "bark brown", "role": "shadow", "share": 0.1}]
+
+
+def synthetic_grid(tmp):
+    """Сетка из трёх синтетических «снимков» одной съёмки (тёплый свет, небо, трава, пятно кроны) — вход самопроверки."""
+    import numpy as np
+    from PIL import Image
+    paths = []
+    for i, warm in enumerate((0, 8, 16)):
+        rng = np.random.default_rng(10 + i)
+        H, W = 480, 720
+        yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+        sky = np.stack([160 + 25 * yy / H + warm, 190 + 15 * yy / H, 215 - warm / 2 + 0 * xx], -1)
+        lawn = np.stack([110 + 25 * xx / W + warm, 118 + 10 * xx / W, 62 + 0 * yy], -1)
+        img = np.where((yy > H * (0.45 + 0.05 * i))[..., None], lawn, sky)
+        crown = ((yy - H * 0.4) ** 2 / 80 ** 2 + (xx - W * (0.3 + 0.2 * i)) ** 2 / 110 ** 2) < 1
+        img[crown] = np.array([176 + warm, 118, 44])
+        img = img + rng.normal(0, 4, img.shape)
+        p = Path(tmp) / f"shot{i}.png"
+        Image.fromarray(np.clip(img, 0, 255).astype(np.uint8)).save(p)
+        paths.append(str(p))
+    grid = Path(tmp) / "grid.jpg"
+    make_grid(paths, grid, cell=480, cols=3)
+    return grid
 
 
 def selftest():
@@ -975,45 +1119,65 @@ def selftest():
             fails.append(name)
 
     tmp = Path(tempfile.mkdtemp(prefix="vlm_to_dna_"))
-    # 1. build воспроизводит задание F-05 (текст запроса, модель, формат ответа)
-    job = build_job(ROOT / "99-raw/phase5/inputs/F/brand_grid_autumn.jpg", F05_JOB)
-    ref = load_json(F05_JOB)
-    same = (job["body"]["model"] == ref["body"]["model"] and job["body"]["messages"][0] == ref["body"]["messages"][0]
-            and job["body"]["messages"][1]["content"][0] == ref["body"]["messages"][1]["content"][0]
-            and job["body"]["messages"][1]["content"][1]["image_url"]["url"] == ref["body"]["messages"][1]["content"][1]["image_url"]["url"]
-            and job["body"]["response_format"] == ref["body"]["response_format"])
-    check("build = задание F-05 (модель, system, текст, путь картинки, json_object)", same)
-    # 2. разбор ответа: chat completion с ```json и хвостом
-    wrapped = {"choices": [{"message": {"content": "Here you go:\n```json\n" + json.dumps(STUB_GOOD) + "\n```\nDone."}}]}
-    grid = ROOT / "99-raw/phase5/inputs/F/brand_grid_autumn.jpg"
-    dna, rep = parse_response(wrapped, "vlm-autumn-good", "заглушка", str(grid))
-    check("parse: ответ в ```json → паспорт проходит схему", dna is not None and not rep["schema_errors"], rep.get("schema_errors"))
-    check("parse: линт без ошибок", dna is not None and not rep["lint_errors"], rep.get("lint_errors"))
-    check("parse: критерий F-05 по палитре (правдоподобная заглушка) — выполнен", rep.get("f05_palette_pass") is True, rep.get("f05_palette_criterion"))
-    check("parse: баланс белого из замера сетки тёплый (b > 0,005)", dna["palette"]["neutral_wb"]["target_b"] > 0.005, dna["palette"]["neutral_wb"])
+    # 1. build — пакет той же формы, что пакет судьи: кадр сетки, задание на прогон, ключ вне пакета
+    grid = synthetic_grid(tmp)
+    r = build_package(grid, tmp / "out", "grid", runs=2)
+    pkg = Path(r["package"])
+    man = load_json(pkg / "manifest.json")
+    jobs = sorted((pkg / "jobs").glob("*.md"))
+    prompt = jobs[0].read_text(encoding="utf-8") if jobs else ""
+    check("build: пакет judge-package/1 — 2 задания, кадр PNG под нейтральным именем, сессия design-judge",
+          man["schema"] == "judge-package/1" and len(jobs) == 2 and re.fullmatch(r"frames/[0-9a-f]{16}\.png", r["frame"])
+          and man["session"]["agent"] == "design-judge", (len(jobs), r["frame"], man["session"]))
+    check("build: задание — кадр пакета, рубрика брифа, формат ответа", str(pkg / r["frame"]) in prompt and GRID_REQUEST in prompt
+          and "```json" in prompt)
+    key = load_json(Path(r["key"]))
+    check("build: ключ с исходником сетки — рядом с пакетом, в пакете имени сетки нет",
+          Path(r["key"]).parent == pkg.parent and key["grid"] == str(grid.resolve())
+          and "grid.jpg" not in "".join(f.read_text(encoding="utf-8") for f in pkg.rglob("*") if f.suffix in (".md", ".json")))
+    # 2. разбор ответов пакета: правдоподобный бриф (цвета — с пикселей сетки) и сверка двух прогонов
+    measured = measure_image(str(grid))
+    roles = ["dominant", "secondary", "background", "secondary", "shadow"]
+    good = dict(STUB_BRIEF, palette=[{"hex": h, "name": f"colour {i}", "role": roles[i], "share": round(min(sh, 0.4), 2)}
+                                     for i, (h, sh) in enumerate(measured["palette"][:5])])
+    for jid in ("j001", "j002"):
+        (pkg / "answers" / f"{jid}.md").write_text("рубрика · сетка бренда · входов хватило\n\n```json\n" + json.dumps(good) + "\n```\n",
+                                                   encoding="utf-8")
+    dna, rep = parse_answers(pkg, "grid-good", "заглушка")
+    check("parse: ответы пакета → паспорт проходит схему и линт", dna is not None and not rep["schema_errors"] and not rep["lint_errors"],
+          (rep.get("schema_errors"), rep.get("lint_errors")))
+    check("parse: палитра брифа совпала с пикселями сетки (≥ 3 из 5)", rep.get("palette_pass") is True, rep.get("palette_criterion"))
+    check("parse: два прогона — сверка совпала, runs = 2, модель — из описания агента",
+          dna["provenance"]["runs"] == 2 and all(c["same_grade_and_light"] for c in rep.get("runs_compare", {}).values())
+          and dna["provenance"]["vlm_model"] == man["session"]["model"], (dna["provenance"]["runs"], rep.get("runs_compare")))
+    check("parse: баланс белого — замер нейтралей сетки, а не таблица категорий брифа",
+          measured.get("neutral_ab") and dna["palette"]["neutral_wb"] == {"target_b": round(measured["neutral_ab"][1], 4), "tol": 0.006},
+          (dna["palette"]["neutral_wb"], measured.get("neutral_ab")))
     dump_json(dna, tmp / "good.json")
-    dna_b, rep_b = parse_response(STUB_BAD, "vlm-autumn-bad", "заглушка", str(grid))
-    check("parse: «идеализированная» палитра — критерий F-05 не выполнен", rep_b.get("f05_palette_pass") is False, rep_b.get("f05_palette_criterion"))
-    check("parse: «golden yellow 30 %» — цвет с покрытием < 1/3 заявленной доли помечен как придуманный",
-          "#E8A33D" in rep_b.get("invented_colours", []) and not rep.get("invented_colours"), (rep_b.get("invented_colours"), rep.get("invented_colours")))
-    check("parse: слова stunning/cinematic/vibrant/dramatic ловит линт", any("запрещённые слова" in e for e in rep_b["lint_errors"]), rep_b["lint_errors"])
-    broken = copy.deepcopy(STUB_GOOD)
+    bad = dict(STUB_BRIEF, palette=STUB_BAD_PALETTE, grade=dict(STUB_BRIEF["grade"], saturation="vivid"),
+               style_block_photo="A stunning cinematic autumn park, vibrant golden foliage, dramatic light.")
+    (tmp / "bad.json").write_text(json.dumps(bad), encoding="utf-8")
+    dna_b, rep_b = parse_answers(tmp / "bad.json", "grid-bad", "заглушка", str(grid), "design/promo/art-direction.json")
+    check("parse: «идеализированная» палитра — критерий не выполнен, придуманные цвета помечены",
+          rep_b.get("palette_pass") is False and "#E8A33D" in rep_b.get("invented_colours", []), rep_b.get("palette_criterion"))
+    check("parse: слова stunning/cinematic/vibrant/dramatic ловит линт", any("запрещённые слова" in e for e in rep_b["lint_errors"]),
+          rep_b["lint_errors"])
+    check("parse: ссылка на арт-дирекцию — в происхождении паспорта", dna_b["provenance"].get("art_direction") == "design/promo/art-direction.json"
+          and not schema_errors(dna_b)[0], dna_b["provenance"].get("art_direction"))
+    broken = copy.deepcopy(good)
     del broken["grade"]
     d0, r0 = parse_response(broken, "x", None, None)
-    check("parse: нет grade → отказ с причиной", d0 is None and any("grade" in p for p in r0["vlm_problems"]), r0["vlm_problems"][:3])
-    # 3. сравнение двух прогонов
+    check("parse: нет grade → отказ с причиной", d0 is None and any("grade" in p for p in r0["brief_problems"]), r0["brief_problems"][:3])
     c = compare(dna, dna_b)
     check("compare: разная насыщенность → «grade и light не совпали»", c["same_grade_and_light"] is False, c)
-    c2 = compare(dna, load_json(tmp / "good.json"))
-    check("compare: тот же прогон → совпали, ΔE палитр 0", c2["same_grade_and_light"] and c2["palette_dE_sym_mean"] == 0, c2)
-    # 4. три примера паспортов: схема (jsonschema или встроенный) и линт
-    for p in sorted(EXAMPLES.glob("dna-*.json")):
+    # 3. примеры паспортов базы: схема (jsonschema и встроенный валидатор) и линт
+    samples = sorted(EXAMPLES.glob("dna-*.json")) + sorted(ROOT.glob("14-recipes/examples/*/brand/dna-*.json"))
+    for p in samples:
         d = load_json(p)
         e1, eng = schema_errors(d)
         e2, _ = schema_errors(d, force_builtin=True)
         le, lw = lint(d, p)
         check(f"пример {p.name}: схема ({eng}) и встроенный валидатор — 0 ошибок, линт — 0 ошибок", not e1 and not e2 and not le, (e1 or e2 or le)[:3])
-    # 5. сломанный паспорт ловят оба валидатора
     d = load_json(EXAMPLES / "dna-warm-consumer.json")
     d["palette"]["image_palette"][0]["hex"] = "#7B6A3"
     d["composition"]["subject_region"] = "left"
@@ -1026,12 +1190,39 @@ def selftest():
     d["palette"]["image_palette"].append({"role": "secondary", "hex": "#8B5CF6", "name": "violet", "share_max": 0.2})
     le, _ = lint(d)
     check("линт: фиолетовый #8B5CF6 (293°) с долей 0,2 в запрещённой полосе", any("запрещённой полосе" in e for e in le), le)
-    # 6. LUT из паспорта = LUT опыта F/05
-    lut = write_lut(load_json(EXAMPLES / "dna-warm-consumer.json"), tmp / "warm.cube")
-    a_, b_ = cube_numbers(lut), cube_numbers(F05 / "brand_warm_consumer.cube")
-    diff = max(max(abs(x - y) for x, y in zip(r1, r2)) for r1, r2 in zip(a_, b_)) if a_ and len(a_) == len(b_) else None
-    check("lut: паспорт warm-consumer → .cube совпадает с F/05 brand_warm_consumer.cube", diff is not None and diff < 1e-6, f"max|Δ| = {diff}")
-    # 7. from-tokens на мини-наборе DTCG (алиасы, oklch+hex, px)
+    d = load_json(EXAMPLES / "dna-strict-saas.json")
+    d["icon3d"].pop("series_passport", None)
+    d["icon3d"]["key_light"] = "soft key"
+    e1, _ = schema_errors(d)
+    _, lw = lint(d)
+    check("icon3d: свет в паспорте визуала — ошибка схемы; без series_passport — предупреждение линта",
+          any("key_light" in e for e in e1) and any("series_passport" in w for w in lw), (e1[:2], lw))
+    d = load_json(EXAMPLES / "dna-strict-saas.json")
+    ms = d["illustration"].get("metaphors") or []
+    check("пример strict-saas: места, формат, перекраска и метафоры иллюстраций — поля системы", ms and d["illustration"].get("places")
+          and d["illustration"].get("recolor"), d["illustration"])
+    d["illustration"]["metaphors"] = ms + [dict(ms[0], meaning="тот же id — другой смысл")] if ms else ms
+    le, _ = lint(d)
+    check("illustration: повтор id метафоры — ошибка линта", any("metaphors" in e for e in le), le)
+    d["illustration"].pop("metaphors", None)
+    _, lw = lint(d)
+    check("illustration: пустые состояния без списка метафор — предупреждение линта", any("метафор" in w for w in lw), lw)
+    d["video"] = {"tempo": "fast"}
+    check("video.tempo: fast — проходит схему", not schema_errors(d)[0], schema_errors(d)[0][:2])
+    # 4. LUT: нейтральный грейд — тождество; грейд паспорта — файл 33³
+    ident = load_json(EXAMPLES / "dna-warm-consumer.json")
+    ident["grade"].update({"wb_ab": [0.0, 0.0], "chroma": 1.0, "black": 0.0, "white": 1.0, "contrast": 0.0})
+    rows = cube_numbers(write_lut(ident, tmp / "ident.cube", size=9))
+    import numpy as np
+    g = np.linspace(0, 1, 9)
+    b_, gg, r_ = np.meshgrid(g, g, g, indexing="ij")
+    lattice = np.stack([r_, gg, b_], -1).reshape(-1, 3)
+    diff = float(np.abs(np.array(rows) - lattice).max()) if len(rows) == len(lattice) else None
+    check("lut: нейтральный грейд → тождественный .cube", diff is not None and diff < 1e-3, f"max|Δ| = {diff}")
+    rows = cube_numbers(write_lut(load_json(EXAMPLES / "dna-warm-consumer.json"), tmp / "warm.cube"))
+    mid = rows[len(rows) // 2] if rows else None
+    check("lut: паспорт warm-consumer → 33³ строк, средний серый теплеет (R > B)", len(rows) == 33 ** 3 and mid and mid[0] > mid[2], mid)
+    # 5. from-tokens на мини-наборе DTCG (алиасы, oklch+hex, px)
     toks = {"primitive": {"color": {"neutral": {"200": {"$value": {"colorSpace": "oklch", "components": [0.929, 0.013, 255.5], "hex": "#e2e8f0"}},
                                                 "400": {"$value": {"hex": "#90a1b9"}}, "500": {"$value": {"hex": "#62748e"}},
                                                 "50": {"$value": {"hex": "#f8fafc"}}},
@@ -1049,7 +1240,9 @@ def selftest():
     check("from-tokens: алиасы разрешены (canvas #F8FAFC, акцент #155DFC, радиус 6)", dt_["palette"]["image_palette"][0]["hex"] == "#F8FAFC"
           and k["accent_hex"] == "#155DFC" and k["radius_px"] == 6, k)
     check("from-tokens: холодная slate-нейтраль → cool, b −0,004", k["neutral_temp"] == "cool" and dt_["palette"]["neutral_wb"]["target_b"] == -0.004, k)
-    # 8. паспорт → спецификация ассета проходит схему 05-prompting; компилятор D2 вставляет блок стиля дословно
+    check("from-tokens: icon3d — материал и акцент, свет и камера — ссылкой на паспорт 3D-серии",
+          dt_["icon3d"].get("series_passport") == SERIES_PASSPORT and "key_light" not in dt_["icon3d"], dt_["icon3d"])
+    # 6. паспорт → спецификация ассета; компилятор промтов вставляет блок стиля дословно (нужен снимок каталога polza)
     wc = EXAMPLES / "dna-warm-consumer.json"
     spec = to_spec(load_json(wc), "photo", "IMG-HERO-PHOTO", "a weathered wooden park bench under a birch tree", "hero", None, True,
                    "exterior-park-autumn", wc, tmp / "spec.json")
@@ -1057,20 +1250,24 @@ def selftest():
     check(f"to-spec: спецификация проходит asset-spec.schema.json ({eng})", not e1, e1[:3])
     check("to-spec: сумма долей палитры ≤ 1, ≤ 5 цветов", sum(p["share"] for p in spec["palette"]) <= 1.0 and len(spec["palette"]) <= 5,
           [p["share"] for p in spec["palette"]])
+    s3 = to_spec(load_json(EXAMPLES / "dna-strict-saas.json"), "icon3d", "IMG-ICON3D", "a small parcel box", "section")
+    check("to-spec icon3d: свет — схема паспорта 3D-серии, спецификация проходит схему",
+          "fill and rim" in s3["light"]["source"] and not schema_errors(s3, SPEC_SCHEMA_PATH)[0], s3["light"])
     dump_json(spec, tmp / "spec.json")
     venv = Path(kbpaths.python())
     py = str(venv) if venv.exists() else sys.executable
     r = subprocess.run([py, str(TOOLS / "prompt_compile.py"), "compile", str(tmp / "spec.json"), "--model", "openai/gpt-image-2.5-sunburst"],
                        capture_output=True, text=True, timeout=120)
     block = load_json(wc)["style_blocks"]["photo"]
-    check("prompt_compile: блок стиля паспорта дословно в промте GPT Image 2.5", r.returncode == 0 and block in r.stdout,
-          (r.stderr or r.stdout)[-300:] if r.returncode else "")
-    for s in res:
-        print(f"{s[0]}  {s[1]}" + (f"  → {s[2]}" if s[0] == "FAIL" or (s[2] and 'F-05' in s[1]) else ""))
-    print(f"итого: {len(res) - len(fails)}/{len(res)} PASS; временные файлы: {tmp}")
-    for f in tmp.iterdir():
-        f.unlink()
-    tmp.rmdir()
+    if "нет снимков" in (r.stdout + r.stderr):
+        check("prompt_compile: нет снимка каталога polza (install.sh --catalogs) — пропуск", True)
+    else:
+        check("prompt_compile: блок стиля паспорта дословно в промте GPT Image 2.5", r.returncode == 0 and block in r.stdout,
+              (r.stderr or r.stdout)[-300:] if r.returncode else "")
+    for s_ in res:
+        print(f"{s_[0]}  {s_[1]}" + (f"  → {s_[2]}" if s_[0] == "FAIL" else ""))
+    print(f"итого: {len(res) - len(fails)}/{len(res)} PASS")
+    shutil.rmtree(tmp, ignore_errors=True)
     return 0 if not fails else 1
 
 
@@ -1079,10 +1276,17 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("grid"); s.add_argument("images", nargs="+"); s.add_argument("--out", required=True)
     s.add_argument("--cell", type=int, default=640); s.add_argument("--cols", type=int, default=3); s.set_defaults(f=cmd_grid)
-    s = sub.add_parser("build"); s.add_argument("grid"); s.add_argument("--out", required=True); s.add_argument("--model", default=VLM_MODEL)
-    s.add_argument("--variant", type=int, default=1); s.add_argument("--tag", default="F-05-vlm-brand-brief"); s.set_defaults(f=cmd_build)
-    s = sub.add_parser("parse"); s.add_argument("response"); s.add_argument("--out", required=True); s.add_argument("--grid")
-    s.add_argument("--id"); s.add_argument("--brand"); s.add_argument("--model", default=VLM_MODEL); s.set_defaults(f=cmd_parse)
+    s = sub.add_parser("build", help="пакет для сессии Opus (агент design-judge): сетка → JSON-бриф паспорта")
+    s.add_argument("grid"); s.add_argument("--out", help="папка пакетов (по умолчанию $DDD_HOME/out/ai-media/dna)")
+    s.add_argument("--name", help="имя пакета (по умолчанию — хэш сетки)")
+    s.add_argument("--runs", type=int, default=2, help="прогонов — отдельных сессий (сверка — compare)")
+    s.add_argument("--force", action="store_true", help="пересобрать пакет, в котором уже есть ответы"); s.set_defaults(f=cmd_build)
+    s = sub.add_parser("parse", help="ответы пакета или файл ответа → черновик паспорта")
+    s.add_argument("response", help="папка пакета build или файл ответа"); s.add_argument("--out", required=True)
+    s.add_argument("--grid", help="сетка для сверки палитры (по умолчанию — из ключа пакета)")
+    s.add_argument("--id"); s.add_argument("--brand")
+    s.add_argument("--art-direction", help="путь к art-direction.json, из которого выведен паспорт (происхождение)")
+    s.set_defaults(f=cmd_parse)
     s = sub.add_parser("validate"); s.add_argument("files", nargs="+"); s.add_argument("--builtin", action="store_true"); s.set_defaults(f=cmd_validate)
     s = sub.add_parser("compare"); s.add_argument("a"); s.add_argument("b"); s.set_defaults(f=cmd_compare)
     s = sub.add_parser("lut"); s.add_argument("dna"); s.add_argument("--out", required=True); s.add_argument("--size", type=int, default=33)

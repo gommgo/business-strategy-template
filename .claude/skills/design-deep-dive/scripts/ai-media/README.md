@@ -96,11 +96,11 @@ Blink не выключается, `navigator.webdriver` не трогается
 Ограничения: HEVC в этом Chromium не играет; куки-баннеры не закрываются; антибот отдаёт заглушку (смотреть `title` и
 контактный лист); один браузер за раз.
 
-## Стенд моделей — `stand_run.py` (агент E, волна 2, 23.09.2026; строку внёс оркестратор)
+## Стенд моделей — `stand_run.py`
 
 | Утилита | Что делает | Пример |
 |---|---|---|
-| `stand_run.py` (≈ 920 строк; `selftest` 8/8) | стенд фазы 5 поверх `polza.py`: `build` (перекомпилировать задачи `../../kb/ai-media/13-routing-matrix/stand/tasks.yaml` компилятором D2), `estimate`, `run`, `collect`, `metrics`, `sheet` (контактные листы), `page` (**страница слепого попарного голосования**, проверена Playwright 6/6), `tally` (итог голосов), `ministand` (прогон новой модели на регрессионном наборе) | `99-raw/tools/venv-D/bin/python stand_run.py build && python3 stand_run.py estimate` |
+| `stand_run.py` (`selftest` — 12 проверок) | стенд моделей поверх `polza.py`: `build` (задачи `../../kb/ai-media/13-routing-matrix/stand/tasks.yaml` через компилятор промтов), `estimate`, `run`, `collect`, `metrics`, `sheet` (контактные листы), `page` — **страница слепого попарного голосования**: картинки из таблицы результатов или **текстовые карточки** из листа `copydeck.py export-variants` (`--text ЛИСТ.md --text-key КЛЮЧ.yaml`, пары — между вариантами одного слота); ключ — `<DIR>.key.json` рядом с папкой страницы; `tally` (доли побед, Уилсон, Брэдли–Терри, повторы, позиция; у текстовой страницы `--selection` — победы меток по слоту для `copydeck.py apply-selection --votes … --method human-pairwise`), `ministand` (прогон новой модели на регрессионном наборе) | `python3 stand_run.py page --text sheet.md --text-key key.yaml --out page/` → голоса → `stand_run.py tally votes.json --key page.key.json --selection votes.yaml` |
 | `routing_check.py` (агент N, волна 3, 24.09.2026; v1.1 — агент U, 25.09.2026; 424 строки) | валидатор `../../kb/ai-media/13-routing-matrix/routing.yaml` v1/v2 по последним снимкам каталогов: id моделей есть в polza / RouterAI / Gen-API или помечены внешними, параметры проходят проверку каталога, цены совпадают с `polza_catalog.py price` (± 1 %), каналы, диалекты, рубрики `../../kb/ai-media/11-evaluation-qa/rubrics/`, флаги `legal` (Qwen 2.1 не финал; с 24.09 X2 — `minimax/*` только с `visible-vendor-mark`, строки политики 12–14 — флаг маршрута `people-consent`), тесты фазы 5; предупреждает об устаревающих моделях. 24.09: 33 маршрута, 124 варианта — 0 ошибок; отрицательный тест 9/9 (`99-raw/experiments/N/01-routing-check/`) + 2/2 новых правил (`99-raw/experiments/X/06-x2/routing_check_negative_x2.py`). Запускать после каждого снимка каталога и перед фазой 5 (`../../kb/ai-media/13-routing-matrix/04-update-procedure.md` §2). **v1.1 (агент U, сессия 5, 25.09.2026)**: `version` 1 или 2; коды тестов с цифрой в начале и трёхбуквенные (`3D-21`, `VAR-01`); `defaults.unavailable_<дата>` — выбывшая модель вариантом только с `final: false` или в `not`, у записи обязательны `model` и `error`; `defaults.not_routes` — у записи `what` и `why`. 25.09: `routing.yaml` v2 — 33 маршрута, 136 вариантов, 0 ошибок, 0 предупреждений (снимки `2026-09-25_1411`); v1 (`routing.v1.yaml`, снимки 24.09) — 0 ошибок; отрицательный тест v1.1 — 6 поломок → 7 ошибок, все пойманы (`99-raw/notes/session5/U-work/routing-negtest/`) | `python3 routing_check.py ../../kb/ai-media/13-routing-matrix/routing.yaml --md report.md --json report.json` |
 
 ## Будут добавлены агентами
@@ -183,22 +183,24 @@ Python 3.13 + numpy + scipy + Pillow (системные) + ffmpeg 7.1.5; ΔE00,
 0,98 → 3,4 после CRF 12, дубль кадра после кодирования уже не виден (I/02, I/04). `cam_shift_max_px` на ровном фоне
 (хромакей) показывает движение объекта, а не камеры — там смотреть `chroma`.
 
-## Паспорт визуала — `vlm_to_dna.py` (агент F2, волна 2, 23.09.2026)
+## Паспорт визуала — `vlm_to_dna.py`
 
-Системный Python 3.13 + numpy + Pillow; с `venv-D2/bin/python` схему проверяет jsonschema, без него — встроенный валидатор
-подмножества JSON Schema (итоги совпадают, самопроверка 23/23 в обоих). Схема — `../../kb/ai-media/06-art-direction-consistency/visual-dna.schema.json`,
-примеры — `06-art-direction-consistency/examples/dna-*.json`, опыт — `99-raw/experiments/F/07-dna/`. Платных вызовов нет.
+Python окружения скилла (`numpy`, `Pillow`, `jsonschema`; без jsonschema — встроенный валидатор подмножества JSON Schema).
+Схема — `../../kb/ai-media/06-art-direction-consistency/visual-dna.schema.json`, примеры —
+`../../kb/ai-media/06-art-direction-consistency/examples/dna-*.json`. Разбор сетки бренда делает отдельная сессия Opus — агент
+`design-judge` по пакету той же формы, что пакет судьи (`asset_audit.py judge-jobs`); утилита собирает пакет и читает
+ответ, моделей сама не вызывает. Паспорт утверждает человек.
 
 | Утилита | Что делает | Пример |
 |---|---|---|
-| `vlm_to_dna.py grid` / `build` | сетка бренд-картинок (белые желоба 10 px) → задание `.polza-chat.json` (VLM `google/gemini-3-flash-preview`, JSON-бриф: характер, палитра, грейд, свет, камера, композиция, реквизит, блок стиля, запреты, канарейки) — как F-05 | `python3 vlm_to_dna.py build grid.jpg --out jobs/X.polza-chat.json` |
-| `parse` | ответ VLM (chat completion, ```json или голый JSON) → черновик паспорта; с `--grid` — палитра, баланс белого и хрома, снятые локально, критерий «≥ 3 из 5 hex в ΔE ≤ 0,05» и «придуманные» цвета (покрытие пикселей < 1/3 заявленной доли) | `… parse resp.json --grid grid.jpg --out dna.json` |
-| `validate` | схема + линт: оттенки в запрещённых полосах, «no X» и слова-слоп в блоках стиля, ярлык «Series style» внутри блока, замены запретов с предметами, объект и зона текста на одной стороне, референсы разных классов, p95 вместо p99,9; с 24.09 (оркестратор) — «transparent background» в блоке стиля: модели без альфы рисуют шахматку, в блоке — ровный фон цвета секции, альфа — вырезом или векторизацией; `from-tokens` пишет «plain flat … background» | `… validate dna.json` |
-| `compare` | два прогона VLM: совпадение категорий грейда и света, симметричная ΔE палитр | `… compare run1.json run2.json` |
-| `lut` | числа `grade` паспорта → 3D LUT `.cube` (формула F/05 `parametric_grade`; ffmpeg `lut3d` = Python с ΔE 0,002) | `… lut dna.json --out brand.cube` |
-| `from-tokens` | токены DTCG (ui-research 09/04: `color.bg.canvas`, `color.accent.solid`, `primitive.color.neutral.*`, `radius.md`) → скелет паспорта по правилам R1–R8 | `… from-tokens tokens.json --out dna.json --adjectives "строгий,плотный,технический"` |
-| `to-spec` | паспорт → спецификация ассета v0.2 (`../../kb/ai-media/05-prompting/asset-spec.schema.json`) для `prompt_compile.py`: блок стиля, палитра (сумма долей ≤ 1), свет, камера, зона текста, референсы одного класса, замены запретов | `… to-spec dna.json --kind photo --task IMG-HERO-PHOTO --subject "…" --out spec.json` |
-| `selftest` | 23 проверки на заглушках ответа VLM, трёх паспортах, сломанном паспорте, LUT F/05, мини-наборе токенов, компиляции в промт | `python3 vlm_to_dna.py selftest` |
+| `vlm_to_dna.py grid` / `build` | сетка бренд-картинок (белые желоба 10 px) → пакет формы judge-package/1 в `$DDD_HOME/out/ai-media/dna/<имя>/`: кадр сетки PNG, задание на прогон (`jobs/<id>.md` — рубрика брифа: характер, палитра, грейд, свет, камера, композиция, реквизит, блок стиля, запреты, канарейки), пустая `<имя>/answers/`; ключ с исходником сетки — рядом, `<имя>.key.json`; `--runs 2` — две сессии для сверки | `python3 vlm_to_dna.py build grid.jpg --name brand` |
+| `parse` | ответы пакета (`answers/<id>.md`: первая строка и блок ```json) или файл ответа → черновик паспорта; по сетке из ключа — палитра, баланс белого и хрома, снятые с пикселей, критерий «≥ 3 из 5 hex в ΔE ≤ 0,05» и «придуманные» цвета (покрытие < 1/3 заявленной доли); два ответа и больше — сверка прогонов; `--art-direction` — ссылка на арт-дирекцию в происхождении | `… parse $DDD_HOME/out/ai-media/dna/brand --out dna.json` |
+| `validate` | схема + линт: оттенки в запрещённых полосах, «no X» и оценочные слова в блоках стиля, «transparent background» в блоке, ярлык «Series style», замены запретов с предметами, объект и зона текста на одной стороне, референсы разных классов, p95 вместо p99,9, `icon3d` без ссылки на паспорт 3D-серии, повтор id и отсутствие списка метафор иллюстраций | `… validate dna.json` |
+| `compare` | два прогона разбора: совпадение категорий грейда и света, симметричная ΔE палитр | `… compare run1.json run2.json` |
+| `lut` | числа `grade` паспорта → 3D LUT `.cube` (`palette.parametric_grade`) | `… lut dna.json --out brand.cube` |
+| `from-tokens` | токены DTCG (`color.bg.canvas`, `color.accent.solid`, `primitive.color.neutral.*`, радиус `radius` шага md) → скелет паспорта по правилам R1–R8; `icon3d` — материал и доля акцента, камера и свет — ссылкой на паспорт 3D-серии blender 06/02 §6 | `… from-tokens tokens.json --out dna.json --adjectives "строгий,плотный,технический"` |
+| `to-spec` | паспорт → спецификация ассета (`../../kb/ai-media/05-prompting/asset-spec.schema.json`) для `prompt_compile.py`: блок стиля, палитра (сумма долей ≤ 1), свет, камера, зона текста, референсы одного класса, замены запретов | `… to-spec dna.json --kind photo --task IMG-HERO-PHOTO --subject "…" --out spec.json` |
+| `selftest` | 33 проверки: пакет и разбор на синтетической сетке, примеры паспортов базы, сломанный паспорт, поля `icon3d` и иллюстраций, LUT, токены, спецификация (компиляция промта — при снимке каталога polza) | `python3 vlm_to_dna.py selftest` |
 
 ## Проверка правок и альфы, кодеры и C2PA (агент H, волна 2, 23.09.2026)
 
@@ -233,26 +235,27 @@ v0.2 (H2, 23.09.2026 17:50): исправлено грубое совмещен�
 0,30 с и 0,48 ГБ на кадр, 4 потока; предобработка и метрики против эталона — `99-raw/experiments/H/06-depth/depth_eval.py`
 (под `heavy.lock`).
 
-## Каналы вне Media API polza — `mp_client.py` (агент B2, волна 3, 23.09.2026)
+## Каналы вне Media API polza — `mp_client.py`
 
-Python 3.13, только стандартная библиотека (+ `polza_catalog.py` рядом). Исполняет задания фазы 5 `*.routerai.json(l)`,
-`*.genapi.json`, `*.polza-chat.json`, `*.polza-images.json` (формат — `../../kb/ai-media/99-raw/phase5/README.md`) так же, как `polza.py`
-исполняет Media API: **сухой прогон по умолчанию**, трата только с `--live`, проверка по каталогам и документации, оценка
-цены (ожидание и верх), лимиты, опрос, немедленное скачивание, паспорт `.passport.json` рядом с файлом, **общий журнал**
-`99-raw/experiments/_ledger.jsonl` (поле `channel`). Проверено: `selftest` 36/36, макет каналов — 44/44 сценария
-(`99-raw/experiments/B2/01-mock`), `estimate` по 31 файлу заданий каналов — 0 ошибок (`B2/02`). **Против настоящих
-каналов не запускался** (ключей нет). Правила и зонды первых вызовов — `../../kb/ai-media/02-providers-platforms/07-multichannel-client.md`.
+Python 3.13, только стандартная библиотека (+ `polza_catalog.py` рядом). Исполняет задания генерации `<имя>.routerai.json(l)`,
+`<имя>.genapi.json`, `<имя>.polza-chat.json`, `<имя>.polza-images.json` так же, как `polza.py` исполняет Media API: **сухой прогон по
+умолчанию**, трата только с `--live`, проверка по каталогам и документации, оценка цены (ожидание и верх), лимиты, опрос,
+немедленное скачивание, паспорт `<файл>.passport.json` рядом с файлом, **общий журнал** `$DDD_HOME/out/ai-media/_ledger.jsonl`
+(поле `channel`). Правила и зонды первых вызовов — `../../kb/ai-media/02-providers-platforms/07-multichannel-client.md`.
+Задание оценки по рубрике (`meta.judge: vlm` или `meta.rubric`) — ошибка задания: оценку делает сессия Opus по пакету
+`asset_audit.py judge-jobs`. 3D-генераторы Gen-API (по имени сети или формату выхода каталога: glb, obj, fbx …) — ошибка
+задания: 3D — Blender и код (`../../kb/blender/10-ai-3d-generation-assets/01-generators-landscape.md` §1).
 
 | Канал | Что исполняет | Особенности клиента |
 |---|---|---|
-| `routerai` | `POST /api/v1/images` (синхронно, `b64_json`/`url`, SVG Recraft), `POST /api/v1/videos` (202 → опрос → `unsigned_urls` с ключом), `/api/v1/chat/completions` | проверка по каталогу RouterAI (`supported_*`, `max_image_*`), форма `input_references`/`mask`, passthrough против `allowed_passthrough_parameters` OpenRouter; цена: картинка / Мп / токены GPT Image (формула C1/02) / секунды видео |
-| `genapi` | `POST /api/v1/networks/{slug}` → опрос `/api/v1/request/get/{id}`; `is_sync` | проверка по каталогу `networks?include=parameters` (`required`, `items`, типы `url_or_file`, `RGB`); `translate_input` явно (нет в задании → `false`); `recraft-v4` без `model`/`pro` — ошибка; цена по прайсу (flux-2 за Мп, recraft-v4 по варианту) или `cost` каталога |
-| `polza-chat` | `POST /api/v1/chat/completions` | картинки на вход — data:URI; цена по токенам каталога; без `max_tokens` — потолок по `max_rub` (`--no-auto-cap`) |
+| `routerai` | `POST /api/v1/images` (синхронно, `b64_json`/`url`, SVG Recraft), `POST /api/v1/videos` (202 → опрос → `unsigned_urls` с ключом), `/api/v1/chat/completions` | проверка по каталогу RouterAI (`supported_*`, `max_image_*`), форма `input_references`/`mask`, passthrough против `allowed_passthrough_parameters` OpenRouter; цена: картинка / Мп / токены GPT Image / секунды видео |
+| `genapi` | `POST /api/v1/networks/{slug}` → опрос `/api/v1/request/get/{id}`; `is_sync` | проверка по каталогу `networks?include=parameters` (`required`, `items`, типы `url_or_file`, `RGB`); `translate_input` явно (нет в задании → `false`); `recraft-v4` без `model`/`pro` — ошибка; 3D-сети — ошибка; цена по прайсу (flux-2 за Мп, recraft-v4 по варианту) или `cost` каталога |
+| `polza-chat` | `POST /api/v1/chat/completions` | генерация (LLM → SVG); картинки на вход — data:URI; цена по токенам каталога; без `max_tokens` — потолок по `max_rub` (`--no-auto-cap`) |
 | `polza-images` | `POST /api/v2/images/generations` (≤ 120 с синхронно, иначе опрос `/api/v1/media/{id}`) | схема OpenAPI; цена — ступень 1K каталога, верх — запасная ступень |
 
 Подкоманды: `estimate JOBS… [--summary|--json]`, `run JOB [--pick TAG|N|/re/]`, `batch JOBS… [--parallel 2]`,
 `status ID --channel C`, `download ID --channel C`, `ledger [--sum] [--channel C]`, `show MODEL --channel C`,
-`snapshot [--channel routerai|genapi|all]` (публичные каталоги без ключа → `99-raw/cache/{routerai,genapi}/<дата_время>/`),
+`snapshot [--channel routerai|genapi|all]` (публичные каталоги без ключа → `$DDD_HOME/cache/ai-media/{routerai,genapi}/<дата_время>/`),
 `selftest`. Шаблоны `{{ИМЯ}}` / «<…>» — `--set ИМЯ=значение`, `--set-file ИМЯ=путь`; лимиты по верху (`--limit-by
 high`) или ожиданию (`expected`).
 
@@ -260,12 +263,12 @@ high`) или ожиданию (`expected`).
 (600; читаются только при `--live`, `Authorization` — только своему хосту); базы `ROUTERAI_BASE_URL`, `GENAPI_BASE_URL`,
 `POLZA_BASE_URL`; бюджеты `ROUTERAI_BUDGET_TOTAL`, `GENAPI_BUDGET_TOTAL` (**по умолчанию 0 — без явного лимита `--live`
 не тратит**), `POLZA_BUDGET_TOTAL` (2000, общий с `polza.py`), `MP_BUDGET_AGENT`, `MP_MAX_JOB` (60); журнал `MP_LEDGER` |
-`POLZA_LEDGER`; результаты `MP_OUT_ROOT` (`99-raw/experiments/_mp/<агент>/<дата>/`). Коды выхода — как у `polza.py`
-(0 успех; 1 задание или незаполненный шаблон; 2 бюджет; 3 таймаут опроса; 4 failed/error/expired; 5 HTTP; 6 скачивание).
+`POLZA_LEDGER`; результаты `MP_OUT_ROOT` (`$DDD_HOME/out/ai-media/_mp/<агент>/<дата>/`). Коды выхода — как у `polza.py`
+(0 успех; 1 задание, незаполненный шаблон, задание оценки или 3D-сеть; 2 бюджет; 3 таймаут опроса; 4 failed/error/expired;
+5 HTTP; 6 скачивание).
 
-Примеры: `python3 mp_client.py estimate 99-raw/phase5/jobs/*.routerai.json* --summary`;
-`python3 mp_client.py run 99-raw/phase5/jobs/G-16-genapi-image2svg.genapi.json` → `… --live`;
-`python3 mp_client.py show recraft-v4 --channel genapi`; `python3 mp_client.py ledger --sum`.
+Примеры: `python3 mp_client.py estimate jobs/*.routerai.json --summary`; `python3 mp_client.py run jobs/X.genapi.json` →
+`… --live`; `python3 mp_client.py show recraft-v4 --channel genapi`; `python3 mp_client.py ledger --sum`.
 
 ## Провенанс: `provenance_check.py` (агент L, волна 3, 23.09.2026)
 
@@ -289,31 +292,32 @@ high`) или ожиданию (`expected`).
 После чистки путей манифест `Invalid` (`dataHash.mismatch`), svgo `preset-default` удаляет его вместе с `<metadata>`.
 `selftest` — PASS до и после; скан всех выходов фазы 5 (254 файла) — `99-raw/experiments/L/05-phase5-provenance/2026-09-25-all/README.md`.
 
-## Приёмка ассетов — `asset_audit.py` (агент K, волна 3, 23.09.2026)
+## Приёмка ассетов — `asset_audit.py`
 
-Системный Python 3.13 + numpy + scipy + Pillow + PyYAML + ffmpeg 7.1.5; OCR — `venv-K` (RapidOCR 3.9.2 + onnxruntime 1.30,
-379 МБ; модели `models/ocr/`, 29 МБ, sha256 — `../../kb/ai-media/11-evaluation-qa/thresholds.yaml` → `ocr_models`), иконки — `venv-G`.
-Объединяет вызовом и импортом, не переписывая: A/04 `image_metrics`, F/04 `composition_metrics`, F/02 `text_zone`, F/06
-`series_metrics` и `split_grid`, `stand_run.text_check` (E), `edit_check` 0.2 и `alpha_check` (H), `tile_check` (H2),
-`video_loop_check` 0.2 (I), G `check_icons.py`, `mp_client.svg_info` (B2), `vlm_to_dna` (палитра, приёмка паспорта),
-`provenance_check.py scan --corners` (L: метка в углу → `QA-PROV-VISIBLE-MARK`, лист `*_corners.jpg`; ИИ-файл `--stage web` без машиночитаемой метки → `QA-PROV-NO-MARK`). Пороги — `../../kb/ai-media/11-evaluation-qa/thresholds.yaml` (у каждого источник и статус). Тесты:
-`python3 tests/test_asset_audit.py [--ocr] [-v]` — **55/55** (с OCR; без — 53/53), ≈ 50 с.
-Опыты — `99-raw/experiments/K/01…05` (OCR кириллицы, локальный сдвиг правки, видео-негативы, рубрики, входы судьи).
+Python окружения скилла (`numpy`, `scipy`, `Pillow`, `PyYAML`, `rapidocr` для OCR) + ffmpeg; модели OCR —
+`$DDD_HOME/models/ocr` (sha256 — `../../kb/ai-media/11-evaluation-qa/thresholds.yaml` → `ocr_models`). Объединяет вызовом и
+импортом, не переписывая: `image_metrics`, `composition_metrics`, `text_zone`, `series_metrics` и `split_grid`,
+`stand_run.text_check`, `edit_check` и `alpha_check`, `tile_check`, `video_loop_check`, `check_icons.py`,
+`mp_client.svg_info`, `vlm_to_dna` (палитра, приёмка паспорта), `provenance_check.py scan --corners` (метка в углу →
+`QA-PROV-VISIBLE-MARK`, лист `<файл>_corners.jpg`; ИИ-файл `--stage web` без машиночитаемой метки → `QA-PROV-NO-MARK`).
+Пороги — `../../kb/ai-media/11-evaluation-qa/thresholds.yaml` (у каждого источник и статус). Тесты:
+`python3 tests/test_asset_audit.py [--ocr] [-v]` — 76 проверок без OCR (входы журнала опытов и exiftool, которых нет, —
+пропуск с пометкой); `asset_audit.py selftest` — те же тесты.
 
 | Команда | Что делает | Пример |
 |---|---|---|
-| `audit PATH…` | файл, список или папка с паспортами polza.py / mp_client.py → `OUT/audit.json` (asset-audit/1: вердикт pass / warn / needs_human / fail, коды дефектов с порогом и источником, маркеры A, что смотреть человеку), `audit.md`, панели `*_panel.jpg`, листы углов `*_corners.jpg`, `index_sheet.jpg`; `--strict` — код 1 при fail | `python3 asset_audit.py audit 99-raw/experiments/_polza/E/2026-10-01 --dna ../../kb/ai-media/06-art-direction-consistency/examples/dna-strict-saas.json --out out/` |
-| режимы (`--mode auto` по паспорту, коду задачи, альфе, расширению) | `image`, `cutout`, `edit` (`--orig [--mask] [--protect]`; аутпейнт — по пропорции; без маски — маска из разницы), `texture`, `video-loop` (`--control`, `--mask` синемаграфа, `--mezzanine`; `--master` мезонин → `motion_keep` ≥ 0,75, J), `video-alpha` (`--key`), `svg-icon`, `og`; `--series` / `--grid 2x2` | `audit hero.png --slot hero --text-zone 0,0,0.42,1 --expect "Весенняя распродажа"` |
-| `ocr IMG… [--expect]` | OCR кириллицы (det PP-OCRv6 small + rec eslav PP-OCRv5, «латинский нюх» en) в venv-K под `heavy.lock` + сверка: пропуск, удвоение, латиница, ё, лишнее слово, GNED | `asset_audit.py ocr banner.png --expect "Скидки до −30 %"` |
+| `audit PATH…` | файл, список или папка с паспортами polza.py / mp_client.py → `<OUT>/audit.json` (asset-audit/1: вердикт pass / warn / needs_human / fail, коды дефектов с порогом и источником, маркеры, что смотреть человеку), `<OUT>/audit.md`, панели `<файл>_panel.jpg`, листы углов `<файл>_corners.jpg`, `<OUT>/index_sheet.jpg`; `--strict` — код 1 при fail; `--stage web` — бюджеты веса, `--mobile` — телефонный кадр слота (`budget.image.hero_mobile_kb`, 80 КБ) | `python3 asset_audit.py audit gen/ --dna ../../kb/ai-media/06-art-direction-consistency/examples/dna-strict-saas.json --out out/` |
+| режимы (`--mode auto` по паспорту, коду задачи, альфе, расширению) | `image`, `cutout`, `edit` (`--orig [--mask] [--protect]`; аутпейнт — по пропорции; без маски — маска из разницы), `texture`, `video-loop` (`--control`, `--mask` синемаграфа, `--mezzanine`; `--master` мезонин → `motion_keep` ≥ 0,75), `video-alpha` (`--key`), `svg-icon`, `og`; `--series` / `--grid 2x2` | `audit hero.png --slot hero --text-zone 0,0,0.42,1 --expect "Весенняя распродажа"` |
+| `ocr IMG… [--expect]` | OCR кириллицы (det PP-OCRv6 small + rec eslav PP-OCRv5, «латинский нюх» en) под блокировкой heavy + сверка: пропуск, удвоение, латиница, ё, лишнее слово, GNED | `asset_audit.py ocr banner.png --expect "Скидки до −30 %"` |
 | `thresholds [--check]` | пороги с источниками; `--check` — все ключи кода есть в YAML и у каждого источник | `asset_audit.py thresholds --check` |
-| `judge-jobs` | задания VLM-судьи `.polza-chat.json` по рубрике `11-evaluation-qa/rubrics/*.rubric.json`: `checklist` / `defects` (с «где») / `pairwise` (стороны перемешаны, повтор — со сменой сторон) / `transcribe`; `--from-stand-page` — те же пары и те же перекодированные файлы, что у заказчика (сверка в `agree` — по исходникам); `--same-encoding DIR` — одинаковое кодирование пар вне страницы; ключ слепоты — `*.keys.json`; поля запроса по `supported_parameters` каталога | `judge-jobs --rubric hero-photo --from-stand-page out/page --mode pairwise --repeat 0.1 --out 99-raw/phase5/jobs/K-01-….polza-chat.json` |
-| `judge-parse`, `agree`, `calibrate` | ответы (паспорта `mp-passport/1`) → `answers.jsonl` по схеме `judge-response.schema.json`; согласие с голосами (Уилсон, κ, позиционный сдвиг, повторы) → «доверять / предфильтр / не использовать»; порог метрики по меткам человека (Юден, AUC) | `agree --answers a.jsonl --votes votes.json --key page.key.json` |
+| `judge-jobs` | **пакет судьи** для отдельных сессий Opus (агент `design-judge`, протокол `../../kb/common/judge.md`) в `$DDD_HOME/out/ai-media/judge/<имя>/`: `jobs/<id>.md` (вид вызова, задача, кадры, рубрика, формат ответа), `<имя>/frames/` (нейтральные имена по sha256; PNG без потерь или `--same-encoding`; кадры пары одной пропорции — к меньшему размеру), `<имя>/response.schema.json`, `<имя>/manifest.json`, `<имя>/README.md`, пустая `<имя>/answers/`; ключ слепоты — `<имя>.key.json` рядом, вне пакета. Входы: `--items` (рубрика по кадру — `--mode checklist|defects`, пары — `--mode pairwise`; без `--rubric` — вопросы рубрики владельца в каждой строке, так судят макет и страницу), `--from-stand-page` (те же пары и файлы, что у заказчика), `--calibration [--pairs …]` (пары `assets/calibration/index.yaml`, вопросы из поля `rubric`, разметка — в ключе); оба порядка пары и `--runs` прогонов (3; 5 — сортировка; 1 — черновик) — отдельные задания | `judge-jobs --rubric hero-photo --items pairs.jsonl --mode pairwise` |
+| `judge-parse PACKAGE` | ответы `answers/<id>.md` (первая строка и блок ```json по схеме) + ключ → `<имя>.answers.jsonl` и сводка `<имя>.verdict.json` рядом с ключом: пара — совпадение обоих порядков в прогоне и большинство прогонов («неразличимы» без большинства), маркер и находка — не меньше чем в двух прогонах; «нет» без доказательства и «да» без места — «не уверен», выбор без причины — ничья; партия — доля позиции A, согласованность перестановки, доля «не уверен»; у калибровки — попадания в уровень | `judge-parse $DDD_HOME/out/ai-media/judge/<имя>` |
+| `agree`, `calibrate` | согласие вердиктов пар с голосами заказчика по сессиям (`--votes` — файл на сессию), Уилсон, F1 находок против разметки (`--labels`), κ по вопросам → уровень доверия «мало данных / не использовать / только предфильтр / сортировать» и сигналы пересчёта — пороги группы `judge` `thresholds.yaml`; порог метрики по меткам человека (Юден, AUC) | `agree --answers <имя>.answers.jsonl --votes votes.json --key page.key.json` |
 
-Платных вызовов нет: `judge-jobs` только пишет задания (исполняет `mp_client.py … --live` в фазе 5). OCR и тяжёлые шаги —
-под `flock heavy.lock`, при < 1 ГБ available OCR не запускается (ошибка в отчёте, вердикт needs_human). **Блокировку утилита
-берёт сама — внешним `flock` не оборачивать** (с 24.09.2026, правка X: если замок уже держит процесс-предок `flock`, повторно
-не берёт; раньше — самоблокировка до 1800 с, находка M); `page_accept.py` с `browser.lock` — то же правило и та же проверка
-предка (с 24.09.2026, правка X2: под `flock -w 5 … browser.lock` прогон страницы 00 — 18 с, PASS, а не ожидание 900 с).
+Моделей утилита не вызывает: оценку делает сессия Opus по пакету, код готовит пакет и разбирает ответы. OCR и тяжёлые шаги —
+под блокировкой heavy; при < 1 ГБ свободной памяти OCR не запускается (ошибка в отчёте, вердикт needs_human). Блокировку
+утилита берёт сама и внешним `flock` не оборачивается: если замок уже держит процесс-предок `flock`, повторно не берёт;
+`page_accept.py` с `browser.lock` — то же правило.
 
 ## Приёмка страницы с ИИ-ассетами — `page_accept.py` (агент J, волна 3, 23.09.2026)
 

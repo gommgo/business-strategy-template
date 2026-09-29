@@ -1,24 +1,30 @@
 #!/usr/bin/env python3
-"""stand_run.py — стенд моделей ai-media-research: задания фазы 5, сбор результатов, автометрики, контактные листы,
-страница слепого попарного голосования, подсчёт голосов, мини-стенд новой модели.
+"""stand_run.py — стенд моделей ai-media: задания по рецептам стенда, сбор результатов, автометрики, контактные листы,
+страница слепого попарного голосования (картинки и текстовые варианты), подсчёт голосов, мини-стенд новой модели.
 
-Агент E, волна 2, 2026-09-23. Python 3.13 + PyYAML, numpy, scipy, Pillow (системные). Сеть не нужна; платные вызовы
-делает только polza.py и только с --live (ключ — у оркестратора в фазе 5). Описание стенда — 13-routing-matrix/.
+Python 3.13 + PyYAML, numpy, scipy, Pillow. Сеть не нужна; платные вызовы делает только polza.py и только с --live (ключ —
+переменная окружения владельца). Описание стенда — kb/ai-media/13-routing-matrix/; метод голосования — 13/01 §4.3.
 
 Подкоманды:
-  build     [--only E-02,E-08]         рецепты tasks.yaml → 99-raw/phase5/jobs/E-*.jsonl (+ .routerai.json); промт —
-                                       компилятор prompt_compile.py (диалект семейства по умолчанию) или буквальная строка
+  build     [--only E-02,E-08]         рецепты tasks.yaml → задания polza.py в $DDD_HOME/out/ai-media/phase5/jobs (E-*.jsonl,
+                                       + .routerai.json); промт — компилятор prompt_compile.py (диалект семейства по
+                                       умолчанию) или буквальная строка
   estimate  [--only …]                 polza.py estimate по заданиям E-* → таблица «тест · заданий · ошибок · ₽»
   run       JOBS.jsonl [--live] [--parallel 2]   прогон через polza.py batch (без --live — сухой прогон)
-  collect   [--root 99-raw/experiments/_polza/E] [--out results.jsonl]   паспорта polza.py → таблица результатов
+  collect   [--root DIR] [--out results.jsonl]   паспорта polza.py → таблица результатов
   metrics   RESULTS.jsonl [--transcripts T.json] [--out metrics.jsonl]   автометрики по задачам (см. METRICS)
   sheet     RESULTS.jsonl --out DIR [--blind]      контактные листы по тестам (подписи моделей или буквы)
-  page      RESULTS.jsonl --out DIR [--tests E-08,E-10] [--repeat 0.1] [--seed 7]   страница слепого голосования
+  page      RESULTS.jsonl --out DIR [--tests E-08,E-10] [--repeat 0.1] [--seed 7]   страница слепого голосования картинок
             (DIR/index.html + DIR/img/; ключ «картинка → модель» — рядом, в DIR.key.json, в папку страницы не кладётся)
-  tally     VOTES.json [VOTES2.json …] --key DIR.key.json [--out tally.md]   доли побед с интервалом Уилсона,
-            Брэдли–Терри, согласованность повторов, позиционный сдвиг, контрольные пары
+  page      --text SHEET.md [--text-key KEY.yaml] --out DIR [--repeat 0.1] [--seed 7]
+                                       те же слепые пары для текстовых вариантов: карточки текста из листа
+                                       copydeck.py export-variants, пары — между вариантами одного слота
+  tally     VOTES.json [VOTES2.json …] --key DIR.key.json [--out tally.md] [--selection VOTES.yaml]
+                                       доли побед с интервалом Уилсона, Брэдли–Терри, согласованность повторов,
+                                       позиционный сдвиг, контрольные пары; у текстовой страницы --selection — победы
+                                       меток по слоту для copydeck.py apply-selection --votes (--method human-pairwise)
   ministand --model ID [--params '{"image_resolution":"1K"}'] [--vs PRESET]   регрессионный набор для новой модели
-  selftest                             офлайн-проверки (нормализация кириллицы, Уилсон, Брэдли–Терри)
+  selftest                             офлайн-проверки (нормализация кириллицы, Уилсон, Брэдли–Терри, текстовая страница)
 """
 from __future__ import annotations
 
@@ -37,13 +43,13 @@ import sys
 import unicodedata
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))  # scripts/lib: kbpaths
 import kbpaths  # noqa: E402
 ROOT = kbpaths.kb("ai-media")
 TOOLS = kbpaths.scripts("ai-media")
 STAND = ROOT / "13-routing-matrix/stand"
 TASKS = STAND / "tasks.yaml"
-JOBS = kbpaths.out("ai-media", "phase5", "jobs")  # перенос: задания — выход, не kb
+JOBS = kbpaths.out("ai-media", "phase5", "jobs")  # задания стенда — выход, не kb (их же читает routing_check.py)
 sys.path.insert(0, str(TOOLS))
 
 
@@ -193,7 +199,7 @@ def cmd_estimate(a):
 def cmd_run(a):
     cmd = [sys.executable, str(TOOLS / "polza.py"), "batch", a.jobs, "--parallel", str(a.parallel)]
     if a.live:
-        cmd.append("--live")          # только оркестратор в фазе 5, с ключом и после сухого прогона
+        cmd.append("--live")          # трата — только с ключом владельца и после сухого прогона
     return subprocess.call(cmd)
 
 
@@ -479,6 +485,34 @@ QUESTIONS = [
     {"id": "slot", "text": "Что лучше для слота на сайте (как будет стоять на странице)?", "options": ["A", "B", "=", "0"]},
     {"id": "natural", "text": "Что естественнее и ближе к брифу (меньше «сделано нейросетью»)?", "options": ["A", "B", "="]},
 ]
+TEXT_QUESTIONS = [
+    {"id": "slot", "text": "Какой текст лучше для этого места на странице?", "options": ["A", "B", "=", "0"]},
+]
+HINTS = {"image": "Клавиши: ← A, → B, ↓ равно, X — оба не годятся (вопрос 1); затем те же для вопроса 2. Пробел — увеличить "
+                  "(A/B переключает Tab), M — макет с текстом, Backspace — назад.",
+         "text": "Клавиши: ← A, → B, ↓ равно, X — оба не годятся; Backspace — назад. Тексты — дословно, как на странице."}
+
+
+def parse_variants_sheet(text):
+    """Лист слепого выбора copydeck.py export-variants → [{path, stype, context, variants: [(метка, текст)]}]: секция
+    «## <путь> · <тип слота>», строка «Контекст: …», варианты «- **A**: текст»."""
+    slots, cur = [], None
+    for line in text.splitlines():
+        m = re.match(r"^##\s+(\S+)\s+·\s*(.*)$", line.strip())
+        if m:
+            cur = {"path": m.group(1), "stype": m.group(2).strip(), "context": "", "variants": []}
+            slots.append(cur)
+            continue
+        if cur is None:
+            continue
+        m = re.match(r"^Контекст:\s*(.*)$", line.strip())
+        if m:
+            cur["context"] = m.group(1).strip()
+            continue
+        m = re.match(r"^-\s+\*\*([A-Z])\*\*:\s?(.*)$", line.strip())
+        if m:
+            cur["variants"].append((m.group(1), m.group(2)))
+    return [x for x in slots if len(x["variants"]) >= 2]
 
 
 def _encode(im, maxside=1600):
@@ -493,9 +527,11 @@ def _encode(im, maxside=1600):
     return buf.getvalue(), "jpg"
 
 
-def build_page(items, out, title="Стенд моделей — слепое сравнение", repeat=0.1, seed=7, gold=True):
+def build_page(items, out, title="Стенд моделей — слепое сравнение", repeat=0.1, seed=7, gold=True, kind="image"):
     """items: [{"group": ключ сравнения, "brief": текст, "text_zone": [x0,y0,x1,y1] | None, "copy": [...],
-    "ref": путь эталона | None, "model": …, "files": [пути] , "test": …}] — пары строятся внутри group между разными моделями."""
+    "ref": путь эталона | None, "model": …, "files": [пути] , "test": …}] — пары строятся внутри group между разными моделями.
+    kind="text": у элемента вместо files — "text" (карточка текста), model — метка варианта листа; контрольных пар с
+    размытием нет, одинаковая пара — та же карточка с обеих сторон."""
     from PIL import Image, ImageFilter
     rnd = random.Random(seed)
     out = Path(out)
@@ -533,10 +569,10 @@ def build_page(items, out, title="Стенд моделей — слепое с�
     rnd.shuffle(pairs)
     half = len(pairs) // 2
     first, second = pairs[:half], pairs[half:]
-    rep = rnd.sample(first, max(1, round(len(pairs) * repeat))) if first and repeat > 0 else []
+    rep = rnd.sample(first, min(len(first), max(1, round(len(pairs) * repeat)))) if first and repeat > 0 else []
     extra = [{"g": p["g"], "A": p["B"], "B": p["A"], "repeat_of": id(p)} for p in rep]
     golds = []
-    if gold and pairs:
+    if gold and pairs and kind == "image":
         for p in rnd.sample(pairs, max(1, len(pairs) // 20)):
             good = p["A"]
             golds.append({"g": p["g"], "A": good, "B": dict(good, _degrade=True), "gold": "A"} if rnd.random() < 0.5 else
@@ -549,21 +585,27 @@ def build_page(items, out, title="Стенд моделей — слепое с�
     rnd.shuffle(tail)
     seq = first + tail
     pid_of = {id(p): f"p{n + 1:03d}" for n, p in enumerate(seq)}
-    data = {"title": title, "questions": QUESTIONS, "pairs": []}
+    questions = TEXT_QUESTIONS if kind == "text" else QUESTIONS
+    data = {"title": title, "kind": kind, "questions": questions, "hint": HINTS[kind], "pairs": []}
+    key["kind"] = kind
+    key["questions"] = [q["id"] for q in questions]
     for p in seq:
         pid = pid_of[id(p)]
         side = {}
         for s in ("A", "B"):
             it = p[s]
-            side[s] = [put(f, it.get("_degrade", False)) for f in it["files"]]
+            side[s] = [it["text"]] if kind == "text" else [put(f, it.get("_degrade", False)) for f in it["files"]]
         first = p["A"]
         rec = {"id": pid, "brief": first.get("brief", ""), "tz": first.get("text_zone"), "copy": first.get("copy") or [],
                "ref": put(first["ref"]) if first.get("ref") else None, "A": side["A"], "B": side["B"]}
         data["pairs"].append(rec)
-        key["pairs"][pid] = {"group": p["g"], "A": {"model": p["A"]["model"], "files": p["A"]["files"], "degraded": p["A"].get("_degrade", False)},
-                             "B": {"model": p["B"]["model"], "files": p["B"]["files"], "degraded": p["B"].get("_degrade", False)},
+        key["pairs"][pid] = {"group": p["g"], "A": {"model": p["A"]["model"], "files": p["A"].get("files") or [], "degraded": p["A"].get("_degrade", False)},
+                             "B": {"model": p["B"]["model"], "files": p["B"].get("files") or [], "degraded": p["B"].get("_degrade", False)},
                              "test": first.get("test"), "gold": p.get("gold"), "identical": p.get("identical", False),
                              "repeat_of": pid_of.get(p.get("repeat_of")) if p.get("repeat_of") else None}
+        if kind == "text":
+            for s in ("A", "B"):
+                key["pairs"][pid][s].update({"text": p[s]["text"], **({"variant": p[s]["variant"]} if p[s].get("variant") else {})})
     for (path, deg), iid in img_ids.items():
         key["images"][iid] = {"file": path, "degraded": deg}
     page = PAGE_HTML.replace("__TITLE__", html.escape(title)).replace("__DATA__", json.dumps(data, ensure_ascii=False).replace("</", "<\\/"))
@@ -573,6 +615,21 @@ def build_page(items, out, title="Стенд моделей — слепое с�
 
 
 def cmd_page(a):
+    if a.text:
+        slots = parse_variants_sheet(Path(a.text).read_text(encoding="utf-8"))
+        labels = load_yaml(a.text_key) if a.text_key else {}
+        items = [{"group": sl["path"], "model": lab, "text": txt, "brief": sl["context"] or sl["path"], "test": sl["path"],
+                  **({"variant": str(labels[sl["path"]][lab])} if isinstance(labels.get(sl["path"]), dict) and lab in labels[sl["path"]] else {})}
+                 for sl in slots for lab, txt in sl["variants"]]
+        if not items:
+            print(f"в листе {a.text} нет слотов с двумя вариантами и больше", file=sys.stderr)
+            return 2
+        st = build_page(items, a.out, title="Тексты — слепое сравнение", repeat=a.repeat, seed=a.seed, kind="text")
+        print(json.dumps(st, ensure_ascii=False))
+        return 0
+    if not a.results:
+        print("нужен RESULTS.jsonl или --text SHEET.md", file=sys.stderr)
+        return 2
     rows = jl_read(a.results)
     tests = set(a.tests.split(",")) if a.tests else None
     by = {}
@@ -627,6 +684,7 @@ textarea{width:100%;min-height:38px;margin-top:8px;font:inherit;color:inherit;ba
 #zoom img{max-width:100vw;max-height:100vh;image-rendering:auto}#zoom .lab{position:fixed;top:10px;left:14px;color:#fff;font-weight:700}
 footer{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;padding:10px 16px;background:var(--panel);border-top:1px solid var(--line)}
 .done{padding:40px 16px;text-align:center}.warn{color:#ffb547}
+.card{background:var(--bg);border-radius:6px;padding:14px 16px;font-size:17px;line-height:1.5;white-space:pre-wrap;min-height:64px}
 @media (max-width:760px){.pair{grid-template-columns:1fr}.shots.n2{grid-template-columns:1fr}}
 </style></head><body>
 <header><h1>__TITLE__</h1><span id="prog"></span><div class="bar"><i id="barfill" style="width:0"></i></div><div class="grow"></div>
@@ -646,10 +704,10 @@ try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.votes)S=Object
 const $=id=>document.getElementById(id);let shown=0,zoomSide='A';
 function save(){S.updated=new Date().toISOString();try{localStorage.setItem(KEY,JSON.stringify(S));$('saved').textContent='сохранено в браузере'}catch(e){$('saved').textContent='браузер не сохраняет — скачайте JSON'}}
 function applyUI(){document.documentElement.dataset.bg=S.bg;$('bgsel').value=S.bg;$('mockbtn').setAttribute('aria-pressed',S.mock);$('voter').value=S.voter||''}
-function answered(){return Object.values(S.votes).filter(v=>v.slot&&v.natural).length}
+function answered(){return Object.values(S.votes).filter(v=>D.questions.every(q=>v[q.id])).length}
 function prog(){const n=D.pairs.length,a=answered();$('prog').textContent=`${Math.min(S.i+1,n)} / ${n} · готово ${a}`;$('barfill').style.width=(100*a/n)+'%'}
 function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-function shots(p,s){const f=p[s];return `<div class="shots ${f.length>1?'n2':''}">`+f.map(src=>`<div class="shot">${tz(p)}<img src="${src}" alt="Вариант ${s}" loading="eager" data-side="${s}"></div>`).join('')+'</div>'}
+function shots(p,s){if(D.kind==='text')return `<div class="card">${esc(p[s][0])}</div>`;const f=p[s];return `<div class="shots ${f.length>1?'n2':''}">`+f.map(src=>`<div class="shot">${tz(p)}<img src="${src}" alt="Вариант ${s}" loading="eager" data-side="${s}"></div>`).join('')+'</div>'}
 function tz(p){if(!p.tz)return'';const[x0,y0,x1,y1]=p.tz;const c=p.copy||[];const col='#1E1E1E';
  return `<div class="tz" style="left:${x0*100}%;top:${y0*100}%;width:${(x1-x0)*100}%;height:${(y1-y0)*100}%;color:${col}"><b>${esc(c[0]||'Заголовок страницы')}</b><span>${esc(c[1]||'')}</span></div>`}
 function render(){prog();const m=$('main');if(S.i>=D.pairs.length){m.innerHTML=`<div class="done"><h2>Готово: ${answered()} из ${D.pairs.length}</h2><p>Нажмите «Скачать голоса (JSON)» и отправьте файл. Можно вернуться кнопкой «Назад».</p>${answered()<D.pairs.length?'<p class="warn">Есть неотвеченные пары — они будут пропущены при подсчёте.</p>':''}</div>`;return}
@@ -659,7 +717,7 @@ function render(){prog();const m=$('main');if(S.i>=D.pairs.length){m.innerHTML=`
  D.questions.map((q,k)=>`<div class="q ${k>0&&!v[D.questions[k-1].id]?'dim':''}" data-q="${q.id}"><p>${k+1}. ${esc(q.text)}</p><div class="opts">`+
   q.options.map(o=>`<button data-o="${o}" aria-pressed="${v[q.id]===o}">${o==='A'?'A лучше':o==='B'?'B лучше':o==='='?'Равно':'Оба не годятся'}</button>`).join('')+'</div></div>').join('')+
  `<textarea id="cm" placeholder="Почему (необязательно): дефект, «пластик», лишний текст…">${esc(v.comment||'')}</textarea>
- <p class="hint">Клавиши: ← A, → B, ↓ равно, X — оба не годятся (вопрос 1); затем те же для вопроса 2. Пробел — увеличить (A/B переключает Tab), M — макет с текстом, Backspace — назад.</p>`;
+ <p class="hint">${esc(D.hint||'')}</p>`;
  m.querySelectorAll('.q button').forEach(b=>b.onclick=()=>answer(b.closest('.q').dataset.q,b.dataset.o));
  m.querySelectorAll('.shot img').forEach(im=>im.onclick=()=>openZoom(im.dataset.side,im.src));
  $('cm').oninput=e=>{(S.votes[p.id]=S.votes[p.id]||{}).comment=e.target.value;save()}}
@@ -672,7 +730,7 @@ document.addEventListener('keydown',e=>{if(e.target.tagName==='TEXTAREA'||e.targ
  if(z){if(e.key==='Escape'||e.key===' '){$('zoom').classList.remove('on');e.preventDefault()}if(e.key==='Tab'){e.preventDefault();openZoom(zoomSide==='A'?'B':'A')}return}
  const q=cur();if(!q)return;const map={ArrowLeft:'A',ArrowRight:'B',ArrowDown:'=',x:'0',X:'0',ч:'0',Ч:'0'};
  if(map[e.key]&&q.options.includes(map[e.key])){e.preventDefault();answer(q.id,map[e.key])}
- else if(e.key===' '){e.preventDefault();openZoom('A')}else if(e.key==='m'||e.key==='M'||e.key==='ь'){toggleMock()}
+ else if(e.key===' '&&D.kind!=='text'){e.preventDefault();openZoom('A')}else if((e.key==='m'||e.key==='M'||e.key==='ь')&&D.kind!=='text'){toggleMock()}
  else if(e.key==='Backspace'){e.preventDefault();S.i=Math.max(0,S.i-1);save();render()}});
 function toggleMock(){S.mock=!S.mock;save();applyUI();render()}
 $('mockbtn').onclick=toggleMock;$('bgsel').onchange=e=>{S.bg=e.target.value;save();applyUI()};$('voter').oninput=e=>{S.voter=e.target.value;save()};$('voter').onkeydown=e=>{if(e.key==='Enter'||e.key==='Escape')e.target.blur()};
@@ -682,7 +740,7 @@ $('export').onclick=()=>{const b=new Blob([payload()],{type:'application/json'})
  a.download=`votes-${(S.voter||'anon').replace(/\W+/g,'_')}-${new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')}.json`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)};
 $('copy').onclick=async()=>{try{await navigator.clipboard.writeText(payload());$('saved').textContent='скопировано'}catch(e){$('saved').textContent='копирование недоступно — скачайте JSON'}};
 $('imp').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const j=JSON.parse(await f.text());S.votes=Object.assign(S.votes,j.votes||{});save();render()}catch(err){alert('Не JSON голосов')}};
-applyUI();render()})();
+if(D.kind==='text')$('mockbtn').hidden=true;applyUI();render()})();
 </script></body></html>
 """
 
@@ -731,7 +789,7 @@ def tally(votes_files, key):
         for pid, v in (V.get("votes") or {}).items():
             if pid in K["pairs"]:
                 allv.append((V.get("voter"), pid, v))
-    for q in ("slot", "natural"):
+    for q in K.get("questions") or ("slot", "natural"):
         games, per_test, posA, nonTie = [], {}, 0, 0
         for voter, pid, v in allv:
             kp = K["pairs"][pid]
@@ -780,6 +838,18 @@ def tally(votes_files, key):
     res["gold"] = {"correct": g_ok, "total": g_n}
     idn = [v.get("slot") for vo, pid, v in allv if K["pairs"][pid].get("identical") and v.get("slot")]
     res["identical"] = {"tie_or_both_bad": sum(o in ("=", "0") for o in idn), "total": len(idn)}
+    if K.get("kind") == "text":
+        sel: dict = {}
+        for vo, pid, v in allv:
+            kp = K["pairs"][pid]
+            if kp.get("gold") or kp.get("repeat_of") or kp.get("identical"):
+                continue
+            wins = sel.setdefault(kp["group"], {kp["A"]["model"]: 0, kp["B"]["model"]: 0})
+            wins.setdefault(kp["A"]["model"], 0)
+            wins.setdefault(kp["B"]["model"], 0)
+            if v.get("slot") in ("A", "B"):
+                wins[kp[v["slot"]]["model"]] += 1
+        res["selection"] = {g: dict(sorted(w.items())) for g, w in sorted(sel.items())}
     return res
 
 
@@ -796,6 +866,9 @@ def tally_md(r):
           f"- Контрольные пары (размытая копия должна проиграть): {r['gold']}.",
           f"- Одинаковая картинка с обеих сторон (ожидается «равно»/«оба не годятся»): {r.get('identical')}.",
           f"- «Оба не годятся» по моделям: {r['both_bad']}."]
+    if r.get("selection"):
+        L += ["", "## Победы вариантов по слотам (для copydeck.py apply-selection)", ""]
+        L += [f"- `{g}`: " + ", ".join(f"{lab} — {n}" for lab, n in w.items()) for g, w in r["selection"].items()]
     return "\n".join(L) + "\n"
 
 
@@ -805,6 +878,13 @@ def cmd_tally(a):
     if a.out:
         Path(a.out).write_text(md, encoding="utf-8")
         Path(a.out).with_suffix(".json").write_text(json.dumps(r, ensure_ascii=False, indent=1), encoding="utf-8")
+    if a.selection:
+        if "selection" not in r:
+            print("--selection — только для текстовой страницы (page --text)", file=sys.stderr)
+            return 2
+        import yaml
+        Path(a.selection).write_text("# победы меток по слоту — copydeck.py apply-selection --votes (method human-pairwise)\n"
+                                     + yaml.safe_dump(r["selection"], allow_unicode=True, sort_keys=False), encoding="utf-8")
     print(md)
     return 0
 
@@ -891,6 +971,51 @@ def cmd_selftest(a):
     check(f"Брэдли–Терри порядок x > y > z: {bt}", bt["x"] > bt["y"] > bt["z"])
     import numpy as np
     check("ΔE2000 эталон Шармы (пара 1) = 2,0425", abs(float(de2000(np.array([50.0, 2.6772, -79.7751]), np.array([50.0, 0.0, -82.7485]))) - 2.0425) < 1e-3)
+    # текстовые карточки: лист export-variants → страница слепых пар → голоса → победы меток для apply-selection
+    import shutil
+    import tempfile
+    tmp = Path(tempfile.mkdtemp(prefix="stand_text_"))
+    try:
+        sheet = ("# Слепой выбор вариантов\n\n## home/hero/h1 · headline\nКонтекст: что предлагаем\n\n"
+                 "- **A**: Ремонт квартир под ключ за 45 дней\n- **B**: Отремонтируем квартиру под ключ\n"
+                 "- **C**: Квартира под ключ — с гарантией 3 года\n\nВыбор: ___\n\n## home/hero/cta · cta-label\n\n"
+                 "- **A**: Позвать замерщика\n\nВыбор: ___\n")
+        (tmp / "sheet.md").write_text(sheet, encoding="utf-8")
+        (tmp / "key.yaml").write_text("home/hero/h1: {A: v2, B: v1, C: v3}\n", encoding="utf-8")
+        slots = parse_variants_sheet(sheet)
+        check("текст: лист export-variants разобран (слот с одним вариантом — не на странице)",
+              len(slots) == 1 and [lab for lab, _ in slots[0]["variants"]] == ["A", "B", "C"])
+        a = argparse.Namespace(text=str(tmp / "sheet.md"), text_key=str(tmp / "key.yaml"), out=str(tmp / "page"), repeat=0.5,
+                               seed=3, results=None)
+        import contextlib
+        with contextlib.redirect_stdout(io.StringIO()):
+            cmd_page(a)
+        html_ = (tmp / "page" / "index.html").read_text(encoding="utf-8")
+        K = json.loads((tmp / "page.key.json").read_text(encoding="utf-8"))
+        main_pairs = [kp for kp in K["pairs"].values() if not (kp.get("repeat_of") or kp.get("identical") or kp.get("gold"))]
+        check("текст: 3 варианта → 3 пары, повторы со сменой сторон, одинаковая пара; ключ — вне папки страницы",
+              len(main_pairs) == 3 and any(kp.get("repeat_of") for kp in K["pairs"].values())
+              and any(kp.get("identical") for kp in K["pairs"].values()) and not (tmp / "page" / "page.key.json").exists())
+        check("текст: карточки текста на странице, id вариантов и метки — только в ключе",
+              '"kind": "text"' in html_ and "Отремонтируем квартиру" in html_ and '"v2"' not in html_
+              and {kp["A"].get("variant") for kp in main_pairs} <= {"v1", "v2", "v3"})
+        votes = {}
+        for pid, kp in K["pairs"].items():
+            if kp.get("identical"):
+                votes[pid] = {"slot": "="}
+                continue
+            pref = sorted((kp["A"]["model"], kp["B"]["model"]), key=lambda m: {"C": 0, "A": 1, "B": 2}[m])[0]
+            votes[pid] = {"slot": "A" if kp["A"]["model"] == pref else "B"}
+        (tmp / "votes.json").write_text(json.dumps({"voter": "заказчик", "votes": votes}), encoding="utf-8")
+        a = argparse.Namespace(votes=[str(tmp / "votes.json")], key=str(tmp / "page.key.json"), out=None,
+                               selection=str(tmp / "selection.yaml"))
+        with contextlib.redirect_stdout(io.StringIO()):
+            cmd_tally(a)
+        import yaml
+        sel = yaml.safe_load((tmp / "selection.yaml").read_text(encoding="utf-8"))
+        check(f"текст: победы меток по слоту для apply-selection — {sel}", sel == {"home/hero/h1": {"A": 1, "B": 0, "C": 2}})
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
     return 0 if ok else 1
 
 
@@ -907,9 +1032,12 @@ def main(argv=None):
     c.add_argument("--any-agent", action="store_true")
     m = sub.add_parser("metrics"); m.add_argument("results"); m.add_argument("--transcripts"); m.add_argument("--out", default="metrics.jsonl")
     s = sub.add_parser("sheet"); s.add_argument("results"); s.add_argument("--out", required=True); s.add_argument("--blind", action="store_true")
-    p = sub.add_parser("page"); p.add_argument("results"); p.add_argument("--out", required=True); p.add_argument("--tests")
+    p = sub.add_parser("page"); p.add_argument("results", nargs="?"); p.add_argument("--out", required=True); p.add_argument("--tests")
+    p.add_argument("--text", help="лист copydeck.py export-variants: страница текстовых карточек")
+    p.add_argument("--text-key", help="ключ меток export-variants (id вариантов — в ключ страницы)")
     p.add_argument("--repeat", type=float, default=0.1); p.add_argument("--seed", type=int, default=7)
     t = sub.add_parser("tally"); t.add_argument("votes", nargs="+"); t.add_argument("--key", required=True); t.add_argument("--out")
+    t.add_argument("--selection", help="текстовая страница: YAML побед меток по слоту для copydeck.py apply-selection --votes")
     ms = sub.add_parser("ministand"); ms.add_argument("--model", required=True); ms.add_argument("--params"); ms.add_argument("--vs"); ms.add_argument("--out")
     sub.add_parser("selftest")
     a = ap.parse_args(argv)

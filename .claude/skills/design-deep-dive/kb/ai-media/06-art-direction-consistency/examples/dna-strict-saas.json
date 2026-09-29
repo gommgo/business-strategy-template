@@ -262,16 +262,52 @@
     "accents_per_image": 2,
     "detail_min_px": 4,
     "saturation_offset": "на 1–2 шага ниже UI",
-    "dark_theme": "two-files"
+    "dark_theme": "two-files",
+    "places": [
+      {
+        "place": "empty-state",
+        "size_px": 160
+      },
+      {
+        "place": "error",
+        "size_px": 240
+      },
+      {
+        "place": "onboarding",
+        "size_px": 200
+      }
+    ],
+    "format": "svg",
+    "recolor": {
+      "neutrals": "css-variables",
+      "accents": "fixed"
+    },
+    "metaphors": [
+      {
+        "id": "empty-orders",
+        "place": "empty-state",
+        "meaning": "пустой список заказов",
+        "metaphor": "коробка с открытой крышкой"
+      },
+      {
+        "id": "no-access",
+        "place": "error",
+        "meaning": "нет доступа",
+        "metaphor": "закрытая дверь"
+      },
+      {
+        "id": "not-found",
+        "place": "error",
+        "meaning": "страница не найдена (404)",
+        "metaphor": "карта с оторванным углом"
+      }
+    ]
   },
   "icon3d": {
     "material": "matte light blue-grey ceramic #E3E8EE with one indigo-blue #5469D4 part",
     "camera": "3/4 view from 35 degrees above, 85mm",
-    "key_light": "soft key from the upper left at 45 degrees, fill 20 percent",
-    "fill_pct": 20,
-    "contact_shadow_alpha_max": 0.12,
-    "margin_pct": 8,
-    "accent_share_max": 0.15
+    "accent_share_max": 0.15,
+    "series_passport": "blender/06-materials-lighting-render/02-lighting-camera-composition.md §6"
   },
   "abstract": {
     "policy": "code-first",

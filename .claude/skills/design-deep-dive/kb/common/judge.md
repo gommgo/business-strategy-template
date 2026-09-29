@@ -181,9 +181,9 @@ Opus-судья тянется к варианту, где «больше»: д�
 | только предфильтр | согласие не ниже `prefilter_agreement_min` | отсеивать явный брак; решение — человек |
 | сортировать | согласие не ниже `trust_agreement_min`, нижняя граница Уилсона не ниже порога | сортировать варианты перед человеком (§5) |
 
-Для поиска дефектов вместо согласия меряют F1 против разметки человека. Ключи `min_pairs`, `prefilter_agreement_min`,
-`trust_agreement_min`, `swap_consistency_min`, `position_bias_max` — в группе `judge`; нижняя граница Уилсона и порог F1
-записаны в блоке `calibration` рубрик text и site.
+Для поиска дефектов вместо согласия меряют F1 против разметки человека. Ключи группы `judge`: `min_pairs`,
+`prefilter_agreement_min`, `trust_agreement_min`, `wilson_low_min` (нижняя граница Уилсона), `f1_min`,
+`swap_consistency_min`, `position_bias_max`, `unsure_share_max` и `disagree_sessions` (когда пересчитывать).
 
 Калибровочный набор — `assets/calibration/index.yaml`: сорок своих кадров, поровну «уровень» и «типичный брак», из
 баз creative, ui, ai-media и blender. У кадра — что он иллюстрирует, сила оценки (ворота, метрика, голос вслепую,

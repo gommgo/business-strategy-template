@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ai-media-research.local/06-art-direction-consistency/visual-dna.schema.json",
   "title": "Visual DNA passport (паспорт визуала бренда) v0.1",
-  "description": "Числа и правила изображений бренда: из токенов и стиля UI (derived_from_ui), эталонов (references) и VLM-описания (provenance). Куда идёт каждое поле: → промт (style_blocks, palette.image_palette, light, camera, composition, subject_matter, materials, exclusions, references); → постобработка (grade, post); → приёмка (acceptance). Агент F, волна 2, 23.09.2026. Проверка: python3 ../../scripts/ai-media/vlm_to_dna.py validate FILE. Описание полей: 06-art-direction-consistency/01-visual-dna-from-ui.md.",
+  "description": "Числа и правила изображений бренда: из токенов и стиля UI (derived_from_ui), эталонов (references), разбора сетки брендовых фото сессией Opus (provenance) или арт-дирекции сайта (provenance.art_direction). Куда идёт каждое поле: → промт (style_blocks, palette.image_palette, light, camera, composition, subject_matter, materials, exclusions, references); → постобработка (grade, post); → приёмка (acceptance); иллюстрации — поля системы ui 07/02 и список метафор (его читают экраны кабинета); 3D-серия — материал и доля акцента здесь, камера и свет — паспорт 3D-серии blender 06/02 §6. Проверка: scripts/ai-media/vlm_to_dna.py validate FILE. Описание полей: 06-art-direction-consistency/01-visual-dna-from-ui.md.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -638,7 +638,7 @@
     "illustration": {
       "type": "object",
       "additionalProperties": false,
-      "description": "2D-иллюстрации и spot-картинки (ui 07/02 §2–§3).",
+      "description": "2D-иллюстрации и spot-картинки: облик (ui 07/02 §2) и поля системы — места и размеры, формат, перекраска, список метафор (паспорт системы иллюстраций ui 07/02 §3). Экраны кабинета называют метафору пустого состояния по id из списка (`illustration=` у ui:EmptyState).",
       "properties": {
         "medium": {
           "enum": [
@@ -718,42 +718,130 @@
             "css-variables",
             "dim"
           ]
+        },
+        "places": {
+          "type": "array",
+          "maxItems": 8,
+          "description": "Места иллюстраций в продукте и размер показа (ui 07/02 §1.1); рабочие экраны, шапка и декоративный фон — не места.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "place",
+              "size_px"
+            ],
+            "properties": {
+              "place": {
+                "enum": [
+                  "empty-state",
+                  "onboarding",
+                  "error",
+                  "success",
+                  "announcement",
+                  "task-card"
+                ],
+                "description": "пустое состояние, онбординг, ошибка (404, 500, нет доступа), успех, анонс, карточка задачи"
+              },
+              "size_px": {
+                "type": "integer",
+                "minimum": 16,
+                "maximum": 640
+              }
+            }
+          }
+        },
+        "format": {
+          "enum": [
+            "svg",
+            "webp",
+            "avif",
+            "png"
+          ],
+          "description": "Формат файла иллюстрации (ui 07/02 §2.9); вес — порог svg.illustration_kb_max ai-media 11 thresholds.yaml."
+        },
+        "recolor": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Перекраска под тему и бренд (ui 07/02 §3 п. 10).",
+          "properties": {
+            "neutrals": {
+              "enum": [
+                "css-variables",
+                "fixed"
+              ]
+            },
+            "accents": {
+              "enum": [
+                "css-variables",
+                "fixed"
+              ]
+            }
+          }
+        },
+        "metaphors": {
+          "type": "array",
+          "maxItems": 40,
+          "description": "Список метафор: одна картинка на смысл (ui 07/02 §1.4, §3 п. 12). id — значение атрибута illustration у ui:EmptyState экранов кабинета.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "meaning",
+              "metaphor"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+              },
+              "place": {
+                "enum": [
+                  "empty-state",
+                  "onboarding",
+                  "error",
+                  "success",
+                  "announcement",
+                  "task-card"
+                ]
+              },
+              "meaning": {
+                "type": "string",
+                "minLength": 3,
+                "description": "Смысл: какая пустота или событие (пустой список заказов, нет доступа)."
+              },
+              "metaphor": {
+                "type": "string",
+                "minLength": 3,
+                "description": "Что нарисовано — один концепт (коробка с открытой крышкой)."
+              }
+            }
+          }
         }
       }
     },
     "icon3d": {
       "type": "object",
       "additionalProperties": false,
-      "description": "3D-иконки и объекты (ui 12/01 §6.2; F-07 «кубик материала»).",
+      "description": "3D-иконки и объекты серии (ui 12/01 §6.2): поля бренда — материал и доля акцента, цвет среды — palette.env_color. Камера, свет, поля кадра и контактная тень — паспорт 3D-серии blender 06/02 §6 (поле series_passport): один паспорт серии на рендеры Blender и промты генерации.",
       "properties": {
         "material": {
-          "type": "string"
+          "type": "string",
+          "description": "Материальный язык серии словами промта: материал, отделка, акцентная деталь."
         },
         "camera": {
-          "type": "string"
-        },
-        "key_light": {
-          "type": "string"
-        },
-        "fill_pct": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 100
-        },
-        "contact_shadow_alpha_max": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
-        },
-        "margin_pct": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 30
+          "type": "string",
+          "description": "Ракурс словами промта генерации; числа ракурса — паспорт 3D-серии (series_passport)."
         },
         "accent_share_max": {
           "type": "number",
           "minimum": 0,
           "maximum": 1
+        },
+        "series_passport": {
+          "type": "string",
+          "minLength": 3,
+          "description": "Паспорт 3D-серии: путь к файлу паспорта серии проекта (рядом со скриптом Blender) или адрес канона «blender/06-materials-lighting-render/02-lighting-camera-composition.md §6». Оттуда — камера, свет key/fill/rim, мир, вид, фон с ловцом теней и поля кадра по типу (blender 11/05 §5, CAM-02)."
         }
       }
     },
@@ -782,8 +870,10 @@
           "enum": [
             "still",
             "slow",
-            "medium"
-          ]
+            "medium",
+            "fast"
+          ],
+          "description": "Темп движения в кадре; fast — сюжетное видео кампании L2. Привязка видео к прокрутке — режим подачи (motion-spec creative), не темп."
         },
         "camera": {
           "enum": [
@@ -1086,17 +1176,24 @@
             "vlm",
             "script",
             "mixed"
-          ]
+          ],
+          "description": "vlm — разбор сетки брендовых фото сессией Opus (vlm_to_dna.py build и parse); script — вывод из токенов; human — вручную; mixed — сочетание."
+        },
+        "art_direction": {
+          "type": "string",
+          "description": "Арт-дирекция, из которой выведен паспорт сайта (handoff.visual_dna, creative 01/02 §4.1): путь к design/<surface>/art-direction.json."
         },
         "vlm_model": {
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "description": "Модель сессии разбора (из описания агента design-judge)."
         },
         "runs": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Сколько прогонов разбора вошло в паспорт (сверка — vlm_to_dna.py compare)."
         },
         "measured": {
           "type": "object",
@@ -1104,7 +1201,7 @@
         },
         "vlm_raw": {
           "type": "object",
-          "description": "Исходный ответ VLM после разбора (для сверки прогонов)."
+          "description": "Бриф разбора после чтения ответа (для сверки прогонов)."
         },
         "notes": {
           "type": "string"

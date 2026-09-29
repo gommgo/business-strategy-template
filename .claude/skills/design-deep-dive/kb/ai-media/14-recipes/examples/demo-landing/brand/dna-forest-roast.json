@@ -244,11 +244,8 @@
   "icon3d": {
     "material": "matte glazed ceramic in warm off-white with one deep forest-green part",
     "camera": "3/4 view from 30 degrees above, 50mm",
-    "key_light": "soft key from the upper left at 45 degrees, fill 20 percent",
-    "fill_pct": 20,
-    "contact_shadow_alpha_max": 0.15,
-    "margin_pct": 8,
-    "accent_share_max": 0.15
+    "accent_share_max": 0.15,
+    "series_passport": "blender/06-materials-lighting-render/02-lighting-camera-composition.md §6"
   },
   "abstract": {
     "policy": "code-first"

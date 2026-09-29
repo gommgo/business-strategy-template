@@ -1,7 +1,7 @@
 path	kind	smoke	xfail
 scripts/ai-media/README.md	data	data	
 scripts/ai-media/alpha_check.py	utility	help	
-scripts/ai-media/asset_audit.py	utility	help	
+scripts/ai-media/asset_audit.py	utility	help; run: selftest	
 scripts/ai-media/asset_inventory.py	utility	help; run: --selftest	
 scripts/ai-media/avif_pick.sh	utility	compile	
 scripts/ai-media/channel_diff.py	step	compile	
@@ -49,5 +49,5 @@ scripts/ai-media/text_zone.py	module	import-only
 scripts/ai-media/tile_check.py	utility	help	
 scripts/ai-media/validate_recipes.py	step	compile	
 scripts/ai-media/video_loop_check.py	utility	help; run: selftest	
-scripts/ai-media/vlm_to_dna.py	utility	help	
+scripts/ai-media/vlm_to_dna.py	utility	help; run: selftest	
 scripts/ai-media/vm_sheet.py	step	help	

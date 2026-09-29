@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""mp_client.py — клиент каналов фазы 5 вне Media API polza: RouterAI, Gen-API, polza-chat, polza-images.
+"""mp_client.py — клиент каналов генерации вне Media API polza: RouterAI, Gen-API, polza-chat, polza-images.
 
-Агент B2, волна 3, 2026-09-23. Python 3.13, только стандартная библиотека (+ polza_catalog.py рядом: снимок каталога
-polza и калькулятор ступеней). Образец и совместимость — polza.py: сухой прогон по умолчанию, трата только с --live,
-оценка цены до отправки, лимиты, опрос, немедленное скачивание, паспорт рядом с файлом, общий журнал затрат
-99-raw/experiments/_ledger.jsonl (поле channel; события polza-chat и polza-images считаются в бюджет polza вместе с
-polza.py). Проверен на локальном макете 99-raw/experiments/B2/01-mock, НЕ на настоящих каналах (ключей нет).
+Python 3.13, только стандартная библиотека (+ polza_catalog.py рядом: снимок каталога polza и калькулятор ступеней).
+Образец и совместимость — polza.py: сухой прогон по умолчанию, трата только с --live, оценка цены до отправки, лимиты,
+опрос, немедленное скачивание, паспорт рядом с файлом, общий журнал затрат (поле channel; события polza-chat и
+polza-images считаются в бюджет polza вместе с polza.py). Каналы — для генерации картинок, видео и SVG по утверждённому
+плану ассетов. Оценка по рубрике и разбор картинок — не задание канала: их делает отдельная сессия Opus (агент
+design-judge) по пакету asset_audit.py judge-jobs или vlm_to_dna.py build. 3D-генераторы Gen-API не вызываются: 3D —
+Blender и код (kb/blender/10-ai-3d-generation-assets/01-generators-landscape.md §1).
 
-Каналы (документация и правила — 02-providers-platforms/07-multichannel-client.md):
+Каналы (документация и правила — kb/ai-media/02-providers-platforms/07-multichannel-client.md):
   routerai      POST /api/v1/images — синхронно: data[].b64_json (+ media_type; SVG у векторных Recraft), usage.cost в ₽
                 POST /api/v1/videos — 202 {id, polling_url} → GET /api/v1/videos/{id} → unsigned_urls (скачивание с ключом)
                 POST /api/v1/chat/completions — диалоговые модели (картинки в message.images)
@@ -24,11 +26,11 @@ polza.py). Проверен на локальном макете 99-raw/experime
   download ID --channel C           дожать готовый результат: скачать файлы, паспорт, закрыть запись журнала
   ledger [--sum] [--channel C] [--agent A] [--tail N] [--json]   общий журнал затрат (и события polza.py)
   show MODEL --channel C            что клиент знает о модели или сети: параметры, значения, цены, passthrough
-  snapshot [--channel routerai|genapi|all]   свежий публичный каталог (бесплатный GET без ключа) в 99-raw/cache/<канал>/
+  snapshot [--channel routerai|genapi|all]   свежий публичный каталог (бесплатный GET без ключа) в $DDD_HOME/cache/ai-media/<канал>/
   selftest                          самопроверка без сети
 
-Задание (99-raw/phase5/README.md): {"channel": "routerai", "method": "POST", "path": "/api/v1/images", "body": {...},
-  "tag": "...", "agent": "G", "variant": 1, "max_rub": 10, "price_rub": 8.74, "notes": "гипотеза", "meta": {...}}.
+Задание: {"channel": "routerai", "method": "POST", "path": "/api/v1/images", "body": {...}, "tag": "...", "agent": "G",
+  "variant": 1, "max_rub": 10, "price_rub": 8.74, "notes": "гипотеза", "meta": {...}}.
 Файлы: .json (объект или массив заданий), .jsonl (строка — генерация); channel можно не писать, если он в имени файла
 (*.routerai.json, *.genapi.jsonl …). Локальные пути в полях картинок (относительно файла задания) уходят data:URI base64.
 Шаблоны: {{ИМЯ}} где угодно в теле и «<…>» в полях файлов — estimate предупреждает и берёт цену из price_rub, --live
@@ -39,13 +41,13 @@ polza.py). Проверен на локальном макете 99-raw/experime
 для нужного канала; базы ROUTERAI_BASE_URL (https://routerai.ru/api), GENAPI_BASE_URL (https://api.gen-api.ru/api),
 POLZA_BASE_URL (https://polza.ai/api, общий с polza.py); бюджеты ROUTERAI_BUDGET_TOTAL, GENAPI_BUDGET_TOTAL (по умолчанию
 0 — без явного лимита --live не тратит), POLZA_BUDGET_TOTAL (2000, общий с polza.py); MP_BUDGET_AGENT; MP_MAX_JOB (60 ₽
-на задание); журнал MP_LEDGER или POLZA_LEDGER (99-raw/experiments/_ledger.jsonl); MP_OUT_ROOT
-(99-raw/experiments/_mp/<агент>/<дата>/). Ключ никогда не печатается и не пишется; Authorization уходит только на
+на задание); журнал MP_LEDGER или POLZA_LEDGER ($DDD_HOME/out/ai-media/_ledger.jsonl); MP_OUT_ROOT
+($DDD_HOME/out/ai-media/_mp/<агент>/<дата>/). Ключ никогда не печатается и не пишется; Authorization уходит только на
 хост своего канала и не переносится при редиректе.
 
-Коды выхода (как у polza.py): 0 — успех; 1 — ошибка задания/проверки (в том числе незаполненный шаблон); 2 — отказ
-по бюджету или цене; 3 — таймаут опроса (дожать: download ID --channel C --live); 4 — генерация failed / error /
-expired / cancelled; 5 — HTTP-ошибка; 6 — ошибка скачивания.
+Коды выхода (как у polza.py): 0 — успех; 1 — ошибка задания/проверки (в том числе незаполненный шаблон, задание оценки,
+3D-сеть); 2 — отказ по бюджету или цене; 3 — таймаут опроса (дожать: download ID --channel C --live); 4 — генерация
+failed / error / expired / cancelled; 5 — HTTP-ошибка; 6 — ошибка скачивания.
 """
 from __future__ import annotations
 
@@ -76,16 +78,16 @@ from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOLS))
-sys.path.insert(0, str(TOOLS.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(TOOLS.parent / "lib"))  # scripts/lib: kbpaths
 import kbpaths  # noqa: E402
 import polza_catalog as pc  # noqa: E402
 
-VERSION = "mp_client.py 1.0 (2026-09-23)"
+VERSION = "mp_client.py 1.1"
 ROOT = pc.ROOT
 CACHE = kbpaths.cache("ai-media")
-DEFAULT_LEDGER = kbpaths.out("ai-media") / "_ledger.jsonl"  # перенос: журнал затрат — общий с polza
+DEFAULT_LEDGER = kbpaths.out("ai-media") / "_ledger.jsonl"  # журнал затрат — общий с polza.py
 DEFAULT_OUT_ROOT = kbpaths.out("ai-media", "_mp")
-P04 = kbpaths.data("ai-media")  # перенос: прайс Gen-API — scripts/ai-media/data/; routerai_models.json не переносится (Р76 п. 15)
+P04 = kbpaths.data("ai-media")  # прайс Gen-API — scripts/ai-media/data/; каталог RouterAI — снимок snapshot
 MAX_PARALLEL = 3
 EXIT_OK, EXIT_JOB, EXIT_BUDGET, EXIT_TIMEOUT, EXIT_FAILED, EXIT_HTTP, EXIT_DOWNLOAD = 0, 1, 2, 3, 4, 5, 6
 INLINE_WARN = 4 * 1024 * 1024        # больше — предупреждение (тело запроса тяжёлое)
@@ -246,7 +248,7 @@ def sniff(b: bytes) -> tuple[str, str]:
         return "video/webm", ".webm"
     if b[:4] == b"PK\x03\x04":
         return "application/zip", ".zip"
-    if b[:4] == b"glTF":                                  # GLB (выход 3D-сетей Gen-API; C, сессия 4 — было .bin)
+    if b[:4] == b"glTF":                                  # GLB (glTF 2.0, двоичный)
         return "model/gltf-binary", ".glb"
     head = b[:4096].lstrip(b"\xef\xbb\xbf \t\r\n").lower()
     if head.startswith(b"<svg") or (head.startswith((b"<?xml", b"<!doctype svg", b"<!--")) and b"<svg" in head):
@@ -320,7 +322,7 @@ def svg_info(data: bytes) -> dict:
 
 
 def glb_info(data: bytes) -> dict:
-    """Паспорт GLB: версия, генератор, расширения, меши, треугольники (по accessors), материалы, картинки (C, сессия 4)."""
+    """Паспорт GLB: версия, генератор, расширения, меши, треугольники (по accessors), материалы, картинки."""
     import struct
     try:
         ver, _total = struct.unpack("<II", data[4:12])
@@ -478,7 +480,7 @@ class RouterCatalog:
     def __init__(self, ref: str | None = None):
         path = latest_file("routerai", "api-v1-models.json", ref) or (P04 / "routerai_models.json")
         if not path.exists():
-            raise SystemExit("нет снимка каталога RouterAI: python3 99-raw/tools/mp_client.py snapshot --channel routerai")
+            raise SystemExit("нет снимка каталога RouterAI: python3 scripts/ai-media/mp_client.py snapshot --channel routerai")
         raw = json.loads(path.read_text(encoding="utf-8"))
         self.models = {m["id"]: m for m in (raw["data"] if isinstance(raw, dict) else raw)}
         self.path, self.fetched = path, snap_time(path)
@@ -535,7 +537,7 @@ class GenapiCatalog:
     def __init__(self, ref: str | None = None):
         path = latest_file("genapi", "networks-include-parameters.json", ref)
         if path is None:
-            raise SystemExit("нет снимка каталога Gen-API: python3 99-raw/tools/mp_client.py snapshot --channel genapi")
+            raise SystemExit("нет снимка каталога Gen-API: python3 scripts/ai-media/mp_client.py snapshot --channel genapi")
         raw = json.loads(path.read_text(encoding="utf-8"))
         self.nets = {n["slug"]: n for n in raw.get("data", [])}
         self.params = {s: {p["title"]: p for p in (n.get("parameters") or []) if p.get("title")}
@@ -1595,10 +1597,25 @@ def prep_chat(ctx: Ctx, prep: Prepared, body: dict):
 # ---------------------------------------------------------------------------------------------------------------
 
 GENAPI_EXPLICIT = {"recraft-v4": ("model", "pro")}
-# проверено 25.09.2026 (сессия 4, 99-raw/phase5/runs/3D/3D-G1.log): trellis отверг data:URI в url_or_file — HTTP 422
-# «Неверный тип. Параметр image_url должен быть file либо url» (без списания); рабочий путь — публичный URL
-GA_DATA_URI_WARN = ("локальный файл уйдёт data:URI — Gen-API (trellis, 25.09) отвечает 422 «должен быть file либо url»: "
-                    "выложите файл `polza.py upload ФАЙЛ --live` (TEMP 24 ч) и подставьте URL")          # ценовые параметры с дорогим умолчанием (pro=1 → 75 ₽)
+# Gen-API отвечает на data:URI в url_or_file HTTP 422 «Неверный тип. Параметр … должен быть file либо url» (без списания);
+# рабочий путь — публичный URL
+GA_DATA_URI_WARN = ("локальный файл уйдёт data:URI — Gen-API отвечает 422 «должен быть file либо url»: "
+                    "выложите файл `polza.py upload ФАЙЛ --live` (TEMP 24 ч) и подставьте URL")
+# 3D-генераторы (сетка, облако точек, анимация скелета) в работе скилла не вызываются: 3D — Blender и код
+# (kb/blender/10-ai-3d-generation-assets/01-generators-landscape.md §1); сеть узнаётся по имени и по форматам выхода каталога
+GA_3D_SLUG = re.compile(r"(^|-)3d(-|$)|^(trellis|tripo|rodin|meshy|hi3d|hunyuan-motion)")
+GA_3D_FORMATS = {"glb", "gltf", "obj", "stl", "fbx", "usdz", "ply"}
+
+
+def ga_is_3d(sl: str, params: dict) -> bool:
+    """Сеть Gen-API — 3D-генератор: по имени или по формату выхода (export_format, output_format) из каталога."""
+    if GA_3D_SLUG.search(sl or ""):
+        return True
+    for k in ("export_format", "output_format", "format"):
+        items = {str(x).lower() for x in ((params.get(k) or {}).get("items") or [])}
+        if items & GA_3D_FORMATS:
+            return True
+    return False
 
 
 def ga_type_check(prep: Prepared, name: str, spec: dict, v, body: dict):
@@ -1665,6 +1682,10 @@ def prep_genapi(ctx: Ctx, prep: Prepared, body: dict):
         return
     prep.minfo = net
     params = ctx.ga.params.get(sl) or {}
+    if ga_is_3d(sl, params):
+        prep.add("error", "path", f"{sl}: 3D-генератор — в работе скилла не вызывается; 3D — Blender и код "
+                                  f"(blender 10/01 §1), поворот и конфигуратор — модель из Blender")
+        return
     for k, v in list(body.items()):
         spec = params.get(k)
         if spec is None:
@@ -1702,58 +1723,12 @@ def prep_genapi(ctx: Ctx, prep: Prepared, body: dict):
     genapi_price(ctx, prep, sl, body, params, net)
 
 
-# Цены 3D-сетей Gen-API по параметрам: таблицы на страницах gen-api.ru/model/<slug> (Nuxt-данные, 25.09.2026;
-# 99-raw/experiments/3D/00-genapi-docs/*.html). `cost` каталога — минимальная ступень: hunyuan-3d 32 ₽ = base без покраски,
-# а с textured_mesh — 96 ₽ (проверено живым вызовом 3D-03 25.09, паспорт …54171175: usage_cost_rub 96). C, сессия 4.
-GA3D_SRC = "таблица цен страницы gen-api.ru/model/{sl} (25.09.2026)"
-
-
-def genapi_3d_price(sl: str, val) -> tuple[float, str] | None:
-    if sl in ("hunyuan-3d", "hunyuan-3d-multi-view"):
-        base = {"base": 32, "base-turbo": 28, "mini": 20, "mini-turbo": 16, "multi-view": 34, "multi-view-turbo": 30}
-        model = str(val("model") or ("base" if sl == "hunyuan-3d" else "multi-view"))
-        tex = bool(as_bool(val("textured_mesh")))
-        if model in base:
-            p = base[model] * (3 if tex else 1)
-            return float(p), f"{sl} {model}, {'с покраской ×3' if tex else 'без покраски'} = {fmt(p)} ₽"
-    if sl == "trellis-2":
-        res = int(num(val("resolution")) or 1024)
-        p = {512: 62.5, 1024: 75.0, 1536: 87.5}.get(res)
-        if p is not None:
-            return p, f"trellis-2 resolution {res} = {fmt(p)} ₽"
-    if sl == "tripo-3d":
-        img = bool(val("image_urls"))
-        tex = as_bool(val("texture"))
-        tex = True if tex is None else tex
-        hd = str(val("texture_quality") or "standard") == "detailed"
-        p = (50 if img else 25) if not tex else ((100 if img else 75) if hd else (75 if img else 50))
-        extra = []
-        if str(val("geometry_quality") or "standard") == "detailed":
-            p += 50
-            extra.append("детальная геометрия +50")
-        if as_bool(val("quad")):
-            p += 12.5
-            extra.append("quad +12,5")
-        return float(p), (f"tripo-3d {'Image' if img else 'Text'}-to-3D, "
-                          f"{'без текстур' if not tex else ('HD' if hd else 'Standard')}"
-                          + (f", {', '.join(extra)}" if extra else "") + f" = {fmt(p)} ₽")
-    return None
-
-
 def genapi_price(ctx: Ctx, prep: Prepared, sl: str, body: dict, params: dict, net: dict):
     e, W = prep.estimate, prep.estimate["warnings"]
     rows = genapi_table(ctx.ga.prices.get(sl))
 
     def val(k):
         return body[k] if k in body else (params.get(k) or {}).get("default")
-
-    p3 = genapi_3d_price(sl, val)
-    if p3 is not None:
-        e.update(rub=p3[0], rub_low=p3[0], rub_high=p3[0], formula=p3[1] + f" ({GA3D_SRC.format(sl=sl)})")
-        c = net.get("cost")
-        if isinstance(c, (int, float)) and c > 0 and abs(p3[0] - c) > 0.01:
-            W.append(f"cost каталога {fmt(c)} ₽ — минимальная ступень; по параметрам {fmt(p3[0])} ₽")
-        return
 
     n = int(num(val("num_images")) or 1) if "num_images" in params else 1
     src = f"прайс Gen-API ({ctx.ga.prices_src})"
@@ -1867,8 +1842,21 @@ def prep_pz_image(ctx: Ctx, prep: Prepared, body: dict):
 # Подготовка задания
 # ---------------------------------------------------------------------------------------------------------------
 
+def evaluation_job(job: dict) -> str | None:
+    """Задание оценки по рубрике (судья) — не задание канала: оценку делает отдельная сессия Opus по пакету. → причина."""
+    meta = job.get("meta") if isinstance(job.get("meta"), dict) else {}
+    if str(meta.get("judge") or "").lower() == "vlm" or meta.get("rubric"):
+        return ("оценка по рубрике — не задание канала: её делает отдельная сессия Opus (агент design-judge) по пакету "
+                "asset_audit.py judge-jobs, разбор — judge-parse")
+    return None
+
+
 def prepare(ctx: Ctx, job: dict) -> Prepared:
     prep = Prepared(job, ctx)
+    why = evaluation_job(job)
+    if why:
+        prep.add("error", "задание", why)
+        return prep
     if prep.channel not in CHANNELS:
         prep.add("error", "channel", f"{job.get('channel')!r}: нужен routerai | genapi | polza-chat | polza-images "
                                      f"(задания Media API polza — через polza.py)")
@@ -2865,15 +2853,20 @@ def cmd_selftest(ctx: Ctx, a):
     _glb_js += b" " * (-len(_glb_js) % 4)
     _glb = b"glTF" + (2).to_bytes(4, "little") + (20 + len(_glb_js)).to_bytes(4, "little") + \
         len(_glb_js).to_bytes(4, "little") + b"JSON" + _glb_js
-    ok("sniff GLB → .glb (выход 3D Gen-API)", sniff(_glb)[1] == ".glb")
+    ok("sniff GLB → .glb", sniff(_glb)[1] == ".glb")
     ok("паспорт GLB: 2 треуг., metallic 1.0 по умолчанию", glb_info(_glb).get("triangles") == 2 and
        glb_info(_glb)["materials"][0]["metallic"] == 1.0, glb_info(_glb))
-    _v = lambda d: (lambda k: d.get(k))  # noqa: E731
-    ok("цена 3D: hunyuan-3d base с покраской = 96 (живой вызов 25.09)",
-       genapi_3d_price("hunyuan-3d", _v({"model": "base", "textured_mesh": True}))[0] == 96)
-    ok("цена 3D: trellis-2 resolution 1024 = 75", genapi_3d_price("trellis-2", _v({"resolution": 1024}))[0] == 75)
-    ok("цена 3D: tripo-3d image Standard с текстурой = 75",
-       genapi_3d_price("tripo-3d", _v({"image_urls": ["x"], "texture": True, "texture_quality": "standard"}))[0] == 75)
+    ok("3D-сети Gen-API узнаются по имени: trellis-2, tripo-3d, hunyuan-3d, meshy-v7, rodin, hi3d-v3",
+       all(ga_is_3d(x, {}) for x in ("trellis-2", "tripo-3d", "hunyuan-3d", "hunyuan-3d-multi-view", "meshy-v7", "rodin", "hi3d-v3")))
+    ok("3D-сеть Gen-API узнаётся по формату выхода каталога (fbx, glb)",
+       ga_is_3d("new-mesh-net", {"output_format": {"items": ["fbx", "dict"]}}) and not ga_is_3d("flux-2", {"output_format": {"items": ["png"]}}))
+    ok("картиночные сети Gen-API — не 3D: flux-2, recraft-v4, hunyuan-image-v3",
+       not any(ga_is_3d(x, {}) for x in ("flux-2", "recraft-v4", "hunyuan-image-v3")))
+    p = prepare(ctx, {"channel": "polza-chat", "path": "/api/v1/chat/completions", "_dir": ".", "_file": "st", "_index": 1,
+                      "tag": "st", "max_rub": 1, "meta": {"judge": "vlm", "mode": "pairwise"},
+                      "body": {"model": "x", "messages": [{"role": "user", "content": "x"}]}})
+    ok("задание оценки по рубрике — ошибка задания (оценку делает сессия Opus по пакету)",
+       any(i["param"] == "задание" and "design-judge" in i["msg"] for i in p.errors), p.errors[:1])
     # 3. пути и база
     ok("api_path /api/v1/images → /v1/images", api_path("/api/v1/images") == "/v1/images")
     ok("api_path /v2/images/generations", api_path("v2/images/generations") == "/v2/images/generations")
@@ -2974,8 +2967,8 @@ def build_parser():
     common = argparse.ArgumentParser(add_help=False)
     g = common.add_argument_group("общие")
     g.add_argument("--live", action="store_true", help="реально отправлять запросы (иначе сухой прогон)")
-    g.add_argument("--ledger", help="журнал затрат (по умолчанию MP_LEDGER | POLZA_LEDGER | 99-raw/experiments/_ledger.jsonl)")
-    g.add_argument("--out", help="корень результатов (по умолчанию MP_OUT_ROOT | 99-raw/experiments/_mp)")
+    g.add_argument("--ledger", help="журнал затрат (по умолчанию MP_LEDGER | POLZA_LEDGER | $DDD_HOME/out/ai-media/_ledger.jsonl)")
+    g.add_argument("--out", help="корень результатов (по умолчанию MP_OUT_ROOT | $DDD_HOME/out/ai-media/_mp)")
     g.add_argument("--agent", help="агент по умолчанию для заданий без поля agent")
     g.add_argument("--budget-total", type=float, help="общий лимит ₽ каждого затронутого канала (иначе *_BUDGET_TOTAL)")
     g.add_argument("--budget-agent", type=float, help="лимит ₽ на агента в пределах канала (MP_BUDGET_AGENT)")
@@ -3001,7 +2994,7 @@ def build_parser():
     g.add_argument("--polza-base", help="база polza (POLZA_BASE_URL | https://polza.ai/api)")
     g.add_argument("--routerai-catalog", help="снимок каталога RouterAI (папка/файл; по умолчанию последний)")
     g.add_argument("--genapi-catalog", help="снимок каталога Gen-API (папка/файл; по умолчанию последний)")
-    g.add_argument("--polza-catalog", help="снимок каталога polza (имя папки в 99-raw/cache/polza; по умолчанию последний)")
+    g.add_argument("--polza-catalog", help="снимок каталога polza (имя папки в $DDD_HOME/cache/ai-media/polza; по умолчанию последний)")
     ap = argparse.ArgumentParser(prog="mp_client.py", description=__doc__.split("\n")[0], epilog=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     sp = ap.add_subparsers(dest="cmd", required=True)
@@ -3040,7 +3033,7 @@ def build_parser():
     s.set_defaults(fn=cmd_show)
     s = sp.add_parser("snapshot", parents=[common])
     s.add_argument("--channel", choices=("routerai", "genapi", "all"), default="all")
-    s.add_argument("--dest", help="корень для снимков (по умолчанию 99-raw/cache)")
+    s.add_argument("--dest", help="корень для снимков (по умолчанию $DDD_HOME/cache/ai-media)")
     s.set_defaults(fn=cmd_snapshot)
     s = sp.add_parser("selftest", parents=[common])
     s.set_defaults(fn=cmd_selftest)

@@ -263,11 +263,8 @@
   "icon3d": {
     "material": "matte ceramic in warm sand #E9DFCF with one park-green #2D7B48 part",
     "camera": "3/4 front view, 30 degrees above, 50mm",
-    "key_light": "soft key from the upper left at 45 degrees",
-    "fill_pct": 20,
-    "contact_shadow_alpha_max": 0.15,
-    "margin_pct": 8,
-    "accent_share_max": 0.15
+    "accent_share_max": 0.15,
+    "series_passport": "blender/06-materials-lighting-render/02-lighting-camera-composition.md §6"
   },
   "abstract": {
     "policy": "code-first",

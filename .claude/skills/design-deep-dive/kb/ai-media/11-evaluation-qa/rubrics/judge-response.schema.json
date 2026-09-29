@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "ai-media/11-evaluation-qa/rubrics/judge-response.schema.json",
-  "title": "Ответ VLM-судьи (asset-audit judge/1)",
-  "description": "Четыре режима судьи — checklist (атомарные вопросы брифа, DSG), defects (маркеры «сгенерированности» с обязательным «где»), pairwise (A/B/tie/both_bad по вопросам) и transcribe (дословная расшифровка текста — сверка с OCR, K-05). Формат «сразу вердикт» без рассуждения (GEditBench v2: у малых моделей рассуждение первым ухудшает точность). Подмножество, которое принимает structured output Gemini/OpenAI: object, required, enum, additionalProperties false. Агент K, 23.09.2026; разбор — ../../scripts/ai-media/asset_audit.py judge-parse.",
+  "title": "Ответ судьи (asset-audit judge/1)",
+  "description": "Ответ сессии судьи — агента design-judge по протоколу kb/common/judge.md — на задание пакета asset_audit.py judge-jobs. Режимы: checklist — вопросы брифа и рубрики «да / нет / не уверен / не применимо», у каждого «нет» — доказательство; defects — маркеры рубрики, «да» только с местом в кадре; pairwise — A, B, ничья или «оба не годятся» с причиной и местом; transcribe — дословная расшифровка текста кадра для сверки с OCR (судье не поручается: текст по буквам читают OCR и человек, judge.md §1). Находки — «что · где · правило · доказательство · наименьшая правка», не больше двенадцати за проход; серьёзность ставит не судья. Формат «сразу вердикт»: ответ — первая строка вида вызова и один блок JSON. Разбор — asset_audit.py judge-parse: «нет» без доказательства и «да» без места читаются как «не уверен», победитель пары без причины — как ничья.",
   "$defs": {
     "checklist_answer": {
       "type": "object",
@@ -30,8 +30,36 @@
                 "enum": [
                   "yes",
                   "no",
-                  "unsure"
+                  "unsure",
+                  "not_applicable"
                 ]
+              },
+              "evidence": {
+                "type": "string",
+                "description": "Цитата, место на кадре или id секции; обязательно у «no» — без него ответ читается как unsure"
+              }
+            }
+          }
+        },
+        "findings": {
+          "$ref": "#/$defs/findings"
+        },
+        "strengths": {
+          "type": "array",
+          "description": "Сильные стороны с местом — у макета не меньше двух (cd 06/04 §6): правка не должна сломать то, что работает",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "what",
+              "where"
+            ],
+            "properties": {
+              "what": {
+                "type": "string"
+              },
+              "where": {
+                "type": "string"
               }
             }
           }
@@ -54,8 +82,7 @@
             "required": [
               "code",
               "present",
-              "where",
-              "severity"
+              "where"
             ],
             "properties": {
               "code": {
@@ -74,16 +101,28 @@
                 "type": "string",
                 "description": "Короткое место в кадре («left hand», «top-right corner»); пусто, если no"
               },
+              "evidence": {
+                "type": "string",
+                "description": "Что видно в этом месте — доказательство «да»"
+              },
+              "fix": {
+                "type": "string",
+                "description": "Наименьшая правка, которая снимает дефект"
+              },
               "severity": {
                 "type": "string",
                 "enum": [
                   "none",
                   "minor",
                   "major"
-                ]
+                ],
+                "description": "Не заполняется: серьёзность ставит владелец проверки (judge.md §1); поле читается, если есть"
               }
             }
           }
+        },
+        "findings": {
+          "$ref": "#/$defs/findings"
         }
       }
     },
@@ -107,7 +146,7 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "slot, natural … — те же id, что на странице голосования stand_run.py"
+                "description": "Id вопроса задания: slot, natural … (те же, что на странице голосования stand_run.py) или id критерия рубрики"
               },
               "winner": {
                 "type": "string",
@@ -117,6 +156,14 @@
                   "tie",
                   "both_bad"
                 ]
+              },
+              "why": {
+                "type": "string",
+                "description": "Причина выбора — видимое различие по этому критерию; у ничьей — почему равны"
+              },
+              "where": {
+                "type": "string",
+                "description": "Место на кадре, где видно различие"
               }
             }
           }
@@ -141,6 +188,39 @@
           "type": "array",
           "description": "Строки текста как на картинке, без исправлений; пусто, если текста нет",
           "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "maxItems": 12,
+      "description": "Находки прохода вне перечня вопросов: что, где, правило (код или пункт рубрики), доказательство, наименьшая правка; не больше двенадцати (judge.md §3)",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "what",
+          "where",
+          "rule",
+          "evidence"
+        ],
+        "properties": {
+          "what": {
+            "type": "string"
+          },
+          "where": {
+            "type": "string"
+          },
+          "rule": {
+            "type": "string",
+            "description": "Код рубрики (IMG-M…, RUB-…) или пункт нормы — по нему находки прогонов сводятся вместе"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "fix": {
             "type": "string"
           }
         }

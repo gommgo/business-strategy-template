@@ -126,7 +126,9 @@ thresholds:
     ssimulacra2_min: {value: 70, status: calibrated, source: "H 08/04 §1.2: ≥ 70 — второстепенные, карточки, фоны секций"}
   budget:
     image:
-      hero_kb: {value: 150, status: calibrated, source: "A 01/01 §2: hero ≤ 150 КБ десктоп (≤ 80 КБ телефонный кадр)"}
+      hero_kb: {value: 150, status: calibrated, source: "A 01/01 §2: hero ≤ 150 КБ десктоп"}
+      hero_mobile_kb: {value: 80, status: calibrated,
+        source: "A 01/01 §7 (таблица бюджетов: hero-картинка, телефон ≤ 80 КБ) и выжимка п. 4 (свой кадр 4:5 или 9:16); позиция по замеру лидеров — 01/02 §4.3"}
       section_kb: {value: 120, status: calibrated, source: "A 01/01 §2: фичи ≤ 120 КБ на картинку"}
       product_kb: {value: 150, status: calibrated, source: "A 01/01 §2: галерея товара ≤ 150 КБ на кадр"}
       og_kb: {value: 300, status: calibrated, source: "A 01/01 §2.7"}
@@ -139,6 +141,14 @@ thresholds:
       source: "E-helper-judging «Рекомендации» п. 16: доверие к VLM при согласии ≥ 75–80 % с решающими голосами (GPT-4 ↔ эксперты Chatbot Arena 76–81 %)"}
     prefilter_agreement_min: {value: 0.7, status: position, source: "K: 70–80 % — только предфильтр грубого брака, решение за человеком"}
     min_pairs: {value: 20, status: calibrated, source: "E-helper-judging §12.2: 20–30 решающих голосов на пару хватает выбрать лидера; Уилсон 14/20 = [0,48; 0,86]"}
+    wilson_low_min: {value: 0.65, status: position,
+      source: "02-vlm-critic-and-rubrics.md выжимка п. 17 и §6 (E-helper «Рекомендации» п. 16): уровень «сортировать» — согласие ≥ trust_agreement_min и нижняя граница 95 % интервала Уилсона ≥ 0,65"}
+    f1_min: {value: 0.8, status: position,
+      source: "поиск дефектов меряют F1 против разметки человека (common/judge.md §6); 0,8 — text copy-rubric.yaml#calibration.f1_min, site site-rubric.json#calibration.f1_min (NN/g)"}
+    unsure_share_max: {value: 0.2, status: position,
+      source: "02-vlm-critic-and-rubrics.md §6.4: доля ответов «не уверен» выше 20 % — пересчитать калибровку (сигнал плохого вопроса, §2.1)"}
+    disagree_sessions: {value: 3, status: position,
+      source: "02-vlm-critic-and-rubrics.md §6.4: расхождение судьи и заказчика в 3 сессиях подряд — пересчитать калибровку; сессия расходится, если согласие в ней ниже prefilter_agreement_min"}
     swap_consistency_min: {value: 0.8, status: position, source: "Arena Bench (E-helper §2): два прогона со сменой сторон; D2-03: согласованность повторов ≥ 90 % ответов"}
     position_bias_max: {value: 0.15, status: position, source: "LMArena журнал 12.05.2026: перевес левой стороны → поправка; |доля A − 0,5| > 0,15 — судья смещён"}
 ocr_models:

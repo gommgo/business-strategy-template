@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""asset_audit.py — единая автоматическая приёмка ИИ-ассетов сайта (агент K, волна 3, 23.09.2026).
+"""asset_audit.py — автоматическая приёмка ИИ-ассетов сайта и пакет судьи по рубрике.
 
-Объединяет готовые проверки волн 1–2 вызовом и импортом, ничего в них не переписывая:
-  A/04 image_metrics.py (цвет, «HDR»), F/04 composition_metrics.py («средний вид»), F/02 text_zone.py (зона текста,
-  скрим, WCAG F83), F/06 series_metrics.py и split_grid.py (серия), stand_run.py (E: text_check, pHash, Уилсон, BT),
-  edit_check.py 0.2 и alpha_check.py (H), tile_check.py (H2), video_loop_check.py 0.2 (I), G/check_icons.py (venv-G),
-  mp_client.py (svg_info), vlm_to_dna.py (паспорт визуала: палитра, приёмка, запреты), polza/mp_client-паспорта,
-  exiftool / c2patool (или provenance_check.py агента L, если есть), OCR кириллицы RapidOCR + PP-OCRv5 eslav (venv-K).
-Пороги — 11-evaluation-qa/thresholds.yaml (у каждого — источник). Вход — файл, список или папка с паспортами.
-Выход — JSON-вердикт с кодами дефектов (asset-audit/1), Markdown-сводка и контактный лист для человека.
+Объединяет проверки соседних утилит вызовом и импортом, не переписывая их: image_metrics.py (цвет, «HDR»),
+composition_metrics.py («средний вид»), text_zone.py (зона текста, скрим, WCAG F83), series_metrics.py и split_grid.py
+(серия), stand_run.py (сверка строк, Уилсон), edit_check.py и alpha_check.py (правка, альфа), tile_check.py (текстура),
+video_loop_check.py (петли), check_icons.py (иконки), mp_client.py (сведения SVG), vlm_to_dna.py (паспорт визуала:
+палитра, приёмка, запреты), паспорта генераций polza.py и mp_client.py, провенанс (provenance_check.py, exiftool,
+c2patool), OCR кириллицы (RapidOCR + PP-OCRv5 eslav). Пороги — kb/ai-media/11-evaluation-qa/thresholds.yaml (у каждого —
+источник). Вход — файл, список или папка с паспортами. Выход — JSON-вердикт с кодами дефектов (asset-audit/1),
+Markdown-сводка и контактный лист для человека.
 
 Режимы (--mode; auto — по паспорту, коду задачи, альфе и расширению):
   image       фото, иллюстрация, фон, 3D-объект: размеры, цвет-слоп, композиция, зона текста, палитра, текст (OCR), провенанс
@@ -25,12 +25,24 @@
 
 Команды:
   audit PATH… [--mode M] [--out DIR] [--dna DNA.json] [--spec SPEC.json] [--expect "строка"]… [--orig O] [--mask M]
-        [--control C] [--ref-alpha GT] [--text-zone x0,y0,x1,y1] [--slot hero|section|product|icon|og] [--strict]
-  ocr IMG… [--lang ru|en] [--expect …]      OCR (venv-K под heavy.lock) + сверка со строками
+        [--control C] [--ref-alpha GT] [--text-zone x0,y0,x1,y1] [--slot hero|section|product|icon|og] [--stage web]
+        [--mobile] [--strict]
+  ocr IMG… [--lang ru|en] [--expect …]      OCR под блокировкой heavy + сверка со строками
   thresholds [--check]                       пороги с источниками; --check — у каждого есть source
-  judge-jobs / judge-parse / agree / calibrate — VLM-критик и калибровка по голосам заказчика (см. 11-evaluation-qa/02)
-  selftest                                   офлайн-проверки на синтетике (без OCR-модели — отдельный тест)
-Платных вызовов нет: judge-jobs только пишет задания .polza-chat.json (исполняет mp_client.py в фазе 5).
+  judge-jobs (--items F | --from-stand-page DIR | --calibration [--pairs ID,…]) [--rubric R] [--mode M] [--runs 3]
+             [--same-encoding] [--out DIR] [--name N]
+                                             пакет заданий судьи для отдельных сессий Opus (агент design-judge): кадры
+                                             вслепую, вопросы рубрики, формат ответа по judge-response.schema.json; оба
+                                             порядка пары и повторы — отдельные задания; ключ слепоты — рядом, вне пакета
+  judge-parse PACKAGE [--key K] [--answers DIR] [--out F]
+                                             ответы сессий → строки ответов и сводка: пара — оба порядка и большинство
+                                             прогонов, находка — не меньше чем в двух прогонах (kb/common/judge.md §5)
+  agree --answers ROWS.jsonl [--votes V.json…] [--key PAGE.key.json] [--labels L.jsonl]
+                                             согласие судьи с человеком: Уилсон, F1, повторы, позиция A, «не уверен»,
+                                             сессии подряд → уровень доверия (пороги — группа judge thresholds.yaml)
+  calibrate --audit A.json --labels L.jsonl --metric PATH   порог метрики по меткам человека (Юден, AUC)
+  selftest                                   офлайн-проверки на синтетике (tests/test_asset_audit.py без OCR)
+Моделей утилита не вызывает: оценку делает сессия Opus по пакету, код готовит пакет и разбирает ответы.
 """
 from __future__ import annotations
 
@@ -50,20 +62,20 @@ import tempfile
 import unicodedata
 from pathlib import Path
 
-VERSION = "0.1 (2026-09-23)"
+VERSION = "0.2"
 SCHEMA = "asset-audit/1"
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))  # scripts/lib: kbpaths
 import kbpaths  # noqa: E402
 ROOT = kbpaths.kb("ai-media")
 TOOLS = kbpaths.scripts("ai-media")
 EXP = ROOT / "99-raw" / "experiments"
-LOCKS = Path(kbpaths.lock_path("heavy", "ai-media")).parent  # перенос: $DDD_HOME/locks/ai-media/{heavy,browser,blender}.lock
+LOCKS = Path(kbpaths.lock_path("heavy", "ai-media")).parent  # $DDD_HOME/locks/ai-media/{heavy,browser,blender}.lock
 THRESHOLDS = ROOT / "11-evaluation-qa" / "thresholds.yaml"
 RUBRICS = ROOT / "11-evaluation-qa" / "rubrics"
-VENV_K = Path(kbpaths.python())  # перенос: venv-K (rapidocr) → Python окружения скилла
-VENV_G = Path(kbpaths.python())  # перенос: venv-G (cairosvg, svgelements)
+VENV_K = Path(kbpaths.python())  # Python окружения скилла: rapidocr для OCR
+VENV_G = Path(kbpaths.python())  # Python окружения скилла: cairosvg, svgelements
 OCR_MODELS = kbpaths.models("ocr")
-A04 = F02 = F04 = F05 = F06 = G_EXP = TOOLS  # перенос: модули опытов (Р54) — scripts/ai-media
+A04 = F02 = F04 = F05 = F06 = G_EXP = TOOLS  # модули проверок — рядом, в scripts/ai-media
 LUCIDE_REF = kbpaths.data("ai-media", "lucide-ref")
 EXIFTOOL = Path(kbpaths.which("exiftool"))
 C2PATOOL = Path(kbpaths.which("c2patool"))
@@ -164,7 +176,7 @@ def _ancestor_holds_lock(lock_name: str) -> bool:
     """Держит ли уже этот замок процесс-предок через flock(1) (`flock … heavy.lock python3 asset_audit.py …`).
 
     Повторный `flock` на тот же файл из дочернего процесса ждал бы родителя до таймаута — самоблокировка
-    (найдено агентом M, исправлено агентом X 24.09.2026). Только Linux (/proc); при любой ошибке — False.
+    — поэтому замок предка не берут повторно. Только Linux (/proc); при любой ошибке — False.
     """
     try:
         pid = os.getppid()
@@ -183,7 +195,7 @@ def _ancestor_holds_lock(lock_name: str) -> bool:
 
 
 def locked(cmd: list[str], lock: str = "heavy", wait: int = 1800) -> list[str]:
-    """Команда под flock из 99-raw/tools/.locks (heavy — модели, browser — Chromium, blender — Blender).
+    """Команда под flock из $DDD_HOME/locks/ai-media (heavy — модели, browser — Chromium, blender — Blender).
 
     Если замок уже держит процесс-предок (утилиту обернули во внешний `flock`), повторно не берём — иначе самоблокировка.
     """
@@ -315,12 +327,12 @@ class Report:
                 "errors": self.errors, "thresholds": {"file": self.th.doc.get("_path"), "sha": self.th.doc.get("_sha")}}
 
 
-# ================================================================ OCR (RapidOCR + PP-OCRv5, venv-K)
+# ================================================================ OCR (RapidOCR + PP-OCRv5, Python окружения скилла)
 
 OCR_SETS = {
-    # det — детектор строк, rec — распознаватель; модели: 99-raw/tools/models/ocr (sha256 — thresholds.yaml → ocr.models);
-    # «@» — модель из колеса rapidocr 3.9.2 (venv-K). Кириллица — только eslav/cyrillic PP-OCRv5 (у PP-OCRv6 её нет).
-    # K/01 (714 синтетических баннеров): ru = det PP-OCRv6 small + rec eslav — меньше всего ложного брака (3/72 чистых).
+    # det — детектор строк, rec — распознаватель; модели: $DDD_HOME/models/ocr (sha256 — thresholds.yaml → ocr_models);
+    # «@» — модель из колеса rapidocr 3.9.2. Кириллица — только eslav/cyrillic PP-OCRv5 (у PP-OCRv6 её нет).
+    # опыт OCR на 714 синтетических баннерах: ru = det PP-OCRv6 small + rec eslav — меньше всего ложного брака (3/72 чистых).
     "ru": ("@PP-OCRv6_det_small.onnx", "eslav_PP-OCRv5_rec_mobile.onnx"),
     "ru-v5det": ("ch_PP-OCRv5_det_mobile.onnx", "eslav_PP-OCRv5_rec_mobile.onnx"),
     "ru-cyrillic": ("@PP-OCRv6_det_small.onnx", "cyrillic_PP-OCRv5_rec_mobile.onnx"),
@@ -332,7 +344,7 @@ OCR_DET_LIMIT = (1600, "max")
 
 
 def _ocr_model_path(name: str) -> str:
-    if name.startswith("@"):      # модель из колеса rapidocr (venv-K)
+    if name.startswith("@"):      # модель из колеса rapidocr
         import rapidocr
         return str(Path(rapidocr.__file__).parent / "models" / name[1:])
     return str(OCR_MODELS / name)
@@ -385,8 +397,8 @@ def _load_rgb_pil(p):
 
 def ocr_worker(paths: list[str], lang: str = "ru", text_score: float = 0.3, relines: bool = True,
                det_limit: tuple = OCR_DET_LIMIT, sniff: bool = True) -> list[dict]:
-    """Выполняется в venv-K (rapidocr 3.9.2 + onnxruntime). Возвращает на каждую картинку строки, слова, время.
-    relines: слова одной строки склеиваются по рамке и строка распознаётся заново целиком (K/01: детектор PP-OCRv5 режет
+    """Выполняется в Python окружения скилла (rapidocr 3.9.2 + onnxruntime). Возвращает на каждую картинку строки, слова,
+    время. relines: слова одной строки склеиваются по рамке и строка распознаётся заново целиком (детектор PP-OCRv5 режет
     строку на перекрывающиеся слова, и буква на стыке читается дважды — «Весенняяр распродажа»)."""
     import time
     from rapidocr import RapidOCR
@@ -397,7 +409,7 @@ def ocr_worker(paths: list[str], lang: str = "ru", text_score: float = 0.3, reli
                            "EngineConfig.onnxruntime.intra_op_num_threads": 4})
     sn = None
     if sniff and lang.startswith("ru"):
-        # K/01: русская модель «исправляет» латиницу в кириллицу (DОСТАВКА → ДОСТАВКА: 5 из 5); английская по той же
+        # опыт OCR на 714 синтетических баннерах: русская модель «исправляет» латиницу в кириллицу (DОСТАВКА → ДОСТАВКА: 5 из 5); английская по той же
         # рамке читает «D» (5 из 5, ложных 1 из 144) — сверка в text_verdict (класс latin_suspect)
         sn = RapidOCR(params={"Global.log_level": "error", "Global.use_cls": False, "Global.text_score": 0.0,
                               "Det.model_path": _ocr_model_path(det), "Rec.model_path": _ocr_model_path(OCR_SNIFF_REC),
@@ -438,9 +450,9 @@ def ocr_worker(paths: list[str], lang: str = "ru", text_score: float = 0.3, reli
 
 
 def run_ocr(paths: list, lang: str = "ru", text_score: float = 0.3, timeout: int = 900) -> list[dict]:
-    """Из системного Python: OCR в venv-K под heavy.lock (одна загрузка моделей на пачку картинок)."""
+    """OCR отдельным процессом Python окружения скилла под heavy.lock (одна загрузка моделей на пачку картинок)."""
     if not VENV_K.exists():
-        return [{"file": str(p), "error": "нет venv-K (rapidocr) — см. 99-raw/tools/README.md, раздел asset_audit"} for p in paths]
+        return [{"file": str(p), "error": "нет Python окружения скилла с rapidocr — scripts/install.sh"} for p in paths]
     fg = free_gb()
     if fg is not None and fg < 1.0:
         return [{"file": str(p), "error": f"мало памяти ({fg:.1f} ГБ available) — OCR не запущен"} for p in paths]
@@ -464,9 +476,9 @@ SIMILAR_CYR = {frozenset(p) for p in (("и", "й"), ("ш", "щ"), ("б", "в"), 
 
 
 def norm_text(s: str, homoglyphs: bool = True, all_homoglyphs: bool = False) -> str:
-    """Нормализация E (stand_run.norm_line): NFC, тире и кавычки, пробелы; латинские двойники в русских словах → кириллица.
+    """Нормализация как stand_run.norm_line: NFC, тире и кавычки, пробелы; латинские двойники в русских словах → кириллица.
     all_homoglyphs — двойники → кириллица и в словах без кириллицы (однобуквенное «K» вместо «к»): только если в ожидаемой
-    строке нет латиницы (K/01: «Щедрые подарки K Новому году» — ложный брак без этого правила)."""
+    строке нет латиницы («Щедрые подарки K Новому году» — ложный брак без этого правила)."""
     sr = mod("stand_run")
     s = sr.norm_line(s, homoglyphs)
     if homoglyphs and all_homoglyphs:
@@ -563,10 +575,10 @@ def classify_ops(ops: list, exp: str) -> list[dict]:
 
 
 FAIL_CLASSES = {"omission", "doubling", "insertion", "substitution", "latin_substitute", "similar_cyr", "digit_confusion"}
-# Классы, которые OCR ловит почти без ложных тревог (K/01): при уверенном OCR и строке ≥ min_line_h — сразу брак;
+# Классы, которые OCR ловит почти без ложных тревог (опыт OCR на 714 синтетических баннерах): при уверенном OCR и строке ≥ min_line_h — сразу брак;
 # остальные расхождения — «покажи человеку» (кроп строки и дифф).
 ROBUST_CLASSES = {"omission", "doubling", "extra_text", "missing_line", "latin_substitute"}
-# «Латинский нюх»: пары, где английская модель надёжно видит латиницу, которую русская исправила (K/01: D 5/5 при 1/144
+# «Латинский нюх»: пары, где английская модель надёжно видит латиницу, которую русская исправила (опыт OCR на 714 синтетических баннерах: D 5/5 при 1/144
 # ложных, R 5/7 при 0/144, g 9/16 при 2/144); n, u, r — шумно (34, 8, 6 ложных из 144) — не используются.
 SNIFF_PAIRS = {"Д": "D", "д": "g", "Я": "R", "я": "R"}
 
@@ -611,7 +623,7 @@ def text_verdict(expected: list[str], transcript: str, case_sensitive: bool = Fa
                  extra_allowed: bool = False, lines_meta: list[dict] | None = None, th: Th | None = None,
                  allowed: list[str] | None = None) -> dict:
     """Сверка ожидаемых строк брифа с транскриптом картинки (OCR, VLM или человек).
-    Основа — stand_run.text_check агента E (двойники, латинские недвойники, лишние слова, ё); сверху — классы ошибок
+    Основа — stand_run.text_check (двойники, латинские недвойники, лишние слова, ё); сверху — классы ошибок
     по выравниванию (пропуск, удвоение, похожая буква, цифра), точность и полнота слов, GNED, минимальная высота строки."""
     sr = mod("stand_run")
     base = sr.text_check(expected, transcript) if expected else {"lines": [], "fake_latin": [], "extra_words": []}
@@ -631,7 +643,7 @@ def text_verdict(expected: list[str], transcript: str, case_sensitive: bool = Fa
                       "match": Tc[j0:j1], "errors": cls if found else [],
                       "classes": sorted({c["class"] for c in cls}) if found else ["missing_line"]})
     # лишний текст: слова транскрипта вне найденных окон (WeGenBench: точность — «нет лишнего»); считаются только буквы
-    # и цифры вне окон — висящая точка или кавычка от JPEG-шума не «лишнее слово» (K/01: «булок.» — ложный брак)
+    # и цифры вне окон — висящая точка или кавычка от JPEG-шума не «лишнее слово» («булок.» — ложный брак)
     extra, cur, start = [], "", 0
     for j, ch in enumerate(Tc + " "):
         if ch == " ":
@@ -850,15 +862,18 @@ def check_file_basics(R: Report, path: Path, facts: dict | None, a):
 
 
 def check_budget(R: Report, info: dict, slot: str | None, a, kind="image"):
-    """Бюджет веса — только для файлов на страницу (--stage web): A 01/01 §2–§4."""
+    """Бюджет веса — только для файлов на страницу (--stage web): ai-media 01/01 §7. Телефонный кадр (--mobile) — свой
+    ключ слота `<slot>_mobile_kb`, если он есть (hero ≤ 80 КБ), иначе ключ слота."""
     if getattr(a, "stage", "master") != "web" or not slot:
         return
     key = f"budget.{kind}.{slot}_kb"
+    if getattr(a, "mobile", False) and R.th(f"budget.{kind}.{slot}_mobile_kb") is not None:
+        key = f"budget.{kind}.{slot}_mobile_kb"
     lim = R.th(key)
     if lim is None:
         return
     kb = info["bytes"] / 1024
-    R.checks.setdefault("budget", {})[slot] = {"kb": round(kb, 1), "limit_kb": lim}
+    R.checks.setdefault("budget", {})[slot] = {"kb": round(kb, 1), "limit_kb": lim, "key": key}
     if kb > lim:
         R.defect("QA-BUDGET", "warn", f"{kb:.0f} КБ > бюджета слота {slot} {lim} КБ", metric="file.bytes", value=round(kb, 1),
                  th_key=key)
@@ -1034,14 +1049,14 @@ def check_palette(R: Report, path: Path, dna: dict | None, spec: dict | None):
     return rows
 
 
-# ================================================================ провенанс (информационно; решения — агент L)
+# ================================================================ провенанс (информационно; решения — ворота 12-legal-provenance/04)
 
 
 def provenance(path: Path, out_dir: Path | None = None) -> dict:
     lp = TOOLS / "provenance_check.py"
     alt = sorted((EXP / "L").glob("*/provenance_check.py")) if (EXP / "L").exists() else []
     tool = lp if lp.exists() else (alt[0] if alt else None)
-    if tool:   # утилита агента L: `provenance_check.py scan PATH --json F` (C2PA, IPTC/XMP, AIGC, подпись Recraft, маркеры)
+    if tool:   # `provenance_check.py scan PATH --json F` (C2PA, IPTC/XMP, AIGC, подпись Recraft, маркеры)
         try:   # + `--corners` (ворота L 04 §5 п. 7): эвристика видимой метки в углах и лист углов для глаза / VLM
             sheet = None
             with tempfile.TemporaryDirectory() as td:
@@ -1101,7 +1116,7 @@ def provenance(path: Path, out_dir: Path | None = None) -> dict:
 def audit_image(R: Report, path: Path, facts, a, ctx):
     info = check_file_basics(R, path, facts, a)
     slot = ctx["slot"]
-    if slot in ("hero",) and max(info["w"], info["h"]) < R.th("image.hero_master_min_px", 2560):
+    if slot in ("hero",) and not getattr(a, "mobile", False) and max(info["w"], info["h"]) < R.th("image.hero_master_min_px", 2560):
         R.defect("QA-DIMS-SMALL", "info" if getattr(a, "stage", "master") == "master" else "warn",
                  f"длинная сторона {max(info['w'], info['h'])} px < мастера hero {R.th('image.hero_master_min_px', 2560)} px "
                  "(ступень 2K/4K модели или апскейл Lanczos, H 08/02 §1)", metric="file.w", value=max(info["w"], info["h"]),
@@ -1428,7 +1443,7 @@ def luma_flicker(frames) -> dict:
     L = frames.reshape(len(frames), -1).mean(1)
     if len(L) < 7:
         return {"n": int(len(L))}
-    sm = median_filter(L, size=11, mode="nearest")   # окно 11: вспышка на 3–4 кадра не «съедается» медианой (K/03)
+    sm = median_filter(L, size=11, mode="nearest")   # окно 11: вспышка на 3–4 кадра не «съедается» медианой
     dev = np.abs(L - sm)
     return {"luma_mean": round(float(L.mean()), 2), "luma_range": round(float(L.max() - L.min()), 3),
             "flicker_max": round(float(dev.max()), 3), "flicker_p95": round(float(np.percentile(dev, 95)), 3)}
@@ -1607,9 +1622,9 @@ def audit_svg(R: Report, path: Path, facts, a, ctx):
 
 
 def check_icons(R: Report, path: Path):
-    """G/check_icons.py (пороги по Lucide 1.47) — в venv-G; иконка копируется во временную папку."""
+    """check_icons.py (пороги по Lucide 1.47) — в Python окружения скилла; иконка копируется во временную папку."""
     if not VENV_G.exists():
-        R.errors.append("нет venv-G — check_icons не запущен")
+        R.errors.append("нет Python окружения скилла — check_icons не запущен")
         return
     with tempfile.TemporaryDirectory() as td:
         shutil.copy(path, Path(td) / path.name)
@@ -2023,10 +2038,11 @@ TH_KEYS_USED = [
     "series.pal_de_break", "series.sd_L_max", "series.phash_dup_max", "text.fail_min_ocr_score", "text.fail_min_line_h_px",
     "text.unrequested_min_chars", "text.unrequested_min_score", "slop.cluster_markers", "slop.key_slot_markers",
     "svg.icon_kb_max", "svg.illustration_kb_max", "svg.check_icons_flags", "og.size", "og.formats", "og.kb_max",
-    "encoding.ssimulacra2_hero_min", "encoding.ssimulacra2_min", "budget.image.hero_kb", "budget.image.section_kb",
-    "budget.image.og_kb", "budget.image.texture_kb", "budget.image.product_kb", "budget.video.hero_1080_kb", "budget.video.hero_720_kb",
-    "judge.trust_agreement_min", "judge.prefilter_agreement_min", "judge.min_pairs", "judge.swap_consistency_min",
-    "judge.position_bias_max"]
+    "encoding.ssimulacra2_hero_min", "encoding.ssimulacra2_min", "budget.image.hero_kb", "budget.image.hero_mobile_kb",
+    "budget.image.section_kb", "budget.image.og_kb", "budget.image.texture_kb", "budget.image.product_kb",
+    "budget.video.hero_1080_kb", "budget.video.hero_720_kb",
+    "judge.trust_agreement_min", "judge.prefilter_agreement_min", "judge.min_pairs", "judge.wilson_low_min", "judge.f1_min",
+    "judge.swap_consistency_min", "judge.position_bias_max", "judge.unsure_share_max", "judge.disagree_sessions"]
 
 
 def cmd_thresholds(a):
@@ -2051,188 +2067,565 @@ def cmd_thresholds(a):
     return 0
 
 
-# ================================================================ VLM-критик: задания, разбор ответов, согласие с голосами
+# ================================================================ судья: пакет для сессии Opus, разбор ответов, согласие с голосами
 
-JUDGE_MODEL = "google/gemini-3.1-flash-lite"      # polza 2026-09-23_1745: 14,78 / 88,69 ₽ за 1 млн токенов вход/выход
 JUDGE_SCHEMA = RUBRICS / "judge-response.schema.json"
+JUDGE_AGENT = kbpaths.repo(".claude", "agents", "design-judge.md")
+JUDGE_PROTOCOL = ".claude/skills/design-deep-dive/kb/common/judge.md"
+CALIBRATION = kbpaths.assets("calibration", "index.yaml")
+PACKAGE_SCHEMA = "judge-package/1"
+KEY_SCHEMA = "judge-key/1"
+ANSWER_DEF = {"checklist": "checklist_answer", "defects": "defects_answer", "pairwise": "pairwise_answer"}
+CALL_KIND = {"checklist": "рубрика", "defects": "рубрика", "pairwise": "попарно"}
+WINNERS = ("A", "B", "tie", "both_bad")
+FINDING_MIN_RUNS = 2        # judge.md §5: находку засчитывают, если она есть хотя бы в двух прогонах
+SIZE_RATIO_TOL = 0.02       # кадры пары с пропорцией в пределах 2 % приводятся к меньшему размеру (judge.md §2)
+CAL_TASK = {"creative": "кадр маркетинговой страницы сайта", "ui": "экран веб-приложения",
+            "ai-media": "картинка для слота страницы сайта", "blender": "3D-кадр предмета для сайта"}
+CAL_SYSTEM = ("Сравни два варианта по одному критерию рубрики. Суди только то, что видно на кадрах. Мера — задача и "
+              "критерий, а не насыщенность: добавленное без просьбы — дефект того же веса, что пропущенное; не предпочитай "
+              "вариант за то, что он богаче, темнее, цветнее, детальнее или эффектнее; где один вариант богаче, назови "
+              "критерий, которому служит богатство, иначе — ничья.")
+ROW_SYSTEM = ("Оцени кадр по вопросам рубрики владельца. Суди только то, что видно на кадре, и не додумывай соответствие "
+              "задаче. Мера — задача и слот, а не насыщенность: добавленное без просьбы — дефект того же веса, что "
+              "пропущенное; не засчитывай вариант за то, что он богаче, темнее, цветнее, детальнее или эффектнее.")
+ROW_INTRO = {"checklist": ("На каждый вопрос ответь yes, no, unsure или not_applicable; у каждого no — доказательство: что "
+                           "видно и где на кадре. Вопросы:"),
+             "defects": ("Проверь кадр на каждый признак. present — yes, no или unsure; yes — только с местом (`where`) и "
+                         "тем, что там видно (`evidence`). Признаки:")}
+CAL_INTRO = ("Кадры A и B — два варианта одного места. Задача: {brief}. На каждый вопрос выбери A, B, tie (равны) или "
+             "both_bad (оба не годятся) и дай короткую причину (`why`) и место на кадре (`where`). Суди только видимое; "
+             "разницу веса файла и артефакты сжатия не учитывай. Вопросы:")
+RULES = {
+    "checklist": ["- На каждый вопрос — один ответ: `yes`, `no`, `unsure` или `not_applicable`. `no` — только с `evidence` "
+                  "(что видно и где); без него ответ читается как `unsure`. Мелко или не видно — `unsure`.",
+                  "- Находки вне вопросов — массив `findings`: что, где, правило (код рубрики), доказательство, наименьшая "
+                  "правка; не больше двенадцати.",
+                  "- Балл, серьёзность и решение — не твои: балл считает код, решает человек."],
+    "defects": ["- На каждый код — один элемент `defects`: `present` — `yes`, `no` или `unsure`; `yes` — только с `where` и "
+                "`evidence`, без места ответ читается как `unsure`. Серьёзность не ставишь.",
+                "- Находки вне перечня — массив `findings`: что, где, правило (код рубрики), доказательство, наименьшая "
+                "правка; не больше двенадцати.",
+                "- Решение — не твоё: находку проверяет человек."],
+    "pairwise": ["- На каждый вопрос — один ответ: `A`, `B`, `tie` или `both_bad`, с `why` (видимое различие) и `where`; "
+                 "без причины выбор читается как ничья.",
+                 "- Второй порядок пары и повторы — другие вызовы: ты их не видишь и не имитируешь.",
+                 "- Коды рубрики, решившие выбор, — в `defect_codes` (можно пусто)."]}
+PACKAGE_README = """# Пакет судьи · {name}
+
+Задания для отдельных сессий судьи — агента `design-judge` (протокол `kb/common/judge.md`). Ключ слепоты лежит рядом с
+папкой пакета, вне её: судья его не видит, задание его не называет.
+
+{what}
+
+1. Каждое задание `jobs/<id>.md` — отдельный вызов инструмента `Agent` с `subagent_type: design-judge`; текст задания —
+   промт вызова целиком. Модель в вызове не передают — её задаёт описание агента.
+2. Ответ агента целиком — в `answers/<id>.md` (тот же id).
+3. Порядок пары и повторы — разные задания: их не объединяют в один вызов и не показывают агенту прошлые ответы.
+4. Ответы собраны — `asset_audit.py judge-parse <папка пакета>`: пара — совпадение обоих порядков и большинство прогонов,
+   находка — не меньше чем в двух прогонах (протокол §5); сводка ложится рядом с ключом.
+"""
+
+
+class JudgeError(Exception):
+    """Ошибка входа судьи (рубрика, файл, порог, пакет) — код выхода 2."""
 
 
 def load_rubric(name: str) -> dict:
     p = RUBRICS / f"{name}.rubric.json"
     if not p.exists():
-        raise SystemExit(f"нет рубрики {rel(p)}")
+        raise JudgeError(f"нет рубрики {rel(p)}")
     return json.loads(p.read_text(encoding="utf-8"))
+
+
+def rubric_meta(name: str, rubric: dict) -> dict:
+    p = RUBRICS / f"{name}.rubric.json"
+    return {"id": rubric.get("rubric") or name, "title": rubric.get("title"), "version": rubric.get("version"),
+            "sha256": sha256_file(p)[:16], "file": rel(p)}
 
 
 def image_key(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()[:16] if Path(path).exists() else hashlib.sha256(str(path).encode()).hexdigest()[:16]
 
 
-def model_params(model: str) -> set | None:
-    """supported_parameters модели в последнем снимке каталога polza (99-raw/cache/polza/<дата[_ЧЧММ]>/api-v1-models.json)."""
-    snaps = sorted(kbpaths.cache("ai-media", "polza").glob("20*/api-v1-models.json"))
-    if not snaps:
+def judge_model() -> str | None:
+    """Модель судьи — из описания агента design-judge (frontmatter `model:`): запись прогона, а не выбор кода."""
+    try:
+        txt = JUDGE_AGENT.read_text(encoding="utf-8")
+    except OSError:
         return None
-    d = json.loads(snaps[-1].read_text(encoding="utf-8"))
-    for m in (d.get("data") if isinstance(d, dict) else d) or []:
-        if m.get("id") == model:
-            return set(((m.get("top_provider") or {}).get("supported_parameters")) or [])
-    return None
+    m = re.match(r"---\n(.*?)\n---", txt, re.S)
+    mm = re.search(r"^model:\s*(\S+)", m.group(1), re.M) if m else None
+    return mm.group(1).strip("'\"") if mm else None
 
 
-def judge_body(rubric: dict, mode: str, questions: list[dict], images: list[str], model: str, brief: str | None) -> dict:
-    j = rubric["judge"]
-    sys_prompt = j["system"]
+def th_need(th: Th, key: str):
+    """Порог группы judge из thresholds.yaml; числа доверия живут только там — нет ключа, нет расчёта."""
+    v = th(key)
+    if v is None:
+        raise JudgeError(f"нет порога {key} в {th.doc.get('_path')} (группа judge)")
+    return v
+
+
+# ---------------------------------------------------------------- кадры пакета
+
+
+def _item_path(p, base: Path | None) -> Path:
+    P = Path(p).expanduser()
+    if P.is_absolute():
+        return P
+    for b in ((base,) if base else ()) + (Path.cwd(),):
+        if (b / P).exists():
+            return (b / P).resolve()
+    return (base or Path.cwd()) / P
+
+
+def _open_frame(src: Path):
+    from PIL import Image
+    with Image.open(src) as im:
+        im.load()
+        alpha = im.mode in ("RGBA", "LA", "PA") or (im.mode == "P" and "transparency" in im.info)
+        return im.convert("RGBA" if alpha else "RGB")
+
+
+def equalize(ima, imb) -> tuple:
+    """Кадры пары — одного размера (judge.md §2): при пропорции в пределах SIZE_RATIO_TOL больший уменьшается до меньшего;
+    иначе пара остаётся как есть с предупреждением. → (A, B, какой уменьшен | None, предупреждение | None)."""
+    if ima.size == imb.size:
+        return ima, imb, None, None
+    ra, rb = ima.width / ima.height, imb.width / imb.height
+    if abs(ra / rb - 1) > SIZE_RATIO_TOL:
+        return ima, imb, None, f"кадры пары разной пропорции: {ima.width}×{ima.height} и {imb.width}×{imb.height}"
+    from PIL import Image
+    if ima.width * ima.height > imb.width * imb.height:
+        return ima.resize(imb.size, Image.LANCZOS), imb, "a", None
+    return ima, imb.resize(ima.size, Image.LANCZOS), "b", None
+
+
+class FrameStore:
+    """Кадры пакета под нейтральными именами (sha256 содержимого). По умолчанию — PNG без потерь и без метаданных
+    (judge.md §2); same_encoding — кодирование страницы голосования stand_run (JPEG q90 ≤ 1600 px, PNG при альфе); файлы
+    страницы голосования — байт в байт: судья видит то же, что заказчик. Исходники — только в ключ."""
+
+    def __init__(self, pkg: Path, same_encoding: bool = False):
+        self.pkg = pkg
+        self.dir = pkg / "frames"
+        self.dir.mkdir(parents=True, exist_ok=True)
+        self.same = same_encoding
+        self.source: dict = {}
+
+    def put_bytes(self, data: bytes, ext: str, source: str) -> dict:
+        from PIL import Image
+        name = f"{hashlib.sha256(data).hexdigest()[:16]}.{ext}"
+        (self.dir / name).write_bytes(data)
+        with Image.open(io.BytesIO(data)) as im:
+            info = {"frame": f"frames/{name}", "w": im.width, "h": im.height, "format": im.format}
+        self.source.setdefault(info["frame"], source)
+        return info
+
+    def put_image(self, im, source: str) -> dict:
+        if self.same:
+            data, ext = mod("stand_run")._encode(im.convert("RGBA"))
+        else:
+            buf = io.BytesIO()
+            im.save(buf, "PNG", optimize=True)
+            data, ext = buf.getvalue(), "png"
+        return self.put_bytes(data, ext, source)
+
+    def put_raw(self, path: Path) -> dict:
+        data = Path(path).read_bytes()
+        return self.put_bytes(data, Path(path).suffix.lstrip(".").lower() or "bin", str(path))
+
+
+# ---------------------------------------------------------------- задания
+
+
+def answer_example(mode: str, questions: list[dict]) -> dict:
     if mode == "checklist":
-        text = j["checklist_intro"] + "\n" + "\n".join(f'{q["id"]}: {q["q"]}' for q in questions)
-    elif mode == "defects":
-        text = j["defects_intro"] + "\n" + "\n".join(f'{q["code"]}: {q["q"]}' for q in questions)
-    elif mode == "transcribe":
-        text = j.get("transcribe_intro") or ("Transcribe all text visible in the image exactly as written, letter by letter, preserving "
-                                             "case, punctuation and line breaks. Do not correct spelling and do not translate. "
-                                             "If there is no text, return an empty list.")
-    else:
-        text = j["pairwise_intro"].replace("{brief}", brief or "—") + "\n" + "\n".join(f'{q["id"]}: {q["q"]}' for q in questions)
-    content = [{"type": "text", "text": text}]
-    for lab, im in zip(("A", "B") if mode == "pairwise" else ("",), images):
-        if lab:
-            content.append({"type": "text", "text": f"Image {lab}:"})
-        content.append({"type": "image_url", "image_url": {"url": im}})
-    schema = json.loads(JUDGE_SCHEMA.read_text(encoding="utf-8")) if JUDGE_SCHEMA.exists() else None
-    body = {"model": model, "temperature": 0, "seed": 7, "max_tokens": j.get("max_tokens", 700),
-            "messages": [{"role": "system", "content": sys_prompt}, {"role": "user", "content": content}]}
-    sup = model_params(model)
-    if schema and j.get("structured", True) and (sup is None or "response_format" in sup):
-        sub = schema["$defs"][{"checklist": "checklist_answer", "defects": "defects_answer", "pairwise": "pairwise_answer",
-                               "transcribe": "transcribe_answer"}[mode]]
-        body["response_format"] = {"type": "json_schema", "json_schema": {"name": f"judge_{mode}", "strict": True, "schema": sub}}
-    elif schema:   # модель без structured output (qwen3.5-9b: только max_tokens) — формат словами + образец
-        example = {"checklist": '{"answers": [{"id": "q1", "answer": "yes"}]}',
-                   "defects": '{"defects": [{"code": "IMG-M03", "present": "no", "where": "", "severity": "none"}]}',
-                   "pairwise": '{"answers": [{"id": "slot", "winner": "A"}], "defect_codes": []}',
-                   "transcribe": '{"lines": ["first line of text", "second line"]}'}[mode]
-        content[0]["text"] += f"\nReply with JSON only, exactly in this shape: {example}"
-    if j.get("reasoning_effort") and (sup is None or "reasoning" in sup):
-        body["reasoning"] = {"effort": j["reasoning_effort"]}
-    if sup is not None:   # убрать то, чего модель не принимает (каталог polza)
-        for k in ("temperature", "seed"):
-            if k not in sup:
-                body.pop(k, None)
-    return body
+        return {"answers": [{"id": (questions[0].get("id") if questions else "q1"), "answer": "no", "evidence": "что видно и где"}],
+                "findings": []}
+    if mode == "defects":
+        return {"defects": [{"code": (questions[0].get("code") if questions else "IMG-M03"), "present": "yes",
+                             "where": "место в кадре", "evidence": "что там видно", "fix": "наименьшая правка"}], "findings": []}
+    return {"answers": [{"id": (questions[0].get("id") if questions else "slot"), "winner": "A", "why": "видимое различие",
+                         "where": "место на кадре"}], "defect_codes": []}
 
 
-def cmd_judge_jobs(a):
-    """Задания VLM-судьи (.polza-chat.json, исполняет mp_client.py в фазе 5). Вход — пары или картинки (JSONL):
-    checklist/defects: {"image": путь, "brief": id|текст, "questions": [...]?}; pairwise: {"a": путь, "b": путь, "brief": …,
-    "pair": id}. Слепо: имя модели и плечо в задание не попадают; ключ → *.keys.json рядом."""
-    import random
-    rubric = load_rubric(a.rubric)
-    if getattr(a, "from_stand_page", None):
-        rows = stand_page_items(Path(a.from_stand_page))
-    else:
-        rows = [json.loads(x) for x in Path(a.items).read_text(encoding="utf-8").splitlines() if x.strip() and not x.startswith("#")]
-    qfile = json.loads(Path(a.questions).read_text(encoding="utf-8")) if a.questions else {}
-    jobs_dir = Path(a.out).resolve().parent
-    rnd_ = random.Random(20260923)
-    tasks, keys = [], {}
-    price = a.price_rub
-    base_q = rubric.get("vlm", {}).get("pairwise_questions" if a.mode == "pairwise" else "defect_questions" if a.mode == "defects"
-                                          else "checklist_generic", [])
+def job_prompt(pkg: Path, mode: str, title: str, frames: list[tuple[str, dict]], questions: list[dict], system: str,
+               intro: str, brief: str | None, report: str | None = None) -> str:
+    """Текст задания одной сессии судьи: задача, кадры, машинный отчёт (не в попарном), рубрика, формат ответа."""
+    kind = CALL_KIND[mode]
+    qkey = "code" if mode == "defects" else "id"
+    L = [f"# Задание судьи · {kind} · {title}", "",
+         f"Ты — агент `design-judge`; протокол — `{JUDGE_PROTOCOL}` (путь от корня репозитория), §1–§5. Открывай только "
+         "файлы, названные в этом задании.", "", "## Задача", "", (brief or "").strip() or "Строки задачи нет — суди по рубрике.",
+         "", "## Кадры", ""]
+    for lab, fr in frames:
+        L.append(f"- {lab + ': ' if lab else ''}`{pkg / fr['frame']}` — {fr['w']}×{fr['h']}, {fr['format']}")
+    if report and mode != "pairwise":
+        L += ["", "## Машинный отчёт — прочитай первым", "", report.strip()]
+    L += ["", "## Рубрика", "", system.strip(), "", intro.replace("{brief}", (brief or "").strip() or "—").strip()]
+    L += [f"{q.get(qkey)}: {q['q']}" for q in questions]
+    L += ["", "## Ответ", "", f"Первая строка — «{kind} · что судил · входы, чего не хватило». Затем один блок ```json по "
+          f"схеме `{pkg / 'response.schema.json'}`, раздел `$defs/{ANSWER_DEF[mode]}`:", "", "```json",
+          json.dumps(answer_example(mode, questions), ensure_ascii=False), "```", "", *RULES[mode]]
+    return "\n".join(L) + "\n"
 
-    def relp(p):
-        P = Path(p)
-        P = P if P.is_absolute() else (ROOT / P)
-        return os.path.relpath(P, jobs_dir)
-    work = list(rows)
-    enc_dir = Path(a.same_encoding) if getattr(a, "same_encoding", None) else None
-    enc_cache: dict = {}
 
-    def shown(p):
-        """Одинаковое кодирование сторон (как на странице голосования stand_run: JPEG q90 ≤ 1600 px, PNG при альфе) —
-        судья и люди выбирают по артефактам сжатия [V:b_PmGocP4rc 11:17]; K-04 меряет это смещение и идёт без флага."""
-        if enc_dir is None:
-            return p
-        if p not in enc_cache:
-            from PIL import Image
-            P = Path(p) if Path(p).is_absolute() else ROOT / p
-            data, ext = mod("stand_run")._encode(Image.open(P).convert("RGBA"))
-            enc_dir.mkdir(parents=True, exist_ok=True)
-            q = enc_dir / f"{hashlib.sha256(data).hexdigest()[:16]}.{ext}"
-            q.write_bytes(data)
-            enc_cache[p] = str(q)
-        return enc_cache[p]
-    if a.mode == "pairwise":
-        extra = rnd_.sample(work, max(1, round(len(work) * a.repeat))) if work and a.repeat > 0 else []
-        first_swap: dict = {}
-        for run, group in ((1, work), (2, extra)):
-            for r in group:
-                rid = id(r)
-                # повтор — всегда с переставленными сторонами относительно первого показа (позиционный сдвиг, Arena Bench)
-                swap = first_swap.setdefault(rid, rnd_.random() < 0.5) if run == 1 else not first_swap.get(rid, False)
-                oa, ob = str(r.get("orig_a") or r["a"]), str(r.get("orig_b") or r["b"])   # исходники сторон (для сверки с голосами)
-                sa, sb = shown(r["a"]), shown(r["b"])                                       # что увидит судья
-                A, B, A_orig, B_orig = (sb, sa, ob, oa) if swap else (sa, sb, oa, ob)
-                pid = r.get("pair") or hashlib.sha256((oa + ob).encode()).hexdigest()[:12]
-                qs = r.get("questions") or base_q
-                body = judge_body(rubric, "pairwise", qs, [relp(A), relp(B)], a.model, r.get("brief_text") or r.get("brief"))
-                tag = f"K-judge-{a.rubric}-pw-{pid}-r{run}"
-                keys[tag] = {"pair": pid, "A": str(A), "B": str(B), "A_orig": A_orig, "B_orig": B_orig, "swapped": swap, "run": run,
-                             "orig_a": oa, "orig_b": ob,
-                             "meta": {k: v for k, v in r.items() if k not in ("a", "b", "orig_a", "orig_b")}}
-                tasks.append(chat_job(body, tag, a, price, {"test": a.test, "mode": "pairwise", "rubric": a.rubric, "pair": pid, "run": run}))
-    else:
-        extra = rnd_.sample(work, max(1, round(len(work) * a.repeat))) if work and a.repeat > 0 else []
-        for run, group in ((1, work), (2, extra)):
-            for r in group:
-                img = r["image"]
-                key = image_key(ROOT / img if not Path(img).is_absolute() else Path(img))
-                if a.mode == "checklist":
-                    qs = r.get("questions") or qfile.get(r.get("brief") or "", []) or base_q
-                    qs = [q for q in qs if "q" in q]
-                elif a.mode == "transcribe":
-                    qs = []
-                else:
-                    qs = r.get("questions") or base_q
-                body = judge_body(rubric, a.mode, qs, [relp(img)], a.model, None)
-                tag = f"K-judge-{a.rubric}-{a.mode[:2]}-{key}-r{run}"
-                keys[tag] = {"key": key, "image": str(img), "run": run, "meta": {k: v for k, v in r.items() if k != "image"}}
-                tasks.append(chat_job(body, tag, a, price, {"test": a.test, "mode": a.mode, "rubric": a.rubric, "key": key, "run": run,
-                                                            "n_questions": len(qs)}))
-    Path(a.out).write_text(jdump(tasks) + "\n", encoding="utf-8")
-    kp = Path(a.out).with_name(Path(a.out).name.replace(".polza-chat.json", "") + ".keys.json")
-    kp.write_text(jdump(keys) + "\n", encoding="utf-8")
-    print(jdump({"jobs": len(tasks), "file": rel(a.out), "keys": rel(kp), "price_rub_expected": round(price * len(tasks), 2)}))
-    return 0
+def _rows_jsonl(path: Path) -> list[dict]:
+    base = path.parent
+    rows = []
+    for x in path.read_text(encoding="utf-8").splitlines():
+        if x.strip() and not x.lstrip().startswith("#"):
+            r = json.loads(x)
+            r["_base"] = str(base)
+            rows.append(r)
+    return rows
 
 
 def stand_page_items(page_dir: Path) -> list[dict]:
-    """Пары страницы слепого голосования stand_run.py (DIR/index.html + DIR.key.json) → пары для судьи с теми же id и теми же
-    файлами, что видел заказчик (DIR/img/*: одинаковое кодирование JPEG q90 ≤ 1600 px); исходники — orig_a/orig_b для сверки
-    с голосами. Без контрольных, повторов и «одинаковых»; серия (несколько файлов на сторону) — судье только первый."""
+    """Пары страницы слепого голосования stand_run.py (DIR/index.html + DIR.key.json) → пары судьи с теми же id и теми же
+    файлами, что видел заказчик (DIR/img/*); исходники — orig_a/orig_b для сверки с голосами. Без контрольных, повторов и
+    «одинаковых»; у серии (несколько файлов на сторону) судье идёт первый."""
     page_dir = Path(page_dir).resolve()
     html_ = (page_dir / "index.html").read_text(encoding="utf-8")
     m = re.search(r'<script type="application/json" id="data">(.*?)</script>', html_, re.S)
     data = json.loads(m.group(1).replace("<\\/", "</")) if m else {"pairs": []}
+    if data.get("kind") == "text":
+        raise JudgeError("страница текстовых карточек: пакет судьи — для кадров; тексты судят по рубрике text "
+                         "(copy-rubric.yaml) после голоса заказчика")
     K = json.loads(Path(str(page_dir) + ".key.json").read_text(encoding="utf-8"))
     out = []
     for p in data.get("pairs", []):
         kp = K["pairs"].get(p["id"])
-        if not kp or kp.get("gold") or kp.get("identical") or kp.get("repeat_of"):
+        if not kp or kp.get("gold") or kp.get("identical") or kp.get("repeat_of") or not p["A"] or not p["B"]:
             continue
         out.append({"pair": p["id"], "a": str(page_dir / p["A"][0]), "b": str(page_dir / p["B"][0]),
-                    "orig_a": str(kp["A"]["files"][0]), "orig_b": str(kp["B"]["files"][0]), "brief_text": p.get("brief") or "",
-                    "test": kp.get("test"), "group": kp.get("group")})
+                    "orig_a": str(kp["A"]["files"][0]), "orig_b": str(kp["B"]["files"][0]), "brief": p.get("brief") or "",
+                    "raw": True, "test": kp.get("test"), "group": kp.get("group")})
     return out
 
 
-def chat_job(body, tag, a, price, meta):
-    return {"channel": "polza-chat", "method": "POST", "path": "/api/v1/chat/completions", "body": body, "tag": tag, "agent": "K",
-            "variant": meta.get("run", 1), "max_rub": a.max_rub, "price_rub": price,
-            "price_source": "каталог polza 2026-09-23_1745: google/gemini-3.1-flash-lite 14,78225 / 88,6935 ₽ за 1 млн токенов "
-                            "вход/выход; оценка — mp_client.py estimate",
-            "docs": "99-raw/cache/polza/2026-09-23/docs-repo/gaidy/structured-output.mdx; gaidy/media-input.mdx",
-            "notes": "VLM-судья вслепую (рубрика 11-evaluation-qa/rubrics): имя модели и плечо скрыты, ключ — *.keys.json",
-            "meta": {**meta, "judge": "vlm"}}
+# ---------------------------------------------------------------- калибровочный набор
+
+
+ADDR_RX = re.compile(r"^(kb/\S+?\.(?:md|json|ya?ml))\b\s*(.*)$")
+RUBRIC_LIKE = re.compile(r"rubric|/11-evaluation-qa/|/13-evaluation-checklists/|/09-ai-(?:execution|generation)-evaluation/")
+LEAKY_HEADING = re.compile(r"^(эксперимент|опыт|калибровк|пример|итоги)", re.I)
+
+
+def _addr_file(addr: str) -> str:
+    m = ADDR_RX.match(addr.strip())
+    return m.group(1) if m else addr.strip()
+
+
+def rubric_address(frames: list[dict]) -> str:
+    """Пункт рубрики пары из поля rubric кадров: сначала адрес рубрики (рубрика, чек-лист, оценка базы), общий для кадров
+    пары, затем адрес рубрики любого кадра по порядку, затем общий адрес, затем первый."""
+    lists = [list(f.get("rubric") or []) for f in frames]
+    common = [x for x in lists[0] if all(_addr_file(x) in {_addr_file(y) for y in L} for L in lists[1:])]
+    pools = [[x for x in common if RUBRIC_LIKE.search(_addr_file(x))]]
+    pools += [[x for x in L if RUBRIC_LIKE.search(_addr_file(x))] for L in lists] + [common, lists[0]]
+    return next((pool[0] for pool in pools if pool), "")
+
+
+def _md_section(path: Path, sec: str) -> tuple[str | None, list[str]]:
+    """Заголовок раздела md с номером sec и строки его тела до следующего заголовка того же или старшего уровня."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    for i, line in enumerate(lines):
+        m = re.match(r"^(#{2,4})\s+(\d+(?:\.\d+)*)\.?\s+(.+?)\s*$", line)
+        if m and m.group(2) == sec:
+            body = []
+            for x in lines[i + 1:]:
+                h = re.match(r"^(#{1,6})\s", x)
+                if h and len(h.group(1)) <= len(m.group(1)):
+                    break
+                body.append(x)
+            return m.group(3), body
+    return None, []
+
+
+def _twin_rubric(path: Path) -> dict | None:
+    """JSON-рубрика владельца, чей `doc` — этот md (creative effectiveness.rubric.json ↔ 04-effectiveness-rubric.md)."""
+    for p in sorted(path.parent.glob("*rubric*.json")):
+        try:
+            d = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(d, dict) and str(d.get("doc") or "").endswith(f"{path.parent.name}/{path.name}"):
+            return d
+    return None
+
+
+def _stem_in(label: str, text: str) -> bool:
+    words = [w[:5] for w in re.findall(r"[\wё-]{5,}", label.lower())]
+    return bool(words) and all(w in text.lower() for w in words)
+
+
+def criterion_of(addr: str) -> dict:
+    """Вопросы пары калибровки из адреса рубрики — формулировки владельцев без тел разделов: в разделах баз стоят якоря и
+    разборы тех же кадров, а судья идёт вслепую (judge.md §6). Рубрика ai-media — её вопросы по id (g1 …) или попарные
+    вопросы и её промт; md с JSON-рубрикой-близнецом — попарный вопрос критерия по заголовку раздела; таблица вопросов
+    раздела («…» во второй колонке); строка ворот YAML — её имя; иначе — заголовок раздела или пометка в скобках. Адрес —
+    только в ключ."""
+    m = ADDR_RX.match(addr.strip())
+    path, rest = (m.group(1), m.group(2)) if m else ("", addr)
+    P = kbpaths.skill(path) if path else None
+    base = {"system": CAL_SYSTEM, "intro": CAL_INTRO, "rubric": None, "version": None}
+    if P is not None and P.name.endswith(".rubric.json") and P.exists():
+        rub = json.loads(P.read_text(encoding="utf-8"))
+        v = rub.get("vlm") or {}
+        ids = set(re.findall(r"\bg\d+\b", rest))
+        qs = [{"id": q["id"], "q": f"Which image better satisfies: {q['q']}"} for q in v.get("checklist_generic", []) if q.get("id") in ids]
+        return {"questions": qs or list(v.get("pairwise_questions") or []), "system": rub["judge"]["system"],
+                "intro": rub["judge"]["pairwise_intro"], "rubric": rub.get("rubric"), "version": rub.get("version")}
+    text = None
+    label = re.search(r"§\s*[\d.]+\s*(?:[A-ZА-Я]\d+\s*)?\(([^)]{3,})\)", rest)
+    label = label.group(1) if label and not LEAKY_HEADING.match(label.group(1)) else None
+    if P is not None and P.suffix in (".yaml", ".yml") and P.exists():
+        import yaml
+        want = set(re.findall(r"\b[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+\b", rest))
+
+        def walk(node):
+            if isinstance(node, dict):
+                if node.get("id") in want and node.get("name"):
+                    return str(node["name"])
+                node = list(node.values())
+            if isinstance(node, list):
+                for x in node:
+                    r = walk(x)
+                    if r:
+                        return r
+            return None
+        name = walk(yaml.safe_load(P.read_text(encoding="utf-8")))
+        text = re.split(r"\s+—\s+|\s+\(", name, maxsplit=1)[0] if name else None
+    elif P is not None and P.suffix == ".md" and P.exists():
+        twin = _twin_rubric(P)
+        for sec in re.findall(r"§\s*(\d+(?:\.\d+)*)", rest):
+            head, body = _md_section(P, sec)
+            if not head or LEAKY_HEADING.match(head):
+                continue
+            if twin:
+                first = re.split(r"[\s—:.,]+", head.strip().lower(), maxsplit=1)[0]
+                for c in twin.get("criteria") or []:
+                    if first and first in (str(c.get("id")).lower(), str(c.get("name_en") or "").lower()) and c.get("pairwise_q"):
+                        qs = [{"id": c["id"], "q": c["pairwise_q"]}]
+                        qs += [{"id": f"{c['id']}.{k}", "q": sub["pairwise_q"]} for k, sub in (c.get("sub") or {}).items()
+                               if isinstance(sub, dict) and sub.get("pairwise_q")]
+                        return {**base, "questions": qs, "rubric": twin.get("rubric"), "version": twin.get("version")}
+            table = [re.match(r"^\|\s*([a-z][a-z0-9_.-]*)\s*\|\s*«([^»]+)»", x) for x in body]
+            qs = [{"id": t.group(1), "q": t.group(2)} for t in table if t]
+            if qs:
+                return {**base, "questions": qs}
+            text = head if not label or _stem_in(label, head) else f"{head}: {label}"
+            break
+    if not text:
+        par = re.search(r"\(([^)]{3,})\)", rest)
+        text = label or (par.group(1) if par and not LEAKY_HEADING.match(par.group(1)) else None)
+    q = f"Какой вариант лучше по критерию «{text}»?" if text else "Какой вариант лучше для своего места на сайте?"
+    return {**base, "questions": [{"id": "c1", "q": q}]}
+
+
+def _strength(frame: dict) -> str:
+    s = str(frame.get("assessment") or "")
+    m = re.match(r"\s*сила:\s*([^.]+)", s)
+    return m.group(1).strip() if m else ""
+
+
+def calibration_pairs(select: list[str] | None) -> list[dict]:
+    """Пары калибровочного набора (assets/calibration/index.yaml, поле pair; у тройки — все пары тройки) с вопросами из
+    поля rubric. Пары, где сила оценки брака — только мнение, в проверку не входят (judge.md §6) и берутся лишь по
+    --pairs. Разметка кадров (что иллюстрирует, сила, на что смотреть) — только в ключ."""
+    import itertools
+    import yaml
+    doc = yaml.safe_load(CALIBRATION.read_text(encoding="utf-8"))
+    groups: dict = {}
+    for f in doc.get("frames") or []:
+        if f.get("pair"):
+            groups.setdefault(str(f["pair"]), []).append(f)
+    if select:
+        bad = [g for g in select if g not in groups]
+        if bad:
+            raise JudgeError(f"нет пар {', '.join(bad)} в {rel(CALIBRATION)}; есть: {', '.join(sorted(groups))}")
+    out = []
+    for g, frames in groups.items():
+        if select and g not in select:
+            continue
+        for x, y in itertools.combinations(frames, 2):
+            pid = g if len(frames) == 2 else f"{g}:{x['id']}-{y['id']}"
+            addr = rubric_address([x, y])
+            kinds = {x["id"]: x.get("kind"), y["id"]: y.get("kind")}
+            levels = [i for i, k in kinds.items() if k == "level"]
+            strengths = {x["id"]: _strength(x), y["id"]: _strength(y)}
+            basis = [strengths[i] for i, k in kinds.items() if k == "defect"] or list(strengths.values())
+            opinion = all(b.startswith("мнение") for b in basis)
+            if opinion and not select:
+                continue
+            out.append({"pid": pid, "group": g, "frames": (x, y), "addr": addr, "criterion": criterion_of(addr),
+                        "brief": CAL_TASK.get(str(x.get("base")), "кадр для сайта"),
+                        "expect": levels[0] if len(levels) == 1 else None, "opinion_only": opinion,
+                        "kinds": kinds, "strength": strengths})
+    return out
+
+
+# ---------------------------------------------------------------- judge-jobs
+
+
+def cmd_judge_jobs(a):
+    """Пакет заданий судьи для отдельных сессий Opus (агент design-judge) и ключ слепоты вне пакета."""
+    runs = int(a.runs)
+    if runs < 1:
+        raise JudgeError("--runs — не меньше 1 (три — находки и второе мнение, пять — сортировка, один — черновик)")
+    sources = sum(bool(x) for x in (a.items, a.from_stand_page, a.calibration))
+    if sources != 1:
+        raise JudgeError("нужен ровно один вход: --items, --from-stand-page или --calibration")
+    mode = "pairwise" if (a.from_stand_page or a.calibration) else a.mode
+    rubric = load_rubric(a.rubric) if a.rubric and not a.calibration else None
+    qfile = json.loads(Path(a.questions).read_text(encoding="utf-8")) if a.questions else {}
+    if a.calibration:
+        cal = calibration_pairs([x.strip() for x in a.pairs.split(",") if x.strip()] if a.pairs else None)
+        rows = [{"pair": c["pid"], "_cal": c} for c in cal]
+        label = "calibration"
+    elif a.from_stand_page:
+        rows = stand_page_items(Path(a.from_stand_page))
+        label = f"{a.rubric}-stand"
+    else:
+        rows = _rows_jsonl(Path(a.items))
+        label = f"{a.rubric}-{mode}"
+    if not rows:
+        raise JudgeError("входов нет: пустой список пар или картинок")
+    if rubric is None and not a.calibration and not all(r.get("questions") for r in rows):
+        raise JudgeError("нужна --rubric (рубрика ai-media 11-evaluation-qa/rubrics/<имя>.rubric.json) или вопросы "
+                         "в каждой строке входа (questions: [{id, q}], у defects — [{code, q}])")
+    digest = hashlib.sha256(json.dumps([{k: v for k, v in r.items() if k not in ("_cal", "_base")} for r in rows]
+                                       + [mode, runs, a.rubric, bool(a.same_encoding)], sort_keys=True,
+                                       ensure_ascii=False, default=str).encode()).hexdigest()
+    name = a.name or f"{label}-{digest[:8]}"
+    out_root = Path(a.out).resolve() if a.out else kbpaths.out("ai-media", "judge")
+    pkg = out_root / name
+    key_path = out_root / f"{name}.key.json"
+    if pkg.exists():
+        if any((pkg / "answers").glob("*")) and not a.force:
+            raise JudgeError(f"в пакете {pkg} уже есть ответы — другое имя (--name) или --force")
+        shutil.rmtree(pkg)
+    (pkg / "jobs").mkdir(parents=True)
+    (pkg / "answers").mkdir()
+    store = FrameStore(pkg, same_encoding=bool(a.same_encoding))
+    rmeta = rubric_meta(a.rubric, rubric) if rubric else None
+    title = (f"{rubric.get('title')} ({rmeta['id']} v{rmeta['version']})" if rubric
+             else "калибровочная пара" if a.calibration else "вопросы строки входа")
+    specs, key_pairs, key_items, warnings = [], {}, {}, []
+    if mode == "pairwise":
+        for n, r in enumerate(rows, 1):
+            pid = str(r.get("pair") or f"p{n:03d}")
+            c = r.get("_cal")
+            if c:
+                fa, fb = c["frames"]
+                va, vb = str(fa["id"]), str(fb["id"])
+                src_a, src_b = kbpaths.assets("calibration", fa["file"]), kbpaths.assets("calibration", fb["file"])
+                crit = c["criterion"]
+                qs, system, intro, brief = crit["questions"], crit["system"], crit["intro"], c["brief"]
+                ptitle = (f"рубрика {crit['rubric']} v{crit['version']}" if crit.get("rubric") else "пункт рубрики")
+            else:
+                base = Path(r["_base"]) if r.get("_base") else None
+                va, vb = "a", "b"
+                src_a, src_b = _item_path(r["a"], base), _item_path(r["b"], base)
+                qs = r.get("questions") or rubric.get("vlm", {}).get("pairwise_questions", [])
+                system = r.get("system") or (rubric["judge"]["system"] if rubric else CAL_SYSTEM)
+                intro = rubric["judge"]["pairwise_intro"] if rubric else CAL_INTRO
+                brief, ptitle = r.get("brief"), title
+            for s in (src_a, src_b):
+                if not Path(s).exists():
+                    raise JudgeError(f"нет кадра {s} (пара {pid})")
+            resized, warn = None, None
+            if r.get("raw"):
+                fr_a, fr_b = store.put_raw(src_a), store.put_raw(src_b)
+                if (fr_a["w"], fr_a["h"]) != (fr_b["w"], fr_b["h"]):
+                    warn = f"кадры пары разного размера: {fr_a['w']}×{fr_a['h']} и {fr_b['w']}×{fr_b['h']}"
+            else:
+                ima, imb, resized, warn = equalize(_open_frame(src_a), _open_frame(src_b))
+                fr_a, fr_b = store.put_image(ima, str(src_a)), store.put_image(imb, str(src_b))
+            if warn:
+                warnings.append(warn)
+            orig_a, orig_b = str(r.get("orig_a") or src_a), str(r.get("orig_b") or src_b)
+            key_pairs[pid] = {"variants": {va: orig_a, vb: orig_b}, "frames": {va: fr_a["frame"], vb: fr_b["frame"]},
+                              **({"resized": {"a": va, "b": vb}[resized]} if resized else {}),
+                              **({"warning": warn} if warn else {}),
+                              "meta": {k: v for k, v in r.items() if k not in ("a", "b", "orig_a", "orig_b", "_cal", "_base", "raw")}}
+            if c:
+                key_pairs[pid].update({"group": c["group"], "rubric_address": c["addr"], "expect": c["expect"],
+                                       "in_check": not c["opinion_only"], "kinds": c["kinds"], "strength": c["strength"]})
+            for run in range(1, runs + 1):
+                for order in ("AB", "BA"):
+                    A, B = (va, vb) if order == "AB" else (vb, va)
+                    frA, frB = (fr_a, fr_b) if order == "AB" else (fr_b, fr_a)
+                    specs.append({"prompt": job_prompt(pkg, "pairwise", ptitle, [("A", frA), ("B", frB)], qs, system, intro, brief),
+                                  "frames": [frA["frame"], frB["frame"]],
+                                  "key": {"mode": "pairwise", "pair": pid, "run": run, "order": order, "A": A, "B": B,
+                                          "A_orig": key_pairs[pid]["variants"][A], "B_orig": key_pairs[pid]["variants"][B],
+                                          "orig_a": orig_a, "orig_b": orig_b,
+                                          "questions": [q.get("id") for q in qs]}})
+    else:
+        base_q = (rubric or {}).get("vlm", {}).get("defect_questions" if mode == "defects" else "checklist_generic", [])
+        for n, r in enumerate(rows, 1):
+            base = Path(r["_base"]) if r.get("_base") else None
+            src = _item_path(r["image"], base)
+            if not src.exists():
+                raise JudgeError(f"нет кадра {src}")
+            iid = str(r.get("id") or f"i{n:03d}")
+            if mode == "checklist":
+                qs = [q for q in (r.get("questions") or qfile.get(r.get("brief_id") or r.get("brief") or "", []) or base_q) if "q" in q]
+            else:
+                qs = r.get("questions") or base_q
+            report = r.get("report")
+            if report and len(str(report)) < 400 and _item_path(report, base).exists():
+                report = _item_path(report, base).read_text(encoding="utf-8")
+            fr = store.put_image(_open_frame(src), str(src))
+            key_items[iid] = {"image": str(src), "key": image_key(src), "frame": fr["frame"],
+                              "meta": {k: v for k, v in r.items() if k not in ("image", "report", "_base")}}
+            for run in range(1, runs + 1):
+                system = r.get("system") or (rubric["judge"]["system"] if rubric else ROW_SYSTEM)
+                intro = rubric["judge"][f"{mode}_intro"] if rubric else ROW_INTRO[mode]
+                specs.append({"prompt": job_prompt(pkg, mode, title, [("", fr)], qs, system, intro, r.get("brief"), report),
+                              "frames": [fr["frame"]],
+                              "key": {"mode": mode, "item": iid, "run": run, "image": str(src), "key": key_items[iid]["key"],
+                                      "questions": [q.get("code" if mode == "defects" else "id") for q in qs]}})
+    import random
+    random.Random(int(digest[:12], 16)).shuffle(specs)
+    width = max(3, len(str(len(specs))))
+    jobs_manifest, key_jobs = [], {}
+    for i, s in enumerate(specs, 1):
+        jid = f"j{i:0{width}d}"
+        (pkg / "jobs" / f"{jid}.md").write_text(s["prompt"], encoding="utf-8")
+        jobs_manifest.append({"id": jid, "kind": CALL_KIND[mode], "prompt": f"jobs/{jid}.md", "frames": s["frames"],
+                              "answer": f"answers/{jid}.md"})
+        key_jobs[jid] = s["key"]
+    shutil.copy(JUDGE_SCHEMA, pkg / "response.schema.json")
+    session = {"agent": "design-judge", "model": judge_model()}
+    if rmeta is None and not a.calibration:
+        qs_all = json.dumps([r.get("questions") for r in rows], ensure_ascii=False, sort_keys=True)
+        rmeta = {"id": "questions", "sha256": hashlib.sha256(qs_all.encode()).hexdigest()[:16]}
+    manifest = {"schema": PACKAGE_SCHEMA, "package": name, "created": now_iso(), "tool": f"asset_audit.py {VERSION}",
+                "mode": mode, "kind": CALL_KIND[mode], "runs": runs, "orders": 2 if mode == "pairwise" else 1,
+                "rubric": rmeta or {"id": "calibration", "sha256": sha256_file(CALIBRATION)[:16]},
+                "response_schema": "response.schema.json", "session": session, "jobs": jobs_manifest,
+                "warnings": sorted(set(warnings))}
+    (pkg / "manifest.json").write_text(jdump(manifest) + "\n", encoding="utf-8")
+    what = (f"Состав: пар — {len(key_pairs)}, порядков — 2, прогонов — {runs}; заданий — {len(specs)}." if mode == "pairwise"
+            else f"Состав: кадров — {len(key_items)}, прогонов — {runs}; заданий — {len(specs)}.")
+    (pkg / "README.md").write_text(PACKAGE_README.format(name=name, what=what), encoding="utf-8")
+    key = {"schema": KEY_SCHEMA, "package": name, "package_dir": str(pkg), "created": manifest["created"], "mode": mode,
+           "runs": runs, "rubric": {**manifest["rubric"], **({"file": str(CALIBRATION)} if a.calibration else {})},
+           "session": session, "calibration": bool(a.calibration),
+           "pairs": key_pairs, "items": key_items, "frames": store.source, "jobs": key_jobs}
+    key_path.write_text(jdump(key) + "\n", encoding="utf-8")
+    print(jdump({"package": str(pkg), "key": str(key_path), "jobs": len(specs), "mode": mode, "runs": runs,
+                 "pairs" if mode == "pairwise" else "images": len(key_pairs) if mode == "pairwise" else len(key_items),
+                 "warnings": manifest["warnings"]}))
+    return 0
+
+
+# ---------------------------------------------------------------- judge-parse
 
 
 def extract_json_text(t: str):
@@ -2246,15 +2639,42 @@ def extract_json_text(t: str):
     return json.loads(t[s:e + 1])
 
 
+def _norm_findings(items, probs: list[str]) -> list[dict]:
+    out = []
+    for f in items or []:
+        if not isinstance(f, dict):
+            continue
+        rule = str(f.get("rule") or "").strip()
+        where, ev = str(f.get("where") or "").strip(), str(f.get("evidence") or "").strip()
+        if len(where) < 3 or len(ev) < 3:
+            probs.append(f"находка «{str(f.get('what') or rule)[:40]}» без места или доказательства — не засчитана")
+            continue
+        out.append({"what": str(f.get("what") or "").strip(), "where": where, "rule": rule, "evidence": ev,
+                    "fix": str(f.get("fix") or "").strip()})
+    return out[:12]
+
+
 def normalize_answer(ans: dict, mode: str) -> tuple[dict, list[str]]:
-    """Ответ судьи → нормализованный вид; дефект «есть» без «где» понижается до unsure (защита от галлюцинаций)."""
-    probs = []
+    """Ответ судьи → нормализованный вид по протоколу: «нет» без доказательства и дефект «есть» без места — «не уверен»,
+    победитель пары без причины — ничья, находка без места или доказательства не засчитывается."""
+    probs: list[str] = []
     if mode == "checklist":
-        out = {}
+        out, ev = {}, {}
         for q in ans.get("answers", []):
-            v = str(q.get("answer", "")).lower()
-            out[q.get("id")] = v if v in ("yes", "no", "unsure") else "unsure"
-        return {"answers": out}, probs
+            v = str(q.get("answer", "")).strip().lower().replace("/", "").replace(" ", "_")
+            v = {"na": "not_applicable", "n_a": "not_applicable"}.get(v, v)
+            v = v if v in ("yes", "no", "unsure", "not_applicable") else "unsure"
+            e = str(q.get("evidence") or "").strip()
+            if v == "no" and len(e) < 3:
+                v = "unsure"
+                probs.append(f"{q.get('id')}: «нет» без доказательства → unsure")
+            out[q.get("id")] = v
+            if e:
+                ev[q.get("id")] = e
+        strengths = [{"what": str(x.get("what") or "").strip(), "where": str(x.get("where") or "").strip()}
+                     for x in ans.get("strengths") or [] if isinstance(x, dict) and x.get("what")]
+        return {"answers": out, "evidence": ev, "findings": _norm_findings(ans.get("findings"), probs),
+                **({"strengths": strengths} if strengths else {})}, probs
     if mode == "defects":
         out = []
         for d in ans.get("defects", []):
@@ -2265,54 +2685,33 @@ def normalize_answer(ans: dict, mode: str) -> tuple[dict, list[str]]:
             if present == "yes" and len(where) < 3:
                 present = "unsure"
                 probs.append(f"{d.get('code')}: «есть» без «где» → unsure")
-            out.append({"code": d.get("code"), "present": present, "where": where, "severity": d.get("severity")})
-        return {"defects": out}, probs
-    if mode == "transcribe":
-        return {"lines": [str(x) for x in ans.get("lines", [])]}, probs
-    out = {}
+            out.append({"code": d.get("code"), "present": present, "where": where,
+                        "evidence": str(d.get("evidence") or "").strip(), "fix": str(d.get("fix") or "").strip()})
+        return {"defects": out, "findings": _norm_findings(ans.get("findings"), probs)}, probs
+    out, why = {}, {}
     for q in ans.get("answers", []):
-        v = str(q.get("winner", "")).upper()
-        out[q.get("id")] = v if v in ("A", "B", "TIE", "BOTH_BAD") else "TIE"
-    return {"answers": out, "codes": ans.get("defect_codes", [])}, probs
+        raw = str(q.get("winner", "")).strip()
+        v = raw.upper() if raw.upper() in ("A", "B") else raw.lower().replace(" ", "_")
+        v = v if v in WINNERS else "tie"
+        reason = str(q.get("why") or "").strip()
+        if v in ("A", "B") and len(reason) < 3:
+            probs.append(f"{q.get('id')}: выбор {v} без причины → ничья")
+            v = "tie"
+        out[q.get("id")] = v
+        if reason:
+            why[q.get("id")] = {"why": reason, "where": str(q.get("where") or "").strip()}
+    return {"answers": out, "why": why, "codes": ans.get("defect_codes", [])}, probs
 
 
-def cmd_judge_parse(a):
-    """Ответы mp_client.py (паспорта mp-passport/1 + файлы ответа .json/.md) → answers.jsonl (разметка по ключу)."""
-    keys = json.loads(Path(a.keys).read_text(encoding="utf-8"))
-    rows, bad = [], 0
-    schema_ok = JUDGE_SCHEMA.exists()
-    for pp in sorted(Path(a.passports).rglob("*.passport.json")):
-        j = json.loads(pp.read_text(encoding="utf-8"))
-        tag = (j.get("job") or {}).get("tag")
-        if tag not in keys:
-            continue
-        mode = ((j.get("job") or {}).get("meta") or {}).get("mode")
-        f = (j.get("files") or [{}])[0]
-        fp = ROOT / f.get("path", "")
-        row = {"tag": tag, "mode": mode, **keys[tag], "usage": j.get("usage"), "cost_rub": (j.get("cost") or {}).get("usage_cost_rub")}
-        try:
-            raw = json.loads(fp.read_text(encoding="utf-8")) if fp.suffix == ".json" else extract_json_text(fp.read_text(encoding="utf-8"))
-            if schema_ok:
-                sch = json.loads(JUDGE_SCHEMA.read_text(encoding="utf-8"))
-                sub = sch["$defs"][{"checklist": "checklist_answer", "defects": "defects_answer", "pairwise": "pairwise_answer",
-                                    "transcribe": "transcribe_answer"}[mode]]
-                errs = mini_validate(raw, sub)
-                row["schema_errors"] = errs[:5]
-            norm, probs = normalize_answer(raw, mode)
-            row.update(norm)
-            row["problems"] = probs
-            row["valid"] = not row.get("schema_errors")
-        except Exception as e:  # noqa: BLE001
-            row.update({"valid": False, "error": str(e)[:200]})
-            bad += 1
-        rows.append(row)
-    Path(a.out).write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
-    print(jdump({"answers": len(rows), "invalid": bad, "out": rel(a.out)}))
-    return 0
-
-
-def mini_validate(inst, sch, path="") -> list[str]:
-    """Проверка подмножества JSON Schema (type, required, enum, properties, items, additionalProperties) — для ответа судьи."""
+def mini_validate(inst, sch, path="", root=None) -> list[str]:
+    """Проверка подмножества JSON Schema (type, required, enum, properties, items, additionalProperties, maxItems, $ref
+    внутри файла) — запасной путь, когда нет jsonschema."""
+    root = root if root is not None else sch
+    if "$ref" in sch and str(sch["$ref"]).startswith("#/"):
+        node = root
+        for part in sch["$ref"][2:].split("/"):
+            node = node[part]
+        return mini_validate(inst, node, path, root)
     errs = []
     t = sch.get("type")
     types = {"object": dict, "array": list, "string": str, "boolean": bool, "number": (int, float), "integer": int}
@@ -2329,13 +2728,196 @@ def mini_validate(inst, sch, path="") -> list[str]:
         props = sch.get("properties", {})
         for k, v in inst.items():
             if k in props:
-                errs += mini_validate(v, props[k], f"{path}/{k}")
+                errs += mini_validate(v, props[k], f"{path}/{k}", root)
             elif sch.get("additionalProperties") is False:
                 errs.append(f"{path}/{k}: лишнее поле")
-    if isinstance(inst, list) and "items" in sch:
-        for i, v in enumerate(inst):
-            errs += mini_validate(v, sch["items"], f"{path}[{i}]")
+    if isinstance(inst, list):
+        if "maxItems" in sch and len(inst) > sch["maxItems"]:
+            errs.append(f"{path}: элементов {len(inst)} > {sch['maxItems']}")
+        if "items" in sch:
+            for i, v in enumerate(inst):
+                errs += mini_validate(v, sch["items"], f"{path}[{i}]", root)
     return errs
+
+
+def answer_errors(raw, mode: str, schema: dict) -> list[str]:
+    """Ответ против раздела схемы ответа: jsonschema, если есть, иначе встроенная проверка."""
+    sub = {"$ref": f"#/$defs/{ANSWER_DEF[mode]}"}
+    try:
+        import jsonschema
+    except ImportError:
+        return mini_validate(raw, sub, "", schema)
+    v = jsonschema.Draft202012Validator({"$defs": schema["$defs"], **sub})
+    return ["/" + "/".join(map(str, e.absolute_path)) + ": " + e.message for e in v.iter_errors(raw)]
+
+
+def _answer_file(ans_dir: Path, jid: str) -> Path | None:
+    for ext in (".md", ".json", ".txt"):
+        p = ans_dir / f"{jid}{ext}"
+        if p.exists():
+            return p
+    return None
+
+
+def pair_verdicts(rows: list[dict]) -> dict:
+    """Попарные ответы → вердикт пары по вопросу (judge.md §5). В прогоне: совпадение обоих порядков — вариант, разные ответы
+    — ничья, «оба не годятся» в любом порядке — «оба не годятся». По прогонам — большинство, иначе «неразличимы»; один прогон
+    — черновая подсказка. → {(pair, вопрос): {verdict, runs, complete, draft, same}}."""
+    by: dict = {}
+    for r in rows:
+        if r.get("mode") != "pairwise" or not r.get("answers"):
+            continue
+        for q, w in r["answers"].items():
+            v = {"A": r.get("A"), "B": r.get("B")}.get(w, w)
+            by.setdefault((r["pair"], q), {}).setdefault(r.get("run", 1), {})[r.get("order", "AB")] = v
+    out = {}
+    for (pid, q), runs in by.items():
+        per_run, same = {}, []
+        for run, orders in sorted(runs.items()):
+            if len(orders) < 2:
+                continue
+            x, y = orders.get("AB"), orders.get("BA")
+            same.append(x == y)
+            per_run[run] = "both_bad" if "both_bad" in (x, y) else (x if x == y else "tie")
+        vals = list(per_run.values())
+        top = max(set(vals), key=vals.count) if vals else None
+        verdict = top if vals and vals.count(top) * 2 > len(vals) else ("indistinct" if vals else None)
+        out[(pid, q)] = {"verdict": verdict, "runs": per_run, "complete": len(vals), "draft": len(vals) == 1, "same": same}
+    return out
+
+
+def item_verdicts(rows: list[dict]) -> dict:
+    """Ответы по кадру (рубрика): вопрос — большинство прогонов, иначе «не уверен»; маркер и находка засчитываются, если
+    есть не меньше чем в двух прогонах (judge.md §5). → {item: {runs, checklist, defects, findings}}."""
+    by: dict = {}
+    for r in rows:
+        if r.get("mode") not in ("checklist", "defects"):
+            continue
+        it = by.setdefault(r["item"], {"image": r.get("image"), "key": r.get("key"), "runs": set(), "q": {}, "d": {}, "f": {}})
+        it["runs"].add(r.get("run", 1))
+        for q, v in (r.get("answers") or {}).items():
+            it["q"].setdefault(q, []).append(v)
+        for d in r.get("defects") or []:
+            if d.get("present") == "yes":
+                it["d"].setdefault(d["code"], []).append({"run": r.get("run"), "where": d.get("where"), "evidence": d.get("evidence")})
+        for f in r.get("findings") or []:
+            k = re.sub(r"\s+", " ", (f.get("rule") or f.get("what") or "").strip().lower())
+            it["f"].setdefault(k, []).append({"run": r.get("run"), **f})
+    out = {}
+    for iid, it in by.items():
+        n = len(it["runs"])
+        need = FINDING_MIN_RUNS if n >= FINDING_MIN_RUNS else 1
+        chk = {}
+        for q, vals in it["q"].items():
+            top = max(set(vals), key=vals.count)
+            chk[q] = top if vals.count(top) * 2 > len(vals) else "unsure"
+        defects = [{"code": c, "runs": len({x["run"] for x in xs}), "confirmed": len({x["run"] for x in xs}) >= need,
+                    "where": [x["where"] for x in xs]} for c, xs in sorted(it["d"].items())]
+        findings = [{"rule": xs[0].get("rule"), "what": xs[0].get("what"), "runs": len({x["run"] for x in xs}),
+                     "confirmed": len({x["run"] for x in xs}) >= need, "where": [x.get("where") for x in xs],
+                     "evidence": xs[0].get("evidence"), "fix": xs[0].get("fix")} for _k, xs in sorted(it["f"].items())]
+        out[iid] = {"image": it["image"], "key": it["key"], "runs": n, "draft": n < FINDING_MIN_RUNS, "checklist": chk,
+                    "defects": defects, "findings": findings}
+    return out
+
+
+def batch_checks(rows: list[dict], pv: dict, th: Th) -> dict:
+    """Проверка партии (judge.md §5–§6): доля выбора позиции A, согласованность при перестановке, доля «не уверен»."""
+    pos = [w == "A" for r in rows if r.get("mode") == "pairwise" for w in (r.get("answers") or {}).values() if w in ("A", "B")]
+    same = [s for v in pv.values() for s in v["same"]]
+    rub = [v for r in rows if r.get("mode") == "checklist" for v in (r.get("answers") or {}).values()]
+    rub += [d["present"] for r in rows if r.get("mode") == "defects" for d in r.get("defects") or []]
+    out = {"position_A_share": round(sum(pos) / len(pos), 3) if pos else None, "decisive_answers": len(pos),
+           "swap_consistency": round(sum(same) / len(same), 3) if same else None, "swap_runs": len(same),
+           "unsure_share": round(sum(v == "unsure" for v in rub) / len(rub), 3) if rub else None, "rubric_answers": len(rub),
+           "usable": True, "reasons": [], "recalibrate": []}
+    if out["position_A_share"] is not None and abs(out["position_A_share"] - 0.5) > th_need(th, "judge.position_bias_max"):
+        out["usable"] = False
+        out["reasons"].append(f"доля выбора A {out['position_A_share']} — судья смещён к позиции (порог ± {th('judge.position_bias_max')})")
+    if out["swap_consistency"] is not None and out["swap_consistency"] < th_need(th, "judge.swap_consistency_min"):
+        out["usable"] = False
+        out["reasons"].append(f"согласованность при перестановке {out['swap_consistency']} < {th('judge.swap_consistency_min')}")
+    if out["unsure_share"] is not None and out["unsure_share"] > th_need(th, "judge.unsure_share_max"):
+        out["recalibrate"].append(f"доля «не уверен» {out['unsure_share']} > {th('judge.unsure_share_max')} — пересчитать калибровку")
+    return out
+
+
+def judge_summary(K: dict, rows: list[dict], th: Th) -> dict:
+    pv = pair_verdicts(rows)
+    pairs: dict = {}
+    cal = {"hit": 0, "miss": 0, "tie": 0, "not_in_check": 0, "no_expect": 0} if K.get("calibration") else None
+    for (pid, q), v in sorted(pv.items()):
+        kp = (K.get("pairs") or {}).get(pid) or {}
+        rec = {"verdict": v["verdict"], "runs": v["runs"], "complete_runs": v["complete"], "draft": v["draft"]}
+        if cal is not None:
+            exp = kp.get("expect")
+            rec["expect"] = exp
+            if not kp.get("in_check", True):
+                rec["result"] = "not_in_check"
+            elif exp is None:
+                rec["result"] = "no_expect"
+            elif v["verdict"] == exp:
+                rec["result"] = "hit"
+            elif v["verdict"] in (kp.get("variants") or {}):
+                rec["result"] = "miss"
+            else:
+                rec["result"] = "tie"
+            cal[rec["result"]] += 1
+        pairs.setdefault(pid, {})[q] = rec
+    out = {"package": K.get("package"), "mode": K.get("mode"), "runs": K.get("runs"), "rubric": K.get("rubric"),
+           "session": K.get("session"), "answers": len(rows), "invalid": sum(1 for r in rows if not r.get("valid")),
+           "pairs": pairs, "items": item_verdicts(rows), "batch": batch_checks(rows, pv, th)}
+    if cal is not None:
+        out["calibration"] = cal
+    return out
+
+
+def cmd_judge_parse(a):
+    """Ответы сессий судьи (answers/<id>.md|json) + ключ вне пакета → строки ответов и сводка по правилу протокола."""
+    pkg = Path(a.package).resolve()
+    key_path = Path(a.key).resolve() if a.key else pkg.with_name(pkg.name + ".key.json")
+    if not key_path.exists():
+        raise JudgeError(f"нет ключа {key_path}")
+    K = json.loads(key_path.read_text(encoding="utf-8"))
+    ans_dir = Path(a.answers).resolve() if a.answers else pkg / "answers"
+    schema = json.loads(JUDGE_SCHEMA.read_text(encoding="utf-8"))
+    rows, missing = [], []
+    for jid, j in sorted(K.get("jobs", {}).items()):
+        f = _answer_file(ans_dir, jid)
+        if f is None:
+            missing.append(jid)
+            continue
+        mode = j["mode"]
+        row = {"job": jid, **{k: v for k, v in j.items() if k != "questions"}, "file": str(f)}
+        try:
+            text = f.read_text(encoding="utf-8")
+            raw = json.loads(text) if f.suffix == ".json" else extract_json_text(text)
+            errs = answer_errors(raw, mode, schema)
+            norm, probs = normalize_answer(raw, mode)
+            asked = [q for q in j.get("questions") or [] if q]
+            got = set(norm.get("answers") or {}) | {d["code"] for d in norm.get("defects") or []}
+            if asked and set(asked) - got:
+                probs.append("нет ответа на: " + ", ".join(sorted(set(asked) - got)))
+            row.update(norm)
+            row.update({"problems": probs, "schema_errors": errs[:5], "valid": not errs})
+        except (ValueError, json.JSONDecodeError) as e:
+            row.update({"valid": False, "error": str(e)[:200]})
+        rows.append(row)
+    th = Th(load_thresholds(Path(a.thresholds) if a.thresholds else None))
+    summ = judge_summary(K, rows, th)
+    summ["missing"] = missing
+    out = Path(a.out).resolve() if a.out else key_path.with_name(K.get("package", pkg.name) + ".verdict.json")
+    rows_path = out.with_name(out.name.replace(".verdict.json", "") + ".answers.jsonl") if out.name.endswith(".verdict.json") \
+        else out.with_suffix(".answers.jsonl")
+    rows_path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+    summ["rows"] = str(rows_path)
+    out.write_text(jdump(summ) + "\n", encoding="utf-8")
+    print(jdump({"verdict": str(out), "rows": str(rows_path), "answers": len(rows), "missing": len(missing),
+                 "invalid": summ["invalid"], "batch": summ["batch"], **({"calibration": summ["calibration"]} if "calibration" in summ else {})}))
+    return 0 if not missing and not summ["invalid"] else 1
+
+
+# ---------------------------------------------------------------- согласие с человеком и доверие
 
 
 def wilson(k, n):
@@ -2353,91 +2935,130 @@ def cohen_kappa(pairs: list[tuple[str, str]]) -> float | None:
 
 
 def trust_level(agree: float | None, lo: float | None, n: int, th: Th) -> str:
-    if agree is None or n < th("judge.min_pairs", 20):
+    """Уровень доверия судье по согласию с решающими голосами человека (judge.md §6); пороги — группа judge thresholds.yaml."""
+    if agree is None or n < th_need(th, "judge.min_pairs"):
         return "мало данных"
-    if agree >= th("judge.trust_agreement_min", 0.8) and (lo or 0) >= 0.65:
-        return "доверять (фильтр и сортировка best-of-N)"
-    if agree >= th("judge.prefilter_agreement_min", 0.7):
-        return "только предфильтр грубого брака, решение — человек"
+    if agree >= th_need(th, "judge.trust_agreement_min") and (lo or 0) >= th_need(th, "judge.wilson_low_min"):
+        return "сортировать"
+    if agree >= th_need(th, "judge.prefilter_agreement_min"):
+        return "только предфильтр"
     return "не использовать"
 
 
+def f1_level(f1: float | None, n: int, th: Th) -> str:
+    """Поиск дефектов меряют F1 против разметки человека (judge.md §6): выше порога судья — предфильтр, решает человек."""
+    if f1 is None or n < th_need(th, "judge.min_pairs"):
+        return "мало данных"
+    return "только предфильтр" if f1 >= th_need(th, "judge.f1_min") else "не использовать"
+
+
 def cmd_agree(a):
-    """Согласие VLM-судьи с заказчиком. Попарно: голоса страницы stand_run.py (--votes, --key) против ответов судьи
-    (--answers pairwise). Бинарно: ответы заказчика на те же вопросы (--labels) против ответов судьи (checklist)."""
+    """Согласие судьи с человеком. Попарно: голоса страницы stand_run.py (--votes — файл на сессию, по порядку; --key) против
+    вердиктов пар (строки judge-parse). Рубрика: ответы человека на те же вопросы и разметка маркеров (--labels) против
+    ответов судьи — согласие и F1. Пороги — группа judge thresholds.yaml."""
     th = Th(load_thresholds(Path(a.thresholds) if a.thresholds else None))
-    ans = [json.loads(x) for x in Path(a.answers).read_text(encoding="utf-8").splitlines() if x.strip()]
-    rep: dict = {"answers": rel(a.answers)}
+    rows = [json.loads(x) for x in Path(a.answers).read_text(encoding="utf-8").splitlines() if x.strip()]
+    pv = pair_verdicts(rows)
+    rep: dict = {"answers": rel(a.answers), "batch": batch_checks(rows, pv, th), "recalibrate": []}
+    rep["recalibrate"] += rep["batch"]["recalibrate"]
     if a.votes and a.key:
         K = json.loads(Path(a.key).read_text(encoding="utf-8"))
-        human, human_pid = {}, {}
+        files = {}
+        for r in rows:
+            if r.get("mode") == "pairwise":
+                files.setdefault(r["pair"], {r.get("A"): r.get("A_orig"), r.get("B"): r.get("B_orig")})
+        by_set = {frozenset(map(str, f.values())): pid for pid, f in files.items()}
+        per_q: dict = {}
+        sessions = []
         for vf in a.votes:
             V = json.loads(Path(vf).read_text(encoding="utf-8"))
+            hits = []
             for pid, v in (V.get("votes") or {}).items():
                 kp = K["pairs"].get(pid)
                 if not kp or kp.get("gold") or kp.get("identical") or kp.get("repeat_of"):
                     continue
                 pa, pb = str(kp["A"]["files"][0]), str(kp["B"]["files"][0])
+                jp = pid if pid in files else by_set.get(frozenset((pa, pb)))
                 for q, o in v.items():
-                    if o in ("A", "B"):
-                        w = pa if o == "A" else pb
-                        human[(frozenset((pa, pb)), q)] = w
-                        human_pid[(pid, q)] = w
-        per_q, pos, swaps = {}, [], {}
-        for r in ans:
-            if r.get("mode") != "pairwise" or not r.get("answers"):
-                continue
-            for q, w in r["answers"].items():
-                if w in ("A", "B"):
-                    pos.append(w == "A")
-                    # исходник выбранной стороны (судья мог видеть перекодированную копию страницы или --same-encoding)
-                    winner = (r.get("A_orig") or r["A"]) if w == "A" else (r.get("B_orig") or r["B"])
-                    swaps.setdefault((r["pair"], q), []).append(winner)
-                    h = human_pid.get((r.get("pair"), q)) or human.get((frozenset((str(r["orig_a"]), str(r["orig_b"]))), q))
-                    if h is not None and r.get("run") == 1:
-                        per_q.setdefault(q, []).append((winner == h))
+                    if o not in ("A", "B") or jp is None:
+                        continue
+                    human = pa if o == "A" else pb
+                    jv = (pv.get((jp, q)) or {}).get("verdict")
+                    if jv in files[jp]:
+                        ok = str(files[jp][jv]) == human
+                        per_q.setdefault(q, {"hits": [], "abstain": 0})["hits"].append(ok)
+                        hits.append(ok)
+                    else:
+                        per_q.setdefault(q, {"hits": [], "abstain": 0})["abstain"] += 1
+            sessions.append({"votes": rel(vf), "voter": V.get("voter"), "n": len(hits),
+                             "agree": round(sum(hits) / len(hits), 3) if hits else None})
         rep["pairwise"] = {}
-        for q, v in per_q.items():
-            k, n = sum(v), len(v)
-            p, lo, hi = wilson(k, n)
-            rep["pairwise"][q] = {"agree": round(p, 3), "wilson95": [round(lo, 3), round(hi, 3)], "n": n,
+        for q, d in per_q.items():
+            k, n = sum(d["hits"]), len(d["hits"])
+            p, lo, hi = wilson(k, n) if n else (None, None, None)
+            rep["pairwise"][q] = {"agree": round(p, 3) if p is not None else None,
+                                  "wilson95": [round(lo, 3), round(hi, 3)] if n else None, "n": n, "abstain": d["abstain"],
                                   "decision": trust_level(p, lo, n, th)}
-        cons = [len(set(w)) == 1 for w in swaps.values() if len(w) >= 2]
-        rep["swap_consistency"] = {"same": sum(cons), "n": len(cons), "share": round(sum(cons) / len(cons), 3) if cons else None}
-        rep["position_A_share"] = round(sum(pos) / len(pos), 3) if pos else None
-        if rep["position_A_share"] is not None and abs(rep["position_A_share"] - 0.5) > th("judge.position_bias_max", 0.15):
-            rep["warning"] = "судья предпочитает одну сторону — ответы на перестановках обязательны"
+        rep["sessions"] = sessions
+        need = int(th_need(th, "judge.disagree_sessions"))
+        low = th_need(th, "judge.prefilter_agreement_min")
+        tail = 0
+        for s in reversed(sessions):
+            if s["agree"] is None or s["agree"] >= low:
+                break
+            tail += 1
+        rep["sessions_disagree_tail"] = tail
+        if tail >= need:
+            rep["recalibrate"].append(f"расхождение с заказчиком {tail} сессий подряд (порог {need}) — пересчитать калибровку")
     if a.labels:
-        lab = {json.loads(x)["key"]: json.loads(x) for x in Path(a.labels).read_text(encoding="utf-8").splitlines() if x.strip()}
-        pairs, by_type = [], {}
-        yes_j, yes_h = 0, 0
-        for r in ans:
-            if r.get("mode") != "checklist" or r.get("run") != 1 or r.get("key") not in lab:
+        lab = [json.loads(x) for x in Path(a.labels).read_text(encoding="utf-8").splitlines() if x.strip()]
+        iv = item_verdicts(rows)
+        by_key = {v["key"]: v for v in iv.values()}
+        pairs, by_type, yes_j, yes_h = [], {}, 0, 0
+        tp = fp = fn = 0
+        n_def = 0
+        for L in lab:
+            jv = by_key.get(L.get("key"))
+            if jv is None:
                 continue
-            hl = lab[r["key"]]["answers"]
-            types = lab[r["key"]].get("types", {})
-            for q, v in r.get("answers", {}).items():
-                if q in hl and v in ("yes", "no") and hl[q] in ("yes", "no"):
-                    pairs.append((v, hl[q]))
-                    by_type.setdefault(types.get(q, "?"), []).append(v == hl[q])
+            for q, hv in (L.get("answers") or {}).items():
+                v = jv["checklist"].get(q)
+                if v in ("yes", "no") and hv in ("yes", "no"):
+                    pairs.append((v, hv))
+                    by_type.setdefault((L.get("types") or {}).get(q, "?"), []).append(v == hv)
                     yes_j += v == "yes"
-                    yes_h += hl[q] == "yes"
-        k = sum(1 for x, y in pairs if x == y)
-        p, lo, hi = wilson(k, len(pairs)) if pairs else (None, None, None)
-        rep["checklist"] = {"agree": round(p, 3) if p is not None else None, "wilson95": [round(lo, 3), round(hi, 3)] if pairs else None,
-                            "n": len(pairs), "kappa": cohen_kappa(pairs),
-                            "yes_rate_judge": round(yes_j / len(pairs), 3) if pairs else None,
-                            "yes_rate_human": round(yes_h / len(pairs), 3) if pairs else None,
-                            "by_type": {t: {"agree": round(sum(v) / len(v), 3), "n": len(v)} for t, v in by_type.items()},
-                            "decision": trust_level(p, lo, len(pairs), th)}
-    Path(a.out).write_text(jdump(rep), encoding="utf-8") if a.out else None
+                    yes_h += hv == "yes"
+            found = {d["code"] for d in jv["defects"] if d["confirmed"]} | {f["rule"] for f in jv["findings"] if f["confirmed"]}
+            for code, hv in (L.get("defects") or {}).items():
+                if hv not in ("yes", "no"):
+                    continue
+                n_def += 1
+                got = code in found
+                tp += got and hv == "yes"
+                fp += got and hv == "no"
+                fn += (not got) and hv == "yes"
+        if pairs:
+            k = sum(1 for x, y in pairs if x == y)
+            p, lo, hi = wilson(k, len(pairs))
+            rep["checklist"] = {"agree": round(p, 3), "wilson95": [round(lo, 3), round(hi, 3)], "n": len(pairs),
+                                "kappa": cohen_kappa(pairs), "yes_rate_judge": round(yes_j / len(pairs), 3),
+                                "yes_rate_human": round(yes_h / len(pairs), 3),
+                                "by_type": {t: {"agree": round(sum(v) / len(v), 3), "n": len(v)} for t, v in by_type.items()},
+                                "decision": trust_level(p, lo, len(pairs), th)}
+        if n_def:
+            prec = tp / (tp + fp) if tp + fp else None
+            recall = tp / (tp + fn) if tp + fn else None
+            f1 = (2 * prec * recall / (prec + recall)) if prec and recall else (0.0 if (tp + fp + fn) else None)
+            rep["defects"] = {"precision": rnd(prec, 3), "recall": rnd(recall, 3), "f1": rnd(f1, 3), "tp": tp, "fp": fp,
+                              "fn": fn, "n": n_def, "decision": f1_level(f1, n_def, th)}
+    if a.out:
+        Path(a.out).write_text(jdump(rep), encoding="utf-8")
     print(jdump(rep))
     return 0
 
 
 def cmd_calibrate(a):
-    """Порог метрики по меткам человека (ok/bad): лучший порог по Юдену, AUC (Манн–Уитни), n. Пример: калибровка
-    text_zone.edge_density и palette на первых 10 картинках фазы 5 (E)."""
+    """Порог метрики по меткам человека (ok/bad): лучший порог по Юдену, AUC (Манн–Уитни), n."""
     audit = json.loads(Path(a.audit).read_text(encoding="utf-8"))
     lab = {json.loads(x)["file"]: json.loads(x)["label"] for x in Path(a.labels).read_text(encoding="utf-8").splitlines() if x.strip()}
     vals = []
@@ -2521,12 +3142,12 @@ def build_parser():
     w.add_argument("--text-score", type=float, default=0.3)
     w.add_argument("--det-limit", default=f"{OCR_DET_LIMIT[0]}:{OCR_DET_LIMIT[1]}")
     w.add_argument("--no-relines", action="store_true")
-    o = sp.add_parser("ocr", help="OCR (venv-K под heavy.lock) + сверка со строками")
+    o = sp.add_parser("ocr", help="OCR кириллицы под блокировкой heavy + сверка со строками")
     o.add_argument("paths", nargs="+")
     o.add_argument("--lang", default="ru", choices=sorted(OCR_SETS))
     o.add_argument("--text-score", type=float, default=0.3)
     o.add_argument("--expect", action="append", default=[])
-    o.add_argument("--transcripts-out", help="JSON {файл: транскрипт} для stand_run.py metrics --transcripts (E)")
+    o.add_argument("--transcripts-out", help="JSON {файл: транскрипт} для stand_run.py metrics --transcripts")
     u = sp.add_parser("audit", help="приёмка файлов или папки с паспортами")
     u.add_argument("paths", nargs="+")
     u.add_argument("--mode", default="auto", choices=["auto", "series"] + sorted(MODES))
@@ -2537,6 +3158,8 @@ def build_parser():
     u.add_argument("--task", help="код задачи (IMG-HERO-PHOTO …), если нет паспорта")
     u.add_argument("--slot", choices=["hero", "section", "product", "icon", "og", "texture"])
     u.add_argument("--stage", default="master", choices=["master", "web"], help="web — файл на страницу: бюджеты веса")
+    u.add_argument("--mobile", action="store_true",
+                   help="телефонный кадр слота: бюджет <слот>_mobile_kb (hero ≤ 80 КБ), без проверки размера мастера hero")
     u.add_argument("--ratio", help="заказанная пропорция 16:9, если нет паспорта")
     u.add_argument("--expect", action="append", help="строка, которая должна быть на картинке дословно (повторять)")
     u.add_argument("--allow-text", action="append", help="текст, который может быть на картинке (этикетка товара)")
@@ -2545,7 +3168,7 @@ def build_parser():
     u.add_argument("--lang", default="ru", choices=sorted(OCR_SETS))
     u.add_argument("--text-zone", help="x0,y0,x1,y1 в долях кадра")
     u.add_argument("--text-color", help="#hex цвета текста поверх зоны")
-    u.add_argument("--master", help="мастер для проверки производной: картинка — SSIMULACRA2, видео — motion_keep к мезонину (J)")
+    u.add_argument("--master", help="мастер для проверки производной: картинка — SSIMULACRA2, видео — motion_keep к мезонину")
     u.add_argument("--orig", help="исходник правки или аутпейнта")
     u.add_argument("--mask")
     u.add_argument("--mask-mode", default="white", choices=["white", "black", "alpha"])
@@ -2571,30 +3194,39 @@ def build_parser():
     t = sp.add_parser("thresholds", help="пороги с источниками")
     t.add_argument("--check", action="store_true")
     t.add_argument("--thresholds")
-    j = sp.add_parser("judge-jobs", help="задания VLM-судьи .polza-chat.json (платно только в фазе 5 через mp_client.py --live)")
-    j.add_argument("--rubric", required=True)
-    j.add_argument("--items", help="JSONL: {image,…} или {a,b,pair,brief,…}")
-    j.add_argument("--from-stand-page", help="папка страницы голосования stand_run.py page (пары те же, что у заказчика)")
-    j.add_argument("--mode", default="checklist", choices=["checklist", "defects", "pairwise", "transcribe"])
-    j.add_argument("--questions", help="вопросы по id брифа (формат questions_v2.json D2)")
-    j.add_argument("--model", default=JUDGE_MODEL)
-    j.add_argument("--repeat", type=float, default=0.1)
-    j.add_argument("--same-encoding", metavar="DIR",
-                   help="pairwise: перекодировать обе стороны одинаково (как страница stand_run: JPEG q90 ≤ 1600 px) в DIR "
-                        "(например 99-raw/phase5/inputs/K/<тест>); не для K-04 — он меряет смещение к сжатию")
-    j.add_argument("--price-rub", type=float, default=0.05)
-    j.add_argument("--max-rub", type=float, default=0.3)
-    j.add_argument("--test", default="K")
-    j.add_argument("--out", required=True)
-    pj = sp.add_parser("judge-parse", help="ответы судьи (паспорта mp_client) → answers.jsonl")
-    pj.add_argument("--passports", required=True)
-    pj.add_argument("--keys", required=True)
-    pj.add_argument("--out", required=True)
-    g = sp.add_parser("agree", help="согласие судьи с заказчиком")
-    g.add_argument("--answers", required=True)
-    g.add_argument("--votes", action="append")
-    g.add_argument("--key")
-    g.add_argument("--labels")
+    j = sp.add_parser("judge-jobs", help="пакет заданий судьи для отдельных сессий Opus (агент design-judge), ключ — вне пакета")
+    src = j.add_mutually_exclusive_group(required=True)
+    src.add_argument("--items", help="JSONL: {image, brief?, questions?, report?} или {a, b, pair?, brief?, questions?}; "
+                                     "относительные пути — от файла")
+    src.add_argument("--from-stand-page", help="папка страницы голосования stand_run.py page: те же пары и файлы, что у заказчика")
+    src.add_argument("--calibration", action="store_true", help="пары калибровочного набора assets/calibration/index.yaml, "
+                                                                "вопросы — из поля rubric")
+    j.add_argument("--rubric", help="рубрика kb/ai-media/11-evaluation-qa/rubrics/<имя>.rubric.json; без неё — вопросы в каждой "
+                                    "строке --items (макет, страница: вопросы рубрики владельца), с --calibration не нужна")
+    j.add_argument("--mode", default="checklist", choices=["checklist", "defects", "pairwise"],
+                   help="checklist, defects — вид «рубрика» по кадру; pairwise — «попарно» (страница и калибровка — всегда)")
+    j.add_argument("--pairs", help="с --calibration: id пар поля pair через запятую; без него — все пары набора")
+    j.add_argument("--questions", help="JSON {id брифа: [{id, q}]} — вопросы чек-листа по брифу (brief_id строки)")
+    j.add_argument("--runs", type=int, default=3,
+                   help="прогонов задания: 3 — находки и второе мнение, 5 — сортировка трёх и больше вариантов, 1 — черновик "
+                        "(kb/common/judge.md §5)")
+    j.add_argument("--same-encoding", action="store_true",
+                   help="попарно: обе стороны — кодированием страницы голосования (JPEG q90 ≤ 1600 px, PNG при альфе); "
+                        "по умолчанию — PNG без потерь")
+    j.add_argument("--out", help="папка пакетов (по умолчанию $DDD_HOME/out/ai-media/judge)")
+    j.add_argument("--name", help="имя пакета (по умолчанию — вход и хэш входов)")
+    j.add_argument("--force", action="store_true", help="пересобрать пакет, в котором уже есть ответы")
+    pj = sp.add_parser("judge-parse", help="ответы сессий судьи → строки ответов и сводка по правилу протокола")
+    pj.add_argument("package", help="папка пакета judge-jobs")
+    pj.add_argument("--key", help="ключ слепоты (по умолчанию <пакет>.key.json рядом с папкой)")
+    pj.add_argument("--answers", help="папка ответов (по умолчанию <пакет>/answers)")
+    pj.add_argument("--out", help="сводка JSON (по умолчанию <пакет>.verdict.json рядом с ключом; строки — <пакет>.answers.jsonl)")
+    pj.add_argument("--thresholds")
+    g = sp.add_parser("agree", help="согласие судьи с человеком и уровень доверия")
+    g.add_argument("--answers", required=True, help="строки ответов judge-parse (<пакет>.answers.jsonl)")
+    g.add_argument("--votes", action="append", help="голоса страницы stand_run.py — файл на сессию, по порядку сессий")
+    g.add_argument("--key", help="ключ страницы голосования (DIR.key.json)")
+    g.add_argument("--labels", help="JSONL разметки человека: {key, answers?: {id: yes|no}, types?, defects?: {код: yes|no}}")
     g.add_argument("--thresholds")
     g.add_argument("--out")
     c = sp.add_parser("calibrate", help="порог метрики по меткам человека")
@@ -2612,11 +3244,15 @@ def main(argv=None):
     fn = {"_ocr-worker": cmd_ocr_worker, "ocr": cmd_ocr, "audit": cmd_audit, "thresholds": cmd_thresholds,
           "judge-jobs": cmd_judge_jobs, "judge-parse": cmd_judge_parse, "agree": cmd_agree, "calibrate": cmd_calibrate,
           "selftest": cmd_selftest}[a.cmd]
-    return fn(a)
+    try:
+        return fn(a)
+    except JudgeError as e:
+        print(f"asset_audit.py {a.cmd}: {e}", file=sys.stderr)
+        return 2
 
 
 def cmd_selftest(a):
-    """Самопроверка без сети и без OCR-модели (OCR — tests/test_asset_audit.py, если есть venv-K)."""
+    """Самопроверка без сети и без OCR-модели (OCR — tests/test_asset_audit.py --ocr)."""
     sys.path.insert(0, str(TOOLS / "tests"))
     import test_asset_audit as T
     return T.run(keep=getattr(a, "keep", False), ocr=False)
