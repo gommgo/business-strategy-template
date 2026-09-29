@@ -8,13 +8,15 @@
 
 ### Перед работой (0 ₽)
 
-1. Свежие каталоги: `python3 ../../scripts/ai-media/polza_catalog.py snapshot`, `python3 ../../scripts/ai-media/mp_client.py snapshot --channel all`.
-2. Маршруты против каталогов: `python3 ../../scripts/ai-media/routing_check.py 13-routing-matrix/routing.yaml` — 0 ошибок; модель с ошибкой
-   не вызывать (пример 25.09: id Flare сменился `gpt-image-2-5-flare` → `openai/gpt-image-2.5-flare`).
-3. Деньги: `python3 ../../scripts/ai-media/polza.py ledger --sum`, `python3 ../../scripts/ai-media/mp_client.py ledger --sum`; `polza.py balance` —
-   `spentAmount` должен равняться «потрачено до» + журнал (в фазе 5 сошлось до копейки).
+1. Перед платным вызовом — `estimate` без ошибок и «да» заказчика: `polza.py estimate` или `mp_client.py estimate` по файлу заданий
+   (`prompt_compile.py jobs` — одно задание на спецификацию и модель), сумма — против строки утверждённого плана ассетов; `--live` —
+   вместе с владельцем денег. Вызовы — `$DDD_HOME/venv/bin/python scripts/ai-media/<утилита>` из корня скилла.
+2. Снимки каталогов и маршрут — сигнал, не стоп: `polza_catalog.py snapshot`, `mp_client.py snapshot --channel all` (или
+   `scripts/install.sh --catalogs`), затем `routing_check.py` на последних снимках. Расхождение модели или цены с каталогом (id сменился,
+   модель выбыла) — повод сверить строку плана и `estimate`, а не запрет генерации.
+3. Деньги — сигнал: `polza.py ledger --sum`, `mp_client.py ledger --sum` и `polza.py balance` показывают траты; журнал машины и счёт
+   заказчика могут не сойтись (другие траты, другие машины) — расхождение докладывается заказчику, работа не останавливается.
 4. Ключи — только файлами `~/.config/{polza,routerai,genapi}/api_key` (права 600); не читать, не печатать, не класть в чат.
-5. Каждое задание — сначала `estimate` (`polza.py estimate`, `mp_client.py estimate`), 0 ошибок; `--live` — с согласия владельца денег.
 
 ### Что брать (фаза 5, ₽ за один результат)
 
@@ -105,9 +107,9 @@
 
 ## Чек-лист
 
-- [ ] Снимки каталогов свежие, `routing_check.py` — 0 ошибок, баланс сверен с журналом.
+- [ ] Снимки каталогов, `routing_check.py` и сверка баланса с журналом — сигнал: расхождение сверено со строкой плана и доложено.
 - [ ] Строка «Что брать» найдена; детали — в `04-capability-map.md` §2 той же возможности.
-- [ ] `estimate` — 0 ошибок; для Gen-API цена по таблице страницы модели.
+- [ ] Перед платным вызовом — `estimate` без ошибок и «да» заказчика; для Gen-API цена по таблице страницы модели.
 - [ ] Выход проверен утилитой и порогом из таблицы «Как проверить» и глазами.
 - [ ] Видео нормализовано: теги BT.709, `-an`, постер = кадр 0.
 - [ ] Паспорт и мастер сохранены; производные помечены `provenance_check.py stamp`.

@@ -1,32 +1,38 @@
 #!/usr/bin/env python3
-"""routing_check.py 1.1 — проверка 13-routing-matrix/routing.yaml (агент N, волна 3, 24.09.2026; v1.1 — агент U, 25.09.2026).
+"""routing_check.py — сверка матрицы маршрутов kb/ai-media/13-routing-matrix/routing.yaml с каталогами моделей.
 
-Без сети и без ключей. Проверяет:
-  1. yaml.safe_load, version, checked_at, все 31 код таксономии (+ предложения с `proposal: true`);
-  2. у каждого варианта (`options`) — канал из `enums.channel`, роль, `final`;
-  3. polza: модель есть в снимке каталога; провайдер — из списка провайдеров модели (или top_provider);
-     параметры проходят `polza_catalog.validate` (0 ошибок); цена = `polza_catalog.estimate` (± 1 % или ± 0,02 ₽);
-  4. routerai / genapi: модель (сеть) есть в своём снимке каталога; цена — по прайсу канала (± 2 %; у токенных GPT Image —
-     выход medium по формуле mp_client не выше заявленной цены, заявленная ≤ выход × 2,5 — вход картинки);
-  5. polza-chat: чат-модель есть в снимке polza; polza-images: модель есть, цена ≥ ступени 1K;
-  6. external — есть `access`; local / code / blender — есть `tool`;
-  7. диалект — семейство есть в 05-prompting/dialects.yaml и формат совпадает;
-  8. check.audit_mode — из enums; check.rubric — файл 11-evaluation-qa/rubrics/<имя>.rubric.json;
-  9. legal.flags и флаги вариантов — из enums; модель с флагом research (qwen/image-2.1) — только `final: false`;
-     `minimax/*` — с флагом `visible-vendor-mark` (ToS: метка в контенте); строки политики 12–14 (люди) — флаг
-     маршрута `people-consent` (X2, 24.09.2026; CONTRADICTIONS X35, X42);
- 10. устаревшие модели (defaults.deprecated) — не среди вариантов (в `not` можно);
- 11. phase5_test — есть задание 99-raw/phase5/jobs/<ID>-* или строка плана 99-raw/phase5/*-plan.md, T0–T9
-     (коды с цифрой в начале и трёхбуквенные — `3D-21`, `VAR-01` — с v1.1);
- 12. label — из enums.labels (каждая метка в квадратных скобках — известная).
- v1.1 (агент U, сессия 5, 25.09.2026) — routing.yaml v2:
- 13. version — 1 или 2;
- 14. defaults.unavailable_<дата> (выбывшие модели: model, error) — такая модель не может быть вариантом с final: true
-     (в `not` и с final: false — можно); у записи обязательны model и error;
- 15. defaults.not_routes — у каждой записи есть what и why.
+Сигнал, а не стоп: расхождение варианта с каталогом (модель выбыла, сменился id, цена или параметр) говорит, что строку
+матрицы надо сверить перед заданием; генерацию останавливают `estimate` задания с ошибкой и отсутствие «да» заказчика,
+а не этот отчёт. Без сети и без ключей.
 
-Запуск:  python3 99-raw/tools/routing_check.py [13-routing-matrix/routing.yaml] [--json OUT.json] [--md OUT.md]
-Код выхода: 0 — ошибок нет (предупреждения допустимы), 1 — есть ошибки.
+Снимки каталогов — последние в $DDD_HOME/cache/ai-media/{polza,routerai,genapi}/ (ставит `scripts/install.sh
+--catalogs`, обновляют `polza_catalog.py snapshot` и `mp_client.py snapshot --channel all`); другой снимок — ключами
+--polza, --routerai, --genapi (имя папки или путь). Поле `catalog_snapshots` матрицы — снимки, с которыми её сверяли при
+обновлении; отчёт показывает их рядом со снимками прогона.
+
+Проверяет:
+  1. разбор YAML, `version` (1 или 2), `checked_at`, маршрут на каждый код таксономии (код вне таксономии — с
+     `proposal: true`), обязательные поля маршрута, `delivery` из `defaults.delivery`, метки `label` из `enums.labels`;
+  2. у варианта (`options`) — роль, канал из `enums.channel`, поле `final`;
+  3. polza: модель есть в снимке, провайдер — из провайдеров модели (или `top_provider`), параметры проходят
+     `polza_catalog.validate`, цена = `polza_catalog.estimate` (± 1 % или ± 0,02 ₽);
+  4. routerai, genapi: модель (сеть) есть в своём снимке, цена — по прайсу канала (± 2 %; у токенных GPT Image — выход
+     medium по формуле mp_client не выше заявленной цены, заявленная ≤ выход × 2,5 — вход картинки);
+  5. polza-chat: чат-модель есть в снимке polza; polza-images: модель есть, цена не ниже ступени 1K;
+  6. external — есть `access`; local, code, blender — есть `tool`;
+  7. диалект — семейство есть в 05-prompting/dialects.yaml, формат совпадает;
+  8. `check.audit_mode` — из enums, `check.rubric` — файл 11-evaluation-qa/rubrics/<имя>.rubric.json;
+  9. флаги `legal` маршрута и варианта — из enums; модель с флагом research — только `final: false`; `minimax/*` — с
+     флагом `visible-vendor-mark` (условия вендора: метка в контенте); строки политики 12–14 (люди) — флаг маршрута
+     `people-consent`;
+ 10. устаревшие модели (`defaults.deprecated`) — не среди вариантов (в `not` можно; с `until` не раньше `checked_at` —
+     предупреждение);
+ 11. выбывшие модели (`defaults.unavailable_<дата>`: `model`, `error`) — вариантом только с `final: false` или в `not`;
+     `defaults.not_routes` — у записи `what` и `why`.
+
+Запуск:  routing_check.py [ROUTING.yaml] [--polza SNAP] [--routerai SNAP] [--genapi SNAP] [--json OUT.json] [--md OUT.md]
+Код выхода: 0 — расхождений нет (предупреждения допустимы); 1 — есть расхождения (раздел «Ошибки» отчёта); 2 — нет
+снимка каталога polza.
 """
 from __future__ import annotations
 
@@ -39,7 +45,7 @@ from pathlib import Path
 import yaml
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(HERE.parent / "lib"))  # scripts/lib: kbpaths
 import kbpaths  # noqa: E402
 ROOT = kbpaths.kb("ai-media")
 sys.path.insert(0, str(HERE))
@@ -76,31 +82,6 @@ class Report:
 
 def near(a: float, b: float, rel: float, abs_: float = 0.02) -> bool:
     return abs(a - b) <= max(abs_, rel * max(abs(a), abs(b)))
-
-
-TEST_ID = r"[A-Z0-9][A-Z0-9]{0,2}\d?-\d{2}"   # E-08, D2-01, CM-09, MS-05, 3D-21, VAR-01 (v1.1: цифра в начале, 3 буквы)
-
-
-def known_test_ids() -> set[str]:
-    ids = set()
-    jobs = kbpaths.out("ai-media", "phase5", "jobs")  # перенос: задания — выход stand_run, не kb
-    for f in jobs.iterdir() if jobs.is_dir() else []:
-        m = re.match(rf"^({TEST_ID})-", f.name)
-        if m:
-            ids.add(m.group(1))
-    drafts = ROOT / "99-raw/experiments/N/02-phase5-plan/jobs"   # заготовки N сводного плана (до переноса в jobs/)
-    for f in drafts.iterdir() if drafts.is_dir() else []:
-        m = re.match(rf"^({TEST_ID})-", f.name)
-        if m:
-            ids.add(m.group(1))
-    for plan in [*(ROOT / "99-raw/phase5").glob("*-plan.md"), ROOT / "99-raw/phase5/plan.md"]:
-        if not plan.exists():
-            continue
-        txt = plan.read_text(encoding="utf-8")
-        for m in re.finditer(rf"^\|\s*({TEST_ID})\s*\|", txt, re.M):
-            ids.add(m.group(1))
-    ids.update(f"T{i}" for i in range(10))
-    return ids
 
 
 def ra_price(cat, mid: str, params: dict) -> tuple[float | None, str]:
@@ -144,7 +125,7 @@ def ga_price(cat, slug: str, params: dict) -> tuple[float | None, str]:
 
 
 def people_rows(rows) -> bool:
-    """Есть ли среди policy_rows строки 12–14 таблицы L 12/04 §2 (люди-декор, реальные люди, клиенты и команда)."""
+    """Есть ли среди policy_rows строки 12–14 таблицы ai-media 12/04 §2 (люди-декор, реальные люди, клиенты и команда)."""
     nums = set()
     for row in rows or []:
         for chunk in re.findall(r"стр\. ([0-9][0-9,–\- ]*)", str(row)):
@@ -158,10 +139,14 @@ def people_rows(rows) -> bool:
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("routing", nargs="?", default=str(ROOT / "13-routing-matrix/routing.yaml"))
-    ap.add_argument("--json")
-    ap.add_argument("--md")
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("routing", nargs="?", default=str(ROOT / "13-routing-matrix/routing.yaml"),
+                    help="матрица маршрутов (по умолчанию — routing.yaml базы)")
+    ap.add_argument("--polza", metavar="SNAP", help="снимок каталога polza: имя папки или путь (по умолчанию — последний)")
+    ap.add_argument("--routerai", metavar="SNAP", help="снимок каталога RouterAI (по умолчанию — последний)")
+    ap.add_argument("--genapi", metavar="SNAP", help="снимок каталога Gen-API (по умолчанию — последний)")
+    ap.add_argument("--json", metavar="OUT.json", help="отчёт JSON: ok, errors, warnings, rows, snapshots")
+    ap.add_argument("--md", metavar="OUT.md", help="отчёт Markdown в файл (без ключа — в stdout)")
     a = ap.parse_args(argv)
 
     rep = Report()
@@ -178,7 +163,7 @@ def main(argv=None) -> int:
     modes_ok = set(enums.get("audit_modes", []))
     defaults = data.get("defaults", {}) or {}
     deprecated = [str(x).split(" ")[0] for x in defaults.get("deprecated", [])]
-    # v1.1: выбывшие модели (defaults.unavailable_<дата>) и «не маршруты» (defaults.not_routes)
+    # выбывшие модели (defaults.unavailable_<дата>) и «не маршруты» (defaults.not_routes)
     unavailable = {}
     for key, lst in defaults.items():
         if not str(key).startswith("unavailable"):
@@ -192,22 +177,28 @@ def main(argv=None) -> int:
         if not isinstance(nr, dict) or not nr.get("what") or not nr.get("why"):
             rep.err(f"defaults.not_routes#{i + 1}", "нужны поля what и why")
 
-    snaps = data.get("catalog_snapshots", {})
-    snap = pc.Snapshot(Path(ROOT / snaps["polza"]).name if snaps.get("polza") else None)
+    pinned = {k: Path(str(v)).name for k, v in (data.get("catalog_snapshots") or {}).items() if v}
+    try:
+        snap = pc.Snapshot(a.polza)
+    except SystemExit as e:
+        print(f"{e} — снимок каталога polza: scripts/install.sh --catalogs или polza_catalog.py snapshot (бесплатный GET)",
+              file=sys.stderr)
+        return 2
     ra = ga = None
     if mp is not None:
         try:
-            ra = mp.RouterCatalog(str(ROOT / snaps["routerai"])) if snaps.get("routerai") else mp.RouterCatalog()
+            ra = mp.RouterCatalog(a.routerai)
         except SystemExit as e:
             rep.warn("routerai", f"каталог не загружен: {e}")
         try:
-            ga = mp.GenapiCatalog(str(ROOT / snaps["genapi"])) if snaps.get("genapi") else mp.GenapiCatalog()
+            ga = mp.GenapiCatalog(a.genapi)
         except SystemExit as e:
             rep.warn("genapi", f"каталог не загружен: {e}")
+    used = {"polza": snap.dir.name, "routerai": ra.path.parent.name if ra else None,
+            "genapi": ga.path.parent.name if ga else None}
     dialects = yaml.safe_load((ROOT / "05-prompting/dialects.yaml").read_text(encoding="utf-8"))
     families = dialects.get("families", {})
     rubrics = {p.name.replace(".rubric.json", "") for p in (ROOT / "11-evaluation-qa/rubrics").glob("*.rubric.json")}
-    test_ids = known_test_ids()
 
     routes = data.get("routes", {})
     for code in TAXONOMY:
@@ -217,7 +208,7 @@ def main(argv=None) -> int:
         if code not in TAXONOMY and not r.get("proposal"):
             rep.err(code, "код вне таксономии без proposal: true")
         where = code
-        for key in ("name", "options", "dialect", "check", "delivery", "legal", "label", "checked", "phase5_test", "decides"):
+        for key in ("name", "options", "dialect", "check", "delivery", "legal", "label", "checked", "decides"):
             if key not in r:
                 rep.err(where, f"нет поля {key}")
         if r.get("delivery") and r["delivery"] not in data.get("defaults", {}).get("delivery", {}):
@@ -247,11 +238,7 @@ def main(argv=None) -> int:
                 rep.err(where, f"флаг legal {f!r} не из enums.legal_flags")
         if people_rows((r.get("legal") or {}).get("policy_rows", [])) and \
                 "people-consent" not in ((r.get("legal") or {}).get("flags") or []):
-            rep.err(where, "строки политики 12–14 (люди) без флага people-consent (L 12/04 §2)")
-        # тесты фазы 5
-        for t in r.get("phase5_test") or []:
-            if t not in test_ids:
-                rep.err(where, f"тест {t} не найден в jobs/ и планах фазы 5")
+            rep.err(where, "строки политики 12–14 (люди) без флага people-consent (ai-media 12/04 §2)")
         # варианты
         if not r.get("options"):
             rep.err(where, "пустой options")
@@ -278,10 +265,10 @@ def main(argv=None) -> int:
             if mid and mid in unavailable and o.get("final") is not False:
                 rep.err(w, f"модель {mid} выбыла (defaults.{unavailable[mid]}) — вариантом только с final: false или в not")
             if mid and mid.startswith("minimax/") and "visible-vendor-mark" not in (o.get("legal") or []):
-                rep.err(w, "MiniMax без флага visible-vendor-mark (ToS: «prominent mark… within generated content», L 12/01 §2)")
+                rep.err(w, "MiniMax без флага visible-vendor-mark (ToS: «prominent mark… within generated content», ai-media 12/01 §2)")
             if mid == "qwen/image-2.1" or "research" in (o.get("legal") or []):
                 if o.get("final") is not False:
-                    rep.err(w, "модель с флагом research должна быть final: false (L 12/01 §5)")
+                    rep.err(w, "модель с флагом research должна быть final: false (ai-media 12/01 §5)")
                 if "research" not in (o.get("legal") or []):
                     rep.err(w, "qwen/image-2.1 без флага legal research")
             row = {"code": code, "role": o.get("role"), "channel": ch, "model": mid or o.get("tool", "")[:60],
@@ -396,11 +383,14 @@ def main(argv=None) -> int:
                 rep.err(where, f"в not у {n.get('model')} нет why")
 
     ok = not rep.errors
-    lines = [f"# routing_check.py — {path.name} v{data.get('version')} · снимок polza {snap.dir.name} · "
-             f"RouterAI {ra.path.parent.name if ra else '—'} · Gen-API {ga.path.parent.name if ga else '—'}", "",
-             f"Маршрутов: {len(routes)} (кодов таксономии {sum(1 for c in routes if c in TAXONOMY)}/{len(TAXONOMY)}); "
-             f"вариантов: {len(rep.rows)}; ошибок: {len(rep.errors)}; предупреждений: {len(rep.warnings)}", "",
-             "| Код | Роль | Канал | Модель / инструмент | Провайдер | ₽ заявлено | ₽ каталог | Статус |", "|---|---|---|---|---|---|---|---|"]
+    lines = [f"# routing_check.py — {path.name} v{data.get('version')} · снимок polza {used['polza']} · "
+             f"RouterAI {used['routerai'] or '—'} · Gen-API {used['genapi'] or '—'}", ""]
+    if pinned:
+        lines += ["Снимки, с которыми матрицу сверяли при обновлении (`catalog_snapshots`): "
+                  + ", ".join(f"{k} {v}" for k, v in pinned.items()) + ".", ""]
+    lines += [f"Маршрутов: {len(routes)} (кодов таксономии {sum(1 for c in routes if c in TAXONOMY)}/{len(TAXONOMY)}); "
+              f"вариантов: {len(rep.rows)}; ошибок: {len(rep.errors)}; предупреждений: {len(rep.warnings)}", "",
+              "| Код | Роль | Канал | Модель / инструмент | Провайдер | ₽ заявлено | ₽ каталог | Статус |", "|---|---|---|---|---|---|---|---|"]
     for row in rep.rows:
         cat = "" if row["catalog"] is None else f"{row['catalog']:.4f}".rstrip("0").rstrip(".")
         dec = "" if row["declared"] is None else f"{row['declared']}"
@@ -413,7 +403,8 @@ def main(argv=None) -> int:
     if a.md:
         Path(a.md).write_text(text, encoding="utf-8")
     if a.json:
-        Path(a.json).write_text(json.dumps({"ok": ok, "errors": rep.errors, "warnings": rep.warnings, "rows": rep.rows},
+        Path(a.json).write_text(json.dumps({"ok": ok, "errors": rep.errors, "warnings": rep.warnings, "rows": rep.rows,
+                                            "snapshots": {"used": used, "matrix": pinned}},
                                            ensure_ascii=False, indent=1), encoding="utf-8")
     print(text if (a.md is None) else f"Маршрутов {len(routes)}, вариантов {len(rep.rows)}, ошибок {len(rep.errors)}, "
                                       f"предупреждений {len(rep.warnings)} → {a.md}")

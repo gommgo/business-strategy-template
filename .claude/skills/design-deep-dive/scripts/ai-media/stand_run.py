@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """stand_run.py — стенд моделей ai-media: задания по рецептам стенда, сбор результатов, автометрики, контактные листы,
-страница слепого попарного голосования (картинки и текстовые варианты), подсчёт голосов, мини-стенд новой модели.
+страница слепого попарного выбора (варианты картинок, кадры 3D, текстовые варианты), подсчёт голосов, мини-стенд новой
+модели.
 
-Python 3.13 + PyYAML, numpy, scipy, Pillow. Сеть не нужна; платные вызовы делает только polza.py и только с --live (ключ —
-переменная окружения владельца). Описание стенда — kb/ai-media/13-routing-matrix/; метод голосования — 13/01 §4.3.
+Python окружения скилла: PyYAML, numpy, scipy, Pillow. Сеть не нужна; платные вызовы делает только polza.py и только с
+--live (ключ — переменная окружения владельца). Описание стенда — kb/ai-media/13-routing-matrix/; метод голосования —
+13/01 §4.3.
 
 Подкоманды:
   build     [--only E-02,E-08]         рецепты tasks.yaml → задания polza.py в $DDD_HOME/out/ai-media/phase5/jobs (E-*.jsonl,
@@ -11,11 +13,17 @@ Python 3.13 + PyYAML, numpy, scipy, Pillow. Сеть не нужна; платн
                                        умолчанию) или буквальная строка
   estimate  [--only …]                 polza.py estimate по заданиям E-* → таблица «тест · заданий · ошибок · ₽»
   run       JOBS.jsonl [--live] [--parallel 2]   прогон через polza.py batch (без --live — сухой прогон)
-  collect   [--root DIR] [--out results.jsonl]   паспорта polza.py → таблица результатов
+  collect   [--root DIR] [--agent A] [--out results.jsonl]   паспорта polza.py под DIR → таблица результатов (строка на
+                                       файл); DIR по умолчанию — выходы polza.py (POLZA_OUT_ROOT, иначе
+                                       $DDD_HOME/out/ai-media/_polza); путь паспорта — от DIR; --agent — только его задания
   metrics   RESULTS.jsonl [--transcripts T.json] [--out metrics.jsonl]   автометрики по задачам (см. METRICS)
   sheet     RESULTS.jsonl --out DIR [--blind]      контактные листы по тестам (подписи моделей или буквы)
-  page      RESULTS.jsonl --out DIR [--tests E-08,E-10] [--repeat 0.1] [--seed 7]   страница слепого голосования картинок
-            (DIR/index.html + DIR/img/; ключ «картинка → модель» — рядом, в DIR.key.json, в папку страницы не кладётся)
+  page      ВХОД --out DIR [--tests E-08,E-10] [--repeat 0.1] [--seed 7]   страница слепых пар картинок (DIR/index.html +
+            DIR/img/; ключ «картинка → вариант» — рядом, в DIR.key.json, в папку страницы не кладётся). ВХОД — папка
+            выходов polza.py (паспорта), таблица collect или папка картинок без паспортов. Задания стенда — пары между
+            моделями группы голосования; задания плана (prompt_compile.py jobs) — группа на спецификацию, пары между
+            всеми её вариантами (вариант — «модель#номер»); папка картинок (кадры 3D, снимки сборок) — группа на
+            подпапку, вариант — имя файла; --tests — только эти группы
   page      --text SHEET.md [--text-key KEY.yaml] --out DIR [--repeat 0.1] [--seed 7]
                                        те же слепые пары для текстовых вариантов: карточки текста из листа
                                        copydeck.py export-variants, пары — между вариантами одного слота
@@ -24,7 +32,8 @@ Python 3.13 + PyYAML, numpy, scipy, Pillow. Сеть не нужна; платн
                                        позиционный сдвиг, контрольные пары; у текстовой страницы --selection — победы
                                        меток по слоту для copydeck.py apply-selection --votes (--method human-pairwise)
   ministand --model ID [--params '{"image_resolution":"1K"}'] [--vs PRESET]   регрессионный набор для новой модели
-  selftest                             офлайн-проверки (нормализация кириллицы, Уилсон, Брэдли–Терри, текстовая страница)
+  selftest                             офлайн-проверки (нормализация кириллицы, Уилсон, Брэдли–Терри, страницы картинок и
+                                       текстов, сбор паспортов вне базы)
 """
 from __future__ import annotations
 
@@ -36,6 +45,7 @@ import importlib.util
 import io
 import json
 import math
+import os
 import random
 import re
 import subprocess
@@ -49,7 +59,8 @@ ROOT = kbpaths.kb("ai-media")
 TOOLS = kbpaths.scripts("ai-media")
 STAND = ROOT / "13-routing-matrix/stand"
 TASKS = STAND / "tasks.yaml"
-JOBS = kbpaths.out("ai-media", "phase5", "jobs")  # задания стенда — выход, не kb (их же читает routing_check.py)
+JOBS = kbpaths.out("ai-media", "phase5", "jobs")  # задания стенда — выход, не kb
+IMAGE_EXT = (".png", ".jpg", ".jpeg", ".webp", ".avif", ".gif")   # что страница пар показывает картинкой
 sys.path.insert(0, str(TOOLS))
 
 
@@ -205,24 +216,32 @@ def cmd_run(a):
 
 # ================================================================ collect: паспорта → результаты
 
-def cmd_collect(a):
-    rows = []
-    for pp in sorted(Path(a.root).rglob("*.passport.json")):
+def collect_rows(root, agent=None):
+    """Паспорта polza.py под root → строки результатов (файл результата — строка); путь паспорта — от root."""
+    root, rows = Path(root), []
+    for pp in sorted(root.rglob("*.passport.json")):
         p = json.loads(pp.read_text(encoding="utf-8"))
         job = p.get("job") or {}
         meta = job.get("meta") or {}
-        if job.get("agent") not in (None, "E") and not a.any_agent:
+        if agent and job.get("agent") != agent:
             continue
         for i, f in enumerate(p.get("files") or []):
+            if not f.get("path"):
+                continue
             media = f.get("media") or {}
             rows.append({"test": meta.get("test"), "task": meta.get("task"), "code": meta.get("code"), "arm": meta.get("arm"),
                          "preset": meta.get("preset"), "model": job.get("model"), "variant": job.get("variant"),
                          "file": f.get("path"), "file_index": i, "w": media.get("width"), "h": media.get("height"),
                          "bytes": f.get("bytes"), "cost_rub": (p.get("cost") or {}).get("usage_cost_rub"),
                          "wall_s": (p.get("timing") or {}).get("wall_s"), "provider_actual": p.get("provider_actual"),
-                         "dialect": meta.get("dialect"), "meta": meta, "passport": str(pp.relative_to(ROOT))})
+                         "dialect": meta.get("dialect"), "meta": meta, "passport": str(pp.relative_to(root))})
+    return rows
+
+
+def cmd_collect(a):
+    rows = collect_rows(a.root, a.agent)
     jl_write(a.out, rows)
-    print(f"результатов: {len(rows)} → {a.out}")
+    print(f"результатов: {len(rows)} → {a.out} (паспорта — от {a.root})")
     return 0
 
 
@@ -627,19 +646,40 @@ def cmd_page(a):
         st = build_page(items, a.out, title="Тексты — слепое сравнение", repeat=a.repeat, seed=a.seed, kind="text")
         print(json.dumps(st, ensure_ascii=False))
         return 0
-    if not a.results:
-        print("нужен RESULTS.jsonl или --text SHEET.md", file=sys.stderr)
+    if not a.results or not Path(a.results).exists():
+        print(f"нет входа страницы {a.results or ''}: нужна папка выходов polza.py, таблица collect, папка картинок "
+              f"или --text SHEET.md", file=sys.stderr)
         return 2
-    rows = jl_read(a.results)
+    src = Path(a.results)
+    rows = page_rows(src)
     tests = set(a.tests.split(",")) if a.tests else None
-    by = {}
+    by, seen, other = {}, {}, 0
     for r in rows:
         meta = r.get("meta") or {}
-        for grp in meta.get("vote_groups") or [f"{r['test']}/{r.get('task')}/{r.get('arm')}"]:
-            if tests and grp.split("/")[0] not in tests:
-                continue
-            key = (grp, meta.get("vote_id") or r.get("preset") or r.get("model"), r.get("variant"), r.get("file_index"))
-            by.setdefault(key, []).append(r)
+        if Path(str(r.get("file") or "")).suffix.lower() not in IMAGE_EXT:
+            other += 1
+            continue
+        if meta.get("vote_groups") or meta.get("task"):       # задания стенда: пары между моделями группы голосования
+            for grp in meta.get("vote_groups") or [f"{r['test']}/{r.get('task')}/{r.get('arm')}"]:
+                if tests and grp.split("/")[0] not in tests:
+                    continue
+                key = (grp, meta.get("vote_id") or r.get("preset") or r.get("model"), r.get("variant"), r.get("file_index"))
+                by.setdefault(key, []).append(r)
+            continue
+        # задания плана и папка картинок: группа — спецификация (подпапка), пары между всеми вариантами группы
+        grp = meta.get("group") or meta.get("spec") or r.get("test") or src.resolve().name
+        if tests and grp.split("/")[0] not in tests:
+            continue
+        label = meta.get("label") or (f"{r.get('model')}#{r.get('variant') or 1}"
+                                      + (f".{r['file_index'] + 1}" if r.get("file_index") else ""))
+        base, n = label, 1
+        while label in seen.setdefault(grp, set()):
+            n += 1
+            label = f"{base}·{n}"
+        seen[grp].add(label)
+        by[(grp, label, None, None)] = [r]
+    if other:
+        print(f"не картинки — на страницу не попали файлов: {other}", file=sys.stderr)
     items = []
     for (grp, model, _, _), rs in by.items():
         meta = rs[0].get("meta") or {}
@@ -647,11 +687,30 @@ def cmd_page(a):
         spec = json.loads((STAND / brief).read_text(encoding="utf-8")) if brief and brief != "literal" else {}
         tz = ((spec.get("composition") or {}).get("text_zone") or {}).get("rect")
         items.append({"group": grp, "model": model, "files": [r["file"] for r in rs], "test": grp.split("/")[0],
-                      "brief": meta.get("brief_text") or meta.get("success", ""), "text_zone": tz,
-                      "copy": (spec.get("text") or {}).get("copy"), "ref": meta.get("ref")})
+                      "brief": meta.get("brief_text") or meta.get("success") or meta.get("spec") or meta.get("group") or "",
+                      "text_zone": tz, "copy": (spec.get("text") or {}).get("copy"), "ref": meta.get("ref")})
+    if not items:
+        print(f"в {src} нет картинок для пар", file=sys.stderr)
+        return 2
     st = build_page(items, a.out, repeat=a.repeat, seed=a.seed)
     print(json.dumps(st, ensure_ascii=False))
     return 0
+
+
+def page_rows(src):
+    """Вход страницы картинок → строки результатов: таблица collect (файл); паспорта polza.py в папке; если паспортов
+    нет — картинки папки (строка на файл: группа — подпапка, вариант — имя файла)."""
+    src = Path(src)
+    if src.is_file():
+        return jl_read(src)
+    rows = collect_rows(src)
+    if rows:
+        return rows
+    for f in sorted(x for x in src.rglob("*") if x.is_file() and x.suffix.lower() in IMAGE_EXT):
+        grp = f.parent.relative_to(src).as_posix() if f.parent != src else src.resolve().name
+        rows.append({"model": None, "variant": None, "file": str(f.resolve()), "file_index": 0,
+                     "meta": {"group": grp, "label": f.stem}})
+    return rows
 
 
 PAGE_HTML = r"""<!doctype html>
@@ -1016,23 +1075,69 @@ def cmd_selftest(a):
         check(f"текст: победы меток по слоту для apply-selection — {sel}", sel == {"home/hero/h1": {"A": 1, "B": 0, "C": 2}})
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
+    # картинки: паспорта polza.py вне базы → collect → страница пар между вариантами спецификации; папка кадров без паспортов
+    from PIL import Image
+    tmp = Path(tempfile.mkdtemp(prefix="stand_img_"))
+    try:
+        day = tmp / "out" / "pilot" / "day"
+        day.mkdir(parents=True)
+        for n, (model, variant) in enumerate([("m/a", 1), ("m/a", 2), ("m/b", 1)]):
+            f = day / f"hero__{slug(model)}__g{n}.png"
+            Image.new("RGB", (64, 36), (60 + 60 * n, 90, 140)).save(f)
+            pas = {"schema": "polza-passport/1", "job": {"tag": "hero", "agent": "pilot", "variant": variant, "model": model,
+                                                         "meta": {"spec": "hero-16x9", "dialect": "sections"}},
+                   "files": [{"path": str(f), "bytes": f.stat().st_size, "media": {"width": 64, "height": 36}}]}
+            (day / f"{f.stem}.passport.json").write_text(json.dumps(pas), encoding="utf-8")
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = cmd_collect(argparse.Namespace(root=str(tmp / "out"), agent=None, out=str(tmp / "results.jsonl")))
+            cmd_collect(argparse.Namespace(root=str(tmp / "out"), agent="другой", out=str(tmp / "none.jsonl")))
+        rows = jl_read(tmp / "results.jsonl")
+        check("картинки: collect по паспортам вне базы — путь паспорта от корня выходов; --agent — только его задания",
+              rc == 0 and len(rows) == 3 and all(r["passport"].startswith("pilot/day/") for r in rows)
+              and jl_read(tmp / "none.jsonl") == [])
+        page_args = dict(text=None, text_key=None, tests=None, repeat=0.1, seed=3)
+        with contextlib.redirect_stdout(io.StringIO()):
+            cmd_page(argparse.Namespace(results=str(tmp / "out"), out=str(tmp / "vote"), **page_args))
+        K = json.loads((tmp / "vote.key.json").read_text(encoding="utf-8"))
+        main_pairs = [kp for kp in K["pairs"].values() if not (kp.get("repeat_of") or kp.get("identical") or kp.get("gold"))]
+        check("картинки: страница из выхода polza.py — 3 варианта спецификации → 3 пары, варианты одной модели — тоже в паре",
+              len(main_pairs) == 3 and {kp["group"] for kp in main_pairs} == {"hero-16x9"}
+              and {kp[s]["model"] for kp in main_pairs for s in "AB"} == {"m/a#1", "m/a#2", "m/b#1"}
+              and (tmp / "vote" / "index.html").exists())
+        frames = tmp / "frames" / "hero-3d"
+        frames.mkdir(parents=True)
+        for n in range(3):
+            Image.new("RGB", (48, 48), (40 + 70 * n, 120, 90)).save(frames / f"kadr-{n + 1}.png")
+        with contextlib.redirect_stdout(io.StringIO()):
+            cmd_page(argparse.Namespace(results=str(tmp / "frames"), out=str(tmp / "vote3d"), **page_args))
+        K = json.loads((tmp / "vote3d.key.json").read_text(encoding="utf-8"))
+        main_pairs = [kp for kp in K["pairs"].values() if not (kp.get("repeat_of") or kp.get("identical") or kp.get("gold"))]
+        check("картинки: папка кадров без паспортов — группа по подпапке, вариант — имя файла",
+              len(main_pairs) == 3 and {kp["group"] for kp in main_pairs} == {"hero-3d"}
+              and {kp[s]["model"] for kp in main_pairs for s in "AB"} == {"kadr-1", "kadr-2", "kadr-3"})
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
     return 0 if ok else 1
 
 
 # ================================================================ main
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--tasks", default=str(TASKS))
     sub = ap.add_subparsers(dest="cmd", required=True)
     b = sub.add_parser("build"); b.add_argument("--only")
     e = sub.add_parser("estimate"); e.add_argument("--only")
     r = sub.add_parser("run"); r.add_argument("jobs"); r.add_argument("--live", action="store_true"); r.add_argument("--parallel", type=int, default=2)
-    c = sub.add_parser("collect"); c.add_argument("--root", default=str(kbpaths.out("ai-media", "_polza", "E"))); c.add_argument("--out", default="results.jsonl")
-    c.add_argument("--any-agent", action="store_true")
+    c = sub.add_parser("collect"); c.add_argument("--out", default="results.jsonl")
+    c.add_argument("--root", default=os.environ.get("POLZA_OUT_ROOT") or str(kbpaths.out("ai-media", "_polza")),
+                   help="корень выходов polza.py с паспортами (по умолчанию POLZA_OUT_ROOT или $DDD_HOME/out/ai-media/_polza)")
+    c.add_argument("--agent", help="только задания этого агента (поле agent задания)")
     m = sub.add_parser("metrics"); m.add_argument("results"); m.add_argument("--transcripts"); m.add_argument("--out", default="metrics.jsonl")
     s = sub.add_parser("sheet"); s.add_argument("results"); s.add_argument("--out", required=True); s.add_argument("--blind", action="store_true")
-    p = sub.add_parser("page"); p.add_argument("results", nargs="?"); p.add_argument("--out", required=True); p.add_argument("--tests")
+    p = sub.add_parser("page"); p.add_argument("--out", required=True)
+    p.add_argument("results", nargs="?", help="папка выходов polza.py, таблица collect (.jsonl) или папка картинок")
+    p.add_argument("--tests", help="только эти группы: тесты стенда, спецификации или подпапки через запятую")
     p.add_argument("--text", help="лист copydeck.py export-variants: страница текстовых карточек")
     p.add_argument("--text-key", help="ключ меток export-variants (id вариантов — в ключ страницы)")
     p.add_argument("--repeat", type=float, default=0.1); p.add_argument("--seed", type=int, default=7)

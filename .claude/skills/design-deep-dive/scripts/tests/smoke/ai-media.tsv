@@ -5,7 +5,7 @@ scripts/ai-media/asset_audit.py	utility	help; run: selftest
 scripts/ai-media/asset_inventory.py	utility	help; run: --selftest	
 scripts/ai-media/avif_pick.sh	utility	compile	
 scripts/ai-media/channel_diff.py	step	compile	
-scripts/ai-media/check_icons.py	module	help	help: нужны cairosvg (cairocffi, cffi, системная libcairo), svgelements, scikit-image — ставит install.sh (группа svg)
+scripts/ai-media/check_icons.py	utility	help	
 scripts/ai-media/composition_metrics.py	module	import-only	
 scripts/ai-media/data/svgo.keep-signature.config.mjs	data	compile	
 scripts/ai-media/edit_check.py	utility	help; run: selftest	
@@ -14,10 +14,10 @@ scripts/ai-media/layout_check.py	step	import-only
 scripts/ai-media/loop_rife_bridge.py	step	compile	
 scripts/ai-media/mp_client.py	utility	help; run: selftest	run: оценки цен сверяются с числами снимков каталогов routerai, genapi, polza на дату самопроверки — без снимков (install.sh --catalogs) данных нет, со свежими снимками цены расходятся
 scripts/ai-media/page_accept.py	utility	help; run: --selftest	
-scripts/ai-media/palette.py	module	import-only	
+scripts/ai-media/palette.py	utility	help	
 scripts/ai-media/polza.py	utility	help	
 scripts/ai-media/polza_catalog.py	utility	help; run: selftest	run: самопроверка сравнивает снимки 2026-09-23 из кэша источника (99-raw/cache не переносится) — со снимками источника проходит
-scripts/ai-media/prompt_compile.py	utility	help	help: нужен снимок каталога polza в $DDD_HOME/cache/ai-media/polza — install.sh --catalogs (бесплатный GET, сеть); 99-raw/cache не переносится
+scripts/ai-media/prompt_compile.py	utility	help	
 scripts/ai-media/provenance_check.py	utility	help; run: selftest	run: нужны c2patool 0.27.22 и exiftool 13.59 в $DDD_HOME/bin — install.sh
 scripts/ai-media/routing_check.py	utility	help	
 scripts/ai-media/series_metrics.py	module	import-only	
@@ -47,7 +47,5 @@ scripts/ai-media/tests/test_prompt_compile.py	test	run: 	run: нужен сни�
 scripts/ai-media/tests/test_prompt_compile_x2.py	test	run: 	run: нужен снимок каталога polza — install.sh --catalogs
 scripts/ai-media/text_zone.py	module	import-only	
 scripts/ai-media/tile_check.py	utility	help	
-scripts/ai-media/validate_recipes.py	step	compile	
 scripts/ai-media/video_loop_check.py	utility	help; run: selftest	
 scripts/ai-media/vlm_to_dna.py	utility	help; run: selftest	
-scripts/ai-media/vm_sheet.py	step	help	

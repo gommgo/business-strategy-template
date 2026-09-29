@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Офлайн-тесты исправлений prompt_compile.py v2.1.1 (агент X2, 24.09.2026; дефекты стыка из демо M `14-recipes/`).
-Запуск: 99-raw/tools/venv-D2/bin/python 99-raw/tools/tests/test_prompt_compile_x2.py [-v]
-Основные тесты v2 — test_prompt_compile.py (98), тесты D — D2/01 run_d_tests_on_v2.py (30); регресс X2 —
-99-raw/experiments/X/06-x2/pc_regress_x2.py."""
+"""Офлайн-тесты prompt_compile.py на спецификациях демо `kb/ai-media/14-recipes/examples/demo-landing`: поверхность
+зоны текста, `edit.keep`, заглавная в движении, «Keep its position…» только после замены объекта, `ratios` без
+safe_zone, `focal_point` не объектом. Основные тесты — test_prompt_compile.py; нужен снимок каталога polza.
+Запуск: $DDD_HOME/venv/bin/python scripts/ai-media/tests/test_prompt_compile_x2.py [-v]"""
 import copy, pathlib, sys
 HERE = pathlib.Path(__file__).resolve().parent
 TOOLS = HERE.parent
-sys.path.insert(0, str(TOOLS.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(TOOLS.parent / "lib"))  # scripts/lib: kbpaths
 import kbpaths  # noqa: E402
 ROOT = kbpaths.kb("ai-media")
 sys.path.insert(0, str(TOOLS))

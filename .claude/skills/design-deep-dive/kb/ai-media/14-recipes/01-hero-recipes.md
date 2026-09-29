@@ -95,17 +95,18 @@ M-01…M-03 не запускались — место демо занял ле�
 ### 0.2 Команды звеньев 2–7 (проверены на демо)
 
 ```bash
-# prompt_compile.py 2.1 · vlm_to_dna.py · polza.py — [проверено: 14-recipes/examples/demo-landing/brand, 99-raw/phase5/jobs/M-0*]
-T=99-raw/tools; V=$T/venv-D2/bin/python; B=14-recipes/examples/demo-landing/brand
-python3 $T/vlm_to_dna.py from-tokens $B/tokens.json --out $B/dna.json --id forest-roast --adjectives "тёплый,ремесленный,спокойный"
-$V $T/vlm_to_dna.py validate $B/dna.json                      # jsonschema + линт; «ok»: true обязательно
-$V $T/vlm_to_dna.py to-spec $B/dna.json --kind photo --task IMG-HERO-PHOTO --slot hero --ratio 16:9 \
-   --subject "a glazed off-white ceramic cup of black coffee on a pale oak table by a tall window in the morning" --out $B/specs/hero.spec.json
-$V $T/prompt_compile.py compile $B/specs/hero.spec.json --model openai/gpt-image-2.5-sunburst      # прочитать промт глазами
-$V $T/prompt_compile.py jobs $B/specs/hero.spec.json --models openai/gpt-image-2.5-sunburst --dialects sections \
-   --repeats 1 --test M-01 --agent M --out 99-raw/phase5/jobs/M-01-hero-16x9-2k.jsonl                  # без --dialects — 3 плеча A/B
-python3 $T/polza.py estimate 99-raw/phase5/jobs/M-01-hero-16x9-2k.jsonl                                # 0 ошибок, 7,00 ₽
-python3 $T/asset_audit.py audit master.png --slot hero --text-zone 0,0,0.45,1 --dna $B/dna.json --out audit/ --strict
+# prompt_compile.py · vlm_to_dna.py · polza.py — [проверено: 14-recipes/examples/demo-landing/brand]; из корня скилла, 0 ₽
+P=$DDD_HOME/venv/bin/python; B=kb/ai-media/14-recipes/examples/demo-landing/brand; O=$DDD_HOME/out/ai-media/demo-hero
+$P scripts/ai-media/vlm_to_dna.py from-tokens $B/tokens.json --out $O/dna.json --id forest-roast --adjectives "тёплый,ремесленный,спокойный"
+#   скелет паспорта → руками блоки стиля, палитра и запреты; готовый паспорт демо — $B/dna-forest-roast.json
+$P scripts/ai-media/vlm_to_dna.py validate $B/dna-forest-roast.json          # jsonschema + линт; «ok»: true обязательно
+$P scripts/ai-media/vlm_to_dna.py to-spec $B/dna-forest-roast.json --kind photo --task IMG-HERO-PHOTO --slot hero --ratio 16:9 \
+   --subject "a glazed off-white ceramic cup of black coffee on a pale oak table by a tall window in the morning" --out $O/hero.spec.json
+$P scripts/ai-media/prompt_compile.py compile $O/hero.spec.json --model openai/gpt-image-2.5-sunburst  # прочитать промт глазами
+$P scripts/ai-media/prompt_compile.py jobs $O/hero.spec.json --models openai/gpt-image-2.5-sunburst \
+   --out $O/hero-16x9.jsonl                          # одно задание: диалект семейства, один вариант; варианты — --repeats N
+$P scripts/ai-media/polza.py estimate $O/hero-16x9.jsonl   # 0 ошибок, 4,00 ₽ (1K); --live — после «да» заказчика
+$P scripts/ai-media/asset_audit.py audit master.png --slot hero --text-zone 0,0,0.45,1 --dna $B/dna-forest-roast.json --out $O/audit/ --strict
 # НЕ оборачивать asset_audit.py в flock heavy.lock и page_accept.py в flock browser.lock — они берут блокировку сами
 ```
 

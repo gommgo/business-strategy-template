@@ -1,39 +1,31 @@
 #!/usr/bin/env python3
 """prompt_compile.py — компилятор промтов: спецификация ассета → промт в диалекте модели + параметры задания.
 
-Волна 1 — прототип (агент D); волна 2 — v2 (агент D2, 2026-09-23): схема v0.2, правки и маски, референсы с ролями,
-серии, продукт из 7 блоков, видео (i2v / FLF / мульти-шот / запреты движения / фоновое движение), IR MiniMax H3,
-JSON Bria FIBO, бюджет длины, линты (кириллица в описании, слоп, слова качества, сравнительные правки), параметры по
-`unified` нормализованного каталога и проверка той же библиотекой `polza_catalog` (coerce_input, validate, estimate),
-паспорт компиляции (meta.compile задания → паспорт polza.py), задания polza.py и .routerai.json / .genapi.json.
-
-Совместимость с v1: команды validate / compile / jobs и функции load_json, load_dialects, load_catalog, family_of,
-validate_spec, compile_prompt, make_jobs, price_hint — те же; для спецификаций v0.1 без новых полей текст промта по
-умолчанию не меняется (регресс — 99-raw/experiments/D2/01-compiler-v2).
-
-v2.1 (D2b, 2026-09-23 вечер): снимок каталога — последний (`polza_catalog.find_snapshot`, закрепить — POLZA_CATALOG, как
-у polza.py); GA Omni (`google/gemini-omni-1.1-flash`) — кадры полями `first_frame_url`/`last_frame_url` (dialects:
-`frames_via`), без тегов preview; референсы одной роли — одной фразой (`defaults.reference_group`); без повтора позитивных
-замен; поверхность зоны без артикля; метка серии не дублируется; смешанные правки (`edit.changes[].op`: replace / add /
-remove / recolor); цель неподвижной камеры (`motion.camera.target`, Kling «fixed on …»); проверки видео: звук без
-параметра (→ -an), мульти-шот Kling (≤ 6 планов, ≤ 512 символов, только стартовый кадр), таймкоды Seedance 2.5 (целые
-секунды, без разрывов).
-
-v2.1.1 (X2, 2026-09-24; дефекты стыка, найденные M в демо `14-recipes/`): поверхность зоны без повторного «empty/uncluttered»;
-`edit.keep` без двойного артикля («Keep the the cup»); `subject_motion`/`environment_motion` с заглавной; «Keep its position…»
-только после замены объекта (не у relight, background_swap, текста); `ratios`: без safe_zone — кадр по фокусной точке (раньше
-весь кадр считался неприкосновенным → ложный «аутпейнт»), соотношения из `output.variants` тоже выводятся, потеря зоны текста —
-в note; `focal_point` не объектом — ошибка схемы вместо TypeError.
+Спецификация — схема kb/ai-media/05-prompting/asset-spec.schema.json, диалекты семейств моделей —
+kb/ai-media/05-prompting/dialects.yaml. Компилятор проверяет спецификацию и собирает промт в диалекте семейства: правки
+и маски с полярностью модели, референсы с ролями, серии, продукт из 7 блоков, видео (i2v, первый и последний кадр,
+мульти-шот, запреты движения, фоновое движение), бюджет длины, линты (кириллица в описании, слоп, слова качества,
+сравнительные правки). Ценовые параметры ставятся явно, вход и цена проверяются той же библиотекой, что у polza.py
+(`polza_catalog`: coerce_input, validate, estimate). Паспорт компиляции уходит в `meta.compile` задания, оттуда — в
+паспорт генерации polza.py. Задания — JSONL для polza.py или список .routerai.json / .genapi.json для mp_client.py.
 
 Команды:
   prompt_compile.py validate SPEC.json [--model ID] [--channel polza|routerai|genapi]
   prompt_compile.py compile  SPEC.json --model ID [--dialect D] [--channel C] [--opt k=v …] [--json]
-  prompt_compile.py jobs     SPEC.json [SPEC …] --models ID,ID [--dialects prose,sections,json] [--repeats 2]
-                             [--seeds 101,202] [--tag D-ab] [--agent phase5-D] [--channel C] [--opt k=v …]
-                             [--test D2-01] [--meta '{json}'] [--out jobs.jsonl]
+  prompt_compile.py jobs     SPEC.json [SPEC …] --models ID[,ID …] [--out jobs.jsonl] [--channel C] [--opt k=v …]
+                             [--dialects D[,D …]] [--repeats N] [--seeds S[,S …]] [--tag T] [--agent A] [--test ID]
+                             [--meta '{json}'] [--no-provider] [--allow-missing-inputs]
   prompt_compile.py chain    SPEC.json --model ID           правка порциями (≤ edit.max_changes за вызов)
   prompt_compile.py ratios   SPEC.json                      варианты соотношений: генерация / кадр мастера / аутпейнт
   prompt_compile.py matrix   SPEC.json [SPEC …] [--models …] длины и ошибки по моделям и диалектам (таблица)
+
+`jobs` без ключей формы — одно задание на спецификацию и модель: диалект семейства, один вариант, без seed, тега и
+агента; его цену считает `polza.py estimate` по файлу заданий. Сравнение форм промта (A/B) — только явными ключами:
+--dialects (несколько форм), --repeats и --seeds (повторы с сидами), --tag, --agent, --test.
+
+Снимок каталога polza читают только команды, которым он нужен: compile, jobs, chain, matrix и validate с --model;
+--help, ratios и validate без --model отвечают без снимка. Снимок — POLZA_CATALOG (имя папки или путь), иначе последний в
+$DDD_HOME/cache/ai-media/polza/ (ставит `scripts/install.sh --catalogs`, обновляет `polza_catalog.py snapshot`).
 
 Опции --opt (как поле compile спецификации): order=family|product7|shuffled|custom, length=full|short,
 text_zone_style=base|vendor|google|openai|copyspace, negation=family|positive|sentence, palette_form=family|hex|names,
@@ -41,8 +33,10 @@ fit=fail|drop, language=en|ru, quality_words=true, enhancer=on|off, labels=globa
 anti_average=true, seed=101, shuffle_seed=7, i2v=motion_only|full, forbid_style=sentence|positive,
 max_changes=10.
 
-Зависимости: PyYAML; jsonschema и Pillow — необязательно (без jsonschema схема не проверяется — предупреждение; без
-Pillow маска не инвертируется — ошибка). Полное окружение: 99-raw/tools/venv-D2/bin/python. Сеть не используется.
+Запуск — Python окружения скилла ($DDD_HOME/venv/bin/python, scripts/install.sh): PyYAML; jsonschema и Pillow —
+необязательно (без jsonschema схема не проверяется — предупреждение; без Pillow маска не инвертируется — ошибка). Сеть не
+используется. Код выхода: 0 — без ошибок; 1 — ошибки спецификации или компиляции (validate, compile); 2 — ошибка
+компиляции одной строкой (модель вне dialects.yaml и т. п.) или нет снимка каталога.
 """
 from __future__ import annotations
 
@@ -60,7 +54,7 @@ import sys
 try:
     import yaml
 except ImportError:  # pragma: no cover
-    sys.exit("нужен PyYAML: 99-raw/tools/venv-D2/bin/python prompt_compile.py …")
+    sys.exit("нужен PyYAML: запуск — Python окружения скилла ($DDD_HOME/venv/bin/python, scripts/install.sh)")
 try:
     import jsonschema
 except ImportError:  # pragma: no cover
@@ -68,19 +62,14 @@ except ImportError:  # pragma: no cover
 
 TOOLS = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOLS))
-sys.path.insert(0, str(TOOLS.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(TOOLS.parent / "lib"))  # scripts/lib: kbpaths
 import kbpaths  # noqa: E402
-import polza_catalog as pcat  # noqa: E402  (агент B: coerce_input, validate, estimate — одна точка истины)
+import polza_catalog as pcat  # noqa: E402  (coerce_input, validate, estimate — одна точка истины с polza.py)
 
-VERSION = "2.1.1 (2026-09-24, X2)"
+VERSION = "2.2"
 ROOT = kbpaths.kb("ai-media")
 SCHEMA = ROOT / "05-prompting/asset-spec.schema.json"
 DIALECTS = ROOT / "05-prompting/dialects.yaml"
-# Снимок каталога — как у polza.py: POLZA_CATALOG (имя папки или путь) или последний снимок в 99-raw/cache/polza/
-# (23.09.2026: 2026-09-23_1745 — +GA Omni и Grok Image 2.0; утренний — POLZA_CATALOG=2026-09-23).
-SNAPSHOT_DIR = pcat.find_snapshot(os.environ.get("POLZA_CATALOG") or None)
-CATALOG = SNAPSHOT_DIR / "api-v1-models.json"
-NORMALIZED = SNAPSHOT_DIR / "media-models.normalized.json"
 
 # оценочные слова без видимого содержания (v1; расширенный список — dialects.yaml defaults.slop_words)
 SLOP_WORDS = {"luminous", "radiant", "vibrant", "lush", "dynamic", "glowing", "gorgeous", "stunning", "breathtaking",
@@ -170,13 +159,32 @@ def load_dialects(path=DIALECTS):
     return _merge_video(yaml.safe_load(pathlib.Path(path).read_text(encoding="utf-8")))
 
 
-def load_catalog(path=CATALOG):
-    data = load_json(path)
+def snapshot_dir():
+    """Папка снимка каталога polza: POLZA_CATALOG (имя папки или путь), иначе последний снимок в
+    $DDD_HOME/cache/ai-media/polza/. Читается при первой команде, которой нужен каталог; снимка нет — строка с командой
+    установки в stderr и код 2."""
+    if "snapshot" not in _CACHE:
+        try:
+            _CACHE["snapshot"] = pcat.find_snapshot(os.environ.get("POLZA_CATALOG") or None)
+        except SystemExit as e:
+            print(f"{e} — снимок каталога polza: scripts/install.sh --catalogs или polza_catalog.py snapshot "
+                  f"(бесплатный GET); другой снимок — POLZA_CATALOG", file=sys.stderr)
+            raise SystemExit(2) from None
+    return _CACHE["snapshot"]
+
+
+def catalog_file():
+    return snapshot_dir() / "api-v1-models.json"
+
+
+def load_catalog(path=None):
+    data = load_json(path or catalog_file())
     items = data["data"] if isinstance(data, dict) and "data" in data else data
     return {m["id"]: m for m in items if m.get("type") in ("image", "video")}
 
 
-def load_normalized(path=NORMALIZED):
+def load_normalized(path=None):
+    path = path or snapshot_dir() / "media-models.normalized.json"
     key = ("norm", str(path))
     if key not in _CACHE:
         try:
@@ -1369,7 +1377,7 @@ def build_params(spec, model_id, fam, catalog, errors, warnings, mode=None, opts
         if not mo.get("audio") and not any(k in cp for k in ("generate_audio", "sound")):
             # D2b: Veo (Gemini API «Always on»), Omni, Wan 2.5/2.6 («Only wan2.2 and wan2.1… silent»), Grok, H3 Max
             warnings.append(f"{model_id}: звук параметром не выключается (в каталоге нет generate_audio/sound) — дорожку "
-                            f"снимать при кодировании (-an, агент I); словами — только уточнения (No dialogue. No music.)")
+                            f"снимать при кодировании (-an); словами — только уточнения (No dialogue. No music.)")
         if "fixed_lens" in cp:
             out["fixed_lens"] = "true" if mo["camera"]["move"] == "static" else "false"
         if "multi_shots" in cp:
@@ -1470,7 +1478,7 @@ def derive_mask(mask, out_dir):
     try:
         from PIL import Image, ImageOps
     except ImportError as e:  # pragma: no cover
-        raise CompileError("инверсия маски требует Pillow (venv-D2)") from e
+        raise CompileError("инверсия маски требует Pillow (Python окружения скилла, scripts/install.sh)") from e
     out_dir = pathlib.Path(out_dir) / "masks"
     out_dir.mkdir(parents=True, exist_ok=True)
     dst = out_dir / f"{src.stem}.{mask['model_polarity'].split('=')[0]}.png"
@@ -1493,7 +1501,7 @@ def derive_mask(mask, out_dir):
 
 
 def catalog_check(model_raw, inp):
-    """Та же проверка, что у polza.py estimate: coerce_input → validate → estimate (агент B)."""
+    """Та же проверка, что у polza.py estimate: coerce_input → validate → estimate."""
     params = model_raw.get("parameters") or (model_raw.get("top_provider") or {}).get("parameters") or {}
     inp2, notes = pcat.coerce_input(params, inp)
     issues = pcat.validate(model_raw, inp2, strict=True)
@@ -1716,7 +1724,7 @@ def compile_prompt(spec, model_id, dialect=None, dialects=None, catalog=None, *,
             if channel == "polza" else info.get("max_refs")
         if mimg is not None and mimg < 2:
             warnings.append(f"{model_id}: images ≤ {mimg} — последний кадр не передаётся; режим i2v по первому кадру, "
-                            f"замыкание петли — постобработкой (агент I)")
+                            f"замыкание петли — постобработкой")
             mode = "i2v"
             rules.append("flf_to_i2v")
     images, videos, mask, in_errs = collect_inputs(spec, fam, model_id, mode, spec_path)
@@ -1743,7 +1751,7 @@ def compile_prompt(spec, model_id, dialect=None, dialects=None, catalog=None, *,
               "dropped_blocks": dropped}
     if frame_fields:
         warnings.append(f"{model_id}: кадры — полями {', '.join(frame_fields)}; polza.py их не загружает — перед запуском "
-                        f"polza.py upload <файл> --live → URL в поле (I2, I-15)")
+                        f"polza.py upload <файл> --live → URL в поле")
     if channel == "polza":
         params = build_params(spec, model_id, fam, catalog, errors, warnings, mode=mode, opts=opts, prompt=prompt)
         result["params"] = params
@@ -1779,8 +1787,8 @@ def compile_prompt(spec, model_id, dialect=None, dialects=None, catalog=None, *,
         "spec_id": spec.get("id"), "spec_version": spec.get("spec_version"), "spec_sha256": canonical_sha(spec),
         "task": spec.get("task"), "mode": mode, "model": model_id, "channel": channel, "family": fname,
         "family_class": fam.get("class"), "dialect": dialect, "dialects_version": dialects.get("version"),
-        "dialects_sha256": file_sha256(DIALECTS), "catalog_snapshot": _rootrel(CATALOG),
-        "catalog_sha256": file_sha256(CATALOG),
+        "dialects_sha256": file_sha256(DIALECTS), "catalog_snapshot": _rootrel(catalog_file()),
+        "catalog_sha256": file_sha256(catalog_file()),
         "options": {k: v for k, v in opts.items() if k not in ("extra_body",)}, "rules": rules,
         "dropped_blocks": dropped, "chars": len(prompt), "limit": limit, "words": words,
         "mask": ({k: v for k, v in mask.items() if k != "src"} if mask else None),
@@ -1870,7 +1878,7 @@ def ratio_variants(spec):
             box = crop_box(master, r, comp.get("focal_point"), safe.get(r))
         note = ""
         if strat == "crop" and box is None:
-            strat, note = "outpaint", "безопасная зона не помещается в кадр — аутпейнт (агент H)"
+            strat, note = "outpaint", "безопасная зона не помещается в кадр — аутпейнт"
         elif strat == "crop" and r not in safe:
             note = ("нет safe_zone для соотношения — кадр по " + ("фокусной точке" if fp else "центру")
                     + (" и зоне текста" if with_tz else ""))
@@ -1895,11 +1903,14 @@ def _topprovider(catalog, model_id):
     return ((catalog.get(model_id) or {}).get("top_provider") or {}).get("name")
 
 
-def make_jobs(spec_paths, models, dialects_list, repeats=2, seeds=(101, 202), tag="D-ab", agent="phase5-D", *,
+def make_jobs(spec_paths, models, dialects_list=None, repeats=1, seeds=(), tag=None, agent=None, *,
               channel="polza", options=None, out_path=None, test=None, meta=None, variant_opts=None,
               provider=True, allow_missing_inputs=False, notes=None):
     """Задания для polza.py (JSONL) или каналов (.routerai.json / .genapi.json — список заданий).
-    variant_opts — список словарей опций (плечи формы при одной спецификации): [{"order": "family"}, {"order": "shuffled"}]."""
+    По умолчанию — одно задание на спецификацию и модель: диалект семейства, один вариант, без seed, тега и агента.
+    dialects_list — формы промта (несколько — сравнение форм); repeats и seeds — повторы с сидами; tag — префикс тега,
+    agent — поле agent задания (папка выходов polza.py); variant_opts — список словарей опций (плечи формы при одной
+    спецификации): [{"order": "family"}, {"order": "shuffled"}]."""
     dialects, catalog = load_dialects(), load_catalog()
     out_dir = str(pathlib.Path(out_path).resolve().parent) if out_path else None
     jobs, skipped, series_blocks = [], [], {}
@@ -1915,7 +1926,7 @@ def make_jobs(spec_paths, models, dialects_list, repeats=2, seeds=(101, 202), ta
             series_blocks[sid] = blk
         for mid in models:
             fname, fam = family_of(mid, dialects, None if channel == "polza" else channel)
-            for d in dialects_list:
+            for d in (dialects_list or [fam["format"]]):
                 for vo in (variant_opts or [{}]):
                     vo_all = {**(options or {}), **vo}
                     for k in range(repeats):
@@ -1953,13 +1964,13 @@ def make_jobs(spec_paths, models, dialects_list, repeats=2, seeds=(101, 202), ta
                                 inp.update({k: _rel(v, out_dir) for k, v in ff.items()})
                                 m["url_fields"] = {k: _rel(v, out_dir) for k, v in ff.items()}
                                 m["prepare"] = ("polza.py upload <файл> --live → data.url → input.<поле> (polza.py загружает "
-                                                "только images, videos, mask_url; I2, I-15)")
+                                                "только images, videos, mask_url)")
                             if seed is not None and "seed" not in inp and "seeds" not in inp:
                                 m["seed_note"] = "у модели нет seed в каталоге — повторы независимые (variant)"
                             if price is None:
                                 price = price_hint(fam, mid, r["params"])
                             job = {"model": mid, "input": inp, "tag": jtag[:80], "agent": agent,
-                                   "notes": notes or f"A/B диалектов: {spec['id']}, {d}, повтор {k + 1}",
+                                   "notes": notes or f"{spec['id']}: диалект {d}, вариант {k + 1}",
                                    "variant": k + 1, "max_rub": round(price * 1.25, 2) if price else None}
                             tp = _topprovider(catalog, mid)
                             if provider and tp:
@@ -1983,7 +1994,9 @@ def make_jobs(spec_paths, models, dialects_list, repeats=2, seeds=(101, 202), ta
                                    "max_rub": round((price or 0) * 1.25, 2) or None, "price_rub": price,
                                    "price_source": f"{chcfg.get('price_source')}; {info.get('price_unit', '')}".strip("; "),
                                    "docs": chcfg.get("docs"),
-                                   "notes": notes or f"A/B диалектов: {spec['id']}, {d}, повтор {k + 1}", "meta": m}
+                                   "notes": notes or f"{spec['id']}: диалект {d}, вариант {k + 1}", "meta": m}
+                        if not agent:           # без агента polza.py и mp_client.py берут свой (--agent, иначе unknown)
+                            job.pop("agent")
                         jobs.append(job)
     return jobs, skipped
 
@@ -2014,24 +2027,28 @@ def parse_opts(items):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     a = sub.add_parser("validate"); a.add_argument("spec"); a.add_argument("--model"); a.add_argument("--channel", default="polza")
     c = sub.add_parser("compile"); c.add_argument("spec"); c.add_argument("--model", required=True)
     c.add_argument("--dialect"); c.add_argument("--json", action="store_true"); c.add_argument("--channel", default="polza")
     c.add_argument("--opt", action="append")
-    j = sub.add_parser("jobs"); j.add_argument("specs", nargs="+"); j.add_argument("--models", required=True)
-    j.add_argument("--dialects", default="prose,sections,json"); j.add_argument("--repeats", type=int, default=2)
-    j.add_argument("--seeds", default="101,202"); j.add_argument("--tag", default="D-ab"); j.add_argument("--out")
-    j.add_argument("--agent", default="phase5-D"); j.add_argument("--channel", default="polza"); j.add_argument("--opt", action="append")
-    j.add_argument("--test"); j.add_argument("--meta"); j.add_argument("--no-provider", action="store_true")
-    j.add_argument("--allow-missing-inputs", action="store_true")
+    j = sub.add_parser("jobs", help="задания для polza.py или каналов: по умолчанию одно на спецификацию и модель")
+    j.add_argument("specs", nargs="+"); j.add_argument("--models", required=True, help="модели через запятую")
+    j.add_argument("--dialects", help="формы промта через запятую (по умолчанию — диалект семейства модели)")
+    j.add_argument("--repeats", type=int, default=1, help="вариантов на форму (по умолчанию 1)")
+    j.add_argument("--seeds", help="сиды повторов через запятую (по умолчанию без seed)")
+    j.add_argument("--tag", help="префикс тега задания"); j.add_argument("--out", help="файл заданий (без ключа — stdout)")
+    j.add_argument("--agent", help="поле agent задания — папка выходов polza.py (по умолчанию — агент polza.py)")
+    j.add_argument("--channel", default="polza"); j.add_argument("--opt", action="append")
+    j.add_argument("--test", help="метка meta.test задания"); j.add_argument("--meta", help="JSON в meta задания")
+    j.add_argument("--no-provider", action="store_true"); j.add_argument("--allow-missing-inputs", action="store_true")
     ch = sub.add_parser("chain"); ch.add_argument("spec"); ch.add_argument("--model", required=True)
     rt = sub.add_parser("ratios"); rt.add_argument("spec")
     mx = sub.add_parser("matrix"); mx.add_argument("specs", nargs="+"); mx.add_argument("--models")
     args = ap.parse_args(argv)
     if args.cmd == "validate":
-        dialects, catalog = load_dialects(), load_catalog()
+        dialects, catalog = load_dialects(), (load_catalog() if args.model else None)
         ch_ = None if args.channel == "polza" else args.channel
         errs, warns = validate_spec(load_json(args.spec), args.model, dialects, catalog, channel=ch_)
         for w in warns:
@@ -2060,7 +2077,8 @@ def main(argv=None):
         return 0 if not r["errors"] else 1
     if args.cmd == "jobs":
         seeds = tuple(int(x) for x in args.seeds.split(",")) if args.seeds else ()
-        jobs, skipped = make_jobs(args.specs, args.models.split(","), args.dialects.split(","), args.repeats, seeds,
+        dialects_list = args.dialects.split(",") if args.dialects else None
+        jobs, skipped = make_jobs(args.specs, args.models.split(","), dialects_list, args.repeats, seeds,
                                   args.tag, args.agent, channel=args.channel, options=parse_opts(args.opt),
                                   out_path=args.out, test=args.test, meta=json.loads(args.meta) if args.meta else None,
                                   provider=not args.no_provider, allow_missing_inputs=args.allow_missing_inputs)
@@ -2105,7 +2123,7 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    # поправка сессии 5 (25.09.2026): ошибка компиляции (модель канала вне dialects.yaml и т. п.) — сообщением, без трассировки
+    # ошибка компиляции (модель канала вне dialects.yaml и т. п.) — сообщением, без трассировки
     try:
         sys.exit(main())
     except CompileError as e:

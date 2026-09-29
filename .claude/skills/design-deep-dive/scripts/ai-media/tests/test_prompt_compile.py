@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Офлайн-тесты prompt_compile.py v2 (D2, волна 2). Без сети и генераций.
-Запуск: 99-raw/tools/venv-D2/bin/python 99-raw/tools/tests/test_prompt_compile.py [-v]
-Тесты v1 (агент D, 30 шт.) — 99-raw/experiments/D2/01-compiler-v2/run_d_tests_on_v2.py; регресс — regress_v1.py."""
-import json, pathlib, re, subprocess, sys, tempfile
+"""Офлайн-тесты prompt_compile.py: CLI и API, ценовые параметры, видео, правки, референсы, каналы, соотношения,
+задания polza.py и чтение снимка каталога. Без сети и генераций; нужен снимок каталога polza (scripts/install.sh
+--catalogs) — без него тесты завершаются строкой о снимке и кодом 2.
+Запуск: $DDD_HOME/venv/bin/python scripts/ai-media/tests/test_prompt_compile.py [-v]"""
+import json, os, pathlib, re, subprocess, sys, tempfile
 HERE = pathlib.Path(__file__).resolve().parent
 TOOLS = HERE.parent
-sys.path.insert(0, str(TOOLS.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(TOOLS.parent / "lib"))  # scripts/lib: kbpaths
 import kbpaths  # noqa: E402
 ROOT = kbpaths.kb("ai-media")
 sys.path.insert(0, str(TOOLS))
@@ -38,7 +39,7 @@ check("CLI compile: строка «// модель · семейство · ди
 with tempfile.TemporaryDirectory() as td:
     out = pathlib.Path(td) / "j.jsonl"
     r = cli("jobs", str(FX / "D03/B2.spec.json"), "--models", "qwen/image-2.1",
-            "--dialects", "prose,json", "--repeats", "2", "--out", str(out))
+            "--dialects", "prose,json", "--repeats", "2", "--seeds", "101,202", "--out", str(out))
     lines = out.read_text().splitlines() if out.exists() else []
     j0 = json.loads(lines[0]) if lines else {}
     check("CLI jobs: 4 задания, seed 101/202, meta.compile, provider mie без запасных", len(lines) == 4 and j0["input"].get("seed") == 101
@@ -62,7 +63,7 @@ check("цена по каталогу (polza_catalog.estimate): Veo Fast 45 ₽"
 r = fx("v2-loop", "bytedance/seedance-1.5-pro")
 check("Seedance 1.5 Pro: 480p, 4 с, звук и fixed_lens явно; 5,25 ₽", r["params"].get("resolution") == "480p" and r["params"].get("generate_audio") == "false" and r["params"].get("fixed_lens") == "true" and r["price_rub"] == 5.25, (r["params"], r["price_rub"]))
 check("Seedance 1.5 Pro: images = [первый, последний] кадр", len(r["images"]) == 2 and r["images"][0].endswith("frame-A.png"), r["images"])
-check("каталог без ошибок (validate агента B)", not [i for i in r["catalog_issues"] if i["level"] == "error"], r["catalog_issues"])
+check("каталог без ошибок (validate polza_catalog)", not [i for i in r["catalog_issues"] if i["level"] == "error"], r["catalog_issues"])
 
 # --- 3. видео-промт: фон, неподвижное, запреты, темп
 p = r["prompt"]
@@ -206,9 +207,9 @@ s = E("E4"); s["motion"]["timeline"] = [{"t0": 0, "t1": 2, "beat": "steam starts
 check("Veo: таймкод «[00:00-00:02]»", "[00:00-00:02] steam starts to rise" in comp(s, "google/veo3_fast")["prompt"])
 check("Omni: теги петли сохранены", comp(E("E4"), "gemini-omni-video")["prompt"].startswith("[# Sources <FIRST_FRAME>@Image1 <LAST_FRAME>@Image1]"))
 
-# --- 12. v2.1 (D2b): снимок каталога, GA Omni, исправления F2, смешанные правки, проверки видео
-check("снимок каталога — последний (find_snapshot), путь в паспорте", pc.SNAPSHOT_DIR.name >= "2026-09-23_1745"
-      and comp(E("E1"), "black-forest-labs/flux.2-pro")["passport"]["catalog_snapshot"].endswith(f"{pc.SNAPSHOT_DIR.name}/api-v1-models.json"), pc.SNAPSHOT_DIR)
+# --- 12. снимок каталога, GA Omni, референсы одной роли, смешанные правки, проверки видео
+check("снимок каталога — последний (find_snapshot), путь в паспорте", pc.snapshot_dir().name >= "2026-09-23_1745"
+      and comp(E("E1"), "black-forest-labs/flux.2-pro")["passport"]["catalog_snapshot"].endswith(f"{pc.snapshot_dir().name}/api-v1-models.json"), pc.snapshot_dir())
 r = fx("v2-loop", "google/gemini-omni-1.1-flash")
 check("GA Omni: петля — first_frame_url = last_frame_url, images пусты, 48 ₽", r["frame_fields"].get("first_frame_url", "").endswith("frame-A.png")
       and r["frame_fields"].get("last_frame_url") == r["frame_fields"].get("first_frame_url") and not r["images"] and r["price_rub"] == 48.0
@@ -275,6 +276,30 @@ s = F("v2-series"); s["subject"]["summary"] = "a woman reading on a bench"; s["s
 check("«против среднего» у фото с человеком: взгляд и несовершенства", "gaze turned away from the camera, natural imperfections." in comp(s, "gpt-image-2-5-flare", "prose", spec_path=FX / "v2-series.spec.json")["prompt"])
 r = comp(B("B1"), "grok-imagine-image-2-0/text-to-image")
 check("Grok Image 2.0 (снимок 17:45) компилируется: 16:9, 3 ₽", r["params"].get("aspect_ratio") == "16:9" and r["price_rub"] == 3.0 and not r["errors"], (r["params"], r["price_rub"], r["errors"]))
+
+# --- 13. задания по умолчанию и команды без снимка каталога
+jobs, skipped = pc.make_jobs([FX / "D03/B2.spec.json"], ["openai/gpt-image-2.5-sunburst"])
+j0 = jobs[0] if jobs else {}
+check("jobs по умолчанию: одно задание — диалект семейства, вариант 1, без seed, тега и агента",
+      len(jobs) == 1 and not skipped and j0["meta"]["dialect"] == pc.family_of("openai/gpt-image-2.5-sunburst", D)[1]["format"]
+      and j0["variant"] == 1 and "seed" not in j0["input"] and "agent" not in j0 and j0["tag"].startswith("ab-b2-illustr-"),
+      (len(jobs), skipped, j0.get("tag")))
+with tempfile.TemporaryDirectory() as td:
+    out = pathlib.Path(td) / "one.jsonl"
+    r = cli("jobs", str(FX / "D03/B2.spec.json"), "--models", "openai/gpt-image-2.5-sunburst", "--out", str(out))
+    lines = out.read_text().splitlines() if out.exists() else []
+    check("CLI jobs без ключей формы: 1 задание", len(lines) == 1 and "заданий: 1" in r.stderr, r.stderr[-200:])
+    env = {k: v for k, v in os.environ.items() if k != "POLZA_CATALOG"}
+    env["DDD_HOME"] = td
+    run = lambda *a: subprocess.run([py, str(TOOLS / "prompt_compile.py"), *a], capture_output=True, text=True, env=env)
+    e1 = str(FX / "D02/E1.spec.json")
+    rs = [run("--help"), run("ratios", e1), run("validate", e1)]
+    check("без снимка каталога: --help, ratios и validate без --model — код 0", all(x.returncode == 0 for x in rs),
+          [(x.returncode, x.stderr[-160:]) for x in rs])
+    rs = [run("validate", e1, "--model", "openai/gpt-image-2.5-sunburst"), run("compile", e1, "--model", "openai/gpt-image-2.5-sunburst")]
+    check("без снимка каталога: validate --model и compile — код 2 и строка с командой установки",
+          all(x.returncode == 2 and "нет снимков" in x.stderr and "install.sh --catalogs" in x.stderr for x in rs),
+          [(x.returncode, x.stderr[-200:]) for x in rs])
 
 ok = sum(x[1] for x in R)
 verbose = "-v" in sys.argv
