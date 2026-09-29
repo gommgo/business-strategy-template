@@ -26,7 +26,9 @@ $DDD_HOME/out/project/design_audit/<slug>/): findings.jsonl и summary.json — 
 
 Тяжесть — по правилу реестра: где правило зависит от этапа, этап выводится из статусов файлов (вход холста страницы
 или поверхности, закрытый copy deck, закрытая арт-дирекция, вердикт REVIEW.md); у находки валидатора — его уровень
-(error → error, warning → warning, сведения не переносятся); шкала ворот и приёмки B/S/D → error/warning/hint.
+(error → error, warning → warning, сведения не переносятся), кроме правил с тяжестью по закрытию файла (R-REF-006 из
+ad_check: warning, error у закрытой арт-дирекции); шкала ворот и приёмки B/S/D → error/warning/hint. Правило, которое
+утилита не проверила (свежесть производных при битых токенах), — заметка сводки, а не находка.
 Окружение не установлено (нет PyYAML или jsonschema в Python окружения) — валидаторы не запускаются, в сводке —
 «утилиты не запускались», их правила уходят в чтение.
 
@@ -681,7 +683,8 @@ class Audit:
                         json.loads(r.out)
                     except ValueError:
                         ok = False
-                seen[prof] = (ok, last_line(r.err) or last_line(r.out))
+                why = re.sub(r"^page_gates\.py:\s*", "", last_line(r.err) or last_line(r.out))
+                seen[prof] = (ok, why or f"код {r.rc}")
             ok, why = seen[prof]
             if not ok:
                 self.add("R-STRUCT-002", "error", s, "page-plan", f"{pid}#/page/budget_profile", p,
@@ -831,7 +834,11 @@ class Audit:
             self.notes.append(f"ds_build check: {e}")
             return
         self.tools.note("project/ds_build.py", "check")
-        self.rep.extend(items)
+        # «свежесть не сверялась» при битых токенах — строка сводки, а не находка: правило не проверялось
+        skipped = [f for f in items if f.rule == "R-FRESH-001" and f.severity == "hint"]
+        for f in skipped:
+            self.note_once(f"ds_build: R-FRESH-001 не проверялось — {f.message}")
+        self.rep.extend([f for f in items if f not in skipped])
 
     def passport(self, vd):
         r = self.tools.run("ai-media/vlm_to_dna.py", ["validate", vd])
@@ -853,20 +860,17 @@ class Audit:
                 self.notes.append(f"ad_check.py {s}: не отработал ({last_line(r.err) or r.rc})")
             closed = self.closed("art-direction", ad)
             for _f, v in res.items():
-                for part in ("schema", "visual_dna", "refs", "rules"):
+                # снятые приметы (ключи --allow, lifted_markers) — правила ad_check, тяжесть — по R-REF-006: warning,
+                # error у закрытой арт-дирекции; ошибки схемы и паспорта о тех же полях — форма файла (R-STRUCT-004)
+                for part in ("schema", "visual_dna", "refs", "rules", "warnings"):
                     for msg in v.get(part) or []:
                         msg = str(msg)
-                        rule = "R-REF-006" if re.search(r"k3_allow|lifted_markers|--allow|decision", msg) else \
-                            "R-STRUCT-004"
-                        self.add(rule, "error", s, "art-direction", "art-direction", ad, f"ad_check: {msg[:300]}",
+                        if part in ("rules", "warnings") and re.search(r"--allow|lifted_markers", msg):
+                            rule, sev = "R-REF-006", "error" if closed else "warning"
+                        else:
+                            rule, sev = "R-STRUCT-004", "warning" if part == "warnings" else "error"
+                        self.add(rule, sev, s, "art-direction", "art-direction", ad, f"ad_check: {msg[:300]}",
                                  self.dd(s, "art-direction"))
-                for msg in v.get("warnings") or []:
-                    msg = str(msg)
-                    rule = "R-REF-006" if re.search(r"k3_allow|lifted_markers|--allow|decision", msg) else \
-                        "R-STRUCT-004"
-                    sev = "error" if rule == "R-REF-006" and closed else "warning"
-                    self.add(rule, sev, s, "art-direction", "art-direction", ad, f"ad_check: {msg[:300]}",
-                             self.dd(s, "art-direction"))
         md = self.dsurf(s, "motion")
         for spec in sorted(md.glob("*.motion-spec.yaml")) if md.is_dir() else []:
             r = self.tools.run("creative/spec_check.py", ["spec", spec])
@@ -1027,6 +1031,10 @@ class Audit:
             for fld in ("tokens_ref", "motion_spec_ref"):
                 self.check_ref("page-plan", s, pid, p, f"page.treatment.{fld}", get(plan, "page", "treatment", fld),
                                fix)
+            for i, sec in enumerate(plan.get("sections") or []):
+                if isinstance(sec, dict):
+                    self.check_ref("page-plan", s, pid, p, f"sections.{i}.treatment.motion_spec_ref",
+                                   get(sec, "treatment", "motion_spec_ref"), fix)
         for p, deck, _lang in self.decks(s):
             if not isinstance(deck, dict):
                 continue
@@ -1171,6 +1179,10 @@ class Audit:
                             self.add("R-REF-003", "error", s, "copy-deck", f"{stem}#/{sid}/{slid}", p,
                                      f"слот `{sid}/{slid}`: site_slot_id {sl['site_slot_id']}, а anatomy плана — "
                                      f"{t['anatomy']}", fix)
+                        if (sl.get("group") or t.get("group")) and sl.get("group") != t.get("group"):
+                            self.add("R-REF-003", "error", s, "copy-deck", f"{stem}#/{sid}/{slid}", p,
+                                     f"слот `{sid}/{slid}`: group {sl.get('group') or '—'}, а экземпляр группы слота "
+                                     f"плана — {t.get('group') or '—'}", fix)
 
     # ---------- страницы и их id
     def site_pages(self, s):
@@ -1880,6 +1892,13 @@ class Audit:
             sid = str(r.get("slot") or "")
             hit = slots.get(sid)
             if hit is None:
+                # у сайта генерация идёт только по плану ассетов страницы; иллюстрации кабинета — по ДС и паспорту
+                if self.reg[s].page and any(r.get(k) is True for k in ("ai", "ai_mark", "ai_label")):
+                    f = folder / Path(str(r.get("file") or "")).name
+                    self.add("R-MAT-008", "error", s, "asset", sid or f.name, f if f.is_file() else
+                             folder / "manifest.yaml", f"ассет слота {sid or '—'} с пометкой ИИ, а слота нет ни в "
+                             "одном плане ассетов поверхности: генерация — только по утверждённому плану",
+                             self.dd(s, "asset-plan"))
                 continue
             ap, slot, plan = hit
             gen = str(slot.get("source") or "") in ("generate", "edit-real") or bool(r.get("ai") or
@@ -2307,6 +2326,11 @@ SEEDED = (
     ("otves-remont-nn", "R-COV-007", "docs/projects/otves-remont-nn/voice.yaml"),
     ("otves-remont-nn", "R-DEBT-002", "docs/projects/otves-remont-nn/site/promo/copy/spasibo.yaml"),
 )
+# тот же дефект тем же правилом в соседних файлах: правка значения токена (R-FRESH-001) — по находке на производное
+SEEDED_ALSO = (
+    ("otves-office", "R-FRESH-001", "docs/projects/otves-office/design/DESIGN.md"),
+    ("otves-office", "R-FRESH-001", "docs/projects/otves-office/design/_design-system/project/tokens.json"),
+)
 
 
 def _selftest():
@@ -2330,6 +2354,7 @@ def _selftest():
     kbpaths.use("tests")
     import fixture_project
     me = str(Path(__file__).resolve())
+    base = {}
     for name, slug in (("package-landing", "otves-remont-nn"), ("package-cabinet", "otves-office")):
         with fixture_project.built(name) as fx, tempfile.TemporaryDirectory(prefix="ddd-audit-cwd-") as cwd:
             r = subprocess.run([sys.executable, me, "check", slug, "--repo", str(fx.root), "--today",
@@ -2340,6 +2365,7 @@ def _selftest():
             except ValueError:
                 items = None
             errs = [f for f in items or [] if f.severity == "error"]
+            base[slug] = items or []
             summ = json.loads((Path(cwd) / "out" / "summary.json").read_text(encoding="utf-8")) \
                 if (Path(cwd) / "out" / "summary.json").is_file() else {}
             check(f"{name}: check --json из чужой рабочей папки — код 0, строки контракта, 0 error"
@@ -2349,19 +2375,29 @@ def _selftest():
                   summ.get("utilities") == "запускались" and summ.get("called")
                   and any(x["rule"] == "R-SEM-001" for x in summ.get("reading") or []))
     with fixture_project.built("package-defects") as fx:
-        found = {}
+        found, notes = {}, {}
         for slug in ("otves-remont-nn", "otves-office"):
             res = audit(slug, fx.root, today=today, visual_list=True)
             found[slug] = [F.Finding.from_dict(d) for d in res["findings"]]
-        seeded = {(s, r, p) for s, r, p in SEEDED}
+            notes[slug] = res["notes"]
+        seeded = set(SEEDED)
         hit = {(s, r, p) for s, r, p in seeded if any(f.rule == r and f.path == p for f in found[s])}
         miss = sorted(seeded - hit)
         check(f"package-defects: найдены все {len(SEEDED)} посеянных дефектов — своим правилом и с путём"
               + (f" (нет: {miss})" if miss else ""), not miss)
-        extra = [f for s, fs in found.items() for f in fs if f.severity == "error"
-                 and not any(f.rule == r and s == ps for ps, r, _p in SEEDED)]
-        check("package-defects: лишних error нет" + (f" (есть: {[(f.rule, f.path) for f in extra[:3]]})"
-                                                     if extra else ""), not extra)
+        extra = sorted({(s, f.rule, f.path) for s, fs in found.items() for f in fs if f.severity == "error"}
+                       - seeded - set(SEEDED_ALSO))
+        check("package-defects: лишних error нет — каждый error своим правилом в месте посева"
+              + (f" (есть: {extra[:3]})" if extra else ""), not extra)
+        old = [x for x in SEEDED if any(f.rule == x[1] and f.path == x[2] for f in base.get(x[0], []))]
+        check("посевы — новые против чистых основ; кроме R-COV-007 в voice.yaml: у основы — другое условие (канала "
+              "product-ui нет), у посева — канал есть, профиля голоса продукта нет"
+              + (f" (у основы есть: {old})" if old != [SEEDED[12]] else ""),
+              old == [SEEDED[12]] and any("профиля голоса продукта" in f.message for f in found[SEEDED[12][0]]
+                                          if f.rule == SEEDED[12][1] and f.path == SEEDED[12][2]))
+        check("битые токены: «свежесть не сверялась» — заметка сводки, а не находка R-FRESH-001",
+              not any(f.rule == "R-FRESH-001" for f in found["otves-remont-nn"])
+              and any("R-FRESH-001 не проверялось" in n for n in notes["otves-remont-nn"]))
         sev = {(f.rule, f.path): f.severity for fs in found.values() for f in fs}
         check("тяжесть по реестру и этапу: R-COV-002 error (copy deck закрыт), R-COV-005 error (вход mockup), "
               "R-COV-007 warning, R-DEBT-002 hint",
@@ -2394,6 +2430,29 @@ def _selftest():
         got = rules_of()
         check("уровень и профиль арт-дирекции не равны брифу и плану → R-PROJ-002, R-PROJ-003 error",
               ("R-PROJ-002", "error") in got and ("R-PROJ-003", "error") in got)
+
+        def ad_rules():
+            aa = Audit(slug, root, today=today)
+            with tempfile.TemporaryDirectory(prefix="ddd-audit-ad-") as td:
+                aa.tools = Tools(td)
+                aa.design_files("promo")
+            return [(f.rule, f.severity, f.message) for f in aa.rep.items]
+
+        ad = json.loads(adt)
+        ad["exclusions"]["k3_allow"] = ["no-such-key"]
+        ad["decisions"][0]["decision"] = "bogus"
+        adp.write_text(json.dumps(ad, ensure_ascii=False), encoding="utf-8")
+        got = ad_rules()
+        check("ad_check: ключ --allow вне реестра примет у незакрытой арт-дирекции → R-REF-006 warning; ошибка схемы "
+              "в decisions → R-STRUCT-004 error, не R-REF-006",
+              any(r == "R-REF-006" and s == "warning" for r, s, _m in got)
+              and not any(r == "R-REF-006" and s == "error" for r, s, _m in got)
+              and any(r == "R-STRUCT-004" and s == "error" and m.startswith("ad_check: decisions/") for r, s, m in got)
+              and not any(r == "R-REF-006" and "decisions/" in m for r, s, m in got))
+        ad["status"] = "approved"
+        adp.write_text(json.dumps(ad, ensure_ascii=False), encoding="utf-8")
+        check("ad_check: у закрытой арт-дирекции ключ --allow без решения → R-REF-006 error",
+              any(r == "R-REF-006" and s == "error" for r, s, _m in ad_rules()))
         adp.write_text(adt, encoding="utf-8")
         art = pj / "design" / "ARTIFACTS.md"
         at = art.read_text(encoding="utf-8")
@@ -2431,6 +2490,32 @@ def _selftest():
         shutil.rmtree(root / ".claude")
         one = {f.surface for f in Audit(slug, root, surface="promo", today=today, run_tools=False).run().rep.items}
         check("вызов с поверхностью — находки уровня продукта и этой поверхности", one <= {None, "promo"})
+        y = yaml_mod()
+        dp = docpaths.site(slug, "promo", "copy", "spasibo.yaml", repo=root)
+        pp = docpaths.site(slug, "promo", "plans", "spasibo.yaml", repo=root)
+        dtext, ptext = dp.read_text(encoding="utf-8"), pp.read_text(encoding="utf-8")
+        deck, plan = y.safe_load(dtext), y.safe_load(ptext)
+        deck["copy_deck"]["pages"][0]["sections"][0]["slots"][0]["group"] = "cta-1"
+        plan["sections"][0]["treatment"] = {"motion_spec_ref": "../../../design/promo/motion/spasibo.motion-spec.yaml"
+                                                               "#/sections/header"}
+        dp.write_text(y.safe_dump(deck, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        pp.write_text(y.safe_dump(plan, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        am = docpaths.design(slug, "assets", surface="promo", repo=root) / "manifest.yaml"
+        am.parent.mkdir(parents=True, exist_ok=True)
+        am.write_text("example: true\nassets:\n  - {slot: nope-photo, file: nope.avif, ai: true, status: draft}\n",
+                      encoding="utf-8")
+        sec = deck["copy_deck"]["pages"][0]["sections"][0]
+        where = f"spasibo#/{sec['section_id']}/{sec['slots'][0]['slot_id']}"
+        got = [(f.rule, f.severity, f.ref, f.message) for f in
+               Audit(slug, root, today=today, run_tools=False).run().rep.items]
+        check("group слота copy deck не как у плана → R-REF-003 error; motion_spec_ref подачи секции в пустоту → "
+              "R-REF-001 error; ассет с пометкой ИИ вне планов ассетов сайта → R-MAT-008 error",
+              any(x[:3] == ("R-REF-003", "error", where) and "group cta-1" in x[3] for x in got)
+              and any(x[:3] == ("R-REF-001", "error", "spasibo#/sections/0/treatment/motion_spec_ref") for x in got)
+              and any(x[:3] == ("R-MAT-008", "error", "nope-photo") for x in got))
+        dp.write_text(dtext, encoding="utf-8")
+        pp.write_text(ptext, encoding="utf-8")
+        am.unlink()
     # макетный прогон: отчёт mockup_checks → R-VIS-001 и сводка по доменам
     with tempfile.TemporaryDirectory(prefix="ddd-audit-vis-") as td:
         rep = Path(td) / "home.json"

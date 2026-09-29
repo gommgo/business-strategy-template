@@ -1,4 +1,8 @@
-"""Генератор фикстур с посеянными дефектами: package-landing-defects, package-cabinet-defects, package-defects."""
+"""Генератор фикстур с посеянными дефектами: package-landing-defects, package-cabinet-defects, package-defects.
+
+Запуск — после package_landing.py, Python окружения скилла (временные сборки — в TMPDIR):
+    TMPDIR=<scratchpad> ~/.cache/design-deep-dive/venv/bin/python \\
+        research/design-build/phase-8/tools/c13/package_defects.py"""
 import hashlib
 import json
 import re
@@ -10,13 +14,15 @@ from pathlib import Path
 
 import yaml
 
-SK = Path("/home/mm/git/stit-core/business-strategy-template/.claude/skills/design-deep-dive")
+SK = Path(__file__).resolve().parents[5] / ".claude/skills/design-deep-dive"
 FIX = SK / "scripts/tests/fixtures"
-PY = "/home/mm/.cache/design-deep-dive/venv/bin/python"
 TODAY = "2026-09-29"
 sys.path.insert(0, str(SK / "scripts/tests"))
 sys.path.insert(0, str(SK / "scripts/lib"))
 import fixture_project  # noqa: E402
+import kbpaths  # noqa: E402
+
+PY = kbpaths.python()
 
 
 def run(*args):
@@ -151,18 +157,28 @@ extra = nexts + """      - slot_id: reschedule
         fact_ids: []
         claim_flags: []
 """
+# R-DEBT-002: у основы в copy deck ссылок на факты нет — посев ставит демо-факт в мета страницы до закрытия
+META = [("      description: 'Заявка на замер принята. Студия ремонта «Отвес», Нижний Новгород.'\n",
+         "      description: 'Заявка на замер принята. Ремонтируем квартиры в Нижнем Новгороде с 2014 года.'\n"),
+        ("      og_description: 'Прораб позвонит и договорится о дне замера.'\n      fact_ids: []\n",
+         "      og_description: 'Прораб позвонит и договорится о дне замера.'\n      fact_ids: [company-since-2014]\n")]
+seeded_deck = deck.replace(privacy, "").replace(nexts, extra)
+for find, to in META:
+    assert seeded_deck.count(find) == 1, find
+    seeded_deck = seeded_deck.replace(find, to)
 with tempfile.TemporaryDirectory() as td:
     b = fixture_project.build("package-landing", Path(td) / "root")
     cdir = b.project / "site/promo/copy"
     d1, d2, d3 = cdir / "_d1.yaml", cdir / "_d2.yaml", cdir / "_d3.yaml"
-    d1.write_text(deck.replace(privacy, "").replace(nexts, extra), encoding="utf-8")
+    d1.write_text(seeded_deck, encoding="utf-8")
     run(SK / "scripts/text/copydeck.py", "check", d1, "--facts", b.project / "facts.yaml", "--today", TODAY,
         "--update", d2, "--promote", "--quiet")
     r = run(SK / "scripts/text/copydeck.py", "approve", d2, "--page", "spasibo", "--by", "владелец продукта (демо)",
             "-o", d3)
     assert d3.is_file(), r.stdout + r.stderr
     approved = d3.read_text(encoding="utf-8")
-assert "status: approved" in approved and "reschedule" in approved and "privacy-label" not in approved
+assert "status: approved" in approved and "reschedule" in approved and "privacy-label" not in approved \
+    and "company-since-2014" in approved and "company-since-2014" not in deck
 m = {
     "example": True,
     "description": "лендинг promo с посеянными дефектами слоёв страницы и дизайна для проверки design_audit и ready",
@@ -197,9 +213,12 @@ head = """\
 #   R-FRESH-006  design/promo/ready.yaml — манифест собран на основе до посевов и отстал от источников
 #   R-MAT-008    design/promo/assets/logo.svg — файл ассета слота header-logo при плане ассетов spasibo в draft
 #   R-COV-007    voice.yaml — канал product-ui при поверхности рода app без профиля голоса продукта
-#   R-DEBT-002   site/promo/copy/spasibo.yaml — демо-факт company-since-2014 в закрытом copy deck (approved)
-# copy deck страницы spasibo заменён целиком: он прошёл copydeck.py check --update --promote и approve (записи проверок
-# lint и claims с text_hash, approval страницы) уже с посевами R-REF-003 и R-COV-002.
+#   R-DEBT-002   site/promo/copy/spasibo.yaml — демо-факт company-since-2014 в закрытом copy deck (approved); у основы
+#                в copy deck ссылок на факты нет
+# У основы — та же находка R-COV-007 в voice.yaml другим условием: канала product-ui нет; посев — канал есть, профиля
+# голоса продукта нет. copy deck страницы spasibo заменён целиком: он прошёл copydeck.py check --update --promote и
+# approve (записи проверок lint и claims с text_hash, approval страницы) уже с посевами R-REF-003, R-COV-002 и
+# R-DEBT-002.
 # Манифест готовности не пересобирать перед аудитом: иначе он совпадёт с источниками. Формат — докстринг
 # fixture_project.py.
 """

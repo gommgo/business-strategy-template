@@ -11,9 +11,12 @@
 #   R-FRESH-006  design/promo/ready.yaml — манифест собран на основе до посевов и отстал от источников
 #   R-MAT-008    design/promo/assets/logo.svg — файл ассета слота header-logo при плане ассетов spasibo в draft
 #   R-COV-007    voice.yaml — канал product-ui при поверхности рода app без профиля голоса продукта
-#   R-DEBT-002   site/promo/copy/spasibo.yaml — демо-факт company-since-2014 в закрытом copy deck (approved)
-# copy deck страницы spasibo заменён целиком: он прошёл copydeck.py check --update --promote и approve (записи проверок
-# lint и claims с text_hash, approval страницы) уже с посевами R-REF-003 и R-COV-002.
+#   R-DEBT-002   site/promo/copy/spasibo.yaml — демо-факт company-since-2014 в закрытом copy deck (approved); у основы
+#                в copy deck ссылок на факты нет
+# У основы — та же находка R-COV-007 в voice.yaml другим условием: канала product-ui нет; посев — канал есть, профиля
+# голоса продукта нет. copy deck страницы spasibo заменён целиком: он прошёл copydeck.py check --update --promote и
+# approve (записи проверок lint и claims с text_hash, approval страницы) уже с посевами R-REF-003, R-COV-002 и
+# R-DEBT-002.
 # Манифест готовности не пересобирать перед аудитом: иначе он совпадёт с источниками. Формат — докстринг
 # fixture_project.py.
 example: true
@@ -68,10 +71,10 @@ layers:
               basis: 'подтверждение заявки — первое, что видит человек после формы'
             meta:
               title: 'Заявка на замер принята — студия «Отвес»'
-              description: 'Заявка на замер принята. Ремонтируем квартиры в Нижнем Новгороде с 2014 года.'
+              description: 'Заявка на замер принята. Студия ремонта «Отвес», Нижний Новгород.'
               og_title: 'Заявка на замер принята'
               og_description: 'Прораб позвонит и договорится о дне замера.'
-              fact_ids: [company-since-2014]
+              fact_ids: []
               notes: 'Служебная страница: не индексируется (seo.indexable плана — false).'
             sections:
             - section_id: header

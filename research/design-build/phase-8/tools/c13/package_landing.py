@@ -1,9 +1,11 @@
-"""Генератор манифеста фикстуры package-landing: длинная правка copy deck — точным текстом примера базы."""
+"""Генератор манифеста фикстуры package-landing: длинная правка copy deck — точным текстом примера базы.
+
+Запуск: python3 research/design-build/phase-8/tools/c13/package_landing.py (первым — до package_defects.py)."""
 import sys
 from pathlib import Path
 import yaml
 
-SKILL = Path("/home/mm/git/stit-core/business-strategy-template/.claude/skills/design-deep-dive")
+SKILL = Path(__file__).resolve().parents[5] / ".claude/skills/design-deep-dive"
 KB = SKILL / "kb"
 OUT = SKILL / "scripts/tests/fixtures/package-landing"
 case = (KB / "text/10-templates-recipes/examples/ru-otves-case.yaml").read_text(encoding="utf-8")
@@ -26,10 +28,10 @@ SPASIBO = """\
       basis: 'подтверждение заявки — первое, что видит человек после формы'
     meta:
       title: 'Заявка на замер принята — студия «Отвес»'
-      description: 'Заявка на замер принята. Ремонтируем квартиры в Нижнем Новгороде с 2014 года.'
+      description: 'Заявка на замер принята. Студия ремонта «Отвес», Нижний Новгород.'
       og_title: 'Заявка на замер принята'
       og_description: 'Прораб позвонит и договорится о дне замера.'
-      fact_ids: [company-since-2014]
+      fact_ids: []
       notes: 'Служебная страница: не индексируется (seo.indexable плана — false).'
     sections:
     - section_id: header
@@ -161,8 +163,9 @@ head = """\
 # фикстуры input-landing, приведённый к раскладке проекта для структурного аудита. Ссылки брифа, смысла, иерархий,
 # голоса и планов ведут в файлы проекта, а не в примеры базы; главная — план в работе (proposed) без copy deck;
 # страница «спасибо» — план примера lead-services-otves (approved) и copy deck, собранный правкой из примера copy deck
-# text по слотам этого плана (тексты — черновик агента, assumed), свой файл — каркас плана ассетов страницы «спасибо»
-# (plan_to_assets.py build, draft). design_audit check — 0 error; ready build → check — 0.
+# text по слотам этого плана (тексты — черновик агента, assumed; ссылок на факты нет — демо-факт в закрытом copy deck
+# сеет package-landing-defects), свой файл — каркас плана ассетов страницы «спасибо» (plan_to_assets.py build, draft).
+# design_audit check — 0 error; ready build → check — 0.
 # Формат манифеста — докстринг fixture_project.py.
 """
 OUT.mkdir(parents=True, exist_ok=True)
