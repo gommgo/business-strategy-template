@@ -12,4 +12,4 @@ scripts/text/ux_dict_to_yaml.py	utility	help; run: --check
 scripts/text/validate_any.py	step	import-only; run: {skill}/kb/text/02-strategy-messaging/examples/meaning-otves.yaml {skill}/kb/text/02-strategy-messaging/examples/hierarchy-otves-product-aware.yaml	
 scripts/text/validate_facts.py	step	run: 	
 scripts/text/validate_meaning.py	step	run: --quiet	
-scripts/text/validate_voice.py	step	run: 	
+scripts/text/validate_voice.py	step	help; run: 	

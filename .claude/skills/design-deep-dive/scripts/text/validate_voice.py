@@ -280,6 +280,9 @@ PRODUCT_MUTATIONS = [
 
 def main(argv=None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
+    if any(a in ("-h", "--help") for a in argv):
+        print(__doc__.strip())
+        return 0
     out = []
     ok = True
 
