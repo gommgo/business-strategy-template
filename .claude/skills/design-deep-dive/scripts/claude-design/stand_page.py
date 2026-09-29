@@ -1,42 +1,29 @@
 #!/usr/bin/env python3
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-# stand_page.py — копия БЕЗ ПРАВОК КОДА (26.09.2026) страницы слепого попарного выбора для стенда тестов от 24.09.2026,
-# md5 оригинала 7cae69382f00cdc712b416741e0c7d6d. Как пользоваться — claude-design-research/06-design-process/06-test-stand.md (§5, §6).
-# Брать: build (страница + ключи рядом), tally (Уилсон, Брэдли — Терри, повторы, контрольные пары, вердикт по паре условий),
-#   power (мощность правила решения), fake и simulate (проверка конвейера без модели), selftest.
-# Зависимость: читает модуль ai-media-research/99-raw/tools/stand_run.py по АБСОЛЮТНОМУ пути (константа STAND) — канон слепых пар
-#   (ai-media 13-routing-matrix/01-stand-method.md); при переносе в шаблон — путь относительный или модуль рядом.
-# Что убрать при адаптации:
-#   1. Имена условий другого исполнителя в докстринге, умолчаниях `fake` (--test T-501 --conditions …) и в selftest — заменить на
-#      условия этой базы (например types, kit, ui); ссылка на правило решения 09-test-plan/… → 06-design-process/06-test-stand.md §6.
-#   2. Кадры ждёт как <shots_dir>/<вид>.jpg (виды по умолчанию desktop-1440x900-00, mobile-390x844-00, desktop-1440x900-map):
-#      первые экраны даёт mockup_checks.py page --shots, карту — JPEG из полного кадра kit/shot.py (или --views без карты).
-#   3. selftest создаёт временную папку рядом со скриптом; запускать с PYTHONDONTWRITEBYTECODE=1, чтобы не писать кэш в ai-media.
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-"""stand_page.py — страница слепого попарного выбора для СТЕНДА тестов (T, волна 2, 2026-09-24).
+"""stand_page.py — страница слепого попарного выбора для стенда тестов (claude-design/06-design-process/06-test-stand.md).
 
-Поверх `stand_run.py page/tally` из ai-media (модуль только читается; страница и ключи пишутся рядом с --out).
-Отличие от G/05 `variants_page.py` (варианты одного проекта): здесь сравниваются УСЛОВИЯ теста (K3 high / K3 max / Claude
-Opus 5.5 / Claude Fable 5.1 / …) на нескольких брифах и прогонах; пары строятся внутри группы «тест | бриф | вид» между
-разными условиями, прогоны одного условия между собой не сравниваются; итог — вердикт по паре условий с интервалом Уилсона
-и кластерной проверкой по парам прогонов (виды одного прогона не независимы). Модель не вызывается, сеть не нужна.
+Поверх `stand_run.py page/tally` из ai-media (модуль только читается, путь — kbpaths; страница и ключи пишутся рядом с
+--out). Варианты одного проекта сравнивает страница слепых пар этапа (06-test-stand.md §8); здесь сравниваются УСЛОВИЯ
+теста (путь холста, настройки, модель или effort) на нескольких брифах и прогонах; пары строятся внутри группы
+«тест | бриф | вид» между разными условиями, прогоны одного условия между собой не сравниваются; итог — вердикт по паре
+условий с интервалом Уилсона и кластерной проверкой по парам прогонов (виды одного прогона не независимы). Модель не
+вызывается, сеть не нужна.
 
   stand_page.py build --manifest runs.tsv --out PAGE_DIR [--views desktop-1440x900-00,mobile-390x844-00,desktop-1440x900-map]
                       [--title T] [--repeat 0.1] [--seed 7]
       runs.tsv: test, brief, brief_text, condition, run, shots_dir (TAB; строка на прогон; базовые прогоны повторить под
       каждым тестом, где они — база). Пишет PAGE_DIR/index.html + img/, ключ PAGE_DIR.key.json и PAGE_DIR.runs.json РЯДОМ.
-  stand_page.py simulate --key PAGE_DIR.key.json --runs PAGE_DIR.runs.json --truth 'T-501:k3=0,opus=0.4,fable=0.8'
+  stand_page.py simulate --key PAGE_DIR.key.json --runs PAGE_DIR.runs.json --truth 'T-501:types=0,kit=0.4,ui=0.8'
                       [--truth …] [--run-sd 0.3] [--tau 0.35] [--tie 0.12] [--seed 1] --out votes.json
       сценарный голосующий: скрытое качество прогона = качество условия + шум прогона; голос по виду — логистика разницы.
   stand_page.py tally VOTES.json [VOTES2.json …] --key PAGE_DIR.key.json --runs PAGE_DIR.runs.json [--out tally.md]
       таблицы stand_run (Уилсон, Брэдли — Терри, повторы, контрольные) + ВЕРДИКТ по каждой паре условий каждого теста.
   stand_page.py power [--designs 1x2,1x3,2x2,3x2] [--diffs 0,0.2,0.4,0.6,0.9] [--sims 2000] [--out power.md]
       доля верно найденных перевесов и ложных срабатываний правила решения для размеров стенда (брифов × прогонов).
-  stand_page.py fake --out DIR --manifest-out runs.tsv [--test T-501 --conditions k3,opus,fable --briefs S1 --runs 2]
+  stand_page.py fake --out DIR --manifest-out runs.tsv [--test T-501 --conditions types,kit,ui --briefs S1 --runs 2]
       фиктивные кадры (PIL) и манифест — для проверки конвейера без модели.
   stand_page.py selftest    fake → build → проверка слепоты страницы → simulate → tally (вердикт = заданный порядок)
 
-Правило решения (09-test-plan/03-protocol-logging.md §5.4): условие X лучше Y, если (1) нижняя граница 95 % Уилсона доли
+Правило решения (06-test-stand.md §6): условие X лучше Y, если (1) нижняя граница 95 % Уилсона доли
 побед X (ничья = ½) > 0,5 и (2) X выиграл большинство видов в ≥ 75 % пар прогонов; симметрично для Y; иначе «неразличимы» —
 остаётся умолчание (дешевле / проще). Контрольная пара провалена или повторы перевёрнуты больше чем в половине — голосование
 не засчитывать.
@@ -44,7 +31,7 @@ Opus 5.5 / Claude Fable 5.1 / …) на нескольких брифах и п�
 import argparse, csv, importlib.util, json, math, os, random, re, sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'lib'))  # перенос: scripts/lib
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'lib'))
 import kbpaths  # noqa: E402
 STAND = kbpaths.scripts('ai-media', 'stand_run.py')
 DEF_VIEWS = 'desktop-1440x900-00,mobile-390x844-00,desktop-1440x900-map'
@@ -391,21 +378,21 @@ def cmd_selftest(a):
     check(f'Уилсон 10/12 = {p:.2f} [{lo:.3f}; {hi:.3f}] — нижняя > 0,5', lo > 0.5)
     p, lo, hi = wilson(9, 12)
     check(f'Уилсон 9/12 = {p:.2f} [{lo:.3f}; {hi:.3f}] — нижняя ≤ 0,5', lo <= 0.5)
-    with tempfile.TemporaryDirectory(dir=os.path.dirname(os.path.abspath(__file__))) as td:
+    with tempfile.TemporaryDirectory() as td:
         ns = argparse.Namespace
-        cmd_fake(ns(out=f'{td}/shots', manifest_out=f'{td}/runs.tsv', test='T-501', conditions='k3,opus,fable', briefs='S1',
+        cmd_fake(ns(out=f'{td}/shots', manifest_out=f'{td}/runs.tsv', test='T-501', conditions='types,kit,ui', briefs='S1',
                     runs=2, seed=3))
         rc = cmd_build(ns(manifest=f'{td}/runs.tsv', out=f'{td}/page', views=DEF_VIEWS, title='Стенд · selftest', repeat=0.1, seed=7))
         check('страница собрана и слепа (нет имён условий и путей)', rc == 0)
         key = json.loads(Path(f'{td}/page.key.json').read_text(encoding='utf-8'))
         check(f"пар: {len(key['pairs'])} (36 основных + повторы и контрольные)", len(key['pairs']) >= 36)
         check('ключ лежит рядом со страницей, не внутри', not Path(f'{td}/page/page.key.json').exists())
-        cmd_simulate(ns(key=f'{td}/page.key.json', runs=f'{td}/page.runs.json', truth=['T-501:k3=0,opus=-1.5,fable=1.5'],
+        cmd_simulate(ns(key=f'{td}/page.key.json', runs=f'{td}/page.runs.json', truth=['T-501:types=0,kit=-1.5,ui=1.5'],
                         run_sd=0.1, tau=0.35, tie=0.05, seed=1, voter='scripted', out=f'{td}/votes.json'))
         vs = verdicts([f'{td}/votes.json'], f'{td}/page.key.json', f'{td}/page.runs.json')
         vd = {(v['x'], v['y']): v['verdict'] for v in vs}
-        check(f'вердикт fable > k3: {vd.get(("fable", "k3"))}', vd.get(('fable', 'k3')) == 'fable лучше')
-        check(f'вердикт k3 > opus: {vd.get(("k3", "opus"))}', vd.get(('k3', 'opus')) == 'k3 лучше')
+        check(f'вердикт ui > types: {vd.get(("types", "ui"))}', vd.get(('types', 'ui')) == 'ui лучше')
+        check(f'вердикт types > kit: {vd.get(("kit", "types"))}', vd.get(('kit', 'types')) == 'types лучше')
         rnd = random.Random(13)
         fp = sum(sim_campaign(rnd, 1, 2, 3, 0.0, 0.15, 0.35, 0.12)[0] != '=' for _ in range(400)) / 400
         check(f'ложные «лучше» при равных условиях (1 бриф × 2 прогона, шум прогона 0,15): {fp:.2f} ≤ 0,15', fp <= 0.15)
@@ -432,7 +419,7 @@ def main():
     p.add_argument('--run-sd', type=float, default=0.3); p.add_argument('--tau', type=float, default=0.35)
     p.add_argument('--tie', type=float, default=0.12); p.add_argument('--seed', type=int, default=11); p.add_argument('--out')
     f = sub.add_parser('fake'); f.add_argument('--out', required=True); f.add_argument('--manifest-out', required=True)
-    f.add_argument('--test', default='T-501'); f.add_argument('--conditions', default='k3,opus,fable')
+    f.add_argument('--test', default='T-501'); f.add_argument('--conditions', default='types,kit,ui')
     f.add_argument('--briefs', default='S1'); f.add_argument('--runs', type=int, default=2); f.add_argument('--seed', type=int, default=3)
     sub.add_parser('selftest')
     a = ap.parse_args()

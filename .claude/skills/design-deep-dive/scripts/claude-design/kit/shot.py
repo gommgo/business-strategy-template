@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""kit/shot.py — «глаза» холста для работы из чата: PNG каждого артборда (с метками #N и без), весь холст, marks.json.
+"""kit/shot.py — «глаза» холста для работы из чата: PNG каждого кадра HTML-копий (с метками #N и без), весь холст,
+marks.json. Модель не вызывается; сеть — только к шрифтам и ресурсам самих копий. Фоновых процессов не оставляет:
+сервер — поток этого процесса, браузер закрывается в finally.
 
-Агент D базы claude-design-research, 2026-09-25, v1. Проверки страницы и проверка реально отрисованных шрифтов перенесены из
-kimi-research/07-brief-handoff/templates/shot.py v3 (агент F, 2026-09-24). Модель не вызывается; сеть — только к шрифтам и
-ресурсам самих артбордов. Фоновых процессов не оставляет: сервер — поток этого процесса, браузер закрывается в finally.
+Кадры — список `artboards` манифеста (file, w, h, theme, title). Манифест HTML-копий холста — `kit.json`
+(`kit/kit_manifest.py` собирает его из `kb/common/acceptance-widths.yaml`: статичные копии на ширине рамки, адаптивные — на
+ширинах класса экрана в темах ДС, вылет и границы брейкпоинтов ± 1 px). Набор ширин живёт в файле ширин, а не здесь:
+--widths acceptance раскладывает каждую копию манифеста без своих ширин на все ширины приёмки и вылет (высота окна —
+900, у окон уже первого брейкпоинта — 844).
 
 Использование:
-  python3 shot.py <папка проекта> <outdir> [--manifest canvas.json] [--only landing.html] [--themes light,dark]
-          [--scale 1] [--tiles] [--no-plain] [--no-marks] [--no-canvas] [--canvas-dpr 0.5]
+  python3 shot.py <папка копий> <outdir> [--manifest kit.json] [--widths manifest|acceptance] [--only landing.html]
+          [--themes light,dark] [--scale 1] [--tiles] [--no-plain] [--no-marks] [--no-canvas] [--canvas-dpr 0.5]
           [--set "radius-md=16px;color-accent=#0a7d4f"] [--prev review/iter-01/marks.json] [--iteration iter-02]
           [--lock /path/to/browser.lock] [--min-free-gb 2] [--strict]
   python3 shot.py serve <папка проекта> [--port 8765]
@@ -31,10 +35,16 @@ from datetime import datetime, timezone
 from urllib.parse import quote, unquote, urlparse
 
 KIT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(KIT_DIR, '..', '..', 'lib'))
+import kbpaths  # noqa: E402
+
+WIDTHS_FILE = kbpaths.kb(None, 'common', 'acceptance-widths.yaml')
+REF_TOKENS = kbpaths.kb('ui', '14-recipes', 'examples', 'tokens.css')
+VIEW_H_WIDE, VIEW_H_NARROW = 900, 844          # высота окна — параметр прогона, а не норма приёмки
 GENERIC = {'serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui', 'ui-sans-serif', 'ui-serif',
            'ui-monospace', 'ui-rounded', '-apple-system', 'blinkmacsystemfont', 'emoji', 'math', 'fangsong'}
 
-# --- проверки страницы (из shot.py v3, сокращено; плейсхолдеры — любые [КАПС-МЕТКИ]) -------------------------------------
+# --- проверки страницы (плейсхолдеры — любые [КАПС-МЕТКИ]) ---------------------------------------------------------------
 CHECKS_JS = r"""
 (conf) => {
   const vw = conf.vw || document.documentElement.clientWidth;
@@ -112,7 +122,7 @@ SAMPLE_JS = r"""
 
 
 def platform_fonts(ctx, page):
-    """Какие шрифты реально отрисованы у образцов (CDP CSS.getPlatformFontsForNode). Из shot.py v3."""
+    """Какие шрифты реально отрисованы у образцов (CDP CSS.getPlatformFontsForNode)."""
     try:
         samples = [s for s in page.evaluate(SAMPLE_JS, ['h1', 'h2', 'h3', 'p', 'button', 'label', 'a']) if s]
         cdp = ctx.new_cdp_session(page)
@@ -175,7 +185,8 @@ def mem_available_gb():
 
 
 class BrowserLock:
-    """Необязательная блокировка: --lock PATH или переменная KIT_BROWSER_LOCK (flock, как у соседних баз)."""
+    """Блокировка браузера (flock): --lock PATH, переменная KIT_BROWSER_LOCK или общая блокировка окружения
+    `kbpaths.lock_path("browser")` — браузер один за раз на машину; пустой --lock "" — без блокировки."""
     def __init__(self, path):
         self.path, self.fh = path, None
 
@@ -303,6 +314,28 @@ def parse_set(s):
     return pairs
 
 
+def acceptance_frames(frames, first_bp=None):
+    """Кадры по файлу ширин приёмки: каждая пара «копия + тема» манифеста — на всех ширинах `widths` и на
+    `overflow_only`; высота окна — 900, уже первого брейкпоинта — 844 (первый брейкпоинт — эталонные токены ui)."""
+    import yaml
+    with open(WIDTHS_FILE, encoding='utf-8') as f:
+        aw = yaml.safe_load(f) or {}
+    if first_bp is None:
+        with open(REF_TOKENS, encoding='utf-8') as f:
+            first_bp = min(float(v) for v in re.findall(r'--bp-[a-z-]+:\s*(\d+(?:\.\d+)?)px', f.read()))
+    widths = [int(w) for w in aw.get('widths') or []] + ([int(aw['overflow_only'])] if aw.get('overflow_only') else [])
+    out, seen = [], set()
+    for fr in frames:
+        key = (fr['file'], fr['theme'])
+        if key in seen:
+            continue
+        seen.add(key)
+        for w in widths:
+            out.append({**fr, 'w': w, 'h': VIEW_H_WIDE if w >= first_bp else VIEW_H_NARROW,
+                        'title': f"{fr.get('title') or fr['file']} · {w}"})
+    return out
+
+
 def slug(s):
     return re.sub(r'[^\w.-]+', '-', s, flags=re.UNICODE).strip('-_.') or 'design'
 
@@ -326,7 +359,10 @@ def main():
 
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('project'); ap.add_argument('outdir')
-    ap.add_argument('--manifest', default='canvas.json')
+    ap.add_argument('--manifest', default='canvas.json', help='манифест кадров: kit.json HTML-копий холста или canvas.json kit')
+    ap.add_argument('--widths', choices=('manifest', 'acceptance'), default='manifest',
+                    help='manifest — кадры как в манифесте; acceptance — каждая копия на всех ширинах приёмки и вылете')
+    ap.add_argument('--first-bp', type=float, help='первый брейкпоинт ДС для высоты окна (по умолчанию — эталон ui)')
     ap.add_argument('--only', default='', help='только рамки этого файла (через запятую)')
     ap.add_argument('--themes', default='', help='снять каждую рамку во всех темах списка, напр. light,dark')
     ap.add_argument('--scale', type=float, default=1.0, help='DPR кадров артбордов (2 — «ретина»)')
@@ -338,7 +374,7 @@ def main():
     ap.add_argument('--prev', default='', help='marks.json прошлой итерации — перенести номера')
     ap.add_argument('--iteration', default='')
     ap.add_argument('--wait-ms', type=int, default=350)
-    ap.add_argument('--lock', default=os.environ.get('KIT_BROWSER_LOCK', ''))
+    ap.add_argument('--lock', default=os.environ.get('KIT_BROWSER_LOCK') or kbpaths.lock_path('browser'))
     ap.add_argument('--min-free-gb', type=float, default=float(os.environ.get('KIT_MIN_FREE_GB', '0') or 0))
     ap.add_argument('--strict', action='store_true')
     a = ap.parse_args()
@@ -356,6 +392,8 @@ def main():
             continue
         for th in (themes or [ab.get('theme', 'light')]):
             frames.append({**ab, 'theme': th})
+    if a.widths == 'acceptance':
+        frames = acceptance_frames(frames, a.first_bp)
     if not frames:
         print(json.dumps({'error': 'нет рамок (проверьте --only и manifest)'}, ensure_ascii=False), file=sys.stderr)
         return 3

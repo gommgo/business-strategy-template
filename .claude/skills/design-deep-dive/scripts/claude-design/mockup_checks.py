@@ -1,79 +1,197 @@
 #!/usr/bin/env python3
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-# mockup_checks.py — копия БЕЗ ПРАВОК КОДА (26.09.2026) утилиты проверок макета v1.0 от 24.09.2026, md5 оригинала 7dde044e876c83b9ad6e5a03d212af5c.
-# Описание и пороги — claude-design-research/06-design-process/04-checks.md (§3, §4); бан-лист — 05-default-look.md.
-# Брать: `page` (приметы «дефолтного вида» с ключами --allow; честность: числа против фактов, текст против copy deck, подписи и
-#   alt против списка ассетов, сток и хотлинк, «рыба», отзывы; мобильная: навигация, тело 16 px, вылет, строки h1; наложения
-#   текста; контраст тёплых палитр), `resize` (1440 → 390 → 1440 без перезагрузки), `selftest`.
-# Что убрать при адаптации:
-#   1. Подкоманда `watch` — сторож потока CLI другого исполнителя, НЕ НУЖЕН: функции resolve_stream, watch, cmd_watch, парсер
-#      `watch` в main(), раздел `watch` в докстринге, проверки разбора потока в cmd_selftest.
-#   2. id проверок K3-* и F-* ПЕРЕИМЕНОВАТЬ при уборке по таблице соответствий: на них опираются маркеры site
-#      (09-ai-generation-evaluation/ai-landing-markers.yaml, 07-seo-geo-performance-analytics/page-gates.yaml) и реестр клише creative
-#      (08-uniqueness-anti-slop/cliche-registry.yaml, 09-ai-execution-evaluation/effect-gates.yaml). Значения ALLOW_KEYS не менять —
-#      их использует арт-дирекция creative (разрешённые брифом приметы).
-#   3. Имя исполнителя в докстринге, help и текстах находок; пример --ignore-selector для бейджа хостинга публичных страниц; ссылки на
-#      документы и опыты старой базы (08-director-loop-qa/…, ACCEPTANCE H5, E/01, W1–W3, G/01–G/04) → 06-design-process/04-checks.md.
-#   4. safe_root: список служебных папок привести к нужным (в нём есть папка настроек другого CLI).
-#   5. Входы --facts / --assets-readme ждут markdown-таблицы (колонка «Факт…», колонки «Файл», «Подпись», «Alt»); YAML фактов text —
-#      переводить в таблицу или научить утилиту.
-# Зависимости: Python 3.10+, Playwright + Chromium; браузер — один за раз, свободная память ≥ 2 ГБ (--min-free-gb).
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-"""k3_checks.py — проверки арт-директора для сборок Kimi K3: приметы K3, выдумки, мобильная версия, сторож потока.
+"""mockup_checks.py — проверки макета по отрисованной HTML-копии: приметы «дефолтного вида», честность содержимого,
+формы, телефон, наложения, ресайз. Модель не вызывается; браузер — Chromium Playwright, один за раз.
 
-Агент G (волна 2), 2026-09-24. Модель не вызывается. Python 3.10+; для `page` — playwright (Chromium) из системы.
-Место в цикле: `08-director-loop-qa/02-checks-k3.md` (что ловит, пороги, что делать при провале).
-Дополняет, а не дублирует: shot.py v3 (F) — вылет, битые/внешние картинки, alt, мелкий текст, цели, шрифты, lang, h1;
-ui_audit.py (ui-research) — отступы, контраст, состояния, фокус; Gesso `anti-slop` и `impeccable detect` — слоп-признаки.
-Здесь — то, чего нет у них: почерк K3 и выдумки по брифу.
+Место в цикле — слой скриптов проверок макета (claude-design/06-design-process/04-checks.md §2–§4; протокол холста
+`references/claude-design.md § Проверки по постоянной просьбе`): на статичных копиях артбордов и на адаптивной копии,
+только по просьбе заказчика. Проверки холста — слой ниже ворот страницы и их не заменяют.
 
 Подкоманды:
-  page <url|file.html|dir> [--views 1440x900,390x844] [--facts brief/facts.md] [--copy brief/copy.md]
-       [--assets-readme assets/README.md] [--src DIR] [--allow warm,serif,...] [--ignore-selector CSS]
-       [--block-external | --allow-external] [--shots DIR] [--json OUT.json] [--md OUT.md] [--min-free-gb 2]
-       приметы K3 (K3-*), выдумки (F-*), мобильная версия (M-*), контраст тёплых палитр; exit 0 — нет critical/major,
-       2 — есть, 1 — ошибка, 3 — мало свободной памяти (браузер не запускался)
-  watch <stream.jsonl | <проект>.runs/> [--running] [--idle-warn 600] [--idle-act 1200] [--loop 4] [--churn 8]
-       [--iter N] [--frames K] [--allowed-packages a,b] [--expect-first Read,Skill,...] [--forbid-tools ...]
-       разбор потока `kimi -p --output-format stream-json` (идёт или закончен): первый вызов, запрещённые инструменты
-       и команды, петли, долгие шаги, чтение кадров итерации; вердикт ok | warn | act | done; exit 0/0/2/0
+  page <url|file.html|dir> [--views 1440x900,390x844 | --acceptance] [--surface page|app] [--preset A|B|C|D]
+       [--tokens ТОКЕНЫ_ДС] [--facts facts.md|facts.yaml] [--copy copy.md|copy-deck.yaml [--page ID]]
+       [--assets assets.md|план.yaml] [--forms ID|план.yaml …] [--src DIR] [--allow warm,serif,…]
+       [--ignore-selector CSS] [--block-external | --allow-external] [--shots DIR] [--json OUT.json] [--md OUT.md]
+       [--min-free-gb 2]
+       exit 0 — нет critical и major, 2 — есть, 1 — ошибка, 3 — мало свободной памяти (браузер не запускался)
   resize <url|file> [--desktop 1440x900] [--mobile 390x844] [--wait-ms 1000] [--shots DIR]
-       ресайз без перезагрузки 1440 → 390 → 1440 (ACCEPTANCE H5; W3: hero ≥ 4 с чёрный после ресайза): вылет, навигация,
-       медиа первого экрана показано за 1 с, кадр после возврата совпадает с исходным; exit 0 pass / 2 fail
-  selftest  офлайн-проверки (цвет, контраст, числа, текст, разбор потока)
+       ресайз без перезагрузки: широкий → узкий → широкий (пункт H5 приёмки): вылет, навигация, медиа первого экрана
+       за --wait-ms, кадр после возврата совпадает с исходным (--max-diff — порог cd 06/04 §3 B); exit 0 pass / 2 fail
+  selftest  офлайн-проверки: цвет, контраст, числа с единицей и объектом, факты и копия таблицами и YAML, формы,
+       пороги владельцев, id примет, сводка по доменам
 
-Приметы K3 (источники: E/01 Kilo 9 задач, W1–W3, ui 11/04; `--allow` снимает примету, если бриф её заказал):
-  K3-BG-WARM warm        тонированный тёплый фон страницы/секций (OKLCH h 45–115°, C 0.006–0.08, L ≥ 0.88 или ≤ 0.30)
-  K3-ACCENT-WORD accent-word  одно слово заголовка выделено (курсив, цвет, градиент, другой шрифт, подчёркивание)
-  K3-SERIF-DISPLAY serif антиква в h1/h2 (+ пара с Inter/Geist/Roboto — «Fraunces + Inter»)
-  K3-EYEBROW eyebrow     капс-надзаголовок с разрядкой над > 1/3 заголовков (ui 11/04 m30)
-  K3-HERO-OVERLAY photo-hero  фото или видео на весь hero под тёмной вуалью
-  K3-HERO-CENTER center-hero  hero ≥ 90 % высоты окна, всё по центру (Hallmark гейт 6; не ловит ни один детектор D/02)
-  K3-STATS-ROW stats     ряд из 3–5 крупных чисел (+ числа уходят в сверку с facts.md)
-  K3-THREE-CARDS cards   три одинаковые карточки в ряд (m17)
-  K3-GRADIENT-TEXT gradient, K3-GLASS glass, K3-PILL pill, K3-META-DOTS dots, K3-ARROWS arrows, K3-MONO-LABELS mono,
-  K3-NUMBERED numbered, K3-MARQUEE marquee, K3-DRAWN-CHROME chrome, K3-CAPS caps — шаблонный хром (m3, m8, m15,
-  m30–m34), K3-WARM-CONTRAST — текст на тёплом фоне или тёплым цветом ниже 4.5:1 (3:1 крупный).
-Выдумки: F-UNSPLASH и F-STOCK (ID фото Unsplash и стоковые/заглушечные хосты в DOM и исходниках), F-HOTLINK, F-CAPTION
-  (подпись/alt против assets/README.md), F-NUMBERS (число на странице, которого нет в facts.md и copy.md), F-COPY (текст не из
-  copy.md), F-FILLER (lorem, Feature 1, John Doe, example.com), F-QUOTE (отзыв без источника).
-Мобильная (вьюпорт < 768): M-NAV (навигация не видна), M-BODY-16 (тело < 16 px), M-OVERFLOW (горизонтальная прокрутка),
-  M-H1-LINES (h1 > 4 строк). Вёрстка: V-OVERLAP (строки текста накладываются ≥ 30 % — плашка на H1, W2; календарь K3, E/01).
-Слепая зона: E-LOW-DOM — < 12 текстовых узлов или canvas/видео > 50 % первого экрана: проверки по разметке неполны.
-Публичные страницы Kimi (*.kimi.page, *.ok.kimi.link): --ignore-selector '[class*=kimi-brand], [class*=kimi-badge]' (бейдж хостинга).
-Проверено: 99-raw/experiments/G/01 (свои страницы: 36 из 37 подброшенных, 0 ложных на чистой), G/02 (Gesso 4, impeccable 12
-  из 36), G/03 (4 публичные страницы K3), G/04 (watch: 9 потоков).
-Приватность: статический обход только внутри указанной папки; `/`, домашняя папка и её служебные подпапки отклоняются
-  (урок B2/05). Для локальных целей внешние запросы по умолчанию блокируются (детерминизм, ничего не уходит в сеть).
+Ширины. Без --views окна — основные артборды `kb/common/acceptance-widths.yaml` (`artboards`), --acceptance — все
+ширины приёмки и отдельный прогон вылета на `overflow_only`. Высота окна — параметр прогона: 900 у широких окон, 844 у
+окон уже первого брейкпоинта ДС (окна первого экрана site). Первый брейкпоинт — из токенов ДС (--tokens: CSS, DTCG или
+tokens.json артефакта), без них — эталонные токены ui.
+
+Проверки и id примет. id проверок — ключи раздела `checks` реестра `kb/common/tells.yaml`: там у ключа группа (look —
+приметы вида, honesty — честность, acceptance — проверки приёмки), id приметы `tell` и ключ `--allow`. Находка несёт
+`tell` и `group` своей строки; сводка называет примету один раз, сколько бы проверок её ни нашли, и считает приметы
+по доменам реестра в единице домена-владельца (экран, страница, сцена), не складывая домены (`domains`, `clusters`
+реестра и кластеры реестра клише creative); вердикт кластера — по порогу владельца домена.
+  Приметы вида: тёплая тонированная бумага, выделенное слово заголовка, антиква в заголовках, капс-надзаголовки (частота
+  — число владельца COPY-C-18: не чаще одного на N секций с заголовком H1, H2), доля капса, пилюля над H1, градиентный
+  текст, hero на высоту окна по центру без продолжения (порог высоты — AIL-06 site), фото-hero под вуалью, ряд крупных
+  чисел, три одинаковые карточки (вариация длины текстов — AIL-07 site), бенто из однотипных плиток и орбита иконок
+  (пороги — реестр клише creative), мета-строки «·», стрелки в кнопках и ссылках («»» — кавычка, «↗» у внешней ссылки —
+  законна), моно-подписи, нумерация 01/02/03, стекло, бегущая строка, нарисованный хром, шкала кеглей и высота шапки
+  (пороги — `scripts/ui/data/thresholds.yaml`: кегли — одни для всех поверхностей, шапка — по поверхности: страница
+  сайта — телефон или десктоп, экран приложения — пресет), контраст тёплых палитр.
+  Честность: сток и хотлинк картинок; подписи и alt против списка ассетов; числа против фактов и текстов — число
+  совпадает с фактом значением, единицей и объектом, а строка факта без источника число не легализует; текст против
+  copy deck; «рыба»; отзывы без источника.
+  Формы — по `kb/site/05-conversion-funnels/lead-forms.yaml`: запреты раздела `forbidden`, которые видны в DOM, у любой
+  формы; с --forms — поля и видимые подписи против набора формы плана.
+  Приёмка: навигация, тело 16 px и вылет на телефоне, строки H1, наложение текста, слепая зона разметки (canvas и видео).
+Входы. Факты — facts.md входа холста (таблица «Факты»: id · дословно · источник · где можно) или facts.yaml продукта;
+тексты — copy.md входа или copy deck (YAML: выбранные варианты страницы --page); ассеты — assets.md входа (колонки
+«Файл», «Подпись», «Alt») или YAML плана ассетов (записи с file и caption или alt); формы — id наборов lead-forms.yaml
+или YAML плана страницы (`form.ref: lead-forms.yaml#<id>`). `--allow` снимает примету, если бриф или арт-дирекция
+записали решение; ключи — `allow` реестра примет.
+Приватность: статический обход только внутри указанной папки; `/`, домашняя папка и её служебные подпапки отклоняются.
+Для локальных целей внешние запросы по умолчанию блокируются (детерминизм, ничего не уходит в сеть).
 """
 import argparse, colorsys, json, math, os, re, statistics, sys, time, unicodedata
 from datetime import datetime, timezone
+from functools import lru_cache
 from urllib.parse import urlparse
 
-VERSION = '1.0'
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib'))
+import kbpaths  # noqa: E402
+
+VERSION = '2.0'
+
+# ---------------------------------------------------------------- данные владельцев (числа и id — не в коде)
+TELLS_FILE = kbpaths.kb(None, 'common', 'tells.yaml')                 # проверки → id приметы, группа, ключ --allow
+WIDTHS_FILE = kbpaths.kb(None, 'common', 'acceptance-widths.yaml')    # ширины приёмки
+UI_THRESHOLDS = kbpaths.data('ui', 'thresholds.yaml')                 # кегли и высота шапки
+REF_TOKENS = kbpaths.kb('ui', '14-recipes', 'examples', 'tokens.css')  # первый брейкпоинт без токенов ДС
+AIL_FILE = kbpaths.kb('site', '09-ai-generation-evaluation', 'ai-landing-markers.yaml')
+LEAD_FORMS = kbpaths.kb('site', '05-conversion-funnels', 'lead-forms.yaml')
+COPY_CHECKLIST = kbpaths.kb('text', '09-ai-generation-evaluation', 'copy-checklist.yaml')
+ANALYZERS = kbpaths.kb('text', '06-anti-slop', 'lexicon', 'analyzers.yaml')
+CLICHE = kbpaths.kb('creative', '08-uniqueness-anti-slop', 'cliche-registry.yaml')
+# Высота окна — параметр прогона, а не норма приёмки: широкие окна 900, окна уже первого брейкпоинта 844 (окна первого
+# экрана site 1440×900 и 390×844).
+VIEW_H_WIDE, VIEW_H_NARROW = 900, 844
+
+
+def _yaml(path):
+    import yaml
+    with open(path, encoding='utf-8') as f:
+        return yaml.safe_load(f) or {}
+
+
+@lru_cache(maxsize=None)
+def registry():
+    """Реестр примет: checks {id проверки: {group, tell, allow, norm}}, tells {id: запись}, domains, clusters."""
+    d = _yaml(TELLS_FILE)
+    return {'checks': {k: v for k, v in (d.get('checks') or {}).items() if isinstance(v, dict)},
+            'tells': {t['id']: t for t in d.get('tells') or [] if isinstance(t, dict) and t.get('id')},
+            'domains': d.get('domains') or {}, 'clusters': d.get('clusters') or []}
+
+
+def allow_keys():
+    """Ключи --allow проверок этой утилиты (без префикса `<утилита>:` у ключа строки реестра)."""
+    return {v['allow'] for k, v in registry()['checks'].items() if ':' not in k and v.get('allow')}
+
+
+@lru_cache(maxsize=None)
+def acceptance_widths():
+    d = _yaml(WIDTHS_FILE)
+    return {'widths': [int(w) for w in d.get('widths') or []], 'artboards': [int(w) for w in d.get('artboards') or []],
+            'overflow_only': int(d['overflow_only']) if d.get('overflow_only') else None}
+
+
+@lru_cache(maxsize=None)
+def ui_thresholds():
+    return _yaml(UI_THRESHOLDS)
+
+
+def first_breakpoint(tokens=None):
+    """Первый брейкпоинт ДС (--tokens), иначе эталонный ui (`--bp-*` эталонных токенов)."""
+    if tokens:
+        kbpaths.use('claude-design')
+        import literal_tokens
+        bps = literal_tokens.load_tokens([tokens]).breakpoints
+        if bps:
+            return min(bps)
+    with open(REF_TOKENS, encoding='utf-8') as f:
+        return min(float(v) for v in re.findall(r'--bp-[a-z-]+:\s*(\d+(?:\.\d+)?)px', f.read()))
+
+
+def header_limit(surface, preset, vw, first_bp):
+    """Порог высоты шапки поверхности: страница сайта — телефон (окно уже первого брейкпоинта) или десктоп, экран
+    приложения — пресет (A, B, C, D)."""
+    hh = ui_thresholds()['header_height']
+    if surface == 'app':
+        return hh['app'][preset]
+    return hh['page']['phone' if vw < first_bp else 'desktop']
+
+
+def num_in(text, pattern):
+    m = re.search(pattern, str(text or ''))
+    return float(m.group(1).replace(',', '.')) if m else None
+
+
+@lru_cache(maxsize=None)
+def ail(marker_id):
+    d = _yaml(AIL_FILE)
+    return next((m for m in d.get('markers') or [] if isinstance(m, dict) and m.get('id') == marker_id), {})
+
+
+def hero_height_share():
+    """Порог высоты hero без продолжения — AIL-06 site («hero ≥ 95 % высоты окна»)."""
+    v = num_in(ail('AIL-06').get('threshold'), r'hero\s*≥\s*(\d+(?:[.,]\d+)?)\s*%')
+    return v / 100.0 if v else None
+
+
+def cards_cv_max():
+    """Вариация длины текстов карточек ниже порога — примета AIL-07 site («CV длины текстов карточек < 0,2»)."""
+    return num_in(ail('AIL-07').get('threshold'), r'CV длины текстов карточек\s*<\s*(\d+(?:[.,]\d+)?)')
+
+
+@lru_cache(maxsize=None)
+def eyebrow_per_sections():
+    """Надзаголовок — не чаще одного на N секций с заголовком (H1, H2): число владельца COPY-C-18 (text) — поле
+    per_sections анализатора an-eyebrow-rate или формулировка pass_when пункта COPY-C-18."""
+    for a in (_yaml(ANALYZERS).get('rules') or []):
+        if isinstance(a, dict) and a.get('id') == 'an-eyebrow-rate' and a.get('per_sections'):
+            return int(a['per_sections'])
+    for item in (_yaml(COPY_CHECKLIST).get('items') or []):
+        if isinstance(item, dict) and item.get('id') == 'COPY-C-18':
+            n = num_in(item.get('pass_when'), r'не чаще 1 на (\d+) секци')
+            return int(n) if n else None
+    return None
+
+
+@lru_cache(maxsize=None)
+def cliche_entry(cid):
+    return next((e for e in _yaml(CLICHE).get('entries') or [] if isinstance(e, dict) and e.get('id') == cid), {})
+
+
+def bento_min_tiles():
+    """Бенто — от N однотипных плиток с одним радиусом (порог записи реестра клише bento-uniform-tiles)."""
+    v = num_in(cliche_entry('bento-uniform-tiles').get('threshold'), r'≥\s*(\d+)\s*однотипн')
+    return int(v) if v else None
+
+
+def orbit_min_icons():
+    """Орбита — от N иконок на окружностях (метрика записи реестра клише logo-orbit-hero)."""
+    v = num_in(((cliche_entry('logo-orbit-hero').get('signals') or {}).get('metric')), r'≥\s*(\d+)\s*икон')
+    return int(v) if v else None
+
+
+@lru_cache(maxsize=None)
+def lead_forms():
+    d = _yaml(LEAD_FORMS)
+    return {'sets': {f['id']: f for f in d.get('form_sets') or [] if isinstance(f, dict) and f.get('id')},
+            'fields': d.get('fields') or {}, 'defaults': d.get('defaults') or {},
+            'forbidden': {f['id']: f for f in d.get('forbidden') or [] if isinstance(f, dict) and f.get('id')}}
+
 
 # ---------------------------------------------------------------- справочники
-SERIF_FAMILIES = {  # display-антиквы, типичные для LLM-лендингов 2025–2026 и K3 (E/01, W2, taste-skill, impeccable)
+SERIF_FAMILIES = {  # display-антиквы, частые у сгенерированных лендингов 2025–2026 (замеры cd 06/05, impeccable, taste)
     'fraunces', 'instrument serif', 'playfair display', 'playfair', 'cormorant', 'cormorant garamond', 'dm serif display',
     'dm serif text', 'newsreader', 'eb garamond', 'garamond', 'libre caslon', 'libre caslon display', 'libre baskerville',
     'lora', 'merriweather', 'crimson pro', 'crimson text', 'source serif', 'source serif 4', 'source serif pro', 'pt serif',
@@ -90,7 +208,7 @@ MONO_FAMILIES = {'jetbrains mono', 'ibm plex mono', 'geist mono', 'space mono', 
                  'roboto mono', 'source code pro', 'ubuntu mono', 'courier new', 'courier', 'menlo', 'monaco', 'consolas',
                  'sf mono', 'dejavu sans mono', 'liberation mono', 'monospace', 'ui-monospace', 'berkeley mono',
                  'commit mono', 'martian mono', 'azeret mono', 'overpass mono', 'red hat mono'}
-STOCK_PATTERNS = [  # (id, regex) — хотлинк стоковых фото и сервисов-заглушек (W2: «Amalfi Coast», DesignArena: ID по памяти)
+STOCK_PATTERNS = [  # (id, regex) — хотлинк стоковых фото и сервисов-заглушек; ID фото модель берёт «по памяти»
     ('unsplash', r'(?:images|plus)\.unsplash\.com/(?:photo|premium_photo)-[0-9]+-[0-9a-f]{6,}|source\.unsplash\.com/[^\s"\')]+'
                  r'|unsplash\.com/photos/[\w-]+|unsplash\.it/[^\s"\')]+'),
     ('pexels', r'images\.pexels\.com/photos/\d+|pexels\.com/photo/[\w-]+'),
@@ -112,8 +230,6 @@ TEXT_EXT = ('.html', '.htm', '.css', '.scss', '.sass', '.less', '.js', '.mjs', '
             '.svelte', '.astro', '.md', '.mdx', '.json', '.txt')
 SKIP_DIRS = {'node_modules', '.git', '.next', '.nuxt', '.svelte-kit', '.venv', 'venv', '__pycache__', '.cache',
              'screenshots', '.turbo', 'coverage'}
-ALLOW_KEYS = {'warm', 'accent-word', 'serif', 'eyebrow', 'photo-hero', 'center-hero', 'stats', 'cards', 'gradient', 'glass',
-              'pill', 'dots', 'arrows', 'mono', 'numbered', 'marquee', 'chrome', 'caps', 'external'}
 SEV_ORDER = {'critical': 0, 'major': 1, 'minor': 2, 'info': 3}
 
 
@@ -157,8 +273,9 @@ def contrast(fg, bg):
 
 
 def warm_class(rgb):
-    """'light' (крем, беж, тёплый off-white), 'dark' (коричнево-чёрный) или None. Пороги — по E/01 (#f4f4ec h≈107,
-    #14140c) и ui 11/04 (#F4F1EA h≈84); насыщенный брендовый цвет (C > 0.08) — не «тонировка»."""
+    """'light' (крем, беж, тёплый off-white), 'dark' (коричнево-чёрный) или None. Пороги — метрика записи warm-paper
+    реестра клише creative (OKLCH h 45–115°, C 0,006–0,08, L ≥ 0,88 или ≤ 0,30); насыщенный брендовый цвет (C > 0,08) —
+    не «тонировка»."""
     L, C, H = oklch(rgb)
     if not (45 <= H <= 115 and 0.006 <= C <= 0.08):
         return None
@@ -208,48 +325,211 @@ def extract_numbers(text):
 
 
 def md_plain(text):
-    text = re.sub(r'\{#.*?#\}', ' ', text, flags=re.S)           # комментарии шаблонов F
+    text = re.sub(r'\{#.*?#\}', ' ', text, flags=re.S)           # комментарии шаблонов {# … #}
     text = re.sub(r'^\s*\|?\s*-{3,}.*$', ' ', text, flags=re.M)   # разделители таблиц
     return text
 
 
-def fact_text(path):
-    """Текст фактов для сверки чисел: из таблиц facts.md (шаблон F) — только колонки «Fact…» и «Text on the page…»
-    (даты источников и номера строк не делают число «известным»); без таблиц — весь текст."""
-    raw = md_plain(open(path, encoding='utf-8').read())
-    keep, header, tables = [], None, False
-    for line in raw.splitlines():
-        st = line.strip()
-        if not st.startswith('|'):
-            header = None
-            continue
-        cells = [c.strip() for c in st.strip('|').split('|')]
-        low = [c.lower() for c in cells]
-        if header is None:
-            header = low
-            tables = True
-            continue
-        idx = [i for i, h in enumerate(header) if h.startswith(('fact', 'факт')) or 'text on the page' in h or 'текст на странице' in h]
-        keep += [cells[i] for i in idx if i < len(cells)]
-    return '\n'.join(keep) if tables else raw
+# Число как утверждение: значение, единица и объект («1 146 квартир», «гарантия 3 года», «4,8 из 5»). Число на странице
+# легально, только если факт (или текст copy deck) говорит то же значение с той же единицей о том же объекте.
+UNITS = [(r'%|процент\w*', '%'), (r'₽|руб\w*|р\.', '₽'), (r'\$|долл\w*', '$'), (r'€|евро', '€'), (r'£', '£'),
+         (r'×|x|раз(?:а)?', '×'), (r'лет|год\w*|г\.', 'год'), (r'мес\w*', 'мес'), (r'недел\w*|нед\.', 'нед'),
+         (r'дн\w*|день|сут\w*', 'день'), (r'час\w*|ч\.?', 'ч'), (r'мин\w*', 'мин'), (r'сек\w*', 'с'),
+         (r'м²|м2|кв\.\s?м', 'м²'), (r'км', 'км'), (r'см', 'см'), (r'мм', 'мм'), (r'кг', 'кг'), (r'м', 'м'),
+         (r'шт\w*', 'шт')]
+UNIT_RX = re.compile(r'\s?(' + '|'.join(u for u, _ in UNITS) + r')(?![\wА-Яа-яЁё])', re.I)
+MULT = {'k': 1e3, 'тыс': 1e3, 'm': 1e6, 'млн': 1e6, 'млрд': 1e9}
+STOP = {'и', 'в', 'во', 'на', 'за', 'до', 'от', 'по', 'с', 'со', 'к', 'о', 'об', 'из', 'у', 'не', 'а', 'но', 'под', 'над',
+        'при', 'около', 'более', 'менее', 'чем', 'для', 'же', 'уже', 'всего', 'лишь', 'the', 'of', 'and', 'for', 'in', 'to',
+        'on', 'at', 'by', 'with', 'from', 'over', 'than', 'up', 'our', 'your', 'наших', 'наш', 'наша', 'ваш', 'ваших'}
+PHONE_RX = re.compile(r'(?:\+7|8)[\s(-]*\d{3}[\s)-]*\d{3}[\s-]*\d{2}[\s-]*\d{2}')
+DATE_RX = re.compile(r'\b\d{1,2}\.\d{1,2}\.\d{2,4}\b')
+TIME_RX = re.compile(r'\b\d{1,2}:\d{2}\b')
+WORD_RX = re.compile(r'[A-Za-zА-Яа-яЁё]{3,}')
 
 
-def load_numbers_file(path):
+def _stem(w):
+    return w.lower().replace('ё', 'е')[:5]
+
+
+def number_claims(text):
+    """Утверждения с числами: [{raw, value, unit, objs}] — телефон и дата целиком, число с единицей и словами рядом
+    (первое значимое слово после числа и последнее до него в той же части фразы). Время «10:00» — не утверждение."""
+    text = str(text or '')
+    out = []
+    for m in PHONE_RX.finditer(text):
+        out.append({'raw': m.group(0), 'value': 'tel:' + re.sub(r'\D', '', m.group(0))[-10:], 'unit': 'tel', 'objs': set()})
+    for m in DATE_RX.finditer(text):
+        d, mo, y = m.group(0).split('.')
+        out.append({'raw': m.group(0), 'value': f"date:{int(d):02d}.{int(mo):02d}.{y[-2:]}", 'unit': 'date', 'objs': set()})
+    rest = TIME_RX.sub(' ', DATE_RX.sub(' ', PHONE_RX.sub(' ', text)))
+    for m in NUM_RX.finditer(rest):
+        raw = (m.group(1) + (m.group(2) or '')).strip()
+        core = re.sub(r'[$€£₽\s\u00a0\u202f\u2009]', '', m.group(1))
+        if re.fullmatch(r'\d{1,3}(?:[.,]\d{3})+', core) and not re.fullmatch(r'\d+[.,]\d{1,2}', core):
+            core = re.sub(r'[.,]', '', core)
+        try:
+            val = float(core.replace(',', '.'))
+        except ValueError:
+            continue
+        suf = (m.group(2) or '').strip().lower()
+        unit = None
+        if suf in MULT:
+            val *= MULT[suf]
+        elif suf in ('%', '₽', '$', '€', '£', '×', 'x'):
+            unit = '×' if suf in ('x', '×') else suf
+        cur = re.match(r'\s*[$€£₽]', m.group(1))
+        if cur:
+            unit = cur.group(0).strip()
+        tail = rest[m.end():m.end() + 40]
+        if unit is None:
+            um = UNIT_RX.match(tail)
+            if um:
+                unit = next(n for u, n in UNITS if re.fullmatch(u, um.group(1), re.I))
+                tail = tail[um.end():]
+        clause_after = re.split(r'[.;:!?()«»"—–]|\d', tail)[0]
+        clause_before = re.split(r'[.;:!?()«»"—–]|\d', rest[max(0, m.start() - 40):m.start()][::-1])[0][::-1]
+        after = next((w for w in WORD_RX.findall(clause_after) if w.lower() not in STOP), None)
+        before = next((w for w in reversed(WORD_RX.findall(clause_before)) if w.lower() not in STOP), None)
+        v = ('%f' % val).rstrip('0').rstrip('.')
+        out.append({'raw': raw, 'value': v, 'unit': unit, 'objs': {_stem(w) for w in (after, before) if w}})
+    return out
+
+
+def claim_known(c, known):
+    """Число страницы совпадает с утверждением фактов или текстов: значение, единица и хотя бы одно общее слово-объект
+    (если объект есть у обоих)."""
+    for k in known:
+        if k['value'] != c['value'] or k['unit'] != c['unit']:
+            continue
+        if not c['objs'] or not k['objs'] or c['objs'] & k['objs']:
+            return True
+    return False
+
+
+def _cells(line):
+    return [x.strip() for x in line.strip().strip('|').split('|')]
+
+
+def load_facts(path):
+    """Факты для сверки чисел → {'known': [утверждения], 'rows': n, 'no_source': [id]}. facts.md входа холста: таблица
+    раздела «Факты» (id · дословно · источник · где можно; колонка «Факт…» или «Текст на странице» — тоже текст факта);
+    строки раздела «Нет» и строки без источника число не легализуют. facts.yaml продукта: verbatim и canonical каждого
+    факта с источником (source: who или where)."""
     if not path:
         return None
     try:
-        txt = fact_text(path)
+        raw = open(path, encoding='utf-8').read()
     except OSError as e:
         raise SystemExit(f'не читается {path}: {e}')
-    return {v for _, v in extract_numbers(txt)}
+    known, rows, nosrc = [], 0, []
+    if path.lower().endswith(('.yaml', '.yml', '.json')):
+        import yaml
+        d = yaml.safe_load(raw) or {}
+        for f in d.get('facts') or []:
+            if not isinstance(f, dict):
+                continue
+            rows += 1
+            src = f.get('source') or {}
+            if not (isinstance(src, dict) and (src.get('who') or src.get('where') or src.get('url'))):
+                nosrc.append(str(f.get('id')))
+                continue
+            for t in list(f.get('verbatim') or []) + [f.get('canonical') or '']:
+                known += number_claims(t)
+        return {'known': known, 'rows': rows, 'no_source': nosrc}
+    section, header = '', None
+    for line in re.sub(r'\{#.*?#\}', ' ', raw, flags=re.S).splitlines():
+        st = line.strip()
+        if re.fullmatch(r'\|?(?:\s*:?-{3,}:?\s*\|)+\s*:?-*:?\s*\|?', st):
+            continue                                       # разделитель шапки таблицы
+        if st.startswith('#'):
+            section, header = st.lstrip('#').strip().lower(), None
+            continue
+        if not st.startswith('|'):
+            header = None
+            continue
+        cells = _cells(st)
+        if header is None:
+            header = [c.lower() for c in cells]
+            continue
+        if section and not section.startswith('факт') and not section.startswith('fact'):
+            continue
+        rec = dict(zip(header, cells))
+        text_cols = [h for h in header if h in ('дословно', 'verbatim') or h.startswith(('факт', 'fact'))
+                     or 'текст на странице' in h or 'text on the page' in h]
+        if not text_cols:
+            continue
+        fid = rec.get('id') or rec.get(text_cols[0], '')[:30]
+        if fid in ('—', '-', ''):
+            continue
+        rows += 1
+        src = next((rec[h] for h in header if h.startswith(('источник', 'source'))), None)
+        if not src or src.strip() in ('—', '-'):
+            nosrc.append(fid)
+            continue
+        for h in text_cols:
+            known += number_claims(rec.get(h, ''))
+    return {'known': known, 'rows': rows, 'no_source': nosrc}
+
+
+def load_copy(path, page=None):
+    """Тексты copy deck: copy.md входа (строки слотов) или copy deck YAML/JSON (выбранные варианты страницы --page;
+    без --page — все страницы)."""
+    if not path:
+        return None
+    try:
+        raw = open(path, encoding='utf-8').read()
+    except OSError as e:
+        raise SystemExit(f'не читается {path}: {e}')
+    if not path.lower().endswith(('.yaml', '.yml', '.json')):
+        out = []
+        for line in raw.splitlines():
+            m = re.match(r'^\[[^\]]*\](?:\s+[a-z]+)?:\s?(.*)$', line.strip())
+            if m:
+                out.append(m.group(1))
+            elif line.startswith('  ') and out:
+                out[-1] += '\n' + line.strip()
+        return '\n'.join(out) if out else md_plain(raw)
+    import yaml
+    d = yaml.safe_load(raw) or {}
+    deck = d.get('copy_deck') if isinstance(d.get('copy_deck'), dict) else d
+    out = []
+    for pg in deck.get('pages') or []:
+        if page and str(pg.get('page_id')) != str(page):
+            continue
+        for sec in pg.get('sections') or []:
+            for sl in sec.get('slots') or []:
+                vs = [v for v in sl.get('variants') or [] if isinstance(v, dict)]
+                ch = next((v for v in vs if str(v.get('id')) == str(sl.get('chosen'))), vs[0] if len(vs) == 1 else None)
+                if ch and ch.get('text'):
+                    out.append(str(ch['text']))
+    return '\n'.join(out)
 
 
 def parse_assets_readme(path):
-    """Таблица assets/README.md (шаблон F): колонки File / Caption / Alt → {stem: {caption, alt, file}}."""
+    """Список ассетов → {stem: {caption, alt, file}}: assets.md входа холста (колонки «Файл», «Подпись», «Alt») или YAML
+    плана ассетов и манифеста (записи с file и caption или alt на любой глубине)."""
     rows = {}
     if not path:
         return None
     text = open(path, encoding='utf-8').read()
+    if path.lower().endswith(('.yaml', '.yml', '.json')):
+        import yaml
+
+        def walk(x):
+            if isinstance(x, dict):
+                f = x.get('file') or x.get('path') or x.get('src')
+                if isinstance(f, str) and (x.get('caption') is not None or x.get('alt') is not None):
+                    rows[os.path.splitext(os.path.basename(f))[0].lower()] = {
+                        'file': f, 'caption': str(x.get('caption') or '').strip('"« »'),
+                        'alt': str(x.get('alt') or '').strip('"« »')}
+                for v in x.values():
+                    walk(v)
+            elif isinstance(x, list):
+                for v in x:
+                    walk(v)
+        walk(yaml.safe_load(text))
+        return rows
     header = None
     for line in text.splitlines():
         if not line.strip().startswith('|'):
@@ -273,6 +553,24 @@ def parse_assets_readme(path):
             rows[os.path.splitext(os.path.basename(f))[0].lower()] = {'file': f, 'caption': cap.strip('"« »'),
                                                                       'alt': alt.strip('"« »')}
     return rows
+
+
+def load_form_sets(items):
+    """--forms: id наборов lead-forms.yaml и YAML-файлы (план страницы, вход холста) со ссылками
+    `lead-forms.yaml#<id>` → [id]."""
+    out = []
+    for it in items or []:
+        for part in [x.strip() for x in str(it).split(',') if x.strip()]:
+            if os.path.isfile(part):
+                txt = open(part, encoding='utf-8').read()
+                out += re.findall(r'lead-forms\.yaml#([a-z0-9]+(?:-[a-z0-9]+)*)', txt)
+            else:
+                out.append(part.split('#')[-1])
+    sets = lead_forms()['sets']
+    bad = [x for x in out if x not in sets]
+    if bad:
+        raise SystemExit(f'нет наборов форм в lead-forms.yaml: {sorted(set(bad))}; есть: {sorted(sets)}')
+    return list(dict.fromkeys(out))
 
 
 def family_first(ff):
@@ -307,7 +605,7 @@ def safe_root(path):
     home = os.path.realpath(os.path.expanduser('~'))
     if real in ('/', home, os.path.dirname(home)):
         raise SystemExit(f'отказ: {real} — корень или домашняя папка; укажите папку проекта (--src)')
-    for bad in ('.ssh', '.kimi-code', '.claude', '.config', '.gnupg', '.local'):
+    for bad in ('.ssh', '.claude', '.config', '.gnupg', '.local'):
         if real == os.path.join(home, bad) or real.startswith(os.path.join(home, bad) + os.sep):
             raise SystemExit(f'отказ: {real} внутри ~/{bad}')
     return real
@@ -456,10 +754,13 @@ COLLECT_JS = r"""
     if (isIgn(el) || !visible(el)) continue;
     const cs = getComputedStyle(el); const bg = effBg(el);
     const own = clean(Array.from(el.childNodes).filter(c => c.nodeType === 3).map(c => c.textContent).join(' '));
+    const link = el.closest('a[href]');
+    let ext = false;
+    if (link && /^https?:/i.test(link.getAttribute('href') || '')) { try { ext = new URL(link.href).host !== location.host; } catch (e) {} }
     leaves.push({el: desc(el), tag: el.tagName.toLowerCase(), text: own.slice(0, 160), fs: parseFloat(cs.fontSize),
                  fw: parseInt(cs.fontWeight) || 400, ff: cs.fontFamily, tt: cs.textTransform,
                  ls: cs.letterSpacing === 'normal' ? 0 : parseFloat(cs.letterSpacing), color: rgba(cs.color), bg: bg.rgb,
-                 bg_img: bg.img, in_btn: !!el.closest('button, a, [role=button]')});
+                 bg_img: bg.img, in_btn: !!el.closest('button, a, [role=button]'), ext});
   }
   out.leaves = leaves;
 
@@ -564,10 +865,19 @@ COLLECT_JS = r"""
         if ((darkFill || gradDark) && cover >= 0.6) overlays.push({el: desc(m) + (ps || ''), alpha: c[3], grad: gradDark});
       }
     }
+    // продолжение: край следующего блока в окне или знак прокрутки в нижней четверти hero
+    let next = hero.nextElementSibling;
+    while (next && (!visible(next) || ['SCRIPT', 'STYLE', 'TEMPLATE'].includes(next.tagName))) next = next.nextElementSibling;
+    const nextTop = next ? next.getBoundingClientRect().top : null;
+    const cueRx = /[↓⌄⬇]|листа|прокрут|scroll|ниже|вниз/i;
+    const cue = all.some(m => { const r = m.getBoundingClientRect();
+      return r.top >= hr.top + hr.height * 0.75 && r.bottom <= hr.bottom + 2 && visible(m) &&
+             cueRx.test((m.getAttribute && (m.getAttribute('aria-label') || '')) + ' ' + (m.children.length ? '' : clean(m.textContent))); });
     out.hero = {el: desc(hero), h: hr.height, w: hr.width, top: hr.top + scrollY, h1_align: h1s.textAlign, hero_align: hs.textAlign,
                 h1_cx: (h1r.left + h1r.width / 2) / vw, h1_w: h1r.width / vw, min_height: hs.minHeight,
                 h1_lines: Math.max(1, Math.round(h1r.height / (parseFloat(h1s.lineHeight) || parseFloat(h1s.fontSize) * 1.2))),
-                media: media.slice(0, 5), bg_url: bgUrl.slice(0, 5), overlays: overlays.slice(0, 5)};
+                media: media.slice(0, 5), bg_url: bgUrl.slice(0, 5), overlays: overlays.slice(0, 5),
+                next_top: nextTop, cue};
   }
 
   // --- ряды: ряд цифр, три одинаковые карточки
@@ -590,12 +900,78 @@ COLLECT_JS = r"""
       }
       return best;
     }).filter(Boolean);
-    rows.push({el: desc(p), n: kids.length, top: t0 + scrollY, w_ratio: Math.max(...ws) / Math.max(1, Math.min(...ws)),
+    const lens = kids.map(c => clean(c.innerText).length);
+    const mean = lens.reduce((a, b) => a + b, 0) / lens.length;
+    const cv = mean ? Math.sqrt(lens.reduce((a, b) => a + (b - mean) * (b - mean), 0) / lens.length) / mean : 0;
+    rows.push({el: desc(p), n: kids.length, top: t0 + scrollY, w_ratio: Math.max(...ws) / Math.max(1, Math.min(...ws)), cv: +cv.toFixed(3),
                h_ratio: Math.max(...hs2) / Math.max(1, Math.min(...hs2)), min_w: Math.min(...ws) / pr.width, min_h: Math.min(...hs2),
                same: sig.every(s => s === sig[0]), content: kids.every(c => !!c.querySelector('h2,h3,h4,h5,p,strong')),
                nums: nums.length, num_texts: nums.map(x => x.t), in_chrome: !!p.closest('nav, header, footer')});
   }
   out.rows = rows;
+
+  // --- бенто: сетка из однотипных плиток с одним радиусом и одним отступом
+  const bento = []; k = 0;
+  for (const g of document.querySelectorAll('body *')) {
+    if (++k > LIM || bento.length > 20) break; if (isIgn(g) || !visible(g)) continue;
+    const gs = getComputedStyle(g);
+    if (!(gs.display.includes('grid') || (gs.display.includes('flex') && gs.flexWrap === 'wrap'))) continue;
+    const tiles = Array.from(g.children).filter(c => visible(c));
+    if (tiles.length < 4) continue;
+    const st = tiles.map(c => getComputedStyle(c));
+    const rad = st.map(x => x.borderTopLeftRadius), pad = st.map(x => x.paddingTop + ' ' + x.paddingLeft);
+    const sig = tiles.map(c => c.tagName + ':' + c.children.length);
+    const areas = tiles.map(c => { const r = c.getBoundingClientRect(); return Math.round(r.width) + 'x' + Math.round(r.height); });
+    const tops = new Set(tiles.map(c => Math.round(c.getBoundingClientRect().top)));
+    bento.push({el: desc(g), n: tiles.length, one_radius: new Set(rad).size === 1 && parseFloat(rad[0]) > 0, radius: rad[0],
+                one_padding: new Set(pad).size === 1, same: new Set(sig).size === 1, sizes: new Set(areas).size, rows: tops.size,
+                in_chrome: !!g.closest('nav, header, footer')});
+  }
+  out.bento = bento;
+
+  // --- орбита: иконки на окружности вокруг общего центра в контейнере с бесконечной анимацией
+  const orbit = []; k = 0;
+  for (const c of document.querySelectorAll('body *')) {
+    if (++k > LIM || orbit.length > 10) break; if (isIgn(c) || !visible(c)) continue;
+    const spinning = (el) => { const s = getComputedStyle(el); return s.animationName && s.animationName !== 'none' && s.animationIterationCount === 'infinite'; };
+    if (!spinning(c) && !Array.from(c.children).some(spinning)) continue;
+    const icons = Array.from(c.querySelectorAll('img, svg, picture, i, [class*=icon i], [class*=logo i]')).filter(x => {
+      if (!visible(x) || (x.tagName.toLowerCase() !== 'svg' && x.closest('svg'))) return false;
+      const r = x.getBoundingClientRect(); return r.width <= 120 && r.height <= 120 && r.width >= 8; });
+    if (icons.length < 3) continue;
+    const cr = c.getBoundingClientRect(), cx0 = cr.left + cr.width / 2, cy0 = cr.top + cr.height / 2;
+    const dist = icons.map(x => { const r = x.getBoundingClientRect(); return Math.hypot(r.left + r.width / 2 - cx0, r.top + r.height / 2 - cy0); });
+    const m = dist.reduce((a, b) => a + b, 0) / dist.length;
+    const sd = Math.sqrt(dist.reduce((a, b) => a + (b - m) * (b - m), 0) / dist.length);
+    orbit.push({el: desc(c), icons: icons.length, radius: Math.round(m), ring_cv: m ? +(sd / m).toFixed(3) : 1, top: cr.top + scrollY});
+  }
+  out.orbit = orbit;
+
+  // --- шапка: первый видимый header или role=banner у верха страницы
+  const hdr = Array.from(document.querySelectorAll('header, [role=banner]')).find(h => visible(h) && h.getBoundingClientRect().top + scrollY < 60);
+  out.header = hdr ? {el: desc(hdr), h: +hdr.getBoundingClientRect().height.toFixed(1)} : null;
+
+  // --- формы: поля, подписи, согласия, кнопка отправки
+  const labelOf = (f) => {
+    let t = '';
+    if (f.id) { const l = document.querySelector('label[for="' + CSS.escape(f.id) + '"]'); if (l) t = clean(l.innerText); }
+    if (!t && f.closest('label')) t = clean(f.closest('label').innerText);
+    return t || clean(f.getAttribute('aria-label') || '');
+  };
+  const forms = [];
+  const roots = Array.from(document.querySelectorAll('form'));
+  for (const fm of roots.slice(0, 10)) {
+    if (isIgn(fm)) continue;
+    const fields = Array.from(fm.querySelectorAll('input, select, textarea')).filter(f => !['hidden', 'submit', 'button', 'reset', 'image'].includes((f.type || '').toLowerCase()));
+    const submit = fm.querySelector('button[type=submit], input[type=submit], button:not([type])');
+    forms.push({el: desc(fm), in_dialog: !!fm.closest('dialog, [role=dialog], [aria-modal=true]'), text: clean(fm.innerText).slice(0, 1500),
+                submit: submit ? {text: clean(submit.innerText || submit.value || ''), disabled: !!submit.disabled} : null,
+                fields: fields.slice(0, 30).map(f => ({tag: f.tagName.toLowerCase(), type: (f.type || '').toLowerCase(), name: f.getAttribute('name') || '',
+                  id: f.id || '', autocomplete: (f.getAttribute('autocomplete') || '').toLowerCase(), required: !!f.required,
+                  checked: !!f.checked, label: labelOf(f), placeholder: f.getAttribute('placeholder') || '', visible: visible(f),
+                  hidden_trap: !visible(f) || f.getAttribute('tabindex') === '-1' || f.getAttribute('aria-hidden') === 'true'}))});
+  }
+  out.forms = forms;
 
   // --- стекло, градиентный текст, бегущая строка, нарисованный хром
   const glass = [], gradText = [], marquee = [], dots = []; k = 0;
@@ -686,7 +1062,7 @@ def collect(target, views, ignore, block_external, shots_dir):
         local_host = f'127.0.0.1:{httpd.server_address[1]}'
     results, blocked = [], []
     try:
-        with sync_playwright() as p:
+        with kbpaths.lock('browser'), sync_playwright() as p:     # браузер один за раз на машину
             browser = p.chromium.launch()
             try:
                 for i, spec in enumerate(views):
@@ -728,12 +1104,16 @@ def collect(target, views, ignore, block_external, shots_dir):
 
 
 # ---------------------------------------------------------------- анализ
-def add(findings, fid, sev, view, msg, evidence=None, fix=None, allow=None, allowed=()):
-    if allow and allow in allowed:
+def add(findings, fid, sev, view, msg, evidence=None, fix=None, allowed=()):
+    """Находка: id проверки, примета и группа — из реестра примет (`checks`), ключ --allow снимает примету до info."""
+    row = registry()['checks'].get(fid, {})
+    key = row.get('allow')
+    lifted = bool(key and key in allowed)
+    if lifted:
         sev = 'info'
-        msg += f' (разрешено брифом: --allow {allow})'
-    findings.append({'id': fid, 'severity': sev, 'view': view, 'message': msg, 'evidence': evidence or {},
-                     'fix_en': fix or ''})
+        msg += f' (решение записано: --allow {key})'
+    findings.append({'id': fid, 'tell': row.get('tell'), 'group': row.get('group'), 'severity': sev, 'view': view,
+                     'message': msg, 'evidence': evidence or {}, 'fix': fix or '', 'allowed': lifted})
 
 
 def urls_in(text):
@@ -747,12 +1127,127 @@ def stock_kind(u):
     return None
 
 
-def analyze(url, views, static, facts_nums, copy_text, copy_nums, assets, allowed, blocked):
+def sequence(texts):
+    """1, 2, 3 или 01, 02, 03 — номера шагов, а не ряд чисел-доказательств."""
+    try:
+        vals = [int(t.strip().rstrip('.)')) for t in texts]
+    except ValueError:
+        return False
+    return len(vals) >= 2 and all(0 < v < 100 for v in vals) and vals == list(range(vals[0], vals[0] + len(vals)))
+
+
+def view_w(v):
+    return int(v['viewport'].split('x')[0])
+
+
+def form_field_id(f, fields_lib):
+    """Поле DOM → id поля библиотеки lead-forms.yaml: name, autocomplete, тип, подпись."""
+    name = (f['name'] or f['id'] or '').lower()
+    if name in fields_lib:
+        return name
+    ac = {'name': 'name', 'tel': 'phone', 'email': 'email', 'organization': 'company', 'organization-title': 'role',
+          'street-address': 'address', 'address-level2': 'city'}
+    if f['autocomplete'] in ac:
+        return ac[f['autocomplete']]
+    if f['type'] in ('tel', 'email'):
+        return {'tel': 'phone', 'email': 'email'}[f['type']]
+    lab = norm_text(f['label'])
+    for fid, spec in fields_lib.items():
+        if isinstance(spec, dict) and spec.get('label') and norm_text(spec['label']) == lab:
+            return fid
+    return None
+
+
+CONSENT_RX = re.compile(r'персональн|обработк\w* (?:моих |своих )?(?:данн|имени|телефон)|\bпд\b|согласи', re.I)
+BUNDLE_RX = re.compile(r'оферт|рассылк|реклам|маркетинг', re.I)
+BY_BUTTON_RX = re.compile(r'нажима\w+\s+(?:на\s+)?кнопк\w*[^.]{0,80}соглаша', re.I)
+
+
+def check_forms(F, desk, form_sets, allowed):
+    """Формы по lead-forms.yaml: запреты `forbidden`, видимые в DOM, — у любой формы; поля и подписи — против наборов
+    --forms (форма страницы ↔ набор по наибольшему совпадению полей)."""
+    lf = lead_forms()
+    lib, forb = lf['fields'], lf['forbidden']
+    modal_max = (lf['defaults'] or {}).get('modal_max_fields')
+    view = desk['viewport']
+    for fm in desk.get('forms') or []:
+        fields = [f for f in fm['fields'] if not f['hidden_trap'] or f['type'] not in ('text', '')]
+        people = [f for f in fields if f['type'] not in ('checkbox', 'radio')]
+        boxes = [f for f in fields if f['type'] == 'checkbox']
+        ids = [form_field_id(f, lib) for f in people]
+        consent = [b for b in boxes if CONSENT_RX.search(b['label'] or '')]
+        pd = [i for i in ids if i in ('name', 'phone', 'email')] or [f for f in people if f['type'] in ('tel', 'email')]
+        bad = []
+        for b in boxes:
+            if b['checked'] and (CONSENT_RX.search(b['label'] or '') or BUNDLE_RX.search(b['label'] or '')):
+                bad.append(('prechecked-consent', 'critical', f"галочка «{b['label'][:50]}» отмечена заранее"))
+        if pd and not consent:
+            bad.append(('consent-by-button' if BY_BUTTON_RX.search(fm['text']) else 'no-separate-consent', 'critical',
+                        'согласие «нажимая кнопку…» вместо отдельной галочки' if BY_BUTTON_RX.search(fm['text'])
+                        else 'нет отдельной неотмеченной галочки согласия на обработку ПД'))
+        for b in consent:
+            if BUNDLE_RX.search(b['label'] or ''):
+                bad.append(('bundled-consent', 'critical', f"одно согласие на ПД и рассылку или оферту: «{b['label'][:60]}»"))
+        if fm['submit'] and fm['submit']['disabled']:
+            bad.append(('disabled-submit', 'major', 'кнопка отправки неактивна до нажатия'))
+        if sum(1 for i in ids if i == 'email') > 1 or any(re.search(r'повтор', f['label'] or '', re.I) for f in people):
+            bad.append(('repeat-email', 'major', 'поле «повторите почту»'))
+        for f, i in zip(people, ids):
+            if f['required'] and (i in ('task', 'address') or f['tag'] == 'textarea'):
+                bad.append(('required-comment', 'major', f"обязательное поле «{f['label'] or f['name']}» в первичной заявке"))
+            if f['autocomplete'] == 'off' and i in ('name', 'phone', 'email'):
+                bad.append(('autocomplete-off', 'major', f"autocomplete=off у поля «{f['label'] or f['name']}»"))
+        if fm['in_dialog'] and modal_max and len(people) > modal_max:
+            bad.append(('modal-long-form', 'major', f'форма в окне из {len(people)} полей (> {modal_max})'))
+        for fid, sev, msg in bad:
+            rule = (forb.get(fid) or {}).get('rule') or ''
+            add(F, 'FORM-FORBIDDEN', sev, view, f"форма {fm['el']}: {msg}",
+                {'form': fm['el'], 'forbidden': fid, 'rule': rule}, 'снять запрещённый приём формы (lead-forms.yaml, '
+                'раздел forbidden): согласие — отдельной неотмеченной галочкой, поля — по набору формы', allowed)
+    if not form_sets:
+        return
+    sets = lf['sets']
+    forms = desk.get('forms') or []
+    for sid in form_sets:
+        spec = sets[sid]
+        want = [x['field'] for x in spec.get('fields') or [] if isinstance(x, dict)]
+        if not want:
+            continue
+        best, got_best = None, []
+        for fm in forms:
+            got = [form_field_id(f, lib) for f in fm['fields'] if f['type'] not in ('checkbox', 'hidden')
+                   and not f['hidden_trap']]
+            if best is None or len(set(got) & set(want)) > len(set(got_best) & set(want)):
+                best, got_best = fm, got
+        if best is None:
+            add(F, 'FORM-FIELDS', 'major', view, f'формы набора {sid} на странице нет',
+                {'set': sid, 'fields': want}, f'форма по набору {sid} lead-forms.yaml: поля {", ".join(want)}', allowed)
+            continue
+        req = {x['field']: bool(x.get('required')) for x in spec.get('fields') or [] if isinstance(x, dict)}
+        miss = [w for w in want if w not in got_best]
+        people = [f for f in best['fields'] if f['type'] not in ('checkbox', 'hidden') and not f['hidden_trap']]
+        extra = [g or (f['label'] or f['name'] or f['tag']) for f, g in zip(people, got_best) if g not in want]
+        nolabel = [f['name'] or f['placeholder'] or f['tag'] for f in people if not f['label']]
+        wrong_req = [g for f, g in zip(people, got_best) if g in req and f['required'] and not req[g]]
+        problems = ([f'нет полей набора: {", ".join(miss)}'] if miss else []) + \
+                   ([f'поля вне набора: {", ".join(extra)}'] if extra else []) + \
+                   ([f'поля без видимой подписи (подсказка вместо подписи): {", ".join(nolabel)}'] if nolabel else []) + \
+                   ([f'обязательны, хотя в наборе нет: {", ".join(wrong_req)}'] if wrong_req else [])
+        if problems:
+            add(F, 'FORM-FIELDS', 'major', view, f"форма {best['el']} против набора {sid}: " + '; '.join(problems),
+                {'set': sid, 'want': want, 'got': got_best, 'missing': miss, 'extra': extra, 'no_label': nolabel},
+                f'поля, порядок, обязательность и видимые подписи — по набору {sid} lead-forms.yaml', allowed)
+
+
+def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts):
+    """opts: surface (page | app), preset (A–D), first_bp, form_sets. Кадр с overflow_only — только вылет."""
     F = []
-    desk = next((v for v in views if int(v['viewport'].split('x')[0]) >= 1024), views[0])
+    over = [v for v in views if v.get('overflow_only')]
+    views = [v for v in views if not v.get('overflow_only')]
+    desk = next((v for v in views if view_w(v) >= opts['first_bp']), views[0])
     target_host = urlparse(url).netloc
 
-    # ---------- K3-BG-WARM: фон страницы и секций
+    # ---------- тёплая бумага: фон страницы и секций
     for v in views[:1] if len(views) else []:
         page_w = warm_class(v['page_bg'])
         secs = v['sections']
@@ -764,11 +1259,10 @@ def analyze(url, views, static, facts_nums, copy_text, copy_nums, assets, allowe
         if page_w or share >= 0.25:
             add(F, 'K3-BG-WARM', 'major', v['viewport'],
                 f"тёплый тонированный фон ({'страница ' + hexs(v['page_bg']) if page_w else 'секции'}; доля {share:.0%})",
-                ev, 'Use the neutral paper from DESIGN.md (--color-bg) for the page and every section; no cream, beige or brown-black tints.',
-                'warm', allowed)
+                ev, 'фон страницы и секций — нейтраль из токенов ДС (без крема, беж и коричнево-чёрного)', allowed)
         elif warm_secs:
             add(F, 'K3-BG-WARM', 'minor', v['viewport'], f'тёплая тонированная секция ({len(warm_secs)} шт., доля {share:.0%})',
-                ev, 'Replace the tinted section background with a DESIGN.md surface token.', 'warm', allowed)
+                ev, 'фон секции — поверхность из токенов ДС', allowed)
 
     # ---------- заголовки: акцентное слово, антиква, надзаголовки, пилюля, градиент
     heads = desk['headings']
@@ -780,11 +1274,11 @@ def analyze(url, views, static, facts_nums, copy_text, copy_nums, assets, allowe
         add(F, 'K3-ACCENT-WORD', 'major', desk['viewport'],
             f"в h1 выделено слово «{a['text']}» ({', '.join(a['reasons'])})",
             {'h1': acc_h1[0]['text'], 'accent': a, 'h2_with_accent': len(acc_h2)},
-            f"H1 {acc_h1[0]['el']}: render \"{a['text']}\" exactly like the rest of the headline (same font, style, colour); "
-            'build hierarchy with size, weight and placement.', 'accent-word', allowed)
+            f"H1 {acc_h1[0]['el']}: «{a['text']}» — как весь заголовок (та же гарнитура, начертание, цвет); иерархия — "
+            'кеглем, насыщенностью и местом', allowed)
     elif len(acc_h2) >= 2:
         add(F, 'K3-ACCENT-WORD', 'minor', desk['viewport'], f'выделенное слово в {len(acc_h2)} подзаголовках',
-            {'examples': [h['accent'] for h in acc_h2[:3]]}, 'Remove accent words from section headings.', 'accent-word', allowed)
+            {'examples': [h['accent'] for h in acc_h2[:3]]}, 'снять выделенные слова в заголовках секций', allowed)
     serif_heads = [h for h in heads if family_kind(h['ff']) == 'serif']
     h2s = [h for h in heads if h['tag'] == 'h2']
     serif_h1 = any(family_kind(h['ff']) == 'serif' for h in h1s)
@@ -796,64 +1290,89 @@ def analyze(url, views, static, facts_nums, copy_text, copy_nums, assets, allowe
         pair = body_fam in SANS_DEFAULTS
         italic = any(h['style'] == 'italic' for h in serif_heads if h['tag'] == 'h1')
         add(F, 'K3-SERIF-DISPLAY', 'major', desk['viewport'],
-            f"антиква в заголовках: {disp or '?'}" + (f" + {body_fam} в тексте (пара «антиква + дефолтный гротеск», как Fraunces + Inter)" if pair else '')
+            f"антиква в заголовках: {disp or '?'}" + (f" + {body_fam} в тексте (пара «антиква + дефолтный гротеск»)" if pair else '')
             + (' курсивом' if italic else ''),
             {'display': disp, 'body': body_fam, 'serif_headings': len(serif_heads), 'headings': len(heads)},
-            'Use the display and text faces from DESIGN.md only; no serif display face unless DESIGN.md names it.',
-            'serif', allowed)
-    eyebrowed = [h for h in heads if h['eyebrow']]
-    if heads and len(eyebrowed) >= 2 and len(eyebrowed) / len(heads) > 1 / 3:
+            'гарнитуры — только из ДС; антиква в заголовках — только если её называет ДС', allowed)
+    per = eyebrow_per_sections()
+    heads12 = [h for h in heads if h['tag'] in ('h1', 'h2')]
+    eyebrowed = [h for h in heads12 if h['eyebrow']]
+    limit = math.ceil(len(heads12) / per) if per and heads12 else None
+    if eyebrowed and limit is not None and len(eyebrowed) > limit:
         add(F, 'K3-EYEBROW', 'major', desk['viewport'],
-            f'капс-надзаголовки над {len(eyebrowed)} из {len(heads)} заголовков (> 1/3; ui 11/04 m30)',
-            {'examples': [h['eyebrow'] for h in eyebrowed[:4]]},
-            'Delete the uppercase letter-spaced labels above headings; keep at most one per three sections, sentence case.',
-            'eyebrow', allowed)
+            f'капс-надзаголовки над {len(eyebrowed)} из {len(heads12)} заголовков H1, H2 (> ceil({len(heads12)}/{per}) '
+            f'= {limit}; число — COPY-C-18)',
+            {'examples': [h['eyebrow'] for h in eyebrowed[:4]], 'per_sections': per, 'limit': limit},
+            f'надзаголовок — не чаще одного на {per} секции с заголовком, обычным регистром', allowed)
     elif eyebrowed:
-        add(F, 'K3-EYEBROW', 'minor', desk['viewport'], f'капс-надзаголовок: {len(eyebrowed)} шт.',
-            {'examples': [h['eyebrow'] for h in eyebrowed[:3]]}, 'Remove the eyebrow label unless the brief asks for it.',
-            'eyebrow', allowed)
+        add(F, 'K3-EYEBROW', 'info', desk['viewport'],
+            f'капс-надзаголовков {len(eyebrowed)} из {len(heads12)} заголовков H1, H2'
+            + (f' (в пределах ceil(N/{per}))' if per else ' (порог COPY-C-18 не найден у владельца)'),
+            {'examples': [h['eyebrow'] for h in eyebrowed[:3]], 'per_sections': per})
     pills = [h['pill'] for h in h1s if h['pill']]
     if pills:
         add(F, 'K3-PILL', 'minor', desk['viewport'], f"пилюля над h1: «{pills[0]['text']}»", {'pill': pills[0]},
-            'Remove the pill badge above the H1.', 'pill', allowed)
+            'снять пилюлю над H1', allowed)
     grad = desk['grad_text']
     if grad:
         in_head = any(h['grad'] or (h['accent'] and 'gradient' in h['accent']['reasons']) for h in heads)
         add(F, 'K3-GRADIENT-TEXT', 'major' if in_head else 'minor', desk['viewport'],
             f'градиентный текст: {len(grad)} эл.', {'examples': grad[:3]},
-            'Remove background-clip:text gradients; use a solid colour token.', 'gradient', allowed)
+            'снять background-clip: text с градиентом; цвет текста — сплошной токен', allowed)
 
     # ---------- hero
     hero = desk.get('hero')
-    if hero:
+    share = hero_height_share()
+    if hero and share:
         vh = desk['vh']
         centered = hero['h1_align'] == 'center' or (abs(hero['h1_cx'] - 0.5) < 0.05 and hero['h1_w'] < 0.9 and hero['hero_align'] == 'center')
-        if hero['h'] >= 0.9 * vh and centered:
+        cont = hero.get('cue') or (hero.get('next_top') is not None and hero['next_top'] < vh - 1)
+        if hero['h'] >= share * vh and centered and not cont:
             add(F, 'K3-HERO-CENTER', 'major', desk['viewport'],
-                f"hero {hero['h']:.0f} px при окне {vh} (≥ 90 %), всё по центру (Hallmark гейт 6)",
-                {'hero': hero['el'], 'h': round(hero['h']), 'vh': vh, 'h1_align': hero['h1_align']},
-                f"Hero {hero['el']}: not a centred full-viewport stack; left-align the headline block and let the hero end "
-                'below the fold line with the next section visible at 1440x900.', 'center-hero', allowed)
-        if (hero['media'] or hero['bg_url']) and (hero['overlays'] or any(b['veil_in_same'] for b in hero['bg_url'])):
-            add(F, 'K3-HERO-OVERLAY', 'major', desk['viewport'], 'фото/видео на весь hero под тёмной вуалью',
-                {'media': hero['media'][:2] + hero['bg_url'][:2], 'overlays': hero['overlays'][:2]},
-                'Drop the full-bleed photo under a dark overlay; use the hero asset from assets/README.md at its natural '
-                'contrast, or a solid surface.', 'photo-hero', allowed)
+                f"hero {hero['h']:.0f} px при окне {vh} (≥ {share:.0%}, AIL-06), всё по центру, продолжения не видно",
+                {'hero': hero['el'], 'h': round(hero['h']), 'vh': vh, 'h1_align': hero['h1_align'],
+                 'next_top': hero.get('next_top'), 'cue': hero.get('cue')},
+                f"hero {hero['el']}: высота по политике первого экрана плана, край следующей секции виден в окне "
+                f"{desk['viewport']}; центр — не больше четырёх элементов", allowed)
+    if hero and (hero['media'] or hero['bg_url']) and (hero['overlays'] or any(b['veil_in_same'] for b in hero['bg_url'])):
+        add(F, 'K3-HERO-OVERLAY', 'major', desk['viewport'], 'фото или видео на весь hero под тёмной вуалью',
+            {'media': hero['media'][:2] + hero['bg_url'][:2], 'overlays': hero['overlays'][:2]},
+            'снять вуаль: ассет героя из списка ассетов в естественном контрасте или сплошная поверхность', allowed)
 
-    # ---------- ряды: цифры, три карточки
+    # ---------- ряды: цифры, три карточки, бенто, орбита
     rows = desk['rows']
-    stats = [r for r in rows if r['nums'] >= 3 and not r['in_chrome']]
+    stats = [r for r in rows if r['nums'] >= 3 and not r['in_chrome'] and not sequence(r['num_texts'])]
     if stats:
         add(F, 'K3-STATS-ROW', 'major', desk['viewport'], f"ряд крупных чисел: {', '.join(stats[0]['num_texts'][:5])}",
             {'rows': [{'el': r['el'], 'numbers': r['num_texts']} for r in stats[:3]]},
-            'Remove the stats row unless every number is in brief/facts.md and the brief asks for it.', 'stats', allowed)
+            'снять ряд чисел, если каждое число не из фактов и бриф его не заказывал', allowed)
+    cv_max = cards_cv_max()
     cards = [r for r in rows if r['n'] == 3 and r['w_ratio'] <= 1.06 and r['h_ratio'] <= 1.25 and r['same'] and
-             r['min_w'] >= 0.2 and r['min_h'] >= 120 and r['content'] and not r['in_chrome']]
+             r['min_w'] >= 0.2 and r['min_h'] >= 120 and r['content'] and not r['in_chrome'] and
+             (cv_max is None or r.get('cv', 0) < cv_max)]
     if cards:
-        add(F, 'K3-THREE-CARDS', 'major', desk['viewport'], f'три одинаковые карточки в ряд: {len(cards)} ряд(а) (m17)',
-            {'rows': [c['el'] for c in cards[:3]]},
-            f"Section {cards[0]['el']}: replace the three equal cards with an asymmetric layout (one lead item wider) or a list.",
-            'cards', allowed)
+        add(F, 'K3-THREE-CARDS', 'major', desk['viewport'],
+            f'три одинаковые карточки в ряд: {len(cards)} ряд(а)' + (f', вариация длины текстов < {cv_max:g} (AIL-07)'
+                                                                   if cv_max else ''),
+            {'rows': [{'el': c['el'], 'cv': c.get('cv')} for c in cards[:3]]},
+            f"секция {cards[0]['el']}: продукт настоящим интерфейсом или асимметрия (ведущий элемент шире), не три "
+            'одинаковые карточки', allowed)
+    nb = bento_min_tiles()
+    bento = [b for b in desk.get('bento') or [] if nb and b['n'] >= nb and b['one_radius'] and b['one_padding']
+             and b['same'] and b['rows'] >= 2 and not b['in_chrome']]
+    if bento:
+        add(F, 'LOOK-BENTO', 'minor', desk['viewport'],
+            f"бенто из однотипных плиток: {bento[0]['n']} плиток с одним радиусом {bento[0]['radius']} и одним отступом",
+            {'grids': bento[:3], 'min_tiles': nb}, 'список или чередование «текст ↔ кадр»; бенто — только плитки разного '
+            'содержания и веса, главный блок крупнее', allowed)
+    no = orbit_min_icons()
+    orbit = [o for o in desk.get('orbit') or [] if no and o['icons'] >= no and o['ring_cv'] <= 0.15
+             and o['top'] < desk['vh'] * 1.2]
+    if orbit:
+        add(F, 'LOOK-ORBIT', 'minor', desk['viewport'],
+            f"орбита: {orbit[0]['icons']} иконок по кольцу радиуса {orbit[0]['radius']} px с бесконечной анимацией в первом экране",
+            {'orbits': orbit[:3], 'min_icons': no}, 'сетка логотипов интеграций с подписями или схема потока данных '
+            'кодом — только реальные интеграции', allowed)
 
     # ---------- шаблонный хром по текстовым узлам
     leaves = desk['leaves']
@@ -861,38 +1380,58 @@ def analyze(url, views, static, facts_nums, copy_text, copy_nums, assets, allowe
     caps = [l for l in leaves if l['tt'] == 'uppercase' and re.search(r'[A-Za-zА-Яа-яЁё]{2,}', l['text'])]
     if len(caps) / n_leaves > 0.02 and len(caps) >= 3:
         add(F, 'K3-CAPS', 'minor', desk['viewport'], f'капс у {len(caps)} из {n_leaves} текстовых узлов ({len(caps) / n_leaves:.1%} > 2 %, m8)',
-            {'examples': [l['text'][:30] for l in caps[:5]]}, 'Use sentence case; uppercase at most for one small role.', 'caps', allowed)
+            {'examples': [l['text'][:30] for l in caps[:5]]}, 'обычный регистр; капс — не больше одной малой роли', allowed)
     dots = [l for l in leaves if re.search(r'[·•]', l['text']) and len(l['text']) <= 90]
     if len(dots) > 5:
         add(F, 'K3-META-DOTS', 'minor', desk['viewport'], f'мета-строки через «·»: {len(dots)} (> 5, m32)',
-            {'examples': [l['text'][:50] for l in dots[:4]]}, 'Replace "A · B · C" meta lines with plain labels separated by space.',
-            'dots', allowed)
-    arrows = [l for l in leaves if l['in_btn'] and re.search(r'[→↗⟶➝➜⇢↘»]', l['text'])]
+            {'examples': [l['text'][:50] for l in dots[:4]]}, 'подписи с ролями вместо строк «A · B · C», разделять '
+            'пространством', allowed)
+    arrows = [l for l in leaves if l['in_btn'] and (re.search(r'[→⟶➝➜⇢↘]', l['text'])
+                                                    or ('↗' in l['text'] and not l.get('ext')))]
     if arrows:
-        add(F, 'K3-ARROWS', 'minor', desk['viewport'], f'стрелки в кнопках и ссылках: {len(arrows)} (m34)',
-            {'examples': [l['text'][:30] for l in arrows[:4]]}, 'Remove arrow glyphs from button and link labels.', 'arrows', allowed)
+        add(F, 'K3-ARROWS', 'minor', desk['viewport'], f'стрелки в подписях кнопок и ссылок: {len(arrows)} (m34)',
+            {'examples': [l['text'][:30] for l in arrows[:4]]}, 'стрелку — из текста подписи; иконка рядом — решение '
+            'облика («↗» у ссылки на внешний сайт законна)', allowed)
     mono = [l for l in leaves if l['fs'] < 14 and family_kind(l['ff']) == 'mono' and not re.search(r'\d', l['text'])]
     if len(mono) >= 3:
         add(F, 'K3-MONO-LABELS', 'minor', desk['viewport'], f'моноширинные подписи без данных: {len(mono)} (m33)',
-            {'examples': [l['text'][:30] for l in mono[:4]]}, 'Use the text face for small labels; monospace only for code and data.',
-            'mono', allowed)
+            {'examples': [l['text'][:30] for l in mono[:4]]}, 'малые подписи — гарнитурой текста; моно — только код и '
+            'данные', allowed)
     numbered = [l for l in leaves if re.match(r'^\s*0[1-9](?:\b|[.·/—-])', l['text']) and len(l['text']) <= 24]
     if len(numbered) >= 3:
         add(F, 'K3-NUMBERED', 'minor', desk['viewport'], f'нумерация 01/02/03: {len(numbered)} (m31 — только для настоящей последовательности)',
-            {'examples': [l['text'] for l in numbered[:4]]}, 'Remove 01/02/03 labels unless the content is a real sequence.',
-            'numbered', allowed)
+            {'examples': [l['text'] for l in numbered[:4]]}, 'снять 01/02/03, если содержимое — не последовательность',
+            allowed)
     if len(desk['glass']) > 2:
         add(F, 'K3-GLASS', 'minor', desk['viewport'], f"стекло (backdrop-filter): {len(desk['glass'])} эл. (> 2, m15)",
-            {'examples': desk['glass'][:4]}, 'Keep backdrop blur on at most one overlay layer; use solid surfaces.', 'glass', allowed)
+            {'examples': desk['glass'][:4]}, 'размытие фона — не больше одного слоя оверлея; поверхности сплошные', allowed)
     elif desk['glass']:
         add(F, 'K3-GLASS', 'info', desk['viewport'], f"стекло: {len(desk['glass'])} эл.", {'examples': desk['glass'][:2]})
     if desk['marquee']:
         add(F, 'K3-MARQUEE', 'minor', desk['viewport'], f"бегущая строка: {len(desk['marquee'])}", {'examples': desk['marquee'][:3]},
-            'Remove the marquee or make it static; if kept, add a pause control (WCAG 2.2.2).', 'marquee', allowed)
+            'снять бегущую строку или сделать статичной; если остаётся — кнопка паузы (WCAG 2.2.2)', allowed)
     if desk['drawn_dots']:
         add(F, 'K3-DRAWN-CHROME', 'minor', desk['viewport'], f"нарисованный браузерный хром (три точки): {len(desk['drawn_dots'])}",
-            {'examples': desk['drawn_dots'][:3]}, 'Remove drawn browser or phone frames; show the real screenshot asset only.',
-            'chrome', allowed)
+            {'examples': desk['drawn_dots'][:3]}, 'снять нарисованные рамки браузера и телефона; только настоящий кадр '
+            'из ассетов', allowed)
+
+    # ---------- шкала кеглей и шапка — пороги ui по поверхности, на каждой ширине
+    fs_th = ui_thresholds().get('font_sizes') or {}
+    for v in views:
+        sizes = sorted({round(l['fs'] * 2) / 2 for l in v['leaves'] if l['text']})
+        if fs_th.get('tell_above') and len(sizes) > fs_th['tell_above']:
+            add(F, 'LOOK-TYPE-SCALE', 'minor', v['viewport'],
+                f"кеглей на странице {len(sizes)} (> {fs_th['tell_above']}; норма {fs_th.get('norm')})",
+                {'sizes': sizes, 'norm': fs_th.get('norm')}, 'шкала кеглей ДС: 6–8 кеглей, три несущих', allowed)
+        hdr = v.get('header')
+        if hdr:
+            lim = header_limit(opts['surface'], opts['preset'], view_w(v), opts['first_bp'])
+            if hdr['h'] > lim:
+                add(F, 'LOOK-HEADER', 'minor', v['viewport'], f"шапка {hdr['h']:.0f} px (> {lim} px для "
+                    + ('экрана приложения, пресет ' + opts['preset'] if opts['surface'] == 'app' else
+                       'телефона' if view_w(v) < opts['first_bp'] else 'десктопа') + ')',
+                    {'header': hdr['el'], 'h': hdr['h'], 'limit': lim, 'surface': opts['surface']},
+                    f'высота шапки — не больше {lim} px (токен высоты шапки)', allowed)
 
     # ---------- контраст тёплых палитр
     bad = []
@@ -913,9 +1452,9 @@ def analyze(url, views, static, facts_nums, copy_text, copy_nums, assets, allowe
         bad = sorted(uniq_bad.values(), key=lambda x: x['ratio'])
         add(F, 'K3-WARM-CONTRAST', 'major', bad[0]['view'],
             f"текст тёплой палитры ниже порога: {len(bad)} узл., худший {bad[0]['ratio']}:1 ({bad[0]['fg']} на {bad[0]['bg']})",
-            {'worst': bad[:6]}, f"Raise contrast of {bad[0]['el']} to >= {bad[0]['need']}:1 using a darker text token.")
+            {'worst': bad[:6]}, f"поднять контраст {bad[0]['el']} до ≥ {bad[0]['need']}:1 более тёмным токеном текста")
 
-    # ---------- выдумки: сток и хотлинк
+    # ---------- честность: сток и хотлинк
     stock, hot = [], []
     for v in views:
         srcs = [(im['src'], im['el']) for im in v['images']] + [(s, 'srcset') for im in v['images'] for s in re.split(r',\s*', im['srcset']) if s]
@@ -945,18 +1484,17 @@ def analyze(url, views, static, facts_nums, copy_text, copy_nums, assets, allowe
         ids = sorted({re.sub(r'^.*?(photo-[0-9]+-[0-9a-f]+).*$', r'\1', s['url']) for s in unsplash})
         add(F, 'F-UNSPLASH', 'critical', 'all', f'фото Unsplash по памяти (хотлинк): {len(unsplash)} адрес(ов)',
             {'ids': ids[:10], 'where': [s['el'] for s in unsplash[:6]]},
-            'Remove every Unsplash URL; use only files from assets/ with captions from assets/README.md; empty slots get a '
-            'placeholder captioned "placeholder".')
+            'снять адреса Unsplash: только файлы из списка ассетов с подписями оттуда; пустой слот — заглушка «placeholder»')
     if other:
-        add(F, 'F-STOCK', 'critical', 'all', f"стоковые/заглушечные сервисы: {', '.join(sorted({s['kind'] for s in other}))}",
+        add(F, 'F-STOCK', 'critical', 'all', f"стоковые и заглушечные сервисы: {', '.join(sorted({s['kind'] for s in other}))}",
             {'urls': [s['url'] for s in other[:8]], 'where': [s['el'] for s in other[:6]]},
-            'Remove hotlinked stock and placeholder-service images; use assets/ files or a local placeholder.')
+            'снять хотлинк стока и сервисов-заглушек: файлы из ассетов или локальная заглушка')
     hot_u = sorted({h['url'] for h in hot})
     if hot_u:
         add(F, 'F-HOTLINK', 'major', 'all', f'внешние картинки (не сток): {len(hot_u)}', {'urls': hot_u[:8]},
-            'Copy approved assets into public/assets/ and reference them locally; no external image URLs.', 'external', allowed)
+            'утверждённые ассеты — локальными файлами (загрузки холста), без внешних адресов картинок', allowed)
 
-    # ---------- подписи и alt против assets/README.md
+    # ---------- подписи и alt против списка ассетов
     caps_all = []
     for im in desk['images']:
         if not im['visible']:
@@ -971,60 +1509,68 @@ def analyze(url, views, static, facts_nums, copy_text, copy_nums, assets, allowe
                 continue
             row = assets.get(c['file']) or next((r for k, r in assets.items() if c['file'].startswith(k) or k.startswith(c['file'])), None)
             if not row:
-                add(F, 'F-CAPTION', 'major', desk['viewport'], f"картинка «{c['file']}» не описана в assets/README.md",
-                    {'img': c}, f"Image {c['el']}: use only files listed in assets/README.md.")
+                add(F, 'F-CAPTION', 'major', desk['viewport'], f"картинки «{c['file']}» нет в списке ассетов",
+                    {'img': c}, f"картинка {c['el']}: только файлы из списка ассетов")
                 continue
             if c['caption'] is not None and row['caption'] and norm_text(c['caption']) != norm_text(row['caption']):
-                add(F, 'F-CAPTION', 'critical', desk['viewport'], f"подпись не из README: «{c['caption'][:60]}»",
+                add(F, 'F-CAPTION', 'critical', desk['viewport'], f"подпись не из списка ассетов: «{c['caption'][:60]}»",
                     {'expected': row['caption'], 'found': c['caption'], 'file': row['file']},
-                    f"Figure with {row['file']}: caption must be exactly \"{row['caption']}\" (assets/README.md).")
+                    f"подпись к {row['file']} — дословно «{row['caption']}» (список ассетов)")
             if c['alt'] is not None and row['alt'] and norm_text(c['alt']) != norm_text(row['alt']):
-                add(F, 'F-CAPTION', 'major', desk['viewport'], f"alt не из README: «{(c['alt'] or '')[:60]}»",
+                add(F, 'F-CAPTION', 'major', desk['viewport'], f"alt не из списка ассетов: «{(c['alt'] or '')[:60]}»",
                     {'expected': row['alt'], 'found': c['alt'], 'file': row['file']},
-                    f"Image {row['file']}: alt must be exactly \"{row['alt']}\" (assets/README.md).")
+                    f"alt у {row['file']} — дословно «{row['alt']}» (список ассетов)")
     elif caps_all:
         sus = [c for c in caps_all if c['caption'] and re.search(r'\b(1[89]|20)\d{2}\b|[A-ZА-Я][a-zа-я]+,\s*[A-ZА-Я]', c['caption'])]
-        add(F, 'F-CAPTION', 'info', desk['viewport'], f'подписей/alt без README для сверки: {len(caps_all)}'
-            + (f'; с местом/датой (проверить глазами): {len(sus)}' if sus else ''), {'captions': caps_all[:8]})
+        add(F, 'F-CAPTION', 'info', desk['viewport'], f'подписей и alt без списка ассетов для сверки: {len(caps_all)}'
+            + (f'; с местом или датой (проверить глазами): {len(sus)}' if sus else ''), {'captions': caps_all[:8]})
 
-    # ---------- числа против facts.md и copy.md
+    # ---------- числа против фактов и текстов: значение, единица и объект; строка факта без источника не легализует
     seen_nums, page_nums = set(), []
     for v in views:
         for l in v['leaves']:
-            if '[PLACEHOLDER' in l['text'].upper():
-                continue
-            for rawn, val in extract_numbers(l['text']):
-                if re.fullmatch(r'0\d', rawn.strip()):
-                    continue                       # 01/02/03 — это K3-NUMBERED, не факт
-                key = (val, rawn)
+            if '[PLACEHOLDER' in l['text'].upper() or re.fullmatch(r'\s*\d{1,2}\s*[.)]?\s*', l['text']):
+                continue                           # заглушка; номер пункта или шага — не утверждение
+            for c in number_claims(l['text']):
+                if re.fullmatch(r'0\d', c['raw'].strip()):
+                    continue                       # 01/02/03 — нумерация (K3-NUMBERED), не факт
+                key = (c['value'], c['unit'], c['raw'])
                 if key in seen_nums:
                     continue
                 seen_nums.add(key)
-                page_nums.append({'raw': rawn, 'value': val, 'el': l['el'], 'context': l['text'][:80]})
-    if facts_nums is not None or copy_nums is not None:
-        known = (facts_nums or set()) | (copy_nums or set())
-        unknown = [n for n in page_nums if n['value'] not in known]
+                page_nums.append(dict(c, objs=sorted(c['objs']), el=l['el'], context=l['text'][:80]))
+    copy_claims = number_claims(copy_text) if copy_text is not None else None
+    if facts is not None or copy_claims is not None:
+        known = (facts or {}).get('known', []) + (copy_claims or [])
+        unknown = [n for n in page_nums if not claim_known(dict(n, objs=set(n['objs'])), known)]
+        nosrc = (facts or {}).get('no_source') or []
         if unknown:
-            add(F, 'F-NUMBERS', 'critical', desk['viewport'], f'чисел нет в facts.md/copy.md: {len(unknown)}',
-                {'numbers': unknown[:12]},
-                'Every number must come from brief/facts.md; replace invented numbers with [PLACEHOLDER] and list them in REPORT.md: '
-                + ', '.join(n['raw'] for n in unknown[:6]) + '.')
+            add(F, 'F-NUMBERS', 'critical', desk['viewport'],
+                f'чисел нет в фактах и текстах (значение, единица, объект): {len(unknown)}'
+                + (f'; строк фактов без источника: {len(nosrc)}' if nosrc else ''),
+                {'numbers': unknown[:12], 'facts_without_source': nosrc[:12]},
+                'каждое число — из фактов с источником (та же единица, тот же объект); выдуманное — [PLACEHOLDER: что] и '
+                'строка «Нет»: ' + ', '.join(n['raw'] for n in unknown[:6]))
+        elif nosrc:
+            add(F, 'F-NUMBERS', 'info', desk['viewport'], f'строк фактов без источника: {len(nosrc)} (число они не легализуют)',
+                {'facts_without_source': nosrc[:12]})
     elif page_nums:
-        big = [n for n in page_nums if not (re.fullmatch(r'\d', n['raw']))]
+        big = [n for n in page_nums if not re.fullmatch(r'\d', n['raw'])]
         if big:
-            add(F, 'F-NUMBERS', 'info', desk['viewport'], f'чисел на странице (нет facts.md для сверки): {len(big)}',
+            add(F, 'F-NUMBERS', 'info', desk['viewport'], f'чисел на странице (нет фактов для сверки): {len(big)}',
                 {'numbers': big[:12]})
 
-    # ---------- текст против copy.md, заглушки, отзывы
+    # ---------- текст против copy deck, заглушки, отзывы
     if copy_text is not None:
         cn = norm_text(copy_text)
         cand = [b for b in desk['blocks'] if len(b['text'].split()) >= 3 and '[PLACEHOLDER' not in b['text'].upper()]
         miss = [b for b in cand if norm_text(b['text']) not in cn]
         if cand and len(miss) / len(cand) > 0.10:
             add(F, 'F-COPY', 'major', desk['viewport'],
-                f'текст не из copy.md: {len(miss)} из {len(cand)} блоков ({len(miss) / len(cand):.0%} > 10 %)',
+                f'текст не из copy deck: {len(miss)} из {len(cand)} блоков ({len(miss) / len(cand):.0%} > 10 %)',
                 {'examples': [{'el': b['el'], 'text': b['text'][:90]} for b in miss[:10]]},
-                'Use brief/copy.md verbatim: do not rewrite, shorten or add copy; missing copy becomes [PLACEHOLDER: what].')
+                'тексты — дословно из copy.md входа: не переписывать, не сокращать, не дописывать; пробел — '
+                '[PLACEHOLDER: что]')
     filler = []
     alltext = ' \n'.join(b['text'] for b in desk['blocks'])
     for rx in FILLER_PATTERNS:
@@ -1032,38 +1578,40 @@ def analyze(url, views, static, facts_nums, copy_text, copy_nums, assets, allowe
             filler.append(m.group(0))
     if filler:
         add(F, 'F-FILLER', 'critical', desk['viewport'], f"текст-заглушка: {', '.join(sorted(set(filler))[:6])}",
-            {'hits': sorted(set(filler))[:10]}, 'Replace filler text with copy from brief/copy.md or [PLACEHOLDER: what].')
+            {'hits': sorted(set(filler))[:10]}, 'заменить «рыбу» текстом copy deck или [PLACEHOLDER: что]')
     quotes = [b for b in desk['blocks'] if b['quote'] and len(b['text'].split()) >= 5]
     if quotes:
-        if copy_text is not None or facts_nums is not None:
+        if copy_text is not None or facts is not None:
             src = norm_text(copy_text or '')
             unsourced = [q for q in quotes if norm_text(q['text']) not in src]
             if unsourced:
-                add(F, 'F-QUOTE', 'critical', desk['viewport'], f'отзыв/цитата без источника: {len(unsourced)}',
+                add(F, 'F-QUOTE', 'critical', desk['viewport'], f'отзыв или цитата без источника: {len(unsourced)}',
                     {'examples': [q['text'][:90] for q in unsourced[:4]]},
-                    'Remove testimonials that are not in brief/copy.md or brief/facts.md.')
+                    'снять отзывы, которых нет в copy deck и фактах')
         else:
-            add(F, 'F-QUOTE', 'info', desk['viewport'], f'отзывы/цитаты — проверить источник: {len(quotes)}',
+            add(F, 'F-QUOTE', 'info', desk['viewport'], f'отзывы и цитаты — проверить источник: {len(quotes)}',
                 {'examples': [q['text'][:90] for q in quotes[:4]]})
 
-    # ---------- наложение текста (E/01: календарь K3; W2: плашка навигации на H1)
+    # ---------- формы по lead-forms.yaml
+    check_forms(F, desk, opts.get('form_sets'), allowed)
+
+    # ---------- наложение текста
     ov = [dict(o, view=v['viewport']) for v in views for o in v.get('text_overlaps', [])]
     if ov:
         add(F, 'V-OVERLAP', 'major', ov[0]['view'], f"текст накладывается на текст: {len(ov)} пар(ы), напр. «{ov[0]['a']}» × «{ov[0]['b']}»",
-            {'pairs': ov[:8]}, f"At {ov[0]['view']}: \"{ov[0]['a']}\" ({ov[0]['a_el']}) overlaps \"{ov[0]['b']}\" ({ov[0]['b_el']}) "
-            f"near y={ov[0]['y']}px; separate them (at least 8 px) without changing their sizes.")
+            {'pairs': ov[:8]}, f"на {ov[0]['view']}: «{ov[0]['a']}» ({ov[0]['a_el']}) наезжает на «{ov[0]['b']}» "
+            f"({ov[0]['b_el']}) около y={ov[0]['y']} px — развести (≥ 8 px), размеры не менять")
 
-    # ---------- мобильная версия
+    # ---------- телефон: окна уже первого брейкпоинта
     for v in views:
-        w = int(v['viewport'].split('x')[0])
-        if w >= 768:
+        w = view_w(v)
+        if w >= opts['first_bp']:
             continue
         nav_ok = any(n['links'] >= 2 for n in v['nav']['navs']) or any(t['top'] < v['vh'] * 0.3 for t in v['nav']['toggles'])
         if not nav_ok:
-            add(F, 'M-NAV', 'critical', v['viewport'], 'навигация не видна (нет меню-кнопки и нет ≥ 2 ссылок в nav/header)',
+            add(F, 'M-NAV', 'critical', v['viewport'], 'навигация не видна (нет кнопки меню и нет ≥ 2 ссылок в nav или header)',
                 {'navs': v['nav']['navs'][:3], 'toggles': v['nav']['toggles'][:3]},
-                f"At {v['viewport']}: show navigation — a menu button in the header (>= 44x44 px) that opens the section links, "
-                'or visible anchor links.')
+                f"на {v['viewport']}: кнопка меню в шапке (≥ 44 × 44 px), открывающая разделы, или видимые ссылки")
         paras = [l for l in v['leaves'] if l['tag'] in ('p', 'li', 'dd', 'blockquote') and len(l['text'].split()) >= 8]
         if paras:
             small = [l for l in paras if l['fs'] < 16]
@@ -1071,23 +1619,30 @@ def analyze(url, views, static, facts_nums, copy_text, copy_nums, assets, allowe
             if len(small) / len(paras) > 0.25:
                 add(F, 'M-BODY-16', 'major', v['viewport'], f'тело текста < 16 px: {len(small)} из {len(paras)} абзацев, медиана {med:.1f} px',
                     {'examples': [{'el': l['el'], 'fs': l['fs']} for l in small[:5]]},
-                    f"At {v['viewport']}: body text at least 16 px (line-height 1.4–1.6); keep desktop sizes unchanged.")
+                    f"на {v['viewport']}: основной текст ≥ 16 px (интерлиньяж 1,4–1,6), десктоп не менять")
         if v['scroll_w'] > w + 1:
             add(F, 'M-OVERFLOW', 'critical', v['viewport'], f"горизонтальная прокрутка: {v['scroll_w'] - w} px",
-                {'scroll_width': v['scroll_w']}, f"At {v['viewport']}: remove horizontal overflow (find the element wider than the "
-                'viewport; see shot.py overflow_elements).')
+                {'scroll_width': v['scroll_w']}, f"на {v['viewport']}: убрать горизонтальный вылет (элемент шире окна — "
+                'overflow_elements кадров kit/shot.py)')
         hero_m = v.get('hero')
         if hero_m and hero_m['h1_lines'] > 4:
             add(F, 'M-H1-LINES', 'minor', v['viewport'], f"h1 занимает {hero_m['h1_lines']} строк (> 4)",
-                {'lines': hero_m['h1_lines']}, f"At {v['viewport']}: fit the H1 in at most 4 lines (reduce size with clamp()).")
+                {'lines': hero_m['h1_lines']}, f"на {v['viewport']}: H1 — не больше четырёх строк (кегль узкой ширины ДС)")
 
-    # ---------- слепая зона DOM: canvas/WebGL или почти пустая разметка
+    for v in over:
+        w = view_w(v)
+        if v['scroll_w'] > w + 1:
+            add(F, 'M-OVERFLOW', 'critical', v['viewport'], f"горизонтальная прокрутка на ширине вылета: {v['scroll_w'] - w} px",
+                {'scroll_width': v['scroll_w']}, f"на {v['viewport']}: страница читается без прокрутки в двух измерениях "
+                '(таблицы и карты — прокрутка в своём контейнере)')
+
+    # ---------- слепая зона разметки: canvas и видео или почти пустой DOM
     if len(desk['leaves']) < 12 or desk.get('canvas_share', 0) > 0.5:
         add(F, 'E-LOW-DOM', 'minor', desk['viewport'],
-            f"мало текста в DOM ({len(desk['leaves'])} узл.) или canvas/видео {desk.get('canvas_share', 0):.0%} первого экрана — "
+            f"мало текста в DOM ({len(desk['leaves'])} узл.) или canvas и видео {desk.get('canvas_share', 0):.0%} первого экрана — "
             'проверки по разметке неполны, смотреть кадры глазами', {'leaves': len(desk['leaves']), 'canvas_share': desk.get('canvas_share')})
 
-    # ---------- справочно: шрифты и цвета
+    # ---------- справочно: шрифты
     fam = {}
     for l in desk['leaves']:
         f = family_first(l['ff'])
@@ -1100,66 +1655,164 @@ def analyze(url, views, static, facts_nums, copy_text, copy_nums, assets, allowe
     return F
 
 
-def summarize(F, allowed):
-    counts = {s: 0 for s in SEV_ORDER}
+def domain_of(tell_id, surface):
+    """Домен приметы для поверхности: владелец приметы (по поверхности, если их несколько) → домен реестра с тем же
+    файлом-владельцем, иначе первый домен той же базы."""
+    reg = registry()
+    t = reg['tells'].get(tell_id) or {}
+    own = t.get('owner')
+    if isinstance(own, dict):
+        own = own.get(surface) or next(iter(own.values()), '')
+    path = re.split(r'[#\s]', str(own or ''))[0]
+    for did, d in reg['domains'].items():
+        if path and path == re.split(r'[#\s]', str(d.get('owner') or ''))[0]:
+            return did
+    base = path.split('/')[0]
+    return next((did for did, d in reg['domains'].items() if str(d.get('owner') or '').split('/')[0] == base), None)
+
+
+def ui_markers(tell_id):
+    """Номера маркеров ui 11/04 приметы (владелец и соседи: «04-anti-slop-ui.md §… (маркер N)»)."""
+    t = registry()['tells'].get(tell_id) or {}
+    own = t.get('owner')
+    refs = (list(own.values()) if isinstance(own, dict) else [own]) + list(t.get('also') or [])
+    out = set()
+    for r in refs:
+        m = re.search(r'04-anti-slop-ui\.md[^()]*\(маркер(?:ы)?\s+([\d,\s]+)\)', str(r or ''))
+        if m:
+            out |= {int(x) for x in re.findall(r'\d+', m.group(1))}
+    return out
+
+
+def summarize(F, allowed, surface='page'):
+    """Сводка без дублей: примета — один раз, сколько бы проверок её ни нашли; счёт — по доменам реестра в единице
+    домена (страница или экран одного прогона), домены не складываются; кластеры реестра и реестра клише — членами,
+    вердикт по порогу владельца (правило кластера названо)."""
+    reg = registry()
+    counts = {s_: 0 for s_ in SEV_ORDER}
     for f in F:
         counts[f['severity']] += 1
-    sig = sorted({f['id'] for f in F if f['id'].startswith('K3-') and f['severity'] in ('major', 'minor')})
-    sig_major = sorted({f['id'] for f in F if f['id'].startswith('K3-') and f['severity'] == 'major'})
-    fab = sorted({f['id'] for f in F if f['id'].startswith('F-') and f['severity'] in ('critical', 'major')})
-    mob = sorted({f['id'] for f in F if f['id'].startswith('M-') and f['severity'] in ('critical', 'major')})
-    m1104 = {'K3-ACCENT-WORD': 'm7', 'K3-CAPS': 'm8', 'K3-GLASS': 'm15', 'K3-THREE-CARDS': 'm17', 'K3-EYEBROW': 'm30',
-             'K3-NUMBERED': 'm31', 'K3-META-DOTS': 'm32', 'K3-MONO-LABELS': 'm33', 'K3-ARROWS': 'm34', 'K3-GRADIENT-TEXT': 'm3'}
-    markers = sorted({m1104[f['id']] for f in F if f['id'] in m1104 and f['severity'] in ('major', 'minor')})
-    return {'counts': counts, 'k3_signatures': sig, 'k3_signatures_major': sig_major, 'fabrications': fab, 'mobile': mob,
-            'ui1104_markers_hit': markers,
-            'acceptance_hint': {'H2_no_k3_signature': not sig_major, 'B_honesty': not fab, 'D2_mobile': not mob},
+    hit = {}
+    for f in F:
+        if not f.get('tell') or f['severity'] == 'info':
+            continue
+        h = hit.setdefault(f['tell'], {'tell': f['tell'], 'checks': [], 'severity': f['severity'], 'group': f.get('group')})
+        if f['id'] not in h['checks']:
+            h['checks'].append(f['id'])
+        if SEV_ORDER[f['severity']] < SEV_ORDER[h['severity']]:
+            h['severity'] = f['severity']
+    tells = []
+    for t, h in sorted(hit.items()):
+        tells.append(dict(h, domain=domain_of(t, surface)))
+    domains = {}
+    for row in tells:
+        did = row['domain'] or '—'
+        d = reg['domains'].get(did) or {}
+        dom = domains.setdefault(did, {'unit': d.get('unit'), 'owner': d.get('owner'), 'diagnosis': d.get('diagnosis'),
+                                       'tells': []})
+        dom['tells'].append(row['tell'])
+    for did, dom in domains.items():
+        dom['count'] = len(dom['tells'])
+        if did == 'app-visual':
+            dom['ui_markers'] = sorted(set().union(*(ui_markers(t) for t in dom['tells'])))
+    clusters = []
+    for c in reg['clusters']:
+        mem = [m for m in c.get('members') or [] if m in hit]
+        if mem:
+            clusters.append({'id': c['id'], 'name': c.get('name'), 'unit': c.get('unit'), 'members_hit': mem,
+                             'members': len(c.get('members') or []), 'rule': c.get('rule') or c.get('owner')})
+    if surface == 'page':
+        for c in _yaml(CLICHE).get('clusters') or []:
+            mem = [m for m in c.get('members') or [] if m in hit]
+            if mem:
+                clusters.append({'id': f"cliche:{c['id']}", 'name': c.get('name_ru'), 'unit': 'сцена страницы',
+                                 'members_hit': mem, 'members': len(c.get('members') or []),
+                                 'rule': 'creative/08-uniqueness-anti-slop/cliche-registry.yaml#cluster_rule'})
+    groups = {}
+    for f in F:
+        if f['severity'] in ('critical', 'major') and f.get('group'):
+            groups.setdefault(f['group'], [])
+            if f['id'] not in groups[f['group']]:
+                groups[f['group']].append(f['id'])
+    return {'counts': counts, 'tells': tells, 'domains': domains, 'clusters': clusters,
+            'groups': {g: sorted(v) for g, v in sorted(groups.items())},
+            'acceptance_hint': {g: not groups.get(g) for g in ('look', 'honesty', 'acceptance')},
             'allowed_by_brief': sorted(allowed)}
 
 
 def to_md(res):
     s = res['summary']
-    L = [f"# k3_checks · {res['target']} · {res['created']}", '',
-         f"Итог: critical {s['counts']['critical']} · major {s['counts']['major']} · minor {s['counts']['minor']} · info {s['counts']['info']}; "
-         f"приметы K3 (major): {', '.join(s['k3_signatures_major']) or '—'}; выдумки: {', '.join(s['fabrications']) or '—'}; "
-         f"мобильная: {', '.join(s['mobile']) or '—'}; маркеры ui 11/04: {', '.join(s['ui1104_markers_hit']) or '—'}.", '',
-         '| Проверка | Тяжесть | Вид | Найдено | Правка для NOTES (EN) |', '|---|---|---|---|---|']
+    doms = '; '.join(f"{d} ({v.get('unit') or '—'}): {', '.join(v['tells'])}" for d, v in s['domains'].items()) or '—'
+    cl = '; '.join(f"{c['id']} {len(c['members_hit'])} из {c['members']}" for c in s['clusters']) or '—'
+    L = [f"# mockup_checks · {res['target']} · {res['created']}", '',
+         f"Итог: critical {s['counts']['critical']} · major {s['counts']['major']} · minor {s['counts']['minor']} · "
+         f"info {s['counts']['info']}. Приметы по доменам (единица домена; домены не складываются): {doms}. "
+         f"Кластеры (члены; вердикт — правило владельца): {cl}.", '',
+         '| Проверка | Примета | Тяжесть | Вид | Найдено | Правка |', '|---|---|---|---|---|---|']
     for f in sorted(res['findings'], key=lambda x: (SEV_ORDER[x['severity']], x['id'])):
         if f['severity'] == 'info':
             continue
-        L.append(f"| {f['id']} | {f['severity']} | {f['view']} | {f['message'].replace('|', '/')} | {f['fix_en'].replace('|', '/')} |")
+        L.append(f"| {f['id']} | {f.get('tell') or '—'} | {f['severity']} | {f['view']} | {f['message'].replace('|', '/')} | "
+                 f"{f['fix'].replace('|', '/')} |")
     return '\n'.join(L) + '\n'
+
+
+def static_frame(target):
+    """Ширина рамки, если цель — статичная копия артборда (строка происхождения dc_to_html): такая копия — страница
+    фиксированной ширины и проверяется окном своей рамки; остальные ширины — на адаптивной копии."""
+    if target.startswith(('http://', 'https://')) or not os.path.isfile(target):
+        return None
+    head = open(target, encoding='utf-8', errors='replace').read(4000)
+    m = re.search(r'<!--\s*dc_to_html:\s*статичная копия артборда [^;]+;.*?рамка (\d+)×\d+', head)
+    return int(m.group(1)) if m else None
 
 
 def cmd_page(a):
     allowed = {x.strip() for x in (a.allow or '').split(',') if x.strip()}
-    unknown = allowed - ALLOW_KEYS
+    keys = allow_keys()
+    unknown = allowed - keys
     if unknown:
-        raise SystemExit(f'неизвестные ключи --allow: {sorted(unknown)}; допустимые: {sorted(ALLOW_KEYS)}')
+        raise SystemExit(f'неизвестные ключи --allow: {sorted(unknown)}; допустимые: {sorted(keys)}')
     fg = free_gb()
     if fg is not None and fg < a.min_free_gb:
         print(json.dumps({'error': f'свободно {fg:.1f} ГБ < {a.min_free_gb} ГБ — браузер не запускаю'}, ensure_ascii=False))
         return 3
+    first_bp = first_breakpoint(a.tokens)
+    aw = acceptance_widths()
+    frame = static_frame(a.target)
+    if a.views:
+        specs = [v.strip() for v in a.views.split(',') if v.strip()]
+    elif frame:
+        specs = [f'{frame}x{VIEW_H_WIDE if frame >= first_bp else VIEW_H_NARROW}']
+    else:
+        specs = [f'{w}x{VIEW_H_WIDE if w >= first_bp else VIEW_H_NARROW}'
+                 for w in (aw['widths'] if a.acceptance else aw['artboards'])]
+    over = f"{aw['overflow_only']}x{VIEW_H_NARROW}" if a.acceptance and aw['overflow_only'] and not frame else None
     local = not a.target.startswith(('http://', 'https://'))
     block = a.block_external or (local and not a.allow_external)
     src = a.src or (os.path.dirname(os.path.abspath(a.target)) if local and os.path.isfile(a.target)
                     else (os.path.abspath(a.target) if local else None))
     static = scan_sources(src) if src else None
-    facts_nums = load_numbers_file(a.facts)
-    copy_text = md_plain(open(a.copy, encoding='utf-8').read()) if a.copy else None
-    copy_nums = {v for _, v in extract_numbers(copy_text)} if copy_text is not None else None
-    assets = parse_assets_readme(a.assets_readme)
+    facts = load_facts(a.facts)
+    copy_text = load_copy(a.copy, a.page)
+    assets = parse_assets_readme(a.assets)
+    form_sets = load_form_sets(a.forms)
     t0 = time.time()
-    url, views, blocked = collect(a.target, [v.strip() for v in a.views.split(',') if v.strip()], a.ignore_selector,
-                                  block, a.shots)
-    F = analyze(url, views, static, facts_nums, copy_text, copy_nums, assets, allowed, blocked)
-    res = {'tool': 'k3_checks.py', 'version': VERSION, 'target': a.target, 'url': url,
+    url, views, blocked = collect(a.target, specs + ([over] if over else []), a.ignore_selector, block, a.shots)
+    if over:
+        views[-1]['overflow_only'] = True
+    opts = {'surface': a.surface, 'preset': a.preset, 'first_bp': first_bp, 'form_sets': form_sets}
+    F = analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts)
+    res = {'tool': 'mockup_checks.py', 'version': VERSION, 'target': a.target, 'url': url, 'static_frame': frame,
            'created': datetime.now(timezone.utc).isoformat(timespec='seconds'), 'seconds': round(time.time() - t0, 1),
-           'views': [v['viewport'] for v in views], 'inputs': {'facts': a.facts, 'copy': a.copy, 'assets_readme': a.assets_readme,
-                                                              'src': (static or {}).get('root'), 'block_external': block},
+           'surface': a.surface, 'first_breakpoint': first_bp,
+           'views': [v['viewport'] for v in views],
+           'widths': '--views' if a.views else ('рамка статичной копии' if frame else 'kb/common/acceptance-widths.yaml'),
+           'inputs': {'facts': a.facts, 'copy': a.copy, 'assets': a.assets, 'forms': form_sets, 'tokens': a.tokens,
+                      'src': (static or {}).get('root'), 'block_external': block},
            'static': {k: v for k, v in (static or {}).items() if k != 'stock_hits'} if static else None,
            'shots': [v.get('shot') for v in views if v.get('shot')],
-           'summary': summarize(F, allowed),
+           'summary': summarize(F, allowed, a.surface),
            'findings': sorted(F, key=lambda x: (SEV_ORDER[x['severity']], x['id']))}
     if a.json:
         os.makedirs(os.path.dirname(os.path.abspath(a.json)), exist_ok=True)
@@ -1168,201 +1821,14 @@ def cmd_page(a):
         os.makedirs(os.path.dirname(os.path.abspath(a.md)), exist_ok=True)
         open(a.md, 'w', encoding='utf-8').write(to_md(res))
     s = res['summary']
-    print(json.dumps({'target': a.target, 'seconds': res['seconds'], 'summary': s,
+    print(json.dumps({'target': a.target, 'seconds': res['seconds'], 'summary': {k: s[k] for k in ('counts', 'groups',
+                      'acceptance_hint')}, 'tells': [t['tell'] for t in s['tells']],
                       'top': [f"{f['severity']} {f['id']}: {f['message']}" for f in res['findings'] if f['severity'] != 'info'][:14]},
                      ensure_ascii=False, indent=1))
     return 2 if (s['counts']['critical'] or s['counts']['major']) else 0
 
 
-# ---------------------------------------------------------------- сторож потока stream-json
-FORBID_TOOLS_DEFAULT = 'FetchURL,WebSearch,WebFetch,AgentSwarm,Agent,CronCreate,AskUserQuestion,EnterPlanMode'
-FORBID_CMD = [
-    ('global-install', r'\b(?:npm|pnpm|yarn|bun)\s+(?:i|install|add)\b[^\n;&|]*\s(?:-g|--global)\b|\bnpm\s+-g\b'),
-    ('sudo', r'(?:^|[;&|]\s*|\s)sudo\s'),
-    ('git-mutation', r'\bgit\s+(?:push|reset|checkout|clean|rebase|commit|restore|stash|rm)\b'),
-    ('rm-rf-outside', r'\brm\s+-[a-z]*r[a-z]*f?\s+(?:/|~|\.\.)'),
-    ('pipe-to-shell', r'\b(?:curl|wget)\b[^\n|]*\|\s*(?:ba|z)?sh\b'),
-    ('home-access', r'(?:~|/home/[^/\s]+)/(?:\.ssh|\.kimi-code|\.claude|\.config|Документы|Documents)'),
-    ('docker', r'\bdocker\s+(?:run|compose|build)\b'),
-]
-TOOL_WAIT_LIMIT = {'FetchURL': 60, 'WebSearch': 60, 'WebFetch': 60, 'ReadMediaFile': 120, 'Read': 60, 'Write': 120,
-                   'Edit': 60, 'Grep': 60, 'Glob': 60, 'Bash': 360, 'TaskStop': 60, 'WaitFor': 660, 'Skill': 60}
-
-
-def resolve_stream(path):
-    if os.path.isdir(path):
-        runs = sorted((d for d in os.listdir(path) if os.path.isfile(os.path.join(path, d, 'stream.jsonl'))), reverse=True)
-        if runs:
-            return os.path.join(path, runs[0], 'stream.jsonl')
-        if os.path.isfile(os.path.join(path, 'stream.jsonl')):
-            return os.path.join(path, 'stream.jsonl')
-        raise SystemExit(f'в {path} нет stream.jsonl')
-    return path
-
-
-def watch(path, a, now=None):
-    path = resolve_stream(path)
-    calls, pending, retries, bad = [], {}, [], 0
-    session_id, final_text, version = None, None, None
-    with open(path, encoding='utf-8', errors='replace') as f:
-        for n, raw in enumerate(f):
-            raw = raw.strip()
-            if not raw:
-                continue
-            try:
-                m = json.loads(raw)
-            except json.JSONDecodeError:
-                bad += 1
-                continue
-            role, typ = m.get('role'), m.get('type')
-            if role == 'meta' and typ == 'system.version':
-                version = m.get('version')
-            elif role == 'meta' and typ == 'turn.step.retrying':
-                retries.append({'status': m.get('status_code'), 'attempt': m.get('failed_attempt'), 'msg': (m.get('error_message') or '')[:80]})
-            elif role == 'meta' and typ == 'session.resume_hint':
-                session_id = m.get('session_id')
-            elif role == 'assistant':
-                if m.get('content'):
-                    final_text = m['content'][-600:]
-                for c in m.get('tool_calls') or []:
-                    fn = c.get('function') or {}
-                    try:
-                        args = json.loads(fn.get('arguments') or '{}')
-                    except json.JSONDecodeError:
-                        args = {'_raw': (fn.get('arguments') or '')[:200]}
-                    rec = {'i': len(calls), 'line': n, 'id': c.get('id'), 'name': fn.get('name', '?'), 'args': args, 'result': None}
-                    calls.append(rec)
-                    pending[c.get('id')] = rec
-            elif role == 'tool':
-                rec = pending.pop(m.get('tool_call_id'), None)
-                if rec:
-                    content = m.get('content')
-                    rec['result'] = content if isinstance(content, str) else json.dumps(content, ensure_ascii=False)
-    running = a.running
-    idle = round((now or time.time()) - os.path.getmtime(path)) if running else None
-    reasons, verdict = [], 'ok'
-
-    def flag(level, msg):
-        nonlocal verdict
-        reasons.append({'level': level, 'msg': msg})
-        if level == 'act' or (level == 'warn' and verdict == 'ok'):
-            verdict = level if verdict != 'act' else verdict
-
-    def arg_text(c):
-        return json.dumps(c['args'], ensure_ascii=False, sort_keys=True)[:400]
-
-    expect = [x.strip() for x in a.expect_first.split(',') if x.strip()]
-    first = calls[0] if calls else None
-    if first and expect and first['name'] not in expect:
-        flag('warn', f"первый вызов {first['name']} {arg_text(first)[:120]} — ожидали {'/'.join(expect)} (задача не прочитана?)")
-    forbid = {x.strip() for x in a.forbid_tools.split(',') if x.strip()}
-    for c in calls:
-        if c['name'] in forbid:
-            flag('act', f"запрещённый инструмент {c['name']} (вызов №{c['i'] + 1}): {arg_text(c)[:120]}")
-            break
-    installs, allowed_pk, kinds_seen = [], {x.strip().lower() for x in (a.allowed_packages or '').split(',') if x.strip()}, set()
-    for c in calls:
-        if c['name'] != 'Bash':
-            continue
-        cmd = str(c['args'].get('command') or c['args'].get('cmd') or c['args'].get('_raw') or '')
-        for kind, rx in FORBID_CMD:
-            if kind not in kinds_seen and re.search(rx, cmd, re.I):
-                kinds_seen.add(kind)
-                flag('act' if kind != 'docker' else 'warn', f'команда «{kind}» (вызов №{c["i"] + 1}): {cmd[:120]}')
-        for m in re.finditer(r'\b(?:npm|pnpm|yarn|bun)\s+(?:i|install|add)\s+([^;&|\n]+)', cmd):
-            pk = [p for p in m.group(1).split() if not p.startswith('-')]
-            installs += pk
-            if a.allowed_packages is not None:
-                extra = [p for p in pk if re.sub(r'@[^/]*$', '', p).lower() not in allowed_pk]
-                if extra:
-                    flag('warn', f'установка вне разрешённого списка: {extra}')
-    keyseq = [(c['name'], arg_text(c)) for c in calls]
-    run, best = 1, (1, None)
-    for i in range(1, len(keyseq)):
-        run = run + 1 if keyseq[i] == keyseq[i - 1] else 1
-        if run > best[0]:
-            best = (run, keyseq[i])
-    if best[0] >= a.loop:
-        flag('act', f'петля: один и тот же вызов {best[1][0]} подряд ×{best[0]}: {best[1][1][:100]}')
-    counts = {}
-    for k in keyseq:
-        counts[k] = counts.get(k, 0) + 1
-    for k, v in counts.items():
-        if v >= a.loop + 2 and k[0] not in ('ReadMediaFile',):
-            flag('warn', f'повтор вызова {k[0]} ×{v} за прогон: {k[1][:100]}')
-            break
-    fails = {}
-    for c in calls:
-        if c['name'] == 'Bash' and c['result'] and re.search(r'(?i)\b(error|failed|not found|exit code:? [1-9]|ENOENT|EADDRINUSE)\b', c['result']):
-            k = arg_text(c)
-            fails[k] = fails.get(k, 0) + 1
-    for k, v in fails.items():
-        if v >= 3:
-            flag('act', f'одна и та же команда падает ×{v}: {k[:100]}')
-            break
-    edits = {}
-    for c in calls:
-        if c['name'] in ('Write', 'Edit'):
-            p = c['args'].get('path') or c['args'].get('file_path') or '?'
-            edits[p] = edits.get(p, 0) + 1
-    churn = {p: v for p, v in edits.items() if v >= a.churn}
-    if churn:
-        flag('warn', f'файл переписывается снова и снова: {churn}')
-    rm = [str(c['args'].get('path')) for c in calls if c['name'] == 'ReadMediaFile']
-    iter_frames = [p for p in rm if a.iter is not None and re.search(rf'iter-0*{a.iter}/', p or '')]
-    shot_runs = [c for c in calls if c['name'] == 'Bash' and 'shot.py' in str(c['args'])]
-    taskstop = any(c['name'] == 'TaskStop' for c in calls)
-    phase = 'finished' if session_id else ('waiting_tool' if pending else 'generating')
-    if running and idle is not None:
-        if phase == 'waiting_tool':
-            last = list(pending.values())[-1]
-            lim = TOOL_WAIT_LIMIT.get(last['name'], 300)
-            if idle > lim:
-                flag('act', f"инструмент {last['name']} без результата {idle} с (> {lim} с): {arg_text(last)[:100]}")
-        elif phase == 'generating':
-            if idle > a.idle_act:
-                flag('act', f'нет новых строк {idle} с (> {a.idle_act} с) — модель молчит или зависла')
-            elif idle > a.idle_warn:
-                flag('warn', f'нет новых строк {idle} с (> {a.idle_warn} с) — длинный шаг (запись большого файла?)')
-    streak = 0
-    for r in reversed(retries):
-        if r['status'] == 429:
-            streak += 1
-        else:
-            break
-    if streak >= 5:
-        flag('warn', f'подряд {streak} повторов 429 (перегрузка): готовиться продолжить сессию позже')
-    if phase == 'finished':
-        if a.iter is not None and not iter_frames:
-            flag('warn', f'прогон закончен, но кадры screenshots/iter-{a.iter}/ не прочитаны ReadMediaFile — итерацию не принимать')
-        if a.frames and len(set(iter_frames)) < a.frames:
-            flag('warn', f'прочитано кадров итерации {len(set(iter_frames))} из {a.frames}')
-        if shot_runs and not taskstop:
-            flag('warn', 'dev-сервер мог остаться в фоне: TaskStop не вызывался')
-        if not final_text:
-            flag('warn', 'нет финального сообщения (только мышление?) — смотреть REPORT.md и git diff')
-        if verdict == 'ok':
-            verdict = 'done'
-    nxt = {'ok': 'ждать; следующий взгляд через 1–3 мин',
-           'warn': 'посмотреть причины; если повторится на следующем взгляде — действовать',
-           'act': 'SIGTERM группе процессов kimi (или дождаться сторожа), затем продолжить ту же сессию (-S) коротким '
-                  'сообщением STOP (03-critique-messages.md, «прерывание») или откатить git',
-           'done': 'приёмка: summary.json → кадры Claude → проверки (01-loop-protocol.md, фаза 5)'}[verdict]
-    return {'stream': path, 'version': version, 'verdict': verdict, 'phase': phase, 'idle_s': idle, 'reasons': reasons,
-            'first_call': {'name': first['name'], 'args': arg_text(first)[:160]} if first else None,
-            'calls_total': len(calls), 'calls_by_tool': {k: sum(1 for c in calls if c['name'] == k) for k in sorted({c['name'] for c in calls})},
-            'read_media_total': len(rm), 'iter_frames_read': len(set(iter_frames)), 'shot_runs': len(shot_runs),
-            'taskstop': taskstop, 'installs': installs, 'retries': len(retries), 'retries_429_streak': streak,
-            'session_id': session_id, 'final_text_tail': (final_text or '')[-300:], 'bad_lines': bad, 'next': nxt}
-
-
-def cmd_watch(a):
-    r = watch(a.stream, a)
-    print(json.dumps(r, ensure_ascii=False, indent=1))
-    return 2 if r['verdict'] == 'act' else 0
-
-
-# ---------------------------------------------------------------- ресайз без перезагрузки (ACCEPTANCE H5, W3: чёрный hero)
+# ---------------------------------------------------------------- ресайз без перезагрузки (пункт H5 приёмки)
 RESIZE_JS = r"""
 () => {
   const vis = (el) => { const r = el.getBoundingClientRect(); const s = getComputedStyle(el);
@@ -1406,7 +1872,7 @@ def cmd_resize(a):
     small = [int(x) for x in a.mobile.split('x')]
     steps, shots = [], []
     try:
-        with sync_playwright() as p:
+        with kbpaths.lock('browser'), sync_playwright() as p:
             b = p.chromium.launch()
             try:
                 page = b.new_page(viewport={'width': big[0], 'height': big[1]})
@@ -1457,18 +1923,48 @@ def cmd_resize(a):
 
 
 # ---------------------------------------------------------------- самопроверка
+def _view(w=1440, vh=900, **kw):
+    """Кадр COLLECT_JS для синтетики самопроверки."""
+    base = {'viewport': f'{w}x{vh}', 'vw': w, 'vh': vh, 'headings': [], 'leaves': [], 'text_overlaps': [], 'blocks': [],
+            'images': [], 'bg_images': [], 'media_src': [], 'sections': [], 'canvas_share': 0, 'page_bg': [255, 255, 255],
+            'page_h': 3000, 'scroll_w': w, 'hero': None, 'rows': [], 'bento': [], 'orbit': [], 'header': None, 'forms': [],
+            'glass': [], 'grad_text': [], 'marquee': [], 'drawn_dots': [], 'nav': {'navs': [{'el': 'nav', 'links': 4}], 'toggles': []}}
+    base.update(kw)
+    return base
+
+
+def _leaf(text, fs=16, tag='p', **kw):
+    base = {'el': tag, 'tag': tag, 'text': text, 'fs': fs, 'fw': 400, 'ff': 'Inter', 'tt': 'none', 'ls': 0,
+            'color': [17, 21, 28, 1], 'bg': [255, 255, 255], 'bg_img': False, 'in_btn': False, 'ext': False}
+    base.update(kw)
+    return base
+
+
+def _field(label, type_='text', **kw):
+    base = {'tag': 'input', 'type': type_, 'name': '', 'id': '', 'autocomplete': '', 'required': False, 'checked': False,
+            'label': label, 'placeholder': '', 'visible': True, 'hidden_trap': False}
+    base.update(kw)
+    return base
+
+
 def cmd_selftest(_a):
+    import tempfile
     ok = True
 
     def check(name, cond, got=None):
         nonlocal ok
         ok &= bool(cond)
         print(('PASS ' if cond else 'FAIL ') + name + ('' if cond else f' → {got}'))
+
+    def ids(F, sev=None):
+        return sorted({f['id'] for f in F if sev is None or f['severity'] in sev})
+
+    opts = {'surface': 'page', 'preset': 'A', 'first_bp': 640.0, 'form_sets': []}
     L, C, H = oklch((0xF4, 0xF1, 0xEA))
     check('oklch #F4F1EA ≈ (0.957, 0.010, 84)', abs(L - 0.957) < 0.01 and abs(C - 0.010) < 0.004 and 70 < H < 95, (L, C, H))
     check('warm light #F4F1EA', warm_class((0xF4, 0xF1, 0xEA)) == 'light')
-    check('warm light #f4f4ec (E/01)', warm_class((0xf4, 0xf4, 0xec)) == 'light', oklch((0xf4, 0xf4, 0xec)))
-    check('warm dark #14140c (E/01)', warm_class((0x14, 0x14, 0x0c)) == 'dark', oklch((0x14, 0x14, 0x0c)))
+    check('warm light #f4f4ec', warm_class((0xf4, 0xf4, 0xec)) == 'light', oklch((0xf4, 0xf4, 0xec)))
+    check('warm dark #14140c', warm_class((0x14, 0x14, 0x0c)) == 'dark', oklch((0x14, 0x14, 0x0c)))
     check('neutral #fafafa not warm', warm_class((0xfa, 0xfa, 0xfa)) is None)
     check('cool #f4f6fb not warm', warm_class((0xf4, 0xf6, 0xfb)) is None, oklch((0xf4, 0xf6, 0xfb)))
     check('brand orange #e4002b not tint', warm_class((0xe4, 0x00, 0x2b)) is None)
@@ -1477,28 +1973,175 @@ def cmd_selftest(_a):
     nums = dict((r, v) for r, v in extract_numbers('Более 12 000+ клиентов, рейтинг 4,9 и 98 % довольных; с 2014 года; $1,250'))
     check('numbers 12 000+ → 12000', nums.get('12 000+') == '12000', nums)
     check('numbers 4,9 → 4.9', nums.get('4,9') == '4.9', nums)
-    check('numbers 98 % → 98', any(v == '98' for v in nums.values()), nums)
-    check('numbers $1,250 → 1250', any(v == '1250' for v in nums.values()), nums)
     check('norm_text quotes/dashes', norm_text('«Смена — за 5 минут»') == norm_text('"смена - за 5 минут"'))
     check('family_kind Fraunces serif', family_kind('"Fraunces", Georgia, serif') == 'serif')
-    check('family_kind Inter sans', family_kind('Inter, system-ui, sans-serif') == 'sans')
     check('family_kind JetBrains mono', family_kind('"JetBrains Mono", monospace') == 'mono')
-    check('family_kind unknown+serif fallback', family_kind('"Brand Display", serif') == 'serif')
     check('stock unsplash id', stock_kind('https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1600') == 'unsplash')
-    check('stock picsum', stock_kind('https://picsum.photos/800/600') == 'picsum')
-    import tempfile
-    lines = [{'role': 'meta', 'type': 'system.version', 'version': '2.0.2'},
-             {'role': 'assistant', 'tool_calls': [{'id': 'c1', 'function': {'name': 'FetchURL', 'arguments': '{"url":"https://brand.example"}'}}]},
-             {'role': 'tool', 'tool_call_id': 'c1', 'content': 'text'}]
-    lines += [{'role': 'assistant', 'tool_calls': [{'id': f'd{i}', 'function': {'name': 'Bash', 'arguments': '{"command":"docker run x"}'}}]} for i in range(5)]
-    with tempfile.NamedTemporaryFile('w', suffix='.jsonl', delete=False) as t:
-        t.write('\n'.join(json.dumps(x) for x in lines))
-    ns = argparse.Namespace(running=False, idle_warn=600, idle_act=1200, loop=4, churn=8, iter=None, frames=0,
-                            allowed_packages=None, expect_first='Read,Skill,Glob,Grep,ReadMediaFile,TodoList', forbid_tools=FORBID_TOOLS_DEFAULT)
-    r = watch(t.name, ns)
-    os.unlink(t.name)
-    check('watch: forbidden FetchURL → act', r['verdict'] == 'act' and any('FetchURL' in x['msg'] for x in r['reasons']), r['reasons'])
-    check('watch: loop docker ×5 detected', any('петля' in x['msg'] for x in r['reasons']), r['reasons'])
+
+    # реестр примет, ширины и пороги владельцев
+    reg = registry()
+    check('реестр: K3-EYEBROW → примета caps-eyebrow', reg['checks'].get('K3-EYEBROW', {}).get('tell') == 'caps-eyebrow')
+    check('ключи --allow — из реестра', {'warm', 'eyebrow', 'cards', 'arrows', 'external'} <= allow_keys(), sorted(allow_keys()))
+    aw = acceptance_widths()
+    check('ширины приёмки из файла: артборды 1440 и 390, вылет 320', (aw['artboards'], aw['overflow_only']) == ([1440, 390], 320), aw)
+    check('первый брейкпоинт без токенов ДС — эталон ui 640', first_breakpoint() == 640.0, first_breakpoint())
+    check('шапка страницы: телефон 64, десктоп 80', (header_limit('page', 'A', 390, 640), header_limit('page', 'A', 1440, 640)) == (64, 80))
+    check('шапка приложения по пресету: A 48, B 64', (header_limit('app', 'A', 1440, 640), header_limit('app', 'B', 390, 640)) == (48, 64))
+    check('надзаголовок: N у владельца COPY-C-18 = 3', eyebrow_per_sections() == 3, eyebrow_per_sections())
+    check('порог высоты hero — AIL-06: 0.95', hero_height_share() == 0.95, hero_height_share())
+    check('вариация длины карточек — AIL-07: 0.2', cards_cv_max() == 0.2, cards_cv_max())
+    check('бенто и орбита — пороги реестра клише: 5 и 6', (bento_min_tiles(), orbit_min_icons()) == (5, 6), (bento_min_tiles(), orbit_min_icons()))
+
+    # числа: значение, единица, объект
+    fact = number_claims('1 146 квартир сдали с 2014 года; гарантия 3 года по договору; перезвоним: +7 (831) 555-12-34')
+    check('телефон — одно утверждение', any(c['unit'] == 'tel' and c['value'] == 'tel:8315551234' for c in fact), fact)
+    check('«3 года» — единица «год», объект «гарантия»', any(c['value'] == '3' and c['unit'] == 'год' and 'гаран' in c['objs'] for c in fact), fact)
+    known = fact
+    same = number_claims('Гарантия 3 года')[0]
+    other_unit = number_claims('Гарантия 3 дня')[0]
+    other_obj = number_claims('3 года на рынке')[0]
+    check('число, единица и объект совпали — легально', claim_known(same, known))
+    check('та же цифра с другой единицей — выдумка', not claim_known(other_unit, known))
+    check('та же цифра и единица о другом объекте — выдумка', not claim_known(other_obj, known), other_obj)
+    check('время 10:00 — не утверждение', number_claims('Запись на 10:00') == [], number_claims('Запись на 10:00'))
+
+    with tempfile.TemporaryDirectory() as td:
+        fmd = os.path.join(td, 'facts.md')
+        open(fmd, 'w', encoding='utf-8').write(
+            '# Факты — пример\n\n## Факты\n\n| id | дословно | источник | где можно |\n|---|---|---|---|\n'
+            '| guarantee | Гарантия 3 года на работы | договор, п. 7.2 / 2026-09-01 | везде |\n'
+            '| flats | 1 146 квартир | — | hero |\n\n## Нет\n\n| id | чего нет | на странице до ответа | кто даст |\n'
+            '|---|---|---|---|\n| price | цена 3 500 ₽ | [PLACEHOLDER: цена] | заказчик |\n')
+        fx = load_facts(fmd)
+        check('facts.md входа: строка без источника не легализует', fx['no_source'] == ['flats'] and fx['rows'] == 2, fx)
+        check('facts.md: строки «Нет» — не факты', not any(c['value'] == '3500' for c in fx['known']), fx['known'])
+        fy = load_facts(str(kbpaths.kb('text', '02-strategy-messaging', 'examples', 'facts-service-renovation.yaml')))
+        check('facts.yaml: числа фактов с источником', any(c['value'] == '1146' for c in fy['known']) and fy['rows'] > 5, fy['rows'])
+        cmd = os.path.join(td, 'copy.md')
+        open(cmd, 'w', encoding='utf-8').write('# Тексты\n\n## hero\n[h1] approved: Ремонт под ключ с 2014 года\n'
+                                               '[text]: Первая строка\n  Вторая строка\n')
+        check('copy.md: строки слотов и продолжения', load_copy(cmd) == 'Ремонт под ключ с 2014 года\nПервая строка\nВторая строка',
+              load_copy(cmd))
+        deck = str(kbpaths.kb('text', '10-templates-recipes', 'examples', 'ru-otves-lead.yaml'))
+        check('copy deck YAML: выбранные тексты страницы', 'Позвать замерщика' in (load_copy(deck, 'otves-product-aware') or ''))
+        ay = os.path.join(td, 'plan.yaml')
+        open(ay, 'w', encoding='utf-8').write('slots:\n  - {slot: hero, file: assets/hero-01.avif, alt: Прихожая после ремонта}\n')
+        check('ассеты из YAML: file и alt', parse_assets_readme(ay) == {'hero-01': {'file': 'assets/hero-01.avif', 'caption': '',
+                                                                                     'alt': 'Прихожая после ремонта'}}, parse_assets_readme(ay))
+        pl = os.path.join(td, 'home.yaml')
+        open(pl, 'w', encoding='utf-8').write('form:\n  ref: lead-forms.yaml#callback\n')
+        check('--forms: id из плана страницы', load_form_sets([pl, 'quote-request']) == ['callback', 'quote-request'])
+
+    # приметы на синтетических кадрах
+    heads = [{'tag': t, 'el': t, 'text': 'З', 'ff': 'Inter', 'fs': 30, 'fw': '700', 'style': 'normal', 'align': 'left', 'x': 0,
+              'w': 600, 'top': 0, 'h': 40, 'lines': 1, 'color': [0, 0, 0, 1], 'accent': None, 'grad': False,
+              'eyebrow': {'text': 'НАДЗАГОЛОВОК'} if e else None, 'pill': None} for t, e in
+             [('h1', True), ('h2', False), ('h2', True), ('h2', False), ('h2', False), ('h2', False)]]
+    F = analyze('http://x/', [_view(headings=heads)], None, None, None, None, set(), [], opts)
+    check('надзаголовки 2 из 6 при ceil(6/3) = 2 — не примета', 'K3-EYEBROW' not in ids(F, ('major',)), F)
+    heads[3]['eyebrow'] = {'text': 'ЕЩЁ'}
+    F = analyze('http://x/', [_view(headings=heads)], None, None, None, None, set(), [], opts)
+    check('надзаголовки 3 из 6 — major, примета caps-eyebrow',
+          any(f['id'] == 'K3-EYEBROW' and f['severity'] == 'major' and f['tell'] == 'caps-eyebrow' for f in F), F)
+    F = analyze('http://x/', [_view(headings=heads)], None, None, None, None, {'eyebrow'}, [], opts)
+    check('--allow eyebrow снимает примету до info', all(f['severity'] == 'info' for f in F if f['id'] == 'K3-EYEBROW'))
+    arrows = [_leaf('Записаться →', in_btn=True), _leaf('«Отвес»', in_btn=True), _leaf('Мы на Яндекс Картах ↗', in_btn=True, ext=True)]
+    F = analyze('http://x/', [_view(leaves=arrows)], None, None, None, None, set(), [], opts)
+    ar = [f for f in F if f['id'] == 'K3-ARROWS']
+    check('стрелки: «→» — примета, «»» и «↗» у внешней ссылки — нет', len(ar) == 1 and ar[0]['evidence']['examples'] == ['Записаться →'], ar)
+    row = {'el': 'div.cards', 'n': 3, 'top': 800, 'w_ratio': 1.0, 'h_ratio': 1.0, 'min_w': 0.3, 'min_h': 200, 'same': True,
+           'content': True, 'nums': 0, 'num_texts': [], 'in_chrome': False}
+    steps = dict(row, n=3, nums=3, num_texts=['1', '2', '3'], cv=0.5)
+    F = analyze('http://x/', [_view(rows=[steps])], None, None, None, None, set(), [], opts)
+    check('номера шагов 1, 2, 3 — не ряд чисел', 'K3-STATS-ROW' not in ids(F))
+    F = analyze('http://x/', [_view(rows=[dict(steps, num_texts=['1 146', '4,8', '12 лет'])])], None, None, None, None, set(), [], opts)
+    check('ряд 1 146, 4,8, 12 лет — ряд чисел', 'K3-STATS-ROW' in ids(F))
+    F = analyze('http://x/', [_view(rows=[dict(row, cv=0.1)])], None, None, None, None, set(), [], opts)
+    check('три карточки одной длины (CV 0.1) — примета', 'K3-THREE-CARDS' in ids(F))
+    F = analyze('http://x/', [_view(rows=[dict(row, cv=0.45)])], None, None, None, None, set(), [], opts)
+    check('три карточки разного содержания (CV 0.45) — не примета', 'K3-THREE-CARDS' not in ids(F))
+    hero = {'el': 'section', 'h': 880, 'w': 1440, 'top': 0, 'h1_align': 'center', 'hero_align': 'center', 'h1_cx': 0.5, 'h1_w': 0.5,
+            'min_height': '100vh', 'h1_lines': 2, 'media': [], 'bg_url': [], 'overlays': [], 'next_top': 900, 'cue': False}
+    F = analyze('http://x/', [_view(hero=hero)], None, None, None, None, set(), [], opts)
+    check('hero 98 % по центру без продолжения — примета AIL-06', 'K3-HERO-CENTER' in ids(F))
+    F = analyze('http://x/', [_view(hero=dict(hero, next_top=860))], None, None, None, None, set(), [], opts)
+    check('край следующей секции виден — не примета', 'K3-HERO-CENTER' not in ids(F))
+    F = analyze('http://x/', [_view(hero=dict(hero, h=820))], None, None, None, None, set(), [], opts)
+    check('hero 91 % окна (< 95 %) — не примета', 'K3-HERO-CENTER' not in ids(F))
+    bento = {'el': 'div.grid', 'n': 6, 'one_radius': True, 'radius': '20px', 'one_padding': True, 'same': True, 'sizes': 2, 'rows': 2,
+             'in_chrome': False}
+    orbit = {'el': 'div.orbit', 'icons': 8, 'radius': 220, 'ring_cv': 0.04, 'top': 200}
+    F = analyze('http://x/', [_view(bento=[bento], orbit=[orbit])], None, None, None, None, set(), [], opts)
+    check('бенто 6 однотипных плиток и орбита 8 иконок — приметы',
+          {f['tell'] for f in F if f['id'] in ('LOOK-BENTO', 'LOOK-ORBIT')} == {'bento-uniform-tiles', 'logo-orbit-hero'}
+          or {f['id'] for f in F} >= {'LOOK-BENTO', 'LOOK-ORBIT'}, [(f['id'], f['tell']) for f in F])
+    F = analyze('http://x/', [_view(bento=[dict(bento, n=4)], orbit=[dict(orbit, icons=4)])], None, None, None, None, set(), [], opts)
+    check('4 плитки и 4 иконки — ниже порогов владельца', not {'LOOK-BENTO', 'LOOK-ORBIT'} & set(ids(F)))
+    many = [_leaf('т', fs=f) for f in (12, 13, 14, 15, 16, 18, 20, 24, 28, 32, 40)]
+    F = analyze('http://x/', [_view(leaves=many, header={'el': 'header', 'h': 96})], None, None, None, None, set(), [], opts)
+    check('11 кеглей (> 9) — шкала без ролей; шапка 96 > 80 на десктопе страницы',
+          {'LOOK-TYPE-SCALE', 'LOOK-HEADER'} <= set(ids(F)), ids(F))
+    F = analyze('http://x/', [_view(header={'el': 'header', 'h': 56})], None, None, None, None, set(), [],
+                dict(opts, surface='app', preset='A'))
+    check('кабинет, пресет A: шапка 56 > 48 — примета', 'LOOK-HEADER' in ids(F))
+    leaves = [_leaf('Гарантия 3 года на работы'), _leaf('Ремонт за 3 дня'), _leaf('Более 500 проектов'), _leaf('2'),
+              _leaf('Звоните: +7 (831) 555-12-34')]
+    facts = {'known': number_claims('Гарантия 3 года на работы; телефон +7 (831) 555-12-34'), 'no_source': [], 'rows': 2}
+    F = analyze('http://x/', [_view(leaves=leaves)], None, facts, None, None, set(), [], opts)
+    nf = next((f for f in F if f['id'] == 'F-NUMBERS'), None)
+    check('F-NUMBERS: «3 дня» и «500 проектов» — выдумки, гарантия и телефон — факты, номер шага «2» — не число',
+          nf and sorted(n['raw'] for n in nf['evidence']['numbers']) == ['3', '500'], nf and nf['evidence'])
+    check('находка честности несёт примету invented-numbers', nf and nf['tell'] == 'invented-numbers' and nf['group'] == 'honesty')
+    form = {'el': 'form', 'in_dialog': False, 'text': 'Имя Телефон Нажимая кнопку, вы соглашаетесь с политикой',
+            'submit': {'text': 'Отправить', 'disabled': True},
+            'fields': [_field('Имя', name='name'), _field('Телефон', 'tel', required=True), _field('', 'email', placeholder='Почта'),
+                       _field('Что нужно сделать', required=True, tag='textarea', name='task')]}
+    F = analyze('http://x/', [_view(forms=[form])], None, None, None, None, set(), [], dict(opts, form_sets=['callback']))
+    fb = sorted(f['evidence'].get('forbidden') for f in F if f['id'] == 'FORM-FORBIDDEN')
+    check('запреты форм: согласие кнопкой, неактивная кнопка, обязательный комментарий',
+          fb == ['consent-by-button', 'disabled-submit', 'required-comment'], fb)
+    ff = next((f for f in F if f['id'] == 'FORM-FIELDS'), None)
+    check('поля против набора callback: нет preferred-time, лишние email и task, у почты нет подписи',
+          ff and ff['evidence']['missing'] == ['preferred-time'] and sorted(ff['evidence']['extra']) == ['email', 'task']
+          and ff['evidence']['no_label'], ff and ff['evidence'])
+    good = {'el': 'form', 'in_dialog': False, 'text': 'Телефон Имя', 'submit': {'text': 'Позвать', 'disabled': False},
+            'fields': [_field('Телефон', 'tel', required=True), _field('Имя', name='name'),
+                       _field('Когда удобно принять звонок', name='preferred-time'),
+                       _field('Согласен на обработку персональных данных', 'checkbox')]}
+    F = analyze('http://x/', [_view(forms=[good])], None, None, None, None, set(), [], dict(opts, form_sets=['callback']))
+    check('форма по набору с отдельной неотмеченной галочкой — 0 находок форм', not {'FORM-FIELDS', 'FORM-FORBIDDEN'} & set(ids(F)),
+          [(f['id'], f['message']) for f in F if f['id'].startswith('FORM')])
+    ov = _view(390, 844, scroll_w=412, overflow_only=True)
+    F = analyze('http://x/', [_view(), ov], None, None, None, None, set(), [], opts)
+    check('кадр вылета: только M-OVERFLOW', ids(F, ('critical',)) == ['M-OVERFLOW'], ids(F))
+
+    with tempfile.TemporaryDirectory() as td:
+        cp = os.path.join(td, 'Main.html')
+        open(cp, 'w', encoding='utf-8').write('<!doctype html><head><!-- dc_to_html: статичная копия артборда Main.dc.html; '
+                                              'перевод исходника · рамка 1440×2700 · твики: — --></head>')
+        check('статичная копия — окно своей рамки', (static_frame(cp), static_frame(__file__)) == (1440, None))
+
+    # сводка: примета один раз, домены не складываются
+    F = [{'id': 'F-UNSPLASH', 'tell': 'stock-and-hotlink', 'group': 'honesty', 'severity': 'critical'},
+         {'id': 'F-STOCK', 'tell': 'stock-and-hotlink', 'group': 'honesty', 'severity': 'critical'},
+         {'id': 'K3-BG-WARM', 'tell': 'warm-paper', 'group': 'look', 'severity': 'major'},
+         {'id': 'K3-EYEBROW', 'tell': 'caps-eyebrow', 'group': 'look', 'severity': 'major'},
+         {'id': 'K3-META-DOTS', 'tell': 'meta-dots', 'group': 'look', 'severity': 'minor'},
+         {'id': 'K3-ARROWS', 'tell': 'arrow-in-button', 'group': 'look', 'severity': 'minor'},
+         {'id': 'K3-NUMBERED', 'tell': 'numbered-labels', 'group': 'look', 'severity': 'minor'}]
+    sm = summarize(F, set(), 'page')
+    check('сводка: две проверки стока — одна примета', [t['tell'] for t in sm['tells']].count('stock-and-hotlink') == 1)
+    check('сводка: тёплая бумага — домен page-visual', sm['domains'].get('page-visual', {}).get('tells') == ['warm-paper'], sm['domains'])
+    check('сводка: у доменов свой счёт, общего нет', 'total' not in sm and all('count' in d for d in sm['domains'].values()))
+    chrome = next((c for c in sm['clusters'] if c['id'] == 'template-chrome'), None)
+    check('сводка: кластер шаблонного хрома — 4 члена из 6 с правилом владельца',
+          chrome and len(chrome['members_hit']) == 4 and chrome['members'] == 6 and chrome['rule'], chrome)
+    sa = summarize(F, set(), 'app')
+    check('сводка кабинета: маркеры ui 11/04 домена app-visual', 'ui_markers' in sa['domains'].get('app-visual', {}), sa['domains'])
+    check('подсказка приёмки по группам реестра', sm['acceptance_hint'] == {'look': False, 'honesty': False, 'acceptance': True},
+          sm['acceptance_hint'])
+    miss = sorted({f['id'] for f in F} - set(reg['checks']))
+    check('id проверок сводки есть в реестре примет', not miss, miss)
     print('selftest:', 'OK' if ok else 'FAIL')
     return 0 if ok else 1
 
@@ -1506,31 +2149,34 @@ def cmd_selftest(_a):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest='cmd', required=True)
-    p = sub.add_parser('page', help='приметы K3, выдумки, мобильная версия по отрисованной странице')
+    p = sub.add_parser('page', help='приметы «дефолтного вида», честность, формы, телефон по отрисованной странице')
     p.add_argument('target')
-    p.add_argument('--views', default='1440x900,390x844')
-    p.add_argument('--facts'); p.add_argument('--copy'); p.add_argument('--assets-readme'); p.add_argument('--src')
-    p.add_argument('--allow', default='', help='приметы, заказанные брифом: ' + ','.join(sorted(ALLOW_KEYS)))
-    p.add_argument('--ignore-selector', default='', help='CSS-селектор чужих вставок (бейдж хостинга и т. п.)')
+    p.add_argument('--views', help='окна через запятую (1440x900,390x844); по умолчанию — артборды acceptance-widths.yaml')
+    p.add_argument('--acceptance', action='store_true', help='все ширины приёмки и прогон вылета на overflow_only')
+    p.add_argument('--surface', choices=('page', 'app'), default='page', help='страница сайта или экран приложения')
+    p.add_argument('--preset', choices=('A', 'B', 'C', 'D'), default='A', help='пресет экрана приложения (порог шапки)')
+    p.add_argument('--tokens', help='токены ДС (CSS, DTCG или tokens.json артефакта): первый брейкпоинт')
+    p.add_argument('--facts', help='facts.md входа холста или facts.yaml продукта')
+    p.add_argument('--copy', help='copy.md входа холста или copy deck (YAML, JSON)')
+    p.add_argument('--page', help='id страницы copy deck (с --copy YAML)')
+    p.add_argument('--assets', '--assets-readme', dest='assets', help='assets.md входа холста или YAML плана ассетов')
+    p.add_argument('--forms', action='append', help='id набора lead-forms.yaml или YAML плана страницы; повтором')
+    p.add_argument('--src', help='папка исходников для статического обхода (сток, шрифты)')
+    p.add_argument('--allow', default='', help='приметы с записанным решением: ' + ','.join(sorted(allow_keys())))
+    p.add_argument('--ignore-selector', default='', help='CSS-селектор чужих вставок (виджеты хостинга, чаты)')
     p.add_argument('--block-external', action='store_true'); p.add_argument('--allow-external', action='store_true')
-    p.add_argument('--shots', help='папка: первый экран каждого вьюпорта JPEG q80')
+    p.add_argument('--shots', help='папка: первый экран каждого окна JPEG q80')
     p.add_argument('--json'); p.add_argument('--md'); p.add_argument('--min-free-gb', type=float, default=2.0)
-    w = sub.add_parser('watch', help='сторож потока kimi -p stream-json')
-    w.add_argument('stream')
-    w.add_argument('--running', action='store_true', help='процесс ещё идёт: считать простой по mtime файла')
-    w.add_argument('--idle-warn', type=int, default=600); w.add_argument('--idle-act', type=int, default=1200)
-    w.add_argument('--loop', type=int, default=4); w.add_argument('--churn', type=int, default=8)
-    w.add_argument('--iter', type=int); w.add_argument('--frames', type=int, default=0)
-    w.add_argument('--allowed-packages')
-    w.add_argument('--expect-first', default='Read,Skill,Glob,Grep,ReadMediaFile,TodoList')
-    w.add_argument('--forbid-tools', default=FORBID_TOOLS_DEFAULT)
-    r = sub.add_parser('resize', help='ресайз 1440 → 390 → 1440 без перезагрузки (ACCEPTANCE H5)')
-    r.add_argument('target'); r.add_argument('--desktop', default='1440x900'); r.add_argument('--mobile', default='390x844')
+    r = sub.add_parser('resize', help='ресайз широкий → узкий → широкий без перезагрузки (пункт H5 приёмки)')
+    aw = acceptance_widths()
+    r.add_argument('target')
+    r.add_argument('--desktop', default=f"{aw['artboards'][0]}x{VIEW_H_WIDE}")
+    r.add_argument('--mobile', default=f"{aw['artboards'][-1]}x{VIEW_H_NARROW}")
     r.add_argument('--wait-ms', type=int, default=1000); r.add_argument('--max-diff', type=float, default=0.02)
     r.add_argument('--shots'); r.add_argument('--min-free-gb', type=float, default=2.0)
     sub.add_parser('selftest')
     a = ap.parse_args()
-    return {'page': cmd_page, 'watch': cmd_watch, 'resize': cmd_resize, 'selftest': cmd_selftest}[a.cmd](a)
+    return {'page': cmd_page, 'resize': cmd_resize, 'selftest': cmd_selftest}[a.cmd](a)
 
 
 if __name__ == '__main__':

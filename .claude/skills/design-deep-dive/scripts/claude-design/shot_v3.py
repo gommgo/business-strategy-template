@@ -1,59 +1,44 @@
 #!/usr/bin/env python3
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-# shot_v3.py — копия БЕЗ ПРАВОК КОДА (26.09.2026) скрипта кадров и проверок страницы shot.py v3 от 24.09.2026, md5 оригинала 6a5c3a872785d1aa748b1df76f654dd0.
-# Зачем рядом с 04-claude-code-native/kit/shot.py: kit снимает артборды холста по canvas.json (полный кадр PNG + метки #N, --prev,
-#   --set, serve), а v3 — любую страницу или сборку по URL или папке:
-#   --views  ширины задаются в командной строке (по умолчанию 1440x900,768x1024,390x844); у kit — только из canvas.json;
-#   --routes несколько маршрутов приложения за запуск (кадры с префиксом r<N>-<slug>); у kit нет;
-#   --expect-fonts семейства из ДС → поле fonts_unexpected (отрисован не тот шрифт); у kit есть только fonts_missing;
-#   ещё: кадры по экранам JPEG в бюджете байт и ≤ 2000 px, --selector (кадры секций), --map (карта страницы DPR 0.25), --motion,
-#   --strict (код 4). Проверки страницы те же, что у kit: вылет, шрифты, битые и внешние картинки, alt, невидимый текст, цели
-#   < 24 и < 44 px, h1, lang, [PLACEHOLDER].
-# Что убрать при адаптации:
-#   1. Привязку к чтению картинок другим исполнителем: бюджет --budget 262144 байт и его подсказку с именем переменной окружения,
-#      комментарий к MAX_EDGE, строки докстринга про «папку задачи» и то, кто вызывает скрипт. Бюджет и край кадра — под чтение
-#      картинок Claude или по нужде этапа.
-#   2. При слиянии с kit: перенести --expect-fonts (fonts_unexpected), --routes и --views в kit/shot.py или оставить этот скрипт
-#      для этапа кода (сборка по URL); не держать два расходящихся набора проверок.
-# Где описан: claude-design-research/06-design-process/04-checks.md (§3 B, §4). Зависимости: Python 3.10+, Playwright + Chromium.
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-"""shot.py v3 — «глаза» дизайн-цикла Claude ↔ K3: кадры по экранам + проверки, которых не видно на ужатом кадре.
+"""shot_v3.py — кадры страницы или сборки по экранам и проверки, которых не видно на ужатом кадре (любой URL или папка).
 
-F (волна 2), 2026-09-24; основа — shot.py v2 (B2/04, 2026-09-24), тот — от шаблона B1/04. Кладётся в папку задачи как
-scripts/shot.py; одинаково вызывают K3 (Bash → кадры читает ReadMediaFile / Read) и Claude (приёмка).
+Рядом с kit/shot.py: kit снимает HTML-копии холста по манифесту (полный кадр PNG, метки #N, --prev, --set, serve), а этот
+скрипт — любую страницу или сборку по адресу или папке: --views (окна в командной строке), --routes (несколько маршрутов
+приложения за запуск, префикс r<N>-<slug> в именах кадров), --expect-fonts (семейства ДС → поле fonts_unexpected), кадры
+по экранам JPEG в бюджете байт и не длиннее 2000 px, --selector (кадры секций), --map (карта страницы DPR 0.25),
+--motion, --strict (код 4). Проверки страницы те же, что у kit: вылет, шрифты, битые и внешние картинки, alt, невидимый
+текст, цели < 24 и < 44 px, h1, lang, [PLACEHOLDER].
 
-Кадры: ПО ЭКРАНАМ (не full-page) в JPEG, каждый ≤ --budget байт (262 144 = бюджет ReadMediaFile Kimi Code 2.0.2) и
-≤ 2000 px по длинной стороне; если кадр больше — пересъёмка с качеством ниже (80 → 70 → … → 40). Мобильная эмуляция с
-горизонтальным вылетом растягивает layout viewport (390 → 849 px, опыт B2/04) — остаток страницы снимается по
-координатам документа (mode: clip).
-Нового в v3 относительно v2:
-  * вьюпорты по умолчанию 1440x900,768x1024,390x844 (десктоп, планшет, телефон);
-  * --routes "/,/orders,/settings": несколько экранов приложения за один запуск (префикс r<N>-<slug> в именах кадров);
+Кадры: по экранам (не full-page) в JPEG, каждый ≤ --budget байт и ≤ 2000 px по длинной стороне; если кадр больше —
+пересъёмка с качеством ниже (80 → 70 → … → 40). Мобильная эмуляция с горизонтальным вылетом растягивает окно раскладки
+(390 → 849 px) — остаток страницы снимается по координатам документа (mode: clip).
+  * окна по умолчанию 1440x900,768x1024,390x844 (десктоп, планшет, телефон); ширины приёмки — kb/common/acceptance-widths.yaml;
+  * --routes "/,/orders,/settings": несколько экранов приложения за один запуск;
   * проверки: lang, число h1, внешние (хотлинк) картинки, картинки без alt, невидимый после прокрутки текст
-    (накопленная opacity < 0.1 — «reveal-ловушка»), цели < 24 и < 44 px на тач-вьюпортах, [PLACEHOLDER] на странице,
+    (накопленная opacity < 0.1 — «reveal-ловушка»), цели < 24 и < 44 px на тач-окнах, [PLACEHOLDER] на странице,
     шрифты в работе и реально отрисованные (CDP CSS.getPlatformFontsForNode) → fonts_missing (объявлен, а рисуется
     запасной), --expect-fonts → fonts_unexpected;
   * stdout — краткая сводка (пути кадров и проверки по видам), полный манифест — в <outdir>/shots.json;
-  * --strict: код 4, если какая-либо проверка не пройдена (для скриптовых ворот Claude).
+  * --strict: код 4, если какая-либо проверка не пройдена.
 Использование:
-  python3 shot.py <url|path> <outdir> [--views 1440x900,768x1024,390x844] [--routes /,/x] [--selector "main > section"]
+  python3 shot_v3.py <url|path> <outdir> [--views 1440x900,768x1024,390x844] [--routes /,/x] [--selector "main > section"]
          [--max-elements 8] [--max-screens 12] [--quality 80] [--budget 262144] [--map] [--motion] [--wait-ms 400]
          [--expect-fonts "Golos Text,Unbounded"] [--strict] [--print-manifest]
 Коды выхода: 0 — кадры есть; 2 — страница не открылась; 3 — кадров нет; 4 — --strict и есть непройденные проверки.
 Зависимости: Python 3.10+, playwright (Chromium). Модель не вызывается; сеть — только к цели. Фоновых процессов не
 оставляет: сервер статики — поток этого процесса, браузер закрывается в finally.
+Где описан: claude-design/06-design-process/04-checks.md (§3 B, §4).
 """
 import argparse, functools, http.server, json, os, re, socketserver, sys, threading, time
 from datetime import datetime, timezone
 from urllib.parse import urljoin, urlparse
 
-MAX_EDGE = 2000  # ReadMediaFile по умолчанию уменьшает всё, что длиннее 2000 px
+MAX_EDGE = 2000  # длинная сторона кадра по экранам, px
 GENERIC = {'serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui', 'ui-sans-serif', 'ui-serif',
            'ui-monospace', 'ui-rounded', '-apple-system', 'blinkmacsystemfont', 'emoji', 'math', 'fangsong'}
 
 CHECKS_JS = r"""
 (conf) => {
-  const vw = conf.vw || document.documentElement.clientWidth;   // ширина из заданного вьюпорта (B2/04: innerWidth врёт)
+  const vw = conf.vw || document.documentElement.clientWidth;   // ширина из заданного вьюпорта: innerWidth при вылете растянут
   const touch = conf.touch;
   const sw = Math.max(document.documentElement.scrollWidth, document.body ? document.body.scrollWidth : 0);
   const desc = (el) => el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') +
@@ -229,7 +214,7 @@ def main():
     ap.add_argument('--routes', default='', help='пути через запятую относительно цели: "/,/orders"')
     ap.add_argument('--max-screens', type=int, default=12)
     ap.add_argument('--quality', type=int, default=80)
-    ap.add_argument('--budget', type=int, default=262144, help='байт на кадр (KIMI_IMAGE_READ_BYTE_BUDGET)')
+    ap.add_argument('--budget', type=int, default=262144, help='байт на кадр: больше — пересъёмка с качеством ниже')
     ap.add_argument('--selector', default=None, help='CSS-селектор секций для отдельных кадров')
     ap.add_argument('--max-elements', type=int, default=8)
     ap.add_argument('--map', action='store_true', help='обзорная карта full-page при DPR 0.25 (для Claude)')
@@ -302,7 +287,7 @@ def main():
                             page.evaluate(f'window.scrollTo(0, {y})'); page.wait_for_timeout(a.wait_ms // 2)
                             top = page.evaluate('window.visualViewport ? window.visualViewport.pageTop : window.scrollY')
                             if top + h < min(total, y + h) - 1:
-                                # прокрутка упёрлась раньше конца (растянутый layout viewport, B2/04) — кадр по документу
+                                # прокрутка упёрлась раньше конца (растянутый layout viewport) — кадр по документу
                                 c = {'x': 0, 'y': y, 'width': w, 'height': min(h, total - y)}
                                 shoot = lambda qq, c=c: page.screenshot(type='jpeg', quality=qq, full_page=True, clip=c)
                                 mode = 'clip'; clip_frames += 1
@@ -326,7 +311,7 @@ def main():
                                 el = els.nth(k)
                                 el.scroll_into_view_if_needed(); page.wait_for_timeout(a.wait_ms // 2)
                                 # координаты документа через getBoundingClientRect()+scrollY: bounding_box() считает от
-                                # visual viewport и при мобильной эмуляции с вылетом даёт неверный кадр (B2/04)
+                                # visual viewport и при мобильной эмуляции с вылетом даёт неверный кадр
                                 bb = el.evaluate('e => { const r = e.getBoundingClientRect(); '
                                                  'return {y: r.top + window.scrollY, height: r.height}; }')
                                 if not bb or bb['height'] < 2:

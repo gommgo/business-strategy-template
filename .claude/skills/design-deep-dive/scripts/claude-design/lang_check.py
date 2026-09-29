@@ -1,27 +1,16 @@
 #!/usr/bin/env python3
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-# lang_check.py — копия БЕЗ ПРАВОК КОДА (26.09.2026) проверки языка готовой вёрстки, версия с патчем v1 (md5 53aae9fcd072e971fbd8a1110e7e06ea;
-# исходник без патча — md5 007b868f6fe74729a1b43ac7273b0474).
-# Назначение: русскоязычная страница, сборка или HTML-копии артбордов без модели и сети: иероглифы и кана в тексте и коде;
-#   <html lang> не ru; латинская «рыба» (lorem, placeholder, TODO, «Your …»; маркер [PLACEHOLDER: …] рыбой не считается);
-#   строки текстов (copy deck), которых нет в видимом тексте; прямые кавычки в русском тексте; число + единица без
-#   неразрывного пробела. Запуск: python3 lang_check.py <папка|html> [--copy <файл текстов>] [--json]; код 1 — есть находки.
-# Что убрать при адаптации:
-#   1. Разбор файла текстов заточен под markdown-формат старого пакета (шапка «# COPY…», «Voice:», «Keys in square brackets…»,
-#      строки «[ключ]: текст»): для copy deck text — читать её формат (YAML) или выгрузку в текст.
-#   2. Ссылки докстринга на опыты и патч старой базы (Z/04, «P-патч»).
-#   3. Язык задан жёстко (ru, ru-ru) — вынести в параметр, если понадобятся другие локали.
-#   4. Проверка иероглифов появилась против подмешивания CJK другой моделью; для Claude — дешёвая страховка, оставить.
-# Где описан: claude-design-research/06-design-process/04-checks.md (§3 D, честность текста). Только стандартная библиотека.
-# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-"""Z/04 lang_check: проверка языка готовой вёрстки русскоязычного сайта (без модели, без сети).
-Ищет: иероглифы и кану в коде/тексте, `lang` у <html>, латинские «рыбы» (lorem, placeholder, TODO, Your …), строки copy.md,
-которых нет в видимом тексте, прямые кавычки "…" в русском тексте, число+единица без неразрывного пробела.
+"""lang_check.py — проверка языка готовой вёрстки русскоязычной страницы: HTML-копии артбордов, сборка (без модели и сети).
+
+Ищет: иероглифы и кану в коде и тексте (страховка от подмешанных чужих систем письма); `lang` у <html> не ru; латинскую
+«рыбу» (lorem, placeholder, TODO, «Your …»; маркер [PLACEHOLDER: …] рыбой не считается, подпись «placeholder» пустого
+слота — считается); строки copy.md входа холста, которых нет в видимом тексте; прямые кавычки "…" в русском тексте; число
+и единицу без неразрывного пробела.
 Запуск:  python3 lang_check.py <папка_сборки_или_html> [--copy copy.md] [--json]
-Код возврата: 0 — чисто, 1 — есть находки. Только стандартная библиотека Python 3.
-P-патч v1 (kimi-research P, 2026-09-24; оригинал — 99-raw/experiments/Z/04-lang-check/lang_check.py): понимает формат
-copy.md сборщика F — строки «[ключ]: текст» сверяются по тексту после двоеточия, шапка «# COPY…», «Voice:», «Keys in square
-brackets…» пропускается; маркер [PLACEHOLDER: …] не считается латинской «рыбой» (подписи «placeholder» пустых слотов — считаются)."""
+copy.md — синтаксис выгрузки текстов (`copydeck.py export`): строки слотов `[<slot_id>] <статус>: текст` сверяются по
+тексту после двоеточия; заголовки, комментарии и строки секций пропускаются.
+Код возврата: 0 — чисто, 1 — есть находки, 2 — нет аргумента. Только стандартная библиотека Python 3.
+Где описан: claude-design/06-design-process/04-checks.md (§3 D, честность текста).
+"""
 import html, json, os, re, sys
 from html.parser import HTMLParser
 
@@ -69,7 +58,7 @@ def main():
             if (p.html_lang or "").lower() not in ("ru", "ru-ru"):
                 out["html_lang"].append(f"{f}: <html lang={p.html_lang!r}>")
             vis = norm(" ".join(p.parts)); visible_all.append(vis)
-            vis_nomarker = re.sub(r"\[PLACEHOLDER[^\]]*\]", " ", vis, flags=re.I)  # P-патч: маркер пропуска F — не «рыба»
+            vis_nomarker = re.sub(r"\[PLACEHOLDER[^\]]*\]", " ", vis, flags=re.I)  # маркер пропуска факта — не «рыба»
             for m in LATIN_FILLER.finditer(vis_nomarker): out["latin_filler"].append(f"{f}: …{vis_nomarker[max(0,m.start()-30):m.end()+30]}…")
             for m in STRAIGHT_QUOTES_RU.finditer(vis): out["straight_quotes"].append(f"{f}: {m.group(0)[:60]}")
             for m in NUM_UNIT_NO_NBSP.finditer(" ".join(p.parts)): out["num_unit_space"].append(f"{f}: «{m.group(0)}» — нужен неразрывный пробел")
@@ -77,9 +66,10 @@ def main():
         joined = " ".join(visible_all)
         for line in open(copy, encoding="utf-8"):
             raw = line.strip()
-            if raw.startswith(("# COPY", "Voice:", "Keys in square brackets")): continue  # P-патч: шапка copy.md F
-            raw = re.sub(r"^\[[^\]]+\]:\s*", "", raw)  # P-патч: «[ключ]: текст» → текст
-            s = norm(re.sub(r"^\s*[#>*-]+\s*", "", raw))
+            if raw.startswith(("#", "<!--")): continue  # заголовок, комментарий, строка секции «## <section_id>»
+            m = re.match(r"^\[[^\]]*\](?:\s+[a-z]+)?:\s?(.*)$", raw)  # «[slot_id] статус: текст» → текст
+            if m: raw = m.group(1)
+            s = norm(re.sub(r"^\s*[>*-]+\s*", "", raw))
             if len(s) >= 12 and s not in joined:
                 out["missing_copy"].append(s[:100])
     n = sum(len(v) for v in out.values())
