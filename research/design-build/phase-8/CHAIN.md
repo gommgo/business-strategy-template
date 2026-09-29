@@ -81,3 +81,22 @@
 - Не прочитано: ux 12/02, `effects.yaml`, ui 09/04, creative 09/03 — только нужные места.
 - Решения оркестратора (строка DECISIONS «Ф8, зона 2 принята»): отступления приняты; строки `ui_audit:*` (9) внесены в
   `tells.yaml#checks`; строки смоука C2 — в `smoke/ui.tsv`, `smoke/ux.tsv`; профиль site пересобран отдельным коммитом.
+
+## 03. C4 — creative: данные и валидаторы подачи (29.09, ≈ 58 мин, в уведомлении — 918 тыс. токенов)
+- Сделано: правлены `ambition-levels.yaml` (+176/−65), схемы `art-direction.v1` (+364/−106), `treatment` (+51/−40),
+  `motion-spec` (+51/−13), `marketing-tokens.json`, `stack.yaml`, `block-treatments.yaml`, рубрика, `effects.yaml`
+  (строка), 6 примеров арт-дирекции; утилиты `spec_check.py` (+485/−68, команды `canvas-map`, `levels --check`),
+  `ad_check.py`, `validate_stack.py`, `registry_check.py` (переписаны), `marketing_audit.py` (+332/−232), README папки
+  (переписан: журнал прежних агентов снят, описаны все утилиты папки), `smoke/creative.tsv`. 40 действий — отчёт C4 §2.
+- Тесты: смоук creative PASS 22, FAIL 0; site, ui, claude-design — 0 FAIL; самопроверки 24 + 35 + 11 + 11 + 45 OK;
+  `levels --check`, `canvas-map` — 0; примеры — 0 ошибок; `marketing_audit` в браузере на примере рецепта L0.
+- Отступления: `budgets.page` и `fonts_kb` — зеркало до переключения `threshold_ref` у C14; L2 — кадр в покое 30 / 60,
+  «мир» при прокрутке 50 / 100 (по решению узла GT-08); потолки петель сняты из схемы `treatment`; `source` референса —
+  три значения; шкала K2 из токенов; MKT-C2 — находка; число COPY-C-18 из `pass_when` до поля C15.
+- Стыки: форма `x-canvas-map` и id документов (C7, C8, C11); `$defs/reference` (C7); пути ключей уровней (C7, C14,
+  C11); `per_sections` (C15); `ad_check --json` (C13) — отчёт C4 §4.
+- Открыто: зеркало `budgets.page` — C14; расхождения реестра клише (9) — Ф10; порог wasm — пилот Ф9; v0-схемы creative и
+  тексты базы о них — Ф10; `canvas:frame` в примере blender `zveno` не проходит шаблон свойства — владелец примера, Ф10.
+- Не прочитано: `effect-gates.yaml`, `motion_check.py`, `ui_audit.py` — только места стыков; creative 01/03 — частично.
+- Решения оркестратора (строка DECISIONS «Ф8, зона 4 принята»): отступления приняты; строки `marketing_audit:*` (3)
+  внесены в `tells.yaml#checks`; `ambition-levels.yaml` вписан в файлы C14 для снятия зеркала вместе с `threshold_ref`.
