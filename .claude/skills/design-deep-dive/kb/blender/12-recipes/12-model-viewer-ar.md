@@ -144,7 +144,7 @@ Blender 0,3 с (копия AR-GLB, `ar_lint`, импорт, `wm.usd_export` 65 �
 
 1. **Клип в AR** (открытие крышки) — AR-GLB с одной анимацией (пресет `anim_trs` без сжатия, рецепт 05); в USDZ — `export_animation=True`
    [не проверено в Quick Look].
-2. **Сжатая витрина + AR** — свой three (рецепт 01, 12,4 КБ) + кнопка: Android — intent `scene-viewer/1.2` с `file=<AR-GLB>`,
+2. **Сжатая витрина + AR** — свой three (рецепт 01, 12,3 КБ) + кнопка: Android — intent `scene-viewer/1.2` с `file=<AR-GLB>`,
    iOS — `<a rel="ar" href="case.usdz"><img …></a>` (F1 `09/06 §2.3`).
 3. **Текстурный товар** — текстуры AR-GLB JPEG/PNG ≤ 2048²; KTX2/WebP — только в веб-версии.
 4. **USDZ без Blender** — three `USDZExporter` из того же GLB (как делает model-viewer, `maxTextureSize` 1024) (F1).

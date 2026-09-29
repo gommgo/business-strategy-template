@@ -29,7 +29,7 @@ Iris Xe) · сквозной прогон: [проверено: 99-raw/experimen
 ## 2. Паспорт
 
 Паспорт стиля — по умолчанию из `00-how-to-use.md §3` (Neutral, E_key 2–3 Вт/м², 85–100 мм, фон страницы). Паспорт ассета —
-словарь `P` в коде: реальные размеры кейса (60,6 × 21,7 × 45,2 мм), шов крышки на высоте 33,5 мм с зазором 0,3 мм, радиусы
+словарь `P` в коде: размеры условного кейса (64 × 24 × 50 мм), шов крышки на высоте 37 мм с зазором 0,3 мм, радиусы
 углов и кромки, цвета hex, кадр (az 28°, el 16°, 90 мм, поле 1,25), бюджет (≤ 20 тыс. треуг., ≤ 300 КБ).
 
 ## 3. Код: build(P) → проверки → рендер → экспорт
@@ -41,7 +41,7 @@ sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-r
 import rk
 D, bpyx = rk.D, rk.bpyx
 SLUG = "01-hero-product"
-P = dict(W=0.0606, D=0.0217, H=0.0452, corner=0.0105, edge=0.0085, power=2.6, seam_z=0.0335, gap=0.0003,
+P = dict(W=0.064, D=0.024, H=0.050, corner=0.0115, edge=0.0095, power=2.6, seam_z=0.037, gap=0.0003,
          lid_open_deg=0, body="#F4F3F0", led="#39D98A", bg="#ECEEF2",
          cam=dict(az=28, el=16, lens=90, margin=1.25, res=(1024, 1024)), max_tris=20000)
 
@@ -102,17 +102,17 @@ rk.save(SLUG, passport=P)
 
 ## 4. Числа прогона
 
-`python3 ../../scripts/blender/run_recipes.py 12-recipes/01-hero-product.md` — 4,3 с на весь рецепт (сборка,
-утверждения, рендер EEVEE 48 спп 1024² — 3,4 с, экспорт, meshopt), итераций правки кода — 1 (аудит был поставлен до камеры).
+`python3 ../../scripts/blender/run_recipes.py 12-recipes/01-hero-product.md` — 3,8 с на весь рецепт (сборка,
+утверждения, рендер EEVEE 48 спп 1024² — 3,2 с, экспорт, meshopt), итераций правки кода — 1 (аудит был поставлен до камеры).
 
 | величина | значение |
 |---|---|
 | треугольники / узлы / материалы | 1 976 / 3 / 2 (`KHR_materials_clearcoat`, `KHR_materials_emissive_strength`) |
-| GLB после экспорта → после `optimize` | 53,4 → **12,4 КБ** (5,3 КБ brotli в сети); валидатор 0 ошибок, 0 предупреждений |
-| утверждения C1/16 | габарит 60,6 × 22,3 × 45,2 мм (±5 %), зазор LED ↔ корпус 0 мм — ok |
-| аудит C1/10 | кадр 53 % площади; флаги `ngons` (крышки `rounded_slab` — n-гоны, в glTF корректны, D1 `05/05 §1`), `raw_sharp_edges` (шов — намеренно острый), `interpenetration` LED ↔ корпус (врастание детали на 30–40 % — правило D1) |
+| GLB после экспорта → после `optimize` | 53,4 → **12,3 КБ** (5,5 КБ brotli в сети); валидатор 0 ошибок, 0 предупреждений |
+| утверждения C1/16 | габарит 64,0 × 24,6 × 50,0 мм (±5 %), зазор LED ↔ корпус 0 мм — ok |
+| аудит C1/10 | кадр 55 % площади; флаги `ngons` (крышки `rounded_slab` — n-гоны, в glTF корректны, D1 `05/05 §1`), `raw_sharp_edges` (шов — намеренно острый), `interpenetration` LED ↔ корпус (врастание детали на 30–40 % — правило D1) |
 | three r186 (`web_view.py`, Neutral) | загрузка 9 мс, 3 меша, `MeshPhysicalMaterial` (clearcoat) + `MeshStandardMaterial`, 0 ошибок консоли |
-| постер со страницы (`make_poster.py`) | AVIF q60 **6,5 КБ**, WebP q85 8,2 КБ (1024² с альфой) |
+| постер со страницы (`make_poster.py`) | AVIF q60 **8,0 КБ**, WebP q85 7,9 КБ (1024² с альфой) |
 
 Файлы: `examples/01-hero-product/` — `build.py` (блок выше), `case.glb`, `case_raw.glb`, `poster_blender.png` (рендер Blender для
 просмотра), `numbers.json`, `web/case/web_sheet.png` (4 ракурса в three), страница `index.html` + `dist/` + `poster.*`.

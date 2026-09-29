@@ -7,7 +7,7 @@ import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__fil
 import rk
 D, bpyx = rk.D, rk.bpyx
 SLUG = "01-hero-product"
-P = dict(W=0.0606, D=0.0217, H=0.0452, corner=0.0105, edge=0.0085, power=2.6, seam_z=0.0335, gap=0.0003,
+P = dict(W=0.064, D=0.024, H=0.050, corner=0.0115, edge=0.0095, power=2.6, seam_z=0.037, gap=0.0003,
          lid_open_deg=0, body="#F4F3F0", led="#39D98A", bg="#ECEEF2",
          cam=dict(az=28, el=16, lens=90, margin=1.25, res=(1024, 1024)), max_tris=20000)
 
