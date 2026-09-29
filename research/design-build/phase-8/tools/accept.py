@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Приёмка зоны Ф8 (оркестратор, phase-8/PLAN.md §5): механические пункты одним прогоном.
+"""Приёмка зоны Ф8 и ДФ9 (оркестратор, phase-8/PLAN.md §5): механические пункты одним прогоном.
+Зоны C<N> — маски ZONE_GLOBS ниже; зоны разгрузки D<N> — строки «Маски файлов» phase-9/DF9-PLAN.md.
 
   python3 research/design-build/phase-8/tools/accept.py C1 [C2 …] [--smoke scripts/lib,scripts/tests] [--base REF]
 
@@ -101,10 +102,12 @@ ZONE_GLOBS = {
             ".claude/skills/mobile-audit/references/rules.md", "docs/projects/_template/*", "docs/README.md",
             "docs/getting-started.md"],
 }
-ALWAYS = ["research/design-build/phase-8/reports/*"]
+ALWAYS = ["research/design-build/phase-8/reports/*", "research/design-build/phase-9/reports/*"]
 IGNORE = ["research/design-build/phase-4/inputs/in-drafts/*", "research/design-build/phase-8/briefs/*",
           "research/design-build/phase-8/tools/*", "research/design-build/phase-8/check/*",
           "research/design-build/phase-8/CHAIN.md", "research/design-build/STATE.md", "research/design-build/DECISIONS.md",
+          "research/design-build/phase-9/briefs/*", "research/design-build/phase-9/tools/*",
+          "research/design-build/phase-9/CHAIN.md", "research/design-build/phase-9/DF9-*",
           "*/__pycache__/*", "*.pyc"]
 
 TRACE_PATTERNS = [
@@ -114,6 +117,13 @@ TRACE_PATTERNS = [
     ("Ф-номер", re.compile(r"(?<![\w-])Ф\d{1,2}(?![\w-])")),
     ("дата", re.compile(r"\b20\d\d-\d\d-\d\d\b|\b\d\d\.\d\d\.20\d\d\b")),
 ]
+
+
+def df9_masks():
+    """Маски зон разгрузки D<N> — строки «Маски файлов» разделов phase-9/DF9-PLAN.md (разбор — phase-9/tools/df9_check.py)."""
+    sys.path.insert(0, str(ROOT / "research/design-build/phase-9/tools"))
+    import df9_check
+    return df9_check.plan_masks()[0]
 
 
 def git(*args):
@@ -215,6 +225,8 @@ def main():
     a = ap.parse_args()
     globs = ALWAYS[:]
     for z in a.zones:
+        if z not in ZONE_GLOBS and re.fullmatch(r"D\d+[a-z]?", z):
+            ZONE_GLOBS.update(df9_masks())
         if z not in ZONE_GLOBS:
             sys.exit(f"нет масок зоны {z}")
         globs += ZONE_GLOBS[z]
