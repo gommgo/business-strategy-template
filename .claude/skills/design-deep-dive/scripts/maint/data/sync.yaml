@@ -25,10 +25,6 @@ generators:
     what: сводный чек-лист сайта из site 09/02
     derived: kb/site/09-ai-generation-evaluation/site-checklist.yaml
     run: scripts/site/checklist_export.py --check
-    xfail: >-
-      генератор пишет шапку «Сгенерировано 99-raw/tools/checklist_export.py» и помечает «?» пути источников, которых
-      нет в скилле (99-raw/experiments, 99-raw/notes, соседняя база вне скилла), а производный YAML собран с путём
-      генератора в скилле и без пометок; правка генератора и пересборка YAML — владелец site
   - id: site-crosswalk
     what: таблица соответствия словарей против словаря site
     derived: kb/site/02-site-types/crosswalk.tsv

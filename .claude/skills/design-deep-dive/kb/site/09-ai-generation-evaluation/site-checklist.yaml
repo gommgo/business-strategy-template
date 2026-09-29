@@ -1,8 +1,8 @@
 # Машиночитаемая версия 09-ai-generation-evaluation/02-site-checklist.md (сводный чек-лист сайта, агент K).
-# Сгенерировано ../../scripts/site/checklist_export.py — правки вносить в Markdown и перегенерировать.
+# Сгенерировано scripts/site/checklist_export.py — правки вносить в Markdown и перегенерировать.
 version: "1.0"
-generated_at: "2026-09-25 00:56"
-checked: "2026-09-25"
+generated_at: "2026-09-29 13:27"
+checked: "2026-09-29"
 source_md: "09-ai-generation-evaluation/02-site-checklist.md"
 source_md_meta: "Свод правил базы в форме «да / нет» для проверки плана, собранной страницы и сайта: **248 пунктов в 15 блоках** плюс каталог"
 items_count: 248
@@ -185,7 +185,7 @@ items:
     check_method_class: [script]
     check_method_main: script
     auto_gate: true
-    source_file: ["04-blocks/03-slots-and-page-plan.md", "99-raw/experiments/E/01-validate/validate.py"]
+    source_file: ["04-blocks/03-slots-and-page-plan.md", "99-raw/experiments/E/01-validate/validate.py?"]
     source_section: ""
     source_raw: "`../04-blocks/03-slots-and-page-plan.md`; `../99-raw/experiments/E/01-validate/validate.py`"
     evidence_level: []
@@ -406,7 +406,7 @@ items:
     check_method_class: [script]
     check_method_main: script
     auto_gate: true
-    source_file: ["09-ai-generation-evaluation/01-generators-and-ai-landing-markers.md", "../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md"]
+    source_file: ["09-ai-generation-evaluation/01-generators-and-ai-landing-markers.md", "../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md?"]
     source_section: "§6"
     source_raw: "`01-generators-and-ai-landing-markers.md` §6; `../../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md`"
     evidence_level: []
@@ -712,7 +712,7 @@ items:
     check_method_class: [script, dom]
     check_method_main: script
     auto_gate: true
-    source_file: ["04-blocks/01-blocks-catalog.md", "99-raw/experiments/E/01-validate/validate.py"]
+    source_file: ["04-blocks/01-blocks-catalog.md", "99-raw/experiments/E/01-validate/validate.py?"]
     source_section: "§1.1"
     source_raw: "`../04-blocks/01-blocks-catalog.md` §1.1; `../99-raw/experiments/E/01-validate/validate.py`"
     evidence_level: []
@@ -1091,7 +1091,7 @@ items:
     check_method_class: [scenario]
     check_method_main: scenario
     auto_gate: true
-    source_file: ["99-raw/notes/wave2/H-notes.md"]
+    source_file: ["99-raw/notes/wave2/H-notes.md?"]
     source_section: "«## Для K» (прозрачные слои над CTA); AIL-47"
     source_raw: "`../99-raw/notes/wave2/H-notes.md` «## Для K» (прозрачные слои над CTA); AIL-47"
     evidence_level: []
@@ -1239,7 +1239,7 @@ items:
     check_method_class: [scenario]
     check_method_main: scenario
     auto_gate: true
-    source_file: ["05-conversion-funnels/lead-forms.yaml", "99-raw/experiments/F/01-quiz-forms-ru/deep_check.py"]
+    source_file: ["05-conversion-funnels/lead-forms.yaml", "99-raw/experiments/F/01-quiz-forms-ru/deep_check.py?"]
     source_section: "AIL-13; DEF-21"
     source_raw: "`../05-conversion-funnels/lead-forms.yaml` `rolling-deadline`; `../99-raw/experiments/F/01-quiz-forms-ru/deep_check.py` `[проверено: 2 из 5 квизов]`; AIL-13; DEF-21"
     evidence_level: ["проверено"]
@@ -2254,7 +2254,7 @@ items:
     check_method_class: [dom, scenario]
     check_method_main: dom
     auto_gate: true
-    source_file: ["99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md"]
+    source_file: ["99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md?"]
     source_section: "SG-SEO-03; п.2 ; SITE-BLK-03"
     source_raw: "SG-SEO-03; `../99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md` п.2 `[данные: creative C — H1 ≠ дисплейному заголовку у 18 из 49: H1 нет у 11, меньше 24 px у 7]`; SITE-BLK-03"
     evidence_level: ["данные"]
@@ -2447,7 +2447,7 @@ items:
     check_method_class: [scenario]
     check_method_main: scenario
     auto_gate: true
-    source_file: ["../creative-research/99-raw/experiments/E/02-scroll-scene/README.md", "99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md", "99-raw/experiments/K/03-gates-v1/README.md"]
+    source_file: ["../creative-research/99-raw/experiments/E/02-scroll-scene/README.md?", "99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md?", "99-raw/experiments/K/03-gates-v1/README.md"]
     source_section: "SG-PERF-03; ; п.2"
     source_raw: "SG-PERF-03; `../../creative-research/99-raw/experiments/E/02-scroll-scene/README.md` `[проверено: creative E/02]`; `../99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md` п.2; `../99-raw/experiments/K/03-gates-v1/README.md` `[проверено: K/03 — сумма сдвигов 0,42 против 0,15 окна сессии]`"
     evidence_level: ["проверено"]
@@ -2477,7 +2477,7 @@ items:
     check_method_class: [scenario, dom]
     check_method_main: scenario
     auto_gate: true
-    source_file: ["04-blocks/blocks.yaml", "../creative-research/99-raw/experiments/E/01-lcp-reveal/README.md", "99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md"]
+    source_file: ["04-blocks/blocks.yaml", "../creative-research/99-raw/experiments/E/01-lcp-reveal/README.md?", "99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md?"]
     source_section: "SG-PERF-06; ; CRV-AL-09; DEF-31; ; п.1"
     source_raw: "SG-PERF-06; `../04-blocks/blocks.yaml` `conventions.lcp-eager`; CRV-AL-09; DEF-31; `../../creative-research/99-raw/experiments/E/01-lcp-reveal/README.md` `[проверено: creative E/01, Chromium 153]`; `../99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md` п.1"
     evidence_level: ["проверено"]
@@ -2597,7 +2597,7 @@ items:
     check_method_class: [scenario]
     check_method_main: scenario
     auto_gate: true
-    source_file: ["07-seo-geo-performance-analytics/budgets.yaml", "99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md"]
+    source_file: ["07-seo-geo-performance-analytics/budgets.yaml", "99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md?"]
     source_section: "SG-WEIGHT-09, SG-PERF-16; CRV-AL-01, CRV-AL-06; ; п.3, п.5"
     source_raw: "SG-WEIGHT-09, SG-PERF-16; CRV-AL-01, CRV-AL-06; `../07-seo-geo-performance-analytics/budgets.yaml` `layers.first_screen_kb`; `../99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md` п.3, п.5 `[данные: creative C — > 5 МБ видео до прокрутки у 15 из 49, постер у 1 из 23 автовидео]`"
     evidence_level: ["данные"]
@@ -2658,7 +2658,7 @@ items:
     check_method_class: [scenario]
     check_method_main: scenario
     auto_gate: true
-    source_file: ["08-legal-trust-a11y/03-a11y-marketing-pages.md", "../creative/05-motion/01-motion-principles-and-access.md", "99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md"]
+    source_file: ["08-legal-trust-a11y/03-a11y-marketing-pages.md", "../creative/05-motion/01-motion-principles-and-access.md", "99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md?"]
     source_section: "§2.1 ; §3.2; SG-A11Y-03; CRV-AL-02; п.5 ; DEF-34"
     source_raw: "`../08-legal-trust-a11y/03-a11y-marketing-pages.md` §2.1 `[стандарт: WCAG 2.2.2]`; `../../creative/05-motion/01-motion-principles-and-access.md` §3.2; SG-A11Y-03; CRV-AL-02; `../99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md` п.5 `[данные: creative C — пауза у непрерывного движения у 1 из 20 эффектных страниц]`; DEF-34"
     evidence_level: ["данные", "стандарт"]
@@ -2688,7 +2688,7 @@ items:
     check_method_class: [scenario]
     check_method_main: scenario
     auto_gate: true
-    source_file: ["../creative/05-motion/01-motion-principles-and-access.md", "99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md", "99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md"]
+    source_file: ["../creative/05-motion/01-motion-principles-and-access.md", "99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md?", "99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md?"]
     source_section: "SG-A11Y-07; CRV-AL-01; §4.5; п.3, п.17; п.5"
     source_raw: "SG-A11Y-07; CRV-AL-01; `../../creative/05-motion/01-motion-principles-and-access.md` §4.5; `../99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md` п.3, п.17; `../99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md` п.5 `[данные: creative C — reduce полностью у 4 из 21, WebGL под reduce рисует у 11 из 12]`"
     evidence_level: ["данные"]
@@ -2890,7 +2890,7 @@ items:
     check_method_class: [scenario]
     check_method_main: scenario
     auto_gate: true
-    source_file: ["99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md"]
+    source_file: ["99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md?"]
     source_section: "п.1 ; CRV-AL-11; SITE-STR-17"
     source_raw: "`../99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md` п.1 `[данные: creative C — 3 из 23 наградных страниц]`; CRV-AL-11; SITE-STR-17"
     evidence_level: ["данные"]
@@ -2905,7 +2905,7 @@ items:
     check_method_class: [dom]
     check_method_main: dom
     auto_gate: true
-    source_file: ["99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md"]
+    source_file: ["99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md?"]
     source_section: "п.9 ; SG-A11Y-08"
     source_raw: "`../99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md` п.9 `[стандарт: WCAG 1.4.4]` `[данные: creative D — 40→160 px даёт рост 1,25–1,78 вместо 2]`; SG-A11Y-08"
     evidence_level: ["данные", "стандарт"]
@@ -3306,7 +3306,7 @@ items:
     check_method_class: [scenario]
     check_method_main: scenario
     auto_gate: true
-    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md?"]
     source_section: "§2 B; UX-MOB-01 ; DEF-42"
     source_raw: "`../../kimi-research/08-director-loop-qa/02-checks-k3.md` §2 B; UX-MOB-01 `[проверено: M — 4 из 51]`; DEF-42"
     evidence_level: ["проверено"]
@@ -3321,7 +3321,7 @@ items:
     check_method_class: [scenario]
     check_method_main: scenario
     auto_gate: true
-    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md?"]
     source_section: "§2 B (M-NAV); SITE-NAV-06, SITE-NAV-07"
     source_raw: "`../../kimi-research/08-director-loop-qa/02-checks-k3.md` §2 B (M-NAV); SITE-NAV-06, SITE-NAV-07"
     evidence_level: []
@@ -3336,7 +3336,7 @@ items:
     check_method_class: [scenario]
     check_method_main: scenario
     auto_gate: true
-    source_file: ["../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md"]
+    source_file: ["../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md?"]
     source_section: "D2, D3"
     source_raw: "`../../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md` D2, D3"
     evidence_level: []
@@ -3437,7 +3437,7 @@ items:
     check_method_class: [scenario]
     check_method_main: scenario
     auto_gate: true
-    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md?"]
     source_section: "§2 B (H5)"
     source_raw: "`../../kimi-research/08-director-loop-qa/02-checks-k3.md` §2 B (H5)"
     evidence_level: []
@@ -3493,7 +3493,7 @@ items:
     check_method_class: [scenario, human]
     check_method_main: scenario
     auto_gate: true
-    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md?"]
     source_section: "§1.4; §2 B"
     source_raw: "§1.4; `../../kimi-research/08-director-loop-qa/02-checks-k3.md` §2 B"
     evidence_level: []
@@ -3507,7 +3507,7 @@ items:
     check_method_class: [dom, script]
     check_method_main: dom
     auto_gate: true
-    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md?"]
     source_section: "COPY-C-04; §2 D (F-FILLER); AIL-09, AIL-44; DEF-48"
     source_raw: "COPY-C-04; `../../kimi-research/08-director-loop-qa/02-checks-k3.md` §2 D (F-FILLER); AIL-09, AIL-44; DEF-48"
     evidence_level: []
@@ -3537,7 +3537,7 @@ items:
     check_method_class: [scenario]
     check_method_main: scenario
     auto_gate: true
-    source_file: ["../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md"]
+    source_file: ["../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md?"]
     source_section: "SG-CONTENT-04; G1"
     source_raw: "SG-CONTENT-04; `../../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md` G1"
     evidence_level: []
@@ -3552,7 +3552,7 @@ items:
     check_method_class: [human]
     check_method_main: human
     auto_gate: false
-    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md?"]
     source_section: "§1; DEF-45"
     source_raw: "`../../kimi-research/08-director-loop-qa/02-checks-k3.md` §1; DEF-45"
     evidence_level: []
@@ -3567,7 +3567,7 @@ items:
     check_method_class: [scenario]
     check_method_main: scenario
     auto_gate: true
-    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md?"]
     source_section: "§8; DEF-46"
     source_raw: "`../../kimi-research/08-director-loop-qa/02-checks-k3.md` §8; DEF-46"
     evidence_level: []
@@ -3640,7 +3640,7 @@ items:
     check_method_class: [human]
     check_method_main: human
     auto_gate: false
-    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md"]
+    source_file: ["../kimi-research/08-director-loop-qa/02-checks-k3.md?"]
     source_section: "§7"
     source_raw: "`../../kimi-research/08-director-loop-qa/02-checks-k3.md` §7"
     evidence_level: []

@@ -2,7 +2,7 @@ path	kind	smoke	xfail
 scripts/site/README.md	data	data	
 scripts/site/ab_plan.py	utility	help; run: --selftest	
 scripts/site/build_profile.py	step	help; run: --check; run: --selftest	
-scripts/site/checklist_export.py	utility	help	
+scripts/site/checklist_export.py	utility	help; run: --check	
 scripts/site/geo_probe.py	utility	help; run: --selftest	
 scripts/site/ia_probe.py	utility	help; run: --selftest	
 scripts/site/page_anatomy.py	utility	help; run: --selftest	

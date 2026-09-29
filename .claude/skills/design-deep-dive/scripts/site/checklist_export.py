@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
-"""checklist_export.py — сводный чек-лист сайта из Markdown в YAML (агент K, волна 3 site-research, 2026-09-24).
+"""checklist_export.py — сводный чек-лист сайта из Markdown в YAML.
 
 Читает строки таблиц `09-ai-generation-evaluation/02-site-checklist.md`:
   | SITE-<БЛОК>-<NN> | проверка | B|S|D | DOM, SCR, … | источник |      — пункты чек-листа
   | DEF-<NN> | дефект | step:… | ловят | маркер |                         — каталог дефектов для процедуры J
 и пишет `09-ai-generation-evaluation/site-checklist.yaml`. Правки — только в Markdown; YAML — производный артефакт
 (PLAN.md: «YAML, выводимый из Markdown, генерируется скриптом и руками не правится»). Образец —
-`../ux-research/99-raw/tools/checklist_export.py` (формат ux `12-evaluation-checklists/master-checklist.yaml`).
+`scripts/ux/checklist_export.py` (формат ux `12-evaluation-checklists/master-checklist.yaml`). Источник, которого нет в
+скилле, остаётся в `source_file` с пометкой «?».
 
 Запуск из любого места (пути считаются от расположения файла):
-  python3 99-raw/tools/checklist_export.py            # записать YAML и напечатать сводку
-  python3 99-raw/tools/checklist_export.py --check    # YAML совпадает с Markdown? (код 1 — нет)
-  python3 99-raw/tools/checklist_export.py --selftest # самопроверка разбора на встроенном примере
-  python3 99-raw/tools/checklist_export.py --md FILE --out FILE   # другой файл (опыты)
+  python3 scripts/site/checklist_export.py            # записать YAML и напечатать сводку
+  python3 scripts/site/checklist_export.py --check    # YAML совпадает с Markdown? (код 1 — нет)
+  python3 scripts/site/checklist_export.py --selftest # самопроверка разбора на встроенном примере
+  python3 scripts/site/checklist_export.py --md FILE --out FILE   # другой файл
 Только стандартная библиотека; PyYAML — если установлен — для проверки валидности результата.
 """
 import argparse
@@ -200,7 +201,7 @@ def render(d, md_path, now=None):
     now = now or datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
     rel_md = os.path.relpath(md_path, ROOT)
     out = [f'# Машиночитаемая версия {rel_md} (сводный чек-лист сайта, агент K).',
-           '# Сгенерировано 99-raw/tools/checklist_export.py — правки вносить в Markdown и перегенерировать.',
+           '# Сгенерировано scripts/site/checklist_export.py — правки вносить в Markdown и перегенерировать.',
            f'version: {q("1.0")}', f'generated_at: {q(now)}', f'checked: {q(now[:10])}',
            f'source_md: {q(rel_md)}', f'source_md_meta: {q(d["meta"])}',
            f'items_count: {len(d["items"])}', f'defects_count: {len(d["defects"])}',
