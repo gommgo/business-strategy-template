@@ -16,6 +16,7 @@ site: okoshko-demo-en
 lang: en
 jurisdiction: ru
 status: draft
+example: true
 owner: {role: "founder (demo customer)"}
 collected_by: "агент E (демо-набор, английская адаптация, 2026-09-24)"
 never_claim_defaults: ru-default-1

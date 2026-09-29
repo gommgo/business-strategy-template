@@ -7,14 +7,14 @@
 # связанных `sibling_ids`). Правила — `02-awareness-hierarchy-objections.md` §2–§3.
 #
 # Границы (контракт тройки v2 §2): ПОРЯДОК и набор секций задаёт site (`page-plan`); здесь — какое сообщение несёт
-# секция и какой вопрос посетителя она закрывает («вопрос → доказательство → действие», kimi 03/03 §3.4). До page-plan
-# site секции описываются ролями `section_role` из временного словаря (`99-raw/notes/temp-vocabulary-v0.yaml`), порядок —
-# черновой (`order`), site его переопределит; после page-plan — поле `section_id`.
+# секция и какой вопрос посетителя она закрывает («вопрос → доказательство → действие»). Секции описываются ролями
+# `section_role` словаря site (`../site/02-site-types/vocabulary.yaml`) с черновым порядком (`order`), который задаёт
+# план страницы; место в плане — поле `section_id`.
 #
 # Ссылки: смысл — `meaning_ref` (meaning.schema.yaml); факты — `fact:<id>` / `missing:<id>` (B2 facts.yaml); голос
 # клиента — `voc:<id>` (B2); возражения и ценность — id из meaning (`objection_ids`, `value_theme_refs`).
 # Потребители: E (тексты по слотам), I (цепочка генерации), J (copy-deck: `sections[].message` ← `sections[].message`,
-# `slots[].fact_ids` ← `proof_ids`), kimi (`site.sections[{id, job}]` — проекция, `x-kimi-map`).
+# `slots[].fact_ids` ← `proof_ids`), вход холста (работа секций `site.sections[].job` брифа холста — проекция `x-canvas-map`).
 #
 # Даты — строкой в кавычках. Проверка: `../../scripts/text/validate_meaning.py` (схема + смысловые
 # проверки: первая секция — hero, каждая опора стоит хотя бы в одной секции, у опоры есть доказательство или missing,
@@ -27,7 +27,7 @@ description: >-
   Главное сообщение (одна фраза), 3–5 опор с доказательствами, возражение к каждой опоре и раскладка по секциям:
   у каждой секции один вопрос посетителя, одно сообщение, доказательства и следующий шаг. Формулировки внутренние —
   тексты страницы пишет copy-deck.
-date: "2026-09-24"
+date: "2026-09-29"
 x-version: 1
 x-status: "черновик волны 1, 2026-09-24"
 x-owner: "text-research · 02-strategy-messaging · B1"
@@ -70,7 +70,7 @@ properties:
         $ref: "#/$defs/page-type"
       page_id:
         type: string
-        description: "id страницы из site-map site (когда появится)."
+        description: "id страницы плана (page.id) или карты сайта."
       segment_ref:
         $ref: "#/$defs/id"
         description: "Сегмент из meaning.audience (по умолчанию — основной)."
@@ -97,7 +97,7 @@ properties:
         type: object
         additionalProperties: false
         properties:
-          action_ref: {type: string, description: "Главное действие (словарь action site; до S0 — свободный id)."}
+          action_ref: {type: string, description: "Главное действие (id action словаря site)."}
           secondary_goal: {type: string, description: "Для не готовых сейчас: что запомнить или сделать."}
 
   core_message:
@@ -203,13 +203,13 @@ $defs:
            retargeting, maps-local, social-organic, marketplace, messenger, offline]
 
   page-type:
-    description: "Временные id (temp-vocabulary-v0: page_types); после S0 — vocabulary.yaml site."
+    description: "Тип страницы — id словаря site (page_type)."
     enum: [landing-lead-services, landing-saas, landing-product, landing-campaign, landing-event, landing-course,
            landing-app, landing-waitlist, home-multipage, service-page, about-page, case-page, pricing-page, careers-page,
            contacts-page, portfolio-page, article-page, seo-landing-page]
 
   section-role:
-    description: "Временные id (temp-vocabulary-v0: section_roles); после page-plan site — section_id."
+    description: "Роль секции — id словаря site (section_role); место в плане страницы — section_id."
     enum: [hero, problem, solution, benefits, how-it-works, product-demo, proof-logos, proof-stats, testimonials,
            case-studies, awards-press, comparison, pricing, guarantee, objections, faq, about, team, portfolio,
            integrations, event-program, cta-band, lead-form, final-cta, contacts, footer, article-body, related]
@@ -278,16 +278,22 @@ $defs:
         description: "С какого уровня на какой секция переводит читателя (problem-aware → solution-aware и т. д.)."
       notes: {type: string}
 
-# Проекция в brief.yaml kimi и copy-deck (J) — предложение формата.
-x-kimi-map:
-  - site_path: "sections[] (упорядоченные по page-plan)"
-    kimi_path: "site.sections[{id, job}]"
-    rule: derive
-    note: "id ← section_id (до page-plan — section_role; одинаковые роли → суффикс -2); job ← «<question> → <message>; доказательства: <proof_ids без префикса>» строкой в кавычках; других секций нет."
-  - site_path: "core_message.text + first_screen"
-    kimi_path: "product.goal (через meaning.value_proposition.core)"
-    rule: derive
-    note: "Только утверждения с доказательством; без классов meaning.boundaries.not_promised."
+# Проекция во вход холста (references/claude-design.md § 6): работа секции в брифе холста — «вопрос → сообщение;
+# доказательства» по секциям плана; остальное воплощено в текстах copy deck.
+x-canvas-map:
+  source: hierarchy
+  stages: [wireframe, mockup]
+  files:
+    brief.yaml:
+      site.sections[].job:
+        rule: derive
+        from: [/sections/*/section_id, /sections/*/section_role, /sections/*/question, /sections/*/message, /sections/*/proof_ids]
+        note: "«<вопрос посетителя> → <сообщение секции>; доказательства: <id фактов без префикса>» — секции сводятся с секциями плана по section_id (без него — по роли); порядок и состав секций — план страницы"
+  drop:
+    - {from: [/hierarchy_version, /date, /status, /id, /site, /lang, /sibling_ids, /meaning_ref], note: "служебные поля, ссылки и подпись: статус, путь и отпечаток — в INPUT.md"}
+    - {from: [/page], note: "тип страницы, осведомлённость, трафик и цель — план страницы и site-brief, во вход идут их картами"}
+    - {from: [/core_message, /first_screen, /pillars, /proof_order, /not_said], note: "главное сообщение, первый экран, опоры и порядок доводов воплощены в текстах copy deck; обещание первого экрана — слот copy deck, product.goal — из смысла"}
+    - {from: [/sections/*/order, /sections/*/carries, /sections/*/objection_ids, /sections/*/next_step, /sections/*/awareness_shift, /sections/*/notes], note: "порядок и следующий шаг секции — план страницы; опоры и возражения — уже в текстах"}
 x-copy-deck-map:
   - {from: "sections[].message", to: "copy_deck.pages[].sections[].message", note: "опора иерархии одной фразой (copy-deck v0, PLAN)"}
   - {from: "sections[].proof_ids", to: "copy_deck…slots[].fact_ids", note: "без префикса fact:; missing:<id> → [PLACEHOLDER] в тексте"}

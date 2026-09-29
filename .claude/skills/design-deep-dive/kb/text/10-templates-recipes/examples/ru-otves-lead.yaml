@@ -8,7 +8,7 @@ copy_deck:
   lang: ru
   voice_ref: ../../05-voice-editorial/examples/voice-otves-warm.yaml
   facts_ref: ../../02-strategy-messaging/examples/facts-service-renovation.yaml
-  meaning_ref: ../../../../02-strategy-messaging/examples/meaning-otves.yaml
+  meaning_ref: ../../02-strategy-messaging/examples/meaning-otves.yaml
   copy_slots_ref: ../../04-copy-by-block/copy-slots.yaml
   jurisdiction: ru
   legal_category:
@@ -41,7 +41,6 @@ copy_deck:
       - estimate-free
     sections:
     - section_id: hero
-      block: hero
       section_role: hero
       question: Это та студия, про которую я слышал? Им можно доверять?
       message: 12 лет в городе, 4,8 из 5 на Яндекс Картах, гарантия 3 года; замер бесплатно
@@ -51,7 +50,7 @@ copy_deck:
         variants:
         - id: a
           text: Студия ремонта «Отвес»
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -66,7 +65,7 @@ copy_deck:
         variants:
         - id: a
           text: Ремонт квартир под ключ в Нижнем Новгороде с 2014 года
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -83,7 +82,7 @@ copy_deck:
         variants:
         - id: a
           text: 1 146 квартир сдали по акту, гарантия 3 года по договору
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -102,7 +101,7 @@ copy_deck:
         variants:
         - id: a
           text: 4,8 из 5 на Яндекс Картах — 214 оценок
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -119,7 +118,7 @@ copy_deck:
         variants:
         - id: a
           text: Яндекс Карты, 01.09.2026
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -136,7 +135,7 @@ copy_deck:
         variants:
         - id: a
           text: Позвать замерщика
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -151,7 +150,7 @@ copy_deck:
         variants:
         - id: a
           text: Выезд замерщика и смета — бесплатно в черте города
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -165,7 +164,6 @@ copy_deck:
           warnings: 0
         notes: условие «в черте города» в той же строке (H FREE-01)
     - section_id: review
-      block: testimonials
       section_role: testimonials
       question: Что говорят те, кто уже делал у вас ремонт?
       message: Отзыв с подробностями — срок, смета, связь с прорабом
@@ -175,7 +173,7 @@ copy_deck:
         variants:
         - id: a
           text: Анна К. о ремонте своей двушки — срок, смета и прораб
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -192,7 +190,7 @@ copy_deck:
         - id: a
           text: «Сдали двушку за 47 рабочих дней — на три дня раньше, чем в договоре. Прораб каждый вечер присылал фото… Смета не выросла ни на
             рубль»
-          status: draft
+          status: assumed
           source: customer
         chosen: a
         fact_ids:
@@ -209,7 +207,7 @@ copy_deck:
         variants:
         - id: a
           text: Анна К., Нижний Новгород, ремонт двухкомнатной квартиры, 2026
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -225,7 +223,7 @@ copy_deck:
         variants:
         - id: a
           text: 'Это опыт Анны: смета каждого ремонта зависит от объёма работ и выбранных материалов.'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -237,7 +235,6 @@ copy_deck:
         notes: 'рамка типичности рядом с отзывом о смете (B2 §5.4); голосом компании «смета не меняется» — нельзя (nc-no-extra-cost-promise);
           правка 2: пробел estimate-change-policy — fallback rewrite-without (COPY-D-FALLBACK): пункт договора не упоминаем до ответа заказчика'
     - section_id: case
-      block: case-studies
       section_role: case-studies
       question: Сдаёте в срок?
       message: 'Двушка 54 м²: 47 рабочих дней при 50 по договору'
@@ -247,7 +244,7 @@ copy_deck:
         variants:
         - id: a
           text: 'Двушка в Сормове: 47 рабочих дней вместо 50 по договору'
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -266,7 +263,7 @@ copy_deck:
         - id: a
           text: Двухкомнатная квартира 54 м² в Сормовском районе, ремонт под ключ. Ремонт занял 47 рабочих дней при сроке по договору 50; акт
             подписан 30 мая 2026 года.
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -279,7 +276,6 @@ copy_deck:
           warnings: 0
         notes: ситуация → результат с базой и сроком; задача клиента его словами — нет в фактах (03 §4.4)
     - section_id: guarantee
-      block: guarantee
       section_role: guarantee
       question: Что если что-то пойдёт не так?
       message: Гарантия 3 года на работы — пункт 7.2 договора
@@ -289,7 +285,7 @@ copy_deck:
         variants:
         - id: a
           text: Гарантия 3 года на работы — по договору
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -306,7 +302,7 @@ copy_deck:
         variants:
         - id: a
           text: 'Отошла плитка через год после ремонта — звоните нам: гарантия на работы действует 3 года с даты акта, это пункт 7.2 договора.'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -323,7 +319,7 @@ copy_deck:
         variants:
         - id: a
           text: Прораб Сергей Лапин ведёт ремонты квартир 11 лет.
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -337,7 +333,6 @@ copy_deck:
         notes: 'правка 1: человек по имени с разрешением (permission.shows full-name); из ряда цифр убран — use факта не включает proof-stats;
           «объект ведёт один прораб» — нельзя (missing foreman-per-object)'
     - section_id: pricing
-      block: pricing
       section_role: pricing
       question: Сколько стоит и есть ли скидка сейчас?
       message: От 9 800 ₽ за м² без материалов; смета бесплатно; минус 10 % на работы при договоре до 31 октября
@@ -347,7 +342,7 @@ copy_deck:
         variants:
         - id: a
           text: Ремонт под ключ — от 9 800 ₽ за м² без материалов
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -364,7 +359,7 @@ copy_deck:
         variants:
         - id: a
           text: 'Точную сумму покажет смета: замер и смета бесплатны в черте города.'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -382,7 +377,7 @@ copy_deck:
         variants:
         - id: a
           text: При договоре до 31 октября 2026 года — скидка 10 % на работы; на материалы скидка не действует.
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -400,7 +395,7 @@ copy_deck:
         variants:
         - id: a
           text: Позвать замерщика
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -411,7 +406,6 @@ copy_deck:
           warnings: 0
         notes: то же имя действия, что в hero
     - section_id: form
-      block: lead-form
       section_role: lead-form
       question: Как записаться на замер?
       message: Замер бесплатно и ни к чему не обязывает; перезвоним и согласуем время
@@ -421,7 +415,7 @@ copy_deck:
         variants:
         - id: a
           text: Вызов замерщика и смета до договора
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -435,7 +429,7 @@ copy_deck:
         variants:
         - id: a
           text: Приедем, измерим и посчитаем смету. В черте города — бесплатно.
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -453,7 +447,7 @@ copy_deck:
         variants:
         - id: a
           text: Позвать замерщика
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -482,7 +476,7 @@ copy_deck:
         variants:
         - id: a
           text: Заявка принята. Замерщик позвонит, чтобы договориться о времени замера.
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -493,7 +487,6 @@ copy_deck:
           warnings: 0
         notes: что будет дальше (04 §1.5); срок звонка — нет в фактах, поэтому без «в течение N минут»
     - section_id: faq
-      block: faq
       section_role: faq
       question: Возьмёте только ванную? Как платить?
       message: Оплата и выезд замерщика
@@ -506,7 +499,7 @@ copy_deck:
         variants:
         - id: a
           text: Сколько стоит выезд замерщика?
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -521,7 +514,7 @@ copy_deck:
         variants:
         - id: a
           text: 'Бесплатно в черте города: замерщик приезжает, делает замер и составляет смету до договора.'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -539,7 +532,7 @@ copy_deck:
         variants:
         - id: a
           text: Как платить за ремонт?
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -554,7 +547,7 @@ copy_deck:
         variants:
         - id: a
           text: '[PLACEHOLDER: порядок оплаты по договору — есть ли предоплата, по каким этапам, как оплачиваются материалы]'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -567,7 +560,6 @@ copy_deck:
           warnings: 0
         notes: блокирующий пробел B2 — страница не публикуется до ответа
     - section_id: final
-      block: final-cta
       section_role: final-cta
       question: Что сделать сейчас?
       message: Вызвать замерщика; пример сметы — переслать домашним
@@ -577,7 +569,7 @@ copy_deck:
         variants:
         - id: a
           text: Начните с замера и сметы
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -591,7 +583,7 @@ copy_deck:
         variants:
         - id: a
           text: Позвать замерщика
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -605,7 +597,7 @@ copy_deck:
         variants:
         - id: a
           text: Замер и смета — бесплатно в черте города
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -618,7 +610,6 @@ copy_deck:
           errors: 0
           warnings: 0
     - section_id: footer
-      block: footer
       section_role: footer
       message: Кто продавец услуги и где документы
       slots:
@@ -627,7 +618,7 @@ copy_deck:
         variants:
         - id: a
           text: Ремонт квартир под ключ в Нижнем Новгороде с 2014 года
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:

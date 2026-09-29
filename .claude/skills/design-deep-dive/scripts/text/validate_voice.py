@@ -1,19 +1,26 @@
 #!/usr/bin/env python3
-"""validate_voice.py — проверка voice.schema.yaml (F) и профилей голоса: схема, смысловые проверки, отрицательные мутации.
+"""validate_voice.py — проверка voice.schema.yaml и профилей голоса бренда (voice.yaml) и продукта (voice.product.yaml):
+схема, смысловые проверки, отрицательные мутации.
 
-Запуск (venv-F: jsonschema 4.26.0, PyYAML 6.0.3):
-    99-raw/tools/venv-F/bin/python 99-raw/experiments/F/03-schema-lint/validate_voice.py [voice.yaml …]
-Без аргументов — три примера базы 05-voice-editorial/examples/voice-*.yaml (для них ≥ 8 типов слотов на язык).
+Запуск (Python окружения скилла, нужны jsonschema и PyYAML):
+    python3 scripts/text/validate_voice.py [voice.yaml …]
+Без аргументов — три примера базы 05-voice-editorial/examples/voice-*.yaml (для них ≥ 8 типов слотов на язык) и
+профиль голоса продукта, собранный в памяти из первого примера.
 
 Проверки:
-  1. метасхема Draft 2020-12; поле date; enum slot-type совпадает с временным словарём (+ 4 предложения B2 и J);
+  1. метасхема Draft 2020-12; поле date; enum slot-type входит в слоты вида text словаря site
+     (kb/site/02-site-types/vocabulary.yaml); слот словаря, которого нет в enum, — справка, не ошибка;
   2. каждый профиль валиден по схеме;
   3. смысловые (схема их не видит): образцы против обращения («ты» при ru_form: vy; «Вы» в середине фразы), эмодзи,
      восклицаний, словаря «не говорим»; ссылки fact:/missing: разрешаются в facts_ref; adaptation_of указывает на
      русский образец; use ∩ avoid = ∅; tone_of_voice называет обращение; у принципа есть проверяемое исполнение
      (число или «цитата» хотя бы в одном правиле); пустые принципы-прилагательные («честные», «надёжные») — предупреждение;
-  4. отрицательные мутации: каждая обязана дать ошибку схемы или смысловую ошибку.
-Выход: 0 — всё прошло; 1 — есть ошибки. Итог печатается и пишется в last-run.txt рядом.
+  4. голос продукта — профиль, у которого все scope.surfaces[].voice — product: жанр interface; юмора нет в ситуациях
+     service-error, destructive-action, money, security; образцы — по роли строки интерфейса (role), не по slot_type;
+     «!» нет в success-routine и destructive-action; карта тона без service-error, destructive-action или money и
+     ситуации только сайта в ней — предупреждения. У профиля бренда образец только с role — предупреждение;
+  5. отрицательные мутации (профиль бренда и голос продукта): каждая обязана дать ошибку схемы или смысловую ошибку.
+Выход: 0 — всё прошло; 1 — есть ошибки. Итог печатается и пишется в $DDD_HOME/out/text/validate_voice.last-run.txt.
 """
 import copy
 import re
@@ -25,16 +32,21 @@ import yaml
 try:
     import jsonschema
 except ImportError:  # pragma: no cover
-    sys.exit("нужен jsonschema: 99-raw/tools/venv-F/bin/python")
+    sys.exit("нужен jsonschema: запускайте Python окружения скилла")
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(HERE.parent / "lib"))
 import kbpaths  # noqa: E402
 ROOT = kbpaths.kb("text")
 SCHEMA = ROOT / "05-voice-editorial" / "voice.schema.yaml"
 EXAMPLES = sorted((ROOT / "05-voice-editorial" / "examples").glob("voice-*.yaml"))
-VOCAB = ROOT / "99-raw" / "notes" / "temp-vocabulary-v0.yaml"
-PROPOSED_SLOTS = {"spec-row", "price-old", "stat-source", "image-caption"}
+VOCAB = kbpaths.kb("site", "02-site-types", "vocabulary.yaml")   # словарь id системы: слоты вида text
+# голос продукта: ситуации интерфейса, где юмора нет (x-situations схемы), и ситуации без «!»
+PRODUCT_NO_HUMOR = ("service-error", "destructive-action", "money", "security")
+PRODUCT_NO_EXCLAMATION = ("success-routine", "destructive-action")
+PRODUCT_TONE_MAP = ("service-error", "destructive-action", "money")
+SITE_ONLY_SITUATIONS = {"hero", "benefits", "how-it-works", "proof", "testimonials", "case", "pricing", "objections", "faq",
+                        "about", "careers", "article", "meta", "campaign-slogan", "footer"}
 
 TY_RE = re.compile(r"(?<![А-Яа-яЁё])(ты|тебя|тебе|тобой|твой|твоя|твоё|твое|твои|твоего|твоей|твоему|твоим|твоими|твоих|твою|"
                    r"закажи|узнай|получи|попробуй|начни|выбери|оставь|запишись|подпишись|скачай|жми|нажми|купи|"
@@ -71,6 +83,36 @@ def facts_ids(voice: dict, voice_path: Path) -> tuple[set, set, str]:
     return {f["id"] for f in d.get("facts", [])}, {m["id"] for m in d.get("missing", [])}, ""
 
 
+def is_product(voice: dict) -> bool:
+    """Голос продукта — все поверхности профиля с voice: product."""
+    surf = (voice.get("scope") or {}).get("surfaces") or []
+    return bool(surf) and all(s.get("voice") == "product" for s in surf)
+
+
+def semantic_product(voice: dict) -> tuple[list, list]:
+    """Проверки голоса продукта (интерфейс за входом, письма и уведомления продукта)."""
+    errs, warns = [], []
+    if "interface" not in ((voice.get("scope") or {}).get("genres") or []):
+        errs.append("голос продукта: в scope.genres нет interface")
+    never = set((voice.get("humor") or {}).get("never_in") or [])
+    miss = [x for x in PRODUCT_NO_HUMOR if x not in never]
+    if miss:
+        errs.append(f"голос продукта: юмор не запрещён в {', '.join(miss)} (humor.never_in)")
+    for s in voice.get("samples") or []:
+        if not s.get("role"):
+            errs.append(f"{s['id']}: образец голоса продукта — по роли строки интерфейса (role), а не по slot_type")
+        if s.get("situation") in PRODUCT_NO_EXCLAMATION and "!" in QUOTE_RE.sub(" ", s.get("text", "")):
+            errs.append(f"{s['id']}: «!» в ситуации {s['situation']} — у голоса продукта сухой тон")
+    tm = [t.get("situation") for t in voice.get("tone_map") or []]
+    for x in PRODUCT_TONE_MAP:
+        if x not in tm:
+            warns.append(f"голос продукта: в карте тона нет ситуации {x}")
+    site_only = sorted({x for x in tm if x in SITE_ONLY_SITUATIONS})
+    if site_only:
+        warns.append(f"голос продукта: в карте тона ситуации сайта {', '.join(site_only)} — их тон задаёт профиль бренда")
+    return errs, warns
+
+
 def semantic(voice: dict, voice_path: Path, base_example: bool) -> tuple[list, list]:
     errs, warns = [], []
     samples = voice.get("samples") or []
@@ -81,15 +123,24 @@ def semantic(voice: dict, voice_path: Path, base_example: bool) -> tuple[list, l
     fids, mids, ferr = facts_ids(voice, voice_path)
     if ferr:
         errs.append(ferr)
-    # 1. типы слотов по языкам
+    product = is_product(voice)
+    # 1. типы слотов (у голоса продукта — роли строк) по языкам
     by_lang: dict = {}
     for s in samples:
-        by_lang.setdefault(s["lang"][:2], set()).add(s["slot_type"])
+        by_lang.setdefault(s["lang"][:2], set()).add(s.get("role") if product else s.get("slot_type"))
     if base_example:
         for lg in ("ru", "en"):
-            n = len(by_lang.get(lg, set()))
+            n = len(by_lang.get(lg, set()) - {None})
             if n < 8:
-                errs.append(f"образцов {lg}: {n} типов слотов, нужно ≥ 8 (задание F)")
+                errs.append(f"образцов {lg}: {n} {'ролей строк' if product else 'типов слотов'}, нужно ≥ 8 (образец базы)")
+    if product:
+        perr, pwarn = semantic_product(voice)
+        errs += perr
+        warns += pwarn
+    else:
+        for s in samples:
+            if s.get("role") and not s.get("slot_type"):
+                warns.append(f"{s['id']}: образец по роли строки интерфейса в профиле бренда — его место в голосе продукта")
     for s in samples:
         t = s["text"]
         plain = QUOTE_RE.sub(" ", t)
@@ -125,8 +176,8 @@ def semantic(voice: dict, voice_path: Path, base_example: bool) -> tuple[list, l
             errs.append(f"{s['id']}: эмодзи при policy: never")
         if em and pol in ("rare", "allowed"):
             allowed = set((punct.get("emoji") or {}).get("allowed_slot_types") or [])
-            if allowed and s["slot_type"] not in allowed:
-                errs.append(f"{s['id']}: эмодзи в слоте {s['slot_type']} вне allowed_slot_types")
+            if allowed and s.get("slot_type") not in allowed:
+                errs.append(f"{s['id']}: эмодзи в слоте {s.get('slot_type') or s.get('role')} вне allowed_slot_types")
             mx = (punct.get("emoji") or {}).get("max_per_block")
             if mx is not None and len(em) > mx:
                 errs.append(f"{s['id']}: эмодзи {len(em)} > max_per_block {mx}")
@@ -188,6 +239,44 @@ MUTATIONS = [
     ("adaptation_of в никуда (смысл)", lambda v: [s.__setitem__("adaptation_of", "ru-nowhere") for s in v["samples"] if s["lang"] == "en"]),
 ]
 
+# роль строки интерфейса для образца бренда, из которого в памяти собирается голос продукта
+SLOT_TO_ROLE = {"headline": "title", "subheadline": "subtitle", "hero-proof": "caption", "cta-label": "action",
+                "cta-secondary-label": "link", "cta-note": "hint", "card-title": "title", "card-body": "caption",
+                "section-title": "section-title", "form-title": "title", "form-success": "toast", "form-consent": "checkbox-label",
+                "faq-q": "help", "faq-a": "help", "email-subject": "email", "email-body": "email", "guarantee-text": "inline-message",
+                "pricing-price-note": "hint", "nav-label": "nav", "badge": "badge", "image-alt": "alt"}
+
+
+def product_variant(brand: dict) -> dict:
+    """Голос продукта в памяти из профиля бренда: поверхности продукта, жанр interface, юмора нет в ситуациях
+    интерфейса с риском, карта тона по ситуациям интерфейса, образцы — по ролям строк."""
+    v = copy.deepcopy(brand)
+    v["voice_id"] = v["voice_id"] + "-product"
+    v["scope"] = {"genres": ["interface"],
+                  "surfaces": [{"surface": "product-ui", "voice": "product"}, {"surface": "transactional-emails", "voice": "product"}]}
+    never = list(v["humor"].get("never_in") or [])
+    v["humor"]["never_in"] = never + [x for x in PRODUCT_NO_HUMOR if x not in never]
+    v["humor"]["allowed_in"] = [x for x in v["humor"].get("allowed_in") or [] if x not in PRODUCT_NO_HUMOR and x not in SITE_ONLY_SITUATIONS]
+    v["tone_map"] = [{"situation": "service-error", "rules": ["Признаём сбой прямо: что случилось, что уже делаем, что сделать сейчас"]},
+                     {"situation": "destructive-action", "rules": ["Называем, что удалится и можно ли вернуть; без «Вы уверены?»"]},
+                     {"situation": "money", "rules": ["Сумма полностью, с валютой и сроком списания"]},
+                     {"situation": "empty-first-use", "rules": ["Одна строка, что здесь появится, и одно действие"]}]
+    for s in v["samples"]:
+        s["role"] = SLOT_TO_ROLE.get(s.pop("slot_type"), "caption")
+        if s.get("situation") in SITE_ONLY_SITUATIONS:
+            s.pop("situation")
+    return v
+
+
+PRODUCT_MUTATIONS = [
+    ("голос продукта: юмор не запрещён в service-error", lambda v: v["humor"].__setitem__("never_in", [x for x in v["humor"]["never_in"] if x != "service-error"])),
+    ("голос продукта: нет жанра interface", lambda v: v["scope"].__setitem__("genres", ["landing"])),
+    ("голос продукта: образец по slot_type без role", lambda v: v["samples"][0].pop("role") and v["samples"][0].__setitem__("slot_type", "headline")),
+    ("голос продукта: «!» в деструктивном действии", lambda v: v["samples"][0].update(situation="destructive-action", text="Удалить проект!")),
+    ("голос продукта: неизвестная роль строки", lambda v: v["samples"][0].__setitem__("role", "hero-title")),
+    ("голос продукта: неизвестная ситуация", lambda v: v["tone_map"][0].__setitem__("situation", "checkout")),
+]
+
 
 def main(argv=None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
@@ -201,13 +290,16 @@ def main(argv=None) -> int:
     schema = load(SCHEMA)
     jsonschema.Draft202012Validator.check_schema(schema)
     say(f"метасхема: OK ({SCHEMA.relative_to(ROOT)}, date {schema.get('date')})")
-    vocab = {s["id"] for s in load(VOCAB)["slot_types"]}
+    slots = ((load(VOCAB).get("namespaces") or {}).get("slot") or {}).get("values") or []
+    vocab = {s["id"] for s in slots if isinstance(s, dict) and s.get("kind") == "text"}
     enum = set(schema["$defs"]["slot-type"]["enum"])
-    if enum != vocab | PROPOSED_SLOTS:
+    if enum - vocab:
         ok = False
-        say(f"FAIL enum slot-type ≠ временный словарь: лишние {sorted(enum - vocab - PROPOSED_SLOTS)}, нет {sorted(vocab - enum)}")
+        say(f"FAIL enum slot-type вне словаря site (слоты вида text): {sorted(enum - vocab)}")
     else:
-        say(f"enum slot-type = временный словарь ({len(vocab)}) + предложения ({len(PROPOSED_SLOTS)}): OK")
+        say(f"enum slot-type ({len(enum)}) — слоты вида text словаря site ({len(vocab)}): OK")
+    if vocab - enum:
+        say(f"справка: слоты вида text словаря site без образцов голоса в enum — {', '.join(sorted(vocab - enum))}")
     validator = jsonschema.Draft202012Validator(schema)
     paths = [Path(a) for a in argv] or EXAMPLES
     for p in paths:
@@ -217,10 +309,11 @@ def main(argv=None) -> int:
         serr, swarn = semantic(v, p, base)
         status = "OK" if not errs and not serr else "FAIL"
         ok &= status == "OK"
-        n_ru = len({s["slot_type"] for s in v.get("samples", []) if s["lang"].startswith("ru")})
-        n_en = len({s["slot_type"] for s in v.get("samples", []) if s["lang"].startswith("en")})
-        say(f"{status} {p.name}: схема {len(errs)} ошибок, смысл {len(serr)} ошибок, {len(swarn)} предупр.; "
-            f"образцов {len(v.get('samples', []))} (слотов ru {n_ru}, en {n_en})")
+        kind = "role" if is_product(v) else "slot_type"
+        n_ru = len({s.get(kind) for s in v.get("samples", []) if s["lang"].startswith("ru")})
+        n_en = len({s.get(kind) for s in v.get("samples", []) if s["lang"].startswith("en")})
+        say(f"{status} {p.name}{' (голос продукта)' if kind == 'role' else ''}: схема {len(errs)} ошибок, смысл {len(serr)} ошибок, "
+            f"{len(swarn)} предупр.; образцов {len(v.get('samples', []))} ({'ролей' if kind == 'role' else 'слотов'} ru {n_ru}, en {n_en})")
         for e in errs[:10]:
             say(f"   схема: {'/'.join(map(str, e.path))}: {e.message[:160]}")
         for e in serr:
@@ -242,8 +335,37 @@ def main(argv=None) -> int:
         say(f"  {'пойман ' if hit else 'ПРОПУЩЕН'} {name}: схема {len(errs)}, смысл {len(serr)}")
     say(f"мутаций поймано: {caught} из {len(MUTATIONS)}")
     ok &= caught == len(MUTATIONS)
+    # голос продукта в памяти: чистый профиль проходит, мутации ловятся
+    prod = product_variant(base_voice)
+    perrs = list(validator.iter_errors(prod))
+    pserr, pswarn = semantic(prod, base_path, True)
+    pok = not perrs and not pserr
+    ok &= pok
+    say(f"\n{'OK' if pok else 'FAIL'} голос продукта из {base_path.name} (в памяти): схема {len(perrs)} ошибок, смысл {len(pserr)} ошибок, "
+        f"{len(pswarn)} предупр.")
+    for e in perrs[:10]:
+        say(f"   схема: {'/'.join(map(str, e.path))}: {e.message[:160]}")
+    for e in pserr + [f"предупреждение: {w}" for w in pswarn]:
+        say(f"   {e}")
+    pcaught = 0
+    for name, fn in PRODUCT_MUTATIONS:
+        v = copy.deepcopy(prod)
+        fn(v)
+        errs = list(validator.iter_errors(v))
+        serr, _ = semantic(v, base_path, True)
+        hit = bool(errs or serr)
+        pcaught += hit
+        say(f"  {'пойман ' if hit else 'ПРОПУЩЕН'} {name}: схема {len(errs)}, смысл {len(serr)}")
+    v = copy.deepcopy(prod)
+    v["tone_map"] = [t for t in v["tone_map"] if t["situation"] != "money"] + [{"situation": "hero", "rules": ["Коротко"]}]
+    _, w = semantic(v, base_path, True)
+    wok = any("money" in x for x in w) and any("ситуации сайта hero" in x for x in w)
+    pcaught += wok
+    say(f"  {'пойман ' if wok else 'ПРОПУЩЕН'} голос продукта: карта тона без money и с ситуацией сайта — предупреждения")
+    say(f"мутаций голоса продукта поймано: {pcaught} из {len(PRODUCT_MUTATIONS) + 1}")
+    ok &= pcaught == len(PRODUCT_MUTATIONS) + 1
     say("validate_voice: " + ("OK" if ok else "FAIL"))
-    (HERE / "last-run.txt").write_text("\n".join(out) + "\n", encoding="utf-8")
+    (kbpaths.out("text") / "validate_voice.last-run.txt").write_text("\n".join(out) + "\n", encoding="utf-8")
     return 0 if ok else 1
 
 

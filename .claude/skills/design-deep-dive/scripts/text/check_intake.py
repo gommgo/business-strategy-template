@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """check_intake.py — проверка выхода промта P1 (разбор брифа) кодом.
 
-text-research · волна 3 · агент I (I3, фаза 2) · 2026-09-24 · опыт 99-raw/experiments/I/04-chain-manual/
-Промт: 09-ai-generation-evaluation/prompts/p1-brief-intake.md §4.
+Промт: kb/text/09-ai-generation-evaluation/prompts/p1-brief-intake.md §4.
 
-Запуск (из корня text-research, системный python3 с PyYAML):
-    python3 99-raw/experiments/I/04-chain-manual/check_intake.py INTAKE.yaml --brief BRIEF.txt [--json OUT] [--quiet]
-    python3 99-raw/experiments/I/04-chain-manual/check_intake.py --selftest
+Запуск (Python с PyYAML):
+    python3 scripts/text/check_intake.py INTAKE.yaml --brief BRIEF.txt [--json OUT] [--quiet]
+    python3 scripts/text/check_intake.py --selftest
 
 Проверки (error — нарушение правила промта; warning — эвристика или правило «по смыслу»):
   E1  YAML читается, корень intake, все поля формата P1 на месте;
@@ -124,7 +123,7 @@ def check(intake_doc, brief):
     asks = len(qs) + len(standalone)
     if asks > 7:
         warnings.append(f"W1: просьб к заказчику {asks} (вопросов {len(qs)} + документов вне вопросов {len(standalone)}: "
-                        f"{', '.join(standalone)}) > 7 — документы спрашивать внутри тематических вопросов (B2 proof-intake §4)")
+                        f"{', '.join(standalone)}) > 7 — документы спрашивать внутри тематических вопросов (proof-intake §4)")
     msg = it.get("message_to_customer") or ""
     numbered = re.findall(r"(?m)^\s*\d+\.\s", msg)
     if len(numbered) > 7:

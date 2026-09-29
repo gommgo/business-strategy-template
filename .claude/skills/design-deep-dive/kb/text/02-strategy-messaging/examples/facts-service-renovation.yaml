@@ -14,6 +14,7 @@ site: otves-remont-nn
 lang: ru
 jurisdiction: ru
 status: draft
+example: true
 owner: {role: "директор (заказчик)", contact: "почта заказчика из брифа"}
 collected_by: "редактор по анкете proof-intake.md"
 intake: {form: "proof-intake.md@2026-09-24", asked: "2026-09-10", answered: "2026-09-18", channel: "общий документ + созвон с записью"}
@@ -183,7 +184,7 @@ facts:
     source: {type: customer-document, who: "заказчик", where: "прайс-лист 2026", date: "2026-01-15", document: "price-2026.pdf, примечание 1", quote: "Замер и составление сметы — бесплатно (в черте города)", derivation: direct}
     verification: {status: verified, by: "редактор", date: "2026-09-18"}
     permission: {status: not-required}
-    use: {section_roles: [hero, lead-form, pricing, final-cta], slot_types: [cta-label, cta-note, form-lead, pricing-price-note], requires_nearby: "«в черте города»"}
+    use: {section_roles: [hero, lead-form, pricing, final-cta], slot_types: [cta-label, cta-note, form-lead, pricing-price-note], requires_nearby: "«в черте города» или «в пределах Нижнего Новгорода»"}
     valid: {until: "2026-12-31"}
     lang: ru
 

@@ -19,7 +19,7 @@
 # Нормы — первоисточники с редакцией на 2026-09-24 (consultant.ru, garant.ru, fas.gov.ru, br.fas.gov.ru, EUR-Lex через
 #   web.archive.org, eCFR). Подробности, примеры и практика ФАС — 01-advertising-law-claims.md.
 version: 1
-date: "2026-09-24"
+date: "2026-09-29"
 jurisdiction: ru
 owner: "H (волна 2) · text-research/08-russian-legal-typography"
 note: "Не юридическое заключение. id — COPY-L-<ТЕМА>-<NN>; классы — x-claim-classes (02-strategy-messaging/facts.schema.yaml)."
@@ -69,7 +69,7 @@ rules:
     claim_class: [superlative]
     exclude_slot_types: [testimonial-quote]
     requires_no_fact: true
-    pattern: '(?:\bthe\s+best%E%|\bbest[- ]in[- ]class|\bbest[- ]selling|(?<![\w#])#\s?1(?!\d)|\bno\.\s?1%E%|\bnumber\s+one%E%|\bworld''?s\s+(?:first|leading|best|largest|fastest)|\bmarket\s+leader|\bindustry[- ]leading|\bleading\s+provider|\bthe\s+(?:fastest|cheapest|lowest[- ]priced|most\s+(?:popular|trusted|advanced|reliable|affordable|accurate|secure|powerful)))'
+    pattern: '(?:\bthe\s+best%E%|\bbest[- ]in[- ]class|\bbest[- ]selling|(?<![\w#])#\s?1(?!\d)|\bno\.\s?1%E%|\bnumber\s+one%E%|\bworld''?s\s+(?:first|leading|best|largest|fastest)|\bmarket\s+leader|\bindustry[- ]leading|\bleading\s+provider|\bthe\s+(?:fastest|cheapest|lowest[- ]priced|hottest|finest|greatest|freshest|tastiest|strongest|safest|easiest|smartest|biggest|largest|healthiest|quickest|most\s+(?:popular|trusted|advanced|reliable|affordable|accurate|secure|powerful))|\b[a-z]+est\s+(?:[a-z]+\s+){1,2}you(?:''ll|\s+will|''ve|\s+have)\s+ever\b)'
     unless: 'according\s+to|based\s+on|as\s+of|source:|\bsurvey\b|ranked\s+by|rated\s+by|\bper\s+(?:g2|capterra|gartner|forrester|idc|statista)'
     requires:
       nearby: ['according\s+to', 'based\s+on', 'as\s+of', 'source:', '\bsurvey\b', 'ranked\s+by', 'rated\s+by']
@@ -83,6 +83,8 @@ rules:
     examples:
       bad: "The best CRM for small teams"
       good: "Rated 4.8 on G2 based on 312 reviews, September 2026"
+      bad_en: "The hottest sauce you'll ever taste"
+      good_en: "A habanero sauce: 350 000 SHU by the pepper supplier's lab test, June 2026"
 
   - id: COPY-L-UNIQ-01
     title: "Исключительность: «единственный», «только у нас», «не имеет аналогов», «впервые в России»"
@@ -212,9 +214,9 @@ rules:
     claim_class: [price-discount]
     exclude_slot_types: [testimonial-quote]
     pattern: '%B%(?:бесплатн\w*|безвозмездн\w*|в\s+подарок|даром%E%|за\s+0\s?(?:₽|руб\w*)|подар(?:им|ок|ки)%E%)'
-    unless: 'при\s+(?:заказе|покупке|оплате|условии|заключении|подписке|оформлении|сумме|записи)|от\s+\d|если\s|для\s+(?:новых|первых|всех|участников|держателей|владельцев|клиентов\s+с)|с\s+(?:покупкой|заказом|договором)|до\s+\d|в\s+пределах|в\s+течение|первы[ейх]\s+\d+|\d+\s+перв\w+\s+[а-яё]+|без\s+(?:условий|обязательств|доплат|скрытых|ограничений)|входит\s+в\s+(?:стоимость|цену)|включ[её]н\w*\s+в\s+(?:стоимость|цену)|звон\w*|8[\s-]?800|горяч\w+\s+лини\w*'
+    unless: 'при\s+(?:заказе|покупке|оплате|условии|заключении|подписке|оформлении|сумме|записи)|от\s+\d|если\s|для\s+(?:новых|первых|всех|участников|держателей|владельцев|клиентов\s+с)|с\s+(?:покупкой|заказом|договором)|до\s+\d|в\s+пределах|в\s+черте\s+[а-яё]+|в\s+течение|первы[ейх]\s+\d+|\d+\s+перв\w+\s+[а-яё]+|без\s+(?:условий|обязательств|доплат|скрытых|ограничений)|входит\s+в\s+(?:стоимость|цену)|включ[её]н\w*\s+в\s+(?:стоимость|цену)|звон\w*|8[\s-]?800|горяч\w+\s+лини\w*'
     requires:
-      nearby: ['при\s+(?:заказе|покупке|оплате|условии|заключении|подписке|оформлении|сумме|записи)', 'от\s+\d', 'если\s', 'в\s+пределах', 'в\s+течение', 'без\s+(?:условий|обязательств|доплат|ограничений)', 'входит\s+в\s+(?:стоимость|цену)', '\d+\s+перв\w+\s+[а-яё]+']
+      nearby: ['при\s+(?:заказе|покупке|оплате|условии|заключении|подписке|оформлении|сумме|записи)', 'от\s+\d', 'если\s', 'в\s+пределах', 'в\s+черте\s+[а-яё]+', 'в\s+течение', 'без\s+(?:условий|обязательств|доплат|ограничений)', 'входит\s+в\s+(?:стоимость|цену)', '\d+\s+перв\w+\s+[а-яё]+']
       fact_conditions: true
     message: "«Бесплатно» при условиях без самих условий рядом — умолчание существенной информации; условие из facts.yaml (qualifier) обязано стоять рядом"
     replacement: "условие в том же предложении или строке у кнопки: «Замер и смета бесплатно в пределах города», «Доставка бесплатно при заказе от 3 000 ₽»; без условий — так и сказать"
@@ -233,7 +235,7 @@ rules:
     lang: en
     claim_class: [price-discount]
     exclude_slot_types: [testimonial-quote]
-    pattern: '\b(?:free%E%(?![- ](?:of\s+charge\s+calls?|call))|on\s+the\s+house|complimentary)'
+    pattern: '\b(?:free%E%(?![- ](?:of\s+charge\s+calls?|call))(?!\s+(?:slots?|spots?|seats?|places?|tables?|rooms?|time|days?|hours?|minutes?|dates?)%E%)|on\s+the\s+house|complimentary)'
     unless: '\bwith\b|\bwhen\b|\bif\b|\bwithin\b|\bon\s+orders?\b|\bover\s+[$€£]?\d|\bfor\s+(?:the\s+first|new|\d+)|\bno\s+(?:strings|conditions|credit\s+card)|\btrial\b|\buntil\b|\bup\s+to\b'
     requires:
       nearby: ['\bon\s+orders?\b', '\bover\s+[$€£]?\d', '\bfor\s+(?:the\s+first|new|\d+)', '\bno\s+(?:strings|conditions|credit\s+card)', '\btrial\b', '\bwhen\b', '\bif\b', '\bwithin\b']
@@ -246,6 +248,7 @@ rules:
     examples:
       bad: "Free shipping"
       good: "Free shipping on orders over $50"
+      good_en: "Pick a free slot for the measurement visit"
 
   - id: COPY-L-TERMS-01
     title: "«Подробности уточняйте у менеджера» вместо условий"
@@ -541,7 +544,7 @@ rules:
 
   - id: COPY-L-RET-02
     title: "Срок возврата денег при дистанционной продаже больше 10 дней"
-    level: warning
+    level: error
     claim_class: [purchase-terms]
     pattern: '%B%(?:верн[её]м|возвраща\w*|возврат\w*)\s+(?:(?:е[её]|его|деньги|денежн\w*\s+средств\w*|бронь|предоплат\w*|аванс\w*|оплат\w*|сумм\w*)\s+)?(?:[^.!?\n]{0,30}\s)?в\s+течение\s+(?:1[1-9]|[2-9]\d)\s+(?:календарн\w*\s+)?(?:дн|сут)\w*'
     unless: 'товар\w*\s+надлежащ|обмен\w*|верн(?:уть|ите)\s+товар|возврат\w*\s+товар|получени\w+\s+(?:товар|заказ)|гаранти\w*'
@@ -579,6 +582,7 @@ rules:
     title: "«Не является публичной офертой» — для товаров интернет-магазина не работает"
     level: info
     claim_class: [purchase-terms]
+    page_types_except: [landing-lead-services, service-page, services-index-page, specialist-page, location-page]
     pattern: '%B%не\s+является\s+(?:публичной\s+)?офертой'
     message: "Для услуг оговорка согласуется с ГК ст. 437 п. 1; для товаров сведения о товаре в интернете — публичная оферта независимо от цены, кроме явного «не продаётся» (ГК ст. 494 п. 2): цена и условия на карточке должны быть верны"
     replacement: "не опираться на оговорку: держать цены и условия актуальными (факты с valid.until); товар не для продажи — так и написать"
@@ -905,6 +909,28 @@ rules:
       good: "Торговля валютными парами: договоры являются высокорискованными и могут привести к потере внесённых денежных средств в полном объёме"
       legal_category: [finance]
 
+  - id: COPY-L-FCST-01
+    title: "Обещание роста дохода, выручки или продаж клиента без расчёта: «удвоит выручку», «увеличите продажи»"
+    level: error
+    claim_class: [forecast, income-finance]
+    exclude_slot_types: [testimonial-quote]
+    pattern: '%B%(?:удво|утро|учетвер|приумнож|увелич|повыс|нараст)\w*?(?:ит|ят|ите|ишь)%E%\s+(?:[а-яё]+\s+){0,2}?(?:выручк|продаж|прибыл|доход|оборот|заработ|конверси|средн\w+\s+чек|заказ|заявк)\w*|(?:\bwill|\byou(?:''ll|\s+will))\s+(?:double|triple|boost|increase|grow|multiply)\s+(?:your\s+)?(?:revenue|sales|profits?|income|conversions?|orders)\b'
+    unless: 'по\s+(?:расч[её]ту|данным|итогам|результатам)|в\s+среднем\s+(?:у|на)|результат\w*\s+зависит|не\s+гарантиру|based\s+on|on\s+average|results?\s+(?:may\s+)?vary'
+    requires:
+      fact: true
+      fact_fields: [basis.criterion, legal.disclaimer]
+      nearby: ['по\s+(?:расч[её]ту|данным|итогам|результатам)', 'в\s+среднем\s+(?:у|на)', 'результат\w*\s+зависит', 'не\s+гарантиру\w*', 'based\s+on', 'on\s+average']
+    message: "Обещание роста дохода, выручки или продаж клиента — прогноз результата: только с расчётом (basis.criterion) и оговоркой рядом; без числа и основания — недостоверное обещание"
+    replacement: "свойство вместо обещания («показывает, какие заявки теряются») или факт с методикой и оговоркой рядом («у 40 клиентов в 2025 году — в среднем +12 % заявок по данным CRM; результат зависит от …»)"
+    source: "38-ФЗ ст. 5 ч. 1, ч. 3 п. 2; классы forecast и income-finance — facts.schema.yaml x-claim-classes (legal: required); 01-advertising-law-claims.md §2, §6.2–6.3"
+    law:
+      - {ref: "38-ФЗ ст. 5 ч. 3 п. 2", edition: "ред. от 04.08.2026", checked: "2026-09-24"}
+    examples:
+      bad: "Сервис удвоит вашу выручку"
+      good: "Сервис показывает, какие заявки теряются"
+      bad_en: "Our CRM will double your revenue"
+      good_en: "Our CRM shows which leads go unanswered"
+
   - id: COPY-L-EDU-01
     title: "Обещание дохода или работы после обучения: «зарплата от …», «трудоустройство»"
     level: warning
@@ -1184,7 +1210,23 @@ rules:
       bad: "Нажимая кнопку, вы соглашаетесь с политикой обработки персональных данных"
       good: "Согласие на обработку персональных данных — отдельной галочкой под формой"
 
-  # ── 10. Профиль ЕС (--jurisdiction eu) и США (--jurisdiction us): кратко ───────────────────────────────────────
+  # ── 10. Вакансии ──────────────────────────────────────────────────────────────────────────────────────────────────
+  - id: COPY-L-JOB-01
+    title: "Вакансия с требованиями не по деловым качествам: пол, возраст, место жительства, семейное положение"
+    level: error
+    page_types: [careers-page]
+    exclude_slot_types: [testimonial-quote]
+    pattern: '%B%(?:требу\w+|ищем|ищут|нужн\w*|приглаша\w+|вакансия|кандидат\w*|соискател\w*)[^.!?\n]{0,80}?(?:%B%(?:мужчин\w*|женщин\w*|девушк\w*|парн(?:я|ей|и|ю|ем)%E%|юнош\w*)|%B%(?:до|от)\s+\d{2}\s+(?:до\s+\d{2}\s+)?лет%E%|%B%в\s+возрасте\s+(?:от|до)\s+\d{2}|%B%(?:с\s+)?(?:прописк\w*|регистраци\w*\s+в\s+[а-яё]+|местн\w+\s+жител\w*)|%B%(?:без\s+детей|бездетн\w*|холост\w*|не\s*замужн\w*|незамужн\w*|семейн\w+\s+положени\w*))'
+    message: "В вакансии нельзя требовать пол, возраст, место жительства, семейное положение и другое, не связанное с деловыми качествами работника (исключения — только прямо по федеральному закону)"
+    replacement: "требования к делу: опыт, навыки, допуски, график; место работы («объекты — в Нижнем Новгороде»), а не место жительства"
+    source: "565-ФЗ «О занятости населения в Российской Федерации» ст. 53 ч. 3 (ред. от 28.11.2025), ответственность — КоАП; требование права сайта — req:LR-RU-28 (../../site/08-legal-trust-a11y/legal-requirements.yaml); тексты вакансий — 04-copy-by-block/03-page-types.md §4.7"
+    law:
+      - {ref: "565-ФЗ ст. 53 ч. 3", edition: "ред. от 28.11.2025", checked: "2026-09-24", note: "сверка с первоисточником — 04/03 §4.7 [S19]"}
+    examples:
+      bad: "Требуется девушка до 35 лет с пропиской в Нижнем Новгороде, без детей, готовая к переработкам"
+      good: "Ищем плиточника с опытом укладки крупного формата; объекты — в Нижнем Новгороде"
+
+  # ── 11. Профиль ЕС (--jurisdiction eu) и США (--jurisdiction us): кратко ───────────────────────────────────────
   - id: COPY-L-EU-01
     title: "ЕС: объявление о снижении цены без прежней цены (минимальной за 30 дней)"
     level: error

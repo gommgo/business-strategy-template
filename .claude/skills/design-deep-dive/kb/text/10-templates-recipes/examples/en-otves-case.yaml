@@ -43,14 +43,13 @@ copy_deck:
     sections:
     - section_id: case
       section_role: case-studies
-      block: case-studies
       message: 'A 54 m² apartment: 47 working days against 50 in the contract'
       question: 'Will they keep to the timeline on a flat like mine?'
       slots:
       - slot_id: title
         slot_type: case-title
         variants:
-        - {id: a, text: 'A 54 m² apartment in Sormovo, done in 47 working days', status: draft, source: ai-self}
+        - {id: a, text: 'A 54 m² apartment in Sormovo, done in 47 working days', status: assumed, source: ai-self}
         chosen: a
         fact_ids: [case-two-room-47-days]
         claim_flags: [fact-number]
@@ -59,7 +58,7 @@ copy_deck:
         variants:
         - id: a
           text: 'A turnkey renovation of a two-room apartment in Sormovo, a district of Nizhny Novgorod. It took 47 working days against the 50 set in the contract; the handover certificate was signed on 30 May 2026. Below: what the owner wrote afterwards and what the price covers.'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: [case-two-room-47-days]
@@ -67,26 +66,25 @@ copy_deck:
       - slot_id: result
         slot_type: case-result
         variants:
-        - {id: a, text: '47 working days instead of the 50 in the contract', status: draft, source: fact}
+        - {id: a, text: '47 working days instead of the 50 in the contract', status: assumed, source: fact}
         chosen: a
         fact_ids: [case-two-room-47-days]
         claim_flags: [fact-number]
       - slot_id: cta
         slot_type: cta-label
         variants:
-        - {id: a, text: 'Book a site visit', status: draft, source: ai-self}
+        - {id: a, text: 'Book a site visit', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
     - section_id: review
       section_role: testimonials
-      block: testimonials
       message: 'Timing and the estimate in the client’s words, framed as one apartment'
       slots:
       - slot_id: title
         slot_type: section-title
         variants:
-        - {id: a, text: 'What the owner wrote after the handover', status: draft, source: ai-self}
+        - {id: a, text: 'What the owner wrote after the handover', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
@@ -94,7 +92,7 @@ copy_deck:
         slot_type: testimonial-quote
         group: review-1
         variants:
-        - {id: a, text: '“We got the two-room flat back in 47 working days, three days ahead of the contract. The site manager sent photos every evening… The estimate didn''t grow by a single rouble”', status: draft, source: voc}
+        - {id: a, text: '“We got the two-room flat back in 47 working days, three days ahead of the contract. The site manager sent photos every evening… The estimate didn''t grow by a single rouble”', status: assumed, source: voc}
         chosen: a
         fact_ids: [review-anna-k]
         claim_flags: [testimonial-quote]
@@ -102,85 +100,82 @@ copy_deck:
         slot_type: testimonial-attribution
         group: review-1
         variants:
-        - {id: a, text: 'Anna K., Nizhny Novgorod (translated from Russian)', status: draft, source: fact}
+        - {id: a, text: 'Anna K., Nizhny Novgorod (translated from Russian)', status: assumed, source: fact}
         chosen: a
         fact_ids: [review-anna-k]
         claim_flags: []
       - slot_id: frame
         slot_type: body
         variants:
-        - {id: a, text: 'This is one apartment and one owner''s words. The estimate and timing of another renovation depend on the area, the scope of work and the materials.', status: draft, source: ai-self}
+        - {id: a, text: 'This is one apartment and one owner''s words. The estimate and timing of another renovation depend on the area, the scope of work and the materials.', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
     - section_id: guarantee
       section_role: guarantee
-      block: guarantee
       message: 'A 3-year warranty on the work — clause 7.2 of the contract'
       slots:
       - slot_id: title
         slot_type: section-title
         variants:
-        - {id: a, text: 'A 3-year warranty on the work, in the contract', status: draft, source: ai-self}
+        - {id: a, text: 'A 3-year warranty on the work, in the contract', status: assumed, source: ai-self}
         chosen: a
         fact_ids: [guarantee-3-years]
         claim_flags: [guarantee]
       - slot_id: text
         slot_type: guarantee-text
         variants:
-        - {id: a, text: 'Our work comes with a 3-year warranty, written into clause 7.2 of the contract. The same clause is in every Otves contract, not only in this one.', status: draft, source: ai-self}
+        - {id: a, text: 'Our work comes with a 3-year warranty, written into clause 7.2 of the contract. The same clause is in every Otves contract, not only in this one.', status: assumed, source: ai-self}
         chosen: a
         fact_ids: [guarantee-3-years]
         claim_flags: [guarantee]
     - section_id: price
       section_role: pricing
-      block: pricing
       message: 'From ₽9800 per m², materials not included; the total comes with the estimate'
       slots:
       - slot_id: title
         slot_type: section-title
         variants:
-        - {id: a, text: 'What turnkey renovation costs', status: draft, source: ai-self}
+        - {id: a, text: 'What turnkey renovation costs', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
       - slot_id: price
         slot_type: pricing-price
         variants:
-        - {id: a, text: 'from ₽9800 per m²', status: draft, source: fact}
+        - {id: a, text: 'from ₽9800 per m²', status: assumed, source: fact}
         chosen: a
         fact_ids: [price-from-per-m2]
         claim_flags: [price-discount]
       - slot_id: note
         slot_type: pricing-price-note
         variants:
-        - {id: a, text: 'Labour only, materials not included.', status: draft, source: ai-self}
+        - {id: a, text: 'Labour only, materials not included.', status: assumed, source: ai-self}
         chosen: a
         fact_ids: [price-from-per-m2]
         claim_flags: [price-discount]
     - section_id: final
       section_role: final-cta
-      block: final-cta
       message: 'Book a site visit; the estimate is free within city limits'
       slots:
       - slot_id: title
         slot_type: section-title
         variants:
-        - {id: a, text: 'Start with a site visit and an estimate', status: draft, source: ai-self}
+        - {id: a, text: 'Start with a site visit and an estimate', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
       - slot_id: cta
         slot_type: cta-label
         variants:
-        - {id: a, text: 'Book a site visit', status: draft, source: ai-self}
+        - {id: a, text: 'Book a site visit', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
       - slot_id: cta-note
         slot_type: cta-note
         variants:
-        - {id: a, text: 'The visit and the estimate are free within city limits', status: draft, source: fact}
+        - {id: a, text: 'The visit and the estimate are free within city limits', status: assumed, source: fact}
         chosen: a
         fact_ids: [estimate-free]
         claim_flags: [price-discount]

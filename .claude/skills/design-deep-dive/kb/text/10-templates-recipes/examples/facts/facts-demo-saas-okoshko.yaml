@@ -17,6 +17,7 @@ site: okoshko-demo
 lang: ru
 jurisdiction: ru
 status: draft
+example: true
 owner: {role: "основатель (демо-заказчик)", contact: "почта заказчика из брифа (демо)"}
 collected_by: "агент E (демо-набор для примеров, 2026-09-24)"
 never_claim_defaults: ru-default-1

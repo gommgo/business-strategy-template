@@ -32,7 +32,7 @@ copy_deck:
     cta_primary: okoshko-solution-aware/hero/cta
     promise:
       variants:
-      - {id: a, text: 'Online booking with Telegram reminders for barbershops and salons', status: draft, source: ai-self}
+      - {id: a, text: 'Online booking with Telegram reminders for barbershops and salons', status: assumed, source: ai-self}
       chosen: a
       fact_ids: [reminders, self-booking-link]
       claim_flags: [fact-property]
@@ -47,54 +47,52 @@ copy_deck:
     sections:
     - section_id: hero
       section_role: hero
-      block: hero
       message: 'Clients book themselves, reminders go out without you; the first step is a free trial'
       question: 'Will this stop the evening calls?'
       slots:
       - slot_id: eyebrow
         slot_type: eyebrow
         variants:
-        - {id: a, text: 'Online booking for barbershops and salons', status: draft, source: ai-self}
+        - {id: a, text: 'Online booking for barbershops and salons', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
       - slot_id: h1
         slot_type: headline
         variants:
-        - {id: a, text: 'Telegram reminders instead of evening calls', status: draft, source: ai-self}
+        - {id: a, text: 'Telegram reminders instead of evening calls', status: assumed, source: ai-self}
         chosen: a
         fact_ids: [reminders]
         claim_flags: [fact-property]
       - slot_id: sub
         slot_type: subheadline
         variants:
-        - {id: a, text: 'Clients book through your link and get a reminder 24 hours and 2 hours before the visit.', status: draft, source: fact}
+        - {id: a, text: 'Clients book through your link and get a reminder 24 hours and 2 hours before the visit.', status: assumed, source: fact}
         chosen: a
         fact_ids: [self-booking-link, reminders]
         claim_flags: [fact-property]
       - slot_id: cta
         slot_type: cta-label
         variants:
-        - {id: a, text: 'Set up your booking link', status: draft, source: ai-self}
+        - {id: a, text: 'Set up your booking link', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
       - slot_id: cta-note
         slot_type: cta-note
         variants:
-        - {id: a, text: 'Free for 14 days, no card required', status: draft, source: fact}
+        - {id: a, text: 'Free for 14 days, no card required', status: assumed, source: fact}
         chosen: a
         fact_ids: [trial-14-days]
         claim_flags: [price-discount]
     - section_id: how
       section_role: benefits
-      block: benefits
       message: 'Booking by link and Telegram reminders'
       slots:
       - slot_id: h2
         slot_type: section-title
         variants:
-        - {id: a, text: 'Clients book themselves; reminders go out without you', status: draft, source: ai-self}
+        - {id: a, text: 'Clients book themselves; reminders go out without you', status: assumed, source: ai-self}
         chosen: a
         fact_ids: [self-booking-link, reminders]
         claim_flags: [fact-property]
@@ -102,7 +100,7 @@ copy_deck:
         slot_type: card-title
         group: card-1
         variants:
-        - {id: a, text: 'Booking by link', status: draft, source: ai-self}
+        - {id: a, text: 'Booking by link', status: assumed, source: ai-self}
         chosen: a
         fact_ids: [self-booking-link]
         claim_flags: []
@@ -110,7 +108,7 @@ copy_deck:
         slot_type: card-body
         group: card-1
         variants:
-        - {id: a, text: 'Clients pick a service, a stylist and an open slot. Put the link in Telegram, VK, maps and on your website.', status: draft, source: fact}
+        - {id: a, text: 'Clients pick a service, a stylist and an open slot. Put the link in Telegram, VK, maps and on your website.', status: assumed, source: fact}
         chosen: a
         fact_ids: [self-booking-link]
         claim_flags: [fact-property]
@@ -118,7 +116,7 @@ copy_deck:
         slot_type: card-title
         group: card-2
         variants:
-        - {id: a, text: 'Telegram reminders', status: draft, source: ai-self}
+        - {id: a, text: 'Telegram reminders', status: assumed, source: ai-self}
         chosen: a
         fact_ids: [reminders]
         claim_flags: []
@@ -126,26 +124,25 @@ copy_deck:
         slot_type: card-body
         group: card-2
         variants:
-        - {id: a, text: '24 hours and 2 hours before the visit; Telegram reminders are included in every plan.', status: draft, source: fact}
+        - {id: a, text: '24 hours and 2 hours before the visit; Telegram reminders are included in every plan.', status: assumed, source: fact}
         chosen: a
         fact_ids: [reminders]
         claim_flags: [fact-property]
     - section_id: case
       section_role: case-studies
-      block: case-studies
       message: 'Best case and the average next to it: 14% → 6% in one barbershop, −4 points across 212 salons'
       slots:
       - slot_id: title
         slot_type: case-title
         variants:
-        - {id: a, text: 'A barbershop in Kazan: no-shows down from 14% to 6%', status: draft, source: fact}
+        - {id: a, text: 'A barbershop in Kazan: no-shows down from 14% to 6%', status: assumed, source: fact}
         chosen: a
         fact_ids: [case-noshow-kazan]
         claim_flags: [fact-number]
       - slot_id: result
         slot_type: case-result
         variants:
-        - {id: a, text: 'No-shows fell from 14% to 6% in three months. On average, no-shows fell by 4 percentage points across 212 salons.', status: draft, source: fact}
+        - {id: a, text: 'No-shows fell from 14% to 6% in three months. On average, no-shows fell by 4 percentage points across 212 salons.', status: assumed, source: fact}
         chosen: a
         fact_ids: [case-noshow-kazan, noshow-average]
         claim_flags: [fact-number]
@@ -153,7 +150,7 @@ copy_deck:
         slot_type: testimonial-quote
         group: review-1
         variants:
-        - {id: a, text: '“I used to spend my evenings calling everyone booked for the next day. Now reminders go out on their own, and I only call those who haven''t confirmed”', status: draft, source: voc}
+        - {id: a, text: '“I used to spend my evenings calling everyone booked for the next day. Now reminders go out on their own, and I only call those who haven''t confirmed”', status: assumed, source: voc}
         chosen: a
         fact_ids: [review-ruslan]
         claim_flags: [testimonial-quote]
@@ -161,45 +158,43 @@ copy_deck:
         slot_type: testimonial-attribution
         group: review-1
         variants:
-        - {id: a, text: 'Ruslan, barbershop owner, Kazan (translated from Russian)', status: draft, source: fact}
+        - {id: a, text: 'Ruslan, barbershop owner, Kazan (translated from Russian)', status: assumed, source: fact}
         chosen: a
         fact_ids: [review-ruslan]
         claim_flags: []
     - section_id: switch
       section_role: objections
-      block: objections
       message: 'Support moves the client list in 1 business day; setup questions go to a chat'
       slots:
       - slot_id: h2
         slot_type: section-title
         variants:
-        - {id: a, text: 'We move your client list in 1 business day', status: draft, source: fact}
+        - {id: a, text: 'We move your client list in 1 business day', status: assumed, source: fact}
         chosen: a
         fact_ids: [import-free]
         claim_flags: [purchase-terms]
       - slot_id: a1
         slot_type: objection-answer
         variants:
-        - {id: a, text: 'No manual transfer: send the file from Excel or Google Sheets, and support will move your clients for free within 1 business day.', status: draft, source: fact}
+        - {id: a, text: 'No manual transfer: send the file from Excel or Google Sheets, and support will move your clients for free within 1 business day.', status: assumed, source: fact}
         chosen: a
         fact_ids: [import-free]
         claim_flags: [purchase-terms, price-discount]
       - slot_id: a2
         slot_type: objection-answer
         variants:
-        - {id: a, text: 'Setup questions go to the support chat, 9:00 to 21:00 Moscow time; the first reply comes in 7 minutes on average.', status: draft, source: fact}
+        - {id: a, text: 'Setup questions go to the support chat, 9:00 to 21:00 Moscow time; the first reply comes in 7 minutes on average.', status: assumed, source: fact}
         chosen: a
         fact_ids: [support-chat]
         claim_flags: [fact-number]
     - section_id: pricing
       section_role: pricing
-      block: pricing
       message: 'Plans by salon size; 14 days free with no card; switch off on any day'
       slots:
       - slot_id: h2
         slot_type: section-title
         variants:
-        - {id: a, text: 'Plans from 990 ₽ a month per stylist', status: draft, source: fact}
+        - {id: a, text: 'Plans from 990 ₽ a month per stylist', status: assumed, source: fact}
         chosen: a
         fact_ids: [price-master]
         claim_flags: [price-discount]
@@ -207,7 +202,7 @@ copy_deck:
         slot_type: pricing-plan-name
         group: plan-1
         variants:
-        - {id: a, text: 'Master', status: draft, source: fact}
+        - {id: a, text: 'Master', status: assumed, source: fact}
         chosen: a
         fact_ids: [price-master]
         claim_flags: []
@@ -215,7 +210,7 @@ copy_deck:
         slot_type: pricing-price
         group: plan-1
         variants:
-        - {id: a, text: '990 ₽ a month', status: draft, source: fact}
+        - {id: a, text: '990 ₽ a month', status: assumed, source: fact}
         chosen: a
         fact_ids: [price-master]
         claim_flags: [price-discount]
@@ -223,7 +218,7 @@ copy_deck:
         slot_type: pricing-plan-summary
         group: plan-1
         variants:
-        - {id: a, text: 'For one stylist: online booking and Telegram reminders', status: draft, source: ai-self}
+        - {id: a, text: 'For one stylist: online booking and Telegram reminders', status: assumed, source: ai-self}
         chosen: a
         fact_ids: [price-master, reminders]
         claim_flags: []
@@ -231,7 +226,7 @@ copy_deck:
         slot_type: pricing-plan-name
         group: plan-2
         variants:
-        - {id: a, text: 'Salon: up to 5 stylists', status: draft, source: fact}
+        - {id: a, text: 'Salon: up to 5 stylists', status: assumed, source: fact}
         chosen: a
         fact_ids: [price-salon]
         claim_flags: []
@@ -239,7 +234,7 @@ copy_deck:
         slot_type: pricing-price
         group: plan-2
         variants:
-        - {id: a, text: '2,490 ₽ a month', status: draft, source: fact}
+        - {id: a, text: '2,490 ₽ a month', status: assumed, source: fact}
         chosen: a
         fact_ids: [price-salon]
         claim_flags: [price-discount]
@@ -247,66 +242,64 @@ copy_deck:
         slot_type: pricing-plan-summary
         group: plan-2
         variants:
-        - {id: a, text: 'For up to 5 stylists: online booking and Telegram reminders for each of them', status: draft, source: ai-self}
+        - {id: a, text: 'For up to 5 stylists: online booking and Telegram reminders for each of them', status: assumed, source: ai-self}
         chosen: a
         fact_ids: [price-salon, reminders]
         claim_flags: []
       - slot_id: cancel
         slot_type: guarantee-text
         variants:
-        - {id: a, text: 'Switch it off in settings on any day; unused days are refunded within 10 days.', status: draft, source: fact}
+        - {id: a, text: 'Switch it off in settings on any day; unused days are refunded within 10 days.', status: assumed, source: fact}
         chosen: a
         fact_ids: [cancel-refund]
         claim_flags: [purchase-terms]
       - slot_id: cta
         slot_type: cta-label
         variants:
-        - {id: a, text: 'Set up your booking link', status: draft, source: ai-self}
+        - {id: a, text: 'Set up your booking link', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
       - slot_id: cta-note
         slot_type: cta-note
         variants:
-        - {id: a, text: 'No card required: after 14 days, booking pauses until you pick a plan.', status: draft, source: fact}
+        - {id: a, text: 'No card required: after 14 days, booking pauses until you pick a plan.', status: assumed, source: fact}
         chosen: a
         fact_ids: [trial-14-days]
         claim_flags: [purchase-terms]
     - section_id: final
       section_role: final-cta
-      block: final-cta
       message: 'The same first step — 14 days with no card'
       slots:
       - slot_id: h2
         slot_type: section-title
         variants:
-        - {id: a, text: 'Start with 14 days free', status: draft, source: fact}
+        - {id: a, text: 'Start with 14 days free', status: assumed, source: fact}
         chosen: a
         fact_ids: [trial-14-days]
         claim_flags: [price-discount]
       - slot_id: cta
         slot_type: cta-label
         variants:
-        - {id: a, text: 'Set up your booking link', status: draft, source: ai-self}
+        - {id: a, text: 'Set up your booking link', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
       - slot_id: cta-note
         slot_type: cta-note
         variants:
-        - {id: a, text: 'Free for 14 days, no card required', status: draft, source: fact}
+        - {id: a, text: 'Free for 14 days, no card required', status: assumed, source: fact}
         chosen: a
         fact_ids: [trial-14-days]
         claim_flags: [price-discount]
     - section_id: footer
       section_role: footer
-      block: footer
       message: 'Who the seller is and where the documents are'
       slots:
       - slot_id: tagline
         slot_type: footer-tagline
         variants:
-        - {id: a, text: 'Okoshko — online booking for barbershops and salons', status: draft, source: ai-self}
+        - {id: a, text: 'Okoshko — online booking for barbershops and salons', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []

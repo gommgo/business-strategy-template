@@ -1,10 +1,12 @@
-# ДЕМО-ФАКТЫ J · «Сталькон» — ВЫМЫШЛЕНЫ (формат text facts.yaml; поля — по образцу демо-фактов text «Отвес»).
+# ДЕМО-ФАКТЫ · «Сталькон» — ВЫМЫШЛЕНЫ (формат text facts.yaml, example: true): металлоконструкции, B2B. Макет на них
+# допустим, в публикацию они не идут: copydeck.py validate --final и claims_check.py --final дают error.
 facts_version: 1
-date: '2026-09-24'
+date: '2026-09-29'
 site: stalkon
 lang: ru
 jurisdiction: ru
 status: draft
+example: true
 owner:
   role: директор (заказчик)
   contact: почта заказчика из брифа
@@ -16,36 +18,12 @@ intake:
   channel: общий документ + созвон с записью
 never_claim_defaults: ru-default-1
 entities:
-- id: company-otves
+- id: company-stalkon
   type: company
   names:
-  - «Отвес»
-  - Отвес
-  - студия ремонта «Отвес»
-- id: city-nn
-  type: place
-  names:
-  - Нижний Новгород
-  - Нижнем Новгороде
-  - Нижегородская область
-- id: platform-yandex-maps
-  type: platform
-  names:
-  - Яндекс Карты
-  - Яндекс Картах
-  - Яндекс.Карты
-- id: person-lapin
-  type: person
-  names:
-  - Сергей Лапин
-  - Сергей
-  fact_id: foreman-lapin
-- id: person-anna-k
-  type: person
-  names:
-  - Анна К.
-  - Анна
-  fact_id: review-anna-k
+  - «Сталькон»
+  - Сталькон
+  - ООО «Сталькон»
 facts:
 - id: company-requisites
   kind: company
@@ -53,22 +31,17 @@ facts:
   - company-details
   - fact-number
   verbatim:
-  - ООО «Сталькон» (вымышленная демо-компания J), ОГРН 0000000000000 — ДЕМО
-  canonical: Студия «Отвес» ремонтирует квартиры в Нижнем Новгороде с 2014 года.
-  values:
-  - value: 2014
-    unit: year
-    what: год начала работы
+  - ООО «Сталькон» (вымышленная демо-компания), ОГРН 0000000000000 — ДЕМО
+  canonical: ООО «Сталькон», ОГРН 0000000000000 — вымышленная демо-компания.
   entities:
-  - company-otves
-  - city-nn
+  - company-stalkon
   source:
     type: registry
     who: ЕГРЮЛ
-    where: выписка
+    where: выписка (демо)
     date: '2026-09-10'
-    document: egrul-2026-09-10.pdf
-    quote: 'Дата регистрации: 11.03.2014'
+    document: egrul-demo.pdf
+    quote: 'ООО «Сталькон», ОГРН 0000000000000'
     derivation: direct
   verification:
     status: verified
@@ -87,21 +60,20 @@ facts:
   - fact-number
   verbatim:
   - Работаем с 2009 года (демо)
-  canonical: Студия «Отвес» ремонтирует квартиры в Нижнем Новгороде с 2014 года.
+  canonical: «Сталькон» работает с 2009 года.
   values:
-  - value: 2014
+  - value: 2009
     unit: year
     what: год начала работы
   entities:
-  - company-otves
-  - city-nn
+  - company-stalkon
   source:
     type: registry
     who: ЕГРЮЛ
-    where: выписка
+    where: выписка (демо)
     date: '2026-09-10'
-    document: egrul-2026-09-10.pdf
-    quote: 'Дата регистрации: 11.03.2014'
+    document: egrul-demo.pdf
+    quote: 'Год регистрации: 2009'
     derivation: direct
   verification:
     status: verified
@@ -119,42 +91,36 @@ facts:
   - fact-number
   verbatim:
   - 312 объектов с 2009 года (демо)
-  canonical: С 2014 по сентябрь 2026 года студия «Отвес» сдала 1 146 квартир в Нижнем Новгороде (данные CRM на 1 сентября 2026 года).
+  canonical: С 2009 года «Сталькон» сдал по актам 312 объектов (реестр объектов на 1 сентября 2026 года).
   values:
-  - value: 1146
+  - value: 312
     unit: pcs
-    what: квартиры, сданные по акту
+    what: объекты, сданные по акту
     as_of: '2026-09-01'
-  - value: 2014
+  - value: 2009
     unit: year
     what: год начала работы
   entities:
-  - company-otves
-  - city-nn
+  - company-stalkon
   source:
     type: customer-system
     who: заказчик (директор)
-    where: выгрузка CRM, актов сдачи-приёмки
+    where: реестр объектов и актов сдачи-приёмки (демо)
     date: '2026-09-01'
-    document: crm-export-2026-09-01.xlsx, лист «Акты»
-    quote: 'Подписанных актов сдачи: 1146 (с 03.2014)'
+    document: objects-demo.xlsx, лист «Акты»
+    quote: 'Объектов сдано по актам: 312 (с 2009 года)'
     derivation: direct
   verification:
     status: verified
     by: редактор
     date: '2026-09-18'
-    method: число строк выгрузки совпало с отчётом CRM; выборочно 10 актов
+    method: число строк реестра совпало с числом актов (демо)
   permission:
     status: not-required
   use:
     section_roles: []
     slot_types: []
-  notes: «Более 1 100» — округление вниз допустимо; «1 200+» — нет (текст не может быть больше факта).
-  translations:
-    en:
-      canonical: From 2014 to September 2026, Otves renovated and handed over 1,146 apartments in Nizhny Novgorod (CRM data as of 1
-        September 2026).
-      note: адаптация; числа по-английски с запятой
+  notes: «Более 300 объектов» — округление вниз допустимо; «350+» — нет (текст не может быть больше факта).
   lang: ru
 - id: capacity-tons
   kind: metric
@@ -162,73 +128,54 @@ facts:
   - fact-number
   verbatim:
   - 1 800 тонн металлоконструкций в месяц (демо)
-  canonical: С 2014 по сентябрь 2026 года студия «Отвес» сдала 1 146 квартир в Нижнем Новгороде (данные CRM на 1 сентября 2026 года).
+  canonical: Производственная мощность «Сталькона» — 1 800 тонн металлоконструкций в месяц.
   values:
-  - value: 1146
-    unit: pcs
-    what: квартиры, сданные по акту
-    as_of: '2026-09-01'
-  - value: 2014
-    unit: year
-    what: год начала работы
+  - value: 1800
+    unit: t
+    what: металлоконструкции в месяц
   entities:
-  - company-otves
-  - city-nn
+  - company-stalkon
   source:
-    type: customer-system
-    who: заказчик (директор)
-    where: выгрузка CRM, актов сдачи-приёмки
+    type: customer-document
+    who: заказчик (главный инженер)
+    where: паспорт производства (демо)
     date: '2026-09-01'
-    document: crm-export-2026-09-01.xlsx, лист «Акты»
-    quote: 'Подписанных актов сдачи: 1146 (с 03.2014)'
+    document: production-passport-demo.pdf
+    quote: 'Производственная мощность: 1 800 т металлоконструкций в месяц'
     derivation: direct
   verification:
     status: verified
     by: редактор
     date: '2026-09-18'
-    method: число строк выгрузки совпало с отчётом CRM; выборочно 10 актов
   permission:
     status: not-required
   use:
     section_roles: []
     slot_types: []
-  notes: «Более 1 100» — округление вниз допустимо; «1 200+» — нет (текст не может быть больше факта).
-  translations:
-    en:
-      canonical: From 2014 to September 2026, Otves renovated and handed over 1,146 apartments in Nizhny Novgorod (CRM data as of 1
-        September 2026).
-      note: адаптация; числа по-английски с запятой
   lang: ru
 - id: case-warehouse
   kind: case
   claim_class:
   - fact-number
-  - testimonial-quote
   verbatim:
   - Склад 12 000 м² за 94 дня (демо)
-  canonical: Ремонт двухкомнатной квартиры 54 м² под ключ в Сормовском районе Нижнего Новгорода занял 47 рабочих дней при сроке по договору
-    50 (договор № 2026-041, акт от 30 мая 2026 года).
+  canonical: Каркас склада площадью 12 000 м² изготовлен и смонтирован за 94 дня (договор и акт — демо).
   values:
-  - value: 54
+  - value: 12000
     unit: m2
-    what: площадь квартиры
-  - value: 47
+    what: площадь склада
+  - value: 94
     unit: days
-    what: срок ремонта, рабочие дни
-  - value: 50
-    unit: days
-    what: срок по договору, рабочие дни
+    what: срок изготовления и монтажа, дни
   entities:
-  - company-otves
-  - person-anna-k
-  - city-nn
+  - company-stalkon
   source:
     type: contract
     who: заказчик
-    where: договор подряда и акт сдачи-приёмки
+    where: договор подряда и акт сдачи-приёмки (демо)
     date: '2026-05-30'
-    document: договор № 2026-041; акт от 30.05.2026
-    quote: 'Объект: квартира, 2 комнаты, 54 м²; срок выполнения работ — 50 рабочих дней; работы приняты 30.05.2026 (47-й рабочий день)'
+    document: договор № ДЕМО-01; акт (демо)
+    quote: 'Объект: склад, 12 000 м²; срок изготовления и монтажа — 94 дня'
     derivation: direct
   verification:
     status: verified
@@ -236,17 +183,15 @@ facts:
     date: '2026-09-18'
   permission:
     status: granted
-    subject: Анна К. (владелец квартиры)
+    subject: заказчик объекта (демо)
     form: written-email
-    document: письмо от 2026-09-16
+    document: письмо (демо)
     date: '2026-09-16'
     shows:
     - city
     pd_consent: false
     image_consent: false
-  asset: assets/cases/2026-041/ (фото до и после от заказчика; адрес на фото скрыт)
-  related:
-  - review-anna-k
+  asset: assets/cases/warehouse/ (фото объекта от заказчика, демо)
   use:
     section_roles: []
     slot_types: []
@@ -255,32 +200,25 @@ facts:
   kind: case
   claim_class:
   - fact-number
-  - testimonial-quote
   verbatim:
   - Пешеходный мост 48 м за 60 дней (демо)
-  canonical: Ремонт двухкомнатной квартиры 54 м² под ключ в Сормовском районе Нижнего Новгорода занял 47 рабочих дней при сроке по договору
-    50 (договор № 2026-041, акт от 30 мая 2026 года).
+  canonical: Пешеходный мост длиной 48 м изготовлен и смонтирован за 60 дней (договор и акт — демо).
   values:
-  - value: 54
-    unit: m2
-    what: площадь квартиры
-  - value: 47
+  - value: 48
+    unit: m
+    what: длина моста
+  - value: 60
     unit: days
-    what: срок ремонта, рабочие дни
-  - value: 50
-    unit: days
-    what: срок по договору, рабочие дни
+    what: срок изготовления и монтажа, дни
   entities:
-  - company-otves
-  - person-anna-k
-  - city-nn
+  - company-stalkon
   source:
     type: contract
     who: заказчик
-    where: договор подряда и акт сдачи-приёмки
-    date: '2026-05-30'
-    document: договор № 2026-041; акт от 30.05.2026
-    quote: 'Объект: квартира, 2 комнаты, 54 м²; срок выполнения работ — 50 рабочих дней; работы приняты 30.05.2026 (47-й рабочий день)'
+    where: договор подряда и акт сдачи-приёмки (демо)
+    date: '2026-06-20'
+    document: договор № ДЕМО-02; акт (демо)
+    quote: 'Объект: пешеходный мост, 48 м; срок изготовления и монтажа — 60 дней'
     derivation: direct
   verification:
     status: verified
@@ -288,17 +226,15 @@ facts:
     date: '2026-09-18'
   permission:
     status: granted
-    subject: Анна К. (владелец квартиры)
+    subject: заказчик объекта (демо)
     form: written-email
-    document: письмо от 2026-09-16
+    document: письмо (демо)
     date: '2026-09-16'
     shows:
     - city
     pd_consent: false
     image_consent: false
-  asset: assets/cases/2026-041/ (фото до и после от заказчика; адрес на фото скрыт)
-  related:
-  - review-anna-k
+  asset: assets/cases/bridge/ (фото объекта от заказчика, демо)
   use:
     section_roles: []
     slot_types: []
@@ -306,51 +242,42 @@ facts:
 - id: person-chief-engineer
   kind: person
   claim_class:
-  - fact-number
   - fact-property
   verbatim:
   - Главный инженер — демо-персона, согласие на изображение (демо)
-  canonical: Сергей Лапин — прораб студии «Отвес», опыт в ремонте квартир 11 лет.
-  values:
-  - value: 11
-    unit: years
-    what: опыт в ремонте
+  canonical: Главный инженер «Сталькона» — демо-персона; согласие на изображение есть (демо).
   entities:
-  - person-lapin
-  - company-otves
+  - company-stalkon
   source:
     type: customer-document
     who: заказчик
-    where: анкета сотрудника, трудовая книжка (сведения о работе)
+    where: согласие на распространение ПДн и изображения (демо)
     date: '2026-09-12'
-    document: hr/lapin-2026-09-12.pdf
-    quote: стаж в строительно-отделочных работах с 2015 г.
-    derivation: computed
-    computation: 2026 − 2015 = 11 лет
+    document: consent-demo.pdf
+    quote: 'Главный инженер: согласие на изображение на сайте'
+    derivation: direct
   verification:
     status: verified
     by: редактор
     date: '2026-09-18'
   permission:
     status: granted
-    subject: Сергей Лапин
+    subject: главный инженер (демо-персона)
     form: signed-consent
     scope:
     - site
-    document: согласие на распространение ПДн от 2026-09-12
+    document: согласие на распространение ПДн (демо)
     date: '2026-09-12'
     shows:
-    - full-name
     - photo
     - position
     pd_consent: true
     image_consent: true
   attribution:
-    name: Сергей Лапин
-    display: full-name
-    role: прораб
+    display: anonymous
+    role: главный инженер
     relation: employee
-  asset: assets/team/lapin.jpg (фото заказчика)
+  asset: assets/team/chief-engineer.jpg (фото заказчика, демо)
   use:
     section_roles: []
     slot_types: []
@@ -361,42 +288,26 @@ facts:
   - fact-number
   verbatim:
   - Допуск СРО № ДЕМО-0000 (демо, срок — до 2027-12-31)
-  canonical: С 2014 по сентябрь 2026 года студия «Отвес» сдала 1 146 квартир в Нижнем Новгороде (данные CRM на 1 сентября 2026 года).
-  values:
-  - value: 1146
-    unit: pcs
-    what: квартиры, сданные по акту
-    as_of: '2026-09-01'
-  - value: 2014
-    unit: year
-    what: год начала работы
+  canonical: У «Сталькона» допуск СРО № ДЕМО-0000, действует до 31 декабря 2027 года (демо).
   entities:
-  - company-otves
-  - city-nn
+  - company-stalkon
   source:
-    type: customer-system
-    who: заказчик (директор)
-    where: выгрузка CRM, актов сдачи-приёмки
-    date: '2026-09-01'
-    document: crm-export-2026-09-01.xlsx, лист «Акты»
-    quote: 'Подписанных актов сдачи: 1146 (с 03.2014)'
+    type: registry
+    who: реестр членов СРО (демо)
+    where: выписка из реестра
+    date: '2026-09-10'
+    document: sro-demo.pdf
+    quote: 'Допуск СРО № ДЕМО-0000, действует до 2027-12-31'
     derivation: direct
   verification:
     status: verified
     by: редактор
     date: '2026-09-18'
-    method: число строк выгрузки совпало с отчётом CRM; выборочно 10 актов
   permission:
     status: not-required
   use:
     section_roles: []
     slot_types: []
-  notes: «Более 1 100» — округление вниз допустимо; «1 200+» — нет (текст не может быть больше факта).
-  translations:
-    en:
-      canonical: From 2014 to September 2026, Otves renovated and handed over 1,146 apartments in Nizhny Novgorod (CRM data as of 1
-        September 2026).
-      note: адаптация; числа по-английски с запятой
   lang: ru
   valid:
     until: '2027-12-31'
@@ -406,35 +317,34 @@ missing:
   kind: client
   claim_class:
   - company-details
-  placeholder: '[PLACEHOLDER: реквизиты ООО]'
-  who: заказчик (бухгалтер)
+  placeholder: '[PLACEHOLDER: логотипы клиентов с разрешением]'
+  who: заказчик (директор)
   needed_for:
     section_roles:
-    - footer
-    - contacts
+    - proof-logos
     slot_types:
-    - footer-legal
+    - logos-caption
   asked: '2026-09-10'
   due: '2026-09-30'
   blocking: false
   fallback: omit-block
-  question: Пришлите полное название юрлица, ОГРН, ИНН и юридический адрес — как в ЕГРЮЛ.
+  question: Каких клиентов можно показать логотипом? Пришлите логотипы (SVG) и письменное разрешение каждого.
 - id: job-openings
   what: список открытых вакансий с датами
   kind: availability
   claim_class:
   - company-details
-  placeholder: '[PLACEHOLDER: реквизиты ООО]'
-  who: заказчик (бухгалтер)
+  placeholder: '[PLACEHOLDER: открытые вакансии]'
+  who: заказчик (HR)
   needed_for:
     section_roles:
-    - footer
-    - contacts
+    - offer
     slot_types:
-    - footer-legal
+    - card-title
+    - card-body
   asked: '2026-09-10'
   due: '2026-09-30'
   blocking: false
   fallback: omit-block
-  question: Пришлите полное название юрлица, ОГРН, ИНН и юридический адрес — как в ЕГРЮЛ.
+  question: Какие вакансии сейчас открыты и до какой даты? Требования — без пола, возраста и прописки.
 never_claim: []

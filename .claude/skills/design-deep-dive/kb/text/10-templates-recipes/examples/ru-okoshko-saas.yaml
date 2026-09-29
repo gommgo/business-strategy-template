@@ -27,13 +27,13 @@ copy_deck:
       variants:
       - id: a
         text: Онлайн-запись с напоминаниями в Telegram для барбершопов и салонов
-        status: draft
+        status: assumed
         source: ai-self
       chosen: a
       fact_ids:
       - reminders
       - self-booking-link
-      basis: 03 §3.2 (solution-vs-alternatives); product.goal пакета kimi
+      basis: 03 §3.2 (solution-vs-alternatives); обещание первого экрана
     meta:
       title: Онлайн-запись с напоминаниями в Telegram — «Окошко»
       description: Клиенты записываются по ссылке сами и получают напоминание в Telegram за 24 и за 2 часа до визита. 14 дней бесплатно, без привязки
@@ -47,7 +47,6 @@ copy_deck:
       - price-master
     sections:
     - section_id: hero
-      block: hero
       section_role: hero
       question: Чем это лучше, чем обзванивать клиентов самому?
       message: Клиенты записываются сами, напоминание уходит без вас; первый шаг — 14 дней бесплатно без карты
@@ -57,7 +56,7 @@ copy_deck:
         variants:
         - id: a
           text: Онлайн-запись для барбершопов и салонов
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -72,7 +71,7 @@ copy_deck:
         variants:
         - id: a
           text: Напоминания в Telegram вместо вечерних обзвонов
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -89,7 +88,7 @@ copy_deck:
         variants:
         - id: a
           text: Клиенты записываются по ссылке сами и получают напоминание за 24 часа и за 2 часа до визита.
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -107,7 +106,7 @@ copy_deck:
         variants:
         - id: a
           text: Настроить ссылку на запись
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -122,7 +121,7 @@ copy_deck:
         variants:
         - id: a
           text: 14 дней бесплатно, без привязки карты
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -136,7 +135,6 @@ copy_deck:
           warnings: 0
         notes: условие «бесплатно» в той же строке (H FREE-01)
     - section_id: how
-      block: benefits
       section_role: benefits
       question: Что именно делает сервис?
       message: Запись по ссылке и напоминания в Telegram
@@ -146,7 +144,7 @@ copy_deck:
         variants:
         - id: a
           text: Клиенты записываются сами, а напоминания уходят без вас
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -165,7 +163,7 @@ copy_deck:
         variants:
         - id: a
           text: Запись по ссылке
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -181,7 +179,7 @@ copy_deck:
         variants:
         - id: a
           text: Клиент сам выбирает услугу, мастера и свободное время; ссылку ставят в Telegram, VK, на карты и на сайт.
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -198,7 +196,7 @@ copy_deck:
         variants:
         - id: a
           text: Напоминания в Telegram
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -214,7 +212,7 @@ copy_deck:
         variants:
         - id: a
           text: За 24 часа и за 2 часа до визита; напоминания в Telegram входят в любой тариф.
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -227,7 +225,6 @@ copy_deck:
           warnings: 0
         notes: 'карточек две — по числу фактов о продукте, не три по шаблону (02 §3; D: три карточки — примета ИИ)'
     - section_id: case
-      block: case-studies
       section_role: case-studies
       question: Это правда снижает неявки?
       message: 'Лучший случай и средний результат рядом: 14 % → 6 % в одном барбершопе, в среднем −4 п. п. у 212 салонов'
@@ -237,7 +234,7 @@ copy_deck:
         variants:
         - id: a
           text: 'Барбершоп в Казани: неявки — с 14 % до 6 % за три месяца'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -255,7 +252,7 @@ copy_deck:
         variants:
         - id: a
           text: Неявки — с 14 % до 6 % за три месяца. В среднем у 212 салонов неявок стало меньше на 4 процентных пункта.
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -273,7 +270,7 @@ copy_deck:
         variants:
         - id: a
           text: «Раньше вечером обзванивал всех, кто записан на завтра. Теперь напоминания уходят сами, а я звоню только тем, кто не подтвердил»
-          status: draft
+          status: assumed
           source: customer
         chosen: a
         fact_ids:
@@ -290,7 +287,7 @@ copy_deck:
         variants:
         - id: a
           text: Руслан, владелец барбершопа, Казань
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -302,7 +299,6 @@ copy_deck:
           warnings: 0
         notes: подпись по permission.shows (имя, должность, город)
     - section_id: switch
-      block: objections
       section_role: objections
       question: Переносить базу и учить мастеров — морока?
       message: Базу переносит поддержка за 1 рабочий день; данные — на серверах в России
@@ -312,7 +308,7 @@ copy_deck:
         variants:
         - id: a
           text: Базу клиентов из Excel перенесём за 1 рабочий день
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -329,7 +325,7 @@ copy_deck:
         - id: a
           text: 'Переносить базу вручную не придётся: пришлите файл из Excel или Google Таблиц, и поддержка перенесёт клиентов бесплатно в течение
             1 рабочего дня после получения файла.'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -347,7 +343,7 @@ copy_deck:
         variants:
         - id: a
           text: Вопросы по настройке — в чат поддержки с 9:00 до 21:00 по Москве; в августе первый ответ приходил в среднем за 7 минут.
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -364,7 +360,7 @@ copy_deck:
         variants:
         - id: a
           text: Данные клиентов хранятся на серверах в России.
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -376,7 +372,6 @@ copy_deck:
           errors: 0
           warnings: 0
     - section_id: pricing
-      block: pricing
       section_role: pricing
       question: Сколько стоит и что будет после пробного периода?
       message: Тарифы по размеру салона; 14 дней бесплатно без карты; отключить — в любой день
@@ -386,7 +381,7 @@ copy_deck:
         variants:
         - id: a
           text: 'Тарифы «Окошка»: от 990 ₽ в месяц за мастера'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -403,7 +398,7 @@ copy_deck:
         variants:
         - id: a
           text: Мастер
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -419,7 +414,7 @@ copy_deck:
         variants:
         - id: a
           text: 990 ₽ в месяц
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -436,7 +431,7 @@ copy_deck:
         variants:
         - id: a
           text: 'Для одного мастера: онлайн-запись и напоминания в Telegram'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -454,7 +449,7 @@ copy_deck:
         variants:
         - id: a
           text: 'Салон: до 5 мастеров'
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -470,7 +465,7 @@ copy_deck:
         variants:
         - id: a
           text: 2 490 ₽ в месяц
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -487,7 +482,7 @@ copy_deck:
         variants:
         - id: a
           text: 'Для команды до 5 мастеров: онлайн-запись и напоминания в Telegram для каждого'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -505,7 +500,7 @@ copy_deck:
         variants:
         - id: a
           text: Сеть
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -521,7 +516,7 @@ copy_deck:
         variants:
         - id: a
           text: от 6 900 ₽ в месяц
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -538,7 +533,7 @@ copy_deck:
         variants:
         - id: a
           text: От 6 мастеров и несколько филиалов; итог зависит от числа мастеров
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -555,7 +550,7 @@ copy_deck:
         variants:
         - id: a
           text: SMS-напоминания — 4 ₽ за сообщение сверх тарифа
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -572,7 +567,7 @@ copy_deck:
         variants:
         - id: a
           text: При оплате за 12 месяцев вперёд — 2 месяца в подарок
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -590,7 +585,7 @@ copy_deck:
         - id: a
           text: Подписку можно отключить в настройках в любой день; деньги за оставшиеся дни оплаченного периода вернём в течение 10 дней после
             заявки.
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -608,7 +603,7 @@ copy_deck:
         variants:
         - id: a
           text: Настроить ссылку на запись
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -622,7 +617,7 @@ copy_deck:
         variants:
         - id: a
           text: 'Без привязки карты: после 14 дней запись приостановится, пока вы не выберете тариф.'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -635,7 +630,6 @@ copy_deck:
           warnings: 0
         notes: что будет после пробного периода (03 §4.5)
     - section_id: faq
-      block: faq
       section_role: faq
       question: Что будет после пробного периода?
       message: Остаток вопросов после секций
@@ -647,7 +641,7 @@ copy_deck:
         variants:
         - id: a
           text: Что будет, когда закончится пробный период?
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -666,7 +660,7 @@ copy_deck:
         variants:
         - id: a
           text: Запись приостановится, пока вы не выберете тариф, а данные сохранятся 90 дней. Пробный период — без привязки карты.
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -680,7 +674,6 @@ copy_deck:
           warnings: 0
         notes: 'ответ первой фразой (02 §9; G COPY-GEO-14); правка 1: «без привязки карты» дословно — requires_nearby факта (COPY-F-NEARBY)'
     - section_id: final
-      block: final-cta
       section_role: final-cta
       question: Попробовать сейчас?
       message: Тот же первый шаг — 14 дней без карты
@@ -690,7 +683,7 @@ copy_deck:
         variants:
         - id: a
           text: Начните с 14 дней без оплаты
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -706,7 +699,7 @@ copy_deck:
         variants:
         - id: a
           text: Настроить ссылку на запись
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -720,7 +713,7 @@ copy_deck:
         variants:
         - id: a
           text: 14 дней бесплатно, без привязки карты
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -733,7 +726,6 @@ copy_deck:
           errors: 0
           warnings: 0
     - section_id: footer
-      block: footer
       section_role: footer
       message: Кто продавец и где документы
       slots:
@@ -743,7 +735,7 @@ copy_deck:
         variants:
         - id: a
           text: «Окошко» — онлайн-запись для барбершопов и салонов
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []

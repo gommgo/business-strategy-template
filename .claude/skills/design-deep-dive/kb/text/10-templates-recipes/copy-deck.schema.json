@@ -2,13 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:app-design:text-research:copy-deck:1",
   "title": "copy-deck — тексты страниц по секциям и слотам с вариантами, фактами, флагами и статусами",
-  "description": "Формат copy deck text-research v1 (волна 3, агент J, 2026-09-24). Экземпляр — YAML или JSON с корнем copy_deck. v1 = черновик v0 из PLAN.md («Как всё сочетается») без удаления и переименования полей (точка T2 контракта тройки: creative привязывает движение текста к слотам) плюс новые необязательные поля. Структурные требования — здесь; требования статусов, словаря, фактов и файлов волны 2 — в x-status-rules и в ../../scripts/text/copydeck.py validate. Описание — 10-templates-recipes/README.md.",
-  "date": "2026-09-24",
+  "description": "Формат copy deck: тексты одной страницы (или шаблона страницы) по секциям и слотам с вариантами, фактами, флагами и статусами. Экземпляр — YAML или JSON с корнем copy_deck; в проекте — docs/projects/<slug>/site/<surface>/copy/<page-id>.yaml. Поля и статусы v0 не удаляются и не переименовываются (x-v0-fields): creative привязывает движение текста к слотам. Стык с планом страницы — x-site-map; выгрузка во вход холста — x-canvas-map. Структурные требования — здесь; требования статусов, словаря, фактов и правил текста — в x-status-rules и в ../../scripts/text/copydeck.py validate. Описание — 10-templates-recipes/README.md.",
+  "date": "2026-09-29",
   "x-version": 1,
-  "x-status": "v1.1 (волна 3, фаза 2 J3, 2026-09-24): + variant.fact_ids (I3); процесс — 01-copy-deck-workflow.md, примеры — examples/ (02, 03). v1.1 совместима с v1: только новое необязательное поле",
+  "x-status": "v1.2: совместима с v1 — поля и статусы v0 на месте, новые значения и поля необязательны; процесс — 01-copy-deck-workflow.md, примеры — examples/ (02, 03)",
   "x-owner": "text-research · 10-templates-recipes · J (контракт тройки v2 §3 п.8)",
   "x-doc": ["10-templates-recipes/README.md", "../../scripts/text/README.md#copydeck"],
-  "x-tool": "../../scripts/text/copydeck.py (validate, claims, lint, check, approve, export-kimi, import-kimi, export-assets, export-variants, upgrade, --selftest)",
+  "x-tool": "../../scripts/text/copydeck.py (skeleton, validate, claims, lint, check, approve, export, import-copy, export-assets, export-variants, apply-selection, verify-page, upgrade, before-after, --selftest)",
 
   "type": "object",
   "required": ["copy_deck"],
@@ -22,12 +22,12 @@
     "local-id": {
       "type": "string",
       "pattern": "^[a-z0-9]+([_-][a-z0-9]+)*$",
-      "description": "Локальный id copy deck: строчная латиница и цифры, разделители «-» (рекомендуется, kebab-case) или «_» (ключи copy.md kimi вроде item1_title). После page-plan site совпадает с id site или связан полем site_*."
+      "description": "Локальный id copy deck: строчная латиница и цифры, разделители «-» (рекомендуется, kebab-case) или «_». Страница, секция и слот — id плана страницы (page-plan), поля site_* связывают их с планом."
     },
     "vocab-id": {
       "type": "string",
       "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
-      "description": "id словаря в kebab-case: до S0 site — 99-raw/notes/temp-vocabulary-v0.yaml; slot_type после волны 2 — 04-copy-by-block/copy-slots.yaml (E)."
+      "description": "id словаря site в kebab-case (kb/site/02-site-types/vocabulary.yaml: page_type, section_role, slot); правила текста типа слота — 04-copy-by-block/copy-slots.yaml."
     },
     "date": {
       "type": "string",
@@ -40,8 +40,8 @@
       "description": "Жанр базы (PLAN.md «Жанры — ось базы») = профиль линтера copy_lint.py по умолчанию."
     },
     "status": {
-      "enum": ["draft", "checked", "approved", "rejected"],
-      "description": "draft — написан; checked — прошёл claims_check.py и copy_lint.py с 0 error (запись lint и claims с text_hash); approved — утверждён человеком (review.by/at варианта или approval страницы); rejected — отклонён с причиной (reason), выбранным быть не может."
+      "enum": ["draft", "assumed", "checked", "approved", "rejected"],
+      "description": "draft — каркас или текст в работе: владельцу ещё не предложен; assumed — черновик агента «допущением» из утверждённых смысла, фактов и голоса: предложен владельцу, идёт на вайрфрейм, ждёт проверки и утверждения; checked — прошёл claims_check.py и copy_lint.py с 0 error (запись lint и claims с text_hash); approved — утверждён человеком (review.by/at варианта или approval страницы); rejected — отклонён с причиной (reason), выбранным быть не может."
     },
     "copy-path": {
       "type": "string",
@@ -51,7 +51,7 @@
     "fact-ref": {
       "type": "string",
       "pattern": "^(fact:)?[A-Za-z0-9]+([._-][A-Za-z0-9]+)*$",
-      "description": "id факта facts.yaml (B2): «rating-yandex-maps» или «fact:rating-yandex-maps»; принимаются алиасы факта (F1 из facts.md kimi) — как в claims_check.py. Пробел missing:<id> сюда не ставится: он живёт в тексте как [PLACEHOLDER: …] и в missing_ids."
+      "description": "id факта facts.yaml (B2): «rating-yandex-maps» или «fact:rating-yandex-maps»; принимаются алиасы факта (aliases) — как в claims_check.py. Пробел missing:<id> сюда не ставится: он живёт в тексте как [PLACEHOLDER: …] и в missing_ids."
     },
     "missing-ref": {
       "type": "string",
@@ -128,7 +128,7 @@
         "status": {"$ref": "#/$defs/status"},
         "source": {
           "enum": ["ai-self", "model", "human", "customer", "voc", "fact", "imported"],
-          "description": "Кто написал: ai-self — агент сам; model — генерация (подробности — generated); human — редактор; customer — заказчик; voc — слова клиента; fact — дословный verbatim факта; imported — из чужого файла (copy.md kimi)."
+          "description": "Кто написал: ai-self — агент сам; model — генерация (подробности — generated); human — редактор; customer — заказчик (и его правка текста на холсте, принятая из copy.md: copydeck.py import-copy); voc — слова клиента; fact — дословный verbatim факта; imported — из чужого файла."
         },
         "generated": {
           "type": "object",
@@ -137,7 +137,7 @@
           "description": "След генерации для цепочки I (09-ai-generation-evaluation): модель, промт, дата, параметры.",
           "properties": {
             "model": {"type": "string"},
-            "channel": {"type": "string", "description": "Канал вызова: polza, routerai, gen-api, direct, kimi (I, живая фаза)."},
+            "channel": {"type": "string", "description": "Канал вызова: polza, routerai, gen-api, direct; агент сам — «none (ai-self)»."},
             "prompt_ref": {"type": "string", "description": "Путь или id промта (09/prompts/…)."},
             "run_id": {"type": "string"},
             "date": {"$ref": "#/$defs/date"},
@@ -248,11 +248,11 @@
       "required": ["slot_id", "slot_type", "variants"],
       "allOf": [{"$ref": "#/$defs/slot-core"}],
       "properties": {
-        "slot_id": {"$ref": "#/$defs/local-id", "description": "id слота (v0; до S1 — локальный, уникален в секции; ключ [slot_id] в copy.md kimi)."},
-        "slot_type": {"$ref": "#/$defs/vocab-id", "description": "Тип слота (v0): временный словарь или copy-slots.yaml E."},
-        "site_slot_id": {"type": "string", "description": "id слота blocks.yaml site; пусто до S1."},
-        "group": {"$ref": "#/$defs/local-id", "description": "Элемент повторяемого блока: карточка, шаг, пара «вопрос — ответ», отзыв с подписью, число с подписью (card-1, q2)."},
-        "asset_ref": {"type": "string", "description": "Ассет, к которому относится текст (image-alt, image-caption, in-image-text): id слота плана ассетов ai-media (hero, og) или файл пакета kimi (assets/img/hero.avif)."},
+        "slot_id": {"$ref": "#/$defs/local-id", "description": "id слота (v0) = id текстового слота плана; уникален в секции; ключ [slot_id] в copy.md входа холста."},
+        "slot_type": {"$ref": "#/$defs/vocab-id", "description": "Тип слота (v0) = slot слота плана: слот словаря site вида text; правила текста — copy-slots.yaml."},
+        "site_slot_id": {"type": "string", "description": "Элемент анатомии блока — anatomy слота плана («группа.элемент» у повторяемого набора; по умолчанию равен id слота)."},
+        "group": {"$ref": "#/$defs/local-id", "description": "Экземпляр повторяемого набора = group плана «группа-N»: карточка, шаг, пара «вопрос — ответ», отзыв с подписью, число с подписью (card-1, qa-2)."},
+        "asset_ref": {"type": "string", "description": "Ассет, к которому относится текст (image-alt, image-caption, in-image-text): id слота плана ассетов ai-media (hero, og)."},
         "in_image": {"$ref": "#/$defs/in-image"},
         "variants": true, "chosen": true, "selection": true, "fact_ids": true, "missing_ids": true,
         "claim_flags": true, "lint": true, "claims": true, "lint_allow": true, "edit_log": true, "notes": true
@@ -262,7 +262,7 @@
       "type": "object",
       "additionalProperties": false,
       "patternProperties": {"^x-": {}},
-      "description": "Обещание первого экрана одной фразой → product.goal брифа kimi → строка «Promise:» в TASK.md → K3 ставит его в первый экран (ACCEPTANCE A3). Это текст страницы: сверяется и линтуется как подзаголовок hero (урок «Кварца»: «без усталости глаз» прошло через product.goal). Либо свои варианты, либо from — ссылка на слот страницы.",
+      "description": "Обещание первого экрана одной фразой. Это текст страницы: сверяется и линтуется как подзаголовок hero (урок «Кварца»: обещание «без усталости глаз» ушло к исполнителю без сверки). Либо свои варианты, либо from — ссылка на слот страницы; на холст и в код обещание идёт слотом, на который указывает from.",
       "anyOf": [{"required": ["variants"]}, {"required": ["from"]}],
       "allOf": [{"$ref": "#/$defs/slot-core"}],
       "properties": {
@@ -346,10 +346,10 @@
       "patternProperties": {"^x-": {}},
       "required": ["section_id", "slots"],
       "properties": {
-        "section_id": {"$ref": "#/$defs/local-id", "description": "id секции (v0; из page-plan site, до S1 — локальный; = site.sections[].id и «## id» в copy.md kimi)."},
-        "block": {"type": "string", "description": "id блока blocks.yaml site (v0); до S1 — роль секции или пусто."},
-        "section_role": {"$ref": "#/$defs/vocab-id", "description": "Роль секции (временный словарь section_roles; claims_check.py читает это поле)."},
-        "site_section_id": {"type": "string", "description": "id секции page-plan site; пусто до S1."},
+        "section_id": {"$ref": "#/$defs/local-id", "description": "id секции (v0) = id секции плана страницы; заголовок «## <section_id>» в copy.md входа холста."},
+        "block": {"type": "string", "description": "id блока blocks.yaml site (v0) = block секции плана; роль секции — в section_role. Блок в плане не выбран — поля нет (copydeck.py validate сверяет id с blocks.yaml)."},
+        "section_role": {"$ref": "#/$defs/vocab-id", "description": "Роль секции = role секции плана: section_role словаря site (claims_check.py читает это поле)."},
+        "site_section_id": {"type": "string", "description": "id секции плана (= section_id)."},
         "genre": {"$ref": "#/$defs/genre", "description": "Жанр слотов секции, если он отличается от жанра страницы (GEO-блок на лендинге — geo)."},
         "question": {"type": "string", "description": "Вопрос посетителя, который закрывает секция (иерархия B1 sections[].question)."},
         "message": {"type": "string", "description": "Опора иерархии B1 одной фразой (v0; x-copy-deck-map: sections[].message)."},
@@ -364,9 +364,9 @@
       "patternProperties": {"^x-": {}},
       "required": ["page_id", "page_type", "sections"],
       "properties": {
-        "page_id": {"$ref": "#/$defs/local-id", "description": "id страницы (v0; из site-map site, до S0 — локальный)."},
-        "page_type": {"$ref": "#/$defs/vocab-id", "description": "Тип страницы (v0; временный словарь page_types → жанр по умолчанию)."},
-        "site_page_id": {"type": "string", "description": "id страницы site-map; пусто до S0."},
+        "page_id": {"$ref": "#/$defs/local-id", "description": "id страницы (v0) = page.id плана = id страницы брифа или карты сайта."},
+        "page_type": {"$ref": "#/$defs/vocab-id", "description": "Тип страницы (v0) = page.page_type плана: page_type словаря site; жанр по умолчанию — page_type.genre."},
+        "site_page_id": {"type": "string", "description": "id страницы карты сайта (site-map), если отличается от page_id."},
         "genre": {"$ref": "#/$defs/genre", "description": "Жанр страницы, если отличается от жанра page_type."},
         "status": {"$ref": "#/$defs/status", "description": "Статус страницы (по умолчанию draft)."},
         "approval": {"$ref": "#/$defs/review", "description": "Кто утвердил страницу целиком (обязательно при approved)."},
@@ -374,8 +374,8 @@
         "hierarchy_ref": {"type": "string", "description": "Файл иерархии сообщений B1, по которой написана страница."},
         "awareness": {"enum": ["unaware", "problem-aware", "solution-aware", "product-aware", "most-aware"], "description": "Уровень осведомлённости трафика этой версии страницы (B1)."},
         "promise": {"$ref": "#/$defs/promise"},
-        "cta_primary": {"$ref": "#/$defs/copy-path", "description": "Главная кнопка → site.cta.label kimi; по умолчанию — первый cta-label секции hero."},
-        "primary_action": {"type": "string", "description": "Одно целевое действие страницы (глагол + объект) → product.primary_action брифа kimi → «The one job» в TASK.md; сверяется как текст (урок «Кварца»: «бронь на лампу из первой партии» — вывод без факта)."},
+        "cta_primary": {"$ref": "#/$defs/copy-path", "description": "Главная кнопка страницы (путь слота cta-label) → site.cta.label брифа холста; по умолчанию — первый cta-label секции hero."},
+        "primary_action": {"type": "string", "description": "Одно целевое действие страницы (глагол + объект) словами страницы; сверяется как текст (урок «Кварца»: «бронь на лампу из первой партии» — вывод без факта)."},
         "meta": {"$ref": "#/$defs/meta"},
         "article": {"$ref": "#/$defs/article"},
         "og_template": {"$ref": "#/$defs/og-template"},
@@ -392,8 +392,8 @@
       "properties": {
         "version": {"enum": [0, 1], "description": "Версия формата: 0 — черновик v0 фундамента (принимается), 1 — эта схема."},
         "date": {"$ref": "#/$defs/date", "description": "Дата последнего изменения."},
-        "site": {"$ref": "#/$defs/vocab-id", "description": "slug проекта: как в site-brief, facts.yaml site и project.slug brief.yaml kimi."},
-        "product_name": {"type": "string", "description": "Имя продукта, как на сайте (заголовки copy.md и facts.md kimi)."},
+        "site": {"$ref": "#/$defs/vocab-id", "description": "slug проекта: как project.slug site-brief и site facts.yaml."},
+        "product_name": {"type": "string", "description": "Имя продукта, как на сайте (заголовки выгрузки copy.md и facts.md)."},
         "lang": {"$ref": "#/$defs/lang", "description": "Язык текстов (v0). Второй язык — отдельный copy deck."},
         "source_lang": {"$ref": "#/$defs/lang", "description": "Язык исходного copy deck, если этот — адаптация (v0: «второй язык — отдельный copy deck с полем source_lang»)."},
         "source_ref": {"type": "string", "description": "Путь к исходному copy deck."},
@@ -403,14 +403,14 @@
           "description": "Как сделан второй язык: адаптация под свою аудиторию, а не дословный перевод (решение заказчика п. 16).",
           "properties": {
             "mode": {"enum": ["adaptation", "translation", "original"]},
-            "audience_note": {"type": "string", "description": "Чем аудитория языка отличается: альтернативы, осведомлённость, категория, возражения (meaning.languages[].audience_note)."}, "voice_line": {"type": "string", "description": "v1.1 (J3): строка «Voice:» copy.md на языке этого deck, если у профиля голоса F проекция tone_of_voice только на исходном языке (export-kimi берёт её вместо проекции)."}
+            "audience_note": {"type": "string", "description": "Чем аудитория языка отличается: альтернативы, осведомлённость, категория, возражения (meaning.languages[].audience_note)."}, "voice_line": {"type": "string", "description": "Строка голоса на языке этого deck, если проекция tone_of_voice профиля голоса F есть только на исходном языке (выгрузка берёт её вместо проекции)."}
           }
         },
-        "voice_ref": {"type": "string", "description": "Профиль голоса (v0): путь к voice.yaml (F) или, до F, строка-описание."},
+        "voice_ref": {"type": "string", "description": "Профиль голоса (v0): путь к voice.yaml или voice.product.yaml (F) либо строка-описание."},
         "facts_ref": {"type": "string", "description": "Путь к facts.yaml (v0), от папки copy deck."},
         "meaning_ref": {"type": "string", "description": "Путь к meaning.yaml (B1)."},
         "copy_slots_ref": {"type": "string", "description": "Путь к copy-slots.yaml (E); по умолчанию 04-copy-by-block/copy-slots.yaml базы."},
-        "page_plan_ref": {"type": "string", "description": "Путь к page-plan site; пусто до S1."},
+        "page_plan_ref": {"type": "string", "description": "Путь к плану страницы (page-plan) от папки copy deck: каркас deck строится из плана (copydeck.py skeleton), стык сверяет copydeck.py validate (x-site-map)."},
         "jurisdiction": {"enum": ["ru", "eu", "us", "other"], "description": "Право для claims_check.py (по умолчанию из facts.yaml или ru)."},
         "legal_category": {
           "type": "array",
@@ -439,48 +439,74 @@
   },
 
   "x-status-rules": {
-    "description": "Что обязано быть на каждом статусе (читает copydeck.py validate; процесс — 01-copy-deck-workflow.md, фаза 2). Статус слота = статус выбранного варианта; статус обещания — так же.",
+    "description": "Что обязано быть на каждом статусе (читает copydeck.py validate; процесс — 01-copy-deck-workflow.md). Статус слота = статус выбранного варианта; статус обещания — так же. assumed требует того же, что draft: это черновик «допущением», его проверяют claims_check.py и copy_lint.py (check --promote → checked).",
     "slot": {
       "draft": {"slot_requires": ["slot_id", "slot_type", "variants"], "variant_requires": ["id", "text", "status"], "checks": ["chosen-if-many"]},
+      "assumed": {"slot_requires": ["slot_id", "slot_type", "variants"], "variant_requires": ["id", "text", "status"], "checks": ["chosen-if-many"]},
       "checked": {"slot_requires": ["chosen", "fact_ids", "claim_flags", "lint", "claims"], "checks": ["lint-zero-errors", "claims-zero-errors", "hash-current", "facts-resolve"]},
       "approved": {"slot_requires": ["chosen", "fact_ids", "claim_flags", "lint", "claims"], "checks": ["lint-zero-errors", "claims-zero-errors", "hash-current", "facts-resolve", "no-placeholder", "review-or-page-approval"]},
       "rejected": {"variant_requires": ["reason"], "checks": ["not-chosen"]}
     },
     "page": {
       "draft": {"page_requires": ["page_id", "page_type", "sections"]},
+      "assumed": {"page_requires": ["page_id", "page_type", "sections"]},
       "checked": {"page_requires": ["meta"], "checks": ["all-chosen-at-least-checked", "promise-checked-if-present"]},
-      "approved": {"page_requires": ["meta", "approval"], "checks": ["all-chosen-approved", "meta-complete", "no-placeholder"]},
+      "approved": {"page_requires": ["meta", "approval"], "checks": ["all-chosen-approved", "meta-complete", "no-placeholder", "no-process-log"]},
       "rejected": {"page_requires": ["reason"], "checks": []}
     },
-    "export_kimi": {"requires": ["promise"], "default_min_status": "draft", "strict_min_status": "approved", "note": "--strict: страница и все выбранные варианты approved, 0 [PLACEHOLDER]"}
+    "on_approve": "copydeck.py approve: журнал процесса уходит — edit_log слотов и обещания, отклонённые варианты (и их записи); остаются выбранные тексты с записями проверок, живые альтернативы (план теста title), selection с compared (id удалённых вариантов в нём — законная история выбора), review, approval; история — в git"
   },
 
-  "x-kimi-map": {
-    "description": "Проекция copy deck → пакет kimi (../kimi-research/07-brief-handoff/templates/: copy.md, facts.md, brief.yaml). copydeck.py export-kimi; сборщик берёт файлы дословно через content.copy_source / facts_source.",
-    "copy_md": {
-      "header": "# COPY — all texts of <product_name>, verbatim (<lang>) + Voice + строка ключей шаблона kimi; для ru — строка «Typography is final…» (тире и кавычки по грамматике; «no em dashes» kimi к русскому не переносится — C, H)",
-      "head_block": "## head: [title], [description], [og_title], [og_description], [og_image_alt] — мета страницы (не секция страницы)",
-      "sections": "## <section_id> в порядке copy deck; [<slot_id>]: выбранный текст; in-image-text не выгружается (уходит в ассет ai-media); пустой alt — не выгружается",
-      "section_ids_equal": "site.sections[].id brief.yaml = заголовки ## copy.md (ACCEPTANCE A1 kimi)"
+  "x-canvas-map": {
+    "source": "copy-deck",
+    "stages": ["directions", "wireframe", "mockup"],
+    "files": {
+      "pages/<page-id>/copy.md": {
+        "## <section_id>": {"rule": "copy", "from": ["/copy_deck/pages/*/page_id", "/copy_deck/pages/*/sections/*/section_id"], "note": "страница — папка pages/<page-id>/, секции — в порядке copy deck (он же порядок плана)"},
+        "[<slot_id>]": {"rule": "copy", "from": ["/copy_deck/pages/*/sections/*/slots/*/slot_id"]},
+        "текст": {"rule": "derive", "from": ["/copy_deck/pages/*/sections/*/slots/*/variants", "/copy_deck/pages/*/sections/*/slots/*/chosen", "/copy_deck/pages/*/sections/*/slots/*/slot_type"], "note": "текст выбранного варианта, если его статус разрешён этапом (copy_md.stage_statuses); на этапе directions — только типы copy_md.directions_slot_types; alt, подписи и строки в картинках (copy_md.not_exported) сюда не идут"},
+        "статус": {"rule": "derive", "from": ["/copy_deck/pages/*/sections/*/slots/*/variants", "/copy_deck/pages/*/sections/*/slots/*/chosen"], "note": "статус выбранного варианта: assumed · checked · approved"}
+      },
+      "brief.yaml": {
+        "site.cta.label": {"rule": "derive", "from": ["/copy_deck/pages/*/cta_primary", "/copy_deck/pages/*/sections/*/slots/*/variants"], "note": "подпись главной кнопки — выбранный вариант слота cta_primary (по умолчанию первый cta-label секции hero) в статусе этапа"}
+      },
+      "pages/<page-id>/assets.md": {
+        "подпись": {"rule": "derive", "from": ["/copy_deck/pages/*/sections/*/slots/*/asset_ref", "/copy_deck/pages/*/sections/*/slots/*/variants"], "stages": ["mockup"], "note": "выбранный текст слота image-caption по asset_ref (copydeck.py export-assets)"},
+        "alt": {"rule": "derive", "from": ["/copy_deck/pages/*/sections/*/slots/*/asset_ref", "/copy_deck/pages/*/sections/*/slots/*/variants"], "stages": ["mockup"], "note": "выбранный текст слота image-alt по asset_ref; декоративная картинка — alt пустой"}
+      }
     },
-    "facts_md": "по facts.schema.yaml x-kimi-map (B2): публикуемые факты → Facts (verbatim[0], следующие — <id>.2…), остальные → Missing с причиной; missing[] → Missing; Never claim — never_claim[].text + x-never-claim-defaults без снимающего факта (строки вместо четырёх жёстких строк шаблона — предложение {{=NEVER_ROWS}})",
-    "brief_yaml": {
-      "product.goal": "promise (выбранный текст или from)",
-      "product.primary_action": "page.primary_action",
-      "product.locale": "copy_deck.lang",
-      "product.name": "copy_deck.product_name",
-      "site.cta.label": "cta_primary или первый cta-label секции hero",
-      "site.sections[{id, job}]": "section_id; job = «<question> → <message>; доказательства: <fact_ids>» (x-kimi-map B1)",
-      "content.copy_source / facts_source": "имена выгруженных файлов",
-      "assets[{file, alt, caption}]": "слоты image-alt / image-caption с asset_ref = путь assets/…",
-      "product.target_user, product.description, product.viewport_primary, questions": "из meaning.yaml по x-kimi-map B1 (--meaning)"
+    "drop": [
+      {"from": ["/copy_deck/version", "/copy_deck/date", "/copy_deck/site", "/copy_deck/authors", "/copy_deck/notes", "/copy_deck/pages/*/status", "/copy_deck/pages/*/approval", "/copy_deck/pages/*/reason", "/copy_deck/pages/*/notes"], "note": "служебные поля и подпись: статус, путь и отпечаток (text_hash) — в INPUT.md"},
+      {"from": ["/copy_deck/product_name", "/copy_deck/lang", "/copy_deck/source_lang", "/copy_deck/source_ref", "/copy_deck/adaptation"], "note": "имя продукта и язык — в брифе холста из site-brief (product.name, product.locale); второй язык — свой copy deck и своя выгрузка"},
+      {"from": ["/copy_deck/voice_ref", "/copy_deck/facts_ref", "/copy_deck/meaning_ref", "/copy_deck/copy_slots_ref", "/copy_deck/page_plan_ref", "/copy_deck/pages/*/hierarchy_ref"], "note": "ссылки на источники: голос, факты, смысл и план идут во вход своими картами"},
+      {"from": ["/copy_deck/jurisdiction", "/copy_deck/legal_category", "/copy_deck/pages/*/lint_allow"], "note": "режим сверки фактов и права и исключения линтера — входы проверок текста, исполнителю не нужны"},
+      {"from": ["/copy_deck/pages/*/page_type", "/copy_deck/pages/*/site_page_id", "/copy_deck/pages/*/genre", "/copy_deck/pages/*/awareness"], "note": "тип страницы, жанр и осведомлённость — план и бриф, во вход идут их картами"},
+      {"from": ["/copy_deck/pages/*/promise", "/copy_deck/pages/*/primary_action"], "note": "обещание первого экрана — текст слота, на который указывает promise.from, он уже в copy.md; product.goal брифа холста — из смысла, главное действие — из плана"},
+      {"from": ["/copy_deck/pages/*/meta", "/copy_deck/pages/*/og_template", "/copy_deck/pages/*/article"], "note": "мета, OG и бриф статьи на артборд не идут — их берёт код сайта; текст картинки OG — шаблон ai-media"},
+      {"from": ["/copy_deck/pages/*/sections/*/block", "/copy_deck/pages/*/sections/*/section_role", "/copy_deck/pages/*/sections/*/site_section_id", "/copy_deck/pages/*/sections/*/genre", "/copy_deck/pages/*/sections/*/slots/*/site_slot_id", "/copy_deck/pages/*/sections/*/slots/*/group", "/copy_deck/pages/*/sections/*/slots/*/in_image"], "note": "роль, блок, анатомия и экземпляр набора — план страницы (page.yaml входа); строка в картинке — спецификация ассета (copydeck.py export-assets)"},
+      {"from": ["/copy_deck/pages/*/sections/*/question", "/copy_deck/pages/*/sections/*/message", "/copy_deck/pages/*/sections/*/carries", "/copy_deck/pages/*/sections/*/notes"], "note": "смысл секции воплощён в тексте; работа секции для брифа — из плана и иерархии"},
+      {"from": ["/copy_deck/pages/*/sections/*/slots/*/selection", "/copy_deck/pages/*/sections/*/slots/*/fact_ids", "/copy_deck/pages/*/sections/*/slots/*/missing_ids", "/copy_deck/pages/*/sections/*/slots/*/claim_flags", "/copy_deck/pages/*/sections/*/slots/*/lint", "/copy_deck/pages/*/sections/*/slots/*/claims", "/copy_deck/pages/*/sections/*/slots/*/lint_allow", "/copy_deck/pages/*/sections/*/slots/*/edit_log", "/copy_deck/pages/*/sections/*/slots/*/notes"], "note": "как текст получен и проверен (выбор, факты, флаги, проверки, журнал правки) — запись copy deck; исполнитель получает текст и его статус, факты — выгрузкой facts.md"}
+    ],
+    "copy_md": {
+      "file": "pages/<page-id>/copy.md — тексты одной страницы; выгрузка — copydeck.py export, приём правок заказчика с холста — copydeck.py import-copy, разбор исходников холста в тот же формат — scripts/claude-design/dc_texts.py",
+      "syntax": [
+        "«# …» — заголовок или комментарий; разбор его пропускает (как пустые строки и «<!-- … -->»)",
+        "«## <section_id>» — секция плана; «## ?» или «## ? <подпись>» — тексты холста без секции плана",
+        "«[<slot_id>] <status>: <текст>» — строка слота; статус (assumed · checked · approved) пишет выгрузка, у текстов из исходников холста его нет: «[<slot_id>]: <текст>»",
+        "«[?]: <текст>» или «[? <подпись>]: <текст>» — текст холста без слота плана (разбор агентом: вопрос «перенести в план?»)",
+        "текст — всё после первого «: » до конца строки, дословно; абзацы — строками продолжения, начатыми двумя пробелами"
+      ],
+      "stage_statuses": {"directions": ["assumed", "checked", "approved"], "wireframe": ["assumed", "checked", "approved"], "mockup": ["approved"]},
+      "directions_slot_types": ["headline", "cta-label"],
+      "not_exported": ["image-alt", "image-caption", "in-image-text"],
+      "gap": "слот без текста статуса этапа в copy.md не пишется: находка COPY-D-STAGE и строка пробелов INPUT.md; [PLACEHOLDER] в тексте — только из missing фактов"
     }
   },
 
   "x-asset-map": {
     "description": "Какие тексты copy deck уходят в план ассетов ai-media (01/01 §8) и спецификацию ассета (05/03, asset-spec.schema.json). copydeck.py export-assets.",
     "image-alt": "slots[id = asset_ref].alt плана ассетов; декоративная картинка — alt пустой (ai-media 10/01 §8)",
-    "image-caption": "подпись к картинке (assets[].caption пакета kimi); факты в подписи — только из facts.yaml",
+    "image-caption": "подпись к картинке (caption плана ассетов и строка assets.md входа холста); факты в подписи — только из facts.yaml",
     "in-image-text": "spec.text = {mode: in_image, strings: [{text, language: lang, script, role: in_image.role}]} — ≤ 3 строк на asset_ref, ≤ 40 знаков, 1–4 слова; кириллица — предупреждение про OCR (ai-media 05/03 §7)",
     "html_overlay": "заголовки и кнопки поверх картинки остаются в HTML (слоты страницы); в промт ассета не идут",
     "og": "meta.og_image_alt → og:image:alt; og_template.kicker/title → текст HTML-шаблона OG (ai-media 10/01 §7)"
@@ -491,31 +517,23 @@
     "promise": "псевдослот hero: slot_type subheadline, жанр страницы",
     "meta": "псевдосекция head: meta-title, meta-description, og-title, og-description, og-image-alt; жанр meta",
     "og_template": "псевдосекция head: kicker → eyebrow, title → og-title; жанр meta",
-    "genre": "lint.profile слота → section.genre → жанр slot_type (meta-*, og-* → meta; email-* → email-form; geo-answer → geo) → page.genre → page_type словаря → landing",
+    "genre": "lint.profile слота → section.genre → жанр slot_type (meta-*, og-* → meta; email-* → email-form; geo-answer → geo) → page.genre → page_type.genre словаря site → landing",
     "chosen_only": "проверяется выбранный вариант (claims_check и copy_lint по умолчанию); --all-variants — все, кроме rejected"
   },
 
   "x-site-map": {
-    "description": "Связь с форматами site до и после точек синхронизации (контракт §5).",
-    "before_S0_S1": "page_type, section_role, slot_type — временный словарь; page_id, section_id, slot_id — локальные; site_page_id, site_section_id, site_slot_id пустые",
-    "after_S0": "page_type и section_role — vocabulary.yaml site (X сводит); site_page_id — id site-map",
-    "after_S1": "section_id = page-plan, block = blocks.yaml, site_slot_id = слот blocks.yaml; порядок секций — page-plan"
+    "description": "Стык с планом страницы (page-plan site): каркас copy deck строится из плана (copydeck.py skeleton), copydeck.py validate сверяет стык по page_plan_ref; путь текста copy:<page>/<section>/<slot> один для всех языков.",
+    "page_plan_ref": "файл плана страницы от папки copy deck",
+    "page_id": "page.id плана",
+    "section_id, site_section_id": "sections[].id плана; порядок секций — порядок плана",
+    "section_role": "sections[].role плана",
+    "block": "sections[].block плана (id blocks.yaml); блок не выбран — поля нет",
+    "slot_id": "sections[].slots.text[].id плана; слоты уровня страницы (page_slots.text: meta-title, meta-description, og-*) — поля meta",
+    "slot_type": "sections[].slots.text[].slot плана (слот словаря site вида text)",
+    "site_slot_id": "sections[].slots.text[].anatomy плана («группа.элемент»; по умолчанию — id слота)",
+    "group": "sections[].slots.text[].group плана («группа-N»)",
+    "fact_ids, missing_ids": "sections[].slots.data[] плана: fact:<id> и missing:<id> слотов, в binds которых стоит текстовый слот; page_slots.data[] — meta.fact_ids"
   },
-
-  "x-vocabulary-proposals": {
-    "description": "id, которых нет во временном словаре (предложения к нему; строка в отчёте J). Валидатор принимает их с info.",
-    "slot_types": [
-      {"id": "image-caption", "name": "Подпись к картинке или фото", "ux_role": "caption", "kimi": "assets[].caption", "why": "подписи ассетов попадают на страницу и содержат факты («Порт USB-C в основании» писала модель — B2/02)"},
-      {"id": "spec-row", "name": "Строка характеристик «параметр — значение»", "why": "предложение B2 (facts.schema.yaml x-vocabulary-proposals)"},
-      {"id": "price-old", "name": "Зачёркнутая обычная цена", "why": "предложение B2"},
-      {"id": "stat-source", "name": "Строка источника у числа или рейтинга", "why": "предложение B2"}
-    ],
-    "section_roles": [
-      {"id": "specs", "name": "Характеристики товара (таблица)", "why": "предложение B2"},
-      {"id": "head", "name": "Мета и OG страницы (псевдосекция экспорта, не секция страницы)", "why": "copy.md kimi: блок ## head — мета без выдумки K3"}
-    ]
-  },
-
   "examples": [
     {
       "copy_deck": {
@@ -536,7 +554,6 @@
             "sections": [
               {
                 "section_id": "hero",
-                "block": "hero",
                 "section_role": "hero",
                 "message": "Одной фразой: что это, для кого и что делать",
                 "slots": [

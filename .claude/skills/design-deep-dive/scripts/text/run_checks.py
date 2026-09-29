@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-"""J/08: все проверки примеров 10-templates-recipes/examples/*.yaml в порядке E и I: claims_check.py --legal-category →
-copy_lint.py → copydeck.py check → copydeck.py validate (+ validate библиотекой jsonschema из venv-J). JSON — в out/,
-сводка — таблицей Markdown (для 02-examples-ru.md и 03-examples-en.md) и out/summary.json. Запуск из корня базы:
-python3 99-raw/experiments/J/08-examples/run_checks.py [пример.yaml …] [--md out/table.md]"""
+"""Все проверки примеров copy deck базы (kb/text/10-templates-recipes/examples/*.yaml) по порядку аудита текстов:
+claims_check.py --legal-category → copy_lint.py → copydeck.py check → copydeck.py validate (+ validate на Python
+окружения скилла с jsonschema) → copydeck.py export (вход холста этапа wireframe: pages/<page-id>/copy.md и facts.md).
+JSON и выгрузки — в $DDD_HOME/out/text/run_checks/, сводка — таблицей Markdown (для 02-examples-ru.md и
+03-examples-en.md) и summary.json. Код выхода: 0 — ни одной ошибки, 2 — есть ошибки.
+Запуск: python3 scripts/text/run_checks.py [пример.yaml …] [--md table.md]"""
 import json, os, subprocess, sys, time, yaml
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib'))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib'))
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb('text'))
 EX = os.path.join(ROOT, '10-templates-recipes', 'examples')
 OUT = str(kbpaths.out('text', 'run_checks'))
 T = str(kbpaths.scripts('text'))
-TODAY = '2026-09-24'
+TODAY = '2026-09-24'   # дата сверки примеров: сроки и «по состоянию на» демо-фактов считаются от неё
+STAGE = 'wireframe'    # этап выгрузки во вход холста: тексты assumed · checked · approved
 VENV = kbpaths.python()
 
 
@@ -61,14 +64,19 @@ def main(argv):
             j = os.path.join(OUT, f'{name}.validate-jsonschema.json')
             code, sec, _p = run([VENV, os.path.join(T, 'copydeck.py'), 'validate', path, '--today', TODAY, '--json', j, '--quiet'])
             r['jsonschema'] = (code, sec, counts(json.load(open(j))) if os.path.exists(j) else None)
+        j = os.path.join(OUT, f'{name}.export.json')
+        code, sec, _p = run([sys.executable, os.path.join(T, 'copydeck.py'), 'export', path, '--stage', STAGE,
+                             '--out', os.path.join(OUT, name, 'input'), '--today', TODAY, '--json', j, '--quiet'])
+        r['export'] = (code, sec, counts(json.load(open(j))) if os.path.exists(j) else None)
         summ[name] = {k: {'exit': v[0], 'sec': v[1], 'error': (v[2] or (None,))[0], 'warning': (v[2] or (None, None))[1],
                           'info': (v[2] or (None, None, None))[2]} for k, v in r.items()}
         cell = lambda v: '—' if v[2] is None else f'{v[2][0]} / {v[2][1]} / {v[2][2]}'
         rows.append(f"| `{name}` | {cell(r['claims'])} | {cell(r['lint'])} | {cell(r['check'])} | {cell(r['validate'])} | "
-                    f"{cell(r['jsonschema']) if 'jsonschema' in r else '—'} |")
+                    f"{cell(r['jsonschema']) if 'jsonschema' in r else '—'} | {cell(r['export'])} |")
         print(name, {k: (v[0], v[2]) for k, v in r.items()}, flush=True)
-    head = ['| Пример | claims_check (error / warning / info) | copy_lint | copydeck check | copydeck validate | validate + jsonschema |',
-            '|---|---|---|---|---|---|']
+    head = ['| Пример | claims_check (error / warning / info) | copy_lint | copydeck check | copydeck validate | validate + jsonschema | '
+            'copydeck export (wireframe) |',
+            '|---|---|---|---|---|---|---|']
     table = '\n'.join(head + rows) + '\n'
     print(table)
     json.dump(summ, open(os.path.join(OUT, 'summary.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)

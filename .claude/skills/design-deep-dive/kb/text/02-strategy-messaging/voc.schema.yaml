@@ -12,7 +12,7 @@
 # Персональные данные: в voc.yaml — без ФИО, телефонов, почты, адресов; исходники с ПДн — у заказчика (`storage`),
 # основание обработки — `sources[].legal` (152-ФЗ; детали — H).
 #
-# Проверка: `99-raw/tools/venv-B2/bin/python ../../scripts/text/validate_facts.py` (метасхема и пример
+# Проверка: `python3 ../../scripts/text/validate_facts.py` (Python окружения скилла; метасхема и пример
 # `examples[0]` ниже).
 
 $schema: "https://json-schema.org/draft/2020-12/schema"
@@ -22,7 +22,7 @@ description: >-
   Дословные слова клиентов с кодами и темами. Нужен, чтобы заголовки, возражения, FAQ и язык страницы брались из слов
   аудитории, а не из головы автора (Wiebe; Griffin & Hauser 1993). Частота упоминания не равна важности: важность —
   отдельным методом (importance.method).
-date: "2026-09-24"
+date: "2026-09-29"
 x-version: 1
 x-owner: "text-research · 02-strategy-messaging · B2"
 x-doc: "02-strategy-messaging/04-voice-of-customer.md"
@@ -194,7 +194,7 @@ $defs:
       use:
         type: object
         additionalProperties: false
-        description: "Где тема работает в тексте (id временного словаря 99-raw/notes/temp-vocabulary-v0.yaml)."
+        description: "Где тема работает в тексте (id словаря site ../site/02-site-types/vocabulary.yaml: page_type, section_role, slot)."
         properties:
           page_types: {type: array, items: {$ref: "#/$defs/id"}}
           section_roles: {type: array, items: {$ref: "#/$defs/id"}}

@@ -74,8 +74,8 @@ Xe без CUDA; Python 3.13, Node 24.21 (`node` из PATH или DDD_NODE), Play
 | конвертер словарей ux → YAML (имя выбирает C) | таблицы `ux 07/06` §1–§6 → `06-anti-slop/lexicon/*.yaml` с `source` | C · 1 |
 | `copy_extract.py` | страница → структурированный текст: секции, hero, CTA, отзывы, FAQ, мета, OG, текст JSON-LD | D · 1 |
 | `copy_metrics.py` | метрики корпуса (длины, ритм, конкретика, плотности, повторы, читаемость) → `measurements.tsv`; функции для линтера и оценки | D · 1 |
-| `claims_check.py` | сверка copy deck или страницы с `facts.yaml`: числа, имена, даты, цитаты, логотипы, рейтинги, цены, гарантии, `never_claim`, `[PLACEHOLDER]`; с волны 2 — правовые правила из `../../kb/text/08-russian-legal-typography/claims-rules.yaml` | B2 · 1 (ядро), H · 2 (право) |
-| `copydeck.py` | `validate` (схема и `copy-slots.yaml`), `lint`, `claims`, `export-kimi` (`copy.md` и `facts.md` пакета kimi) | J · 3 |
+| `claims_check.py` | сверка copy deck, `pages/<page-id>/copy.md` входа холста или страницы с `facts.yaml`: числа (и словами), имена, даты, цитаты, логотипы, рейтинги, цены, гарантии, `never_claim`, места `use`, демо-данные, `[PLACEHOLDER]`; правовые правила из `../../kb/text/08-russian-legal-typography/claims-rules.yaml` | раздел ниже |
+| `copydeck.py` | каркас из плана страницы, `validate`, `claims`, `lint`, `check`, выбор вариантов, `approve`, выгрузка `pages/<page-id>/copy.md` и `<вход>/facts.md` во вход холста, приём правок текста с холста, `verify-page` | раздел ниже |
 | `before_after_build.py` (адаптация) | `../../kb/text/10-templates-recipes/before-after.tsv` из таблиц «было / стало» базы | J · 3 |
 
 Каждый автор добавляет в этот файл свой раздел: запуск, вход и выход, на чём проверено (опыт), ограничения.
@@ -92,43 +92,40 @@ Xe без CUDA; Python 3.13, Node 24.21 (`node` из PATH или DDD_NODE), Play
   проверку — по стороннему описанию), Wordstat API (`api.wordstat.yandex.net`, OAuth через поддержку Яндекс Директа),
   вызовы моделей — только в живой фазе с заказчиком. Ключи не печатать и не копировать.
 
-## `claims_check.py` — сверка текстов с `facts.yaml` (B2, волна 1, 2026-09-24)
+## `claims_check.py` — сверка текстов с `facts.yaml`
 
 Ядро «контура честности»: любое число, имя, дата, цитата, логотип, рейтинг, цена, гарантия текста сверяется с белым
 списком фактов (`../../kb/text/02-strategy-messaging/facts.schema.yaml`). Спецификация и правила — `../../kb/text/02-strategy-messaging/03-proof-and-facts.md`
-§7. Зависимости: Python 3.10+ и PyYAML (системный или `venv-B2`); сеть и модели не нужны. Идеи разбора чисел и цитат —
-из `../kimi-research/99-raw/tools/k3_checks.py` (F-NUMBERS, F-QUOTE), с указанием в шапке.
+§7. Зависимости: Python 3.10+ и PyYAML; сеть и модели не нужны. Полная справка — шапка файла (`python3 claims_check.py -h`).
 
 | Команда | Что делает | Выход |
 |---|---|---|
-| `python3 claims_check.py [check] <вход> --facts facts.yaml [--today ГГГГ-ММ-ДД] [--json out.json] [--md out.md]` | сверка copy deck v0 (YAML), `copy.md` kimi, Markdown, текста, HTML; `--all-variants`, `--strict`, `--verbose`, `--rules <файл>`, `--no-external-rules`, `--no-default-never`, `--format` | 0 — нет error, 2 — есть, 1 — ошибка входа |
-| `claims_check.py inventory <страница>` | утверждения по классам без фактов и «виден ли источник» (метрика для D и G) | 0 |
-| `claims_check.py lint-facts facts.yaml` | сам инвентарь: вывод без основания (`source.quote`), истёкшие, без разрешения, id не из временного словаря | 0 / 2 |
-| `claims_check.py import-kimi facts.md -o facts.yaml` | черновой импорт `facts.md` пакета kimi (обратный экспорт пишет J в `copydeck.py`) | 0 |
-| `claims_check.py rules-schema` | JSON Schema формата правовых правил (для H) | 0 |
-| `claims_check.py --selftest` | офлайн-тесты: извлечение, сопоставление, «Кварц», отзывы, сроки, правила H, 20 фраз без фактов, регрессии B1 | 0 / 1 |
+| `python3 claims_check.py [check] <вход> --facts facts.yaml [--today ГГГГ-ММ-ДД] [--json out.json] [--md out.md]` | сверка copy deck (YAML), `pages/<page-id>/copy.md` входа холста (`## <section_id>`, `[<slot_id>] <статус>: текст` — синтаксис `copydeck.py`), Markdown, текста, HTML; `--final` — ворота публикации (демо-данные `example: true` — error, без ключа — info); `--all-variants`, `--strict`, `--verbose`, `--rules <файл>`, `--no-external-rules`, `--no-default-never`, `--format` | 0 — нет error, 2 — есть, 1 — ошибка входа |
+| `claims_check.py inventory <страница>` | утверждения по классам без фактов и «виден ли источник» (метрика доли утверждений с видимым источником) | 0 |
+| `claims_check.py lint-facts facts.yaml [--final]` | сам инвентарь: вывод без основания (`source.quote`), истёкшие, без разрешения, места `use` не из словаря site, демо-данные | 0 / 2 |
+| `claims_check.py rules-schema` | JSON Schema формата правовых правил | 0 |
+| `claims_check.py --selftest` | офлайн-тесты: извлечение, сопоставление, «Кварц», отзывы, сроки, правовые правила, нейтральные фразы, калибровки К17–К27 (разделитель тысяч по языку, числительные словами, «рядом» у выбранного варианта, `requires_nearby` демо-фактов, подпись отзыва против разрешения, прогнозы, вопросы FAQ, имена в падежах, переводы фактов и запретов, места `use` на 8 примерах copy deck, демо-данные) | 0 / 1 |
 
-**Правила находок** — префикс `COPY-F-` (контракт v2 §3 п.16): `NUM`, `NUM-MISMATCH`, `DATE`, `RATING`, `QUOTE`,
-`QUOTE-EDIT`, `QUOTE-RECUT`, `CLASS`, `EXTENDS`, `PROPERTY`, `NEVER`, `TYPICALITY`, `PERMISSION`, `INFERRED`, `EXPIRED`,
-`STALE`, `LEGAL`, `UNVERIFIED`, `REF`, `USE`, `NEARBY`, `NAME`, `PLACEHOLDER`, `PLACEHOLDER-UNLISTED`, `FLAGS`,
-`UNSUPPORTED` (`--strict`), `VOCAB` (`lint-facts`). Уровни и условия — `03-proof-and-facts.md` §7.2.
+**Правила находок** — префикс `COPY-F-`: `NUM`, `NUM-MISMATCH`, `NUM-WORDS`, `DATE`, `RATING`, `QUOTE`, `QUOTE-EDIT`,
+`QUOTE-RECUT`, `CLASS`, `EXTENDS`, `PROPERTY`, `NEVER`, `TYPICALITY`, `PERMISSION`, `INFERRED`, `EXPIRED`, `STALE`,
+`LEGAL`, `UNVERIFIED`, `REF`, `USE`, `NEARBY`, `NAME`, `EXAMPLE`, `PLACEHOLDER`, `PLACEHOLDER-UNLISTED`, `FLAGS`,
+`UNSUPPORTED` (`--strict`), `VOCAB` (`lint-facts`). Уровни и условия — `03-proof-and-facts.md` §7.2. Места `use` факта —
+ориентир: вне их — `COPY-F-USE` warning, запрет `use.not_in` — error; места `x-use-always` схемы фактов (мета, FAQ,
+статья, подвал, форма) законны всегда. Число словами в утверждении («пять лет») сверяется как цифрами и получает
+`COPY-F-NUM-WORDS` (пишите цифрами); счёт без утверждения («два шага») — без находок. Вопрос (FAQ, предложение с «?»)
+утверждением не считается.
 
-**Правовые правила H (волна 2).** Файл `../../kb/text/08-russian-legal-typography/claims-rules.yaml` подхватывается сам, если есть;
+**Правовые правила.** Файл `../../kb/text/08-russian-legal-typography/claims-rules.yaml` подхватывается сам, если есть;
 дополнительные — `--rules`. Формат (`rules-schema`): `version: 1`, `date`, `rules[]` с полями `id` (рекомендуется
 `COPY-L-…`), `level`, `claim_class[]` и/или `patterns[]` (Python re, регистр не важен), `genres`, `slot_types`,
 `jurisdiction`, `forbid` (любое срабатывание — находка), `requires` (`fact`, `fact_fields` вроде `basis.criterion`,
 `nearby` — регулярки оговорки или источника в той же единице или секции, `legal_review: approved`), `message`, `fix`,
 `source`. Классы маркеров берутся из `x-claim-classes` схемы фактов; набор запретов по умолчанию — `x-never-claim-defaults`.
 
-**Проверено** (`../../kb/text/99-raw/experiments/B2/`): 01 — схема и примеры (метасхема, 19 отрицательных мутаций); 02 — «Кварц»:
-3 из 3 эталонных провалов (обещание про глаза, «датчик», «сборка в Казани») и 4 новых, исправленный текст — 0 error;
-03 — 40 фраз без фактов: 1 ложное (метафора «sleep better»), полнота 33 из 33; 04 — `inventory` на трёх живых
-лендингах; 05 — чужой copy deck B1: 2 ложные ошибки найдены и исправлены.
-
 **Ограничения:** свойства без словарных слов и утверждения без чисел и маркеров ловит только `--strict` (с шумом);
 смысл между фразами не сравнивается; эвристика имён по заглавным буквам шумит на служебных файлах (сверять copy deck, а
-не TASK.md); `inventory` на Markdown переоценивает число утверждений (цены опций, нумерация) и плохо видит источники в
-картинках и сносках — для корпуса нужен разбор DOM (`copy_extract.py`, D).
+не служебные заметки); `inventory` на Markdown переоценивает число утверждений (цены опций, нумерация) и плохо видит
+источники в картинках и сносках — для корпуса нужен разбор DOM (`copy_extract.py`).
 
 ## `copy_lint.py` и `ux_dict_to_yaml.py` — линтер маркетинговых текстов RU/EN (C, волна 1, 2026-09-24)
 
@@ -191,53 +188,47 @@ MIT; pymorphy3-dicts-ru 2.4.417150.4580142 — код MIT, словарные д
 ux написаны для ECMAScript — в JS `\w` не видит кириллицу, линтер на Python это обходит, JS-реализации нужны макросы
 (спецификация §2.2). Смысл, правдивость, тон и структуру страницы линтер не проверяет (спецификация §12).
 
-## `claims_check.py` — правовой модуль H (волна 2, 2026-09-24)
+## `claims_check.py` — правовой модуль
 
-Право формулировок в той же утилите и том же отчёте, что сверка B2 (раздел выше не менялся). Правила —
-`../../kb/text/08-russian-legal-typography/claims-rules.yaml` (66 правил `COPY-L-…`, подхватываются сами), нормы и практика —
+Право формулировок — в той же утилите и том же отчёте, что сверка с фактами. Правила —
+`../../kb/text/08-russian-legal-typography/claims-rules.yaml` (68 правил `COPY-L-…`, подхватываются сами), нормы и практика —
 `../../kb/text/08-russian-legal-typography/01-advertising-law-claims.md`. Не юридическое заключение: находка показывает, где нужна
 оговорка, факт или юрист.
 
 | Команда | Что делает |
 |---|---|
-| `python3 claims_check.py page.md --facts facts.yaml` | сверка B2 + право РФ (по умолчанию `ru`, отрасль `general`) |
+| `python3 claims_check.py page.md --facts facts.yaml` | сверка с фактами + право РФ (по умолчанию `ru`, отрасль `general`) |
 | `… --legal-category medical` (`finance`, `dietary-supplements`, `alcohol`, `education`, `real-estate`, `other`, `general`; через запятую) | отраслевые правила: противопоказания, БАД, ПСК, ДДУ, алкоголь; по умолчанию — `legal_category` из шапки copy deck или `general` |
-| `… --jurisdiction eu` (`us`) | профиль ЕС (прежняя цена за 30 дней, экологические заявления с 27.09.2026, «проверенные отзывы») или США (FTC); по умолчанию — `jurisdiction` из facts.yaml или `ru` |
-| `… --legal-only --json out.json` | в отчёте только находки права; в JSON блок `legal` (юрисдикция, отрасль, число правил и находок); у находки — `law` (норма и редакция) |
-| `python3 claims_check.py rules-schema` | JSON Schema правил (расширена: поля права H и поля формата C) |
-| `python3 claims_check.py --selftest` | 65 проверок B2 + 28 проверок модуля: механика на встроенных правилах, все пары «плохо / хорошо» из claims-rules.yaml, 33 нейтральные фразы без error и warning права, CLI |
+| `… --jurisdiction eu` (`us`) | профиль ЕС (цена до скидки — наименьшая за 30 дней, экологические заявления, «проверенные отзывы») или США (FTC); по умолчанию — `jurisdiction` из facts.yaml или `ru` |
+| `… --legal-only --json out.json` | в отчёте только находки права; в JSON блок `legal` (модуль, юрисдикция, отрасль, число правил и находок); у находки — `law` (норма и редакция) |
+| `python3 claims_check.py rules-schema` | JSON Schema правил (поля права и поля формата линтера) |
 
 **Как работает правило.** Срабатывание — `pattern` (синтаксис copy_lint: макросы `%B%` `%E%` `%W%`) по «мягкому» тексту
 (нижний регистр, ё→е, тире→«-», NBSP→пробел); `unless` в том же предложении снимает срабатывание. Фильтры: `genres`,
 `slot_types`/`exclude_slot_types` (шаблоны fnmatch), `lang` (ru/en по буквам единицы), `jurisdiction`, `legal_category` /
-`legal_category_except`. Условия снятия (`requires`): `nearby` (хотя бы одна регулярка) и `nearby_all` (все) в единице,
-секции или на странице (`nearby_scope`); `fact_fields` — поля найденного факта (`basis.criterion`, `valid.from`…);
-`fact_conditions` — условия факта (`values[].qualifier`, `legal.disclaimer`) должны стоять рядом; `fact`, `legal_review`
-— как у B2. `forbid: true` — запрет; правило без `requires` и `forbid` — сигнал. `once: page` — одна находка на
-страницу (обязательные оговорки). `defaults` файла сливаются в правила.
+`legal_category_except`, `page_types` / `page_types_except` (тип страницы copy deck: правило вакансий — только на
+`careers-page`, правило оферты — не на страницах услуг). Условия снятия (`requires`): `nearby` (хотя бы одна регулярка) и `nearby_all`
+(все) в единице, секции или на странице (`nearby_scope`); `fact_fields` — поля найденного факта (`basis.criterion`,
+`valid.from`…); `fact_conditions` — условия факта (`values[].qualifier`, `legal.disclaimer`) должны стоять рядом; `fact`,
+`legal_review` — как у сверки фактов. `forbid: true` — запрет; правило без `requires` и `forbid` — сигнал. `once: page` —
+одна находка на страницу (обязательные оговорки). `defaults` файла сливаются в правила. Факты для `requires` — найденные
+числом, датой, цитатой, именем, `fact_ids` и маркером класса.
 
-**Что изменено в коде B2 (только блок внешних правил).** Прежний блок `check_units` заменён функцией
-`apply_legal_rules`; `load_rules` читает `defaults`, `pattern` с макросами, `unless`, `nearby_all`; факты для `requires` —
-найденные числом, датой, цитатой, именем, `fact_ids` **и маркером класса** (раньше только первые — факт «самая быстрая
-доставка по замеру агентства X» не засчитывался); `fact_fields` проверяются у найденного факта, «нет факта» — только при
-`fact: true` (отсутствие факта и так даёт `COPY-F-CLASS` ядра); `check_units(..., ctx=legal_ctx(юрисдикция, отрасли))` —
-новый необязательный аргумент. Ядро сверки и тесты B2 не тронуты; сборка и проверка — `99-raw/experiments/H/`.
-
-**Файл правил общий с copy_lint.py (C).** C подключает `claims-rules.yaml` через `profiles.yaml → external_rules`:
+**Файл правил общий с copy_lint.py.** Линтер подключает `claims-rules.yaml` через `profiles.yaml → external_rules`:
 у каждого правила `pattern`, пара `examples` строками, `group: EXT`, `count_as_marker: false`, `priority: 60`; блок
 `overrides` в конце файла делает право в линтере сигналом (info; 6 правил — warning: превосходная степень, лечебные
 свойства, гарантия результата, согласие ПДн с рекламой, цена только в валюте), отраслевые и ЕС/США — `off` (отрасль и
-юрисдикцию знает только claims_check). Проверено: `copy_lint.py --selftest` — OK. Порядок в конвейере (решение
-оркестратора): `claims_check.py` → `copy_lint.py`.
+юрисдикцию знает только claims_check). Порядок в конвейере: `claims_check.py` → `copy_lint.py`.
 
 **Набор (типографика) — в `copy_lint.py`, не здесь.** `../../kb/text/08-russian-legal-typography/typography-rules.yaml` — 27 правил
 `typo-…` (маркеры `COPY-T-01…27`: тире и диапазоны, минус, проценты, валюта, разряды, неразрывные пробелы, кавычки,
-знаки, двойные пробелы, английский набор); C подключает файл через `profiles.yaml → external_rules`, разово —
+знаки, двойные пробелы, английский набор); линтер подключает файл через `profiles.yaml → external_rules`, разово —
 `python3 copy_lint.py page.md --rules ../../kb/text/08-russian-legal-typography/typography-rules.yaml`. Автотипограф
-typograf 7.8.0 (MIT) и его настройка — `02-typography-for-marketing.md` §8, опыт `99-raw/experiments/H/03-typograf/`.
+typograf 7.8.0 (MIT) и его настройка — `02-typography-for-marketing.md` §8.
 
-**Проверено** (`99-raw/experiments/H/`): 00 — сборка модуля и дифф с B2; 01 — 20 русских страниц корпуса D, ручная
-проверка находок; 02 — пакет «Кварц» (kimi F/03) против фактов B2; 03 — typograf и правила набора на 10 текстах.
+**Самопроверка** (`--selftest`, общая с ядром): механика требований на встроенных правилах, все пары «плохо / хорошо» из
+claims-rules.yaml, нейтральные фразы без error и warning права, CLI `--legal-only`, калибровки права К26 и К27
+(«бесплатно в черте города», возврат, оферта, вакансии).
 
 **Ограничения.** Регулярки не видят смысла: «лучший способ проверить» и похожие исключения перечислены вручную; отрицание
 учтено только там, где оно вписано в регулярку; размер оговорки (5–10 % площади) и шрифт не проверяются — это вёрстка
@@ -283,71 +274,108 @@ GEO — G, право и типографика — H). Причина: внеш
 `measurements.tsv` говорит, какой режим). Новая функция `lint_markdown(text, genre, lang="auto")` — как
 `copy_lint.lint_text`, но тем же набором правил. `copy_lint.py` не менялся.
 
-## `copydeck.py` — copy deck: проверка, сверка, линтер, экспорт в kimi (J, волна 3, 2026-09-24)
+## `copydeck.py` — copy deck: каркас, проверки, статусы, выгрузка во вход холста
 
-Единственный путь текста страницы в пакет исполнителя: copy deck проверяется, получает статусы и выгружается в
-`copy.md`, `facts.md` и фрагмент `brief.yaml` kimi; руками эти файлы не пишутся. Формат —
-`../../kb/text/10-templates-recipes/copy-deck.schema.json` (JSON Schema 2020-12, `urn:app-design:text-research:copy-deck:1`; v1 = черновик
-v0 из `PLAN.md` без удаления и переименования полей + необязательные поля v1; v1.1 — `variant.fact_ids`,
-`adaptation.voice_line`), процесс — `../../kb/text/10-templates-recipes/01-copy-deck-workflow.md`, поля и потоки — `../../kb/text/10-templates-recipes/README.md`.
-Версия 1.1 (1.0 — фаза 1, J и J2; 1.1 — правки фазы 2, J3). Зависимости: Python 3.10+ и PyYAML (системный `python3`); `jsonschema` — по желанию,
-интерпретатором `99-raw/tools/venv-J/bin/python` (jsonschema 4.26.0, PyYAML 6.0.3, Python 3.12.13, 6,4 МБ). Сеть и модели не
-нужны. Чужие утилиты не переписаны: `claims_check.py` (B2, H) вызывается процессом, `copy_lint.py` (C) — через API `lint_text`.
+Единственный путь текста страницы во вход холста: copy deck строится каркасом из плана страницы, проверяется, получает
+статусы и выгружается во вход холста (`design/<surface>/input/pages/<page-id>/copy.md` и
+`design/<surface>/input/facts.md`, протокол — `references/claude-design.md § 6`); руками эти файлы не пишутся. Правки текста с холста
+возвращаются в copy deck вариантами `source: customer`. Формат — `../../kb/text/10-templates-recipes/copy-deck.schema.json`
+(JSON Schema 2020-12; поля и статусы v0 на месте, статус `assumed`, стык с планом — `x-site-map`, выгрузка — `x-canvas-map`),
+процесс — `../../kb/text/10-templates-recipes/01-copy-deck-workflow.md`, поля и потоки — `../../kb/text/10-templates-recipes/README.md`.
+Зависимости: Python 3.10+ и PyYAML; `jsonschema` — по желанию (Python окружения скилла). Сеть и модели не нужны; браузер —
+только у `verify-page --browser` и `--url`. `claims_check.py` вызывается процессом, `copy_lint.py` — через API `lint_text`.
+Полная справка — шапка файла (`python3 copydeck.py -h`).
+
+**Статусы текста.** `draft` — каркас или текст в работе, владельцу не предложен; `assumed` — черновик агента
+«допущением» из утверждённых смысла, фактов и голоса: предложен владельцу и идёт на вайрфрейм; `checked` — 0 error у
+`claims_check.py` и `copy_lint.py` (записи `lint` и `claims` с `text_hash`); `approved` — утверждён человеком;
+`rejected` — отклонён с причиной. Этап холста берёт тексты по `x-canvas-map` (`copy_md.stage_statuses`): направления —
+заголовок и кнопку первого экрана, вайрфрейм — `assumed` · `checked` · `approved`, макет — только `approved`.
+Юридические тексты (согласие формы, реквизиты в подвале) и подпись автора статьи агент «допущением» не пишет: до юриста
+заказчика или человека они остаются `draft`, а в выгрузке становятся пробелом этапа.
 
 | Команда | Что делает |
 |---|---|
-| `python3 copydeck.py check DECK [--facts F] [--today ГГГГ-ММ-ДД] [--final] [--strict] [--all-variants]` | всё сразу в порядке решения оркестратора: `claims` → `lint` → `validate`; `--update OUT --promote` пишет копию deck с записями `lint` и `claims` (`text_hash`, дата, версии утилит) и переводит draft → checked у текстов с 0 error; с `--all-variants --update` — ещё `variant.checks {claims, lint}` у каждого живого варианта; факты выбранного варианта (`variant.fact_ids`) переносятся в слот |
-| `… validate DECK [--facts F] [--final] [--no-jsonschema]` | схема; id и ссылки; статусы (`x-status-rules`); временный словарь; факты (есть, не пробел, не истёк, публикуем; битые `fact_ids` невыбранного варианта — warning); пробелы B2 (`missing_ids`, `fallback` → `COPY-D-FALLBACK`); обещание; строки в картинках; второй язык; файлы волны 2 (ниже) |
-| `… claims DECK [--facts F] [--strict] [--all-variants]` | `claims_check.py check` на плоской копии v0: обещание — `__promise`, мета и OG — `__head`, `lint.profile` = жанр; в слоте — проверяемый вариант с его фактами; `--all-variants` — каждая живая альтернатива (и альтернатива мета) копией страницы `<page>~alt~N` с одной заменой: отклонённые не сверяются, соседний вариант не закрывает `requires_nearby`, итоги — в `variants` пути, статус выбранного не трогают |
-| `… lint DECK [--final] [--all-variants] [--no-page-pass]` | `lint_text` на каждый текст со своим `slot_type` и жанром + проход страницы по Markdown-проекции; `lint_allow` и `--final` — по семантике C; `meta.fact_ids` учитываются (`tools.lint.parity_copy_lint` — сколько находок в мета снято: прямой `copy_lint.py` на deck их покажет) |
-| `… approve DECK --page ID --by КТО -o OUT [--at ГГГГ-ММ-ДД] [--note]` | утверждение человеком: все тексты checked (0 error, актуальный `text_hash`, без `[PLACEHOLDER]`) → approved, `review {by, at}` и `approval` страницы |
-| `… export-kimi DECK --out DIR [--page ID] [--facts F] [--meaning meaning.yaml] [--merge-into brief.yaml] [--strict] [--facts-scope all\|used] [--job-facts]` | `copy.md` (+ `## head`; строка `Voice:` — `adaptation.voice_line` или проекция профиля F), `facts.md`, `brief-fragment.yaml`, с `--merge-into` — слитый `brief.yaml`. Ворота: validate + claims по странице и полям брифа; `--strict` — только утверждённая страница без заглушек |
-| `… import-kimi copy.md -o DECK [--brief brief.yaml] [--facts F] [--page-type T] [--page-id home]` | готовый `copy.md` kimi (+ `product.goal`, jobs, alt и подписи из `brief.yaml`) → copy deck v1 |
-| `… export-assets DECK [--page ID] [-o OUT]` | alt, подписи, строки в картинках (`text.mode: in_image`, ≤ 3 строк по ≤ 40 знаков), OG → фрагмент плана ассетов ai-media |
-| `… export-variants DECK -o SHEET.md --key KEY.yaml [--seed N] [--min 2] [--include-failed]` | лист слепого выбора: слоты, обещание и мета (`meta.variants.*`; выбранный текст без варианта — id `meta`), метки A, B, C, модели скрыты; варианты с error в `variant.checks` не показываются (в ключе — комментарием) |
+| `python3 copydeck.py skeleton PLAN -o DECK [--facts-ref F] [--voice-ref V]` | каркас из плана страницы: секции (`section_id` = `site_section_id` плана, роль, блок), текстовые слоты (id, тип, анатомия, группа), `fact_ids` и `missing_ids` из `binds` слотов данных, мета из `page_slots`, `page_plan_ref`; тексты пусты, статус `draft`. Страница без плана — `make_skeleton.py` |
+| `… validate DECK [--facts F] [--plan PLAN] [--final] [--no-jsonschema]` | схема; id и ссылки; статусы (`x-status-rules`); словарь site v1 (типы страниц, роли секций, слоты); `block` против `blocks.yaml`; стык с планом (`page_plan_ref` или `--plan`); факты (есть, не пробел, не истёк, публикуем, демо-данные); пробелы (`missing_ids`, `fallback` → `COPY-D-FALLBACK`); обещание и ядро первого экрана (секция `hero`, без неё — первая после шапки); строки в картинках; второй язык; файлы правил текста (ниже). `--final` — ворота публикации: страница `approved`, 0 `[PLACEHOLDER]`, 0 демо-фактов |
+| `… check DECK [--facts F] [--today ГГГГ-ММ-ДД] [--final] [--strict] [--all-variants] [--update OUT --promote]` | `claims` → `lint` → `validate`; `--update OUT --promote` пишет копию deck с записями `lint` и `claims` (`text_hash`, дата, версии утилит) и переводит `draft` и `assumed` → `checked` у текстов с 0 error; `--all-variants` — живые альтернативы «как выбранные» (`variant.checks`) |
+| `… claims DECK [--facts F] [--strict] [--all-variants] [--final]` | `claims_check.py check` на плоской копии: обещание — `__promise`, мета и OG — `__head`; `--all-variants` — каждая живая альтернатива копией страницы с одной заменой: отклонённые не сверяются, соседний вариант не закрывает `requires_nearby` |
+| `… lint DECK [--final] [--all-variants] [--no-page-pass]` | `lint_text` на каждый текст со своим `slot_type` и жанром + проход страницы по Markdown-проекции; `lint_allow` и `--final` — по семантике линтера; `meta.fact_ids` учитываются |
+| `… export DECK --page ID --stage directions\|wireframe\|mockup [--out DIR] [--facts-scope all\|used]` | выгрузка во вход холста: `DIR/pages/<page-id>/copy.md` (тексты статуса этапа) и `<DIR>/facts.md` («Факты» — публикуемые дословно, с источником и местами, демо-данные помечены; «Нет» — пробелы `[PLACEHOLDER: что]`; «Нельзя утверждать» — запреты без снимающего факта); слот без текста статуса этапа — `COPY-D-STAGE`, факты не `confirmed` — `COPY-D-FACTS-STATUS` (на макете — error, раньше — warning) |
+| `… import-copy COPY.md --deck DECK --page ID -o OUT [--choose]` | правки текста с холста (`pages/<page-id>/copy.md` из разбора исходников холста или правленая выгрузка): изменённый текст слота — новый вариант `source: customer` в статусе `draft` (дальше — `check` и утверждение); `--choose` — сразу выбран, утверждённая страница возвращается в `draft`; текст без секции или слота плана — находка «перенести в план?» |
+| `… export-variants DECK -o SHEET.md --key KEY.yaml [--seed N] [--include-failed]` | лист слепого выбора: слоты, обещание и мета, метки A, B, C; модели и авторы скрыты; варианты с error в `variant.checks` сняты |
+| `… apply-selection DECK --key KEY.yaml (--votes VOTES.yaml \| --sheet SHEET.md) --by КТО -o OUT` | голоса слепого выбора → `chosen` и `selection {method, by, at, compared, tally, ref}`; у мета — выбранный текст в `meta.<поле>` |
+| `… approve DECK --page ID --by КТО -o OUT` | утверждение человеком: тексты `checked` (0 error, актуальный `text_hash`, без `[PLACEHOLDER]`) → `approved`, `review {by, at}` и `approval` страницы; журнал процесса (`edit_log`, отклонённые варианты) уходит, `selection.compared` остаётся |
+| `… verify-page DECK --page ID (--extract PAGE.json \| --html PAGE.html [--browser] \| --url URL)` | собранная страница против copy deck: блоки не из copy deck > 10 % — error, число вне фактов и текстов — error, потерянные слоты, мета, обещание |
+| `… export-assets DECK [--page ID] [-o OUT]` | alt, подписи, строки в картинках (`text.mode: in_image`, ≤ 3 строк по ≤ 40 знаков), OG → фрагмент плана ассетов |
 | `… upgrade DECK -o OUT` | copy deck v0 → v1 |
-| `python3 copydeck.py --selftest` | 111 проверок (112 с jsonschema): T2, схема, статусы и `text_hash`, факты и пробелы, файлы волны 2, мета G, плоская копия и альтернативы, экспорт и обратный импорт, сверка брифа, ассеты, слепой выбор, `variant.fact_ids`, `rebase_refs`, строка голоса EN |
+| `… before-after [--write \| --check]` | пустой `why` в `../../kb/text/10-templates-recipes/before-after.tsv` — из `rule_ref` (заголовок раздела нормы) |
+| `python3 copydeck.py --selftest` | 146 проверок: схема и статусы (`assumed`), факты и пробелы, словарь site и блоки, каркас из плана и стык, ядро первого экрана, файлы правил текста, мета, альтернативы, выгрузка и приём copy.md, facts.md, слепой выбор и `apply-selection`, `approve` без журнала процесса, `verify-page`, `before-after` |
 
-Копия deck, записанная в другую папку (`check --update`, `approve -o`, `upgrade -o`), получает относительные пути
-(`facts_ref`, `voice_ref`, `copy_slots_ref`, `meaning_ref`, `source_ref`, `page_plan_ref`, `hierarchy_ref`) от своей папки
-(`rebase_refs`; до правки J3 `approve` в `out/` терял факты).
+**Синтаксис copy.md** (владелец формата — эта утилита, `parse_copy_md` и `render_copy_md`; тот же формат пишет разбор
+исходников холста, читают `claims_check.py --format copy-md` и сборщик входа; правило — `x-canvas-map` ключ `copy_md`):
+строка `# …` — заголовок или комментарий; `## <section_id>` — секция плана, `## ?` или `## ? <подпись>` — тексты холста
+без секции плана; `[<slot_id>] <статус>: <текст>` — слот (статус пишет выгрузка; у текстов из исходников холста его нет:
+`[<slot_id>]: <текст>`); `[?]: <текст>` или `[? <подпись>]: <текст>` — текст холста без слота плана; текст — всё после
+первого «: » до конца строки, дословно; абзацы — строками продолжения, начатыми двумя пробелами; пустые строки и
+`<!-- … -->` пропускаются.
+
+```
+# Тексты страницы home — Отвес (ru), этап wireframe
+# Тексты — дословно: не переводить, не сокращать, не дописывать. Строка слота: [<slot_id>] <статус>: текст.
+
+## hero
+[h1] assumed: Ремонт квартир под ключ в Нижнем Новгороде с 2014 года
+[cta] checked: Позвать замерщика
+
+## guarantee
+[text] approved: Гарантия 3 года на работы — пункт 7.2 договора.
+  Отошла плитка — звоните: гарантия действует с даты акта.
+```
 
 **Выход.** Терминал (`--verbose` — с info, `--quiet` — без вывода); `--json OUT` — `{tool, version, date, command, input,
 today, summary{error, warning, info}, tools{claims, lint, validate}, findings[{tool, level, rule, where, message, fix,
-fragment, fact_ids, variant}], notes, slots{<путь>: {claims, lint[, variants]}}}`, у `export-kimi` ещё `export{…}`; `--md OUT`
-— таблица находок. Коды выхода: 0 — нет error, 2 — есть error, 1 — ошибка входа или ключей. Правила: свои `COPY-D-…`,
-`COPY-F-…` и `COPY-L-…` — из `claims_check.py`, id линтера C — из `copy_lint.py`, `meta-x-…` — проверки G вне линтера.
+fragment, fact_ids, variant}], notes, slots{<путь>: {claims, lint[, variants]}}}`, у `export` ещё `export{…}`; `--md OUT` —
+таблица находок. Коды выхода: 0 — нет error, 2 — есть error, 1 — ошибка входа. Правила: свои `COPY-D-…`; `COPY-F-…` и
+`COPY-L-…` — из `claims_check.py`, id линтера — из `copy_lint.py`, `meta-x-…` — проверки мета вне линтера. Копия deck,
+записанная в другую папку (`check --update`, `approve -o`, `upgrade -o`, `import-copy -o`, `apply-selection -o`), получает
+относительные пути (`facts_ref`, `voice_ref`, `copy_slots_ref`, `meaning_ref`, `source_ref`, `page_plan_ref`,
+`hierarchy_ref`) от своей папки.
 
-**Файлы волны 2**: есть — проверка работает; нет — warning `COPY-D-RULES-MISSING`; формат не распознан —
-`COPY-D-RULES-FORMAT`; ничего не падает. `copy-slots.yaml` E — длины (`COPY-D-LEN`), `fact_required` (`COPY-D-FACT-REQUIRED`),
-ядро первого экрана > 40 слов (`COPY-D-HERO-CORE`), роль секции (`COPY-D-SLOT-ROLE`); `voice.yaml` F — обращение и
-`vocabulary.avoid` (`COPY-D-VOICE`), `projections.tone_of_voice` → `Voice:`; `meta-rules.yaml` G — длины мета и `meta-x-…`;
-`claims-rules.yaml` H — `claim_flags` сверяются с id правил (`COPY-D-FLAGS`).
+**Файлы правил текста**: есть — проверка работает; нет — warning `COPY-D-RULES-MISSING`; формат не распознан —
+`COPY-D-RULES-FORMAT`; ничего не падает. `copy-slots.yaml` — длины (`COPY-D-LEN`), `fact_required` (`COPY-D-FACT-REQUIRED`),
+ядро первого экрана > 40 слов (`COPY-D-HERO-CORE`), роль секции (`COPY-D-SLOT-ROLE`); голос проекта (`docs/projects/<slug>/voice.yaml`) — обращение и
+`vocabulary.avoid` (`COPY-D-VOICE`); `meta-rules.yaml` — длины мета и `meta-x-…`; `claims-rules.yaml` — `claim_flags`
+сверяются с id правил (`COPY-D-FLAGS`).
 
-**Проверено** (`../../kb/text/99-raw/experiments/J/`): 01–06 — фаза 1 (J, J2: путь «Отвеса» до пакета, импорт «Кварца», 31 из 31
-отрицательного случая, пакеты kimi, паритет линтера, сухой прогон пар); 07 — правки фазы 2 на находках E3 и I3 (`check`:
-`COPY-D-FALLBACK` 0 → 2; `--all-variants` на deck-v4 I/04: 4 error → 1 → 0 с `variant.fact_ids`; лист выбора: 3 → 4 слота);
-08 — 8 примеров `../../kb/text/10-templates-recipes/examples/` с 0 error в пяти проверках, страница кейса до `build_package.py check` (0
-error), вебинар — `--all-variants --update` и лист выбора.
-
-**Ограничения и решения J.**
-- `lint_text` не принимает `fact_ids` слота и `lint_allow`: `copydeck.py lint` повторяет режим copy deck C поверх API
-  (29 правил `requires_no_fact`, `an-number-without-fact`, `lint_allow` — fnmatch по id, ART и CNT не снимаются, `--final`).
-  Предложение C — параметры `fact_ids` и `allow` у `lint_text`, чтение `meta.fact_ids` в режиме copy deck.
-- **`lint_allow` не снимает находки сверки** (`COPY-F-…`, `COPY-L-…`) и формата (`COPY-D-…`): ложное срабатывание сверки
-  лечится правкой текста или `facts.yaml` (I/04: «ипотека» → `COPY-F-CLASS`), по замыслу.
-- **Два пути линтера**: прямой `copy_lint.py` на copy deck не читает `meta.fact_ids` (число в title — ложный
-  `an-number-without-fact`: 6 у «Отвеса» v1 в J/05, 7 на трёх примерах J/08), не видит обещание и OG-шаблон и линтует отклонённые
-  варианты; `copydeck.py lint` — наоборот. Ворота — `copydeck.py check`; расхождение по мете — в `parity_copy_lint`.
-- Загрузка правил линтера запоминается внутри процесса copydeck (код C не менялся): правили словари C — перезапустите.
-- `claims` — процессом на плоской копии v0; `meta.fact_ids` в сверку не передаются (один список на все поля давал ложные
+**Ограничения.**
+- `lint_text` не принимает `fact_ids` слота и `lint_allow`: `copydeck.py lint` повторяет режим copy deck линтера поверх API
+  (правила `requires_no_fact`, `an-number-without-fact`, `lint_allow` — fnmatch по id, ART и CNT не снимаются, `--final`).
+- `lint_allow` не снимает находки сверки (`COPY-F-…`, `COPY-L-…`) и формата (`COPY-D-…`): ложное срабатывание сверки
+  лечится правкой текста или `facts.yaml`.
+- Два пути линтера: прямой `copy_lint.py` на copy deck не читает `meta.fact_ids` (число в title — ложный
+  `an-number-without-fact`), не видит обещание и OG-шаблон и линтует отклонённые варианты; `copydeck.py lint` —
+  наоборот. Ворота — `copydeck.py check`; расхождение по мете — в `parity_copy_lint`.
+- Загрузка правил линтера запоминается внутри процесса copydeck: правили словари линтера — перезапустите.
+- `claims` — процессом на плоской копии; `meta.fact_ids` в сверку не передаются (один список на все поля давал ложные
   `COPY-F-USE`); свои `fact_ids` варианта мета — передаются.
-- `export-kimi`: id фактов в `job` — только `--job-facts`; в `brief.yaml` — только отвеченные вопросы; «no em dashes» kimi не
-  переносится (для `lang: ru` — «Typography is final…»); поля брифа сверяются как текст (error — `goal`, `primary_action`,
-  `description`, `cta.label`; warning — jobs и `target_user`); у профилей F проекция голоса одноязычная — для EN без
-  `adaptation.voice_line` warning `COPY-D-LANG`.
-- Нет команд `verify-page` (сверка собранной страницы с copy deck — спецификация `01-copy-deck-workflow.md` §9) и `select`
-  (перенос голосов слепого выбора в `chosen` и `selection`) — пробелы в отчёте J.
+
+## Цепочка смысла, голоса и каркаса: проверки и входы промтов
+
+Утилиты шагов цепочки текста (`../../kb/text/09-ai-generation-evaluation/02-generation-pipeline.md`): смысл и иерархия,
+факты, голос бренда и продукта, каркас copy deck без плана, входы промтов P1–P7 и прогон примеров. Сеть и модели не
+нужны: входы собирает код, тексты пишет агент сессии.
+
+| Команда | Что делает | Выход |
+|---|---|---|
+| `python3 validate_meaning.py [--quiet] [--no-negative]` | схемы смысла и иерархии сообщений (метасхема), примеры базы, смысловые проверки (допущение без вопроса, ссылки на альтернативы и доказательства, `never_claim` с `lift: never` в обещаниях, блокеры до `final-cta`), отрицательные случаи; обещание из допущения — предупреждения: свойство или опора `has-proof` с `missing:` в `proof_ids`, `never_claim` с `lift: with-fact` без снимающего проверенного факта того же класса, главное сообщение или ядро ценностного предложения на свойстве без доказательства (К30) | 0 / 1 |
+| `python3 validate_any.py FILE.yaml […]` | те же проверки на meaning или иерархии проекта (выход промтов P2, P3) | 0 / 1 |
+| `python3 validate_voice.py [voice.yaml …]` | схема голоса, перечень `slot-type` — слоты вида text словаря site; профили бренда и голоса продукта (`docs/projects/<slug>/voice.product.yaml`: все поверхности `voice: product`, жанр `interface`, юмора нет в `service-error`, `destructive-action`, `money`, `security`, образцы по роли строки); отрицательные мутации бренда и голоса продукта; итог — `$DDD_HOME/out/text/validate_voice.last-run.txt` | 0 / 1 |
+| `python3 validate_facts.py` | схемы фактов и голоса клиента, примеры text и site (`example: true` у демо-наборов), ссылки `entities` и `related`, отрицательные случаи (`example`, переводы, язык запретов) | 0 / 1 |
+| `python3 check_intake.py INTAKE.yaml --brief BRIEF.txt` · `--selftest` | выход промта P1 (разбор брифа): цитаты — подстроки брифа, числа только из цитат, вопросов ≤ 7, допущения с вопросами | 0 / 2 / 1 |
+| `python3 make_skeleton.py HIERARCHY.yaml --facts F --voice V --meaning M --page-id ID -o DECK [--force]` · `--selftest` | каркас copy deck из иерархии, когда плана страницы нет; есть план (`../plans/<page-id>.yaml` рядом с папкой иерархии) — отказ с кодом 2 и подсказкой `copydeck.py skeleton`, `--force` — всё равно | 0 / 2 |
+| `python3 chain_inputs.py <команда>` · `--selftest` | входы промтов P2–P7 и код между шагами: `digest-meaning`, `meaning-claims`, `hierarchy-input`, `section-input`, `edit-input`, `judge-input`, `judge-score`, `assemble` и `apply-edits` (тексты агента — `assumed`), `canvas-texts` (выгрузка во вход холста — `copydeck.py export`) | 0 / 1 / 2 |
+| `python3 run_checks.py [пример.yaml …] [--md table.md]` | все проверки примеров copy deck базы: `claims_check.py` → `copy_lint.py` → `copydeck.py check` → `validate` (+ jsonschema) → `export` этапа wireframe; JSON и выгрузки — `$DDD_HOME/out/text/run_checks/` | 0 / 2 |
 
 ## `before_after_build.py` — пары «до / после» по маркетинговым жанрам (J, волна 3, 2026-09-24)
 

@@ -13,6 +13,7 @@ site: okoshko-demo
 lang: ru
 jurisdiction: ru
 status: draft
+example: true
 owner:
   role: основатель (демо-заказчик)
 collected_by: агент J3 (демо-набор для примера вебинара, 2026-09-24)

@@ -1,24 +1,29 @@
 #!/usr/bin/env python3
-"""Проверка схем B1 (meaning, message-hierarchy) и примеров: загрузка, JSON Schema 2020-12, смысловые проверки.
+"""Проверка схем смысла и иерархии сообщений (meaning, message-hierarchy) и примеров базы: загрузка, JSON Schema
+2020-12, смысловые проверки, отрицательные случаи.
 
-text-research · волна 1 · агент B1 · 2026-09-24
-
-Запуск (из корня text-research):
-    99-raw/tools/venv-B1/bin/python 99-raw/experiments/B1/03-schema-validate/validate.py [--quiet] [--no-negative]
+Запуск (Python окружения скилла, нужен jsonschema):
+    python3 scripts/text/validate_meaning.py [--quiet] [--no-negative]
+Функции проверки файла проекта (schema_errors, semantic_meaning, semantic_hierarchy) вызывает validate_any.py.
 
 Что проверяет:
   1. Обе схемы загружаются yaml.safe_load и проходят метасхему draft 2020-12.
   2. Каждый examples/meaning-*.yaml и examples/hierarchy-*.yaml проходит свою схему.
   3. Смысловые проверки meaning: уникальность id; все внутренние ссылки (альтернативы, свойства, боли, выгоды,
      возражения, снятие риска, вопросы) разрешаются; допущения ведут в open_questions; ссылки fact:/missing: сверяются с
-     facts.yaml из proof_ref (если файл есть рядом), неизвестные missing — предупреждение (кандидаты в missing B2);
+     facts.yaml из proof_ref (если файл есть рядом), неизвестные missing — предупреждение (кандидаты в missing этапа фактов);
      обещания (core, offering, темы ценности) не задевают never_claim с lift: never (урок «Кварца»); вопросов
-     приоритета 1 не больше 7 (одно сообщение заказчику, kimi 07/01 §4.1).
+     приоритета 1 не больше 7 (одно сообщение заказчику).
+     Обещание из допущения (предупреждения): свойство has-proof, а в proof_ids — missing:; обещание задевает
+     never_claim с lift: with-fact, а снимающего проверенного факта того же класса нет; ядро ценностного предложения
+     опирается на свойство без доказательства (сообщение сильнее своих доказательств).
   4. Смысловые проверки hierarchy: первая секция — hero; каждая опора несётся хотя бы одной секцией; hero несёт core;
      порядок секций без повторов; ссылки на ценности и возражения разрешаются в meaning_ref; возражения-блокеры
      основного сегмента закрыты до final-cta; тип hero соответствует уровню осведомлённости (предупреждение);
-     never_claim в главном сообщении, опорах и сообщениях секций.
-  5. Отрицательные случаи (в памяти): каждый должен дать ошибку.
+     never_claim в главном сообщении, опорах и сообщениях секций; опора has-proof с missing: в proof_ids, главное
+     сообщение на свойстве без доказательства или без proof_ids, never_claim с lift: with-fact без снимающего факта —
+     предупреждения.
+  5. Отрицательные случаи (в памяти): каждый должен дать ошибку; случаи обещания из допущения — предупреждение.
 Код выхода: 0 — ошибок нет; 1 — есть ошибки (предупреждения не влияют).
 """
 import copy
@@ -31,7 +36,7 @@ import yaml
 from jsonschema import Draft202012Validator
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb("text"))
 SM = os.path.join(ROOT, "02-strategy-messaging")
@@ -100,23 +105,71 @@ def walk_proof_ids(obj, out, path=""):
             walk_proof_ids(v, out, f"{path}[{i}]")
 
 
-def facts_index(meaning_path, meaning):
-    """Ищет facts.yaml из proof_ref рядом с meaning; возвращает (facts_ids, missing_ids, never_patterns) или None."""
-    ref = (meaning or {}).get("proof_ref")
-    if not ref:
-        return None
-    cand = os.path.normpath(os.path.join(os.path.dirname(meaning_path), ref))
-    if not os.path.exists(cand):
-        return None
-    fx = load(cand)
+def facts_index(meaning_path, meaning, data=None):
+    """facts.yaml из proof_ref рядом с meaning (или data — готовый словарь фактов) → (facts_ids, missing_ids,
+    запреты lift: never [(id, регулярка)], путь, запреты lift: with-fact [(id, регулярка, классы)], классы фактов,
+    которые снимают запрет) или None. Снимает запрет факт с источником: verification verified или stated, разрешение
+    granted или not-required, не вывод агента."""
+    cand = None
+    if data is None:
+        ref = (meaning or {}).get("proof_ref")
+        if not ref:
+            return None
+        cand = os.path.normpath(os.path.join(os.path.dirname(meaning_path), ref))
+        if not os.path.exists(cand):
+            return None
+        data = load(cand)
+    fx = data
     fids = {f["id"] for f in fx.get("facts", []) if isinstance(f, dict) and "id" in f}
     mids = {m["id"] for m in fx.get("missing", []) if isinstance(m, dict) and "id" in m}
-    pats = []
+    pats, pats_wf = [], []
     for nc in fx.get("never_claim", []) or []:
         if isinstance(nc, dict) and nc.get("lift") == "never":
             for p in nc.get("patterns", []) or []:
                 pats.append((nc.get("id"), p))
-    return fids, mids, pats, cand
+        elif isinstance(nc, dict) and nc.get("lift") == "with-fact":
+            for p in nc.get("patterns", []) or []:
+                pats_wf.append((nc.get("id"), p, set(nc.get("claim_class") or [])))
+    lifting = set()
+    for f in fx.get("facts", []) or []:
+        if not isinstance(f, dict):
+            continue
+        ok_ver = (f.get("verification") or {}).get("status") in ("verified", "stated")
+        ok_perm = (f.get("permission") or {}).get("status") in ("granted", "not-required")
+        if ok_ver and ok_perm and (f.get("source") or {}).get("derivation") != "inferred":
+            lifting |= set(f.get("claim_class") or [])
+    return fids, mids, pats, cand, pats_wf, lifting
+
+
+def check_never_with_fact(texts, pats_wf, lifting, where, warnings):
+    """Обещание задевает never_claim с lift: with-fact, а снимающего проверенного факта того же класса нет — обещание
+    из допущения (предупреждение: снимется, когда заказчик даст факт)."""
+    for label, t in texts:
+        if not isinstance(t, str):
+            continue
+        for ncid, p, classes in pats_wf:
+            if re.search(p, t, flags=re.I | re.U) and not (classes & lifting):
+                warnings.append(f"{where}: {label} задевает never_claim {ncid} (lift: with-fact, /{p}/), а проверенного факта класса "
+                                f"{', '.join(sorted(classes)) or '—'} нет — обещание из допущения: «{t[:80]}»")
+
+
+STEM_STOP = {"для", "или", "как", "что", "это", "без", "под", "при", "над", "все", "всё", "наш", "ваш"}
+
+
+def _stems(text):
+    return {w.lower().replace("ё", "е")[:6] for w in re.findall(r"[А-Яа-яЁёA-Za-z]{4,}", text or "") if w.lower() not in STEM_STOP}
+
+
+def attr_unproven(a):
+    """Свойство без доказательства: needs-proof или в proof_ids только missing:."""
+    ids = a.get("proof_ids") or []
+    return a.get("proof_status") != "has-proof" or not any(str(x).startswith("fact:") for x in ids)
+
+
+def attr_in_text(a, text):
+    """Свойство названо в тексте: половина значимых основ формулировки свойства есть в тексте."""
+    st = _stems(a.get("attribute"))
+    return bool(st) and len(st & _stems(text)) >= max(1, (len(st) + 1) // 2)
 
 
 def check_never(texts, pats, where, errors):
@@ -128,7 +181,7 @@ def check_never(texts, pats, where, errors):
                 errors.append(f"{where}: {label} задевает never_claim {ncid} (/{p}/): «{t[:80]}»")
 
 
-def semantic_meaning(path, m):
+def semantic_meaning(path, m, facts_data=None):
     errors, warnings, info = [], [], {}
     ids = []
     collect_ids(m, ids)
@@ -165,6 +218,10 @@ def semantic_meaning(path, m):
     for a in pos.get("unique_attributes", []):
         for v in a.get("versus", []):
             need(v, alts, "альтернативу", f"unique_attributes/{a['id']}")
+        miss_ids = [x for x in a.get("proof_ids") or [] if str(x).startswith("missing:")]
+        if a.get("proof_status") == "has-proof" and miss_ids:
+            warnings.append(f"unique_attributes/{a['id']}: has-proof, а в proof_ids пробел {', '.join(miss_ids)} — свойство держится и на "
+                            "недоказанном: needs-proof до ответа заказчика или только fact:")
     for t in pos.get("value_themes", []):
         for a in t.get("from_attributes", []):
             need(a, attrs, "свойство", f"value_themes/{t['id']}")
@@ -211,19 +268,24 @@ def semantic_meaning(path, m):
     info["basis_kinds"] = kinds
     p1 = [q for q in qs.values() if q.get("priority") == 1]
     if len(p1) > 7:
-        warnings.append(f"вопросов приоритета 1: {len(p1)} > 7 (одно сообщение заказчику — kimi 07/01 §4.1)")
+        warnings.append(f"вопросов приоритета 1: {len(p1)} > 7 (одно сообщение заказчику)")
     info["questions"] = len(qs)
     info["questions_p1"] = len(p1)
 
-    fx = facts_index(path, m)
+    core_text = ((vp.get("core") or {}).get("text")) or ""
+    for a in pos.get("unique_attributes", []):
+        if attr_unproven(a) and attr_in_text(a, core_text):
+            warnings.append(f"value_proposition.core опирается на свойство без доказательства {a['id']} («{a.get('attribute', '')[:60]}») — "
+                            "сообщение сильнее своих доказательств: обещание из допущения")
+    fx = facts_index(path, m, facts_data)
     proofs = []
     walk_proof_ids(m, proofs)
     info["proof_refs"] = len(proofs)
     proposals = {x.get("id") for x in (m.get("x-missing-proposals") or []) if isinstance(x, dict)}
     unresolved = set()
     if fx:
-        fids, mids, pats, fpath = fx
-        info["facts_file"] = os.path.relpath(fpath, ROOT)
+        fids, mids, pats, fpath, pats_wf, lifting = fx
+        info["facts_file"] = os.path.relpath(fpath, ROOT) if fpath else "(факты переданы)"
         for where, pid in proofs:
             kind, _, pid_ = pid.partition(":")
             if kind == "fact" and pid_ not in fids:
@@ -232,19 +294,20 @@ def semantic_meaning(path, m):
                 unresolved.add(pid_)
         for u in sorted(unresolved):
             (warnings if u in proposals else errors).append(
-                f"missing:{u} нет в {os.path.basename(fpath)}" + (" — есть в x-missing-proposals (предложение B2)" if u in proposals else " и нет в x-missing-proposals"))
+                f"missing:{u} нет в {os.path.basename(fpath)}" + (" — есть в x-missing-proposals (предложение в факты)" if u in proposals else " и нет в x-missing-proposals"))
         texts = [("offering_summary", (m.get("offering_summary") or {}).get("text")),
                  ("value_proposition.core", ((vp.get("core") or {}).get("text")))]
         texts += [(f"value_theme {t['id']}", t.get("theme")) for t in pos.get("value_themes", [])]
         check_never(texts, pats, os.path.basename(path), errors)
+        check_never_with_fact(texts, pats_wf, lifting, os.path.basename(path), warnings)
     else:
-        warnings.append("facts.yaml по proof_ref не найден — fact:/missing: не сверены (ожидается сбор фактов B2)")
+        warnings.append("facts.yaml по proof_ref не найден — fact:/missing: не сверены (ожидается сбор фактов)")
         info["facts_file"] = None
     info["unresolved_missing"] = sorted(unresolved)
     return errors, warnings, info
 
 
-def semantic_hierarchy(path, h):
+def semantic_hierarchy(path, h, facts_data=None):
     errors, warnings, info = [], [], {}
     secs = sorted(h.get("sections", []), key=lambda s: s.get("order", 0))
     orders = [s.get("order") for s in secs]
@@ -285,7 +348,23 @@ def semantic_hierarchy(path, h):
     for t in (h.get("core_message") or {}).get("value_theme_refs", []):
         if t not in themes:
             errors.append(f"core_message: ценность «{t}» не найдена в {os.path.basename(mpath)}")
+    attrs = {a["id"]: a for a in m["positioning"].get("unique_attributes", [])}
+    th_by_id = {t["id"]: t for t in m["positioning"]["value_themes"]}
+    cm = h.get("core_message") or {}
+    if not cm.get("proof_ids"):
+        warnings.append("core_message без proof_ids — главное сообщение без доказательств: обещание из допущения")
+    weak = {}
+    for t in cm.get("value_theme_refs", []):
+        for aid in (th_by_id.get(t) or {}).get("from_attributes", []):
+            a = attrs.get(aid)
+            if a and attr_unproven(a) and attr_in_text(a, cm.get("text")):
+                weak.setdefault(aid, []).append(t)
+    for aid, ts in weak.items():
+        warnings.append(f"core_message опирается на свойство без доказательства {aid} (ценность {', '.join(ts)}) — сообщение сильнее своих доказательств")
     for p in pillars.values():
+        miss_ids = [x for x in p.get("proof_ids") or [] if str(x).startswith("missing:")]
+        if p.get("proof_status") == "has-proof" and miss_ids:
+            warnings.append(f"опора {p['id']}: has-proof, а в proof_ids пробел {', '.join(miss_ids)} — опора держится и на недоказанном")
         for t in p.get("value_theme_refs", []):
             if t not in themes:
                 errors.append(f"опора {p['id']}: ценность «{t}» не найдена в meaning")
@@ -307,11 +386,11 @@ def semantic_hierarchy(path, h):
         segs = o.get("segment_ids") or [primary]
         if o.get("severity") == "blocker" and seg in segs and o["id"] not in covered_before_final:
             errors.append(f"возражение-блокер «{o['id']}» не закрыто ни одной секцией до final-cta")
-    fx = facts_index(mpath, m)
+    fx = facts_index(mpath, m, facts_data)
     proofs = []
     walk_proof_ids(h, proofs)
     if fx:
-        fids, mids, pats, fpath = fx
+        fids, mids, pats, fpath, pats_wf, lifting = fx
         proposals = {x.get("id") for x in (m.get("x-missing-proposals") or []) if isinstance(x, dict)}
         for where, pid in proofs:
             kind, _, pid_ = pid.partition(":")
@@ -323,6 +402,7 @@ def semantic_hierarchy(path, h):
         texts += [(f"pillar {p['id']}", p.get("message")) for p in pillars.values()]
         texts += [(f"section {s.get('order')}", s.get("message")) for s in secs]
         check_never(texts, pats, os.path.basename(path), errors)
+        check_never_with_fact(texts, pats_wf, lifting, os.path.basename(path), warnings)
     info["proof_refs"] = len(proofs)
     return errors, warnings, info
 
@@ -377,6 +457,67 @@ def run_negative(vm, vh, meanings, hierarchies):
             for s in d["sections"]:
                 s["objection_ids"] = []
         hcase("блокеры не закрыты до final-cta", drop_blockers)
+    results += run_assumption_cases(meanings, hierarchies)
+    return results
+
+
+def run_assumption_cases(meanings, hierarchies):
+    """Обещание из допущения — три предупреждения схемы смысла: has-proof при missing: в proof_ids, never_claim с
+    lift: with-fact без снимающего факта, свойство без доказательства в главном сообщении. Каждый случай обязан дать
+    своё предупреждение, исходный пример — нет."""
+    results = []
+    mo = next(((p, m) for p, m in meanings if os.path.basename(p) == "meaning-otves.yaml"), None)
+    if mo:
+        mpath, m = mo
+        base_w = semantic_meaning(mpath, m)[1]
+
+        def wcase(name, mutate, needle, facts_data=None, control=None):
+            ref_w = base_w
+            if control:
+                c = copy.deepcopy(m)
+                control(c)
+                ref_w = semantic_meaning(mpath, c, facts_data)[1]
+            d = copy.deepcopy(m)
+            mutate(d)
+            w = semantic_meaning(mpath, d, facts_data)[1]
+            hit = [x for x in w if needle in x and x not in ref_w]
+            results.append((name, bool(hit), hit[:1]))
+        a0 = m["positioning"]["unique_attributes"][2]["id"]
+        wcase("has-proof при missing: в proof_ids (свойство)",
+              lambda d: d["positioning"]["unique_attributes"][2].update(proof_ids=["fact:guarantee-3-years", "missing:x-doc"]), a0)
+        fx = load(os.path.join(os.path.dirname(mpath), m["proof_ref"]))
+        fx = copy.deepcopy(fx)
+        fx["never_claim"] = (fx.get("never_claim") or []) + [{"id": "nc-fast", "text": "самые быстрые сроки", "claim_class": ["superlative"],
+                                                                 "patterns": [r"быстр\w*\s+срок"], "lift": "with-fact"}]
+        wcase("never_claim с lift: with-fact без снимающего факта", lambda d: d["value_proposition"]["core"].update(text="Самые быстрые сроки ремонта в городе"),
+              "nc-fast", fx)
+        fx2 = copy.deepcopy(fx)
+        fx2["facts"] = fx2["facts"] + [{"id": "fast-terms", "claim_class": ["superlative"], "verification": {"status": "verified"},
+                                        "permission": {"status": "not-required"}, "source": {"derivation": "direct"}}]
+        d2 = copy.deepcopy(m)
+        d2["value_proposition"]["core"]["text"] = "Самые быстрые сроки ремонта в городе"
+        w2 = semantic_meaning(mpath, d2, fx2)[1]
+        results.append(("never_claim с lift: with-fact снят проверенным фактом того же класса — без предупреждения",
+                        not any("nc-fast" in x for x in w2), [x for x in w2 if "nc-fast" in x][:1]))
+        wcase("ядро на свойстве без доказательства (сообщение сильнее доказательств)",
+              lambda d: d["value_proposition"]["core"].update(text="Объект ведёт один прораб от замера до сдачи"), "attr-one-foreman",
+              control=lambda d: d["value_proposition"]["core"].update(text="Договор подряда с гарантией 3 года на работы"))
+    ho = next(((p, h) for p, h in hierarchies if os.path.basename(p) == "hierarchy-otves-product-aware.yaml"), None)
+    if ho:
+        hpath, h = ho
+        base_w = semantic_hierarchy(hpath, h)[1]
+
+        def hw(name, mutate, needle):
+            d = copy.deepcopy(h)
+            mutate(d)
+            w = semantic_hierarchy(hpath, d)[1]
+            hit = [x for x in w if needle in x and x not in base_w]
+            results.append((name, bool(hit), hit[:1]))
+        hw("главное сообщение без proof_ids", lambda d: d["core_message"].update(proof_ids=[]), "core_message без proof_ids")
+        hw("главное сообщение на свойстве без доказательства",
+           lambda d: d["core_message"].update(text="Объект ведёт один прораб, срок и смета в договоре", value_theme_refs=["val-predictable"]), "attr-one-foreman")
+        results.append(("исходное главное сообщение на доказанных свойствах — без предупреждения",
+                        not any("core_message" in x for x in base_w), [x for x in base_w if "core_message" in x][:1]))
     return results
 
 

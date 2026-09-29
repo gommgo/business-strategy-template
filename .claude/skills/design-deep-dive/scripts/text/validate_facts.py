@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""B2/01 — проверка схем B2: загрузка yaml.safe_load, метасхема draft 2020-12, валидация примеров и отрицательных случаев.
+"""Проверка схем фактов и голоса клиента (facts.schema.yaml, voc.schema.yaml): загрузка yaml.safe_load, метасхема
+draft 2020-12, примеры базы text (02-strategy-messaging/examples/facts-*.yaml, демо-наборы 10-templates-recipes/examples/
+facts/) и site (10-playbooks-contracts/examples/*/facts.yaml) с пометкой example: true, отрицательные случаи — каждая
+мутация обязана дать ошибку схемы.
 
-Запуск: 99-raw/tools/venv-B2/bin/python 99-raw/experiments/B2/01-schema-validate/validate.py
+Запуск (Python окружения скилла, нужны jsonschema и PyYAML): python3 scripts/text/validate_facts.py
 Выход: 0 — всё сошлось, 1 — есть расхождения. Даты YAML (datetime.date) приводятся к строке ISO до валидации.
 """
-import copy, datetime, glob, os, sys
+import copy, datetime, glob, os, re, sys
 import yaml
 from jsonschema import Draft202012Validator
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb('text'))
 SM = os.path.join(ROOT, '02-strategy-messaging')
@@ -46,7 +49,7 @@ def check(name, cond, detail=''):
 fs = load(os.path.join(SM, 'facts.schema.yaml'))
 Draft202012Validator.check_schema(fs)
 check('facts.schema.yaml: метасхема 2020-12', True)
-check('facts.schema.yaml: поле date', fs.get('date') == '2026-09-24')
+check('facts.schema.yaml: поле date — ISO ГГГГ-ММ-ДД', bool(re.fullmatch(r'\d{4}-\d{2}-\d{2}', str(fs.get('date') or ''))), fs.get('date'))
 check('x-claim-classes = enum claim-class', [c['id'] for c in fs['x-claim-classes']] == fs['$defs']['claim-class']['enum'])
 enum_classes = set(fs['$defs']['claim-class']['enum'])
 check('x-never-claim-defaults: классы из enum',
@@ -55,18 +58,24 @@ check('x-kinds = enum kind', set(fs['x-kinds']) == set(fs['$defs']['kind']['enum
 fv = Draft202012Validator(fs)
 examples = sorted(glob.glob(os.path.join(SM, 'examples', 'facts-*.yaml')))
 check('примеров facts-*.yaml ≥ 2', len(examples) >= 2, examples)
+demo_examples = sorted(glob.glob(os.path.join(ROOT, '10-templates-recipes', 'examples', 'facts', 'facts-*.yaml')))
+site_examples = sorted(glob.glob(str(kbpaths.kb('site', '10-playbooks-contracts', 'examples', '*', 'facts.yaml'))))
+check('примеров фактов site ≥ 1', len(site_examples) >= 1, site_examples)
+examples = examples + demo_examples + site_examples
 for p in examples:
     doc = load(p)
     errs = errors(fv, doc)
-    check(f'{os.path.basename(p)}: валиден', not errs, [f'{list(e.path)}: {e.message[:160]}' for e in errs[:8]])
+    name = os.path.basename(p) if p.startswith(SM) else os.path.relpath(p, os.path.dirname(os.path.dirname(os.path.dirname(p))))
+    check(f'{name}: валиден', not errs, [f'{list(e.path)}: {e.message[:160]}' for e in errs[:8]])
+    check(f'{name}: демо-набор помечен example: true', doc.get('example') is True, 'пример базы без example: true попадёт в публикацию')
     ids = [f['id'] for f in doc.get('facts', [])] + [m['id'] for m in doc.get('missing', [])]
-    check(f'{os.path.basename(p)}: id уникальны', len(ids) == len(set(ids)))
+    check(f'{name}: id уникальны', len(ids) == len(set(ids)))
     ents = {e['id'] for e in doc.get('entities', [])}
     bad = [(f['id'], e) for f in doc.get('facts', []) for e in f.get('entities', []) if e not in ents]
-    check(f'{os.path.basename(p)}: ссылки entities существуют', not bad, bad)
+    check(f'{name}: ссылки entities существуют', not bad, bad)
     rel = {f['id'] for f in doc.get('facts', [])}
     badr = [(f['id'], r) for f in doc.get('facts', []) for r in f.get('related', []) if r not in rel]
-    check(f'{os.path.basename(p)}: ссылки related существуют', not badr, badr)
+    check(f'{name}: ссылки related существуют', not badr, badr)
 
 # ---- отрицательные случаи: каждая мутация должна дать ошибку валидации
 base = load(examples[0]) if examples else None
@@ -90,6 +99,13 @@ if base:
         'rating без count/scale': lambda d: (d['facts'][0].__setitem__('kind', 'rating'), d['facts'][0]['source'].__setitem__('url', 'https://example.org')),
         'лишнее поле в факте': lambda d: d['facts'][0].__setitem__('confidence', 0.9),
         'facts_version 2': lambda d: d.__setitem__('facts_version', 2),
+        'example файла не булево': lambda d: d.__setitem__('example', 'да'),
+        'example факта не булево': lambda d: d['facts'][0].__setitem__('example', 1),
+        'перевод факта: неизвестное поле': lambda d: d['facts'][0].setdefault('translations', {}).__setitem__('en', {'claim': 'x'}),
+        'перевод факта: объект счёта не строка': lambda d: d['facts'][0].setdefault('translations', {}).__setitem__('en', {'what': 5}),
+        'перевод факта: язык не код': lambda d: d['facts'][0].setdefault('translations', {}).__setitem__('english', {'canonical': 'x'}),
+        'never_claim: язык вне формата': lambda d: d.setdefault('never_claim', [{'id': 'nc-x', 'text': 'x', 'claim_class': ['superlative'], 'patterns': ['x']}])[0].__setitem__('lang', 'english'),
+        'never_claim: перевод с лишним полем': lambda d: d.setdefault('never_claim', [{'id': 'nc-x', 'text': 'x', 'claim_class': ['superlative'], 'patterns': ['x']}])[0].__setitem__('translations', {'en': {'text': 'x', 'lift': 'never'}}),
     }
     for name, fn in negs.items():
         errs = mutate(fn)

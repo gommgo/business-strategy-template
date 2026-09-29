@@ -10,17 +10,18 @@
 #   site-brief (site)   → `proof.facts_ref: <путь к facts.yaml>`; поля фактов в бриф не копируются;
 #   page-plan (site)    → слоты `data: [fact:<id>, …]`;
 #   copy-deck (text)    → `slots[].fact_ids: [<id>]` (в полях, где смешаны ссылки, — `fact:<id>`);
-#   пакет kimi          → `brief/facts.md` и `brief.yaml` (`facts`, `missing`, `never_claim`) — проекция, `x-kimi-map`;
+#   вход холста         → `facts.md` («Факты», «Нет», «Нельзя утверждать») — проекция по `x-canvas-map`;
 #   schema.org (G, site H) → текст разметки = `canonical` факта (одна формулировка на все страницы).
-# Идентификаторы страниц, секций и слотов в `use` — временный словарь оркестратора
-#   `99-raw/notes/temp-vocabulary-v0.yaml` (page_types, section_roles, slot_types) до S0 site; новые id — предложения
-#   к словарю (список — `x-vocabulary-proposals`).
+# Идентификаторы страниц, секций и слотов в `use` — словарь site `../site/02-site-types/vocabulary.yaml` (page_type,
+#   section_role, slot).
+# Демо-данные: `example: true` у файла или факта — вымышленные данные примера или макета; макет на них допустим,
+#   публикация — нет (`copydeck.py validate --final`, `claims_check.py check --final` — error).
 #
 # Даты — строкой ISO `ГГГГ-ММ-ДД` или `ГГГГ-ММ` (месяц точности: «отгрузка — декабрь 2026» → 2026-12). YAML читает
 # `2026-09-24` без кавычек как дату; валидатор и claims_check.py приводят её к строке, но надёжнее писать в кавычках.
 #
-# Проверка: `99-raw/tools/venv-B2/bin/python ../../scripts/text/validate_facts.py`
-#   (загрузка yaml.safe_load, валидация двух примеров `examples/facts-*.yaml` и отрицательных случаев).
+# Проверка: `python3 ../../scripts/text/validate_facts.py` (Python окружения скилла)
+#   (загрузка yaml.safe_load, валидация примеров `examples/facts-*.yaml` и отрицательных случаев).
 
 $schema: "https://json-schema.org/draft/2020-12/schema"
 $id: "urn:app-design:text-research:facts:1"
@@ -30,9 +31,9 @@ description: >-
   пробелы (missing) с текстом-заглушкой; запреты (never_claim). Любое утверждение текста сайта, которое можно проверить,
   ссылается на факт отсюда. Факт не может происходить от модели, пишущей тексты: источник — заказчик, его документы,
   публичные страницы и площадки, реестры, исследования (ux 12/03, стр. 1077: иначе сверка вырождается).
-date: "2026-09-24"
+date: "2026-09-29"
 x-version: 1
-x-status: "v1 по итогам волны 1 (2026-09-24); черновик T1 выпущен в 07:06, после него добавлено never_claim[].voice"
+x-status: "v1.1: совместима с v1 — новые поля (example, переводы с объектом счёта и оговоркой, запреты по языку) необязательны"
 x-owner: "text-research · 02-strategy-messaging · B2 (контракт тройки v2 §2, §3 п.10)"
 x-doc: "02-strategy-messaging/03-proof-and-facts.md"
 
@@ -50,7 +51,7 @@ properties:
     description: "Дата последнего изменения инвентаря."
   site:
     $ref: "#/$defs/id"
-    description: "slug проекта: как в site-brief и `project.slug` brief.yaml kimi."
+    description: "slug проекта: как `project.slug` site-brief."
   lang:
     $ref: "#/$defs/lang"
     description: "Язык сайта по умолчанию для verbatim и canonical."
@@ -62,6 +63,11 @@ properties:
     enum: [draft, confirmed]
     default: draft
     description: "confirmed — заказчик подтвердил список фактов и разрешений целиком (дата — date)."
+  example:
+    type: boolean
+    description: >-
+      true — весь файл: вымышленные данные примера базы или демо-набор для макета. Макет на них допустим, публикация —
+      нет: `copydeck.py validate --final` и `claims_check.py check --final` дают error, без --final — сигнал.
   owner:
     $ref: "#/$defs/responsible"
     description: "Кто у заказчика отвечает за инвентарь: даёт факты, документы, разрешения, продлевает сроки."
@@ -105,7 +111,7 @@ $defs:
   vocab-id:
     type: string
     pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
-    description: "id из временного словаря 99-raw/notes/temp-vocabulary-v0.yaml (после S0 — vocabulary.yaml site)."
+    description: "id словаря site (../site/02-site-types/vocabulary.yaml): page_type, section_role, slot."
 
   date:
     type: string
@@ -276,7 +282,12 @@ $defs:
   use:
     type: object
     additionalProperties: false
-    description: "Где факт можно использовать. Пусто или any: true — везде. Сверка выдаёт предупреждение COPY-F-USE, если факт стоит вне этих мест."
+    description: >-
+      Где факт уместен — ориентир, а не белый список. Место текста — слот или секция: факт на месте, если тип слота
+      есть в slot_types или роль секции — в section_roles (достаточно одного); page_types сужают по типу страницы.
+      Вне этих мест — предупреждение COPY-F-USE (не ошибка). Места, где любой факт законен (мета и OG, FAQ, статья,
+      «как это работает», GEO, подвал, hero страницы кейса, цена в подзаголовке, пункт списка, итог, подписи фото людей
+      с согласием), — x-use-always: там COPY-F-USE не ставится. Пусто или any: true — везде. Запрет — not_in (error).
     properties:
       any: {type: boolean, default: false}
       page_types: {type: array, items: {$ref: "#/$defs/vocab-id"}}
@@ -368,9 +379,13 @@ $defs:
   translation:
     type: object
     additionalProperties: false
+    description: "Факт на другом языке с теми же id: формулировки, объект счёта, уточнение и оговорка рядом — на языке страницы (сверка сравнивает текст с ними, а не с исходным языком)."
     properties:
       verbatim: {type: array, items: {type: string, minLength: 1}}
       canonical: {type: string}
+      what: {type: string, description: "Объект счёта на этом языке (values[].what): «apartments», «reviews»."}
+      qualifier: {type: string, description: "Уточнение значения на этом языке (values[].qualifier): «within city limits»."}
+      requires_nearby: {type: string, description: "Что стоит рядом на этом языке (use.requires_nearby): «Yandex Maps, as of 1 September 2026»."}
       note: {type: string, description: "Адаптация, а не дословный перевод (решение заказчика п. 16); у цитат — пометка перевода."}
 
   entity:
@@ -397,7 +412,7 @@ $defs:
       aliases:
         type: array
         items: {type: string}
-        description: "Прежние id (F1 из facts.md kimi, номер строки анкеты); сверка принимает их в fact_ids."
+        description: "Другие id факта (номер строки анкеты, id из материалов заказчика); сверка принимает их в fact_ids."
       kind: {$ref: "#/$defs/kind"}
       claim_class:
         type: array
@@ -458,6 +473,9 @@ $defs:
         description: "Связанные факты: обычная цена к скидке, исследование к сравнению, клиент к кейсу."
       tags: {type: array, items: {type: string}}
       notes: {type: string}
+      example:
+        type: boolean
+        description: "true — вымышленный факт (демо-набор макета, пример базы): на макете допустим, в публикацию не идёт (validate --final и claims_check --final — error)."
     allOf:
       - if: {properties: {kind: {const: testimonial}}}
         then:
@@ -549,7 +567,7 @@ $defs:
     required: [id, text]
     properties:
       id: {$ref: "#/$defs/id"}
-      text: {type: string, description: "Что нельзя утверждать — человеческой фразой (так уходит в facts.md kimi)."}
+      text: {type: string, description: "Что нельзя утверждать — человеческой фразой (так уходит в раздел «Нельзя утверждать» facts.md входа холста)."}
       claim_class:
         type: array
         items: {$ref: "#/$defs/claim-class"}
@@ -568,6 +586,21 @@ $defs:
         default: company
         description: "company — запрет на утверждение от имени компании: дословная цитата клиента с разрешением его не нарушает (claims_check.py даёт warning COPY-F-TYPICALITY: подпись, не повторять голосом компании, оговорка о типичности — 03-proof-and-facts.md §5.4); any — запрет и в цитатах (здоровье, доход, ИИ-люди, одобрение властей)."
       reason: {type: string}
+      lang:
+        type: string
+        pattern: "^([a-z]{2}(-[A-Z]{2})?|any)$"
+        default: any
+        description: "Язык text и patterns: запрет с регулярками одного языка проверяется только в текстах этого языка; any — везде."
+      translations:
+        type: object
+        propertyNames: {$ref: "#/$defs/lang"}
+        description: "Запрет на языке страницы: text и patterns для текстов этого языка (английская страница русского продукта)."
+        additionalProperties:
+          type: object
+          additionalProperties: false
+          properties:
+            text: {type: string}
+            patterns: {type: array, items: {type: string}}
       source:
         type: object
         additionalProperties: false
@@ -606,7 +639,8 @@ x-claim-classes:
   # needs — что обязано быть в факте, чтобы утверждение этого класса прошло сверку; needs_document — stated (со слов)
   # недостаточно, нужен документ, реестр или публичная страница; permission — нужно разрешение третьего лица;
   # legal — флаг для H: none | check (проверить формулировку) | required (без проверки не публиковать);
-  # law — ориентир нормы (РФ, ред. на 2026-09-24; толкование и полные требования — H); default_never — id запрета по умолчанию.
+  # law — где нормы права к классу: таблица «класс → требование → норма» text 08/01 §2 и правила claims-rules.yaml с этим
+  # классом (своего перечня норм здесь нет); default_never — id запрета по умолчанию.
   - id: fact-number
     name: "Факт-число"
     covers: "метрики, счётчики клиентов и заказов, сроки, объёмы, годы на рынке, проценты роста"
@@ -614,7 +648,7 @@ x-claim-classes:
     needs_document: false
     permission: false
     legal: check
-    law: "38-ФЗ ст. 5 ч. 3 п. 2 (характеристики), п. 13 (размер спроса), п. 14 (объём производства и продажи)"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: fact-number"
     default_never: nc-counts
   - id: fact-property
     name: "Факт-свойство"
@@ -623,7 +657,7 @@ x-claim-classes:
     needs_document: false
     permission: false
     legal: check
-    law: "38-ФЗ ст. 5 ч. 3 п. 2–3, п. 11 (испытания)"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2"
   - id: comparison
     name: "Сравнение"
     covers: "с конкурентом, аналогом, рынком, прошлой версией; «в N раз», «быстрее, чем»"
@@ -631,7 +665,7 @@ x-claim-classes:
     needs_document: true
     permission: false
     legal: required
-    law: "38-ФЗ ст. 5 ч. 2 п. 1 (некорректное сравнение), ч. 3 п. 1; Пленум ВАС № 58 п. 9, п. 29"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: comparison"
     default_never: nc-comparisons
   - id: superlative
     name: "Превосходная степень"
@@ -640,7 +674,7 @@ x-claim-classes:
     needs_document: true
     permission: false
     legal: required
-    law: "38-ФЗ ст. 5 ч. 3 п. 1; Пленум ВАС № 58 п. 29 (конкретный критерий + объективное подтверждение); 135-ФЗ ст. 14.3 п. 1; руководство ФАС (приказ № 1079/23)"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: superlative"
     default_never: nc-superlatives
   - id: guarantee
     name: "Гарантия"
@@ -649,7 +683,7 @@ x-claim-classes:
     needs_document: true
     permission: false
     legal: check
-    law: "38-ФЗ ст. 5 ч. 3 п. 6; ЗоЗПП ст. 10 п. 2, ст. 19 (H)"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: guarantee"
     default_never: nc-prices-terms
   - id: health
     name: "Здоровье"
@@ -658,7 +692,7 @@ x-claim-classes:
     needs_document: true
     permission: false
     legal: required
-    law: "38-ФЗ ст. 5 ч. 5 п. 6 (лечебные свойства — только лекарства, мед. изделия, мед. услуги), ч. 5 п. 4; ст. 24, 25 (H)"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: health"
     default_never: nc-health
   - id: income-finance
     name: "Доход и финансы"
@@ -667,7 +701,7 @@ x-claim-classes:
     needs_document: true
     permission: false
     legal: required
-    law: "38-ФЗ ст. 28 (финансовые услуги) и ст. 5 ч. 3 (H)"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: income-finance"
     default_never: nc-income
   - id: price-discount
     name: "Цена и скидка"
@@ -676,7 +710,7 @@ x-claim-classes:
     needs_document: false
     permission: false
     legal: check
-    law: "38-ФЗ ст. 5 ч. 3 п. 4, ч. 7 (существенные условия); ЗоЗПП ст. 10 (H)"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: price-discount"
     default_never: nc-prices-terms
   - id: availability-scarcity
     name: "Наличие и дефицит"
@@ -685,7 +719,7 @@ x-claim-classes:
     needs_document: false
     permission: false
     legal: check
-    law: "38-ФЗ ст. 5 ч. 3 п. 3; ux 06/04 §8.1 п.11"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: availability-scarcity"
     default_never: nc-scarcity
   - id: promo-deadline
     name: "Срок акции"
@@ -694,7 +728,7 @@ x-claim-classes:
     needs_document: false
     permission: false
     legal: check
-    law: "38-ФЗ ст. 5 ч. 3 п. 3–4, ст. 9 (стимулирующие мероприятия); ux 06/04 §8.1 п.10"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: promo-deadline"
     default_never: nc-deadline
   - id: award-press
     name: "Награда и пресса"
@@ -703,7 +737,7 @@ x-claim-classes:
     needs_document: true
     permission: false
     legal: check
-    law: "38-ФЗ ст. 5 ч. 3 п. 9; логотипы СМИ — товарные знаки (ГК ст. 1484, H)"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: award-press"
     default_never: nc-awards-press
   - id: client-logo
     name: "Клиент и логотип"
@@ -712,7 +746,7 @@ x-claim-classes:
     needs_document: false
     permission: true
     legal: check
-    law: "38-ФЗ ст. 5 ч. 3 п. 10 (одобрение юрлицами); ГК ст. 1484 (товарный знак) (H)"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2"
     default_never: nc-trusted-by
   - id: testimonial-quote
     name: "Отзыв и цитата"
@@ -721,7 +755,7 @@ x-claim-classes:
     needs_document: false
     permission: true
     legal: check
-    law: "38-ФЗ ст. 5 ч. 3 п. 10; 152-ФЗ ст. 10.1 (распространение ПДн); ГК ст. 152.1 (изображение); для EN — FTC 16 CFR 465 и 255 (H)"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: testimonial-quote"
     default_never: nc-testimonials
   - id: rating
     name: "Рейтинг"
@@ -730,7 +764,7 @@ x-claim-classes:
     needs_document: true
     permission: false
     legal: check
-    law: "38-ФЗ ст. 5 ч. 3 п. 9–10 (H)"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: rating"
     default_never: nc-ratings
   - id: forecast
     name: "Прогноз"
@@ -739,7 +773,7 @@ x-claim-classes:
     needs_document: true
     permission: false
     legal: required
-    law: "38-ФЗ ст. 5 ч. 1, ч. 3 п. 2 (потребительские свойства) (H)"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: forecast"
     default_never: nc-forecast
   - id: origin
     name: "Происхождение и производство (предложение B2)"
@@ -748,7 +782,7 @@ x-claim-classes:
     needs_document: true
     permission: false
     legal: check
-    law: "38-ФЗ ст. 5 ч. 3 п. 2 («о месте его происхождения»)"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2"
   - id: certification
     name: "Сертификаты, лицензии, одобрения (предложение B2)"
     covers: "сертификат, декларация, ГОСТ, ISO, лицензия, аккредитация, «одобрено», «рекомендовано»"
@@ -756,7 +790,7 @@ x-claim-classes:
     needs_document: true
     permission: false
     legal: check
-    law: "38-ФЗ ст. 5 ч. 3 п. 2 (наличие сертификата), ч. 5 п. 2 (одобрение органами власти — запрет)"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2"
     default_never: nc-prices-terms
   - id: eco-natural
     name: "Экологичность и натуральность (предложение B2)"
@@ -765,7 +799,7 @@ x-claim-classes:
     needs_document: true
     permission: false
     legal: required
-    law: "38-ФЗ ст. 5 ч. 3 п. 2; маркировка органической продукции и зелёные заявления — H"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: eco-natural"
   - id: company-details
     name: "Реквизиты и контакты (предложение B2)"
     covers: "юрлицо, ИНН, ОГРН, адрес, телефон, почта, часы работы, год основания"
@@ -773,7 +807,7 @@ x-claim-classes:
     needs_document: false
     permission: false
     legal: check
-    law: "38-ФЗ ст. 5 ч. 3 п. 20 (об изготовителе или продавце); сведения о продавце на сайте — site I"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2"
   - id: purchase-terms
     name: "Условия покупки (предложение B2)"
     covers: "порядок оплаты, бронь, предоплата, доставка, отгрузка, сроки выполнения, возврат и обмен, пробный период"
@@ -781,13 +815,12 @@ x-claim-classes:
     needs_document: false
     permission: false
     legal: check
-    law: "38-ФЗ ст. 5 ч. 3 п. 4 (порядок оплаты, условия приобретения), п. 5 (доставка, обмен, ремонт, обслуживание)"
+    law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: purchase-terms"
     default_never: nc-prices-terms
 
 x-never-claim-defaults:
-  # Набор ru-default-1. Поправка к ../kimi-research/07-brief-handoff/templates/facts.md (Never claim, стр. 25–29) для
-  # сайта: запрет действует на НЕПРОВЕРЕННОЕ; проверенный факт класса с разрешением снимает запрет (lift: with-fact);
-  # запреты политики и закона не снимаются (lift: never) или снимаются только юристом (legal-review).
+  # Набор ru-default-1: запрет действует на непроверенное; проверенный факт класса с разрешением снимает запрет
+  # (lift: with-fact); запреты политики и закона не снимаются (lift: never) или снимаются только юристом (legal-review).
   - {id: nc-counts, text: "Счётчики клиентов, пользователей, заказов и рост в процентах без факта с источником и датой", claim_class: [fact-number], lift: with-fact}
   - {id: nc-ratings, text: "Рейтинги и звёзды без факта с площадкой, шкалой, числом оценок и датой снимка", claim_class: [rating], lift: with-fact}
   - {id: nc-trusted-by, text: "«Нам доверяют», названия и логотипы клиентов и партнёров без факта с письменным разрешением клиента", claim_class: [client-logo], lift: with-fact}
@@ -804,24 +837,53 @@ x-never-claim-defaults:
   - {id: nc-official-approval, text: "Указание на одобрение органами власти («одобрено Минздравом»)", claim_class: [certification], patterns: ["одобрен\\w*\\s+(минздрав|министерств|правительств|государств|роспотребнадзор)", "рекомендован\\w*\\s+(минздрав|министерств|роспотребнадзор)"], lift: never, voice: any}
   - {id: nc-ai-people, text: "ИИ-люди в роли клиентов, команды, авторов отзывов; выдуманные имена и лица", claim_class: [testimonial-quote, client-logo], lift: never, voice: any}
 
-x-kimi-map:
-  # Проекция facts.yaml → пакет kimi (brief/facts.md, brief.yaml). Экспорт пишет J (copydeck.py export-kimi).
-  publish_filter: "в Facts попадают только факты: verification.status ∈ {verified, stated} (stated — если класс не needs_document), permission.status ∈ {granted, not-required}, derivation ≠ inferred, valid.until ≥ дата сборки, legal.review ≠ required|rejected для классов legal: required; остальные — строками Missing с placeholder"
+x-canvas-map:
+  # Проекция facts.yaml во вход холста (references/claude-design.md § 6): файл facts.md поверхности — «Факты» (публикуемые),
+  # «Нет» (пробелы и непубликуемые факты заглушками), «Нельзя утверждать». Выгрузка — copydeck.py export (facts.md).
+  source: facts
+  stages: [wireframe, mockup]
+  files:
+    facts.md:
+      "Факты":
+        rule: derive
+        from: [/facts/*/id, /facts/*/verbatim, /facts/*/translations, /facts/*/source, /facts/*/use, /facts/*/lang,
+               /facts/*/claim_class, /facts/*/verification, /facts/*/permission, /facts/*/valid, /facts/*/legal,
+               /facts/*/example, /example, /lang]
+        note: "публикуемые факты по publish_filter, строка на формулировку verbatim (на языке страницы — translations.<lang>) с колонками facts_md; демо-данные (example) — с пометкой в колонке источника"
+      "Нет":
+        rule: derive
+        from: [/missing/*/id, /missing/*/what, /missing/*/placeholder, /missing/*/who]
+        note: "пробелы missing[] (колонки missing_md) и факты, не прошедшие publish_filter, — строкой с заглушкой [PLACEHOLDER: <id>] и причиной"
+      "Нельзя утверждать":
+        rule: derive
+        from: [/never_claim/*/text, /never_claim/*/claim_class, /never_claim/*/lift, /never_claim/*/translations, /never_claim_defaults]
+        note: "never_claim_md: строки запретов проекта и набора x-never-claim-defaults, которые не сняты проверенным фактом"
+  drop:
+    - {from: [/facts_version, /date, /site, /status, /owner, /collected_by, /intake], note: "служебные поля и подпись: статус, путь и отпечаток — в INPUT.md"}
+    - {from: [/jurisdiction], note: "право — вход сверки claims_check.py и брифа (constraints.jurisdiction)"}
+    - {from: [/entities], note: "имена для сверки текстов; на холст идут готовые формулировки фактов"}
+    - {from: [/facts/*/aliases, /facts/*/kind, /facts/*/canonical, /facts/*/values, /facts/*/entities, /facts/*/basis,
+              /facts/*/attribution, /facts/*/original_ref, /facts/*/edits, /facts/*/asset, /facts/*/responsible,
+              /facts/*/schema_org, /facts/*/related, /facts/*/tags, /facts/*/notes],
+       note: "поля сверки, разметки и происхождения: исполнитель ставит на макет только дословные формулировки; canonical и schema_org — пакет кода; файлы-доказательства — план ассетов"}
+    - {from: [/missing/*/aliases, /missing/*/kind, /missing/*/claim_class, /missing/*/needed_for, /missing/*/asked,
+              /missing/*/due, /missing/*/blocking, /missing/*/fallback, /missing/*/question],
+       note: "как и когда закрыть пробел — работа слоя страницы; блокирующие пробелы — строка пробелов INPUT.md"}
+    - {from: [/never_claim/*/id, /never_claim/*/patterns, /never_claim/*/scope, /never_claim/*/voice, /never_claim/*/reason,
+              /never_claim/*/lang, /never_claim/*/source],
+       note: "механика сверки запрета; на холст — только человеческая фраза запрета"}
+  publish_filter: "в «Факты» — только факты, которые сверка разрешает публиковать: verification.status ∈ {verified, stated} (stated — если класс не needs_document), permission.status ∈ {granted, not-required}, разрешение не отозвано и не истекло, source.derivation ≠ inferred, выдержка источника подтверждает слова факта, valid.until ≥ дата сборки, legal.review ∈ {approved, not-needed} для классов legal: required; остальные — строками «Нет» с заглушкой и причиной (фильтр — claims_check.publishable_issues)"
   facts_md:
-    "ID": "id (kimi принимает любой идентификатор; aliases — для обратной совместимости с F1…)"
-    "Fact, exactly as it may appear": "verbatim[0]; каждый следующий verbatim — отдельная строка с id «<id>.2», «<id>.3»"
-    "Source (who / where / date)": "source.who / source.where / source.date (+ source.url)"
-    "Where it may be used": "use.section_roles → id секций site.sections[] (через page-plan); без page-plan — сами section_roles"
+    "id": "id факта; каждая следующая формулировка verbatim — строка с id «<id>.2», «<id>.3»"
+    "дословно": "verbatim[n]; на языке страницы — translations.<lang>.verbatim"
+    "источник": "source.who / source.where / source.date (+ source.url); демо-данные (example) — «демо: вымышленные данные»"
+    "где можно": "use.section_roles → id секций плана страницы; use.slot_types; use.not_in — «не в …»; use.requires_nearby — «рядом: …»"
   missing_md:
-    "ID": "missing.id"
-    "What is missing": "missing.what"
-    "Text on the page until provided": "missing.placeholder"
-    "Who provides": "missing.who"
-  never_claim_md: "строки never_claim[].text + x-never-claim-defaults, у которых lift: never или нет снимающего факта; четыре жёстких строки шаблона facts.md (стр. 26–29) заменяются этим списком (предложение kimi: плейсхолдер {{=NEVER_ROWS}})"
-  brief_yaml:
-    facts: "[{id, text: verbatim[0], source: 'who, where, date', use: 'id секций через запятую'}]"
-    missing: "[{id, what, placeholder: текст внутри [PLACEHOLDER: …], who}]"
-    never_claim: "[text, …] — тот же список, что never_claim_md"
+    "id": "missing.id (у непубликуемого факта — id факта)"
+    "чего нет": "missing.what (у факта — canonical и причина)"
+    "на странице до ответа": "missing.placeholder ([PLACEHOLDER: …])"
+    "кто даст": "missing.who (у факта — responsible.role или owner.role)"
+  never_claim_md: "строки never_claim[].text (на языке страницы — translations.<lang>.text) и набора x-never-claim-defaults, у которых lift: never или нет снимающего проверенного факта того же класса (legal-review — факта с legal.review.status: approved); запрет стоит только на непроверенном"
 
 x-site-brief-proof:
   # Предложение site A для блока proof в site-brief (поля фактов не дублируются; контракт v2 §3 п.10).
@@ -831,11 +893,17 @@ x-site-brief-proof:
   collection: "{owner: роль у заказчика, agent: кто ведёт анкету proof-intake.md, asked: дата, due: дата, status: not-started | in-progress | done}"
   gaps: "не копировать — брать из facts.yaml missing[] (blocking: true — ворота публикации)"
 
-x-vocabulary-proposals:
-  # id, которых нет во временном словаре 99-raw/notes/temp-vocabulary-v0.yaml; предложения к словарю (отчёт B2).
-  section_roles:
-    - {id: specs, name: "Характеристики товара (таблица)", why: "«Кварц»: секция specs; у продуктовых страниц — обязательная"}
-  slot_types:
-    - {id: spec-row, name: "Строка характеристик «параметр — значение»", why: "«Кварц» specs.row1–row4; у каждой строки — факт"}
-    - {id: price-old, name: "Зачёркнутая обычная цена", why: "38-ФЗ ст. 5 ч. 3 п. 4: старая цена — отдельный факт с периодом действия"}
-    - {id: stat-source, name: "Строка источника у числа или рейтинга («по данным … на дату»)", why: "use.requires_nearby; GEO-канон; источник, видимый на странице"}
+x-use-always:
+  # Места, где любой факт законен: там сверка не ставит COPY-F-USE, даже если места нет в use факта (use — ориентир,
+  # а не белый список). Место записи — как в use: слот (slot_types) или секция (section_roles); условия (page_types,
+  # claim_classes, fact_kinds, requires) — все сразу. not_in факта сильнее (error). Читает claims_check.py.
+  - {slot_types: [meta-title, meta-description, og-title, og-description, og-image-alt], note: "мета и OG страницы"}
+  - {section_roles: [faq], slot_types: [faq-q, faq-a], note: "FAQ: вопрос и ответ с фактом — норма"}
+  - {slot_types: [article-title, article-lead, article-summary, article-heading, article-paragraph, article-author, article-date, article-sources], section_roles: [article-body], note: "статья"}
+  - {section_roles: [how-it-works], note: "«как это работает»: шаги со сроками и условиями"}
+  - {slot_types: [geo-answer, definition], note: "GEO: ответ и определение с фактом"}
+  - {section_roles: [footer], slot_types: [footer-tagline, footer-legal, contact-info], note: "подвал: реквизиты и контакты"}
+  - {section_roles: [hero], page_types: [case-page], note: "первый экран страницы кейса несёт факт кейса"}
+  - {slot_types: [subheadline], claim_classes: [price-discount], note: "цена в подзаголовке"}
+  - {slot_types: [list-item, result-summary], note: "пункт списка и итог"}
+  - {slot_types: [image-alt, image-caption], fact_kinds: [person, testimonial, case], requires: permission.image_consent, note: "подпись и alt фото людей — с согласием на изображение"}

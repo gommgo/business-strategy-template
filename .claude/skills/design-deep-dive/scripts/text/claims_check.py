@@ -1,60 +1,60 @@
 #!/usr/bin/env python3
-"""claims_check.py — сверка текстов сайта с белым списком фактов (facts.yaml): ядро «контура честности» text-research.
+"""claims_check.py — сверка текстов сайта с белым списком фактов (facts.yaml): ядро «контура честности» базы text.
 
-Агент B2 (волна 1), 2026-09-24. Модель не вызывается; сеть не нужна. Python 3.10+, PyYAML (системный или
-99-raw/tools/venv-B2). Правовые правила (классы → требования → оговорки) добавляет H в волне 2 внешним файлом
-08-russian-legal-typography/claims-rules.yaml (подхватывается сам, если есть; формат — `rules-schema`).
-Правовой модуль H (волна 2, 2026-09-24): правила права по юрисдикции (--jurisdiction ru|eu|us, по умолчанию из
-facts.yaml или ru) и отрасли (--legal-category, из copy deck legal_category или general); --legal-only — только находки
-права; условия снятия: оговорка рядом (unless, nearby, nearby_all), поля факта, условия факта (qualifier, disclaimer).
+Модель не вызывается, сеть не нужна. Python 3.10+, PyYAML. Правовые правила (классы → требования → оговорки) — внешний
+файл 08-russian-legal-typography/claims-rules.yaml (подхватывается сам; формат — `rules-schema`): право по юрисдикции
+(--jurisdiction ru|eu|us, по умолчанию из facts.yaml или ru) и отрасли (--legal-category, из copy deck legal_category
+или general); --legal-only — только находки права; условия снятия: оговорка рядом (unless, nearby, nearby_all), поля
+факта, условия факта (qualifier, disclaimer), тип страницы (page_types, page_types_except).
 
 Что делает (спецификация — 02-strategy-messaging/03-proof-and-facts.md §7):
-  извлекает из текста числа (единицы, %, валюта, диапазоны, «от/до/более», «+», тыс./млн), даты, годы, рейтинги
-  («4,9 из 5», звёзды), цитаты в «ёлочках» и "кавычках", счётчики, имена и названия (эвристика + сущности facts.yaml),
-  маркеры 20 классов утверждений (лучший, № 1, гарантируем, бесплатно, вылечит, доход, сборка, сертификат…) и термины
-  свойств (датчик, аккумулятор, материал…); сопоставляет с фактами дословно и по нормализованному значению с единицей и
-  объектом счёта; проверяет сам факт: разрешение, срок, основание (дословная выдержка источника), вывод вместо факта,
-  проверку юриста для рискованных классов; never_claim (проектный + набор по умолчанию из facts.schema.yaml);
-  [PLACEHOLDER] — info со счётчиком.
+  извлекает из текста числа (единицы, %, валюта, диапазоны, «от/до/более», «+», тыс./млн, «20-летний», разделитель
+  тысяч по языку текста и факта), числительные словами («пять лет» — утверждение пишется цифрами: COPY-F-NUM-WORDS),
+  даты, годы, рейтинги («4,9 из 5», звёзды; своя шкала бренда — не рейтинг), цитаты в «ёлочках» и "кавычках",
+  счётчики, имена и названия (эвристика + сущности facts.yaml, падежи имён), маркеры 20 классов утверждений (лучший,
+  № 1, гарантируем, бесплатно, вылечит, доход, «удвоит выручку», сборка, сертификат…) и термины свойств (датчик,
+  аккумулятор, материал…); сопоставляет с фактами дословно и по нормализованному значению с единицей и объектом счёта
+  (переводы translations.<lang> — со своим объектом счёта и оговоркой); проверяет сам факт: разрешение (и подпись
+  отзыва против permission.shows), срок, основание (дословная выдержка источника), вывод вместо факта, проверку юриста
+  для рискованных классов, демо-данные (example: true); never_claim (проектный + набор по умолчанию из
+  facts.schema.yaml, на языке текста); места use (ориентир: вне их — COPY-F-USE warning, места x-use-always законны
+  всегда); [PLACEHOLDER] — info со счётчиком. Вопрос (FAQ, предложение с «?») утверждением не считается.
 
 Входы (формат определяется сам или --format):
-  copy deck v0 (PLAN.md «Как всё сочетается»: copy_deck.pages[].sections[].slots[] — slot_type, variants[].text, chosen,
-  fact_ids, claim_flags) · copy.md пакета kimi («## секция» + «[ключ]: текст») · Markdown · текст · HTML.
+  copy deck (copy_deck.pages[].sections[].slots[] — slot_type, variants[].text, chosen, fact_ids, claim_flags) ·
+  copy.md входа холста («## <section_id>» + «[<slot_id>] <status>: текст», синтаксис — copydeck.py) · Markdown ·
+  текст · HTML.
 
 Подкоманды:
-  [check] INPUT [--facts facts.yaml] [--format auto|deck|kimi-md|md|text|html] [--rules FILE ...] [--no-external-rules]
-          [--no-default-never] [--today ГГГГ-ММ-ДД] [--genre landing] [--all-variants] [--strict] [--verbose]
+  [check] INPUT [--facts facts.yaml] [--format auto|deck|copy-md|md|text|html] [--rules FILE ...] [--no-external-rules]
+          [--no-default-never] [--today ГГГГ-ММ-ДД] [--genre landing] [--all-variants] [--strict] [--final] [--verbose]
           [--json OUT] [--md OUT] [--quiet] [--jurisdiction ru|eu|us|other] [--legal-category finance,medical,…]
           [--legal-only]
+          --final — ворота публикации: демо-данные (example: true у файла или факта) — error, без него — info;
+          --all-variants — все варианты, кроме отклонённых; соседние варианты слота текстом «рядом» не считаются.
           exit 0 — нет error; 2 — есть error; 1 — ошибка входа или утилиты
   inventory INPUT [--format …] [--json OUT] [--md OUT]  — без фактов: утверждения по классам и видимый ли источник на
-          странице (метрика «доля утверждений с видимым источником», опыт B2/04); exit 0
-  lint-facts FACTS [--today …] — проверка самого инвентаря (вывод без основания, истёкшие, без разрешений); exit 0/2/1
-  import-kimi FACTS.md [-o facts.yaml] [--site slug] [--date ГГГГ-ММ-ДД] — facts.md пакета kimi → facts.yaml v1
-          (черновик для сверки; обратный экспорт facts.yaml → facts.md пишет J в copydeck.py)
-  rules-schema — JSON Schema формата claims-rules.yaml (для H)
-  --selftest — офлайн-тесты извлечения, сопоставления, правил и ложных срабатываний; exit 0/1
+          странице (метрика «доля утверждений с видимым источником»); exit 0
+  lint-facts FACTS [--today …] [--final] — проверка самого инвентаря (вывод без основания, истёкшие, без разрешений,
+          id мест use по словарю site, демо-данные); exit 0/2/1
+  rules-schema — JSON Schema формата claims-rules.yaml
+  --selftest — офлайн-тесты извлечения, сопоставления, правил, калибровок и ложных срабатываний; exit 0/1
 
-Идеи и часть кода взяты из ../kimi-research/99-raw/tools/k3_checks.py (агент G kimi, 2026-09-24): нормализация кавычек
-и тире (QUOTES, norm_text), разбор чисел с разделителями тысяч (NUM_RX, extract_numbers), логика F-NUMBERS (число
-страницы против чисел колонок «Fact…» facts.md) и F-QUOTE (цитата ≥ 5 слов без источника), разбор таблиц facts.md
-(fact_text) — переписаны: у числа здесь есть единица, объект счёта и сравнение, у цитаты — многоточия и правки.
-Правила ux: ../ux-research/07-ux-writing/06-banned-words-and-patterns.md §5.2 (регулярки соцдоказательств),
-../ux-research/06-feedback-states-motion/04-dark-patterns-and-ethics.md §8.1 п.10–12, 22.
-
-Идентификаторы правил — префикс COPY-F- (контракт тройки v2 §3 п.16); правила H — свои id (рекомендация COPY-L-).
-Это не юридическое заключение: классы и флаги показывают, где нужна проверка права (H, юрист заказчика).
+Идентификаторы правил — префикс COPY-F-; правила права — COPY-L-.
+Правила ux: kb/ux/07-ux-writing/06-banned-words-and-patterns.md §5.2 (регулярки соцдоказательств),
+kb/ux/06-feedback-states-motion/04-dark-patterns-and-ethics.md §8.1 п.10–12, 22.
+Это не юридическое заключение: классы и флаги показывают, где нужна проверка права (юрист заказчика).
 """
 import argparse, copy, datetime as dt, difflib, fnmatch, html.parser, json, os, re, sys, tempfile, unicodedata
 
 VERSION = '1.0'
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb('text'))
 SCHEMA_PATH = os.path.join(ROOT, '02-strategy-messaging', 'facts.schema.yaml')
 RULES_PATH = os.path.join(ROOT, '08-russian-legal-typography', 'claims-rules.yaml')
-VOCAB_PATH = os.path.join(ROOT, '99-raw', 'notes', 'temp-vocabulary-v0.yaml')
+VOCAB_PATH = str(kbpaths.kb('site', '02-site-types', 'vocabulary.yaml'))   # словарь id системы (site v1)
 
 try:
     import yaml
@@ -63,7 +63,7 @@ except ImportError:  # pragma: no cover
 
 LEVELS = ('error', 'warning', 'info')
 
-# ================================================================ нормализация текста (идея — k3_checks.norm_text)
+# ================================================================ нормализация текста
 SPACES = {'\u00a0': ' ', '\u202f': ' ', '\u2009': ' ', '\u2007': ' ', '\u2002': ' ', '\u2003': ' ', '\u200b': ''}
 DASHES = {'—': '-', '–': '-', '‑': '-', '−': '-', '‒': '-'}
 QUOTES = {'«': '"', '»': '"', '“': '"', '”': '"', '„': '"', '‟': '"', '’': "'", '‘': "'", '‚': "'"}
@@ -174,6 +174,10 @@ MONTH_RX = (r'(январ[ьяе]|феврал[ьяе]|март[ае]?|апре�
             r'october|november|december|jan|feb|mar|apr|jun|jul|aug|sept|sep|oct|nov|dec)\.?')
 
 UNIT_MAP = [  # (регулярка единицы сразу после числа, нормализованная единица) — порядок важен
+    # прилагательное через дефис: «20-летний опыт», «14-дневный возврат», «24-часовая поддержка», «5-кратный рост»
+    (r'[-‑–]\s?лет(?:н|и)[а-я]*', 'years'), (r'[-‑–]\s?дневн[а-я]*', 'days'), (r'[-‑–]\s?недельн[а-я]*', 'weeks'),
+    (r'[-‑–]\s?месячн[а-я]*', 'months'), (r'[-‑–]\s?часов[а-я]*', 'hours'), (r'[-‑–]\s?минутн[а-я]*', 'minutes'),
+    (r'[-‑–]\s?процентн[а-я]*', '%'), (r'[-‑–]\s?кратн[а-я]*', 'times'),
     (r'₽|руб\.?(?:л[а-я]*)?|р\.(?!\w)|rub\b', 'RUB'),
     (r'\$|usd\b|долл\.?(?:ар[а-я]*)?', 'USD'),
     (r'€|eur\b|евро\b', 'EUR'),
@@ -212,6 +216,8 @@ MULT_RX = [(re.compile(rx, re.I), f) for rx, f in MULT]
 EN_BIG = {'thousand': 1e3, 'million': 1e6, 'billion': 1e9}
 
 NUM_RX = re.compile(r'(?<![\w.,/:-])(\d{1,3}(?:[ \u00a0\u202f\u2009]\d{3})+|\d+)(?:[.,](\d+))?(?![\w])', re.U)
+# английский текст и факт: запятая перед тремя цифрами — разделитель тысяч («₽9,800», «1,380», «1,234,567»), дробь — точкой
+NUM_RX_EN = re.compile(r'(?<![\w.,/:-])(\d{1,3}(?:,\d{3})+|\d{1,3}(?:[ \u00a0\u202f\u2009]\d{3})+|\d+)(?:\.(\d+))?(?![\w])', re.U)
 PREFIX_CMP = [
     (r'(?:от|с)\s*$', 'gte'), (r'(?:до|вплоть до|up to|within|в течение|в пределах)\s*$', 'lte'),
     (r'(?:более|больше|свыше|over|more than|above|>)\s*$', 'gt'),
@@ -240,7 +246,7 @@ PLACEHOLDER_RX = re.compile(r'\[PLACEHOLDER(?::\s*([^\]]*))?\]', re.I)
 
 
 def parse_num(intpart, frac):
-    core = re.sub(r'[ \u00a0\u202f\u2009]', '', intpart)
+    core = re.sub(r'[ \u00a0\u202f\u2009,]', '', intpart)
     if frac is not None:
         return float(core + '.' + frac)
     return float(core)
@@ -274,9 +280,10 @@ def next_noun(text, pos, k=2):
     return out
 
 
-def extract_numbers(text):
+def extract_numbers(text, lang=None):
     """Числа текста: [{raw, start, end, value | range, unit, noun[], cmp, kind}] без дат, телефонов, ссылок на законы,
-    копирайта, времени и рейтингов (они извлекаются отдельно)."""
+    копирайта, времени и рейтингов (они извлекаются отдельно). lang — язык текста или факта: у «en» запятая перед тремя
+    цифрами — разделитель тысяч при любой валюте; без языка — эвристика по латинице рядом."""
     s = text
     mask = [False] * len(s)
 
@@ -290,7 +297,7 @@ def extract_numbers(text):
         if m.group(1) or m.group(3):
             cover(m)
     out = []
-    ms = [m for m in NUM_RX.finditer(s) if not mask[m.start()]]
+    ms = [m for m in (NUM_RX_EN if lang == 'en' else NUM_RX).finditer(s) if not mask[m.start()]]
     i = 0
     low = s.lower()
     while i < len(ms):
@@ -353,14 +360,94 @@ def extract_numbers(text):
         if not item['unit'] and raw_start > 0 and s[raw_start - 1] in '$€₽':
             item['unit'] = {'$': 'USD', '€': 'EUR', '₽': 'RUB'}[s[raw_start - 1]]
             raw_start -= 1
-        # «1,250» по-английски: тысячи через запятую
-        if m.group(2) and len(m.group(2)) == 3 and ',' in s[m.start():m.end()] and 'value' in item and item['unit'] in ('USD', 'EUR', None) and re.search(r'[a-z]', low[max(0, raw_start - 30):raw_start + 30]):
+        # «1,250» по-английски: тысячи через запятую (язык не задан — по латинице рядом)
+        if lang is None and m.group(2) and len(m.group(2)) == 3 and ',' in s[m.start():m.end()] and 'value' in item and item['unit'] in ('USD', 'EUR', None) and re.search(r'[a-z]', low[max(0, raw_start - 30):raw_start + 30]):
             item['value'] = float(re.sub(r'[^\d]', '', s[m.start():m.end()]))
         item['noun'] = next_noun(s, end)
         item['raw'] = s[raw_start:end].strip()
         item['end'] = end
         out.append(item)
         i += 1
+    return out
+
+
+# числительные словами: в утверждении сайта число пишется цифрами; сверка разбирает и слова, чтобы утверждение
+# «пять лет гарантии» не прошло мимо фактов, и ставит COPY-F-NUM-WORDS
+RU_NUM_WORDS = [  # (регулярка основы с окончаниями, значение, вид: u — единицы и десятки, h — сотни, m — множитель)
+    (r'одн?(?:ин|на|но|ого|ой|ому|им|ом|у)', 1, 'u'), (r'дв(?:а|е|ух|ум|умя)', 2, 'u'), (r'тр(?:и|[её]х|[её]м|емя)', 3, 'u'),
+    (r'четыр(?:е|[её]х|[её]м|ьмя)', 4, 'u'), (r'пят(?:ь|и|ью)', 5, 'u'), (r'шест(?:ь|и|ью)', 6, 'u'), (r'сем(?:ь|и|ью)', 7, 'u'),
+    (r'вос(?:емь|ьми|емью|ьмью)', 8, 'u'), (r'девят(?:ь|и|ью)', 9, 'u'), (r'десят(?:ь|и|ью)', 10, 'u'),
+    (r'одиннадцат(?:ь|и|ью)', 11, 'u'), (r'двенадцат(?:ь|и|ью)', 12, 'u'), (r'тринадцат(?:ь|и|ью)', 13, 'u'),
+    (r'четырнадцат(?:ь|и|ью)', 14, 'u'), (r'пятнадцат(?:ь|и|ью)', 15, 'u'), (r'шестнадцат(?:ь|и|ью)', 16, 'u'),
+    (r'семнадцат(?:ь|и|ью)', 17, 'u'), (r'восемнадцат(?:ь|и|ью)', 18, 'u'), (r'девятнадцат(?:ь|и|ью)', 19, 'u'),
+    (r'двадцат(?:ь|и|ью)', 20, 'u'), (r'тридцат(?:ь|и|ью)', 30, 'u'), (r'сорок(?:а)?', 40, 'u'),
+    (r'пят(?:ьдесят|идесяти)', 50, 'u'), (r'шест(?:ьдесят|идесяти)', 60, 'u'), (r'сем(?:ьдесят|идесяти)', 70, 'u'),
+    (r'вос(?:емьдесят|ьмидесяти)', 80, 'u'), (r'девяност(?:о|а)', 90, 'u'),
+    (r'ст(?:о|а)', 100, 'h'), (r'дв(?:ести|ухсот)', 200, 'h'), (r'тр(?:иста|[её]хсот)', 300, 'h'),
+    (r'четыр(?:еста|[её]хсот)', 400, 'h'), (r'пят(?:ьсот|исот)', 500, 'h'), (r'шест(?:ьсот|исот)', 600, 'h'),
+    (r'сем(?:ьсот|исот)', 700, 'h'), (r'вос(?:емьсот|ьмисот)', 800, 'h'), (r'девят(?:ьсот|исот)', 900, 'h'),
+    (r'полтор(?:а|ы|ух)', 1.5, 'u'),
+    (r'тысяч(?:а|и|у|ей|ами|ах)?', 1e3, 'm'), (r'миллион(?:а|ов|ам|ами|ах)?', 1e6, 'm'), (r'миллиард(?:а|ов|ам|ами|ах)?', 1e9, 'm')]
+EN_NUM_WORDS = [
+    (r'one', 1, 'u'), (r'two', 2, 'u'), (r'three', 3, 'u'), (r'four', 4, 'u'), (r'five', 5, 'u'), (r'six', 6, 'u'),
+    (r'seven', 7, 'u'), (r'eight', 8, 'u'), (r'nine', 9, 'u'), (r'ten', 10, 'u'), (r'eleven', 11, 'u'), (r'twelve', 12, 'u'),
+    (r'thirteen', 13, 'u'), (r'fourteen', 14, 'u'), (r'fifteen', 15, 'u'), (r'sixteen', 16, 'u'), (r'seventeen', 17, 'u'),
+    (r'eighteen', 18, 'u'), (r'nineteen', 19, 'u'), (r'twenty', 20, 'u'), (r'thirty', 30, 'u'), (r'forty', 40, 'u'),
+    (r'fifty', 50, 'u'), (r'sixty', 60, 'u'), (r'seventy', 70, 'u'), (r'eighty', 80, 'u'), (r'ninety', 90, 'u'),
+    (r'hundred', 100, 'x'), (r'thousand', 1e3, 'm'), (r'million', 1e6, 'm'), (r'billion', 1e9, 'm')]
+_NUM_WORD_RX = {lg: [(re.compile(r'(?<![а-яёa-z0-9-])' + rx + r'(?![а-яёa-z0-9-])', re.I), v, k) for rx, v, k in tbl]
+                for lg, tbl in (('ru', RU_NUM_WORDS), ('en', EN_NUM_WORDS))}
+
+
+def extract_word_numbers(text, lang=None):
+    """Числительные словами: [{raw, start, end, value, unit, noun[], cmp, kind: 'number', words: True}] — «пять лет»,
+    «двадцать пять клиентов», «полторы тысячи», «five years». «Один» и «one» — только с единицей («один день»): иначе это
+    не счёт («всё в одном месте», «one of»); «одна из», «ни одного» — не число."""
+    s = soft(text)
+    lang = lang or unit_lang(text) or 'ru'
+    hits = []
+    for rx, v, k in _NUM_WORD_RX.get(lang, []):
+        for m in rx.finditer(s):
+            hits.append((m.start(), m.end(), v, k))
+    hits.sort()
+    out, i = [], 0
+    while i < len(hits):
+        st, en, v, k = hits[i]
+        group = [(st, en, v, k)]
+        j = i + 1
+        while j < len(hits) and re.fullmatch(r'\s+(?:и\s+|and\s+)?|-', s[group[-1][1]:hits[j][0]]):
+            group.append(hits[j])
+            j += 1
+        total, cur = 0.0, 0.0
+        for _st, _en, gv, gk in group:
+            if gk == 'm':
+                total += (cur or 1) * gv
+                cur = 0.0
+            elif gk == 'x':
+                cur = (cur or 1) * gv
+            else:
+                cur += gv
+        value = total + cur
+        start, end = group[0][0], group[-1][1]
+        i = j
+        pre = s[max(0, start - 4):start]
+        if re.search(r'(?:^|\s)ни\s$', pre) or re.match(r'\s+(?:из|of)\b', s[end:end + 5]):
+            continue
+        u, end2 = unit_at(s, end)
+        if u and re.match(r'[а-яёa-z]', s[end2:end2 + 1]):
+            u, end2 = None, end   # «в одном месте» — не «мес.»: единица словом целиком
+        if value == 1 and not u:
+            continue
+        item = {'start': start, 'value': value, 'cmp': 'eq', 'unit': u, 'noun': [], 'kind': 'number', 'words': True}
+        for rx_, c in PREFIX_CMP_RX:
+            if rx_.search(s[max(0, start - 22):start]):
+                item['cmp'] = c
+                break
+        end = end2 if u else end
+        item['noun'] = next_noun(s, end)
+        item['raw'] = text[start:end].strip() if len(text) == len(s) else s[start:end].strip()
+        item['end'] = end
+        out.append(item)
     return out
 
 
@@ -405,9 +492,17 @@ def platforms_in(text):
     return {k for k, rx in PLATFORM_RX.items() if rx.search(st)}
 
 
+OWN_SCALE_RX = re.compile(r'(?:остр|жгуч|сложн|уров|интенсивн|крепост|сладост|кислотн|плотност|ж[её]сткост|мягкост|спелост|'
+                          r'spic|heat|level|difficulty|intensity|strength|sweetness|firmness)\w*[^.!?;\n]{0,25}$', re.I)
+
+
 def extract_ratings(text):
+    """Рейтинги: «4,9 из 5», «4.8/5», звёзды. Своя шкала бренда («острота 5 из 5», «уровень 3 из 5») — свойство продукта,
+    а не рейтинг площадки: пропускается."""
     out = []
     for m in RATING_RX.finditer(text):
+        if OWN_SCALE_RX.search(soft(text[max(0, m.start() - 40):m.start()])):
+            continue
         if m.group(1):
             out.append({'raw': m.group(0), 'value': float(m.group(1).replace(',', '.')), 'scale': float(m.group(2)), 'start': m.start()})
         elif m.group(3):
@@ -450,7 +545,8 @@ CLASS_MARKERS = {
         r'\bbest\b(?!\s+(?:regards|wishes|practices?))', r'#\s?1\b', r'\bnumber\s+one\b', r'\bno\.\s?1\b',
         r'\bleading\b', r'\bmarket\s+leader\b', r'\bindustry[- ]leading\b', r'\bthe\s+only\b', r'\bunique\b', r"\bworld'?s\s+first\b",
         r'\bunmatched\b', r'\bunrivall?ed\b', r'\bmost\s+(?:popular|trusted|advanced|powerful|reliable|affordable|accurate|secure|loved)\b',
-        r'\b(?:fastest|cheapest|easiest|safest|biggest|largest|smartest|strongest|lowest|highest)\b'),
+        r'\b(?:fastest|cheapest|easiest|safest|biggest|largest|smartest|strongest|lowest|highest|hottest|finest|greatest|freshest|tastiest|healthiest|quickest)\b',
+        r"\b[a-z]+est\s+(?:[a-z]+\s+){1,2}you(?:'ll|\s+will|'ve|\s+have)\s+ever\b"),
     'comparison': R(
         B + r'(?:быстрее|дешевле|дороже|выгоднее|надежнее|надёжнее|точнее|мощнее|эффективнее|долговечнее|экономичнее|прочнее|тише|легче|лучше)\s*,?\s*(?:чем|в\s+\d|на\s+\d|аналог\w*|конкурент\w*|других|обычн\w*|традиционн\w*|у\s+(?:других|конкурент))',
         B + r'в\s+\d+(?:[.,]\d+)?\s+раз(?:а)?' + E, B + r'в\s+(?:два|три|четыре|пять|десять|несколько)\s+раз(?:а)?' + E,
@@ -460,7 +556,7 @@ CLASS_MARKERS = {
         r'\b\d+(?:\.\d+)?x\s+(?:faster|more|better|cheaper|higher|less)\b', r'\bcompared\s+(?:to|with)\b', r'\bunlike\s+(?:other|competitor)', r'\bvs\.?\s'),
     'guarantee': R(
         B + r'гарант(?:ия|ии|ию|ией|ируем|ирует|ируют|ированн\w*|ийн\w*)', B + r'верн[её]м\s+деньги', B + r'возврат\w*\s+(?:денег|средств|оплаты)',
-        B + r'деньги\s+назад', B + r'без\s+риска' + E, B + r'или\s+верн[её]м',
+        B + r'деньги\s+назад', B + r'без\s+риска' + E, B + r'или\s+верн[её]м', B + r'без\s+исключени[йя]' + E,
         r'\bguarante\w*', r'\bmoney[- ]back\b', r'\brisk[- ]free\b', r'\bwarranty\b', r'\bor\s+your\s+money\s+back\b'),
     'health': R(
         B + r'(?:леч(?:ит|ат|ение|ебн\w*|ить)|вылеч\w*|исцел\w*|оздоров\w*|профилакти\w*|иммунитет\w*|похуд\w*|сжига\w*\s+жир|детокс\w*|омолаж\w*)',
@@ -469,7 +565,11 @@ CLASS_MARKERS = {
         B + r'(?:клинически|научно)\s+доказ\w*', B + r'врач\w*\s+рекоменд\w*', B + r'рекомендова\w*\s+врач\w*',
         r'\b(?:cures?|heals?|treat(?:s|ment)?|prevents?\s+(?:disease|illness)|immun\w+|weight\s+loss|lose\s+weight|detox|anti-?aging|eye\s*strain|eyesight|clinically\s+proven|doctor[- ]recommended|hypoallergenic|sleep\s+better)\b'),
     'income-finance': R(
-        B + r'(?:доход\w*|прибыл[а-я]*|дивиденд\w*|пассивн\w*\s+доход\w*|инвестиц\w*|кредит\w*|ипотек\w*|займ\w*|кэшб[эе]к\w*|кешб[эе]к\w*)' + E,
+        B + r'(?:доход\w*|прибыл[а-я]*|дивиденд\w*|пассивн\w*\s+доход\w*|инвестиц\w*|кэшб[эе]к\w*|кешб[эе]к\w*)' + E,
+        # кредит, ипотека, заём — предложение денег (ставка, условие, одобрение), а не ситуация клиента («аренда и ипотека»)
+        B + r'в\s+(?:кредит|ипотеку|заём|займ)' + E, B + r'(?:кредит\w*|ипотек\w*|за[йё]м\w*)\s+(?:от|под|без|до)\s+(?:\d|перепл|процент|первоначальн|залог|справ)',
+        B + r'(?:одобр\w*|оформ\w*|выда\w*|предлага\w*)\s+(?:[а-яё]+\s+)?(?:кредит\w*|ипотек\w*|за[йё]м\w*)',
+        B + r'(?:кредит\w*|ипотек\w*|за[йё]м\w*)\s+(?:за|через)\s+\d',
         B + r'(?:заработ(?:ок|ка|ку|ком|ать|аете|аешь|ают|аем|али)|зарабатыва\w*)' + E, B + r'процент\w*\s+годовых', B + r'ставк\w*\s+(?:от\s+)?\d',
         B + r'зарплат\w*', B + r'(?:удвоил|утроил|увеличил|подняли?)\w*\s+(?:нашу\s+|свою\s+)?(?:выручк|продаж|прибыл|доход|оборот)\w*',
         r'\bsalar(?:y|ies)\b', r'\b(?:doubl|tripl|quadrupl)\w*\s+(?:our\s+|their\s+|my\s+)?(?:revenue|sales|income|profit)\w*',
@@ -512,6 +612,7 @@ CLASS_MARKERS = {
     'forecast': R(
         B + r'сэконом(?:ите|ишь|ят|ит)' + E, B + r'окуп(?:ится|ятся|аемост\w*|ит)' + E,
         B + r'увелич(?:ит|ите|ат|ивает)\s+(?:ваш\w*\s+)?(?:продаж\w*|выручк\w*|прибыл\w*|конверси\w*|доход\w*|трафик\w*|заявк\w*)',
+        B + r'(?:удво|утро|учетвер|приумнож|повыс|нараст)\w*?(?:ит|ят|ите|ишь)\s+(?:ваш\w*\s+|свою\s+|свой\s+)?(?:продаж\w*|выручк\w*|прибыл\w*|конверси\w*|доход\w*|трафик\w*|заявк\w*|оборот\w*)',
         B + r'выраст(?:ет|ут|ит)' + E, B + r'принес(?:[её]т|ут)\s+(?:доход|прибыль|клиент\w*|заявк\w*)',
         B + r'(?:результат|эффект)\w*\s+через\s+\d', B + r'гарантированн\w*\s+результат\w*',
         r"\byou(?:'ll|\s+will)\s+(?:save|earn|get|grow|increase|double)\b", r'\bwill\s+(?:increase|boost|double|grow|triple)\b', r'\bpays\s+for\s+itself\b', r'\bguaranteed\s+results?\b'),
@@ -556,6 +657,9 @@ PROPERTY_TERMS = R(
     B + r'штатн\w*\s+(?:юрист|инженер|дизайнер|врач|психолог)\w*', B + r'личн\w*\s+(?:менеджер|куратор)\w*',
     r'\bsensor\w*', r'\bbattery\b', r'\baluminium\b|\baluminum\b', r'\bstainless\b', r'\bwaterproof\b', r'\bwireless\b', r'\bai-powered\b')
 
+PLATFORM_WORDS = {'rustore', 'appgallery', 'app store', 'appstore', 'google play', 'telegram', 'телеграм', 'whatsapp', 'viber',
+                  'vk', 'вконтакте', 'youtube', 'rutube', 'dzen', 'дзен', 'max', 'android', 'ios', 'ipados', 'macos', 'windows',
+                  'linux', 'яндекс', 'yandex', 'google', 'apple', 'сбп', 'мир', 'visa', 'mastercard', 'госуслуги'}
 TECH_WORDS = {'usb', 'usb-c', 'type-c', 'led', 'hdmi', 'wi-fi', 'wifi', 'gps', 'nfc', 'ip', 'seo', 'crm', 'api', 'ai', 'ии',
               'sms', 'pdf', 'faq', 'cta', 'hr', 'it', 'b2b', 'b2c', 'saas', 'erp', 'ux', 'ui', 'ok', 'ооо', 'ип', 'ао',
               'пао', 'рф', 'сми', 'ндс', 'фз', 'гост', 'iso', 'сро', 'инн', 'огрн', 'кпп', 'бик', 'q', 'a', 'k', 'w', 'kw'}
@@ -634,8 +738,16 @@ def is_question(text):
     return bool(re.search(r'\?\s*$', (text or '').strip()))
 
 
+def in_question(text, pos):
+    """Позиция внутри предложения-вопроса («Сколько стоит замер? Бесплатно…»): вопрос FAQ — не утверждение."""
+    for a, b in sentence_spans(text):
+        if a <= pos < b:
+            return text[a:b].rstrip().endswith('?')
+    return False
+
+
 # ================================================================ имена
-NAME_RX = re.compile(r'(?<![\w@./-])((?:[A-ZА-ЯЁ][a-zа-яё]+|[A-ZА-ЯЁ]{2,}[a-zа-яё]*|[A-Z][a-z]*[A-Z]\w*)(?:[ -](?:[A-ZА-ЯЁ][a-zа-яё]+|[A-ZА-ЯЁ]{2,}))*)')
+NAME_RX = re.compile(r'(?<![\w@./-])((?:[A-Z][a-z]*[A-Z]\w*|[A-ZА-ЯЁ][a-zа-яё]+|[A-ZА-ЯЁ]{2,}[a-zа-яё]*)(?:[ -](?:[A-ZА-ЯЁ][a-zа-яё]+|[A-ZА-ЯЁ]{2,}))*)')
 
 
 def sentence_starts(text):
@@ -654,8 +766,8 @@ def extract_names(text):
         w = m.group(1)
         first = w.split()[0].split('-')[0]
         low = w.lower()
-        if low in NAME_OK or low in TECH_WORDS or first.lower() in NAME_OK:
-            continue
+        if low in NAME_OK or low in TECH_WORDS or low in PLATFORM_WORDS or first.lower() in NAME_OK:
+            continue   # площадки и магазины приложений («RuStore», «Google Play») — место, а не клиент
         if re.fullmatch(r'[A-ZА-ЯЁ]{1,2}', w):
             continue
         at_start = m.start() in starts or any(abs(m.start() - s) <= 1 for s in starts)
@@ -680,36 +792,13 @@ def extract_names(text):
 
 
 # ================================================================ загрузка входа → единицы текста
-KIMI_KEY_SLOT = [(r'^h1$', 'headline'), (r'^lead$', 'subheadline'), (r'^cta(?:_\w+)?$', 'cta-label'),
-                 (r'^note$', 'cta-note'), (r'^h2$', 'section-title'), (r'^h3$', 'card-title'), (r'^p\d*$', 'body'),
-                 (r'^item\d+_title$', 'card-title'), (r'^item\d+_text$', 'card-body'), (r'^row\d+$', 'spec-row'),
-                 (r'^price(?:_now)?$', 'pricing-price'), (r'^price_old$', 'price-old'),
-                 (r'^(?:deposit|shipping|price_note)$', 'pricing-price-note'), (r'^q\d+$', 'faq-q'), (r'^a\d+$', 'faq-a'),
-                 (r'^legal$', 'footer-legal'), (r'^hint$', 'body'), (r'^quote\d*$', 'testimonial-quote'),
-                 (r'^(?:author|attribution)\d*$', 'testimonial-attribution'), (r'^stat\d*_value$', 'stat-value'),
-                 (r'^stat\d*_label$', 'stat-label'), (r'^logos?_caption$', 'logos-caption')]
-KIMI_SECTION_ROLE = {'hero': 'hero', 'problem': 'problem', 'how': 'how-it-works', 'object3d': 'product-demo',
-                     'specs': 'specs', 'price': 'pricing', 'pricing': 'pricing', 'faq': 'faq', 'final_cta': 'final-cta',
-                     'footer': 'footer', 'reviews': 'testimonials', 'testimonials': 'testimonials', 'logos': 'proof-logos',
-                     'stats': 'proof-stats', 'cases': 'case-studies', 'team': 'team', 'about': 'about',
-                     'guarantee': 'guarantee', 'contacts': 'contacts', 'form': 'lead-form', 'benefits': 'benefits',
-                     'features': 'benefits', 'solution': 'solution', 'cta': 'cta-band', 'final': 'final-cta',
-                     'case': 'case-studies', 'stats': 'proof-stats', 'proof': 'proof-stats', 'how-it-works': 'how-it-works',
-                     'hero-proof': 'hero', 'objections': 'objections', 'lead-form': 'lead-form'}
 QUOTE_SLOTS = {'testimonial-quote'}
 ATTRIB_SLOTS = {'testimonial-attribution', 'logos-caption', 'case-title', 'case-summary', 'case-result'}
 QUESTION_SLOTS = {'faq-q'}
 
 
-def kimi_slot(key):
-    for rx, st in KIMI_KEY_SLOT:
-        if re.match(rx, key):
-            return st
-    return None
-
-
 def unit(uid, text, **loc):
-    return {'id': uid, 'text': text, 'page': loc.get('page'), 'page_type': loc.get('page_type'),
+    return {'id': uid, 'text': text, 'page': loc.get('page'), 'page_type': loc.get('page_type'), 'alt': False,
             'section': loc.get('section'), 'section_role': loc.get('section_role'), 'slot': loc.get('slot'),
             'slot_type': loc.get('slot_type'), 'variant': loc.get('variant'), 'line': loc.get('line'),
             'fact_ids': list(loc.get('fact_ids') or []), 'claim_flags': list(loc.get('claim_flags') or []),
@@ -728,45 +817,78 @@ def load_deck(data, all_variants=False):
                 units.append(unit(f'{pid}/meta/{k}', str(meta[k]), page=pid, page_type=ptype, section='meta', slot=k, slot_type=st, genre='meta'))
         for s in p.get('sections', []) or []:
             sid = s.get('section_id')
-            role = s.get('section_role') or s.get('role') or KIMI_SECTION_ROLE.get(str(sid), None)
+            role = s.get('section_role') or s.get('role') or role_guess(sid)
             for sl in s.get('slots', []) or []:
                 variants = sl.get('variants') or []
                 chosen = sl.get('chosen')
-                pick = variants if all_variants else [v for v in variants if v.get('id') == chosen] or variants[:1]
+                main = next((v for v in variants if v.get('id') == chosen), None) or (variants[0] if variants else None)
+                pick = variants if all_variants else ([main] if main else [])
                 for v in pick:
-                    if v.get('status') == 'rejected' and not all_variants:
-                        continue
+                    if v.get('status') == 'rejected' and v is not main:
+                        continue   # отклонённый вариант — история правки, не текст страницы
                     txt = v.get('text') or ''
                     if not str(txt).strip():
                         continue
                     lint = sl.get('lint') or {}
-                    units.append(unit(f"{pid}/{sid}/{sl.get('slot_id')}/{v.get('id')}", str(txt), page=pid, page_type=ptype,
-                                      section=sid, section_role=role, slot=sl.get('slot_id'), slot_type=sl.get('slot_type'),
-                                      variant=v.get('id'), fact_ids=sl.get('fact_ids'), claim_flags=sl.get('claim_flags'),
-                                      genre=lint.get('profile') or genre_default, block=s.get('block')))
+                    uu = unit(f"{pid}/{sid}/{sl.get('slot_id')}/{v.get('id')}", str(txt), page=pid, page_type=ptype,
+                              section=sid, section_role=role, slot=sl.get('slot_id'), slot_type=sl.get('slot_type'),
+                              variant=v.get('id'), fact_ids=v.get('fact_ids') if isinstance(v.get('fact_ids'), list) else sl.get('fact_ids'),
+                              claim_flags=sl.get('claim_flags'), genre=lint.get('profile') or genre_default, block=s.get('block'))
+                    uu['alt'] = v is not main   # невыбранный вариант: сверяется, но текстом «рядом» для соседей не считается
+                    units.append(uu)
     return units, {'site': deck.get('site'), 'lang': deck.get('lang'), 'facts_ref': deck.get('facts_ref'),
                    'jurisdiction': deck.get('jurisdiction'), 'legal_category': deck.get('legal_category')}
 
 
-def load_kimi_md(text):
-    units, sec = [], None
-    for i, line in enumerate(text.splitlines(), 1):
-        st = line.strip()
-        if not st or st.startswith('{#') or st.startswith('<!--'):
-            continue
-        m = re.match(r'^##\s+(\S+)', st)
-        if m:
-            sec = m.group(1)
-            continue
-        if st.startswith('# ') or st.lower().startswith(('voice:', 'keys in square brackets')):
-            continue
-        m = re.match(r'^\[([\w\-]+)\]:\s*(.*)$', st)
-        if m:
-            key, txt = m.group(1), m.group(2)
-            units.append(unit(f'{sec}/{key}', txt, section=sec, section_role=KIMI_SECTION_ROLE.get(sec or '', sec),
-                              slot=key, slot_type=kimi_slot(key), line=i))
-        else:
-            units.append(unit(f'L{i}', st, section=sec, section_role=KIMI_SECTION_ROLE.get(sec or '', sec), line=i))
+_VOCAB = {}
+
+
+def site_vocab():
+    """Словарь id системы — site vocabulary.yaml v1: {'page_types': {id: запись}, 'section_roles': {…}, 'slots': {…},
+    'text_slots': {id}, 'status': {id: статус}}; нет файла или PyYAML — пустые словари."""
+    if 'v' not in _VOCAB:
+        v = {}
+        if yaml is not None and os.path.exists(VOCAB_PATH):
+            with open(VOCAB_PATH, encoding='utf-8') as fh:
+                v = (yaml.safe_load(fh) or {}).get('namespaces') or {}
+        vals = lambda ns: {str(x['id']): x for x in (v.get(ns) or {}).get('values') or [] if isinstance(x, dict) and x.get('id')}
+        out = {'page_types': vals('page_type'), 'section_roles': vals('section_role'), 'slots': vals('slot'), 'blocks': vals('block')}
+        out['text_slots'] = {k for k, x in out['slots'].items() if x.get('kind') == 'text'}
+        _VOCAB['v'] = out
+    return _VOCAB['v']
+
+
+def _id_guess(ident, pool):
+    """id плана → id словаря: как есть, без номера экземпляра («case-studies-2», «step-1-title»), по префиксу («testimonials-reviews»)."""
+    if not ident or not pool:
+        return None
+    cands = [ident, re.sub(r'-\d+$', '', ident), re.sub(r'-\d+(?=-|$)', '', ident)]
+    parts = ident.split('-')
+    cands += ['-'.join(parts[:k]) for k in range(len(parts) - 1, 0, -1)]
+    return next((c for c in cands if c in pool), None)
+
+
+def role_guess(section_id):
+    return _id_guess(str(section_id or ''), site_vocab()['section_roles'])
+
+
+def slot_guess(slot_id):
+    return _id_guess(str(slot_id or ''), site_vocab()['text_slots'])
+
+
+def load_copy_md(text):
+    """copy.md входа холста (синтаксис — copydeck.py: «## <section_id>», «[<slot_id>] <status>: текст») → единицы;
+    роль секции и тип слота угадываются по id плана и словарю site; тексты без секции или слота плана — «?»."""
+    kbpaths.use('text')
+    import copydeck  # noqa: E402 — владелец формата copy.md
+    sections, _notes = copydeck.parse_copy_md(text)
+    units = []
+    for sec in sections:
+        sid = sec.get('section_id')
+        for sl in sec.get('slots') or []:
+            slid = sl.get('slot_id')
+            units.append(unit(f"{sid or '?'}/{slid or '?'}", sl.get('text') or '', section=sid or '?', section_role=role_guess(sid),
+                              slot=slid, slot_type=slot_guess(slid), line=sl.get('line')))
     return units
 
 
@@ -892,8 +1014,8 @@ def detect_format(path, text):
         return 'deck'
     if low.endswith(('.html', '.htm')) or re.match(r'\s*<(?:!doctype|html)', text, re.I):
         return 'html'
-    if re.search(r'^\[[\w\-]+\]:\s', text, re.M) and re.search(r'^##\s+\S+', text, re.M):
-        return 'kimi-md'
+    if re.search(r'^\[(?:\?|[\w\-]+)[^\]\n]*\](?:\s+[a-z-]+)?:\s', text, re.M) and re.search(r'^##\s+\S+', text, re.M):
+        return 'copy-md'
     if low.endswith('.md') or re.search(r'^#{1,6}\s', text, re.M):
         return 'md'
     return 'text'
@@ -906,11 +1028,11 @@ def load_input(path, fmt='auto', all_variants=False):
     meta = {}
     if fmt == 'deck':
         if yaml is None:
-            raise SystemExit('нужен PyYAML: python3 -m pip … или 99-raw/tools/venv-B2/bin/python')
+            raise SystemExit('нужен PyYAML: Python окружения скилла ($DDD_HOME/venv, scripts/install.sh)')
         data = deep_dates(yaml.safe_load(text) if not path.lower().endswith('.json') else json.loads(text))
         units, meta = load_deck(data, all_variants)
-    elif fmt == 'kimi-md':
-        units = load_kimi_md(text)
+    elif fmt == 'copy-md':
+        units = load_copy_md(text)
     elif fmt == 'md':
         units = load_md(text)
     elif fmt == 'html':
@@ -930,12 +1052,25 @@ def fact_texts(f):
     return [p for p in parts if p]
 
 
+def fact_lang_texts(f):
+    """Формулировки факта с их языком: [(текст, язык)] — verbatim и canonical на языке факта, translations.<lang>."""
+    base = (f.get('lang') or 'ru').split('-')[0]
+    out = [(t, base) for t in list(f.get('verbatim') or []) + [f.get('canonical') or ''] if t]
+    for lg, tr in (f.get('translations') or {}).items():
+        out += [(t, str(lg).split('-')[0]) for t in list((tr or {}).get('verbatim') or []) + [(tr or {}).get('canonical') or ''] if t]
+    return out
+
+
 def fact_values(f):
-    """Числа факта: из values[] и из чисел verbatim/canonical (с единицей и объектом счёта)."""
+    """Числа факта: из values[] и из чисел verbatim/canonical (с единицей и объектом счёта). Числа формулировок
+    разбираются по языку формулировки (разделитель тысяч), объект счёта values[] дополняют what и qualifier переводов."""
     out = []
+    tr_what = set()
+    for tr in (f.get('translations') or {}).values():
+        tr_what |= stems((tr or {}).get('what') or '') | stems((tr or {}).get('qualifier') or '')
     for v in f.get('values') or []:
         unit_ = UNIT_SYNONYMS.get(str(v.get('unit') or '').lower(), v.get('unit'))
-        d = {'unit': unit_, 'what': stems(v.get('what') or '') | stems(v.get('qualifier') or ''), 'cmp': v.get('comparator', 'eq'),
+        d = {'unit': unit_, 'what': stems(v.get('what') or '') | stems(v.get('qualifier') or '') | tr_what, 'cmp': v.get('comparator', 'eq'),
              'approx': bool(v.get('approx')), 'src': 'values'}
         if 'value' in v and v['value'] is not None:
             out.append(dict(d, value=float(v['value']), scale=v.get('scale'), count=v.get('count')))
@@ -943,10 +1078,12 @@ def fact_values(f):
             out.append(dict(d, range=[float(x) for x in v['range']]))
         if v.get('date'):
             out.append(dict(d, date=parse_iso(v['date'])))
+        if v.get('as_of') and parse_iso(v['as_of']):   # «по данным на 1 сентября», «as of September 2026» — дата снимка
+            out.append(dict(d, date=parse_iso(v['as_of'])))
         if unit_ in ('year',) and 'value' in v:
             out.append(dict(d, date=(int(v['value']), None, None)))
-    for t in fact_texts(f):
-        for n in extract_numbers(t):
+    for t, lg in fact_lang_texts(f):
+        for n in extract_numbers(t, lg) + extract_word_numbers(t, lg):
             d = {'unit': n['unit'], 'what': {stem(w) for w in n['noun']}, 'cmp': n['cmp'], 'approx': n['cmp'] == 'approx', 'src': 'text'}
             if 'range' in n:
                 out.append(dict(d, range=n['range']))
@@ -997,6 +1134,7 @@ class Facts:
         for r in data.get('never_claim') or []:
             self.never.append(dict(r, origin='project'))
         self.class_info = {}
+        self.use_always = [e for e in (schema or {}).get('x-use-always') or [] if isinstance(e, dict)]
         if schema:
             self.class_info = {c['id']: c for c in schema.get('x-claim-classes') or []}
             if use_defaults and data.get('never_claim_defaults', 'ru-default-1') != 'none':
@@ -1015,7 +1153,7 @@ def load_facts(path, schema, use_defaults=True):
     with open(path, encoding='utf-8') as f:
         data = yaml.safe_load(f) or {}
     if not isinstance(data, dict) or 'facts' not in data:
-        raise SystemExit(f'{path}: не facts.yaml (нет ключа facts); facts.md kimi — сначала `claims_check.py import-kimi`')
+        raise SystemExit(f'{path}: не facts.yaml (нет ключа facts)')
     return Facts(data, schema, use_defaults, path=path)
 
 
@@ -1026,19 +1164,19 @@ def load_schema(path=SCHEMA_PATH):
         return deep_dates(yaml.safe_load(f) or {})
 
 
-# ================================================================ внешние правила (H): правовой модуль
-# Волна 2, агент H, 2026-09-24. Правила — 08-russian-legal-typography/claims-rules.yaml (подхватывается сам) и --rules.
-# Файл правил общий с copy_lint.py (C): у правила есть `pattern` в синтаксисе C (макросы %B% %E% %W%), `unless`,
-# `examples: {bad, good}` строками, поля C (group, count_as_marker, priority…) claims_check не читает; поля права
+# ================================================================ внешние правила: правовой модуль
+# Правила — 08-russian-legal-typography/claims-rules.yaml (подхватывается сам) и --rules.
+# Файл правил общий с copy_lint.py: у правила есть `pattern` в синтаксисе линтера (макросы %B% %E% %W%), `unless`,
+# `examples: {bad, good}` строками, поля линтера (group, count_as_marker, priority…) claims_check не читает; поля права
 # (claim_class, requires, jurisdiction, legal_category, law) не читает copy_lint. Это не юридическое заключение.
-LEGAL_MODULE_VERSION = '2.0 (H, 2026-09-24)'
+LEGAL_MODULE_VERSION = '2.1'
 JURISDICTIONS = ('ru', 'eu', 'us', 'other')
 LEGAL_CATEGORIES = ('finance', 'medical', 'dietary-supplements', 'alcohol', 'education', 'real-estate', 'other', 'general')
 _MACROS = (('%B%', r'(?<![A-Za-zА-Яа-яЁё0-9_])'), ('%E%', r'(?![A-Za-zА-Яа-яЁё0-9_])'), ('%W%', r'[A-Za-zА-Яа-яЁё0-9_]*'))
 
 
 def expand_macros(p):
-    """Макросы границ слова copy_lint (C, спецификация §2.2) → Python re."""
+    """Макросы границ слова copy_lint (спецификация линтера §2.2) → Python re."""
     for k, v in _MACROS:
         p = p.replace(k, v)
     return p
@@ -1049,12 +1187,12 @@ _STRS = {'type': 'array', 'items': {'type': 'string'}}
 RULES_SCHEMA = {
     '$schema': 'https://json-schema.org/draft/2020-12/schema',
     '$id': 'urn:app-design:text-research:claims-rules:1',
-    'title': 'claims-rules.yaml — правовые правила формулировок для claims_check.py (H, волна 2); файл читает и copy_lint.py (C)',
+    'title': 'claims-rules.yaml — правовые правила формулировок для claims_check.py; файл читает и copy_lint.py',
     'type': 'object', 'required': ['version', 'date', 'rules'], 'additionalProperties': True,
     'properties': {
         'version': {'const': 1}, 'date': {'type': 'string'}, 'jurisdiction': {'type': 'string'},
         'defaults': {'type': 'object', 'description': 'сливаются в каждое правило файла (как в copy_lint); поля правила сильнее'},
-        'overrides': {'type': 'array', 'description': 'поправки уровней для copy_lint (C, спецификация §2.4); claims_check их не читает'},
+        'overrides': {'type': 'array', 'description': 'поправки уровней для copy_lint (спецификация линтера §2.4); claims_check их не читает'},
         'rules': {'type': 'array', 'items': {
             'type': 'object', 'required': ['id', 'level', 'message'], 'additionalProperties': False,
             'properties': {
@@ -1062,26 +1200,27 @@ RULES_SCHEMA = {
                 'title': _STR, 'level': {'enum': ['error', 'warning', 'info']},
                 'claim_class': {'type': 'array', 'items': {'type': 'string'}, 'description': 'классы x-claim-classes: маркер класса (trigger class|any) и отбор фактов для requires'},
                 'patterns': {'type': 'array', 'items': {'type': 'string'}, 'description': 'Python re, регистр не важен; ищутся в soft-тексте (ё→е, тире→«-», NBSP→пробел)'},
-                'pattern': {'type': 'string', 'description': 'H: одна регулярка в синтаксисе copy_lint (макросы %B% %E% %W%) — её читают обе утилиты'},
-                'unless': {'type': 'string', 'description': 'H: исключение — найдено в том же предложении, что и срабатывание, — правило молчит (как в copy_lint)'},
-                'trigger': {'enum': ['pattern', 'class', 'any'], 'description': 'H: pattern — только регулярки; class — только маркеры claim_class; any (по умолчанию B2) — регулярки, затем маркеры'},
-                'lang': {'enum': ['ru', 'en', 'any'], 'description': 'H: язык единицы (кириллица против латиницы)'},
+                'pattern': {'type': 'string', 'description': 'одна регулярка в синтаксисе copy_lint (макросы %B% %E% %W%) — её читают обе утилиты'},
+                'unless': {'type': 'string', 'description': 'исключение — найдено в том же предложении, что и срабатывание, — правило молчит (как в copy_lint)'},
+                'trigger': {'enum': ['pattern', 'class', 'any'], 'description': 'pattern — только регулярки; class — только маркеры claim_class; any (по умолчанию) — регулярки, затем маркеры'},
+                'lang': {'enum': ['ru', 'en', 'any'], 'description': 'язык единицы (кириллица против латиницы)'},
                 'genres': {'type': 'array', 'items': {'type': 'string'}}, 'slot_types': {'type': 'array', 'items': {'type': 'string'}},
                 'exclude_slot_types': _STRS,
-                'jurisdiction': {'type': 'array', 'items': {'enum': list(JURISDICTIONS)}, 'description': 'H: правило действует, если активная юрисдикция в списке (--jurisdiction, facts.yaml jurisdiction; по умолчанию ru)'},
-                'legal_category': {'type': 'array', 'items': {'enum': list(LEGAL_CATEGORIES)}, 'description': 'H: только для отраслей (meaning.legal_category; --legal-category)'},
-                'legal_category_except': {'type': 'array', 'items': {'enum': list(LEGAL_CATEGORIES)}, 'description': 'H: кроме отраслей'},
+                'jurisdiction': {'type': 'array', 'items': {'enum': list(JURISDICTIONS)}, 'description': 'правило действует, если активная юрисдикция в списке (--jurisdiction, facts.yaml jurisdiction; по умолчанию ru)'},
+                'legal_category': {'type': 'array', 'items': {'enum': list(LEGAL_CATEGORIES)}, 'description': 'только для отраслей (meaning.legal_category; --legal-category)'},
+                'legal_category_except': {'type': 'array', 'items': {'enum': list(LEGAL_CATEGORIES)}, 'description': 'кроме отраслей'},
+                'page_types': _STRS, 'page_types_except': _STRS,
                 'forbid': {'type': 'boolean', 'description': 'true — любое срабатывание = находка (запрещённая формулировка)'},
-                'once': {'enum': ['unit', 'page'], 'description': 'H: page — одна находка правила на страницу (обязательные оговорки)'},
+                'once': {'enum': ['unit', 'page'], 'description': 'page — одна находка правила на страницу (обязательные оговорки)'},
                 'requires': {'type': 'object', 'additionalProperties': False, 'properties': {
                     'fact': {'type': 'boolean', 'description': 'нужен публикуемый факт с классом правила'},
-                    'fact_fields': {'type': 'array', 'items': {'type': 'string'}, 'description': 'поля, которые обязаны быть у найденного факта: basis.criterion, legal.disclaimer… (H: проверяются, только если факт найден; «нет факта» — при fact: true)'},
+                    'fact_fields': {'type': 'array', 'items': {'type': 'string'}, 'description': 'поля, которые обязаны быть у найденного факта: basis.criterion, legal.disclaimer… (проверяются, только если факт найден; «нет факта» — при fact: true)'},
                     'nearby': {'type': 'array', 'items': {'type': 'string'}, 'description': 'регулярки, из которых хотя бы одна должна найтись рядом (оговорка, условие, источник)'},
-                    'nearby_all': {'type': 'array', 'items': {'type': 'string'}, 'description': 'H: регулярки, которые все должны найтись рядом (обязательные тексты оговорок)'},
-                    'nearby_scope': {'enum': ['unit', 'section', 'page'], 'description': 'H: где искать nearby: единица, секция (по умолчанию), страница'},
-                    'fact_conditions': {'type': 'boolean', 'description': 'H: условия найденного факта (values[].qualifier, legal.disclaimer) обязаны стоять рядом; нет факта — проверяется nearby'},
+                    'nearby_all': {'type': 'array', 'items': {'type': 'string'}, 'description': 'регулярки, которые все должны найтись рядом (обязательные тексты оговорок)'},
+                    'nearby_scope': {'enum': ['unit', 'section', 'page'], 'description': 'где искать nearby: единица, секция (по умолчанию), страница'},
+                    'fact_conditions': {'type': 'boolean', 'description': 'условия найденного факта (values[].qualifier, legal.disclaimer) обязаны стоять рядом; нет факта — проверяется nearby'},
                     'legal_review': {'enum': ['approved']}}},
-                'message': {'type': 'string'}, 'fix': {'type': 'string'}, 'replacement': {'type': 'string', 'description': 'как править (формат C); claims_check берёт его, если нет fix'},
+                'message': {'type': 'string'}, 'fix': {'type': 'string'}, 'replacement': {'type': 'string', 'description': 'как править (формат линтера); claims_check берёт его, если нет fix'},
                 'source': {'type': 'string'},
                 'law': {'type': 'array', 'items': {'type': 'object', 'required': ['ref'], 'additionalProperties': False, 'properties': {
                     'ref': {'type': 'string', 'description': 'норма: «38-ФЗ ст. 5 ч. 3 п. 1», «Пленум ВАС № 58 п. 29», «ФАС, приказ № 1079/23, прил. 2 разд. II»'},
@@ -1091,7 +1230,7 @@ RULES_SCHEMA = {
                     'url': {'type': 'string'}, 'note': {'type': 'string'}}}},
                 'date': _STR, 'evidence': _STR, 'note': _STR,
                 'examples': {'type': 'object', 'description': 'bad / good — строки (их проверяют selftest обеих утилит); bad_en, good_en; контекст теста: slot_type, legal_category, jurisdiction, genre'},
-                # поля формата copy_lint (C, 06-anti-slop/02-linter-spec-and-profiles.md §2.1): claims_check их не читает
+                # поля формата copy_lint (06-anti-slop/02-linter-spec-and-profiles.md §2.1): claims_check их не читает
                 'group': _STR, 'marker_id': _STR, 'count_as_marker': {'type': 'boolean'}, 'flags': _STR,
                 'priority': {'type': 'integer'}, 'levels': {'type': 'object'}, 'slot_levels': {'type': 'object'},
                 'requires_no_fact': {'type': 'boolean'}, 'min_count': {'type': 'integer'}, 'scope': _STR,
@@ -1141,7 +1280,7 @@ def load_rules(paths):
             except re.error as e:
                 errs.append(f"{p}: {r['id']}: регулярка: {e}")
                 continue
-            for k in ('jurisdiction', 'legal_category', 'legal_category_except', 'genres', 'slot_types', 'exclude_slot_types'):
+            for k in ('jurisdiction', 'legal_category', 'legal_category_except', 'genres', 'slot_types', 'exclude_slot_types', 'page_types', 'page_types_except'):
                 if r.get(k) is not None:
                     r[k] = _as_list(r[k])
             r['_file'] = p
@@ -1178,6 +1317,11 @@ def legal_rule_applies(r, u, genre, ctx):
     if r.get('legal_category') and not (ctx['categories'] & set(r['legal_category'])):
         return False
     if r.get('legal_category_except') and (ctx['categories'] & set(r['legal_category_except'])):
+        return False
+    pt = u.get('page_type')   # тип страницы известен у copy deck; у текста без типа правило действует
+    if pt and r.get('page_types') and pt not in r['page_types']:
+        return False
+    if pt and r.get('page_types_except') and pt in r['page_types_except']:
         return False
     lang = r.get('lang') or 'any'
     if lang in ('ru', 'en'):
@@ -1219,16 +1363,20 @@ def legal_hit(r, body, markers):
 
 
 def legal_zone(u, units, scope, ctx):
-    """soft-текст зоны «рядом»: единица, секция (page + section, как у B2) или страница."""
+    """soft-текст зоны «рядом»: единица, секция (page + section, как у сверки фактов) или страница."""
     if scope == 'unit':
         return soft(u['text'])
+    if u.get('alt'):   # невыбранный вариант: рядом с ним — выбранные тексты других слотов, не соседние варианты
+        if scope == 'page':
+            return soft(' '.join([u['text']] + [x['text'] for x in units if x.get('page') == u.get('page') and not x.get('alt') and x.get('slot') != u.get('slot')]))
+        return soft(' '.join(near_units(u, units)))
     key = (scope, u.get('page'), u.get('section') if scope == 'section' else None)
     z = ctx['_zones'].get(key)
     if z is None:
         if scope == 'page':
-            z = soft(' '.join(x['text'] for x in units if x.get('page') == u.get('page')))
+            z = soft(' '.join(x['text'] for x in units if x.get('page') == u.get('page') and not x.get('alt')))
         else:
-            z = soft(' '.join(x['text'] for x in units if x.get('section') == u.get('section') and x.get('page') == u.get('page')))
+            z = soft(' '.join(near_units(u, units)))
         ctx['_zones'][key] = z
     return z
 
@@ -1259,7 +1407,7 @@ def condition_nearby(cond, zone):
 
 
 def legal_requirements(r, u, units, facts, strong, related, ctx):
-    """Что не выполнено для сработавшего правила: [причина]. Факты — найденные в единице (strong ∪ related, B2)."""
+    """Что не выполнено для сработавшего правила: [причина]. Факты — найденные в единице (strong ∪ related)."""
     req = r.get('requires') or {}
     fail = []
     if r.get('forbid'):
@@ -1308,7 +1456,7 @@ def law_refs(r):
 
 
 def apply_legal_rules(F, u, body, markers, strong, related, facts, units, rules, genre, ctx):
-    """Правовой модуль H: правила claims-rules.yaml (и --rules) для одной единицы текста."""
+    """Правовой модуль: правила claims-rules.yaml (и --rules) для одной единицы текста."""
     for r in rules:
         if not legal_rule_applies(r, u, genre, ctx):
             continue
@@ -1439,7 +1587,7 @@ def publishable_issues(f, facts, today, cls_hint=None):
         out.append(('error', 'COPY-F-PERMISSION', f"fact:{f['id']}: разрешение отозвано {perm['withdrawn']}", 'Снимите факт со всех страниц.'))
     shows = set(perm.get('shows') or [])
     if ps == 'granted' and (shows & {'full-name', 'photo'}) and not perm.get('pd_consent'):
-        out.append(('error', 'COPY-F-PERMISSION', f"fact:{f['id']}: показывается имя или фото без согласия на распространение ПДн", 'Нужно согласие по 152-ФЗ ст. 10.1 (форма — H) или подпись инициалами без фото.'))
+        out.append(('error', 'COPY-F-PERMISSION', f"fact:{f['id']}: показывается имя или фото без согласия на распространение ПДн", 'Нужно согласие по 152-ФЗ ст. 10.1 (форма — 08-russian-legal-typography) или подпись инициалами без фото.'))
     if perm.get('until'):
         pu = parse_iso(perm['until'])
         if pu and date_end(pu) < today:
@@ -1502,8 +1650,9 @@ def evidence_gap(f):
                     gap.append(frag)
         if computed:
             continue  # числа посчитаны: правило в source.computation
-        qn = {round(n['value'], 6) for n in extract_numbers(q) if 'value' in n} | {x for n in extract_numbers(q) if 'range' in n for x in n['range']}
-        for n in extract_numbers(t):
+        lg = (f.get('lang') or 'ru').split('-')[0]
+        qn = {round(n['value'], 6) for n in extract_numbers(q, lg) if 'value' in n} | {x for n in extract_numbers(q, lg) if 'range' in n for x in n['range']}
+        for n in extract_numbers(t, lg):
             vals = [n['value']] if 'value' in n else n['range']
             for v in vals:
                 if round(v, 6) not in qn and not (n['kind'] == 'year' and str(int(v)) in qs):
@@ -1511,9 +1660,10 @@ def evidence_gap(f):
     return sorted(set(gap))
 
 
-def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose=False, ctx=None):
+def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose=False, ctx=None, final=False):
+    """Сверка единиц текста с фактами. final — ворота публикации: демо-данные (example) — error, без final — info."""
     F, ok_claims = [], []
-    lctx = ctx or legal_ctx()   # правовой модуль H: юрисдикция и отрасль (по умолчанию ru, general)
+    lctx = ctx or legal_ctx()   # правовой модуль: юрисдикция и отрасль (по умолчанию ru, general)
     stats = {'units': len(units), 'claims': 0, 'supported': 0, 'placeholders': 0, 'by_class': {}}
     placeholder_hits = []
 
@@ -1550,8 +1700,9 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
         strong = dict(cand)      # факты, найденные по числу, дате, цитате, имени, fact_ids — основа проверки «шире факта»
         related = {}             # факты, покрывшие маркер класса или термин свойства (проверяются на публикуемость)
         strong_pos = []          # (факт, позиция числа или даты) — для проверки утверждения внутри одного предложения
-        # ---- числа
-        nums = extract_numbers(body)
+        # ---- числа (цифрами и словами; разделитель тысяч — по языку текста)
+        ulang = unit_lang(body)
+        nums = sorted(extract_numbers(body, ulang) + extract_word_numbers(body, ulang), key=lambda x: x['start'])
         spec_label = None
         mm = re.match(r'^\s*([^—:\-–]{2,40}?)\s*[—:–-]\s', body)
         if mm:
@@ -1599,6 +1750,11 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
                 if best and best[0]['id'] not in cand:
                     best = (facts.by_id[match_ids[0]], 'fact_ids')
             mark_claim('fact-number', best is not None)
+            nq = q_unit or in_question(body, n['start'])
+            if n.get('words') and not nq:
+                add(F, 'warning', 'COPY-F-NUM-WORDS', u, n['raw'], 'fact-number', 'число в утверждении написано словами' + ('' if best else ' и не найдено в фактах'),
+                    'В утверждении сайта число пишется цифрами (сверка и читатель видят цифры); словами — только счёт без утверждения («два шага»).',
+                    [best[0]['id']] if best else [])
             if best:
                 for fid in match_ids[:3]:
                     strong.setdefault(fid, 'number')
@@ -1606,10 +1762,10 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
                 ok_claims.append({'unit': u['id'], 'fragment': n['raw'], 'fact': best[0]['id'], 'how': best[1]})
             elif why_bad:
                 f, why = why_bad[0]
-                add(F, 'info' if q_unit else 'error', 'COPY-F-NUM-MISMATCH', u, n['raw'], 'fact-number', f"не совпадает с fact:{f['id']}: {why}",
+                add(F, 'info' if nq else 'error', 'COPY-F-NUM-MISMATCH', u, n['raw'], 'fact-number', f"не совпадает с fact:{f['id']}: {why}",
                     f"Приведите число к факту дословно («{(f.get('verbatim') or [''])[0][:60]}») или заведите новый факт с источником.", [f['id']])
             else:
-                lvl = 'info' if q_unit else 'error'
+                lvl = 'info' if nq else 'error'
                 add(F, lvl, 'COPY-F-NUM', u, n['raw'], 'fact-number', 'число без факта',
                     'Замените на [PLACEHOLDER: что за число] и заведите пробел в missing, либо добавьте факт с источником и датой.')
         # ---- даты
@@ -1633,7 +1789,7 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
                 strong_pos.append((found['id'], d['start']))
                 ok_claims.append({'unit': u['id'], 'fragment': d['raw'], 'fact': found['id'], 'how': 'дата'})
             else:
-                add(F, 'info' if q_unit else 'error', 'COPY-F-DATE', u, d['raw'], 'fact-number', 'дата без факта',
+                add(F, 'info' if (q_unit or in_question(body, d['start'])) else 'error', 'COPY-F-DATE', u, d['raw'], 'fact-number', 'дата без факта',
                     'Дата срока, отгрузки, акции — только из facts.yaml (values.date или valid.until); иначе [PLACEHOLDER].')
             if y and mo and (y, mo, dd or 28) < (today.year, today.month, today.day) and re.search(r'до\s*$|until\s*$|по\s*$', soft(body[:d['start']])[-8:]):
                 add(F, 'error', 'COPY-F-EXPIRED', u, d['raw'], 'promo-deadline', 'срок в тексте уже прошёл', 'Уберите истёкшую акцию или обновите дату по факту.')
@@ -1706,6 +1862,22 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
             add(F, 'error' if ctx else 'warning', 'COPY-F-NAME', u, name, 'client-logo' if ctx else None,
                 'имя или название не найдено в facts.yaml (entities, факты)',
                 'Проверьте, что это реальный клиент, человек или место с фактом и разрешением; иначе уберите или замените на [PLACEHOLDER].')
+        # ---- подпись отзыва, цитаты, человека: показано не больше, чем разрешено (permission.shows)
+        for fid in list(strong):
+            f = facts.by_id.get(fid)
+            if not f or not f.get('attribution') or f.get('kind') not in ('testimonial', 'expert-quote', 'person', 'case'):
+                continue
+            if strong.get(fid) != 'name' and u.get('slot_type') not in ATTRIB_SLOTS:
+                continue
+            perm = f.get('permission') or {}
+            allowed = set(perm.get('shows') or [])
+            if 'full-name' in allowed:
+                allowed |= {'first-name', 'initials'}
+            extra = sorted(x for x in attribution_shown(body, f) if x not in allowed)
+            if extra:
+                add(F, 'error', 'COPY-F-PERMISSION', u, ', '.join(extra), 'testimonial-quote',
+                    f"подпись fact:{fid} показывает {', '.join(extra)}, а разрешено: {', '.join(sorted(perm.get('shows') or [])) or 'ничего'}",
+                    'Подпишите так, как разрешил человек (permission.shows: имя, инициалы, должность, город), или получите письменное согласие и согласие на распространение ПДн.', [fid])
         # ---- маркеры классов
         markers = find_markers(body)
         for cl in sorted(set(u.get('claim_flags') or []) - set(markers) - {'fact-number', 'fact-property'}):
@@ -1721,7 +1893,7 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
                     covered_by = next((facts.by_id[fid] for fid in sent_ids if covers(facts.softtext[fid], facts.stems.get(fid, set()), frag)), None)
                     if not covered_by:
                         mark_claim(cl, False)
-                        lvl = 'info' if (q_unit and not never_hit(body, cl, facts)) else 'error'
+                        lvl = 'info' if ((q_unit or in_question(body, pos)) and not never_hit(body, cl, facts)) else 'error'
                         near = ', '.join(f'fact:{x}' for x in dict.fromkeys(sent_ids))
                         add(F, lvl, 'COPY-F-EXTENDS', u, frag, cl, f'утверждение шире факта ({near}): «{frag}» в факте нет — похоже на вывод из другого факта',
                             'Спросите заказчика (missing) и уберите эту часть до ответа; факт не расширяется выводом.', list(dict.fromkeys(sent_ids))[:3])
@@ -1740,7 +1912,7 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
                     covered_by = pool[0] if pool else None
                 if not covered_by:
                     mark_claim(cl, False)
-                    lvl = 'info' if (q_unit and not never_hit(body, cl, facts)) else 'error'
+                    lvl = 'info' if ((q_unit or in_question(body, pos)) and not never_hit(body, cl, facts)) else 'error'
                     if strong_ids:
                         near = ', '.join(f'fact:{x}' for x in strong_ids[:3])
                         add(F, lvl, 'COPY-F-EXTENDS', u, frag, cl, f'утверждение шире факта ({near}): «{frag}» в факте нет — похоже на вывод из другого факта',
@@ -1771,7 +1943,7 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
                 related.setdefault(sup[0]['id'], 'property')
                 ok_claims.append({'unit': u['id'], 'fragment': term, 'fact': sup[0]['id'], 'how': 'свойство'})
             else:
-                add(F, 'info' if q_unit else 'error', 'COPY-F-PROPERTY', u, term, 'fact-property', f'свойство «{term}» без факта',
+                add(F, 'info' if (q_unit or in_question(body, pos)) else 'error', 'COPY-F-PROPERTY', u, term, 'fact-property', f'свойство «{term}» без факта',
                     'Уберите свойство или спросите заказчика (missing) — свойства продукта не выводятся из описания.')
         # ---- never_claim
         quote_spans = []   # цитаты, совпавшие с публикуемым отзывом: (начало, конец, факт)
@@ -1781,15 +1953,12 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
                 if res_q['status'] in ('exact', 'recut', 'typo') and res_q['fact'] and not [x for x in publishable_issues(res_q['fact'], facts, today) if x[0] == 'error']:
                     quote_spans.append((qd['start'], qd['start'] + len(qd['raw']), res_q['fact']))
         for r in facts.never:
-            hit, hit_pos = None, None
-            for p in r.get('patterns') or []:
-                try:
-                    mm2 = re.search(p, soft(body), re.I)
-                except re.error:
-                    mm2 = None
-                if mm2:
-                    hit, hit_pos = mm2.group(0), mm2.start()
-                    break
+            rl = str(r.get('lang') or 'any').split('-')[0]
+            tr = ((r.get('translations') or {}).get(ulang) or {}) if ulang else {}
+            if rl not in ('any', ulang) and not tr:
+                continue   # запрет на другом языке: его слова в этом тексте не ищутся
+            pats = list(tr.get('patterns') or []) + (list(r.get('patterns') or []) if rl in ('any', ulang) else [])
+            hit, hit_pos = never_match(pats, body, relax=r.get('origin') == 'project')
             if not hit and r.get('origin') == 'project' and not r.get('patterns'):
                 for cl in r.get('claim_class') or []:
                     if cl in markers:
@@ -1821,7 +1990,7 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
             if r.get('origin') == 'default' and not (r.get('patterns')) :
                 continue  # запреты по умолчанию без своих регулярок уже выражены COPY-F-CLASS
             add(F, 'error', 'COPY-F-NEVER', u, hit, ','.join(r.get('claim_class') or []) or None,
-                f"never_claim {r['id']}: {r.get('text', '')[:120]}" + (' (снимается только фактом)' if lift == 'with-fact' else ' (не снимается)' if lift == 'never' else ' (только после проверки юриста)'),
+                f"never_claim {r['id']}: {(tr.get('text') or r.get('text', ''))[:120]}" + (' (снимается только фактом)' if lift == 'with-fact' else ' (не снимается)' if lift == 'never' else ' (только после проверки юриста)'),
                 'Уберите утверждение; вопросом тоже нельзя («Хотите … без …?» — то же обещание).')
         # ---- проблемы использованных фактов
         for fid, how in list(strong.items()) + [(k, v) for k, v in related.items() if k not in strong]:
@@ -1831,7 +2000,12 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
             for lvl, rule, msg, fix in publishable_issues(f, facts, today):
                 add(F, lvl, rule, u, fid, ','.join(f.get('claim_class') or []), msg, fix, [fid])
             use = f.get('use') or {}
-            if use and not use.get('any') and not q_unit:
+            if f.get('example') or facts.data.get('example'):
+                add(F, 'error' if final else 'info', 'COPY-F-EXAMPLE', u, fid, None,
+                    f"fact:{fid} — демо-данные (example: true" + (' у файла фактов)' if facts.data.get('example') and not f.get('example') else ')')
+                    + ': на макете допустимы, в публикацию не идут',
+                    'До публикации замените демо-факт настоящим с источником или уберите утверждение (validate --final).', [fid])
+            if use and not use.get('any') and not q_unit and not use_always(facts, u, f):
                 st_, role = u.get('slot_type'), u.get('section_role')
                 bad = []
                 places = [x for x in ((st_, use.get('slot_types')), (role, use.get('section_roles'))) if x[0] and x[1]]
@@ -1844,14 +2018,15 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
             if use.get('not_in') and not q_unit and ((u.get('slot_type') and u['slot_type'] in use['not_in']) or (u.get('section_role') and u['section_role'] in use['not_in'])):
                 add(F, 'error', 'COPY-F-USE', u, fid, None, f"fact:{fid} стоит в запрещённом месте (use.not_in: {', '.join(use['not_in'])})" + (f" — {f.get('notes')[:100]}" if f.get('notes') else ''),
                     'Перенесите утверждение туда, где факт разрешён, или измените подачу (например, не зачёркнутой «старой» ценой).', [fid])
-            if use.get('requires_nearby') and how in ('number', 'rating', 'fact_ids', 'marker', 'date') and not nearby_ok(use['requires_nearby'], u, units):
-                add(F, 'warning', 'COPY-F-NEARBY', u, fid, None, f"fact:{fid}: рядом должно стоять: {use['requires_nearby']}", 'Добавьте источник или оговорку в тот же блок (slot stat-source, cta-note).', [fid])
+            req_near = nearby_requirement(f, ulang)
+            if req_near and how in ('number', 'rating', 'fact_ids', 'marker', 'date') and not nearby_ok(req_near, u, units):
+                add(F, 'warning', 'COPY-F-NEARBY', u, fid, None, f"fact:{fid}: рядом должно стоять: {req_near}", 'Добавьте источник или оговорку в тот же блок (slot stat-source, cta-note).', [fid])
         # ---- флаги copy deck
         declared = set(u.get('claim_flags') or [])
         found_cl = set(markers) | ({'fact-number'} if nums else set())
         missing_flags = sorted((found_cl - declared) - {'fact-number', 'purchase-terms', 'company-details'}) if u.get('claim_flags') is not None and u.get('slot_type') else []
         if missing_flags and u['id'].count('/') >= 3:
-            add(F, 'info', 'COPY-F-FLAGS', u, ','.join(missing_flags), None, 'в claim_flags слота нет найденных классов', 'Добавьте классы в claim_flags (их читают H и copydeck.py).')
+            add(F, 'info', 'COPY-F-FLAGS', u, ','.join(missing_flags), None, 'в claim_flags слота нет найденных классов', 'Добавьте классы в claim_flags (их читают проверка права и copydeck.py).')
         # ---- строгий режим: утверждения без опоры
         if strict and u.get('slot_type') in (None, 'body', 'card-body', 'step-body', 'subheadline', 'spec-row', 'faq-a', 'case-summary', 'case-result', 'pricing-feature', 'guarantee-text', 'objection-answer') and not q_unit:
             covered = [fid for fid in list(strong) + list(related) if fid in facts.by_id]
@@ -1861,7 +2036,7 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
                 if best[0] < 0.34:
                     add(F, 'warning', 'COPY-F-UNSUPPORTED', u, body[:80], 'fact-property', f'в тексте утверждение без опоры на факт (перекрытие слов с лучшим фактом {best[0]:.0%})',
                         'Строгий режим: у содержательного утверждения о продукте или услуге должен быть факт; иначе — голос клиента без обещаний или [PLACEHOLDER].')
-        # ---- внешние правила (H): правовой модуль — apply_legal_rules
+        # ---- внешние правила: правовой модуль — apply_legal_rules
         if rules:
             apply_legal_rules(F, u, body, markers, strong, related, facts, units, rules, genre, lctx)
     # дедупликация
@@ -1912,19 +2087,121 @@ def placeholder_listed(ph, facts):
     return False
 
 
+JOB_TITLE_RX = re.compile(r'директор|руководител|начальник|менеджер|основател|совладел|владел|партн[её]р|глав[аы]|заведующ|инженер|'
+                          r'бухгалтер|юрист|врач|специалист|консультант|аналитик|дизайнер|архитектор|маркетолог|ceo|cto|cfo|coo|'
+                          r'founder|owner|head\b|manager|director|lead\b|engineer|designer|consultant|officer|president|partner', re.I)
+
+
+def attribution_shown(body, f):
+    """Что подпись показывает из attribution факта: first-name, full-name (фамилия целиком), position (роль — должность:
+    «генеральный директор», «владелец кофейни»; описание заказа клиента — не должность), company, city."""
+    att = f.get('attribution') or {}
+    words = {stem(w) for w in WORD_RX.findall(norm(body))}
+    shown = set()
+    name = [w for w in WORD_RX.findall(norm(att.get('name') or '')) if len(w) > 1]
+    if name and any(stem_like(stem(name[0]), w) for w in words):
+        shown.add('first-name')
+    if len(name) >= 2 and any(stem_like(stem(name[-1]), w) for w in words):
+        shown.add('full-name')
+    for key, what in (('role', 'position'), ('company', 'company'), ('city', 'city')):
+        if key == 'role' and not JOB_TITLE_RX.search(att.get('role') or ''):
+            continue
+        st = {stem(w) for w in WORD_RX.findall(norm(att.get(key) or '')) if w not in STOP and len(w) > 2}
+        if st and len(st & words) >= max(1, (len(st) + 1) // 2):
+            shown.add(what)
+    return shown
+
+
+def never_match(patterns, body, relax=False):
+    """Первое срабатывание регулярок запрета в soft-тексте: (фрагмент, позиция) или (None, None). relax — запрет проекта из
+    слов («смет\\w*\\s+не\\s+вырос»): ищется и пересказ с вставкой до пяти слов между словами внутри одного предложения
+    («смета, которую составили, не выросла»)."""
+    sb = soft(body)
+    for p in patterns:
+        try:
+            m = re.search(p, sb, re.I)
+        except re.error:
+            m = None
+        if m:
+            return m.group(0), m.start()
+    if relax:
+        for p in patterns:
+            parts = re.split(r'\\s[+*]', p)
+            if len(parts) < 2 or any('\\s' in x or not x for x in parts):
+                continue
+            try:
+                rx = re.compile(r'(?:[\s,]+[^\s.!?;]+){0,5}?[\s,]+'.join(parts), re.I)
+            except re.error:
+                continue
+            for a, b in sentence_spans(sb):
+                m = rx.search(sb, a, b)
+                if m:
+                    return m.group(0), m.start()
+    return None, None
+
+
+def near_units(u, units):
+    """Тексты «рядом» с единицей: сама единица и выбранные тексты других слотов той же секции. Невыбранные варианты
+    (--all-variants) и соседние варианты того же слота рядом не считаются: они не стоят на странице одновременно."""
+    out = [u['text']]
+    for x in units:
+        if x is u or x.get('alt') or x.get('section') != u.get('section') or x.get('page') != u.get('page'):
+            continue
+        if x.get('slot') and x.get('slot') == u.get('slot'):
+            continue
+        out.append(x['text'])
+    return out
+
+
 def nearby_ok(req, u, units):
-    """Выполнено ли требование «рядом должно стоять»: фрагменты в «ёлочках» — дословно (без регистра) в единице или её
-    секции; «источник/по данным/дата» — признак источника; иначе половина значимых слов требования."""
-    same = [x['text'] for x in units if x.get('section') == u.get('section') and x.get('page') == u.get('page')] or [u['text']]
-    zone = soft(' '.join(same))
-    frags = re.findall(r'«([^»]+)»', req)
-    if frags:
-        return all(soft(f_) in zone for f_ in frags)
-    if re.search(r'источник|по данным|дат[аы]|source', req, re.I) and SOURCE_HINT_RX.search(zone):
-        return True
-    st = {stem(w) for w in WORD_RX.findall(norm(req)) if w not in STOP and len(w) > 2}
-    zs = {stem(w) for w in WORD_RX.findall(norm(zone))}
-    return bool(st) and len(st & zs) >= max(1, len(st) // 2)
+    """Выполнено ли требование «рядом должно стоять» (use.requires_nearby): альтернативы через « или » — достаточно одной;
+    в альтернативе фрагменты в «ёлочках» — дословно (без регистра) в единице или её секции; «источник, дата» — признак
+    источника рядом (по данным, на дату, площадка); иначе половина значимых слов требования."""
+    zone = soft(' '.join(near_units(u, units)))
+    alts = [a.strip(' ,;') for a in re.split(r'\s+или\s+|\s+or\s+', req) if a.strip(' ,;')] or [req]
+    for alt in alts:
+        if re.search(r'источник|по данным|дат[аы]|source|as of', alt, re.I) and SOURCE_HINT_RX.search(zone):
+            return True
+        frags = re.findall(r'«([^»]+)»', alt)
+        if frags:
+            if all(soft(f_) in zone for f_ in frags):
+                return True
+            continue
+        st = {stem(w) for w in WORD_RX.findall(norm(alt)) if w not in STOP and len(w) > 2}
+        zs = {stem(w) for w in WORD_RX.findall(norm(zone))}
+        if st and len(st & zs) >= max(1, len(st) // 2):
+            return True
+    return False
+
+
+def use_always(facts, u, f):
+    """Место, где любой факт законен (facts.schema.yaml x-use-always): место — слот или секция, как в use; условия
+    (page_types, claim_classes, fact_kinds, requires) — все сразу. → запись или None."""
+    for e in facts.use_always:
+        places = [(u.get('slot_type'), e.get('slot_types')), (u.get('section_role'), e.get('section_roles'))]
+        places = [(v, lst) for v, lst in places if lst]
+        if places and not any(v and v in lst for v, lst in places):
+            continue
+        if e.get('page_types') and u.get('page_type') not in e['page_types']:
+            continue
+        if e.get('claim_classes') and not set(e['claim_classes']) & set(f.get('claim_class') or []):
+            continue
+        if e.get('fact_kinds') and f.get('kind') not in e['fact_kinds']:
+            continue
+        if e.get('requires') and not get_path(f, e['requires']):
+            continue
+        return e
+    return None
+
+
+def nearby_requirement(f, lang):
+    """Что должно стоять рядом с фактом на языке текста: translations.<lang>.requires_nearby, иначе use.requires_nearby."""
+    base = (f.get('lang') or 'ru').split('-')[0]
+    if lang and lang != base:
+        tr = (f.get('translations') or {}).get(lang) or {}
+        if tr.get('requires_nearby'):
+            return tr['requires_nearby']
+    return (f.get('use') or {}).get('requires_nearby')
 
 
 def hint_facts(body, facts):
@@ -1964,7 +2241,18 @@ def class_fix(cl, facts):
     info = facts.class_info.get(cl, {})
     needs = ', '.join(info.get('needs') or []) or 'факт с источником'
     law = info.get('law')
-    return f'Нужен факт класса {cl} ({needs})' + (f'; ориентир права: {law} — H' if law else '') + '; до этого — убрать утверждение или [PLACEHOLDER].'
+    return f'Нужен факт класса {cl} ({needs})' + (f'; нормы права: {law}' if law else '') + '; до этого — убрать утверждение или [PLACEHOLDER].'
+
+
+def stem_like(a, b):
+    """Основы одного имени в разных падежах: «серге» (Сергея) и «серг» (Сергей), «лапин» и «лапин»."""
+    return a == b or (min(len(a), len(b)) >= 4 and (a.startswith(b) or b.startswith(a)) and abs(len(a) - len(b)) <= 2)
+
+
+def name_stem_hit(st, facts):
+    if st in facts.name_stems:
+        return facts.name_stems[st]
+    return next((v for k, v in facts.name_stems.items() if stem_like(st, k)), None)
 
 
 def name_known(name, facts):
@@ -1974,8 +2262,8 @@ def name_known(name, facts):
     if n in facts.names:
         return facts.names[n]
     ws = WORD_RX.findall(n)
-    if ws and all(stem(w) in facts.name_stems for w in ws):
-        return facts.name_stems[stem(ws[0])]
+    if ws and all(name_stem_hit(stem(w), facts) for w in ws):
+        return name_stem_hit(stem(ws[0]), facts)
     if ws and all(stem(w) in facts.all_stems for w in ws):
         for f in facts.facts:
             if all(stem(w) in facts.stems[f['id']] for w in ws):
@@ -2069,7 +2357,7 @@ def to_md(res):
         L += ['', f"Внешние правила: {', '.join(res['rules_loaded'])}"]
     lg = res.get('legal')
     if lg:
-        L += [f"Право (модуль H {lg.get('module')}): юрисдикция {lg.get('jurisdiction')} · отрасль "
+        L += [f"Право (модуль {lg.get('module')}): юрисдикция {lg.get('jurisdiction')} · отрасль "
               f"{', '.join(lg.get('legal_category') or [])} · правил {lg.get('rules')} · находок {lg.get('findings')} · не юридическое заключение"]
     return '\n'.join(L) + '\n'
 
@@ -2107,14 +2395,14 @@ def cmd_check(a):
     jur = (a.jurisdiction or meta.get('jurisdiction') or facts.data.get('jurisdiction') or 'ru')
     cats = a.legal_category.split(',') if a.legal_category else _as_list(meta.get('legal_category') or facts.data.get('x-legal-category') or ['general'])
     ctx = legal_ctx(jur, cats)
-    F, ok_claims, stats = check_units(units, facts, today, rules, a.strict, a.genre, a.verbose, ctx)
+    F, ok_claims, stats = check_units(units, facts, today, rules, a.strict, a.genre, a.verbose, ctx, final=a.final)
     rule_ids = {r['id'] for r in rules}
     if a.legal_only:
         F = [f for f in F if f['rule'] in rule_ids]
     res = {'tool': 'claims_check.py', 'version': VERSION, 'today': today.isoformat(), 'input': a.input, 'format': fmt,
            'facts': a.facts, 'schema': os.path.relpath(a.schema, ROOT) if os.path.exists(a.schema) else None,
            'rules_loaded': [os.path.relpath(p, ROOT) if p.startswith(ROOT) else p for p in rule_paths if os.path.exists(p)],
-           'summary': summarize(F, stats), 'findings': F, 'supported': ok_claims if a.verbose else [], 'verbose': a.verbose,
+           'summary': summarize(F, stats), 'findings': F, 'supported': ok_claims if a.verbose else [], 'verbose': a.verbose, 'final': bool(a.final),
            'legal': {'module': LEGAL_MODULE_VERSION, 'jurisdiction': ctx['jurisdiction'], 'legal_category': sorted(ctx['categories']),
                      'rules': len(rules), 'findings': sum(1 for f in F if f['rule'] in rule_ids), 'legal_only': bool(a.legal_only)}}
     write_outputs(res, a)
@@ -2135,7 +2423,7 @@ def cmd_inventory(a):
         neigh = ' '.join(x['text'] for x in units[max(0, i - 1):i + 2])
         src_vis = bool(SOURCE_HINT_RX.search(neigh))
         claims = []
-        for n in extract_numbers(body):
+        for n in extract_numbers(body, unit_lang(body)) + extract_word_numbers(body):
             if ORDINAL_LINE_RX.match(body[max(0, n['start'] - 6):n['start'] + 4]):
                 continue
             if {stem(w) for w in n['noun']} & STRUCT_NOUNS:
@@ -2202,8 +2490,15 @@ def cmd_lint_facts(a):
     today = today_of(a)
     F = []
     vocab = load_vocab()
+    if facts.data.get('example'):
+        add(F, 'error' if a.final else 'warning', 'COPY-F-EXAMPLE', unit('facts', a.input), 'example', None,
+            'файл фактов — демо-данные (example: true): на макете допустимы, публикация — нет',
+            'До публикации — настоящий facts.yaml заказчика с источниками.')
     for f in facts.facts:
         u = unit(f"fact:{f['id']}", (f.get('verbatim') or [''])[0])
+        if f.get('example') and not facts.data.get('example'):
+            add(F, 'error' if a.final else 'warning', 'COPY-F-EXAMPLE', u, f['id'], None, f"fact:{f['id']} — демо-данные (example: true)",
+                'До публикации замените настоящим фактом с источником.', [f['id']])
         for lvl, rule, msg, fix in publishable_issues(f, facts, today):
             add(F, lvl, rule, u, f['id'], ','.join(f.get('claim_class') or []), msg, fix, [f['id']])
         if f.get('kind') in ('testimonial', 'person', 'client', 'partner', 'case', 'expert-quote') and (f.get('permission') or {}).get('status') == 'not-required':
@@ -2212,8 +2507,8 @@ def cmd_lint_facts(a):
             use = f.get('use') or {}
             for key, vk in (('page_types', 'page_types'), ('section_roles', 'section_roles'), ('slot_types', 'slot_types')):
                 for x in use.get(key) or []:
-                    if x not in vocab.get(vk, set()) and x not in vocab.get('proposals', set()):
-                        add(F, 'warning', 'COPY-F-VOCAB', u, x, None, f'{key}: «{x}» нет во временном словаре', 'Возьмите id из 99-raw/notes/temp-vocabulary-v0.yaml или оформите предложение к словарю.')
+                    if x not in vocab.get(vk, set()):
+                        add(F, 'warning', 'COPY-F-VOCAB', u, x, None, f'{key}: «{x}» нет в словаре site', 'Возьмите id из kb/site/02-site-types/vocabulary.yaml (page_type, section_role, slot).')
     for m in facts.missing:
         if not PLACEHOLDER_RX.fullmatch(m.get('placeholder') or ''):
             add(F, 'error', 'COPY-F-PLACEHOLDER', unit(f"missing:{m.get('id')}", m.get('what', '')), m.get('placeholder'), None, 'placeholder не в форме [PLACEHOLDER: …]', 'Исправьте текст заглушки.')
@@ -2231,116 +2526,11 @@ def cmd_lint_facts(a):
 
 
 def load_vocab():
-    if yaml is None or not os.path.exists(VOCAB_PATH):
+    """id мест use по словарю site: page_types, section_roles, slot_types (слоты вида text)."""
+    v = site_vocab()
+    if not v['page_types']:
         return {}
-    with open(VOCAB_PATH, encoding='utf-8') as f:
-        v = yaml.safe_load(f) or {}
-    out = {'page_types': {x['id'] for x in v.get('page_types') or []}, 'section_roles': {x['id'] for x in v.get('section_roles') or []},
-           'slot_types': {x['id'] for x in v.get('slot_types') or []}}
-    sch = load_schema()
-    props = sch.get('x-vocabulary-proposals') or {}
-    out['proposals'] = {x['id'] for k in props for x in props[k]}
-    return out
-
-
-def phrase_rx(x):
-    """Фраза запрета → регулярка: пробелы → \\s+, N → число («осталось N ламп» → осталось\\s+\\d+\\s+ламп)."""
-    out = []
-    for w in re.split(r'\s+', soft(x).strip()):
-        out.append(r'\d+' if w in ('n', 'n+', 'x', 'х') else re.escape(w))
-    return r'\s+'.join(out)
-
-
-def import_kimi(text, site='imported', date=None):
-    """facts.md kimi (шаблон F) → facts.yaml v1 (черновик). Столбцы: ID | Fact | Source | Where; Missing; Never claim."""
-    date = date or dt.date.today().isoformat()
-    facts, missing, never = [], [], []
-    section = None
-    header = None
-    for line in text.splitlines():
-        st = line.strip()
-        if st.startswith('## '):
-            section = st[3:].lower()
-            header = None
-            continue
-        if section and section.startswith('never') and st.startswith('- '):
-            t = st[2:].rstrip(';').strip()
-            if t:
-                never.append(t)
-            continue
-        if not st.startswith('|'):
-            continue
-        cells = [c.strip() for c in st.strip('|').split('|')]
-        if header is None:
-            header = [c.lower() for c in cells]
-            continue
-        if all(re.fullmatch(r'-{3,}|:?-+:?', c or '---') for c in cells):
-            continue
-        if section and section.startswith('facts') and len(cells) >= 4:
-            fid, txt, src, where = cells[:4]
-            qm = re.search(r'[(（]\s*[«"“]([^»"”]+)[»"”]\s*[)）]', src)
-            dm = re.search(r'(\d{4}-\d{2}-\d{2})', src)
-            who = re.split(r',', src)[0].strip() or 'заказчик'
-            kind = 'price' if re.search(r'₽|руб|\$|€', txt) else ('date' if re.search(MONTH_RX + r'\s+\d{4}', txt, re.I) else 'property')
-            cls = {'price': ['price-discount'], 'date': ['purchase-terms'], 'property': ['fact-property']}[kind]
-            if re.search(r'\d', txt) and kind == 'property':
-                cls = ['fact-property', 'fact-number']
-            for mcl in find_markers(txt):
-                if mcl not in cls:
-                    cls.append(mcl)
-            wl = [w.strip().lower() for w in where.split(',') if w.strip()]
-            roles = [KIMI_SECTION_ROLE.get(w, w) for w in wl if w != 'cta']
-            slots_ = ['cta-label', 'cta-note'] if 'cta' in wl else []
-            f = {'id': 'f-' + fid.lower().replace('_', '-') if re.fullmatch(r'[A-Za-z]?\d+', fid) else re.sub(r'[^a-z0-9-]', '-', fid.lower()).strip('-'),
-                 'aliases': [fid], 'kind': kind, 'claim_class': cls, 'verbatim': [txt], 'canonical': txt,
-                 'source': {'type': 'customer-message', 'who': who, 'where': src, 'date': dm.group(1) if dm else date, 'derivation': 'direct'},
-                 'verification': {'status': 'stated'}, 'permission': {'status': 'not-required'},
-                 'use': dict({'section_roles': [r for r in roles if re.fullmatch(r'[a-z0-9]+(-[a-z0-9]+)*', r)]}, **({'slot_types': slots_} if slots_ else {})), 'lang': 'ru',
-                 'tags': ['imported-from-kimi-facts-md']}
-            if qm:
-                f['source']['quote'] = qm.group(1)
-            facts.append(f)
-        elif section and section.startswith('missing') and len(cells) >= 4:
-            mid, what, ph, who = cells[:4]
-            missing.append({'id': 'm-' + mid.lower() if re.fullmatch(r'[A-Za-z]?\d+', mid) else re.sub(r'[^a-z0-9-]', '-', mid.lower()).strip('-'),
-                            'aliases': [mid], 'what': what, 'placeholder': ph if PLACEHOLDER_RX.fullmatch(ph) else f'[PLACEHOLDER: {ph}]', 'who': who})
-    nc = []
-    for i, t in enumerate(never, 1):
-        cls = []
-        low = soft(t)
-        qm = re.findall(r'[«"“]([^»"”]{3,80})[»"”]', t)
-        if qm and i > 4:  # конкретная фраза заказчика: запрет по регулярке фразы, без маркеров класса
-            pats = [phrase_rx(x) for x in qm]
-            nc.append({'id': f'nc-imported-{i}', 'text': t, 'patterns': pats, 'lift': 'never'})
-            continue
-        for cl, kw in (('health', 'здоров|зрени|medical|health'), ('testimonial-quote', 'отзыв|testimonial'), ('rating', 'оценк|rating'),
-                       ('award-press', 'сми|press|award'), ('availability-scarcity', 'осталось'), ('client-logo', 'logo|trusted'),
-                       ('fact-number', 'count|growth'), ('price-discount', 'price|discount'), ('guarantee', 'guarantee')):
-            if re.search(kw, low):
-                cls.append(cl)
-        item = {'id': f'nc-imported-{i}', 'text': t, 'lift': 'never' if i > 4 else 'with-fact'}
-        if cls:
-            item['claim_class'] = cls
-        if 'здоров' in low or 'зрени' in low:
-            item['patterns'] = ['глаз', 'зрени', 'здоров']
-        nc.append(item)
-    return {'facts_version': 1, 'date': date, 'site': site, 'lang': 'ru', 'jurisdiction': 'ru', 'status': 'draft',
-            'collected_by': 'claims_check.py import-kimi (черновик: kind и класс угаданы, проверить руками)',
-            'never_claim_defaults': 'ru-default-1', 'facts': facts, 'missing': missing, 'never_claim': nc}
-
-
-def cmd_import_kimi(a):
-    with open(a.input, encoding='utf-8') as f:
-        data = import_kimi(f.read(), a.site, a.date)
-    out = yaml.safe_dump(data, allow_unicode=True, sort_keys=False, width=120) if yaml else json.dumps(data, ensure_ascii=False, indent=1)
-    head = f"# facts.yaml — импорт из {os.path.basename(a.input)} (kimi facts.md) · claims_check.py {VERSION} · {dt.date.today().isoformat()}\n# kind и claim_class угаданы по тексту — проверить; строки Never claim шаблона kimi — первые 4 с lift: with-fact.\n"
-    if a.output:
-        with open(a.output, 'w', encoding='utf-8') as f:
-            f.write(head + out)
-        print(a.output)
-    else:
-        print(head + out)
-    return 0
+    return {'page_types': set(v['page_types']), 'section_roles': set(v['section_roles']), 'slot_types': set(v['text_slots'])}
 
 
 def cmd_rules_schema(a):
@@ -2349,7 +2539,7 @@ def cmd_rules_schema(a):
 
 
 # ================================================================ selftest
-FP_PHRASES = [  # лозунги, вопросы, призывы — не утверждения о фактах (опыт B2/03 расширяет до 20+)
+FP_PHRASES = [  # лозунги, вопросы, призывы — не утверждения о фактах
     'Свет, под который хочется читать', 'Ремонт, после которого хочется жить дома', 'Считаем смету честно и по пунктам',
     'Как выбрать лампу для чтения?', 'Сколько стоит ремонт двушки?', 'Что будет после заявки?', 'Оставить заявку',
     'Записаться на консультацию', 'Узнать подробнее', 'Скачать презентацию', 'Как это работает', 'Частые вопросы',
@@ -2409,7 +2599,7 @@ def _selftest_facts():
     return Facts(data, schema, True), schema
 
 
-LEGAL_FP_PHRASES = FP_PHRASES + [  # нейтральные строки лендинга: правила H не дают ни error, ни warning (H, волна 2)
+LEGAL_FP_PHRASES = FP_PHRASES + [  # нейтральные строки лендинга: правила права не дают ни error, ни warning
     'Ремонт квартир под ключ в Нижнем Новгороде', 'Смета по пунктам до начала работ', 'Выезжаем на замер в день заявки',
     'Отвечаем в течение рабочего дня', 'Оплата по этапам, без предоплаты за весь ремонт', 'Кофе обжариваем по средам',
     'Лампа для чтения с тёплым светом', 'Записаться на пробный урок', 'Try it for 14 days', 'Pricing starts at $29 per seat',
@@ -2460,7 +2650,7 @@ rules:
 
 
 def _selftest_legal(check):
-    """Тесты правового модуля H (волна 2): механика требований на встроенных правилах, затем claims-rules.yaml."""
+    """Тесты правового модуля: механика требований на встроенных правилах, затем claims-rules.yaml."""
     schema = load_schema()
     today = dt.date(2026, 9, 24)
     empty = Facts({'facts': [], 'never_claim_defaults': 'none'}, schema, False)
@@ -2476,24 +2666,24 @@ def _selftest_legal(check):
         t.write(_LEGAL_TEST_RULES)
     rules, errs = load_rules([t.name])
     os.unlink(t.name)
-    check('H: встроенные правила загружены (defaults, pattern с макросами)', len(rules) == 6 and not errs, errs)
+    check('право: встроенные правила загружены (defaults, pattern с макросами)', len(rules) == 6 and not errs, errs)
     R = {r['id']: r for r in rules}
     # превосходная степень: unless, nearby в секции, fact_fields у найденного факта
-    check('H: «Лучшая доставка» без критерия → T-SUP', ids(run([unit('a', 'Лучшая доставка в городе')], empty, [R['T-SUP']]), 'T-SUP'))
-    check('H: критерий в том же предложении (unless) → тишина', not ids(run([unit('a', 'Лучшая доставка в городе по данным замера агентства X')], empty, [R['T-SUP']]), 'T-SUP'))
+    check('право: «Лучшая доставка» без критерия → T-SUP', ids(run([unit('a', 'Лучшая доставка в городе')], empty, [R['T-SUP']]), 'T-SUP'))
+    check('право: критерий в том же предложении (unless) → тишина', not ids(run([unit('a', 'Лучшая доставка в городе по данным замера агентства X')], empty, [R['T-SUP']]), 'T-SUP'))
     two = [unit('a', 'Лучшая доставка в городе', section='s', page='p'), unit('b', '* По замеру агентства X, май 2026', section='s', page='p')]
-    check('H: критерий в той же секции (nearby) → тишина', not ids(run(two, empty, [R['T-SUP']]), 'T-SUP'))
+    check('право: критерий в той же секции (nearby) → тишина', not ids(run(two, empty, [R['T-SUP']]), 'T-SUP'))
     fdata = {'facts': [{'id': 'best-noproof', 'kind': 'property', 'claim_class': ['superlative'], 'verbatim': ['лучшая доставка в городе'],
                         'canonical': 'Лучшая доставка в городе.', 'source': {'type': 'customer-message', 'who': 'заказчик', 'date': '2026-09-24'},
                         'verification': {'status': 'stated'}, 'permission': {'status': 'not-required'}, 'lang': 'ru'}], 'never_claim_defaults': 'none'}
     fx = Facts(fdata, schema, False)
     two_f = [unit('a', 'Лучшая доставка в городе', section='s', page='p', fact_ids=['best-noproof']), two[1]]
     F_ = ids(run(two_f, fx, [R['T-SUP']]), 'T-SUP')
-    check('H: факт без basis.criterion → T-SUP «у факта нет basis.criterion»', F_ and 'basis.criterion' in F_[0]['message'], F_)
+    check('право: факт без basis.criterion → T-SUP «у факта нет basis.criterion»', F_ and 'basis.criterion' in F_[0]['message'], F_)
     facts_b2, _ = _selftest_facts()
     two_ok = [unit('a', 'Самая быстрая доставка в городе', section='s', page='p'), unit('b', '* По замеру агентства X, май 2026', section='s', page='p')]
     rs = dict(R['T-SUP'], _rx=[re.compile(expand_macros(r'%B%сам\w+\s+быстр\w+'), re.I)])
-    check('H: факт с basis (best-study, найден маркером) + критерий рядом → тишина', not ids(run(two_ok, facts_b2, [rs]), 'T-SUP'))
+    check('право: факт с basis (best-study, найден маркером) + критерий рядом → тишина', not ids(run(two_ok, facts_b2, [rs]), 'T-SUP'))
     # «бесплатно»: условие факта рядом
     ffree = Facts({'facts': [{'id': 'estimate-free', 'kind': 'price', 'claim_class': ['price-discount'], 'verbatim': ['Смета и выезд замерщика — бесплатно'],
                               'canonical': 'Смета и выезд замерщика бесплатно в пределах города.', 'values': [{'value': 0, 'unit': 'RUB', 'what': 'смета', 'qualifier': 'в пределах города'}],
@@ -2501,42 +2691,42 @@ def _selftest_legal(check):
                               'permission': {'status': 'not-required'}, 'lang': 'ru'}], 'never_claim_defaults': 'none'}, schema, False)
     u1 = unit('a', 'Смета и выезд замерщика — бесплатно', section='s', page='p', fact_ids=['estimate-free'])
     F_ = ids(run([u1], ffree, [R['T-FREE']]), 'T-FREE')
-    check('H: «бесплатно» без условия из факта («в пределах города») → T-FREE', F_ and 'в пределах города' in F_[0]['message'], F_)
-    check('H: условие факта в той же секции → тишина', not ids(run([u1, unit('b', 'Выезжаем в пределах города', section='s', page='p')], ffree, [R['T-FREE']]), 'T-FREE'))
-    check('H: «бесплатно» без факта и без условия → T-FREE', ids(run([unit('a', 'Доставка бесплатно')], empty, [R['T-FREE']]), 'T-FREE'))
-    check('H: «бесплатно, без условий» → тишина', not ids(run([unit('a', 'Доставка бесплатно, без условий')], empty, [R['T-FREE']]), 'T-FREE'))
+    check('право: «бесплатно» без условия из факта («в пределах города») → T-FREE', F_ and 'в пределах города' in F_[0]['message'], F_)
+    check('право: условие факта в той же секции → тишина', not ids(run([u1, unit('b', 'Выезжаем в пределах города', section='s', page='p')], ffree, [R['T-FREE']]), 'T-FREE'))
+    check('право: «бесплатно» без факта и без условия → T-FREE', ids(run([unit('a', 'Доставка бесплатно')], empty, [R['T-FREE']]), 'T-FREE'))
+    check('право: «бесплатно, без условий» → тишина', not ids(run([unit('a', 'Доставка бесплатно, без условий')], empty, [R['T-FREE']]), 'T-FREE'))
     # юрисдикция, отрасль, язык, once
-    check('H: правило ЕС молчит при ru', not ids(run([unit('a', 'Скидка 20 % на всё')], empty, [R['T-EU']], 'ru'), 'T-EU'))
-    check('H: правило ЕС работает при --jurisdiction eu', ids(run([unit('a', 'Скидка 20 % на всё')], empty, [R['T-EU']], 'eu'), 'T-EU'))
+    check('право: правило ЕС молчит при ru', not ids(run([unit('a', 'Скидка 20 % на всё')], empty, [R['T-EU']], 'ru'), 'T-EU'))
+    check('право: правило ЕС работает при --jurisdiction eu', ids(run([unit('a', 'Скидка 20 % на всё')], empty, [R['T-EU']], 'eu'), 'T-EU'))
     med = [unit('a', 'Лечение кариеса', page='p1', section='s1'), unit('b', 'Лечение пульпита', page='p1', section='s2')]
-    check('H: оговорка медицины молчит для general', not ids(run(med, empty, [R['T-MED']]), 'T-MED'))
+    check('право: оговорка медицины молчит для general', not ids(run(med, empty, [R['T-MED']]), 'T-MED'))
     F_ = ids(run(med, empty, [R['T-MED']], cats=['medical']), 'T-MED')
-    check('H: medical без оговорки → одна находка на страницу (once: page)', len(F_) == 1, F_)
+    check('право: medical без оговорки → одна находка на страницу (once: page)', len(F_) == 1, F_)
     med_ok = med + [unit('c', 'Имеются противопоказания, необходима консультация специалиста', page='p1', section='footer')]
-    check('H: оговорка на странице (nearby_all, scope page) → тишина', not ids(run(med_ok, empty, [R['T-MED']], cats=['medical']), 'T-MED'))
+    check('право: оговорка на странице (nearby_all, scope page) → тишина', not ids(run(med_ok, empty, [R['T-MED']], cats=['medical']), 'T-MED'))
     med_half = med + [unit('c', 'Имеются противопоказания', page='p1', section='footer')]
-    check('H: половина обязательной оговорки → находка', ids(run(med_half, empty, [R['T-MED']], cats=['medical']), 'T-MED'))
-    check('H: lang en — английская единица', ids(run([unit('a', 'Get it free today')], empty, [R['T-LANG']]), 'T-LANG'))
-    check('H: lang en — русская единица молчит', not ids(run([unit('a', 'Доставка бесплатно, free')], empty, [R['T-LANG']]), 'T-LANG'))
-    check('H: запрет вне медицины → T-FORBID', ids(run([unit('a', 'Вылечит спину за месяц')], empty, [R['T-FORBID']]), 'T-FORBID'))
-    check('H: legal_category_except medical → тишина', not ids(run([unit('a', 'Вылечит спину за месяц')], empty, [R['T-FORBID']], cats=['medical']), 'T-FORBID'))
+    check('право: половина обязательной оговорки → находка', ids(run(med_half, empty, [R['T-MED']], cats=['medical']), 'T-MED'))
+    check('право: lang en — английская единица', ids(run([unit('a', 'Get it free today')], empty, [R['T-LANG']]), 'T-LANG'))
+    check('право: lang en — русская единица молчит', not ids(run([unit('a', 'Доставка бесплатно, free')], empty, [R['T-LANG']]), 'T-LANG'))
+    check('право: запрет вне медицины → T-FORBID', ids(run([unit('a', 'Вылечит спину за месяц')], empty, [R['T-FORBID']]), 'T-FORBID'))
+    check('право: legal_category_except medical → тишина', not ids(run([unit('a', 'Вылечит спину за месяц')], empty, [R['T-FORBID']], cats=['medical']), 'T-FORBID'))
     # --- claims-rules.yaml
     if not os.path.exists(RULES_PATH):
-        check('H: 08-russian-legal-typography/claims-rules.yaml существует', False, RULES_PATH)
+        check('право: 08-russian-legal-typography/claims-rules.yaml существует', False, RULES_PATH)
         return
     rules, errs = load_rules([RULES_PATH])
-    check(f'H: claims-rules.yaml загружен без ошибок ({len(rules)} правил)', rules and not errs, errs)
+    check(f'право: claims-rules.yaml загружен без ошибок ({len(rules)} правил)', rules and not errs, errs)
     props = RULES_SCHEMA['properties']['rules']['items']['properties']
     rprops = props['requires']['properties']
     with open(RULES_PATH, encoding='utf-8') as f:
         raw_rules = (yaml.safe_load(f) or {}).get('rules') or []
     extra = sorted({k for r in raw_rules for k in r if k not in props} | {k for r in raw_rules for k in (r.get('requires') or {}) if k not in rprops})
-    check('H: поля правил ⊆ rules-schema', not extra, extra)
+    check('право: поля правил ⊆ rules-schema', not extra, extra)
     bad_meta = [r['id'] for r in rules if not (r['id'].startswith('COPY-L-') and law_refs(r) and r.get('source') and (r.get('examples') or {}).get('bad') and (r.get('examples') or {}).get('good'))]
-    check('H: у каждого правила COPY-L-id, law, source и пара примеров', not bad_meta, bad_meta)
+    check('право: у каждого правила COPY-L-id, law, source и пара примеров', not bad_meta, bad_meta)
     classes = {c['id'] for c in schema.get('x-claim-classes') or []}
     bad_cls = sorted({c for r in rules for c in r.get('claim_class') or [] if c not in classes})
-    check('H: claim_class правил ⊆ x-claim-classes', not bad_cls, bad_cls)
+    check('право: claim_class правил ⊆ x-claim-classes', not bad_cls, bad_cls)
     miss_bad, hit_good = [], []
     for r in rules:
         ex = r.get('examples') or {}
@@ -2557,14 +2747,14 @@ def _selftest_legal(check):
             if ex.get(gk) and not ex.get('skip_good'):
                 if ids(run([unit('x', ex[gk], slot_type=st, genre=ex.get('genre'), fact_ids=fids)], fx_ex, [r], jur, _as_list(cats)), r['id']):
                     hit_good.append(f"{r['id']}:{gk}")
-    check('H: каждый «плохой» пример ловится своим правилом', not miss_bad, miss_bad)
-    check('H: ни один «хороший» пример не ловится своим правилом', not hit_good, hit_good)
+    check('право: каждый «плохой» пример ловится своим правилом', not miss_bad, miss_bad)
+    check('право: ни один «хороший» пример не ловится своим правилом', not hit_good, hit_good)
     fp = []
     for p in LEGAL_FP_PHRASES:
         F_ = [f for f in run([unit('t', p)], empty, rules) if f['level'] in ('error', 'warning') and f['rule'].startswith('COPY-L-')]
         if F_:
             fp.append((p, [(f['rule'], f['fragment']) for f in F_]))
-    check(f'H: {len(LEGAL_FP_PHRASES)} нейтральных фраз — ни error, ни warning правил H', not fp, fp)
+    check(f'право: {len(LEGAL_FP_PHRASES)} нейтральных фраз — ни error, ни warning правил права', not fp, fp)
     # CLI: --legal-only
     with tempfile.TemporaryDirectory() as td:
         pin, pout = os.path.join(td, 'in.txt'), os.path.join(td, 'out.json')
@@ -2573,7 +2763,160 @@ def _selftest_legal(check):
         code = main(['check', pin, '--legal-only', '--quiet', '--json', pout, '--today', '2026-09-24'])
         with open(pout, encoding='utf-8') as f:
             res = json.load(f)
-        check('H: CLI --legal-only: только COPY-L, код 2, блок legal', code == 2 and res['findings'] and all(x['rule'].startswith('COPY-L-') for x in res['findings']) and res['legal']['jurisdiction'] == 'ru', (code, res.get('legal'), [x['rule'] for x in res['findings']]))
+        check('право: CLI --legal-only: только COPY-L, код 2, блок legal', code == 2 and res['findings'] and all(x['rule'].startswith('COPY-L-') for x in res['findings']) and res['legal']['jurisdiction'] == 'ru', (code, res.get('legal'), [x['rule'] for x in res['findings']]))
+
+
+EXAMPLE_DECKS = os.path.join(ROOT, '10-templates-recipes', 'examples')
+USE_WARNINGS_MAX = 8   # COPY-F-USE на 8 примерах copy deck с местами x-use-always
+
+
+def _selftest_calibration(check, facts, schema):
+    """Калибровки сверки (text X §7: К17–К27) и демо-данные: числа, варианты, «рядом», подпись, классы, языки, слепые зоны."""
+    today = dt.date(2026, 9, 24)
+
+    def run(units_, facts_=facts, **kw):
+        F_, _, _ = check_units(units_, facts_, today, **kw)
+        return F_
+
+    def rules(F_, level=None):
+        return {f['rule'] for f in F_ if level is None or f['level'] == level}
+
+    def fx(fact, **extra):
+        base = {'kind': 'metric', 'claim_class': ['fact-number'], 'verbatim': ['x'], 'canonical': 'x',
+                'source': {'type': 'customer-system', 'who': 'CRM', 'date': '2026-09-01'}, 'verification': {'status': 'verified'},
+                'permission': {'status': 'not-required'}, 'lang': 'ru'}
+        base.update(fact)
+        return Facts(dict({'facts': [base], 'never_claim_defaults': 'none'}, **extra), schema, False)
+    # К18: разделитель тысяч по языку, «20-летний», числительные словами
+    fen = fx({'id': 'price-m2', 'kind': 'price', 'claim_class': ['price-discount'], 'verbatim': ['₽9,800 per m²'], 'canonical': 'From ₽9,800 per m².',
+              'values': [{'value': 9800, 'unit': 'RUB', 'what': 'price per m2', 'comparator': 'gte'}], 'lang': 'en'})
+    check('К18: «₽9,800» в английском тексте и факте — 9 800 ₽, подтверждено', not rules(run([unit('e', 'Renovation from ₽9,800 per m²')], fen), 'error'),
+          run([unit('e', 'Renovation from ₽9,800 per m²')], fen))
+    fen2 = fx({'id': 'flats-en', 'verbatim': ['1,380 apartments'], 'canonical': '1,380 apartments.', 'values': [{'value': 1380, 'unit': 'pcs', 'what': 'apartments'}], 'lang': 'en'})
+    check('К18: «1,380 apartments» — тысячи, а не 1,38', not rules(run([unit('e', 'We have renovated 1,380 apartments')], fen2), 'error'))
+    f20 = fx({'id': 'exp-20', 'verbatim': ['20 лет в ремонте'], 'canonical': '20 лет в ремонте.', 'values': [{'value': 20, 'unit': 'years', 'what': 'опыт'}]})
+    check('К18: «20-летний опыт» — число с единицей лет, подтверждено', not rules(run([unit('r', 'Бригада с 20-летним опытом')], f20), 'error'),
+          run([unit('r', 'Бригада с 20-летним опытом')], f20))
+    fg5 = fx({'id': 'guar-5', 'kind': 'guarantee', 'claim_class': ['guarantee'], 'verbatim': ['Гарантия 5 лет по договору'], 'canonical': 'Гарантия 5 лет по договору.',
+              'values': [{'value': 5, 'unit': 'years', 'what': 'гарантия'}], 'source': {'type': 'contract', 'who': 'заказчик', 'date': '2026-01-15', 'document': 'dogovor.pdf'}})
+    F_ = run([unit('r', 'Гарантия пять лет по договору')], fg5)
+    check('К18: «пять лет» словами — подтверждено фактом, но COPY-F-NUM-WORDS (пишите цифрами)', 'COPY-F-NUM-WORDS' in rules(F_, 'warning') and not rules(F_, 'error'), F_)
+    F_ = run([unit('r', 'Гарантия семь лет по договору')], fg5)
+    check('К18: «семь лет» без факта — error, как цифрами', rules(F_, 'error') & {'COPY-F-NUM', 'COPY-F-NUM-MISMATCH'}, F_)
+    check('К18: счёт без утверждения («два шага») — без находок', not run([unit('r', 'Два шага до заявки')], fg5))
+    # К19: невыбранные варианты — не текст «рядом»
+    fnear = fx({'id': 'rating-x', 'kind': 'rating', 'claim_class': ['rating'], 'verbatim': ['4,8 из 5 на Яндекс Картах'], 'canonical': 'Рейтинг 4,8 из 5.',
+                'values': [{'value': 4.8, 'unit': 'stars', 'scale': 5, 'count': 214, 'as_of': '2026-09-01'}], 'valid': {'until': '2026-12-01'},
+                'source': {'type': 'platform', 'who': 'Яндекс Карты', 'date': '2026-09-01', 'url': 'https://example.org'},
+                'use': {'requires_nearby': '«по данным Яндекс Карт»'}})
+    deck = {'copy_deck': {'version': 1, 'pages': [{'page_id': 'p', 'page_type': 'landing-lead-services', 'sections': [{'section_id': 'hero', 'section_role': 'hero', 'slots': [
+        {'slot_id': 'proof', 'slot_type': 'hero-proof', 'chosen': 'a', 'fact_ids': ['rating-x'], 'variants': [
+            {'id': 'a', 'text': 'Рейтинг 4,8 из 5', 'status': 'draft'}, {'id': 'b', 'text': 'Рейтинг 4,8 из 5 по данным Яндекс Карт', 'status': 'draft'}]}]}]}]}}
+    us, _ = load_deck(deck, all_variants=True)
+    F_ = run(us, fnear)
+    check('К19: соседний вариант слота не закрывает «рядом» у выбранного', any(f['rule'] == 'COPY-F-NEARBY' and f['location'].get('variant') == 'a' for f in F_)
+          and not any(f['rule'] == 'COPY-F-NEARBY' and f['location'].get('variant') == 'b' for f in F_), [(f['rule'], f['location'].get('variant')) for f in F_])
+    # К20: канонические формулировки демо-фактов проходят своё «рядом» («или», признак источника)
+    b2p = os.path.join(ROOT, '02-strategy-messaging', 'examples', 'facts-service-renovation.yaml')
+    if os.path.exists(b2p):
+        fb2 = load_facts(b2p, schema)
+        for fid in ('rating-yandex-maps', 'estimate-free'):
+            f = fb2.by_id.get(fid)
+            F_ = run([unit('c', f['canonical'], fact_ids=[fid], section='s', page='p')], fb2) if f else [{'rule': 'нет факта'}]
+            check(f'К20: canonical {fid} проходит своё requires_nearby', f is not None and 'COPY-F-NEARBY' not in rules(F_), [(x['rule'], x['message'][:80]) for x in F_])
+    # К21: подпись отзыва против permission.shows
+    fatt = fx({'id': 'rev-anna', 'kind': 'testimonial', 'claim_class': ['testimonial-quote'], 'verbatim': ['«Сдали вовремя»'], 'canonical': 'Анна: «Сдали вовремя».',
+               'attribution': {'name': 'Анна Кузнецова', 'role': 'генеральный директор'}, 'original_ref': 'x',
+               'permission': {'status': 'granted', 'subject': 'Анна', 'form': 'written-email', 'shows': ['first-name']}})
+    F_ = run([unit('a', 'Анна Кузнецова, генеральный директор', slot_type='testimonial-attribution', fact_ids=['rev-anna'])], fatt)
+    check('К21: подпись с фамилией и должностью при shows [first-name] → COPY-F-PERMISSION', any(f['rule'] == 'COPY-F-PERMISSION' and 'full-name' in f['message'] and 'position' in f['message'] for f in F_), F_)
+    F_ = run([unit('a', 'Анна', slot_type='testimonial-attribution', fact_ids=['rev-anna'])], fatt)
+    check('К21: подпись в пределах разрешения — без находки', not any(f['rule'] == 'COPY-F-PERMISSION' for f in F_), F_)
+    # К22: обещание дохода в будущем без числа, английская превосходная степень
+    check('К22: «удвоит выручку» — класс forecast (маркер)', 'forecast' in find_markers('Сервис удвоит вашу выручку'))
+    check('К22: «the hottest sauce you\'ll ever taste» — превосходная степень', 'superlative' in find_markers("The hottest sauce you'll ever taste"))
+    # К23: вопрос, ипотека в ситуации клиента, падежи имён, площадки, своя шкала
+    F_ = run([unit('q', 'Какая гарантия на работы? Спросите прораба.', slot_type='faq-a')])
+    check('К23: маркер в вопросе FAQ — не утверждение (info)', not rules(F_, 'error'), F_)
+    check('К23: «ипотека» в ситуации клиента — не маркер дохода', 'income-finance' not in find_markers('Аренда и ипотека идут одновременно, бюджет ограничен'))
+    check('К23: «ипотека от 5,9 %» — предложение денег, маркер', 'income-finance' in find_markers('Ипотека от 5,9 % на новостройки'))
+    fname = Facts({'facts': [{'id': 'foreman', 'kind': 'person', 'claim_class': ['fact-property'], 'verbatim': ['Прораб Сергей Лапин'], 'canonical': 'Прораб Сергей Лапин.',
+                              'source': {'type': 'customer-message', 'who': 'заказчик', 'date': '2026-09-24'}, 'verification': {'status': 'stated'},
+                              'permission': {'status': 'granted', 'subject': 'Сергей Лапин', 'form': 'written-email', 'shows': ['full-name', 'position']}, 'lang': 'ru'}],
+                   'entities': [{'id': 'p-lapin', 'type': 'person', 'names': ['Сергей Лапин'], 'fact_id': 'foreman'}], 'never_claim_defaults': 'none'}, schema, False)
+    F_ = run([unit('n', 'Работу принимает у Сергея Лапина технадзор')], fname)
+    check('К23: имя в падеже («Сергея Лапина») — известно', not any(f['rule'] == 'COPY-F-NAME' for f in F_), F_)
+    check('К23: площадка CamelCase («RuStore») — не имя клиента', not any(f['rule'] == 'COPY-F-NAME' for f in run([unit('n', 'Приложение есть в RuStore и Google Play')])))
+    check('К23: своя шкала бренда («острота 5 из 5») — не рейтинг', not any(f['rule'] == 'COPY-F-RATING' for f in run([unit('n', 'Острота 5 из 5, соус на хабанеро')])))
+    # К24: перевод факта с объектом счёта и оговоркой; запрет на языке страницы
+    ftr = fx({'id': 'flats', 'verbatim': ['1 146 квартир'], 'canonical': '1 146 квартир.', 'values': [{'value': 1146, 'unit': 'pcs', 'what': 'квартиры', 'as_of': '2026-09'}],
+              'use': {'requires_nearby': '«по данным CRM»'},
+              'translations': {'en': {'verbatim': ['1,146 apartments handed over'], 'what': 'apartments', 'requires_nearby': '«as of September 2026»'}}})
+    F_ = run([unit('e', '1,146 apartments handed over, as of September 2026', fact_ids=['flats'], section='s', page='p')], ftr)
+    check('К24: английский текст — объект счёта и «рядом» из translations.en', not rules(F_, 'error') and 'COPY-F-NEARBY' not in rules(F_), F_)
+    F_ = run([unit('e', '1,146 apartments handed over', fact_ids=['flats'], section='s', page='p')], ftr)
+    check('К24: без английской оговорки — COPY-F-NEARBY с требованием translations.en', any(f['rule'] == 'COPY-F-NEARBY' and 'as of' in f['message'] for f in F_), F_)
+    fnv = Facts({'facts': [], 'never_claim_defaults': 'none', 'never_claim': [
+        {'id': 'nc-eyes', 'text': 'обещания про зрение', 'claim_class': ['health'], 'patterns': ['глаз', 'зрени'], 'lang': 'ru', 'lift': 'never',
+         'translations': {'en': {'text': 'eye promises', 'patterns': ['\\beye']}}}]}, schema, False)
+    check('К24: запрет на языке страницы — английский перевод ловит «eye strain»', 'COPY-F-NEVER' in rules(run([unit('e', 'No more eye strain in the evening')], fnv), 'error'))
+    check('К24: русский запрет не ищется в английском тексте', 'COPY-F-NEVER' not in rules(run([unit('e', 'Glazed ceramic tiles')], Facts({'facts': [], 'never_claim_defaults': 'none', 'never_claim': [
+        {'id': 'nc-x', 'text': 'x', 'patterns': ['glaz'], 'lang': 'ru', 'lift': 'never'}]}, schema, False))))
+    # К25: безглагольное обещание, пересказ запрета с придаточным
+    check('К25: «Каждый вечер. Без исключений.» — обещание (класс guarantee)', 'guarantee' in find_markers('Фото. Каждый вечер. Без исключений.'))
+    fpar = Facts({'facts': [], 'never_claim_defaults': 'none', 'never_claim': [{'id': 'nc-budget', 'text': 'смета никогда не меняется', 'claim_class': ['guarantee'],
+                                                                                'patterns': ['смет\\w*\\s+не\\s+вырос'], 'lift': 'never'}]}, schema, False)
+    check('К25: пересказ запрета с придаточным («смета, которую мы составили, не выросла») → COPY-F-NEVER',
+          'COPY-F-NEVER' in rules(run([unit('p', 'Смета, которую мы составили, не выросла ни разу')], fpar), 'error'))
+    # К26, К27: правила права
+    rs, _e = load_rules([RULES_PATH])
+    R = {r['id']: r for r in rs}
+    if R:
+        empty = Facts({'facts': [], 'never_claim_defaults': 'none'}, schema, False)
+        F_ = run([unit('f', 'Замер и смета — бесплатно в черте города')], empty, rules=[R['COPY-L-FREE-01']], ctx=legal_ctx())
+        check('К26: «бесплатно в черте города» — условие рядом, COPY-L-FREE-01 молчит', 'COPY-L-FREE-01' not in rules(F_), F_)
+        check('К27: COPY-L-RET-02 — error', R['COPY-L-RET-02']['level'] == 'error')
+        u_srv = unit('o', 'Информация на сайте не является публичной офертой', page_type='landing-lead-services')
+        u_prd = unit('o', 'Информация на сайте не является публичной офертой', page_type='landing-product')
+        check('К27: COPY-L-OFFER-01 не на услугах, на товарах — сигнал',
+              'COPY-L-OFFER-01' not in rules(run([u_srv], empty, rules=[R['COPY-L-OFFER-01']], ctx=legal_ctx()))
+              and 'COPY-L-OFFER-01' in rules(run([u_prd], empty, rules=[R['COPY-L-OFFER-01']], ctx=legal_ctx())))
+        check('К27: COPY-L-JOB-01 — вакансия с полом, возрастом, пропиской → error', 'COPY-L-JOB-01' in rules(run([unit('j', 'Требуется девушка до 35 лет с пропиской', page_type='careers-page')], empty,
+                                                                                                                 rules=[R['COPY-L-JOB-01']], ctx=legal_ctx()), 'error'))
+        check('К27: COPY-L-JOB-01 не на странице другого типа', 'COPY-L-JOB-01' not in rules(run([unit('j', 'Требуется девушка до 35 лет с пропиской', page_type='landing-product')], empty,
+                                                                                                    rules=[R['COPY-L-JOB-01']], ctx=legal_ctx())))
+    # демо-данные (example: true) — без --final сигнал, с --final error
+    fdemo = fx({'id': 'demo-n', 'verbatim': ['120 клиентов'], 'canonical': '120 клиентов.', 'values': [{'value': 120, 'unit': 'pcs', 'what': 'клиенты'}], 'example': True})
+    F0 = run([unit('d', '120 клиентов', fact_ids=['demo-n'])], fdemo)
+    F1 = run([unit('d', '120 клиентов', fact_ids=['demo-n'])], fdemo, final=True)
+    check('демо-факт example: true — info без --final, error с --final (COPY-F-EXAMPLE)',
+          any(f['rule'] == 'COPY-F-EXAMPLE' and f['level'] == 'info' for f in F0) and any(f['rule'] == 'COPY-F-EXAMPLE' and f['level'] == 'error' for f in F1), (F0, F1))
+    fdemo_file = fx({'id': 'n', 'verbatim': ['120 клиентов'], 'canonical': '120 клиентов.', 'values': [{'value': 120, 'unit': 'pcs', 'what': 'клиенты'}]}, example=True)
+    check('демо-файл фактов (example у файла) — --final error', any(f['rule'] == 'COPY-F-EXAMPLE' and f['level'] == 'error' for f in run([unit('d', '120 клиентов', fact_ids=['n'])], fdemo_file, final=True)))
+    # К17: места use — ориентир; x-use-always; 8 примеров copy deck
+    fuse = fx({'id': 'g3', 'kind': 'guarantee', 'claim_class': ['guarantee'], 'verbatim': ['гарантия 3 года'], 'canonical': 'Гарантия 3 года.',
+               'values': [{'value': 3, 'unit': 'years', 'what': 'гарантия'}], 'source': {'type': 'contract', 'who': 'заказчик', 'date': '2026-01-15', 'document': 'd.pdf'},
+               'use': {'section_roles': ['guarantee'], 'slot_types': ['guarantee-text']}})
+    check('use: факт вне use — warning COPY-F-USE, не error', 'COPY-F-USE' in rules(run([unit('u', 'Гарантия 3 года', fact_ids=['g3'], slot_type='body', section_role='benefits')], fuse), 'warning'))
+    check('use: мета, FAQ, статья — места x-use-always, COPY-F-USE нет',
+          not any('COPY-F-USE' in rules(run([unit('u', 'Гарантия 3 года', fact_ids=['g3'], slot_type=st, section_role=ro)], fuse))
+                  for st, ro in (('meta-description', None), ('faq-a', 'faq'), ('article-paragraph', 'article-body'), ('body', 'how-it-works'))))
+    if os.path.isdir(EXAMPLE_DECKS):
+        n_use, n_err, n = 0, [], 0
+        for fn in sorted(os.listdir(EXAMPLE_DECKS)):
+            if not fn.endswith('.yaml'):
+                continue
+            path = os.path.join(EXAMPLE_DECKS, fn)
+            units_, _fmt, meta = load_input(path, 'deck')
+            fp = os.path.normpath(os.path.join(EXAMPLE_DECKS, meta.get('facts_ref') or ''))
+            if not os.path.exists(fp):
+                continue
+            n += 1
+            ctx_ = legal_ctx(meta.get('jurisdiction'), _as_list(meta.get('legal_category') or ['general']))
+            F_, _, _ = check_units(units_, load_facts(fp, schema), today, load_rules([RULES_PATH])[0], ctx=ctx_)
+            n_use += sum(1 for f in F_ if f['rule'] == 'COPY-F-USE')
+            n_err += [(fn, f['rule'], f['fragment']) for f in F_ if f['level'] == 'error']
+        check(f'use: 8 примеров copy deck — COPY-F-USE ≤ {USE_WARNINGS_MAX}, 0 error', n == 8 and n_use <= USE_WARNINGS_MAX and not n_err, (n, n_use, n_err[:6]))
 
 
 def cmd_selftest(_a=None):
@@ -2675,7 +3018,7 @@ def cmd_selftest(_a=None):
     check('заглушка вне missing → warning', any(f['rule'] == 'COPY-F-PLACEHOLDER-UNLISTED' for f in F), F)
     F, _, _ = check_units([unit('d', 'Цена — 8 900 ₽', fact_ids=['nope'], slot_type='pricing-price')], facts, dt.date(2026, 9, 24))
     check('fact_ids с неизвестным id → COPY-F-REF', 'COPY-F-REF' in errs(F), F)
-    F, _, _ = check_units([unit('d', 'Цена — 8 900 ₽', fact_ids=['F1'], slot_type='footer-legal')], facts, dt.date(2026, 9, 24))
+    F, _, _ = check_units([unit('d', 'Цена — 8 900 ₽', fact_ids=['F1'], slot_type='card-body')], facts, dt.date(2026, 9, 24))
     check('алиас F1 принят; слот вне use → COPY-F-USE warning', errs(F) == [] and any(f['rule'] == 'COPY-F-USE' for f in F), F)
     f3 = Facts(dict(facts.data, facts=list(facts.data['facts']) + [{'id': 'clients-approx', 'kind': 'metric', 'claim_class': ['fact-number'],
         'verbatim': ['около 200 клиентов'], 'canonical': 'Около 200 клиентов.', 'values': [{'value': 200, 'unit': 'pcs', 'what': 'клиенты', 'approx': True}],
@@ -2683,12 +3026,12 @@ def cmd_selftest(_a=None):
         'permission': {'status': 'not-required'}, 'lang': 'ru'}]), schema, True)
     check('приблизительный факт «около 200» → точное «200 клиентов» — ошибка', errs(rules_of('200 клиентов', f3)) != [], rules_of('200 клиентов', f3))
     check('приблизительный факт → «около 200 клиентов» — ок', errs(rules_of('Около 200 клиентов', f3)) == [], rules_of('Около 200 клиентов', f3))
-    # --- регрессии, найденные B1 (опыт B1/02, 2026-09-24)
+    # --- регрессии сверки
     F = rules_of('−10 % до 31 октября 2026 года', facts)
-    check('B1: минус U+2212 в дословном факте — без EXTENDS', not [f for f in F if f['rule'] == 'COPY-F-EXTENDS'], F)
+    check('регрессия: минус U+2212 в дословном факте — без EXTENDS', not [f for f in F if f['rule'] == 'COPY-F-EXTENDS'], F)
     f2 = Facts(dict(facts.data, never_claim=list(facts.data['never_claim']) + [{'id': 'nc-budget', 'text': 'смета никогда не меняется', 'claim_class': ['guarantee'], 'patterns': ['смет\\w*\\s+не\\s+вырос'], 'lift': 'with-fact'}]), schema, True)
     F = rules_of('«Сдали за 47 рабочих дней… Смета не выросла ни на рубль»', f2)
-    check('B1: запрет голоса компании в цитате отзыва с разрешением → warning COPY-F-TYPICALITY, не error',
+    check('регрессия: запрет голоса компании в цитате отзыва с разрешением → warning COPY-F-TYPICALITY, не error',
           not errs(F) and any(f['rule'] == 'COPY-F-TYPICALITY' for f in F), F)
     F = rules_of('Смета не выросла ни на рубль — гарантируем!', f2)
     check('тот же запрет голосом компании → COPY-F-NEVER', 'COPY-F-NEVER' in errs(F), F)
@@ -2700,22 +3043,24 @@ def cmd_selftest(_a=None):
             bad.append((p, [(f['rule'], f['fragment']) for f in F]))
     check(f'{len(FP_PHRASES)} фраз без фактов — ни error, ни warning', not bad, bad)
     # --- входы
-    kimi = '# COPY\n\n## hero\n[h1]: Лампа\n[cta]: Забронировать за 990 ₽\n\n## specs\n[row4]: Сборка — Казань\n'
-    us = load_kimi_md(kimi)
-    check('kimi copy.md: 3 единицы, слоты', [(u['section'], u['slot_type']) for u in us] == [('hero', 'headline'), ('hero', 'cta-label'), ('specs', 'spec-row')], us)
+    cmd_ = '# Тексты страницы home\n\n## hero\n[headline] approved: Лампа\n[cta-label] assumed: Забронировать за 990 ₽\n\n## specs\n[spec-row]: Сборка — Казань\n## ?\n[?]: Новинка\n'
+    check('copy.md входа холста: формат узнан', detect_format('copy.md', cmd_) == 'copy-md')
+    us = load_copy_md(cmd_)
+    check('copy.md: 4 единицы, роль и тип слота — по словарю site', [(u['section'], u['section_role'], u['slot_type']) for u in us] ==
+          [('hero', 'hero', 'headline'), ('hero', 'hero', 'cta-label'), ('specs', 'specs', 'spec-row'), ('?', None, None)], us)
     deck = {'copy_deck': {'version': 0, 'pages': [{'page_id': 'home', 'page_type': 'landing-waitlist', 'sections': [
-        {'section_id': 'hero', 'slots': [{'slot_id': 'h1', 'slot_type': 'headline', 'variants': [{'id': 'a', 'text': 'A'}, {'id': 'b', 'text': 'B'}], 'chosen': 'b', 'fact_ids': [], 'claim_flags': []}]}]}]}}
+        {'section_id': 'hero', 'slots': [{'slot_id': 'h1', 'slot_type': 'headline', 'variants': [{'id': 'a', 'text': 'A'}, {'id': 'b', 'text': 'B'},
+                                                                                                  {'id': 'c', 'text': 'C', 'status': 'rejected'}], 'chosen': 'b', 'fact_ids': [], 'claim_flags': []}]}]}]}}
     us, _ = load_deck(deck)
     check('copy deck v0: берётся chosen', [u['text'] for u in us] == ['B'], us)
     us, _ = load_deck(deck, all_variants=True)
-    check('copy deck v0: --all-variants', [u['text'] for u in us] == ['A', 'B'], us)
+    check('copy deck --all-variants: живые варианты, отклонённый не сверяется, невыбранные помечены (К19)',
+          [(u['text'], u['alt']) for u in us] == [('A', True), ('B', False)], [(u['text'], u['alt']) for u in us])
     us = load_html('<html><head><title>Кварц</title><meta name="description" content="Лампа за 8 900 ₽"></head><body><h1>Лампа</h1><p>Цена 8 900 ₽</p><blockquote>Отличная лампа, всем советую</blockquote><script>var x=5</script></body></html>')
     check('HTML: title, description, h1, p, blockquote; без script', [u['slot_type'] for u in us] == ['meta-title', 'meta-description', 'headline', 'body', 'testimonial-quote'], [(u['slot_type'], u['text']) for u in us])
-    # --- импорт kimi
-    fm = '| ID | Fact, exactly as it may appear | Source (who / where / date) | Where it may be used |\n|---|---|---|---|\n| F9 | сборка в Казани | заказчик, сообщение 2026-09-24 («стартап из Казани») | specs |\n'
-    imp = import_kimi('## Facts\n\n' + fm + '\n## Never claim\n- любые обещания про здоровье и зрение;\n', 'x', '2026-09-24')
-    check('import-kimi: F9 → quote «стартап из Казани»', imp['facts'][0]['source'].get('quote') == 'стартап из Казани', imp['facts'][0])
-    check('import-kimi: never_claim здоровье → patterns', imp['never_claim'][0].get('patterns'), imp['never_claim'])
+    check('словарь site: id мест use (lint-facts) — типы страниц, роли, слоты вида text', {'faq-page', 'case-page'} <= load_vocab().get('page_types', set())
+          and 'offer' in load_vocab().get('section_roles', set()) and 'disclaimer' in load_vocab().get('slot_types', set()))
+    _selftest_calibration(check, facts, schema)
     # --- внешние правила
     with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False, encoding='utf-8') as t:
         t.write('version: 1\ndate: "2026-10-01"\nrules:\n  - id: COPY-L-TEST-01\n    level: error\n    patterns: ["\\\\bв\\\\s+кредит\\\\b"]\n    requires: {nearby: ["банк\\\\s+\\\\S+"]}\n    message: "кредит без названия банка"\n    fix: "Назовите банк"\n    source: "тест"\n')
@@ -2727,7 +3072,7 @@ def cmd_selftest(_a=None):
     F, _, _ = check_units([unit('r', 'Купите в кредит, банк Альфа')], facts, dt.date(2026, 9, 24), rules)
     check('внешнее правило: оговорка рядом снимает', not any(f['rule'] == 'COPY-L-TEST-01' for f in F), F)
     check('rules-schema — валидный JSON', bool(json.loads(json.dumps(RULES_SCHEMA))))
-    _selftest_legal(check)   # правовой модуль H (волна 2)
+    _selftest_legal(check)   # правовой модуль
     print('selftest:', 'OK' if ok else 'FAIL')
     return 0 if ok else 1
 
@@ -2737,7 +3082,7 @@ def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     if '--selftest' in argv:
         return cmd_selftest()
-    cmds = {'check', 'inventory', 'lint-facts', 'import-kimi', 'rules-schema'}
+    cmds = {'check', 'inventory', 'lint-facts', 'rules-schema'}
     cmd = argv.pop(0) if argv and argv[0] in cmds else 'check'
     p = argparse.ArgumentParser(prog=f'claims_check.py {cmd}', description=__doc__.split('\n')[0])
     if cmd == 'rules-schema':
@@ -2749,7 +3094,7 @@ def main(argv=None):
     p.add_argument('--today')
     p.add_argument('--schema', default=SCHEMA_PATH)
     if cmd in ('check', 'inventory'):
-        p.add_argument('--format', default='auto', choices=['auto', 'deck', 'kimi-md', 'md', 'text', 'html'])
+        p.add_argument('--format', default='auto', choices=['auto', 'deck', 'copy-md', 'md', 'text', 'html'])
     if cmd == 'check':
         p.add_argument('--facts')
         p.add_argument('--rules', nargs='*')
@@ -2761,11 +3106,9 @@ def main(argv=None):
         p.add_argument('--verbose', action='store_true')
         p.add_argument('--jurisdiction', choices=list(JURISDICTIONS), help='право: ru (по умолчанию), eu, us, other; иначе — из facts.yaml')
         p.add_argument('--legal-category', help='отрасль через запятую: finance, medical, dietary-supplements, alcohol, education, real-estate, other, general')
-        p.add_argument('--legal-only', action='store_true', help='в отчёт — только находки правил H (claims-rules.yaml, --rules)')
-    if cmd == 'import-kimi':
-        p.add_argument('-o', '--output')
-        p.add_argument('--site', default='imported')
-        p.add_argument('--date')
+        p.add_argument('--legal-only', action='store_true', help='в отчёт — только находки правил права (claims-rules.yaml, --rules)')
+    if cmd in ('check', 'lint-facts'):
+        p.add_argument('--final', action='store_true', help='ворота публикации: демо-данные (example: true) — error')
     a = p.parse_args(argv)
     try:
         if cmd == 'check':
@@ -2774,8 +3117,6 @@ def main(argv=None):
             return cmd_inventory(a)
         if cmd == 'lint-facts':
             return cmd_lint_facts(a)
-        if cmd == 'import-kimi':
-            return cmd_import_kimi(a)
     except SystemExit as e:
         if isinstance(e.code, str):
             print('claims_check:', e.code, file=sys.stderr)

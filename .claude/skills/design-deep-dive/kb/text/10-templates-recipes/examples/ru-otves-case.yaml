@@ -1,8 +1,8 @@
 # ru-otves-case.yaml — пример copy deck v1.1 (10-templates-recipes, J3, 2026-09-24): страница кейса (case-page) «Отвеса».
 # Тексты — ai-self J3. Факты — ../../02-strategy-messaging/examples/facts-service-renovation.yaml (вымышленная студия B2,
 # синтетические данные: не публиковать). Эта страница проходит весь путь: check --update --promote → approve →
-# validate --final → export-kimi --strict → build_package.py build и check (опыт 99-raw/experiments/J/08-examples,
-# 02-examples-ru.md §4).
+# validate --final (демо-факты примера — error: публикация только на фактах заказчика) → export --stage mockup (вход
+# холста: copy.md и facts.md).
 copy_deck:
   version: 1
   date: '2026-09-24'
@@ -42,14 +42,13 @@ copy_deck:
     sections:
     - section_id: case
       section_role: case-studies
-      block: case-studies
       message: 'Двушка 54 м²: 47 рабочих дней при 50 по договору'
       question: 'Уложатся ли в срок на квартире вроде моей?'
       slots:
       - slot_id: title
         slot_type: case-title
         variants:
-        - {id: a, text: 'Двушка 54 м² в Сормове за 47 рабочих дней', status: draft, source: ai-self}
+        - {id: a, text: 'Двушка 54 м² в Сормове за 47 рабочих дней', status: assumed, source: ai-self}
         chosen: a
         fact_ids: [case-two-room-47-days]
         claim_flags: [fact-number]
@@ -58,7 +57,7 @@ copy_deck:
         variants:
         - id: a
           text: 'Двухкомнатная квартира 54 м² в Сормовском районе, ремонт под ключ. По договору на работы было 50 рабочих дней, сдали за 47 — акт подписан 30 мая 2026 года. Ниже — слова хозяйки и что входит в цену такого ремонта.'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: [case-two-room-47-days]
@@ -66,26 +65,25 @@ copy_deck:
       - slot_id: result
         slot_type: case-result
         variants:
-        - {id: a, text: '47 рабочих дней вместо 50 по договору', status: draft, source: fact}
+        - {id: a, text: '47 рабочих дней вместо 50 по договору', status: assumed, source: fact}
         chosen: a
         fact_ids: [case-two-room-47-days]
         claim_flags: [fact-number]
       - slot_id: cta
         slot_type: cta-label
         variants:
-        - {id: a, text: 'Вызвать замерщика', status: draft, source: ai-self}
+        - {id: a, text: 'Вызвать замерщика', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
     - section_id: review
       section_role: testimonials
-      block: testimonials
       message: 'Срок и смета — словами клиента, с рамкой: это опыт одной квартиры'
       slots:
       - slot_id: title
         slot_type: section-title
         variants:
-        - {id: a, text: 'Что написала хозяйка после сдачи', status: draft, source: ai-self}
+        - {id: a, text: 'Что написала хозяйка после сдачи', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
@@ -93,7 +91,7 @@ copy_deck:
         slot_type: testimonial-quote
         group: review-1
         variants:
-        - {id: a, text: '«Сдали двушку за 47 рабочих дней — на три дня раньше, чем в договоре. Прораб каждый вечер присылал фото… Смета не выросла ни на рубль»', status: draft, source: voc}
+        - {id: a, text: '«Сдали двушку за 47 рабочих дней — на три дня раньше, чем в договоре. Прораб каждый вечер присылал фото… Смета не выросла ни на рубль»', status: assumed, source: voc}
         chosen: a
         fact_ids: [review-anna-k]
         claim_flags: [testimonial-quote]
@@ -102,86 +100,83 @@ copy_deck:
         slot_type: testimonial-attribution
         group: review-1
         variants:
-        - {id: a, text: 'Анна К., Нижний Новгород', status: draft, source: fact}
+        - {id: a, text: 'Анна К., Нижний Новгород', status: assumed, source: fact}
         chosen: a
         fact_ids: [review-anna-k]
         claim_flags: []
       - slot_id: frame
         slot_type: body
         variants:
-        - {id: a, text: 'Это одна квартира и слова одной хозяйки. Смета и срок другого ремонта зависят от площади, объёма работ и материалов.', status: draft, source: ai-self}
+        - {id: a, text: 'Это одна квартира и слова одной хозяйки. Смета и срок другого ремонта зависят от площади, объёма работ и материалов.', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
         notes: 'Рамка типичности рядом с цитатой о смете (B2 §5.4; COPY-F-TYPICALITY — напоминание, а не ошибка).'
     - section_id: guarantee
       section_role: guarantee
-      block: guarantee
       message: 'Гарантия 3 года на работы — пункт 7.2 договора'
       slots:
       - slot_id: title
         slot_type: section-title
         variants:
-        - {id: a, text: 'Гарантия 3 года на работы — по договору', status: draft, source: ai-self}
+        - {id: a, text: 'Гарантия 3 года на работы — по договору', status: assumed, source: ai-self}
         chosen: a
         fact_ids: [guarantee-3-years]
         claim_flags: [guarantee]
       - slot_id: text
         slot_type: guarantee-text
         variants:
-        - {id: a, text: 'Гарантия на работы — 3 года, это пункт 7.2 договора подряда. Такой пункт есть в каждом договоре студии, не только в договоре этой двушки.', status: draft, source: ai-self}
+        - {id: a, text: 'Гарантия на работы — 3 года, это пункт 7.2 договора подряда. Такой пункт есть в каждом договоре студии, не только в договоре этой двушки.', status: assumed, source: ai-self}
         chosen: a
         fact_ids: [guarantee-3-years]
         claim_flags: [guarantee]
     - section_id: price
       section_role: pricing
-      block: pricing
       message: 'От 9 800 ₽ за м² без материалов; точная сумма — в смете'
       slots:
       - slot_id: title
         slot_type: section-title
         variants:
-        - {id: a, text: 'Сколько стоит ремонт под ключ', status: draft, source: ai-self}
+        - {id: a, text: 'Сколько стоит ремонт под ключ', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
       - slot_id: price
         slot_type: pricing-price
         variants:
-        - {id: a, text: 'от 9 800 ₽ за м²', status: draft, source: fact}
+        - {id: a, text: 'от 9 800 ₽ за м²', status: assumed, source: fact}
         chosen: a
         fact_ids: [price-from-per-m2]
         claim_flags: [price-discount]
       - slot_id: note
         slot_type: pricing-price-note
         variants:
-        - {id: a, text: 'Работы под ключ, без материалов. Сумму для вашей квартиры покажет смета.', status: draft, source: ai-self}
+        - {id: a, text: 'Работы под ключ, без материалов. Сумму для вашей квартиры покажет смета.', status: assumed, source: ai-self}
         chosen: a
         fact_ids: [price-from-per-m2]
         claim_flags: [price-discount]
     - section_id: final
       section_role: final-cta
-      block: final-cta
       message: 'Вызвать замерщика; смета бесплатно в черте города'
       slots:
       - slot_id: title
         slot_type: section-title
         variants:
-        - {id: a, text: 'Начните с замера и сметы', status: draft, source: ai-self}
+        - {id: a, text: 'Начните с замера и сметы', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
       - slot_id: cta
         slot_type: cta-label
         variants:
-        - {id: a, text: 'Вызвать замерщика', status: draft, source: ai-self}
+        - {id: a, text: 'Вызвать замерщика', status: assumed, source: ai-self}
         chosen: a
         fact_ids: []
         claim_flags: []
       - slot_id: cta-note
         slot_type: cta-note
         variants:
-        - {id: a, text: 'Смета и выезд замерщика — бесплатно в черте города', status: draft, source: fact}
+        - {id: a, text: 'Смета и выезд замерщика — бесплатно в черте города', status: assumed, source: fact}
         chosen: a
         fact_ids: [estimate-free]
         claim_flags: [price-discount]

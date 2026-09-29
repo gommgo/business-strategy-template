@@ -1,4 +1,5 @@
-# voice.schema.yaml — профиль голоса бренда (voice.yaml): как бренд звучит в текстах сайта, писем вокруг форм и статей
+# voice.schema.yaml — профиль голоса (voice.yaml): как бренд звучит в текстах сайта, писем вокруг форм и статей; той же
+# схемой пишется профиль голоса продукта (voice.product.yaml): интерфейс, письма и уведомления продукта
 # text-research · волна 2 · агент F · 2026-09-24 · версия формата 1
 #
 # Что это. JSON Schema (draft 2020-12), записанная в YAML (формат — как meaning.schema.yaml B1). Экземпляр — файл
@@ -18,15 +19,20 @@
 # 5. Словарь «не говорим» (`vocabulary.avoid`) записан в формате `words` линтера C (06-anti-slop/02 §2.1: `*` — продолжение
 #    основы, «ё» = [её]); конвертер `99-raw/experiments/F/03-schema-lint/voice_to_lint.py` делает из профиля файл правил
 #    для `copy_lint.py --rules` и профиль с `level_overrides` для `--profiles/--profile` (предложение C: ключ `--voice`).
-# 6. Образцы строк — по `slot_type` временного словаря (длины слотов — E, `copy-slots.yaml`); числа и имена — только
-#    `fact_ids` из facts.yaml (B2); английский — адаптация, а не перевод (решение заказчика п. 16).
-# 7. Проекции: одна строка `projections.tone_of_voice` → `design_system.tone_of_voice` пакета kimi и строка «Voice:» в
-#    copy.md; `projections.brand_voice` → `brand.voice {tone, use, avoid}` (brand.json kimi); `prompt_brief` — короткая
-#    «методичка» для промта генератора (опыт Т—Ж: короткая методичка для авторов, полная редполитика — для редакторов).
+# 6. Образцы строк — по `slot_type` словаря site (длины слотов — E, `copy-slots.yaml`), у голоса продукта — по роли
+#    строки интерфейса `role` (ux 07/06 §7.2); числа и имена — только `fact_ids` из facts.yaml (B2); английский —
+#    адаптация, а не перевод (решение заказчика п. 16).
+# 7. Проекции: одна строка `projections.tone_of_voice` → `design_system.tone_of_voice` брифа холста (x-canvas-map);
+#    `projections.brand_voice` — коротко «говорим / не говорим» для людей; `prompt_brief` — короткая «методичка» для
+#    промта генератора (опыт Т—Ж: короткая методичка для авторов, полная редполитика — для редакторов).
+# 8. Голос продукта — профиль, у которого все `scope.surfaces[].voice` — product: карта тона — по ситуациям интерфейса
+#    ux 07/01 §7.1 (`situation`: empty-first-use … notification, имена — x-situations), образцы — по ролям строк;
+#    профиль бренда ссылается на него `scope.product_voice_ref`.
 #
-# Даты — строкой в кавычках «ГГГГ-ММ-ДД». Проверка: `99-raw/tools/venv-F/bin/python ../../scripts/text/validate_voice.py`
-# (метасхема, примеры, 18 отрицательных мутаций, смысловые проверки: образцы против обращения, эмодзи, восклицаний и
-# словаря «не говорим»; ссылки fact: на facts.yaml; ≥ 8 типов слотов на язык в примерах базы).
+# Даты — строкой в кавычках «ГГГГ-ММ-ДД». Проверка: `scripts/text/validate_voice.py` скилла (метасхема, примеры,
+# отрицательные мутации профиля бренда и голоса продукта, смысловые проверки: образцы против обращения, эмодзи,
+# восклицаний и словаря «не говорим»; ссылки fact: на facts.yaml; ≥ 8 типов слотов на язык в примерах базы; перечень
+# slot-type — слоты вида text словаря site).
 
 $schema: "https://json-schema.org/draft/2020-12/schema"
 $id: "urn:app-design:text-research:voice:1"
@@ -34,11 +40,12 @@ title: "voice — профиль голоса бренда для генерац
 description: >-
   Как бренд звучит: зачем он существует и для кого (основание голоса), абзац о голосе, 2–5 принципов с правилами
   исполнения, пары «мы / мы не», точки на четырёх осях тона, обращение, словарь «говорим / не говорим», эмодзи,
-  восклицания, юмор (где да, где нет), карта тона по ситуациям, табу, образцы строк по типам слотов на русском и
-  английском, проекции в пакет kimi. Не платформа бренда (вне рамок базы) и не правила длины слотов (E).
-date: "2026-09-24"
+  восклицания, юмор (где да, где нет), карта тона по ситуациям, табу, образцы строк по типам слотов (у голоса продукта —
+  по ролям строк интерфейса) на русском и английском, проекции во вход холста. Не платформа бренда (вне рамок базы) и не
+  правила длины слотов (E).
+date: "2026-09-29"
 x-version: 1
-x-status: "черновик волны 2 (F), 2026-09-24; сверка с E (слоты), I (судья голоса), J (copy deck) — волна 3"
+x-status: "v1.1: совместима с v1 — ситуации интерфейса, роль строки у образца, жанр interface и типы слотов словаря site добавлены"
 x-owner: "text-research · 05-voice-editorial · F (контракт тройки v2 §2: бренд — выражение у creative, голос у text)"
 x-doc: ["05-voice-editorial/01-brand-voice.md", "05-voice-editorial/02-editorial-policy.md", "05-voice-editorial/03-storytelling-and-concreteness.md"]
 
@@ -445,11 +452,11 @@ properties:
         type: string
         minLength: 20
         maxLength: 240
-        description: "Одна строка для brief.yaml kimi (design_system.tone_of_voice) и строки «Voice:» copy.md: обращение, 2–3 принципа, чего нет."
+        description: "Одна строка голоса для брифа холста (design_system.tone_of_voice): обращение, 2–3 принципа, чего нет."
       brand_voice:
         type: object
         additionalProperties: false
-        description: "Проекция в brand.json kimi: voice {tone, use[], avoid[]}."
+        description: "Коротко о голосе для людей: тон, «говорим», «не говорим»."
         properties:
           tone: {type: string}
           use: {type: array, items: {type: string}}
@@ -504,10 +511,11 @@ $defs:
     pattern: "^[a-z]{2}(-[A-Z]{2})?$"
 
   genre:
-    enum: [landing, site-page, article, meta, geo, email-form]
+    enum: [landing, site-page, article, meta, geo, email-form, interface]
+    description: "Жанры текстов: сайт (landing, site-page, article, meta, geo, email-form) и интерфейс продукта (interface — строки экранов, бота, мобильного; профиль линтера — copy_lint.py)."
 
   slot-type:
-    description: "Временные id (99-raw/notes/temp-vocabulary-v0.yaml, 63 типа) + предложения B2 и J (spec-row, price-old, stat-source, image-caption); E закрепит в copy-slots.yaml."
+    description: "Слоты словаря site вида text (../site/02-site-types/vocabulary.yaml); правила текста — copy-slots.yaml (E). validate_voice.py сверяет перечень со словарём."
     enum: [meta-title, meta-description, og-title, og-description, og-image-alt, eyebrow, headline, subheadline, hero-proof,
            cta-label, cta-secondary-label, cta-note, section-title, section-lead, body, list-item, card-title, card-body,
            step-title, step-body, stat-value, stat-label, logos-caption, testimonial-quote, testimonial-attribution,
@@ -516,13 +524,25 @@ $defs:
            form-title, form-lead, form-next-steps, form-consent, form-success, nav-label, footer-tagline, footer-legal,
            article-title, article-lead, article-summary, article-heading, article-paragraph, article-author, geo-answer,
            definition, email-subject, email-preheader, email-heading, email-body, email-cta-label, email-footer,
-           image-alt, in-image-text, spec-row, price-old, stat-source, image-caption]
+           image-alt, in-image-text, spec-row, price-old, stat-source, image-caption, promise, announcement, event-meta,
+           quiz-question, quiz-option, result-summary, contact-info, disclaimer, ad-marking, cookie-text, article-date,
+           article-sources, email-sender-name]
 
   situation:
-    description: "Ситуации карты тона (предложение F; словаря ситуаций у site нет). Интерфейсные ошибки — ux 07/01 §7."
+    description: >-
+      Ситуации карты тона: сайта (hero … footer; словаря ситуаций у site нет) и интерфейса продукта по матрице
+      ux 07/01 §7.1 (empty-first-use … notification; имена — x-situations).
     enum: [hero, benefits, how-it-works, proof, testimonials, case, pricing, pricing-terms, guarantee, objections, faq,
            form, form-consent, form-success, lead-email, reminder-email, complaint-response, error, legal, about,
-           careers, article, meta, campaign-slogan, footer]
+           careers, article, meta, campaign-slogan, footer,
+           empty-first-use, empty-no-results, empty-all-done, success-routine, flow-complete, waiting, input-error,
+           service-error, access-denied, destructive-action, money, security, permissions, onboarding, notification]
+
+  ui-role:
+    description: "Роль строки интерфейса — закрытый список ux 07/06 §7.2 (тот же, что колонка role реестра texts.md экранов)."
+    enum: [title, subtitle, section-title, label, checkbox-label, placeholder, hint, caption, action, link, nav, tab,
+           column-header, status, badge, toast, banner, inline-message, error, empty, confirm-title, confirm-body,
+           tooltip, setting-description, email, push, aria, alt, marketing, help, user-content]
 
   tone-word:
     description: "37 слов тона NN/g (id по-английски, русские эквиваленты — x-tone-words-ru) или своё слово с префиксом x-."
@@ -623,10 +643,13 @@ $defs:
   sample:
     type: object
     additionalProperties: false
-    required: [id, slot_type, lang, text, fact_ids]
+    required: [id, lang, text, fact_ids]
+    anyOf: [{required: [slot_type]}, {required: [role]}]
+    description: "Образец строки: тип слота сайта (slot_type) или роль строки интерфейса (role) — у голоса продукта."
     properties:
       id: {$ref: "#/$defs/id"}
       slot_type: {$ref: "#/$defs/slot-type"}
+      role: {$ref: "#/$defs/ui-role"}
       lang: {$ref: "#/$defs/lang"}
       text: {type: string, minLength: 1}
       fact_ids:
@@ -680,12 +703,23 @@ x-copy-deck-map:
   copy_deck.voice_ref: "путь к voice.yaml (J, copy-deck.schema.json)"
   slot.variants[].text: "проверка голоса: vocabulary.avoid, address, punctuation — copy_lint.py с правилами из профиля; принципы — судья (I)"
 
-x-kimi-map:
-  - {voice_path: "projections.tone_of_voice", kimi_path: "design_system.tone_of_voice", rule: copy, note: "одна строка ≤ 240 знаков; она же строка «Voice:» в copy.md и «Voice» в TASK.md (build_package.py)"}
-  - {voice_path: "projections.brand_voice.tone", kimi_path: "brand.voice.tone", rule: copy, note: "brand.json kimi"}
-  - {voice_path: "projections.brand_voice.use", kimi_path: "brand.voice.use", rule: copy, note: "слова «говорим» — коротко"}
-  - {voice_path: "projections.brand_voice.avoid + vocabulary.avoid[].term", kimi_path: "brand.voice.avoid, design_system.bans", rule: derive, note: "K3 тексты не пишет (copy.md verbatim) — avoid нужен как страховка для alt и подписей ассетов"}
-  - {voice_path: "samples, principles, tone_map", kimi_path: "—", rule: drop, note: "голос уже воплощён в copy.md; K3 его не пересочиняет"}
+x-canvas-map:
+  # Голос во входе холста — проекция профиля (references/claude-design.md § 6): одна строка тона в брифе холста; свой
+  # текст голоса во входе не пишется. Профиль — тот, чей канал scope.surfaces отвечает роду поверхности: сайт и лендинг —
+  # voice (voice.yaml), кабинет и приложение — voice-product (voice.product.yaml, та же схема и та же карта).
+  source: voice
+  stages: [directions, wireframe, mockup, motion]
+  files:
+    brief.yaml:
+      design_system.tone_of_voice: {rule: copy, from: [/projections/tone_of_voice], note: "одна строка ≤ 240 знаков: обращение, 2–3 принципа, чего нет"}
+      design_system.voice_ref: {rule: derive, from: [/voice_id, /scope/surfaces, /scope/product_voice_ref], note: "путь профиля, из которого взята строка тона: канал scope.surfaces ↔ род поверхности; голос продукта — по product_voice_ref"}
+  drop:
+    - {from: [/voice_version, /date, /status, /brand, /review, /open_questions], note: "служебные поля, ссылки и подпись: статус, путь и отпечаток — в INPUT.md"}
+    - {from: [/scope/genres, /scope/surfaces/*/note, /derived_from, /summary, /key_phrase, /principles, /pairs, /axes, /tone_words,
+              /address, /vocabulary, /punctuation, /humor, /tone_map, /taboos, /claims_boundaries_ref, /samples, /style_sheet,
+              /lint, /languages],
+       note: "голос воплощён в текстах copy deck и реестра текстов экранов; исполнитель тексты дословно ставит, а не пересочиняет"}
+    - {from: [/projections/brand_voice, /projections/prompt_brief], note: "для людей и промта генератора текстов; на холст — только строка тона"}
 
 x-lint-map:
   vocabulary.avoid: "правило kind: words, id brand-<voice_id>-avoid-<n>, group EXT, уровень level, unless → поле unless (регулярка из слов), slot_types"
@@ -742,5 +776,22 @@ x-tone-words-ru:
   witty: "остроумный"
 
 x-vocabulary-proposals:
-  situations: "список situation (25 ситуаций карты тона) — предложение F к временному словарю; site ролей тона не задаёт"
-  slot_types: "spec-row, price-old, stat-source (B2), image-caption (J) — приняты в enum как предложения"
+  situations: "список situation — ситуации карты тона сайта (25, предложение F) и интерфейса (15, ux 07/01 §7.1); site ролей тона не задаёт"
+
+x-situations:
+  # Ситуации интерфейса — матрица ux 07/01 §7.1: влияние на пользователя и тип сообщения задают тон.
+  empty-first-use: "Пустое состояние «ещё ничего нет» — приглашающий тон, допустима лёгкость; без шутки, если пусто из-за неудачи"
+  empty-no-results: "Пустое состояние «ничего не найдено» — нейтральный, деловой; без шутки и обвинения"
+  empty-all-done: "Пустое состояние «всё сделано» — положительный, завершающий; без подгона создавать новое"
+  success-routine: "Подтверждение успеха рутинного действия — максимально сухой; без восклицаний и «успешно»"
+  flow-complete: "Завершение сложного сценария — признание достижения, допустима эмоция; без преувеличения"
+  waiting: "Ожидание — спокойный, информативный; без извинений и юмора про долгое ожидание"
+  input-error: "Ошибка ввода — нейтральный, помогающий; без обвинения, «неверно» и юмора"
+  service-error: "Ошибка на стороне сервиса — прямой, с признанием вины; без «что-то пошло не так» и перекладывания вины"
+  access-denied: "Отказ в доступе — прямой, без извинений, если отказ правомерен"
+  destructive-action: "Деструктивное действие — нейтральный, конкретный; без игривости, восклицаний и «Вы уверены?»"
+  money: "Деньги и платежи — нейтральный, точный, полный; без сокращения сумм, юмора и преуменьшения"
+  security: "Безопасность и утечка данных — честный и скромный; без юмора, приукрашивания и пассива без субъекта"
+  permissions: "Права и роли — скромный, фактический; без оценочности"
+  onboarding: "Онбординг — поддерживающий, конкретный; без панибратства и «легко и просто»"
+  notification: "Уведомление и письмо — сразу к делу; без приветствий и благодарностей до сути"

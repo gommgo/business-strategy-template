@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""validate_any.py — проверки B1 (схема + смысл) для meaning и иерархий вне 02-strategy-messaging/examples/.
+"""validate_any.py — проверки смысла (схема + смысл) для meaning и иерархий сообщений проекта, вне примеров базы.
 
-text-research · волна 3 · агент I (I3) · 2026-09-24 · опыт 99-raw/experiments/I/04-chain-manual/
-validate.py B1 проверяет только файлы examples/; эта обёртка вызывает его функции (schema_errors, semantic_meaning,
-semantic_hierarchy) на любом файле — для выхода P2 и P3. Код B1 не меняется.
+validate_meaning.py без аргументов проверяет примеры базы; эта обёртка вызывает его функции (schema_errors,
+semantic_meaning, semantic_hierarchy) на любом файле — для выхода промтов P2 (смысл) и P3 (иерархия), включая
+предупреждения «обещание из допущения».
 
-Запуск (из корня text-research; нужен jsonschema — venv B1):
-    99-raw/tools/venv-B1/bin/python 99-raw/experiments/I/04-chain-manual/validate_any.py FILE.yaml [FILE2.yaml …]
+Запуск (Python окружения скилла, нужен jsonschema):
+    python3 scripts/text/validate_any.py FILE.yaml [FILE2.yaml …]
 Тип файла — по ключу meaning_version или hierarchy_version. Код выхода: 0 — ошибок нет, 1 — есть.
 """
 import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)  # перенос: B1 validate.py — рядом, scripts/text/validate_meaning.py
+sys.path.insert(0, HERE)
 import validate_meaning as v  # noqa: E402
 from jsonschema import Draft202012Validator  # noqa: E402
 

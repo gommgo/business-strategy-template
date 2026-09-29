@@ -13,6 +13,7 @@ site: otves-remont-nn-en
 lang: en
 jurisdiction: ru
 status: draft
+example: true
 owner:
   role: директор (заказчик)
   contact: почта заказчика из брифа

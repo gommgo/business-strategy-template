@@ -22,6 +22,7 @@ site: kvarts-preorder
 lang: ru
 jurisdiction: ru
 status: draft
+example: true
 owner: {role: "основатель стартапа (заказчик)"}
 collected_by: "Claude (copy-strategy), вопросы одним сообщением — kimi 07/01 §4.4"
 intake: {form: "kimi landing-kvarts/01 §3 (вопрос 1 «Факты»); повторный запрос — proof-intake.md@2026-09-24", asked: "2026-09-24", answered: "2026-09-24", channel: "сообщение"}

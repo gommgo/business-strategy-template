@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """chain_inputs.py — проекции входов промтов P2–P7 и «код между шагами» цепочки генерации copy deck.
 
-text-research · волна 3 · агент I (I3, фаза 2) · 2026-09-24 · опыт 99-raw/experiments/I/04-chain-manual/
-Цепочка: 09-ai-generation-evaluation/02-generation-pipeline.md; промты: 09-ai-generation-evaluation/prompts/p1…p7.
-Зависимости: Python 3.10+ и PyYAML (системный python3). Сеть и модели не нужны: скрипт собирает входы промтов и
-переносит выходы в copy deck, генерирует текст модель (или агент — ai-self).
+Цепочка: kb/text/09-ai-generation-evaluation/02-generation-pipeline.md; промты: 09-ai-generation-evaluation/prompts/p1…p7.
+Зависимости: Python 3.10+ и PyYAML. Сеть и модели не нужны: скрипт собирает входы промтов и переносит выходы в copy
+deck, текст пишет агент сессии (ai-self). Тексты агента входят в copy deck со статусом assumed — черновик
+«допущением», который утверждает владелец продукта.
 
-Команды (из корня text-research):
+Команды (python3 scripts/text/chain_inputs.py <команда> …):
   digest-meaning  [--schema S] [--meaning M] [--call-inputs F…] [-o OUT]   проекция meaning.schema для P2 + замер длины
   meaning-claims  --meaning M [--hierarchy H …] -o OUT.yaml               смысл и иерархии → copy deck для claims_check (P2, P3 §4)
   hierarchy-input --meaning M --awareness L --traffic S[,S] [--promise T] [--page-type T] [-o OUT]   вход P3
@@ -14,11 +14,15 @@ text-research · волна 3 · агент I (I3, фаза 2) · 2026-09-24 · 
   edit-input      --deck D --check J.json --pass N [--voice V] [-o OUT]    вход P6 (проход 1 — error, 2–3 — warning)
   judge-input     --deck D --page P --criterion ID [--scope …] --hierarchy H --meaning M [--lang ru] [-o OUT]   вход P7
   judge-score     --answers A.json [A2.json …] [-o OUT]                    баллы по ответам судьи (формула рубрики)
-  assemble        --skeleton S --parts F.yaml [F2.yaml …] --by WHO -o DECK выходы P4/P5 → copy deck (generated, promise)
-  apply-edits     --deck D --edits E.yaml --pass N --by WHO -o OUT         выход P6 → новые варианты, rejected, edit_log
+  assemble        --skeleton S --parts F.yaml [F2.yaml …] --by WHO -o DECK выходы P4/P5 → copy deck (assumed, generated, promise)
+  apply-edits     --deck D --edits E.yaml --pass N --by WHO -o OUT         выход P6 → новые варианты assumed, rejected, edit_log
+  canvas-texts    --deck D [--page P] [--stage wireframe] [--out DIR]      тексты во вход холста: copydeck.py export
+                                                                           (pages/<page-id>/copy.md и facts.md)
   --selftest                                                               проверки подсчёта баллов и переноса правок
-Факты: facts_ref copy deck или meaning.proof_ref; правила слотов — 04-copy-by-block/copy-slots.yaml (E); голос —
-voice.yaml (F); рубрика — 09-ai-generation-evaluation/copy-rubric.yaml; вопросы G — 07-seo-geo-copy/geo-checklist.yaml.
+Каркас copy deck: у страницы с планом — copydeck.py skeleton, без плана — make_skeleton.py. Факты: facts_ref copy deck
+или meaning.proof_ref; правила слотов — 04-copy-by-block/copy-slots.yaml; голос — voice.yaml; рубрика —
+09-ai-generation-evaluation/copy-rubric.yaml; вопросы GEO — 07-seo-geo-copy/geo-checklist.yaml; роли секций — словарь
+site (kb/site/02-site-types/vocabulary.yaml).
 """
 import argparse
 import copy
@@ -32,7 +36,7 @@ from collections import Counter, defaultdict
 import yaml
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb("text"))
 P = lambda *a: os.path.join(ROOT, *a)  # noqa: E731
@@ -42,15 +46,15 @@ SLOTS = P("04-copy-by-block", "copy-slots.yaml")
 RULES_H = P("08-russian-legal-typography", "claims-rules.yaml")
 RUBRIC = P("09-ai-generation-evaluation", "copy-rubric.yaml")
 GEO = P("07-seo-geo-copy", "geo-checklist.yaml")
-VOCAB = P("99-raw", "notes", "temp-vocabulary-v0.yaml")
+VOCAB = str(kbpaths.kb("site", "02-site-types", "vocabulary.yaml"))   # словарь id системы: роли секций
 TODAY = datetime.date.today().isoformat()
-VARIANTS_N = {"headline": 3, "subheadline": 3, "cta-label": 2, "meta-title": 3}   # решение I2: остальное — 1 [мнение]
+VARIANTS_N = {"headline": 3, "subheadline": 3, "cta-label": 2, "meta-title": 3}   # остальное — 1
 SHORT_SLOTS = {"headline", "subheadline", "eyebrow", "cta-label", "cta-note", "cta-secondary-label", "section-title",
                "card-title", "step-title", "stat-value", "stat-label", "case-title", "pricing-price", "badge",
                "meta-title", "meta-description", "og-title", "og-description", "faq-q", "form-title",
                "testimonial-attribution", "hero-proof"}
 GEO_PASS_IF_NO = {"COPY-GEO-10", "COPY-GEO-18", "COPY-GEO-26"}
-# таблица уровней осведомлённости — проекция B1 02-awareness-hierarchy-objections.md §1.2, §1.4 (для P3)
+# таблица уровней осведомлённости — проекция 02-strategy-messaging/02-awareness-hierarchy-objections.md §1.2, §1.4 (для P3)
 AWARENESS_RULES = {
     "most-aware": {"hero_approach": "direct-offer", "first_screen": "предложение: цена, условия, срок; кнопка; строка снятия риска",
                    "avoid": "объяснять проблему и категорию", "depth": "short",
@@ -323,7 +327,7 @@ def cmd_hierarchy_input(a):
         "TARGET": {"page_type": a.page_type, "traffic_sources": a.traffic.split(","), "awareness": a.awareness,
                    "promise_of_source": a.promise or next((s.get("promise_of_source") for s in (m.get("traffic") or {}).get("sources", [])
                                                            if s.get("source") in a.traffic.split(",")), "")},
-        "SECTION_ROLES": [x["id"] if isinstance(x, dict) else x for x in load(VOCAB)["section_roles"]],
+        "SECTION_ROLES": section_roles(),
         "AWARENESS_RULES": {a.awareness: AWARENESS_RULES[a.awareness]},
         "TODAY": TODAY,
     }
@@ -654,7 +658,20 @@ def cmd_judge_score(a):
     dump({"rubric_version": rub.get("version"), "scored_at": TODAY, "results": out}, a.o)
 
 
+def section_roles():
+    """Роли секций словаря site v1 (namespaces.section_role.values[].id)."""
+    ns = (load(VOCAB) or {}).get("namespaces") or {}
+    return [x["id"] for x in (ns.get("section_role") or {}).get("values") or [] if isinstance(x, dict) and x.get("id")]
+
+
 # ---------------------------------------------------------------- assemble (P4/P5 → deck) и apply-edits (P6)
+AGENT_STATUS = "assumed"   # текст агента в copy deck — черновик «допущением»; утверждает владелец продукта
+
+
+def agent_status(v):
+    """Статус варианта из выхода промта: пустой или draft → assumed; checked, approved, rejected — как есть."""
+    if v.get("status") in (None, "", "draft"):
+        v["status"] = AGENT_STATUS
 def gen_block(prompt_ref, technique, by, run_id):
     return {"model": by, "channel": "none (ai-self)", "prompt_ref": prompt_ref, "run_id": run_id, "date": TODAY,
             "params": {"mode": "ai-self"}, **({"technique": technique} if technique else {})}
@@ -682,6 +699,7 @@ def cmd_assemble(a):
                 for v in sl["variants"]:
                     g = v.get("generated") or {}
                     v["source"] = "ai-self"
+                    agent_status(v)
                     v["generated"] = gen_block(g.get("prompt_ref"), g.get("technique"), a.by, run)
             target["slots"] = sec["slots"]
             target.update(keep)
@@ -690,6 +708,7 @@ def cmd_assemble(a):
             for vv in (mt.get("variants") or {}).values():
                 for v in vv:
                     v["source"] = "ai-self"
+                    agent_status(v)
                     v["generated"] = gen_block("09-ai-generation-evaluation/prompts/p5-meta-geo.md#ru@1", v.get("x-technique"), a.by, run)
                     v.pop("x-technique", None)
             page["meta"] = mt
@@ -698,6 +717,7 @@ def cmd_assemble(a):
             for sl in fs["slots"]:
                 for v in sl["variants"]:
                     v["source"] = "ai-self"
+                    agent_status(v)
                     v["generated"] = gen_block("09-ai-generation-evaluation/prompts/p5-meta-geo.md#ru@1", None, a.by, run)
             if fs["section_id"] in by_id:
                 by_id[fs["section_id"]].update({k: v for k, v in fs.items() if k != "section_id"})
@@ -738,7 +758,7 @@ def cmd_apply_edits(a):
                 if v["id"] == e.get("from_variant"):
                     v["status"] = "rejected"
                     v["reason"] = "правка по находкам: " + ", ".join(sorted({f["rule"] for f in e.get("fixes", [])}))
-            vv.append({"id": e["to_variant"], "text": e["text"], "status": "draft", "source": "ai-self",
+            vv.append({"id": e["to_variant"], "text": e["text"], "status": AGENT_STATUS, "source": "ai-self",
                        "generated": gen_block("09-ai-generation-evaluation/prompts/p6-edit-findings.md#ru@1", "edit-findings", a.by, f"p6-pass{a.pass_}")})
             n_ed += 1
             continue
@@ -749,7 +769,7 @@ def cmd_apply_edits(a):
         rules = sorted({f["rule"] for f in e.get("fixes", [])})
         old["status"] = "rejected"
         old["reason"] = "правка по находкам: " + ", ".join(rules)
-        sl["variants"].append({"id": e["to_variant"], "text": e["text"], "status": "draft", "source": "ai-self",
+        sl["variants"].append({"id": e["to_variant"], "text": e["text"], "status": AGENT_STATUS, "source": "ai-self",
                                "generated": gen_block("09-ai-generation-evaluation/prompts/p6-edit-findings.md#ru@1", "edit-findings", a.by, f"p6-pass{a.pass_}")})
         sl["chosen"] = e["to_variant"]
         if "fact_ids" in e:
@@ -772,6 +792,18 @@ def cmd_apply_edits(a):
     cd["date"] = TODAY
     dump(d, a.o)
     print(f"apply-edits pass {a.pass_}: правок {n_ed}, lint_allow {n_allow}, человеку {n_left} → {a.o}", file=sys.stderr)
+
+
+# ---------------------------------------------------------------- canvas-texts (тексты во вход холста)
+def cmd_canvas_texts(a):
+    """Выгрузка текстов страницы во вход холста — copydeck.py export: pages/<page-id>/copy.md и facts.md по протоколу
+    references/claude-design.md § 6 (этап wireframe — тексты assumed, checked, approved; mockup — только approved)."""
+    import copydeck  # noqa: E402 — владелец выгрузки
+    argv = ["export", a.deck, "--stage", a.stage, "--facts-scope", a.facts_scope]
+    for k, v in (("--page", a.page), ("--out", a.out), ("--facts", a.facts), ("--today", a.today)):
+        if v:
+            argv += [k, v]
+    return copydeck.main(argv)
 
 
 # ---------------------------------------------------------------- selftest
@@ -805,9 +837,15 @@ def selftest():
         finally:
             sys.stderr = _stderr
         sl = load(op)["copy_deck"]["pages"][0]["sections"][0]["slots"][0]
-        res.append(("apply-edits: новый вариант выбран, старый rejected с причиной, edit_log записан",
+        res.append(("apply-edits: новый вариант выбран и assumed, старый rejected с причиной, edit_log записан",
                     sl["chosen"] == "b" and sl["variants"][0]["status"] == "rejected" and "ru-x" in sl["variants"][0]["reason"]
-                    and sl["edit_log"][0]["pass"] == 2))
+                    and sl["variants"][1]["status"] == "assumed" and sl["edit_log"][0]["pass"] == 2))
+    v1, v2 = {"status": "draft"}, {"status": "checked"}
+    agent_status(v1)
+    agent_status(v2)
+    res.append(("выход промта: draft → assumed, checked остаётся", v1["status"] == "assumed" and v2["status"] == "checked"))
+    roles = section_roles()
+    res.append(("роли секций — словарь site v1 (hero, final-cta)", "hero" in roles and "final-cta" in roles and len(roles) >= 20))
     ok = sum(1 for _, r in res if r)
     for n, r in res:
         print(("OK   " if r else "FAIL ") + n)
@@ -839,16 +877,22 @@ def main():
     s.add_argument("--page"); s.add_argument("--by", required=True); s.add_argument("-o", required=True)
     s = sub.add_parser("apply-edits"); s.add_argument("--deck", required=True); s.add_argument("--edits", required=True)
     s.add_argument("--pass", dest="pass_", type=int, required=True); s.add_argument("--by", required=True); s.add_argument("-o", required=True)
+    s = sub.add_parser("canvas-texts"); s.add_argument("--deck", required=True); s.add_argument("--page")
+    s.add_argument("--stage", default="wireframe", choices=["directions", "wireframe", "mockup"]); s.add_argument("--out")
+    s.add_argument("--facts"); s.add_argument("--today"); s.add_argument("--facts-scope", default="all", choices=["all", "used"])
     a = ap.parse_args()
     if a.selftest:
         sys.exit(selftest())
     fn = {"digest-meaning": cmd_digest_meaning, "meaning-claims": cmd_meaning_claims, "hierarchy-input": cmd_hierarchy_input,
           "section-input": cmd_section_input, "edit-input": cmd_edit_input, "judge-input": cmd_judge_input,
-          "judge-score": cmd_judge_score, "assemble": cmd_assemble, "apply-edits": cmd_apply_edits}.get(a.cmd)
+          "judge-score": cmd_judge_score, "assemble": cmd_assemble, "apply-edits": cmd_apply_edits,
+          "canvas-texts": cmd_canvas_texts}.get(a.cmd)
     if not fn:
         ap.print_help()
         sys.exit(1)
-    fn(a)
+    rc = fn(a)
+    if isinstance(rc, int):
+        sys.exit(rc)
 
 
 if __name__ == "__main__":

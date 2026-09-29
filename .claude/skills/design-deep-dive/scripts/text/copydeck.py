@@ -1,42 +1,60 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""copydeck.py — copy deck text-research: проверка формата, сверка с фактами, линтер, экспорт в пакет kimi и обратно.
+"""copydeck.py — copy deck: каркас из плана страницы, проверка формата и стыка, сверка с фактами, линтер, статусы,
+выбор вариантов, утверждение, выгрузка во вход холста и приём правок текста с холста, сверка собранной страницы.
 
-text-research · волна 3 · агент J · 2026-09-24 (1.0 — фаза 1, J и J2; 1.1 — фаза 2, J3: пробелы в check, --all-variants
-копиями страницы, variant.fact_ids, мета на листе выбора, rebase_refs, adaptation.voice_line). Формат —
-10-templates-recipes/copy-deck.schema.json (v1 = черновик v0 из PLAN.md без удаления полей + новые необязательные поля;
-v1.1 — variant.fact_ids, adaptation.voice_line); процесс — 10-templates-recipes/01-copy-deck-workflow.md.
+Формат — 10-templates-recipes/copy-deck.schema.json (поля и статусы v0 на месте; статус assumed — черновик агента
+«допущением»); процесс — 10-templates-recipes/01-copy-deck-workflow.md; стык с планом — x-site-map схемы, выгрузка во
+вход холста — x-canvas-map (ключ copy_md: синтаксис copy.md, статусы по этапу). id типов страниц, ролей секций, слотов и
+блоков — словарь site (kb/site/02-site-types/vocabulary.yaml, kb/site/04-blocks/blocks.yaml).
 
-Подкоманды (порядок проверок — решение оркестратора: сначала факты и право, потом стиль, потом формат и статусы):
-  validate DECK [--facts F] [--today ГГГГ-ММ-ДД] [--final] [--no-jsonschema]
+Подкоманды (порядок проверок: сначала факты и право, потом стиль, потом формат и статусы):
+  skeleton PLAN -o DECK [--facts-ref F] [--voice-ref V] [--lang ru]
+        каркас copy deck из плана страницы (page-plan): секции, текстовые слоты, анатомия, группы, fact_ids и missing_ids
+        из binds слотов данных, мета из page_slots, page_plan_ref; тексты пусты, статус draft. Без плана — make_skeleton.py
+  validate DECK [--facts F] [--plan PLAN] [--today ГГГГ-ММ-ДД] [--final] [--no-jsonschema]
         схема (jsonschema, если есть; иначе встроенная проверка того же подмножества), id и ссылки, статусы
-        (x-status-rules схемы), временный словарь, факты (есть ли, не пробел ли, не истекли ли, публикуемы ли),
-        [PLACEHOLDER], обещание первого экрана, строки в картинках, второй язык; файлы волны 2 — copy-slots.yaml (E),
-        voice.yaml (F), meta-rules.yaml (G), claims-rules.yaml (H): есть — проверка работает, нет — предупреждение
-        «правила не загружены»
-  claims DECK [--facts F] [--today …] [--strict] [--all-variants]
-        claims_check.py (B2 + право H) процессом на плоской копии v0: обещание, мета, OG-шаблон — тоже текст страницы
+        (x-status-rules), словарь site, block против blocks.yaml, стык с планом (page_plan_ref или --plan), факты (есть
+        ли, не пробел ли, не истекли ли, публикуемы ли, демо-данные), [PLACEHOLDER], обещание и ядро первого экрана
+        (секция hero, без неё — первая после шапки), строки в картинках, второй язык; правила copy-slots.yaml,
+        voice.yaml, meta-rules.yaml, claims-rules.yaml: есть — проверка работает, нет — предупреждение
+        «правила не загружены»; --final — ворота публикации: страница approved, 0 [PLACEHOLDER], 0 демо-фактов, мета
+  claims DECK [--facts F] [--today …] [--strict] [--all-variants] [--final]
+        claims_check.py (факты и право) процессом на плоской копии: обещание, мета, OG-шаблон — тоже текст страницы
   lint DECK [--final] [--all-variants] [--no-page-pass]
-        copy_lint.py через API lint_text: каждый слот со своим slot_type и жанром + проход страницы (ритм, плотности,
-        надзаголовки); lint_allow и --final — по правилам C
+        copy_lint.py через API lint_text: каждый слот со своим slot_type и жанром + проход страницы
   check DECK [--facts F] [--today …] [--final] [--strict] [--all-variants] [--update OUT [--promote]]
         claims → lint → validate; --update пишет копию deck с записями lint и claims (text_hash, дата, версия),
-        --promote — draft → checked при 0 error; --all-variants — альтернативы «как выбранные», с --update — variant.checks
-  export-kimi DECK --out DIR [--page ID] [--facts F] [--meaning M] [--merge-into BRIEF] [--strict] [--facts-scope all|used]
-        copy.md, facts.md и brief-fragment.yaml для пакета ../kimi-research/07-brief-handoff/templates/
-  import-kimi COPY.md -o DECK [--brief brief.yaml] [--facts F] [--page-type T]
-        copy.md пакета kimi (+ product.goal, jobs, alt и подписи из brief.yaml) → copy deck v1
+        --promote — draft и assumed → checked при 0 error; --all-variants — альтернативы «как выбранные»
+  export DECK --page ID --stage directions|wireframe|mockup [--out DIR] [--facts F] [--facts-scope all|used]
+        выгрузка во вход холста: DIR/pages/<page-id>/copy.md (тексты статуса этапа) и DIR/facts.md («Факты», «Нет»,
+        «Нельзя утверждать»); слот без текста статуса этапа — находка COPY-D-STAGE (макет — error, вайрфрейм и
+        направления — warning); по умолчанию DIR — $DDD_HOME/out/text/export
+  import-copy COPY.md --deck DECK --page ID -o OUT [--choose] [--date ГГГГ-ММ-ДД]
+        приём правок текста с холста: изменённый текст слота — новый вариант source: customer (draft); --choose — сразу
+        выбран, страница возвращается в draft; тексты холста без слота плана — вопрос «перенести в план?»
   export-assets DECK [--page ID] [-o OUT]   alt, подписи, строки в картинках, OG → фрагмент плана ассетов ai-media
-  export-variants DECK -o SHEET.md --key KEY.yaml [--seed N] [--include-failed]   лист слепого выбора (слоты, обещание,
-                                             мета; метки, модели скрыты; варианты с error в checks сняты; I)
+  export-variants DECK -o SHEET.md --key KEY.yaml [--seed N] [--include-failed]   лист слепого выбора (метки; модели
+                                             и авторы скрыты; варианты с error в checks сняты)
+  apply-selection DECK --key KEY.yaml (--votes VOTES.yaml | --sheet SHEET.md) --by КТО -o OUT [--method M] [--at ДАТА]
+                                             голоса слепого выбора → chosen и selection {method, by, at, compared,
+                                             tally, ref}; у мета — выбранный текст в meta.<поле>
   approve DECK --page ID --by КТО -o OUT      утверждение страницы человеком: checked (0 error, актуальный text_hash,
-                                             без [PLACEHOLDER]) → approved; --promote у check переводит draft → checked
+                                             без [PLACEHOLDER]) → approved; журнал процесса (edit_log, отклонённые
+                                             варианты) уходит — история в git
+  verify-page DECK --page ID (--extract PAGE.json | --html PAGE.html [--browser] | --url URL) [--facts F]
+                                             собранная страница против copy deck: блоки не из copy deck > 10 % —
+                                             error, число вне фактов и текстов — error, потерянные слоты, мета, обещание
   upgrade DECK -o OUT                        copy deck v0 → v1 (section_role, пустые fact_ids и claim_flags)
+  before-after [--write | --check]           пустой why в 10-templates-recipes/before-after.tsv — из rule_ref (заголовок
+                                             раздела нормы); без ключей — показать, что будет заполнено; --check —
+                                             код 1, если есть что заполнить
   --selftest                                 офлайн-тесты
 Все подкоманды проверок: --json OUT, --md OUT, --quiet. Коды выхода: 0 — нет error, 2 — есть error, 1 — ошибка входа.
 
-Зависимости: Python 3.10+, PyYAML. jsonschema — необязательно (99-raw/tools/venv-J). Модели и сеть не нужны.
-Чужие утилиты не переписаны: claims_check.py (B2, H) вызывается процессом, copy_lint.py (C) — через lint_text.
+Зависимости: Python 3.10+, PyYAML; jsonschema — необязательно (Python окружения скилла). Модели и сеть не нужны; браузер —
+только verify-page --browser и --url (copy_extract.py под блокировкой). claims_check.py вызывается процессом, copy_lint.py —
+через lint_text.
 """
 from __future__ import annotations
 
@@ -55,16 +73,18 @@ import tempfile
 try:
     import yaml
 except ImportError:  # pragma: no cover
-    sys.exit('copydeck.py: нужен PyYAML (python3-yaml или 99-raw/tools/venv-J/bin/python)')
+    sys.exit('copydeck.py: нужен PyYAML (Python окружения скилла: $DDD_HOME/venv, scripts/install.sh)')
 
-VERSION = '1.1'
-DATE = '2026-09-24'
+VERSION = '1.2'
+DATE = '2026-09-29'
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb('text'))
 SCHEMA_PATH = os.path.join(ROOT, '10-templates-recipes', 'copy-deck.schema.json')
-VOCAB_PATH = os.path.join(ROOT, '99-raw', 'notes', 'temp-vocabulary-v0.yaml')
+VOCAB_PATH = str(kbpaths.kb('site', '02-site-types', 'vocabulary.yaml'))   # словарь id системы (site v1)
+BLOCKS_PATH = str(kbpaths.kb('site', '04-blocks', 'blocks.yaml'))
+BEFORE_AFTER_PATH = os.path.join(ROOT, '10-templates-recipes', 'before-after.tsv')
 FACTS_SCHEMA_PATH = os.path.join(ROOT, '02-strategy-messaging', 'facts.schema.yaml')
 COPY_SLOTS_PATH = os.path.join(ROOT, '04-copy-by-block', 'copy-slots.yaml')
 VOICE_SCHEMA_PATH = os.path.join(ROOT, '05-voice-editorial', 'voice.schema.yaml')
@@ -73,37 +93,22 @@ CLAIMS_RULES_PATH = os.path.join(ROOT, '08-russian-legal-typography', 'claims-ru
 CLAIMS_CHECK = os.path.join(HERE, 'claims_check.py')
 GENRES = ('landing', 'site-page', 'article', 'meta', 'geo', 'email-form')
 LEVELS = ('error', 'warning', 'info')
-STATUS_RANK = {'draft': 0, 'checked': 1, 'approved': 2, 'rejected': -1}
+STATUS_RANK = {'draft': 0, 'assumed': 0, 'checked': 1, 'approved': 2, 'rejected': -1}
+CHROME_TOP_ROLES = {'header', 'utility'}   # шапка и служебная строка над первым экраном: ядро считается после них
 PLACEHOLDER_RX = re.compile(r'\[PLACEHOLDER(?::\s*([^\]]*))?\]', re.I)
 BAD_PLACEHOLDER_RX = re.compile(r'\[\s*(?:заглушка|todo|tbd|xxx|плейсхолдер|placeholder\s*[^:\]\s])|lorem ipsum|\bTODO\b|'
                                 r'(?<!\[)PLACEHOLDER(?!\s*[:\]])|\[PLACEHOLDER(?![^\]]*\])', re.I)
 META_FIELDS = (('title', 'meta-title'), ('description', 'meta-description'), ('og_title', 'og-title'),
                ('og_description', 'og-description'), ('og_image_alt', 'og-image-alt'))
 OG_TEMPLATE_FIELDS = (('kicker', 'eyebrow'), ('title', 'og-title'))
-# Прозаические типы слотов (спецификация линтера C §3.4) — для прохода страницы.
+# Прозаические типы слотов — для прохода страницы линтером.
 PROSE_SLOT_TYPES = {'body', 'section-lead', 'article-paragraph', 'article-lead', 'article-summary', 'geo-answer',
                     'definition', 'faq-a', 'email-body', 'case-summary', 'guarantee-text', 'objection-answer',
                     'pricing-plan-summary'}
 HEADING_LEVEL = {'headline': 1, 'article-title': 1, 'section-title': 2, 'article-heading': 2, 'form-title': 2,
                  'email-heading': 2, 'card-title': 3, 'step-title': 3, 'case-title': 3, 'pricing-plan-name': 3,
                  'faq-q': 3}
-# Ключи copy.md kimi → slot_type (для import-kimi; claims_check.py держит ту же таблицу — берём её, если доступна).
-KIMI_KEY_SLOT = [(r'^h1$', 'headline'), (r'^lead$', 'subheadline'), (r'^cta(?:_\w+)?$', 'cta-label'),
-                 (r'^note$', 'cta-note'), (r'^h2$', 'section-title'), (r'^h3$', 'card-title'), (r'^p\d*$', 'body'),
-                 (r'^item\d+_title$', 'card-title'), (r'^item\d+_text$', 'card-body'), (r'^row\d+$', 'spec-row'),
-                 (r'^price(?:_now)?$', 'pricing-price'), (r'^price_old$', 'price-old'),
-                 (r'^(?:deposit|shipping|price_note)$', 'pricing-price-note'), (r'^q\d+$', 'faq-q'), (r'^a\d+$', 'faq-a'),
-                 (r'^legal$', 'footer-legal'), (r'^hint$', 'body'), (r'^quote\d*$', 'testimonial-quote'),
-                 (r'^(?:author|attribution)\d*$', 'testimonial-attribution'), (r'^stat\d*_value$', 'stat-value'),
-                 (r'^stat\d*_label$', 'stat-label'), (r'^logos?_caption$', 'logos-caption')]
-KIMI_SECTION_ROLE = {'hero': 'hero', 'problem': 'problem', 'how': 'how-it-works', 'object3d': 'product-demo',
-                     'specs': 'specs', 'price': 'pricing', 'pricing': 'pricing', 'faq': 'faq', 'final_cta': 'final-cta',
-                     'footer': 'footer', 'reviews': 'testimonials', 'testimonials': 'testimonials', 'logos': 'proof-logos',
-                     'stats': 'proof-stats', 'cases': 'case-studies', 'case': 'case-studies', 'team': 'team',
-                     'about': 'about', 'guarantee': 'guarantee', 'contacts': 'contacts', 'form': 'lead-form',
-                     'benefits': 'benefits', 'features': 'benefits', 'solution': 'solution', 'cta': 'cta-band',
-                     'final': 'final-cta', 'proof': 'proof-stats', 'how-it-works': 'how-it-works'}
-# Набор запретов по умолчанию x-never-claim-defaults (B2) — английская адаптация для copy deck с lang: en (ai-self J).
+# Набор запретов по умолчанию x-never-claim-defaults схемы фактов — английская адаптация для copy deck с lang: en.
 NEVER_EN = {
     'nc-counts': 'Customer, user or order counts and growth percentages without a fact with a source and a date',
     'nc-ratings': 'Ratings and stars without a fact with the platform, scale, number of reviews and snapshot date',
@@ -193,7 +198,7 @@ def words(s):
 
 
 class Report:
-    """Находки одной команды: tool (validate, claims, lint), level, rule (COPY-D-…, COPY-F-…, id правила C), where
+    """Находки одной команды: tool (validate, claims, lint), level, rule (COPY-D-…, COPY-F-…, id правила copy_lint.py), where
     (путь copy deck: page/section/slot), message, fix."""
 
     def __init__(self):
@@ -267,8 +272,8 @@ def main_variant(slot):
 
 
 def variant_fact_ids(slot, v):
-    """Факты текста: свои fact_ids варианта (необязательное поле v1.1 — варианты одного слота опираются на разные факты,
-    I3), иначе fact_ids слота (v0). Свой список заменяет список слота, а не дополняет его."""
+    """Факты текста: свои fact_ids варианта (необязательное поле v1.1 — варианты одного слота опираются на разные факты),
+    иначе fact_ids слота (v0). Свой список заменяет список слота, а не дополняет его."""
     if isinstance(v, dict) and isinstance(v.get('fact_ids'), list):
         return v['fact_ids']
     return (slot or {}).get('fact_ids') or []
@@ -327,29 +332,52 @@ def primary_cta(deck, page):
 
 
 # ============================================================================================ словарь, схема, факты
-def load_vocab(path=VOCAB_PATH, copy_schema=None):
-    """Временный словарь (+ предложения B2 и J). None — файла нет."""
+def load_vocab(path=VOCAB_PATH, copy_schema=None, blocks_path=BLOCKS_PATH):
+    """Словарь site v1: типы страниц (жанр), роли секций, слоты вида text (жанры — copy-slots.yaml), блоки blocks.yaml
+    и статусы id (proposed — можно с пометкой, deprecated — предупреждение, out-of-scope и measurement-only — не для
+    copy deck). None — файла словаря нет."""
     if not os.path.exists(path):
         return None
-    v = load_yaml_file(path) or {}
-    out = {'page_types': {x['id']: x.get('genre') for x in v.get('page_types') or [] if isinstance(x, dict)},
-           'section_roles': {x['id'] for x in v.get('section_roles') or [] if isinstance(x, dict)},
-           'slot_types': {x['id']: x for x in v.get('slot_types') or [] if isinstance(x, dict)},
-           'proposals': {'section_roles': set(), 'slot_types': set()}, 'path': path}
-    for src in (load_facts_schema(), copy_schema or {}):
-        props = (src or {}).get('x-vocabulary-proposals') or {}
-        for key in ('section_roles', 'slot_types'):
-            for x in props.get(key) or []:
-                if isinstance(x, dict) and x.get('id'):
-                    out['proposals'][key].add(x['id'])
-    try:  # предложения E к словарю slot_type (copy-slots.yaml: proposals, proposal: true)
+    ns = (load_yaml_file(path) or {}).get('namespaces') or {}
+    vals = lambda key: [x for x in (ns.get(key) or {}).get('values') or [] if isinstance(x, dict) and x.get('id')]
+    out = {'page_types': {x['id']: x.get('genre') for x in vals('page_type')},
+           'section_roles': {x['id'] for x in vals('section_role')},
+           'slot_types': {x['id']: dict(x) for x in vals('slot') if x.get('kind') == 'text'},
+           'slot_kinds': {x['id']: x.get('kind') for x in vals('slot')},
+           'status': {}, 'proposals': {'section_roles': set(), 'slot_types': set()}, 'blocks': {}, 'serves': {}, 'path': path}
+    for key, pool in (('page_type', 'page'), ('section_role', 'role'), ('slot', 'slot'), ('block', 'block')):
+        for x in vals(key):
+            out['status'][(pool, x['id'])] = x.get('status') or 'active'
+    out['proposals']['section_roles'] = {x['id'] for x in vals('section_role') if x.get('status') == 'proposed'}
+    out['proposals']['slot_types'] = {x['id'] for x in vals('slot') if x.get('kind') == 'text' and x.get('status') == 'proposed'}
+    blocks = (load_yaml_file(blocks_path) or {}).get('blocks') if os.path.exists(blocks_path) else None
+    for bid, b in (blocks or {}).items() if isinstance(blocks, dict) else []:
+        out['blocks'][str(bid)] = (b or {}).get('status') or 'active'
+        out['serves'][str(bid)] = list((b or {}).get('serves') or [])
+    if not out['blocks']:   # запасной путь: блоки словаря
+        for x in vals('block'):
+            out['blocks'][x['id']] = x.get('status') or 'active'
+            out['serves'][x['id']] = list(x.get('serves') or [])
+    try:  # жанры типа слота — copy-slots.yaml
         if os.path.exists(COPY_SLOTS_PATH):
-            cs = load_yaml_file(COPY_SLOTS_PATH) or {}
-            out['proposals']['slot_types'] |= {str(x) for x in cs.get('proposals') or []}
-            out['proposals']['slot_types'] |= {str(x.get('id')) for x in cs.get('slot_types') or [] if isinstance(x, dict) and x.get('proposal')}
+            for x in (load_yaml_file(COPY_SLOTS_PATH) or {}).get('slot_types') or []:
+                if isinstance(x, dict) and x.get('id') in out['slot_types']:
+                    g = x.get('genres') or ([x['genre']] if x.get('genre') else [])
+                    out['slot_types'][x['id']]['genres'] = [str(y) for y in g]
     except Exception:  # noqa: BLE001
         pass
     return out
+
+
+def vocab_status(vocab, pool, ident):
+    """Статус id словаря: active | proposed | deprecated | out-of-scope | measurement-only; None — id нет."""
+    return (vocab or {}).get('status', {}).get((pool, ident))
+
+
+def role_of_block(vocab, block):
+    """Роль секции по блоку: первая роль serves блока blocks.yaml (или None)."""
+    serves = (vocab or {}).get('serves', {}).get(str(block or '')) or []
+    return serves[0] if serves else None
 
 
 _FACTS_SCHEMA = {}
@@ -367,7 +395,7 @@ def load_copy_schema(path=SCHEMA_PATH):
 
 
 class Facts:
-    """facts.yaml (B2): факты по id и алиасам, пробелы, запреты. Семантика поиска — как в claims_check.py."""
+    """facts.yaml: факты по id и алиасам, пробелы, запреты. Семантика поиска — как в claims_check.py."""
 
     def __init__(self, data, path=None):
         self.data = deep_dates(data or {})
@@ -403,7 +431,7 @@ def load_facts(path):
         return None
     data = load_yaml_file(path) or {}
     if not isinstance(data, dict) or 'facts' not in data:
-        raise SystemExit(f'{path}: не facts.yaml (нет ключа facts); facts.md kimi — сначала claims_check.py import-kimi')
+        raise SystemExit(f'{path}: не facts.yaml (нет ключа facts)')
     return Facts(data, path)
 
 
@@ -415,8 +443,8 @@ _CC = {}
 
 
 def claims_module():
-    """claims_check.py как модуль (только для фильтра публикации фактов при экспорте — та же семантика, что у сверки);
-    None — файла нет или он не импортируется (тогда работает свой фильтр по x-kimi-map)."""
+    """claims_check.py как модуль (фильтр публикации фактов при выгрузке facts.md — та же семантика, что у сверки);
+    None — файла нет или он не импортируется (тогда работает свой фильтр по publish_filter карты фактов)."""
     if 'm' not in _CC:
         _CC['m'] = None
         if os.path.exists(CLAIMS_CHECK):
@@ -432,7 +460,8 @@ def claims_module():
 
 
 def own_publish_issues(f, today, cls_info=None):
-    """Свой фильтр публикации по x-kimi-map facts.schema.yaml (запасной путь, если claims_check.py не импортируется)."""
+    """Свой фильтр публикации по publish_filter карты фактов (x-canvas-map facts.schema.yaml) — запасной путь, если
+    claims_check.py не импортируется."""
     cls_info = cls_info if cls_info is not None else claim_class_info()
     out = []
     ver = (f.get('verification') or {}).get('status')
@@ -462,9 +491,9 @@ def own_publish_issues(f, today, cls_info=None):
 
 
 def publish_issues(f, today, facts=None):
-    """Почему факт нельзя выгружать в Facts пакета kimi: [] — можно. Основа — claims_check.publishable_issues (error и
-    COPY-F-UNVERIFIED любого уровня: x-kimi-map пускает «со слов» только для классов без needs_document); без модуля —
-    свой фильтр."""
+    """Почему факт нельзя выгружать в «Факты» facts.md входа холста: [] — можно. Основа — claims_check.publishable_issues
+    (error и COPY-F-UNVERIFIED любого уровня: publish_filter пускает «со слов» только для классов без needs_document); без
+    модуля — свой фильтр."""
     m = claims_module()
     if m is not None and facts is not None:
         try:
@@ -595,7 +624,7 @@ def schema_errors(data, schema, use_jsonschema=True):
     return SubsetValidator(schema).errors(data), 'встроенная (подмножество JSON Schema)'
 
 
-# ============================================================================================ файлы волны 2 (E, F, G, H)
+# ============================================================================================ файлы правил текста
 LEN_LANG = {'ru': 'ru', 'en': 'en'}
 LEN_UNIT = {'words': 'words', 'word': 'words', 'слова': 'words', 'слов': 'words', 'w': 'words',
             'chars': 'chars', 'char': 'chars', 'characters': 'chars', 'знаки': 'chars', 'знаков': 'chars', 'symbols': 'chars'}
@@ -639,8 +668,8 @@ def _len_put(acc, lang, unit, bound, v):
 
 
 def load_copy_slots(path):
-    """copy-slots.yaml (E) в терпимом разборе: {id: {fact_required, section_roles, genre, len}}, renames, заметки.
-    Формат E ещё не выпущен (фаза 1 J): берём slot_types | slots | types (список или словарь), длины из length(s)."""
+    """copy-slots.yaml в терпимом разборе: {id: {fact_required, section_roles, genre, len}}, renames, заметки.
+    Берём slot_types | slots | types (список или словарь), длины из length(s)."""
     data = load_yaml_file(path)
     notes, renames, items = [], {}, None
     if isinstance(data, dict):
@@ -666,7 +695,7 @@ def load_copy_slots(path):
             if key in it:
                 lens = _len_walk(it[key])
                 node = it[key] if isinstance(it[key], dict) else {}
-                for lg in ('ru', 'en'):  # формат E: length.<язык>: words/chars {min, target, max}, hard_*, primary
+                for lg in ('ru', 'en'):  # формат copy-slots: length.<язык>: words/chars {min, target, max}, hard_*, primary
                     sp = node.get(lg) if isinstance(node.get(lg), dict) else None
                     if not sp:
                         continue
@@ -700,7 +729,7 @@ RU_FORM = {'vy': 'вы', 'ty': 'ты', 'impersonal': None}
 
 
 def words_rx(term):
-    """Термин в формате words линтера C (06-anti-slop/02 §2.1, F: vocabulary.avoid): «*» — продолжение основы, «ё» = «е»,
+    """Термин в формате words линтера (06-anti-slop/02 §2.1; vocabulary.avoid голоса): «*» — продолжение основы, «ё» = «е»,
     пробел — любые пробелы; границы слова для кириллицы."""
     out, prev_space = [], False
     for ch in term.strip().lower():
@@ -721,8 +750,8 @@ def words_rx(term):
 
 
 def load_voice(path):
-    """voice.yaml (F, voice.schema.yaml v1): address.ru_form (vy | ty | impersonal) и exceptions, vocabulary.avoid (термины
-    в формате words линтера C, уровень, slot_types, unless), projections.tone_of_voice. Иной формат — терпимый разбор:
+    """voice.yaml (voice.schema.yaml v1): address.ru_form (vy | ty | impersonal) и exceptions, vocabulary.avoid (термины
+    в формате words линтера, уровень, slot_types, unless), projections.tone_of_voice. Иной формат — терпимый разбор:
     ключи с «обращение» / «avoid», «табу», «не говорим»."""
     data = load_yaml_file(path) or {}
     out = {'taboo': [], 'address': None, 'exceptions': [], 'tone_of_voice': None, 'format': None}
@@ -779,7 +808,7 @@ META_KEYS = {'title': 'title', 'meta-title': 'title', 'meta_title': 'title', 'de
 
 
 def load_meta_rules(path):
-    """meta-rules.yaml (G): limits (ориентиры длины по полям и языкам: write [min, max], info_over, warning_over,
+    """meta-rules.yaml: limits (ориентиры длины по полям и языкам: write [min, max], info_over, warning_over,
     warning_under, words_min) и checks_outside_linter (проверки между полями и страницами: meta-x-…). Правила для
     линтера из того же файла copy_lint.py подхватывает сам (profiles.yaml → external_rules).
     → {'limits': {поле: {язык: {...}}}, 'checks': {id: {...}}, 'format': 'G' | 'generic' | None}."""
@@ -824,7 +853,7 @@ def load_meta_rules(path):
 
 
 def _meta_checks(deck, mr, rep, final):
-    """Проверки мета между полями и страницами по checks_outside_linter G (id meta-x-…) и ориентиры длины limits G."""
+    """Проверки мета между полями и страницами по checks_outside_linter (id meta-x-…) и ориентиры длины limits из meta-rules.yaml."""
     T = 'validate'
     checks = mr.get('checks') or {}
     lang = (deck.get('lang') or 'ru').split('-')[0]
@@ -842,9 +871,9 @@ def _meta_checks(deck, mr, rep, final):
         for k, val in (('title', t), ('description', d)):
             if not val:
                 rep.add(T, lvl('meta-x-missing', 'error') if published else 'info', 'meta-x-missing', f'{pid}/meta/{k}',
-                        f'нет meta.{k}' + ('' if published else ' (черновик: заполнить до утверждения)'), 'G meta-rules.yaml checks_outside_linter; шаблоны — templates.' + str(page.get('page_type') or ''))
+                        f'нет meta.{k}' + ('' if published else ' (черновик: заполнить до утверждения)'), 'meta-rules.yaml checks_outside_linter; шаблоны — templates.' + str(page.get('page_type') or ''))
         if published and (not norm_ws(meta.get('og_title')) or not norm_ws(meta.get('og_description'))):
-            rep.add(T, lvl('meta-x-og-missing', 'warning'), 'meta-x-og-missing', f'{pid}/meta', 'нет og_title или og_description', 'Картинка OG — ai-media 10/01 §7; теги — site H.')
+            rep.add(T, lvl('meta-x-og-missing', 'warning'), 'meta-x-og-missing', f'{pid}/meta', 'нет og_title или og_description', 'Картинка OG — ai-media 10/01 §7; теги — site.')
         if t:
             titles.setdefault(t.lower(), []).append(pid)
         if d:
@@ -865,16 +894,16 @@ def _meta_checks(deck, mr, rep, final):
             n = len(val)
             where = f'{pid}/meta/{fld}'
             if spec.get('warning_over') is not None and n > spec['warning_over']:
-                rep.add(T, 'warning', 'COPY-D-META-LEN', where, f'{n} знаков > {spec["warning_over"]} (limits G)', 'Главное — в первых 55 знаках; сократите.')
+                rep.add(T, 'warning', 'COPY-D-META-LEN', where, f'{n} знаков > {spec["warning_over"]} (limits meta-rules.yaml)', 'Главное — в первых 55 знаках; сократите.')
             elif spec.get('info_over') is not None and n > spec['info_over']:
-                rep.add(T, 'info', 'COPY-D-META-LEN', where, f'{n} знаков > {spec["info_over"]} (limits G): хвост обрежется в выдаче', '')
+                rep.add(T, 'info', 'COPY-D-META-LEN', where, f'{n} знаков > {spec["info_over"]} (limits meta-rules.yaml): хвост обрежется в выдаче', '')
             if spec.get('warning_under') is not None and n < spec['warning_under']:
-                rep.add(T, 'warning', 'COPY-D-META-LEN', where, f'{n} знаков < {spec["warning_under"]} (limits G)', '')
+                rep.add(T, 'warning', 'COPY-D-META-LEN', where, f'{n} знаков < {spec["warning_under"]} (limits meta-rules.yaml)', '')
             w = spec.get('write')
             if isinstance(w, list) and len(w) == 2 and not (w[0] <= n <= w[1]):
-                rep.add(T, 'info', 'COPY-D-META-LEN', where, f'{n} знаков вне ориентира генерации {w[0]}–{w[1]} (limits G)', '')
+                rep.add(T, 'info', 'COPY-D-META-LEN', where, f'{n} знаков вне ориентира генерации {w[0]}–{w[1]} (limits meta-rules.yaml)', '')
             if spec.get('words_min') and len(words(val)) < spec['words_min']:
-                rep.add(T, 'info', 'COPY-D-META-LEN', where, f'слов меньше {spec["words_min"]} (limits G)', '')
+                rep.add(T, 'info', 'COPY-D-META-LEN', where, f'слов меньше {spec["words_min"]} (limits meta-rules.yaml)', '')
     for (dups, cid, default, fld) in ((titles, 'meta-x-duplicate-title', 'error', 'title'), (descs, 'meta-x-duplicate-description', 'warning', 'description')):
         for _txt, pids in dups.items():
             for pid in pids[1:]:
@@ -918,7 +947,7 @@ def meta_variant_for(meta, key):
 
 
 def meta_alternatives(meta, key):
-    """Живые альтернативы мета (G: 2–3 варианта title): не rejected, с текстом, не равные выбранному meta.<поле>."""
+    """Живые альтернативы мета (2–3 варианта title): не rejected, с текстом, не равные выбранному meta.<поле>."""
     mv = meta.get('variants') if isinstance(meta.get('variants'), dict) else {}
     cur = norm_ws(meta.get(key))
     return [v for v in mv.get(key) or [] if isinstance(v, dict) and v.get('status') != 'rejected'
@@ -961,7 +990,7 @@ def text_units(deck, page, include_meta=True, all_variants=False):
                 out.append({'path': f'{pid}/meta/{k}', 'kind': 'meta', 'slot_type': st, 'text': str(meta[k]),
                             'variant': 'meta', 'chosen': True, 'slot': None, 'section': None,
                             'fact_ids': variant_fact_ids(meta, meta_variant_for(meta, k))})
-            if all_variants:  # альтернативы мета (G: 2–3 варианта title) тоже показываются людям в тесте
+            if all_variants:  # альтернативы мета (2–3 варианта title) тоже показываются людям в тесте
                 for v in meta_alternatives(meta, k):
                     out.append({'path': f'{pid}/meta/{k}', 'kind': 'meta', 'slot_type': st, 'text': str(v['text']),
                                 'variant': str(v.get('id')), 'chosen': False, 'slot': None, 'section': None,
@@ -979,8 +1008,9 @@ class Ctx:
 
     def __init__(self, deck_path=None, facts=None, today=None, vocab_path=VOCAB_PATH, copy_slots_path=None,
                  voice_schema_path=VOICE_SCHEMA_PATH, meta_rules_path=META_RULES_PATH, claims_rules_path=CLAIMS_RULES_PATH,
-                 schema_path=SCHEMA_PATH):
+                 schema_path=SCHEMA_PATH, plan_path=None):
         self.deck_path = deck_path
+        self.plan_path = plan_path
         self.facts = facts
         self.today = today or today_iso()
         self.schema = load_copy_schema(schema_path)
@@ -1007,7 +1037,7 @@ def validate(data, ctx, rep=None, final=False, use_jsonschema=True, fresh=None, 
     data = deep_dates(data, found=found_dates)
     if found_dates:
         rep.add(T, 'info', 'COPY-D-DATE-UNQUOTED', found_dates[0], f'даты без кавычек ({len(found_dates)}): YAML читает их как дату',
-                'Пишите даты строкой в кавычках: date: "2026-09-24".')
+                'Пишите даты строкой в кавычках: date: "ГГГГ-ММ-ДД".')
     if not isinstance(data, dict) or not isinstance(data.get('copy_deck'), dict):
         if isinstance(data, dict) and 'pages' in data:
             rep.add(T, 'error', 'COPY-D-ROOT', '—', 'нет корня copy_deck: страницы лежат на верхнем уровне',
@@ -1020,19 +1050,19 @@ def validate(data, ctx, rep=None, final=False, use_jsonschema=True, fresh=None, 
     rep.tools['validate'] = {'schema_engine': engine}
     for path, msg in errs[:200]:
         rep.add(T, 'error', 'COPY-D-SCHEMA', path.replace('copy_deck.', '') or '—', msg,
-                'Поля и типы — copy-deck.schema.json; поля v0 не переименовывать (T2).')
+                'Поля и типы — copy-deck.schema.json; поля v0 не переименовывать.')
     deck = data['copy_deck']
     v0 = deck.get('version') == 0
     if v0:
         rep.add(T, 'info', 'COPY-D-V0', '—', 'copy deck v0: требования статусов v1 — предупреждениями',
-                'python3 99-raw/tools/copydeck.py upgrade DECK -o DECK-v1.yaml')
+                'python3 scripts/text/copydeck.py upgrade DECK -o DECK-v1.yaml')
 
     def sev(level):  # требования статусов v1 к deck v0 — мягче
         return 'warning' if (v0 and level == 'error') else level
 
     vocab = ctx.vocab
     if vocab is None:
-        rep.add(T, 'warning', 'COPY-D-RULES-MISSING', '—', f'временный словарь не найден: {VOCAB_PATH}', 'Типы страниц, секций и слотов не проверены.')
+        rep.add(T, 'warning', 'COPY-D-RULES-MISSING', '—', f'словарь site не найден: {VOCAB_PATH}', 'Типы страниц, секций, слотов и блоков не проверены.')
     # ---- id, ссылки, статусы
     page_ids = set()
     for page in pages_of(deck):
@@ -1051,23 +1081,173 @@ def validate(data, ctx, rep=None, final=False, use_jsonschema=True, fresh=None, 
                     'Укажите facts_ref от папки copy deck или --facts.')
         elif any(PLACEHOLDER_RX.search(u['text']) for pg in pages_of(deck) for u in text_units(deck, pg)):
             rep.add(T, 'info', 'COPY-D-FACTS-MISSING', '—', 'facts.yaml не подключён: пробелы [PLACEHOLDER] не сверены с missing[]', '')
-    else:  # ссылки и публикуемость фактов check берёт у claims_check.py; пробелы (missing_ids, fallback B2) — всегда здесь
+    else:  # ссылки и публикуемость фактов check берёт у claims_check.py; пробелы (missing_ids, fallback) — всегда здесь
         _validate_facts(deck, ctx, rep, sev, refs_and_publish=not skip_fact_checks)
+        _validate_examples(deck, ctx, rep)
     _validate_wave2(deck, ctx, rep)
     _validate_language(deck, ctx, rep)
+    _validate_plan(deck, ctx, rep)
     return rep
+
+
+def _validate_examples(deck, ctx, rep):
+    """Демо-данные (example: true у файла фактов или факта): на макете допустимы, в публикацию не идут — с --final
+    error COPY-D-EXAMPLE, без него — info (один раз на факт)."""
+    facts = ctx.facts
+    lvl = 'error' if ctx.final else 'info'
+    seen = set()
+    for page in pages_of(deck):
+        if (page.get('status') or 'draft') == 'rejected':
+            continue
+        for u in text_units(deck, page):
+            for ref in u['fact_ids']:
+                f, _m = facts.resolve(ref)
+                if f is None or f['id'] in seen or not (f.get('example') or facts.data.get('example')):
+                    continue
+                seen.add(f['id'])
+                rep.add('validate', lvl, 'COPY-D-EXAMPLE', u['path'], f"fact:{f['id']} — демо-данные (example: true" + (' у файла фактов' if facts.data.get('example') and not f.get('example') else '') + ')'
+                        + (': публикация с демо-фактом запрещена' if ctx.final else ': на макете допустимо, в публикацию не идёт'),
+                        'Замените факт настоящим с источником (факты заказчика) или уберите утверждение до публикации.')
+
+
+def plan_path_of(deck, ctx):
+    """План страницы для сверки стыка: --plan (ctx.plan_path) или page_plan_ref от папки copy deck; None — нет."""
+    if getattr(ctx, 'plan_path', None):
+        return ctx.plan_path
+    ref = deck.get('page_plan_ref')
+    if ref and looks_like_path(ref) and ctx.deck_path:
+        p = rel_to(ctx.deck_path, ref)
+        return p if p and os.path.exists(p) else None
+    return None
+
+
+def plan_text_slots(section):
+    """Текстовые слоты секции плана: [{id, slot, anatomy, group, intent, variants, …}]."""
+    return [x for x in ((section.get('slots') or {}).get('text') or []) if isinstance(x, dict) and x.get('id')]
+
+
+def plan_binds(section_or_page):
+    """fact:<id> и missing:<id> слотов данных по id текстового слота (binds): {slot_id: [ref, …]}."""
+    out = {}
+    for d in ((section_or_page.get('slots') or section_or_page.get('page_slots') or {}).get('data') or []):
+        if isinstance(d, dict) and d.get('fact'):
+            for b in d.get('binds') or []:
+                out.setdefault(str(b), [])
+                if d['fact'] not in out[str(b)]:
+                    out[str(b)].append(d['fact'])
+    return out
+
+
+def _validate_plan(deck, ctx, rep):
+    """Стык copy deck с планом страницы (x-site-map): page_id, page_type, секции (id, роль, блок), текстовые слоты (id,
+    слот словаря, анатомия, группа), порядок секций, слоты плана без текста. План не найден — info, если page_plan_ref
+    задан."""
+    T = 'validate'
+    pp = plan_path_of(deck, ctx)
+    if not pp:
+        if deck.get('page_plan_ref'):
+            rep.add(T, 'warning', 'COPY-D-PLAN', '—', f"page_plan_ref «{deck.get('page_plan_ref')}» не найден: стык с планом не сверен", 'Путь от папки copy deck (или --plan).')
+        return
+    try:
+        plan = deep_dates(load_yaml_file(pp) or {})
+    except Exception as e:  # noqa: BLE001
+        rep.add(T, 'error', 'COPY-D-PLAN', '—', f'план не читается: {e}', '')
+        return
+    pl = plan.get('page') or {}
+    pid = str(pl.get('id') or '')
+    page = next((p for p in pages_of(deck) if str(p.get('page_id')) == pid), None)
+    rep.tools.setdefault('validate', {})['page_plan'] = pp
+    if page is None:
+        rep.add(T, 'error', 'COPY-D-PLAN', '—', f'в copy deck нет страницы page.id плана «{pid}»', 'page_id = page.id плана (каркас — copydeck.py skeleton).')
+        return
+    if pl.get('page_type') and page.get('page_type') != pl.get('page_type'):
+        rep.add(T, 'error', 'COPY-D-PLAN', pid, f"page_type «{page.get('page_type')}» ≠ page_type плана «{pl.get('page_type')}»", '')
+    if (page.get('status') or 'draft') == 'approved' and plan.get('status') != 'approved':
+        rep.add(T, 'error', 'COPY-D-PLAN', pid, f"страница утверждена, а план — {plan.get('status') or 'без статуса'}", 'Закрытый файл не опирается на открытый: сначала утверждается план.')
+    psecs = {str(x.get('id')): x for x in plan.get('sections') or [] if isinstance(x, dict) and x.get('id')}
+    order = [str(x.get('id')) for x in plan.get('sections') or [] if isinstance(x, dict)]
+    n_sec = n_slot = 0
+    seen_slots = set()
+    for s in sections_of(page):
+        sid = str(s.get('section_id'))
+        ps = psecs.get(sid)
+        where = f'{pid}/{sid}'
+        if ps is None:
+            rep.add(T, 'error', 'COPY-D-PLAN', where, f'секции «{sid}» нет в плане', 'section_id = id секции плана; новая секция — правка плана (этап page-plan).')
+            continue
+        n_sec += 1
+        for fld, pv in (('section_role', ps.get('role')), ('site_section_id', sid), ('block', ps.get('block'))):
+            if s.get(fld) not in (None, '') and pv and str(s.get(fld)) != str(pv):
+                rep.add(T, 'error', 'COPY-D-PLAN', where, f"{fld} «{s.get(fld)}» ≠ плана «{pv}»", 'Поле стыка берётся из плана (x-site-map).')
+        pslots = {str(x['id']): x for x in plan_text_slots(ps)}
+        for sl in slots_of(s):
+            slid = str(sl.get('slot_id'))
+            psl = pslots.get(slid)
+            if psl is None:
+                rep.add(T, 'error', 'COPY-D-PLAN', f'{where}/{slid}', f'текстового слота «{slid}» нет в секции плана', 'slot_id = id текстового слота плана; новый слот — правка плана.')
+                continue
+            n_slot += 1
+            seen_slots.add((sid, slid))
+            for fld, pv in (('slot_type', psl.get('slot')), ('site_slot_id', psl.get('anatomy') or slid), ('group', psl.get('group'))):
+                if sl.get(fld) not in (None, '') and pv and str(sl.get(fld)) != str(pv):
+                    rep.add(T, 'error', 'COPY-D-PLAN', f'{where}/{slid}', f"{fld} «{sl.get(fld)}» ≠ плана «{pv}»", 'Поле стыка берётся из плана (x-site-map).')
+    miss = [(sid, str(x['id'])) for sid, ps in psecs.items() for x in plan_text_slots(ps) if (sid, str(x['id'])) not in seen_slots]
+    if miss:
+        rep.add(T, 'error' if ctx.final else 'warning', 'COPY-D-PLAN', pid,
+                f"текстовых слотов плана без текста в copy deck: {len(miss)} ({', '.join(f'{a}/{b}' for a, b in miss[:6])}{' …' if len(miss) > 6 else ''})",
+                'У каждого текстового слота утверждённого плана до передачи в дизайн есть текст (каркас — copydeck.py skeleton).')
+    got = [str(s.get('section_id')) for s in sections_of(page) if str(s.get('section_id')) in psecs]
+    if got != [x for x in order if x in got]:
+        rep.add(T, 'warning', 'COPY-D-PLAN', pid, 'порядок секций copy deck не совпадает с планом', 'Порядок секций — порядок плана.')
+    rep.tools['validate']['plan_stitch'] = {'sections': n_sec, 'slots': n_slot, 'plan_text_slots_without_text': len(miss)}
 
 
 def _status_of(v):
     return (v or {}).get('status') or 'draft'
 
 
+VOCAB_POOL_NAME = {'page': 'page_type', 'role': 'section_role', 'slot': 'slot'}
+
+
+def _vocab_check(rep, vocab, pool, ident, where, field):
+    """id словаря site: нет — error; out-of-scope и measurement-only — error (не для copy deck); deprecated — warning;
+    proposed — info (можно с пометкой)."""
+    st = vocab_status(vocab, pool, ident)
+    ns = VOCAB_POOL_NAME[pool]
+    if st is None:
+        rep.add('validate', 'error', 'COPY-D-VOCAB', where, f'{field} «{ident}» нет в словаре site ({ns})',
+                'id — из kb/site/02-site-types/vocabulary.yaml; нового id в словаре нет — вопрос владельцу словаря (site).')
+    elif st in ('out-of-scope', 'measurement-only'):
+        rep.add('validate', 'error', 'COPY-D-VOCAB', where, f'{field} «{ident}» — статус словаря {st}: не для copy deck', '')
+    elif st == 'deprecated':
+        rep.add('validate', 'warning', 'COPY-D-VOCAB', where, f'{field} «{ident}» устарел в словаре site (deprecated)', 'Замена — replaced_by в словаре.')
+    elif st == 'proposed':
+        rep.add('validate', 'info', 'COPY-D-VOCAB', where, f'{field} «{ident}» — предложение словаря site (proposed)', '')
+
+
+def _validate_block(rep, vocab, s, where):
+    """block секции — id блока blocks.yaml (block плана); роль секции — в section_role; блока нет — поля нет."""
+    b = s.get('block')
+    if b is None or not vocab or not vocab.get('blocks'):
+        return
+    if not str(b).strip():
+        rep.add('validate', 'warning', 'COPY-D-BLOCK', where, 'пустой block', 'Блок в плане не выбран — уберите поле.')
+        return
+    st = vocab['blocks'].get(str(b))
+    if st is None:
+        role_like = str(b) in vocab['section_roles']
+        rep.add('validate', 'error', 'COPY-D-BLOCK', where, f'block «{b}» нет в blocks.yaml' + (' — это роль секции' if role_like else ''),
+                ('Роль — в section_role; ' if role_like else '') + 'block — id блока каталога (block секции плана) или без поля.')
+    elif st in ('measurement-only', 'out-of-scope'):
+        rep.add('validate', 'error', 'COPY-D-BLOCK', where, f'block «{b}» — статус {st}: не для страницы', '')
+
+
 def _validate_page(deck, page, ctx, rep, sev, final, fresh, vocab):
     T = 'validate'
     pid = str(page.get('page_id'))
     ptype = page.get('page_type')
-    if vocab and ptype and ptype not in vocab['page_types']:
-        rep.add(T, 'error', 'COPY-D-VOCAB', pid, f'page_type «{ptype}» нет во временном словаре', 'Возьмите id из 99-raw/notes/temp-vocabulary-v0.yaml (page_types) или заведите предложение к словарю.')
+    if vocab and ptype:
+        _vocab_check(rep, vocab, 'page', ptype, pid, 'page_type')
     pstatus = page.get('status') or 'draft'
     rules = (ctx.schema.get('x-status-rules') or {})
     prules = (rules.get('page') or {}).get(pstatus, {})
@@ -1081,20 +1261,19 @@ def _validate_page(deck, page, ctx, rep, sev, final, fresh, vocab):
     for s in sections_of(page):
         sid = str(s.get('section_id'))
         if sid in sec_ids:
-            rep.add(T, 'error', 'COPY-D-ID-DUP', f'{pid}/{sid}', f'повтор section_id «{sid}» на странице', 'id секции уникален на странице (= site.sections[].id kimi).')
+            rep.add(T, 'error', 'COPY-D-ID-DUP', f'{pid}/{sid}', f'повтор section_id «{sid}» на странице', 'id секции уникален на странице (= id секции плана).')
         sec_ids.add(sid)
         role = s.get('section_role')
         if vocab:
-            if role and role not in vocab['section_roles']:
-                lvl = 'info' if role in vocab['proposals']['section_roles'] else 'error'
-                rep.add(T, lvl, 'COPY-D-VOCAB', f'{pid}/{sid}', f'section_role «{role}» ' + ('— предложение к словарю' if lvl == 'info' else 'нет во временном словаре'),
-                        'Роли секций — temp-vocabulary-v0.yaml section_roles.')
-            if not role:
-                guess = s.get('block') if s.get('block') in vocab['section_roles'] else KIMI_SECTION_ROLE.get(sid, sid if sid in vocab['section_roles'] else None)
+            if role:
+                _vocab_check(rep, vocab, 'role', role, f'{pid}/{sid}', 'section_role')
+            else:
+                guess = role_of_block(vocab, s.get('block')) or (sid if sid in vocab['section_roles'] else None)
                 rep.add(T, 'info', 'COPY-D-ROLE', f'{pid}/{sid}', 'нет section_role' + (f' (по block/id — «{guess}»)' if guess else ''),
-                        'Проставьте section_role (claims_check.py берёт роль секции для use.section_roles фактов).')
+                        'Проставьте section_role = role секции плана (claims_check.py берёт роль секции для use.section_roles фактов).')
+            _validate_block(rep, vocab, s, f'{pid}/{sid}')
         if not s.get('message') and (role or '') not in ('footer', 'contacts'):
-            rep.add(T, 'info', 'COPY-D-MESSAGE', f'{pid}/{sid}', 'у секции нет message (опоры иерархии B1)', 'message — одна фраза из иерархии сообщений (x-copy-deck-map B1).')
+            rep.add(T, 'info', 'COPY-D-MESSAGE', f'{pid}/{sid}', 'у секции нет message (опоры иерархии)', 'message — одна фраза из иерархии сообщений (x-copy-deck-map схемы смысла).')
         slot_ids = set()
         faq_q = faq_a = 0
         for sl in slots_of(s):
@@ -1106,11 +1285,12 @@ def _validate_page(deck, page, ctx, rep, sev, final, fresh, vocab):
             st = sl.get('slot_type')
             faq_q += st == 'faq-q'
             faq_a += st == 'faq-a'
-            if vocab and st and st not in vocab['slot_types']:
-                if st in vocab['proposals']['slot_types']:
-                    rep.add(T, 'info', 'COPY-D-VOCAB', path, f'slot_type «{st}» — предложение к временному словарю', '')
+            if vocab and st:
+                if st not in vocab['slot_types'] and vocab_status(vocab, 'slot', st):
+                    rep.add(T, 'error', 'COPY-D-VOCAB', path, f'slot_type «{st}» — слот словаря site вида {vocab["slot_kinds"].get(st)}, а не text',
+                            'В copy deck — только слоты вида text; медиа, данные и действия — в плане страницы.')
                 else:
-                    rep.add(T, 'error', 'COPY-D-VOCAB', path, f'slot_type «{st}» нет во временном словаре', 'Типы слотов — temp-vocabulary-v0.yaml (после E — copy-slots.yaml).')
+                    _vocab_check(rep, vocab, 'slot', st, path, 'slot_type')
             v = _validate_slot(deck, page, s, sl, path, ctx, rep, sev, final, fresh, pstatus)
             chosen_status.append((path, _status_of(v) if v else None))
         if faq_q != faq_a and faq_q and faq_a:
@@ -1121,7 +1301,7 @@ def _validate_page(deck, page, ctx, rep, sev, final, fresh, vocab):
     if pr is None:
         if genre == 'landing':
             rep.add(T, 'warning', 'COPY-D-PROMISE', pid, 'нет обещания первого экрана (promise)',
-                    'Заведите promise (или promise.from: <page>/hero/<slot>): оно уходит в product.goal kimi → «Promise:» в TASK и сверяется как текст страницы; export-kimi без него откажет.')
+                    'Заведите promise (или promise.from: <page>/hero/<slot>): обещание первого экрана — текст страницы, его сверяют как подзаголовок hero.')
     elif pr.get('from') and ptext is None:
         rep.add(T, 'error', 'COPY-D-PROMISE', f'{pid}/promise', f'promise.from «{pr.get("from")}» не найден или у слота нет выбранного варианта', 'Ссылка — <page_id>/<section_id>/<slot_id> этой страницы.')
     elif not pr.get('from'):
@@ -1132,14 +1312,14 @@ def _validate_page(deck, page, ctx, rep, sev, final, fresh, vocab):
     if page.get('cta_primary') and ctext is None:
         rep.add(T, 'error', 'COPY-D-CTA', pid, f'cta_primary «{page.get("cta_primary")}» не найден', 'Ссылка — <page>/<section>/<slot> слота cta-label.')
     elif cpath is None and genre in ('landing', 'site-page'):
-        rep.add(T, 'info', 'COPY-D-CTA', pid, 'на странице нет слота cta-label', 'site.cta.label пакета kimi останется пустым.')
-    # ---- мета (без правил G; с ними — meta-x-… в _meta_checks)
+        rep.add(T, 'info', 'COPY-D-CTA', pid, 'на странице нет слота cta-label', 'site.cta.label брифа холста останется пустым.')
+    # ---- мета (без meta-rules.yaml; с ним — meta-x-… в _meta_checks)
     meta = page.get('meta')
     need_meta = final or pstatus == 'approved'
     if isinstance(meta, dict) and ctx.meta_rules is None:
         for k in ('title', 'description'):
             if need_meta and not str(meta.get(k) or '').strip():
-                rep.add(T, 'error', 'COPY-D-META', f'{pid}/meta/{k}', f'пустое meta.{k} у страницы {pstatus}', 'Мета — часть copy deck (правила — G, meta-rules.yaml).')
+                rep.add(T, 'error', 'COPY-D-META', f'{pid}/meta/{k}', f'пустое meta.{k} у страницы {pstatus}', 'Мета — часть copy deck (правила — meta-rules.yaml).')
         for k in ('og_title', 'og_description'):
             if need_meta and not str(meta.get(k) or '').strip():
                 rep.add(T, 'warning', 'COPY-D-META', f'{pid}/meta/{k}', f'пустое meta.{k}', 'Без og:* превью ссылки соберёт площадка сама.')
@@ -1149,7 +1329,7 @@ def _validate_page(deck, page, ctx, rep, sev, final, fresh, vocab):
         for k, _st in META_FIELDS:
             if PLACEHOLDER_RX.search(str(meta.get(k) or '')):
                 rep.add(T, 'error', 'COPY-D-PLACEHOLDER', f'{pid}/meta/{k}', 'заглушка в мета опубликованной страницы', 'Закройте пробел в facts.yaml или перепишите без факта.')
-    # ---- варианты мета, пересмотр, бриф статьи (предложения G)
+    # ---- варианты мета, пересмотр, бриф статьи
     if isinstance(meta, dict):
         mv = meta.get('variants') if isinstance(meta.get('variants'), dict) else {}
         for k, vs in mv.items():
@@ -1165,12 +1345,12 @@ def _validate_page(deck, page, ctx, rep, sev, final, fresh, vocab):
         n_title = len([v for v in mv.get('title') or [] if isinstance(v, dict) and v.get('status') != 'rejected'])
         g = effective_genre(deck, page, None, None, None, vocab)[0]
         if meta.get('title') and n_title < 2 and (g == 'article' or ptype in ('service-page', 'seo-landing-page')) and pstatus in ('checked', 'approved'):
-            rep.add(T, 'info', 'COPY-D-META-VARIANTS', f'{pid}/meta/title', 'один вариант title у страницы из поиска', 'G 07/02 §4.3: 2–3 варианта title с планом теста (meta.variants.title, meta.test_plan).')
+            rep.add(T, 'info', 'COPY-D-META-VARIANTS', f'{pid}/meta/title', 'один вариант title у страницы из поиска', '07-seo-geo-copy/02 §4.3: 2–3 варианта title с планом теста (meta.variants.title, meta.test_plan).')
         if n_title >= 2 and not meta.get('test_plan'):
             rep.add(T, 'info', 'COPY-D-META-VARIANTS', f'{pid}/meta/title', f'вариантов title {n_title}, а плана теста нет', 'meta.test_plan: где и сколько недель мерить (Вебмастер, Search Console).')
         rb = meta.get('review_by')
         if rb and date_end(rb) < ctx.today:
-            rep.add(T, 'warning', 'COPY-D-META-REVIEW', f'{pid}/meta', f'пора пересмотреть мета (review_by {rb})', 'G: title и description устаревают; пересмотр раз в 12–24 месяца.')
+            rep.add(T, 'warning', 'COPY-D-META-REVIEW', f'{pid}/meta', f'пора пересмотреть мета (review_by {rb})', 'title и description устаревают; пересмотр раз в 12–24 месяца.')
     art = page.get('article')
     if isinstance(art, dict) and ctx.facts is not None:
         refs = [('author', art.get('author'))] + [('experts', x) for x in art.get('experts') or []] + \
@@ -1185,7 +1365,7 @@ def _validate_page(deck, page, ctx, rep, sev, final, fresh, vocab):
                 rep.add(T, 'warning', 'COPY-D-ARTICLE', f'{pid}/article/{what}', f'fact:{f["id"]} вида {f.get("kind")}, а не person', '')
     g = effective_genre(deck, page, None, None, None, vocab)[0]
     if g == 'article' and not isinstance(art, dict) and pstatus in ('checked', 'approved'):
-        rep.add(T, 'info', 'COPY-D-ARTICLE', pid, 'у статьи нет полей брифа article (интент, запрос, угол, автор)', 'G 07/02 §1.1.')
+        rep.add(T, 'info', 'COPY-D-ARTICLE', pid, 'у статьи нет полей брифа article (интент, запрос, угол, автор)', '07-seo-geo-copy/02 §1.1.')
     # ---- статус страницы из статусов выбранных вариантов
     if pstatus in ('checked', 'approved'):
         need = 'approved' if pstatus == 'approved' else 'checked'
@@ -1195,6 +1375,11 @@ def _validate_page(deck, page, ctx, rep, sev, final, fresh, vocab):
                     'Статус страницы не выше статуса её слотов.')
     if final and pstatus != 'approved':
         rep.add(T, 'error', 'COPY-D-FINAL', pid, f'--final: страница в статусе {pstatus}, а не approved', 'Публикуется только утверждённая страница.')
+    if pstatus == 'approved':
+        logs = [p for p, sl in process_holders(page) if sl.get('edit_log') or any(v.get('status') == 'rejected' for v in variants_of(sl))]
+        if logs:
+            rep.add(T, 'warning', 'COPY-D-PROCESS-LOG', pid, f'в утверждённой странице журнал процесса (edit_log, отклонённые варианты): {", ".join(logs[:5])}',
+                    'Журнал уходит при утверждении (copydeck.py approve); история — в git.')
 
 
 def _validate_slot(deck, page, section, sl, path, ctx, rep, sev, final, fresh, pstatus, is_promise=False):
@@ -1264,15 +1449,15 @@ def _validate_text(deck, page, section, sl, path, text, v, ctx, rep):
     st = sl.get('slot_type') or ''
     bad = BAD_PLACEHOLDER_RX.search(text)
     if bad:
-        rep.add(T, 'error', 'COPY-D-PLACEHOLDER-FORM', path, f'заглушка не по формату: «{bad.group(0)}»', 'Только [PLACEHOLDER: что именно] (B2, kimi).')
+        rep.add(T, 'error', 'COPY-D-PLACEHOLDER-FORM', path, f'заглушка не по формату: «{bad.group(0)}»', 'Только [PLACEHOLDER: что именно].')
     for tok in ('{{', '{#', '<UNSET'):
         if tok in text:
-            rep.add(T, 'error', 'COPY-D-KIMI-TOKEN', path, f'в тексте «{tok}» — сборщик kimi сочтёт это остатком шаблона', 'Уберите фигурные скобки из текста.')
+            rep.add(T, 'error', 'COPY-D-TEMPLATE-TOKEN', path, f'в тексте «{tok}» — проверка входа холста сочтёт это остатком шаблона', 'Уберите фигурные скобки из текста.')
     if not text.strip() and st not in ('image-alt',):
         rep.add(T, 'warning', 'COPY-D-EMPTY', path, 'пустой текст выбранного варианта', 'Пустым бывает только alt декоративной картинки.')
     if st == 'image-alt':
         if not sl.get('asset_ref'):
-            rep.add(T, 'warning', 'COPY-D-ASSET', path, 'alt без asset_ref', 'asset_ref — id слота плана ассетов или файл assets/… пакета kimi.')
+            rep.add(T, 'warning', 'COPY-D-ASSET', path, 'alt без asset_ref', 'asset_ref — id слота плана ассетов.')
         if not text.strip() and not re.search(r'декоратив|decorative', str(sl.get('notes') or '') + str(v.get('notes') or ''), re.I):
             rep.add(T, 'warning', 'COPY-D-ALT', path, 'пустой alt без пометки, что картинка декоративная', 'Декоративная — alt="" и notes: «декоративная»; информационная — описание сцены (ai-media 10/01 §8).')
         if re.match(r'\s*(фото|изображение|картинка|image of|picture of|photo of)\b', text, re.I):
@@ -1290,16 +1475,25 @@ def _validate_text(deck, page, section, sl, path, text, v, ctx, rep):
             rep.add(T, 'warning', 'COPY-D-ASSET', path, 'строка в картинке без asset_ref', 'asset_ref — id слота плана ассетов ai-media.')
 
 
+def first_screen_section(page):
+    """Секция первого экрана: роль hero (или id hero без роли); нет hero — первая секция после шапки (header, utility)."""
+    secs = sections_of(page)
+    hero = next((s for s in secs if (s.get('section_role') or s.get('section_id')) == 'hero'), None)
+    if hero is not None:
+        return hero
+    return next((s for s in secs if (s.get('section_role') or '') not in CHROME_TOP_ROLES), None)
+
+
 def _validate_facts(deck, ctx, rep, sev, refs_and_publish=True):
     """Факты текстов: (1) ссылки fact_ids, срок и публикуемость — их же даёт claims_check.py, поэтому check пропускает
-    эту часть, если сверка отработала (refs_and_publish=False); (2) пробелы: missing_ids и fallback B2 — этого
-    claims_check.py не делает, часть работает всегда (E3: check терял COPY-D-FALLBACK)."""
+    эту часть, если сверка отработала (refs_and_publish=False); (2) пробелы: missing_ids и fallback — этого
+    claims_check.py не делает, часть работает всегда."""
     T = 'validate'
     facts = ctx.facts
     for page in pages_of(deck):
         if (page.get('status') or 'draft') == 'rejected':
             continue
-        # свои fact_ids невыбранных живых вариантов (I3): битая ссылка — warning (этот текст пока не на странице)
+        # свои fact_ids невыбранных живых вариантов: битая ссылка — warning (этот текст пока не на странице)
         pid = str(page.get('page_id'))
         holders = [(f"{pid}/{s.get('section_id')}/{sl.get('slot_id')}", sl, slot_alternatives(sl)) for s in sections_of(page) for sl in slots_of(s)]
         if isinstance(page.get('promise'), dict) and not page['promise'].get('from'):
@@ -1351,7 +1545,7 @@ def _validate_facts(deck, ctx, rep, sev, refs_and_publish=True):
                 hit = next((x for x in facts.missing if norm_ws(x.get('placeholder')).lower() == norm_ws(m.group(0)).lower()), None)
                 if hit is not None:
                     gaps.setdefault(str(hit.get('id')), hit)
-            for gid, gm in gaps.items():  # fallback пробела (B2): заглушка уместна только при fallback: placeholder
+            for gid, gm in gaps.items():  # fallback пробела: заглушка уместна только при fallback: placeholder
                 fb = gm.get('fallback') or 'placeholder'
                 if fb == 'omit-block':
                     rep.add(T, 'warning', 'COPY-D-FALLBACK', u['path'], f'missing:{gid} — fallback omit-block: до ответа блок не показывают, а в тексте заглушка',
@@ -1362,9 +1556,9 @@ def _validate_facts(deck, ctx, rep, sev, refs_and_publish=True):
 
 
 def _validate_wave2(deck, ctx, rep):
-    """Файлы волны 2: есть — проверка работает; нет — предупреждение «правила не загружены», без падения."""
+    """Файлы правил текста: есть — проверка работает; нет — предупреждение «правила не загружены», без падения."""
     T = 'validate'
-    # --- E: copy-slots.yaml
+    # --- copy-slots.yaml
     if ctx.copy_slots_path:
         cs_path = ctx.copy_slots_path
     elif deck.get('copy_slots_ref'):
@@ -1377,7 +1571,7 @@ def _validate_wave2(deck, ctx, rep):
         except Exception as e:  # noqa: BLE001
             specs, renames, notes = None, {}, [f'copy-slots.yaml не читается: {e}']
         for n in notes:
-            rep.add(T, 'warning', 'COPY-D-RULES-FORMAT', '—', n, 'Сообщите J: формат E изменился.')
+            rep.add(T, 'warning', 'COPY-D-RULES-FORMAT', '—', n, 'Формат copy-slots.yaml изменился — сверьте разбор load_copy_slots.')
         if specs:
             meta_cs = specs.pop('__meta__', {}) or {}
             rep.tools.setdefault('validate', {})['copy_slots'] = os.path.relpath(cs_path, ROOT) if cs_path.startswith(ROOT) else cs_path
@@ -1392,9 +1586,9 @@ def _validate_wave2(deck, ctx, rep):
                     spec = specs.get(st)
                     if spec is None:
                         if st in renames:
-                            rep.add(T, 'warning', 'COPY-D-SLOT-RENAMED', path, f'slot_type «{st}» переименован E → «{renames[st]}»', 'Смените тип (upgrade) — copy-slots.yaml.')
+                            rep.add(T, 'warning', 'COPY-D-SLOT-RENAMED', path, f'slot_type «{st}» переименован в copy-slots.yaml → «{renames[st]}»', 'Смените тип (upgrade) — copy-slots.yaml.')
                         else:
-                            rep.add(T, 'warning', 'COPY-D-SLOT-UNKNOWN', path, f'slot_type «{st}» нет в copy-slots.yaml (E)', 'Правила текста для этого типа не заданы.')
+                            rep.add(T, 'warning', 'COPY-D-SLOT-UNKNOWN', path, f'slot_type «{st}» нет в copy-slots.yaml', 'Правила текста для этого типа не заданы.')
                         continue
                     v = chosen_variant(sl)
                     text = str((v or {}).get('text') or '')
@@ -1403,15 +1597,15 @@ def _validate_wave2(deck, ctx, rep):
                     body = PLACEHOLDER_RX.sub('', text)
                     vals = {'words': len(words(body)), 'chars': len(norm_ws(body))}
                     ls = (spec.get('lang') or {}).get(lang)
-                    exc = (' Исключения E: ' + one_line(spec['exceptions'][0])[:160]) if spec.get('exceptions') else ''
-                    if ls:  # формат E: основная единица (RU — знаки, EN — слова), p10–p90 → info, грубые границы D → warning
+                    exc = (' Исключения copy-slots.yaml: ' + one_line(spec['exceptions'][0])[:160]) if spec.get('exceptions') else ''
+                    if ls:  # формат copy-slots: основная единица (RU — знаки, EN — слова), p10–p90 → info, грубые границы замера → warning
                         prim = ls.get('primary') or 'chars'
                         prov = ' (provisional)' if ls.get('provisional') else ''
                         for unit in ('words', 'chars'):
                             val, rng, hard = vals[unit], ls.get(unit), ls.get(f'hard_{unit}')
                             un = 'слов' if unit == 'words' else 'знаков'
                             if hard and hard[1] is not None and val > hard[1]:
-                                rep.add(T, 'warning', 'COPY-D-LEN', path, f'{val} {un} > {hard[1]} — за грубой границей замера D ({st}, {lang}){prov}', 'Длины — copy-slots.yaml E.' + exc)
+                                rep.add(T, 'warning', 'COPY-D-LEN', path, f'{val} {un} > {hard[1]} — за грубой границей замера корпуса ({st}, {lang}){prov}', 'Длины — copy-slots.yaml.' + exc)
                             elif unit == prim and rng and rng[1] is not None and val > rng[1]:
                                 rep.add(T, 'info', 'COPY-D-LEN', path, f'{val} {un} > p90 лидеров {rng[1]} ({st}, {lang}){prov}', 'Сигнал, не ворота: у 10 % лидеров длиннее.' + exc)
                             if not PLACEHOLDER_RX.search(text):
@@ -1425,20 +1619,21 @@ def _validate_wave2(deck, ctx, rep):
                                 continue
                             val = vals[unit]
                             if mx is not None and val > mx:
-                                rep.add(T, 'warning', 'COPY-D-LEN', path, f'{val} {"слов" if unit == "words" else "знаков"} > max {mx} ({st}, {lg})', 'Длины — copy-slots.yaml E; законные исключения — notes.')
+                                rep.add(T, 'warning', 'COPY-D-LEN', path, f'{val} {"слов" if unit == "words" else "знаков"} > max {mx} ({st}, {lg})', 'Длины — copy-slots.yaml; законные исключения — notes.')
                             if mn is not None and val < mn and not PLACEHOLDER_RX.search(text):
                                 rep.add(T, 'info', 'COPY-D-LEN', path, f'{val} {"слов" if unit == "words" else "знаков"} < min {mn} ({st}, {lg})', '')
                     need = spec.get('fact_required')
                     refs = variant_fact_ids(sl, v)
                     if need == 'always' and not refs and not PLACEHOLDER_RX.search(text):
                         lvl = 'error' if STATUS_RANK.get(_status_of(v), 0) >= 1 else 'warning'
-                        rep.add(T, lvl, 'COPY-D-FACT-REQUIRED', path, f'{st}: факт обязателен (copy-slots.yaml E), а fact_ids пуст', 'Ссылка на facts.yaml или [PLACEHOLDER: …].')
+                        rep.add(T, lvl, 'COPY-D-FACT-REQUIRED', path, f'{st}: факт обязателен (copy-slots.yaml), а fact_ids пуст', 'Ссылка на facts.yaml или [PLACEHOLDER: …].')
                     roles = spec.get('section_roles') or []
                     if s is not None and roles and s.get('section_role') and s['section_role'] not in roles:
                         rep.add(T, 'info', 'COPY-D-SLOT-ROLE', path, f'{st} в секции «{s["section_role"]}», а copy-slots.yaml ждёт {roles}', '')
-                # составные правила E: ядро первого экрана (hero-core) — сумма слов слотов первой секции
+                # составные правила copy-slots.yaml: ядро первого экрана (hero-core) — сумма слов слотов секции hero; у страницы без
+                # hero (план другого типа) — первой секции после шапки
                 hc = ((meta_cs.get('composites') or {}).get('hero-core') or {})
-                first = next((s for s in sections_of(page) if (s.get('section_role') or s.get('block') or s.get('section_id')) == 'hero'), None)
+                first = first_screen_section(page)
                 if hc.get('max_words') and first is not None:
                     seen_t, total = set(), 0
                     for sl in slots_of(first):
@@ -1446,14 +1641,14 @@ def _validate_wave2(deck, ctx, rep):
                             seen_t.add(sl.get('slot_type'))
                             total += len(words(PLACEHOLDER_RX.sub('', str((chosen_variant(sl) or {}).get('text') or ''))))
                     if total > hc['max_words']:
-                        rep.add(T, 'warning', 'COPY-D-HERO-CORE', f"{pid}/{first.get('section_id')}", f'ядро первого экрана {total} слов > {hc["max_words"]} (hero-core, E)', one_line(hc.get('rule'))[:200])
+                        rep.add(T, 'warning', 'COPY-D-HERO-CORE', f"{pid}/{first.get('section_id')}", f'ядро первого экрана {total} слов > {hc["max_words"]} (hero-core)', one_line(hc.get('rule'))[:200])
     else:
-        rep.add(T, 'warning', 'COPY-D-RULES-MISSING', '—', 'правила не загружены: copy-slots.yaml (E) нет — длины слотов и обязательность фактов не проверены',
+        rep.add(T, 'warning', 'COPY-D-RULES-MISSING', '—', 'правила не загружены: copy-slots.yaml нет — длины слотов и обязательность фактов не проверены',
                 f'Появится {os.path.relpath(COPY_SLOTS_PATH, ROOT)} — проверка включится сама.')
-    # --- F: голос
+    # --- голос
     vref = deck.get('voice_ref')
     if not os.path.exists(ctx.voice_schema_path):
-        rep.add(T, 'warning', 'COPY-D-RULES-MISSING', '—', 'правила не загружены: voice.schema.yaml (F) нет — голос проверен только по voice.yaml, если он есть', '')
+        rep.add(T, 'warning', 'COPY-D-RULES-MISSING', '—', 'правила не загружены: voice.schema.yaml нет — голос проверен только по voice.yaml, если он есть', '')
     if vref and looks_like_path(vref):
         vp = rel_to(ctx.deck_path, vref) if ctx.deck_path else vref
         if vp and os.path.exists(vp):
@@ -1467,17 +1662,17 @@ def _validate_wave2(deck, ctx, rep):
         else:
             rep.add(T, 'warning', 'COPY-D-VOICE', '—', f'voice_ref «{vref}» не найден', 'Путь от папки copy deck.')
     elif vref:
-        rep.add(T, 'info', 'COPY-D-VOICE', '—', 'voice_ref — строка-описание (до профиля голоса F): голос не проверяется', '')
-    # --- G: мета
+        rep.add(T, 'info', 'COPY-D-VOICE', '—', 'voice_ref — строка-описание (до профиля голоса): голос не проверяется', '')
+    # --- мета
     mr = ctx.meta_rules
     if mr is not None:
         if not mr.get('format'):
-            rep.add(T, 'info', 'COPY-D-RULES-FORMAT', '—', 'meta-rules.yaml: limits и checks_outside_linter не распознаны — проверки мета пропущены (правила линтера G работают через copy_lint.py)', 'Сообщите J: формат G изменился.')
+            rep.add(T, 'info', 'COPY-D-RULES-FORMAT', '—', 'meta-rules.yaml: limits и checks_outside_linter не распознаны — проверки мета пропущены (правила мета в линтере работают через copy_lint.py)', 'Формат meta-rules.yaml изменился — сверьте разбор load_meta_rules.')
         else:
             rep.tools.setdefault('validate', {})['meta_rules'] = f"{os.path.relpath(ctx.meta_rules_path, ROOT) if ctx.meta_rules_path.startswith(ROOT) else ctx.meta_rules_path} ({mr['format']})"
             _meta_checks(deck, mr, rep, ctx.final)
     else:
-        rep.add(T, 'warning', 'COPY-D-RULES-MISSING', '—', 'правила не загружены: meta-rules.yaml (G) нет — длины мета и проверки между страницами не проверены', '')
+        rep.add(T, 'warning', 'COPY-D-RULES-MISSING', '—', 'правила не загружены: meta-rules.yaml нет — длины мета и проверки между страницами не проверены', '')
         seen = {}
         for page in pages_of(deck):
             for k in ('title', 'description'):
@@ -1486,7 +1681,7 @@ def _validate_wave2(deck, ctx, rep):
                     if (k, t) in seen:
                         rep.add(T, 'warning', 'COPY-D-META-DUP', f"{page.get('page_id')}/meta/{k}", f'meta.{k} совпадает со страницей {seen[(k, t)]}', 'У каждой страницы своя мета.')
                     seen.setdefault((k, t), page.get('page_id'))
-    # --- H: флаги права
+    # --- флаги права
     known = set(claim_class_info())
     rule_ids = None
     if os.path.exists(ctx.claims_rules_path):
@@ -1495,7 +1690,7 @@ def _validate_wave2(deck, ctx, rep):
         except Exception as e:  # noqa: BLE001
             rep.add(T, 'warning', 'COPY-D-RULES-FORMAT', '—', f'claims-rules.yaml не читается: {e}', '')
     else:
-        rep.add(T, 'warning', 'COPY-D-RULES-MISSING', '—', 'правила не загружены: claims-rules.yaml (H) нет — флаги права не проверены', '')
+        rep.add(T, 'warning', 'COPY-D-RULES-MISSING', '—', 'правила не загружены: claims-rules.yaml нет — флаги права не проверены', '')
     for page in pages_of(deck):
         for u in text_units(deck, page, include_meta=False):
             slot = u['slot']
@@ -1505,11 +1700,11 @@ def _validate_wave2(deck, ctx, rep):
                     continue
                 if fl.upper().startswith('COPY-'):
                     if rule_ids is None:
-                        rep.add(T, 'info', 'COPY-D-FLAGS', u['path'], f'флаг «{fl}»: правила H не загружены — не проверен', '')
+                        rep.add(T, 'info', 'COPY-D-FLAGS', u['path'], f'флаг «{fl}»: правила права не загружены — не проверен', '')
                     elif fl not in rule_ids:
-                        rep.add(T, 'warning', 'COPY-D-FLAGS', u['path'], f'флаг «{fl}» нет в claims-rules.yaml', 'id правил H — COPY-L-…')
+                        rep.add(T, 'warning', 'COPY-D-FLAGS', u['path'], f'флаг «{fl}» нет в claims-rules.yaml', 'id правил права — COPY-L-…')
                     continue
-                rep.add(T, 'warning', 'COPY-D-FLAGS', u['path'], f'неизвестный claim_flags «{fl}»', 'Классы B2 (x-claim-classes), id правил H (COPY-L-…) или флаги норм (38fz-5-3-1).')
+                rep.add(T, 'warning', 'COPY-D-FLAGS', u['path'], f'неизвестный claim_flags «{fl}»', 'Классы утверждений (x-claim-classes), id правил права (COPY-L-…) или флаги норм (38fz-5-3-1).')
     # подсказка: факт класса legal: required без флага в слоте
     if ctx.facts is not None:
         info = claim_class_info()
@@ -1521,7 +1716,7 @@ def _validate_wave2(deck, ctx, rep):
                     f, _m = ctx.facts.resolve(ref)
                     for c in (f or {}).get('claim_class') or []:
                         if (info.get(c) or {}).get('legal') == 'required' and c not in flags:
-                            rep.add(T, 'info', 'COPY-D-FLAGS', u['path'], f'fact:{f["id"]} класса {c} (legal: required), а в claim_flags его нет', f'claim_flags: [{c}] — флаг для H и человека.')
+                            rep.add(T, 'info', 'COPY-D-FLAGS', u['path'], f'fact:{f["id"]} класса {c} (legal: required), а в claim_flags его нет', f'claim_flags: [{c}] — флаг для проверки права и человека.')
 
 
 def _voice_checks(deck, voice, rep):
@@ -1536,7 +1731,7 @@ def _voice_checks(deck, voice, rep):
     for page in pages_of(deck):
         for u in text_units(deck, page, include_meta=True):
             if u['slot_type'] == 'testimonial-quote':
-                continue  # голос бренда не правит цитату клиента (F, B2)
+                continue  # голос бренда не правит цитату клиента
             low = u['text'].lower()
             for t, rx in rxs:
                 if t['lang'] not in ('any', lang) or (t['slot_types'] and u['slot_type'] not in t['slot_types']):
@@ -1544,14 +1739,14 @@ def _voice_checks(deck, voice, rep):
                 m = rx.search(low)
                 if m:
                     lvl = t['level'] if t['level'] in LEVELS else 'warning'
-                    fix = ('Вместо: ' + t['use_instead'] + '. ' if t['use_instead'] else '') + (f"Можно, если: {t['unless']}." if t['unless'] else 'Профиль голоса F (voice.yaml vocabulary.avoid).')
+                    fix = ('Вместо: ' + t['use_instead'] + '. ' if t['use_instead'] else '') + (f"Можно, если: {t['unless']}." if t['unless'] else 'Профиль голоса (voice.yaml vocabulary.avoid).')
                     rep.add(T, lvl, 'COPY-D-VOICE', u['path'], f'«не говорим» голоса: «{m.group(0)}» (термин {t["term"]})', fix)
             if lang == 'ru' and voice['address'] and u['slot_type'] not in voice.get('exceptions', []) \
                     and (u['section'] or {}).get('section_id') not in voice.get('exceptions', []):
                 if voice['address'] == 'вы' and re.search(r'(?<![а-яё])(ты|тебя|тебе|тобой|твой|твоя|твоё|твои|твоих|твоим)(?![а-яё])', low):
-                    rep.add(T, 'warning', 'COPY-D-VOICE', u['path'], 'обращение на «ты», а голос — на «вы»', 'address.ru_form голоса F.')
+                    rep.add(T, 'warning', 'COPY-D-VOICE', u['path'], 'обращение на «ты», а голос — на «вы»', 'address.ru_form голоса.')
                 if voice['address'] == 'ты' and re.search(r'(?<![а-яё])(вас|вам|вами|ваш|ваша|ваше|ваши|вашего|вашей)(?![а-яё])', low):
-                    rep.add(T, 'warning', 'COPY-D-VOICE', u['path'], 'обращение на «вы», а голос — на «ты»', 'address.ru_form голоса F.')
+                    rep.add(T, 'warning', 'COPY-D-VOICE', u['path'], 'обращение на «вы», а голос — на «ты»', 'address.ru_form голоса.')
 
 
 def _validate_language(deck, ctx, rep):
@@ -1605,7 +1800,7 @@ def flatten_for_claims(deck, ctx, pages=None, alternatives=False):
     только текст, который проверяется как текст слота (main_variant), с его фактами (variant_fact_ids).
     alternatives (check --all-variants): каждый живой невыбранный вариант (и альтернатива мета) сверяется «как если бы
     его выбрали» — копия страницы `<page>~alt~N`, где заменён один слот; соседние варианты не считаются текстом «рядом»
-    (nearby), отклонённые не сверяются (I3: claims_check load_deck при --all-variants не пропускал rejected).
+    (nearby), отклонённые не сверяются.
     → (deck, {(page, section, slot): путь}, {(копия страницы, section, slot): (путь, id варианта)})."""
     vocab = ctx.vocab
     out_pages, mapping, alt_map = [], {}, {}
@@ -1655,9 +1850,7 @@ def flatten_for_claims(deck, ctx, pages=None, alternatives=False):
                 mapping[(pid, sid, slid)] = f'{pid}/{sid}/{slid}'
                 for v in (slot_alternatives(sl) if alternatives else []):
                     alts.append((sid, slid, f'{pid}/{sid}/{slid}', str(v.get('id')), str(v.get('text') or ''), variant_fact_ids(sl, v)))
-            role = s.get('section_role')
-            if not role and vocab and s.get('block') in vocab['section_roles']:
-                role = s.get('block')
+            role = s.get('section_role') or role_of_block(vocab, s.get('block'))
             sec = {'section_id': sid, 'block': s.get('block') or '', 'slots': slots}
             if role:
                 sec['section_role'] = role
@@ -1693,10 +1886,10 @@ def _bump(agg, level, rule):
         agg['rules'].append(rule)
 
 
-def run_claims(deck, ctx, facts_path, rep, strict=False, all_variants=False, pages=None, timeout=240):
+def run_claims(deck, ctx, facts_path, rep, strict=False, all_variants=False, pages=None, timeout=240, final=False):
     """claims_check.py check на плоской копии → находки в rep и итоги по путям {путь: {errors, warnings, info, rules
     [, variants: {id: итоги}]}}: итоги пути — только текст слота (для статусов и записей); с all_variants у пути ещё
-    variants — каждый живой невыбранный вариант, сверенный «как если бы выбран» (I3). None — утилита не отработала."""
+    variants — каждый живой невыбранный вариант, сверенный «как если бы выбран». None — утилита не отработала."""
     if not os.path.exists(CLAIMS_CHECK):
         rep.add('claims', 'error', 'COPY-D-TOOL', '—', f'нет {CLAIMS_CHECK}', 'Сверка с фактами — ворота; без неё статус checked не ставится.')
         return None
@@ -1711,6 +1904,8 @@ def run_claims(deck, ctx, facts_path, rep, strict=False, all_variants=False, pag
             cmd += ['--facts', facts_path]
         if strict:
             cmd.append('--strict')
+        if final:
+            cmd.append('--final')   # демо-данные (example) — error: ворота публикации
         if deck.get('jurisdiction'):
             cmd += ['--jurisdiction', str(deck['jurisdiction'])]
         if deck.get('legal_category'):
@@ -1767,8 +1962,9 @@ BRIEF_TEXT_FIELDS = ('product.goal', 'product.description', 'product.primary_act
 
 
 def brief_texts(brief):
-    """Поля брифа kimi, которые уходят в TASK.md (Promise, Audience, The one job, CTA, Sections) и могут попасть на
-    страницу, — [(где, текст)]; хвост «; доказательства: …» у job не проверяется (это id фактов)."""
+    """Поля брифа холста, которые исполнитель читает как задание и которые могут попасть на страницу (product.goal,
+    description, primary_action, target_user, site.cta.label, работа секций), — [(где, текст)]; хвост «; доказательства:
+    …» у job не проверяется (это id фактов). Сверка — run_claims_text (урок «Кварца»: цель с обещанием здоровья)."""
     out = []
     for path in BRIEF_TEXT_FIELDS:
         cur = brief
@@ -1780,7 +1976,7 @@ def brief_texts(brief):
         if isinstance(sct, dict) and sct.get('job'):
             job = str(sct['job']).split('; доказательства:')[0]
             # «вопрос → опора»: стрелка — граница фразы; иначе эвристика имён claims_check принимает слово после «→» за
-            # имя (ложные COPY-F-NAME «Вызвать», «Один» — перепрогон J/01, J2 2026-09-24)
+            # имя (ложные COPY-F-NAME «Вызвать», «Один»)
             job = re.sub(r'([?!.…]?)\s*→\s*', lambda m: (m.group(1) + ' ') if m.group(1) else '. ', job)
             out.append((f"brief:site.sections[{sct.get('id') or i}].job", one_line(job)))
     return out
@@ -1810,9 +2006,9 @@ def run_claims_text(items, ctx, facts_path, rep, tool='brief', timeout=120):
         where = items[line - 1][0] if isinstance(line, int) and 0 < line <= len(items) else 'brief'
         lvl = f.get('level', 'info')
         if lvl == 'error' and ('.job' in where or 'target_user' in where):
-            lvl = 'warning'  # задание секции и аудитория — инструкции K3, не текст страницы: сигнал, не ворота
+            lvl = 'warning'  # задание секции и аудитория — инструкции исполнителю, не текст страницы: сигнал, не ворота
         rep.add(tool, lvl, f.get('rule', 'COPY-F-?'), where, f.get('message', ''),
-                (f.get('fix') or '') + ' Поле брифа уходит в TASK.md kimi и может попасть на страницу (урок «Кварца»).',
+                (f.get('fix') or '') + ' Поле брифа холста — задание исполнителю и может попасть на страницу (урок «Кварца»).',
                 fragment=str(f.get('fragment') or '')[:90])
         n += 1
     return n
@@ -1838,8 +2034,8 @@ def lint_module():
 
 
 def lint_cache(on=True):
-    """Кэш загрузки правил для lint_text: API C перечитывает YAML и компилирует ≈ 430 правил на каждый вызов (≈ 0,5 с;
-    copy deck на 35 текстов — 17 с против 0,7 с у copy_lint.py в режиме copy deck). Код C не меняется: в процессе
+    """Кэш загрузки правил для lint_text: API линтера перечитывает YAML и компилирует ≈ 430 правил на каждый вызов (≈ 0,5 с;
+    copy deck на 35 текстов — 17 с против 0,7 с у copy_lint.py в режиме copy deck). Код линтера не меняется: в процессе
     copydeck загрузчики copy_lint.load_yaml и load_rules заменяются запоминающими обёртками (по пути и времени изменения
     файла; YAML отдаётся глубокой копией). Равенство результатов с кэшем и без — --selftest. Выключить:
     COPYDECK_NO_LINT_CACHE=1."""
@@ -1892,7 +2088,7 @@ def _allow_list(raw):
 
 
 def _allowed(f, allow):
-    """lint_allow по правилам C: шаблон fnmatch по id; артефакты (ART) и данные (CNT) не подавляются."""
+    """lint_allow по правилам линтера: шаблон fnmatch по id; артефакты (ART) и данные (CNT) не подавляются."""
     if f.get('group') in ('ART', 'CNT'):
         return None
     for pat, reason in allow:
@@ -1981,8 +2177,8 @@ def run_lint(deck, ctx, rep, final=False, all_variants=False, page_pass=True, pa
                 if n not in notes and not n.startswith('жанр не задан'):
                     notes.append(n)
             allow = _allow_list(slot.get('lint_allow'))
-            # lint_text не знает fact_ids слота: повторяем режим copy deck линтера C — правила requires_no_fact и
-            # an-number-without-fact молчат при fact_ids; явный пустой fact_ids — warning, как у C для copy deck
+            # lint_text не знает fact_ids слота: повторяем режим copy deck линтера — правила requires_no_fact и
+            # an-number-without-fact молчат при fact_ids; явный пустой fact_ids — warning, как у линтера для copy deck
             refs = u['fact_ids']
             explicit_empty = (u['kind'] == 'slot' and 'fact_ids' in slot and not refs)
             for f in res.get('findings') or []:
@@ -2050,11 +2246,11 @@ def run_lint(deck, ctx, rep, final=False, all_variants=False, page_pass=True, pa
     rep.tools['lint'] = {'tool': f'copy_lint {getattr(C, "VERSION", "?")} (lint_text)', 'calls': n_calls, 'texts': len(cache),
                          'rules_cache': bool(_CL.get('cache')), 'notes': notes}
     if parity['meta_fact_ids']:
-        # два пути линтера (E3, J/05): copy_lint.py на copy deck не читает meta.fact_ids, copydeck — читает
+        # два пути линтера: copy_lint.py на copy deck не читает meta.fact_ids, copydeck — читает
         rep.tools['lint']['parity_copy_lint'] = parity
         rep.notes.append(f"meta.fact_ids сняли {parity['meta_fact_ids']} находок линтера в мета ({', '.join(parity['rules'])}; "
                          f"{', '.join(parity['paths'][:4])}): copy_lint.py на этом copy deck их покажет — он не читает meta.fact_ids "
-                         '(предложение C); ворота — copydeck.py check')
+                         '; ворота — copydeck.py check')
     for n in notes:
         rep.notes.append(f'copy_lint: {n}')
     return per_path
@@ -2147,7 +2343,7 @@ def resolve_facts_path(a, deck):
 def make_ctx(a, deck):
     fp = resolve_facts_path(a, deck)
     facts = load_facts(fp) if fp else None
-    ctx = Ctx(a.deck, facts, today_iso(getattr(a, 'today', None)))
+    ctx = Ctx(a.deck, facts, today_iso(getattr(a, 'today', None)), plan_path=getattr(a, 'plan', None))
     return ctx, fp
 
 
@@ -2169,7 +2365,7 @@ def cmd_claims(a):
     ctx, fp = make_ctx(a, deck)
     a.today = ctx.today
     rep = Report()
-    run_claims(deck, ctx, fp, rep, a.strict, a.all_variants)
+    run_claims(deck, ctx, fp, rep, a.strict, a.all_variants, final=a.final)
     write_outputs(a, rep, 'claims')
     if not a.quiet:
         print(render_text(rep, f'copydeck claims · {a.deck} · {ctx.today} · facts: {fp or "— (все числа и имена — без опоры)"}', a.verbose))
@@ -2202,7 +2398,7 @@ def _claims_rec(r, today, h):
 
 def apply_records(data, claims_pp, lint_pp, today, promote=False, variant_checks=False):
     """Копия deck с записями lint и claims (text_hash проверенного текста) у выбранных вариантов; promote — перевести
-    draft → checked там, где свежие claims и lint дали 0 error (checked — статус утилиты, approved — только человек).
+    draft и assumed → checked там, где свежие claims и lint дали 0 error (checked — статус утилиты, approved — только человек).
     variant_checks (check --all-variants --update) — ещё variant.checks {claims, lint} у каждого живого варианта (I:
     сравнить варианты до выбора; rubric не трогается). Свои fact_ids выбранного варианта переносятся в слот (прямые
     claims_check.py и copy_lint.py читают только слот); варианты без своих fact_ids при этом получают прежний список слота.
@@ -2254,11 +2450,11 @@ def apply_records(data, claims_pp, lint_pp, today, promote=False, variant_checks
                     if chk:
                         x['checks'] = chk
                         nv += 1
-            if promote and v.get('status', 'draft') == 'draft' and lint_pp and claims_pp and path in lint_pp and path in claims_pp \
+            if promote and v.get('status', 'draft') in ('draft', 'assumed') and lint_pp and claims_pp and path in lint_pp and path in claims_pp \
                     and lint_pp[path]['errors'] == 0 and claims_pp[path]['errors'] == 0:
                 v['status'] = 'checked'
                 v['review'] = {'by': 'copydeck.py check --promote', 'at': today}
-        if variant_checks:  # альтернативы мета (G): итоги — в checks варианта meta.variants.<поле>
+        if variant_checks:  # альтернативы мета: итоги — в checks варианта meta.variants.<поле>
             meta = page.get('meta') or {}
             mv = meta.get('variants') if isinstance(meta.get('variants'), dict) else {}
             for k, _st in META_FIELDS:
@@ -2291,7 +2487,7 @@ PAGE_REF_FIELDS = ('hierarchy_ref',)
 def rebase_refs(data, src_path, out_path):
     """Относительные пути copy deck (facts_ref, voice_ref, copy_slots_ref, meaning_ref, source_ref, page_plan_ref,
     hierarchy_ref) — от папки нового файла: копия deck в другой папке (check --update, approve -o, upgrade -o) иначе теряет
-    факты и голос (J3: approve в out/ → COPY-D-FACTS-MISSING). Строки-описания (voice_ref без .yaml) не трогаются.
+    факты и голос. Строки-описания (voice_ref без .yaml) не трогаются.
     → число переписанных путей."""
     if not src_path or not out_path:
         return 0
@@ -2330,7 +2526,7 @@ def cmd_check(a):
     ctx, fp = make_ctx(a, deck)
     a.today = ctx.today
     rep = Report()
-    claims_pp = run_claims(deck, ctx, fp, rep, a.strict, a.all_variants)           # 1. факты и право
+    claims_pp = run_claims(deck, ctx, fp, rep, a.strict, a.all_variants, final=a.final)   # 1. факты и право
     lint_pp = run_lint(deck, ctx, rep, a.final, a.all_variants, not a.no_page_pass)  # 2. стиль
     fresh = {}
     for p, r in (claims_pp or {}).items():
@@ -2342,7 +2538,7 @@ def cmd_check(a):
     extra = {'slots': {p: fresh[p] for p in sorted(fresh)}}
     if a.update:
         upd, n, nv = apply_records(data, claims_pp, lint_pp, ctx.today, promote=a.promote, variant_checks=a.all_variants)
-        st_line = ('draft → checked у текстов с 0 error claims и lint (--promote); approved ставит только человек (approve)'
+        st_line = ('draft и assumed → checked у текстов с 0 error claims и lint (--promote); approved ставит только человек (approve)'
                    if a.promote else 'статусы не менялись')
         dump_deck(upd, a.update, f'# copy deck — записи lint и claims обновлены copydeck.py check --update · {ctx.today}\n'
                                  f'# источник: {a.deck}; {st_line} (процесс — 10-templates-recipes/01-copy-deck-workflow.md)\n'
@@ -2355,14 +2551,17 @@ def cmd_check(a):
     return 2 if rep.count('error') else 0
 
 
-# ============================================================================================ export-kimi
-COPY_HEADER = ('Keys in square brackets name the element; text after the colon is the exact copy. '
-               'Do not translate, shorten or add text.')
-TYPO_LINE_RU = ('Typography is final: keep «quotes», dashes (—), non-breaking spaces and «₽» exactly as written; '
-                'Russian dashes are grammar, not style.')
-FACTS_INTRO = ('Only the facts below may appear on the site. Anything else that looks like a fact (a number, a name, a date, a price,\n'
-               'a rating, a client, a quote) is forbidden: write [PLACEHOLDER] instead and list it in REPORT.md.')
-NO_EXPORT_SLOTS = {'in-image-text'}   # строки в картинках уходят в спецификацию ассета, не в HTML
+# ============================================================================================ вход холста: copy.md и facts.md
+# Выгрузка во вход холста (references/claude-design.md § 6): тексты страницы — pages/<page-id>/copy.md, факты поверхности —
+# facts.md. Формат copy.md — ключ copy_md карты x-canvas-map схемы copy deck; его же пишет разбор исходников холста
+# (scripts/claude-design/dc_texts.py), читают сборщик входа и приём правок (import-copy).
+COPY_TITLE = 'Тексты страницы'
+COPY_RULE = 'Тексты — дословно: не переводить, не сокращать, не дописывать. Строка слота: [<slot_id>] <статус>: текст.'
+TYPO_LINE_RU = 'Типографика окончательная: кавычки «», тире (—), неразрывные пробелы и «₽» — как в тексте; тире — грамматика, а не стиль.'
+FACTS_RULE = ('На странице — только факты раздела «Факты». Другое число, имя, дата, цена, рейтинг, клиент или цитата — '
+              '[PLACEHOLDER: что] (раздел «Нет»).')
+COPY_MD_SECTION_RX = re.compile(r'^##\s+(\?|[a-z0-9]+(?:[_-][a-z0-9]+)*)(?:\s+(.*?))?\s*$')
+COPY_MD_SLOT_RX = re.compile(r'^\[(\?|[a-z0-9]+(?:[_-][a-z0-9]+)*)(?:\s+([^\]]*))?\](?:\s+([a-z]+))?:(?:\s(.*))?$')
 
 
 def md_cell(s):
@@ -2371,6 +2570,123 @@ def md_cell(s):
 
 def one_line(s):
     return norm_ws(str(s or '').replace('\n', ' '))
+
+
+def copy_md_rules(schema=None):
+    """Ключ copy_md карты x-canvas-map схемы copy deck: статусы по этапу, слоты этапа directions, невыгружаемые типы."""
+    cm = (((schema or load_copy_schema()).get('x-canvas-map') or {}).get('copy_md')) or {}
+    return {'stage_statuses': {k: list(v) for k, v in (cm.get('stage_statuses') or {}).items()},
+            'directions_slot_types': list(cm.get('directions_slot_types') or ['headline', 'cta-label']),
+            'not_exported': set(cm.get('not_exported') or ['image-alt', 'image-caption', 'in-image-text'])}
+
+
+def parse_copy_md(text):
+    """copy.md входа холста → ([{section_id, label, line, slots: [{slot_id, label, status, text, line}]}], заметки).
+    section_id и slot_id — None у «## ?» и «[?]» (тексты холста без секции или слота плана). Строки «# …», пустые и
+    «<!-- … -->» пропускаются; строки, начатые двумя пробелами, продолжают текст слота с новой строки."""
+    sections, notes, cur, last = [], [], None, None
+    for i, raw in enumerate(text.splitlines(), 1):
+        line = raw.rstrip()
+        if not line.strip() or line.lstrip().startswith('<!--'):
+            last = None if not line.strip() else last
+            continue
+        if raw.startswith('  ') and last is not None:
+            last['text'] = (last['text'] + '\n' + raw[2:].rstrip()) if last['text'] else raw[2:].rstrip()
+            continue
+        st = line.strip()
+        m = COPY_MD_SECTION_RX.match(st)
+        if m:
+            cur = {'section_id': None if m.group(1) == '?' else m.group(1), 'label': (m.group(2) or '').strip(), 'line': i, 'slots': []}
+            sections.append(cur)
+            last = None
+            continue
+        if st.startswith('#'):
+            last = None
+            continue
+        m = COPY_MD_SLOT_RX.match(st)
+        if m:
+            if cur is None:
+                cur = {'section_id': None, 'label': '', 'line': i, 'slots': []}
+                sections.append(cur)
+                notes.append(f'стр. {i}: строка слота до первой секции — секция «?»')
+            status = m.group(3)
+            if status and status not in STATUS_RANK:
+                notes.append(f'стр. {i}: статус «{status}» не из {", ".join(STATUS_RANK)}')
+            last = {'slot_id': None if m.group(1) == '?' else m.group(1), 'label': (m.group(2) or '').strip(),
+                    'status': status, 'text': m.group(4) or '', 'line': i}
+            cur['slots'].append(last)
+            continue
+        notes.append(f'стр. {i}: строка вне формата copy.md: «{st[:60]}»')
+        last = None
+    return sections, notes
+
+
+def render_copy_md(sections, title_lines=()):
+    """[{section_id, slots: [{slot_id, status, text}]}] → текст copy.md (абзацы — строками продолжения)."""
+    L = [f'# {t}' for t in title_lines] + ([''] if title_lines else [])
+    for sec in sections:
+        L.append(f"## {sec.get('section_id') or '?'}" + (f" {sec['label']}" if sec.get('label') else ''))
+        for sl in sec.get('slots') or []:
+            head = f"[{sl.get('slot_id') or '?'}" + (f" {sl['label']}" if sl.get('label') else '') + ']'
+            if sl.get('status'):
+                head += f" {sl['status']}"
+            parts = str(sl.get('text') or '').strip('\n').split('\n')
+            L.append(f"{head}: {parts[0].strip()}".rstrip())
+            L += ['  ' + x.strip() for x in parts[1:]]
+        L.append('')
+    return '\n'.join(L).rstrip() + '\n'
+
+
+def export_copy_md(deck, page, stage, schema=None):
+    """Тексты страницы для этапа холста. → (copy.md, строки [(секция, слот, статус)], пробелы [находка]). В copy.md —
+    выбранный текст, если его статус разрешён этапом (x-canvas-map copy_md.stage_statuses); на этапе directions — только
+    заголовок и кнопка первого экрана; alt, подписи и строки в картинках не выгружаются. Слот без текста статуса этапа в
+    файл не пишется: пробел — находка COPY-D-STAGE (строка пробелов INPUT.md; на макете — error, на вайрфрейме и
+    направлениях — warning)."""
+    rules = copy_md_rules(schema)
+    allowed = rules['stage_statuses'].get(stage)
+    if allowed is None:
+        raise SystemExit(f"этап «{stage}»: у copy.md этапы {', '.join(rules['stage_statuses'])}")
+    pid = str(page.get('page_id'))
+    secs = sections_of(page)
+    if stage == 'directions':
+        first = first_screen_section(page)
+        secs = [first] if first is not None else []
+    out, rows, gaps = [], [], []
+    for s in secs:
+        sid = str(s.get('section_id'))
+        slots = []
+        taken = set()
+        for sl in slots_of(s):
+            st = sl.get('slot_type')
+            if st in rules['not_exported']:
+                continue
+            if stage == 'directions' and (st not in rules['directions_slot_types'] or st in taken):
+                continue
+            taken.add(st)
+            path = f"{pid}/{sid}/{sl.get('slot_id')}"
+            v = chosen_variant(sl)
+            if v is None:
+                gaps.append({'path': path, 'status': None, 'why': 'нет выбранного варианта (chosen)'})
+                continue
+            status = _status_of(v)
+            text = str(v.get('text') or '')
+            if status not in allowed:
+                gaps.append({'path': path, 'status': status, 'why': f"текст в статусе {status}, а этап {stage} берёт {' · '.join(allowed)}"})
+                continue
+            if not text.strip():
+                gaps.append({'path': path, 'status': status, 'why': 'пустой текст'})
+                continue
+            slots.append({'slot_id': str(sl.get('slot_id')), 'status': status, 'text': text.strip()})
+            rows.append((sid, str(sl.get('slot_id')), status))
+        if slots:
+            out.append({'section_id': sid, 'slots': slots})
+    lang = (deck.get('lang') or 'ru').split('-')[0]
+    title = [f"{COPY_TITLE} {pid} — {deck.get('product_name') or deck.get('site') or ''} ({lang}), этап {stage}".replace(' —  (', ' (')]
+    title.append(COPY_RULE)
+    if lang == 'ru':
+        title.append(TYPO_LINE_RU)
+    return render_copy_md(out, title), rows, gaps
 
 
 def fact_verbatims(f, lang):
@@ -2390,24 +2706,27 @@ def fact_source_line(f):
     return s or '—'
 
 
-def fact_where(f, page):
+def fact_where(f, page=None, lang=None):
+    """Колонка «где можно»: роли use → id секций страницы (или роли), слоты, «не в …», «рядом: …»."""
     use = f.get('use') or {}
     if not use or use.get('any'):
-        return 'any section'
+        return 'везде'
     roles = use.get('section_roles') or []
-    secs = [str(s.get('section_id')) for s in sections_of(page) if s.get('section_role') in roles or s.get('section_id') in roles]
+    secs = [str(s.get('section_id')) for s in sections_of(page or {}) if s.get('section_role') in roles or s.get('section_id') in roles]
     parts = []
     if secs:
         parts.append(', '.join(dict.fromkeys(secs)))
     elif roles:
-        parts.append('roles: ' + ', '.join(roles))
+        parts.append('роли: ' + ', '.join(roles))
     if use.get('slot_types'):
-        parts.append('slots: ' + ', '.join(use['slot_types']))
+        parts.append('слоты: ' + ', '.join(use['slot_types']))
     if use.get('not_in'):
-        parts.append('not in: ' + ', '.join(use['not_in']))
-    if use.get('requires_nearby'):
-        parts.append('with: ' + one_line(use['requires_nearby']))
-    return '; '.join(parts) or 'any section'
+        parts.append('не в: ' + ', '.join(use['not_in']))
+    near = ((f.get('translations') or {}).get(lang) or {}).get('requires_nearby') if lang and lang != (f.get('lang') or 'ru').split('-')[0] else None
+    near = near or use.get('requires_nearby')
+    if near:
+        parts.append('рядом: ' + one_line(near))
+    return '; '.join(parts) or 'везде'
 
 
 def used_fact_ids(deck, page, facts):
@@ -2417,16 +2736,12 @@ def used_fact_ids(deck, page, facts):
             f, _m = facts.resolve(ref) if facts else (None, None)
             if f is not None and f['id'] not in ids:
                 ids.append(f['id'])
-    ptext, pv, psrc, pr = promise_info(deck, page)
-    for ref in (variant_fact_ids(pr, pv) if pr is not None and not pr.get('from') else []):
-        f, _m = facts.resolve(ref) if facts else (None, None)
-        if f is not None and f['id'] not in ids:
-            ids.append(f['id'])
     return ids
 
 
 def never_rows(facts, today, lang):
-    """Never claim: never_claim[] + x-never-claim-defaults без снимающего факта (x-kimi-map B2) → [(id, текст, почему оставлен)]."""
+    """«Нельзя утверждать»: never_claim[] + x-never-claim-defaults без снимающего проверенного факта (never_claim_md карты
+    фактов) → [(id, текст на языке страницы, lift)]."""
     rows = []
     pub = [f for f in facts.facts if not publish_issues(f, today, facts)] if facts else []
     pub_classes = {c for f in pub for c in f.get('claim_class') or []}
@@ -2441,14 +2756,62 @@ def never_rows(facts, today, lang):
             continue
         if lift == 'legal-review' and cls and cls & legal_ok:
             continue
-        text = r.get('text') or ''
+        text = ((r.get('translations') or {}).get(lang) or {}).get('text') or r.get('text') or ''
         if lang == 'en' and r.get('origin') == 'default' and r.get('id') in NEVER_EN:
             text = NEVER_EN[r['id']]
         rows.append((r.get('id'), text, lift))
     return rows
 
 
-def section_job(section, deck, page, facts, with_facts=False):
+def export_facts_md(facts, today, lang, page=None, used=None, stage='wireframe', product_name=''):
+    """facts.md входа холста: «Факты» (публикуемые по publish_filter; демо-данные — с пометкой), «Нет» (пробелы и
+    непубликуемые факты заглушкой), «Нельзя утверждать». → (текст, сводка {published, hidden, missing, never_rows,
+    demo, status})."""
+    F = ['## Факты', '', '| id | дословно | источник | где можно |', '|---|---|---|---|']
+    M = ['## Нет', '', '| id | чего нет | на странице до ответа | кто даст |', '|---|---|---|---|']
+    summ = {'published': 0, 'hidden': 0, 'missing': 0, 'never_rows': 0, 'demo': [], 'status': (facts.data.get('status') if facts else None),
+            'lang_fallback': []}
+    if facts:
+        file_demo = bool(facts.data.get('example'))
+        for f in facts.facts:
+            if used is not None and f['id'] not in used:
+                continue
+            iss = publish_issues(f, today, facts)
+            if iss:
+                why = '; '.join(re.sub(r'^COPY-F-[A-Z-]+:\s*fact:[\w.-]+:\s*', '', x) for x in iss)
+                resp = (f.get('responsible') or {}).get('role') or ((facts.data.get('owner') or {}).get('role')) or 'заказчик'
+                M.append(f"| {md_cell(f['id'])} | {md_cell(f.get('canonical') or (f.get('verbatim') or [''])[0])} — пока не публикуется: {md_cell(why)} "
+                         f"| [PLACEHOLDER: {md_cell(f['id'])}] | {md_cell(resp)} |")
+                summ['hidden'] += 1
+                continue
+            vs, ok = fact_verbatims(f, lang)
+            if not ok:
+                summ['lang_fallback'].append(f['id'])
+                vs = [x for x in f.get('verbatim') or [] if x]
+            demo = file_demo or bool(f.get('example'))
+            if demo:
+                summ['demo'].append(f['id'])
+            src = ('демо: вымышленные данные · ' if demo else '') + fact_source_line(f)
+            for i, t in enumerate(vs, 1):
+                rid = f['id'] if i == 1 else '%s.%d' % (f['id'], i)
+                F.append(f"| {md_cell(rid)} | {md_cell(t)} | {md_cell(src)} | {md_cell(fact_where(f, page, lang))} |")
+            summ['published'] += 1
+        for m in facts.missing:
+            M.append(f"| {md_cell(m.get('id'))} | {md_cell(m.get('what'))} | {md_cell(m.get('placeholder'))} | {md_cell(m.get('who'))} |")
+            summ['missing'] += 1
+    if summ['published'] == 0:
+        F.append('| — | (фактов нет: любое число, имя, цена на странице — [PLACEHOLDER]) | — | — |')
+    if len(M) == 4:
+        M.append('| — | ничего | — | — |')
+    nrows = never_rows(facts, today, lang)
+    summ['never_rows'] = len(nrows)
+    N = ['## Нельзя утверждать', ''] + ([f'- {one_line(t)};' for _id, t, _lift in nrows] or ['- ничего сверх фактов.'])
+    head = [f"# Факты — {product_name or (facts.data.get('site') if facts else '') or ''} ({lang}), этап {stage}", f'# {FACTS_RULE}', '']
+    return '\n'.join(head + F + [''] + M + [''] + N) + '\n', summ
+
+
+def section_job(section, deck, page, facts, with_facts=True):
+    """Работа секции для брифа холста (site.sections[].job): «<вопрос> → <сообщение>; доказательства: <id фактов>»."""
     msg = one_line(section.get('message'))
     q = one_line(section.get('question'))
     fids = []
@@ -2462,8 +2825,162 @@ def section_job(section, deck, page, facts, with_facts=False):
     return base + (f'; доказательства: {", ".join(fids)}' if (fids and with_facts) else '')
 
 
-MEANING_SCHEMA_PATH = os.path.join(ROOT, '02-strategy-messaging', 'meaning.schema.yaml')
+def export_canvas(data, ctx, out_dir, page_id, stage, facts_scope='all'):
+    """Выгрузка страницы во вход холста: out_dir/pages/<page-id>/copy.md и out_dir/facts.md. → (Report, сводка).
+    Находки: validate deck (формат, статусы, стык), пробелы текстов этапа (COPY-D-STAGE: макет берёт литералы
+    утверждённого copy deck — error; на вайрфрейме и направлениях — warning, пробел уходит строкой в INPUT.md), статус
+    файла фактов (COPY-D-FACTS-STATUS: вход берёт факты confirmed — на вайрфрейме warning, на макете error), демо-данные
+    (info)."""
+    rep = Report()
+    deck = deck_root(data)
+    validate(data, ctx, rep, final=False)
+    live = [p for p in pages_of(deck) if (p.get('status') or 'draft') != 'rejected']
+    page = next((p for p in live if str(p.get('page_id')) == str(page_id)), None) if page_id else (live[0] if len(live) == 1 else None)
+    if page is None:
+        rep.add('export', 'error', 'COPY-D-EXPORT', page_id or '—', 'нет такой страницы (или она rejected); страниц несколько — укажите --page', '')
+        return rep, None
+    pid = str(page.get('page_id'))
+    lang = (deck.get('lang') or 'ru').split('-')[0]
+    copy_md, rows, gaps = export_copy_md(deck, page, stage, ctx.schema)
+    for g in gaps:
+        rep.add('export', 'error' if stage == 'mockup' else 'warning', 'COPY-D-STAGE', g['path'], g['why'],
+                'Текст этапа: вайрфрейм — assumed · checked, макет — approved (x-canvas-map copy_md).')
+    facts = ctx.facts
+    used = used_fact_ids(deck, page, facts) if (facts and facts_scope == 'used') else None
+    facts_md, fsumm = export_facts_md(facts, ctx.today, lang, page, used, stage, deck.get('product_name') or '')
+    if facts is None:
+        rep.add('export', 'warning', 'COPY-D-EXPORT', '—', 'facts.yaml не подключён: в facts.md нет фактов — любое число на странице станет [PLACEHOLDER]', '')
+    elif fsumm['status'] != 'confirmed':
+        rep.add('export', 'error' if stage == 'mockup' else 'warning', 'COPY-D-FACTS-STATUS', '—',
+                f"facts.yaml в статусе {fsumm['status'] or 'draft'}: вход холста берёт подтверждённые заказчиком факты (confirmed)",
+                'Подтверждение фактов заказчиком — этап meaning (status: confirmed).')
+    for fid in fsumm['demo']:
+        rep.add('export', 'info', 'COPY-D-EXAMPLE', pid, f'fact:{fid} — демо-данные: на макете допустимо, в публикацию не идёт', '')
+    for fid in fsumm['lang_fallback']:
+        rep.add('export', 'warning', 'COPY-D-LANG', pid, f'fact:{fid}: нет translations.{lang} — в facts.md ушла формулировка оригинала', '')
+    pdir = os.path.join(out_dir, 'pages', pid)
+    os.makedirs(pdir, exist_ok=True)
+    with open(os.path.join(pdir, 'copy.md'), 'w', encoding='utf-8') as f:
+        f.write(copy_md)
+    with open(os.path.join(out_dir, 'facts.md'), 'w', encoding='utf-8') as f:
+        f.write(facts_md)
+    summ = {'page': pid, 'stage': stage, 'rows': len(rows), 'gaps': len(gaps), 'files': [os.path.join('pages', pid, 'copy.md'), 'facts.md'],
+            'facts_published': fsumm['published'], 'facts_hidden': fsumm['hidden'], 'missing': fsumm['missing'],
+            'never_rows': fsumm['never_rows'], 'demo_facts': fsumm['demo'], 'facts_status': fsumm['status'], 'facts_scope': facts_scope,
+            'publish_filter': 'claims_check.publishable_issues' if claims_module() is not None else 'свой (publish_filter)'}
+    return rep, summ
+
+
+def cmd_export(a):
+    data = open_deck(a.deck)
+    deck = deck_root(data)
+    ctx, fp = make_ctx(a, deck)
+    a.today = ctx.today
+    out = a.out or str(kbpaths.out('text', 'export'))
+    rep, summ = export_canvas(data, ctx, out, a.page, a.stage, a.facts_scope)
+    write_outputs(a, rep, 'export', {'export': summ})
+    if not a.quiet:
+        print(render_text(rep, f'copydeck export · {a.deck} → {out} · этап {a.stage} · facts: {fp or "—"}', a.verbose))
+        if summ:
+            print('  файлы: ' + ', '.join(os.path.join(out, x) for x in summ['files']))
+            print(f"  страница {summ['page']}: строк {summ['rows']}, пробелов этапа {summ['gaps']}; фактов {summ['facts_published']} "
+                  f"(скрыто {summ['facts_hidden']}, демо {len(summ['demo_facts'])}), пробелов фактов {summ['missing']}, строк «Нельзя утверждать» {summ['never_rows']}")
+    return 2 if rep.count('error') or not summ else 0
+
+
+# ============================================================================================ приём правок текста с холста
+def _next_variant_id(slot):
+    used = {str(v.get('id')) for v in variants_of(slot)}
+    for i in range(26 * 27):
+        vid = chr(97 + i % 26) if i < 26 else chr(96 + i // 26) + chr(97 + i % 26)
+        if vid not in used:
+            return vid
+    raise SystemExit('нет свободного id варианта')
+
+
+def import_copy(data, copy_text, page_id, date=None, choose=False):
+    """Правки заказчика на холсте → copy deck: изменённый текст слота — новый вариант source: customer, статус draft
+    (дальше — сверка фактов и права, линтер, при 0 error — approved словом заказчика). choose — вариант сразу выбран, а
+    страница checked или approved возвращается в draft. Тексты холста без секции или слота плана — находки «перенести в
+    план?» (структура — этап page-plan). → (новый data | None, Report, сводка)."""
+    rep = Report()
+    out = _copy.deepcopy(data)
+    deck = deck_root(out)
+    page = next((p for p in pages_of(deck) if str(p.get('page_id')) == str(page_id)), None)
+    if page is None:
+        rep.add('import', 'error', 'COPY-D-IMPORT', str(page_id), 'нет такой страницы в copy deck', '')
+        return None, rep, None
+    sections, notes = parse_copy_md(copy_text)
+    for n in notes:
+        rep.add('import', 'warning', 'COPY-D-IMPORT', str(page_id), n, 'Синтаксис copy.md — x-canvas-map copy_md схемы copy deck.')
+    date = date or today_iso()
+    summ = {'changed': [], 'same': 0, 'unmapped': 0, 'unknown': 0, 'chosen': choose}
+    seen = set()
+    for sec in sections:
+        s = next((x for x in sections_of(page) if sec.get('section_id') and str(x.get('section_id')) == sec['section_id']), None)
+        for row in sec.get('slots') or []:
+            where = f"{page_id}/{sec.get('section_id') or '?'}/{row.get('slot_id') or '?'}"
+            if s is None or row.get('slot_id') is None:
+                summ['unmapped'] += 1
+                rep.add('import', 'warning', 'COPY-D-IMPORT-STRUCT', where, f"текст холста без {'секции' if s is None else 'слота'} плана: «{one_line(row.get('text'))[:60]}»",
+                        'Вопрос заказчику «перенести в план?»: да — правка на этапе page-plan, нет — откат на холсте с его согласия.')
+                continue
+            sl = next((x for x in slots_of(s) if str(x.get('slot_id')) == row['slot_id']), None)
+            if sl is None:
+                summ['unknown'] += 1
+                rep.add('import', 'warning', 'COPY-D-IMPORT-STRUCT', where, 'слота нет в copy deck', 'Новый слот — правка плана (этап page-plan).')
+                continue
+            seen.add((str(s.get('section_id')), str(sl.get('slot_id'))))
+            cur = chosen_variant(sl)
+            new = str(row.get('text') or '').strip()
+            if cur is not None and norm_ws(cur.get('text')) == norm_ws(new):
+                summ['same'] += 1
+                continue
+            same = next((v for v in variants_of(sl) if norm_ws(v.get('text')) == norm_ws(new) and v.get('source') == 'customer'), None)
+            if same is None:
+                vid = _next_variant_id(sl)
+                sl.setdefault('variants', []).append({'id': vid, 'text': new, 'status': 'draft', 'source': 'customer',
+                                                      'notes': f'правка заказчика на холсте, {date}'})
+            else:
+                vid = str(same.get('id'))
+            summ['changed'].append({'path': where, 'variant': vid, 'was': one_line((cur or {}).get('text'))[:80]})
+            if choose:
+                sl['chosen'] = vid
+    if choose and summ['changed'] and (page.get('status') or 'draft') in ('checked', 'approved'):
+        page['status'] = 'draft'
+        page.pop('approval', None)
+    missing = [f"{page_id}/{s.get('section_id')}/{sl.get('slot_id')}" for s in sections_of(page) for sl in slots_of(s)
+               if (str(s.get('section_id')), str(sl.get('slot_id'))) not in seen and sl.get('slot_type') not in copy_md_rules()['not_exported']
+               and any(sec.get('section_id') == str(s.get('section_id')) for sec in sections)]
+    for m in missing[:20]:
+        rep.add('import', 'info', 'COPY-D-IMPORT', m, 'слота нет в copy.md холста: текст на холсте удалён или не выгружался этапом', 'Удаление текста — вопрос структуры: «перенести в план?».')
+    return out, rep, summ
+
+
+def cmd_import_copy(a):
+    with open(a.input, encoding='utf-8') as f:
+        text = f.read()
+    data = open_deck(a.deck)
+    out, rep, summ = import_copy(data, text, a.page, today_iso(a.date) if a.date else None, a.choose)
+    if out is None:
+        print(render_text(rep, f'copydeck import-copy · {a.input} → {a.deck}: отказ', True))
+        return 2
+    dump_deck(out, a.output, f'# copy deck — правки заказчика с холста ({os.path.basename(a.input)}) · copydeck.py import-copy · {today_iso(a.date) if a.date else today_iso()}\n'
+                             '# Новые варианты source: customer (draft): сверка фактов и права, линтер, затем утверждение словом заказчика.\n', src_path=a.deck)
+    print(a.output)
+    print(f"  изменено слотов {len(summ['changed'])}, без изменений {summ['same']}, текстов без слота плана {summ['unmapped'] + summ['unknown']}"
+          + (' · новые варианты выбраны (--choose)' if a.choose else ''))
+    for c in summ['changed']:
+        print(f"  {c['path']} → вариант {c['variant']}")
+    for f in rep.findings:
+        if f['level'] != 'info' or getattr(a, 'verbose', False):
+            print(f"  {f['level'].upper():7} {f['rule']:22} {f['where']} — {f['message'][:120]}")
+    return 0
+
+
+# ============================================================================================ поля продукта брифа холста из смысла
 DEVICE_RU = {'mobile': 'с телефона', 'desktop': 'с компьютера', 'mixed': 'с телефона и компьютера'}
+GOAL_BASIS_OK = {'brief', 'customer', 'fact', 'voc'}
 
 
 def _lcfirst(s):
@@ -2472,47 +2989,42 @@ def _lcfirst(s):
 
 
 def _source_names():
-    names = {}
+    """Имена источников трафика — словарь site (traffic_source)."""
     try:
-        v = load_yaml_file(VOCAB_PATH) or {}
-        for x in ((v.get('traffic') or {}).get('sources') or []):
-            names[x['id']] = x.get('name') or x['id']
+        ns = (load_yaml_file(VOCAB_PATH) or {}).get('namespaces') or {}
+        return {x['id']: x.get('name') or x['id'] for x in (ns.get('traffic_source') or {}).get('values') or [] if isinstance(x, dict) and x.get('id')}
     except Exception:  # noqa: BLE001
-        pass
-    try:
-        ms = load_yaml_file(MEANING_SCHEMA_PATH) or {}
-        for x in ((ms.get('x-vocabulary-proposals') or {}).get('traffic.sources') or []):
-            names.setdefault(x['id'], x.get('name') or x['id'])
-    except Exception:  # noqa: BLE001
-        pass
-    return names
+        return {}
 
 
-def derive_from_meaning(meaning, deck):
-    """product.target_user, description, viewport_primary и questions из meaning.yaml по x-kimi-map B1:
-    target_user — «<сегмент>: <ситуация>. Знает: <что>. Приходит: <источники>, <устройство>»; description — «X — Y. Кому
-    важнее всего: Z» (форма «X — Y для Z» B1 без согласования падежа: X — категория словами клиента, Y — главная ценность,
-    Z — сегмент best_fit)."""
+def meaning_projection(meaning, traffic=None):
+    """Поля продукта брифа холста из смысла (x-canvas-map meaning.schema.yaml): product.description («X — Y. Кому важнее
+    всего: Z»), product.target_user («<сегмент>: <ситуация>. Знает: … Приходит: <источники>, <устройство>»; трафик —
+    site-brief traffic [{traffic_source, share, device}]), product.goal (ядро ценностного предложения — только с
+    основанием brief, customer, fact или voc и без классов boundaries.not_promised; иначе None — цель страницы из плана).
+    → ({поле: текст}, заметки)."""
     m = meaning.get('meaning', meaning) if isinstance(meaning, dict) else {}
     out, notes = {}, []
     aud = [s for s in m.get('audience') or [] if isinstance(s, dict)]
     seg = next((s for s in aud if s.get('primary')), None)
     lvl = (m.get('awareness') or {}).get('level')
-    srcs = sorted(((m.get('traffic') or {}).get('sources')) or [], key=lambda x: -(x.get('share') or 0))
+    srcs = sorted([x for x in traffic or [] if isinstance(x, dict)], key=lambda x: -(x.get('share') or 0))
     names = _source_names()
     if seg:
         parts = [f"{one_line(seg.get('name'))}: {_lcfirst(seg.get('situation'))}"]
-        knows = one_line(seg.get('knows')).split(';')[0].strip()   # первая часть: «кто приходит, что знает» — 1–2 фразы (kimi)
+        knows = one_line(seg.get('knows')).split(';')[0].strip()
         if knows:
             parts.append(knows if re.match(r'^(знает|не знает)', knows, re.I) else f'Знает: {knows}')
         elif lvl:
             parts.append(f'Уровень осведомлённости: {lvl}')
-        if srcs and 'приходит' not in knows.lower():
+        if srcs:
             top = srcs[:2]
-            where = ', '.join(_lcfirst(names.get(x.get('source'), x.get('source'))) for x in top)
+            where = ', '.join(_lcfirst(names.get(x.get('traffic_source') or x.get('source'), x.get('traffic_source') or x.get('source'))) for x in top)
             dev = DEVICE_RU.get(top[0].get('device'))
             parts.append(f'Приходит: {where}' + (f', {dev}' if dev else ''))
-        out['target_user'] = '. '.join(p.rstrip('.') for p in parts)   # без точки: шаблон TASK.md ставит её сам
+        out['product.target_user'] = '. '.join(p.rstrip('.') for p in parts)
+    else:
+        notes.append('meaning: нет основного сегмента — target_user не выведен')
     pos = m.get('positioning') or {}
     cat = one_line((pos.get('market_category') or {}).get('name'))
     theme = one_line(((pos.get('value_themes') or [{}])[0] or {}).get('theme'))
@@ -2521,431 +3033,20 @@ def derive_from_meaning(meaning, deck):
     if cat and theme:
         desc = f'{cat[:1].upper()}{cat[1:]} — {_lcfirst(theme)}'
         if fit and fit.get('name'):
-            desc += f'. Кому важнее всего: {_lcfirst(fit["name"])}'  # без «для …»: падеж без морфологии не согласовать
-        out['description'] = desc
-    if srcs and srcs[0].get('device') in ('mobile', 'desktop'):
-        out['viewport_primary'] = '390x844' if srcs[0]['device'] == 'mobile' else '1440x900'
-    qs = []
-    for q in m.get('open_questions') or []:
-        if isinstance(q, dict) and q.get('q'):
-            item = {'q': one_line(q['q']), 'asked': bool(q.get('asked'))}
-            for k in ('answer', 'source', 'date'):
-                if q.get(k):
-                    item[k] = str(q[k])
-            qs.append(item)
-    if not seg:
-        notes.append('meaning: нет основного сегмента — target_user не выведен')
-    return out, qs, notes
-
-
-def deep_merge(base, over):
-    for k, v in over.items():
-        if isinstance(v, dict) and isinstance(base.get(k), dict):
-            deep_merge(base[k], v)
-        else:
-            base[k] = v
-    return base
-
-
-def export_kimi(data, ctx, out_dir, page_id=None, meaning=None, merge_into=None, strict=False, facts_scope='all',
-                product_name=None, force=False, facts_path=None, claims_gate=True, job_facts=False):
-    """→ (Report, сводка). Пишет copy.md, facts.md, brief-fragment.yaml (+ brief.yaml при merge_into). Ворота: validate
-    и claims_check (факты и право) по выгружаемой странице, включая обещание — урок «Кварца»: product.goal с обещанием
-    здоровья ушёл в TASK без сверки."""
-    rep = Report()
-    deck = deck_root(data)
-    validate(data, ctx, rep, final=False)
-    live = [p for p in pages_of(deck) if (p.get('status') or 'draft') != 'rejected']
-    page = None
-    if page_id:
-        page = next((p for p in live if str(p.get('page_id')) == page_id), None)
-        if page is None:
-            rep.add('export', 'error', 'COPY-D-EXPORT', page_id, 'нет такой страницы (или она rejected)', '')
-    elif len(live) == 1:
-        page = live[0]
-    else:
-        rep.add('export', 'error', 'COPY-D-EXPORT', '—', f'страниц {len(live)}: пакет kimi — одна страница, укажите --page', '')
-    if page is not None and strict:  # ворота публикации — только для выгружаемой страницы
-        sub = _copy.deepcopy(data)
-        deck_root(sub)['pages'] = [p for p in pages_of(deck_root(sub)) if str(p.get('page_id')) == str(page.get('page_id'))]
-        rep2 = validate(sub, ctx, final=True)
-        seen = {(f['rule'], f['where'], f['message']) for f in rep.findings}
-        for f in rep2.findings:
-            if (f['rule'], f['where'], f['message']) not in seen:
-                rep.findings.append(f)
-    ptext = None
-    if page is not None:
-        ptext, _pv, _psrc, _pr = promise_info(deck, page)
-        if not ptext:
-            rep.add('export', 'error', 'COPY-D-PROMISE', str(page.get('page_id')), 'нет обещания (promise): product.goal не из чего взять',
-                    'Урок «Кварца»: обещание — текст страницы, его пишут и сверяют в copy deck, а не в брифе.')
-    if page is not None and claims_gate:
-        pp = run_claims(deck, ctx, facts_path, rep, pages=[str(page.get('page_id'))])
-        if pp is None:
-            rep.add('export', 'error', 'COPY-D-EXPORT', str(page.get('page_id')), 'сверка с фактами не выполнена — выгрузка без ворот честности запрещена', '--no-claims-gate только для опытов.')
-    blocking = [f for f in rep.findings if f['level'] == 'error']
-    if blocking and not force:
-        return rep, None
-    if page is None:
-        return rep, None
-    facts = ctx.facts
-    lang = (deck.get('lang') or 'ru').split('-')[0]
-    pname = product_name or deck.get('product_name') or deck.get('site') or 'product'
-    pid = str(page.get('page_id'))
-    os.makedirs(out_dir, exist_ok=True)
-    # ---------- copy.md
-    vref = deck.get('voice_ref') or ''
-    voice_line = vref if (vref and not looks_like_path(vref)) else 'see design_system.tone_of_voice in the brief'
-    if looks_like_path(vref) and ctx.deck_path:
-        vp = rel_to(ctx.deck_path, vref)
-        if vp and os.path.exists(vp):
-            tov = load_voice(vp).get('tone_of_voice')   # F: projections.tone_of_voice → «Voice:» copy.md
-            if tov:
-                voice_line = tov
-    ad = deck.get('adaptation') if isinstance(deck.get('adaptation'), dict) else {}
-    lang_d = (deck.get('lang') or 'ru').split('-')[0]
-    if ad.get('voice_line'):
-        voice_line = ad['voice_line']   # v1.1: строка голоса на языке deck (у профиля F проекция — на исходном языке)
-    elif lang_d != 'ru' and cyr_share(voice_line) > 0.5:
-        rep.add('export', 'warning', 'COPY-D-LANG', '—', f'строка «Voice:» copy.md — на русском, а deck — lang {lang_d}: у профиля голоса нет проекции на этот язык',
-                'adaptation.voice_line — строка голоса на языке страницы (предложение F: projections.tone_of_voice по языкам).')
-    voice_line = re.sub(r'^\s*черновик:\s*', '', one_line(voice_line)).rstrip('.')
-    L = [f'# COPY — all texts of {pname}, verbatim ({lang})', '', f'Voice: {voice_line}.', COPY_HEADER]
-    if lang == 'ru':
-        L.append(TYPO_LINE_RU)
-    L.append('')
-    meta = page.get('meta') or {}
-    head = [(k, one_line(meta.get(k))) for k, _st in META_FIELDS if str(meta.get(k) or '').strip()]
-    if head:
-        L += ['## head', '(not a page section: <title>, meta description and Open Graph tags)']
-        L += [f'[{k}]: {t}' for k, t in head] + ['']
-    n_slots, sections_out, multi = 0, [], []
-    for s in sections_of(page):
-        rows = []
-        for sl in slots_of(s):
-            if sl.get('slot_type') in NO_EXPORT_SLOTS:
-                continue
-            if sl.get('slot_type') in ('image-alt', 'image-caption') and str(sl.get('asset_ref') or '').startswith('assets/'):
-                continue  # alt и подпись файла пакета — в brief.yaml assets[] → assets/README.md, не дублируем в copy.md
-            v = chosen_variant(sl)
-            if v is None and variants_of(sl):
-                rep.add('export', 'warning', 'COPY-D-EXPORT', f"{pid}/{s.get('section_id')}/{sl.get('slot_id')}",
-                        'слот без выбранного варианта не выгружен в copy.md', 'Выберите вариант (chosen) до выгрузки.')
-            if not v or not str(v.get('text') or '').strip():
-                continue
-            raw = str(v.get('text'))
-            if '\n' in raw.strip():
-                multi.append(f"{pid}/{s.get('section_id')}/{sl.get('slot_id')}")
-            rows.append(f"[{sl.get('slot_id')}]: {one_line(raw)}")
-        if rows:
-            L += [f"## {s.get('section_id')}"] + rows + ['']
-            sections_out.append(s)
-            n_slots += len(rows)
-    for p in multi:
-        rep.add('export', 'warning', 'COPY-D-EXPORT', p, 'абзацы в одном слоте склеены в строку (формат copy.md — строка на ключ)', 'Разбейте прозу на слоты p1, p2…')
-    copy_md = '\n'.join(L).rstrip() + '\n'
-    with open(os.path.join(out_dir, 'copy.md'), 'w', encoding='utf-8') as f:
-        f.write(copy_md)
-    # ---------- facts.md
-    F = [f'# FACTS — whitelist for {pname}', '', FACTS_INTRO, '', '## Facts', '',
-         '| ID | Fact, exactly as it may appear | Source (who / where / date) | Where it may be used |', '|---|---|---|---|']
-    M = ['## Missing — show as [PLACEHOLDER]', '', '| ID | What is missing | Text on the page until provided | Who provides |', '|---|---|---|---|']
-    n_pub = n_hidden = 0
-    used = used_fact_ids(deck, page, facts) if facts else []
-    if facts:
-        scope = [f for f in facts.facts if facts_scope == 'all' or f['id'] in used]
-        for f in scope:
-            iss = publish_issues(f, ctx.today, facts)
-            if iss:
-                why = '; '.join(re.sub(r'^COPY-F-[A-Z-]+:\s*fact:[\w.-]+:\s*', '', x) for x in iss)
-                resp = (f.get('responsible') or {}).get('role') or ((facts.data.get('owner') or {}).get('role')) or 'заказчик'
-                M.append(f"| {md_cell(f['id'])} | {md_cell(f.get('canonical') or (f.get('verbatim') or [''])[0])} — not publishable yet: {md_cell(why)} "
-                         f"| [PLACEHOLDER: {md_cell(f['id'])}] | {md_cell(resp)} |")
-                n_hidden += 1
-                if f['id'] in used:
-                    rep.add('export', 'warning', 'COPY-D-EXPORT', pid, f'fact:{f["id"]} стоит в тексте, но не публикуется: {why}', 'Сверка claims даст error; до исправления — [PLACEHOLDER].')
-                continue
-            vs, ok = fact_verbatims(f, lang)
-            if not ok:
-                rep.add('export', 'warning', 'COPY-D-LANG', pid, f'fact:{f["id"]}: нет translations.{lang} — в facts.md ушла формулировка оригинала', '')
-                vs = [x for x in f.get('verbatim') or [] if x]
-            for i, t in enumerate(vs, 1):
-                rid = f['id'] if i == 1 else '%s.%d' % (f['id'], i)
-                F.append(f"| {md_cell(rid)} | {md_cell(t)} | {md_cell(fact_source_line(f))} | {md_cell(fact_where(f, page))} |")
-            n_pub += 1
-        for m in facts.missing:
-            M.append(f"| {md_cell(m.get('id'))} | {md_cell(m.get('what'))} | {md_cell(m.get('placeholder'))} | {md_cell(m.get('who'))} |")
-    else:
-        rep.add('export', 'warning', 'COPY-D-EXPORT', '—', 'facts.yaml не подключён: в facts.md нет фактов — любое число на странице станет [PLACEHOLDER]', '')
-    if n_pub == 0:
-        F.append('| — | (no facts provided: every fact on the page is a [PLACEHOLDER]) | — | — |')
-    if len(M) == 4:
-        M.append('| — | nothing missing | — | — |')
-    nrows = never_rows(facts, ctx.today, lang)
-    N = ['## Never claim'] + ([f'- {one_line(t)};' for _id, t, _lift in nrows] or ['- nothing else.'])
-    facts_md = '\n'.join(F + [''] + M + [''] + N) + '\n'
-    with open(os.path.join(out_dir, 'facts.md'), 'w', encoding='utf-8') as f:
-        f.write(facts_md)
-    # ---------- brief fragment
-    frag = {'product': {'name': pname, 'goal': one_line(ptext), 'locale': lang}, 'site': {},
-            'content': {'copy_source': 'copy.md', 'facts_source': 'facts.md'}}
-    if page.get('primary_action'):
-        frag['product']['primary_action'] = one_line(page['primary_action'])
-    cpath, ctext = primary_cta(deck, page)
-    if ctext:
-        frag['site']['cta'] = {'label': one_line(ctext)}
-    frag['site']['sections'] = [{'id': str(s.get('section_id')), 'job': section_job(s, deck, page, facts, job_facts)} for s in sections_out]
-    assets = []
-    for s in sections_of(page):
-        for sl in slots_of(s):
-            ref = str(sl.get('asset_ref') or '')
-            v = chosen_variant(sl)
-            if ref.startswith('assets/') and v and sl.get('slot_type') in ('image-alt', 'image-caption'):
-                a = next((x for x in assets if x['file'] == ref), None)
-                if a is None:
-                    a = {'file': ref}
-                    assets.append(a)
-                a['alt' if sl['slot_type'] == 'image-alt' else 'caption'] = one_line(v.get('text'))
-    if assets:
-        frag['assets'] = assets
-    mnotes = []
-    unanswered = []
-    if meaning:
-        derived, qs, mnotes = derive_from_meaning(meaning, deck)
-        frag['product'].update(derived)
-        # в brief.yaml — только отвеченные вопросы: сборщик kimi кладёт в TASK.md лишь ответы (Decisions), остальное
-        # даёт разрыв покрытия; открытые вопросы — заказчику (сводка экспорта), а не исполнителю
-        answered = [q for q in qs if q.get('answer')]
-        unanswered = [q['q'] for q in qs if not q.get('answer')]
-        if answered:
-            frag['questions'] = answered
-    for n in mnotes:
-        rep.add('export', 'info', 'COPY-D-EXPORT', '—', n, '')
-    head_c = (f'# brief.yaml fragment — copydeck.py {VERSION} export-kimi · {ctx.today} · deck {os.path.basename(ctx.deck_path or "")}, page {pid}\n'
-              '# Вливается в brief.yaml проекта (форма — ../kimi-research/07-brief-handoff/templates/brief.yaml; ключи проходят lint_brief).\n'
-              '# product.goal — обещание из copy deck (сверено как текст страницы); site.cta.target и дизайн — вне copy deck.\n')
-    with open(os.path.join(out_dir, 'brief-fragment.yaml'), 'w', encoding='utf-8') as f:
-        f.write(head_c)
-        yaml.safe_dump(frag, f, allow_unicode=True, sort_keys=False, width=140)
-    merged_path = None
-    base = None
-    if merge_into:
-        base = load_yaml_file(merge_into) or {}
-        bdir = os.path.dirname(os.path.abspath(merge_into))
-        for k in ('copy', 'facts', 'missing', 'never_claim'):
-            base.pop(k, None)
-        for lst in ('references', 'assets'):
-            for it in base.get(lst) or []:
-                if isinstance(it, dict) and it.get('source') and not os.path.isabs(str(it['source'])):
-                    it['source'] = os.path.normpath(os.path.join(bdir, str(it['source'])))
-        app = base.get('app') or {}
-        if app.get('fixtures_source') and not os.path.isabs(str(app['fixtures_source'])):
-            app['fixtures_source'] = os.path.normpath(os.path.join(bdir, str(app['fixtures_source'])))
-        fr = _copy.deepcopy(frag)
-        fr_assets = fr.pop('assets', [])
-        deep_merge(base, fr)
-        for a in fr_assets:
-            hit = next((x for x in base.get('assets') or [] if isinstance(x, dict) and x.get('file') == a['file']), None)
-            if hit:
-                hit.update({k: v for k, v in a.items() if k != 'file'})
-            else:
-                rep.add('export', 'info', 'COPY-D-EXPORT', a['file'], 'ассета нет в brief.yaml: alt и подпись не влиты (файл даёт план ассетов)', '')
-        merged_path = os.path.join(out_dir, 'brief.yaml')
-        with open(merged_path, 'w', encoding='utf-8') as f:
-            f.write(f'# brief.yaml — {os.path.basename(merge_into)} + фрагмент copy deck (copydeck.py export-kimi --merge-into) · {ctx.today}\n'
-                    '# copy, facts, missing, never_claim сняты: тексты и факты — файлы copy.md и facts.md (content.*_source).\n')
-            yaml.safe_dump(base, f, allow_unicode=True, sort_keys=False, width=140)
-    # поля брифа, которые уходят в TASK.md (Promise, The one job, Audience, Sections) — сверка как текст страницы
-    btexts = brief_texts(base if merge_into else frag)
-    if claims_gate:
-        run_claims_text(btexts, ctx, facts_path, rep, tool='brief')
-    summary = {'page': pid, 'sections': len(sections_out), 'slots': n_slots, 'head': len(head), 'facts_published': n_pub,
-               'facts_hidden': n_hidden, 'missing': len(facts.missing) if facts else 0, 'never_rows': len(nrows),
-               'facts_scope': facts_scope, 'files': ['copy.md', 'facts.md', 'brief-fragment.yaml'] + (['brief.yaml'] if merged_path else []),
-               'promise': one_line(ptext), 'cta': one_line(ctext) if ctext else None, 'open_questions': unanswered,
-               'publish_filter': 'claims_check.publishable_issues' if claims_module() is not None else 'свой (x-kimi-map)'}
-    return rep, summary
-
-
-def cmd_export_kimi(a):
-    data = open_deck(a.deck)
-    deck = deck_root(data)
-    ctx, fp = make_ctx(a, deck)
-    meaning = load_yaml_file(a.meaning) if a.meaning else None
-    rep, summ = export_kimi(data, ctx, a.out, a.page, meaning, a.merge_into, a.strict, a.facts_scope, a.product_name, a.force,
-                            facts_path=fp, claims_gate=not a.no_claims_gate, job_facts=a.job_facts)
-    a.today = ctx.today
-    write_outputs(a, rep, 'export-kimi', {'export': summ})
-    if not a.quiet:
-        print(render_text(rep, f'copydeck export-kimi · {a.deck} → {a.out} · facts: {fp or "—"}', a.verbose))
-        if summ:
-            print('  файлы: ' + ', '.join(os.path.join(a.out, x) for x in summ['files']))
-            if summ.get('open_questions'):
-                print(f"  открытых вопросов заказчику (в brief.yaml не выгружены): {len(summ['open_questions'])}")
-            print(f"  страница {summ['page']}: секций {summ['sections']}, строк {summ['slots']} (+ head {summ['head']}); фактов {summ['facts_published']} "
-                  f"(скрыто {summ['facts_hidden']}), пробелов {summ['missing']}, строк Never claim {summ['never_rows']}; фильтр — {summ['publish_filter']}")
-        else:
-            print('  экспорт не выполнен: исправьте error (или --force для опыта)')
-    if summ and [f for f in rep.findings if f['level'] == 'error' and f['tool'] == 'brief']:
-        print('  ВНИМАНИЕ: поля брифа не прошли сверку (tool brief) — исправьте их до сборки пакета')
-        return 2
-    return 0 if summ and not [f for f in rep.findings if f['level'] == 'error' and f['tool'] == 'export'] else 2
-
-
-# ============================================================================================ import-kimi
-def _kimi_slot(key):
-    m = claims_module()
-    if m is not None and hasattr(m, 'kimi_slot'):
-        try:
-            st = m.kimi_slot(key)
-            if st:
-                return st
-        except Exception:  # noqa: BLE001
-            pass
-    for rx, st in KIMI_KEY_SLOT:
-        if re.match(rx, key):
-            return st
-    return None
-
-
-def safe_id(s):
-    s = re.sub(r'[^a-z0-9_-]+', '-', str(s).lower()).strip('-_')
-    s = re.sub(r'[-_]{2,}', '-', s)
-    return s or 'x'
-
-
-def import_kimi_copy(text, brief=None, page_id='home', page_type=None, site=None, facts_ref=None, date=None, vocab=None):
-    """copy.md пакета kimi (+ brief.yaml) → copy deck v1. → (data, заметки)."""
-    notes = []
-    date = date or today_iso()
-    pname, lang, voice = None, 'ru', ''
-    sections, meta, cur, in_head = [], {}, None, False
-    for i, line in enumerate(text.splitlines(), 1):
-        st = line.strip()
-        if not st or st.startswith('{#') or st.startswith('<!--'):
-            continue
-        m = re.match(r'^#\s+COPY\s+[—-]\s+all texts of\s+(.+?),\s*verbatim\s*\(([a-z]{2})\)', st, re.I)
-        if m:
-            pname, lang = m.group(1).strip(), m.group(2)
-            continue
-        if st.startswith('# '):
-            continue
-        if st.lower().startswith('voice:'):
-            voice = st[6:].strip().rstrip('.')
-            continue
-        if st.lower().startswith(('keys in square brackets', 'typography is final')):
-            continue
-        m = re.match(r'^##\s+(\S+)', st)
-        if m:
-            sid = m.group(1)
-            in_head = sid == 'head'
-            if in_head:
-                cur = None
-                continue
-            role = KIMI_SECTION_ROLE.get(sid) or (sid if vocab and sid in vocab['section_roles'] else None)
-            if not role:
-                notes.append(f'секция «{sid}»: роль не распознана — section_role не проставлен')
-            cur = {'section_id': safe_id(sid)}
-            if role:
-                cur['section_role'] = role
-            cur.update({'block': role or '', 'message': '', 'slots': []})
-            sections.append(cur)
-            continue
-        m = re.match(r'^\[([\w\-]+)\]:\s*(.*)$', st)
-        if m:
-            key, val = m.group(1), m.group(2)
-            if in_head:
-                if key in dict(META_FIELDS):
-                    meta[key] = val
-                else:
-                    notes.append(f'head: неизвестный ключ [{key}]')
-                continue
-            if cur is None:
-                cur = {'section_id': 'main', 'block': '', 'message': '', 'slots': []}
-                sections.append(cur)
-                notes.append(f'стр. {i}: ключ до первой секции — секция main')
-            stype = _kimi_slot(key)
-            if not stype:
-                stype = 'body'
-                notes.append(f'[{key}] в «{cur["section_id"]}»: тип не распознан — body')
-            cur['slots'].append({'slot_id': safe_id(key) if not re.fullmatch(r'[a-z0-9]+([_-][a-z0-9]+)*', key) else key,
-                                 'slot_type': stype, 'variants': [{'id': 'a', 'text': val, 'status': 'draft', 'source': 'imported'}],
-                                 'chosen': 'a', 'fact_ids': [], 'claim_flags': [], 'notes': f'copy.md [{key}]'})
-            continue
-        if in_head and st.startswith('('):
-            continue
-        if cur is not None:
-            n = len(cur['slots']) + 1
-            cur['slots'].append({'slot_id': f'text-{n}', 'slot_type': 'body', 'variants': [{'id': 'a', 'text': st, 'status': 'draft', 'source': 'imported'}],
-                                 'chosen': 'a', 'fact_ids': [], 'claim_flags': [], 'notes': f'copy.md стр. {i}: строка без ключа'})
-            notes.append(f'стр. {i}: строка без [ключа] — слот body')
-    page = {'page_id': page_id, 'page_type': page_type or 'landing-product', 'status': 'draft', 'meta': meta, 'sections': sections}
-    if not page_type:
-        notes.append('page_type не задан (--page-type): поставлен landing-product')
-    b = brief or {}
-    prod = b.get('product') or {}
-    if prod.get('goal'):
-        page['promise'] = {'variants': [{'id': 'a', 'text': one_line(prod['goal']), 'status': 'draft', 'source': 'imported'}], 'chosen': 'a',
-                           'fact_ids': [], 'claim_flags': [], 'basis': 'brief.yaml product.goal',
-                           'notes': 'product.goal → TASK.md «Promise:» → первый экран (ACCEPTANCE A3)'}
-    jobs = {str(x.get('id')): x.get('job') for x in ((b.get('site') or {}).get('sections') or []) if isinstance(x, dict)}
-    for s in sections:
-        j = jobs.get(s['section_id'])
-        if j:
-            j = one_line(j)
-            if ' → ' in j:
-                q, msg = j.split(' → ', 1)
-                s['question'], s['message'] = q.strip(), msg.split('; доказательства:')[0].strip()
-            else:
-                s['message'] = j
-    label = one_line(((b.get('site') or {}).get('cta') or {}).get('label'))
-    if label:
-        hit = None
-        for s in sections:
-            for sl in s['slots']:
-                if sl['slot_type'] == 'cta-label' and one_line(sl['variants'][0]['text']) == label:
-                    hit = hit or f"{page_id}/{s['section_id']}/{sl['slot_id']}"
+            desc += f'. Кому важнее всего: {_lcfirst(fit["name"])}'
+        out['product.description'] = desc
+    core = (m.get('value_proposition') or {}).get('core') or {}
+    banned = {str(x.get('claim_class')) for x in (m.get('boundaries') or {}).get('not_promised') or [] if isinstance(x, dict) and x.get('claim_class')}
+    if core.get('text') and ((core.get('basis') or {}).get('kind') in GOAL_BASIS_OK):
+        cm = claims_module()   # маркеры класса без снятия отрицанием: «без усталости глаз» — тоже обещание здоровья
+        hit = {cl for cl in banned for rx in (cm.CLASS_MARKERS.get(cl) or []) if rx.search(cm.soft(core['text']))} if cm is not None else set()
         if hit:
-            page['cta_primary'] = hit
+            notes.append(f"product.goal: ядро задевает классы boundaries.not_promised ({', '.join(sorted(hit))}) — цель страницы из плана")
         else:
-            notes.append(f'site.cta.label «{label}» нет среди cta-label copy.md')
-    for i, a in enumerate(b.get('assets') or [], 1):
-        if not isinstance(a, dict) or not a.get('file'):
-            continue
-        target = next((s for s in sections if s['section_id'] == safe_id(a.get('slot') or '')), None)
-        if target is None and sections:
-            target = sections[0]
-            notes.append(f"ассет {a['file']}: секции «{a.get('slot')}» нет — alt и подпись в «{target['section_id']}»")
-        stem = safe_id(os.path.splitext(os.path.basename(a['file']))[0])
-        for key, stype in (('alt', 'image-alt'), ('caption', 'image-caption')):
-            if a.get(key) and target is not None:
-                target['slots'].append({'slot_id': f'{key}-{stem}', 'slot_type': stype, 'asset_ref': a['file'],
-                                        'variants': [{'id': 'a', 'text': one_line(a[key]), 'status': 'draft', 'source': 'imported'}],
-                                        'chosen': 'a', 'fact_ids': [], 'claim_flags': [], 'notes': f'brief.yaml assets[{i - 1}].{key}'})
-    order = ['page_id', 'page_type', 'status', 'promise', 'cta_primary', 'meta', 'sections']
-    page = {k: page[k] for k in order if k in page}
-    lang = (prod.get('locale') or lang or 'ru')
-    deck = {'version': 1, 'date': date, 'site': safe_id(site or (b.get('project') or {}).get('slug') or 'imported'),
-            'product_name': prod.get('name') or pname or '', 'lang': str(lang).split('-')[0],
-            'voice_ref': ((b.get('design_system') or {}).get('tone_of_voice') or voice or ''), 'pages': [page]}
-    if facts_ref:
-        deck['facts_ref'] = facts_ref
-    return {'copy_deck': deck}, notes
-
-
-def cmd_import_kimi(a):
-    with open(a.input, encoding='utf-8') as f:
-        text = f.read()
-    brief = deep_dates(load_yaml_file(a.brief)) if a.brief else None
-    fref = os.path.relpath(os.path.abspath(a.facts), os.path.dirname(os.path.abspath(a.output))) if a.facts else None
-    data, notes = import_kimi_copy(text, brief, a.page_id, a.page_type, a.site, fref, a.date, load_vocab())
-    dump_deck(data, a.output, f'# copy deck v1 — импорт {os.path.basename(a.input)}' + (f' + {os.path.basename(a.brief)}' if a.brief else '') +
-              f' (copydeck.py {VERSION} import-kimi · {today_iso(a.date) if a.date else today_iso()})\n'
-              '# Тексты дословно, статус draft, fact_ids пустые: ссылки на факты проставляет автор (claims_check находит опору и без них).\n')
-    print(a.output)
-    for n in notes:
-        print('  заметка:', n)
-    return 0
+            out['product.goal'] = one_line(core['text'])
+    elif core.get('text'):
+        notes.append(f"product.goal: основание ядра — {(core.get('basis') or {}).get('kind') or 'нет'} (нужно brief, customer, fact или voc) — цель страницы из плана")
+    return out, notes
 
 
 # ============================================================================================ export-assets, upgrade
@@ -3029,7 +3130,8 @@ def upgrade_deck(data, vocab=None):
             if not s.get('section_role'):
                 sid = str(s.get('section_id'))
                 roles = (vocab or {}).get('section_roles') or set()
-                guess = s.get('block') if s.get('block') in roles else (KIMI_SECTION_ROLE.get(sid) or (sid if sid in roles else None))
+                guess = role_of_block(vocab, s.get('block')) or (s.get('block') if s.get('block') in roles else None) \
+                    or (sid if sid in roles else None)
                 if guess:
                     s['section_role'] = guess
                     changes.append(f"{page.get('page_id')}/{sid}: section_role = {guess}")
@@ -3067,9 +3169,9 @@ def _failed_checks(v):
 
 
 def export_variants(deck, page_ids=None, min_variants=2, seed=0, include_failed=False):
-    """Листы для слепого выбора (предложение I): варианты слота под метками A, B, C… в случайном, но воспроизводимом
-    порядке, без source/generated (модель скрыта). Мета тоже (G: 2–3 варианта title; выбранный сейчас текст, которого
-    нет среди вариантов, идёт под id «meta» — I3). Варианты с error в своих checks (claims или lint этого же текста) на
+    """Листы для слепого выбора: варианты слота под метками A, B, C… в случайном, но воспроизводимом
+    порядке, без source/generated (модель скрыта). Мета тоже (2–3 варианта title; выбранный сейчас текст, которого
+    нет среди вариантов, идёт под id «meta»). Варианты с error в своих checks (claims или lint этого же текста) на
     лист не идут: выбирают из прошедших ворота; include_failed — показать и их.
     → (markdown, key {путь: {метка: id варианта}}, excluded {путь: [(id, почему)]})."""
     import random
@@ -3133,7 +3235,9 @@ def cmd_export_variants(a):
 # ============================================================================================ approve
 def approve_page(data, ctx, page_id, by, at, note=''):
     """Утверждение страницы человеком: все выбранные тексты — checked с актуальным text_hash и 0 error, без [PLACEHOLDER];
-    тогда варианты → approved (review), страница → approved (approval). → (новый data | None, Report)."""
+    тогда варианты → approved (review), страница → approved (approval), журнал процесса (edit_log, отклонённые варианты)
+    уходит — clean_process_log. Утверждённая страница обязана пройти validate (требования статуса approved, стык с
+    утверждённым планом, правила текста): error этой страницы — отказ. → (новый data | None, Report)."""
     rep = Report()
     out = _copy.deepcopy(data)
     deck = deck_root(out)
@@ -3171,18 +3275,518 @@ def approve_page(data, ctx, page_id, by, at, note=''):
         v['review'] = {'by': by, 'at': at}
     page['status'] = 'approved'
     page['approval'] = {'by': by, 'at': at, **({'note': note} if note else {})}
+    cleaned = clean_process_log(page)
+    rv = validate(out, ctx, Report(), final=False)
+    errs = [f for f in rv.findings if f['level'] == 'error' and (f['where'] in ('—', page_id) or str(f['where']).startswith(page_id + '/'))]
+    for f in errs:
+        rep.add('approve', 'error', 'COPY-D-APPROVE', f['where'], f"утверждённая страница не проходит validate: {f['rule']} — {f['message']}", f.get('fix', ''))
+    if errs:
+        return None, rep
+    rep.tools['approve'] = {'removed': cleaned}
+    if cleaned['edit_log'] or cleaned['rejected']:
+        rep.notes.append(f"журнал процесса ушёл: edit_log у {cleaned['edit_log']} текстов, отклонённых вариантов {cleaned['rejected']} (история — git)")
     return out, rep
+
+
+def process_holders(page):
+    """Держатели вариантов страницы: [(путь, слот)] — слоты секций и обещание со своими вариантами."""
+    pid = page.get('page_id')
+    out = [(f"{pid}/{s.get('section_id')}/{sl.get('slot_id')}", sl) for s in sections_of(page) for sl in slots_of(s)]
+    pr = page.get('promise')
+    if isinstance(pr, dict) and not pr.get('from'):
+        out.append((f'{pid}/promise', pr))
+    return out
+
+
+def clean_process_log(page):
+    """При утверждении журнал процесса уходит (.claude/rules/forward-only.md § Машинные файлы слоёв): edit_log слотов и
+    обещания, отклонённые варианты (и альтернативы мета со статусом rejected). Остаются выбранные тексты с записями
+    проверок, живые альтернативы, selection (compared может называть удалённые варианты — это история выбора), review,
+    approval. → {'edit_log': n, 'rejected': n}."""
+    n_log = n_rej = 0
+    for _path, sl in process_holders(page):
+        if sl.pop('edit_log', None):
+            n_log += 1
+        keep = [v for v in variants_of(sl) if v.get('status') != 'rejected' or v is chosen_variant(sl)]
+        n_rej += len(variants_of(sl)) - len(keep)
+        if isinstance(sl.get('variants'), list):
+            sl['variants'] = keep
+    mv = (page.get('meta') or {}).get('variants')
+    if isinstance(mv, dict):
+        for k, vs in mv.items():
+            if isinstance(vs, list):
+                keep = [v for v in vs if not (isinstance(v, dict) and v.get('status') == 'rejected')]
+                n_rej += len(vs) - len(keep)
+                mv[k] = keep
+    return {'edit_log': n_log, 'rejected': n_rej}
 
 
 def cmd_approve(a):
     data = open_deck(a.deck)
-    ctx = Ctx(a.deck, None, today_iso(a.at))
+    a.facts, a.today = None, a.at
+    ctx, _fp = make_ctx(a, deck_root(data))
     out, rep = approve_page(data, ctx, a.page, a.by, today_iso(a.at), a.note or '')
     if out is None:
         print(render_text(rep, f'copydeck approve · {a.deck} · страница {a.page}: отказ', True))
         return 2
     dump_deck(out, a.output, f'# copy deck — страница {a.page} утверждена: {a.by}, {today_iso(a.at)} (copydeck.py approve)\n', src_path=a.deck)
     print(a.output)
+    for n in rep.notes:
+        print('  ' + n)
+    return 0
+
+
+# ============================================================================================ skeleton: каркас из плана страницы
+META_SLOT_FIELD = {'meta-title': 'title', 'meta-description': 'description', 'og-title': 'og_title',
+                   'og-description': 'og_description', 'og-image-alt': 'og_image_alt'}
+AWARENESS_IDS = ('unaware', 'problem-aware', 'solution-aware', 'product-aware', 'most-aware')
+
+
+def _plan_refs(refs_list):
+    fact_ids, missing_ids = [], []
+    for r in refs_list or []:
+        r = str(r)
+        if r.startswith('missing:'):
+            missing_ids.append(r[8:])
+        elif r.startswith('fact:'):
+            fact_ids.append(r[5:])
+    return fact_ids, missing_ids
+
+
+def skeleton_from_plan(plan, plan_path, deck_path, facts_ref=None, voice_ref=None, date=None):
+    """Каркас copy deck из плана страницы (стык — x-site-map): страница (page.id, page_type), секции с текстовыми
+    слотами (id, роль, блок, вопрос, опоры), слоты (id, слот словаря, анатомия, группа, число вариантов), fact_ids и
+    missing_ids — из binds слотов данных, мета — из page_slots, главная кнопка и обещание первого экрана — из слотов
+    действия и hero. Тексты пусты (статус draft): их пишет агент «допущением» (assumed). → (data, заметки)."""
+    notes = []
+    pl = plan.get('page') or {}
+    refs = plan.get('refs') or {}
+    pdir = os.path.dirname(os.path.abspath(plan_path))
+    ddir = os.path.dirname(os.path.abspath(deck_path))
+
+    def rel(p):
+        return os.path.relpath(os.path.normpath(os.path.join(pdir, p)), ddir)
+    lang = (pl.get('lang') or str(pl.get('locale') or 'ru')[:2] or 'ru')
+    deck = {'version': 1, 'date': date or today_iso(), 'site': plan.get('site') or 'site', 'lang': lang}
+    if facts_ref:
+        deck['facts_ref'] = facts_ref
+    elif refs.get('facts') and looks_like_path(refs['facts']):
+        deck['facts_ref'] = rel(refs['facts'])
+    if voice_ref:
+        deck['voice_ref'] = voice_ref
+    meaning = str(refs.get('meaning') or '')
+    if meaning and '#' not in meaning and looks_like_path(meaning):
+        deck['meaning_ref'] = rel(meaning)
+    deck['page_plan_ref'] = os.path.relpath(os.path.abspath(plan_path), ddir)
+    jur = [j for j in pl.get('jurisdiction') or [] if j in ('ru', 'eu', 'us', 'other')]
+    if jur:
+        deck['jurisdiction'] = jur[0]
+    pid = str(pl.get('id') or 'page')
+    page = {'page_id': pid, 'page_type': pl.get('page_type'), 'status': 'draft'}
+    if pl.get('awareness') in AWARENESS_IDS:
+        page['awareness'] = pl['awareness']
+        hs = [h for h in (refs.get('hierarchy') or []) if isinstance(h, str) and h.endswith(f"-{pl['awareness']}.yaml")]
+        if len(hs) == 1:
+            page['hierarchy_ref'] = rel(hs[0])
+    ps = plan.get('page_slots') or {}
+    meta = {'title': '', 'description': ''}
+    for t in ps.get('text') or []:
+        fld = META_SLOT_FIELD.get(str((t or {}).get('slot')))
+        if fld:
+            meta[fld] = ''
+        elif t:
+            notes.append(f"слот страницы {t.get('id')} ({t.get('slot')}) — не мета: текст в copy deck не заводится")
+    mids = [x for refs_ in plan_binds({'page_slots': ps}).values() for x in _plan_refs(refs_)[0]]
+    if mids:
+        meta['fact_ids'] = list(dict.fromkeys(mids))
+    page['meta'] = meta
+    sections = []
+    for s in plan.get('sections') or []:
+        if not isinstance(s, dict) or not s.get('id'):
+            continue
+        texts = plan_text_slots(s)
+        if not texts:
+            continue
+        binds = plan_binds(s)
+        assets = {}   # текстовый слот alt или подписи → слот плана ассетов «<секция>-<медиа>» (page-plan: media-slot)
+        for m in ((s.get('slots') or {}).get('media') or []):
+            if isinstance(m, dict) and m.get('id'):
+                for key in ('alt', 'caption'):
+                    if m.get(key) and m[key] != 'decorative':
+                        assets[str(m[key])] = f"{s['id']}-{m['id']}"
+        sec = {'section_id': str(s['id']), 'site_section_id': str(s['id'])}
+        if s.get('role'):
+            sec['section_role'] = s['role']
+        if s.get('block'):
+            sec['block'] = s['block']
+        if s.get('question'):
+            sec['question'] = s['question']
+        if s.get('carries'):
+            sec['carries'] = list(s['carries'])
+        slots = []
+        for t in texts:
+            n = int(t.get('variants') or 1)
+            fids, miss = _plan_refs(binds.get(str(t['id'])))
+            sl = {'slot_id': str(t['id']), 'slot_type': t.get('slot'), 'site_slot_id': t.get('anatomy') or str(t['id'])}
+            if t.get('group'):
+                sl['group'] = t['group']
+            if assets.get(str(t['id'])):
+                sl['asset_ref'] = assets[str(t['id'])]
+            sl['variants'] = [{'id': chr(97 + i), 'text': '', 'status': 'draft'} for i in range(max(1, min(n, 5)))]
+            sl['chosen'] = 'a'
+            sl['fact_ids'] = fids
+            if miss:
+                sl['missing_ids'] = miss
+            sl['claim_flags'] = []
+            intent = '; '.join(x for x in (one_line(t.get('intent')), one_line(t.get('note'))) if x)
+            if intent:
+                sl['notes'] = f'план: {intent}'
+            slots.append(sl)
+        sec['slots'] = slots
+        sections.append(sec)
+    page['sections'] = sections
+    first = first_screen_section(page)
+    if first is not None:
+        lead = next((sl for sl in slots_of(first) if sl.get('slot_type') == 'subheadline'), None)
+        if lead is not None:
+            page['promise'] = {'from': f"{pid}/{first['section_id']}/{lead['slot_id']}"}
+        ps_first = next((x for x in plan.get('sections') or [] if isinstance(x, dict) and str(x.get('id')) == first['section_id']), {})
+        prim = next((a for a in ((ps_first.get('slots') or {}).get('action') or []) if isinstance(a, dict) and a.get('style') == 'primary' and a.get('label')), None)
+        if prim and any(str(sl.get('slot_id')) == str(prim['label']) for sl in slots_of(first)):
+            page['cta_primary'] = f"{pid}/{first['section_id']}/{prim['label']}"
+    order = ['page_id', 'page_type', 'status', 'awareness', 'hierarchy_ref', 'promise', 'cta_primary', 'meta', 'sections']
+    deck['pages'] = [{k: page[k] for k in order if k in page}]
+    skipped = [str(s.get('id')) for s in plan.get('sections') or [] if isinstance(s, dict) and not plan_text_slots(s)]
+    if skipped:
+        notes.append(f"секции без текстовых слотов в плане (в copy deck не заводятся): {', '.join(skipped)}")
+    return {'copy_deck': deck}, notes
+
+
+def cmd_skeleton(a):
+    if os.path.exists(a.output) and not a.force:
+        print(f'copydeck skeleton: {a.output} уже есть — тексты не перезаписываются (--force — заменить каркасом)', file=sys.stderr)
+        return 1
+    plan = deep_dates(load_yaml_file(a.plan) or {})
+    if 'page' not in plan or 'sections' not in plan:
+        print(f'copydeck skeleton: {a.plan} — не план страницы (page-plan: page, sections)', file=sys.stderr)
+        return 1
+    data, notes = skeleton_from_plan(plan, a.plan, a.output, a.facts_ref, a.voice_ref, today_iso(a.date) if a.date else None)
+    dump_deck(data, a.output, f'# copy deck — каркас из плана {os.path.basename(a.plan)} (copydeck.py skeleton · {today_iso(a.date) if a.date else today_iso()})\n'
+                              '# Тексты пусты (draft): их пишет агент «допущением» (assumed) из утверждённых смысла, фактов и голоса.\n')
+    page = deck_root(data)['pages'][0]
+    n = sum(len(slots_of(s)) for s in sections_of(page))
+    print(f"{a.output}: страница {page['page_id']}, секций {len(sections_of(page))}, текстовых слотов {n}")
+    for x in notes:
+        print('  заметка:', x)
+    return 0
+
+
+# ============================================================================================ apply-selection: голоса слепого выбора
+SELECTION_METHODS = ('single', 'editor', 'customer', 'pairwise', 'judge', 'ab-test', 'human-pairwise', 'judge-pairwise')
+
+
+def parse_votes_sheet(text):
+    """Лист export-variants с заполненными строками «Выбор: B» (или «Выбор: B, A» — ранжирование) → {путь: метка | [метки]}."""
+    votes, cur = {}, None
+    for line in text.splitlines():
+        m = re.match(r'^##\s+(\S+)\s+·', line.strip())
+        if m:
+            cur = m.group(1)
+            continue
+        m = re.match(r'^Выбор:\s*(.*)$', line.strip())
+        if m and cur:
+            labels = [x for x in re.split(r'[\s,;>]+', m.group(1).strip().strip('_')) if re.fullmatch(r'[A-Z]', x)]
+            if labels:
+                votes[cur] = labels[0] if len(labels) == 1 else labels
+    return votes
+
+
+def apply_selection(data, key, votes, method='customer', by='заказчик', at=None, ref=None):
+    """Голоса слепого выбора → chosen и selection {method, by, at, compared, tally, ref}. Голос — метка («B»), ранжирование
+    ([«B», «A»]) или счёт ({A: 1, B: 5}); метки — ключ export-variants. У мета выбранный текст пишется в meta.<поле>.
+    Сменился выбранный текст — прежние записи lint и claims недействительны (check --update --promote); страница checked или
+    approved возвращается в draft. → (новый data | None, Report, сводка)."""
+    rep = Report()
+    if method not in SELECTION_METHODS:
+        rep.add('select', 'error', 'COPY-D-SELECT', '—', f'method «{method}» не из {", ".join(SELECTION_METHODS)}', '')
+        return None, rep, None
+    out = _copy.deepcopy(data)
+    deck = deck_root(out)
+    at = at or today_iso()
+    summ = {'applied': [], 'changed_pages': set()}
+    for path, vote in (votes or {}).items():
+        labels = (key or {}).get(path)
+        if not isinstance(labels, dict) or not labels:
+            rep.add('select', 'error', 'COPY-D-SELECT', path, 'пути нет в ключе меток', 'Ключ — --key export-variants.')
+            continue
+        tally = None
+        if isinstance(vote, dict):
+            counts = {str(k): int(v) for k, v in vote.items()}
+            best = max(counts.values()) if counts else 0
+            top = [k for k, v in counts.items() if v == best]
+            if len(top) != 1:
+                rep.add('select', 'error', 'COPY-D-SELECT', path, f'ничья голосов: {", ".join(top)}', 'Решает человек: ещё один голос или выбор редактора.')
+                continue
+            win, tally = top[0], {labels[k]: v for k, v in counts.items() if k in labels}
+        else:
+            win = vote[0] if isinstance(vote, list) else str(vote)
+        if win not in labels:
+            rep.add('select', 'error', 'COPY-D-SELECT', path, f'метки «{win}» нет в ключе ({", ".join(labels)})', '')
+            continue
+        vid = labels[win]
+        sel = {'method': method, 'by': by, 'at': at, 'compared': list(labels.values())}
+        if tally:
+            sel['tally'] = tally
+        if ref:
+            sel['ref'] = ref
+        parts = path.split('/')
+        page = next((p for p in pages_of(deck) if str(p.get('page_id')) == parts[0]), None)
+        if page is None:
+            rep.add('select', 'error', 'COPY-D-SELECT', path, 'нет такой страницы', '')
+            continue
+        if len(parts) == 3 and parts[1] == 'meta':
+            meta = page.setdefault('meta', {})
+            if vid != 'meta':
+                v = next((x for x in (meta.get('variants') or {}).get(parts[2]) or [] if str(x.get('id')) == vid), None)
+                if v is None:
+                    rep.add('select', 'error', 'COPY-D-SELECT', path, f'варианта {vid} нет в meta.variants.{parts[2]}', '')
+                    continue
+                if norm_ws(meta.get(parts[2])) != norm_ws(v.get('text')):
+                    summ['changed_pages'].add(parts[0])
+                meta[parts[2]] = v.get('text')
+            summ['applied'].append((path, vid))
+            continue
+        holder = page.get('promise') if (len(parts) == 2 and parts[1] == 'promise') else ((find_slot(deck, path) or (None, None, None))[2])
+        if not isinstance(holder, dict) or not any(str(v.get('id')) == vid for v in variants_of(holder)):
+            rep.add('select', 'error', 'COPY-D-SELECT', path, f'нет слота или варианта {vid}', '')
+            continue
+        if str(holder.get('chosen')) != vid:
+            summ['changed_pages'].add(parts[0])
+        holder['chosen'] = vid
+        holder['selection'] = sel
+        summ['applied'].append((path, vid))
+    for p in pages_of(deck):
+        if str(p.get('page_id')) in summ['changed_pages'] and (p.get('status') or 'draft') in ('checked', 'approved'):
+            p['status'] = 'draft'
+            p.pop('approval', None)
+    if summ['changed_pages']:
+        rep.notes.append('выбор сменил тексты: записи lint и claims этих слотов недействительны — copydeck.py check --update OUT --promote')
+    summ['changed_pages'] = sorted(summ['changed_pages'])
+    return out, rep, summ
+
+
+def cmd_apply_selection(a):
+    data = open_deck(a.deck)
+    key = load_yaml_file(a.key) or {}
+    if a.votes:
+        votes = load_yaml_file(a.votes) or {}
+    else:
+        with open(a.sheet, encoding='utf-8') as f:
+            votes = parse_votes_sheet(f.read())
+    ref = ' · '.join(os.path.basename(x) for x in (a.sheet or a.votes, a.key) if x)
+    out, rep, summ = apply_selection(data, key, votes, a.method, a.by, today_iso(a.at) if a.at else None, ref)
+    if out is None or rep.count('error'):
+        print(render_text(rep, f'copydeck apply-selection · {a.deck}: отказ', True))
+        return 2
+    dump_deck(out, a.output, f'# copy deck — выбор вариантов ({a.method}, {a.by}) · copydeck.py apply-selection · {today_iso(a.at) if a.at else today_iso()}\n', src_path=a.deck)
+    print(a.output)
+    print(f"  выбрано {len(summ['applied'])}: " + ', '.join(f'{p} → {v}' for p, v in summ['applied']))
+    for n in rep.notes:
+        print('  ' + n)
+    return 0
+
+
+# ============================================================================================ verify-page: собранная страница
+VERIFY_ADDED_MAX = 0.10          # доля блоков страницы не из copy deck (спецификация 10/01 §9: > 10 % — стоп)
+VERIFY_FIRST_UNITS = 6           # без замера первого экрана (HTML без браузера) — первые блоки страницы
+_VQ = str.maketrans({'«': '"', '»': '"', '“': '"', '”': '"', '„': '"', '’': "'", '—': '-', '–': '-', '−': '-', ' ': ' ',
+                     ' ': ' ', ' ': ' ', 'ё': 'е', 'Ё': 'Е'})
+
+
+def _vnorm(s):
+    return re.sub(r'\s+', ' ', str(s or '').translate(_VQ)).strip().lower()
+
+
+def page_units_offline(html_text):
+    """Блоки сохранённого HTML без браузера (разбор claims_check.load_html): [{text, slot_type, above_fold: None}]."""
+    cm = claims_module()
+    if cm is None:
+        raise SystemExit('verify-page: claims_check.py не импортируется — нужен --extract или --browser')
+    units = cm.load_html(html_text)
+    meta = {}
+    for u in units:
+        if u.get('slot_type') in ('meta-title', 'meta-description', 'og-title', 'og-description'):
+            meta.setdefault({'meta-title': 'title', 'meta-description': 'description', 'og-title': 'og_title', 'og-description': 'og_description'}[u['slot_type']], u['text'])
+    body = [{'text': u['text'], 'slot_type': u.get('slot_type'), 'above_fold': None} for u in units if u.get('section') != 'meta' and u.get('slot_type') != 'meta-title']
+    return body, meta
+
+
+def page_units_extract(res):
+    """Выход copy_extract.py (units с above_fold, meta) → ([{text, slot_type, above_fold}], meta)."""
+    units = [{'text': u.get('text') or '', 'slot_type': u.get('slot_type'), 'above_fold': u.get('above_fold')} for u in res.get('units') or [] if isinstance(u, dict)]
+    return units, dict(res.get('meta') or {})
+
+
+def run_copy_extract(src, is_url, out_json):
+    """copy_extract.py (браузер под блокировками базы) → JSON; None — не отработал."""
+    cmd = [kbpaths.python(), str(kbpaths.scripts('text', 'copy_extract.py'))] + ([src] if is_url else ['--html', src]) + ['-o', out_json, '--lock']
+    p = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    if p.returncode != 0 or not os.path.exists(out_json):
+        return None
+    with open(out_json, encoding='utf-8') as f:
+        return json.load(f)
+
+
+def verify_page(deck, page, units, meta, facts=None):
+    """Собранная страница против copy deck (спецификация 10/01 §9): блок страницы ↔ выбранный текст слота по
+    нормализованной строке и подстроке; слот не найден — «потерян» (warning); блок без слота — «добавлен исполнителем»,
+    доля > 10 % — error; число на странице вне фактов и текстов copy deck — error; мета ≠ copy deck — warning; обещание
+    не в первом экране — warning. → (Report, сводка)."""
+    rep = Report()
+    T = 'verify'
+    pid = str(page.get('page_id'))
+    texts = [u for u in text_units(deck, page, include_meta=False) if str(u['text']).strip()]
+    slot_norm = [(u['path'], _vnorm(u['text'])) for u in texts if u['kind'] == 'slot' and u['slot_type'] not in ('image-alt', 'in-image-text')]
+    blocks = [b for b in units if _vnorm(b.get('text'))]
+    matched_slots, added = set(), []
+    for b in blocks:
+        bn = _vnorm(b['text'])
+        hit = [p for p, sn in slot_norm if sn and (sn == bn or sn in bn or (len(bn) >= 12 and bn in sn))]
+        if hit:
+            matched_slots.update(hit)
+        else:
+            added.append(b['text'])
+    lost = [p for p, sn in slot_norm if p not in matched_slots]
+    share = (len(added) / len(blocks)) if blocks else 0.0
+    for p in lost:
+        rep.add(T, 'warning', 'COPY-D-VERIFY-LOST', p, 'текст слота не найден на собранной странице', 'Сверьте макет и код: текст должен стоять дословно (copy.md).')
+    if blocks and share > VERIFY_ADDED_MAX:
+        rep.add(T, 'error', 'COPY-D-VERIFY-ADDED', pid, f'блоков не из copy deck {len(added)} из {len(blocks)} ({share:.0%} > {VERIFY_ADDED_MAX:.0%})',
+                'Исполнитель дописал текст: верните тексты copy deck; новый текст — через copy deck (правка заказчика — import-copy).')
+    for t in added[:10]:
+        rep.add(T, 'info', 'COPY-D-VERIFY-ADDED', pid, f'добавлено исполнителем: «{one_line(t)[:80]}»', '')
+    cm = claims_module()
+    if cm is not None:
+        allowed = set()
+        lang = (deck.get('lang') or 'ru').split('-')[0]
+        for u in text_units(deck, page):
+            for n in cm.extract_numbers(u['text'], lang):
+                allowed |= {n['value']} if 'value' in n else set(n['range'])
+        for f in (facts.facts if facts else []):
+            for t in list(f.get('verbatim') or []) + [f.get('canonical') or '']:
+                for n in cm.extract_numbers(t, (f.get('lang') or 'ru').split('-')[0]):
+                    allowed |= {n['value']} if 'value' in n else set(n['range'])
+            for v in f.get('values') or []:
+                if isinstance(v.get('value'), (int, float)):
+                    allowed.add(float(v['value']))
+        outside = []
+        for b in blocks:
+            for n in cm.extract_numbers(b['text'], cm.unit_lang(b['text'])):
+                vals = [n['value']] if 'value' in n else n['range']
+                if any(not any(abs(x - y) < 1e-9 for y in allowed) for x in vals):
+                    outside.append(n['raw'])
+        for raw in dict.fromkeys(outside):
+            rep.add(T, 'error', 'COPY-D-VERIFY-NUMBERS', pid, f'число «{raw}» на странице — ни в фактах, ни в текстах copy deck', 'Число — только из facts.yaml через copy deck.')
+    dm = page.get('meta') or {}
+    for k in ('title', 'description'):
+        if dm.get(k) and meta.get(k) and _vnorm(dm[k]) != _vnorm(meta[k]):
+            rep.add(T, 'warning', 'COPY-D-VERIFY-META', f'{pid}/meta/{k}', f'мета страницы ≠ copy deck: «{one_line(meta[k])[:60]}»', 'Мета — из copy deck (пакет кода).')
+    ptext, _pv, _psrc, _pr = promise_info(deck, page)
+    if ptext:
+        pn = _vnorm(ptext)
+        fold = [b for b in blocks if b.get('above_fold')] if any(b.get('above_fold') is not None for b in blocks) else blocks[:VERIFY_FIRST_UNITS]
+        if not any(pn in _vnorm(b['text']) or _vnorm(b['text']) in pn for b in fold if _vnorm(b['text'])):
+            rep.add(T, 'warning', 'COPY-D-VERIFY-PROMISE', f'{pid}/promise', 'обещание первого экрана не найдено в первом экране собранной страницы', 'Первый экран — по first_screen_policy плана.')
+    summ = {'page': pid, 'blocks': len(blocks), 'from_deck': len(blocks) - len(added), 'added': len(added),
+            'added_share': round(share, 3), 'slots': len(slot_norm), 'lost': len(lost)}
+    rep.tools['verify'] = summ
+    return rep, summ
+
+
+def cmd_verify_page(a):
+    data = open_deck(a.deck)
+    deck = deck_root(data)
+    ctx, fp = make_ctx(a, deck)
+    a.today = ctx.today
+    page = next((p for p in pages_of(deck) if str(p.get('page_id')) == a.page), None)
+    if page is None:
+        print(f'copydeck verify-page: страницы {a.page} нет', file=sys.stderr)
+        return 1
+    if a.extract:
+        with open(a.extract, encoding='utf-8') as f:
+            units, meta = page_units_extract(json.load(f))
+    elif a.url or a.browser:
+        out_json = os.path.join(str(kbpaths.out('text', 'verify')), f'{a.page}.extract.json')
+        res = run_copy_extract(a.url or a.html, bool(a.url), out_json)
+        if res is None:
+            print('copydeck verify-page: copy_extract.py не отработал (браузер, блокировка, память)', file=sys.stderr)
+            return 1
+        units, meta = page_units_extract(res)
+    elif a.html:
+        with open(a.html, encoding='utf-8') as f:
+            units, meta = page_units_offline(f.read())
+    else:
+        print('copydeck verify-page: нужен --extract, --html или --url', file=sys.stderr)
+        return 1
+    rep, summ = verify_page(deck, page, units, meta, ctx.facts)
+    write_outputs(a, rep, 'verify-page', {'verify': summ})
+    if not a.quiet:
+        print(render_text(rep, f'copydeck verify-page · {a.deck} · страница {a.page}', a.verbose))
+        print(f"  блоков {summ['blocks']}: из copy deck {summ['from_deck']}, добавлено {summ['added']} ({summ['added_share']:.0%}); слотов {summ['slots']}, потеряно {summ['lost']}")
+    return 2 if rep.count('error') else 0
+
+
+# ============================================================================================ before-after.tsv: why из rule_ref
+def _section_title(path, sec):
+    """Заголовок раздела «§N» md-файла базы text: «## N. …» или «### N.M. …» → текст заголовка; None — нет."""
+    if not os.path.exists(path):
+        return None
+    rx = re.compile(r'^#{2,4}\s+' + re.escape(sec) + r'\.?\s+(.+?)\s*$')
+    with open(path, encoding='utf-8') as f:
+        for line in f:
+            m = rx.match(line.rstrip())
+            if m:
+                return m.group(1).strip()
+    return None
+
+
+def before_after_fill(path=BEFORE_AFTER_PATH, root=ROOT):
+    """Пустой why строк before-after.tsv — из rule_ref: «норма: <заголовок раздела> (<rule_ref>)». → (строки файла,
+    [(номер строки, why)], [(номер строки, rule_ref) — раздел не найден]). Остальные колонки и байты строк не меняются."""
+    with open(path, encoding='utf-8') as f:
+        lines = f.read().split('\n')
+    head = lines[0].split('\t')
+    iw, ir = head.index('why'), head.index('rule_ref')
+    filled, miss = [], []
+    for i, line in enumerate(lines[1:], 2):
+        if not line.strip():
+            continue
+        cells = line.split('\t')
+        if len(cells) <= max(iw, ir) or cells[iw].strip():
+            continue
+        m = re.match(r'^([\w./-]+\.md)\s*§\s*([\d.]+)', cells[ir].strip())
+        title = _section_title(os.path.join(root, m.group(1)), m.group(2).rstrip('.')) if m else None
+        if not title:
+            miss.append((i, cells[ir]))
+            continue
+        cells[iw] = f'норма: {title} ({cells[ir].strip()})'
+        lines[i - 1] = '\t'.join(cells)
+        filled.append((i, cells[iw]))
+    return lines, filled, miss
+
+
+def cmd_before_after(a):
+    lines, filled, miss = before_after_fill()
+    if a.write and filled:
+        with open(BEFORE_AFTER_PATH, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(lines))
+    for i, why in filled[:(None if a.verbose else 5)]:
+        print(f'  строка {i}: {why}')
+    print(f"before-after.tsv: пустой why из rule_ref — {'заполнено' if a.write else 'к заполнению'} {len(filled)}; раздел не найден — {len(miss)}")
+    for i, ref in miss[:10]:
+        print(f'  строка {i}: раздел не найден: {ref}')
+    if a.check:
+        return 1 if filled else 0
     return 0
 
 
@@ -3206,14 +3810,23 @@ def main(argv=None):
         p.add_argument('--md')
         p.add_argument('--quiet', action='store_true')
         p.add_argument('--verbose', action='store_true', help='показать и info')
-    p = sp.add_parser('validate', help='формат, ссылки, статусы, словарь, факты, файлы волны 2')
+    p = sp.add_parser('skeleton', help='каркас copy deck из плана страницы (page-plan)')
+    p.add_argument('plan', help='план страницы site/<surface>/plans/<page-id>.yaml')
+    p.add_argument('-o', '--output', required=True, help='copy deck (site/<surface>/copy/<page-id>.yaml)')
+    p.add_argument('--facts-ref', help='путь к facts.yaml от папки copy deck (по умолчанию — refs.facts плана)')
+    p.add_argument('--voice-ref', help='путь к voice.yaml от папки copy deck')
+    p.add_argument('--date')
+    p.add_argument('--force', action='store_true', help='заменить существующий файл каркасом')
+    p = sp.add_parser('validate', help='формат, ссылки, статусы, словарь site, блоки, стык с планом, факты, правила текста')
     common(p)
-    p.add_argument('--final', action='store_true', help='перед публикацией: страница approved, 0 [PLACEHOLDER], мета заполнена')
+    p.add_argument('--plan', help='план страницы для сверки стыка (по умолчанию — page_plan_ref)')
+    p.add_argument('--final', action='store_true', help='перед публикацией: страница approved, 0 [PLACEHOLDER], 0 демо-фактов, мета заполнена')
     p.add_argument('--no-jsonschema', action='store_true', help='встроенная проверка схемы даже при установленном jsonschema')
-    p = sp.add_parser('claims', help='claims_check.py (факты B2 + право H) по copy deck')
+    p = sp.add_parser('claims', help='claims_check.py (факты и право) по copy deck')
     common(p)
     p.add_argument('--strict', action='store_true', help='claims_check --strict: утверждения без чисел и маркеров (шумно)')
     p.add_argument('--all-variants', action='store_true')
+    p.add_argument('--final', action='store_true', help='ворота публикации: демо-данные — error')
     p = sp.add_parser('lint', help='copy_lint.py (lint_text) по слотам и страницам')
     common(p, facts=False)
     p.add_argument('--final', action='store_true', help='[PLACEHOLDER] — error')
@@ -3221,34 +3834,28 @@ def main(argv=None):
     p.add_argument('--no-page-pass', action='store_true')
     p = sp.add_parser('check', help='claims → lint → validate')
     common(p)
+    p.add_argument('--plan', help='план страницы для сверки стыка (по умолчанию — page_plan_ref)')
     p.add_argument('--final', action='store_true')
     p.add_argument('--strict', action='store_true')
     p.add_argument('--no-jsonschema', action='store_true')
     p.add_argument('--no-page-pass', action='store_true')
     p.add_argument('--update', help='записать копию deck с записями lint и claims (text_hash, дата, версия)')
-    p.add_argument('--promote', action='store_true', help='с --update: draft → checked у текстов с 0 error claims и lint')
+    p.add_argument('--promote', action='store_true', help='с --update: draft и assumed → checked у текстов с 0 error claims и lint')
     p.add_argument('--all-variants', action='store_true', help='проверить и живые невыбранные варианты (и альтернативы мета) — каждый как если бы его выбрали; с --update — variant.checks у каждого')
-    p = sp.add_parser('export-kimi', help='copy.md, facts.md, brief-fragment.yaml для пакета kimi')
+    p = sp.add_parser('export', help='выгрузка во вход холста: pages/<page-id>/copy.md и facts.md')
     common(p)
-    p.add_argument('--out', required=True, help='папка для файлов пакета')
-    p.add_argument('--page', help='id страницы (пакет kimi — одна страница)')
-    p.add_argument('--meaning', help='meaning.yaml (B1): target_user, description, viewport_primary, questions')
-    p.add_argument('--merge-into', help='brief.yaml проекта: записать в --out слитый brief.yaml')
-    p.add_argument('--strict', action='store_true', help='только утверждённая страница, 0 [PLACEHOLDER]')
-    p.add_argument('--facts-scope', choices=['all', 'used'], default='all', help='all — все публикуемые факты (x-kimi-map B2); used — только из текстов страницы')
-    p.add_argument('--product-name')
-    p.add_argument('--force', action='store_true', help='выгрузить, несмотря на error (только для опытов)')
-    p.add_argument('--no-claims-gate', action='store_true', help='не запускать claims_check перед выгрузкой (только для опытов)')
-    p.add_argument('--job-facts', action='store_true', help='id фактов в job секций (x-kimi-map B1); по умолчанию нет — TASK.md короче, связь факт → секция есть в facts.md')
-    p = sp.add_parser('import-kimi', help='copy.md kimi (+ brief.yaml) → copy deck v1')
-    p.add_argument('input')
+    p.add_argument('--page', help='id страницы (у copy deck с одной страницей — необязательно)')
+    p.add_argument('--stage', required=True, choices=['directions', 'wireframe', 'mockup'], help='этап холста: статусы текстов — x-canvas-map copy_md')
+    p.add_argument('--out', help='папка входа (по умолчанию — $DDD_HOME/out/text/export)')
+    p.add_argument('--facts-scope', choices=['all', 'used'], default='all', help='all — все публикуемые факты; used — только из текстов страницы')
+    p = sp.add_parser('import-copy', help='правки текста с холста: copy.md → варианты source: customer')
+    p.add_argument('input', help='copy.md (разбор исходников холста или правленая выгрузка)')
+    p.add_argument('--deck', required=True)
+    p.add_argument('--page', required=True)
     p.add_argument('-o', '--output', required=True)
-    p.add_argument('--brief')
-    p.add_argument('--facts', help='facts.yaml — записать facts_ref')
-    p.add_argument('--site')
-    p.add_argument('--page-id', default='home')
-    p.add_argument('--page-type')
+    p.add_argument('--choose', action='store_true', help='сразу выбрать варианты заказчика (страница возвращается в draft)')
     p.add_argument('--date')
+    p.add_argument('--verbose', action='store_true')
     p = sp.add_parser('export-assets', help='alt, подписи, строки в картинках, OG → фрагмент плана ассетов ai-media')
     p.add_argument('deck')
     p.add_argument('--page')
@@ -3261,21 +3868,44 @@ def main(argv=None):
     p.add_argument('-o', '--output', required=True, help='Markdown для выбирающего')
     p.add_argument('--key', required=True, help='YAML ключа меток (у ведущего)')
     p.add_argument('--include-failed', action='store_true', help='показать и варианты с error в variant.checks (по умолчанию — только прошедшие ворота)')
-    p = sp.add_parser('approve', help='утверждение страницы человеком: checked → approved (review, approval)')
+    p = sp.add_parser('apply-selection', help='голоса слепого выбора → chosen и selection')
+    p.add_argument('deck')
+    p.add_argument('--key', required=True, help='ключ меток export-variants')
+    g = p.add_mutually_exclusive_group(required=True)
+    g.add_argument('--votes', help='YAML: {путь: метка | [метки по убыванию] | {метка: голоса}}')
+    g.add_argument('--sheet', help='лист export-variants с заполненными строками «Выбор: …»')
+    p.add_argument('--method', default='customer', choices=list(SELECTION_METHODS))
+    p.add_argument('--by', required=True, help='кто выбирал: роль или имя')
+    p.add_argument('--at', help='дата ГГГГ-ММ-ДД (по умолчанию сегодня)')
+    p.add_argument('-o', '--output', required=True)
+    p = sp.add_parser('approve', help='утверждение страницы человеком: checked → approved; журнал процесса уходит')
     p.add_argument('deck')
     p.add_argument('--page', required=True)
     p.add_argument('--by', required=True, help='кто утверждает: роль или имя (не агент)')
     p.add_argument('--at', help='дата ГГГГ-ММ-ДД (по умолчанию сегодня)')
     p.add_argument('--note')
     p.add_argument('-o', '--output', required=True)
+    p = sp.add_parser('verify-page', help='собранная страница против copy deck')
+    common(p)
+    p.add_argument('--page', required=True)
+    src = p.add_mutually_exclusive_group(required=True)
+    src.add_argument('--extract', help='JSON copy_extract.py')
+    src.add_argument('--html', help='сохранённый HTML (без браузера — разбор тегов; --browser — copy_extract.py)')
+    src.add_argument('--url', help='адрес страницы (copy_extract.py, браузер под блокировкой)')
+    p.add_argument('--browser', action='store_true', help='--html через copy_extract.py (браузер: первый экран, скрытое)')
     p = sp.add_parser('upgrade', help='copy deck v0 → v1')
     p.add_argument('deck')
     p.add_argument('-o', '--output', required=True)
+    p = sp.add_parser('before-after', help='пустой why в before-after.tsv — из rule_ref')
+    p.add_argument('--write', action='store_true', help='записать заполненный why в файл базы')
+    p.add_argument('--check', action='store_true', help='код 1, если есть пустой why, который заполняется из rule_ref')
+    p.add_argument('--verbose', action='store_true')
     a = ap.parse_args(argv)
     try:
-        return {'validate': cmd_validate, 'claims': cmd_claims, 'lint': cmd_lint, 'check': cmd_check,
-                'export-kimi': cmd_export_kimi, 'import-kimi': cmd_import_kimi, 'export-assets': cmd_export_assets,
-                'approve': cmd_approve, 'upgrade': cmd_upgrade, 'export-variants': cmd_export_variants}[a.cmd](a)
+        return {'skeleton': cmd_skeleton, 'validate': cmd_validate, 'claims': cmd_claims, 'lint': cmd_lint, 'check': cmd_check,
+                'export': cmd_export, 'import-copy': cmd_import_copy, 'export-assets': cmd_export_assets,
+                'export-variants': cmd_export_variants, 'apply-selection': cmd_apply_selection, 'approve': cmd_approve,
+                'verify-page': cmd_verify_page, 'upgrade': cmd_upgrade, 'before-after': cmd_before_after}[a.cmd](a)
     except SystemExit as e:
         if isinstance(e.code, str):
             print(e.code, file=sys.stderr)
@@ -3296,7 +3926,7 @@ def _st_deck(**over):
             'meta': {'title': 'Ремонт квартир под ключ — Демо', 'description': 'Срок и смета в договоре, гарантия 3 года на работы.',
                      'og_title': 'Ремонт под ключ', 'og_description': 'Срок и смета в договоре.'},
             'sections': [
-                {'section_id': 'hero', 'section_role': 'hero', 'block': 'hero', 'message': 'Срок и смета — в договоре',
+                {'section_id': 'hero', 'section_role': 'hero', 'block': 'hero-media', 'message': 'Срок и смета — в договоре',
                  'slots': [
                      {'slot_id': 'h1', 'slot_type': 'headline', 'variants': [{'id': 'a', 'text': 'Ремонт квартир под ключ', 'status': 'draft'}], 'chosen': 'a', 'fact_ids': [], 'claim_flags': []},
                      {'slot_id': 'lead', 'slot_type': 'subheadline', 'variants': [{'id': 'a', 'text': 'Гарантия 3 года на работы — пункт 7.2 договора.', 'status': 'draft'}], 'chosen': 'a', 'fact_ids': ['guarantee-3'], 'claim_flags': ['guarantee']},
@@ -3330,10 +3960,26 @@ def _st_facts():
                 {'id': 'city-inferred', 'kind': 'company', 'claim_class': ['origin'], 'verbatim': ['Сборка в Казани'], 'canonical': 'Сборка в Казани.',
                  'source': {'type': 'customer-message', 'who': 'заказчик', 'date': '2026-09-24', 'quote': 'мы стартап из Казани', 'derivation': 'inferred'},
                  'verification': {'status': 'stated'}, 'permission': {'status': 'not-required'}, 'lang': 'ru'},
+                {'id': 'rating-demo', 'kind': 'rating', 'claim_class': ['rating'], 'verbatim': ['4,9 из 5 на Яндекс Картах — 120 оценок'],
+                 'canonical': 'Рейтинг 4,9 из 5 по 120 оценкам.', 'values': [{'value': 4.9, 'unit': 'stars', 'scale': 5, 'count': 120, 'as_of': '2026-09-01'}],
+                 'source': {'type': 'platform', 'who': 'Яндекс Карты', 'date': '2026-09-01', 'url': 'https://example.org'}, 'verification': {'status': 'verified'},
+                 'permission': {'status': 'not-required'}, 'valid': {'until': '2026-12-01'}, 'lang': 'ru', 'example': True},
             ],
             'missing': [{'id': 'measure-price', 'what': 'цена замера', 'placeholder': '[PLACEHOLDER: цена замера]', 'who': 'заказчик'}],
             'never_claim': [{'id': 'nc-eyes', 'text': 'любые обещания про здоровье и зрение', 'claim_class': ['health'],
                              'patterns': ['глаз', 'зрени'], 'lift': 'never', 'voice': 'any'}]}
+
+
+def _st_checked(slot, text, status='checked'):
+    """Слот с записями проверок текущего текста (0 error) и статусом выбранного варианта."""
+    h = text_hash(text)
+    v = chosen_variant(slot)
+    v['text'], v['status'] = text, status
+    slot['lint'] = {'profile': 'landing', 'errors': 0, 'warnings': 0, 'text_hash': h}
+    slot['claims'] = {'errors': 0, 'warnings': 0, 'text_hash': h}
+    slot.setdefault('fact_ids', [])
+    slot.setdefault('claim_flags', [])
+    return slot
 
 
 def selftest():
@@ -3348,8 +3994,8 @@ def selftest():
     td = tempfile.mkdtemp(prefix='copydeck-selftest-')
     try:
         schema = load_copy_schema()
-        check('schema: $id и date', schema.get('$id') == 'urn:app-design:text-research:copy-deck:1' and schema.get('date') == '2026-09-24')
-        # --- T2: поля v0 есть в схеме (T2 контракта: не удалять и не переименовывать)
+        check('schema: $id и дата', schema.get('$id') == 'urn:app-design:text-research:copy-deck:1' and re.fullmatch(r'\d{4}-\d{2}-\d{2}', schema.get('date') or ''))
+        # --- поля v0 есть в схеме (не удалять и не переименовывать)
         defs = schema['$defs']
         owners = {'copy_deck': schema['properties'], 'page': defs['page']['properties'], 'meta': defs['meta']['properties'],
                   'section': defs['section']['properties'], 'slot': defs['slot']['properties'], 'variant': defs['variant']['properties'],
@@ -3359,13 +4005,16 @@ def selftest():
             if path == 'copy_deck':
                 continue
             owner, field = path.split('.', 1)
-            props = owners['copy_deck'] if owner == 'copy_deck' else owners[owner]
-            if owner == 'copy_deck':
-                props = defs['deck']['properties']
+            props = defs['deck']['properties'] if owner == 'copy_deck' else owners[owner]
             if field not in props:
                 miss.append(path)
         check('схема: все поля v0 на месте', not miss, miss)
-        check('схема: статусы v0', defs['status']['enum'] == schema['x-v0-fields']['status_values_v0'])
+        check('схема: статусы v0 на месте, assumed добавлен', set(schema['x-v0-fields']['status_values_v0']) <= set(defs['status']['enum']) and 'assumed' in defs['status']['enum'])
+        check('схема: x-status-rules знают assumed (слот и страница)', 'assumed' in schema['x-status-rules']['slot'] and 'assumed' in schema['x-status-rules']['page'])
+        cmr = copy_md_rules(schema)
+        check('схема: x-canvas-map copy_md — статусы этапов (вайрфрейм — assumed и checked, макет — approved)',
+              {'assumed', 'checked'} <= set(cmr['stage_statuses']['wireframe']) and cmr['stage_statuses']['mockup'] == ['approved'], cmr)
+        check('схема: прежней карты проекции нет', not any(k.startswith('x-k' + 'imi') for k in schema), [k for k in schema if k.startswith('x-')])
         # --- схема: пример и отрицательные случаи; паритет с jsonschema
         sv = SubsetValidator(schema)
         check('схема: пример проходит (встроенная)', not sv.errors(schema['examples'][0]), sv.errors(schema['examples'][0])[:3])
@@ -3380,6 +4029,8 @@ def selftest():
         d = _st_deck(); del d['copy_deck']['pages'][0]['sections'][0]['slots'][0]['variants']; negs['нет variants (поле v0)'] = d
         for name, dd in negs.items():
             check(f'схема ловит: {name}', bool(sv.errors(dd)), 'нет ошибки')
+        d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['slots'][0]['variants'][0]['status'] = 'assumed'
+        check('схема: статус assumed проходит', not sv.errors(d), sv.errors(d)[:2])
         try:
             from jsonschema import Draft202012Validator
             jv = Draft202012Validator(schema)
@@ -3387,7 +4038,7 @@ def selftest():
             par += [] if bool(list(jv.iter_errors(_st_deck()))) == bool(sv.errors(_st_deck())) else ['позитивный']
             check('схема: встроенная = jsonschema', not par, par)
         except ImportError:
-            print('  (jsonschema нет — паритет не проверен; venv-J/bin/python)')
+            print('  (jsonschema нет — паритет не проверен; Python окружения скилла)')
         # --- validate: позитив и смысловые ошибки
         facts = Facts(_st_facts(), os.path.join(td, 'facts.yaml'))
         ctx = Ctx(os.path.join(td, 'deck.yaml'), facts, '2026-09-24', copy_slots_path=os.path.join(td, 'нет.yaml'),
@@ -3395,7 +4046,7 @@ def selftest():
         rep = validate(_st_deck(), ctx)
         errs = [f for f in rep.findings if f['level'] == 'error']
         check('validate: чистый deck — 0 error', not errs, [(f['rule'], f['where'], f['message']) for f in errs][:4])
-        check('validate: файлы волны 2 нет → warning, не падение', any(f['rule'] == 'COPY-D-RULES-MISSING' and 'copy-slots' in f['message'] for f in rep.findings))
+        check('validate: файлы правил текста нет → warning, не падение', any(f['rule'] == 'COPY-D-RULES-MISSING' and 'copy-slots' in f['message'] for f in rep.findings))
 
         def rules_of(d, **kw):
             r = validate(d, kw.pop('ctx', ctx), **kw)
@@ -3409,12 +4060,28 @@ def selftest():
         r0 = rules_of(d)[0]
         check('validate: выбран отклонённый', ('COPY-D-CHOSEN', 'error') in r0)
         check('validate: rejected без reason (v1)', ('COPY-D-REJECTED', 'error') in r0)
+        # словарь site v1 (типы страниц, роли, слоты) и блоки blocks.yaml
         d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['slots'][0]['slot_type'] = 'mega-title'
-        check('validate: неизвестный slot_type', ('COPY-D-VOCAB', 'error') in rules_of(d)[0])
-        d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['slots'][3]['slot_type'] = 'image-caption'
-        check('validate: slot_type-предложение → info', ('COPY-D-VOCAB', 'info') in rules_of(d)[0])
+        check('словарь site: неизвестный slot_type → error', ('COPY-D-VOCAB', 'error') in rules_of(d)[0])
+        media = next((k for k, kind in (ctx.vocab or {}).get('slot_kinds', {}).items() if kind == 'media'), None)
+        d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['slots'][0]['slot_type'] = media
+        check('словарь site: слот не вида text → error', media and ('COPY-D-VOCAB', 'error') in rules_of(d)[0], media)
         d = _st_deck(); d['copy_deck']['pages'][0]['page_type'] = 'landing-unknown'
-        check('validate: неизвестный page_type', ('COPY-D-VOCAB', 'error') in rules_of(d)[0])
+        check('словарь site: неизвестный page_type → error', ('COPY-D-VOCAB', 'error') in rules_of(d)[0])
+        d = _st_deck(); d['copy_deck']['pages'][0]['page_type'] = 'ecommerce-product-page'
+        check('словарь site: page_type out-of-scope → error', ('COPY-D-VOCAB', 'error') in rules_of(d)[0])
+        d = _st_deck(); d['copy_deck']['pages'][0]['page_type'] = 'faq-page'; d['copy_deck']['pages'][0]['sections'][0]['section_role'] = 'offer'
+        d['copy_deck']['pages'][0]['sections'][1]['slots'][1]['slot_type'] = 'disclaimer'
+        check('словарь site: faq-page, роль offer, слот disclaimer — законные id v1', not any(f['rule'] == 'COPY-D-VOCAB' and f['level'] == 'error' for f in rules_of(d)[1].findings),
+              [(f['rule'], f['message']) for f in rules_of(d)[1].findings if f['rule'] == 'COPY-D-VOCAB'])
+        d = _st_deck(); d['copy_deck']['pages'][0]['page_type'] = 'integrations-page'
+        check('словарь site: proposed → info', ('COPY-D-VOCAB', 'info') in rules_of(d)[0])
+        d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['block'] = 'hero'
+        check('block: роль вместо блока → error COPY-D-BLOCK', ('COPY-D-BLOCK', 'error') in rules_of(d)[0])
+        d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['block'] = ''
+        check('block: пустое поле → warning', ('COPY-D-BLOCK', 'warning') in rules_of(d)[0])
+        d = _st_deck(); d['copy_deck']['pages'][0]['sections'][1]['block'] = 'faq'
+        check('block: id блока blocks.yaml — без находки', not any(f['rule'] == 'COPY-D-BLOCK' for f in rules_of(d)[1].findings))
         d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['slots'][1]['fact_ids'] = ['guarantee-33']
         check('validate: нет факта', ('COPY-D-FACT-REF', 'error') in rules_of(d)[0])
         d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['slots'][1]['fact_ids'] = ['missing:measure-price']
@@ -3427,7 +4094,16 @@ def selftest():
         check('validate: вывод вместо факта (draft → warning)', ('COPY-D-FACT-UNPUBLISHABLE', 'warning') in rules_of(d)[0])
         d = _st_deck(); d['copy_deck']['pages'][0]['sections'][1]['slots'][1]['missing_ids'] = ['measure-cost']
         check('validate: неизвестный missing_ids', ('COPY-D-MISSING-REF', 'error') in rules_of(d)[0])
+        # демо-данные: --final — error, без него — info
+        d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['slots'][1]['fact_ids'] = ['rating-demo']
+        check('демо-факт example: true — без --final info', ('COPY-D-EXAMPLE', 'info') in rules_of(d)[0])
+        check('демо-факт example: true — --final error', ('COPY-D-EXAMPLE', 'error') in rules_of(d, final=True)[0])
+        fx_demo = dict(_st_facts(), example=True)
+        ctx_demo = Ctx(os.path.join(td, 'deck.yaml'), Facts(fx_demo, os.path.join(td, 'f.yaml')), '2026-09-24', copy_slots_path=os.path.join(td, 'нет.yaml'), meta_rules_path=os.path.join(td, 'нет-meta.yaml'))
+        check('демо-файл фактов (example у файла) — --final error на любом факте', ('COPY-D-EXAMPLE', 'error') in rules_of(_st_deck(), ctx=ctx_demo, final=True)[0])
         # статусы
+        d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['slots'][0]['variants'][0]['status'] = 'assumed'
+        check('статус assumed: без записей проверок — не ошибка (как draft)', not any(f['rule'] == 'COPY-D-STATUS' for f in rules_of(d)[1].findings))
         d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['slots'][0]['variants'][0]['status'] = 'checked'
         check('validate: checked без записей lint и claims', ('COPY-D-STATUS', 'error') in rules_of(d)[0])
         h = text_hash('Ремонт квартир под ключ')
@@ -3448,7 +4124,7 @@ def selftest():
         d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['slots'][0]['variants'][0]['text'] = 'Ремонт [ЗАГЛУШКА] под ключ'
         check('validate: заглушка не по формату', ('COPY-D-PLACEHOLDER-FORM', 'error') in rules_of(d)[0])
         d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['slots'][0]['variants'][0]['text'] = 'Ремонт {{product.name}}'
-        check('validate: «{{» в тексте (kimi)', ('COPY-D-KIMI-TOKEN', 'error') in rules_of(d)[0])
+        check('validate: «{{» в тексте — остаток шаблона для проверки входа холста', ('COPY-D-TEMPLATE-TOKEN', 'error') in rules_of(d)[0])
         d = _st_deck(); d['copy_deck']['pages'][0].pop('promise')
         check('validate: нет обещания → warning', ('COPY-D-PROMISE', 'warning') in rules_of(d)[0])
         d = _st_deck(); d['copy_deck']['pages'][0]['promise'] = {'from': 'home/hero/leadd'}
@@ -3466,13 +4142,13 @@ def selftest():
         check('validate: кириллица в EN-тексте', any(f['rule'] == 'COPY-D-LANG' and 'кириллица' in f['message'] for f in rules_of(d)[1].findings))
         d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['slots'][1]['claim_flags'] = ['guarantee', 'weird-flag']
         check('validate: неизвестный claim_flags', ('COPY-D-FLAGS', 'warning') in rules_of(d)[0])
-        # --- файлы волны 2: copy-slots.yaml (E) в двух формах, голос (F), мета (G)
+        # --- правила текста: copy-slots.yaml (E) в двух формах, голос (F), мета (G); ядро первого экрана без hero
         cs1 = os.path.join(td, 'cs1.yaml')
         with open(cs1, 'w', encoding='utf-8') as f:
             yaml.safe_dump({'slot_types': [{'id': 'headline', 'length': {'ru': {'words': {'min': 2, 'target': 6, 'max': 3}, 'chars': {'max': 20},
                                                                                'hard_words': [1, 3], 'primary': 'chars'}}},
                                            {'id': 'subheadline', 'fact_required': 'always', 'length': {'ru': {'desktop': {'words': [5, 12, 25]}, 'mobile': {'words': [5, 10, 20]}}}}],
-                            'renames': {'cta-label': 'cta-button'}}, f, allow_unicode=True)
+                            'renames': {'cta-label': 'cta-button'}, 'composites': {'hero-core': {'max_words': 6, 'rule': 'тест'}}}, f, allow_unicode=True)
         specs, ren, notes = load_copy_slots(cs1)
         check('copy-slots: список и длины (форма 1)', specs['headline']['len'][('ru', 'words')] == [2, 3] and specs['subheadline']['len'][('ru', 'words')] == [5, 25], specs)
         cs2 = os.path.join(td, 'cs2.yaml')
@@ -3482,11 +4158,21 @@ def selftest():
         check('copy-slots: словарь и плоские ключи (форма 2)', specs2['headline']['len'][('en', 'words')] == [None, 8])
         ctx2 = Ctx(os.path.join(td, 'deck.yaml'), facts, '2026-09-24', copy_slots_path=cs1, meta_rules_path=os.path.join(td, 'нет-meta.yaml'))
         d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['slots'][1]['fact_ids'] = []
-        r0 = {(f['rule'], f['level']) for f in validate(d, ctx2).findings}
-        check('copy-slots E: за грубой границей → warning', ('COPY-D-LEN', 'warning') in r0)
-        check('copy-slots E: основная единица > p90 → info', ('COPY-D-LEN', 'info') in r0)
+        rr = validate(d, ctx2).findings
+        r0 = {(f['rule'], f['level']) for f in rr}
+        check('copy-slots: за грубой границей → warning', ('COPY-D-LEN', 'warning') in r0)
+        check('copy-slots: основная единица > p90 → info', ('COPY-D-LEN', 'info') in r0)
         check('copy-slots: fact_required always', ('COPY-D-FACT-REQUIRED', 'warning') in r0)
         check('copy-slots: переименованный тип', ('COPY-D-SLOT-RENAMED', 'warning') in r0)
+        check('ядро первого экрана: секция hero > max_words → COPY-D-HERO-CORE', any(f['rule'] == 'COPY-D-HERO-CORE' and f['where'] == 'home/hero' for f in rr))
+        d = _st_deck(); pg = d['copy_deck']['pages'][0]; pg['page_type'] = 'case-page'
+        hero = pg['sections'][0]; hero['section_id'], hero['section_role'], hero['block'] = 'case', 'case-studies', 'case-study'
+        pg['sections'].insert(0, {'section_id': 'header', 'section_role': 'header', 'block': 'header', 'slots': [
+            {'slot_id': 'cta-label', 'slot_type': 'cta-label', 'variants': [{'id': 'a', 'text': 'Позвонить нам сегодня же, прямо сейчас', 'status': 'draft'}], 'chosen': 'a'}]})
+        pg['promise'] = {'from': 'home/case/lead'}
+        rr = validate(d, ctx2).findings
+        check('ядро первого экрана без hero — по первой секции после шапки', any(f['rule'] == 'COPY-D-HERO-CORE' and f['where'] == 'home/case' for f in rr)
+              and not any(f['rule'] == 'COPY-D-HERO-CORE' and f['where'] == 'home/header' for f in rr), [(f['rule'], f['where']) for f in rr if f['rule'] == 'COPY-D-HERO-CORE'])
         vy = os.path.join(td, 'voice.yaml')
         with open(vy, 'w', encoding='utf-8') as f:
             yaml.safe_dump({'voice_version': 1, 'address': {'ru_form': 'vy', 'capital_vy': False, 'self_reference': 'we'},
@@ -3494,7 +4180,7 @@ def selftest():
                                                      {'term': 'решения под ключ', 'reason': 'штамп', 'level': 'info'}]},
                             'projections': {'tone_of_voice': 'на «вы», спокойно и по делу, без восклицаний'}}, f, allow_unicode=True)
         vo = load_voice(vy)
-        check('голос F: обращение, avoid, tone_of_voice', vo['format'] == 'F' and vo['address'] == 'вы' and vo['taboo'][0]['term'] == 'уникальн*' and vo['tone_of_voice'], vo)
+        check('голос: обращение, avoid, tone_of_voice', vo['format'] == 'F' and vo['address'] == 'вы' and vo['taboo'][0]['term'] == 'уникальн*' and vo['tone_of_voice'], vo)
         vg = os.path.join(td, 'voice-generic.yaml')
         with open(vg, 'w', encoding='utf-8') as f:
             yaml.safe_dump({'обращение': 'на «ты»', 'lexicon': {'dont_say': ['уникальный']}}, f, allow_unicode=True)
@@ -3510,73 +4196,125 @@ def selftest():
                             'checks_outside_linter': [{'id': 'meta-x-duplicate-title', 'level': 'error'}, {'id': 'meta-x-missing', 'level': 'error'},
                                                       {'id': 'meta-x-desc-equals-title', 'level': 'warning'}]}, f, allow_unicode=True)
         ctx3 = Ctx(os.path.join(td, 'deck.yaml'), facts, '2026-09-24', copy_slots_path=cs1, meta_rules_path=mg)
-        check('мета G: формат распознан', ctx3.meta_rules['format'] == 'G')
+        check('мета: формат распознан', ctx3.meta_rules['format'] == 'G')
         d = _st_deck(); p2 = _copy.deepcopy(d['copy_deck']['pages'][0]); p2['page_id'] = 'home-2'; d['copy_deck']['pages'].append(p2)
         r0 = {(f['rule'], f['level']) for f in validate(d, ctx3).findings}
-        check('мета G: дубль title между страницами', ('meta-x-duplicate-title', 'error') in r0)
-        check('мета G: description короче warning_under', ('COPY-D-META-LEN', 'warning') in r0)
+        check('мета: дубль title между страницами', ('meta-x-duplicate-title', 'error') in r0)
+        check('мета: description короче warning_under', ('COPY-D-META-LEN', 'warning') in r0)
         d = _st_deck(); m = d['copy_deck']['pages'][0]['meta']
         m['variants'] = {'title': [{'id': 'a', 'text': m['title'], 'status': 'draft'}, {'id': 'b', 'text': 'Ремонт под ключ с гарантией 3 года', 'status': 'draft'},
                                    {'id': 'c', 'text': 'Ремонт без смет', 'status': 'rejected'}]}
         m['review_by'] = '2026-01-01'
         r0 = {(f['rule'], f['level']) for f in validate(d, ctx3).findings}
-        check('мета G: варианты title без плана теста → info', ('COPY-D-META-VARIANTS', 'info') in r0)
-        check('мета G: отклонённый вариант без reason', ('COPY-D-REJECTED', 'error') in r0)
-        check('мета G: review_by в прошлом → warning', ('COPY-D-META-REVIEW', 'warning') in r0)
+        check('мета: варианты title без плана теста → info', ('COPY-D-META-VARIANTS', 'info') in r0)
+        check('мета: отклонённый вариант без reason', ('COPY-D-REJECTED', 'error') in r0)
+        check('мета: review_by в прошлом → warning', ('COPY-D-META-REVIEW', 'warning') in r0)
         flat, _mp, _alt = flatten_for_claims(deck_root(d), ctx3)
         tslot = next(x for x in flat['copy_deck']['pages'][0]['sections'][0]['slots'] if x['slot_id'] == 'title')
-        check('мета G: в основной сверке — выбранный title', len(tslot['variants']) == 1 and tslot['chosen'] == 'meta' and not _alt, tslot)
+        check('мета: в основной сверке — выбранный title', len(tslot['variants']) == 1 and tslot['chosen'] == 'meta' and not _alt, tslot)
         flat, _mp, alt = flatten_for_claims(deck_root(d), ctx3, alternatives=True)
-        check('мета G: --all-variants — живая альтернатива title копией страницы, отклонённая и равная выбранному — нет',
+        check('мета: --all-variants — живая альтернатива title копией страницы, отклонённая и равная выбранному — нет',
               sorted(alt.values()) == [('home/meta/title', 'b')] and len(flat['copy_deck']['pages']) == 2, sorted(alt.values()))
         d = _st_deck(); d['copy_deck']['pages'][0]['article'] = {'intent': 'выбор подрядчика', 'author': 'fact:lapin-nope', 'unique_angle': {'text': 'график по неделям', 'fact_ids': ['guarantee-3']}}
         r0 = {(f['rule'], f['level'], f['where']) for f in validate(d, ctx3).findings}
-        check('статья G: автор — несуществующий факт', ('COPY-D-FACT-REF', 'error', 'home/article/author') in r0)
+        check('статья: автор — несуществующий факт', ('COPY-D-FACT-REF', 'error', 'home/article/author') in r0)
         if os.path.exists(META_RULES_PATH):
-            check('мета G: реальный meta-rules.yaml читается', load_meta_rules(META_RULES_PATH).get('format') in ('G', 'generic'))
+            check('мета: реальный meta-rules.yaml читается', load_meta_rules(META_RULES_PATH).get('format') in ('G', 'generic'))
         # --- плоская копия для claims_check
         flat, mp, _alt = flatten_for_claims(deck_root(_st_deck()), ctx)
         secs = {s['section_id'] for s in flat['copy_deck']['pages'][0]['sections']}
         check('claims: псевдосекции мета и обещания', {'__head', '__promise', 'hero'} <= secs, secs)
         check('claims: обратная карта путей', mp[('home', '__promise', 'promise')] == 'home/promise' and mp[('home', '__head', 'title')] == 'home/meta/title')
-        # --- экспорт в kimi (без процесса claims — быстро) и обратный импорт
-        out = os.path.join(td, 'kimi')
-        rep_e, summ = export_kimi(_st_deck(), ctx, out, claims_gate=False)
-        check('export-kimi: выгружено', summ is not None, [(f['rule'], f['message']) for f in rep_e.findings if f['level'] == 'error'])
-        if summ:
-            cm = open(os.path.join(out, 'copy.md'), encoding='utf-8').read()
-            fm = open(os.path.join(out, 'facts.md'), encoding='utf-8').read()
-            fr = yaml.safe_load(open(os.path.join(out, 'brief-fragment.yaml'), encoding='utf-8'))
-            check('export-kimi: copy.md — head, секции, ключи', '## head' in cm and '## hero' in cm and '[h1]: Ремонт квартир под ключ' in cm and '[a1]: [PLACEHOLDER: цена замера]' in cm)
-            check('export-kimi: нет остатков шаблона', not re.search(r'\{\{|\{#|<UNSET', cm + fm))
-            check('export-kimi: факт публикуется, вывод и истёкший — в Missing', '| guarantee-3 |' in fm and '| city-inferred |' in fm.split('## Missing')[1] and '| promo-old |' in fm.split('## Missing')[1])
-            check('export-kimi: Never claim — строка проекта и умолчания', 'здоровье и зрение' in fm and 'Рейтинги и звёзды' in fm)
-            check('export-kimi: гарантия снимает nc-prices-terms', 'Цены, скидки, сроки доставки' not in fm)
-            KNOWN_TOP = {'project', 'product', 'design_system', 'direction', 'references', 'site', 'app', 'feature', 'component', 'content',
-                         'copy', 'facts', 'missing', 'never_claim', 'brand', 'assets', 'missing_slots', 'decisions', 'build', 'run', 'questions'}
-            check('export-kimi: ключи фрагмента = форма brief.yaml kimi', set(fr) <= KNOWN_TOP and all(set(x) == {'id', 'job'} for x in fr['site']['sections']), fr)
-            check('export-kimi: обещание → product.goal, кнопка → site.cta.label', fr['product']['goal'].startswith('Ремонт без выездов') and fr['site']['cta']['label'] == 'Вызвать замерщика')
-            dk, notes = import_kimi_copy(cm, {'product': {'goal': fr['product']['goal']}, 'site': fr['site']}, page_type='landing-lead-services', vocab=ctx.vocab)
-            out2 = os.path.join(td, 'kimi2')
-            _r2, summ2 = export_kimi(dk, Ctx(os.path.join(td, 'deck.yaml'), facts, '2026-09-24', meta_rules_path=os.path.join(td, 'x')), out2, claims_gate=False)
-            cm2 = open(os.path.join(out2, 'copy.md'), encoding='utf-8').read() if summ2 else ''
-            body = lambda t: t.split('\n## ', 1)[1] if '\n## ' in t else t
-            check('import-kimi → export-kimi: copy.md без потерь', body(cm2) == body(cm), (body(cm2)[:200], body(cm)[:200]))
-        d = _st_deck(); d['copy_deck']['pages'][0].pop('promise')
-        _r, s0 = export_kimi(d, ctx, os.path.join(td, 'kimi3'), claims_gate=False)
-        check('export-kimi: без обещания — отказ', s0 is None)
-        d = _st_deck(lang='en', source_lang='ru', voice_ref='voice.yaml')
-        _r, s1 = export_kimi(d, ctx, os.path.join(td, 'kimi-en'), claims_gate=False)
-        check('export-kimi EN: строка Voice профиля на русском → warning COPY-D-LANG (J3)', s1 is not None and any(f['rule'] == 'COPY-D-LANG' and 'Voice' in f['message'] for f in _r.findings), [(f['rule'], f['message'][:60]) for f in _r.findings if f['level'] != 'info'][:4])
-        d['copy_deck']['adaptation'] = {'mode': 'adaptation', 'voice_line': 'Address the reader as “you”, calm and precise'}
-        _r, s1 = export_kimi(d, ctx, os.path.join(td, 'kimi-en2'), claims_gate=False)
-        cm_en = open(os.path.join(td, 'kimi-en2', 'copy.md'), encoding='utf-8').read() if s1 else ''
-        check('export-kimi EN: adaptation.voice_line → строка Voice copy.md', 'Voice: Address the reader as “you”, calm and precise.' in cm_en and 'Typography is final' not in cm_en, cm_en[:200])
-        bt = dict(brief_texts({'site': {'sections': [{'id': 'final', 'job': 'Что сделать сейчас? → Вызвать замерщика'},
-                                                     {'id': 'solution', 'job': 'Решение → Один подрядчик; доказательства: guarantee-3'}]}}))
-        check('export-kimi: стрелка в job — граница фразы для сверки брифа', bt.get('brief:site.sections[final].job') == 'Что сделать сейчас? Вызвать замерщика'
-              and bt.get('brief:site.sections[solution].job') == 'Решение. Один подрядчик', bt)
-        # --- план ассетов и upgrade
+        # --- каркас из плана страницы и стык (пример site v1)
+        plan_p = str(kbpaths.kb('site', '10-playbooks-contracts', 'examples', 'lead-services-otves', 'plans', 'home.yaml'))
+        if os.path.exists(plan_p):
+            plan = deep_dates(load_yaml_file(plan_p))
+            sk_p = os.path.join(td, 'site', 'copy', 'home.yaml')
+            os.makedirs(os.path.dirname(sk_p), exist_ok=True)
+            sk, sk_notes = skeleton_from_plan(plan, plan_p, sk_p, date='2026-09-29')
+            dump_deck(sk, sk_p, '# каркас\n')
+            pg = deck_root(sk)['pages'][0]
+            n_plan = sum(len(plan_text_slots(s)) for s in plan['sections'])
+            check('каркас из плана: page_id, page_type, page_plan_ref, все текстовые слоты плана',
+                  pg['page_id'] == plan['page']['id'] and pg['page_type'] == plan['page']['page_type'] and deck_root(sk).get('page_plan_ref')
+                  and sum(len(slots_of(s)) for s in sections_of(pg)) == n_plan, (pg['page_id'], n_plan))
+            hero_sl = next(sl for s in sections_of(pg) if s['section_id'] == 'hero' for sl in slots_of(s) if sl['slot_id'] == 'headline')
+            check('каркас: поля стыка слота (slot_type, site_slot_id, варианты по плану)', hero_sl['slot_type'] == 'headline' and hero_sl['site_slot_id'] == 'headline' and len(hero_sl['variants']) == 2, hero_sl)
+            check('каркас: fact_ids из binds, обещание и главная кнопка первого экрана',
+                  any(sl.get('fact_ids') for s in sections_of(pg) for sl in slots_of(s)) and pg.get('promise', {}).get('from') == 'home/hero/subheadline' and pg.get('cta_primary') == 'home/hero/cta-label', (pg.get('promise'), pg.get('cta_primary')))
+            fp_sk = rel_to(sk_p, deck_root(sk)['facts_ref'])
+            ctx_sk = Ctx(sk_p, load_facts(fp_sk), '2026-09-29')
+            r_sk = validate(sk, ctx_sk)
+            check('каркас из плана → validate: 0 error, стык сверен', not r_sk.count('error') and (r_sk.tools.get('validate') or {}).get('plan_stitch', {}).get('slots') == n_plan,
+                  [(f['rule'], f['where'], f['message'][:60]) for f in r_sk.findings if f['level'] == 'error'][:4])
+            bad_sk = _copy.deepcopy(sk)
+            bpg = deck_root(bad_sk)['pages'][0]
+            multi = [s for s in sections_of(bpg) if len(slots_of(s)) >= 2]
+            slots_of(multi[0])[0]['slot_type'] = 'body' if slots_of(multi[0])[0]['slot_type'] != 'body' else 'headline'
+            multi[1]['slots'] = slots_of(multi[1])[1:]
+            bpg['sections'].append({'section_id': 'extra', 'section_role': 'benefits', 'slots': [{'slot_id': 'x', 'slot_type': 'body', 'variants': [{'id': 'a', 'text': '', 'status': 'draft'}], 'chosen': 'a'}]})
+            r_b = validate(bad_sk, ctx_sk)
+            plan_errs = [f for f in r_b.findings if f['rule'] == 'COPY-D-PLAN']
+            check('стык: слот не того типа и секция вне плана → error, слот плана без текста → warning (--final — error)',
+                  sum(f['level'] == 'error' for f in plan_errs) >= 2 and any(f['level'] == 'warning' and 'без текста' in f['message'] for f in plan_errs)
+                  and any(f['rule'] == 'COPY-D-PLAN' and f['level'] == 'error' and 'без текста' in f['message'] for f in validate(bad_sk, ctx_sk, final=True).findings),
+                  [(f['level'], f['message'][:60]) for f in plan_errs])
+        else:
+            print('  (примера плана site нет — каркас не проверен)')
+        # --- выгрузка во вход холста и разбор copy.md
+        d = _st_deck()
+        pg = d['copy_deck']['pages'][0]
+        _st_checked(pg['sections'][0]['slots'][0], 'Ремонт квартир под ключ', 'approved')
+        pg['sections'][0]['slots'][1]['variants'][0]['status'] = 'assumed'
+        pg['sections'][0]['slots'][2]['variants'][0]['status'] = 'checked'
+        c_md, rows, gaps = export_copy_md(deck_root(d), pg, 'wireframe', schema)
+        check('выгрузка wireframe: approved, assumed и checked — в copy.md, draft — пробел этапа',
+              ('hero', 'h1', 'approved') in rows and ('hero', 'lead', 'assumed') in rows and ('hero', 'cta', 'checked') in rows
+              and any(g['path'] == 'home/faq/q1' for g in gaps), (rows, [g['path'] for g in gaps]))
+        check('выгрузка: alt и строки в картинке не идут в copy.md', 'alt-hero' not in c_md and '[h1] approved: Ремонт квартир под ключ' in c_md, c_md[:300])
+        c_md2, rows2, gaps2 = export_copy_md(deck_root(d), pg, 'mockup', schema)
+        check('выгрузка mockup: только approved', rows2 == [('hero', 'h1', 'approved')] and any(g['path'] == 'home/hero/lead' for g in gaps2), (rows2, gaps2[:2]))
+        c_md3, rows3, _g3 = export_copy_md(deck_root(d), pg, 'directions', schema)
+        check('выгрузка directions: заголовок и кнопка первого экрана', {r[1] for r in rows3} == {'h1', 'cta'}, rows3)
+        secs_p, notes_p = parse_copy_md(c_md)
+        check('copy.md: разбор выгрузки — те же секции, слоты, статусы и тексты', [(s['section_id'], sl['slot_id'], sl['status']) for s in secs_p for sl in s['slots']] == rows and not notes_p, (secs_p, notes_p))
+        rt = render_copy_md([{'section_id': 'hero', 'slots': [{'slot_id': 'body', 'status': 'assumed', 'text': 'Абзац один.\nАбзац два.'}]}, {'section_id': None, 'slots': [{'slot_id': None, 'label': 'плашка', 'text': 'Новинка'}]}])
+        sp_, _n = parse_copy_md(rt)
+        check('copy.md: абзацы строками продолжения, «## ?» и «[? подпись]» — туда и обратно',
+              sp_[0]['slots'][0]['text'] == 'Абзац один.\nАбзац два.' and sp_[1]['section_id'] is None and sp_[1]['slots'][0]['label'] == 'плашка', (rt, sp_))
+        fmd, fsumm = export_facts_md(facts, '2026-09-24', 'ru', pg, None, 'mockup', 'Демо')
+        check('facts.md: «Факты», «Нет», «Нельзя утверждать»; публикуемый факт, вывод и истёкший — в «Нет»',
+              '## Факты' in fmd and '## Нет' in fmd and '## Нельзя утверждать' in fmd and '| guarantee-3 |' in fmd.split('## Нет')[0]
+              and '| city-inferred |' in fmd.split('## Нет')[1] and '| promo-old |' in fmd.split('## Нет')[1], fmd[:400])
+        check('facts.md: демо-факт — в «Факты» с пометкой, в сводке', 'демо: вымышленные данные' in fmd and fsumm['demo'] == ['rating-demo'], fsumm)
+        check('facts.md: «Нельзя утверждать» — строка проекта и умолчания без снимающего факта', 'здоровье и зрение' in fmd and 'Рейтинги и звёзды' not in fmd and 'Отзывы, цитаты' in fmd, fmd.split('## Нельзя утверждать')[1][:300])
+        check('facts.md: нет остатков шаблона', not re.search(r'\{\{|\{#|<UNSET', fmd + c_md))
+        out_dir = os.path.join(td, 'input')
+        rep_e, summ_e = export_canvas(d, ctx, out_dir, 'home', 'wireframe')
+        check('export: файлы pages/<page-id>/copy.md и facts.md, пробел этапа — COPY-D-STAGE warning, факты не confirmed — warning',
+              summ_e and os.path.exists(os.path.join(out_dir, 'pages', 'home', 'copy.md')) and os.path.exists(os.path.join(out_dir, 'facts.md'))
+              and any(f['rule'] == 'COPY-D-STAGE' and f['level'] == 'warning' for f in rep_e.findings)
+              and any(f['rule'] == 'COPY-D-FACTS-STATUS' and f['level'] == 'warning' for f in rep_e.findings), (summ_e, [(f['rule'], f['level']) for f in rep_e.findings if f['tool'] == 'export']))
+        rep_m, _s = export_canvas(d, ctx, out_dir, 'home', 'mockup')
+        check('export mockup: факты не confirmed и текст не approved — error',
+              any(f['rule'] == 'COPY-D-FACTS-STATUS' and f['level'] == 'error' for f in rep_m.findings)
+              and any(f['rule'] == 'COPY-D-STAGE' and f['level'] == 'error' for f in rep_m.findings))
+        # --- приём правок текста с холста
+        edited = c_md.replace('[h1] approved: Ремонт квартир под ключ', '[h1]: Ремонт квартир под ключ в Казани') + '\n## ?\n[? плашка]: Новинка сезона\n'
+        pg['status'] = 'approved'
+        imp, rep_i, summ_i = import_copy(d, edited, 'home', '2026-09-29')
+        sl_i = find_slot(deck_root(imp), 'home/hero/h1')[2]
+        newv = next(v for v in sl_i['variants'] if v.get('source') == 'customer')
+        check('import-copy: изменённый текст → вариант source: customer (draft) в том же слоте, выбор не тронут',
+              newv['text'] == 'Ремонт квартир под ключ в Казани' and newv['status'] == 'draft' and sl_i['chosen'] == 'a' and len(summ_i['changed']) == 1, (sl_i, summ_i))
+        check('import-copy: текст холста без секции плана → вопрос «перенести в план?»', any(f['rule'] == 'COPY-D-IMPORT-STRUCT' for f in rep_i.findings))
+        imp2, _r2, _s2 = import_copy(d, edited, 'home', '2026-09-29', choose=True)
+        pg2 = deck_root(imp2)['pages'][0]
+        check('import-copy --choose: вариант заказчика выбран, утверждённая страница → draft', find_slot(deck_root(imp2), 'home/hero/h1')[2]['chosen'] == newv['id'] and pg2['status'] == 'draft' and 'approval' not in pg2)
+        pg['status'] = 'draft'
+        rsch = SubsetValidator(schema).errors(imp)
+        check('import-copy: результат проходит схему', not rsch, rsch[:3])
+        # --- export-assets и upgrade
         d = _st_deck()
         for i in range(4):
             d['copy_deck']['pages'][0]['sections'][0]['slots'].append({'slot_id': f't{i}', 'slot_type': 'in-image-text', 'asset_ref': 'banner', 'in_image': {'role': 'label'},
@@ -3587,16 +4325,18 @@ def selftest():
         check('export-assets: > 3 строк — заметка', any('> 3' in n for n in notes))
         check('export-assets: alt по asset_ref', next(x for x in frag['slots'] if x['id'] == 'hero')['alt'].startswith('Прораб'))
         v0 = {'copy_deck': {'version': 0, 'date': '2026-09-24', 'site': 'x', 'lang': 'ru', 'pages': [{'page_id': 'p', 'page_type': 'landing-saas', 'sections': [
-            {'section_id': 'case', 'block': 'case-studies', 'slots': [{'slot_id': 'h', 'slot_type': 'case-title', 'variants': [{'id': 'a', 'text': 'Кейс', 'status': 'draft'}], 'chosen': 'a'}]}]}]}}
+            {'section_id': 'case', 'block': 'case-study', 'slots': [{'slot_id': 'h', 'slot_type': 'case-title', 'variants': [{'id': 'a', 'text': 'Кейс', 'status': 'draft'}], 'chosen': 'a'}]}]}]}}
         up, ch = upgrade_deck(v0, ctx.vocab)
-        check('upgrade: v0 → v1, роль секции из block', deck_root(up)['version'] == 1 and deck_root(up)['pages'][0]['sections'][0]['section_role'] == 'case-studies')
-        check('text_hash: пробелы и NBSP не меняют хэш', text_hash('Смета — бесплатно ') == text_hash('Смета — бесплатно'))
+        rb_ = role_of_block(ctx.vocab, 'case-study')
+        check('upgrade: v0 → v1, роль секции по блоку blocks.yaml', deck_root(up)['version'] == 1 and rb_ is not None and deck_root(up)['pages'][0]['sections'][0]['section_role'] == rb_, deck_root(up)['pages'][0]['sections'][0])
+        check('text_hash: пробелы и NBSP не меняют хэш', text_hash('Смета — бесплатно ') == text_hash('Смета — бесплатно'))
         d = _st_deck(facts_ref='../facts/f.yaml', voice_ref='черновик: на «вы»', meaning_ref='m.yaml')
         d['copy_deck']['pages'][0]['hierarchy_ref'] = '../h/h.yaml'
         nre = rebase_refs(d, '/base/decks/deck.yaml', '/base/out/run1/deck.checked.yaml')
-        check('rebase_refs: копия deck в другой папке — пути от новой папки, строка голоса не тронута (J3)',
+        check('rebase_refs: копия deck в другой папке — пути от новой папки, строка голоса не тронута',
               nre == 3 and d['copy_deck']['facts_ref'] == '../../facts/f.yaml' and d['copy_deck']['meaning_ref'] == '../../decks/m.yaml'
               and d['copy_deck']['pages'][0]['hierarchy_ref'] == '../../h/h.yaml' and d['copy_deck']['voice_ref'].startswith('черновик'), deck_root(d))
+        # --- слепой выбор: лист, ключ, голоса → chosen и selection
         d = _st_deck(); sl = d['copy_deck']['pages'][0]['sections'][0]['slots'][0]
         sl['variants'] += [{'id': 'b', 'text': 'Ремонт с договором', 'status': 'draft', 'source': 'model', 'generated': {'model': 'x'}},
                            {'id': 'c', 'text': 'Ремонт отклонён', 'status': 'rejected', 'reason': 'тест'}]
@@ -3604,16 +4344,55 @@ def selftest():
         check('export-variants: метки без модели, отклонённые не показываются', 'home/hero/h1' in key and set(key['home/hero/h1'].values()) == {'a', 'b'}
               and 'model' not in md and 'Ремонт отклонён' not in md, (key, md[:200]))
         check('export-variants: порядок воспроизводим', export_variants(deck_root(d))[1] == key)
-        # --- фаза 2 (J3): мета на листе выбора, фильтр вариантов с error, свои факты вариантов, пробелы в check
-        m = d['copy_deck']['pages'][0]['meta']
-        m['variants'] = {'title': [{'id': 'b', 'text': 'Ремонт под ключ с гарантией 3 года', 'status': 'draft'},
-                                   {'id': 'c', 'text': 'Ремонт без смет', 'status': 'rejected', 'reason': 'тест'}]}
-        sl['variants'][1]['checks'] = {'claims': {'errors': 1, 'warnings': 0, 'text_hash': text_hash(sl['variants'][1]['text'])}}
-        md, key, ex = export_variants(deck_root(d))
-        check('export-variants: мета — выбранный title под id «meta» и живые варианты (I3)', key.get('home/meta/title') and set(key['home/meta/title'].values()) == {'meta', 'b'}, key)
-        check('export-variants: вариант с error в checks снят с листа, в сводке — почему', 'home/hero/h1' not in key and ex.get('home/hero/h1', [[None]])[0][0] == 'b', (key, ex))
-        _md2, key2, _ex2 = export_variants(deck_root(d), include_failed=True)
-        check('export-variants: --include-failed возвращает вариант', set(key2.get('home/hero/h1', {}).values()) == {'a', 'b'}, key2)
+        lab_b = next(k for k, v in key['home/hero/h1'].items() if v == 'b')
+        sheet = md.replace('Выбор: ___', f'Выбор: {lab_b}', 1)
+        votes = parse_votes_sheet(sheet)
+        check('apply-selection: голос листа разобран', votes.get('home/hero/h1') == lab_b, votes)
+        sel_d, rep_s, summ_s = apply_selection(d, key, votes, 'customer', 'заказчик', '2026-09-29', 'sheet.md · key.yaml')
+        ssl = find_slot(deck_root(sel_d), 'home/hero/h1')[2]
+        check('apply-selection: chosen и selection {method, by, at, compared, ref}', ssl['chosen'] == 'b' and ssl['selection']['method'] == 'customer'
+              and sorted(ssl['selection']['compared']) == ['a', 'b'] and ssl['selection']['ref'] and not rep_s.count('error'), ssl.get('selection'))
+        tally_d, _rt, _st = apply_selection(d, key, {'home/hero/h1': {lab_b: 5, next(k for k in key['home/hero/h1'] if k != lab_b): 1}}, 'human-pairwise', 'группа', '2026-09-29')
+        check('apply-selection: счёт голосов → tally по id вариантов', find_slot(deck_root(tally_d), 'home/hero/h1')[2]['selection'].get('tally', {}).get('b') == 5)
+        _tie, rep_t, _ = apply_selection(d, key, {'home/hero/h1': {k: 2 for k in key['home/hero/h1']}}, 'customer', 'x')
+        check('apply-selection: ничья — error, выбор за человеком', rep_t.count('error') >= 1)
+        # --- утверждение: журнал процесса уходит, selection остаётся
+        d = _st_deck(); pg = d['copy_deck']['pages'][0]
+        for s in sections_of(pg):
+            for sl in slots_of(s):
+                _st_checked(sl, 'Замер и смета' if sl['slot_id'] == 'a1' else chosen_variant(sl)['text'])
+        pg['promise']['variants'][0]['status'] = 'checked'
+        _st_checked(pg['promise'], pg['promise']['variants'][0]['text'])
+        h1 = find_slot(deck_root(d), 'home/hero/h1')[2]
+        h1['variants'].append({'id': 'x', 'text': 'Ремонт мечты', 'status': 'rejected', 'reason': 'правка по находкам: ru-lex-x'})
+        h1['edit_log'] = [{'pass': 1, 'rules': ['ru-lex-x'], 'from_variant': 'x', 'to_variant': 'a'}]
+        h1['selection'] = {'method': 'customer', 'by': 'заказчик', 'at': '2026-09-24', 'compared': ['a', 'x']}
+        d_bad = _copy.deepcopy(d)
+        ap, rep_a = approve_page(d, ctx, 'home', 'заказчик', '2026-09-29')
+        ah1 = find_slot(deck_root(ap), 'home/hero/h1')[2] if ap else {}
+        check('approve: журнал правки и отклонённые варианты удалены, selection с compared остался',
+              ap is not None and 'edit_log' not in ah1 and all(v['status'] != 'rejected' for v in ah1['variants']) and ah1['selection']['compared'] == ['a', 'x']
+              and rep_a.tools['approve']['removed'] == {'edit_log': 1, 'rejected': 1}, (rep_a.findings[:3], ah1))
+        r_ap = validate(ap, ctx) if ap else Report()
+        check('approve → validate: 0 error, удалённые варианты в selection.compared не требуются', ap is not None and not r_ap.count('error')
+              and not any(f['rule'] == 'COPY-D-PROCESS-LOG' for f in r_ap.findings), [(f['rule'], f['where']) for f in r_ap.findings if f['level'] == 'error'][:4])
+        find_slot(deck_root(d_bad), 'home/hero/cta')[2]['fact_ids'] = ['nope-fact']
+        ap_bad, rep_b = approve_page(d_bad, ctx, 'home', 'заказчик', '2026-09-29')
+        check('approve: утверждённая страница не проходит validate (битый fact_ids) — отказ COPY-D-APPROVE',
+              ap_bad is None and any(f['rule'] == 'COPY-D-APPROVE' and 'не проходит validate' in f['message'] for f in rep_b.findings), rep_b.findings[:3])
+        d2 = _copy.deepcopy(ap)
+        find_slot(deck_root(d2), 'home/hero/h1')[2]['edit_log'] = [{'pass': 1}]
+        check('утверждённая страница с журналом процесса → warning COPY-D-PROCESS-LOG', ('COPY-D-PROCESS-LOG', 'warning') in {(f['rule'], f['level']) for f in validate(d2, ctx).findings})
+        # --- check --promote: draft и assumed → checked
+        d = _st_deck(); pg = d['copy_deck']['pages'][0]
+        pg['sections'][0]['slots'][0]['variants'][0]['status'] = 'assumed'
+        rec = {'errors': 0, 'warnings': 0, 'info': 0, 'rules': []}
+        lrec = {'profile': 'landing', 'errors': 0, 'warnings': 0, 'info': 0, 'suppressed': 0, 'verdict': 'clean'}
+        upd, _n, _nv = apply_records(d, {'home/hero/h1': dict(rec), 'home/hero/cta': dict(rec)}, {'home/hero/h1': dict(lrec), 'home/hero/cta': dict(lrec)}, '2026-09-29', promote=True)
+        uh = find_slot(deck_root(upd), 'home/hero/h1')[2]
+        check('check --promote: assumed → checked (запись утилиты)', chosen_variant(uh)['status'] == 'checked' and chosen_variant(uh)['review']['by'].startswith('copydeck')
+              and chosen_variant(find_slot(deck_root(upd), 'home/hero/cta')[2])['status'] == 'checked')
+        # --- варианты со своими фактами, пробелы в check
         d = _st_deck(); sl = d['copy_deck']['pages'][0]['sections'][0]['slots'][1]
         sl['variants'].append({'id': 'b', 'text': 'Смета до договора — бесплатно', 'status': 'draft', 'fact_ids': ['estimate-free']})
         sl['variants'].append({'id': 'c', 'text': 'Старый вариант', 'status': 'rejected', 'reason': 'тест', 'fact_ids': ['nope-old']})
@@ -3648,8 +4427,49 @@ def selftest():
         a1['variants'][0]['text'] = '[PLACEHOLDER: минимальный объём]'; a1['missing_ids'] = ['min-job']
         d['copy_deck']['pages'][0]['sections'][0]['slots'][0]['fact_ids'] = ['nope-fact']
         rs = validate(d, ctxg, skip_fact_checks=True)
-        check('check: пробелы и fallback проверяются и при свежей сверке (E3: COPY-D-FALLBACK терялся)', any(f['rule'] == 'COPY-D-FALLBACK' for f in rs.findings), [(f['rule'], f['where']) for f in rs.findings][:6])
+        check('check: пробелы и fallback проверяются и при свежей сверке', any(f['rule'] == 'COPY-D-FALLBACK' for f in rs.findings), [(f['rule'], f['where']) for f in rs.findings][:6])
         check('check: ссылки фактов при свежей сверке не дублируются (их даёт claims_check)', not any(f['rule'] == 'COPY-D-FACT-REF' for f in rs.findings))
+        bt = dict(brief_texts({'site': {'sections': [{'id': 'final', 'job': 'Что сделать сейчас? → Вызвать замерщика'},
+                                                     {'id': 'solution', 'job': 'Решение → Один подрядчик; доказательства: guarantee-3'}]}}))
+        check('поля брифа холста: стрелка в job — граница фразы для сверки', bt.get('brief:site.sections[final].job') == 'Что сделать сейчас? Вызвать замерщика'
+              and bt.get('brief:site.sections[solution].job') == 'Решение. Один подрядчик', bt)
+        mp_, mnotes = meaning_projection({'audience': [{'id': 's1', 'name': 'Владельцы квартир', 'primary': True, 'situation': 'Купили вторичку', 'knows': 'сравнивают бригады'}],
+                                          'awareness': {'level': 'solution-aware'},
+                                          'positioning': {'market_category': {'name': 'ремонт под ключ'}, 'value_themes': [{'theme': 'Срок и смета в договоре'}], 'best_fit': {'segment_ids': ['s1']}},
+                                          'value_proposition': {'core': {'text': 'Ремонт без усталости глаз', 'basis': {'kind': 'brief'}}},
+                                          'boundaries': {'not_promised': [{'text': 'здоровье', 'claim_class': 'health'}]}},
+                                         [{'traffic_source': 'maps-local', 'share': 0.6, 'device': 'mobile'}])
+        check('поля продукта из смысла: description и target_user выведены, goal с классом not_promised не выводится',
+              mp_.get('product.description', '').startswith('Ремонт под ключ — срок и смета') and 'с телефона' in mp_.get('product.target_user', '')
+              and 'product.goal' not in mp_ and any('not_promised' in n for n in mnotes), (mp_, mnotes))
+        # --- сверка собранной страницы
+        d = _st_deck(); pg = d['copy_deck']['pages'][0]
+        html_ok = ('<html><head><title>Ремонт квартир под ключ — Демо</title></head><body><h1>Ремонт квартир под ключ</h1>'
+                   '<p>Гарантия 3 года на работы — пункт 7.2 договора.</p><button>Вызвать замерщика</button>'
+                   '<h2>Сколько стоит замер?</h2><p>[PLACEHOLDER: цена замера]</p></body></html>')
+        units_ok, meta_ok = page_units_offline(html_ok)
+        rv, sv_ = verify_page(deck_root(d), pg, units_ok, meta_ok, facts)
+        check('verify-page: страница из copy deck — 0 error, потерянных слотов нет', not rv.count('error') and sv_['lost'] == 0 and sv_['added'] == 0, (sv_, [(f['rule'], f['message'][:50]) for f in rv.findings][:4]))
+        html_bad = html_ok.replace('<button>Вызвать замерщика</button>', '<p>Более 2 000 довольных клиентов</p><p>Работаем 24 часа</p><p>Лучшие мастера города</p>')
+        units_b, meta_b = page_units_offline(html_bad)
+        rb, sb = verify_page(deck_root(d), pg, units_b, meta_b, facts)
+        check('verify-page: добавленные блоки > 10 % и число вне фактов → error, потерянный слот → warning',
+              ('COPY-D-VERIFY-ADDED', 'error') in {(f['rule'], f['level']) for f in rb.findings} and ('COPY-D-VERIFY-NUMBERS', 'error') in {(f['rule'], f['level']) for f in rb.findings}
+              and any(f['rule'] == 'COPY-D-VERIFY-LOST' and f['where'] == 'home/hero/cta' for f in rb.findings), (sb, [(f['rule'], f['where']) for f in rb.findings][:6]))
+        # --- before-after.tsv: why из rule_ref
+        md_dir = os.path.join(td, 'kbt', '04-copy-by-block')
+        os.makedirs(md_dir)
+        with open(os.path.join(md_dir, 'x.md'), 'w', encoding='utf-8') as f:
+            f.write('# X\n\n## 1. Заголовок первого экрана\n\nтекст\n\n### 1.2. Кнопка\n')
+        ba = os.path.join(td, 'ba.tsv')
+        with open(ba, 'w', encoding='utf-8') as f:
+            f.write('before\tafter\trule_ref\tlang\twhy\n'
+                    'А\tБ\t04-copy-by-block/x.md §1\tru\t\n'
+                    'В\tГ\t04-copy-by-block/x.md §1.2\tru\tуже есть\n'
+                    'Д\tЕ\t04-copy-by-block/x.md §7\tru\t\n')
+        lines, filled, missed = before_after_fill(ba, os.path.join(td, 'kbt'))
+        check('before-after: пустой why ← заголовок раздела rule_ref, заполненный не тронут, раздел не найден — в отчёт',
+              [w for _i, w in filled] == ['норма: Заголовок первого экрана (04-copy-by-block/x.md §1)'] and lines[2].endswith('уже есть') and [i for i, _r in missed] == [4], (filled, missed))
         # --- интеграция: claims_check.py (процесс) и copy_lint.lint_text
         fpath = os.path.join(td, 'facts.yaml')
         with open(fpath, 'w', encoding='utf-8') as f:
@@ -3667,10 +4487,18 @@ def selftest():
             rep_c = Report()
             pp = run_claims(deck_root(d), ctx, fpath, rep_c, all_variants=True)
             nev = [(f['where'], f.get('variant')) for f in rep_c.findings if f['rule'] == 'COPY-F-NEVER']
-            check('claims --all-variants: отклонённый вариант не сверяется, живой — сверяется «как выбранный» (I3)',
+            check('claims --all-variants: отклонённый вариант не сверяется, живой — сверяется «как выбранный»',
                   ('home/hero/h1', 'c') in nev and ('home/hero/h1', 'b') not in nev, nev)
             check('claims --all-variants: итоги варианта отдельно, статус выбранного не задет',
                   pp and pp['home/hero/h1']['errors'] == 0 and pp['home/hero/h1']['variants']['c']['errors'] >= 1, (pp or {}).get('home/hero/h1'))
+            d = _st_deck(); d['copy_deck']['pages'][0]['sections'][0]['slots'][1]['variants'][0]['text'] = 'Рейтинг 4,9 из 5 на Яндекс Картах — 120 оценок'
+            d['copy_deck']['pages'][0]['sections'][0]['slots'][1]['fact_ids'] = ['rating-demo']
+            rep_c, rep_f = Report(), Report()
+            run_claims(deck_root(d), ctx, fpath, rep_c)
+            run_claims(deck_root(d), ctx, fpath, rep_f, final=True)
+            check('claims: демо-факт — без --final сигнал, с --final error COPY-F-EXAMPLE',
+                  not any(f['rule'] == 'COPY-F-EXAMPLE' and f['level'] == 'error' for f in rep_c.findings)
+                  and any(f['rule'] == 'COPY-F-EXAMPLE' and f['level'] == 'error' for f in rep_f.findings), [(f['rule'], f['level']) for f in rep_f.findings][:5])
         else:
             print('  (claims_check.py нет — интеграция не проверена)')
         if lint_module() is not None:
@@ -3706,7 +4534,6 @@ def selftest():
             rep_l3 = Report()
             run_lint(deck_root(_st_deck()), ctx, rep_l3, final=True, page_pass=True)
             check('lint: --final — [PLACEHOLDER] становится error', any(f['rule'] == 'art-placeholder-marker' and f['level'] == 'error' for f in rep_l3.findings))
-            check('lint: проход страницы дал метрики', True)
             d = _st_deck(); sl = d['copy_deck']['pages'][0]['sections'][0]['slots'][0]
             sl['variants'].append({'id': 'b', 'text': 'Мы предлагаем инновационные решения для вашего бизнеса', 'status': 'draft'})
             rep_l4 = Report()
@@ -3718,7 +4545,7 @@ def selftest():
             rep_l5 = Report()
             run_lint(deck_root(d), ctx, rep_l5, page_pass=False)
             par = (rep_l5.tools.get('lint') or {}).get('parity_copy_lint') or {}
-            check('lint: meta.fact_ids снимают число в мета — заметка паритета с copy_lint.py (E3, J/05)',
+            check('lint: meta.fact_ids снимают число в мета — заметка паритета с copy_lint.py',
                   par.get('meta_fact_ids', 0) >= 1 and any('meta.fact_ids' in n for n in rep_l5.notes), (par, rep_l5.notes[:2]))
         else:
             print('  (copy_lint.py не импортируется — интеграция не проверена)')

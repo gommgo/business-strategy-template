@@ -10,7 +10,7 @@
 # Главный принцип: у каждого утверждения смысла есть основание `basis` — бриф, ответ заказчика, голос клиента (VoC, B2),
 # факт (facts.yaml, B2), публичная страница, исследование, вывод агента или допущение. Допущение не входит в обещание
 # страницы, пока заказчик его не подтвердил (урок «Кварца»: цель «без усталости глаз» попала в Promise задачи и нарушила
-# собственный never_claim — аудит KIMI §2.7).
+# собственный never_claim).
 #
 # Ссылки на другие форматы (контракт тройки v2 §3 п.10–15):
 #   facts.yaml (B2)          → `fact:<id>` и `missing:<id>` в `proof_ids`; путь к файлу — `proof_ref`;
@@ -18,12 +18,11 @@
 #   иерархия сообщений (B1)  → `message_hierarchy_ref` (файлы по `message-hierarchy.schema.yaml`, один на страницу);
 #   профиль голоса (F)       → `voice_ref` (`05-voice-editorial/voice.schema.yaml`, волна 2);
 #   site-brief (site)        → `traffic.ref`, `offer.ref`, `conversion.action_ref` — JSON Pointer внутри site-brief;
-#   словарь                  → awareness, traffic, section_role — временные id `99-raw/notes/temp-vocabulary-v0.yaml`
-#                              до S0 site, затем `../site/02-site-types/vocabulary.yaml`; новые id — в
-#                              `x-vocabulary-proposals` (предложения к временному словарю).
+#   словарь                  → awareness, traffic, section_role — id словаря site `../site/02-site-types/vocabulary.yaml`;
+#   вход холста              → поля product.* брифа холста — проекция `x-canvas-map`.
 #
 # Даты — строкой в кавычках «ГГГГ-ММ-ДД» (YAML без кавычек делает объект даты, валидатор его отвергнет).
-# Проверка: `99-raw/tools/venv-B1/bin/python ../../scripts/text/validate_meaning.py` (загрузка, схема,
+# Проверка: `python3 ../../scripts/text/validate_meaning.py` (Python окружения скилла; загрузка, схема,
 # смысловые проверки: один основной сегмент, ссылки внутри блока, допущения в open_questions, доказательства опор).
 
 $schema: "https://json-schema.org/draft/2020-12/schema"
@@ -33,7 +32,7 @@ description: >-
   Что сказать, прежде чем писать: кто клиент и какую работу он поручает продукту, что он уже знает, с чем сравнивает,
   чем продукт отличается и чем это доказано, какую категорию назвать, какие силы мешают выбору и чем снять риск.
   Не тексты страницы: формулировки здесь внутренние, тексты пишет copy-deck (E, J) по иерархии сообщений.
-date: "2026-09-24"
+date: "2026-09-29"
 x-version: 1
 x-status: "черновик T1 (ранний выпуск для site-brief), 2026-09-24; v1 — по итогам волны 1"
 x-owner: "text-research · 02-strategy-messaging · B1 (контракт тройки v2 §2: поля «смысл» брифа — text)"
@@ -58,7 +57,7 @@ properties:
       approved — заказчик подтвердил или ответил (допущения закрыты).
   site:
     $ref: "#/$defs/id"
-    description: "slug проекта: как в site-brief и `project.slug` brief.yaml kimi."
+    description: "slug проекта: как `project.slug` site-brief."
   offering_summary:
     type: object
     additionalProperties: false
@@ -128,10 +127,10 @@ properties:
     type: object
     additionalProperties: false
     description: >-
-      Температура и источники трафика — поле site-brief (владелец site). Здесь — ссылка и временная копия до S0, нужная
-      для вывода осведомлённости и соответствия обещанию источника (message match).
+      Температура и источники трафика — поле site-brief (владелец site). Здесь — ссылка и рабочая копия, нужная для
+      вывода осведомлённости и соответствия обещанию источника (message match).
     properties:
-      ref: {type: string, description: "JSON Pointer в site-brief (например, `/traffic`); после S0 — единственное, что остаётся."}
+      ref: {type: string, description: "JSON Pointer в site-brief (например, `/traffic`): источник правды о трафике."}
       sources:
         type: array
         items:
@@ -142,7 +141,7 @@ properties:
             source: {$ref: "#/$defs/traffic-source"}
             temperature: {enum: [cold, warm, hot]}
             share: {type: number, minimum: 0, maximum: 1, description: "Доля трафика, если известна (0–1)."}
-            device: {enum: [mobile, desktop, mixed], description: "Преобладающее устройство источника (для viewport_primary kimi)."}
+            device: {enum: [mobile, desktop, mixed], description: "Преобладающее устройство источника (основная ширина макета берётся из трафика брифа)."}
             promise_of_source:
               type: string
               description: "Что обещает источник: текст объявления, формулировка запроса, тема письма — заголовок страницы продолжает именно это."
@@ -168,7 +167,7 @@ properties:
     additionalProperties: false
     description: "Цели страницы: одно главное действие и, если нужно, вторая цель для тех, кто не готов сейчас."
     properties:
-      action_ref: {type: string, description: "id действия из словаря site (`action`, до S0 — свободный id kebab-case) или JSON Pointer."}
+      action_ref: {type: string, description: "id действия из словаря site (`action`) или JSON Pointer."}
       secondary_goal:
         type: string
         description: "Для зашедших заранее: что они должны запомнить или сделать (сохранить, подписаться) — [V:b2VdPF9svEU 33:37] двойная цель."
@@ -246,8 +245,8 @@ properties:
     type: array
     maxItems: 10
     description: >-
-      Вопросы к заказчику: не больше 10 в пуле, в одном сообщении — не больше 7 (kimi 07/01 §4.1). У каждого — зачем,
-      варианты, умолчание («если не ответите — …»), какие поля закрывает. Совместимо с `questions[]` brief.yaml kimi.
+      Вопросы к заказчику: не больше 10 в пуле, в одном сообщении — не больше 7. У каждого — зачем, варианты,
+      умолчание («если не ответите — …»), какие поля закрывает. Сводятся в журнал вопросов site-brief.
     items: {$ref: "#/$defs/question"}
 
 $defs:
@@ -302,18 +301,17 @@ $defs:
         then: {required: [ref]}
 
   awareness-level:
-    description: "Временные id (temp-vocabulary-v0: awareness); после S0 — vocabulary.yaml site. Определения — 02 §1.1."
+    description: "id словаря site (awareness). Определения — 02 §1.1."
     enum: [unaware, problem-aware, solution-aware, product-aware, most-aware]
 
   traffic-source:
     description: >-
-      Временные id (temp-vocabulary-v0: traffic.sources) + предложения B1 (x-vocabulary-proposals): retargeting,
-      maps-local, social-organic, marketplace, messenger, offline.
+      id словаря site (traffic_source).
     enum: [search-problem, search-category, search-brand, paid-social, paid-search, ai-answer, referral, email, direct,
            retargeting, maps-local, social-organic, marketplace, messenger, offline]
 
   section-role:
-    description: "Временные id (temp-vocabulary-v0: section_roles); после page-plan site — section_id."
+    description: "Роль секции — id словаря site (section_role); место в плане страницы — section_id плана."
     enum: [hero, problem, solution, benefits, how-it-works, product-demo, proof-logos, proof-stats, testimonials,
            case-studies, awards-press, comparison, pricing, guarantee, objections, faq, about, team, portfolio,
            integrations, event-program, cta-band, lead-form, final-cta, contacts, footer, article-body, related]
@@ -663,80 +661,50 @@ $defs:
       source: {type: string, description: "Кто и где ответил."}
       date: {$ref: "#/$defs/date"}
 
-# ───────────────────────── Соответствие полям brief.yaml kimi (точка T1) ─────────────────────────
-# Колонки как у site A (`site-brief.kimi-map.tsv`): site_path · kimi_path · rule · note; rule ∈ copy | map | derive |
-# drop | claude_fills. site_path — путь внутри site-brief (блок meaning и соседние поля). kimi `lint_brief` отвергает
-# неизвестные ключи (build_package.py стр. 242–264), поэтому смысл уходит в kimi только проекцией в существующие поля.
-x-kimi-map:
-  - site_path: "meaning.audience[primary] + meaning.awareness.level + meaning.traffic.sources[0]"
-    kimi_path: "product.target_user"
-    rule: derive
-    note: "«<сегмент>: <ситуация>. Знает: <что знает — из awareness>. Приходит: <источник>, <устройство>» — 1–2 фразы (kimi: «кто приходит, что уже знает, с какого устройства и откуда»)."
-  - site_path: "meaning.value_proposition.core.text"
-    kimi_path: "product.goal"
-    rule: derive
-    note: "Обещание одной фразой — только из утверждений с basis ∈ {brief, customer, fact, voc} и без классов из boundaries.not_promised; иначе — бизнес-цель страницы («получать заявки на …»). Урок «Кварца»: цель с обещанием здоровья нарушила never_claim."
-  - site_path: "meaning.positioning.market_category.name + meaning.value_themes[0].theme + meaning.positioning.best_fit"
-    kimi_path: "product.description"
-    rule: derive
-    note: "«X — Y для Z»: X — категория словами клиента, Y — главная ценность, Z — кому важно больше всего."
-  - site_path: "meaning.conversion.action_ref"
-    kimi_path: "product.primary_action"
-    rule: map
-    note: "Глагол + объект из словаря action site; meaning не формулирует текст кнопки."
-  - site_path: "meaning.voice_ref"
-    kimi_path: "design_system.tone_of_voice"
-    rule: derive
-    note: "Одна строка из профиля голоса F (оси + «мы / мы не»). Предложение kimi (контракт §3 п.11): поле-ссылка на профиль."
-  - site_path: "copy-deck: slot cta-label (E, J)"
-    kimi_path: "site.cta.label"
-    rule: drop
-    note: "Текст кнопки — copy-deck, не meaning; основание — meaning.offer.summary и conversion."
-  - site_path: "page-plan: action (site)"
-    kimi_path: "site.cta.target"
-    rule: drop
-    note: "Куда ведёт кнопка — site."
-  - site_path: "message-hierarchy.sections[] (по одному файлу на страницу)"
-    kimi_path: "site.sections[{id, job}]"
-    rule: derive
-    note: "id ← section_role (после page-plan — section_id); job ← «<вопрос посетителя> → <сообщение секции>; доказательства: <fact ids>» строкой в кавычках (запятая в незакавыченном job ломает YAML — kimi 07/01 §5.3); порядок и состав секций — page-plan site."
-  - site_path: "meaning.open_questions[]"
-    kimi_path: "questions[]"
-    rule: map
-    note: "q ← q; asked ← asked; answer ← answer; source ← source; date ← date; why, options, default, affects — в kimi не уходят (у kimi нет полей) или склеиваются в q."
-  - site_path: "meaning.boundaries.not_promised[]"
-    kimi_path: "never_claim[]"
-    rule: derive
-    note: "Через B2: строки переносятся в facts.yaml never_claim и уходят в kimi экспортом фактов (x-kimi-map facts.schema.yaml)."
-  - site_path: "meaning.*.proof_ids"
-    kimi_path: "facts[], missing[]"
-    rule: drop
-    note: "Факты идут в kimi только из facts.yaml (B2), meaning хранит ссылки."
-  - site_path: "meaning.languages[role=primary].lang"
-    kimi_path: "product.locale"
-    rule: copy
-    note: "Второй язык — отдельный пакет или copy deck с source_lang (PLAN, copy-deck v0)."
-  - site_path: "meaning.traffic.sources[max share].device"
-    kimi_path: "product.viewport_primary"
-    rule: derive
-    note: "mobile → 390x844 (kimi 07/01 §2.3: «если приходят из соцсетей и мессенджеров»); desktop → 1440x900."
-  - site_path: "meaning.positioning, meaning.sophistication, meaning.awareness.by_source, meaning.value_proposition.forces"
-    kimi_path: "—"
-    rule: drop
-    note: "K3 тексты не пишет и не правит (copy.md verbatim, kimi 07/01 §2.5): смысл уже воплощён в copy-deck → copy.md. Для справки допустимо в brief.md одной строкой («Why us»)."
-  - site_path: "meaning.legal_category"
-    kimi_path: "—"
-    rule: drop
-    note: "Поля в brief.yaml нет. Предложение kimi — блок приёмки «право» (контракт §8); правила — H, claims-rules.yaml."
-  - site_path: "meaning.objections[]"
-    kimi_path: "—"
-    rule: drop
-    note: "Ответы на возражения — тексты copy-deck (FAQ, гарантия, строка у кнопки); в kimi — через copy.md."
+# ───────────────────────── Проекция во вход холста ─────────────────────────
+# Смысл воплощён в текстах copy deck: во вход холста (references/claude-design.md § 6) идут три поля продукта брифа
+# холста; остальное исполнителю не нужно (drop). Трафик, главное действие и вопросы идут картой site-brief, голос —
+# картой voice.schema.yaml, факты и запреты — facts.md.
+x-canvas-map:
+  source: meaning
+  stages: [directions, wireframe, mockup, motion]
+  files:
+    brief.yaml:
+      product.description:
+        rule: derive
+        from: [/positioning/market_category/name, /positioning/value_themes, /positioning/best_fit/segment_ids, /audience/*/id, /audience/*/name]
+        note: "«X — Y для Z»: X — категория словами клиента, Y — первая тема ценности, Z — сегмент best_fit"
+      product.target_user:
+        rule: derive
+        from: [/audience/*/primary, /audience/*/situation, /audience/*/knows, /awareness/level]
+        note: "1–2 фразы: основной сегмент и его ситуация, что он знает (уровень осведомлённости); источник трафика и устройство — из site-brief"
+      product.goal:
+        rule: derive
+        from: [/value_proposition/core/text, /value_proposition/core/basis, /boundaries/not_promised]
+        note: "ядро ценностного предложения — только утверждение с основанием brief, customer, fact или voc и без классов boundaries.not_promised (урок «Кварца»); иначе — цель страницы из плана"
+  drop:
+    - {from: [/meaning_version, /date, /status, /site], note: "служебные поля и подпись: статус, путь и отпечаток — в INPUT.md"}
+    - {from: [/audience/*/role, /audience/*/characteristics, /audience/*/trigger, /audience/*/jobs, /audience/*/pains,
+              /audience/*/gains, /audience/*/current_alternative_ids, /audience/*/customer_words, /audience/*/basis,
+              /awareness/basis, /awareness/confidence, /awareness/by_source, /sophistication],
+       note: "аудитория и осведомлённость уже в текстах; исполнителю — две фразы target_user"}
+    - {from: [/positioning/alternatives, /positioning/unique_attributes, /positioning/best_fit/characteristics,
+              /positioning/best_fit/why_care, /positioning/market_category/strategy, /positioning/market_category/parent_category,
+              /positioning/market_category/subsegment, /positioning/market_category/reference_leader,
+              /positioning/market_category/assumptions_true, /positioning/market_category/assumptions_false,
+              /positioning/market_category/basis, /positioning/trends, /positioning/statement, /positioning/only_we_can_say],
+       note: "позиционирование воплощено в текстах copy deck; исполнителю — description"}
+    - {from: [/offering_summary, /value_proposition/pain_relievers, /value_proposition/gain_creators, /value_proposition/forces,
+              /value_proposition/fit_status, /offer, /conversion, /objections, /risk_reversal, /boundaries/not_for],
+       note: "ценностное предложение, оффер, возражения и снятие риска — тексты copy deck; главное действие и кнопка — план и copy deck"}
+    - {from: [/traffic, /open_questions, /languages], note: "трафик, журнал вопросов и языки — поля site-brief, во вход идут его картой"}
+    - {from: [/message_hierarchy_ref, /voice_ref, /proof_ref, /legal_category, /legal_note],
+       note: "ссылки на иерархию, голос и факты (у них свои карты); отрасль права — вход claims_check.py"}
 
 # ───────────────────────── Как блок встаёт в site-brief (предложение site A) ─────────────────────────
 x-site-brief-meaning:
   include: "site-brief.properties.meaning = {$ref: 'urn:app-design:text-research:meaning:1'} (или относительный путь к этому файлу)"
-  site_owned_fields_referenced: "traffic (источники × температура), offer, conversion.action — живут в site-brief; meaning хранит JSON Pointer и временную копию до S0"
+  site_owned_fields_referenced: "traffic (источники × температура), offer, conversion.action — живут в site-brief; meaning хранит JSON Pointer и рабочую копию"
   proof: "meaning.proof_ref == site-brief.proof.facts_ref (одна ссылка на facts.yaml)"
   minimum_by_type: >-
     Минимум заполнения для генерации текстов: audience (1 основной сегмент: situation, 1 job, 1 pain, 1 gain),
@@ -746,16 +714,7 @@ x-site-brief-meaning:
   questions: "open_questions → общий журнал вопросов site-brief (у site — свой список; дубли сводит оркестратор)"
 
 x-vocabulary-proposals:
-  # id, которых нет во временном словаре 99-raw/notes/temp-vocabulary-v0.yaml (предложения к словарю; отчёт B1).
-  traffic.sources:
-    - {id: retargeting, name: "Ретаргетинг: вернувшийся после визита", temperature_hint: warm, why: "Copyhackers: ретаргетинг — product-aware или most-aware; нужен короткий аргумент и стимул"}
-    - {id: maps-local, name: "Карты и справочники (Яндекс Карты, 2ГИС)", temperature_hint: hot, why: "Лидогенерация услуг в РФ (приоритет 1): ищут «рядом», сравнивают рейтинг и отзывы"}
-    - {id: social-organic, name: "Соцсети без рекламы: пост, канал, упоминание", temperature_hint: warm, why: "Отличается от paid-social: пришёл за автором или темой, а не по таргету"}
-    - {id: marketplace, name: "Агрегатор услуг или маркетплейс (Профи, Авито Услуги)", temperature_hint: warm, why: "Сравнивает исполнителей в одной выдаче: возражение «конкурент» первым"}
-    - {id: messenger, name: "Мессенджер: пересланная ссылка, чат, канал", temperature_hint: warm, why: "Рекомендация в чате — тёплый, почти всегда телефон"}
-    - {id: offline, name: "Офлайн: QR, печать, мероприятие", temperature_hint: warm, why: "Видел продукт или бренд вживую; обещание источника — на листовке"}
-  awareness: []
-  section_roles: []
+  # Значения, которых нет в словаре site (предложения text к словарю); источники трафика и роли — уже в словаре site v1.
   objection_types:
     - {id: status-quo, name: "«И так работает», «сделаем сами»", why: "Привычка настоящего (Moesta) — самый частый проигрыш «без решения» (Dunford)"}
     - {id: decision-maker, name: "«Надо согласовать»", why: "B2B-комитет, семья в B2C: нужен материал для того, кто решает"}

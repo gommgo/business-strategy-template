@@ -8,7 +8,7 @@ copy_deck:
   lang: ru
   voice_ref: ../../05-voice-editorial/examples/voice-grafa-b2b.yaml
   facts_ref: ../../02-strategy-messaging/examples/facts-kvarts.yaml
-  meaning_ref: ../../../../02-strategy-messaging/examples/meaning-kvarts.yaml
+  meaning_ref: ../../02-strategy-messaging/examples/meaning-kvarts.yaml
   copy_slots_ref: ../../04-copy-by-block/copy-slots.yaml
   jurisdiction: ru
   legal_category:
@@ -29,7 +29,7 @@ copy_deck:
       variants:
       - id: a
         text: Настольная лампа сама подстраивает свет под книгу и время суток
-        status: draft
+        status: assumed
         source: ai-self
       chosen: a
       fact_ids:
@@ -47,7 +47,6 @@ copy_deck:
       - shipping-date
     sections:
     - section_id: hero
-      block: hero
       section_role: hero
       question: Что это за лампа из поста?
       message: Лампа для вечернего чтения, которая сама подстраивает свет; бронь первой партии — 990 ₽
@@ -57,7 +56,7 @@ copy_deck:
         variants:
         - id: a
           text: Читаете вечером — свет подстраивается сам
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -74,7 +73,7 @@ copy_deck:
         variants:
         - id: a
           text: Настольная лампа «Кварц» сама подстраивает оттенок и яркость света под книгу и время суток.
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -91,7 +90,7 @@ copy_deck:
         variants:
         - id: a
           text: Забронировать за 990 ₽
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -109,7 +108,7 @@ copy_deck:
         variants:
         - id: a
           text: Бронь 990 ₽ входит в цену лампы
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -125,7 +124,6 @@ copy_deck:
           пробела preorder-offer (COPY-F-PLACEHOLDER-UNLISTED); правка 3: «возврат» в одной фразе с фактом брони — COPY-F-EXTENDS (error), строка
           у кнопки отвечает на один вопрос — цена шага (01 §7); возврат — в тарифах, пробелом'
     - section_id: problem
-      block: problem
       section_role: problem
       question: Почему при обычном свете неудобно читать вечером?
       message: Свет в комнате рассчитан на комнату, а не на страницу
@@ -135,7 +133,7 @@ copy_deck:
         variants:
         - id: a
           text: Верхний свет бликует, ночник светит тускло
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -151,7 +149,7 @@ copy_deck:
         - id: a
           text: Верхний свет рассчитан на всю комнату и бликует на странице, ночник светит слишком тускло, а обычная настольная лампа весь вечер
             светит одинаково.
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -162,7 +160,6 @@ copy_deck:
           warnings: 0
         notes: без статистики и страха, без утверждений о зрении (02 §2)
     - section_id: solution
-      block: solution
       section_role: solution
       question: Что «Кварц» делает иначе, чем обычная лампа?
       message: Меняет оттенок (2700–5000 K) и яркость сам — под книгу и время суток
@@ -174,7 +171,7 @@ copy_deck:
         variants:
         - id: a
           text: Оттенок и яркость света меняются сами
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -192,7 +189,7 @@ copy_deck:
         variants:
         - id: a
           text: Лампа сама меняет цветовую температуру и яркость под книгу и время суток.
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -206,7 +203,6 @@ copy_deck:
         notes: 'механизм — пробел B2 light-mechanism с fallback rewrite-without (правка 4, COPY-D-FALLBACK): без заглушки и без «датчика» (must_not_say
           иерархии)'
     - section_id: specs
-      block: product-demo
       section_role: product-demo
       question: Как она выглядит у кресла и что ещё умеет?
       message: Фото прототипа; характеристики строками
@@ -219,7 +215,7 @@ copy_deck:
         variants:
         - id: a
           text: Цветовая температура — 2700–5000 K
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -236,7 +232,7 @@ copy_deck:
         variants:
         - id: a
           text: Зарядка телефона — USB-C, 18 Вт
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -253,7 +249,7 @@ copy_deck:
         variants:
         - id: a
           text: Сценарии — 4
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -266,7 +262,6 @@ copy_deck:
           warnings: 0
         notes: место сборки — нет в фактах (missing assembly-place), строки нет
     - section_id: pricing
-      block: pricing
       section_role: pricing
       question: Сколько стоит и что с бронью?
       message: Первые 300 ламп — 8 900 ₽; бронь 990 ₽ входит в цену; отгрузка — декабрь 2026
@@ -276,7 +271,7 @@ copy_deck:
         variants:
         - id: a
           text: Первые 300 ламп — 8 900 ₽
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -292,7 +287,7 @@ copy_deck:
         variants:
         - id: a
           text: 8 900 ₽
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -308,7 +303,7 @@ copy_deck:
         variants:
         - id: a
           text: Первые 300 ламп — 8 900 ₽; после предзаказа — 11 900 ₽
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -326,7 +321,7 @@ copy_deck:
         variants:
         - id: a
           text: Бронь 990 ₽ входит в цену лампы
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -343,7 +338,7 @@ copy_deck:
         variants:
         - id: a
           text: '[PLACEHOLDER: как и когда покупатель доплачивает остаток и как узнаёт об отгрузке]'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -360,7 +355,7 @@ copy_deck:
         variants:
         - id: a
           text: Отгрузка первых ламп — декабрь 2026
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -376,7 +371,7 @@ copy_deck:
         variants:
         - id: a
           text: '[PLACEHOLDER: ссылка на условия предзаказа — срок и порядок возврата брони]'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -394,7 +389,7 @@ copy_deck:
         variants:
         - id: a
           text: Забронировать за 990 ₽
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -407,7 +402,6 @@ copy_deck:
           errors: 0
           warnings: 0
     - section_id: faq
-      block: faq
       section_role: faq
       question: Кто производитель и где условия предзаказа?
       message: Юрлицо и оферта предзаказа — блокирующие пробелы
@@ -418,7 +412,7 @@ copy_deck:
         variants:
         - id: a
           text: Кто принимает бронь?
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -433,7 +427,7 @@ copy_deck:
         variants:
         - id: a
           text: '[PLACEHOLDER: юрлицо — название, ОГРН или ИНН, адрес]'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -451,7 +445,7 @@ copy_deck:
         variants:
         - id: a
           text: Где прочитать условия предзаказа?
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -466,7 +460,7 @@ copy_deck:
         variants:
         - id: a
           text: '[PLACEHOLDER: ссылка на условия предзаказа — бронь, возврат, доплата, перенос отгрузки]'
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids: []
@@ -479,7 +473,6 @@ copy_deck:
           warnings: 0
         notes: блокирующий пробел B2
     - section_id: final
-      block: final-cta
       section_role: final-cta
       question: Бронировать сейчас?
       message: Бронь 990 ₽ в счёт цены первой партии, с возвратом по заявке
@@ -489,7 +482,7 @@ copy_deck:
         variants:
         - id: a
           text: Бронь — 990 ₽ в счёт цены лампы
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
@@ -505,7 +498,7 @@ copy_deck:
         variants:
         - id: a
           text: Забронировать за 990 ₽
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -522,7 +515,7 @@ copy_deck:
         variants:
         - id: a
           text: Бронь 990 ₽ входит в цену лампы
-          status: draft
+          status: assumed
           source: fact
         chosen: a
         fact_ids:
@@ -535,7 +528,6 @@ copy_deck:
           errors: 0
           warnings: 0
     - section_id: footer
-      block: footer
       section_role: footer
       message: Кто продавец и где документы
       slots:
@@ -544,7 +536,7 @@ copy_deck:
         variants:
         - id: a
           text: «Кварц» — настольная лампа от стартапа из Казани
-          status: draft
+          status: assumed
           source: ai-self
         chosen: a
         fact_ids:
