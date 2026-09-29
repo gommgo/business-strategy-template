@@ -207,3 +207,27 @@
 - Не прочитано: см. отчёт C8 §8.
 - Решения оркестратора (строка DECISIONS «Ф8, зона 8 принята»): отступления приняты; `validate_voice.py --help` —
   справка вместо трассировки (правка при приёмке), строка смоука — `help; run:`.
+
+## 09. C9 — план ассетов, инвентарь и референсы (29.09, ≈ 48 мин, в уведомлении — 724 тыс. токенов)
+- Сделано: новая схема `kb/ai-media/05-prompting/asset-plan.schema.json` (275: `status` и `approval`, `key`, дорога 3D,
+  `source` с `render`, `task_codes` или `recipe:`, `ai_fit`, id слотов — словарь site, `x-canvas-map`); фикстура
+  `scripts/tests/fixtures/asset-plan/`; `plan_to_assets.py` переписан (1 102: режим проекта `build|check <slug>`,
+  `--check`, `--types`, `--spec-role`, `--selftest`, находки по контракту C3); `asset_inventory.py` (без маскировки,
+  GSAP по рантайму); `refs_client.py` (без превью работ и автора площадок со входом); `asset-spec.schema.json`
+  (`role.page_type` — id словаря, класс — `role.page_class`); три примера `asset-plan.home.yaml`; README site, ai-media,
+  creative; строки смоука. 14 действий — отчёт C9 §2.
+- Тесты: смоук site PASS 25, ai-media 51, creative 22; самопроверки `plan_to_assets` 52, `asset_inventory` 9 (Chromium,
+  `file://`), `refs_client` 46 (с Brave — пункт МЗ закрыт); схемы — метасхема, `canvas-map` — 0; `--check` примеров — 0
+  ошибок; посеянные дефекты — R-MAT-002, R-STRUCT-005; 10 новых типов страниц — 0 ошибок.
+- Отступления: `page_type` плана ассетов — id словаря, класс ai-media — `media_class`; каркас меняет форму прежних
+  файлов; `key` — по правилу канона; `build --write` — только для страниц без плана; утилита site говорит контрактом
+  находок `project/`; `--spec-role`; перечень `role.page_type` → шаблон id, прежний — `role.page_class`; телефонный UA —
+  Pixel 7 с `HeadlessChrome` (честный); автор снят в записях работ площадок; `handoff` — в форме `refs.md`.
+- Стыки: C11 — карта `asset-plan` (`assets.md`, `decisions.assets_mode`, `decisions.three_d` — объединить с картой
+  уровней); C13 — `plan_to_assets.py check <slug> [<surface>] --json`, правила, фикстура `asset-plan`; C14 и C15 — приём
+  без маскировки UA и GSAP по рантайму; C17 — тексты (отчёт C9 §4).
+- Открыто: полный шаблон §8 ai-media 01/01 и чек-лист плана ассетов — Ф10; `prompt_compile.py` берёт фразу из
+  `role.page_type` — после пилота генерации; автор у записей галерей (CSSDA) — Ф9 или юрист.
+- Не прочитано: см. отчёт C9 §8.
+- Решения оркестратора (строка DECISIONS «Ф8, зона 9 принята»): отступления приняты; шаблон §8 ai-media 01/01 — поля
+  страницы и статус приведены к схеме при приёмке (полное выравнивание — Ф10); `handoff` `refs_client` оставлен до пилота.
