@@ -16,13 +16,13 @@ check:
   warning: 1
   hint: 0
 files:
-  ACCEPTANCE.md: sha256:d73155ee57f8ce8035d2a64c35cd04c9d3ae7897c828e6fd34d9cb2227925c1c
+  ACCEPTANCE.md: sha256:47e828cf4ce6cc63c3bc5da36f502966275a56de8cdee88eae2d0aeddcec11ab
   assets.md: sha256:a639c884bedb7f5b4700e4bd3596e31300b46c0c2907362cd7c79aaf88149206
-  brief.yaml: sha256:6659a76e2ccea880fd0ba1139e3605b9060c4176e22ba2d473bec147744e78c7
+  brief.yaml: sha256:a9f03843d8f3610c6f464aaa0831d5df7b1c351cc7f7e0b5f236d2b2ea7907f2
   contract.md: sha256:252acc176ad7ee4459cedae6478aa5e4c31836ab2c892ed937140d7a37af239a
   copy.md: sha256:456134aab65cafd47882c90ebe6414b6e9284975c2257a982e503b0a4e5f637c
   demo-data.json: sha256:0ed1f8ddd7d77b02b3cbeb13d767e8dfa6f0f322c0deff152a703371e4efac7d
-manifest: sha256:ef6adc2d51ff46f1fde4e7ab87c969a953331803931485d72ddf8f5c77f7cae9
+manifest: sha256:9915bc6552f91e0e4010f4adbdb8348009b2a5cab77095be88443d9254121158
 ---
 # Вход холста — `office` (web · app), этап `mockup`
 
@@ -63,7 +63,7 @@ manifest: sha256:ef6adc2d51ff46f1fde4e7ab87c969a953331803931485d72ddf8f5c77f7cae
 | screens | `docs/projects/otves-office/screens/office/texts.md` | — | `sha256:3d3c2bd1084e1cfa0faa333734834fdb497e558ced21b457e43b66859e0d3ef2` |
 | user | `docs/projects/otves-office/user.md` | — | `sha256:f6a3d8a78c812a87cb1f62e4673ec8329d5cee88c9a0a5ec97aefc1827958e84` |
 | vision | `docs/projects/otves-office/vision.md` | draft | `sha256:fe81774f1e9ad71dfff632bd52ef7afab2f2b37a1cf93d00e0b42c56ee930a5d` |
-| acceptance-widths | `kb/common/acceptance-widths.yaml` | база | `sha256:263392cb17282ca981621f7599c20c341b759ad311163d7bf6beb6e18a348156` |
+| acceptance-widths | `kb/common/acceptance-widths.yaml` | база | `sha256:d4526b119a7da5391670c82cbd16e7458455c5fd7b84cf72c11bb0add78a2d7c` |
 | components | `kb/common/components.yaml` | база | `sha256:303205c9eacc3da0dc23ec2eed9fb36fc5282c47b874a3dea4df82c47d28d7e6` |
 | tells | `kb/common/tells.yaml` | база | `sha256:eedf4532a72101f9cdbb9b915a4e9751d0c7f5db5cfb5b82ad490a86f40973ff` |
 | 04-dark-patterns-and-ethics | `kb/ux/06-feedback-states-motion/04-dark-patterns-and-ethics.md` | база | `sha256:5f7a47bffe9d873b2c5d80f721af6a87d199ea306b193e8f37a0938cd82747f4` |

@@ -3,9 +3,11 @@
 
 Артборд холста (тип Design) — самодостаточная страница фиксированной ширины: разметка внутри `<x-dc>`, база и шрифты — в
 `<helmet>`, логика и твики — в блоке `<script type="text/x-dc" data-dc-script data-props='…'>`, среда исполнения — строка
-`support.js`. Локально такую страницу открывает только редактор типа, поэтому проверки макета (кадры, метки, скрипты,
-сверка текстов и фактов) идут по статичной копии. Правило перевода (claude-design/05-design-artifacts/02-staying-current.md
-§5; протокол холста `references/claude-design.md § HTML-копии и kit`):
+`support.js`. Локально такую страницу открывает только редактор типа, поэтому автопроверки макета (кадры, метки,
+скрипты, сверка текстов и фактов) идут по статичной копии. Оригинал макета — холст в claude.ai: копии нужны скриптам
+проверок, а не для просмотра, и собираются, когда заказчик попросил проверки макета (строка «Проверки макета:
+разрешены» в ARTIFACTS.md). Правило перевода (claude-design/05-design-artifacts/02-staying-current.md §5; протокол
+холста `references/claude-design.md § HTML-копии и kit`):
   - инлайн-стили и остальная разметка сохраняются байт в байт;
   - `<x-dc>`, `<helmet>`, блок логики и строка `support.js` снимаются, шрифты и базовые стили `<helmet>` уходят в `<head>`;
   - значения твиков подставляются: умолчания `data-props` (или `--tweak имя=значение`) проходят через `renderVals()`
@@ -13,19 +15,20 @@
   - `<sc-if>` раскрывается по начальному состоянию, `<sc-for>` повторяет содержимое по списку, `<dc-import>` вставляет
     артборд-источник; обработчики событий (`onClick="{{…}}"` и другие) снимаются;
   - ссылки прототипа `X.dc.html` ведут на копию `X.html`; ширина окна копии — ширина рамки.
-Копия — производная: руками не правится. В голове копии — строка о происхождении с отпечатком исходника и твиками, по
-ней `check` отличает статичные копии от адаптивных (`<page-id>.html` пишет агент) и находит устаревшие.
+Копия — производная: руками не правится. В голове копии — строка о происхождении с отпечатком исходника и твиками: по
+ней `check` узнаёт копию и находит устаревшие; в папке копий других HTML нет.
 
 Команды (файлы проекта — через lib/docpaths.py: ключ --repo, переменная DDD_REPO или репозиторий скилла):
   dc_to_html.py build <slug> <surface> [--repo DIR] [--json]
       design/<surface>/canvas/project/<Имя>.dc.html → design/<surface>/canvas/html/<Имя>.html для артбордов canvas.json
       (без canvas.json — всех .dc.html); пишет только изменившиеся копии, снимает копии артбордов, которых больше нет.
   dc_to_html.py check <slug> <surface> [--repo DIR] [--json]
-      правило R-FRESH-005 `design-audit`: у каждого артборда есть копия, копия равна переводу исходника (error).
-      Ничего не пишет. Находки — строки JSON {rule, severity, surface, kind, ref, path, message, fix}.
+      правило R-FRESH-005 `design-audit`: у каждого артборда есть копия, копия равна переводу исходника, копий снятых
+      артбордов нет (error); HTML без строки происхождения — не копия, в папке копий ему не место (warning). Ничего
+      не пишет. Находки — строки JSON {rule, severity, surface, kind, ref, path, message, fix}.
   dc_to_html.py fingerprint <slug> <surface> [--artboards A.dc.html,B.dc.html] [--repo DIR] [--json]
-      отпечаток артбордов (sha256 по именам и содержимому): по нему REVIEW.md держит, на каких артбордах построена
-      адаптивная копия и что одобрено.
+      отпечаток артбордов (sha256 по именам и содержимому): он входит в отпечаток одобрения единицы в REVIEW.md
+      (`ready show`), поэтому правка артборда снимает одобрение его единицы.
   dc_to_html.py convert <файл.dc.html | папка project> … [--out DIR] [--tweak имя=значение …] [--json]
       перевод вне проекта (пример базы, снимок живой версии из scratchpad); по умолчанию —
       $DDD_HOME/out/claude-design/dc_to_html/.
@@ -709,6 +712,11 @@ def check_copies(call):
             if ab and p.name not in names:
                 rep.add(RULE, "error", surface=call.surface, kind="copy", ref=p.name, path=docpaths.rel(p, call.repo),
                         message=f"копия артборда {ab}, которого нет в исходниках холста", fix=fix)
+            elif not ab:
+                rep.add(RULE, "warning", surface=call.surface, kind="copy", ref=p.name, path=docpaths.rel(p, call.repo),
+                        message="HTML без строки происхождения dc_to_html — не копия артборда: в папке копий только "
+                                "производные копии, все ширины макета — артборды холста",
+                        fix="убрать файл из canvas/html/; нужная ширина или состояние — артбордом на холсте")
     return rep
 
 
@@ -849,13 +857,13 @@ def selftest():
         (html_dir / "Main.html").write_text((html_dir / "Main.html").read_text(encoding="utf-8").replace(
             "Обслужим велосипед", "Починим велосипед"), encoding="utf-8")
         (html_dir / "Dir-Paper.html").unlink()
-        (html_dir / "home.html").write_text("<!doctype html><title>адаптивная</title>", encoding="utf-8")
+        (html_dir / "home.html").write_text("<!doctype html><title>страница</title>", encoding="utf-8")
         rc, out = _run(["check"] + argv + ["--json"])
         items = FND.parse_lines(out)
-        check("правка копии и пропавшая копия — две находки R-FRESH-005 error",
+        check("правка копии и пропавшая копия — две находки R-FRESH-005 error; HTML без строки происхождения — warning",
               (rc, sorted((f.rule, f.severity, f.ref) for f in items)),
-              (1, [(RULE, "error", "Dir-Paper.html"), (RULE, "error", "Main.html")]))
-        check("адаптивная копия (без строки происхождения) — не находка", any(f.ref == "home.html" for f in items), False)
+              (1, [(RULE, "error", "Dir-Paper.html"), (RULE, "error", "Main.html"), (RULE, "warning", "home.html")]))
+        (html_dir / "home.html").unlink()
         check("build чинит копии", _run(["build"] + argv)[0] == 0 and _run(["check"] + argv + ["--json"]) == (0, ""), True)
         fp1 = _run(["fingerprint"] + argv)[1].strip()
         check("fingerprint — sha256", fp1.startswith("sha256:") and len(fp1) == 71, True)

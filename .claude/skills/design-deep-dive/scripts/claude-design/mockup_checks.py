@@ -3,8 +3,9 @@
 формы, телефон, наложения, ресайз. Модель не вызывается; браузер — Chromium Playwright, один за раз.
 
 Место в цикле — слой скриптов проверок макета (claude-design/06-design-process/04-checks.md §2–§4; протокол холста
-`references/claude-design.md § Проверки по постоянной просьбе`): на статичных копиях артбордов и на адаптивной копии,
-только по просьбе заказчика. Проверки холста — слой ниже ворот страницы и их не заменяют.
+`references/claude-design.md § Проверки по постоянной просьбе`): на статичных копиях артбордов, только по просьбе
+заказчика; все ширины приёмки — артборды холста. Проверки холста — слой ниже ворот страницы и их не заменяют: вылет на
+320, ресайз и зум проверяются на собранной странице в репозитории кода (`page --acceptance` и `resize` берут её адрес).
 
 Подкоманды:
   page <url|file.html|dir> [--views 1440x900,390x844 | --acceptance] [--surface page|app] [--preset A|B|C|D]
@@ -15,15 +16,18 @@
        exit 0 — нет critical и кластера примет, 2 — есть, 1 — ошибка, 3 — мало свободной памяти (браузер не
        запускался)
   resize <url|file> [--desktop 1440x900] [--mobile 390x844] [--wait-ms 1000] [--shots DIR]
-       ресайз без перезагрузки: широкий → узкий → широкий (пункт H5 приёмки): вылет, навигация, медиа первого экрана
-       за --wait-ms, кадр после возврата совпадает с исходным (--max-diff — порог cd 06/04 §3 B); exit 0 pass / 2 fail
+       ресайз без перезагрузки на собранной странице: широкий → узкий → широкий (пункт H5 приёмки, место «после
+       сборки»): вылет, навигация, медиа первого экрана за --wait-ms, кадр после возврата совпадает с исходным
+       (--max-diff — порог cd 06/04 §3 B); окна по умолчанию — самая широкая ширина приёмки и самая широкая ниже
+       первого брейкпоинта эталона ui; exit 0 pass / 2 fail
   selftest  офлайн-проверки: цвет, контраст, числа с единицей и объектом, факты и копия таблицами и YAML, демо-набор,
        формы, пороги владельцев, id примет, поверхность примет, вердикт кластера, токены ДС, сводка по доменам
 
-Ширины. Без --views окна — основные артборды `kb/common/acceptance-widths.yaml` (`artboards`), --acceptance — все
-ширины приёмки и отдельный прогон вылета на `overflow_only`. Высота окна — параметр прогона: 900 у широких окон, 844 у
-окон уже первого брейкпоинта ДС (окна первого экрана site). Первый брейкпоинт — из токенов ДС (--tokens: CSS, DTCG или
-tokens.json артефакта), без них — эталонные токены ui.
+Ширины. У статичной копии артборда окно — её рамка. У другой цели (собранная страница) без --views окна — ширины
+артбордов `kb/common/acceptance-widths.yaml` (`artboards` — все ширины приёмки), с --acceptance — ещё отдельный прогон
+вылета на `overflow_only`. Высота окна — параметр прогона: 900 у широких окон, 844 у окон уже первого брейкпоинта ДС
+(окна первого экрана site). Первый брейкпоинт — из токенов ДС (--tokens: CSS, DTCG или tokens.json артефакта), без них
+— эталонные токены ui.
 
 Проверки и id примет. id проверок — ключи раздела `checks` реестра `kb/common/tells.yaml`: там у ключа группа (look —
 приметы вида, honesty — честность, acceptance — проверки приёмки), id приметы `tell` и ключ `--allow`. Находка несёт
@@ -2014,7 +2018,7 @@ def to_md(res):
 
 def static_frame(target):
     """Ширина рамки, если цель — статичная копия артборда (строка происхождения dc_to_html): такая копия — страница
-    фиксированной ширины и проверяется окном своей рамки; остальные ширины — на адаптивной копии."""
+    фиксированной ширины и проверяется окном своей рамки; другие ширины — свои артборды холста и их копии."""
     if target.startswith(('http://', 'https://')) or not os.path.isfile(target):
         return None
     head = open(target, encoding='utf-8', errors='replace').read(4000)
@@ -2087,6 +2091,15 @@ def cmd_page(a):
 
 
 # ---------------------------------------------------------------- ресайз без перезагрузки (пункт H5 приёмки)
+def resize_windows():
+    """Окна ресайза по умолчанию: широкое — самая широкая ширина приёмки, узкое — самая широкая ниже первого брейкпоинта
+    эталона ui (окна первого экрана site 1440×900 и 390×844)."""
+    aw = acceptance_widths()
+    bp = first_breakpoint()
+    narrow = [w for w in aw['widths'] if w < bp]
+    return f"{aw['widths'][0]}x{VIEW_H_WIDE}", f"{max(narrow) if narrow else aw['widths'][-1]}x{VIEW_H_NARROW}"
+
+
 RESIZE_JS = r"""
 () => {
   const vis = (el) => { const r = el.getBoundingClientRect(); const s = getComputedStyle(el);
@@ -2241,7 +2254,9 @@ def cmd_selftest(_a):
     check('реестр: LOOK-EYEBROW → примета caps-eyebrow', reg['checks'].get('LOOK-EYEBROW', {}).get('tell') == 'caps-eyebrow')
     check('ключи --allow — из реестра', {'warm', 'eyebrow', 'cards', 'arrows', 'external'} <= allow_keys(), sorted(allow_keys()))
     aw = acceptance_widths()
-    check('ширины приёмки из файла: артборды 1440 и 390, вылет 320', (aw['artboards'], aw['overflow_only']) == ([1440, 390], 320), aw)
+    check('ширины приёмки из файла: артборды — все ширины приёмки, вылет 320',
+          (aw['artboards'], aw['overflow_only']) == (aw['widths'], 320) and len(aw['widths']) == 6, aw)
+    check('ресайз по умолчанию: 1440x900 → 390x844', resize_windows() == ('1440x900', '390x844'), resize_windows())
     check('первый брейкпоинт без токенов ДС — эталон ui 640', first_breakpoint() == 640.0, first_breakpoint())
     check('шапка страницы: телефон 64, десктоп 80', (header_limit('page', 'A', 390, 640), header_limit('page', 'A', 1440, 640)) == (64, 80))
     check('шапка приложения по пресету: A 48, B 64', (header_limit('app', 'A', 1440, 640), header_limit('app', 'B', 390, 640)) == (48, 64))
@@ -2536,11 +2551,12 @@ def main():
     p.add_argument('--block-external', action='store_true'); p.add_argument('--allow-external', action='store_true')
     p.add_argument('--shots', help='папка: первый экран каждого окна JPEG q80')
     p.add_argument('--json'); p.add_argument('--md'); p.add_argument('--min-free-gb', type=float, default=2.0)
-    r = sub.add_parser('resize', help='ресайз широкий → узкий → широкий без перезагрузки (пункт H5 приёмки)')
-    aw = acceptance_widths()
+    r = sub.add_parser('resize', help='ресайз широкий → узкий → широкий без перезагрузки на собранной странице '
+                                      '(пункт H5 приёмки)')
+    desk, mob = resize_windows()
     r.add_argument('target')
-    r.add_argument('--desktop', default=f"{aw['artboards'][0]}x{VIEW_H_WIDE}")
-    r.add_argument('--mobile', default=f"{aw['artboards'][-1]}x{VIEW_H_NARROW}")
+    r.add_argument('--desktop', default=desk)
+    r.add_argument('--mobile', default=mob)
     r.add_argument('--wait-ms', type=int, default=1000); r.add_argument('--max-diff', type=float, default=0.02)
     r.add_argument('--shots'); r.add_argument('--min-free-gb', type=float, default=2.0)
     sub.add_parser('selftest')

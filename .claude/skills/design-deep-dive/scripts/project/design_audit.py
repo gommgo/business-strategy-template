@@ -32,13 +32,14 @@ counts, notes, reading, visual. Код 2 в called: у text/copydeck.py и text/
 Тяжесть — по правилу реестра: где правило зависит от этапа, этап выводится из статусов файлов (вход холста страницы
 или поверхности, закрытый copy deck, закрытая арт-дирекция, вердикт REVIEW.md); у находки валидатора — его уровень
 (error → error, warning → warning, сведения не переносятся), кроме правил с тяжестью по закрытию файла (R-REF-006 из
-ad_check: warning, error у закрытой арт-дирекции) и по просьбе заказчика (R-FRESH-005 статичных копий и kit.json:
-error — при строке «Проверки макета: разрешены» в ARTIFACTS.md, без неё — warning); шкала ворот и приёмки B/S/D →
-error/warning/hint. R-COV-002 — error под гейтом 2: у страницы строка «Приёмка» в REVIEW.md или она в партии
-действующего входа холста (поле units INPUT.md или папка pages/<id>/) этапа mockup или motion; в партии входа
-вайрфрейма или направлений — warning (тексты — до макета); закрытый copy deck без текста в слоте — error. Одобрение
-единицы (R-MAT-004, R-FRESH-005 адаптивной копии) сверяется с отпечатком `ready`: артборды и источники единицы. Ошибки
-публикуемости фактов из claims_check.py lint-facts (разрешение, срок, проверка) в R-STRUCT-003 не идут: их сверяет
+ad_check: warning, error у закрытой арт-дирекции); шкала ворот и приёмки B/S/D → error/warning/hint. R-FRESH-005 —
+статичные копии артбордов и kit.json — сверяется только при постоянной просьбе заказчика о проверках макета (строка
+«Проверки макета: разрешены» в ARTIFACTS.md): копии нужны скриптам проверок, а оригинал макета — холст в claude.ai;
+без строки копий может не быть, и это не находка и не заметка. R-COV-002 — error под гейтом 2: у страницы строка
+«Приёмка» в REVIEW.md или она в партии действующего входа холста (поле units INPUT.md или папка pages/<id>/) этапа
+mockup или motion; в партии входа вайрфрейма или направлений — warning (тексты — до макета); закрытый copy deck без
+текста в слоте — error. Одобрение единицы (R-MAT-004) сверяется с отпечатком `ready`: артборды и источники единицы.
+Ошибки публикуемости фактов из claims_check.py lint-facts (разрешение, срок, проверка) в R-STRUCT-003 не идут: их сверяет
 R-COV-003 там, где факт стоит (план, copy deck). Совет находки называет этап: у site_validate — по коду (SB-* — brief,
 SM-* — site-map, PL-* — page-plan), факты и голос — meaning, copy deck — copy. Правило, которое утилита не проверила
 (свежесть производных при битых токенах; артефакт ДС без токенов DTCG system.tokens.json и system.tokens.css — ds_build
@@ -50,8 +51,9 @@ SM-* — site-map, PL-* — page-plan), факты и голос — meaning, co
 каждого плана), copydeck.py check, claims_check.py lint-facts, validate_any.py, validate_voice.py, spec_check.py spec,
 ad_check.py, vlm_to_dna.py validate, plan_to_assets.py check, утилиты project/ — ds_build (check), ds_coverage,
 canvas_input (check; у кабинета со входом в неё входят находки contract и demo_data), screen_map (check — только
-расхождения свода для R-MAT-011), ready (check), claude-design/dc_to_html.py check и kit/kit_manifest.py check;
-находки утилит экранов (tree, states) — правила /screen-audit, сюда они не переносятся.
+расхождения свода для R-MAT-011), ready (check), claude-design/dc_to_html.py check и kit/kit_manifest.py check (при
+строке «Проверки макета: разрешены»); находки утилит экранов (tree, states) — правила /screen-audit, сюда они не
+переносятся.
 Код выхода: 0 — ошибок нет; 1 — есть error; 2 — ошибка вызова или окружения.
 """
 from __future__ import annotations
@@ -130,7 +132,7 @@ READING = {
     "R-SEM-004": "метафора пустого состояния — одна на смысл пустоты и повторяется на экранах с тем же смыслом",
 }
 VISUAL = {
-    "R-VIS-001": "кадры копий (kit/shot.py --manifest kit.json) → mockup_checks.py page (на адаптивной — ещё resize) → "
+    "R-VIS-001": "кадры статичных копий артбордов (kit/shot.py --manifest kit.json) → mockup_checks.py page → "
                  "ui_audit.py, у сайта — marketing_audit.py; отчёты — design_audit visual (сводка по доменам)",
     "R-VIS-002": "claims_check.py на копиях: числа, отзывы, подписи и alt против фактов, текстов и списка ассетов "
                  "входа",
@@ -1732,7 +1734,6 @@ class Audit:
                     self.tools.note("project/ready.py", f"check {s.slug}")
                 except Exception as e:                      # noqa: BLE001
                     self.notes.append(f"ready check {s.slug}: {e}")
-            self.fresh_adaptive(s.slug)
 
     def fresh_input(self, s):
         CI = mod("canvas_input")
@@ -1759,9 +1760,11 @@ class Audit:
         return bool(re.search(r"^Проверки макета:\s*разрешен", text, re.M | re.I))
 
     def fresh_copies(self, s):
-        """R-FRESH-005 статичных копий и kit.json: их читают кадры и скрипты проверок макета — error при постоянной
-        просьбе о проверках, без неё — warning (доклад)."""
-        strict = self.checks_permitted()
+        """R-FRESH-005 статичных копий артбордов и kit.json — только при постоянной просьбе о проверках макета: копии
+        читают кадры и скрипты проверок, оригинал макета — холст в claude.ai. Без просьбы копий может не быть: утилиты
+        не зовутся, находок и заметок о копиях нет."""
+        if not self.checks_permitted():
+            return
         for name, args in (("claude-design/dc_to_html.py", ["check", self.slug, s, "--repo", self.root, "--json"]),
                            ("claude-design/kit/kit_manifest.py", ["check", self.slug, s, "--repo", self.root,
                                                                   "--json"])):
@@ -1775,30 +1778,7 @@ class Audit:
                 self.notes.append(f"{name} check {s}: вывод не по контракту находок ({e})")
                 continue
             for f in items:
-                if f.rule == "R-FRESH-005" and f.severity == "error" and not strict:
-                    self.add(f.rule, "warning", f.surface, f.kind, f.ref, f.path, f.message + " (доклад: строки "
-                             "«Проверки макета: разрешены» в ARTIFACTS.md нет — копии читают проверки по просьбе)",
-                             f.fix)
-                else:
-                    self.add(f.rule, f.severity, f.surface, f.kind, f.ref, f.path, f.message, f.fix)
-
-    def fresh_adaptive(self, s):
-        html = self.dsurf(s, "canvas-html")
-        _fm, rows, _items = self.review(s)
-        if not html.is_dir() or not rows:
-            return
-        R = mod("ready")
-        b = R.Build(self.slug, self.reg[s], self.root, self.today)
-        for unit, row in rows.items():
-            copy = html / f"{unit}.html"
-            if not copy.is_file() or row.get("вердикт") not in ACCEPTED:
-                continue
-            now = b.fingerprint(unit, row.get("artboards") or [])
-            if now != row.get("отпечаток"):
-                self.add("R-FRESH-005", "warning", s, "copy", f"{unit}.html", copy,
-                         f"адаптивная копия {unit}.html построена по одобренному макету, а отпечаток одобрения "
-                         "(артборды и источники единицы) в REVIEW.md не совпал с текущим — копию пересобрать по "
-                         "текущим артбордам и текстам", self.dd(s, "холст — адаптивная копия"))
+                self.add(f.rule, f.severity, f.surface, f.kind, f.ref, f.path, f.message, f.fix)
 
     # ================================================================ R-MAT
     def r_mat(self):
@@ -2245,8 +2225,8 @@ class Audit:
         cat = rules_catalog()
         out = []
         for rid, title, _sev in cat:
-            if rid.startswith("R-VIS"):
-                continue
+            if rid.startswith("R-VIS") or (rid == "R-FRESH-005" and not self.checks_permitted()):
+                continue                                    # копии без просьбы о проверках — не предмет аудита
             what = READING.get(rid)
             if what is None and not self.env and rid in NEEDS_ENV:
                 what = "окружение не установлено — правило проверяется чтением по форме"
@@ -2614,14 +2594,11 @@ def _selftest():
 
         ci("--stage", "wireframe")
         cp = docpaths.design(slug, "canvas-project", surface="promo", repo=root)
-        ch = docpaths.design(slug, "canvas-html", surface="promo", repo=root)
         cp.mkdir(parents=True)
-        ch.mkdir(parents=True)
         boards = {"home": "Home.dc.html", "spasibo": "Spasibo.dc.html"}
         (cp / boards["home"]).write_text("<section id='hero'>Главная</section>\n", encoding="utf-8")
         (cp / boards["spasibo"]).write_text("<section id='confirmation'>Заявка на замер принята</section>\n",
                                             encoding="utf-8")
-        (ch / "spasibo.html").write_text("<!doctype html><title>Адаптивная копия spasibo</title>\n", encoding="utf-8")
         b = mod("ready").Build(slug, docpaths.surface(slug, "promo", root), root, today)
         accept = ("# REVIEW\n\nИллюстрация самопроверки.\n\n## Приёмка\n\n"
                   "| страница или экран | артборды | вердикт | одобрил | дата | отпечаток | открыто |\n"
@@ -2641,12 +2618,12 @@ def _selftest():
         (cp / boards["home"]).write_text(hb.replace("Главная", "Главная страница"), encoding="utf-8")
         got2 = found()
         (cp / boards["home"]).write_text(hb, encoding="utf-8")
-        check("одобрение по единице: дата в ARTIFACTS.md и пересборка входа — без R-MAT-004 и R-FRESH-005; правка "
-              "своего текста (spasibo) — R-MAT-004 и R-FRESH-005 адаптивной копии только у spasibo; правка артборда "
-              "home — R-MAT-004 только у home",
+        check("одобрение по единице: дата в ARTIFACTS.md и пересборка входа — без R-MAT-004; правка своего текста "
+              "(spasibo) — R-MAT-004 только у spasibo; правка артборда home — R-MAT-004 только у home; R-FRESH-005 "
+              "нет ни в одном случае",
               not any(r in ("R-MAT-004", "R-FRESH-005") for r, *_ in got0)
               and {(r, ref) for r, _s, ref, _m in got1 if r in ("R-MAT-004", "R-FRESH-005")}
-              == {("R-MAT-004", "promo#Приёмка/spasibo"), ("R-FRESH-005", "spasibo.html")}
+              == {("R-MAT-004", "promo#Приёмка/spasibo")}
               and {(r, ref) for r, _s, ref, _m in got2 if r in ("R-MAT-004", "R-FRESH-005")}
               == {("R-MAT-004", "promo#Приёмка/home")})
         acc_md = ("\n## Пункты ACCEPTANCE\n\n| id | страница или экран | где | итог | доказательство |\n"
@@ -2665,14 +2642,21 @@ def _selftest():
             with tempfile.TemporaryDirectory(prefix="ddd-audit-copies-") as td:
                 aa.tools = Tools(td)
                 aa.fresh_copies("promo")
-            return {f.severity for f in aa.rep.items if f.rule == "R-FRESH-005"}
+            return ({f.severity for f in aa.rep.items if f.rule == "R-FRESH-005"}, set(aa.tools.used),
+                    [n for n in aa.notes if "копи" in n or "dc_to_html" in n or "kit_manifest" in n])
 
-        asked = copies()
+        def reads_copies():
+            return any(x["rule"] == "R-FRESH-005" for x in Audit(slug, root, today=today, run_tools=False).reading())
+
+        asked, asked_read = copies(), reads_copies()
         art.write_text(at.replace("Проверки макета: разрешены", "Проверки макета: —"), encoding="utf-8")
-        not_asked = copies()
+        not_asked, not_asked_read = copies(), reads_copies()
         art.write_text(at, encoding="utf-8")
-        check("R-FRESH-005 статичных копий (dc_to_html check): со строкой «Проверки макета: разрешены» — error, "
-              "без неё — warning (доклад)", asked == {"error"} and not_asked == {"warning"})
+        check("R-FRESH-005 статичных копий: со строкой «Проверки макета: разрешены» — dc_to_html check и kit_manifest "
+              "check зовутся, копий артбордов нет — error; без строки — утилиты не зовутся, ни находки, ни заметки о "
+              "копиях, и без окружения правила нет в чтении",
+              asked[0] == {"error"} and {"claude-design/dc_to_html.py", "claude-design/kit/kit_manifest.py"} <= asked[1]
+              and not_asked == (set(), set(), []) and asked_read and not not_asked_read)
         # R-COV-002 по этапу: error под гейтом 2 — партия входа mockup или motion (units, pages/<id>/) или строка
         # «Приёмка»; партия входа вайрфрейма — warning
         (rv / "REVIEW.md").unlink()

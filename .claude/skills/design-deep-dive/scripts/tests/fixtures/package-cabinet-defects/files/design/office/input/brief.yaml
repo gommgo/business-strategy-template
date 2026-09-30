@@ -126,7 +126,11 @@ build:
   viewports:
     artboards:
     - 1440
+    - 1280
+    - 1024
+    - 768
     - 390
+    - 360
     widths:
     - 1440
     - 1280

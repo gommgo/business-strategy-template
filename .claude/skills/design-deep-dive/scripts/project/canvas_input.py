@@ -1687,13 +1687,14 @@ POLICY = {"offer-cta": "обещание (что это и результат) �
 
 
 def common_items(ctx, A):
-    """Группы, общие для сайта и кабинета: C, D2–D4, G, V (среда)."""
+    """Группы, общие для сайта и кабинета: C, D2–D5, G, V (среда). Артборды — все ширины приёмки; вылет на узком окне,
+    ресайз, зум и темы на всех ширинах — на собранной странице («после сборки»)."""
     th = " и ".join(A["themes"])
     return [
         Item("C1", "Шрифты — только объявленные в ДС и реально отрисованные", "S", "скрипт", "макет", "mockup",
              "cd 06/04 §3 (fonts_missing)"),
-        Item("C2", "Каждое значение на артборде — литерал из значений токенов ДС; на адаптивной копии — только "
-             "var(--…)", "S", "скрипт", "макет", "mockup", "cd 06/02 §2; literal_tokens.py"),
+        Item("C2", "Каждое значение на артборде — литерал из значений токенов ДС", "S", "скрипт", "макет", "mockup",
+             "cd 06/02 §2; literal_tokens.py"),
         Item("C3", "Кегли — по шкале ДС; заголовок не длиннее 2 строк на 1440 и 4 строк на 390", "S", "скрипт", "макет",
              "mockup", "cd 06/02 §4 (C3)"),
         Item("C4", "Нет кластера примет бан-листа brief.yaml#design_system.bans (одиночная примета — вопрос "
@@ -1707,16 +1708,20 @@ def common_items(ctx, A):
              + (f"; цель доступности — {A['a11y']}" if A.get("a11y") else ""), "S", "скрипт", "макет", "mockup",
              "ux 08/01; " + ("site-brief constraints.accessibility" if ctx.route != "app" else
                              "app-brief constraints")),
+        Item("D5", f"Горизонтальный вылет 0 на {A['overflow']} (только вылет)"
+             + (" у экранов классов mobile и any" if ctx.route == "app" else ""), "S", "скрипт", "после сборки", "—",
+             "acceptance-widths.yaml#overflow_only; ux 08/01 §3.2; ui_audit.py --acceptance"),
         Item("G1", "Публикация принята инструментом; консоль HTML-копий без ошибок", "S", "протокол", "макет",
              "wireframe", "claude-design.md § Создание и публикация"),
         Item("G2", "Изменены только свои файлы; правки заказчика слиты по «прочитать → слить → опубликовать», чужие "
              "ключи и маркеры сохранены", "S", "протокол", "макет", "wireframe", "claude-design.md § Синхронизация"),
-        Item("V1", f"Темы ДС ({th}) — на всех ширинах приёмки, на адаптивной копии", "S", "скрипт", "макет", "mockup",
-             "acceptance-widths.yaml#themes; ux 06/01 §7.3"),
+        Item("V1", f"Темы ДС ({th}) — на всех ширинах приёмки"
+             + ("; на холсте тёмная тема — твиком" if "dark" in A["themes"] else ""), "S", "скрипт", "после сборки",
+             "—", "acceptance-widths.yaml#themes; ux 06/01 §7.3"),
         Item("V2", "Сокращённое движение: конечные состояния, невидимого текста 0 (ui_audit.py --reduced-motion)", "S",
              "скрипт", "макет", "motion" if ctx.route != "app" else "mockup", "ux 06/01 §7.3"),
-        Item("V3", "Зум браузера 200 % на 1280 на адаптивной копии — без потери текста и функций", "S", "скрипт",
-             "макет", "mockup", "ux 08/01 §3.2"),
+        Item("V3", "Зум браузера 200 % на 1280 — без потери текста и функций", "S", "скрипт", "после сборки", "—",
+             "ux 08/01 §3.2"),
         Item("V4", "forced-colors — смысл не потерян; кадр с эмуляцией смотрят глазами", "D", "глаза", "макет",
              "mockup", "ux 06/01 §7.3"),
     ]
@@ -1772,10 +1777,9 @@ def site_items(ctx, A, pages, brief):
         Item("B3", "Картинки — только загрузки из assets.md с подписью и alt дословно; внешних картинок 0; пустой "
              "слот — заглушка «placeholder»", "B", "скрипт", "макет", "mockup", "assets.md; cd 06/04 §3"),
     ] + [x for x in common_items(ctx, A) if x.id.startswith("C")] + [
-        Item("D1", f"Горизонтальный вылет 0 на ширинах {', '.join(map(str, A['widths']))} и на {A['overflow']} "
-             f"(только вылет); артборды {', '.join(map(str, A['artboards']))}, остальные ширины — адаптивная копия "
-             "после «Keep»", "S", "скрипт", "макет", "wireframe", "kb/common/acceptance-widths.yaml"),
-    ] + [x for x in common_items(ctx, A) if x.id in ("D2", "D3", "D4")] + [
+        Item("D1", f"Артборды — все ширины приёмки ({', '.join(map(str, A['artboards']))}), горизонтальный вылет 0 на "
+             "каждом", "S", "скрипт", "макет", "wireframe", "kb/common/acceptance-widths.yaml"),
+    ] + [x for x in common_items(ctx, A) if x.id in ("D2", "D3", "D4", "D5")] + [
         Item("E1", f"Анимируются только свойства спецификации движения, не шире уровня {lvl}: "
              f"{', '.join(hints.get('properties_allowed') or []) or '—'}; без transition: all и анимации свойств "
              "раскладки", "S", "скрипт", "макет", "motion", "motion.md; ambition-levels.yaml#levels.motion_hints"),
@@ -1802,8 +1806,8 @@ def site_items(ctx, A, pages, brief):
              "refs.md"),
         Item("H4", "Силуэт макета в 200 px отличается от референсов и соседних вариантов", "D", "судья", "макет",
              "mockup", "cd 06/02 §4 (H4)"),
-        Item("H5", "Ресайз 1440 → 390 → 1440 без перезагрузки на адаптивной копии; медиа первого экрана ≤ 1 с", "S",
-             "скрипт", "макет", "mockup", "mockup_checks.py resize"),
+        Item("H5", "Ресайз 1440 → 390 → 1440 без перезагрузки; медиа первого экрана ≤ 1 с", "S", "скрипт",
+             "после сборки", "—", "mockup_checks.py resize"),
         Item("I1", f"Ровно один H1 — слот seo.h1 плана ({'; '.join(h1s)})", "S", "скрипт", "макет", "wireframe",
              "page.yaml seo.h1; site 09/01 §6.2"),
         Item("I2", "title, description, canonical на себя и lang заданы и уникальны", "S", "скрипт", "после сборки",
@@ -1866,10 +1870,10 @@ def app_items(ctx, A, con, lay):
     ] + [x for x in common_items(ctx, A) if x.id.startswith("C")] + [
         Item("C5", "Компоненты — только из карты решений system.yaml (components, extensions)", "S", "скрипт", "макет",
              "mockup", "system.yaml; ds_coverage"),
-        Item("D1", f"Кадры — по классу экрана: viewport экрана → by_viewport, первый брейкпоинт ДС {A['first_bp']} px "
-             f"({A['bp_source']}); вылет 0 на ширинах класса (таблица ниже)", "S", "скрипт", "макет", "wireframe",
-             "kb/common/acceptance-widths.yaml#by_viewport"),
-    ] + [x for x in common_items(ctx, A) if x.id in ("D2", "D3", "D4")] + [
+        Item("D1", f"Артборды — по классу экрана: viewport экрана → by_viewport, первый брейкпоинт ДС "
+             f"{A['first_bp']} px ({A['bp_source']}); горизонтальный вылет 0 на каждом (таблица ниже)", "S", "скрипт",
+             "макет", "wireframe", "kb/common/acceptance-widths.yaml#by_viewport"),
+    ] + [x for x in common_items(ctx, A) if x.id in ("D2", "D3", "D4", "D5")] + [
         Item("E1", "Отклик компонентов — токены движения ДС; без transition: all и анимации свойств раскладки; "
              "движения подачи у рабочих экранов нет", "S", "скрипт", "макет", "mockup",
              "creative 01/03 §1.3; токены ДС"),
@@ -1909,12 +1913,13 @@ def acceptance_md(ctx, items, A, extra=()):
            "Производный файл: собирает `canvas_input` вместе со входом по роду поверхности, уровню и партии входа; "
            "руками не правится. Серьёзность: B — блокирует приёмку (critical): честность макета — тексты, числа, "
            "факты и картинки только из входа — и пункты места «после сборки»; S — исправить или принять с записью "
-           "заказчика (major); D — по месту (minor). Где: «макет» — проверяется на холсте и копиях, «после сборки» — "
-           "в репозитории кода, пункт уходит в манифест готовности. Этап — с какого этапа холста пункт проверяется. "
-           "Итог и одобрение — `review/REVIEW.md`.", "",
+           "заказчика (major); D — по месту (minor). Где: «макет» — проверяется на холсте (способ «скрипт» — на "
+           "статичных копиях артбордов, когда заказчик попросил проверки макета), «после сборки» — на собранной "
+           "странице в репозитории кода, пункт уходит в манифест готовности. Этап — с какого этапа холста пункт "
+           "проверяется. Итог и одобрение — `review/REVIEW.md`.", "",
            f"Партия входа ({unit}): {', '.join(ctx.units) or '—'}.", "",
-           f"Уровень: {A['level']} · темы: {', '.join(A['themes'])} · ширины: {', '.join(map(str, A['widths']))}, "
-           f"вылет — {A['overflow']} · артборды: {', '.join(map(str, A['artboards']))}", ""]
+           f"Уровень: {A['level']} · темы: {', '.join(A['themes'])} · артборды — все ширины приёмки: "
+           f"{', '.join(map(str, A['artboards']))}; вылет на {A['overflow']}, ресайз и зум — на сборке", ""]
     groups = {}
     for it in items:
         g = "S" if it.id.startswith("ST-") else re.match(r"[A-Z]", it.id).group(0)
@@ -2356,9 +2361,9 @@ def assemble_app(ctx):
         ctx.files["refs.md"] = refs_md(ctx, {"ad": ab, "ad_src": ab_s})
     A = acc_context(ctx, ab.get("themes"), get(ab, "constraints", "accessibility"), None)
     km = mod("kit_manifest")
-    cls = km.classes(A["widths"], A["first_bp"], A["overflow"])
-    rows = ["Кадры по классу экрана (`viewport` экрана → `by_viewport`):", "", "| экран | класс | ширины |",
-            "|---|---|---|"]
+    cls = km.classes(A["artboards"], A["first_bp"], None)
+    rows = [f"Артборды по классу экрана (`viewport` экрана → `by_viewport`; вылет на {A['overflow']} — на сборке, "
+            "пункт D5):", "", "| экран | класс | артборды |", "|---|---|---|"]
     for slug in ctx.units:
         vp = str(lay.screens[slug].fm.get("viewport") or "any").strip()
         rows.append(f"| `{slug}` | {vp} | {', '.join(map(str, cls.get(vp, cls['any'])))} |")
@@ -2922,6 +2927,9 @@ def selftest():
               get(brief, "project", "stage") == "wireframe" and get(brief, "product", "name") == "Отвес"
               and get(brief, "site", "cta", "target") and isinstance(get(brief, "site", "sections"), list)
               and get(brief, "decisions", "variants") == 1 and get(brief, "build", "viewports", "artboards"))
+        vp = get(brief, "build", "viewports", default={}) or {}
+        check("brief.yaml: артборды холста — все шесть ширин приёмки (build.viewports.artboards = widths)",
+              vp.get("artboards") == vp.get("widths") and len(vp.get("artboards") or []) == 6)
         check("brief.yaml вайрфрейма без облика: нет decisions.motion, direction.visual_thesis, references",
               get(brief, "decisions", "motion") is None and get(brief, "direction", "visual_thesis") is None
               and brief.get("references") is None)
@@ -2992,6 +3000,13 @@ def selftest():
               b_mock == {"B1", "B2", "B3", "J3"} and b_after and all(sev.get(i) == "S" for i in
                                                                     ("A1", "A3", "D1", "G1", "K2"))
               and "кластера примет" in next(r for r in acc if r.get("id") == "C4")["вопрос (да = норма)"])
+        where = {r.get("id"): r.get("где") for r in acc}
+        check("ACCEPTANCE.md: вылет на 320 (D5), ресайз (H5), зум (V3) и темы на всех ширинах (V1) — после сборки; "
+              "артборды всех ширин (D1) — на макете; строка ширин — «артборды — все ширины приёмки», вылет, ресайз и "
+              "зум — на сборке",
+              all(where.get(i) == "после сборки" for i in ("D5", "H5", "V3", "V1")) and where.get("D1") == "макет"
+              and "артборды — все ширины приёмки: 1440, 1280, 1024, 768, 390, 360; вылет на 320, ресайз и зум — на "
+                  "сборке" in m.files[ACCEPT])
         check("mockup: refs.md и подача в page.yaml", "refs.md" in m.files
               and "treatment" in (yaml_mod().safe_load(m.files["pages/home/page.yaml"])["sections"][2]))
         deck = docpaths.site(fx.slug, "promo", "copy", "home.yaml", repo=fx.root)
@@ -3125,6 +3140,10 @@ def selftest():
         check("ACCEPTANCE.md кабинета: B1, B2 — «глаза», A1, C5, D1 — S",
               all(arows[i]["способ"] == "глаза" and arows[i]["серьёзность"] == "B" for i in ("B1", "B2"))
               and all(arows[i]["серьёзность"] == "S" for i in ("A1", "C5", "D1")))
+        trows = [x for x in acc.splitlines() if x.startswith("| `")]
+        check("ACCEPTANCE.md кабинета: артборды по классу экрана — без 320; вылет на 320 — D5 после сборки",
+              "| экран | класс | артборды |" in acc and trows and not any("320" in x for x in trows)
+              and arows["D5"]["где"] == "после сборки")
         # партия экранов: разделы, строки текстов, демо-набор и гейт текстов — только экрана партии
         T = mod("tree")
         keys = C.batch_scope(lay, T.parse_layer(lay), ["plan-dashboard"])["keys"]

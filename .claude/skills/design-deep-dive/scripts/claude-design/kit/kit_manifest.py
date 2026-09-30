@@ -1,32 +1,28 @@
 #!/usr/bin/env python3
-"""kit_manifest — манифест кадров `kit.json` HTML-копий холста: копии × ширины приёмки × темы, класс экрана, границы ДС.
+"""kit_manifest — манифест кадров `kit.json` статичных копий артбордов холста: кадр на копию, ряды — по ширинам.
 
-Набор ширин задаёт заказчик в одном месте — `kb/common/acceptance-widths.yaml` (NU-01); утилита его не повторяет, а
-раскладывает по копиям поверхности (`references/claude-design.md § HTML-копии и kit`):
-  - статичная копия артборда (`<Имя>.html`, перевод `dc_to_html.py`) — кадр на ширине и высоте своей рамки; её тема —
-    та, что дали твики артборда (тёмная — при твике темы со значением dark);
-  - адаптивная копия страницы или экрана (`<page-id>.html`, пишет агент после «Keep») — кадры на ширинах класса экрана
-    в каждой теме ДС (`themes` файла ширин, тёмная — если она есть в токенах ДС), вылет на `overflow_only` и проверка
-    перестроения на границах брейкпоинтов ДС ± 1 px (NU-05; числа случайных ширин внутри диапазонов — по цене прогона,
-    их здесь нет);
-  - класс экрана (NU-02): у кабинета — поле `viewport` экрана (`screens/<surface>/screens/<slug>/index.md`), у страницы
-    сайта — `any`; `acceptance-widths.yaml#by_viewport`: `desktop` — ширины от первого брейкпоинта ДС, `mobile` — ниже
-    него и вылет, `any` — все ширины и вылет;
-  - брейкпоинты — токены `breakpoint.*` ДС продукта (`system.tokens.css` или DTCG); без них — эталон по маршруту:
-    кабинет — эталонные токены ui (`kb/ui/14-recipes/examples/tokens.css`), сайт — соглашение `breakpoints` каталога
-    блоков site (`kb/site/04-blocks/blocks.yaml`);
-  - высота окна кадра адаптивной копии — параметр прогона, а не норма: 900 у широких окон, 844 у окон уже первого
-    брейкпоинта (окна первого экрана site 1440×900 и 390×844).
+Оригинал макета — холст в claude.ai. Статичные копии артбордов (`<Имя>.html`, перевод `dc_to_html.py`) и манифест
+нужны скриптам проверок макета и собираются, когда заказчик попросил проверки (строка «Проверки макета: разрешены» в
+ARTIFACTS.md; `references/claude-design.md § HTML-копии и kit`). Все ширины приёмки — артборды холста
+(`kb/common/acceptance-widths.yaml#artboards`, набор задаёт заказчик в одном месте, NU-01), поэтому кадр — сама копия:
+  - кадр статичной копии — на ширине и высоте её рамки, в теме её твиков (тёмная — при твике темы со значением dark), с
+    подписью и этапом страницы холста из canvas.json;
+  - `widths` манифеста — ширины артбордов из файла ширин: по ним `kit/canvas.html` раскладывает кадры рядами;
+  - HTML без строки происхождения dc_to_html — не копия: кадра у него нет;
+  - вылет на `overflow_only`, ресайз и зум проверяются на собранной странице в репозитории кода: кадров для них нет.
 `kit/shot.py <canvas/html> <кадры> --manifest kit.json` снимает кадры по списку `artboards` манифеста (поля file, w, h,
-theme, title); поля `kind` (static · adaptive) и `check` (artboard · width · overflow · reflow) говорят, зачем кадр.
-Манифест — производная: руками не правится, в нём нет даты — пересборка без изменений даёт те же байты.
+theme, title). Манифест — производная: руками не правится, в нём нет даты — пересборка без изменений даёт те же байты.
+Из Python (их читает вход холста): `classes(widths, first_bp, overflow)` — ширины классов экрана по `by_viewport` (NU-02:
+`desktop` — от первого брейкпоинта ДС, `mobile` — ниже него и вылет, `any` — все и вылет; без overflow — без вылета),
+`reference_breakpoints(route)` — эталонные границы без токенов ДС: кабинет — эталонные токены ui
+(`kb/ui/14-recipes/examples/tokens.css`), сайт — соглашение `breakpoints` каталога блоков site
+(`kb/site/04-blocks/blocks.yaml`).
 
 Команды (файлы проекта — через lib/docpaths.py):
   kit_manifest.py build <slug> <surface> [--repo DIR] [--json]   пишет design/<surface>/canvas/html/kit.json
-  kit_manifest.py check <slug> <surface> [--repo DIR] [--json]   R-FRESH-005: kit.json равен сборке из файла ширин
-  kit_manifest.py make <папка копий> [--canvas ПАПКА] [--tokens ФАЙЛ …] [--route page|app] [--viewport КОПИЯ=КЛАСС …]
-                       [--out ФАЙЛ] [--json]                     вне проекта; без --out — в stdout
-  kit_manifest.py --selftest                                      на фикстуре canvas и примере базы, без сети
+  kit_manifest.py check <slug> <surface> [--repo DIR] [--json]   R-FRESH-005: kit.json равен сборке из копий и ширин
+  kit_manifest.py make <папка копий> [--canvas ПАПКА] [--out ФАЙЛ] [--json]   вне проекта; без --out — в stdout
+  kit_manifest.py --selftest                                      на фикстуре canvas (пример базы), без сети
 Коды выхода: 0 — готово, ошибок нет; 1 — есть находки error (check); 2 — ошибка вызова или окружения.
 """
 from __future__ import annotations
@@ -45,7 +41,6 @@ import docpaths  # noqa: E402
 
 kbpaths.use("claude-design")
 import dc_to_html as DC  # noqa: E402
-import literal_tokens as LT  # noqa: E402
 
 kbpaths.use("project")
 import findings as FND  # noqa: E402
@@ -54,9 +49,7 @@ RULE = "R-FRESH-005"
 WIDTHS = kbpaths.kb(None, "common", "acceptance-widths.yaml")
 REF_UI = kbpaths.kb("ui", "14-recipes", "examples", "tokens.css")
 REF_SITE = kbpaths.kb("site", "04-blocks", "blocks.yaml")
-VIEW_H_WIDE, VIEW_H_NARROW = 900, 844
 NAME = "kit.json"
-CLASSES = ("desktop", "mobile", "any")
 
 
 class ToolError(RuntimeError):
@@ -127,73 +120,30 @@ def frame_of(copy_text):
     return (int(m.group(1)), int(m.group(2))) if m else (None, None)
 
 
-def build_manifest(html_dir, canvas_dir=None, token_files=(), route="page", viewports=None, title="", rel=str):
-    """Манифест kit по папке копий. viewports — {имя адаптивной копии: desktop | mobile | any}."""
+def build_manifest(html_dir, canvas_dir=None, title=""):
+    """Манифест kit по папке копий: кадр на статичную копию артборда в порядке canvas.json (без него — по имени)."""
     html_dir = Path(html_dir)
     aw = acceptance()
-    ts = LT.load_tokens(token_files) if token_files else None
-    bps = [int(round(b)) for b in (ts.breakpoints if ts else [])]
-    bp_source = "токены ДС: " + ", ".join(rel(p) for p in token_files) if bps else ""
-    if not bps:
-        ref, bp_source = reference_breakpoints(route)
-        bps = [int(round(b)) for b in ref]
-    first_bp = min(bps) if bps else min(aw["artboards"] or [640])
-    ds_themes = ts.themes if ts else ["light"]
-    themes = [t for t in aw["themes"] if t in ds_themes] or ["light"]
-    cls = classes(aw["widths"], first_bp, aw["overflow_only"])
     canvas = DC.load_canvas(canvas_dir) if canvas_dir and Path(canvas_dir).is_dir() else None
-    statics, adaptive = [], []
+    statics = []
     for p in sorted(html_dir.glob("*.html")):
         text = p.read_text(encoding="utf-8", errors="replace")
         src = DC.copy_source(text)
-        if src:
-            board = (canvas or {}).get("boards", {}).get(src) if canvas else None
-            w, h = frame_of(text)
-            statics.append({"file": p.name, "artboard": src, "w": w, "h": h, "theme": theme_of_tweaks(text),
-                            "title": (board or {}).get("title") or src,
-                            "stage": DC.stage_of(board, canvas) if canvas else None,
-                            "order": canvas["order"].index(src) if canvas and src in canvas["order"] else 10 ** 6})
-        else:
-            vp = (viewports or {}).get(p.stem) or (viewports or {}).get(p.name) or "any"
-            if vp not in CLASSES:
-                raise ToolError(f"{p.name}: класс экрана {vp!r} не из {', '.join(CLASSES)}")
-            adaptive.append({"file": p.name, "viewport": vp})
+        if not src:
+            continue
+        board = (canvas or {}).get("boards", {}).get(src) if canvas else None
+        w, h = frame_of(text)
+        statics.append({"file": p.name, "artboard": src, "w": w, "h": h, "theme": theme_of_tweaks(text),
+                        "title": (board or {}).get("title") or src,
+                        "stage": DC.stage_of(board, canvas) if canvas else None,
+                        "order": canvas["order"].index(src) if canvas and src in canvas["order"] else 10 ** 6})
     statics.sort(key=lambda s: (s["order"], s["file"]))
-    frames = []
-    for s in statics:
-        frames.append({"file": s["file"], "w": s["w"], "h": s["h"], "theme": s["theme"], "title": s["title"],
-                       "kind": "static", "check": "artboard"})
-    for a in adaptive:
-        ws = cls[a["viewport"]]
-        for th in themes:
-            for w in ws:
-                over = aw["overflow_only"] is not None and w == aw["overflow_only"] and w not in aw["widths"]
-                if over and th != themes[0]:
-                    continue
-                frames.append({"file": a["file"], "w": w, "h": VIEW_H_WIDE if w >= first_bp else VIEW_H_NARROW,
-                               "theme": th, "title": f"{Path(a['file']).stem} · {w} · {th}", "kind": "adaptive",
-                               "check": "overflow" if over else "width"})
-        lo = first_bp if a["viewport"] == "desktop" else 0
-        hi = first_bp if a["viewport"] == "mobile" else 10 ** 6
-        seen = {f["w"] for f in frames if f["file"] == a["file"]}
-        for b in bps:
-            for w in (b - 1, b + 1):
-                if lo <= w < hi and w not in seen:
-                    seen.add(w)
-                    frames.append({"file": a["file"], "w": w, "h": VIEW_H_WIDE if w >= first_bp else VIEW_H_NARROW,
-                                   "theme": themes[0], "title": f"{Path(a['file']).stem} · граница {b} ± 1 · {w}",
-                                   "kind": "adaptive", "check": "reflow", "boundary": b})
     return {
         "title": (title or (canvas or {}).get("title") or html_dir.parent.name) + " — кадры kit",
         "source": {"acceptance_widths": "kb/common/acceptance-widths.yaml",
-                   "acceptance_widths_sha256_16": aw["sha256_16"], "breakpoints": bp_source,
-                   "themes": ("токены ДС" if ts else "нет токенов ДС — только светлая")},
-        "widths": aw["widths"], "artboard_widths": aw["artboards"], "overflow_only": aw["overflow_only"],
-        "themes": themes, "breakpoints": bps, "first_breakpoint": first_bp,
-        "by_viewport": cls,
-        "copies": {"static": [{k: s[k] for k in ("file", "artboard", "w", "h", "theme", "stage")} for s in statics],
-                   "adaptive": adaptive},
-        "artboards": frames,
+                   "acceptance_widths_sha256_16": aw["sha256_16"]},
+        "widths": aw["artboards"],
+        "artboards": [{k: s[k] for k in ("file", "artboard", "w", "h", "theme", "title", "stage")} for s in statics],
     }
 
 
@@ -203,41 +153,18 @@ def dumps(man):
 
 # ------------------------------------------------------------------ проект
 
-def screen_viewports(call):
-    """Класс экрана адаптивных копий кабинета: поле viewport записи экрана (slug = имя копии)."""
-    out = {}
-    if not (call.surf and call.surf.app):
-        return out
-    base = docpaths.screens(call.slug, call.surface, "screens", repo=call.repo)
-    for idx in sorted(base.glob("*/index.md")) if base.is_dir() else []:
-        text = idx.read_text(encoding="utf-8", errors="replace")
-        m = re.match(r"^---\n(.*?)\n---", text, re.S)
-        if not m:
-            continue
-        try:
-            fm = _yaml().safe_load(m.group(1)) or {}
-        except Exception:  # noqa: BLE001 — запись с битым frontmatter разбирает аудит экранов
-            continue
-        vp = str(fm.get("viewport") or "").strip()
-        if vp in CLASSES:
-            out[idx.parent.name] = vp
-    return out
-
-
 def project_manifest(call):
     html_dir = docpaths.design(call.slug, "canvas-html", surface=call.surface, repo=call.repo)
     canvas_dir = docpaths.design(call.slug, "canvas-project", surface=call.surface, repo=call.repo)
     if not html_dir.is_dir():
         raise ToolError(f"нет HTML-копий: {docpaths.rel(html_dir, call.repo)} (dc_to_html build)")
-    toks = []
-    css = docpaths.design(call.slug, "tokens-css", repo=call.repo)
-    dtcg = docpaths.design(call.slug, "tokens", repo=call.repo)
-    art = docpaths.design(call.slug, "ds-project", repo=call.repo) / "tokens.json"
-    toks = [css] if css.is_file() else [dtcg] if dtcg.is_file() else [art] if art.is_file() else []
-    route = "app" if call.surf and call.surf.app else "page"
-    man = build_manifest(html_dir, canvas_dir, toks, route, screen_viewports(call),
-                         rel=lambda p: docpaths.rel(p, call.repo))
-    return html_dir / NAME, man
+    return html_dir / NAME, build_manifest(html_dir, canvas_dir)
+
+
+def has_copies(html_dir):
+    """В папке есть статичные копии артбордов (строка происхождения dc_to_html)."""
+    return html_dir.is_dir() and any(DC.copy_source(p.read_text(encoding="utf-8", errors="replace"))
+                                     for p in html_dir.glob("*.html"))
 
 
 def cmd_build(call):
@@ -247,40 +174,34 @@ def cmd_build(call):
     if not same:
         path.write_text(text, encoding="utf-8")
     res = {"path": docpaths.rel(path, call.repo), "written": not same, "frames": len(man["artboards"]),
-           "themes": man["themes"], "breakpoints": man["breakpoints"]}
+           "widths": man["widths"]}
     print(json.dumps(res, ensure_ascii=False) if call.json else
-          f"{res['path']}: {'записан' if not same else 'без изменений'}, кадров {res['frames']}, темы "
-          f"{', '.join(res['themes'])}, границы {', '.join(str(b) for b in res['breakpoints'])}")
+          f"{res['path']}: {'записан' if not same else 'без изменений'}, кадров {res['frames']}, ширины артбордов "
+          f"{', '.join(str(w) for w in res['widths'])}")
     return 0
 
 
 def cmd_check(call):
     rep = FND.Report()
     html_dir = docpaths.design(call.slug, "canvas-html", surface=call.surface, repo=call.repo)
-    if html_dir.is_dir() and any(html_dir.glob("*.html")):
+    if has_copies(html_dir):
         path, man = project_manifest(call)
         rel = docpaths.rel(path, call.repo)
-        fix = f"kit_manifest build {call.slug} {call.surface} — манифест собирается из acceptance-widths.yaml"
+        fix = f"kit_manifest build {call.slug} {call.surface} — манифест собирается из копий и acceptance-widths.yaml"
         if not path.is_file():
             rep.add(RULE, "error", surface=call.surface, kind="kit", ref=NAME, path=rel,
-                    message="нет манифеста kit.json у HTML-копий холста", fix=fix)
+                    message="нет манифеста kit.json у статичных копий артбордов", fix=fix)
         elif path.read_text(encoding="utf-8") != dumps(man):
             rep.add(RULE, "error", surface=call.surface, kind="kit", ref=NAME, path=rel,
-                    message="kit.json не равен сборке из acceptance-widths.yaml и копий: правлен руками или копии, "
-                            "ширины либо токены ДС изменились", fix=fix)
+                    message="kit.json не равен сборке из копий и acceptance-widths.yaml: правлен руками или копии либо "
+                            "файл ширин изменились", fix=fix)
     FND.print_findings(rep.items, as_json=call.json,
                        title=None if call.json else f"kit_manifest check {call.slug} {call.surface}")
     return rep.exit_code()
 
 
 def cmd_make(a):
-    vps = {}
-    for it in a.viewport or []:
-        k, sep, v = it.partition("=")
-        if not sep:
-            raise ToolError(f"--viewport: ожидается копия=класс, получено {it!r}")
-        vps[k.strip()] = v.strip()
-    man = build_manifest(a.html, a.canvas, a.tokens or [], a.route, vps)
+    man = build_manifest(a.html, a.canvas)
     text = dumps(man)
     if a.out:
         Path(a.out).write_text(text, encoding="utf-8")
@@ -303,10 +224,14 @@ def selftest():
         print(f"{'OK  ' if good else 'FAIL'} {name}" + ("" if good else f": {got!r} (ожидалось {want!r})"))
 
     aw = acceptance()
-    check("ширины приёмки из файла", (aw["widths"], aw["artboards"], aw["overflow_only"]),
-          ([1440, 1280, 1024, 768, 390, 360], [1440, 390], 320))
-    check("классы экрана при первой границе 640", classes(aw["widths"], 640, 320),
-          {"desktop": [1440, 1280, 1024, 768], "mobile": [390, 360, 320], "any": [1440, 1280, 1024, 768, 390, 360, 320]})
+    six = [1440, 1280, 1024, 768, 390, 360]
+    check("ширины приёмки из файла: артборды — все ширины приёмки, вылет на 320",
+          (aw["widths"], aw["artboards"], aw["overflow_only"]), (six, six, 320))
+    check("классы экрана при первой границе 640 без вылета — артборды класса (вход холста)",
+          classes(aw["artboards"], 640, None),
+          {"desktop": [1440, 1280, 1024, 768], "mobile": [390, 360], "any": six})
+    check("классы экрана с вылетом на 320", classes(aw["widths"], 640, 320),
+          {"desktop": [1440, 1280, 1024, 768], "mobile": [390, 360, 320], "any": six + [320]})
     check("эталон кабинета — токены ui", reference_breakpoints("app")[0], [640.0, 1024.0, 1440.0])
     check("эталон сайта — соглашение блоков site 40rem и 60rem", reference_breakpoints("page")[0], [640.0, 960.0])
     check("тема статичной копии по твику dark=true", theme_of_tweaks("· твики: dark=true -->"), "dark")
@@ -315,30 +240,31 @@ def selftest():
     import fixture_project
     with fixture_project.built("canvas") as fx:
         argv = [fx.slug, "promo", "--repo", str(fx.root)]
+        html_dir = docpaths.design(fx.slug, "canvas-html", surface="promo", repo=fx.root)
+        r = subprocess.run([sys.executable, __file__, "check"] + argv + ["--json"], capture_output=True, text=True)
+        check("копий нет — check без находок: манифест нужен только копиям", (r.returncode, r.stdout), (0, ""))
         dc = str(Path(DC.__file__))
         subprocess.run([sys.executable, dc, "build"] + argv, capture_output=True, text=True, check=True)
-        html_dir = docpaths.design(fx.slug, "canvas-html", surface="promo", repo=fx.root)
-        (html_dir / "home.html").write_text("<!doctype html><title>адаптивная копия</title>", encoding="utf-8")
+        (html_dir / "home.html").write_text("<!doctype html><title>страница</title>", encoding="utf-8")
         r = subprocess.run([sys.executable, __file__, "build"] + argv + ["--json"], capture_output=True, text=True)
         check("фикстура canvas: build — код 0", r.returncode, 0)
         man = json.loads((html_dir / NAME).read_text(encoding="utf-8"))
-        st = [f for f in man["artboards"] if f["kind"] == "static"]
-        check("восемь статичных кадров на ширине рамки", [(f["file"], f["w"]) for f in st][:3],
-              [("Main.html", 1440), ("Landing-Phone.html", 390), ("Booking.html", 1440)])
-        check("статичная Booking — тёмная по твику", next(f["theme"] for f in st if f["file"] == "Booking.html"), "dark")
-        check("темы ДС артефакта: светлая и тёмная", man["themes"], ["light", "dark"])
-        check("границы без токенов breakpoint — соглашение site", man["breakpoints"], [640, 960])
-        ad = [f for f in man["artboards"] if f["kind"] == "adaptive"]
-        widths = sorted({f["w"] for f in ad if f["check"] == "width"}, reverse=True)
-        check("адаптивная копия: все ширины приёмки", widths, [1440, 1280, 1024, 768, 390, 360])
-        check("адаптивная копия: вылет на 320 — один кадр", [f["w"] for f in ad if f["check"] == "overflow"], [320])
-        check("адаптивная копия: темы на каждой ширине", len([f for f in ad if f["check"] == "width"]), 12)
-        check("перестроение: границы ± 1 px", sorted(f["w"] for f in ad if f["check"] == "reflow"), [639, 641, 959, 961])
-        check("высота окна: 900 широкое, 844 узкое", {f["w"]: f["h"] for f in ad if f["w"] in (1440, 390)},
-              {1440: 900, 390: 844})
+        fr = man["artboards"]
+        check("манифест — заголовок, источник, ширины артбордов и кадры; полей кадров вылета и классов нет",
+              sorted(man), ["artboards", "source", "title", "widths"])
+        check("ширины манифеста — артборды файла ширин (ряды canvas.html)", man["widths"], aw["artboards"])
+        check("кадры — восемь статичных копий в порядке canvas.json, на ширине рамки",
+              (len(fr), [(f["file"], f["w"]) for f in fr][:3]),
+              (8, [("Main.html", 1440), ("Landing-Phone.html", 390), ("Booking.html", 1440)]))
+        check("HTML без строки происхождения — не кадр", any(f["file"] == "home.html" for f in fr), False)
+        check("вылета на 320 нет: ширины кадров — ширины рамок копий", sorted({f["w"] for f in fr}), [390, 880, 1440])
+        check("статичная Booking — тёмная по твику", next(f["theme"] for f in fr if f["file"] == "Booking.html"), "dark")
+        check("этап и артборд кадра — из canvas.json и строки происхождения",
+              {f["file"]: (f["artboard"], f["stage"]) for f in fr if f["file"] in ("Dir-Paper.html", "Main.html")},
+              {"Dir-Paper.html": ("Dir-Paper.dc.html", "directions"), "Main.html": ("Main.dc.html", "mockup")})
         r = subprocess.run([sys.executable, __file__, "check"] + argv + ["--json"], capture_output=True, text=True)
         check("check после build — 0 находок", (r.returncode, r.stdout), (0, ""))
-        (html_dir / NAME).write_text((html_dir / NAME).read_text(encoding="utf-8").replace('"w": 1280', '"w": 1300'),
+        (html_dir / NAME).write_text((html_dir / NAME).read_text(encoding="utf-8").replace('"w": 390', '"w": 400'),
                                      encoding="utf-8")
         r = subprocess.run([sys.executable, __file__, "check"] + argv + ["--json"], capture_output=True, text=True)
         items = FND.parse_lines(r.stdout)
@@ -348,21 +274,11 @@ def selftest():
         b1 = (html_dir / NAME).read_bytes()
         subprocess.run([sys.executable, __file__, "build"] + argv, capture_output=True, text=True)
         check("пересборка — те же байты", (r1.returncode, (html_dir / NAME).read_bytes() == b1), (0, True))
-    with fixture_project.built("cabinet-ds") as fx:
-        css = docpaths.design(fx.slug, "tokens-css", repo=fx.root)
-        tmp = Path(fx.root) / "html"
-        tmp.mkdir()
-        (tmp / "requests-list.html").write_text("<!doctype html><title>экран</title>", encoding="utf-8")
-        man = build_manifest(tmp, None, [css], "app", {"requests-list": "desktop"})
-        ws = sorted({f["w"] for f in man["artboards"] if f["check"] == "width"}, reverse=True)
-        check("кабинет, класс desktop: ширины от первой границы ДС 640", ws, [1440, 1280, 1024, 768])
-        check("кабинет: границы из токенов breakpoint ДС", man["breakpoints"], [640, 1024, 1440])
-        check("кабинет, desktop: перестроение только выше первой границы",
-              sorted(f["w"] for f in man["artboards"] if f["check"] == "reflow"), [641, 1023, 1025, 1439, 1441])
-        man_m = build_manifest(tmp, None, [css], "app", {"requests-list": "mobile"})
-        check("кабинет, класс mobile: 390, 360 и вылет 320",
-              sorted({f["w"] for f in man_m["artboards"] if f["check"] in ("width", "overflow")}, reverse=True),
-              [390, 360, 320])
+        canvas_dir = docpaths.design(fx.slug, "canvas-project", surface="promo", repo=fx.root)
+        r = subprocess.run([sys.executable, __file__, "make", str(html_dir), "--canvas", str(canvas_dir)],
+                           capture_output=True, text=True)
+        check("make вне проекта — тот же манифест в stdout", (r.returncode, r.stdout),
+              (0, (html_dir / NAME).read_text(encoding="utf-8")))
     print("selftest:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 
@@ -377,10 +293,6 @@ def main(argv=None):
             ap.add_argument("cmd")
             ap.add_argument("html", help="папка HTML-копий")
             ap.add_argument("--canvas", help="папка исходников холста с canvas.json (подписи и порядок артбордов)")
-            ap.add_argument("--tokens", action="append", help="токены ДС: брейкпоинты и темы; повтором")
-            ap.add_argument("--route", choices=("page", "app"), default="page",
-                            help="эталонные границы без токенов: page — блоки site, app — токены ui")
-            ap.add_argument("--viewport", action="append", help="класс адаптивной копии: имя=desktop|mobile|any")
             ap.add_argument("--out")
             ap.add_argument("--json", action="store_true")
             return cmd_make(ap.parse_args(argv))
@@ -390,7 +302,7 @@ def main(argv=None):
         if call.selftest:
             return selftest()
         return {"build": cmd_build, "check": cmd_check}[call.command](call)
-    except (ToolError, DC.ToolError, LT.ToolError) as e:
+    except (ToolError, DC.ToolError) as e:
         print(f"kit_manifest: {e}", file=sys.stderr)
         return 2
 

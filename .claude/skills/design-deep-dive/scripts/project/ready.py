@@ -24,9 +24,13 @@
   sources                             файлы, которые читает код, со статусом и sha256 (путь — от папки проекта): сайт —
                                       бриф, карта, планы, copy deck, факты, голос, ДС (статус токенов, CSS и прозы —
                                       статус system.yaml), бренд, манифест ассетов продукта, арт-дирекция, спецификации
-                                      движения, манифест ассетов поверхности, адаптивные HTML-копии, REVIEW.md,
-                                      integration.md; кабинет — экраны, блоки, каркасы, map.md, texts.md, FSD-карта, ДС,
-                                      бриф на вид, продуктовый паспорт, манифесты ассетов, адаптивные копии, REVIEW.md
+                                      движения, манифест ассетов поверхности, исходники холста принятых единиц,
+                                      REVIEW.md, integration.md; кабинет — экраны, блоки, каркасы, map.md, texts.md,
+                                      FSD-карта, ДС, бриф на вид, продуктовый паспорт, манифесты ассетов, исходники
+                                      холста принятых экранов, REVIEW.md. Исходники холста принятой единицы — её
+                                      артборды из строки «Приёмка» REVIEW.md с вердиктом accepted или
+                                      accepted_with_notes (`canvas/project/<Имя>.dc.html`, все ширины приёмки) и их
+                                      статичные копии `canvas/html/<Имя>.html`, если собраны (проверки по просьбе)
   units                               сайт — страницы планов site/<surface>/plans/ (порядок build_order карты или
                                       pages.list брифа); кабинет — экраны screens/<surface>/screens/
     composition                       сайт — статус плана; кабинет — статус экрана
@@ -594,14 +598,27 @@ class Build:
             md = self.dsurf("motion")
             p += sorted(md.glob("*.motion-spec.yaml")) if md.is_dir() else []
         p.append(self.dsurf("assets") / "manifest.yaml")
-        html = self.dsurf("canvas-html")
-        if html.is_dir():
-            dc = mod("dc_to_html")
-            for f in sorted(html.glob("*.html")):
-                if dc.copy_source(f.read_text(encoding="utf-8", errors="replace")) is None:
-                    p.append(f)
+        p += self.canvas_sources()
         p.append(self.dsurf("review") / "REVIEW.md")
         return [x for x in dict.fromkeys(p) if x is not None and Path(x).is_file()]
+
+    def canvas_sources(self):
+        """Исходники холста принятых единиц: артборды строки «Приёмка» с вердиктом accepted или accepted_with_notes
+        (`canvas/project/<Имя>.dc.html`) и их статичные копии, если собраны; имя артборда — файл без пути."""
+        proj, html = self.dsurf("canvas-project"), self.dsurf("canvas-html")
+        dc = mod("dc_to_html")
+        out = []
+        for row in self.review().values():
+            if row["verdict"] not in ACCEPTED:
+                continue
+            for a in row["artboards"]:
+                if Path(a).name != a or not a.endswith(".dc.html"):
+                    continue
+                out.append(proj / a)
+                c = html / dc.copy_name(a)
+                if c.is_file() and dc.copy_source(c.read_text(encoding="utf-8", errors="replace")) == a:
+                    out.append(c)
+        return out
 
     def run(self):
         page = self.surf.page
@@ -993,6 +1010,20 @@ def _selftest():
               "отпечаток — sha256, у единиц разный",
               units["spasibo"]["mockup"] == "accepted_with_notes" and units["home"]["mockup"] == "accepted"
               and str(fp_sp).startswith("sha256:") and fp_sp != fp_home)
+        html = docpaths.design(slug, "canvas-html", surface="promo", repo=root)
+        html.mkdir(parents=True, exist_ok=True)
+        (html / "Spasibo.html").write_text("<!doctype html><head><!-- dc_to_html: статичная копия артборда "
+                                           "Spasibo.dc.html; рамка 1440×900 --></head>\n", encoding="utf-8")
+        (html / "landing.html").write_text("<!doctype html><title>страница</title>\n", encoding="utf-8")
+        (proj / "Draft.dc.html").write_text("<section id='hero'>Черновик</section>\n", encoding="utf-8")
+        srcs = {s["path"] for s in build(slug, surf, root, today)["sources"]}
+        check("источники пакета — исходники холста принятых единиц (артборды «Приёмки») и статичная копия, если "
+              "собрана; HTML не копия и артборд без приёмки — не источники",
+              {"design/promo/canvas/project/Spasibo.dc.html", "design/promo/canvas/project/Home.dc.html",
+               "design/promo/canvas/html/Spasibo.html"} <= srcs
+              and not {"design/promo/canvas/html/landing.html", "design/promo/canvas/project/Draft.dc.html"} & srcs)
+        shutil.rmtree(html)
+        (proj / "Draft.dc.html").unlink()
         art = docpaths.design(slug, "artifacts", repo=root)
         at = art.read_text(encoding="utf-8")
         art.write_text(at.replace("| 2026-09-29 | аналитик |", "| 2026-10-02 | аналитик |"), encoding="utf-8")

@@ -1,5 +1,4 @@
 path	kind	smoke	xfail
-scripts/claude-design/copies_compare.py	utility	help; run: --selftest	
 scripts/claude-design/dc_texts.py	utility	help; run: --selftest	
 scripts/claude-design/dc_to_html.py	utility	help; run: --selftest	
 scripts/claude-design/kit/canvas.html	kit	data	

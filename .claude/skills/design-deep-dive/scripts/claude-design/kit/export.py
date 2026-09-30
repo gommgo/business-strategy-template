@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """kit/export.py — экспорт холста без интерфейса Claude Design: PDF по артбордам, PNG 2×, standalone.html, zip.
 
+Холст — рамки манифеста: `kit.json` статичных копий артбордов (`kit_manifest.py build`, папка `canvas/html/`) или
+`canvas.json` kit; рамка — копия на ширине своей рамки, standalone раскладывает их рядами по ширинам (`canvas.html`).
 Использует сервер, блокировку и проверку памяти из shot.py (тот же каталог).
 
 Использование:

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""literal_tokens — «литерал ∈ значений токенов ДС»: облик артбордов холста и адаптивных копий против токенов продукта.
+"""literal_tokens — «литерал ∈ значений токенов ДС»: облик артбордов холста против токенов продукта.
 
 На артбордах типа Design значения облика — литералы, и каждый литерал берётся из токенов ДС (так требует тип, а свой
-цвет или отступ на артборде — облик вне системы); на адаптивной копии — только переменные `system.tokens.css`
-(`references/claude-design.md § Приёмка`, пункт C2; правило R-VIS-004 `design-audit`). Утилита читает исходники
-холста без браузера:
+цвет или отступ на артборде — облик вне системы; `references/claude-design.md § Приёмка`, пункт C2; правило R-VIS-004
+`design-audit`). Все ширины приёмки — артборды холста, поэтому сверка артбордов покрывает макет целиком; утилита
+читает исходники холста без браузера:
   - литералы — инлайн-стили и `<style>` артборда, цветовые атрибуты SVG (`fill`, `stroke`, `stop-color`, `color`),
     умолчания цветовых твиков `data-props`; дырки `{{…}}` получают значения `renderVals()` на умолчаниях твиков (как в
     статичной копии, `dc_to_html.py`). Образцы твика (`options`) — варианты на выбор заказчика, а не облик артборда:
@@ -29,8 +29,7 @@
 Команды (файлы проекта — через lib/docpaths.py):
   literal_tokens.py check <slug> <surface> [--repo DIR] [--accepted] [--all-stages] [--json]
       исходники design/<surface>/canvas/project/ против токенов продукта (system.tokens.css, иначе system.tokens.json,
-      иначе tokens.json артефакта; плюс копия ДС, установленная в холст, `canvas/project/ds/*/tokens.json`); адаптивные
-      копии design/<surface>/canvas/html/<page-id>.html — значения облика только через var(--…) из system.tokens.css.
+      иначе tokens.json артефакта; плюс копия ДС, установленная в холст, `canvas/project/ds/*/tokens.json`).
       Тяжесть — warning и у принятого макета: литерал вне токенов — пункт C2 приёмки (S), его исправляют или
       принимают с записью; --accepted (макет принят) ведёт совет к записи в REVIEW.md. Ничего не пишет.
   literal_tokens.py scan <файл.dc.html | папка project> … --tokens ФАЙЛ [--tokens ФАЙЛ …] [--all-stages] [--json]
@@ -215,7 +214,7 @@ class TokenSet:
     families: dict = field(default_factory=dict)       # первая гарнитура → [имена]
     shadows: dict = field(default_factory=dict)
     durations: dict = field(default_factory=dict)
-    names: set = field(default_factory=set)            # имена CSS-переменных (адаптивная копия)
+    names: set = field(default_factory=set)            # имена CSS-переменных токенов
     themes: list = field(default_factory=list)
     breakpoints: list = field(default_factory=list)
     sources: list = field(default_factory=list)
@@ -725,44 +724,6 @@ def scan_boards(files, ts, canvas=None, all_stages=False):
     return out
 
 
-def adaptive_findings(path, ts, rep, surface, repo, severity):
-    """Адаптивная копия: значения облика — только var(--…) из system.tokens.css."""
-    text = Path(path).read_text(encoding="utf-8", errors="replace")
-    root, _notes = DC.parse(text)
-    offs = _offsets(root)
-    bad, unknown = {}, {}
-    for node in DC.walk(root):
-        if not isinstance(node, DC.El) or node.tag == "#root":
-            continue
-        decls = []
-        if node.attrs.get("style"):
-            decls += [(k, v, offs.get(id(node), 0)) for k, v in declarations(node.attrs["style"])]
-        if node.tag == "style":
-            css = "".join(c.raw for c in node.children if isinstance(c, DC.Tx))
-            base = offs.get(id(node), 0) + len(node.raw)
-            decls += [(k, v, base + o) for k, v, o in css_rules(css) if not k.startswith("--")]
-        for prop, value, off in decls:
-            for m in re.finditer(r"var\(\s*(--[A-Za-z0-9_-]+)", value):
-                if m.group(1) not in ts.names:
-                    unknown.setdefault(m.group(1), []).append(line_of(text, off))
-            plain = re.sub(r"var\([^()]*(?:\([^()]*\)[^()]*)*\)", " ", value)
-            for lit in literals_of(prop, plain, line_of(text, off), "css"):
-                if ts.has(lit.family):
-                    bad.setdefault((lit.family, lit.raw), []).append(lit.line)
-    rel = docpaths.rel(path, repo)
-    name = Path(path).name
-    for (fam, raw), lines in sorted(bad.items(), key=lambda x: (FAMILIES.index(x[0][0]), x[1][0])):
-        rep.add(RULE, severity, surface=surface, kind="copy", ref=f"{name}#{fam}:{raw}", path=rel,
-                message=f"адаптивная копия: {FAMILY_RU[fam]} `{raw}` литералом, а не var(--…) system.tokens.css "
-                        f"(мест {len(lines)}, строки {', '.join(str(x) for x in sorted(set(lines))[:8])})",
-                fix="значение облика адаптивной копии — переменная system.tokens.css")
-    for var, lines in sorted(unknown.items()):
-        rep.add(RULE, severity, surface=surface, kind="copy", ref=f"{name}#{var}", path=rel,
-                message=f"адаптивная копия: переменной {var} нет в system.tokens.css "
-                        f"(строки {', '.join(str(x) for x in sorted(set(lines))[:8])})",
-                fix="имя переменной — путь токена DTCG через дефис (ds_build show)")
-
-
 def project_tokens(call):
     """Файлы токенов продукта по старшинству и копия ДС, установленная в холст."""
     css = docpaths.design(call.slug, "tokens-css", repo=call.repo)
@@ -779,7 +740,6 @@ def cmd_check(call):
     sev = "warning"
     fix = FIX_ACCEPTED if call.args.accepted else FIX
     src = docpaths.design(call.slug, "canvas-project", surface=call.surface, repo=call.repo)
-    html_dir = docpaths.design(call.slug, "canvas-html", surface=call.surface, repo=call.repo)
     tok_files = project_tokens(call)
     if not src.is_dir():
         FND.print_findings([], as_json=call.json)
@@ -804,10 +764,6 @@ def cmd_check(call):
             rep.add(RULE, "hint", surface=call.surface, kind="artboard", ref=f"{ab.name}#{fam}", path=rel,
                     message=f"{FAMILY_RU[fam]}: в ДС нет токенов этого семейства — литералы не сверялись",
                     fix="пробел ДС — этап design-system")
-    if html_dir.is_dir() and any(n.startswith("--") for n in ts.names):
-        for p in sorted(html_dir.glob("*.html")):
-            if not DC.copy_source(p.read_text(encoding="utf-8", errors="replace")):
-                adaptive_findings(p, ts, rep, call.surface, call.repo, sev)
     FND.print_findings(rep.items, as_json=call.json,
                        title=None if call.json else f"literal_tokens check {call.slug} {call.surface}")
     return rep.exit_code()
@@ -959,6 +915,13 @@ def selftest():
         check("--accepted: литералы — warning, код 0; совет — пункт C2 с записью в REVIEW.md",
               (r2.returncode, {f.severity for f in acc} <= {"warning", "hint"},
                any("C2" in f.fix and "REVIEW.md" in f.fix for f in acc)), (0, True, True))
+        html_dir = docpaths.design(fx.slug, "canvas-html", surface="promo", repo=fx.root)
+        html_dir.mkdir(parents=True, exist_ok=True)
+        (html_dir / "home.html").write_text('<!doctype html><p style="color: #123456; padding: var(--nope)">т</p>\n',
+                                            encoding="utf-8")
+        r3 = subprocess.run([sys.executable, __file__, "check"] + argv + ["--json"], capture_output=True, text=True)
+        check("HTML в canvas/html не сверяется: находки — только по артбордам холста",
+              sorted(f.ref for f in FND.parse_lines(r3.stdout)), sorted(f.ref for f in items))
     print("selftest:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 

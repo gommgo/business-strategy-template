@@ -5,10 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Холст макета</title>
 <!--
-  kit/canvas.html — холст: несколько артбордов рядом (агент D, claude-design-research, 2026-09-25, v1).
-  Открывать по http (python3 kit/shot.py serve <папка проекта>), иначе браузер не даст прочитать canvas.json и вложить метки.
+  kit/canvas.html — холст: рамки манифеста рядами по ширинам. Ряд — одна ширина: сначала ширины из поля widths
+  манифеста (у kit.json — ширины артбордов acceptance-widths.yaml) в их порядке, затем остальные от широкой к узкой;
+  в ряду — рамки в порядке манифеста.
+  Открывать по http (python3 kit/shot.py serve <папка проекта>), иначе браузер не даст прочитать манифест и вложить метки.
   Параметры адреса:
-    m=/canvas.json        манифест (по умолчанию canvas.json рядом со страницей); пути артбордов — относительно манифеста
+    m=/canvas.json        манифест: kit.json статичных копий артбордов или canvas.json kit (по умолчанию canvas.json рядом
+                          со страницей); пути артбордов — относительно манифеста
     marks=1               нумерованные метки #N (номера едины для всех рамок одного файла: блоки #1–#99, #101–#199, …)
     pin=/_virtual/pin.json закреплённые номера {файл: {селектор: номер}} (их даёт shot.py, чтобы холст и кадры совпадали)
     theme=light|dark      тема для всех рамок (иначе — поле theme рамки)
@@ -29,6 +32,8 @@
   .notes { display: flex; flex-wrap: wrap; gap: 12px; padding: 0 40px 8px; }
   .note { max-width: 420px; background: #fff7c2; border: 1px solid #e3d98a; padding: 8px 10px; font-size: 13px; white-space: pre-line; border-radius: 2px; }
   .board { padding: 24px 40px 80px; display: flex; flex-direction: column; gap: 120px; width: max-content; }
+  .row-group { display: flex; flex-direction: column; gap: 16px; }
+  .row-label { font-size: 13px; color: var(--kit-muted); }
   .row { display: flex; gap: 80px; align-items: flex-start; }
   .frame { display: flex; flex-direction: column; gap: 8px; }
   .label { display: flex; gap: 10px; align-items: baseline; font-size: 13px; color: var(--kit-muted); white-space: nowrap; }
@@ -152,8 +157,21 @@
     var files = [];
     var frames = (m.artboards || []).filter(function (ab) { return !only || ab.file === only; });
     frames.forEach(function (ab) { if (files.indexOf(ab.file) < 0) { files.push(ab.file); } });
+    // ряд — ширина: ширины манифеста в их порядке, затем остальные от широкой к узкой
+    var widths = (m.widths || []).map(Number).filter(function (w) {
+      return frames.some(function (ab) { return Number(ab.w) === w; });
+    });
+    frames.map(function (ab) { return Number(ab.w); }).sort(function (a, b) { return b - a; }).forEach(function (w) {
+      if (widths.indexOf(w) < 0) { widths.push(w); }
+    });
     var rows = {};
-    files.forEach(function (f) { rows[f] = el('div', { 'class': 'row', 'data-file': f }); board.appendChild(rows[f]); });
+    widths.forEach(function (w) {
+      var group = el('section', { 'class': 'row-group', 'data-w': String(w) });
+      group.appendChild(el('div', { 'class': 'row-label' }, w + ' px'));
+      rows[w] = el('div', { 'class': 'row', 'data-w': String(w) });
+      group.appendChild(rows[w]);
+      board.appendChild(group);
+    });
     var all = [];
     frames.forEach(function (ab, i) {
       var theme = forcedTheme || ab.theme || 'light';
@@ -168,7 +186,7 @@
       if (embedded) { ifr.srcdoc = embedded.files[ab.file] || '<p>нет файла ' + ab.file + '</p>'; }
       else { ifr.src = new URL(ab.file, res.base).href; }
       box.appendChild(ifr);
-      rows[ab.file].appendChild(box);
+      rows[Number(ab.w)].appendChild(box);
       all.push({ ab: ab, ifr: ifr, theme: theme });
     });
 
