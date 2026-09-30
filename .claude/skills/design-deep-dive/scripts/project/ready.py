@@ -796,7 +796,7 @@ def check_surface(slug, surf, repo=None, today=None):
     rep = F.Report()
     kw = dict(surface=surf.slug, kind=KIND, ref=surf.slug, path=docpaths.rel(p, r),
               fix=f"ready build {slug} {surf.slug} — на этапе package, после аудита: design_audit check на переходе, "
-                  "скилл /design-audit — перед итоговым коммитом")
+                  "скилл /design-audit — перед коммитом")
     try:
         old = yaml_mod().safe_load(p.read_text(encoding="utf-8"))
     except Exception as e:                                  # noqa: BLE001
@@ -968,9 +968,9 @@ def _selftest():
               len(items) == 1 and items[0].rule == RULE and items[0].severity == "error"
               and items[0].path == docpaths.rel(path, root) and "site/promo/plans/spasibo.yaml" in items[0].message)
         check("совет R-FRESH-006: пересборка на этапе package после аудита — design_audit check на переходе, скилл "
-              "/design-audit — перед итоговым коммитом",
+              "/design-audit — перед коммитом",
               items and "на этапе package" in items[0].fix and "design_audit check на переходе" in items[0].fix
-              and "/design-audit — перед итоговым коммитом" in items[0].fix and "без error" not in items[0].fix)
+              and "/design-audit — перед коммитом" in items[0].fix and "без error" not in items[0].fix)
         plan.write_text(ptext, encoding="utf-8")
         bad = dict(data, status="done", units=[dict(data["units"][0], mockup="ok", extra=1)])
         bad.pop("blockers")
