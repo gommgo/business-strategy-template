@@ -1,0 +1,54 @@
+# Ф10: файлы kb/, где проза называет утилиты и подкоманды, снятые в ДФ9 (снимок 30.09; имя — сколько раз)
+# Собрано: grep -rcE по .claude/skills/design-deep-dive/kb; вход уборки kb в Ф10 (DF9-PLAN.md §9).
+kb/ai-media/02-providers-platforms/05-open-weights-landscape.md	layers.py×1 
+kb/ai-media/14-recipes/README.md	validate_recipes×1 
+kb/ai-media/99-raw/experiments/M/10-recipes-yaml/README.md	validate_recipes×1 
+kb/ai-media/99-raw/reports/wave4-X-audit.md	validate_recipes×4 
+kb/ai-media/CONTRADICTIONS.md	validate_recipes×1 
+kb/ai-media/README.md	vm_sheet×2 
+kb/blender/11-evaluation-qa/04-regression-set.md	blender/regression×1 
+kb/blender/11-evaluation-qa/06-wow-pairwise-3d.md	blender/vote×4 build_pairs×12 vote_server×3 
+kb/blender/11-evaluation-qa/regression/README.md	blender/regression×1 
+kb/blender/15-showcase/sdano/README.md	build_pairs×1 
+kb/blender/15-showcase/_shared/digests/02-quality-playbook.md	blender/regression×1 
+kb/blender/15-showcase/VERDICT.md	blender/vote×5 build_pairs×3 
+kb/blender/15-showcase/vote/pairs.json	build_pairs×1 
+kb/blender/99-raw/experiments/SD/HANDOFF-3.md	build_pairs×2 
+kb/blender/99-raw/experiments/VD/HANDOFF-3.md	build_pairs×1 
+kb/blender/99-raw/notes/trial/RC-checks/rc_vote_tally.py	build_pairs×1 vote_server×1 
+kb/blender/99-raw/notes/trial/RC-checks/rc_vote_tally_test.py	build_pairs×1 
+kb/blender/PLAN.md	blender/regression×1 build_pairs×1 
+kb/blender/README.md	blender/vote×6 build_pairs×3 vote_server×2 
+kb/claude-design/06-design-process/README.md	shot_v3×1 
+kb/common/canon.tsv	verify-page×1 
+kb/creative/00-glossary/glossary.md	idle_probe×1 
+kb/creative/10-recipes/00-how-to-use.md	idle_probe×1 
+kb/creative/10-recipes/03-product-launch-l2.md	idle_probe×4 
+kb/creative/10-recipes/examples/README.md	idle_probe×1 
+kb/creative/10-recipes/README.md	idle_probe×1 
+kb/creative/99-raw/handoff-to-neighbours.md	orch_check×1 
+kb/creative/99-raw/reports/wave4-X-audit.md	orch_check×12 
+kb/creative/PLAN.md	idle_probe×1 orch_check×4 
+kb/creative/README.md	idle_probe×3 orch_check×4 
+kb/site/99-raw/reports/wave4-X-audit.md	orch_check×1 
+kb/site/PLAN.md	orch_check×5 
+kb/site/README.md	orch_check×3 
+kb/text/03-corpus-measured/01-corpus-method.md	copy_extract×2 
+kb/text/03-corpus-measured/README.md	copy_extract×2 
+kb/text/03-corpus-measured/thresholds.yaml	copy_extract×2 
+kb/text/09-ai-generation-evaluation/02-generation-pipeline.md	check_intake×2 digest-meaning×1 edit-input×1 hierarchy-input×1 make_skeleton×1 section-input×1 
+kb/text/09-ai-generation-evaluation/copy-checklist.yaml	copy_extract×1 
+kb/text/09-ai-generation-evaluation/live-test-plan.md	check_intake×3 make_skeleton×1 
+kb/text/09-ai-generation-evaluation/prompts/p1-brief-intake.md	check_intake×3 
+kb/text/09-ai-generation-evaluation/prompts/p2-meaning.md	digest-meaning×1 
+kb/text/09-ai-generation-evaluation/prompts/p3-hierarchy.md	hierarchy-input×1 make_skeleton×2 
+kb/text/09-ai-generation-evaluation/prompts/p4-section-copy.md	section-input×2 
+kb/text/09-ai-generation-evaluation/prompts/p6-edit-findings.md	edit-input×1 
+kb/text/09-ai-generation-evaluation/README.md	check_intake×3 make_skeleton×1 orch_check×1 
+kb/text/10-templates-recipes/01-copy-deck-workflow.md	apply-edits×1 copy_extract×2 make_skeleton×1 verify-page×4 
+kb/text/10-templates-recipes/README.md	verify-page×1 
+kb/text/99-raw/experiments/I/04-chain-manual/README.md	apply-edits×2 check_intake×5 digest-meaning×2 edit-input×2 hierarchy-input×3 make_skeleton×3 section-input×2 
+kb/text/99-raw/handoff-to-neighbours.md	make_skeleton×1 
+kb/text/99-raw/reports/wave4-X-audit.md	check_intake×1 copy_extract×2 orch_check×2 verify-page×2 
+kb/text/PLAN.md	copy_extract×4 orch_check×6 verify-page×1 
+kb/text/README.md	apply-edits×1 check_intake×3 copy_extract×1 edit-input×1 orch_check×3 section-input×1 verify-page×4 
