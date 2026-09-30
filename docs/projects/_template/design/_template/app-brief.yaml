@@ -100,7 +100,7 @@ style_tiles:
     depth: <модель глубины словами>
     icons: {set: <набор>, size: <размер>, stroke: <толщина>}
     motion: {}                        # длительности
-    contrast_report: {}               # посчитанные пары с пометкой «прошло / не прошло» (build_reference_tokens.py)
+    contrast_report: {}               # пары палитры карточки с пометкой «прошло / не прошло» (lib/color.py contrast)
     risk: <чем рискуем>
     refs: []                          # референсы карточки — форма записи, как у moodboard
 
