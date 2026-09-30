@@ -7,7 +7,7 @@
 | Файл | О чём |
 |---|---|
 | `01-claude-design-in-claude-code-session.md` | карта 35 функций Claude Design → как в чате Claude Code → что теряем → статус; чат-протокол правок по меткам `#N` (грамматика, пакет ≤ 7, эхо, проверка «изменилось только то, что просили»); где смотреть результат; как это делает Anthropic (canvas-скилл `design`, тип «Design» — своими словами); официальный путь `/design`; прототип; спецификация скилла `studio`; что теряем и выигрываем; тесты T-D1…T-D12 |
-| `../../../scripts/claude-design/kit/canvas.html` | холст: артборды рядами (1440 и 390), подписи, темы, `?marks=1`, `?set=`, `?theme=`, `?zoom=` |
+| `../../../scripts/claude-design/kit/canvas.html` | холст: рамки манифеста рядами по ширинам, подписи, темы, `?marks=1`, `?set=`, `?theme=`, `?zoom=` |
 | `../../../scripts/claude-design/kit/marks.js` | нумерация значимых элементов бейджами `#N`, карта номеров, отпечатки для сверки правок |
 | `../../../scripts/claude-design/kit/shot.py` | кадры артбордов с метками и без, весь холст, `marks.json` / `marks.md`, проверки (из `shot.py` v3 kimi 07), `--prev`, `--set`, `serve` |
 | `../../../scripts/claude-design/kit/export.py` | PDF по артбордам + общий, PNG 2×, `standalone.html` (весь холст одним файлом), zip |
