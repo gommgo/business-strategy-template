@@ -34,13 +34,15 @@ counts, notes, reading, visual. Код 2 в called: у text/copydeck.py и text/
 (error → error, warning → warning, сведения не переносятся), кроме правил с тяжестью по закрытию файла (R-REF-006 из
 ad_check: warning, error у закрытой арт-дирекции) и по просьбе заказчика (R-FRESH-005 статичных копий и kit.json:
 error — при строке «Проверки макета: разрешены» в ARTIFACTS.md, без неё — warning); шкала ворот и приёмки B/S/D →
-error/warning/hint. «Страница передана в дизайн» (R-COV-002) — она в партии действующего входа холста (поле units
-INPUT.md или папка pages/<id>/) или у неё строка «Приёмка» в REVIEW.md. Одобрение единицы (R-MAT-004, R-FRESH-005
-адаптивной копии) сверяется с отпечатком `ready`: артборды и источники единицы. Ошибки
+error/warning/hint. R-COV-002 — error под гейтом 2: у страницы строка «Приёмка» в REVIEW.md или она в партии
+действующего входа холста (поле units INPUT.md или папка pages/<id>/) этапа mockup или motion; в партии входа
+вайрфрейма или направлений — warning (тексты — до макета); закрытый copy deck без текста в слоте — error. Одобрение
+единицы (R-MAT-004, R-FRESH-005 адаптивной копии) сверяется с отпечатком `ready`: артборды и источники единицы. Ошибки
 публикуемости фактов из claims_check.py lint-facts (разрешение, срок, проверка) в R-STRUCT-003 не идут: их сверяет
 R-COV-003 там, где факт стоит (план, copy deck). Совет находки называет этап: у site_validate — по коду (SB-* — brief,
 SM-* — site-map, PL-* — page-plan), факты и голос — meaning, copy deck — copy. Правило, которое утилита не проверила
-(свежесть производных при битых токенах), — заметка сводки, а не находка.
+(свежесть производных при битых токенах; артефакт ДС без токенов DTCG system.tokens.json и system.tokens.css — ds_build
+не зовётся), — заметка сводки, а не находка.
 Окружение не установлено (нет PyYAML или jsonschema в Python окружения) — валидаторы не запускаются, в сводке —
 «утилиты не запускались», их правила уходят в чтение.
 
@@ -82,6 +84,7 @@ CLOSED = {"site-brief": ("approved",), "meaning": ("approved",), "hierarchy": ("
           "art-direction": ("approved",), "visual-dna": ("approved",), "asset-plan": ("approved",),
           "motion-spec": ("approved",)}
 ACCEPTED = ("accepted", "accepted_with_notes")
+TEXT_GATE_STAGES = ("mockup", "motion")                   # этапы входа холста под гейтом 2: тексты — утверждённые
 SITE_FILES = ("site-brief.yaml", "meaning.yaml", "site-map.yaml")
 SITE_DIRS = ("hierarchy", "plans", "copy")
 DESIGN_SURF = ("art-direction.json", "visual-dna.json", "assets", "motion", "canvas", "input", "review", "ready.yaml")
@@ -399,12 +402,15 @@ class Audit:
         return [str(u) for u in listify(get(fm, "units"))]
 
     def page_has_input(self, s, pid):
-        """Страница передана в дизайн — причина: она в партии действующего входа холста (units INPUT.md или папка
-        pages/<id>/) или у неё строка «Приёмка» в REVIEW.md; не передана — None."""
-        if (self.dsurf(s, "input") / "pages" / pid).is_dir() or pid in self.input_units(s):
-            return "в партии входа холста"
+        """Страница передана в дизайн — (причина, гейт 2) или None. Гейт 2 (чистовой макет — только на утверждённых
+        текстах) — у страницы строка «Приёмка» в REVIEW.md или она в партии действующего входа холста (units INPUT.md
+        или папка pages/<id>/) этапа mockup или motion; партия входа вайрфрейма или направлений — передача до гейта."""
         if pid in self.review(s)[1]:
-            return "строка «Приёмка» в REVIEW.md"
+            return "строка «Приёмка» в REVIEW.md", True
+        if (self.dsurf(s, "input") / "pages" / pid).is_dir() or pid in self.input_units(s):
+            st = self.input_stage(s)
+            return (f"в партии входа холста этапа {st}" if st else "в партии входа холста без этапа в INPUT.md"), \
+                st in TEXT_GATE_STAGES
         return None
 
     def review(self, s):
@@ -845,6 +851,10 @@ class Audit:
             self.schema_file(voc, kbpaths.kb("text", "02-strategy-messaging", "voc.schema.yaml"), "voc")
         if self.dprod("tokens").is_file() or self.dprod("tokens-css").is_file():
             self.ds_build()
+        elif any((self.dprod("ds-project") / f).is_file() for f in ("tokens.json", "README.md")):
+            # артефакт ДС без источника DTCG: ds_build не зовётся — заметка сводки, чтобы счёт не читался как полный
+            self.note_once("производные ДС не проверены: нет источника DTCG system.tokens.json — ds_build check "
+                           "назовёт R-STRUCT-006")
         self.forms()
         for vd in [self.dprod("visual-dna")] + [self.dsurf(s.slug, "visual-dna") for s in self.scope if s.design]:
             if vd.is_file():
@@ -1459,9 +1469,14 @@ class Audit:
                 continue
             handed = self.page_has_input(s, pid)
             closed = bool(page and page.get("status") == "approved")
-            sev = "error" if handed or closed else "warning"
-            why = f"страница передана в дизайн: {handed}" if handed else \
-                ("copy deck закрыт" if closed else "до передачи в дизайн")
+            if handed and handed[1]:
+                sev, why = "error", f"страница передана в дизайн: {handed[0]}"
+            elif closed:
+                sev, why = "error", "copy deck закрыт"
+            elif handed:
+                sev, why = "warning", f"{handed[0]}: тексты — до макета (гейт 2)"
+            else:
+                sev, why = "warning", "до передачи в дизайн"
             path = dp or self.site(s, "copy", f"{pid}.yaml")
             fix = self.dd(s, f"copy — copy deck {pid}")
             if len(miss) > 10:
@@ -1577,7 +1592,7 @@ class Audit:
             elif not vpp.is_file():
                 self.add("R-COV-007", "warning", None, "voice", "voice#/scope/surfaces", vp,
                          f"канал product-ui есть, а профиля голоса продукта voice.product.yaml нет (интерфейс: "
-                         f"{names})", self.dd(what="голос продукта"))
+                         f"{names})", self.dd(what="meaning (голос продукта)"))
             else:
                 ref, _why = self.ref_target(vp, get(data, "scope", "product_voice_ref"))
                 if ref is None or not ref.exists() or ref.resolve() != vpp.resolve():
@@ -2447,7 +2462,7 @@ def _selftest():
     kbpaths.use("tests")
     import fixture_project
     me = str(Path(__file__).resolve())
-    base = {}
+    base, ds = {}, {}
     for name, slug in (("package-landing", "otves-remont-nn"), ("package-cabinet", "otves-office")):
         with fixture_project.built(name) as fx, tempfile.TemporaryDirectory(prefix="ddd-audit-cwd-") as cwd:
             r = subprocess.run([sys.executable, me, "check", slug, "--repo", str(fx.root), "--today",
@@ -2467,6 +2482,12 @@ def _selftest():
             check(f"{name}: сводка — утилиты запускались, правила чтением с тем, что прочитать",
                   summ.get("utilities") == "запускались" and summ.get("called")
                   and any(x["rule"] == "R-SEM-001" for x in summ.get("reading") or []))
+            ds[slug] = (any(str(n).startswith("производные ДС не проверены") for n in summ.get("notes") or []),
+                        "project/ds_build.py" in (summ.get("called") or {}))
+    check("артефакт ДС без токенов DTCG (package-landing) — заметка сводки «производные ДС не проверены», ds_build не "
+          "зовётся, находки R-STRUCT-006 нет; токены DTCG есть (package-cabinet) — ds_build зовётся, заметки нет",
+          ds.get("otves-remont-nn") == (True, False) and ds.get("otves-office") == (False, True)
+          and not any(f.rule == "R-STRUCT-006" for f in base.get("otves-remont-nn", [])))
     with fixture_project.built("package-defects") as fx:
         found, notes, surfs = {}, {}, {}
         for slug in ("otves-remont-nn", "otves-office"):
@@ -2506,10 +2527,13 @@ def _selftest():
         pl = next((f for f in found["otves-remont-nn"] if f.rule == "R-COV-003" and f.path == SEEDED[6][2]), None)
         sb = [f for f in found["otves-remont-nn"] if f.message.startswith("SB-")]
         m010 = next((f for f in found["otves-office"] if f.rule == "R-MAT-010"), None)
-        check("советы с этапом: PL-* — page-plan страницы, SB-* — brief, R-MAT-010 — слой проекта и этап app-brief",
+        c007 = next((f for f in found[SEEDED[12][0]] if f.rule == SEEDED[12][1] and f.path == SEEDED[12][2]), None)
+        check("советы с этапом: PL-* — page-plan страницы, SB-* — brief, R-MAT-010 — слой проекта и этап app-brief, "
+              "R-COV-007 без голоса продукта — meaning (голос продукта)",
               pl is not None and pl.fix.endswith("— page-plan:spasibo") and sb
               and all(f.fix.endswith("— brief") for f in sb) and m010 is not None
-              and "/project-deep-dive otves-office" in m010.fix and m010.fix.endswith("— app-brief"))
+              and "/project-deep-dive otves-office" in m010.fix and m010.fix.endswith("— app-brief")
+              and c007 is not None and c007.fix.endswith("— meaning (голос продукта)"))
     # сценарии правил на копии чистого лендинга, без валидаторов
     with fixture_project.built("package-landing") as fx:
         root, slug = fx.root, fx.slug
@@ -2649,7 +2673,8 @@ def _selftest():
         art.write_text(at, encoding="utf-8")
         check("R-FRESH-005 статичных копий (dc_to_html check): со строкой «Проверки макета: разрешены» — error, "
               "без неё — warning (доклад)", asked == {"error"} and not_asked == {"warning"})
-        # R-COV-002: «передана в дизайн» — в партии действующего входа (units, pages/<id>/) или строка «Приёмка»
+        # R-COV-002 по этапу: error под гейтом 2 — партия входа mockup или motion (units, pages/<id>/) или строка
+        # «Приёмка»; партия входа вайрфрейма — warning
         (rv / "REVIEW.md").unlink()
         shutil.rmtree(cp.parent)
         hp = docpaths.site(slug, "promo", "plans", "home.yaml", repo=root)
@@ -2664,6 +2689,8 @@ def _selftest():
 
         ci("--stage", "wireframe", "--page", "home")
         a1 = cov2()
+        ci("--stage", "mockup", "--page", "home")
+        a4 = cov2()
         (rv / "REVIEW.md").write_text(accept, encoding="utf-8")
         a2 = cov2()
         (rv / "REVIEW.md").unlink()
@@ -2672,13 +2699,18 @@ def _selftest():
         hp.write_text(hpt, encoding="utf-8")
         dk.write_text(dkt, encoding="utf-8")
         shutil.rmtree(docpaths.design(slug, "input", surface="promo", repo=root))
-        sev = {k: {u: v[0] for u, v in a.items()} for k, a in (("a1", a1), ("a2", a2), ("a3", a3))}
-        check("R-COV-002: страница партии входа (--page home) — error, вне партии (spasibo) — warning; строка "
-              "«Приёмка» spasibo — error; вход без папок pages/ (motion --page spasibo) — error только у страницы из "
-              "units",
-              sev["a1"] == {"home": "error", "spasibo": "warning"} and sev["a2"].get("spasibo") == "error"
-              and "строка «Приёмка»" in a2["spasibo"][1] and sev["a3"] == {"home": "warning", "spasibo": "error"}
-              and "в партии входа холста" in a3["spasibo"][1])
+        sev = {k: {u: v[0] for u, v in a.items()} for k, a in (("a1", a1), ("a2", a2), ("a3", a3), ("a4", a4))}
+        check("R-COV-002 по этапу: партия входа вайрфрейма (--page home) — warning «тексты — до макета (гейт 2)», "
+              "партия макета (mockup --page home) — error, вне партии (spasibo) — warning; строка «Приёмка» — error; "
+              "вход без папок pages/ (motion --page spasibo) — error только у страницы из units",
+              sev["a1"] == {"home": "warning", "spasibo": "warning"}
+              and "этапа wireframe: тексты — до макета (гейт 2)" in a1["home"][1]
+              and sev["a4"] == {"home": "error", "spasibo": "warning"}
+              and "передана в дизайн: в партии входа холста этапа mockup" in a4["home"][1]
+              and sev["a2"] == {"home": "error", "spasibo": "error"}
+              and all("строка «Приёмка»" in a2[u][1] for u in ("home", "spasibo"))
+              and sev["a3"] == {"home": "warning", "spasibo": "error"}
+              and "в партии входа холста этапа motion" in a3["spasibo"][1])
         ip = pj / "integration.md"
         ip.write_text("# integration\n\nИллюстрация самопроверки.\n\n| slug | name | description | surface |\n"
                       "|---|---|---|---|\n| `amocrm` | amoCRM | Заявки с сайта — в CRM менеджера | [`promo`] |\n",
