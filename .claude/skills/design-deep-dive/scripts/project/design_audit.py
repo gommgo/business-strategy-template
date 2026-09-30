@@ -2074,7 +2074,9 @@ class Audit:
         self.tools.note("project/screen_map.py", f"check {s.slug}")
         bad = [f for f in items if f.severity in ("error", "warning")]
         if bad:
-            self.add("R-MAT-011", "error", s.slug, "map", "map", lay.map_path,
+            # error — только если сам свод сломан (ошибка screen_map); расхождения уровня warning — доклад
+            sev = "error" if any(f.severity == "error" for f in bad) else "warning"
+            self.add("R-MAT-011", sev, s.slug, "map", "map", lay.map_path,
                      f"вход холста кабинета собран при своде map.md с расхождениями (screen_map check: {len(bad)} — "
                      + listed((f"{f.rule} {f.message[:60]}" for f in bad), 3, "; ") + ")",
                      f"свод и экраны — /screen-deep-dive {self.slug} {s.slug}; затем пересборка входа")
