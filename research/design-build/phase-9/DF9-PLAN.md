@@ -730,3 +730,46 @@ COPY-F-CLASS и COPY-F-NUM и обходы `claims_allow` (OE2-04), висячи
   3.11 (OE4-16), `check_links` и три проверки ссылок (OE4-18), `kit.json` вне git (OE4-08), имя расширения DTCG
   (OE4-22), два профиля голоса (OE5-18), проекции `app-brief` (OE5-19), служебные файлы в диффах (OE5-23);
 - `оставить`: порядок колонок `texts.md` (OE1-18), знание о моделях в коде до Ф10 (OE3-20).
+
+## 10. Дополнение — все адаптивы в холсте (решения заказчика Р234–Р236, 30.09)
+
+Контракт обеих зон: артборды холста — все шесть ширин приёмки 1440, 1280, 1024, 768, 390, 360
+(`kb/common/acceptance-widths.yaml#artboards` = `widths`); адаптивной HTML-копии нет; горизонтальный вылет на 320, ресайз
+и зум — на собранной странице в репозитории кода (ворота после сборки), тёмная тема — твиком холста и на сборке;
+статичные копии артбордов и манифест `kit` — только при постоянной просьбе о проверках макета (строка «Проверки макета:
+разрешены» в `ARTIFACTS.md`), без неё их нет и это не находка; ссылка холста и ДС публичная или приватная — постоянное
+решение заказчика на проект строкой `ARTIFACTS.md`, доступ меняет владелец аккаунта в Share. Зоны идут парой [D10 ∥ D11].
+
+### D10 — код, данные и фикстуры (≈ 60–75 мин)
+- **Маски файлов:** `.claude/skills/design-deep-dive/scripts/claude-design/copies_compare.py`,
+  `.claude/skills/design-deep-dive/scripts/claude-design/kit/kit_manifest.py`,
+  `.claude/skills/design-deep-dive/scripts/claude-design/kit/shot.py`,
+  `.claude/skills/design-deep-dive/scripts/claude-design/kit/canvas.html`,
+  `.claude/skills/design-deep-dive/scripts/claude-design/kit/export.py`,
+  `.claude/skills/design-deep-dive/scripts/claude-design/literal_tokens.py`,
+  `.claude/skills/design-deep-dive/scripts/claude-design/dc_to_html.py`,
+  `.claude/skills/design-deep-dive/scripts/claude-design/mockup_checks.py`,
+  `.claude/skills/design-deep-dive/scripts/project/canvas_input.py`,
+  `.claude/skills/design-deep-dive/scripts/project/design_audit.py`,
+  `.claude/skills/design-deep-dive/scripts/project/ready.py`,
+  `.claude/skills/design-deep-dive/kb/common/acceptance-widths.yaml`,
+  `.claude/skills/design-deep-dive/scripts/tests/fixtures/*`,
+  `.claude/skills/design-deep-dive/scripts/tests/smoke/claude-design.tsv`,
+  `.claude/skills/design-deep-dive/scripts/tests/smoke/project-canvas.tsv`,
+  `.claude/skills/design-deep-dive/scripts/tests/smoke/project-package.tsv`
+
+### D11 — тексты (≈ 45–60 мин)
+- **Маски файлов:** `.claude/skills/design-deep-dive/references/claude-design.md`,
+  `.claude/skills/design-deep-dive/references/phases.md`,
+  `.claude/skills/design-deep-dive/references/workflow-patterns.md`,
+  `.claude/skills/design-deep-dive/references/field-checklists.md`,
+  `.claude/skills/design-deep-dive/scripts/README.md`,
+  `.claude/skills/design-audit/SKILL.md`,
+  `.claude/skills/design-audit/references/rules.md`,
+  `docs/projects/_template/design/*`,
+  `docs/README.md`,
+  `.claude/skills/design-deep-dive/kb/INDEX.md`,
+  `.claude/skills/design-deep-dive/kb/common/glossary.md`,
+  `.claude/skills/design-deep-dive/kb/claude-design/06-design-process/*`,
+  `.claude/skills/design-deep-dive/kb/claude-design/04-claude-code-native/*`,
+  `.claude/skills/design-deep-dive/kb/claude-design/README.md`
