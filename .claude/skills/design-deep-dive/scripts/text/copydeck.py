@@ -43,10 +43,11 @@
   apply-selection DECK --key KEY.yaml (--votes VOTES.yaml | --sheet SHEET.md) --by КТО -o OUT [--method M] [--at ДАТА]
                                              голоса слепого выбора → chosen и selection {method, by, at, compared,
                                              tally, ref}; у мета — выбранный текст в meta.<поле>
-  approve DECK --page ID --by КТО -o OUT      утверждение страницы человеком: checked (0 error, актуальный text_hash,
-                                             без [PLACEHOLDER]) → approved; журнал процесса (edit_log, отклонённые
-                                             варианты) уходит — история в git; пустая мета — warning; обходы
-                                             claims_allow страницы — списком
+  approve DECK --page ID --by КТО -o OUT      утверждение страницы человеком: checked (0 error, актуальный text_hash)
+                                             → approved; заглушка пробела facts.yaml missing[] — warning (её держит
+                                             validate --final), заглушка без пробела — отказ; журнал процесса
+                                             (edit_log, отклонённые варианты) уходит — история в git; пустая мета —
+                                             warning; обходы claims_allow страницы — списком
   before-after [--write | --check]           пустой why в 10-templates-recipes/before-after.tsv — из rule_ref (заголовок
                                              раздела нормы); без ключей — показать, что будет заполнено; --check —
                                              код 1, если есть что заполнить
@@ -1344,7 +1345,9 @@ def _validate_page(deck, page, ctx, rep, final, fresh, vocab):
     if isinstance(meta, dict) and need_meta:
         for k, _st in META_FIELDS:
             if PLACEHOLDER_RX.search(str(meta.get(k) or '')):
-                rep.add(T, 'error', 'COPY-D-PLACEHOLDER', f'{pid}/meta/{k}', 'заглушка в мета опубликованной страницы', 'Закройте пробел в facts.yaml или перепишите без факта.')
+                rep.add(T, 'error' if final else 'warning', 'COPY-D-PLACEHOLDER', f'{pid}/meta/{k}',
+                        'заглушка в мета страницы ' + ('перед публикацией' if final else f'{pstatus} — закрыть до публикации'),
+                        'Закройте пробел в facts.yaml или перепишите без факта; ворота публикации — validate --final.')
     # ---- варианты мета, пересмотр, бриф статьи
     if isinstance(meta, dict):
         mv = meta.get('variants') if isinstance(meta.get('variants'), dict) else {}
@@ -1396,6 +1399,30 @@ def _validate_page(deck, page, ctx, rep, final, fresh, vocab):
         if logs:
             rep.add(T, 'warning', 'COPY-D-PROCESS-LOG', pid, f'в утверждённой странице журнал процесса (edit_log, отклонённые варианты): {", ".join(logs[:5])}',
                     'Журнал уходит при утверждении (copydeck.py approve); история — в git.')
+
+
+def placeholder_links(text, facts, missing_ids=None):
+    """Заглушки текста и пробелы facts.yaml missing[], к которым они привязаны: missing_ids держателя (как в сверке
+    фактов) или совпадение с missing[].placeholder. → (id пробелов, заглушки без пробела). Заглушка названного пробела —
+    честный пропуск факта на макете; публикацию держит validate --final (гейт 3)."""
+    found = [m.group(0) for m in PLACEHOLDER_RX.finditer(text or '')]
+    if not found:
+        return [], []
+    if facts is None:
+        return [], found
+    ids = []
+    for ref in missing_ids or []:
+        r = str(ref)[8:] if str(ref).startswith('missing:') else str(ref)
+        if r in facts.missing_by_id:
+            ids.append(r)
+    loose = []
+    for ph in found:
+        hit = next((x for x in facts.missing if norm_ws(x.get('placeholder')).lower() == norm_ws(ph).lower()), None)
+        if hit is not None:
+            ids.append(str(hit.get('id')))
+        elif not ids:
+            loose.append(ph)
+    return sorted(set(ids)), loose
 
 
 def _validate_slot(deck, page, section, sl, path, ctx, rep, final, fresh, pstatus, is_promise=False):
@@ -1454,8 +1481,16 @@ def _validate_slot(deck, page, section, sl, path, ctx, rep, final, fresh, pstatu
             rv = None  # запись утилиты (check --promote) — не утверждение человеком
         if not (rv and rv.get('by') and rv.get('at')) and not isinstance(page.get('approval'), dict):
             rep.add(T, 'error', 'COPY-D-STATUS', path, 'approved без review (by, at) у варианта и без approval страницы', 'Утверждает человек: review: {by: …, at: …}.')
-    if (status == 'approved' or final) and PLACEHOLDER_RX.search(text):
-        rep.add(T, 'error', 'COPY-D-PLACEHOLDER', path, f'заглушка в тексте статуса {status}' + (' (--final)' if final else ''), 'Закройте пробел в facts.yaml или перепишите без утверждения (fallback пробела).')
+    if final and PLACEHOLDER_RX.search(text):
+        rep.add(T, 'error', 'COPY-D-PLACEHOLDER', path, f'заглушка в тексте статуса {status} (--final)', 'Закройте пробел в facts.yaml или перепишите без утверждения (fallback пробела).')
+    elif status == 'approved' and PLACEHOLDER_RX.search(text):
+        gaps, loose = placeholder_links(text, ctx.facts, sl.get('missing_ids'))
+        if loose:
+            rep.add(T, 'error', 'COPY-D-PLACEHOLDER', path, f'заглушка без пробела в facts.yaml: {", ".join(loose)}',
+                    'Заведите пробел в facts.yaml missing[] (или missing_ids слота) — это вопрос владельцу факта — либо перепишите без утверждения.')
+        else:
+            rep.add(T, 'warning', 'COPY-D-PLACEHOLDER', path, 'заглушка пробела ' + ', '.join(f'missing:{g}' for g in gaps)
+                    + ' в утверждённом тексте: макету не мешает, публикацию держит validate --final', 'Закройте пробел в facts.yaml до публикации.')
     _validate_text(deck, page, section, sl, path, text, v, ctx, rep)
     return v
 
@@ -3308,7 +3343,8 @@ def cmd_export_variants(a):
 
 # ============================================================================================ approve
 def approve_page(data, ctx, page_id, by, at, note=''):
-    """Утверждение страницы человеком: все выбранные тексты — checked с актуальным text_hash и 0 error, без [PLACEHOLDER];
+    """Утверждение страницы человеком: все выбранные тексты — checked с актуальным text_hash и 0 error; заглушка
+    названного пробела facts.yaml missing[] — warning (публикацию держит validate --final), заглушка без пробела — отказ;
     тогда варианты → approved (review), страница → approved (approval), журнал процесса (edit_log, отклонённые варианты)
     уходит — clean_process_log. Утверждённая страница обязана пройти validate (требования статуса approved, стык с
     утверждённым планом, правила текста): error этой страницы — отказ. Пустые meta.title и meta.description — warning
@@ -3337,8 +3373,13 @@ def approve_page(data, ctx, page_id, by, at, note=''):
             rec = sl.get(key) or {}
             if rec.get('errors', 1) != 0 or rec.get('text_hash') != text_hash(t):
                 rep.add('approve', 'error', 'COPY-D-APPROVE', path, f'запись {key}: нет 0 error для этого текста (text_hash)', 'Перепроверьте: check --update.')
-        if PLACEHOLDER_RX.search(t):
-            rep.add('approve', 'error', 'COPY-D-APPROVE', path, 'в тексте [PLACEHOLDER]', 'Закройте пробел в facts.yaml или перепишите без утверждения.')
+        gaps, loose = placeholder_links(t, ctx.facts, sl.get('missing_ids'))
+        if loose:
+            rep.add('approve', 'error', 'COPY-D-APPROVE', path, f'заглушка без пробела в facts.yaml: {", ".join(loose)}',
+                    'Заведите пробел в facts.yaml missing[] (или missing_ids слота) — это вопрос владельцу факта — либо перепишите без утверждения.')
+        elif gaps:
+            rep.add('approve', 'warning', 'COPY-D-APPROVE', path, 'заглушка пробела ' + ', '.join(f'missing:{g}' for g in gaps)
+                    + ': утверждению и макету не мешает, публикацию держит validate --final', 'Закройте пробел в facts.yaml до публикации.')
     meta = page.get('meta') or {}
     for k in ('title', 'description'):
         if not norm_ws(meta.get(k)):
@@ -4338,6 +4379,22 @@ def selftest():
               ap_nb is not None and ('COPY-D-META', 'warning') in {(f['rule'], f['level']) for f in validate(ap_nb, ctx).findings}
               and ('COPY-D-META', 'error') in {(f['rule'], f['level']) for f in validate(ap_nb, ctx, final=True).findings},
               [(f['rule'], f['level'], f['message'][:60]) for f in rep_nb.findings][:4])
+        # --- заглушки: пробел missing[] утверждению и макету не мешает, публикацию держит --final; без пробела — отказ
+        d_ph = _copy.deepcopy(d)
+        _st_checked(find_slot(deck_root(d_ph), 'home/faq/a1')[2], '[PLACEHOLDER: цена замера]')
+        ap_ph, rep_ph = approve_page(d_ph, ctx, 'home', 'заказчик', '2026-09-29')
+        got = {(f['rule'], f['level'], f['where']) for f in rep_ph.findings}
+        lv_ph = lambda r: {f['level'] for f in r.findings if f['rule'] == 'COPY-D-PLACEHOLDER' and f['where'] == 'home/faq/a1'}
+        check('approve: заглушка пробела missing[] — warning, страница утверждена; validate — warning, --final — error',
+              ap_ph is not None and ('COPY-D-APPROVE', 'warning', 'home/faq/a1') in got and not rep_ph.count('error')
+              and lv_ph(validate(ap_ph, ctx)) == {'warning'} and lv_ph(validate(ap_ph, ctx, final=True)) == {'error'},
+              (got, rep_ph.findings[:3]))
+        d_lo = _copy.deepcopy(d)
+        _st_checked(find_slot(deck_root(d_lo), 'home/hero/cta')[2], 'Позвонить [PLACEHOLDER: телефон]')
+        ap_lo, rep_lo = approve_page(d_lo, ctx, 'home', 'заказчик', '2026-09-29')
+        check('approve: заглушка без пробела в facts.yaml — отказ COPY-D-APPROVE',
+              ap_lo is None and any(f['rule'] == 'COPY-D-APPROVE' and f['level'] == 'error' and f['where'] == 'home/hero/cta'
+                                    for f in rep_lo.findings), rep_lo.findings[:3])
         # --- check --promote: draft и assumed → checked
         d = _st_deck(); pg = d['copy_deck']['pages'][0]
         pg['sections'][0]['slots'][0]['variants'][0]['status'] = 'assumed'
