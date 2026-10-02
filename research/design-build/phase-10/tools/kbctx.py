@@ -7,6 +7,7 @@
 
     python3 research/design-build/phase-10/tools/kbctx.py --zone ЗОНА.tsv --out ПАПКА [--extra ФАЙЛ] [--around 3]
     python3 research/design-build/phase-10/tools/kbctx.py --zone ЗОНА.tsv --count          # только счёт токенов окон
+    python3 research/design-build/phase-10/tools/kbctx.py --zone ЗОНА.tsv --all-kinds --out ПАПКА   # и машинные файлы
     python3 research/design-build/phase-10/tools/kbctx.py --selftest
 
 Классы маркеров — `tools/kbscan.py` (целевые; `k3` — вне базы ui) плюс классы файла `--extra` (TSV «класс<TAB>regex»).
@@ -107,16 +108,16 @@ def row(i, text, classes):
     return f"{i:04d}│{text}"
 
 
-def zone_files(zone):
+def zone_files(zone, all_kinds=False):
     rows = list(csv.DictReader(open(zone, encoding="utf-8"), delimiter="\t"))
-    return [r for r in rows if r.get("kind", "prose") == "prose"]
+    return [r for r in rows if all_kinds or r.get("kind", "prose") == "prose"]
 
 
-def process(zone, out, extra, around, count_only):
+def process(zone, out, extra, around, count_only, all_kinds=False):
     classes = load_classes(extra)
     total_ctx = total_full = total_marks = 0
     report = []
-    for r in zone_files(zone):
+    for r in zone_files(zone, all_kinds):
         rel = r["file"]
         p = KB / rel
         if not p.is_file():
@@ -164,13 +165,14 @@ def main():
     ap.add_argument("--extra")
     ap.add_argument("--around", type=int, default=3)
     ap.add_argument("--count", action="store_true")
+    ap.add_argument("--all-kinds", action="store_true", help="брать и машинные файлы списка (YAML, JSON, TSV, код)")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
     if a.selftest:
         return selftest()
     if not a.zone or not (a.out or a.count):
         ap.error("нужны --zone и --out (или --count)")
-    report, m, ctx, full = process(a.zone, a.out, a.extra, a.around, a.count)
+    report, m, ctx, full = process(a.zone, a.out, a.extra, a.around, a.count, a.all_kinds)
     for rel, note, marks_n, c, f in report:
         print(f"{marks_n:5d}  {c:7d}  {f:7d}  {rel}  {note}")
     print(f"ИТОГО: файлов {len(report)}, строк с маркерами {m}, токенов окон {ctx}, токенов файлов {full}")

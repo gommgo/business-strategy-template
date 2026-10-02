@@ -7,3 +7,4 @@
 .claude/skills/design-deep-dive/scripts/maint/ctx_monitor.py
 .claude/skills/design-deep-dive/scripts/maint/check_links.py
 .claude/skills/design-deep-dive/scripts/maint/data/traces.tsv
+.claude/skills/design-deep-dive/scripts/maint/refcheck.py

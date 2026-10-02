@@ -1,0 +1,18 @@
+# Д-common — машинные файлы базы common (волна 4); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/kb/common/**/*.yaml
+.claude/skills/design-deep-dive/kb/common/**/*.yml
+.claude/skills/design-deep-dive/kb/common/**/*.json
+.claude/skills/design-deep-dive/kb/common/**/*.jsonl
+.claude/skills/design-deep-dive/kb/common/**/*.tsv
+.claude/skills/design-deep-dive/kb/common/**/*.csv
+.claude/skills/design-deep-dive/kb/common/**/*.toml
+.claude/skills/design-deep-dive/kb/common/**/*.xml
+.claude/skills/design-deep-dive/kb/common/**/*.js
+.claude/skills/design-deep-dive/kb/common/**/*.mjs
+.claude/skills/design-deep-dive/kb/common/**/*.cjs
+.claude/skills/design-deep-dive/kb/common/**/*.html
+.claude/skills/design-deep-dive/kb/common/**/*.css
+.claude/skills/design-deep-dive/kb/common/**/*.py
+.claude/skills/design-deep-dive/kb/common/**/*.sh
+.claude/skills/design-deep-dive/kb/common/**/*.svg
+.claude/skills/design-deep-dive/kb/common/**/*.glsl

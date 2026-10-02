@@ -1,0 +1,18 @@
+# Д-ui — машинные файлы базы ui (волна 4); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/kb/ui/**/*.yaml
+.claude/skills/design-deep-dive/kb/ui/**/*.yml
+.claude/skills/design-deep-dive/kb/ui/**/*.json
+.claude/skills/design-deep-dive/kb/ui/**/*.jsonl
+.claude/skills/design-deep-dive/kb/ui/**/*.tsv
+.claude/skills/design-deep-dive/kb/ui/**/*.csv
+.claude/skills/design-deep-dive/kb/ui/**/*.toml
+.claude/skills/design-deep-dive/kb/ui/**/*.xml
+.claude/skills/design-deep-dive/kb/ui/**/*.js
+.claude/skills/design-deep-dive/kb/ui/**/*.mjs
+.claude/skills/design-deep-dive/kb/ui/**/*.cjs
+.claude/skills/design-deep-dive/kb/ui/**/*.html
+.claude/skills/design-deep-dive/kb/ui/**/*.css
+.claude/skills/design-deep-dive/kb/ui/**/*.py
+.claude/skills/design-deep-dive/kb/ui/**/*.sh
+.claude/skills/design-deep-dive/kb/ui/**/*.svg
+.claude/skills/design-deep-dive/kb/ui/**/*.glsl

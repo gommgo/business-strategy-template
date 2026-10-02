@@ -1,0 +1,50 @@
+file	kind	lines	tokens	markers	sum
+creative/01-creative-direction/ambition-levels.yaml	data	408	14997	raw 1; research 4; process 8; decision 2; plan 3; letters 3; words 1	22
+creative/01-creative-direction/art-direction.schema.json	data	459	14846	kimi 9; k3 2; research 3; process 4; words 3	21
+creative/01-creative-direction/drafts-for-site/site-brief-creative-fields.yaml	data	331	11440	raw 3; kimi 47; research 7; process 5; decision 1; letters 3; words 1	67
+creative/01-creative-direction/drafts-for-site/treatment.v0.schema.json	data	304	9129	raw 1; kimi 5; research 3; process 8; letters 5	22
+creative/01-creative-direction/examples/art-direction-forest-roast-l0.json	data	194	7053	k3 1; process 3; decision 1; words 2	7
+creative/01-creative-direction/examples/art-direction-forest-roast-l2.json	data	678	9173	process 2; decision 1; words 1	4
+creative/01-creative-direction/examples/art-direction-kvarts.json	data	244	8997	kimi 2; k3 2; process 3; letters 1; words 3	11
+creative/01-creative-direction/examples/art-direction-okoshko.json	data	207	6757	raw 2; kimi 1; k3 1; research 3; process 1; decision 1; words 1	10
+creative/01-creative-direction/examples/art-direction-otves.json	data	209	6958	k3 2; research 2; process 1; words 1	6
+creative/02-references-moodboards/library-example/library.jsonl	data	5	5223	letters 1	1
+creative/02-references-moodboards/refs-library.schema.json	data	567	5883	research 2; process 2; letters 1	5
+creative/02-references-moodboards/sources.yaml	data	1249	16861	research 2; process 46; decision 1; letters 3; words 6	58
+creative/04-visual-language/cyrillic-display-fonts.yaml	data	233	13705	raw 3; research 3; process 10; decision 1	17
+creative/04-visual-language/marketing-tokens.css	code	184	5755	raw 2; research 2; process 5; letters 1	10
+creative/04-visual-language/marketing-tokens.json	data	288	18691	raw 2; research 1; letters 1	4
+creative/06-effects-catalog/effects.schema.json	data	174	7568	raw 1; kimi 1; research 2; process 1; letters 5	10
+creative/06-effects-catalog/effects.yaml	data	3788	108351	raw 396; research 1; process 14; letters 28; words 2	441
+creative/07-stack-implementation/stack.yaml	data	833	20549	raw 2; process 18; letters 2; words 1	23
+creative/08-uniqueness-anti-slop/cliche-registry.yaml	data	1554	42169	raw 4; research 2; process 48; letters 18	72
+creative/09-ai-execution-evaluation/art-direction.v1.schema.json	data	2245	24662	research 1; letters 1; words 4	6
+creative/09-ai-execution-evaluation/block-treatments.yaml	data	725	20036	research 2; process 2; letters 14	18
+creative/09-ai-execution-evaluation/effect-gates.yaml	data	780	16316	raw 4; kimi 3; k3 1; research 3; process 34; letters 22; words 2	69
+creative/09-ai-execution-evaluation/effectiveness.rubric.json	data	298	11046	raw 4; research 2; process 6; letters 8	20
+creative/09-ai-execution-evaluation/examples/art-direction-okoshko.v1.json	data	619	7750	raw 2; kimi 1; k3 1; research 3; process 1; decision 1; words 1	10
+creative/09-ai-execution-evaluation/examples/okoshko-home.motion-spec.yaml	data	136	3789	research 1; process 2	3
+creative/09-ai-execution-evaluation/examples/okoshko-home.treatment.yaml	data	80	2052	research 1; process 1	2
+creative/09-ai-execution-evaluation/examples/otves-home.motion-spec.yaml	data	185	5566	raw 2; research 1; process 4; letters 1	8
+creative/09-ai-execution-evaluation/examples/otves-home.treatment.yaml	data	96	2683	raw 1; research 1; process 1	3
+creative/09-ai-execution-evaluation/examples/stalkon-home.motion-spec.yaml	data	126	3050	research 1; process 1; letters 1; words 1	4
+creative/09-ai-execution-evaluation/examples/stalkon-home.treatment.yaml	data	66	1690	research 1; process 1; letters 2	4
+creative/09-ai-execution-evaluation/motion-spec.schema.json	data	807	19938	research 1; process 4; letters 4	9
+creative/09-ai-execution-evaluation/treatment.schema.json	data	418	15710	research 2; letters 5	7
+creative/10-recipes/examples/_shared/fonts.css	code	63	2938	raw 1; process 1	2
+creative/10-recipes/examples/_shared/marketing-tokens.css	code	184	5755	raw 2; research 2; process 5; letters 1	10
+creative/10-recipes/examples/l0-sdano/index.html	code	238	7807	research 2; process 1	3
+creative/10-recipes/examples/l0-sdano/motion-spec.yaml	data	144	3523	raw 1; research 1; process 1	3
+creative/10-recipes/examples/l0-sdano/style.css	code	185	6731	kimi 1; process 1	2
+creative/10-recipes/examples/l1-sverka/index.html	code	141	4469	research 2; process 1	3
+creative/10-recipes/examples/l1-sverka/motion-spec.yaml	data	138	3816	raw 3; research 1; process 2	6
+creative/10-recipes/examples/l1-sverka/style.css	code	180	6733	process 3; letters 1	4
+creative/10-recipes/examples/l2-zveno/index.html	code	210	6690	research 2; process 1	3
+creative/10-recipes/examples/l2-zveno/js/main.js	code	111	3215	raw 1; process 1; letters 3	5
+creative/10-recipes/examples/l2-zveno/js/motion.js	code	32	1152	words 1	1
+creative/10-recipes/examples/l2-zveno/motion-spec.yaml	data	206	6135	raw 3; research 1; process 2; letters 1	7
+creative/10-recipes/examples/l2-zveno/style.css	code	222	8366	process 3	3
+creative/10-recipes/recipes/01-lead-services-l0.recipe.yaml	data	116	3888	raw 2; kimi 1; k3 1; research 2; process 3; decision 1; letters 1	11
+creative/10-recipes/recipes/02-saas-l1.recipe.yaml	data	96	3157	raw 2; process 3	5
+creative/10-recipes/recipes/03-product-launch-l2.recipe.yaml	data	102	3826	raw 3; kimi 1; research 1; process 2; letters 2	9
+creative/10-recipes/recipes/recipe.schema.json	data	160	5141	raw 1; kimi 1; research 2; process 1	5

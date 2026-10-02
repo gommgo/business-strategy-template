@@ -1,0 +1,18 @@
+# Д-ai-media — машинные файлы базы ai-media (волна 4); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/kb/ai-media/**/*.yaml
+.claude/skills/design-deep-dive/kb/ai-media/**/*.yml
+.claude/skills/design-deep-dive/kb/ai-media/**/*.json
+.claude/skills/design-deep-dive/kb/ai-media/**/*.jsonl
+.claude/skills/design-deep-dive/kb/ai-media/**/*.tsv
+.claude/skills/design-deep-dive/kb/ai-media/**/*.csv
+.claude/skills/design-deep-dive/kb/ai-media/**/*.toml
+.claude/skills/design-deep-dive/kb/ai-media/**/*.xml
+.claude/skills/design-deep-dive/kb/ai-media/**/*.js
+.claude/skills/design-deep-dive/kb/ai-media/**/*.mjs
+.claude/skills/design-deep-dive/kb/ai-media/**/*.cjs
+.claude/skills/design-deep-dive/kb/ai-media/**/*.html
+.claude/skills/design-deep-dive/kb/ai-media/**/*.css
+.claude/skills/design-deep-dive/kb/ai-media/**/*.py
+.claude/skills/design-deep-dive/kb/ai-media/**/*.sh
+.claude/skills/design-deep-dive/kb/ai-media/**/*.svg
+.claude/skills/design-deep-dive/kb/ai-media/**/*.glsl
