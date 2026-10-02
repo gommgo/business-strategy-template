@@ -212,64 +212,130 @@ args задаёт scope:
 
 ## Формат отчёта
 
-В чат:
+Отчёт читает человек, который правила аудита не писал, поэтому в чат он
+идёт словами (`.claude/rules/guiding.md` §4, §5):
+
+- **Итог — первым.** Одна-две фразы: что в порядке, что держит работу, что
+  можно отложить; затем два-три хода дальше, один рекомендован.
+- **Находка — три части:** что нарушено → чем грозит → как исправить (кто
+  и каким шагом). Уровень — словом («ошибка», «предупреждение»,
+  «подсказка»); код правила и уровень латиницей — в скобках в конце.
+  Запись названа словами, её адрес — в скобках: по нему находят файл и
+  вызывают команду. «Чем грозит» берётся из нормы правила
+  (`references/rules.md`), а не сочиняется.
+- **Дефект проверки — не вопрос человеку.** Находку, в которой аудит видит
+  дефект самой проверки, а не слоя (правило сработало мимо своей нормы),
+  он записывает с причиной в reasoning-trace
+  `audit-state/<project-slug>/last-report.md` и называет одной строкой
+  отчёта; вопросом выносится только то, где у человека есть выбор.
+- **Группировка** — по поверхности, внутри — по фиче, внутри фичи — по
+  сущности; в пределах сущности — ошибки, предупреждения, подсказки.
+- **Адрес записи.** Для табличных kind корня (command, notification) —
+  `файл:строка` таблицы; для dialog — путь к `features/<feature>/dialog.md`;
+  для window и use-case — путь к `features/<feature>/window.md` или
+  `use-case.md` и заголовок секции `## <slug>` (и строка, когда нарушение
+  точечное).
+
+Пример — иллюстрация формы на вымышленных данных:
 
 ```
-=== /telegram-bot-flow-audit <project-slug> ===
-Bot-поверхностей в scope: K (tg-client-bot), фич: F. Прочитано: 5 kind, N записей.
+Проверка бота проекта «Ресторан „Двор“» (/telegram-bot-flow-audit
+<project-slug>): бот для гостей, одна фича — бронирование.
 
-[error] tg-client-bot / папка слоя есть, а поверхности нет в реестре surface.md.
-  Что делать: завести строку в surface.md через /project-deep-dive <project-slug>,
-  либо удалить папку telegram-bot-flow/<surface>/.
+Итог. Уведомления бота в порядке. Работу держат шесть ошибок: папка без
+поверхности, четыре поломки диалога бронирования и вход /start, который
+не сбрасывает стек диалогов. Два предупреждения о действии «Отправить
+бронь» и подсказку о блоке без окна можно отложить.
 
-[error] tg-client-bot / booking / dialog → невалидная ссылка windows[2] = `addres`
-  (нет секции ## addres в window.md этой фичи).
-  Что делать: исправить опечатку или завести окно через
-  /telegram-bot-flow-deep-dive <project-slug> tg-client-bot window:addres.
+Дальше можно:
+1) исправить диалог бронирования — рекомендую: четыре ошибки из шести там;
+   /telegram-bot-flow-deep-dive <project-slug> tg-client-bot
+   dialog:booking, от вас — тексты окна адреса;
+2) начать с двух быстрых — вход /start и папка без поверхности: два
+   решения, диалог бронирования останется сломан;
+3) перенести правило «больше восьми гостей» в домен —
+   /domain-deep-dive <project-slug> booking: это решение архитектора,
+   ошибок оно не снимает.
 
-[error] tg-client-bot / booking / dialog → transitions расходится с transition виджетов окон:
-  сводка содержит { from: guests, to: confirm }, но ни один виджет окна `guests` туда не ведёт.
-  Что делать: пересинхронизировать через /telegram-bot-flow-deep-dive <project-slug> tg-client-bot
-  dialog:booking (источник правды — transition виджетов).
+── Папка tg-courier-bot ──
 
-[error] tg-client-bot / booking / window:services → action = `use-case:submit-draft`
-  не находит секции ## submit-draft в use-case.md этой фичи.
-  Что делать: завести use-case бота или поправить реф через
-  /telegram-bot-flow-deep-dive <project-slug> tg-client-bot window:services.
+Ошибка. Папка слоя есть, а поверхности в реестре продукта (surface.md)
+  нет.
+  Чем грозит: поверхности ведёт реестр — папка без строки в нём
+  осиротела, её диалоги ни к чему не привязаны.
+  Как исправить: аналитик заводит поверхность —
+  /project-deep-dive <project-slug> — или удаляет папку
+  telegram-bot-flow/tg-courier-bot/ (R-SURF-001, error).
 
-[error] tg-client-bot / booking / window:services → плейсхолдер {selected_summary} в message.text
-  не обеспечен ключом getter.
-  Что делать: добавить ключ getter с source и fallback через
-  /telegram-bot-flow-deep-dive <project-slug> tg-client-bot window:services.
+── Бот для гостей (tg-client-bot) · фича «Бронирование» (booking) ──
 
-[error] tg-client-bot / command:start-menu → `/start` со `stack: push`.
-  Что делать: поставить stack: reset через /telegram-bot-flow-deep-dive <project-slug>
-  tg-client-bot command:start-menu — вход всегда сбрасывает стек.
+Ошибка. Диалог бронирования (dialog:booking) третьим окном называет
+  addres, а такой секции в окнах фичи нет.
+  Чем грозит: на третьем шаге боту нечего показать.
+  Как исправить: аналитик правит опечатку или заводит окно —
+  /telegram-bot-flow-deep-dive <project-slug> tg-client-bot window:addres
+  (R-STRUCT-011, error).
 
-[warning] tg-client-bot / booking / use-case:submit-booking → Steps содержит «если гостей > 8 —
-  отказать» — бизнес-правило в оркестраторе, не вызов домена.
-  Что делать: перенести правило в доменный use-case через /domain-deep-dive <project-slug> booking,
-  а bot UC оставить маршрутизацию исхода через
-  /telegram-bot-flow-deep-dive <project-slug> tg-client-bot use-case:submit-booking.
+Ошибка. Сводка переходов диалога расходится с виджетами окон: в сводке
+  есть переход от «Гости» (guests) к «Подтверждение» (confirm), а ни один
+  виджет окна «Гости» туда не ведёт.
+  Чем грозит: сводку читают как карту диалога — по ней путь есть, в окне
+  его нет.
+  Как исправить: аналитик сводит их — /telegram-bot-flow-deep-dive
+  <project-slug> tg-client-bot dialog:booking; источник правды — переходы
+  виджетов (R-MIRROR-001, error).
 
-[warning] tg-client-bot / booking / use-case:submit-booking → Dependencies ссылается на
-  use-case:booking.CreateOrder, которого нет в services/*/domains/booking/use-cases/.
-  Что делать: спроектировать use-case через /domain-deep-dive <project-slug> booking,
-  либо поправить реф (домен опционален — если осознанно, объяснить).
+Ошибка. Виджет окна «Услуги» (window:services) вызывает действие бота
+  (use-case:submit-draft), которого нет в действиях фичи.
+  Чем грозит: нажатие ничего не сделает.
+  Как исправить: аналитик заводит действие бота или правит ссылку —
+  /telegram-bot-flow-deep-dive <project-slug> tg-client-bot
+  window:services (R-STRUCT-020, error).
 
-[hint] tg-client-bot / booking / interface-блок `loyalty-status` не реализован ни одним окном (дыра синтеза).
-  Что делать: завести окно через /telegram-bot-flow-deep-dive <project-slug> tg-client-bot window,
-  либо это сознательно отложено.
+Ошибка. В тексте того же окна стоит подстановка {selected_summary}, а
+  данных для неё окно не получает.
+  Чем грозит: в сообщение нечего подставить.
+  Как исправить: аналитик добавляет окну ключ данных с источником и
+  запасным значением (getter: source, fallback) —
+  /telegram-bot-flow-deep-dive <project-slug> tg-client-bot
+  window:services (R-DATA-001, error).
 
-Сводка: 6 error / 2 warning / 1 hint.
+Предупреждение. В шагах действия бота «Отправить бронь»
+  (use-case:submit-booking) записано бизнес-правило: «если гостей больше
+  восьми — отказать».
+  Чем грозит: правило живёт в боте, а не в домене, — при его смене бот
+  отстанет.
+  Как исправить: архитектор переносит правило в домен —
+  /domain-deep-dive <project-slug> booking, боту остаётся маршрутизация
+  исхода (R-SEM-010, warning).
+
+Предупреждение. То же действие зависит от доменной операции
+  booking.CreateOrder, которой нет в доменах сервисов.
+  Чем грозит: боту нечего вызвать.
+  Как исправить: архитектор проектирует операцию —
+  /domain-deep-dive <project-slug> booking — или аналитик правит ссылку;
+  если домена нет осознанно — объяснить (R-SEM-011, warning).
+
+Подсказка. Блок interface «Статус лояльности» (loyalty-status) не
+  реализован ни одним окном.
+  Чем грозит: часть interface до бота не дошла.
+  Как исправить: аналитик заводит окно —
+  /telegram-bot-flow-deep-dive <project-slug> tg-client-bot window — или
+  подтверждает, что это отложено (R-COV-001, hint).
+
+── Бот для гостей (tg-client-bot) · команды ──
+
+Ошибка. Команда /start (command:start-menu) кладёт диалог поверх стека
+  (stack: push).
+  Чем грозит: вход всегда сбрасывает стек — с push прежний диалог
+  остаётся под новым.
+  Как исправить: аналитик ставит сброс (stack: reset) —
+  /telegram-bot-flow-deep-dive <project-slug> tg-client-bot
+  command:start-menu (R-TG-001, error).
+
+Что проверено: 5 видов записей у одной поверхности.
+Счёт: 6 ошибок, 2 предупреждения, 1 подсказка.
 ```
-
-Группировка — по поверхности, внутри — по фиче, внутри фичи — по сущности;
-в пределах сущности — `error → warning → hint`. Для табличных kind корня
-(command, notification) к finding'у добавляется `файл:строка` таблицы; для
-dialog — путь к `features/<feature>/dialog.md`; для window/use-case — путь
-к `features/<feature>/window.md`/`use-case.md` и заголовок секции
-`## <slug>` (и строка, когда нарушение точечное).
 
 ## `audit-state/<project-slug>/last-report.md`
 

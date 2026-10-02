@@ -7,98 +7,146 @@
 
 ## Отчёт в чат
 
-Findings сгруппированы по `(проект, поверхность, угол)`, внутри группы — по
-severity; верхнеуровневые — первой группой «Общие слои», углы одного
-проекта по всем его поверхностям — группой «все поверхности». Каждый finding
-несёт доказательство (конкретные файлы, slug, поля) и рекомендацию, какой
-скилл запустить.
+Отчёт читает человек, который углы не писал, поэтому в чат он идёт словами
+(`.claude/rules/guiding.md` §4, §5):
+
+- **Итог — первым.** Одна-две фразы: что в порядке, что держит работу, что
+  можно отложить; затем два-три хода дальше, один рекомендован.
+- **Находка — три части:** что нарушено → чем грозит → как исправить (кто
+  и каким скиллом). Уровень — словом («ошибка», «предупреждение»,
+  «подсказка»); имя угла и уровень латиницей — в скобках в конце. Записи
+  обоих слоёв названы словами, их адреса — файл и slug — в скобках: это
+  доказательство находки. «Чем грозит» берётся из карточки угла
+  (`angles.md`), а не сочиняется.
+- **Дефект проверки — не вопрос человеку.** Находку, в которой аудит сам
+  видит дефект проверки, а не слоёв (агент прочитал не тот файл, сослался
+  на запись, которой нет), он записывает с причиной в reasoning-trace
+  отчёта прогона (шаблон — ниже) и называет одной строкой отчёта; вопросом
+  выносится только то, где у человека есть выбор.
+- **Группировка** — по `(проект, поверхность, угол)`, внутри группы — по
+  уровню; верхнеуровневые — первой группой «Общие слои», углы одного
+  проекта по всем его поверхностям — группой «все поверхности».
+- **Что проверено и что пропущено** — в конце: слои, проекты и
+  поверхности, число агентов, пропущенные углы с причиной.
+
+Пример — иллюстрация формы на вымышленных данных:
 
 ```
-=== /cross-audit ===
-Слои: business (+ стейкхолдеры), ajtbd, swot, hypothesis-map, project-map, infrastructure (общие) + проекты: referral-network (поверхности: web-partner, tg-bot), loyalty-app (поверхности: mobile)
-Проектов: 2 · агентов: 15 верхнеуровневых + referral-network (7 пар + 15 и 18 троек по web-partner и tg-bot + 1 dataitems) + loyalty-app (6 пар + 13 троек по mobile) = 75
-Пропущено: surface-screen, surface-design у web-partner (нет screens/web-partner/, design/web-partner/); surface-design у tg-bot и mobile (у бота и мобильного своего макета нет); facts-business, promise-product у обоих проектов (нет facts.yaml и слоя страницы); capability-domain, integration-domain, surface-service, service-capability, mobile-domain, mobile-service у loyalty-app (нет services/)
-Время: <duration>
+Сверка слоёв (/cross-audit): общие слои и два проекта — «Сеть направлений»
+(referral-network) и «Лояльность» (loyalty-app).
+
+Итог. Бизнес, SWOT и Карта гипотез между собой сходятся. Работу держат
+пять ошибок: «Лояльность» ссылается на проблему и на проект, которых нет;
+у «Сети направлений» стык с «Лояльностью» не попал на карту проектов, а
+кабинет партнёра закрыт без возможностей и без роли врача. Два
+предупреждения и две подсказки можно отложить.
+
+Дальше можно:
+1) закрыть ошибки «Сети направлений» — рекомендую: кабинет партнёра
+   объявлен закрытым, а строить его не из чего;
+   /project-deep-dive referral-network, затем
+   /interface-deep-dive referral-network web-partner, от вас — три решения;
+2) начать с «Лояльности» — две ссылки в пустоту: проблема и проект; две
+   короткие правки в /project-deep-dive loyalty-app;
+3) разобрать предупреждения — трение под проблему оттока и домен
+   направлений: это разведка, ошибок она не снимает.
 
 — Общие слои —
 
-[error] addresses-problem-bizproblem → проект loyalty-app бьёт в проблему
-  `legacy-sync`, которой нет в docs/business/business-problem.md.
-  Доказательство: projects/loyalty-app/vision.md addresses-problem =
-    [`paid-churn`, `legacy-sync`]; business/business-problem.md → строки [`paid-churn`,
-    `slot-utilization`] — `legacy-sync` отсутствует.
-  Что делать: завести проблему `legacy-sync` через
-  /business-deep-dive business-problem, либо убрать ref в /project-deep-dive
+Ошибка. Проект «Лояльность» называет своей проблему legacy-sync
+  (projects/loyalty-app/vision.md, addresses-problem), а в реестре проблем
+  бизнеса её нет: там paid-churn и slot-utilization.
+  Чем грозит: продукт решает проблему, которой бизнес не называл.
+  Как исправить: аналитик заводит проблему —
+  /business-deep-dive business-problem — или убирает ссылку —
+  /project-deep-dive loyalty-app (addresses-problem-bizproblem, error).
+
+Ошибка. Стык «Лояльность → магазин» (project-map.md:loyalty-to-store)
+  ведёт в проект web-store, которого нет: есть referral-network и
   loyalty-app.
+  Чем грозит: карта проектов показывает стык с продуктом, которого нет.
+  Как исправить: аналитик правит проект назначения или удаляет стык —
+  /project-deep-dive loyalty-app integration
+  (projectmap-reciprocity, error).
 
-[error] projectmap-reciprocity → ребро `loyalty-to-store` ссылается на
-  to-project `web-store`, которого нет в docs/projects/.
-  Доказательство: project-map.md:loyalty-to-store to-project=`web-store`;
-    каталога docs/projects/web-store/ нет (есть referral-network, loyalty-app).
-  Что делать: исправить to-project на реальный проект или удалить ребро
-  через /project-deep-dive loyalty-app integration.
+Предупреждение. Проблему бизнеса «Отток платящих»
+  (business-problem.md:paid-churn) не доказывает ни одно трение клиента
+  (ajtbd/segment-problem.md).
+  Чем грозит: проблема бизнеса стоит без доказательства со стороны
+  клиента.
+  Как исправить: аналитик разведывает трение — /job-graph-deep-dive — или
+  записывает другой источник доказательства
+  (segmentproblem-bizproblem, warning).
 
-[warning] segmentproblem-bizproblem → проблему бизнеса `paid-churn` не
-  доказывает ни одно трение клиента из docs/ajtbd/segment-problem.md.
-  Доказательство: business/business-problem.md:paid-churn; в segment-problem.md нет ни одной
-    записи с feeds-problem=`paid-churn` или семантически бьющей в эту
-    проблему.
-  Что делать: разведать трение клиента под эту проблему через
-  /job-graph-deep-dive, либо зафиксировать другой источник доказательства.
+— Проект «Сеть направлений» (referral-network) · все поверхности —
 
-— Проект referral-network · все поверхности —
+Ошибка. Интеграция с соседним проектом «Лояльность»
+  (integration.md:loyalty-sync) не сведена на карту проектов: в
+  project-map.md нет стыка, который на неё опирается.
+  Чем грозит: стык между продуктами записан с одной стороны — на карте
+  его не видно.
+  Как исправить: аналитик заводит стык — /project-deep-dive
+  referral-network — или правит адресата, если это внешняя система
+  (integration-crossproject, error).
 
-[error] integration-crossproject → integration:loyalty-sync (target:
-  sibling-project, sibling-project=`loyalty-app`) не сведена в project-map.
-  Доказательство: integration.md:loyalty-sync target=sibling-project,
-    sibling-project=`loyalty-app`; в project-map.md нет ребра с
-    via=`integration:loyalty-sync` от referral-network.
-  Что делать: завести ребро в project-map.md (через /project-deep-dive),
-  или поправить target, если это внешняя система.
+— Проект «Сеть направлений» · кабинет партнёра (web-partner) —
 
-— Проект referral-network · поверхность web-partner —
+Ошибка. Поверхность закрыта (surface.md:web-partner, stable), а её файл
+  возможностей пуст (capability/web-partner.md).
+  Чем грозит: кабинет объявлен готовым, а что он умеет — не названо.
+  Как исправить: аналитик заводит возможности —
+  /project-deep-dive referral-network capability:web-partner — или
+  понижает поверхность (surface-capability, error).
 
-[error] surface-capability → поверхность web-partner объявлена stable, но
-  capability/web-partner.md пуст.
-  Доказательство: surface.md:web-partner status=stable;
-    projects/referral-network/capability/web-partner.md — 0 записей.
-  Что делать: завести возможности через /project-deep-dive referral-network
-  capability:web-partner, или понизить поверхность.
+Ошибка. Пользователь «Врач» (user:doctor) назван у кабинета партнёра, а
+  среди участников interface его нет (interface/web-partner/who.md).
+  Чем грозит: для врача не будет ни ситуаций, ни экранов.
+  Как исправить: аналитик заводит участника —
+  /interface-deep-dive referral-network web-partner who — или решает, что
+  кабинет врача не обслуживает (user-who, error).
 
-[error] user-who → user:doctor не несётся ни одним who поверхности
-  web-partner.
-  Доказательство: user:doctor.context = «врач инициирующей клиники»;
-    surface:web-partner.user ∋ `doctor`; в interface/web-partner/who.md нет
-    роли, выполняющей действия врача.
-  Что делать: завести who:doctor через /interface-deep-dive referral-network
-  web-partner who, либо пересмотреть, обслуживает ли web-partner врача.
+Предупреждение. У возможности «Отправить направление»
+  (capability/web-partner.md:send-referral) нет домена в сервисах проекта:
+  там auth, billing и inventory.
+  Чем грозит: возможность обещана, а бэкенду её нечем исполнить.
+  Как исправить: архитектор добавляет домен направлений —
+  /domain-deep-dive — или аналитик пересматривает возможность
+  (capability-domain, warning).
 
-[warning] capability-domain → capability:send-referral (web-partner) не имеет
-  домена в projects/referral-network/services/*/domains/.
-  Доказательство: capability/web-partner.md:send-referral.value = «один
-    клик»; в доменах сервисов есть только `auth`, `billing`, `inventory`.
-  Что делать: добавить домен `referrals` через /domain-deep-dive, или
-  пересмотреть capability.
+— Проект «Сеть направлений» · бот (tg-bot) —
 
-— Проект referral-network · поверхность tg-bot —
-
-[hint] capability-situation → ситуация confirm-via-bot в
-  interface/tg-bot/situation.md не имеет capability-якоря в
+Подсказка. У ситуации «Переподтвердить слот»
+  (interface/tg-bot/situation.md:confirm-via-bot) нет возможности в
   capability/tg-bot.md.
-  Доказательство: situation:confirm-via-bot.action = «переподтвердить слот»;
-    в capability/tg-bot.md нет возможности про переподтверждение.
-  Что делать: завести capability на tg-bot или решить, что ситуация лишняя.
+  Чем грозит: ситуация есть, а возможности, ради которой она нужна, нет.
+  Как исправить: аналитик заводит возможность бота —
+  /project-deep-dive referral-network capability:tg-bot — или решает, что
+  ситуация лишняя (capability-situation, hint).
 
-— Проект loyalty-app · поверхность mobile —
+— Проект «Лояльность» (loyalty-app) · приложение (mobile) —
 
-[hint] market-capability → конкурент klara-app покрывает push-кампании,
-  у mobile нет такой возможности.
-  Доказательство: market:klara-app.description = «push loyalty campaigns»;
-    projects/loyalty-app/capability/mobile.md → нет записи про кампании.
-  Что делать: рассмотреть через /project-deep-dive loyalty-app
-  capability:mobile, или зафиксировать boundary.
+Подсказка. Аналог klara-app (market.md:klara-app) ведёт push-кампании, а у
+  приложения такой возможности нет (capability/mobile.md).
+  Чем грозит: на рынке это есть, у продукта — нет, и не записано почему.
+  Как исправить: аналитик рассматривает возможность —
+  /project-deep-dive loyalty-app capability:mobile — или записывает
+  границу (market-capability, hint).
 
-Сводка: 5 error / 2 warning / 2 hint.
+Что проверено. Слои: бизнес и стейкхолдеры, AJTBD, SWOT, Карта гипотез,
+карта проектов, ИТ-периметр; проекты: referral-network (web-partner,
+tg-bot), loyalty-app (mobile). Агентов 75: 15 по общим слоям;
+referral-network — 7 пар, 15 и 18 троек по web-partner и tg-bot, один по
+словарю данных (dataitems-crosssurface); loyalty-app — 6 пар и 13 троек
+по mobile. Время: <duration>.
+Что пропущено. У web-partner — экраны и макет (surface-screen,
+surface-design): папок screens/web-partner/ и design/web-partner/ нет. У
+tg-bot и mobile — макет (surface-design): у бота и мобильного своего
+макета нет. У обоих проектов — факты и обещания страницы (facts-business,
+promise-product): нет facts.yaml и слоя страницы. У loyalty-app — углы
+сервисов и доменов (capability-domain, integration-domain,
+surface-service, service-capability, mobile-domain, mobile-service): нет
+services/.
+Счёт: 5 ошибок, 2 предупреждения, 2 подсказки.
 ```
 
 ## `audit-state/last-report.md`
