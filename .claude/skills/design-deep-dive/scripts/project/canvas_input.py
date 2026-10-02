@@ -105,7 +105,10 @@ ARTIFACTS.md — её числа (артборды, ширины брифа хо
 карты — treatment, wireframe и mockup; на этапе directions запреты направления — поле directions[].bans арт-дирекции →
 directions[].bans брифа холста, каждый список — только своему артборду; с ним идёт заметка направления (notes).
 Этап treatment — вход страницы холста «Подача» (варианты подачи выбранного направления; только сайт): поля продукта,
-выбранное направление (direction.*), варианты подачи арт-дирекции — treatment_variants[] (id, name, shows, effects,
+тема и логотип бренда — как на этапе directions, выбранное направление (direction.*) с обликом до ДС — палитрой,
+стратегией цвета и шрифтами (direction.palette, color_strategy, type: решение визуального языка арт-дирекции, пока
+оно не записано — запись выбранного направления), сигнатурным приёмом и первым экраном (direction.signature_move,
+first_viewport), варианты подачи арт-дирекции — treatment_variants[] (id, name, shows, effects,
 chosen; кто, когда и почему выбрал — запись арт-дирекции, во вход не идёт), прототипы вне холста отдельным полем
 prototypes: variants[] — лабораторная страница `lab_path` и её запись `recording` по id варианта, main_effect —
 объект prototype арт-дирекции (status, effect, lab_path, recording, notes; запись из одного «status: none» не
@@ -1158,6 +1161,7 @@ def site_brief(ctx, B):
     chosen = get(ad, "choice", "chosen")
     dirs = {d.get("id"): d for d in get(ad, "directions", default=[]) or [] if isinstance(d, dict)}
     cdir = dirs.get(chosen) or {}
+    vl = ad.get("visual_language") if isinstance(ad.get("visual_language"), dict) else {}
     allowed = sorted(set(str_list(get(brief, "ambition", "allow", "markers")))
                      | {k for d in get(ad, "decisions", default=[]) or [] if isinstance(d, dict)
                         for k in str_list(d.get("k3_allow"))}
@@ -1316,6 +1320,12 @@ def site_brief(ctx, B):
             out["main_effect"] = own
         return out or None
 
+    def look(key):
+        """Облик выбранного направления до ДС: решение визуального языка, пока оно не записано — запись
+        направления."""
+        v = vl.get(key)
+        return v if v not in (None, "", [], {}) else cdir.get(key)
+
     def references():
         mb = [r for r in get(ad, "moodboard", default=[]) or [] if isinstance(r, dict)]
         return [{k: r[k] for k in ("url", "ref", "role", "applies_to", "take", "dont_take", "values", "captured")
@@ -1364,6 +1374,11 @@ def site_brief(ctx, B):
                                                             ("hue", get(cdir, "axes", "accent_hue"))) if v} or None,
         "direction.imagery": lambda: get(ad, "visual_language", "imagery") or cdir.get("imagery")
         or get(cdir, "axes", "imagery"),
+        "direction.palette": lambda: look("palette"),
+        "direction.color_strategy": lambda: look("color_strategy"),
+        "direction.type": lambda: look("type"),
+        "direction.signature_move": lambda: cdir.get("signature_move"),
+        "direction.first_viewport": lambda: cdir.get("first_viewport"),
         "references[]": references,
         "brand.logo": lambda: get(brand, "logo", "files"),
         "brand.never": lambda: get(brand, "logo", "never"),
@@ -1394,8 +1409,8 @@ def questions(brief):
     return out or None
 
 
-DIRECTION_KEYS = ("id", "name", "thesis", "axes", "palette", "type", "signature_move", "first_screen", "risk", "cost",
-                  "recommended", "notes")
+DIRECTION_KEYS = ("id", "name", "thesis", "axes", "palette", "type", "signature_move", "first_viewport", "risk",
+                  "cost", "recommended", "notes")
 ROLE_ORDER = ("composition", "typography", "block-solution", "rhythm", "structure", "color", "material", "imagery",
               "brand", "effect", "other", "motion")
 VARIANT_KEYS = ("id", "name", "shows", "effects", "chosen")     # вариант подачи — артборд страницы «Подача»
@@ -4470,8 +4485,15 @@ def selftest():
         surf = surf_of(fx, "promo")
         adp = docpaths.design(fx.slug, "art-direction", surface="promo", repo=fx.root)
         adt = adp.read_text(encoding="utf-8")
+        brand = docpaths.design(fx.slug, "brand", repo=fx.root)
+        bdoc = yaml_mod().safe_load(brand.read_text(encoding="utf-8"))
+        bdoc["logo"] = {"files": ["design/_assets/logo.svg"], "never": ["не растягивать знак"]}
+        brand.write_text(yaml_mod().safe_dump(bdoc, allow_unicode=True, sort_keys=False), encoding="utf-8")
         d0 = assemble(fx.slug, surf, fx.root, "directions", maps, "2026-09-29")
         tdoc = json.loads(adt)
+        cdoc = next(x for x in tdoc["directions"] if x["id"] == tdoc["choice"]["chosen"])
+        tdoc["visual_language"]["palette"] = {"background": "#101418", "text": "#F2F2F0", "accent": "#D7263D"}
+        tdoc["visual_language"].pop("type")
         tdoc["treatment_variants"] = [
             {"id": "plumb-line", "name": "Линия", "shows": "первый экран и этапы: линия ведёт взгляд по шагам",
              "effects": ["effect:scroll-driven-progress"], "chosen": True, "chosen_by": "customer",
@@ -4498,6 +4520,28 @@ def selftest():
               pr.get("variants") == [{"id": "wall-scene", "lab_path": "motion/lab/wall-scene/",
                                       "recording": "motion/lab/wall-scene/take-1.mp4"}]
               and pr.get("main_effect") == tdoc["prototype"])
+        d0b = yaml_mod().safe_load(d0.files[BRIEF])
+        look = tb.get("direction") or {}
+        check("вход treatment: тема и логотип бренда — как у directions; облик выбранного направления до ДС — палитра "
+              "и стратегия цвета визуального языка, шрифты — записи направления (в визуальном языке их нет), "
+              "сигнатурный приём и первый экран",
+              get(tb, "design_system", "knobs", "theme")
+              and get(tb, "design_system", "knobs") == get(d0b, "design_system", "knobs")
+              and tb.get("brand") == d0b.get("brand") and get(tb, "brand", "logo") == ["design/_assets/logo.svg"]
+              and get(tb, "brand", "never") and look.get("palette") == tdoc["visual_language"]["palette"]
+              and look.get("color_strategy") == tdoc["visual_language"]["color_strategy"]
+              and look.get("type") == cdoc["type"] and look.get("signature_move") == cdoc["signature_move"]
+              and look.get("first_viewport") == cdoc["first_viewport"])
+        check("вход treatment: описание, цель и аудитория продукта — из смысла, строка тона — из голоса: те же, что у "
+              "directions",
+              tb["product"] == d0b["product"] and get(tb, "design_system", "tone_of_voice")
+              and get(tb, "design_system", "tone_of_voice") == get(d0b, "design_system", "tone_of_voice")
+              and {"meaning", "voice"} <= {s.id for s in t.sources.values()})
+        dirs0 = {x["id"]: x for x in json.loads(adt)["directions"]}
+        check("вход directions: композиция первого экрана направления (first_viewport арт-дирекции) — в directions[] "
+              "брифа холста у каждого направления, где она записана",
+              any(x.get("first_viewport") for x in d0b["directions"])
+              and all(x.get("first_viewport") == dirs0[x["id"]].get("first_viewport") for x in d0b["directions"]))
         check("вход treatment: тексты первого экрана — те же, что у directions, заголовок файла называет этап; файлы "
               "входа — как у directions (page.yaml нет); поля вариантов покрыты картой, находок сборки нет",
               t.files["pages/home/copy.md"] == d0.files["pages/home/copy.md"].replace("этап directions",

@@ -116,6 +116,64 @@
      ],
      "note": "язык картинок: что настоящее, что генерируется, что кодом"
     },
+    "direction.palette": {
+     "rule": "map",
+     "from": [
+      "/visual_language/palette",
+      "/choice/chosen",
+      "/directions/*/palette"
+     ],
+     "stages": [
+      "treatment"
+     ],
+     "note": "палитра выбранного направления до ДС: решение визуального языка (visual_language.palette), пока оно не записано — палитра записи направления; на вайрфрейме и макете цвета — токены ДС"
+    },
+    "direction.color_strategy": {
+     "rule": "map",
+     "from": [
+      "/visual_language/color_strategy",
+      "/choice/chosen",
+      "/directions/*/color_strategy"
+     ],
+     "stages": [
+      "treatment"
+     ],
+     "note": "стратегия цвета выбранного направления: решение визуального языка, пока оно не записано — запись направления"
+    },
+    "direction.type": {
+     "rule": "map",
+     "from": [
+      "/visual_language/type",
+      "/choice/chosen",
+      "/directions/*/type"
+     ],
+     "stages": [
+      "treatment"
+     ],
+     "note": "шрифты выбранного направления до ДС: решение визуального языка (visual_language.type), пока оно не записано — шрифты записи направления; на вайрфрейме и макете гарнитуры — токены ДС"
+    },
+    "direction.signature_move": {
+     "rule": "map",
+     "from": [
+      "/choice/chosen",
+      "/directions/*/signature_move"
+     ],
+     "stages": [
+      "treatment"
+     ],
+     "note": "сигнатурный приём выбранного направления: что, где, эффекты каталога, минимальный уровень, связь с концепцией"
+    },
+    "direction.first_viewport": {
+     "rule": "map",
+     "from": [
+      "/choice/chosen",
+      "/directions/*/first_viewport"
+     ],
+     "stages": [
+      "treatment"
+     ],
+     "note": "композиция первого экрана выбранного направления: что где и какого размера, где главное действие"
+    },
     "treatment_variants[]": {
      "rule": "map",
      "from": [
@@ -291,16 +349,13 @@
    },
    {
     "from": [
-     "/visual_language/color_strategy",
-     "/visual_language/palette",
-     "/visual_language/type",
      "/visual_language/composition",
      "/visual_language/surfaces",
      "/visual_language/theme",
      "/visual_language/d_refs",
      "/tokens_extension"
     ],
-    "note": "цвета, шрифты и поверхности — в ДС: исполнитель берёт токены, а не числа; композиция секций — подача плана"
+    "note": "поверхности, тема и расширение токенов — в ДС: исполнитель берёт токены, а не числа; композиция секций — подача плана; палитра, стратегия цвета и шрифты идут во вход только до ДС — правилами этапа treatment"
    },
    {
     "from": [
