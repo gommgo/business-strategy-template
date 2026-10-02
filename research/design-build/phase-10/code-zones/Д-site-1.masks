@@ -1,0 +1,5 @@
+# Д-site-1 — машинные файлы базы site: следы процесса исследования (волна 4); маски — пути от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/kb/site/02-site-types/crosswalk.tsv
+.claude/skills/design-deep-dive/kb/site/02-site-types/vocabulary.yaml
+.claude/skills/design-deep-dive/kb/site/09-ai-generation-evaluation/ai-landing-markers.yaml
+.claude/skills/design-deep-dive/kb/site/09-ai-generation-evaluation/site-rubric.json

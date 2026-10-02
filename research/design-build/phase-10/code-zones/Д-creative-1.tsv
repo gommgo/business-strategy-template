@@ -1,0 +1,5 @@
+file	kind	lines	tokens	markers	sum
+creative/06-effects-catalog/effects.schema.json	data	174	7551	kimi 1; research 2; process 1; letters 5	9
+creative/06-effects-catalog/effects.yaml	data	3788	107505	raw 357; research 1; process 14; letters 28; words 2	402
+creative/07-stack-implementation/stack.yaml	data	833	20549	raw 2; process 18; letters 2; words 1	23
+creative/08-uniqueness-anti-slop/cliche-registry.yaml	data	1554	42169	raw 4; research 2; process 48; letters 18	72

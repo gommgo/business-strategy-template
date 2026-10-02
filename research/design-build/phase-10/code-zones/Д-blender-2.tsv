@@ -1,0 +1,77 @@
+file	kind	lines	tokens	markers	sum
+blender/15-showcase/_shared/code3d/build.sh	code	34	1600	process 2; showcase 1	3
+blender/15-showcase/_shared/code3d/src/detail.js	code	89	3148	process 1	1
+blender/15-showcase/_shared/code3d/src/glb-modules.js	code	241	7506	process 2; letters 2	4
+blender/15-showcase/_shared/code3d/src/ik.js	code	33	1260	process 1; letters 1	2
+blender/15-showcase/_shared/code3d/src/ktx2.js	code	19	573	process 1; letters 1	2
+blender/15-showcase/_shared/code3d/src/modules-code.js	code	221	7580	process 1; letters 9	10
+blender/15-showcase/_shared/code3d/src/post.js	code	140	4944	process 1	1
+blender/15-showcase/_shared/code3d/src/rig.js	code	39	1269	process 1	1
+blender/15-showcase/_shared/code3d/src/scene.js	code	688	22935	raw 1; process 2; letters 3	6
+blender/15-showcase/_shared/code3d/src/studio.js	code	57	1983	process 1; letters 1	2
+blender/15-showcase/_shared/code3d/src/trail.js	code	64	1925	process 1	1
+blender/15-showcase/_shared/code3d/src/util.js	code	20	675	process 1	1
+blender/15-showcase/_shared/code3d/src/world.js	code	195	6743	process 1; letters 3	4
+blender/15-showcase/keyboard/a-code/src/capture.js	code	54	1685	letters 1	1
+blender/15-showcase/keyboard/a-code/src/model_a.js	code	389	11596	letters 8	8
+blender/15-showcase/keyboard/a-code/src/model_c.js	code	181	4520	letters 1	1
+blender/15-showcase/keyboard/a-code/src/stage3d.js	code	232	6105	letters 4	4
+blender/15-showcase/keyboard/b-blender/src/capture.js	code	54	1685	letters 1	1
+blender/15-showcase/keyboard/b-blender/src/model_a.js	code	389	11596	letters 8	8
+blender/15-showcase/keyboard/b-blender/src/model_c.js	code	181	4520	letters 1	1
+blender/15-showcase/keyboard/b-blender/src/stage3d.js	code	232	6105	letters 4	4
+blender/15-showcase/keyboard/c-hybrid/src/capture.js	code	54	1685	letters 1	1
+blender/15-showcase/keyboard/c-hybrid/src/model_a.js	code	389	11596	letters 8	8
+blender/15-showcase/keyboard/c-hybrid/src/model_c.js	code	181	4520	letters 1	1
+blender/15-showcase/keyboard/c-hybrid/src/stage3d.js	code	232	6105	letters 4	4
+blender/15-showcase/keyboard/gallery.json	data	101	3551	letters 3	3
+blender/15-showcase/sdano/a-code/_shared/fonts.css	code	63	2938	raw 1; process 1	2
+blender/15-showcase/sdano/a-code/_shared/marketing-tokens.css	code	184	5755	raw 2; research 2; process 5; letters 1	10
+blender/15-showcase/sdano/a-code/index.html	code	238	7801	research 2; process 1	3
+blender/15-showcase/sdano/a-code/motion-spec.yaml	data	144	3523	raw 2; research 1; process 1	4
+blender/15-showcase/sdano/a-code/style.css	code	185	6731	kimi 1; process 1	2
+blender/15-showcase/sdano/b-blender/_shared/fonts.css	code	63	2938	raw 1; process 1	2
+blender/15-showcase/sdano/b-blender/_shared/marketing-tokens.css	code	184	5755	raw 2; research 2; process 5; letters 1	10
+blender/15-showcase/sdano/b-blender/index.html	code	256	9533	research 2; process 2; showcase 1	5
+blender/15-showcase/sdano/b-blender/motion-spec.yaml	data	175	4521	raw 1; research 1; process 2; showcase 1; letters 1	6
+blender/15-showcase/sdano/b-blender/style.css	code	277	10487	kimi 1; process 2; showcase 1	4
+blender/15-showcase/sdano/c-hybrid/_shared/fonts.css	code	63	2938	raw 1; process 1	2
+blender/15-showcase/sdano/c-hybrid/_shared/marketing-tokens.css	code	184	5755	raw 2; research 2; process 5; letters 1	10
+blender/15-showcase/sdano/c-hybrid/index.html	code	259	9656	research 2; process 2; showcase 1	5
+blender/15-showcase/sdano/c-hybrid/motion-spec.yaml	data	219	5952	raw 1; research 1; process 1; showcase 1; letters 2; words 1	7
+blender/15-showcase/sdano/c-hybrid/style.css	code	313	11965	kimi 1; process 2; showcase 1; letters 1	5
+blender/15-showcase/sdano/gallery.json	data	74	3064	letters 2	2
+blender/15-showcase/sdano/numbers.json	data	684	7521	raw 1; process 1; letters 2	4
+blender/15-showcase/velmora/ai/01-mouse-scrub/index.html	code	188	8606	raw 1; research 1; process 2; words 2	6
+blender/15-showcase/velmora/ai/css/demos.css	code	134	4536	process 1; words 1	2
+blender/15-showcase/velmora/ai/js/hero-video.js	code	74	2125	process 1; words 1	2
+blender/15-showcase/velmora/ai/js/scrub.js	code	376	11636	process 2; words 1	3
+blender/15-showcase/velmora/b-blender/css/demos.css	code	134	4536	process 1; words 1	2
+blender/15-showcase/velmora/b-blender/index.html	code	241	11661	raw 1; process 2; showcase 1	4
+blender/15-showcase/velmora/b-blender/js/scrub.js	code	376	11636	process 2; words 1	3
+blender/15-showcase/velmora/gallery.json	data	110	2962	letters 1	1
+blender/15-showcase/zveno/a-code/_shared/fonts.css	code	63	2938	raw 1; process 1	2
+blender/15-showcase/zveno/a-code/_shared/marketing-tokens.css	code	184	5755	raw 2; research 2; process 5; letters 1	10
+blender/15-showcase/zveno/a-code/index.html	code	210	6681	research 2; process 1	3
+blender/15-showcase/zveno/a-code/js/main.js	code	137	4421	raw 1; process 1; showcase 1; letters 4	7
+blender/15-showcase/zveno/a-code/js/motion.js	code	32	1152	words 1	1
+blender/15-showcase/zveno/a-code/motion-spec.yaml	data	208	6246	raw 4; research 1; process 2; showcase 1; letters 1	9
+blender/15-showcase/zveno/a-code/numbers.json	data	2691	27846	machine 6; raw 26; research 6; process 5; showcase 21; letters 7	71
+blender/15-showcase/zveno/a-code/style.css	code	222	8366	process 3	3
+blender/15-showcase/zveno/b-blender/_shared/fonts.css	code	63	2938	raw 1; process 1	2
+blender/15-showcase/zveno/b-blender/_shared/marketing-tokens.css	code	184	5755	raw 2; research 2; process 5; letters 1	10
+blender/15-showcase/zveno/b-blender/index.html	code	213	6850	research 2; process 1; showcase 1	4
+blender/15-showcase/zveno/b-blender/js/main.js	code	218	6196	showcase 1	1
+blender/15-showcase/zveno/b-blender/js/motion.js	code	32	1152	words 1	1
+blender/15-showcase/zveno/b-blender/motion-spec.yaml	data	190	5902	raw 4; research 1; process 2; showcase 2; letters 1	10
+blender/15-showcase/zveno/b-blender/style.css	code	222	8366	process 3	3
+blender/15-showcase/zveno/c-hybrid/_shared/fonts.css	code	63	2938	raw 1; process 1	2
+blender/15-showcase/zveno/c-hybrid/_shared/marketing-tokens.css	code	184	5755	raw 2; research 2; process 5; letters 1	10
+blender/15-showcase/zveno/c-hybrid/index.html	code	212	6816	research 2; process 3; showcase 1	6
+blender/15-showcase/zveno/c-hybrid/js/main.js	code	139	4597	raw 1; showcase 2; letters 4	7
+blender/15-showcase/zveno/c-hybrid/js/motion.js	code	32	1152	words 1	1
+blender/15-showcase/zveno/c-hybrid/motion-spec.yaml	data	208	6246	raw 4; research 1; process 2; showcase 1; letters 1	9
+blender/15-showcase/zveno/c-hybrid/style.css	code	222	8366	process 3	3
+blender/15-showcase/zveno/gallery-CD.json	data	112	3846	process 1; letters 1	2
+blender/15-showcase/zveno/gallery-Z.json	data	79	2507	letters 4	4
+blender/15-showcase/zveno/numbers.json	data	1066	10597	machine 4; raw 2; research 4; showcase 2	12

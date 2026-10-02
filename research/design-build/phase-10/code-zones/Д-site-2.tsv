@@ -1,0 +1,31 @@
+file	kind	lines	tokens	markers	sum
+site/01-foundations/site-brief.schema.json	data	778	20520	kimi 14; research 4; process 3; plan 3; letters 10	34
+site/04-blocks/blocks.schema.json	data	746	9517	raw 1; research 1; process 3; decision 1; letters 1	7
+site/04-blocks/blocks.yaml	data	2394	87387	kimi 1; process 12; decision 11; letters 20	44
+site/04-blocks/page-plan.schema.json	data	1377	19248	raw 1; kimi 5; research 3; process 2; decision 2; letters 5; words 1	19
+site/05-conversion-funnels/lead-forms.yaml	data	486	12469	research 1; process 12; decision 1; letters 5; words 2	21
+site/06-multipage-ia/site-map.schema.json	data	484	13939	kimi 2; research 2; process 3; letters 3	10
+site/07-seo-geo-performance-analytics/budgets.yaml	data	209	7680	research 2; process 3; decision 5; plan 1; showcase 1; words 1	13
+site/07-seo-geo-performance-analytics/crawlers.yaml	data	1028	22782	raw 3; kimi 1; research 1; process 7; decision 1; words 1	14
+site/07-seo-geo-performance-analytics/events.yaml	data	144	9028	raw 1; research 3; process 3; decision 1; letters 3; words 1	12
+site/07-seo-geo-performance-analytics/head-kit.yaml	data	500	18810	raw 3; research 1; process 9; letters 9; words 2	24
+site/07-seo-geo-performance-analytics/page-gates.yaml	data	628	20428	raw 3; kimi 10; k3 7; research 2; process 15; letters 15; words 3	55
+site/08-legal-trust-a11y/legal-requirements.yaml	data	792	18546	process 1; decision 1; letters 3	5
+site/10-playbooks-contracts/examples/corporate-b2b-stalkon/asset-plan.home.yaml	data	80	961	words 1	1
+site/10-playbooks-contracts/examples/corporate-b2b-stalkon/site-brief.yaml	data	160	1721	decision 1	1
+site/10-playbooks-contracts/examples/corporate-b2b-stalkon/site-map.yaml	data	708	7444	letters 2	2
+site/10-playbooks-contracts/examples/lead-services-otves/asset-plan.home.yaml	data	158	1749	words 1	1
+site/10-playbooks-contracts/examples/lead-services-otves/plans/home.yaml	data	1515	18386	process 3; decision 1; letters 2	6
+site/10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml	data	713	9151	process 2; letters 2	4
+site/10-playbooks-contracts/examples/lead-services-otves/stubs-sisters.yaml	data	718	10713	process 1	1
+site/10-playbooks-contracts/examples/saas-okoshko/asset-plan.home.yaml	data	208	2376	words 1	1
+site/10-playbooks-contracts/examples/saas-okoshko/facts.yaml	data	995	11903	raw 1; research 1; process 4; letters 3	9
+site/10-playbooks-contracts/examples/saas-okoshko/plans/home.yaml	data	1234	14833	process 1; letters 5	6
+site/10-playbooks-contracts/examples/saas-okoshko/plans/not-found.yaml	data	174	2126	letters 1	1
+site/10-playbooks-contracts/examples/saas-okoshko/plans/pricing.yaml	data	394	5036	letters 1	1
+site/10-playbooks-contracts/examples/saas-okoshko/plans/privacy.yaml	data	170	2087	letters 1	1
+site/10-playbooks-contracts/examples/saas-okoshko/plans/spasibo.yaml	data	165	2035	letters 1	1
+site/10-playbooks-contracts/examples/saas-okoshko/site-brief.yaml	data	207	2231	process 2; letters 1	3
+site/10-playbooks-contracts/schemas/blocks.schema.json	data	749	9509	raw 1; research 1; process 2; decision 1; letters 1	6
+site/10-playbooks-contracts/schemas/site-brief.schema.json	data	3175	44310	research 4; process 2; decision 2; plan 2; letters 10	20
+site/10-playbooks-contracts/schemas/site-map.schema.json	data	1365	20415	decision 2	2

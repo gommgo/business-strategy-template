@@ -1,51 +1,68 @@
 file	kind	lines	tokens	markers	sum
-blender/09-web-runtime/examples/camera-path-scroll/build_scene.py	code	95	2825	raw 2	2
-blender/09-web-runtime/examples/camera-path-scroll/index.html	code	158	4959	raw 2	2
+blender/09-web-runtime/examples/camera-path-scroll/build_scene.py	code	95	2806	raw 1	1
+blender/09-web-runtime/examples/camera-path-scroll/index.html	code	158	4940	raw 1	1
 blender/09-web-runtime/examples/hero-lazy/hero.js	code	134	3900	raw 1	1
 blender/09-web-runtime/examples/hero-lazy/index.html	code	45	1506	letters 1	1
 blender/09-web-runtime/examples/r3f-hero/build.sh	code	13	450	machine 1; research 1	2
-blender/09-web-runtime/examples/r3f-hero/index.html	code	40	1084	raw 1	1
 blender/09-web-runtime/examples/r3f-hero/src/Hero.jsx	code	100	2370	process 1	1
-blender/09-web-runtime/examples/shader-background/index.html	code	153	5638	raw 1	1
 blender/09-web-runtime/page-3d-gates.yaml	data	91	1571	letters 2	2
-blender/12-recipes/examples/01-hero-product/build.py	code	55	1622	raw 1; process 2; letters 2	5
+blender/12-recipes/examples/01-hero-product/build.py	code	55	1604	process 2; letters 2	4
 blender/12-recipes/examples/01-hero-product/dist/RoomEnvironment-F4HHI32D.js	code	1	1013	letters 1	1
 blender/12-recipes/examples/01-hero-product/dist/hero.js	code	1	2211	letters 1	1
-blender/12-recipes/examples/01-hero-product/index.html	code	46	1531	raw 1; process 1; letters 2	4
+blender/12-recipes/examples/01-hero-product/index.html	code	46	1505	letters 2	2
 blender/12-recipes/examples/01-hero-product/web/case/web_stats.json	data	79	692	letters 1	1
-blender/12-recipes/examples/02-icon-series/build.py	code	129	3623	raw 1; process 2	3
-blender/12-recipes/examples/02-icon-series/post.py	code	38	1265	raw 1; process 1	2
+blender/12-recipes/examples/02-icon-series/build.py	code	129	3605	process 2	2
+blender/12-recipes/examples/02-icon-series/post.py	code	38	1247	process 1	1
 blender/12-recipes/examples/02-icon-series/web/icon_bell/web_stats.json	data	77	941	machine 6; research 6; letters 1	13
 blender/12-recipes/examples/02-icon-series/web/icon_chat/web_stats.json	data	77	941	machine 6; research 6; letters 1	13
 blender/12-recipes/examples/02-icon-series/web/icon_folder/web_stats.json	data	77	949	machine 6; research 6; letters 1	13
-blender/12-recipes/examples/03-device-mockup/build.py	code	116	3598	raw 2; process 2	4
+blender/12-recipes/examples/03-device-mockup/build.py	code	116	3580	raw 1; process 2	3
 blender/12-recipes/examples/03-device-mockup/web/phone/web_stats.json	data	79	963	machine 6; research 6; letters 1	13
 blender/12-recipes/examples/03-device-mockup/web/phone_phone/web_stats.json	data	80	1001	machine 6; research 6; letters 1	13
-blender/12-recipes/examples/04-abstract-sculpture/build.py	code	55	1778	raw 1; process 2; letters 2	5
+blender/12-recipes/examples/04-abstract-sculpture/build.py	code	55	1759	process 2; letters 2	4
 blender/12-recipes/examples/04-abstract-sculpture/web/sculpture_ink_34/web_stats.json	data	78	1004	machine 6; research 6; letters 1	13
 blender/12-recipes/examples/04-abstract-sculpture/web/sculpture_pearl_23/web_stats.json	data	78	1012	machine 6; research 6; letters 1	13
-blender/12-recipes/examples/05-scroll-showcase/build.py	code	72	1967	raw 1; process 2; letters 2	5
-blender/12-recipes/examples/05-scroll-showcase/index.html	code	86	2337	raw 1; process 2	3
+blender/12-recipes/examples/05-scroll-showcase/build.py	code	72	1949	process 2; letters 2	4
+blender/12-recipes/examples/05-scroll-showcase/index.html	code	86	2318	process 2	2
 blender/12-recipes/examples/05-scroll-showcase/web/case_reveal/web_stats.json	data	83	1000	machine 6; research 6; letters 1	13
-blender/12-recipes/examples/06-logo-3d-particles/build.py	code	40	1180	raw 1; process 1	2
-blender/12-recipes/examples/06-logo-3d-particles/index.html	code	74	2184	raw 1	1
+blender/12-recipes/examples/06-logo-3d-particles/build.py	code	40	1162	process 1	1
 blender/12-recipes/examples/06-logo-3d-particles/web/logo/web_stats.json	data	77	938	machine 6; research 6; letters 1	13
-blender/12-recipes/examples/07-lowpoly-diorama/build.py	code	107	3304	raw 1; process 2; letters 2	5
+blender/12-recipes/examples/07-lowpoly-diorama/build.py	code	107	3286	process 2; letters 2	4
 blender/12-recipes/examples/07-lowpoly-diorama/web/island/web_stats.json	data	78	953	machine 6; research 6; letters 1	13
-blender/12-recipes/examples/08-sequence-video-alpha/build.py	code	37	1016	raw 1; process 1	2
-blender/12-recipes/examples/08-sequence-video-alpha/index.html	code	23	694	raw 1	1
+blender/12-recipes/examples/08-sequence-video-alpha/build.py	code	37	997	process 1	1
 blender/12-recipes/examples/08-sequence-video-alpha/numbers.json	data	22	201	machine 1; research 1	2
-blender/12-recipes/examples/08-sequence-video-alpha/post.py	code	26	909	raw 1; process 2	3
-blender/12-recipes/examples/09-glass-product/build.py	code	64	2065	raw 1; process 1; letters 2	4
-blender/12-recipes/examples/09-glass-product/index.html	code	54	1747	raw 1; letters 1	2
-blender/12-recipes/examples/09-glass-product/index_css.html	code	54	1746	raw 1; letters 1	2
+blender/12-recipes/examples/08-sequence-video-alpha/post.py	code	26	891	process 2	2
+blender/12-recipes/examples/09-glass-product/build.py	code	64	2047	process 1; letters 2	3
+blender/12-recipes/examples/09-glass-product/index.html	code	54	1729	letters 1	1
+blender/12-recipes/examples/09-glass-product/index_css.html	code	54	1728	letters 1	1
 blender/12-recipes/examples/09-glass-product/web/glass/web_stats.json	data	81	990	machine 6; research 6; letters 1	13
-blender/12-recipes/examples/10-instance-field/build.py	code	56	1757	raw 1; process 1	2
+blender/12-recipes/examples/10-instance-field/build.py	code	56	1739	process 1	1
 blender/12-recipes/examples/10-instance-field/web/field/web_stats.json	data	78	955	machine 6; research 6; letters 1	13
-blender/12-recipes/examples/11-shader-background/index.html	code	152	5570	raw 1	1
-blender/12-recipes/examples/12-model-viewer-ar/build.py	code	63	2329	raw 1; process 2	3
+blender/12-recipes/examples/12-model-viewer-ar/build.py	code	63	2307	process 1	1
 blender/12-recipes/examples/12-model-viewer-ar/index.html	code	28	1019	raw 1	1
-blender/13-tools-atlas/atlas.tsv	data	157	16662	process 10; letters 6; words 1	17
+blender/12-recipes/examples/13-wow-light-hero/src/brender.py	code	467	11459	letters 3	3
+blender/12-recipes/examples/13-wow-light-hero/src/kbb.py	code	743	16582	process 1; letters 3	4
+blender/12-recipes/examples/13-wow-light-hero/src/kbm.py	code	61	1332	process 2	2
+blender/12-recipes/examples/13-wow-light-hero/src/kbp.py	code	183	6144	process 1; showcase 2; letters 1	4
+blender/12-recipes/examples/13-wow-light-hero/src/kbr.py	code	270	5585	process 1	1
+blender/12-recipes/examples/13-wow-light-hero/src/zkin.py	code	72	1291	process 1	1
+blender/12-recipes/examples/13-wow-light-hero/src/zmat.py	code	223	5911	process 1	1
+blender/12-recipes/examples/13-wow-light-hero/src/zmetrics.py	code	114	2869	process 1	1
+blender/12-recipes/examples/13-wow-light-hero/src/zpass.py	code	66	1639	process 1	1
+blender/12-recipes/examples/13-wow-light-hero/src/zrender.py	code	303	8238	process 1; letters 1	2
+blender/12-recipes/examples/13-wow-light-hero/src/zstudio.py	code	430	9868	process 1	1
+blender/12-recipes/examples/14-product-in-code/src/build.sh	code	47	1395	process 1; showcase 3	4
+blender/12-recipes/examples/14-product-in-code/src/model_a.js	code	389	11596	letters 8	8
+blender/12-recipes/examples/15-hybrid-blender-code/src/model_c.js	code	181	4520	letters 1	1
+blender/12-recipes/examples/15-hybrid-blender-code/src/zbuild.py	code	531	14561	letters 4	4
+blender/12-recipes/examples/15-hybrid-blender-code/src/zgeo.py	code	303	6779	process 1; letters 1	2
+blender/12-recipes/examples/15-hybrid-blender-code/src/zweb_all.py	code	305	7073	showcase 1	1
+blender/12-recipes/examples/16-relight-by-passes/src/fonarik.js	code	279	10217	showcase 1; letters 2	3
+blender/12-recipes/examples/16-relight-by-passes/src/passes_convert.py	code	94	2088	letters 1	1
+blender/12-recipes/examples/16-relight-by-passes/src/run_v2.py	code	153	3500	letters 2	2
+blender/12-recipes/examples/16-relight-by-passes/src/sdano_lib.py	code	636	14422	process 1; showcase 2; letters 2	5
+blender/12-recipes/examples/16-relight-by-passes/src/sdano_v2.py	code	239	5723	process 1	1
+blender/13-tools-atlas/atlas.tsv	data	157	16647	process 6; letters 6; words 1	13
 blender/15-showcase/_shared/code3d/build.sh	code	34	1600	process 2; showcase 1	3
 blender/15-showcase/_shared/code3d/src/detail.js	code	89	3148	process 1	1
 blender/15-showcase/_shared/code3d/src/glb-modules.js	code	241	7506	process 2; letters 2	4

@@ -1,0 +1,21 @@
+file	kind	lines	tokens	markers	sum
+text/07-seo-geo-copy/geo-checklist.yaml	data	331	10652	raw 2; research 1; process 4; letters 9; words 1	17
+text/07-seo-geo-copy/geo-rules.yaml	data	173	7659	raw 2; research 1; process 2; letters 1	6
+text/07-seo-geo-copy/meta-rules.yaml	data	300	11299	raw 3; research 1; process 2; letters 1	7
+text/08-russian-legal-typography/claims-rules.yaml	data	1319	38921	research 2; process 4; decision 1; letters 6	13
+text/08-russian-legal-typography/typography-rules.yaml	data	307	7561	research 2; process 2; letters 4	8
+text/09-ai-generation-evaluation/copy-checklist.yaml	data	458	11336	raw 9; kimi 2; k3 1; research 4; process 24; journal 1; removed 1; letters 13; words 1	56
+text/09-ai-generation-evaluation/copy-rubric.yaml	data	604	16794	raw 4; kimi 1; research 3; process 16; journal 1; plan 1; letters 5; words 4	35
+text/10-templates-recipes/before-after.tsv	data	541	67447	raw 54; process 138; letters 20; words 43	255
+text/10-templates-recipes/copy-deck.schema.json	data	627	23130	research 1; plan 2; letters 11	14
+text/10-templates-recipes/examples/en-okoshko-saas.yaml	data	313	6520	letters 1	1
+text/10-templates-recipes/examples/en-otves-case.yaml	data	181	4000	letters 1	1
+text/10-templates-recipes/examples/facts/facts-demo-saas-okoshko-en.yaml	data	264	9385	raw 2; research 1; process 8; letters 1	12
+text/10-templates-recipes/examples/facts/facts-demo-saas-okoshko.yaml	data	406	11793	raw 2; research 1; process 7; letters 5	15
+text/10-templates-recipes/examples/facts/facts-demo-webinar-okoshko.yaml	data	647	7858	raw 1; research 1; process 7; letters 1	10
+text/10-templates-recipes/examples/facts/facts-otves-en.yaml	data	403	5642	raw 1; research 1; process 10; letters 3	15
+text/10-templates-recipes/examples/ru-kvarts-preorder.yaml	data	573	8215	raw 1; letters 3	4
+text/10-templates-recipes/examples/ru-okoshko-saas.yaml	data	768	10495	raw 1; letters 3	4
+text/10-templates-recipes/examples/ru-otves-article-faq.yaml	data	229	4622	letters 1	1
+text/10-templates-recipes/examples/ru-otves-case.yaml	data	182	3544	letters 1	1
+text/10-templates-recipes/examples/ru-otves-lead.yaml	data	651	9210	raw 1; letters 5	6

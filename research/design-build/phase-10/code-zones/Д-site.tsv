@@ -1,19 +1,19 @@
 file	kind	lines	tokens	markers	sum
-site/01-foundations/site-brief.schema.json	data	778	20543	kimi 14; research 9; process 3; plan 3; letters 10	39
+site/01-foundations/site-brief.schema.json	data	778	20520	kimi 14; research 4; process 3; plan 3; letters 10	34
 site/02-site-types/crosswalk.tsv	data	710	56789	raw 145; letters 15	160
 site/02-site-types/vocabulary.yaml	data	652	31751	research 5; process 9; decision 4; plan 1; letters 10	29
-site/04-blocks/blocks.schema.json	data	746	9522	raw 1; research 2; process 3; decision 1; letters 1	8
-site/04-blocks/blocks.yaml	data	2394	87475	kimi 1; process 40; decision 11; letters 20	72
-site/04-blocks/page-plan.schema.json	data	1377	19252	raw 1; kimi 5; research 4; process 2; decision 2; letters 5; words 1	20
+site/04-blocks/blocks.schema.json	data	746	9517	raw 1; research 1; process 3; decision 1; letters 1	7
+site/04-blocks/blocks.yaml	data	2394	87387	kimi 1; process 12; decision 11; letters 20	44
+site/04-blocks/page-plan.schema.json	data	1377	19248	raw 1; kimi 5; research 3; process 2; decision 2; letters 5; words 1	19
 site/05-conversion-funnels/lead-forms.yaml	data	486	12469	research 1; process 12; decision 1; letters 5; words 2	21
-site/06-multipage-ia/site-map.schema.json	data	484	13943	kimi 2; research 3; process 3; letters 3	11
+site/06-multipage-ia/site-map.schema.json	data	484	13939	kimi 2; research 2; process 3; letters 3	10
 site/07-seo-geo-performance-analytics/budgets.yaml	data	209	7680	research 2; process 3; decision 5; plan 1; showcase 1; words 1	13
 site/07-seo-geo-performance-analytics/crawlers.yaml	data	1028	22782	raw 3; kimi 1; research 1; process 7; decision 1; words 1	14
 site/07-seo-geo-performance-analytics/events.yaml	data	144	9028	raw 1; research 3; process 3; decision 1; letters 3; words 1	12
-site/07-seo-geo-performance-analytics/head-kit.yaml	data	500	18870	raw 4; research 1; process 21; letters 9; words 2	37
-site/07-seo-geo-performance-analytics/page-gates.yaml	data	628	20444	raw 3; kimi 10; k3 7; research 2; process 15; letters 15; words 3	55
+site/07-seo-geo-performance-analytics/head-kit.yaml	data	500	18810	raw 3; research 1; process 9; letters 9; words 2	24
+site/07-seo-geo-performance-analytics/page-gates.yaml	data	628	20428	raw 3; kimi 10; k3 7; research 2; process 15; letters 15; words 3	55
 site/08-legal-trust-a11y/legal-requirements.yaml	data	792	18546	process 1; decision 1; letters 3	5
-site/09-ai-generation-evaluation/ai-landing-markers.yaml	data	1130	28740	raw 9; kimi 27; k3 7; research 16; process 25; decision 12; plan 2; letters 8; words 1	107
+site/09-ai-generation-evaluation/ai-landing-markers.yaml	data	1130	28729	raw 9; kimi 27; k3 7; research 16; process 25; decision 12; plan 2; letters 8; words 1	107
 site/09-ai-generation-evaluation/site-checklist.yaml	data	3915	78898	raw 24; kimi 23; research 26; process 27; decision 18; letters 7	125
 site/09-ai-generation-evaluation/site-rubric.json	data	733	9921	k3 2; research 1; process 2; journal 1; letters 2	8
 site/09-ai-generation-evaluation/ux-marketing-profile.tsv	data	435	36880	decision 177	177
@@ -23,7 +23,7 @@ site/10-playbooks-contracts/examples/corporate-b2b-stalkon/site-map.yaml	data	70
 site/10-playbooks-contracts/examples/lead-services-otves/asset-plan.home.yaml	data	158	1749	words 1	1
 site/10-playbooks-contracts/examples/lead-services-otves/plans/home.yaml	data	1515	18386	process 3; decision 1; letters 2	6
 site/10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml	data	713	9151	process 2; letters 2	4
-site/10-playbooks-contracts/examples/lead-services-otves/stubs-sisters.yaml	data	718	10718	research 1; process 1	2
+site/10-playbooks-contracts/examples/lead-services-otves/stubs-sisters.yaml	data	718	10713	process 1	1
 site/10-playbooks-contracts/examples/saas-okoshko/asset-plan.home.yaml	data	208	2376	words 1	1
 site/10-playbooks-contracts/examples/saas-okoshko/facts.yaml	data	995	11903	raw 1; research 1; process 4; letters 3	9
 site/10-playbooks-contracts/examples/saas-okoshko/plans/home.yaml	data	1234	14833	process 1; letters 5	6
@@ -32,7 +32,6 @@ site/10-playbooks-contracts/examples/saas-okoshko/plans/pricing.yaml	data	394	50
 site/10-playbooks-contracts/examples/saas-okoshko/plans/privacy.yaml	data	170	2087	letters 1	1
 site/10-playbooks-contracts/examples/saas-okoshko/plans/spasibo.yaml	data	165	2035	letters 1	1
 site/10-playbooks-contracts/examples/saas-okoshko/site-brief.yaml	data	207	2231	process 2; letters 1	3
-site/10-playbooks-contracts/schemas/blocks.schema.json	data	749	9513	raw 1; research 2; process 2; decision 1; letters 1	7
-site/10-playbooks-contracts/schemas/page-plan.schema.json	data	1953	28359	research 5	5
-site/10-playbooks-contracts/schemas/site-brief.schema.json	data	3171	44285	research 9; process 2; decision 2; plan 2; letters 10	25
-site/10-playbooks-contracts/schemas/site-map.schema.json	data	1365	20419	research 1; decision 2	3
+site/10-playbooks-contracts/schemas/blocks.schema.json	data	749	9509	raw 1; research 1; process 2; decision 1; letters 1	6
+site/10-playbooks-contracts/schemas/site-brief.schema.json	data	3175	44310	research 4; process 2; decision 2; plan 2; letters 10	20
+site/10-playbooks-contracts/schemas/site-map.schema.json	data	1365	20415	decision 2	2
