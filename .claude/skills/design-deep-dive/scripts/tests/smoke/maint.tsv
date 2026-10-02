@@ -8,5 +8,6 @@ scripts/maint/data/sync.yaml	data	data
 scripts/maint/data/traces.tsv	data	data	
 scripts/maint/fixture_gen.py	maint	help; run: --selftest	
 scripts/maint/mapcheck.py	maint	help; run: --selftest; run: {skill}/kb/INDEX.md	
+scripts/maint/normcheck.py	maint	help; run: --selftest	
 scripts/maint/refcheck.py	maint	help; run: --selftest	
 scripts/maint/sync_check.py	maint	help; run: --selftest; run: copies; run: descriptions	
