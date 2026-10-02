@@ -536,6 +536,8 @@ channels:
     catalog: "99-raw/experiments/P/04-ru-aggregators/routerai_models.json (23.09.2026 09:34, supported_parameters)"
     price_source: "99-raw/experiments/P/05-price-compare/price_table_2026-09-23.md (RouterAI ×1,30 к ЦБ)"
     input_reference: {type: image_url, image_url: {url: "{src}"}}   # src → data URI при отправке (клиент B2)
+    # output_format модели — формат, который она отдаёт, когда его не называет маршрут задачи (routing.yaml); без поля —
+    # png. У векторных моделей — svg: другого формата канал у них не принимает (supported_output_formats каталога).
     models:
       black-forest-labs/flux.2-pro:  {family: flux2, params: [aspect_ratio, output_format, n, input_references, seed], price_rub: 3.28, price_unit: "картинка ≤ 1 Мп", upsampling: "не управляется: disable_pup нет в supported_parameters"}
       black-forest-labs/flux.2-flex: {family: flux2, params: [aspect_ratio, output_format, n, input_references, seed], price_rub: 6.56, price_unit: "картинка ≤ 1 Мп", upsampling: "не управляется"}
@@ -543,7 +545,8 @@ channels:
       openai/gpt-image-2.5-flare:    {family: gpt-image, params: [aspect_ratio, quality, background, n, input_references, output_compression], price_rub: 1.44, price_unit: "1024² medium, по токенам (P/05)"}
       bytedance-seed/seedream-4.5:   {family: seedream, params: [resolution, aspect_ratio, n, input_references, seed], price_rub: 4.37, price_unit: "картинка"}
       recraft/recraft-v4.1:          {family: recraft-v4, params: [aspect_ratio, n, input_references], price_rub: 3.82, price_unit: "картинка"}
-      recraft/recraft-v4.1-vector:   {family: recraft-v4, params: [aspect_ratio, output_format, n, input_references], price_rub: 8.74, price_unit: "картинка"}
+      recraft/recraft-v4.1-vector:   {family: recraft-v4, params: [aspect_ratio, output_format, n, input_references], output_format: svg, price_rub: 8.74, price_unit: "картинка"}
+      recraft/recraft-v4.1-pro-vector: {family: recraft-v4, params: [aspect_ratio, output_format, n, input_references], output_format: svg, price_rub: 33.11, price_unit: "картинка"}
   genapi:
     method: POST
     path: "/api/v1/networks/{network}"   # ответ {request_id, status: starting}; результат GET /api/v1/request/get/{request_id}

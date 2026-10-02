@@ -12,12 +12,15 @@
   - текстовые единицы артборда — заголовки, абзацы, пункты, подписи, кнопки и ссылки, ячейки, опции, подсказки полей
     (`placeholder`), текст прямо в контейнере; ветки `<sc-if>` читаются все (правка бывает в любом состоянии), alt и
     подписи картинок не берутся (они — ассеты, `assets.md`), текст с дыркой `{{…}}` — шаблон, он идёт строкой без слота;
+  - ярлык вайрфрейма — элемент с атрибутом `data-wf` (роль секции, подпись заглушки медиа) — пометка для чтения
+    артборда, а не текст страницы: единицей не становится и в copy deck не попадает;
   - секция — атрибут `data-section` или `id` предка, равный id секции плана (id секций холста = id плана, протокол §
     Вход холста); `header`, `footer`, `nav` без id — секция плана с тем же именем, если она есть;
   - слот — атрибут `data-slot`; иначе текст равен тексту слота copy deck (любого варианта) или строке `copy.md`
     входа; иначе — по месту: несопоставленный текст секции и несопоставленный слот той же секции в порядке документа,
     если тег подходит типу слота (заголовок — h1…h6, кнопка — a или button, абзац — p и т. п.; пара «по месту»
-    помечена комментарием `# по месту: …`);
+    помечена комментарием `# по месту: …`); слоты alt, подписи картинки и текста в картинке текстом на артборде не
+    стоят и в сопоставление по тексту и по месту не входят — иначе чужой текст секции занял бы слот alt;
   - остальное — `[? <тег>]` в своей секции или в `## ?` с подписью ориентира (aria-label, id, тег);
   - несколько артбордов одной страницы (десктоп и телефон) сводятся в один файл: у слота — текст первого артборда,
     другой текст того же слота с другого артборда — строка `[? <slot_id> · <артборд>]`.
@@ -37,6 +40,7 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import html
 import json
 import re
@@ -115,7 +119,8 @@ def norm(s):
 # ------------------------------------------------------------------ текстовые единицы артборда
 
 def _text_of(node):
-    """Текст узла: текстовые узлы, <br> — перевод строки; скрытые подпапки (svg, script) не читаются."""
+    """Текст узла: текстовые узлы, <br> — перевод строки; скрытые подпапки (svg, script) и ярлыки вайрфрейма
+    (`data-wf`) не читаются."""
     out = []
     for ch in node.children:
         if isinstance(ch, DC.Tx):
@@ -123,7 +128,7 @@ def _text_of(node):
                 out.append(ch.raw)
         elif ch.tag == "br":
             out.append("\n")
-        elif ch.tag not in SKIP:
+        elif ch.tag not in SKIP and "data-wf" not in ch.attrs:
             out.append("".join(_text_of(ch)))
     return "".join(out)
 
@@ -177,8 +182,8 @@ def units_of(ab, plan_sections=()):
 
     def rec(node, stack, in_block):
         for ch in node.children:
-            if not isinstance(ch, DC.El) or ch.tag in SKIP or DC.is_logic(ch):
-                continue
+            if not isinstance(ch, DC.El) or ch.tag in SKIP or DC.is_logic(ch) or "data-wf" in ch.attrs:
+                continue                               # ярлык вайрфрейма — пометка артборда, не текст страницы
             st = stack + [ch]
             if ch.tag in ("input", "textarea") and ch.attrs.get("placeholder"):
                 add(ch, st, html.unescape(ch.attrs["placeholder"]), "placeholder")
@@ -238,6 +243,13 @@ def tag_fits(stype, tag):
     return True if allowed is None else tag in allowed
 
 
+@functools.lru_cache(maxsize=None)
+def asset_slot_types():
+    """Типы слотов, чей текст на артборде текстом не стоит (alt, подпись картинки, текст в картинке): их не выгружает
+    `copy.md` входа — список владельца, карта `copy_md.not_exported` схемы copy deck."""
+    return frozenset(CD.copy_md_rules()["not_exported"])
+
+
 def assign(units, ref):
     """Единицы → (секция, слот, способ): data-slot · текст · по месту · без слота."""
     plan_secs = []
@@ -254,7 +266,8 @@ def assign(units, ref):
         if res[i] or u.template or not ref:
             continue
         t = norm(u.text)
-        cands = [r for r in ref if t in r.texts and (r.section, r.slot) not in used]
+        cands = [r for r in ref if t in r.texts and (r.section, r.slot) not in used
+                 and r.stype not in asset_slot_types()]
         pick = next((r for r in cands if r.section == u.section), None) or (cands[0] if cands and not u.section else None)
         if pick is None and cands and u.section and u.section not in plan_secs:
             pick = cands[0]
@@ -265,7 +278,7 @@ def assign(units, ref):
         if res[i] or u.template or not u.section or u.section not in plan_secs:
             continue
         pick = next((r for r in ref if r.section == u.section and (r.section, r.slot) not in used
-                     and tag_fits(r.stype, u.tag)), None)
+                     and r.stype not in asset_slot_types() and tag_fits(r.stype, u.tag)), None)
         if pick:
             res[i] = (pick.section, pick.slot, "по месту")
             used.add((pick.section, pick.slot))
@@ -480,6 +493,32 @@ def selftest():
         refc = ref_from_copy_md(export)
         _t5, _s5, stat5, _n5 = extract([td / "Home.dc.html"], refc, page)
         check("план из copy.md входа — те же места", stat5["текст"], n_export)
+        # вайрфрейм: ярлык роли секции и свободный слот alt той же секции — ярлык не текст, слот alt не место
+        import copy as _copy
+        data_alt = _copy.deepcopy(data)
+        hero = next(s for s in CD.sections_of(CD.pages_of(CD.deck_root(data_alt))[0]) if s.get("section_id") == "hero")
+        hero["slots"].append({"slot_id": "alt-hero", "slot_type": "image-alt", "asset_ref": "hero", "chosen": "a",
+                              "variants": [{"id": "a", "text": "Прораб с рулеткой в пустой комнате", "status": "draft"}]})
+        ref_alt = ref_from_deck(data_alt, page)
+        check("слот alt есть в плане страницы", [r.slot for r in ref_alt if r.stype in asset_slot_types()], ["alt-hero"])
+        label = '<div data-wf="role">Первый экран · hero — кадр во всю ширину</div>'
+        wf = ab_text.replace('<section id="hero" style="padding: 24px;">', '<section id="hero" style="padding: 24px;">' + label, 1)
+        check("артборд вайрфрейма несёт ярлык роли", label in wf)
+        (td / "Home.dc.html").write_text(wf, encoding="utf-8")
+        t8, _s8, stat8, _n8 = extract([td / "Home.dc.html"], ref_alt, page)
+        check("ярлык data-wf — не единица текста: слот alt не занят, строки ярлыка в copy.md нет",
+              (stat8["по месту"], stat8["без слота"], stat8["текст"], "Первый экран" in t8), (0, 0, n_export, False))
+        inline = ab_text.replace("</h1>", '<span data-wf="role">H1 · headline</span></h1>', 1)
+        (td / "Home.dc.html").write_text(inline, encoding="utf-8")
+        t8i, _s8i, stat8i, _n8i = extract([td / "Home.dc.html"], ref_alt, page)
+        check("ярлык data-wf внутри текстового элемента в его текст не входит",
+              (stat8i["текст"], stat8i["по месту"], stat8i["без слота"], "headline" in t8i), (n_export, 0, 0, False))
+        ab9, _ = artboard_from(data_alt, page, extra=("hero", "Выезд замерщика в день обращения"))
+        (td / "Home.dc.html").write_text(ab9, encoding="utf-8")
+        t9, _s9, stat9, n9 = extract([td / "Home.dc.html"], ref_alt, page)
+        check("новый абзац секции со свободным слотом alt — [? p], а не «по месту» в alt",
+              (stat9["по месту"], "[? p]: Выезд замерщика в день обращения" in t9, any("alt-hero" in n for n in n9)),
+              (0, True, False))
     spica = DC.EXAMPLE / "canvas" / "project"
     t6, s6, stat6, _n6 = extract([spica / "Main.dc.html"])
     ids = [s["section_id"] for s in s6]

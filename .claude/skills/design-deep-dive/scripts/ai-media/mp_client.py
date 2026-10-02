@@ -47,13 +47,15 @@ POLZA_BASE_URL (https://polza.ai/api, общий с polza.py); бюджеты RO
 
 Коды выхода (как у polza.py): 0 — успех; 1 — ошибка задания/проверки (в том числе незаполненный шаблон, задание оценки,
 3D-сеть); 2 — отказ по бюджету или цене; 3 — таймаут опроса (дожать: download ID --channel C --live); 4 — генерация
-failed / error / expired / cancelled; 5 — HTTP-ошибка; 6 — ошибка скачивания.
+failed / error / expired / cancelled или ответ без результата: тело и заголовки ответа канала — в паспорте задания
+(<тег>__<модель>__<id>.passport.json, поле response); 5 — HTTP-ошибка; 6 — ошибка скачивания.
 """
 from __future__ import annotations
 
 import argparse
 import base64
 import concurrent.futures as cf
+import contextlib
 import datetime as dt
 import fcntl
 import hashlib
@@ -90,6 +92,7 @@ DEFAULT_OUT_ROOT = kbpaths.out("ai-media", "_mp")
 P04 = kbpaths.data("ai-media")  # прайс Gen-API — scripts/ai-media/data/; каталог RouterAI — снимок snapshot
 MAX_PARALLEL = 3
 EXIT_OK, EXIT_JOB, EXIT_BUDGET, EXIT_TIMEOUT, EXIT_FAILED, EXIT_HTTP, EXIT_DOWNLOAD = 0, 1, 2, 3, 4, 5, 6
+RESPONSE_TEXT_MAX = 20000            # тело ответа не JSON в паспорте отказа: первые символы, остальное — длиной и sha256
 INLINE_WARN = 4 * 1024 * 1024        # больше — предупреждение (тело запроса тяжёлое)
 INLINE_MAX = 20 * 1024 * 1024        # больше — ошибка (дайте публичный URL)
 FX_ROUTERAI_DEFAULT = 109.285        # ₽/$ RouterAI к ценам OpenRouter (3,82498935 ₽ / $0,035 у Recraft V4.1; P/04)
@@ -2055,6 +2058,11 @@ class Run:
         self.label = prep.label
         self.t0 = time.time()
         self.submitted_at = now_iso()
+        self.last: Resp | None = None       # последний ответ канала: при отказе его тело и заголовки идут в паспорт
+
+    def request(self, method: str, url: str, **kw) -> Resp:
+        self.last = self.http.request(method, url, **kw)
+        return self.last
 
     def ev(self, event: str, **kw):
         self.ctx.ledger.append({"event": event, "uid": self.prep.uid, "base_url": self.base,
@@ -2098,9 +2106,9 @@ class Run:
         d = out_dir_for(self.ctx, self.prep.job, self.prep.agent)
         return d / base_name(self.prep.tag, self.prep.model, gen_id)
 
-    def finish(self, gen_id, files: list[dict], cost, resp_create, resp_final, polls=0, extra=None) -> int:
+    def passport_head(self, gen_id) -> dict:
         p = self.prep
-        passport = {
+        return {
             "schema": "mp-passport/1", "client": VERSION, "channel": p.channel, "kind": p.kind, "uid": p.uid,
             "request_hash": p.request_hash, "id": gen_id,
             "job": {**{k: p.job.get(k) for k in ("tag", "agent", "notes", "variant", "channel", "path", "price_rub",
@@ -2109,7 +2117,23 @@ class Run:
             "model": p.model, "prompt": prompt_of(p.body),
             "request": {"method": "POST", "url": self.http.url(p.api_path or ""), "body": shorten(p.body)},
             "catalog": {"source": p.estimate.get("source"), "estimate": p.estimate, "issues": p.issues,
-                        "filled": p.filled, "inputs": p.files},
+                        "filled": p.filled, "inputs": p.files}}
+
+    def response_record(self) -> dict | None:
+        """Последний ответ канала для паспорта отказа: статус, заголовки (без cookie), тело — JSON с сокращённым
+        base64, иначе начало текста; длина и sha256 — всего тела."""
+        r = self.last
+        if r is None:
+            return None
+        text = r.body.decode("utf-8", "replace")
+        return {"http_status": r.status, "headers": {k: v for k, v in r.headers.items() if k != "set-cookie"},
+                "bytes": len(r.body), "sha256": sha256_hex(r.body),
+                "body": shorten(r.json) if r.json is not None else text[:RESPONSE_TEXT_MAX]}
+
+    def finish(self, gen_id, files: list[dict], cost, resp_create, resp_final, polls=0, extra=None) -> int:
+        p = self.prep
+        passport = {
+            **self.passport_head(gen_id),
             "response_create": shorten(resp_create), "response_final": shorten(resp_final),
             "timing": {"submitted_at": self.submitted_at, "completed_at": now_iso(),
                        "wall_s": round(time.time() - self.t0, 2), "polls": polls},
@@ -2130,10 +2154,19 @@ class Run:
         return EXIT_OK
 
     def fail(self, gen_id, status, cost, error, final=None) -> int:
+        """Отказ или ответ без результата: паспорт без файлов с телом и заголовками последнего ответа канала — по
+        одной строке журнала причину отказа не разобрать."""
+        passport = {**self.passport_head(gen_id), "status": status, "error": shorten(error),
+                    "response": self.response_record(),
+                    "timing": {"submitted_at": self.submitted_at, "completed_at": now_iso(),
+                               "wall_s": round(time.time() - self.t0, 2)},
+                    "cost": {"usage_cost_rub": cost or 0.0, "estimate_rub": self.prep.estimate.get("rub")},
+                    "files": [], "base_url": self.base}
+        pp = write_passport([], passport, self.out_base(gen_id))
         self.ev("cancelled" if status == "cancelled" else "failed", id=gen_id, status=status, cost_rub=cost or 0.0,
-                error=shorten(error))
-        say(f"  [{self.label}] {str(status).upper()}: {jdump(shorten(error), None)[:600]}; списано {cost or 0} ₽",
-            err=True)
+                error=shorten(error), passport=pp)
+        say(f"  [{self.label}] {str(status).upper()}: {jdump(shorten(error), None)[:600]}; списано {cost or 0} ₽; "
+            f"ответ канала — в паспорте {pp}", err=True)
         return EXIT_FAILED
 
     def download_error(self, gen_id, cost, e, hint) -> int:
@@ -2146,7 +2179,7 @@ class Run:
         max_wait = self.ctx.a.max_wait or (1800.0 if kind == "video" else 900.0)
         t0, n, last, st = time.time(), 0, None, {}
         while True:
-            st = self.http.request("GET", url).json or {}
+            st = self.request("GET", url).json or {}
             n += 1
             s = st.get("status")
             if s != last:
@@ -2188,7 +2221,7 @@ def sync_timeout(ctx: Ctx, kind: str) -> float:
 def run_ra_image(run: Run) -> int:
     p = run.prep
     try:
-        r = run.http.request("POST", run.http.url("/v1/images"), body=p.body, timeout=sync_timeout(run.ctx, "ra-image"))
+        r = run.request("POST", run.http.url("/v1/images"), body=p.body, timeout=sync_timeout(run.ctx, "ra-image"))
     except ApiError as e:
         return run.post_error(e)
     j = r.json or {}
@@ -2209,7 +2242,7 @@ def run_ra_image(run: Run) -> int:
 def run_ra_video(run: Run) -> int:
     p = run.prep
     try:
-        r = run.http.request("POST", run.http.url("/v1/videos"), body=p.body, retry_429_base=10.0, retries=7)
+        r = run.request("POST", run.http.url("/v1/videos"), body=p.body, retry_429_base=10.0, retries=7)
     except ApiError as e:
         return run.post_error(e)
     j = r.json or {}
@@ -2251,7 +2284,7 @@ def run_genapi(run: Run) -> int:
     p = run.prep
     sync = p.kind == "ga-sync"
     try:
-        r = run.http.request("POST", run.http.url(p.api_path), body=p.body,
+        r = run.request("POST", run.http.url(p.api_path), body=p.body,
                              timeout=sync_timeout(run.ctx, "ga-sync") if sync else None)
     except ApiError as e:
         return run.post_error(e)
@@ -2347,7 +2380,7 @@ def strip_fence(t: str) -> str:
 def run_chat(run: Run) -> int:
     p = run.prep
     try:
-        r = run.http.request("POST", run.http.url("/v1/chat/completions"), body=p.body,
+        r = run.request("POST", run.http.url("/v1/chat/completions"), body=p.body,
                              timeout=sync_timeout(run.ctx, "chat"))
     except ApiError as e:
         return run.post_error(e)
@@ -2394,7 +2427,7 @@ def run_chat(run: Run) -> int:
 def run_pz_image(run: Run) -> int:
     p = run.prep
     try:
-        r = run.http.request("POST", run.http.url("/v2/images/generations"), body=p.body,
+        r = run.request("POST", run.http.url("/v2/images/generations"), body=p.body,
                              timeout=sync_timeout(run.ctx, "pz-image"))
     except ApiError as e:
         return run.post_error(e)
@@ -2528,6 +2561,25 @@ def collect(ctx: Ctx, files: list[str], pick=None) -> list[Prepared]:
     return preps
 
 
+def catalog_notes(ctx: Ctx) -> list[tuple[str, bool]]:
+    """Снимки каталогов, по которым считалась оценка: (строка с папкой и возрастом, отметка «свериться»). Берутся
+    только каталоги, которые оценка прочитала."""
+    out = []
+    for cat, name, refresh in ((ctx._ra, "RouterAI", "mp_client.py snapshot --channel routerai"),
+                               (ctx._ga, "Gen-API", "mp_client.py snapshot --channel genapi")):
+        if cat is not None:
+            out.append(pc.age_note(f"{name} {cat.path.parent.name}", cat.fetched,
+                                   (cat.path.parent / "snapshot.meta.json").exists(), refresh))
+    if ctx._pz is not None:
+        out.append(pc.snapshot_note(ctx._pz))
+    return out
+
+
+def say_catalogs(ctx: Ctx):
+    for note, check in catalog_notes(ctx):
+        say(("# ! " if check else "# ") + note)
+
+
 def cmd_estimate(ctx: Ctx, a):
     preps = collect(ctx, a.jobs, a.pick)
     total, by_scope, bad, tpl, refused, rows = 0.0, {}, 0, 0, 0, []
@@ -2561,11 +2613,13 @@ def cmd_estimate(ctx: Ctx, a):
     if a.json:
         say(jdump({"client": VERSION, "at": now_iso(), "jobs": rows, "total_rub": round(total, 4),
                    "by_channel": {k: round(v, 4) for k, v in by_scope.items()}, "with_errors": bad,
-                   "templates": tpl, "limits_refused": refused}))
+                   "templates": tpl, "limits_refused": refused,
+                   "catalogs": [{"note": n, "check": c} for n, c in catalog_notes(ctx)]}))
     else:
         parts = " · ".join(f"{k} {fmt(v)}" for k, v in sorted(by_scope.items()))
         say(f"# ИТОГО: файлов {len(a.jobs)}, заданий {len(preps)}, с ошибками {bad}, шаблонов {tpl}; оценка "
             f"{fmt(total)} ₽ ({parts}); отказов лимитов при --live: {refused}")
+        say_catalogs(ctx)
     return EXIT_JOB if bad else EXIT_OK
 
 
@@ -2574,6 +2628,7 @@ def cmd_run(ctx: Ctx, a):
     if len(jobs) != 1:
         raise SystemExit(f"run принимает одно задание (в файле {len(jobs)}; выберите --pick TAG|N|/re/ или batch)")
     prep = prepare(ctx, jobs[0])
+    say_catalogs(ctx)
     if not ctx.live:
         say("# СУХОЙ ПРОГОН — ничего не отправлено (для реального вызова добавьте --live)")
         print_plan(ctx, prep)
@@ -2611,6 +2666,7 @@ def cmd_batch(ctx: Ctx, a):
             need[p.channel] = need.get(p.channel, 0.0) + (price_for_limits(ctx, p) or 0.0)
     say(f"# СЕРИЯ: {len(preps)} заданий, к исполнению {len(preps) - len(bad)}, с ошибками или шаблонов {len(bad)}; "
         f"параллельно {par}; лимит по каналам: " + ", ".join(f"{k} {fmt(v)} ₽" for k, v in need.items()))
+    say_catalogs(ctx)
     if bad and not a.skip_bad:
         say("# ОТКАЗ: исправьте ошибки и шаблоны (или --skip-bad — пропустить их)", err=True)
         return EXIT_JOB
@@ -2696,7 +2752,7 @@ def cmd_download(ctx: Ctx, a):
         prep.estimate.update(rub=j["estimate_rub"], rub_high=j["estimate_rub"])
     run = Run(ctx, prep, force=True)
     run.download_note = f"скачано командой download {a.id} (запрос — в журнале по uid {prep.uid})"
-    st = run.http.request("GET", url).json or {}
+    st = run.request("GET", url).json or {}
     if ch == "routerai":
         return ra_video_result(run, a.id, st, None, 0)
     if ch == "genapi":
@@ -2825,6 +2881,19 @@ def cmd_snapshot(ctx: Ctx, a):
 # Самопроверка без сети
 # ---------------------------------------------------------------------------------------------------------------
 
+class _Reply:
+    """Канал самопроверки: один ответ на любой запрос, сети нет."""
+
+    def __init__(self, status: int, headers: dict, body: bytes):
+        self.resp = Resp(status, headers, body)
+
+    def url(self, path: str) -> str:
+        return "https://channel.test/api" + path
+
+    def request(self, method: str, url: str, **kw) -> Resp:
+        return self.resp
+
+
 def cmd_selftest(ctx: Ctx, a):
     res = []
 
@@ -2914,7 +2983,40 @@ def cmd_selftest(ctx: Ctx, a):
             ok("хэш: локальный путь = тот же файл в base64", h1 == h2)
         except SystemExit as e:
             ok("хэш: локальный путь = тот же файл в base64", False, str(e))
-    # 8. оценки по снимкам каталогов
+    # 8. отказ канала: тело и заголовки ответа — в паспорте задания
+    with tempfile.TemporaryDirectory() as td:
+        saved = (ctx.ledger, ctx.out_root, ctx.a.budget_total)
+        ctx.ledger, ctx.out_root, ctx.a.budget_total = Ledger(Path(td) / "ledger.jsonl"), Path(td) / "out", 100.0
+        try:
+            def refused(tag, headers, body):
+                p = Prepared({"channel": "routerai", "tag": tag, "_file": "st", "_index": 1, "max_rub": 10}, ctx)
+                p.kind, p.model, p.api_path, p.request_hash = "ra-image", "demo/vector", "/v1/images", tag
+                p.body = {"model": "demo/vector", "prompt": "x", "n": 1, "output_format": "svg"}
+                p.estimate.update(rub=1.0, rub_low=1.0, rub_high=1.0)
+                run = Run(ctx, p, force=True)
+                run.http = _Reply(200, headers, body)
+                with contextlib.redirect_stderr(io.StringIO()):       # строка отказа — не итог самопроверки
+                    code = run.begin() or run_ra_image(run)
+                job = ctx.ledger.jobs().get(p.uid) or {}
+                pas = json.loads(absp(job["passport"]).read_text(encoding="utf-8")) if job.get("passport") else {}
+                return code, job, pas.get("response") or {}
+
+            code, job, resp = refused("st-empty", {"Content-Type": "application/json", "X-Generation-Id": "gen-demo",
+                                                   "Set-Cookie": "sid=1"},
+                                      json.dumps({"data": [], "usage": {"cost": 0}, "detail": "format is not accepted"}).encode())
+            ok("ответ без картинок: код 4, запись failed с паспортом", code == EXIT_FAILED and job.get("state") == "failed"
+               and job.get("spent") == 0.0 and bool(resp), (code, job))
+            ok("паспорт отказа: тело и заголовки ответа канала, cookie не сохранён",
+               resp.get("http_status") == 200 and (resp.get("body") or {}).get("detail") == "format is not accepted"
+               and (resp.get("headers") or {}).get("x-generation-id") == "gen-demo"
+               and "set-cookie" not in (resp.get("headers") or {}), resp)
+            code, job, resp = refused("st-html", {"Content-Type": "text/html"}, b"<html>upstream error</html>")
+            ok("ответ не JSON: в паспорте текст тела, длина и sha256",
+               code == EXIT_FAILED and resp.get("body") == "<html>upstream error</html>" and resp.get("bytes") == 27
+               and len(resp.get("sha256") or "") == 64, resp)
+        finally:
+            ctx.ledger, ctx.out_root, ctx.a.budget_total = saved
+    # 9. оценки по снимкам каталогов
     cases = [
         ({"channel": "routerai", "path": "/api/v1/images", "body": {"model": "recraft/recraft-v4.1-vector", "prompt": "x",
           "aspect_ratio": "1:1", "n": 1, "output_format": "svg"}}, 8.7428, None),
@@ -2938,7 +3040,7 @@ def cmd_selftest(ctx: Ctx, a):
                f"{got} / {p.estimate.get('rub_high')} / ошибок {len(p.errors)}")
         except SystemExit as e:
             ok(f"оценка {job['channel']}", False, str(e))
-    # 9. ловушки
+    # 10. ловушки
     p = prepare(ctx, {"channel": "genapi", "path": "/api/v1/networks/recraft-v4", "_dir": ".", "_file": "st", "_index": 1,
                       "tag": "st", "max_rub": 100, "body": {"prompt": "x"}})
     ok("Gen-API recraft-v4 без model/pro — ошибка ценовых параметров", {"model", "pro"} <= {i["param"] for i in p.errors})

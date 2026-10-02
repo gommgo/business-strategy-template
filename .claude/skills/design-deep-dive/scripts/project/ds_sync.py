@@ -333,7 +333,8 @@ def compare(live_doc, built_doc, toks):
         if e.family == "color":
             lv = e.value if isinstance(e.value, dict) else {}
             bv = b.value if isinstance(b.value, dict) else {}
-            for theme in sorted(set(lv) | set(bv), key=lambda x: (x != "light", x)):
+            first = B.base_theme(toks.data)
+            for theme in sorted(set(lv) | set(bv), key=lambda x: (x != first, x)):
                 if lv.get(theme) != bv.get(theme):
                     out.append(_value_change(e, t, path, theme, bv.get(theme), lv.get(theme), toks))
         elif e.family == "type.styles":
@@ -356,9 +357,9 @@ def compare(live_doc, built_doc, toks):
     return out
 
 
-def _mode_slot(t, theme):
-    """Место значения темы в токене: `$value` или режим."""
-    if theme in (None, "light"):
+def _mode_slot(t, theme, first="light"):
+    """Место значения темы в токене: `$value` — у темы значений first, иначе режим."""
+    if theme in (None, first):
         return t.pointer + "/$value", t.value
     modes = t.modes()
     return t.pointer + f"/$extensions/{B.EXT_MODES}/{B.esc(theme)}", modes.get(theme)
@@ -369,8 +370,9 @@ def _value_change(e, t, path, theme, old, new, toks):
     if t is None:
         ch.note = "путь DTCG не найден — вопрос заказчику"
         return ch
-    ch.pointer, current = _mode_slot(t, theme)
-    like = toks.resolve(current, theme if theme not in (None, "light") else None) if current is not None else None
+    first = B.base_theme(toks.data)
+    ch.pointer, current = _mode_slot(t, theme, first)
+    like = toks.resolve(current, theme if theme not in (None, first) else None) if current is not None else None
     if t.type == "typography":
         ch.note = "стиль текста правится по полям"
         return ch
@@ -381,7 +383,7 @@ def _value_change(e, t, path, theme, old, new, toks):
     m = B.ALIAS.match(current) if isinstance(current, str) else None
     if m:
         peers = [".".join(x.path) for x in toks.list if x is not t and B.in_artifact(x) and
-                 _slot_value(x, theme) == current]
+                 _slot_value(x, theme, first) == current]
         ch.alias = m.group(1)
         ch.note = _roads(current, path, ch.alias, peers)
     return ch
@@ -396,8 +398,8 @@ def _roads(current, path, prim, peers=()):
             f"примитив — правка пути {prim} в system.tokens.json руками, меняет все ссылки на него{who}")
 
 
-def _slot_value(t, theme):
-    if theme in (None, "light"):
+def _slot_value(t, theme, first="light"):
+    if theme in (None, first):
         return t.value
     return t.modes().get(theme, t.value)
 
@@ -545,6 +547,7 @@ def restore(live_doc):
     notes = {}
     questions = []
     themes = themes_of(live_doc) or ["light"]
+    first = "light" if "light" in themes else themes[0]      # тема значений `$value`
     fonts = {}
 
     def put(path, token, ty=None, family=None):
@@ -568,15 +571,15 @@ def restore(live_doc):
     for e in flatten(live_doc):
         path, family = guess_path(e.family, e.name)
         if e.family == "color":
-            vals = e.value if isinstance(e.value, dict) else {"light": e.value}
-            base = parse_color(vals.get("light", vals.get(themes[0])))
+            vals = e.value if isinstance(e.value, dict) else {first: e.value}
+            base = parse_color(vals.get(first))
             if base is None:
                 questions.append(f"{e.label}: цвет «{vals}» не переводится в DTCG")
                 continue
             tok = {"$value": base}
             if e.usage:
                 tok["$description"] = e.usage
-            modes = {th: parse_color(v) for th, v in vals.items() if th != "light" and v != vals.get("light")}
+            modes = {th: parse_color(v) for th, v in vals.items() if th != first and v != vals.get(first)}
             if any(v is None for v in modes.values()):
                 questions.append(f"{e.label}: значение темы не переводится в DTCG")
                 modes = {k: v for k, v in modes.items() if v is not None}
@@ -616,6 +619,8 @@ def restore(live_doc):
         art_root["families"] = {k: {"note": v} for k, v in notes.items()}
     if art_root:
         doc["$extensions"] = {B.EXT_ART: art_root}
+    if first != "light" and first in B.THEMES:
+        doc.setdefault("$extensions", {})[B.EXT_MODES] = {"base": first}
     return doc, questions
 
 

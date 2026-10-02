@@ -25,6 +25,18 @@
 значение в блок `@media (width < <граница>)` CSS и в `x-narrow` передней части; мобильное приложение берёт основной
 кегль оттуда же.
 
+Тема значений `$value` — `light`, пока корень токенов не объявил другую: `$extensions["org.ui-research.modes"].base` —
+`light` или `dark`. От неё — `color-scheme` в `:root` (у продукта с одной тёмной темой — `dark`) и первая тема
+артефакта; режим токена с именем парной темы даёт вторую тему — её блок включается и по настройке системы
+(`prefers-color-scheme`), и атрибутом `[data-theme]`.
+
+Типографика в CSS считается от того, что покажет браузер. Интерлиньяж: число DTCG — отношение, округлённое до шести
+знаков; когда оно недотягивает до целого px (14 px × 1.428571 = 19,999994), браузер усекает высоту строки до шага
+раскладки 1/64 px и строка выходит 19,98 px — в CSS идёт наименьшее шестизначное отношение, которое даёт целый px
+(1.428572); в передней части и артефакте остаётся число DTCG. Трекинг: у стиля с резиновым кеглем (расширение
+`org.creative-research.fluid` или готовый CSS кегля) px значения верен только на наибольшем кегле, поэтому в CSS и в
+передней части он идёт в em — `letter_spacing_em` расширения, иначе px значения / кегль значения.
+
 Что не идёт в артефакт: примитивы (`primitive.*` — холст и компоненты берут значения ролей) и движение (группы
 `motion*`, типы duration, cubicBezier, transition — у формата токенов артефакта нет семейства движения, длительности и
 кривые задаёт `components/bundle.css`). Поля артефакта, которых нет в DTCG, — расширение
@@ -40,7 +52,8 @@
 
 Правила (`.claude/skills/design-audit/references/rules.md`):
   R-STRUCT-006  формат DTCG схемой (группы, `$type`, форма `$value` по типу, алиасы `{…}` ведут в токен того же типа,
-                без циклов; значения режимов; одна шкала space.*)         error; warning — вторая шкала, лимит семейств
+                без циклов; значения режимов; тема значений `base`; одна шкала space.*)                    error;
+                warning — вторая шкала, лимит семейств, px типографики из CSS расходится с px значения DTCG
   R-FRESH-001   system.tokens.css, передняя часть DESIGN.md, tokens.json и README артефакта равны сборке байт в байт
                 (хвост README, который дописывает страница артефакта, — не расхождение)   error; нет прозы — warning
 Код выхода: 0 — нет error, 1 — есть error, 2 — ошибка вызова или окружения.
@@ -52,6 +65,7 @@ import os
 import re
 import sys
 from dataclasses import dataclass, field
+from decimal import ROUND_CEILING, ROUND_FLOOR, ROUND_HALF_EVEN, Decimal
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -71,11 +85,15 @@ EXT_ART = "org.design-deep-dive.artifact"                   # поля арте�
 
 NARROW_BODY_MIN_PX = 16     # ux/09-mobile/03-mobile-content-tables-forms-dashboards.md §7.1 (canon.tsv, NU-15)
 REM_PX = 16
+LAYOUT_STEP = 64            # браузер считает высоту строки шагами 1/64 px и усекает её до шага
+RATIO_DIGITS = 6            # знаков после запятой у отношения интерлиньяжа и у трекинга в em (ui 09/04 §2.5)
+TRACKING_TOL_PX = 0.005     # трекинг em × кегль против px значения: расхождение больше половины сотой px
 
 TYPES = ("color", "dimension", "fontFamily", "fontWeight", "duration", "cubicBezier", "number", "strokeStyle", "border",
          "transition", "shadow", "gradient", "typography")
 MOTION_TYPES = ("duration", "cubicBezier", "transition")
 THEMES = {"light": "Светлая", "dark": "Тёмная"}
+THEME_PAIR = {"light": "dark", "dark": "light"}              # тема, парная теме значений `$value`
 DENSITY = ("compact", "comfortable")
 REDUCED = "reduced"
 BASE_FAMILIES = ("color", "type", "spacing", "radius", "shadow")
@@ -376,6 +394,18 @@ class Tokens:
         return out
 
 
+def _root_modes(data):
+    ext = data.get("$extensions") if isinstance(data, dict) else None
+    return ext.get(EXT_MODES) if isinstance(ext, dict) else None
+
+
+def base_theme(data):
+    """Тема значений `$value`: `base` корневого расширения режимов (`light` · `dark`); не объявлена — `light`."""
+    m = _root_modes(data)
+    b = m.get("base") if isinstance(m, dict) else None
+    return b if isinstance(b, str) and b in THEMES else "light"
+
+
 # ------------------------------------------------------------------ проверка формата (R-STRUCT-006)
 
 def validate(data):
@@ -387,6 +417,10 @@ def validate(data):
     validator = js.Draft202012Validator(DTCG_SCHEMA)
     for e in sorted(validator.iter_errors(data), key=lambda e: list(e.absolute_path)):
         issues.append(Issue(pointer(tuple(str(p) for p in e.absolute_path)), "форма DTCG: " + _schema_message(e)))
+    m = _root_modes(data)
+    if m is not None and not (isinstance(m, dict) and base_theme(data) == m.get("base", "light")):
+        issues.append(Issue(pointer(("$extensions", EXT_MODES, "base")),
+                            f"тема значений `$value` — `base` расширения режимов в корне: {' или '.join(THEMES)}"))
     toks = Tokens(data)
     issues += toks.structure
     value_validators = {t: js.Draft202012Validator({"$ref": f"#/$defs/v-{t}", "$defs": DTCG_SCHEMA["$defs"]})
@@ -590,6 +624,54 @@ def _ext_css(t):
     return None
 
 
+def _dec(x):
+    return Decimal(str(x))
+
+
+def whole_leading(ratio, size):
+    """Целый px интерлиньяжа, если отношение × кегль отличается от него меньше шага раскладки; иначе None."""
+    p = _dec(ratio) * _dec(size)
+    whole = p.to_integral_value(rounding=ROUND_HALF_EVEN)
+    return int(whole) if abs(p - whole) * LAYOUT_STEP < 1 else None
+
+
+def leading_px(ratio, size):
+    """Высота строки в браузере: отношение × кегль, усечённое до шага раскладки."""
+    return (_dec(ratio) * _dec(size) * LAYOUT_STEP).to_integral_value(rounding=ROUND_FLOOR) / LAYOUT_STEP
+
+
+def leading_css(v):
+    """Интерлиньяж CSS: число DTCG; если оно недотягивает до целого px, который записывает (отношение округлено
+    вниз), — наименьшее отношение той же точности, которое этот px даёт. Округление вверх, а не точная дробь: браузер
+    хранит множитель с одинарной точностью, и после усечения до шага точная дробь тоже теряет px (20 / 15)."""
+    ratio, size = v["lineHeight"], px_of(v["fontSize"])
+    if not size or isinstance(ratio, bool) or not isinstance(ratio, (int, float)):
+        return num(ratio)
+    whole = whole_leading(ratio, size)
+    if whole is None or leading_px(ratio, size) == whole:
+        return num(ratio)
+    up = (Decimal(whole) / _dec(size)).quantize(Decimal(1).scaleb(-RATIO_DIGITS), rounding=ROUND_CEILING)
+    return format(up.normalize(), "f")
+
+
+def tracking_em(t, v):
+    """Трекинг в em у стиля с резиновым кеглем: `letter_spacing_em` расширения fluid, иначе px значения / кегль
+    значения — у кегля из готового CSS. None — кегль постоянный или трекинга нет: остаётся px значения."""
+    fl = t.ext(EXT_FLUID)
+    em = fl.get("letter_spacing_em") if isinstance(fl, dict) else None
+    if isinstance(em, bool) or not isinstance(em, (int, float)):
+        size, px = px_of(v["fontSize"]), px_of(v["letterSpacing"])
+        if _ext_css(t) is None or not size or px is None:
+            return None
+        em = round(px / size, RATIO_DIGITS)
+    return em or None
+
+
+def tracking_css(t, v):
+    em = tracking_em(t, v)
+    return css_value("dimension", v["letterSpacing"]) if em is None else f"{num(em)}em"
+
+
 TYPO_PARTS = (("family", "fontFamily"), ("size", "fontSize"), ("leading", "lineHeight"), ("weight", "fontWeight"),
               ("tracking", "letterSpacing"))
 
@@ -600,9 +682,17 @@ def token_vars(toks, t, mode=None):
     if t.type == "typography":
         sub = SUBTYPES["typography"]
         out = []
-        fluid = _ext_css(t) if mode is None or mode not in t.modes() else None
+        own = mode is None or mode not in t.modes()          # своё значение режима расширениями кегля не правится
+        fluid = _ext_css(t) if own else None
         for suffix, key in TYPO_PARTS:
-            val = fluid if key == "fontSize" and fluid else css_value(sub[key], v[key])
+            if key == "fontSize" and fluid:
+                val = fluid
+            elif key == "lineHeight":
+                val = leading_css(v)
+            elif key == "letterSpacing" and own:
+                val = tracking_css(t, v)
+            else:
+                val = css_value(sub[key], v[key])
             out.append((f"{t.name}-{suffix}", val))
         return out
     if mode is None or mode not in t.modes():
@@ -610,6 +700,33 @@ def token_vars(toks, t, mode=None):
         if ext is not None and (mode is None or toks.in_mode(t, mode) == t.value):
             return [(t.name, ext)]
     return [(t.name, css_value(t.type, v))]
+
+
+def typography_issues(toks):
+    """Типографика CSS против значения DTCG при кегле значения: высота строки в браузере — целый px интерлиньяжа,
+    трекинг в em × кегль — px трекинга. Расхождение — замечание: в CSS уходит не то, что записано в `$value`."""
+    out = []
+    for t in toks.list:
+        if t.type != "typography":
+            continue
+        try:
+            v = toks.value(t)
+            size, track, em = px_of(v["fontSize"]), px_of(v["letterSpacing"]), tracking_em(t, v)
+            lead = dict(token_vars(toks, t))[f"{t.name}-leading"]
+            whole = whole_leading(v["lineHeight"], size) if size else None
+            shown = leading_px(lead, size) if whole is not None else None
+        except (ValueError, KeyError, TypeError, ArithmeticError):
+            continue                                         # значение не по форме — замечание формата уже есть
+        name = ".".join(t.path)
+        if whole is not None and shown != whole:
+            out.append(Issue(t.pointer + "/$value/lineHeight",
+                             f"`{name}` — интерлиньяж: в CSS {lead} × {num(size)} px даёт в браузере "
+                             f"{num(float(shown))} px, в значении — {whole} px", "warning"))
+        if em is not None and size and track is not None and abs(em * size - track) > TRACKING_TOL_PX:
+            out.append(Issue(t.pointer + "/$value/letterSpacing",
+                             f"`{name}` — трекинг: в CSS {num(em)}em × {num(size)} px = {num(round(em * size, 4))} px, "
+                             f"в значении — {num(track)} px", "warning"))
+    return out
 
 
 # ------------------------------------------------------------------ узкая ширина (NU-15)
@@ -648,7 +765,9 @@ def build_css(toks):
     base_map = dict(base)
     modes = toks.mode_names()
     themes = [m for m in modes if m not in DENSITY and m != REDUCED]
-    lines = [CSS_HEAD, ":root {", f"  color-scheme: {'light dark' if themes else 'light'};"]
+    first = base_theme(toks.data)
+    pair = THEME_PAIR[first]
+    lines = [CSS_HEAD, ":root {", f"  color-scheme: {f'{first} {pair}' if themes else first};"]
     lines += [f"  {_var(n)}: {v};" for n, v in base]
     lines.append("}")
 
@@ -673,10 +792,10 @@ def build_css(toks):
         label = THEMES.get(mode, mode)
         lines += ["", f"/* Тема «{label}» ({mode}): на :root, где объявлены переменные, иначе алиасы "
                       "не пересчитаются. */"]
-        if mode == "dark":
-            lines += ["@media (prefers-color-scheme: dark) {", '  :root:not([data-theme="light"]) {',
-                      "    color-scheme: dark;"] + [f"    {_var(n)}: {v};" for n, v in rows] + ["  }", "}", ""]
-        lines += [f':root[data-theme="{mode}"] {{'] + (["  color-scheme: dark;"] if mode == "dark" else []) + \
+        if mode == pair:
+            lines += [f"@media (prefers-color-scheme: {mode}) {{", f'  :root:not([data-theme="{first}"]) {{',
+                      f"    color-scheme: {mode};"] + [f"    {_var(n)}: {v};" for n, v in rows] + ["  }", "}", ""]
+        lines += [f':root[data-theme="{mode}"] {{'] + ([f"  color-scheme: {mode};"] if mode == pair else []) + \
                  [f"  {_var(n)}: {v};" for n, v in rows] + ["}"]
     if REDUCED in modes:
         rows = block(REDUCED)
@@ -712,10 +831,9 @@ def _y(v):
 
 def _typo(toks, t, mode=None):
     v = toks.value(t, mode)
-    sub = SUBTYPES["typography"]
     return {"fontFamily": css_value("fontFamily", v["fontFamily"]), "fontSize": _ext_css(t) or dim(v["fontSize"]),
             "fontWeight": weight_num(v["fontWeight"]), "lineHeight": v["lineHeight"],
-            "letterSpacing": css_value(sub["letterSpacing"], v["letterSpacing"])}
+            "letterSpacing": tracking_css(t, v)}
 
 
 def in_artifact(t):
@@ -852,13 +970,14 @@ def artifact_tokens(toks, name, example=False):
             order.append(f)
             fam_tokens[f] = []
         fam_tokens[f].append(t)
-    themes = ["light"] + [m for m in toks.mode_names() if m not in DENSITY and m != REDUCED and m != "light"]
+    first = base_theme(toks.data)
+    themes = [first] + [m for m in toks.mode_names() if m not in DENSITY and m != REDUCED and m != first]
     for f in order:
         ts = fam_tokens[f]
         if f == "color":
             doc["color"] = {"themes": [{"id": m, "name": THEMES.get(m, m)} for m in themes],
                             "tokens": [{"name": t.name,
-                                        "value": {m: token_vars(toks, t, None if m == "light" else m)[0][1]
+                                        "value": {m: token_vars(toks, t, None if m == first else m)[0][1]
                                                   for m in themes},
                                         "usage": t.description} for t in ts]}
         elif f == "type":
@@ -1082,6 +1201,10 @@ def check(prj):
             not [t for t in toks.list if t.path[0] == "breakpoint"]:
         rep.add("R-STRUCT-006", "warning", surface=None, kind=KIND, ref="tokens#/breakpoint", path=rel_tokens,
                 message="нет breakpoint.*: граница узкой ширины для основного текста (ux 09/03 §7.1) не задана")
+    for i in typography_issues(toks):
+        rep.add("R-STRUCT-006", i.severity, surface=None, kind=KIND, ref="tokens#" + i.pointer, path=rel_tokens,
+                message=i.message, fix="одно значение в `$value` и в расширении кегля токена, затем "
+                                       f"ds_build build {prj.slug}")
     built, _ = derive(prj, data)
     fix = f"ds_build build {prj.slug} — производные руками не правят"
     for path in (prj.css_path, prj.design_md_path, prj.art_tokens, prj.art_readme):
@@ -1223,7 +1346,7 @@ def _selftest():
     css = build_css(toks)
     check_("CSS: имена = пути через дефис, типографика — пять переменных",
            "--color-bg: #FFFFFF;" in css and "--type-body-size: 14px;" in css
-           and "--type-body-leading: 1.428571;" in css
+           and "--type-body-leading: 1.428572;" in css
            and "--font-sans: \"Golos Text\", Arial, sans-serif;" in css)
     check_("CSS: блок тёмной темы — транзитивное замыкание (color.on-bg без своего режима)",
            re.search(r':root\[data-theme="dark"\] \{[^}]*--color-on-bg: #FFFFFF;', css) is not None)
@@ -1240,6 +1363,69 @@ def _selftest():
            and "motion" not in art and "breakpoint" in art)
     back = json.loads(dump_artifact(art))
     check_("tokens.json артефакта — валидный JSON той же структуры", back == art)
+    # 1а. тема значений
+    lite = copy.deepcopy(doc)
+    for role in ("bg", "text"):
+        del lite["color"][role]["$extensions"]
+    check_("тема значений не объявлена: с тёмным режимом — color-scheme: light dark, без режимов темы — light",
+           "  color-scheme: light dark;\n" in css and "  color-scheme: light;\n" in build_css(Tokens(lite))
+           and [x["id"] for x in artifact_tokens(Tokens(lite), "Проба")["color"]["themes"]] == ["light"])
+    dark = copy.deepcopy(lite)
+    dark["$extensions"] = {EXT_MODES: {"base": "dark"}}
+    dark["color"]["bg"]["$value"], dark["color"]["text"]["$value"] = "{primitive.color.ink}", "{primitive.color.paper}"
+    dcss, dart = build_css(Tokens(dark)), artifact_tokens(Tokens(dark), "Проба")
+    check_("одна тёмная тема (base: dark, режимов темы нет): color-scheme: dark, блоков темы нет, в артефакте — dark",
+           validate(dark) == [] and "  color-scheme: dark;\n" in dcss and "data-theme" not in dcss
+           and "prefers-color-scheme" not in dcss and dart["color"]["themes"] == [{"id": "dark", "name": "Тёмная"}]
+           and dart["color"]["tokens"][0]["value"] == {"dark": "#000000"})
+    both = copy.deepcopy(dark)
+    both["color"]["bg"]["$extensions"] = {EXT_MODES: {"light": "{primitive.color.paper}"}}
+    both["color"]["text"]["$extensions"] = {EXT_MODES: {"light": "{primitive.color.ink}"}}
+    bcss, bart = build_css(Tokens(both)), artifact_tokens(Tokens(both), "Проба")
+    check_("тёмная тема значений со светлым режимом: color-scheme: dark light, блок светлой — по системе и атрибутом",
+           "  color-scheme: dark light;\n" in bcss
+           and '@media (prefers-color-scheme: light) {\n  :root:not([data-theme="dark"]) {\n    color-scheme: light;\n'
+           in bcss
+           and re.search(r':root\[data-theme="light"\] \{\n  color-scheme: light;\n  --color-bg: #FFFFFF;', bcss)
+           is not None and [x["id"] for x in bart["color"]["themes"]] == ["dark", "light"]
+           and bart["color"]["tokens"][0]["value"] == {"dark": "#000000", "light": "#FFFFFF"})
+    # 1б. типографика: интерлиньяж и трекинг
+
+    def style(size, leading, tracking, fluid=None):
+        tok = {"$value": {"fontFamily": "{font.sans}", "fontSize": {"value": size, "unit": "px"}, "fontWeight": 600,
+                          "letterSpacing": {"value": tracking, "unit": "px"}, "lineHeight": leading}}
+        if fluid is not None:
+            tok["$extensions"] = {EXT_FLUID: fluid}
+        return tok
+
+    clamp = "clamp(2.25rem, 1.7857rem + 1.9048vw, 3.5rem)"
+    typ = copy.deepcopy(doc)
+    typ["type"].update({"label": style(15, 1.333333, 0.12), "media": style(28, 1.214286, 0.42,
+                                                                          {"letter_spacing_em": 0.015}),
+                        "lead": style(16, 1.5, 0), "display": style(56, 1.04, 0.84, {"css": clamp,
+                                                                                    "letter_spacing_em": 0.015}),
+                        "title": style(56, 1.1, -0.28, {"css": clamp}),
+                        "quote": style(44, 1.2, 0, {"css": clamp, "letter_spacing_em": 0})})
+    tt = Tokens(typ)
+    tcss = build_css(tt)
+    check_("интерлиньяж: отношение, округлённое вниз, поднимается до целого px (14 × 1.428572, 15 × 1.333334); "
+           "точное, округлённое вверх и дробное — как в значении",
+           leading_px(1.428571, 14) < 20 == leading_px("1.428572", 14) and "--type-label-leading: 1.333334;" in tcss
+           and "--type-lead-leading: 1.5;" in tcss and "--type-media-leading: 1.214286;" in tcss
+           and "--type-display-leading: 1.04;" in tcss)
+    check_("трекинг: резиновый кегль — em (объявленный и px / кегль), постоянный кегль и нулевой трекинг — px",
+           "--type-display-tracking: 0.015em;" in tcss and "--type-title-tracking: -0.005em;" in tcss
+           and "--type-media-tracking: 0.015em;" in tcss and "--type-label-tracking: 0.12px;" in tcss
+           and "--type-quote-tracking: 0px;" in tcss and "--type-display-size: " + clamp + ";" in tcss)
+    tfm = front_matter(tt, "Проба", "описание")
+    check_("передняя часть: трекинг резинового стиля — em, интерлиньяж — число значения",
+           'letterSpacing: "0.015em"' in tfm and 'letterSpacing: "0.12px"' in tfm and "lineHeight: 1.428571" in tfm)
+    clean = typography_issues(tt)
+    typ["type"]["display"]["$value"]["letterSpacing"]["value"] = 0.9
+    got = typography_issues(Tokens(typ))
+    check_("сверка px: согласованная типографика — 0 замечаний; трекинг em × кегль ≠ px значения — предупреждение",
+           clean == [] and len(got) == 1 and got[0].severity == "warning"
+           and "трекинг" in got[0].message and "0.84" in got[0].message and "0.9" in got[0].message)
     # 2. дефекты формата
     bad = copy.deepcopy(doc)
     bad["color"]["bg"]["$value"] = "#fff"
@@ -1257,6 +1443,10 @@ def _selftest():
     bad["color"]["text"]["$extensions"][EXT_MODES]["dark"] = "{color.bg}"
     check_("цикл алиасов только в режиме dark — ошибка", any("цикл" in i.message and "dark" in i.message
                                                              for i in validate(bad)))
+    bad = copy.deepcopy(doc)
+    bad["$extensions"] = {EXT_MODES: {"base": "system"}}
+    check_("тема значений вне light и dark — ошибка", any("`base`" in i.message and i.severity == "error"
+                                                         for i in validate(bad)))
     bad = copy.deepcopy(doc)
     bad["loose"] = {"x": {"$value": 3}}
     check_("токен без типа — ошибка (тип не угадывают)", any("тип не определён" in i.message for i in validate(bad)))
@@ -1322,6 +1512,12 @@ def _selftest():
                    and "#1e40af" not in prj.css_path.read_text(encoding="utf-8"))
         build(prj)
         check_("после build — снова 0 error", not [f for f in check(prj) if f.severity == "error"])
+        loose = json.loads(raw)
+        loose["type"]["title"].setdefault("$extensions", {})[EXT_FLUID] = {"letter_spacing_em": 0.05}
+        prj.tokens_path.write_text(json.dumps(loose, ensure_ascii=False, indent=2), encoding="utf-8")
+        got = [f for f in check(prj) if f.rule == "R-STRUCT-006" and f.severity == "warning"]
+        check_("трекинг в em расходится с px значения в токенах фикстуры → R-STRUCT-006 warning",
+               got and "трекинг" in got[0].message)
         prj.tokens_path.write_text(raw.replace('"$value": "{primitive.color.accent.700}"',
                                                '"$value": "{primitive.color.nope}"', 1), encoding="utf-8")
         got = [f for f in check(prj) if f.rule == "R-STRUCT-006" and f.severity == "error"]

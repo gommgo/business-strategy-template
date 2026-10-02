@@ -39,6 +39,14 @@ ad_check: warning, error у закрытой арт-дирекции); шкал�
 «Приёмка» в REVIEW.md или она в партии действующего входа холста (поле units INPUT.md или папка pages/<id>/) этапа
 mockup или motion; в партии входа вайрфрейма или направлений — warning (тексты — до макета); закрытый copy deck без
 текста в слоте — error. Одобрение единицы (R-MAT-004) сверяется с отпечатком `ready`: артборды и источники единицы.
+Ключ ассета — страница и слот: строка манифеста ассетов с полем page сверяется с планом ассетов этой страницы, без
+page — общая для страниц с таким слотом, у которых нет своих строк (R-MAT-007, R-MAT-008, R-REF-008, R-COV-009); строка
+манифеста — на файл, слот принят, когда принята хотя бы одна его строка. R-FRESH-007 — колонка sha256 «Загрузок»
+ARTIFACTS.md против файла: расхождение — warning, отпечатка нет — одна подсказка со счётом, файла нет на машине —
+заметка сводки.
+R-REF-001 у refs.copy_deck плана — hint, пока copy deck страницы не заведён. Страницы copy deck с site_page_id = id
+плана — образцы шаблона коллекции (page.template): их стык с планом сверяет R-REF-003. R-MAT-009 — error у вопроса,
+который держит закрытие, hint у блокера публикации (пункт называет пробел фактов missing[] по id).
 Ошибки публикуемости фактов из claims_check.py lint-facts (разрешение, срок, проверка) в R-STRUCT-003 не идут: их сверяет
 R-COV-003 там, где факт стоит (план, copy deck). Совет находки называет этап: у site_validate — по коду (SB-* — brief,
 SM-* — site-map, PL-* — page-plan), факты и голос — meaning, copy deck — copy. Правило, которое утилита не проверила
@@ -94,12 +102,18 @@ PAGE_ONLY = ("art-direction.json", "visual-dna.json", "motion")
 GATE = {"critical": "error", "major": "warning", "minor": "hint"}
 BSD = {"B": "error", "S": "warning", "D": "hint"}
 LOOK = ("#", "rgb(", "hsl(", "px", "rem", "font-", "шрифт", "палитр", "градиент", "тень")
+# Папка итерации в review/ — имя с номером, датой или словом о прошлом прогоне (iter-02, round3, v2, 2026-09-30, prev);
+# папка машинных отчётов последнего результата (checks/, shots/, кадры ширины 390/) — не итерация: номер итерации — до
+# двух цифр, ширина артборда — от трёх.
+ITER_DIR = re.compile(r"^(?:(?:iter(?:ation)?|round|run|pass|rev|итерац[а-яё]*|раунд|проход|прогон|верси[а-яё]*)"
+                      r"[-_. ]?\d+|[vr]\d+|\d{1,2}|\d{4}-\d{2}-\d{2}|\d{8}|prev(?:ious)?|old|archive|history|backup"
+                      r"|архив|прошл(?:ое|ая|ые|ый)|стар(?:ое|ая|ые|ый))(?:[-_. ].*)?$", re.I)
 
 # Правила, которые утилита проверяет не целиком или не проверяет: id → что прочитать скиллу. Правило вне словаря
 # утилита проверяет целиком; сверку со списком реестра держит самопроверка.
 READING = {
     "R-STRUCT-001": "раскладку сверяет утилита; «своя форма поля вместо схемы базы» — чтением файлов слоя против схем",
-    "R-STRUCT-004": "арт-дирекция — чек-лист creative 01/02 §8.1 чтением; схему, паспорт и ссылки проверяет "
+    "R-STRUCT-004": "арт-дирекция — чек-лист creative 01/02 § Чек-лист чтением; схему, паспорт и ссылки проверяет "
                     "ad_check.py",
     "R-STRUCT-005": "файлы ассетов — asset_audit.py, check_icons.py, provenance_check.py по типу файла: в структурный "
                     "прогон не входят (нужны модели и бинарники окружения); план ассетов проверяет plan_to_assets.py",
@@ -1071,15 +1085,21 @@ class Audit:
             return None, f"«{str(value)[:80]}» — не путь к файлу"
         return (Path(base).parent / v), None
 
-    def check_ref(self, rule_kind, s, ref_id, base, field_path, value, fix):
+    def check_ref(self, rule_kind, s, ref_id, base, field_path, value, fix, ahead=None):
+        """ahead — (причина, совет): файл ссылки создаёт следующий этап, и он ещё не начат — подсказка, не ошибка."""
         if value in (None, "", [], {}):
             return
         for v in listify(value):
             p, why = self.ref_target(base, v)
             if p is not None and p.exists():
                 continue
+            ref = f"{ref_id}#/{field_path.replace('.', '/')}"
+            if ahead and not why:
+                self.add("R-REF-001", "hint", s, rule_kind, ref, base,
+                         f"{field_path} ведёт в файл, которого ещё нет: {v} — {ahead[0]}", ahead[1])
+                continue
             msg = f"{field_path}: {why}" if why else f"{field_path} ведёт в несуществующий файл: {v}"
-            self.add("R-REF-001", "error", s, rule_kind, f"{ref_id}#/{field_path.replace('.', '/')}", base, msg, fix)
+            self.add("R-REF-001", "error", s, rule_kind, ref, base, msg, fix)
 
     def refs_site(self, s):
         b = self.site(s, "brief")
@@ -1097,10 +1117,15 @@ class Audit:
             if isinstance(data, dict):
                 self.check_ref("hierarchy", s, h.stem, h, "meaning_ref", data.get("meaning_ref"),
                                self.dd(s, "page-plan"))
+        started = {p.name[:-len(f".{lang}.yaml")] if lang else p.stem for p, _deck, lang in self.decks(s)}
         for pid, (p, plan) in self.plans(s).items():
             fix = self.dd(s, f"page-plan:{pid}")
             for fld in ("brief", "facts", "copy_deck", "asset_plan", "treatment"):
-                self.check_ref("page-plan", s, pid, p, f"refs.{fld}", get(plan, "refs", fld), fix)
+                # план называет copy deck до этапа copy: пока текстов страницы нет ни на одном языке, ссылка ждёт файл
+                ahead = ("этап copy страницы не начат",
+                         self.dd(s, f"copy — каркас copy deck {pid}: copydeck.py skeleton")) \
+                    if fld == "copy_deck" and pid not in started else None
+                self.check_ref("page-plan", s, pid, p, f"refs.{fld}", get(plan, "refs", fld), fix, ahead)
             for fld in ("tokens_ref", "motion_spec_ref"):
                 self.check_ref("page-plan", s, pid, p, f"page.treatment.{fld}", get(plan, "page", "treatment", fld),
                                fix)
@@ -1209,19 +1234,24 @@ class Audit:
             pp, plan = plans[stem]
             slots, sections = self.plan_text_slots(plan)
             pages = [pg for pg in deck.get("pages") or [] if isinstance(pg, dict)]
-            if len(pages) != 1 or pages[0].get("page_id") != stem:
+            # у шаблона коллекции рядом со страницей шаблона — образцы записей: page_id свой, site_page_id — id плана
+            template = bool(get(plan, "page", "template"))
+            own = [pg for pg in pages if pg.get("page_id") == stem]
+            samples = [pg for pg in pages if pg.get("page_id") != stem and pg.get("site_page_id") == stem]
+            if len(own) != 1 or len(own) + (len(samples) if template else 0) != len(pages):
                 ids = ", ".join(str(pg.get("page_id")) for pg in pages) or "—"
+                why = " — образцы (site_page_id — id плана) есть только у шаблона коллекции (page.template: true)" \
+                    if samples and not template else ""
                 self.add("R-REF-003", "error", s, "copy-deck", stem, p,
-                         f"один copy deck на план: в {p.name} страницы {ids}, а файл — страница {stem} (page.id плана)",
-                         fix)
-            for pg in pages:
-                if pg.get("page_id") != stem:
-                    continue
+                         f"один copy deck на план: в {p.name} страницы {ids}, а файл — страница {stem} (page.id плана)"
+                         + why, fix)
+            for pg in own + (samples if template else []):
+                pid = pg.get("page_id")
                 ref = pg.get("page_plan_ref")
                 if ref:
                     t, _why = self.ref_target(p, ref)
                     if t is not None and t.exists() and t.resolve() != pp.resolve():
-                        self.add("R-REF-003", "error", s, "copy-deck", f"{stem}#/page_plan_ref", p,
+                        self.add("R-REF-003", "error", s, "copy-deck", f"{pid}#/page_plan_ref", p,
                                  f"page_plan_ref ведёт не в план страницы {stem}: {ref}", fix)
                 for sec in pg.get("sections") or []:
                     if not isinstance(sec, dict):
@@ -1229,11 +1259,11 @@ class Audit:
                     sid = sec.get("section_id")
                     ssid = sec.get("site_section_id")
                     if sid not in sections:
-                        self.add("R-REF-003", "error", s, "copy-deck", f"{stem}#/{sid}", p,
+                        self.add("R-REF-003", "error", s, "copy-deck", f"{pid}#/{sid}", p,
                                  f"секции `{sid}` copy deck нет в плане {stem}", fix)
                         continue
                     if ssid and ssid != sid:
-                        self.add("R-REF-003", "error", s, "copy-deck", f"{stem}#/{sid}", p,
+                        self.add("R-REF-003", "error", s, "copy-deck", f"{pid}#/{sid}", p,
                                  f"секция `{sid}`: site_section_id `{ssid}` — не id секции плана", fix)
                     for sl in sec.get("slots") or []:
                         if not isinstance(sl, dict):
@@ -1241,19 +1271,19 @@ class Audit:
                         slid = sl.get("slot_id")
                         t = slots.get((sid, slid))
                         if t is None:
-                            self.add("R-REF-003", "error", s, "copy-deck", f"{stem}#/{sid}/{slid}", p,
+                            self.add("R-REF-003", "error", s, "copy-deck", f"{pid}#/{sid}/{slid}", p,
                                      f"слота `{sid}/{slid}` copy deck нет среди текстовых слотов плана {stem}", fix)
                             continue
                         if sl.get("slot_type") and t.get("slot") and sl["slot_type"] != t["slot"]:
-                            self.add("R-REF-003", "error", s, "copy-deck", f"{stem}#/{sid}/{slid}", p,
+                            self.add("R-REF-003", "error", s, "copy-deck", f"{pid}#/{sid}/{slid}", p,
                                      f"слот `{sid}/{slid}`: slot_type {sl['slot_type']}, а slot плана — {t['slot']}",
                                      fix)
                         if sl.get("site_slot_id") and t.get("anatomy") and sl["site_slot_id"] != t["anatomy"]:
-                            self.add("R-REF-003", "error", s, "copy-deck", f"{stem}#/{sid}/{slid}", p,
+                            self.add("R-REF-003", "error", s, "copy-deck", f"{pid}#/{sid}/{slid}", p,
                                      f"слот `{sid}/{slid}`: site_slot_id {sl['site_slot_id']}, а anatomy плана — "
                                      f"{t['anatomy']}", fix)
                         if (sl.get("group") or t.get("group")) and sl.get("group") != t.get("group"):
-                            self.add("R-REF-003", "error", s, "copy-deck", f"{stem}#/{sid}/{slid}", p,
+                            self.add("R-REF-003", "error", s, "copy-deck", f"{pid}#/{sid}/{slid}", p,
                                      f"слот `{sid}/{slid}`: group {sl.get('group') or '—'}, а экземпляр группы слота "
                                      f"плана — {t.get('group') or '—'}", fix)
 
@@ -1269,7 +1299,9 @@ class Audit:
             if isinstance(get(m, "pages"), dict):
                 out = [str(k) for k in m["pages"]]
             for u in (get(m, "utility_pages") or {}).values() if isinstance(get(m, "utility_pages"), dict) else []:
-                out += [str(x.get("id") if isinstance(x, dict) else x) for x in listify(u)]
+                # служебная страница — id строкой или запись карты: у «спасибо» id страницы лежит в поле page
+                ids = [(x.get("id") or x.get("page")) if isinstance(x, dict) else x for x in listify(u)]
+                out += [str(i) for i in ids if i]
             return out
         return [str(x.get("id")) for x in get(self.brief(s), "pages", "list", default=[]) or []
                 if isinstance(x, dict) and x.get("id")]
@@ -1355,30 +1387,36 @@ class Audit:
         t = md.table(("id", "файл", "слот", "артефакт"))
         ta = md.table(("артефакт", "тип", "адрес"))
         arts = {L.cell(r.get("артефакт")) for r in ta.rows} if ta else set()
-        slots = set()
-        for ap in sorted(self.dsurf(s, "asset-plans").glob("*.yaml")) if self.dsurf(s, "asset-plans").is_dir() else []:
-            d = self.load(ap)
-            for x in listify(get(d, "slots")):
-                if isinstance(x, dict) and x.get("id"):
-                    slots.add(str(x["id"]))
-        man = self.manifest_rows(self.dsurf(s, "assets") / "manifest.yaml")
+        slots = self.plan_slots(s)
+        folder = self.dsurf(s, "assets")
+        man = self.manifest_rows(folder / "manifest.yaml")
         for r in t.rows if t else []:
-            f = L.cell(r.get("файл"))
-            if L.is_empty(r.get("id")) and L.is_empty(f):
+            f = self.upload_file(r.get("файл"))
+            a = L.cell(r.get("артефакт"))
+            if L.is_empty(r.get("id")) and not f:
                 continue
-            if not f.startswith(f"design/{s}/") and not f.startswith(f"{s}/") and "/" in f:
+            if (not f.startswith(f"design/{s}/") and not f.startswith(f"{s}/") and "/" in f) or \
+                    (not f and a != f"canvas:{s}"):
                 continue                                     # загрузка другой поверхности
             problems = []
             name = Path(f).name
             if L.is_empty(r.get("id")):
                 problems.append("нет id загрузки")
-            if not (self.dsurf(s, "assets") / name).is_file() and not any(
-                    Path(str(x.get("file") or "")).name == name for x in man):
+            up = self.upload_path(f, s)
+            same = [x for x in man if f and Path(str(x.get("file") or "")).name == name]
+            if not f:
+                problems.append("нет файла")
+            elif up is None and not (folder / name).is_file() and not same:
                 problems.append(f"файла {name} нет в ассетах поверхности и строке манифеста")
+            # страницу слота называет строка манифеста файла загрузки; у одноимённых файлов страниц — строка этого пути
+            row = next((x for x in same if up is not None and self.asset_path(folder, x) == up),
+                       same[0] if len(same) == 1 else None)
+            page = str(row.get("page")) if row and row.get("page") not in (None, "") else None
             sl = L.cell(r.get("слот"))
-            if slots and sl not in slots:
+            if slots and page and (page, sl) not in slots:
+                problems.append(f"слот {sl} — не id слота плана ассетов страницы {page} (page строки манифеста)")
+            elif slots and not page and sl not in {x for _pg, x in slots}:
                 problems.append(f"слот {sl} — не id слота плана ассетов")
-            a = L.cell(r.get("артефакт"))
             if arts and a not in arts:
                 problems.append(f"артефакт {a} не из таблицы «Артефакты»")
             if problems:
@@ -1389,6 +1427,66 @@ class Audit:
         d = self.load(path)
         rows = d if isinstance(d, list) else get(d, "assets", default=[]) if isinstance(d, dict) else []
         return [r for r in rows or [] if isinstance(r, dict)]
+
+    def asset_path(self, folder, row):
+        """Файл строки манифеста ассетов: от папки манифеста, от корня данных или от design/ продукта — как у сборщика
+        входа холста; файла нет — None."""
+        v = str(row.get("file") or "").strip()
+        if not v:
+            return None
+        return next((p.resolve() for p in (folder / v, self.root / v, self.dprod() / v) if p.is_file()), None)
+
+    @staticmethod
+    def upload_file(value):
+        """Ячейка «файл» строки «Загрузки» → путь: первое значение в обратных кавычках (после него — пояснение),
+        без кавычек — ячейка целиком; пусто — ''."""
+        v = str(value or "").strip()
+        m = re.search(r"`([^`]+)`", v)
+        v = m.group(1).strip() if m else v
+        return "" if mod("layer").is_empty(v) else v
+
+    def upload_path(self, f, s=None):
+        """Файл загрузки на диске: `design/…` — от папки проекта, `docs/…` — от корня данных, `<surface>/…` — от
+        design/, имя без папки — в ассетах поверхности s; `$DDD_HOME/…`, `~/…` и абсолютный путь — файл вне
+        репозитория (демо-кадр); файла нет — None."""
+        if not f:
+            return None
+        if f.startswith("$DDD_HOME/"):
+            cands = [kbpaths.home(f[len("$DDD_HOME/"):])]
+        elif f.startswith("~") or Path(f).is_absolute():
+            cands = [Path(f).expanduser()]
+        else:
+            cands = [self.project / f, self.root / f, self.dprod() / f]
+            if s:
+                cands.append(self.dsurf(s, "assets") / f)
+        return next((p.resolve() for p in cands if p.is_file()), None)
+
+    def plan_slots(self, s):
+        """{(страница, id слота): (путь плана ассетов, слот, план)}. id слота повторяется между страницами (знак
+        шапки, обложка, визуал первого экрана), поэтому ключ ассета — страница и слот; страница — page.id плана
+        ассетов, без него — имя файла плана."""
+        out = {}
+        d = self.dsurf(s, "asset-plans")
+        for ap in sorted(d.glob("*.yaml")) if d.is_dir() else []:
+            data = self.load(ap)
+            page = str(get(data, "page", "id") or ap.stem)
+            for x in listify(get(data, "slots")):
+                if isinstance(x, dict) and x.get("id"):
+                    out[(page, str(x["id"]))] = (ap, x, data)
+        return out
+
+    @staticmethod
+    def row_slots(slots, row, rows=()):
+        """Слоты планов ассетов строки манифеста — как её читает вход холста: с полем page — слот плана этой страницы;
+        без него — слот с таким id в планах страниц, у которых нет своих строк (rows — строки манифеста), а когда
+        свои строки есть у всех — в плане любой страницы."""
+        sid, page = str(row.get("slot") or ""), row.get("page")
+        if page not in (None, ""):
+            hit = slots.get((str(page), sid))
+            return [hit] if hit else []
+        own = {str(r.get("page")) for r in rows if str(r.get("slot") or "") == sid and r.get("page") not in (None, "")}
+        same = [(pg, v) for (pg, x), v in slots.items() if x == sid]
+        return [v for pg, v in same if pg not in own] or [v for _pg, v in same]
 
     # ================================================================ R-COV
     def r_cov(self):
@@ -1543,12 +1641,22 @@ class Audit:
             return
         man_path = folder / "manifest.yaml"
         rows = self.manifest_rows(man_path)
-        by_file = {Path(str(r.get("file") or "")).name: r for r in rows if r.get("file")}
+        # строка манифеста — на файл: у слота их несколько (форматы, варианты), а файлы страниц с одним id слота
+        # одноимённы в своих подпапках — строку находит путь файла, имя — когда строка называет файл без папки
+        by_path, by_name = {}, {}
+        for r in rows:
+            if r.get("file"):
+                rp = self.asset_path(folder, r)
+                if rp is not None:
+                    by_path[rp] = r
+                else:
+                    by_name[Path(str(r["file"])).name] = r
+        slots = self.plan_slots(s) if s else {}
         for f in sorted(x for x in folder.rglob("*") if x.is_file()):
             relp = f.relative_to(folder).as_posix()
             if f.name == "manifest.yaml" or relp.startswith("plans/"):
                 continue
-            r = by_file.get(f.name)
+            r = by_path.get(f.resolve()) or by_name.get(f.name)
             if r is None:
                 self.add("R-COV-009", "warning", s, "asset", relp, f, f"файл ассета {relp} без строки манифеста "
                          f"{self.prel(man_path)}", self.dd(s, "assets"))
@@ -1560,6 +1668,8 @@ class Audit:
             sha = str(r.get("sha256") or "").replace("sha256:", "")
             if sha and sha != __import__("hashlib").sha256(f.read_bytes()).hexdigest():
                 need.append("sha256 не совпадает с файлом")
+            if r.get("page") not in (None, "") and r.get("slot") and slots and not self.row_slots(slots, r):
+                need.append(f"page {r['page']}: слота {r['slot']} нет в плане ассетов этой страницы")
             if need:
                 self.add("R-COV-009", "warning", s, "asset", relp, man_path,
                          f"строка манифеста ассета {relp}: нет или неверно — {', '.join(need)}", self.dd(s, "assets"))
@@ -1734,6 +1844,7 @@ class Audit:
                     self.tools.note("project/ready.py", f"check {s.slug}")
                 except Exception as e:                      # noqa: BLE001
                     self.notes.append(f"ready check {s.slug}: {e}")
+        self.fresh_uploads()
 
     def fresh_input(self, s):
         CI = mod("canvas_input")
@@ -1780,6 +1891,55 @@ class Audit:
             for f in items:
                 self.add(f.rule, f.severity, f.surface, f.kind, f.ref, f.path, f.message, f.fix)
 
+    def fresh_uploads(self):
+        """R-FRESH-007: файл загрузки холста заменён после загрузки — колонка sha256 «Загрузок» ARTIFACTS.md против
+        файла: холст показывает загруженную версию, репозиторий — новую. Отпечаток — sha256 файла целиком или его
+        начало от восьми знаков. Строки без отпечатка (или таблица без колонки) — одна подсказка со счётом: сверять
+        нечем; файла строки нет на машине (демо-кадр вне git) — заметка сводки."""
+        p = self.dprod("artifacts")
+        if not p.is_file():
+            return
+        L = mod("layer")
+        t = L.Md(p).table(("id", "файл", "слот", "артефакт"))
+        if t is None:
+            return
+        scope = {x.slug for x in self.scope}
+        empty, lost, total = [], [], 0
+        for r in t.rows:
+            f, uid = self.upload_file(r.get("файл")), L.cell(r.get("id")) or "—"
+            art = L.cell(r.get("артефакт")) or ""
+            s = art.split(":", 1)[1] if art.startswith("canvas:") else None
+            if not f or (s is not None and s not in scope):
+                continue
+            total += 1
+            sha = (L.cell(r.get("sha256")) or "").replace("sha256:", "").strip().lower()
+            if not sha:
+                empty.append(uid)
+                continue
+            ref, fix = f"ARTIFACTS#Загрузки/{uid}", self.dd(s, "холст — загрузки")
+            if not re.fullmatch(r"[0-9a-f]{8,64}", sha):
+                self.add("R-FRESH-007", "warning", s, "artifacts", ref, p, f"отпечаток загрузки {uid} не по форме: "
+                         "sha256 файла — шестнадцатеричные знаки, от восьми", fix)
+                continue
+            path = self.upload_path(f, s)
+            if path is None:
+                lost.append(uid)
+            elif not __import__("hashlib").sha256(path.read_bytes()).hexdigest().startswith(sha):
+                self.add("R-FRESH-007", "warning", s, "artifacts", ref, p,
+                         f"файл загрузки {uid} изменился после загрузки: sha256 строки «Загрузки» не равен файлу "
+                         f"{self.prel(path)} — холст показывает загруженный кадр, а не файл репозитория",
+                         "замена загрузки по протоколу холста: новая загрузка, её id — в исходники артбордов, новые id "
+                         "и sha256 — в строку «Загрузок» — " + fix)
+        if empty:
+            col = "" if "sha256" in t.columns else "в «Загрузках» нет колонки sha256: "
+            self.add("R-FRESH-007", "hint", None, "artifacts", "ARTIFACTS#Загрузки", p,
+                     f"{col}загрузки холста без отпечатка файла — {len(empty)} из {total} ({listed(empty, 4)}): замена "
+                     "файла после загрузки не ловится", "колонка sha256 после «файл» — sha256 файла на момент "
+                     "загрузки: " + self.dd(what="холст — загрузки"))
+        if lost:
+            self.note_once(f"R-FRESH-007 не проверялось у загрузок, файла которых нет на этой машине, — {len(lost)}: "
+                           + listed(lost, 4))
+
     # ================================================================ R-MAT
     def r_mat(self):
         for s in self.scope:
@@ -1814,7 +1974,9 @@ class Audit:
                 if not isinstance(pg, dict) or pg.get("status") != "approved":
                     continue
                 pid = pg.get("page_id")
-                pst = docpaths.status(plans[pid][0]) if pid in plans else None
+                # образец шаблона коллекции стоит на плане шаблона: его называет site_page_id
+                plan_id = next((x for x in (pg.get("site_page_id"), pid) if x in plans), None)
+                pst = docpaths.status(plans[plan_id][0]) if plan_id else None
                 open_ = ([f"план {pst or 'нет'}"] if pst != "approved" else []) + \
                     ([f"факты {fst or 'нет'} (confirmed ставит заказчик)"] if fst != "confirmed" else [])
                 if open_:
@@ -1920,8 +2082,8 @@ class Audit:
                 self.add("R-MAT-012", "error", s, "input", "INPUT.md", inp,
                          f"холст этапа {fm.get('stage')} опубликован на входе с ошибками проверки ({errs} error в "
                          "манифесте)", f"canvas_input build {self.slug} {s} --stage {fm.get('stage')}")
-        iters = [p for p in self.dsurf(s, "review").iterdir() if p.is_dir()] if self.dsurf(s, "review").is_dir() \
-            else []
+        iters = [p for p in sorted(self.dsurf(s, "review").iterdir()) if p.is_dir() and ITER_DIR.match(p.name)] \
+            if self.dsurf(s, "review").is_dir() else []
         for p in iters:
             self.add("R-SEM-002", "warning", s, "review", f"{s}#{p.name}", p,
                      f"папка по итерациям в review/: {p.name} — review/ держит последний результат", self.dd(s))
@@ -1949,68 +2111,76 @@ class Audit:
                          "строки «Проверки макета» в ARTIFACTS.md нет — снимается только подтверждённой человеком "
                          "разовой просьбой заказчика", self.dd(s.slug, "checks"))
 
-    def plan_slots_by_id(self, s):
-        """{id слота плана ассетов: (путь плана, слот, план)}."""
-        out = {}
-        d = self.dsurf(s, "asset-plans")
-        for ap in sorted(d.glob("*.yaml")) if d.is_dir() else []:
-            data = self.load(ap)
-            for x in listify(get(data, "slots")):
-                if isinstance(x, dict) and x.get("id"):
-                    out[str(x["id"])] = (ap, x, data)
-        return out
-
     def mat_assets(self, s):
         folder = self.dsurf(s, "assets")
         rows = self.manifest_rows(folder / "manifest.yaml")
-        slots = self.plan_slots_by_id(s)
+        slots = self.plan_slots(s)
         for r in rows:
             sid = str(r.get("slot") or "")
-            hit = slots.get(sid)
-            if hit is None:
+            hits = self.row_slots(slots, r, rows)
+            f = self.asset_path(folder, r) or folder / Path(str(r.get("file") or "")).name
+            if not hits:
                 # у сайта генерация идёт только по плану ассетов страницы; иллюстрации кабинета — по ДС и паспорту
                 if self.reg[s].page and any(r.get(k) is True for k in ("ai", "ai_mark", "ai_label")):
-                    f = folder / Path(str(r.get("file") or "")).name
+                    where = f"в плане ассетов страницы {r['page']}" if r.get("page") not in (None, "") else \
+                        "ни в одном плане ассетов поверхности"
                     self.add("R-MAT-008", "error", s, "asset", sid or f.name, f if f.is_file() else
-                             folder / "manifest.yaml", f"ассет слота {sid or '—'} с пометкой ИИ, а слота нет ни в "
-                             "одном плане ассетов поверхности: генерация — только по утверждённому плану",
-                             self.dd(s, "asset-plan"))
+                             folder / "manifest.yaml", f"ассет слота {sid or '—'} с пометкой ИИ, а слота нет {where}: "
+                             "генерация — только по утверждённому плану", self.dd(s, "asset-plan"))
                 continue
-            ap, slot, plan = hit
-            gen = str(slot.get("source") or "") in ("generate", "edit-real") or bool(r.get("ai") or
-                                                                                    r.get("ai_mark"))
-            approved = get(plan, "status") == "approved" and bool(get(plan, "approval"))
-            if gen and not approved:
-                f = folder / Path(str(r.get("file") or "")).name
+            ai = bool(r.get("ai") or r.get("ai_mark"))
+            # строка без page при одном id слота у нескольких страниц — общая для страниц без своих строк: генерацию
+            # разрешает утверждённый план любой из них, находка — когда не разрешает ни один
+            open_ = [(ap, slot, plan) for ap, slot, plan in hits
+                     if (ai or str(slot.get("source") or "") in ("generate", "edit-real"))
+                     and not (get(plan, "status") == "approved" and bool(get(plan, "approval")))]
+            if len(open_) == len(hits):
+                # первым — план, где слот генерируется: его источник и id называет находка
+                open_.sort(key=lambda x: (str(x[1].get("source") or "") not in ("generate", "edit-real"), x[0].stem))
+                ap, slot, plan = open_[0]
+                what = "; ".join(f"план ассетов {a.stem} — {get(p, 'status') or 'без статуса'}"
+                                 + ("" if get(p, "approval") else " без approval") for a, _sl, p in open_)
                 self.add("R-MAT-008", "error", s, "asset-plan", f"{ap.stem}#{sid}", f if f.is_file() else ap,
-                         f"ассет слота {sid} ({slot.get('source')}) есть, а план ассетов {ap.stem} — "
-                         f"{get(plan, 'status') or 'без статуса'}" + ("" if get(plan, "approval") else
-                                                                      " без approval")
-                         + ": генерация — только после утверждения плана", self.dd(s, "asset-plan — утверждение"))
+                         f"ассет слота {sid} ({slot.get('source')}) есть, а {what}: генерация — только после "
+                         "утверждения плана", self.dd(s, "asset-plan — утверждение"))
         # ключевые ассеты и ДС (R-MAT-007)
         if not self.reg[s].page:
             return
-        keys = [(sid, ap) for sid, (ap, sl, _p) in slots.items() if sl.get("key") and
+        keys = [(pg, sid) for (pg, sid), (_ap, sl, _p) in slots.items() if sl.get("key") and
                 str(sl.get("source") or "") in ("generate", "edit-real")]
         if not keys:
             return
-        by = {str(r.get("slot")): r for r in rows}
+        many = {sid for _pg, sid in keys if sum(1 for _p, x in slots if x == sid) > 1}
+
+        def name(pg, sid):                                  # id слота, у повторяющегося между страницами — со страницей
+            return f"{pg}/{sid}" if sid in many else sid
+
+        def rows_of(pg, sid):           # строки слота страницы, как у входа холста: с её page, без таких — без page
+            mine = [r for r in rows if str(r.get("slot")) == sid]
+            return [r for r in mine if str(r.get("page") or "") == pg] or [r for r in mine if not r.get("page")]
+
         note = self.state("design", "_phase-jump.md")
         debt = note.is_file() and re.search(r"ДС до ключевых ассетов", note.read_text(encoding="utf-8"))
         if self.status(self.dprod("system")) == "approved" and not debt:
-            late = [sid for sid, _ap in keys if str(get(by.get(sid), "status") or "") != "accepted"]
+            # у слота несколько строк — по файлу на формат и вариант; принят — есть принятая строка: её берёт вход
+            late = [name(pg, sid) for pg, sid in keys
+                    if not any(r.get("file") and r.get("status") == "accepted" for r in rows_of(pg, sid))]
             if late:
                 self.add("R-MAT-007", "warning", s, "design-system", "system", self.dprod("system"),
                          f"ДС утверждена раньше ключевых ассетов {s}: {', '.join(late)} не приняты, долга «ДС до "
                          "ключевых ассетов» в заметке пропусков нет", self.dd(what="design-system"))
         vd = self.dsurf(s, "visual-dna")
-        made = [sid for sid, _ap in keys if sid in by]
+        made = [name(pg, sid) for pg, sid in keys if rows_of(pg, sid)]
         if made and self.status(vd) != "approved":
             self.add("R-MAT-007", "warning", s, "visual-dna", "visual-dna", vd,
                      f"ключевые ассеты генерации ({', '.join(made)}) есть, а маркетинговый паспорт не approved",
                      self.dd(s, "art-direction"))
 
     def mat_blockers(self):
+        """R-MAT-009: строка **blocker** заметки ветки у закрытого файла. Закрытие держит вопрос без ответа; строка,
+        которая называет пробел фактов missing[] по id, — блокер публикации: файл закрывается с заглушкой пробела, а
+        публикацию держит copydeck.py validate --final — подсказка."""
+        gaps = [str(g) for g in self.facts()[2] if g]
         for branch in ("site", "design"):
             d = self.state(branch)
             for note in sorted(d.rglob("*.md")) if d.is_dir() else []:
@@ -2023,11 +2193,24 @@ class Audit:
                 if not target.is_file():
                     continue
                 st = self.status(target)
-                if st in ("approved", "confirmed", "verified", "stable"):
-                    n = len(re.findall(r"\*\*blocker\*\*", text))
+                if st not in ("approved", "confirmed", "verified", "stable"):
+                    continue
+                # пункт списка — строка «- …» с продолжением до следующего пункта, заголовка или пустой строки
+                items = [x for x in re.split(r"\n(?=\s*[-*]\s)|\n\s*\n|\n(?=#)", text[m.end():]) if "**blocker**" in x]
+                publish = [x for x in items if any(re.search(rf"(?<![\w-]){re.escape(g)}(?![\w-])", x) for g in gaps)]
+                hold = len(items) - len(publish)
+                if hold:
                     self.add("R-MAT-009", "error", None, "state", note.stem, note,
-                             f"строки **blocker** в заметке у закрытого файла {self.rel(target)} ({st}) — {n}",
+                             f"строки **blocker** в заметке у закрытого файла {self.rel(target)} ({st}) — {hold}",
                              "закрыть вопрос словом владельца или вернуть файл в работу — " + self.dd())
+                if publish:
+                    named = sorted({g for g in gaps for x in publish
+                                    if re.search(rf"(?<![\w-]){re.escape(g)}(?![\w-])", x)})
+                    self.add("R-MAT-009", "hint", None, "state", note.stem, note,
+                             f"блокер публикации в заметке у закрытого файла {self.rel(target)} ({st}) — "
+                             f"{len(publish)}: пробелы фактов {listed(named)}; закрытие он не держит",
+                             "перед публикацией сайта — copydeck.py validate --final (0 заглушек); пробел закрывает "
+                             "источник заказчика: " + self.dd(what="meaning (факты)"))
 
     def mat_first_input(self):
         ab = self.dprod("app-brief")
@@ -2748,6 +2931,201 @@ def _selftest():
         dp.write_text(dtext, encoding="utf-8")
         pp.write_text(ptext, encoding="utf-8")
         am.unlink()
+        # ключ ассета — страница и слот: слот header-logo есть в планах ассетов обеих страниц; строка манифеста — на
+        # файл (формат, вариант); загрузки холста с отпечатком файла
+        import copy
+        import hashlib
+        adir = am.parent
+        aplans = {n: adir / "plans" / f"{n}.yaml" for n in ("home", "spasibo")}
+        aplan_texts = {n: p.read_text(encoding="utf-8") for n, p in aplans.items()}
+
+        def asset_plan(name, slots, **top):
+            """План ассетов фикстуры с нужным статусом и слотами: слот по id правится или добавляется."""
+            data = y.safe_load(aplan_texts[name])
+            data.pop("approval", None)
+            data.update(top)
+            have = {sl.get("id"): sl for sl in data.setdefault("slots", []) if isinstance(sl, dict)}
+            for sid, fields in slots.items():
+                if sid in have:
+                    have[sid].update(fields)
+                else:
+                    data["slots"].append({"id": sid, **fields})
+            aplans[name].write_text(y.safe_dump(data, allow_unicode=True, sort_keys=False), encoding="utf-8")
+
+        asset_plan("home", {"header-logo": {"source": "real"}, "hero-visual": {"source": "edit-real", "key": True}},
+                   status="approved", approval={"by": "владелец продукта (демо)", "date": "2026-09-29"})
+        asset_plan("spasibo", {"header-logo": {"source": "generate"}}, status="draft")
+        made = {"header-logo.svg": "<svg id='home'/>\n", "spasibo/header-logo.svg": "<svg id='spasibo'/>\n",
+                "hero-visual-desktop.avif": "avif\n", "hero-visual-desktop.webp": "webp\n",
+                "uslugi-header-logo.svg": "<svg id='uslugi'/>\n"}
+        sha = {n: hashlib.sha256(text.encode("utf-8")).hexdigest() for n, text in made.items()}
+        base_row = "role: informational, license: демо, origin: демо"
+        rows = ["slot: header-logo, file: header-logo.svg, ai: true, status: accepted",
+                "page: spasibo, slot: header-logo, file: spasibo/header-logo.svg, ai: true, status: draft",
+                "slot: hero-visual, variant: desktop, format: avif, file: hero-visual-desktop.avif, ai: false, "
+                "status: accepted",
+                "slot: hero-visual, variant: desktop, format: webp, file: hero-visual-desktop.webp, ai: false, "
+                "status: draft"]
+        stray = "page: uslugi, slot: header-logo, file: uslugi-header-logo.svg, ai: true, status: draft"
+
+        def manifest(rws):
+            for r in rws:                                   # файл — у каждой строки манифеста, лишних файлов нет
+                n = re.search(r"file: ([^,]+)", r).group(1)
+                (adir / n).parent.mkdir(parents=True, exist_ok=True)
+                (adir / n).write_text(made[n], encoding="utf-8")
+            am.write_text("example: true\nassets:\n" + "".join(
+                "  - {" + r + f", {base_row}, sha256: {sha[re.search(r'file: ([^,]+)', r).group(1)]}" + "}\n"
+                for r in rws), encoding="utf-8")
+
+        def assets():
+            aa = Audit(slug, root, today=today, run_tools=False)
+            aa.mat_assets("promo")
+            aa.cov_assets(adir, "promo")
+            aa.uploads("promo")
+            aa.fresh_uploads()
+            return [(f.rule, f.severity, f.ref, f.message) for f in aa.rep.items], aa.notes
+
+        manifest(rows)
+        g1, _n = assets()
+        check("ключ ассета — страница и слот: строка без page при одном id слота у двух страниц — генерацию разрешает "
+              "утверждённый план одной из них; строка с page — план своей страницы (R-MAT-008 error у spasibo); "
+              "одноимённые файлы страниц в подпапках и строки на формат слота — без R-COV-009; у ключевого слота есть "
+              "принятая строка — ДС не «раньше ассетов», паспорта нет — R-MAT-007 warning",
+              [x[:3] for x in g1 if x[0] == "R-MAT-008"] == [("R-MAT-008", "error", "spasibo#header-logo")]
+              and not any(x[0] == "R-COV-009" for x in g1)
+              and [x[2] for x in g1 if x[0] == "R-MAT-007"] == ["visual-dna"]
+              and any(x[0] == "R-MAT-007" and "(hero-visual)" in x[3] for x in g1))
+        manifest(rows + [stray])
+        g2, _n = assets()
+        check("строка манифеста с page, плана ассетов которой нет: R-MAT-008 error «слота нет в плане ассетов "
+              "страницы» и R-COV-009 warning у файла",
+              any(x[:3] == ("R-MAT-008", "error", "header-logo") and "страницы uslugi" in x[3] for x in g2)
+              and [x[2] for x in g2 if x[0] == "R-COV-009"] == ["uslugi-header-logo.svg"]
+              and any(x[0] == "R-COV-009" and "page uslugi: слота header-logo нет" in x[3] for x in g2))
+        manifest(["page: home, " + rows[0], rows[1].replace("page: spasibo, ", "")])
+        g3, _n = assets()
+        check("строка без page — общая для страниц без своих строк, как у входа холста: у home своя строка (план "
+              "утверждён), общая строка с пометкой ИИ служит spasibo — R-MAT-008 error по плану spasibo",
+              [x[:3] for x in g3 if x[0] == "R-MAT-008"] == [("R-MAT-008", "error", "spasibo#header-logo")])
+        (adir / "uslugi-header-logo.svg").unlink()
+        manifest(rows)
+        up = "design/promo/assets/"
+
+        def uploads_table(table):
+            """ARTIFACTS.md фикстуры с таблицей table на месте таблицы раздела «Загрузки»."""
+            text, n = re.subn(r"(## Загрузки\n(?:(?!\|)[^\n]*\n)*)(?:\|[^\n]*\n)+", lambda m: m.group(1) + table, at,
+                              count=1)
+            art.write_text(text if n else at + "\n## Загрузки\n\n" + table, encoding="utf-8")
+
+        uploads_table("| id | файл | sha256 | слот | артефакт |\n|---|---|---|---|---|\n"
+                      f"| `up-1` | `{up}header-logo.svg` | {sha['header-logo.svg']} | `header-logo` | "
+                      "`canvas:promo` |\n"
+                      f"| `up-2` | `{up}spasibo/header-logo.svg` — знак страницы «спасибо» | "
+                      f"sha256:{sha['header-logo.svg']} | `header-logo` | `canvas:promo` |\n"
+                      f"| `up-3` | `{up}hero-visual-desktop.avif` | — | `hero-visual` | `canvas:promo` |\n"
+                      "| `up-4` | `$DDD_HOME/out/selftest-no-such/demo.webp` — демо, вне git | 0123456789ab | "
+                      "`hero-visual` | `canvas:promo` |\n"
+                      f"| `up-5` | `{up}spasibo/header-logo.svg` | {sha['spasibo/header-logo.svg'][:12]} | "
+                      "`hero-visual` | `canvas:promo` |\n")
+        u1, n1 = assets()
+        f7 = [x for x in u1 if x[0] == "R-FRESH-007"]
+        check("загрузки холста: sha256 строки не равен файлу — R-FRESH-007 warning (up-2); полный отпечаток и его "
+              "начало — без находки (up-1, up-5); пустая ячейка — одна подсказка со счётом (1 из 5); файла нет на "
+              "машине — заметка сводки (up-4)",
+              "R-FRESH-007" in ids
+              and sorted(x[1:3] for x in f7) == [("hint", "ARTIFACTS#Загрузки"), ("warning", "ARTIFACTS#Загрузки/up-2")]
+              and any(x[1] == "hint" and "1 из 5 (up-3)" in x[3] and "нет колонки" not in x[3] for x in f7)
+              and len(n1) == 1 and "R-FRESH-007 не проверялось" in n1[0] and n1[0].endswith("1: up-4"))
+        check("загрузки холста: слот строки «Загрузки» сверяется с планом ассетов страницы файла (page строки "
+              "манифеста) — R-REF-008 warning у up-5, у остальных строк находок нет",
+              [x[2] for x in u1 if x[0] == "R-REF-008"] == ["ARTIFACTS#Загрузки/up-5"]
+              and any(x[0] == "R-REF-008" and "страницы spasibo" in x[3] for x in u1))
+        uploads_table("| id | файл | слот | артефакт |\n|---|---|---|---|\n"
+                      f"| `up-1` | `{up}header-logo.svg` | `header-logo` | `canvas:promo` |\n")
+        u2, _n = assets()
+        check("загрузки холста: таблица без колонки sha256 — одна подсказка R-FRESH-007, не ошибка",
+              [x[1] for x in u2 if x[0] == "R-FRESH-007"] == ["hint"]
+              and any(x[0] == "R-FRESH-007" and "нет колонки sha256" in x[3] and "1 из 1" in x[3] for x in u2))
+        art.write_text(at, encoding="utf-8")
+        for n, p in aplans.items():
+            p.write_text(aplan_texts[n], encoding="utf-8")
+        am.unlink()
+        for r in rows:
+            (adir / re.search(r"file: ([^,]+)", r).group(1)).unlink()
+        (adir / "spasibo").rmdir()
+
+        def found_of(*rules):
+            return [(f.rule, f.severity, f.ref, f.message)
+                    for f in Audit(slug, root, today=today, run_tools=False).run().rep.items if f.rule in rules]
+
+        # образцы шаблона коллекции: страницы copy deck с site_page_id = id плана
+        deck, plan = y.safe_load(dtext), y.safe_load(ptext)
+        sample = copy.deepcopy(deck["copy_deck"]["pages"][0])
+        sample.update(page_id="spasibo-obrazec", site_page_id="spasibo", status="approved")
+        deck["copy_deck"]["pages"].append(sample)
+        dp.write_text(y.safe_dump(deck, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        j0 = found_of("R-REF-003")
+        plan["page"]["template"] = True
+        pp.write_text(y.safe_dump(plan, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        j1 = found_of("R-REF-003", "R-MAT-001")
+        sample["sections"][0]["slots"][0]["slot_id"] = "no-such-slot"
+        dp.write_text(y.safe_dump(deck, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        j2 = found_of("R-REF-003")
+        dp.write_text(dtext, encoding="utf-8")
+        pp.write_text(ptext, encoding="utf-8")
+        check("образец шаблона коллекции (вторая страница copy deck с site_page_id = id плана): у плана без "
+              "page.template — R-REF-003 error «один copy deck на план»; у шаблона коллекции стык образца сверен и "
+              "чист, план образца найден по site_page_id (R-MAT-001 без «план нет»); слот образца вне плана — "
+              "R-REF-003 error с id образца",
+              [x[1:3] for x in j0] == [("error", "spasibo")] and "только у шаблона коллекции" in j0[0][3]
+              and not any(x[0] == "R-REF-003" for x in j1)
+              and any(x[0] == "R-MAT-001" and x[2] == "spasibo-obrazec" for x in j1)
+              and not any("план нет" in x[3] for x in j1)
+              and [x[1:3] for x in j2] == [("error", f"spasibo-obrazec#/{sample['sections'][0]['section_id']}/"
+                                            "no-such-slot")])
+        # refs.copy_deck плана до этапа copy
+        for path, text, ref in ((hp, hpt, "../copy/home.yaml"), (pp, ptext, "../copy/spasibo-typo.yaml")):
+            data = y.safe_load(text)
+            data["refs"]["copy_deck"] = ref
+            path.write_text(y.safe_dump(data, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        r1 = {x[2]: x for x in found_of("R-REF-001")}
+        hp.write_text(hpt, encoding="utf-8")
+        pp.write_text(ptext, encoding="utf-8")
+        check("refs.copy_deck плана ведёт в файл, которого ещё нет: copy deck страницы не заведён (home) — R-REF-001 "
+              "hint «этап copy страницы не начат»; copy deck страницы есть, а ссылка мимо (spasibo) — error",
+              r1.get("home#/refs/copy_deck", ("", ""))[1] == "hint"
+              and "этап copy страницы не начат" in r1["home#/refs/copy_deck"][3]
+              and [k for k, x in r1.items() if x[1] == "error"] == ["spasibo#/refs/copy_deck"])
+        # папка итерации в review/ — по имени
+        (rv / "REVIEW.md").write_text(accept, encoding="utf-8")
+        for n in ("checks", "iter-02"):
+            (rv / n).mkdir()
+            (rv / n / "home.json").write_text('{"example": true}\n', encoding="utf-8")
+        sem = [x[1:3] for x in found_of("R-SEM-002") if x[2].startswith("promo#")]
+        for n in ("checks", "iter-02"):
+            shutil.rmtree(rv / n)
+        (rv / "REVIEW.md").unlink()
+        check("подпапка review/: папка отчётов checks/ — не находка, папка итерации iter-02/ — R-SEM-002 warning",
+              sem == [("warning", "promo#iter-02")] and all(ITER_DIR.match(n) for n in (
+                  "iter-1", "round3", "v2", "2026-09-30", "prev", "итерация-2", "03-mockup"))
+              and not any(ITER_DIR.match(n) for n in ("checks", "shots", "shots-390", "kit", "reports", "runs", "390",
+                                                      "1440", "390-dark")))
+        # блокер публикации и блокер закрытия в заметке у закрытого плана
+        note.parent.mkdir(parents=True)
+        gap = "- (**blocker**) Этапы оплаты — из договора заказчика; до ответа на странице заглушка пробела\n" \
+              "  `payment-stages`.\n"
+        head = ("---\nkind: page-plan\nslug: spasibo\nref: docs/projects/otves-remont-nn/site/promo/plans/spasibo.yaml"
+                "\n---\n\n## Открытые вопросы\n")
+        note.write_text(head + gap, encoding="utf-8")
+        b1 = found_of("R-MAT-009")
+        note.write_text(head + gap + "- (**blocker**) Кто перезванивает — прораб или офис?\n", encoding="utf-8")
+        b2 = found_of("R-MAT-009")
+        shutil.rmtree(root / ".claude")
+        check("R-MAT-009: строка **blocker** с id пробела фактов missing[] у закрытого плана — блокер публикации, hint "
+              "(держит validate --final, не закрытие); вопрос без пробела рядом — error со счётом 1",
+              [x[1] for x in b1] == ["hint"] and "payment-stages" in b1[0][3]
+              and sorted(x[1] for x in b2) == ["error", "hint"]
+              and next(x for x in b2 if x[1] == "error")[3].endswith("— 1"))
     # макетный прогон: отчёт mockup_checks → R-VIS-001 и сводка по доменам
     with tempfile.TemporaryDirectory(prefix="ddd-audit-vis-") as td:
         rep = Path(td) / "home.json"

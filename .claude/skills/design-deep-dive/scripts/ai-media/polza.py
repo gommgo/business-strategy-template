@@ -13,10 +13,13 @@
   status ID                                            статус генерации (GET /v1/media/{id})
   download ID                                          скачать результат готовой генерации + паспорт
   upload FILE [--permanent]                            загрузить файл в хранилище polza (TEMP_UPLOAD 24 ч / PERMANENT)
-  ops ID extend|upscale_1080p|upscale_4k [--params JSON]   операция над готовым видео (Veo 3.1)
+  ops ID extend|upscale_1080p|upscale_4k [--params JSON]   операция над готовым видео (Veo 3.1); результат сверяется
+                                                       с исходником: тот же id и тот же файл — операция не выполнена
   ledger [--sum] [--agent X] [--tail N]                журнал затрат
+  ledger --ops                                         сверка записей операций с сохранёнными ответами, без сети
   balance                                              GET /v2/balance и /v1/key (предполётная проверка)
   history ID                                           GET /v1/history/generations/{id} (провайдер, clientCost)
+  selftest                                             самопроверка операций на подменном канале: без сети и без ключа
 
 Задание (JSON): {"model": "...", "input": {...}, "provider": {...}?, "tag": "...", "agent": "B", "notes": "...",
   "variant": 1?, "max_rub": 10?, "out_dir": "..."?, "meta": {"ref_video_seconds": 7.5}?, "user": "..."?}
@@ -28,7 +31,8 @@ https://polza.ai/api); POLZA_CATALOG (снимок); POLZA_LEDGER; POLZA_OUT_ROO
 POLZA_BUDGET_AGENT; POLZA_MAX_JOB (60). Ключ никогда не печатается и не пишется в журнал и паспорта.
 
 Коды выхода: 0 — успех; 1 — ошибка задания/проверки; 2 — отказ по бюджету или цене; 3 — таймаут опроса (генерацию
-можно дожать: download ID --live); 4 — генерация failed/cancelled; 5 — HTTP-ошибка; 6 — ошибка скачивания.
+можно дожать: download ID --live); 4 — генерация failed/cancelled или операция не выполнена (канал вернул исходник);
+5 — HTTP-ошибка; 6 — ошибка скачивания.
 """
 from __future__ import annotations
 
@@ -292,6 +296,34 @@ def multipart(fields: dict, files: dict) -> tuple[bytes, str]:
 # Журнал затрат (append-only JSONL, события по uid)
 # ---------------------------------------------------------------------------------------------------------------
 
+def summarize_jobs(events: list[dict]) -> dict:
+    """События журнала → uid → сводка: последнее состояние, id, стоимость (факт или резерв по оценке)."""
+    js = {}
+    for e in events:
+        uid = e.get("uid")
+        if not uid:
+            continue
+        j = js.setdefault(uid, {"uid": uid, "events": 0})
+        j["events"] += 1
+        for k in ("agent", "tag", "model", "base_url", "request_hash", "estimate_rub", "id", "files",
+                  "passport", "cost_rub", "operation", "parent_id"):
+            if e.get(k) is not None:
+                j[k] = e[k]
+        j["state"] = e.get("event")
+        j["ts"] = e.get("ts")
+    for j in js.values():
+        st = j.get("state")
+        if st in ("completed",):
+            j["spent"] = float(j.get("cost_rub") if j.get("cost_rub") is not None else j.get("estimate_rub") or 0)
+        elif st in ("failed", "cancelled"):
+            j["spent"] = float(j.get("cost_rub") or 0)
+        elif st in ("http_error", "cache_hit", "upload", "rejected"):
+            j["spent"] = 0.0
+        else:   # submit / created / timeout / unknown — резерв по оценке (консервативно)
+            j["spent"] = float(j.get("estimate_rub") or 0)
+    return js
+
+
 class Ledger:
     def __init__(self, path: Path):
         self.path = path
@@ -322,30 +354,7 @@ class Ledger:
 
     def jobs(self) -> dict:
         """uid → сводка: последнее состояние, id, стоимость (факт или резерв по оценке)."""
-        js = {}
-        for e in self.events():
-            uid = e.get("uid")
-            if not uid:
-                continue
-            j = js.setdefault(uid, {"uid": uid, "events": 0})
-            j["events"] += 1
-            for k in ("agent", "tag", "model", "base_url", "request_hash", "estimate_rub", "id", "files",
-                      "passport", "cost_rub", "operation", "parent_id"):
-                if e.get(k) is not None:
-                    j[k] = e[k]
-            j["state"] = e.get("event")
-            j["ts"] = e.get("ts")
-        for j in js.values():
-            st = j.get("state")
-            if st in ("completed",):
-                j["spent"] = float(j.get("cost_rub") if j.get("cost_rub") is not None else j.get("estimate_rub") or 0)
-            elif st in ("failed", "cancelled"):
-                j["spent"] = float(j.get("cost_rub") or 0)
-            elif st in ("http_error", "cache_hit", "upload", "rejected"):
-                j["spent"] = 0.0
-            else:   # submit / created / timeout / unknown — резерв по оценке (консервативно)
-                j["spent"] = float(j.get("estimate_rub") or 0)
-        return js
+        return summarize_jobs(self.events())
 
     def spent(self, base_url: str, agent: str | None = None) -> float:
         return round(sum(j["spent"] for j in self.jobs().values()
@@ -359,9 +368,11 @@ class Ledger:
                     return j
         return None
 
-    def find_by_id(self, gen_id: str):
+    def find_by_id(self, gen_id: str, with_ops: bool = False):
+        """Запись генерации по id. Операция, которой канал ответил записью исходника, носит его id: без with_ops такая
+        запись пропускается — иначе status и download приписали бы операции цену и файлы исходной генерации."""
         for j in reversed(list(self.jobs().values())):
-            if j.get("id") == gen_id:
+            if j.get("id") == gen_id and (with_ops or not (j.get("operation") and j.get("parent_id") == gen_id)):
                 return j
         return None
 
@@ -803,6 +814,121 @@ def get_history(ctx: Ctx, gen_id: str):
 
 
 # ---------------------------------------------------------------------------------------------------------------
+# Операция над готовой генерацией: сверка результата с исходником и цена операции
+# ---------------------------------------------------------------------------------------------------------------
+
+OP_NOT_APPLIED = "OPERATION_NOT_APPLIED"
+
+
+def file_sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def known_results(jobs: dict, gen_id: str) -> dict:
+    """Что журнал (сводка jobs: uid → задание) знает о генерации до операции: sha256 → путь каждого файла, который уже
+    выдавался под этим id (исходник и результаты прежних операций над ним), и цена самой генерации. Отпечаток берётся
+    из паспорта — он снят при скачивании; без паспорта — с файла на диске."""
+    files, cost = {}, None
+    for j in jobs.values():
+        if j.get("id") != gen_id:
+            continue
+        if not j.get("operation") and j.get("cost_rub") is not None:
+            cost = float(j["cost_rub"])
+        recorded = {}
+        pp = absp(j["passport"]) if j.get("passport") else None
+        if pp is not None and pp.exists():
+            try:
+                for f in json.loads(pp.read_text(encoding="utf-8")).get("files") or []:
+                    if f.get("sha256") and f.get("path"):
+                        recorded[f["sha256"]] = f["path"]
+            except (OSError, json.JSONDecodeError):
+                pass
+        if not recorded:
+            for f in j.get("files") or []:
+                if absp(f).is_file():
+                    recorded[file_sha256(absp(f))] = f
+        for digest, path in recorded.items():
+            if digest not in files or not absp(files[digest]).is_file():
+                files[digest] = path
+    return {"sha256": files, "cost_rub": cost}
+
+
+def operation_cost(source_id: str, known: dict, op_resp: dict, final: dict) -> tuple[float | None, bool]:
+    """Цена операции по её ответу и признак «у операции своя запись».
+
+    Своя запись — id в ответе на запрос операции не равен id исходника: usage этой записи и есть цена операции. Иначе
+    канал ответил записью исходной генерации, и usage при опросе — цена исходника, а не операции: цена берётся только
+    из ответа на сам запрос операции и только если она не совпала с ценой исходника из журнала. Цены в ответе нет —
+    None: журнал держит оценку по каталогу, а не чужое списание."""
+    op_id = (op_resp or {}).get("id")
+    own = bool(op_id) and op_id != source_id
+    if own:
+        cost = usage_cost(final)
+        return (cost if cost is not None else usage_cost(op_resp)), True
+    cost = usage_cost(op_resp)
+    if cost is not None and known.get("cost_rub") is not None and abs(cost - known["cost_rub"]) < 1e-9:
+        cost = None
+    return cost, False
+
+
+def operation_outcome(source_id: str, known: dict, op_resp: dict, final: dict, files: list[dict]) -> dict:
+    """Итог завершённой операции. Тот же id и только те файлы, что уже выдавались под этим id, — канал вернул
+    исходник: операция не выполнена, цена 0, код OP_NOT_APPLIED."""
+    cost, own = operation_cost(source_id, known, op_resp, final)
+    got = [f.get("sha256") for f in files]
+    same = [known["sha256"][h] for h in got if h in known["sha256"]]
+    if not own and got and len(same) == len(got):
+        return {"applied": False, "own_record": False, "code": OP_NOT_APPLIED, "cost_rub": 0.0, "same_as": same}
+    return {"applied": True, "own_record": own, "code": None, "cost_rub": cost, "same_as": same}
+
+
+def check_operations(ledger: Ledger) -> list[dict]:
+    """Сверка записей операций журнала с их сохранёнными ответами: паспорт операции против файлов, которые журнал знал
+    под id исходника до неё. Строка на операцию: applied — выполнена ли (None — паспорта нет, сверить не с чем), spent
+    — сколько за неё стоит в журнале, phantom — деньги записаны за операцию, которая не выполнена."""
+    events = ledger.events()
+    rows = []
+    for uid, j in summarize_jobs(events).items():
+        if not j.get("operation") or not j.get("parent_id"):
+            continue
+        first = next(i for i, e in enumerate(events) if e.get("uid") == uid)
+        known = known_results(summarize_jobs(events[:first]), j["parent_id"])
+        pp = absp(j["passport"]) if j.get("passport") else None
+        try:
+            pas = json.loads(pp.read_text(encoding="utf-8")) if pp is not None and pp.exists() else None
+        except (OSError, json.JSONDecodeError):
+            pas = None
+        applied = None
+        if pas is not None:
+            op_resp = pas.get("response_operation") or {"id": j.get("id")}
+            applied = operation_outcome(j["parent_id"], known, op_resp, pas.get("response_final") or {},
+                                        pas.get("files") or [])["applied"]
+        rows.append({"uid": uid, "tag": j.get("tag"), "operation": j["operation"], "parent_id": j["parent_id"],
+                     "state": j.get("state"), "spent": j["spent"], "applied": applied,
+                     "phantom": applied is False and j["spent"] > 0})
+    return rows
+
+
+def drop_copies(files: list[dict], known: dict) -> list[str]:
+    """Убрать скачанные копии исходника: файл с именем операции, а содержимым исходника, сошёл бы за её результат.
+    Копия снимается, только когда тот же файл лежит на диске под своим именем."""
+    removed = []
+    for f in files:
+        src = known["sha256"].get(f.get("sha256"))
+        if not src:
+            continue
+        copy, orig = absp(f["path"]), absp(src)
+        if orig.is_file() and copy.is_file() and copy.resolve() != orig.resolve() and file_sha256(orig) == f["sha256"]:
+            copy.unlink()
+            removed.append(f["path"])
+    return removed
+
+
+# ---------------------------------------------------------------------------------------------------------------
 # Живой цикл
 # ---------------------------------------------------------------------------------------------------------------
 
@@ -981,6 +1107,12 @@ def print_plan(ctx: Ctx, prep: Prepared, show_request=True):
     say(f"# Кэш: {'есть — ' + str(hit.get('files')) if hit else 'нет'} (хэш {prep.request_hash[:16]}…)")
 
 
+def say_catalog(ctx: Ctx):
+    """Какой снимок каталога взят для оценки и сколько ему: снимок не за сегодня — с отметкой «!»."""
+    note, check = pc.snapshot_note(ctx.snap)
+    say(("# ! " if check else "# ") + note)
+
+
 # ---------------------------------------------------------------------------------------------------------------
 # Команды
 # ---------------------------------------------------------------------------------------------------------------
@@ -1045,6 +1177,7 @@ def cmd_show(ctx: Ctx, a):
 def cmd_estimate(ctx: Ctx, a):
     jobs = load_jobs(a.job)
     total, bad = 0.0, 0
+    say_catalog(ctx)
     for j in jobs:
         j.setdefault("_dir", str(Path(a.job).resolve().parent))
         prep = prepare(ctx, j, fill=not a.no_fill, allow_unknown=a.allow_unknown, raw=a.raw)
@@ -1075,6 +1208,7 @@ def cmd_run(ctx: Ctx, a):
     if prep.model is None:
         print_issues(prep)
         return EXIT_JOB
+    say_catalog(ctx)
     if not ctx.live:
         say("# СУХОЙ ПРОГОН — ничего не отправлено (для реального вызова добавьте --live)")
         print_plan(ctx, prep)
@@ -1097,6 +1231,7 @@ def cmd_batch(ctx: Ctx, a):
     bad = [p for p in preps if p.model is None or (p.errors and not a.no_validate)]
     total = sum(price_for_limits(p) or 0 for p in preps if p.model is not None)
     par = max(1, min(a.parallel, MAX_PARALLEL))
+    say_catalog(ctx)
     for p in preps:
         if p.model is not None:
             print_plan(ctx, p, show_request=not ctx.live and a.verbose)
@@ -1199,7 +1334,7 @@ def cmd_upload(ctx: Ctx, a):
 
 
 def cmd_ops(ctx: Ctx, a):
-    j = ctx.ledger.find_by_id(a.id) or {}
+    j = ctx.ledger.find_by_id(a.id) or ctx.ledger.find_by_id(a.id, with_ops=True) or {}
     model_id = a.model or j.get("model")
     if not model_id:
         raise SystemExit("не знаю модель генерации: укажите --model (в журнале нет этого id)")
@@ -1244,6 +1379,7 @@ def cmd_ops(ctx: Ctx, a):
         return EXIT_JOB
     if not ok:
         return EXIT_BUDGET
+    known = known_results(ctx.ledger.jobs(), a.id)     # до записи операции: её события носят тот же id
     ctx.ledger.append({"event": "submit", "uid": prep.uid, "agent": prep.agent, "tag": prep.tag, "model": model_id,
                        "operation": a.operation, "parent_id": a.id, "base_url": ctx.base,
                        "request_hash": prep.request_hash, "estimate_rub": oe["rub"]})
@@ -1256,31 +1392,63 @@ def cmd_ops(ctx: Ctx, a):
                            "http_status": e.status, "code": e.code, "message": e.message})
         say(f"ОШИБКА: {e}", err=True)
         return EXIT_HTTP
-    st = r.json or {}
-    new_id = st.get("id") or a.id
+    op_resp = r.json or {}
+    st = op_resp
+    new_id = op_resp.get("id") or a.id
     ctx.ledger.append({"event": "created", "uid": prep.uid, "id": new_id, "status": st.get("status"), "base_url": ctx.base})
     if st.get("status") not in TERMINAL:
         st, n, _ = poll(ctx, new_id, "video", prep.tag)
     if st.get("status") != "completed":
         ev = st.get("status") if st.get("status") in TERMINAL else "timeout"
-        ctx.ledger.append({"event": ev, "uid": prep.uid, "id": new_id, "cost_rub": usage_cost(st) or 0.0,
+        cost, _ = operation_cost(a.id, known, op_resp, st)
+        ctx.ledger.append({"event": ev, "uid": prep.uid, "id": new_id, "cost_rub": cost or 0.0,
                            "error": st.get("error"), "base_url": ctx.base})
         say(f"операция: {ev} {st.get('error') or ''}", err=True)
         return EXIT_FAILED if ev != "timeout" else EXIT_TIMEOUT
     files = fetch_results(ctx, st, prep, new_id, model_id)
-    cost = usage_cost(st)
-    pp = write_passport(files, {"schema": "polza-passport/1", "client": VERSION, "uid": prep.uid,
-                                "operation": a.operation, "parent_id": a.id, "request": {"method": "POST",
-                                "url": ctx.http.url(f"/v1/media/{a.id}/operations"), "body": body},
-                                "response_final": st, "cost": {"usage_cost_rub": cost, "estimate_rub": oe["rub"]},
-                                "timing": {"wall_s": round(time.time() - t0, 2)}, "files": files, "base_url": ctx.base})
+    res = operation_outcome(a.id, known, op_resp, st, files)
+    cost = res["cost_rub"]
+    passport = {"schema": "polza-passport/1", "client": VERSION, "uid": prep.uid,
+                "operation": a.operation, "parent_id": a.id, "request": {"method": "POST",
+                "url": ctx.http.url(f"/v1/media/{a.id}/operations"), "body": body},
+                "response_operation": op_resp, "response_final": st, "outcome": res,
+                "cost": {"usage_cost_rub": cost, "estimate_rub": oe["rub"]},
+                "timing": {"wall_s": round(time.time() - t0, 2)}, "files": files, "base_url": ctx.base}
+    if not res["applied"]:
+        msg = (f"канал вернул исходную генерацию — тот же id {a.id} и тот же файл "
+               f"(sha256 {files[0]['sha256'][:16]}…): операция {a.operation} не выполнена")
+        res["removed_copies"] = drop_copies(files, known)
+        pp = write_passport(files, passport)
+        ctx.ledger.append({"event": "failed", "uid": prep.uid, "id": new_id, "cost_rub": 0.0, "estimate_rub": oe["rub"],
+                           "error": {"code": OP_NOT_APPLIED, "message": msg}, "passport": pp, "base_url": ctx.base})
+        say(f"ОШИБКА {OP_NOT_APPLIED}: {msg}; цена 0 ₽, файл исходника — {res['same_as'][0]}; паспорт {pp}", err=True)
+        return EXIT_FAILED
+    if not res["own_record"] and not known["sha256"]:
+        say(f"! исходника {a.id} нет в журнале или нет его файлов — результат с ним не сверен: проверь файл сам "
+            f"(ffprobe, sha256)", err=True)
+    pp = write_passport(files, passport)
     ctx.ledger.append({"event": "completed", "uid": prep.uid, "id": new_id, "cost_rub": cost, "estimate_rub": oe["rub"],
                        "files": [f["path"] for f in files], "passport": pp, "base_url": ctx.base})
-    say(f"готово: {cost} ₽, паспорт {pp}")
+    say(f"готово: {cost} ₽, паспорт {pp}" if cost is not None else
+        f"готово: цены операции в ответе нет — в журнале оценка по каталогу {pc.fmt_rub(oe['rub'])} ₽ "
+        f"(сверь с балансом: polza.py balance --live); паспорт {pp}")
     return EXIT_OK
 
 
 def cmd_ledger(ctx: Ctx, a):
+    if a.ops:
+        rows = check_operations(ctx.ledger)
+        words = {True: "выполнена", False: "не выполнена — канал вернул исходник (тот же id и тот же файл)",
+                 None: "паспорта операции нет — с исходником не сверить"}
+        for r in rows:
+            say(f"{'✗' if r['phantom'] else '·'} {r['uid']} {r['operation']} над {r['parent_id']} [{r['state']}]: "
+                f"{words[r['applied']]}; в журнале {pc.fmt_rub(r['spent'])} ₽"
+                + (" — за невыполненную операцию должно быть 0 ₽" if r["phantom"] else ""))
+        bad = sum(r["phantom"] for r in rows)
+        say(f"# операций {len(rows)}, с деньгами за невыполненную — {bad}; журнал {ctx.ledger.path}: по {ctx.base} "
+            f"потрачено {pc.fmt_rub(ctx.ledger.spent(ctx.base))} ₽ — сверь с балансом канала: polza.py balance --live "
+            f"(бесплатный GET)")
+        return EXIT_JOB if bad else EXIT_OK
     js = list(ctx.ledger.jobs().values())
     if a.agent:
         js = [j for j in js if j.get("agent") == a.agent]
@@ -1342,6 +1510,169 @@ def cmd_history(ctx: Ctx, a):
 
 
 # ---------------------------------------------------------------------------------------------------------------
+# Самопроверка: операции на подменном канале
+# ---------------------------------------------------------------------------------------------------------------
+
+class _FakeHttp:
+    """Канал самопроверки: ответы и байты результата — из сценария, сети нет."""
+
+    def __init__(self, base: str, replies: dict, blobs: dict):
+        self.base, self.replies, self.blobs, self.calls = base, replies, blobs, []
+
+    def url(self, path: str) -> str:
+        return self.base + path
+
+    def show(self, *args, **kw):
+        pass
+
+    def request(self, method: str, path: str, **kw) -> Resp:
+        self.calls.append((method, path))
+        queue = self.replies[(method, path)]
+        reply = queue.pop(0) if len(queue) > 1 else queue[0]
+        return Resp(200, {}, json.dumps(reply).encode())
+
+    def download(self, url: str, dest: Path, timeout: float = 300, tries: int = 3) -> dict:
+        data = self.blobs[url]
+        dest.write_bytes(data)
+        return {"path": str(dest), "url": url, "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
+                "content_type": "application/octet-stream"}
+
+
+def selftest() -> int:
+    """Операции над готовой генерацией на вымышленных данных: каталог, журнал, исходник и ответы канала — во временной
+    папке."""
+    import contextlib
+    import io
+    import tempfile
+    global KEY_FILE
+    base, model, src_id, src_cost, op_rub = "https://channel.test/api", "demo/video-fast", "gen_source", 45.0, 10.0
+    src_bytes, up_bytes, ext_bytes = b"source 720p", b"upscaled 1080p", b"extended"
+    cdn = "https://cdn.test/"
+    blobs = {cdn + "source.bin": src_bytes, cdn + "up.bin": up_bytes, cdn + "ext.bin": ext_bytes}
+    catalog = {"data": [{"id": model, "type": "video", "name": "Demo Video Fast", "top_provider": {"name": "demo"},
+                         "operations": [
+                             {"id": "upscale_1080p", "async": False, "pricing": {"per_request": op_rub},
+                              "parameters": {"index": {"type": "number", "min": 0}}},
+                             {"id": "extend", "async": True, "pricing": {"per_request": 45},
+                              "parameters": {"prompt": {"type": "string", "required": True, "max_length": 200}}}]}]}
+    src_record = {"id": src_id, "status": "completed", "data": {"url": cdn + "source.bin"},
+                  "usage": {"cost_rub": src_cost}}
+    checks = []
+
+    def ok(name, cond, got=""):
+        checks.append(bool(cond))
+        say(f"{'OK  ' if cond else 'FAIL'} {name}" + (f" — {got}" if got != "" and not cond else ""))
+
+    def stage(tmp: Path, name: str, argv: list[str], replies: dict, budget: str = "60") -> tuple:
+        """Свежие журнал и папка результатов с исходной генерацией → (ctx, код выхода, запись операции, исходник)."""
+        root = tmp / name
+        out = root / "out"
+        out.mkdir(parents=True)
+        src = out / f"clip__{slug(model)}__{src_id}.bin"
+        src.write_bytes(src_bytes)
+        src_pp = write_passport([{"path": str(src), "sha256": hashlib.sha256(src_bytes).hexdigest()}],
+                                {"schema": "polza-passport/1", "files": [
+                                    {"path": str(src), "sha256": hashlib.sha256(src_bytes).hexdigest()}]})
+        a = build_parser().parse_args(argv + ["--live", "--catalog", str(tmp / "catalog"), "--ledger",
+                                              str(root / "ledger.jsonl"), "--out", str(out), "--base-url", base,
+                                              "--agent", "selftest", "--budget-total", budget, "--max-job", "60",
+                                              "--poll-interval", "0.01", "--no-history"])
+        ctx = Ctx(a)
+        ctx.http = _FakeHttp(base, replies, blobs)
+        for ev in ({"event": "submit", "agent": "selftest", "tag": "clip", "model": model, "estimate_rub": src_cost},
+                   {"event": "created", "id": src_id, "status": "pending"},
+                   {"event": "completed", "id": src_id, "cost_rub": src_cost, "files": [str(src)], "passport": src_pp}):
+            ctx.ledger.append({"uid": "source", "base_url": base, **ev})
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            code = cmd_ops(ctx, a)       # печать хода операции самопроверке не нужна: итог — строки OK и FAIL
+        job = next((j for j in ctx.ledger.jobs().values() if j.get("operation")), {})
+        return ctx, code, job, src
+
+    env_key = os.environ.pop("POLZA_API_KEY", None)
+    key_file = KEY_FILE
+    try:
+        with tempfile.TemporaryDirectory(prefix="polza-selftest-") as t:
+            tmp = Path(t)
+            KEY_FILE = tmp / "no-key"
+            (tmp / "catalog").mkdir()
+            (tmp / "catalog" / "api-v1-models.json").write_text(json.dumps(catalog))
+            (tmp / "catalog" / "api-v1-models.providers.json").write_text(json.dumps({"data": []}))
+            up = ["ops", src_id, "upscale_1080p"]
+            op_path = ("POST", f"/v1/media/{src_id}/operations")
+            poll_src = ("GET", f"/v1/media/{src_id}")
+
+            # канал отвечает записью исходника и тем же файлом: операция не выполнена
+            ctx, code, job, src = stage(tmp, "same-file", up, {
+                op_path: [{"id": src_id, "status": "processing"}], poll_src: [src_record]})
+            pp = json.loads(absp(job["passport"]).read_text(encoding="utf-8")) if job.get("passport") else {}
+            ok("исходник в ответе: код выхода 4", code == EXIT_FAILED, code)
+            ok("исходник в ответе: запись failed, цена 0", job.get("state") == "failed" and job.get("spent") == 0.0, job)
+            ok("исходник в ответе: в журнале потрачена только генерация", ctx.ledger.spent(base) == src_cost,
+               ctx.ledger.spent(base))
+            ok("исходник в ответе: код ошибки в паспорте", (pp.get("outcome") or {}).get("code") == OP_NOT_APPLIED
+               and pp.get("cost", {}).get("usage_cost_rub") == 0.0 and pp.get("response_operation") is not None, pp)
+            ok("исходник в ответе: копия с именем операции снята, исходник на месте",
+               list(src.parent.rglob("*.bin")) == [src], sorted(p.name for p in src.parent.rglob("*")))
+            ok("исходник в ответе: download и status видят запись генерации, а не операции",
+               (ctx.ledger.find_by_id(src_id) or {}).get("uid") == "source", ctx.ledger.find_by_id(src_id))
+            nxt = Prepared()
+            nxt.estimate = {"rub": op_rub}
+            ok("исходник в ответе: следующее задание проходит бюджет", budget_check(ctx, nxt)[0], budget_check(ctx, nxt))
+            rows = check_operations(ctx.ledger)
+            ok("сверка записей: операция не выполнена, денег за неё в журнале нет",
+               [(r["applied"], r["spent"], r["phantom"]) for r in rows] == [(False, 0.0, False)], rows)
+            ctx.ledger.append({"event": "completed", "uid": job["uid"], "id": src_id, "cost_rub": src_cost,
+                               "base_url": base})
+            rows = check_operations(ctx.ledger)
+            ok("сверка записей: цена исходника, записанная операции, — деньги за невыполненную",
+               [(r["applied"], r["spent"], r["phantom"]) for r in rows] == [(False, src_cost, True)], rows)
+
+            # тот же id, новый файл, в ответе на запрос цены нет: usage опроса — цена исходника, в журнале оценка
+            ctx, code, job, src = stage(tmp, "same-id-new-file", up, {
+                op_path: [{"id": src_id, "status": "processing"}],
+                poll_src: [{**src_record, "data": {"url": cdn + "up.bin"}}]})
+            ok("та же запись, новый файл: код 0, completed", code == EXIT_OK and job.get("state") == "completed", (code, job))
+            ok("та же запись, новый файл: цена исходника операции не приписана",
+               job.get("cost_rub") is None and job.get("spent") == op_rub, job)
+            ok("сверка записей: выполненная операция — без замечаний",
+               [(r["applied"], r["phantom"]) for r in check_operations(ctx.ledger)] == [(True, False)])
+
+            # синхронный ответ с ценой операции
+            ctx, code, job, src = stage(tmp, "sync-priced", up, {
+                op_path: [{"id": src_id, "status": "completed", "data": {"url": cdn + "up.bin"},
+                           "usage": {"cost_rub": op_rub}}]})
+            ok("синхронный ответ: цена из ответа операции", code == EXIT_OK and job.get("cost_rub") == op_rub, (code, job))
+            ok("синхронный ответ: опроса исходника нет", poll_src not in ctx.http.calls, ctx.http.calls)
+
+            # синхронный ответ — эхо записи исходника с его ценой, но файл новый
+            ctx, code, job, src = stage(tmp, "sync-echo", up, {
+                op_path: [{**src_record, "data": {"url": cdn + "up.bin"}}]})
+            ok("эхо записи исходника: его цена операции не приписана",
+               code == EXIT_OK and job.get("cost_rub") is None and job.get("spent") == op_rub, (code, job))
+
+            # своя запись операции: цена — её usage
+            ctx, code, job, src = stage(tmp, "own-record", ["ops", src_id, "extend", "--params", '{"prompt": "go on"}'], {
+                op_path: [{"id": "gen_extended", "status": "pending"}],
+                ("GET", "/v1/media/gen_extended"): [{"id": "gen_extended", "status": "processing"},
+                                                    {"id": "gen_extended", "status": "completed",
+                                                     "data": {"url": cdn + "ext.bin"}, "usage": {"cost_rub": 45}}]},
+                budget="200")
+            ok("своя запись: код 0, цена из записи операции",
+               code == EXIT_OK and job.get("id") == "gen_extended" and job.get("cost_rub") == 45, (code, job))
+            ok("своя запись: исходник находится по своему id", (ctx.ledger.find_by_id(src_id) or {}).get("uid") == "source")
+
+            # операция упала в записи исходника: его цена — не цена операции
+            ctx, code, job, src = stage(tmp, "failed", up, {
+                op_path: [{"id": src_id, "status": "processing"}],
+                poll_src: [{**src_record, "status": "failed", "error": {"code": "BAD_GATEWAY"}}]})
+            ok("отказ операции: код 4, цена 0", code == EXIT_FAILED and job.get("spent") == 0.0, (code, job))
+    finally:
+        KEY_FILE = key_file
+        if env_key is not None:
+            os.environ["POLZA_API_KEY"] = env_key
+    say(f"# selftest: {sum(checks)}/{len(checks)} PASS")
+    return EXIT_OK if all(checks) else EXIT_JOB
+
 
 def build_parser():
     common = argparse.ArgumentParser(add_help=False)
@@ -1404,16 +1735,21 @@ def build_parser():
     s.set_defaults(fn=cmd_ops)
     s = sp.add_parser("ledger", parents=[common])
     s.add_argument("--sum", action="store_true")
+    s.add_argument("--ops", action="store_true", help="сверить записи операций с их сохранёнными ответами: деньги за "
+                                                      "операцию, вернувшую исходник, — код выхода 1")
     s.add_argument("--tail", type=int, default=30)
     s.add_argument("--json", action="store_true")
     s.set_defaults(fn=cmd_ledger)
     s = sp.add_parser("balance", parents=[common])
     s.set_defaults(fn=cmd_balance)
+    sp.add_parser("selftest", parents=[common])
     return ap
 
 
 def main(argv=None):
     a = build_parser().parse_args(argv)
+    if a.cmd == "selftest":         # свои каталог, журнал и канал во временной папке: окружение машины не читается
+        sys.exit(selftest())
     ctx = Ctx(a)
     try:
         code = a.fn(ctx, a)

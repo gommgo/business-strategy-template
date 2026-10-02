@@ -27,9 +27,10 @@
 - **Сверка смысла** (`chain_inputs.py meaning-claims` → `copydeck.py claims`) — сигнал до текстов. Возражения, страхи
   и альтернативы — слова аудитории: в проекцию смысла не идут, сверяются потом ответы на них в copy deck.
 - **Факты** (`claims_check.py lint-facts`): разрешение `pending` и демо-данные — `warning`, с `--final` — `error`.
-- **Статус `checked`** ставит `copydeck.py check --update OUT --promote` у текстов с 0 error сверки и линтера (записи
-  `lint` и `claims` с `text_hash`); **`approved`** — только человек (`approve`). Пустая мета утверждению не мешает —
-  `warning`.
+- **Статус `checked`** ставит `copydeck.py check --update OUT --promote` у текстов без `error` сверки, линтера и
+  `validate` (записи `lint` и `claims` с `text_hash`); страница — `checked`, когда проверены все её выбранные тексты.
+  Текст с `error` остаётся в своём статусе — причина в заметках вывода. **`approved`** — только человек (`approve`).
+  Пустая мета утверждению не мешает — `warning`.
 - **Ворота публикации** — `copydeck.py validate DECK --final`: страница `approved`, 0 `[PLACEHOLDER]`, 0 демо-фактов,
   мета заполнена; обходы сверки — отдельным списком.
 
@@ -48,7 +49,9 @@
 - **copy deck** — `kb/text/10-templates-recipes/copy-deck.schema.json`; стык с планом — карта `x-site-map`, выгрузка во
   вход холста — карта `x-canvas-map`; процесс — `kb/text/10-templates-recipes/01-copy-deck-workflow.md`.
 - **`copy.md`** входа холста: синтаксис и статусы этапа — ключ `copy_md` карты `x-canvas-map` схемы copy deck; пишут и
-  читают `copydeck.py` (`export`, `import-copy`), `claims_check.py --format copy-md` и разбор исходников холста.
+  читают `copydeck.py` (`export`, `import-copy`), `claims_check.py --format copy-md` и разбор исходников холста. Пустая
+  строка между строками продолжения — абзац внутри значения слота: значение тянется до следующей строки слота или
+  секции.
 - **JSON находок `copydeck.py`**: `{tool, version, date, command, input, today, summary{error, warning, info}, tools,
   findings[{tool, level, rule, where, message, fix, fragment, …}], allowed[{rule, where, reason, by, …}], notes}`; у
   `check` ещё `slots` (итоги по путям), у `export` — `export`. Правила: свои `COPY-D-…`; `COPY-F-…` и `COPY-L-…` — из

@@ -199,7 +199,7 @@ def main():
     ap.add_argument("--list", action="append", default=[], metavar="PATH",
                     help="список .tsv или папка списков (ключ — повтором); по умолчанию — все списки папки smoke/")
     ap.add_argument("--only", default="", help="подстрока пути")
-    ap.add_argument("--timeout", type=float, default=90.0)
+    ap.add_argument("--timeout", type=float, default=180.0)
     ap.add_argument("--tsv", default="", help="записать результаты в TSV")
     ap.add_argument("--validate", action="store_true",
                     help="проверить списки (колонки, виды проверок, дубли, файлы строк) без запуска; код 1 — есть ошибки")

@@ -1,6 +1,8 @@
 path	kind	smoke	xfail
+scripts/maint/accept.py	maint	help; run: --selftest	
 scripts/maint/canon_check.py	maint	help; run: --selftest; run: --canon {skill}/kb/common/canon.tsv	
 scripts/maint/check_links.py	maint	help; run: --selftest	
+scripts/maint/data/accept.yaml	data	data	
 scripts/maint/data/fixtures.yaml	data	data	
 scripts/maint/data/sync.yaml	data	data	
 scripts/maint/data/traces.tsv	data	data	

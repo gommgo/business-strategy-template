@@ -339,6 +339,7 @@ motion_caps: [none, subtle, expressive, cinematic]
 # Свойство вне properties_allowed уровня — только у названных эффектов, на любом уровне.
 property_exceptions:
   block-size: [effect:details-accordion]   # ::details-content аккордеона <details> — отклик по клику (motion-spec.schema.json $defs/moment)
+  clip-path: [effect:mask-reveal, effect:button-expand-label]   # приёмы каталога уровня L0, собранные на clip-path (effects.yaml motion.props)
 
 # Проекция уровня во вход холста — форма ключа одна у всех источников входа (references/claude-design.md § 6. Вход
 # холста). Уровень страницы выбирает бриф (site-brief.ambition: level, by_page, by_section_role, motion_cap); этот файл

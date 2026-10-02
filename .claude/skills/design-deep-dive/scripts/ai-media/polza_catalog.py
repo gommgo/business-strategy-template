@@ -7,13 +7,19 @@
 флаг --with-openapi дополнительно берёт публичную спецификацию https://polza.ai/api/openapi.json.
 
 Команды:
-  snapshot [--root DIR] [--with-openapi] [--no-providers]   снимок в 99-raw/cache/polza/<дата>[_ЧЧММ]/ (не перезаписывает)
+  snapshot [--root DIR] [--with-openapi] [--no-providers]   снимок в $DDD_HOME/cache/ai-media/polza/<дата>[_ЧЧММ]/ (не
+                                                             перезаписывает): файлы качаются во временную папку,
+                                                             готовый снимок встаёт на место переименованием — при
+                                                             обрыве последним остаётся прежний снимок, код выхода 1
   normalize [SNAP] [--providers SNAP2] [--out FILE]          media-models.normalized.json (картинки и видео)
   table [SNAP] [--type image|video] [--out FILE]             Markdown-таблица медиа-моделей
   diff A B [--all-types] [--json]                            что изменилось между снимками (модели, цены, параметры, провайдеры)
-  price MODEL [k=v ...] [--provider NAME] [--ref-seconds S]  быстрая оценка цены (значения как в input задания)
+  price MODEL [k=v ...] [--provider NAME] [--ref-seconds S]  быстрая оценка цены (значения как в input задания); в
+                                                             stderr — какой снимок взят и сколько ему
   check MODEL [k=v ...]                                      проверка входа по каталогу (ошибки и предупреждения)
-  selftest                                                   встроенные проверки калькулятора и валидатора
+  selftest [--offline]                                       встроенные проверки: снимок при обрыве и возраст снимка
+                                                             (без каталога), затем калькулятор и валидатор по снимку
+                                                             --snapshot; --offline — только первая часть
 
 SNAP — имя папки в 99-raw/cache/polza/ (например 2026-09-23), путь к папке или к api-v1-models.json; по умолчанию —
 последний снимок. Все цены — рубли по каталогу (top_provider.pricing или providers[].pricing).
@@ -29,10 +35,12 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import hashlib
+import http.client
 import json
 import math
 import os
 import re
+import shutil
 import sys
 import time
 import urllib.error
@@ -220,10 +228,15 @@ def find_snapshot(ref: str | None = None) -> Path:
         if q.is_dir():
             return q
         raise SystemExit(f"снимок не найден: {ref}")
-    dirs = sorted(d for d in CACHE.iterdir() if d.is_dir() and (d / "api-v1-models.json").exists())
+    dirs = sorted(d for d in snapshot_dirs(CACHE) if (d / "api-v1-models.json").exists())
     if not dirs:
         raise SystemExit(f"нет снимков в {CACHE}")
     return dirs[-1]
+
+
+def snapshot_dirs(root: Path) -> list[Path]:
+    """Папки снимков в корне кэша; временная папка снимка, который ещё качается (имя с точки), снимком не считается."""
+    return [d for d in root.iterdir() if d.is_dir() and not d.name.startswith(".")]
 
 
 class Snapshot:
@@ -240,7 +253,7 @@ class Snapshot:
             # в выбранном снимке нет providers[] — берём ближайший более поздний снимок с include_providers
             providers_ref = None
             if not (self.dir / "api-v1-models.providers.json").exists():
-                later = sorted(d for d in CACHE.iterdir() if d.is_dir() and d.name >= self.dir.name
+                later = sorted(d for d in snapshot_dirs(CACHE) if d.name >= self.dir.name
                                and (d / "api-v1-models.providers.json").exists())
                 providers_ref = str(later[0]) if later else None
         pdir = find_snapshot(providers_ref) if providers_ref else self.dir
@@ -260,46 +273,127 @@ class Snapshot:
             (self.dir / "api-v1-models.json").stat().st_mtime, MSK).isoformat(timespec="seconds")
 
 
-def cmd_snapshot(a):
-    root = Path(a.root) if a.root else CACHE
-    stamp = now_msk()
+class SnapshotError(Exception):
+    """Снимок не снят: сеть оборвалась или канал ответил не каталогом."""
+
+
+NET_ERRORS = (urllib.error.URLError, http.client.HTTPException, TimeoutError, ConnectionError, OSError)
+REQUIRED_FILES = ("api-v1-models.json", "api-v1-models.providers.json")   # без них цены и параметры считать не по чему
+STALE_TMP_S = 3600        # временная папка старше часа — след прерванного снимка, её убирает следующий запуск
+
+
+def fmt_age(seconds: float) -> str:
+    m = int(max(seconds, 0) // 60)
+    if m < 60:
+        return f"{m} мин"
+    return f"{m // 60} ч" if m < 48 * 60 else f"{m // 1440} дн"
+
+
+def age_note(name: str, fetched_at: str | None, complete: bool = True, refresh: str = "polza_catalog.py snapshot",
+             now: dt.datetime | None = None) -> tuple[str, bool]:
+    """Строка о снимке каталога, по которому считается оценка, и признак «свериться перед серией». Норма серии —
+    снимок за сегодня (kb/ai-media/02-providers-platforms/01-polza-api.md, чек-лист): цены и параметры меняются без
+    объявления, а утилиты берут последнюю папку — оценка называет её и её возраст, а не выбирает молча. Папка без
+    snapshot.meta.json — снимок, снятый не до конца или не утилитой."""
+    now = now or now_msk()
+    try:
+        t = dt.datetime.fromisoformat(fetched_at) if fetched_at else None
+    except ValueError:
+        t = None
+    if t is not None and t.tzinfo is None:
+        t = t.replace(tzinfo=MSK)
+    text = f"снимок каталога {name}"
+    stale = t is None or t.astimezone(MSK).date() != now.astimezone(MSK).date()
+    if t is not None:
+        text += f" — снят {t.astimezone(MSK):%d.%m.%Y %H:%M} МСК, {fmt_age((now - t).total_seconds())} назад"
+    if not complete:
+        text += "; в папке нет snapshot.meta.json — снимок снят не до конца или не утилитой"
+    if stale:
+        text += f": не за сегодня — цены и параметры могли измениться; перед серией — {refresh} (бесплатный GET)"
+    return text, stale or not complete
+
+
+def snapshot_note(snap: Snapshot, now: dt.datetime | None = None) -> tuple[str, bool]:
+    return age_note(snap.dir.name, snap.fetched_at(), (snap.dir / "snapshot.meta.json").exists(), now=now)
+
+
+def take_snapshot(root: Path, *, with_openapi=False, no_providers=False, get=http_get, pause: float = 1.0,
+                  stamp: dt.datetime | None = None) -> tuple[Path, Snapshot, dict]:
+    """Снять снимок в root/<дата>[_ЧЧММ]/ → (папка, снимок, метаданные). Файлы качаются во временную папку рядом и
+    встают на место одним переименованием, когда скачаны и разобраны все: недокачанная папка с api-v1-models.json
+    стала бы «последним снимком» для всех утилит. Обрыв сети, ответ не 200 или не каталог у обязательного файла —
+    SnapshotError; временная папка убирается, последним остаётся прежний снимок."""
+    stamp = stamp or now_msk()
+    root.mkdir(parents=True, exist_ok=True)
     d = root / stamp.strftime("%Y-%m-%d")
     if (d / "api-v1-models.json").exists():
         d = root / stamp.strftime("%Y-%m-%d_%H%M")
     if d.exists() and any(d.iterdir()):
-        raise SystemExit(f"папка уже существует и не пуста: {d} — повторите через минуту")
-    d.mkdir(parents=True, exist_ok=True)
+        raise SnapshotError(f"папка уже существует и не пуста: {d} — повторите через минуту")
+    for old in root.glob(".snapshot-*.part"):
+        if old.is_dir() and time.time() - old.stat().st_mtime > STALE_TMP_S:
+            shutil.rmtree(old, ignore_errors=True)
+    tmp = root / f".snapshot-{stamp:%Y%m%d-%H%M%S}-{os.getpid()}.part"
+    tmp.mkdir()
     plan = [("api-v1-models.json", f"{BASE}/v1/models")]
-    if not a.no_providers:
+    if not no_providers:
         plan.append(("api-v1-models.providers.json", f"{BASE}/v1/models?include_providers=true"))
     for t in MEDIA_TYPES:
         plan.append((f"api-v1-models-catalog.{t}.json", f"{BASE}/v1/models/catalog?type={t}&limit=100"))
-    if a.with_openapi:
+    if with_openapi:
         plan.append(("openapi.json", f"{BASE}/openapi.json"))
     meta = {"tool": f"polza_catalog.py {VERSION}", "fetched_at_msk": stamp.isoformat(timespec="seconds"),
             "fetched_at_utc": stamp.astimezone(dt.timezone.utc).isoformat(timespec="seconds"), "files": {}}
     keep = ("date", "server", "content-type", "cache-control", "x-cache", "x-trace-id", "x-ratelimit-limit",
             "x-ratelimit-remaining", "x-ratelimit-reset", "age", "etag", "last-modified")
-    for i, (name, url) in enumerate(plan):
-        if i:
-            time.sleep(1.0)  # вежливость: публичный каталог отвечает x-ratelimit-limit: 30
-        t0 = time.time()
-        try:
-            status, headers, body = http_get(url)
-        except urllib.error.HTTPError as e:
-            status, headers, body = e.code, dict(e.headers.items()), e.read()
-        (d / name).write_bytes(body)
-        h = {k.lower(): v for k, v in headers.items() if k.lower() in keep}
-        meta["files"][name] = {"url": url, "status": status, "bytes": len(body), "sha256": sha256_bytes(body),
-                               "seconds": round(time.time() - t0, 2), "headers": h}
-        print(f"{status} {len(body):>9} байт  {name}  ← {url}")
-    (d / "snapshot.meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1))
-    snap = Snapshot(str(d))
-    out = d / "media-models.normalized.json"
-    out.write_text(json.dumps(normalize_snapshot(snap), ensure_ascii=False, indent=1))
+    try:
+        for i, (name, url) in enumerate(plan):
+            if i and pause:
+                time.sleep(pause)  # вежливость: публичный каталог отвечает x-ratelimit-limit: 30
+            t0 = time.time()
+            try:
+                status, headers, body = get(url)
+            except urllib.error.HTTPError as e:
+                status, headers, body = e.code, dict(e.headers.items()), e.read()
+            except NET_ERRORS as e:
+                raise SnapshotError(f"{name}: сеть оборвалась ({type(e).__name__}: {e}) ← {url}") from e
+            if name in REQUIRED_FILES:
+                try:
+                    raw = json.loads(body)
+                    models = raw["data"] if isinstance(raw, dict) else raw
+                except (ValueError, KeyError, TypeError):
+                    models = None
+                if status != 200 or not isinstance(models, list) or not models:
+                    raise SnapshotError(f"{name}: ответ {status}, {len(body)} байт — не каталог моделей ← {url}")
+            (tmp / name).write_bytes(body)
+            h = {k.lower(): v for k, v in headers.items() if k.lower() in keep}
+            meta["files"][name] = {"url": url, "status": status, "bytes": len(body), "sha256": sha256_bytes(body),
+                                   "seconds": round(time.time() - t0, 2), "headers": h}
+            print(f"{status} {len(body):>9} байт  {name}  ← {url}")
+        (tmp / "snapshot.meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1))
+        norm = normalize_snapshot(Snapshot(str(tmp)))
+        for k in ("snapshot_dir", "providers_source"):          # пути — места, куда снимок встанет
+            if isinstance(norm.get(k), str):
+                norm[k] = norm[k].replace(str(tmp), str(d.relative_to(ROOT)) if d.is_relative_to(ROOT) else str(d))
+        (tmp / "media-models.normalized.json").write_text(json.dumps(norm, ensure_ascii=False, indent=1))
+        tmp.rename(d)
+    except BaseException:
+        shutil.rmtree(tmp, ignore_errors=True)
+        raise
+    return d, Snapshot(str(d)), meta
+
+
+def cmd_snapshot(a):
+    root = Path(a.root) if a.root else CACHE
+    try:
+        d, snap, _ = take_snapshot(root, with_openapi=a.with_openapi, no_providers=a.no_providers)
+    except SnapshotError as e:
+        prev = sorted(x.name for x in snapshot_dirs(root) if (x / "api-v1-models.json").exists()) if root.is_dir() else []
+        sys.exit(f"снимок не снят: {e}; последним остаётся " + (f"снимок {prev[-1]}" if prev else "прежнее состояние: "
+                                                                 "снимков нет") + " — повторите позже")
     n = {t: sum(1 for m in snap.models if m.get("type") == t) for t in MEDIA_TYPES}
     print(f"снимок: {d.relative_to(ROOT) if d.is_relative_to(ROOT) else d} — моделей {len(snap.models)}, "
-          f"картинки {n['image']}, видео {n['video']}; нормализовано → {out.name}")
+          f"картинки {n['image']}, видео {n['video']}; нормализовано → media-models.normalized.json")
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -1281,6 +1375,8 @@ def cmd_price(a):
     inp = parse_kv(a.kv)
     e = estimate(m, inp, provider=a.provider, providers=snap.providers.get(a.model), ref_seconds=a.ref_seconds)
     print(json.dumps(e, ensure_ascii=False, indent=1))
+    note, check = snapshot_note(snap)
+    print(("! " if check else "") + note, file=sys.stderr)
 
 
 def cmd_check(a):
@@ -1301,7 +1397,93 @@ def cmd_check(a):
     print(json.dumps(inp3, ensure_ascii=False))
 
 
+def selftest_offline() -> int:
+    """Проверки без снимка каталога и без сети: снимок при обрыве и при ответе не каталогом, возраст снимка. Каталог и
+    ответы канала — вымышленные, во временной папке. Возвращает число ошибок."""
+    import contextlib
+    import io
+    import tempfile
+    global CACHE
+    bad = 0
+
+    def take(*args, **kw):       # строки хода снимка самопроверке не нужны: итог — строки OK и FAIL
+        with contextlib.redirect_stdout(io.StringIO()):
+            return take_snapshot(*args, **kw)
+
+    def ok(name, cond, got=""):
+        nonlocal bad
+        bad += not cond
+        print(("OK  " if cond else "FAIL"), name + (f" — {got}" if got != "" and not cond else ""))
+
+    body = json.dumps({"data": [{"id": "demo/image", "type": "image", "name": "Demo Image", "top_provider": {
+        "name": "demo", "pricing": {"per_request": 1.5}, "parameters": {"prompt": {"type": "string"}}}}]}).encode()
+
+    def good(url):
+        return 200, {"Content-Type": "application/json"}, body
+
+    def failing(exc_at=None, status_at=None):
+        calls = []
+
+        def get(url):
+            calls.append(url)
+            if len(calls) == exc_at:
+                raise http.client.IncompleteRead(body[:40], len(body) - 40)
+            if len(calls) == status_at:
+                return 502, {"Content-Type": "text/html"}, b"<html>Bad Gateway</html>"
+            return good(url)
+        return get
+
+    def names(root):
+        return sorted(x.name for x in root.iterdir())
+
+    cache = CACHE
+    try:
+        with tempfile.TemporaryDirectory(prefix="polza-catalog-selftest-") as t:
+            root = CACHE = Path(t)
+            t1 = dt.datetime(2026, 1, 10, 9, 0, tzinfo=MSK)
+            d1, snap1, meta = take(root, get=good, pause=0, stamp=t1)
+            norm = json.loads((d1 / "media-models.normalized.json").read_text())
+            ok("снимок: папка даты с метаданными и нормализацией, временной папки нет",
+               names(root) == ["2026-01-10"] and len(meta["files"]) == 4 and (d1 / "snapshot.meta.json").exists()
+               and norm["snapshot_dir"] == str(d1) and len(snap1.models) == 1, (names(root), norm.get("snapshot_dir")))
+            for label, get in (("обрыв сети на втором файле", failing(exc_at=2)),
+                               ("обрыв сети на первом файле", failing(exc_at=1)),
+                               ("ответ 502 вместо каталога", failing(status_at=1))):
+                try:
+                    take(root, get=get, pause=0, stamp=t1 + dt.timedelta(hours=2))
+                    err = None
+                except SnapshotError as e:
+                    err = str(e)
+                ok(f"{label}: снимок не снят, новой и временной папок нет", err is not None and names(root) == ["2026-01-10"],
+                   (err, names(root)))
+                ok(f"{label}: последним остаётся прежний снимок", find_snapshot(None) == d1, find_snapshot(None))
+            half = root / ".snapshot-20260110-120000-1.part"
+            half.mkdir()
+            (half / "api-v1-models.json").write_bytes(body)
+            ok("временная папка идущего снимка — не «последний снимок»", find_snapshot(None) == d1, find_snapshot(None))
+            d2, _, _ = take(root, get=failing(status_at=3), pause=0, stamp=t1 + dt.timedelta(hours=3))
+            ok("вспомогательный файл с ответом не 200 снимок не срывает: статус — в метаданных",
+               d2.name == "2026-01-10_1200" and json.loads((d2 / "snapshot.meta.json").read_text())["files"][
+                   "api-v1-models-catalog.image.json"]["status"] == 502, d2.name)
+            note, check = snapshot_note(snap1, now=t1 + dt.timedelta(hours=3))
+            ok("возраст: снимок за сегодня — строка с папкой и возрастом, без отметки",
+               not check and "2026-01-10" in note and "3 ч назад" in note, note)
+            note, check = snapshot_note(snap1, now=t1 + dt.timedelta(hours=30))
+            ok("возраст: снимок не за сегодня — отметка и команда обновления",
+               check and "не за сегодня" in note and "polza_catalog.py snapshot" in note, note)
+            (d1 / "snapshot.meta.json").unlink()
+            note, check = snapshot_note(Snapshot(str(d1)), now=dt.datetime.fromtimestamp(d1.stat().st_mtime, MSK))
+            ok("возраст: папка без snapshot.meta.json — отметка «не до конца»", check and "не до конца" in note, note)
+    finally:
+        CACHE = cache
+    return bad
+
+
 def cmd_selftest(a):
+    bad = selftest_offline()
+    if a.offline:
+        print("ИТОГО:", "все проверки пройдены" if not bad else f"{bad} ошибок")
+        sys.exit(1 if bad else 0)
     snap = Snapshot(a.snapshot)
     by = snap.by_id
     cases = [
@@ -1324,7 +1506,6 @@ def cmd_selftest(a):
         ("topaz/video-upscale", {"upscale_factor": "4"}, None),
         ("google/veo3", {}, 187.5),
     ]
-    bad = 0
     for mid, inp, want in cases:
         e = estimate(by[mid], inp, ref_seconds=None)
         got = e["rub"]
@@ -1380,6 +1561,7 @@ def main(argv=None):
         s.set_defaults(fn=fn)
     s = sp.add_parser("selftest")
     s.add_argument("--snapshot", default="2026-09-23")
+    s.add_argument("--offline", action="store_true", help="только проверки без снимка каталога: обрыв снимка, возраст")
     s.set_defaults(fn=cmd_selftest)
     a = ap.parse_args(argv)
     a.fn(a)

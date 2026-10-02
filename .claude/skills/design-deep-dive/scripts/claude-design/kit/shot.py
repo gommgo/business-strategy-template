@@ -6,16 +6,18 @@ marks.json. Модель не вызывается; сеть — только к
 Кадры — список `artboards` манифеста (file, w, h, theme, title). Манифест HTML-копий холста — `kit.json`
 (`kit/kit_manifest.py` собирает его из статичных копий артбордов: кадр — копия на ширине и высоте своей рамки). Все
 ширины приёмки — артборды холста, поэтому своих ширин у съёмки нет; вылет на 320, ресайз и зум проверяются на собранной
-странице в репозитории кода.
+странице в репозитории кода. `--manifest` — имя файла в папке копий или путь к манифесту, собранному вне её (от рабочей
+папки или абсолютный): копии при этом остаются нетронутыми.
 
 Использование:
-  python3 shot.py <папка копий> <outdir> [--manifest kit.json] [--only landing.html]
+  python3 shot.py <папка копий> <outdir> [--manifest kit.json | ПУТЬ/kit.json] [--only landing.html]
           [--themes light,dark] [--scale 1] [--tiles] [--no-plain] [--no-marks] [--no-canvas] [--canvas-dpr 0.5]
           [--set "radius-md=16px;color-accent=#0a7d4f"] [--prev review/iter-01/marks.json] [--iteration iter-02]
           [--lock /path/to/browser.lock] [--min-free-gb 2] [--strict]
   python3 shot.py serve <папка проекта> [--port 8765]
       → http://127.0.0.1:8765/ перенаправляет на /_kit/canvas.html?m=/canvas.json&marks=1 (холст для встроенного браузера
         приложения через .claude/launch.json или для своего браузера)
+  python3 shot.py --selftest      офлайн: шрифты и их метрические двойники, H1 у частей артборда, путь манифеста
 
 Что пишет в <outdir>:
   <файл>-<W>-<тема>.png            артборд целиком (full page) без меток
@@ -26,8 +28,12 @@ marks.json. Модель не вызывается; сеть — только к
   shots.json                       кадры, проверки, предупреждения, согласованность меток холста и кадров
 Номера: блоки по файлам (base из manifest.marks или 100 × порядок файла); один номер = один элемент на всех ширинах и темах
 этого файла; --prev переносит номера прошлой итерации (совпадение: селектор+тег+текст → тег+текст → селектор+тег).
-Коды выхода: 0 — готово; 2 — страница или браузер не открылись; 3 — нет кадров; 4 — --strict и есть непройденные проверки,
-наложения меток или расхождение номеров холста и кадров.
+Проверки кадра (`failed_checks`). H1 на странице один: у артборда целиком — ровно один; страница длиннее предела высоты
+артборда лежит частями `<Имя>-<ширина>-<N>` — H1 в первой части, у следующих его нет. Шрифт: объявлен веб-шрифт, а
+рисуется системный с другим именем — `fonts_missing`; метрический двойник системного шрифта (Arimo на месте Arial) —
+не пропажа: объявленного системного шрифта на машине нет, раскладка та же.
+Коды выхода: 0 — готово; 2 — страница или браузер не открылись; 3 — нет кадров (манифест не читается, в нём нет рамок
+или --only мимо); 4 — --strict и есть непройденные проверки, наложения меток или расхождение номеров холста и кадров.
 """
 import argparse, fcntl, functools, http.server, json, os, re, socketserver, sys, threading, time
 from datetime import datetime, timezone
@@ -37,8 +43,19 @@ KIT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(KIT_DIR, '..', '..', 'lib'))
 import kbpaths  # noqa: E402
 
+kbpaths.use('claude-design')
+from mockup_checks import artboard_part  # noqa: E402  (имя части артборда — одно правило с проверками макета)
+
 GENERIC = {'serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui', 'ui-sans-serif', 'ui-serif',
            'ui-monospace', 'ui-rounded', '-apple-system', 'blinkmacsystemfont', 'emoji', 'math', 'fangsong'}
+# Метрические двойники системных шрифтов: на машине без Arial, Times New Roman или Courier New fontconfig рисует шрифт
+# с теми же метриками — раскладка не меняется, и веб-шрифт тут не терялся.
+_SANS, _SERIF, _MONO = ('arimo', 'liberation sans', 'nimbus sans'), ('tinos', 'liberation serif', 'nimbus roman'), \
+    ('cousine', 'liberation mono', 'nimbus mono')
+METRIC_TWINS = {'arial': _SANS, 'helvetica': _SANS, 'arial narrow': ('liberation sans narrow',),
+                'times new roman': _SERIF, 'times': _SERIF, 'courier new': _MONO, 'courier': _MONO,
+                'calibri': ('carlito',), 'cambria': ('caladea',), 'georgia': ('gelasio',)}
+MANIFEST_URL = '/_kit-manifest.json'       # манифест вне папки копий: холст берёт его из памяти сервера, кадры — из папки
 
 # --- проверки страницы (плейсхолдеры — любые [КАПС-МЕТКИ]) ---------------------------------------------------------------
 CHECKS_JS = r"""
@@ -141,7 +158,8 @@ def platform_fonts(ctx, page):
 
 
 def fonts_missing(samples):
-    """Объявлен не-generic шрифт, а рисуется системный с другим именем (веб-шрифт не загрузился)."""
+    """Объявлен не-generic шрифт, а рисуется системный с другим именем (веб-шрифт не загрузился). Метрический двойник
+    объявленного системного шрифта (METRIC_TWINS) — не пропажа."""
     missing = []
     for s in samples:
         if 'error' in s or not s.get('rendered'):
@@ -151,7 +169,7 @@ def fonts_missing(samples):
             continue
         top = s['rendered'][0]
         fam = (top.get('family') or '').lower()
-        if top.get('custom') or fam.startswith(dec) or dec in fam:
+        if top.get('custom') or fam.startswith(dec) or dec in fam or fam.startswith(METRIC_TWINS.get(dec, ())):
             continue
         missing.append({'selector': s['selector'], 'declared': s['declared'], 'rendered': top.get('family')})
     return missing
@@ -164,7 +182,8 @@ def failed_checks(v):
         if v.get(k): f.append(k)
     if v['small_text_elements'] > 0: f.append('small_text_elements')
     if v['images_without_alt'] > 0: f.append('images_without_alt')
-    if v['h1_count'] != 1: f.append('h1_count')
+    # H1 на странице один: у частей артборда он в первой части, у следующих его нет
+    if v['h1_count'] != (0 if (v.get('part') or 1) > 1 else 1): f.append('h1_count')
     if not v['lang']: f.append('lang')
     return f
 
@@ -229,7 +248,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Location', Handler.root_redirect)
             self.end_headers()
             return
-        if p.startswith('/_virtual/') and p in Handler.virtual:
+        if p in Handler.virtual:
             body = Handler.virtual[p]
             self.send_response(200)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
@@ -314,7 +333,68 @@ def slug(s):
     return re.sub(r'[^\w.-]+', '-', s, flags=re.UNICODE).strip('-_.') or 'design'
 
 
+def manifest_path(project, name):
+    """Файл манифеста: имя в папке копий, а когда такого файла там нет — путь как передан (от рабочей папки или
+    абсолютный): манифест, собранный вне папки копий."""
+    inside = os.path.join(project, name)
+    return inside if os.path.isfile(inside) or not os.path.isfile(name) else os.path.abspath(name)
+
+
+def selftest():
+    import subprocess, tempfile
+    ok = True
+
+    def check(name, cond, got=None):
+        nonlocal ok
+        ok &= bool(cond)
+        print(('PASS ' if cond else 'FAIL ') + name + ('' if cond else f' → {got}'))
+
+    def sample(declared, family, custom=False):
+        return {'selector': 'p', 'declared': declared, 'rendered': [{'family': family, 'custom': custom, 'glyphs': 9}]}
+
+    miss = fonts_missing([sample('Arial', 'Arimo'), sample('Times New Roman', 'Liberation Serif'),
+                          sample('Golos Text', 'DejaVu Sans'), sample('Golos Text', 'Golos Text', True), sample('system-ui', 'DejaVu Sans'),
+                          sample('Arial', 'DejaVu Serif')])
+    check('шрифты: метрический двойник системного шрифта — не пропажа; веб-шрифт или Arial, отрисованные чужим '
+          'системным, — пропажа', [(m['declared'], m['rendered']) for m in miss]
+          == [('Golos Text', 'DejaVu Sans'), ('Arial', 'DejaVu Serif')], miss)
+    base = {'overflow_px': 0, 'small_text_elements': 0, 'images_without_alt': 0, 'lang': 'ru'}
+    got = [failed_checks(dict(base, h1_count=n, part=part)) for n, part in ((1, None), (0, None), (1, 1), (0, 1), (0, 2), (1, 2))]
+    check('H1 один на страницу: артборд целиком и первая часть — ровно один, следующие части — ни одного',
+          got == [[], ['h1_count'], [], ['h1_count'], [], ['h1_count']], got)
+    parts = [artboard_part(n, w)[1] for n, w in (('Home-390-1.html', 390), ('Home-390-2.dc.html', 390), ('Home-1440.html', 1440))]
+    check('часть артборда — по имени копии и ширине кадра манифеста', parts == [1, 2, None], parts)
+    with tempfile.TemporaryDirectory() as td:
+        td = os.path.realpath(td)
+        proj, other = os.path.join(td, 'html'), os.path.join(td, 'out')
+        os.makedirs(proj); os.makedirs(other)
+        for d in (proj, other):
+            open(os.path.join(d, 'kit.json'), 'w', encoding='utf-8').write('{"artboards": []}')
+        open(os.path.join(other, 'side.json'), 'w', encoding='utf-8').write('{"artboards": []}')
+        cwd = os.getcwd()
+        os.chdir(td)
+        try:
+            got = [manifest_path(proj, 'kit.json'), manifest_path(proj, os.path.join(other, 'side.json')),
+                   manifest_path(proj, os.path.join('out', 'side.json'))]
+        finally:
+            os.chdir(cwd)
+        check('манифест: имя — файл папки копий; путь вне папки копий — как передан, абсолютный и от рабочей папки',
+              got == [os.path.join(proj, 'kit.json'), os.path.join(other, 'side.json'), os.path.join(other, 'side.json')], got)
+        run = lambda *args: subprocess.run([sys.executable, os.path.abspath(__file__), proj, os.path.join(td, 'shots'), *args],  # noqa: E731
+                                           capture_output=True, text=True, cwd=td)
+        r = run('--manifest', 'nope.json')
+        check('манифеста нет — сообщение и код 3, без трассировки',
+              r.returncode == 3 and 'манифест не читается' in r.stderr and 'Traceback' not in r.stderr, (r.returncode, r.stderr[-300:]))
+        r = run('--manifest', os.path.join('out', 'side.json'))
+        check('манифест вне папки копий читается: рамок в нём нет — код 3, без трассировки',
+              r.returncode == 3 and 'нет рамок' in r.stderr and 'Traceback' not in r.stderr, (r.returncode, r.stderr[-300:]))
+    print('selftest:', 'OK' if ok else 'FAIL')
+    return 0 if ok else 1
+
+
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ('--selftest', 'selftest'):
+        return selftest()
     if len(sys.argv) > 1 and sys.argv[1] == 'serve':
         ap = argparse.ArgumentParser(prog='shot.py serve')
         ap.add_argument('cmd'); ap.add_argument('project'); ap.add_argument('--port', type=int, default=8765)
@@ -351,8 +431,19 @@ def main():
     a = ap.parse_args()
 
     project = os.path.abspath(a.project)
-    man_path = os.path.join(project, a.manifest)
-    manifest = json.load(open(man_path, encoding='utf-8'))
+    man_path = manifest_path(project, a.manifest)
+    try:
+        manifest = json.load(open(man_path, encoding='utf-8'))
+    except (OSError, ValueError) as e:
+        print(json.dumps({'error': f'манифест не читается: {man_path} ({type(e).__name__}: {e})'}, ensure_ascii=False),
+              file=sys.stderr)
+        return 3
+    man_rel = os.path.relpath(man_path, project)
+    if man_rel.startswith('..'):
+        Handler.virtual[MANIFEST_URL] = json.dumps(manifest, ensure_ascii=False).encode('utf-8')
+        man_url = MANIFEST_URL
+    else:
+        man_url = '/' + quote(man_rel.replace(os.sep, '/'))
     sets = parse_set(a.set)
     only = [x.strip() for x in a.only.split(',') if x.strip()]
     themes = [t.strip() for t in a.themes.split(',') if t.strip()]
@@ -475,7 +566,8 @@ def main():
                     ctx, page, errs, failed = open_frame(browser, fr, a.scale)
                     checks = page.evaluate(CHECKS_JS, {'vw': w, 'touch': w < 1024})
                     samples = platform_fonts(ctx, page)
-                    view = {'id': fid, 'title': fr.get('title', ''), 'file': fr['file'], 'w': w, 'h': h, 'theme': th, **checks,
+                    view = {'id': fid, 'title': fr.get('title', ''), 'file': fr['file'], 'w': w, 'h': h, 'theme': th,
+                            'part': artboard_part(fr.get('artboard') or fr['file'], w)[1], **checks,
                             'fonts_missing': fonts_missing(samples), 'font_samples': samples,
                             'console_errors': errs[:10], 'failed_requests': failed[:10]}
                     view['failed_checks'] = failed_checks(view)
@@ -530,7 +622,7 @@ def main():
                     for fr in frames:
                         rows.setdefault(fr['file'], []).append(int(fr['w']))
                     width = max(sum(ws) + 80 * (len(ws) - 1) for ws in rows.values()) + 80
-                    q = f"m=/{quote(a.manifest)}&pin=/_virtual/pin.json"
+                    q = f"m={man_url}&pin=/_virtual/pin.json"
                     if only:
                         q += '&only=' + quote(only[0])
                     if themes and len(themes) == 1:

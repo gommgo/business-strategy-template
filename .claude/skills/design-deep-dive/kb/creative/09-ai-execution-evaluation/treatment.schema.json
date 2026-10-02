@@ -26,7 +26,9 @@
         "sections[].treatment.visual_variant": {"rule": "derive", "from": ["/sections/*/treatment/visual_variant", "block-treatments#/blocks/*/visual_variants"], "stages": ["mockup"], "note": "id визуального варианта блока и его описание из block-treatments.yaml"},
         "sections[].treatment.mobile": {"rule": "copy", "from": ["/sections/*/treatment/mobile"], "stages": ["mockup"], "note": "стратегия телефона: артборд 390 рисуется по ней — стопка станций, постер, скрытый декор"},
         "sections[].treatment.lcp_note": {"rule": "copy", "from": ["/sections/*/treatment/lcp_note"], "stages": ["mockup"], "note": "кандидат LCP первого экрана — текст или постер, а не холст 3D"},
-        "treatment.theme": {"rule": "copy", "from": ["/page/treatment/theme"], "stages": ["mockup"], "note": "тема страницы"}
+        "sections[].treatment.notes": {"rule": "copy", "from": ["/sections/*/treatment/notes"], "stages": ["mockup"], "note": "заметки подачи секции: как собран приём, запасной вид, что на телефоне — исполнитель макета читает их во входе, а не в плане"},
+        "treatment.theme": {"rule": "copy", "from": ["/page/treatment/theme"], "stages": ["mockup"], "note": "тема страницы"},
+        "treatment.notes": {"rule": "copy", "from": ["/page/treatment/notes"], "stages": ["mockup"], "note": "заметки подачи страницы"}
       },
       "pages/<page-id>/motion.md": {
         "эффекты": {"rule": "copy", "from": ["/sections/*/treatment/effects"], "stages": ["motion"], "note": "эффекты секции по каталогу: id, цель, назначение, класс, параметры в пределах limits effects.yaml"},
@@ -43,7 +45,7 @@
       {"from": ["/sections/*/treatment/motion_spec_ref", "/page/treatment/motion_spec_ref"], "note": "блок движения собирается из самой спецификации движения"},
       {"from": ["/sections/*/treatment/flash_check"], "note": "проверка вспышек — приёмка ассета и ворота после сборки"},
       {"from": ["/sections/*/treatment/budget", "/page/treatment/budget_overrides"], "note": "доля бюджета секции и исключения — ворота после сборки"},
-      {"from": ["/sections/*/treatment/status", "/sections/*/treatment/notes", "/page/treatment/status", "/page/treatment/notes"], "note": "статус подачи — в манифесте INPUT.md"},
+      {"from": ["/sections/*/treatment/status", "/page/treatment/status"], "note": "статус подачи — в манифесте INPUT.md"},
       {"from": ["/page/treatment/art_direction_ref", "/page/treatment/tokens_ref"], "note": "направление — по карте арт-дирекции; токены — ДС проекта как есть"},
       {"from": ["/page/treatment/motion_level", "/page/treatment/motion_system/thesis", "/page/treatment/motion_system/character", "/page/treatment/motion_system/primitives", "/page/treatment/motion_system/smooth_scroll", "/page/treatment/motion_system/page_transitions", "/page/treatment/motion_system/reduce_toggle"], "note": "уровень движения — decisions.motion.level; тезис, характер, примитивы, прокрутка, переходы и переключатель — из спецификации движения (сверяет spec_check.py)"},
       {"from": ["/page/treatment/peaks", "/page/treatment/accents", "/page/treatment/signature_sections"], "note": "сводка ритма — производная visual_role и эффектов секций; сверяет spec_check.py"}

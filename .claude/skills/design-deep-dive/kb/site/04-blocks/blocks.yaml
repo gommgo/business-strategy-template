@@ -763,7 +763,7 @@ blocks:
     name: "Сетка карточек"
     status: active
     purpose: "3–6 однотипных выгод или функций: заголовок и механизм в каждой карточке"
-    serves: [benefits, solution, audience]
+    serves: [benefits, solution, audience, objections]
     use_when: ["выгоды или функции равного веса, каждая объяснима в 1–2 фразах", "objections: 1–3 ответа карточками рядом с решением"]
     avoid_when: ["единственный показ продукта SaaS — три одинаковые карточки вместо продукта в деле (гейт 8 Hallmark, ux F12.1)", "функции разного веса — feature-alternating или feature-bento"]
     html: {element: section, landmark: region, heading: h2, list: ul, item: li, note: "карточка — <li> с H3; иконка декоративная (alt пустой); ссылка — на заголовок карточки, если ведёт на страницу функции"}
@@ -819,7 +819,7 @@ blocks:
     slots:
       - {id: title, slot: section-title, required: false, heading: h2}
     groups:
-      - {id: row, name: "Ряд", min: 2, max: 6, html: article, slots: [{id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: true}, {id: point, slot: list-item, required: false, max: 4}, {id: media, slot: screenshot, required: true, media_role: informational, note: "или photo, illustration, video по задаче"}, {id: alt, slot: image-alt, required: true}, {id: quote, slot: testimonial-quote, required: false, variants: [claim-proof]}, {id: link, slot: link, required: false}]}
+      - {id: row, name: "Ряд", min: 2, max: 6, html: article, slots: [{id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: true}, {id: point, slot: list-item, required: false, max: 4}, {id: media, slot: screenshot, required: true, media_role: informational, note: "скриншот; фото, иллюстрация или видео ряда — элементами photo, illustration, video вместо него"}, {id: photo, slot: photo, required: false, authenticity: real-only, media_role: informational}, {id: illustration, slot: illustration, required: false, media_role: informational}, {id: video, slot: video, required: false, media_role: informational}, {id: alt, slot: image-alt, required: true}, {id: quote, slot: testimonial-quote, required: false, variants: [claim-proof]}, {id: link, slot: link, required: false}]}
     variants:
       - {id: zigzag, name: "Зигзаг", when: "по умолчанию", default: true}
       - {id: same-side, name: "Медиа всегда с одной стороны", when: "спокойный ритм, документальная подача"}
@@ -1019,7 +1019,7 @@ blocks:
     slots:
       - {id: title, slot: section-title, required: true, heading: h2}
     groups:
-      - {id: segment, name: "Сегмент", min: 2, max: 6, html: li, slots: [{id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: true}, {id: media, slot: photo, required: false, media_role: informational}, {id: link, slot: link, required: false}]}
+      - {id: segment, name: "Сегмент", min: 2, max: 6, html: li, slots: [{id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: true}, {id: media, slot: photo, required: false, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt картинки media"}, {id: link, slot: link, required: false}, {id: link-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки link, когда ссылка — отдельная строка карточки, а не вся карточка"}]}
       - {id: not-for, name: "Кому не подойдёт", min: 0, max: 4, html: li, slots: [{id: text, slot: list-item, required: true}]}
     variants:
       - {id: segment-cards, name: "Карточки сегментов", when: "по умолчанию", default: true}
@@ -1166,6 +1166,7 @@ blocks:
       - {id: service, name: "Услуга", min: 2, max: 12, html: li, slots: [{id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: false}, {id: price, slot: pricing-price, required: if-fact, fact: always}, {id: price-note, slot: pricing-price-note, required: if-fact}, {id: cover, slot: cover-image, required: false, media_role: informational}, {id: link, slot: link, required: false}, {id: price-fact, slot: price-ref, required: if-fact, fact_kinds: [price]}]}
     variants:
       - {id: cards-with-price, name: "Карточки с ценой «от»", when: "по умолчанию", default: true}
+      - {id: cards-plain, name: "Карточки без цены", when: "цены на сайте не публикуются — решение заказчика: название, суть и ссылка, без цены и обложки"}
       - {id: compact-list, name: "Компактный список", when: "10+ услуг"}
       - {id: cross-sell, name: "Смежные предложения", when: "хвост страницы: приложение, смежные услуги, подарочные карты (C 01 §1.2: 10 из 30, позиция 0,82)"}
     mobile: {behavior: [stack, accordion], below_40rem: "одна колонка; длинный перечень — группами в аккордеоне", never_hide: [title, service.price]}
@@ -1656,6 +1657,8 @@ blocks:
       - {id: cta-secondary, slot: cta-secondary, required: false}
       - {id: cta-secondary-label, slot: cta-secondary-label, required: false}
       - {id: cta-note, slot: cta-note, required: false}
+      - {id: phone, slot: phone-link, required: false, variants: [final-with-channels]}
+      - {id: messenger, slot: messenger-link, required: false, variants: [final-with-channels]}
       - {id: proof, slot: fact-ref, required: false}
     variants:
       - {id: mid, name: "Промежуточная", when: "после доказательств или цены", default: true}
@@ -1729,7 +1732,7 @@ blocks:
       - {id: cta-label, slot: cta-label, required: false}
       - {id: more, slot: link, required: false, purpose: "на страницу вопросов (многостраничник)"}
     groups:
-      - {id: qa, name: "Вопрос — ответ", min: 3, max: 12, html: details, slots: [{id: q, slot: faq-q, required: true}, {id: a, slot: faq-a, required: true}, {id: fact, slot: fact-ref, required: if-fact}]}
+      - {id: qa, name: "Вопрос — ответ", min: 1, max: 12, html: details, slots: [{id: q, slot: faq-q, required: true}, {id: a, slot: faq-a, required: true}, {id: fact, slot: fact-ref, required: if-fact}], note: "минимум — по варианту objections-near-cta (1–3 вопроса у призыва); аккордеон, открытый список и «по темам» — от 3 вопросов"}
     variants:
       - {id: accordion, name: "Аккордеон", when: "по умолчанию", default: true}
       - {id: open-list, name: "Открытый список", when: "≤ 5 вопросов; ответы видны сразу (удобно для ИИ-цитирования)"}
@@ -1754,6 +1757,7 @@ blocks:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: body, slot: body, required: true}
       - {id: photo, slot: photo, required: false, authenticity: real-only, media_role: informational}
+      - {id: alt, slot: image-alt, required: false, purpose: "alt фото photo"}
       - {id: company, slot: fact-ref, required: true, fact_kinds: [company, metric]}
       - {id: link, slot: link, required: false, purpose: "на страницу «О компании»"}
     groups:
@@ -1780,6 +1784,8 @@ blocks:
     slots:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: lead, slot: section-lead, required: false}
+      - {id: all, slot: link, required: false, purpose: "на страницу команды"}
+      - {id: all-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки all — называет, что откроется: страница команды"}
     groups:
       - {id: person, name: "Человек", min: 1, max: 24, html: li, slots: [{id: photo, slot: photo, required: false, authenticity: real-only, media_role: informational}, {id: name, slot: card-title, required: true, heading: h3}, {id: role, slot: card-body, required: true, purpose: "роль, опыт, специализация — из факта"}, {id: link, slot: link, required: false}, {id: person, slot: person-ref, required: true, fact_kinds: [person]}]}
     variants:
@@ -1900,9 +1906,11 @@ blocks:
     slots:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: map, slot: map, required: true, media_role: informational}
+      - {id: map-alt, slot: image-alt, required: false, purpose: "alt картинки карты map"}
       - {id: address, slot: contact-info, required: true}
       - {id: directions, slot: body, required: false, purpose: "как добраться словами: транспорт, вход, парковка"}
       - {id: route, slot: link, required: true, purpose: "открыть в картах; action visit-location"}
+      - {id: route-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки route — называет действие и карты, которые откроются"}
       - {id: photo, slot: photo, required: false, authenticity: real-only, purpose: "вход, фасад, зал площадки"}
     variants:
       - {id: static-image, name: "Статичная карта со ссылкой", when: "по умолчанию: лёгкая, без скриптов", default: true}
@@ -1958,8 +1966,9 @@ blocks:
     slots:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: all, slot: link, required: false}
+      - {id: all-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки all — называет, что откроется: все работы"}
     groups:
-      - {id: project, name: "Проект", min: 4, max: 24, html: li, slots: [{id: cover, slot: cover-image, required: true, authenticity: real-only, media_role: informational}, {id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: false, purpose: "клиент, задача, год"}, {id: link, slot: link, required: false}, {id: case, slot: case-ref, required: true, fact_kinds: [case, demo]}]}
+      - {id: project, name: "Проект", min: 4, max: 24, html: li, slots: [{id: cover, slot: cover-image, required: true, authenticity: real-only, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt обложки cover"}, {id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: false, purpose: "клиент, задача, год"}, {id: link, slot: link, required: false}, {id: case, slot: case-ref, required: true, fact_kinds: [case, demo]}]}
       - {id: filter, name: "Фильтр", min: 0, max: 8, html: li, slots: [{id: label, slot: nav-label, required: true}]}
     variants:
       - {id: grid, name: "Сетка", when: "по умолчанию", default: true, hallmark: [F6]}
@@ -2205,6 +2214,8 @@ blocks:
       - {id: phone, slot: phone-link, required: if-available}
       - {id: email, slot: email-link, required: false}
       - {id: messenger, slot: messenger-link, required: false}
+      - {id: messenger-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки messenger — называет мессенджер или действие в нём"}
+      - {id: group-label, slot: nav-label, required: false, max: 6, purpose: "заголовок группы ссылок подвала сайта — по одному на группу site-map.chrome.footer.groups"}
       - {id: tagline, slot: footer-tagline, required: false}
       - {id: logo, slot: brand-logo, required: false}
       - {id: company, slot: fact-ref, required: true, fact_kinds: [company]}

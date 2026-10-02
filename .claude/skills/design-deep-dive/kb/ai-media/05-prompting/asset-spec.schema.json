@@ -230,7 +230,7 @@
         "primary_ratio": {"$ref": "#/$defs/ratio"},
         "aspect_ratios": {"type": "array", "items": {"$ref": "#/$defs/ratio"}, "description": "Все соотношения, которые нужны странице (кадрирование или аутпейнт)."},
         "resolution": {"enum": ["0.5K", "1K", "2K", "4K", "480p", "720p", "768p", "1080p"]},
-        "format": {"enum": ["avif", "webp", "jpeg", "png", "mp4", "webm"]},
+        "format": {"enum": ["avif", "webp", "jpeg", "png", "svg", "mp4", "webm"], "description": "Формат файла на странице. svg — векторный ассет: задание собирается только для модели, которая отдаёт svg."},
         "alpha": {"type": "boolean", "default": false},
         "max_kb": {"type": "integer", "minimum": 1},
         "variants": {

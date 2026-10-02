@@ -1465,7 +1465,8 @@ effects:
     pause_required: false
     flashes: none
   cliche: {risk: low, status: н/д (higgsfield C3), registry_id: null}
-  rules: [sticky-сцена 100svh в обёртке 100svh + 150vh; clip-path inset(22% 30% round 28px) → 0, подпись появляется в последней четверти]
+  rules: [sticky-сцена 100svh в обёртке 100svh + 150vh; clip-path inset(22% 30% round 28px) → 0, подпись появляется в последней четверти, 'кадр сцены
+      — без loading="lazy" или с предзагрузкой за экран до входа в окно: при задержке ответа ленивый кадр появился бы в уже раскрывающемся окне']
   evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[мнение вендора: higgsfield wow-catalog C3 «Scroll-driven mask reveal»]']
   checked_at: '2026-09-25'
   cost:
@@ -2548,7 +2549,9 @@ effects:
     pause_required: false
     flashes: none
   cliche: {risk: low, status: н/д, registry_id: null}
-  rules: ['clip-path: inset(100% 0 0 0) → inset(0) 900 мс + обратный масштаб 1,06 → 1; скрытие только при html.js']
+  rules: ['clip-path: inset(100% 0 0 0) → inset(0) 900 мс + обратный масштаб 1,06 → 1; скрытие только при html.js', 'кадр под маской — без
+      loading="lazy" или с предзагрузкой за экран до входа в окно: кадр под clip-path: inset(100%) браузер считает невидимым и лениво не грузит — он
+      появился бы в уже открытой маске']
   evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[V:xQnJLYTVl_E 24:06] окно в форме логотипа — кандидат W2']
   checked_at: '2026-09-25'
   cost:

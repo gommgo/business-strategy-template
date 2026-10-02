@@ -11,7 +11,9 @@
 Подкоманды (порядок проверок: сначала факты и право, потом стиль, потом формат и статусы):
   skeleton PLAN -o DECK [--facts-ref F] [--voice-ref V] [--date ГГГГ-ММ-ДД] [--force]
         каркас copy deck из плана страницы (page-plan): секции, текстовые слоты, анатомия блока, группы, fact_ids и
-        missing_ids из binds слотов данных, мета из page_slots, page_plan_ref; тексты пусты, статус draft
+        missing_ids из binds слотов данных (missing_ids — только пробел с заглушкой: fallback rewrite-without и
+        omit-block заглушки не оставляют), мета из page_slots, page_plan_ref; voice_ref — из смысла, legal_category —
+        из брифа (refs плана); тексты пусты, статус draft; папка выхода создаётся
   validate DECK [--facts F] [--plan PLAN] [--today ГГГГ-ММ-ДД] [--final] [--no-jsonschema]
         схема (jsonschema, если есть; иначе встроенная проверка того же подмножества), id и ссылки, статусы
         (x-status-rules), словарь site, block против blocks.yaml, стык с планом (page_plan_ref или --plan), факты (есть
@@ -19,9 +21,10 @@
         (секция hero, без неё — первая после шапки), строки в картинках, второй язык; правила copy-slots.yaml,
         voice.yaml, meta-rules.yaml, claims-rules.yaml: есть — проверка работает, нет — предупреждение
         «правила не загружены»; copy_slots_ref, который не разрешается от папки copy deck, — предупреждение
-        COPY-D-RULES-REF и правила copy-slots.yaml базы; записи claims_allow; --final — ворота публикации: страница
-        approved, 0 [PLACEHOLDER], 0 демо-фактов, мета заполнена (без --final пустая мета — warning), обходы claims_allow —
-        списком
+        COPY-D-RULES-REF и правила copy-slots.yaml базы; нет voice_ref — предупреждение COPY-D-VOICE (голос не
+        проверяется); OG-поля мета ждутся те, что заведены слотами плана; записи claims_allow; --final — ворота
+        публикации: страница approved, 0 [PLACEHOLDER], 0 демо-фактов, мета заполнена (без --final пустая мета —
+        warning), обходы claims_allow — списком
   claims DECK [--facts F] [--today …] [--strict] [--all-variants] [--final]
         claims_check.py (факты и право) процессом на плоской копии: обещание, мета, OG-шаблон — тоже текст страницы;
         находки, обойдённые claims_allow, в error не идут — списком обходов
@@ -29,7 +32,9 @@
         copy_lint.py через API lint_text: каждый слот со своим slot_type и жанром + проход страницы
   check DECK [--facts F] [--today …] [--final] [--strict] [--all-variants] [--update OUT [--promote]]
         claims → lint → validate; --update пишет копию deck с записями lint и claims (text_hash, дата, версия),
-        --promote — draft и assumed → checked при 0 error; --all-variants — альтернативы «как выбранные»
+        --promote — draft и assumed → checked у текстов без error проверки (claims, lint, validate — и на статусе
+        checked тоже), страница — checked, когда проверены все её выбранные тексты и error нет; --all-variants —
+        альтернативы «как выбранные»
   export DECK --page ID --stage directions|wireframe|mockup [--out DIR] [--facts F] [--facts-scope all|used]
         выгрузка во вход холста: DIR/pages/<page-id>/copy.md (тексты статуса этапа) и DIR/facts.md («Факты», «Нет»,
         «Нельзя утверждать»); слот без текста статуса этапа — находка COPY-D-STAGE (макет — error, вайрфрейм и
@@ -45,9 +50,10 @@
                                              tally, ref}; у мета — выбранный текст в meta.<поле>
   approve DECK --page ID --by КТО -o OUT      утверждение страницы человеком: checked (0 error, актуальный text_hash)
                                              → approved; заглушка пробела facts.yaml missing[] — warning (её держит
-                                             validate --final), заглушка без пробела — отказ; журнал процесса
-                                             (edit_log, отклонённые варианты) уходит — история в git; пустая мета —
-                                             warning; обходы claims_allow страницы — списком
+                                             validate --final), заглушка без пробела или о другом, чем пробел
+                                             missing_ids слота, — отказ; журнал процесса (edit_log, отклонённые
+                                             варианты) уходит — история в git; пустая мета — warning; обходы
+                                             claims_allow страницы — списком
   before-after [--write | --check]           пустой why в 10-templates-recipes/before-after.tsv — из rule_ref (заголовок
                                              раздела нормы); без ключей — показать, что будет заполнено; --check —
                                              код 1, если есть что заполнить
@@ -104,6 +110,7 @@ GENRES = ('landing', 'site-page', 'article', 'meta', 'geo', 'email-form')
 LEVELS = ('error', 'warning', 'info')
 STATUS_RANK = {'draft': 0, 'assumed': 0, 'checked': 1, 'approved': 2, 'rejected': -1}
 CHROME_TOP_ROLES = {'header', 'utility'}   # шапка и служебная строка над первым экраном: ядро считается после них
+PAGE_PASS = ' (страница)'                  # хвост места (where) у находок прохода страницы линтером
 PLACEHOLDER_RX = re.compile(r'\[PLACEHOLDER(?::\s*([^\]]*))?\]', re.I)
 BAD_PLACEHOLDER_RX = re.compile(r'\[\s*(?:заглушка|todo|tbd|xxx|плейсхолдер|placeholder\s*[^:\]\s])|lorem ipsum|\bTODO\b|'
                                 r'(?<!\[)PLACEHOLDER(?!\s*[:\]])|\[PLACEHOLDER(?![^\]]*\])', re.I)
@@ -862,7 +869,27 @@ def load_meta_rules(path):
     return out
 
 
-def _meta_checks(deck, mr, rep, final):
+def plan_og_fields(deck, ctx, page):
+    """Поля OG, заведённые у страницы слотами плана (page_slots.text: og-title, og-description): {'og_title', …}. None —
+    плана нет, он не читается или он о другой странице: тогда ожидаются оба поля. Страница без OG-слотов в плане
+    (служебная: 404, политика) OG не ждёт."""
+    pp = plan_path_of(deck, ctx) if ctx is not None else None
+    if not pp:
+        return None
+    cache = ctx.__dict__.setdefault('_plan_docs', {})
+    if pp not in cache:
+        try:
+            cache[pp] = deep_dates(load_yaml_file(pp) or {})
+        except Exception:  # noqa: BLE001 — о нечитаемом плане говорит сверка стыка (COPY-D-PLAN)
+            cache[pp] = None
+    plan = cache[pp]
+    if not isinstance(plan, dict) or str((plan.get('page') or {}).get('id') or '') not in (str(page.get('page_id')), str(page.get('site_page_id'))):
+        return None
+    return {META_SLOT_FIELD[str(t.get('slot'))] for t in ((plan.get('page_slots') or {}).get('text') or [])
+            if isinstance(t, dict) and str(t.get('slot')) in ('og-title', 'og-description')}
+
+
+def _meta_checks(deck, mr, rep, final, ctx=None):
     """Проверки мета между полями и страницами по checks_outside_linter (id meta-x-…) и ориентиры длины limits из meta-rules.yaml."""
     T = 'validate'
     checks = mr.get('checks') or {}
@@ -882,8 +909,11 @@ def _meta_checks(deck, mr, rep, final):
             if not val:   # мета — ворота публикации (--final); у утверждённой страницы — предупреждение, у черновика — справка
                 rep.add(T, lvl('meta-x-missing', 'error') if final else ('warning' if published else 'info'), 'meta-x-missing', f'{pid}/meta/{k}',
                         f'нет meta.{k}' + ('' if final else ' — заполнить до публикации (validate --final)'), 'meta-rules.yaml checks_outside_linter; шаблоны — templates.' + str(page.get('page_type') or ''))
-        if published and (not norm_ws(meta.get('og_title')) or not norm_ws(meta.get('og_description'))):
-            rep.add(T, lvl('meta-x-og-missing', 'warning'), 'meta-x-og-missing', f'{pid}/meta', 'нет og_title или og_description', 'Картинка OG — ai-media 10/01 §7; теги — site.')
+        # OG сверяется с планом: какие OG-слоты у страницы есть, те и ждём; с checked — чтобы пропуск был виден до утверждения
+        og_plan = plan_og_fields(deck, ctx, page)
+        og_miss = [k for k in ('og_title', 'og_description') if (og_plan is None or k in og_plan) and not norm_ws(meta.get(k))]
+        if og_miss and (final or page.get('status') in ('checked', 'approved')):
+            rep.add(T, lvl('meta-x-og-missing', 'warning'), 'meta-x-og-missing', f'{pid}/meta', 'нет ' + ' и '.join(og_miss), 'Картинка OG — ai-media 10/01 §7; теги — site.')
         if t:
             titles.setdefault(t.lower(), []).append(pid)
         if d:
@@ -1337,8 +1367,9 @@ def _validate_page(deck, page, ctx, rep, final, fresh, vocab):
             if need_meta and not str(meta.get(k) or '').strip():
                 rep.add(T, 'error' if final else 'warning', 'COPY-D-META', f'{pid}/meta/{k}', f'пустое meta.{k} у страницы {pstatus}'
                         + ('' if final else ' — заполнить до публикации'), 'Мета — часть copy deck (правила — meta-rules.yaml); ворота публикации — validate --final.')
+        og_plan = plan_og_fields(deck, ctx, page)   # как meta-x-og-missing: ждём те OG-поля, что заведены слотами плана
         for k in ('og_title', 'og_description'):
-            if need_meta and not str(meta.get(k) or '').strip():
+            if (need_meta or pstatus == 'checked') and (og_plan is None or k in og_plan) and not str(meta.get(k) or '').strip():
                 rep.add(T, 'warning', 'COPY-D-META', f'{pid}/meta/{k}', f'пустое meta.{k}', 'Без og:* превью ссылки соберёт площадка сама.')
     elif final and not isinstance(meta, dict):
         rep.add(T, 'error', 'COPY-D-META', pid, 'нет блока meta', 'meta: {title, description, og_title, og_description}.')
@@ -1401,26 +1432,44 @@ def _validate_page(deck, page, ctx, rep, final, fresh, vocab):
                     'Журнал уходит при утверждении (copydeck.py approve); история — в git.')
 
 
+def gap_stems(s):
+    """Значимые слова заглушки или описания пробела основами — той же нормализацией, что у сверки фактов
+    (claims_check.py); без модуля — первые пять букв слова."""
+    body = PLACEHOLDER_RX.sub(lambda m: m.group(1) or '', str(s or ''))
+    m = claims_module()
+    if m is not None:
+        return {m.stem(w) for w in m.WORD_RX.findall(m.norm(body)) if w not in m.STOP and len(w) > 2}
+    return {w.lower().replace('ё', 'е')[:5] for w in words(body) if len(w) > 2}
+
+
 def placeholder_links(text, facts, missing_ids=None):
-    """Заглушки текста и пробелы facts.yaml missing[], к которым они привязаны: missing_ids держателя (как в сверке
-    фактов) или совпадение с missing[].placeholder. → (id пробелов, заглушки без пробела). Заглушка названного пробела —
-    честный пропуск факта на макете; публикацию держит validate --final (гейт 3)."""
+    """Заглушки текста и пробелы facts.yaml missing[], к которым они привязаны. → (id пробелов, заглушки без пробела).
+    Заглушка привязана, если дословно повторяет placeholder любого пробела missing[] или названа своим пробелом: он стоит
+    в missing_ids держателя, и больше половины значимых слов заглушки есть в его what и placeholder (один пробел
+    «бригадир — имя, стаж» закрывает слот имени и слот стажа своими заглушками; заглушка без слов — «[PLACEHOLDER]» —
+    при своём пробеле тоже его). Заглушка о другом рядом с чужим missing_ids не привязана: иначе любой текст в скобках
+    прошёл бы утверждение. Заглушка названного пробела — честный пропуск факта на макете; публикацию держит
+    validate --final (гейт 3)."""
     found = [m.group(0) for m in PLACEHOLDER_RX.finditer(text or '')]
     if not found:
         return [], []
     if facts is None:
         return [], found
-    ids = []
+    own = []
     for ref in missing_ids or []:
         r = str(ref)[8:] if str(ref).startswith('missing:') else str(ref)
-        if r in facts.missing_by_id:
-            ids.append(r)
-    loose = []
+        g = facts.missing_by_id.get(r)
+        if g is not None and not any(g is x for x in own):
+            own.append(g)
+    ids, loose = [], []
     for ph in found:
         hit = next((x for x in facts.missing if norm_ws(x.get('placeholder')).lower() == norm_ws(ph).lower()), None)
+        if hit is None:
+            st = gap_stems(ph)
+            hit = next((g for g in own if 2 * len(st & (gap_stems(g.get('what')) | gap_stems(g.get('placeholder')))) > len(st) or not st), None)
         if hit is not None:
             ids.append(str(hit.get('id')))
-        elif not ids:
+        else:
             loose.append(ph)
     return sorted(set(ids)), loose
 
@@ -1487,7 +1536,8 @@ def _validate_slot(deck, page, section, sl, path, ctx, rep, final, fresh, pstatu
         gaps, loose = placeholder_links(text, ctx.facts, sl.get('missing_ids'))
         if loose:
             rep.add(T, 'error', 'COPY-D-PLACEHOLDER', path, f'заглушка без пробела в facts.yaml: {", ".join(loose)}',
-                    'Заведите пробел в facts.yaml missing[] (или missing_ids слота) — это вопрос владельцу факта — либо перепишите без утверждения.')
+                    'Заглушка повторяет placeholder пробела facts.yaml missing[] или названа словами своего пробела (missing_ids слота); пробела нет — заведите его '
+                    '(это вопрос владельцу факта) либо перепишите без утверждения.')
         else:
             rep.add(T, 'warning', 'COPY-D-PLACEHOLDER', path, 'заглушка пробела ' + ', '.join(f'missing:{g}' for g in gaps)
                     + ' в утверждённом тексте: макету не мешает, публикацию держит validate --final', 'Закройте пробел в facts.yaml до публикации.')
@@ -1718,6 +1768,9 @@ def _validate_wave2(deck, ctx, rep):
             rep.add(T, 'warning', 'COPY-D-VOICE', '—', f'voice_ref «{vref}» не найден', 'Путь от папки copy deck.')
     elif vref:
         rep.add(T, 'info', 'COPY-D-VOICE', '—', 'voice_ref — строка-описание (до профиля голоса): голос не проверяется', '')
+    else:   # без ссылки проверка голоса молчит — и «не говорим» профиля проходит незамеченным
+        rep.add(T, 'warning', 'COPY-D-VOICE', '—', 'нет voice_ref: голос текстов не проверяется',
+                'voice_ref — путь к voice.yaml от папки copy deck (каркас берёт его из смысла: copydeck.py skeleton).')
     # --- мета
     mr = ctx.meta_rules
     if mr is not None:
@@ -1725,7 +1778,7 @@ def _validate_wave2(deck, ctx, rep):
             rep.add(T, 'info', 'COPY-D-RULES-FORMAT', '—', 'meta-rules.yaml: limits и checks_outside_linter не распознаны — проверки мета пропущены (правила мета в линтере работают через copy_lint.py)', 'Формат meta-rules.yaml изменился — сверьте разбор load_meta_rules.')
         else:
             rep.tools.setdefault('validate', {})['meta_rules'] = f"{os.path.relpath(ctx.meta_rules_path, ROOT) if ctx.meta_rules_path.startswith(ROOT) else ctx.meta_rules_path} ({mr['format']})"
-            _meta_checks(deck, mr, rep, ctx.final)
+            _meta_checks(deck, mr, rep, ctx.final, ctx)
     else:
         rep.add(T, 'warning', 'COPY-D-RULES-MISSING', '—', 'правила не загружены: meta-rules.yaml нет — длины мета и проверки между страницами не проверены', '')
         seen = {}
@@ -2368,7 +2421,7 @@ def run_lint(deck, ctx, rep, final=False, all_variants=False, page_pass=True, pa
                     agg['suppressed'] += 1
                     rep.notes.append(f"lint_allow страницы: {f.get('id')} @ {pid}: {why}")
                     continue
-                rep.add('lint', lvl, f.get('id'), f'{pid} (страница)', f.get('message', ''), f.get('replacement', ''),
+                rep.add('lint', lvl, f.get('id'), pid + PAGE_PASS, f.get('message', ''), f.get('replacement', ''),
                         fragment=str(f.get('fragment') or f.get('context') or '')[:90], marker_id=f.get('marker_id'), group=f.get('group'))
                 agg[{'error': 'errors', 'warning': 'warnings'}.get(lvl, 'info')] += 1
             m = res.get('metrics') or {}
@@ -2376,7 +2429,7 @@ def run_lint(deck, ctx, rep, final=False, all_variants=False, page_pass=True, pa
                               'prose_words': (m.get('prose') or {}).get('words') if m.get('prose') else 0,
                               'dash_punct_per_100w': (m.get('prose') or {}).get('dash_punct_per_100w') if m.get('prose') else None,
                               'concreteness_per_100w': (m.get('prose') or {}).get('concreteness_per_100w') if m.get('prose') else None}
-            per_path[f'{pid} (страница)'] = agg
+            per_path[pid + PAGE_PASS] = agg
     rep.tools['lint'] = {'tool': f'copy_lint {getattr(C, "VERSION", "?")} (lint_text)', 'calls': n_calls, 'texts': len(cache),
                          'rules_cache': bool(_CL.get('cache')), 'notes': notes}
     if parity['meta_fact_ids']:
@@ -2545,9 +2598,34 @@ def _claims_rec(r, today, h):
             'checked_at': today, 'text_hash': h, 'tool': 'claims_check'}
 
 
-def apply_records(data, claims_pp, lint_pp, today, promote=False, variant_checks=False):
+def error_paths(rep, fresh=None):
+    """Места находок уровня error, которые держат повышение статуса: путь слота, варианта, мета, страницы или «—» у
+    находки всего файла; находка прохода страницы линтером — место страницы. Находка невыбранного варианта (check
+    --all-variants сверяет его «как если бы выбрали»; fresh — свежие итоги по путям) выбранный текст не держит."""
+    out = set()
+    for f in rep.findings:
+        if f['level'] != 'error':
+            continue
+        w = str(f['where'])
+        alts = (((fresh or {}).get(w) or {}).get(f['tool']) or {}).get('variants') or {}
+        if f.get('variant') is not None and str(f['variant']) in alts:
+            continue
+        out.add(w[:-len(PAGE_PASS)] if w.endswith(PAGE_PASS) else w)
+    return out
+
+
+def path_held(path, held):
+    """Есть ли error на пути или под ним: у слота — и на его вариантах, у страницы — и на её секциях, слотах, мета."""
+    return any(w == path or w.startswith(path + '/') for w in held)
+
+
+def apply_records(data, claims_pp, lint_pp, today, promote=False, variant_checks=False, held=(), log=None):
     """Копия deck с записями lint и claims (text_hash проверенного текста) у выбранных вариантов; promote — перевести
-    draft и assumed → checked там, где свежие claims и lint дали 0 error (checked — статус утилиты, approved — только человек).
+    draft и assumed → checked там, где свежие claims и lint дали 0 error (checked — статус утилиты, approved — только
+    человек) и на пути текста нет error проверки (held — места находок error: error_paths). Страница draft или assumed
+    становится checked, когда все её выбранные тексты не ниже checked и error нет ни на ней, ни у файла в целом: статус
+    страницы — минимум статусов её текстов; страница checked или approved не меняется. log — словарь для сводки:
+    promoted (пути текстов), pages (id страниц), held (пути текстов, оставленных из-за error).
     variant_checks (check --all-variants --update) — ещё variant.checks {claims, lint} у каждого живого варианта (I:
     сравнить варианты до выбора; rubric не трогается). Свои fact_ids выбранного варианта переносятся в слот (прямые
     claims_check.py и copy_lint.py читают только слот); варианты без своих fact_ids при этом получают прежний список слота.
@@ -2556,6 +2634,10 @@ def apply_records(data, claims_pp, lint_pp, today, promote=False, variant_checks
     deck = deck_root(out)
     lint_tool = (f"copy_lint {getattr(lint_module(), 'VERSION', '?')}" if lint_module() else None)
     n = nv = 0
+    log = log if log is not None else {}
+    log.update(promoted=[], pages=[], held=[])
+    page_ids = [str(p.get('page_id')) for p in pages_of(deck)]
+    file_held = any(not any(path_held(p, [w]) for p in page_ids) for w in held)   # error вне страниц: схема, корень, файл фактов
     for page in pages_of(deck):
         pid = page.get('page_id')
         targets = [(f"{pid}/{s.get('section_id')}/{sl.get('slot_id')}", sl) for s in sections_of(page) for sl in slots_of(s)]
@@ -2601,8 +2683,16 @@ def apply_records(data, claims_pp, lint_pp, today, promote=False, variant_checks
                         nv += 1
             if promote and v.get('status', 'draft') in ('draft', 'assumed') and lint_pp and claims_pp and path in lint_pp and path in claims_pp \
                     and lint_pp[path]['errors'] == 0 and claims_pp[path]['errors'] == 0:
+                if path_held(path, held):
+                    log['held'].append(path)
+                    continue
                 v['status'] = 'checked'
                 v['review'] = {'by': 'copydeck.py check --promote', 'at': today}
+                log['promoted'].append(path)
+        if promote and (page.get('status') or 'draft') in ('draft', 'assumed') and targets and not file_held and not path_held(str(pid), held) \
+                and all(STATUS_RANK.get(_status_of(chosen_variant(sl)), 0) >= 1 for _p, sl in targets):
+            page['status'] = 'checked'
+            log['pages'].append(str(pid))
         if variant_checks:  # альтернативы мета: итоги — в checks варианта meta.variants.<поле>
             meta = page.get('meta') or {}
             mv = meta.get('variants') if isinstance(meta.get('variants'), dict) else {}
@@ -2661,9 +2751,11 @@ def rebase_refs(data, src_path, out_path):
 
 
 def dump_deck(data, path, header, src_path=None):
-    """Запись copy deck (YAML); src_path — исходный файл: относительные пути переписываются от папки path (rebase_refs)."""
+    """Запись copy deck (YAML); src_path — исходный файл: относительные пути переписываются от папки path (rebase_refs).
+    Папка файла создаётся: первый copy deck поверхности пишется в ещё не заведённую copy/."""
     if src_path:
         rebase_refs(data, src_path, path)
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     with open(path, 'w', encoding='utf-8') as f:
         f.write(header)
         yaml.safe_dump(data, f, allow_unicode=True, sort_keys=False, width=140, default_flow_style=False)
@@ -2686,13 +2778,27 @@ def cmd_check(a):
              skip_fact_checks=claims_pp is not None)                              # 3. формат и статусы
     extra = {'slots': {p: fresh[p] for p in sorted(fresh)}}
     if a.update:
-        upd, n, nv = apply_records(data, claims_pp, lint_pp, ctx.today, promote=a.promote, variant_checks=a.all_variants)
-        st_line = ('draft и assumed → checked у текстов с 0 error claims и lint (--promote); approved ставит только человек (approve)'
-                   if a.promote else 'статусы не менялись')
-        dump_deck(upd, a.update, f'# copy deck — записи lint и claims обновлены copydeck.py check --update · {ctx.today}\n'
-                                 f'# источник: {a.deck}; {st_line} (процесс — 10-templates-recipes/01-copy-deck-workflow.md)\n'
-                                 + (f'# --all-variants: variant.checks у {nv} вариантов\n' if a.all_variants else ''), src_path=a.deck)
+        held, log, later = (error_paths(rep, fresh) if a.promote else set()), {}, {}
+        upd, n, nv = apply_records(data, claims_pp, lint_pp, ctx.today, promote=a.promote, variant_checks=a.all_variants, held=held, log=log)
+        for _ in range(3 if a.promote else 0):
+            # поднятый утилитой статус обязан пройти проверку нового статуса: что на checked даёт error, остаётся как было
+            rv = validate(upd, ctx, Report(), final=a.final, use_jsonschema=not a.no_jsonschema, fresh=fresh, skip_fact_checks=claims_pp is not None)
+            new = {str(f['where']): f for f in rv.findings if f['level'] == 'error' and str(f['where']) not in held}
+            if not new:
+                break
+            later.update(new)
+            held |= set(new)
+            upd, n, nv = apply_records(data, claims_pp, lint_pp, ctx.today, promote=True, variant_checks=a.all_variants, held=held, log=log)
+        # шапка — о файле, а не о прогоне: без даты и пути источника (дата проверки — в записях lint и claims)
+        dump_deck(upd, a.update, '# copy deck — записи lint и claims (text_hash проверенного текста) пишет copydeck.py check --update;\n'
+                                 '# checked ставит --promote при 0 error проверки, approved — только человек (copydeck.py approve)\n', src_path=a.deck)
         rep.notes.append(f'--update: записи у {n} текстов' + (f', checks у {nv} вариантов' if a.all_variants else '') + f' → {a.update}')
+        if a.promote:
+            rep.notes.append(f"--promote: checked — текстов {len(log['promoted'])}" + (f", страниц {len(log['pages'])} ({', '.join(log['pages'])})" if log['pages'] else ', страницы не повышены')
+                             + (f"; оставлены из-за error проверки: {', '.join(log['held'][:8])}{' …' if len(log['held']) > 8 else ''}" if log['held'] else ''))
+            for w, f in list(later.items())[:8]:
+                rep.notes.append(f"--promote: {w} — на статусе checked был бы error {f['rule']}: {f['message'][:120]}")
+            extra['promote'] = log
         extra['updated'] = a.update
     write_outputs(a, rep, 'check', extra)
     if not a.quiet:
@@ -2731,17 +2837,25 @@ def copy_md_rules(schema=None):
 
 def parse_copy_md(text):
     """copy.md входа холста → ([{section_id, label, line, slots: [{slot_id, label, status, text, line}]}], заметки).
-    section_id и slot_id — None у «## ?» и «[?]» (тексты холста без секции или слота плана). Строки «# …», пустые и
-    «<!-- … -->» пропускаются; строки, начатые двумя пробелами, продолжают текст слота с новой строки."""
+    section_id и slot_id — None у «## ?» и «[?]» (тексты холста без секции или слота плана). Строки «# …» и
+    «<!-- … -->» пропускаются. Значение слота тянется до следующей строки слота, секции или «# …»: строки, начатые двумя
+    пробелами, продолжают текст с новой строки, пустая строка между ними — граница абзаца внутри значения (так
+    render_copy_md пишет текст в несколько абзацев); пустые строки после последней строки значения в текст не входят."""
     sections, notes, cur, last = [], [], None, None
+    gap = 0   # пустые строки после текста слота: станут границей абзаца, если значение продолжится
     for i, raw in enumerate(text.splitlines(), 1):
         line = raw.rstrip()
-        if not line.strip() or line.lstrip().startswith('<!--'):
-            last = None if not line.strip() else last
+        if not line.strip():
+            if last is not None:
+                gap += 1
+            continue
+        if line.lstrip().startswith('<!--'):
             continue
         if raw.startswith('  ') and last is not None:
-            last['text'] = (last['text'] + '\n' + raw[2:].rstrip()) if last['text'] else raw[2:].rstrip()
+            last['text'] = (last['text'] + '\n' * (gap + 1) + raw[2:].rstrip()) if last['text'] else raw[2:].rstrip()
+            gap = 0
             continue
+        gap = 0
         st = line.strip()
         m = COPY_MD_SECTION_RX.match(st)
         if m:
@@ -2771,7 +2885,8 @@ def parse_copy_md(text):
 
 
 def render_copy_md(sections, title_lines=()):
-    """[{section_id, slots: [{slot_id, status, text}]}] → текст copy.md (абзацы — строками продолжения)."""
+    """[{section_id, slots: [{slot_id, status, text}]}] → текст copy.md (строки текста — строками продолжения; пустая
+    строка между абзацами — строкой из двух пробелов)."""
     L = [f'# {t}' for t in title_lines] + ([''] if title_lines else [])
     for sec in sections:
         L.append(f"## {sec.get('section_id') or '?'}" + (f" {sec['label']}" if sec.get('label') else ''))
@@ -3376,7 +3491,8 @@ def approve_page(data, ctx, page_id, by, at, note=''):
         gaps, loose = placeholder_links(t, ctx.facts, sl.get('missing_ids'))
         if loose:
             rep.add('approve', 'error', 'COPY-D-APPROVE', path, f'заглушка без пробела в facts.yaml: {", ".join(loose)}',
-                    'Заведите пробел в facts.yaml missing[] (или missing_ids слота) — это вопрос владельцу факта — либо перепишите без утверждения.')
+                    'Заглушка повторяет placeholder пробела facts.yaml missing[] или названа словами своего пробела (missing_ids слота); пробела нет — заведите его '
+                    '(это вопрос владельцу факта) либо перепишите без утверждения.')
         elif gaps:
             rep.add('approve', 'warning', 'COPY-D-APPROVE', path, 'заглушка пробела ' + ', '.join(f'missing:{g}' for g in gaps)
                     + ': утверждению и макету не мешает, публикацию держит validate --final', 'Закройте пробел в facts.yaml до публикации.')
@@ -3479,11 +3595,31 @@ def _plan_refs(refs_list):
     return fact_ids, missing_ids
 
 
+def _ref_doc(base_dir, ref):
+    """Файл по ссылке плана (путь от папки base_dir, с «#/ключ/…» — его часть: смысл внутри брифа) → (словарь, папка
+    файла); нет ссылки, файла, части или файл не читается — ({}, None): каркас собирается и без соседнего файла."""
+    path, _, pointer = str(ref or '').partition('#')
+    if not looks_like_path(path):
+        return {}, None
+    p = os.path.normpath(os.path.join(base_dir, path))
+    try:
+        d = deep_dates(load_yaml_file(p))
+    except (OSError, yaml.YAMLError):
+        return {}, None
+    for key in [k for k in pointer.split('/') if k]:
+        d = d.get(key) if isinstance(d, dict) else None
+    return (d, os.path.dirname(p)) if isinstance(d, dict) else ({}, None)
+
+
 def skeleton_from_plan(plan, plan_path, deck_path, facts_ref=None, voice_ref=None, date=None):
     """Каркас copy deck из плана страницы (стык — x-site-map): страница (page.id, page_type), секции с текстовыми
     слотами (id, роль, блок, вопрос, опоры), слоты (id, слот словаря, анатомия, группа, число вариантов), fact_ids и
     missing_ids — из binds слотов данных, мета — из page_slots, главная кнопка и обещание первого экрана — из слотов
-    действия и hero. Тексты пусты (статус draft): их пишет агент «допущением» (assumed). → (data, заметки)."""
+    действия и hero. Голос — voice_ref смысла (refs.meaning плана, у брифа — meaning_ref или meaning), отраслевой режим
+    права — constraints.legal_category брифа (refs.brief), иначе legal_category смысла: без них проверки голоса и права
+    молча идут по умолчаниям. missing_ids получает только пробел, у которого до ответа на странице стоит заглушка:
+    пробел с fallback rewrite-without или omit-block заглушки не оставляет. Тексты пусты (статус draft): их пишет агент
+    «допущением» (assumed). → (data, заметки)."""
     notes = []
     pl = plan.get('page') or {}
     refs = plan.get('refs') or {}
@@ -3498,8 +3634,19 @@ def skeleton_from_plan(plan, plan_path, deck_path, facts_ref=None, voice_ref=Non
         deck['facts_ref'] = facts_ref
     elif refs.get('facts') and looks_like_path(refs['facts']):
         deck['facts_ref'] = rel(refs['facts'])
+    brief, bdir = _ref_doc(pdir, refs.get('brief'))
+    mean, mdir = _ref_doc(pdir, refs.get('meaning'))
+    if mdir is None and bdir is not None:   # смысл без своей ссылки в плане: отдельным файлом брифа или внутри брифа
+        mean, mdir = _ref_doc(bdir, brief.get('meaning_ref'))
+        if mdir is None and isinstance(brief.get('meaning'), dict):
+            mean, mdir = brief['meaning'], bdir
+    vref = voice_ref or mean.get('voice_ref')
     if voice_ref:
         deck['voice_ref'] = voice_ref
+    elif isinstance(vref, str) and vref.strip():   # путь — от папки файла смысла; строка-описание — как есть
+        deck['voice_ref'] = os.path.relpath(os.path.normpath(os.path.join(mdir, vref)), ddir) if looks_like_path(vref) else vref
+    else:
+        notes.append('voice_ref не найден (смысл по refs плана его не называет): голос текстов проверяться не будет — задайте --voice-ref')
     meaning = str(refs.get('meaning') or '')
     if meaning and '#' not in meaning and looks_like_path(meaning):
         deck['meaning_ref'] = rel(meaning)
@@ -3507,6 +3654,18 @@ def skeleton_from_plan(plan, plan_path, deck_path, facts_ref=None, voice_ref=Non
     jur = [j for j in pl.get('jurisdiction') or [] if j in ('ru', 'eu', 'us', 'other')]
     if jur:
         deck['jurisdiction'] = jur[0]
+    cats = (brief.get('constraints') or {}).get('legal_category') if isinstance(brief.get('constraints'), dict) else None
+    cats = cats or mean.get('legal_category')
+    cats = [str(c) for c in ([cats] if isinstance(cats, str) else cats or []) if c]
+    if cats:
+        deck['legal_category'] = cats
+    # пробелы, у которых до ответа на странице нет заглушки (текст пишется без утверждения или блок снят)
+    gaps, _fdir = _ref_doc(ddir, deck.get('facts_ref'))
+    no_stub, skipped_gaps = {}, []
+    for m in gaps.get('missing') or []:
+        if isinstance(m, dict) and m.get('fallback') in ('rewrite-without', 'omit-block'):
+            for k in [m.get('id')] + list(m.get('aliases') or []):
+                no_stub[str(k)] = m['fallback']
     pid = str(pl.get('id') or 'page')
     page = {'page_id': pid, 'page_type': pl.get('page_type'), 'status': 'draft'}
     if pl.get('awareness') in AWARENESS_IDS:
@@ -3553,6 +3712,8 @@ def skeleton_from_plan(plan, plan_path, deck_path, facts_ref=None, voice_ref=Non
         for t in texts:
             n = int(t.get('variants') or 1)
             fids, miss = _plan_refs(binds.get(str(t['id'])))
+            skipped_gaps += [f"{s['id']}/{t['id']} ← missing:{g} ({no_stub[g]})" for g in miss if g in no_stub]
+            miss = [g for g in miss if g not in no_stub]
             sl = {'slot_id': str(t['id']), 'slot_type': t.get('slot'), 'site_slot_id': t.get('anatomy') or str(t['id'])}
             if t.get('group'):
                 sl['group'] = t['group']
@@ -3585,6 +3746,9 @@ def skeleton_from_plan(plan, plan_path, deck_path, facts_ref=None, voice_ref=Non
     skipped = [str(s.get('id')) for s in plan.get('sections') or [] if isinstance(s, dict) and not plan_text_slots(s)]
     if skipped:
         notes.append(f"секции без текстовых слотов в плане (в copy deck не заводятся): {', '.join(skipped)}")
+    if skipped_gaps:
+        notes.append('пробелы без заглушки на странице в missing_ids не ставятся (до ответа текст пишется без утверждения или блок снят): '
+                     + ', '.join(skipped_gaps))
     return {'copy_deck': deck}, notes
 
 
@@ -3592,8 +3756,12 @@ def cmd_skeleton(a):
     if os.path.exists(a.output) and not a.force:
         print(f'copydeck skeleton: {a.output} уже есть — тексты не перезаписываются (--force — заменить каркасом)', file=sys.stderr)
         return 1
-    plan = deep_dates(load_yaml_file(a.plan) or {})
-    if 'page' not in plan or 'sections' not in plan:
+    try:
+        plan = deep_dates(load_yaml_file(a.plan) or {})
+    except (OSError, yaml.YAMLError) as e:
+        print(f'copydeck skeleton: план не читается: {a.plan}: {e}', file=sys.stderr)
+        return 1
+    if not isinstance(plan, dict) or 'page' not in plan or 'sections' not in plan:
         print(f'copydeck skeleton: {a.plan} — не план страницы (page-plan: page, sections)', file=sys.stderr)
         return 1
     data, notes = skeleton_from_plan(plan, a.plan, a.output, a.facts_ref, a.voice_ref, today_iso(a.date) if a.date else None)
@@ -3826,7 +3994,7 @@ def main(argv=None):
     p.add_argument('--no-jsonschema', action='store_true')
     p.add_argument('--no-page-pass', action='store_true')
     p.add_argument('--update', help='записать копию deck с записями lint и claims (text_hash, дата, версия)')
-    p.add_argument('--promote', action='store_true', help='с --update: draft и assumed → checked у текстов с 0 error claims и lint')
+    p.add_argument('--promote', action='store_true', help='с --update: draft и assumed → checked у текстов без error проверки; страница — checked, когда проверены все её тексты')
     p.add_argument('--all-variants', action='store_true', help='проверить и живые невыбранные варианты (и альтернативы мета) — каждый как если бы его выбрали; с --update — variant.checks у каждого')
     p = sp.add_parser('export', help='выгрузка во вход холста: pages/<page-id>/copy.md и facts.md')
     common(p)
@@ -4190,6 +4358,22 @@ def selftest():
         check('мета: варианты title без плана теста → info', ('COPY-D-META-VARIANTS', 'info') in r0)
         check('мета: отклонённый вариант без reason', ('COPY-D-REJECTED', 'error') in r0)
         check('мета: review_by в прошлом → warning', ('COPY-D-META-REVIEW', 'warning') in r0)
+        # --- OG-поля мета ждутся те, что заведены слотами плана; с checked, до утверждения
+        og_of = lambda dd, cx: [f['message'] for f in validate(dd, cx).findings if f['rule'] == 'meta-x-og-missing']
+        plan_og = {}
+        for name, slots in (('no-og', ['meta-title', 'meta-description']), ('og-title', ['meta-title', 'meta-description', 'og-title'])):
+            plan_og[name] = os.path.join(td, f'plan-{name}.yaml')
+            with open(plan_og[name], 'w', encoding='utf-8') as f:
+                yaml.safe_dump({'status': 'approved', 'page': {'id': 'home', 'page_type': 'landing-lead-services'}, 'sections': [],
+                                'page_slots': {'text': [{'id': x, 'slot': x} for x in slots]}}, f, allow_unicode=True)
+        cx_og = lambda plan=None: Ctx(os.path.join(td, 'deck.yaml'), facts, '2026-09-24', copy_slots_path=cs1, meta_rules_path=mg, plan_path=plan)
+        d_og = _st_deck(); pg_og = d_og['copy_deck']['pages'][0]; pg_og['status'] = 'checked'; pg_og['meta'].update(og_title='', og_description='')
+        check('мета: OG пусты, плана нет — meta-x-og-missing уже на checked (до утверждения), у черновика — нет',
+              og_of(d_og, cx_og()) == ['нет og_title и og_description']
+              and not og_of(dict(copy_deck=dict(d_og['copy_deck'], pages=[dict(pg_og, status='draft')])), cx_og()), og_of(d_og, cx_og()))
+        check('мета: у страницы без OG-слотов в плане (служебная) OG не ждётся; есть слот og-title — ждётся только он',
+              og_of(d_og, cx_og(plan_og['no-og'])) == [] and og_of(d_og, cx_og(plan_og['og-title'])) == ['нет og_title'],
+              (og_of(d_og, cx_og(plan_og['no-og'])), og_of(d_og, cx_og(plan_og['og-title']))))
         flat, _mp, _alt = flatten_for_claims(deck_root(d), ctx3)
         tslot = next(x for x in flat['copy_deck']['pages'][0]['sections'][0]['slots'] if x['slot_id'] == 'title')
         check('мета: в основной сверке — выбранный title', len(tslot['variants']) == 1 and tslot['chosen'] == 'meta' and not _alt, tslot)
@@ -4228,6 +4412,32 @@ def selftest():
             r_sk = validate(sk, ctx_sk)
             check('каркас из плана → validate: 0 error, стык сверен', not r_sk.count('error') and (r_sk.tools.get('validate') or {}).get('plan_stitch', {}).get('slots') == n_plan,
                   [(f['rule'], f['where'], f['message'][:60]) for f in r_sk.findings if f['level'] == 'error'][:4])
+            check('каркас: голос — voice_ref смысла (у примера смысл внутри брифа), режим права — legal_category брифа',
+                  str(deck_root(sk).get('voice_ref') or '').startswith('черновик') and deck_root(sk).get('legal_category') == ['general']
+                  and not any('voice_ref не найден' in n for n in sk_notes), (deck_root(sk).get('voice_ref'), deck_root(sk).get('legal_category')))
+            sk_miss = {f"{s['section_id']}/{sl['slot_id']}": sl.get('missing_ids') for s in sections_of(pg) for sl in slots_of(s)}
+            check('каркас: missing_ids — только пробел с заглушкой; пробел rewrite-without или omit-block — заметкой, не ссылкой слота',
+                  sk_miss.get('pricing/disclaimer') == ['payment-stages'] and 'guarantee/text' in sk_miss and sk_miss['guarantee/text'] is None
+                  and any('guarantee/text ← missing:estimate-change-policy (rewrite-without)' in n for n in sk_notes)
+                  and not any(f['rule'] == 'COPY-D-MISSING-REF' and f['where'] == 'home/guarantee/text' for f in r_sk.findings),
+                  (sk_miss.get('pricing/disclaimer'), sk_miss.get('guarantee/text'), sk_notes))
+            import contextlib
+            import io
+            new_p = os.path.join(td, 'new-surface', 'copy', 'home.yaml')
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()) as err_:
+                rc_new = main(['skeleton', plan_p, '-o', new_p, '--date', '2026-09-29'])
+                rc_none = main(['skeleton', os.path.join(td, 'нет-плана.yaml'), '-o', os.path.join(td, 'x', 'home.yaml')])
+            check('skeleton: папки выхода ещё нет — создаётся, каркас записан; плана нет — код 1 и строка об ошибке входа',
+                  rc_new == 0 and os.path.isfile(new_p) and rc_none == 1 and 'план не читается' in err_.getvalue() and not os.path.exists(os.path.join(td, 'x')),
+                  (rc_new, rc_none, err_.getvalue()[:200]))
+            p_nv = _copy.deepcopy(plan)
+            p_nv['refs'] = {k: v for k, v in plan['refs'].items() if k not in ('brief', 'meaning')}
+            sk_nv, notes_nv = skeleton_from_plan(p_nv, plan_p, sk_p, date='2026-09-29')
+            r_nv = validate(sk_nv, ctx_sk)
+            check('без voice_ref: каркас говорит заметкой, validate — warning COPY-D-VOICE (голос не проверяется), а не тишина',
+                  'voice_ref' not in deck_root(sk_nv) and any('voice_ref не найден' in n for n in notes_nv)
+                  and any(f['rule'] == 'COPY-D-VOICE' and f['level'] == 'warning' and 'нет voice_ref' in f['message'] for f in r_nv.findings)
+                  and not any(f['rule'] == 'COPY-D-VOICE' and f['level'] == 'warning' for f in r_sk.findings), notes_nv)
             bad_sk = _copy.deepcopy(sk)
             bpg = deck_root(bad_sk)['pages'][0]
             multi = [s for s in sections_of(bpg) if len(slots_of(s)) >= 2]
@@ -4263,6 +4473,14 @@ def selftest():
         sp_, _n = parse_copy_md(rt)
         check('copy.md: абзацы строками продолжения, «## ?» и «[? подпись]» — туда и обратно',
               sp_[0]['slots'][0]['text'] == 'Абзац один.\nАбзац два.' and sp_[1]['section_id'] is None and sp_[1]['slots'][0]['label'] == 'плашка', (rt, sp_))
+        two = 'Первый абзац.\n\nВторой абзац.\nЕго вторая строка.'
+        rt2 = render_copy_md([{'section_id': 'solution', 'slots': [{'slot_id': 'body', 'status': 'approved', 'text': two}, {'slot_id': 'note', 'status': 'approved', 'text': 'Сноска'}]},
+                              {'section_id': 'faq', 'slots': [{'slot_id': 'q1', 'status': 'approved', 'text': 'Вопрос?'}]}])
+        sp2, n2 = parse_copy_md(rt2)
+        sp3, n3 = parse_copy_md('\n'.join(x.rstrip() for x in rt2.split('\n')))   # редактор срезал пробелы пустой строки абзаца
+        check('copy.md: слот в два абзаца — значение тянется до следующей строки слота, пустая строка — абзац внутри значения',
+              [sl['text'] for s in sp2 for sl in s['slots']] == [two, 'Сноска', 'Вопрос?'] and not n2
+              and [sl['text'] for s in sp3 for sl in s['slots']] == [two, 'Сноска', 'Вопрос?'] and not n3, (rt2, sp2, n2, n3))
         fmd, fsumm = export_facts_md(facts, '2026-09-24', 'ru', pg, None, 'mockup', 'Демо')
         check('facts.md: «Факты», «Нет», «Нельзя утверждать»; публикуемый факт, вывод и истёкший — в «Нет»',
               '## Факты' in fmd and '## Нет' in fmd and '## Нельзя утверждать' in fmd and '| guarantee-3 |' in fmd.split('## Нет')[0]
@@ -4395,6 +4613,34 @@ def selftest():
         check('approve: заглушка без пробела в facts.yaml — отказ COPY-D-APPROVE',
               ap_lo is None and any(f['rule'] == 'COPY-D-APPROVE' and f['level'] == 'error' and f['where'] == 'home/hero/cta'
                                     for f in rep_lo.findings), rep_lo.findings[:3])
+        d_fo = _copy.deepcopy(d)
+        _st_checked(find_slot(deck_root(d_fo), 'home/faq/a1')[2], '[PLACEHOLDER: что-то совсем другое]')
+        ap_fo, rep_fo = approve_page(d_fo, ctx, 'home', 'заказчик', '2026-09-29')
+        check('approve: заглушка о другом при missing_ids слота — отказ COPY-D-APPROVE (чужой пробел её не прикрывает)',
+              find_slot(deck_root(d_fo), 'home/faq/a1')[2].get('missing_ids') == ['measure-price'] and ap_fo is None
+              and any(f['rule'] == 'COPY-D-APPROVE' and f['level'] == 'error' and f['where'] == 'home/faq/a1' and 'заглушка без пробела' in f['message']
+                      for f in rep_fo.findings), rep_fo.findings[:3])
+        fx_g = _st_facts()
+        fx_g['missing'].append({'id': 'crew', 'what': 'бригадир: имя и стаж', 'placeholder': '[PLACEHOLDER: бригадир — имя, стаж]', 'who': 'заказчик'})
+        fg = Facts(fx_g, os.path.join(td, 'facts.yaml'))
+        got = [placeholder_links(t, fg, ids) for t, ids in (
+            ('[PLACEHOLDER: цена замера]', None), ('[PLACEHOLDER: имя бригадира]', ['crew']), ('[PLACEHOLDER: стаж бригадира]', ['missing:crew']),
+            ('[PLACEHOLDER: имя бригадира]', None), ('[PLACEHOLDER: часы работы]', ['crew']), ('[PLACEHOLDER]', ['crew']), ('[PLACEHOLDER]', None))]
+        check('заглушка и пробел: placeholder любого пробела дословно; часть своего пробела словами; о другом или без missing_ids — без пробела',
+              got == [(['measure-price'], []), (['crew'], []), (['crew'], []), ([], ['[PLACEHOLDER: имя бригадира]']),
+                      ([], ['[PLACEHOLDER: часы работы]']), (['crew'], []), ([], ['[PLACEHOLDER]'])], got)
+        check('заглушка и пробел: одно общее слово из двух — мало (больше половины значимых слов заглушки)',
+              placeholder_links('[PLACEHOLDER: телефон бригадира]', fg, ['crew']) == ([], ['[PLACEHOLDER: телефон бригадира]']))
+        d_pa = _copy.deepcopy(d)
+        a1_pa = find_slot(deck_root(d_pa), 'home/faq/a1')[2]
+        _st_checked(a1_pa, '[PLACEHOLDER: имя бригадира]')
+        a1_pa['missing_ids'] = ['crew']
+        ctx_g = Ctx(os.path.join(td, 'deck.yaml'), fg, '2026-09-24', copy_slots_path=os.path.join(td, 'нет.yaml'), meta_rules_path=os.path.join(td, 'нет-meta.yaml'))
+        ap_pa, rep_pa = approve_page(d_pa, ctx_g, 'home', 'заказчик', '2026-09-29')
+        check('approve: заглушка части своего пробела (один пробел на несколько слотов) — warning, страница утверждена',
+              ap_pa is not None and not rep_pa.count('error') and any(f['level'] == 'warning' and f['where'] == 'home/faq/a1' and 'missing:crew' in f['message'] for f in rep_pa.findings)
+              and {f['level'] for f in validate(ap_pa, ctx_g).findings if f['rule'] == 'COPY-D-PLACEHOLDER' and f['where'] == 'home/faq/a1'} == {'warning'},
+              rep_pa.findings[:3])
         # --- check --promote: draft и assumed → checked
         d = _st_deck(); pg = d['copy_deck']['pages'][0]
         pg['sections'][0]['slots'][0]['variants'][0]['status'] = 'assumed'
@@ -4404,6 +4650,36 @@ def selftest():
         uh = find_slot(deck_root(upd), 'home/hero/h1')[2]
         check('check --promote: assumed → checked (запись утилиты)', chosen_variant(uh)['status'] == 'checked' and chosen_variant(uh)['review']['by'].startswith('copydeck')
               and chosen_variant(find_slot(deck_root(upd), 'home/hero/cta')[2])['status'] == 'checked')
+        check('check --promote: страница остаётся draft, пока проверены не все её тексты', deck_root(upd)['pages'][0]['status'] == 'draft')
+        # --- check --promote: статус страницы — минимум статусов её текстов; error проверки статус не повышает
+        d = _st_deck(); pg = d['copy_deck']['pages'][0]; pg['status'] = 'assumed'
+        all_p = [p for _pg, _s, _sl, p in iter_slots(deck_root(d))] + ['home/promise']
+        cpp, lpp = {p: dict(rec) for p in all_p}, {p: dict(lrec) for p in all_p}
+        st_of = lambda dd, p: _status_of(chosen_variant(find_slot(deck_root(dd), p)[2]))
+        lg = {}
+        upd, _n, _nv = apply_records(d, cpp, lpp, '2026-09-29', promote=True, log=lg)
+        check('check --promote: все выбранные тексты checked → страница assumed → checked', deck_root(upd)['pages'][0]['status'] == 'checked'
+              and lg['pages'] == ['home'] and len(lg['promoted']) == len(all_p) and not lg['held'], (deck_root(upd)['pages'][0]['status'], lg))
+        upd, _n, _nv = apply_records(d, cpp, lpp, '2026-09-29', promote=True, held={'home/faq/a1'}, log=lg)
+        check('check --promote: error проверки на тексте (COPY-D-MISSING-REF) — текст и страница не повышаются, остальные тексты — checked',
+              st_of(upd, 'home/faq/a1') == 'draft' and st_of(upd, 'home/hero/h1') == 'checked' and deck_root(upd)['pages'][0]['status'] == 'assumed'
+              and lg['held'] == ['home/faq/a1'] and not lg['pages'], (st_of(upd, 'home/faq/a1'), lg))
+        upd, _n, _nv = apply_records(d, cpp, lpp, '2026-09-29', promote=True, held={'—'}, log=lg)
+        check('check --promote: error всего файла (схема, корень) — страница не повышается', deck_root(upd)['pages'][0]['status'] == 'assumed' and st_of(upd, 'home/hero/h1') == 'checked')
+        rep_h = Report()
+        rep_h.add('lint', 'error', 'ru-lex-x', 'home/hero/h1', 'штамп у альтернативы', variant='b')
+        rep_h.add('claims', 'error', 'COPY-F-NUM', 'home/hero/lead', 'число без факта', variant='a')
+        rep_h.add('lint', 'error', 'an-x', 'home' + PAGE_PASS, 'находка прохода страницы')
+        rep_h.add('validate', 'warning', 'COPY-D-EMPTY', 'home/hero/cta', 'пусто')
+        fr_h = {'home/hero/h1': {'lint': {'errors': 0, 'variants': {'b': {'errors': 1}}}}, 'home/hero/lead': {'claims': {'errors': 1}}}
+        check('check --promote: error невыбранного варианта (--all-variants) выбранный текст не держит; проход страницы — место страницы',
+              error_paths(rep_h, fr_h) == {'home/hero/lead', 'home'} and error_paths(rep_h) == {'home/hero/h1', 'home/hero/lead', 'home'},
+              (error_paths(rep_h, fr_h), error_paths(rep_h)))
+        d_ap = _copy.deepcopy(ap)
+        upd, _n, _nv = apply_records(d_ap, cpp, lpp, '2026-09-29', promote=True, log=lg)
+        check('check --promote: утверждённая страница и её тексты не меняются', deck_root(upd)['pages'][0]['status'] == 'approved'
+              and deck_root(upd)['pages'][0].get('approval') == deck_root(ap)['pages'][0].get('approval') and st_of(upd, 'home/hero/h1') == 'approved'
+              and not lg['promoted'] and not lg['pages'], lg)
         # --- варианты со своими фактами, пробелы в check
         d = _st_deck(); sl = d['copy_deck']['pages'][0]['sections'][0]['slots'][1]
         sl['variants'].append({'id': 'b', 'text': 'Смета до договора — бесплатно', 'status': 'draft', 'fact_ids': ['estimate-free']})
@@ -4562,6 +4838,44 @@ def selftest():
                   and not any(f['where'] == 'home/hero/h1' and f['level'] == 'error' for f in rep_n2.findings)
                   and [x['rule'] for x in rep_n2.allowed] and all(x['rule'] in CLAIMS_ALLOW_RULES['COPY-F-NUM'] for x in rep_n2.allowed),
                   (miss_n, [(x['rule'], x['fragment']) for x in rep_n2.allowed]))
+            if lint_module() is not None:
+                # --- check --update --promote целиком: шапка файла, статус страницы, error проверки
+                import contextlib
+                import io
+                d = _st_deck(); pg = d['copy_deck']['pages'][0]; pg['status'] = 'assumed'
+                pg['promise'] = {'from': 'home/hero/lead'}
+                src_p, out_p = os.path.join(td, 'deck-src.yaml'), os.path.join(td, 'checked', 'deck.yaml')
+                with open(src_p, 'w', encoding='utf-8') as f:
+                    yaml.safe_dump(d, f, allow_unicode=True, sort_keys=False)
+                with contextlib.redirect_stdout(io.StringIO()):
+                    rc_u = main(['check', src_p, '--facts', fpath, '--today', '2026-09-29', '--update', out_p, '--promote', '--quiet'])
+                with open(out_p, encoding='utf-8') as f:
+                    raw_u = f.read()
+                head_u = '\n'.join(x for x in raw_u.split('\n') if x.startswith('#'))
+                pg_u = deck_root(yaml.safe_load(raw_u))['pages'][0]
+                check('check --update: шапка файла — без даты и без пути источника; папка выхода создаётся',
+                      rc_u == 0 and head_u and not re.search(r'\d{4}-\d{2}-\d{2}', head_u) and td not in head_u and 'deck-src' not in head_u, head_u)
+                check('check --update --promote: 0 error → тексты и страница checked',
+                      pg_u['status'] == 'checked' and all(_status_of(chosen_variant(sl)) == 'checked' for s in sections_of(pg_u) for sl in slots_of(s)),
+                      (pg_u['status'], [(sl['slot_id'], _status_of(chosen_variant(sl))) for s in sections_of(pg_u) for sl in slots_of(s)]))
+                find_slot(deck_root(d), 'home/faq/a1')[2]['missing_ids'] = ['нет-такого-пробела']
+                del find_slot(deck_root(d), 'home/hero/cta')[2]['chosen']
+                with open(src_p, 'w', encoding='utf-8') as f:
+                    yaml.safe_dump(d, f, allow_unicode=True, sort_keys=False)
+                jp_u = os.path.join(td, 'check-promote.json')
+                with contextlib.redirect_stdout(io.StringIO()):
+                    rc_e = main(['check', src_p, '--facts', fpath, '--today', '2026-09-29', '--update', out_p, '--promote', '--quiet', '--json', jp_u])
+                with open(out_p, encoding='utf-8') as f:
+                    dk_e = yaml.safe_load(f)
+                with open(jp_u, encoding='utf-8') as f:
+                    js_e = json.load(f)
+                st_e = {sl['slot_id']: _status_of(chosen_variant(sl)) for s in sections_of(deck_root(dk_e)['pages'][0]) for sl in slots_of(s)}
+                check('check --update --promote при error COPY-D-MISSING-REF: текст с error и страница не повышаются, чистые тексты — checked',
+                      rc_e == 2 and st_e['a1'] == 'draft' and st_e['h1'] == 'checked' and deck_root(dk_e)['pages'][0]['status'] == 'assumed'
+                      and 'home/faq/a1' in js_e['promote']['held'], (rc_e, st_e, js_e.get('promote')))
+                check('check --update --promote: текст, у которого статус checked дал бы error (нет chosen), остаётся draft — с заметкой',
+                      st_e['cta'] == 'draft' and 'home/hero/cta' in js_e['promote']['held']
+                      and any('home/hero/cta' in n and 'на статусе checked' in n for n in js_e['notes']), (st_e['cta'], js_e['notes']))
         else:
             print('  (claims_check.py нет — интеграция не проверена)')
         if lint_module() is not None:

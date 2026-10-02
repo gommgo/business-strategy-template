@@ -94,7 +94,8 @@
   юридических, — ещё `question` и `next_step`. Слоты: текст — `id`, `slot`; медиа — `media_role`; 3D — `poster`;
   данные — `fact`; действие — `action`. Исключение ворот `x-gate-exception` — `id`, `why`, `who` и срок `until`.
 - **Ссылки:** `page.id` — id страницы брифа или карты, он же `page_id` copy deck; `refs.brief: ../site-brief.yaml`,
-  `refs.facts: ../../../facts.yaml`, `refs.copy_deck`; `refs.asset_plan` и `refs.treatment` — в слой дизайна; `block` —
+  `refs.facts: ../../../facts.yaml`, `refs.copy_deck` — пишется на этапе плана, а файл появляется на этапе `copy`: до
+  него аудит даёт подсказку, а не ошибку; `refs.asset_plan` и `refs.treatment` — в слой дизайна; `block` —
   id `blocks.yaml`; слоты — `vocabulary.yaml#slot`; `fact:<id>`, `event:<id>`, `form.ref` — на форму `lead-forms.yaml`.
 - **Anti-patterns:** kind `block`, `section`, `slot`; значения подачи до выбора направления; `built`; секция без блока
   каталога; форма страницы без двух альтернатив; призыв не к главному действию.
@@ -241,7 +242,10 @@
   `territories`, `directions`, `lifecycle`; у `proposed` — одна рекомендация среди направлений; решения `use` и `twist`
   не проваливают ни одной из пяти проверок.
 - **Ссылки:** `ambition` — проекция брифа; бюджет — профиль бюджета плана; у референса — одно место (`applies_to`);
-  `k3_allow` и `lifted_markers` — с решением (`decision_ref`).
+  `k3_allow` и `lifted_markers` — с решением (`decision_ref`); `decisions[].k3_allow` — строка: один ключ `--allow` на
+  решение, список ключей — `exclusions.k3_allow`.
+- **Расширение:** `x-direction-bans` — запреты направлений до выбора, `{<id направления>: [запрет]}`: на странице
+  «Направления» каждый список идёт своему артборду; после выбора запреты живут в `exclusions`.
 - **Anti-patterns:** направление без риска и цены; приметы сняты без решения; мудборд больше предела схемы; статус
   `superseded`, история старше текущей версии; арт-дирекция у кабинета.
 - **Порядок:** `inputs` и `ambition` → концепция и территории → направления → выбор → мудборд → визуальный язык →
@@ -250,15 +254,18 @@
 ### `asset-plan` — `…/design/<surface>/assets/plans/<page-id>.yaml`
 
 Схема — `kb/ai-media/05-prompting/asset-plan.schema.json` (формат — ai-media 01/01 §8); каркас —
-`plan_to_assets.py build <slug> <surface> --write`.
+`plan_to_assets.py build <slug> <surface> --write`: слот `edit-real` при подлинности `real-only` он пишет строкой `real`
+с заметкой — кадр доводится без генерации.
 
-- **Закрыто:** `status: approved` и `approval` — заказчик, до генерации; `plan_to_assets.py check <slug> <surface>` без
-  ошибок.
+- **Закрыто:** `status: approved` и `approval` — заказчик, до генерации;
+  `plan_to_assets.py check <slug> <surface> [--page ID …]` без ошибок.
 - **Поля:** `plan_version`, `checked`, `status`, `approval`, `page` (`page_type` — id словаря site, `media_class` —
   проекция), `brand`, `budgets`, `policy`, `slots[]`: `id` (`<секция>-<id>` плана), `section`, `slot`, `role`, `goal`,
   `key` — ключевой ассет, `ladder`, `source` (`generate` · `edit-real` · `real` · `code` · `template` · `render`),
   `task_codes` или `recipe:`, `three_d.road` — дорога 3D, `variants` (соотношение, размер, форматы, вес, фокус),
-  `delivery`, `alt_ref` и `caption_ref` — текстовые слоты плана страницы, `acceptance`, `ai_fit`.
+  `delivery`, `alt_ref` и `caption_ref` — текстовые слоты плана страницы, `acceptance`, `ai_fit`. Расширение слота
+  `x-demo` — демо-картинка макета вне git: `x-demo.file` — путь или `x-demo.files` — `{<вариант>: <путь>}`,
+  `x-demo.what` — что это за картинка; вход холста ставит её строкой с пометкой «демо».
 - **Ссылки:** `refs.asset_plan` плана ведёт сюда; готовые файлы — строки `…/design/<surface>/assets/manifest.yaml`;
   загрузки холста — `ARTIFACTS.md`.
 - **Anti-patterns:** генерация до утверждения; `generate` у людей-доказательств, товара «как есть» и чужих знаков;

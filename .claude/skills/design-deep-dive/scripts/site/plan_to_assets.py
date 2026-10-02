@@ -10,10 +10,12 @@
 
 Каркас: строка на медиа- и 3D-слот секций и на медиа-слот уровня страницы; id строки — <секция>-<id> слота плана
 страницы (у слота уровня страницы — его id), он же asset_ref строк copy deck. Из плана страницы: section, slot, role
-(media_role), goal, source (customer-tbd → real и заметка; постер 3D-слота без source — render), task_codes (task:),
-recipe, соотношения и зона текста → variants, lcp_candidate и loading → delivery, load 3D-слота (без load — умолчание
-схемы плана страницы), alt и caption → alt_ref и caption_ref (сам текст — строки copy deck, copydeck.py export-assets),
-authenticity → ai_fit и policy.no_ai_subjects, poster и poster_for, cta_before_3d → three_d. key — визуал и фон
+(media_role), goal, source (customer-tbd → real и заметка; edit-real при подлинности real-only → real и заметка: кадр
+доводится без генерации; постер 3D-слота без source — render; слот уровня страницы без source — template, фавикон —
+code), task_codes (task:), recipe, соотношения и зона текста → variants, lcp_candidate и loading → delivery, load
+3D-слота (без load — умолчание схемы плана страницы), alt и caption → alt_ref и caption_ref (сам текст — строки copy
+deck, copydeck.py export-assets), authenticity → ai_fit и policy.no_ai_subjects, poster и poster_for, cta_before_3d →
+three_d. Каркас проходит свою проверку: строки, которую она бракует, он не пишет. key — визуал и фон
 первого экрана не кодом и постер 3D-слота: ключевые ассеты делаются до ДС (`references/phases.md § Порядок ассетов и
 ДС`); агент уточняет. Бюджеты — профиль плана страницы (`kb/site/07-seo-geo-performance-analytics/budgets.yaml`).
 Размер, форматы, вес, предмет и дорога 3D — заглушки TODO и пустые поля: их дописывает агент. Статус — draft;
@@ -29,8 +31,8 @@ authenticity → ai_fit и policy.no_ai_subjects, poster и poster_for, cta_befo
   R-COV-004     3D-слот без постера; с планом страницы — строка на каждый медиа- и 3D-слот (нет строки: error у
                 утверждённого плана, иначе warning), строка без слота плана страницы, real-only не на generate (error)
                 и с ai_fit: forbidden, постер 3D-слота как в плане страницы; в проекте — план страницы ведёт в план
-                ассетов (refs.asset_plan), план ассетов есть у страницы с медиа- и 3D-слотами (error при утверждённой
-                арт-дирекции или при входе холста, иначе hint)
+                ассетов (refs.asset_plan), план ассетов есть у страницы с медиа- и 3D-слотами (error — у страницы
+                партии входа холста: поле units манифеста INPUT.md; у остальных страниц и до входа — hint)
   R-REF-001     refs.* плана ассетов и refs.asset_plan плана страницы ведут в пустоту или в другой файл
   R-MAT-001     в проекте — план ассетов approved при плане страницы или арт-дирекции не approved (warning)
   R-STRUCT-001  в проекте — план ассетов страницы, которой нет среди планов поверхности (warning)
@@ -51,8 +53,9 @@ authenticity → ai_fit и policy.no_ai_subjects, poster и poster_for, cta_befo
                                                         умолчанию $DDD_HOME/out/site/plan_to_assets/<slug>/); --write —
                                                         в проект, только для страниц без плана ассетов (план ассетов
                                                         правит агент, существующий файл не перезаписывается)
-  plan_to_assets.py check <slug> [<surface>] [--repo DIR] [--json]
-                                                        планы ассетов поверхностей со слоем страницы и покрытие
+  plan_to_assets.py check <slug> [<surface>] [--page ID …] [--repo DIR] [--json]
+                                                        планы ассетов поверхностей со слоем страницы и покрытие;
+                                                        --page — только эти страницы (находки и код выхода — по ним)
   plan_to_assets.py --selftest                          примеры баз, 10 типов v1, фикстура asset-plan, без сети
 Без <surface> — все поверхности проекта со слоем страницы (web рода landing и site). Корень данных — --repo,
 переменная DDD_REPO или репозиторий скилла. --json — строки JSON находок (check) или один документ JSON (build,
@@ -240,6 +243,22 @@ def variants(sl, kind):
     return out
 
 
+def source_of(sl, default):
+    """Источник строки плана ассетов и заметки к нему по слоту плана страницы. customer-tbd — real: ждём материалы
+    заказчика. edit-real при подлинности real-only — тоже real: правка моделью изменила бы то, что обязано остаться
+    настоящим, а доводка без генерации источник не меняет; строку edit-real при ai_fit: forbidden проверка плана
+    бракует, поэтому каркас её не пишет."""
+    src, note = sl.get("source"), []
+    if src == "customer-tbd":
+        src = "real"
+        note.append("ждём материалы заказчика (source: customer-tbd в плане страницы)")
+    elif src == "edit-real" and sl.get("authenticity") == "real-only":
+        src = "real"
+        note.append("edit-real при подлинности real-only в плане страницы: настоящий кадр доводится без генерации "
+                    "(кадрирование, цвет, апскейл), правка моделью — только при real-or-generated")
+    return src or default, note
+
+
 def text_ref(sec_id, value):
     if not value:
         return None
@@ -249,14 +268,8 @@ def text_ref(sec_id, value):
 def slot_entry(K, sec, sl, kind, posters, fs):
     """Строка плана ассетов для медиа- или 3D-слота секции sec; posters — (секция, id) → 3d | video и постеры видео."""
     sid = f"{sec['id']}-{sl['id']}"
-    note = []
     target_kind = posters["kind"].get((sec["id"], sl.get("poster_for")))
-    src = sl.get("source")
-    if src == "customer-tbd":
-        src = "real"
-        note.append("ждём материалы заказчика (source: customer-tbd в плане страницы)")
-    if not src:
-        src = "code" if kind == "3d" else ("render" if target_kind == "3d" else "real")
+    src, note = source_of(sl, "code" if kind == "3d" else ("render" if target_kind == "3d" else "real"))
     auth = sl.get("authenticity") or ("code" if kind == "3d" else None)
     e = {"id": sid, "section": sec["id"], "slot": sl["slot"], "role": sl.get("media_role", "informational")}
     e["goal"] = sl.get("goal") or "TODO: что ассет показывает за 3 секунды"
@@ -302,17 +315,24 @@ def slot_entry(K, sec, sl, kind, posters, fs):
 
 
 def page_slot_entry(sl):
+    """Строка плана ассетов для медиа-слота уровня страницы (OG, фавикон): источник и подлинность — из слота плана
+    страницы, как у слота секции; без них — шаблон с уместным ИИ у картинки и код без ИИ у фавикона."""
     kind = sl.get("slot")
     fav = kind == "favicon"
+    src, note = source_of(sl, "code" if fav else "template")
     e = {"id": sl["id"], "section": "meta", "slot": kind, "role": sl.get("media_role", "informational"),
-         "goal": sl.get("goal") or kind, "ladder": "svg" if fav else "image", "source": "code" if fav else "template",
-         "task_codes": [t.replace("task:", "", 1) for t in sl.get("task") or []],
-         "variants": [{"id": kind, "ratio": "1.91:1" if kind == "og-image" else "1:1"}],
-         "motion": {"type": "none"}, "delivery": {"lcp_candidate": False, "loading": "lazy"}}
+         "goal": sl.get("goal") or kind, "ladder": "svg" if fav else "image", "source": src,
+         "task_codes": [t.replace("task:", "", 1) for t in sl.get("task") or []]}
+    if src in ("generate", "edit-real", "render"):
+        e["subject"] = "TODO: предмет словами паспорта визуала"
+    e.update({"variants": [{"id": kind, "ratio": "1.91:1" if kind == "og-image" else "1:1"}],
+              "motion": {"type": "none"}, "delivery": {"lcp_candidate": False, "loading": "lazy"}})
     a = text_ref("meta", sl.get("alt"))
     if a:
         e["alt_ref"] = a
-    e["ai_fit"] = "forbidden" if fav else "allowed"
+    e["ai_fit"] = AI_FIT.get(sl.get("authenticity"), "forbidden" if fav else "allowed")
+    if note:
+        e["note"] = "; ".join(note)
     return e
 
 
@@ -348,6 +368,10 @@ def build(plan, page_plan_ref=None, K=None):
                         no_ai.append(subj)
     for sl in (plan.get("page_slots") or {}).get("media") or []:
         slots.append(page_slot_entry(sl))
+        if sl.get("authenticity") == "real-only":
+            subj = NO_AI.get(sl.get("slot"), "real_people_or_work")
+            if subj not in no_ai:
+                no_ai.append(subj)
     ap = {"plan_version": 1}
     if plan.get("checked"):
         ap["checked"] = str(plan["checked"])
@@ -803,14 +827,32 @@ def cmd_build(call):
     return rc
 
 
+def input_batch(inp):
+    """Партия входа холста: (вход есть, страницы партии). Страницы — поле units передней части INPUT.md, без него —
+    папки pages/ входа; None — вход есть, а партию из него не узнать (манифест без передней части и без pages/): тогда
+    в партии считается каждая страница."""
+    manifest = Path(inp) / "INPUT.md"
+    if not manifest.is_file():
+        return False, None
+    text = manifest.read_text(encoding="utf-8", errors="replace")
+    m = re.match(r"^---[ \t]*\r?\n(.*?)\r?\n---[ \t]*(\r?\n|$)", text, re.S)
+    try:
+        fm = yaml.safe_load(m.group(1)) if m else None
+    except yaml.YAMLError:
+        fm = None
+    if isinstance(fm, dict) and isinstance(fm.get("units"), list):
+        return True, {str(u) for u in fm["units"]}
+    pages = Path(inp) / "pages"
+    return True, ({d.name for d in pages.iterdir() if d.is_dir()} if pages.is_dir() else None)
+
+
 def cmd_check(call):
     K = kb()
     rep = F.Report()
     todo = 0
+    wanted = set(call.args.page or [])
+    found = []
     for s in page_surfaces(call):
-        ad_status = docpaths.status(docpaths.design(call.slug, "art-direction", surface=s.slug, repo=call.repo))
-        has_input = docpaths.design(call.slug, "input", surface=s.slug, repo=call.repo).joinpath("INPUT.md").is_file()
-        fix = f"/design-deep-dive {call.slug} {s.slug} asset-plan:"
         plans = {}
         for pp in plans_of(call, s) if s.page else []:
             try:
@@ -819,16 +861,30 @@ def cmd_check(call):
                 continue
             if isinstance(plan, dict) and isinstance(plan.get("page"), dict):
                 plans[str(plan["page"].get("id") or pp.stem)] = (pp, plan)
-        aps = {p.stem: p for p in asset_plans_of(call, s)}
+        found.append((s, plans, {p.stem: p for p in asset_plans_of(call, s)}))
+    unknown = sorted(wanted - {pid for _, plans, aps in found for pid in (*plans, *aps)})
+    if unknown:
+        raise F.ToolError(f"--page: нет страниц {', '.join(unknown)} среди планов страниц и планов ассетов")
+    for s, plans, aps in found:
+        ad_status = docpaths.status(docpaths.design(call.slug, "art-direction", surface=s.slug, repo=call.repo))
+        has_input, batch = input_batch(docpaths.design(call.slug, "input", surface=s.slug, repo=call.repo))
+        fix = f"/design-deep-dive {call.slug} {s.slug} asset-plan:"
+        if wanted:
+            plans = {pid: v for pid, v in plans.items() if pid in wanted}
+            aps = {pid: v for pid, v in aps.items() if pid in wanted}
         for pid, (pp, plan) in plans.items():
             if not has_media(plan):
                 continue
             dest = docpaths.design(call.slug, "asset-plans", pid + ".yaml", surface=s.slug, repo=call.repo)
             c0 = Ctx(rep, docpaths.rel(pp, call.repo), pid, s.slug, fix + pid)
             if pid not in aps:
-                sev = "error" if ad_status == "approved" or has_input else "hint"
-                c0.add("R-COV-004", sev, "", f"у страницы {pid} медиа- и 3D-слоты, а плана ассетов нет ("
-                       f"{docpaths.rel(dest, call.repo)})" + ("" if sev == "error" else " — до арт-дирекции это норма"),
+                # план ассетов обязателен странице, которая уходит на холст: остальные страницы поверхности могут ждать
+                # своей партии — у шаблона, до которого очередь не дошла, плана ещё нет законно
+                in_batch = has_input and (batch is None or pid in batch)
+                why = "" if in_batch else (" — страница вне партии входа холста: план нужен к её входу" if has_input
+                                           else " — до входа холста это норма")
+                c0.add("R-COV-004", "error" if in_batch else "hint", "", f"у страницы {pid} медиа- и 3D-слоты, а плана "
+                       f"ассетов нет ({docpaths.rel(dest, call.repo)})" + why,
                        fix=f"plan_to_assets.py build {call.slug} {s.slug} --page {pid} --write")
                 continue
             ref = (plan.get("refs") or {}).get("asset_plan") if isinstance(plan.get("refs"), dict) else None
@@ -966,6 +1022,34 @@ def _selftest():
             v.update({"ratio": v["ratio"] if not str(v["ratio"]).startswith(TODO) else "1:1", "size": [1200, 1200],
                       "formats": ["avif", "webp"], "max_kb": 120})
     check("заполненный утверждённый план с approval — 0 error", not [f for f in rules(ap, otv) if f.severity == "error"])
+    # каркас против своей проверки: правка настоящего кадра при real-only и слоты уровня страницы с подлинностью
+    pe = copy.deepcopy(otv)
+    next(s for s in pe["sections"] if s["id"] == "hero")["slots"]["media"][0]["source"] = "edit-real"
+    pe["page_slots"]["media"][0].update({"source": "edit-real", "authenticity": "real-only"})
+    ae = build(pe, "plans/home.yaml", K)
+    he, og = (next(s for s in ae["slots"] if s["id"] == i) for i in ("hero-visual", "og-image"))
+    check("edit-real при real-only → строка real, ai_fit forbidden, заметка о доводке без генерации",
+          (he["source"], he["ai_fit"]) == ("real", "forbidden") and "без генерации" in he.get("note", ""))
+    check("слот уровня страницы: источник и подлинность плана страницы — real, forbidden, заметка",
+          (og["source"], og["ai_fit"]) == ("real", "forbidden") and "без генерации" in og.get("note", ""))
+    po = copy.deepcopy(pe)
+    for sec in po["sections"]:
+        for sl in (sec.get("slots") or {}).get("media") or []:
+            sl.pop("authenticity", None)
+    check("слот уровня страницы с real-only называет предмет в policy.no_ai_subjects и без таких слотов в секциях",
+          "real_people_or_work" in build(po, None, K)["policy"]["no_ai_subjects"]
+          and "real_people_or_work" not in build({**po, "page_slots": {}}, None, K)["policy"]["no_ai_subjects"])
+    check("каркас с edit-real при real-only проходит свою проверку — 0 находок", not rules(ae, pe, EXAMPLES / "lead-services-otves"))
+    pe["page_slots"]["media"][0].update({"source": "generate", "authenticity": "generated-ok", "task": ["task:IMG-ILLUSTR"]})
+    next(s for s in pe["sections"] if s["id"] == "hero")["slots"]["media"][0]["authenticity"] = "real-or-generated"
+    ae = build(pe, "plans/home.yaml", K)
+    he, og = (next(s for s in ae["slots"] if s["id"] == i) for i in ("hero-visual", "og-image"))
+    check("edit-real при real-or-generated остаётся правкой: conditional и предмет-заглушка",
+          (he["source"], he["ai_fit"]) == ("edit-real", "conditional") and str(he.get("subject", "")).startswith(TODO))
+    check("слот уровня страницы на generate: allowed, коды задач и предмет-заглушка",
+          (og["source"], og["ai_fit"], og["task_codes"]) == ("generate", "allowed", ["IMG-ILLUSTR"])
+          and str(og.get("subject", "")).startswith(TODO))
+    check("… и такой каркас проходит свою проверку — 0 находок", not rules(ae, pe, EXAMPLES / "lead-services-otves"))
     # 3D: постер, рендер, загрузка по умолчанию схемы плана страницы
     p3 = copy.deepcopy(otv)
     hero_sec = next(s for s in p3["sections"] if s["id"] == "hero")
@@ -1050,9 +1134,40 @@ def _selftest():
         r = subprocess.run(tool + ["check", fx.slug, "promo", "--repo", str(fx.root), "--json"], capture_output=True, text=True)
         check("фикстура: плана ассетов нет при входе холста → R-COV-004 error", r.returncode == 1
               and [(f.rule, f.severity) for f in F.parse_lines(r.stdout)] == [("R-COV-004", "error")])
+
+        def cov(manifest):
+            (inp / "INPUT.md").write_text(manifest, encoding="utf-8")
+            r_ = subprocess.run(tool + ["check", fx.slug, "promo", "--repo", str(fx.root), "--json"], capture_output=True, text=True)
+            return r_.returncode, [(f.rule, f.severity) for f in F.parse_lines(r_.stdout)]
+
+        check("фикстура: страница вне партии входа (units) → R-COV-004 hint, код 0",
+              cov("---\nstage: wireframe\nunits:\n- spasibo\n---\n") == (0, [("R-COV-004", "hint")]))
+        check("фикстура: страница в партии входа (units) → R-COV-004 error, код 1",
+              cov("---\nstage: wireframe\nunits:\n- home\n- spasibo\n---\n") == (1, [("R-COV-004", "error")]))
+        (inp / "pages" / "spasibo").mkdir(parents=True)
+        check("фикстура: вход без units — партия по папкам pages/: страницы там нет → hint",
+              cov("---\nstage: wireframe\n---\n") == (0, [("R-COV-004", "hint")]))
+        (inp / "pages" / "home").mkdir()
+        check("фикстура: … страница среди папок pages/ → error", cov("---\nstage: wireframe\n---\n")[0] == 1)
         r = subprocess.run(tool + ["build", fx.slug, "promo", "--repo", str(fx.root), "--write"], capture_output=True, text=True)
         check("фикстура: build --write пишет каркас на пустое место", r.returncode == 0 and proj_ap.is_file()
               and "каркас записан" in r.stdout)
+        # сужение проверки до страниц: второй план ассетов с ошибкой не портит код выхода первой страницы
+        extra = proj_ap.with_name("spasibo.yaml")
+        extra.write_text(proj_ap.read_text(encoding="utf-8").replace("status: draft", "status: approved"), encoding="utf-8")
+        r = subprocess.run(tool + ["check", fx.slug, "promo", "--repo", str(fx.root), "--json"], capture_output=True, text=True)
+        refs = {f.ref.split("#")[0] for f in F.parse_lines(r.stdout) if f.severity == "error"}
+        check("фикстура: check поверхности — ошибки второго плана, код 1", r.returncode == 1 and bool(refs))
+        r = subprocess.run(tool + ["check", fx.slug, "promo", "--page", "home", "--repo", str(fx.root), "--json"],
+                           capture_output=True, text=True)
+        check("фикстура: check --page home — только находки страницы, код 0",
+              r.returncode == 0 and not [f for f in F.parse_lines(r.stdout) if "spasibo" in f.path])
+        r = subprocess.run(tool + ["check", fx.slug, "promo", "--page", "spasibo", "--repo", str(fx.root), "--json"],
+                           capture_output=True, text=True)
+        check("фикстура: check --page второго плана — его ошибки, код 1",
+              r.returncode == 1 and all("spasibo" in f.path for f in F.parse_lines(r.stdout)))
+        r = subprocess.run(tool + ["check", fx.slug, "promo", "--page", "nope", "--repo", str(fx.root)], capture_output=True, text=True)
+        check("фикстура: check --page неизвестной страницы — код 2 и имя в сообщении", r.returncode == 2 and "nope" in r.stderr)
     print("plan_to_assets selftest:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 
@@ -1076,7 +1191,7 @@ def file_parser():
 def project_parser():
     ap = docpaths.parser("plan_to_assets.py", "План ассетов проекта: каркасы страниц (build) и проверка (check). "
                          "Подробно — plan_to_assets.py --help.", surface="optional", accept=lambda s: s.design)
-    ap.add_argument("--page", action="append", metavar="ID", help="build: только эти страницы")
+    ap.add_argument("--page", action="append", metavar="ID", help="только эти страницы (build и check); ключ — повтором")
     ap.add_argument("--write", action="store_true", help="build: в проект, только для страниц без плана ассетов")
     return ap
 

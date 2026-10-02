@@ -27,6 +27,12 @@ kb/ai-media/05-prompting/dialects.yaml. Компилятор проверяет 
 --help, ratios и validate без --model отвечают без снимка. Снимок — POLZA_CATALOG (имя папки или путь), иначе последний в
 $DDD_HOME/cache/ai-media/polza/ (ставит `scripts/install.sh --catalogs`, обновляет `polza_catalog.py snapshot`).
 
+Формат файла в задании канала routerai (output_format) — из варианта маршрута задачи для этой модели
+(kb/ai-media/13-routing-matrix/routing.yaml), иначе из записи модели в dialects.yaml, иначе png; формат вне списка
+каталога канала заменяется поддерживаемым (у векторных моделей — svg). Снимок каталога канала — ROUTERAI_CATALOG (имя
+папки или путь), иначе последний в $DDD_HOME/cache/ai-media/routerai/ (`mp_client.py snapshot --channel routerai`); без
+снимка формат решают маршрут и dialects.yaml.
+
 Опции --opt (как поле compile спецификации): order=family|product7|shuffled|custom, length=full|short,
 text_zone_style=base|vendor|google|openai|copyspace, negation=family|positive|sentence, palette_form=family|hex|names,
 fit=fail|drop, language=en|ru, quality_words=true, enhancer=on|off, labels=global|family, refs=declare|silent,
@@ -70,6 +76,8 @@ VERSION = "2.2"
 ROOT = kbpaths.kb("ai-media")
 SCHEMA = ROOT / "05-prompting/asset-spec.schema.json"
 DIALECTS = ROOT / "05-prompting/dialects.yaml"
+ROUTING = ROOT / "13-routing-matrix/routing.yaml"
+CHANNEL_CATALOGS = {"routerai": ("ROUTERAI_CATALOG", "api-v1-models.json")}   # канал → (переменная снимка, файл)
 
 # оценочные слова без видимого содержания (v1; расширенный список — dialects.yaml defaults.slop_words)
 SLOP_WORDS = {"luminous", "radiant", "vibrant", "lush", "dynamic", "glowing", "gorgeous", "stunning", "breathtaking",
@@ -1514,6 +1522,66 @@ def catalog_check(model_raw, inp):
 
 # ---------------------------------------------------------------- каналы вне Media API polza
 
+def route_params(task, channel, model_id):
+    """Параметры варианта маршрута задачи для этой модели канала (routing.yaml: routes.<код>.options[].params)."""
+    key = ("routing", str(ROUTING))
+    if key not in _CACHE:
+        try:
+            _CACHE[key] = (yaml.safe_load(ROUTING.read_text(encoding="utf-8")) or {}).get("routes") or {}
+        except FileNotFoundError:
+            _CACHE[key] = {}
+    for o in (_CACHE[key].get(task) or {}).get("options") or []:
+        if o.get("channel") == channel and o.get("model") == model_id:
+            return o.get("params") or {}
+    return {}
+
+
+def channel_catalog(channel):
+    """Модели последнего снимка каталога канала: id → запись. Снимок — переменная из CHANNEL_CATALOGS (имя папки или
+    путь), иначе последний в $DDD_HOME/cache/ai-media/<канал>/; снимка нет — пусто, и формат вывода решают маршрут и
+    dialects.yaml."""
+    if channel not in CHANNEL_CATALOGS:
+        return {}
+    env, fname = CHANNEL_CATALOGS[channel]
+    ref = os.environ.get(env) or None
+    key = ("channel-catalog", channel, ref)
+    if key not in _CACHE:
+        root = kbpaths.cache("ai-media", channel, create=False)
+        if ref:
+            cands = [pathlib.Path(ref), pathlib.Path(ref) / fname, root / ref / fname]
+            path = next((c for c in cands if c.is_file()), None)
+            if path is None:
+                raise CompileError(f"снимок каталога канала {channel} не найден: {env}={ref}")
+        else:
+            dirs = sorted(d for d in root.iterdir() if (d / fname).is_file()) if root.is_dir() else []
+            path = dirs[-1] / fname if dirs else None
+        models = {}
+        if path is not None:
+            raw = load_json(path)
+            models = {m["id"]: m for m in (raw["data"] if isinstance(raw, dict) else raw) if m.get("id")}
+        _CACHE[key] = models
+    return _CACHE[key]
+
+
+def channel_output_format(channel, info, model_id, spec, errors, warnings):
+    """Формат файла, который отдаёт канал: вариант маршрута задачи для этой модели, иначе запись модели в dialects.yaml,
+    иначе png. Последнее слово — за каталогом канала: формат вне supported_output_formats модели канал отклоняет
+    (векторная модель отдаёт только svg), поэтому он заменяется поддерживаемым."""
+    route = route_params(spec.get("task"), channel, model_id).get("output_format")
+    fmt = route or info.get("output_format") or "png"
+    supported = (channel_catalog(channel).get(model_id) or {}).get("supported_output_formats") or []
+    if supported and fmt not in supported:
+        if route:
+            warnings.append(f"{model_id} ({channel}): output_format {route} из маршрута {spec.get('task')} нет в каталоге "
+                            f"канала {supported} — беру {supported[0]}; маршрут сверить с каталогом")
+        fmt = supported[0]
+    want = spec["output"].get("format")
+    if want == "svg" and fmt != "svg":
+        errors.append(f"{model_id} ({channel}): спецификация ждёт svg, модель отдаёт {fmt} — нужна векторная модель "
+                      f"маршрута задачи")
+    return fmt
+
+
 def genapi_dims(ratio, max_px=1_000_000, step=16):
     a, b = (int(x) for x in ratio.split(":"))
     r = a / b
@@ -1543,7 +1611,7 @@ def channel_body(channel, chcfg, info, model_id, spec, prompt, dialect, b, image
         elif seed is not None:
             warnings.append(f"{model_id} (routerai): seed не поддерживается — повторы независимые")
         if "output_format" in params:
-            body["output_format"] = "png"
+            body["output_format"] = channel_output_format(channel, info, model_id, spec, errors, warnings)
         if "quality" in params:
             body["quality"] = opts.get("quality", "medium")
         if spec["output"].get("alpha"):

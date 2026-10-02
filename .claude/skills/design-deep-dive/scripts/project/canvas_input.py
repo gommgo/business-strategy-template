@@ -37,6 +37,15 @@ git); без `--stage` — этап действующего входа; `--out 
            mockup), assets.md (wireframe, mockup), motion.md (motion — страницы со спецификацией движения)
   кабинет: contract.md, copy.md (строки texts.md статуса этапа), demo-data.json (wireframe, mockup, motion — контракт
            этапа mockup), assets.md (mockup, motion)
+assets.md страницы — строка на файл слота плана ассетов. Ключ ассета — страница и слот: строки манифеста ассетов с
+`page` этой страницы, без них — строки без `page` (общие для страниц с таким слотом). На макет идёт принятое (`status:
+accepted`): у каждого варианта (`variant`) — файлы первого формата по FORMAT_ORDER; слот без принятого файла — заглушка.
+На макете ещё строки демо-картинок слотов (расширение `x-demo` слота плана: `file` — путь вне git или `files` —
+{вариант: путь}; пометка «демо») и общих ассетов продукта (принятые строки `design/_assets/manifest.yaml`, кроме
+шрифтов). id загрузки — таблица «Загрузки» ARTIFACTS.md по пути файла: путь — первый фрагмент ячейки в обратных
+кавычках, после него — пояснение; путь вне git сверяется с раскрытыми `~` и `$DDD_HOME`. У каждого артефакта id
+загрузки свой: берётся строка холста этой поверхности (`canvas:<surface>`), строка артефакта ДС — когда файл загружен
+только туда.
 
 Правила проекции — ключ x-canvas-map схем-владельцев (файлы базы с ключом — как у `spec_check.py canvas-map`): поле
 холста → {rule: copy | map | derive | drop | claude_fills, from, note, stages}. Сборщик исполняет правила этапа; поле,
@@ -48,6 +57,9 @@ git); без `--stage` — этап действующего входа; `--out 
 идёт, вход собирается. Поля без карт — правила сборщика: project.{surface, web_kind, stage},
 design_system.{artifact, tokens}, decisions.{variants, iterations_max, form} («Условия холста» ARTIFACTS.md),
 build.viewports (acceptance-widths.yaml); у кабинета бриф холста — проекция app-brief.yaml (карты у брифа на вид нет).
+Запреты арт-дирекции (exclusions) идут в design_system.bans после выбора направления (choice.chosen) на этапах её
+карты — wireframe и mockup; на этапе directions запреты направления — расширение x-direction-bans арт-дирекции
+({id направления: [запрет]}) → directions[].bans, каждый список — только своему артборду.
 
 Документы-источники (id — как в указателях карт; пути — lib/docpaths.py):
   site-brief site/<s>/site-brief.yaml · meaning site/<s>/meaning.yaml или meaning_ref брифа · hierarchy
@@ -57,8 +69,9 @@ build.viewports (acceptance-widths.yaml); у кабинета бриф холс�
   design/<s>/motion/<page-id>.motion-spec.yaml или motion_spec_ref подачи · asset-plan
   design/<s>/assets/plans/<page-id>.yaml или refs.asset_plan плана · brand
   design/brand.yaml или brand.ref брифа · system, tokens-css, app-brief, artifacts (ARTIFACTS.md) — design/ продукта ·
-  asset-manifest design/<s>/assets/manifest.yaml · review design/<s>/review/REVIEW.md; база — ambition-levels,
-  block-treatments, lead-forms, acceptance-widths, budgets (через page_gates.py --resolve), tells.
+  asset-manifest design/<s>/assets/manifest.yaml · product-assets design/_assets/manifest.yaml · review
+  design/<s>/review/REVIEW.md; база — ambition-levels, block-treatments, lead-forms, acceptance-widths, budgets (через
+  page_gates.py --resolve), tells.
 
 Проверка входа до публикации — итог в манифесте: error держат гейт «чистовой макет — только на утверждённых текстах и
 подтверждённых фактах» у единиц партии и целостность входа, и этап с error не публикуется; остальное — warning с тем же
@@ -86,9 +99,10 @@ build.viewports (acceptance-widths.yaml); у кабинета бриф холс�
   R-COV-002   warning  текстовый слот плана без текста этапа на вайрфрейме; страница без copy deck
   R-COV-004   warning  медиа-слоты страницы без плана ассетов на вайрфрейме
   R-COV-001   hint     страница брифа или карты без плана — во вход не идёт; у рода site нет карты — warning
-  R-REF-003   warning  секция или слот copy deck вне плана страницы
-  R-REF-008   warning  у файла ассета нет id загрузки в «Загрузках» ARTIFACTS.md
-  R-DEBT-002  hint     демо-факты, заглушки фактов и ассетов
+  R-REF-003   warning  секция или слот copy deck вне плана страницы (стык — по id секции и slot_id); site_slot_id слота
+                       — не anatomy слота плана
+  R-REF-008   warning  у файла ассета или демо-картинки слота нет id загрузки в «Загрузках» ARTIFACTS.md
+  R-DEBT-002  hint     демо-факты, заглушки фактов и ассетов, демо-картинки слотов
   кабинет: находки contract.py по экранам партии (R-MAT-011 warning — пункты PRE, R-COV-005, R-DEBT-002; его R-MAT-003
   о строках texts.md на макете — R-MAT-012 error), перед макетом ds_coverage (R-COV-005: тип без ключа или компонента —
   error, не нарисованное состояние — warning) и ds_build (R-STRUCT-006; R-FRESH-001 — warning); без ДС — пробел
@@ -96,11 +110,13 @@ build.viewports (acceptance-widths.yaml); у кабинета бриф холс�
 Списки в сообщениях и пробелах — первые позиции и хвост «и ещё N».
 
 Источники единицы — основа отпечатка одобрения (`unit_sources`, `unit_fingerprint`): страница — план, тексты этой
-страницы в copy deck (text_hash), план ассетов и файлы её слотов по манифесту ассетов, спецификация движения, записи
-фактов из слотов данных плана и fact_ids текстов; экран — файл экрана, блоки его состава и каркас, строки texts.md,
-которые они называют (ключ, текст, статус). У обеих — токены ДС (system.tokens.css, иначе system.tokens.json, иначе
-tokens.json артефакта ДС) и system.yaml без starter; у страницы — ещё бренд и арт-дирекция поверхности, у экрана — бриф
-на вид. ARTIFACTS.md, REVIEW.md, вход, файлы базы, review/ и копии холста в источники единицы не входят.
+страницы в copy deck (text_hash), план ассетов и файлы её слотов, которые идут во вход макета (принятые строки
+манифеста ассетов своей страницы по варианту и формату — строка `asset · <слот>` на файл; демо-картинки и общие ассеты
+продукта — нет), спецификация движения, записи фактов из слотов данных плана и fact_ids текстов; экран — файл экрана,
+блоки его состава и каркас, строки texts.md, которые они называют (ключ, текст, статус). У обеих — токены ДС
+(system.tokens.css, иначе system.tokens.json, иначе tokens.json артефакта ДС) и system.yaml без starter; у страницы —
+ещё бренд и арт-дирекция поверхности, у экрана — бриф на вид. ARTIFACTS.md, REVIEW.md, вход, файлы базы, review/ и копии
+холста в источники единицы не входят.
 Из Python: `assemble(slug, surf, repo, stage, maps, today=None, units=None)` → сборка в памяти (`files`, `rep`, `units`,
 `outside`); `check_surface(…, units=None)` → (находки, сборка); `unit_sources(slug, surface, unit, repo=None)` → строки
 {id, path, fingerprint} или None; `unit_fingerprint(slug, surface, unit, repo=None)` → "sha256:…" по отсортированным
@@ -583,10 +599,37 @@ def deck_text_hash(data, page=None):
 
 # ------------------------------------------------------------------ общее: ARTIFACTS.md, голос, бан-лист
 
+def upload_path(text):
+    """Путь файла из ячейки «файл» таблицы «Загрузки»: первый фрагмент в обратных кавычках (после него — пояснение
+    строки), без кавычек — ячейка целиком."""
+    m = re.match(r"\s*`([^`]+)`", text or "")
+    return m.group(1).strip() if m else mod("layer").cell(text)
+
+
+def outside_path(path):
+    """Путь файла вне git к одному виду: `~` и `$DDD_HOME` раскрыты — одна загрузка находится по обеим записям."""
+    s = str(path).strip()
+    if s.startswith("$" + kbpaths.ENV_HOME):
+        s = str(kbpaths.home()) + s[len(kbpaths.ENV_HOME) + 1:]
+    return os.path.normpath(os.path.expanduser(s))
+
+
+def upload_id(art, *names):
+    """id загрузки файла по строкам «Загрузок», которые отобрал `artifacts`: путь как в таблице, у файла вне git —
+    ещё и раскрытый путь."""
+    for n in names:
+        if art["uploads"].get(str(n)):
+            return art["uploads"][str(n)]
+    for n in names:
+        if str(n).startswith(("/", "~", "$")) and outside_path(n) in art["uploads_abs"]:
+            return art["uploads_abs"][outside_path(n)]
+    return None
+
+
 def artifacts(ctx):
     """ARTIFACTS.md продукта: артефакты, загрузки, условия холста поверхности."""
     s = ctx.load("artifacts", ctx.dprod("artifacts"))
-    out = {"design_system": None, "canvas": None, "uploads": {}, "conditions": None}
+    out = {"design_system": None, "canvas": None, "uploads": {}, "uploads_abs": {}, "conditions": None}
     if s is None:
         return out
     L = mod("layer")
@@ -601,10 +644,17 @@ def artifacts(ctx):
         elif a == f"canvas:{ctx.surface}":
             out["canvas"] = row
     t = md.table(("id", "файл", "слот"))
+    # id загрузки у каждого артефакта свой: входу поверхности нужна загрузка её холста; строка артефакта ДС — запасная
+    # (файл загружен только туда), холст другой поверхности не читается
+    rank = {f"canvas:{ctx.surface}": 0, None: 1, "design-system": 2}
+    best = {}
     for r in t.rows if t else []:
-        fid, f = L.cell(r.get("id")), L.cell(r.get("файл"))
-        if fid and f:
+        fid, f, where = L.cell(r.get("id")), upload_path(r.get("файл")), L.cell(r.get("артефакт"))
+        if fid and f and where in rank and rank[where] <= best.get(f, 2):
+            best[f] = rank[where]
             out["uploads"][f] = fid
+            if f.startswith(("/", "~", "$")):
+                out["uploads_abs"][outside_path(f)] = fid
     t = md.table(("поверхность", "форма результата"))
     for r in t.rows if t else []:
         if L.cell(r.get("поверхность")) == ctx.surface:
@@ -937,10 +987,15 @@ def site_brief(ctx, B):
     chosen = get(ad, "choice", "chosen")
     dirs = {d.get("id"): d for d in get(ad, "directions", default=[]) or [] if isinstance(d, dict)}
     cdir = dirs.get(chosen) or {}
-    allowed = sorted(set(get(brief, "ambition", "allow", "markers", default=[]) or [])
+    allowed = sorted(set(str_list(get(brief, "ambition", "allow", "markers")))
                      | {k for d in get(ad, "decisions", default=[]) or [] if isinstance(d, dict)
-                        for k in (d.get("k3_allow") or [])}
-                     | set(get(ad, "exclusions", "k3_allow", default=[]) or []))
+                        for k in str_list(d.get("k3_allow"))}
+                     | set(str_list(get(ad, "exclusions", "k3_allow"))))
+    # Запреты арт-дирекции (exclusions) — общий бан-лист страниц после выбора направления, на этапах её карты: до
+    # выбора они написаны под одно направление и на странице «Направления» запретили бы приёмы остальных артбордов.
+    # Запреты направления до выбора — расширение x-direction-bans, каждый список — своему артборду (directions[].bans).
+    ad_bans = bool(chosen) and any(r.source == "art-direction"
+                                   for r in ctx.maps.rules(BRIEF, ctx.stage).get("design_system.bans", []))
     brand = B["brand"]
     phone = sum(x.get("share") or 0 for x in traffic if x.get("device") == "mobile")
 
@@ -1048,14 +1103,36 @@ def site_brief(ctx, B):
                 (get(brief, "ambition", "forbid", "cliches", default=[]) or []) +
                 (get(brief, "ambition", "forbid", "effects", default=[]) or [])]
         lifted = {str(get(x, "marker") or x) for x in get(ad, "exclusions", "lifted_markers", default=[]) or []}
-        proj += [{"what": one_line(x), "from": "art-direction"}
-                 for x in get(ad, "exclusions", "bans", default=[]) or []]
+        own = [{"what": one_line(x), "from": "art-direction"}
+               for x in get(ad, "exclusions", "bans", default=[]) or []]
         if get(ad, "exclusions", "forbidden_hues"):
-            proj.append({"what": "запретные оттенки", "hues": get(ad, "exclusions", "forbidden_hues"),
-                         "from": "art-direction"})
-        proj += [{"id": str(x), "what": "примета, запрещённая арт-дирекцией", "from": "art-direction"}
-                 for x in get(ad, "exclusions", "forbidden_markers", default=[]) or [] if str(x) not in lifted]
+            own.append({"what": "запретные оттенки", "hues": get(ad, "exclusions", "forbidden_hues"),
+                        "from": "art-direction"})
+        own += [{"id": str(x), "what": "примета, запрещённая арт-дирекцией", "from": "art-direction"}
+                for x in get(ad, "exclusions", "forbidden_markers", default=[]) or [] if str(x) not in lifted]
+        if ad_bans:
+            proj += own
+        elif own:
+            ctx.gap(f"запреты арт-дирекции (exclusions) во вход не идут — {len(own)}: "
+                    + ("на этапе directions у каждого направления свой артборд" if ctx.stage == "directions" else
+                       "направление не выбрано (choice.chosen)")
+                    + "; общий бан-лист — после выбора направления, запреты направления до выбора — x-direction-bans")
         return ban_list(ctx, set(allowed), proj, "page")
+
+    def directions():
+        own = ad.get(DIRECTION_BANS) if isinstance(ad.get(DIRECTION_BANS), dict) else {}
+        lost = [str(k) for k in own if k not in dirs]
+        if lost:
+            ctx.gap(f"{DIRECTION_BANS} арт-дирекции называет направления, которых нет в directions: "
+                    f"{', '.join(lost)} — их запреты во вход не идут")
+        out = []
+        for d in dirs.values():
+            row = {k: d[k] for k in DIRECTION_KEYS if d.get(k) is not None}
+            mine = [one_line(x) for x in str_list(own.get(d.get("id")))]
+            if mine:
+                row["bans"] = mine
+            out.append(row)
+        return out or None
 
     def references():
         mb = [r for r in get(ad, "moodboard", default=[]) or [] if isinstance(r, dict)]
@@ -1091,8 +1168,7 @@ def site_brief(ctx, B):
         "design_system.bans": bans,
         "design_system.tone_of_voice": lambda: B["tone"][0],
         "design_system.voice_ref": lambda: B["tone"][1],
-        "directions[]": lambda: [{k: d[k] for k in DIRECTION_KEYS if d.get(k) is not None} for d in dirs.values()]
-        or None,
+        "directions[]": directions,
         "direction.name": lambda: cdir.get("name") or chosen,
         "direction.macrostructure": lambda: get(cdir, "axes", "macrostructure"),
         "direction.visual_thesis": lambda: cdir.get("thesis"),
@@ -1136,8 +1212,18 @@ def questions(brief):
 
 DIRECTION_KEYS = ("id", "name", "thesis", "axes", "palette", "type", "signature_move", "first_screen", "risk", "cost",
                   "recommended")
+DIRECTION_BANS = "x-direction-bans"                    # расширение арт-дирекции: {id направления: [запрет]}
 ROLE_ORDER = ("composition", "typography", "block-solution", "rhythm", "structure", "color", "material", "imagery",
               "brand", "effect", "other", "motion")
+
+
+def str_list(value):
+    """Строки поля, которое схема даёт строкой или списком: строка — один элемент (ключ --allow решения), а не её
+    символы."""
+    if isinstance(value, str):
+        return [value.strip()] if value.strip() else []
+    return [str(x).strip() for x in value if isinstance(x, str) and x.strip()] if isinstance(value, (list, tuple)) \
+        else []
 
 
 def pick_refs(mb):
@@ -1344,16 +1430,25 @@ def copy_md(ctx, B, pg):
 
 
 def stitch(ctx, pg):
-    """Стык copy deck с планом: текстовый слот плана без слота copy deck; секция и слот copy deck вне плана."""
+    """Стык copy deck с планом по id: секция copy deck — id секции плана, slot_id — id текстового слота плана (у
+    повторяемого набора id слота не равен элементу анатомии: nav-catalog и nav-link). Находки — текстовый слот плана
+    без слота copy deck; секция и слот copy deck вне плана; site_slot_id слота — не anatomy слота плана."""
     cd = mod("copydeck")
     skip = cd.copy_md_rules()["not_exported"]
-    plan = {s["id"]: {x.get("id") for x in get(s, "slots", "text", default=[]) or []
+    plan = {s["id"]: {str(x.get("id")): x for x in get(s, "slots", "text", default=[]) or []
                       if isinstance(x, dict) and x.get("slot") not in skip} for s in pg.sections}
-    deck = {}
+    deck, anatomy = {}, []
     for s in cd.sections_of(pg.deck_page):
         sid = str(s.get("site_section_id") or s.get("section_id"))
-        deck.setdefault(sid, set()).update(str(sl.get("site_slot_id") or sl.get("slot_id")) for sl in cd.slots_of(s)
-                                           if sl.get("slot_type") not in skip)
+        have = deck.setdefault(sid, set())
+        for sl in cd.slots_of(s):
+            if sl.get("slot_type") in skip:
+                continue
+            slid = str(sl.get("slot_id"))
+            have.add(slid)
+            t = plan.get(sid, {}).get(slid)
+            if t and sl.get("site_slot_id") and t.get("anatomy") and str(sl["site_slot_id"]) != str(t["anatomy"]):
+                anatomy.append(f"{sid}/{slid} ({sl['site_slot_id']} ≠ {t['anatomy']})")
     lost = [f"{sid}/{x}" for sid, xs in plan.items() for x in sorted(xs) if x not in deck.get(sid, set())]
     extra = [sid for sid in deck if sid not in plan] + \
             [f"{sid}/{x}" for sid, xs in deck.items() if sid in plan for x in sorted(xs) if x not in plan[sid]]
@@ -1370,11 +1465,16 @@ def stitch(ctx, pg):
         shown = listed(extra)
         ctx.add("R-REF-003", "warning", "copy-deck", pg.id, pg.deck_src.path, f"секции и слоты copy deck вне плана "
                 f"страницы: {shown} — в copy.md они идут без места в page.yaml",
-                f"/design-deep-dive {ctx.slug} {ctx.surface} — стык copy deck с планом (site_section_id, site_slot_id)")
+                f"/design-deep-dive {ctx.slug} {ctx.surface} — стык copy deck с планом (section_id, slot_id)")
+    if anatomy:
+        ctx.add("R-REF-003", "warning", "copy-deck", pg.id, pg.deck_src.path, "site_slot_id слотов copy deck — не "
+                f"anatomy слотов плана — {len(anatomy)}: {listed(anatomy)}; текст слота во вход идёт по slot_id",
+                f"/design-deep-dive {ctx.slug} {ctx.surface} — стык copy deck с планом (site_slot_id = anatomy слота)")
 
 
 def deck_texts(ctx, pg):
-    """Тексты copy deck для ассетов: {(секция, слот): (тип, текст, статус)} и {asset_ref: {alt, caption}}."""
+    """Тексты copy deck для ассетов: {(секция, slot_id): (тип, текст, статус)} и {asset_ref: {alt, caption}}; ссылки
+    alt_ref и caption_ref плана ассетов называют слот его id — как стык с планом."""
     cd = mod("copydeck")
     by_slot, by_ref = {}, {}
     if pg.deck_page is None:
@@ -1384,7 +1484,7 @@ def deck_texts(ctx, pg):
         for sl in cd.slots_of(s):
             v = cd.chosen_variant(sl)
             rec = (sl.get("slot_type"), one_line((v or {}).get("text")), cd._status_of(v) if v else None)
-            by_slot[(sid, str(sl.get("site_slot_id") or sl.get("slot_id")))] = rec
+            by_slot[(sid, str(sl.get("slot_id")))] = rec
             if sl.get("asset_ref") and sl.get("slot_type") in ("image-alt", "image-caption"):
                 kind = "alt" if sl["slot_type"] == "image-alt" else "caption"
                 by_ref.setdefault(str(sl["asset_ref"]), {})[kind] = rec
@@ -1392,12 +1492,62 @@ def deck_texts(ctx, pg):
 
 
 ASSET_COLS = ("файл", "слот", "роль", "подпись", "alt", "фокус", "варианты", "источник и лицензия", "id загрузки")
+# Формат файла слота на холсте: вектор, затем растр и видео, которые открывает любой браузер заказчика; AVIF и WebM —
+# форматы публикации, на холст идут, когда другого формата у варианта нет.
+FORMAT_ORDER = ("svg", "webp", "png", "jpg", "jpeg", "avif", "gif", "mp4", "webm")
+FONT_EXT = (".woff2", ".woff", ".ttf", ".otf")         # шрифты продукта — часть ДС, а не картинки страницы
+DEMO = "x-demo"                                        # расширение слота плана ассетов: картинка макета вне git
+DEMO_MARK = "демо · файл вне git, в публикацию не идёт"
+SHARED_MARK = "общий ассет продукта"
 
 
-def asset_manifest(ctx):
-    s = ctx.load("asset-manifest", ctx.dsurf("assets") / "manifest.yaml", cover=False)
+def asset_manifest(ctx, product=False):
+    """Строки манифеста ассетов со слотом: поверхности (`design/<surface>/assets/manifest.yaml`) или продукта
+    (`design/_assets/manifest.yaml`)."""
+    folder = ctx.dprod("assets") if product else ctx.dsurf("assets")
+    s = ctx.load("product-assets" if product else "asset-manifest", folder / "manifest.yaml", cover=False)
     rows = s.data if s and isinstance(s.data, list) else get(s.data if s else {}, "assets", default=[]) or []
-    return {str(r.get("slot")): r for r in rows if isinstance(r, dict) and r.get("slot")}
+    return [r for r in rows if isinstance(r, dict) and r.get("slot")]
+
+
+def format_rank(row):
+    """Место файла в выборе формата: формат по FORMAT_ORDER, у роликов одного формата — сначала H.264 (`codec` строки):
+    AV1 и HEVC открывает не каждый браузер."""
+    fmt = str(row.get("format") or Path(str(row.get("file") or "")).suffix.lstrip(".")).lower()
+    codec = str(row.get("codec") or "").lower().replace(".", "")
+    return (FORMAT_ORDER.index(fmt) if fmt in FORMAT_ORDER else len(FORMAT_ORDER),
+            int(bool(codec) and "h264" not in codec and "avc" not in codec))
+
+
+def slot_files(rows, slot, page=None):
+    """Файлы слота для входа из строк манифеста → (строки файлов, строки слота, которые во вход не идут).
+    Ключ ассета — страница и слот: у слотов разных страниц id совпадают (hero-visual, og-image), поэтому берутся строки
+    с `page` этой страницы, а без них — строки без `page` (общие для страниц с таким слотом); строки других страниц не
+    читаются. Во вход идёт только принятое — `status: accepted` с файлом: строка draft на холст не уходит, слот
+    остаётся заглушкой. У каждого варианта (`variant`) — файлы первого по FORMAT_ORDER формата, какой у варианта есть
+    (`format_rank`); несколько файлов одного варианта и формата идут все (светлый и тёмный знак)."""
+    mine = [r for r in rows if str(r.get("slot")) == slot]
+    own = [r for r in mine if page is not None and str(r.get("page") or "") == page]
+    pick = own or [r for r in mine if not r.get("page")]
+    ok = [r for r in pick if r.get("file") and r.get("status") == "accepted"]
+    out = []
+    for var in dict.fromkeys(str(r.get("variant") or "") for r in ok):
+        rs = [r for r in ok if str(r.get("variant") or "") == var]
+        best = min(format_rank(r) for r in rs)
+        out += [r for r in rs if format_rank(r) == best]
+    return out, [r for r in pick if not (r.get("file") and r.get("status") == "accepted")]
+
+
+def demo_files(slot):
+    """Демо-картинки слота плана ассетов — расширение `x-demo`: `file` — путь файла вне git, `files` — {вариант:
+    путь} → [(вариант или None, путь, пояснение `what`)]. Демо в манифест ассетов и в git не идёт: его путь называет
+    план, на холсте оно стоит с пометкой «демо», в публикацию идёт файл слота."""
+    d = slot.get(DEMO) if isinstance(slot.get(DEMO), dict) else {}
+    what = one_line(d.get("what")) if isinstance(d.get("what"), str) else ""
+    out = [(None, d["file"].strip(), what)] if isinstance(d.get("file"), str) and d["file"].strip() else []
+    if isinstance(d.get("files"), dict):
+        out += [(str(k), v.strip(), what) for k, v in d["files"].items() if isinstance(v, str) and v.strip()]
+    return out
 
 
 def asset_file(ctx, f):
@@ -1408,18 +1558,24 @@ def asset_file(ctx, f):
 
 
 def assets_md(ctx, B, pg):
-    """pages/<page-id>/assets.md: строка на слот плана ассетов — файл, слот, роль, подпись и alt из copy deck в статусе
-    этапа, фокус, варианты, источник и лицензия, id загрузки; пустой слот — заглушка placeholder и TODO."""
+    """pages/<page-id>/assets.md: строка на файл слота плана ассетов (у слота с вариантами — строка на вариант) — файл,
+    слот, роль, подпись и alt из copy deck в статусе этапа, фокус, варианты, источник и лицензия, id загрузки; пустой
+    слот — заглушка placeholder и TODO. На макете — ещё строки демо-картинок слотов (`x-demo` плана) и общих ассетов
+    продукта: на артборде стоит `/_blob/<id>`, и кадр находят по id загрузки."""
     rules = ctx.maps.rules(PAGE_KEY + "assets.md", ctx.stage)
     cols = [c for c in ASSET_COLS if c in rules]
     ok = stage_statuses(ctx.stage)
     by_slot, by_ref = deck_texts(ctx, pg)
-    man, uploads = B["manifest"], B["art"]["uploads"]
+    man, art = B["manifest"], B["art"]
     mockup = ctx.stage == "mockup"
-    rows, placeholders = [], []
+    rows, placeholders, demos = [], [], []
+    missed = ctx.__dict__.setdefault("_no_upload", set())
 
     def txt(rec):
         return rec[1] if rec and rec[1] and rec[2] in ok else None
+
+    def emit(cells):
+        rows.append("| " + " | ".join(cell(cells[c]) if c not in ("файл", "слот") else cells[c] for c in cols) + " |")
 
     slots = [sl for sl in get(pg.assets, "slots", default=[]) or [] if isinstance(sl, dict)] if pg.assets else []
     if pg.assets is None:
@@ -1439,8 +1595,6 @@ def assets_md(ctx, B, pg):
                 "утверждение плана ассетов — словом заказчика (status: approved, approval)")
     for sl in slots:
         sid = str(sl.get("id"))
-        m = man.get(sid) or {}
-        f = m.get("file")
         refs = by_ref.get(sid, {})
         alt = None
         if sl.get("alt_ref") == "decorative" or sl.get("role") == "decorative":
@@ -1454,45 +1608,90 @@ def assets_md(ctx, B, pg):
         if cap is None and isinstance(sl.get("caption_ref"), str) and "." in sl["caption_ref"]:
             cap = txt(by_slot.get(tuple(sl["caption_ref"].split(".", 1))))
         cap = cap or (one_line(sl.get("caption")) if sl.get("caption") else None)
-        var = "; ".join(" ".join(str(x) for x in (v.get("id"), v.get("ratio"), v.get("size")) if x not in (None, ""))
-                        for v in sl.get("variants") or [] if isinstance(v, dict))
-        if sl.get("poster"):
-            var += ("; " if var else "") + f"постер: {sl['poster']}"
-        if sl.get("poster_for"):
-            var += ("; " if var else "") + f"постер для {sl['poster_for']}"
-        focal = "; ".join(f"{v.get('id')}: {v.get('focal')}" for v in sl.get("variants") or []
-                          if isinstance(v, dict) and v.get("focal"))
-        lic = " · ".join(x for x in (str(sl.get("source") or ""), f"ИИ: {sl['ai_fit']}" if sl.get("ai_fit") else "",
-                                     str(m.get("license") or ""), str(m.get("origin") or m.get("provenance") or ""))
-                         if x)
-        if not f:
-            placeholders.append(sid)
-        elif mockup and asset_file(ctx, f) is None:
-            ctx.add("R-MAT-012", "warning", "asset-manifest", sid, ctx.dsurf("assets") / "manifest.yaml",
-                    f"проверка входа: файла ассета {f} нет — строка манифеста без файла",
-                    "положить файл или убрать строку")
-        elif mockup and not m.get("license"):
-            ctx.add("R-MAT-012", "warning", "asset-manifest", sid, ctx.dsurf("assets") / "manifest.yaml",
-                    f"проверка входа: у файла ассета {f} нет лицензии в манифесте",
-                    "строка манифеста ассетов: лицензия")
-        up = uploads.get(str(f)) or uploads.get(f"design/{ctx.surface}/assets/{f}") if f else None
-        if f and mockup and not up:
-            ctx.add("R-REF-008", "warning", "artifacts", sid, ctx.dprod("artifacts"), f"у файла ассета {f} нет id "
-                    "загрузки в «Загрузках» ARTIFACTS.md — загрузить в холст при публикации и записать строку")
-        cells = {"файл": f"`{f}`" if f else "placeholder · TODO",
-                 "слот": f"`{sid}` ({sl.get('section')} · {sl.get('slot')})",
-                 "роль": sl.get("role"), "подпись": cap, "alt": alt, "фокус": focal, "варианты": var,
-                 "источник и лицензия": lic, "id загрузки": up}
-        rows.append("| " + " | ".join(cell(cells[c]) if c not in ("файл", "слот") else cells[c] for c in cols) + " |")
+        plan_vars = [v for v in sl.get("variants") or [] if isinstance(v, dict)]
+
+        def var_cells(label):
+            """«варианты» и «фокус» строки файла: вариант файла — id вариантов плана («desktop+mobile» — оба); у файла
+            без варианта и у заглушки — все варианты слота."""
+            ids = [x.strip() for x in str(label).split("+") if x.strip()] if label else None
+            vs = plan_vars if ids is None else [v for v in plan_vars if str(v.get("id")) in ids]
+            var = "; ".join(" ".join(str(x) for x in (v.get("id"), v.get("ratio"), v.get("size"))
+                                     if x not in (None, "")) for v in vs)
+            for x in [i for i in ids or [] if i not in {str(v.get("id")) for v in vs}]:
+                var += ("; " if var else "") + x
+            if sl.get("poster"):
+                var += ("; " if var else "") + f"постер: {sl['poster']}"
+            if sl.get("poster_for"):
+                var += ("; " if var else "") + f"постер для {sl['poster_for']}"
+            return var, "; ".join(f"{v.get('id')}: {v.get('focal')}" for v in vs if v.get("focal"))
+
+        def row(file_cell, label, lic, up):
+            var, focal = var_cells(label)
+            emit({"файл": file_cell, "слот": f"`{sid}` ({sl.get('section')} · {sl.get('slot')})",
+                  "роль": sl.get("role"), "подпись": cap, "alt": alt, "фокус": focal, "варианты": var,
+                  "источник и лицензия": lic, "id загрузки": up})
+
+        origin = [str(sl.get("source") or ""), f"ИИ: {sl['ai_fit']}" if sl.get("ai_fit") else ""]
+        files, rest = slot_files(man, sid, pg.id)
+        demo = demo_files(sl) if mockup else []
+        order = [str(v.get("id")) for v in plan_vars]
+        files.sort(key=lambda m: next((i for i, v in enumerate(order) if v in str(m.get("variant") or "").split("+")),
+                                      len(order)))
+        if not files and not demo:
+            placeholders.append(sid + (f" ({rest[-1].get('status') or 'без статуса'})" if rest and rest[-1].get("file")
+                                       else ""))
+            row("placeholder · TODO", None, " · ".join(x for x in origin if x), None)
+        for m in files:
+            f = m["file"]
+            if mockup and asset_file(ctx, f) is None:
+                ctx.add("R-MAT-012", "warning", "asset-manifest", sid, ctx.dsurf("assets") / "manifest.yaml",
+                        f"проверка входа: файла ассета {f} нет — строка манифеста без файла",
+                        "положить файл или убрать строку")
+            elif mockup and not m.get("license"):
+                ctx.add("R-MAT-012", "warning", "asset-manifest", sid, ctx.dsurf("assets") / "manifest.yaml",
+                        f"проверка входа: у файла ассета {f} нет лицензии в манифесте",
+                        "строка манифеста ассетов: лицензия")
+            up = upload_id(art, f, f"design/{ctx.surface}/assets/{f}")
+            if mockup and not up and f not in missed:
+                missed.add(f)                               # общий файл страниц — одна находка, а не на страницу
+                ctx.add("R-REF-008", "warning", "artifacts", sid, ctx.dprod("artifacts"), f"у файла ассета {f} нет id "
+                        "загрузки в «Загрузках» ARTIFACTS.md — загрузить в холст при публикации и записать строку")
+            row(f"`{f}`", m.get("variant"), " · ".join(x for x in origin + [
+                str(m.get("license") or ""), str(m.get("origin") or m.get("provenance") or "")] if x), up)
+        for label, path, what_ in demo:
+            up = upload_id(art, path)
+            if not up and path not in missed:
+                missed.add(path)
+                ctx.add("R-REF-008", "warning", "artifacts", sid, ctx.dprod("artifacts"), f"у демо-картинки {path} нет "
+                        "id загрузки в «Загрузках» ARTIFACTS.md — загрузить в холст при публикации и записать строку")
+            row(f"`{path}`", label, DEMO_MARK + (f" · {what_}" if what_ else ""), up)
+        if demo:
+            demos.append(sid)
+    shared = [m for m in B.get("product_assets") or [] if m.get("file") and m.get("status") == "accepted"
+              and not str(m["file"]).lower().endswith(FONT_EXT)] if mockup else []
+    for m in shared:
+        f = f"_assets/{m['file']}"
+        emit({"файл": f"`{f}`", "слот": f"`{m.get('slot')}` ({SHARED_MARK})", "роль": m.get("role"), "подпись": None,
+              "alt": 'alt=""' if m.get("role") == "decorative" else m.get("alt"), "фокус": None,
+              "варианты": m.get("variant"), "источник и лицензия": " · ".join(
+                  str(x) for x in (m.get("license"), m.get("origin") or m.get("provenance")) if x),
+              "id загрузки": upload_id(art, f"design/{f}", f, m["file"])})
     if placeholders and mockup:
         ctx.gap(f"`{pg.id}`: слотов без файла — {len(placeholders)}: заглушка «placeholder» и TODO "
                 f"({listed(placeholders)})")
         ctx.add("R-DEBT-002", "hint", "asset-plan", pg.id, (pg.assets_src.path if pg.assets_src else
                 ctx.dsurf("asset-plans", f"{pg.id}.yaml")), f"слотов без файла ассета: {len(placeholders)} — на макете "
                 "заглушка «placeholder»")
+    if demos:
+        ctx.gap(f"`{pg.id}`: демо-картинки слотов — {len(demos)}: на макете допустимы, в публикацию не идут "
+                f"({listed(demos)})")
+        ctx.add("R-DEBT-002", "hint", "asset-plan", pg.id, pg.assets_src.path, f"демо-картинки во входе: {len(demos)} "
+                f"({listed(demos)}) — файлы вне git с пометкой «демо»; в публикацию идёт файл слота")
     head = [f"# Ассеты страницы {pg.id}, этап {ctx.stage}",
             "# Строка — файл слота плана ассетов: только загрузки из этого списка; подпись и alt — дословно; пустой "
-            "слот — нейтральная заглушка с подписью «placeholder», а не сток и не хотлинк.", "",
+            "слот — нейтральная заглушка с подписью «placeholder», а не сток и не хотлинк."
+            + (" «демо» — картинка макета вне git, в публикацию не идёт; общий ассет продукта — файл design/_assets/."
+               if demos or shared else ""), "",
             "| " + " | ".join(cols) + " |", "|" + "---|" * len(cols)]
     if not rows:
         rows = ["| " + " | ".join("—" for _ in cols) + " |"]
@@ -1789,8 +1988,11 @@ def site_items(ctx, A, pages, brief):
              f"{fmt(hints.get('continuous_motions_in_view_max')) or '—'}, под читаемым текстом — "
              f"{hints.get('continuous_motions_under_text_max', 0)}", "S", "глаза", "макет", "motion",
              "motion.md; ambition-levels.yaml#levels.motion_hints"),
-        Item("F1", "Ассеты — в бюджетах владельцев: hero и первый экран, ниже первого экрана — lazy, видео с постером",
-             "S", "скрипт", "макет", "mockup", "ai-media 10/04 §1.1; ambition-levels.yaml#levels.budgets.effects"),
+        Item("F1", "Ассеты — в бюджетах владельцев: hero и первый экран, ниже первого экрана — lazy, видео с постером; "
+             "кадр под маской раскрытия (mask-reveal, scroll-mask-expand) — исключение: без lazy или с предзагрузкой "
+             "до входа в окно — закрытый маской кадр браузер лениво не грузит", "S", "скрипт", "макет", "mockup",
+             "ai-media 10/04 §1.1; ambition-levels.yaml#levels.budgets.effects; effects.yaml (mask-reveal, "
+             "scroll-mask-expand)"),
         Item("F2", f"Вес и скорость — профиль бюджета страницы ({prof}, build.perf): первый экран и LCP по профилю",
              "S", "скрипт", "после сборки", "—", "page_gates.py --resolve; budgets.yaml"),
         Item("F3", f"3D — только в режимах уровня ({', '.join(modes) or '—'}) и в бюджете уровня; у 3D-слота — "
@@ -2101,7 +2303,8 @@ def assemble_site(ctx):
          "meaning": ms.data if ms is not None else None, "art": art, "cond_mobile": cond_mobile,
          "tone": voice_projection(ctx, product=False), "site_map": sm.data if sm is not None else None,
          "lang": next((x.get("lang") for x in langs if x.get("role") == "primary"), None),
-         "name": get(brief, "business", "name"), "manifest": asset_manifest(ctx) if stage == "mockup" else {},
+         "name": get(brief, "business", "name"), "manifest": asset_manifest(ctx) if stage == "mockup" else [],
+         "product_assets": asset_manifest(ctx, product=True) if stage == "mockup" else [],
          "spec_ctx": lambda: spec_ctx.setdefault("c", mod("spec_check").Ctx())}
     if stage == "motion":
         B["motion_level"] = motion_level(ctx, brief, main, work)
@@ -2232,16 +2435,17 @@ def app_assets_md(ctx, B):
     out = [f"# Ассеты поверхности {ctx.surface}, этап {ctx.stage}",
            "# Строка — файл манифеста ассетов поверхности: иллюстрации мест и другие файлы; только загрузки из этого "
            "списка.", "", "| " + " | ".join(cols) + " |", "|" + "---|" * len(cols)]
-    for sid, m in man.items():
-        f = m.get("file")
-        up = B["art"]["uploads"].get(str(f)) if f else None
-        vals = {"файл": f"`{f}`" if f else "placeholder · TODO", "слот": f"`{sid}`", "роль": m.get("role"),
-                "подпись": m.get("caption"), "alt": m.get("alt"), "фокус": m.get("focal"),
-                "варианты": m.get("variants"),
-                "источник и лицензия": " · ".join(str(x) for x in (m.get("license"), m.get("origin") or
-                                                                   m.get("provenance")) if x),
-                "id загрузки": up}
-        out.append("| " + " | ".join(vals[c] if c in ("файл", "слот") else cell(vals[c]) for c in cols) + " |")
+    for sid in dict.fromkeys(str(r.get("slot")) for r in man):
+        files, rest = slot_files(man, sid)
+        for m, f in [(m, m["file"]) for m in files] or [(rest[-1] if rest else {}, None)]:
+            up = upload_id(B["art"], f, f"design/{ctx.surface}/assets/{f}") if f else None
+            vals = {"файл": f"`{f}`" if f else "placeholder · TODO", "слот": f"`{sid}`", "роль": m.get("role"),
+                    "подпись": m.get("caption"), "alt": m.get("alt"), "фокус": m.get("focal"),
+                    "варианты": m.get("variants") or m.get("variant"),
+                    "источник и лицензия": " · ".join(str(x) for x in (m.get("license"), m.get("origin") or
+                                                                       m.get("provenance")) if x),
+                    "id загрузки": up}
+            out.append("| " + " | ".join(vals[c] if c in ("файл", "слот") else cell(vals[c]) for c in cols) + " |")
     if not man:
         out.append("| " + " | ".join("—" for _ in cols) + " |")
         ctx.gap("ассетов поверхности нет (манифеста design/<surface>/assets/manifest.yaml нет): иллюстраций мест во "
@@ -2388,7 +2592,7 @@ def what(name):
     if name.startswith("pages/") and base == "copy.md":
         return "тексты страницы по слотам — статус этапа"
     if name.startswith("pages/") and base == "assets.md":
-        return "ассеты страницы: строка на слот плана ассетов"
+        return "ассеты страницы: строка на файл слота плана ассетов; на макете — демо и общие ассеты продукта"
     return FILE_WHAT.get(base, "—")
 
 
@@ -2652,10 +2856,10 @@ def _page_rows(ctx, unit):
         rows.append(_row(ctx, "asset-plan", pg.assets_src.path))
         man = asset_manifest(ctx)
         for sl in get(pg.assets, "slots", default=[]) or []:
-            f = (man.get(str(sl.get("id"))) or {}).get("file") if isinstance(sl, dict) else None
-            if f:
-                p = asset_file(ctx, f)
-                rows.append(_row(ctx, f"asset · {sl.get('id')}", p or ctx.dsurf("assets") / str(f),
+            # файлы слота — те же, что уходят во вход макета: принятые, этой страницы, по варианту и формату
+            for m in slot_files(man, str(sl.get("id")), unit)[0] if isinstance(sl, dict) else []:
+                p = asset_file(ctx, m["file"])
+                rows.append(_row(ctx, f"asset · {sl.get('id')}", p or ctx.dsurf("assets") / str(m["file"]),
                                  None if p is not None else "—"))
     if pg.spec_src is not None:
         rows.append(_row(ctx, "motion-spec", pg.spec_src.path))
@@ -2936,9 +3140,10 @@ def selftest():
         page = yaml_mod().safe_load((inp / "pages/home/page.yaml").read_text(encoding="utf-8"))
         plan_path = docpaths.site(fx.slug, "promo", "plans", "home.yaml", repo=fx.root)
         plan = yaml_mod().safe_load(plan_path.read_text("utf-8"))
-        check("page.yaml: секции — id и порядок плана, подачи на вайрфрейме нет",
+        check("page.yaml: секции — id и порядок плана, подачи и её заметок на вайрфрейме нет",
               [s["id"] for s in page.get("sections") or []] == [s["id"] for s in plan["sections"]]
-              and not any("treatment" in s for s in page["sections"]))
+              and not any("treatment" in s for s in page["sections"]) and "treatment" not in page
+              and any(get(s, "treatment", "notes") for s in plan["sections"]))
         check("page.yaml: политика первого экрана, формы по lead-forms.yaml, H1",
               get(page, "first_screen", "policy") == "offer-cta" and page.get("forms")
               and all(f.get("set") for f in page["forms"]) and get(page, "seo", "h1") == "hero.headline")
@@ -3007,6 +3212,12 @@ def selftest():
               all(where.get(i) == "после сборки" for i in ("D5", "H5", "V3", "V1")) and where.get("D1") == "макет"
               and "артборды — все ширины приёмки: 1440, 1280, 1024, 768, 390, 360; вылет на 320, ресайз и зум — на "
                   "сборке" in m.files[ACCEPT])
+        f1 = next(r for r in acc if r.get("id") == "F1")
+        check("F1: ниже первого экрана — lazy, кадр под маской раскрытия — исключение (без lazy или с предзагрузкой), "
+              "источник называет приёмы каталога эффектов",
+              "ниже первого экрана — lazy" in f1["вопрос (да = норма)"]
+              and "кадр под маской раскрытия (mask-reveal, scroll-mask-expand) — исключение: без lazy или с "
+                  "предзагрузкой" in f1["вопрос (да = норма)"] and "effects.yaml" in f1["источник"])
         check("mockup: refs.md и подача в page.yaml", "refs.md" in m.files
               and "treatment" in (yaml_mod().safe_load(m.files["pages/home/page.yaml"])["sections"][2]))
         deck = docpaths.site(fx.slug, "promo", "copy", "home.yaml", repo=fx.root)
@@ -3022,6 +3233,43 @@ def selftest():
                  if any(sl["slot_id"] == x.get("slot_id") for sc in dsecs for sl in sc["slots"])}
         check("directions: copy.md — только заголовок и кнопка первого экрана",
               dsecs and types <= {"headline", "cta-label"} and "page.yaml" not in " ".join(d.files))
+        # запреты арт-дирекции: до выбора — каждому направлению свои, общий бан-лист — после выбора направления
+        adp = docpaths.design(fx.slug, "art-direction", surface="promo", repo=fx.root)
+        adt = adp.read_text(encoding="utf-8")
+        adoc = json.loads(adt)
+        ids = [x["id"] for x in adoc["directions"]]
+        first = ["без золота в акценте", "имя не по центру поверх ролика"]
+        adoc[DIRECTION_BANS] = {ids[0]: first, ids[1]: "без неона"}
+        adoc["decisions"][0]["k3_allow"] = "center-hero"
+        adoc["exclusions"]["k3_allow"] = ["photo-hero"]
+        adp.write_text(json.dumps(adoc, ensure_ascii=False, indent=1), encoding="utf-8")
+
+        def brief_of(stage):
+            c = assemble(fx.slug, surf_of(fx, "promo"), fx.root, stage, maps, "2026-09-29")
+            b = yaml_mod().safe_load(c.files[BRIEF])
+            return c, b, [x for x in get(b, "design_system", "bans", default=[]) if x.get("from") == "art-direction"]
+        dc, db, dad = brief_of("directions")
+        own = {x["id"]: x.get("bans") for x in db["directions"]}
+        check(f"вход directions: запреты двух направлений ({DIRECTION_BANS}) — каждый список только у своего артборда "
+              "(directions[].bans); запреты exclusions арт-дирекции в общий бан-лист не идут — строка пробелов",
+              own[ids[0]] == first and own[ids[1]] == ["без неона"] and all(own[i] is None for i in ids[2:])
+              and not dad and get(db, "design_system", "bans")
+              and any("запреты арт-дирекции (exclusions) во вход не идут" in g for g in dc.gaps))
+        _wc, wb, wad = brief_of("wireframe")
+        mb2 = yaml_mod().safe_load(m.files[BRIEF])
+        mad = [x for x in get(mb2, "design_system", "bans", default=[]) if x.get("from") == "art-direction"]
+        check(f"после выбора направления запреты арт-дирекции ({len(mad)}) — в общем бан-листе входов wireframe и "
+              "mockup; directions[] в них нет",
+              mad and len(wad) == len(mad) and "directions" not in wb and "directions" not in mb2)
+        allow = get(wb, "design_system", "allow", default=[])
+        check(f"k3_allow решения строкой и exclusions.k3_allow списком — ключи целиком ({', '.join(allow)})",
+              {"center-hero", "photo-hero"} <= set(allow) and all(len(k) > 1 for k in allow))
+        del adoc["choice"]
+        adp.write_text(json.dumps(adoc, ensure_ascii=False, indent=1), encoding="utf-8")
+        nc, _nb, nad = brief_of("wireframe")
+        check("направление не выбрано — запретов арт-дирекции в бан-листе wireframe нет, причина — строкой пробелов",
+              not nad and any("направление не выбрано (choice.chosen)" in g for g in nc.gaps))
+        adp.write_text(adt, encoding="utf-8")
         mo = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "motion", maps, "2026-09-29")
         mb = yaml_mod().safe_load(mo.files[BRIEF])
         check("motion: motion.md, decisions.motion.level по уровням, без page.yaml и copy.md",
@@ -3048,6 +3296,59 @@ def selftest():
         x = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, "2026-09-29")
         check("x-* у страницы и во вложенном слоте copy deck — расширения, не поля: R-FRESH-003 нет",
               "R-FRESH-003" not in rules_of(x.rep.items))
+        deck.write_text(dt, encoding="utf-8")
+        # стык по id: у слота повторяемого набора id не равен элементу анатомии (site_slot_id copy deck = anatomy)
+        import copy
+        skip = cd.copy_md_rules()["not_exported"]
+        ptext = {(s["id"], str(t["id"])): t for s in plan["sections"] for t in get(s, "slots", "text", default=[]) or []
+                 if t.get("slot") not in skip}
+        dd = yaml_mod().safe_load(dt)
+        dpage = cd.pages_of(cd.deck_root(dd))[0]
+        sets = [(str(s["section_id"]), sl) for s in cd.sections_of(dpage) for sl in cd.slots_of(s)
+                if (ptext.get((str(s["section_id"]), str(sl["slot_id"]))) or {}).get("anatomy")
+                not in (None, sl["slot_id"])]
+        for sid, sl in sets:
+            sl["site_slot_id"] = ptext[(sid, str(sl["slot_id"]))]["anatomy"]
+        hero = next(s for s in cd.sections_of(dpage) if s["section_id"] == "hero")
+        alt = copy.deepcopy(next(sl for sl in cd.slots_of(hero) if cd.chosen_variant(sl)))
+        alt.update({"slot_id": "photo-alt", "slot_type": "image-alt", "site_slot_id": "media.alt"})
+        cd.chosen_variant(alt).update({"text": "Замерщик с рулеткой у окна", "status": "approved"})
+        hero["slots"].append(alt)
+        have = {(str(s["section_id"]), str(sl["slot_id"])) for s in cd.sections_of(dpage) for sl in cd.slots_of(s)}
+        lost = [k for k in ptext if k not in have]
+        shown = listed((f"{a}/{sl.get('slot_id')} → {sl.get('site_slot_id')}" for a, sl in sets), 2)
+
+        def stitched():
+            """Стык страницы home на макете по текущему copy deck: (сборка с находками стыка, страница)."""
+            deck.write_text(yaml_mod().safe_dump(dd, allow_unicode=True, sort_keys=False), encoding="utf-8")
+            c = Ctx(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, "2026-09-29")
+            src = c.load("page-plan", plan_path, page="home")
+            pg = Page("home", src.data, src)
+            attach_deck(c, pg)
+            stitch(c, pg)
+            return c, pg
+        x, xpg = stitched()
+        gate = next((f for f in x.rep.items if "текстовые слоты плана без текста в copy deck" in f.message), None)
+        ref = [f for f in x.rep.items if f.rule == "R-REF-003"]
+        check(f"стык по slot_id: слоты повторяемого набора с anatomy ≠ id ({len(sets)}: {shown}) — с текстом; без "
+              f"текста — только слоты, которых нет в copy deck ({len(lost)}); элемент анатомии — не слот вне плана",
+              sets and gate is not None and gate.rule == "R-MAT-012" and f"copy deck — {len(lost)}: " in gate.message
+              and not any(f"{a}/{sl.get('site_slot_id')}" in f.message for f in ref for a, sl in sets)
+              and not any("site_slot_id" in f.message for f in ref))
+        texts = deck_texts(x, xpg)[0]
+        check("alt_ref плана ассетов (<секция>.<id слота>) находит текст слота copy deck по slot_id, а не по элементу "
+              "анатомии",
+              texts.get(("hero", "photo-alt"), (None, None))[1] == "Замерщик с рулеткой у окна"
+              and ("hero", "media.alt") not in texts)
+        sets[0][1]["site_slot_id"] = "other.element"
+        x, _pg = stitched()
+        gate = next((f for f in x.rep.items if "текстовые слоты плана без текста в copy deck" in f.message), None)
+        an = [f for f in x.rep.items if f.rule == "R-REF-003" and "site_slot_id" in f.message]
+        check("site_slot_id слота не равен anatomy слота плана — отдельная R-REF-003 warning с путём слота; текст "
+              "слота во входе остаётся (стык — по slot_id)",
+              len(an) == 1 and an[0].severity == "warning"
+              and f"{sets[0][0]}/{sets[0][1]['slot_id']} (other.element ≠ " in an[0].message
+              and gate is not None and f"copy deck — {len(lost)}: " in gate.message)
         deck.write_text(dt, encoding="utf-8")
         chk = docpaths.design(fx.slug, "review", surface="promo", repo=fx.root) / "checks.json"
         chk.parent.mkdir(parents=True, exist_ok=True)
@@ -3235,6 +3536,130 @@ def selftest():
               and fp0.startswith("sha256:") and same == fp0
               and unit_fingerprint(fx.slug, "promo", "spasibo", fx.root) not in (fp0, None)
               and unit_sources(fx.slug, "promo", "nope", fx.root) is None)
+    with FP.built("package-landing") as fx:
+        # ассеты входа макета: ключ «страница и слот», принятое по варианту и формату, демо, общие ассеты продукта
+        Y = yaml_mod()
+        dump = lambda data: Y.safe_dump(data, allow_unicode=True, sort_keys=False)   # noqa: E731
+        adir = docpaths.design(fx.slug, "assets", surface="promo", repo=fx.root)
+        pdir = docpaths.design(fx.slug, "assets", repo=fx.root)
+        demo = kbpaths.home("out", "demo", "person-demo.png")
+        for n in ("logo.svg", "spasibo/logo.svg", "hero-visual-desktop.webp", "hero-visual-desktop.avif",
+                  "hero-visual-mobile.webp", "hero-visual-mobile.avif", "case-photo.webp"):
+            (adir / n).parent.mkdir(parents=True, exist_ok=True)
+            (adir / n).write_bytes(n.encode())
+        (pdir / "icons").mkdir(parents=True, exist_ok=True)
+        (pdir / "icons" / "play.svg").write_text("<svg/>", encoding="utf-8")
+
+        def mrow(slot, file, **kw):
+            return dict({"slot": slot, "file": file, "license": "права у заказчика (демо)", "status": "accepted"}, **kw)
+        (adir / "manifest.yaml").write_text(dump({"example": True, "assets": [
+            mrow("header-logo", "logo.svg", variant="default", format="svg"),
+            mrow("header-logo", "spasibo/logo.svg", page="spasibo", variant="default", format="svg"),
+            mrow("hero-visual", "hero-visual-mobile.avif", variant="mobile", format="avif"),
+            mrow("hero-visual", "hero-visual-mobile.webp", variant="mobile", format="webp"),
+            mrow("hero-visual", "hero-visual-desktop.avif", variant="desktop", format="avif"),
+            mrow("hero-visual", "hero-visual-desktop.webp", variant="desktop", format="webp"),
+            mrow("case-studies-photo", "case-photo.webp", status="draft")]}), encoding="utf-8")
+        (pdir / "manifest.yaml").write_text(dump({"example": True, "assets": [
+            mrow("icons", "icons/play.svg", variant="play", role="decorative"),
+            mrow("icons", "icons/pause.svg", variant="pause", status="draft"),
+            mrow("fonts", "fonts/text.woff2")]}), encoding="utf-8")
+        hp = docpaths.design(fx.slug, "asset-plans", "home.yaml", surface="promo", repo=fx.root)
+        ap = Y.safe_load(hp.read_text(encoding="utf-8"))
+        next(s for s in ap["slots"] if s["id"] == "team-person-1-photo")[DEMO] = {
+            "what": "кадр рук мастера без лица — до письменных согласий", "files": {"desktop": str(demo)}}
+        hp.write_text(dump(ap), encoding="utf-8")
+        pp = docpaths.site(fx.slug, "promo", "plans", "home.yaml", repo=fx.root)
+        plan = Y.safe_load(pp.read_text(encoding="utf-8"))
+        plan["page"]["treatment"]["notes"] = "запасной вид первого экрана — постер без ролика"
+        noted = [s["id"] for s in plan["sections"] if get(s, "treatment", "notes")]
+        pp.write_text(dump(plan), encoding="utf-8")
+        art = docpaths.design(fx.slug, "artifacts", repo=fx.root)
+        head = "| id | файл | слот | артефакт |\n|---|---|---|---|\n"
+        at = art.read_text(encoding="utf-8")
+        art.write_text(at.replace(head, "| id | файл | sha256 | слот | артефакт |\n|---|---|---|---|---|\n"
+                                  f"| `u-logo` | `design/promo/assets/logo.svg` | `{sha_path(adir / 'logo.svg')[7:]}` "
+                                  "| `header-logo` | `canvas:promo` |\n"
+                                  "| `u-hero-d` | `design/promo/assets/hero-visual-desktop.webp` — кадр первого экрана "
+                                  "| — | `hero-visual` | `canvas:promo` |\n"
+                                  f"| `u-demo` | `${kbpaths.ENV_HOME}/out/demo/person-demo.png` — демо, вне git | — | "
+                                  "`team-person-1-photo` | `canvas:promo` |\n"
+                                  "| `u-play` | `design/_assets/icons/play.svg` | — | `icons` (`play`) | "
+                                  "`canvas:promo` |\n"
+                                  "| `u-play-ds` | `design/_assets/icons/play.svg` | — | `icons` (`play`) | "
+                                  "`design-system` |\n"
+                                  "| `u-other` | `design/promo/assets/hero-visual-mobile.webp` | — | `hero-visual` | "
+                                  "`canvas:other` |\n"), encoding="utf-8")
+        m = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, "2026-09-29")
+
+        def asset_rows(page):
+            t = mod("layer").tables(m.files[f"pages/{page}/assets.md"])[0]
+            return [{c: (r.get(c) or "").strip() for c in t.columns} for r in t.rows]
+
+        def of(rows, slot):
+            return [r for r in rows if r["слот"].startswith(f"`{slot}`")]
+        hr, sr = asset_rows("home"), asset_rows("spasibo")
+        check("ключ ассета — страница и слот: у двух планов слот header-logo; строка манифеста с page — своей "
+              "странице, без page — остальным",
+              head in at and [r["файл"] for r in of(hr, "header-logo")] == ["`logo.svg`"]
+              and [r["файл"] for r in of(sr, "header-logo")] == ["`spasibo/logo.svg`"])
+        hero = of(hr, "hero-visual")
+        check("файл слота — по варианту и формату: строка на вариант в порядке плана, WebP раньше AVIF; у строки — "
+              "свой вариант и id загрузки (ячейка «файл» с пояснением после пути читается)",
+              [r["файл"] for r in hero] == ["`hero-visual-desktop.webp`", "`hero-visual-mobile.webp`"]
+              and hero[0]["варианты"].startswith("desktop ") and "mobile" not in hero[0]["варианты"]
+              and hero[1]["варианты"].startswith("mobile ") and [r["id загрузки"] for r in hero] == ["u-hero-d", "—"]
+              and of(hr, "header-logo")[0]["id загрузки"] == "u-logo")
+        gaps = m.files[INPUT].split("## Пробелы", 1)[1].split("## Итог", 1)[0]
+        empty = next((x for x in gaps.splitlines() if "слотов без файла" in x), "")
+        check("строка манифеста draft на холст не идёт: слот — заглушка placeholder, в пробелах — слот со статусом",
+              [r["файл"] for r in of(hr, "case-studies-photo")] == ["placeholder · TODO"]
+              and "case-studies-photo (draft)" in empty and "og-image" in empty)
+        person = of(hr, "team-person-1-photo")
+        debt = [f for f in m.rep.items if f.rule == "R-DEBT-002" and "демо-картинки" in f.message]
+        check("x-demo слота плана ассетов — строка с путём вне git и пометкой «демо», вариант — ключ files, id "
+              "загрузки — по раскрытому пути; заглушки у слота нет; долг — R-DEBT-002 hint и строка пробелов",
+              [r["файл"] for r in person] == [f"`{demo}`"] and person[0]["id загрузки"] == "u-demo"
+              and person[0]["источник и лицензия"].startswith(DEMO_MARK + " · кадр рук мастера")
+              and person[0]["варианты"].startswith("desktop ") and "team-person-1-photo" not in empty
+              and len(debt) == 1 and debt[0].severity == "hint" and "team-person-1-photo" in debt[0].message
+              and "демо-картинки слотов — 1" in gaps)
+        shared = [r for r in hr if SHARED_MARK in r["слот"]]
+        check("общие ассеты продукта — принятые файлы design/_assets/ строками у каждой страницы, с id загрузки; draft "
+              "и шрифты не идут",
+              [r["файл"] for r in shared] == ["`_assets/icons/play.svg`"] and shared[0]["id загрузки"] == "u-play"
+              and shared[0]["alt"] == 'alt=""' and shared[0]["варианты"] == "play"
+              and [r["файл"] for r in sr if SHARED_MARK in r["слот"]] == ["`_assets/icons/play.svg`"])
+        clips = [mrow("clip", "a.av1.mp4", variant="desktop", format="mp4", codec="AV1 Main (av01.0.08M.10)"),
+                 mrow("clip", "a.h264.mp4", variant="desktop", format="mp4", codec="H.264 High 4.0 (avc1.640028)"),
+                 mrow("clip", "mark-light.svg", variant="mark"), mrow("clip", "mark-dark.svg", variant="mark"),
+                 mrow("clip", "old.webp", variant="mark", page="other")]
+        check("у роликов одного формата — H.264 раньше AV1; файлы одного варианта и формата идут все; строка другой "
+              "страницы не читается",
+              [r["file"] for r in slot_files(clips, "clip", "home")[0]] == ["a.h264.mp4", "mark-light.svg",
+                                                                           "mark-dark.svg"])
+        ref8 = sorted(f.message.split(" нет id")[0] for f in m.rep.items if f.rule == "R-REF-008")
+        check("R-REF-008 — только у файлов без строки «Загрузок»: телефонный вариант и знак страницы spasibo, по одной "
+              "находке на файл; id загрузки артефакта ДС id холста поверхности не подменяет",
+              ref8 == ["у файла ассета hero-visual-mobile.webp", "у файла ассета spasibo/logo.svg"])
+        page = Y.safe_load(m.files["pages/home/page.yaml"])
+        check(f"заметки подачи (treatment.notes) страницы и секций ({len(noted)}) — в page.yaml макета",
+              get(page, "treatment", "notes") == plan["page"]["treatment"]["notes"] and noted
+              and all(get(s, "treatment", "notes") for s in page["sections"] if s["id"] in noted))
+
+        def asset_paths(unit):
+            return sorted(r["path"].rsplit("/assets/", 1)[1] for r in unit_sources(fx.slug, "promo", unit, fx.root)
+                          if r["id"].startswith("asset · "))
+        fp0 = unit_fingerprint(fx.slug, "promo", "home", fx.root)
+        (adir / "hero-visual-desktop.avif").write_bytes(b"new avif")
+        same = unit_fingerprint(fx.slug, "promo", "home", fx.root)
+        (adir / "hero-visual-desktop.webp").write_bytes(b"new webp")
+        check("источники страницы: строки asset — файлы входа макета (принятые, своей страницы, по варианту и формату);"
+              " draft, демо и общие ассеты продукта в отпечаток не входят; правка файла вне входа (AVIF) отпечаток не "
+              "меняет, правка файла входа — меняет",
+              asset_paths("home") == ["hero-visual-desktop.webp", "hero-visual-mobile.webp", "logo.svg"]
+              and asset_paths("spasibo") == ["spasibo/logo.svg"] and same == fp0
+              and unit_fingerprint(fx.slug, "promo", "home", fx.root) not in (fp0, None))
     with FP.built("cabinet-demo") as fx:
         ctx = assemble(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, "2026-09-29")
         check("кабинет без ДС — пробел в INPUT.md", "ДС нет" in ctx.files[INPUT])

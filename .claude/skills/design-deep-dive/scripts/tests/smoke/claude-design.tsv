@@ -11,7 +11,7 @@ scripts/claude-design/kit/example/tokens.css	kit	data
 scripts/claude-design/kit/export.py	kit	help	
 scripts/claude-design/kit/kit_manifest.py	kit	help; run: --selftest	
 scripts/claude-design/kit/marks.js	kit	compile	
-scripts/claude-design/kit/shot.py	kit	help	
+scripts/claude-design/kit/shot.py	kit	help; run: --selftest	
 scripts/claude-design/lang_check.py	utility	import-only; run: {skill}/scripts/claude-design/kit/example	
 scripts/claude-design/literal_tokens.py	utility	help; run: --selftest	
 scripts/claude-design/mockup_checks.py	utility	help; run: selftest	

@@ -10,9 +10,9 @@
 Подкоманды:
   page <url|file.html|dir> [--views 1440x900,390x844 | --acceptance] [--surface page|app] [--preset A|B|C|D]
        [--tokens ТОКЕНЫ_ДС] [--facts facts.md|facts.yaml] [--copy copy.md|copy-deck.yaml [--page ID]]
-       [--demo demo-data.json] [--assets assets.md|план.yaml] [--forms ID|план.yaml …] [--src DIR]
-       [--allow warm,serif,…] [--ignore-selector CSS] [--block-external | --allow-external] [--shots DIR]
-       [--json OUT.json] [--md OUT.md] [--min-free-gb 2]
+       [--demo demo-data.json] [--assets assets.md|план.yaml [--uploads ARTIFACTS.md]] [--forms ID|план.yaml …]
+       [--src DIR] [--allow warm,serif,…] [--ignore-selector CSS] [--block-external | --allow-external]
+       [--shots DIR] [--json OUT.json] [--md OUT.md] [--min-free-gb 2]
        exit 0 — нет critical и кластера примет, 2 — есть, 1 — ошибка, 3 — мало свободной памяти (браузер не
        запускался)
   resize <url|file> [--desktop 1440x900] [--mobile 390x844] [--wait-ms 1000] [--shots DIR]
@@ -21,13 +21,20 @@
        (--max-diff — порог cd 06/04 §3 B); окна по умолчанию — самая широкая ширина приёмки и самая широкая ниже
        первого брейкпоинта эталона ui; exit 0 pass / 2 fail
   selftest  офлайн-проверки: цвет, контраст, числа с единицей и объектом, факты и копия таблицами и YAML, демо-набор,
-       формы, пороги владельцев, id примет, поверхность примет, вердикт кластера, токены ДС, сводка по доменам
+       список ассетов и реестр загрузок, части артборда, формы, пороги владельцев, id примет, поверхность примет,
+       вердикт кластера, токены ДС, сводка по доменам
 
 Ширины. У статичной копии артборда окно — её рамка. У другой цели (собранная страница) без --views окна — ширины
 артбордов `kb/common/acceptance-widths.yaml` (`artboards` — все ширины приёмки), с --acceptance — ещё отдельный прогон
 вылета на `overflow_only`. Высота окна — параметр прогона: 900 у широких окон, 844 у окон уже первого брейкпоинта ДС
 (окна первого экрана site). Первый брейкпоинт — из токенов ДС (--tokens: CSS, DTCG или tokens.json артефакта), без них
 — эталонные токены ui.
+Части артборда. Страница, которая длиннее предела высоты артборда, лежит на холсте частями `<Имя>-<ширина>-<N>`
+(`Home-390-1`, `Home-390-2`; ширина в имени — ширина рамки). Шапка с навигацией и H1 — у первой части, поэтому у
+следующих навигация не проверяется (M-NAV — справкой), а кадр --shots назван по копии артборда: части одной ширины
+друг друга не затирают.
+Ярлыки вайрфрейма — элементы с атрибутом `data-wf` (ярлык роли секции, подпись заглушки медиа): пометки для чтения
+артборда, а не содержимое страницы. В проверки они не входят — как элементы --ignore-selector.
 
 Проверки и id примет. id проверок — ключи раздела `checks` реестра `kb/common/tells.yaml`: там у ключа группа (look —
 приметы вида, honesty — честность, acceptance — проверки приёмки), id приметы `tell` и ключ `--allow`. Находка несёт
@@ -45,8 +52,10 @@
   или сложившийся кластер.
   Приметы вида: тёплая тонированная бумага, выделенное слово заголовка, антиква в заголовках, капс-надзаголовки (частота
   — число владельца COPY-C-18: не чаще одного на N секций с заголовком H1, H2), доля капса, пилюля над H1, градиентный
-  текст, hero на высоту окна по центру без продолжения (порог высоты — AIL-06 site), фото-hero под вуалью, ряд крупных
-  чисел, три одинаковые карточки (вариация длины текстов — AIL-07 site), бенто из однотипных плиток и орбита иконок
+  текст, hero на высоту окна по центру без продолжения (порог высоты — AIL-06 site; hero — блок верхнего уровня с
+  H1, а когда этот блок — обёртка вроде рамки копии артборда — секция разметки с H1: `<section>` или `data-section`),
+  фото-hero под вуалью, ряд крупных чисел, три одинаковые карточки (вариация длины текстов — AIL-07 site; ряд с
+  заглушками `[PLACEHOLDER…]` не мерится: текстов ещё нет), бенто из однотипных плиток и орбита иконок
   (пороги — реестр клише creative), мета-строки «·», стрелки в кнопках и ссылках («»» — кавычка, «↗» у внешней ссылки —
   законна), моно-подписи, нумерация 01/02/03, стекло, бегущая строка, нарисованный хром, шкала кеглей и высота шапки
   (пороги — `scripts/ui/data/thresholds.yaml`: кегли — одни для всех поверхностей, шапка — по поверхности: страница
@@ -54,16 +63,25 @@
   Честность: сток и хотлинк картинок; подписи и alt против списка ассетов; числа против фактов и текстов — число
   совпадает с фактом значением, единицей и объектом, а строка факта без источника число не легализует; текст против
   copy deck; «рыба»; отзывы без источника.
+  Картинка и список ассетов. Картинка с именем файла ищется в списке по имени. Загрузка холста `/_blob/<id>` — по
+  реестру загрузок: колонка «id загрузки» списка, затем таблица «Загрузки» ARTIFACTS.md продукта (--uploads; без
+  ключа — ARTIFACTS.md в папках выше списка ассетов) — её файл или слот есть в списке. Файл общих ассетов продукта
+  (`design/_assets/`: знак, иконки) в список страницы не входит и находкой не считается. Находка — загрузка вне
+  реестра и загрузка, чьих файла и слота в списке нет; без реестра сверка не идёт — одна находка на прогон.
   Формы — по `kb/site/05-conversion-funnels/lead-forms.yaml`: запреты раздела `forbidden`, которые видны в DOM, у любой
   формы; с --forms — поля и видимые подписи против набора формы плана.
   Приёмка: навигация, тело 16 px и вылет на телефоне, строки H1, наложение текста, слепая зона разметки (canvas и видео).
+  Тело 16 px считается по абзацам внутри `main` (без `main` — вне шапки, подвала и навигации): строка реквизитов
+  подвала — не основной текст.
   Навигация на телефоне — major, как пункт D2 приёмки (S): страница без меню по плану (посадочная, одноэкранная) —
   законна, такую находку отбрасывают с причиной.
 Входы. Факты — facts.md входа холста (таблица «Факты»: id · дословно · источник · где можно) или facts.yaml продукта;
 тексты — copy.md входа (строки слотов страницы или таблица «ключ · роль · текст …» кабинета; `{имя}` в тексте —
 подстановка, её значение любое) или copy deck (YAML: выбранные варианты страницы --page); демо-набор кабинета —
 demo-data.json входа (--demo): тексты и числа записей, даты и телефоны, объёмы коллекций — не выдумка; ассеты —
-assets.md входа (колонки «Файл», «Подпись», «Alt») или YAML плана ассетов (записи с file и caption или alt); формы —
+assets.md входа (колонки «Файл», «Подпись», «Alt»; «Слот» и «id загрузки» — для загрузок холста) или YAML плана
+ассетов и манифеста (записи с file или id слота и caption или alt); реестр загрузок — ARTIFACTS.md продукта, таблица
+«Загрузки» (колонки id, файл, слот); формы —
 id наборов lead-forms.yaml или YAML плана страницы (`form.ref: lead-forms.yaml#<id>`). Токены ДС (--tokens) — первый
 брейкпоинт, гарнитуры и цвета: антиква в заголовках и тёплый фон, которые называет ДС, — решение, а не примета.
 `--allow` снимает примету, если бриф или арт-дирекция записали решение; ключи — `allow` реестра примет.
@@ -668,53 +686,162 @@ def load_demo(path):
     return {'texts': texts, 'values': values}
 
 
+def _md_rows(text, is_header):
+    """Строки таблиц markdown, чья шапка проходит is_header(ячейки шапки в нижнем регистре) → [{колонка: ячейка}]."""
+    out, header = [], None
+    for line in text.splitlines():
+        st = line.strip()
+        if not st.startswith('|'):
+            header = None if not st else header
+            continue
+        cells = _cells(st)
+        if all(re.fullmatch(r':?-{3,}:?', c) for c in cells if c):
+            continue
+        low = [c.lower() for c in cells]
+        if is_header(low):
+            header = low
+            continue
+        if header:
+            out.append(dict(zip(header, cells)))
+    return out
+
+
+def _code(cell):
+    """Значение ячейки формы: текст первых обратных кавычек, без них — ячейка целиком; прочерк — пусто."""
+    cell = str(cell or '').strip()
+    m = re.search(r'`([^`]+)`', cell)
+    val = (m.group(1) if m else cell).strip()
+    return '' if val in ('—', '–', '-') else val
+
+
+def _file_stem(path):
+    return os.path.splitext(os.path.basename(path))[0].lower()
+
+
+def asset_index(rows):
+    """Строки списка ассетов [{file, slot, caption, alt, uploads}] → поиск строки по имени файла без расширения, id
+    слота и id загрузки. Строка пустого слота (заглушка placeholder без файла) находится по слоту и по имени
+    «placeholder»: так картинка-заглушка страницы остаётся картинкой из списка."""
+    idx = {'rows': rows, 'by_stem': {}, 'by_slot': {}, 'by_upload': {}}
+    for r in rows:
+        if r['file']:
+            idx['by_stem'].setdefault(_file_stem(r['file']), r)
+        elif r.get('placeholder'):
+            idx['by_stem'].setdefault('placeholder', r)
+        if r['slot']:
+            idx['by_slot'].setdefault(r['slot'], r)
+        for u in r['uploads']:
+            idx['by_upload'].setdefault(u, r)
+    return idx
+
+
 def parse_assets_readme(path):
-    """Список ассетов → {stem: {caption, alt, file}}: assets.md входа холста (колонки «Файл», «Подпись», «Alt») или YAML
-    плана ассетов и манифеста (записи с file и caption или alt на любой глубине)."""
-    rows = {}
+    """Список ассетов → индекс asset_index: assets.md входа холста (колонки «Файл», «Подпись», «Alt»; «Слот» и «id
+    загрузки» — если есть) или YAML плана ассетов и манифеста (записи с file или id слота и caption или alt на любой
+    глубине). Прочерк в ячейке — пусто: сверять не с чем; alt декоративной картинки `alt=""` — тоже."""
     if not path:
         return None
     text = open(path, encoding='utf-8').read()
+    rows = []
+
+    def row(f, slot, cap, alt, uploads=(), placeholder=False):
+        rows.append({'file': f, 'slot': slot, 'caption': cap, 'alt': alt, 'uploads': list(uploads),
+                     'placeholder': placeholder})
+
     if path.lower().endswith(('.yaml', '.yml', '.json')):
         import yaml
 
         def walk(x):
             if isinstance(x, dict):
                 f = x.get('file') or x.get('path') or x.get('src')
-                if isinstance(f, str) and (x.get('caption') is not None or x.get('alt') is not None):
-                    rows[os.path.splitext(os.path.basename(f))[0].lower()] = {
-                        'file': f, 'caption': str(x.get('caption') or '').strip('"« »'),
-                        'alt': str(x.get('alt') or '').strip('"« »')}
+                f = f if isinstance(f, str) else ''
+                # id слота: у плана ассетов — `id` (там `slot` — тип слота блока), у манифеста — `slot`
+                slot = next((x[k] for k in ('id', 'slot') if isinstance(x.get(k), str)), '')
+                if (f or slot) and (x.get('caption') is not None or x.get('alt') is not None):
+                    row(f, slot, str(x.get('caption') or '').strip('"« »'), str(x.get('alt') or '').strip('"« »'))
                 for v in x.values():
                     walk(v)
             elif isinstance(x, list):
                 for v in x:
                     walk(v)
         walk(yaml.safe_load(text))
-        return rows
-    header = None
-    for line in text.splitlines():
-        if not line.strip().startswith('|'):
-            header = None if not line.strip() else header
-            continue
-        cells = [c.strip() for c in line.strip().strip('|').split('|')]
-        if all(re.fullmatch(r':?-{3,}:?', c) for c in cells if c):
-            continue
-        low = [c.lower() for c in cells]
-        if any(h.startswith(('file', 'файл')) for h in low) and any(('caption' in h or 'подпис' in h) for h in low):
-            header = low
-            continue
-        if not header:
-            continue
-        rec = dict(zip(header, cells))
-        f = next((rec[h] for h in header if h.startswith(('file', 'файл'))), '')
-        cap = next((rec[h] for h in header if 'caption' in h or 'подпис' in h), '')
-        alt = next((rec[h] for h in header if h.startswith('alt')), '')
-        f = f.strip('` ')
-        if f:
-            rows[os.path.splitext(os.path.basename(f))[0].lower()] = {'file': f, 'caption': cap.strip('"« »'),
-                                                                      'alt': alt.strip('"« »')}
-    return rows
+        return asset_index(rows)
+    for rec in _md_rows(text, lambda low: any(h.startswith(('file', 'файл')) for h in low)
+                        and any(('caption' in h or 'подпис' in h) for h in low)):
+        col = lambda test: next((rec[h] for h in rec if test(h)), '')   # noqa: E731
+        f_cell = col(lambda h: h.startswith(('file', 'файл')))
+        placeholder = '`' not in f_cell and f_cell.strip().lower().startswith('placeholder')
+        f = '' if placeholder else _code(f_cell)
+        slot = _code(col(lambda h: h.startswith(('slot', 'слот')))).split(' ')[0]
+        cap = _code(col(lambda h: 'caption' in h or 'подпис' in h)).strip('"« »')
+        alt = _code(col(lambda h: h.startswith('alt'))).strip('"« »')
+        ups = re.findall(r'[0-9A-Za-z_-]{6,}', col(lambda h: 'id загрузки' in h or 'upload' in h))
+        if f or slot or placeholder:
+            row(f, slot, cap, '' if alt == 'alt=' else alt, ups, placeholder)
+    return asset_index(rows)
+
+
+def load_uploads(path):
+    """Реестр загрузок холста — таблица «Загрузки» ARTIFACTS.md продукта (колонки id, файл, слот, артефакт; другие
+    колонки не мешают) → {id: {file, slot, artifact}}. Загрузка живёт в claude.ai, на артборде она — `/_blob/<id>`."""
+    if not path:
+        return None
+    try:
+        text = open(path, encoding='utf-8').read()
+    except OSError as e:
+        raise SystemExit(f'не читается реестр загрузок {path}: {e}')
+    reg = {}
+    for rec in _md_rows(text, lambda low: 'id' in low and any(h.startswith(('файл', 'file')) for h in low)):
+        fid = _code(rec.get('id'))
+        if fid:
+            reg[fid] = {'file': _code(next((rec[h] for h in rec if h.startswith(('файл', 'file'))), '')),
+                        'slot': _code(rec.get('слот') or rec.get('slot')).split(' ')[0],
+                        'artifact': _code(rec.get('артефакт') or rec.get('artifact'))}
+    return reg
+
+
+def find_uploads(assets_path, depth=6):
+    """ARTIFACTS.md продукта для списка ассетов: первая папка вверх от списка (не дальше depth уровней), где он лежит
+    — у входа холста это `design/` продукта; нет — None."""
+    d = os.path.dirname(os.path.abspath(assets_path))
+    for _ in range(depth):
+        p = os.path.join(d, 'ARTIFACTS.md')
+        if os.path.isfile(p):
+            return p
+        if os.path.dirname(d) == d:
+            break
+        d = os.path.dirname(d)
+    return None
+
+
+def blob_id(src):
+    """id загрузки холста в адресе картинки `/_blob/<id>`; другой адрес — None."""
+    m = re.search(r'/_blob/([^/?#]+)', urlparse(src or '').path)
+    return m.group(1) if m else None
+
+
+def asset_for(img, assets, uploads):
+    """Картинка страницы {file — имя без расширения, src, blob — id загрузки} → (строка списка ассетов или None,
+    статус, запись реестра). Статусы: row — строка найдена; shared — файл общих ассетов продукта (`_assets/`), в
+    список страницы не входит; off-list — загрузка есть в реестре, а её файла и слота в списке нет; unregistered —
+    загрузки нет в реестре; no-registry — реестра нет вовсе (ни id в списке, ни таблицы «Загрузки»); missing — файла
+    нет в списке."""
+    blob = img['blob'] if 'blob' in img else blob_id(img.get('src'))
+    if not blob:
+        f = img['file']
+        r = assets['by_stem'].get(f) or next((r for k, r in assets['by_stem'].items()
+                                              if f.startswith(k) or k.startswith(f)), None)
+        return (r, 'row', None) if r else (None, 'missing', None)
+    r = assets['by_upload'].get(blob)
+    if r:
+        return r, 'row', None
+    up = (uploads or {}).get(blob)
+    if not up:
+        return None, ('unregistered' if uploads is not None or assets['by_upload'] else 'no-registry'), None
+    r = assets['by_stem'].get(_file_stem(up['file'])) or assets['by_slot'].get(up['slot'])
+    if r:
+        return r, 'row', up
+    return None, ('shared' if re.search(r'(?:^|/)_assets/', up['file']) else 'off-list'), up
 
 
 def load_form_sets(items):
@@ -817,7 +944,8 @@ COLLECT_JS = r"""
 (conf) => {
   const vw = conf.vw, vh = conf.vh, LIM = 6000;
   const out = {vw, vh, url: location.href, lang: document.documentElement.getAttribute('lang') || ''};
-  const ign = conf.ignore ? Array.from(document.querySelectorAll(conf.ignore)) : [];
+  // ярлыки вайрфрейма [data-wf] — пометки артборда, не содержимое страницы: вне проверок, как --ignore-selector
+  const ign = Array.from(document.querySelectorAll(conf.ignore ? '[data-wf], ' + conf.ignore : '[data-wf]'));
   const isIgn = (el) => ign.some(g => g === el || g.contains(el));
   const cv = document.createElement('canvas'); cv.width = cv.height = 1;
   const cx = cv.getContext('2d', {willReadFrequently: true});
@@ -922,7 +1050,8 @@ COLLECT_JS = r"""
     leaves.push({el: desc(el), tag: el.tagName.toLowerCase(), text: own.slice(0, 160), fs: parseFloat(cs.fontSize),
                  fw: parseInt(cs.fontWeight) || 400, ff: cs.fontFamily, tt: cs.textTransform,
                  ls: cs.letterSpacing === 'normal' ? 0 : parseFloat(cs.letterSpacing), color: rgba(cs.color), bg: bg.rgb,
-                 bg_img: bg.img, in_btn: !!el.closest('button, a, [role=button]'), ext});
+                 bg_img: bg.img, in_btn: !!el.closest('button, a, [role=button]'), ext,
+                 body: main ? main.contains(el) : !el.closest('header, footer, nav')});
   }
   out.leaves = leaves;
 
@@ -1003,12 +1132,19 @@ COLLECT_JS = r"""
   const h1 = heads.find(h => h.tagName === 'H1') || null;
   out.hero = null;
   if (h1) {
+    // hero — блок верхнего уровня с H1 (ребёнок body или main). Когда этот блок — обёртка, а не секция (рамка копии
+    // артборда без <main>, корень приложения), hero — самая внешняя секция разметки между обёрткой и H1
     let hero = h1;
     while (hero.parentElement && hero.parentElement !== document.body && hero.parentElement !== main) hero = hero.parentElement;
+    if (hero !== h1 && !hero.matches('section, [data-section], header')) {
+      let sec = null;
+      for (let e = h1.parentElement; e && e !== hero; e = e.parentElement) if (e.matches('section, [data-section]')) sec = e;
+      if (sec) hero = sec;
+    }
     const hr = hero.getBoundingClientRect(); const hs = getComputedStyle(hero); const h1s = getComputedStyle(h1); const h1r = h1.getBoundingClientRect();
     const area = Math.max(1, hr.width * Math.min(hr.height, Math.max(vh, 1)));
     const media = [], bgUrl = [], overlays = [];
-    const all = [hero, ...hero.querySelectorAll('*')].slice(0, 500);
+    const all = [hero, ...hero.querySelectorAll('*')].filter(m => !isIgn(m)).slice(0, 500);
     for (const m of all) {
       const r = m.getBoundingClientRect(); const s = getComputedStyle(m);
       const big = r.width >= hr.width * 0.85 && r.height >= Math.min(hr.height, vh) * 0.5;
@@ -1046,7 +1182,7 @@ COLLECT_JS = r"""
   const rows = []; k = 0;
   for (const p of document.querySelectorAll('body *')) {
     if (++k > LIM || rows.length > 200) break; if (isIgn(p)) continue;
-    const kids = Array.from(p.children).filter(c => visible(c));
+    const kids = Array.from(p.children).filter(c => visible(c) && !isIgn(c));
     if (kids.length < 3 || kids.length > 6) continue;
     const rs = kids.map(c => c.getBoundingClientRect()); const t0 = rs[0].top;
     if (!rs.every(r => Math.abs(r.top - t0) < 10)) continue;
@@ -1068,6 +1204,7 @@ COLLECT_JS = r"""
     rows.push({el: desc(p), n: kids.length, top: t0 + scrollY, w_ratio: Math.max(...ws) / Math.max(1, Math.min(...ws)), cv: +cv.toFixed(3),
                h_ratio: Math.max(...hs2) / Math.max(1, Math.min(...hs2)), min_w: Math.min(...ws) / pr.width, min_h: Math.min(...hs2),
                same: sig.every(s => s === sig[0]), content: kids.every(c => !!c.querySelector('h2,h3,h4,h5,p,strong')),
+               ph: kids.filter(c => /\[PLACEHOLDER/i.test(c.innerText || '')).length,
                nums: nums.length, num_texts: nums.map(x => x.t), in_chrome: !!p.closest('nav, header, footer')});
   }
   out.rows = rows;
@@ -1078,7 +1215,7 @@ COLLECT_JS = r"""
     if (++k > LIM || bento.length > 20) break; if (isIgn(g) || !visible(g)) continue;
     const gs = getComputedStyle(g);
     if (!(gs.display.includes('grid') || (gs.display.includes('flex') && gs.flexWrap === 'wrap'))) continue;
-    const tiles = Array.from(g.children).filter(c => visible(c));
+    const tiles = Array.from(g.children).filter(c => visible(c) && !isIgn(c));
     if (tiles.length < 4) continue;
     const st = tiles.map(c => getComputedStyle(c));
     const rad = st.map(x => x.borderTopLeftRadius), pad = st.map(x => x.paddingTop + ' ' + x.paddingLeft);
@@ -1203,7 +1340,15 @@ def make_router(host, blocked):
     return handler
 
 
-def collect(target, views, ignore, block_external, shots_dir):
+def shot_name(w, h, copy=None):
+    """Файл кадра первого экрана в --shots: у статичной копии артборда — по имени копии (части одного артборда и
+    артборды разных страниц одной ширины кладутся в одну папку и друг друга не затирают), у другой цели — по классу
+    окна (`desktop-1440x900-00.jpg` — имена видов страницы слепого выбора `stand_page.py`)."""
+    kind = 'desktop' if w >= 1024 else ('tablet' if w >= 768 else 'mobile')
+    return f'{copy or kind}-{w}x{h}-00.jpg'
+
+
+def collect(target, views, ignore, block_external, shots_dir, copy=None):
     from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
     import functools, http.server, socketserver, threading
     httpd, url, local_host = None, target, None
@@ -1248,8 +1393,7 @@ def collect(target, views, ignore, block_external, shots_dir):
                     data['viewport'] = spec
                     if shots_dir:
                         os.makedirs(shots_dir, exist_ok=True)
-                        kind = 'desktop' if w >= 1024 else ('tablet' if w >= 768 else 'mobile')
-                        fn = os.path.join(shots_dir, f'{kind}-{w}x{h}-00.jpg')
+                        fn = os.path.join(shots_dir, shot_name(w, h, copy))
                         try:                              # WebGL-страницы бывают «нестабильны» для скриншота — не ронять прогон
                             page.screenshot(path=fn, type='jpeg', quality=80, animations='disabled', timeout=15000)
                             data['shot'] = os.path.abspath(fn)
@@ -1411,8 +1555,9 @@ def check_forms(F, desk, form_sets, allowed, surface='page'):
 
 def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts):
     """opts: surface (page | app), preset (A–D), first_bp, form_sets; ds — гарнитуры и цвета токенов ДС (ds_look),
-    demo — демо-набор кабинета (load_demo). Кадр с overflow_only — только вылет. Находки — после фильтра поверхности и
-    вердикта кластера (verdict)."""
+    demo — демо-набор кабинета (load_demo), uploads — реестр загрузок (load_uploads), part — номер части артборда
+    (artboard_part). Кадр с overflow_only — только вылет. Находки — после фильтра поверхности и вердикта кластера
+    (verdict)."""
     F = []
     over = [v for v in views if v.get('overflow_only')]
     views = [v for v in views if not v.get('overflow_only')]
@@ -1534,8 +1679,9 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
             {'rows': [{'el': r['el'], 'numbers': r['num_texts']} for r in stats[:3]]},
             'снять ряд чисел, если каждое число не из фактов и бриф его не заказывал', allowed)
     cv_max = cards_cv_max()
+    # ряд с заглушками [PLACEHOLDER…] не мерится: одинаковая длина заглушек — не одинаковые тексты карточек
     cards = [r for r in rows if r['n'] == 3 and r['w_ratio'] <= 1.06 and r['h_ratio'] <= 1.25 and r['same'] and
-             r['min_w'] >= 0.2 and r['min_h'] >= 120 and r['content'] and not r['in_chrome'] and
+             r['min_w'] >= 0.2 and r['min_h'] >= 120 and r['content'] and not r['in_chrome'] and not r.get('ph') and
              (cv_max is None or r.get('cv', 0) < cv_max)]
     if cards:
         add(F, 'LOOK-THREE-CARDS', 'major', desk['viewport'],
@@ -1689,24 +1835,53 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
         stem = os.path.splitext(os.path.basename(urlparse(im['src']).path))[0].lower()
         if im['src'].startswith('data:'):
             continue
-        caps_all.append({'el': im['el'], 'file': stem, 'src': im['src'][:160], 'alt': im['alt'], 'caption': im['caption']})
+        caps_all.append({'el': im['el'], 'file': stem, 'src': im['src'][:160], 'blob': blob_id(im['src']),
+                         'alt': im['alt'], 'caption': im['caption']})
     if assets is not None:
+        shared, unverified = [], []
         for c in caps_all:
             if not c['file'] or stock_kind(c.get('src') or ''):
                 continue
-            row = assets.get(c['file']) or next((r for k, r in assets.items() if c['file'].startswith(k) or k.startswith(c['file'])), None)
-            if not row:
-                add(F, 'HON-CAPTION', 'major', desk['viewport'], f"картинки «{c['file']}» нет в списке ассетов",
-                    {'img': c}, f"картинка {c['el']}: только файлы из списка ассетов")
+            row, status, up = asset_for(c, assets, opts.get('uploads'))
+            if status == 'shared':
+                shared.append(up['file'])
                 continue
+            if status == 'no-registry':
+                unverified.append(c)
+                continue
+            if not row:
+                blob = c['blob']
+                msg, fix = {
+                    'missing': (f"картинки «{c['file']}» нет в списке ассетов",
+                                f"картинка {c['el']}: только файлы из списка ассетов"),
+                    'unregistered': (f'загрузки {blob} нет в реестре загрузок',
+                                     f"картинка {c['el']}: только загрузки из списка ассетов — строка «Загрузок» "
+                                     'ARTIFACTS.md (id, файл, слот) или id загрузки в списке'),
+                    'off-list': (f"загрузка {blob} — файл {(up or {}).get('file') or '?'}, слот "
+                                 f"{(up or {}).get('slot') or '?'}: ни файла, ни слота нет в списке ассетов страницы",
+                                 f"картинка {c['el']}: только файлы слотов плана ассетов страницы; общий ассет "
+                                 'продукта — файл из design/_assets/'),
+                }[status]
+                add(F, 'HON-CAPTION', 'major', desk['viewport'], msg, {'img': c, 'upload': up}, fix)
+                continue
+            name = row['file'] or row['slot'] or c['file']
             if c['caption'] is not None and row['caption'] and norm_text(c['caption']) != norm_text(row['caption']):
                 add(F, 'HON-CAPTION', 'critical', desk['viewport'], f"подпись не из списка ассетов: «{c['caption'][:60]}»",
-                    {'expected': row['caption'], 'found': c['caption'], 'file': row['file']},
-                    f"подпись к {row['file']} — дословно «{row['caption']}» (список ассетов)")
+                    {'expected': row['caption'], 'found': c['caption'], 'file': name},
+                    f"подпись к {name} — дословно «{row['caption']}» (список ассетов)")
             if c['alt'] is not None and row['alt'] and norm_text(c['alt']) != norm_text(row['alt']):
                 add(F, 'HON-CAPTION', 'major', desk['viewport'], f"alt не из списка ассетов: «{(c['alt'] or '')[:60]}»",
-                    {'expected': row['alt'], 'found': c['alt'], 'file': row['file']},
-                    f"alt у {row['file']} — дословно «{row['alt']}» (список ассетов)")
+                    {'expected': row['alt'], 'found': c['alt'], 'file': name},
+                    f"alt у {name} — дословно «{row['alt']}» (список ассетов)")
+        if unverified:
+            add(F, 'HON-CAPTION', 'minor', desk['viewport'],
+                f'загрузок холста без реестра загрузок: {len(unverified)} — со списком ассетов не сверены',
+                {'images': unverified[:8]}, 'реестр загрузок — ARTIFACTS.md продукта (--uploads, таблица «Загрузки») '
+                'или колонка «id загрузки» списка ассетов')
+        if shared:
+            add(F, 'HON-CAPTION', 'info', desk['viewport'],
+                f'общих ассетов продукта на странице: {len(shared)} (в список ассетов страницы не входят)',
+                {'files': sorted(set(shared))[:12]})
     elif caps_all:
         sus = [c for c in caps_all if c['caption'] and re.search(r'\b(1[89]|20)\d{2}\b|[A-ZА-Я][a-zа-я]+,\s*[A-ZА-Я]', c['caption'])]
         add(F, 'HON-CAPTION', 'info', desk['viewport'], f'подписей и alt без списка ассетов для сверки: {len(caps_all)}'
@@ -1800,12 +1975,18 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
         if w >= opts['first_bp']:
             continue
         nav_ok = any(n['links'] >= 2 for n in v['nav']['navs']) or any(t['top'] < v['vh'] * 0.3 for t in v['nav']['toggles'])
-        if not nav_ok:
+        part = opts.get('part') or 1
+        if part > 1:
+            add(F, 'M-NAV', 'info', v['viewport'], f'часть {part} артборда: шапка с навигацией — у первой части, '
+                'здесь навигация не проверяется', {'part': part})
+        elif not nav_ok:
             add(F, 'M-NAV', 'major', v['viewport'], 'навигация не видна (нет кнопки меню и нет ≥ 2 ссылок в nav или header)',
                 {'navs': v['nav']['navs'][:3], 'toggles': v['nav']['toggles'][:3]},
                 f"на {v['viewport']}: кнопка меню в шапке (≥ 44 × 44 px), открывающая разделы, или видимые ссылки; "
                 'страница без меню по плану (посадочная, одноэкранная) — законна: находку отбросить с причиной')
-        paras = [l for l in v['leaves'] if l['tag'] in ('p', 'li', 'dd', 'blockquote') and len(l['text'].split()) >= 8]
+        # тело — абзацы основного содержимого: строка реквизитов подвала или подпись шапки — не основной текст
+        paras = [l for l in v['leaves'] if l.get('body', True) and l['tag'] in ('p', 'li', 'dd', 'blockquote')
+                 and len(l['text'].split()) >= 8]
         if paras:
             small = [l for l in paras if l['fs'] < 16]
             med = statistics.median(l['fs'] for l in paras)
@@ -2016,14 +2197,32 @@ def to_md(res):
     return '\n'.join(L) + '\n'
 
 
-def static_frame(target):
-    """Ширина рамки, если цель — статичная копия артборда (строка происхождения dc_to_html): такая копия — страница
-    фиксированной ширины и проверяется окном своей рамки; другие ширины — свои артборды холста и их копии."""
+def static_copy(target):
+    """Статичная копия артборда (строка происхождения dc_to_html) → {artboard — имя исходника, w, h — рамка}; другая
+    цель — None."""
     if target.startswith(('http://', 'https://')) or not os.path.isfile(target):
         return None
     head = open(target, encoding='utf-8', errors='replace').read(4000)
-    m = re.search(r'<!--\s*dc_to_html:\s*статичная копия артборда [^;]+;.*?рамка (\d+)×\d+', head)
-    return int(m.group(1)) if m else None
+    m = re.search(r'<!--\s*dc_to_html:\s*статичная копия артборда ([^;]+);.*?рамка (\d+)×(\d+)', head)
+    return {'artboard': m.group(1).strip(), 'w': int(m.group(2)), 'h': int(m.group(3))} if m else None
+
+
+def static_frame(target):
+    """Ширина рамки, если цель — статичная копия артборда: такая копия — страница фиксированной ширины и проверяется
+    окном своей рамки; другие ширины — свои артборды холста и их копии."""
+    c = static_copy(target)
+    return c['w'] if c else None
+
+
+def artboard_part(name, width):
+    """Имя артборда или его копии → (имя без номера части, номер части). Страница длиннее предела высоты артборда
+    лежит на холсте частями `<Имя>-<ширина>-<N>`, N с единицы; ширина в имени равна ширине рамки — так номер части не
+    путается с числом в имени страницы (`Flat-204-1440` — артборд целиком). Артборд целиком — (имя, None)."""
+    stem = re.sub(r'(?:\.dc)?\.html?$', '', os.path.basename(str(name or '')))
+    m = re.fullmatch(r'(.+-(\d+))-(\d+)', stem)
+    if m and width and int(m.group(2)) == int(width) and int(m.group(3)) >= 1:
+        return m.group(1), int(m.group(3))
+    return stem, None
 
 
 def cmd_page(a):
@@ -2038,7 +2237,9 @@ def cmd_page(a):
         return 3
     first_bp = first_breakpoint(a.tokens)
     aw = acceptance_widths()
-    frame = static_frame(a.target)
+    copy = static_copy(a.target)
+    frame = copy['w'] if copy else None
+    part = artboard_part(copy['artboard'], frame)[1] if copy else None
     if a.views:
         specs = [v.strip() for v in a.views.split(',') if v.strip()]
     elif frame:
@@ -2056,22 +2257,27 @@ def cmd_page(a):
     copy_text = load_copy(a.copy, a.page)
     demo = load_demo(a.demo)
     assets = parse_assets_readme(a.assets)
+    uploads_file = a.uploads or (find_uploads(a.assets) if a.assets else None)
+    uploads = load_uploads(uploads_file)
     form_sets = load_form_sets(a.forms)
     t0 = time.time()
-    url, views, blocked = collect(a.target, specs + ([over] if over else []), a.ignore_selector, block, a.shots)
+    url, views, blocked = collect(a.target, specs + ([over] if over else []), a.ignore_selector, block, a.shots,
+                                  os.path.splitext(os.path.basename(a.target))[0] if copy else None)
     if over:
         views[-1]['overflow_only'] = True
     opts = {'surface': a.surface, 'preset': a.preset, 'first_bp': first_bp, 'form_sets': form_sets,
-            'ds': ds_look(a.tokens), 'demo': demo}
+            'ds': ds_look(a.tokens), 'demo': demo, 'uploads': uploads, 'part': part}
     F = analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts)
     res = {'tool': 'mockup_checks.py', 'version': VERSION, 'target': a.target, 'url': url, 'static_frame': frame,
+           'artboard': copy and copy['artboard'], 'part': part,
            'created': datetime.now(timezone.utc).isoformat(timespec='seconds'), 'seconds': round(time.time() - t0, 1),
            'surface': a.surface, 'first_breakpoint': first_bp,
            'views': [v['viewport'] for v in views],
            'widths': '--views' if a.views else ('рамка статичной копии' if frame else 'kb/common/acceptance-widths.yaml'),
            'off_surface': off_surface(a.surface),
-           'inputs': {'facts': a.facts, 'copy': a.copy, 'demo': a.demo, 'assets': a.assets, 'forms': form_sets,
-                      'tokens': a.tokens, 'src': (static or {}).get('root'), 'block_external': block},
+           'inputs': {'facts': a.facts, 'copy': a.copy, 'demo': a.demo, 'assets': a.assets, 'uploads': uploads_file,
+                      'forms': form_sets, 'tokens': a.tokens, 'src': (static or {}).get('root'),
+                      'block_external': block},
            'static': {k: v for k, v in (static or {}).items() if k != 'stock_hits'} if static else None,
            'shots': [v.get('shot') for v in views if v.get('shot')],
            'summary': summarize(F, allowed, a.surface),
@@ -2206,9 +2412,13 @@ def _view(w=1440, vh=900, **kw):
 
 def _leaf(text, fs=16, tag='p', **kw):
     base = {'el': tag, 'tag': tag, 'text': text, 'fs': fs, 'fw': 400, 'ff': 'Inter', 'tt': 'none', 'ls': 0,
-            'color': [17, 21, 28, 1], 'bg': [255, 255, 255], 'bg_img': False, 'in_btn': False, 'ext': False}
+            'color': [17, 21, 28, 1], 'bg': [255, 255, 255], 'bg_img': False, 'in_btn': False, 'ext': False, 'body': True}
     base.update(kw)
     return base
+
+
+def _img(src, alt=None, caption=None):
+    return {'el': 'img', 'src': src, 'srcset': '', 'alt': alt, 'w': 320, 'h': 240, 'visible': True, 'caption': caption}
 
 
 def _field(label, type_='text', **kw):
@@ -2309,8 +2519,62 @@ def cmd_selftest(_a):
         check('copy deck YAML: выбранные тексты страницы', 'Позвать замерщика' in (load_copy(deck, 'otves-product-aware') or ''))
         ay = os.path.join(td, 'plan.yaml')
         open(ay, 'w', encoding='utf-8').write('slots:\n  - {slot: hero, file: assets/hero-01.avif, alt: Прихожая после ремонта}\n')
-        check('ассеты из YAML: file и alt', parse_assets_readme(ay) == {'hero-01': {'file': 'assets/hero-01.avif', 'caption': '',
-                                                                                     'alt': 'Прихожая после ремонта'}}, parse_assets_readme(ay))
+        ya = parse_assets_readme(ay)
+        check('ассеты из YAML: file, слот и alt', {k: ya['by_stem'].get('hero-01', {}).get(k) for k in ('file', 'slot', 'caption', 'alt')}
+              == {'file': 'assets/hero-01.avif', 'slot': 'hero', 'caption': '', 'alt': 'Прихожая после ремонта'}, ya)
+        F = analyze('http://x/', [_view(images=[_img('http://x/assets/hero-01.avif', 'Прихожая после ремонта'),
+                                                _img('http://x/assets/sofa.jpg', 'Диван')])], None, None, None, ya, set(), [], opts)
+        check('картинка с именем файла: из списка — молчит, вне списка — HON-CAPTION major',
+              [(f['severity'], f['message']) for f in F if f['id'] == 'HON-CAPTION'] == [('major', 'картинки «sofa» нет в списке ассетов')],
+              [(f['severity'], f['message']) for f in F if f['id'] == 'HON-CAPTION'])
+
+        # загрузка холста /_blob/<id>: id загрузки списка ассетов, затем «Загрузки» ARTIFACTS.md — файл или слот
+        bid = {k: (k * 4 + k.upper() * 4) * 4 for k in 'abcdef'}
+        am = os.path.join(td, 'design', 'web', 'input', 'pages', 'home', 'assets.md')
+        os.makedirs(os.path.dirname(am))
+        open(am, 'w', encoding='utf-8').write(
+            '# Ассеты страницы home, этап mockup\n\n'
+            '| файл | слот | роль | подпись | alt | фокус | варианты | источник и лицензия | id загрузки |\n'
+            '|---|---|---|---|---|---|---|---|---|\n'
+            '| `hero-01.avif` | `hero-visual` (hero · hero-visual) | informational | — | Прихожая после ремонта | — | desktop 16:9 | real | — |\n'
+            f'| `icon-ruler.svg` | `steps-1-icon` (steps · icon) | decorative | — | alt="" | — | default 1:1 | code | {bid["a"]} |\n'
+            '| placeholder · TODO | `team-1-photo` (team · photo) | informational | Прораб на объекте | — | — | desktop 4:5 | real | — |\n')
+        art = os.path.join(td, 'design', 'ARTIFACTS.md')
+        open(art, 'w', encoding='utf-8').write(
+            '# ARTIFACTS\n\n## Загрузки\n\n| id | файл | sha256 | слот | артефакт |\n|---|---|---|---|---|\n'
+            f'| `{bid["b"]}` | `design/web/assets/hero-01.avif` | | `hero-visual` | `canvas:web` |\n'
+            f'| `{bid["c"]}` | `$DDD_HOME/out/demo/team-1-demo.webp` | | `team-1-photo` | `canvas:web` |\n'
+            f'| `{bid["d"]}` | `design/_assets/brand/logo.svg` | | `logo` | `canvas:web` |\n'
+            f'| `{bid["e"]}` | `design/web/assets/cases-1-cover.avif` | | `cases-1-cover` | `canvas:web` |\n')
+        A, U = parse_assets_readme(am), load_uploads(find_uploads(am))
+        check('assets.md входа: строки по файлу, слоту и id загрузки; пустой слот — по слоту; прочерк и alt="" — пусто',
+              (sorted(A['by_stem']), sorted(A['by_slot']), list(A['by_upload']), A['by_slot']['steps-1-icon']['alt'],
+               A['by_slot']['hero-visual']['caption'], A['by_slot']['team-1-photo']['file']) ==
+              (['hero-01', 'icon-ruler', 'placeholder'], ['hero-visual', 'steps-1-icon', 'team-1-photo'], [bid['a']], '', '', ''),
+              A)
+        check('реестр загрузок — «Загрузки» ARTIFACTS.md в папке выше списка: id → файл, слот, артефакт',
+              (find_uploads(am), len(U), U[bid['e']]) == (art, 4, {'file': 'design/web/assets/cases-1-cover.avif',
+                                                                   'slot': 'cases-1-cover', 'artifact': 'canvas:web'}), U)
+        blob = lambda k: f'http://127.0.0.1:8000/_blob/{bid[k]}'   # noqa: E731
+        st = [asset_for({'file': bid[k], 'src': blob(k)}, A, U)[1] for k in 'abcdef']
+        check('кадр /_blob/<id>: по id списка, по файлу и по слоту реестра — строка; _assets/ — общий ассет; файл и '
+              'слот вне списка; id вне реестра', st == ['row', 'row', 'row', 'shared', 'off-list', 'unregistered'], st)
+        imgs = [_img(blob('a'), ''), _img(blob('b'), 'Прихожая после ремонта'), _img(blob('c'), '', 'Прораб на объекте'),
+                _img(blob('d'), 'Логотип')]
+        F = analyze('http://x/', [_view(images=imgs)], None, None, None, A, set(), [], dict(opts, uploads=U))
+        hc = [(f['severity'], f['message']) for f in F if f['id'] == 'HON-CAPTION']
+        check('кадры из реестра загрузок с alt и подписью списка — HON-CAPTION молчит, общий ассет — справкой',
+              [s_ for s_, _ in hc] == ['info'], hc)
+        imgs = [_img(blob('b'), 'Кухня'), _img(blob('c'), '', 'Мастер'), _img(blob('e'), ''), _img(blob('f'), '')]
+        F = analyze('http://x/', [_view(images=imgs)], None, None, None, A, set(), [], dict(opts, uploads=U))
+        hc = sorted((f['severity'], f['message'].split(':')[0].split(' — ')[0]) for f in F if f['id'] == 'HON-CAPTION')
+        check('чужой alt — major, чужая подпись — critical, загрузка вне списка и вне реестра — major',
+              hc == [('critical', 'подпись не из списка ассетов'), ('major', 'alt не из списка ассетов'),
+                     ('major', f'загрузка {bid["e"]}'), ('major', f'загрузки {bid["f"]} нет в реестре загрузок')], hc)
+        F = analyze('http://x/', [_view(images=[_img(blob('b'), 'Кухня'), _img(blob('c'), '')])], None, None, None, ya,
+                    set(), [], opts)
+        hc = [(f['severity'], f['evidence'].get('images') and len(f['evidence']['images'])) for f in F if f['id'] == 'HON-CAPTION']
+        check('без реестра загрузок — одна находка minor на прогон, не major на каждый кадр', hc == [('minor', 2)], hc)
         pl = os.path.join(td, 'home.yaml')
         open(pl, 'w', encoding='utf-8').write('form:\n  ref: lead-forms.yaml#callback\n')
         check('--forms: id из плана страницы', load_form_sets([pl, 'quote-request']) == ['callback', 'quote-request'])
@@ -2356,6 +2620,9 @@ def cmd_selftest(_a):
           and off_surface('page') == [], off_surface('app'))
     F = analyze('http://x/', [_view(rows=[dict(row, cv=0.45)])], None, None, None, None, set(), [], opts)
     check('три карточки разного содержания (CV 0.45) — не примета', 'LOOK-THREE-CARDS' not in ids(F))
+    F = analyze('http://x/', [_view(rows=[dict(row, cv=0.0, ph=3)])], None, None, None, None, set(), [], opts)
+    check('три карточки с одинаковыми заглушками [PLACEHOLDER…] — вариация не мерится, не примета',
+          'LOOK-THREE-CARDS' not in ids(F), ids(F))
     hero = {'el': 'section', 'h': 880, 'w': 1440, 'top': 0, 'h1_align': 'center', 'hero_align': 'center', 'h1_cx': 0.5, 'h1_w': 0.5,
             'min_height': '100vh', 'h1_lines': 2, 'media': [], 'bg_url': [], 'overlays': [], 'next_top': 900, 'cue': False}
     F = analyze('http://x/', [_view(hero=hero)], None, None, None, None, set(), [], opts)
@@ -2493,11 +2760,35 @@ def cmd_selftest(_a):
           ([f['severity'] for f in F if f['id'] == 'M-NAV'], exit_code(summarize(F, set(), 'page'))) == (['major'], 0),
           [(f['id'], f['severity']) for f in F])
 
+    # части артборда: шапка с навигацией и H1 — у первой части
+    parts = [artboard_part(n, w) for n, w in (('Home-390-1.html', 390), ('Home-390-2.dc.html', 390), ('Home-1440.html', 1440),
+                                              ('Flat-204-1440.dc.html', 1440), ('Tariff-B2-390.html', 390))]
+    check('часть артборда — имя <Имя>-<ширина>-<N> при рамке этой ширины; число в имени страницы — не номер части',
+          parts == [('Home-390', 1), ('Home-390', 2), ('Home-1440', None), ('Flat-204-1440', None), ('Tariff-B2-390', None)],
+          parts)
+    no_nav = _view(390, 844, nav={'navs': [], 'toggles': []})
+    sev = [[f['severity'] for f in analyze('http://x/', [no_nav], None, None, None, None, set(), [], dict(opts, part=n))
+            if f['id'] == 'M-NAV'] for n in (1, 2, 3)]
+    check('копия без шапки: первая часть — M-NAV major, вторая и третья — справка', sev == [['major'], ['info'], ['info']], sev)
+    check('кадр --shots: у копии артборда — по имени копии, части не затирают друг друга; у страницы — по классу окна',
+          [shot_name(390, 844, 'Home-390-1'), shot_name(390, 844, 'Home-390-2'), shot_name(390, 844), shot_name(1440, 900)]
+          == ['Home-390-1-390x844-00.jpg', 'Home-390-2-390x844-00.jpg', 'mobile-390x844-00.jpg', 'desktop-1440x900-00.jpg'])
+
+    # тело 16 px — по абзацам основного содержимого, строка реквизитов подвала не в счёт
+    body = _leaf('Мастерская открыта каждый день с десяти утра до восьми вечера без перерыва')
+    legal = _leaf('ООО «Демо», ИНН 0000000000, адрес регистрации и реквизиты для договора', fs=14)
+    F = analyze('http://x/', [_view(390, 844, leaves=[body, dict(legal, body=False)])], None, None, None, None, set(), [], opts)
+    check('короткая страница: абзац тела 16 px и строка подвала 14 px — без M-BODY-16', 'M-BODY-16' not in ids(F), ids(F))
+    F = analyze('http://x/', [_view(390, 844, leaves=[body, legal])], None, None, None, None, set(), [], opts)
+    check('тот же абзац 14 px внутри main — M-BODY-16', 'M-BODY-16' in ids(F, ('major',)), ids(F))
+
     with tempfile.TemporaryDirectory() as td:
         cp = os.path.join(td, 'Main.html')
         open(cp, 'w', encoding='utf-8').write('<!doctype html><head><!-- dc_to_html: статичная копия артборда Main.dc.html; '
                                               'перевод исходника · рамка 1440×2700 · твики: — --></head>')
         check('статичная копия — окно своей рамки', (static_frame(cp), static_frame(__file__)) == (1440, None))
+        check('статичная копия — имя артборда и рамка из строки происхождения',
+              static_copy(cp) == {'artboard': 'Main.dc.html', 'w': 1440, 'h': 2700}, static_copy(cp))
 
     # сводка: примета один раз, домены не складываются
     F = [{'id': 'HON-UNSPLASH', 'tell': 'stock-and-hotlink', 'group': 'honesty', 'severity': 'critical'},
@@ -2544,12 +2835,14 @@ def main():
     p.add_argument('--page', help='id страницы copy deck (с --copy YAML)')
     p.add_argument('--demo', help='demo-data.json входа холста кабинета: тексты и числа записей — не выдумка')
     p.add_argument('--assets', '--assets-readme', dest='assets', help='assets.md входа холста или YAML плана ассетов')
+    p.add_argument('--uploads', help='реестр загрузок холста — ARTIFACTS.md продукта (таблица «Загрузки»); без ключа — '
+                                     'ARTIFACTS.md в папках выше списка --assets')
     p.add_argument('--forms', action='append', help='id набора lead-forms.yaml или YAML плана страницы; повтором')
     p.add_argument('--src', help='папка исходников для статического обхода (сток, шрифты)')
     p.add_argument('--allow', default='', help='приметы с записанным решением: ' + ','.join(sorted(allow_keys())))
     p.add_argument('--ignore-selector', default='', help='CSS-селектор чужих вставок (виджеты хостинга, чаты)')
     p.add_argument('--block-external', action='store_true'); p.add_argument('--allow-external', action='store_true')
-    p.add_argument('--shots', help='папка: первый экран каждого окна JPEG q80')
+    p.add_argument('--shots', help='папка: первый экран каждого окна JPEG q80; у копии артборда кадр назван по копии')
     p.add_argument('--json'); p.add_argument('--md'); p.add_argument('--min-free-gb', type=float, default=2.0)
     r = sub.add_parser('resize', help='ресайз широкий → узкий → широкий без перезагрузки на собранной странице '
                                       '(пункт H5 приёмки)')

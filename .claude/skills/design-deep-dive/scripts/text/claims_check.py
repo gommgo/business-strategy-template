@@ -18,12 +18,13 @@
   отзыва против permission.shows), срок, основание (дословная выдержка источника), вывод вместо факта, проверку юриста
   для рискованных классов, демо-данные (example: true); never_claim (проектный + набор по умолчанию из
   facts.schema.yaml, на языке текста); места use (ориентир: вне их — COPY-F-USE warning, места x-use-always законны
-  всегда); [PLACEHOLDER] — info со счётчиком. Вопрос (FAQ, предложение с «?») утверждением не считается.
+  всегда); [PLACEHOLDER] — info со счётчиком. Вопрос (FAQ, предложение с «?») утверждением не считается. Цифры в
+  именах сущностей facts.yaml (entities[].names: модель «Атлас Р 45») — часть имени, числом утверждения не считаются.
 
 Входы (формат определяется сам или --format):
   copy deck (copy_deck.pages[].sections[].slots[] — slot_type, variants[].text, chosen, fact_ids, claim_flags) ·
   copy.md входа холста («## <section_id>» + «[<slot_id>] <status>: текст», синтаксис — copydeck.py) · Markdown ·
-  текст · HTML.
+  текст · HTML (у статичной копии артборда служебный <title> не читается).
 
 Подкоманды:
   [check] INPUT [--facts facts.yaml] [--format auto|deck|copy-md|md|text|html] [--rules FILE ...] [--no-external-rules]
@@ -281,15 +282,19 @@ def next_noun(text, pos, k=2):
     return out
 
 
-def extract_numbers(text, lang=None):
+def extract_numbers(text, lang=None, skip=()):
     """Числа текста: [{raw, start, end, value | range, unit, noun[], cmp, kind}] без дат, телефонов, ссылок на законы,
     копирайта, времени и рейтингов (они извлекаются отдельно). lang — язык текста или факта: у «en» запятая перед тремя
-    цифрами — разделитель тысяч при любой валюте; без языка — эвристика по латинице рядом."""
+    цифрами — разделитель тысяч при любой валюте; без языка — эвристика по латинице рядом. skip — места текста
+    [(начало, конец)], где цифры числом не считаются (имена сущностей с цифрой — Facts.name_spans)."""
     s = text
     mask = [False] * len(s)
 
     def cover(m):
         for i in range(m.start(), m.end()):
+            mask[i] = True
+    for a, b in skip or ():
+        for i in range(max(0, a), min(len(s), b)):
             mask[i] = True
     for rx in (URL_RX, EMAIL_RX, PHONE_RX, LAWREF_RX, COPYRIGHT_RX, TIME_RX, DATE_DMY, DATE_ISO, RATING_RX, PLACEHOLDER_RX):
         for m in rx.finditer(s):
@@ -939,10 +944,12 @@ class _HTMLUnits(html.parser.HTMLParser):
              'title': 'meta-title', 'div': None, 'section': None, 'article': None, 'span': None, 'a': None, 'small': None}
     SKIP = {'script', 'style', 'noscript', 'svg', 'template', 'iframe', 'canvas'}
 
-    def __init__(self):
+    def __init__(self, skip_title=False):
         super().__init__(convert_charrefs=True)
         self.units, self.stack, self.buf, self.skip, self.section = [], [], [], 0, None
         self.n = 0
+        if skip_title:
+            self.SKIP = self.SKIP | {'title'}
 
     def flush(self, tag=None):
         txt = re.sub(r'\s+', ' ', ''.join(self.buf)).strip()
@@ -995,8 +1002,14 @@ class _HTMLUnits(html.parser.HTMLParser):
         self.flush(self.stack[-1] if self.stack else None)
 
 
+CANVAS_COPY_RX = re.compile(r'<!--\s*dc_to_html:')   # строка происхождения статичной копии артборда в <head>
+
+
 def load_html(text):
-    p = _HTMLUnits()
+    """HTML → единицы текста. У статичной копии артборда <title> — служебное имя артборда («Главная · 1440»), а не
+    заголовок страницы: он не читается, иначе ширина и номер из имени сверяются как числа утверждения."""
+    end = re.search(r'</head\s*>', text, re.I)
+    p = _HTMLUnits(skip_title=bool(CANVAS_COPY_RX.search(text[:end.start()] if end else text[:4000])))
     p.feed(text)
     p.close()
     seen, out = set(), []
@@ -1130,6 +1143,7 @@ class Facts:
         for n, v in self.names.items():
             for w in WORD_RX.findall(n):
                 self.name_stems.setdefault(stem(w), v)
+        self.digit_names = [name_rx(str(n)) for e in self.entities for n in e.get('names') or [] if re.search(r'\d', str(n))]
         self.all_stems = set().union(*self.stems.values()) if self.stems else set()
         self.never = []
         for r in data.get('never_claim') or []:
@@ -1144,6 +1158,24 @@ class Facts:
 
     def text_has_stem(self, fid, st):
         return st in self.stems.get(fid, set())
+
+    def name_spans(self, text):
+        """Места имён сущностей с цифрой в названии (entities[].names: модель «Атлас Р 45», серия «707»):
+        [(начало, конец)]. Цифра там — часть имени, а не число утверждения: сверка чисел такие места пропускает, как
+        телефоны и даты. Написание заявил владелец фактов, поэтому имя из одних цифр закрывает это число в любом месте
+        текста."""
+        return [m.span() for rx in self.digit_names for m in rx.finditer(text or '')]
+
+
+def name_rx(name):
+    """Имя сущности в тексте: без регистра, целым словом; пробел имени — любой пробел (в том числе неразрывный), дефис —
+    любое тире."""
+    parts = []
+    for p in re.split(r'(\s+|[-‐‑–—−])', name.strip()):
+        if not p:
+            continue
+        parts.append(r'\s+' if p.isspace() else r'[-‐‑–—−]' if p in '-‐‑–—−' else re.escape(p))
+    return re.compile(r'(?<!\w)' + ''.join(parts) + r'(?!\w)', re.I)
 
 
 def load_facts(path, schema, use_defaults=True):
@@ -1703,7 +1735,7 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
         strong_pos = []          # (факт, позиция числа или даты) — для проверки утверждения внутри одного предложения
         # ---- числа (цифрами и словами; разделитель тысяч — по языку текста)
         ulang = unit_lang(body)
-        nums = sorted(extract_numbers(body, ulang) + extract_word_numbers(body, ulang), key=lambda x: x['start'])
+        nums = sorted(extract_numbers(body, ulang, facts.name_spans(body)) + extract_word_numbers(body, ulang), key=lambda x: x['start'])
         spec_label = None
         mm = re.match(r'^\s*([^—:\-–]{2,40}?)\s*[—:–-]\s', body)
         if mm:
@@ -2154,18 +2186,28 @@ def near_units(u, units):
     return out
 
 
+def words_in(frag, zone_words):
+    """Слова фрагмента стоят в зоне подряд и в том же порядке; знаки препинания и вид пробелов не сравниваются (тире
+    вместо запятой, неразрывный пробел — та же формулировка). Фрагмент без слов — False."""
+    fw = WORD_RX.findall(norm(frag))
+    n = len(fw)
+    return bool(n) and any(zone_words[i:i + n] == fw for i in range(len(zone_words) - n + 1))
+
+
 def nearby_ok(req, u, units):
     """Выполнено ли требование «рядом должно стоять» (use.requires_nearby): альтернативы через « или » — достаточно одной;
-    в альтернативе фрагменты в «ёлочках» — дословно (без регистра) в единице или её секции; «источник, дата» — признак
-    источника рядом (по данным, на дату, площадка); иначе половина значимых слов требования."""
+    в альтернативе фрагменты в «ёлочках» — теми же словами подряд (без регистра, знаков препинания и вида пробелов) в
+    единице или её секции; «источник, дата» — признак источника рядом (по данным, на дату, площадка); иначе половина
+    значимых слов требования."""
     zone = soft(' '.join(near_units(u, units)))
+    zone_words = WORD_RX.findall(norm(zone))
     alts = [a.strip(' ,;') for a in re.split(r'\s+или\s+|\s+or\s+', req) if a.strip(' ,;')] or [req]
     for alt in alts:
         if re.search(r'источник|по данным|дат[аы]|source|as of', alt, re.I) and SOURCE_HINT_RX.search(zone):
             return True
         frags = re.findall(r'«([^»]+)»', alt)
         if frags:
-            if all(soft(f_) in zone for f_ in frags):
+            if all(soft(f_) in zone or words_in(f_, zone_words) for f_ in frags):
                 return True
             continue
         st = {stem(w) for w in WORD_RX.findall(norm(alt)) if w not in STOP and len(w) > 2}
@@ -3039,6 +3081,28 @@ def cmd_selftest(_a=None):
           not errs(F) and any(f['rule'] == 'COPY-F-TYPICALITY' for f in F), F)
     F = rules_of('Смета не выросла ни на рубль — гарантируем!', f2)
     check('тот же запрет голосом компании → COPY-F-NEVER', 'COPY-F-NEVER' in errs(F), F)
+    # --- цифры в именах сущностей — часть имени, а не число утверждения
+    addr = {'id': 'office', 'kind': 'company', 'claim_class': ['company-details'], 'verbatim': ['Садовая улица, 12'], 'canonical': 'Офис — Садовая улица, 12.',
+            'source': {'type': 'customer-message', 'who': 'заказчик', 'date': '2026-09-24'}, 'verification': {'status': 'stated'},
+            'permission': {'status': 'not-required'}, 'lang': 'ru'}
+    f_addr = Facts(dict(facts.data, facts=list(facts.data['facts']) + [addr]), schema, True)
+    f_ent = Facts(dict(f_addr.data, entities=list(facts.data['entities']) + [{'id': 'atlas', 'type': 'brand', 'names': ['Атлас', 'Атлас Р 45', 'Р 45', 'К45 С']},
+                                                                              {'id': 'vega', 'type': 'brand', 'names': ['Вега', '707']}]), schema, True)
+    num_rules = lambda F: sorted({f['rule'] for f in F if f['rule'] in ('COPY-F-NUM', 'COPY-F-NUM-MISMATCH')})
+    check('число из имени модели без сущности → сверяется с числом другого факта (контроль)',
+          num_rules(rules_of('Атлас Р 45 — подготовка к сезону', f_addr)) != [], rules_of('Атлас Р 45 — подготовка к сезону', f_addr))
+    got = [num_rules(rules_of(t, f_ent)) for t in ('Атлас Р 45 — подготовка к сезону', 'Атлас Р\u00a045 в цехе', 'Вега 707 после сборки', 'К45 С — новая серия')]
+    check('цифры внутри имён сущностей entities[].names числом не считаются (пробел любой, имя из одних цифр)', got == [[], [], [], []], got)
+    F = rules_of('Атлас Р 45 — 15 лет на рынке', f_ent)
+    check('число рядом с именем сущности сверяется как раньше', [f['fragment'] for f in F if f['rule'] in ('COPY-F-NUM', 'COPY-F-NUM-MISMATCH')] == ['15 лет'], F)
+    check('имя сущности — целым словом: «Р 450» и «1707» под маску не попадают',
+          f_ent.name_spans('Р 450 и 1707, а ещё Р 45.') == [(20, 24)], f_ent.name_spans('Р 450 и 1707, а ещё Р 45.'))
+    # --- «рядом должно стоять»: фрагмент сравнивается словами, без знаков препинания и вида пробелов
+    req = '«за сезон, на май 2026»'
+    check('requires_nearby: тире вместо запятой и неразрывный пробел — та же формулировка',
+          nearby_ok(req, unit('n', 'Сдали 120 объектов за сезон — на\u00a0май 2026'), []) and nearby_ok(req, unit('n', 'Сдали 120 объектов за сезон, на май 2026'), []))
+    check('requires_nearby: другие слова или другой порядок — требование не выполнено',
+          not nearby_ok(req, unit('n', 'Сдали 120 объектов за месяц — на май 2026'), []) and not nearby_ok(req, unit('n', 'На май 2026 — 120 объектов за сезон'), []))
     # --- ложные срабатывания
     bad = []
     for p in FP_PHRASES:
@@ -3062,6 +3126,10 @@ def cmd_selftest(_a=None):
           [(u['text'], u['alt']) for u in us] == [('A', True), ('B', False)], [(u['text'], u['alt']) for u in us])
     us = load_html('<html><head><title>Кварц</title><meta name="description" content="Лампа за 8 900 ₽"></head><body><h1>Лампа</h1><p>Цена 8 900 ₽</p><blockquote>Отличная лампа, всем советую</blockquote><script>var x=5</script></body></html>')
     check('HTML: title, description, h1, p, blockquote; без script', [u['slot_type'] for u in us] == ['meta-title', 'meta-description', 'headline', 'body', 'testimonial-quote'], [(u['slot_type'], u['text']) for u in us])
+    us = load_html('<!doctype html><html><head><title>Главная · 1440</title>\n<!-- dc_to_html: статичная копия артборда Home-1440.dc.html; рамка 1440×900 -->'
+                   '<style>h1{margin:0}</style></head><body><h1>Лампа</h1><p>Цена 8 900 ₽</p></body></html>')
+    check('HTML статичной копии артборда: служебный title не читается, текст страницы — читается',
+          [(u['slot_type'], u['text']) for u in us] == [('headline', 'Лампа'), ('body', 'Цена 8 900 ₽')], [(u['slot_type'], u['text']) for u in us])
     check('словарь site: id мест use (lint-facts) — типы страниц, роли, слоты вида text', {'faq-page', 'case-page'} <= load_vocab().get('page_types', set())
           and 'offer' in load_vocab().get('section_roles', set()) and 'disclaimer' in load_vocab().get('slot_types', set()))
     lf = {}

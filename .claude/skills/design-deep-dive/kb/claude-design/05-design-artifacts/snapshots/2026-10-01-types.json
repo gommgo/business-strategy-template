@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-01",
+  "surface": "Claude Code (терминал и десктоп-приложение), Opus 5.5",
+  "previous": "2026-09-26-types.json",
+  "session": {
+    "types_check": "list scope=types — первым вызовом сессии",
+    "capabilities_fixed_at_start": true,
+    "without_types": {
+      "read": true,
+      "asset_upload": true,
+      "create_from_type": false,
+      "publish_project_files": false
+    },
+    "note": "Возможности инструмента Artifact фиксируются на старте сессии: сессия, начатая без типов, остаётся без них до конца; публикация в project/ артефакта типа из неё отклоняется, повтор не помогает — нужна новая сессия."
+  },
+  "types": {
+    "Design": {
+      "release": "1790869903-0489",
+      "releases_seen": [
+        { "date": "2026-09-30", "release": "1790707925-3098" },
+        { "date": "2026-10-01", "release": "1790801787-9bdf" },
+        { "date": "2026-10-01", "release": "1790869903-0489", "note": "обновление посреди сессии; публикации после него — без отказов" }
+      ],
+      "contract": "0.2.47",
+      "contract_newest_seen": "0.2.66",
+      "flags": {
+        "added": ["appifact_creation_sequence", "design_artboards_at_address"],
+        "removed": ["design_vector_pen"],
+        "note": "полный список флагов в этой сверке не снят; на релизе 1790707925-3098 раздела flags в декларации возможностей не было"
+      },
+      "files_bytes": {
+        "SKILL.md": 16051,
+        "index.html": 33153,
+        "artifact-type/app.js": 3512502,
+        "artifact-type/dc-runtime.js": 187897,
+        "artifact-type/reference/craft.md": 16081,
+        "artifact-type/reference/design-system-components.md": 12139,
+        "artifact-type/reference/diagrams.md": 9459,
+        "artifact-type/reference/format.md": 11305,
+        "artifact-type/reference/print.md": 5443,
+        "artifact-type/reference/view-state.md": 8777
+      },
+      "files_bytes_note": "app.js и design-system-components.md — релиз 1790869903-0489 (до обновления — 3498994 и 12197); остальные сняты до обновления и после него не перечитывались, SKILL.md, format.md и craft.md сверены на релизе 1790801787-9bdf; файлы типа, которых здесь нет, не сняты"
+    },
+    "Design System": {
+      "release": "1790878175-7275",
+      "releases_seen": [
+        { "date": "2026-09-30", "release": "1790718537-1550" },
+        { "date": "2026-10-01", "release": "1790818940-93cf" },
+        { "date": "2026-10-01", "release": "1790878175-7275", "note": "обновление посреди сессии" }
+      ],
+      "contract": "0.2.47",
+      "contract_newest_seen": "0.2.66",
+      "flags": {
+        "added": ["design_system_clean_up_button"],
+        "note": "полный список флагов в этой сверке не снят"
+      },
+      "files_bytes": {
+        "SKILL.md": 16019,
+        "index.html": 31247,
+        "artifact-type/app.js": 1850196,
+        "artifact-type/reference/format.md": 16211,
+        "artifact-type/reference/from-design-tool.md": 16116,
+        "artifact-type/reference/migrated-compat.md": 9001,
+        "artifact-type/reference/migrated-upgrading.md": 11127
+      },
+      "files_bytes_note": "сняты до обновления и после него не перечитывались, SKILL.md и format.md сверены на релизе 1790818940-93cf; файлы типа, которых здесь нет, не сняты"
+    }
+  },
+  "reference_changes": [
+    {
+      "type": "Design",
+      "file": "artifact-type/reference/format.md",
+      "what": "артборд страницы (PAGE) — резиновый корень и expand: fill",
+      "base": "01-design-system-and-canvas-in-session.md §3.1 — корень фиксированного размера, равного рамке"
+    },
+    {
+      "type": "Design",
+      "file": "artifact-type/reference/design-system-components.md",
+      "what": "снята оговорка о загрузке первых 199 файлов",
+      "base": "01-design-system-and-canvas-in-session.md §3.1 — «страница грузит первые 199 файлов»"
+    },
+    {
+      "type": "Design",
+      "file": "artifact-type/reference/diagrams.md",
+      "what": "новая справка",
+      "base": "в пересказе базы её нет"
+    },
+    {
+      "type": "Design System",
+      "file": "artifact-type/reference/format.md",
+      "what": "lastChange пишется при каждой правке; значения tokens.json — одиночные: составной токен (градиент, ритм, размер) формату не отвечает; meta.source — источник пересинхронизации; примеры docs индекса противоречат друг другу",
+      "base": "01-design-system-and-canvas-in-session.md §3.2"
+    },
+    {
+      "type": "Design System",
+      "file": "artifact-type/reference/migrated-compat.md",
+      "what": "новая справка: режим editing: off у перенесённых систем",
+      "base": "в пересказе базы её нет"
+    }
+  ],
+  "confirmed": [
+    "установка ДС в холст — запись files {artifact, path} с копией tokens.json и запись designSystems индекса (01-design-system-and-canvas-in-session.md §5); принимает её сессия с типами"
+  ],
+  "demo_artifacts": {
+    "note": "демо «Спица» из аккаунта сверки не открывается: размеры файлов типов сняты на артефактах проекта, sha256 не снят, смоук на демо не проводился"
+  },
+  "editor_behaviour": [
+    "Design: редактор пересохраняет project/canvas.json — ключ attachments, ширина w заголовков, launch без страницы; правкой заказчика это не является",
+    "Design: состояние доступа называет ответ публикации; первая публикация холста пришла со статусом «shared as Anyone with the link», хотя доступ никто не менял",
+    "Артефакт привязан к аккаунту, в котором создан: сессия другого аккаунта читает его только с согласия владельца и без права правки не публикует"
+  ]
+}

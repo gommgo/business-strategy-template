@@ -9,7 +9,8 @@
          (уровни ролей, один референс — одно место) и правило лидогенерации услуг (поля
          levels[id=L0].appropriate_for.lead_services файла ambition-levels.yaml); SB-L01…L03 правовой опросник;
          SB-B01…B02 бренд продукта по ссылке brand.ref: файл есть и проходит схему kb/common/brand.schema.yaml;
-         SB-C01…C03 темы: при двух темах — переключатель и умолчание по системе (ui 11/03 §6.4).
+         SB-C01…C03 темы: при двух темах — переключатель и умолчание по системе (ui 11/03 §6.4); одна тёмная тема —
+         с причиной themes.dark.why (без причины — warning), «по системе» без второй темы — error.
   plan   (page-plan)   PL-S01 схема; PL-V01 id словаря; PL-B01…B03 блок и вариант; PL-A01…A05 слоты и анатомия
          (группа.элемент, экземпляр группа-N); PL-F00…F07 факты: есть, вид, допуск, use.page_types, срок valid.until,
          «популярный», минимумы доказательств; PL-H01 один H1; PL-R01 ссылки «секция.слот»; PL-L01 длина; PL-N01 id секций
@@ -22,7 +23,10 @@
          PL-D01 3D: постер, призыв до 3D; PL-D02 recipe: — рецепт blender 12-recipes есть; PL-D03 загрузка 3D по месту
          секции (ниже первого экрана — on-interaction); PL-T01…T02 формы lead-forms.yaml; PL-SEO01 разметка по head-kit.
   map    (site-map)    SM-S01 схема; SM-01…SM-18 перекрёстные ссылки карты; SM-19 входящие ссылки (граф); SM-20 крошки по
-         глубине; SM-21 уровень шаблона ≤ сайта; SM-22 у шаблона есть план; SM-23 «спасибо» у страниц с формой.
+         глубине; SM-21 уровень шаблона ≤ сайта; SM-22 планы шаблонов; SM-23 «спасибо» у страниц с формой.
+         SM-22 в папке слоя: файл плана есть, а его page.template_id — не этот шаблон — error; служебный шаблон
+         (thank-you-page, legal-page, not-found-page) без плана, когда планы уже пишутся, — warning; остальные шаблоны
+         без плана — info: планы — выход этапа page-plan, шаблоны идут по build_order.
   blocks (blocks.yaml)       BL-* — каталог блоков.
   forms  (lead-forms.yaml)   LF-01…LF-06 — наборы, действия, блоки, события, поля.
   project DIR                бриф + facts + site-map + plans/*.yaml одной папки со всеми связями (PJ-*); страница брифа
@@ -30,14 +34,17 @@
                              not-found-page) — warning.
 
 Запуск:
-  python3 scripts/site/site_validate.py PATH [PATH…] [--today ГГГГ-ММ-ДД] [--json OUT] [--quiet]
+  python3 scripts/site/site_validate.py PATH [PATH…] [--today ГГГГ-ММ-ДД] [--json [OUT]] [--quiet]
   python3 scripts/site/site_validate.py --all          # каталог блоков, наборы форм, примеры 10-playbooks-contracts/examples
-  python3 scripts/site/site_validate.py --selftest     # пример lead-services-otves проходит, посеянные дефекты — каждый своим кодом
+  python3 scripts/site/site_validate.py --selftest     # примеры lead-services-otves и corporate-b2b-stalkon проходят, посеянные
+                                                       # дефекты — каждый своим кодом и тяжестью, законные правки — без находки
 Сроки фактов (valid.until) считаются от даты прогона: файлы проекта — сегодня или --today; --all — дата примеров базы
 (EXAMPLES_TODAY), --today её переопределяет; самопроверка — всегда на дате примеров, так её итог не зависит от календаря.
+--json OUT — находки списком JSON (level, code, where, msg) в файл; --json без файла — тот же список в stdout вместо
+строк отчёта, итог — в stderr.
 Схемам нужны jsonschema + referencing: без них в системном python утилита перезапускается Python окружения скилла.
-Код выхода: 1 — есть error; 2 — не названы пути. Уровни: error (блокер SITE-PRE), warning (доклад: решает заказчик,
-обход — с записанной причиной), info, ok.
+Код выхода: 1 — есть error; 2 — вызов: не названы пути, у --today нет даты. Уровни: error (блокер SITE-PRE), warning
+(доклад: решает заказчик, обход — с записанной причиной), info, ok.
 """
 import copy
 import datetime as dt
@@ -111,7 +118,7 @@ PROOF_MIN = {'logo-wall': 4, 'stat-strip': 2, 'hero-stat': 1, 'testimonial-cards
              'guarantee': 1, 'founder-note': 1, 'team-grid': 1}           # site 05/02 §1.6
 WIDGET_MEDIA = {'map', 'video'}
 WIDGET_BLOCKS = {'booking-widget', 'chat-widget', 'location-map', 'interactive-demo'}
-# служебные страницы брифа: план у них короткий и строится по плейбуку перед их сборкой — без плана PJ-03 warning
+# служебные страницы: план у них короткий и строится по плейбуку перед их сборкой — без плана PJ-03 и SM-22 warning
 SERVICE_PAGE_TYPES = {'thank-you-page', 'legal-page', 'not-found-page'}
 # дата примеров базы 10-playbooks-contracts/examples: сроки их фактов (valid.until) считаются от неё в --all и самопроверке
 EXAMPLES_TODAY = dt.date(2026, 9, 29)
@@ -465,16 +472,24 @@ def check_brief(path, ctx, facts_override=None):
                     R.add('error', 'SB-B02', w0, f'{brand["ref"]} не проходит схему brand: /{"/".join(map(str, e.absolute_path))}: {e.message[:200]}')
             except Exception as ex:  # noqa: BLE001 — битый YAML бренда или сменившаяся схема
                 R.add('error', 'SB-B02', w0, f'{brand["ref"]}: схема brand не применена — {ex}')
-    # темы: светлая по умолчанию; две темы — переключатель на странице и умолчание по системе (ui 11/03 §6.4)
+    # темы: светлая по умолчанию; две темы — переключатель на странице и умолчание по системе (ui 11/03 §6.4). Одна тёмная
+    # тема — решение брифа, а не разрыв контракта: с причиной она проходит, без причины — доклад заказчику
     th = b.get('themes') or {}
     if th:
-        two = bool((th.get('dark') or {}).get('needed'))
+        dark = th.get('dark') or {}
+        two = bool(dark.get('needed'))
         dflt = th.get('default', 'light')
         if two and th.get('switcher') is not True:
             R.add('error', 'SB-C01', w0, 'две темы — переключатель темы на странице обязателен: themes.switcher: true (ui 11/03 §6.4)')
-        if not two and dflt in ('dark', 'system'):
-            R.add('error', 'SB-C02', w0, f'themes.default {dflt} без второй темы: тёмная — themes.dark.needed с причиной; '
-                                         'по системе — только при двух темах')
+        if not two and dflt == 'system':
+            R.add('error', 'SB-C02', w0, 'themes.default system без второй темы: по системе — только при двух темах '
+                                         '(themes.dark.needed: true с причиной)')
+        if not two and dflt == 'dark':
+            if str(dark.get('why') or '').strip():
+                R.add('info', 'SB-C02', w0, 'одна тёмная тема — решение брифа с причиной в themes.dark.why')
+            else:
+                R.add('warning', 'SB-C02', w0, 'одна тёмная тема без причины: причина — в themes.dark.why (отрасль, аудитория, слово '
+                                               'заказчика; ui 11/03 §6.4); themes.dark.needed остаётся false — он о второй теме')
         if two and dflt != 'system':
             R.add('warning', 'SB-C03', w0, f'две темы, умолчание {dflt}: по умолчанию — по системе (system); {dflt} — только по '
                                            'отраслевой причине в themes.dark.why (ui 11/03 §6.4)')
@@ -1056,7 +1071,9 @@ def check_form_slot(ctx, where, sl, fm, pg):
 
 
 # ─────────────────────────────────────────── карта сайта ───────────────────────────────────────────
-def check_map(path, ctx, brief=None, plans=None):
+def check_map(path, ctx, brief=None, plans=None, plan_tpl=None):
+    """plans и plan_tpl — планы папки слоя: шаблон → файл плана и файл плана → его page.template_id; без них карта
+    проверяется одна (пример карты без планов)."""
     w0 = rel(path)
     m = load_yaml(path)
     ver = str(m.get('site_map_version', ''))
@@ -1228,12 +1245,28 @@ def check_map(path, ctx, brief=None, plans=None):
             R.add('warning', 'SM-21', f'{w0}:templates.{tid}', f"уровень {t['level']} выше умолчания {dflt} без level_why")
         if not t.get('level'):
             R.add('warning', 'SM-21', f'{w0}:templates.{tid}', 'нет templates[].level')
-    # планы шаблонов
+    # планы шаблонов. В папке слоя план — выход этапа page-plan, шаблоны идут по build_order по одному, поэтому шаблон без
+    # плана — ход работы, а не разрыв: ошибка — только файл плана, который есть, но с шаблоном не связан
     if plans is not None:
+        base = Path(path).resolve().parent
+        started = bool(plan_tpl)
+        waiting = []
         for tid, t in tmpl.items():
-            pp = plans.get(tid)
-            if pp is None:
-                R.add('error', 'SM-22', f'{w0}:templates.{tid}', f"нет плана шаблона ({t.get('page_plan')})")
+            if plans.get(tid) is not None:
+                continue
+            pp, pt = t.get('page_plan'), t.get('page_type')
+            pfile = (base / pp).resolve() if pp else None
+            if pfile is not None and pfile in (plan_tpl or {}):
+                R.add('error', 'SM-22', f'{w0}:templates.{tid}', f'план {pp} есть, а с шаблоном не связан: page.template_id в нём — '
+                                                                 f'«{plan_tpl[pfile] or "—"}», нужен «{tid}»')
+            elif started and pt in SERVICE_PAGE_TYPES:
+                R.add('warning', 'SM-22', f'{w0}:templates.{tid}', f'служебный шаблон {tid} ({pt}) без плана ({pp}): план по '
+                                                                   'site 10/02 §2.1 — до его макета, другие страницы он не держит')
+            else:
+                waiting.append(tid)
+        if waiting:
+            R.add('info', 'SM-22', w0, f"шаблоны без плана ({len(waiting)} из {len(tmpl)}): {', '.join(waiting)} — "
+                                       + ('очередь этапа page-plan по build_order' if started else 'этап page-plan не начат'))
     else:
         base = Path(path).resolve().parent
         missing_plans = [t.get('page_plan') for t in tmpl.values() if t.get('page_plan') and not (base / t['page_plan']).exists()]
@@ -1263,15 +1296,16 @@ def check_project(d, ctx):
         R.add('error', 'PJ-01', rel(d), 'в папке проекта нет site-brief*.yaml')
     maps = sorted(d.glob('site-map*.yaml'))
     plan_files = sorted((d / 'plans').glob('*.yaml')) if (d / 'plans').exists() else sorted(d.glob('page-plan*.yaml'))
-    plans_by_tpl = {}
+    plans_by_tpl, tpl_by_plan = {}, {}
     sitemap = load_yaml(maps[0]) if maps else None
     for pf in plan_files:
         pl = load_yaml(pf)
         pg = pl.get('page') or {}
+        tpl_by_plan[pf.resolve()] = pg.get('template_id')
         if pg.get('template_id'):
             plans_by_tpl[pg['template_id']] = pf
     if maps:
-        check_map(maps[0], ctx, brief=brief, plans=plans_by_tpl)
+        check_map(maps[0], ctx, brief=brief, plans=plans_by_tpl, plan_tpl=tpl_by_plan)
     for pf in plan_files:
         pl = check_plan(pf, ctx, brief=brief, facts_pack=facts_pack, sitemap=sitemap)
         if brief is not None and pl.get('site') != (brief.get('project') or {}).get('slug'):
@@ -1374,9 +1408,65 @@ def selftest(ctx):
         print('   ', i)
     ok &= not base_err
     plan_name = 'plans/home.yaml'
+    site = 'corporate-b2b-stalkon'      # многостраничник: карта сайта и планы шаблонов
+    if (ex.parent / site).exists():
+        R.items.clear()
+        check_project(ex.parent / site, ctx)
+        base_err = [i for i in R.items if i[0] == 'error']
+        print(f"P0 пример {site}: error {len(base_err)} → {'OK' if not base_err else 'FAIL'}")
+        for i in base_err[:5]:
+            print('   ', i)
+        ok &= not base_err
+    else:
+        print(f'P0 пример {site}: FAIL (примера нет — случаи карты сайта не проверить)')
+        ok = False
 
     def sec(p, sid):
         return next(s for s in p['sections'] if s['id'] == sid)
+
+    def link(lid, label, **kw):
+        return dict({'id': lid, 'slot': 'link', 'action': 'read-more', 'target': {'kind': 'route', 'value': '/team'},
+                     'style': 'link', 'label': label}, **kw)
+
+    def add_labels(p):
+        # ссылка уровня секции с подписью у team-grid, подпись мессенджера и заголовок группы в подвале
+        team, foot = sec(p, 'team')['slots'], sec(p, 'footer')['slots']
+        team['text'].append({'id': 'all-label', 'slot': 'cta-secondary-label'})
+        team.setdefault('action', []).append(link('all', 'all-label'))
+        foot['text'] += [{'id': 'messenger-label', 'slot': 'cta-secondary-label'},
+                         {'id': 'company-group-label', 'slot': 'nav-label', 'anatomy': 'group-label'}]
+        foot['action'].append({'id': 'messenger', 'slot': 'messenger-link', 'action': 'message', 'style': 'channel',
+                               'target': {'kind': 'messenger', 'value': 'канал компании'}, 'label': 'messenger-label'})
+
+    def add_map_texts(p):
+        # подпись ссылки маршрута и alt картинки карты
+        m = sec(p, 'location-map')['slots']
+        m['text'] += [{'id': 'route-label', 'slot': 'cta-secondary-label'}, {'id': 'map-alt', 'slot': 'image-alt'}]
+        next(a for a in m['action'] if a['id'] == 'route')['label'] = 'route-label'
+        next(x for x in m['media'] if x['id'] == 'map')['alt'] = 'map-alt'
+
+    def objections_cards(p):
+        # возражения карточками рядом с решением: секция вопросов примера становится feature-grid в роли objections
+        s = sec(p, 'faq')
+        s.update({'id': 'objections', 'role': 'objections', 'block': 'feature-grid', 'variant': 'cards'})
+        s['slots'] = {'text': [{'id': 'title', 'slot': 'section-title', 'heading': 'h2'}]
+                      + [{'id': f'card-{n}-{k}', 'slot': f'card-{k}', 'anatomy': f'card.{k}', 'group': f'card-{n}'}
+                         for n in (1, 2, 3) for k in ('title', 'body')]}
+
+    def one_question(p):
+        s = sec(p, 'faq')
+        s['variant'] = 'objections-near-cta'
+        for kind in ('text', 'data'):
+            s['slots'][kind] = [x for x in s['slots'][kind] if x.get('group', 'qa-1') == 'qa-1']
+
+    def band_channels(p):
+        s = sec(p, 'final-cta')
+        s['variant'] = 'final-with-channels'
+        s['slots'].setdefault('action', []).extend([
+            {'id': 'phone', 'slot': 'phone-link', 'action': 'call', 'style': 'channel',
+             'target': {'kind': 'tel', 'value': 'tel: номер компании'}},
+            {'id': 'messenger', 'slot': 'messenger-link', 'action': 'message', 'style': 'channel',
+             'target': {'kind': 'messenger', 'value': 'канал компании'}}])
 
     def add_3d(p, sid, **slot):
         sec(p, sid).setdefault('slots', {})['3d'] = [dict({'id': 'model', 'slot': 'model-3d', 'poster': 'visual'}, **slot)]
@@ -1423,17 +1513,32 @@ def selftest(ctx):
         ('N26 бриф: правило лидогенерации — L0 по данным уровней', ('warning', 'SB-A03'), 'site-brief.yaml', lead_traffic),
         ('N27 служебная страница брифа без плана', ('warning', 'PJ-03'), 'plans/spasibo.yaml', drop),
         ('N28 статья брифа без плана', 'PJ-03', 'plans/guide.yaml', drop),
+        ('N29 план: подписи ссылок и ссылка секции на необязательных элементах каталога', ('none', 'PL-A03'), plan_name, add_labels),
+        ('N30 план: подпись ссылки маршрута и alt карты', ('none', 'PL-A03'), 'plans/contacts.yaml', add_map_texts, site),
+        ('N31 план: подпись у блока без такого элемента', 'PL-A03', plan_name, lambda p: sec(p, 'faq')['slots']['text'].append({'id': 'all-label', 'slot': 'cta-secondary-label'})),
+        ('N32 бриф: одна тёмная тема с причиной', ('info', 'SB-C02'), 'site-brief.yaml', lambda b: b.__setitem__('themes', {'default': 'dark', 'dark': {'why': 'пульт диспетчера работает ночью'}})),
+        ('N33 бриф: одна тёмная тема без причины', ('warning', 'SB-C02'), 'site-brief.yaml', lambda b: b.__setitem__('themes', {'default': 'dark'})),
+        ('N34 бриф: «по системе» без второй темы', 'SB-C02', 'site-brief.yaml', lambda b: b.__setitem__('themes', {'default': 'system'})),
+        ('N35 карта без планов: этап page-plan не начат', ('info', 'SM-22'), 'plans', drop, site),
+        ('N36 карта без планов: ошибок нет', ('none', 'SM-22'), 'plans', drop, site),
+        ('N37 служебный шаблон без плана', ('warning', 'SM-22'), 'plans/404.yaml', drop, site),
+        ('N38 шаблон без плана, когда планы уже пишутся', ('info', 'SM-22'), 'plans/about.yaml', drop, site),
+        ('N39 план есть, а с шаблоном не связан', 'SM-22', 'plans/about.yaml', lambda p: p['page'].__setitem__('template_id', 'about-us'), site),
+        ('N40 план: возражения карточками — роль objections у feature-grid', ('none', 'PL-B03'), plan_name, objections_cards),
+        ('N41 план: один вопрос у призыва', ('none', 'PL-A05'), plan_name, one_question),
+        ('N42 план: фото в ряду «текст ↔ картинка»', ('none', 'PL-A03'), plan_name, lambda p: sec(p, 'product-demo')['slots']['media'][0].update({'slot': 'photo', 'anatomy': 'row.photo'}), 'saas-okoshko'),
+        ('N43 план: телефон и мессенджер в полосе призыва', ('none', 'PL-A03'), plan_name, band_channels, 'saas-okoshko'),
     ]
-    for name, want, fname, fn in cases:
+    for name, want, fname, fn, *other in cases:
         if fname is None:
             print(f'{name}: пропущен (нет тарифов в примере лидогенерации; покрыт примером SaaS)')
             continue
         level, code = want if isinstance(want, tuple) else ('error', want)
         dst = Path(tempfile.mkdtemp(dir=ex.parent, prefix='.selftest-'))   # та же глубина — относительные пути примера работают
-        shutil.copytree(ex, dst, dirs_exist_ok=True)
+        shutil.copytree(ex.parent / other[0] if other else ex, dst, dirs_exist_ok=True)
         f = dst / fname
         if fn is drop:
-            f.unlink()
+            shutil.rmtree(f) if f.is_dir() else f.unlink()
         else:
             doc = load_yaml(f)
             fn(doc)
@@ -1443,10 +1548,12 @@ def selftest(ctx):
         errs = [i for i in R.items if i[0] == 'error']
         if level == 'clean':          # code — подстрока: ни одной ошибки о ней
             good = not [i for i in errs if code in i[3]]
-        else:
+        elif level == 'none':         # законная правка: ошибок нет вовсе, предупреждения с этим кодом — тоже
+            good = not errs and not [i for i in R.items if i[1] == code and i[0] == 'warning']
+        else:                         # доклад, а не стоп: той же находки уровнем выше нет
+            higher = {'warning': ('error',), 'info': ('error', 'warning')}.get(level, ())
             good = bool([i for i in R.items if i[0] == level and i[1] == code])
-            if level == 'warning':    # доклад, а не стоп: той же находки уровнем error нет
-                good = good and not [i for i in errs if i[1] == code]
+            good = good and not [i for i in R.items if i[1] == code and i[0] in higher]
         if name.startswith('N26'):    # порог доли — поле ambition-levels.yaml: выше порог — правила нет
             rule, ctx.lead_rule = ctx.lead_rule, dict(ctx.lead_rule, hot_mobile_share_min=0.99)
             R.items.clear()
@@ -1466,13 +1573,53 @@ def selftest(ctx):
         R.items.clear()
         check_project(ex, ctx)
         good = any(i[0] == 'error' and 'прошёл' in i[3] for i in R.items)
-        print(f"N29 дата прогона {ctx.today} — после срока факта примера: {'OK' if good else 'FAIL'} (error «срок прошёл»)")
+        print(f"N44 дата прогона {ctx.today} — после срока факта примера: {'OK' if good else 'FAIL'} (error «срок прошёл»)")
         ok &= good
         ctx.today = EXAMPLES_TODAY
     else:
-        print('N29 дата прогона после срока факта: пропущен (у фактов примера нет valid.until)')
+        print('N44 дата прогона после срока факта: пропущен (у фактов примера нет valid.until)')
+    # подписи ссылок, alt информационных картинок, ссылка секции и каналы полосы призыва — необязательные элементы:
+    # обязательный дал бы находку каждому плану, где его нет, а утверждённый план от правки каталога меняться не должен
+    optional = {'portfolio-grid': ('all-label', 'project.alt'), 'team-grid': ('all', 'all-label'),
+                'location-map': ('route-label', 'map-alt'), 'footer': ('messenger-label', 'group-label'),
+                'audience-grid': ('segment.link-label', 'segment.alt'), 'about-story': ('alt',),
+                'cta-band': ('phone', 'messenger'), 'feature-alternating': ('row.photo', 'row.illustration', 'row.video')}
+    bad = [f'{b}.{e}' for b, els in optional.items() for e in els
+           if (anatomy_index(ctx.B.get(b) or {})[0].get(e) or {}).get('required', True) is not False]
+    print(f"N45 каталог: подписи ссылок, alt картинок и каналы есть и необязательны: {'OK' if not bad else 'FAIL ' + ', '.join(bad)}")
+    ok &= not bad
+    # --json: значение — файл вывода; ключ, папка и YAML после него — вход, JSON тогда идёт в stdout
+    got = [json_target(a) for a in (['p.yaml', '--json'], ['--json', '--quiet', 'p.yaml'], ['--json', str(ex), '--quiet'],
+                                    ['--json', 'p.yaml'], ['p.yaml', '--json', 'out.json', '--quiet'])]
+    good = got == [(None, True, ['p.yaml']), (None, True, ['--quiet', 'p.yaml']), (None, True, [str(ex), '--quiet']),
+                   (None, True, ['p.yaml']), ('out.json', False, ['p.yaml', '--quiet'])]
+    import subprocess
+    r = subprocess.run([sys.executable, str(Path(__file__).resolve()), str(ex / plan_name), '--json', '--today',
+                        EXAMPLES_TODAY.isoformat()], capture_output=True, text=True)
+    try:
+        rows = json.loads(r.stdout)
+    except ValueError:
+        rows = None
+    good = good and r.returncode == 0 and isinstance(rows, list) and bool(rows) and {'level', 'code', 'where', 'msg'} <= set(rows[0]) \
+        and 'Итого' in r.stderr
+    r = subprocess.run([sys.executable, str(Path(__file__).resolve()), '--json'], capture_output=True, text=True)
+    good = good and r.returncode == 2 and 'Traceback' not in r.stderr and not r.stdout.strip()
+    print(f"N46 --json без файла — JSON в stdout, итог в stderr; без путей — код 2 без трассировки: {'OK' if good else 'FAIL'}")
+    ok &= good
     print('SELFTEST', 'OK' if ok else 'FAIL')
     return 0 if ok else 1
+
+
+def json_target(args):
+    """Ключ --json → (файл вывода или None, JSON в stdout, аргументы без ключа). Значение ключа — файл вывода; ключ,
+    папка и YAML после него — уже вход: тогда JSON идёт в stdout, а входной файл не затирается находками."""
+    if '--json' not in args:
+        return None, False, args
+    i = args.index('--json')
+    nxt = args[i + 1] if i + 1 < len(args) else None
+    if nxt is None or nxt.startswith('--') or nxt.lower().endswith(('.yaml', '.yml')) or Path(nxt).is_dir():
+        return None, True, args[:i] + args[i + 1:]
+    return nxt, False, args[:i] + args[i + 2:]
 
 
 def main():
@@ -1483,13 +1630,13 @@ def main():
     today = EXAMPLES_TODAY if '--all' in args else dt.date.today()    # --all — примеры базы на их дате
     if '--today' in args:
         i = args.index('--today')
-        today = dt.date.fromisoformat(args[i + 1])
+        try:
+            today = dt.date.fromisoformat(args[i + 1])
+        except (IndexError, ValueError):
+            print('--today ждёт дату ГГГГ-ММ-ДД', file=sys.stderr)
+            sys.exit(2)
         del args[i:i + 2]
-    out_json = None
-    if '--json' in args:
-        i = args.index('--json')
-        out_json = args[i + 1]
-        del args[i:i + 2]
+    out_json, json_stdout, args = json_target(args)
     quiet = '--quiet' in args
     args = [a for a in args if a != '--quiet']
     ctx = Ctx(today)
@@ -1497,20 +1644,29 @@ def main():
         sys.exit(selftest(ctx))
     paths = all_paths() if '--all' in args else [Path(a) for a in args if not a.startswith('--')]
     if not paths:
-        print(__doc__)
+        if len(sys.argv) == 1:
+            print(__doc__)
+        else:
+            print('не названы пути: PATH [PATH…], --all или --selftest (справка — --help)', file=sys.stderr)
         sys.exit(2)
     for pth in paths:
         run_path(pth, ctx)
     cnt = R.count()
-    order = ('error', 'warning') if quiet else ('error', 'warning', 'info', 'ok')
-    for level in order:
-        for l, c, w, m in R.items:
-            if l == level:
-                print(f'{l.upper():7} {c:8} {w}: {m}')
-    print(f"\nИтого: error {cnt['error']}, warning {cnt['warning']}, info {cnt['info']}, ok {cnt['ok']}; "
-          f"словарь v{load_yaml(P['vocab']).get('version')}, блоков {len(ctx.B)}, наборов форм {len(ctx.form_sets)}, событий {len(ctx.events)}; дата {today}")
-    if out_json:
-        Path(out_json).write_text(json.dumps([{'level': l, 'code': c, 'where': w, 'msg': m} for l, c, w, m in R.items], ensure_ascii=False, indent=1), encoding='utf-8')
+    total = (f"Итого: error {cnt['error']}, warning {cnt['warning']}, info {cnt['info']}, ok {cnt['ok']}; "
+             f"словарь v{load_yaml(P['vocab']).get('version')}, блоков {len(ctx.B)}, наборов форм {len(ctx.form_sets)}, событий {len(ctx.events)}; дата {today}")
+    found = json.dumps([{'level': l, 'code': c, 'where': w, 'msg': m} for l, c, w, m in R.items], ensure_ascii=False, indent=1)
+    if json_stdout:                     # stdout — только JSON: его читает вызывающая утилита, итог — в stderr
+        print(found)
+        print(total, file=sys.stderr)
+    else:
+        order = ('error', 'warning') if quiet else ('error', 'warning', 'info', 'ok')
+        for level in order:
+            for l, c, w, m in R.items:
+                if l == level:
+                    print(f'{l.upper():7} {c:8} {w}: {m}')
+        print('\n' + total)
+        if out_json:
+            Path(out_json).write_text(found, encoding='utf-8')
     sys.exit(1 if cnt['error'] else 0)
 
 

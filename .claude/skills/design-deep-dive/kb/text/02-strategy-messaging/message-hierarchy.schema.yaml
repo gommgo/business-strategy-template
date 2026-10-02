@@ -17,8 +17,9 @@
 # `slots[].fact_ids` ← `proof_ids`), вход холста (работа секций `site.sections[].job` брифа холста — проекция `x-canvas-map`).
 #
 # Даты — строкой в кавычках. Проверка: `../../scripts/text/validate_meaning.py` (схема + смысловые
-# проверки: первая секция — hero, каждая опора стоит хотя бы в одной секции, у опоры есть доказательство или missing,
-# возражения-блокеры из meaning закрыты до финального призыва).
+# проверки: тип страницы и роли секций — id словаря site, первая секция — hero, каждая опора стоит хотя бы в одной
+# секции, у опоры есть доказательство или missing, возражения-блокеры из meaning закрыты до финального призыва — кроме
+# справочных и служебных страниц, `x-blocker-optional`).
 
 $schema: "https://json-schema.org/draft/2020-12/schema"
 $id: "urn:app-design:text-research:message-hierarchy:1"
@@ -203,16 +204,16 @@ $defs:
            retargeting, maps-local, social-organic, marketplace, messenger, offline]
 
   page-type:
-    description: "Тип страницы — id словаря site (page_type)."
-    enum: [landing-lead-services, landing-saas, landing-product, landing-campaign, landing-event, landing-course,
-           landing-app, landing-waitlist, home-multipage, service-page, about-page, case-page, pricing-page, careers-page,
-           contacts-page, portfolio-page, article-page, seo-landing-page]
+    $ref: "#/$defs/id"
+    description: >-
+      Тип страницы — id словаря site (`page_type`, `../../site/02-site-types/vocabulary.yaml`). Перечень один — в
+      словаре, как у плана страницы: id сверяет validate_meaning.py (нет в словаре или `out-of-scope` — ошибка).
 
   section-role:
-    description: "Роль секции — id словаря site (section_role); место в плане страницы — section_id."
-    enum: [hero, problem, solution, benefits, how-it-works, product-demo, proof-logos, proof-stats, testimonials,
-           case-studies, awards-press, comparison, pricing, guarantee, objections, faq, about, team, portfolio,
-           integrations, event-program, cta-band, lead-form, final-cta, contacts, footer, article-body, related]
+    $ref: "#/$defs/id"
+    description: >-
+      Роль секции — id словаря site (`section_role`); место в плане страницы — section_id. Перечень один — в словаре,
+      как у плана страницы: id сверяет validate_meaning.py (нет в словаре или `measurement-only` — ошибка).
 
   pillar:
     type: object
@@ -277,6 +278,13 @@ $defs:
           to: {$ref: "#/$defs/awareness-level"}
         description: "С какого уровня на какой секция переводит читателя (problem-aware → solution-aware и т. д.)."
       notes: {type: string}
+
+# Страницы, у которых иерархия не обязана закрывать возражение-блокер до главного призыва: справочную и служебную
+# страницу читают за адресом, документом или выходом из тупика, решение о покупке принимается не на ней. `page_class` —
+# поле `class` типа страницы в словаре site, `page_types` — отдельные типы.
+x-blocker-optional:
+  page_class: [utility]
+  page_types: [contacts-page]
 
 # Проекция во вход холста (references/claude-design.md § 6): работа секции в брифе холста — «вопрос → сообщение;
 # доказательства» по секциям плана; остальное воплощено в текстах copy deck.

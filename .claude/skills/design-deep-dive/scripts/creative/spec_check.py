@@ -6,7 +6,7 @@
 kb/creative/01-creative-direction/ambition-levels.yaml (--levels — другой файл той же формы); пределы времени и смещения
 первого экрана — токены motion.marketing (04-visual-language/marketing-tokens.json). Работает на примерах базы и на файлах
 проекта: путь — аргументом; план находит спецификацию движения по page.treatment.motion_spec_ref, спецификация — план по
-refs.page_plan (пути от файла), если их не назвали ключом.
+refs.page_plan (пути от файла), если их не назвали ключом, и арт-дирекцию по refs.art_direction.
 
 Команды:
   blocks [--yaml F]                              block-treatments.yaml ↔ blocks.yaml site, effects.yaml, cliche-registry.yaml
@@ -28,6 +28,12 @@ refs.page_plan (пути от файла), если их не назвали к�
 (TR-11), петля под переключатель страницы, которого нет (TR-16); нормы облика — уровень секции и блока, конверсия — L0,
 пики, акценты и фирменные приёмы по уровню, списки page.treatment против секций, один референс — одна секция, петли,
 плавная прокрутка, пределы параметров эффекта — warning: облик выбирает заказчик, находка — доклад с нормой в сообщении.
+Тяжесть находок spec: четыре нормы движения — error, пока их не сняло решение арт-дирекции, после — warning с тем же
+правилом и строкой «принято решением арт-дирекции <id решения>»: свойство и blur по уровню (MS-08), вход элемента LCP
+(MS-09), длительность сцены первого экрана (MS-10), свойства страницы шире уровня (MS-23). Запись —
+exclusions.lifted_markers[] арт-дирекции (refs.art_direction спецификации): marker — id правила, decision_ref — id записи
+decisions[]; у каждого правила своя запись; запись, чьего решения нет в decisions[], ничего не снимает. Остальные error
+(схема, ссылки, уровень эффекта, пределы сцен и петель) решением не снимаются.
 Коды выхода: 0 — нет error; 1 — есть error; 2 — сбой запуска. Overlay treatment (формат примеров базы):
   {overlay_version: "1.0", plan: <путь к page-plan site>, page: {treatment страницы}, sections: {<id секции>: {treatment}}}
 """
@@ -64,6 +70,9 @@ P = {
 LV = {'L0': 0, 'L1': 1, 'L2': 2}
 CHROME_ROLES = {'header', 'footer', 'utility', 'legal'}
 ROLES = ['peak', 'accent', 'support', 'calm', 'pause', 'chrome']
+# Нормы движения spec, которые снимает решение арт-дирекции: облик выбирает заказчик, записанное отступление — доклад, а
+# не стоп. Схема, ссылки и уровень эффекта решением не снимаются — это целостность файла, а не выбор облика.
+LIFTABLE = ('MS-08', 'MS-09', 'MS-10', 'MS-23')
 STAGES = ('directions', 'wireframe', 'mockup', 'motion')                      # этапы входа холста
 RULES = ('copy', 'map', 'derive', 'drop', 'claude_fills')                      # правила проекции x-canvas-map
 POINTER = re.compile(r'^(?:[a-z][a-z0-9-]*#)?(?:/[^/]*)*$')                     # [<документ>#]<JSON Pointer>; * — любой элемент
@@ -510,6 +519,33 @@ def px_of(ctx, s):
     return max((abs(x) for x in vals), default=None)
 
 
+def lifted_rules(spec_path, spec):
+    """Нормы движения, снятые решением арт-дирекции: refs.art_direction спецификации → exclusions.lifted_markers[], где
+    marker — id правила из LIFTABLE, decision_ref — id записи decisions[]. Возвращает ({правило: [id решений]},
+    {правило: [decision_ref без записи в decisions[]]}); арт-дирекции нет или она не читается — оба словаря пусты."""
+    ad_path = ref_file(spec_path, (spec.get('refs') or {}).get('art_direction'))
+    if not ad_path:
+        return {}, {}
+    try:
+        ad = load(ad_path)
+    except (OSError, ValueError, yaml.YAMLError):
+        return {}, {}
+    if not isinstance(ad, dict):
+        return {}, {}
+    known = {d.get('id') for d in ad.get('decisions') or [] if isinstance(d, dict)}
+    ex = ad.get('exclusions')
+    ok, lost = {}, {}
+    for lm in (ex.get('lifted_markers') if isinstance(ex, dict) else None) or []:
+        if not isinstance(lm, dict):
+            continue
+        rule, ref = str(lm.get('marker') or '').strip(), lm.get('decision_ref')
+        if rule in LIFTABLE:
+            refs = (ok if isinstance(ref, str) and ref in known else lost).setdefault(rule, [])
+            if ref not in refs:
+                refs.append(ref)
+    return ok, lost
+
+
 def cmd_spec(ctx, R, spec_path, plan_path=None, overlay_path=None):
     spec = load(spec_path)
     v = Draft202012Validator(load(P['m_schema']))
@@ -517,6 +553,17 @@ def cmd_spec(ctx, R, spec_path, plan_path=None, overlay_path=None):
         R.add('error', 'MS-S', '/'.join(str(p) for p in e.path), e.message[:220])
     if any(i[1] == 'MS-S' for i in R.items):
         return spec
+    lifted, lost = lifted_rules(spec_path, spec)
+
+    def norm(code, where, msg):
+        """Норма движения: снятая решением арт-дирекции — доклад с тем же правилом и советом; иначе error."""
+        if code in lifted:
+            R.add('warning', code, where, f'{msg} — принято решением арт-дирекции {", ".join(lifted[code])}')
+        elif code in lost:
+            R.add('error', code, where, f'{msg}; снятая примета {code} арт-дирекции не действует: решения '
+                                        f'{", ".join(str(x) for x in lost[code])} нет в decisions')
+        else:
+            R.add('error', code, where, msg)
     lvl = spec['level']
     page = spec['page']
     base = (page.get('base') or {}).get('duration_ms')
@@ -528,7 +575,7 @@ def cmd_spec(ctx, R, spec_path, plan_path=None, overlay_path=None):
     page_props = page.get('properties_allowed') or []
     wide = [p for p in page_props if not ctx.prop_in(p, ctx.props(lvl)) and p not in ctx.prop_exc]
     if wide:
-        R.add('error', 'MS-23', 'page.properties_allowed', f'шире уровня {lvl}: {wide} (ambition-levels.yaml motion_hints.properties_allowed)')
+        norm('MS-23', 'page.properties_allowed', f'шире уровня {lvl}: {wide} (ambition-levels.yaml motion_hints.properties_allowed)')
     shift_max = ctx.token_ms('motion.marketing.distance.shift-hero')
     scene_max = ctx.token_ms('motion.marketing.duration.hero-scene-max')
     group_max = ctx.token_ms('motion.marketing.stagger.group-total-max')
@@ -607,26 +654,26 @@ def cmd_spec(ctx, R, spec_path, plan_path=None, overlay_path=None):
             for tk in m['tracks']:
                 prop = tk['property']
                 if not ctx.prop_ok(slvl, prop, m.get('effect')):
-                    R.add('error', 'MS-08', wm, f'свойство {prop} не разрешено уровнем {slvl} (ambition-levels.yaml motion_hints.properties_allowed)')
+                    norm('MS-08', wm, f'свойство {prop} не разрешено уровнем {slvl} (ambition-levels.yaml motion_hints.properties_allowed)')
                 elif page_props and not ctx.prop_in(prop, set(page_props)) and m.get('effect') not in ctx.prop_exc.get(prop, ()):
                     R.add('error', 'MS-24', wm, f'свойство {prop} вне page.properties_allowed {page_props}')
                 bmax = ctx.blur_max(slvl)
                 if prop == 'filter' and bmax is not None:
                     for b in re.findall(r'blur\((\d+(?:\.\d+)?)px\)', f'{tk.get("from", "")} {tk.get("to", "")}'):
                         if float(b) > bmax:
-                            R.add('error', 'MS-08', wm, f'blur {b}px > {bmax:g} px для {slvl} (ambition-levels.yaml motion_hints.blur_max_px)')
+                            norm('MS-08', wm, f'blur {b}px > {bmax:g} px для {slvl} (ambition-levels.yaml motion_hints.blur_max_px)')
                 if prop == 'opacity' and str(tk.get('from')) in ('0', '0.0') and m['class'] == 'one-shot' and sid == first_flow:
                     R.add('warning', 'MS-19', wm, 'появление из opacity 0 в первом экране: возьмите .01 (кандидат LCP сохраняется — creative 05-motion/02 §10)')
             is_lcp = m.get('lcp') == 'is-lcp' or m['target'] == page['lcp']['target']
             if is_lcp:
                 if page['lcp']['entrance'] == 'none':
-                    R.add('error', 'MS-09', wm, f'элемент LCP {page["lcp"]["target"]} анимируется, а page.lcp.entrance = none')
+                    norm('MS-09', wm, f'элемент LCP {page["lcp"]["target"]} анимируется, а page.lcp.entrance = none')
                 for tk in m['tracks']:
                     if tk['property'] not in ('transform', 'translate'):
-                        R.add('error', 'MS-09', wm, f'LCP-элемент: свойство {tk["property"]} (только transform)')
+                        norm('MS-09', wm, f'LCP-элемент: свойство {tk["property"]} (только transform)')
                     px = px_of(ctx, tk.get('from'))
                     if px is not None and shift_max is not None and px > shift_max:
-                        R.add('error', 'MS-09', wm, f'LCP-элемент: сдвиг {px:g} px > {shift_max:g} (токен distance.shift-hero)')
+                        norm('MS-09', wm, f'LCP-элемент: сдвиг {px:g} px > {shift_max:g} (токен distance.shift-hero)')
             if m['class'] == 'one-shot' and m['trigger']['type'] == 'load' and sid == first_flow:
                 st = m.get('stagger') or {}
                 each = dur_ms(ctx, st.get('each'), base) or 0
@@ -652,7 +699,7 @@ def cmd_spec(ctx, R, spec_path, plan_path=None, overlay_path=None):
             if m.get('scrub', {}).get('snap') == 'stations' and slvl != 'L2':
                 R.add('error', 'MS-13', wm, 'привязка к станциям (snap) — только L2')
         if sid == first_flow and scene_max is not None and t_end > scene_max:
-            R.add('error', 'MS-10', w, f'сцена первого экрана {t_end:g} мс > {scene_max:g} (токен duration.hero-scene-max)')
+            norm('MS-10', w, f'сцена первого экрана {t_end:g} мс > {scene_max:g} (токен duration.hero-scene-max)')
         lmax = ctx.loops_max(slvl)
         if lmax is not None and loops > lmax:
             R.add('error', 'MS-14', w, f'петель {loops} > {lmax} для {slvl} (ambition-levels.yaml continuous_motions_in_view_max)')
@@ -1070,9 +1117,12 @@ def codes(R, sev='error'):
     return {i[1] for i in R.items if i[0] == sev}
 
 
-def levels_copy(tmp, mutate):
+def levels_copy(tmp, mutate, top=None):
+    """Копия файла уровней: mutate правит уровни по id, top — ключи верхнего уровня (property_exceptions)."""
     lv = load(P['levels'])
     mutate({L['id']: L for L in lv['levels']})
+    if top:
+        top(lv)
     p = os.path.join(tmp, 'ambition-levels.yaml')
     with open(p, 'w', encoding='utf-8') as f:
         yaml.safe_dump(lv, f, allow_unicode=True, sort_keys=False)
@@ -1161,6 +1211,72 @@ def selftest(ctx):
         cmd_plan(ctx, R, p3, spec=load(sp))
         expect('уровень эффекта и схема плана — error: эффект L2 в секции L1 → TR-11, чужой ключ → TR-S',
                {'TR-11', 'TR-S'} <= codes(R))
+    # нормы движения, снятые решением арт-дирекции: копия примера с четырьмя отступлениями и арт-дирекция рядом с ней.
+    # Уровни — копией без исключения clip-path и с ним: вердикт случаев не зависит от состава property_exceptions базы
+    with tempfile.TemporaryDirectory() as tmp:
+        c_plain = Ctx(levels_copy(tmp, lambda L: None, lambda t: (t.get('property_exceptions') or {}).pop('clip-path', None)))
+        c_exc = Ctx(levels_copy(tmp, lambda L: None, lambda t: t.setdefault('property_exceptions', {}).update({'clip-path': ['effect:mask-reveal']})))
+        doc = load(sp)
+        doc['refs']['art_direction'] = 'art-direction.json#/directions/0'
+        doc['page']['properties_allowed'] = list(doc['page']['properties_allowed']) + ['currentTime']       # MS-23: шире L1
+        hero = next(s_ for s_ in doc['sections'] if s_['id'] == 'hero')
+        hero['level'] = 'L0'
+        moms = {m_['id']: m_ for m_ in hero['moments']}
+        frame, rise = moms['hero-photo-settle'], moms['hero-copy-rise']
+        frame.pop('lcp')                                                                                    # LCP — по цели page.lcp.target
+        frame['tracks'] = [{'property': 'filter', 'from': 'brightness(0.3)', 'to': 'brightness(1)'}]        # MS-09 и MS-08 (filter на L0)
+        rise['effect'] = 'effect:mask-reveal'
+        rise['tracks'] = [{'property': 'clip-path', 'from': 'inset(100% 0 0 0)', 'to': 'inset(0 0 0 0)'}]   # MS-08 (clip-path на L0)
+        rise['trigger']['delay_ms'] = 2000                                                                  # MS-10
+        p_spec = os.path.join(tmp, 'home.motion-spec.yaml')
+        crit = {k: {'result': 'pass'} for k in ('concept', 'brand', 'execution', 'epoch', 'singularity')}
+        decisions = [{'id': 'd-frame-light', 'technique': 'effect:mask-reveal', 'decision': 'use', 'criteria': crit,
+                      'why': 'заказчик выбрал подачу первого экрана на прототипе', 'where': 'hero'}]
+
+        def lifted_run(c, markers, ref=True):
+            """Находки spec у копии с отступлениями; markers — записи lifted_markers [(marker, decision_ref)]."""
+            ad = {'decisions': decisions, 'exclusions': {'lifted_markers': [{'marker': k, 'decision_ref': r} for k, r in markers]}}
+            with open(os.path.join(tmp, 'art-direction.json'), 'w', encoding='utf-8') as f:
+                json.dump(ad, f, ensure_ascii=False)
+            d = copy.deepcopy(doc)
+            if not ref:
+                d['refs'].pop('art_direction')
+            with open(p_spec, 'w', encoding='utf-8') as f:
+                yaml.safe_dump(d, f, allow_unicode=True, sort_keys=False)
+            R = Report()
+            cmd_spec(c, R, p_spec, plan, ov)
+            return R, ad
+        every = [(k, 'd-frame-light') for k in LIFTABLE]
+        R0, _ = lifted_run(c_plain, [])
+        R1, ad1 = lifted_run(c_plain, every)
+        R2, _ = lifted_run(c_plain, [(k, 'd-no-such-decision') for k in LIFTABLE])
+        for k in LIFTABLE:
+            expect(f'снятая норма {k}: записи нет → error', k in codes(R0))
+            expect(f'снятая норма {k}: запись с решением → warning «принято решением арт-дирекции d-frame-light»',
+                   k in codes(R1, 'warning') and k not in codes(R1)
+                   and all('принято решением арт-дирекции d-frame-light' in i[3] for i in R1.items if i[1] == k))
+            expect(f'снятая норма {k}: decision_ref в пустоту → error с причиной',
+                   k in codes(R2) and k not in codes(R2, 'warning')
+                   and all('d-no-such-decision нет в decisions' in i[3] for i in R2.items if i[1] == k))
+        expect('снятые нормы: четыре записи с решением → 0 error у копии с отступлениями', not codes(R1))
+        ad_s = load(P['ad_schema'])
+        adv = Draft202012Validator({'properties': {k: ad_s['properties'][k] for k in ('decisions', 'exclusions')}, '$defs': ad_s['$defs']})
+        expect('снятые нормы: записи (marker — id правила) проходят схему арт-дирекции', not list(adv.iter_errors(ad1)))
+        R, _ = lifted_run(c_plain, [('MS-08', 'd-frame-light')])
+        expect('у каждого правила своя запись: примета MS-08 не снимает MS-09, MS-10, MS-23',
+               'MS-08' in codes(R, 'warning') and {'MS-09', 'MS-10', 'MS-23'} <= codes(R))
+        R, _ = lifted_run(c_plain, [('длительность сцены первого экрана (MS-10)', 'd-frame-light')])
+        expect('marker — ровно id правила: текст с id в скобках норму не снимает', 'MS-10' in codes(R))
+        R, _ = lifted_run(c_plain, every, ref=False)
+        expect('без refs.art_direction у спецификации записи не читаются: error', set(LIFTABLE) <= codes(R))
+
+        def ms08(R_, moment):
+            return {i[0] for i in R_.items if i[1] == 'MS-08' and i[2] == f'hero.{moment}'}
+        R, _ = lifted_run(c_exc, [])
+        expect('приём каталога на своём уровне: без строки property_exceptions clip-path у mask-reveal на L0 — MS-08 error',
+               ms08(R0, 'hero-copy-rise') == {'error'})
+        expect('приём каталога на своём уровне: строка property_exceptions (clip-path → effect:mask-reveal) снимает MS-08 без '
+               'записи арт-дирекции, filter без исключения остаётся', not ms08(R, 'hero-copy-rise') and ms08(R, 'hero-photo-settle') == {'error'})
     # файлы проекта: план с подачей и спецификация движения находят друг друга по ссылкам
     try:
         kbpaths.use('tests')

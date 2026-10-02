@@ -78,6 +78,10 @@ profiles:
     groups:
       STR: {enabled: true, max_level: warning}
     level_overrides:
+      # Правила микрокопи интерфейса (ux 07/06 §6.4, §3.1) на тексте страницы — сигнал, а не запрет: «Адрес: Казань» —
+      # имя собственное после двоеточия, «собираем вручную» — описание ручной работы, «улица Лесная,» — не деепричастие.
+      # Один набор на жанры текста страницы (landing, site-page, article, meta); у interface — уровни канона.
+      <<: &ux_on_page {"ux-6-4-*": warning, ux-6-4-10: info, ux-3-1-03: warning}
       ru-syn-sales-question: info
     analyzers:
       lists_of_three: {enabled: false}          # три карточки фич — норма раскладки (PLAN.md, «Жанры»)
@@ -88,6 +92,8 @@ profiles:
     description: "Страницы многостраничника: главная, услуги, о компании, кейсы, тарифы, вакансии, контакты"
     groups:
       STR: {enabled: true, max_level: warning}
+    level_overrides:
+      <<: *ux_on_page
     analyzers:
       lists_of_three: {enabled: false}
       questions: {warn_per_100w: 1.5}
@@ -95,6 +101,7 @@ profiles:
     genre: article
     description: "Статьи блога, справочные, категорийные и сервисные SEO-тексты"
     level_overrides:
+      <<: *ux_on_page
       ru-syn-not-x-but-y: info
     analyzers:
       rhythm: {level: info}                    # опыт C/02: 2 из 8 человеческих колонок получали warning
@@ -106,6 +113,7 @@ profiles:
     genre: meta
     description: "title, description, og:title, og:description, og:image:alt — короткие тексты: анализаторы прозы выключены"
     level_overrides:
+      <<: *ux_on_page
       "ru-lex-intro-cliche": error
       "en-lex-intro-cliche": error
       "ru-mkt-banned-openers": error

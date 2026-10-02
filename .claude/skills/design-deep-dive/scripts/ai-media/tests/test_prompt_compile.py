@@ -182,6 +182,40 @@ r = comp(B("B1"), "bria-fibo", "fibo_json", channel="genapi", options={"seed": 1
 sp = r["body"].get("structured_prompt") or {}
 check("Gen-API Bria FIBO: structured_prompt с ключами схемы", list(sp)[:3] == ["short_description", "objects", "background_setting"] and "lighting" in sp and r["body"].get("model") == "generate", list(sp))
 
+# формат вывода канала: маршрут задачи → запись модели в dialects.yaml → png; последнее слово — за каталогом канала
+vec = B("B1"); vec["task"] = "VEC-ICON-FILLED"; vec["output"] = {"primary_ratio": "1:1"}
+_cc, _rp = pc.channel_catalog, pc.route_params
+pc.channel_catalog = lambda ch: {}
+r = comp(vec, "recraft/recraft-v4.1-pro-vector", channel="routerai")
+check("RouterAI Pro Vector: основная модель маршрута цветных иконок собирается, output_format svg из маршрута",
+      r["body"].get("output_format") == "svg" and not r["errors"], (r["body"].get("output_format"), r["errors"]))
+pc.route_params = lambda *a: {}
+r = comp(vec, "recraft/recraft-v4.1-vector", channel="routerai")
+check("RouterAI Vector без маршрута и без снимка канала: svg из записи модели", r["body"].get("output_format") == "svg", r["body"])
+r = comp(B("B1"), "black-forest-labs/flux.2-pro", channel="routerai")
+check("RouterAI FLUX.2 Pro: растровая модель — png", r["body"].get("output_format") == "png" and not r["errors"], r["body"])
+pc.channel_catalog = lambda ch: {"black-forest-labs/flux.2-pro": {"supported_output_formats": ["jpeg"]},
+                                 "recraft/recraft-v4.1-vector": {"supported_output_formats": ["png"]}}
+r = comp(B("B1"), "black-forest-labs/flux.2-pro", channel="routerai")
+check("каталог канала принимает только jpeg → jpeg вместо png", r["body"].get("output_format") == "jpeg" and not r["errors"], r["body"])
+pc.route_params = lambda *a: {"output_format": "svg"}
+r = comp(vec, "recraft/recraft-v4.1-vector", channel="routerai")
+check("маршрут называет svg, каталог канала — только png → png и предупреждение о маршруте",
+      r["body"].get("output_format") == "png" and any("маршрут сверить" in w for w in r["warnings"]), r["warnings"][-2:])
+pc.channel_catalog, pc.route_params = _cc, _rp
+vec["output"]["format"] = "svg"
+r = comp(vec, "black-forest-labs/flux.2-pro", channel="routerai")
+check("спецификация ждёт svg, модель растровая → ошибка", any("спецификация ждёт svg" in e for e in r["errors"]), r["errors"])
+check("svg в схеме спецификации: output.format svg проходит проверку", not any("svg" in e for e in pc.validate_spec(vec, None, D, C)[0]),
+      pc.validate_spec(vec, None, D, C)[0])
+with tempfile.TemporaryDirectory() as td:
+    sp_, out = pathlib.Path(td) / "icons.spec.json", pathlib.Path(td) / "icons.routerai.json"
+    sp_.write_text(json.dumps(vec))
+    r = cli("jobs", str(sp_), "--models", "recraft/recraft-v4.1-pro-vector", "--channel", "routerai", "--out", str(out))
+    jb = json.loads(out.read_text()) if out.exists() else [{}]
+    check("CLI jobs по маршруту цветных иконок: код 0, одно задание, svg",
+          r.returncode == 0 and len(jb) == 1 and jb[0].get("body", {}).get("output_format") == "svg", (r.returncode, r.stderr[-200:]))
+
 # --- 10. соотношения и серия
 s = E("E1")
 s["output"]["aspect_ratios"] = ["16:9", "4:5", "9:16", "21:9"]

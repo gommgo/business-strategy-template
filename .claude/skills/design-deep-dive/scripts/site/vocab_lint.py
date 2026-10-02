@@ -8,6 +8,8 @@ jurisdiction, ambition_level, conversion_channel, procedure_step).
 Что проверяет:
   1. значения ключей из карты «ключ → пространство» (по умолчанию — ключи blocks.yaml, page-plan, site-map, site-brief,
      чек-листа: page_type, role, block, slot, action, awareness …) на любой глубине; значение — строка или список строк;
+     у copy deck сверяются slot_type, section_role, block и page_type — локальный slot_id и действие страницы словами
+     в карту не входят; у facts.yaml — места use, а роли людей (owner, responsible, attribution) — нет;
   2. ссылки с префиксом пространства в любой строке и в Markdown: block:hero-media, slot:headline, section-role:faq,
      page-type:…, site-type:…, action:…, macrostructure:… (чужие префиксы effect:, fact:, task:, recipe:, copy-rule: —
      пропускаются: их словари ведут владельцы);
@@ -53,7 +55,7 @@ DEFAULT_MAP = {
     "page_type": "page_type", "page_types": "page_type",
     "role": "section_role", "section_role": "section_role", "section_roles": "section_role", "serves": "section_role",
     "block": "block", "blocks_allowed": "block", "block_family": "block_family", "family": "block_family",
-    "slot": "slot", "slot_id": "slot", "slot_kind": "slot_kind",
+    "slot": "slot", "slot_kind": "slot_kind",
     "macrostructure": "macrostructure", "first_screen_policy": "first_screen_policy",
     "action": "action", "actions": "action", "primary_action": "action", "secondary_actions": "action",
     "awareness": "awareness",
@@ -65,6 +67,11 @@ DEFAULT_MAP = {
     "references.role": None,
     # поля site-brief, одноимённые ключам плана, но не id словаря: роль в аудитории и языке, раздел брифа у вопроса
     "audience.role": None, "languages.role": None, "questions.block": None, "versions.role": None,
+    # copy deck: тип слота словаря — slot_type слота секции, а slot_id — локальный id слота плана и в карту не входит;
+    # действие страницы записано словами страницы, role у текста в кадре — его место в кадре
+    "slots.slot_type": "slot", "pages.primary_action": None, "in_image.role": None,
+    # facts.yaml: роль владельца инвентаря, ответственного за факт и автора отзыва — должность словами
+    "owner.role": None, "responsible.role": None, "attribution.role": None,
 }
 PREFIX_RE = re.compile(r"(?<![\w/.-])(site-type|page-type|section-role|block-family|block|slot-kind|slot|macrostructure|first-screen-policy|"
                        r"action|awareness|traffic-temperature|traffic-source|jurisdiction|ambition):([A-Za-z0-9][A-Za-z0-9-]*)")
@@ -326,6 +333,20 @@ def selftest():
         (td / "dotted.yaml").write_text("site:\n  sections:\n    - {id: hero}\n    - {id: final_cta}\n"
                                         "facts:\n  - {id: F1}\n", encoding="utf-8")
         cases.append(("ключ с точкой: только site.sections.id", ["dotted.yaml"], {}, 1, 1))
+        (td / "deck.yaml").write_text(
+            "copy_deck:\n  pages:\n    - page_id: home\n      page_type: landing-saas\n      primary_action: Записаться на замер\n"
+            "      sections:\n        - section_id: hero\n          section_role: hero\n          block: hero-media\n"
+            "          slots:\n            - {slot_id: main-title, slot_type: headline}\n"
+            "            - {slot_id: note, slot_type: headlin}\n"
+            "            - {slot_id: banner, slot_type: cta-primary, in_image: [{role: sign, text: Открыто}]}\n",
+            encoding="utf-8")
+        cases.append(("copy deck: slot_type сверяется; slot_id, действие словами и role текста в кадре — нет",
+                      ["deck.yaml"], {}, 1, 1))
+        (td / "facts.yaml").write_text(
+            "owner: {role: маркетолог}\nfacts:\n  - id: f1\n    responsible: {role: юрист}\n"
+            "    attribution: {role: владелец кофейни}\n"
+            "    use: {page_types: [landing-saas], section_roles: [hero, heroo]}\n", encoding="utf-8")
+        cases.append(("facts.yaml: места use сверяются, роли людей — нет", ["facts.yaml"], {}, 1, 1))
         ok = True
         for name, files, kai, code_exp, err_exp in cases:
             km = dict(DEFAULT_MAP)
@@ -344,6 +365,10 @@ def selftest():
                 good = good and all(e.line > 0 for e in errs)
             if name.startswith("ключ с точкой"):
                 good = good and errs[0].value == "final_cta"
+            if name.startswith("copy deck"):
+                good = good and errs[0].value == "headlin" and "возможно, headline" in errs[0].msg
+            if name.startswith("facts.yaml"):
+                good = good and errs[0].value == "heroo"
             ok &= good
             print(("PASS " if good else "FAIL ") + name + f" (код {code}, ошибок {len(errs)})")
         # приоритет relation в подсказке crosswalk

@@ -17,9 +17,11 @@
      Обещание из допущения (предупреждения): свойство has-proof, а в proof_ids — missing:; обещание задевает
      never_claim с lift: with-fact, а снимающего проверенного факта того же класса нет; ядро ценностного предложения
      опирается на свойство без доказательства (сообщение сильнее своих доказательств).
-  4. Смысловые проверки hierarchy: первая секция — hero; каждая опора несётся хотя бы одной секцией; hero несёт core;
+  4. Смысловые проверки hierarchy: тип страницы и роли секций — id словаря site (перечень один — в словаре; id не для
+     страницы — ошибка); первая секция — hero; каждая опора несётся хотя бы одной секцией; hero несёт core;
      порядок секций без повторов; ссылки на ценности и возражения разрешаются в meaning_ref; возражения-блокеры
-     основного сегмента закрыты до final-cta; тип hero соответствует уровню осведомлённости (предупреждение);
+     основного сегмента закрыты до final-cta — кроме справочных и служебных страниц (x-blocker-optional схемы
+     иерархии); тип hero соответствует уровню осведомлённости (предупреждение);
      never_claim в главном сообщении, опорах и сообщениях секций; опора has-proof с missing: в proof_ids, главное
      сообщение на свойстве без доказательства или без proof_ids, never_claim с lift: with-fact без снимающего факта —
      предупреждения.
@@ -41,6 +43,9 @@ import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb("text"))
 SM = os.path.join(ROOT, "02-strategy-messaging")
 EX = os.path.join(SM, "examples")
+VOCAB = str(kbpaths.kb("site", "02-site-types", "vocabulary.yaml"))   # словарь id системы: типы страниц, роли секций
+NOT_FOR_PAGE = ("out-of-scope", "measurement-only")                    # статусы id словаря, с которыми страницу не описывают
+_LOADED = {}
 
 HERO_BY_AWARENESS = {
     "most-aware": "direct-offer",
@@ -59,6 +64,52 @@ def load(path):
 def schema_errors(validator, doc):
     return [f"{'/'.join(map(str, e.path)) or '(корень)'}: {e.message[:180]}"
             for e in sorted(validator.iter_errors(doc), key=lambda e: list(e.path))]
+
+
+def site_vocab():
+    """Типы страниц и роли секций словаря site: {'page_type': {id: запись}, 'section_role': {id: запись}}; словаря
+    нет — None."""
+    if "vocab" not in _LOADED:
+        _LOADED["vocab"] = None
+        if os.path.exists(VOCAB):
+            ns = (load(VOCAB) or {}).get("namespaces") or {}
+            _LOADED["vocab"] = {k: {str(x["id"]): x for x in (ns.get(k) or {}).get("values") or [] if isinstance(x, dict) and x.get("id")}
+                                for k in ("page_type", "section_role")}
+    return _LOADED["vocab"]
+
+
+def vocab_check(h):
+    """Тип страницы и роли секций иерархии против словаря site — перечень один, в словаре, схема держит только форму
+    id. Нет id или он не для страницы (out-of-scope, measurement-only) — ошибка; deprecated — предупреждение.
+    → (ошибки, предупреждения)."""
+    errors, warnings = [], []
+    vocab = site_vocab()
+    if vocab is None:
+        return errors, [f"словарь site не найден ({VOCAB}) — тип страницы и роли секций не сверены"]
+    used = [("page_type", "page/page_type", (h.get("page") or {}).get("page_type"))]
+    used += [("section_role", f"секция {s.get('order')}", s.get("section_role")) for s in h.get("sections") or [] if isinstance(s, dict)]
+    for ns, where, ident in used:
+        if not isinstance(ident, str):
+            continue   # нет поля или не строка — это скажет схема
+        rec = vocab[ns].get(ident)
+        if rec is None:
+            errors.append(f"{where}: {ns} «{ident}» нет в словаре site (vocabulary.yaml#{ns})")
+        elif rec.get("status") in NOT_FOR_PAGE:
+            errors.append(f"{where}: {ns} «{ident}» — статус словаря {rec['status']}: страницу им не описывают")
+        elif rec.get("status") == "deprecated":
+            warnings.append(f"{where}: {ns} «{ident}» устарел в словаре site" + (f" — замена «{rec['replaced_by']}»" if rec.get("replaced_by") else ""))
+    return errors, warnings
+
+
+def blocker_optional(h):
+    """Справочная или служебная страница (x-blocker-optional схемы иерархии: класс типа страницы в словаре site или сам
+    тип): решение о покупке принимается не на ней, и закрывать возражение-блокер её иерархия не обязана."""
+    if "hs" not in _LOADED:
+        _LOADED["hs"] = load(os.path.join(SM, "message-hierarchy.schema.yaml")) or {}
+    rule = _LOADED["hs"].get("x-blocker-optional") or {}
+    pt = (h.get("page") or {}).get("page_type")
+    cls = (((site_vocab() or {}).get("page_type") or {}).get(pt) or {}).get("class")
+    return pt in (rule.get("page_types") or []) or (cls is not None and cls in (rule.get("page_class") or []))
 
 
 def collect_ids(obj, out, path=""):
@@ -309,6 +360,9 @@ def semantic_meaning(path, m, facts_data=None):
 
 def semantic_hierarchy(path, h, facts_data=None):
     errors, warnings, info = [], [], {}
+    ve, vw = vocab_check(h)
+    errors += ve
+    warnings += vw
     secs = sorted(h.get("sections", []), key=lambda s: s.get("order", 0))
     orders = [s.get("order") for s in secs]
     if len(orders) != len(set(orders)):
@@ -382,9 +436,10 @@ def semantic_hierarchy(path, h, facts_data=None):
     seg = (h.get("page") or {}).get("segment_ref")
     primary = next((a["id"] for a in m["audience"] if a.get("primary")), None)
     seg = seg or primary
+    need_blockers = not blocker_optional(h)
     for o in objs.values():
         segs = o.get("segment_ids") or [primary]
-        if o.get("severity") == "blocker" and seg in segs and o["id"] not in covered_before_final:
+        if need_blockers and o.get("severity") == "blocker" and seg in segs and o["id"] not in covered_before_final:
             errors.append(f"возражение-блокер «{o['id']}» не закрыто ни одной секцией до final-cta")
     fx = facts_index(mpath, m, facts_data)
     proofs = []
@@ -453,10 +508,37 @@ def run_negative(vm, vh, meanings, hierarchies):
         hcase("неизвестное возражение в секции", lambda d: d["sections"][1].setdefault("objection_ids", []).append("obj-ghost"))
         hcase("section_role вне словаря", lambda d: d["sections"][1].update(section_role="testimonial-wall"))
 
+        hcase("page_type вне словаря", lambda d: d["page"].update(page_type="mega-page"))
+        hcase("section_role только для замеров (other)", lambda d: d["sections"][1].update(section_role="other"))
+
         def drop_blockers(d):
             for s in d["sections"]:
                 s["objection_ids"] = []
         hcase("блокеры не закрыты до final-cta", drop_blockers)
+
+        def hok(name, mutate):
+            d = copy.deepcopy(h)
+            mutate(d)
+            errs = schema_errors(vh, d) + semantic_hierarchy(hpath, d)[0]
+            results.append((name, not errs, errs[:1]))
+
+        def no_blockers_at(page_type):
+            def mutate(d):
+                d["page"]["page_type"] = page_type
+                drop_blockers(d)
+            return mutate
+
+        def mid_role(role):
+            def mutate(d):
+                next(s for s in d["sections"] if s["section_role"] not in ("hero", "final-cta"))["section_role"] = role
+            return mutate
+        for pt in ("team-page", "case-list-page", "legal-page", "not-found-page"):
+            hok(f"тип страницы словаря site {pt} — без ошибок", lambda d, pt=pt: d["page"].update(page_type=pt))
+        for role in ("audience", "services", "legal", "not-found"):
+            hok(f"роль секции словаря site {role} — без ошибок", mid_role(role))
+        hok("справочная страница (contacts-page) без закрытого блокера — без ошибок", no_blockers_at("contacts-page"))
+        hok("служебная страница (legal-page) без закрытого блокера — без ошибок", no_blockers_at("legal-page"))
+        hcase("страница с решением о покупке (team-page) без закрытого блокера", no_blockers_at("team-page"))
     results += run_assumption_cases(meanings, hierarchies)
     return results
 
