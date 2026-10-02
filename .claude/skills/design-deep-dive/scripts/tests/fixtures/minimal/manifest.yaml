@@ -1,13 +1,9 @@
 # Фикстура minimal — иллюстрация для самопроверок lib/docpaths.py и сборщика: демо-проект из двух поверхностей разного
-# рода (лендинг promo, кабинет cabinet). Слой страницы, факты и голос — примеры баз (вымышленная студия «Отвес»);
-# реестр, vision и свод экранов — свои файлы фикстуры. Формат манифеста — докстринг fixture_project.py.
+# рода (лендинг promo, кабинет cabinet) вымышленной студии ремонта «Отвес» — факты, голос, бриф и план главной слоя
+# страницы, реестр поверхностей, vision и свод экранов. Формат манифеста — докстринг fixture_project.py.
 example: true
-description: минимальный демо-проект — лендинг promo и кабинет cabinet; слой страницы, факты и голос — из примеров баз
+description: минимальный демо-проект — лендинг promo и кабинет cabinet; факты, голос, бриф и план главной слоя страницы
 project: otves-remont-nn
+unmarked: [files/site/promo/site-brief.yaml, files/voice.yaml]   # бриф и голос — в форме, которую читают утилиты
 layers:
-  - kb:
-      facts.yaml: text/02-strategy-messaging/examples/facts-service-renovation.yaml
-      voice.yaml: text/05-voice-editorial/examples/voice-otves-warm.yaml
-      site/promo/site-brief.yaml: site/10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml
-      site/promo/plans/home.yaml: site/10-playbooks-contracts/examples/lead-services-otves/plans/home.yaml
   - files: files

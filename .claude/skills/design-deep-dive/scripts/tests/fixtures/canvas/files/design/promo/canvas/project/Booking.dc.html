@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Спица — запись на обслуживание</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&amp;family=Unbounded:wght@500;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Golos Text","Segoe UI",Roboto,Arial,system-ui,sans-serif}
+a{color:#2146D8}a:hover{color:#1935B0}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1140px; box-sizing: border-box; background: {{ c.bg }}; color: {{ c.text }}; font-size: 17px; line-height: 1.55; display: flex; flex-direction: column;">
+  <header style="min-height: 72px; padding: 0 120px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid {{ c.border }};">
+    <a href="Main.dc.html" style="display: flex; align-items: center; gap: 12px; color: {{ c.text }}; text-decoration: none; font-family: Unbounded, 'Arial Black', sans-serif; font-weight: 700; font-size: 20px;">
+      <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" fill="none" stroke="{{ c.accent }}" stroke-width="2"><circle cx="16" cy="16" r="13"></circle><circle cx="16" cy="16" r="2.5"></circle><path d="M16 3v26M3 16h26M6.8 6.8l18.4 18.4M25.2 6.8 6.8 25.2"></path></svg>
+      <span>Спица</span>
+    </a>
+    <nav aria-label="Разделы" style="display: flex; align-items: center; gap: 32px;">
+      <a href="Main.dc.html" style="color: {{ c.text }}; text-decoration: none; font-weight: 500;">Услуги</a>
+      <a href="Main.dc.html" style="color: {{ c.text }}; text-decoration: none; font-weight: 500;">Как это работает</a>
+      <a href="Main.dc.html" style="color: {{ c.text }}; text-decoration: none; font-weight: 500;">Где мы</a>
+    </nav>
+  </header>
+
+  <main style="flex-grow: 1; padding: 64px 120px 104px; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: 48px; align-items: start;">
+    <div>
+      <sc-if value="{{ showForm }}" hint-placeholder-val="{{ true }}">
+        <section aria-label="Запись" style="display: flex; flex-direction: column;">
+          <h1 style="margin: 0; font-family: Unbounded, 'Arial Black', sans-serif; font-weight: 700; font-size: 36px; line-height: 1.2;">Запись на обслуживание</h1>
+          <p style="margin: 12px 0 0; color: {{ c.muted }};">Выберите услугу и удобное время. Мастер перезвонит в течение [СРОК] и подтвердит запись.</p>
+          <form onSubmit="{{ submit }}" style="margin-top: 32px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label for="b-name" style="font-weight: 500;">Имя</label>
+              <input id="b-name" name="name" type="text" autocomplete="name" style="box-sizing: border-box; width: 100%; min-height: 48px; padding: 0 16px; font: 17px/1.3 'Golos Text', system-ui, sans-serif; color: {{ c.text }}; background: {{ c.surface }}; border: 1px solid {{ c.border }}; border-radius: 6px;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label for="b-phone" style="font-weight: 500;">Телефон</label>
+              <input id="b-phone" name="phone" type="tel" autocomplete="tel" style="box-sizing: border-box; width: 100%; min-height: 48px; padding: 0 16px; font: 17px/1.3 'Golos Text', system-ui, sans-serif; color: {{ c.text }}; background: {{ c.surface }}; border: 1px solid {{ c.border }}; border-radius: 6px;">
+              <span style="font-size: 14px; color: {{ c.muted }};">Перезвоним, чтобы подтвердить время</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label for="b-service" style="font-weight: 500;">Услуга</label>
+              <select id="b-service" name="service" onChange="{{ pickService }}" style="box-sizing: border-box; width: 100%; min-height: 48px; padding: 0 16px; font: 17px/1.3 'Golos Text', system-ui, sans-serif; color: {{ c.text }}; background: {{ c.surface }}; border: 1px solid {{ c.border }}; border-radius: 6px;">
+                <option>Полное ТО</option>
+                <option>Базовое ТО</option>
+                <option>Замена цепи и кассеты</option>
+                <option>Сборка и правка колеса</option>
+                <option>Другое — опишу в комментарии</option>
+              </select>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label for="b-bike" style="font-weight: 500;">Велосипед</label>
+              <input id="b-bike" name="bike" type="text" placeholder="Например, шоссейный, 2019 год" style="box-sizing: border-box; width: 100%; min-height: 48px; padding: 0 16px; font: 17px/1.3 'Golos Text', system-ui, sans-serif; color: {{ c.text }}; background: {{ c.surface }}; border: 1px solid {{ c.border }}; border-radius: 6px;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label for="b-date" style="font-weight: 500;">Дата</label>
+              <input id="b-date" name="date" type="date" style="box-sizing: border-box; width: 100%; min-height: 48px; padding: 0 16px; font: 17px/1.3 'Golos Text', system-ui, sans-serif; color: {{ c.text }}; background: {{ c.surface }}; border: 1px solid {{ c.border }}; border-radius: 6px;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label for="b-time" style="font-weight: 500;">Время</label>
+              <select id="b-time" name="time" style="box-sizing: border-box; width: 100%; min-height: 48px; padding: 0 16px; font: 17px/1.3 'Golos Text', system-ui, sans-serif; color: {{ c.text }}; background: {{ c.surface }}; border: 1px solid {{ c.border }}; border-radius: 6px;">
+                <option>10:00</option>
+                <option>12:00</option>
+                <option>14:00</option>
+                <option>16:00</option>
+                <option>18:00</option>
+              </select>
+            </div>
+            <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 8px;">
+              <label for="b-comment" style="font-weight: 500;">Что беспокоит</label>
+              <textarea id="b-comment" name="comment" placeholder="Когда и как проявляется: скрип, проскальзывание, тормоза…" style="box-sizing: border-box; width: 100%; min-height: 112px; padding: 12px 16px; font: 17px/1.4 'Golos Text', system-ui, sans-serif; color: {{ c.text }}; background: {{ c.surface }}; border: 1px solid {{ c.border }}; border-radius: 6px; resize: vertical;"></textarea>
+            </div>
+            <label style="grid-column: 1 / -1; display: flex; gap: 12px; align-items: flex-start; font-size: 14px; color: {{ c.muted }};">
+              <input type="checkbox" name="consent" style="width: 20px; height: 20px; margin: 2px 0 0;">
+              <span>Согласен на обработку имени и телефона для записи</span>
+            </label>
+            <div style="grid-column: 1 / -1; display: flex;">
+              <button type="submit" style="min-height: 48px; padding: 0 24px; border: 0; border-radius: 6px; background: {{ c.accent }}; color: {{ c.onAccent }}; font: 600 17px/1 'Golos Text', system-ui, sans-serif; cursor: pointer;">Отправить заявку</button>
+            </div>
+          </form>
+        </section>
+      </sc-if>
+      <sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}">
+        <section role="status" aria-label="Заявка отправлена" style="background: {{ c.surface }}; border: 1px solid {{ c.border }}; border-radius: 12px; padding: 40px; display: flex; flex-direction: column; gap: 16px;">
+          <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true" fill="none" stroke="{{ c.accent }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M7.5 12.5l3 3 6-6.5"></path></svg>
+          <h1 style="margin: 0; font-family: Unbounded, 'Arial Black', sans-serif; font-weight: 700; font-size: 32px; line-height: 1.2;">Заявка отправлена</h1>
+          <p style="margin: 0; color: {{ c.muted }};">Услуга: {{ service }}. Мастер перезвонит в течение [СРОК] и подтвердит время.</p>
+          <div style="margin-top: 8px; display: flex; gap: 16px;">
+            <button type="button" onClick="{{ reset }}" style="min-height: 48px; padding: 0 24px; border: 1px solid {{ c.text }}; border-radius: 6px; background: transparent; color: {{ c.text }}; font: 600 17px/1 'Golos Text', system-ui, sans-serif; cursor: pointer;">Изменить заявку</button>
+            <a href="Main.dc.html" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 24px; border-radius: 6px; background: {{ c.accent }}; color: {{ c.onAccent }}; font-weight: 600; text-decoration: none;">На главную</a>
+          </div>
+        </section>
+      </sc-if>
+    </div>
+    <aside aria-label="Перед визитом" style="background: {{ c.surface }}; border: 1px solid {{ c.border }}; border-radius: 12px; padding: 32px; display: flex; flex-direction: column; gap: 16px;">
+      <h2 style="margin: 0; font-family: Unbounded, 'Arial Black', sans-serif; font-weight: 700; font-size: 21px; line-height: 1.2;">Что взять с собой</h2>
+      <ul style="margin: 0; padding-left: 1.2em; display: grid; gap: 8px;">
+        <li>Велосипед без сумок и багажа</li>
+        <li>Ключ от замка, если он остаётся на раме</li>
+        <li>Описание проблемы: когда и как проявляется</li>
+      </ul>
+      <p style="margin: 0; font-size: 14px; color: {{ c.muted }};">Цена по прайсу — ориентир; итоговую сумму подтвердим до начала работ.</p>
+    </aside>
+  </main>
+
+  <footer style="border-top: 1px solid {{ c.border }}; padding: 32px 120px; display: flex; justify-content: space-between; gap: 16px; font-size: 14px; color: {{ c.muted }};">
+    <span>Спица, веломастерская</span>
+    <a href="Main.dc.html" style="color: {{ c.muted }};">На главную</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":true,"section":"Тема"},"$preview":{"width":1440,"height":1140}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? true;
+    const st = this.state || {};
+    const sent = !!st.sent;
+    const c = dark
+      ? { bg: '#0C0F14', surface: '#151A22', text: '#E6EBF2', muted: '#9EA8B6', border: '#29313D', accent: '#8EA5FF', onAccent: '#0C0F14' }
+      : { bg: '#EEF2F6', surface: '#FFFFFF', text: '#11151C', muted: '#4B5563', border: '#CFD6DF', accent: '#2146D8', onAccent: '#FFFFFF' };
+    return {
+      c: c,
+      sent: sent,
+      showForm: !sent,
+      service: st.service || 'Полное ТО',
+      submit: (e) => { if (e && e.preventDefault) { e.preventDefault(); } this.setState({ sent: true }); },
+      reset: () => this.setState({ sent: false }),
+      pickService: (e) => this.setState({ service: e.target.value })
+    };
+  }
+}
+</script>
+</body>
+</html>

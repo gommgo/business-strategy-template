@@ -1,0 +1,410 @@
+{
+  "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
+  "$description": "Иллюстрация: токены ДС демо-кабинета «Отвес» (фикстура cabinet-ds) — пресет плотной админки, светлая тема по умолчанию и тёмная, плотность compact и comfortable, сокращённое движение.",
+  "example": true,
+  "primitive": {
+    "color": {
+      "$type": "color",
+      "neutral": {
+        "0": {
+          "$value": {"colorSpace": "srgb", "components": [1.0, 1.0, 1.0], "hex": "#ffffff"}
+        },
+        "50": {
+          "$value": {"colorSpace": "srgb", "components": [0.9725, 0.9804, 0.9882], "hex": "#f8fafc"}
+        },
+        "100": {
+          "$value": {"colorSpace": "srgb", "components": [0.9451, 0.9608, 0.9765], "hex": "#f1f5f9"}
+        },
+        "200": {
+          "$value": {"colorSpace": "srgb", "components": [0.8863, 0.9098, 0.9412], "hex": "#e2e8f0"}
+        },
+        "300": {
+          "$value": {"colorSpace": "srgb", "components": [0.7961, 0.8353, 0.8824], "hex": "#cbd5e1"}
+        },
+        "500": {
+          "$value": {"colorSpace": "srgb", "components": [0.3922, 0.4549, 0.5451], "hex": "#64748b"}
+        },
+        "600": {
+          "$value": {"colorSpace": "srgb", "components": [0.2784, 0.3333, 0.4118], "hex": "#475569"}
+        },
+        "700": {
+          "$value": {"colorSpace": "srgb", "components": [0.2, 0.2549, 0.3333], "hex": "#334155"}
+        },
+        "800": {
+          "$value": {"colorSpace": "srgb", "components": [0.1176, 0.1608, 0.2314], "hex": "#1e293b"}
+        },
+        "900": {
+          "$value": {"colorSpace": "srgb", "components": [0.0588, 0.0902, 0.1647], "hex": "#0f172a"}
+        },
+        "950": {
+          "$value": {"colorSpace": "srgb", "components": [0.0078, 0.0235, 0.0902], "hex": "#020617"}
+        }
+      },
+      "accent": {
+        "50": {
+          "$value": {"colorSpace": "srgb", "components": [0.9373, 0.9647, 1.0], "hex": "#eff6ff"}
+        },
+        "400": {
+          "$value": {"colorSpace": "srgb", "components": [0.3765, 0.6471, 0.9804], "hex": "#60a5fa"}
+        },
+        "600": {
+          "$value": {"colorSpace": "srgb", "components": [0.1451, 0.3882, 0.9216], "hex": "#2563eb"}
+        },
+        "700": {
+          "$value": {"colorSpace": "srgb", "components": [0.1176, 0.251, 0.6863], "hex": "#1e40af"}
+        }
+      },
+      "red": {
+        "400": {
+          "$value": {"colorSpace": "srgb", "components": [0.9725, 0.4431, 0.4431], "hex": "#f87171"}
+        },
+        "600": {
+          "$value": {"colorSpace": "srgb", "components": [0.8627, 0.149, 0.149], "hex": "#dc2626"}
+        }
+      },
+      "green": {
+        "400": {
+          "$value": {"colorSpace": "srgb", "components": [0.2902, 0.8706, 0.502], "hex": "#4ade80"}
+        },
+        "600": {
+          "$value": {"colorSpace": "srgb", "components": [0.0863, 0.6392, 0.2902], "hex": "#16a34a"}
+        }
+      },
+      "amber": {
+        "400": {
+          "$value": {"colorSpace": "srgb", "components": [0.9843, 0.749, 0.1412], "hex": "#fbbf24"}
+        },
+        "600": {
+          "$value": {"colorSpace": "srgb", "components": [0.851, 0.4667, 0.0235], "hex": "#d97706"}
+        }
+      },
+      "shadow": {
+        "key": {
+          "$value": {"colorSpace": "srgb", "components": [0.0078, 0.0235, 0.0902], "alpha": 0.08, "hex": "#020617"}
+        },
+        "key-dark": {
+          "$value": {"colorSpace": "srgb", "components": [0.0078, 0.0235, 0.0902], "alpha": 0.4, "hex": "#020617"}
+        }
+      }
+    },
+    "size": {
+      "$type": "dimension",
+      "2": {
+        "$value": {"value": 2, "unit": "px"}
+      },
+      "4": {
+        "$value": {"value": 4, "unit": "px"}
+      },
+      "8": {
+        "$value": {"value": 8, "unit": "px"}
+      },
+      "12": {
+        "$value": {"value": 12, "unit": "px"}
+      },
+      "14": {
+        "$value": {"value": 14, "unit": "px"}
+      },
+      "16": {
+        "$value": {"value": 16, "unit": "px"}
+      },
+      "20": {
+        "$value": {"value": 20, "unit": "px"}
+      },
+      "24": {
+        "$value": {"value": 24, "unit": "px"}
+      },
+      "28": {
+        "$value": {"value": 28, "unit": "px"}
+      },
+      "32": {
+        "$value": {"value": 32, "unit": "px"}
+      },
+      "36": {
+        "$value": {"value": 36, "unit": "px"}
+      },
+      "40": {
+        "$value": {"value": 40, "unit": "px"}
+      },
+      "48": {
+        "$value": {"value": 48, "unit": "px"}
+      },
+      "240": {
+        "$value": {"value": 240, "unit": "px"}
+      },
+      "1280": {
+        "$value": {"value": 1280, "unit": "px"}
+      }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "regular": {
+        "$value": 400
+      },
+      "medium": {
+        "$value": 500
+      },
+      "semibold": {
+        "$value": 600
+      }
+    }
+  },
+  "color": {
+    "$type": "color",
+    "bg": {
+      "canvas": {
+        "$value": "{primitive.color.neutral.50}",
+        "$description": "Фон страницы кабинета за карточками и таблицами.",
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.900}"}}
+      },
+      "surface": {
+        "$value": "{primitive.color.neutral.0}",
+        "$description": "Карточки, таблицы, поля ввода и боковая панель.",
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.800}"}}
+      },
+      "subtle": {
+        "$value": "{primitive.color.neutral.100}",
+        "$description": "Шапка таблицы, скелетон, фон неактивного поля.",
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.950}"}}
+      },
+      "selected": {
+        "$value": "{primitive.color.accent.50}",
+        "$description": "Выбранная строка и текущий пункт навигации.",
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.700}"}}
+      }
+    },
+    "text": {
+      "default": {
+        "$value": "{primitive.color.neutral.900}",
+        "$description": "Основной текст и заголовки; 17,1:1 к color-bg-canvas.",
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.50}"}}
+      },
+      "muted": {
+        "$value": "{primitive.color.neutral.600}",
+        "$description": "Подписи, подсказки, метаданные; 7,2:1 к color-bg-canvas.",
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.300}"}}
+      },
+      "on-accent": {
+        "$value": "{primitive.color.neutral.0}",
+        "$description": "Текст и иконки на color-accent-solid.",
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.950}"}}
+      }
+    },
+    "border": {
+      "default": {
+        "$value": "{primitive.color.neutral.200}",
+        "$description": "Границы карточек, таблиц и разделителей.",
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.700}"}}
+      },
+      "strong": {
+        "$value": "{primitive.color.neutral.500}",
+        "$description": "Граница поля ввода: 4,8:1 к фону — порог 3:1 для контролов (WCAG 1.4.11).",
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.500}"}}
+      }
+    },
+    "accent": {
+      "solid": {
+        "$value": "{primitive.color.accent.700}",
+        "$description": "Главное действие «Назначить замер», текущий пункт навигации; белый на нём 6,7:1.",
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.accent.400}"}, "org.design-deep-dive.llm": {"usage": ["primary-action", "selected-nav"], "rules": "Use for the one primary action per area. Do NOT use for large backgrounds."}}
+      },
+      "text": {
+        "$value": "{primitive.color.accent.700}",
+        "$description": "Ссылки и текст действия на светлом фоне.",
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.accent.400}"}}
+      }
+    },
+    "focus": {
+      "$value": "{primitive.color.accent.600}",
+      "$description": "Кольцо фокуса: outline 2px с отступом 2px.",
+      "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.accent.400}"}}
+    },
+    "status": {
+      "info": {
+        "$value": "{primitive.color.accent.600}",
+        "$description": "Статус «новая»: информационная метка.",
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.accent.400}"}}
+      },
+      "success": {
+        "$value": "{primitive.color.green.600}",
+        "$description": "Статус «замер проведён».",
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.green.400}"}}
+      },
+      "warning": {
+        "$value": "{primitive.color.amber.600}",
+        "$description": "Статус «замер назначен»: ждёт выезда.",
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.amber.400}"}}
+      },
+      "danger": {
+        "$value": "{primitive.color.red.600}",
+        "$description": "Статус «отказ», ошибки загрузки и полей.",
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.red.400}"}}
+      }
+    }
+  },
+  "font": {
+    "sans": {
+      "$type": "fontFamily",
+      "$value": ["Golos Text", "Arial", "sans-serif"],
+      "$description": "Гарнитура интерфейса: кириллица проверена отрисовкой."
+    }
+  },
+  "space": {
+    "$type": "dimension",
+    "$description": "Шкала отступов кабинета — одна на продукт; режимы плотности сдвигают шаги, а не шкалу.",
+    "2xs": {
+      "$value": "{primitive.size.2}",
+      "$description": "Иконка и счётчик в пункте навигации."
+    },
+    "xs": {
+      "$value": "{primitive.size.4}",
+      "$description": "Подпись и поле, зазоры в меню."
+    },
+    "sm": {
+      "$value": "{primitive.size.8}",
+      "$description": "Кнопки в ряду, ячейки плотной таблицы.",
+      "$extensions": {"org.design-deep-dive.modes": {"compact": "{primitive.size.4}", "comfortable": "{primitive.size.12}"}}
+    },
+    "md": {
+      "$value": "{primitive.size.16}",
+      "$description": "Отступ карточки, между полями формы.",
+      "$extensions": {"org.design-deep-dive.modes": {"compact": "{primitive.size.12}", "comfortable": "{primitive.size.20}"}}
+    },
+    "lg": {
+      "$value": "{primitive.size.24}",
+      "$description": "Между блоками экрана.",
+      "$extensions": {"org.design-deep-dive.modes": {"compact": "{primitive.size.16}", "comfortable": "{primitive.size.32}"}}
+    },
+    "xl": {
+      "$value": "{primitive.size.32}",
+      "$description": "Отступ области содержимого от каркаса."
+    }
+  },
+  "size": {
+    "$type": "dimension",
+    "$description": "Размеры контролов, строк и панелей каркаса.",
+    "control": {
+      "md": {
+        "$value": "{primitive.size.32}",
+        "$description": "Высота кнопок и полей на десктопе; на таче зона нажатия не меньше 44px."
+      },
+      "lg": {
+        "$value": "{primitive.size.40}",
+        "$description": "Высота главной кнопки формы."
+      }
+    },
+    "row": {
+      "table": {
+        "$value": "{primitive.size.36}",
+        "$description": "Высота строки таблицы заявок.",
+        "$extensions": {"org.design-deep-dive.modes": {"compact": "{primitive.size.28}"}}
+      }
+    },
+    "panel": {
+      "sidebar": {
+        "$value": "{primitive.size.240}",
+        "$description": "Ширина боковой навигации каркаса."
+      },
+      "topbar": {
+        "$value": "{primitive.size.48}",
+        "$description": "Высота верхней панели каркаса."
+      },
+      "content-max": {
+        "$value": "{primitive.size.1280}",
+        "$description": "Наибольшая ширина области содержимого."
+      }
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "$description": "Два радиуса: у контролов и у контейнеров.",
+    "sm": {
+      "$value": "{primitive.size.4}",
+      "$description": "Кнопки, поля, метки статуса."
+    },
+    "md": {
+      "$value": "{primitive.size.8}",
+      "$description": "Карточки, плитки, выпадающие списки."
+    }
+  },
+  "elevation": {
+    "$type": "shadow",
+    "raised": {
+      "$value": [{"color": "{primitive.color.shadow.key}", "offsetX": {"value": 0, "unit": "px"}, "offsetY": {"value": 1, "unit": "px"}, "blur": {"value": 2, "unit": "px"}, "spread": {"value": 0, "unit": "px"}}, {"color": "{primitive.color.shadow.key}", "offsetX": {"value": 0, "unit": "px"}, "offsetY": {"value": 4, "unit": "px"}, "blur": {"value": 8, "unit": "px"}, "spread": {"value": -2, "unit": "px"}}],
+      "$description": "Выпадающий список и всплывающая карточка; у карточек на странице тени нет — граница.",
+      "$extensions": {"org.design-deep-dive.modes": {"dark": [{"color": "{primitive.color.shadow.key-dark}", "offsetX": {"value": 0, "unit": "px"}, "offsetY": {"value": 1, "unit": "px"}, "blur": {"value": 2, "unit": "px"}, "spread": {"value": 0, "unit": "px"}}, {"color": "{primitive.color.shadow.key-dark}", "offsetX": {"value": 0, "unit": "px"}, "offsetY": {"value": 4, "unit": "px"}, "blur": {"value": 8, "unit": "px"}, "spread": {"value": -2, "unit": "px"}}]}}
+    }
+  },
+  "breakpoint": {
+    "$type": "dimension",
+    "tablet": {
+      "$value": {"value": 640, "unit": "px"},
+      "$description": "Планшет и шире: ниже — одна колонка, навигация в выдвижной панели."
+    },
+    "desktop": {
+      "$value": {"value": 1024, "unit": "px"},
+      "$description": "Главная граница приложения: боковая навигация видна постоянно."
+    },
+    "wide": {
+      "$value": {"value": 1440, "unit": "px"},
+      "$description": "Широкий экран: инспектор рядом со списком."
+    }
+  },
+  "motion": {
+    "duration": {
+      "$type": "duration",
+      "fast": {
+        "$value": {"value": 100, "unit": "ms"},
+        "$description": "Наведение и нажатие."
+      },
+      "default": {
+        "$value": {"value": 150, "unit": "ms"},
+        "$description": "Раскрытие меню и выпадающего списка."
+      },
+      "slow": {
+        "$value": {"value": 200, "unit": "ms"},
+        "$description": "Выдвижная панель.",
+        "$extensions": {"org.design-deep-dive.modes": {"reduced": {"value": 150, "unit": "ms"}}}
+      }
+    },
+    "easing": {
+      "$type": "cubicBezier",
+      "standard": {
+        "$value": [0.4, 0, 0.2, 1],
+        "$description": "Кривая по умолчанию для отклика компонентов."
+      }
+    }
+  },
+  "type": {
+    "$type": "typography",
+    "title": {
+      "$value": {"fontFamily": "{font.sans}", "fontSize": "{primitive.size.20}", "fontWeight": "{primitive.weight.semibold}", "letterSpacing": {"value": -0.2, "unit": "px"}, "lineHeight": 1.4},
+      "$description": "Заголовок экрана и окна подтверждения: 20/28, 600.",
+      "$extensions": {"org.design-deep-dive.artifact": {"group": "Заголовки", "sample": "Заявки на замер"}}
+    },
+    "metric": {
+      "$value": {"fontFamily": "{font.sans}", "fontSize": "{primitive.size.24}", "fontWeight": "{primitive.weight.semibold}", "letterSpacing": {"value": -0.36, "unit": "px"}, "lineHeight": 1.333333},
+      "$description": "Число плитки плана: 24/32, 600, табличные цифры.",
+      "$extensions": {"org.design-deep-dive.artifact": {"group": "Заголовки", "sample": "32 из 40"}}
+    },
+    "body": {
+      "$value": {"fontFamily": "{font.sans}", "fontSize": "{primitive.size.14}", "fontWeight": "{primitive.weight.regular}", "letterSpacing": {"value": 0, "unit": "px"}, "lineHeight": 1.428571},
+      "$description": "Основной текст, ячейки таблицы, сообщения: 14/20; ниже tablet — 16 (сборка ДС).",
+      "$extensions": {"org.design-deep-dive.artifact": {"group": "Текст", "sample": "З-0412 · Сормово, двухкомнатная"}}
+    },
+    "body-strong": {
+      "$value": {"fontFamily": "{font.sans}", "fontSize": "{primitive.size.14}", "fontWeight": "{primitive.weight.semibold}", "letterSpacing": {"value": 0, "unit": "px"}, "lineHeight": 1.428571},
+      "$description": "Текст кнопок и акцент в строке: 14/20, 600.",
+      "$extensions": {"org.design-deep-dive.artifact": {"group": "Текст", "sample": "Назначить замер"}}
+    },
+    "label": {
+      "$value": {"fontFamily": "{font.sans}", "fontSize": "{primitive.size.12}", "fontWeight": "{primitive.weight.medium}", "letterSpacing": {"value": 0.12, "unit": "px"}, "lineHeight": 1.333333},
+      "$description": "Подписи полей, заголовки колонок: 12/16, 500.",
+      "$extensions": {"org.design-deep-dive.artifact": {"group": "Текст", "sample": "Дата замера"}}
+    },
+    "caption": {
+      "$value": {"fontFamily": "{font.sans}", "fontSize": "{primitive.size.12}", "fontWeight": "{primitive.weight.regular}", "letterSpacing": {"value": 0.12, "unit": "px"}, "lineHeight": 1.333333},
+      "$description": "Подсказки, ошибки у поля, статусы: 12/16.",
+      "$extensions": {"org.design-deep-dive.artifact": {"group": "Текст", "sample": "Перезвоним, чтобы подтвердить время"}}
+    }
+  }
+}

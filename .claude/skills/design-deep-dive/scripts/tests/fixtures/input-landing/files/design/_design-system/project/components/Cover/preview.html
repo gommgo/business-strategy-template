@@ -1,0 +1,44 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Спица — обложка</title>
+<style>
+  .cover { position: relative; width: 960px; height: 288px; background: var(--color-bg); overflow: hidden; }
+  .cover svg { position: absolute; left: 0; top: 0; width: 960px; height: 288px; }
+  .b-accent { fill: var(--color-accent); }
+  .b-band { fill: var(--color-band); }
+  .b-ink { fill: var(--color-text); }
+  .b-tint { fill: var(--color-band-muted); }
+  .r-lg { rx: var(--radius-lg); }
+  .r-md { rx: var(--radius-md); }
+  .r-sm { rx: var(--radius-sm); }
+  .rim { fill: none; stroke: var(--color-bg); stroke-width: 4px; }
+  .name { position: absolute; left: 40px; bottom: 64px; max-width: 440px; margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 96px; line-height: .95; color: var(--color-text); letter-spacing: 0; }
+  .tagline { position: absolute; left: 40px; bottom: 32px; max-width: 440px; margin: 0; font-family: var(--font-body); font-size: 14px; line-height: 1.4; color: var(--color-muted); }
+</style>
+</head>
+<body style="margin: 0;">
+<div class="cover">
+  <svg viewBox="0 0 960 288" aria-hidden="true">
+    <!--
+      blocks: color-accent 256×240 (radius-lg) · color-band 96×96 (radius-md) on it · color-text 152×112 (radius-md) · color-band-muted 152×112 (radius-sm)
+      arrangement: one tall accent slab with two satellites stacked on the right, band block set into the slab; all right of x = 480
+      pattern: literal motif — the wheel's rim as three quarter-arcs cut in color-bg across the slab; «Спица» is a wheel, so arcs, not a grid
+      scales: sides and gaps in 16/24/32/48 px steps (space-4…space-7), arc radii 64/112/160, stroke 4px (space-1); corners radius-sm/md/lg
+    -->
+    <rect class="b-accent r-lg" x="512" y="24" width="256" height="240"></rect>
+    <rect class="b-band r-md" x="544" y="56" width="96" height="96"></rect>
+    <rect class="b-ink r-md" x="784" y="24" width="152" height="112"></rect>
+    <rect class="b-tint r-sm" x="784" y="152" width="152" height="112"></rect>
+    <path class="rim" d="M 704 264 A 64 64 0 0 1 768 200"></path>
+    <path class="rim" d="M 656 264 A 112 112 0 0 1 768 152"></path>
+    <path class="rim" d="M 608 264 A 160 160 0 0 1 768 104"></path>
+  </svg>
+  <h1 class="name">Спица</h1>
+  <p class="tagline">Веломастерская: ТО за один день, цена — до начала работ</p>
+</div>
+<script>document.documentElement.lang = 'ru';</script>
+</body>
+</html>

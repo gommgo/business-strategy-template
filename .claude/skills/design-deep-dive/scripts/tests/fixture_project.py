@@ -2,10 +2,10 @@
 """fixture_project — сборщик демо-проекта во временную папку для прогонов и самопроверок утилит `scripts/project/`.
 
 Фикстура — папка `scripts/tests/fixtures/<имя>/` с манифестом `manifest.yaml` и своими файлами. Сборщик раскладывает
-дерево `docs/projects/<project>/…` в корень сборки из слоёв манифеста — по порядку, поздний слой перекрывает ранний:
-файлы примеров баз берутся из `kb/` по пути (в фикстуре их копий нет, в сборке они байт в байт как в `kb/`), свои файлы
-фикстуры — из её папки. Корень сборки — корень данных утилит: `<утилита> <команда> <slug> --repo <корень>` (или
-переменная DDD_REPO, модуль `lib/docpaths.py`).
+дерево `docs/projects/<project>/…` в корень сборки из слоёв манифеста — по порядку, поздний слой перекрывает ранний.
+Источники фикстуры — только её файлы и файлы фикстур, которые она продолжает (`extends`): из `kb/` сборщик ничего не
+берёт, поэтому правка примера базы фикстуру не меняет. Корень сборки — корень данных утилит: `<утилита> <команда>
+<slug> --repo <корень>` (или переменная DDD_REPO, модуль `lib/docpaths.py`).
 
 Манифест (YAML):
 
@@ -14,11 +14,9 @@
     project: <slug>                 # папка docs/projects/<slug>/; пути назначения — от неё
     extends: [<фикстура>, …]        # по желанию: эти фикстуры собираются раньше в тот же корень (их проекты — рядом,
                                     # тот же slug — слои продолжают тот же проект); общая база нескольких extends
-                                    # собирается один раз
+                                    # собирается один раз; цепочка extends — не длиннее двух звеньев
+    unmarked: [<путь>, …]           # по желанию: свои файлы и папки без пометки иллюстрации — пути от папки фикстуры
     layers:                         # по порядку; у слоя один ключ
-      - kb:                         # примеры баз: путь назначения ← путь от kb/ (файл или папка целиком)
-          site/promo/site-brief.yaml: site/10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml
-          site/promo/plans: site/10-playbooks-contracts/examples/lead-services-otves/plans
       - files: files                # свои файлы: папка фикстуры раскладывается от папки проекта
       - files:                      # или поштучно: путь назначения ← путь от папки фикстуры (файл или папка)
           design/promo/ready.yaml: seeded/ready-stale.yaml
@@ -27,9 +25,11 @@
             - {find: "status: proposed", to: "status: approved"}
       - drop: [voice.yaml]          # убрать положенный раньше файл или папку
 
-Пути назначения — относительные, без «..». Свои файлы — иллюстрация: машинные (.yaml, .yml, .json) несут
-`example: true` на верхнем уровне, md — слово «иллюстрация» в первых десяти строках; самопроверка сверяет это и
-манифесты у всех фикстур папки.
+Пути назначения — относительные, без «..». Правка `replace` меняет файл основы или свой файл, положенный слоем раньше.
+Свои файлы — иллюстрация: машинные (.yaml, .yml, .json) несут `example: true` на верхнем уровне, md — слово
+«иллюстрация» в первых десяти строках. Файл, формат которого пометку не несёт (исходники холста и артефакт ДС, файл в
+форме, которую читает утилита проекта), назван в `unmarked` манифеста. Самопроверка сверяет пометки, манифесты и длину
+цепочек `extends` у всех фикстур папки.
 
     python3 scripts/tests/fixture_project.py list [--json]
     python3 scripts/tests/fixture_project.py build <имя> [--out DIR] [--json]   # печатает корень сборки
@@ -42,6 +42,10 @@
     kbpaths.use("tests"); import fixture_project
     with fixture_project.built("minimal") as fx:          # fx.root — корень данных, fx.slug — проект
         subprocess.run([sys.executable, tool, "check", fx.slug, "--repo", str(fx.root)])
+
+Опорная дата фикстур — `fixture_project.today()`: сроки фактов, записи проверок и одобрения в файлах фикстур считаются
+от неё, поэтому прогон на фикстуре получает её ключом `--today`. Дата записана один раз — ключ `today` файла
+`scripts/maint/data/sync.yaml`.
 """
 import argparse
 import contextlib
@@ -61,10 +65,12 @@ import kbpaths  # noqa: E402
 FIXTURES = HERE / "fixtures"
 SENTINEL = ".ddd-fixture.json"
 SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-KEYS = ("example", "description", "project", "extends", "layers")
-LAYER_KEYS = ("kb", "files", "replace", "drop")
+KEYS = ("example", "description", "project", "extends", "unmarked", "layers")
+LAYER_KEYS = ("files", "replace", "drop")
+MAX_EXTENDS = 2                                         # звеньев extends в цепочке: фикстура → основа → её основа
 MACHINE = (".yaml", ".yml", ".json")
 MARK = "иллюстрац"                                      # пометка своих md-файлов фикстуры
+DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 class FixtureError(ValueError):
@@ -78,11 +84,21 @@ class Built:
     root: Path
     slug: str
     projects: list = field(default_factory=list)
-    files: dict = field(default_factory=dict)           # путь от корня → откуда: kb/…, fixtures/<имя>/…, replace
+    files: dict = field(default_factory=dict)           # путь от корня → откуда: fixtures/<имя>/…, replace
 
     @property
     def project(self):
         return self.root / "docs" / "projects" / self.slug
+
+
+def today():
+    """Опорная дата фикстур `ГГГГ-ММ-ДД` — ключ today данных сверки обслуживания (FixtureError — даты нет)."""
+    import yaml
+    path = kbpaths.data("maint", "sync.yaml")
+    value = str((yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get("today", ""))
+    if not DATE.match(value):
+        raise FixtureError(f"{path}: нужна опорная дата фикстур today (ГГГГ-ММ-ДД)")
+    return value
 
 
 def names(fixtures=FIXTURES):
@@ -112,6 +128,10 @@ def load(name, fixtures=FIXTURES):
         raise FixtureError(f"{path}: project — slug проекта (kebab-case), не {m.get('project')!r}")
     ext = m.get("extends") or []
     m["extends"] = [ext] if isinstance(ext, str) else list(ext)
+    plain = m.get("unmarked") or []
+    if not (isinstance(plain, list) and all(isinstance(u, str) for u in plain)):
+        raise FixtureError(f"{path}: unmarked — список путей от папки фикстуры")
+    m["unmarked"] = plain
     layers = m.get("layers") or []
     if not isinstance(layers, list):
         raise FixtureError(f"{path}: layers — список слоёв")
@@ -138,12 +158,23 @@ def _expand(src, dest):
             if f.is_file() and "__pycache__" not in f.parts]
 
 
+def chain(name, fixtures=FIXTURES, _stack=()):
+    """Самая длинная цепочка extends от фикстуры: [фикстура, основа, основа основы, …] (FixtureError — цикл)."""
+    if name in _stack:
+        raise FixtureError(f"цикл extends: {' → '.join(_stack + (name,))}")
+    tails = [chain(base, fixtures, _stack + (name,)) for base in load(name, fixtures)["extends"]]
+    return [name] + (max(tails, key=len) if tails else [])
+
+
 def plan(name, fixtures=FIXTURES, _stack=(), _done=None):
     """Операции сборки по порядку: ("copy", путь от docs/projects, источник, откуда), ("replace", путь, правки),
     ("drop", путь). Сначала фикстуры extends, затем свои слои; фикстура, которая входит через несколько extends
-    (общая база двух слоёв), собирается один раз — первой по порядку."""
-    if name in _stack:
-        raise FixtureError(f"цикл extends: {' → '.join(_stack + (name,))}")
+    (общая база двух слоёв), собирается один раз — первой по порядку. Цепочка extends длиннее MAX_EXTENDS звеньев —
+    ошибка: такую фикстуру собирают своими файлами."""
+    if _done is None:
+        links = chain(name, fixtures)
+        if len(links) - 1 > MAX_EXTENDS:
+            raise FixtureError(f"цепочка extends длиннее {MAX_EXTENDS} звеньев: {' → '.join(links)}")
     done = set() if _done is None else _done
     fdir = Path(fixtures) / name
     m = load(name, fixtures)
@@ -156,16 +187,7 @@ def plan(name, fixtures=FIXTURES, _stack=(), _done=None):
     proj = Path(m["project"])
     for lay in m["layers"]:
         (kind, body), = lay.items()
-        if kind == "kb":
-            if not isinstance(body, dict):
-                raise FixtureError(f"{mpath}: kb — словарь «путь назначения: путь от kb/»")
-            for dest, src in body.items():
-                s = kbpaths.kb(*Path(_dest(mpath, src)).parts)
-                if not s.exists():
-                    raise FixtureError(f"{mpath}: нет примера kb/{src}")
-                for d, f in _expand(s, proj / _dest(mpath, dest)):
-                    ops.append(("copy", d, f, "kb/" + f.relative_to(kbpaths.kb()).as_posix()))
-        elif kind == "files":
+        if kind == "files":
             pairs = {".": body} if isinstance(body, str) else body
             if not isinstance(pairs, dict):
                 raise FixtureError(f"{mpath}: files — папка фикстуры или словарь «путь назначения: путь от фикстуры»")
@@ -253,28 +275,39 @@ def built(name, fixtures=FIXTURES):
         yield build(name, td, fixtures)
 
 
-def lint(name, fixtures=FIXTURES):
-    """Пометки своих файлов фикстуры: example: true у машинных, «иллюстрация» в md. → список замечаний."""
+def mark_issue(f):
+    """Пометка иллюстрации своего файла: example: true у машинного, «иллюстрация» в md. → замечание или ""."""
     import yaml
+    f = Path(f)
+    if f.suffix in MACHINE:
+        try:
+            data = json.loads(f.read_text(encoding="utf-8")) if f.suffix == ".json" else \
+                yaml.safe_load(f.read_text(encoding="utf-8"))
+        except (ValueError, yaml.YAMLError) as e:
+            return f"не разбирается ({str(e).splitlines()[0][:80]})"
+        if not (isinstance(data, dict) and data.get("example") is True):
+            return "нет example: true на верхнем уровне"
+    elif f.suffix == ".md":
+        head = "\n".join(f.read_text(encoding="utf-8").splitlines()[:10]).lower()
+        if MARK not in head:
+            return "нет пометки «иллюстрация» в первых строках"
+    return ""
+
+
+def lint(name, fixtures=FIXTURES):
+    """Пометки своих файлов фикстуры, кроме названных в unmarked манифеста. → список замечаний."""
     fdir = Path(fixtures) / name
-    issues = []
+    mpath = fdir / "manifest.yaml"
+    plain = [(u, fdir / _dest(mpath, u)) for u in load(name, fixtures)["unmarked"]]
+    issues = [f"{name}: unmarked «{u}» — такого файла или папки в фикстуре нет" for u, p in plain if not p.exists()]
     for f in sorted(fdir.rglob("*")):
         if not f.is_file() or f.name == "manifest.yaml" or "__pycache__" in f.parts:
             continue
-        rel = f.relative_to(Path(fixtures)).as_posix()
-        if f.suffix in MACHINE:
-            try:
-                data = json.loads(f.read_text(encoding="utf-8")) if f.suffix == ".json" else \
-                    yaml.safe_load(f.read_text(encoding="utf-8"))
-            except (ValueError, yaml.YAMLError) as e:
-                issues.append(f"{rel}: не разбирается ({str(e).splitlines()[0][:80]})")
-                continue
-            if not (isinstance(data, dict) and data.get("example") is True):
-                issues.append(f"{rel}: нет example: true на верхнем уровне")
-        elif f.suffix == ".md":
-            head = "\n".join(f.read_text(encoding="utf-8").splitlines()[:10]).lower()
-            if MARK not in head:
-                issues.append(f"{rel}: нет пометки «иллюстрация» в первых строках")
+        if any(f == p or p in f.parents for _, p in plain):
+            continue
+        issue = mark_issue(f)
+        if issue:
+            issues.append(f"{f.relative_to(Path(fixtures)).as_posix()}: {issue}")
     return issues
 
 
@@ -296,6 +329,7 @@ def _selftest():
 
     all_names = names()
     check(f"фикстуры папки: {', '.join(all_names) or '—'} (есть minimal)", "minimal" in all_names)
+    check(f"опорная дата фикстур: {today()}", bool(DATE.match(today())))
     for n in all_names:
         try:
             ops = plan(n)
@@ -314,12 +348,12 @@ def _selftest():
         for key, origin in fx.files.items():
             if "replace" in origin:
                 continue
-            src = kbpaths.skill(origin) if origin.startswith("kb/") else FIXTURES / origin[len("fixtures/"):]
-            same = same and (out / key).read_bytes() == src.read_bytes()
-        kb_files = [k for k, v in fx.files.items() if v.startswith("kb/")]
-        check(f"build minimal: {len(fx.files)} файлов, из kb ({len(kb_files)}) — байт в байт", same and kb_files)
-        want = {(Path("docs/projects") / m["project"] / d).as_posix() for d in m["layers"][0]["kb"]}
-        check("build minimal: все пути слоя kb манифеста разложены", want <= set(fx.files))
+            same = same and (out / key).read_bytes() == (FIXTURES / origin[len("fixtures/"):]).read_bytes()
+        check(f"build minimal: {len(fx.files)} файлов — байт в байт как свои файлы фикстуры", same and fx.files)
+        own = FIXTURES / "minimal" / "files"
+        want = {(Path("docs/projects") / m["project"] / f.relative_to(own)).as_posix() for f in own.rglob("*")
+                if f.is_file()}
+        check("build minimal: все свои файлы папки files разложены", want and want == set(fx.files))
         again = build("minimal", out)
         check("повторная сборка в ту же папку — тот же набор файлов", again.files == fx.files)
         busy = Path(td) / "busy"
@@ -330,15 +364,17 @@ def _selftest():
         import docpaths
         check("docpaths --repo <корень сборки>: проект и две поверхности",
               docpaths.projects(out) == [fx.slug] and len(docpaths.surfaces(fx.slug, out)) == 2)
-        # слои манифеста: порядок, extends, replace, drop, папки kb и защита путей — на синтетических фикстурах
+        # слои манифеста: порядок, extends, replace, drop, папка своих файлов, защита путей — на синтетических фикстурах
         fx_dir = Path(td) / "fixtures"
-        (fx_dir / "base" / "own").mkdir(parents=True)
+        (fx_dir / "base" / "own" / "plans").mkdir(parents=True)
         (fx_dir / "base" / "own" / "note.md").write_text("# note\n> Иллюстрация.\nпервый\n", encoding="utf-8")
+        for page in ("home", "contacts"):
+            (fx_dir / "base" / "own" / "plans" / f"{page}.yaml").write_text(f"example: true\npage_id: {page}\n",
+                                                                             encoding="utf-8")
+        (fx_dir / "base" / "own" / "voice.yaml").write_text("voice_version: 1\n", encoding="utf-8")
         (fx_dir / "base" / "manifest.yaml").write_text(yaml.safe_dump({
-            "example": True, "description": "база", "project": "demo-a",
-            "layers": [{"kb": {"plans": "site/10-playbooks-contracts/examples/saas-okoshko/plans",
-                               "voice.yaml": "text/05-voice-editorial/examples/voice-otves-warm.yaml"}},
-                       {"files": "own"}]}, allow_unicode=True), encoding="utf-8")
+            "example": True, "description": "база", "project": "demo-a", "unmarked": ["own/voice.yaml"],
+            "layers": [{"files": "own"}]}, allow_unicode=True), encoding="utf-8")
         (fx_dir / "top" / "own").mkdir(parents=True)
         (fx_dir / "top" / "own" / "note.md").write_text("# note\n> Иллюстрация.\nвторой\n", encoding="utf-8")
         (fx_dir / "top" / "manifest.yaml").write_text(yaml.safe_dump({
@@ -347,15 +383,23 @@ def _selftest():
                        {"replace": {"note.md": [{"find": "второй", "to": "третий"}]}},
                        {"drop": ["voice.yaml"]}]}, allow_unicode=True), encoding="utf-8")
         (fx_dir / "other").mkdir()
+        (fx_dir / "other" / "facts.yaml").write_text("example: true\nfacts: []\n", encoding="utf-8")
         (fx_dir / "other" / "manifest.yaml").write_text(yaml.safe_dump({
             "example": True, "description": "второй проект", "project": "demo-b",
-            "layers": [{"kb": {"facts.yaml": "text/02-strategy-messaging/examples/facts-kvarts.yaml"}}]},
-            allow_unicode=True), encoding="utf-8")
+            "layers": [{"files": {"facts.yaml": "facts.yaml"}}]}, allow_unicode=True), encoding="utf-8")
         t = build("top", Path(td) / "t", fx_dir)
         a = t.root / "docs" / "projects" / "demo-a"
-        n_plans = len(list(kbpaths.kb("site", "10-playbooks-contracts", "examples", "saas-okoshko", "plans").glob("*")))
         check("extends: оба проекта в одном корне", t.projects == ["demo-a", "demo-b"])
-        check("kb: папка примеров целиком", len(list((a / "plans").glob("*"))) == n_plans and n_plans > 0)
+        check("files: папка своих файлов целиком, с вложенными папками",
+              sorted(p.name for p in (a / "plans").glob("*")) == ["contacts.yaml", "home.yaml"])
+        check("пометки: файл из unmarked не проверяется, остальные помечены", lint("base", fx_dir) == [])
+        (fx_dir / "base" / "own" / "plans" / "home.yaml").write_text("page_id: home\n", encoding="utf-8")
+        found = lint("base", fx_dir)
+        check("пометки: машинный файл без example: true — замечание с путём",
+              len(found) == 1 and "base/own/plans/home.yaml" in found[0])
+        (fx_dir / "base" / "own" / "plans" / "home.yaml").write_text("example: true\npage_id: home\n", encoding="utf-8")
+        (fx_dir / "base" / "own" / "voice.yaml").unlink()
+        check("пометки: путь unmarked без файла — замечание", any("unmarked" in x for x in lint("base", fx_dir)))
         check("поздний слой перекрывает ранний, replace правит текст", "третий" in (a / "note.md").read_text("utf-8"))
         check("drop убирает положенный раньше файл", not (a / "voice.yaml").exists() and "docs/projects/demo-a/voice.yaml"
               not in t.files)
@@ -370,6 +414,17 @@ def _selftest():
                 allow_unicode=True), encoding="utf-8")
         check("ромб extends: общая база собирается один раз", not raises(lambda: build("dia-top", Path(td) / "d", fx_dir))
               and "база" in (Path(td) / "d" / "docs" / "projects" / "demo-d" / "n.md").read_text("utf-8"))
+        check("цепочка extends из двух звеньев — собирается",
+              chain("dia-top", fx_dir) == ["dia-top", "dia-a", "dia-base"])
+        (fx_dir / "dia-over").mkdir()
+        (fx_dir / "dia-over" / "manifest.yaml").write_text(yaml.safe_dump({
+            "example": True, "description": "третье звено", "project": "demo-d", "extends": ["dia-top"], "layers": []},
+            allow_unicode=True), encoding="utf-8")
+        check("цепочка extends из трёх звеньев — ошибка", raises(lambda: plan("dia-over", fx_dir)))
+        (fx_dir / "dia-over" / "manifest.yaml").write_text(yaml.safe_dump({
+            "example": True, "description": "слой базы", "project": "demo-d",
+            "layers": [{"kb": {"facts.yaml": "text/facts.yaml"}}]}, allow_unicode=True), encoding="utf-8")
+        check("слой kb — ошибка: источники фикстуры — её файлы", raises(lambda: load("dia-over", fx_dir)))
         (fx_dir / "top" / "manifest.yaml").write_text(yaml.safe_dump({
             "example": True, "description": "плохая правка", "project": "demo-a", "extends": ["base"],
             "layers": [{"replace": {"note.md": [{"find": "нет такого", "to": "x"}]}}]}, allow_unicode=True),
@@ -396,7 +451,8 @@ def _selftest():
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--selftest", action="store_true", help="самопроверка: манифесты и пометки всех фикстур, сборка minimal")
+    ap.add_argument("--selftest", action="store_true",
+                    help="самопроверка: манифесты, цепочки extends и пометки всех фикстур, сборка minimal")
     sub = ap.add_subparsers(dest="cmd")
     b = sub.add_parser("build", help="собрать фикстуру; печатает корень сборки (корень данных для --repo)")
     b.add_argument("name")

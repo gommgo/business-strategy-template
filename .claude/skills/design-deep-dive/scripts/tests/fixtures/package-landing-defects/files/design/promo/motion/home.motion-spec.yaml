@@ -1,0 +1,185 @@
+# Пример motion-spec v1 — «Отвес», главная (L1). Учебный.
+# creative-research · 09-ai-execution-evaluation · агент I · волна 3 · 2026-09-24.
+# Проверка: spec_check.py spec 09-ai-execution-evaluation/examples/otves-home.motion-spec.yaml --plan <план site> --overlay otves-home.treatment.yaml
+# Проекции: spec_check.py moments … (строки T7), motion-md … (MOTION.md пакета), values … --out DIR (JSON чисел на секцию).
+# Опыт «достаточность спецификации»: секция how-it-works собрана только по этому файлу — 99-raw/experiments/I/02-spec-sufficiency.
+motion_spec_version: "1.0"
+id: otves-home
+x-revision: "1.1 — после опыта I/02: subject диапазона = линия, станции по якорям, грузик через attach, ветка unsupported"
+example: true
+status: proposed
+checked_at: "2026-09-24"
+refs:
+  page_plan: ../../../site/promo/plans/home.yaml
+  art_direction: ../../01-creative-direction/examples/art-direction-otves.json#/directions/0
+  tokens: ../../04-visual-language/marketing-tokens.json
+  effects: ../../06-effects-catalog/effects.yaml
+  block_treatments: ../block-treatments.yaml
+level: L1
+executor: {target: any, harness: any, video_in: false}
+page:
+  thesis: "Двигается только вертикаль: линия-отвес опускается по этапам работы от замера до сдачи; остальное неподвижно и точно."
+  character: [precise, calm]
+  base: {duration_ms: 400, easing: {token: motion.marketing.easing.out-expo}}
+  primitives: [fade-up, line-draw]
+  lcp: {target: hero.visual, entrance: transform-only, note: "фото прораба — кандидат LCP (page-plan lcp_candidate); H1 не анимируется вовсе"}
+  toggle: {required: false, attr: data-motion, states: [system, reduced, full], placement: sticky-header, remember: false}
+  scroll: {smooth: false, tail_ms_max: 0, jacking: never}
+  transitions: {kind: none}
+  properties_allowed: [transform, opacity, background-color, color]
+  budget: {loops_in_view_max: 0, loops_in_view_max_mobile: 0, first_screen_scene_ms_max: 500, js_kb_br_effects_max: 0, long_frames_pct_max: 2, cls_scroll_max: 0.1}
+  never:
+    - "появление секций ниже первого экрана (fade-and-slide-up на каждой секции — примета генератора)"
+    - "вторая линия или прогресс по прокрутке в других секциях: вертикаль на странице одна"
+    - "счётчики у рейтинга, цены и сроков; бегущая строка; свой курсор; плавная прокрутка"
+    - "анимация H1 первого экрана (split, маска, opacity 0)"
+sections:
+  - id: hero
+    block: hero-media
+    role: accent
+    level: L1
+    intent: "первый экран оседает один раз: прораб на фото чуть опускается на место, текст поддержки поднимается следом; H1 стоит"
+    moments:
+      - id: hero-photo-settle
+        class: one-shot
+        purpose: guide
+        transition_type: entrance
+        effect: "effect:hero-entrance-once"
+        target: hero.visual
+        selector_hint: ".hero__photo"
+        trigger: {type: load}
+        model: time
+        tracks:
+          - {property: transform, from: "translateY(var(--mm-shift-hero))", to: "none", unit_note: "--mm-shift-hero = 24px"}
+        duration: {share: 1}
+        easing: {token: motion.marketing.easing.out-expo}
+        repeat: once
+        interrupt: jump-to-end
+        lcp: is-lcp
+        reduce: {strategy: final-state, describe: "фото на месте с первого кадра"}
+        mobile: {strategy: same, describe: "фото 4:5 под заголовком — тот же сдвиг"}
+      - id: hero-copy-rise
+        class: one-shot
+        purpose: guide
+        transition_type: entrance
+        effect: "effect:hero-entrance-once"
+        target: hero.subheadline
+        stagger_targets: [hero.hero-proof, hero.cta]
+        trigger: {type: load, delay_ms: 80}
+        model: time
+        tracks:
+          - {property: transform, from: "translateY(var(--mm-shift-reveal))", to: "none", unit_note: "--mm-shift-reveal = 16px"}
+          - {property: opacity, from: 0.01, to: 1}
+        duration: {share: 0.8}
+        easing: {token: motion.marketing.easing.out-expo}
+        stagger: {each: {token: motion.marketing.stagger.group}, order: dom, max_items: 3, total_ms_max: 600}
+        repeat: once
+        interrupt: jump-to-end
+        lcp: not-lcp
+        reduce: {strategy: final-state, describe: "текст и кнопка видны сразу, без смещения"}
+        mobile: {strategy: same}
+    storyboard:
+      frames:
+        - {id: hero-t0, at: {time_ms: 0}, viewport: desktop, describe: "Первый кадр: H1 и цена уже на месте; фото на 24 px ниже финального положения, полностью видно; лид, рейтинг и кнопка — почти прозрачны (0,01), на 16 px ниже.", check: "H1 и фото видимы в первом кадре"}
+        - {id: hero-t500, at: {time_ms: 500}, viewport: desktop, describe: "Конечное состояние: всё на местах; дальше в первом экране ничего не движется.", check: "движение в покое 0 %"}
+    reduce: {strategy: final-state, describe: "первый экран полон с первого кадра"}
+    mobile: {strategy: same, describe: "то же; фото — отдельный кадр 4:5"}
+    budget: {js_kb_br: 0, loops_in_view: 0, load: eager}
+    acceptance:
+      - {id: hero-lcp-honest, check: "LCP-элемент = фото прораба, H1 не выпал из кандидатов, LCP не позже появления фото", tool: motion_check, gate: EG-PERF-07, metric: vitals.h1_lcp_dropped, at: desktop}
+      - {id: hero-scene-length, check: "движение первого экрана заканчивается ≤ 500 мс после load", tool: scroll_record, at: desktop, threshold: 500}
+  - id: how-it-works
+    block: steps
+    role: peak
+    level: L1
+    intent: "линия-отвес опускается от первого шага к последнему вместе с прокруткой; грузик на конце линии держит середину окна; пройденный шаг отмечается акцентом"
+    scene:
+      pin: none
+      length_vh: 140
+      length_vh_mobile: 160
+      stations:
+        - {id: s1, anchor: how-it-works.step-1, anchor_line: viewport-center, describe: "маркер шага 1 «Замер» на середине окна: линия длины 0, грузик у маркера 1"}
+        - {id: s2, anchor: how-it-works.step-2, anchor_line: viewport-center, describe: "маркер шага 2 «Смета и договор» на середине: конец линии и грузик у маркера 2, маркеры 1–2 залиты"}
+        - {id: s3, anchor: how-it-works.step-3, anchor_line: viewport-center, describe: "маркер шага 3 «Работы и отчёты» на середине: линия у маркера 3, маркеры 1–3 залиты"}
+        - {id: s4, anchor: how-it-works.step-4, anchor_line: viewport-center, describe: "маркер шага 4 «Сдача и гарантия» на середине: линия у маркера 4, все маркеры залиты; дальше линия дотягивается до низа колонки"}
+    moments:
+      - id: plumb-line-drop
+        class: scroll-linked
+        purpose: narrate
+        transition_type: persistent
+        effect: "effect:scroll-driven-progress"
+        target: how-it-works.fx-plumb-line
+        selector_hint: ".steps__line"
+        trigger:
+          type: scroll-scrub
+          subject: how-it-works.fx-plumb-line
+          range: {start: "cover 50vh", end: "cover calc(100% - 50vh)"}
+        model: scrub
+        tracks:
+          - {property: transform, from: "scaleY(0)", to: "scaleY(1)", unit_note: "transform-origin: top; линия 2 px цвета текста; раскладка линии (её layout-box, на него смотрит view()) — от центра маркера шага 1 до низа колонки шагов; конец линии всё время на середине окна"}
+        easing: {none: true}
+        scrub: {smoothing_s: 0, snap: none}
+        interrupt: follow-input
+        reduce: {strategy: final-state, describe: "линия нарисована целиком"}
+        mobile: {strategy: simplified, describe: "линия у левого края колонки, 2 px; маркеры шагов — на линии (центр маркера на оси линии)"}
+        note: "v1.1 (после опыта I/02): диапазон считается по самой линии, а не по списку — в v1.0 конец линии отставал от маркеров до 98 px"
+      - id: plumb-bob-follow
+        class: scroll-linked
+        purpose: orient
+        transition_type: persistent
+        effect: "effect:scroll-driven-progress"
+        target: how-it-works.fx-plumb-bob
+        selector_hint: ".steps__bob"
+        attach: {to: how-it-works.fx-plumb-line, point: end}
+        trigger:
+          type: scroll-scrub
+          subject: how-it-works.fx-plumb-line
+          range: {start: "cover 50vh", end: "cover calc(100% - 50vh)"}
+        model: scrub
+        tracks:
+          - {property: transform, from: "у начала линии", to: "у конца линии", unit_note: "грузик — ромб 12 px цвета акцента, центр ромба на конце линии; механизм — на выбор исполнителя без JS (например, прозрачная коробка длиной линии с ромбом у низа, translateY(-100%) → 0)"}
+        easing: {none: true}
+        interrupt: follow-input
+        reduce: {strategy: final-state, describe: "грузик у конца линии, внизу колонки"}
+        mobile: {strategy: hidden, describe: "грузика нет"}
+      - id: step-marker-fill
+        class: scroll-linked
+        purpose: inform
+        transition_type: persistent
+        target: how-it-works.fx-step-marker
+        selector_hint: ".step__marker"
+        trigger:
+          type: scroll-scrub
+          subject: how-it-works.fx-step-marker
+          range: {start: "cover calc(50vh - 6px)", end: "cover calc(50vh + 6px)"}
+        model: scrub
+        tracks:
+          - {property: background-color, from: "transparent", to: "var(--color-accent)", unit_note: "маркер — круг 12 px с контуром 2 px цвета текста, по одному у каждого шага (fx-элемент подачи); subject — сам маркер: заливка идёт на последних 12 px подхода и заканчивается, когда центр маркера на середине окна (= конец линии в центре маркера)"}
+        easing: {none: true}
+        interrupt: follow-input
+        reduce: {strategy: final-state, describe: "все маркеры залиты"}
+        mobile: {strategy: same}
+        note: "subject — маркер каждого шага (свой view()); текст шагов и факты не движутся и не меняются"
+    storyboard:
+      frames:
+        - {id: hiw-s1, at: {station: s1}, viewport: desktop, describe: "Колонка шагов слева (≈ 7 из 12 колонок), 4 шага друг под другом, у каждого маркер-кольцо слева; линия не видна, грузик у маркера шага 1.", check: "линия ≤ 5 % высоты колонки"}
+        - {id: hiw-s2, at: {station: s2}, viewport: desktop, describe: "Линия от маркера 1 до маркера 2; маркеры 1–2 залиты красным акцентом; грузик на уровне середины окна.", check: "конец линии в пределах ±24 px от маркера 2"}
+        - {id: hiw-s4, at: {station: s4}, viewport: desktop, describe: "Линия от маркера 1 до маркера 4, все маркеры залиты; дальше страница прокручивается, линия не меняется.", check: "линия = 100 % высоты между маркерами 1 и 4"}
+        - {id: hiw-m, at: {progress: 0.5}, viewport: mobile, describe: "Телефон: одна колонка, линия 2 px у левого края, грузика нет; залиты маркеры пройденных шагов."}
+        - {id: hiw-r, at: {progress: 0}, viewport: reduce, describe: "Reduce: линия целиком, грузик внизу, все маркеры залиты — уже на входе в секцию.", check: "движение при прокрутке внутри секции 0 %"}
+      note: "эскизы по кадрам не рисовались: описание словами + проверка кадров записи (опыт I/02)"
+    reduce: {strategy: final-state, describe: "линия целиком, грузик внизу колонки, маркеры залиты; ничего не движется"}
+    mobile: {strategy: simplified, describe: "линия 2 px у левого края, без грузика; маркеры на линии; site blocks.yaml steps убирает соединительные линии < 40rem — здесь линия несёт тезис и остаётся"}
+    fallback:
+      no_js: "эффект без JS — работает как есть"
+      unsupported: "нет CSS scroll-driven (Firefox, 2026-09-24): конечное состояние reduce — линия целиком, маркеры залиты, грузик внизу"
+    budget: {js_kb_br: 0, loops_in_view: 0, long_frames_pct_max: 2, idle_motion_pct_s_max: 0, cls_scroll_max: 0.1, load: eager}
+    acceptance:
+      - {id: hiw-idle, check: "в покое между шагами прокрутки движения нет (скраб стоит вместе с прокруткой)", tool: scroll_record, at: desktop, threshold: 0}
+      - {id: hiw-stations, check: "зонд станций: конец линии и грузик на середине окна ±24 px, залито N маркеров (99-raw/experiments/I/02-spec-sufficiency/shoot_stations.py)", tool: eye, at: "s1–s4", threshold: 24}
+      - {id: hiw-reduce, check: "в reduce линия целиком с первого кадра секции, доля меняющихся пикселей 0 %", tool: motion_check, metric: rm.idle_first_pct, at: reduce, threshold: 0}
+      - {id: hiw-no-js, check: "эффект без JS: 0 КБ скриптов подачи; без поддержки scroll-driven — линия целиком", tool: effects_probe, at: desktop, threshold: 0}
+      - {id: hiw-cls, check: "CLS при прокрутке ≤ 0,1", tool: motion_check, gate: EG-PERF-02, metric: scroll.cls, at: desktop, threshold: 0.1}
+open_questions:
+  - "A просит «заголовок и фото прораба один раз ≤ 500 мс»; по E 02 §10 H1 не анимируется — оставлено фото (transform) и текст поддержки. Согласовать с A при v1 art-direction."
+  - "site blocks.yaml steps: «соединительные линии убираются» < 40rem — предложение site: линия-прогресс, несущая тезис, остаётся (2 px у края)."

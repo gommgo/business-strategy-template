@@ -1,0 +1,67 @@
+# Иллюстрация: бриф на вид демо-кабинета «Отвес» (фикстура cabinet-ds) — для самопроверок утилит скилла, не данные
+# проекта. Форма — docs/projects/_template/design/_template/app-brief.yaml.
+example: true
+app_brief_version: 1
+
+project:
+  slug: otves-office
+  status: approved
+  approval: {by: владелец продукта (демо), date: "2026-09-29"}
+
+intake:
+  raw_ref: "демо фикстуры: материалов заказчика нет"
+
+languages:
+  - {lang: ru, role: primary}
+
+constraints:
+  jurisdiction: [ru]
+  legal_category: [general]
+  accessibility: wcag22-aa
+
+themes:
+  default: light
+  dark: {needed: true, why: "замерщик смотрит карточку заявки вечером с телефона (демо)"}
+
+brand: {ref: brand.yaml}
+
+assets_available:
+  logo_vector: false
+  product_ui: false
+
+references: []
+questions: []
+
+core:
+  app_type: admin
+  postures:
+    - {user: manager, surface: —, posture: sovereign}
+    - {user: surveyor, surface: —, posture: mixed}
+  pointer: {office: both}
+  ai_layer: {present: false, where: []}
+  mobile_scope: "отметка проведённого замера с телефона — карточка заявки"
+  status_roles: [request.new, request.scheduled, request.measured, request.declined]
+  platform_constraints: []
+  density:
+    default: compact
+    switch: false
+    why: "менеджер весь день в таблице заявок; замерщику хватает compact на карточке"
+  character:
+    adjectives: [строгий, плотный, спокойный]
+    temperature: cool
+  bans: ["градиенты в фоне и кнопках", "тень у карточек на странице — карточка держится на границе"]
+
+style_tiles: []
+moodboard: []
+allow: {markers: [], why: "приметы не снимаются"}
+
+surfaces:
+  office:
+    main_screen_type: list
+    sections: 2
+    density_by_area:
+      - {area: таблицы, density: compact}
+      - {area: формы, density: default}
+    hierarchy_levels: 3
+    states_visual: [loading-initial, empty-first-run, error-load, offline]
+    shell: {sidebar: 240, inspector: false, content_max: 1280}

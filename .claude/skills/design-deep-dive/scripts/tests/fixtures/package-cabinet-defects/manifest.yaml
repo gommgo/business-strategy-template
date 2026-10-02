@@ -1,6 +1,8 @@
 # Фикстура package-cabinet-defects — иллюстрация: кабинет office фикстуры package-cabinet (0 error у design_audit),
 # вход холста этапа mockup, собранный canvas_input на этой основе (файлы входа — с пометками иллюстрации, отпечатки в
-# INPUT.md — их), и посеянные дефекты проекта otves-office — вход проверки сценария «пакет». Дефект — правило — место:
+# INPUT.md — их), и посеянные дефекты проекта otves-office — вход проверки сценария «пакет». Собрана целиком своими
+# файлами: файлы основы, поверх — вход холста и посевы (рецепт scripts/maint/fixture_gen.py; руками не правится).
+# Дефект — правило — место:
 #   R-COV-005    design/system.yaml — у типа ui:Pagination stable-экрана requests-list нет компонента ДС (снят ключ)
 #   R-FRESH-001  design/system.tokens.json — значение primitive.color.accent.700 изменено без пересборки производных
 #   R-FRESH-003  design/office/input/copy.md — файл входа правлен руками после сборки
@@ -9,12 +11,9 @@
 example: true
 description: кабинет office с посеянными дефектами ДС и входа холста для проверки design_audit
 project: otves-office
-extends: [package-cabinet]
+unmarked:
+- files/design/_design-system/project/components/ServiceCard/README.md
+- files/design/_design-system/project/components/Steps/README.md
+- files/design/_design-system/project/design-system.json
 layers:
 - {files: files}
-- replace:
-    design/system.yaml:
-    - find: "  Pagination: {component: Pagination}\n"
-      to: ''
-    design/system.tokens.json:
-    - {find: '[0.1137, 0.3059, 0.8471], "hex": "#1d4ed8"', to: '[0.1176, 0.251, 0.6863], "hex": "#1e40af"'}

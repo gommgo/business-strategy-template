@@ -1,0 +1,18 @@
+# Иллюстрация: карта решений ДС демо-лендинга «Отвес» (фикстура input-landing) — для самопроверки сборщика входа холста,
+# не данные проекта. Форма — docs/projects/_template/design/_template/system.yaml.
+example: true
+system_version: 1
+status: approved
+approval: {by: владелец продукта (демо), date: "2026-09-29"}
+
+components:
+  Button: {component: Button}
+  Field: {component: Field}
+  TextInput: {component: Field, note: "поле ввода — часть компонента Field"}
+
+extensions: []
+text_styles: {}
+conventions:
+  range_sign: "–"
+  empty_state: {align: center}
+starter: []

@@ -1,0 +1,338 @@
+# ПРИМЕР J v1 · план шаблона project (case-page, L1) — planlib.py; факты — демо J.
+page_plan_version: '1'
+checked: '2026-09-24'
+status: approved
+example: true
+site: stalkon
+refs:
+  brief: ../site-brief.yaml
+  facts: ../facts.yaml
+  site_map: ../site-map.yaml
+  blocks: ../../../../04-blocks/blocks.yaml
+  vocabulary: ../../../../02-site-types/vocabulary.yaml
+  lead_forms: ../../../../05-conversion-funnels/lead-forms.yaml
+  events: ../../../../07-seo-geo-performance-analytics/events.yaml
+  head_kit: ../../../../07-seo-geo-performance-analytics/head-kit.yaml
+  budgets: ../../../../07-seo-geo-performance-analytics/budgets.yaml
+  legal_requirements: ../../../../08-legal-trust-a11y/legal-requirements.yaml
+page:
+  id: project
+  page_type: case-page
+  template: true
+  template_id: project
+  lang: ru
+  locale: ru-RU
+  jurisdiction:
+  - ru
+  goal: 'project: запрос расчёта или переход к нужному разделу'
+  primary_action: request-quote
+  cta_target:
+    kind: route
+    value: /zapros-rascheta/
+  awareness: product-aware
+  awareness_basis:
+    from: assumption
+    rule: уровень по главному источнику страницы (C 01 §3.1)
+  traffic:
+  - traffic_source: internal
+    temperature: warm
+    device: desktop
+  macrostructure: long-document
+  macrostructure_family: document
+  first_screen_policy: offer-cta-header
+  budget_profile: case-page@L1
+  ambition_level: L1
+  navigation:
+    header: site
+    archetype: two-tier
+    logo_link: /
+    breadcrumbs: true
+    footer: site
+  seo:
+    indexable: true
+    canonical: self
+    h1: hero.headline
+    structured_data:
+    - Article
+    - BreadcrumbList
+    ssr_required: true
+    sitemap: true
+  legal:
+    pd_consent: checkbox-and-link
+    privacy_policy: /politika-konfidencialnosti/
+    cookie_banner: required
+    cookie_mode: opt-in
+    analytics_before_consent: false
+    withdraw_link: footer
+    requisites: both
+    operator_ref: fact:company-requisites
+    requirements:
+    - req:LR-RU-05
+    - req:LR-RU-10
+    - req:LR-RU-13
+  analytics:
+    systems:
+    - yandex-metrica
+    goals: []
+    load_after_consent: true
+sections:
+- id: header
+  role: header
+  question: где я и куда дальше
+  job: шапка сайта two-tier из site-map.chrome
+  block: header
+  variant: site-nav
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: nav-link
+      slot: nav-label
+      intent: 'nav-label: по иерархии сообщений text'
+    - id: cta-label
+      slot: cta-label
+      intent: 'cta-label: по иерархии сообщений text'
+    media:
+    - id: logo
+      slot: brand-logo
+      media_role: informational
+      goal: показать brand-logo
+      source: generate
+      authenticity: real-or-generated
+    action:
+    - id: cta
+      slot: cta-primary
+      action: request-quote
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: cta-label
+    - id: phone
+      slot: phone-link
+      action: call
+      style: channel
+      target:
+        kind: tel
+        value: 'tel: номер из facts.yaml'
+      event: event:phone-click
+- id: breadcrumbs
+  role: header
+  question: где я в иерархии
+  job: путь наверх
+  block: breadcrumbs
+  variant: full-path
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: current
+      slot: nav-label
+      intent: 'nav-label: по иерархии сообщений text'
+    - id: crumb-1-label
+      slot: nav-label
+      anatomy: crumb.label
+      group: crumb-1
+      intent: 'nav-label: по иерархии сообщений text'
+    - id: crumb-2-label
+      slot: nav-label
+      anatomy: crumb.label
+      group: crumb-2
+      intent: 'nav-label: по иерархии сообщений text'
+    action:
+    - id: crumb-1-link
+      slot: link
+      anatomy: crumb.link
+      group: crumb-1
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'
+    - id: crumb-2-link
+      slot: link
+      anatomy: crumb.link
+      group: crumb-2
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'
+- id: hero
+  role: hero
+  question: что это за объект и результат
+  job: заголовок страницы и путь дальше
+  block: hero-text
+  variant: statement-cta
+  next_step: главное действие страницы
+  slots:
+    text:
+    - id: headline
+      slot: headline
+      heading: h1
+      intent: 'headline: по иерархии сообщений text'
+- id: case-studies
+  role: case-studies
+  question: как сделали и за сколько
+  job: задача, решение, срок, результат — с разрешения клиента
+  block: case-study
+  variant: problem-solution-result
+  next_step: главное действие страницы
+  slots:
+    text:
+    - id: title
+      slot: case-title
+      heading: h2
+      intent: 'case-title: по иерархии сообщений text'
+    - id: summary
+      slot: case-summary
+      intent: 'case-summary: по иерархии сообщений text'
+    - id: result
+      slot: case-result
+      intent: 'case-result: по иерархии сообщений text'
+    data:
+    - id: case
+      slot: case-ref
+      fact: fact:case-warehouse
+      anatomy: case
+      binds:
+      - summary
+- id: related
+  role: related
+  question: что ещё посмотреть
+  job: направление проекта и похожие проекты
+  block: related-links
+  variant: list
+  next_step: главное действие страницы
+  slots:
+    text:
+    - id: title
+      slot: section-title
+      heading: h2
+      intent: 'section-title: по иерархии сообщений text'
+    - id: item-1-title
+      slot: card-title
+      anatomy: item.title
+      group: item-1
+      intent: 'card-title: по иерархии сообщений text'
+    - id: item-2-title
+      slot: card-title
+      anatomy: item.title
+      group: item-2
+      intent: 'card-title: по иерархии сообщений text'
+    action:
+    - id: item-1-link
+      slot: link
+      anatomy: item.link
+      group: item-1
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'
+    - id: item-2-link
+      slot: link
+      anatomy: item.link
+      group: item-2
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'
+- id: final-cta
+  role: final-cta
+  question: готов обсудить объект
+  job: переход к запросу расчёта
+  block: cta-band
+  variant: mid
+  next_step: главное действие страницы
+  slots:
+    text:
+    - id: title
+      slot: section-title
+      heading: h2
+      intent: 'section-title: по иерархии сообщений text'
+    - id: cta-label
+      slot: cta-label
+      intent: 'cta-label: по иерархии сообщений text'
+    action:
+    - id: cta
+      slot: cta-primary
+      action: request-quote
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: cta-label
+- id: footer
+  role: footer
+  question: кто компания, документы, разделы
+  job: 'подвал сайта: группы разделов, реквизиты, правовые ссылки'
+  block: footer
+  variant: site
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: legal
+      slot: footer-legal
+      intent: 'footer-legal: по иерархии сообщений text'
+    - id: privacy-label
+      slot: nav-label
+      intent: подписи правовых ссылок
+    - id: nav-1-label
+      slot: nav-label
+      anatomy: nav.label
+      group: nav-1
+      intent: 'nav-label: по иерархии сообщений text'
+    - id: nav-2-label
+      slot: nav-label
+      anatomy: nav.label
+      group: nav-2
+      intent: 'nav-label: по иерархии сообщений text'
+    - id: nav-3-label
+      slot: nav-label
+      anatomy: nav.label
+      group: nav-3
+      intent: 'nav-label: по иерархии сообщений text'
+    data:
+    - id: company
+      slot: fact-ref
+      fact: fact:company-requisites
+      anatomy: company
+      binds:
+      - legal
+    action:
+    - id: privacy
+      slot: link
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'
+    - id: nav-1-link
+      slot: link
+      anatomy: nav.link
+      group: nav-1
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'
+    - id: nav-2-link
+      slot: link
+      anatomy: nav.link
+      group: nav-2
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'
+    - id: nav-3-link
+      slot: link
+      anatomy: nav.link
+      group: nav-3
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'

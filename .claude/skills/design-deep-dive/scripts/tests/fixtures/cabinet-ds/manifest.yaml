@@ -1,17 +1,18 @@
 # Фикстура cabinet-ds — иллюстрация для самопроверок утилит дизайн-системы scripts/project/ds_build.py, ds_sync.py и
-# ds_coverage.py: демо-кабинет фикстуры cabinet и ДС продукта. Артефакт Design System — пример базы claude-design
-# (05-design-artifacts/example/design-system/project/) слоем, поверх него — свои файлы: токены DTCG, проза DESIGN.md,
-# карта решений system.yaml с сопоставлением всех типов ui: stable-экранов и одним расширением словаря (AddressMap,
-# добавлено в блок request-details правкой), бренд, бриф на вид и компоненты артефакта с превью состояний. Производные
+# ds_coverage.py: демо-кабинет фикстуры cabinet и ДС продукта — свои файлы: токены DTCG, проза DESIGN.md, карта решений
+# system.yaml с сопоставлением всех типов ui: stable-экранов и одним расширением словаря (AddressMap, добавлено в блок
+# request-details правкой), бренд, бриф на вид и артефакт Design System с компонентами и превью состояний. Производные
 # (system.tokens.css, передняя часть DESIGN.md, tokens.json и README артефакта) лежат собранными: ds_build check — 0,
 # ds_coverage check — 0 error. Формат манифеста — докстринг fixture_project.py.
 example: true
 description: кабинет cabinet и его ДС — токены, проза, карта решений, бренд, бриф на вид, артефакт с компонентами
 project: otves-office
 extends: [cabinet]
+unmarked:   # части артефакта ДС в своём формате: описание артефакта и компоненты без карты решений
+  - files/design/_design-system/project/design-system.json
+  - files/design/_design-system/project/components/ServiceCard/README.md
+  - files/design/_design-system/project/components/Steps/README.md
 layers:
-  - kb:
-      design/_design-system/project: claude-design/05-design-artifacts/example/design-system/project
   - files: files
   - replace:
       screens/office/blocks/request-details/index.md:

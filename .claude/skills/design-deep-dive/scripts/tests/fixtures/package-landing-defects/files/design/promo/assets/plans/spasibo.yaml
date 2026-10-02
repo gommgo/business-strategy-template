@@ -1,0 +1,49 @@
+# План ассетов страницы spasibo — каркас из spasibo.yaml (plan_to_assets.py). Формат — ai-media 01/01 §8, схема —
+# kb/ai-media/05-prompting/asset-plan.schema.json. Заглушки TODO, предмет, варианты, вес, фокус и дорогу 3D
+# дописывает агент; тексты ассетов — copydeck.py export-assets; генерация — после status: approved и approval.
+plan_version: 1
+checked: '2026-09-24'
+status: draft
+example: true
+refs:
+  page_plan: ../../../../site/promo/plans/spasibo.yaml
+page:
+  id: spasibo
+  page_type: thank-you-page
+  media_class: corporate
+  locale: ru-RU
+  goal: подтвердить заявку, сказать, что и когда будет, дать канал для срочного вопроса
+budgets:
+  profile: thank-you-page@L0
+  first_screen_kb:
+    mobile: 800
+    desktop: 1200
+  session_kb:
+    mobile: 3000
+    desktop: 5000
+    basis: S-creative-C1; M телефон медиана 3 497
+policy:
+  no_ai_subjects: []
+  disclosure: per-slot
+slots:
+- id: header-logo
+  section: header
+  slot: brand-logo
+  role: informational
+  goal: показать brand-logo
+  ladder: svg
+  source: generate
+  task_codes: []
+  subject: 'TODO: предмет словами паспорта визуала'
+  variants:
+  - id: default
+    ratio: TODO
+    size: TODO
+    formats: TODO
+    max_kb: TODO
+  motion:
+    type: none
+  delivery:
+    lcp_candidate: false
+    loading: lazy
+  ai_fit: conditional

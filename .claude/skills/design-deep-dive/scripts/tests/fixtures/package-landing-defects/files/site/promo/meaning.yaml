@@ -1,0 +1,341 @@
+# meaning-otves.yaml — пример 1: смысл для лидогенерации услуги (ремонт квартир под ключ), приоритет 1 заказчика
+# text-research · B1 · 2026-09-24 · формат: ../meaning.schema.yaml (meaning_version 1)
+#
+# ВЫМЫШЛЕННАЯ студия «Отвес» (Нижний Новгород) — та же, что в ../examples/facts-service-renovation.yaml (B2): факты и
+# их id — оттуда. Вход — сообщение заказчика (ai-self, 99-raw/experiments/B1/01-briefs-to-meaning/README.md §3).
+# Что показывает пример: вывод позиционирования из короткого брифа; basis у каждого утверждения; допущения → вопросы;
+# уникальное свойство без документа — needs-proof; возражения с доказательствами из facts.yaml и с missing, которых в
+# инвентаре ещё нет (предложения B2 — x-missing-proposals). Иерархии страниц — hierarchy-otves-*.yaml.
+
+meaning_version: 1
+date: "2026-09-24"
+status: proposed
+site: otves-remont-nn
+
+offering_summary:
+  text: >-
+    Ремонт квартир под ключ в Нижнем Новгороде: замер и смета бесплатно, работы по договору подряда с гарантией 3 года,
+    объект от замера до сдачи ведёт один прораб. Цена работ — от 9 800 ₽ за м² без материалов.
+  kind: service
+  basis: {kind: brief, ref: "сообщение заказчика, 2026-09-24 (experiments/B1/01 §3)"}
+
+audience:
+  - id: busy-owners
+    name: "Владельцы квартиры, которые не могут стоять над ремонтом"
+    primary: true
+    role: buyer-user
+    characteristics:
+      - "работают полный день и не могут ездить на объект"
+      - "на время ремонта живут в другом месте (аренда, родители) — каждая неделя задержки стоит денег"
+      - "делают ремонт впервые или раз в десять лет и не знают, как его проверять"
+      - "готовы платить за предсказуемость, а не за минимальную цену за метр"
+    situation: "Когда купили или освободили квартиру и надо сделать полный ремонт за 1,5–3 месяца, а времени следить за бригадой нет"
+    trigger: "Страшные истории знакомых о затянутом ремонте; близкий срок переезда; неудачный опыт с частной бригадой"
+    knows: >-
+      Знает, что нужен ремонт под ключ, и слышал, что бригады срывают сроки и раздувают смету; сравнивает цены за метр;
+      «Отвес» знает, если пришёл с Яндекс Карт или по рекомендации.
+    jobs:
+      - {id: job-renovate-on-time, type: functional, statement: "Когда делаю ремонт, хочу получить квартиру в срок и в сумму из договора, чтобы вовремя переехать и не доплачивать аренду", priority: 1, basis: {kind: fact, ref: "fact:review-anna-k — «на три дня раньше, чем в договоре… Смета не выросла»"}}
+      - {id: job-control-remotely, type: functional, statement: "Когда не могу приезжать на объект, хочу видеть, что сделано за день, чтобы не бояться обмана", priority: 1, basis: {kind: brief, ref: "«клиенты хвалят, что видят всё по фото»"}}
+      - {id: job-no-conflicts, type: social, statement: "Когда в доме идёт мой ремонт, хочу, чтобы соседи не жаловались, чтобы жить с ними дальше без ссор", priority: 3, basis: {kind: fact, ref: "fact:review-igor-pending (разрешения нет — только как голос клиента)"}}
+      - {id: job-peace-of-mind, type: emotional, statement: "Когда отдаю крупные деньги, хочу знать, к кому прийти, если что-то пойдёт не так", priority: 2, basis: {kind: inferred, ref: "гарантия 3 года как козырь заказчика; страхи в потребительских гидах (Т—Ж, 2019)"}}
+    pains:
+      - {id: pain-budget-grows, text: "Смета растёт по ходу ремонта: «тут непредвиденное», «тут материал подорожал»", severity: high, job_ref: job-renovate-on-time, basis: {kind: fact, ref: "fact:review-anna-k («Смета не выросла ни на рубль» — клиент отмечает как редкость)"}}
+      - {id: pain-delays, text: "Срок срывается, а аренда и ипотека идут одновременно", severity: high, job_ref: job-renovate-on-time, basis: {kind: inferred, ref: "характеристика «живут в другом месте»"}}
+      - {id: pain-blind, text: "Не видно, что происходит на объекте, пока не приедешь; приезжать некогда", severity: high, job_ref: job-control-remotely, basis: {kind: brief, ref: "«видят всё по фото» — ценят именно это"}}
+      - {id: pain-rework, text: "Криво сделали — переделывать за свой счёт или искать, с кого спросить", severity: medium, job_ref: job-peace-of-mind, basis: {kind: inferred, ref: "гарантия как главный довод заказчика"}}
+      - {id: pain-neighbours, text: "Грязь в подъезде и шум — жалобы соседей", severity: low, job_ref: job-no-conflicts, basis: {kind: fact, ref: "fact:review-igor-pending (как голос клиента, без публикации)"}}
+    gains:
+      - {id: gain-move-in-date, text: "Заехать в дату из договора", measure: "дни просрочки против договора (в кейсе — на 3 рабочих дня раньше)", job_ref: job-renovate-on-time, basis: {kind: fact, ref: "fact:case-two-room-47-days"}}
+      - {id: gain-known-total, text: "Знать итоговую сумму до начала работ", measure: "разница между сметой в договоре и итогом", job_ref: job-renovate-on-time, basis: {kind: assumption, question_id: q-estimate-changes}}
+      - {id: gain-see-progress, text: "Видеть ход работ с телефона, не приезжая", measure: "сколько раз пришлось ехать на объект «проверить»", job_ref: job-control-remotely, basis: {kind: brief, ref: "«видят всё по фото»"}}
+      - {id: gain-one-contact, text: "Один человек отвечает за всё — от замера до сдачи", job_ref: job-peace-of-mind, basis: {kind: brief, ref: "«объект ведёт один человек от замера до сдачи»"}}
+    current_alternative_ids: [alt-private-crew, alt-self-managed, alt-other-studios]
+    basis: {kind: inferred, ref: "бриф: «дешёвые заказы не берём» + козыри «прораб», «видят по фото», «гарантия»"}
+  - id: new-build-owners
+    name: "Владельцы новостройки без отделки"
+    primary: false
+    role: buyer-user
+    situation: "Когда получили ключи от квартиры без отделки и хотят въехать как можно быстрее"
+    jobs:
+      - {id: job-first-renovation, type: functional, statement: "Когда получаю ключи от новостройки, хочу ремонт с нуля за один подход, чтобы въехать и не жить в стройке", priority: 1, basis: {kind: assumption, question_id: q-segments}}
+    pains:
+      - {id: pain-new-build-noise, text: "Весь дом ремонтируется, бригады нарасхват, сроки плывут", severity: medium, basis: {kind: assumption, question_id: q-segments}}
+    gains:
+      - {id: gain-fast-move, text: "Въехать в свою квартиру в назначенный месяц", basis: {kind: assumption, question_id: q-segments}}
+    basis: {kind: assumption, question_id: q-segments}
+
+awareness:
+  level: solution-aware
+  basis: {kind: inferred, ref: "основной будущий трафик — Директ по запросам «ремонт квартир под ключ нижний новгород» (знает решение, выбирает исполнителя)"}
+  confidence: medium
+  by_source:
+    - {source: paid-search, level: solution-aware, note: "категорийные запросы с городом"}
+    - {source: search-problem, level: problem-aware, note: "«как контролировать ремонт, если нет времени», «бригада затянула ремонт» — статьи и SEO-страницы"}
+    - {source: maps-local, level: product-aware, note: "увидел карточку и рейтинг на Яндекс Картах"}
+    - {source: search-brand, level: product-aware, note: "«Отвес ремонт отзывы» — проверяет перед звонком"}
+    - {source: referral, level: product-aware, note: "рекомендация знакомых"}
+
+sophistication:
+  stage: 4
+  claims_heard:
+    - "ремонт под ключ"
+    - "гарантия на работы"
+    - "в срок и без доплат"
+    - "фиксированная смета"
+    - "опытные мастера, свой прораб"
+    - "бесплатный замер"
+  basis: {kind: assumption, question_id: q-competitors}
+
+traffic:
+  ref: "/traffic"
+  sources:
+    - {source: paid-search, temperature: warm, share: 0.5, device: mixed, promise_of_source: "объявление Директа: «Ремонт квартир под ключ в Нижнем Новгороде — смета бесплатно» (черновик, подтвердить)"}
+    - {source: maps-local, temperature: hot, share: 0.25, device: mobile, promise_of_source: "карточка организации: рейтинг, фото, «ремонт квартир»"}
+    - {source: referral, temperature: hot, share: 0.15, device: mobile}
+    - {source: search-problem, temperature: cold, share: 0.1, device: mixed, promise_of_source: "заголовок статьи или SEO-страницы о контроле ремонта"}
+
+positioning:
+  alternatives:
+    - {id: alt-private-crew, name: "Частная бригада по знакомству или с досок объявлений", kind: hire-someone, why_used: "дешевле за метр, «договоримся на словах»", limits: "нет договора и гарантии, контролировать самому, бригада может исчезнуть", mention_on_page: as-approach, basis: {kind: brief, ref: "«дешёвые заказы не берём» — заказчик теряет эту аудиторию сознательно"}}
+    - {id: alt-self-managed, name: "Вести ремонт самому: нанимать мастеров по отдельности, закупать материалы", kind: diy-manual, why_used: "полный контроль, экономия на посреднике", limits: "нужны время и знания; каждый мастер отвечает только за своё", mention_on_page: as-approach, basis: {kind: inferred, ref: "типовой путь при ремонте (Т—Ж, «Как выбрать бригаду…», 2019)"}}
+    - {id: alt-other-studios, name: "Другие студии ремонта под ключ в Нижнем Новгороде", kind: competitor-direct, why_used: "те же обещания, иногда дешевле", limits: "неизвестно — вопрос заказчику", mention_on_page: never, basis: {kind: assumption, question_id: q-competitors}}
+    - {id: alt-postpone, name: "Отложить или ограничиться косметикой", kind: do-nothing, why_used: "страшно и дорого", limits: "жить в неудобной квартире; ремонт всё равно придётся делать", mention_on_page: never, basis: {kind: inferred, ref: "Dunford: «ничего не делать» — частая альтернатива"}}
+  unique_attributes:
+    - {id: attr-one-foreman, attribute: "Один прораб ведёт объект от замера до сдачи", versus: [alt-private-crew, alt-self-managed], proof_status: needs-proof, proof_ids: ["missing:foreman-per-object", "fact:foreman-lapin"], basis: {kind: brief, ref: "«объект ведёт один человек от замера до сдачи» — слова заказчика; в facts.yaml есть прораб (fact:foreman-lapin), но не само правило"}}
+    - {id: attr-photo-reports, attribute: "Ход работ виден по фото каждый день, не приезжая на объект", versus: [alt-private-crew, alt-self-managed, alt-other-studios], proof_status: needs-proof, proof_ids: ["fact:review-anna-k", "missing:photo-report-process"], basis: {kind: fact, ref: "fact:review-anna-k — один отзыв; правило ли это для всех объектов — вопрос q-photo-reports"}}
+    - {id: attr-contract-guarantee, attribute: "Договор подряда с гарантией 3 года на работы (п. 7.2)", versus: [alt-private-crew, alt-self-managed], proof_status: has-proof, proof_ids: ["fact:guarantee-3-years"], basis: {kind: fact, ref: "fact:guarantee-3-years"}}
+    - {id: attr-track-record, attribute: "12 лет и 1 146 сданных квартир в одном городе", versus: [alt-private-crew, alt-other-studios], proof_status: has-proof, proof_ids: ["fact:flats-completed", "fact:company-since-2014", "fact:rating-yandex-maps"], basis: {kind: fact, ref: "fact:flats-completed"}}
+  value_themes:
+    - id: val-control-without-visits
+      theme: "Ремонт идёт под присмотром, даже когда вы на работе"
+      from_attributes: [attr-one-foreman, attr-photo-reports]
+      chain:
+        - {attribute_ref: attr-one-foreman, benefit: "один ответственный вместо пяти мастеров", value: "не нужно самому координировать и проверять"}
+        - {attribute_ref: attr-photo-reports, benefit: "видно, что сделано за день", value: "не надо ездить на объект, чтобы убедиться"}
+      customer_measure: "сколько раз пришлось приехать или звонить «узнать, как дела» (против частной бригады)"
+      pain_refs: [pain-blind]
+      gain_refs: [gain-see-progress, gain-one-contact]
+      proof_ids: ["missing:foreman-per-object", "fact:foreman-lapin", "fact:review-anna-k", "missing:photo-report-process"]
+    - id: val-predictable
+      theme: "Срок и сумма зафиксированы в договоре, работа — на гарантии 3 года"
+      from_attributes: [attr-contract-guarantee, attr-one-foreman]
+      chain:
+        - {attribute_ref: attr-contract-guarantee, benefit: "письменные обязательства и пункт о гарантии", value: "есть к кому прийти, если что-то отвалится через год"}
+      customer_measure: "дни просрочки и рубли сверх сметы (кейс: 47 рабочих дней при 50 по договору)"
+      pain_refs: [pain-delays, pain-budget-grows, pain-rework]
+      gain_refs: [gain-move-in-date, gain-known-total]
+      proof_ids: ["fact:guarantee-3-years", "fact:case-two-room-47-days", "missing:estimate-change-policy"]
+    - id: val-proven-locally
+      theme: "Проверено тысячей квартир в вашем городе"
+      from_attributes: [attr-track-record]
+      customer_measure: "рейтинг и число оценок на Яндекс Картах против других студий"
+      pain_refs: [pain-rework]
+      proof_ids: ["fact:flats-completed", "fact:rating-yandex-maps", "fact:company-since-2014"]
+  best_fit:
+    segment_ids: [busy-owners]
+    characteristics: ["не может бывать на объекте чаще раза в неделю", "платит аренду или ипотеку во время ремонта", "квартира 40–80 м², полный ремонт"]
+    why_care: "Для них каждая неделя задержки и каждая поездка «проверить» стоят денег и нервов — присмотр и договор ценнее низкой цены за метр."
+  market_category:
+    name: "ремонт квартир под ключ в Нижнем Новгороде"
+    strategy: head-to-head
+    reference_leader: "крупные студии ремонта города и частные бригады с досок объявлений"
+    assumptions_true: ["всё делают сами, от черновых работ до чистовой отделки", "есть договор и смета", "есть замер"]
+    assumptions_false: ["материалы входят в цену (у «Отвеса» — нет: цена работ без материалов)", "берут любые объёмы, в том числе одну комнату"]
+    basis: {kind: inferred, ref: "локальный рынок услуг без явного лидера (Dunford: head-to-head возможен, если чёткого победителя нет); критерии выбора сдвигаем с цены за метр на присмотр и договор"}
+  statement:
+    template: moore
+    internal_only: true
+    text: >-
+      Для владельцев квартир в Нижнем Новгороде, которым некогда следить за ремонтом и которых не устраивает частная
+      бригада «на словах», «Отвес» — ремонт под ключ, при котором объект от замера до сдачи ведёт один прораб, а срок и
+      сумма зафиксированы в договоре с гарантией 3 года. В отличие от частной бригады, у нас договор, гарантия и 12 лет в
+      городе; в отличие от ведения ремонта самому — один ответственный вместо пяти мастеров.
+  only_we_can_say:
+    - claim: "1 146 квартир в Нижнем Новгороде с 2014 года"
+      proof_ids: ["fact:flats-completed"]
+      checked_against: [alt-private-crew, alt-other-studios]
+
+value_proposition:
+  core:
+    text: "Ремонт под ключ для тех, кому некогда следить: объект ведёт один прораб, срок и смета в договоре, гарантия 3 года — вместо частной бригады «на словах»."
+    basis: {kind: inferred, ref: "value_themes val-control-without-visits + val-predictable"}
+  pain_relievers:
+    - {id: pr-foreman, text: "Прораб — один ответственный за объект и за мастеров", pain_refs: [pain-blind, pain-rework], proof_ids: ["missing:foreman-per-object", "fact:foreman-lapin"]}
+    - {id: pr-contract, text: "Договор подряда: этапы, срок, смета; гарантия 3 года", pain_refs: [pain-delays, pain-rework, pain-budget-grows], proof_ids: ["fact:guarantee-3-years", "missing:estimate-change-policy"]}
+  gain_creators:
+    - {id: gc-photos, text: "Фотоотчёт о сделанном за день", gain_refs: [gain-see-progress], proof_ids: ["missing:photo-report-process"]}
+    - {id: gc-free-estimate, text: "Бесплатные замер и смета — сумма известна до договора", gain_refs: [gain-known-total], proof_ids: ["fact:estimate-free"]}
+  forces:
+    push:
+      - {text: "Близкий срок переезда; аренда и ипотека одновременно", basis: {kind: inferred, ref: "характеристики сегмента"}}
+      - {text: "Страшные истории о ремонтах у знакомых", basis: {kind: inferred, ref: "Т—Ж, 2019: «Как строительные бригады обманывают заказчиков»"}}
+    pull:
+      - {text: "Представить, что ремонт идёт, а ты на работе и видишь всё по фото", basis: {kind: brief, ref: "«видят всё по фото»"}}
+      - {text: "Заехать в дату из договора", basis: {kind: fact, ref: "fact:case-two-room-47-days"}}
+    anxiety:
+      - {text: "Смета вырастет по ходу", objection_ids: [obj-budget-grows]}
+      - {text: "Возьмут предоплату и затянут", objection_ids: [obj-trust, obj-delays]}
+      - {text: "Переплачу за «студию» против частника", objection_ids: [obj-price]}
+    habit:
+      - {text: "«Найду бригаду по знакомству, как все»", objection_ids: [obj-diy-crew]}
+      - {text: "«Сделаю пока косметику, потом разберусь»", objection_ids: [obj-timing]}
+  fit_status: hypothesis
+
+offer:
+  ref: "/offer"
+  summary: "Бесплатный выезд замерщика и смета; при договоре до 31 октября 2026 года — скидка 10 % на работы."
+  proof_ids: ["fact:estimate-free", "fact:promo-october-10"]
+  risk_reversal_ids: [rr-free-estimate, rr-guarantee]
+
+conversion:
+  action_ref: "request-measurement"
+  secondary_goal: "Сохранить или отправить домашним пример сметы и договора, чтобы вернуться после обсуждения"
+
+objections:
+  - id: obj-price
+    text: "Дорого: частники берут меньше за метр"
+    type: price
+    force: anxiety
+    segment_ids: [busy-owners]
+    severity: major
+    answer: "Цена работ — от 9 800 ₽/м² без материалов, и в неё входят прораб, договор и гарантия 3 года; точную сумму показываем в бесплатной смете до договора."
+    proof_ids: ["fact:price-from-per-m2", "fact:estimate-free", "fact:guarantee-3-years"]
+    where: [{section_role: pricing, slot_type: pricing-price-note}, {section_role: faq}]
+    awareness_stage: product-aware
+    status: answered
+    basis: {kind: brief, ref: "«дешёвые заказы не берём»"}
+  - id: obj-budget-grows
+    text: "Смета вырастет по ходу, «всплывут» доплаты"
+    type: risk
+    force: anxiety
+    severity: blocker
+    answer: "Смета — часть договора; что меняет сумму и как это согласуется — написать по договору (не обещать «смета никогда не меняется»)."
+    proof_ids: ["missing:estimate-change-policy", "fact:review-anna-k"]
+    where: [{section_role: how-it-works}, {section_role: guarantee}, {section_role: faq}]
+    awareness_stage: solution-aware
+    status: needs-proof
+    basis: {kind: fact, ref: "fact:review-anna-k; never_claim B2 nc-no-extra-cost-promise"}
+  - id: obj-delays
+    text: "Затянут срок, а у меня аренда"
+    type: time
+    force: anxiety
+    severity: blocker
+    answer: "Срок — в договоре по этапам; пример: двушка 54 м² за 47 рабочих дней при 50 по договору."
+    proof_ids: ["fact:case-two-room-47-days", "missing:deadline-terms"]
+    where: [{section_role: case-studies}, {section_role: how-it-works}]
+    awareness_stage: solution-aware
+    status: answered
+    basis: {kind: fact, ref: "fact:case-two-room-47-days"}
+  - id: obj-trust
+    text: "Кто вы такие? Возьмут предоплату и пропадут"
+    type: trust
+    force: anxiety
+    severity: blocker
+    answer: "С 2014 года в Нижнем Новгороде, 1 146 квартир, 4,8 из 5 на Яндекс Картах; реквизиты в подвале; оплата поэтапно (подтвердить)."
+    proof_ids: ["fact:company-since-2014", "fact:flats-completed", "fact:rating-yandex-maps", "missing:legal-details", "missing:payment-stages"]
+    where: [{section_role: hero, slot_type: hero-proof}, {section_role: proof-stats}, {section_role: footer, slot_type: footer-legal}]
+    awareness_stage: solution-aware
+    status: answered
+    basis: {kind: inferred, ref: "Т—Ж, 2019: договор на юрлицо, контакты, поэтапная оплата — что проверяет заказчик"}
+  - id: obj-diy-crew
+    text: "Найду бригаду сам, по знакомству будет дешевле"
+    type: status-quo
+    force: habit
+    severity: major
+    answer: "Можно, но тогда закупка, контроль и приёмка — на вас, а спросить без договора не с кого; у нас это делает прораб, гарантия — в договоре."
+    proof_ids: ["fact:foreman-lapin", "fact:guarantee-3-years"]
+    where: [{section_role: comparison}, {section_role: solution}]
+    awareness_stage: problem-aware
+    status: answered
+    basis: {kind: inferred, ref: "альтернатива alt-private-crew"}
+  - id: obj-same-as-others
+    text: "Все обещают «под ключ» и гарантию — чем вы другие?"
+    type: competitor
+    force: anxiety
+    severity: major
+    answer: "Показать механизм, а не повторить обещание: один прораб на объект, фото за день (подтвердить), пункт 7.2 договора о гарантии — текстом."
+    proof_ids: ["fact:foreman-lapin", "fact:guarantee-3-years", "missing:photo-report-process"]
+    where: [{section_role: solution}, {section_role: how-it-works}]
+    awareness_stage: solution-aware
+    status: needs-proof
+    basis: {kind: assumption, question_id: q-competitors}
+  - id: obj-small-job
+    text: "Мне нужна только ванная или одна комната — возьмётесь?"
+    type: not-for-me
+    force: anxiety
+    severity: minor
+    answer: "Честно сказать, с какого объёма работаем (со слов заказчика — косметику одной комнаты не берут)."
+    proof_ids: ["missing:min-job-size"]
+    where: [{section_role: faq}]
+    status: needs-proof
+    basis: {kind: brief, ref: "«косметику одной комнаты тоже не берём»"}
+  - id: obj-decision-maker
+    text: "Надо обсудить с мужем или женой"
+    type: decision-maker
+    force: habit
+    severity: minor
+    answer: "Дать то, что удобно переслать: пример сметы и договора, отзыв, кейс; вторая цель страницы — сохранить."
+    proof_ids: ["fact:case-two-room-47-days", "fact:review-anna-k"]
+    where: [{section_role: final-cta}]
+    status: answered
+    basis: {kind: inferred, ref: "решение о ремонте — семейное; Бирман [33:37] двойная цель"}
+  - id: obj-timing
+    text: "Сейчас не время, после праздников"
+    type: timing
+    force: habit
+    severity: minor
+    answer: "Замер и смета бесплатно и ни к чему не обязывают; скидка 10 % — до 31 октября 2026 (реальная дата, без таймеров со сбросом)."
+    proof_ids: ["fact:estimate-free", "fact:promo-october-10"]
+    risk_reversal_ids: [rr-free-estimate]
+    where: [{section_role: pricing}, {section_role: cta-band, slot_type: cta-note}]
+    status: answered
+    basis: {kind: brief, ref: "«в октябре скидка 10 %»"}
+  - id: obj-neighbours
+    text: "Соседи будут жаловаться на грязь и шум"
+    type: risk
+    force: anxiety
+    severity: minor
+    answer: "Отзыв клиента об уборке каждый день — после разрешения; до этого — только правила работы (часы тишины, уборка), если они есть в договоре."
+    proof_ids: ["fact:review-igor-pending", "missing:permission-igor"]
+    where: [{section_role: testimonials}, {section_role: faq}]
+    status: needs-proof
+    basis: {kind: fact, ref: "fact:review-igor-pending"}
+
+risk_reversal:
+  - {id: rr-free-estimate, type: free-first-step, summary: "Замер и смета бесплатно в пределах города; решение о договоре — после сметы", fact_id: "fact:estimate-free", answers: [obj-price, obj-timing]}
+  - {id: rr-guarantee, type: guarantee, summary: "Гарантия 3 года на работы по п. 7.2 договора", fact_id: "fact:guarantee-3-years", answers: [obj-diy-crew, obj-same-as-others]}
+  - {id: rr-stage-payment, type: pay-after, summary: "Оплата по этапам после приёмки этапа (подтвердить)", fact_id: "missing:payment-stages", answers: [obj-trust]}
+
+boundaries:
+  not_for:
+    - "нужна косметика одной комнаты"
+    - "главное — самая низкая цена за метр, договор не нужен"
+  not_promised:
+    - {text: "«смета никогда не меняется» как гарантия всем", claim_class: guarantee, why: "в договоре такого пункта нет (B2 nc-no-extra-cost-promise)"}
+    - {text: "«лучший ремонт в городе», «№ 1»", claim_class: superlative, why: "нет независимого рейтинга (B2 nc-best-in-city)"}
+
+message_hierarchy_ref: ["hierarchy-otves-problem-aware.yaml", "hierarchy-otves-product-aware.yaml"]
+voice_ref: "черновик: спокойно и по делу, на «вы», без восклицаний; профиль голоса — F (волна 2)"
+proof_ref: "../../facts.yaml"
+legal_category: [general]
+legal_note: "Бытовой подряд (ГК, ЗоЗПП): цена «от», скидка с датой, гарантия — формулировки проверяет H; реквизиты — site I."
+languages:
+  - {lang: ru, role: primary}
+
+open_questions:
+  - {id: q-photo-reports, q: "Фото сделанного за день — правило для всех объектов? Можно показать пример отчёта без адреса?", why: "Это главный отличительный довод; по одному отзыву его нельзя обещать всем", options: ["да, каждый вечер в мессенджере", "да, но раз в несколько дней", "нет, по запросу"], default: "Не обещаем фотоотчёт; говорим «один прораб ведёт объект»", affects: [positioning.unique_attributes, value_proposition.gain_creators, objections], priority: 1, asked: true}
+  - {id: q-estimate-changes, q: "Что в договоре о смене сметы: сумма фиксирована или меняется по согласованию? Можно процитировать пункт?", why: "Главный страх клиентов — растущая смета", options: ["фиксирована, кроме допработ по письменному согласию", "меняется при изменении цен материалов", "другое"], default: "О неизменной смете не пишем; пишем только «смета — часть договора»", affects: [objections, positioning.value_themes], priority: 1, asked: true}
+  - {id: q-competitors, q: "С кем вас чаще всего сравнивают клиенты и почему выбирают вас (или уходят к ним)?", why: "Без альтернатив отличие не проверить", options: [], default: "Сравниваем с частными бригадами и «ведением ремонта самому», студии не называем", affects: [positioning.alternatives, sophistication], priority: 1, asked: true}
+  - {id: q-segments, q: "Кто ваши клиенты чаще: вторичка или новостройки без отделки? Какая площадь типична?", why: "От этого зависит главный сегмент и примеры на странице", options: ["вторичка", "новостройки", "поровну"], default: "Основной — вторичка, 40–80 м²; новостройки — вторичный сегмент", affects: [audience], priority: 2, asked: true}
+  - {id: q-payment, q: "Как устроена оплата: предоплата, по этапам, после приёмки?", why: "Снимает страх «возьмут деньги и пропадут»", options: ["по этапам после приёмки", "предоплата 30 %, остальное по этапам", "другое"], default: "Об оплате не пишем до ответа", affects: [risk_reversal, objections], priority: 2, asked: true}
+  - {id: q-min-job, q: "С какого объёма работ вы берёте заказ?", why: "Честный ответ на «возьмётесь ли за ванную»", options: ["от квартиры целиком", "от одной комнаты с полной отделкой", "от санузла"], default: "В FAQ: «делаем полный ремонт квартиры; отдельные помещения — уточните при звонке»", affects: [objections, boundaries], priority: 3, asked: true}
+
+x-missing-proposals:
+  # missing:<id>, которых нет в facts-service-renovation.yaml (B2): предложения B2 добавить в missing[] (смысл выявил пробел)
+  - {id: foreman-per-object, what: "правило «объект от замера до сдачи ведёт один прораб» — заказчик это сказал (бриф), но в инвентаре нет; записать фактом со словами заказчика (verification: stated)", for: "attr-one-foreman, pl-foreman"}
+  - {id: photo-report-process, what: "правило фотоотчёта прораба: как часто, где, пример без адреса", for: "attr-photo-reports, obj-same-as-others"}
+  - {id: estimate-change-policy, what: "пункт договора о том, когда и как меняется смета", for: "obj-budget-grows, val-predictable"}
+  - {id: deadline-terms, what: "как в договоре задан срок (этапы, дни) и что при просрочке", for: "obj-delays"}
+  - {id: payment-stages, what: "порядок оплаты (этапы, предоплата)", for: "obj-trust, rr-stage-payment"}
+  - {id: min-job-size, what: "минимальный объём заказа", for: "obj-small-job"}

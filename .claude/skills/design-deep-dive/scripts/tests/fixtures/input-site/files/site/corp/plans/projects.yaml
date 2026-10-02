@@ -1,0 +1,279 @@
+# ПРИМЕР J v1 · план шаблона projects-hub (case-list-page, L0) — planlib.py; факты — демо J.
+page_plan_version: '1'
+checked: '2026-09-24'
+status: approved
+example: true
+site: stalkon
+refs:
+  brief: ../site-brief.yaml
+  facts: ../facts.yaml
+  site_map: ../site-map.yaml
+  blocks: ../../../../04-blocks/blocks.yaml
+  vocabulary: ../../../../02-site-types/vocabulary.yaml
+  lead_forms: ../../../../05-conversion-funnels/lead-forms.yaml
+  events: ../../../../07-seo-geo-performance-analytics/events.yaml
+  head_kit: ../../../../07-seo-geo-performance-analytics/head-kit.yaml
+  budgets: ../../../../07-seo-geo-performance-analytics/budgets.yaml
+  legal_requirements: ../../../../08-legal-trust-a11y/legal-requirements.yaml
+page:
+  id: projects
+  page_type: case-list-page
+  template: false
+  template_id: projects-hub
+  lang: ru
+  locale: ru-RU
+  jurisdiction:
+  - ru
+  goal: 'projects-hub: запрос расчёта или переход к нужному разделу'
+  primary_action: request-quote
+  cta_target:
+    kind: route
+    value: /zapros-rascheta/
+  awareness: product-aware
+  awareness_basis:
+    from: assumption
+    rule: уровень по главному источнику страницы (C 01 §3.1)
+  traffic:
+  - traffic_source: internal
+    temperature: warm
+    device: desktop
+  macrostructure: portfolio-grid
+  macrostructure_family: grid
+  first_screen_policy: offer-cta-header
+  budget_profile: case-list-page@L0
+  ambition_level: L0
+  navigation:
+    header: site
+    archetype: two-tier
+    logo_link: /
+    breadcrumbs: false
+    footer: site
+  seo:
+    indexable: true
+    canonical: self
+    h1: hero.headline
+    structured_data:
+    - CollectionPage
+    - BreadcrumbList
+    ssr_required: true
+    sitemap: true
+  legal:
+    pd_consent: checkbox-and-link
+    privacy_policy: /politika-konfidencialnosti/
+    cookie_banner: required
+    cookie_mode: opt-in
+    analytics_before_consent: false
+    withdraw_link: footer
+    requisites: both
+    operator_ref: fact:company-requisites
+    requirements:
+    - req:LR-RU-05
+    - req:LR-RU-10
+    - req:LR-RU-13
+  analytics:
+    systems:
+    - yandex-metrica
+    goals: []
+    load_after_consent: true
+sections:
+- id: header
+  role: header
+  question: где я и куда дальше
+  job: шапка сайта two-tier из site-map.chrome
+  block: header
+  variant: site-nav
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: nav-link
+      slot: nav-label
+      intent: 'nav-label: по иерархии сообщений text'
+    - id: cta-label
+      slot: cta-label
+      intent: 'cta-label: по иерархии сообщений text'
+    media:
+    - id: logo
+      slot: brand-logo
+      media_role: informational
+      goal: показать brand-logo
+      source: generate
+      authenticity: real-or-generated
+    action:
+    - id: cta
+      slot: cta-primary
+      action: request-quote
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: cta-label
+    - id: phone
+      slot: phone-link
+      action: call
+      style: channel
+      target:
+        kind: tel
+        value: 'tel: номер из facts.yaml'
+      event: event:phone-click
+- id: hero
+  role: hero
+  question: какие объекты вы делали
+  job: заголовок страницы и путь дальше
+  block: hero-text
+  variant: statement-cta
+  next_step: главное действие страницы
+  slots:
+    text:
+    - id: headline
+      slot: headline
+      heading: h1
+      intent: 'headline: по иерархии сообщений text'
+- id: case-studies
+  role: case-studies
+  question: похожие объекты
+  job: проекты с фильтром по направлению
+  block: case-cards
+  variant: grid
+  next_step: главное действие страницы
+  slots:
+    text:
+    - id: title
+      slot: section-title
+      heading: h2
+      intent: 'section-title: по иерархии сообщений text'
+    - id: case-1-title
+      slot: case-title
+      anatomy: case.title
+      group: case-1
+      heading: h3
+      intent: 'case-title: по иерархии сообщений text'
+    - id: case-1-result
+      slot: case-result
+      anatomy: case.result
+      group: case-1
+      intent: 'case-result: по иерархии сообщений text'
+    - id: case-2-title
+      slot: case-title
+      anatomy: case.title
+      group: case-2
+      heading: h3
+      intent: 'case-title: по иерархии сообщений text'
+    - id: case-2-result
+      slot: case-result
+      anatomy: case.result
+      group: case-2
+      intent: 'case-result: по иерархии сообщений text'
+    data:
+    - id: case-1-case
+      slot: case-ref
+      anatomy: case.case
+      group: case-1
+      fact: fact:case-warehouse
+      binds:
+      - case-1-title
+    - id: case-2-case
+      slot: case-ref
+      anatomy: case.case
+      group: case-2
+      fact: fact:case-bridge
+      binds:
+      - case-1-title
+- id: final-cta
+  role: final-cta
+  question: готов обсудить объект
+  job: переход к запросу расчёта
+  block: cta-band
+  variant: mid
+  next_step: главное действие страницы
+  slots:
+    text:
+    - id: title
+      slot: section-title
+      heading: h2
+      intent: 'section-title: по иерархии сообщений text'
+    - id: cta-label
+      slot: cta-label
+      intent: 'cta-label: по иерархии сообщений text'
+    action:
+    - id: cta
+      slot: cta-primary
+      action: request-quote
+      style: primary
+      target:
+        kind: anchor
+        value: '#lead-form'
+      event: event:cta-click
+      label: cta-label
+- id: footer
+  role: footer
+  question: кто компания, документы, разделы
+  job: 'подвал сайта: группы разделов, реквизиты, правовые ссылки'
+  block: footer
+  variant: site
+  next_step: шапка и подвал сайта
+  slots:
+    text:
+    - id: legal
+      slot: footer-legal
+      intent: 'footer-legal: по иерархии сообщений text'
+    - id: privacy-label
+      slot: nav-label
+      intent: подписи правовых ссылок
+    - id: nav-1-label
+      slot: nav-label
+      anatomy: nav.label
+      group: nav-1
+      intent: 'nav-label: по иерархии сообщений text'
+    - id: nav-2-label
+      slot: nav-label
+      anatomy: nav.label
+      group: nav-2
+      intent: 'nav-label: по иерархии сообщений text'
+    - id: nav-3-label
+      slot: nav-label
+      anatomy: nav.label
+      group: nav-3
+      intent: 'nav-label: по иерархии сообщений text'
+    data:
+    - id: company
+      slot: fact-ref
+      fact: fact:company-requisites
+      anatomy: company
+      binds:
+      - legal
+    action:
+    - id: privacy
+      slot: link
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'
+    - id: nav-1-link
+      slot: link
+      anatomy: nav.link
+      group: nav-1
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'
+    - id: nav-2-link
+      slot: link
+      anatomy: nav.link
+      group: nav-2
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'
+    - id: nav-3-link
+      slot: link
+      anatomy: nav.link
+      group: nav-3
+      action: read-more
+      style: link
+      target:
+        kind: anchor
+        value: '#lead-form'

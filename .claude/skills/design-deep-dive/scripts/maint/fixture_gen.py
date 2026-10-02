@@ -2,16 +2,19 @@
 """fixture_gen — пересборка фикстур `scripts/tests/fixtures/`, в которых лежат файлы, собранные утилитами скилла.
 
 Такая фикстура держит вывод утилит: производные ДС (`ds_build build`), манифест готовности (`ready build`), вход холста
-(`canvas_input build`), copy deck, прошедший `copydeck check --promote` и `approve`, правки `replace` по точному тексту
-примера базы. Когда меняется формат этих утилит или примеров баз, фикстура пересобирается рецептом, а не правится
-руками: иначе правки `replace` не найдут свой текст, а самопроверки аудита потеряют посеянный дефект. Список фикстур,
-рецепты и файлы, которые рецепт пишет (`owns`), — `scripts/maint/data/fixtures.yaml`; там же дата сборок (`today`): от
-неё зависят сроки фактов, записи проверок и одобрение, и повтор сборки даёт те же байты.
+(`canvas_input build`), copy deck, прошедший `copydeck check --promote` и `approve`. Когда меняется формат этих утилит
+или файлы фикстуры-основы, фикстура пересобирается рецептом, а не правится руками: иначе отпечатки в собранных файлах
+разойдутся с источниками, а самопроверки аудита потеряют посеянный дефект. Источники рецептов — файлы фикстур: примеры
+базы рецепты не читают, правка примера сборку не меняет. Список фикстур, рецепты и файлы, которые рецепт пишет
+(`owns`), — `scripts/maint/data/fixtures.yaml`. Дата сборок — опорная дата фикстур (`fixture_project.today()`, ключ
+`today` файла `scripts/maint/data/sync.yaml`), одна на рецепты и на сверку `sync_check.py`: от неё зависят сроки
+фактов, записи проверок и одобрение, и повтор сборки даёт те же байты.
 
 Рецепты пишут во временную копию папки фикстур, поэтому фикстура, собранная раньше в том же вызове, служит входом
-следующей (`after`). `build` переносит в фикстуры только файлы из `owns`: новые и изменённые пишет, лишние в папке,
-которой рецепт владеет целиком, убирает; свои файлы фикстуры вне `owns` не трогает. `build --check` ничего не пишет —
-сравнивает байт в байт и печатает расхождения.
+следующей (`after`). Фикстура с посеянными дефектами лежит целиком своими файлами: рецепт раскладывает собранную
+основу, поверх кладёт выводы утилит и посевы. `build` переносит в фикстуры только файлы из `owns`: новые и изменённые
+пишет, лишние в папке, которой рецепт владеет целиком, убирает; свои файлы фикстуры вне `owns` не трогает.
+`build --check` ничего не пишет — сравнивает байт в байт и печатает расхождения.
 
     python3 .claude/skills/design-deep-dive/scripts/maint/fixture_gen.py list
     python3 .claude/skills/design-deep-dive/scripts/maint/fixture_gen.py build ИМЯ… | --all [--check] [--fixtures DIR]
@@ -47,7 +50,6 @@ import fixture_project  # noqa: E402
 
 DATA = kbpaths.data("maint", "fixtures.yaml")
 FIXTURES = fixture_project.FIXTURES
-DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 DIFF_LINES = 30
 
 
@@ -75,7 +77,12 @@ def _str(d, s):
     return d.represent_scalar("tag:yaml.org,2002:str", s)
 
 
+class Block(list):
+    """Список манифеста по элементу на строку."""
+
+
 Dumper.add_representer(str, _str)
+Dumper.add_representer(Block, lambda d, v: d.represent_sequence("tag:yaml.org,2002:seq", v, flow_style=False))
 
 
 def dump_manifest(path: Path, head: str, m: dict):
@@ -107,11 +114,37 @@ def reset(d: Path):
     d.mkdir(parents=True)
 
 
-def R(find, to, count=None):
-    e = {"find": find, "to": to}
-    if count:
-        e["count"] = count
-    return e
+def write(files: Path, rel: str, text: str):
+    p = files / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(text, encoding="utf-8")
+
+
+def copy_tree(src: Path, dst: Path) -> list[str]:
+    """Файлы папки src — в dst с той же раскладкой. → пути файлов от src."""
+    rels = []
+    for f in sorted(src.rglob("*")):
+        if f.is_file():
+            rel = f.relative_to(src).as_posix()
+            (dst / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(f, dst / rel)
+            rels.append(rel)
+    return rels
+
+
+def seed(files: Path, rel: str, find: str, to: str):
+    """Посев в своём файле фикстуры: строка find встречается в нём ровно один раз."""
+    text = (files / rel).read_text(encoding="utf-8")
+    if text.count(find) != 1:
+        raise GenError(f"{rel}: строка посева встречается {text.count(find)} раз, ждали 1: {find.strip()}")
+    (files / rel).write_text(text.replace(find, to), encoding="utf-8")
+
+
+def unmarked(files: Path, base: list[str]) -> Block:
+    """Файлы основы, формат которых не несёт пометку иллюстрации, — пути для ключа unmarked манифеста. Файлы, которые
+    написал рецепт, сюда не попадают: их пометку сверяет самопроверка сборщика."""
+    return Block(f"files/{rel}" for rel in base
+                 if (files / rel).is_file() and fixture_project.mark_issue(files / rel))
 
 
 # ─────────────────────────────── рецепты ───────────────────────────────
@@ -133,156 +166,11 @@ def recipe_ds_derived(ctx: Ctx, spec: dict):
             shutil.copyfile(src, dst)
 
 
-SPASIBO = """\
-  notes: >-
-    Страница «спасибо» после заявки на замер: статус заявки первым, затем кто и когда свяжется, одно следующее
-    действие. Реквизиты продавца — пробел legal-details: в подвале — имя студии и город до ответа заказчика.
-  pages:
-  - page_id: spasibo
-    page_type: thank-you-page
-    status: draft
-    awareness: product-aware
-    primary_action: Вызвать замерщика
-    cta_primary: spasibo/header/cta-label
-    promise:
-      from: spasibo/confirmation/title
-      basis: 'подтверждение заявки — первое, что видит человек после формы'
-    meta:
-      title: 'Заявка на замер принята — студия «Отвес»'
-      description: 'Заявка на замер принята. Студия ремонта «Отвес», Нижний Новгород.'
-      og_title: 'Заявка на замер принята'
-      og_description: 'Прораб позвонит и договорится о дне замера.'
-      fact_ids: []
-      notes: 'Служебная страница: не индексируется (seo.indexable плана — false).'
-    sections:
-    - section_id: header
-      section_role: header
-      message: 'Куда вернуться и как связаться'
-      slots:
-      - slot_id: cta-label
-        slot_type: cta-label
-        variants:
-        - {id: a, text: 'Вызвать замерщика', status: assumed, source: ai-self}
-        chosen: a
-        fact_ids: []
-        claim_flags: []
-    - section_id: confirmation
-      section_role: confirmation
-      message: 'Заявка дошла; прораб позвонит и договорится о замере'
-      question: 'Заявка дошла? Что дальше?'
-      slots:
-      - slot_id: title
-        slot_type: form-success
-        variants:
-        - {id: a, text: 'Заявка на замер принята', status: assumed, source: ai-self}
-        chosen: a
-        fact_ids: []
-        claim_flags: []
-      - slot_id: next-steps
-        slot_type: form-next-steps
-        variants:
-        - {id: a, text: 'Прораб позвонит и договорится о дне замера', status: assumed, source: ai-self}
-        chosen: a
-        fact_ids: []
-        claim_flags: []
-    - section_id: footer
-      section_role: footer
-      message: 'Кто продавец и где документы'
-      slots:
-      - slot_id: legal
-        slot_type: footer-legal
-        variants:
-        - {id: a, text: 'Студия ремонта «Отвес», Нижний Новгород', status: assumed, source: ai-self}
-        chosen: a
-        fact_ids: []
-        claim_flags: []
-      - slot_id: privacy-label
-        slot_type: nav-label
-        variants:
-        - {id: a, text: 'Политика обработки персональных данных', status: assumed, source: ai-self}
-        chosen: a
-        fact_ids: []
-        claim_flags: []
-"""
-
-PACKAGE_LANDING_HEAD = """\
-# Фикстура package-landing — иллюстрация для самопроверок scripts/project/ready.py и design_audit.py: лендинг promo
-# фикстуры input-landing, приведённый к раскладке проекта для структурного аудита. Ссылки брифа, смысла, иерархий,
-# голоса и планов ведут в файлы проекта, а не в примеры базы; главная — план в работе (proposed) без copy deck;
-# страница «спасибо» — план примера lead-services-otves (approved) и copy deck, собранный правкой из примера copy deck
-# text по слотам этого плана (тексты — черновик агента, assumed; ссылок на факты нет — демо-факт в закрытом copy deck
-# сеет package-landing-defects), свой файл — каркас плана ассетов страницы «спасибо» (plan_to_assets.py build, draft).
-# design_audit check — 0 error; ready build → check — 0.
-# Формат манифеста — докстринг fixture_project.py.
-"""
-
-
-def recipe_package_landing(ctx: Ctx, spec: dict):
-    """Манифест лендинга: copy deck «спасибо» — правка хвоста примера text по его точному тексту на текст SPASIBO."""
-    case = kbpaths.kb("text", "10-templates-recipes", "examples", "ru-otves-case.yaml").read_text(encoding="utf-8")
-    anchor = "  notes: >-\n"
-    if anchor not in case:
-        raise GenError("пример text ru-otves-case.yaml: нет строки «  notes: >-» — начала хвоста copy deck")
-    tail = case[case.index(anchor):]
-    m = {
-        "example": True,
-        "description": "лендинг promo для манифеста готовности и аудита: ссылки файлов — по раскладке проекта, страница "
-                       "«спасибо» с планом и copy deck, сошедшимися по слотам",
-        "project": "otves-remont-nn",
-        "extends": ["input-landing"],
-        "layers": [
-            {"kb": {"site/promo/plans/spasibo.yaml":
-                    "site/10-playbooks-contracts/examples/lead-services-otves/plans/spasibo.yaml",
-                    "site/promo/copy/spasibo.yaml": "text/10-templates-recipes/examples/ru-otves-case.yaml"}},
-            {"drop": ["site/promo/copy/home.yaml"]},
-            {"files": "files"},
-            {"replace": {
-                "site/promo/site-brief.yaml": [
-                    R("  facts_ref: ../../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml\n",
-                      "  facts_ref: ../../facts.yaml\n"),
-                    R("  proof_ref: ../../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml\n",
-                      "  proof_ref: ../../facts.yaml\n")],
-                "site/promo/meaning.yaml": [R('proof_ref: "facts-service-renovation.yaml"\n',
-                                              'proof_ref: "../../facts.yaml"\n')],
-                "site/promo/hierarchy/home-product-aware.yaml": [R("meaning_ref: meaning-otves.yaml\n",
-                                                                   "meaning_ref: ../meaning.yaml\n")],
-                "site/promo/hierarchy/home-problem-aware.yaml": [R("meaning_ref: meaning-otves.yaml\n",
-                                                                   "meaning_ref: ../meaning.yaml\n")],
-                "voice.yaml": [
-                    R('  meaning_ref: "../../02-strategy-messaging/examples/meaning-otves.yaml"\n',
-                      '  meaning_ref: "site/promo/meaning.yaml"\n'),
-                    R('  facts_ref: "../../02-strategy-messaging/examples/facts-service-renovation.yaml"\n',
-                      '  facts_ref: "facts.yaml"\n')],
-                "site/promo/plans/home.yaml": [
-                    R("\nstatus: approved\n", "\nstatus: proposed\n"),
-                    R("  facts: ../../../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml\n",
-                      "  facts: ../../../facts.yaml\n"),
-                    R("  copy_deck: ../copy/home.yaml\n", "  treatment: ../../../design/promo/art-direction.json\n")],
-                "site/promo/plans/spasibo.yaml": [
-                    R("\nstatus: proposed\n", "\nstatus: approved\n"),
-                    R("  facts: ../../../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml\n",
-                      "  facts: ../../../facts.yaml\n"),
-                    R("  events: ../../../../07-seo-geo-performance-analytics/events.yaml\n",
-                      "  events: ../../../../07-seo-geo-performance-analytics/events.yaml\n"
-                      "  asset_plan: ../../../design/promo/assets/plans/spasibo.yaml\n")],
-                "site/promo/copy/spasibo.yaml": [
-                    R("  voice_ref: ../../05-voice-editorial/examples/voice-otves-warm.yaml\n",
-                      "  voice_ref: ../../../voice.yaml\n"),
-                    R("  facts_ref: ../../02-strategy-messaging/examples/facts-service-renovation.yaml\n",
-                      "  facts_ref: ../../../facts.yaml\n"),
-                    R("  meaning_ref: ../../02-strategy-messaging/examples/meaning-otves.yaml\n",
-                      "  meaning_ref: ../meaning.yaml\n"),
-                    R(tail, SPASIBO)],
-            }},
-        ],
-    }
-    dump_manifest(ctx.fixtures / spec["name"] / "manifest.yaml", PACKAGE_LANDING_HEAD, m)
-
-
 LANDING_DEFECTS_HEAD = """\
 # Фикстура package-landing-defects — иллюстрация: лендинг promo фикстуры package-landing (0 error у design_audit) и
-# посеянные дефекты проекта otves-remont-nn — вход проверки сценария «пакет» (ready build → design_audit). Дефект —
-# правило реестра .claude/skills/design-audit/references/rules.md — место:
+# посеянные дефекты проекта otves-remont-nn — вход проверки сценария «пакет» (ready build → design_audit). Собрана
+# целиком своими файлами: файлы основы, поверх — выводы утилит и посевы (рецепт scripts/maint/fixture_gen.py; руками
+# не правится). Дефект — правило реестра .claude/skills/design-audit/references/rules.md — место:
 #   R-SURF-004   screens/promo/map.md — у поверхности рода landing есть папка screens/promo/
 #   R-SURF-001   site/old-promo/ — папка слоя страницы у slug, которого нет в surface.md
 #   R-STRUCT-006 design/system.tokens.json — алиас {primitive.color.neutral.950} ведёт в несуществующий токен
@@ -353,32 +241,28 @@ def _cut_slot(text: str, slot_id: str) -> str:
 
 
 def recipe_landing_defects(ctx: Ctx, spec: dict):
-    """Лендинг с посевами: манифест готовности основы, свои файлы дефектов, copy deck «спасибо» после check и approve."""
+    """Лендинг с посевами: файлы основы package-landing, манифест готовности основы, свои файлы дефектов, copy deck
+    «спасибо» после check и approve, посевы в файлах основы."""
     L = ctx.fixtures / spec["name"]
     reset(L)
     files = L / "files"
     with tempfile.TemporaryDirectory(prefix="fixture_gen-landing-") as td:
         b = fixture_project.build("package-landing", Path(td) / "root", fixtures=ctx.fixtures)
         proj = b.project
+        base = copy_tree(proj, files)
         run("project", "ready.py", "build", b.slug, "promo", "--repo", b.root, "--today", ctx.today)
         ready = (proj / "design/promo/ready.yaml").read_text(encoding="utf-8")
         lines = ready.splitlines(keepends=True)
         i = next(k for k, x in enumerate(lines) if x.startswith("surface:"))
         lines.insert(i, "example: true   # пометка иллюстрации фикстуры: манифест собран на чистой основе "
                         "package-landing\n")
-        (files / "design/promo").mkdir(parents=True)
-        (files / "design/promo/ready.yaml").write_text("".join(lines), encoding="utf-8")
+        write(files, "design/promo/ready.yaml", "".join(lines))
         deck = (proj / "site/promo/copy/spasibo.yaml").read_text(encoding="utf-8")
-    (files / "screens/promo").mkdir(parents=True)
-    (files / "screens/promo/map.md").write_text(MAP_MD, encoding="utf-8")
-    (files / "site/old-promo").mkdir(parents=True)
-    (files / "site/old-promo/README.md").write_text(OLD_PROMO_MD, encoding="utf-8")
-    (files / "design").mkdir(parents=True, exist_ok=True)
-    (files / "design/system.tokens.json").write_text(json.dumps(LANDING_TOKENS, ensure_ascii=False, indent=2) + "\n",
-                                                     encoding="utf-8")
-    (files / "design/promo/assets").mkdir(parents=True)
-    (files / "design/promo/assets/logo.svg").write_text(LOGO, encoding="utf-8")
-    (files / "design/promo/assets/manifest.yaml").write_text(f"""\
+    write(files, "screens/promo/map.md", MAP_MD)
+    write(files, "site/old-promo/README.md", OLD_PROMO_MD)
+    write(files, "design/system.tokens.json", json.dumps(LANDING_TOKENS, ensure_ascii=False, indent=2) + "\n")
+    write(files, "design/promo/assets/logo.svg", LOGO)
+    write(files, "design/promo/assets/manifest.yaml", f"""\
 # Манифест ассетов поверхности promo — иллюстрация фикстуры package-landing-defects: посеянный дефект R-MAT-008 —
 # файл сгенерированного логотипа лежит, а план ассетов страницы spasibo ещё draft (генерация — только после
 # status: approved и approval плана).
@@ -392,7 +276,7 @@ assets:
     ai: true
     sha256: {sha(LOGO)}
     status: draft
-""", encoding="utf-8")
+""")
     privacy = _cut_slot(deck, "privacy-label")
     nexts = _cut_slot(deck, "next-steps")
     extra = nexts + """      - slot_id: reschedule
@@ -433,33 +317,26 @@ assets:
     if not ("status: approved" in approved and "reschedule" in approved and "privacy-label" not in approved
             and "company-since-2014" in approved and "company-since-2014" not in deck):
         raise GenError("copy deck после approve: посевы R-REF-003, R-COV-002, R-DEBT-002 не на месте")
-    m = {
+    write(files, "site/promo/copy/spasibo.yaml", approved)
+    seed(files, "site/promo/site-brief.yaml", "brand:\n  ref: ../../design/brand.yaml\n",
+         "brand:\n  ref: ../../design/brand-old.yaml\n")
+    seed(files, "site/promo/plans/spasibo.yaml", "      fact: missing:legal-details\n",
+         "      fact: fact:legal-details\n")
+    seed(files, "voice.yaml", "    - {surface: marketing-site, voice: brand}\n",
+         "    - {surface: marketing-site, voice: brand}\n"
+         "    - {surface: product-ui, voice: product, note: \"кабинет клиента — голос продукта\"}\n")
+    dump_manifest(L / "manifest.yaml", LANDING_DEFECTS_HEAD, {
         "example": True,
         "description": "лендинг promo с посеянными дефектами слоёв страницы и дизайна для проверки design_audit и ready",
-        "project": "otves-remont-nn",
-        "extends": ["package-landing"],
-        "layers": [
-            {"files": "files"},
-            {"replace": {
-                "site/promo/site-brief.yaml": [
-                    {"find": "brand:\n  ref: ../../design/brand.yaml\n", "to": "brand:\n  ref: ../../design/brand-old.yaml\n"}],
-                "site/promo/plans/spasibo.yaml": [
-                    {"find": "      fact: missing:legal-details\n", "to": "      fact: fact:legal-details\n"}],
-                "voice.yaml": [
-                    {"find": "    - {surface: marketing-site, voice: brand}\n",
-                     "to": "    - {surface: marketing-site, voice: brand}\n"
-                           "    - {surface: product-ui, voice: product, note: \"кабинет клиента — голос продукта\"}\n"}],
-                "site/promo/copy/spasibo.yaml": [{"find": deck, "to": approved}],
-            }},
-        ],
-    }
-    dump_manifest(L / "manifest.yaml", LANDING_DEFECTS_HEAD, m)
+        "project": "otves-remont-nn", "unmarked": unmarked(files, base), "layers": [{"files": "files"}]})
 
 
 CABINET_DEFECTS_HEAD = """\
 # Фикстура package-cabinet-defects — иллюстрация: кабинет office фикстуры package-cabinet (0 error у design_audit),
 # вход холста этапа mockup, собранный canvas_input на этой основе (файлы входа — с пометками иллюстрации, отпечатки в
-# INPUT.md — их), и посеянные дефекты проекта otves-office — вход проверки сценария «пакет». Дефект — правило — место:
+# INPUT.md — их), и посеянные дефекты проекта otves-office — вход проверки сценария «пакет». Собрана целиком своими
+# файлами: файлы основы, поверх — вход холста и посевы (рецепт scripts/maint/fixture_gen.py; руками не правится).
+# Дефект — правило — место:
 #   R-COV-005    design/system.yaml — у типа ui:Pagination stable-экрана requests-list нет компонента ДС (снят ключ)
 #   R-FRESH-001  design/system.tokens.json — значение primitive.color.accent.700 изменено без пересборки производных
 #   R-FRESH-003  design/office/input/copy.md — файл входа правлен руками после сборки
@@ -472,19 +349,19 @@ MARK_MD = ("<!-- Иллюстрация: вход холста фикстуры 
 
 
 def recipe_cabinet_defects(ctx: Ctx, spec: dict):
-    """Кабинет с посевами: вход холста mockup основы с пометками иллюстрации, правка copy.md после сборки."""
+    """Кабинет с посевами: файлы основы package-cabinet, вход холста mockup основы с пометками иллюстрации, правка
+    copy.md после сборки, посевы в карте решений и токенах."""
     C = ctx.fixtures / spec["name"]
     reset(C)
     cfiles = C / "files"
     with tempfile.TemporaryDirectory(prefix="fixture_gen-cabinet-") as td:
         b = fixture_project.build("package-cabinet", Path(td) / "root", fixtures=ctx.fixtures)
+        base = copy_tree(b.project, cfiles)
         run("project", "canvas_input.py", "build", b.slug, "office", "--stage", "mockup", "--repo", b.root,
             "--today", ctx.today)
         inp = b.project / "design/office/input"
         built = {p.relative_to(inp).as_posix(): p.read_text(encoding="utf-8") for p in sorted(inp.rglob("*"))
                  if p.is_file()}
-        tokens_c = (b.project / "design/system.tokens.json").read_text(encoding="utf-8")
-        system_c = (b.project / "design/system.yaml").read_text(encoding="utf-8")
     if "INPUT.md" not in built:
         raise GenError("canvas_input build не записал INPUT.md")
     out = {}
@@ -518,28 +395,15 @@ def recipe_cabinet_defects(ctx: Ctx, spec: dict):
     lines[k] = lines[k].replace("approved", "approved (правка руками после сборки)", 1)
     out[edited] = "".join(lines)
     for name, text in out.items():
-        p = cfiles / "design/office/input" / name
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(text, encoding="utf-8")
-    (cfiles / "design/office/input/INPUT.md").write_text(fm_text, encoding="utf-8")
-    pag = "  Pagination: {component: Pagination}\n"
-    hexv = '[0.1137, 0.3059, 0.8471], "hex": "#1d4ed8"'
-    if system_c.count(pag) != 1 or tokens_c.count(hexv) != 1:
-        raise GenError("основа package-cabinet: нет строки Pagination в system.yaml или значения акцента в токенах")
-    m = {
+        write(cfiles, f"design/office/input/{name}", text)
+    write(cfiles, "design/office/input/INPUT.md", fm_text)
+    seed(cfiles, "design/system.yaml", "  Pagination: {component: Pagination}\n", "")
+    seed(cfiles, "design/system.tokens.json", '[0.1137, 0.3059, 0.8471], "hex": "#1d4ed8"',
+         '[0.1176, 0.251, 0.6863], "hex": "#1e40af"')
+    dump_manifest(C / "manifest.yaml", CABINET_DEFECTS_HEAD, {
         "example": True,
         "description": "кабинет office с посеянными дефектами ДС и входа холста для проверки design_audit",
-        "project": "otves-office",
-        "extends": ["package-cabinet"],
-        "layers": [
-            {"files": "files"},
-            {"replace": {
-                "design/system.yaml": [{"find": pag, "to": ""}],
-                "design/system.tokens.json": [{"find": hexv, "to": '[0.1176, 0.251, 0.6863], "hex": "#1e40af"'}],
-            }},
-        ],
-    }
-    dump_manifest(C / "manifest.yaml", CABINET_DEFECTS_HEAD, m)
+        "project": "otves-office", "unmarked": unmarked(cfiles, base), "layers": [{"files": "files"}]})
 
 
 BOTH_DEFECTS_HEAD = """\
@@ -561,7 +425,6 @@ def recipe_both_defects(ctx: Ctx, spec: dict):
 
 RECIPES = {
     "ds-derived": recipe_ds_derived,
-    "package-landing": recipe_package_landing,
     "landing-defects": recipe_landing_defects,
     "cabinet-defects": recipe_cabinet_defects,
     "both-defects": recipe_both_defects,
@@ -571,9 +434,13 @@ RECIPES = {
 # ─────────────────────────────── данные и сверка ───────────────────────────────
 
 def load_data(path: Path = DATA) -> dict:
+    """Список фикстур с рецептами и дата сборок — опорная дата фикстур; в списке фикстур второй даты нет."""
     d = yaml.safe_load(path.read_text(encoding="utf-8"))
-    if not isinstance(d, dict) or not DATE.match(str(d.get("today", ""))) or not isinstance(d.get("fixtures"), list):
-        raise GenError(f"{path}: нужны today (ГГГГ-ММ-ДД) и список fixtures")
+    if not isinstance(d, dict) or not isinstance(d.get("fixtures"), list):
+        raise GenError(f"{path}: нужен список fixtures")
+    if "today" in d:
+        raise GenError(f"{path}: дата сборок одна — опорная дата фикстур (today в sync.yaml); здесь её не держат")
+    d["today"] = fixture_project.today()
     seen = []
     for f in d["fixtures"]:
         if not isinstance(f, dict) or not f.get("name") or f.get("recipe") not in RECIPES:
@@ -691,8 +558,9 @@ def build(names: list[str], all_: bool, check: bool, fixtures: Path = FIXTURES, 
 # ─────────────────────────────── самопроверка ───────────────────────────────
 
 def selftest() -> int:
-    """Данные и сверка на копии фикстур: сборка, повтор без изменений, ручная правка и удалённый файл — расхождение с
-    именем файла, свои файлы вне owns не трогаются. Рецепты с утилитами copy deck и входа холста гоняет --check всех."""
+    """Данные и сверка на копии фикстур: одна дата сборок, сборка, повтор без изменений, ручная правка и удалённый
+    файл — расхождение с именем файла, свои файлы вне owns не трогаются. Рецепты с утилитами copy deck и входа холста
+    гоняет --check всех."""
     ok = fail = 0
 
     def ok_if(name, cond):
@@ -715,16 +583,22 @@ def selftest() -> int:
                                                                            for f in data["fixtures"]))
     ok_if("данные: каждая фикстура списка есть в папке фикстур",
           all((FIXTURES / f["name"] / "manifest.yaml").is_file() for f in data["fixtures"]))
-    names = ["cabinet-ds", "package-landing"]
+    sync = yaml.safe_load(kbpaths.data("maint", "sync.yaml").read_text(encoding="utf-8"))
+    ok_if("данные: дата сборок — ключ today данных сверки, она же у рецептов", data["today"] == str(sync["today"]))
+    names = ["cabinet-ds", "package-defects"]
     with tempfile.TemporaryDirectory(prefix="fixture_gen-selftest-") as td:
+        twice = Path(td) / "fixtures.yaml"
+        twice.write_text('today: "2030-01-31"\n' + DATA.read_text(encoding="utf-8"), encoding="utf-8")
+        rc0, out0 = quiet(load_data, twice)
+        ok_if("данные: вторая дата в списке фикстур — ошибка данных", rc0 == 2 and "today" in out0)
         A = Path(td) / "fixtures"
         shutil.copytree(FIXTURES, A, ignore=shutil.ignore_patterns("__pycache__"))
-        own = A / "package-landing" / "files" / "design" / "promo" / "assets" / "plans" / "spasibo.yaml"
+        own = A / "cabinet-ds" / "files" / "design" / "system.yaml"
         own_bytes = own.read_bytes()
         rc, _ = quiet(build, names, False, False, A, data)
         rc2, out2 = quiet(build, names, False, True, A, data)
         ok_if("build, затем --check — совпадает", rc == 0 and rc2 == 0 and "РАСХОДИТСЯ" not in out2)
-        man = A / "package-landing" / "manifest.yaml"
+        man = A / "package-defects" / "manifest.yaml"
         man.write_text(man.read_text(encoding="utf-8") + "# правка руками\n", encoding="utf-8")
         derived = A / "cabinet-ds" / "files" / "design" / "system.tokens.css"
         derived.unlink()

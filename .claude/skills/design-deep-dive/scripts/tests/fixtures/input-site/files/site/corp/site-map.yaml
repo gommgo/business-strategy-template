@@ -1,0 +1,708 @@
+# ПРИМЕР J v1 · карта G (06-multipage-ia/examples/site-map-corporate-b2b.yaml) → v1: templates[].level, свои бриф и факты.
+site_map_version: '1'
+checked: '2026-09-24'
+status: draft
+example: true
+site: stalkon
+site_type: corporate-site
+refs:
+  brief: site-brief.yaml
+  facts: facts.yaml
+  vocabulary: ../../../../02-site-types/vocabulary.yaml
+  blocks: ../../../../04-blocks/blocks.yaml
+  page_plans: plans/
+  legal_requirements: ../../../../08-legal-trust-a11y/legal-requirements.yaml
+  head_kit: ../../../../07-seo-geo-performance-analytics/head-kit.yaml
+derived_from:
+  pages_mode: by-type
+  default_map: site:06-01#2.1
+  added:
+  - documents
+  - careers
+  excluded:
+  - reviews-page
+  missing_facts_blocked: []
+  why: 'Карта по умолчанию corporate-site; вакансии — задача найма из брифа (goal.primary: leads, вторичная — hiring); документы и допуски
+    — первое возражение закупщика'
+languages:
+  primary: ru
+  structure: subdirectory
+  primary_prefix: false
+  versions:
+  - lang: ru
+    role: primary
+    scope: all-pages
+  - lang: en
+    role: adaptation
+    scope: selected-pages
+    pages:
+    - home
+    - directions
+    - direction
+    - projects
+    - project
+    - about
+    - contacts
+    base: /en/
+    untranslated_fallback: language-home
+  switcher:
+    placement: header-utility
+    label: native-name
+    same_page: true
+    auto_redirect: false
+url_policy:
+  case: lower
+  word_separator: '-'
+  slug_source: translit
+  translit_scheme: одна схема на сайт (Яндекс-транслит)
+  trailing_slash: true
+  max_depth: 3
+  section_prefixes: true
+  ids_in_urls: false
+  dates_in_urls: false
+  file_extensions: false
+  keep_existing: true
+  redirects:
+  - from: /produkciya/
+    to: /napravleniya/
+    code: 301
+    why: раздел переименован при редизайне
+  - from: /novosti/arhiv-2015/
+    code: 410
+    why: архив удалён без замены
+templates:
+- id: home
+  page_type: home-multipage
+  instances: single
+  page_plan: plans/home.yaml
+  breadcrumbs: false
+  indexable: true
+  macrostructure: directory
+  package:
+    order: 1
+    builds_chrome: true
+  level: L1
+- id: directions-hub
+  page_type: services-index-page
+  instances: single
+  page_plan: plans/directions.yaml
+  breadcrumbs: false
+  indexable: true
+  package:
+    order: 3
+    depends_on:
+    - home
+  level: L1
+- id: direction
+  page_type: service-page
+  instances: collection
+  collection: directions
+  page_plan: plans/direction.yaml
+  breadcrumbs: true
+  related: direction-projects
+  indexable: true
+  local_nav:
+    kind: siblings
+    sticky: false
+  package:
+    order: 2
+    depends_on:
+    - home
+    sample_instances: 2
+  level: L0
+- id: projects-hub
+  page_type: case-list-page
+  instances: single
+  page_plan: plans/projects.yaml
+  breadcrumbs: false
+  indexable: true
+  package:
+    order: 5
+    depends_on:
+    - project
+  level: L0
+- id: project
+  page_type: case-page
+  instances: collection
+  collection: projects
+  page_plan: plans/project.yaml
+  breadcrumbs: true
+  related: project-direction
+  indexable: true
+  package:
+    order: 4
+    depends_on:
+    - home
+    sample_instances: 2
+  level: L1
+- id: about
+  page_type: about-page
+  instances: single
+  page_plan: plans/about.yaml
+  breadcrumbs: false
+  indexable: true
+  macrostructure: long-document
+  local_nav:
+    kind: subpages
+  package:
+    order: 6
+    depends_on:
+    - home
+  level: L1
+- id: documents
+  page_type: documents-page
+  instances: single
+  page_plan: plans/documents.yaml
+  breadcrumbs: true
+  indexable: true
+  package:
+    order: 6
+    depends_on:
+    - about
+  note: '(новый id) документы и допуски: сертификаты, СРО, лицензии — факты credential'
+  level: L0
+- id: news-hub
+  page_type: blog-index-page
+  instances: single
+  page_plan: plans/news.yaml
+  breadcrumbs: true
+  indexable: true
+  package:
+    order: 8
+    depends_on:
+    - news-item
+  level: L0
+- id: news-item
+  page_type: article-page
+  instances: collection
+  collection: news
+  page_plan: plans/news-item.yaml
+  breadcrumbs: true
+  indexable: true
+  package:
+    order: 7
+    depends_on:
+    - home
+    sample_instances: 1
+  level: L0
+- id: careers
+  page_type: careers-page
+  instances: single
+  page_plan: plans/careers.yaml
+  breadcrumbs: true
+  indexable: true
+  package:
+    order: 9
+    depends_on:
+    - about
+  level: L0
+- id: contacts
+  page_type: contacts-page
+  instances: single
+  page_plan: plans/contacts.yaml
+  breadcrumbs: false
+  indexable: true
+  package:
+    order: 3
+    depends_on:
+    - home
+  level: L0
+- id: request
+  page_type: form-page
+  instances: single
+  page_plan: plans/request.yaml
+  breadcrumbs: false
+  indexable: true
+  package:
+    order: 2
+    depends_on:
+    - home
+  level: L0
+- id: utility
+  page_type: thank-you-page
+  instances: single
+  page_plan: plans/thank-you.yaml
+  breadcrumbs: false
+  indexable: false
+  footer: minimal
+  package:
+    order: 10
+    depends_on:
+    - home
+  level: L0
+- id: not-found
+  page_type: not-found-page
+  instances: single
+  page_plan: plans/404.yaml
+  breadcrumbs: false
+  indexable: false
+  package:
+    order: 10
+    depends_on:
+    - home
+  level: L0
+- id: legal
+  page_type: legal-page
+  instances: collection
+  collection: legal-docs
+  page_plan: plans/legal.yaml
+  breadcrumbs: false
+  indexable: true
+  package:
+    order: 10
+    depends_on:
+    - home
+    sample_instances: 1
+  level: L0
+pages:
+- id: home
+  page_type: home-multipage
+  template: home
+  url: /
+  parent: null
+  priority: must
+  main_sources:
+  - search-brand
+  - direct
+  - referral
+  - offline
+- id: directions
+  page_type: services-index-page
+  template: directions-hub
+  url: /napravleniya/
+  parent: home
+  priority: must
+- id: direction
+  page_type: service-page
+  template: direction
+  url: /napravleniya/{slug}/
+  parent: directions
+  priority: must
+  main_sources:
+  - search-category
+  - paid-search
+  action: request-quote
+  note: 'образец коллекции directions: 5 направлений'
+- id: projects
+  page_type: case-list-page
+  template: projects-hub
+  url: /proekty/
+  parent: home
+  priority: must
+- id: project
+  page_type: case-page
+  template: project
+  url: /proekty/{slug}/
+  parent: projects
+  priority: must
+  also_listed_in:
+  - direction
+  note: проект виден на странице своего направления (полииерархия ≤ 2 хабов; крошки — по parent)
+- id: about
+  page_type: about-page
+  template: about
+  url: /o-kompanii/
+  parent: home
+  priority: must
+- id: documents
+  page_type: documents-page
+  template: documents
+  url: /o-kompanii/dokumenty/
+  parent: about
+  priority: should
+- id: news
+  page_type: blog-index-page
+  template: news-hub
+  url: /o-kompanii/novosti/
+  parent: about
+  priority: could
+  note: только если новости выходят не реже раза в квартал; иначе раздел не строится
+- id: news-item
+  page_type: article-page
+  template: news-item
+  url: /o-kompanii/novosti/{slug}/
+  parent: news
+  priority: could
+- id: careers
+  page_type: careers-page
+  template: careers
+  url: /o-kompanii/vakansii/
+  parent: about
+  priority: should
+  action: apply-job
+- id: contacts
+  page_type: contacts-page
+  template: contacts
+  url: /kontakty/
+  parent: home
+  priority: must
+- id: request
+  page_type: form-page
+  template: request
+  url: /zapros-rascheta/
+  parent: home
+  priority: must
+  action: request-quote
+- id: thanks-request
+  page_type: thank-you-page
+  template: utility
+  url: /zapros-rascheta/spasibo/
+  parent: request
+  priority: must
+  indexable: false
+- id: privacy
+  page_type: legal-page
+  template: legal
+  url: /politika-konfidencialnosti/
+  parent: null
+  priority: must
+- id: consent
+  page_type: legal-page
+  template: legal
+  url: /soglasie-na-obrabotku-dannyh/
+  parent: null
+  priority: must
+  note: согласие отдельным документом с 01.09.2025 (152-ФЗ в ред. 156-ФЗ) — I
+- id: not-found
+  page_type: not-found-page
+  template: not-found
+  url: /404/
+  parent: null
+  priority: must
+  indexable: false
+  note: отдаётся по любому несуществующему адресу с кодом 404; сам путь /404/ не в sitemap
+collections:
+- id: directions
+  name: Направления
+  template: direction
+  url_pattern: /napravleniya/{slug}/
+  hub_page: directions
+  expected_items: 5
+  sort: порядок заказчика (по выручке направления)
+  fields:
+  - id: title
+    type: text
+    required: true
+    slot: headline
+  - id: slug
+    type: slug
+    required: true
+    unique: true
+  - id: summary
+    type: text
+    required: true
+    slot: subheadline
+  - id: scope
+    type: rich-text
+    required: true
+    slot: body
+    note: что входит, мощности, допуски — только факты
+  - id: price-from
+    type: fact-ref
+    required: false
+    fact_kinds:
+    - price
+    slot: pricing-price
+  - id: steps
+    type: reference-list
+    required: false
+    ref: process-steps
+  - id: credentials
+    type: fact-ref
+    required: false
+    fact_kinds:
+    - certificate
+    - award
+  - id: projects
+    type: reference-list
+    required: false
+    ref: projects
+  - id: hero-image
+    type: media
+    required: true
+    slot: hero-visual
+    note: 'реальное фото производства (ai-media: task по плану ассетов)'
+  - id: seo
+    type: seo-meta
+    required: true
+    note: meta-title, meta-description — text
+- id: projects
+  name: Проекты
+  template: project
+  url_pattern: /proekty/{slug}/
+  hub_page: projects
+  expected_items: 24
+  sort: дата сдачи, новые первыми
+  facets:
+  - direction
+  - industry
+  pagination: pages
+  fields:
+  - id: title
+    type: text
+    required: true
+    slot: case-title
+  - id: slug
+    type: slug
+    required: true
+    unique: true
+  - id: client
+    type: fact-ref
+    required: true
+    fact_kinds:
+    - client
+    note: клиент — только с разрешением; нет разрешения — «объект в отрасли X»
+  - id: direction
+    type: reference
+    required: true
+    ref: directions
+  - id: industry
+    type: enum
+    required: true
+    values:
+    - energetika
+    - logistika
+    - promyshlennost
+    - torgovlya
+  - id: task
+    type: rich-text
+    required: true
+    slot: case-summary
+  - id: result
+    type: fact-ref
+    required: true
+    fact_kinds:
+    - case
+    - metric
+    slot: case-result
+  - id: quote
+    type: fact-ref
+    required: false
+    fact_kinds:
+    - testimonial
+  - id: year
+    type: date
+    required: true
+  - id: gallery
+    type: media
+    required: true
+  - id: seo
+    type: seo-meta
+    required: true
+- id: news
+  name: Новости
+  template: news-item
+  url_pattern: /o-kompanii/novosti/{slug}/
+  hub_page: news
+  sort: дата, новые первыми
+  pagination: pages
+  fields:
+  - id: title
+    type: text
+    required: true
+    slot: article-title
+  - id: slug
+    type: slug
+    required: true
+    unique: true
+  - id: date
+    type: date
+    required: true
+    slot: article-date
+  - id: body
+    type: rich-text
+    required: true
+    slot: article-paragraph
+    note: Markdown или поля CMS — исходник, наружу HTML (V:Vkn3R6DUJ34 20:33)
+  - id: related-projects
+    type: reference-list
+    required: false
+    ref: projects
+- id: legal-docs
+  name: Юридические документы
+  template: legal
+  url_pattern: /{slug}/
+  fields:
+  - id: title
+    type: text
+    required: true
+  - id: slug
+    type: slug
+    required: true
+    unique: true
+  - id: body
+    type: rich-text
+    required: true
+    slot: body
+  - id: edition-date
+    type: date
+    required: true
+    note: дата редакции документа — I
+chrome:
+  header:
+    block: header
+    archetype: two-tier
+    hallmark_ref: N12 без баннера или N1b — выбор подачи за creative
+    items:
+    - page: directions
+      label_hint: Направления
+      presentation: dropdown
+      groups:
+      - label_hint: Направления
+        pages:
+        - direction
+        from_collection: directions
+    - page: projects
+      label_hint: Проекты
+      presentation: link
+    - page: about
+      label_hint: О компании
+      presentation: dropdown
+      groups:
+      - label_hint: О компании
+        pages:
+        - documents
+        - news
+        - careers
+    - page: contacts
+      label_hint: Контакты
+      presentation: link
+    utilities:
+      phone: true
+      messenger: false
+      address_or_city: false
+      search: false
+      lang_switch: true
+      login: false
+      cta:
+        action: request-quote
+        target: request
+    sticky: partial
+    mobile:
+      pattern: full-screen-list
+      keep_visible:
+      - logo
+      - cta
+      - phone
+    landing_minimal_pages: []
+  footer:
+    block: footer
+    variant: site
+    groups:
+    - label_hint: Направления
+      pages:
+      - directions
+      - direction
+    - label_hint: Компания
+      pages:
+      - about
+      - documents
+      - news
+      - careers
+    - label_hint: Связаться
+      pages:
+      - contacts
+      - request
+    legal:
+    - privacy
+    - consent
+    requisites_fact: fact:company-requisites
+    contacts: true
+    html_sitemap_link: false
+    mobile: open-list
+  breadcrumbs:
+    block: breadcrumbs
+    rule: depth-2-plus
+    mobile: parent-only
+    structured_data: H
+  search:
+    enabled: false
+    why: ≈ 45 индексируемых страниц, 3 коллекции по ≤ 24 записи; меню + подвал + хабы дают ≥ 2 способа (WCAG 2.4.5)
+  html_sitemap:
+    enabled: false
+linking:
+  min_inbound_links: 1
+  hubs:
+  - page: directions
+    lists: directions
+  - page: projects
+    lists: projects
+  - page: news
+    lists: news
+  related_rules:
+  - id: direction-projects
+    from: direction
+    to: projects
+    by: reference-field
+    field: direction
+    max: 4
+    block: case-cards
+    placement: in-content
+  - id: project-direction
+    from: project
+    to: directions
+    by: reference-field
+    field: direction
+    max: 1
+    block: related-links
+    placement: after-final-cta
+  contextual_links: true
+  orphans_allowed:
+  - thanks-request
+utility_pages:
+  not_found: not-found
+  thank_you:
+  - after: request
+    page: thanks-request
+  legal_set:
+  - privacy
+  - consent
+build_order:
+- step: 1
+  template: home
+  why: главная задаёт общую шапку, подвал, DESIGN.md и токены; все пункты меню ведут на страницы карты (пока заглушки со статусом planned)
+  acceptance:
+  - каждая ссылка шапки и подвала ведёт на URL из pages[]
+  - шапка и подвал вынесены в общие компоненты
+- step: 2
+  template: direction
+  why: главный вход поискового и рекламного трафика; 2 образца коллекции
+- step: 3
+  template: request
+  why: целевое действие; сразу со страницей «спасибо»
+- step: 4
+  template: contacts
+  why: первое, что ищут B2B-закупщики после направлений
+- step: 5
+  template: project
+  why: доказательство направлений; связь project ↔ direction
+- step: 6
+  template: projects-hub
+  why: хаб с фильтрами по полям direction и industry
+- step: 7
+  template: directions-hub
+  why: хаб направлений после появления их страниц
+- step: 8
+  template: about
+  why: 4 уровня «О компании» (NN/g 2019) с подстраницами
+- step: 9
+  template: documents
+  why: допуски и сертификаты — факты credential
+- step: 10
+  template: news-item
+  why: только при регулярных новостях
+- step: 11
+  template: news-hub
+  why: список новостей — после образца новости
+- step: 12
+  template: careers
+  why: вторичная задача найма
+- step: 13
+  template: legal
+  why: юридический набор (I) до публикации любой формы
+- step: 14
+  template: not-found
+  why: 404 с путями на хабы, код 404 (H)
+- step: 15
+  template: utility
+  why: «спасибо» проверяется вместе с формой на шаге 3

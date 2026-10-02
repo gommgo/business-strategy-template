@@ -1,0 +1,212 @@
+# copy deck — записи lint и claims (text_hash проверенного текста) пишет copydeck.py check --update;
+# checked ставит --promote при 0 error проверки, approved — только человек (copydeck.py approve)
+# утверждённые страницы: spasibo (copydeck.py approve; кто и когда — approval страницы)
+copy_deck:
+  version: 1
+  date: '2026-09-29'
+  site: otves-remont-nn
+  product_name: Отвес
+  lang: ru
+  voice_ref: ../../../voice.yaml
+  facts_ref: ../../../facts.yaml
+  copy_slots_ref: ../../04-copy-by-block/copy-slots.yaml
+  meaning_ref: ../meaning.yaml
+  jurisdiction: ru
+  legal_category:
+  - general
+  authors:
+  - J3 (ai-self, 2026-09-24)
+  notes: 'Страница «спасибо» после заявки на замер: статус заявки первым, затем кто и когда свяжется, одно следующее действие. Реквизиты продавца
+    — пробел legal-details: в подвале — имя студии и город до ответа заказчика.'
+  pages:
+  - page_id: spasibo
+    page_type: thank-you-page
+    status: approved
+    awareness: product-aware
+    primary_action: Вызвать замерщика
+    cta_primary: spasibo/header/cta-label
+    promise:
+      from: spasibo/confirmation/title
+      basis: подтверждение заявки — первое, что видит человек после формы
+    meta:
+      title: Заявка на замер принята — студия «Отвес»
+      description: Заявка на замер принята. Ремонтируем квартиры в Нижнем Новгороде с 2014 года.
+      og_title: Заявка на замер принята
+      og_description: Прораб позвонит и договорится о дне замера.
+      fact_ids:
+      - company-since-2014
+      notes: 'Служебная страница: не индексируется (seo.indexable плана — false).'
+    sections:
+    - section_id: header
+      section_role: header
+      message: Куда вернуться и как связаться
+      slots:
+      - slot_id: cta-label
+        slot_type: cta-label
+        variants:
+        - id: a
+          text: Вызвать замерщика
+          status: approved
+          source: ai-self
+          review:
+            by: владелец продукта (демо)
+            at: '2026-09-29'
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: site-page
+          errors: 0
+          warnings: 0
+          info: 0
+          suppressed: 0
+          verdict: clean
+          checked_at: '2026-09-29'
+          text_hash: 6f5286fbe668
+          tool: copy_lint 1.0.0
+        claims:
+          errors: 0
+          warnings: 0
+          info: 0
+          rules: []
+          checked_at: '2026-09-29'
+          text_hash: 6f5286fbe668
+          tool: claims_check
+    - section_id: confirmation
+      section_role: confirmation
+      message: Заявка дошла; прораб позвонит и договорится о замере
+      question: Заявка дошла? Что дальше?
+      slots:
+      - slot_id: title
+        slot_type: form-success
+        variants:
+        - id: a
+          text: Заявка на замер принята
+          status: approved
+          source: ai-self
+          review:
+            by: владелец продукта (демо)
+            at: '2026-09-29'
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: site-page
+          errors: 0
+          warnings: 0
+          info: 1
+          suppressed: 0
+          verdict: clean
+          checked_at: '2026-09-29'
+          text_hash: 6150706adcf0
+          tool: copy_lint 1.0.0
+        claims:
+          errors: 0
+          warnings: 0
+          info: 0
+          rules: []
+          checked_at: '2026-09-29'
+          text_hash: 6150706adcf0
+          tool: claims_check
+      - slot_id: next-steps
+        slot_type: form-next-steps
+        variants:
+        - id: a
+          text: Прораб позвонит и договорится о дне замера
+          status: approved
+          source: ai-self
+          review:
+            by: владелец продукта (демо)
+            at: '2026-09-29'
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: site-page
+          errors: 0
+          warnings: 0
+          info: 0
+          suppressed: 0
+          verdict: clean
+          checked_at: '2026-09-29'
+          text_hash: 8429b4394138
+          tool: copy_lint 1.0.0
+        claims:
+          errors: 0
+          warnings: 0
+          info: 0
+          rules: []
+          checked_at: '2026-09-29'
+          text_hash: 8429b4394138
+          tool: claims_check
+      - slot_id: reschedule
+        slot_type: body
+        variants:
+        - id: a
+          text: Если планы изменились — позвоните, перенесём замер
+          status: approved
+          source: ai-self
+          review:
+            by: владелец продукта (демо)
+            at: '2026-09-29'
+        chosen: a
+        fact_ids: []
+        claim_flags: []
+        lint:
+          profile: site-page
+          errors: 0
+          warnings: 0
+          info: 0
+          suppressed: 0
+          verdict: clean
+          checked_at: '2026-09-29'
+          text_hash: 024fbcf8175a
+          tool: copy_lint 1.0.0
+        claims:
+          errors: 0
+          warnings: 0
+          info: 0
+          rules: []
+          checked_at: '2026-09-29'
+          text_hash: 024fbcf8175a
+          tool: claims_check
+    - section_id: footer
+      section_role: footer
+      message: Кто продавец и где документы
+      slots:
+      - slot_id: legal
+        slot_type: footer-legal
+        variants:
+        - id: a
+          text: Студия ремонта «Отвес», Нижний Новгород
+          status: approved
+          source: ai-self
+          review:
+            by: владелец продукта (демо)
+            at: '2026-09-29'
+        chosen: a
+        fact_ids:
+        - company-since-2014
+        claim_flags: []
+        lint:
+          profile: site-page
+          errors: 0
+          warnings: 0
+          info: 0
+          suppressed: 0
+          verdict: clean
+          checked_at: '2026-09-29'
+          text_hash: 3e7daa5642ed
+          tool: copy_lint 1.0.0
+        claims:
+          errors: 0
+          warnings: 0
+          info: 1
+          rules:
+          - COPY-F-EXAMPLE
+          checked_at: '2026-09-29'
+          text_hash: 3e7daa5642ed
+          tool: claims_check
+    approval:
+      by: владелец продукта (демо)
+      at: '2026-09-29'

@@ -1,31 +1,29 @@
 # Фикстуры scripts/tests/fixtures/ с файлами, которые собраны утилитами скилла: чем их пересобирать, когда меняется
-# формат этих утилит или примеров баз. Читает scripts/maint/fixture_gen.py: build пишет файлы фикстуры, build --check
-# собирает во временную папку и сверяет байт в байт (строка fixtures в scripts/maint/data/sync.yaml).
+# формат этих утилит или файлы фикстуры-основы. Читает scripts/maint/fixture_gen.py: build пишет файлы фикстуры,
+# build --check собирает во временную папку и сверяет байт в байт (строка fixtures в scripts/maint/data/sync.yaml).
+# Остальные фикстуры папки — свои файлы без рецепта. Дата сборок — ключ today в scripts/maint/data/sync.yaml.
 #   recipe — рецепт утилиты (функция fixture_gen.py);
 #   owns   — что пишет рецепт: пути от папки фикстуры, «.» — вся папка фикстуры; остальные файлы фикстуры — свои,
 #            рецепт их не трогает;
 #   after  — фикстуры, файлы которых рецепт читает: при сборке нескольких фикстур они идут раньше (порядок — этот
 #            список), при сборке одной — берутся как есть.
 # Новая фикстура с собранными файлами — строка здесь и рецепт в fixture_gen.py.
-today: "2026-09-29"   # дата сборок: сроки фактов и записи проверок copy deck, одобрение, манифест готовности, вход холста
 fixtures:
   - name: cabinet-ds
     recipe: ds-derived
     what: производные ДС кабинета — ds_build build на собранной фикстуре
     owns: [files/design/system.tokens.css, files/design/DESIGN.md, files/design/_design-system/project/tokens.json,
            files/design/_design-system/project/README.md]
-  - name: package-landing
-    recipe: package-landing
-    what: манифест лендинга — copy deck страницы «спасибо» правкой по точному тексту примера text ru-otves-case.yaml
-    owns: [manifest.yaml]
   - name: package-landing-defects
     recipe: landing-defects
-    after: [package-landing]
-    what: посеянные дефекты лендинга — манифест готовности основы, copy deck после copydeck check --promote и approve
+    what: лендинг package-landing с посеянными дефектами — файлы основы, манифест готовности основы, copy deck после
+      copydeck check --promote и approve
     owns: [.]
   - name: package-cabinet-defects
     recipe: cabinet-defects
-    what: посеянные дефекты кабинета — вход холста mockup основы (canvas_input build) с правкой после сборки
+    after: [cabinet-ds]
+    what: кабинет package-cabinet с посеянными дефектами — файлы основы, вход холста mockup (canvas_input build) с
+      правкой после сборки
     owns: [.]
   - name: package-defects
     recipe: both-defects

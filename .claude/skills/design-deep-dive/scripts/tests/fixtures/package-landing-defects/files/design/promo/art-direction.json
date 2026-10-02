@@ -1,0 +1,209 @@
+{
+  "art_direction_version": 0,
+  "id": "otves-remont-nn",
+  "site": "otves-remont-nn",
+  "example": true,
+  "status": "proposed",
+  "approved_by": null,
+  "checked_at": "2026-09-24",
+  "refs": {
+    "brief": "../../../site-research/01-foundations/site-brief.example.yaml",
+    "meaning": "../../../text/02-strategy-messaging/examples/meaning-otves.yaml",
+    "facts": "../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml",
+    "page_plans": ["../../../site-research/04-blocks/examples/page-plan-lead-services-otves.yaml"]
+  },
+  "inputs": {
+    "site_type": "landing-site",
+    "page_type": "landing-lead-services",
+    "audience": "Владельцы квартир 40–80 м² в Нижнем Новгороде, которым нужен полный ремонт в срок и некогда стоять над бригадой",
+    "job": "Записаться на бесплатный замер",
+    "awareness": "solution-aware (Директ), product-aware (Яндекс Карты, рекомендации)",
+    "traffic": "Директ тёплый 0,5 (смешанные устройства); Яндекс Карты горячий 0,25 и рекомендации 0,15 — телефон",
+    "proof": ["fact:price-from-per-m2", "fact:estimate-free", "fact:guarantee-3-years", "fact:rating-yandex-maps", "fact:foreman-lapin", "fact:case-two-room-47-days", "fact:company-since-2014", "fact:flats-completed"],
+    "brand_status": "none",
+    "brand_expression_mode": "open",
+    "must_keep": ["словесный знак «Отвес»"],
+    "customer_words": ["дешёвые заказы не берём", "клиенты хвалят, что видят всё по фото"],
+    "assets": "фото прораба Сергея Лапина (согласие в факте), фотоотчёты с объектов без разрешений на показ; видео нет",
+    "constraints": ["лидогенерация: форма замера и калькулятор — L0", "горячий мобильный трафик 40 % — первый экран ≤ 1,5 МБ на телефоне", "фото «до и после» — missing:before-after-photos", "обещание ежедневного фотоотчёта не подтверждено (q-photo-reports)"]
+  },
+  "ambition": {
+    "level": "L1",
+    "source": "default",
+    "budget_profile": "landing-lead-services@L1",
+    "motion_cap": "expressive",
+    "rationale": "Лидогенерация услуг — L1 по решению заказчика п. 13, но с L0-блоками конверсии (форма, калькулятор) и весом первого экрана L0 на телефоне (горячий трафик с карт 40 %). Фирменный приём один и спокойный — линия-отвес через этапы работы.",
+    "by_section_role": [{"role": "lead-form", "level": "L0"}, {"role": "pricing", "level": "L0"}, {"role": "hero", "level": "L1", "why": "фото прораба и один приём; без тяжёлого медиа"}]
+  },
+  "concept": {
+    "design_read": "Читаю это как: лендинг ремонта квартир под ключ для занятых владельцев в Нижнем Новгороде, язык точного строительного инструмента и договора, тянется к одной вертикали и настоящему человеку, который отвечает за объект",
+    "mechanism": "Один прораб ведёт объект от замера до сдачи; срок и смета — в договоре, гарантия 3 года",
+    "audience_scene": "Обеденный перерыв или вечер, телефон; открыли из карточки на Яндекс Картах или из объявления Директа; рядом — вторая половина, с кем решать",
+    "first_screen_proves": "За ремонт отвечает конкретный человек (фото прораба с именем), цена «от» и рейтинг на картах с датой — видно сразу",
+    "thesis": "Ремонт по вертикали: одна тонкая линия-отвес проходит через страницу от замера до сдачи, рядом — один человек, который отвечает, и цифры из договора",
+    "metaphor": "отвес — инструмент, которым проверяют вертикаль",
+    "material": "бумага договора и сметы, свет на свежей стене",
+    "energy": "calm",
+    "rut": "Широкое фото «идеального интерьера» из стока с тёмной вуалью, заголовок «Ремонт под ключ» по центру, таймер акции, «10 000+ довольных клиентов», квиз в первом экране",
+    "rut_opposite": "Строительная эстетика: каска, сигнальная жёлто-чёрная лента, оранжевый",
+    "not_this": ["без стоковых интерьеров", "без таймера и выдуманных цифр", "без касок и сигнальной ленты"]
+  },
+  "territories": [
+    {"id": "plumb-line", "name": "Отвес", "source": "имя бренда — инструмент для проверки вертикали", "family": "tool-instrument", "literal": true, "why": "буквальное прочтение имени, но оно же — обещание точности и одного ответственного"},
+    {"id": "contract", "name": "Договор и смета", "source": "договор подряда, смета, пункты и подписи", "family": "document-print", "why": "главные страхи аудитории — смета и срок; договор их снимает"},
+    {"id": "daily-report", "name": "Фотоотчёт дня", "source": "фото с объекта в мессенджере вечером", "family": "screen-interface", "why": "клиенты ценят, что видят всё по фото", "rejected_because": "регулярность отчётов не подтверждена (q-photo-reports) — приём станет обещанием"},
+    {"id": "fresh-wall", "name": "Свежая стена", "source": "ровная окрашенная стена, свет из окна, уровень", "family": "place-architecture", "why": "результат ремонта без «идеального интерьера из стока»"},
+    {"id": "work-stages", "name": "Этапы работ", "source": "график работ на объекте: черновые, чистовые, сдача", "family": "data-notation", "why": "срок в договоре по этапам"},
+    {"id": "hard-hat", "name": "Стройка", "source": "каска, лента, инструмент", "family": "tool-instrument", "why": "узнаваемо", "rejected_because": "клише категории и колея «строительной» эстетики"}
+  ],
+  "directions": [
+    {
+      "id": "a",
+      "name": "Вертикаль",
+      "recommended": true,
+      "thesis": "Тонкая линия-отвес — ось страницы: по ней выстроены этапы от замера до сдачи; рядом фото прораба, цифры из договора и спокойный светлый фон",
+      "territory": "plumb-line",
+      "axes": {"paper": "light", "paper_temperature": "neutral", "display_style": "grotesque", "accent_hue": "warm", "macrostructure": "split-studio", "imagery": "photo", "energy": "calm"},
+      "palette": {"background": "#F5F5F2", "surface": "#FFFFFF", "text": "#161616", "muted": "#595959", "accent": "#C8102E", "on_accent": "#FFFFFF"},
+      "color_strategy": "restrained",
+      "type": {"display": "Onest", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL"},
+      "signature_move": {"what": "Линия-отвес с грузиком опускается по мере прокрутки через этапы работы; на каждом этапе — факт из договора", "where": "section-role:how-it-works", "effects": ["effect:scroll-driven-progress"], "min_level": "L1", "concept_link": "один человек держит вертикаль ремонта от замера до сдачи"},
+      "first_viewport": "Слева заголовок (категория и город), цена «от 9 800 ₽ за м²», кнопка «Записаться на замер», рейтинг 4,8 с датой; справа фото прораба на объекте 1:1 (телефон — 4:5 под заголовком)",
+      "imagery": "фото прораба и объектов заказчика; без стока",
+      "motion": "одна линия по прокрутке; остальное неподвижно",
+      "risk": "Буквальное прочтение имени: без фактов на этапах линия станет украшением; красный акцент близок к «сигнальному»",
+      "cost": "дёшево: SVG-линия и фото заказчика",
+      "level_fit": ["L0", "L1"]
+    },
+    {
+      "id": "b",
+      "name": "Договор",
+      "thesis": "Страница как договор подряда: пункты, смета таблицей, подпись прораба; главный шрифт — табличные цифры",
+      "territory": "contract",
+      "axes": {"paper": "light", "paper_temperature": "neutral", "display_style": "serif", "accent_hue": "cool", "macrostructure": "comparison-led", "imagery": "typographic", "energy": "still"},
+      "palette": {"background": "#FFFFFF", "surface": "#F3F4F6", "text": "#1A1F24", "accent": "#1E5B8C", "on_accent": "#FFFFFF"},
+      "color_strategy": "restrained",
+      "type": {"display": "Literata", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL"},
+      "signature_move": {"what": "Смета как документ: строки работ с ценой «от» и пунктами договора, выделенными полями", "where": "section-role:offer", "effects": [], "min_level": "L0", "concept_link": "страх «смета вырастет» снимается документом"},
+      "first_viewport": "Заголовок антиквой «Срок и смета — в договоре», фрагмент сметы и кнопка замера",
+      "imagery": "типографика; фото прораба ниже",
+      "motion": "без движения",
+      "risk": "Пункты договора не подтверждены (missing:estimate-change-policy, deadline-terms); антиква — примета K3 serif",
+      "cost": "дёшево",
+      "level_fit": ["L0"]
+    },
+    {
+      "id": "c",
+      "name": "Свежая стена",
+      "thesis": "Большие спокойные кадры готовых стен и углов при дневном свете, текст на ровной поверхности, как на стене",
+      "territory": "fresh-wall",
+      "axes": {"paper": "mid", "paper_temperature": "cool", "display_style": "wide", "accent_hue": "chromatic-other", "macrostructure": "photographic", "imagery": "photo", "energy": "calm"},
+      "palette": {"background": "#EDEFF2", "surface": "#FFFFFF", "text": "#15191E", "accent": "#0A7C66", "on_accent": "#FFFFFF"},
+      "color_strategy": "restrained",
+      "type": {"display": "Unbounded", "text": "Golos Text", "cyrillic_checked": true, "license": "OFL"},
+      "signature_move": {"what": "Полноэкранный кадр готового угла комнаты с заголовком на ровной стене", "where": "section-role:hero", "effects": [], "min_level": "L0", "concept_link": "результат — ровная стена, а не «дизайн-интерьер»"},
+      "first_viewport": "Фото ровной стены и угла при дневном свете на весь экран, заголовок на стене, кнопка",
+      "imagery": "фото объектов заказчика",
+      "motion": "без движения",
+      "risk": "Разрешений на показ фото объектов нет (missing:before-after-photos); тяжёлый первый экран на телефоне",
+      "cost": "нужна съёмка объектов",
+      "level_fit": ["L0", "L1"]
+    },
+    {
+      "id": "d",
+      "name": "Канон «под ключ»",
+      "canon": true,
+      "thesis": "Категорийный стандарт рунета, сыгранный честно: форма замера в первом экране, цена «от», этапы, кейс, отзывы с площадки, FAQ",
+      "territory": "work-stages",
+      "axes": {"paper": "dark", "paper_temperature": "cool", "display_style": "grotesque", "accent_hue": "warm", "macrostructure": "form-first", "imagery": "photo", "energy": "measured"},
+      "palette": {"background": "#1C2127", "surface": "#262C33", "text": "#EEF0F2", "accent": "#F2A900", "on_accent": "#1C2127"},
+      "color_strategy": "committed",
+      "type": {"display": "Golos Text", "text": "Golos Text", "cyrillic_checked": true, "license": "OFL"},
+      "signature_move": {"what": "Форма замера с тремя полями прямо в первом экране", "where": "section-role:hero", "effects": [], "min_level": "L0", "concept_link": "горячий трафик хочет записаться сразу"},
+      "first_viewport": "Тёмный первый экран: заголовок, цена «от», форма из трёх полей справа",
+      "imagery": "фото прораба",
+      "motion": "отклик",
+      "risk": "Сходится с десятками студий ремонта; тёмный + жёлтый — кластер ui 11/04 №2",
+      "cost": "дёшево",
+      "level_fit": ["L0"]
+    }
+  ],
+  "choice": {
+    "chosen": "a",
+    "chosen_by": "default",
+    "date": "2026-09-24",
+    "why": "Рекомендуемое (строка q-brand «Направление A»): держится на фактах (прораб, цена, рейтинг, гарантия), один спокойный приём, совпадает с макроструктурой split-studio плана site. Статус proposed — заказчик не ответил.",
+    "rejected": [
+      {"id": "b", "why": "пункты договора не подтверждены; антиква — примета K3"},
+      {"id": "c", "why": "нет разрешений на фото объектов"},
+      {"id": "d", "why": "канон — дверь для заказчика, не рекомендация"}
+    ]
+  },
+  "visual_language": {
+    "color_strategy": "restrained",
+    "palette": {"background": "#F5F5F2", "surface": "#FFFFFF", "text": "#161616", "muted": "#595959", "accent": "#C8102E", "on_accent": "#FFFFFF"},
+    "accent_rule": "красный отвеса — главная кнопка и грузик линии; больше нигде",
+    "type": {"display": "Onest", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL"},
+    "composition": ["диптих: текст ↔ доказательство, стороны чередуются (split-studio)", "вертикальная линия по левому полю этапов"],
+    "surfaces": ["светлое нейтральное поле; без фактур бетона и дерева"],
+    "imagery": {"kinds": ["photo"], "subject": "прораб на объекте, реальные этапы работ", "source_policy": "только фото заказчика с согласиями; ИИ-люди в роли команды и клиентов запрещены (решение заказчика п. 13)", "people_policy": "real-only", "product_policy": "real-photo-only"},
+    "theme": "light"
+  },
+  "motion_system": {
+    "thesis": "Двигается только вертикаль: линия-отвес опускается по этапам; остальное неподвижно и точно",
+    "level": "expressive",
+    "entrance_system": "только первый экран: заголовок и фото прораба один раз ≤ 500 мс; секции ниже без появления",
+    "library": ["css"],
+    "smooth_scroll": false,
+    "page_transitions": "none",
+    "reduce": "линия нарисована целиком, грузик внизу",
+    "by_section": [
+      {"section": "hero", "motion_level": "subtle", "visual_role": "accent"},
+      {"section": "kak-rabotaem", "motion_level": "expressive", "visual_role": "peak"},
+      {"section": "zamer", "motion_level": "none", "visual_role": "calm"},
+      {"section": "price", "motion_level": "none", "visual_role": "calm"}
+    ]
+  },
+  "effects_by_section": [
+    {"section": "hero", "level": "L1", "effects": ["effect:hero-entrance-once"], "purpose": "support"},
+    {"section": "kak-rabotaem", "level": "L1", "effects": ["effect:scroll-driven-progress"], "purpose": "signature", "why": "линия-отвес через этапы"}
+  ],
+  "decisions": [
+    {"id": "d-literal-name", "technique": "приём: буквальное прочтение имени (линия-отвес)", "decision": "twist",
+     "criteria": {"concept": {"result": "pass", "note": "отвес = один ответственный держит вертикаль ремонта"}, "brand": {"result": "pass", "note": "имя бренда"}, "execution": {"result": "pass", "note": "SVG-линия + CSS scroll-driven, фолбэк — статичная линия"}, "epoch": {"result": "na"}, "singularity": {"result": "pass", "note": "единственный приём"}},
+     "why": "Буквальное прочтение допускается одним кандидатом; поворот — линия несёт факты этапов, а не украшает"},
+    {"id": "d-stock-interior", "technique": "cliche:stock-interior-under-overlay", "decision": "avoid",
+     "criteria": {"concept": {"result": "fail", "note": "чужой интерьер"}, "brand": {"result": "na"}, "execution": {"result": "fail", "note": "фото под вуалью — LOOK-HERO-OVERLAY; тяжёлый первый экран"}, "epoch": {"result": "fail"}, "singularity": {"result": "na"}},
+     "why": "Первый экран держится на прораба и фактах"}
+  ],
+  "exclusions": {
+    "forbidden_hues": [{"from": 270, "to": 320, "reason": "пурпур и неон (IMG-M05)"}, {"from": 60, "to": 100, "reason": "сигнальный жёлтый стройки — колея категории", "except_share_max": 0.02}],
+    "forbidden_markers": ["IMG-M02", "IMG-M05", "IMG-M07", "IMG-M13", "IMG-M14", "IMG-M21", "IMG-M22"],
+    "k3_allow": [],
+    "bans": ["стоковые интерьеры", "таймер акции", "выдуманные числа клиентов", "каски и сигнальная лента", "ИИ-люди в роли команды и клиентов"]
+  },
+  "budget": {
+    "profile": "landing-lead-services@L1",
+    "spend": [
+      {"what": "фото прораба hero (AVIF 4:5 телефон / 1:1 десктоп)", "kb": 90, "device": "both", "load": "eager"},
+      {"what": "SVG линии и грузика", "kb": 4, "device": "both", "load": "eager"}
+    ]
+  },
+  "handoff": {
+    "visual_dna": {
+      "character": {"adjectives": ["спокойный", "точный", "ответственный"], "boldness": "balanced", "one_bold_move": "линия-отвес через этапы работы и настоящий прораб в первом экране"},
+      "palette_forbidden_hues": [{"from": 270, "to": 320, "reason": "пурпур и неон (IMG-M05)"}, {"from": 60, "to": 100, "reason": "сигнальный жёлтый стройки", "except_share_max": 0.02}],
+      "exclusions": {"forbidden_markers": ["IMG-M02", "IMG-M05", "IMG-M07", "IMG-M13", "IMG-M14", "IMG-M21", "IMG-M22"], "replace_with": [{"what": "stock interiors", "kind": "style", "replace_with": "documentary photo of a real renovated wall in daylight"}]},
+      "abstract": {"policy": "none"},
+      "video": {"tempo": "still"},
+      "composition": {"subject_region": "right-third", "text_zone_default": {"side": "left", "share": 0.45, "surface": "evenly lit freshly painted wall"}, "negative_space_min": 0.35, "max_elements": 3, "asymmetry": true},
+      "subject_matter": {"domain_props": ["plumb bob on a string", "spirit level", "freshly painted wall", "contract on a clipboard"], "motifs": ["one foreman on site"], "people_policy": "real-only", "product_policy": "real-photo-only"}
+    }
+  },
+  "lifecycle": {
+    "version": "0.1",
+    "history": [{"version": "0.1", "date": "2026-09-24", "change": "4 направления к брифу site A", "by": "Claude (пример A/01)"}],
+    "review_by": "2027-03-24",
+    "on_brand_change": "при появлении логотипа — сверить красный акцент и словесный знак; линия-отвес остаётся приёмом, если бренд назван «Отвес»"
+  }
+}

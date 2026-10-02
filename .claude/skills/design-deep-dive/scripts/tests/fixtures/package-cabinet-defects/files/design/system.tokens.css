@@ -1,0 +1,192 @@
+/* Производный файл: собирает scripts/project/ds_build.py из system.tokens.json — руками не правится.
+   Имя переменной — путь токена DTCG через дефис; алиасы разрешены до значения. */
+
+:root {
+  color-scheme: light dark;
+  --primitive-color-neutral-0: #ffffff;
+  --primitive-color-neutral-50: #f8fafc;
+  --primitive-color-neutral-100: #f1f5f9;
+  --primitive-color-neutral-200: #e2e8f0;
+  --primitive-color-neutral-300: #cbd5e1;
+  --primitive-color-neutral-500: #64748b;
+  --primitive-color-neutral-600: #475569;
+  --primitive-color-neutral-700: #334155;
+  --primitive-color-neutral-800: #1e293b;
+  --primitive-color-neutral-900: #0f172a;
+  --primitive-color-neutral-950: #020617;
+  --primitive-color-accent-50: #eff6ff;
+  --primitive-color-accent-400: #60a5fa;
+  --primitive-color-accent-600: #2563eb;
+  --primitive-color-accent-700: #1d4ed8;
+  --primitive-color-red-400: #f87171;
+  --primitive-color-red-600: #dc2626;
+  --primitive-color-green-400: #4ade80;
+  --primitive-color-green-600: #16a34a;
+  --primitive-color-amber-400: #fbbf24;
+  --primitive-color-amber-600: #d97706;
+  --primitive-color-shadow-key: rgb(2 6 23 / 0.08);
+  --primitive-color-shadow-key-dark: rgb(2 6 23 / 0.4);
+  --primitive-size-2: 2px;
+  --primitive-size-4: 4px;
+  --primitive-size-8: 8px;
+  --primitive-size-12: 12px;
+  --primitive-size-14: 14px;
+  --primitive-size-16: 16px;
+  --primitive-size-20: 20px;
+  --primitive-size-24: 24px;
+  --primitive-size-28: 28px;
+  --primitive-size-32: 32px;
+  --primitive-size-36: 36px;
+  --primitive-size-40: 40px;
+  --primitive-size-48: 48px;
+  --primitive-size-240: 240px;
+  --primitive-size-1280: 1280px;
+  --primitive-weight-regular: 400;
+  --primitive-weight-medium: 500;
+  --primitive-weight-semibold: 600;
+  --color-bg-canvas: #f8fafc;
+  --color-bg-surface: #ffffff;
+  --color-bg-subtle: #f1f5f9;
+  --color-bg-selected: #eff6ff;
+  --color-text-default: #0f172a;
+  --color-text-muted: #475569;
+  --color-text-on-accent: #ffffff;
+  --color-border-default: #e2e8f0;
+  --color-border-strong: #64748b;
+  --color-accent-solid: #1d4ed8;
+  --color-accent-text: #1d4ed8;
+  --color-focus: #2563eb;
+  --color-status-info: #2563eb;
+  --color-status-success: #16a34a;
+  --color-status-warning: #d97706;
+  --color-status-danger: #dc2626;
+  --font-sans: "Golos Text", Arial, sans-serif;
+  --space-2xs: 2px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --size-control-md: 32px;
+  --size-control-lg: 40px;
+  --size-row-table: 36px;
+  --size-panel-sidebar: 240px;
+  --size-panel-topbar: 48px;
+  --size-panel-content-max: 1280px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --elevation-raised: 0px 1px 2px 0px rgb(2 6 23 / 0.08), 0px 4px 8px -2px rgb(2 6 23 / 0.08);
+  --breakpoint-tablet: 640px;
+  --breakpoint-desktop: 1024px;
+  --breakpoint-wide: 1440px;
+  --motion-duration-fast: 100ms;
+  --motion-duration-default: 150ms;
+  --motion-duration-slow: 200ms;
+  --motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --type-title-family: "Golos Text", Arial, sans-serif;
+  --type-title-size: 20px;
+  --type-title-leading: 1.4;
+  --type-title-weight: 600;
+  --type-title-tracking: -0.2px;
+  --type-metric-family: "Golos Text", Arial, sans-serif;
+  --type-metric-size: 24px;
+  --type-metric-leading: 1.333334;
+  --type-metric-weight: 600;
+  --type-metric-tracking: -0.36px;
+  --type-body-family: "Golos Text", Arial, sans-serif;
+  --type-body-size: 14px;
+  --type-body-leading: 1.428572;
+  --type-body-weight: 400;
+  --type-body-tracking: 0px;
+  --type-body-strong-family: "Golos Text", Arial, sans-serif;
+  --type-body-strong-size: 14px;
+  --type-body-strong-leading: 1.428572;
+  --type-body-strong-weight: 600;
+  --type-body-strong-tracking: 0px;
+  --type-label-family: "Golos Text", Arial, sans-serif;
+  --type-label-size: 12px;
+  --type-label-leading: 1.333334;
+  --type-label-weight: 500;
+  --type-label-tracking: 0.12px;
+  --type-caption-family: "Golos Text", Arial, sans-serif;
+  --type-caption-size: 12px;
+  --type-caption-leading: 1.333334;
+  --type-caption-weight: 400;
+  --type-caption-tracking: 0.12px;
+}
+
+/* Узкая ширина: ниже breakpoint.tablet основной текст не меньше 16 px (ux 09/03 §7.1). */
+@media (width < 640px) {
+  :root {
+    --type-body-size: 16px;
+  }
+}
+
+/* Тема «Тёмная» (dark): на :root, где объявлены переменные, иначе алиасы не пересчитаются. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-bg-canvas: #0f172a;
+    --color-bg-surface: #1e293b;
+    --color-bg-subtle: #020617;
+    --color-bg-selected: #334155;
+    --color-text-default: #f8fafc;
+    --color-text-muted: #cbd5e1;
+    --color-text-on-accent: #020617;
+    --color-border-default: #334155;
+    --color-accent-solid: #60a5fa;
+    --color-accent-text: #60a5fa;
+    --color-focus: #60a5fa;
+    --color-status-info: #60a5fa;
+    --color-status-success: #4ade80;
+    --color-status-warning: #fbbf24;
+    --color-status-danger: #f87171;
+    --elevation-raised: 0px 1px 2px 0px rgb(2 6 23 / 0.4), 0px 4px 8px -2px rgb(2 6 23 / 0.4);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg-canvas: #0f172a;
+  --color-bg-surface: #1e293b;
+  --color-bg-subtle: #020617;
+  --color-bg-selected: #334155;
+  --color-text-default: #f8fafc;
+  --color-text-muted: #cbd5e1;
+  --color-text-on-accent: #020617;
+  --color-border-default: #334155;
+  --color-accent-solid: #60a5fa;
+  --color-accent-text: #60a5fa;
+  --color-focus: #60a5fa;
+  --color-status-info: #60a5fa;
+  --color-status-success: #4ade80;
+  --color-status-warning: #fbbf24;
+  --color-status-danger: #f87171;
+  --elevation-raised: 0px 1px 2px 0px rgb(2 6 23 / 0.4), 0px 4px 8px -2px rgb(2 6 23 / 0.4);
+}
+
+/* Сокращённое движение: только токены движения. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration-slow: 150ms;
+  }
+}
+
+:root[data-motion="reduced"] {
+  --motion-duration-slow: 150ms;
+}
+
+/* Плотность compact: переопределяются роли, режим включается и на поддереве. */
+[data-density="compact"] {
+  --space-sm: 4px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --size-row-table: 28px;
+}
+
+/* Плотность comfortable: переопределяются роли, режим включается и на поддереве. */
+[data-density="comfortable"] {
+  --space-sm: 12px;
+  --space-md: 20px;
+  --space-lg: 32px;
+}

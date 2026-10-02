@@ -317,16 +317,19 @@ README домена — `blender/README.md`: назначение утилит �
 | утилита | вид | назначение | вход | выход | зависимости |
 |---|---|---|---|---|---|
 | `tests/smoke.py` | test | смоук утилит скилла: каждая утилита импортируется и отвечает на `--help` или самопроверку; без сети и браузера. | без ключей — все списки `tests/smoke/`; `--only ПОДСТРОКА` — строки по пути; `--list ФАЙЛ` — один список; `--validate` — проверка списков без запуска (дубль пары «путь + вид проверки» — ошибка); `--uncovered` — утилиты без строки; `--tsv ФАЙЛ` | stdout: PASS · FAIL · XFAIL · XPASS | stdlib |
-| `tests/fixture_project.py` | utility | сборщик демо-проекта во временную папку для прогонов и самопроверок утилит `project/`. | `list`; `build ИМЯ [--out DIR] [--json]` — печатает корень данных для `--repo`; `--selftest`; из Python — `with fixture_project.built("ИМЯ") as fx:` | `$DDD_HOME/out/tests/fixtures/<имя>/` | PyYAML |
+| `tests/fixture_project.py` | utility | сборщик демо-проекта во временную папку для прогонов и самопроверок утилит `project/`. | `list`; `build ИМЯ [--out DIR] [--json]` — печатает корень данных для `--repo`; `--selftest`; из Python — `with fixture_project.built("ИМЯ") as fx:`; `fixture_project.today()` — опорная дата фикстур | `$DDD_HOME/out/tests/fixtures/<имя>/` | PyYAML |
 
 Списки смоука — `tests/smoke/<папка>.tsv`, колонки `path · kind · smoke · xfail`: строка на утилиту или файл данных,
 ожидаемое падение — только с причиной в колонке `xfail`. Фикстуры — `tests/fixtures/<имя>/`: манифест `manifest.yaml`
-(`project`, `extends`, слои `kb`, `files`, `replace`, `drop`) и свои файлы с пометкой иллюстрации; список —
-`fixture_project.py list`. Основы: `minimal` (лендинг и кабинет, примеры баз), `cabinet` (чистый слой экранов кабинета
+(`project`, `extends` — цепочка до двух звеньев, `unmarked`, слои `files`, `replace`, `drop`) и свои файлы с пометкой
+иллюстрации; из `kb/` сборщик ничего не берёт — правка примера базы фикстуру не меняет; список —
+`fixture_project.py list`. Основы: `minimal` (лендинг и кабинет), `cabinet` (чистый слой экранов кабинета
 `otves-office`), `cabinet-ds`, `cabinet-demo`, `cabinet-texts`, `asset-plan`, `canvas`, `input-landing`, `input-site`,
 `input-cabinet`, `package-landing`, `package-cabinet`; с посеянными дефектами — `cabinet-defects`, `cabinet-freeform`
 (вольная запись для нормализатора), `cabinet-texts-defects`, `package-landing-defects`, `package-cabinet-defects`,
-`package-defects`. Фикстуры с файлами, собранными утилитами, пересобирает `maint/fixture_gen.py`.
+`package-defects`. Фикстуры с файлами, собранными утилитами, пересобирает `maint/fixture_gen.py`;
+`package-landing-defects` и `package-cabinet-defects` лежат целиком своими файлами и руками не правятся. Опорная дата
+фикстур — `fixture_project.today()`.
 
 ## maint — обслуживание базы
 
@@ -343,8 +346,9 @@ README домена — `blender/README.md`: назначение утилит �
 | `maint/sync_check.py` | maint | проверка синхронности скилла одним вызовом: производные против генераторов, копии против канона, описания скиллов в пределах. | `[all \| generators \| copies \| descriptions] [--only ID,…] [--list] [--json]`; `--selftest`; коды: 0 — FAIL нет, 1 — есть FAIL, расхождение копии или описание вне пределов, 2 — ошибка данных | stdout | PyYAML |
 
 Данные кода: `maint/data/traces.tsv` (шаблоны следов журнала для `refcheck`, `accept`, `mapcheck`, `canon_check`),
-`maint/data/sync.yaml` (генераторы, копии и описания для `sync_check`; новый генератор или копия — строка данных),
-`maint/data/fixtures.yaml` (рецепты `fixture_gen`), `maint/data/accept.yaml` (исключения сверки ссылок и образцы следов
+`maint/data/sync.yaml` (генераторы, копии и описания для `sync_check`; новый генератор или копия — строка данных;
+ключ `today` — опорная дата фикстур для `sync_check` и `fixture_gen`), `maint/data/fixtures.yaml` (рецепты
+`fixture_gen`), `maint/data/accept.yaml` (исключения сверки ссылок и образцы следов
 «на разбор» для `accept`; новое исключение или образец — строка данных).
 
 ## Данные, которые читает только код

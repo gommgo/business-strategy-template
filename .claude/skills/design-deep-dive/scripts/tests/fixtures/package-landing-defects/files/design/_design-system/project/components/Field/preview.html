@@ -1,0 +1,35 @@
+<!-- @dsCard group="Формы" height=340 subtitle="Текст, подсказка, список, согласие" -->
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Поле формы</title>
+</head>
+<body>
+<div class="form" style="margin: 0; padding: 32px; background: var(--color-bg);">
+  <div class="field">
+    <label for="name">Имя</label>
+    <input class="input" id="name" name="name" type="text" autocomplete="name">
+  </div>
+  <div class="field">
+    <label for="phone">Телефон</label>
+    <input class="input" id="phone" name="phone" type="tel" autocomplete="tel">
+    <span class="hint">Перезвоним, чтобы подтвердить время</span>
+  </div>
+  <div class="field">
+    <label for="service">Услуга</label>
+    <select class="input" id="service" name="service">
+      <option>Полное ТО</option>
+      <option>Базовое ТО</option>
+      <option>Замена цепи и кассеты</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="bike">Велосипед</label>
+    <input class="input" id="bike" name="bike" type="text" placeholder="Например, шоссейный, 2019 год">
+  </div>
+  <label class="check"><input type="checkbox" name="consent"><span>Согласен на обработку имени и телефона для записи</span></label>
+</div>
+<script>document.documentElement.lang = 'ru';</script>
+</body>
+</html>

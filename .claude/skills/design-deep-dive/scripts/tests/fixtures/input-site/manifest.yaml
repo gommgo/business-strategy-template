@@ -1,58 +1,11 @@
 # Фикстура input-site — иллюстрация для самопроверки scripts/project/canvas_input.py и прогонов входа холста
-# многостраничника: вымышленная металлоконструкторская компания «Сталькон» (пример site corporate-b2b-stalkon) —
-# бриф, карта сайта, 15 планов страниц, факты и бренд примера, план ассетов главной, спецификация движения главной
-# creative; голос — пример text (B2B-профиль) как голос демо-продукта. Свои файлы — vision.md и реестр поверхностей
-# (поверхность corp, web рода site). Планы утверждены правкой статуса; copy deck у страниц нет — вход wireframe даёт
-# предупреждения о текстах. Формат манифеста — докстринг fixture_project.py.
+# многостраничника: вымышленная металлоконструкторская компания «Сталькон» — бриф, карта сайта, 15 планов страниц,
+# факты, бренд, план ассетов и спецификация движения главной, голос (B2B-профиль как голос демо-продукта), vision.md и
+# реестр поверхностей (поверхность corp, web рода site). Планы утверждены; copy deck у страниц нет — вход wireframe
+# даёт предупреждения о текстах. Формат манифеста — докстринг fixture_project.py.
 example: true
 description: многостраничник corp (web рода site) — бриф, карта сайта, 15 планов, факты, бренд, ассеты и движение главной
 project: stalkon
+unmarked: [files/site/corp/site-brief.yaml, files/voice.yaml]   # бриф и голос — в форме, которую читают утилиты
 layers:
-  - kb:
-      site/corp/site-brief.yaml: site/10-playbooks-contracts/examples/corporate-b2b-stalkon/site-brief.yaml
-      site/corp/site-map.yaml: site/10-playbooks-contracts/examples/corporate-b2b-stalkon/site-map.yaml
-      site/corp/plans: site/10-playbooks-contracts/examples/corporate-b2b-stalkon/plans
-      facts.yaml: site/10-playbooks-contracts/examples/corporate-b2b-stalkon/facts.yaml
-      voice.yaml: text/05-voice-editorial/examples/voice-grafa-b2b.yaml
-      design/brand.yaml: site/10-playbooks-contracts/examples/corporate-b2b-stalkon/brand.yaml
-      design/corp/assets/plans/home.yaml: site/10-playbooks-contracts/examples/corporate-b2b-stalkon/asset-plan.home.yaml
-      design/corp/motion/home.motion-spec.yaml: creative/09-ai-execution-evaluation/examples/stalkon-home.motion-spec.yaml
   - files: files
-  - replace:
-      site/corp/site-brief.yaml:
-        - {find: "brand:\n  ref: brand.yaml\n", to: "brand:\n  ref: ../../design/brand.yaml\n"}
-      design/corp/assets/plans/home.yaml:
-        - {find: "  page_plan: plans/home.yaml", to: "  page_plan: ../../../../site/corp/plans/home.yaml"}
-      design/corp/motion/home.motion-spec.yaml:
-        - {find: "  page_plan: ../../../site/10-playbooks-contracts/examples/corporate-b2b-stalkon/plans/home.yaml",
-           to: "  page_plan: ../../../site/corp/plans/home.yaml"}
-      site/corp/plans/404.yaml:
-        - {find: "\nstatus: draft\n", to: "\nstatus: approved\n"}
-      site/corp/plans/about.yaml:
-        - {find: "\nstatus: draft\n", to: "\nstatus: approved\n"}
-      site/corp/plans/careers.yaml:
-        - {find: "\nstatus: draft\n", to: "\nstatus: approved\n"}
-      site/corp/plans/contacts.yaml:
-        - {find: "\nstatus: draft\n", to: "\nstatus: approved\n"}
-      site/corp/plans/directions.yaml:
-        - {find: "\nstatus: draft\n", to: "\nstatus: approved\n"}
-      site/corp/plans/direction.yaml:
-        - {find: "\nstatus: draft\n", to: "\nstatus: approved\n"}
-      site/corp/plans/documents.yaml:
-        - {find: "\nstatus: draft\n", to: "\nstatus: approved\n"}
-      site/corp/plans/home.yaml:
-        - {find: "\nstatus: draft\n", to: "\nstatus: approved\n"}
-      site/corp/plans/legal.yaml:
-        - {find: "\nstatus: draft\n", to: "\nstatus: approved\n"}
-      site/corp/plans/news-item.yaml:
-        - {find: "\nstatus: draft\n", to: "\nstatus: approved\n"}
-      site/corp/plans/news.yaml:
-        - {find: "\nstatus: draft\n", to: "\nstatus: approved\n"}
-      site/corp/plans/projects.yaml:
-        - {find: "\nstatus: draft\n", to: "\nstatus: approved\n"}
-      site/corp/plans/project.yaml:
-        - {find: "\nstatus: draft\n", to: "\nstatus: approved\n"}
-      site/corp/plans/request.yaml:
-        - {find: "\nstatus: draft\n", to: "\nstatus: approved\n"}
-      site/corp/plans/thank-you.yaml:
-        - {find: "\nstatus: draft\n", to: "\nstatus: approved\n"}

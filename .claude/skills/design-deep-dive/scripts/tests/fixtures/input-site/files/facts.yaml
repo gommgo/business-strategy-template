@@ -1,0 +1,382 @@
+# ДЕМО-ФАКТЫ · «Сталькон» — ВЫМЫШЛЕНЫ (формат text facts.yaml, example: true): металлоконструкции, B2B. Макет на них
+# допустим, в публикацию они не идут: copydeck.py validate --final и claims_check.py --final дают error.
+facts_version: 1
+date: '2026-09-29'
+site: stalkon
+lang: ru
+jurisdiction: ru
+status: draft
+example: true
+owner:
+  role: директор (заказчик)
+  contact: почта заказчика из брифа
+collected_by: редактор по анкете proof-intake.md
+intake:
+  form: proof-intake.md@2026-09-24
+  asked: '2026-09-10'
+  answered: '2026-09-18'
+  channel: общий документ + созвон с записью
+never_claim_defaults: ru-default-1
+entities:
+- id: company-stalkon
+  type: company
+  names:
+  - «Сталькон»
+  - Сталькон
+  - ООО «Сталькон»
+facts:
+- id: company-requisites
+  kind: company
+  claim_class:
+  - company-details
+  - fact-number
+  verbatim:
+  - ООО «Сталькон» (вымышленная демо-компания), ОГРН 0000000000000 — ДЕМО
+  canonical: ООО «Сталькон», ОГРН 0000000000000 — вымышленная демо-компания.
+  entities:
+  - company-stalkon
+  source:
+    type: registry
+    who: ЕГРЮЛ
+    where: выписка (демо)
+    date: '2026-09-10'
+    document: egrul-demo.pdf
+    quote: 'ООО «Сталькон», ОГРН 0000000000000'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: not-required
+  use:
+    section_roles: []
+    slot_types: []
+  lang: ru
+- id: company-since-2009
+  kind: company
+  claim_class:
+  - company-details
+  - fact-number
+  verbatim:
+  - Работаем с 2009 года (демо)
+  canonical: «Сталькон» работает с 2009 года.
+  values:
+  - value: 2009
+    unit: year
+    what: год начала работы
+  entities:
+  - company-stalkon
+  source:
+    type: registry
+    who: ЕГРЮЛ
+    where: выписка (демо)
+    date: '2026-09-10'
+    document: egrul-demo.pdf
+    quote: 'Год регистрации: 2009'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: not-required
+  use:
+    section_roles: []
+    slot_types: []
+  lang: ru
+- id: projects-count
+  kind: metric
+  claim_class:
+  - fact-number
+  verbatim:
+  - 312 объектов с 2009 года (демо)
+  canonical: С 2009 года «Сталькон» сдал по актам 312 объектов (реестр объектов на 1 сентября 2026 года).
+  values:
+  - value: 312
+    unit: pcs
+    what: объекты, сданные по акту
+    as_of: '2026-09-01'
+  - value: 2009
+    unit: year
+    what: год начала работы
+  entities:
+  - company-stalkon
+  source:
+    type: customer-system
+    who: заказчик (директор)
+    where: реестр объектов и актов сдачи-приёмки (демо)
+    date: '2026-09-01'
+    document: objects-demo.xlsx, лист «Акты»
+    quote: 'Объектов сдано по актам: 312 (с 2009 года)'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+    method: число строк реестра совпало с числом актов (демо)
+  permission:
+    status: not-required
+  use:
+    section_roles: []
+    slot_types: []
+  notes: «Более 300 объектов» — округление вниз допустимо; «350+» — нет (текст не может быть больше факта).
+  lang: ru
+- id: capacity-tons
+  kind: metric
+  claim_class:
+  - fact-number
+  verbatim:
+  - 1 800 тонн металлоконструкций в месяц (демо)
+  canonical: Производственная мощность «Сталькона» — 1 800 тонн металлоконструкций в месяц.
+  values:
+  - value: 1800
+    unit: t
+    what: металлоконструкции в месяц
+  entities:
+  - company-stalkon
+  source:
+    type: customer-document
+    who: заказчик (главный инженер)
+    where: паспорт производства (демо)
+    date: '2026-09-01'
+    document: production-passport-demo.pdf
+    quote: 'Производственная мощность: 1 800 т металлоконструкций в месяц'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: not-required
+  use:
+    section_roles: []
+    slot_types: []
+  lang: ru
+- id: staff-count
+  kind: metric
+  claim_class:
+  - fact-number
+  verbatim:
+  - 240 сотрудников в штате (демо)
+  canonical: В штате «Сталькона» 240 сотрудников (штатное расписание на 1 сентября 2026 года).
+  values:
+  - value: 240
+    unit: pcs
+    what: сотрудники в штате
+    as_of: '2026-09-01'
+  entities:
+  - company-stalkon
+  source:
+    type: customer-document
+    who: заказчик (директор)
+    where: штатное расписание (демо)
+    date: '2026-09-01'
+    document: staff-demo.xlsx
+    quote: 'Штатная численность: 240'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: not-required
+  use:
+    section_roles: []
+    slot_types: []
+  lang: ru
+- id: case-warehouse
+  kind: case
+  claim_class:
+  - fact-number
+  verbatim:
+  - Склад 12 000 м² за 94 дня (демо)
+  canonical: Каркас склада площадью 12 000 м² изготовлен и смонтирован за 94 дня (договор и акт — демо).
+  values:
+  - value: 12000
+    unit: m2
+    what: площадь склада
+  - value: 94
+    unit: days
+    what: срок изготовления и монтажа, дни
+  entities:
+  - company-stalkon
+  source:
+    type: contract
+    who: заказчик
+    where: договор подряда и акт сдачи-приёмки (демо)
+    date: '2026-05-30'
+    document: договор № ДЕМО-01; акт (демо)
+    quote: 'Объект: склад, 12 000 м²; срок изготовления и монтажа — 94 дня'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: granted
+    subject: заказчик объекта (демо)
+    form: written-email
+    document: письмо (демо)
+    date: '2026-09-16'
+    shows:
+    - city
+    pd_consent: false
+    image_consent: false
+  asset: assets/cases/warehouse/ (фото объекта от заказчика, демо)
+  use:
+    section_roles: []
+    slot_types: []
+  lang: ru
+- id: case-bridge
+  kind: case
+  claim_class:
+  - fact-number
+  verbatim:
+  - Пешеходный мост 48 м за 60 дней (демо)
+  canonical: Пешеходный мост длиной 48 м изготовлен и смонтирован за 60 дней (договор и акт — демо).
+  values:
+  - value: 48
+    unit: m
+    what: длина моста
+  - value: 60
+    unit: days
+    what: срок изготовления и монтажа, дни
+  entities:
+  - company-stalkon
+  source:
+    type: contract
+    who: заказчик
+    where: договор подряда и акт сдачи-приёмки (демо)
+    date: '2026-06-20'
+    document: договор № ДЕМО-02; акт (демо)
+    quote: 'Объект: пешеходный мост, 48 м; срок изготовления и монтажа — 60 дней'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: granted
+    subject: заказчик объекта (демо)
+    form: written-email
+    document: письмо (демо)
+    date: '2026-09-16'
+    shows:
+    - city
+    pd_consent: false
+    image_consent: false
+  asset: assets/cases/bridge/ (фото объекта от заказчика, демо)
+  use:
+    section_roles: []
+    slot_types: []
+  lang: ru
+- id: person-chief-engineer
+  kind: person
+  claim_class:
+  - fact-property
+  verbatim:
+  - Главный инженер — демо-персона, согласие на изображение (демо)
+  canonical: Главный инженер «Сталькона» — демо-персона; согласие на изображение есть (демо).
+  entities:
+  - company-stalkon
+  source:
+    type: customer-document
+    who: заказчик
+    where: согласие на распространение ПДн и изображения (демо)
+    date: '2026-09-12'
+    document: consent-demo.pdf
+    quote: 'Главный инженер: согласие на изображение на сайте'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: granted
+    subject: главный инженер (демо-персона)
+    form: signed-consent
+    scope:
+    - site
+    document: согласие на распространение ПДн (демо)
+    date: '2026-09-12'
+    shows:
+    - photo
+    - position
+    pd_consent: true
+    image_consent: true
+  attribution:
+    display: anonymous
+    role: главный инженер
+    relation: employee
+  asset: assets/team/chief-engineer.jpg (фото заказчика, демо)
+  use:
+    section_roles: []
+    slot_types: []
+  lang: ru
+- id: certificate-sro
+  kind: certificate
+  claim_class:
+  - fact-number
+  verbatim:
+  - Допуск СРО № ДЕМО-0000 (демо, срок — до 2027-12-31)
+  canonical: У «Сталькона» допуск СРО № ДЕМО-0000, действует до 31 декабря 2027 года (демо).
+  entities:
+  - company-stalkon
+  source:
+    type: registry
+    who: реестр членов СРО (демо)
+    where: выписка из реестра
+    date: '2026-09-10'
+    document: sro-demo.pdf
+    quote: 'Допуск СРО № ДЕМО-0000, действует до 2027-12-31'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: not-required
+  use:
+    section_roles: []
+    slot_types: []
+  lang: ru
+  valid:
+    until: '2027-12-31'
+missing:
+- id: client-logos
+  what: логотипы клиентов с письменным разрешением
+  kind: client
+  claim_class:
+  - company-details
+  placeholder: '[PLACEHOLDER: логотипы клиентов с разрешением]'
+  who: заказчик (директор)
+  needed_for:
+    section_roles:
+    - proof-logos
+    slot_types:
+    - logos-caption
+  asked: '2026-09-10'
+  due: '2026-09-30'
+  blocking: false
+  fallback: omit-block
+  question: Каких клиентов можно показать логотипом? Пришлите логотипы (SVG) и письменное разрешение каждого.
+- id: job-openings
+  what: список открытых вакансий с датами
+  kind: availability
+  claim_class:
+  - company-details
+  placeholder: '[PLACEHOLDER: открытые вакансии]'
+  who: заказчик (HR)
+  needed_for:
+    section_roles:
+    - offer
+    slot_types:
+    - card-title
+    - card-body
+  asked: '2026-09-10'
+  due: '2026-09-30'
+  blocking: false
+  fallback: omit-block
+  question: Какие вакансии сейчас открыты и до какой даты? Требования — без пола, возраста и прописки.
+never_claim: []

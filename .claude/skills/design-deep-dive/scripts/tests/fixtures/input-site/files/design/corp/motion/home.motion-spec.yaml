@@ -1,0 +1,126 @@
+# Пример motion-spec v1 — «Сталькон», главная корпоративного многостраничника (L1). Учебный.
+# creative-research · 09-ai-execution-evaluation · агент I · волна 3 · 2026-09-24.
+# Проверка: spec_check.py spec … --plan ../site/10-playbooks-contracts/examples/corporate-b2b-stalkon/plans/home.yaml --overlay stalkon-home.treatment.yaml
+# Показывает класс transition: кросс-документный View Transition «обложка карточки → hero кейса» с именами и ролями (Bramus) и долями базы.
+motion_spec_version: "1.0"
+id: stalkon-home
+example: true
+status: draft
+checked_at: "2026-09-24"
+refs:
+  page_plan: ../../../site/corp/plans/home.yaml
+  tokens: ../../04-visual-language/marketing-tokens.json
+  effects: ../../06-effects-catalog/effects.yaml
+  block_treatments: ../block-treatments.yaml
+level: L1
+executor: {target: any, harness: any, video_in: false}
+page:
+  thesis: "Сталь не суетится: страница стоит, двигается только путь от карточки объекта к его кейсу — обложка переезжает на новую страницу."
+  character: [heavy, precise]
+  base: {duration_ms: 320, easing: {token: motion.marketing.easing.in-out}}
+  primitives: [fade-up, none]
+  lcp: {target: hero.visual, entrance: transform-only, note: "фото объекта — кандидат LCP"}
+  toggle: {required: false, attr: data-motion, states: [system, reduced, full], placement: sticky-header, remember: false}
+  scroll: {smooth: false, tail_ms_max: 0, jacking: never}
+  transitions:
+    kind: view-transitions
+    base_ms: 320
+    names:
+      - {name: case-cover, role: shared, share: 1, delay_share: 0}
+      - {name: case-title, role: new-only, share: 0.75, delay_share: 0.25}
+      - {name: site-header, role: shared, share: 0, delay_share: 0}
+  properties_allowed: [transform, opacity, view-transition]
+  budget: {loops_in_view_max: 0, loops_in_view_max_mobile: 0, first_screen_scene_ms_max: 600, js_kb_br_effects_max: 1, long_frames_pct_max: 2, cls_scroll_max: 0.1}
+  never:
+    - "появление секций ниже первого экрана; счётчики; бегущая строка логотипов"
+    - "шторка на весь экран между страницами; повторяющееся интро на каждом переходе"
+    - "переход дольше 400 мс (переход видят на каждом клике — E 02 §8.3)"
+sections:
+  - id: hero
+    block: hero-media
+    role: accent
+    level: L1
+    intent: "первый экран оседает один раз: фото объекта опускается на место сдвигом, текст поддержки поднимается; H1 стоит"
+    moments:
+      - id: hero-photo-settle
+        class: one-shot
+        purpose: guide
+        transition_type: entrance
+        effect: "effect:hero-entrance-once"
+        target: hero.visual
+        trigger: {type: load}
+        model: time
+        tracks:
+          - {property: transform, from: "translateY(var(--mm-shift-hero))", to: "none"}
+        duration: {token: motion.marketing.duration.reveal}
+        easing: {token: motion.marketing.easing.out-expo}
+        repeat: once
+        interrupt: jump-to-end
+        lcp: is-lcp
+        reduce: {strategy: final-state, describe: "фото на месте"}
+        mobile: {strategy: same}
+      - id: hero-copy-rise
+        class: one-shot
+        purpose: guide
+        transition_type: entrance
+        effect: "effect:hero-entrance-once"
+        target: hero.subheadline
+        trigger: {type: load, delay_ms: 60}
+        model: time
+        tracks:
+          - {property: transform, from: "translateY(var(--mm-shift-reveal))", to: "none"}
+          - {property: opacity, from: 0.01, to: 1}
+        duration: {token: motion.marketing.duration.reveal}
+        easing: {token: motion.marketing.easing.out-expo}
+        repeat: once
+        note: "в плане site у hero нет слота призыва (призыв — в шапке, site-nav): двигается только подзаголовок; spec_check поймал цель hero.cta"
+        interrupt: jump-to-end
+        lcp: not-lcp
+        reduce: {strategy: final-state, describe: "подзаголовок виден сразу, без смещения"}
+        mobile: {strategy: same}
+    reduce: {strategy: final-state, describe: "первый экран полон с первого кадра"}
+    mobile: {strategy: separate-asset, describe: "фото 4:5 под заголовком, тот же сдвиг"}
+    acceptance:
+      - {id: hero-h1-lcp, check: "H1 не выпал из кандидатов LCP, LCP-элемент — фото или H1", tool: motion_check, gate: EG-PERF-07, metric: vitals.h1_lcp_dropped, at: desktop}
+  - id: case-studies
+    block: case-cards
+    role: support
+    level: L1
+    intent: "переход с главной на кейс: обложка карточки переезжает и становится hero страницы кейса; заголовок кейса появляется после"
+    moments:
+      - id: case-cover-to-page
+        class: transition
+        purpose: continuity
+        transition_type: persistent
+        effect: "effect:page-transition"
+        target: case-studies.case
+        selector_hint: ".case-card__cover → .case-hero__media (view-transition-name: case-cover)"
+        trigger: {type: click}
+        model: time
+        tracks:
+          - {property: view-transition, from: "карточка: обложка view-transition-name case-cover", to: "страница кейса: hero-медиа с тем же именем"}
+        duration: {share: 1}
+        easing: {token: motion.marketing.easing.in-out}
+        repeat: each-entry
+        interrupt: jump-to-end
+        reduce: {strategy: crossfade, describe: "@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none } } — мгновенная смена"}
+        mobile: {strategy: same, describe: "то же; на медленной сети переход пропускается сам (таймаут навигации 4 с)"}
+        note: "имя case-cover ставится только на обложку нажатой карточки (уникальность имени на странице); фокус после перехода — на H1 кейса; «назад» — тот же переход обратно"
+    reduce: {strategy: crossfade, describe: "без анимации перехода"}
+    mobile: {strategy: same, describe: "как на десктопе"}
+    fallback:
+      no_js: "обычная навигация; переход — CSS @view-transition, JS не нужен"
+      unsupported: "Firefox и старые браузеры: обычная навигация без перехода"
+    budget: {js_kb_br: 0, loops_in_view: 0, load: eager}
+    acceptance:
+      - {id: vt-duration, check: "переход ≤ 400 мс, в reduce мгновенно", tool: eye, at: desktop}
+  - id: final-cta
+    block: cta-band
+    role: accent
+    level: L1
+    intent: "без движения: смена фона на тёмный"
+    moments: []
+    reduce: {strategy: no-motion-needed, describe: "как есть"}
+    mobile: {strategy: same, describe: "кнопка на всю ширину"}
+open_questions:
+  - "Кросс-документный переход — effect:page-transition (effects.yaml v0.3: нативный @view-transition — L1, библиотеки — L2; решение оркестратора 2026-09-25, X-21; до S1 здесь стоял effect:view-transition — переход внутри документа); Chromium 126+, Safari 18.2+; Firefox — нет (E 02 §8.1): поддержку сверить в живой фазе."

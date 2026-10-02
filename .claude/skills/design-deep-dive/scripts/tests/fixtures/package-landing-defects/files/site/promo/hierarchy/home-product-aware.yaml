@@ -1,0 +1,142 @@
+# hierarchy-otves-product-aware.yaml — иерархия лендинга «Отвес» для брендового трафика и карт (product-aware)
+# text-research · B1 · 2026-09-24 · формат: ../message-hierarchy.schema.yaml (hierarchy_version 1)
+# Та же студия и тот же смысл, что в hierarchy-otves-problem-aware.yaml; другой уровень осведомлённости: посетитель
+# уже знает «Отвес» (искал «Отвес ремонт отзывы», увидел карточку на Яндекс Картах, пришёл по рекомендации) и проверяет
+# перед звонком. Разница — опыт 99-raw/experiments/B1/02-two-hierarchies/.
+
+hierarchy_version: 1
+date: "2026-09-24"
+status: draft
+id: hierarchy-otves-product-aware
+site: otves-remont-nn
+meaning_ref: ../meaning.yaml
+lang: ru
+sibling_ids: [hierarchy-otves-problem-aware]
+
+page:
+  page_type: landing-lead-services
+  segment_ref: busy-owners
+  awareness: product-aware
+  traffic_sources: [search-brand, maps-local, referral]
+  sophistication_stage: 4
+  promise_of_source: "брендовый запрос «Отвес ремонт отзывы»; карточка организации на Яндекс Картах (рейтинг, фото)"
+  argument_depth: short
+  goal:
+    action_ref: request-measurement
+    secondary_goal: "Сохранить контакты и пример сметы"
+
+core_message:
+  text: "«Отвес» — 12 лет ремонтов в Нижнем Новгороде: 4,8 из 5 на Яндекс Картах, срок и смета в договоре, гарантия 3 года; замер и смета бесплатно."
+  hero_approach: product-benefit
+  value_theme_refs: [val-proven-locally, val-predictable]
+  proof_ids: ["fact:company-since-2014", "fact:rating-yandex-maps", "fact:guarantee-3-years", "fact:estimate-free"]
+  must_not_say:
+    - "«смета никогда не меняется»"
+    - "«лучший в городе»"
+
+first_screen:
+  what: "студия ремонта квартир под ключ «Отвес», Нижний Новгород"
+  for_whom: "тем, кто уже выбирает «Отвес» и проверяет перед звонком"
+  outcome: "ремонт в срок из договора"
+  differentiator: "1 146 квартир с 2014 года; 4,8 из 5 по 214 оценкам на Яндекс Картах"
+  next_step: "вызвать замерщика — бесплатно"
+  proof_ids: ["fact:flats-completed", "fact:rating-yandex-maps", "fact:estimate-free"]
+  message_match: "искал отзывы → в первом экране рейтинг с числом оценок и датой, сразу ниже — отзывы"
+
+pillars:
+  - id: pl-reviews
+    message: "Клиенты подтверждают срок и смету своими словами"
+    value_theme_refs: [val-proven-locally]
+    layer: relevance
+    proof_status: has-proof
+    proof_ids: ["fact:review-anna-k", "fact:rating-yandex-maps"]
+    objection_ids: [obj-trust]
+  - id: pl-track-record
+    message: "1 146 квартир в Нижнем Новгороде с 2014 года"
+    value_theme_refs: [val-proven-locally]
+    layer: differentiation
+    proof_status: has-proof
+    proof_ids: ["fact:flats-completed", "fact:company-since-2014"]
+    objection_ids: [obj-trust, obj-same-as-others]
+  - id: pl-contract
+    message: "Срок и смета — в договоре, гарантия 3 года, объект ведёт один прораб"
+    value_theme_refs: [val-predictable, val-control-without-visits]
+    layer: value
+    proof_status: has-proof
+    proof_ids: ["fact:guarantee-3-years", "fact:case-two-room-47-days", "fact:foreman-lapin", "missing:foreman-per-object", "missing:estimate-change-policy"]
+    objection_ids: [obj-budget-grows, obj-delays]
+  - id: pl-offer
+    message: "Замер и смета бесплатно; при договоре до 31 октября 2026 — минус 10 % на работы"
+    layer: friction
+    proof_status: has-proof
+    proof_ids: ["fact:estimate-free", "fact:promo-october-10", "fact:price-from-per-m2"]
+    objection_ids: [obj-price, obj-timing]
+
+sections:
+  - order: 1
+    section_role: hero
+    question: "Это та студия, про которую я слышал? Им можно доверять?"
+    message: "Да: 12 лет в городе, 4,8 из 5 на Яндекс Картах, срок и смета в договоре; замер бесплатно."
+    carries: [core]
+    proof_ids: ["fact:company-since-2014", "fact:rating-yandex-maps", "fact:estimate-free"]
+    next_step: "Главный призыв «Вызвать замерщика» в первом экране"
+  - order: 2
+    section_role: testimonials
+    question: "Что говорят те, кто уже делал у вас ремонт?"
+    message: "Отзыв с подробностями: срок, смета, связь с прорабом; ссылка на карточку с оценками."
+    carries: [pl-reviews]
+    proof_ids: ["fact:review-anna-k", "fact:rating-yandex-maps"]
+    objection_ids: [obj-trust]
+  - order: 3
+    section_role: case-studies
+    question: "Сдаёте в срок?"
+    message: "Двушка 54 м²: 47 рабочих дней при 50 по договору."
+    carries: [pl-contract]
+    proof_ids: ["fact:case-two-room-47-days"]
+    objection_ids: [obj-delays]
+  - order: 4
+    section_role: guarantee
+    question: "Что если что-то пойдёт не так?"
+    message: "Гарантия 3 года на работы — пункт 7.2 договора; смета — часть договора."
+    carries: [pl-contract]
+    proof_ids: ["fact:guarantee-3-years", "missing:estimate-change-policy"]
+    objection_ids: [obj-budget-grows]
+  - order: 5
+    section_role: pricing
+    question: "Сколько стоит и есть ли скидка сейчас?"
+    message: "От 9 800 ₽ за м² без материалов; смета бесплатно; минус 10 % на работы при договоре до 31 октября."
+    carries: [pl-offer]
+    proof_ids: ["fact:price-from-per-m2", "fact:estimate-free", "fact:promo-october-10"]
+    objection_ids: [obj-price, obj-timing]
+  - order: 6
+    section_role: proof-stats
+    question: "Сколько вы уже сделали?"
+    message: "1 146 квартир с 2014 года."
+    carries: [pl-track-record]
+    proof_ids: ["fact:flats-completed", "fact:company-since-2014"]
+    objection_ids: [obj-same-as-others]
+  - order: 7
+    section_role: lead-form
+    question: "Как записаться на замер?"
+    message: "Замер бесплатно и ни к чему не обязывает; перезвоним и согласуем время."
+    carries: [pl-offer]
+    proof_ids: ["fact:estimate-free"]
+  - order: 8
+    section_role: faq
+    question: "Возьмёте только ванную? Как с соседями?"
+    message: "Минимальный объём, правила работы в доме, оплата."
+    proof_ids: ["missing:min-job-size", "missing:payment-stages"]
+    objection_ids: [obj-small-job, obj-neighbours]
+  - order: 9
+    section_role: final-cta
+    question: "Что сделать сейчас?"
+    message: "Вызвать замерщика; пример сметы — переслать домашним."
+    carries: [core]
+    objection_ids: [obj-decision-maker]
+
+proof_order: ["fact:rating-yandex-maps", "fact:review-anna-k", "fact:case-two-room-47-days", "fact:guarantee-3-years",
+              "fact:price-from-per-m2", "fact:estimate-free", "fact:promo-october-10", "fact:flats-completed"]
+
+not_said:
+  - "История «почему ремонты срываются» — этот трафик подход уже выбрал, ему нужна проверка студии"
+  - "Сравнение с частными бригадами и ведением ремонта самому"

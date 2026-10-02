@@ -1,0 +1,32 @@
+# Иллюстрация: бренд демо-кабинета «Отвес» (фикстура cabinet-ds) — для самопроверок утилит скилла, не материалы
+# заказчика. Форма — docs/projects/_template/design/_template/brand.yaml.
+example: true
+name: Отвес
+status: draft
+guidelines_ref: "—"
+
+logo:
+  files:
+    primary: otves-logo.svg
+    on_dark: otves-logo-on-dark.svg
+  never: [перерисовывать, перекрашивать, растягивать, добавлять эффекты]
+
+colors:
+  roles:
+    background: "#f8fafc"
+    surface: "#ffffff"
+    text: "#0f172a"
+    muted: "#475569"
+    border: "#e2e8f0"
+    accent: "#1d4ed8"
+    accent_hover: "#2563eb"
+    on_accent: "#ffffff"
+    focus: "#2563eb"
+  avoid: ["терракота — демо-запрет фикстуры"]
+
+fonts:
+  families:
+    - {role: heading, family: Golos Text, cyrillic: true, license: SIL OFL 1.1}
+    - {role: body, family: Golos Text, cyrillic: true, license: SIL OFL 1.1}
+
+sources: ["демо фикстуры cabinet-ds: материалов заказчика нет"]

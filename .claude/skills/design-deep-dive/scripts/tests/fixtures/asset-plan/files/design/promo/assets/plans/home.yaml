@@ -1,0 +1,158 @@
+# План ассетов страницы home — каркас из home.yaml (plan_to_assets.py). Формат — ai-media 01/01 §8, схема —
+# kb/ai-media/05-prompting/asset-plan.schema.json. Заглушки TODO, предмет, варианты, вес, фокус и дорогу 3D
+# дописывает агент; тексты ассетов — copydeck.py export-assets; генерация — после status: approved и approval.
+plan_version: 1
+checked: '2026-09-24'
+status: draft
+example: true
+refs:
+  page_plan: ../../../../site/promo/plans/home.yaml
+page:
+  id: home
+  page_type: landing-lead-services
+  media_class: corporate
+  locale: ru-RU
+  goal: Заявки на бесплатный замер от владельцев квартир 40–80 м² под полный ремонт в Нижнем Новгороде
+budgets:
+  profile: landing-lead-services@L1
+  first_screen_kb:
+    mobile: 1500
+    desktop: 2500
+  session_kb:
+    mobile: 5000
+    desktop: 10000
+    basis: S-creative-C1; ai-media лидеры SaaS сессия 7,1 МБ
+policy:
+  no_ai_subjects:
+  - logos
+  - real_people_or_work
+  disclosure: per-slot
+slots:
+- id: header-logo
+  section: header
+  slot: brand-logo
+  role: informational
+  goal: 'TODO: что ассет показывает за 3 секунды'
+  ladder: svg
+  source: real
+  task_codes: []
+  variants:
+  - id: default
+    ratio: TODO
+    size: TODO
+    formats: TODO
+    max_kb: TODO
+  motion:
+    type: none
+  delivery:
+    lcp_candidate: false
+    loading: lazy
+  ai_fit: forbidden
+  note: 'ждём материалы заказчика (source: customer-tbd в плане страницы)'
+- id: hero-visual
+  section: hero
+  slot: hero-visual
+  role: informational
+  goal: 'прораб Сергей Лапин на объекте: «за ремонт отвечает один человек»'
+  key: true
+  ladder: image
+  source: real
+  task_codes:
+  - IMG-EDIT
+  variants:
+  - id: desktop
+    ratio: '1:1'
+    size: TODO
+    formats: TODO
+    max_kb: TODO
+    text_zone:
+      side: none
+  - id: mobile
+    ratio: '4:5'
+    size: TODO
+    formats: TODO
+    max_kb: TODO
+  motion:
+    type: none
+  delivery:
+    lcp_candidate: true
+    loading: eager
+    fetchpriority: high
+  alt_ref: hero.alt
+  ai_fit: forbidden
+  note: 'подлинность real-only: люди-доказательства, товар «как есть», чужие знаки — только настоящие (ai-media 12/04 §2,
+    site 08/02 §2.1)'
+- id: case-studies-photo
+  section: case-studies
+  slot: photo
+  role: informational
+  goal: квартира после ремонта
+  ladder: image
+  source: real
+  task_codes: []
+  variants:
+  - id: desktop
+    ratio: '4:3'
+    size: TODO
+    formats: TODO
+    max_kb: TODO
+  - id: mobile
+    ratio: '4:5'
+    size: TODO
+    formats: TODO
+    max_kb: TODO
+  motion:
+    type: none
+  delivery:
+    lcp_candidate: false
+    loading: lazy
+  alt_ref: decorative
+  ai_fit: forbidden
+  note: 'ждём материалы заказчика (source: customer-tbd в плане страницы); подлинность real-only: люди-доказательства, товар
+    «как есть», чужие знаки — только настоящие (ai-media 12/04 §2, site 08/02 §2.1)'
+- id: team-person-1-photo
+  section: team
+  slot: photo
+  role: informational
+  goal: 'TODO: что ассет показывает за 3 секунды'
+  ladder: image
+  source: real
+  task_codes: []
+  variants:
+  - id: desktop
+    ratio: '4:5'
+    size: TODO
+    formats: TODO
+    max_kb: TODO
+  - id: mobile
+    ratio: '4:5'
+    size: TODO
+    formats: TODO
+    max_kb: TODO
+  motion:
+    type: none
+  delivery:
+    lcp_candidate: false
+    loading: lazy
+  alt_ref: team.person-1-name
+  ai_fit: forbidden
+  note: 'подлинность real-only: люди-доказательства, товар «как есть», чужие знаки — только настоящие (ai-media 12/04 §2,
+    site 08/02 §2.1)'
+- id: og-image
+  section: meta
+  slot: og-image
+  role: informational
+  goal: превью ссылки для мессенджеров (рекомендации)
+  ladder: image
+  source: template
+  task_codes: []
+  variants:
+  - id: og-image
+    ratio: 1.91:1
+  motion:
+    type: none
+  delivery:
+    lcp_candidate: false
+    loading: lazy
+  alt_ref: meta.og-image-alt
+  ai_fit: allowed

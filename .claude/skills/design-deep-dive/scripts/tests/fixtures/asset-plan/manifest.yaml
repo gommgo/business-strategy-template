@@ -1,16 +1,10 @@
 # Фикстура asset-plan — иллюстрация для самопроверки site/plan_to_assets.py и прогонов аудита слоя дизайна: демо-проект
-# фикстуры minimal (лендинг promo с планом главной) и план ассетов главной на своём месте в слое дизайна — каркас
-# примера базы lead-services-otves. Ссылки поправлены под раскладку проекта: план страницы ведёт в план ассетов, план
-# ассетов — в план страницы; plan_to_assets.py check на чистой сборке — 0 находок.
+# фикстуры minimal (лендинг promo с планом главной) и план ассетов главной на своём месте в слое дизайна. Свои файлы —
+# каркас плана ассетов и план главной со ссылкой на него: план страницы ведёт в план ассетов, план ассетов — в план
+# страницы; plan_to_assets.py check на чистой сборке — 0 находок.
 example: true
-description: лендинг promo с планом ассетов главной в design/promo/assets/plans/ — каркас примера lead-services-otves
+description: лендинг promo с планом ассетов главной в design/promo/assets/plans/
 project: otves-remont-nn
 extends: [minimal]
 layers:
-  - kb:
-      design/promo/assets/plans/home.yaml: site/10-playbooks-contracts/examples/lead-services-otves/asset-plan.home.yaml
-  - replace:
-      design/promo/assets/plans/home.yaml:
-        - {find: "  page_plan: plans/home.yaml", to: "  page_plan: ../../../../site/promo/plans/home.yaml"}
-      site/promo/plans/home.yaml:
-        - {find: "asset_plan: ../asset-plan.home.yaml", to: "asset_plan: ../../../design/promo/assets/plans/home.yaml"}
+  - files: files

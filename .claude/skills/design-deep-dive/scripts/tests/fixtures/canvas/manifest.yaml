@@ -1,12 +1,11 @@
 # Фикстура canvas — иллюстрация для самопроверок утилит холста scripts/claude-design/ (dc_to_html, kit_manifest,
-# literal_tokens, dc_texts): лендинг promo фикстуры minimal получает исходники холста и артефакт ДС
-# примера базы claude-design (демо «Спица»: восемь артбордов на трёх страницах холста, canvas.json, tokens.json
-# артефакта с темами). Своих файлов нет — только слои из kb. Формат манифеста — докстринг fixture_project.py.
+# literal_tokens, dc_texts): лендинг promo фикстуры minimal и свои файлы — исходники холста и артефакт ДС (демо
+# «Спица»: восемь артбордов на трёх страницах холста, canvas.json, tokens.json артефакта с темами). Статичных копий и
+# kit.json нет. Формат манифеста — докстринг fixture_project.py.
 example: true
-description: лендинг promo с исходниками холста и артефактом ДС примера claude-design; копий и kit.json нет
+description: лендинг promo с исходниками холста и артефактом ДС демо «Спица»; копий и kit.json нет
 project: otves-remont-nn
 extends: [minimal]
+unmarked: [files/design/promo/canvas/project, files/design/_design-system/project]   # формат артефактов холста
 layers:
-  - kb:
-      design/promo/canvas/project: claude-design/05-design-artifacts/example/canvas/project
-      design/_design-system/project: claude-design/05-design-artifacts/example/design-system/project
+  - files: files
