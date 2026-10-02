@@ -1,0 +1,5 @@
+# К4в — стык обходов copy deck и сверки фактов, класс страницы в спецификациях (волна 2); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/scripts/text/claims_check.py
+.claude/skills/design-deep-dive/scripts/text/copydeck.py
+.claude/skills/design-deep-dive/kb/ai-media/13-routing-matrix/stand/briefs/*.spec.json
+.claude/skills/design-deep-dive/kb/ai-media/14-recipes/examples/demo-landing/brand/specs/*.spec.json
