@@ -15,7 +15,7 @@
 и печатает отчёт; строка «<<<» в отчёте — непройденный порог контраста. `tokens.css` — эталонные токены
 `kb/ui/14-recipes/examples/tokens.css`, по ним `ui_audit.py` проверяет экран, когда токенов ДС проекта нет.
 
-Правила применения (`$extensions.org.ui-research.llm`) пишутся на английском: их читают модель и код. `size.control.*` —
+Правила применения (`$extensions.org.design-deep-dive.llm`) пишутся на английском: их читают модель и код. `size.control.*` —
 высота видимого контрола; зона нажатия на таче — не меньше 44×44 у каждой цели (правило `size.control.lg`), режимы
 плотности её не уменьшают. Метки `usage` описывают экраны приложения: H1 страницы сайта — роли display базы creative.
 """
@@ -33,8 +33,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 import kbpaths  # noqa: E402
 from color import hex2oklch, wcag, apca, composite, sim_cvd, dE_oklab  # noqa: E402
 
-EXT = "org.ui-research.llm"
-EXT_MODES = "org.ui-research.modes"
+EXT = "org.design-deep-dive.llm"
+EXT_MODES = "org.design-deep-dive.modes"
 
 # --------------------------------------------------------------------------------------
 # 1. Примитивы: цветовые шкалы (значения Tailwind v4 theme.css, OKLCH -> hex, см. F-notes S23)

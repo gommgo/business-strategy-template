@@ -69,7 +69,7 @@ JSON по стандарту W3C DTCG 2025.10, скомпилированные 
    выражается: `$value` либо ссылка целиком, либо собственный объект. Пять цветов теней и скрим поэтому
    заданы собственными значениями с `alpha`. Carbon обходит это нестандартным расширением
    `{value, alpha}`. → §2.7 `[спорно]`
-9. **Правила применения лежат в токене**, в расширении `$extensions.org.ui-research.llm` с полями
+9. **Правила применения лежат в токене**, в расширении `$extensions.org.design-deep-dive.llm` с полями
    `usage`, `rules`, `doNotUse`, `alternatives` — формат скопирован с `org.primer.llm` у GitHub Primer.
    Расширение стоит **только на семантических токенах** (185 из 185), на примитивах его нет. → §3
    `[система]`
@@ -77,7 +77,7 @@ JSON по стандарту W3C DTCG 2025.10, скомпилированные 
     ломает доступность), `RECOMMENDED default for…` (выбор по умолчанию), `Use for…` (обычное
     применение), плюс запрет `Do NOT use for…` с обоснованием в том же предложении. → §3.2 `[система]`
 11. **Тёмная тема — переопределение внутри токена**, а не отдельный файл: `$extensions.
-    org.ui-research.modes.dark`. Так делает Primer (`org.primer.overrides`) и Carbon (`carbon.themes`).
+    org.design-deep-dive.modes.dark`. Так делает Primer (`org.primer.overrides`) и Carbon (`carbon.themes`).
     Альтернатива по стандарту — Resolver Module с `sets` и `modifiers`, листинг в
     `03-theming-and-modes.md` §2. → §2.8 `[система]`
 12. **Переключатель темы вешается на тот же элемент, где объявлены семантические переменные** (`:root`).
@@ -172,7 +172,7 @@ JSON по стандарту W3C DTCG 2025.10, скомпилированные 
 
 Переопределений на тёмную тему: 60. Переопределений на плотность: 20 (11 шагов отступов и 9 размеров).
 Переопределений на сокращённое движение: 7 (3 длительности и 4 пространственные величины).
-Блоков `org.ui-research.llm`: 185, то есть 100 % семантических токенов и 0 % примитивов.
+Блоков `org.design-deep-dive.llm`: 185, то есть 100 % семантических токенов и 0 % примитивов.
 
 Для сравнения — порядки величин в живых системах (из исходников, `99-raw/notes/wave2/F-notes.md`):
 
@@ -439,15 +439,15 @@ sRGB, поэтому расширенный гамут ничего не даё�
 
 ### 2.8. Режимы внутри токена
 
-Тёмная тема и плотность записаны в `$extensions.org.ui-research.modes`:
+Тёмная тема и плотность записаны в `$extensions.org.design-deep-dive.modes`:
 
 ```json
 "canvas": {
   "$value": "{primitive.color.neutral.50}",
   "$description": "Page background behind every surface.",
   "$extensions": {
-    "org.ui-research.modes": {"dark": "{primitive.color.neutral.900}"},
-    "org.ui-research.llm": { "usage": ["page-background", "app-shell", "body"],
+    "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.900}"},
+    "org.design-deep-dive.llm": { "usage": ["page-background", "app-shell", "body"],
       "rules": "Use for the outermost page background only. Cards and panels MUST sit on bg.surface, not on this token." }
   }
 }
@@ -517,7 +517,7 @@ elevation.overlay  = 0 0 0 1px ring, 0 8px 16px -4px key.overlay, 0 16px 32px -8
    захардкоженное `translateY(8px)` выключить нельзя.
 
 **Сокращённое движение — четвёртая ось режимов**, ортогональная теме, плотности и контрасту. В
-`$extensions.org.ui-research.modes.reduced` переопределяются семь токенов: `slow`, `slower`, `slowest`
+`$extensions.org.design-deep-dive.modes.reduced` переопределяются семь токенов: `slow`, `slower`, `slowest`
 схлопываются в 150 ms, `translateSmall` и `translateMedium` в 0, `scaleIn` в 1, `staggerStep` в 0.
 В CSS это даёт блок `@media (prefers-reduced-motion: reduce)` плюс `:root[data-motion="reduced"]` для
 собственного переключателя в интерфейсе. Резолвер с контекстами `full` / `reduced` — в его файле §5.3.
@@ -533,7 +533,7 @@ elevation.overlay  = 0 0 0 1px ring, 0 8px 16px -4px key.overlay, 0 16px 32px -8
 
 ---
 
-## 3. Расширение `org.ui-research.llm`: правила применения внутри токена
+## 3. Расширение `org.design-deep-dive.llm`: правила применения внутри токена
 
 ### 3.1. Откуда формат
 
@@ -639,7 +639,7 @@ CSS-переменной из пути токена. В нашей схеме с
 ```json
 {
   "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
-  "$description": "ui-research reference token set. Preset: dense back-office admin, light theme is the default, dark theme and two density modes ship as in-token overrides under $extensions.org.ui-research.modes. Rules of use for a language model live under $extensions.org.ui-research.llm on every semantic token.",
+  "$description": "ui-research reference token set. Preset: dense back-office admin, light theme is the default, dark theme and two density modes ship as in-token overrides under $extensions.org.design-deep-dive.modes. Rules of use for a language model live under $extensions.org.design-deep-dive.llm on every semantic token.",
   "primitive": {
     "color": {
       "$type": "color",
@@ -945,8 +945,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.50}",
         "$description": "Page background behind every surface.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.900}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.900}"},
+          "org.design-deep-dive.llm": {
             "usage": ["page-background", "app-shell", "body"],
             "rules": "Use for the outermost page background only. Cards and panels MUST sit on bg.surface, not on this token."
           }
@@ -956,8 +956,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.white}",
         "$description": "Background of a card, panel, table or modal.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.800}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.800}"},
+          "org.design-deep-dive.llm": {
             "usage": ["card", "panel", "modal", "table", "sidebar"],
             "rules": "RECOMMENDED default surface for content containers. Pair with text.primary and border.subtle."
           }
@@ -967,8 +967,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.white}",
         "$description": "Background of a floating surface: popover, dropdown menu, tooltip body, toast.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.700}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.700}"},
+          "org.design-deep-dive.llm": {
             "usage": ["popover", "dropdown", "menu", "toast", "combobox-list"],
             "rules": "Use for surfaces rendered in a portal above the page. MUST be combined with elevation.overlay so the surface separates from the page in both themes."
           }
@@ -978,8 +978,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.100}",
         "$description": "Hover background of a row or list item that lies on bg.surface.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.700}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.700}"},
+          "org.design-deep-dive.llm": {
             "usage": ["table-row-hover", "list-item-hover", "menu-item-hover"],
             "rules": "Use for whole-row hover feedback. Do NOT use as a resting background. In the light theme text.tertiary reads 4.35:1 on it: acceptable for the transient hover state only, never for resting content."
           }
@@ -989,8 +989,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.100}",
         "$description": "Recessed area: zebra striping, code block, empty state, disabled field.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.950}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.950}"},
+          "org.design-deep-dive.llm": {
             "usage": ["zebra-row", "code-block", "empty-state", "input-disabled", "well"],
             "rules": "Use for areas that read as pushed into the surface. Do NOT use for elevated content. Text on it is text.primary or text.secondary: text.tertiary gives only 4.35:1 here in the light theme."
           }
@@ -1000,8 +1000,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.100}",
         "$description": "Resting background of a low-emphasis control: secondary button, chip, tag, segmented item.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.700}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.700}"},
+          "org.design-deep-dive.llm": {
             "usage": ["secondary-button", "chip", "tag", "segmented-control"],
             "rules": "Use for controls that need a fill but not the accent. Pair with text.primary."
           }
@@ -1011,8 +1011,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.200}",
         "$description": "Hover background of a low-emphasis control.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.600}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.600}"},
+          "org.design-deep-dive.llm": {
             "usage": ["secondary-button-hover", "chip-hover", "icon-button-hover"],
             "rules": "Use only for the hover state of a control already using bg.component."
           }
@@ -1022,8 +1022,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.300}",
         "$description": "Pressed or active background of a low-emphasis control.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.500}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.500}"},
+          "org.design-deep-dive.llm": {
             "usage": ["secondary-button-active", "toggle-selected", "segmented-item-selected"],
             "rules": "Use for the pressed state and for the selected item of a segmented control."
           }
@@ -1033,8 +1033,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.accent.100}",
         "$description": "Background of a selected row, selected list item or the active navigation item.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.accent.950}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.accent.950}"},
+          "org.design-deep-dive.llm": {
             "usage": ["row-selected", "nav-item-active", "option-selected"],
             "rules": "Use to mark selection, not hover. MUST be paired with a second signal (checkmark, left bar or bold label): colour alone is not enough. Hover on a selected item uses bg.selected-hover. Metadata inside a selected row uses text.secondary: text.tertiary drops to 3.9:1 on this token in the light theme."
           }
@@ -1044,8 +1044,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.accent.200}",
         "$description": "Hover background of an element that is already selected (selected + hover).",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.accent.900}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.accent.900}"},
+          "org.design-deep-dive.llm": {
             "usage": ["row-selected-hover", "nav-item-active-hover", "option-selected-hover"],
             "rules": "Use ONLY for the hover state of an element that already sits on bg.selected: one step darker than bg.selected in the light theme and one step lighter in the dark theme, so a hovered selected row stays distinct from both bg.selected and bg.surface-hover. Do NOT use for hover on unselected rows: that is bg.surface-hover."
           }
@@ -1055,8 +1055,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.800}",
         "$description": "Inverted surface used for tooltips and snackbars inside the current theme.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.100}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.100}"},
+          "org.design-deep-dive.llm": {
             "usage": ["tooltip", "snackbar", "inverse-banner"],
             "rules": "MUST be paired with text.on-inverse. Keeps tooltips high-contrast in both themes."
           }
@@ -1068,8 +1068,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.200}",
         "$description": "Divider and border of a non-interactive container.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.800}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.800}"},
+          "org.design-deep-dive.llm": {
             "usage": ["divider", "card-border", "table-rule", "separator"],
             "rules": "Use for separators and card outlines. Do NOT use for the border of an input: it is below the 3:1 non-text contrast threshold."
           }
@@ -1079,8 +1079,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.300}",
         "$description": "Border of a low-emphasis interactive component at rest.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.700}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.700}"},
+          "org.design-deep-dive.llm": {
             "usage": ["secondary-button-border", "chip-border", "tab-border"],
             "rules": "Use for outlined controls whose shape is already carried by a fill or a label."
           }
@@ -1090,8 +1090,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.500}",
         "$description": "Border of an input, checkbox, radio or any control whose shape carries meaning.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.500}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.500}"},
+          "org.design-deep-dive.llm": {
             "usage": ["input-border", "checkbox-border", "radio-border", "select-border"],
             "rules": "MUST use for form control borders: this is the only neutral border token that meets WCAG 1.4.11 (3:1) in both themes."
           }
@@ -1103,8 +1103,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.900}",
         "$description": "Primary text: body copy, headings, table cell values.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.100}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.100}"},
+          "org.design-deep-dive.llm": {
             "usage": ["body-text", "heading", "default-text", "cell-value"],
             "rules": "RECOMMENDED default for all text. Use for headings, body text and primary labels."
           }
@@ -1114,8 +1114,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.600}",
         "$description": "Secondary text: metadata, captions, column headers, helper text.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.300}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.300}"},
+          "org.design-deep-dive.llm": {
             "usage": ["secondary-text", "metadata", "helper-text", "column-header"],
             "rules": "Use for supporting text next to primary content. Do NOT use for primary content."
           }
@@ -1125,8 +1125,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.500}",
         "$description": "Tertiary text: placeholders, hints, timestamps in dense lists.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.350}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.350}"},
+          "org.design-deep-dive.llm": {
             "usage": ["placeholder", "hint", "timestamp"],
             "rules": "Use for the lowest readable tier of text. Do NOT use for anything the user must read to complete a task. In the dark theme it sits on neutral-350, not 400, so it keeps 4.5:1 on bg.surface-raised (popover, dialog): neutral-400 gave 3.94:1 there."
           }
@@ -1136,8 +1136,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.400}",
         "$description": "Text of a disabled control.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.450}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.450}"},
+          "org.design-deep-dive.llm": {
             "usage": ["disabled-text", "disabled-label"],
             "rules": "Use ONLY inside a disabled control. It is below 4.5:1 on purpose (WCAG 1.4.3 exempts inactive components); never use it for active content. Target APCA Lc 30–45 on every surface (01-color/05 §4.2): neutral-450 gives Lc 31–41 in the dark theme from surface-raised to subtle, where neutral-500 gave Lc 25 and read as absent."
           }
@@ -1147,8 +1147,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.white}",
         "$description": "Text and icons on a solid accent fill.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.950}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.950}"},
+          "org.design-deep-dive.llm": {
             "usage": ["text-on-accent", "primary-button-label", "contrast-text"],
             "rules": "MUST use for text and icons on accent.solid. Its polarity flips between themes: white in the light theme, near-black in the dark theme, because the dark theme moves every solid fill to a light step. Never hard-code white."
           }
@@ -1158,8 +1158,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.50}",
         "$description": "Text on bg.inverse.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.900}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.900}"},
+          "org.design-deep-dive.llm": {
             "usage": ["tooltip-text", "snackbar-text"],
             "rules": "MUST use for text inside a tooltip or snackbar built on bg.inverse."
           }
@@ -1171,8 +1171,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.600}",
         "$description": "Default icon colour next to primary or secondary text.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.300}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.300}"},
+          "org.design-deep-dive.llm": {
             "usage": ["icon", "leading-icon", "trailing-icon"],
             "rules": "Use for icons that carry meaning. Match icon size to the adjacent text size."
           }
@@ -1182,8 +1182,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.500}",
         "$description": "Low-emphasis icon: chevrons, drag handles, decorative glyphs.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.350}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.350}"},
+          "org.design-deep-dive.llm": {
             "usage": ["chevron", "drag-handle", "decorative-icon"],
             "rules": "Use for structural glyphs. Do NOT use for status icons."
           }
@@ -1195,8 +1195,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.accent.50}",
         "$description": "Tinted accent background: info banner, highlighted zone, selected tab strip.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.accent.950}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.accent.950}"},
+          "org.design-deep-dive.llm": {
             "usage": ["accent-banner", "highlight-zone", "tinted-panel"],
             "rules": "Use as a soft accent fill under accent.text. Do NOT put text.on-accent on it."
           }
@@ -1206,8 +1206,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.accent.300}",
         "$description": "Border of an accent-tinted area or an accent-outlined control.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.accent.800}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.accent.800}"},
+          "org.design-deep-dive.llm": {
             "usage": ["accent-banner-border", "accent-outline"],
             "rules": "Use together with accent.bg. Do NOT use as a focus ring; use focus-ring."
           }
@@ -1217,8 +1217,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.accent.600}",
         "$description": "Solid accent fill: primary button, active toggle, progress bar.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.accent.400}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.accent.400}"},
+          "org.design-deep-dive.llm": {
             "usage": ["primary-button", "toggle-on", "progress-fill", "badge-solid"],
             "rules": "MUST be paired with text.on-accent. Exactly one solid accent per screen area: more than one primary button in a view is an error."
           }
@@ -1228,8 +1228,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.accent.700}",
         "$description": "Hover fill of a solid accent control.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.accent.300}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.accent.300}"},
+          "org.design-deep-dive.llm": {
             "usage": ["primary-button-hover"],
             "rules": "Use only for the hover state of accent.solid. The light theme darkens by one step, the dark theme lightens by one step."
           }
@@ -1239,8 +1239,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.accent.700}",
         "$description": "Accent text and links on a neutral background.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.accent.300}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.accent.300}"},
+          "org.design-deep-dive.llm": {
             "usage": ["link", "accent-text", "text-button"],
             "rules": "Use for links and text buttons. Do NOT use on accent.solid. In the dark theme it is accent-300, not accent-400: accent-400 gives 3.93:1 on bg.surface-raised."
           }
@@ -1251,8 +1251,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.color.accent.600}",
       "$description": "Focus indicator ring.",
       "$extensions": {
-        "org.ui-research.modes": {"dark": "{primitive.color.accent.400}"},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"dark": "{primitive.color.accent.400}"},
+        "org.design-deep-dive.llm": {
           "usage": ["focus-indicator", "focus-ring"],
           "rules": "MUST use for the keyboard focus ring, 2px wide with a 2px offset. Do NOT reuse accent.solid: the ring must stay visible on top of an accent fill."
         }
@@ -1262,8 +1262,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": {"colorSpace": "oklch", "components": [0.1298, 0.0425, 265.13], "alpha": 0.32, "hex": "#020618"},
       "$description": "Scrim behind a modal dialog or drawer.",
       "$extensions": {
-        "org.ui-research.modes": {"dark": {"colorSpace": "oklch", "components": [0.1298, 0.0425, 265.13], "alpha": 0.6, "hex": "#020618"}},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"dark": {"colorSpace": "oklch", "components": [0.1298, 0.0425, 265.13], "alpha": 0.6, "hex": "#020618"}},
+        "org.design-deep-dive.llm": {
           "usage": ["modal-scrim", "drawer-scrim", "backdrop"],
           "rules": "Use under any blocking overlay. Keep one scrim per screen: nested scrims stack and darken the page twice."
         }
@@ -1273,8 +1273,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.color.accent.200}",
       "$description": "Background of selected text (::selection).",
       "$extensions": {
-        "org.ui-research.modes": {"dark": "{primitive.color.accent.800}"},
-        "org.ui-research.llm": {"usage": ["text-selection"], "rules": "Use for ::selection only. Row selection uses bg.selected."}
+        "org.design-deep-dive.modes": {"dark": "{primitive.color.accent.800}"},
+        "org.design-deep-dive.llm": {"usage": ["text-selection"], "rules": "Use for ::selection only. Row selection uses bg.selected."}
       }
     },
     "shadow": {
@@ -1282,8 +1282,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": {"colorSpace": "oklch", "components": [0.1298, 0.0425, 265.13], "alpha": 0.06, "hex": "#020618"},
         "$description": "Colour of the 1px ring layer present in every elevation token.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": {"colorSpace": "oklch", "components": [1.0, 0.0, 89.88], "alpha": 0.1, "hex": "#ffffff"}},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": {"colorSpace": "oklch", "components": [1.0, 0.0, 89.88], "alpha": 0.1, "hex": "#ffffff"}},
+          "org.design-deep-dive.llm": {
             "usage": ["shadow-ring", "hairline"],
             "rules": "Carries the outline of a floating surface. In the dark theme it flips polarity to a translucent white, because a black ring is invisible on a dark canvas."
           }
@@ -1294,10 +1294,10 @@ CSS-переменной из пути токена. В нашей схеме с
           "$value": {"colorSpace": "oklch", "components": [0.1298, 0.0425, 265.13], "alpha": 0.08, "hex": "#020618"},
           "$description": "Key (near, tight) shadow layer of elevation.raised.",
           "$extensions": {
-            "org.ui-research.modes": {
+            "org.design-deep-dive.modes": {
               "dark": {"colorSpace": "oklch", "components": [0.1298, 0.0425, 265.13], "alpha": 0.4, "hex": "#020618"}
             },
-            "org.ui-research.llm": {
+            "org.design-deep-dive.llm": {
               "usage": ["shadow-key"],
               "rules": "Short offset, small blur, no spread. Do NOT raise its alpha in the light theme: above 0.12 the edge starts to read as a border."
             }
@@ -1307,10 +1307,10 @@ CSS-переменной из пути токена. В нашей схеме с
           "$value": {"colorSpace": "oklch", "components": [0.1298, 0.0425, 265.13], "alpha": 0.12, "hex": "#020618"},
           "$description": "Key shadow layer of elevation.overlay.",
           "$extensions": {
-            "org.ui-research.modes": {
+            "org.design-deep-dive.modes": {
               "dark": {"colorSpace": "oklch", "components": [0.1298, 0.0425, 265.13], "alpha": 0.5, "hex": "#020618"}
             },
-            "org.ui-research.llm": {
+            "org.design-deep-dive.llm": {
               "usage": ["shadow-key"],
               "rules": "Same role as key.raised but stronger, because a portal surface must separate from everything under it."
             }
@@ -1322,10 +1322,10 @@ CSS-переменной из пути токена. В нашей схеме с
           "$value": {"colorSpace": "oklch", "components": [0.1298, 0.0425, 265.13], "alpha": 0.08, "hex": "#020618"},
           "$description": "Ambient (far, diffuse) shadow layer of elevation.raised.",
           "$extensions": {
-            "org.ui-research.modes": {
+            "org.design-deep-dive.modes": {
               "dark": {"colorSpace": "oklch", "components": [0.1298, 0.0425, 265.13], "alpha": 0.4, "hex": "#020618"}
             },
-            "org.ui-research.llm": {
+            "org.design-deep-dive.llm": {
               "usage": ["shadow-ambient"],
               "rules": "Large blur and negative spread. Carries the sense of height, not the edge."
             }
@@ -1335,10 +1335,10 @@ CSS-переменной из пути токена. В нашей схеме с
           "$value": {"colorSpace": "oklch", "components": [0.1298, 0.0425, 265.13], "alpha": 0.12, "hex": "#020618"},
           "$description": "Ambient shadow layer of elevation.overlay.",
           "$extensions": {
-            "org.ui-research.modes": {
+            "org.design-deep-dive.modes": {
               "dark": {"colorSpace": "oklch", "components": [0.1298, 0.0425, 265.13], "alpha": 0.5, "hex": "#020618"}
             },
-            "org.ui-research.llm": {"usage": ["shadow-ambient"], "rules": "Same role as ambient.raised but stronger and further."}
+            "org.design-deep-dive.llm": {"usage": ["shadow-ambient"], "rules": "Same role as ambient.raised but stronger and further."}
           }
         }
       }
@@ -1348,8 +1348,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.red.100}",
         "$description": "Danger bg: destructive action, failed validation, error banner.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.red.950}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.red.950}"},
+          "org.design-deep-dive.llm": {
             "usage": ["danger-bg", "error", "destructive", "failure"],
             "rules": "Use as the tinted background of a danger banner, badge or cell. MUST be paired with danger.text, never with text.primary."
           }
@@ -1359,8 +1359,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.red.300}",
         "$description": "Danger border: destructive action, failed validation, error banner.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.red.900}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.red.900}"},
+          "org.design-deep-dive.llm": {
             "usage": ["danger-border", "error", "destructive", "failure"],
             "rules": "Use for the 1px border of a danger banner or badge that sits on danger.bg. Do NOT use as a focus ring."
           }
@@ -1370,8 +1370,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.red.600}",
         "$description": "Danger solid: destructive action, failed validation, error banner.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.red.500}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.red.500}"},
+          "org.design-deep-dive.llm": {
             "usage": ["danger-solid", "error", "destructive", "failure"],
             "rules": "Use for the solid danger fill: filled badge, status dot, filled button. MUST be paired with danger.on-solid."
           }
@@ -1381,8 +1381,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.red.700}",
         "$description": "Danger text: destructive action, failed validation, error banner.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.red.300}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.red.300}"},
+          "org.design-deep-dive.llm": {
             "usage": ["danger-text", "error", "destructive", "failure"],
             "rules": "Use for danger text and icons, both on a neutral surface and on danger.bg. Do NOT put it on danger.solid."
           }
@@ -1392,8 +1392,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.white}",
         "$description": "Text and icons on danger.solid.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.950}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.950}"},
+          "org.design-deep-dive.llm": {
             "usage": ["text-on-danger", "contrast-text"],
             "rules": "MUST use for any label or icon placed on danger.solid. Its polarity is not the same in both themes: check the value before hard-coding white."
           }
@@ -1405,8 +1405,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.amber.100}",
         "$description": "Warning bg: risky action, expiring item, non-blocking problem.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.amber.950}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.amber.950}"},
+          "org.design-deep-dive.llm": {
             "usage": ["warning-bg", "warning", "caution", "at-risk"],
             "rules": "Use as the tinted background of a warning banner, badge or cell. MUST be paired with warning.text, never with text.primary."
           }
@@ -1416,8 +1416,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.amber.300}",
         "$description": "Warning border: risky action, expiring item, non-blocking problem.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.amber.900}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.amber.900}"},
+          "org.design-deep-dive.llm": {
             "usage": ["warning-border", "warning", "caution", "at-risk"],
             "rules": "Use for the 1px border of a warning banner or badge that sits on warning.bg. Do NOT use as a focus ring."
           }
@@ -1427,8 +1427,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.amber.600}",
         "$description": "Warning solid: risky action, expiring item, non-blocking problem.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.amber.400}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.amber.400}"},
+          "org.design-deep-dive.llm": {
             "usage": ["warning-solid", "warning", "caution", "at-risk"],
             "rules": "Use for the solid warning fill: filled badge, status dot, filled button. MUST be paired with warning.on-solid."
           }
@@ -1438,8 +1438,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.amber.900}",
         "$description": "Warning text: risky action, expiring item, non-blocking problem.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.amber.300}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.amber.300}"},
+          "org.design-deep-dive.llm": {
             "usage": ["warning-text", "warning", "caution", "at-risk"],
             "rules": "Use for warning text and icons, both on a neutral surface and on warning.bg. Do NOT put it on warning.solid."
           }
@@ -1449,8 +1449,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.neutral.950}",
         "$description": "Text and icons on warning.solid.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.950}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.950}"},
+          "org.design-deep-dive.llm": {
             "usage": ["text-on-warning", "contrast-text"],
             "rules": "MUST use for any label or icon placed on warning.solid. Its polarity is not the same in both themes: check the value before hard-coding white."
           }
@@ -1462,8 +1462,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.green.100}",
         "$description": "Success bg: completed operation, healthy state, positive delta.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.green.950}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.green.950}"},
+          "org.design-deep-dive.llm": {
             "usage": ["success-bg", "success", "positive", "healthy"],
             "rules": "Use as the tinted background of a success banner, badge or cell. MUST be paired with success.text, never with text.primary."
           }
@@ -1473,8 +1473,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.green.300}",
         "$description": "Success border: completed operation, healthy state, positive delta.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.green.900}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.green.900}"},
+          "org.design-deep-dive.llm": {
             "usage": ["success-border", "success", "positive", "healthy"],
             "rules": "Use for the 1px border of a success banner or badge that sits on success.bg. Do NOT use as a focus ring."
           }
@@ -1484,8 +1484,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.green.700}",
         "$description": "Success solid: completed operation, healthy state, positive delta.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.green.500}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.green.500}"},
+          "org.design-deep-dive.llm": {
             "usage": ["success-solid", "success", "positive", "healthy"],
             "rules": "Use for the solid success fill: filled badge, status dot, filled button. MUST be paired with success.on-solid."
           }
@@ -1495,8 +1495,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.green.700}",
         "$description": "Success text: completed operation, healthy state, positive delta.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.green.400}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.green.400}"},
+          "org.design-deep-dive.llm": {
             "usage": ["success-text", "success", "positive", "healthy"],
             "rules": "Use for success text and icons, both on a neutral surface and on success.bg. Do NOT put it on success.solid."
           }
@@ -1506,8 +1506,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.white}",
         "$description": "Text and icons on success.solid.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.950}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.950}"},
+          "org.design-deep-dive.llm": {
             "usage": ["text-on-success", "contrast-text"],
             "rules": "MUST use for any label or icon placed on success.solid. Its polarity is not the same in both themes: check the value before hard-coding white."
           }
@@ -1519,8 +1519,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.accent.100}",
         "$description": "Info bg: neutral notification, hint, in-progress state.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.accent.950}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.accent.950}"},
+          "org.design-deep-dive.llm": {
             "usage": ["info-bg", "info", "neutral-status", "in-progress"],
             "rules": "Use as the tinted background of a info banner, badge or cell. MUST be paired with info.text, never with text.primary."
           }
@@ -1530,8 +1530,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.accent.300}",
         "$description": "Info border: neutral notification, hint, in-progress state.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.accent.800}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.accent.800}"},
+          "org.design-deep-dive.llm": {
             "usage": ["info-border", "info", "neutral-status", "in-progress"],
             "rules": "Use for the 1px border of a info banner or badge that sits on info.bg. Do NOT use as a focus ring."
           }
@@ -1541,8 +1541,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.accent.600}",
         "$description": "Info solid: neutral notification, hint, in-progress state.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.accent.400}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.accent.400}"},
+          "org.design-deep-dive.llm": {
             "usage": ["info-solid", "info", "neutral-status", "in-progress"],
             "rules": "Use for the solid info fill: filled badge, status dot, filled button. MUST be paired with info.on-solid."
           }
@@ -1552,8 +1552,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.accent.700}",
         "$description": "Info text: neutral notification, hint, in-progress state.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.accent.300}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.accent.300}"},
+          "org.design-deep-dive.llm": {
             "usage": ["info-text", "info", "neutral-status", "in-progress"],
             "rules": "Use for info text and icons, both on a neutral surface and on info.bg. Do NOT put it on info.solid."
           }
@@ -1563,8 +1563,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.color.white}",
         "$description": "Text and icons on info.solid.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": "{primitive.color.neutral.950}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.950}"},
+          "org.design-deep-dive.llm": {
             "usage": ["text-on-info", "contrast-text"],
             "rules": "MUST use for any label or icon placed on info.solid. Its polarity is not the same in both themes: check the value before hard-coding white."
           }
@@ -1576,8 +1576,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": {"colorSpace": "oklch", "components": [0.4001, 0.1315, 254.94], "hex": "#00468c"},
         "$description": "Categorical chart series 1.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": {"colorSpace": "oklch", "components": [0.6803, 0.1698, 255.04], "hex": "#4699fe"}},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": {"colorSpace": "oklch", "components": [0.6803, 0.1698, 255.04], "hex": "#4699fe"}},
+          "org.design-deep-dive.llm": {
             "usage": ["chart-series", "legend", "data-visualisation"],
             "rules": "Use for chart series only. Do NOT reuse status colours for categories: a green series reads as 'good' even when it just means 'Europe'. The five hues are ordered by lightness on purpose; keep the order."
           }
@@ -1587,8 +1587,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": {"colorSpace": "oklch", "components": [0.46, 0.1073, 60.54], "hex": "#824700"},
         "$description": "Categorical chart series 2.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": {"colorSpace": "oklch", "components": [0.7391, 0.1699, 59.96], "hex": "#f68c11"}},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": {"colorSpace": "oklch", "components": [0.7391, 0.1699, 59.96], "hex": "#f68c11"}},
+          "org.design-deep-dive.llm": {
             "usage": ["chart-series", "legend", "data-visualisation"],
             "rules": "Use for chart series only. Do NOT reuse status colours for categories: a green series reads as 'good' even when it just means 'Europe'. The five hues are ordered by lightness on purpose; keep the order."
           }
@@ -1598,8 +1598,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": {"colorSpace": "oklch", "components": [0.5197, 0.0898, 189.73], "hex": "#007974"},
         "$description": "Categorical chart series 3.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": {"colorSpace": "oklch", "components": [0.7989, 0.1379, 190.05], "hex": "#00d9d1"}},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": {"colorSpace": "oklch", "components": [0.7989, 0.1379, 190.05], "hex": "#00d9d1"}},
+          "org.design-deep-dive.llm": {
             "usage": ["chart-series", "legend", "data-visualisation"],
             "rules": "Use for chart series only. Do NOT reuse status colours for categories: a green series reads as 'good' even when it just means 'Europe'. The five hues are ordered by lightness on purpose; keep the order."
           }
@@ -1609,8 +1609,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": {"colorSpace": "oklch", "components": [0.6394, 0.1694, 330.05], "hex": "#c360bc"},
         "$description": "Categorical chart series 4.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": {"colorSpace": "oklch", "components": [0.6208, 0.1699, 330.13], "hex": "#bd5ab6"}},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": {"colorSpace": "oklch", "components": [0.6208, 0.1699, 330.13], "hex": "#bd5ab6"}},
+          "org.design-deep-dive.llm": {
             "usage": ["chart-series", "legend", "data-visualisation"],
             "rules": "Use for chart series only. Do NOT reuse status colours for categories: a green series reads as 'good' even when it just means 'Europe'. The five hues are ordered by lightness on purpose; keep the order."
           }
@@ -1620,8 +1620,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": {"colorSpace": "oklch", "components": [0.5792, 0.1377, 120.14], "hex": "#708500"},
         "$description": "Categorical chart series 5.",
         "$extensions": {
-          "org.ui-research.modes": {"dark": {"colorSpace": "oklch", "components": [0.8608, 0.1703, 120.18], "hex": "#c3e151"}},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"dark": {"colorSpace": "oklch", "components": [0.8608, 0.1703, 120.18], "hex": "#c3e151"}},
+          "org.design-deep-dive.llm": {
             "usage": ["chart-series", "legend", "data-visualisation"],
             "rules": "Use for chart series only. Do NOT reuse status colours for categories: a green series reads as 'good' even when it just means 'Europe'. The five hues are ordered by lightness on purpose; keep the order."
           }
@@ -1635,8 +1635,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.2}",
       "$description": "Spacing step 3xs = 2px.",
       "$extensions": {
-        "org.ui-research.modes": {"compact": "{primitive.size.2}", "comfortable": "{primitive.size.4}"},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"compact": "{primitive.size.2}", "comfortable": "{primitive.size.4}"},
+        "org.design-deep-dive.llm": {
           "usage": ["gap", "padding", "margin", "flex-gap", "grid-gap"],
           "rules": "Use between an icon and its label inside a dense control, and for hairline insets."
         }
@@ -1646,8 +1646,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.4}",
       "$description": "Spacing step 2xs = 4px.",
       "$extensions": {
-        "org.ui-research.modes": {"compact": "{primitive.size.2}", "comfortable": "{primitive.size.6}"},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"compact": "{primitive.size.2}", "comfortable": "{primitive.size.6}"},
+        "org.design-deep-dive.llm": {
           "usage": ["gap", "padding", "margin", "flex-gap", "grid-gap"],
           "rules": "Use inside a control: gap between an icon and text in a button, badge padding."
         }
@@ -1657,8 +1657,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.8}",
       "$description": "Spacing step xs = 8px.",
       "$extensions": {
-        "org.ui-research.modes": {"compact": "{primitive.size.6}", "comfortable": "{primitive.size.10}"},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"compact": "{primitive.size.6}", "comfortable": "{primitive.size.10}"},
+        "org.design-deep-dive.llm": {
           "usage": ["gap", "padding", "margin", "flex-gap", "grid-gap"],
           "rules": "RECOMMENDED default gap between sibling controls in a row (button group, toolbar)."
         }
@@ -1668,8 +1668,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.12}",
       "$description": "Spacing step sm = 12px.",
       "$extensions": {
-        "org.ui-research.modes": {"compact": "{primitive.size.8}", "comfortable": "{primitive.size.16}"},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"compact": "{primitive.size.8}", "comfortable": "{primitive.size.16}"},
+        "org.design-deep-dive.llm": {
           "usage": ["gap", "padding", "margin", "flex-gap", "grid-gap"],
           "rules": "Use for vertical gaps inside a form and for horizontal cell padding in a table."
         }
@@ -1679,8 +1679,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.16}",
       "$description": "Spacing step md = 16px.",
       "$extensions": {
-        "org.ui-research.modes": {"compact": "{primitive.size.12}", "comfortable": "{primitive.size.20}"},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"compact": "{primitive.size.12}", "comfortable": "{primitive.size.20}"},
+        "org.design-deep-dive.llm": {
           "usage": ["gap", "padding", "margin", "flex-gap", "grid-gap"],
           "rules": "RECOMMENDED default padding of a card and gap between cards in a grid."
         }
@@ -1690,8 +1690,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.24}",
       "$description": "Spacing step lg = 24px.",
       "$extensions": {
-        "org.ui-research.modes": {"compact": "{primitive.size.16}", "comfortable": "{primitive.size.32}"},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"compact": "{primitive.size.16}", "comfortable": "{primitive.size.32}"},
+        "org.design-deep-dive.llm": {
           "usage": ["gap", "padding", "margin", "flex-gap", "grid-gap"],
           "rules": "Use between sections of a page and for panel padding."
         }
@@ -1701,8 +1701,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.32}",
       "$description": "Spacing step xl = 32px.",
       "$extensions": {
-        "org.ui-research.modes": {"compact": "{primitive.size.24}", "comfortable": "{primitive.size.40}"},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"compact": "{primitive.size.24}", "comfortable": "{primitive.size.40}"},
+        "org.design-deep-dive.llm": {
           "usage": ["gap", "padding", "margin", "flex-gap", "grid-gap"],
           "rules": "Use between major blocks on a page and for the top padding of a page header."
         }
@@ -1712,8 +1712,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.40}",
       "$description": "Spacing step 2xl = 40px.",
       "$extensions": {
-        "org.ui-research.modes": {"compact": "{primitive.size.32}", "comfortable": "{primitive.size.48}"},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"compact": "{primitive.size.32}", "comfortable": "{primitive.size.48}"},
+        "org.design-deep-dive.llm": {
           "usage": ["gap", "padding", "margin", "flex-gap", "grid-gap"],
           "rules": "Use for generous separation on wide screens. Rare in a dense admin."
         }
@@ -1723,8 +1723,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.48}",
       "$description": "Spacing step 3xl = 48px.",
       "$extensions": {
-        "org.ui-research.modes": {"compact": "{primitive.size.40}", "comfortable": "{primitive.size.64}"},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"compact": "{primitive.size.40}", "comfortable": "{primitive.size.64}"},
+        "org.design-deep-dive.llm": {
           "usage": ["gap", "padding", "margin", "flex-gap", "grid-gap"],
           "rules": "Use for empty-state padding and hero blocks inside an application."
         }
@@ -1734,8 +1734,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.64}",
       "$description": "Spacing step 4xl = 64px.",
       "$extensions": {
-        "org.ui-research.modes": {"compact": "{primitive.size.48}", "comfortable": "{primitive.size.80}"},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"compact": "{primitive.size.48}", "comfortable": "{primitive.size.80}"},
+        "org.design-deep-dive.llm": {
           "usage": ["gap", "padding", "margin", "flex-gap", "grid-gap"],
           "rules": "Use only for empty states and onboarding screens."
         }
@@ -1745,8 +1745,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.96}",
       "$description": "Spacing step 5xl = 96px.",
       "$extensions": {
-        "org.ui-research.modes": {"compact": "{primitive.size.80}", "comfortable": "{primitive.size.96}"},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"compact": "{primitive.size.80}", "comfortable": "{primitive.size.96}"},
+        "org.design-deep-dive.llm": {
           "usage": ["gap", "padding", "margin", "flex-gap", "grid-gap"],
           "rules": "Use only for full-page empty or error states. Do NOT use between components."
         }
@@ -1757,7 +1757,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{space.md}",
         "$description": "Padding inside a card or panel body.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["card-padding", "panel-padding"],
             "rules": "RECOMMENDED default padding for a card. Nested radius rule: the inner radius equals the outer radius minus this padding, clamped at 0."
           }
@@ -1767,7 +1767,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{space.lg}",
         "$description": "Horizontal padding of the page content area.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["page-inline", "content-inset"],
             "rules": "Use as the left and right inset of the content column. Override per breakpoint: 16 on mobile, 24 on desktop, 32 above the wide breakpoint."
           }
@@ -1777,7 +1777,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{space.sm}",
         "$description": "Horizontal padding of a text button and input.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["button-padding-x", "input-padding-x"],
             "rules": "Use for the horizontal padding of medium controls. An icon-only button uses a square box instead: size.control.md."
           }
@@ -1787,7 +1787,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{space.sm}",
         "$description": "Horizontal padding of a table cell.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["table-cell-x"],
             "rules": "Use for td and th horizontal padding. Keep the first and last cell flush with the card padding by adding space.inset.card to the outer edge."
           }
@@ -1797,7 +1797,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{space.3xs}",
         "$description": "Vertical padding of a table cell in a dense table.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["table-cell-y"],
             "rules": "Use with size.row.table = 36px. Do NOT set a row height and a vertical padding that contradict each other."
           }
@@ -1809,7 +1809,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{space.sm}",
         "$description": "Vertical gap between form fields.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["field-gap", "form-stack"],
             "rules": "Use between a field and the next field. The gap between a label and its control is space.2xs."
           }
@@ -1819,7 +1819,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{space.lg}",
         "$description": "Vertical gap between page sections.",
         "$extensions": {
-          "org.ui-research.llm": {"usage": ["section-gap"], "rules": "Use between titled blocks of a page. Do NOT use inside a card."}
+          "org.design-deep-dive.llm": {"usage": ["section-gap"], "rules": "Use between titled blocks of a page. Do NOT use inside a card."}
         }
       }
     },
@@ -1828,7 +1828,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{space.xs}",
         "$description": "Horizontal gap between adjacent controls.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["control-gap", "button-group-gap", "toolbar-gap"],
             "rules": "RECOMMENDED default gap in a toolbar, filter row or button group."
           }
@@ -1843,8 +1843,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.24}",
         "$description": "Height of an extra-small control.",
         "$extensions": {
-          "org.ui-research.modes": {"compact": "{primitive.size.20}", "comfortable": "{primitive.size.28}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"compact": "{primitive.size.20}", "comfortable": "{primitive.size.28}"},
+          "org.design-deep-dive.llm": {
             "usage": ["chip", "inline-tag", "table-inline-button"],
             "rules": "Use inside dense tables only. Its hit target MUST be enlarged to 24px minimum by padding; below that it fails WCAG 2.2 SC 2.5.8."
           }
@@ -1854,8 +1854,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.28}",
         "$description": "Height of a small control.",
         "$extensions": {
-          "org.ui-research.modes": {"compact": "{primitive.size.24}", "comfortable": "{primitive.size.32}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"compact": "{primitive.size.24}", "comfortable": "{primitive.size.32}"},
+          "org.design-deep-dive.llm": {
             "usage": ["filter-button", "toolbar-button", "compact-select"],
             "rules": "Use in toolbars and filter rows inside a dense admin."
           }
@@ -1865,8 +1865,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.32}",
         "$description": "Default control height.",
         "$extensions": {
-          "org.ui-research.modes": {"compact": "{primitive.size.28}", "comfortable": "{primitive.size.40}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"compact": "{primitive.size.28}", "comfortable": "{primitive.size.40}"},
+          "org.design-deep-dive.llm": {
             "usage": ["button", "input", "select", "icon-button"],
             "rules": "RECOMMENDED default for buttons, inputs and selects in a dense admin. A client-facing service uses 40px instead."
           }
@@ -1876,8 +1876,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.40}",
         "$description": "Large control height.",
         "$extensions": {
-          "org.ui-research.modes": {"compact": "{primitive.size.36}", "comfortable": "{primitive.size.48}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"compact": "{primitive.size.36}", "comfortable": "{primitive.size.48}"},
+          "org.design-deep-dive.llm": {
             "usage": ["primary-cta", "search-field", "mobile-control"],
             "rules": "Use for the main call to action, for search fields and for every control on touch screens."
           }
@@ -1889,7 +1889,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.14}",
         "$description": "Small icon box.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["icon-in-caption", "icon-in-12px-text"],
             "rules": "Use next to 11-12px text. Do NOT go below 14px for a meaningful icon."
           }
@@ -1899,7 +1899,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.16}",
         "$description": "Default icon box.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["icon-in-body", "button-icon", "menu-icon"],
             "rules": "RECOMMENDED default. 68% of measured production interfaces use a 16x16 icon box."
           }
@@ -1909,7 +1909,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.20}",
         "$description": "Large icon box.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["empty-state-icon", "nav-icon", "status-icon"],
             "rules": "Use for navigation and status icons, and next to 16-20px text."
           }
@@ -1920,7 +1920,7 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.16}",
       "$description": "Checkbox and radio box.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["checkbox", "radio"],
           "rules": "Use for the visual box. The clickable label area MUST reach 24px in height."
         }
@@ -1931,7 +1931,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.36}",
         "$description": "Switch track width.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["switch"],
             "rules": "Use with size.switch.height. The thumb diameter equals the height minus 4px."
           }
@@ -1940,7 +1940,7 @@ CSS-переменной из пути токена. В нашей схеме с
       "height": {
         "$value": "{primitive.size.20}",
         "$description": "Switch track height.",
-        "$extensions": {"org.ui-research.llm": {"usage": ["switch"], "rules": "Use with size.switch.width."}}
+        "$extensions": {"org.design-deep-dive.llm": {"usage": ["switch"], "rules": "Use with size.switch.width."}}
       }
     },
     "avatar": {
@@ -1948,21 +1948,21 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.20}",
         "$description": "Small avatar.",
         "$extensions": {
-          "org.ui-research.llm": {"usage": ["avatar-in-row", "avatar-in-table"], "rules": "Use inside table rows and dense lists."}
+          "org.design-deep-dive.llm": {"usage": ["avatar-in-row", "avatar-in-table"], "rules": "Use inside table rows and dense lists."}
         }
       },
       "md": {
         "$value": "{primitive.size.24}",
         "$description": "Default avatar.",
         "$extensions": {
-          "org.ui-research.llm": {"usage": ["avatar", "comment-avatar"], "rules": "RECOMMENDED default avatar in lists and comments."}
+          "org.design-deep-dive.llm": {"usage": ["avatar", "comment-avatar"], "rules": "RECOMMENDED default avatar in lists and comments."}
         }
       },
       "lg": {
         "$value": "{primitive.size.32}",
         "$description": "Large avatar.",
         "$extensions": {
-          "org.ui-research.llm": {"usage": ["avatar-in-header", "profile-avatar"], "rules": "Use in headers and profile cards."}
+          "org.design-deep-dive.llm": {"usage": ["avatar-in-header", "profile-avatar"], "rules": "Use in headers and profile cards."}
         }
       }
     },
@@ -1971,8 +1971,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.36}",
         "$description": "Height of a data table row.",
         "$extensions": {
-          "org.ui-research.modes": {"compact": "{primitive.size.28}", "comfortable": "{primitive.size.48}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"compact": "{primitive.size.28}", "comfortable": "{primitive.size.48}"},
+          "org.design-deep-dive.llm": {
             "usage": ["table-row"],
             "rules": "Use for dense data tables: 19 rows fit a 1440x900 viewport. A comfortable table uses 44-48px."
           }
@@ -1982,24 +1982,24 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.28}",
         "$description": "Height of a dropdown menu item.",
         "$extensions": {
-          "org.ui-research.modes": {"compact": "{primitive.size.24}", "comfortable": "{primitive.size.36}"},
-          "org.ui-research.llm": {"usage": ["menu-item"], "rules": "Use in dropdown menus and command palettes."}
+          "org.design-deep-dive.modes": {"compact": "{primitive.size.24}", "comfortable": "{primitive.size.36}"},
+          "org.design-deep-dive.llm": {"usage": ["menu-item"], "rules": "Use in dropdown menus and command palettes."}
         }
       },
       "sidebar-item": {
         "$value": "{primitive.size.32}",
         "$description": "Height of a sidebar navigation item.",
         "$extensions": {
-          "org.ui-research.modes": {"compact": "{primitive.size.28}", "comfortable": "{primitive.size.40}"},
-          "org.ui-research.llm": {"usage": ["sidebar-item"], "rules": "Use for primary navigation entries."}
+          "org.design-deep-dive.modes": {"compact": "{primitive.size.28}", "comfortable": "{primitive.size.40}"},
+          "org.design-deep-dive.llm": {"usage": ["sidebar-item"], "rules": "Use for primary navigation entries."}
         }
       },
       "tab": {
         "$value": "{primitive.size.36}",
         "$description": "Height of a tab.",
         "$extensions": {
-          "org.ui-research.modes": {"compact": "{primitive.size.32}", "comfortable": "{primitive.size.44}"},
-          "org.ui-research.llm": {"usage": ["tab"], "rules": "Use for the tab strip under a page header."}
+          "org.design-deep-dive.modes": {"compact": "{primitive.size.32}", "comfortable": "{primitive.size.44}"},
+          "org.design-deep-dive.llm": {"usage": ["tab"], "rules": "Use for the tab strip under a page header."}
         }
       }
     },
@@ -2008,8 +2008,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.48}",
         "$description": "Height of the application top bar.",
         "$extensions": {
-          "org.ui-research.modes": {"compact": "{primitive.size.40}", "comfortable": "{primitive.size.56}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"compact": "{primitive.size.40}", "comfortable": "{primitive.size.56}"},
+          "org.design-deep-dive.llm": {
             "usage": ["topbar", "app-header"],
             "rules": "Use for the fixed application header. 48px is the modal value across measured products."
           }
@@ -2019,7 +2019,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.240}",
         "$description": "Width of the expanded sidebar.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["sidebar"],
             "rules": "Use for the primary navigation column. Measured range in production is 224-320px."
           }
@@ -2029,7 +2029,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.48}",
         "$description": "Width of the collapsed icon rail.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["sidebar-collapsed", "icon-rail"],
             "rules": "Use when the sidebar collapses below the desktop breakpoint."
           }
@@ -2039,7 +2039,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.288}",
         "$description": "Width of a right-hand inspector panel.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["inspector", "details-panel"],
             "rules": "Use for properties and details panels. Below the desktop breakpoint it becomes a drawer."
           }
@@ -2049,7 +2049,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.480}",
         "$description": "Width of a slide-over drawer.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["drawer", "slide-over"],
             "rules": "Use for edit-in-place panels. Do NOT exceed half the viewport width."
           }
@@ -2061,7 +2061,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.400}",
         "$description": "Width of a confirmation dialog.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["confirm-dialog", "alert"],
             "rules": "Use for one question and two buttons. Do NOT put a form in it."
           }
@@ -2071,7 +2071,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.560}",
         "$description": "Width of a form dialog.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["form-dialog"],
             "rules": "RECOMMENDED default modal width: fits a single-column form at 14px base."
           }
@@ -2081,7 +2081,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.880}",
         "$description": "Width of a wide dialog.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["wide-dialog", "table-in-modal"],
             "rules": "Use only when the dialog holds a table or a two-column layout."
           }
@@ -2093,14 +2093,14 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.240}",
         "$description": "Default popover width.",
         "$extensions": {
-          "org.ui-research.llm": {"usage": ["popover"], "rules": "Use for filter popovers and small forms attached to a trigger."}
+          "org.design-deep-dive.llm": {"usage": ["popover"], "rules": "Use for filter popovers and small forms attached to a trigger."}
         }
       },
       "menu-min": {
         "$value": "{primitive.size.180}",
         "$description": "Minimum dropdown menu width.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["menu", "dropdown"],
             "rules": "Use as min-width so a menu never collapses to the width of its shortest item."
           }
@@ -2110,7 +2110,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.280}",
         "$description": "Maximum tooltip width.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["tooltip"],
             "rules": "Use as max-width. A tooltip longer than two lines belongs in a popover."
           }
@@ -2120,7 +2120,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.360}",
         "$description": "Toast width.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["toast", "snackbar"],
             "rules": "Use for the notification stack in the corner of the viewport."
           }
@@ -2132,7 +2132,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.640}",
         "$description": "Maximum width of a single-column form.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["form-column"],
             "rules": "Use as max-width on a form column: 560-640px gives 64-73 Cyrillic characters per line."
           }
@@ -2142,7 +2142,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.1280}",
         "$description": "Maximum width of the content column.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["content-column", "page-max-width"],
             "rules": "Use for pages made of text and forms. Data tables and dashboards may go full width."
           }
@@ -2156,7 +2156,7 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.0}",
       "$description": "Square corner.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["table", "full-bleed", "inline-code"],
           "rules": "Use for edge-to-edge tables and for elements flush with a container edge."
         }
@@ -2166,7 +2166,7 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.2}",
       "$description": "Extra-small radius.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["badge", "tag", "checkbox", "progress-bar"],
           "rules": "Use for elements under 16px tall. Do NOT use for buttons or cards."
         }
@@ -2176,7 +2176,7 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.4}",
       "$description": "Small radius.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["input", "small-button", "menu-item"],
           "rules": "Use for controls up to 28px tall and for items inside a menu."
         }
@@ -2186,7 +2186,7 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.6}",
       "$description": "Default radius.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["button", "input", "card", "popover", "container"],
           "rules": "RECOMMENDED default for a dense admin. A client-facing service uses 8-10px."
         }
@@ -2196,7 +2196,7 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": "{primitive.size.8}",
       "$description": "Large radius.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["card", "modal", "drawer", "toast"],
           "rules": "Use for containers larger than 200px on their shortest side."
         }
@@ -2206,7 +2206,7 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": {"value": 9999, "unit": "px"},
       "$description": "Pill and circle.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["avatar", "pill-badge", "switch", "spinner"],
           "rules": "Use for avatars, pills and switches. Do NOT use for rectangular containers."
         }
@@ -2220,7 +2220,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.1}",
         "$description": "Default border width.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["border", "divider", "input-border"],
             "rules": "RECOMMENDED default. 95% of borders measured in production are 1px."
           }
@@ -2230,7 +2230,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.2}",
         "$description": "Emphasised border width.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["selected-state", "active-tab-underline", "emphasis-border"],
             "rules": "Use for selected states and active tab underlines. Do NOT use for subtle dividers."
           }
@@ -2240,7 +2240,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.2}",
         "$description": "Focus ring width.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["focus-indicator"],
             "rules": "MUST use for the focus ring, together with a 2px offset and color focus-ring."
           }
@@ -2252,7 +2252,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.size.2}",
         "$description": "Focus ring offset.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["focus-indicator"],
             "rules": "MUST use as outline-offset so the ring does not touch the control edge."
           }
@@ -2266,7 +2266,7 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": [],
       "$description": "No shadow.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["flat", "inline"],
           "rules": "Use for elements that lie in the page plane. Explicitly setting elevation.none is better than leaving box-shadow unset in a component API."
         }
@@ -2284,7 +2284,7 @@ CSS-переменной из пути токена. В нашей схеме с
       ],
       "$description": "Hairline ring drawn as a shadow instead of a border.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["card-outline", "hairline", "no-layout-shift-border"],
           "rules": "Use instead of a border when a border would shift layout, and as the base layer of every raised surface."
         }
@@ -2316,7 +2316,7 @@ CSS-переменной из пути токена. В нашей схеме с
       ],
       "$description": "Raised surface: card that needs separation, sticky header, dragged row.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["card-raised", "sticky-header", "dragging"],
           "rules": "Use for surfaces that stay in the page flow but need separation. Do NOT use for portals: they need elevation.overlay."
         }
@@ -2348,7 +2348,7 @@ CSS-переменной из пути токена. В нашей схеме с
       ],
       "$description": "Floating surface rendered in a portal: popover, menu, modal, toast.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["popover", "menu", "modal", "toast", "dropdown"],
           "rules": "MUST use together with bg.surface-raised. In the dark theme the ring layer carries most of the separation, because shadows barely read on a dark canvas."
         }
@@ -2361,14 +2361,14 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": 0,
       "$description": "Page flow.",
       "$extensions": {
-        "org.ui-research.llm": {"usage": ["default"], "rules": "Use 0, not 'auto', when a stacking context must exist."}
+        "org.design-deep-dive.llm": {"usage": ["default"], "rules": "Use 0, not 'auto', when a stacking context must exist."}
       }
     },
     "raised": {
       "$value": 10,
       "$description": "Element lifted inside its own container.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["sticky-column", "hovered-row"],
           "rules": "Use inside a component. Do NOT use to escape a container: use a portal."
         }
@@ -2378,7 +2378,7 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": 100,
       "$description": "Sticky page furniture.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["sticky-header", "table-head", "toolbar"],
           "rules": "Use for sticky table headers and toolbars."
         }
@@ -2388,38 +2388,38 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": 1000,
       "$description": "Dropdown and select list.",
       "$extensions": {
-        "org.ui-research.llm": {"usage": ["dropdown", "select-list", "combobox"], "rules": "Use for menus attached to a trigger."}
+        "org.design-deep-dive.llm": {"usage": ["dropdown", "select-list", "combobox"], "rules": "Use for menus attached to a trigger."}
       }
     },
     "app-bar": {
       "$value": 1100,
       "$description": "Application top bar and sidebar.",
-      "$extensions": {"org.ui-research.llm": {"usage": ["topbar", "sidebar"], "rules": "Use for the app shell."}}
+      "$extensions": {"org.design-deep-dive.llm": {"usage": ["topbar", "sidebar"], "rules": "Use for the app shell."}}
     },
     "drawer": {
       "$value": 1200,
       "$description": "Slide-over drawer.",
-      "$extensions": {"org.ui-research.llm": {"usage": ["drawer", "slide-over"], "rules": "Use for drawers and their scrim."}}
+      "$extensions": {"org.design-deep-dive.llm": {"usage": ["drawer", "slide-over"], "rules": "Use for drawers and their scrim."}}
     },
     "modal": {
       "$value": 1300,
       "$description": "Modal dialog.",
       "$extensions": {
-        "org.ui-research.llm": {"usage": ["modal", "dialog"], "rules": "Use for blocking dialogs and their scrim."}
+        "org.design-deep-dive.llm": {"usage": ["modal", "dialog"], "rules": "Use for blocking dialogs and their scrim."}
       }
     },
     "toast": {
       "$value": 1400,
       "$description": "Toast stack.",
       "$extensions": {
-        "org.ui-research.llm": {"usage": ["toast", "snackbar"], "rules": "Use for notifications, which must sit above a modal."}
+        "org.design-deep-dive.llm": {"usage": ["toast", "snackbar"], "rules": "Use for notifications, which must sit above a modal."}
       }
     },
     "tooltip": {
       "$value": 1500,
       "$description": "Tooltip.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["tooltip"],
           "rules": "Use for tooltips, the topmost layer. Do NOT invent values above this: render into a portal instead of raising the number."
         }
@@ -2432,14 +2432,14 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": 0.4,
       "$description": "Opacity of a disabled control.",
       "$extensions": {
-        "org.ui-research.llm": {"usage": ["disabled"], "rules": "Use on the whole disabled control, not on its text only."}
+        "org.design-deep-dive.llm": {"usage": ["disabled"], "rules": "Use on the whole disabled control, not on its text only."}
       }
     },
     "loading": {
       "$value": 0.2,
       "$description": "Opacity of content being replaced while loading.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["loading", "pending"],
           "rules": "Use for optimistic-update placeholders. Do NOT use for skeletons: they have their own background."
         }
@@ -2449,14 +2449,14 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": 0.32,
       "$description": "Alpha baked into overlay-scrim.",
       "$extensions": {
-        "org.ui-research.llm": {"usage": ["scrim"], "rules": "Documented separately so a component can rebuild the scrim colour."}
+        "org.design-deep-dive.llm": {"usage": ["scrim"], "rules": "Documented separately so a component can rebuild the scrim colour."}
       }
     },
     "state-hover": {
       "$value": 0.04,
       "$description": "Alpha of a hover state layer.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["hover-layer"],
           "rules": "Use only when a solid hover token does not exist for the surface in question."
         }
@@ -2466,7 +2466,7 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": 0.08,
       "$description": "Alpha of a pressed state layer.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["pressed-layer"],
           "rules": "Use only when a solid pressed token does not exist. In the dark theme raise both state alphas by half (0.06 / 0.12): the same alpha reads weaker on a dark surface."
         }
@@ -2480,7 +2480,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.duration.0}",
         "$description": "No animation; lands in the same frame.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["focus", "instant-feedback"],
             "rules": "MUST use for the focus ring: focus never animates, because a delayed focus indicator breaks keyboard navigation."
           }
@@ -2490,7 +2490,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.duration.100}",
         "$description": "Hover, press, colour change.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["hover", "pressed", "colour-change"],
             "rules": "Use for colour and border transitions on hover and press. Do NOT animate layout properties with it."
           }
@@ -2500,7 +2500,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.duration.150}",
         "$description": "Default duration for any transition.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["default-transition", "popover-enter", "menu-enter"],
             "rules": "RECOMMENDED default. Use when nothing suggests a slower or faster value."
           }
@@ -2510,8 +2510,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.duration.200}",
         "$description": "Popover and menu entrance, block expansion, medium exits.",
         "$extensions": {
-          "org.ui-research.modes": {"reduced": "{primitive.duration.150}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"reduced": "{primitive.duration.150}"},
+          "org.design-deep-dive.llm": {
             "usage": ["expand", "modal-exit", "drawer-exit", "toast-exit"],
             "rules": "Use for medium-sized surfaces leaving the screen and for expanding blocks."
           }
@@ -2521,8 +2521,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.duration.300}",
         "$description": "Modals, drawers, large panels entering.",
         "$extensions": {
-          "org.ui-research.modes": {"reduced": "{primitive.duration.150}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"reduced": "{primitive.duration.150}"},
+          "org.design-deep-dive.llm": {
             "usage": ["modal-enter", "drawer-enter", "toast-enter"],
             "rules": "Use for large surfaces entering. Entrances are longer than exits on purpose."
           }
@@ -2532,8 +2532,8 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.duration.400}",
         "$description": "Page-level transitions.",
         "$extensions": {
-          "org.ui-research.modes": {"reduced": "{primitive.duration.150}"},
-          "org.ui-research.llm": {
+          "org.design-deep-dive.modes": {"reduced": "{primitive.duration.150}"},
+          "org.design-deep-dive.llm": {
             "usage": ["page-transition", "onboarding-step"],
             "rules": "Ceiling for a work interface. Do NOT exceed 400ms in an admin: it reads as lag."
           }
@@ -2546,7 +2546,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.easing.standard}",
         "$description": "Movement inside the screen.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["hover", "colour-change", "reorder", "expand"],
             "rules": "RECOMMENDED default for transitions that stay on screen."
           }
@@ -2556,7 +2556,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.easing.entrance}",
         "$description": "Entering the frame; decelerates to rest.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["enter", "appear", "expand"],
             "rules": "Use for anything entering the screen: it starts fast and settles."
           }
@@ -2566,7 +2566,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.easing.exit}",
         "$description": "Leaving for good; accelerates off the edge.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["exit", "dismiss", "collapse"],
             "rules": "Use for anything leaving the screen. Exception: a drawer that will come back uses motion.easing.standard, so it decelerates at the edge."
           }
@@ -2576,7 +2576,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "$value": "{primitive.easing.linear}",
         "$description": "Loops: spinner, progress, shimmer.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["spinner", "indeterminate-progress", "shimmer"],
             "rules": "MUST use for animation that loops forever: a spinner with an eased curve visibly stutters at each revolution. Do NOT use for a transition that starts and stops."
           }
@@ -2593,7 +2593,7 @@ CSS-переменной из пути токена. В нашей схеме с
         },
         "$description": "Hover feedback on a control.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["hover"],
             "rules": "Composite token: duration fast plus easing standard. Apply as `transition: <property> var(--motion-hover);`. Do NOT recombine duration and easing by hand."
           }
@@ -2607,7 +2607,7 @@ CSS-переменной из пути токена. В нашей схеме с
         },
         "$description": "Pressed feedback on a control.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["pressed"],
             "rules": "Composite token: duration fast plus easing entrance. Apply as `transition: <property> var(--motion-press);`. Do NOT recombine duration and easing by hand."
           }
@@ -2621,7 +2621,7 @@ CSS-переменной из пути токена. В нашей схеме с
         },
         "$description": "Popover entrance.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["popover-enter"],
             "rules": "Composite token: duration default plus easing entrance. Apply as `transition: <property> var(--motion-popup-enter);`. Do NOT recombine duration and easing by hand."
           }
@@ -2635,7 +2635,7 @@ CSS-переменной из пути токена. В нашей схеме с
         },
         "$description": "Popover exit.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["popover-exit"],
             "rules": "Composite token: duration fast plus easing exit. Apply as `transition: <property> var(--motion-popup-exit);`. Do NOT recombine duration and easing by hand."
           }
@@ -2649,7 +2649,7 @@ CSS-переменной из пути токена. В нашей схеме с
         },
         "$description": "Dropdown menu entrance.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["menu-enter"],
             "rules": "Composite token: duration default plus easing entrance. Apply as `transition: <property> var(--motion-menu-enter);`. Do NOT recombine duration and easing by hand."
           }
@@ -2663,7 +2663,7 @@ CSS-переменной из пути токена. В нашей схеме с
         },
         "$description": "Dropdown menu exit.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["menu-exit"],
             "rules": "Composite token: duration fast plus easing exit. Apply as `transition: <property> var(--motion-menu-exit);`. Do NOT recombine duration and easing by hand."
           }
@@ -2677,7 +2677,7 @@ CSS-переменной из пути токена. В нашей схеме с
         },
         "$description": "Modal dialog entrance.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["modal-enter"],
             "rules": "Composite token: duration slower plus easing entrance. Apply as `transition: <property> var(--motion-modal-enter);`. Do NOT recombine duration and easing by hand."
           }
@@ -2691,7 +2691,7 @@ CSS-переменной из пути токена. В нашей схеме с
         },
         "$description": "Modal dialog exit.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["modal-exit"],
             "rules": "Composite token: duration slow plus easing exit. Apply as `transition: <property> var(--motion-modal-exit);`. Do NOT recombine duration and easing by hand."
           }
@@ -2705,7 +2705,7 @@ CSS-переменной из пути токена. В нашей схеме с
         },
         "$description": "Modal scrim entrance.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["scrim-enter"],
             "rules": "Composite token: duration slower plus easing entrance. Apply as `transition: <property> var(--motion-blanket-enter);`. Do NOT recombine duration and easing by hand."
           }
@@ -2719,7 +2719,7 @@ CSS-переменной из пути токена. В нашей схеме с
         },
         "$description": "Modal scrim exit.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["scrim-exit"],
             "rules": "Composite token: duration slow plus easing exit. Apply as `transition: <property> var(--motion-blanket-exit);`. Do NOT recombine duration and easing by hand."
           }
@@ -2733,7 +2733,7 @@ CSS-переменной из пути токена. В нашей схеме с
         },
         "$description": "Drawer entrance.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["drawer-enter"],
             "rules": "Composite token: duration slower plus easing entrance. Apply as `transition: <property> var(--motion-drawer-enter);`. Do NOT recombine duration and easing by hand."
           }
@@ -2747,7 +2747,7 @@ CSS-переменной из пути токена. В нашей схеме с
         },
         "$description": "Drawer exit.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["drawer-exit"],
             "rules": "Composite token: duration slow plus easing standard. Apply as `transition: <property> var(--motion-drawer-exit);`. Do NOT recombine duration and easing by hand."
           }
@@ -2761,7 +2761,7 @@ CSS-переменной из пути токена. В нашей схеме с
         },
         "$description": "Toast entrance.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["toast-enter"],
             "rules": "Composite token: duration slower plus easing entrance. Apply as `transition: <property> var(--motion-toast-enter);`. Do NOT recombine duration and easing by hand."
           }
@@ -2775,7 +2775,7 @@ CSS-переменной из пути токена. В нашей схеме с
         },
         "$description": "Toast exit.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["toast-exit"],
             "rules": "Composite token: duration slow plus easing exit. Apply as `transition: <property> var(--motion-toast-exit);`. Do NOT recombine duration and easing by hand."
           }
@@ -2789,7 +2789,7 @@ CSS-переменной из пути токена. В нашей схеме с
         },
         "$description": "Expanding or collapsing a block.",
         "$extensions": {
-          "org.ui-research.llm": {
+          "org.design-deep-dive.llm": {
             "usage": ["expand", "collapse"],
             "rules": "Composite token: duration slow plus easing standard. Apply as `transition: <property> var(--motion-expand);`. Do NOT recombine duration and easing by hand."
           }
@@ -2803,8 +2803,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": 4,
       "$description": "Entrance offset of a small surface, px.",
       "$extensions": {
-        "org.ui-research.modes": {"reduced": 0},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"reduced": 0},
+        "org.design-deep-dive.llm": {
           "usage": ["popover-enter", "tooltip-enter"],
           "rules": "Equals space.2xs. MUST be driven by this token, not hard-coded, so reduced motion can zero it out."
         }
@@ -2814,8 +2814,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": 8,
       "$description": "Entrance offset of a card or block, px.",
       "$extensions": {
-        "org.ui-research.modes": {"reduced": 0},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"reduced": 0},
+        "org.design-deep-dive.llm": {
           "usage": ["modal-enter", "card-enter", "drawer-enter"],
           "rules": "Equals space.xs. Same rule: never hard-code the offset."
         }
@@ -2825,8 +2825,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": 0.95,
       "$description": "Initial scale of an entering surface.",
       "$extensions": {
-        "org.ui-research.modes": {"reduced": 1},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"reduced": 1},
+        "org.design-deep-dive.llm": {
           "usage": ["scale-in", "modal-enter", "popover-enter"],
           "rules": "95 to 100 %, the value Atlassian uses for motion.keyframe.scale.in.small. Becomes 1 under reduced motion."
         }
@@ -2836,8 +2836,8 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": 20,
       "$description": "Delay step inside a series, ms.",
       "$extensions": {
-        "org.ui-research.modes": {"reduced": 0},
-        "org.ui-research.llm": {
+        "org.design-deep-dive.modes": {"reduced": 0},
+        "org.design-deep-dive.llm": {
           "usage": ["stagger", "list-enter"],
           "rules": "Carbon caps the total stagger at 500ms, so with 20ms a series of more than 25 items MUST animate as one block."
         }
@@ -2850,7 +2850,7 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": {"value": 640, "unit": "px"},
       "$description": "Tablet and up.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["tablet", "sm"],
           "rules": "Below this width: one column, sidebar in an overlay, page inset 16px, tables become cards."
         }
@@ -2860,7 +2860,7 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": {"value": 1024, "unit": "px"},
       "$description": "Desktop and up.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["desktop", "lg"],
           "rules": "The main threshold of an application: at and above it the sidebar is expanded and side panels are docked rather than overlaid."
         }
@@ -2870,7 +2870,7 @@ CSS-переменной из пути токена. В нашей схеме с
       "$value": {"value": 1440, "unit": "px"},
       "$description": "Wide screens.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["wide", "xl"],
           "rules": "Above it, raise the page inset to 32-40px and stop stretching the content column."
         }
@@ -2889,7 +2889,7 @@ CSS-переменной из пути токена. В нашей схеме с
       },
       "$description": "Smallest readable text. 11/16px, weight 400, tracking +0.010em.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["caption", "chart-label", "legend"],
           "rules": "Use for chart labels and dense metadata. Do NOT use for anything the user must read to act."
         }
@@ -2905,7 +2905,7 @@ CSS-переменной из пути токена. В нашей схеме с
       },
       "$description": "Uppercase-like emphasis at caption size. 11/16px, weight 600, tracking +0.020em.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["table-column-header", "overline", "eyebrow"],
           "rules": "Use for table column headers and section eyebrows. Positive tracking compensates for the small size."
         }
@@ -2921,7 +2921,7 @@ CSS-переменной из пути токена. В нашей схеме с
       },
       "$description": "Helper and error text under a form field. 12/16px, weight 400, tracking +0.010em.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["helper-text", "field-error", "hint"],
           "rules": "Use below inputs. Pair with text.secondary, or with danger.text for validation errors."
         }
@@ -2937,7 +2937,7 @@ CSS-переменной из пути токена. В нашей схеме с
       },
       "$description": "Form label and small UI label. 12/16px, weight 500, tracking +0.010em.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["form-label", "badge-label", "tab-label"],
           "rules": "Use for form labels and badges. Keep the gap between the label and its control at 4px."
         }
@@ -2953,7 +2953,7 @@ CSS-переменной из пути токена. В нашей схеме с
       },
       "$description": "Inline code, IDs, hashes. 12/16px, weight 400, tracking +0.000em.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["code", "identifier", "hash", "log"],
           "rules": "Use the mono family. Monospace runs visually larger, so it is set 2px smaller than the surrounding body text."
         }
@@ -2969,7 +2969,7 @@ CSS-переменной из пути токена. В нашей схеме с
       },
       "$description": "Body text in a dense row. 14/18px, weight 400, tracking +0.000em.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["table-cell", "list-row", "dense-body"],
           "rules": "Use inside table cells and dense list rows where a 20px leading would break the 36px row."
         }
@@ -2985,7 +2985,7 @@ CSS-переменной из пути токена. В нашей схеме с
       },
       "$description": "Default body text. 14/20px, weight 400, tracking +0.000em.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["body-text", "paragraph", "default-text"],
           "rules": "RECOMMENDED default for a dense admin. A client-facing service uses 16/24 instead."
         }
@@ -3001,7 +3001,7 @@ CSS-переменной из пути токена. В нашей схеме с
       },
       "$description": "Emphasised body text. 14/20px, weight 600, tracking +0.000em.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["emphasis", "key-value", "selected-row"],
           "rules": "Use for the emphasised half of a key-value pair. Do NOT use bold for whole paragraphs."
         }
@@ -3017,7 +3017,7 @@ CSS-переменной из пути токена. В нашей схеме с
       },
       "$description": "Button and control label. 14/20px, weight 500, tracking +0.000em.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["button-label", "menu-item", "tab"],
           "rules": "Use for every control label. Medium weight, never bold."
         }
@@ -3033,7 +3033,7 @@ CSS-переменной из пути токена. В нашей схеме с
       },
       "$description": "Title of a card or panel. 14/20px, weight 600, tracking +0.000em.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["card-title", "panel-title", "modal-title-small"],
           "rules": "Use for the title bar of a card. A card title is the same size as body text and differs only by weight."
         }
@@ -3049,7 +3049,7 @@ CSS-переменной из пути токена. В нашей схеме с
       },
       "$description": "Section heading inside a page. 16/24px, weight 600, tracking -0.005em.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["section-heading", "modal-title", "drawer-title"],
           "rules": "Use for the heading of a block and for modal titles."
         }
@@ -3064,7 +3064,7 @@ CSS-переменной из пути токена. В нашей схеме с
         "lineHeight": 1.4
       },
       "$description": "Page title. 20/28px, weight 600, tracking -0.010em.",
-      "$extensions": {"org.ui-research.llm": {"usage": ["page-title", "h1"], "rules": "Use once per page, in the page header."}}
+      "$extensions": {"org.design-deep-dive.llm": {"usage": ["page-title", "h1"], "rules": "Use once per page, in the page header."}}
     },
     "page-title-lg": {
       "$value": {
@@ -3076,7 +3076,7 @@ CSS-переменной из пути токена. В нашей схеме с
       },
       "$description": "Large page title. 24/32px, weight 600, tracking -0.015em.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["page-title-large", "landing-h1"],
           "rules": "Use on overview and dashboard pages that need a stronger opening."
         }
@@ -3092,7 +3092,7 @@ CSS-переменной из пути токена. В нашей схеме с
       },
       "$description": "Metric value on a dashboard tile. 28/32px, weight 600, tracking -0.020em.",
       "$extensions": {
-        "org.ui-research.llm": {
+        "org.design-deep-dive.llm": {
           "usage": ["kpi", "metric", "stat-value"],
           "rules": "Use for the number in a stat tile. Enable tabular numerals so digits do not shift on update."
         }
@@ -3108,7 +3108,7 @@ CSS-переменной из пути токена. В нашей схеме с
       },
       "$description": "Large metric value. 32/36px, weight 600, tracking -0.020em.",
       "$extensions": {
-        "org.ui-research.llm": {"usage": ["kpi-large", "hero-metric"], "rules": "Use for the single headline number of a dashboard."}
+        "org.design-deep-dive.llm": {"usage": ["kpi-large", "hero-metric"], "rules": "Use for the single headline number of a dashboard."}
       }
     }
   }
@@ -4412,7 +4412,7 @@ Viénot–Brettel–Mollon, ΔE в OKLab) в момент сборки, а не 
 ВСЕГО ТОКЕНОВ: 289   примитивов: 104   семантических: 185
 по группам: primitive.color 45, primitive.size 33, primitive.font 13, primitive.duration 8, primitive.easing 5, color 60, space 19, size 31, radius 6, border 4, elevation 4, z 9, opacity 5, motion 25, motionScale 4, breakpoint 3, type 15
 переопределений dark: 60; compact/comfortable: 20
-токенов с блоком org.ui-research.llm: 185 (100% семантических, 0% примитивов)
+токенов с блоком org.design-deep-dive.llm: 185 (100% семантических, 0% примитивов)
 примитивы вне полных рамп, не использованные семантикой: нет
 ступени полных рамп neutral/accent/duration без семантической роли (это норма, рампа хранится целиком): primitive.color.accent.500, primitive.duration.50, primitive.duration.600, primitive.easing.emphasized
 ```

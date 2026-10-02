@@ -8,7 +8,7 @@
 
   - изменилось значение известного имени — правка его пути DTCG в своей теме: имя CSS-переменной совпадает с путём
     токена через дефис (`color-accent-solid` ↔ `color.accent.solid`), тема `light` — `$value`, другая —
-    `$extensions["org.ui-research.modes"].<тема>`; поле стиля текста — поле составного `$value`; `usage` —
+    `$extensions["org.design-deep-dive.modes"].<тема>`; поле стиля текста — поле составного `$value`; `usage` —
     `$description`; образец стиля — `$extensions["org.design-deep-dive.artifact"].sample`;
   - новое или удалённое имя, значение, которое не переводится в тип токена, — вопрос заказчику: роль и назначение или
     отказ; сами они в DTCG не пишутся.

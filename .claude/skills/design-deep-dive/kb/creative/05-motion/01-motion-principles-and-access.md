@@ -531,7 +531,7 @@ A считает пики, счёт акцентов добавляет K. Хо�
 Группа добавлена в `../04-visual-language/marketing-tokens.json` (DTCG 2025.10: `duration` = `{value, unit}`, `cubicBezier` =
 массив из 4 чисел, длины прокрутки — `number` в vh с CSS в `$extensions`) и `marketing-tokens.css` (переменные `--mm-*`, ветка
 reduce `@media (prefers-reduced-motion: reduce)` и `:root[data-motion="reduced"]`). Reduce-значения каждого токена — в
-`$extensions.org.creative-research.reduce` (как модификатор резолвера `ui 08/03` §5.3) [S13]. Исполнитель берёт числа
+`$extensions.org.design-deep-dive.reduce` (как модификатор резолвера `ui 08/03` §5.3) [S13]. Исполнитель берёт числа
 только оттуда; K сверяет `transition-duration` и `animation-duration` страницы со шкалой.
 
 ## Частые ошибки

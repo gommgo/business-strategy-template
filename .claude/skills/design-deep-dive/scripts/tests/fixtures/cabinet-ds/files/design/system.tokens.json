@@ -154,90 +154,90 @@
       "canvas": {
         "$value": "{primitive.color.neutral.50}",
         "$description": "Фон страницы кабинета за карточками и таблицами.",
-        "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.neutral.900}"}}
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.900}"}}
       },
       "surface": {
         "$value": "{primitive.color.neutral.0}",
         "$description": "Карточки, таблицы, поля ввода и боковая панель.",
-        "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.neutral.800}"}}
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.800}"}}
       },
       "subtle": {
         "$value": "{primitive.color.neutral.100}",
         "$description": "Шапка таблицы, скелетон, фон неактивного поля.",
-        "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.neutral.950}"}}
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.950}"}}
       },
       "selected": {
         "$value": "{primitive.color.accent.50}",
         "$description": "Выбранная строка и текущий пункт навигации.",
-        "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.neutral.700}"}}
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.700}"}}
       }
     },
     "text": {
       "default": {
         "$value": "{primitive.color.neutral.900}",
         "$description": "Основной текст и заголовки; 17,1:1 к color-bg-canvas.",
-        "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.neutral.50}"}}
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.50}"}}
       },
       "muted": {
         "$value": "{primitive.color.neutral.600}",
         "$description": "Подписи, подсказки, метаданные; 7,2:1 к color-bg-canvas.",
-        "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.neutral.300}"}}
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.300}"}}
       },
       "on-accent": {
         "$value": "{primitive.color.neutral.0}",
         "$description": "Текст и иконки на color-accent-solid.",
-        "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.neutral.950}"}}
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.950}"}}
       }
     },
     "border": {
       "default": {
         "$value": "{primitive.color.neutral.200}",
         "$description": "Границы карточек, таблиц и разделителей.",
-        "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.neutral.700}"}}
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.700}"}}
       },
       "strong": {
         "$value": "{primitive.color.neutral.500}",
         "$description": "Граница поля ввода: 4,8:1 к фону — порог 3:1 для контролов (WCAG 1.4.11).",
-        "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.neutral.500}"}}
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.neutral.500}"}}
       }
     },
     "accent": {
       "solid": {
         "$value": "{primitive.color.accent.700}",
         "$description": "Главное действие «Назначить замер», текущий пункт навигации; белый на нём 6,7:1.",
-        "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.accent.400}"}, "org.ui-research.llm": {"usage": ["primary-action", "selected-nav"], "rules": "Use for the one primary action per area. Do NOT use for large backgrounds."}}
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.accent.400}"}, "org.design-deep-dive.llm": {"usage": ["primary-action", "selected-nav"], "rules": "Use for the one primary action per area. Do NOT use for large backgrounds."}}
       },
       "text": {
         "$value": "{primitive.color.accent.700}",
         "$description": "Ссылки и текст действия на светлом фоне.",
-        "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.accent.400}"}}
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.accent.400}"}}
       }
     },
     "focus": {
       "$value": "{primitive.color.accent.600}",
       "$description": "Кольцо фокуса: outline 2px с отступом 2px.",
-      "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.accent.400}"}}
+      "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.accent.400}"}}
     },
     "status": {
       "info": {
         "$value": "{primitive.color.accent.600}",
         "$description": "Статус «новая»: информационная метка.",
-        "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.accent.400}"}}
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.accent.400}"}}
       },
       "success": {
         "$value": "{primitive.color.green.600}",
         "$description": "Статус «замер проведён».",
-        "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.green.400}"}}
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.green.400}"}}
       },
       "warning": {
         "$value": "{primitive.color.amber.600}",
         "$description": "Статус «замер назначен»: ждёт выезда.",
-        "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.amber.400}"}}
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.amber.400}"}}
       },
       "danger": {
         "$value": "{primitive.color.red.600}",
         "$description": "Статус «отказ», ошибки загрузки и полей.",
-        "$extensions": {"org.ui-research.modes": {"dark": "{primitive.color.red.400}"}}
+        "$extensions": {"org.design-deep-dive.modes": {"dark": "{primitive.color.red.400}"}}
       }
     }
   },
@@ -262,17 +262,17 @@
     "sm": {
       "$value": "{primitive.size.8}",
       "$description": "Кнопки в ряду, ячейки плотной таблицы.",
-      "$extensions": {"org.ui-research.modes": {"compact": "{primitive.size.4}", "comfortable": "{primitive.size.12}"}}
+      "$extensions": {"org.design-deep-dive.modes": {"compact": "{primitive.size.4}", "comfortable": "{primitive.size.12}"}}
     },
     "md": {
       "$value": "{primitive.size.16}",
       "$description": "Отступ карточки, между полями формы.",
-      "$extensions": {"org.ui-research.modes": {"compact": "{primitive.size.12}", "comfortable": "{primitive.size.20}"}}
+      "$extensions": {"org.design-deep-dive.modes": {"compact": "{primitive.size.12}", "comfortable": "{primitive.size.20}"}}
     },
     "lg": {
       "$value": "{primitive.size.24}",
       "$description": "Между блоками экрана.",
-      "$extensions": {"org.ui-research.modes": {"compact": "{primitive.size.16}", "comfortable": "{primitive.size.32}"}}
+      "$extensions": {"org.design-deep-dive.modes": {"compact": "{primitive.size.16}", "comfortable": "{primitive.size.32}"}}
     },
     "xl": {
       "$value": "{primitive.size.32}",
@@ -296,7 +296,7 @@
       "table": {
         "$value": "{primitive.size.36}",
         "$description": "Высота строки таблицы заявок.",
-        "$extensions": {"org.ui-research.modes": {"compact": "{primitive.size.28}"}}
+        "$extensions": {"org.design-deep-dive.modes": {"compact": "{primitive.size.28}"}}
       }
     },
     "panel": {
@@ -331,7 +331,7 @@
     "raised": {
       "$value": [{"color": "{primitive.color.shadow.key}", "offsetX": {"value": 0, "unit": "px"}, "offsetY": {"value": 1, "unit": "px"}, "blur": {"value": 2, "unit": "px"}, "spread": {"value": 0, "unit": "px"}}, {"color": "{primitive.color.shadow.key}", "offsetX": {"value": 0, "unit": "px"}, "offsetY": {"value": 4, "unit": "px"}, "blur": {"value": 8, "unit": "px"}, "spread": {"value": -2, "unit": "px"}}],
       "$description": "Выпадающий список и всплывающая карточка; у карточек на странице тени нет — граница.",
-      "$extensions": {"org.ui-research.modes": {"dark": [{"color": "{primitive.color.shadow.key-dark}", "offsetX": {"value": 0, "unit": "px"}, "offsetY": {"value": 1, "unit": "px"}, "blur": {"value": 2, "unit": "px"}, "spread": {"value": 0, "unit": "px"}}, {"color": "{primitive.color.shadow.key-dark}", "offsetX": {"value": 0, "unit": "px"}, "offsetY": {"value": 4, "unit": "px"}, "blur": {"value": 8, "unit": "px"}, "spread": {"value": -2, "unit": "px"}}]}}
+      "$extensions": {"org.design-deep-dive.modes": {"dark": [{"color": "{primitive.color.shadow.key-dark}", "offsetX": {"value": 0, "unit": "px"}, "offsetY": {"value": 1, "unit": "px"}, "blur": {"value": 2, "unit": "px"}, "spread": {"value": 0, "unit": "px"}}, {"color": "{primitive.color.shadow.key-dark}", "offsetX": {"value": 0, "unit": "px"}, "offsetY": {"value": 4, "unit": "px"}, "blur": {"value": 8, "unit": "px"}, "spread": {"value": -2, "unit": "px"}}]}}
     }
   },
   "breakpoint": {
@@ -363,7 +363,7 @@
       "slow": {
         "$value": {"value": 200, "unit": "ms"},
         "$description": "Выдвижная панель.",
-        "$extensions": {"org.ui-research.modes": {"reduced": {"value": 150, "unit": "ms"}}}
+        "$extensions": {"org.design-deep-dive.modes": {"reduced": {"value": 150, "unit": "ms"}}}
       }
     },
     "easing": {

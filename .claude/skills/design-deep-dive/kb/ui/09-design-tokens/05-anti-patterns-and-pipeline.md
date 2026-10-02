@@ -306,7 +306,7 @@ with a leaner variable structure, then introduced additional tiers once the dust
     "$value": {"value": 16, "unit": "px"},
     "$deprecated": "Replaced by space.md. Will be removed in 2.0.",
     "$extensions": {
-      "org.ui-research.llm": {
+      "org.design-deep-dive.llm": {
         "doNotUse": true,
         "alternatives": ["space.md"],
         "rules": "Deprecated. Use space.md instead."

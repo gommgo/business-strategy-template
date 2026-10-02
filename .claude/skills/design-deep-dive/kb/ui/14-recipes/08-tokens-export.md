@@ -29,7 +29,7 @@ to implement this version… do not reference this version as authoritative».
 | Цвет — объект с `colorSpace` и `components`; `hex` только шестизначный, `alpha` отдельным полем | `{"colorSpace": "oklch", "components": [0.5465, 0.2455, 262.87], "hex": "#155dfc"}` |
 | Ссылаться можно только на токен целиком, не на группу | `{color.accent.600}` |
 | Токена прозрачности в стандарте нет — используется `number` | `"$type": "number", "$value": 0.32` |
-| `$extensions` — ключи в обратной доменной нотации; инструменты **MUST** сохранять непонятные им расширения | `org.ui-research.llm` |
+| `$extensions` — ключи в обратной доменной нотации; инструменты **MUST** сохранять непонятные им расширения | `org.design-deep-dive.llm` |
 
 **Альфу нельзя навесить на алиас.** `{color.neutral.950}` с другой прозрачностью в DTCG не выражается:
 `$value` — либо ссылка целиком, либо собственный объект. Цвета теней и скрим поэтому задаются собственными
@@ -42,7 +42,7 @@ to implement this version… do not reference this version as authoritative».
 
 ```json
 "$extensions": {
-  "org.ui-research.llm": {
+  "org.design-deep-dive.llm": {
     "usage": ["input-border", "checkbox-border", "select-border"],
     "rules": "MUST use for the border of any control that the user can type in or toggle. Gives 4.76:1 against bg.surface, which satisfies WCAG 1.4.11. Do NOT use for dividers: it is too strong and turns the layout into a grid.",
     "doNotUse": ["divider", "card-border"],

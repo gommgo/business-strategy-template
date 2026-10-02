@@ -1280,7 +1280,7 @@
 
 **Магическое значение** (magic value) — размер или цвет, записанный литералом в компоненте вместо токена. → `09-design-tokens/`.
 
-**`usage` / `rules` / `doNotUse` / `alternatives`** — поля расширения с правилами применения токена для языковой модели. Формат `org.primer.llm` у GitHub Primer; в эталонной схеме — `org.ui-research.llm`. → `09-design-tokens/`.
+**`usage` / `rules` / `doNotUse` / `alternatives`** — поля расширения с правилами применения токена для языковой модели. Формат `org.primer.llm` у GitHub Primer; в эталонной схеме — `org.design-deep-dive.llm`. → `09-design-tokens/`.
 
 **Модальность правила** — три уровня в тексте `rules`: `MUST use for…` (нарушение ломает доступность), `RECOMMENDED default for…` (выбор по умолчанию), `Use for…` (обычное применение); запрет — `Do NOT use for…` с причиной. → `09-design-tokens/`.
 

@@ -221,7 +221,7 @@ CSS-селектор.
 `05-anti-patterns-and-pipeline.md` §5.
 
 **`usage` / `rules` / `doNotUse` / `alternatives`** — поля расширения с правилами применения токена для
-языковой модели. Формат `org.primer.llm` у GitHub Primer; в эталонной схеме — `org.ui-research.llm`.
+языковой модели. Формат `org.primer.llm` у GitHub Primer; в эталонной схеме — `org.design-deep-dive.llm`.
 
 **Модальность правила** — три уровня в тексте `rules`: `MUST use for…` (нарушение ломает доступность),
 `RECOMMENDED default for…` (выбор по умолчанию), `Use for…` (обычное применение); запрет —

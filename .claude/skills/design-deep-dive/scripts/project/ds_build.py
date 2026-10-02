@@ -25,7 +25,7 @@
 значение в блок `@media (width < <граница>)` CSS и в `x-narrow` передней части; мобильное приложение берёт основной
 кегль оттуда же.
 
-Тема значений `$value` — `light`, пока корень токенов не объявил другую: `$extensions["org.ui-research.modes"].base` —
+Тема значений `$value` — `light`, пока корень токенов не объявил другую: `$extensions["org.design-deep-dive.modes"].base` —
 `light` или `dark`. От неё — `color-scheme` в `:root` (у продукта с одной тёмной темой — `dark`) и первая тема
 артефакта; режим токена с именем парной темы даёт вторую тему — её блок включается и по настройке системы
 (`prefers-color-scheme`), и атрибутом `[data-theme]`.
@@ -34,7 +34,7 @@
 знаков; когда оно недотягивает до целого px (14 px × 1.428571 = 19,999994), браузер усекает высоту строки до шага
 раскладки 1/64 px и строка выходит 19,98 px — в CSS идёт наименьшее шестизначное отношение, которое даёт целый px
 (1.428572); в передней части и артефакте остаётся число DTCG. Трекинг: у стиля с резиновым кеглем (расширение
-`org.creative-research.fluid` или готовый CSS кегля) px значения верен только на наибольшем кегле, поэтому в CSS и в
+`org.design-deep-dive.fluid` или готовый CSS кегля) px значения верен только на наибольшем кегле, поэтому в CSS и в
 передней части он идёт в em — `letter_spacing_em` расширения, иначе px значения / кегль значения.
 
 Что не идёт в артефакт: примитивы (`primitive.*` — холст и компоненты берут значения ролей) и движение (группы
@@ -76,11 +76,11 @@ import kbpaths  # noqa: E402
 import docpaths  # noqa: E402
 import findings as F  # noqa: E402
 
-EXT_MODES = "org.ui-research.modes"
-EXT_LLM = "org.ui-research.llm"
-EXT_REDUCE = "org.creative-research.reduce"                 # сокращённое движение расширения страниц сайта
-EXT_FLUID = "org.creative-research.fluid"                   # fluid-значение clamp() расширения страниц
-EXT_CSS = "org.creative-research.css"                       # готовое CSS-значение расширения страниц
+EXT_MODES = "org.design-deep-dive.modes"
+EXT_LLM = "org.design-deep-dive.llm"
+EXT_REDUCE = "org.design-deep-dive.reduce"                 # сокращённое движение расширения страниц сайта
+EXT_FLUID = "org.design-deep-dive.fluid"                   # fluid-значение clamp() расширения страниц
+EXT_CSS = "org.design-deep-dive.css"                       # готовое CSS-значение расширения страниц
 EXT_ART = "org.design-deep-dive.artifact"                   # поля артефакта Design System, которых нет в DTCG
 
 NARROW_BODY_MIN_PX = 16     # ux/09-mobile/03-mobile-content-tables-forms-dashboards.md §7.1 (canon.tsv, NU-15)
@@ -279,7 +279,7 @@ class Token:
         return e.get(key) if isinstance(e, dict) else None
 
     def mode_entries(self):
-        """[(режим, значение, место)]: `org.ui-research.modes` и сокращённое движение расширения страниц."""
+        """[(режим, значение, место)]: `org.design-deep-dive.modes` и сокращённое движение расширения страниц."""
         out = []
         m = self.ext(EXT_MODES)
         if isinstance(m, dict):

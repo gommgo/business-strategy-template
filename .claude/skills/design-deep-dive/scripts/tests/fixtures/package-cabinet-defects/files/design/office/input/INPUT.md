@@ -22,7 +22,7 @@ files:
   contract.md: sha256:252acc176ad7ee4459cedae6478aa5e4c31836ab2c892ed937140d7a37af239a
   copy.md: sha256:456134aab65cafd47882c90ebe6414b6e9284975c2257a982e503b0a4e5f637c
   demo-data.json: sha256:0ed1f8ddd7d77b02b3cbeb13d767e8dfa6f0f322c0deff152a703371e4efac7d
-manifest: sha256:23a843ce4ab77b6fe506d42de218f162184d2a4ee60139b2f80f4a127add66fb
+manifest: sha256:747f898d95cdf3c8905b7ecb30fc7cf3dcf6e05d764c4c2644e8e60d0f0be090
 ---
 # Вход холста — `office` (web · app), этап `mockup`
 
@@ -42,7 +42,7 @@ manifest: sha256:23a843ce4ab77b6fe506d42de218f162184d2a4ee60139b2f80f4a127add66f
 | app-brief | `docs/projects/otves-office/design/app-brief.yaml` | approved | `sha256:d3c25364ef2a51ab12af4ad6e014b10dc3f75210a147497a1f7a05bcba142808` |
 | brand | `docs/projects/otves-office/design/brand.yaml` | draft | `sha256:62e0880156972099da86207e73ef57b0c60b423cbdab47200c5c5de1accbcf07` |
 | tokens-css | `docs/projects/otves-office/design/system.tokens.css` | — | `sha256:937bc0d0e0d0df0972b7ff4d403e6ae6fa9ebc4297088643b1e38cd3f54bce22` |
-| tokens | `docs/projects/otves-office/design/system.tokens.json` | — | `sha256:4b00b0b92b5c03ce1d29cc7c629323a625fdef2a6ed31f5d5022bcaf7c7a877c` |
+| tokens | `docs/projects/otves-office/design/system.tokens.json` | — | `sha256:5434e66ced40fe63749af4d1637a9b4e593b928a45ce23b763e12209b4ee1506` |
 | system | `docs/projects/otves-office/design/system.yaml` | approved | `sha256:c96a72c9a9fd3b8f37e9a759a2751f2dd0ce82478da9c2d9da6635b091d68367` |
 | interface | `docs/projects/otves-office/interface/office/data-items.md` | — | `sha256:6c88085ea0733c5c92d04c26808c043eeffe36166939f971bc0a88585fa5b937` |
 | interface | `docs/projects/otves-office/interface/office/scenario.md` | — | `sha256:b81a16e61cb7fdbe53aa21c46c84ecb41c8645807a0d46e24c1d029ba1f8b4ac` |
