@@ -1,7 +1,7 @@
 # Сгенерировано K/01 из 12-recipes/08-sequence-video-alpha.md — блоки python в напечатанном виде, по порядку.
 
 # ---- блок со строки 37
-# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 08: вращение 360° импортированного GLB → PNG RGBA
+# Blender 5.2.2 — [проверено] рецепт 08: вращение 360° импортированного GLB → PNG RGBA
 import sys, math, os, bpy
 import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender
 import rk

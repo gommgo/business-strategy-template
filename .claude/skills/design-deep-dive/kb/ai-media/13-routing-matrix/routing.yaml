@@ -270,7 +270,7 @@ routes:
       - {class: B, src: "LiWi: разложение Qwen на фото IoU 0,61 (J10)"}
       - {class: run, src: "T2 (25.09): Qwen 2.1 background: transparent — настоящая альфа, 64 % прозрачных, мягкий край — 99-raw/phase5/runs/0-protocol/t2-qwen-alpha_on-white-dark-checker.jpg"}
       - {class: run, src: "H-03 (RouterAI GPT 2.5 transparent, 2 × 1,454 ₽): мех — годен (α=0 27 %, 1–249 36 %, ≥ 250 36,5 %); стекло — тело непрозрачно, облако фона медиана 76 px, маска блоками 16 px (энергия края ×1,6–1,7) → не годится; для сравнения T2 Qwen 2.1 — 64 / 1,5 / 35 % — 99-raw/phase5/runs/S5-analysis/H-03_alpha.json, лист H-03_sheet.jpg"}
-    label: "[проверено: 99-raw/experiments/H/01] для локального; нативная альфа Qwen 2.1 — [проверено: 99-raw/phase5/runs/0-protocol/t2-qwen-alpha_on-white-dark-checker.jpg, 1 образец]; RouterAI GPT 2.5 — [проверено: 99-raw/phase5/runs/S5-analysis/H-03_alpha.json, мех да, стекло нет, 1 образец]"
+    label: "[проверено] для локального; нативная альфа Qwen 2.1 — [проверено: 99-raw/phase5/runs/0-protocol/t2-qwen-alpha_on-white-dark-checker.jpg, 1 образец]; RouterAI GPT 2.5 — [проверено: 99-raw/phase5/runs/S5-analysis/H-03_alpha.json, мех да, стекло нет, 1 образец]"
     checked: "2026-09-25"
     decides: "ИТОГ: маршрут по типу объекта (ровный фон + локальный вырез) без изменений; T2 — Qwen 2.1 даёт настоящую альфу, но лицензия исследовательская → черновик; H-03 — RouterAI GPT 2.5 transparent (1,45 ₽): мех — годен, стекло — нет (облако фона, блочная маска) → стекло — хромакей или Ideogram; Riverflow transparent — пусто ×2 → not; H-01 v2–v4, H-02, H-04 не прогонялись (отменено заказчиком 25.09)"
 
@@ -322,7 +322,7 @@ routes:
     legal: {flags: [], policy_rows: ["04 §2 стр. 1"]}
     evidence:
       - {class: B, src: "параметра tile нет ни у одной модели polza [документация]; H/05 — заделка локально [проверено]"}
-    label: "[документация] + [проверено: 99-raw/experiments/H/05-tiling-banding] для постобработки"
+    label: "[документация] + [проверено] для постобработки"
     checked: "2026-09-25"
     decides: "ИТОГ: без изменений — H-09 не прогонялся (отменено заказчиком 25.09); ворота E-01 сняты (метки Seedream через mie нет)"
 
@@ -475,7 +475,7 @@ routes:
     legal: {flags: [], policy_rows: []}
     evidence:
       - {class: B, src: "H/02: Real-ESRGAN хуже Lanczos на фото [проверено]; J18: NB2 ≈ PiSA-SR по PSNR, но галлюцинации"}
-    label: "[проверено: 99-raw/experiments/H/02] для локального; Topaz — [не проверено]"
+    label: "[проверено] для локального; Topaz — [не проверено]"
     checked: "2026-09-25"
     decides: "ИТОГ: без изменений — генерировать в целевой ступени (Sunburst 4K = 3840×2160, 11 ₽; Seedream 4 «4K» ≈ 2,4K); H-05 (Topaz ×2) не прогонялся (отменено заказчиком 25.09)"
 
@@ -793,7 +793,7 @@ routes:
       - {class: A, src: "Rapidata SVG (59 моделей, 3 млн голосов): icons & ui №1 Claude Opus 5.5 1410, Recraft V4.1 #37–39 (J3)"}
       - {class: B, src: "G/01: 9 из 20 иконок Lucide LLM воспроизводит с IoU ≥ 0,92; новые метафоры узнались 2 из 5 [проверено]"}
       - {class: run, src: "G-01, G-02, G-04, G-06 (25.09, polza-chat): 99-raw/experiments/_mp/G/2026-09-25/ (3,43 / 0,84 / 1,17 / 0,21 ₽); G-03 — пустой ответ за 9,77 ₽; разбор V (check_icons + лист 16/24/48): GPT-5.6 Sol и Gemini 3.8 Flash — поле и зазор 4 из 6 против 6 из 6 у Claude в сессии (G/01); новые метафоры съезжают к знакомым глифам; VLM-узнавание (G-06, лист G/01) совпало с глазом 12 из 12 — 99-raw/phase5/runs/S5-analysis/G-llm-svg/nearest-lucide.json"}
-    label: "[исследование] + [проверено: 99-raw/experiments/G/01] + [проверено: 99-raw/phase5/runs/S5-analysis/G-llm-svg/nearest-lucide.json, G-01, G-02, n = 6 иконок на модель]"
+    label: "[исследование] + [проверено] + [проверено: 99-raw/phase5/runs/S5-analysis/G-llm-svg/nearest-lucide.json, G-01, G-02, n = 6 иконок на модель]"
     checked: "2026-09-25"
     decides: "ИТОГ: маршрут без изменений (набор продукта или LLM → SVG в сессии, 0 ₽); G-01, G-02 (разбор V): поле и зазор 4 из 6 у обеих платных LLM против 6 из 6 у Claude в сессии, новые метафоры съезжают к знакомым глифам → платная LLM лучше «Claude в сессии, 0 ₽» не оказалась; урок фазы 5 — рассуждающий чат может израсходовать весь max_tokens без ответа (G-03 Sonnet 5 — 9,77 ₽, G-04 DeepSeek — 1,17 ₽ при оценке 0,17: 8 000 ток. планирования текстом и ставка провайдера ×3,6), верх цены — max_tokens × ставка провайдера; G-05 не прогонялся"
 
@@ -854,7 +854,7 @@ routes:
     delivery: svg
     legal: {flags: [], policy_rows: ["04 §2 стр. 1–2"]}
     evidence:
-      - {class: B, src: "G 07/03 [проверено: 99-raw/experiments/G/]"}
+      - {class: B, src: "G 07/03 [проверено]"}
     label: "[проверено]"
     checked: "2026-09-24"
     decides: "не нужен"
@@ -873,7 +873,7 @@ routes:
     legal: {flags: [], policy_rows: ["04 §2 стр. 2"]}
     evidence:
       - {class: B, src: "G/05: reduce в Chromium — CSS inline слушает, SMIL/<img>/Lottie — нет [проверено]"}
-    label: "[проверено: 99-raw/experiments/G/05]"
+    label: "[проверено]"
     checked: "2026-09-24"
     decides: "не нужен"
 
@@ -891,6 +891,6 @@ routes:
     legal: {flags: [], policy_rows: ["04 §2 стр. 15 (логотип — не генерацией)"]}
     evidence:
       - {class: B, src: "G/03: vtracer с эталоном [проверено]; GDB image-to-SVG GPT-5.4 SSIM 0,918 (J13)"}
-    label: "[проверено: 99-raw/experiments/G/03]"
+    label: "[проверено]"
     checked: "2026-09-24"
     decides: "G-16: Image2svg (1 ₽) против локального vtracer"

@@ -16,7 +16,7 @@
 # `examples[0]` ниже).
 
 $schema: "https://json-schema.org/draft/2020-12/schema"
-$id: "urn:app-design:text-research:voc:1"
+$id: "urn:app-design:text:voc:1"
 title: "voc.yaml — голос клиента: источники, фрагменты, темы"
 description: >-
   Дословные слова клиентов с кодами и темами. Нужен, чтобы заголовки, возражения, FAQ и язык страницы брались из слов

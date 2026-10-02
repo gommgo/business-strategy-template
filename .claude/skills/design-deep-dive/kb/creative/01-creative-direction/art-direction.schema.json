@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:app-design:creative-research:art-direction:0",
+  "$id": "urn:app-design:creative:art-direction:0",
   "title": "art-direction v0 — документ арт-дирекшна сайта (концепция, направления, выбор, визуальный язык, движение, эффекты, решения о приёмах, уровень и бюджет)",
   "description": "Формат №5 контракта тройки v2 (§3 п.5), владелец — creative-research. Один документ на сайт (или на мир сайта: маркетинг и продукт — два документа). Питает паспорт визуала ai-media (visual-dna.schema.json) через блок handoff.visual_dna, спецификации blender (handoff.blender), пакет kimi (handoff.kimi) и treatment секций page-plan (effects_by_section, motion_system). Процедура заполнения — 01-concept-and-directions.md; поля и соответствия — 02-art-direction-document.md; уровни — ambition-levels.yaml. v0 — агент A (волна 1); v1 — агент I (волна 3). Правила, которые JSON Schema выразить не может (различие направлений по осям, критерии приёмов, соответствие уровню), проверяет ../../scripts/creative/ad_check.py.",
   "x-version": 0,

@@ -13,7 +13,7 @@ sources:
   name: Dribbble
   group: portfolio-shots
   url: https://dribbble.com/
-  alive: 'жив: 6 запросов и 2 get через сессию заказчика (Brave 153), челленджей нет [проверено: B/06]'
+  alive: 'жив: 6 запросов и 2 get через сессию заказчика (Brave 153), челленджей нет [проверено]'
   value: 3
   useful_for:
   - статика-концепты
@@ -101,7 +101,7 @@ sources:
   name: Dprofile
   group: portfolio-shots
   url: https://dprofile.ru/
-  alive: 'жив: 0,7–1 с; 3 запроса + 2 повтора через сессию заказчика, челленджей нет [проверено: B/07]'
+  alive: 'жив: 0,7–1 с; 3 запроса + 2 повтора через сессию заказчика, челленджей нет [проверено]'
   value: 3
   useful_for:
   - русский дизайн и кириллица
@@ -215,7 +215,7 @@ sources:
   name: FWA
   group: site-galleries
   url: https://thefwa.com/
-  alive: 'жив: 200, 7,7 с [проверено: B/01]'
+  alive: 'жив: 200, 7,7 с [проверено]'
   value: 2
   useful_for:
   - FOTD, кейсы студий
@@ -252,7 +252,7 @@ sources:
   name: Recent (прежний Godly)
   group: site-galleries
   url: https://recent.design/
-  alive: 'жив: 200, 10 с, Cloudflare; godly.website → recent.design/?ref=godly [проверено: B/01]'
+  alive: 'жив: 200, 10 с, Cloudflare; godly.website → recent.design/?ref=godly [проверено]'
   value: 3
   useful_for:
   - сайты с датой, категорией и тегами стека (framework, hosting, library, interaction)
@@ -287,7 +287,7 @@ sources:
   name: Godly (godly.design)
   group: site-galleries
   url: https://godly.design/
-  alive: 'жив: 200, 23 с, «Godly — Design Inspiration», Cloudflare [проверено: B/01]'
+  alive: 'жив: 200, 23 с, «Godly — Design Inspiration», Cloudflare [проверено]'
   value: 2
   useful_for:
   - галерея сайтов

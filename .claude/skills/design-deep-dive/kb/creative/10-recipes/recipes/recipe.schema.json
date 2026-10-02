@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:app-design:creative-research:recipe:0",
+  "$id": "urn:app-design:creative:recipe:0",
   "title": "Рецепт эффектной страницы от брифа до кода (creative-research · 10-recipes · J · волна 3)",
   "description": "Машиночитаемая половина рецепта NN-<тип>-<уровень>.md. Ссылки на чужие id — с пространством имён (block:, effect:, cliche:, recipe:) или по файлу соседа. Проверка: 99-raw/tools/venv-J/bin/python ../../scripts/creative/recipe_check.py 10-recipes/recipes/*.recipe.yaml (схема + id блоков site, эффектов F, клише H, ворот K + журнал вариативности ≥ 4 из 8 осей). checked_at 2026-09-25.",
   "type": "object",

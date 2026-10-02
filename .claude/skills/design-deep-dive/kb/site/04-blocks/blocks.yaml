@@ -267,7 +267,7 @@ blocks:
     mobile: {behavior: [stack], below_40rem: "дисплей на шаг меньше; длинные слова — hyphens: auto при lang=ru или дисплей ещё на шаг меньше; неразрывный пробел после предлогов и союзов — правило text (типографика); ядро ≤ 40 слов (text hero-core) выше черты первого экрана с учётом шапки и баннера cookie", never_hide: [headline, cta]}
     refs: {structure: ["site:03-03#1.2", "site:03-03#2.2", "site:03-03#3.1"], conversion: ["site:05-01"], seo: ["site:07-01"], a11y: ["site:08-03"], events: ["site:07-04"], text: ["text:04-01"], creative: ["creative:block-treatments"]}
     errors: ["Слоган вместо категории без надзаголовка (C/02: 5 из 30)", "Анимированный по буквам H1 — задерживает смысл и LCP", "hero 100vh с текстом по центру и без признака продолжения (гейт 6 Hallmark)"]
-    evidence: ["hero у 30 из 30 живых страниц, позиция 0,00 [проверено: C/01]"]
+    evidence: ["hero у 30 из 30 живых страниц, позиция 0,00 [проверено]"]
 
   hero-media:
     family: hero
@@ -342,7 +342,7 @@ blocks:
     mobile: {behavior: [stack], below_40rem: "в первом экране — заголовок и начало формы с первым полем или кнопкой; подпись над полем; кнопка на всю ширину; поля tel/email со своей клавиатурой", never_hide: [headline, form, consent, cta-note]}
     refs: {structure: ["site:03-03#3.2"], conversion: ["site:05-01", "site:05-lead-forms"], legal: ["site:08-01"], a11y: ["ux:08-03", "site:08-03"], events: ["site:07-04"], ux: ["ux:04-05#2.5", "ux:04-05#7.8", "ux:07-02"], text: ["text:04-04"], creative: ["creative:block-treatments"]}
     errors: ["Поля без ценности обмена («Оставьте заявку» без того, что получит человек)", "Согласие на ПД — предзаполненная галочка или только текст мелким шрифтом", "Форма в hero SaaS с 5 полями вместо кнопки пробного периода", "Нет строки «что будет после отправки»"]
-    evidence: ["форма в hero — 17 % страниц на десктопе, 15 % на телефоне [проверено: C/02]"]
+    evidence: ["форма в hero — 17 % страниц на десктопе, 15 % на телефоне [проверено]"]
 
   hero-input:
     family: hero
@@ -506,7 +506,7 @@ blocks:
     mobile: {behavior: [stack], below_60rem: "6 → 3 в ряд", below_40rem: "3 → 2 в ряд, высота логотипа 32 → 24 px; бегущая строка — медленнее или сеткой", never_hide: [caption]}
     refs: {conversion: ["site:05-02"], legal: ["site:08-02"], a11y: ["site:08-03"], assets: ["ai-media:01-01#2.3"], ux: ["ux:07-06#5.2"], creative: ["creative:block-treatments"]}
     errors: ["«Нам доверяют» с чужими или сгенерированными логотипами", "alt=«logo» у всех картинок", "Логотипы как бегущая строка без паузы"]
-    evidence: ["proof-logos — 4 из 30 живых страниц, позиция 0,66 [проверено: C/01]; логотипы клиентов — 15 из 43 лидеров [данные: ai-media]"]
+    evidence: ["proof-logos — 4 из 30 живых страниц, позиция 0,66 [проверено]; логотипы клиентов — 15 из 43 лидеров [данные: ai-media]"]
 
   stat-strip:
     family: proof
@@ -530,7 +530,7 @@ blocks:
     mobile: {behavior: [stack], below_60rem: "4 → 2 в ряд", below_40rem: "по одному числу в строке", never_hide: [stat.value, stat.label, source]}
     refs: {conversion: ["site:05-02"], legal: ["site:08-02"], text: ["copy-rule:stat-value", "copy-rule:stat-source"], creative: ["creative:block-treatments"]}
     errors: ["«10 000+ клиентов» без факта", "Чередование «ряд чисел ↔ фичи» по всей странице — новый шаблон ИИ-страниц 2026 (C/01: переход stats → benefits 5 раз на 6 страницах)", "Анимированный счётчик, который показывает 0 до прокрутки (краулер и читалка видят 0)"]
-    evidence: ["proof-stats — 6 из 30 живых страниц, позиция 0,32 [проверено: C/01]"]
+    evidence: ["proof-stats — 6 из 30 живых страниц, позиция 0,32 [проверено]"]
 
   testimonial-cards:
     family: proof
@@ -556,7 +556,7 @@ blocks:
     mobile: {behavior: [rail, stack], below_40rem: "лента с видимым краем или стопка из 3 + «Ещё отзывы»", never_hide: [testimonial.quote, testimonial.attribution]}
     refs: {conversion: ["site:05-02"], legal: ["site:08-01", "site:08-02"], a11y: ["site:08-03"], assets: ["ai-media:01-01#2.5"], text: ["copy-rule:testimonial-quote"], creative: ["creative:block-treatments"]}
     errors: ["ИИ-лица и выдуманные имена", "Три одинаковые карточки отзывов в хвосте — «shared tail» Hallmark", "Карусель отзывов с автопрокруткой", "Только пятёрки без источника — выборка «лучших»"]
-    evidence: ["testimonials — 18 из 30 живых страниц, позиция 0,62 [проверено: C/01]"]
+    evidence: ["testimonials — 18 из 30 живых страниц, позиция 0,62 [проверено]"]
 
   testimonial-single:
     family: proof
@@ -639,7 +639,7 @@ blocks:
     mobile: {behavior: [stack, rail], below_40rem: "стопка из 2–3 + ссылка на все; или лента", never_hide: [title, case.result]}
     refs: {conversion: ["site:05-02"], legal: ["site:08-02"], ia: ["site:06-01"], text: ["copy-rule:case-result"], creative: ["creative:block-treatments"]}
     errors: ["Кейс без числа и срока", "Обложка — сток вместо фото объекта", "Результат одного клиента подан как обычный (text: рядом — типичный результат)"]
-    evidence: ["case-studies — 6 из 30 живых страниц, позиция 0,61 [проверено: C/01]"]
+    evidence: ["case-studies — 6 из 30 живых страниц, позиция 0,61 [проверено]"]
 
   case-study:
     family: proof
@@ -771,7 +771,7 @@ blocks:
     mobile: {behavior: [stack], below_60rem: "3–6 колонок → 2", below_40rem: "одна колонка; иконки меньше", never_hide: [title, card.body]}
     refs: {structure: ["site:03-01#1.2"], conversion: ["site:05-01"], a11y: ["site:08-03"], text: ["copy-rule:card-title", "copy-rule:card-body"], assets: ["ai-media:01-01#2.4"], creative: ["creative:block-treatments"]}
     errors: ["«Три карточки на всё»: выгоды, аудитория, возражения — одним и тем же блоком", "Иконки-«искры» и абстрактные пиктограммы без смысла", "card-body повторяет заголовок другими словами"]
-    evidence: ["benefits — 26 из 30 живых страниц, позиция 0,23 [проверено: C/01]"]
+    evidence: ["benefits — 26 из 30 живых страниц, позиция 0,23 [проверено]"]
 
   feature-bento:
     family: value
@@ -919,7 +919,7 @@ blocks:
     mobile: {behavior: [stack], below_60rem: "номера из поля слева — в строку с заголовком шага", below_40rem: "соединительные линии убираются", never_hide: [title, step.body]}
     refs: {structure: ["site:03-01#3.2"], conversion: ["site:05-02"], text: ["copy-rule:step-title", "copy-rule:step-body"], creative: ["creative:block-treatments"]}
     errors: ["Сроки шагов без факта («за 1 день»)", "Шаги в виде картинок без текста"]
-    evidence: ["how-it-works — 7 из 30 живых страниц, позиция 0,28 [проверено: C/01]"]
+    evidence: ["how-it-works — 7 из 30 живых страниц, позиция 0,28 [проверено]"]
 
   product-showcase:
     family: value
@@ -949,7 +949,7 @@ blocks:
     mobile: {behavior: [stack], below_60rem: "скриншот на всю ширину, выноски — нумерованным списком ниже", below_40rem: "кадр 16:9 или вертикальный кадр телефона; легенда под ним", never_hide: [screenshot, callout]}
     refs: {assets: ["ai-media:01-01#2.4", "ai-media:12-04#2"], budget: ["site:07-03"], creative: ["creative:block-treatments"]}
     errors: ["Сгенерированный интерфейс вместо настоящего", "Мелкий текст скриншота как единственный носитель смысла"]
-    evidence: ["product-demo — 5 из 30 живых страниц, позиция 0,29 [проверено: C/01]"]
+    evidence: ["product-demo — 5 из 30 живых страниц, позиция 0,29 [проверено]"]
 
   video-showcase:
     family: value
@@ -1050,7 +1050,7 @@ blocks:
     mobile: {behavior: [stack], never_hide: [title]}
     refs: {structure: ["site:03-01#3.1"], text: ["text:02-02"], creative: ["creative:block-treatments"]}
     errors: ["Боли не из голоса клиента, а из воображения", "Боли перед ценой у лидогенерации под горячий трафик"]
-    evidence: ["problem — 3 из 30 живых страниц, позиция 0,14 [проверено: C/01]"]
+    evidence: ["problem — 3 из 30 живых страниц, позиция 0,14 [проверено]"]
 
   integrations-grid:
     family: value
@@ -1076,7 +1076,7 @@ blocks:
     mobile: {behavior: [stack], below_40rem: "3 → 2 в ряд", never_hide: [integration.name]}
     refs: {conversion: ["site:05-02"], legal: ["site:08-02"], creative: ["creative:block-treatments"]}
     errors: ["Логотипы сервисов, с которыми интеграции нет (только «планируется»)"]
-    evidence: ["integrations — 3 из 30 живых страниц, позиция 0,71 [проверено: C/01]"]
+    evidence: ["integrations — 3 из 30 живых страниц, позиция 0,71 [проверено]"]
 
   spec-sheet:
     family: value
@@ -1126,7 +1126,7 @@ blocks:
     mobile: {behavior: [none], never_hide: [body]}
     refs: {seo: ["site:07-01", "site:07-02"], text: ["copy-rule:body", "copy-rule:geo-answer"], creative: ["creative:block-treatments"]}
     errors: ["SEO-текст между оффером и призывом", "Стена текста без подзаголовков"]
-    evidence: ["seo-text — 5 из 30 живых страниц, позиция 0,73 [проверено: C/01]"]
+    evidence: ["seo-text — 5 из 30 живых страниц, позиция 0,73 [проверено]"]
 
   media-band:
     family: value
@@ -1174,7 +1174,7 @@ blocks:
     mobile: {behavior: [stack, accordion], below_40rem: "одна колонка; длинный перечень — группами в аккордеоне", never_hide: [title, service.price]}
     refs: {structure: ["site:03-01#3.2"], conversion: ["site:05-02"], ia: ["site:06-01"], legal: ["site:08-01"], creative: ["creative:block-treatments"]}
     errors: ["«Цена по запросу» у всех услуг при известных ценах «от»", "Одинаковые стоковые обложки у всех услуг"]
-    evidence: ["services — 9 из 30 живых страниц, позиция 0,14 [проверено: C/01]"]
+    evidence: ["services — 9 из 30 живых страниц, позиция 0,14 [проверено]"]
 
   pricing-cards:
     family: offer
@@ -1203,7 +1203,7 @@ blocks:
     mobile: {behavior: [stack], below_60rem: "не больше 2 тарифов рядом", below_40rem: "по одному; популярный тариф выделен подачей, а не переносом в DOM", never_hide: [plan.name, plan.price, plan.price-note, plan.feature, plan.cta]}
     refs: {structure: ["site:03-01#3.2"], conversion: ["site:05-02"], legal: ["site:08-01"], seo: ["site:07-01"], ux: ["ux:04-09#10"], text: ["copy-rule:pricing-price", "copy-rule:pricing-price-note"], creative: ["creative:block-treatments"]}
     errors: ["Три тарифа «из шаблона» с выдуманными ценами", "Цена только картинкой или только скриптом", "Зачёркнутая цена без реальной прежней (I)"]
-    evidence: ["pricing — 14 из 30 живых страниц, позиция 0,31; SaaS: цена на странице у 2 из 8 [проверено: C/01]"]
+    evidence: ["pricing — 14 из 30 живых страниц, позиция 0,31; SaaS: цена на странице у 2 из 8 [проверено]"]
 
   pricing-table:
     family: offer
@@ -1299,7 +1299,7 @@ blocks:
     mobile: {behavior: [toggle], below_40rem: "две колонки (мы и выбранная альтернатива) + переключатель или карточки по альтернативе", never_hide: [row, source]}
     refs: {conversion: ["site:05-02"], legal: ["site:08-01", "site:08-02"], a11y: ["ux:04-01#1.4", "site:08-03"], ux: ["ux:04-01#1.4"], creative: ["creative:block-treatments"]}
     errors: ["Сравнение, где у нас все ✓, у других все ✗", "Таблица картинкой", "Горизонтальная прокрутка таблицы на телефоне без подсказки"]
-    evidence: ["comparison — 0 из 30 живых страниц людей, 2 из 6 ИИ-страниц [проверено: C/01]"]
+    evidence: ["comparison — 0 из 30 живых страниц людей, 2 из 6 ИИ-страниц [проверено]"]
 
   offer-details:
     family: offer
@@ -1328,7 +1328,7 @@ blocks:
     mobile: {behavior: [stack], never_hide: [include, exclude]}
     refs: {conversion: ["site:05-02"], legal: ["site:08-01"], text: ["copy-rule:list-item"], creative: ["creative:block-treatments"]}
     errors: ["«Всё включено» без списка", "Скрытое «не входит» мелким шрифтом"]
-    evidence: ["offer — 3 из 30 живых страниц, позиция 0,23 [проверено: C/01]"]
+    evidence: ["offer — 3 из 30 живых страниц, позиция 0,23 [проверено]"]
 
   key-facts:
     family: offer
@@ -1380,7 +1380,7 @@ blocks:
     mobile: {behavior: [stack], never_hide: [body, deadline, cta]}
     refs: {conversion: ["site:05-02"], legal: ["site:08-01", "site:08-02"], ux: ["ux:06-04#8.1"], text: ["copy-rule:price-old"], creative: ["creative:block-treatments"]}
     errors: ["Таймер, который сбрасывается при обновлении (157 лживых из 393 — ux 06-04)", "«Только сегодня» каждый день", "Зачёркнутая цена без периода реальной продажи"]
-    evidence: ["promo — 9 из 30 живых страниц, позиция 0,40 [проверено: C/01]"]
+    evidence: ["promo — 9 из 30 живых страниц, позиция 0,40 [проверено]"]
 
   guarantee:
     family: offer
@@ -1409,7 +1409,7 @@ blocks:
     mobile: {behavior: [none], never_hide: [text]}
     refs: {conversion: ["site:05-02"], legal: ["site:08-01"], text: ["copy-rule:guarantee-text"], creative: ["creative:block-treatments"]}
     errors: ["Нарисованная «печать гарантии» без условий", "Гарантия, противоречащая договору"]
-    evidence: ["guarantee — 2 из 30 живых страниц, позиция 0,70 [проверено: C/01]"]
+    evidence: ["guarantee — 2 из 30 живых страниц, позиция 0,70 [проверено]"]
 
   # =========================================================================================================== conversion
   lead-form:
@@ -1443,7 +1443,7 @@ blocks:
     mobile: {behavior: [stack], below_40rem: "подписи над полями; поля tel/email со своей клавиатурой; кнопка на всю ширину; липкий призыв скрыт, пока форма видна", never_hide: [form, consent, next-steps]}
     refs: {conversion: ["site:05-01", "site:05-lead-forms"], legal: ["site:08-01"], a11y: ["ux:08-03", "site:08-03"], events: ["site:07-04"], ux: ["ux:04-05#2.5", "ux:04-05#6.3", "ux:04-05#7.7", "ux:04-05#7.8", "ux:07-02"], text: ["text:04-04"], creative: ["creative:block-treatments"]}
     errors: ["Капча-картинка вместо антиспама без трения (F)", "Предзаполненная галочка согласия", "Кнопка «Отправить» вместо результата («Получить смету»)", "Нет подтверждения после отправки"]
-    evidence: ["lead-form — 10 из 30 живых страниц, позиция 0,47; промежуточная форма или полоса призыва — 14 из 30 [проверено: C/01]"]
+    evidence: ["lead-form — 10 из 30 живых страниц, позиция 0,47; промежуточная форма или полоса призыва — 14 из 30 [проверено]"]
 
   quiz:
     family: conversion
@@ -1624,7 +1624,7 @@ blocks:
     mobile: {behavior: [stack], never_hide: [channel]}
     refs: {conversion: ["site:05-01"], legal: ["site:08-01"], a11y: ["site:08-03"], events: ["site:07-04"], creative: ["creative:block-treatments"]}
     errors: ["Кнопки мессенджеров поверх кнопки «Отправить»", "Номер телефона картинкой"]
-    evidence: ["кнопки мессенджеров и звонка на телефоне — 7 из 27 страниц [проверено: C/02]"]
+    evidence: ["кнопки мессенджеров и звонка на телефоне — 7 из 27 страниц [проверено]"]
 
   app-download:
     family: conversion
@@ -1680,7 +1680,7 @@ blocks:
     mobile: {behavior: [stack], below_40rem: "кнопка на всю ширину", never_hide: [cta]}
     refs: {conversion: ["site:05-01"], events: ["site:07-04"], text: ["text:04-01"], assets: ["ai-media:01-01#2.6"], creative: ["creative:block-treatments"]}
     errors: ["Полоса «Готовы начать?» без нового довода", "Две равные кнопки разных действий"]
-    evidence: ["cta-band — 4 из 30, final-cta — 12 из 30 живых страниц [проверено: C/01]"]
+    evidence: ["cta-band — 4 из 30, final-cta — 12 из 30 живых страниц [проверено]"]
 
   sticky-cta:
     family: cta
@@ -1757,7 +1757,7 @@ blocks:
     mobile: {behavior: [accordion], below_40rem: "первый пункт не раскрыт; вопрос — вся строка нажатия", never_hide: [qa.q, qa.a]}
     refs: {structure: ["site:03-01#1.2"], seo: ["site:07-01", "site:07-02"], a11y: ["ux:02-02#6", "site:08-03"], ux: ["ux:09-03#7.2"], text: ["copy-rule:faq-q", "copy-rule:faq-a"], creative: ["creative:block-treatments"]}
     errors: ["Ответ начинается с «Отличный вопрос!»", "FAQ из 20 вопросов вместо ответов в тексте страницы", "Ответы подгружаются скриптом"]
-    evidence: ["faq — 15 из 30 живых страниц, позиция 0,90 (14 из 15 в нижней трети) [проверено: C/01]"]
+    evidence: ["faq — 15 из 30 живых страниц, позиция 0,90 (14 из 15 в нижней трети) [проверено]"]
 
   # ========================================================================================================== about-team
   about-story:
@@ -1785,7 +1785,7 @@ blocks:
     mobile: {behavior: [stack], never_hide: [body]}
     refs: {structure: ["site:03-01#3.2"], seo: ["site:07-02"], legal: ["site:08-01"], creative: ["creative:block-treatments"]}
     errors: ["Стоковое фото офиса", "Миссия общими словами без фактов"]
-    evidence: ["about — 6 из 30 живых страниц, позиция 0,82 [проверено: C/01]"]
+    evidence: ["about — 6 из 30 живых страниц, позиция 0,82 [проверено]"]
 
   team-grid:
     family: about-team
@@ -1812,7 +1812,7 @@ blocks:
     mobile: {behavior: [stack, rail], below_40rem: "2 в ряд или лента", never_hide: [person.name, person.role]}
     refs: {conversion: ["site:05-02"], legal: ["site:08-01", "site:08-02"], assets: ["ai-media:01-01#2.5", "ai-media:12-04#2"], creative: ["creative:block-treatments"]}
     errors: ["ИИ-лица в роли команды (решение заказчика 15)", "Стоковые фото «специалистов»", "Имена без согласия на публикацию"]
-    evidence: ["team — 6 из 30 живых страниц, позиция 0,42 [проверено: C/01]"]
+    evidence: ["team — 6 из 30 живых страниц, позиция 0,42 [проверено]"]
 
   founder-note:
     family: about-team
@@ -1912,7 +1912,7 @@ blocks:
     mobile: {behavior: [stack], never_hide: [info, phone]}
     refs: {seo: ["site:07-01", "site:07-02"], legal: ["site:08-01"], ia: ["site:06-01"], creative: ["creative:block-treatments"]}
     errors: ["Адрес картинкой", "Разные телефоны в шапке, контактах и на картах"]
-    evidence: ["contacts — 3 из 30 живых страниц, позиция 1,00 [проверено: C/01]"]
+    evidence: ["contacts — 3 из 30 живых страниц, позиция 1,00 [проверено]"]
 
   location-map:
     family: contacts
@@ -2051,7 +2051,7 @@ blocks:
     mobile: {behavior: [accordion], below_40rem: "дни — аккордеон; потоки — списком по времени", never_hide: [slot.time, title]}
     refs: {structure: ["site:03-01#3.3"], seo: ["site:07-01"], a11y: ["site:08-03"], creative: ["creative:block-treatments"]}
     errors: ["Время без часового пояса у онлайн-события", "Программа картинкой"]
-    evidence: ["event-program — 2 из 30 живых страниц, позиция 0,39 [проверено: C/01]"]
+    evidence: ["event-program — 2 из 30 живых страниц, позиция 0,39 [проверено]"]
 
   speakers-grid:
     family: event
@@ -2127,7 +2127,7 @@ blocks:
     mobile: {behavior: [stack], never_hide: [title, article.date]}
     refs: {ia: ["site:06-02"], seo: ["site:07-01"], creative: ["creative:block-treatments"]}
     errors: ["Нет дат", "ИИ-обложки для новостей (ai-media: ❌ новостные фото)"]
-    evidence: ["related — 8 из 30 живых страниц, позиция 0,85 [проверено: C/01]"]
+    evidence: ["related — 8 из 30 живых страниц, позиция 0,85 [проверено]"]
 
   article-body:
     family: resources-blog
@@ -2286,7 +2286,7 @@ blocks:
     mobile: {behavior: [none], below_40rem: "компактно: не больше 25–30 % высоты экрана; призыв hero остаётся видимым", never_hide: [reject]}
     refs: {legal: ["site:08-01"], a11y: ["site:08-03"], budget: ["site:07-03"], events: ["site:07-04"], ux: ["ux:04-07#7", "ux:06-04"], creative: ["creative:block-treatments"]}
     errors: ["«Отклонить» спрятано в настройках", "Метрика стартует до выбора", "Баннер закрывает главный призыв на телефоне (C/02: 3 из 27)"]
-    evidence: ["баннер cookie или окно перекрывают первый экран телефона у 15 из 27 страниц [проверено: C/02]"]
+    evidence: ["баннер cookie или окно перекрывают первый экран телефона у 15 из 27 страниц [проверено]"]
 
   thank-you:
     family: utility

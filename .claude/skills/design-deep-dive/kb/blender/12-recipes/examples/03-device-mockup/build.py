@@ -1,7 +1,7 @@
 # Сгенерировано K/01 из 12-recipes/03-device-mockup.md — блоки python в напечатанном виде, по порядку.
 
 # ---- блок со строки 34
-# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 03: телефон D1/02 + скриншот из файла → постер + GLB
+# Blender 5.2.2 — [проверено] рецепт 03: телефон D1/02 + скриншот из файла → постер + GLB
 import sys, math, bpy, bmesh
 import numpy as np
 from mathutils import Matrix

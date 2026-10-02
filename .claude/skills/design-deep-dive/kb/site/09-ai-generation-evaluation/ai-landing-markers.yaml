@@ -700,7 +700,7 @@ markers:
     site_checklist: [SITE-PRE-15]
     defects: [DEF-04]
     sources:
-      - "../99-raw/reports/wave1-B-report.md (в эталонном брифе kimi «Кварц» самодельные 4 из 8 id секций) [проверено: B/03]"
+      - "../99-raw/reports/wave1-B-report.md (в эталонном брифе kimi «Кварц» самодельные 4 из 8 id секций) [проверено]"
       - "../99-raw/notes/wave3/J-notes.md «## Для K» (section.id — из роли или блока)"
     evidence: ["[проверено]"]
     checked: "2026-09-24"
@@ -1122,7 +1122,7 @@ markers:
     site_checklist: []
     defects: []
     sources:
-      - "../99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md п. 13 [проверено: creative H/01]"
+      - "../99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md п. 13 [проверено]"
       - "../../creative/08-uniqueness-anti-slop/cliche-registry.yaml (cliche:caps-eyebrow, cliche:pill-announcement-chip)"
       - "COPY-C-18 (../../text/09-ai-generation-evaluation/copy-checklist.yaml — текст надзаголовков)"
     evidence: ["[проверено]"]

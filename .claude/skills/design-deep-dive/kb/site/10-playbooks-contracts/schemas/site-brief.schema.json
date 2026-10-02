@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:app-design:site-research:site-brief:1",
+  "$id": "urn:app-design:site:site-brief:1",
   "title": "site-brief v1 — бриф сайта (лендинг или многостраничный сайт)",
   "description": "Единый бриф сайта (лендинг или многостраничный сайт) для тройки site · text · creative; бриф холста — его проекция по ключу x-canvas-map. Владелец схемы — site (01-foundations/03-site-brief.md). Блок meaning — схема text ($ref), proof — ссылка на facts.yaml text, ambition, references и выражение бренда — поля creative; бренд продукта — ссылкой brand.ref на файл бренда слоя дизайна (kb/common/brand.schema.yaml); тема — блок themes. Пустое поле — решение, отданное модели: минимум по типу сайта задан условиями allOf ниже. Идентификаторы site_type, page_type, action, traffic_source, jurisdiction, conversion_channel — словарь 02-site-types/vocabulary.yaml.",
   "x-version": 1,
@@ -1006,7 +1006,7 @@
       "x-fill": "sister:text",
       "allOf": [
         {
-          "$ref": "urn:app-design:text-research:meaning:1"
+          "$ref": "urn:app-design:text:meaning:1"
         },
         {
           "properties": {
@@ -1083,7 +1083,7 @@
           "uniqueItems": true,
           "minItems": 1,
           "items": {
-            "$ref": "urn:app-design:text-research:facts:1#/$defs/kind"
+            "$ref": "urn:app-design:text:facts:1#/$defs/kind"
           },
           "description": "Виды фактов, без которых страница этого типа не публикуется: минимум по типу — allOf ниже; бриф может добавить."
         },
@@ -1091,7 +1091,7 @@
           "type": "array",
           "uniqueItems": true,
           "items": {
-            "$ref": "urn:app-design:text-research:facts:1#/$defs/kind"
+            "$ref": "urn:app-design:text:facts:1#/$defs/kind"
           },
           "description": "Желательные виды по возражениям аудитории (опоры иерархии сообщений text); их нет — блок не строится, а не выдумывается."
         },
@@ -1162,7 +1162,7 @@
           "description": "Право, по которому проверяется сайт: РФ по умолчанию, ЕС — переключаемый профиль (решение заказчика п. 11). Первый элемент — основной (как facts.jurisdiction)."
         },
         "legal_category": {
-          "$ref": "urn:app-design:text-research:meaning:1#/properties/legal_category",
+          "$ref": "urn:app-design:text:meaning:1#/properties/legal_category",
           "description": "Отраслевой режим формулировок (перечень text B1; general — «ничего особого»). Рядом с юрисдикцией — ответ на вопрос 5 text B1."
         },
         "legal_note": {

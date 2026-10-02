@@ -74,7 +74,7 @@ gates:
     spec_override: budget.cls_scroll_max
     where: scroll.cls_sources
     source: "E 05-motion/03 §3.2; E/02 (pin ScrollTrigger через position: fixed — 1,6–2,0; sticky и pinType: 'transform' — 0)"
-    label: "[проверено: 99-raw/experiments/E/02-scroll-scene]"
+    label: "[проверено]"
     site: "дополняет SG-PERF-03 (CLS страницы web-vitals после прокрутки): наш — только фаза прокрутки, указывает на эффект"
     fix: "pinType: 'transform' или position: sticky вместо pin через fixed; размеры медиа до загрузки"
   - id: EG-PERF-03
@@ -86,7 +86,7 @@ gates:
     threshold: 1000
     severity: S
     source: "E 05-motion/01 и токен motion.marketing.duration.settle-max 1000; E/02 (Lenis 800–1050 мс на шаг); C (живые сайты 0,8–1,4 с)"
-    label: "[проверено: E/02] [данные: C]"
+    label: "[проверено] [данные: C]"
     site: "—"
     fix: "Lenis только на L2 и с lerp ≥ 0,15 (токен scroll.lenis-lerp; замер S1 2026-09-25: 0,12 — 1 094–1 125 мс, 0,15 — 896 мс); на L0–L1 — родная прокрутка"
   - id: EG-PERF-04
@@ -132,7 +132,7 @@ gates:
     severity: S
     where: vitals.lcp_sel
     source: "E/01: H1 из opacity 0, за маской строк или скрытый скриптом — не кандидат LCP в Chromium 153, LCP уходит на лид в 5× меньше"
-    label: "[проверено: 99-raw/experiments/E/01-lcp-reveal]"
+    label: "[проверено]"
     site: "= SG-PERF-06 v1.2 (S) — владелец site"
     fix: "H1 без анимации или только transform ≤ 24 px; split по строкам без overflow: hidden; reduce — видно с первого кадра"
   - id: EG-PERF-08
@@ -164,7 +164,7 @@ gates:
     op: "false"
     severity: {L0: S, L1: S, L2: D}
     source: "E/01; CRV-AL-09 (LCP-элемент не анимируется из opacity: 0); на L2 — только если LCP-элемент другой (постер) и H1 — не LCP"
-    label: "[проверено: E/01]"
+    label: "[проверено]"
     site: "дополняет SG-PERF-06"
   - id: EG-PERF-11
     name: "CLS страницы: наибольшее окно сессии (загрузка + прокрутка), с атрибуцией узлов (зеркало)"
@@ -176,7 +176,7 @@ gates:
     severity: D
     where: cls.top_sources
     source: "web.dev CLS (окно сессии: разрыв < 1 с, окно ≤ 5 с); F2/12 cls_sources.py (причины в лаборатории: pin через fixed 0,35–0,99, подпись, вставленная скриптом, подмена латинского подмножества шрифта 0,15); motion_check 0.1.2 — cls.load, cls.scroll, cls.total, cls.top_sources (узел, откуда → куда)"
-    label: "[документация] + [проверено: F2/12]"
+    label: "[документация] + [проверено]"
     site: "= SG-PERF-03 (владелец site); наша добавка — атрибуция: какой эффект сдвигает"
     fix: "размеры медиа и шрифтов до загрузки (preload обоих подмножеств шрифта), вставки скриптом — в зарезервированное место, pin — pinType: 'transform' или sticky"
 
@@ -192,7 +192,7 @@ gates:
     spec_override: budget.js_kb_br_effects_max
     where: net.effects_js
     source: "G 07/02 §5–6 и ворота G (1); A budgets.effects.js_presentation_kb_br (L0 20, L1 100, L2 150/200); G/01 (gsap+ST 39,7 КБ br, «набор Awwwards» 52,4)"
-    label: "[проверено: G/01] + [гипотеза: порог]"
+    label: "[проверено] + [гипотеза: порог]"
     site: "часть SG-WEIGHT-03 (JS первого экрана — все источники)"
     fix: "загрузчик [data-effect] с динамическим импортом за 200 px до экрана (G/03); тяжёлое — только в init() через прокладку"
   - id: EG-WEIGHT-02
@@ -432,7 +432,7 @@ gates:
     limits: {exempt_js_kb_br_max: 3}   # файл JS не больше — переключатель или загрузчик, не библиотека эффектов
     where: derived.effects_libs_loaded
     source: "ворота G (2); G/03 (reduce — GSAP и шейдер не грузятся, ≈ 2 КБ br JS); E/02 (статический импорт — 115–133 КБ и в reduce). Исключения (v0.2): файл ≤ limits.exempt_js_kb_br_max КБ br (переключатель, загрузчик — F2 motion.js 1,1 КБ обязан грузиться и в reduce) и script[data-motion-toggle]; список — derived.effects_libs_exempt. Библиотека распознаётся по имени и по содержимому (__THREE__, GreenSock, pin-spacer, lenis-smooth, bodymovin…)"
-    label: "[проверено: G/03]"
+    label: "[проверено]"
     site: "—"
   - id: EG-A11Y-12
     name: "L2: переключатель «меньше движения» на странице"
@@ -467,7 +467,7 @@ gates:
     severity: D
     where: derived.toggle_summary
     source: "E 05-motion/01 §4.4 (выбор побеждает ОС в обе стороны); F2/12 (?start=full при системном reduce — 3,6 %/с; Lenis — respectReducedMotion: false, иначе ОС перебьёт выбор). Варианта «Полное» нет — N/A"
-    label: "[практика] E + [проверено: F2/12]"
+    label: "[практика] E + [проверено]"
     site: "—"
   - id: EG-A11Y-13
     name: "Фокус после Tab на экране (плавная прокрутка не ломает прокрутку к фокусу)"
@@ -649,7 +649,7 @@ gates:
     threshold: 0.05
     severity: S
     source: "CRV-AL-05; F 10-nojs-fix (опыт F)"
-    label: "[практика] + [проверено: F/10]"
+    label: "[практика] + [проверено]"
     site: "—"
   - id: EG-FB-03
     name: "Без JS: призыв первого экрана, видимый с JS, пропал"
@@ -726,7 +726,7 @@ gates:
     threshold: 0
     severity: D
     source: "ворота G (4); G/03 (destroyAll → 0 ScrollTrigger, 0 обёрток split, canvas и pin-spacer удалены)"
-    label: "[проверено: G/03]"
+    label: "[проверено]"
     site: "—"
   - id: EG-CODE-02
     name: "ScrollTrigger.refresh() после View Transition, меняющего раскладку"
@@ -736,7 +736,7 @@ gates:
     threshold_text: "есть"
     severity: S
     source: "ворота G (6); G/02 (без refresh старт pin устаревает в Chromium и WebKit)"
-    label: "[проверено: G/02]"
+    label: "[проверено]"
     site: "—"
   - id: EG-CODE-03
     name: "Лицензионные комментарии GSAP в бандле"

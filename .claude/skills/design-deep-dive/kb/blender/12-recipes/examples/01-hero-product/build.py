@@ -1,7 +1,7 @@
 # Сгенерировано K/01 из 12-recipes/01-hero-product.md — блоки python в напечатанном виде, по порядку.
 
 # ---- блок со строки 37
-# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 01: кейс наушников → постер Blender + GLB для hero
+# Blender 5.2.2 — [проверено] рецепт 01: кейс наушников → постер Blender + GLB для hero
 import sys, math, bpy, bmesh
 import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender
 import rk

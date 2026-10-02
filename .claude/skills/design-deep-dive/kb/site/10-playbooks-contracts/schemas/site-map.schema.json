@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:app-design:site-research:site-map:1",
+  "$id": "urn:app-design:site:site-map:1",
   "title": "site-map v1 — карта многостраничного сайта: страницы, шаблоны, общая шапка и подвал, перелинковка, языки, модель контента, порядок сборки",
   "description": "Карта многостраничного сайта (владелец — site, 06-multipage-ia). Строится из site-brief (pages.mode: by-type — карта по умолчанию для site_type из 06-multipage-ia/01 §2; listed — список брифа) и порождает план страницы на каждый шаблон или уникальную страницу (page-plan.schema.json: page.id = pages[].id, page.template = templates[].instances == 'collection'). Общие шапка и подвал живут здесь один раз (chrome); план только выбирает вариант (navigation.header/footer). Порядок передачи в дизайн и сборку — build_order и templates[].package: первой — главная с общими шапкой и подвалом. Id — словарь 02-site-types/vocabulary.yaml. Проверки: форма — эта схема; id — vocab_lint.py; связи (шаблон есть, родитель есть, пункты меню ведут на страницы карты, у формы есть «спасибо») — site_validate.py.",
   "x-version": 1,

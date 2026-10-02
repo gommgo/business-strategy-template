@@ -103,7 +103,7 @@ effects:
   rules: ['H1 первого экрана не разбивать: текст рисуется до JS (LCP 40 мс), затем прячется и выезжает — «мелькание»; прятать до JS = задержка LCP', 'по
       строкам (mask: ''lines'') или словам; шаг 60–90 мс; вся сцена ≤ 1000 мс; один раз', 'разбивать после document.fonts.ready; autoSplit: true — пересплит
       при смене ширины', 'библиотеку грузить только когда эффект включён: десктоп без reduce ≈ 30 КБ br (gsap + SplitText), при reduce — 0']
-  evidence: ['[проверено: 99-raw/experiments/F/03-batch-A]', '[данные: C 03-live-sites-measured/01 §4 — split-заголовки 25 из 49, SplitText 8]', '[документация:
+  evidence: ['[проверено]', '[данные: C 03-live-sites-measured/01 §4 — split-заголовки 25 из 49, SplitText 8]', '[документация:
       GSAP SplitText 3.13+ (mask, aria, autoSplit)]']
   checked_at: '2026-09-25'
   cost:
@@ -181,7 +181,7 @@ effects:
   cliche: {risk: mid, status: нет в реестре H v0.1 (приём «хакерской» подачи), registry_id: null}
   rules: ['ширину запирать до старта: width + white-space: nowrap + overflow: clip; только min-width → CLS 0,16 на телефоне', только короткие подписи ≤
       24 знаков; не заголовки и не числа, на тач-экранах по наведению не запускать (pointerType !== 'mouse')]
-  evidence: ['[проверено: 99-raw/experiments/F/03-batch-A]', '[проверено: 99-raw/experiments/F/08-remeasure — после исправления ширины]']
+  evidence: ['[проверено]', '[проверено: 99-raw/experiments/F/08-remeasure — после исправления ширины]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2221
@@ -253,7 +253,7 @@ effects:
       а не «потому что умеем»'}
   rules: [строка без переноса в контейнере фиксированной высоты — соседи не сдвигаются (CLS 0), 'каждый кадр — шейпинг и раскладка строки: только один заголовок
       в зоне видимости']
-  evidence: ['[проверено: 99-raw/experiments/F/03-batch-A]', '[V:luAqYCd_TC8 14:30] вариативная ось по прокрутке (W2)']
+  evidence: ['[проверено]', '[V:luAqYCd_TC8 14:30] вариативная ось по прокрутке (W2)']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 4816
@@ -321,7 +321,7 @@ effects:
   cliche: {risk: mid, status: saturated, registry_id: 'cliche:variable-axis-gimmick'}
   rules: ['буквы — в ячейках ширины самого широкого состояния: без ячеек CLS 0,03 (десктоп) и провалы до 33 кадров/с в WebKit', цикл rAF по требованию —
       только пока буквы догоняют курсор; стиль не трогать без изменения]
-  evidence: ['[проверено: 99-raw/experiments/F/03-batch-A]']
+  evidence: ['[проверено]']
   checked_at: '2026-09-24'
   cost:
     bytes_br: 3405
@@ -383,7 +383,7 @@ effects:
     note: SVG aria-hidden + тот же текст в sr-only заголовке
   cliche: {risk: low, status: н/д, registry_id: null}
   rules: [пересчёт startOffset — в rAF после события прокрутки и только когда секция видна (IO)]
-  evidence: ['[проверено: 99-raw/experiments/F/03-batch-A]']
+  evidence: ['[проверено]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2536
@@ -453,7 +453,7 @@ effects:
   cliche: {risk: mid, status: saturated, registry_id: 'cliche:circular-rotating-text'}
   rules: ['вращать обёртку div с will-change: transform, а не <svg>: вращение <svg> в Chromium не композитится — 36 мс/с главного потока на десктопе и 127
       мс/с на телефоне CPU ×4', оборот 15–30 с; не больше одного на страницу]
-  evidence: ['[проверено: 99-raw/experiments/F/03-batch-A]', '[проверено: 99-raw/experiments/F/08-remeasure — вариант div]']
+  evidence: ['[проверено]', '[проверено: 99-raw/experiments/F/08-remeasure — вариант div]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2536
@@ -520,7 +520,7 @@ effects:
   cliche: {risk: mid, status: рост 2024–2026 (кандидат W2), registry_id: null}
   rules: ['одна view-timeline на абзац, диапазон слова по индексу: cover calc(22% + i/n·38%) … +2 %', 'разбиение на слова — при сборке (статический HTML),
       не JS', только display-текст ≥ 28 px]
-  evidence: ['[проверено: 99-raw/experiments/F/03-batch-A]', '[V:ufHQG7fDLQc 13:41] подсветка слов в сцене прокрутки basement (W2)', '[проверено: color.py
+  evidence: ['[проверено]', '[V:ufHQG7fDLQc 13:41] подсветка слов в сцене прокрутки basement (W2)', '[проверено: color.py
       — 3,41 : 1]']
   checked_at: '2026-09-25'
   cost:
@@ -588,7 +588,7 @@ effects:
   cliche: {risk: low, status: н/д, registry_id: null}
   rules: ['итог стоит в HTML (SEO, без JS, reduce); число — ссылка на fact:<id> (text), без «+» и округления вверх', 'один раз, 1,2 с, ease-out, font-variant-numeric:
       tabular-nums', 'не в тарифах, ценах и формах']
-  evidence: ['[проверено: 99-raw/experiments/F/03-batch-A]']
+  evidence: ['[проверено]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2088
@@ -660,7 +660,7 @@ effects:
   rules: ['скорость 30–60 px/с (C: Stripe 30, Trevor Noah 40, Lama Lama 48; у генератора макета — 155–164, почерк генератора); длительность = ширина дорожки / скорость (JS)
       или запас 48 с', 'два одинаковых списка, второй aria-hidden; анимация translateX(-100 %) — шов не виден', 'видимая кнопка паузы на странице (WCAG
       2.2.2), 44 px; движение ≈ 0,6 % пикселей/с — «дыхание»']
-  evidence: ['[проверено: 99-raw/experiments/F/03-batch-A]', '[данные: C 03/01 §4 — бегущая строка у 6 из 49; пауза у 1 из 20 страниц с петлями]', '[стандарт:
+  evidence: ['[проверено]', '[данные: C 03/01 §4 — бегущая строка у 6 из 49; пауза у 1 из 20 страниц с петлями]', '[стандарт:
       WCAG 2.2.2]']
   checked_at: '2026-09-24'
   cost:
@@ -729,7 +729,7 @@ effects:
   rules: ['крупные слова дают 3,8–4,6 % меняющихся пикселей/с — «заметная» петля по E §5.4: не под читаемым текстом, L1–L2', 'кегль 168 px с обводкой, сдвиг
       из rAF — 8,4 мс на кадр без vsync: дорого для «приправы»; CSS-вариант дешевле по главному потоку', 'реакция на скорость прокрутки ограничена (≤ 900
       px/с на вход, k = 0,35) — строка не «улетает»']
-  evidence: ['[проверено: 99-raw/experiments/F/03-batch-A]']
+  evidence: ['[проверено]']
   checked_at: '2026-09-24'
   cost:
     bytes_br: 2588
@@ -802,7 +802,7 @@ effects:
   cliche: {risk: low, status: норма жанра; клише — одинаковое появление на каждой секции, registry_id: null}
   rules: ['LCP-элемент (H1 или постер) — без opacity 0: только сдвиг 12–16 px', '≤ 5 элементов, шаг 80 мс, всё ≤ 900 мс, один раз', 'без JS: анимация в
       CSS с fill-mode both заканчивается видимым состоянием']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[проверено у ai-media: 10/01 §4.3 — появление из opacity 0 выключает LCP]']
+  evidence: ['[проверено]', '[проверено у ai-media: 10/01 §4.3 — появление из opacity 0 выключает LCP]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2041
@@ -881,7 +881,7 @@ effects:
   rules: ['2–3 примитива по ролям: текст — сдвиг 16 px + прозрачность 560 мс; медиа — clip-path 800 мс; карточки — каскад ≤ 3, шаг 70 мс', 'зона IO без
       обрезки снизу (rootMargin 0 0 −4 %, threshold 0,01) + «добор» у конца: с −12 % и 0,12 в Chromium 1 из 6 последних элементов не появился никогда (F/09)',
     один раз на элемент (IO unobserve); без JS и при reduce всё видно]
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[проверено: 99-raw/experiments/F/08-remeasure, 09-reveal-bottom]', '[данные: C 03/01 §4 —
+  evidence: ['[проверено]', '[проверено: 99-raw/experiments/F/08-remeasure, 09-reveal-bottom]', '[данные: C 03/01 §4 —
       появление текста у 17 из 49, система ≥ 5 элементов у 10]']
   checked_at: '2026-09-25'
   cost:
@@ -954,7 +954,7 @@ effects:
     note: декоративный, aria-hidden
   cliche: {risk: low, status: н/д, registry_id: null}
   rules: ['анимировать transform: scaleX(), не width', 'вне @supports (animation-timeline: scroll()) полосу не показывать']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[проверено у blender: 09/03 §3.1 — антипример .bar scaleX(0) без поддержки]']
+  evidence: ['[проверено]', '[проверено у blender: 09/03 §3.1 — антипример .bar scaleX(0) без поддержки]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2096
@@ -1030,7 +1030,7 @@ effects:
       (горы, город, продукт)'}
   rules: ['разница скоростей слоёв ≤ 40 % — предел уровня (норма E 05-motion/01 §6.2, токен motion.marketing.scroll.parallax-ratio-max 0.4); умолчание лаборатории
       и рецептов — 30 % (X-08); текст едет вместе со страницей', без масштаба и поворота крупных слоёв; на телефоне — половина амплитуды]
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]']
+  evidence: ['[проверено]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2057
@@ -1097,7 +1097,7 @@ effects:
     flashes: none
   cliche: {risk: low, status: н/д, registry_id: null}
   rules: ['pathLength="1" + stroke-dasharray: 1 — не считать длину пути в JS', 'vector-effect: non-scaling-stroke при растянутом viewBox']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]']
+  evidence: ['[проверено]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 1774
@@ -1179,7 +1179,7 @@ effects:
   rules: ['длина закрепления — одно число на уровень, токены motion.marketing.scroll: pin-l1-max-vh — одна сцена L1, pin-l2-max-vh — одна секция
       L2 (сверяет spec_check.py); шаги делят длину сцены: число шагов × длина шага — не больше предела уровня', 'GSAP грузить только при ≥ 768 px и без reduce: 45,7 КБ br десктоп, 3,9 КБ телефон', 'scrub 0,5–1;
       не закреплять форму и тарифы', 'вариант CSS (sticky + view-timeline) — 0 КБ JS, но без поддержки Firefox — остаётся стопка']
-  evidence: ['[проверено: 99-raw/experiments/F/03-batch-A]', '[данные: C 03/01 §4 — ScrollTrigger 19 из 49, закрепление 5]']
+  evidence: ['[проверено]', '[данные: C 03/01 §4 — ScrollTrigger 19 из 49, закрепление 5]']
   checked_at: '2026-09-24'
   cost:
     bytes_br: 45751
@@ -1246,7 +1246,7 @@ effects:
     flashes: none
   cliche: {risk: low, status: н/д, registry_id: null}
   rules: [все карточки — в одном контейнере (sticky работает в пределах родителя), масштаб предыдущей — по view-timeline следующей через timeline-scope]
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]']
+  evidence: ['[проверено]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 1967
@@ -1362,7 +1362,7 @@ effects:
       отпускания (атрибуция LayoutShift: div.hs__sticky; прокрутка — не «ввод» для CLS); pinType: ''transform'' и sticky — 0 (F2/15); «первый экран» ни
       при чём', 'pinType: ''transform'' — только если нужен именно pin: на нативной прокрутке документа возможно дрожание (E/02, запись глазами — живая
       фаза)']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[данные: C 03/01 §4 — горизонтальная секция у 2 из 49]', '[проверено: 99-raw/experiments/F/15-hscroll-cls
+  evidence: ['[проверено]', '[данные: C 03/01 §4 — горизонтальная секция у 2 из 49]', '[проверено: 99-raw/experiments/F/15-hscroll-cls
       — атрибуция сдвигов и варианты pin]', '[проверено у E: 99-raw/experiments/E/02-scroll-scene — pin 1,6–2,0, transform 0]']
   checked_at: '2026-09-25'
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
@@ -1410,8 +1410,8 @@ effects:
       с; формула 99 % (0,6 с при 0,12) занижает хвост — мерить; cost.measured ниже снят F при прежнем 0,1 (974 мс); токен motion.marketing.scroll.lenis-lerp
       = 0,15', 'на L2-странице — только вместе с effect:motion-toggle (EG-A11Y-12): «Меньше движения» — lenis.destroy(); демо lab/smooth-scroll — страница
       эффекта без переключателя, прогон L2 даёт S EG-A11Y-12 ожидаемо (lab.json gate_note)']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[документация: lenis README 1.3.26 — respectReducedMotion, autoRaf, anchors]', '[данные:
-      C 03/01 §10]', '[проверено: 99-raw/experiments/S1/01-lab-fixes]']
+  evidence: ['[проверено]', '[документация: lenis README 1.3.26 — respectReducedMotion, autoRaf, anchors]', '[данные:
+      C 03/01 §10]', '[проверено]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 7055
@@ -1484,7 +1484,7 @@ effects:
   cliche: {risk: low, status: н/д (higgsfield C3), registry_id: null}
   rules: [sticky-сцена 100svh в обёртке 100svh + 150vh; clip-path inset(22% 30% round 28px) → 0, подпись появляется в последней четверти, 'кадр сцены
       — без loading="lazy" или с предзагрузкой за экран до входа в окно: при задержке ответа ленивый кадр появился бы в уже раскрывающемся окне']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[мнение вендора: higgsfield wow-catalog C3 «Scroll-driven mask reveal»]']
+  evidence: ['[проверено]', '[мнение вендора: higgsfield wow-catalog C3 «Scroll-driven mask reveal»]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 1683
@@ -1555,7 +1555,7 @@ effects:
   cliche: {risk: low, status: watchlist H (View Transitions), registry_id: null}
   rules: ['общий view-transition-name — один элемент на состояние; группа 420 мс, текст — перекрёстно 260 мс', без поддержки — тот же DOM-апдейт без обёртки
       (if (!document.startViewTransition) render())]
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[данные: C 03/01 §4 — VT объявлены у 1 из 49]']
+  evidence: ['[проверено]', '[данные: C 03/01 §4 — VT объявлены у 1 из 49]']
   checked_at: '2026-09-24'
   cost:
     bytes_br: 2141
@@ -1623,7 +1623,7 @@ effects:
       улучшение (@supports, без поддержки — обычная навигация), анимация только при prefers-reduced-motion: no-preference, ≤ 400 мс на многостраничнике
       (E 05-motion/02 §8.3); решение оркестратора 2026-09-25 (X-21, вариант 1)', 'переходы на библиотеках (Barba, Swup), JS-переходы с заставкой или шторкой
       — L2 (limits.library_level_min); прелоадер между страницами — нет']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]']
+  evidence: ['[проверено]']
   checked_at: '2026-09-24'
   cost:
     bytes_br: 12297
@@ -1683,7 +1683,7 @@ effects:
     note: на полях ввода и тексте — системный курсор; фокус не трогать
   cliche: {risk: mid, status: 'saturated (C: 10 из 49)', registry_id: 'cliche:custom-cursor-follower'}
   rules: [кольцо догоняет с λ ≈ 18 (≈ 120 мс); цикл rAF по требованию, 'cursor: none только на html.has-cursor; поля ввода — cursor: auto']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[данные: C 03/01 §4]']
+  evidence: ['[проверено]', '[данные: C 03/01 §4]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2512
@@ -1750,7 +1750,7 @@ effects:
     note: слой под текстом (z-index −1), не поверх
   cliche: {risk: mid, status: 'Hallmark: mouse-follow градиенты на SaaS запрещены, в портфолио — да [мнение]', registry_id: null}
   rules: [только внутри hero и под текстом, 'переменные — раз в кадр после pointermove, не в каждом событии']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[мнение: Hallmark hero-enrichment HP3]']
+  evidence: ['[проверено]', '[мнение: Hallmark hero-enrichment HP3]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2249
@@ -1818,7 +1818,7 @@ effects:
   cliche: {risk: mid, status: saturated, registry_id: 'cliche:magnetic-button'}
   rules: ['радиус 1,6 размера кнопки, смещение ≤ 8 px (≤ 25 % высоты кнопки — норма E 05-motion/03 §1.4; было 10 px до S1 2026-09-25, X-09), подпись +40
       %', только одна главная кнопка на экран]
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]']
+  evidence: ['[проверено]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 1902
@@ -1881,7 +1881,7 @@ effects:
     flashes: none
   cliche: {risk: mid, status: 'higgsfield: tilt — «приправа», не вау [мнение вендора]; нет в реестре H', registry_id: null}
   rules: ['≤ 7°, perspective 900 px, возврат 500 мс', 'один ключевой ряд, не все карточки сайта']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]']
+  evidence: ['[проверено]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2104
@@ -1946,7 +1946,7 @@ effects:
   cliche: {risk: mid, status: dated как «на каждой карточке», registry_id: 'cliche:liquid-hover-distortion', turn: 'один ключевой элемент, а не все карточки'}
   rules: ['фильтр подключать только на время анимации (класс), в покое — 0 работы', 'растеризация фильтра — на процессоре: мерить на картинке реального
       размера']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]']
+  evidence: ['[проверено]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2216
@@ -2019,7 +2019,7 @@ effects:
       — токены марки из CSS, свет уходит от текста, без периодического качания'}
   rules: ['1 полноэкранный треугольник, 1 вызов; DPR ≤ 1 (телефон 0,75)', 'цикл только при видимости, без паузы и reduce; скрытая вкладка — стоп', 'дрейф
       непериодический (шум с деформацией домена); доля движения ≤ 2,5 %/с («дыхание»)']
-  evidence: ['[проверено: 99-raw/experiments/F/03-batch-A]', '[проверено у blender: 09/04 §1 — 1 вызов, 1,45 мс/кадр]', '[данные: C 03/01 §5, §13 — шейдерный
+  evidence: ['[проверено]', '[проверено у blender: 09/04 §1 — 1 вызов, 1,45 мс/кадр]', '[данные: C 03/01 §5, §13 — шейдерный
       фон у 20 из 49]']
   checked_at: '2026-09-24'
   cost:
@@ -2093,7 +2093,7 @@ effects:
   cliche: {risk: mid, status: saturated, registry_id: 'cliche:mesh-gradient-bg', turn: 'цвета марки, не пресет «пурпур-розовый»; периоды 29/37/43 с — без
       повтора'}
   rules: [анимация @property перерисовывает фон на главном потоке каждый кадр — мерить TaskDuration; для большой площади — вариант blobs или шейдер]
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]']
+  evidence: ['[проверено]']
   checked_at: '2026-09-24'
   cost:
     bytes_br: 2094
@@ -2165,7 +2165,7 @@ effects:
       сияние — буквальный сюжет; цвета марки; сравнить цену с shader-bg}
   rules: ['размытие 48 px + screen на 3 слоях — 9,6 мс на кадр без vsync (drive=js, Iris Xe 1440×900) против 0,45 мс у shader-bg: в 21 раз дороже шейдера',
     движение в покое ≈ 0 %/с (периоды 31–53 с) — «дыхание»]
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[проверено у blender: 01/01 §5.7 — Unicorn Studio TBT 254–1158 мс]']
+  evidence: ['[проверено]', '[проверено у blender: 01/01 §5.7 — Unicorn Studio TBT 254–1158 мс]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2271
@@ -2253,7 +2253,7 @@ effects:
       штрихи считаются от абсолютных координат, и дрейф ориентации сдвигал их — 3,8 %/с в покое; неподвижная — 0–0,02 %/с, полоса движется только от указателя
       или прокрутки; бюджет ≤ 2 мс GPU на эффект (blender 09/04 §10)', 'без WebGL — CSS-фольга той же конструкции: полоса тонов марки на @property --p от
       курсора, штрихи repeating-linear-gradient']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[проверено: 99-raw/experiments/F/14-holo-look — оценка глазами до → после, контраст, перемер]',
+  evidence: ['[проверено]', '[проверено: 99-raw/experiments/F/14-holo-look — оценка глазами до → после, контраст, перемер]',
     '[гипотеза: «материал продукта» — оценка F2 глазами; показ людям — живая фаза]']
   checked_at: '2026-09-25'
   cost:
@@ -2327,7 +2327,7 @@ effects:
     note: 'зерно под текстом (слой в isolation: isolate)'
   cliche: {risk: low, status: 'saturated, низкий риск', registry_id: 'cliche:grain-overlay'}
   rules: ['SVG feTurbulence тайлом 220 px (0,3 КБ), 6–9 %, soft-light', 'в видео зерно не запекать: H.264 ×2,5 веса, а зерно всё равно теряется (SSIM 0,68)']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[проверено: 99-raw/experiments/F/04-hero-video — зерно в видео]']
+  evidence: ['[проверено]', '[проверено: 99-raw/experiments/F/04-hero-video — зерно в видео]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2278
@@ -2435,7 +2435,7 @@ effects:
       видео или WebGL — ≤ 1; D 04/03 §4.1, E 05/03 §2.4) + цена кадра по замеру (главный поток ≤ контроль + 25 мс/с на телефоне CPU ×4 — порог-кандидат
       F); ≤ 6 на странице — фильтр профиля marketing_audit D3, а не норма; демо по умолчанию — 3 панели для замера цены, не образец (было panels_in_view_max:
       3)', фолбэк @supports и prefers-reduced-transparency — плотная заливка с тем же контрастом]
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]']
+  evidence: ['[проверено]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2636
@@ -2511,7 +2511,7 @@ effects:
   cliche: {risk: high, status: пульсирующий CTA — dated; неоновое свечение — dated, registry_id: 'cliche:pulsing-cta', turn: 'статичное свечение или один
       импульс при появлении, а не вечная пульсация'}
   rules: ['анимировать opacity и transform размытого псевдоэлемента, не box-shadow', по умолчанию — статичное свечение (L0/L1)]
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]']
+  evidence: ['[проверено]']
   checked_at: '2026-09-24'
   cost:
     bytes_br: 1831
@@ -2583,7 +2583,7 @@ effects:
       loading="lazy" или с предзагрузкой за экран до входа в окно: кадр под clip-path: inset(100%) браузер считает невидимым и лениво не грузит — он
       появился бы в уже открытой маске', 'два класса движения: one-shot — раскрытие по времени при входе кадра в окно; scroll-linked — раскрытие по
       шкале view() самого кадра (animation-timeline) на тех же clip-path и transform, без JS; без поддержки шкал прокрутки кадр стоит раскрытым']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[V:xQnJLYTVl_E 24:06] окно в форме логотипа — кандидат W2']
+  evidence: ['[проверено]', '[V:xQnJLYTVl_E 24:06] окно в форме логотипа — кандидат W2']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2263
@@ -2652,7 +2652,7 @@ effects:
   rules: ['background-position по прокрутке — перерисовка на главном потоке: одно слово на экран', 'два класса движения: scroll-linked — кадр
       внутри букв едет по прокрутке; one-shot — слово-окно раскрывается в кадр по времени, один раз: при открытии первого экрана или при входе секции
       в окно']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]']
+  evidence: ['[проверено]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 1522
@@ -2732,7 +2732,7 @@ effects:
       текст на подложке); для L1 — антипример ворот EG-A11Y-22 (громких окон L1 — 0; motion_check 0.1.3: 3 окна, S) — на L1 петля ≤ 5 %/с или effect:cinemagraph
       (E 05/01 §5.4; X-22, X-26)', 'текст над петлёй — на подложке ≥ 0,6: лид rgb(13 15 18 / .72), скрим телефона до надзаголовка (S1 2026-09-25, X-26):
       F83 (motion_check --f83) H1 4,82 : 1, лид 11,01 : 1 (было 3,68 — B)']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[проверено: 99-raw/experiments/F/04-hero-video]', '[проверено: 99-raw/experiments/S1/01-lab-fixes]']
+  evidence: ['[проверено]', '[проверено]', '[проверено]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 61849
@@ -2803,7 +2803,7 @@ effects:
     ai_media: [VID-CINEMAGRAPH]
   cliche: {risk: low, status: н/д, registry_id: null}
   rules: ['без атрибута loop: один проход ≤ 5 с, последний кадр = первый', '≤ 300 КБ (A L0): у нас AV1 66 КБ / H.264 117 КБ']
-  evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[проверено: 99-raw/experiments/F/04-hero-video]']
+  evidence: ['[проверено]', '[проверено]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 74935
@@ -3198,7 +3198,7 @@ effects:
       системную настройку: без ручного управления «Полное» при системном reduce не работает, а «Меньше» не снимает скраб и Lenis', видна при любой прокрутке
       (липкая шапка) или у каждой секции с петлёй; сегменты ≥ 44 px; ширину подписи состояния резервировать (иначе сдвиг шапки при загрузке), 'скраб на
       такой странице — без pin (sticky + ScrollTrigger scrub): pin через position: fixed даёт CLS 1,6–2,0 (E/02)']
-  evidence: ['[проверено: 99-raw/experiments/F/12-motion-toggle]', '[данные: C 03/01 §5 — переключателя нет у 49 из 49]', '[V:_ZdZh-ESOHY 06:08] переключатель
+  evidence: ['[проверено]', '[данные: C 03/01 §5 — переключателя нет у 49 из 49]', '[V:_ZdZh-ESOHY 06:08] переключатель
       на странице = класс reduce-motion на контейнере (W1)', '[стандарт: WCAG 2.2.2 Understanding — single mechanism; 2.3.3 — site-wide setting]', '[документация:
       Lenis README 1.3.26 — respectReducedMotion, Reduced motion]', '[проверено у E: 99-raw/experiments/E/03-motion-tokens — токены в 5 состояниях]']
   checked_at: '2026-09-24'
@@ -3249,7 +3249,7 @@ effects:
       0,98', '@starting-style — начальный кадр входа; transition … overlay и display с allow-discrete — иначе выход мгновенный; ::backdrop — вместе с окном',
     'WebKit 26.6 без overlay: вход анимируется, выход обрывается (на 60 мс уже display: none) — прогрессивное улучшение, прыжка нет [проверено]', 'движение
       — только внутри @media (prefers-reduced-motion: no-preference); reduce — проявление 180 мс']
-  evidence: ['[проверено: 99-raw/experiments/F/16-micro]', '[V:UcXWY057YuQ 03:44] @starting-style + allow-discrete (W1)', '[документация: MDN/BCD @starting-style,
+  evidence: ['[проверено]', '[V:UcXWY057YuQ 03:44] @starting-style + allow-discrete (W1)', '[документация: MDN/BCD @starting-style,
       overlay — 2026-09-24]']
   checked_at: '2026-09-25'
   cost:
@@ -3327,7 +3327,7 @@ effects:
       }; content-visibility … allow-discrete держит текст видимым до конца закрытия', 'анимация высоты — раскладка на каждом кадре (исключение из E 03 §2.1
       п.9 только для раскрытия по клику): CLS 0 и при 250, и при 800 мс (сдвиги идут за кликом), но главный поток телефона ×4 — 70,7 мс/с при 250 мс и 163,4
       при 800 мс против 35,6 без анимации → ≤ 300 мс', 'эксклюзивный аккордеон — <details name=''faq''>, без JS']
-  evidence: ['[проверено: 99-raw/experiments/F/16-micro]', '[V:UcXWY057YuQ 08:44] ::details-content + interpolate-size (W1)']
+  evidence: ['[проверено]', '[V:UcXWY057YuQ 08:44] ::details-content + interpolate-size (W1)']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2775
@@ -3401,7 +3401,7 @@ effects:
   rules: ['раскрывать clip-path по полной коробке кнопки (inset(0 0 0 calc(100% − 3rem) round …) → inset(0 round …)): раскладка не меняется', 'наведение
       — не «ввод» для CLS (hadRecentInput ставят клик, касание, клавиша): раскрытие шириной (grid 0fr → 1fr, width → max-content) — CLS 0,0028 за 3 наведения
       и 2,0–2,3 мс/с раскладки; clip-path — 0 и 0 (F2/16)', 'тач (hover: none) — подписи видны всегда; фокус с клавиатуры раскрывает так же, как наведение']
-  evidence: ['[проверено: 99-raw/experiments/F/16-micro]', '[V:UcXWY057YuQ 06:53] width 2.5rem → max-content (W1)']
+  evidence: ['[проверено]', '[V:UcXWY057YuQ 06:53] width 2.5rem → max-content (W1)']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2895
@@ -3476,7 +3476,7 @@ effects:
   rules: ['громкое — только в @media (prefers-reduced-motion: no-preference): rotateY 180° 500 мс; тихая ветка по умолчанию — проявление оборота [V:_ZdZh-ESOHY
       04:05]', 'грани position: absolute, лицу transform: rotateY(0) и z-index 2, обеим -webkit-backface-visibility: hidden — классическая схема для Safari',
     Playwright-WebKit на Linux не соблюдает backface-visibility даже у эталона (F2/16 flip_min.html) — проверка переворота в Safari только на iPhone]
-  evidence: ['[проверено: 99-raw/experiments/F/16-micro]', '[V:_ZdZh-ESOHY 03:31–05:05] переворот и reduce-ветка (W1)']
+  evidence: ['[проверено]', '[V:_ZdZh-ESOHY 03:31–05:05] переворот и reduce-ветка (W1)']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2956
@@ -3553,7 +3553,7 @@ effects:
   rules: ['animation-timeline: scroll(root) + animation-range: 0 160px; только transform/opacity: плашка scaleY 1 → 60/96 от верха, строка translateY −18
       px, логотип scale 0,78, подпись и тень — opacity', 'не анимировать height/padding шапки в потоке: раскладка на каждом кадре и CLS (прокрутка — не
       «ввод»): 0,0004 у шапки 96 → 60 px против 0 у transform — мало, но растёт с высотой', 'тень — отдельный слой с opacity, а не box-shadow (перерисовка)']
-  evidence: ['[проверено: 99-raw/experiments/F/16-micro]', '[V:UcXWY057YuQ 09:51] shrinking-header-shadow (W1)']
+  evidence: ['[проверено]', '[V:UcXWY057YuQ 09:51] shrinking-header-shadow (W1)']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 3384

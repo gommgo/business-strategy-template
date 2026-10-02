@@ -24,7 +24,7 @@
 #   (загрузка yaml.safe_load, валидация примеров `examples/facts-*.yaml` и отрицательных случаев).
 
 $schema: "https://json-schema.org/draft/2020-12/schema"
-$id: "urn:app-design:text-research:facts:1"
+$id: "urn:app-design:text:facts:1"
 title: "facts.yaml — белый список фактов сайта"
 description: >-
   Инвентарь доказательств проекта: только реальные факты с источником, датой, разрешением и областью применения;

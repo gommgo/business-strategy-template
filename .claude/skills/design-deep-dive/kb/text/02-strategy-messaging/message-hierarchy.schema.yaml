@@ -23,7 +23,7 @@
 # `x-blocker-optional`).
 
 $schema: "https://json-schema.org/draft/2020-12/schema"
-$id: "urn:app-design:text-research:message-hierarchy:1"
+$id: "urn:app-design:text:message-hierarchy:1"
 title: "message-hierarchy — что сообщает страница и в каком порядке доводов"
 description: >-
   Главное сообщение (одна фраза), 3–5 опор с доказательствами, возражение к каждой опоре и раскладка по секциям:

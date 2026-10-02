@@ -111,7 +111,7 @@ head_base:
       языковую версию
     severity: S
     check: 'head.hreflang_n, hreflang_xdefault; взаимность — ia_probe.py (G)'
-    evidence: '[проверено: G/01] hreflang в <head> — у 6 из 19 многостраничников; в sitemap — у heisenbug (196 из 196 URL), такие связи Яндекс не читает (../06-multipage-ia/02-navigation-linking-i18n.md §5.5, §6)'
+    evidence: '[проверено] hreflang в <head> — у 6 из 19 многостраничников; в sitemap — у heisenbug (196 из 196 URL), такие связи Яндекс не читает (../06-multipage-ia/02-navigation-linking-i18n.md §5.5, §6)'
   - id: hk-jsonld-placement
     element: '<script type="application/ld+json">…</script>'
     rule: >-
@@ -137,7 +137,7 @@ access_gates:
       noindex через JS (Google JS SEO basics)
     severity: B
     check: 'запрос к /h-probe-<случайное> → 404 (ia_probe.py G; ручная проверка)'
-    evidence: '[проверено: G/01] мягкая 404 — linear, ilyabirman (2 из 19); SPA: серверный 404 или JS-редирект на URL с серверным 404 [V:0yedoWKPgo4 21:36]'
+    evidence: '[проверено] мягкая 404 — linear, ilyabirman (2 из 19); SPA: серверный 404 или JS-редирект на URL с серверным 404 [V:0yedoWKPgo4 21:36]'
   - id: hk-access-robots-file
     rule: >-
       GET /robots.txt → 200 + text/plain (или 404, если ограничений нет); не 5xx (RFC 9309: полный запрет; Google — стоп на
@@ -157,21 +157,21 @@ access_gates:
       2026-09-15 (многоцелевые Googlebot, Applebot, bingbot блокируются при запрете Training)
     severity: B
     check: 'flag antibot-challenge (заглушка для клиента без JS); page.cdn; «Проверка URL» Search Console и Вебмастера'
-    evidence: '[проверено: 99-raw/experiments/H/01-geo-probe-corpus-d] alfabank.ru, t-j.ru (Qrator + noindex), invitro.ru'
+    evidence: '[проверено] alfabank.ru, t-j.ru (Qrator + noindex), invitro.ru'
   - id: hk-access-tls
     rule: >-
       сертификат проверяется общепризнанными корнями; сертификат НУЦ Минцифры («Russian Trusted Sub CA») — только вторым,
       не единственным: зарубежные боты и браузеры без этого корня не установят TLS
     severity: B
     check: 'flag tls-untrusted-chain; openssl s_client с зарубежного адреса'
-    evidence: '[проверено: H/01] tbank.ru, tochka.com, alfabank.ru с российского адреса; взгляд зарубежного бота — [не проверено]'
+    evidence: '[проверено] tbank.ru, tochka.com, alfabank.ru с российского адреса; взгляд зарубежного бота — [не проверено]'
   - id: hk-access-html-limit
     rule: >-
       несжатый HTML ≤ 2 МБ (Googlebot читает первые 2 МБ каждого файла, 64 МБ — PDF); H1, текст, цены, CTA и JSON-LD — в
       начале документа; без base64-картинок и огромных инлайн-SVG и JSON; CSS и JS — тоже ≤ 2 МБ каждый
     severity: B
     check: 'page.html_bytes, page.offsets.h1; flag html-over-2mb'
-    evidence: '[документация] Googlebot 2026-02-03; [проверено: H/01] practicum.yandex.ru, alice.yandex.ru/station — H1 после 2,4 МБ'
+    evidence: '[документация] Googlebot 2026-02-03; [проверено] practicum.yandex.ru, alice.yandex.ru/station — H1 после 2,4 МБ'
   - id: hk-access-ssr
     rule: >-
       смысловой текст, H1, цены, условия и главный CTA — в HTML сервера (SSR, SSG, пререндер); JS улучшает, но не
@@ -184,7 +184,7 @@ access_gates:
     rule: 'навигация шапки, подвала и перелинковка — <a href="/путь"> в HTML; без маршрутов #/…, onclick-кнопок и меню, построенного только JS; ссылки панелей мега-меню — в HTML (скрыты до раскрытия)'
     severity: S
     check: 'text.a_href; ручная проверка шапки и подвала; сравнить ссылки меню в сыром HTML и в браузере (geo_probe.py против page_anatomy.py)'
-    evidence: '[проверено: G/01] подменю в исходном HTML — у 4 из 18, панелей мега-меню — ни у одного; у kontur и practicum меню видно только в браузере (../06-multipage-ia/02-navigation-linking-i18n.md §3.6, §6)'
+    evidence: '[проверено] подменю в исходном HTML — у 4 из 18, панелей мега-меню — ни у одного; у kontur и practicum меню видно только в браузере (../06-multipage-ia/02-navigation-linking-i18n.md §3.6, §6)'
   - id: hk-access-hidden-text
     rule: >-
       никакого текста только для роботов (белое на белом, за экраном, font-size или opacity 0 навсегда); аккордеоны, табы,
@@ -223,7 +223,7 @@ jsonld_policy:
       where: главная или contacts-page сайта услуг с адресом или зоной обслуживания; landing-lead-services с адресом
       google: 'обязательно name, address; рекомендовано telephone (с кодом страны), url, geo (≥ 5 знаков), openingHoursSpecification (hh:mm:ss), priceRange (< 100 знаков); aggregateRating и review — не для отзывов о себе'
       subtype: самый конкретный подтип schema.org (HomeAndConstructionBusiness, MovingCompany, Dentist, LegalService, AccountingService, ProfessionalService…)
-      nap_rule: 'название, адрес, телефон — буква в букву как на странице, в Яндекс Бизнесе, Google Business Profile и Bing Places; телефон и адрес — в HTML сервера: коллтрекинг подменяет номер поверх серверного, а не вставляет его с нуля ([проверено: G/01] телефон stamus есть только в браузере)'
+      nap_rule: 'название, адрес, телефон — буква в букву как на странице, в Яндекс Бизнесе, Google Business Profile и Bing Places; телефон и адрес — в HTML сервера: коллтрекинг подменяет номер поверх серверного, а не вставляет его с нуля ([проверено] телефон stamus есть только в браузере)'
     website:
       where: главная
       google: 'name, url, alternateName — для названия сайта в выдаче; SearchAction не нужен'
@@ -236,7 +236,7 @@ jsonld_policy:
       google: 'itemListElement → ListItem(position, name, item; у последнего item можно опустить); показ в выдаче — только на десктопе (с 01.2025)'
       rule: >-
         разметка = видимые крошки: видимые крошки без BreadcrumbList — добавить разметку; разметка без видимого блока — убрать
-        ([проверено: G/01] 4 сайта и 1 сайт). Несколько трейлов (решение H по спору G, ../06-multipage-ia/02-navigation-linking-i18n.md
+        ([проверено] 4 сайта и 1 сайт). Несколько трейлов (решение H по спору G, ../06-multipage-ia/02-navigation-linking-i18n.md
         §2.1): Google их допускает — «If there are multiple ways to navigate to a page on your site, you can specify multiple
         breadcrumb trails», в его примере в разметке два трейла, а видимый блок один (Breadcrumb, просмотр 2026-09-24); польза не
         измерена. По умолчанию генератор пишет один трейл — по parent, равный видимому; второй — только для страницы в двух
@@ -445,20 +445,20 @@ site_checks:
       канонические URL с ответом 200 (без редиректов и noindex) и честным lastmod; ≤ 50 000 URL и 50 МБ на файл (01 §2.4)
     severity: S
     check: 'ia_probe.py (G): sitemap, коды URL, относительные <loc>'
-    evidence: '[проверено: G/01] не объявлен в robots.txt — 4 из 20; URL с редиректом — 6; относительные <loc> — ilyabirman (241 из 241); sitemap kontur — 301 на главную'
+    evidence: '[проверено] не объявлен в robots.txt — 4 из 20; URL с редиректом — 6; относительные <loc> — ilyabirman (241 из 241); sitemap kontur — 301 на главную'
   - id: hk-site-soft-404
     rule: 'случайный несуществующий URL → 404 на каждом шаблоне сайта, не только на главной (hk-access-404)'
     severity: B
     check: 'ia_probe.py; запрос /<шаблон>/h-probe-<случайное>'
-    evidence: '[проверено: G/01] мягкая 404 — linear, ilyabirman (2 из 19)'
+    evidence: '[проверено] мягкая 404 — linear, ilyabirman (2 из 19)'
   - id: hk-site-breadcrumbs
     rule: 'BreadcrumbList = видимым крошкам (jsonld_policy.recipes.breadcrumb)'
     severity: D
-    evidence: '[проверено: G/01] видимые крошки без разметки — lewagon, linear, medsi, severstal; разметка без видимого блока — thoughtworks'
+    evidence: '[проверено] видимые крошки без разметки — lewagon, linear, medsi, severstal; разметка без видимого блока — thoughtworks'
   - id: hk-site-hreflang
     rule: 'hreflang — ссылками в <head> каждой версии (Яндекс не читает hreflang из sitemap), взаимно, с x-default (hk-hreflang)'
     severity: S
-    evidence: '[проверено: G/01] в <head> — 6 из 19; в sitemap — heisenbug'
+    evidence: '[проверено] в <head> — 6 из 19; в sitemap — heisenbug'
   - id: hk-site-search-pages
     rule: 'поиск по сайту, календари, фильтры — crawlers.yaml rt-infinite-spaces: одно Disallow на шаблон; уже в индексе — сначала noindex; не 5xx'
     severity: S
@@ -467,7 +467,7 @@ site_checks:
   - id: hk-site-nav-in-html
     rule: 'меню (включая панели мега-меню) и телефон шапки — в HTML сервера на каждом шаблоне (hk-access-links, recipes.local_business.nap_rule)'
     severity: S
-    evidence: '[проверено: G/01] подменю в исходном HTML — 4 из 18, мега-меню — 0; телефон stamus — только в браузере'
+    evidence: '[проверено] подменю в исходном HTML — 4 из 18, мега-меню — 0; телефон stamus — только в браузере'
 
 sources:
   - {id: google-js-seo, title: 'Understand the JavaScript SEO basics', date: 2026-03-04, url: 'https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics'}

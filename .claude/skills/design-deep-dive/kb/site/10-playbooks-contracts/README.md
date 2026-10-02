@@ -10,7 +10,7 @@
 | `01-procedure-brief-to-pages.md` | 13 шагов `step:intake` … `step:measure`: артефакт, проверка SITE-PRE (K), дефекты DEF (K), утилиты, правило пропуска шагов, точки остановки, коды `site_validate.py` |
 | `02-playbooks-landings.md` | 9 типов посадочных: когда, три формы, первый экран, длина, уровень и профиль бюджета, набор формы, факты, разметка, право, события, ошибки |
 | `03-playbooks-multipage.md` | 7 типов многостраничников: карта по умолчанию, шапка, главная, шаблоны, формы, факты, уровни, SEO и проверки уровня сайта, право, события |
-| `schemas/site-brief.schema.json` | бриф v1 (`urn:app-design:site-research:site-brief:1`) |
+| `schemas/site-brief.schema.json` | бриф v1 (`urn:app-design:site:site-brief:1`) |
 | `schemas/page-plan.schema.json` | план страницы v1 (`…:page-plan:1`), подача — `$ref` на `treatment:1` creative (v1 с 2026-09-25) |
 | `schemas/site-map.schema.json` | карта сайта v1 (`…:site-map:1`) |
 | `schemas/blocks.schema.json` | каталог блоков v1 (`…:blocks:1`; формат совместим с v0.9) |

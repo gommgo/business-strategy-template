@@ -9,7 +9,7 @@
 #   4. Две строки происхождения ниже (опыт старой базы, «входы синтетические») — убрать.
 #   5. Английские строки в `decisions` можно перевести: довода за английский для Claude нет.
 # ──
-# brief.yaml — пример 1 (лендинг предзаказа), вымышленный продукт «Кварц» · F/03 · 2026-09-24
+# brief.yaml — пример 1 (лендинг предзаказа), вымышленный продукт «Кварц»
 # Заполнен Claude по описанию заказчика и ответам (01-description-and-questions.md). Входы в src/ синтетические.
 project:
   slug: kvarts-preorder
@@ -197,7 +197,7 @@ assets:
   - {file: assets/img/lamp-detail.jpg, source: src/assets/img/lamp-detail.jpg, slot: how, role: informational, caption: "Кольцо яркости", alt: "Крупный план кольца регулировки яркости лампы Кварц", focal: "50% 50%", variants: "1200x1200", licence: "фото заказчика, 2026"}
   - {file: assets/img/lamp-usb.jpg, source: src/assets/img/lamp-usb.jpg, slot: specs, role: informational, caption: "Порт USB-C в основании", alt: "Порт USB-C в основании лампы Кварц", focal: "40% 70%", variants: "1200x900", licence: "фото заказчика, 2026"}
   - {file: assets/brand/logo.svg, source: src/assets/brand/logo.svg, slot: header and footer, role: informational, caption: "Логотип Кварц", alt: "Кварц", licence: "логотип заказчика"}
-  - {file: assets/3d/kvarts.glb, source: src/assets/3d/kvarts.glb, slot: object3d, role: informational, caption: "3D-модель лампы Кварц", alt: "Трёхмерная модель лампы Кварц, её можно повернуть", licence: "модель дизайнера заказчика; экспорт — blender-research пресет E"}
+  - {file: assets/3d/kvarts.glb, source: src/assets/3d/kvarts.glb, slot: object3d, role: informational, caption: "3D-модель лампы Кварц", alt: "Трёхмерная модель лампы Кварц, её можно повернуть", licence: "модель дизайнера заказчика; экспорт — пресет E базы blender"}
   - {file: assets/3d/kvarts-poster.jpg, source: src/assets/3d/kvarts-poster.jpg, slot: object3d, role: informational, caption: "Постер 3D-модели", alt: "Лампа Кварц, вид три четверти", focal: "50% 50%", variants: "1024x1024", licence: "рендер из той же модели (blender)"}
 missing_slots: []
 
@@ -226,14 +226,6 @@ build:
   src_layout: ""
   out_of_scope: [payment backend (the /preorder link is a placeholder route), analytics, tests, CMS]
   perf: {hero_image_kb: 150, first_screen_kb_mobile: 1500, lcp_s_mobile: 2.5}
-  skill: kimi-design-executor
-
-run:
-  harness: both
-  model: kimi-code/k3
-  effort: high
-  timeout_s: 2400
-  prompt_variant: C
 
 questions:
   - {q: "Главная кнопка", asked: true, answer: "«Забронировать за 990 ₽» → /preorder", source: заказчик, date: 2026-09-24}

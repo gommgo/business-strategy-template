@@ -1,7 +1,7 @@
 # Сгенерировано K/01 из 12-recipes/02-icon-series.md — блоки «run: system» в напечатанном виде.
 
 # ---- блок со строки 164
-# run: system — Python 3 + Pillow — [проверено: 99-raw/experiments/K/01-run-recipes] PNG 512² → AVIF/WebP 1×/2× + страница-сетка
+# run: system — Python 3 + Pillow — [проверено] PNG 512² → AVIF/WebP 1×/2× + страница-сетка
 import os
 from PIL import Image
 EX = os.path.dirname(os.path.abspath(__file__))  # перенос: папка примера

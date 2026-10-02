@@ -8,7 +8,7 @@
 #      таблицы, master-detail) с `measured` из `measure_ui.py`.
 #   4. Две строки происхождения ниже — убрать. Английские строки в `decisions` можно перевести.
 # ──
-# brief.yaml — пример 2 (веб-приложение, панель диспетчера), вымышленная служба «Вода-Казань» · F/03 · 2026-09-24
+# brief.yaml — пример 2 (веб-приложение, панель диспетчера), вымышленная служба «Вода-Казань»
 # Заполнен Claude по описанию и ответам (01-description-and-questions.md). Данные в src/fixtures.json обезличены.
 project:
   slug: smena-dispatch
@@ -30,7 +30,7 @@ product:
   viewport_primary: 1440x900
 
 design_system:
-  style: корпоративная классика (ui-research 11/01 §17) — плотно, спокойно, границы вместо теней
+  style: корпоративная классика (ui 11/01 §17) — плотно, спокойно, границы вместо теней
   knobs:
     accent: "#0A66C2"
     neutral: slate
@@ -211,14 +211,6 @@ build:
   src_layout: ""
   out_of_scope: [backend and API, authentication, map and courier routes, notifications, tests]
   perf: {hero_image_kb: 100, first_screen_kb_mobile: 800, lcp_s_mobile: 2.5}
-  skill: kimi-design-executor
-
-run:
-  harness: kimi
-  model: kimi-code/k3
-  effort: high
-  timeout_s: 2400
-  prompt_variant: B1
 
 questions:
   - {q: "Статусы заказа", asked: true, answer: "новый → назначен → в пути → доставлен / отменён; меняет диспетчер, «доставлен» — ещё и курьер", source: заказчик, date: 2026-09-24}

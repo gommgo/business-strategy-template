@@ -1,7 +1,7 @@
 # Сгенерировано K/01 из 12-recipes/08-sequence-video-alpha.md — блоки «run: system» в напечатанном виде.
 
 # ---- блок со строки 76
-# run: system — Python 3 + Pillow + ffmpeg — [проверено: 99-raw/experiments/K/01-run-recipes] команды A/06 (encode.py) на кадрах рецепта
+# run: system — Python 3 + Pillow + ffmpeg — [проверено] команды A/06 (encode.py) на кадрах рецепта
 import glob, json, os, subprocess
 from PIL import Image
 EX = os.path.dirname(os.path.abspath(__file__))  # перенос: папка примера

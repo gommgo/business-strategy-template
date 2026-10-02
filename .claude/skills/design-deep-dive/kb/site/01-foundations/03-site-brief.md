@@ -9,7 +9,7 @@
 
 1. **Бриф сайта — один YAML-файл по `site-brief.schema.json`**, надмножество `brief.yaml` kimi; в kimi уходит проекция по
    `site-brief.kimi-map.tsv`, а не сам бриф: `lint_brief` отвергает чужие ключи верхнего уровня. → §1, §7 `[проверено]`
-2. **Поля смысла — блок `meaning` по схеме text** (`$ref: urn:app-design:text-research:meaning:1`), доказательства — только
+2. **Поля смысла — блок `meaning` по схеме text** (`$ref: urn:app-design:text:meaning:1`), доказательства — только
    ссылка `proof.facts_ref` на `facts.yaml` text; свои определения аудитории, возражений и фактов не заводить. → §2.6, §2.7
    `[проверено]`
 3. **Один источник на поле**: трафик — `/traffic`, оффер — `/offer`, действие — `/conversion/action`; `meaning` ссылается на
@@ -346,7 +346,7 @@ other, general). `cms`, `stack`, `hosting` (важно для локализац
 
 ## 8. Для сестёр (S0)
 
-Путь схемы — `01-foundations/site-brief.schema.json` (`$id urn:app-design:site-research:site-brief:0`), пример —
+Путь схемы — `01-foundations/site-brief.schema.json` (`$id urn:app-design:site:site-brief:0`), пример —
 `site-brief.example.yaml`. Поля, ждущие определений сестёр (в v0 есть тип и пометка владельца):
 - **text**: весь блок `meaning` (через `$ref` на их схему — определения их); `proof.facts_ref` и виды фактов (ссылка на
   `facts.schema.yaml`); `constraints.legal_category` (их перечень); `meaning.voice_ref` и `brand.voice` — профиль голоса
@@ -427,7 +427,7 @@ other, general). `cms`, `stack`, `hosting` (важно для локализац
   бриф», вопросы Q1–Q8, правила сообщения заказчику; опора — опыт kimi F/03.
 - [S5] kimi-research, агент C. `03-prompting/03-prompt-anatomy-k3.md` §5, 2026-09-24. 11 полей лендинга блока `site:`.
 - [S6] ux-research. `13-app-types/04-master-procedure-brief-to-screens.md` §2, §5. Шаблон «Бриф: разбор», правило допущений.
-- [S7] text-research, агент B1. `02-strategy-messaging/meaning.schema.yaml`, `$id urn:app-design:text-research:meaning:1`,
+- [S7] text-research, агент B1. `02-strategy-messaging/meaning.schema.yaml`, `$id urn:app-design:text:meaning:1`,
   date 2026-09-24 (764 строки). Схема блока «смысл»; `x-kimi-map`, `x-site-brief-meaning`.
 - [S8] text-research, агент B2. `02-strategy-messaging/facts.schema.yaml`, v1 волны 1 (841 строка). Формат `facts.yaml`,
   фильтр публикации, `x-site-brief-proof`, умолчания `never_claim`.

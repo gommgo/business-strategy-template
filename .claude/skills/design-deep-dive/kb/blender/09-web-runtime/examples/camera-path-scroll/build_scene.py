@@ -1,4 +1,4 @@
-# Blender 5.2.2 — [проверено: 99-raw/experiments/F2/03-camera-path] сцена для «путь камеры + клип на прокрутке»
+# Blender 5.2.2 — [проверено] сцена для «путь камеры + клип на прокрутке»
 # Запуск: python3 99-raw/tools/blender_run.py 99-raw/experiments/F2/03-camera-path/build_scene.py -- OUT_DIR
 # Даёт: OUT_DIR/scene.glb (кольца-галерея, пол, стопка плит с клипом сборки, пустышки hotspot_*),
 #       OUT_DIR/cam_path.json (точки кривой в осях three: [x, z, -y], метры), OUT_DIR/build_report.json

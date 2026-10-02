@@ -651,7 +651,7 @@ copy_deck_stub:
       missing_ids: []
       text: '[PLACEHOLDER: nav-label — copy-deck text]'
 treatment_stub:
-  x_stub: 'ЗАГЛУШКА J: treatment creative (urn:app-design:creative-research:treatment:0) — в плане home уже стоит treatment из опыта
+  x_stub: 'ЗАГЛУШКА J: treatment creative (urn:app-design:creative:treatment:0) — в плане home уже стоит treatment из опыта
     creative A/02; здесь — только список секций для art-direction'
   page: home
   level: L1

@@ -26,7 +26,7 @@
 # смысловые проверки: один основной сегмент, ссылки внутри блока, допущения в open_questions, доказательства опор).
 
 $schema: "https://json-schema.org/draft/2020-12/schema"
-$id: "urn:app-design:text-research:meaning:1"
+$id: "urn:app-design:text:meaning:1"
 title: "meaning — смысл страницы или сайта до слов"
 description: >-
   Что сказать, прежде чем писать: кто клиент и какую работу он поручает продукту, что он уже знает, с чем сравнивает,
@@ -703,7 +703,7 @@ x-canvas-map:
 
 # ───────────────────────── Как блок встаёт в site-brief (предложение site A) ─────────────────────────
 x-site-brief-meaning:
-  include: "site-brief.properties.meaning = {$ref: 'urn:app-design:text-research:meaning:1'} (или относительный путь к этому файлу)"
+  include: "site-brief.properties.meaning = {$ref: 'urn:app-design:text:meaning:1'} (или относительный путь к этому файлу)"
   site_owned_fields_referenced: "traffic (источники × температура), offer, conversion.action — живут в site-brief; meaning хранит JSON Pointer и рабочую копию"
   proof: "meaning.proof_ref == site-brief.proof.facts_ref (одна ссылка на facts.yaml)"
   minimum_by_type: >-

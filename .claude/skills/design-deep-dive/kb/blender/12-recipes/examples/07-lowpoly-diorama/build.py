@@ -1,7 +1,7 @@
 # Сгенерировано K/01 из 12-recipes/07-lowpoly-diorama.md — блоки python в напечатанном виде, по порядку.
 
 # ---- блок со строки 38
-# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 07: low-poly остров D1/07 (палитра, GN-инстансы)
+# Blender 5.2.2 — [проверено] рецепт 07: low-poly остров D1/07 (палитра, GN-инстансы)
 import sys, random, bpy, bmesh
 from mathutils import Vector, Matrix
 import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender

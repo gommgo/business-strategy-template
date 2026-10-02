@@ -3,7 +3,7 @@
 Волна 1 · агент A (§1–4, схема, примеры) и продолжатель A2 (§5–8, выжимка, чек-лист) · 2026-09-24 · источников 13
 (прочитаны целиком или нужными разделами) · опыты A/01 и A/02, перезапуск 2026-09-24 15:52 · Python 3.13.5, jsonschema
 4.26.0, referencing 0.37.0 · браузер не запускался. Схема — `art-direction.schema.json` v0
-(`urn:app-design:creative-research:art-direction:0`), примеры — `examples/art-direction-*.json` (5), процедура —
+(`urn:app-design:creative:art-direction:0`), примеры — `examples/art-direction-*.json` (5), процедура —
 `01-concept-and-directions.md`, уровни — `03-ambition-levels.md` и `ambition-levels.yaml`.
 
 ## Выжимка для агента

@@ -10,7 +10,7 @@
 
 | Файл | Что внутри |
 |---|---|
-| `copy-deck.schema.json` | JSON Schema 2020-12 (`urn:app-design:text-research:copy-deck:1`, `date`, `x-status` v1.1): все поля черновика v0 из PLAN + поля v1 и v1.1; `x-v0-fields` (страж T2), `x-status-rules`, `x-kimi-map`, `x-asset-map`, `x-claims-map`, `x-site-map`, `x-vocabulary-proposals`, пример |
+| `copy-deck.schema.json` | JSON Schema 2020-12 (`urn:app-design:text:copy-deck:1`, `date`, `x-status` v1.1): все поля черновика v0 из PLAN + поля v1 и v1.1; `x-v0-fields` (страж T2), `x-status-rules`, `x-kimi-map`, `x-asset-map`, `x-claims-map`, `x-site-map`, `x-vocabulary-proposals`, пример |
 | `01-copy-deck-workflow.md` | процесс от черновика до пакета: статусы и переходы, проверки на каждом, два пути линтера, точки человека (цепочка I S1–S11, пункты `COPY-C-…`), варианты и слепой выбор, правка по находкам, второй язык, выгрузка в kimi, ассеты, спецификация `verify-page` |
 | `02-examples-ru.md` | шесть русских страниц: набор, как собраны, результаты пяти проверок, путь страницы кейса до пакета kimi, варианты вебинара, ворота черновика, пары «до / после» сборки |
 | `03-examples-en.md` | две английские адаптации: свои факты с теми же id, что адаптировано, проверки, выгрузка |

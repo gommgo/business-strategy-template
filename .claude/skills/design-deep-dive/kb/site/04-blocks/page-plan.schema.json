@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:app-design:site-research:page-plan:0.9",
+  "$id": "urn:app-design:site:page-plan:0.9",
   "title": "page-plan v0.9 — план одной страницы или шаблона: цель, трафик, форма, секции по порядку, слоты, события",
   "description": "ЗАМЕНЕНО v1: ../10-playbooks-contracts/schemas/page-plan.schema.json (J, волна 3, 2026-09-24); эта схема v0.9 остаётся для файлов версии 0.9. Владелец — site-research (04-blocks, агент E, волна 2; v1 — J, волна 3). Контракт тройки §3 п.3. Id — словарь B (02-site-types/vocabulary.yaml), блоки и элементы анатомии — 04-blocks/blocks.yaml. Потребители: text (copy-deck: section.id → section_id и site_section_id, role → section_role, block → block, текстовый слот id → slot_id, slot → slot_type, anatomy → site_slot_id, group → group; факты — data[].binds), creative (treatment{} — подсхема creative, пока пустой контейнер), ai-media (media[] → план ассетов 01/01 §8), blender (3d[] → рецепты 12-recipes), kimi (sections[].id и job → site.sections[{id, job}]; first_screen_policy → A3; macrostructure_family → direction.macrostructure). Проверки: форма — эта схема; id — vocab_lint.py; связи (блок есть, слот разрешён блоку, факт есть и разрешён слоту) — 99-raw/experiments/E/01-… (plan_check.py), итог — site_validate.py (J).",
   "type": "object",

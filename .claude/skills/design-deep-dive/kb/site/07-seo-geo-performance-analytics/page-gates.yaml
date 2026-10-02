@@ -105,7 +105,7 @@ gates:
     limits: {poster_bpp_min: 0.05, poster_area_min: 1.0}
     owner: "07/03 §2.1; creative 06-effects-catalog/02 §3.2; ai-media 10-web-integration/01 §4.2"
     status: v1
-    note: "creative F — постер AVIF 2 334 Б 1280×720 (0,020 бит/px) — LCP = VIDEO; ai-media J/01 — 0,024–0,038 бит/px не кандидат, 0,0505 — кандидат [проверено: creative F/05] [проверено: ai-media J/01]; blender VD3 (T26): постер на строку меньше видео — LCP 4 656 мс (VIDEO), на 1 px шире — 596 мс [проверено]. Постер ≥ 0,05 бит/px и не меньше видео — или LCP — H1 (видео не больше текста по площади). Автопроверка — page_gates.py по отчёту page_accept.py"
+    note: "creative F — постер AVIF 2 334 Б 1280×720 (0,020 бит/px) — LCP = VIDEO; ai-media J/01 — 0,024–0,038 бит/px не кандидат, 0,0505 — кандидат [проверено] [проверено]; blender VD3 (T26): постер на строку меньше видео — LCP 4 656 мс (VIDEO), на 1 px шире — 596 мс [проверено]. Постер ≥ 0,05 бит/px и не меньше видео — или LCP — H1 (видео не больше текста по площади). Автопроверка — page_gates.py по отчёту page_accept.py"
     maps_to: ["kimi F3 (постер = LCP)"]
   - id: SG-PERF-07
     name: "Поле p75 (живая страница): LCP, INP, CLS по телефону и десктопу"

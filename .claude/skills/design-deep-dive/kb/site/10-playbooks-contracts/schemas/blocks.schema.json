@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:app-design:site-research:blocks:1",
+  "$id": "urn:app-design:site:blocks:1",
   "title": "blocks.yaml v1 — каталог блоков сайта: анатомия, слоты, варианты, телефон, разметка, ссылки на правила",
   "description": "Владелец — site-research (04-blocks, агент E, волна 2; v1 — J, волна 3). Id блоков, слотов, ролей — словарь B 02-site-types/vocabulary.yaml (проверка — ../../scripts/site/vocab_lint.py --keys-as-ids blocks=block). Визуальные варианты и эффекты блока — creative (block-treatments.yaml) по id блока; правила текста слотов — text (copy-slots.yaml) по id слота; медиа — ai-media (план ассетов 01/01 §8); 3D — blender (12-recipes). Схема проверяет форму; что слот разрешён блоку и что факт существует — site_validate.py (J) и опыт E/01.",
   "type": "object",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:app-design:site-research:site-map:0",
+  "$id": "urn:app-design:site:site-map:0",
   "title": "site-map v0 — карта многостраничного сайта: страницы, шаблоны, общая шапка и подвал, перелинковка, языки, модель контента, порядок сборки",
   "description": "Владелец — site-research (06-multipage-ia, агент G, волна 2; v1 — J, волна 3). Контракт тройки §3 п.2. Строится из site-brief (pages.mode: by-type — карта по умолчанию для site_type из 06-multipage-ia/01 §2; listed — список брифа) и порождает page-plan на каждый шаблон или уникальную страницу (04-blocks/page-plan.schema.json: page.id = pages[].id, page.template = templates[].instances == 'collection'). Общие шапка и подвал живут здесь один раз (chrome); page-plan только выбирает вариант (navigation.header/footer). Пакет исполнителя kimi — один на шаблон (templates[].package), первый пакет строит главную и общие компоненты. Id — словарь B (02-site-types/vocabulary.yaml); новые id — пометка «(новый id)» в описании страницы и заметка «## Для J». Проверки: форма — эта схема; id — vocab_lint.py; связи (шаблон есть, родитель есть, пункты меню ведут на страницы карты, у формы есть thank-you) — site_validate.py (J).",
   "x-version": 0,

@@ -1449,7 +1449,7 @@ _STR = {'type': 'string'}
 _STRS = {'type': 'array', 'items': {'type': 'string'}}
 RULES_SCHEMA = {
     '$schema': 'https://json-schema.org/draft/2020-12/schema',
-    '$id': 'urn:app-design:text-research:claims-rules:1',
+    '$id': 'urn:app-design:text:claims-rules:1',
     'title': 'claims-rules.yaml — правовые правила формулировок для claims_check.py; формат правила совместим с copy_lint.py',
     'type': 'object', 'required': ['version', 'date', 'rules'], 'additionalProperties': True,
     'properties': {

@@ -106,7 +106,7 @@ body {
   color: var(--accent-text);
   font-weight: var(--font-weight-semibold);
 }
-/* selected + hover: роль bg.selected-hover добавлена в схему 22.09.2026 (волна 4); второй признак
+/* selected + hover: роль bg.selected-hover; второй признак
    выбранности — вес и цвет текста, поэтому кольцо больше не нужно */
 .nav-item[aria-current="page"]:hover { background: var(--bg-selected-hover); }
 
@@ -331,7 +331,7 @@ tbody tr:first-child td { border-top: 0; }
 tbody tr { transition: background-color var(--motion-hover); }
 tbody tr:hover { background: var(--bg-surface-hover); }
 tbody tr[aria-selected="true"] { background: var(--bg-selected); }
-/* selected + hover: роль bg.selected-hover добавлена в схему 22.09.2026 (волна 4); второй признак
+/* selected + hover: роль bg.selected-hover; второй признак
    выбранности — чекбокс в первой колонке */
 tbody tr[aria-selected="true"]:hover { background: var(--bg-selected-hover); }
 .num { text-align: right; font-variant-numeric: tabular-nums; }

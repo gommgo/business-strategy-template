@@ -1,6 +1,6 @@
 {
  "$schema": "https://json-schema.org/draft/2020-12/schema",
- "$id": "urn:app-design:creative-research:refs-library:1",
+ "$id": "urn:app-design:creative:refs-library:1",
  "title": "Запись библиотеки референсов creative-research (refs-library/1)",
  "description": "Одна строка library.jsonl. Пишет refs_client.py (search, get, enrich, arena pull), правят lib tag и мудборд. Библиотека заказчика живёт ВНЕ базы (~/.local/share/creative-refs/, каталоги 700, файлы 600); в базе — только пример на публичных наградных сайтах (library-example/). Контракт тройки v2 §3 п.7; поле id — это <id> в ссылке ref:<id> брифа site (site-brief.schema.json $defs/reference). Волна 1 · агент B · 2026-09-24.",
  "type": "object",

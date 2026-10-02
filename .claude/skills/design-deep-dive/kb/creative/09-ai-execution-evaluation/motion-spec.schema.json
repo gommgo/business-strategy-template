@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:app-design:creative-research:motion-spec:1",
+  "$id": "urn:app-design:creative:motion-spec:1",
   "title": "motion-spec v1 — спецификация движения страницы для исполнителя (страница → секции → моменты, раскадровка, видео-референсы)",
   "description": "Владелец — creative. Движение передаётся исполнителю таймлайном, а не прилагательными: у каждого момента — класс, функция, триггер, элемент, свойства from → to, длительность (мс, токен или доля базы) или диапазон прокрутки (vh, % прогресса), кривая-токен, стаггер, повтор, прерывание, reduce, телефон, пауза. Числа — из marketing-tokens.json motion.marketing (E); эффекты — effects.yaml (F); секции и слоты — page-plan v1 (site); подача секции — treatment v1 (motion_spec_ref → #/sections/<id>); свойства — не шире уровня страницы (01-creative-direction/ambition-levels.yaml#levels.motion_hints.properties_allowed). Проекция во вход холста — x-canvas-map; строки моментов, блок движения и JSON чисел на секцию для модуля эффекта — ../../scripts/creative/spec_check.py moments, motion-md, values. Сверка записи со спецификацией — motion_check.py. Документ: 09-ai-execution-evaluation/02-motion-spec-storyboard-handoff.md.",
   "x-version": "1.0",

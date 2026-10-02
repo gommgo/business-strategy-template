@@ -90,7 +90,7 @@ items:
     pass_when: "код выхода 0; summary.error = 0"
     on_fail: "протокол правки C (COPY-C-17): все error в первом проходе; законный случай — lint_allow с причиной"
     genres: all
-    evidence: "[проверено: C/01, C/02]"
+    evidence: "[проверено]"
     source: "06-anti-slop/02-linter-spec-and-profiles.md §7–§9"
 
   - id: COPY-C-06

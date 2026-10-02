@@ -2,7 +2,7 @@
 # creative-research · 01-creative-direction · волна 1 · агент A · 2026-09-24 · статус: предложение для site (A, P, J)
 #
 # Что это: не параллельный формат, а правка к ../../../site/01-foundations/site-brief.schema.json v0
-# ($id urn:app-design:site-research:site-brief:0, сверено 2026-09-24 15:00; sha256 c297ca596b78 на момент S0). В v0 уже есть
+# ($id urn:app-design:site:site-brief:0, сверено 2026-09-24 15:00; sha256 c297ca596b78 на момент S0). В v0 уже есть
 # поля creative: ambition{level, by_page[], note}, brand{…} (структура brand.json kimi), references[] (ref:<id> | url, role,
 # take, dont_take, source, note). Ниже: что оставить, что добавить, что переименовать, JSON Schema-фрагменты для v0.1,
 # таблица «поле kimi → поле site-brief», банк вопросов и примеры.
@@ -15,7 +15,7 @@ c1:
   status: proposal
   checked_at: "2026-09-24"
   owner: "creative-research · A (волна 1)"
-  applies_to: "urn:app-design:site-research:site-brief:0"
+  applies_to: "urn:app-design:site:site-brief:0"
   proposes: "site-brief v0.1: изменения только аддитивные, пример site-brief.example.yaml остаётся валидным"
   sync_point: "C1 (контракт тройки v2 §5): creative → site (A, P); пакет в ../site-research/99-raw/notes/sync/ складывает оркестратор"
 

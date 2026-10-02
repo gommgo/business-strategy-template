@@ -35,7 +35,7 @@
 
 ### 1.1. Где живёт
 
-Схема — `09-ai-execution-evaluation/motion-spec.schema.json` (`urn:app-design:creative-research:motion-spec:1`); документ — YAML или JSON на
+Схема — `09-ai-execution-evaluation/motion-spec.schema.json` (`urn:app-design:creative:motion-spec:1`); документ — YAML или JSON на
 страницу: `page` (тезис, характер, база, примитивы, LCP, переключатель, прокрутка, переходы, свойства, бюджет, `never`) → `sections[]` (id v1
 плана, роль, сцена со станциями, моменты, раскадровка, видео-референсы, reduce, телефон, `fallback`, бюджет, `acceptance`). Treatment секции
 ссылается `motion_spec_ref: <файл>#/sections/<id>`. Примеры: `examples/otves-home.motion-spec.yaml` (скраб-линия, CSS), `okoshko-home` (sticky-окно

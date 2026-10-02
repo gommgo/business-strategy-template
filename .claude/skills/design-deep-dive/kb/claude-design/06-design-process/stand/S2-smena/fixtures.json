@@ -1,5 +1,5 @@
 {
- "_note": "SYNTHETIC, anonymised sample of the customer's Excel export (F/03). Edge cases: long name, one bottle, zero bottles, no courier, cancelled.",
+ "_note": "SYNTHETIC, anonymised sample of the customer's Excel export. Edge cases: long name, one bottle, zero bottles, no courier, cancelled.",
  "orders_today": [
   {
    "id": 1042,

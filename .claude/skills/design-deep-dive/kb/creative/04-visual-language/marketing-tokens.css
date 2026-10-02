@@ -70,7 +70,7 @@
 }
 
 /* Метрический фолбэк (пример для Onest 700; size-adjust = k_ru шрифта / k_ru Arial Bold = 0.548 / 0.546).
-   Порядок local(): полное имя и PostScript жирного → Liberation (Linux) → имя семейства (WebKit Linux). [проверено: D/03] */
+   Порядок local(): полное имя и PostScript жирного → Liberation (Linux) → имя семейства (WebKit Linux). [проверено] */
 @font-face {
   font-family: "Onest fallback";
   src: local("Arial Bold"), local("Arial-BoldMT"), local("Liberation Sans Bold"), local("LiberationSans-Bold"), local("Arial"), local("Liberation Sans");
@@ -138,7 +138,7 @@ html, body { overflow-x: clip; }  /* полный вылет без горизо
 
 /* ── motion.marketing · E (волна 2) · 2026-09-24 · Chromium 153 / WebKit 26 ─────────────────────────────────────────────
    Движение подачи: сцены, появления, петли, прокрутка. Отклик контролов — токены ui-research 08-motion.
-   Правила — 05-motion/01 §4, §7; LCP-заголовок без анимации или только transform [проверено: 99-raw/experiments/E/01-lcp-reveal].
+   Правила — 05-motion/01 §4, §7; LCP-заголовок без анимации или только transform [проверено].
    Reduce: пространственное → 0 / 1, стаггер → 0, сцены → мгновенно; переключатель сайта [data-motion] побеждает ОС в обе стороны. */
 :root {
   --mm-dur-feedback: 120ms;  --mm-dur-hover: 200ms;   --mm-dur-reveal: 560ms;  --mm-dur-split-line: 800ms;

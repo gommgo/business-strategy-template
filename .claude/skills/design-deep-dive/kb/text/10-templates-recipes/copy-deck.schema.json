@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:app-design:text-research:copy-deck:1",
+  "$id": "urn:app-design:text:copy-deck:1",
   "title": "copy-deck — тексты страниц по секциям и слотам с вариантами, фактами, флагами и статусами",
   "description": "Формат copy deck: тексты одной страницы (или шаблона страницы) по секциям и слотам с вариантами, фактами, флагами и статусами. Экземпляр — YAML или JSON с корнем copy_deck; в проекте — docs/projects/<slug>/site/<surface>/copy/<page-id>.yaml. Поля и статусы v0 не удаляются и не переименовываются (x-v0-fields): creative привязывает движение текста к слотам. Стык с планом страницы — x-site-map; выгрузка во вход холста — x-canvas-map. Структурные требования — здесь; требования статусов, словаря, фактов и правил текста — в x-status-rules и в ../../scripts/text/copydeck.py validate. Описание — 10-templates-recipes/README.md.",
   "date": "2026-09-30",

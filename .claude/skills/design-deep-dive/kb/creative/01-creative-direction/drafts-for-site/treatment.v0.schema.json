@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:app-design:creative-research:treatment:0",
+  "$id": "urn:app-design:creative:treatment:0",
   "title": "treatment v0 — подача секции page-plan (корень) и страницы ($defs/page)",
   "description": "Подсхема контейнера treatment{} плана страницы site (page-plan v0.9, контракт тройки v2 §2 и §3 п.12). Владелец — creative-research. Ранний выпуск C1 (волна 1, агент A); финальную версию v1 делает агент I (волна 3, 09-ai-execution-evaluation/treatment.schema.json). Секция: $ref на этот $id; страница: $ref на этот $id + #/$defs/page. Имена слотов словаря site приняты (visual-role → visual_role, effect-ref → effects[].ref, motion-level → motion_level): ключи в snake_case, как остальные ключи page-plan. Значения уровней и потолки — ambition-levels.yaml; правила, которые требуют роли секции или уровня страницы (секции конверсии не выше L0, число пиков, уровень секции ≤ уровня страницы), схема видеть не может — их проверяет скрипт (99-raw/experiments/A/02-c1-check/c1_check.py; у site — site_validate.py J, у creative — ворота K).",
   "x-version": 0,

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:app-design:site-research:page-plan:1",
+  "$id": "urn:app-design:site:page-plan:1",
   "title": "page-plan v1 — план одной страницы или шаблона: цель, трафик, форма, секции, слоты, события, подача",
   "description": "План страницы или шаблона коллекции (владелец — site: 04-blocks, 10-playbooks-contracts). Id — словарь 02-site-types/vocabulary.yaml, блоки и элементы анатомии — 04-blocks/blocks.yaml. Потребители: text (copy deck: section.id → section_id и site_section_id, role → section_role, block → block, текстовый слот id → slot_id, slot → slot_type, anatomy → site_slot_id, group → group; факты — data[].binds), creative (treatment — подсхема creative), ai-media (media[] → план ассетов 01/01 §8), blender (3d[] → рецепты 12-recipes), вход холста (проекция по ключу x-canvas-map: секции, первый экран, навигация, формы, право; статичная часть treatment — по карте treatment). Проверки: форма — эта схема; id — vocab_lint.py; связи (блок есть, слот разрешён блоку, факт есть и разрешён слоту) и подача (spec_check.py plan creative) — site_validate.py.",
   "x-canvas-map": {
@@ -1015,7 +1015,7 @@
               "description": "landing-minimal — логотип (→ главная), призыв, контакт без меню (платный трафик, site 03/02 §2.3); site — шапка сайта по архетипу карты; none — только служебные страницы без шапки (не посадочные)."
             },
             "archetype": {
-              "$ref": "urn:app-design:site-research:site-map:1#/$defs/header-archetype",
+              "$ref": "urn:app-design:site:site-map:1#/$defs/header-archetype",
               "description": "Копия site-map.chrome.header.archetype (валидатор сверяет равенство); на лендинге — minimal-cta."
             },
             "anchor_nav": {
@@ -1029,7 +1029,7 @@
               "description": "Крошки на этой странице: только при глубине ≥ 2 (site-map.chrome.breadcrumbs.rule, site 06/02 §2.1)."
             },
             "local_nav": {
-              "$ref": "urn:app-design:site-research:site-map:1#/$defs/local-nav",
+              "$ref": "urn:app-design:site:site-map:1#/$defs/local-nav",
               "description": "Локальная навигация раздела на этой странице — копия site-map.templates[].local_nav её шаблона (валидатор сверяет равенство); у шаблона её нет — нет и здесь."
             },
             "footer": {
@@ -1219,7 +1219,7 @@
           }
         },
         "treatment": {
-          "$ref": "urn:app-design:creative-research:treatment:1#/$defs/page",
+          "$ref": "urn:app-design:creative:treatment:1#/$defs/page",
           "description": "Подача страницы — подсхема creative: treatment v1 (creative 09-ai-execution-evaluation/treatment.schema.json, $defs/page)."
         },
         "notes": {
@@ -1366,7 +1366,7 @@
           }
         },
         "treatment": {
-          "$ref": "urn:app-design:creative-research:treatment:1",
+          "$ref": "urn:app-design:creative:treatment:1",
           "description": "Подача секции — подсхема creative: treatment v1 (creative 09-ai-execution-evaluation/treatment.schema.json)."
         },
         "notes": {

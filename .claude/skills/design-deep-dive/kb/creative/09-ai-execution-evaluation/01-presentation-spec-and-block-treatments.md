@@ -49,7 +49,7 @@
 
 ### 2.1. Где живёт и что нового
 
-Схема — `09-ai-execution-evaluation/treatment.schema.json`, `$id urn:app-design:creative-research:treatment:1`; корень — секция,
+Схема — `09-ai-execution-evaluation/treatment.schema.json`, `$id urn:app-design:creative:treatment:1`; корень — секция,
 `$defs/page` — страница. В `page-plan` v1 site: `sections[].treatment` и `page.treatment` `[документация: site S1v1]`.
 
 | Поле v1 | Против v0 | Зачем | Источник |

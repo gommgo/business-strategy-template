@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:app-design:creative-research:treatment:1",
+  "$id": "urn:app-design:creative:treatment:1",
   "title": "treatment v1 — подача секции page-plan (корень) и страницы ($defs/page)",
   "description": "Подсхема контейнера treatment{} плана страницы site (page-plan v1: sections[].treatment и page.treatment); владелец — creative. Числа и списки уровней — 01-creative-direction/ambition-levels.yaml и 06-effects-catalog/effects.yaml (level_min); движение по времени и прокрутке — motion-spec (09-ai-execution-evaluation/motion-spec.schema.json), здесь только ссылка. Правила, которые схема не видит (секция ≤ уровня страницы, секции конверсии — L0, счёт пиков, акцентов, секций с фирменным приёмом и петель по уровню, id секций и слотов, эффект есть в каталоге, один референс — одна секция, poster ≤ 12 знаков), проверяет ../../scripts/creative/spec_check.py plan (site_validate.py зовёт его на плане). Проекция во вход холста — x-canvas-map. Документ: 09-ai-execution-evaluation/01-presentation-spec-and-block-treatments.md.",
   "x-version": "1.0",
   "x-checked": "2026-09-29",
-  "x-status": "принята site: page-plan.schema.json ссылается на urn:app-design:creative-research:treatment:1",
+  "x-status": "принята site: page-plan.schema.json ссылается на urn:app-design:creative:treatment:1",
   "x-owner": "creative · 09-ai-execution-evaluation",
   "x-site-slots": {
     "visual-role": "visual_role",

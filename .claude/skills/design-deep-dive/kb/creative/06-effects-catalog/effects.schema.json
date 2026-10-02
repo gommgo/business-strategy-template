@@ -167,7 +167,7 @@
         "mobile": { "behavior": "same" },
         "a11y": { "wcag": ["2.2.2"], "pause_required": true, "loop_control": ["pause-button"], "flashes": "none" },
         "cliche": { "risk": "mid", "registry_id": "cliche:marquee-strip" },
-        "evidence": ["[проверено: 99-raw/experiments/F/01-pilot]"], "checked_at": "2026-09-24"
+        "evidence": ["[проверено]"], "checked_at": "2026-09-24"
       } ]
     }
   ]

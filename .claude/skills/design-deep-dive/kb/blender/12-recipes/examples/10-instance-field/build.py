@@ -1,7 +1,7 @@
 # Сгенерировано K/01 из 12-recipes/10-instance-field.md — блоки python в напечатанном виде, по порядку.
 
 # ---- блок со строки 35
-# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 10: 900 GN-инстансов → EXT_mesh_gpu_instancing
+# Blender 5.2.2 — [проверено] рецепт 10: 900 GN-инстансов → EXT_mesh_gpu_instancing
 import sys, bpy
 import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender
 import rk

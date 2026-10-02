@@ -4385,7 +4385,7 @@ def selftest():
     td = tempfile.mkdtemp(prefix='copydeck-selftest-')
     try:
         schema = load_copy_schema()
-        check('schema: $id и дата', schema.get('$id') == 'urn:app-design:text-research:copy-deck:1' and re.fullmatch(r'\d{4}-\d{2}-\d{2}', schema.get('date') or ''))
+        check('schema: $id и дата', schema.get('$id') == 'urn:app-design:text:copy-deck:1' and re.fullmatch(r'\d{4}-\d{2}-\d{2}', schema.get('date') or ''))
         # --- поля v0 есть в схеме (не удалять и не переименовывать)
         defs = schema['$defs']
         owners = {'copy_deck': schema['properties'], 'page': defs['page']['properties'], 'meta': defs['meta']['properties'],

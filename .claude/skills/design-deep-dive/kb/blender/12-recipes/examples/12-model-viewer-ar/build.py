@@ -1,7 +1,7 @@
 # Сгенерировано K/01 из 12-recipes/12-model-viewer-ar.md — блоки python в напечатанном виде, по порядку.
 
 # ---- блок со строки 38
-# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 12: AR-GLB (лимиты Scene Viewer) + USDZ (Quick Look)
+# Blender 5.2.2 — [проверено] рецепт 12: AR-GLB (лимиты Scene Viewer) + USDZ (Quick Look)
 import sys, os, json, shutil, struct, bpy
 import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender
 import rk
@@ -29,7 +29,7 @@ def ar_lint(path, max_tris=100_000, max_mats=10, max_tex=2048, max_mb=10):
             "extensionsUsed": j.get("extensionsUsed", []), "kb": round(len(data) / 1024, 1)}
 
 
-def export_usdz(path, **overrides):                                       # F1 09/06 §2.4 [проверено: F1/06]
+def export_usdz(path, **overrides):                                       # F1 09/06 §2.4 [проверено]
     kw = dict(selected_objects_only=False, export_animation=False, export_materials=True, generate_preview_surface=True,
               export_textures_mode="NEW", usdz_downscale_size="2048", export_subdivision="TESSELLATE", evaluation_mode="RENDER",
               convert_orientation=True, export_global_forward_selection="NEGATIVE_Z", export_global_up_selection="Y",

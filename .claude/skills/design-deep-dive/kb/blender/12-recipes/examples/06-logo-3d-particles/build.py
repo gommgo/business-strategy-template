@@ -1,7 +1,7 @@
 # Сгенерировано K/01 из 12-recipes/06-logo-3d-particles.md — блоки python в напечатанном виде, по порядку.
 
 # ---- блок со строки 41
-# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 06: 3D-логотип (text_mesh) + точки для частиц (.bin)
+# Blender 5.2.2 — [проверено] рецепт 06: 3D-логотип (text_mesh) + точки для частиц (.bin)
 import sys, json, math, bpy
 import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender
 import rk

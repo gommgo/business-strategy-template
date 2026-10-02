@@ -1,7 +1,7 @@
 # Сгенерировано K/01 из 12-recipes/09-glass-product.md — блоки python в напечатанном виде, по порядку.
 
 # ---- блок со строки 41
-# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 09: стеклянный флакон (transmission + volume) + сцена за ним
+# Blender 5.2.2 — [проверено] рецепт 09: стеклянный флакон (transmission + volume) + сцена за ним
 import sys, math, json, struct, bpy
 from mathutils import Matrix
 import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender

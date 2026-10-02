@@ -37,7 +37,7 @@
 # slot-type — слоты вида text словаря site).
 
 $schema: "https://json-schema.org/draft/2020-12/schema"
-$id: "urn:app-design:text-research:voice:1"
+$id: "urn:app-design:text:voice:1"
 title: "voice — профиль голоса бренда для генерации и проверки текстов"
 description: >-
   Как бренд звучит: зачем он существует и для кого (основание голоса), абзац о голосе, 2–5 принципов с правилами
